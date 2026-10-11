@@ -23,8 +23,12 @@ postcondition `φ : Post C Γ` stands at the context of the line's user
 locals, its fresh ones dropped.  While the program is still open,
 `sequentialToParallel` merges the scoped line's spine itself
 (`Calculus/Merge.lean`), and the literal laws, a term taclet in a box
-update, `applyOnRigid` and `concrete` rewrite the scoped line
-(`Calculus/RewriteScoped.lean`).
+update, `applyOnRigid`, `concrete` and `simplifyUpdate` rewrite the
+scoped line (`Calculus/RewriteScoped.lean`): §3‴'s branches keep their
+reverting program (`Examples/ChainRewritesOpen.lean` has the rewrites while
+the program is open).  Past the program the rewrites go on on the erasure;
+with `set_option sol_chain.scopedPast true`, `sequentialToParallel` merges
+the scoped line where that gives the line written.
 
 * §1 — the headline as the calculus draws it (`Chains.Storage.BalanceWrite.chain`),
   for any modality `m` and postcondition `φ`, down to its last line, and on to
@@ -36,8 +40,6 @@ update, `applyOnRigid` and `concrete` rewrite the scoped line
   first, then the law (`SelectOnSaveConsr.ageWriteReadKeY`'s order, which goes
   on to solkey's read of the write a member at a time, `ageReadMembers`); and
   the headline's write read back;
-* §3⁗ — the same rewrites while the program is open, on the scoped line, a
-  step of the strategy after them in the same chain;
 * §4 — what is refused, and what is printed.
 
 The traces picked up: `StorageSteps.deepFieldWrite` to its last line
@@ -520,19 +522,28 @@ example : dl!{ defined(250 + 10) ∧ 250 + 10 ≐ 260 }
 
 /-- `applyOnRigid` through a conjunction under `m`: the update cannot halt,
 each rigid leaf is substituted, and the goals keep the update in front.
-The second branch is a postcondition `ψ`: past the program a rewrite runs on
-the line's erasure; with the reverting branch still to run, it runs on the
-scoped line (§3⁗). -/
-example (ψ : Post StandardExample []) : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+The reverting branch still has its program, so the rewrite runs on the
+scoped line (`Calculus/RewriteScoped.lean`, as in
+`Examples/ChainRewritesOpen.lean`). -/
+example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } ψ) } := by sol_chain
+        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := by sol_chain
 
 /-- `concrete`: the literal equations close (`eqClose`), the connectives
 fold (`concrete_impl_2`, `concrete_impl_1`, `concrete_and_1`). -/
-example (ψ : Post StandardExample []) : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-      (false ≐ false → { se1 := false } ψ) }
-    ~[concrete]~> dl![m]{ { se1 := false } ψ } := by sol_chain
+example : dl![m]{ (false ≐ true → { se1 := false } φ) ∧
+      (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
+
+/-- The two as one `~~>`: the line after is two rewrites past the first,
+found while the program is open (`openRwPath`) and written out as
+`sol_chain?` finds them, so a re-check does not search. -/
+example : dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
+  exact Solidity.Fml.Via.leads (show cdl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[applyOnRigid]~> cdl![m]{ (false ≐ true → { se1 := false } φ) ∧ (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> cdl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } by sol_chain)
 
 /-- `sequentialToParallel` under a branch: the first spine the skeleton finds. -/
 example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post StandardExample [.val .uint]) :
@@ -541,13 +552,19 @@ example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post Standard
 
 set_option maxHeartbeats 300000 in
 /-- The check's trace, folded: the captured comparison, the update pushed
-through, the branch closed, and the capture dropped. -/
-example (φ ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
-    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ψ)) }
+through, the branch closed.  The capture `se1` stays: the reverting
+branch's scope still holds it until the revert runs (the line's frames
+drop it), so `simplifyUpdate` cannot take it while the program is open. -/
+example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := 260 <= 255 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    ~[leq_literals]~> dl![m]{ { x := 260 ‖ se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
     ~[applyOnRigid]~>
       dl![m]{ (false ≐ true → { x := 260 ‖ se1 := false } φ) ∧
-        (false ≐ false → { x := 260 ‖ se1 := false } ψ) }
-    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ψ }
+        (false ≐ false → { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ) }
+    ~[concrete]~> dl![m]{ { x := 260 ‖ se1 := false } ⟨[ revert(); ]⟩ φ } := by
+  sol_chain
+
+/-- Past the program the capture goes (`simplifyUpdate` on the erasure). -/
+example (ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 := false } ψ }
     ~[simplifyUpdate]~> dl![m]{ { x := 260 } ψ } := by
   sol_chain
 
@@ -565,148 +582,6 @@ example (φ : Post StandardExample [.val .uint]) : dl![m]{ { x := 11579208923731
     ~[add_literals]~> dl![m]{ { x := 0 } φ } := by sol_chain
 
 end Literals
-
-/-! ## 3⁗ · While the program is open
-
-The same rewrites on the scoped line itself, before the program is done
-(`Calculus/RewriteScoped.lean`, `Link.rw`): the reverting branch stays
-`[ revert(); ] φ`, and the strategy goes on from the line a rewrite
-leaves, so a step and a rewrite are links of one chain.  A literal law in
-an update's right-hand sides (`FmlRw.lit`), `applyOnRigid` along the
-skeleton of the formula under the update (`FmlRw.applyOnRigid`: the update
-cannot halt, or the box), and `concrete` (`FmlRw.concrete`), each proved by
-`rfl` over the postcondition and the program it does not look at.  A
-term taclet in a box update (`FmlRw.lawUpd`) is the box's.  Under a
-modality variable `m` each rewrite runs as the diamond and as the box, and
-applies where both give the same line with `m` read back. -/
-
-section Open
-variable (m : Modality)
-
-/-- `applyOnRigid` and `concrete` with the revert still to run, then the
-step that runs it (`revertBox`). -/
-example (φ : Post StandardExample []) :
-    dl![.box]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
-    ~[applyOnRigid]~>
-      dl![.box]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } [ revert(); ] φ) }
-    ~[concrete]~> dl![.box]{ { se1 := false } [ revert(); ] φ }
-    ~[revertBox]~> dl![.box]{ { se1 := false } true } := by
-  sol_chain
-
-/-- `uint8 x = 250; x += 10;` (`Chains.CheckedArithmetic`): the check's
-branches folded before the revert runs, the strategy's steps and the
-rewrites in one chain. -/
-example (φ : Post StandardExample [.val .uint]) :
-    dl!{ [ uint8 x = 250; x += 10; ] φ }
-    ~*> dl![.box]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
-    ~[sequentialToParallel]~> dl![.box]{ { x := 250 ‖ x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
-    ~[add_literals]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := 260 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
-    ~[leq_literals]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
-    ~[applyOnRigid]~> dl![.box]{ (false ≐ true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
-          (false ≐ false → { x := 250 ‖ x := 260 ‖ se1 := false } [ revert(); ] φ) }
-    ~[concrete]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false } [ revert(); ] φ }
-    ~[revertBox]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false } true } := by
-  sol_chain
-
-/-- The same under the diamond: the revert is `false`. -/
-example (φ : Post StandardExample [.val .uint]) :
-    dl!{ ⟨ uint8 x = 250; x += 10; ⟩ φ }
-    ~*> dl!{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[sequentialToParallel]~> dl!{ { x := 250 ‖ x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[add_literals]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := 260 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[leq_literals]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[applyOnRigid]~> dl!{ (false ≐ true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
-          (false ≐ false → { x := 250 ‖ x := 260 ‖ se1 := false } ⟨ revert(); ⟩ φ) }
-    ~[concrete]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false } ⟨ revert(); ⟩ φ }
-    ~[revertDiamond]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false } false } := by
-  sol_chain
-
--- Under the diamond an update that may halt is not pushed through: the
--- line after would hold where the update halts, the line before not.
-/--
-error: ~[applyOnRigid]~>: applyOnRigid does not apply to
-  dl{ { se1 := 1 / 0 == 0 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-while the program is open
--/
-#guard_msgs in
-example (φ : Post StandardExample []) :
-    dl!{ { se1 := 1 / 0 == 0 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[applyOnRigid]~> _ := by
-  sol_chain
-
-/-- `findOnSave` in a box update, onto a literal (`FmlRw.lawUpd`), with the
-revert still to run, then the step that runs it. -/
-example (φ : Post StandardExample [.val .uint]) :
-    dl![.box]{ { x := find(save(storage, alice.age, 42), alice.age) } [ revert(); ] φ }
-    ~[findOnSave]~> dl![.box]{ { x := 42 } [ revert(); ] φ }
-    ~[revertBox]~> dl![.box]{ { x := 42 } true } := by
-  sol_chain
-
--- Under the diamond the law is not applied in the update: `{ x := 42 }`
--- runs where the read halts.
-/--
-error: ~[findOnSave]~>: findOnSave does not apply to
-  dl{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨ revert(); ⟩ φ }
-while the program is open
--/
-#guard_msgs in
-example (φ : Post StandardExample [.val .uint]) :
-    dl!{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨ revert(); ⟩ φ }
-    ~[findOnSave]~> _ := by
-  sol_chain
-
-/-- `add_literals` under `m` with the revert still to run: a literal law is
-exact, so the diamond and the box give one line. -/
-example (φ : Post StandardExample [.val .uint]) :
-    dl![m]{ { x := 250 + 10 } ⟨[ revert(); ]⟩ φ }
-    ~[add_literals]~> dl![m]{ { x := 260 } ⟨[ revert(); ]⟩ φ } := by
-  sol_chain
-
-/-- The check's branches folded under `m`: `{ se1 := false }` cannot halt,
-so `applyOnRigid` applies under the diamond too. -/
-example (φ : Post StandardExample []) :
-    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
-    ~[applyOnRigid]~>
-      dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
-    ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
-  sol_chain
-
--- Under `m` an update that may halt is not pushed through: the diamond
--- refuses it.
-/--
-error: ~[applyOnRigid]~>: applyOnRigid does not apply to
-  dl{ { se1 := 1 / 0 == 0 } (se1 ≐ false → ⟨[ revert(); ]⟩ φ) }
-while the program is open
--/
-#guard_msgs in
-example (φ : Post StandardExample []) :
-    dl![m]{ { se1 := 1 / 0 == 0 } (se1 ≐ false → ⟨[ revert(); ]⟩ φ) }
-    ~[applyOnRigid]~> _ := by
-  sol_chain
-
--- Nor a term taclet in the update: it is the box's.
-/--
-error: ~[findOnSave]~>: findOnSave does not apply to
-  dl{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨[ revert(); ]⟩ φ }
-while the program is open
--/
-#guard_msgs in
-example (φ : Post StandardExample [.val .uint]) :
-    dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } ⟨[ revert(); ]⟩ φ }
-    ~[findOnSave]~> _ := by
-  sol_chain
-
-end Open
 
 /-! ## 4 · What is refused, and what is printed -/
 

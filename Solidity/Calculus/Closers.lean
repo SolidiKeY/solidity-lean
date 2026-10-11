@@ -2,6 +2,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Rewrite
+import Solidity.Calculus.UpdRuleScoped
 
 /-!
 # Today's closers on a scoped leaf
@@ -13,7 +14,10 @@ step, `sol_close_unwrap` (`Calculus/Derive.lean`): each tactic below
 has a second elaborator that erases the leaf (`Derive.eraseLeaf`:
 `Fml.posB`, checked by the kernel, then `Valid.of_erase`) and runs the same
 tactic on today's goal.  Today's macro is tried first and fails on a scoped
-goal; on today's goal the second elaborator steps aside.  `sol_spec_prep`'s
+goal; on today's goal the second elaborator steps aside.  `sol_upd` and
+`sol_merge` rewrite the scoped formula itself (M6c, W7
+`w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s rules, the leaf staying
+scoped.  `sol_spec_prep`'s
 is `Calculus/SolSpec.lean`'s; `sol_decide`'s is ported (M6c) and erases
 only to reduce (`Calculus/DecideComplete.lean`).  `sol_prove?` runs the scoped `sol_prove`
 and today's leaf search after it.
@@ -46,14 +50,33 @@ def evalSolReadsCore : Tactic := fun stx => Derive.onErased "sol_reads" stx stx
 @[tactic Solidity.tacticSol_apply_upd]
 def evalSolApplyUpdCore : Tactic := fun stx => Derive.onErased "sol_apply_upd" stx stx
 
+open Meta in
+/-- `sol_merge` on a scoped goal: every stack of updates merged and cleaned
+on the scoped formula itself (`Fml.simpUpdsS`, `Valid.of_simpUpdsS`). -/
 @[tactic Solidity.tacticSol_merge]
-def evalSolMergeCore : Tactic := fun stx => Derive.onErased "sol_merge" stx stx
+def evalSolMergeCore : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
+  Symex.reporting g do
+    replaceMainGoal [← Symex.applyValid "sol_merge" g (mkApp (mkConst ``Valid.of_simpUpdsS) C)]
 
 @[tactic Solidity.tacticSol_fold_terms]
 def evalSolFoldTermsCore : Tactic := fun stx => Derive.onErased "sol_fold_terms" stx stx
 
+open Meta in
+/-- `sol_upd r` on a scoped goal: the update rule `r` (`UpdRuleNameS`) at
+the first update where it fits, on the scoped formula itself
+(`Fml.updAtS`, `Valid.of_updAtSD`). -/
 @[tactic Solidity.tacticSol_upd_]
-def evalSolUpdCore : Tactic := fun stx => Derive.onErased "sol_upd" stx stx
+def evalSolUpdCore : Tactic := fun stx => withMainContext do
+  let g ← getMainGoal
+  let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
+  Symex.reporting g do
+    let r ← Term.elabTermEnsuringType stx[1] (mkConst ``UpdRuleNameS)
+    Term.synthesizeSyntheticMVarsNoPostponing
+    let r ← instantiateMVars r
+    replaceMainGoal [← Symex.applyValid "sol_upd" g (mkApp2 (mkConst ``Valid.of_updAtSD) C r)
+      (some m!"rule {stx[1]} does not apply here")]
 
 /-! ## `sol_prove?` on a scoped goal
 

@@ -31,6 +31,9 @@ structure Gen where
   /-- The erasures of the first line. -/
   erased : Array Expr
   steps : Array (String × Expr × Array Expr)
+  /-- Rewrites of a line while its program is open, after `steps`
+  (`openRwPath`), each with its line's erasures. -/
+  openRws : Array (String × Expr × Array Expr) := #[]
   rewrites : Array (String × Expr)
   stop : Option MessageData
 
@@ -66,7 +69,13 @@ def generate (φ : Expr) : TermElabM Gen := do
 whether that line is scoped. -/
 def Gen.links (g : Gen) : Array (String × Expr × Bool) :=
   let grouped := NFml.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l))
-  grouped.map (fun (a, l) => (a, l, true)) ++ g.rewrites.map fun (n, l) => (s!"~[{n}]~>", l, false)
+  grouped.map (fun (a, l) => (a, l, true)) ++
+    g.openRws.map (fun (n, l, _) => (s!"~[{n}]~>", l, true)) ++
+    g.rewrites.map fun (n, l) => (s!"~[{n}]~>", l, false)
+
+/-- The erasures of a scoped line of a generated chain. -/
+def Gen.erasedOf (g : Gen) (l : Expr) : Array Expr :=
+  ((g.steps.find? (·.2.1 == l)).map (·.2.2) <|> (g.openRws.find? (·.2.1 == l)).map (·.2.2)).getD #[]
 
 /-- The `dl_fml` of a printed line `dl{ φ }`. -/
 def dlFmlOf? (t : Lean.Term) : Option (TSyntax `dl_fml) :=
@@ -108,12 +117,10 @@ def lineText (sp : Splice) (C e : Expr) (isScoped : Bool) (erased : Array Expr) 
 /-- The declaration stating a generated chain from `φ`. -/
 def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array String) := do
   let (C, _) ← lineType φ
-  let erasedOf (l : Expr) : Array Expr :=
-    ((g.steps.find? (·.2.1 == l)).map (·.2.2)).getD #[]
   let ind (ls : Array String) : Array String := ls.map ("    " ++ ·)
   let mut out := ind (← lineText g.splice C φ true g.erased)
   for (arrow, l, isScoped) in g.links do
-    let line ← lineText g.splice C l isScoped (erasedOf l)
+    let line ← lineText g.splice C l isScoped (g.erasedOf l)
     out := out ++ ind (#[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·))
   let kw := if g.links.size == 1 && (g.links[0]!.1 == "~*>") then "def" else "theorem"
   return #[s!"{kw} {name} :"] ++ out.modify (out.size - 1) (· ++ " := by") |>.push "  sol_chain"
@@ -230,8 +237,25 @@ partial def mergePath (A B : Expr) : Nat → MetaM (Option Expr)
         return some (← mkAppM ``Fml.Leads.comp #[lk, rest])
     return none
 
+/-- The rewrites while the program is open (`openRwPath`) from a line of
+the derivation of `A` (`A` itself first) to `B`: how many of its steps come
+before them, and the rewrites.  `B` with no program is not looked for: a
+rewrite while the program is open keeps it. -/
+def openRwFrom (A B : Expr) : TermElabM (Option (Nat × List OpenStep) × Option MessageData) := do
+  unless (B.find? (·.isAppOf ``Fml.modal)).isSome do return (none, none)
+  let run ← runChain A
+  let mut note := none
+  for i in [0:run.lines.length + 1] do
+    let L := if i == 0 then A else ((run.lines[i - 1]?).map (·.fml)).getD A
+    if !(← runChain L).isOpen then continue
+    let (path?, n) ← openRwPath L (fun B' _ _ => pure (B' == B))
+    note := note <|> n
+    if let some path := path? then return (some (i, path), none)
+  return (none, note)
+
 /-- The derivation from `A` to `B`, as `A ~~> B`: the strategy's steps, then a
-merge of the line's update spine (`Fml.MergeBy`) if `B` is one. -/
+merge of the line's update spine (`Fml.MergeBy`) if `B` is one, else
+rewrites while the program is open (`openRwFrom`). -/
 partial def leadsSteps (A B : Expr) : TermElabM Expr := do
   let run ← runChain A
   match (if A == B then some 0 else (run.lines.findIdx? (·.fml == B)).map (· + 1)) with
@@ -242,7 +266,13 @@ partial def leadsSteps (A B : Expr) : TermElabM Expr := do
       if let some h ← mergePath L B 1 then
         let st ← mkAppM ``Fml.Steps.sound #[← stepsProof run.splice A (run.lines.take i)]
         return ← mkAppM ``Fml.Leads.comp #[st, h]
-    throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}"
+    let (found, note) ← openRwFrom A B
+    if let some (i, path) := found then
+      let L := if i == 0 then A else ((run.lines[i - 1]?).map (·.fml)).getD A
+      let st ← mkAppM ``Fml.Steps.sound #[← stepsProof run.splice A (run.lines.take i)]
+      return ← mkAppM ``Fml.Leads.comp #[st, ← OpenStep.leads L path]
+    throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}\
+      {(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
 
 
 /-- The erasure of the derivation's last line `Z` from `A`, its parameters
@@ -296,11 +326,9 @@ elab_rules : tactic
 line (`Gen.links`). -/
 def chainText (g : Gen) (φ : Expr) : TermElabM (Array String) := do
   let (C, _) ← lineType φ
-  let erasedOf (l : Expr) : Array Expr :=
-    ((g.steps.find? (·.2.1 == l)).map (·.2.2)).getD #[]
   let mut out := ← lineText g.splice C φ true g.erased
   for (arrow, l, isScoped) in g.links do
-    let line ← lineText g.splice C l isScoped (erasedOf l)
+    let line ← lineText g.splice C l isScoped (g.erasedOf l)
     out := out ++ #[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·)
   return out
 
@@ -332,10 +360,17 @@ elab_rules : tactic
     let gen ← match_expr ty with
       | Fml.Leads _ _ _ B =>
         let B ← instantiateMVars B
-        let some i := if A == B then some 0 else
-            (gen.steps.findIdx? (·.2.1 == B)).map (· + 1)
-          | throwError "sol_chain?: the derivation of{← indentLine A}\ndoes not reach{← indentLine B}"
-        pure { gen with steps := gen.steps.extract 0 i, rewrites := #[], stop := none }
+        if let some i := if A == B then some 0 else
+            (gen.steps.findIdx? (·.2.1 == B)).map (· + 1) then
+          pure { gen with steps := gen.steps.extract 0 i, rewrites := #[], stop := none }
+        else
+          -- rewrites while the program is open, written out as links
+          let (found, note) ← openRwFrom A B
+          let some (i, path) := found
+            | throwError "sol_chain?: the derivation of{← indentLine A}\ndoes not reach\
+                {← indentLine B}{(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
+          let openRws := path.toArray.map fun st => (st.name.toString, st.fml, st.erased)
+          pure { gen with steps := gen.steps.extract 0 i, rewrites := #[], stop := none, openRws }
       | Fml.LeadsE C _ Z L =>
         let L₀ ← lastErasure A (← instantiateMVars Z)
         let (path, note) ← NFml.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
@@ -349,7 +384,10 @@ elab_rules : tactic
         pure #["exact Solidity.Fml.Leads.self _"]
       else do
         let ls ← chainText gen A
-        let head := if !gen.rewrites.isEmpty then "exact Solidity.Fml.ViaE.leads (show "
+        -- `Fml.LeadsE`'s chain keeps every link past the program on the erasure
+        let past := if sol_chain.scopedPast.get (← getOptions) then
+          "set_option sol_chain.scopedPast false in " else ""
+        let head := if !gen.rewrites.isEmpty then s!"exact Solidity.Fml.ViaE.leads ({past}show "
           else if links.size == 1 then "exact Solidity.Fml.SoundRel.leads (show "
           else "exact Solidity.Fml.Via.leads (show "
         let body := #[head ++ ls[0]!] ++ (ls.extract 1 ls.size).map ("    " ++ ·)

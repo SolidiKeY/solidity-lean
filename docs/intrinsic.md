@@ -31,7 +31,7 @@ versions.  It names files by the paths they had at each step, which is why
 | Sequent | `Proves` over `Hyp` | `Proves C R Γ₀ H φ` over a telescope `Hyps` (`Calculus/Proves.lean`); `Proves.valid` with no hypothesis; a leaf closed by its erasure (`Proves.close`, `Calculus/CloseErase.lean`) |
 | Tools | on `Fml C` | `sol_symex`, `sol_prove`, `sol_derive?`, chains, `#chain`, the proof tree, `#wp`, `#step`, specs, contracts, callbacks on `Fml C Γ`; the same text through `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) |
 | Names (W5) | `Solidity.Core.X`, `Calculus/Core/*`, `TState`, `trun` | `Solidity.X`, `Calculus/*`, `State`, `run`; the old side's clashing names under `Surface`, `NFml`, `Semantics` (decision 62) |
-| Closer (W6) | a leaf erased to `NFml`, closed over the untyped state | in part on `Fml C Γ`: `sol_decide` reduces a scoped leaf by position (`Calculus/DecideScoped.lean`), `sol_close` reads parameters at their types, `sol_prove`'s leaves on `⊢` are scoped sequents with `rw` (`Calculus/SeqRewrite.lean`), the chains rewrite while the program is open (`Calculus/RewriteScoped.lean`), the update rules and merges have scoped ports (`UpdRuleScoped`, `StatePartsScoped`, no consumer yet); below that `NFml` stays the decision procedure's IR (decisions 83, 88, 91, 93) |
+| Closer (W6) | a leaf erased to `NFml`, closed over the untyped state | in part on `Fml C Γ`: `sol_decide` reduces a scoped leaf by position (`Calculus/DecideScoped.lean`), `sol_close` reads parameters at their types, `sol_prove`'s leaves on `⊢` are scoped sequents with `rw` (`Calculus/SeqRewrite.lean`), the chains rewrite while the program is open (`Calculus/RewriteScoped.lean`), the update rules and merges have scoped ports (`UpdRuleScoped`, `StatePartsScoped`; W7: `sol_upd`, `sol_merge` and the chains' links while the program is open use them); below that `NFml` stays the decision procedure's IR (decisions 83, 88, 91, 93) |
 | SolKey reader | `Corresp.LeanShape` over `Stmt.*` | ported on its branch `intrinsic` (decisions 51–54, 73, 74) |
 
 Not restated from master: termination (`symex_terminates`,
@@ -71,7 +71,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W6 | done 2026-10-09 | lanes `w6-canon` (decision 75 implemented, 77 recorded false), `w6-step` (76: `Stmt.step` total), `w6-closer` (M6c 6a, 6b, and 6c's lanes `w6c-upd`, `w6c-rw`, `w6c-chain`); merged in that order into `intrinsic`; the final gates ("Gates") |
 | W7 `w7-route` | done 2026-10-11 | the `⊨` route on the `⊢` walk; only an `assert` panics, typed; decision 77's conditional form; bare `simp`s (decisions 95–98) |
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
-| W7+ | **left** | the rest of M6c; the lead's calls on proposals 95–100 |
+| W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
+| W7+ | **left** | the rest of M6c; the lead's calls on proposals 95–105 |
 
 ## Checks at the end (W6)
 
@@ -306,6 +307,54 @@ is open, `w6c-chain`): without it, 1.00.  One raw M0 limit is crossed by
 noise: `Derived10` at 11.24 s against 11.2 s (0.4%; the baseline was
 0.09 s under it, the 6a–6b lanes measured 11.20–11.21 s, the file and its
 path unchanged), within its W6 gate (13.33 s).
+
+**W7 `w7-rewrites`** (2026-10-11, after the review fixes at `6f24cbc4`;
+the method above, the 32 GiB cgroup at 7.4–7.9 GB, load 0.3–1.4; the other
+W7 lanes idle; three runs where a row is gated, one otherwise):
+
+| Module | W6 baseline | gate (1.2×) | **W7 `w7-rewrites`** | ratio | CPU |
+|---|---|---|---|---|---|
+| `Examples/ChainRewrites` (§3⁗ moved out, proposal 102) | 6.36 s | 7.63 s | **6.88 s** (6.88, 6.88, 6.85) | 1.08 | 8.07 s |
+| `Examples/ChainRewritesOpen` (new) | — | — | 3.48 s | — | 3.90 s |
+| `Examples/Chains/Storage` | 7.45 s | 8.94 s | **7.58 s** (7.60, 7.58, 7.55) | 1.02 | 8.21 s |
+| `Examples/ProofTree` | 9.81 s | 11.77 s | 10.04 s | 1.02 | 10.26 s |
+| `Evm/Correct` (control, untouched) | 1.68 s | — | 1.74 s | 1.04 | 6.31 s |
+| `Examples/Tactics/UpdateRules` (`sol_upd`, `sol_merge` scoped) | — | — | 2.89 s | — | 2.99 s |
+
+**The unchanged content, timed against this lane's base.**  `intrinsic`'s
+copy of `Examples/ChainRewrites` (at `1616405c`, the base of this lane),
+whole and without §3⁗, three runs each on the base checked out in this
+worktree and on this branch, same cgroup and load:
+
+| Checkout | whole | without §3⁗ |
+|---|---|---|
+| `1616405c` (base) | 7.43, 7.50, 7.43 s | 6.46, 6.42, 6.40 s |
+| `9d1f186f` (before the fixes) | 7.97, 7.92 s | 6.88, 6.89, 6.87 s (+7%) |
+| `6f24cbc4` (after) | 7.45, 7.43 s | 6.44, 6.44, 6.48 s (+0.5%) |
+
+The +7% on identical text was **this lane's**, not `intrinsic`'s post-W6
+commits (the record said otherwise at `83ec42c4`, untimed; the base is
+within 2% of W6's final run, 7.30 and 6.33 s).  Bisected (without §3⁗, one
+or two runs each): `fa3e54fa` 6.69–6.73 s (`openRwPath` in `leads%` and
+`leadsSteps`: the `~~>` statement `headlineWrite` alone took 0.12 s more,
+the depth-3 search run from every open line of a derivation before the
+past-program reading), `8052d96d` 6.69–6.75 s, `df08c553` 6.99–7.05 s
+(`applyOnPV` and three `stateMerge`s per update widened that search),
+`7af11076` 7.78 s (scoped links past the program, off from `445c76f3`).
+Fixed at `6f24cbc4`: the search is breadth first with each line expanded
+once, bounded (`openRwNodes`, its own heartbeats per line), and not run
+where the line written keeps no program (`Written.mayBeOpen`; on the proof
+side `openRwFrom`, a line with no `Fml.modal`), since a rewrite while the
+program is open keeps it.  Every row passes its gate.
+`Examples/Chains/*` against `w6c-chain`'s runs, at `445c76f3` (not re-timed
+after the fixes; the scratch builds of all thirteen pass): `Arithmetic`,
+`CheckedArithmetic`, `EvaluationOrder`, `Memory`, `MemoryArrays`,
+`MemoryCoverage`, `MemoryDelete`, `MemoryToStorage`, `StorageToMemory`,
+`Payment`, `StorageArrays`, `StorageCoverage`, `StorageDelete`: 1.02,
+1.25, 1.04, 4.86, 6.26, 11.81, 9.15, 5.49, 2.55, 1.09, 3.51, 14.16, 7.24 s,
+0.96–1.06 of them.
+`TestSuite/Derived*` and the M0 rows were not re-timed: no module on
+their path changed but `DelabErase` (printing).
 
 ## Decisions
 
@@ -1209,7 +1258,7 @@ scoped, decision 49's four examples restored, the `⊨` route on the `⊢`
 walk; then `NFml`, `Fml.erase` and `Semantics/Erased.lean` go wherever
 nothing reads them, and what stays is recorded as decision 7's IR.
 
-95. *Proposed (W7 `w7-route`; renumber at the merge), the lead's call:*
+95. *Proposed (W7 `w7-route`), the lead's call:*
     `sol_prove` on `⊨ φ` is `Proves.valid` at `.all` and then the `⊢`
     walk (`evalSolProveValid`, `Calculus/ProvesDerive.lean`), decision 89
     extended: its leaves are the walk's sequents `H ⊢ ψ`, closed as a `⊢`
@@ -1280,6 +1329,68 @@ nothing reads them, and what stays is recorded as decision 7's IR.
     `LayoutOk` from `holds σ (.defined wt)`); not done, since the scoped
     `sol_decide`'s leaves (`Examples/Tactics/Decide`) have none, and the
     TestSuite's go through `sol_prove`'s erased closer.
+101. *Proposed (W7 `w7-rewrites`), the
+    lead's call (decision 93 revisited):* past the program a chain's
+    `~[sequentialToParallel]~>` merges the scoped line where that gives the
+    line written (the spine's merge, `Fml.mergeRun`, or one over a state
+    write, `FmlRw.stateMerge`), behind `set_option sol_chain.scopedPast
+    true`, **off by default**; every other rewrite past the program, and a
+    line written `_`, stays on the erasure (`Fml.ViaE`).  Measured and
+    tried: on, it costs 0.44 s on `Examples/ChainRewrites`' content (8.38
+    against 7.94 s, 5.5%), for no line the erasure does not reach; the
+    strategy's line past a declaration keeps a hidden binder `bind` between
+    the two updates, which no scoped merge crosses, so most chains fall back
+    anyway (`ageWriteReadValue`); the scoped `simplifyUpdate` keeps the
+    hidden binders of the locals it drops, and today's closer on that
+    line's erasure fails (`sol_close`, "simp made no progress", tried on
+    `ChainNotation`'s `headline_valid`), so a chain gone scoped past the
+    program could not be closed as today; a law's line reads the same on
+    the erasure.  `~~>` past the program stays `Fml.LeadsE`, and
+    `sol_chain?` writes `set_option sol_chain.scopedPast false in` in the
+    chain for it when the option is on.  To turn it on: a scoped
+    `simplifyUpdate` dropping unread locals with their binders (the
+    formula strengthened out of the local's scope), a merge across a
+    hidden binder (`bind x ({x := e} φ) ⇝ {x :=decl e} φ` where `e` does
+    not read `x`), then the laws.
+102. *Proposed (W7 `w7-rewrites`), the lead's call:* the rewrites
+    while the program is open (W6's §3⁗ and this lane's additions, 26
+    examples) move to their own module, `Examples/ChainRewritesOpen.lean`,
+    so that the W6 gate row `Examples/ChainRewrites` times the content it
+    was baselined on (plus decision 49's four examples, restored) and the
+    new section has a row of its own; no pin changed by the move.
+103. *Proposed (W7 `w7-rewrites`), the lead's call:* decision
+    49's fourth example (the check's trace) ends at `concrete`, one link
+    short of master's: master's last link, `simplifyUpdate`, drops the
+    capture `se1` with the revert still to run, and on the scoped line
+    `se1` is still in the reverting branch's scope until the revert runs
+    (the line's frames drop it), so it is an unread local in scope, which
+    the scoped `simplifyUpdate` keeps (decision 87).  The dropped capture
+    is a separate example past the program, on the erasure.
+104. *Proposed (W7 `w7-rewrites`, review), the lead's call:*
+    decision 92's exemption from G0 condition 1 (`match` on the indexed
+    families, since they run once a link) extends to the walks this lane
+    added to `Calculus/RewriteScoped.lean`: `Fml.lawAlongS`,
+    `Fml.lawFiresS`, `Fml.lawAtom`, `Fml.lawAtomFires`, `Fml.stepIn`,
+    `Fml.atPath`, `Tm.litPV`, `Tm.litPVFires`, `Fml.litPVAlong`,
+    `Fml.litPVFires`, `Fml.applyOnPVTop` (named in its module docstring).
+    It does not extend to what `sol_upd` and `sol_merge` run on a whole
+    leaf: `Upd.unsetAt`, `Upd.redecl` and `Upd.shadow` are recursors with
+    `match` twins and link theorems (`Upd.shadow_eq_shadowM`, …), the
+    declaration's `Idx` read by `Idx.casesOn` with no cast
+    (`Upd.declAt`).
+105. *Proposed (W7 `w7-rewrites`, review), the lead's call:*
+    while the program is open, `~[applyOnRigidBox]~>` is
+    `FmlRw.applyOnRigid` (under the box any update, under the diamond or
+    `m` one that cannot halt), which is how the erasure reads the same
+    link (`NFml.applyOnRigidBoxTop`: `U.total || m = .box`, the example
+    "`applyOnRigidBox` too applies under `m`" in `Examples/ChainRewrites`)
+    and how KeY's `applyOnRigidFormula` applies (its updates cannot
+    halt); refusing it off the box would make the open and the closed
+    reading of one link disagree.  `~[applyStorageBox]~>` is the box's
+    only and asks an update of the storage and locals
+    (`FmlRw.applyStorageBox`, `Upd.stOnly`), as the erasure's
+    `NFml.applyStorageBoxTop`; both refusals pinned under the diamond in
+    `Examples/ChainRewritesOpen.lean`.
 
 ## M6c
 
@@ -1319,7 +1430,7 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   (`Calculus/RewriteScoped.lean`, `Examples/ChainRewrites` §3⁗), so a step
   and a rewrite are links of one chain again; past the program the chains
   stay on `NFml` (`Fml.ViaE`; decisions 92–94).
-- **W7 `w7-route`** (2026-10-11, decisions 95–98): the `⊨` route runs
+- **W7 `w7-route`** (2026-10-11, proposals 95–98): the `⊨` route runs
   the `⊢` walk, its leaves scoped sequents (`evalSolProveValid`; the
   erased route deleted, four pin files re-derived, decision 95); "only an
   `assert` panics" over the typed run (`Semantics/NoPanic.lean`,
@@ -1352,6 +1463,51 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   session took the cgroup past 32 GiB (`Derived6`, `Derived10`), and two
   control runs under another lane's build (load 4.9–20).  Every row
   within 1.2×: passed.
+- **W7 `w7-rewrites`** (2026-10-09 to 2026-10-11; `UpdRuleScoped`,
+  `StatePartsScoped`, `RewriteScoped` given their consumers): `sol_upd` and
+  `sol_merge` rewrite the scoped leaf (`Valid.of_updAtSD`,
+  `Valid.of_simpUpdsS`; `Closers.lean`), merging past hidden binders
+  (`Fml.mergeB`); `simplifyUpdate` drops shadowed writes (`Upd.shadow`,
+  `Upd.redecl`, `Upd.simpS`; decision 87's first half, under either
+  modality); while the program is open the chain links are scoped for
+  the laws in a line's equations (`FmlRw.litEq`, `FmlRw.lawEq`),
+  `simplifyUpdate` (`FmlRw.simplifyUpdate`), `sequentialToParallel` under
+  a branch (`FmlRw.mergeIn`) and over a storage write, a memory write and
+  `ChainRewrites`' locals-then-memory (`FmlRw.stateMerge`,
+  `Upd.mergeMemL?`), `applyOnPV` (`FmlRw.applyOnPV`), `applyStorageBox`
+  and `applyOnRigidBox` (`FmlRw.applyOnRigid` under the box), `~=>`
+  (`openRwSteps`), `~~>` up to three rewrites (`openRwPath`) and `calc`
+  steps (`pendingLines` with `Fml.RwBy`); decision 49's four examples
+  restored on the scoped line (one ends a link short, proposal 103);
+  past the program, scoped merges behind an option, off (proposal 101);
+  the open-program examples in `Examples/ChainRewritesOpen.lean`
+  (proposal 102).  The reported elaboration failure of
+  `dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }`
+  was its print: `↑φ` under the capture, which `DelabErase` printed
+  ill-typed (fixed at `8052d96d`, and a defined postcondition, `xDefined`,
+  at `422e8fe4`); it elaborates, prints and is a chain's line under either
+  modality, pinned in `Examples/ChainRewritesOpen.lean`.  Pins moved:
+  `Examples/Tactics/UpdateRules` (the rules now rewrite the scoped leaf:
+  `copyLocal_merge` keeps `x := 1`, a parameter in scope, decision 87;
+  `selfAssign` closes with no lemma, a typed local always holds a value;
+  the `applySkip` example replaced, a scoped line keeps a declaration);
+  `Examples/ChainRewrites`' `~~>` refusal lists `applyOnPV`.  Gate:
+  "W7 `w7-rewrites`" below.  Review fixes (`f4bd70a5`, `6f24cbc4`):
+  `UpdRuleS.sequentialToParallel` and `UpdRuleS.simplifyUpdate` back in
+  the taclets' `\find`/`\replacewith` shape, the binder-crossing merge
+  and the pop absorption separate Lean-only constructors
+  (`UpdRuleS.mergeHidden`, `absorbPops`, `trans`; `UpdRuleNameS.top_rule`
+  builds from them); `Upd.unsetAt`, `Upd.redecl`, `Upd.shadow` by the
+  recursor (proposal 104); `openRwPath` breadth first, bounded
+  (`openRwNodes`, heartbeats and runtime errors caught per line), not run
+  for a written line with no program, and written out by `sol_chain?` as
+  `~[r]~>` links (`openRwFrom`, `Gen.openRws`), so the two `~~>` examples
+  replay it (`Examples/ChainRewrites`, `Examples/ChainRewritesOpen`); the
+  suggestion pinned in `Examples/Tactics/Chains.lean`, where
+  `Examples/ProofTree.lean`'s docstring puts the chains' suggestions (it
+  does not import the chain tactics, and importing them would load its
+  gated row); `applyStorageBox` box-only (proposal 105);
+  `simplifyUpdate`'s absorbing candidate only over an update.
 - **W6 lanes beside it**: `w6-canon` tied the canonicity invariant to the
   typed state (decision 75) and found 77 false (`huge_reachable_not_fits`);
   `w6-step` made `Stmt.step` total (decision 76, two replay rows
@@ -1408,10 +1564,14 @@ What reads them:
   erases to), `NFmlDerive` (`Derive.residue`, `synClose`), `NFmlClose`,
   `Closable`, `CloseErase`, `Hyp`, `Decide`/`DecideComplete`;
 - *update rules and merges on the erasure*: `NFmlUpdateRules`,
-  `StateParts` (the scoped `sol_upd`/`sol_merge`, `Closers.lean`'s
-  `Derive.onErased`, still erase the leaf);
+  `StateParts` (the scoped `sol_upd`/`sol_merge` are scoped since W7;
+  `sol_apply_upd`, `sol_fold_terms`, `sol_close_eval` and the
+  `sol_decide_*`/`sol_reduce`/`sol_reads` closers still erase the leaf,
+  `Closers.lean`'s `Derive.onErased`);
 - *chains past the program*: `ChainRewrites`, `ChainBranches`,
-  `RewriteChains`, `RewriteChainGen`, `ChainGen`, `LastLine`;
+  `RewriteChains`, `RewriteChainGen`, `ChainGen`, `LastLine` (every link
+  past the program, but a merge under `sol_chain.scopedPast`,
+  proposal 101);
 - *today's notation and sequents*: `Update.lean` (where `NFml` is
   defined), `RuleSyntax`'s `dl{}`/`⊨`, `SurfaceNotation`, `SurfaceSpec`,
   `Literals`, `TermTaclets` and `CloseTests`, `Rewrite.lean`'s tactics;
@@ -1427,20 +1587,22 @@ baseline; a module that fails stays on `NFml` for good, decision 7):
   the erasure, `Tm.toLS_eq`, decision 83); `Atom.name` with `NFml.toL`
   (proposal 99); the scoped closer's layout from a `wt(storage)`
   premise, if wanted (proposal 100).
-- Switch the scoped `sol_upd`/`sol_merge` and the chain rewrite links onto
-  `UpdRuleScoped`/`StatePartsScoped`; port `ChainRewrites`'
-  locals-then-memory merge; `simplifyUpdate` dropping shadowed writes and
-  unread locals, and under the diamond (decision 87).
-- While the program is open, not yet scoped: laws in a line's equations,
-  `simplifyUpdate`, `sequentialToParallel` under a branch, `applyOnPV`,
-  `applyStorageBox`, `lawUpd*`/`EvalLaw`, `~=>`, `calc` steps with scoped
-  rewrite links; `lawUpd` under a modality variable.
-- Restore decision 49's four chain examples (`Examples/ChainRewrites`
-  §Literals, still on `ψ`).
+- `simplifyUpdate` (scoped) dropping unread locals with their hidden
+  binders (the formula strengthened out of the local's scope), and what an
+  update pops under the diamond (decision 87's rest; W7 `w7-rewrites` did
+  the shadowed writes, under either modality).
+- While the program is open, not yet scoped: the laws of memory reads
+  (`EvalLaw`), a law in an update's right-hand side where the update holds
+  the write it reads back (`Upd.covers`) or member-wise (`Term.base?`), a
+  term taclet in a diamond update or under a modality variable (`lawUpd`).
+- Past the program (proposal 101): a merge across a hidden binder, then
+  `sol_chain.scopedPast` on by default and the laws, `~~>` and `calc`
+  steps on the scoped line; `sol_apply_upd`, `sol_fold_terms` on the
+  scoped leaf.
 - Then delete `NFml`, `Fml.erase` and `Semantics/Erased.lean`.
 
 **Besides M6c:**
-- The lead's calls on proposals 95–100; the user's on decision 11 (whether
+- The lead's calls on proposals 95–105; the user's on decision 11 (whether
   `Surface.Stmt`, an IR with no semantics, counts as "deleting the untyped
   `Stmt`").
 - At the merge into `master`: the SolKey reader's require back to

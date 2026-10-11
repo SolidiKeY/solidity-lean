@@ -468,6 +468,17 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
       | none => pure e
     if let some c := e'.getAppFn.constName? then
       if c != n && (lowerFns.contains c || (← getEnv).isConstructor c) then return ← tr ns e'
+  -- a postcondition `↑φ`: the closer's `↑φ'` of its twin `φ' : NFml.Post C`,
+  -- else, for a local `φ`, the coercion itself; `ppFml` prints either as `φ`
+  -- (unfolded, it would be the projection `φ.1`).  A defined postcondition
+  -- computes, as below.
+  if n == `Solidity.Post.fml && args.size == 3 then
+    let p ← tr ns args[2]!
+    if p == args[2]! then
+      if p.getAppFn.isFVar then return e
+    else if ← (try return (← whnfR (← inferType p)).isAppOf `Solidity.NFml.Post
+        catch _ => return false) then
+      return mkApp2 (mkConst `Solidity.NFml.Post.fml) args[0]! p
   if let some r ← generic ns e n then return r
   -- a definition: what it computes to
   let e' ← whnf e

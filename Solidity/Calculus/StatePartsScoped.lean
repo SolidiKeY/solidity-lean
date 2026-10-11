@@ -560,12 +560,211 @@ theorem holds_upd_mergeMem {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ �
     (h : holds σ (.upd m W φ)) : holds σ (.upd m U (.upd m V φ)) :=
   holds_upd_of_apply σ (Upd.apply_mergeMem U V hW σ.erase) h
 
+/-! ## `{L ‖ memory := M}` substituted
+
+`ChainRewrites`' locals-then-memory merge (`Surface.Upd.mergeMem`): `U`
+an update of locals with a memory write last, `{L ‖ memory := M}{V}` is
+`{L ‖ memory := M ‖ V[L, M/memory]}`, the locals `L` leaves and `memory`
+substituted in one pass (`Tm.substMemS`), read where a write looks. -/
+
+section SubstMem
+
+variable {Γ Δ : Ctx} (s : Subst C Γ Δ) (M : Tm C Γ .mem)
+
+/-- A term of `Δ` read in `Γ` before an update of locals and a memory
+write: its locals replaced by what they hold, `memory` by `M`; `none`
+past an unset alias or a ledger variable the update sets. -/
+def Tm.substMemS : {k : Srt} → Tm C Δ k → Option (Tm C Γ k)
+  | _, .pvV i => match s i with
+    | .pos j => some (.pvV j)
+    | .rhs (.val t) => some t
+  | _, .pvP i => match s i with
+    | .pos j => some (.pvP j)
+    | .rhs (.path p) => some p
+    | .rhs .unset => none
+  | _, .pvS i => match s i with
+    | .pos j => some (.pvS j)
+    | .rhs (.store x) => some x
+  | _, .pvI i => match s i with
+    | .pos j => some (.pvI j)
+    | .rhs (.mref t) => some t
+  | _, .netOf i a => match s i with
+    | .pos j => (Tm.substMemS a).map (.netOf j)
+    | .rhs _ => none
+  | _, .app0 .memory => some M
+  | _, .app0 o => some (.app0 o)
+  | _, .app1 o ho x => (Tm.substMemS x).map (.app1 o ho)
+  | _, .app2 o x y => do pure (.app2 o (← Tm.substMemS x) (← Tm.substMemS y))
+  | _, .app3 o x y z => do pure (.app3 o (← Tm.substMemS x) (← Tm.substMemS y) (← Tm.substMemS z))
+
+/-- The memory an update of locals writes last, its locals before it:
+`{L ‖ memory := M}`, `L` an update of locals (`Upd.envOnly`); `none` for
+any other update (`Upd.casesOn`). -/
+def Upd.memLast? (U : Upd C Γ Δ) : Option (Tm C Γ .mem) :=
+  Upd.casesOn (motive := fun _ _ => Option (Tm C Γ .mem)) U (nil := none)
+    (snoc := fun L e => match e with
+      | .memory M => if L.envOnly then some M else none
+      | _ => none)
+    (decl := fun _ _ _ => none) (pop := fun _ _ => none) (drop := fun _ _ => none)
+
+end SubstMem
+
+section SubstMemSound
+
+variable {Γ Δ : Ctx} {U : Upd C Γ Δ} {M : Tm C Γ .mem} {σ₀ : EState C Γ} {σ₁ : EState C Δ}
+  {μ : Semantics.State}
+
+/-- After `{L ‖ memory := M}` the global part is the one before with the
+heap `M` leaves. -/
+theorem Upd.memLast?_glob (hm : U.memLast? = some M) (hU : U.apply σ₀ = .ok σ₁) :
+    ∃ μ : Semantics.State, M.eval σ₀ = .ok μ ∧
+      σ₁.glob = { σ₀.glob with heap := μ.heap, nextId := μ.nextId } := by
+  cases U with
+  | snoc L e =>
+    cases e with
+    | memory M' =>
+      change (if L.envOnly then some M' else none) = some M at hm
+      split at hm
+      · rename_i hL
+        cases hm
+        obtain ⟨τ, hτ, h⟩ := Semantics.bind_ok_inv hU
+        obtain ⟨μ, hμ, h⟩ := Semantics.bind_ok_inv h
+        cases h
+        refine ⟨μ, hμ, ?_⟩
+        show { τ.glob with heap := μ.heap, nextId := μ.nextId } = _
+        rw [Upd.envOnly_glob L hL hτ]
+      · cases hm
+    | _ => cases hm
+  | _ => cases hm
+
+theorem Tm.substMemS_eval (hU : U.apply σ₀ = .ok σ₁)
+    (hg : σ₁.glob = { σ₀.glob with heap := μ.heap, nextId := μ.nextId })
+    (hM : M.eval σ₀ = .ok μ) :
+    {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → Tm.substMemS U.held M t = some t' →
+      Srt.AgreePart k (t'.eval σ₀) (t.eval σ₁)
+  | _, .pvV i, _, h => by
+    simp only [Tm.substMemS] at h
+    exact Tm.eval_substH_pvV _ (Upd.held_ok U hU i) h
+  | _, .pvP i, _, h => by
+    simp only [Tm.substMemS] at h
+    exact Tm.eval_substH_pvP _ (Upd.held_ok U hU i) h
+  | _, .pvI i, _, h => by
+    simp only [Tm.substMemS] at h
+    exact Tm.eval_substH_pvI _ (Upd.held_ok U hU i) h
+  | _, .pvS i, t', h => by
+    have hx := Upd.held_ok U hU i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvS j) | .rhs (.store x) => some x) = some t' := h
+    generalize U.held i = x at h hx
+    show StPartEq _ _
+    cases x with
+    | pos j =>
+      cases h
+      have hx : Env.get i σ₁.env = Env.get j σ₀.env := hx
+      exact Res.stPart_ok hx.symm
+    | rhs r =>
+      cases r with
+      | store x =>
+        cases h
+        have hx : (do pure (← t'.eval σ₀).storage) = Except.ok (Env.get i σ₁.env) := hx
+        cases ht : t'.eval σ₀ with
+        | error e => rw [ht] at hx; cases hx
+        | ok τ =>
+          rw [ht] at hx
+          injection hx with hτ
+          exact Res.stPart_ok hτ
+  | _, .netOf i a, t', h => by
+    have hx := Upd.held_ok U hU i
+    have h : (match U.held i with
+        | .pos j => (Tm.substMemS U.held M a).map (Tm.netOf j) | .rhs _ => none) = some t' := h
+    generalize U.held i = x at h hx
+    cases x with
+    | rhs _ => cases h
+    | pos j =>
+      obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      have hx : Env.get i σ₁.env = Env.get j σ₀.env := hx
+      have ha : a'.eval σ₀ = a.eval σ₁ := Tm.substMemS_eval hU hg hM a ha
+      show (do
+          let l : List (Int × Int) := Env.get j σ₀.env
+          pure (Semantics.Value.int ((Semantics.lookupBy (← (← a'.eval σ₀).asInt) l).getD 0))) =
+        (do
+          let l : List (Int × Int) := Env.get i σ₁.env
+          pure (Semantics.Value.int ((Semantics.lookupBy (← (← a.eval σ₁).asInt) l).getD 0)))
+      rw [ha, hx]
+  | _, .app0 o, t', h => by
+    cases o with
+    | memory =>
+      cases h
+      show MemPartEq (M.eval σ₀) (pure σ₁.glob)
+      rw [hM, hg]; exact ⟨rfl⟩
+    | storage =>
+      cases h
+      show StPartEq (pure σ₀.glob) (pure σ₁.glob)
+      rw [hg]; exact ⟨rfl⟩
+    | mtSt _ =>
+      cases h
+      show Srt.AgreePart _ (Op0.eval σ₀.glob _) (Op0.eval σ₁.glob _)
+      rw [hg]; exact ⟨rfl⟩
+    | lit _ | root _ | env _ =>
+      cases h
+      show Srt.AgreePart _ (Op0.eval σ₀.glob _) (Op0.eval σ₁.glob _)
+      rw [hg]; exact Srt.AgreePart.refl _ _
+  | _, .app1 o ho x, t', h => by
+    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
+    have hrest : σ₀.glob.Rest σ₁.glob := by rw [hg]; exact ⟨rfl, rfl, rfl⟩
+    exact Op1.eval_part hrest o (fun _ _ => by rw [hg]; rfl) (Or.inr (by rw [hg]))
+      (Tm.substMemS_eval hU hg hM x hx)
+  | _, .app2 o x y, t', h => by
+    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Op2.eval_part o (Or.inr (by rw [hg])) (Tm.substMemS_eval hU hg hM x hx)
+      (Tm.substMemS_eval hU hg hM y hy)
+  | _, .app3 o x y z, t', h => by
+    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Op3.eval_part o (Tm.substMemS_eval hU hg hM x hx) (Tm.substMemS_eval hU hg hM y hy)
+      (Tm.substMemS_eval hU hg hM z hz)
+
+end SubstMemSound
+
+/-- **`sequentialToParallel` over locals and a memory write**:
+`{L ‖ memory := M}{V}` as one update (`Tm.substMemS`); `none` for any
+other `U`. -/
+def Upd.mergeMemL? {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (V : Upd C Δ₁ Δ₂) : Option (Upd C Γ Δ₂) :=
+  match U.memLast? with
+  | some M => U.graftF (Tm.substMemS U.held M) V
+  | none => none
+
+/-- The locals-then-memory merge runs as the two updates in turn. -/
+theorem Upd.apply_mergeMemL {Γ Δ₁ Δ₂ : Ctx} (U : Upd C Γ Δ₁) (V : Upd C Δ₁ Δ₂)
+    {W : Upd C Γ Δ₂} (h : U.mergeMemL? V = some W) (σ₀ : EState C Γ) :
+    W.apply σ₀ = (U.apply σ₀ >>= V.apply) := by
+  unfold Upd.mergeMemL? at h
+  split at h
+  · rename_i M hm
+    refine Upd.apply_graftF U σ₀ (fun σ₁ hU => ?_) V h
+    obtain ⟨μ, hM, hg⟩ := Upd.memLast?_glob hm hU
+    exact ⟨fun t _ ht => Tm.substMemS_eval hU hg hM t ht,
+      congrArg (·.net) hg.symm, congrArg (·.selfBalance) hg.symm, congrArg (·.tx) hg.symm⟩
+  · cases h
+
+/-- `{W} φ` gives `{L ‖ memory := M}{V} φ` for the merge `W`. -/
+theorem holds_upd_mergeMemL {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ₁} {V : Upd C Δ₁ Δ₂}
+    {W : Upd C Γ Δ₂} (hW : U.mergeMemL? V = some W) {φ : Fml C Δ₂} (σ : State C Γ)
+    (h : holds σ (.upd m W φ)) : holds σ (.upd m U (.upd m V φ)) :=
+  holds_upd_of_apply σ (Upd.apply_mergeMemL U V hW σ.erase) h
+
 /-! ## The merges at a position -/
 
-/-- The two merges, by the write they merge over. -/
+/-- The merges, by the write they merge over. -/
 inductive MergeNameS where
   | storage
   | memory
+  /-- Locals, then a memory write (`Upd.mergeMemL?`). -/
+  | localsMemory
   deriving DecidableEq, Repr
 
 /-- Merge `r` on `{U}{V} ψ` under one modality. -/
@@ -576,7 +775,8 @@ def MergeNameS.top (r : MergeNameS) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ �
     if m' = m then
       (match r with
         | .storage => U.mergeSt? V
-        | .memory => U.mergeMem? V).map fun W => .upd m W ψ
+        | .memory => U.mergeMem? V
+        | .localsMemory => U.mergeMemL? V).map fun W => .upd m W ψ
     else none
   | none => none
 
@@ -587,7 +787,8 @@ theorem MergeNameS.top_sound (r : MergeNameS) : UpdRw.Sound (C := C) fun m U φ 
     change (if m' = m then
       (match r with
         | .storage => U.mergeSt? V
-        | .memory => U.mergeMem? V).map fun W => Fml.upd m W ψ'
+        | .memory => U.mergeMem? V
+        | .localsMemory => U.mergeMemL? V).map fun W => Fml.upd m W ψ'
     else none) = some ψ at h
     split at h
     · rename_i hm; subst hm
@@ -595,6 +796,7 @@ theorem MergeNameS.top_sound (r : MergeNameS) : UpdRw.Sound (C := C) fun m U φ 
       cases r with
       | storage => exact holds_upd_mergeSt hW σ hψ
       | memory => exact holds_upd_mergeMem hW σ hψ
+      | localsMemory => exact holds_upd_mergeMemL hW σ hψ
     · cases h
   | _ => cases h
 
