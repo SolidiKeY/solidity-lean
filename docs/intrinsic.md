@@ -21,12 +21,12 @@ versions.  It names files by the paths they had at each step, which is why
 
 | | Before | After |
 |---|---|---|
-| Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits `Surface.Stmt` (no run, no rule, no `wt`; decision 11), which `resolve` scopes and checks (`Syntax/Resolve.lean`) |
+| Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits the scoped `Stmt C Γ Γ'` directly (`Syntax/Elab.lean`); `Surface.Stmt` and `resolve` removed (decision 11, W8.4) |
 | State | untyped `Semantics.State`: values, storage and heap by name, with junk | `State C Γ` (`Semantics/State.lean`): typed values (`PrimTy.Denote`, a `uint` an `Int` in range), typed storage (`SVal T` over `structDef`, `Storage C`), a typed heap (`HRef H R`, no mapping object), locals computed from the context (`TEnv`) |
 | Run | `Stmt.run` on the untyped state, halting by `revert`, `panic`, `diverge` or `stuck` | `Stmt.run` (`Semantics/Run.lean`) on the typed state, halting by `revert`, `panic`, `diverge` or `exhausted` (a push at the bound, decision 15): never stuck; the only run of a statement (W4) |
 | Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `StepErase`), and the erased state `EState C Γ` (`Semantics/Erased.lean`): what the closer's terms read |
 | Compiler | `compileStmt` with `wtStmt`, `not_stuck` | over the scoped syntax, locals at their level (`Evm/Compile.lean`), `inFrag` the fragment alone, `compile_correct` over the typed run (`Evm/Correct.lean`), no `not_stuck` |
-| Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; `Surface.Fml` is `dl!{}`'s text before the scoped reading |
+| Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; `dl!{}` elaborates to `Fml C Γ` directly |
 | Rules | `Taclet C k m s p` on `Stmt C`, `Taclet.sound` by case | the same 159 lines read scoped (`Calculus/Rules.lean`, `open scoped Solidity.Schema`); `Taclet.toStep` (`Calculus/Taclet.lean`) says each is the rule `Stmt.step` fires, so soundness is `Stmt.sound` (`Calculus/Sound.lean`) with no proof per taclet; `blockEmpty` and `functionFrameEmpty` claimed; no cover goal (KeY's two goals); the step rules read the rule set (`⊢ₖ`, decision 36) |
 | Sequent | `Proves` over `Hyp` | `Proves C R Γ₀ H φ` over a telescope `Hyps` (`Calculus/Proves.lean`); `Proves.valid` with no hypothesis; a leaf closed by its erasure (`Proves.close`, `Calculus/CloseErase.lean`) |
 | Tools | on `Fml C` | `sol_symex`, `sol_prove`, `sol_derive?`, chains, `#chain`, the proof tree, `#wp`, `#step`, specs, contracts, callbacks on `Fml C Γ`; the same text through `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) |
@@ -73,8 +73,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | W8.1–W8.4 done 2026-10-11 (W8.5 planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
-| left | — | the lead's calls on proposals 95–105, 106–117 (W8.2–W8.3) and 118–128 (W8.4); W8.5; optional ports on the IR ("What is left") |
+| W8 | W8.1–W8.4 done, W8.5 gate done 2026-10-11 | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
+| left | — | the lead's calls on proposals 95–105, 106–117 (W8.2–W8.3) and 118–128 (W8.4); optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -2825,7 +2825,7 @@ worktree), results under `w85_*` in `scratchpad/results.txt`.
 
 **Gate passed**: every row within 1.2× of its baseline, and every run of
 every row within it too.  Against the M0 limits (M0 + 20%):
-`Benchmark/Syntax` 1.60 s against 1.44 s (over by 11%, 0.92 of 1.2× the
+`Benchmark/Syntax` 1.60 s against 1.44 s (over by 11%, 0.93 of 1.2× the
 limit; scoped `sol{}` DAGs since W8.3, unchanged by W8.4), `Derived10`
 11.45 s against 11.2 s (over by 2%, as since W7); `Solkey/TestSuite` 6.67 s
 against 12.5 s, `Problems` 0.88 against 1.44, `ProofTree` 9.80 against
@@ -2839,7 +2839,8 @@ reachable, 0 orphaned; `./scripts/check-doc-paths.sh` OK (eleven
 ambiguous basenames, all resolving, as before); `./scripts/check-testsuite.sh`
 stops at its input check against `../solkey` (its `TestSuite.sol` is
 `4150e0a8…`, the fixture was imported from `2fe50a03…`), and passes with
-`--solkey` at a checkout of `2fe50a03…` (trust: 22 modules clean; axioms:
+`--solkey` at a checkout of solkey `1b4341a303` (`TestSuite.sol`
+`2fe50a03…`) (trust: 22 modules clean; axioms:
 `propext`, `Classical.choice`, `Quot.sound`; parity: 438 functions = 435
 derived + 1 pending + 1 divergent + 1 excluded, 2 skipped).
 `lean_build` of the default targets green (295 jobs); every timed copy
@@ -2874,15 +2875,17 @@ fails stays on the IR:
   `Semantics/Erased.lean` go only when it is empty.
 
 **Besides M6c:**
-- Decision 11's removal of the surface syntax: W8.5 ("W8.4 record").
+- Decision 11: done in W8.4 ("W8.4 record").
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
   `intrinsic`) and that branch merged.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`),
-  `check-testsuite.sh` past its input check (the `../solkey` checkout is
-  stale, "W7 merge"), the `solkeycheck` executable (built), the reader's
+  the `solkeycheck` executable (built), the reader's
   `keycheck` executable as a target and the VS Code extension's tests.  No
   read-only finder/skeptic pass of W6's or W7's merge.
+- `check-testsuite.sh` passes at the W8.5 gate with `--solkey` at a
+  checkout of solkey `1b4341a303` (`TestSuite.sol` `2fe50a03`);
+  `../solkey` itself is stale (`4150e0a8`).
 - Lean docstrings still call the erased side "today's" in places and cite
   this record's sections (at `ad728b16` and `b8565d23`).
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
