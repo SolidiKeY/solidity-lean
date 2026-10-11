@@ -43,33 +43,33 @@ hypothesis):
 
 | name | is | Lean sort | side condition |
 |---|---|---|---|
-| `v`, `lv`, `vp`, `pv` | a stack local (`pv`: where a send's outcome lands) | `Var` | |
-| `lsv` | a storage alias | `Var` | |
-| `mv` | a memory local | `Var` | |
-| `pmv`, `rmv` | a memory local, an array of primitives, of references (`delete pmv[ie]` fixes the element type) | `Var` | |
+| `v`, `lv`, `vp`, `pv` | a stack local (`pv`: where a send's outcome lands) | `Idx Γ (LTy.val p)` (a `Var` where declared) | |
+| `lsv` | a storage alias | `Idx Γ (LTy.alias R)` (a `Var` where declared) | |
+| `mv` | a memory local | `Idx Γ (LTy.mem R)` (a `Var` where declared) | |
+| `pmv`, `rmv` | a memory local, an array of primitives, of references (`delete pmv[ie]` fixes the element type) | `Idx Γ (LTy.mem R)` | |
 | `gsp` | a state variable, with its proof `hgsp` | `Name` | |
-| `se`, `ie`, `sadr` | a simple value | `Simple C p` | |
-| `e` | a value | `Val C p` | not a conditional, when written to storage or to a memory target |
-| `nse`, `nadr` | a value that is not simple | `Val C p` | not simple (and as `e`) |
-| `sp`, `map`, `arr` | a simple storage path (`map`/`arr` fix how it is indexed) | `SPath C T` | simple |
-| `parr`, `rarr` | a simple path to an array of primitives, of references | `SPath C T` | simple; the element primitive (`SPath.elemPrim`), or not |
-| `marr`, `darr` | a simple path to an array of mappings, of anything else | `SPath C T` | simple; the element a mapping (`SPath.elemMapping`), or not |
-| `nsp` | a storage path that is not simple | `SPath C T` | not simple |
-| `path` | any storage path | `SPath C T` | |
-| `nmp` | a memory path that is not a memory local | `MPath C T` | not simple |
-| `mpath` | a memory path | `MPath C T` | bindable, when written as a reference into a target |
+| `se`, `ie`, `sadr` | a simple value | `Simple C Γ p` | |
+| `e` | a value | `Val C Γ p` | not a conditional, when written to storage or to a memory target |
+| `nse`, `nadr` | a value that is not simple | `Val C Γ p` | not simple (and as `e`) |
+| `sp`, `map`, `arr` | a simple storage path (`map`/`arr` fix how it is indexed) | `SPath C Γ T` | simple |
+| `parr`, `rarr` | a simple path to an array of primitives, of references | `SPath C Γ T` | simple; the element primitive (`SPath.elemPrim`), or not |
+| `marr`, `darr` | a simple path to an array of mappings, of anything else | `SPath C Γ T` | simple; the element a mapping (`SPath.elemMapping`), or not |
+| `nsp` | a storage path that is not simple | `SPath C Γ T` | not simple |
+| `path` | any storage path | `SPath C Γ T` | |
+| `nmp` | a memory path that is not a memory local | `MPath C Γ T` | not simple |
+| `mpath` | a memory path | `MPath C Γ T` | bindable, when written as a reference into a target |
 | `fld`, `fr`, with its proof `hfld`, `hfr` | a member name | `Name` | |
 | `pfld`, `rfld` | a member of primitive, of reference type (`delete mv.pfld` fixes it) | `Name` | |
-| `tgt` | where a fresh array lands (`NewLhs`) | | |
-| `lhs` | where a storage or memory read lands (`Hole`, `MHole`) | | a target |
-| `x` | where a value lands (`VHole`) | | |
-| `loc`, `nlhs` | a member or entry a copy lands in | `Loc C T` | `loc`: a target, not a state variable |
-| `l` | the target of `⊕=` and `++` | `OpLoc C p` | |
-| `s`; `P`, `Q`, `ω` | a statement; a program, spliced in place (`P; ..ω` is `P ++ ω`) | `Stmt C`; `Prog C` | |
-| `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
-| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args hsep ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`) |
-| `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C`, …; `List (Stmt C)` | |
-| `cond`; `body`; `n` | a loop's condition (KeY's `s#cond`); its body, a block, or spliced in place inside one (`{ body; … }`); the bound of `/// @custom:key unwind n` | `Val C .bool`; `Prog C`; `Nat` | |
+| `tgt` | where a fresh array lands | `NewLhs C Γ R` | |
+| `lhs` | where a storage or memory read lands | `SHole C Γ T`, `MHole C Γ T` | a target |
+| `x` | where a value lands | `VHole C Γ p` | |
+| `loc`, `nlhs` | a member or entry a copy lands in | `Loc C Γ T` | `loc`: a target, not a state variable |
+| `l` | the target of `⊕=` and `++` | `OpLoc C Γ p` | |
+| `s`; `P`, `Q`, `ω` | a statement; a program, spliced in place (`P; ..ω` is `P ++ ω`) | `Stmt C Γ Γ'`; `Prog C Γ Γ'` | |
+| `fbs` | a call with its body and its targets (KeY's `FunctionBody`), `expand_function_body(fbs)` its statements | `Stmt.call f args ret body` | its arguments simple; it returns to targets (`CallRet.isRets`) |
+| `ic` | any other call with its body (KeY's `InternalCall`), `expand_function_body(ic)` its statements | `Stmt.call f args ret body` | its arguments simple; not `CallRet.isRets` (a result, if any, assigned inside the expansion: `y = f(a);`) |
+| `call`, `rets`, `code`; `body`, `errorBody`, `panicBody`, `otherBody` | a `try`'s call, its return locals, its `Panic` code; its blocks | `ExtCall C Γ`, …; `Prog C Γ Γ'` | |
+| `cond`; `body`; `n` | a loop's condition (KeY's `s#cond`); its body, a block, or spliced in place inside one (`{ body; … }`); the bound of `/// @custom:key unwind n` | `Val C Γ .bool`; `Prog C Γ Γ'`; `Nat` | |
 
 The position says which sort an operand is read at: `sp.fld` is a location
 left of `=`, a value right of it, a path under `delete`.  A copy is a write

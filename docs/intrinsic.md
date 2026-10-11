@@ -74,7 +74,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
 | W8 | done 2026-10-11 (W8.1–W8.5, close-out) | decision 11 resolved: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan", "W8 result") |
-| left | — | the lead's calls on proposals 106–117 (W8.2–W8.3) and 118–128 (W8.4); the SolKey reader's port to the scoped families; optional ports on the IR and the IR's rename ("What is left") |
+| left | — | the lead's calls on proposals 106–117 (W8.2–W8.3) and 118–128 (W8.4); at the merge, the reader's require back to `../../../solidity-lean`; optional ports on the IR and the IR's rename ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -635,12 +635,18 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     `whnfF`, so no second printer).  `Core.Fml.resolveN` reads it.  A
     schema `dl{ … }` with a modality (today's sequents) is an error that
     names the scoped calculus.
+    *Superseded at W8 (decision 11 overridden): `Surface.Fml`,
+    `quoteAuto`, `eraseS` and `resolveN` removed; a modality reads scoped,
+    the printers print `Fml C Γ` (`Calculus/PrintStmt.lean`), and the
+    obligations are `Fml N []` (`solc_scoped_problems`).*
 47. *Proposed (W4 `modal`), the lead's call:* `Core.Fml.erase` (the
     closer's input) erases a modality to `false`: `NFml` has none, and the
     closer takes only a formula with none (`Fml.Closable`), so nothing
     reads it; `Fml.eraseS` keeps it for the printers and the chains' lines
     (`Fml.erasedQuoted`).  `#wp` shows a reduction only of a formula with
     no modality left (`!ψ.active`).
+    *Superseded at W8: `Fml.eraseS` and `Fml.erasedQuoted` removed; the
+    printers print `Fml C Γ` (`Calculus/PrintStmt.lean`).*
 48. *Proposed (W4 `modal`), the lead's call:* the examples' runs of today's
     interpreter (`Prog.run`, `Prog.localAfter`, `Contract.deploy`) run the
     typed run: `Surface.Prog.runT`/`localAfterT`/`Contract.deployRun`
@@ -660,6 +666,9 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     entry: `Coin`, both `Constructors`); a loop (`TLoop.run`, classical)
     runs with fuel (`Core.Prog.trunF_approx`: `Loops.countTo3Run`).  No
     `#guard` of the list is kept.
+    *Superseded at W8: `Surface.Prog` removed; the runs are
+    `Prog.runT`/`Prog.localAfterT`/`Contract.deployRun` on the scoped
+    block (`Tools/Run.lean`).*
 49. *Proposed (W4 `modal`), the lead's call:* a rewrite link on a line
     whose program is still open (`Examples/ChainRewrites`' §Literals,
     `⟨[ revert(); ]⟩ φ` in a check's branch) is gone: the rewrites run on
@@ -1854,6 +1863,7 @@ The elaboration logic is unchanged but for its output constructors, so it should
 ### Not in scope
 
 - **The SolKey reader** (side-projects) matches on `Surface.*` after `Delab.tr`. Its port is a later task. Its require stays at the tag `w8-pre-delete` until then, and these waves do not touch it.
+  *Superseded by the W8 reader port record: ported; the require was a path to this worktree, not the tag.*
 - **Docstrings** that still call the Surface side "as written" are fixed in W8.5.
 
 ### W8.1 record (2026-10-11, `30611d7c`)
@@ -2652,7 +2662,10 @@ the surface `Arg`, `codeBinders`, `expandBody`, the printers and quoters
 are gone, and the module docstring is rewritten.  `Syntax/Resolve.lean` is
 deleted: `NCtx`, `NCtx.find`, `LTy.toStr`, `Binders.nctx`/`snocAll`/
 `ofList`, `CodeBinder.ofOption`/`nctx`/`toOption` and `Prog.castIn` moved
-to `Syntax/Elab.lean` (its only reader); `Prog.sepArgs`, `Stmt.Fresh`,
+to `Syntax/Elab.lean` (its only reader; *amended by the final-review fixes:
+`Binders.nctx`, `CodeBinder.nctx`, `CodeBinder.toOption`, their lemmas,
+`NCtx.ctx_append`/`names_append` and `Binders.toList_snocAll`/
+`toList_ofList` had no reader left there and are removed*); `Prog.sepArgs`, `Stmt.Fresh`,
 `Prog.Fresh` and the cast lemmas had no reader left and are not moved.
 `Syntax/Elab.lean` loses `elabStmt`/`elabStmts`/`elabStmtsS`,
 `Syntax/Splice.lean` the erasing entry points and the expected-type
@@ -2917,6 +2930,8 @@ removed pins.
   its require stays at the tag `w8-pre-delete` (`f16586b1`), and at the
   merge into `master` it can point back to `../../../solidity-lean` only
   once the port builds.
+  *Superseded by the W8 reader port record: ported; the require was a
+  path to this worktree, not the tag.*
 - *Optional*: rename the IR namespace `Surface.Tm`/`Surface.MAddr`/
   `Surface.Upd`/`Surface.UpdElem` (2,235 occurrences in 45 files under
   `Solidity/`) to `NFml`, so that `Surface` no longer names anything.
@@ -3120,6 +3135,105 @@ against `intrinsic` at `9a2c3914`.
 - **Docs**: the reader's `AGENTS.md` (intro, import paragraph, a W8
   paragraph); this repository's `AGENTS.md` no longer says the reader is
   pinned at `w8-pre-delete`.
+
+### W8 final-review fixes (2026-10-11, on `intrinsic`)
+
+The confirmed findings of the final review, applied.
+
+- **Dead code removed**: in `Syntax/Elab.lean` `NCtx.ctx_append`/
+  `names_append`, `Binders.nctx` (with `nctx_ctx`/`nctx_names`),
+  `Binders.toList_snocAll`/`toList_ofList`, `CodeBinder.nctx` (with its
+  lemmas) and `CodeBinder.toOption` (no reader either: the review's second
+  finding listed it as used, but only `Option.toOption` of `Except` is);
+  `Prog.ext_nil`/`ext_cons` (`Syntax/Scoped.lean`), `Delab.twin?`
+  (`Calculus/DelabErase.lean`), `NFml.isSlot`
+  (`Calculus/SurfaceNotation.lean`), `elabDlC` (`Calculus/Notation.lean`),
+  `Tools.elabFormula` (`Tools/Common.lean`), `Fml.not_valid_of_eval3`
+  (`Tools/Counterexample.lean`), the `hsep` branch of
+  `delabTacletBinders` (`Calculus/RuleKit.lean`), the `cov` disjunct of
+  `branchLabel` (`Calculus/TreeData.lean`), and `resolveRule`'s duplicate
+  candidate (`Tools/Taclet.lean`).
+- **Left, with the reason**: `Prog.localAfterT` and
+  `Contract.deployRun` (`Tools/Run.lean`) are not dead, contrary to the
+  finding: `Examples/Tactics/StorageSuite.lean`'s `#eval`s read
+  `localAfterT`, and `Examples/Tactics/Constructors.lean`'s `deployValue`
+  is `Mini.deployRun … = .error .revert := rfl`.  `deployReport` keeps its
+  own run, since it prints the typed end state (balance and storage), which
+  `deployRun`'s untyped result does not carry; only the `#deploy`
+  docstring changes ("in the typed run").
+- **`solc_scoped` removed** (`elabSolcScoped`, its paragraph in
+  `Frontend/Import.lean`, its pins in `Solkey/Constructors.lean` ×4 and
+  `Examples/Tactics/LoopsImport.lean`, and `Solkey/TestSuiteScoped.lean`
+  with its import in `SolkeyTestSuite.lean`): every elaborated row is
+  declared through `Prog.define`, so the check could not fail, and the
+  count it pinned is the import report's.  The gate row
+  `Solkey/TestSuiteScoped` goes with the module.
+- **`solc_problems` removed** (its syntax, `elabSolcProblems`, and
+  `declareObligations`' `table` parameter with the constants-of-their-own
+  branch): no file ran it since W8.2.  `Frontend/Problems.lean`'s docstring
+  is rewritten around `solc_scoped_problems`; its two messages now name
+  `solc_scoped_problems` (no pin reads them).  The current-behaviour
+  mentions follow (`Frontend/Import.lean`, `Calculus/Problem.lean`,
+  `Solkey/Constructors.lean`, `scripts/solkey-port.mjs`,
+  `docs/testsuite-proofs.md`'s parameters paragraph, the module map); the
+  dated records keep the name of their date.
+- **`sol_symex`/`sol_step` on a goal that is not `⊨ φ`** now fail with
+  "expected a goal `⊨ φ`" and the goal, not "Unexpected syntax".  The
+  `negativeKey` pin (`Examples/Tactics/Decide.lean`) pins only the
+  elaboration refusal (`#check dl!{ … }`).
+- **The memory conditional** (`T memory m = c ? a : b;`): the documentation
+  fix, not the behaviour change.  `mv1` stays bound to the index-free branch
+  before the branches; that read cannot revert on a set local, but an unset
+  one (only a hidden binder holds one, decision 17') reverts where solc reads
+  only the branch taken.  Recorded in `docs/solc-alignment.md`'s row, the
+  `hoist` and `MPath.indexFree` docstrings and the `Syntax/Splice.lean` pin's
+  comment.  The alternative (a fresh default object whenever `defaultOkS`)
+  would add an object solc does not allocate on every such conditional and
+  move the `Syntax/Splice.lean` and `Examples/Tactics/Branch.lean` pins, so
+  it is left as an option.
+- **`#proof_node`'s tactics** stay as the node elaborated them
+  (`apply Proves.update (Taclet.toStep .localValueAssign); apply
+  Proves.updIntro`), where master printed the walk text `apply update
+  .localValueAssign`: a node's tactics are the terms it ran.  The module
+  docstring of `Calculus/ProofTree.lean` now says so, and
+  `Examples/ProofTree.lean`'s header records the change from master.
+- **Docs**: `Syntax.lean` (a memory return declared by the call's frame,
+  `CallRet.mem`), `Calculus/RuleSyntax.lean`'s schema-variable table (the
+  scoped sorts, `Stmt.call f args ret body`), `Calculus/SurfaceNotation.lean`
+  (`NFml.Post C`, `Calculus/RewriteChains.lean`), `Syntax/Scoped.lean`'s
+  example section, `Solkey/Constructors.lean`; `docs/kernel-port.md`
+  (`ppTupleCallS`), `docs/lean-key-rule-map.md` (`functionBodyExpand`'s
+  names), `docs/loops.md` (`Val.eval_lower`), `docs/solkey-feedback.md`
+  (`Args.separated`), `docs/testsuite-proofs.md`'s introduction; here,
+  decisions 46–48 superseded, the W8.4 record amended, the reader's
+  "Not in scope" and follow-up items superseded, the `left` row.
+
+**Checks.**  `lean_build` with `SolidityCorpus` and `SolkeyTestSuite` added
+to the default targets for the run: green, 327 jobs (one module fewer), no
+module OOM-killed (`lakefile.toml` reverted).  `dups.py`: only `as`,
+`delabFml`, `delabProves`.  `node scripts/check-orphans.mjs`: 313
+reachable, the one orphan the git-excluded `Solidity/Scratch/ElabDump.lean`.
+`./scripts/check-doc-paths.sh` OK; `./scripts/check-rule-text.sh` passes.
+
+**Gate**, re-timed as in the W8 close-out (driver `scratchpad/w8f.sh`,
+results under `w8f_*` in `scratchpad/results.txt`); this lane the only Lean
+agent, load (1 min) 4.4 falling to 0.9 after the build, cgroup 8.5 GB.
+
+| Module | baseline | gate (1.2×) | W8 close-out | **final-review fixes** (three runs) | ratio | CPU |
+|---|---|---|---|---|---|---|
+| `TestSuite/Derived6` | 11.42 s (W6) | 13.70 s | 11.75 s | **11.64 s** (11.70, 11.64, 11.69) | 1.02 | 13.08 s |
+| `TestSuite/Derived10` | 11.11 s (W6) | 13.33 s | 11.51 s | **11.46 s** (11.51, 11.46, 11.49) | 1.03 | 12.90 s |
+| `TestSuite/Derived14` | 10.89 s (W6) | 13.07 s | 11.23 s | **11.15 s** (11.15, 11.18, 11.21) | 1.02 | 11.68 s |
+| `Examples/ProofTree` | 9.81 s (W6) | 11.77 s | 9.80 s | **9.79 s** (9.80, 9.86, 9.79) | 1.00 | 10.02 s |
+| `TestSuite/Problems` (M0) | 0.81 s (W6) | 0.97 s | 0.86 s | **0.87 s** (0.90, 0.88, 0.87) | 1.07 | 0.90 s |
+| `TestSuite/ScopedProblems` (M0) | 1.39 s (W6) | 1.67 s | 1.06 s | **1.04 s** (1.04, 1.09, 1.09) | 0.75 | 1.07 s |
+| `Solkey/TestSuite` (M0) | 10.83 s (W6) | 13.00 s | 6.73 s | **6.73 s** (6.79, 6.75, 6.73) | 0.62 | 7.11 s |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s (W6) | 1.69 s | 1.62 s | **1.58 s** (1.61, 1.63, 1.58) | 1.12 | 1.90 s |
+| `Evm/Examples` (M0) | 7.75 s (W6) | 9.30 s | 7.27 s | **7.31 s** (7.34, 7.38, 7.31) | 0.94 | 7.76 s |
+| `Solkey/TestSuiteScoped` | 3.61 s (W8.2 base) | 4.33 s | 0.61 s | removed | — | — |
+| `Examples/Tactics/Print` | 3.93 s (W8.2 base) | 4.72 s | 3.57 s | **3.55 s** (3.61, 3.56, 3.55) | 0.90 | 3.68 s |
+| `Calculus/SurfaceNotation` | 7.25 s (W8.2 merge) | 8.70 s | 7.28 s | **7.23 s** (7.25, 7.23, 7.29) | 1.00 | 9.15 s |
+| `Corpus/SolcStructs` | 1.22 s (W8.2 base) | 1.46 s | 1.04 s | **1.02 s** (1.05, 1.02, 1.08) | 0.84 | 1.44 s |
 
 ## What is left
 

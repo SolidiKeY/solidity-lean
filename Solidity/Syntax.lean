@@ -52,9 +52,9 @@ after it moved into the branches that do not return (`lowerReturns`).
 
 A function may return a memory reference (`returns (Person memory p)`), and
 its call is then KeY's expansion written out: the callee's fresh return
-variable is declared at the head of the body (`Person memory mv2;`, a fresh
-default object, as solc allocates one on entry), and the statement after
-the call binds the caller's local to its identity (`Person memory mv1 =
+variable is declared by the call's frame (`CallRet.mem`, a fresh default
+object, as solc allocates one on entry), and the statement after the call
+binds the caller's local to its identity (`Person memory mv1 =
 mv2;`, `m = mv2;`, KeY's `resultVar = freshReturn`).  The printers write the
 two statements as the call they are (`Person memory mv1 =
 choosePersonMem();`), which reads back to them.  A member of a call's value

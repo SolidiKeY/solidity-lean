@@ -217,7 +217,7 @@ unwindings would be a failure of the program rather than of the bound.
 **The annotation is a `Val`, not a `Fml`**: `Fml` (`Update.lean`) contains
 `Prog`, so a `Stmt` carrying one would make `Stmt`, `Term` and `Fml` one
 mutual inductive. A boolean program expression is effect-free, lowered
-exactly (`Val.lower_eval`), and how solkey's spec language compiles, but has
+exactly (`Val.eval_lower`, `Calculus/SoundKit.lean`), and how solkey's spec language compiles, but has
 no quantifier: Ballot's `∀ q < p. proposals[q].voteCount ≤ winningVoteCount`
 needs `Fml.all` (`docs/function-specs.md`) and a table of formulas outside
 `Stmt` that the loop names by index.

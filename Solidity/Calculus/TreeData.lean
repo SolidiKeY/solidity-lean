@@ -108,16 +108,16 @@ def instLabel (l : String) (se : Option String) : String :=
   | some v => l.replace "s#se" v
   | none => l.replace "s#se" "se"
 
-/-- The label of `c`, the goal `i` of the node `p`: solkey's, by its case
-name (`thn`, `els`) or, for an outcome with none, its place; else its case
-name (`cov`, which solkey does not have). -/
+/-- The label of `c`, the goal `i` of the node `p`: solkey's, chosen by its
+case name (`thn`, `els`) or, for an outcome with none, by its place; else
+the walk's case name. -/
 def branchLabel (p : Tree) (i : Nat) (c : Tree) : Option String :=
   -- an invariant rule's first goal is `init`, and its split past `{anon}` the second
   let inv := p.name == "whileInvariantBox" || p.name == "whileInvariantDiamond"
   let idx := match c.label with
     | some l =>
       if l == `init then some 0
-      else if inv && (l == `thn || l == `els || l == `cov) then some 1
+      else if inv && (l == `thn || l == `els) then some 1
       else if l == `thn then some 0 else if l == `els then some 1 else none
     | none => if p.children.size > 1 then some i else none
   let solkey := do (← (branchLabels.lookup p.name))[← idx]?

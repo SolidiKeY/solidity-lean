@@ -11,8 +11,9 @@ corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 Since the intrinsic refactor (`docs/intrinsic.md`, W3 and W4) the
 obligations are scoped formulas (`TestSuite/ScopedProblems.lean`,
-`Fml Solkey.TestSuite []`, each checked to erase to its statement in
-`TestSuite/Problems.lean`), `⊢` is the scoped sequent over the typed run, and
+`Fml Solkey.TestSuite []`, each written on the import's scoped program
+`Solkey.TestSuite.f`; `TestSuite/Problems.lean` prints them in solkey's
+syntax), `⊢` is the scoped sequent over the typed run, and
 `sol_prove` walks it (`Calculus/ProvesDerive.lean`), its leaves erased and
 closed by the closer of the sections below.  The sections are dated records:
 the modules and theorems they name are the ones of their date (the untyped
@@ -442,7 +443,7 @@ one.
   negative.
 - **Parameters**: `Fml.all` binders over the type's range: `uint`
   `[0, 2²⁵⁶)`, `int` the signed 256-bit range, `bool`.  KeY's `int` is
-  unbounded.  The width is not bound (`solc_problems` keeps only the
+  unbounded.  The width is not bound (`solc_scoped_problems` keeps only the
   `PrimTy`): the one narrow parameter (`signedUnaryMinusInRange(int8)`)
   ranges over `[-2²⁵⁵, 2²⁵⁵)`, neither solc's `[-128, 128)` nor KeY's every
   integer.  That makes the obligation stronger than Solidity's (more

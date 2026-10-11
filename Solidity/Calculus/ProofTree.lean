@@ -11,10 +11,14 @@ solkey's proof tree (`Calculus/TreeData.lean`), grown on a scoped goal `H ⊢ φ
 (`Proves`, `Calculus/Proves.lean`): the same nodes, rows, labels
 and printers (`ProofTree.Tree`), the moves the scoped calculus makes.  At a
 goal `⟨[ s; ..ω ]⟩ φ` the rule is the one `Stmt.step` fires, by name
-(`ruleOf?`, `Calculus/Completeness.lean`), applied as a walk writes it:
-`apply update (Taclet.toStep .localValueAssign)`, the `Proves` constructor
-of its premise's kind with the taclet's `toStep`.  Nothing is trusted: each
-node is an elaborated `apply`.
+(`ruleOf?`, `Calculus/Completeness.lean`), applied by the `Proves`
+constructor of its premise's kind with the taclet's `toStep`:
+`apply Proves.update (Taclet.toStep .localValueAssign)`, the silent moves
+after it folded in (`apply Proves.updIntro`, `apply Proves.bindIntro`).
+That is longer than the walk `sol_derive?` writes (`apply update
+.localValueAssign`, read by the scope's macros), since a node's tactics are
+the terms it elaborated.  Nothing is trusted: each node is an elaborated
+`apply`.
 
 What the scoped calculus adds is not a node:
 

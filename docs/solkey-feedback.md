@@ -124,7 +124,7 @@ against the parser.
 
 | solkey should refuse | Lean |
 |---|---|
-| a call whose argument reads an earlier parameter (sequential binding differs from solc) | `Arg.separatedFrom` |
+| a call whose argument reads an earlier parameter (sequential binding differs from solc) | `Args.separated` (`Syntax/Elab.lean`, an elaboration error) |
 | `delete` of a mapping or through a storage alias | `Stmt.delete` takes a `Loc` |
 | `push`/`pop` on a memory or fixed-size array | `Stmt.push`/`pop` at `.array` |
 | a storage reference copied into a memory member or element | `MSrc` has no copy form |

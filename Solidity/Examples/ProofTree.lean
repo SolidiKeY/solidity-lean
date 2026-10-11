@@ -35,6 +35,13 @@ is the scoped one (`Calculus/Closers.lean`), its replay today's
 text.  The chains the tactics write (`sol_chain?`, `#chain`, `sol_rws?`)
 are pinned in `Examples/Tactics/Chains.lean`.  What stays today's: the
 guards on today's closer (the closer's input, the leaves' erasure).
+
+A node's tactics (`#proof_node`) are the ones it elaborated,
+`apply Proves.update (Taclet.toStep .localValueAssign); apply
+Proves.updIntro`, where master printed the walk text `apply update
+.localValueAssign`: the scoped node applies the `Proves` constructor with
+the taclet's `toStep` and folds the silent moves after it in
+(`Calculus/ProofTree.lean`).
 -/
 
 namespace Solidity.Examples.ProofTree
