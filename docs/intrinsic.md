@@ -73,7 +73,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | planned 2026-10-11 | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
+| W8 | W8.1 done 2026-10-11 (the rest planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
 | left | — | the lead's calls on proposals 95–105; optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
@@ -1853,6 +1853,80 @@ The elaboration logic is unchanged but for its output constructors, so it should
 
 - **The SolKey reader** (side-projects) matches on `Surface.*` after `Delab.tr`. Its port is a later task. Its require stays at the tag `w8-pre-delete` until then, and these waves do not touch it.
 - **Docstrings** that still call the Surface side "as written" are fixed in W8.5.
+
+### W8.1 record (2026-10-11, `30611d7c`)
+
+The elaborator is `Syntax/Elab.lean` (between `Syntax/Resolve.lean` and
+`Syntax/Quote.lean`; `Syntax/Splice.lean` now imports `Quote`, whose pins
+moved to `Splice`) and emits the scoped syntax.  The raw passes moved
+verbatim; `synth`/`check`/`checkPath`/`checkMPath`/`elabMRhs`/`elabPush`/
+`litAt` take an `NCtx` and return `TExpr C Γ.ctx`, `Val C Γ.ctx p`, … (a
+local by `NCtx.find`).  What the step had to choose:
+
+- **The elaborator's locals are newest first.** `declare` conses where it
+  used `setBy` (which appended), and a call's frame is its return variables
+  then its parameters, each newest first, so `ECtx.toNCtx` of the state is
+  the context the next statement is read in.  Every other reader of an
+  `ECtx` looks a name up; none reads its order.
+- **A statement is typed where it is elaborated** (`SStmt`: its named
+  context, the context it leaves, the statement) and a block is the
+  statements chained (`SProg.chain`): each placed where the one before
+  leaves, as it is when the names and types agree, else weakened by the
+  thinning by names (`NCtx.thinInto`, `Stmt.wk`).  Two places need it: a
+  flat block (`{ … }`, `unchecked`, a modifier's `_;`, a lowered loop's
+  flags), whose locals the elaborator closes (`elabBranch`) but the scoped
+  program keeps until its scope ends, as `resolve` kept them; and a memory
+  return's variable, which the call leaves in its caller's context and the
+  elaborator never names.  A mismatch is an internal error.  Within one
+  statement, a value typed before a capture is weakened past it
+  (`afterCapture`: the ternary's branches, `elabOpTarget`'s base,
+  `elabIncTarget`'s, a send's operands).
+- **A call** builds `Args` in the caller's context, the frame from its
+  return variables and parameters, `CallRet.val`/`rets`/`none`/`mem` (a
+  memory return in the frame, no `declMem` at the body's head), the
+  separation check on `Args` (`Args.separated`).  `uint y = f(a);` reads the
+  call where `y` is declared, its arguments where it is not (`resNew`,
+  arguments weakened past `y`).
+- **Entry points**: `elabProgS`, `elabProgAtS` (`.go`, `.goWt`, a block
+  appended per statement with `Blk.append`), `ctorProgS`; `elabProg`,
+  `elabProgAt`, `elabProgAt.go`, `ctorProg`, `elabStmt`, `elabStmts` erase
+  them (`Prog.erase`).  No scoped path runs `Prog.resolveCheck`.
+  `sol[C]{ … }` (now a `term_elab`, `solBracket`) splices the erased block
+  where a list (`Surface.Prog C`) or nothing is expected, the scoped one
+  (`Prog.quoteShared`) anywhere else.  `Prog.define` declares a scoped
+  block; `Prog.defineCore` is `resolve` then `Prog.define`.
+- **Callers**: `Calculus/SurfaceNotation.lean`'s `scopeHints` and
+  `elabCompare` call `synth`/`check` at `ECtx.toNCtx` and erase; `Import`
+  imports `Splice`.  No other consumer changed.
+
+**Checks.**  The baseline dump (`Solidity/Scratch/ElabDump.lean`, not
+committed: for each of the 465 programs of the seven imports — the
+TestSuite, ScopedFlip, Counter, EtherWallet, CtorGap, InitGap and Loops —
+`Surface.Prog.toStr`, the hash of its quoted constant and the hash of its
+program resolved and quoted scoped; the six rows left out, with their
+reasons; the three tables of scoped obligations) is byte for byte the same
+through the wrappers.  `resolve` reads a call returning nothing whose body begins
+`T memory m;` as a memory return; the scoped elaborator does not, and no
+imported program has such a call (a scan of the seven imports: none).  New
+pins (`Syntax/Splice.lean`): `sol{ … }` at `Prog C [] _` is
+`rfl`-equal to `tour` and a block of calls resolved (`tourCore`,
+`callsCore`), and prints as `Prog.show`.  No other pin moved.  The full
+build (with `SolidityCorpus` and `SolkeyTestSuite`) is green, `dups.py`
+(the three known), `check-orphans` (the scratch modules only),
+`check-doc-paths`, `check-rule-text` pass.
+
+**Timing** (the end-of-work method, `W6` gate rows; the base is this
+worktree at `65d93a85` restored from the artifact cache, timed in the
+same session; load 0.3–1.2, cgroup 7.3–7.5 GB):
+
+| Module | base (`65d93a85`) | W8.1 | ratio | CPU, base → W8.1 | gate |
+|---|---|---|---|---|---|
+| `Examples/Benchmark/Syntax` | 1.44 s (1.44, 1.46, 1.48) | 1.47 s (1.48, 1.47, 1.48) | 1.02 | 1.68 → 1.68 s | 1.69 s (W6 1.2×); M0 raw 1.44 s, already crossed at the base |
+| `Solkey/TestSuite` | 11.19 s (11.23, 11.19) | 11.02 s (11.02, 11.06, 11.02) | 0.98 | 11.50 → 11.31 s | 12.5 s (M0) |
+| `Examples/Tactics/Calls` | 64.60 s (64.77, 64.60) | 64.49 s (64.49, 64.91) | 1.00 | 65.26 → 65.20 s | no row; 1.2× of the base |
+
+Every row within its gate.  `Solkey/TestSuite` is 2% faster: its import
+no longer runs `resolve`'s check on every statement.
 
 ## What is left
 
