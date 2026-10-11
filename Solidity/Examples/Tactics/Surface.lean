@@ -7,8 +7,9 @@ import Solidity.Tools.Inspect
 
 `open scoped Solidity.Scoped` (`Calculus/Surface.lean`): today's
 text read scoped, `dl!{ … }` a `Fml C []`, `⊨` scoped validity, `⊢`
-the scoped sequent, and the commands on it.  Outside the scope the same text
-is today's.  The callback taclets print as today's
+the scoped sequent, and the commands on it.  Outside the scope a formula
+with no modality is today's (`NFml`); one with a modality reads scoped
+either way (W8.2).  The callback taclets print as today's
 (`Calculus/Callback.lean`).
 -/
 
@@ -18,7 +19,8 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
-/-- info: dl{ a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Surface.Fml StandardExample -/
+-- A formula with a modality reads scoped outside the scope too (decision 11).
+/-- info: dl{ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
 
 section Scoped
