@@ -4,47 +4,52 @@ import Solidity.Calculus.RewriteChainGen
 /-!
 # `#last_line` on a scoped chain
 
-`#last_line`'s check, for a chain whose first line is a scoped
-formula: its last line is read in names — the last line past the program
-as it is, a last scoped line by its erasure (`erasedLine`) — and checked as
-`Calculus/RewriteChainGen.lean` checks one: no program left, one parallel update
-in front of each goal, and no rewrite a chain takes still applying, under
-either modality when the chain is over a modality variable.
+`#last_line`'s check, for a chain whose first line is a scoped formula: its
+last line (the line written, for `~~>` past the program) has no program
+left, one parallel update in front of each goal (a scope end or a frame end
+alone does not count: it prints as nothing), and no rewrite a chain takes
+still applies (`pastSteps`), under either modality when the chain is over a
+modality variable.
 -/
 
 namespace Solidity.Chain
 
 open Lean Elab Term Meta
 
-/-- `k` on the line `L` with each erased postcondition `↑(φ.erase ns)`
-(`Post.erase`) a local `φ : Post`, as a chain over `Update.lean`'s formulas
-writes it, so that what is left prints `φ`. -/
-def withLegacyPosts {α : Type} (L : Expr) (k : Expr → TermElabM α) : TermElabM α := do
-  let ref ← IO.mkRef (#[] : Array Expr)
-  forEachExpr' L fun x => do
-    if x.isAppOfArity ``NFml.Post.fml 2 && x.appArg!.isAppOfArity ``Post.erase 5 then
-      ref.modify fun ps => if ps.contains x then ps else ps.push x
-      return false
-    return true
-  let ps ← ref.get
-  let rec go (i : Nat) (L : Expr) : TermElabM α := do
-    if h : i < ps.size then
-      let p := ps[i]
-      let n ← match p.appArg!.getArg! 2 with
-        | .fvar fv => fv.getUserName
-        | _ => pure `φ
-      withLocalDeclD n (mkApp (mkConst ``NFml.Post) (p.getArg! 0)) fun x =>
-        go (i + 1) (L.replace fun y =>
-          if y == p then some (mkApp2 (mkConst ``NFml.Post.fml) (p.getArg! 0) x) else none)
-    else k L
-  go 0 L
+/-- An update that only ends scopes or frames (`Upd.pop`, `Upd.drop` over
+`Upd.nil`): it prints as nothing. -/
+partial def bookkeepingUpd (U : Expr) : Bool :=
+  if U.isAppOf ``Upd.nil then true
+  else if U.isAppOf ``Upd.pop || U.isAppOf ``Upd.drop then
+    let args := U.getAppArgs
+    args.size ≥ 2 && bookkeepingUpd args[args.size - 2]!
+  else false
 
-/-- What is left of a last line `L` (`Update.lean`'s, over the modalities
-`ms`), as `#last_line` lists it. -/
-def lastLineProblems (C L : Expr) : TermElabM (Array MessageData) := do
-  let mut problems ← NFml.Chain.shapeProblems L
+/-- The goals of a scoped line, each with the number of updates on the path
+to it: through `{U}` (one that ends scopes alone does not count), both sides
+of `∧`, the consequent of `→`, `¬`, `havoc`, `∀`, a hidden binder and
+`anon`. -/
+partial def goalsOfS (e : Expr) (n : Nat) : MetaM (Array (Nat × Expr)) := do
+  let e ← instantiateMVars e
+  let args := e.getAppArgs
+  if e.isAppOf ``Fml.upd && args.size == 6 then
+    goalsOfS args[5]! (if bookkeepingUpd args[4]! then n else n + 1)
+  else if e.isAppOf ``Fml.and && args.size == 4 then
+    return (← goalsOfS args[2]! n) ++ (← goalsOfS args[3]! n)
+  else if (e.isAppOf ``Fml.imp || e.isAppOf ``Fml.not || e.isAppOf ``Fml.havoc ||
+      e.isAppOf ``Fml.all || e.isAppOf ``Fml.bind || e.isAppOf ``Fml.anon) && !args.isEmpty then
+    goalsOfS args.back! n
+  else return #[(n, e)]
+
+/-- What is left of the scoped last line `L`, as `#last_line` lists it. -/
+def lastLineProblems (L : Expr) : TermElabM (Array MessageData) := do
+  let mut problems := #[]
+  for (n, g) in ← goalsOfS L 0 do
+    if n ≥ 2 then
+      problems := problems.push m!"{n} updates stand in front of{← indentLine g}\n\
+        (one parallel update does: `~[sequentialToParallel]~>`)"
   let ms ← NFml.Chain.modalityVars L
-  if ms.size ≥ 2 then throwError "#last_line: the last line is under two modalities{indentExpr L}"
+  if ms.size ≥ 2 then throwError "#last_line: the last line is under two modalities{← indentLine L}"
   let lines : List (Option String × Expr) := match ms[0]? with
     | some m => [(some "under the box", L.replaceFVar (.fvar m) (mkConst ``Modality.box)),
                  (some "under the diamond", L.replaceFVar (.fvar m) (mkConst ``Modality.diamond))]
@@ -59,17 +64,17 @@ def lastLineProblems (C L : Expr) : TermElabM (Array MessageData) := do
     | none => q
   let mut found : Array (String × Expr × Array String) := #[]
   for (where?, L) in lines do
-    for (r, q) in ← NFml.Chain.stillApplies C L do
-      let q := back q
+    for st in ← pastSteps L do
+      let q := back st.fml
       let tag := where?.getD ""
-      if let some i := found.findIdx? fun (r', q', _) => r' == r && q' == q then
+      if let some i := found.findIdx? fun (r', q', _) => r' == st.name && q' == q then
         found := found.modify i fun (r', q', ws) => (r', q', ws.push tag)
       else
-        found := found.push (r, q, #[tag])
+        found := found.push (st.name, q, #[tag])
   for (r, q, ws) in found do
     let note := if ms.isEmpty then m!"" else
       if ws.size == 2 then m!" (under either modality)" else m!" ({ws[0]!})"
-    problems := problems.push m!"{r} still applies{note}, and gives{indentD m!"{← ppLegacyLine q}"}"
+    problems := problems.push m!"{r} still applies{note}, and gives{← indentLine q}"
   return problems
 
 /-- `#last_line c` for a scoped chain: silent when it ends at a last line,
@@ -79,19 +84,13 @@ elab_rules : command
     let n ← realizeGlobalConstNoOverloadWithInfo c
     let info ← getConstInfo n
     forallTelescope info.type fun _ ty => do
-      let some (B, isScoped) ← chainEnd? ty | throwUnsupportedSyntax
+      let some (B, _) ← chainEnd? ty | throwUnsupportedSyntax
       let B ← instantiateMVars B
-      let L ← if isScoped then do
-          unless (← whnfR (← lineType B).2).isAppOf ``List.nil do
-            throwError "#last_line: the last line of {c} has a context of its own"
-          let run ← runChain B
-          pure (dropAllsE (← erasedLine run.splice run.erased))
-        else pure B
-      let C := (← whnfR (← inferType L)).appArg!
-      withLegacyPosts L fun L => do
-      let problems ← lastLineProblems C L
+      unless (← whnfR (← lineType B).2).isAppOf ``List.nil do
+        throwError "#last_line: the last line of {c} has a context of its own"
+      let problems ← lastLineProblems B
       unless problems.isEmpty do
-        throwError "#last_line: {c} does not end at a last line:{indentD m!"{← ppLegacyLine L}"}\n\
+        throwError "#last_line: {c} does not end at a last line:{← indentLine B}\n\
           {MessageData.joinSep problems.toList "\n"}"
 
 end Solidity.Chain

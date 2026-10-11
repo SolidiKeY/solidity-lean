@@ -1,6 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Surface
 import Solidity.Examples.Chains.Storage
@@ -538,7 +539,7 @@ def stacked : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
 error: #last_line: stacked does not end at a last line:
   dl{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
 2 updates stand in front of
-  ↑φ
+  dl{ φ }
 (one parallel update does: `~[sequentialToParallel]~>`)
 sequentialToParallel still applies (under either modality), and gives
   dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
@@ -613,7 +614,7 @@ theorem resolveSeg :
 theorem composed :
     dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } :=
-  (readSeg ..).leads.viaE (resolveSeg ..)
+  ((readSeg ..).leads.via (resolveSeg ..)).leadsK
 
 #guard_msgs in
 #last_line resolveSeg
@@ -626,7 +627,7 @@ from one line to another (`Calculus/ChainGen.lean`). -/
 
 /--
 info: Try this:
-  exact Solidity.Fml.ViaE.leads (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+  exact Solidity.Fml.Via.leadsK (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
         ~*> cdl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
         ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
         ~[findOnSave]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } by sol_chain)

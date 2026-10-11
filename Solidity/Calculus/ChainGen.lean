@@ -7,10 +7,11 @@ import Solidity.Calculus.RewriteChainGen
 The chain generator for a chain whose first line is a
 scoped formula (`cdl![m]{ … }`): the strategy's steps, grouped as the worked chains
 print them (`groupSteps`), each named by the rule `Stmt.step` fires
-(`labelOfFocus?`); past the program, from the erasure of the last scoped
-line, the rewrites to a last line, searched as `#chain` searches them
-(`searchRewritesUsing`).  The commands are `Calculus/RewriteChainGen.lean`'s, read
-here when their formula (or chain) is scoped.
+(`labelOfFocus?`); past the program, the rewrites of the scoped line to a
+last line (`pastSearch`: depth first, the merge first, the rest in `~=>`'s
+order, each at the first place it applies, the smallest last line).  The
+commands are `Calculus/RewriteChainGen.lean`'s, read here when their formula
+(or chain) is scoped.
 
 Each line is written as the text that reads back as it: `cdl![m]{ … }` over
 a modality variable, otherwise the first of `cdl!{ … }`, `cdl![.box]{ … }`,
@@ -23,6 +24,110 @@ namespace Solidity.Chain
 
 open Lean Elab Term Meta
 
+/-! ## Past the program: the scoped rewrites -/
+
+/-- A rewrite of a line past the program: its name, the line it leaves,
+that line's erasures, and the rewrite (`FmlRw`). -/
+structure PastStep where
+  name : String
+  fml : Expr
+  erased : Array Expr
+  rw : Expr
+
+/-- The rewrite `a` named `n` on the line `L` past the program, at the
+first place it applies (`scopedRwCands`), a read of the state as the program
+found it left as it is (`plainReadAny`). -/
+def pastStepOf? (L : Expr) (n : String) (a : NFml.Chain.RwArrow) : TermElabM (Option PastStep) := do
+  let run ← runChain L
+  let st ← saveState
+  try
+    let (_, cands, _) ← scopedRwCands L a run.erased[0]! (past := true) (keep := (!plainReadAny ·))
+    return cands.head?.map fun c => { name := n, fml := c.fml, erased := c.erased, rw := c.rw }
+  catch _ =>
+    st.restore
+    return none
+
+/-- The rewrites a chain takes past the program on the line `L`
+(`NFml.Chain.chainRewrite`; with `every`, `simplifyUpdate` too), each at the
+first place it applies, in the generator's order: the merge first, then
+`~=>`'s. -/
+def pastSteps (L : Expr) (every : Bool := false) : TermElabM (Array PastStep) := do
+  let mut out := #[]
+  for (n, a) in ← NFml.Chain.rwAnyArrows do
+    unless every || NFml.Chain.chainRewrite n do continue
+    if let some st ← pastStepOf? L n a then out := out.push st
+  return out.filter (·.name == "sequentialToParallel") ++ out.filter (·.name != "sequentialToParallel")
+
+/-- What the search past the program keeps: the lines tried, the smallest
+last line found and the path to it, the path to the goal once found, and a
+search step that failed. -/
+structure PastSearch where
+  nodes : Nat := 0
+  seen : Std.HashSet Expr := {}
+  best : Option (Nat × Array PastStep) := none
+  found : Option (Array PastStep) := none
+  failed : Option MessageData := none
+
+/-- Depth first from `L` (`NFml.Chain.searchFrom` on the scoped line): a
+line no rewrite applies to is a last line, and the smallest wins; with a
+goal, the first path to it ends the search.  Each line has its own
+heartbeats, and one whose search fails is a leaf. -/
+partial def pastSearchFrom (goal? : Option (Expr → TermElabM Bool)) (path : Array PastStep)
+    (L : Expr) : StateRefT PastSearch TermElabM Unit := do
+  let s ← get
+  if s.found.isSome || s.nodes ≥ NFml.Chain.genNodes || s.seen.contains L then return
+  set { s with nodes := s.nodes + 1, seen := s.seen.insert L }
+  if let some g := goal? then
+    if ← g L then
+      modify fun s => { s with found := some path }
+      return
+  let r : Except Exception (Array PastStep) ←
+    tryCatchRuntimeEx (.ok <$> withCurrHeartbeats (pastSteps L goal?.isSome)) fun e => pure (.error e)
+  match r with
+  | .error e => modify fun s => { s with failed := s.failed <|> some e.toMessageData }
+  | .ok steps =>
+    if steps.isEmpty then
+      let n := NFml.Chain.lineSize L
+      modify fun s => match s.best with
+        | some (b, _) => if n < b then { s with best := some (n, path) } else s
+        | none => { s with best := some (n, path) }
+    else
+      for st in steps do
+        pastSearchFrom goal? (path.push st) st.fml
+
+/-- The rewrites from `L` to a last line (`goal? = none`) or to a line the
+goal accepts, and a note when the search did not finish. -/
+def pastSearch (L : Expr) (goal? : Option (Expr → TermElabM Bool) := none) :
+    TermElabM (Option (Array PastStep) × Option MessageData) := do
+  let ((), s) ← (pastSearchFrom goal? #[] L).run {}
+  let note := if s.nodes ≥ NFml.Chain.genNodes then
+      some m!"the search stopped after {NFml.Chain.genNodes} lines; this is the best it found"
+    else s.failed.map fun m => m!"a step of the search failed: {m}"
+  match goal? with
+  | some _ => return (s.found, note)
+  | none => return (s.best.map (·.2), note)
+
+/-- A line's key past the program: its erasure, its parameters free. -/
+def pastKey (B : Expr) : MetaM Expr := do
+  let (C, Γ) ← lineType B
+  return mkApp2 (mkConst ``Solidity.NFml.dropAlls) C
+    (mkAppN (mkConst ``Fml.erase) #[C, Γ, mkApp (mkConst ``List.nil [0]) (mkConst ``Solidity.Var), B])
+
+/-- Whether the line `B` is the one the line written `Bw` names (`Fml.LeadsK`). -/
+def namesLine (Bw B : Expr) : MetaM Bool := do
+  kernelDefEq (← pastKey B) (← pastKey Bw)
+
+/-- `L ~~> B` by the rewrite of the step `st` (`FmlRw.sound`), the kernel's. -/
+def PastStep.leads (L : Expr) (st : PastStep) : TermElabM Expr := do
+  let (C, Γ) ← lineType L
+  let sp ← collectPosts L {}
+  let m? ← modalityOf? (punch C sp L)
+  let lhs := mkAppN (mkConst ``FmlRw.apply) #[C, st.rw, Γ, L]
+  let rhs := mkApp2 (mkConst ``Option.some [0]) (mkApp2 (mkConst ``Fml) C Γ) st.fml
+  let h ← kernelReflOrCases m? lhs rhs
+  mkExpectedTypeHint (mkAppN (mkConst ``FmlRw.sound) #[C, st.rw, Γ, L, st.fml, h])
+    (mkApp4 (mkConst ``Fml.Leads) C Γ L st.fml)
+
 /-- A generated chain: the strategy's lines with the rule that reached each
 (and each line's erasures), the rewrites after with theirs, and why it
 stopped early, if it did. -/
@@ -34,11 +139,12 @@ structure Gen where
   /-- Rewrites of a line while its program is open, after `steps`
   (`openRwPath`), each with its line's erasures. -/
   openRws : Array (String × Expr × Array Expr) := #[]
-  rewrites : Array (String × Expr)
+  /-- Rewrites past the program, each with its line's erasures. -/
+  rewrites : Array (String × Expr × Array Expr)
   stop : Option MessageData
 
-/-- Run the strategy from the scoped line `φ`, then, from the erasure of its
-last line, the rewrites to a last line. -/
+/-- Run the strategy from the scoped line `φ`, then the rewrites of its last
+line to a last line (`pastSearch`). -/
 def generate (φ : Expr) : TermElabM Gen := do
   let run ← runChain φ
   let (_, Γ) ← lineType φ
@@ -58,24 +164,23 @@ def generate (φ : Expr) : TermElabM Gen := do
              stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
   unless (← whnfR Γ).isAppOf ``List.nil do
     return { splice := run.splice, erased := run.erased, steps, rewrites := #[], stop := none }
-  let erased := (steps.back?.map (·.2.2)).getD run.erased
-  let L := dropAllsE (← erasedLine run.splice erased)
-  let C := (← lineType φ).1
-  let (rws, stop, _) ← NFml.Chain.searchRewritesUsing C L none
-  return { splice := run.splice, erased := run.erased, steps, rewrites := rws.getD #[], stop }
+  let Z := (steps.back?.map (·.2.1)).getD φ
+  let (rws, stop) ← pastSearch Z
+  return { splice := run.splice, erased := run.erased, steps, stop,
+           rewrites := (rws.getD #[]).map fun st => (st.name, st.fml, st.erased) }
 
 /-- The links of a generated chain: the strategy's steps grouped
-(`groupSteps`), then one `~[r]~>` per rewrite; each with its line, and
-whether that line is scoped. -/
+(`groupSteps`), then one `~[r]~>` per rewrite; each with its line. -/
 def Gen.links (g : Gen) : Array (String × Expr × Bool) :=
   let grouped := NFml.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l))
   grouped.map (fun (a, l) => (a, l, true)) ++
     g.openRws.map (fun (n, l, _) => (s!"~[{n}]~>", l, true)) ++
-    g.rewrites.map fun (n, l) => (s!"~[{n}]~>", l, false)
+    g.rewrites.map fun (n, l, _) => (s!"~[{n}]~>", l, true)
 
-/-- The erasures of a scoped line of a generated chain. -/
+/-- The erasures of a line of a generated chain. -/
 def Gen.erasedOf (g : Gen) (l : Expr) : Array Expr :=
-  ((g.steps.find? (·.2.1 == l)).map (·.2.2) <|> (g.openRws.find? (·.2.1 == l)).map (·.2.2)).getD #[]
+  ((g.steps.find? (·.2.1 == l)).map (·.2.2) <|> (g.openRws.find? (·.2.1 == l)).map (·.2.2) <|>
+    (g.rewrites.find? (·.2.1 == l)).map (·.2.2)).getD #[]
 
 /-- The `dl_fml` of a printed line `dl{ φ }`. -/
 def dlFmlOf? (t : Lean.Term) : Option (TSyntax `dl_fml) :=
@@ -128,7 +233,7 @@ def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array
 /-- The rows of a `FreshNames` table for the fresh variables of the lines. -/
 def Gen.tableRows (g : Gen) (φ : Expr) : Array String := Id.run do
   let mut seen : Array String := #[]
-  for e in #[φ] ++ g.steps.map (·.2.1) ++ g.rewrites.map (·.2) do
+  for e in #[φ] ++ g.steps.map (·.2.1) ++ g.rewrites.map (·.2.1) do
     for s in NFml.Chain.freshSpellings e do
       unless seen.contains s do seen := seen.push s
   return seen.map fun s => s!"(\"?\", \"{s}\")"
@@ -157,8 +262,8 @@ elab_rules : command
       m!"\n\nfresh variables (a `FreshNames` table renames them):\n  [{", ".intercalate rows.toList}]"
     logInfo (m!"{"\n".intercalate (← g.decl φ).toList}" ++ table ++ g.stopNote)
 
-/-- The last line of a scoped chain's statement (a chain term, or `A ~~> B`),
-and whether it is scoped (`false`: past the program, `Update.lean`'s). -/
+/-- The last line of a scoped chain's statement (a chain term, or `A ~~> B`;
+past the program the line written), and whether it is scoped (always). -/
 def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
   let ty ← instantiateMVars ty
   let lastOf (ws : Expr) (dflt : Expr) : MetaM (Option Expr) := do
@@ -170,9 +275,8 @@ def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
   match ty.getAppFnArgs with
   | (``Fml.OneStep, #[_, _, _, B]) | (``Fml.Steps, #[_, _, _, B])
   | (``Fml.StepBy, #[_, _, _, _, B]) | (``Fml.Leads, #[_, _, _, B]) => return some (B, true)
-  | (``Fml.LeadsE, #[_, _, _, L]) => return some (L, false)
+  | (``Fml.LeadsK, #[_, _, B]) => return some (B, true)
   | (``Fml.Via, #[_, _, A, ws]) => return (← lastOf ws A).map (·, true)
-  | (``Fml.ViaE, #[_, _, _, L, rs]) => return (← lastOf rs L).map (·, false)
   | _ => return none
 
 /-- `#chain_rest c` for a scoped chain: the links still to append, from the
@@ -182,29 +286,16 @@ elab_rules : command
     let n ← realizeGlobalConstNoOverloadWithInfo c
     let info ← getConstInfo n
     forallTelescope info.type fun _ ty => do
-      let some (B, isScoped) ← chainEnd? ty | throwUnsupportedSyntax
+      let some (B, _) ← chainEnd? ty | throwUnsupportedSyntax
       let B ← instantiateMVars B
-      let (links, sp, C, stop) ← if isScoped then do
-          let g ← generate B
-          pure (g.links, g.splice, (← lineType B).1, g.stop)
-        else do
-          let ty ← whnfR (← inferType B)
-          let C := ty.appArg!
-          let (rws, stop, _) ← NFml.Chain.searchRewritesUsing C B none
-          let sp ← collectPosts B {}
-          let m? ← (do
-            for x in (collectFVars {} B).fvarIds do
-              if (← instantiateMVars (← x.getType)).isConstOf ``Modality then return some (mkFVar x)
-            return none : MetaM (Option Expr))
-          pure ((rws.getD #[]).map (fun (n, l) => (s!"~[{n}]~>", l, false)),
-            { sp with modality := m? }, C, stop)
+      let g ← generate B
+      let (links, sp, C, stop) := (g.links, g.splice, (← lineType B).1, g.stop)
       if links.isEmpty then
         logInfo m!"{c} ends at a last line"
         return
       let mut out : Array String := #[]
       for (arrow, l, sc) in links do
-        let erased ← if sc then pure ((← runChain l).erased) else pure #[]
-        let line ← lineText sp C l sc erased
+        let line ← lineText sp C l sc (← runChain l).erased
         out := out ++ #[s!"    {arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("      " ++ ·)
       let note := match stop with
         | some m => m!"\n\nthe chain stops early: {m}"
@@ -214,11 +305,11 @@ elab_rules : command
 /-! ## `sol_chain`, `sol_chain?` and `sol_rws` on `~~>`
 
 A goal `A ~~> B` on scoped lines (`Fml.Leads`) is the derivation from `A`
-to `B`, which `sol_chain` proves.  Past the program (`Fml.LeadsE A Z L`)
-it is the derivation to `Z`, then rewrites from `Z`'s erasure to `L`: the
-file names them (`sol_rws [..]`), and only the `?` twins search for them
-(`Calculus/RewriteChainGen.lean`'s `searchRewrites`), so a re-check does not
-search; `sol_chain` refuses such a goal and points to them. -/
+to `B`, which `sol_chain` proves.  Past the program (`Fml.LeadsK A B`) it
+is the derivation to its last line `Z`, then rewrites of the scoped line to
+the line `B` names: the file names them (`sol_rws [..]`), and only the `?`
+twins search for them (`pastSearch`), so a re-check does not search;
+`sol_chain` refuses such a goal and points to them. -/
 
 /-- The merges, one per name, from `A` to `B`: the first sequence of merge
 candidates that ends at `B`, as `A ~~> B`. -/
@@ -275,21 +366,27 @@ partial def leadsSteps (A B : Expr) : TermElabM Expr := do
       {(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
 
 
-/-- The erasure of the derivation's last line `Z` from `A`, its parameters
-free, with the postconditions `Update.lean` reads (`Post.erase`). -/
-def lastErasure (A Z : Expr) : TermElabM Expr := do
-  let run ← runChain A
-  let erased ← if Z == A then pure run.erased else
-    match run.lines.find? (·.fml == Z) with
-    | some l => pure l.erased
-    | none => throwError "sol_chain: the derivation of{← indentLine A}\ndoes not reach{← indentLine Z}"
-  return dropAllsE (← erasedLine run.splice erased)
+/-- The derivation's last line from `A` (`A` itself where no step applies). -/
+def lastLineOf (A : Expr) : TermElabM Expr := do
+  return ((← runChain A).lines.getLast?.map (·.fml)).getD A
 
-/-- `L₀ ~~> L` (`Update.lean`'s) by the rewrites `ns`. -/
-def legacyLeads (C L₀ L : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
-  let g ← mkFreshExprMVar (mkApp3 (mkConst ``Solidity.NFml.Leads) C L₀ L)
-  NFml.Chain.proveRws g.mvarId! ns
-  instantiateMVars g
+/-- `A ~~> B` past the program (`Fml.LeadsK`): the derivation to its last
+line, then the rewrites `ns` of the scoped line in turn, each at the first
+place it applies, to the line `B` names. -/
+def pastLeads (A B : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
+  let Z ← lastLineOf A
+  let mut pf ← leadsSteps A Z
+  let mut cur := Z
+  for n in ns do
+    let some a ← NFml.Chain.rwArrow? (mkIdent n) | throwError "sol_rws: {n} is no rewrite"
+    let some st ← pastStepOf? cur n.toString a
+      | throwError "sol_rws: {n} does not apply to{← indentLine cur}"
+    pf ← mkAppM ``Fml.Leads.comp #[pf, ← st.leads cur]
+    cur := st.fml
+  unless ← namesLine B cur do
+    throwError "sol_rws: the rewrites give{← indentLine cur}\nnot{← indentLine B}"
+  let he ← mkExpectedTypeHint (← mkEqRefl (← pastKey B)) (← mkEq (← pastKey cur) (← pastKey B))
+  mkAppM ``Fml.Leads.leadsK #[pf, he]
 
 /-- Prove a goal `A ~~> B`: scoped, by the derivation; past the program, by
 the derivation and then the rewrites `ns`. -/
@@ -297,22 +394,15 @@ def solveLeads (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
   let ty ← instantiateMVars (← g.getType)
   match_expr ty with
   | Fml.Leads _ _ A B => g.assign (← leadsSteps A B)
-  | Fml.LeadsE C A Z L =>
-    let h₁ ← leadsSteps A Z
-    let L₀ ← lastErasure A Z
-    let h₂ ← legacyLeads C L₀ L ns
-    let er ← mkAppM ``Fml.erase #[mkApp (mkConst ``List.nil [0]) (mkConst ``Solidity.Var), Z]
-    let h₂ ← mkExpectedTypeHint h₂ (mkApp3 (mkConst ``Solidity.NFml.Leads) C
-      (mkApp2 (mkConst ``Solidity.NFml.dropAlls) C er) L)
-    g.assign (← mkAppM ``And.intro #[h₁, h₂])
+  | Fml.LeadsK _ A B => g.assign (← pastLeads (← instantiateMVars A) (← instantiateMVars B) ns)
   | _ => throwError "not a `~~>` goal"
 
 elab_rules : tactic
   | `(tactic| sol_chain) => Tactic.withMainContext do
     let g ← Tactic.getMainGoal
     let ty ← instantiateMVars (← g.getType)
-    unless ty.isAppOf ``Fml.Leads || ty.isAppOf ``Fml.LeadsE do throwUnsupportedSyntax
-    if ty.isAppOf ``Fml.LeadsE then
+    unless ty.isAppOf ``Fml.Leads || ty.isAppOf ``Fml.LeadsK do throwUnsupportedSyntax
+    if ty.isAppOf ``Fml.LeadsK then
       -- logged, not thrown: a throw falls through to `Calculus/RewriteChains.lean`'s
       -- `sol_chain`, whose error would be the one shown
       logError "sol_chain: past the program the rewrites are named, so that a re-check does \
@@ -334,8 +424,9 @@ def chainText (g : Gen) (φ : Expr) : TermElabM (Array String) := do
 
 /-- `sol_chain?` on a scoped chain: proved as `sol_chain` proves it,
 `sol_chain` suggested, and the lines that go on to a last line printed if it
-does not end at one.  On `A ~~> B`: the chain from `A` to `B` (to `L` past
-the program, by the rewrites the search finds), written out as one term. -/
+does not end at one.  On `A ~~> B`: the chain from `A` to `B` (past the
+program to the line `B` names, by the rewrites the search finds), written
+out as one term. -/
 elab_rules : tactic
   | `(tactic| sol_chain?%$tk) => Tactic.withMainContext do
     let g ← Tactic.getMainGoal
@@ -353,7 +444,7 @@ elab_rules : tactic
             {"\n".intercalate (lines.extract start lines.size |>.map ("    " ++ ·)).toList}" ++
             gen.stopNote)
       return
-    unless ty.isAppOf ``Fml.Leads || ty.isAppOf ``Fml.LeadsE do throwUnsupportedSyntax
+    unless ty.isAppOf ``Fml.Leads || ty.isAppOf ``Fml.LeadsK do throwUnsupportedSyntax
     let A := if ty.isAppOf ``Fml.Leads then ty.getArg! 2 else ty.getArg! 1
     let A ← instantiateMVars A
     let gen ← generate A
@@ -371,23 +462,21 @@ elab_rules : tactic
                 {← indentLine B}{(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
           let openRws := path.toArray.map fun st => (st.name.toString, st.fml, st.erased)
           pure { gen with steps := gen.steps.extract 0 i, rewrites := #[], stop := none, openRws }
-      | Fml.LeadsE C _ Z L =>
-        let L₀ ← lastErasure A (← instantiateMVars Z)
-        let (path, note) ← NFml.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
+      | Fml.LeadsK _ _ B =>
+        let B ← instantiateMVars B
+        let Z ← lastLineOf A
+        let (path, note) ← pastSearch Z (some fun L => namesLine B L)
         let some path := path
-          | throwError "sol_chain?: no run of rewrites from{indentExpr L₀}\nreaches{indentExpr L}\
+          | throwError "sol_chain?: no run of rewrites from{← indentLine Z}\nreaches{← indentLine B}\
               {(note.map (m!"\n" ++ ·)).getD m!""}"
-        pure { gen with rewrites := path, stop := none }
+        pure { gen with rewrites := path.map (fun st => (st.name, st.fml, st.erased)), stop := none }
       | _ => throwUnsupportedSyntax
     let links := gen.links
     let lines ← if links.isEmpty then
         pure #["exact Solidity.Fml.Leads.self _"]
       else do
         let ls ← chainText gen A
-        -- `Fml.LeadsE`'s chain keeps every link past the program on the erasure
-        let past := if sol_chain.scopedPast.get (← getOptions) then
-          "set_option sol_chain.scopedPast false in " else ""
-        let head := if !gen.rewrites.isEmpty then s!"exact Solidity.Fml.ViaE.leads ({past}show "
+        let head := if ty.isAppOf ``Fml.LeadsK then "exact Solidity.Fml.Via.leadsK (show "
           else if links.size == 1 then "exact Solidity.Fml.SoundRel.leads (show "
           else "exact Solidity.Fml.Via.leads (show "
         let body := #[head ++ ls[0]!] ++ (ls.extract 1 ls.size).map ("    " ++ ·)
@@ -399,10 +488,10 @@ elab_rules : tactic
     Tactic.evalTactic stx
     Solidity.ProofTree.suggest tk lines
 
-/-! `sol_rws [r₁, …, rₙ]` on `A ~~> B`: scoped, each `sequentialToParallel`
-merges the line's update spine (`Fml.MergeBy`, the merge that leads on to
-`B`); past the program, the derivation to `Z`, then `Update.lean`'s rewrites
-from its erasure (`Calculus/RewriteChainGen.lean`'s `sol_rws`). -/
+/-! `sol_rws [r₁, …, rₙ]` on `A ~~> B`: while the program is open, each
+`sequentialToParallel` merges the line's update spine (`Fml.MergeBy`, the
+merge that leads on to `B`); past the program, the derivation to its last
+line, then the rewrites of the scoped line (`pastLeads`). -/
 
 /-- Prove `A ~~> B` by the rewrites `ns`. -/
 def proveCoreRws (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
@@ -414,14 +503,14 @@ def proveCoreRws (g : MVarId) (ns : Array Lean.Name) : TermElabM Unit := do
     let some h ← mergePath (← instantiateMVars A) (← instantiateMVars B) ns.size
       | throwError "sol_rws: {ns.size} merges of{← indentLine A}\ndo not give{← indentLine B}"
     g.assign h
-  | Fml.LeadsE _ _ _ _ => solveLeads g ns
+  | Fml.LeadsK _ _ _ => solveLeads g ns
   | _ => throwUnsupportedSyntax
 
 elab_rules : tactic
   | `(tactic| sol_rws [$ns,*]) => Tactic.withMainContext do
     let g ← Tactic.getMainGoal
     let ty ← instantiateMVars (← g.getType)
-    unless ty.isAppOf ``Fml.Leads || ty.isAppOf ``Fml.LeadsE do throwUnsupportedSyntax
+    unless ty.isAppOf ``Fml.Leads || ty.isAppOf ``Fml.LeadsK do throwUnsupportedSyntax
     proveCoreRws g (ns.getElems.map (·.getId))
     Tactic.replaceMainGoal []
   | `(tactic| sol_rws?%$tk) => Tactic.withMainContext do
@@ -439,13 +528,14 @@ elab_rules : tactic
         let some n := found
           | throwError "sol_rws?: no run of merges from{← indentLine A}\nreaches{← indentLine B}"
         pure (Array.replicate n `sequentialToParallel)
-      | Fml.LeadsE C A Z L =>
-        let L₀ ← lastErasure (← instantiateMVars A) (← instantiateMVars Z)
-        let (path, note) ← NFml.Chain.searchRewrites C L₀ (some (← instantiateMVars L))
+      | Fml.LeadsK _ A B =>
+        let B ← instantiateMVars B
+        let Z ← lastLineOf (← instantiateMVars A)
+        let (path, note) ← pastSearch Z (some fun L => namesLine B L)
         let some path := path
-          | throwError "sol_rws?: no run of rewrites from{indentExpr L₀}\nreaches{indentExpr L}\
+          | throwError "sol_rws?: no run of rewrites from{← indentLine Z}\nreaches{← indentLine B}\
               {(note.map (m!"\n" ++ ·)).getD m!""}"
-        pure (path.map (Lean.Name.mkSimple ·.1))
+        pure (path.map (Lean.Name.mkSimple ·.name))
       | _ => throwUnsupportedSyntax
     proveCoreRws g ns
     Tactic.replaceMainGoal []
