@@ -1,5 +1,5 @@
 import Solidity.Calculus.Logic
-import Solidity.Syntax.Resolve
+import Solidity.Syntax.Splice
 
 /-!
 # The solkey corpus: what an obligation is
@@ -9,9 +9,9 @@ an example contract, `\<{ f()@C; }\>(true)`: from the contract's initial
 store, the body runs to its end — no `require` fails and no `assert` does.
 The body is the whole specification.  `scripts/solkey-port.mjs` translates
 each function into `sol[C]{ … }` over the ported contract `C` (`Syntax.lean`)
-and states it as `Diamond (State.init C) P`: the program resolved to
-the scoped syntax (`Prog.resolve`) and `⟨ P ⟩ true` read over its
-typed run (`holds`, `Semantics/Run.lean`) from the typed
+and states it as `Diamond (State.init C) P`: the program elaborated scoped
+(`sol[C]{ … }` where a `Prog C [] Γ'` is expected) and `⟨ P ⟩ true` read
+over its typed run (`holds`, `Semantics/Run.lean`) from the typed
 state the contract starts in, every root at its default.
 
 Why not a validity `⊨`, which is what `sol_symex` and `sol_close` prove:
@@ -31,8 +31,8 @@ Why not a validity `⊨`, which is what `sol_symex` and `sol_close` prove:
 
 So the obligation is the diamond *at the store*, which is exactly solkey's
 formula read in the contract's initial state.  It is decided by the kernel
-(`corpus_decide`): the program is resolved and its typed run from the store
-evaluated by `decide +kernel` (`runOk`); the typed run has no well-founded
+(`corpus_decide`): its typed run from the store evaluated by
+`decide +kernel` (`runOk`); the typed run has no well-founded
 definition in the kernel's way (a default is the structural `SVal.dflt`, a
 memory copy a fold).  A run that does not end normally is pinned by `#eval`
 of `outcome` under `#guard_msgs`, and the verdict table
@@ -61,34 +61,27 @@ no gas, never sees: decision 15); under the box, it does not panic. -/
 abbrev Runs {Γ' : Ctx} (m : Modality) (σ : State C []) (Q : Prog C [] Γ') : Prop :=
   holds σ (.modal m Q .nil .tt)
 
-/-- solkey's `\<{ f(); }\>(true)` at the typed state `σ`: the program `P`
-resolves to the scoped syntax, and its typed run from `σ` ends normally,
-or is exhausted (`Runs`, decision 15). -/
-def Diamond [FreshNames] (σ : State C []) (P : Surface.Prog C) : Prop :=
-  match Prog.resolve [] P with
-  | .ok ⟨_, Q⟩ => Runs .diamond σ Q
-  | .error _ => False
+/-- solkey's `\<{ f(); }\>(true)` at the typed state `σ`: the typed run of
+the scoped program `P` from `σ` ends normally, or is exhausted (`Runs`,
+decision 15). -/
+abbrev Diamond {Γ' : Ctx} (σ : State C []) (P : Prog C [] Γ') : Prop :=
+  Runs .diamond σ P
 
 /-- How the typed run of `P` from `σ` ends: `"ok"`, `"revert"`, `"panic"`,
-`"diverge"` or `"exhausted"`, or why `P` does not resolve.  What `#eval`
-pins where the run does not end normally. -/
-def outcome [FreshNames] (σ : State C []) (P : Surface.Prog C) : String :=
-  match Prog.resolve [] P with
-  | .ok ⟨_, Q⟩ =>
-    match Q.run σ with
-    | .ok _ => "ok"
-    | .error .revert => "revert"
-    | .error .panic => "panic"
-    | .error .diverge => "diverge"
-    | .error .exhausted => "exhausted"
-  | .error e => s!"unresolved: {e}"
+`"diverge"` or `"exhausted"`.  What `#eval` pins where the run does not end
+normally. -/
+def outcome {Γ' : Ctx} (σ : State C []) (P : Prog C [] Γ') : String :=
+  match P.run σ with
+  | .ok _ => "ok"
+  | .error .revert => "revert"
+  | .error .panic => "panic"
+  | .error .diverge => "diverge"
+  | .error .exhausted => "exhausted"
 
-/-- The check `corpus_decide` evaluates: `P` resolves from no locals, and its
-typed run from `σ` ends normally. -/
-def runOk [FreshNames] (σ : State C []) (P : Surface.Prog C) : Bool :=
-  match Prog.resolve [] P with
-  | .ok ⟨_, Q⟩ => (Q.run σ).isOk
-  | .error _ => false
+/-- The check `corpus_decide` evaluates: the typed run of `P` from `σ` ends
+normally. -/
+def runOk {Γ' : Ctx} (σ : State C []) (P : Prog C [] Γ') : Bool :=
+  (P.run σ).isOk
 
 /-- A typed run that ends normally proves the diamond. -/
 theorem runs_of_run {Γ' : Ctx} {σ : State C []} {Q : Prog C [] Γ'}
@@ -97,18 +90,14 @@ theorem runs_of_run {Γ' : Ctx} {σ : State C []} {Q : Prog C [] Γ'}
   exact ⟨trivial, nofun⟩
 
 /-- `runOk` proves the diamond. -/
-theorem diamond_of_runOk [FreshNames] (σ : State C []) {P : Surface.Prog C}
+theorem diamond_of_runOk {Γ' : Ctx} (σ : State C []) {P : Prog C [] Γ'}
     (h : runOk σ P = true) : Diamond σ P := by
   unfold runOk at h
-  unfold Diamond
-  split at h
-  · rename_i Q _
-    cases ht : Q.run σ with
-    | error e => rw [ht] at h; cases h
-    | ok o => exact runs_of_run ht
-  · cases h
+  cases ht : P.run σ with
+  | error e => rw [ht] at h; cases h
+  | ok o => exact runs_of_run ht
 
-/-- `corpus_decide`: let the kernel resolve the program and run it typed. -/
+/-- `corpus_decide`: let the kernel run the program typed. -/
 macro "corpus_decide" : tactic =>
   `(tactic| (apply diamond_of_runOk; decide +kernel))
 

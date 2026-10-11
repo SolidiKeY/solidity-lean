@@ -20,8 +20,8 @@ from the storage laid out as solc lays it out, and compare.
 **What is compared is what `compile_correct` claims** (`Evm/Correct.lean`),
 from a start where its hypotheses hold:
 
-* the call is the program `#run` builds (`callProg`), resolved to the scoped
-  syntax (`Prog.resolve`), and kept only if it is in the compiled
+* the call is the program `#run` builds (`callProg`, elaborated scoped),
+  and kept only if it is in the compiled
   fragment, `inFragP (Frag.init []) Q = some F'`; otherwise the function is
   reported skipped;
 * the start machine represents the start state (`Sim C L b F σ.sem ρ m`): its
@@ -244,7 +244,7 @@ def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
 /-- One run of `Q` from `s`: whether both reverted when the two agree, else
 the lines of the mismatch.  The machine has no panic: a failed `assert`
 reverts there (`compile_correct`'s panic case). -/
-def runOnce (C : Contract) {Γ' : NCtx} (Q : Prog C [] Γ'.ctx) (s : Start) :
+def runOnce (C : Contract) {Γ' : Ctx} (Q : Prog C [] Γ') (s : Start) :
     Except (List String) Bool :=
   let keys0 := s.storage.flatMap (SVal.mapKeys ·.2)
   match encodeStorage C keys0 s.storage, typedState? C s.state with
@@ -267,7 +267,7 @@ def runOnce (C : Contract) {Γ' : NCtx} (Q : Prog C [] Γ'.ctx) (s : Start) :
       else throw ["typed run ok, machine revert, and no payment to refuse"]
     | .ok o, .ok m' 0 =>
       let keys := (keys0 ++ o.st.storage.erase.flatMap (SVal.mapKeys ·.2)).eraseDups
-      match differences C Γ'.names keys o.st m' with
+      match differences C (Q.outNames []) keys o.st m' with
       | [] => pure false
       | ds => throw (s!"both ok, and they differ:" :: ds)
     | _, _ => throw [s!"typed run {fmtTRes res}, machine {fmtOut out}"]
@@ -287,10 +287,7 @@ def testFun [FreshNames] (C : Contract) (name : String) (runs seed j : Nat) (f :
   for i in List.range runs do
     let some (s, args) := (genStart C d).run' (mkStdGen (runSeed seed j i))
       | return [s!"skipped: {f} (a parameter of reference type)"]
-    let P ← match callProg C f args with
-      | .ok P => pure P
-      | .error e => return [s!"skipped: {f} ({e})"]
-    let ⟨_, Q⟩ ← match Prog.resolve [] P with
+    let ⟨_, Q⟩ ← match callProg C f args with
       | .ok r => pure r
       | .error e => return [s!"skipped: {f} ({e})"]
     unless (Evm.inFragP (Evm.Frag.init []) Q).isSome do
