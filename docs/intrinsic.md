@@ -3295,6 +3295,49 @@ clause "a typed storage has every root" is added; `CloseTests`; every
 `#last_line`, `ChainRewrites`, `ChainNotation`, `Tactics/Chains` (W9.4);
 and `DlNotation`'s types, now `Fml C []`.
 
+### W9.1 `terms` record
+
+Branch `w9-terms`, additive: nothing on the IR moved, no pin changed.
+
+- **`Calculus/TermLib.lean`** (imports `Logic`, `Rules`, `TermTaclets`; no
+  module imports it yet but `Solidity.lean`).  `TermTacletS` restates every
+  `TermTaclet` constructor under its solkey name on `Tm C Γ .val`, in
+  `tm{ … }`; `TermTacletS.findOnDelAtSave` as before; `TermTacletS.sound`
+  over the scoped `Tm.denote` into `Tm.Theq` (with `refl`/`symm`/`trans`/
+  `of_eq`), axioms `propext`, `Classical.choice`, `Quot.sound`.  The side
+  conditions on scoped paths: `Tm.hasSeg`, `Tm.litInt?`, `Tm.shape?`,
+  `Tm.diverges`, `Tm.divergesLen`, `Tm.eraseChecks`, `Tm.sameSegs` (by
+  `Tm.beqR`), `Tm.extendsAny`/`Tm.extends`, `Tm.root?`, `Tm.shift?`,
+  `Tm.svLit?`, `Tm.findLitBy`/`Tm.findLit?`, `Tm.KindFreeAt`, `SCtxS` with
+  `fill`, each with its `_denote` lemma; every recursive one generic in the
+  sort, so `by rfl` closes them on closed paths (pinned).
+- **Sort-generic helpers** by the recursor, a `match` twin and a link
+  theorem: `Tm.reads`/`readsM` (`Tm.reads_eq_readsM`; positions as `AnyIdx Γ`),
+  `Tm.litVarsS`/`litVarsSM`, `Tm.beqR`/`beqM` (`Tm.beqR_eq_beqM`,
+  `Tm.eq_of_beqR`, `Tm.beqR_self`, `Tm.beqR_iff`; sorts and symbols compared
+  by `hbeqAt`: `Idx.hbeq`, `Op0.hbeq`–`Op3.hbeq`).  Each reduces by `rfl`
+  in the kernel (pinned).  `Tm.isLitLikeS` already exists, non-recursive, in
+  `Calculus/DecideScoped.lean`; a second one would clash with it once
+  `DecideScoped` imports `TermLib`, so it was not restated (W9.2 may make it
+  sort-generic in place).
+- **`holds_eqD_iffS`** is in `Calculus/SoundLoops.lean`, beside the term
+  bridge `Tm.denote_eval` it needs (`TermLib` sits below `SeqRewrite` and
+  `DecideScoped`, which `SoundLoops` imports).
+- **Notation.** `TermLib` adds a `tm{ … }` rule that reads the expected
+  type (`tm_at%`): at `Tm C Γ s` the text's symbols become their `Tms`
+  twins (`coreNames`), elsewhere it is the closer's term as before (and
+  while the type is unknown, after postponing).  `delabTmS` prints a scoped
+  term over schema variables back as `tm{ … }` through the closer's printers
+  (`tmSurface`, the variables twinned at their closer types): the scoped
+  rules print as `TermTaclet`'s do, escapes included (pinned at the end of
+  the module).  Both are active only where `TermLib` is imported, so a
+  module that imports it later (W9.2) may see a raw scoped `Tms` term in a
+  message print as `tm{ … }`.
+- **Rule map.** `docs/lean-key-rule-map.md`'s term-taclet table has a
+  `TermTacletS` column.
+- **Checks.** Per-file diagnostics clean (`TermLib`, `SoundLoops`);
+  `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
