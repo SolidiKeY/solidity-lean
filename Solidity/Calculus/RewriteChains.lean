@@ -442,6 +442,17 @@ def rwAnyArrows : MetaM (List (String × RwArrow)) := do
 (`Calculus/Chains.lean`). -/
 syntax "sol_chain" : tactic
 
+/-- `sol_chain` on a goal no chain elaborator takes: a statement whose own
+elaboration failed is left with its error, any other goal refused. -/
+elab_rules : tactic
+  | `(tactic| sol_chain) => do
+    let g ← getMainGoal
+    let ty ← instantiateMVars (← g.getType)
+    if ty.hasSyntheticSorry then
+      g.admit
+      replaceMainGoal []
+    else throwError "sol_chain: the goal is no chain on scoped lines{indentExpr ty}"
+
 syntax "#derivation " term : command
 
 end Tactic
