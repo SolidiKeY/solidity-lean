@@ -1928,6 +1928,121 @@ same session; load 0.3–1.2, cgroup 7.3–7.5 GB):
 Every row within its gate.  `Solkey/TestSuite` is 2% faster: its import
 no longer runs `resolve`'s check on every statement.
 
+### W8.2 `reader-tools` record (2026-10-11, branch `w8-w82consumersreadscopedprintersobligationsreader-reader-tools`)
+
+The formula reader, the chains' line matching and the run tools read the
+scoped syntax.
+
+- **The reader** (`Calculus/Notation.lean`).  `elabModalProg` elaborates a
+  formula's program scoped from the formula's named context: each
+  statement by `elabStmtP` from the reader's scope, placed where the one
+  before leaves by `SProg.chain`/`Blk.append`, as `elabProgAtS` does, with
+  the `taken`/`nextFree` capture numbering and `scopeHints` unchanged; no
+  `Prog.resolve`.  The reader's scope is first put in the order of the
+  formula's context (`alignScope`: `setBy` appends a quantifier's local,
+  which `SProg.chain`'s thinning by names would otherwise refuse), and the
+  context the program leaves is named by `Prog.outNames` (`NCtx.named`).
+  An atom is read as the closer's formula and resolved by
+  `NFml.resolveIn` (`Calculus/NotationResolve.lean`; named apart from the
+  `obligations` lane's `NFml.resolveN` in `Calculus/Spec.lean`, which has no
+  `hint`: keep one at the merge).  `Fml.resolveN` on `Surface.Fml` stays
+  in this lane only because `Calculus/Spec.lean`'s `specObligation` reads
+  it here; the `obligations` lane removes that use, so it goes at the
+  merge.
+- **`dl!{ … }` with a modality is scoped** (`elabDlAuto`, a `term_elab` on
+  `dl[C]{ … }` and `dl[C, m]{ … }`, now named `dlAt`/`dlAtM`): `cdl[C]{ … }`
+  when the raw formula has a modality and no `Surface.Fml _` is expected
+  (an expected metavariable postpones once, then reads scoped); today's
+  reading otherwise (`NFml` with no modality).  The sequent forms expand
+  to these.  `Calculus/Surface.lean`'s flip now matters only for a
+  formula with no modality.  `Calculus/SurfaceNotation.lean`'s examples,
+  which need the scoped reader and `Delab`'s printer, moved to
+  `Examples/Tactics/DlNotation.lean`.
+- **Chains** (`Calculus/Chains.lean`).  `Fml.erasedQuoted` is replaced by
+  `Fml.lineKey` (`LineKey`, quoted by `LineKey.quote`): the erasure
+  (`Fml.erase`, quoted as the closer's `NFml`) where there is no modality,
+  and `LineKey.modal m strs k` where there is one, `strs` the program's and
+  the frames' statements as `Prog.toStrs` prints them, a block statement
+  flattened (`Prog.keyStrs`, `Frames.keyStrs`: the erasure flattens a
+  call's expanded body, and the printed line does).  A written line with a
+  modality is read scoped with its parameters open (`elabDlOpen`: no
+  closure, so `underAlls` strips the computed line's `∀`s as before), its
+  slots normalised to `slotExpr j` (`writtenSlots`); one with none is read
+  as today (`elabDlN`, the closer's formula; proposal reader-tools 106).
+  `erasedSlot?`, `toWrittenSlots`, `underAlls` no longer name
+  `Surface.Fml`.  Every pin in `Examples/Chains/*`, `ChainRewrites*`,
+  `ChainNotation` passes unchanged.
+- **Tools and corpus.**  `Tools/Run.lean`: scoped `Prog.runT`,
+  `Prog.localAfterT`, `Contract.deployRunS` on `Prog C [] Γ'` (the
+  `Surface.Prog` versions stay until W8.4); `#run`/`#deploy` elaborate
+  scoped (`elabProgS`, `ctorProgS`), no `resolve`; `callProg` returns a
+  `Blk C []`, and `Tools/DiffTest.lean`'s `runOnce` takes `Prog C [] Γ'`.
+  `Corpus/Basic.lean`: `Diamond`, `outcome`, `runOk`, `diamond_of_runOk`
+  take `{Γ'} (P : Prog C [] Γ')`; the generated `Corpus/Solc*.lean` are
+  unchanged (`sol[C]{ … }` reads scoped at that expected type), and
+  `corpus_decide` evaluates no `resolve`.
+- **Not done: `Calculus/Hyp.lean`, `Calculus/Sequents.lean`.**  The
+  sequent check (`show_sequent`) compares the goal's `Delab.tr` erasure
+  (`Surface.Fml`, the printers lane's) with the line read as today's
+  (`readSequent` calls the legacy `elabDlAt` by name, so it is unchanged).
+  Its scoped cases (`Hyp.pre`/`Hyp.upd` take the closer's `NFml` and
+  `Surface.Upd`, so a scoped `Fml.imp`/`Fml.upd` has no well-typed entry)
+  belong with the goal side's printer: W8.4, after the printers lane.
+
+**Proposals.**
+
+- *reader-tools 106:* a chain's written line with no modality is read as
+  today (`elabDlN`, terms by name), not scoped.  A line past the program
+  drops the `where` clause of a memory local it no longer writes
+  (`{ mv1 := read(memory, carol.account) } …` in
+  `Examples/Chains/MemoryCoverage.lean`), which the scoped reader would
+  read as a `uint` parameter and refuse; the closer's formula, which past
+  the program is what the rewrites read, is unchanged.  The no-modality
+  reading (`dl!{ … }` as `NFml`) outlives W8.4 anyway.
+- *reader-tools 107:* `dl!{ … }` outside the flip binds its parameters as
+  `cdl!{ … }` does (`∀ uint x;` printed), and the scoped printer prints a
+  hidden binder of a `where` clause as nothing.  So a pin of a `where`
+  formula loses its clause (below); the printers lane's `Delab` should
+  print `where T memory x` for a hidden binder of a memory local that a
+  program assigns undeclared, as `copyDecls` does on the erasure.
+
+**Pins that moved** (all in `Examples/Tactics/DlNotation.lean`, moved from
+`Calculus/SurfaceNotation.lean`, unless said):
+
+| Pin | Change | Reason |
+|---|---|---|
+| `dl!{ ⟨ uint x = 10; ⟩ x == 10 }` | `: Surface.Fml StandardExample` → `: Fml StandardExample []` | scoped reading |
+| `dl!{ { carol := freshId(…) ‖ … } ⟨ carol.age = 5; ⟩ true }` | type suffix only | scoped reading |
+| `dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }` | type suffix; `where Person memory carol` no longer printed | proposal 107 |
+| `dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ … where Account memory acc }` | type suffix; `where …` no longer printed (one line) | proposal 107 |
+| `dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }` | type suffix; `∀ uint x;` in front | parameter bound (`cdl!`'s reading) |
+| `fun m φ => dl![m]{ ⟨[ x = 1; ]⟩ φ }` | `φ : NFml StandardExample` → `Post StandardExample [.val .uint]`; `∀ uint x;` | a scoped hole is a `Post C Γ` |
+| `∀ φ, dl!{ ⟨ x = 1; ⟩ φ } = …` (`trace_state`) | `φ✝ : Post …`, `‹↑φ✝›`, `∀ uint x;` | same |
+| `dl!{ ⟨ x = 1; ⟩ ture }` error | `(φ : Post C)` → `(φ : Post C Γ)` | the scoped reader's message |
+| `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the new module sees the scoped `State` too |
+| `dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }` | type suffix; `∀ uint to;` in front | parameter bound |
+| `Examples/Tactics/Surface.lean`: `dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }` outside the flip | prints as the scoped pin below it (`∀ uint a;`, `Fml StandardExample []`) | a modality reads scoped without the flip |
+
+The `rfl` examples and the error pins moved unchanged and pass.
+
+**Checks.**  `import Solidity`, `import SolidityCorpus` and
+`import SolkeyTestSuite` scratch modules: no errors; `check-orphans`
+(the scratch modules only), `check-doc-paths` pass.
+
+**Timing** (end-of-work, base the `intrinsic` worktree at `624c492a`,
+interleaved in one session; other lanes building, load 2–16, so the
+low-load pairs count):
+
+| Module | base | W8.2 reader-tools | ratio | gate |
+|---|---|---|---|---|
+| `Calculus/SurfaceNotation` | 8.59 s (8.50, 8.86, 8.59) | 8.57 s (8.85, 7.86, 8.57) | 1.00 | 1.2× base; its examples now in `Examples/Tactics/DlNotation`, 1.27 s (1.50, 1.27) |
+| `Examples/Tactics/StorageSteps` | 40.48 s | 41.08 s (40.30, 41.86) | 1.01 | 1.2× base |
+| `Corpus/SolcStructs` | 1.22 s (1.24, 1.20) | 1.00 s (1.00, 0.99) | 0.82 | 1.2× base: no `resolve` in the kernel |
+| `Examples/Chains/Storage` | 7.87 s (load 2.8; 10.11, 15.93 under load 7–15) | 7.57 s (load 2.5; 7.69, 9.86 under load) | 0.96 | 8.94 s (W6) |
+| `Examples/ChainRewrites` | 6.91 s | 6.85 s (6.84, 6.86) | 0.99 | 7.63 s (W6) |
+
+Every row within its gate.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
