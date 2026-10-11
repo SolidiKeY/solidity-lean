@@ -29,8 +29,9 @@ locals (`Thin`).  `Stmt.wk`/`Prog.wk` and `Idx.wk` use `match` and are also
 evaluated by the kernel, once per `ifElseUnfold`, call or invariant rule
 fired: the documented exceptions to condition 1 (`Calculus/Step.lean`).
 
-`Syntax.lean`'s families are `Surface.*`: the elaborator emits them, and
-`resolve` (`Syntax/Resolve.lean`) produces these.
+The elaborator (`Syntax/Elab.lean`) emits these families.  `Syntax.lean`'s
+`Surface.*` are their erasure (`Prog.erase`, `Syntax/Resolve.lean`), read by
+the readers not yet scoped.
 -/
 
 namespace Solidity

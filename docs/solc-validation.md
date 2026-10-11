@@ -39,7 +39,7 @@ about Solidity only through one of four links:
 
 - **L1. The typed run is wrong** (`Semantics/Run.lean`, with
   `Semantics.lean`'s operations); the rule is sound against it.
-- **L2. The elaborator misreads `sol{…}`** (`Syntax.lean`, `hoist`): evaluation
+- **L2. The elaborator misreads `sol{…}`** (`Syntax/Elab.lean`, `hoist`): evaluation
   order, what it captures, what it accepts.
 - **L3. The rule is sound but too strong**: its premise asks for more than the
   program needs. `Stmt.rule_exists` is coverage, not logical completeness. The

@@ -45,10 +45,12 @@ and the run, and moved the calculus onto both.
   `Syntax/Scoped.lean`) replaced `Syntax.lean`'s `Stmt C` in every
   semantics, rule and proof: the untyped run, its calculus and the bridge
   theorems (`run_erase`) are deleted.  What stays of the untyped side has no
-  semantics of its own: `Surface.Stmt` (`Syntax.lean`), the elaborator's
-  output and the printers' target, which `resolve` scopes
-  (`Syntax/Resolve.lean`, also the elaborator's locals check; decision 11);
-  and the closer's input below.
+  semantics of its own: `Surface.Stmt` (`Syntax.lean`), the erasure
+  (`Prog.erase`, `Syntax/Resolve.lean`) of the scoped syntax the elaborator
+  emits (`Syntax/Elab.lean`), still the printers' target; `resolveCheck` is
+  no longer the elaborator's check, only the locals check of the readers
+  that take the block as written (decision 11); and the closer's input
+  below.
 - **The closer (M6c, done with an IR).** `sol_decide` reduces and closes
   the scoped leaf by position (`Calculus/DecideScoped.lean`,
   `Calculus/DecideTyped.lean`: `Valid.of_reduceS`, sound over the typed

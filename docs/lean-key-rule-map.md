@@ -325,7 +325,7 @@ gives their shapes and the stages that port them.
 | `whileInvariantDiamond` | `LeanTaclet.whileInvariantDiamond` | ported (past the pin) | the box's premise with `{ variant := dec ‖ b := cond }` and the body's postcondition `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: KeY's skolem `variant` a fresh local (printed `ie`), the variant checked only where the condition holds again. Lean reads `dec` where KeY compares it, so it must be defined where the invariant holds; and under the diamond the cover (`b` is `TRUE` or `FALSE`, `Premise.inv`). Sound by `Premise.sound_whileInvDiamond` (`TLoop.run_variant`) |
 | — | `LeanTaclet.whileClose` | Lean only | a loop with an invariant whose body has no frame (`Prog.frame`: it writes memory, pushes, pops, rebinds an alias or calls out), under either modality, closes to `false`: sound, and nothing about it is derived. solkey refuses only memory-writing bodies (and unwinds them); a push, a pop or a call it frames as writing storage and the ledger, so those refusals are Lean's own (`Stmt.within`) |
 | — | `LeanTaclet.whileNoVariantDiamond` | Lean only | a loop with an invariant and no `decreases` closes to `false` under the diamond (solkey unwinds it). `Stmt.inSolkey` is `false` on every loop |
-| `LoopLowering` (meta-construct) | `lowerLoops` (`Syntax.lean`) | elaborator | `break`/`continue`/`return` in a loop to the flags `brk`/`cnt`/`ret`, `for` and `do … while` to `while`, shape for shape |
+| `LoopLowering` (meta-construct) | `lowerLoops` (`Syntax/Elab.lean`) | elaborator | `break`/`continue`/`return` in a loop to the flags `brk`/`cnt`/`ret`, `for` and `do … while` to `while`, shape for shape |
 
 ## Function contracts
 

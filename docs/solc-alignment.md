@@ -24,7 +24,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Block-scoped locals | in the check (since 2026-10-07, M2.2): the elaborator's locals check (`resolve`) reads the branches of an `if` and a `try`, a loop's body and a call's body as scopes and a name as its newest declaration, so `{ bool x = true; } if (c) { uint x = 1; }` is accepted, as solc accepts it, and a branch's local is not read after it.  The run (`Stmt.run`, `TRun.ite`/`TRun.block`, `docs/intrinsic.md`) pops a scope's locals at its end, and the typing invariants are carried along it (`Typing/TypedRunInv.lean`); since W4 it is the only run of a statement, and the calculus reads it, so no local outlives its scope | `resolve`, `Prog.resolveCheck`, `TRun.ite`, `TRun.block` | `Examples/Tactics/Branch.lean`, `Syntax/Splice.lean` |
 | Conditional of memory references | `T memory m = c ? a : b;` binds `m` to `a`'s or `b`'s object, as solc: the elaborator declares a fresh `mv` before the branches, bound to a branch that indexes nothing (a read that cannot revert), and rebinds it in each branch.  When both branches index, `mv` is first bound to a fresh default object (`T memory mv;`), which nothing reaches: the heap has one object solc does not allocate (since 2026-10-07).  So when both branches index and `T`'s default is not well-formed (`defaultOkS`), the conditional is refused ("a conditional of two indexed memory …s, whose default is not well-formed"), where before 2026-10-07 each branch declared `mv` itself | `hoist`, `MPath.indexFree` | `Syntax/Splice.lean`, `Examples/Tactics/Branch.lean` |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~`, `<<`, `>>` are solc's at `uint256` | `applyBinOp`, `RawExpr.uncheck` | |
-| Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?`, `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax.lean`) | `Examples/Tactics/Checked.lean` |
+| Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?` (`Syntax.lean`), `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/Checked.lean` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `applyBinOp` | |
 | `assert` | a failing `assert` panics (`Panic(0x01)`), a halt distinct from `require`'s revert that neither modality accepts; KeY's "Violated" goal, an obligation under the box too | `assertOk`, `Modality.afterRunTR`, `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
 | Assignment order | right-hand side first, target resolved once | `Stmt.run` (`TRun.assign`, `TRun.opAssign`, `TRun.incDec`) | `Examples/Tools.lean` (`Surface.Prog.runT`) |
@@ -54,7 +54,7 @@ on 2026-09-09.
 
 An effect inside an expression cannot occur in `Stmt.run`: a value has no
 effects, and the elaborator captures each `++`/`−−` (and call) into a fresh
-local before its statement (`hoist`, `Syntax.lean`). An operand solc reads
+local before its statement (`hoist`, `Syntax/Elab.lean`). An operand solc reads
 *before* the effect is captured first (`captureExpr`):
 
 | Form | solc reads | Elaborated |
