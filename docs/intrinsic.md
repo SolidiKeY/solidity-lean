@@ -1950,8 +1950,9 @@ scoped syntax.
   it here; the `obligations` lane removes that use, so it goes at the
   merge.
 - **`dl!{ … }` with a modality is scoped** (`elabDlAuto`, a `term_elab` on
-  `dl[C]{ … }` and `dl[C, m]{ … }`, now named `dlAt`/`dlAtM`): `cdl[C]{ … }`
-  when the raw formula has a modality and no `Surface.Fml _` is expected
+  `dl[C]{ … }` and `dl[C, m]{ … }`, now named `dlAt`/`dlAtM`): `cdl[C]{ … }`,
+  its parameters bound by hidden binders (`useAll := false`), when the raw
+  formula has a modality and no `Surface.Fml _` is expected
   (an expected metavariable postpones once, then reads scoped); today's
   reading otherwise (`NFml` with no modality).  The sequent forms expand
   to these.  `Calculus/Surface.lean`'s flip now matters only for a
@@ -1999,12 +2000,22 @@ scoped syntax.
   read as a `uint` parameter and refuse; the closer's formula, which past
   the program is what the rewrites read, is unchanged.  The no-modality
   reading (`dl!{ … }` as `NFml`) outlives W8.4 anyway.
-- *reader-tools 107:* `dl!{ … }` outside the flip binds its parameters as
-  `cdl!{ … }` does (`∀ uint x;` printed), and the scoped printer prints a
-  hidden binder of a `where` clause as nothing.  So a pin of a `where`
-  formula loses its clause (below); the printers lane's `Delab` should
-  print `where T memory x` for a hidden binder of a memory local that a
-  program assigns undeclared, as `copyDecls` does on the erasure.
+- *reader-tools 107 (withdrawn at review):* `dl!{ … }` outside the flip
+  no longer binds its parameters as `cdl!{ … }` does.  `elabDlAuto` reads
+  through `elabCdlAt … (useAll := false)`, so `Fml.closeN false` binds every
+  parameter by a hidden binder, which prints as nothing, as today's `dl!`
+  left it free.  The flip's `cdl!` still binds a value parameter by
+  `∀ uint x;`.  Outside the flip no proof reads a modal `dl!` (one that is
+  not ascribed `Surface.Fml`), so only pins see the difference, and they
+  print as before.
+
+**Dependency on the `printers` lane.**  The scoped printer prints the
+hidden binder of a `where` clause as nothing.  The two `where` pins
+therefore stay on today's reading in this lane, ascribed
+`(dl!{ … } : Surface.Fml StandardExample)`, so their text is unchanged.
+`Delab` must print `where T memory x` for a hidden binder of a memory local
+that the program assigns without declaring, as `copyDecls` does on the
+erasure.  Once that printer lands, the pins switch to `Fml StandardExample []`.
 
 **Pins that moved** (all in `Examples/Tactics/DlNotation.lean`, moved from
 `Calculus/SurfaceNotation.lean`, unless said):
@@ -2013,15 +2024,15 @@ scoped syntax.
 |---|---|---|
 | `dl!{ ⟨ uint x = 10; ⟩ x == 10 }` | `: Surface.Fml StandardExample` → `: Fml StandardExample []` | scoped reading |
 | `dl!{ { carol := freshId(…) ‖ … } ⟨ carol.age = 5; ⟩ true }` | type suffix only | scoped reading |
-| `dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }` | type suffix; `where Person memory carol` no longer printed | proposal 107 |
-| `dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ … where Account memory acc }` | type suffix; `where …` no longer printed (one line) | proposal 107 |
-| `dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }` | type suffix; `∀ uint x;` in front | parameter bound (`cdl!`'s reading) |
-| `fun m φ => dl![m]{ ⟨[ x = 1; ]⟩ φ }` | `φ : NFml StandardExample` → `Post StandardExample [.val .uint]`; `∀ uint x;` | a scoped hole is a `Post C Γ` |
-| `∀ φ, dl!{ ⟨ x = 1; ⟩ φ } = …` (`trace_state`) | `φ✝ : Post …`, `‹↑φ✝›`, `∀ uint x;` | same |
+| `dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }` | none: ascribed `Surface.Fml StandardExample` | the `printers` lane's `where` printer |
+| `dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ … where Account memory acc }` | none: ascribed `Surface.Fml StandardExample` | same |
+| `dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }` | type suffix only | scoped reading, hidden binder |
+| `fun m φ => dl![m]{ ⟨[ x = 1; ]⟩ φ }` | `φ : NFml StandardExample` → `Post StandardExample [.val .uint]` | a scoped hole is a `Post C Γ` |
+| `∀ φ, dl!{ ⟨ x = 1; ⟩ φ } = …` (`trace_state`) | `φ✝ : Post …`, `‹↑φ✝›` | same |
 | `dl!{ ⟨ x = 1; ⟩ ture }` error | `(φ : Post C)` → `(φ : Post C Γ)` | the scoped reader's message |
 | `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the new module sees the scoped `State` too |
-| `dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }` | type suffix; `∀ uint to;` in front | parameter bound |
-| `Examples/Tactics/Surface.lean`: `dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }` outside the flip | prints as the scoped pin below it (`∀ uint a;`, `Fml StandardExample []`) | a modality reads scoped without the flip |
+| `dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }` | type suffix only | scoped reading, hidden binder |
+| `Examples/Tactics/Surface.lean`: `dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }` outside the flip | type suffix only (`Fml StandardExample []`); the scoped pin below it keeps `∀ uint a;` | a modality reads scoped without the flip, hidden binder |
 
 The `rfl` examples and the error pins moved unchanged and pass.
 
@@ -2035,7 +2046,7 @@ low-load pairs count):
 
 | Module | base | W8.2 reader-tools | ratio | gate |
 |---|---|---|---|---|
-| `Calculus/SurfaceNotation` | 8.59 s (8.50, 8.86, 8.59) | 8.57 s (8.85, 7.86, 8.57) | 1.00 | 1.2× base; its examples now in `Examples/Tactics/DlNotation`, 1.27 s (1.50, 1.27) |
+| `Calculus/SurfaceNotation` + `Examples/Tactics/DlNotation` | 8.59 s (8.50, 8.86, 8.59) | 9.84 s: 8.57 s (8.85, 7.86, 8.57) + 1.27 s (1.50, 1.27) | 1.15 | 1.2× base; the base module held the examples that `DlNotation` now holds, so the two are summed |
 | `Examples/Tactics/StorageSteps` | 40.48 s | 41.08 s (40.30, 41.86) | 1.01 | 1.2× base |
 | `Corpus/SolcStructs` | 1.22 s (1.24, 1.20) | 1.00 s (1.00, 0.99) | 0.82 | 1.2× base: no `resolve` in the kernel |
 | `Examples/Chains/Storage` | 7.87 s (load 2.8; 10.11, 15.93 under load 7–15) | 7.57 s (load 2.5; 7.69, 9.86 under load) | 0.96 | 8.94 s (W6) |

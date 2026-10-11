@@ -42,7 +42,8 @@ in the formula, past the parameters, is marked explicit on its variable
 (`Fml.markExplicit`, decision 28), which only the tactics read.  `cdl[C]{ φ }`,
 `cdl[C, m]{ φ }`, `cdl!{ φ }`, `cdl![m]{ φ }` are `dl[C]{ φ }`'s spellings,
 and `dl[C]{ φ }` itself reads this way when `φ` has a modality and no
-`Surface.Fml` is expected (`elabDlAuto`; decision 11, W8.2).
+`Surface.Fml` is expected (`elabDlAuto`; decision 11, W8.2), its parameters
+bound by hidden binders rather than `∀`.
 -/
 
 namespace Solidity
@@ -270,11 +271,14 @@ read, a declared one included) bound outermost (`Fml.closeN`), each only if
 the formula reads it before anything binds it (tried without it, in order).
 A declared name's parameter is bound but not in the elaborator's scope, so
 the program's declaration shadows it, as `dl!` reads it.  With the number
-of parameters bound, the outermost binders (`Fml.markExplicit`). -/
-def elabDlCN (φ : RawFml) (pastAll : Bool := false) : Except String (Nat × Fml C []) := do
+of parameters bound, the outermost binders (`Fml.markExplicit`).  A
+value parameter is bound by `∀` when `useAll` (`cdl!`), by a hidden binder,
+printing as nothing, otherwise (`dl!` outside the flip, `elabDlAuto`). -/
+def elabDlCN (φ : RawFml) (pastAll : Bool := false) (useAll : Bool := true) :
+    Except String (Nat × Fml C []) := do
   let (params, declared, taken) := dlParams C φ pastAll
   let run (ps : ECtx) : Except String (Fml C []) :=
-    (elabDlIn C φ pastAll declared taken ps).map fun r => Fml.closeN true r.1 r.2
+    (elabDlIn C φ pastAll declared taken ps).map fun r => Fml.closeN useAll r.1 r.2
   let mut ps := params
   for p in params do
     let ps' := ps.erase p
@@ -372,9 +376,10 @@ def elabAgainstQ (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermE
 open Lean Elab Term Meta in
 /-- `cdl[C, m]{ φ }`, `m` optional, as `elabDlAt` reads `dl[C, m]{ φ }`: a
 modality that is no constructor is read twice, at the diamond and at the
-box, and `fillSlotsC` puts it and the Lean formulas back. -/
-def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
-    TermElabM Lean.Expr := do
+box, and `fillSlotsC` puts it and the Lean formulas back.  `useAll` as
+`elabDlCN`'s. -/
+def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
+    (useAll : Bool := true) : TermElabM Lean.Expr := do
   let holes := fmlHoles φ
   let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
   -- a hole that is no postcondition may write fresh variables the reading
@@ -387,11 +392,12 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         return !(← whnfR (← inferType e)).isAppOf ``Post
       catch _ => return true
   let pastAll := quote opaqueHole
+  let useAllQ := quote useAll
   let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll).map fun r =>
+    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll $useAllQ).map fun r =>
       Fml.markExplicit r.1 (Fml.quote $q r.2))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
@@ -404,8 +410,8 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
         let rb ← read ``Modality.box
         let e ← elabAgainstQ c fun q =>
           `(((do
-              let (n₁, d) ← elabDlCN $c $rd $pastAll
-              let (n₂, b) ← elabDlCN $c $rb $pastAll
+              let (n₁, d) ← elabDlCN $c $rd $pastAll $useAllQ
+              let (n₂, b) ← elabDlCN $c $rb $pastAll $useAllQ
               pure (n₁, n₂, Fml.and d b)) : Except String (Nat × Nat × Fml $c [])).map
                 fun r => Fml.markExplicitAnd r.1 r.2.1 (Fml.quote $q r.2.2))
         let #[_, _, d, b] := e.getAppArgs | throwError "cdl[C, m]: not two readings{indentExpr e}"
@@ -446,7 +452,9 @@ def readsScoped (φ : TSyntax `dl_fml) (ty? : Option Lean.Expr) : TermElabM Bool
 
 open Lean Elab Term Meta in
 /-- `dl[C]{ φ }` and `dl[C, m]{ φ }`: `cdl[C]{ φ }` (`elabCdlAt`) when
-`readsScoped`, today's reading (`elabDlAt`: the closer's `NFml`, or a
+`readsScoped`, but with its parameters bound by hidden binders, printing
+as nothing, as today's `dl!` leaves them free (the flip's `cdl!` binds a
+value one by `∀`); today's reading (`elabDlAt`: the closer's `NFml`, or a
 `Surface.Fml` where one is expected) otherwise. -/
 @[term_elab dlAt, term_elab dlAtM]
 def elabDlAuto : TermElab := fun stx ty? => do
@@ -456,7 +464,7 @@ def elabDlAuto : TermElab := fun stx ty? => do
     | _ => throwUnsupportedSyntax
   if let some ty := ty? then tryPostponeIfMVar ty
   unless ← readsScoped φ ty? do throwUnsupportedSyntax
-  elabCdlAt c m? φ
+  elabCdlAt c m? φ (useAll := false)
 
 
 end Solidity

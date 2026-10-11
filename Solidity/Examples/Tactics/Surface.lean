@@ -19,8 +19,10 @@ open Solidity
 
 local instance : InContract := ⟨StandardExample⟩
 
--- A formula with a modality reads scoped outside the scope too (decision 11).
-/-- info: dl{ ∀ uint a; a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Fml StandardExample [] -/
+-- A formula with a modality reads scoped outside the scope too (decision 11),
+-- its parameters bound by hidden binders, as today's `dl!` leaves them free;
+-- the scope's `cdl!` binds a value parameter by `∀`.
+/-- info: dl{ a = 1 → ⟨ uint x = a; ⟩ x = 1 } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
 
 section Scoped

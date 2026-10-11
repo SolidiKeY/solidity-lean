@@ -140,12 +140,19 @@ info: dl{
 #check dl!{ { xs := freshId(copySt(memory, newArr(uint[], 3))) ‖ memory := copySt(memory, newArr(uint[], 3)) }
   true }
 
-/-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true } : Fml StandardExample [] -/
-#guard_msgs in #check dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol }
+-- A `where` clause pinned on today's reading: the scoped printer prints its
+-- hidden binder as nothing until `Delab` prints it (the `printers` lane).
+/-- info: dl{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Surface.Fml StandardExample -/
+#guard_msgs in
+#check (dl!{ ⟨ carol = alice; carol.age = 1; ⟩ true where Person memory carol } : Surface.Fml StandardExample)
 
-/-- info: dl{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ read(memory, acc.balance) = 1 } : Fml StandardExample [] -/
-#guard_msgs in #check dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ acc.balance == 1
-  where Account memory acc }
+/--
+info: dl{
+  { sp2 := alice.account } ⟨ acc = sp2; ⟩ read(memory, acc.balance) = 1 where
+    Account memory acc } : Surface.Fml StandardExample
+-/
+#guard_msgs in #check (dl!{ { sp2 := alice.account } ⟨ acc = sp2; ⟩ acc.balance == 1
+  where Account memory acc } : Surface.Fml StandardExample)
 
 -- An allocation reads back at a struct or an array only.
 /-- error: Solidity elaboration failed: `addM(m, T)`: a value type is not allocated in memory -/
@@ -166,7 +173,7 @@ example : dl[StandardExample, .diamond]{ ⟨[ x = 1; ]⟩ x == 1 } = dl!{ ⟨ x 
 /-- A modality under the update still decides. -/
 example : dl![.diamond]{ { x := 1 } [ x = 2; ] x == 2 } = dl!{ { x := 1 } [ x = 2; ] x == 2 } := rfl
 
-/-- info: dl{ ∀ uint x; ⟨[ x = 1; ]⟩ x = 1 } : Fml StandardExample [] -/
+/-- info: dl{ ⟨[ x = 1; ]⟩ x = 1 } : Fml StandardExample [] -/
 #guard_msgs in
 variable (m : Modality) in
 #check dl![m]{ ⟨[ x = 1; ]⟩ x == 1 }
@@ -191,17 +198,14 @@ example (φ ψ : NFml StandardExample) : dl!{ ‹φ› ∧ ψ ∧ true } = NFml.
 #guard_msgs in
 example : dl!{ ⟨ x = 1; ⟩ ture } = dl!{ ⟨ x = 1; ⟩ true } := rfl
 
-/--
-info: fun m φ =>
-  dl{ ∀ uint x; ⟨[ x = 1; ]⟩ φ } : Modality → Post StandardExample [LTy.val PrimTy.uint] → Fml StandardExample []
--/
+/-- info: fun m φ => dl{ ⟨[ x = 1; ]⟩ φ } : Modality → Post StandardExample [LTy.val PrimTy.uint] → Fml StandardExample [] -/
 #guard_msgs in
 #check fun (m : Modality) (φ : Post StandardExample [.val .uint]) => dl![m]{ ⟨[ x = 1; ]⟩ φ }
 
 -- An inaccessible name prints escaped: bare, it would read back as another.
 /--
 trace: φ✝ : Post StandardExample [LTy.val PrimTy.uint]
-⊢ dl{ ∀ uint x; ⟨ x = 1; ⟩ ‹↑φ✝› } = dl{ ∀ uint x; ⟨ x = 1; ⟩ ‹↑φ✝› }
+⊢ dl{ ⟨ x = 1; ⟩ ‹↑φ✝› } = dl{ ⟨ x = 1; ⟩ ‹↑φ✝› }
 -/
 #guard_msgs in
 example : ∀ φ : Post StandardExample [.val .uint], dl!{ ⟨ x = 1; ⟩ φ } = dl!{ ⟨ x = 1; ⟩ φ } := by
@@ -227,7 +231,7 @@ example (m : Modality) : dl![m]{ a == 1 ⟹ ⟨[ x = 1; ]⟩ true } =
     dl![m]{ a == 1 → ⟨[ x = 1; ]⟩ true } := rfl
 
 -- It prints as the formula it is.
-/-- info: dl{ ∀ uint to; 5 <= selfBalance → ⟨ to .transfer(5); ⟩ true } : Fml StandardExample [] -/
+/-- info: dl{ 5 <= selfBalance → ⟨ to .transfer(5); ⟩ true } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ 5 <= selfBalance ⟹ ⟨ to.transfer(5); ⟩ true }
 
 /-- `0 <= se <= selfBalance`, and the read of the ledger. -/
