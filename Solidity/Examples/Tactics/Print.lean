@@ -87,26 +87,16 @@ run_meta do
       (.pop .block (.push .refl) (.seq (.cons (.assignLocal .here (.simple (.lit 2 rfl))) .nil) .nil))
       (.eqD (.pvV .here) (.app0 (.lit (.int 1)))))) : Fml SE [])
 
-/-- `∀ x₁; … ∀ xₙ; ψ` over the value locals of `Γ` (innermost first). -/
-private def closeAll {C : Contract} : (Γ : NCtx) → Fml C Γ.ctx → MetaM (Fml C [])
-  | [], ψ => pure ψ
-  | (x, .val p) :: Γ, ψ => closeAll Γ (.all x p ψ)
-  | _, _ => throwError "a local that is not a value"
-
-/-- The scoped strategy's formula after `n` steps on `φ`, its program read
-under the value locals `Γ`, each bound by `∀`, printed from its quoted
-`Expr` and checked against `Fml.show` on the value. -/
-private def stepsShowOf {C : Contract} (c : Expr) (φ : Solidity.Surface.Fml C) (n : Nat)
-    (Γ : NCtx := []) : MetaM Unit := do
-  let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
-  let ψ := symex n (← closeAll Γ (.modal m Pc .nil .tt))
+/-- The scoped strategy's formula after `n` steps on `φ`, printed from its
+quoted `Expr` and checked against `Fml.show` on the value. -/
+private def stepsShowOf {C : Contract} (c : Expr) (φ : Fml C []) (n : Nat) : MetaM Unit := do
+  let ψ := symex n φ
   let a ← Delab.fmtFml (Fml.quote c ψ)
   let b ← ψ.show c []
   unless a == b do throwError "from the Expr\n{a}\nbut the value prints\n{b}"
   logInfo a
 
-private def stepsShow (φ : Solidity.Surface.Fml SE) (n : Nat) : MetaM Unit :=
+private def stepsShow (φ : Fml SE []) (n : Nat) : MetaM Unit :=
   stepsShowOf (mkConst ``StandardExample) φ n
 
 /-- The premise of the rule on the first statement of a program, quoted. -/
@@ -115,17 +105,19 @@ private def headPremiseOf {C : Contract} (c : Expr) (m : Modality) :
   | _, _, .cons s _ => return Premise.quote c (s.step 1 m)
   | _, _, .nil => throwError "no statement"
 
-/-- The premise of the rule on the first statement of `φ`'s program, read in
-the context `Γ`, quoted, checked by the kernel's type checker and printed. -/
-private def headPremise {C : Contract} (c : Expr) (Γ : NCtx) (φ : Solidity.Surface.Fml C) :
-    MetaM Unit := do
-  let .modal m P _ := φ | throwError "not a modality"
-  let .ok ⟨_, Pc⟩ := Prog.resolve (C := C) Γ P | throwError "the program does not resolve"
-  let e ← headPremiseOf c m Pc
-  Meta.check e
-  logInfo m!"{e}"
+/-- The premise of the rule on the first statement of `φ`'s program, read
+under its binders, quoted, checked by the kernel's type checker and
+printed. -/
+private def headPremise {C : Contract} (c : Expr) : {Γ : Ctx} → Fml C Γ → MetaM Unit
+  | _, .all _ _ φ => headPremise c φ
+  | _, .bind _ _ _ φ => headPremise c φ
+  | _, .modal m P _ _ => do
+    let e ← headPremiseOf c m P
+    Meta.check e
+    logInfo m!"{e}"
+  | _, _ => throwError "not a modality"
 
-private def branchφ : Solidity.Surface.Fml SE :=
+private def branchφ : Fml SE [] :=
   dl!{ [ if (alice.age > 4) { uint z = 1; total = z; } else { total = 2; }; uint y = total; ] true }
 
 /--
@@ -182,7 +174,7 @@ section Calls
 
 local instance : InContract := ⟨CallsExample⟩
 
-private def callsφ : Solidity.Surface.Fml CallsExample :=
+private def callsφ : Fml CallsExample [] :=
   dl!{ [ uint y = addOne(4); credit(y, 5); bump(); ] true }
 
 /--
@@ -210,12 +202,10 @@ local instance : InContract := ⟨Rets⟩
 
 private def re : Expr := mkConst ``Solidity.Examples.Tactics.Print.Rets
 
-private def retsCallφ : Solidity.Surface.Fml Rets :=
+private def retsCallφ : Fml Rets [] :=
   dl!{ [ uint a; uint b; (a, b) = pair(3); Person memory m = mk(2); uint y = m.age; ] true }
 
-private def pairφ : Solidity.Surface.Fml Rets := dl!{ [ (a, b) = pair(3); ] true }
-
-private def abΓ : NCtx := [(.user "b", .val .uint), (.user "a", .val .uint)]
+private def pairφ : Fml Rets [] := dl!{ ∀ uint a; ∀ uint b; [ (a, b) = pair(3); ] true }
 
 /--
 info: [ uint a; uint b; (a, b) = pair(3); Person memory m = mk(2); uint y = m.age; ] true
@@ -233,12 +223,12 @@ info: { a := 0 } { b := 0 } [ se1 = 3; uint se2; uint se3; se2 = se1; se3 = se1 
 info: dl{ ⟨[ uint se1 = 3; uint se2; uint se3; se2 = se1; se3 = se1 + 1; ]⟩ }
 -/
 #guard_msgs in
-run_meta headPremise re abΓ pairφ
+run_meta headPremise re pairφ
 
 /--
 info: ∀ uint a; ∀ uint b; [ uint se1 = 3; uint se2; uint se3; se2 = se1; se3 = se1 + 1; a = se2; b = se3; ] true
 -/
-#guard_msgs in run_meta stepsShowOf re pairφ 1 abΓ
+#guard_msgs in run_meta stepsShowOf re pairφ 1
 
 end Rets
 
@@ -251,7 +241,7 @@ local instance : InContract := ⟨Pinger⟩
 
 private def pe : Expr := mkConst ``Solidity.Examples.Tactics.Print.Pinger
 
-private def tryφ : Solidity.Surface.Fml Pinger :=
+private def tryφ : Fml Pinger [] :=
   dl!{ [ try I(7).get() returns (uint v) { last = v; } catch Panic(uint c) { last = c; }
          catch { last = 0; }; pings = 1; ] true }
 
@@ -270,38 +260,36 @@ info: (∀ uint v; [ last = v; } pings = 1; ] true) ∧ [ last = 0; } pings = 1;
 info: dl{ ⟨[ {last = 1;} ]⟩ ; ⟨[ {last = 0;} ]⟩ ; ⟨[ {last = 0;} ]⟩ ; ⟨[ {last = 0;} ]⟩ }
 -/
 #guard_msgs in
-run_meta headPremise pe [] dl!{ [ try I(7).get() { last = 1; } catch { last = 0; }; ] true }
+run_meta headPremise pe dl!{ [ try I(7).get() { last = 1; } catch { last = 0; }; ] true }
 
 end Try
 
 /-! ## The other premises -/
 
-private def sendφ : Solidity.Surface.Fml SE := dl!{ [ ok = owner.send(3); ] true }
+private def sendφ : Fml SE [] := dl!{ ∀ bool ok; [ ok = owner.send(3); ] true }
 
-private def sendSimpleφ : Solidity.Surface.Fml SE := dl!{ [ ok = to.send(3); ] true }
+private def sendSimpleφ : Fml SE [] := dl!{ ∀ uint to; ∀ bool ok; [ ok = to.send(3); ] true }
 
-private def okToΓ : NCtx := [(.user "ok", .val .bool), (.user "to", .val .uint)]
-
-private def loopφ : Solidity.Surface.Fml SE :=
-  dl!{ [ /// @custom:key invariant i <= 3
-         while (i < 3) { i = i + 1; total = i; }; ] true }
+private def loopφ : Fml SE [] :=
+  dl!{ ∀ uint i; [ /// @custom:key invariant i <= 3
+                   while (i < 3) { i = i + 1; total = i; }; ] true }
 
 -- `sendNoCallbackBox`: labelled goals (`Premise.cases`).
 /--
 info: dl{ { net := if(_ = this) then net else store(net, at(_), net(_) - 3) ‖ _ := true } ⟨[ ]⟩ ; { _ := false } ⟨[ ]⟩ }
 -/
 #guard_msgs in
-run_meta headPremise (mkConst ``StandardExample) okToΓ sendSimpleφ
+run_meta headPremise (mkConst ``StandardExample) sendSimpleφ
 
 /--
 info: ∀ bool ok; [ uint se1 = owner; ok = se1 .send(3); ] true
 -/
-#guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) sendφ 1 [(.user "ok", .val .bool)]
+#guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) sendφ 1
 
 /--
 info: ∀ bool ok; { se1 := find(storage, owner) } ({ net := if(se1 = this) then net else store(net, at(se1), net(se1) - 3) ‖ ok := true } true ∧ { ok := false } true)
 -/
-#guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) sendφ 4 [(.user "ok", .val .bool)]
+#guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) sendφ 4
 
 -- `whileInvariantBox` (`Premise.inv`).
 /--
@@ -310,12 +298,12 @@ info: dl{
     _ <= 3 ; se1 = false ⟹ ⟨[ ]⟩)) }
 -/
 #guard_msgs in
-run_meta headPremise (mkConst ``StandardExample) [(.user "i", .val .uint)] loopφ
+run_meta headPremise (mkConst ``StandardExample) loopφ
 
 /--
 info: ∀ uint i; i <= 3 ∧ { anon(i) } { havoc } (i <= 3 → { se1 := i < 3 } ((se1 = true → [ i = i + 1; total = i; } ] i <= 3) ∧ (se1 = false → true)))
 -/
-#guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) loopφ 1 [(.user "i", .val .uint)]
+#guard_msgs in run_meta stepsShowOf (mkConst ``StandardExample) loopφ 1
 
 /-! ## Sequents
 
