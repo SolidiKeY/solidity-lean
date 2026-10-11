@@ -144,8 +144,9 @@ def elabModalProg (taken : List Nat) (P : List RawStmt) (Γ : NCtx) : ElabM (Blk
   pure acc
 
 /-- An atom of a formula (an equation, `defined`, a comparison), as
-`elabFml` reads it: the closer's formula, its names in the reader's scope. -/
-def elabAtomN : RawFml → ElabM (NFml C)
+`elabFml` reads it, its names in the reader's scope: a formula read where
+it stands (`NRead`). -/
+def elabAtomN : RawFml → ElabM (NRead C)
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
@@ -166,7 +167,7 @@ def elabAtomN : RawFml → ElabM (NFml C)
     pure (.not (.eqD a b))
   | .cmp op a b => do
     let (Γ, _) ← get
-    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
+    pure (NRead.cmp op .uint (← tVal C Γ a) (← tVal C Γ b))
   | _ => throw "internal: not an atom"
 
 /-- A `where` clause's locals, with their types. -/
@@ -186,7 +187,7 @@ def whereLocals (ds : List RawStmt) : ElabM (List (String × LocalTy)) :=
 /-- **A formula read in the named context `Γ`**, as `elabFml` reads it, the
 reader's scope (`ECtx`) and `Γ` binding the same names: a quantifier, an
 update, a program's hints and a `where` push on both.  An atom is read by
-`elabFml` and its names resolved in `Γ`.  With `posts`, a Lean postcondition
+`elabAtomN` and its names resolved in `Γ`.  With `posts`, a Lean postcondition
 right after a program or an update stands where the fresh locals are out of
 scope (`NCtx.dropFresh`, a `Frames.drop` or an update `Upd.drop`, which print
 as nothing), as a rule's own fresh locals are (`Frames.pop .capture`): the
@@ -238,7 +239,7 @@ def elabFmlC (taken : List Nat) (posts : Bool := false) : RawFml → (Γ : NCtx)
     withBinds C (elabFmlC taken posts φ) (ls.map fun (x, t) => (Var.ofName x, t.toLTy)) Γ
   | φ, Γ => do
     let ψ ← elabAtomN C φ
-    ElabM.lift (NFml.resolveN (fun _ => none) Γ ψ)
+    ElabM.lift (ψ Γ)
 
 /-- `elabDl`'s parameters of `φ` (the names read, a declared one
 included), the elaborator's scope (a declared name's parameter left out),

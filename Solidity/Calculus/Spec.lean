@@ -8,9 +8,9 @@ import Solidity.Calculus.Quote
 `Calculus/SurfaceSpec.lean`'s specifications as scoped formulas, `Fml C
 []` (`docs/intrinsic.md`, M6b, W8): a specification's obligation
 (`spec!{f}`, `specObligation`) is built from its pieces (`specPieces`) in
-the parameters' context.  Its premises and postconditions, closer formulas
-(`NFml`), are read with their locals as positions (`NFml.resolveN`,
-`Calculus/NotationResolve.lean`); its
+the parameters' context.  Its premises and postconditions, formulas over
+names (`NRead`, `Calculus/NotationResolve.lean`), are read with their
+locals as positions where they stand; its
 snapshots are declared by its update at their own types (`Upd.resolveN`),
 `old := storage` an `LTy.old` and `oldNet := net` an `LTy.oldNet`
 (`UpdElem.ownTy?`), so `find(old, count)` reads a local of type `old`; the
@@ -47,11 +47,11 @@ def specParams (C : Contract) (f : String) : Except String (List (PrimTy × Var)
 
 /-- `[ P ] (φ₁ ∧ … ∧ φₙ)` read in `Δ`: the call `P` placed there
 (`SProg.chain`), the postconditions in the context it leaves. -/
-def specModal (Δ : NCtx) (P : SProg C) (posts : List (NFml C)) : Except String (Fml C Δ.ctx) := do
+def specModal (Δ : NCtx) (P : SProg C) (posts : List (NRead C)) : Except String (Fml C Δ.ctx) := do
   let ⟨Γ', P'⟩ ← SProg.chain Δ.names Δ.ctx P
   let Γn : NCtx := (P'.outNames Δ.names).zip Γ'
   if h : Γn.ctx = Γ' then
-    let post ← NFml.resolveN (fun _ => none) Γn (NFml.conj posts)
+    let post ← NRead.conj posts Γn
     pure (.modal .box P' .nil (h ▸ post))
   else throw "internal: the call leaves a context its names do not cover"
 
@@ -64,7 +64,7 @@ binders: the update declares `old` and `oldNet` at `LTy.old` and
 def specObligation (C : Contract) (f : String) : Except String (Fml C []) := do
   let (a, b, U, P, posts) ← specPieces C f
   let Γ := paramsN (← specParams C f)
-  let pre ← NFml.resolveN (fun _ => none) Γ (NFml.conj (a ++ b))
+  let pre ← NRead.conj (a ++ b) Γ
   let body ← if U.isEmpty then specModal Γ P posts else do
     let ⟨Δ, U'⟩ ← Upd.resolveN (fun _ => none) Γ Γ .nil U
     pure (.upd .box U' (← specModal Δ P posts))

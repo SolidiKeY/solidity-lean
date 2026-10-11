@@ -1003,7 +1003,7 @@ structure SpecProblem (C : Contract) where
   fml : Fml C []
   assumed : Nat
   checked : Nat
-  posts : List (NFml C)
+  posts : List (NRead C)
   params : List (String × PrimTy)
   payable : Bool
   lits : List Int
@@ -1186,14 +1186,19 @@ structure Refutation where
 
 /-- The `i`-th conjunct owed after the call of `d`, `φ`: an invariant or an
 `ensures` as written, a conjunct of the frame of `assignable` as the
-formula it is (quoted against the contract `cE`). -/
-def postLabel (C : Contract) (d : FunDecl) (cE : Expr) (i : Nat) (φ : NFml C) : MessageData :=
+formula it is, read where the snapshots `old` and `oldNet` are in scope
+and closed over them by hidden binders (quoted against the contract `cE`). -/
+def postLabel (C : Contract) (d : FunDecl) (cE : Expr) (i : Nat) (φ : NRead C) : MessageData :=
   if h : i < C.inv.length then m!"invariant {SpecExpr.fmt C.inv[i]}"
   else if h' : i - C.inv.length < d.spec.ensures.length then
     m!"ensures {SpecExpr.fmt d.spec.ensures[i - C.inv.length]}"
   else
     let locs := (d.spec.assignable.getD []).map SpecLoc.fmt
-    m!"assignable {if locs.isEmpty then "\\nothing" else ", ".intercalate locs}: {NFml.quote cE φ}"
+    let Γ : NCtx := [(oldNetVar, .oldNet), (oldVar, .old)]
+    let shown : MessageData := match φ Γ with
+      | .ok ψ => m!"{Fml.quote cE (Fml.closeN false Γ ψ)}"
+      | .error e => m!"{e}"
+    m!"assignable {if locs.isEmpty then "\\nothing" else ", ".intercalate locs}: {shown}"
 
 /-- **Refute `f`'s specification**: search, then certify what was found
 against the scoped obligation.  `n` names the contract `C`. -/
@@ -1211,7 +1216,7 @@ def refuteSpec (n : Lean.Name) (C : Contract) (f : String) (budget : Nat := 2000
     let certified ← if Fml.eval3Peel (poolDom lits) c.vals (State.ofSemD C w.state)
         P.fml = .ff then certifyRefl cE (Fml.quote cE P.fml) lits c.vals w.state
       else pure false
-    let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i NFml.tt)
+    let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i NRead.tt)
     pure (.ok (s, some { witness := w, certified, fails }))
 
 /-- The report of a refutation: the witness and the conjuncts it fails. -/
