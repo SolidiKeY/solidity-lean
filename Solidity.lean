@@ -138,6 +138,7 @@ import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.ChainBranches
 import Solidity.Calculus.Literals
 import Solidity.Calculus.TermTaclets
+import Solidity.Calculus.TermLib
 import Solidity.Calculus.Rewrite
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays

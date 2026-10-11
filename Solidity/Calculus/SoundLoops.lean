@@ -109,6 +109,24 @@ theorem holds_isBoolD (t : Tm C Γ .val) (σ : State C Γ) (b : Bool) :
     rw [Tm.denote_eval σ.erase t _ h]
     exact Theory.StValue.Equiv.refl _
 
+/-- **`eqD` is the interpreter's equation** over the typed state
+(`holds_eqD_iff`, scoped): both sides return, with one value, on the
+erasure. -/
+theorem holds_eqD_iffS {σ : State C Γ} {a b : Tm C Γ .val} :
+    holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ.erase = .ok x ∧ b.eval σ.erase = .ok x := by
+  constructor
+  · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
+    have he' : Theory.StValue.Equiv (.prim x) (.prim y) := by
+      rw [← Tm.denote_eval σ.erase a x hx, ← Tm.denote_eval σ.erase b y hy]; exact he
+    rw [Theory.StValue.Equiv.prim_iff] at he'
+    cases he'
+    exact ⟨x, hx, hy⟩
+  · rintro ⟨x, hx, hy⟩
+    refine ⟨⟨x, hx⟩, ⟨x, hy⟩, ?_⟩
+    show Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase)
+    rw [Tm.denote_eval σ.erase a x hx, Tm.denote_eval σ.erase b x hy]
+    exact Theory.StValue.Equiv.refl _
+
 /-- A value that returns over the typed state reads its erasure on the
 erased state. -/
 theorem Val.eval_erase_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
