@@ -1405,6 +1405,11 @@ user: decision 11 (`Surface.Stmt`), the merge into `master`, and the SolKey
 reader branch (side-projects `intrinsic`), whose require goes back to
 `../../../solidity-lean` at that merge.
 
+**User, 2026-10-11, decision 11:** "you can remove it". The untyped
+`Surface.Stmt` goes, with `Surface.Prog` and the formula as written
+(`Surface.Fml`): the elaborator emits the scoped syntax directly, the
+printers print it, and `resolve`/`erase` to the surface go (W8).
+
 ## M6c
 
 The closer on `Fml C Γ`, in W6's lanes (each with its gate table and
