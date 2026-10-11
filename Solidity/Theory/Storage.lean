@@ -867,29 +867,35 @@ theorem find_delAt_fields (s : Struct) {p q : List Seg} (hp : p ≠ []) (hq : q 
 
 /-! ## Shapes
 
-`structRules.key` (since `8c5c69ca25`) tags a struct read through a member with
-the member's declared shape — `typed(fieldShape(m), selectSt<[Struct]>(st, m))`,
-by `findDefinitionMemberStruct`/`findDefinitionMemberCons`, the two member
-cases of what used to be one `findDefinitionCons` — and eight taclets read
-through the tag: `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,
-Element,Member}` and `typedTyped`.  Exactly one of them *reads* it:
-`selectOnTypedFixedSize` answers a fixed-size array's `.length` with its
-declared `n`, which nothing ever writes.  Every other one falls through to the
-struct beneath, so on any shape but `fixedArr` the tag is the identity.
+`structRules.key` keeps a fixed-size array's declared length in two places,
+neither of them a read or a write: the shape a constructor's
+storage holds at every declared root (`storeSt(mtSt, C$d1, fixedArr(9,
+leaf))`, a shape being its own empty node, read by `selectOnShape{Size,Struct,Element,Member}`), and the
+predicate `wellformed(storage)` a function assumes on entry and owes on exit,
+generated per contract as one `wf(shape, selectSt<[Struct]>(s, C$m))` atom per
+root.  In the antecedent the atoms are consumed by `\assumes` triggers at a
+stuck read — `wfFixedSize` answers `|st|` with `n`, `wf{Fixed,Dyn,Map}Elem[Map]`
+hand the element's atom down — and in the succedent they are peeled off writes
+(`wfSaveRight`, `wfDelAtRight`, …) and unfolded (`wf{Fixed,Dyn,Map}Right`).
+The kind of a node, `fixed(st)`, is read off its base the same way, so
+`selectStDelNodeSize` and `selectOnSaveEmptySize` keep a fixed-size array's
+length through a `delete` and a copy.  (Before, since `8c5c69ca25`, a struct
+read through a member was tagged `typed(fieldShape(m), …)` and eight
+`selectOnTyped*` taclets read the tag.)
 
-A declared fixed-size array has a `fixedArr` shape (`Shape.ofTy_fixed`), but
-the one rule that reads the tag answers a question no program here asks: the
-elaborator writes a fixed-size array's `.length` as its literal
-(`Syntax.lean`, `synth`), so no read of a fixed-size array's length reaches
-the calculus.  As a symbol `typed` would be an eighth `Struct` constructor,
-threaded through every recursion and every proof of the three algebras, and
-not a free one (`typedTyped` identifies two of its terms).  So `typed` is not
-a symbol of this algebra: the seven-way `findDefinition*` split is
-`findDefinitionCons` (identical once the tag is the identity), and the eight
-rules are absent by this argument.  The
-`FixedField` rules that pick `delNodeFixed` by the member's sort —
-`delFieldFixed`, `selectStDelNodeFixed` — are stated with the member's kind
-for its sort ("The delete family").
+Here the same facts are the storage's well-typedness: `wellTypedStorageB`
+(`Typing/Storage.lean`) is `wf` clause for clause — `fx && elems.length == n`
+is the `fixedArr` case, `!fx` the `dynArr` one — the closer reads a length
+off the type (`Facts.tyArr`, `Facts.retsW`), the elaborator writes a
+fixed-size array's `.length` as its literal (`Syntax.lean`, `synth`), and a
+delete keeps the length by the node's kind (`keepsOnDelete`).  As symbols,
+shapes as nodes and `wf` would be an eighth `Struct` constructor and a predicate
+threaded through every recursion and proof of the three algebras, so neither
+is a symbol of this algebra: the member cases of `findDefinition*` are
+`findDefinitionCons`, and the `wf*`/`selectOnShape*` taclets are absent by this
+argument, as the `typed` ones were.  The `FixedField` rules that pick
+`delNodeFixed` by the member's sort — `delFieldFixed`, `selectStDelNodeFixed`
+— are stated with the member's kind for its sort ("The delete family").
 
 What *is* stated is the part of the shape algebra that is free terms alone:
 `fieldShape` here, and `sizeOf`/`shapeAt`/`idShape` with their taclets in

@@ -466,7 +466,7 @@ def SVal.find : SVal -> List Seg -> Res SVal
   -- `Seg.field`, so it has to be answered here rather than by the struct
   -- arm above — an array is not a struct with a `length` member.  A
   -- fixed-size array has no `length` slot: its length is its type's (KeY's
-  -- `selectOnTypedFixedSize`), and a program's `.length` of one is a literal.
+  -- `wfFixedSize`, `selectOnShapeSize`), and a program's `.length` of one is a literal.
   | SVal.array elems _ fx, Seg.field "length" :: rest =>
       if fx then .error .undef else (SVal.int elems.length).find rest
   | SVal.map entries dflt, Seg.at i :: rest =>

@@ -47,13 +47,17 @@ beside its name:
   length `selectStDelNodeFixedElement` takes the element to `delNode` of it,
   and `selectStDelNodeMap` reads a member of a deleted mapping as it was;
   past it the slot is kept outright (`selectStDelNodeKeep`).
-* **`typed`** — `selectOnTyped{Struct,FixedSize,DynSize,LeafSize,MapSize,
-  Element,Member}` and `typedTyped`: the tag a struct read through a member
-  carries so that a fixed-size array's length survives.  Its one reading rule
-  answers `.length` of a fixed-size array, which the elaborator writes as the
-  literal, and it would be one more `Struct` constructor through every proof
-  (`Theory/Storage.lean`, "Shapes").  A delete keeps that length without it:
-  the node's kind says it is a fixed-size array (`keepsOnDelete`).
+* **shapes as nodes, `wf`, `fixed`** — `selectOnShape*`, the `wf*` triggers and
+  unfoldings, `fixed*`, `selectStDelNodeSize`, `selectOnSaveEmptySize`: the
+  shaped empty storage a constructor starts from and the `wellformed(storage)`
+  a function assumes, which is how a fixed-size array's length survives.  The
+  elaborator writes that length as the literal, the closer reads it off the
+  type, and a delete keeps it by the node's kind (`keepsOnDelete`); as symbols
+  they would be one more `Struct` constructor through every proof
+  (`Theory/Storage.lean`, "Shapes").  `selectStDelNode{Element,Member}` and
+  `selectOnSaveEmpty{IndexPrim,Member}` are the selector-split successors of
+  `selectStDelNodeDefault` and `selectOnSaveEmptyDefault`, stated here under
+  the old names.
 * the four `expandInUintN`/`expandInIntN` rules, the arithmetic the signature's
   own "not implemented" section lists.
 
