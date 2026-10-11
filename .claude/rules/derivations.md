@@ -82,7 +82,7 @@ one of two ways:
 - **by a walk**, for a worked example: `apply Proves.valid`, then
   one `apply` per taclet (`unfold r`, `update r`, `split r`, `Proves.check r`,
   `done r`, `empty`, `intro`; `Calculus/WalkSyntax.lean`), and
-  `refine close ?_; sol_close` at each leaf. Each rule the walk takes is named
+  `sol_leaf; sol_close` at each leaf. Each rule the walk takes is named
   in the proof, so renaming a rule breaks the example. `sol_derive?` writes
   the walk out (`Calculus/Derive.lean`), as `#chain` writes a chain.
 

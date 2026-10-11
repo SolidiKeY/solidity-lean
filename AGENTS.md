@@ -113,8 +113,9 @@ solc over KeY.
 ## Using the calculus
 
 A formula is written in `dl!{ … }` over a named contract (`local instance :
-InContract := ⟨StandardExample⟩`) under `open scoped Solidity.Scoped`
-(`Calculus/Surface.lean`), which reads it as a scoped `Fml C []`. Import
+InContract := ⟨StandardExample⟩`), which reads it as a scoped `Fml C []`;
+under `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) its
+parameters are bound by `∀`, outside by hidden binders. Import
 `Solidity.Calculus.Surface`, `Solidity.Calculus.Closers` and
 `Solidity.Calculus.NFmlClose` for the tactics (and
 `Solidity.Calculus.SolSpec` for `sol_spec`),
@@ -137,7 +138,9 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
   goals `thn`/`els`; `splitBox r` is the same rule), `Proves.check r` (an `assert`; goals `thn`/`els`; qualified,
   since `check` is also the elaborator's), `done r`, `empty`
   (`emptyModality`), `allIntro` (`allRight`) — and
-  `refine close ?_; sol_symex; sol_close` at each leaf. `sol_derive?` writes
+  `sol_leaf; sol_close` at each leaf (`sol_leaf`: the sequent as `⊨ ψ`,
+  scoped; `sol_decide` or `sol_spec_close` in place of `sol_close`).
+  `sol_derive?` writes
   the solkey names (`impRight`, `emptyModality`, `allRight`).
   `apply` refuses a rule whose `\find` or side conditions do not match.
   `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
