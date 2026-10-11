@@ -4,12 +4,14 @@ import Solidity.Calculus.RuleKit
 /-!
 # A scoped term's erasure, with its schema variables
 
-The translation the printers of the scoped syntax (`Calculus/PrintStmt.lean`)
-print terms, updates and the closer's formulas through: the `Expr` of a
-scoped term, update or formula with no modality, its schema variables free,
-to the `Expr` of its erasure, the `Update.lean` term that `Fml.erase` would
-compute (`Delab.tr`, run under `Delab.withTwins`), which `RuleSyntax.lean`'s
-term printers print.
+The `Expr` of a scoped term, update or formula with no modality, its schema
+variables free, translated to the `Expr` of its erasure, the `Update.lean`
+term that `Fml.erase` would compute (`Delab.tr`, run under
+`Delab.withTwins`), which `RuleSyntax.lean`'s term printers print.  The
+printers no longer read it (W9.1 `print`: `Calculus/PrintTerm.lean` prints
+the scoped terms themselves); it stays for the twin check
+(`pp.sol.twinCheck`, `Calculus/PrintStmt.lean`) and for the SolKey reader,
+which W9.5 ports.
 
 * **Schema variables** get twins: each free variable of a scoped term type
   (`t : Tm C Γ .val`, `U : Upd C Γ Δ`) stands, for the printer, as a local
