@@ -49,10 +49,9 @@ def person0 : Semantics.SVal :=
 /-- `alice` and `bob` at zero. -/
 def peopleStore : Semantics.State := { storage := [("alice", person0), ("bob", person0)] }
 
-/-- The flags, and the local `x` the read binds, declared. -/
+/-- The flags. -/
 def flagStore : Semantics.State :=
-  { storage := [("flag", .bool false), ("flag2", .bool true)],
-    env := [(.user "x", .val (.bool false))] }
+  { storage := [("flag", .bool false), ("flag2", .bool true)] }
 
 /-- `peopleStore`, as a scoped state with no locals. -/
 def peopleCore : EState People [] := EState.ofSem peopleStore
@@ -67,12 +66,6 @@ theorem peopleStore_wt : RunWT People [] peopleCore :=
 /-- `Flags`'s store is well-typed, `x` a `bool`. -/
 theorem flagStore_wt : RunWT Flags [] flagCore :=
   ⟨StateWT.ofB (H := []) (L := Flags.layout) (by decide), rfl, trivial⟩
-
-theorem peopleStore_agree : Agree [] peopleCore peopleStore :=
-  ⟨rfl, List.nodup_nil, rfl, fun _ h => nomatch h⟩
-
-theorem flagStore_agree : Agree [.user "x"] flagCore flagStore :=
-  ⟨rfl, List.nodup_cons.2 ⟨List.not_mem_nil, List.nodup_nil⟩, rfl, by decide⟩
 
 /-! ## The copy rule -/
 
@@ -89,8 +82,7 @@ theorem preFix_rootCopy_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [] [] peopleCore peopleStore peopleStore_wt peopleStore_agree
-    "bob" [] person0 rfl rfl
+  have := hall [] peopleCore peopleStore_wt "bob" [] person0 rfl rfl
   exact absurd this (by decide)
 
 /-- The fixed row (sort-free `find<[StValue]>`) is faithful there, as
@@ -121,8 +113,7 @@ theorem preFix_readSelect_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [.user "x"] [] flagCore flagStore flagStore_wt flagStore_agree
-    "flag" [] (.bool false) rfl rfl
+  have := hall [] flagCore flagStore_wt "flag" [] (.bool false) rfl rfl
   exact absurd this (by decide)
 
 /-- The current row (`\hasSort`) is faithful there. -/

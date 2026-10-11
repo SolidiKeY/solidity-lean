@@ -46,7 +46,7 @@ def capturedDl : Fml StandardExample [] := dl!{ ⟨ values[total + 1] += 2; ⟩ 
 end Scoped
 
 /-- A capture in a block, numbered past the local `ie1`. -/
-def captured : Surface.Prog StandardExample := sol{ uint ie1 = 1; values[total + 1] += 2; }
+def captured := (sol{ uint ie1 = 1; values[total + 1] += 2; } : Prog StandardExample [] _)
 
 -- with no rows, a table is the default spelling
 example : (FreshNames.ofTable []).name "sp" 2 = "sp2" := rfl
@@ -115,14 +115,15 @@ local instance : FreshNames := .ofTable names
 
 #guard (FreshNames.clashes StandardExample names).isEmpty
 
-example : Surface.Prog.toStr (sol{ values[total + 1] += 2; }) = "uint idx = total + 1; values[idx] += 2;" :=
+example : Prog.toStr [] (sol{ values[total + 1] += 2; }) = "uint idx = total + 1; values[idx] += 2;" :=
   rfl
 
 -- a program local spelled like a row is that fresh variable (the hazard of
 -- `FreshNames.lean`'s docstring); its capture is numbered past it, not
 -- re-declared
-example : sol{ uint idx = 1; values[total + 1] += 2; } = captured := rfl
-example : Surface.Prog.toStr (sol{ uint idx = 1; values[total + 1] += 2; }) =
+example : (sol{ uint idx = 1; values[total + 1] += 2; } : Prog StandardExample [] _) = captured :=
+  rfl
+example : Prog.toStr [] (sol{ uint idx = 1; values[total + 1] += 2; }) =
     "uint idx = 1; uint ie2 = total + 1; values[ie2] += 2;" := rfl
 
 end Capture

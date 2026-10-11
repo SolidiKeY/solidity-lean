@@ -38,6 +38,9 @@ def Total : Contract := contract!{ uint total; }
 /-- The minimal ill-typed store: `total` holds a `bool`. -/
 def badStore : Semantics.State := { storage := [("total", .bool true)] }
 
+/-- `badStore`, as a scoped state with the local `uint x` the read binds. -/
+def badCore : EState Total [.val .uint] := EState.ofGlob badStore (.int 0, ())
+
 /-- `x = total;`, as `storageRootReadSelect` matches it. -/
 def totalRead : Stmt Total [.val .uint] [.val .uint] :=
   stmtOf (@Taclet.storageRootReadSelect Total 0 .box [.val .uint] .uint .here "total" rfl)
@@ -49,18 +52,19 @@ theorem readSelect_row :
   decide +kernel
 
 /-- **Storage well-typedness is the boundary.**  `badStore` meets every
-conjunct of `RunWT` but `storage` (it has no locals to type), and there
-`x = total;` finds a `bool` where the row's `\hasSort` read promises a
-`uint`. -/
+conjunct of `RunWT` but `storage` (with `x`, the local the read binds, a
+`uint`), and there `x = total;` finds a `bool` where the row's `\hasSort`
+read promises a `uint`. -/
 theorem readSelect_needs_storage :
     nodupKeysB Total.vars = true ∧
     nodupKeysB ([] : HeapTy) = true ∧ heapTypedB [] badStore.heap = true ∧
     HeapWellFormed badStore ∧
     wellTypedStorageB Total.layout badStore.storage = false ∧
+    Env.All (LTy.WT Total []) badCore.env ∧
     Stmt.read? totalRead = some (.storage (.prim .uint) (.loc (.root "total" rfl))) ∧
-    ¬ (Read.storage (.prim .uint) (.loc (.root "total" rfl)) : Read Total).SortOk badStore []
-      (.generic .hasSort) := by
-  refine ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, rfl, ?_⟩
+    ¬ (Read.storage (.prim .uint) (.loc (.root "total" rfl)) : Read Total [.val .uint]).SortOk
+      badCore [] (.generic .hasSort) := by
+  refine ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, ⟨rfl, trivial⟩, rfl, ?_⟩
   intro h
   exact absurd (h "total" [] (.bool true) rfl rfl) (by decide)
 
