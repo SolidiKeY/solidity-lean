@@ -1,15 +1,17 @@
-import Solidity.Calculus.Fml
-import Solidity.Calculus.RuleSyntax
+import Solidity.Calculus.PrintStmt
 import Solidity.Calculus.NFmlQuote
+import Solidity.Syntax.Quote
 
 /-!
 # Printing scoped formulas
 
 A formula of `Calculus/Fml.lean` printed as the `dl{ … }` printers of
 `Calculus/RuleSyntax.lean` print its erasure (`Fml.eraseS`): the same KeY text.
-Terms, updates and statements are printed by those printers themselves, on
-the erased part quoted (`Calculus/NFmlQuote.lean`); this module only walks the
-formula, with the names of its context beside it.
+Terms and updates are printed by those printers themselves, on the erased
+part quoted (`Calculus/NFmlQuote.lean`); a block is quoted as it is
+(`Prog.quoteShared`) and printed by `Calculus/PrintStmt.lean`'s printer of
+the scoped syntax (`ppProgS`), its names those of its context.  This module
+only walks the formula, with the names of its context beside it.
 
 What erasure loses prints as KeY would have it: a frame's statements follow
 the program, a block's end is `}`, and a capture's end, a pop of an update
@@ -22,7 +24,7 @@ The contract is passed as the expression `c` that names it
 namespace Solidity
 
 open Lean Meta
-open Solidity (ppTerm ppUpd ppProg?)
+open Solidity (ppTerm ppUpd)
 
 variable {C : Contract} [FreshNames] (c : Lean.Expr)
 
@@ -33,17 +35,19 @@ def fmtCat (cat : Lean.Name) (stx : Lean.Syntax) : MetaM String := do
 def Tm.show {Γ : Ctx} (ns : List Var) (t : Tm C Γ .val) : MetaM String := do
   fmtCat `dl_term (← ppTerm (Surface.Tm.quote c (t.erase ns)))
 
-/-- The statements of an erased block, each with its `;`. -/
-def showStmts (ss : List (Solidity.Surface.Stmt C)) : MetaM (List String) := do
-  match ← ppProg? (Solidity.Surface.Prog.quote c ss) with
+/-- The statements of a block read where the locals are named `ns`, each
+with its `;`. -/
+def showStmts {Γ Γ' : Ctx} (ns : List Var) (P : Prog C Γ Γ') : MetaM (List String) := do
+  let (Pe, _, _) := P.quoteShared c
+  match ← (Delab.ppProgS (ns.map toExpr) Pe).run {} with
   | some out => out.toList.mapM fun s => return (← fmtCat `sol_stmt s.raw) ++ ";"
-  | none => return ss.map fun _ => "‹stmt›;"
+  | none => return ["‹stmt›;"]
 
 /-- The items of a modality: the program's statements, then each frame's,
 `}` where a block ends. -/
 def Frames.items (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → MetaM (List String)
   | _, _, .nil => return []
-  | _, _, .seq ω κ => return (← showStmts c (ω.erase ns)) ++ (← κ.items (ω.outNames ns))
+  | _, _, .seq ω κ => return (← showStmts c ns ω) ++ (← κ.items (ω.outNames ns))
   | _, _, .pop .block h κ => return "}" :: (← κ.items (ns.drop h.depth))
   | _, _, .pop .capture h κ => κ.items (ns.drop h.depth)
   | _, _, .drop h κ => κ.items (h.names ns)
@@ -132,7 +136,7 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
       1024)
   | .bind _ x _ ψ => Fml.showP (x :: ns) ψ
   | .modal m P κ ψ =>
-    let items := (← showStmts c (P.erase ns)) ++ (← κ.items c (P.outNames ns))
+    let items := (← showStmts c ns P) ++ (← κ.items c (P.outNames ns))
     let body ← arg (κ.outNames (P.outNames ns)) ψ 50
     let (l, r) := match m with
       | .diamond => ("⟨", "⟩")

@@ -66,6 +66,7 @@ import Solidity.Calculus.Closable
 import Solidity.Calculus.CloseErase
 import Solidity.Calculus.Sound
 import Solidity.Calculus.DelabErase
+import Solidity.Calculus.PrintStmt
 import Solidity.Calculus.Delab
 import Solidity.Calculus.Proves
 import Solidity.Calculus.ProvesSound
