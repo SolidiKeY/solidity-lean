@@ -21,12 +21,12 @@ versions.  It names files by the paths they had at each step, which is why
 
 | | Before | After |
 |---|---|---|
-| Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits the scoped `Stmt C Γ Γ'` directly (`Syntax/Elab.lean`); `Surface.Stmt` and `resolve` removed (decision 11, W8.4) |
+| Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits it directly (`Syntax/Elab.lean`) and the printers print it (`Calculus/PrintStmt.lean`): the untyped `Surface.Stmt` and `resolve` went at W8 (decision 11) |
 | State | untyped `Semantics.State`: values, storage and heap by name, with junk | `State C Γ` (`Semantics/State.lean`): typed values (`PrimTy.Denote`, a `uint` an `Int` in range), typed storage (`SVal T` over `structDef`, `Storage C`), a typed heap (`HRef H R`, no mapping object), locals computed from the context (`TEnv`) |
 | Run | `Stmt.run` on the untyped state, halting by `revert`, `panic`, `diverge` or `stuck` | `Stmt.run` (`Semantics/Run.lean`) on the typed state, halting by `revert`, `panic`, `diverge` or `exhausted` (a push at the bound, decision 15): never stuck; the only run of a statement (W4) |
 | Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `StepErase`), and the erased state `EState C Γ` (`Semantics/Erased.lean`): what the closer's terms read |
 | Compiler | `compileStmt` with `wtStmt`, `not_stuck` | over the scoped syntax, locals at their level (`Evm/Compile.lean`), `inFrag` the fragment alone, `compile_correct` over the typed run (`Evm/Correct.lean`), no `not_stuck` |
-| Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; `dl!{}` elaborates to `Fml C Γ` directly |
+| Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; `dl!{}` with a modality reads scoped (`Surface.Fml` went at W8) |
 | Rules | `Taclet C k m s p` on `Stmt C`, `Taclet.sound` by case | the same 159 lines read scoped (`Calculus/Rules.lean`, `open scoped Solidity.Schema`); `Taclet.toStep` (`Calculus/Taclet.lean`) says each is the rule `Stmt.step` fires, so soundness is `Stmt.sound` (`Calculus/Sound.lean`) with no proof per taclet; `blockEmpty` and `functionFrameEmpty` claimed; no cover goal (KeY's two goals); the step rules read the rule set (`⊢ₖ`, decision 36) |
 | Sequent | `Proves` over `Hyp` | `Proves C R Γ₀ H φ` over a telescope `Hyps` (`Calculus/Proves.lean`); `Proves.valid` with no hypothesis; a leaf closed by its erasure (`Proves.close`, `Calculus/CloseErase.lean`) |
 | Tools | on `Fml C` | `sol_symex`, `sol_prove`, `sol_derive?`, chains, `#chain`, the proof tree, `#wp`, `#step`, specs, contracts, callbacks on `Fml C Γ`; the same text through `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) |
@@ -73,8 +73,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | W8.1–W8.4 done, W8.5 gate done 2026-10-11 | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
-| left | — | the lead's calls on proposals 95–105, 106–117 (W8.2–W8.3) and 118–128 (W8.4); optional ports on the IR ("What is left") |
+| W8 | done 2026-10-11 (W8.1–W8.5) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan", "W8 result") |
+| left | — | the lead's calls on proposals 106–117 (W8.2–W8.3) and 118–128 (W8.4); the SolKey reader's port to the scoped families; optional ports on the IR and the IR's rename ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -396,6 +396,8 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     the printers' target, with no run, no taclet and no `wt`; every
     semantics is on Core.  `NFml` (today's `Fml` with `.modal` removed)
     stays the closer's input until M6c.
+    *Overridden by the user (below): `Surface.Stmt`, `Surface.Prog` and
+    `Surface.Fml` removed at W8 ("W8 result").*
 
 12. *Hidden binder at a memory type*: option (c). `Fml.bind` takes the
     modality; under the diamond it asks for an inhabitant of the binder's
@@ -2846,6 +2848,105 @@ derived + 1 pending + 1 divergent + 1 excluded, 2 skipped).
 `lean_build` of the default targets green (295 jobs); every timed copy
 elaborated with no error.
 
+### W8 result (W8.5 lane `docs`, 2026-10-11)
+
+**Decision 11 is done.**  The user's call ("you can remove it",
+2026-10-11) is carried out: `Surface.Stmt`, `Surface.Prog` and
+`Surface.Fml` (the formula as written), the sixteen program-term families,
+the surface `Arg`, `Surface.Premise` and the holes, `Surface.Problem.*`,
+and `resolve`/`erase` between the surface and the scoped syntax are gone.
+The elaborator emits `Stmt C Γ Γ'`/`Prog C Γ Γ'` and `Fml C Γ` directly,
+and the printers print the scoped syntax.  `rg
+'Surface\.(Stmt|Prog|Fml|Premise|Hole|Problem)' Solidity` is empty.
+`Surface.Tm`, `Surface.MAddr`, `Surface.Upd` and `Surface.UpdElem` remain:
+they are the closer's IR (decision 7), not the surface syntax.  Over the
+wave, 90 files under `Solidity/` changed: 5,954 lines added and 8,374
+deleted (`65d93a85..9d9fdf67`).
+
+**Modules.**
+
+| | Module | Step |
+|---|---|---|
+| removed | `Syntax/Resolve.lean` (`resolve`, `Prog.erase`, `Prog.resolveCheck`; `NCtx` and the binders' contexts moved to `Syntax/Elab.lean`) | W8.4 |
+| added | `Syntax/Elab.lean`: the elaborator, from `Syntax.lean`, emitting the scoped syntax | W8.1 |
+| added | `Calculus/PrintStmt.lean`: the printer of the scoped syntax and its name API (`idxName`, `SPiece`, `progPiecesS`, `framePiecesS`, `updShape`, `withPrinter`) | W8.2 `printers` |
+| added | `Syntax/Inlined.lean`: a block printed with its calls inlined (`Prog.inlinedStr`, `Prog.inlinedShow`), in place of `Surface.Prog.inlined` | W8.3 (`Syntax/PrintInlined`, added by `ex-evm-bench`, was merged into it) |
+| added | `Examples/Tactics/DlNotation.lean`: `Calculus/SurfaceNotation.lean`'s examples, which need the scoped reader | W8.2 `reader-tools` |
+
+`Syntax.lean` keeps the grammar, the raw syntax, the contract and the
+quoters' helpers.  `Semantics.lean`, `Semantics/Agree.lean`,
+`Semantics/NoPanicOps.lean` and `Semantics/StateErase.lean` lost their
+surface evaluators and lemmas but remain, with the state's operations.
+
+**Pins that moved**, each lane's list collected.  The printed text of
+every `#guard_msgs` pin is as before, except for the rows below that
+change printed text (type suffixes, a hole's `Post C Γ` type,
+`Semantics.State`, `‹Stmt.call …›`), the elaboration errors, and the
+removed pins.
+
+| Step | Pins | Change | Why |
+|---|---|---|---|
+| W8.1 | `Syntax/Quote.lean`'s pins | moved to `Syntax/Splice.lean`, same text | `Splice` now imports `Quote` |
+| W8.1 | `Syntax/Splice.lean`: `tourCore`, `callsCore`, `Prog.show` | new constructor-tree `rfl` and print pins | the scoped elaborator equals `resolve` of the old one |
+| W8.2 `obligations` | `solc_scoped_problems … main [decl]` (4 files) | command line `… [decl]`, pin unchanged | proposal 113 |
+| W8.2 `obligations` | `solc_problems … legacy` lines (5 files) | removed | no legacy statement |
+| W8.2 `obligations` | `LoopsImport`'s three `Surface.Prog.show N.f` | `#solc_show N.f`, same text | proposal 112 |
+| W8.2 `obligations` | `Examples/Tactics/Spec`'s `Surface.Problem.ctor` erasure guard | a `Problem.text` pin of the deployment's obligation | `Surface.Problem` removed |
+| W8.2 `reader-tools` | `Examples/Tactics/DlNotation.lean` (from `SurfaceNotation`): four pins, `Examples/Tactics/Surface.lean`: one | type suffix `: Surface.Fml X` → `: Fml X []` | a modality reads scoped |
+| W8.2 `reader-tools` | `fun m φ => dl![m]{ … }`, the `trace_state` pin, the `ture` error | `NFml` → `Post StandardExample [.val .uint]`, `(φ : Post C)` → `(φ : Post C Γ)` | a scoped hole is a `Post C Γ` |
+| W8.2 `reader-tools` | `fun φ => (⊨ φ) ∧ ∀ σ, NFml.holds σ φ` | `State` → `Semantics.State` | the module sees the scoped `State` |
+| W8.3 (all lanes) | string pins `Surface.Prog.toStr (sol{…}) = "…"` (16 in `Benchmark/Syntax`, `ExampleNames`; more in `Checked`, `Operators`, `Chains/Memory`, `Calls`, …) | `Prog.toStr [] (sol{…})`, same strings | `Surface.Prog` removed |
+| W8.3 | `Surface.Prog.inlined` pins (`Benchmark/{Syntax,Purchase}`, `Loops`, `CallOperands`) | `Prog.inlinedStr`/`inlinedShow`, same strings | proposal 116 |
+| W8.3 | the run pins (`StorageSuite`, `StorageDelete`, `Memory`, `LedgerDelete`, `Values`, `CrossDomain`, `Tools`) | `Prog.runT`/`Prog.localAfterT`, same values | the scoped run tools |
+| W8.3 `ex-evm-bench` | `ExampleNames`' constructor tree `sol{ uint idx = 1; … } = captured` | the scoped blocks compared | constructor-tree `rfl` pin |
+| W8.3 `ex-calls-print` | `Loops`' four elaboration-error pins | the type is `Prog StandardExample [] [.val .uint]` | with `_`, a placeholder error comes first |
+| W8.3 `ex-calls-print` | `Branch`'s `Prog.resolveCheck` guard | an `example` at `Prog StandardExample [] [.val .bool]` | the scoped elaborator accepting it is the check |
+| W8.3 `ex-calls-print` | `Print`'s `stepsShowOf`/`headPremise` | no context argument | formulas written with their `∀`s |
+| W8.4 | `Syntax/Splice.lean`'s string pins, constructor trees, inlined pin | `Prog.toStr []`, scoped trees, `Prog.inlinedStr`; same strings | `Surface.Prog` removed |
+| W8.4 | `Syntax/Splice.lean`'s three hand-built `resolveCheck` guards | the elaborator's own errors on `sol{}` text: `unknown name x`, `a number where a bool is expected`, `a bool where a uint is expected`, `unknown name y` | proposal 126: `resolve`'s messages cannot be reached from text |
+| W8.4 | `Examples/Tools.lean`'s `functionCallArgCapture` | `‹Surface.Stmt.call f args hsep ret body›` → `‹Stmt.call f args ret body›` | proposals 107, 118 |
+| W8.4 | `DlNotation`'s two `where` pins | type suffix `Fml StandardExample []`, same text | proposal 120 |
+| W8.4 | `Calculus/Print.lean`'s `legacyShow` pin, `Examples/Tactics/Spec.lean`'s two `sameAs` guards | removed | what they compared against is gone |
+
+**Follow-ups.**
+
+- *The SolKey reader* (side-projects `lean/solkey`) still matches the
+  surface constructors after `Delab.tr`.  Its port to the scoped families
+  goes through `Calculus/PrintStmt.lean`'s name API (`idxName`, `SPiece`,
+  `progPiecesS`, `framePiecesS`, `updShape`, `withPrinter`).  Until then
+  its require stays at the tag `w8-pre-delete` (`f16586b1`), and at the
+  merge into `master` it can point back to `../../../solidity-lean` only
+  once the port builds.
+- *Optional*: rename the IR namespace `Surface.Tm`/`Surface.MAddr`/
+  `Surface.Upd`/`Surface.UpdElem` (2,235 occurrences in 45 files under
+  `Solidity/`) to `NFml`, so that `Surface` no longer names anything.
+  This is a mechanical rename with pins (`Delab.tr`'s escapes
+  `‹Solidity.Surface.…›`, `#check_rule_text`'s roots) and a full rebuild.
+  It needs the speed warning of `AGENTS.md`, but changes no
+  representation.
+- The `(sol{…} : Prog C [] _)` ascriptions in about 18 example files and
+  the proposal 117 workarounds in `Evm/Examples.lean` and
+  `Examples/Tactics/TryCatch.lean` (W8.4 "Left") are harmless and stay
+  as they are.
+
+**Docstrings.**  A scan of `Solidity/`, `AGENTS.md`, `.claude/` and
+`docs/` (this record aside) for the surface names (`Surface.Stmt`,
+`Surface.Prog`, `Surface.Fml`, `Surface.Premise`, `Surface.Problem`,
+`Syntax/Resolve`, `Prog.resolve`, a bare `resolve`, `resolveCheck`, `defineCore`), for "as
+written (`Surface.…`)", and for the identifiers W8.4 deleted
+(`expandBody`, `copyDecls`, `withErased`, `legacyShow`, `specParts`,
+`scopedOf`, `deployRunS`, …) finds nothing left: W8.4 and its review
+(`9d9fdf67`) already rewrote them.  No Lean file is edited here.  The
+remaining "as written" in Lean docstrings describe raw text (a term or
+formula read by name, `Calculus/SurfaceNotation.lean`) or a printed block,
+not the removed syntax.  The "today's" docstrings name the closer's IR,
+which stays ("What is left").  `AGENTS.md`'s layering line now says that
+`Syntax.lean` holds the grammar and raw syntax, that `Syntax/Elab.lean`
+elaborates it, and that the SolKey reader's require is pinned at
+`w8-pre-delete`.  `docs/README.md`'s row for this record mentions W8.
+
+**Checks** (lane `docs`, no Lean): `./scripts/check-doc-paths.sh` passes.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
@@ -2875,10 +2976,14 @@ fails stays on the IR:
   `Semantics/Erased.lean` go only when it is empty.
 
 **Besides M6c:**
-- Decision 11: done in W8.4 ("W8.4 record").
+- The SolKey reader's port to the scoped families, through
+  `Calculus/PrintStmt.lean`'s name API; its require stays at the tag
+  `w8-pre-delete` until then ("W8 result").
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
-  `intrinsic`) and that branch merged.
+  `intrinsic`), once ported, and that branch merged.
+- Optional: the IR namespace `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`
+  (2,235 occurrences) renamed to `NFml` ("W8 result").
 - Not run since W4: `check-corpus.sh` (its probes need `lake`),
   the `solkeycheck` executable (built), the reader's
   `keycheck` executable as a target and the VS Code extension's tests.  No
