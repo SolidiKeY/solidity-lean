@@ -10,8 +10,7 @@ import Solidity.Calculus.ProvesDerive
 `f` that elaborated its obligation as solkey states it,
 `N.f.problem : Fml N []` (`Problem.fml`, `Calculus/Problem.lean`): the
 modality is the function's tag, the binders its parameters (`∀`, the first
-outermost), the program the constant `N.f`, read in their context
-(`obligation`).  The constructor's, `N.constructor.problem`, is a
+outermost), the program `N.f`'s, read in their context (`obligation`).  The constructor's, `N.constructor.problem`, is a
 deployment's (`Problem.ctorFml`): the program `constructor(x̄);` from
 solkey's deployment update, with no `wt(storage)` premise.  A statement is
 a constant, so `sol_prove` names it and the elaborator never unfolds it;
@@ -72,10 +71,13 @@ def ImportRow.binders? (r : ImportRow) : Option (List (PrimTy × Var)) :=
   r.params.mapM fun (x, t) => (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x)
 
 /-- **The statement of `N.f`** (the row `r`), written on the program
-`N.f : Prog N Γ Γ'` (its type read off the environment): `∀x̄. wt(storage)
-→ [m] N.f`, or a deployment's `∀x̄. {deployUpd} [m] N.f`, its binders
-(`Fml.all`, the first parameter outermost), the premise and the modality
-as constructors, what `Problem.fml` and `Problem.ctorFml` compute.  `none`
+`N.f : Prog N Γ Γ'` (its type and value read off the environment):
+`∀x̄. wt(storage) → [m] N.f`, or a deployment's `∀x̄. {deployUpd} [m] N.f`,
+its binders (`Fml.all`, the first parameter outermost), the premise and
+the modality as constructors, what `Problem.fml` and `Problem.ctorFml`
+compute.  The program is `N.f`'s value, the literal the import declared:
+the import does not compile it, and `sol_prove` evaluates the statement
+with compiled code (`Symex.evaluable`).  `none`
 where solkey states no plain obligation (the tag) or a parameter is of no
 value type. -/
 def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
@@ -85,13 +87,14 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
   let n := N ++ Lean.Name.mkSimple r.name
   let some ci := env.find? n | throw s!"{r.name}: no program {n}"
   let ty := ci.type.consumeMData
+  let some v := ci.value? | throw s!"{r.name}: {n} is not a scoped program"
   unless ty.isAppOfArity ``Prog 3 do throw s!"{r.name}: {n} is not a scoped program"
   let Γe := ty.appFn!.appArg!
   let Γ'e := ty.appArg!
   unless Γe == ctxE (paramsN xs).ctx do
     throw s!"{r.name}: {n} is not read in its parameters' context"
   let c := mkConst N
-  let modal := mkAppN (mkConst ``Fml.modal) #[c, Γe, Γ'e, Γ'e, toExpr m, mkConst n,
+  let modal := mkAppN (mkConst ``Fml.modal) #[c, Γe, Γ'e, Γ'e, toExpr m, v,
     mkApp2 (mkConst ``Frames.nil) c Γ'e, mkApp2 (mkConst ``Fml.tt) c Γ'e]
   let body := if r.name == "constructor" then
       mkAppN (mkConst ``Fml.upd) #[c, Γe, Γe, toExpr m, mkApp2 (mkConst ``Problem.deployUpd) c Γe, modal]

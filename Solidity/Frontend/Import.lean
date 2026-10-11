@@ -38,7 +38,9 @@ each as ordinary compiled code (`elabProgAtS.go`); `sol[C]{ … }` would
 compile one program per function.  Its result, the scoped program, is
 quoted back hash-consed with every proof `Eq.refl` (`Prog.quoteShared`,
 `Prog.define`), so the kernel re-checks what it computed: every local the
-program reads is in scope, at its type.
+program reads is in scope, at its type.  The programs are not compiled
+(about half the import's time for the TestSuite): what evaluates one reads
+its value (`#solc_show N.f`; an obligation, `Frontend/Problems.lean`).
 
 Lake does not track the fixture, so the command names its hash (FNV-1a 64
 over the bytes) and refuses a fixture of another one; the script that
@@ -310,7 +312,6 @@ def elabSolcImport : CommandElab := fun stx => do
     (mkApp (mkConst ``List [0]) rawTy) (mkConst N) (← liftTermElabM <| mkListLit rawTy (raws.map (·.2.2.2)).toList)
   let (C, bodies) ← liftTermElabM <| unsafe evalExpr (Contract × List (List RawStmt)) pairTy val
   -- the typed elaborator on each, the program quoted back and checked
-  let mut defined : Array Lean.Name := #[]
   for ((k, f, ss, _), raw) in raws.toList.zip bodies do
     let fail (msg : String) : Array ImportRow :=
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
@@ -331,7 +332,7 @@ def elabSolcImport : CommandElab := fun stx => do
       | .ok ⟨_, P⟩ =>
         let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
         match ← liftCoreM (Prog.define n N P) with
-        | none => defined := defined.push n
+        | none => pure ()
         | some m => rows := fail (at_ f 0 m)
   -- the constructor's program, a deployment: `constructor(x̄);` with its
   -- parameters in scope (`elabCtor`), the obligation's program
@@ -349,15 +350,11 @@ def elabSolcImport : CommandElab := fun stx => do
         | .ok ⟨_, P⟩ =>
           let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
           match ← liftCoreM (Prog.define n N P) with
-          | none =>
-            defined := defined.push n
-            ctorRow := some (row .elaborated "")
+          | none => ctorRow := some (row .elaborated "")
           | some m => ctorRow := some (row .unsupported (at_ f 0 m))
-  -- compiled for `sol_prove`; a failure here leaves the definitions, uncompiled
-  let compiled ← liftCoreM <| tryCatchRuntimeEx (do compileDecls defined; pure none)
-    fun ex => do pure (some (← ex.toMessageData.toString))
-  if let some m := compiled then
-    logWarning m!"solc_import: the programs are defined but not compiled: {m}"
+  -- not compiled: compiling the scoped literals costs about half the import
+  -- (TestSuite: 5.9 s); a reader evaluates a program's value (`#solc_show`,
+  -- `Frontend/Problems.lean`'s `obligation`)
   let rowsTy := mkApp (mkConst ``List [0]) (mkConst ``ImportRow)
   let rep : Lean.Name := N ++ `report
   liftCoreM <| addAndCompile <| .defnDecl {
@@ -386,5 +383,27 @@ def elabSolcScoped : CommandElab := fun stx => do
   unless errs.isEmpty do
     throwError "solc_scoped: {errs.size} programs are not scoped:\n{"\n".intercalate errs.toList}"
   logInfo m!"{k} program{if k == 1 then "" else "s"} declared scoped"
+
+/-- The value of the imported program `n` (a literal: the import does not
+compile it), its contexts' terms and its parameters' names, newest first. -/
+def programValue (n : Lean.Name) (r : ImportRow) : CoreM (Expr × Expr × Expr × List Var) := do
+  let ci ← getConstInfo n
+  let ty := ci.type.consumeMData
+  unless ty.isAppOfArity ``Prog 3 && ci.value?.isSome do throwError "{n} is not a scoped program"
+  pure (ci.value!, ty.appFn!.appArg!, ty.appArg!, r.params.reverse.map fun (x, _) => Var.ofName x)
+
+/-- `#solc_show N.f`: the imported program `N.f`, one statement per line
+(`Prog.show`, its parameters named), its value evaluated. -/
+syntax (name := solcShow) "#solc_show " ident : command
+
+@[command_elab solcShow]
+def elabSolcShow : CommandElab := fun stx => do
+  let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
+  let N := n.getPrefix
+  let rows ← liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)
+  let some r := rows.find? (N ++ Lean.Name.mkSimple ·.name == n) | throwError "{n} is no row of {N}"
+  let (v, _, _, ns) ← liftCoreM <| programValue n r
+  logInfo (← liftTermElabM do
+    unsafe evalExpr String (mkConst ``String) (← mkAppM ``Prog.show #[toExpr ns, v]))
 
 end Solidity.Frontend
