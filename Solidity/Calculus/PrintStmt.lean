@@ -708,6 +708,22 @@ def progItemsS (ps : Array SPiece) : PrM (Option (Array (TSyntax `sol_stmt))) :=
 
 /-! ## Formulas -/
 
+/-- Whether an update read at `ns` prints (has an element: `Delab.updParts`'s
+pieces, nothing erased), and the names of the context it leaves. -/
+partial def updShape (ns : List Expr) (U : Expr) : MetaM (Bool × List Expr) := do
+  let U ← whnf (← instantiateMVars U)
+  let args := U.getAppArgs
+  if U.isAppOf ``Upd.snoc then return (true, (← updShape ns args[3]!).2)
+  if U.isAppOf ``Upd.decl then return (true, args[5]! :: (← updShape ns args[4]!).2)
+  if U.isAppOf ``Upd.pop then
+    let (b, ms) ← updShape ns args[4]!
+    return (b, ms.drop (← extDepth args[5]!))
+  if U.isAppOf ``Upd.drop then
+    let (b, ms) ← updShape ns args[4]!
+    return (b, ← thinNames ms args[5]!)
+  if U.isAppOf ``Upd.nil then return (false, ns)
+  return (true, ns)
+
 /-- A formula as its erasure shows it, read at `ns`: the hidden binders and
 the updates that print as nothing gone through, the rest computed.  A
 postcondition variable (`↑φ`) and a schema variable stay. -/
@@ -721,8 +737,8 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
   let e ← whnf e
   if e.isAppOfArity ``Fml.bind 6 then return ← viewF (e.getArg! 3 :: ns) (e.getArg! 5)
   if e.isAppOfArity ``Fml.upd 6 then
-    let (es, ms) ← runTr (updParts ns (e.getArg! 4))
-    if es.isEmpty then return ← viewF ms (e.getArg! 5)
+    let (shown, ms) ← updShape ns (e.getArg! 4)
+    if !shown then return ← viewF ms (e.getArg! 5)
   return (ns, e)
 
 /-- The erased term of a term read at `ns`. -/
@@ -730,8 +746,11 @@ def termS (ns : List Expr) (t : Expr) : PrM Expr := do
   instantiateMVars (← runTr (tr ns t))
 
 /-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
-`a = b` prints: `a` and `b`, erased. -/
-def eqDPartsS (ns : List Expr) (e : Expr) : PrM (Option (Expr × Expr)) := do
+`a = b` prints: `a` and `b`, each with its names.  The two reads of a term
+are the same when their erasures are (the same term at the same names, else
+the erasures compared). -/
+def eqDPartsS (ns : List Expr) (e : Expr) :
+    PrM (Option ((List Expr × Expr) × (List Expr × Expr))) := do
   let (ns, e) ← viewF ns e
   let_expr Fml.and _ _ l r := e | return none
   let (nl, l) ← viewF ns l
@@ -742,14 +761,20 @@ def eqDPartsS (ns : List Expr) (e : Expr) : PrM (Option (Expr × Expr)) := do
   let_expr Fml.defined _ _ b := l' | return none
   let (nr', r') ← viewF nr r'
   let_expr Fml.eq _ _ a' b' := r' | return none
-  let (a, b, a', b') := (← termS nl a, ← termS nl' b, ← termS nr' a', ← termS nr' b')
-  return if a == a' && b == b' then some (a, b) else none
+  let same (n₁ : List Expr) (x : Expr) (n₂ : List Expr) (y : Expr) : PrM Bool := do
+    let (x, y) := (← instantiateMVars x, ← instantiateMVars y)
+    if x == y && n₁ == n₂ then return true
+    return (← termS n₁ x) == (← termS n₂ y)
+  unless ← same nl a nr' a' do return none
+  unless ← same nl' b nr' b' do return none
+  return some ((nl, a), (nl', b))
 
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
 def isConnectiveS (ns : List Expr) (e : Expr) : PrM Bool := do
-  if (← eqDPartsS ns e).isSome then return false
-  let (_, e) ← viewF ns e
-  return e.isAppOfArity ``Fml.and 4 || e.isAppOfArity ``Fml.imp 4 || e.isAppOfArity ``Fml.all 5
+  let (_, e') ← viewF ns e
+  if e'.isAppOfArity ``Fml.imp 4 || e'.isAppOfArity ``Fml.all 5 then return true
+  unless e'.isAppOfArity ``Fml.and 4 do return false
+  return (← eqDPartsS ns e).isNone
 
 /-- `¬(¬φ ∧ ¬ψ)`, which `φ ∨ ψ` spells: `φ` and `ψ`, with their names. -/
 def orPartsS (ns : List Expr) (e : Expr) :
@@ -824,7 +849,9 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
     let some T ← primName? p | escape
     `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $xi:ident; $(← ppFmlS (x :: ns) φ):dl_fml)
   | Fml.and _ _ φ ψ =>
-    if let some (a, b) ← eqDPartsS ns e then
+    if let some ((na, a), (nb, b)) ← eqDPartsS ns e then
+      let a ← termS na a
+      let b ← termS nb b
       if let some (sym, l, r) ← Surface.cmpParts? a b then
         let l ← ppTerm l
         let r ← ppTerm r

@@ -323,7 +323,7 @@ partial def hypsNamesS (H : Expr) : PrM (List Expr) := do
   match H.getAppFn.constName? with
   | some ``Hyps.nil => unknown args[1]!
   | some ``Hyps.pre | some ``Hyps.havoc | some ``Hyps.anon => hypsNamesS args[3]!
-  | some ``Hyps.upd => return (← runTr (updParts (← hypsNamesS args[4]!) args[6]!)).2
+  | some ``Hyps.upd => return (← updShape (← hypsNamesS args[4]!) args[6]!).2
   | some ``Hyps.all => return args[4]! :: (← hypsNamesS args[3]!)
   | some ``Hyps.bind => return args[5]! :: (← hypsNamesS args[3]!)
   | _ => throwError "not a context"
