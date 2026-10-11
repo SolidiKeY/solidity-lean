@@ -1,4 +1,5 @@
 import Solidity.Calculus.Decide
+import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.Delab
 import Solidity.Calculus.Quote
 import Solidity.Calculus.ProofTree
@@ -16,9 +17,9 @@ import Solidity.Tools.Taclet
 
 * `#wp φ` runs the scoped strategy to the end (`symex 200`, what
   `sol_symex` does) and prints what is left, the first-order formula whose
-  validity is `φ`'s.  When its erasure (`Fml.erase`) is in
-  `sol_decide`'s fragment (`NFml.inL`) it also prints its reduction
-  (`NFml.reduce`): the updates pushed in and every read of a write
+  validity is `φ`'s.  When it is in `sol_decide`'s fragment
+  (`Fml.inLS`) it also prints its reduction (`Fml.reduceS`): the updates
+  pushed in and every read of a write
   eliminated, a formula over the initial state alone, printed by `LFml.fmt`
   in KeY's spelling (`find(storage, alice.age)`, `save(s, p, w)`,
   `delAt(s, p)`, `if(i = j) then a else b`, `write(m, idC(idp0, nil), at(i),
@@ -210,6 +211,45 @@ where
     | φ => LFml.fmt φ
 
 
+/-! ## The binders' names
+
+The scoped reduction keys a local by the binder count where it is pushed
+(`SymS.key`, `slotVar k`), which prints as `#k`; `#wp` prints it by the name
+its binder gives, replaying the count as `Fml.toLS` makes it. -/
+
+/-- The names an update declares, in the order it pushes them
+(`Upd.replayS`). -/
+def _root_.Solidity.Upd.declNames {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → List Var
+  | _, .nil => []
+  | _, .snoc U _ => U.declNames
+  | _, .decl U x _ => U.declNames ++ [x]
+  | _, .pop U _ => U.declNames
+  | _, .drop U _ => U.declNames
+
+/-- The name of each key the reduction of `φ` gives a local, from `k` on,
+as `Fml.toLS` counts the locals it pushes. -/
+def _root_.Solidity.Fml.keyNames : {Γ : Ctx} → Nat → Fml C Γ → List (Nat × Var)
+  | _, k, .all x _ φ => (k, x) :: Fml.keyNames (k + 1) φ
+  | _, k, .bind _ x _ φ => (k, x) :: Fml.keyNames (k + 1) φ
+  | _, k, .upd _ U φ =>
+    let ds := U.declNames
+    (ds.zipIdx k).map (fun (x, i) => (i, x)) ++ Fml.keyNames (k + ds.length) φ
+  | _, k, .not φ => Fml.keyNames k φ
+  | _, k, .and φ ψ => Fml.keyNames k φ ++ Fml.keyNames k ψ
+  | _, k, .imp φ ψ => Fml.keyNames k φ ++ Fml.keyNames k ψ
+  | _, _, _ => []
+
+/-- The fresh names, with the key `#k` printed by the name its binder gives
+(`ks`) where that name is the only one. -/
+def keyedNames [inst : FreshNames] (ks : List (Nat × Var)) : FreshNames where
+  name b k :=
+    if b == "#" then
+      match (ks.filter (·.1 == k)).map (·.2) |>.eraseDups with
+      | [x] => toString x
+      | _ => inst.name b k
+    else inst.name b k
+  parse := inst.parse
+
 /-! ## The commands -/
 
 variable {C : Contract}
@@ -224,13 +264,17 @@ syntax "#wp " term : command
 syntax "#step " term : command
 
 /-- What `#wp` shows of a scoped `φ`: the formula the scoped strategy leaves,
-quoted, and the reduction of its erasure when it is in the fragment. -/
+quoted, and its reduction when it is in the fragment. -/
 def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     Lean.Expr × Option String :=
   let ψ := symex 200 φ
-  let ψ' := ψ.erase []
-  -- a modality left has no erasure the closer reads (`Fml.erase`)
-  (ψ.quote c, if !ψ.active && ψ'.inL Sym.empty then some (LFml.fmt ψ'.reduce) else none)
+  -- a modality left is outside the fragment (`Fml.inLS`)
+  (ψ.quote c, match Γ, ψ with
+    | [], ψ =>
+      if !ψ.active && ψ.inLS true SymS.empty then
+        some (@LFml.fmt (keyedNames (ψ.keyNames 0)) ψ.reduceS)
+      else none
+    | _, _ => none)
 
 /-- What `#step` shows of a scoped `φ`: the formula one step leaves, quoted. -/
 def stepQuotedC (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) : Option Lean.Expr :=
@@ -275,7 +319,7 @@ def elabWpCore : CommandElab := fun stx => liftTermElabM do
   let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) (← inferType e) e
   let tail := match red with
     | some r => m!"\nupdate-free:\n    {r}"
-    | none => m!"\noutside `sol_decide`'s fragment (`NFml.inL`): no reduction"
+    | none => m!"\noutside `sol_decide`'s fragment (`Fml.inLS`): no reduction"
   logInfo (m!"symbolic execution leaves:\n    {ψ}" ++ tail)
 
 /-- `#step φ`. -/
