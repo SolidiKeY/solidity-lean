@@ -3449,6 +3449,85 @@ Branch `w9-print`: the printers no longer read the erasure; no pin moved.
   `Delab`, `Print`, the pin files above); `lean_build` of the default
   targets; `check-orphans`, `check-doc-paths`.
 
+### W9.2 `rw` record
+
+Branch `w9-rw`: the scoped rewrites read the scoped term taclets
+(`TermTacletS`) and no longer erase a goal's terms; no pin moved.
+
+- **The rewrite's pair is scoped.**  `q : Tm C [] .val × Tm C [] .val`, two
+  closed terms at the empty scope, everywhere the scoped calculus rewrites:
+  `Tm.sideC`, `Fml.rwEqC`, `Hyps.rwEqC`, `Tm.pickC`/`Tm.rwC`/`Rhs.rwC`/
+  `UpdElem.rwC`/`Upd.rwC`, `Proves.rewrite` (`hq : Tm.Theq q.1 q.2`),
+  `Proves.updRw` (`hq : Tm.EvalRefines q.1 q.2`), `Proves.rewrite'`/`updRw'`,
+  `SolkeyProves`, `ProvesSound`.  A term of the sequent fires where it has no
+  local and reads `q.1` at the empty scope (`Tm.closedAs`: `Tm.toNil?`, then
+  `Tm.beqR`); it becomes `q.2` read at its scope (`Tm.ofNil`).  Soundness
+  through `Tm.eval_toNilS`/`Tm.denote_toNilS` and
+  `Tm.eval_ofNil`/`Tm.denote_ofNil` over the state's global part at the empty
+  scope (`EState.nil`, `EState.nil_eq_of_glob`); `Tm.EvalRefines.of_theq`
+  (a Theory equation onto a literal, `Tm.isLit`) by the term bridge
+  `Tm.denote_eval`, moved from `Calculus/SoundLoops.lean` into
+  `Calculus/SeqRewrite.lean`.  `Tm.denote_toNil`/`Tm.eval_toNil` (a closed
+  term as its erasure) are gone.
+- **Modules.**  The update rewrite (`Tm.toNil?` … `holds_upd_rwC`) moved from
+  `Calculus/Graft.lean` to `Calculus/SeqRewrite.lean`, which now imports
+  `Calculus/TermLib.lean` (Graft does not).  `Tm.ofClosed?` stays there, only
+  for the literal laws (below).
+- **`rw`/`sol_rw` on a scoped goal** (`Calculus/RewriteSyntax.lean`): a name
+  resolves to its `TermTacletS` twin (`qualifyTacletS`), a `Tm.Theq` becomes
+  `TermTacletS.theory` (`asTacletS`), and its left side is unified with each
+  candidate read at the empty scope (`Walk.rwCandidates`: the closed sides of
+  the equations, then every closed value subterm of the last box update,
+  `Tm.toNilQ?`, `Tm.closedNilVals`, `Walk.valSubterms`).  `Walk.rwTheory`
+  reads the Theory's laws on the scoped term (`theoryRewriteS`: the scoped
+  `Tm.denote_*S` unfold lemmas, `rfl`, and `reifyTermS` … back to `Tms`
+  terms; `Tm.Theq.of_eq`).  The erased `theoryRewrite` stays for
+  `NFml.Proves`' `sol_rw` (`Calculus/Rewrite.lean`) and the chains past the
+  program.
+- **Chains while the program is open** (`Calculus/RewriteScoped.lean`,
+  `Calculus/Chains.lean`): `FmlRw.lawEq`/`FmlRw.lawUpd` take a
+  `TermTacletS t t'` at the empty scope (`lawUpd` with `t'.isLit`).  The
+  elaborator maps a law to its twin (`scopedLaw?`) and finds its instances
+  among the line's closed terms read at the empty scope
+  (`Tm.closedNilVals`, `NFml.Chain.lawInstances`, whose `lawSides?` reads a
+  `TermTacletS` and whose head pattern is the scoped side's constructor).
+  `FmlRw.lit`/`litEq` keep `LitLaw` on the closer's terms: the law's two
+  sides are read at the empty scope at the boundary
+  (`Term.closedPairS?`, `LitLaw.closedPairS`), so the line is not erased, but
+  their instances are still found on the erased line.
+- **Callbacks** (`Calculus/CallbackSound.lean`): `Tm.reclose?` is
+  `Tm.toNil?` then `Tm.ofNil`; `Proves.assumeInv` asks the goal to read as
+  the invariant at the empty scope (`he : φ.reclose? = some I`, by `rfl`,
+  through `holds_reclose`), in place of `Fml.closedB` and an equal erasure;
+  `holds_closedB` (an `NFml.holds` reader) is gone.
+- **Deferred.**  `lawUpd` beyond the box is not direct: under the diamond a
+  law onto a literal changes where the update halts, and
+  `Examples/ChainRewritesOpen`'s pinned refusal of `findOnSave` under the
+  diamond would move; it needs the erased `LineRw.lawUpdAny`'s condition
+  (`Upd.covers`) restated scoped (W9.4, the spike's class 5).  The `…In`
+  laws (a storage context `SCtxS`) match on the scoped line by unification
+  only, with no spine search (`matchLaw` searches `SCtx` positions on the
+  erasure).  A closer `Term.Theq` hypothesis no longer rewrites a scoped
+  goal (a `Tm.Theq` does); no pin used one.  The literal laws' instances
+  (above), `Calculus/Rewrite.lean`, `TheoryRewrite`'s `NFml.Proves` side,
+  `RewriteChains` and `ChainRewrites` past the program stay erased (W9.4).
+- **Timing** (each file copied under `Solidity/Scratch/`, a fresh worker
+  through the MCP, `/proc` sampled every 20 ms, wall to the last CPU tick;
+  base `57598cd3` in a second worktree, runs interleaved; load 2.5–4, the
+  `decide` lane running):
+
+  | Module | base | W9.2 `rw` | gate |
+  |---|---|---|---|
+  | `Examples/ChainRewritesOpen` | 3.47 s, 5.02 s (CPU 3.61, 3.75 s) | 2.96 s, 3.47 s (CPU 3.64, 3.59 s) | 4.1 s |
+  | `Examples/ChainRewrites` | 7.54 s, 6.83 s (CPU 8.53, 7.79 s) | 7.31 s, 6.84 s (CPU 8.37, 7.82 s) | 8.2 s |
+
+  Before any edit, on this worktree: 3.46 s and 6.76 s.
+- **Checks.**  Per-file diagnostics clean (`SeqRewrite`, `Proves`,
+  `ProvesSound`, `SolkeyProves`, `UpdateRules`, `CallbackSound`,
+  `RewriteScoped`, `RewriteChains`, `Chains`, `RewriteSyntax`, and the pins
+  `ChainRewritesOpen`, `Tactics/{SelectOnSaveConsr,StorageDelete,UpdateRules,Sequents,Callback}`);
+  `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
