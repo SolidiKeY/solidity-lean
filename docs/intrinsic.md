@@ -3080,6 +3080,47 @@ W8.5: `Benchmark/Syntax` 1.62 s against 1.44 s (over by 12%; scoped
 `sol{}` DAGs since W8.3), `Derived10` 11.51 s against 11.2 s (over by 3%,
 as since W7); the rest under theirs.
 
+### W8 reader port record (2026-10-11, side-projects `intrinsic` at `99c6477`)
+
+The SolKey reader (side-projects `lean/solkey`, branch `intrinsic`,
+worktree `../side-projects-intrinsic`) is ported to the scoped syntax.
+Its require already pointed at this worktree (`../../../solidity-lean-intrinsic`,
+a path, not the tag), so it did not build after W8.4; it now builds
+against `intrinsic` at `9a2c3914`.
+
+- **The walk** (`SolKey/Corresp/LeanShape.lean`) reads the scoped
+  constructors themselves (`Stmt.*`, `Simple`/`Val`/`SPath`/`Loc`/`MPath`/
+  `MLoc`/`OpLoc`/`Src`/`MSrc`/`ARhs`/`MRhs`/`NewLhs`, `SHole.fill`/
+  `MHole.fill`/`VHole.fill`/`NewLhs.fill`, `Premise.*`): names from the
+  binders, a position from the stack of the `Var`s the premise declared
+  (`Delab.stmtOutNames`), `.there`, `up` and `Prog.wk up` (`Delab.wkUp?`)
+  transparent, `Ext`/`Thin` invisible, a nested `{ … }` its statements,
+  as `Calculus/PrintStmt.lean` prints them.  Its tables (roles, heads,
+  coercions, side-condition predicates) are keyed by the scoped names;
+  `Delab.legacyName?` is no longer used.  Only terms, updates and
+  formulas go through `Delab.tr`/`updParts`/`updList`.
+- **Lowerings.**  `Delab.tr` erases `se.lower` to `Term.pv (Var.user "se")`
+  (`Delab.loweredVar?`, since W8.4); the walk reads a `Var.user` naming a
+  schema variable of the constructor back as `lowerV`/`lowerP` of it, the
+  shape the old `Surface.Simple.lower` gave.
+- **Imports unchanged**: `Calculus/Rules`, `Calculus/DelabErase`,
+  `Calculus/KeyTaclets`.  It uses `DelabErase`'s helpers (`stmtOutNames`,
+  `wkUp?`, `isUp`, `isCtx`, `tr`, `updParts`, `updList`, `withTwins`) and
+  not `PrintStmt`'s name API, which would add a module to its dependency
+  surface for nothing it needs.
+- **Result**: `Corresp/Proved.lean` regenerated (GenProved's `main` run
+  from a scratch module) is **byte-identical** to the committed one: no row
+  moved, every docstring's printed shape is the same (206 theorems, 170
+  `Agrees`, 36 `FindAgrees`; `tryCallNoCallbackBox` still `differs`).  MCP
+  `lean_build` of the reader's default target passes (`Proved` 14 s); the
+  axiom probe of `scripts/check-axioms.sh`, run from a scratch module:
+  "checked 206 correspondence theorems", none on `sorryAx`/`ofReduceBool`/
+  `trustCompiler`.  Not run: the `keycheck` executable (not a default
+  target) and the VS Code extension's tests.
+- **Docs**: the reader's `AGENTS.md` (intro, import paragraph, a W8
+  paragraph); this repository's `AGENTS.md` no longer says the reader is
+  pinned at `w8-pre-delete`.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
@@ -3109,12 +3150,9 @@ fails stays on the IR:
   `Semantics/Erased.lean` go only when it is empty.
 
 **Besides M6c:**
-- The SolKey reader's port to the scoped families, through
-  `Calculus/PrintStmt.lean`'s name API; its require stays at the tag
-  `w8-pre-delete` until then ("W8 result").
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
-  `intrinsic`), once ported, and that branch merged.
+  `intrinsic`, ported: "W8 reader port record"), and that branch merged.
 - Optional: the IR namespace `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`
   (2,235 occurrences) renamed to `NFml` ("W8 result").
 - Not run since W4: `check-corpus.sh` (its probes need `lake`),

@@ -59,8 +59,8 @@ evaluation order.
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Calculus.Rules`,
 `Solidity.Calculus.DelabErase` and `Solidity.Calculus.KeyTaclets` (and through
-them the syntax); its require is pinned at the tag `w8-pre-delete` until it
-is ported to the scoped syntax (`docs/intrinsic.md`, "W8 result"). That is its
+them the syntax), and walks the scoped constructors directly
+(`docs/intrinsic.md`, "W8 reader port record"). That is its
 whole dependency surface: renaming a `Taclet` constructor breaks its
 correspondence proofs, which is the point of it. It lives in the
 side-projects repository (`lean/solkey`, requiring this checkout by path):
