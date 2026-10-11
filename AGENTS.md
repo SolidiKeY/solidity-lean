@@ -38,7 +38,7 @@ writes, a push and a pop are nested writes over `size`, and
 (`{ sp := alice.account }`); a read marks the *value* side instead
 (`find`/`select`/`read`).
 
-**Calls are inlined** (`Syntax.lean`): a contract declares its functions
+**Calls are inlined** (`Syntax.lean`, `Syntax/Scoped.lean`): a contract declares its functions
 (`contract!{ function f(uint x) returns (uint r) { … } }`), a function may
 call only the ones declared before it, and a call statement (`Stmt.call`)
 carries its callee's body, closed over a frame of its own — KeY's
@@ -58,7 +58,8 @@ evaluation order.
 A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
 files in a separate repository. It imports only `Solidity.Calculus.Rules`,
 `Solidity.Calculus.DelabErase` and `Solidity.Calculus.KeyTaclets` (and through
-them the syntax). That is its
+them the syntax); its require is pinned at the tag `w8-pre-delete` until it
+is ported to the scoped syntax (`docs/intrinsic.md`, "W8 result"). That is its
 whole dependency surface: renaming a `Taclet` constructor breaks its
 correspondence proofs, which is the point of it. It lives in the
 side-projects repository (`lean/solkey`, requiring this checkout by path):
@@ -83,8 +84,9 @@ earlier change made for speed.
 `docs/module-map.md` — one line per module. Read it instead of searching
 when you need to know where something lives.
 
-Layering: types and names in `AST.lean`, contexts in `Scope.lean`, the syntax
-as written in `Syntax.lean` and scoped in `Syntax/Scoped.lean`, the state's
+Layering: types and names in `AST.lean`, contexts in `Scope.lean`, the grammar
+and raw syntax in `Syntax.lean`, elaborated (`Syntax/Elab.lean`) to the scoped
+syntax of `Syntax/Scoped.lean`, the state's
 operations in `Semantics.lean` and the run in `Semantics/Run.lean`, terms and
 the closer's formulas in `Update.lean`, scoped formulas in `Calculus/Fml.lean`,
 the taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
