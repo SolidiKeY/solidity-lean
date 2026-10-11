@@ -11,11 +11,12 @@ importing file) and defines
 
 * `N : Contract`, the contract's state variables and the functions called
   by name through `contract!{ … }`, each function checked alone first;
-* `N.f : Prog N` for each function `f` that elaborates, its body read
-  against `N` with its parameters as locals in scope, after its return
-  variables declared at their defaults, its loops and then its `return`s
-  lowered (`lowerLoops`, `lowerReturns`), as a call inlines it;
-* `N.constructor : Prog N` for a declared constructor, a deployment:
+* `N.f : Prog N Γ Γ'` for each function `f` that elaborates, its body read
+  against `N` with its parameters as locals in scope (`Γ`, newest first:
+  `paramCtx`), after its return variables declared at their defaults, its
+  loops and then its `return`s lowered (`lowerLoops`, `lowerReturns`), as a
+  call inlines it;
+* `N.constructor : Prog N Γ Γ'` for a declared constructor, a deployment:
   `constructor(x̄);` with its parameters as locals in scope (`elabCtor`).
   The contract declares the constructor (its member last, since it may
   call every function) and the state variables' initializers
@@ -33,23 +34,20 @@ Each body is printed as `sol` text (`SolcJson.lean`), parsed as
 `sol_raw!{ … }` and elaborated to a `List RawStmt` term by the macros, the
 one lowering path `sol[C]{ … }` takes.  Those terms and the contract are
 then evaluated together, one `evalExpr`, and the typed elaborator runs on
-each as ordinary compiled code (`elabProgAt.go`); `sol[C]{ … }` would
-compile one program per function.  Its result is quoted back with every
-proof `Eq.refl` (`Prog.quote`), so the kernel re-checks what it computed.
+each as ordinary compiled code (`elabProgAtS.go`); `sol[C]{ … }` would
+compile one program per function.  Its result, the scoped program, is
+quoted back hash-consed with every proof `Eq.refl` (`Prog.quoteShared`,
+`Prog.define`), so the kernel re-checks what it computed: every local the
+program reads is in scope, at its type.
 
 Lake does not track the fixture, so the command names its hash (FNV-1a 64
 over the bytes) and refuses a fixture of another one; the script that
 writes the fixture rewrites the literal, which makes Lake re-check the
 importing module.
 
-`solc_scoped N`, after the import, is the lint of the scoped syntax
-(`docs/intrinsic.md`, M2): it declares `N.f.core : Prog N Γ Γ'` for
-every program `N.f` the import made, resolved from its parameters
-(`resolve`) and quoted (`Prog.defineCore`), so the kernel checks the
-scoped form of every imported function; a program that does not resolve is
-an error.  It is a command of its own, run in a module of its own for the
-large imports, because the kernel's check costs about what the import's own
-does.
+`solc_scoped N`, after the import, checks that every row the import
+elaborated is a scoped program `N.f : Prog N Γ Γ'` (`docs/intrinsic.md`,
+M2, W8), and names how many.
 
 A function that does not elaborate is a row, not an error: the import
 never fails on one function.  Each body's elaboration has its own
@@ -65,7 +63,7 @@ open Lean Elab Command Term Meta
 
 /-- What the import made of a function. -/
 inductive ImportStatus where
-  /-- A constant `N.f : Prog N`. -/
+  /-- A constant `N.f : Prog N Γ Γ'`. -/
   | elaborated
   /-- solkey's `@custom:key skip`: no obligation. -/
   | skipped
@@ -312,7 +310,6 @@ def elabSolcImport : CommandElab := fun stx => do
     (mkApp (mkConst ``List [0]) rawTy) (mkConst N) (← liftTermElabM <| mkListLit rawTy (raws.map (·.2.2.2)).toList)
   let (C, bodies) ← liftTermElabM <| unsafe evalExpr (Contract × List (List RawStmt)) pairTy val
   -- the typed elaborator on each, the program quoted back and checked
-  let progTy := mkApp (mkConst ``Surface.Prog) (mkConst N)
   let mut defined : Array Lean.Name := #[]
   for ((k, f, ss, _), raw) in raws.toList.zip bodies do
     let fail (msg : String) : Array ImportRow :=
@@ -328,19 +325,14 @@ def elabSolcImport : CommandElab := fun stx => do
     match paramCtx f.params >>= lowered with
     | .error m => rows := fail (at_ f 0 m)
     | .ok (raw, st) =>
-      match elabProgAt.go C 0 raw st with
+      match elabProgAtS.go C 0 raw st with
       | .error (j, m) =>
         rows := fail (at_ f (if lower then 0 else (ss[j]?.map (·.1)).getD 0) m)
-      | .ok P =>
+      | .ok ⟨_, P⟩ =>
         let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
-        let decl := Declaration.defnDecl {
-          name := n, levelParams := [], type := progTy, value := Surface.Prog.quote (mkConst N) P,
-          hints := .abbrev, safety := .safe }
-        let ok ← liftCoreM <| tryCatchRuntimeEx (do addDecl decl; pure (Except.ok ()))
-          fun ex => do pure (.error (← ex.toMessageData.toString))
-        match ok with
-        | .ok () => defined := defined.push n
-        | .error m => rows := fail (at_ f 0 s!"the kernel rejects the program: {m}")
+        match ← liftCoreM (Prog.define n N P) with
+        | none => defined := defined.push n
+        | some m => rows := fail (at_ f 0 m)
   -- the constructor's program, a deployment: `constructor(x̄);` with its
   -- parameters in scope (`elabCtor`), the obligation's program
   if let (some f, some _) := (c.ctor, ctorMember) then
@@ -352,20 +344,15 @@ def elabSolcImport : CommandElab := fun stx => do
       match paramCtx f.params with
       | .error m => ctorRow := some (row .unsupported (at_ f 0 m))
       | .ok Γ =>
-        match elabProgAt.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with
+        match elabProgAtS.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with
         | .error (_, m) => ctorRow := some (row .unsupported (at_ f 0 m))
-        | .ok P =>
+        | .ok ⟨_, P⟩ =>
           let n : Lean.Name := N ++ Lean.Name.mkSimple f.name
-          let decl := Declaration.defnDecl {
-            name := n, levelParams := [], type := progTy, value := Surface.Prog.quote (mkConst N) P,
-            hints := .abbrev, safety := .safe }
-          let ok ← liftCoreM <| tryCatchRuntimeEx (do addDecl decl; pure (Except.ok ()))
-            fun ex => do pure (.error (← ex.toMessageData.toString))
-          match ok with
-          | .ok () =>
+          match ← liftCoreM (Prog.define n N P) with
+          | none =>
             defined := defined.push n
             ctorRow := some (row .elaborated "")
-          | .error m => ctorRow := some (row .unsupported (at_ f 0 s!"the kernel rejects the program: {m}"))
+          | some m => ctorRow := some (row .unsupported (at_ f 0 m))
   -- compiled for `sol_prove`; a failure here leaves the definitions, uncompiled
   let compiled ← liftCoreM <| tryCatchRuntimeEx (do compileDecls defined; pure none)
     fun ex => do pure (some (← ex.toMessageData.toString))
@@ -377,31 +364,27 @@ def elabSolcImport : CommandElab := fun stx => do
     name := rep, levelParams := [], type := rowsTy, value := toExpr (ctorRow.toList ++ rows.toList),
     hints := .abbrev, safety := .safe }
 
-/-- `solc_scoped N`: every program of the import `N` declared scoped,
-`N.f.core`, the kernel checking each; an info names how many. -/
+/-- `solc_scoped N`: every row of the import `N` that elaborated is a
+scoped program, `N.f : Prog N Γ Γ'`; an info names how many. -/
 syntax (name := solcScoped) "solc_scoped " ident : command
 
 @[command_elab solcScoped]
 def elabSolcScoped : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  let errs ← liftTermElabM do
-    let C ← unsafe evalConst Contract N
-    let rows ← unsafe evalConst (List ImportRow) (N ++ `report)
-    let mut errs : Array String := #[]
-    let mut k := 0
-    for r in rows do
-      if r.status != .elaborated then continue
-      let n := N ++ Lean.Name.mkSimple r.name
-      let P ← unsafe evalConst (Surface.Prog C) n
-      let err ← match paramCtx r.params with
-        | .error e => pure (some e)
-        | .ok Γ => Prog.defineCore (n ++ `core) N (ECtx.toNCtx Γ) P
-      match err with
-      | some e => errs := errs.push s!"{r.name}: {e}"
-      | none => k := k + 1
-    if errs.isEmpty then logInfo m!"{k} program{if k == 1 then "" else "s"} declared scoped"
-    pure errs
+  let rows ← liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)
+  let env ← getEnv
+  let mut errs : Array String := #[]
+  let mut k := 0
+  for r in rows do
+    if r.status != .elaborated then continue
+    let n := N ++ Lean.Name.mkSimple r.name
+    match env.find? n with
+    | some ci =>
+      if ci.type.isAppOfArity ``Prog 3 && ci.type.appFn!.appFn!.appArg!.isConstOf N then k := k + 1
+      else errs := errs.push s!"{r.name}: not a scoped program of {N}"
+    | none => errs := errs.push s!"{r.name}: no program {n}"
   unless errs.isEmpty do
     throwError "solc_scoped: {errs.size} programs are not scoped:\n{"\n".intercalate errs.toList}"
+  logInfo m!"{k} program{if k == 1 then "" else "s"} declared scoped"
 
 end Solidity.Frontend

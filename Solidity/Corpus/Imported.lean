@@ -66,8 +66,8 @@ end Solidity.Corpus
 /-! ## Obligations at a store, from `⊢`
 
 The `TestSuite` obligations are derived by the scoped `⊢`
-(`Proves`, `docs/intrinsic.md`, W3c): `N.f.proved : ⊢ N.f.problem`, the
-program resolved (`Prog`).  Its corollary at the initial storage is
+(`Proves`, `docs/intrinsic.md`, W3c): `N.f.proved : ⊢ N.f.problem`, on
+the import's scoped program `N.f` (`Prog`, W8).  Its corollary at the initial storage is
 stated over the typed run of that program, as every other corpus row is
 (`Corpus/Basic.lean`): `N.f.problem` is `wt(storage) → ⟨ Q ⟩ true`, and
 `Q`'s typed run from the initial state ends normally, or is exhausted

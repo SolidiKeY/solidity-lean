@@ -3,12 +3,11 @@ import Solidity.Solkey.TestSuite
 /-!
 # `TestSuite.sol`'s programs, scoped
 
-The lint of the scoped syntax (`docs/intrinsic.md`, M2) over the TestSuite
-import: each of its programs resolved from its parameters, quoted and
-declared `Solkey.TestSuite.f.core : Prog Solkey.TestSuite Γ Γ'`, the
-kernel checking it (`solc_scoped`, `Frontend/Import.lean`).  A module of its
-own: the kernel's check costs about a third of the import's, which
-`Solkey/TestSuite.lean` keeps.
+The TestSuite import's programs are scoped, `Solkey.TestSuite.f : Prog
+Solkey.TestSuite Γ Γ'` (`docs/intrinsic.md`, M2, W8), each read in its
+parameters' context and checked by the kernel at the import;
+`solc_scoped` (`Frontend/Import.lean`) checks that every row it elaborated
+is one.
 -/
 
 /-- info: 449 programs declared scoped -/

@@ -28,10 +28,11 @@ which rewrites the hash below.  A function's loops are lowered before its
 is renamed fresh first, so that a sibling `for (uint i …)` declares a name
 of its own (`returnBeforeSiblingLoop`).
 
-Each function's obligation is solkey's, scoped (`solc_scoped_problems …
-main`, `Frontend/Problems.lean`): `Solc.Loops.f.problem`, its parameters
-bound by `∀`, `wt(storage)` assumed, each checked to erase to today's
-(`Solc.Loops.f.problem.legacy`), proved by `sol_prove`.
+Each function's program is scoped, `Solc.Loops.f : Prog Solc.Loops Γ Γ'`,
+read in its parameters' context, and its obligation solkey's
+(`solc_scoped_problems`, `Frontend/Problems.lean`): `Solc.Loops.f.problem`,
+its parameters bound by `∀`, `wt(storage)` assumed, proved by
+`sol_prove`.
 -/
 
 solc_import "../../../tests/solc/Loops.ast.json" hash 0x499c9a4ed86a4b11 as Solc.Loops
@@ -39,10 +40,8 @@ solc_import "../../../tests/solc/Loops.ast.json" hash 0x499c9a4ed86a4b11 as Solc
 /-- info: 9 programs declared scoped -/
 #guard_msgs in solc_scoped Solc.Loops
 
-solc_problems Solc.Loops legacy
-
 /-- info: 7 obligations declared scoped -/
-#guard_msgs in solc_scoped_problems Solc.Loops main
+#guard_msgs in solc_scoped_problems Solc.Loops
 
 namespace Solidity.Examples.LoopsImport
 
@@ -57,7 +56,7 @@ uint i = 0;
 /// @custom:key invariant i <= n while (i < n) { i = i + 1; }
 assert(i == n); -/
 #guard_msgs in
-#eval IO.println (Surface.Prog.show Solc.Loops.invariantCountsToBound)
+#eval IO.println (Prog.show [.ofName "n"] Solc.Loops.invariantCountsToBound)
 
 /-- solkey's `invariantCountsToBound`, its `box` obligation: the loop's
 invariant proves the `assert` after it. -/
@@ -105,7 +104,7 @@ bool ret3 = false;
 while (!ret3 && (se1 < 3)) { uint se2 = 0; while (!ret3 && (se2 < 3)) { if (((se1 * 3) + se2) == k) { r = (se1 * 10) + se2; ret3 = true; } else { } if (!ret3) { se2++; } else { } } if (!ret3) { se1++; } else { } }
 if (ret3) { } else { r = 99; } -/
 #guard_msgs in
-#eval IO.println (Surface.Prog.show Solc.Loops.loopNestedReturn)
+#eval IO.println (Prog.show [.ofName "k"] Solc.Loops.loopNestedReturn)
 
 /-- info: uint r;
 uint se1 = 0;
@@ -113,7 +112,7 @@ bool ret3 = false;
 while (!ret3 && (se1 < 3)) { if (se1 == k) { r = se1; ret3 = true; } else { } if (!ret3) { se1++; } else { } }
 if (ret3) { } else { uint se2 = 0; while (se2 < 2) { r = r + se2; se2++; } } -/
 #guard_msgs in
-#eval IO.println (Surface.Prog.show Solc.Loops.returnBeforeSiblingLoop)
+#eval IO.println (Prog.show [.ofName "k"] Solc.Loops.returnBeforeSiblingLoop)
 
 /-! Two of solkey's functions elaborate but are not proved here, both under
 the diamond (`docs/loops.md`, L4):

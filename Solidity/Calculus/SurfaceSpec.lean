@@ -427,9 +427,13 @@ update `{old := storage ‖ oldNet := net ‖ B}` (`B` the booking of
 `msg.value`), the call
 `T result; result = f(x₁, …, xₙ);`, and what is owed after it, `I`, `ensures` and
 `A` one by one (a counterexample search names the one that fails).  For
-`constructor`, the deployment's (the module docstring). -/
+`constructor`, the deployment's (the module docstring).  The call is
+elaborated scoped, from the parameters in scope (newest first), each
+statement typed where it is read (`SProg`): the scoped obligation places it
+past the locals the update declares (`SProg.chain`, `Calculus/Spec.lean`),
+`specParts` in the parameters' context. -/
 def specPieces (f : String) :
-    Except String (List (NFml C) × List (NFml C) × Surface.Upd C × Surface.Prog C × List (NFml C)) := do
+    Except String (List (NFml C) × List (NFml C) × Surface.Upd C × SProg C × List (NFml C)) := do
   -- `constructor` names the contract's constructor (`Contract.ctor`)
   let ctor := f == "constructor"
   let some d := if ctor then C.ctor else lookupBy f C.funs
@@ -475,9 +479,8 @@ def specPieces (f : String) :
   let call : List RawStmt := if ctor then [.call (.name f) args] else
     rets.map (fun (_, v, p) => RawStmt.decl (.named (Surface.primName p)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
-  let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
-  let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
-  let _ ← Prog.resolveCheck (ECtx.toNCtx Γ) P
+  let Γ : ECtx := ps.reverse.map fun (n, p) => (n, LocalTy.val p)
+  let P ← ((elabStmtsP C call).run { funs := C.funs }).run' (Γ, 1)
   -- the snapshots `\old` reads, taken where something reads them
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
@@ -519,7 +522,10 @@ construction, the premises stated, and the conclusion
 `{old := storage ‖ oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`. -/
 def specParts (f : String) : Except String (List (NFml C) × List (NFml C) × Surface.Fml C) := do
   let (a, b, U, P, posts) ← specPieces C f
-  pure (a, b, specBody C U P posts)
+  -- the call placed in the parameters' context, where its first statement is read
+  let Γ : NCtx := (P.head?.map (·.Γ)).getD []
+  let ⟨_, P⟩ ← SProg.chain Γ.names Γ.ctx P
+  pure (a, b, specBody C U (P.erase Γ.names) posts)
 
 /-- **The obligation of `f`**: `R ∧ L ∧ M ∧ I ∧ requires → {old := storage ‖
 oldNet := net ‖ B} [ T result = f(x₁, …, xₙ); ] (I ∧ ensures ∧ A)`,

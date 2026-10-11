@@ -8,53 +8,48 @@ import Solidity.Calculus.ProvesDerive
 
 `solc_problems N`, after `solc_import … as N`, defines for each function
 `f` that elaborated its obligation as solkey states it,
-`N.f.problem : Surface.Fml N` (`Problem.fml`, `Calculus/Problem.lean`): the
-modality is the function's tag, the binders its parameters, the program
-`N.f`.  The constructor's, `N.constructor.problem`, is a deployment's
-(`Problem.ctorFml`): the program `constructor(x̄);` from solkey's
-deployment update, with no `wt(storage)` premise.  A statement is a constant, so `sol_prove` names it and the
-elaborator never unfolds it; it is compiled, since `sol_prove` evaluates
-its sequent with compiled code.
+`N.f.problem : Fml N []` (`Problem.fml`, `Calculus/Problem.lean`): the
+modality is the function's tag, the binders its parameters (`∀`, the first
+outermost), the program the constant `N.f`, read in their context
+(`obligation`).  The constructor's, `N.constructor.problem`, is a
+deployment's (`Problem.ctorFml`): the program `constructor(x̄);` from
+solkey's deployment update, with no `wt(storage)` premise.  A statement is
+a constant, so `sol_prove` names it and the elaborator never unfolds it;
+it is compiled, since `sol_prove` evaluates its sequent with compiled code.
+
+`solc_scoped_problems N` declares the same statements as one declaration,
+the list `N.problems`, which the kernel checks once, each `N.f.problem`
+its entry (`List.getD`, read back by `Symex.evaluable`; 437 statements:
+0.4 s against 3.4 s); with `decl`, not compiled (the scoped `sol_prove`
+reads an obligation by its value).  An info names how many.
 
 An obligation is proved by a theorem named `N.f.proved : ⊢ N.f.problem`,
-in a module of its own (`Solidity/TestSuite/`); one not yet proved is no
-theorem at all.  `#solkey_obligations N` reads the environment and reports
-each function as derived (its theorem exists, states `⊢ N.f.problem`
-syntactically, and uses no axiom but Lean's three, so no `sorry` that a
-pasted suggestion of `sol_prove?` would leave), pending (its statement
-exists, its theorem not yet), or what the import made of it.  A theorem
-`N.f.proved` of another type or with another axiom, or an elaborated
-function with no statement, is listed apart, never derived.
+the scoped sequent `Proves N .all [] .nil N.f.problem`, in a module of its
+own (`Solidity/TestSuite/`); one not yet proved is no theorem at all.
+`#solkey_obligations N` reads the environment and reports each function as
+derived (its theorem exists, states `⊢ N.f.problem` syntactically, and
+uses no axiom but Lean's three, so no `sorry` that a pasted suggestion of
+`sol_prove?` would leave), pending (its statement exists, its theorem not
+yet), or what the import made of it.  A theorem `N.f.proved` of another
+type or with another axiom, or an elaborated function with no statement,
+is listed apart, never derived.
 
 A parameter is bound at its type's 256-bit range (`PrimTy`), not at its
 width: an `int8` binder admits values solc's ABI decoder rejects.  The
 obligation is then stronger than Solidity's, never weaker, since the body
 is elaborated at the width (`paramCtx`).
 
-`solc_scoped_problems N` (`docs/intrinsic.md`, M6b) states each of them
-scoped, `N.f.problem.core : Fml N []` (`Problem.fml`,
-`Problem.ctorFml`, `Calculus/Spec.lean`): the program resolved in
-the context of its parameters, which `∀` binds.  They are one declaration,
-the list `N.problems.core`, which the kernel checks once, and each
-`N.f.problem.core` is its entry (`List.getD`, read back by
-`Symex.evaluable`); each is checked to erase to its legacy statement
-(`Fml.eraseS`, compared as quoted expressions).  The flip
-(`docs/intrinsic.md`, W3) is `solc_problems N legacy`
-(`N.f.problem.legacy`, not compiled) then `solc_scoped_problems N main`
-(`N.f.problem`, the table `N.problems`); `#solkey_problem` reads the
-legacy statement wherever it is (`legacyStatement`), `#solkey_scan` the
-scoped one (`scopedStatement?`; today's walk on the legacy statement went
-with today's rule table), `#solkey_derive?` searches the scoped `⊢` once
-there is one, and `#solkey_obligations` counts a theorem of either `⊢`.
-
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
-  (`Problem.text`), to compare with `--print-problem`.
-* `#solkey_scan N` runs `sol_prove`'s walk on every scoped statement with
+  (`Problem.text`), to compare with `--print-problem`: `N.f.problem`, or the
+  statement `solc_problems` would declare where it has not run.
+* `#solkey_scan N` runs `sol_prove`'s walk on every statement with
   compiled code and lists what it leaves, with times: a search, to choose the
   theorems to state.  It is not used in a checked file.  `#solkey_scan N
   walk` lists the leaves without closing them; the closer skips a leaf
   past its bounds (`Derive.fitsClose`: the leaf's nodes and its
   reduction's, which grows faster).
+* `#solkey_derive? N` searches `⊢ N.f.problem` (`scopedSearch`) and prints
+  the theorems that close.
 -/
 
 namespace Solidity.Frontend
@@ -71,158 +66,146 @@ def Tag.modality? : Tag → Option Modality
   | .box => some .box
   | .skip | .specified | .internal | .malformed => none
 
-/-- The name of `N.f`'s statement in `Update.lean`'s formulas: `N.f.problem.legacy`
-once the scoped one is `N.f.problem` (`solc_scoped_problems N main`),
-`N.f.problem` before. -/
-def legacyProblem (env : Environment) (f : Lean.Name) : Lean.Name :=
-  if env.contains (f ++ `problem ++ `legacy) then f ++ `problem ++ `legacy else f ++ `problem
+/-- The parameters of an obligation, each at its type's 256-bit range
+(`paramTy?`): `none` for a parameter of no value type. -/
+def ImportRow.binders? (r : ImportRow) : Option (List (PrimTy × Var)) :=
+  r.params.mapM fun (x, t) => (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x)
 
-/-- `N.f`'s statement in `Update.lean`'s formulas, as compiled code
-evaluates it: `N.f.problem`, or the value of `N.f.problem.legacy`, which is
-not compiled (`Problem.fml N m xs N.f`, every part of it compiled). -/
-def legacyStatement (env : Environment) (f : Lean.Name) : Expr :=
-  let n := legacyProblem env f
-  match env.find? n, IR.findEnvDecl env n with
-  | some (.defnInfo d), none => d.value
-  | _, _ => mkConst n
+/-- **The statement of `N.f`** (the row `r`), written on the program
+`N.f : Prog N Γ Γ'` (its type read off the environment): `∀x̄. wt(storage)
+→ [m] N.f`, or a deployment's `∀x̄. {deployUpd} [m] N.f`, its binders
+(`Fml.all`, the first parameter outermost), the premise and the modality
+as constructors, what `Problem.fml` and `Problem.ctorFml` compute.  `none`
+where solkey states no plain obligation (the tag) or a parameter is of no
+value type. -/
+def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
+    Except String (Option Expr) := do
+  let some m := r.tag.modality? | return none
+  let some xs := r.binders? | return none
+  let n := N ++ Lean.Name.mkSimple r.name
+  let some ci := env.find? n | throw s!"{r.name}: no program {n}"
+  let ty := ci.type.consumeMData
+  unless ty.isAppOfArity ``Prog 3 do throw s!"{r.name}: {n} is not a scoped program"
+  let Γe := ty.appFn!.appArg!
+  let Γ'e := ty.appArg!
+  unless Γe == ctxE (paramsN xs).ctx do
+    throw s!"{r.name}: {n} is not read in its parameters' context"
+  let c := mkConst N
+  let modal := mkAppN (mkConst ``Fml.modal) #[c, Γe, Γ'e, Γ'e, toExpr m, mkConst n,
+    mkApp2 (mkConst ``Frames.nil) c Γ'e, mkApp2 (mkConst ``Fml.tt) c Γ'e]
+  let body := if r.name == "constructor" then
+      mkAppN (mkConst ``Fml.upd) #[c, Γe, Γe, toExpr m, mkApp2 (mkConst ``Problem.deployUpd) c Γe, modal]
+    else mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.wt) c Γe, modal]
+  -- the binders, the last parameter innermost
+  let φ := xs.zipIdx.foldr (init := body) fun ((p, x), i) φ =>
+    mkAppN (mkConst ``Fml.all) #[c, ctxE (paramsN (xs.take i)).ctx, toExpr x, toExpr p, φ]
+  return some φ
 
-/-- `solc_problems N`, or `solc_problems N legacy` to declare each as
-`N.f.problem.legacy`, beside a scoped `N.f.problem`, and not compiled: no
-tactic proves a legacy statement, and the commands below read its value
-(`legacyStatement`). -/
-syntax (name := solcProblems) "solc_problems " ident (&" legacy")? : command
+/-- Declare each obligation of the import `N`, `N.f.problem : Fml N []`
+(`obligation`): as constants of their own, or with `table` as the entries
+of one declaration `N.problems`; compiled when `compile`.  How many. -/
+def declareObligations (N : Lean.Name) (table compile : Bool) : CommandElabM Nat := do
+  let rows ← reportRows N
+  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
+  let env ← getEnv
+  let mut errs0 : Array String := #[]
+  let mut entries : Array (Lean.Name × Expr) := #[]
+  for r in rows do
+    unless r.status == .elaborated do continue
+    if r.tag.modality?.isSome && r.binders?.isNone then
+      logWarning m!"solc_problems: {r.name} has a parameter of no value type, so no statement"
+    match obligation env N r with
+    | .error e => errs0 := errs0.push e
+    | .ok none => pure ()
+    | .ok (some φ) => entries := entries.push (N ++ Lean.Name.mkSimple r.name ++ `problem, φ)
+  let errs ← liftTermElabM do
+    let mut errs := errs0
+    let mut defined : Array Lean.Name := #[]
+    try
+      if table then
+        -- one declaration holds every statement, so the kernel checks the
+        -- contract's types and contexts once rather than once an obligation
+        -- (437: 0.4 s against 3.4 s); each `N.f.problem` is its entry,
+        -- which `Symex.evaluable` reads back
+        let tn := N ++ `problems
+        let tt := mkApp2 (mkConst ``Fml.tt) (mkConst N) nilCtx
+        let value := Lean.ShareCommon.shareCommon (← mkListLit fmlTy (entries.toList.map (·.2)))
+        addDecl <| Declaration.defnDecl {
+          name := tn, levelParams := [], type := mkApp (mkConst ``List [0]) fmlTy,
+          value, hints := .abbrev, safety := .safe }
+        defined := defined.push tn
+        for (dn, _) in entries, i in [0:entries.size] do
+          addDecl <| Declaration.defnDecl {
+            name := dn, levelParams := [], type := fmlTy,
+            value := mkApp4 (mkConst ``List.getD [0]) fmlTy (mkConst tn) (mkRawNatLit i) tt,
+            hints := .abbrev, safety := .safe }
+          defined := defined.push dn
+      else
+        for (dn, φ) in entries do
+          addDecl <| Declaration.defnDecl {
+            name := dn, levelParams := [], type := fmlTy, value := φ,
+            hints := .abbrev, safety := .safe }
+          defined := defined.push dn
+      if compile then compileDecls defined
+    catch ex => errs := errs.push s!"the kernel rejects them: {← ex.toMessageData.toString}"
+    pure errs
+  unless errs.isEmpty do
+    throwError "solc_problems: {errs.size} obligations are not stated:\n{"\n".intercalate errs.toList}"
+  return entries.size
+
+/-- `solc_problems N`: each obligation, `N.f.problem : Fml N []`
+(`obligation`), a constant of its own, compiled. -/
+syntax (name := solcProblems) "solc_problems " ident : command
 
 @[command_elab solcProblems]
 def elabSolcProblems : CommandElab := fun stx => do
-  let N := stx[1].getId
-  let suffix := if stx[2].isNone then `problem else `problem ++ `legacy
-  let rows ← reportRows N
-  let fmlTy := mkApp (mkConst ``Surface.Fml) (mkConst N)
-  let mut defined : Array Lean.Name := #[]
-  for r in rows do
-    unless r.status == .elaborated do continue
-    let some m := r.tag.modality? | continue
-    let some xs := r.params.mapM (fun (x, t) =>
-      (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x))
-      | logWarning m!"solc_problems: {r.name} has a parameter of no value type, so no \
-          statement"
-        continue
-    let n := N ++ Lean.Name.mkSimple r.name ++ suffix
-    -- the constructor's is a deployment's, from the empty storage
-    let stmt := if r.name == "constructor" then ``Surface.Problem.ctorFml else ``Surface.Problem.fml
-    let value := mkAppN (mkConst stmt) #[mkConst N, toExpr m, toExpr xs,
-      mkConst (N ++ Lean.Name.mkSimple r.name)]
-    liftCoreM <| addDecl <| .defnDecl {
-      name := n, levelParams := [], type := fmlTy, value, hints := .abbrev, safety := .safe }
-    defined := defined.push n
-  if stx[2].isNone then liftCoreM <| compileDecls defined
+  let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
+  discard <| declareObligations N false true
 
-/-- `solc_scoped_problems N`: each obligation `solc_problems` states,
-scoped, `N.f.problem.core`, an entry of the table `N.problems.core`,
-compiled; with `main`, `N.f.problem` and `N.problems` (the flip:
-`solc_problems N legacy` first); with `decl`, not compiled (the scoped
-`sol_prove` reads an obligation by its value, `Symex.evaluable`).
-Each is checked to erase to its legacy statement (`legacyProblem`;
-`N.f.problem.legacy` with `main`), as expressions; a missing legacy
-statement or a mismatch is an error. -/
-syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" main")? (&" decl")? :
-  command
+/-- `solc_scoped_problems N`: `solc_problems N`'s statements as the entries
+of one table `N.problems`, compiled, or with `decl` not compiled (the
+scoped `sol_prove` reads an obligation by its value, `Symex.evaluable`); an
+info names how many. -/
+syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")? : command
 
 @[command_elab solcScopedProblems]
 def elabSolcScopedProblems : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  let suffix := if stx[2].isNone then `problem ++ `core else `problem
-  let compile := stx[3].isNone
-  let rows ← reportRows N
-  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-  let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
-  let errs ← liftTermElabM do
-    let C ← unsafe evalConst Contract N
-    let mut errs : Array String := #[]
-    let mut entries : Array (Lean.Name × Expr) := #[]
-    let mut defined : Array Lean.Name := #[]
-    for r in rows do
-      unless r.status == .elaborated do continue
-      let some m := r.tag.modality? | continue
-      let some xs := r.params.mapM (fun (x, t) =>
-        (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x)) | continue
-      let n := N ++ Lean.Name.mkSimple r.name
-      let P ← unsafe evalConst (Surface.Prog C) n
-      match Problem.resolve (r.name == "constructor") m xs P with
-      | .error e => errs := errs.push s!"{r.name}: {e}"
-      | .ok φ =>
-        -- the guard: the scoped statement erases to the legacy one
-        let env ← getEnv
-        let ln := if stx[2].isNone then legacyProblem env n else n ++ `problem ++ `legacy
-        match env.find? ln with
-        | some (.defnInfo d) =>
-          -- the legacy statement is `solc_problems`' application to `N.f`, and that
-          -- is computed here from `P`: an `evalConst` of it would run the
-          -- interpreter on the contract again, 9 ms an obligation
-          let ctor := r.name == "constructor"
-          let want := mkAppN (mkConst (if ctor then ``Surface.Problem.ctorFml else ``Surface.Problem.fml))
-            #[mkConst N, toExpr m, toExpr xs, mkConst n]
-          let legacy := if ctor then Surface.Problem.ctorFml m xs P else Surface.Problem.fml m xs P
-          unless d.value == want &&
-              Solidity.Surface.Fml.quote (mkConst N) (φ.eraseS []) ==
-                Solidity.Surface.Fml.quote (mkConst N) legacy do
-            errs := errs.push s!"{r.name}: it does not erase to {ln}"
-        | _ => errs := errs.push s!"{r.name}: no legacy statement {ln}"
-        -- written out here and shared once, across the statements, below
-        entries := entries.push (n ++ suffix, (Quote.qFml [] φ).run (mkConst N))
-    -- one declaration holds every statement, so the kernel checks the
-    -- contract's types, contexts and side conditions once rather than once
-    -- an obligation (437: 0.4 s against 3.4 s); each `N.f.problem` is its
-    -- entry, which `Symex.evaluable` reads back
-    let table := N ++ (if stx[2].isNone then `problems ++ `core else `problems)
-    let tt := mkApp2 (mkConst ``Fml.tt) (mkConst N) nilCtx
-    let value := Lean.ShareCommon.shareCommon (← mkListLit fmlTy (entries.toList.map (·.2)))
-    try
-      addDecl <| Declaration.defnDecl {
-        name := table, levelParams := [], type := mkApp (mkConst ``List [0]) fmlTy,
-        value, hints := .abbrev, safety := .safe }
-      for (dn, _) in entries, i in [0:entries.size] do
-        addDecl <| Declaration.defnDecl {
-          name := dn, levelParams := [], type := fmlTy,
-          value := mkApp4 (mkConst ``List.getD [0]) fmlTy (mkConst table) (mkRawNatLit i) tt,
-          hints := .abbrev, safety := .safe }
-        defined := defined.push dn
-    catch ex => errs := errs.push s!"the kernel rejects them: {← ex.toMessageData.toString}"
-    -- compiled, as `N.f.problem` is, for compiled consumers
-    if compile then compileDecls (#[table] ++ defined)
-    if errs.isEmpty then
-      let k := defined.size
-      logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
-    pure errs
-  unless errs.isEmpty do
-    throwError "solc_scoped_problems: {errs.size} obligations are not scoped:\n{"\n".intercalate errs.toList}"
+  let k ← declareObligations N true stx[2].isNone
+  logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
+
+/-- `N.f`'s statement, as compiled code evaluates it: `N.f.problem` (its
+value, where it has no code: `Symex.evaluable`), else the one
+`solc_problems` would declare (`obligation`). -/
+def statement? (N f : Lean.Name) : CommandElabM (Option Expr) := do
+  let env ← getEnv
+  if env.contains (f ++ `problem) then
+    return some (← liftTermElabM <| Symex.evaluable (mkConst (f ++ `problem)))
+  let some r := (← reportRows N).find? (fun r => N ++ Lean.Name.mkSimple r.name == f)
+    | return none
+  match obligation env N r with
+  | .ok φ => return φ
+  | .error _ => return none
 
 syntax (name := solkeyProblem) "#solkey_problem " ident : command
 
-/-- `#solkey_problem N.f`: the statement of `N.f.problem` in solkey's
-syntax. -/
+/-- `#solkey_problem N.f`: the statement of `N.f` in solkey's syntax. -/
 @[command_elab solkeyProblem]
 def elabSolkeyProblem : CommandElab := fun stx => do
   let f := stx[1].getId
   let N := f.getPrefix
-  let e := mkAppN (mkConst ``Surface.Problem.text) #[mkConst N, toExpr N.getString!,
-    toExpr f.getString!, legacyStatement (← getEnv) f]
+  let some φ ← statement? N f | throwError "#solkey_problem: {f} has no statement"
+  let e := mkAppN (mkConst ``Problem.text) #[mkConst N, toExpr N.getString!,
+    toExpr f.getString!, φ]
   let s ← liftTermElabM <| unsafe evalExpr String (mkConst ``String) e
   logInfo s
 
-/-- `N.f`'s scoped statement, if there is one: `N.f.problem.core`, or
-`N.f.problem` once it is the scoped one (`solc_scoped_problems N main`,
-beside `N.f.problem.legacy`). -/
-def scopedStatement? (env : Environment) (f : Lean.Name) : Option Expr :=
-  if env.contains (f ++ `problem ++ `core) then some (mkConst (f ++ `problem ++ `core))
-  else if env.contains (f ++ `problem ++ `legacy) then some (mkConst (f ++ `problem))
-  else none
-
 syntax (name := solkeyScan) "#solkey_scan " ident (&" walk")? : command
 
-/-- `#solkey_scan N`: per statement, the leaves `sol_prove` leaves on its
-scoped statement (`Seq.scanLeaves`) and the time; with `walk`, the
-leaves of the walk before any is closed. -/
+/-- `#solkey_scan N`: per statement, the leaves `sol_prove` leaves on it
+(`Seq.scanLeaves`) and the time; with `walk`, the leaves of the walk
+before any is closed. -/
 @[command_elab solkeyScan]
 def elabSolkeyScan : CommandElab := fun stx => do
   let N := stx[1].getId
@@ -233,9 +216,7 @@ def elabSolkeyScan : CommandElab := fun stx => do
   for r in rows do
     unless r.status == .elaborated do continue
     let f := N ++ Lean.Name.mkSimple r.name
-    let env ← getEnv
-    let some φ := scopedStatement? env f
-      | throwError "#solkey_scan: {f} has no scoped statement (`solc_scoped_problems {N}`)"
+    let some φ ← statement? N f | continue
     let e := mkAppN (mkConst ``Seq.scanLeaves) #[C, toExpr walk, φ]
     let t0 ← IO.monoMsNow
     let k ← liftTermElabM <| unsafe evalExpr (Option (Nat × Nat)) (mkApp (mkConst ``Option [0])
@@ -259,8 +240,8 @@ def scopedSearch (g : MVarId) : TacticM NFml.Derive.Search := do
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?
   (&" count " num)? (&" timed")? (&" pending")? : command
 
-/-- `#solkey_derive? N from i count k`: `sol_prove?`'s search
-(`Derive.proveSearch`, or `scopedSearch` once `N.f.problem` is scoped) on the statements `i … i+k-1` (all of them by
+/-- `#solkey_derive? N from i count k`: `sol_prove?`'s search on the scoped
+`⊢ N.f.problem` (`scopedSearch`) for the statements `i … i+k-1` (all of them by
 default), or with `only f` on `N.f` alone; each one whose leaves all close,
 and whose replay fits one declaration's `maxHeartbeats`
 (`Derive.replayFits`), is printed as the theorem to paste, `N.f.proved`
@@ -292,19 +273,16 @@ def elabSolkeyDerive : CommandElab := fun stx => do
     -- the tactics' names (`Proves.close_dropWt`) resolve as in a `Derived` module
     let res : Except String (Array String) ← withScope (fun sc =>
         { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <| liftTermElabM do
-      -- once `N.f.problem` is scoped, its `⊢` (`Calculus/Surface.lean`)
-      let isScoped := env.contains (f ++ `problem ++ `legacy)
+      -- the scoped `⊢ N.f.problem` (`Calculus/Surface.lean`)
+      unless env.contains (f ++ `problem) do return .error "no statement"
       let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-      let ty := if isScoped then
-          mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, nilCtx, nilCtx,
-            mkApp2 (mkConst ``Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
-        else NFml.Derive.provesNil C (legacyStatement env f)
+      let ty := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, nilCtx, nilCtx,
+        mkApp2 (mkConst ``Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
       let g ← mkFreshExprSyntheticOpaqueMVar ty
       tryCatchRuntimeEx (do
           let out ← IO.mkRef (none : Option NFml.Derive.Search)
           let _ ← Tactic.run g.mvarId! do
-            out.set (some (← if isScoped then scopedSearch g.mvarId!
-              else NFml.Derive.proveSearch g.mvarId! (stopAtOpen := true)))
+            out.set (some (← scopedSearch g.mvarId!))
           let some s ← out.get | return .error "the search did not run"
           if let some l := s.open_.head? then return .error s!"{← l.getTag} stays open"
           unless ← NFml.Derive.replayFits s.heartbeats do
@@ -339,11 +317,9 @@ def provesScoped (C φ ty : Expr) : Bool :=
 
 /-- `#solkey_obligations N`: each function derived, pending, or what the
 import made of it, counted; the pending ones named.  Derived means a
-theorem `N.f.proved` whose type is `⊢ N.f.problem` as `⊢` writes it
-(`Derive.provesNil`, or the scoped `Proves N .all [] .nil N.f.problem`
-once `N.f.problem` is scoped: `provesScoped`), compared as an expression, and
-whose proof uses no
-axiom but Lean's three (`standardAxioms`): a theorem of another statement,
+theorem `N.f.proved` whose type is `⊢ N.f.problem`, the scoped
+`Proves N .all [] .nil N.f.problem` (`provesScoped`), compared as an
+expression, and whose proof uses no axiom but Lean's three (`standardAxioms`): a theorem of another statement,
 or of a sequent with hypotheses, is "mismatched"; one that uses `sorry` or
 `native_decide` is "unsound".  The axioms are collected once for all the
 theorems, and per theorem only when that union is not standard. -/
@@ -363,10 +339,9 @@ def elabSolkeyObligations : CommandElab := fun stx => do
         let why := if r.tag.modality?.isNone then r.tag.toStr else "unstated"
         other := other.push s!"{why} {r.name}"
         continue
-      let want := NFml.Derive.provesNil C (mkConst (f ++ `problem))
       match env.find? (f ++ `proved) with
       | some (.thmInfo t) =>
-        if t.type.consumeMData == want || provesScoped C (mkConst (f ++ `problem)) t.type then matched := matched.push (r.name, f ++ `proved)
+        if provesScoped C (mkConst (f ++ `problem)) t.type then matched := matched.push (r.name, f ++ `proved)
         else other := other.push s!"mismatched {r.name}"
       | some _ => other := other.push s!"mismatched {r.name}"
       | none => pending := pending.push r.name

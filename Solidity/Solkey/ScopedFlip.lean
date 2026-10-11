@@ -5,13 +5,12 @@ import Solidity.Calculus.Surface
 /-!
 # The scoped flip's switches, on one box function
 
-`tests/solc/ScopedFlip.sol` holds one box function, so each switch of the
-flip (`docs/intrinsic.md`, W3b lane `testsuite`) runs on every build:
-`solc_problems … legacy` (the legacy statement, not compiled, read through
-`legacyStatement`), `solc_scoped_problems … main decl` (the table
-`N.problems`, each `N.f.problem` its entry), `#solkey_problem` on the
-legacy statement, `#solkey_derive?` on the scoped `⊢ N.f.problem`
-(`scopedSearch`), and `#solkey_obligations` counting the scoped theorem.
+`tests/solc/ScopedFlip.sol` holds one box function, so each command the
+TestSuite's obligations go through (`docs/intrinsic.md`, W3b lane
+`testsuite`, W8) runs on every build: `solc_scoped_problems … decl` (the
+table `N.problems`, each `N.f.problem` its entry), `#solkey_problem` on
+the statement, `#solkey_derive?` on `⊢ N.f.problem` (`scopedSearch`), and
+`#solkey_obligations` counting the theorem.
 `scripts/solc-ast.mjs --source tests/solc/ScopedFlip.sol --out
 tests/solc/ScopedFlip.ast.json --wrapper Solidity/Solkey/ScopedFlip.lean`
 rewrites the fixture and its hash.
@@ -22,13 +21,9 @@ open scoped Scoped
 
 solc_import "../../tests/solc/ScopedFlip.ast.json" hash 0x7c6221bb7e6edb3f as Solkey.ScopedFlip
 
--- the legacy statement, `N.f.problem.legacy`, declared and not compiled
-#guard_msgs in
-solc_problems Solkey.ScopedFlip legacy
-
 /-- info: 1 obligation declared scoped -/
 #guard_msgs in
-solc_scoped_problems Solkey.ScopedFlip main decl
+solc_scoped_problems Solkey.ScopedFlip decl
 
 -- `N.f.problem` is the scoped statement, an entry of `N.problems`
 example : Solkey.ScopedFlip.additionStorageWrite.problem =

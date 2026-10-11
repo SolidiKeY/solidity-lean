@@ -1,6 +1,8 @@
 import Solidity.Typing.CanonTest
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Semantics.StateErase
+import Solidity.Calculus.NotationResolve
+import Solidity.Calculus.Quote
 
 /-!
 # Obligations, as solkey states them
@@ -187,27 +189,44 @@ theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, rfl, Storage.init_erase C⟩
     (storageWordsB_init hnd))
 
-/-! ## The obligations -/
+/-! ## The obligations
+
+Scoped (`docs/intrinsic.md`, M6b, W8): the program is read in the context
+of the parameters, `paramsN xs` (the first parameter outermost, so its
+position the deepest), which `∀` binds over each type's range
+(`Fml.closeN`). -/
+
+/-- The parameters `xs` as a named context, the first parameter the
+outermost (deepest) local. -/
+def paramsN (xs : List (PrimTy × Var)) : NCtx := xs.reverse.map fun (p, x) => (x, .val p)
+
+/-- `wt(storage)`: the storage is one `C` can be in (`NFml.wt`). -/
+def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
+  .defined (.app1 (.wt C.vars) rfl (.app0 .storage))
 
 /-- solkey's obligation for a function of body `P` and parameters `xs`
-under the modality `m`: `∀xs. wt(storage) → [ P ] true`, or the same with
-`⟨ P ⟩`. -/
-def Surface.Problem.fml (m : Modality) (xs : List (PrimTy × Var)) (P : Surface.Prog C) : Surface.Fml C :=
-  Surface.Fml.alls xs (.imp (NFml.wt C).toSurface (.modal m P .tt))
+under the modality `m`, `P` read in their context: `∀xs. wt(storage) → [ P ]
+true`, or the same with `⟨ P ⟩`. -/
+def Problem.fml (m : Modality) (xs : List (PrimTy × Var)) {Γ' : Ctx}
+    (P : Prog C (paramsN xs).ctx Γ') : Fml C [] :=
+  Fml.closeN true (paramsN xs) (.imp (Fml.wt C) (.modal m P .nil .tt))
 
 /-- solkey's deployment update,
 `{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖ selfBalance := msgValue}`:
 the empty storage, a ledger holding the deployer's payment, and the value
 sent as the contract's funds (`Contract.deployState`). -/
-def Surface.Problem.deployUpd (C : Contract) : Surface.Upd C :=
-  [.storage (.mtSt C.vars), .netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
+def Problem.deployUpd (C : Contract) {Γ : Ctx} : Upd C Γ Γ :=
+  ((Upd.nil.snoc (.storage (.app0 (.mtSt C.vars)))).snoc
+    (.netMt (.app0 (.env .msgSender)) (.app0 (.env .msgValue)))).snoc
+    (.setBalance (.app0 (.env .msgValue)))
 
 /-- solkey's obligation for a constructor, of parameters `xs`, deployed by
 `P` (`constructor(x̄);`): `∀xs. {deployUpd} ⟨ P ⟩ true`, or the box.  No
 `wt(storage)` premise: the update discards the storage, and the empty one
 is well formed (`initStorage_wt`). -/
-def Surface.Problem.ctorFml (m : Modality) (xs : List (PrimTy × Var)) (P : Surface.Prog C) : Surface.Fml C :=
-  Surface.Fml.alls xs (.upd m (Surface.Problem.deployUpd C) (.modal m P .tt))
+def Problem.ctorFml (m : Modality) (xs : List (PrimTy × Var)) {Γ' : Ctx}
+    (P : Prog C (paramsN xs).ctx Γ') : Fml C [] :=
+  Fml.closeN true (paramsN xs) (.upd m (Problem.deployUpd C) (.modal m P .nil .tt))
 
 /-- A constructor's obligation with no specification, `Problem.ctorFml` of
 the contract's constructor: its parameters bound, the program
@@ -216,7 +235,7 @@ only where neither the contract nor the constructor is specified, and with
 `{storage := mtSt || net := mtSt}`; Lean with `Problem.deployUpd`, its
 specified problem's update (`docs/solkey-feedback.md`).  A constructor
 marked `skip`, or specified, is refused. -/
-def Surface.Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Surface.Fml C) := do
+def Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except String (Fml C []) := do
   let some d := C.ctor | throw "the contract declares no constructor: an implicit one has no obligation"
   if d.spec.skip then throw "constructor is marked `skip`: it has no obligation"
   -- solkey states the unspecified form only where neither the contract
@@ -227,11 +246,12 @@ def Surface.Problem.ctor [FreshNames] (C : Contract) (m : Modality) : Except Str
   let ps ← d.params.mapM fun (n, T) => match T with
     | .prim p => pure (n, p)
     | _ => throw s!"constructor: the parameter {n} has a reference type"
+  let xs := ps.map fun (n, p) => (p, Var.ofName n)
   let call : List RawStmt := [.call (.name "constructor") (ps.map fun (n, _) => RawExpr.name n)]
-  let Γ : ECtx := ps.map fun (n, p) => (n, LocalTy.val p)
-  let P ← ((elabStmts C call).run { funs := C.funs }).run' (Γ, 1)
-  let _ ← Prog.resolveCheck (ECtx.toNCtx Γ) P
-  pure (Surface.Problem.ctorFml m (ps.map fun (n, p) => (p, Var.ofName n)) P)
+  let Γ : ECtx := ps.reverse.map fun (n, p) => (n, LocalTy.val p)
+  let P ← ((elabStmtsP C call).run { funs := C.funs }).run' (Γ, 1)
+  let ⟨_, P⟩ ← SProg.chain (paramsN xs).names (paramsN xs).ctx P
+  pure (Problem.ctorFml m xs P)
 
 /-- `problem[C]{constructor}`: `Problem.ctor C .diamond`, the unspecified
 constructor obligation, elaborated (`constructor` is a keyword,
@@ -245,21 +265,26 @@ syntax (name := problemCtorBang) "problem!{ " &"constructor" " }" : term
 open Lean Elab Term Meta in
 elab_rules (kind := problemCtor) : term
   | `(problem[ $c ]{ constructor }) =>
-    elabAgainst c fun q => `((Surface.Problem.ctor ($c) Modality.diamond).map (Surface.Fml.quote $q))
+    elabAgainst c fun q => `((Problem.ctor ($c) Modality.diamond).map (Fml.quote $q))
 
 macro_rules (kind := problemCtorBang)
   | `(problem!{ constructor }) => `(problem[InContract.contract]{ constructor })
 
-/-- The parameters an obligation binds, whether it is a deployment, its
-modality and its program, read back off the formula: what `Problem.text`
-prints. -/
-def Surface.Problem.parts : Surface.Fml C → Option (List (PrimTy × Var) × Bool × Modality × Surface.Prog C)
-  | .all x p φ => (Surface.Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
-  | .imp (.defined (.app1 (.wt _) (.app0 .storage))) (.modal m P .tt) => some ([], false, m, P)
-  | .upd m [.storage (.app0 (.mtSt _)), .netMt (.env .msgSender) (.env .msgValue),
-      .setBalance (.env .msgValue)] (.modal m' P .tt) =>
-    if m = m' then some ([], true, m, P) else none
-  | _ => none
+/-- The parameters an obligation binds, whether it is a deployment, and its
+modality, read back off the formula (its locals named `ns`): what
+`Problem.text` prints. -/
+def Problem.parts : {Γ : Ctx} → List Var → Fml C Γ → Option (List (PrimTy × Var) × Bool × Modality)
+  | _, ns, .all x p φ => (Problem.parts (x :: ns) φ).map fun (xs, r) => ((p, x) :: xs, r)
+  | _, ns, .imp (.defined t) (.modal m _ _ .tt) =>
+    match t.erase ns with
+    | .app1 (.wt _) (.app0 .storage) => some ([], false, m)
+    | _ => none
+  | _, ns, .upd m U (.modal m' _ _ .tt) =>
+    match U.erase ns with
+    | [.storage (.app0 (.mtSt _)), .netMt (.env .msgSender) (.env .msgValue),
+        .setBalance (.env .msgValue)] => if m = m' then some ([], true, m) else none
+    | _ => none
+  | _, _, _ => none
 
 /-- KeY's sort of a parameter, as solkey declares it: `int` for every
 integer type. -/
@@ -274,10 +299,10 @@ with its update, solkey's specified one: solkey's unspecified constructor
 problem writes `{storage := mtSt || net := mtSt}`, an empty ledger and free
 funds, where the interpreter's deployment books the payment
 (`Contract.deployState`). -/
-def Surface.Problem.text (contract fn : String) (φ : Surface.Fml C) : String :=
-  match Surface.Problem.parts φ with
+def Problem.text (contract fn : String) (φ : Fml C []) : String :=
+  match Problem.parts [] φ with
   | none => "(not an obligation)"
-  | some (xs, deploy, m, _) =>
+  | some (xs, deploy, m) =>
     let vars := if xs.isEmpty then "" else
       "\\programVariables {\n" ++
         String.join (xs.map fun (p, x) => s!"    {p.keySort} {x};\n") ++ "}\n\n"

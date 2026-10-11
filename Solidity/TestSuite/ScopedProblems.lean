@@ -2,13 +2,12 @@ import Solidity.TestSuite.Problems
 import Solidity.Calculus.Surface
 
 /-!
-# solkey's `TestSuite` obligations, scoped
+# solkey's `TestSuite` obligations, declared
 
-`Problems.lean`'s obligations stated over the scoped calculus,
-`Solkey.TestSuite.f.problem : Fml Solkey.TestSuite []`
-(`solc_scoped_problems … main`, `Frontend/Problems.lean`), each checked to
-erase to its legacy statement `Solkey.TestSuite.f.problem.legacy` in
-`Problems.lean`.  They are the entries of one table,
+`Problems.lean`'s obligations, `Solkey.TestSuite.f.problem : Fml
+Solkey.TestSuite []` (`solc_scoped_problems`, `Frontend/Problems.lean`),
+each written on its scoped program `Solkey.TestSuite.f`.  They are the
+entries of one table,
 `Solkey.TestSuite.problems`, which the kernel checks once, and are declared,
 not compiled (`decl`): compiling 437 obligations in one command takes more
 than the default heartbeats, and the scoped `sol_prove` reads an obligation
@@ -20,4 +19,4 @@ timing gate (`docs/intrinsic.md`, W3b lane `testsuite`).
 -/
 
 /-- info: 437 obligations declared scoped -/
-#guard_msgs in solc_scoped_problems Solkey.TestSuite main decl
+#guard_msgs in solc_scoped_problems Solkey.TestSuite decl
