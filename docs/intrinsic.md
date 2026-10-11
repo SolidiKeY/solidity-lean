@@ -3235,6 +3235,66 @@ agent, load (1 min) 4.4 falling to 0.9 after the build, cgroup 8.5 GB.
 | `Calculus/SurfaceNotation` | 7.25 s (W8.2 merge) | 8.70 s | 7.28 s | **7.23 s** (7.25, 7.23, 7.29) | 1.00 | 9.15 s |
 | `Corpus/SolcStructs` | 1.22 s (W8.2 base) | 1.46 s | 1.04 s | **1.02 s** (1.05, 1.02, 1.08) | 0.84 | 1.44 s |
 
+## W9 plan (the IR's removal)
+
+Asked by the user on 2026-10-11 ("full port, in waves"): remove the
+closer's untyped IR.  **Two IRs.**  The *syntax* IR is `NFml`, its terms
+`Surface.Tm`/`MAddr`/`Upd`/`UpdElem` and `Fml.erase`/`Tm.erase` (about 3,600
+occurrences in 80 files).  W9.1–W9.5 remove it.  The *state* IR is
+`Env`/`EState`/`State.erase`: the scoped `holds` reads it
+(`Calculus/Logic.lean`), and so do the run invariants (`RunInv.Holds`).
+W9.6 is a proposal of its own.  `Semantics.State`, the symbols
+`Op0`–`Op3` with their `eval`/`denote` (decision 83), and the value-level
+erasure (`PrimTy.erase`, `Storage.erase`, `Heap.erase`) stay.
+
+**Do positions slow kernel evaluation?**  No.  Both routes key a local by a
+`Var` in an association list.  A position's key is `slotVar k = .fresh "#" k`;
+the extra cost is `Idx.toNatR`'s walk, which the recursor form keeps cheap
+(G0: 0.8× on symex).  At W7 `w7-closer`, moving the atoms to positions left
+`Tactics/Decide` at 1.04× with the machine 2–4% slower.  Positions also
+remove `Fml.closeErase`'s `Nodup`/`Avoids` checks and the string-keyed
+`decide +kernel` of `NFml.inL`.
+
+**Gates**: 1.2× the W7 merge table.
+
+| Row | Gate |
+|---|---|
+| `Derived1`–`14` (sum) | 237.8 s |
+| `Derived7` | 61.7 s |
+| `Tactics/Decide` | 45.0 s |
+| `ProofTree` | 11.7 s |
+| `Chains/Storage` | 9.0 s |
+| `ChainRewrites` | 8.2 s |
+| `ChainRewritesOpen` | 4.1 s |
+| `Solkey/TestSuite` | 13.2 s |
+
+**Waves**: at most two Lean-heavy lanes at once, each in its own worktree.
+
+| Wave | Lanes | Work | Rows at risk |
+|---|---|---|---|
+| W9.0 | spikes (scratch) | the scoped leaf closer on `Derived7`'s leaves against `Fml.closeErase` + `NFml.Derive.residue`; `ChainRewrites` with scoped lines past the program | — |
+| W9.1 | `terms` ‖ `print` | `TermTacletS` on `Tm C Γ .val` (solkey's names, `tm{}`), `Tm.Theq`, sort-generic `Tm.reads`/`litVarsS`/`beqR` (recursor + `match` twin), `holds_eqD_iff` on `holds`; `DelabErase`/`RuleSyntax` print scoped `Tm`/`Upd`/`Fml` from a name stack, twin-checked, no pin moves | none |
+| W9.2 | `decide` ‖ `rw` | `Tm.toLS` sound over `RelU` directly; `sameAt`/`allocPairS?` by `Tm.beqR`; `LFml.closeS` with a layout from a scoped `wt(storage)` premise (proposal 100); scoped `sol_reduce`/`sol_reads`/`sol_decide_*`; `SeqRewrite`, `Walk.rwTheory`, `Proves.updRw`, `FmlRw.lawEq`/`lawUpd`, `UpdateRules.rewrite` read `TermTacletS` | `Tactics/Decide` |
+| W9.3 | `walk` ‖ `close` | `Calculus/LeafDerive.lean`: a leaf closes by `Fml.reduceS` + `LFml.closeS`, sound by `Proves.closeHolds`/`Fml.toLSM_sound`; a scoped `seqUpd`, ground split, `pick`/`Fml.stripN`; the replays re-derived (`Derived1`, `7`, `12`, `LoopsImport`, `Benchmark/Mapping`, `Purchase`, `Tactics/Constructors`, `Solkey/Constructors`, `TestSuite/Suggestions`, `Frontend/Problems`); `Calculus/CloseScoped.lean` (`sol_close` over `holds`/`Tm.eval`/`Upd.apply`, symbol lemmas split out to `Calculus/CloseLemmas.lean`) | Derived rows, `ProofTree`, `Solkey/TestSuite` |
+| W9.4 | `chains` ‖ `fronts` | lines past the program scoped (decision 101's list: `simplifyUpdate` dropping unread locals with their binders, a merge across a hidden binder, the laws, `~~>`/`calc`, a positional `lineKey`; `Fml.ViaE`, `NFml.Via`, `scopedPast` go); `Tools/Inspect`, `Counterexample`, `Problem`/`Corpus/Imported`/`TestSuite/Problems` (`NFml.wt` scoped), `SurfaceSpec`/`NotationResolve`, `dl!{}` with no modality reads `Fml C []`, `RuleSyntax`'s sequents scoped | `Chains/*`, `ChainRewrites*` |
+| W9.5 | on master | delete `NFml`, `Surface.*` terms, the erasure, `HoldsErase`, `CloseErase`, `Close`, `NFmlLogic`, `NFmlDerive`, `NFmlUpdateRules`, `NFmlQuote`, `StateParts`, `Rewrite`, `Proves.close`, `Atom.name`; `TermTacletS` → `TermTaclet`; the SolKey reader ported (asked first: it reads the erased syntax) | all |
+| W9.6 | proposal | the state IR: `Tm.eval` over `State C Γ`, the Sound* files against `TRun.*`, the run invariants over `State` (12–20k lines of proof) | — |
+
+**Fallbacks.**  If a Derived row fails W9.3's gate, that leaf class keeps
+`Fml.closeErase` + `NFml.Derive` and W9.5 deletes the rest.  If
+`ChainRewrites` fails W9.4's, the links past the program stay on the IR, and
+`NFml` survives only as `RewriteChains`' line type.  W9.6 is judged
+infeasible within this plan.  Its fallback keeps `EState` as the terms'
+state (decisions 40, 83) and deletes only `Erased.lean`'s program
+evaluators and `StepErase`.
+
+**Pins expected to move**: `ProofTree`'s residues (`rounds2`/`4`/`6`,
+`pushes22`, `writes4`/`6`, `deletes10`) and `Dangling`'s four (W9.3); the
+open `⟨ alice.age = 1; ⟩ true` leaf, which closes only if a Lean-only
+clause "a typed storage has every root" is added; `CloseTests`; every
+`#last_line`, `ChainRewrites`, `ChainNotation`, `Tactics/Chains` (W9.4);
+and `DlNotation`'s types, now `Fml C []`.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
@@ -3267,8 +3327,7 @@ fails stays on the IR:
 - At the merge into `master`: the SolKey reader's require back to
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
   `intrinsic`, ported: "W8 reader port record"), and that branch merged.
-- Optional: the IR namespace `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`
-  (2,235 occurrences) renamed to `NFml` ("W8 result").
+- The IR's removal: "W9 plan" (supersedes the optional rename).
 - Not run since W4: `check-corpus.sh` (its probes need `lake`),
   the `solkeycheck` executable (built), the reader's
   `keycheck` executable as a target and the VS Code extension's tests.  No
