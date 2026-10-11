@@ -73,8 +73,8 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
 | W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
-| W8 | W8.1, W8.2 done 2026-10-11 (the rest planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
-| left | — | the lead's calls on proposals 95–105 and 106–115 (W8.2); optional ports on the IR ("What is left") |
+| W8 | W8.1, W8.2, W8.3 done 2026-10-11 (the rest planned) | decision 11: `Surface.Stmt`, `Surface.Prog`, `Surface.Fml` removed, the elaborator and printers on the scoped syntax ("W8 plan") |
+| left | — | the lead's calls on proposals 95–105 and 106–117 (W8.2–W8.3); optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -2556,6 +2556,85 @@ these files; the lane's rows against the base:
 | `Examples/Tactics/Symex` | 1.22 s | 1.17 s | 0.96 |
 
 Every row within 1.2× of its base (`Print`'s W8.2 merge row: 3.73 s).
+
+### W8 W8.3 examples and leaf consumers migrate merge (2026-10-11)
+
+`ex-evm-bench`, `ex-storage-memory` and `ex-calls-print` merged into
+`intrinsic` in that order.  Only `ex-calls-print` proposed decisions;
+its 116–117 follow 115 and keep their numbers.
+
+**Reconciled at the merge.**  The two inlining printers are one module,
+`Syntax/Inlined.lean` (`ex-calls-print`'s, the one proposal 116 names):
+it takes `ex-evm-bench`'s `Syntax/PrintInlined`'s `.block` clause, so a
+`{ … }` block's statements are written in place with their calls inlined,
+as `Surface.Prog.inlined` on the erasure (which flattens a block) wrote
+them, and keeps `Prog.inlinedShow`.  `Syntax/PrintInlined` is deleted;
+`Examples/Benchmark/{Syntax,Purchase}.lean` import `Syntax/Inlined.lean`.
+`Solidity.lean` and `docs/module-map.md` carry the one module.
+`Operators.machine_run`'s `slotAfter sol{ … }` (left by
+`ex-storage-memory`) reads scoped since `ex-evm-bench` moved `slotAfter`,
+with no change of text.  No pin moved at the merge beyond the lanes' own.
+
+**Checks.**  The full build with `SolidityCorpus` and `SolkeyTestSuite`
+(329 jobs) green at the first try; `dups.py` (the three known),
+`check-orphans` (a scratch module only), `check-doc-paths`,
+`check-rule-text` pass.
+
+**Timing** (the end-of-work method as at the W8.2 merge, one run a row,
+load 0.9–2.4, cgroup 8.2–13.3 GB):
+
+| Module | W6 baseline | gate (1.2×) | W8.2 merge | **W8.3 merge** | ratio (W6) |
+|---|---|---|---|---|---|
+| `TestSuite/Derived1` | 7.32 s | 8.78 s | 7.50 s | **7.56 s** | 1.03 |
+| `TestSuite/Derived2` | 8.63 s | 10.36 s | 9.03 s | **8.97 s** | 1.04 |
+| `TestSuite/Derived3` | 13.01 s | 15.61 s | 13.63 s | **13.34 s** | 1.03 |
+| `TestSuite/Derived4` | 17.57 s | 21.08 s | 18.12 s | **17.85 s** | 1.02 |
+| `TestSuite/Derived5` | 6.95 s | 8.34 s | 7.18 s | **7.07 s** | 1.02 |
+| `TestSuite/Derived6` | 11.42 s | 13.70 s | 11.89 s | **11.64 s** | 1.02 |
+| `TestSuite/Derived7` | 50.43 s | 60.52 s | 52.92 s | **51.26 s** | 1.02 |
+| `TestSuite/Derived8` | 26.38 s | 31.66 s | 27.71 s | **27.11 s** | 1.03 |
+| `TestSuite/Derived9` | 7.16 s | 8.59 s | 7.26 s | **7.24 s** | 1.01 |
+| `TestSuite/Derived10` | 11.11 s | 13.33 s | 11.53 s | **11.47 s** | 1.03 |
+| `TestSuite/Derived11` | 3.16 s | 3.79 s | 3.23 s | **3.29 s** | 1.04 |
+| `TestSuite/Derived12` | 13.17 s | 15.80 s | 13.62 s | **13.51 s** | 1.03 |
+| `TestSuite/Derived13` | 6.36 s | 7.63 s | 6.47 s | **6.48 s** | 1.02 |
+| `TestSuite/Derived14` | 10.89 s | 13.07 s | 11.24 s | **11.00 s** | 1.01 |
+| Derived1–14, sum | 193.6 s | 232.3 s | 201.3 s | **197.8 s** | 1.02 |
+| `Examples/Tactics/Decide` | 49.14 s | 58.97 s | 37.48 s | **37.62 s** | 0.77 |
+| `Examples/ProofTree` | 9.81 s | 11.77 s | 9.73 s | **9.83 s** | 1.00 |
+| `Examples/Chains/Storage` | 7.45 s | 8.94 s | 7.70 s | **7.55 s** | 1.01 |
+| `Examples/ChainRewrites` | 6.36 s | 7.63 s | 6.84 s | **6.81 s** | 1.07 |
+| `Examples/ChainRewritesOpen` | — | — | 3.45 s | **3.48 s** | — |
+| `TestSuite/Problems` (M0) | 0.81 s | 0.97 s | 0.84 s | **0.83 s** | 1.02 |
+| `TestSuite/ScopedProblems` (M0) | 1.39 s | 1.67 s | 1.09 s | **1.04 s** | 0.75 |
+| `Solkey/TestSuite` (M0) | 10.83 s | 13.00 s | 6.71 s | **6.78 s** | 0.63 |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s | 1.69 s | 1.44 s | **1.60 s** (1.60, 1.60) | 1.13 |
+| `Evm/Examples` (M0) | 7.75 s | 9.30 s | 7.91 s | **7.25 s** | 0.94 |
+| `Evm/Correct` (M0) | 1.68 s | 2.02 s | 1.72 s | **1.72 s** | 1.02 |
+
+**Gate passed**: every row within 1.2× of its W6 baseline.  Against the
+M0 limits, `Derived10` 11.47 (11.2, over by 2%, as since W7) and
+`Benchmark/Syntax` 1.60 (1.44, over by 11%): the `ex-evm-bench` lane's
+`rfl` checks of `Prog.toStr` on the scoped blocks (its record), which
+W8.4 may win back when `sol{}` with nothing expected reads scoped.
+`Evm/Examples` is faster: the kernel no longer evaluates `resolve`.
+
+**Left** (from the lanes, for W8.4–W8.5): `Examples/Tools.lean`'s
+`functionCallArgCapture` pin (proposal 107) prints `‹Surface.Stmt.call …›`
+(the delaborator, W8.4); `Surface.Prog.inlined` and its pin in
+`Syntax/Splice.lean` (can take `Prog.inlinedStr` from
+`Syntax/Inlined.lean`); a scoped `sol{}` inside a `do` block fails with
+"Type of b✝ is not known" (proposal 117: `elabSolBracket`'s scoped
+branch, `fun b => (Prog.quoteShared q b.2).1`, has no binder type), worked
+around in `Evm/Examples.lean` and `Examples/Tactics/TryCatch.lean` by
+binding the program first; the `(sol{…} : Prog C [] _)` ascriptions that
+can go when `sol{}` with nothing expected reads scoped, and the bare
+`#check sol{ … }` error pins that then take the scoped path; the
+`import Solidity.Calculus.Surface` lines stay (it is the `open scoped
+Solidity.Scoped` switch); if `Contract.deployRunS` is renamed back to
+`deployRun`, `Examples/Tactics/Constructors.lean` and its module-map line
+follow; the lead's calls on proposals 116–117; the read-only review pass
+(W8.5).
 
 ## What is left
 
