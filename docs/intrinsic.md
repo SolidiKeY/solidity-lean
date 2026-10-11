@@ -59,7 +59,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **partial** (W6, merged 2026-10-09; gates passed) | the closer on `Fml C Γ`: 6a (`DecideSyn`, `DecideComplete`, `NFmlClose`), 6b (`Decide.lean` as a scoped front end), 6c (`NFmlUpdateRules`, `StateParts`, `Rewrite`, `NFmlDerive`, `NFmlLogic`, the chains' rewrites while the program is open) all partial; `Closer`, the `⊨` route, the chains past the program and `NFml`'s deletion left ("M6c", "What is left") |
+| M6c | **done with IR** (W6–W7, merged 2026-10-11; gates passed) | the closer on `Fml C Γ`: 6a (`DecideSyn`, `DecideComplete`, `NFmlClose`), 6b (`Decide.lean` as a scoped front end), 6c (update rules, merges, `⊢`/`⊨` leaves, the chains' rewrites while the program is open); W7: atoms by position and the closer on the scoped reduction, the `⊨` route on the walk, the scoped update rules given their consumers.  `NFml`, `Fml.erase` and `Semantics/Erased.lean` stay as decision 7's IR, every reader listed ("M6c", W7 merge) |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -69,10 +69,11 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | W4 | done 2026-10-09 | prep (`theorems`, `contracts`, `moves`), then `sem-del` (the untyped run), `calc-del` (the untyped calculus), `modal` (the modality off `Update.lean`'s formulas), `reader-dry`; W4b: `run40` (decisions 40, 50), `rules36` (36, 53), `printers` (item 14) |
 | W5 | done 2026-10-09 | the rename (`scripts/w5-rename.sh`, since deleted), its pins, review fixes, the reader ported |
 | W6 | done 2026-10-09 | lanes `w6-canon` (decision 75 implemented, 77 recorded false), `w6-step` (76: `Stmt.step` total), `w6-closer` (M6c 6a, 6b, and 6c's lanes `w6c-upd`, `w6c-rw`, `w6c-chain`); merged in that order into `intrinsic`; the final gates ("Gates") |
-| W7 `w7-route` | done 2026-10-11 | the `⊨` route on the `⊢` walk; only an `assert` panics, typed; decision 77's conditional form; bare `simp`s (decisions 95–98) |
+| W7 `w7-route` | done 2026-10-11 | the `⊨` route on the `⊢` walk; only an `assert` panics, typed; decision 77's conditional form; bare `simp`s (proposals 95–98) |
 | W7 `w7-closer` | done 2026-10-11 | the closer core: atoms by position, `LFml.closeS` on the scoped reduction, its soundness over the typed state (proposals 99–100) |
 | W7 `w7-rewrites` | done 2026-10-11 | the scoped update rules and merges given their consumers; the open-program links scoped; decision 49's examples restored (proposals 101–105) |
-| W7+ | **left** | the rest of M6c; the lead's calls on proposals 95–105 |
+| W7 merge | done 2026-10-11 | `w7-route`, `w7-closer`, `w7-rewrites` merged in that order (proposals renumbered 95–105); vestigial `open NFml.Proves` and four dead lemmas deleted; the IR's readers listed; the final W7 gate ("M6c") |
+| left | — | the lead's calls on proposals 95–105; optional ports on the IR ("What is left") |
 
 ## Checks at the end (W6)
 
@@ -1557,31 +1558,179 @@ no `sorry`, `axiom` or `maxHeartbeats` added.
   † another session's build ran beside it (load 6.7 and 14–26, the
   cgroup at 31.9 GB); repeated.  **Gate passed**: every row within 1.2×.
 
-**`NFml`, `Fml.erase` and `Semantics/Erased.lean` stay** (the plan's last
-M6c step, deferred; decision 7's fallback, decisions 83, 88, 91 and 93).
-What reads them:
-- *the closer's IR*: `NFmlLogic` (`NFml.Proves`, what a scoped leaf
-  erases to), `NFmlDerive` (`Derive.residue`, `synClose`), `NFmlClose`,
-  `Closable`, `CloseErase`, `Hyp`, `Decide`/`DecideComplete`;
-- *update rules and merges on the erasure*: `NFmlUpdateRules`,
-  `StateParts` (the scoped `sol_upd`/`sol_merge` are scoped since W7;
-  `sol_apply_upd`, `sol_fold_terms`, `sol_close_eval` and the
-  `sol_decide_*`/`sol_reduce`/`sol_reads` closers still erase the leaf,
-  `Closers.lean`'s `Derive.onErased`);
-- *chains past the program*: `ChainRewrites`, `ChainBranches`,
-  `RewriteChains`, `RewriteChainGen`, `ChainGen`, `LastLine` (every link
-  past the program, but a merge under `sol_chain.scopedPast`,
-  proposal 101);
-- *today's notation and sequents*: `Update.lean` (where `NFml` is
-  defined), `RuleSyntax`'s `dl{}`/`⊨`, `SurfaceNotation`, `SurfaceSpec`,
-  `Literals`, `TermTaclets` and `CloseTests`, `Rewrite.lean`'s tactics;
-- `Semantics/Erased.lean`, the erased state the closer's terms read
-  (`State.erase`), goes only with the last of the above.
+- **W7 merge** (2026-10-11): `w7-route`, `w7-closer` and `w7-rewrites`
+  merged into `intrinsic` in that order, conflicts only in this record
+  (the lanes' proposals renumbered 95–98, 99–100 and 101–105, their
+  references in the Lean sources and `docs/lean-key-rule-map.md` with
+  them).  The deletion step: no module, and neither `NFml`, `Fml.erase`
+  nor `Semantics/Erased.lean`, is unread (the list below).  What nothing
+  read went: `open NFml.Proves` in 51 files whose tactics are the scoped
+  macros (`Calculus/WalkSyntax.lean`, `Calculus/RewriteSyntax.lean`, whose
+  fallbacks name `NFml.Proves` in full; kept in `Calculus/NFmlLogic.lean`
+  and `Examples/Tactics/TermTaclets.lean`, which use its names bare), and
+  four lemmas nothing cited (`anonRead_eq_ok`, `SubstAgree.abs_eq`,
+  `State.alloc_heapEq`, `State.Keeps.heapEq`); two unused `simp`
+  arguments of `Calculus/DecideScoped.lean` too.  Checks: `lean_build`
+  with `SolidityCorpus` and `SolkeyTestSuite` among the default targets
+  green (325 jobs, no error); `check-orphans` (311 reachable, the orphans
+  only the git-excluded scratch modules, since deleted),
+  `check-doc-paths`, `check-rule-text` OK; the duplicate-name scan at its
+  three known false positives (`as`, `delabFml`, `delabProves`).
+  `check-testsuite.sh` stops at its input check: the checkout `../solkey`
+  holds another `TestSuite.sol` than the imported AST (sha `4150e0a8…`
+  against `2fe50a03…`), a stale checkout, not a change here.  No pin
+  moved at the merge.
+
+  **Final W7 gate** (2026-10-11, at the merge; the W6 method: each file
+  copied under `Solidity/Scratch/`, one fresh worker at a time through the
+  MCP, end of work sampled every 20 ms, the worker killed after the run;
+  two runs a row, three for the rows furthest from 1.0, one for the M0
+  controls, the minimum kept; load 0.7–1.9, the cgroup at 7.4–13.8 GB.
+  The CPU column is left out: this run killed the worker before reading
+  the sample, so its CPU counts the idle polling after the work):
+
+  | Module | W6 baseline | gate (1.2×) | **W7 merge** (runs) | ratio |
+  |---|---|---|---|---|
+  | `TestSuite/Derived1` | 7.32 s | 8.78 s | **7.65 s** (7.81, 7.71, 7.65) | 1.05 |
+  | `TestSuite/Derived2` | 8.63 s | 10.36 s | **8.91 s** (9.00, 9.05, 8.91) | 1.03 |
+  | `TestSuite/Derived3` | 13.01 s | 15.61 s | **13.36 s** (13.36, 13.47) | 1.03 |
+  | `TestSuite/Derived4` | 17.57 s | 21.08 s | **17.87 s** (17.87, 18.10) | 1.02 |
+  | `TestSuite/Derived5` | 6.95 s | 8.34 s | **7.20 s** (7.29, 7.24, 7.20) | 1.04 |
+  | `TestSuite/Derived6` | 11.42 s | 13.70 s | **11.79 s** (11.80, 11.79) | 1.03 |
+  | `TestSuite/Derived7` | 50.43 s | 60.52 s | **51.41 s** (51.41, 51.57) | 1.02 |
+  | `TestSuite/Derived8` | 26.38 s | 31.66 s | **26.83 s** (26.83, 26.99) | 1.02 |
+  | `TestSuite/Derived9` | 7.16 s | 8.59 s | **7.31 s** (7.50, 7.31) | 1.02 |
+  | `TestSuite/Derived10` | 11.11 s | 13.33 s | **11.59 s** (11.79, 11.75, 11.59) | 1.04 |
+  | `TestSuite/Derived11` | 3.16 s | 3.79 s | **3.23 s** (3.23, 3.29) | 1.02 |
+  | `TestSuite/Derived12` | 13.17 s | 15.80 s | **13.54 s** (13.59, 13.54) | 1.03 |
+  | `TestSuite/Derived13` | 6.36 s | 7.63 s | **6.45 s** (6.49, 6.45) | 1.01 |
+  | `TestSuite/Derived14` | 10.89 s | 13.07 s | **11.08 s** (11.32, 11.08) | 1.02 |
+  | Derived1–14, sum | 193.6 s | 232.3 s | **198.2 s** | 1.02 |
+  | `Examples/Tactics/Decide` | 49.14 s | 58.97 s | **37.47 s** (37.47, 37.50) | 0.76 |
+  | `Examples/ProofTree` | 9.81 s | 11.77 s | **9.74 s** (9.90, 9.74) | 0.99 |
+  | `Examples/Chains/Storage` | 7.45 s | 8.94 s | **7.52 s** (7.57, 7.52) | 1.01 |
+  | `Examples/ChainRewrites` (§3⁗ in `ChainRewritesOpen`, proposal 102) | 6.36 s | 7.63 s | **6.86 s** (6.86, 6.87, 6.92) | 1.08 |
+  | `Examples/ChainRewritesOpen` (new at W7) | — | — | 3.43 s | — |
+  | `TestSuite/Problems` (M0) | 0.81 s | 0.97 s | 0.85 s | 1.05 |
+  | `TestSuite/ScopedProblems` (M0) | 1.39 s | 1.67 s | 1.45 s | 1.04 |
+  | `Solkey/TestSuite` (M0) | 10.83 s | 13.00 s | 11.03 s | 1.02 |
+  | `Examples/Benchmark/Syntax` (M0) | 1.41 s | 1.69 s | 1.48 s | 1.05 |
+  | `Evm/Examples` (M0) | 7.75 s | 9.30 s | 7.91 s | 1.02 |
+  | `Evm/Correct` (M0) | 1.68 s | 2.02 s | 1.71 s | 1.02 |
+
+  **Gate passed**: every row within 1.2× of its W6 baseline.  The Derived
+  files are 1–5% over it, as at each W7 lane (whose controls put the
+  machine 2–4% slower than at W6).  `ChainRewrites` is at 1.08, the same
+  figure `w7-rewrites` measured: its §3⁗ moved out, and the rest of the
+  file is re-read by the open-program search, bounded at `6f24cbc4`.
+  `Decide` is at 0.76 (1.04 of the lanes' 36.06 and 35.87 s).  Against
+  the M0 limits: `Derived9` 7.31 (limit 8.4), `Derived10` 11.59 (11.2:
+  over by 3%, as by 0.4% at W6's final gate; within its W6 gate, 13.33),
+  `Derived11` 3.23 (3.4), `Problems` 0.85 (1.44), `Solkey/TestSuite`
+  11.03 (12.5), `Benchmark/Syntax` 1.48 (1.44: over by 3%; M0's limit
+  sat 0.03 s over the W6 baseline), `ProofTree` 9.74 (12.1),
+  `Chains/Storage` 7.52 (9.0), `Evm/Examples` 7.91 (11.4), `Evm/Correct`
+  1.71 (30.7).
+
+**`NFml`, `Fml.erase` and `Semantics/Erased.lean` stay**, as decision 7's
+documented IR: the decision procedure, the closer's sequent calculus, the
+update rules and the chains past the program read the erased formula and
+state.  Every reader at the W7 merge, by what it reads (`NFml` or its
+namespace, an `NFml*` module it imports, `Fml.erase`, or the erased state
+`EState`), and why it stays:
+- *where they are defined*: `Update.lean` (`NFml`, `NFml.holds`,
+  `NFml.Valid`), `Calculus/Fml.lean` (`Fml.erase`),
+  `Semantics/Erased.lean` (`Env`, `EState`, the erased evaluators: what
+  the closer's terms read, decision 40), `Semantics/State.lean`
+  (`State.erase`).
+- *the closer's IR* (decision 7; 83, 91): `Calculus/NFmlLogic.lean`
+  (`NFml.Proves`, what a scoped leaf erases to), `Calculus/NFmlDerive.lean`
+  (`NFml.Derive`: the closer's walk and its residue),
+  `Calculus/NFmlClose.lean` (`sol_close`), `Calculus/NFmlUpdateRules.lean`
+  (KeY's update simplification on the erasure),
+  `Calculus/NFmlQuote.lean` (the quoter), `Calculus/Hyp.lean` (the
+  context both sequents share), `Calculus/Closable.lean`,
+  `Calculus/CloseErase.lean`, `Calculus/Close.lean`,
+  `Calculus/CloseHavoc.lean`, `Calculus/HoldsErase.lean`,
+  `Calculus/Proves.lean` (`Proves.close`: a scoped leaf closes by its
+  erasure's validity), `Calculus/CallbackSound.lean` (the callback
+  modality's leaves), `Calculus/Problem.lean` (`NFml.wt`),
+  `Theory/Bridge/Denote.lean` (`eqD`'s reading).
+- *the decision procedure and the closers' front ends*:
+  `Calculus/Decide.lean` (`NFml.toL`, `NFml.inL`; decision 83: the scoped
+  reduction is proved through it, `Fml.toLS_eq`),
+  `Calculus/DecideComplete.lean` (`NFml.valid_iff_reduce`),
+  `Calculus/DecideLang.lean`, `Tools/Inspect.lean` (`NFml.inL`),
+  `Calculus/Closer.lean`, `Calculus/Closers.lean` (`Derive.onErased`:
+  `sol_apply_upd`, `sol_fold_terms`, `sol_close_eval`, the
+  `sol_decide_*`/`sol_reduce`/`sol_reads` closers), `Calculus/Derive.lean`
+  (`sol_close_unwrap`), `Calculus/ProvesDerive.lean` (a leaf's first line
+  erases it, `Proves.close_leaf`), `Calculus/SolSpec.lean`,
+  `Frontend/Problems.lean` (`#solkey_derive?`'s search),
+  `Calculus/TacticSyntax.lean`, `Calculus/TheoryRewrite.lean` (`sol_rw`
+  on `NFml.Proves`).
+- *update rules and rewrites on the erasure* (decisions 86–88):
+  `Calculus/Rewrite.lean`, `Calculus/RewriteSyntax.lean` and
+  `Calculus/WalkSyntax.lean` (the scoped macros' fallbacks to
+  `NFml.Proves`), `Calculus/StateParts.lean`, `Calculus/Graft.lean`,
+  `Calculus/TermRules.lean`, `Calculus/Literals.lean`.
+- *chains past the program* (decisions 92–93; a merge past it is scoped
+  under `sol_chain.scopedPast`, off, proposal 101):
+  `Calculus/ChainBranches.lean`, `Calculus/ChainRewrites.lean`,
+  `Calculus/ChainKit.lean`, `Calculus/Chains.lean`,
+  `Calculus/ChainGen.lean`, `Calculus/RewriteChains.lean`,
+  `Calculus/RewriteChainGen.lean`, `Calculus/LastLine.lean`,
+  `Calculus/TreeData.lean`, `Calculus/ProofTree.lean`,
+  `Calculus/DelabErase.lean` (printing an erased line).
+- *notation and quoting of formulas with no modality*:
+  `Calculus/RuleSyntax.lean` (`dl{}`, `⊨`), `Calculus/SurfaceNotation.lean`,
+  `Calculus/SurfaceSpec.lean`, `Calculus/RuleKit.lean`,
+  `Calculus/Sequents.lean`, `Calculus/Surface.lean`, `Calculus/Print.lean`,
+  `Calculus/Quote.lean`, `Tools/Common.lean`, `Tools/Counterexample.lean`,
+  `Calculus/CloseTests.lean` (the closer's tests).
+- *the erased state* (`EState`, `State.erase`, `Fml.erase`'s reading;
+  decision 40: the typed step erases to it, and the closer's terms read
+  it): `Semantics/StateErase.lean`, `Semantics/StepErase.lean`,
+  `Calculus/Logic.lean`, `Calculus/SoundKit.lean`,
+  `Calculus/SoundArms.lean`, `Calculus/SoundLocal.lean`,
+  `Calculus/SoundLoops.lean`, `Calculus/SoundMem.lean`,
+  `Calculus/SoundStore.lean`, `Calculus/ProvesSound.lean`,
+  `Calculus/UpdateRules.lean`, `Calculus/FunContract.lean`,
+  `Calculus/Deploy.lean`, `Calculus/SeqRewrite.lean`,
+  `Calculus/RewriteScoped.lean`, `Calculus/StatePartsScoped.lean`,
+  `Calculus/UpdRuleScoped.lean`, `Calculus/DecideTyped.lean`,
+  `Calculus/Taclet.lean`, `Typing/Soundness.lean`,
+  `Typing/TypedRunInv.lean`, `Typing/Reachability.lean`,
+  `Typing/Constructibility.lean`, `Typing/Fits.lean` (the run
+  invariants, stated on the erasure as `canonInv`, `tightInv`,
+  `fitsInv`), `SortCheck/Faithfulness.lean`, `Tools/Taclet.lean`,
+  `Counterexamples/PreFixSortAnnotations.lean`.
+- *examples and the TestSuite*: `Corpus/Imported.lean` and
+  `TestSuite/Problems.lean` (the legacy statements' `NFml.wt` premise);
+  `TestSuite/Derived1`, `Derived7`, `Derived12` and
+  `Examples/Tactics/LoopsImport` (replays naming
+  `NFml.Proves.close_dropWt`, read as `core_leaf_close_wt`, and
+  `NFml.valid_iff_reduce`); `Examples/Benchmark/Mapping`,
+  `Examples/Benchmark/Purchase`, `Examples/Tactics/Constructors` and
+  `Solkey/Constructors` (`NFml.Proves.close`, `NFml.valid_iff_reduce`);
+  `Examples/ProofTree` and `Examples/Tactics/Dangling` (the pins of
+  `NFml.Derive`'s bounds); `Examples/ChainNotation` (`NFml.Via`),
+  `Examples/Tactics/SelectOnSaveConsr` (`NFml.Valid`),
+  `Examples/Tactics/TermTaclets` (term taclets on `NFml.Proves`); and,
+  importing `Calculus/NFmlClose.lean` or `Calculus/NFmlDerive.lean` for
+  `sol_close`/`sol_prove` only: `Examples/Benchmark/Coin`, `Examples/Benchmark/Counter`, `Examples/Benchmark/ERC20`, `Examples/Benchmark/EtherWallet`, `Examples/Benchmark/SimpleStorage`, `Examples/Chains/Arithmetic`, `Examples/Chains/CheckedArithmetic`, `Examples/Chains/Memory`, `Examples/Chains/MemoryArrays`, `Examples/Chains/MemoryCoverage`, `Examples/Chains/MemoryDelete`, `Examples/Chains/Payment`, `Examples/Chains/Storage`, `Examples/Chains/StorageArrays`, `Examples/Chains/StorageCoverage`, `Examples/Chains/StorageDelete`, `Examples/Notation`, `Examples/Tactics/ApplySteps`, `Examples/Tactics/Branch`, `Examples/Tactics/CallOperands`, `Examples/Tactics/Callback`, `Examples/Tactics/Calls`, `Examples/Tactics/Checked`, `Examples/Tactics/Contracts`, `Examples/Tactics/CrossDomain`, `Examples/Tactics/LedgerDelete`, `Examples/Tactics/Loops`, `Examples/Tactics/Memory`, `Examples/Tactics/Net`, `Examples/Tactics/Operators`, `Examples/Tactics/Revert`, `Examples/Tactics/Step`, `Examples/Tactics/StorageDelete`, `Examples/Tactics/StorageSuite`, `Examples/Tactics/Symex`, `Examples/Tactics/Tour`, `Examples/Tactics/TryCatch`, `Examples/Tactics/Values`, `Solkey/ScopedFlip`.
+
+Only docstrings name `NFml` in `Calculus/DecideScoped.lean`,
+`Calculus/DecideSyn.lean`, `Calculus/RewriteScoped.lean`,
+`Calculus/SeqRewrite.lean`, `Calculus/Symex.lean`,
+`Examples/ChainRewrites.lean`, `Examples/Tactics/Chains.lean` and
+`TestSuite/Suggestions.lean`.
 
 ## What is left
 
-**M6c, the rest**, each gated as above (the final gate's table is the
-baseline; a module that fails stays on `NFml` for good, decision 7):
+**On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
+Each item below is gated against the final W7 table, and a module that
+fails stays on the IR:
 - `NFmlClose`'s `simp` set over typed symbols (decision 82); the
   reduction's symbols over the typed state (a term still reads them on
   the erasure, `Tm.toLS_eq`, decision 83); `Atom.name` with `NFml.toL`
@@ -1599,7 +1748,8 @@ baseline; a module that fails stays on `NFml` for good, decision 7):
   `sol_chain.scopedPast` on by default and the laws, `~~>` and `calc`
   steps on the scoped line; `sol_apply_upd`, `sol_fold_terms` on the
   scoped leaf.
-- Then delete `NFml`, `Fml.erase` and `Semantics/Erased.lean`.
+- Each of these shortens the reader list ("M6c"); `NFml`, `Fml.erase` and
+  `Semantics/Erased.lean` go only when it is empty.
 
 **Besides M6c:**
 - The lead's calls on proposals 95–105; the user's on decision 11 (whether
@@ -1609,9 +1759,10 @@ baseline; a module that fails stays on `NFml` for good, decision 7):
   `../../../solidity-lean` (side-projects `lean/solkey`, branch
   `intrinsic`) and that branch merged.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`),
-  `check-testsuite.sh`, the `solkeycheck` executable, the reader's
+  `check-testsuite.sh` past its input check (the `../solkey` checkout is
+  stale, "W7 merge"), the `solkeycheck` executable (built), the reader's
   `keycheck` executable as a target and the VS Code extension's tests.  No
-  read-only finder/skeptic pass of W6's merge.
+  read-only finder/skeptic pass of W6's or W7's merge.
 - Lean docstrings still call the erased side "today's" in places and cite
   this record's sections (at `ad728b16` and `b8565d23`).
 - `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
