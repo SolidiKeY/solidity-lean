@@ -61,7 +61,7 @@ theorem chain (φ : Post Pushes [.alias (.struct "Token")]) :
           { storage := save(save(storage, tokens[tokens.length], find(storage, tokRef)), tokens.length, tokens.length + 1) }
           φ }
     ~[sequentialToParallel]~> dl![m]{
-        { tokRef := bob.account.token ‖ bobAcc := bob.account ‖
+        { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
             storage :=
               save(save(save(storage, bob.account.token.value, 10), tokens[tokens.length],
                   find(save(storage, bob.account.token.value, 10), bob.account.token)),
@@ -140,7 +140,7 @@ theorem refSource (φ : Post Pushes [.alias (.struct "Token")]) :
           { storage := save(save(storage, tokens[tokens.length], find(storage, tokRef)), tokens.length, tokens.length + 1) }
           φ }
     ~[sequentialToParallel]~> dl![m]{
-        { tokRef := bob.account.token ‖ bobAcc := bob.account ‖
+        { bobAcc := bob.account ‖ tokRef := bob.account.token ‖
             storage :=
               save(save(save(storage, bob.account.token.value, 10), tokens[tokens.length],
                   find(save(storage, bob.account.token.value, 10), bob.account.token)),
@@ -199,7 +199,7 @@ theorem chain (φ : Post Pushes [.alias (.struct "Token")]) :
           { bobAcc := bob.account } { tokRef := bobAcc.token } { sp := bucket.tokens }
           { storage := save(save(storage, sp[sp.length], find(storage, tokRef)), sp.length, sp.length + 1) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { tokRef := bob.account.token ‖ bobAcc := bob.account ‖ sp := bucket.tokens ‖
+        { bobAcc := bob.account ‖ tokRef := bob.account.token ‖ sp := bucket.tokens ‖
             storage :=
               save(save(save(storage, bob.account.token.value, 10), bucket.tokens[bucket.tokens.length],
                   find(save(storage, bob.account.token.value, 10), bob.account.token)),
@@ -226,7 +226,7 @@ theorem field (φ : Post Pushes [.alias (.struct "Token"), .val .uint, .val .uin
           { storage := save(storage, sp1.length, sp1.length + 1) ‖ sp := sp1[sp1.length] }
           { storage := save(storage, sp.value, pv) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { valueVal := 42 ‖ pv := 42 ‖ sp := bucket.tokens[bucket.tokens.length] ‖ sp1 := bucket.tokens ‖
+        { valueVal := 42 ‖ pv := 42 ‖ sp1 := bucket.tokens ‖ sp := bucket.tokens[bucket.tokens.length] ‖
             storage :=
               save(save(storage, bucket.tokens.length, bucket.tokens.length + 1), bucket.tokens[bucket.tokens.length].value,
                 42) }

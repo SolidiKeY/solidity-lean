@@ -83,8 +83,7 @@ through the alias `aliceAcc` and saved, the declaration dropped, the member sour
 `sp` (the worked example's `⇝*` binds it), and the updates merged before the copy, as the example prints them,
 but for `sp`: the declaration's hidden binder (`memoryLocalDeclInitDrop`) stands between the stack and `sp`'s
 update, and a merge does not move a stack that declares locals (`pv`, `aliceAcc`) under a binder
-(`Calculus/Merge.lean`), so `sp` joins the rest past the program, where the binder is absorbed into the
-update that sets `acc`, which declares it first (`Upd.absorb`).  Then `acc` a copy of the object `sp`
+(`Calculus/Merge.lean`), so `sp` joins the rest past the program.  Then `acc` a copy of the object `sp`
 names, and `v = acc.balance;` a read of the copy: the updates merged, the read of the copy a read of the
 storage copied (`readCopySt`), which the write answers (`findOnSave`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint]) :
@@ -121,21 +120,21 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint])
           { v := read(memory, acc.balance) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
             sp := alice.account ‖
+            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
             memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
             v := read(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)),
                 freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))).balance) } φ }
     ~[readCopySt]~> dl![m]{
         { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
             sp := alice.account ‖
+            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
             memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
             v := find(save(storage, alice.account.balance, 10), alice.account.balance) } φ }
     ~[findOnSave]~> dl![m]{
         { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
-            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
             sp := alice.account ‖
+            acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖
             memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
             v := 10 } φ } := by
   sol_chain
