@@ -274,7 +274,7 @@ def Tm.litVarsSM : {s : Srt} → Tm C Γ s → Option (List (AnyIdx Γ))
   | _, _ => none
 
 /-- **The locals a value term reads when it is built from literals and value
-operators alone** (`Surface.Tm.litVars`), by position; `none` when it reads
+operators alone**, by position; `none` when it reads
 anything else.  By the recursor. -/
 @[implemented_by Tm.litVarsSM]
 def Tm.litVarsS {s : Srt} (t : Tm C Γ s) : Option (List (AnyIdx Γ)) :=

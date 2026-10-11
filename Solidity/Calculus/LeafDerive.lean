@@ -31,10 +31,13 @@ a.push();`), is the push and then the alias to the last slot, the length
 read after the push (`Upd.pushSplit`, the scoped `Derive.pushAlias?`).
 
 A split's branch whose condition is ground under the context
-(`Hyps.groundS`, the scoped `Derive.groundCond`) is asked of the closer
-first: a refuted branch is closed by `Proves.closeFalse`
-(`Seq.refutes`), not walked.  The test reads only positions and literals
-and decides only when to ask; the closer proves what is closed.
+(`Hyps.groundS`) is asked of the closer first: `if (v < 0)` after
+`int v = -3;` takes one branch only.  KeY applies the update to the
+condition in each branch's antecedent, simplifies it, and closes the branch
+it became `false` in (`closeFalse`); here a refuted branch is closed by
+`Proves.closeFalse` (`Seq.refutes`), not walked.  The test reads only
+positions and literals and decides only when to ask; the closer proves what
+is closed.
 
 The functions the kernel evaluates are written with their recursors, each
 with a `match` twin for compiled code and a link theorem (Gate G0).
@@ -140,9 +143,9 @@ def _root_.Solidity.Hyps.groundInSM {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ 
     !ys.any (fun y => xs.contains y.2.toNatR) && H.groundInSM xs
 
 /-- **Whether every position of `xs` is bound by the context**, its
-entries innermost first, to a term of literals, transitively
-(`Derive.groundIn` by position).  A quantified local, a hidden binder's
-not yet assigned and one a loop anonymised are not.  By the recursor. -/
+entries innermost first, to a term of literals, transitively.  A
+quantified local, a hidden binder's not yet assigned and one a loop
+anonymised are not.  By the recursor. -/
 @[implemented_by Hyps.groundInSM]
 def _root_.Solidity.Hyps.groundInS {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List Nat) : Bool :=
   Hyps.rec (motive := fun _ _ => List Nat → Bool)
@@ -193,8 +196,7 @@ def _root_.Solidity.Fml.litPosM : {Γ : Ctx} → Fml C Γ → Option (List Nat)
   | _, _ => none
 
 /-- **The positions a first-order formula reads when its terms are built
-from literals and value operators alone** (`NFml.litVars` by position);
-`none` otherwise.  By the recursor. -/
+from literals and value operators alone**; `none` otherwise.  By the recursor. -/
 @[implemented_by Fml.litPosM]
 def _root_.Solidity.Fml.litPos {Γ : Ctx} (φ : Fml C Γ) : Option (List Nat) :=
   Fml.rec (motive := fun _ _ => Option (List Nat))
@@ -222,7 +224,7 @@ theorem _root_.Solidity.Fml.litPos_eq_litPosM {Γ : Ctx} (φ : Fml C Γ) :
 
 /-- **Whether a split's condition `c` is ground in the context `H`**: it
 reads only locals the context binds, through its updates, to terms of
-literals and value operators (`Derive.groundCond` by position). -/
+literals and value operators. -/
 def _root_.Solidity.Hyps.groundS {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ) : Bool :=
   match c.litPos with
   | some xs => H.groundInS xs
@@ -515,6 +517,18 @@ end PushAlias
 
 section Prep
 
+/-- A hidden binder of a value as the `∀` it reads as; any other kept. -/
+def _root_.Solidity.Fml.bindAsAll {Γ : Ctx} (m : Modality) (x : Var) :
+    (t : LTy) → Fml C (t :: Γ) → Fml C Γ
+  | .val p, φ => .all x p φ
+  | t, φ => .bind m x t φ
+
+theorem holds_bindAsAll {Γ : Ctx} {m : Modality} {x : Var} :
+    (t : LTy) → {φ : Fml C (t :: Γ)} → (σ : State C Γ) →
+      holds σ (Fml.bindAsAll m x t φ) → holds σ (.bind m x t φ)
+  | .val _, _, _, h => fun v => h v
+  | .alias _, _, _, h | .mem _, _, _, h | .old, _, _, h | .oldNet, _, _, h => h
+
 /-- `Fml.prepS`' compiled twin. -/
 def _root_.Solidity.Fml.prepSM : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .upd m U φ =>
@@ -524,12 +538,15 @@ def _root_.Solidity.Fml.prepSM : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .imp a φ => .imp a φ.prepSM
   | _, .and φ ψ => .and φ.prepSM ψ.prepSM
   | _, .all x p φ => .all x p φ.prepSM
-  | _, .bind m x t φ => .bind m x t φ.prepSM
+  | _, .bind m x t φ => Fml.bindAsAll m x t φ.prepSM
   | _, φ => φ
 
 /-- **A leaf rewritten where the fragment does not read it**, in the
 positions a leaf proves (not in a premise): a push and its returned alias
-one after the other (`Upd.pushSplit`).  Each step only implies the leaf
+one after the other (`Upd.pushSplit`); a hidden binder of a value as the
+`∀` it reads as (a `spec!{f}` obligation binds its parameters so), whose
+local the reduction then reads at its position before any update binds
+it.  Each step only implies the leaf
 (`holds_of_prepS`).  By the recursor. -/
 @[implemented_by Fml.prepSM]
 def _root_.Solidity.Fml.prepS {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ :=
@@ -541,7 +558,8 @@ def _root_.Solidity.Fml.prepS {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ :=
       | some ψ => ψ
       | none => .upd m U ih)
     (fun m P κ φ _ => .modal m P κ φ) (fun φ _ => .havoc φ) (fun x p _ ih => .all x p ih)
-    (fun m x t _ ih => .bind m x t ih) (fun xs φ _ => .anon xs φ) φ
+    (fun m x t _ ih => Fml.bindAsAll m x t ih)
+    (fun xs φ _ => .anon xs φ) φ
 
 theorem _root_.Solidity.Fml.prepS_eq_prepSM {Γ : Ctx} (φ : Fml C Γ) : φ.prepS = φ.prepSM := by
   induction φ with
@@ -577,7 +595,8 @@ theorem holds_of_prepS {Γ : Ctx} (φ : Fml C Γ) : ∀ σ : State C Γ, holds �
   | imp a φ _ ih => exact fun σ h ha => ih σ (h ha)
   | and φ ψ ihφ ihψ => exact fun σ h => ⟨ihφ σ h.1, ihψ σ h.2⟩
   | all x p φ ih => exact fun σ h v => ih _ (h v)
-  | bind m x t φ ih => exact fun σ h => Modality.forallB_imp (fun v => ih _) h
+  | bind m x t φ ih =>
+    exact fun σ h => Modality.forallB_imp (fun v => ih _) (holds_bindAsAll t σ h)
   | _ => exact fun _ h => h
 
 end Prep
