@@ -385,9 +385,9 @@ theorem Fml.closableB_sound {Γ : Ctx} (φ : Fml C Γ) {ns : List Var}
 
 /-! ## The leaf in one pass
 
-`Proves.close_leaf` (`Calculus/ProvesDerive.lean`; until W9.4 the walk's
-erased fallback) asks two things of a leaf: `Fml.closableB`, and its
-erasure (`Fml.erase`), which it hands to today's closer.  `Fml.closeErase` computes
+The walk's erased fallback (`Calculus/ProvesDerive.lean`, until W9.4)
+asked two things of a leaf: `Fml.closableB`, and its erasure
+(`Fml.erase`), which it handed to today's closer.  `Fml.closeErase` computes
 both in one pass, `Fml.closableB`'s binder names beside the erasure
 (`Fml.closeErase_eq`), so the kernel walks the leaf's context once.  The
 erasure is written by the recursors (Gate G0, conditions 1 and 2: `Fml.erase`,

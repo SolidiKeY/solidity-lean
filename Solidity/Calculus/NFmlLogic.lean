@@ -33,9 +33,9 @@ Since M6c 6c (decisions 89, 90) the scoped sequent (`Calculus/Proves.lean`)
 has every rule of this one (`rewrite` among them, a modality still open
 or not), and a leaf `sol_prove` leaves on `⊢` is a scoped sequent: this
 calculus is the decision procedure's IR (decision 7), what a scoped leaf
-erases to (`Proves.close_leaf`, on `⊢` and, since W7, on `⊨`, whose
-`sol_prove` is the same walk) and the sequents written over today's terms
-(`Examples/Tactics/TermTaclets.lean`).
+erased to (`Proves.close`; since W9.4 only a chain's last line past the
+program and the erased closer's tests take it, the walk's leaves are
+closed scoped).
 -/
 
 namespace Solidity
