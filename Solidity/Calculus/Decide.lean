@@ -3540,7 +3540,7 @@ theorem NFml.toL_holds :
 
 /-- `⊨ φ` is the formula with its updates pushed in, true in every state. -/
 theorem NFml.valid_iff_toL (φ : NFml C) (hf : φ.inL Sym.empty = true) :
-    (⊨ φ) ↔ ∀ σ, (φ.toL Sym.empty).holds σ :=
+    NFml.Valid φ ↔ ∀ σ, (φ.toL Sym.empty).holds σ :=
   forall_congr' fun σ => NFml.toL_holds φ (Rel.empty σ) hf
 
 /-! ## What the storage reads after a write
@@ -9794,7 +9794,7 @@ Example: what symbolic execution leaves of
 is valid exactly when its reduction, a statement about `k`, `j` and whether
 `balances[k]` and `balances[j]` are locations, holds in every state. -/
 theorem _root_.Solidity.NFml.valid_iff_reduce (φ : NFml C) (hf : φ.inL Sym.empty = true) :
-    (⊨ φ) ↔ ∀ σ, φ.reduce.holds σ := by
+    NFml.Valid φ ↔ ∀ σ, φ.reduce.holds σ := by
   rw [NFml.valid_iff_toL φ hf]
   exact forall_congr' fun σ => (LFml.elim_holds σ _).symm
 

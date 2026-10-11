@@ -41,9 +41,9 @@ printer, as `dl{ … }` (a hidden binder printing as nothing).  A `∀` written
 in the formula, past the parameters, is marked explicit on its variable
 (`Fml.markExplicit`, decision 28), which only the tactics read.  `cdl[C]{ φ }`,
 `cdl[C, m]{ φ }`, `cdl!{ φ }`, `cdl![m]{ φ }` are `dl[C]{ φ }`'s spellings,
-and `dl[C]{ φ }` itself reads this way when `φ` has a modality
-(`elabDlAuto`; decision 11), its parameters bound by hidden binders rather
-than `∀`.
+and `dl[C]{ φ }` itself reads this way (`elabDlAuto`; decision 11, and
+W9.4 for a formula with no modality), its parameters bound by hidden
+binders rather than `∀`.
 -/
 
 namespace Solidity
@@ -432,25 +432,17 @@ macro_rules
   | `(cdl![ $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) =>
     `(cdl[InContract.contract, $m]{ ($[$as],* ⟹ $φ) })
 
-/-! ## `dl[C]{ … }` with a modality: scoped -/
+/-! ## `dl[C]{ … }`: scoped -/
 
 /-- Whether a raw formula, as `expandFml` writes it, has a modality. -/
 def rawHasModal (raw : Lean.Syntax) : Bool :=
   (raw.find? fun s => s.isIdent && s.getId.eraseMacroScopes.toString.endsWith "RawFml.modal").isSome
 
 open Lean Elab Term Meta in
-/-- Whether `dl[C]{ φ }` reads scoped: `φ` has a modality. -/
-def readsScoped (φ : TSyntax `dl_fml) : TermElabM Bool := do
-  let r : Reading := { either := some (mkCIdent ``Modality.diamond), holes := fmlHoles φ }
-  let some raw ← (try some <$> liftMacroM (expandFml r φ) catch _ => pure none) | return false
-  return rawHasModal raw
-
-open Lean Elab Term Meta in
-/-- `dl[C]{ φ }` and `dl[C, m]{ φ }`: `cdl[C]{ φ }` (`elabCdlAt`) when
-`readsScoped`, but with its parameters bound by hidden binders, printing
-as nothing, as today's `dl!` leaves them free (the flip's `cdl!` binds a
-value one by `∀`); today's reading (`elabDlAt`, the closer's `NFml`)
-otherwise. -/
+/-- `dl[C]{ φ }` and `dl[C, m]{ φ }`: `cdl[C]{ φ }` (`elabCdlAt`), a
+`Fml C []` with or without a modality, but with its parameters bound by
+hidden binders, printing as nothing (the flip's `cdl!` binds a value one by
+`∀`). -/
 @[term_elab dlAt, term_elab dlAtM]
 def elabDlAuto : TermElab := fun stx ty? => do
   let (c, m?, φ) ← match stx with
@@ -458,7 +450,6 @@ def elabDlAuto : TermElab := fun stx ty? => do
     | `(dl[ $c, $m ]{ $φ:dl_fml }) => pure (c, some m, φ)
     | _ => throwUnsupportedSyntax
   if let some ty := ty? then tryPostponeIfMVar ty
-  unless ← readsScoped φ do throwUnsupportedSyntax
   elabCdlAt c m? φ (useAll := false)
 
 

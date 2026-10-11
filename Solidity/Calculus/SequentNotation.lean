@@ -5,10 +5,10 @@ import Solidity.Calculus.RuleSyntax
 # Scoped sequents, as input
 
 `Calculus/Delab.lean` prints a scoped goal `Proves C R Γ₀ H φ` as
-today's sequent, `dl{ ..H, a ⟹[R] φ }`; under
-`open scoped Solidity.Sequent` the same text reads back as the scoped
-judgement, so a rule of `Proves` (or a goal) can be stated as it
-prints.  The context is a telescope (`Hyps`), built from the left:
+the sequent `dl{ ..H, a ⟹[R] φ }`, and the same text reads back as the
+scoped judgement (since W9.4 wherever this module is imported; the closer's
+sequent is `open scoped Solidity.NFmlSeq`'s, `Calculus/RuleSyntax.lean`), so
+a rule of `Proves` (or a goal) can be stated as it prints.  The context is a telescope (`Hyps`), built from the left:
 `..H, a, {U} [ ]` is `((H.pre a).upd .box U)`, and with no `..H` it starts
 at `Hyps.nil`.
 
@@ -105,7 +105,7 @@ def seqHyps (hs : Array (TSyntax `dl_hyp)) : MacroM Lean.Term := do
       return ← (hs.extract 1 hs.size).foldlM seqHyp H
   hs.foldlM seqHyp (← `(Hyps.nil))
 
-scoped macro_rules
+macro_rules
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
     `(Proves _ .all _ $(← seqHyps hs) $(← seqFml φ))
   | `(dl{ $[$hs:dl_hyp],* ⟹ₖ $φ:dl_fml }) => do

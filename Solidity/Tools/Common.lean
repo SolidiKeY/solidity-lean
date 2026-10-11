@@ -1,4 +1,4 @@
-import Solidity.Update
+import Solidity.Syntax
 import Solidity.Tools.Show
 
 /-!

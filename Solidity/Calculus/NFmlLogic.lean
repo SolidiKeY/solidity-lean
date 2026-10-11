@@ -41,6 +41,7 @@ erases to (`Proves.close_leaf`, on `⊢` and, since W7, on `⊨`, whose
 namespace Solidity
 
 open Semantics
+open scoped NFmlSeq
 
 variable {C : Contract}
 

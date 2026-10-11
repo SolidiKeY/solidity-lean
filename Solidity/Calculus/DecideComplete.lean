@@ -961,7 +961,7 @@ nothing below it: the constraint of `x.a.b` says that where `x.a` shows a
 word, `x.a.b` shows nothing. -/
 theorem _root_.Solidity.NFml.valid_iff_cons {C : Contract} (φ : NFml C)
     (hf : φ.inL Sym.empty = true) (hi : φ.reduce.initOnly = true) :
-    (⊨ φ) ↔ ∀ σ (o : List Seg → Obs),
+    NFml.Valid φ ↔ ∀ σ (o : List Seg → Obs),
       consAll (envOf σ) o φ.reduce.reads → φ.reduce.holdsA (envOf σ) o := by
   rw [NFml.valid_iff_reduce φ hf]
   exact LFml.valid_iff_cons _ hi

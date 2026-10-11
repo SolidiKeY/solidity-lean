@@ -3,23 +3,26 @@ import Solidity.Calculus.Spec
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Proves
+import Solidity.Calculus.SequentNotation
 
 /-!
 # The flip switch: `open scoped Solidity.Scoped`
 
 With the scope open, today's notation reads the scoped calculus
-(`docs/intrinsic.md`, W2 `tree`): the same text, a scoped term.  A formula
-with a modality reads scoped without it (`elabDlAuto`, decision 11), so the
-switch matters only for one with none, which reads as the closer's `NFml`
-when it is off:
+(`docs/intrinsic.md`, W2 `tree`): the same text, a scoped term.  Since W9.4
+every formula reads scoped without it too (`elabDlAuto`, decision 11), so
+the switch decides only how a parameter is bound, by `∀` (`cdl!`) or by a
+hidden binder printing as nothing (`dl!` outside the scope):
 
 * `dl!{ φ }`, `dl![m]{ φ }`, `dl[C]{ φ }`, `dl[C, m]{ φ }` and their sequent
   lines (`dl!{ Γ ⟹ φ }`) are `cdl…`'s (`Calculus/Notation.lean`): a
   `Fml C []`, with or without a modality;
 * `spec!{f}`, `spec[C]{f}` are `cspec…`'s, `problem!{constructor}` is
   `cproblem…`'s (`Calculus/Spec.lean`);
-* `⊨ φ` is `Valid φ` for a scoped `φ`, and today's `Valid φ` for any
-  other (`valid% φ`); `⊢ φ` is the scoped sequent with nothing assumed,
+* `⊨ φ` is `Valid φ` (`Calculus/RuleSyntax.lean`, either side); under the
+  scope `valid% φ`, which reads the closer's `Valid` of a formula that is
+  no `Fml` (a chain's line past the program, `Calculus/RewriteChains.lean`);
+  `⊢ φ` is the scoped sequent with nothing assumed,
   `Proves C .all [] .nil φ`;
 * the commands of `Tools/Inspect.lean` (`#wp`, `#step`, `#proof_tree`,
   `#proof_node`, `#proof_tree_json`) read `dl!{ … }` as scoped
@@ -66,6 +69,12 @@ def elabValidDispatch : TermElab := fun stx _ => do
 @[app_unexpander Valid]
 def unexpandValid : PrettyPrinter.Unexpander
   | `($_ $φ) => `(⊨ $φ)
+  | _ => throw ()
+
+/-- `holds σ φ` prints as `σ ⊧ φ`. -/
+@[app_unexpander holds]
+def unexpandHolds : PrettyPrinter.Unexpander
+  | `($_ $σ $φ) => `($σ ⊧ $φ)
   | _ => throw ()
 
 namespace Scoped

@@ -21,11 +21,11 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ [ s; ] ⇝ p }`, `dl{ ⟨ s; ⟩ ⇝ p }` | a taclet for the box only, the diamond only |
 | `dl[LeanTaclet C k]{ ⟨ s; ⟩ ⇝ p }` | a rule of another judgement, `LeanTaclet C k .diamond s p` |
 | `dl{ p }` | a premise |
-| `dl{ ..Γ, c, {U} ⟹[R] φ }` | the closer's sequent `Proves R (Γ ++ [.pre c] ++ [.upd m U]) φ` (`Calculus/NFmlLogic.lean`; a scoped sequent with a modality is `Calculus/SequentNotation.lean`'s) |
+| `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`); under `open scoped Solidity.NFmlSeq` the closer's `NFml.Proves R (Γ ++ [.pre c] ++ [.upd m U]) φ` (`Calculus/NFmlLogic.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
 | `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
-| `⊨ φ` | `Valid φ` |
-| `σ ⊧ φ` | `holds σ φ` |
+| `⊨ φ` | `Valid φ`, scoped (`Calculus/Logic.lean`) |
+| `σ ⊧ φ` | `holds σ φ`, scoped |
 
 At a state variable a write is `save(storage, gsp, se)` and a read
 `find(storage, gsp)`, as solkey writes them; `store`/`select` still read.
@@ -340,8 +340,8 @@ syntax:25 "⊨ " term:26 : term
 syntax:50 term:51 " ⊧ " term:51 : term
 
 macro_rules
-  | `(⊨ $φ:term) => `(NFml.Valid $φ)
-  | `($σ:term ⊧ $φ:term) => `(NFml.holds $σ $φ)
+  | `(⊨ $φ:term) => `($(Lean.mkIdent `Solidity.Valid) $φ)
+  | `($σ:term ⊧ $φ:term) => `($(Lean.mkIdent `Solidity.holds) $σ $φ)
 
 /-! ## Side conditions
 
@@ -1755,8 +1755,9 @@ The lines read into `Solidity`'s scoped syntax under `open scoped
 Solidity.Schema`.  The statements and expressions are read as above, from
 `coreScope`: a fresh local is a position, a `\find`'s schema variable is
 weakened past the fresh locals before it (`headOfCore`); a program is
-`Prog.cons`.  The terms are read as the closer's (`Term.find`, `NFml.eq`)
-and then turned into their scoped twins (`coreNames`).  The premise: an
+`Prog.cons`.  The terms are read as the closer's (`Term.find`) and then
+turned into their scoped twins (`coreNames`); a formula is written scoped
+(`fmlC`).  The premise: an
 unfolding premise pops its fresh locals (`Premise.unfold P (Ext.push^d
 .refl)`), a `\find` that declares binds its local in front of the premise
 (`Premise.bind`) or declares it in the update (`Upd.decl`), a split says how
@@ -1764,13 +1765,13 @@ its goals end (`BlockKind`), a check has no program. -/
 
 /-- The scoped twin of a family of the closer's terms (`Update.lean`): the
 term symbols (`Term.find`, `STerm.save`, …) are `Calculus/Rules.lean`'s,
-under `Tms` (`Solidity.MAddr` is the typed heap's); a formula is `Fml`; a
-term, an update and its elements their families of the same name. -/
+under `Tms` (`Solidity.MAddr` is the typed heap's); a term, an update and
+its elements their families of the same name.  A formula is written scoped
+(`fmlC`). -/
 def coreFamily? : Lean.Name → Option Lean.Name
   | n =>
     if [`Term, `PTerm, `STerm, `SValT, `ITerm, `MAddr, `MTerm, `MValT].contains n then
       some (`Tms ++ n)
-    else if n == `NFml then some `Fml
     else if [`Tm, `UpdElem, `Upd].contains n then some n
     else none
 
@@ -1868,41 +1869,45 @@ def schemaUpdCore (Γ : Scope) (found : Option String) (U : TSyntax `dl_upd) :
     | _ => Macro.throwErrorAt e "a scoped taclet's update has no update variable"
   return (acc, Γ')
 
+/-- `Solidity.Fml.c`, a constructor of the scoped formulas, by its full
+name: no term of the closer's (`NFml`) is written for `coreNames` to turn. -/
+def fmlC (c : String) : Lean.Term := Lean.mkCIdent (`Solidity.Fml ++ Name.mkSimple c)
+
 /-- A scoped formula, its names read in `Γ`: a fresh local an update in it
 declares (`{ b := cond } (b = TRUE → …)`) is a position in the formula after
 it.  The forms the rule lines write. -/
 partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
-  | `(dl_fml| true) => `(NFml.tt)
-  | `(dl_fml| false) => `(NFml.not NFml.tt)
+  | `(dl_fml| true) => pure (fmlC "tt")
+  | `(dl_fml| false) => `($(fmlC "not") $(fmlC "tt"))
   | `(dl_fml| $a:dl_term = $b:dl_term) => do
     if let `(dl_term| $c:ident) := b then
       let n := c.getId.toString
       if n == "TRUE" || n == "FALSE" then
         let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
-        return ← `(NFml.eqD $(← schemaTerm Γ .val a) (Term.lit (.bool $v)))
-    `(NFml.eq $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+        return ← `($(fmlC "eqD") $(← schemaTerm Γ .val a) (Term.lit (.bool $v)))
+    `($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
-    `(NFml.eq $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
-  | `(dl_fml| defined( $t:dl_term )) => do `(NFml.defined $(← schemaTerm Γ .val t))
-  | `(dl_fml| ¬ $φ:dl_fml) => do `(NFml.not $(← schemaFmlCore Γ φ))
+    `($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_fml| defined( $t:dl_term )) => do `($(fmlC "defined") $(← schemaTerm Γ .val t))
+  | `(dl_fml| ¬ $φ:dl_fml) => do `($(fmlC "not") $(← schemaFmlCore Γ φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) => do
-    `(NFml.and $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
+    `($(fmlC "and") $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
   | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do
-    `(NFml.imp $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
+    `($(fmlC "imp") $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
   | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
     let m ← match ← fmlModality? (schemaIdent "m") φ with
       | some m => pure m
       | none => `(Modality.diamond)
     let (U, Γ') ← schemaUpdCore Γ none U
-    `(NFml.upd $m $U $(← schemaFmlCore Γ' φ))
+    `($(fmlC "upd") $m $U $(← schemaFmlCore Γ' φ))
   | `(dl_fml| ( $φ:dl_fml )) => schemaFmlCore Γ φ
   | `(dl_fml| ‹ $t:term ›) => pure t
   | `(dl_fml| $x:ident) => pure x
   | `(dl_fml| $a:dl_term <= $b:dl_term) => do
-    `(NFml.eqD (Term.binop BinOp.le PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+    `($(fmlC "eqD") (Term.binop BinOp.le PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
         (Term.lit (.bool true)))
   | `(dl_fml| $a:dl_term < $b:dl_term) => do
-    `(NFml.eqD (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+    `($(fmlC "eqD") (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
         (Term.lit (.bool true)))
   | φ => Macro.throwErrorAt φ "no scoped reading of this formula yet"
 
@@ -2054,6 +2059,18 @@ def schemaHyps (hs : Array (TSyntax `dl_hyp)) : MacroM Lean.Term := do
 macro_rules
   | `(dl_schema{ $φ:dl_fml }) => schemaFml φ
   | `(dl{ $φ:dl_fml }) => schemaFml φ
+  | `(tm{ $t:dl_term }) => schemaTerm rawScope (tmSort t) t
+
+end Expand
+
+/-! Under `open scoped Solidity.NFmlSeq`, a sequent `dl{ ..Γ ⟹[R] φ }` is
+the closer's (`NFml.Proves`, `Calculus/NFmlLogic.lean`).  Elsewhere it is
+the scoped judgement `Proves` (`Calculus/SequentNotation.lean`). -/
+namespace NFmlSeq
+
+open Lean (mkIdent)
+
+scoped macro_rules
   | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
     `($(mkIdent `Solidity.NFml.Proves) $(mkIdent `Solidity.RuleSet.all) $(← schemaHyps hs)
       $(← schemaFml φ))
@@ -2062,9 +2079,8 @@ macro_rules
       $(← schemaFml φ))
   | `(dl{ $[$hs:dl_hyp],* ⟹[ $R:term ] $φ:dl_fml }) => do
     `($(mkIdent `Solidity.NFml.Proves) $R $(← schemaHyps hs) $(← schemaFml φ))
-  | `(tm{ $t:dl_term }) => schemaTerm rawScope (tmSort t) t
 
-end Expand
+end NFmlSeq
 
 namespace Schema
 

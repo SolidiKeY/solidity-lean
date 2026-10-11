@@ -109,8 +109,6 @@ abbrev Represents (C : Contract) (L b : Nat) {Γ : Ctx} (F : Evm.Frag Γ)
     (σ : State C Γ) (m : Evm.Machine) : Prop :=
   Evm.Sim C L b F σ.sem (Evm.Look.ofTEnv σ.env) m
 
-scoped notation:25 "⊨ " φ:26 => Valid φ
-scoped notation:50 σ:51 " ⊧ " φ:51 => holds σ φ
 scoped notation:25 H:26 " ⊨ " φ:26 => ValidUnder H φ
 scoped notation:25 H:26 " ⊢ " φ:26 => Derives H φ
 scoped notation:25 "⊢ " φ:26 => Derives Hyps.nil φ

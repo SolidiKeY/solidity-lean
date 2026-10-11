@@ -19,11 +19,12 @@ The printers do not change: a formula prints as `dl{ φ }`, and the `φ` it
 shows reads back through `dl[C]{ φ }` (or `dl!{ φ }`) as the formula it is —
 at its modality, `dl![m]{ φ }`, when it has `⟨[ ]⟩` or is a box's: an update
 prints `{U} ψ` whatever the modality it is judged at.  The reading is
-mini-solkey's: the macros build a raw formula, `elabDl` resolves its names
-at compile time (`elabAgainst`, as `sol[C]{ … }` does), and `NFml.quote`
-(`Calculus/NFmlQuote.lean`) splices the result, the closer's formula.  A
-formula with a modality is read scoped (`Fml C []`,
-`Calculus/Notation.lean`'s `elabDlAuto`); the examples are there.
+mini-solkey's: the macros here build a raw formula, which
+`Calculus/Notation.lean`'s `elabDlAuto` reads scoped at compile time
+(`elabAgainst`, as `sol[C]{ … }` does), a `Fml C []`, with or without a
+modality; the examples are there.  `elabDl` below, the closer's reading
+(`NFml`), is read only by `Calculus/Chains.lean`'s lines past the program
+(`elabDlN`).
 
 **Lean terms in a formula.**  `dl![m]{ φ }` (`dl[C, m]{ φ }`) reads `φ` at
 the modality `m`, a Lean term — a variable, `.box`, `.diamond`: `⟨[ P ]⟩ ψ`
@@ -31,11 +32,11 @@ is `P` under `m`, and an update with no modality under
 it is judged at `m`, so the last line of a box derivation is
 `dl![.box]{ { x := 1 } x == 1 }`.  In `dl!{ φ }` such an update is judged at
 the diamond, and `⟨[ ]⟩` is refused.  A name where a formula stands, or
-`‹t›`, is a Lean formula: the postcondition `φ` (a `NFml.Post C`,
-`Calculus/RewriteChains.lean`), which prints back as its name.  The reader runs as compiled
+`‹t›`, is a Lean formula: the postcondition `φ` (a `Post C Γ`,
+`Calculus/NotationResolve.lean`), which prints back as its name.  The reader runs as compiled
 code, which no Lean variable can enter, so each of these stands in for
-something closed while the formula is read, and one walk (`fillSlots`) puts
-the Lean terms back: a formula is read as a slot (`NFml.slot`), and the
+something closed while the formula is read, and one walk (`fillSlotsC`) puts
+the Lean terms back: a formula is read as a slot (`Fml.slotC`), and the
 modality as the difference between two readings, one at the diamond and one
 at the box — the reading never looks at a modality, so they differ exactly
 where `m` goes.
@@ -46,13 +47,13 @@ with `→` ("Chain-only spellings" below).  In `dl{ Γ ⟹ φ }`, and in the
 goals a `⊢` derivation prints, it is a sequent, a `Proves` with its context
 apart, which no `dl!{ … }` reads back.
 
-**Two equations.**  `a = b` here is the interpreter's equation, `NFml.eqD`:
+**Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
 both sides return, with one value — what `==` means, and what `a = b`
 meant before `holds` read an equation in the Theory.  `a ≐ b` is the total
-one, `NFml.eq` (KeY's `=`, which a taclet writes as `=` in `dl{ … }`): it
+one, `Fml.eq` (KeY's `=`, which a taclet writes as `=` in `dl{ … }`): it
 compares what the sides denote, and may hold of sides that halt.
-`defined(t)` says `t` returns.  The printer follows: `NFml.eqD` prints as `=`
-(a comparison `a < b` as itself), `NFml.eq` as `≐`.
+`defined(t)` says `t` returns.  The printer follows: `Fml.eqD` prints as `=`
+(a comparison `a < b` as itself), `Fml.eq` as `≐`.
 
 What a name is:
 
@@ -1101,7 +1102,7 @@ variable the formula writes has (`elabFml`): a line of a derivation leaves a
 gap exactly where the elaborator numbered a capture it does not show, the
 locals of a callee its call statement carries.  With `pastAll`, a capture
 is numbered past every written index instead: a Lean formula in the formula
-(`‹…›`) may write fresh variables the reading does not see (`elabDlAt`). -/
+(`‹…›`) may write fresh variables the reading does not see. -/
 def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (NFml C) :=
   let (used, declared) := φ.names
   let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
@@ -1186,65 +1187,6 @@ syntax (name := dlSeq) "dl[" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }"
 @[inherit_doc dlSeq] syntax "dl[" term ", " term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
 @[inherit_doc dlSeq] syntax "dl!{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
 @[inherit_doc dlSeq] syntax "dl![" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
-
-open Lean Elab Term Meta in
-/-- `dl[C, m]{ φ }`, `m` optional.  A constructor is read as itself, any other
-modality twice, at the diamond and at the box, in one evaluation (the two
-sides of a conjunction); `fillSlots` then puts `m` and the Lean formulas
-back. -/
-def elabDlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml) :
-    TermElabM Lean.Expr := do
-  let holes := fmlHoles φ
-  let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
-  -- a hole that is no postcondition (`φ : NFml.Post C` writes no fresh variable)
-  -- may write fresh variables the reading cannot see: captures are then
-  -- numbered past every written index
-  let opaqueHole ← holes.anyM fun h => do
-    let some t := fmlHole? h | return true
-    withoutModifyingState do
-      try
-        let e ← withoutErrToSorry <| withoutAutoBoundImplicit <| elabTerm t none
-        return !(← whnfR (← inferType e)).isAppOf `Solidity.NFml.Post
-      catch _ => return true
-  let pastAll := quote opaqueHole
-  let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
-    liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
-  let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
-    let raw ← read μ
-    elabAgainst c fun q => `((elabDl $c $raw $pastAll).map (NFml.quote $q))
-  let (d, b) ← match m? with
-    | none => do let e ← once none; pure (e, e)
-    | some m =>
-      if m.isConstOf ``Modality.diamond || m.isConstOf ``Modality.box then
-        let e ← once m.constName?
-        pure (e, e)
-      else
-        let rd ← read ``Modality.diamond
-        let rb ← read ``Modality.box
-        let e ← elabAgainst c fun q =>
-          `((do pure (NFml.and (← elabDl $c $rd $pastAll) (← elabDl $c $rb $pastAll))).map
-              (NFml.quote $q))
-        let #[_, d, b] := e.getAppArgs | throwError "dl[C, m]: not two readings{indentExpr e}"
-        pure (d, b)
-  if holes.isEmpty && d == b then return d
-  -- a Lean formula is the closer's
-  let ty ← whnfR (← inferType d)
-  let φs ← holes.mapM fun h => do
-    let some t := fmlHole? h | throwError "dl[C]: not a formula hole"
-    withRef h do
-      -- A misspelt `true` is not a new variable of the signature.
-      if let `($x:ident) := t then
-        if (← resolveLocalName x.getId).isNone && (← resolveGlobalName x.getId).isEmpty then
-          throwError "a name where a formula stands is a Lean formula (φ : NFml.Post C): unknown `{x}`"
-      withoutAutoBoundImplicit do elabTermEnsuringType t ty
-  match fillSlots m? φs d b with
-  | .ok e => return e
-  | .error msg => throwError "dl[C, m]: {msg}"
-
-open Lean Elab Term Meta in
-elab_rules : term
-  | `(dl[ $c ]{ $φ:dl_fml }) => elabDlAt c none φ
-  | `(dl[ $c, $m ]{ $φ:dl_fml }) => elabDlAt c (some m) φ
 
 macro_rules
   | `(dl!{ $φ:dl_fml }) => `(dl[InContract.contract]{ $φ })
