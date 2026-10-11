@@ -60,113 +60,113 @@ theorem chain (φ : Post TestSuite [.val .uint, .val .uint]) :
           { storage := delAt(storage, alice.account) } { sp4 := alice.account } { b := find(storage, sp4.balance) }
           { sp6 := alice.account } { sp5 := sp6.token } { v := find(storage, sp5.value) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
             sp4 := alice.account ‖
             b :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.balance) ‖
-            sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.token.value) }
           φ }
     ~[findMemberCons]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
             sp4 := alice.account ‖
             b :=
               find(select(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                   alice),
                 account.balance) ‖
-            sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.token.value) }
           φ }
     ~[selectOnDelAtMember]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
             sp4 := alice.account ‖
             b :=
               find(delAt(select(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice),
                   account),
                 account.balance) ‖
-            sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.token.value) }
           φ }
     ~[selectOnSaveMemberIn]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
             sp4 := alice.account ‖
             b :=
               find(delAt(save(select(save(storage, alice.account.balance, 100), alice), account.token.value, 7), account),
                 account.balance) ‖
-            sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.token.value) }
           φ }
     ~[selectOnSaveMemberIn]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
             sp4 := alice.account ‖
             b :=
               find(delAt(save(save(select(storage, alice), account.balance, 100), account.token.value, 7), account),
                 account.balance) ‖
-            sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.token.value) }
           φ }
     ~[findOnDelAtBelow]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp4 := alice.account ‖ b := 0 ‖ sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                 alice.account.token.value) }
           φ }
     ~[findMemberCons]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp4 := alice.account ‖ b := 0 ‖ sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(select(delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account),
                   alice),
                 account.token.value) }
           φ }
     ~[selectOnDelAtMember]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp4 := alice.account ‖ b := 0 ‖ sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(select(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice),
                   account),
                 account.token.value) }
           φ }
     ~[selectOnSaveMemberIn]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp4 := alice.account ‖ b := 0 ‖ sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(select(save(storage, alice.account.balance, 100), alice), account.token.value, 7), account),
                 account.token.value) }
           φ }
     ~[selectOnSaveMemberIn]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖
+            sp4 := alice.account ‖ b := 0 ‖ sp5 := alice.account.token ‖ sp6 := alice.account ‖
             v :=
               find(delAt(save(save(select(storage, alice), account.balance, 100), account.token.value, 7), account),
                 account.token.value) }
           φ }
     ~[findOnDelAtBelow]~> dl![m]{
-        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp3 := alice.account ‖ sp2 := alice.account.token ‖
+        { se1 := 100 ‖ sp1 := alice.account ‖ se2 := 7 ‖ sp2 := alice.account.token ‖ sp3 := alice.account ‖
             storage := delAt(save(save(storage, alice.account.balance, 100), alice.account.token.value, 7), alice.account) ‖
-            sp4 := alice.account ‖ b := 0 ‖ sp6 := alice.account ‖ sp5 := alice.account.token ‖ v := 0 }
+            sp4 := alice.account ‖ b := 0 ‖ sp5 := alice.account.token ‖ sp6 := alice.account ‖ v := 0 }
           φ } := by
   sol_chain
 #last_line chain
