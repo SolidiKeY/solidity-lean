@@ -1,5 +1,5 @@
 import Solidity.Calculus.PrintStmt
-import Solidity.Calculus.NFmlQuote
+import Solidity.Calculus.Quote
 import Solidity.Syntax.Quote
 
 /-!
@@ -7,11 +7,15 @@ import Solidity.Syntax.Quote
 
 A formula of `Calculus/Fml.lean` printed in the `dl{ … }` notation of
 `Calculus/RuleSyntax.lean`: the KeY text.
-Terms and updates are printed by those printers themselves, on the erased
-part quoted (`Calculus/NFmlQuote.lean`); a block is quoted as it is
+Terms and updates are quoted as they are (`Tm.quote`, `Upd.quote`,
+`Calculus/Quote.lean`) and printed by `Calculus/PrintTerm.lean`'s printers
+of the scoped terms (`ppTermS`, `ppUpdS`); a block is quoted as it is
 (`Prog.quoteShared`) and printed by `Calculus/PrintStmt.lean`'s printer of
-the scoped syntax (`ppProgS`), its names those of its context.  This module
-only walks the formula, with the names of its context beside it.
+the scoped syntax (`ppProgS`); each with the names of its context.  This
+module only walks the formula, with the names of its context beside it.
+Under `pp.sol.twinCheck` each term and update is printed through its
+erasure too (`Tm.erase`, `Upd.erase`), and a difference is an error
+(`Delab.twinCompare`).
 
 What has no KeY text prints as KeY would have it: a frame's statements
 follow the program, a block's end is `}`, and a capture's end, a pop of an
@@ -25,6 +29,7 @@ namespace Solidity
 
 open Lean Meta
 open Solidity (ppTerm ppUpd)
+open Solidity.Delab (twinCheckOn twinCompare)
 
 variable {C : Contract} [FreshNames] (c : Lean.Expr)
 
@@ -33,7 +38,27 @@ def fmtCat (cat : Lean.Name) (stx : Lean.Syntax) : MetaM String := do
   return (← PrettyPrinter.ppCategory cat stx).pretty 100000
 
 def Tm.show {Γ : Ctx} (ns : List Var) (t : Tm C Γ .val) : MetaM String := do
-  fmtCat `dl_term (← ppTerm (Surface.Tm.quote c (t.erase ns)))
+  let new ← fmtCat `dl_term (← Delab.ppTermS (ns.map toExpr) (t.quote c))
+  if ← twinCheckOn then
+    let old ← fmtCat `dl_term (← ppTerm (Surface.Tm.quote c (t.erase ns)))
+    twinCompare "term" (some (Syntax.mkStrLit new)) (some (Syntax.mkStrLit old))
+  return new
+
+/-- Whether an update has an element: else it prints as nothing (pops and
+drops only). -/
+def Upd.hasElem {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
+  | _, .nil => false
+  | _, .snoc .. | _, .decl .. => true
+  | _, .pop U _ => U.hasElem
+  | _, .drop U _ => U.hasElem
+
+/-- An update read where the locals are named `ns`, printed. -/
+def Upd.show {Γ Δ : Ctx} (ns : List Var) (U : Upd C Γ Δ) : MetaM String := do
+  let new ← fmtCat `dl_upd (← Delab.ppUpdS (ns.map toExpr) (U.quote c)).1
+  if ← twinCheckOn then
+    let old ← fmtCat `dl_upd (← ppUpd (Surface.Upd.quote c (U.erase ns)))
+    twinCompare "update" (some (Syntax.mkStrLit new)) (some (Syntax.mkStrLit old))
+  return new
 
 /-- The statements of a block read where the locals are named `ns`, each
 with its `;`. -/
@@ -55,21 +80,33 @@ def Frames.items (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Me
 /-- The formula as it prints: the one under an update that prints as nothing
 (only pops) or under a hidden binder. -/
 def Fml.visible : {Γ : Ctx} → Fml C Γ → (Δ : Ctx) × Fml C Δ
-  | Γ, φ@(.upd _ U ψ) => if (U.erase []).isEmpty then Fml.visible ψ else ⟨Γ, φ⟩
+  | Γ, φ@(.upd _ U ψ) => if U.hasElem then ⟨Γ, φ⟩ else Fml.visible ψ
   | _, .bind _ _ _ φ => Fml.visible φ
   | Γ, φ => ⟨Γ, φ⟩
 
+/-- Whether two terms read where the locals are named `ns` are the same
+text (`Delab.eqTmS`). -/
+def Tm.sameAt {Γ : Ctx} (ns : List Var) (a a' : Tm C Γ .val) : MetaM Bool := do
+  let ns' := ns.map toExpr
+  let new ← Delab.eqTmS ns' (a.quote c) ns' (a'.quote c)
+  if ← twinCheckOn then
+    let old := (a.erase ns).quote c == (a'.erase ns).quote c
+    unless new == old do
+      twinCompare "same term" (some (Syntax.mkStrLit (toString new)))
+        (some (Syntax.mkStrLit (toString old)))
+  return new
+
 /-- `a = b` as `Fml.eqD` writes it: `defined(a) ∧ defined(b) ∧ a ≐ b`. -/
-def Fml.eqDParts? {Γ : Ctx} (ns : List Var) : Fml C Γ → Option (Tm C Γ .val × Tm C Γ .val)
-  | .and (.defined a) (.and (.defined b) (.eq a' b')) =>
-    if (a.erase ns).quote c == (a'.erase ns).quote c && (b.erase ns).quote c == (b'.erase ns).quote c
-    then some (a, b) else none
-  | _ => none
+def Fml.eqDParts? {Γ : Ctx} (ns : List Var) :
+    Fml C Γ → MetaM (Option (Tm C Γ .val × Tm C Γ .val))
+  | .and (.defined a) (.and (.defined b) (.eq a' b')) => do
+    if (← a.sameAt c ns a') && (← b.sameAt c ns b') then return some (a, b) else return none
+  | _ => return none
 
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
-def Fml.isConnective {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : Bool :=
-  (φ.eqDParts? c ns).isNone &&
-    match (Fml.visible φ).2 with
+def Fml.isConnective {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Bool := do
+  if (← φ.eqDParts? c ns).isSome then return false
+  return match (Fml.visible φ).2 with
     | .and .. | .imp .. | .all .. => true
     | _ => false
 
@@ -100,7 +137,7 @@ connective explicitly, so does this; the rest is the grammar's. -/
 partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String × Nat) := do
   let arg {Δ : Ctx} (ms : List Var) (ψ : Fml C Δ) (min : Nat) : MetaM String := do
     let s ← Fml.showP ms ψ
-    return if ψ.isConnective c ms then s!"({s.1})" else paren s min
+    return if ← ψ.isConnective c ms then s!"({s.1})" else paren s min
   let sub {Δ : Ctx} (ms : List Var) (ψ : Fml C Δ) (min : Nat) : MetaM String :=
     return paren (← Fml.showP ms ψ) min
   match φ with
@@ -113,23 +150,27 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
   | .defined t => return (s!"defined({← t.show c ns})", 1024)
   | .all x p ψ => return (s!"∀ {primName p} {x}; {← sub (x :: ns) ψ 25}", 25)
   | .and ψ χ =>
-    if let some (a, b) := φ.eqDParts? c ns then
+    if let some (a, b) ← φ.eqDParts? c ns then
       if let some (sym, l, r) := cmpParts? a b then
         return (s!"{← l.show c ns} {sym} {← r.show c ns}", 55)
       return (s!"{← a.show c ns} = {← b.show c ns}", 50)
     if let .imp a b := ψ then
       if let .imp b' a' := χ then
-        if (a.erase ns).quote c == (a'.erase ns).quote c &&
-            (b.erase ns).quote c == (b'.erase ns).quote c then
+        let iff := a.quote c == a'.quote c && b.quote c == b'.quote c
+        if ← twinCheckOn then
+          let old := (a.erase ns).quote c == (a'.erase ns).quote c &&
+            (b.erase ns).quote c == (b'.erase ns).quote c
+          unless iff == old do
+            twinCompare "iff" (some (Syntax.mkStrLit (toString iff)))
+              (some (Syntax.mkStrLit (toString old)))
+        if iff then
           return (s!"{← sub ns a 21} ↔ {← sub ns b 21}", 20)
     let r ← if χ matches .imp .. then pure s!"({(← Fml.showP ns χ).1})" else sub ns χ 35
     return (s!"{← arg ns ψ 36} ∧ {r}", 35)
   | .imp ψ χ => return (s!"{← arg ns ψ 26} → {← sub ns χ 25}", 25)
   | .upd _ U ψ =>
-    let U' := U.erase ns
-    if U'.isEmpty then return ← Fml.showP (U.names ns) ψ
-    return (s!"{← fmtCat `dl_upd (← ppUpd (Surface.Upd.quote c U'))} {← arg (U.names ns) ψ 50}",
-      1024)
+    if !U.hasElem then return ← Fml.showP (U.names ns) ψ
+    return (s!"{← U.show c ns} {← arg (U.names ns) ψ 50}", 1024)
   | .havoc ψ => return (s!"\{ havoc } {← arg ns ψ 50}", 1024)
   | .anon xs ψ =>
     return (s!"\{ anon({", ".intercalate (xs.map fun x => toString (x.2.name ns))}) } {← arg ns ψ 50}",

@@ -10,8 +10,9 @@ in `MetaM`).  A taclet is not closed: its schema variables are free (`v`,
 `se`, `thenStm`), so it is printed from its `Expr`, by
 `Calculus/PrintStmt.lean`'s printer of the scoped syntax (`ppStmtS`,
 `ppPremiseS`, `ppFmlS`): positions are the names their binders gave them, a
-schema variable its own name, terms and updates printed through their
-erasure (`Delab.tr`), with `RuleSyntax.lean`'s builders, so the KeY text is
+schema variable its own name, terms and updates printed by
+`Calculus/PrintTerm.lean`'s printers of the scoped terms, with
+`RuleSyntax.lean`'s builders, so the KeY text is
 the one the rule lines write.  The end of a block in a formula's frames
 prints `}` (`core_item`, below), the one piece of text the grammar of
 `RuleSyntax.lean` has no production for.
@@ -192,9 +193,23 @@ attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.defined,
 
 /-! ## Sequents -/
 
+/-- An update `U` of a sequent's context, of pieces `ps`, produced under `m`,
+as `Calculus/Hyp.lean`'s `ppHyp?` prints the closer's: `{U}`, or `{U} [ ]`
+and `{U} ⟨ ⟩` for a rule's update at a fixed modality; none where it
+escapes (it would read back as a precondition). -/
+def updHypS (m U : Expr) (ps : Array UPiece) : MetaM (Option (TSyntax `dl_hyp)) := do
+  let u ← ppUpdPiecesS U ps
+  if Solidity.isEscape u then return none
+  if ← updHasSchemaVar U then
+    match_expr (← whnf m) with
+    | Modality.box => return some (← `(dl_hyp| $u:dl_upd [ ]))
+    | Modality.diamond => return some (← `(dl_hyp| $u:dl_upd ⟨ ⟩))
+    | _ => pure ()
+  return some (← `(dl_hyp| $u:dl_upd))
+
 /-- A sequent's context for the scoped printer: the rest `..H` when it is a
-variable, the entries printed (a precondition by `ppFmlS`, the rest as
-`Calculus/Hyp.lean`'s `Hyp`s of their erasure), and the names of the last
+variable, the entries printed (a precondition by `ppFmlS`, an update by
+`updHypS`, the rest as `Calculus/Hyp.lean`'s `Hyp`s), and the names of the last
 scope.  What prints as nothing: an update of pops only, and the hidden
 binder.  An error where an entry does not print. -/
 partial def hypsPartsS (c H : Expr) : PrM (Option Lean.Name × Array (TSyntax `dl_hyp) × List Expr) := do
@@ -216,10 +231,17 @@ partial def hypsPartsS (c H : Expr) : PrM (Option Lean.Name × Array (TSyntax `d
     return (r, hs.push (← `(dl_hyp| $(← ppFmlS ns args[4]!):dl_fml)), ns)
   | some ``Hyps.upd =>
     let (r, hs, ns) ← hypsPartsS c args[4]!
-    let (es, ms) ← runTr (updParts ns args[6]!)
-    if es.isEmpty then return (r, hs, ms)
-    let U ← runTr (updList c args[6]! es)
-    return (r, hs.push (← hyp (mkApp3 (mkConst ``Solidity.Hyp.upd) c args[5]! U)), ms)
+    let U := args[6]!
+    let (ps, ms) ← updPiecesS ns U
+    if ps.isEmpty then return (r, hs, ms)
+    let h ← updHypS args[5]! U ps
+    if ← twinCheckOn then
+      let (es, _) ← runTr (updParts ns U)
+      let old ← Solidity.ppHyp? (mkApp3 (mkConst ``Solidity.Hyp.upd) c args[5]!
+        (← runTr (updList c U es)))
+      twinCompare "context update" (h.map (·.raw)) (old.map (·.raw)) `dl_hyp
+    let some h := h | throwError "an entry that does not print"
+    return (r, hs.push h, ms)
   | some ``Hyps.havoc =>
     let (r, hs, ns) ← hypsPartsS c args[3]!
     return (r, hs.push (← hyp (mkApp (mkConst ``Solidity.Hyp.havoc) c)), ns)
