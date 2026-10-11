@@ -3338,6 +3338,71 @@ Branch `w9-terms`, additive: nothing on the IR moved, no pin changed.
 - **Checks.** Per-file diagnostics clean (`TermLib`, `SoundLoops`);
   `lean_build` of the default targets; `check-orphans`, `check-doc-paths`.
 
+### W9.1 `print` record
+
+Branch `w9-print`: the printers no longer read the erasure; no pin moved.
+
+- **`Calculus/PrintTerm.lean`** (new, over `DelabErase`'s non-erasing
+  helpers): a scoped term is read by its view (`viewTmS`): a schema
+  variable, a local's name (`idxName`, moved here from `PrintStmt`; a
+  lowered program schema variable is the local of its name), `net(x, a)`,
+  `t⊕⊕`, or a symbol by its constructor (`Op2.find`) on its subterms, `up`s
+  read through, computed (`whnf`) unless `pp.sol.reduce` is off.
+  `ppTermS` … `ppMValS` restate `RuleSyntax.lean`'s `ppTerm` … `ppMVal`
+  case for case on the view (the builders `lenTerms`, `elemTerm`,
+  `dotTerm`, `allocTy?`, `termOpSym?` shared).  Updates by their pieces
+  (`updPiecesS`: an element with the names its sides are read at, a
+  declaration, a variable, a stuck part; pops and drops nothing), printed
+  as `ppUpd` prints the erased list (`ppUpdPiecesS`, `updElemS`,
+  `rhsElemS`).  `eqTmS` compares two terms read at two name stacks by their
+  views (the erasure compared their erasures); `cmpPartsS` is
+  `Surface.cmpParts?` on views.  The view's tags are the symbols `Op0`–`Op3`,
+  which stay at W9.5 (not `Update.lean`'s `Term.find`, which goes).
+- **Switched to it**: `PrintStmt` (`ppFmlS`'s equations, `defined`, `=`,
+  comparisons and `{U}`, `Premise.update`/`cases`/`inv`); `Delab`'s
+  sequent context (`hypsPartsS`: an update by `updHypS`, as `ppHyp?`
+  prints one, a rule's update at a fixed modality when it has a schema
+  variable, `updHasSchemaVar`); `Print` (`Tm.show`, `Upd.show` on
+  `Tm.quote`/`Upd.quote`; `Upd.hasElem` for an update that prints as
+  nothing; `Fml.eqDParts?` by `eqTmS`, now in `MetaM`; `↔` by the quoted
+  formulas, as `PrintStmt`'s `iffPartsS` already did, decision 109).
+  `withPrinter` builds the twins only under the twin check.
+- **Kept, unchanged**: `Delab.tr`, `Env`, `loweredVar?`, `wkUp?`, `isUp`,
+  `isCtx`, `unknownVar`, `stmtOutNames`, `withTwins`, `updParts`,
+  `updList` (the SolKey reader's surface, and the twin check's).  Not
+  switched: TermLib's `delabTmS` (`tm{ … }` of a scoped term over schema
+  variables, printed as written through `tmSurface`'s twins of the
+  closer's terms); its pins stay with it until W9.5 deletes the closer's
+  printers.
+- **Twin check.**  `pp.sol.twinCheck` (re-registered in `PrintStmt`, as at
+  W8.2) prints every term and update, the `same term` and comparison
+  choices of `eqDPartsS` and `Print`'s `Tm.show`/`Upd.show`/`sameAt`/`↔`
+  both ways and throws on a difference.  A control (an `Fml.eq` on
+  `Tm.app2 o x y`, `o` a variable symbol: `‹Tm.app2 o x y›` against the
+  erasure's `‹Surface.Tm.app2 …›`) fails to print with it on.  Run with it
+  on, every pin passing (copies under `Solidity/Scratch/`, deleted):
+  `Examples/{ProofTree,ChainRewrites,ChainRewritesOpen,ChainNotation,Tools,Notation,Verify}`,
+  `Examples/Tactics/{Print,DlNotation,UpdateRules,ProofTree,Symex,Step,Loops,Chains,Sequents,Surface,Notation,Branch,Checked,Dangling,Derive,Revert,StorageDelete,StorageSuite,TryCatch,Payment,Values,LedgerDelete,Tour,Spec,Constructors,CallOperands,UpdRulesScoped,Calls,Memory,Decide}`,
+  `Solkey/Constructors`, `Theorems`, and `Calculus/Print`'s own pins.
+  `Examples/Tactics/{Rules,TermTaclets}` and `Calculus/KeyNotation` do not
+  import the printers.
+- **Timing** (the end-of-work method: each file copied under
+  `Solidity/Scratch/`, a fresh worker through the MCP, `/proc` sampled every
+  20 ms; base `f6adf036` in a second worktree filled from the artifact
+  cache, runs interleaved; load 0.7–1.3, cgroup 13–16 GB, another Lean lane
+  running):
+
+  | Module | base | W9.1 `print` | ratio | gate |
+  |---|---|---|---|---|
+  | `Examples/ProofTree` | 9.73 s (9.73, 9.80, 9.90, 9.80) | 9.77 s (10.04, 10.03, 9.87, 9.77) | 1.00 | 11.7 s |
+  | `Examples/Tactics/Print` | 3.55 s (3.57, 3.55) | 3.55 s (3.58, 3.55) | 1.00 | 1.2× the base |
+
+  Printing is a small part of either file: a `#proof_tree` command's
+  elaboration is under 30 ms in the profiler.
+- **Checks.**  Per-file diagnostics clean (`PrintTerm`, `PrintStmt`,
+  `Delab`, `Print`, the pin files above); `lean_build` of the default
+  targets; `check-orphans`, `check-doc-paths`.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
