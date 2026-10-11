@@ -2321,6 +2321,86 @@ x` for a hidden binder, after which the two `where` pins of
 `docs/testsuite-proofs.md`'s `solc_problems … legacy`; the read-only
 review pass (W8.5).
 
+### W8.3 lane `ex-evm-bench` record (2026-10-11, branch `w8-w83examplesandleafconsumersmigrate-ex-evm-bench`)
+
+`Evm/{Examples,Interpreter}`, `Examples/Benchmark/{Coin,EtherWallet,Purchase,Syntax}`,
+`Examples/{Tools,ExampleNames}` and `SortCheck/Faithfulness` read the
+scoped syntax only; none of them names `Surface.Prog`, `resolve` or
+`erase` any more.
+
+- **`Evm/Examples.lean`**: `scopedOf` is gone; `codeOf P := compileProg 0 P`,
+  and `code`, `slotAfter`, `reverts`, `compiles`, `rejects` take a
+  `Prog C [] Γ'`.  `compiles`/`rejects` lose their `resolve … toBool`
+  conjunct (an elaborated block is scoped already).  The named programs
+  are `def setAge := (sol{ … } : Prog StandardExample [] _)`: `sol{ … }`
+  with nothing expected is still the surface list until W8.4, and a
+  `def` header cannot leave `Γ'` a hole.  `Evm/Interpreter.lean` reads
+  `setAge` where it read `(scopedOf setAge).2`.
+- **`SortCheck/Faithfulness.lean`**: `Read C Γ` is over the scoped
+  `SPath C Γ T`/`MPath C Γ T` (the old `CRead`, renamed; the surface
+  `Read`, `Read.Typed` and `CRead.erase*` are gone), and `Read.SortOk σ`
+  reads an `EState C Γ` through the scoped `SPath.resolve`, `MPath.mval`
+  and `Val.eval` (`Semantics/Erased.lean`).  `Read.sortOk` needs only
+  `RunWT`: no `Agree`, no `SPath.resolve_erase`/`MPath.mval_erase`/
+  `Val.eval_erase`.  `RowFaithful` quantifies over `H` and a `RunWT`
+  state, not over names and an agreeing untyped state; the import of
+  `Semantics/StateErase.lean` goes.  The 36 `faithful_<ctor>` theorems,
+  `faithfulCtors`, `rows_covered` and `rows_accounting` are unchanged in
+  text.  Its two importers follow (outside the lane's list, since they
+  break otherwise): `Counterexamples/PreFixSortAnnotations.lean` drops
+  `peopleStore_agree`/`flagStore_agree` and `flagStore`'s `env`, and
+  applies `hall` to the scoped state; `Counterexamples/WellTypedNecessity.lean`
+  states its refutation on `badCore` (`badStore` with the local `uint x`).
+- **New `Syntax/PrintInlined.lean`**: `Prog.inlinedStr ns P`, a scoped
+  block printed with each call as its inlined body (the strings
+  `Surface.Prog.toStr (Surface.Prog.inlined (P.erase ns))` gives: the
+  arguments' `T x = e;`, the return variables' `T r;` (a memory return's
+  `R memory r;`), the body under `ret.names ++ args.names`, `res = r;`; a
+  `{ … }` block's statements in place; a call in a branch or loop body
+  printed as the call).  The `ex-calls-print` lane's pins of
+  `Surface.Prog.inlined` (`Examples/Tactics/{CallOperands,Loops}.lean`)
+  can use it; `Surface.Prog.inlined` in `Syntax/Splice.lean` goes in W8.4.
+- **`Coin`/`EtherWallet`**: the `run_cmd … Prog.defineCore` declarations of
+  `ctorCore`, `mintSendCore`, `mintCore`, `withdrawCore`, `overdrawCore`
+  are plain `def`s of the scoped `sol{ … }`, the same names and types.
+- **`Tools.lean`**: the three `#eval`s run `Prog.runT` (`Tools/Run.lean`'s
+  scoped one).  The `functionCallArgCapture` pin (proposal 107) still
+  prints `‹Surface.Stmt.call …›`: the delaborator's, W8.4.
+
+**Pins.**  No `#guard_msgs` text moved.  Restated, same strings or
+values: the 16 `Surface.Prog.toStr (sol{ … }) = "…" := rfl` examples of
+`Benchmark/Syntax` and `ExampleNames` are `Prog.toStr [] (sol{ … })`
+(still `rfl`); the five `#eval`s of `Surface.Prog.toStr
+(Surface.Prog.inlined …)` (`Benchmark/{Syntax,Purchase}`) are
+`Prog.inlinedStr [] …`; `ExampleNames`' constructor-tree pin
+`sol{ uint idx = 1; … } = captured := rfl` compares the scoped blocks
+(`captured` is a `Prog StandardExample [] _`).  One `#eval` of
+`Evm/Examples.lean` (`total = total + age;`, its three lines) binds the
+program before its `do`: a `sol{ … }` elaborated inside a `do` block fails
+with "Type of b✝ is not known" (`elabSolBracket`'s scoped branch,
+`fun b => (Prog.quoteShared q b.2).1`, has no binder type; W8.4 can
+annotate it when it drops the surface branch).
+
+**Checks.**  Zero errors and warnings in every touched file and in the
+importers `Examples/Tactics/Operators.lean` (of `Evm/Examples`, unedited)
+and the two counterexamples; `check-orphans`, `check-doc-paths` pass.
+
+**Timing** (end-of-work method, each file copied under `Solidity/Scratch/`,
+one fresh worker at a time, killed after; base = the files at `intrinsic`
+`cebf1880` in the same worktree; load 1.2–1.7, cgroup 8.4–9.1 GB):
+
+| Module | W6 baseline | gate (1.2×) | base (`cebf1880`) | **ex-evm-bench** | ratio (W6) |
+|---|---|---|---|---|---|
+| `Evm/Examples` (M0) | 7.75 s | 9.30 s | 7.99 s | **7.29 s** (7.29, 7.36) | 0.94 |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s | 1.69 s | 1.44 s (1.49, 1.44) | **1.57 s** (1.57, 1.59) | 1.11 |
+
+`Evm/Examples` is faster, as expected: the kernel no longer evaluates
+`resolve`.  `Benchmark/Syntax` is 0.1 s slower (9% over its M0 limit of
+1.44 s, within the 1.2× gate): a profile puts it in the `rfl` checks of
+`Prog.toStr` on the scoped blocks (33, 30, 72 ms over 30 ms against one of
+54 ms at base), the four inlined `#eval`s costing what they did
+(110–124 ms each, both).
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
