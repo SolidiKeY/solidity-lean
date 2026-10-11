@@ -2794,6 +2794,57 @@ SolKey reader's port to the scoped constructors (side-projects, from tag
 the read-only finder/skeptic review (W8.5); the lead's calls on proposals
 118–128.
 
+### W8.5 lane `gate` record (2026-10-11, branch `w8-w85gatedocsreview-gate`, at `9d9fdf67`)
+
+The gate re-timed after W8.4, with this lane as the only Lean agent; no
+`.lean` file edited, no pin moved.  Method as in "Gates" (each file copied
+under `Solidity/Scratch/`, opened in a fresh worker through the MCP, every
+import built beforehand, `/proc` sampled every 20 ms, the worker killed
+after each run; end of work, the minimum of three runs; CPU the minimum of
+the runs).  Three interleaved passes over the thirteen modules; load (1 min)
+at the starts 5.0 falling to 2.0 in pass 1 (a full build had just ended;
+btrfs writeback threads), 1.8–1.3 in pass 2, 1.2–0.9 in pass 3; cgroup
+9.9 GB.  The driver is `scratchpad/w85.sh` (a copy of `w84m.sh` on this
+worktree), results under `w85_*` in `scratchpad/results.txt`.
+
+| Module | baseline | gate (1.2×) | W8.4 | **W8.5** (three runs) | ratio | CPU |
+|---|---|---|---|---|---|---|
+| `TestSuite/Derived6` | 11.42 s (W6) | 13.70 s | 11.70 s | **11.72 s** (11.73, 11.72, 11.73) | 1.03 | 13.33 s |
+| `TestSuite/Derived10` | 11.11 s (W6) | 13.33 s | 11.56 s | **11.45 s** (11.48, 11.50, 11.45) | 1.03 | 12.84 s |
+| `TestSuite/Derived14` | 10.89 s (W6) | 13.07 s | 11.20 s | **11.15 s** (11.15, 11.31, 11.17) | 1.02 | 11.73 s |
+| `Examples/ProofTree` | 9.81 s (W6) | 11.77 s | 9.75 s | **9.80 s** (9.80, 9.81, 9.84) | 1.00 | 10.05 s |
+| `TestSuite/Problems` (M0) | 0.81 s (W6) | 0.97 s | 0.86 s | **0.88 s** (0.88, 0.89, 0.89) | 1.09 | 0.88 s |
+| `TestSuite/ScopedProblems` (M0) | 1.39 s (W6) | 1.67 s | 1.11 s | **1.06 s** (1.06, 1.08, 1.09) | 0.76 | 1.10 s |
+| `Solkey/TestSuite` (M0) | 10.83 s (W6) | 13.00 s | 6.77 s | **6.67 s** (6.87, 6.81, 6.67) | 0.62 | 7.06 s |
+| `Examples/Benchmark/Syntax` (M0) | 1.41 s (W6) | 1.69 s | 1.61 s | **1.60 s** (1.63, 1.63, 1.60) | 1.13 | 1.92 s |
+| `Evm/Examples` (M0) | 7.75 s (W6) | 9.30 s | 7.34 s | **7.33 s** (7.36, 7.33, 7.34) | 0.95 | 7.79 s |
+| `Solkey/TestSuiteScoped` | 3.61 s (W8.2 base) | 4.33 s | — | **0.61 s** (0.65, 0.61, 0.64) | 0.17 | 0.57 s |
+| `Examples/Tactics/Print` | 3.93 s (W8.2 base) | 4.72 s | — | **3.55 s** (3.55, 3.62, 3.57) | 0.90 | 3.71 s |
+| `Calculus/SurfaceNotation` | 7.25 s (W8.2 merge) | 8.70 s | — | **7.19 s** (7.23, 7.19, 7.26) | 0.99 | 9.18 s |
+| `Corpus/SolcStructs` | 1.22 s (W8.2 base) | 1.46 s | — | **1.02 s** (1.11, 1.02, 1.08) | 0.84 | 1.44 s |
+
+**Gate passed**: every row within 1.2× of its baseline, and every run of
+every row within it too.  Against the M0 limits (M0 + 20%):
+`Benchmark/Syntax` 1.60 s against 1.44 s (over by 11%, 0.92 of 1.2× the
+limit; scoped `sol{}` DAGs since W8.3, unchanged by W8.4), `Derived10`
+11.45 s against 11.2 s (over by 2%, as since W7); `Solkey/TestSuite` 6.67 s
+against 12.5 s, `Problems` 0.88 against 1.44, `ProofTree` 9.80 against
+12.1, `Evm/Examples` 7.33 against 11.4.  The speed risks the plan named
+("Speed risk") did not materialise: the import absorbing the scoped check
+is 0.62 of its W6 time, the printers (`ProofTree`, `Tactics/Print`) 1.00
+and 0.90.
+
+**Checks** (this worktree): `node scripts/check-orphans.mjs` 314
+reachable, 0 orphaned; `./scripts/check-doc-paths.sh` OK (eleven
+ambiguous basenames, all resolving, as before); `./scripts/check-testsuite.sh`
+stops at its input check against `../solkey` (its `TestSuite.sol` is
+`4150e0a8…`, the fixture was imported from `2fe50a03…`), and passes with
+`--solkey` at a checkout of `2fe50a03…` (trust: 22 modules clean; axioms:
+`propext`, `Classical.choice`, `Quot.sound`; parity: 438 functions = 435
+derived + 1 pending + 1 divergent + 1 excluded, 2 skipped).
+`lean_build` of the default targets green (295 jobs); every timed copy
+elaborated with no error.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
