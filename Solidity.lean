@@ -125,6 +125,7 @@ import Solidity.Calculus.SlotLemmas
 import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideSyn
 import Solidity.Calculus.DecideScoped
+import Solidity.Calculus.DecideRel
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.NFmlDerive

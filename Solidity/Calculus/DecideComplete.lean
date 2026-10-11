@@ -1350,17 +1350,23 @@ elab "sol_decide_atoms" ht:ident : tactic => withMainContext do
       rcases res_value_cases $tt with ⟨_, _⟩ | ⟨_, _⟩ | ⟨_, _⟩))
 
 open Lean Elab Tactic Meta in
-/-- The constraints' step with the parameters typed
-(`LFml.valid_alls_of_cons`), on a goal `∀ σ, LFml.holds σ (alls xs body)`
-whose body reads the initial storage only. -/
-elab "sol_decide_typed" : tactic => withMainContext do
-  let g ← getMainGoal
+/-- `LFml.valid_alls_of_cons` applied to a goal `∀ σ, LFml.holds σ (alls xs
+body)` whose body reads the initial storage only: the reads free under
+their constraints, the parameters typed. -/
+def typedCons (g : MVarId) : TacticM MVarId := do
   let (xs, body) ← allsGoal g
   let hn ← nodupLemma xs
   let hi ← trueLemma (mkApp (mkConst ``LFml.initOnly) body)
   let [g'] ← g.apply (mkApp4 (mkConst ``LFml.valid_alls_of_cons) xs body hn hi)
     | throwError "sol_decide: unexpected goals"
-  replaceMainGoal [g']
+  return g'
+
+open Lean Elab Tactic Meta in
+/-- The constraints' step with the parameters typed
+(`LFml.valid_alls_of_cons`), on a goal `∀ σ, LFml.holds σ (alls xs body)`
+whose body reads the initial storage only. -/
+elab "sol_decide_typed" : tactic => withMainContext do
+  replaceMainGoal [← typedCons (← getMainGoal)]
   evalTactic (← `(tactic| (
     sol_reads
     intro σ o ht hc
@@ -1378,42 +1384,158 @@ elab "sol_decide_body" : tactic => withMainContext do
     | throwError "sol_decide: unexpected goals"
   replaceMainGoal [g']
 
+/-! ### The layout of a scoped leaf (proposal 100)
+
+A leaf's premise `wt(storage)`, under its parameters' quantifiers, is set
+aside (`Fml.dropWtS`) and read as the layout its roots hold
+(`Fml.layoutS`): the closer then knows each root is there, canonical at
+its type (`LayoutOk`), as the erased route's `wrap_topWt` knows it. -/
+
+/-- A `wt(storage)` premise that holds gives the layout of its roots, in
+any state with the same storage (`layoutOk_of_wt`, scoped). -/
+theorem layoutOk_of_wtS {Γ : Ctx} {τ : State C Γ} {a : Fml C Γ} {vs : List (Name × Ty)}
+    (hw : a.wtRootsS? = some vs) (ha : holds τ a) {σ : Semantics.State}
+    (hs : σ.storage = τ.erase.storage) : LayoutOk vs σ := by
+  unfold Fml.wtRootsS? at hw
+  split at hw
+  · rename_i vs' _
+    cases hw
+    obtain ⟨x, hx⟩ := ha
+    have hwb : storageWtB vs σ.storage = true := by
+      rw [hs]
+      simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at hx
+      split at hx
+      · rename_i hw'
+        exact hw'
+      · cases hx
+    simp only [storageWtB, storageShapeB, Bool.and_eq_true, List.all_eq_true] at hwb
+    intro r T hT
+    have := hwb.1.2 (r, T) (SemanticsProperties.lookupBy_eq_some_mem hT)
+    revert this
+    split
+    · rename_i v hv
+      simp only [Bool.and_eq_true]
+      exact fun h => ⟨v, hv, h.1⟩
+    · exact fun h => nomatch h
+  · cases hw
+
+theorem layoutOk_nil (σ : Semantics.State) : LayoutOk [] σ :=
+  fun _ _ hT => by simp only [lookupBy, reduceCtorEq] at hT
+
+/-- **A leaf holds where it does with its `wt(storage)` set aside**, in
+every state whose storage holds the layout the premise gives. -/
+theorem holds_of_dropWtSM : ∀ {Γ : Ctx} (φ : Fml C Γ) (τ : State C Γ) (σ : Semantics.State),
+    σ.storage = τ.erase.storage → (LayoutOk φ.layoutSM σ → holds τ φ.dropWtSM) → holds τ φ := by
+  intro Γ φ
+  induction φ with
+  | all x p φ ih =>
+    intro τ σ hs h v
+    refine ih (τ.push (t := .val p) v) σ (by rw [hs, State.push_erase]; rfl) fun hL => ?_
+    exact h hL v
+  | imp a ψ _ _ =>
+    intro τ σ hs h
+    cases hw : a.wtRootsS? with
+    | some vs =>
+      simp only [Fml.layoutSM, Fml.dropWtSM, hw, Option.getD_some] at h
+      exact fun ha => h (layoutOk_of_wtS hw ha hs)
+    | none =>
+      simp only [Fml.layoutSM, Fml.dropWtSM, hw, Option.getD_none] at h
+      exact h (layoutOk_nil σ)
+  | _ => intro τ σ _ h; exact h (layoutOk_nil σ)
+
+/-- **The boundary, scoped, with the layout**: a leaf is valid where its
+reduction with its `wt(storage)` set aside holds in every state whose
+storage holds the layout (proposal 100). -/
+theorem _root_.Solidity.Valid.of_reduceSL {φ : Fml C []}
+    (hf : φ.dropWtS.inLS true SymS.empty = true)
+    (h : ∀ σ, LayoutOk φ.layoutS σ → φ.dropWtS.reduceS.holds σ) : Valid φ := by
+  intro τ
+  refine holds_of_dropWtSM φ τ τ.redState rfl fun hL => ?_
+  rw [← Fml.layoutS_eq_layoutSM] at hL
+  rw [← Fml.dropWtS_eq_dropWtSM]
+  exact holds_of_reduceS hf τ (h _ hL)
+
+/-- A statement of every state, of every state that holds a layout. -/
+theorem LFml.forall_layout {L : List (Name × Ty)} {φ : LFml} (h : ∀ σ, φ.holds σ) :
+    ∀ σ, LayoutOk L σ → φ.holds σ := fun σ _ => h σ
+
 /-- The closer on a scoped leaf's reduction (`Fml.reduceS`, decision 81):
 within the bound `NFml.Derive.elimSize` (`Calculus/Closer.lean`) the erased
-route keeps too, and
-with no layout, since a typed state's storage is typed but not canonical
-(`LayoutOk` asks `SVal.canonB` of each root; `SVal.map`'s default is any
-value of its type). -/
-def LFml.closeS (φ : LFml) : Bool :=
-  (φ.fits NFml.Derive.elimSize).isSome && LFml.close [] φ
+route keeps too, and with the layout `L` a `wt(storage)` premise gives
+(`Fml.layoutS`, proposal 100; `[]` without one): a typed state's storage is
+typed but not canonical (`LayoutOk` asks `SVal.canonB` of each root;
+`SVal.map`'s default is any value of its type), so the layout comes from
+the premise, not from the typed state. -/
+def LFml.closeS (L : List (Name × Ty)) (φ : LFml) : Bool :=
+  (φ.fits NFml.Derive.elimSize).isSome && LFml.close L φ
 
 /-- **The closer, on a scoped leaf's reduction**: what it accepts holds in
-every state. -/
-theorem LFml.closeS_valid {φ : LFml} (h : φ.closeS = true) : ∀ σ, φ.holds σ := by
+every state that holds the layout. -/
+theorem LFml.closeS_valid {L : List (Name × Ty)} {φ : LFml} (h : φ.closeS L = true) :
+    ∀ σ, LayoutOk L σ → φ.holds σ := by
   simp only [LFml.closeS, Bool.and_eq_true] at h
-  exact fun _ => LFml.close_holds (fun _ _ hT => by simp only [lookupBy, reduceCtorEq] at hT) h.2
+  exact fun _ hL => LFml.close_holds hL h.2
 
-/-- `LFml.closeS` on the computed reduction, checked by the kernel. -/
-macro "sol_decide_close" : tactic => `(tactic| exact LFml.closeS_valid (by decide +kernel))
+/-- With no layout: what it accepts holds in every state. -/
+theorem LFml.closeS_valid_nil {φ : LFml} (h : φ.closeS [] = true) : ∀ σ, φ.holds σ :=
+  fun σ => LFml.closeS_valid h σ (layoutOk_nil σ)
+
+/-- `LFml.closeS` on the computed reduction, checked by the kernel: with
+no layout, or with the layout the goal assumes. -/
+macro "sol_decide_close" : tactic => `(tactic| first
+  | exact LFml.closeS_valid_nil (by decide +kernel)
+  | exact LFml.closeS_valid (by decide +kernel))
+
+open Lean Elab Tactic Meta in
+/-- `sol_reduce` on a goal `∀ σ, LayoutOk L σ → (…).holds σ`: the
+reduction computed as `Decide.reduceGoal` computes it. -/
+@[tactic Solidity.Decide.tacticSol_reduce]
+def evalSolReduceLayout : Tactic := fun _ => do
+  let g ← getMainGoal
+  let ty ← instantiateMVars (← g.getType)
+  let .forallE n d b bi := ty | throwUnsupportedSyntax
+  let .forallE n' d' b' bi' := b | throwUnsupportedSyntax
+  unless d'.isAppOfArity ``LayoutOk 2 do throwUnsupportedSyntax
+  let_expr LFml.holds _ r := b' | throwUnsupportedSyntax
+  let r' ← if r.hasFVar || r.hasMVar || r.hasLooseBVars then
+      withTransparency .all <| Meta.reduce r (skipTypes := true) (skipProofs := true)
+    else
+      pure (toExpr (← unsafe evalExpr LFml (mkConst ``LFml) r))
+  replaceMainGoal [← g.replaceTargetDefEq
+    (.forallE n d (.forallE n' d' (mkApp2 (mkConst ``LFml.holds) (.bvar 1) r') bi') bi)]
 
 open Lean Elab Tactic Meta in
 /-- The scoped leaf `Valid ψ` as `∀ σ, (Fml.reduceS ψ).holds σ`, reduced on
 the leaf itself (`Valid.of_reduceS`): the fragment (`Fml.inLS`) checked by
-the kernel. -/
-def reduceScoped (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
+the kernel.  A leaf with a premise `wt(storage)` under its parameters'
+quantifiers (`Fml.layoutS` not empty) is reduced with the premise set
+aside, as `∀ σ, LayoutOk (Fml.layoutS ψ) σ → (Fml.reduceS (Fml.dropWtS ψ)).holds σ`
+(`Valid.of_reduceSL`); the second component says which. -/
+def reduceScoped (g : MVarId) (C ψ : Expr) : TacticM (MVarId × Bool) := do
   let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let lay := mkApp3 (mkConst ``Fml.layoutS) C nilCtx ψ
+  let layTy ← inferType lay
+  let hasLayout ← try
+      pure !(← unsafe evalExpr (List (Name × Ty)) layTy lay).isEmpty
+    catch _ => pure false
+  let ψ' := if hasLayout then mkApp3 (mkConst ``Fml.dropWtS) C nilCtx ψ else ψ
   let hf ← try trueLemma (mkAppN (mkConst ``Fml.inLS)
-      #[C, nilCtx, mkConst ``Bool.true, mkConst ``SymS.empty, ψ])
+      #[C, nilCtx, mkConst ``Bool.true, mkConst ``SymS.empty, ψ'])
     catch _ => throwError "sol_decide: the formula is outside the fragment (a push of a memory \
       object, a copy of memory whose guards are not literals, a copy from storage outside its \
       allocation's pair, a memory past memSize, a read of the ledger, an alias no update \
       binds, one through an index used after a write, or an update, a hidden binder or a \
       modality under a negation or a precondition)"
-  let goal := Lean.mkForall `σ .default (mkConst ``Semantics.State)
-    (mkApp2 (mkConst ``LFml.holds) (.bvar 0) (mkApp2 (mkConst ``Fml.reduceS) C ψ))
+  let body := mkApp2 (mkConst ``LFml.holds) (.bvar 0) (mkApp2 (mkConst ``Fml.reduceS) C ψ')
+  let goal := if hasLayout then
+      Lean.mkForall `σ .default (mkConst ``Semantics.State)
+        (Lean.mkForall `hL .default (mkApp2 (mkConst ``LayoutOk) lay (.bvar 0))
+          (body.liftLooseBVars 0 1))
+    else Lean.mkForall `σ .default (mkConst ``Semantics.State) body
   let g' ← mkFreshExprSyntheticOpaqueMVar goal (← g.getTag)
-  g.assign (mkAppN (mkConst ``Valid.of_reduceS) #[C, ψ, hf, g'])
-  return g'.mvarId!
+  g.assign (mkAppN (mkConst (if hasLayout then ``Valid.of_reduceSL else ``Valid.of_reduceS))
+    #[C, ψ, hf, g'])
+  return (g'.mvarId!, hasLayout)
 
 open Lean Elab Tactic Meta in
 /-- **`sol_decide` on a scoped leaf** (`Valid ψ`, after `sol_symex`): the
@@ -1421,21 +1543,35 @@ leaf reduced by position (`Valid.of_reduceS`), then closed by its terms
 with its parameters known (`LFml.syn_valid_alls`), or by the closer
 (`LFml.closeS`, `Calculus/Closer.lean`), or by the constraints
 with its parameters typed (`LFml.valid_alls_of_cons`), or by
-`sol_decide_heuristic` with them free.  Today's `sol_decide` runs on
-today's goal. -/
+`sol_decide_heuristic` with them free.  With a premise `wt(storage)`
+(`Valid.of_reduceSL`) the closer reads its layout, and the other steps run
+without it (`LFml.forall_layout`).  Today's `sol_decide` runs on today's
+goal. -/
 @[tactic Solidity.Decide.tacticSol_decide]
 def evalSolDecideScoped : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
   Symex.reporting g do
-    replaceMainGoal [← reduceScoped g C ψ]
-    evalTactic (← `(tactic| (
-      sol_reduce
-      first
-      | sol_decide_syn_alls
-      | sol_decide_close
-      | sol_decide_typed
-      | (sol_decide_body; sol_decide_heuristic))))
+    let (g', hasLayout) ← reduceScoped g C ψ
+    replaceMainGoal [g']
+    if hasLayout then
+      evalTactic (← `(tactic| (
+        sol_reduce
+        first
+        | sol_decide_close
+        | (refine LFml.forall_layout ?_
+           first
+           | sol_decide_syn_alls
+           | sol_decide_typed
+           | (sol_decide_body; sol_decide_heuristic)))))
+    else
+      evalTactic (← `(tactic| (
+        sol_reduce
+        first
+        | sol_decide_syn_alls
+        | sol_decide_close
+        | sol_decide_typed
+        | (sol_decide_body; sol_decide_heuristic))))
 
 end Decide
 

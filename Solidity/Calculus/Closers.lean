@@ -10,10 +10,12 @@ import Solidity.Calculus.UpdRuleScoped
 After `sol_symex` on a scoped goal (`Valid ψ`, `⊨ dl!{ … }` under
 `open scoped Solidity.Scoped`), a leaf is closed by today's closers on
 its erasure, as `sol_close` and `sol_close_mt` are through their first
-step, `sol_close_unwrap` (`Calculus/Derive.lean`): each tactic below
-has a second elaborator that erases the leaf (`Derive.eraseLeaf`:
-`Fml.posB`, checked by the kernel, then `Valid.of_erase`) and runs the same
-tactic on today's goal.  Today's macro is tried first and fails on a scoped
+step, `sol_close_unwrap` (`Calculus/Derive.lean`): each of
+`sol_close_eval`, `sol_apply_upd` and `sol_fold_terms` has a second
+elaborator that erases the leaf (`Derive.eraseLeaf`: `Fml.posB`, checked
+by the kernel, then `Valid.of_erase`) and runs the same tactic on today's
+goal; `sol_decide`'s parts reduce the scoped leaf by position instead
+(below).  Today's macro is tried first and fails on a scoped
 goal; on today's goal the second elaborator steps aside.  `sol_upd` and
 `sol_merge` rewrite the scoped formula itself (M6c, W7
 `w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s rules, the leaf staying
@@ -30,22 +32,51 @@ open Lean Elab Tactic
 @[tactic Solidity.tacticSol_close_eval]
 def evalSolCloseEvalCore : Tactic := fun stx => Derive.onErased "sol_close_eval" stx stx
 
+/-! ## `sol_decide`'s parts on a scoped goal (decision 80)
+
+Each part on a scoped leaf `Valid ψ` reduces the leaf by position
+(`Decide.reduceScoped`, `Valid.of_reduceS`; with a premise `wt(storage)`,
+`Valid.of_reduceSL`, its layout then set aside), computes the reduction
+(`sol_reduce`) and takes the step it names on it: the constraints with the
+parameters typed (`sol_decide_cons`, `sol_decide_typed`'s step; `sol_reads`
+its first part), or the finish without them, the parameters free
+(`sol_decide_heuristic`, `sol_decide_unconstrained`).  On today's goal
+each steps aside for today's macro. -/
+
+open Meta in
+/-- A part of `sol_decide` on a scoped goal: the leaf reduced by position,
+the reduction computed, then `rest`. -/
+def Decide.onReduced (layout : Bool) (rest : Option (TacticM Unit)) : Tactic := fun _ =>
+  withMainContext do
+    let g ← getMainGoal
+    let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
+    Symex.reporting g do
+      let (g', hasLayout) ← Decide.reduceScoped g C ψ
+      replaceMainGoal [g']
+      evalTactic (← `(tactic| sol_reduce))
+      if hasLayout && !layout then
+        evalTactic (← `(tactic| refine Decide.LFml.forall_layout ?_))
+      if let some k := rest then withMainContext k
+
 @[tactic Solidity.Decide.tacticSol_decide_heuristic]
-def evalSolDecideHeuristicCore : Tactic := fun stx =>
-  Derive.onErased "sol_decide_heuristic" stx stx
+def evalSolDecideHeuristicCore : Tactic := Decide.onReduced false <| some do
+  evalTactic (← `(tactic| (sol_decide_body; sol_decide_heuristic)))
 
 @[tactic Solidity.Decide.tacticSol_decide_cons]
-def evalSolDecideConsCore : Tactic := fun stx => Derive.onErased "sol_decide_cons" stx stx
+def evalSolDecideConsCore : Tactic := Decide.onReduced false <| some do
+  evalTactic (← `(tactic| sol_decide_typed))
 
 @[tactic Solidity.Decide.tacticSol_decide_unconstrained]
-def evalSolDecideUnconstrainedCore : Tactic := fun stx =>
-  Derive.onErased "sol_decide_unconstrained" stx stx
+def evalSolDecideUnconstrainedCore : Tactic := Decide.onReduced false <| some do
+  evalTactic (← `(tactic| (sol_decide_body; sol_decide_heuristic)))
 
 @[tactic Solidity.Decide.tacticSol_reduce]
-def evalSolReduceCore : Tactic := fun stx => Derive.onErased "sol_reduce" stx stx
+def evalSolReduceCore : Tactic := Decide.onReduced true none
 
 @[tactic Solidity.Decide.tacticSol_reads]
-def evalSolReadsCore : Tactic := fun stx => Derive.onErased "sol_reads" stx stx
+def evalSolReadsCore : Tactic := Decide.onReduced false <| some do
+  replaceMainGoal [← Decide.typedCons (← getMainGoal)]
+  evalTactic (← `(tactic| sol_reads))
 
 @[tactic Solidity.tacticSol_apply_upd]
 def evalSolApplyUpdCore : Tactic := fun stx => Derive.onErased "sol_apply_upd" stx stx
