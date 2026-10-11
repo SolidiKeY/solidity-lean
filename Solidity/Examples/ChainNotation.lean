@@ -169,17 +169,16 @@ goes on on the erasure (`Fml.ViaE`), its last scoped line closed by `Proves.clos
 captures, which `sol_close` does not drop: `simplifyUpdate` drops them first. -/
 
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
-  refine (show dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
+  refine Fml.Via.valid (show dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
       ~*> dl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
         alice.account.balance == 10 }
       ~[sequentialToParallel]~> dl![.box]{
         { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
           alice.account.balance == 10 }
       ~[simplifyUpdate]~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
-        alice.account.balance == 10 } by sol_chain).valid_close ?_
-  show NFml.Valid _
-  dsimp only [Solidity.NFml.Via.last]
-  sol_close
+        alice.account.balance == 10 } by sol_chain) ?_
+  dsimp only [Fml.Via.last]
+  sol_decide
 
 /-- A box derivation's last line, written: an update with no modality under
 it is judged at the box in `dl![.box]{ … }` (in `dl!{ … }`, at the diamond).

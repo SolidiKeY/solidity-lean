@@ -183,7 +183,7 @@ theorem headlineValueChain :
 /-- `alice.account.balance = 10;` reads back `10`: the chain is a proof, its last scoped line
 closed by `Proves.close` (`Fml.ViaE.valid_close`). -/
 theorem headlineValue : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 } :=
-  headlineValueChain.valid_close fun _ => Theory.StValue.Equiv.refl _
+  Fml.Via.valid headlineValueChain fun _ => Theory.StValue.Equiv.refl _
 
 /-- `alice.account.balance = 10;` against `==`: the law rewrites the
 equation, not the `defined(…)` beside it. -/
@@ -215,25 +215,25 @@ program): the write sits amid captures, and the spine merges inside out. -/
 
 /-- `alice.age = 42; uint x = alice.age;` reads back `42`: the law in the update. -/
 theorem ageWriteReadValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 } :=
-  (show dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 }
+  Fml.Via.valid (show dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 }
     ~*> dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x ≐ 42 }
     ~[sequentialToParallel]~>
         dl![.box]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) }
           x ≐ 42 }
     ~[findOnSave]~> dl![.box]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } x ≐ 42 }
-    ~[applyOnRigidBox]~> dl!{ 42 ≐ 42 } by sol_chain).valid_close
+    ~[applyOnRigidBox]~> dl!{ 42 ≐ 42 } by sol_chain)
     fun _ => Theory.StValue.Equiv.refl _
 
 /-- `alice.age = 42; uint x = alice.age;` reads back `42`, in
 `ageWriteReadKeY`'s order: merge, apply, then the law. -/
 theorem ageWriteReadKeYValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 } :=
-  (show dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 }
+  Fml.Via.valid (show dl!{ [ alice.age = 42; uint x = alice.age; ] x ≐ 42 }
     ~*> dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x ≐ 42 }
     ~[sequentialToParallel]~>
         dl![.box]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) }
           x ≐ 42 }
     ~[applyOnRigidBox]~> dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
-    ~[findOnSave]~> dl!{ 42 ≐ 42 } by sol_chain).valid_close
+    ~[findOnSave]~> dl!{ 42 ≐ 42 } by sol_chain)
     fun _ => Theory.StValue.Equiv.refl _
 
 /-- The read of the write, one member at a time instead of `findOnSave`: solkey's
@@ -255,7 +255,7 @@ def ageReadMembers :
 (`withSt`), then the captures; the law in the update; the update applied. -/
 theorem readBackValue :
     ⊨ dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x ≐ 10 } :=
-  (show dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x ≐ 10 }
+  Fml.Via.valid (show dl!{ [ alice.account.balance = 10; uint x = alice.account.balance; ] x ≐ 10 }
     ~*> dl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
             { sp2 := alice.account } { x := find(storage, sp2.balance) } x ≐ 10 }
     ~[sequentialToParallel]~>
@@ -265,8 +265,8 @@ theorem readBackValue :
     ~[findOnSave]~>
         dl![.box]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
           ‖ sp2 := alice.account ‖ x := 10 } x ≐ 10 }
-    ~[applyOnRigidBox]~> dl!{ 10 ≐ 10 } by sol_chain).valid_close
-    fun _ => Theory.StValue.Equiv.refl _
+    ~[applyOnRigidBox]~> dl!{ 10 ≐ 10 } by sol_chain)
+    fun _ _ _ _ => Theory.StValue.Equiv.refl _
 
 /-! ## 3′ · Under any modality
 
