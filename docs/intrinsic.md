@@ -2711,6 +2711,12 @@ What the step had to choose (proposals, lane `delete`):
 - **119**: `show_sequent` compares the line the goal prints as (its context
   folded in front, `Hyps.wrap`, a block's end not shown) with the line read
   scoped (`cdl[C]{ … }`), printed alike; it unified the two erasures.
+  The fold alone made the check weaker (a context entry prints as an
+  implication or update of the formula, so `⟹ ∀ uint x; a → φ` passed
+  for the goal `∀ uint x, a ⟹ φ`); the review restored the old entry
+  count, the goal's printed entries (`Delab.hypsPartsS`, a hidden binder
+  none) against the line's, pinned by a `fail_if_success` in
+  `Examples/Tactics/Sequents.lean`.
 - **120**: `Delab.ppFmlE` prints `φ where T memory x` for a memory local a
   copy out of storage binds (`MRhs.copy`) under a hidden binder, the
   scoped form of `copyDecls`; only a formula standing alone (`dl{ … }`)

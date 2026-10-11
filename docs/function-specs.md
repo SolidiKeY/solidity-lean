@@ -114,8 +114,10 @@ R ∧ L ∧ M ∧ I ∧ requires →
   `∀ k` at a mapping, with `¬ k = e` where `m[e]` is listed; an array owes
   its length and every element; keys are read in the pre-state.
 
-`specParts` returns the parts apart (`R, L, M`; `I, requires`; the
-conclusion). A function marked `skip`, or with no clause and no invariant,
+`specPieces` (`Calculus/SurfaceSpec.lean`) returns the parts apart (`R, L,
+M`; `I, requires`; the update, the call, the conclusion's clauses), and
+`specObligation` (`Calculus/Spec.lean`) reads them scoped, in the
+parameters' context, the call placed past the locals the update declares. A function marked `skip`, or with no clause and no invariant,
 has no obligation; a parameter named `old`, `oldNet`, `result` or `k<n>`, or
 of reference type, is rejected.
 

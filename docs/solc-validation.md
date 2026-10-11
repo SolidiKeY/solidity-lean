@@ -183,7 +183,7 @@ citations when re-pinning.
 **D. The harness.** Lean generates a program `P`, prints it as a Solidity case
 (`source`, `setUp`, `calls`), a Node harness compiles it with solc under legacy and
 via-IR, with and without the optimizer, at pinned versions, runs it on an EVM, decodes
-the storage by `--storage-layout`, and diffs with the typed run (`Surface.Prog.runT`). The Lean side, with no
+the storage by `--storage-layout`, and diffs with the typed run (`Prog.runT`, `Tools/Run.lean`). The Lean side, with no
 dependency:
 - a **printer** from `Stmt C` to Solidity (`Solidity.Tools.Emit`), its round trip
   `sol[C]{ print P } = P` checked by `#guard` per program (it prints elaborated

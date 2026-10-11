@@ -7,7 +7,8 @@ import Solidity.Calculus.Sequents
 `show sequent!{ Γ ⟹ φ }` checks that a scoped goal prints as the line
 (its erasure against the line read as today's), as a walk over today's
 goals states them (today's `Calculus/Sequents`).  A block's `}` is not
-written; a hidden binder is no entry.
+written; a hidden binder is no entry, and an entry folded into the formula
+is not the line.
 -/
 
 namespace Solidity.Examples.Tactics.Sequents
@@ -25,6 +26,8 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] true } := by
   apply Proves.split (Taclet.toStep .ifElseSplit)
   case thn =>
     show sequent!{ ∀ uint x, true ≐ true ⟹ [ x = 2; ] true }
+    -- an entry folded into the formula is not the line
+    fail_if_success show_sequent!{ ⟹ ∀ uint x; true ≐ true → [ x = 2; ] true }
     apply Proves.update (Taclet.toStep .localValueAssign)
     fail_if_success show sequent!{ ∀ uint x, true ≐ true, { x := 1 } ⟹ true }
     show sequent!{ ∀ uint x, true ≐ true, { x := 2 } ⟹ true }

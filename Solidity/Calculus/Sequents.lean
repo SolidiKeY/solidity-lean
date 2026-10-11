@@ -14,9 +14,11 @@ unfolding.  The line is checked on what the goal **prints as**: the goal's
 formula with its context folded in front (`Hyps.wrap`) and the line read as
 a scoped formula (`cdl[C]{ … }`, the context's entries in front of it as
 `sequentFmlC` writes them), both printed by `Calculus/PrintStmt.lean`'s
-printer, a block's end not shown, and the two lines compared.  So the line
-is written as the goal prints, without the `}` of a block's end, and a
-hidden binder is no entry.
+printer, a block's end not shown, and the two lines compared, after the
+line's entries are counted against the goal's (an entry folded into the
+formula, `a → φ` for the entry `a`, prints the same but is not the line).
+So the line is written as the goal prints, without the `}` of a block's
+end, and a hidden binder is no entry.
 
 `show_sequent[C]{ Γ ⟹ φ }` and `show_sequent!{ Γ ⟹ φ }` are the checks;
 under `open scoped Solidity.Scoped`, `show sequent!{ … }` and
@@ -58,6 +60,13 @@ def checkSequent (c : Lean.Term) (arrow : TSyntax `seq_arrow) (hs : Array (TSynt
   let R := match arrow with
     | `(seq_arrow| ⟹ₖ) => ``RuleSet.solkey
     | _ => ``RuleSet.all
+  -- The context's entries as the goal prints them (a hidden binder, an
+  -- empty update are none): the line must write as many.
+  let n ← Delab.withPrinter ty false do
+    let (r, gs, _) ← Delab.hypsPartsS (ty.getArg! 0) (ty.getArg! 4)
+    return gs.size + (if r.isSome then 1 else 0)
+  unless n == hs.size do
+    throwError "show_sequent: the goal has {n} context entries, the line {hs.size}; it is{indentExpr (← g.getType)}"
   let goal ← fmlLine (← mkAppM ``Hyps.wrap #[ty.getArg! 4, ty.getArg! 5])
   let line ← Term.TermElabM.run' do
     let F ← liftMacroM (sequentFmlC hs φ)

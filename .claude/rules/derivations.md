@@ -101,7 +101,7 @@ closer reads a leaf's erasure over every untyped state (decision 7's IR;
 roots, so a write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩ true`,
 pinned in `Examples/ProofTree.lean`). Write the box, or state the
 precondition. A claim about the contract's initial store is a typed run
-(`Surface.Prog.runT` from `State.exampleStore`, `Tools/Run.lean`), pinned
+(`Prog.runT` from `State.exampleStore`, `Tools/Run.lean`), pinned
 with `#guard_msgs in #eval`.
 
 When `sol_close` does not close a true goal, the gap belongs in

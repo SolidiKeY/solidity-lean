@@ -228,7 +228,7 @@ syntax:20 dl_fml:21 " ↔ " dl_fml:21 : dl_fml
 /-- `φ where Person memory carol`: `φ` with `carol` a memory local, a
 declaration the formula's programs do not make (KeY's `\programVariables`).
 Only `dl[C]{ … }` reads it; a line prints it where the kind of a local is
-not otherwise written (`copyDecls`). -/
+not otherwise written (`Delab.ppFmlE`, `Calculus/Delab.lean`). -/
 syntax:10 dl_fml:11 " where " sepBy1(sol_stmt, ", ") : dl_fml
 
 /-- What a taclet leaves: an update in front of the rest, statements, two
