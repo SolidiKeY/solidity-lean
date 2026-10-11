@@ -2330,7 +2330,7 @@ Constructors,CallbackRuns,Tour}.lean`, `Examples/Chains/Memory.lean`,
 `Examples/Notation.lean`.  None of them names `Surface.Prog` any more.
 
 - **Strings and runs.**  `Surface.Prog.toStr (sol{ … })` is
-  `Prog.toStr [] (sol{ … })`, with the same strings, still by `decide`.
+  `Prog.toStr [] (sol{ … })`, with the same strings, still by `decide` (`rfl` in `Chains/Memory.lean`).
   `Surface.Prog.runT`/`localAfterT` are `Prog.runT`/`Prog.localAfterT`
   (`Tools/Run.lean`), and `Mini.deployRun` is `Mini.deployRunS`.  An
   ascription `: Surface.Prog C` is `: Prog C [] _`.
@@ -2365,7 +2365,7 @@ with the same expected text:
 |---|---|---|
 | `Tactics/Checked.lean` | 1 `#eval` pin, 6 `decide` string examples | `Surface.Prog.toStr` → `Prog.toStr []` |
 | `Tactics/Operators.lean` | 2 `decide` string examples | same |
-| `Chains/Memory.lean` | 1 `decide` string example | same, ascription `: Prog Calls [] _` |
+| `Chains/Memory.lean` | 1 `rfl` string example | same, ascription `: Prog Calls [] _` |
 | `Tactics/StorageSuite.lean` | 9 `#eval` pins (`localAfterT`/`runT`) | the scoped run tools |
 | `Tactics/StorageDelete.lean` | its `#eval` pins on a run | same |
 | `Tactics/Memory.lean` | its `#eval` pins on a run (some bind `let P : Prog C [] _`) | same |
