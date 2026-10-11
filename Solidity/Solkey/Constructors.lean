@@ -42,11 +42,8 @@ warning: solc_import: the initializers are left out: an initializer calls `cap`,
 #guard_msgs in
 solc_import "../../tests/solc/InitGap.ast.json" hash 0x83328c56fa8af038 as Solkey.InitGap
 
--- the legacy statement, `N.f.problem.legacy`, declared and not compiled
-solc_problems Solkey.EtherWallet legacy
-
-/-! Each import's programs, scoped (`solc_scoped`): the lint of the scoped
-syntax, `N.f.core` checked by the kernel. -/
+/-! Each import's programs are scoped, `N.f : Prog N Γ Γ'`, checked by the
+kernel at the import (`solc_scoped` counts them). -/
 
 /-- info: 2 programs declared scoped -/
 #guard_msgs in solc_scoped Solkey.Counter
@@ -60,12 +57,11 @@ syntax, `N.f.core` checked by the kernel. -/
 /-- info: 1 program declared scoped -/
 #guard_msgs in solc_scoped Solkey.InitGap
 
-/-! `EtherWallet`'s obligations, scoped (`solc_scoped_problems … main`): each
-program resolved in its parameters' context, `N.f.problem`, checked to
-erase to the legacy statement `N.f.problem.legacy`. -/
+/-! `EtherWallet`'s obligations (`solc_scoped_problems`): each stated on
+its program `N.f`, read in its parameters' context, `N.f.problem`. -/
 
 /-- info: 1 obligation declared scoped -/
-#guard_msgs in solc_scoped_problems Solkey.EtherWallet main
+#guard_msgs in solc_scoped_problems Solkey.EtherWallet
 
 
 /-! ## `Counter.sol`
@@ -89,12 +85,7 @@ info: 2 functions (0 diamond, 0 box, 0 skip, 2 specified): 2 elaborated, 0 skipp
 #guard_msgs in
 #eval IO.println (Solkey.Counter.inits.map fun (x, e) => (x, e.toStr))
 
-private def counterDeployP : Surface.Prog Solkey.Counter := sol[Solkey.Counter]{ constructor(7); }
-
-open Lean Elab Command in
-run_cmd liftCoreM do
-  if let some e ← Prog.defineCore `counterDeployCore ``Solkey.Counter [] counterDeployP then
-    throwError "counterDeployCore: {e}"
+private def counterDeployCore : Prog Solkey.Counter [] [] := sol[Solkey.Counter]{ constructor(7); }
 
 /-- What the deployment with `7` stores: `limit = 5`, `count = 7`. -/
 private def counterStorage : Storage Solkey.Counter :=

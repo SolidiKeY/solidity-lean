@@ -2,23 +2,20 @@ import Solidity.Solkey.TestSuite
 import Solidity.Frontend.Problems
 
 /-!
-# solkey's `TestSuite` obligations, as `Update.lean`'s formulas
+# solkey's `TestSuite` obligations, in solkey's syntax
 
-One statement per public or external function the import elaborated
-(`solc_problems`, `Frontend/Problems.lean`); an internal helper has none,
-as solkey inlines it at its calls: the obligation as solkey's
-`SolidityProblemSynthesizer` states it, the modality the function's tag,
-`∀` over its parameters, under `wt(storage)` (`Calculus/Problem.lean`).
-Declared `Solkey.TestSuite.f.problem.legacy` and not compiled (`legacy`):
-the statement proved is the scoped `Solkey.TestSuite.f.problem` of
-`ScopedProblems.lean`, checked to erase to this one, and `#solkey_problem`
-prints this one.  The theorems are in the `Derived*` modules; `Report.lean`
-counts them.  The suggestions `#solkey_derive?` prints are pinned in
+One statement per public or external function the import elaborated; an
+internal helper has none, as solkey inlines it at its calls: the
+obligation as solkey's `SolidityProblemSynthesizer` states it, the
+modality the function's tag, `∀` over its parameters, under `wt(storage)`
+(`Calculus/Problem.lean`), on the scoped program `Solkey.TestSuite.f`.
+They are declared in `ScopedProblems.lean`, `Solkey.TestSuite.f.problem`
+(`solc_scoped_problems`, `Frontend/Problems.lean`); `#solkey_problem` here
+prints the statement it would declare.  The theorems are in the `Derived*`
+modules; `Report.lean` counts them.  The suggestions `#solkey_derive?` prints are pinned in
 `Suggestions.lean`, which no `Derived` module imports, so that its
 searches stay off their path.
 -/
-
-solc_problems Solkey.TestSuite legacy
 
 /-! Two statements as solkey prints them: a box and a diamond, each with
 parameters. -/

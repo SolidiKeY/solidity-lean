@@ -4,9 +4,10 @@ import Solidity.Calculus.Delab
 /-!
 # Obligations and specifications, scoped
 
-`Calculus/Spec.lean` pinned: a constructor's obligation and a
-specification's, read in their parameters' context, print as today's do
-(a hidden binder printing as nothing), and erase to today's.
+`Calculus/Problem.lean` and `Calculus/Spec.lean` pinned: a constructor's
+obligation and a specification's, read in their parameters' context, print
+as the closer's formulas do (a hidden binder printing as nothing), and a
+specification's erases to the closer's.
 -/
 
 namespace Solidity.Examples.Tactics.Spec
@@ -75,11 +76,24 @@ def sameAs (a b : Except String (Surface.Fml Ledger)) : Bool :=
     Surface.Fml.quote (Lean.mkConst ``Ledger) φ == Surface.Fml.quote (Lean.mkConst ``Ledger) ψ
   | _, _ => false
 
-/-! Each scoped obligation erases to today's. -/
+/-! Each specification's obligation erases to the closer's (`specParts`). -/
 
 #guard sameAs ((specObligation Ledger "add").map (·.eraseS [])) (Surface.specObligation Ledger "add")
 #guard sameAs ((specObligation Ledger "constructor").map (·.eraseS []))
   (Surface.specObligation Ledger "constructor")
-#guard sameAs ((Problem.ctor Ledger .diamond).map (·.eraseS [])) (Surface.Problem.ctor Ledger .diamond)
+
+/-! The deployment's obligation in solkey's problem syntax (`Problem.text`). -/
+
+/--
+info: \programVariables {
+    int a;
+}
+
+\problem {
+    {storage := mtSt || net := storeSt(mtSt, at(msgSender), msgValue) || selfBalance := msgValue} \<{ constructor(a)@Ledger; }\>(true)
+}
+-/
+#guard_msgs in
+#eval IO.println (Problem.text "Ledger" "constructor" ctorObligation)
 
 end Solidity.Examples.Tactics.Spec

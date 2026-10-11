@@ -5,13 +5,10 @@ import Solidity.Calculus.SoundKit
 /-!
 # A scoped constructor obligation, read at the deployment
 
-The scoped constructor obligation (`Problem.ctorFml`,
-`cproblem!{constructor}`, `problem!{constructor}` under `open scoped
-Solidity.Scoped`), read as master's `Problem.text` and
+The constructor obligation (`Problem.ctorFml`, `problem!{constructor}`,
+`Calculus/Problem.lean`), read at the deployment, as master's
 `Problem.deploy_of_valid` read the unscoped one:
 
-* `Problem.text` prints the KeY problem file of its erasure
-  (`Surface.Problem.text`; `Problem.ofLegacy` reads the erasure back);
 * `Problem.deploy_of_valid`: a valid obligation is a theorem about the typed
   run of its program from the typed deployment state (`State.deploy`) with
   any values of its parameters, which the deployment update leaves as it
@@ -26,11 +23,6 @@ namespace Solidity
 open Solidity (Modality)
 
 variable {C : Contract}
-
-/-- solkey's problem file of a scoped obligation: its erasure's
-(`Surface.Problem.text`). -/
-def Problem.text (contract fn : String) (φ : Fml C []) : String :=
-  Surface.Problem.text contract fn (φ.eraseS [])
 
 /-- The typed state a deployment starts in (`Contract.deployState`): the
 empty storage, no memory, a ledger holding the deployer's payment, and the
