@@ -1,5 +1,4 @@
 import Solidity.Typing.TypedWT
-import Solidity.Semantics.StateErase
 import Solidity.Calculus.RuleShapes
 import Solidity.SortCheck.Annotations
 
@@ -8,9 +7,9 @@ import Solidity.SortCheck.Annotations
 
 The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
-taclet's value read declares agrees with the value the interpreter finds
-there, in every state that agrees (`Agree`, `Semantics/StateErase.lean`) with a
-scoped state the invariant `RunWT` (`Typing/Soundness.lean`) holds of.
+taclet's value read declares agrees with the value the scoped evaluators
+(`Semantics/Erased.lean`) find there, in every state the invariant `RunWT`
+(`Typing/Soundness.lean`) holds of.
 `solkeycheck` keeps the table equal to the `.key` text; this module keeps it
 true of the interpreter, so a table updated to match a buggy
 taclet stops building here (`Counterexamples/PreFixSortAnnotations.lean`
@@ -27,10 +26,10 @@ What a declared sort claims about the value found (`SortOkS`, `SortOkM`):
 **Which read.**  Every read-bearing taclet is a Step-3 rule, whose statement
 is all simple and reads storage or memory in exactly one place: the source
 of a copy, the local a read binds, the target of `⊕=` and `++`
-(`Stmt.read?`, on the scoped statement, a `CRead` that erases to a `Read`
-under any names of its locals).  That is the read the row annotates (a row's other reads are
-`size` cells, the `net` ledger and `delete` defaults, which the Lean model
-has no cell for: `solkeycheck` checks their tokens).  The typed syntax makes
+(`Stmt.read?`, a `Read` of the scoped statement's own paths).  That is
+the read the row annotates (a row's other reads are `size` cells, the `net`
+ledger and `delete` defaults, which the Lean model has no cell for:
+`solkeycheck` checks their tokens).  The typed syntax makes
 the fixed claims *static*: an `⊕=` target is at a numeric type by its
 constructor, a copy source at a reference type.  So each row is faithful
 once its constructors read at a type of the right class (`ReadClass`), and
@@ -57,75 +56,30 @@ variable {C : Contract}
 
 /-! ## The value read of a statement -/
 
-/-- A read of a storage path or a memory path, at its static type. -/
-inductive Read (C : Contract) where
-  | storage (T : Ty) (p : Surface.SPath C T)
-  | memory (T : Ty) (p : Surface.MPath C T)
-  /-- `values.length`: KeY reads it as the member `length` of the array, a
-  `uint` cell (`size`). -/
-  | slen {E : Ty} (p : Surface.SPath C (.array E))
-  /-- `xs.length` of a memory array. -/
-  | mlen {E : Ty} (p : Surface.MPath C (.array E))
-
-/-- `alice.age` is read from storage, `m.age` from memory. -/
-def Read.domain : Read C → ReadDomain
-  | .storage .. | .slen _ => .storage
-  | .memory .. | .mlen _ => .memory
-
-/-- `alice.age` is read at `uint`, and so is a length. -/
-def Read.ty : Read C → Ty
-  | .storage T _ | .memory T _ => T
-  | .slen _ | .mlen _ => .uint
-
-/-- The read's locals are used as declared: it is the erasure, under the
-names `ns`, of a read in the scoped syntax over `Γ` (`resolve` finds one when
-it accepts the statement). -/
-def Read.Typed (ns : List Var) (Γ : Ctx) : Read C → Prop
-  | .storage T p => ∃ p' : SPath C Γ T, p'.erase ns = p
-  | .memory T p => ∃ p' : MPath C Γ T, p'.erase ns = p
-  | @Read.slen _ E p => ∃ p' : SPath C Γ (.array E), p'.erase ns = p
-  | @Read.mlen _ E p => ∃ p' : MPath C Γ (.array E), p'.erase ns = p
-
-/-- A read of the scoped syntax over `Γ`: a storage or memory path at its
-type, or a length.  It erases, under the names `ns`, to a `Read` its locals
-are used as declared in (`CRead.erase_typed`). -/
-inductive CRead (C : Contract) (Γ : Ctx) where
+/-- A read of the scoped syntax over `Γ`: a storage path or a memory path,
+at its static type, or a length. -/
+inductive Read (C : Contract) (Γ : Ctx) where
   | storage (T : Ty) (p : SPath C Γ T)
   | memory (T : Ty) (p : MPath C Γ T)
+  /-- `values.length`: KeY reads it as the member `length` of the array, a
+  `uint` cell (`size`). -/
   | slen {E : Ty} (p : SPath C Γ (.array E))
+  /-- `xs.length` of a memory array. -/
   | mlen {E : Ty} (p : MPath C Γ (.array E))
 
-/-- The read under the names `ns`. -/
-def CRead.erase {Γ : Ctx} (ns : List Var) : CRead C Γ → Read C
-  | .storage T p => .storage T (p.erase ns)
-  | .memory T p => .memory T (p.erase ns)
-  | .slen p => .slen (p.erase ns)
-  | .mlen p => .mlen (p.erase ns)
-
 /-- `alice.age` is read from storage, `m.age` from memory. -/
-def CRead.domain {Γ : Ctx} : CRead C Γ → ReadDomain
+def Read.domain {Γ : Ctx} : Read C Γ → ReadDomain
   | .storage .. | .slen _ => .storage
   | .memory .. | .mlen _ => .memory
 
 /-- `alice.age` is read at `uint`, and so is a length. -/
-def CRead.ty {Γ : Ctx} : CRead C Γ → Ty
+def Read.ty {Γ : Ctx} : Read C Γ → Ty
   | .storage T _ | .memory T _ => T
   | .slen _ | .mlen _ => .uint
-
-theorem CRead.erase_typed {Γ : Ctx} (ns : List Var) :
-    (R : CRead C Γ) → (R.erase ns).Typed ns Γ
-  | .storage _ p | .memory _ p | .slen p | .mlen p => ⟨p, rfl⟩
-
-theorem CRead.erase_domain {Γ : Ctx} (ns : List Var) :
-    (R : CRead C Γ) → (R.erase ns).domain = R.domain
-  | .storage .. | .memory .. | .slen _ | .mlen _ => rfl
-
-theorem CRead.erase_ty {Γ : Ctx} (ns : List Var) : (R : CRead C Γ) → (R.erase ns).ty = R.ty
-  | .storage .. | .memory .. | .slen _ | .mlen _ => rfl
 
 /-- The place `x ⊕= e` and `x++` read: `alice.age` in storage, `m.age` in
 memory; a stack local is not read from a state component. -/
-def OpLoc.read? {Γ : Ctx} : {p : PrimTy} → OpLoc C Γ p → Option (CRead C Γ)
+def OpLoc.read? {Γ : Ctx} : {p : PrimTy} → OpLoc C Γ p → Option (Read C Γ)
   | _, .local _ => none
   | p, .root r h => some (.storage (.prim p) (.loc (.root r h)))
   | p, .field b f h => some (.storage (.prim p) (.loc (.field b f h)))
@@ -136,7 +90,7 @@ def OpLoc.read? {Γ : Ctx} : {p : PrimTy} → OpLoc C Γ p → Option (CRead C �
 /-- The value read a statement performs: `x = alice.age;` reads `alice.age`,
 `alice = bob;` reads `bob`, `m = alice;` reads `alice`, `alice.age += 1;`
 reads `alice.age`. -/
-def Stmt.read? {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (CRead C Γ)
+def Stmt.read? {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Read C Γ)
   | @Stmt.assignLocal _ _ p _ (.read l) => some (.storage (.prim p) (.loc l))
   | @Stmt.assignLocal _ _ p _ (.readMem l) => some (.memory (.prim p) (.loc l))
   | @Stmt.assignLocal _ _ _ _ (.len b _) => some (.slen b)
@@ -167,12 +121,12 @@ def SortOkM (H : HeapTy) : ReadSort → Ty → Semantics.MVal → Bool
 /-- The declared sort `rs` holds of whatever the read finds in `σ`:
 resolving the storage path and finding the value, or reading the memory
 slot. -/
-def Read.SortOk (σ : Semantics.State) (H : HeapTy) (rs : ReadSort) : Read C → Prop
+def Read.SortOk {Γ : Ctx} (σ : EState C Γ) (H : HeapTy) (rs : ReadSort) : Read C Γ → Prop
   | .storage T p => ∀ r segs v, p.resolve σ = .ok (r, segs) →
-      σ.findStorage r segs = .ok v → SortOkS rs T v = true
+      σ.glob.findStorage r segs = .ok v → SortOkS rs T v = true
   | .memory T p => ∀ mv, p.mval σ = .ok mv → SortOkM H rs T mv = true
-  | .slen p => ∀ v, (Surface.Val.len (p := .uint) p rfl).eval σ = .ok v → SortOkS rs .uint v.toSVal = true
-  | .mlen p => ∀ v, (Surface.Val.mlen (p := .uint) p rfl).eval σ = .ok v →
+  | .slen p => ∀ v, (Val.len (p := .uint) p rfl).eval σ = .ok v → SortOkS rs .uint v.toSVal = true
+  | .mlen p => ∀ v, (Val.mlen (p := .uint) p rfl).eval σ = .ok v →
       SortOkM H rs .uint v.toMVal = true
 
 /-- What a constructor's schema fixes about its read's static type. -/
@@ -224,22 +178,17 @@ theorem MVal.ref_of_hasTyH_ref {H : HeapTy} {mv : Semantics.MVal} {T : Ty}
     | prim pv => cases pv <;> simp [MVal.hasTyH] at h
     | ref id => exact ⟨id, rfl⟩
 
-/-- **The semantic core.**  A read whose locals are used as declared, of a
-class the declared sort is supported by, finds a value the sort claims, in
-every state that agrees with a `RunWT` state: `x = total;` finds a number
+/-- **The semantic core.**  A read of a class the declared sort is supported
+by finds a value the sort claims, in every `RunWT` state: `x = total;` finds a number
 where `total : uint`, `alice.age += 1` finds an `int`, `m = alice;` finds a
 `Struct` node. -/
-theorem Read.sortOk {Γ : Ctx} {ns : List Var} {H : HeapTy} {σ : EState C Γ}
-    {τ : Semantics.State} (hwt : RunWT C H σ) (hag : Agree ns σ τ) {R : Read C}
-    (hw : R.Typed ns Γ) {cls : ReadClass} (hfit : cls.fits R.ty = true) {rs : ReadSort}
-    (hsup : cls.supports R.domain rs = true) : R.SortOk τ H rs := by
+theorem Read.sortOk {Γ : Ctx} {H : HeapTy} {σ : EState C Γ} (hwt : RunWT C H σ)
+    {R : Read C Γ} {cls : ReadClass} (hfit : cls.fits R.ty = true) {rs : ReadSort}
+    (hsup : cls.supports R.domain rs = true) : R.SortOk σ H rs := by
   cases R with
   | storage T p =>
     intro r segs v hr hv
-    obtain ⟨p', rfl⟩ := hw
-    rw [SPath.resolve_erase hag] at hr
-    rw [hag.findStorage] at hv
-    have hty := findStorage_hasTy hwt.glob.storage (SPath.resolve_wt hwt p' hr) hv
+    have hty := findStorage_hasTy hwt.glob.storage (SPath.resolve_wt hwt p hr) hv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -253,9 +202,7 @@ theorem Read.sortOk {Γ : Ctx} {ns : List Var} {H : HeapTy} {σ : EState C Γ}
         exact KeySort.le_refl _
   | memory T p =>
     intro mv hmv
-    obtain ⟨p', rfl⟩ := hw
-    rw [MPath.mval_erase hag] at hmv
-    have hty := MPath.mval_wt hwt p' hmv
+    have hty := MPath.mval_wt hwt p hmv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -269,9 +216,7 @@ theorem Read.sortOk {Γ : Ctx} {ns : List Var} {H : HeapTy} {σ : EState C Γ}
         rfl
   | slen p =>
     intro v hv
-    obtain ⟨p', rfl⟩ := hw
-    have hty := Val.eval_wt hwt (Val.len (p := .uint) p' rfl)
-      (by rw [← Val.eval_erase hag]; exact hv)
+    have hty := Val.eval_wt hwt (Val.len (p := .uint) p rfl) hv
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -284,10 +229,7 @@ theorem Read.sortOk {Γ : Ctx} {ns : List Var} {H : HeapTy} {σ : EState C Γ}
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
   | mlen p =>
     intro v hv
-    obtain ⟨p', rfl⟩ := hw
-    have hty := Value.toMVal_hasTyH (H := H)
-      (Val.eval_wt hwt (Val.mlen (p := .uint) p' rfl)
-        (by rw [← Val.eval_erase hag]; exact hv))
+    have hty := Value.toMVal_hasTyH (H := H) (Val.eval_wt hwt (Val.mlen (p := .uint) p rfl) hv)
     cases rs with
     | generic _ => exact hty
     | fixed s =>
@@ -304,11 +246,11 @@ erasure is well-typed by construction (`State.erase_wt`), and the next
 statement's read finds what its sort declares.
 `Person storage p = alice; p.age = 10;` then `x = alice.age;` still reads a
 number. -/
-theorem Read.sortOk_typed {Γ : Ctx} {ns : List Var} (hnd : nodupKeysB C.vars = true)
-    (σ : State C Γ) {τ : Semantics.State} {R : Read C} {cls : ReadClass} {rs : ReadSort}
-    (hag : Agree ns σ.erase τ) (hR : R.Typed ns Γ) (hfit : cls.fits R.ty = true)
-    (hsup : cls.supports R.domain rs = true) : ∃ H', R.SortOk τ H' rs :=
-  ⟨_, Read.sortOk (State.erase_wt hnd σ) hag hR hfit hsup⟩
+theorem Read.sortOk_typed {Γ : Ctx} (hnd : nodupKeysB C.vars = true)
+    (σ : State C Γ) {R : Read C Γ} {cls : ReadClass} {rs : ReadSort}
+    (hfit : cls.fits R.ty = true) (hsup : cls.supports R.domain rs = true) :
+    ∃ H', R.SortOk σ.erase H' rs :=
+  ⟨_, Read.sortOk (State.erase_wt hnd σ) hfit hsup⟩
 
 /-! ## Rows, constructors, statements -/
 
@@ -355,13 +297,11 @@ def rowsSupported (n : Lean.Name) (dom : ReadDomain) (cls : ReadClass) : Bool :=
   (rowsOf n).all fun row => (valueReads row).all fun r => r.domain == dom && cls.supports dom r.sort
 
 /-- A row is faithful at a statement over `Γ`: each value read it declares
-is the statement's read, and under any names of `Γ`'s locals, in every
-state that agrees with a `RunWT` state over `Γ`, the declared sort holds of
-what the read finds. -/
+is the statement's read, and in every `RunWT` state over `Γ` the declared
+sort holds of what the read finds. -/
 def RowFaithful (row : TacletReadAnn) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
   ∀ r ∈ valueReads row, ∃ R, Stmt.read? s = some R ∧ R.domain = r.domain ∧
-    ∀ (ns : List Var) (H : HeapTy) (σ : EState C Γ) (τ : Semantics.State),
-      RunWT C H σ → Agree ns σ τ → (R.erase ns).SortOk τ H r.sort
+    ∀ (H : HeapTy) (σ : EState C Γ), RunWT C H σ → R.SortOk σ H r.sort
 
 /-- Every row constructor `n` transcribes is faithful at `s`. -/
 def CtorFaithful (n : Lean.Name) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
@@ -370,20 +310,18 @@ def CtorFaithful (n : Lean.Name) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prop :=
 /-- A row is faithful at a statement whose read is of a class the row's
 declared sorts are all supported by: `find<[int]>` at `total += 1;`. -/
 theorem rowFaithful_of {row : TacletReadAnn} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'}
-    {R : CRead C Γ} {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R)
+    {R : Read C Γ} {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R)
     (hdom : R.domain = dom) (hfit : cls.fits R.ty = true)
     (hrow : (valueReads row).all (fun r => r.domain == dom && cls.supports dom r.sort) = true) :
     RowFaithful row s := by
   intro r hr
   have h := List.all_eq_true.mp hrow r hr
   simp only [Bool.and_eq_true, beq_iff_eq] at h
-  refine ⟨R, hR, hdom.trans h.1.symm, fun ns H σ τ hwt hag => ?_⟩
-  exact Read.sortOk hwt hag (R.erase_typed ns) (R.erase_ty ns ▸ hfit)
-    (R.erase_domain ns ▸ hdom ▸ h.2)
+  exact ⟨R, hR, hdom.trans h.1.symm, fun H σ hwt => Read.sortOk hwt hfit (hdom ▸ h.2)⟩
 
 /-- A constructor is faithful at a statement whose read is of a class every
 row's declared sorts are supported by. -/
-theorem ctorFaithful_of {n : Lean.Name} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {R : CRead C Γ}
+theorem ctorFaithful_of {n : Lean.Name} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {R : Read C Γ}
     {dom : ReadDomain} {cls : ReadClass} (hR : Stmt.read? s = some R) (hdom : R.domain = dom)
     (hfit : cls.fits R.ty = true) (hrows : rowsSupported n dom cls = true) :
     CtorFaithful n s := fun row hrow =>
