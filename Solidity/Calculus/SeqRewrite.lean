@@ -4,7 +4,7 @@ import Solidity.Calculus.TermLib
 /-!
 # A Theory equation in a scoped sequent, read on its scoped terms
 
-A rewrite of a scoped sequent by a term taclet (`TermTacletS`,
+A rewrite of a scoped sequent by a term taclet (`TermTaclet`,
 `Calculus/TermLib.lean`) or a Theory equation (`Tm.Theq`): `q = (t, t')`, two
 closed value terms at the empty scope.  A term of the sequent is `t` where it
 has no local and reads `t` at the empty scope (`Tm.closedAs`: `Tm.toNil?`,
@@ -37,10 +37,6 @@ compiled twin (`Fml.rwEqCM`, `Hyps.rwEqCM`) and a link theorem; the
 recursor's clauses are stated by hand (`Fml.rwEqC_not`, …), by `rfl`.
 `Tm.toNil?`, `Tm.ofNil` and the update's rewrite use `match` (the
 exemption of `Calculus/Graft.lean`'s functions): they run once a rule.
-
-`Tm.ofClosed?` reads one of the closer's closed terms at a scope: what a
-literal law (`LitLaw`, `Calculus/Literals.lean`), still stated on the
-closer's terms, gives `FmlRw.lit` (`Calculus/RewriteScoped.lean`).
 -/
 
 namespace Solidity

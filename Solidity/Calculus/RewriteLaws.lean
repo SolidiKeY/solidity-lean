@@ -15,7 +15,7 @@ x := find(save(storage, p, 10), p) }` halts exactly where
 the write is an element of the update.
 
 **The law is solkey's taclet** (`Calculus/TermLaws.lean`): a term taclet
-(`TermTacletS`), a law of a memory read (`EvalLawS`), with what makes it
+(`TermTaclet`), a law of a memory read (`EvalLaw`), with what makes it
 exact in an update (`LawCov`: `Upd.covers`, `Upd.coversRef`,
 `Tm.sameBase`, `Upd.coversEval`), all on the scoped terms.
 

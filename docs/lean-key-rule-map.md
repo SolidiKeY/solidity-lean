@@ -384,8 +384,8 @@ diamond (`Hyps.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | — | `Proves.definedWritten` | Lean only | `defined(x)` behind a box update whose last binder of `x` is `x := t`: what `applyOnRigidBox` forgets |
 | — | `Proves.definedWritten` (`Calculus/UpdateRules.lean`) | Lean only (deviation from the row above) | `defined(x)` for any `.val` local, behind a context with no diamond (`Hyps.boxOnly`), with **no update asked**: a typed local always holds a value of its type, where the closer's untyped state may not bind it |
 | — | `Proves.definedLit`; `NFml.concrete` (`defined(v) ⇝ true`) | Lean only | a literal is defined |
-| any theory taclet on a sequent | `Proves.rewrite` (`Calculus/NFmlLogic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`NFml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma.  Scoped: `Proves.rewrite` (`Calculus/Proves.lean`, a rule; `Calculus/SeqRewrite.lean`) with a scoped term taclet `TermTacletS t t'` (or a `Tm.Theq`) at the empty scope, every closed side of an equation of the sequent's preconditions and goal reading `t` there (`Tm.closedAs`; `Hyps.rwEqC`, `Fml.rwEqC`), a modality open or not, `core_rw`; decision 90 |
-| the same, inside an update | `Proves.updRw`, `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite asks `Term.EvalRefines t t'`, which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only.  Scoped: `Proves.updRw` (`core_rw`), on the **last** box update of the context only, its closed occurrences of `t` read at the empty scope (`Upd.rwC`, `holds_upd_rwC`; `Tm.EvalRefines.of_theq` onto a literal); a chain's scoped line while the program is open, any box update of its spine (`FmlRw.lawUpd`, `Calculus/RewriteScoped.lean`, a `TermTacletS`) |
+| any theory taclet on a sequent | `Proves.rewrite` (`Calculus/NFmlLogic.lean`), `rw [r]`/`sol_rw` (`Calculus/Rewrite.lean`) | done | a term taclet `r : TermTaclet t t'` rewrites every total equation of the sequent (`NFml.rwEq`); `TermTaclet.sound` proves each rule once, from its Theory lemma.  Scoped: `Proves.rewrite` (`Calculus/Proves.lean`, a rule; `Calculus/SeqRewrite.lean`) with a scoped term taclet `TermTaclet t t'` (or a `Tm.Theq`) at the empty scope, every closed side of an equation of the sequent's preconditions and goal reading `t` there (`Tm.closedAs`; `Hyps.rwEqC`, `Fml.rwEqC`), a modality open or not, `core_rw`; decision 90 |
+| the same, inside an update | `Proves.updRw`, `sol_rw` | done | an update's right-hand side runs in the interpreter, so the rewrite asks `Term.EvalRefines t t'`, which a Theory equation onto a literal gives (`Term.EvalRefines.of_theq`); box updates only.  Scoped: `Proves.updRw` (`core_rw`), on the **last** box update of the context only, its closed occurrences of `t` read at the empty scope (`Upd.rwC`, `holds_upd_rwC`; `Tm.EvalRefines.of_theq` onto a literal); a chain's scoped line while the program is open, any box update of its spine (`FmlRw.lawUpd`, `Calculus/RewriteScoped.lean`, a `TermTaclet`) |
 | the same, inside an update, on a chain's line past the program | `FmlRw.lawUpdE` (`Calculus/RewriteLaws.lean`) | done (W9.4), any modality | the erasure's taclet (`TermTaclet`, `EvalLaw`) at an update's right-hand sides, its two sides read at the update's scope (`LawPair`); exact where the update holds the write it reads back (`ErasedCov.covered`, `Upd.covers`; `ErasedCov.ref`, `Upd.coversRef`; `ErasedCov.eval`, `Upd.coversEval`) or member-wise (`ErasedCov.eqv`, `Term.base?`); sound through the erasure (`Tm.eval_erase`, `Upd.apply_erase`) |
 
 ### The closer's clauses (`Calculus/Closer.lean`)
@@ -572,7 +572,7 @@ them as KeY's `\replacewith` updates do.
 | `defaultValueStruct` | `defaultValueStruct`, `defaultValueInt`, `defaultValueBool` | done: `defaultValue<[α]>` is `st mtSt`, the `Struct` default, read through the caller's cast |
 | `selectOnStore`, `selectOnEmptyStorage`, `findDefinitionEmpty` | same names | done |
 | `saveOnEmptyStorage` | same | done, with an `isEmpty(flds)` split upstream lacks (the collapsing leaf) |
-| `selectOnEmptyStorage`, `saveOnEmptyStorage` in the closer | `sol_close_mt` (`Calculus/NFmlClose.lean`) | Phase 1, Lean-only: `mtSt` evaluates to the roots at their defaults (`Close.STerm.eval_mtSt`), and the storage evaluators are unfolded over that list; no `LStor` clause yet, so `sol_prove` refuses `mtSt` (`Op0.inL`) |
+| `selectOnEmptyStorage`, `saveOnEmptyStorage` in the closer | `sol_close_mt` (`Calculus/Close.lean`) | Phase 1, Lean-only: `mtSt` evaluates to the roots at their defaults (`Close.STerm.eval_mtSt`), and the storage evaluators are unfolded over that list; no `LStor` clause yet, so `sol_prove` refuses `mtSt` (`Op0.inL`) |
 | `saveOnStoreCons` | same | done, likewise; `(Struct) v0` is `asStruct v0` |
 | `findDefinitionElement`, `findDefinitionMapElement`, `findDefinitionSize`, `findDefinitionMemberPrim`, `findDefinitionMemberValue` | `findDefinitionCons` | done: `atMap(i)` is `Seg.at i`, `size` is `Seg.field "length"` |
 | `findDefinitionMemberStruct`, `findDefinitionMemberCons` | `findDefinitionCons` | done **without the tag**: upstream wraps the member read in `typed(fieldShape(m), …)`, which is not modelled (below) |
@@ -669,30 +669,30 @@ Side conditions are syntactic `Bool`s on the `PTerm`s, closed by `rfl`
 (`PTerm.hasSeg`, `PTerm.diverges`), or a hypothesis of the chain
 (`STerm.KindFreeAt`). solkey has none of these as a taclet;
 they are the rules `Theory/Rewrite.lean` lists as Lean-only, stated on terms.
-Each is also a constructor of `TermTacletS` under the same name
+Each is also a constructor of `TermTaclet` under the same name
 (`Calculus/TermLib.lean`, W9.1): the rule on scoped terms `Tm C Γ .val`, its
 side conditions read off scoped paths (`Tm.hasSeg`, `Tm.diverges`,
 `Tm.sameSegs`, `Tm.shift?`, `Tm.findLit?`, `Tm.KindFreeAt`; `SCtxS` for the
-contexts), sound by `TermTacletS.sound` over the scoped `Tm.denote`
+contexts), sound by `TermTaclet.sound` over the scoped `Tm.denote`
 (`Tm.Theq`).
 
-| Term taclet | Scoped (`TermTacletS`) | Theory lemma | Printed rule (`TheoryRule`) | Notes |
+| Term taclet | Scoped (`TermTaclet`) | Theory lemma | Printed rule (`TheoryRule`) | Notes |
 | --- | --- | --- | --- | --- |
-| `findOnSave` | `TermTacletS.findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), q) ≐ v` for a literal word `v`, `q` the path `p` its checks aside (`PTerm.sameSegs`: `p[i]@S` is `p[i]`): a copy reads back the new value laid over the old, which is `v` only for a word |
-| `findOnSaveFrame` | `TermTacletS.findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |
-| `findMemberCons` | `TermTacletS.findMemberCons` | `find_cons` | — | solkey's `consRcons`, `consRnil`, `findDefinitionMemberCons`/`Prim`: `find(s, r.p) ≐ find(select(s, r), p)`, the path read from its head (`PTerm.shift?`), at any depth |
-| `selectOnSaveMember` | `TermTacletS.selectOnSaveMember` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 = a2`: `find(select(save(s, r.p, v), r), q) ≐ find(save(select(s, r), p, v), q)` |
-| `selectOnSaveFrame` | `TermTacletS.selectOnSaveFrame` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 ≠ a2`: a write under another root is not seen from `r` |
-| `selectOnDelAtMember`, `selectOnDelAtFrame` | `TermTacletS.selectOnDelAtMember`, `TermTacletS.selectOnDelAtFrame` | `StValue.selectOnSaveCons`, `find_cons` | — | the same for a delete, `delAt(s, p)` being `save(s, p, delValue(find(s, p)))` |
-| `selectOnSaveMemberIn`, `selectOnSaveFrameIn`, `selectOnDelAtMemberIn`, `selectOnDelAtFrameIn` | `TermTacletS.selectOnSaveMemberIn`, `TermTacletS.selectOnSaveFrameIn`, `TermTacletS.selectOnDelAtMemberIn`, `TermTacletS.selectOnDelAtFrameIn` | the same, `SCtx.fill_denote` | — | the four in a storage context `K` of saves, deletes and selects (`SCtx`), which the arrow finds: solkey rewrites a storage term wherever it stands |
-| `findOnDelAt` | `TermTacletS.findOnDelAt` | `find_delAt_same`, `delValueDefault` | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default at `p` (`sameSegs`) |
-| `findOnDelAtSave` | `TermTacletS.findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word, the three paths one path their checks aside |
-| `findOnDelAtValue` | `TermTacletS.findOnDelAtValue` | `find_delAt_same` | `findDelAt` | `find(delAt(s, p), q) ≐ delValue(find(s, q))`, `q` the path `p` its checks aside: the delete's effect at its own path, the value left for a later law (`delValueLit`, or a read below a mapping member) |
-| `delValueLit` | `TermTacletS.delValueLit` | `delValueDefault` | `delValueDefault` | `delValue(w) ≐ default(w)` for a literal word |
-| `findOnDelAtBelow` | `TermTacletS.findOnDelAtBelow` | `find_delAt_below`, `delValueDefault` | `findDelAtFields` | a word at or below a deleted node reads its default, where the deleted storage writes the word there (`STerm.findLit?`) and the node is no mapping (`STerm.KindFreeAt`, a premise of the chain: a mapping keeps its members) |
-| `findOnDelAtFrame` | `TermTacletS.findOnDelAtFrame` | `find_delAt_frame` | `findDelAtOutside` | |
-| `findOnPushFrame`, `findOnPopFrame` | `TermTacletS.findOnPushFrame`, `TermTacletS.findOnPopFrame` | `find_pushT_frame`, `find_popT_frame` (`Theory/Copy.lean`) | — | a push or pop is one term here, not two saves |
-| `lenOnSaveFrame`, `lenOnDelAtFrame` | `TermTacletS.lenOnSaveFrame`, `TermTacletS.lenOnDelAtFrame` | `find_copyTo_frame`, `find_delAt_frame` | `findOnSaveDifferent`, `findDelAtOutside` at `p.size` | `len(save(s, q, v), p) ≐ len(s, p)`, `len(delAt(s, q), p) ≐ len(s, p)` where `q` leaves `p.length` (`PTerm.divergesLen`): a length is a read at `p.length`, one term here (`Term.len`) |
+| `findOnSave` | `TermTaclet.findOnSave` | `find_copyTo_same` (`Theory/Copy.lean`) | `findOnSave` | `find(save(s, p, v), q) ≐ v` for a literal word `v`, `q` the path `p` its checks aside (`PTerm.sameSegs`: `p[i]@S` is `p[i]`): a copy reads back the new value laid over the old, which is `v` only for a word |
+| `findOnSaveFrame` | `TermTaclet.findOnSaveFrame` | `find_copyTo_frame` | `findOnSaveDifferent` | any written value, `p` diverging from `q` |
+| `findMemberCons` | `TermTaclet.findMemberCons` | `find_cons` | — | solkey's `consRcons`, `consRnil`, `findDefinitionMemberCons`/`Prim`: `find(s, r.p) ≐ find(select(s, r), p)`, the path read from its head (`PTerm.shift?`), at any depth |
+| `selectOnSaveMember` | `TermTaclet.selectOnSaveMember` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 = a2`: `find(select(save(s, r.p, v), r), q) ≐ find(save(select(s, r), p, v), q)` |
+| `selectOnSaveFrame` | `TermTaclet.selectOnSaveFrame` | `StValue.selectOnSaveCons` | — | solkey's `selectOnSaveCons` at `a1 ≠ a2`: a write under another root is not seen from `r` |
+| `selectOnDelAtMember`, `selectOnDelAtFrame` | `TermTaclet.selectOnDelAtMember`, `TermTaclet.selectOnDelAtFrame` | `StValue.selectOnSaveCons`, `find_cons` | — | the same for a delete, `delAt(s, p)` being `save(s, p, delValue(find(s, p)))` |
+| `selectOnSaveMemberIn`, `selectOnSaveFrameIn`, `selectOnDelAtMemberIn`, `selectOnDelAtFrameIn` | `TermTaclet.selectOnSaveMemberIn`, `TermTaclet.selectOnSaveFrameIn`, `TermTaclet.selectOnDelAtMemberIn`, `TermTaclet.selectOnDelAtFrameIn` | the same, `SCtx.fill_denote` | — | the four in a storage context `K` of saves, deletes and selects (`SCtx`), which the arrow finds: solkey rewrites a storage term wherever it stands |
+| `findOnDelAt` | `TermTaclet.findOnDelAt` | `find_delAt_same`, `delValueDefault` | `findDelAt` | where `find(s, p) ≐ w` for a word `w`, the delete reads its default at `p` (`sameSegs`) |
+| `findOnDelAtSave` | `TermTaclet.findOnDelAtSave` | `findOnDelAt` over `findOnSave` | `findDelAt` | a delete over a written word, the three paths one path their checks aside |
+| `findOnDelAtValue` | `TermTaclet.findOnDelAtValue` | `find_delAt_same` | `findDelAt` | `find(delAt(s, p), q) ≐ delValue(find(s, q))`, `q` the path `p` its checks aside: the delete's effect at its own path, the value left for a later law (`delValueLit`, or a read below a mapping member) |
+| `delValueLit` | `TermTaclet.delValueLit` | `delValueDefault` | `delValueDefault` | `delValue(w) ≐ default(w)` for a literal word |
+| `findOnDelAtBelow` | `TermTaclet.findOnDelAtBelow` | `find_delAt_below`, `delValueDefault` | `findDelAtFields` | a word at or below a deleted node reads its default, where the deleted storage writes the word there (`STerm.findLit?`) and the node is no mapping (`STerm.KindFreeAt`, a premise of the chain: a mapping keeps its members) |
+| `findOnDelAtFrame` | `TermTaclet.findOnDelAtFrame` | `find_delAt_frame` | `findDelAtOutside` | |
+| `findOnPushFrame`, `findOnPopFrame` | `TermTaclet.findOnPushFrame`, `TermTaclet.findOnPopFrame` | `find_pushT_frame`, `find_popT_frame` (`Theory/Copy.lean`) | — | a push or pop is one term here, not two saves |
+| `lenOnSaveFrame`, `lenOnDelAtFrame` | `TermTaclet.lenOnSaveFrame`, `TermTaclet.lenOnDelAtFrame` | `find_copyTo_frame`, `find_delAt_frame` | `findOnSaveDifferent`, `findDelAtOutside` at `p.size` | `len(save(s, q, v), p) ≐ len(s, p)`, `len(delAt(s, q), p) ≐ len(s, p)` where `q` leaves `p.length` (`PTerm.divergesLen`): a length is a read at `p.length`, one term here (`Term.len`) |
 
 ### The laws of memory reads (`EvalLaw`, `Calculus/ChainRewrites.lean`)
 

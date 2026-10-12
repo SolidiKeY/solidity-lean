@@ -1,6 +1,6 @@
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Tools.Show

@@ -66,7 +66,7 @@ open Lean Elab Tactic Meta
 
 `~[n]~>` names a rewrite when `n` is no rule of the strategy: an update rule
 of the table (`rwTable`), or a law (`Calculus/TermLaws.lean`): a term taclet
-(`TermTacletS`), a law of a memory read (`EvalLawS`), a literal law
+(`TermTaclet`), a law of a memory read (`EvalLaw`), a literal law
 (`LitLaw`), or a constant whose statement is one.  The name stands for
 several rewrites, which the line before tells apart: the position on the
 update spine, and for a law its instance, found in the scoped line as `rw`
@@ -81,7 +81,7 @@ inductive RwArrow where
   | table (n : Lean.Name)
   /-- A law: a term taclet, or a constant whose statement is one. -/
   | law (c : Lean.Name)
-  /-- A law of a memory read (`EvalLawS`), or a constant whose statement is one. -/
+  /-- A law of a memory read (`EvalLaw`), or a constant whose statement is one. -/
   | evalLaw (c : Lean.Name)
   /-- A literal law (`LitLaw`), or a constant whose statement is one. -/
   | litLaw (c : Lean.Name)
@@ -94,13 +94,13 @@ def rwTable : List Lean.Name :=
     `applyStorageBox, `applyOnPV, `concrete]
 
 /-- The kind of law the constant `c` states under its arguments:
-`TermTacletS`, `EvalLawS`, `LitLaw`, or none. -/
+`TermTaclet`, `EvalLaw`, `LitLaw`, or none. -/
 def lawKind? (c : Lean.Name) : MetaM (Option Lean.Name) := do
   let some info := (← getEnv).find? c | return none
   forallTelescope info.type fun _ ty => do
     let ty ← whnfR ty
-    if ty.isAppOf ``TermTacletS then return some ``TermTacletS
-    if ty.isAppOf ``EvalLawS then return some ``EvalLawS
+    if ty.isAppOf ``TermTaclet then return some ``TermTaclet
+    if ty.isAppOf ``EvalLaw then return some ``EvalLaw
     if ty.isAppOf ``LitLaw then return some ``LitLaw
     return none
 
@@ -108,16 +108,16 @@ def lawKind? (c : Lean.Name) : MetaM (Option Lean.Name) := do
 def isLaw (c : Lean.Name) : MetaM Bool := return (← lawKind? c).isSome
 
 /-- The two sides of a law's statement, its last two arguments:
-`TermTacletS t t'`, `EvalLawS t t'`, `LitLaw t t'`. -/
+`TermTaclet t t'`, `EvalLaw t t'`, `LitLaw t t'`. -/
 def lawSides? (ty : Lean.Expr) : Option (Lean.Expr × Lean.Expr) :=
-  if ty.isAppOf ``TermTacletS || ty.isAppOf ``EvalLawS || ty.isAppOf ``LitLaw then
+  if ty.isAppOf ``TermTaclet || ty.isAppOf ``EvalLaw || ty.isAppOf ``LitLaw then
     let args := ty.getAppArgs
     if args.size ≥ 2 then some (args[args.size - 2]!, args[args.size - 1]!) else none
   else none
 
 /-- The arrow for the law `c` of kind `k`. -/
 def RwArrow.ofLaw (k c : Lean.Name) : RwArrow :=
-  if k == ``EvalLawS then .evalLaw c else if k == ``LitLaw then .litLaw c else .law c
+  if k == ``EvalLaw then .evalLaw c else if k == ``LitLaw then .litLaw c else .law c
 
 /-- What `~[r]~>` names: `none` for a rule of the strategy (a constructor of
 the scoped `Taclet` or `LeanTaclet`, `emptyModality`), else a
@@ -130,8 +130,8 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
       env.contains (`Solidity.LeanTaclet ++ n) then
     return none
   if rwTable.contains n then return some (.table n)
-  if env.contains (``TermTacletS ++ n) then return some (.law (``TermTacletS ++ n))
-  if env.contains (``EvalLawS ++ n) then return some (.evalLaw (``EvalLawS ++ n))
+  if env.contains (``TermTaclet ++ n) then return some (.law (``TermTaclet ++ n))
+  if env.contains (``EvalLaw ++ n) then return some (.evalLaw (``EvalLaw ++ n))
   if env.contains (``LitLaw ++ n) then return some (.litLaw (``LitLaw ++ n))
   let cs := ((← resolveGlobalName n).filterMap fun (c, fs) =>
     if fs.isEmpty then some c else none).eraseDups
@@ -248,23 +248,23 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
   return (out, failed)
 
 /-- The term taclets `~=>` tries, after the update rules of `rwTable`: the
-named rules of `TermTacletS`, and `findOnDelAtSave`. -/
+named rules of `TermTaclet`, and `findOnDelAtSave`. -/
 def rwLaws : List Lean.Name :=
-  [``TermTacletS.findOnSave, ``TermTacletS.findOnSaveFrame, ``TermTacletS.findMemberCons,
-    ``TermTacletS.selectOnSaveMember, ``TermTacletS.selectOnSaveFrame,
-    ``TermTacletS.selectOnDelAtMember, ``TermTacletS.selectOnDelAtFrame,
-    ``TermTacletS.selectOnSaveMemberIn, ``TermTacletS.selectOnSaveFrameIn,
-    ``TermTacletS.selectOnDelAtMemberIn, ``TermTacletS.selectOnDelAtFrameIn,
-    ``TermTacletS.findOnDelAt, ``TermTacletS.findOnDelAtSave, ``TermTacletS.findOnDelAtValue,
-    ``TermTacletS.delValueLit, ``TermTacletS.findOnDelAtBelow, ``TermTacletS.findOnDelAtFrame,
-    ``TermTacletS.findOnPushFrame, ``TermTacletS.findOnPopFrame, ``TermTacletS.lenOnSaveFrame,
-    ``TermTacletS.lenOnDelAtFrame]
+  [``TermTaclet.findOnSave, ``TermTaclet.findOnSaveFrame, ``TermTaclet.findMemberCons,
+    ``TermTaclet.selectOnSaveMember, ``TermTaclet.selectOnSaveFrame,
+    ``TermTaclet.selectOnDelAtMember, ``TermTaclet.selectOnDelAtFrame,
+    ``TermTaclet.selectOnSaveMemberIn, ``TermTaclet.selectOnSaveFrameIn,
+    ``TermTaclet.selectOnDelAtMemberIn, ``TermTaclet.selectOnDelAtFrameIn,
+    ``TermTaclet.findOnDelAt, ``TermTaclet.findOnDelAtSave, ``TermTaclet.findOnDelAtValue,
+    ``TermTaclet.delValueLit, ``TermTaclet.findOnDelAtBelow, ``TermTaclet.findOnDelAtFrame,
+    ``TermTaclet.findOnPushFrame, ``TermTaclet.findOnPopFrame, ``TermTaclet.lenOnSaveFrame,
+    ``TermTaclet.lenOnDelAtFrame]
 
 /-- The laws of memory reads `~=>` tries, after the term taclets. -/
 def rwEvalLaws : List Lean.Name :=
-  [``EvalLawS.readOnWrite, ``EvalLawS.findCopyMem, ``EvalLawS.readCopySt, ``EvalLawS.readAddEqual,
-    ``EvalLawS.readAddDifferent, ``EvalLawS.readAddDifferentIdentity, ``EvalLawS.readWriteDifferent,
-    ``EvalLawS.readWriteDifferentIdentity, ``EvalLawS.readOnWriteIdentity]
+  [``EvalLaw.readOnWrite, ``EvalLaw.findCopyMem, ``EvalLaw.readCopySt, ``EvalLaw.readAddEqual,
+    ``EvalLaw.readAddDifferent, ``EvalLaw.readAddDifferentIdentity, ``EvalLaw.readWriteDifferent,
+    ``EvalLaw.readWriteDifferentIdentity, ``EvalLaw.readOnWriteIdentity]
 
 /-- The literal laws `~=>` tries, after the laws of memory reads. -/
 def rwLitLaws : List Lean.Name :=

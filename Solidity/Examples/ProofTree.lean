@@ -13,7 +13,7 @@ the tactics that write a proof out, as `#guard_msgs` tests:
 * `#proof_tree`, `#proof_node` and `#proof_tree_json` (`Tools/ProofTree.lean`)
   print the tree of `⊢ φ` as solkey's GUI and web prover do;
 * `sol_derive?` suggests the `apply` walk the tree is;
-* `sol_prove?` suggests `sol_prove` (`Calculus/NFmlDerive.lean`), the same walk
+* `sol_prove?` suggests `sol_prove` (`Calculus/ProvesDerive.lean`), the same walk
   as one kernel evaluation, and a tactic per leaf its closer leaves.
 
 If the strategy picks another rule, or a printer changes, these fail.

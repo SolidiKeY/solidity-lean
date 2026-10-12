@@ -26,10 +26,13 @@ reduces a scoped leaf by position and closes it there
 reads a leaf's parameters at their types, `sol_prove`'s leaves on `⊢` and
 on `⊨` are scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`),
 `sol_upd`/`sol_merge` rewrite the scoped leaf, and a chain rewrites while
-the program is open (`Calculus/RewriteScoped.lean`). Below that a leaf is
-still erased (`Fml.erase`) to `Update.lean`'s untyped `NFml`, read over the
-erased state (`Semantics/Erased.lean`): the decision procedure's IR
-(decision 7), whose readers `docs/intrinsic.md` lists ("M6c").
+the program is open (`Calculus/RewriteScoped.lean`) and past it
+(`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
+erased: the untyped formulas (`NFml`) are gone (W9.5a). What stays
+untyped is the state a reduction is read over (`Semantics/Erased.lean`,
+`EState.erase`), and `Update.lean`'s untyped terms (`Surface.Tm`), which
+remain only as the notation's front end and the `SolKey` reader's
+interface.
 
 **Updates are terms** (`Update.lean`): `STerm` at `structRules.key`'s
 signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do
@@ -102,7 +105,7 @@ read them by path.
 |---|---|
 | the rule table: `Calculus/{Rules,RuleSyntax,Arms,Blocks,Step,Taclet,Completeness,RuleShapes,PrintedRules,KeyTaclets}.lean`, `SortCheck/**` | `.claude/rules/rule-table.md` |
 | `Examples/**`, `Theory/**`, `Update.lean` (derivations and notation) | `.claude/rules/derivations.md` |
-| `Calculus/{Sound*,ProvesSound,Logic,Symex,Close,CloseErase}.lean`, `Counterexamples/**` | `.claude/rules/soundness.md` |
+| `Calculus/{Sound*,ProvesSound,Logic,Symex}.lean`, `Counterexamples/**` | `.claude/rules/soundness.md` |
 | `Typing/**`, `Semantics/**` | `.claude/rules/typing.md` |
 
 `docs/README.md` indexes the documents. `docs/lean-key-rule-map.md` is the
@@ -117,7 +120,7 @@ InContract := ⟨StandardExample⟩`), which reads it as a scoped `Fml C []`;
 under `open scoped Solidity.Scoped` (`Calculus/Surface.lean`) its
 parameters are bound by `∀`, outside by hidden binders. Import
 `Solidity.Calculus.Surface`, `Solidity.Calculus.Closers` and
-`Solidity.Calculus.NFmlClose` for the tactics (and
+`Solidity.Calculus.Close` for the tactics (and
 `Solidity.Calculus.SolSpec` for `sol_spec`),
 `Solidity.Calculus.LastLine` for chains, `Solidity.Tools.Inspect` for `#wp`,
 `#step` and the tree. `Examples/` shows each of
@@ -156,7 +159,8 @@ step, `~*>` several, and the rewrite links
 `~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/RewriteScoped.lean`
 while the program is open, `Calculus/RewritePast.lean` past it).
 `Fml.Via.leads` makes a chain `A ~~> E` (`Fml.Via.leadsK`/`Fml.LeadsK`
-when it ends on a written last line), and `Fml.Leads.via` composes
+when it ends on a written last line, the same up to its binders' names;
+`Fml.LeadsK.valid h hL` proves `A` from it and `Valid L`), and `Fml.Leads.via` composes
 segments of a long one. `#derivation φ` prints the strategy's lines, in the
 rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
 writes the whole chain, the program and then one rewrite a link to a last
@@ -192,7 +196,7 @@ to the strategy or a printer fails there.
    (`tryCatchRuntimeEx`; a plain `try` does not catch them). A step that
    fails ends the search with a note, not with an error. Greedy choices can
    dead-end: search depth first in a fixed order and keep the best leaf
-   (`NFml.Chain.searchRewritesUsing`).
+   (`Chain.pastSearchFrom`).
 3. **Measure before optimising.** In a scratch module under
    `Solidity/Scratch/` (never committed), time one term or tactic with an
    `IO.monoNanosNow` wrapper, or set `trace.profiler` on one declaration. A
@@ -250,7 +254,7 @@ rebuilds nothing after merging a lane that was built elsewhere.
 
 - **A parallel lane is a `git worktree`** on its own branch
   (`git worktree add ../solidity-lean-<lane> -b <lane>`), not a `cp -r`:
-  the cache fills its `.lake` in seconds (a file importing `Calculus/NFmlClose`
+  the cache fills its `.lake` in seconds (a file importing `Calculus/Close`
   opened in 8 s with no build directory), and its commits are visible to
   master without a fetch.
 - **RAM is per open file, not per build.** A Lean worker holds 0.6–1.5 GB,

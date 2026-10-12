@@ -180,8 +180,7 @@ elab "core_apply_upd" : tactic => withMainContext do
 
 /-! ## A Theory lemma as a rewrite rule, on scoped terms
 
-`theoryRewrite` (`Calculus/TheoryRewrite.lean`) on a scoped closed term
-`u : Tm C [] .val`: `u.denote σ` unfolded by the denotation of its symbols
+On a scoped closed term `u : Tm C [] .val`: `u.denote σ` unfolded by the denotation of its symbols
 (the `Tm.denote_*S` lemmas, `rfl`), rewritten by the laws, and read back as a
 scoped term (`reifyTermS`).  The two `simp` runs prove
 `∀ σ, u.denote σ = u'.denote σ`, which `Tm.Theq.of_eq` makes a Theory
@@ -442,11 +441,11 @@ def Walk.rwCandidates : TacticM (Array (Expr × Bool)) := withMainContext do
         for u in ← Walk.valSubterms t do out := out.push (u, false)
   return out
 
-/-- `h`, a term taclet's name, as the scoped one (`TermTacletS.h`). -/
+/-- `h`, a term taclet's name, as the scoped one (`TermTaclet.h`). -/
 def qualifyTacletS (h : Lean.Term) : TermElabM Lean.Term := do
   let qual (id : Syntax) : TermElabM (Option Syntax) := do
     unless id.isIdent do return none
-    let n := ``TermTacletS ++ id.getId
+    let n := ``TermTaclet ++ id.getId
     if (← getEnv).contains n then return some (mkCIdentFrom id n) else return none
   if let some q ← qual h.raw then return ⟨q⟩
   if h.raw.isOfKind ``Lean.Parser.Term.app then
@@ -454,13 +453,13 @@ def qualifyTacletS (h : Lean.Term) : TermElabM Lean.Term := do
   return h
 
 /-- `pf` as a scoped term taclet: itself, or, for a Theory equation
-`Tm.Theq t t'`, the rule `TermTacletS.theory` makes of it. -/
+`Tm.Theq t t'`, the rule `TermTaclet.theory` makes of it. -/
 def asTacletS (pf : Expr) : MetaM Expr := do
   if (← whnfR (← instantiateMVars (← inferType pf))).isAppOf ``Tm.Theq then
-    mkAppM ``TermTacletS.theory #[pf]
+    mkAppM ``TermTaclet.theory #[pf]
   else pure pf
 
-/-- `rw [r]` with a term taclet (`TermTacletS`) or a Theory equation
+/-- `rw [r]` with a term taclet (`TermTaclet`) or a Theory equation
 (`Tm.Theq`) `r` on a scoped goal: its left side matched against each place
 a rewrite may reach, in turn. -/
 def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContext do
@@ -474,8 +473,8 @@ def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContex
         | _ => elabTerm h' none (mayPostpone := true)
       let (args, _, _) ← forallMetaTelescope (← instantiateMVars (← inferType pf))
       let pf ← asTacletS (mkAppN pf args)
-      let pf ← if symm then mkAppM ``TermTacletS.symm #[pf] else pure pf
-      let_expr TermTacletS _ _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
+      let pf ← if symm then mkAppM ``TermTaclet.symm #[pf] else pure pf
+      let_expr TermTaclet _ _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
         | throwError "rw: {h} is not a term taclet or a Theory equation"
       unless ← isDefEq lhs t₀ do throwError "no match"
       for a in args do
@@ -488,7 +487,7 @@ def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContex
       if !inGoal then
         unless (← whnfR rhs).isAppOf ``Tm.app0 do throwError "not a literal"
       let q ← mkAppM ``Prod.mk #[t₀, rhs]
-      Walk.rwWith C q (← mkAppM ``TermTacletS.sound #[pf]) inGoal
+      Walk.rwWith C q (← mkAppM ``TermTaclet.sound #[pf]) inGoal
       return
     catch _ => saved.restore
   throwError "rw: {h} rewrites nothing in the sequent"
@@ -518,7 +517,7 @@ def Walk.rwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit
     throwError "sol_rw: no term of the sequent is rewritten to a term by {names}"
 
 /-- `core_rw [r, …]`: `sol_rw`'s rules on a scoped goal, in order (a term
-taclet (`TermTacletS`) or Theory equation by `Walk.rwTaclet`, a run of Theory laws by
+taclet (`TermTaclet`) or Theory equation by `Walk.rwTaclet`, a run of Theory laws by
 `Walk.rwTheory`).  It fails on a goal that is not a scoped sequent. -/
 def Walk.rwRules (rs : Array Syntax) : TacticM Unit := do
   unless (← instantiateMVars (← getMainTarget)).isAppOf ``Proves do
@@ -530,12 +529,12 @@ def Walk.rwRules (rs : Array Syntax) : TacticM Unit := do
     let symm := !r[0].isNone
     let isTheq ← withMainContext do
       unless h.raw.isIdent do return true
-      if (← getEnv).contains (``TermTacletS ++ h.raw.getId) then return true
+      if (← getEnv).contains (``TermTaclet ++ h.raw.getId) then return true
       let some n ← (try some <$> realizeGlobalConstNoOverloadWithInfo h
           catch _ => pure none) | return true
       forallTelescope (← getConstInfo n).type fun _ ty => do
         let ty ← whnfR ty
-        return ty.isAppOf ``Solidity.Tm.Theq || ty.isAppOf ``Solidity.TermTacletS
+        return ty.isAppOf ``Solidity.Tm.Theq || ty.isAppOf ``Solidity.TermTaclet
     if isTheq then
       unless names.isEmpty do
         Walk.rwTheory thms names

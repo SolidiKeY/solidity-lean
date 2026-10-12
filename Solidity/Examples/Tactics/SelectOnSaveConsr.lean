@@ -39,9 +39,9 @@ equation and dropped in one step (`Proves.applyOnRigidBox`, through
 `sol_apply_upd`); it writes the storage too, which it may because `x ≐ 42`
 reads no storage.  The one storage step, the read of the
 write, is the term taclet `findOnSave` on scoped terms
-(`TermTacletS.findOnSave`, `Calculus/TermLib.lean`), applied by
+(`TermTaclet.findOnSave`, `Calculus/TermLib.lean`), applied by
 `Proves.rewrite`; its soundness is the Theory's `find_copyTo_same`
-(`TermTacletS.sound`).  `42 ≐ 42` closes by `Proves.eqRefl`.
+(`TermTaclet.sound`).  `42 ≐ 42` closes by `Proves.eqRefl`.
 
 The `consr` path has not gone away, it has moved into the Theory.
 `alice.age` still denotes `[.field "alice"] ++ [.field "age"]`

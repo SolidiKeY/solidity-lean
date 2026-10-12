@@ -1,4 +1,4 @@
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.SeqRewrite
 
 /-!
@@ -8,7 +8,7 @@ import Solidity.Calculus.SeqRewrite
 leaves leaves `Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
 `sol_close_mt` and `sol_spec_close` close them here, on the scoped formula,
 by the elaborators below, which read it with `close_rw_s`
-(`Calculus/NFmlClose.lean` declares the syntax and the simp sets).
+(`Calculus/Close.lean` declares the syntax and the simp sets).
 
 **The leaf as the closer reads it.**  `holds` asks an update's rest of every
 typed state that erases to where the update ends, with a heap typing that
@@ -115,7 +115,7 @@ end EStateAPI
 
 /-! ## Terms, one constructor at a time
 
-Each as `close_rw`'s equation for the closer's term (`Calculus/NFmlClose.lean`),
+Each as `close_rw`'s equation for the closer's term (`Calculus/Close.lean`),
 a local read by its position, a symbol on the global part (`EState.glob`). -/
 
 section Terms

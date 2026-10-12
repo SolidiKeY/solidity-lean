@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
@@ -26,7 +26,7 @@ after `Person memory carol;`; here that line is the first of the program.
 Their derivations, line by line, are `Examples/Chains/Memory.lean`'s and `Examples/Chains/MemoryDelete.lean`'s.
 
 Where `sol_close` cannot read the result back, the postcondition is `true` and
-the walk is the claim.  Two things it does not know (`NFmlClose.lean`): that two
+the walk is the claim.  Two things it does not know (`Calculus/Close.lean`): that two
 allocations are different objects, and what a member of a fresh object reads
 as by default.  Those claims are runs of the interpreter at the end of the
 file, from `State.exampleStore`.

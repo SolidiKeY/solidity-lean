@@ -4,7 +4,7 @@ import Solidity.Calculus.StateFacts
 /-!
 # Merges over a storage or memory write, on scoped updates
 
-`Calculus/StateParts.lean`'s two merges on `Upd C Γ Δ`, where
+Two merges on `Upd C Γ Δ`, where
 `Upd.seqPar` (`Calculus/Graft.lean`) refuses them: it reads `V` in `U`'s
 state exactly, so a symbol of `V` that reads a global part `U` writes is
 refused, but `storage` after a storage write.

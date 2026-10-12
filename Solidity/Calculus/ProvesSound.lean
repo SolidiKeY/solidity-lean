@@ -15,8 +15,7 @@ implication, an update or a universal; `closeTrue` holds behind a context
 with no diamond update but scope ends (`Hyps.wrap_valid`; a rule with no
 goal would not be sound behind a diamond update that halts, so `branches`
 and `cases` have at least one goal); `emptyModality` goes into the frames
-(`holds_exit`); and `close` is `holds_of_erase_valid`
-(`Calculus/CloseErase.lean`).
+(`holds_exit`).
 
 An update's reading asks of every typed state that erases to the one it
 ends in, so a rule's premise gives its conclusion in the state the typed

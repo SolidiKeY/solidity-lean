@@ -5,8 +5,7 @@ import Solidity.Calculus.LeafDerive
 
 Under `open scoped Solidity.Scoped` an obligation is stated `⊢ φ`, the
 scoped sequent `Proves C .all [] .nil φ` (`Calculus/Surface.lean`),
-so the strategy has to build a derivation, as today's `Proves.of_residue`
-does (`Calculus/NFmlDerive.lean`).  A goal `Valid φ` (`⊨ φ`) goes the
+so the strategy has to build a derivation.  A goal `Valid φ` (`⊨ φ`) goes the
 same way: `Proves.valid`, then this walk (decision 89 extended), so its
 leaves are scoped sequents too.
 

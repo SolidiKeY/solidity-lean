@@ -28,16 +28,15 @@ under solkey's names where solkey has the rule:
   (`Frames.exit`), a scope end a popping update, which `updIntro` takes;
 * `closeTrue`, behind a context with no diamond update but scope ends
   (`Hyps.boxOnly`);
-* `closeFalse`: a context that refutes itself closes any goal, as today's
-  `Proves.closeFalse` (`Calculus/NFmlLogic.lean`), the shape of KeY's `cut` on
-  `false` and `closeFalse`; `sol_prove` closes a split's branch so when its
+* `closeFalse`: a context that refutes itself closes any goal, the shape
+  of KeY's `cut` on `false` and `closeFalse`; `sol_prove` closes a split's branch so when its
   condition is ground under the context (`Calculus/ProvesDerive.lean`);
-* the rules on the context's updates, today's `Proves`'s: `merge`
+* the rules on the context's updates: `merge`
   (`sequentialToParallel`, over a storage write too, KeY's `mergeStorage`;
   past the hidden binders between the two updates) and `updRw` (a term
   taclet in the last box update's right-hand sides), both while a modality
   may still be open (`Calculus/Graft.lean`);
-* `rewrite`: a Theory equation (a term taclet's, `TermTacletS.sound`) in
+* `rewrite`: a Theory equation (a term taclet's, `TermTaclet.sound`) in
   every equation of the sequent, its context's preconditions and its goal,
   at any depth and under a modality still open (`Fml.rwEqC`,
   `Calculus/SeqRewrite.lean`): today's `Proves.rewrite`, the closer's
@@ -410,7 +409,7 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   side of an equation that is a closed term reading `q.1` at the empty
   scope becomes `q.2`, in every equation of the sequent (`Hyps.rwEqC`,
   `Fml.rwEqC`), a modality still open or not.  `hq` is the Theory equation
-  (`TermTacletS.sound` of a taclet, `TermTacletS.theory` of a law). -/
+  (`TermTaclet.sound` of a taclet, `TermTaclet.theory` of a law). -/
   | rewrite {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (q : Tm C [] .val × Tm C [] .val)
       (hq : Tm.Theq q.1 q.2) (h : Proves C R Γ₀ (H.rwEqC q) (φ.rwEqC q)) :
       Proves C R Γ₀ H φ

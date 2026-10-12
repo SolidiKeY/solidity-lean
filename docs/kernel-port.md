@@ -20,7 +20,7 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 | `Ch05_Logic` | `Calculus/Fml.lean` (`Fml C Γ`, both modalities), `Calculus/Logic.lean` (`holds`), `Update.lean` (terms, updates, the closer's `NFml`) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/SurfaceNotation.lean` (`dl[C]{}`) |
 | `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Taclet.lean` (`Taclet.toStep`), `Calculus/Sound*.lean` (`Stmt.sound`), `Calculus/Proves.lean` (`Proves`) |
-| `Ch07_Symex` | `Calculus/Step.lean`, `Calculus/Symex.lean`, `Calculus/NFmlClose.lean` |
+| `Ch07_Symex` | `Calculus/Step.lean`, `Calculus/Symex.lean`, `Calculus/Close.lean` |
 | `Ch08_EVM`-`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
 | `Ch11_Completeness` | `Calculus/Step.lean` (`Stmt.step`), `Calculus/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
 | `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |

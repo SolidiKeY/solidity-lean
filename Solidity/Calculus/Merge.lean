@@ -3,7 +3,7 @@ import Solidity.Calculus.Sound
 import Solidity.Calculus.Logic
 import Solidity.Calculus.FirstOrder
 import Solidity.Semantics.StateErase
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 
 /-!
 # `sequentialToParallel` on scoped lines
@@ -11,7 +11,7 @@ import Solidity.Calculus.NFmlClose
 KeY's `sequentialToParallel2` (`{u}{u2}φ ⇝ {u ‖ {u}u2}φ`) on a scoped line,
 so that a scoped chain merges its stack while the program is still open
 (`Examples/Chains/StorageToMemory.lean`'s `FieldCopy` and `TokenCopy`), as
-`Calculus/ChainRewrites.lean`'s merge does on `Update.lean`'s lines past it.
+`Calculus/RewritePast.lean`'s does past it.
 The merge of two updates and why it is sound are
 `Calculus/Graft.lean`'s (`Upd.seqPar`, `holds_upd_seqPar`), which the
 sequent's `merge` reads too; here they are found on a line's update spine,
@@ -20,7 +20,7 @@ through its quantifiers and hidden binders.  This module's spine merge
 A merge over a storage or memory write is `FmlRw.stateMerge`
 (`Calculus/RewriteScoped.lean`, `Upd.mergeSt?`/`Upd.mergeMem?` of
 `Calculus/StatePartsScoped.lean`) while the program is open, and
-`Calculus/ChainRewrites.lean`'s past it.
+`Calculus/RewritePast.lean`'s past it.
 
 The merge is a function the kernel evaluates (`Fml.mergeRun`), and its
 soundness one theorem: `Fml.mergeRun_leads`.  It is written with `match` on

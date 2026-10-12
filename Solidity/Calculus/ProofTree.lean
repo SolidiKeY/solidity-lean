@@ -1,6 +1,6 @@
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.RuleShapes
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.Delab
 

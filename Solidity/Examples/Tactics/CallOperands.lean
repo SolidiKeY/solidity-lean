@@ -1,6 +1,6 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.RewriteChains
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.Chains
@@ -41,7 +41,7 @@ callee's return variable is declared in the call's frame (`CallRet.mem`,
 to it, and the printers write the pair as the call it came from.
 
 `sol_close` does not read back what a push wrote into an array known only by
-its shape (pinned at the end of §3; `Calculus/NFmlClose.lean`), so the push rows
+its shape (pinned at the end of §3; `Calculus/Close.lean`), so the push rows
 have no box theorem about the pushed value.
 -/
 
@@ -127,7 +127,7 @@ theorem bucketPushSlotWrite :
 
 /-- `[ uint n = values.length; values.push(42); ] values.length == n + 1` is
 valid, but the strategy leaves it open: the push's write is not read back
-(`Calculus/NFmlClose.lean`).  Pinned, so that closing it shows here. -/
+(`Calculus/Close.lean`).  Pinned, so that closing it shows here. -/
 example : True := by
   fail_if_success
     have : ⊨ dl!{ [ uint n = values.length; values.push(42); ] values.length == n + 1 } := by

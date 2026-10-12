@@ -1,6 +1,6 @@
 import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Syntax.Inlined
 import Solidity.Calculus.Closers

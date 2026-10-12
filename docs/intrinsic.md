@@ -134,7 +134,7 @@ The confirmed findings of the final review, applied:
   lemmas (the definitions stay, for `#run`), five `Agree.lean` lemmas,
   nine calculus lemmas (`Premise.sound_of_halt`, `sound_unfoldH`, …) and
   the duplicate `Stmt.sound_block`.
-- *docs*: `sol_close` cited at `Calculus/NFmlClose.lean`; master's arms
+- *docs*: `sol_close` cited at `Calculus/Close.lean`; master's arms
   and strategy cited at `ad728b16` (`Step`, `Arms`, `Blocks`,
   `SoundLoops`); `docs/README.md` indexes this record; `AGENTS.md` names
   `Solidity.Calculus.SolSpec` for `sol_spec`; `.claude/rules/typing.md`
@@ -1677,7 +1677,7 @@ namespace, an `NFml*` module it imports, `Fml.erase`, or the erased state
 - *the closer's IR* (decision 7; 83, 91): `Calculus/NFmlLogic.lean`
   (`NFml.Proves`, what a scoped leaf erases to), `Calculus/NFmlDerive.lean`
   (`NFml.Derive`: the closer's walk and its residue),
-  `Calculus/NFmlClose.lean` (`sol_close`), `Calculus/NFmlUpdateRules.lean`
+  `Calculus/Close.lean` (`sol_close`), `Calculus/NFmlUpdateRules.lean`
   (KeY's update simplification on the erasure),
   `Calculus/NFmlQuote.lean` (the quoter), `Calculus/Hyp.lean` (the
   context both sequents share), `Calculus/Closable.lean`,
@@ -1752,7 +1752,7 @@ namespace, an `NFml*` module it imports, `Fml.erase`, or the erased state
   `NFml.Derive`'s bounds); `Examples/ChainNotation` (`NFml.Via`),
   `Examples/Tactics/SelectOnSaveConsr` (`NFml.Valid`),
   `Examples/Tactics/TermTaclets` (term taclets on `NFml.Proves`); and,
-  importing `Calculus/NFmlClose.lean` or `Calculus/NFmlDerive.lean` for
+  importing `Calculus/Close.lean` or `Calculus/NFmlDerive.lean` for
   `sol_close`/`sol_prove` only: `Examples/Benchmark/Coin`, `Examples/Benchmark/Counter`, `Examples/Benchmark/ERC20`, `Examples/Benchmark/EtherWallet`, `Examples/Benchmark/SimpleStorage`, `Examples/Chains/Arithmetic`, `Examples/Chains/CheckedArithmetic`, `Examples/Chains/Memory`, `Examples/Chains/MemoryArrays`, `Examples/Chains/MemoryCoverage`, `Examples/Chains/MemoryDelete`, `Examples/Chains/Payment`, `Examples/Chains/Storage`, `Examples/Chains/StorageArrays`, `Examples/Chains/StorageCoverage`, `Examples/Chains/StorageDelete`, `Examples/Notation`, `Examples/Tactics/ApplySteps`, `Examples/Tactics/Branch`, `Examples/Tactics/CallOperands`, `Examples/Tactics/Callback`, `Examples/Tactics/Calls`, `Examples/Tactics/Checked`, `Examples/Tactics/Contracts`, `Examples/Tactics/CrossDomain`, `Examples/Tactics/LedgerDelete`, `Examples/Tactics/Loops`, `Examples/Tactics/Memory`, `Examples/Tactics/Net`, `Examples/Tactics/Operators`, `Examples/Tactics/Revert`, `Examples/Tactics/Step`, `Examples/Tactics/StorageDelete`, `Examples/Tactics/StorageSuite`, `Examples/Tactics/Symex`, `Examples/Tactics/Tour`, `Examples/Tactics/TryCatch`, `Examples/Tactics/Values`, `Solkey/ScopedFlip`.
 
 Only docstrings name `NFml` in `Calculus/DecideScoped.lean`,

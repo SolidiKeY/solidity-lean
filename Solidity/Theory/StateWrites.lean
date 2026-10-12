@@ -13,7 +13,7 @@ component (`State.saveStorage_with`, `pushAt_with`, `popAt_with`), an
 operator's evaluation unfolded (`evalBinop_compound`, `evalBinop_bump`),
 and what a binding holds (`Close.bindingVal`, …).  Today's taclet soundness
 (`Calculus/SoundKit.lean`, `Calculus/SoundArms.lean`), the scoped one
-(`Calculus/SoundArms.lean`) and the closer (`Calculus/NFmlClose.lean`,
+(`Calculus/SoundArms.lean`) and the closer (`Calculus/Close.lean`,
 `Calculus/Decide.lean`) share them.  Moved out of `SoundKit.lean` and
 `Calculus/SoundArms.lean` (`docs/intrinsic.md`, W4 item 11).
 -/

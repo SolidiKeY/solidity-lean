@@ -246,7 +246,7 @@ elab_rules : tactic
   | `(tactic| sol_close_unwrap) => pure ()
 
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
-(`Calculus/NFmlClose.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
+(`Calculus/Close.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
 steps of the same names).  Run `sol_symex` first; with no goal left it does
 nothing. -/
 macro "sol_close" : tactic => `(tactic|

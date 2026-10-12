@@ -341,7 +341,7 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   panics (`Calculus/NoPanic.lean`, `Upd.apply_ne_panic`), so the two
   readings agree on it.  The closers, `Decide` and the chains read updates;
   their one change is the revert case of a modality (`holds_revert` in
-  `Calculus/NFmlClose.lean`, the modal case of `Fml.toL_holds` in
+  `Calculus/Close.lean`, the modal case of `Fml.toL_holds` in
   `Calculus/Decide.lean`), whose `simp only` now unfolds
   `Modality.afterRun`.  That only an `assert` panics holds of the
   typed run on every state, inside the EVM fragment or not

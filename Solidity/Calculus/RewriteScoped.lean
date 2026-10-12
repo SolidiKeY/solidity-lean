@@ -21,11 +21,11 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `FmlRw` | line before ⇝ line after | sound by | solkey |
 |---|---|---|---|
 | `lit r i` | a literal law in the right-hand sides of the update at spine position `i`, any modality | `Upd.rwC_apply_eq` (iff) | `add_literals`, `leq_literals`, … |
-| `lawUpd r ht i` | a term taclet (`TermTacletS`) onto a literal, in the box update at `i` | `holds_upd_rwC` | `updRw` |
+| `lawUpd r ht i` | a term taclet (`TermTaclet`) onto a literal, in the box update at `i` | `holds_upd_rwC` | `updRw` |
 | `applyOnRigid i s` | `{U}(A ∧ B)`, `{U}(a → B)`, `{U}¬a`, `{U}a` with `a` first-order: `U` applied to the first-order parts (`Fml.substU`), kept in front of the rest; `U` at `i`, cannot halt or under the box | `Fml.pushS_sound` | `applyOnRigidFormula` |
-| `applyStorageBox i s` | `applyOnRigid` where `U` is a box update of the storage and locals (`Fml.pushStAt`) | `Fml.pushS_sound` | `applyOnRigidFormula` (the erasure's `applyStorageBox`) |
+| `applyStorageBox i s` | `applyOnRigid` where `U` is a box update of the storage and locals (`Fml.pushStAt`) | `Fml.pushS_sound` | `applyOnRigidFormula` (`applyStorageBox`) |
 | `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
-| `litEq r n s`, `lawEq r n s` | a literal law or a term taclet (`TermTacletS`) in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
+| `litEq r n s`, `lawEq r n s` | a literal law or a term taclet (`TermTaclet`) in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
 | `mergeIn p n` | the `n + 1` updates at the end of the path `p` (through `∧`, the right of `→`, updates and binders) merged | `Fml.mergeRun_leads` | `sequentialToParallel2` |
 | `stateMerge r i` | the update at `i` merged with the next over its storage or memory write (`MergeNameS`) | `MergeNameS.top_sound` | `sequentialToParallel2` |
 | `applyOnPV i s` | `{U}(x ≐ c → A) ⇝ {U}(v ≐ c → A)`, `U` leaving the literal `v` in `x`, in the atoms along `s` | `Fml.applyOnPVTop_sound` | `applyOnPV` |
@@ -303,7 +303,7 @@ def lit {t t' : Tm C [] .val} (r : LitLaw t t') (i : Nat) : FmlRw C :=
 
 /-- **A term taclet** onto a literal, in the right-hand sides of the box
 update at position `i` (solkey's `updRw`). -/
-def lawUpd {t t' : Tm C [] .val} (r : TermTacletS t t') (ht : t'.isLit = true) (i : Nat) :
+def lawUpd {t t' : Tm C [] .val} (r : TermTaclet t t') (ht : t'.isLit = true) (i : Nat) :
     FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.updRwBox (t, t') m U φ) (fun {_ _ m U φ ψ} h σ hψ => by
     cases m with
@@ -682,7 +682,7 @@ def litEq {t t' : Tm C [] .val} (r : LitLaw t t') (n : Nat) (s : Skel) : FmlRw C
 /-- **A term taclet** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation (solkey's `\find` on an
 equation's side). -/
-def lawEq {t t' : Tm C [] .val} (r : TermTacletS t t') (n : Nat) (s : Skel) : FmlRw C :=
+def lawEq {t t' : Tm C [] .val} (r : TermTaclet t t') (n : Nat) (s : Skel) : FmlRw C :=
   FmlRw.below (fun φ => Fml.lawOnS (t, t') false s φ)
     (fun h σ hψ => Fml.lawOnS_sound (q := (t, t')) r.sound (fun h => absurd h Bool.false_ne_true)
       h σ hψ) n

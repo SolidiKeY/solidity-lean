@@ -1,5 +1,5 @@
 import Solidity.Calculus.Quote
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.MemNames
 
 /-!

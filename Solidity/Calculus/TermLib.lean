@@ -470,7 +470,7 @@ end Generic
 
 /-! ## The side conditions, on scoped paths
 
-`Calculus/TermTaclets.lean`'s, read off a scoped path: the syntactic forms
+The term taclets', read off a scoped path: the syntactic forms
 of the Theory's `p ≠ []`, `diverges p q`, `p = q` and `q = p ++ r`.  The
 shapes are `SegT`'s. -/
 
@@ -821,114 +821,114 @@ end Ctx
 
 /-! ## The rules -/
 
-/-- `t ⇝ t'` on scoped terms: a rule of the Theory rewrites `t` to `t'`
-(`TermTaclet`, its constructors under the same names). -/
-inductive TermTacletS {Γ : Ctx} : Tm C Γ .val → Tm C Γ .val → Prop
+/-- `t ⇝ t'` on scoped terms: a rule of the Theory rewrites `t` to `t'`,
+each constructor named as its solkey taclet. -/
+inductive TermTaclet {Γ : Ctx} : Tm C Γ .val → Tm C Γ .val → Prop
   /-- **`findOnSave`**: `find(save(s, p, v), q) ⇝ v` for a word `v`, `q` the
   path `p` its checks aside (`find_copyTo_same`). -/
   | findOnSave {s : Tm C Γ .st} {p q : Tm C Γ .path} {v : Value} (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
-      TermTacletS tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
+      TermTaclet tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
   /-- **`findOnSaveFrame`**: a read at a path that leaves the written one does
   not see the write (`find_copyTo_frame`). -/
   | findOnSaveFrame {s : Tm C Γ .st} {p q : Tm C Γ .path} {v : Tm C Γ .sv}
       (h : p.diverges q = true := by rfl) :
-      TermTacletS tm{ find(save(s, p, v), q) } tm{ find(s, q) }
+      TermTaclet tm{ find(save(s, p, v), q) } tm{ find(s, q) }
   /-- **`findMemberCons`**: `find(s, r.p) ⇝ find(select(s, r), p)`, the path
   read from its head (`find_cons`). -/
   | findMemberCons {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name} {p' : Tm C Γ .path}
       (h : p.shift? = some (r, p') := by rfl) :
-      TermTacletS tm{ find(s, p) } tm{ find(select(s, r), p') }
+      TermTaclet tm{ find(s, p) } tm{ find(select(s, r), p') }
   /-- **`selectOnSaveMember`**: solkey's `selectOnSaveCons` at `a1 = a2`. -/
   | selectOnSaveMember {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name} {p' : Tm C Γ .path}
       {v : Tm C Γ .sv} {q : Tm C Γ .path} (h : p.shift? = some (r, p') := by rfl) :
-      TermTacletS tm{ find(select(save(s, p, v), r), q) } tm{ find(save(select(s, r), p', v), q) }
+      TermTaclet tm{ find(select(save(s, p, v), r), q) } tm{ find(save(select(s, r), p', v), q) }
   /-- **`selectOnSaveFrame`**: solkey's `selectOnSaveCons` at `a1 ≠ a2`. -/
   | selectOnSaveFrame {s : Tm C Γ .st} {p : Tm C Γ .path} {r r' : Name} {p' : Tm C Γ .path}
       {v : Tm C Γ .sv} {q : Tm C Γ .path} (h : p.shift? = some (r', p') := by rfl)
       (hr : r' ≠ r := by decide) :
-      TermTacletS tm{ find(select(save(s, p, v), r), q) } tm{ find(select(s, r), q) }
+      TermTaclet tm{ find(select(save(s, p, v), r), q) } tm{ find(select(s, r), q) }
   /-- **`selectOnDelAtMember`**: the delete at `r.p`, seen from `r`, is a
   delete at `p`. -/
   | selectOnDelAtMember {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name} {p' : Tm C Γ .path}
       {q : Tm C Γ .path} (h : p.shift? = some (r, p') := by rfl) :
-      TermTacletS tm{ find(select(delAt(s, p), r), q) } tm{ find(delAt(select(s, r), p'), q) }
+      TermTaclet tm{ find(select(delAt(s, p), r), q) } tm{ find(delAt(select(s, r), p'), q) }
   /-- **`selectOnDelAtFrame`**: a delete under another root is not seen from
   `r`. -/
   | selectOnDelAtFrame {s : Tm C Γ .st} {p : Tm C Γ .path} {r r' : Name} {p' : Tm C Γ .path}
       {q : Tm C Γ .path} (h : p.shift? = some (r', p') := by rfl) (hr : r' ≠ r := by decide) :
-      TermTacletS tm{ find(select(delAt(s, p), r), q) } tm{ find(select(s, r), q) }
+      TermTaclet tm{ find(select(delAt(s, p), r), q) } tm{ find(select(s, r), q) }
   /-- **`selectOnSaveMemberIn`**: `selectOnSaveMember` in a storage context. -/
   | selectOnSaveMemberIn (K : SCtxS C Γ) {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name}
       {p' : Tm C Γ .path} {v : Tm C Γ .sv} {q : Tm C Γ .path}
       (h : p.shift? = some (r, p') := by rfl) :
-      TermTacletS tm{ find(‹K.fill tm{ select(save(s, p, v), r) }›, q) }
+      TermTaclet tm{ find(‹K.fill tm{ select(save(s, p, v), r) }›, q) }
         tm{ find(‹K.fill tm{ save(select(s, r), p', v) }›, q) }
   /-- **`selectOnSaveFrameIn`**: `selectOnSaveFrame` in a storage context. -/
   | selectOnSaveFrameIn (K : SCtxS C Γ) {s : Tm C Γ .st} {p : Tm C Γ .path} {r r' : Name}
       {p' : Tm C Γ .path} {v : Tm C Γ .sv} {q : Tm C Γ .path}
       (h : p.shift? = some (r', p') := by rfl) (hr : r' ≠ r := by decide) :
-      TermTacletS tm{ find(‹K.fill tm{ select(save(s, p, v), r) }›, q) }
+      TermTaclet tm{ find(‹K.fill tm{ select(save(s, p, v), r) }›, q) }
         tm{ find(‹K.fill tm{ select(s, r) }›, q) }
   /-- **`selectOnDelAtMemberIn`**: `selectOnDelAtMember` in a storage context. -/
   | selectOnDelAtMemberIn (K : SCtxS C Γ) {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name}
       {p' : Tm C Γ .path} {q : Tm C Γ .path} (h : p.shift? = some (r, p') := by rfl) :
-      TermTacletS tm{ find(‹K.fill tm{ select(delAt(s, p), r) }›, q) }
+      TermTaclet tm{ find(‹K.fill tm{ select(delAt(s, p), r) }›, q) }
         tm{ find(‹K.fill tm{ delAt(select(s, r), p') }›, q) }
   /-- **`selectOnDelAtFrameIn`**: `selectOnDelAtFrame` in a storage context. -/
   | selectOnDelAtFrameIn (K : SCtxS C Γ) {s : Tm C Γ .st} {p : Tm C Γ .path} {r r' : Name}
       {p' : Tm C Γ .path} {q : Tm C Γ .path} (h : p.shift? = some (r', p') := by rfl)
       (hr : r' ≠ r := by decide) :
-      TermTacletS tm{ find(‹K.fill tm{ select(delAt(s, p), r) }›, q) }
+      TermTaclet tm{ find(‹K.fill tm{ select(delAt(s, p), r) }›, q) }
         tm{ find(‹K.fill tm{ select(s, r) }›, q) }
   /-- **`findOnDelAt`**: where `s` reads the word `w` at `p`, the delete
   leaves its default (`find_delAt_same`, `delValueDefault`). -/
   | findOnDelAt {s : Tm C Γ .st} {p q : Tm C Γ .path} {w : Value}
-      (hw : TermTacletS tm{ find(s, p) } tm{ lit(w) }) (hp : p.hasSeg = true := by rfl)
+      (hw : TermTaclet tm{ find(s, p) } tm{ lit(w) }) (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
-      TermTacletS tm{ find(delAt(s, p), q) } tm{ lit(‹primDefault w›) }
+      TermTaclet tm{ find(delAt(s, p), q) } tm{ lit(‹primDefault w›) }
   /-- **`findOnDelAtValue`**: the delete leaves at its path the default of
   what was there (`find_delAt_same`). -/
   | findOnDelAtValue {s : Tm C Γ .st} {p q : Tm C Γ .path} (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
-      TermTacletS tm{ find(delAt(s, p), q) } tm{ delValue(find(s, q)) }
+      TermTaclet tm{ find(delAt(s, p), q) } tm{ delValue(find(s, q)) }
   /-- **`delValueLit`**: the default of a word (`delValueDefault`). -/
-  | delValueLit {w : Value} : TermTacletS tm{ delValue(lit(w)) } tm{ lit(‹primDefault w›) }
+  | delValueLit {w : Value} : TermTaclet tm{ delValue(lit(w)) } tm{ lit(‹primDefault w›) }
   /-- **`findOnDelAtBelow`**: below a deleted node that is not a mapping,
   every word reads its default (`find_delAt_below`, `delValueDefault`). -/
   | findOnDelAtBelow {s : Tm C Γ .st} {p q : Tm C Γ .path} {w : Value} (hk : s.KindFreeAt p)
       (hw : s.findLit? q = some w := by rfl) (hp : p.hasSeg = true := by rfl)
       (hq : q.extends p = true := by rfl) :
-      TermTacletS tm{ find(delAt(s, p), q) } tm{ lit(‹primDefault w›) }
+      TermTaclet tm{ find(delAt(s, p), q) } tm{ lit(‹primDefault w›) }
   /-- **`findOnDelAtFrame`**: a read off the deleted path does not see the
   delete (`find_delAt_frame`). -/
   | findOnDelAtFrame {s : Tm C Γ .st} {p q : Tm C Γ .path} (h : p.diverges q = true := by rfl) :
-      TermTacletS tm{ find(delAt(s, p), q) } tm{ find(s, q) }
+      TermTaclet tm{ find(delAt(s, p), q) } tm{ find(s, q) }
   /-- **`findOnPushFrame`**: a read off the array's path does not see a push
   (`find_pushT_frame`). -/
   | findOnPushFrame {s : Tm C Γ .st} {p q : Tm C Γ .path} {v : Tm C Γ .sv}
       (h : p.diverges q = true := by rfl) :
-      TermTacletS tm{ find(save(save(s, p[p.length], v), p.length, p.length + 1), q) }
+      TermTaclet tm{ find(save(save(s, p[p.length], v), p.length, p.length + 1), q) }
         tm{ find(s, q) }
   /-- **`findOnPopFrame`**: a read off the array's path does not see a pop
   (`find_popT_frame`). -/
   | findOnPopFrame {s : Tm C Γ .st} {p q : Tm C Γ .path} (h : p.diverges q = true := by rfl) :
-      TermTacletS tm{ find(save(delAt(s, p[p.length - 1]), p.length, p.length - 1), q) }
+      TermTaclet tm{ find(save(delAt(s, p[p.length - 1]), p.length, p.length - 1), q) }
         tm{ find(s, q) }
   /-- **`lenOnSaveFrame`**: a length read off the written path does not see
   the write (`find_copyTo_frame`). -/
   | lenOnSaveFrame {s : Tm C Γ .st} {q p : Tm C Γ .path} {v : Tm C Γ .sv}
       (h : q.divergesLen p = true := by rfl) :
-      TermTacletS tm{ find(save(s, q, v), p.length) } tm{ find(s, p.length) }
+      TermTaclet tm{ find(save(s, q, v), p.length) } tm{ find(s, p.length) }
   /-- **`lenOnDelAtFrame`**: a length read off the deleted path does not see
   the delete (`find_delAt_frame`). -/
   | lenOnDelAtFrame {s : Tm C Γ .st} {q p : Tm C Γ .path} (h : q.divergesLen p = true := by rfl) :
-      TermTacletS tm{ find(delAt(s, q), p.length) } tm{ find(s, p.length) }
+      TermTaclet tm{ find(delAt(s, q), p.length) } tm{ find(s, p.length) }
   /-- Any law of the Theory: `t` and `t'` have one Theory value in every
   state. -/
-  | theory {t t' : Tm C Γ .val} (h : Tm.Theq t t') : TermTacletS t t'
+  | theory {t t' : Tm C Γ .val} (h : Tm.Theq t t') : TermTaclet t t'
   /-- A rule read right to left, `rw [← r]`. -/
-  | symm {t t' : Tm C Γ .val} (r : TermTacletS t t') : TermTacletS t' t
+  | symm {t t' : Tm C Γ .val} (r : TermTaclet t t') : TermTaclet t' t
 
 section Rules
 
@@ -936,11 +936,11 @@ variable {Γ : Ctx}
 
 /-- **`findOnDelAtSave`**: a delete over a written word reads the word's
 default: `findOnDelAt` with `findOnSave` as its premise. -/
-theorem TermTacletS.findOnDelAtSave {s : Tm C Γ .st} {p' p q : Tm C Γ .path} {v : Value}
+theorem TermTaclet.findOnDelAtSave {s : Tm C Γ .st} {p' p q : Tm C Γ .path} {v : Value}
     (hp : p.hasSeg = true := by rfl)
     (hp' : p'.sameSegs p = true := by first | rfl | exact Tm.sameSegs_refl _)
     (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
-    TermTacletS tm{ find(delAt(save(s, p', lit(v)), p), q) } tm{ lit(‹primDefault v›) } :=
+    TermTaclet tm{ find(delAt(save(s, p', lit(v)), p), q) } tm{ lit(‹primDefault v›) } :=
   .findOnDelAt (.findOnSave ((Tm.sameSegs_hasSeg hp').trans hp) hp') hp hq
 
 end Rules
@@ -1025,7 +1025,7 @@ theorem Tm.findLit?_theq {s : Tm C Γ .st} {q : Tm C Γ .path} {w : Value}
 
 /-- **Each scoped term taclet is sound**: its two terms have one Theory value
 in every state (`TermTaclet.sound`). -/
-theorem TermTacletS.sound {t t' : Tm C Γ .val} : TermTacletS t t' → Tm.Theq t t'
+theorem TermTaclet.sound {t t' : Tm C Γ .val} : TermTaclet t t' → Tm.Theq t t'
   | @findOnSave _ _ s p q v hp hq => fun σ => by
     simp only [Tm.denote, Op0.denote, Op1.denote, Op2.denote, Op3.denote,
       ← Tm.sameSegs_denote σ hq, find_copyTo_same _ (Tm.denote_ne_nil σ hp), copyVal]
@@ -1099,43 +1099,43 @@ section Pins
 
 variable {Γ : Ctx}
 
-/- `tm{ … }` writes a scoped rule as `TermTaclet`'s and prints it back as it
-was written; an escape's term prints as the closer's does. -/
+/- `tm{ … }` writes a scoped rule and prints it back as it was written; an
+escape's term prints as the closer's does. -/
 /--
-info: @TermTacletS.findOnSave : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {p q : Tm C Γ Srt.path} {v : Value},
+info: @TermTaclet.findOnSave : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {p q : Tm C Γ Srt.path} {v : Value},
   autoParam (p.hasSeg = true) _auto✝ →
-    autoParam (p.sameSegs q = true) _auto✝¹ → TermTacletS tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
+    autoParam (p.sameSegs q = true) _auto✝¹ → TermTaclet tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
 -/
 #guard_msgs in
-#check @TermTacletS.findOnSave
+#check @TermTaclet.findOnSave
 
 /--
-info: @TermTacletS.findOnPushFrame : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {p q : Tm C Γ Srt.path}
+info: @TermTaclet.findOnPushFrame : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {p q : Tm C Γ Srt.path}
   {v : Tm C Γ Srt.sv},
   autoParam (p.diverges q = true) _auto✝ →
-    TermTacletS tm{ find(save(save(s, p[p.length], v), p.length, p.length + 1), q) } tm{ find(s, q) }
+    TermTaclet tm{ find(save(save(s, p[p.length], v), p.length, p.length + 1), q) } tm{ find(s, q) }
 -/
 #guard_msgs in
-#check @TermTacletS.findOnPushFrame
+#check @TermTaclet.findOnPushFrame
 
 /--
-info: @TermTacletS.selectOnSaveMemberIn : ∀ {C : Contract} {Γ : Ctx} (K : SCtxS C Γ) {s : Tm C Γ Srt.st} {p : Tm C Γ Srt.path}
+info: @TermTaclet.selectOnSaveMemberIn : ∀ {C : Contract} {Γ : Ctx} (K : SCtxS C Γ) {s : Tm C Γ Srt.st} {p : Tm C Γ Srt.path}
   {r : Name} {p' : Tm C Γ Srt.path} {v : Tm C Γ Srt.sv} {q : Tm C Γ Srt.path},
   autoParam (p.shift? = some (r, p')) _auto✝ →
-    TermTacletS tm{ find(‹K.fill ((s.save p v).select r)›, q) } tm{ find(‹K.fill ((s.select r).save p' v)›, q) }
+    TermTaclet tm{ find(‹K.fill ((s.save p v).select r)›, q) } tm{ find(‹K.fill ((s.select r).save p' v)›, q) }
 -/
 #guard_msgs in
-#check @TermTacletS.selectOnSaveMemberIn
+#check @TermTaclet.selectOnSaveMemberIn
 
-/-- The side conditions close by `rfl` on closed paths, as `TermTaclet`'s do. -/
+/-- The side conditions close by `rfl` on closed paths. -/
 example (s : Tm C Γ .st) (v : Tm C Γ .sv) :
-    TermTacletS (tm{ find(save(s, ‹.app1 (.field "age") rfl (.app0 (.root "alice"))›, v),
+    TermTaclet (tm{ find(save(s, ‹.app1 (.field "age") rfl (.app0 (.root "alice"))›, v),
       ‹.app1 (.field "name") rfl (.app0 (.root "alice"))›) } : Tm C Γ .val)
       tm{ find(s, ‹.app1 (.field "name") rfl (.app0 (.root "alice"))›) } :=
   .findOnSaveFrame
 
 example (s : Tm C Γ .st) (w : Value) :
-    TermTacletS
+    TermTaclet
       (tm{ find(save(s, ‹.app2 .at (.app0 (.root "xs")) (.app0 (.lit (.int 2)))›, lit(w)),
         ‹.app3 .atIn s (.app0 (.root "xs")) (.app0 (.lit (.int 2)))›) } : Tm C Γ .val) tm{ lit(w) } :=
   .findOnSave

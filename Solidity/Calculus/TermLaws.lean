@@ -19,11 +19,11 @@ second, decided by `rfl`.
 * **A storage law onto a literal** (`Upd.covers`): `find(save(s, p, 10), p)`
   over `storage := save(s, p, 10)`, a word at or below a deleted node over
   `storage := delAt(s, p)`, each read member-wise too (`Tm.baseAny`).
-* **The frame and delete-value laws** (`TermTacletS.RefLaw`,
+* **The frame and delete-value laws** (`TermTaclet.RefLaw`,
   `Upd.coversRef`): their storage operation held by the update.
 * **Two member-wise forms of one read** (`Tm.sameBase`): they return alike
   in every state (`Tm.sameBase_eval`).
-* **The memory laws** (`EvalLawS`, `Upd.coversEval`): KeY's
+* **The memory laws** (`EvalLaw`, `Upd.coversEval`): KeY's
   `readOnWrite`, `readAddEqual`, … with their side conditions
   (`Tm.freshPath?`, `Tm.boundedIn`, `Tm.apart?`).
 
@@ -63,8 +63,8 @@ theorem Tm.evalRefinesAt_of_theq {t t' : Tm C Γ .val} (h : Tm.Theq t t') (ht : 
 
 /-! ## The literal laws -/
 
-/-- KeY's `*_literals` taclets, as the interpreter computes them (`LitLaw`
-of the closer's terms, scoped).  Hover a constructor for the taclet. -/
+/-- KeY's `*_literals` taclets, as the interpreter computes them.  Hover a
+constructor for the taclet. -/
 inductive LitLaw : Tm C Γ .val → Tm C Γ .val → Prop
   /-- **`add_literals`**: `a + b ⇝ a + b` folded, in `uint` range. -/
   | add_literals {a b : Int} (h : 0 ≤ a + b ∧ a + b < uintBound := by decide) :
@@ -1064,26 +1064,26 @@ theorem Tm.find_delAt_value_eval {s : Tm C Γ .st} {p q : Tm C Γ .path} {τ : S
 end RefEval
 
 /-- The storage laws whose two sides evaluate alike once their storage
-operation returns (`TermTaclet.RefLaw`, scoped).  These are the laws that may
+operation returns.  These are the laws that may
 rewrite a covered update under either modality though their right side is
 not total. -/
-inductive TermTacletS.RefLaw : {t t' : Tm C Γ .val} → TermTacletS t t' → Prop where
+inductive TermTaclet.RefLaw : {t t' : Tm C Γ .val} → TermTaclet t t' → Prop where
   | findOnSaveFrame {s : Tm C Γ .st} {p q : Tm C Γ .path} {v : Tm C Γ .sv}
       (hd : p.diverges q = true := by rfl) :
-      RefLaw (TermTacletS.findOnSaveFrame (s := s) (p := p) (q := q) (v := v) hd)
+      RefLaw (TermTaclet.findOnSaveFrame (s := s) (p := p) (q := q) (v := v) hd)
   | findOnDelAtValue {s : Tm C Γ .st} {p q : Tm C Γ .path} (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
-      RefLaw (TermTacletS.findOnDelAtValue (s := s) (p := p) (q := q) hp hq)
+      RefLaw (TermTaclet.findOnDelAtValue (s := s) (p := p) (q := q) hp hq)
   | findOnDelAtFrame {s : Tm C Γ .st} {p q : Tm C Γ .path} (hd : p.diverges q = true := by rfl) :
-      RefLaw (TermTacletS.findOnDelAtFrame (s := s) (p := p) (q := q) hd)
+      RefLaw (TermTaclet.findOnDelAtFrame (s := s) (p := p) (q := q) hd)
   | lenOnSaveFrame {s : Tm C Γ .st} {q p : Tm C Γ .path} {v : Tm C Γ .sv}
       (hd : q.divergesLen p = true := by rfl) :
-      RefLaw (TermTacletS.lenOnSaveFrame (s := s) (q := q) (p := p) (v := v) hd)
+      RefLaw (TermTaclet.lenOnSaveFrame (s := s) (q := q) (p := p) (v := v) hd)
   | lenOnDelAtFrame {s : Tm C Γ .st} {q p : Tm C Γ .path} (hd : q.divergesLen p = true := by rfl) :
-      RefLaw (TermTacletS.lenOnDelAtFrame (s := s) (q := q) (p := p) hd)
+      RefLaw (TermTaclet.lenOnDelAtFrame (s := s) (q := q) (p := p) hd)
 
 /-- **A reference law keeps every value its left side returns.** -/
-theorem TermTacletS.RefLaw.evalRefines {t t' : Tm C Γ .val} {r : TermTacletS t t'} :
+theorem TermTaclet.RefLaw.evalRefines {t t' : Tm C Γ .val} {r : TermTaclet t t'} :
     RefLaw r → Tm.EvalRefinesAt t t'
   | .findOnSaveFrame hd => fun σ x hx => by
       have hx' := hx
@@ -1125,7 +1125,7 @@ def Upd.coversRef {Δ : Ctx} (U : Upd C Γ Δ) : Tm C Γ .val × Tm C Γ .val �
   | _ => false
 
 /-- **Wherever a covered update returns, a reference law refines back.** -/
-theorem TermTacletS.RefLaw.back {t t' : Tm C Γ .val} {r : TermTacletS t t'} (hr : RefLaw r)
+theorem TermTaclet.RefLaw.back {t t' : Tm C Γ .val} {r : TermTaclet t t'} (hr : RefLaw r)
     {Δ : Ctx} {U : Upd C Γ Δ} (hc : U.coversRef (t, t') = true) {σ : EState C Γ}
     {τ : EState C Δ} (hU : U.apply σ = .ok τ) : Res.Le (t'.eval σ) (t.eval σ) := by
   cases hr with
@@ -1163,13 +1163,13 @@ theorem TermTacletS.RefLaw.back {t t' : Tm C Γ .val} {r : TermTacletS t t'} (hr
 /-! ## The laws of memory reads
 
 A memory read (`read`, `copyMem`, `copySt`) denotes its run (`Op2.opaque`),
-so a law of one is no Theory equation (`TermTacletS`) but a refinement of the
+so a law of one is no Theory equation (`TermTaclet`) but a refinement of the
 interpreter: where the read returns, its replacement returns the same
-(`Tm.EvalRefinesAt`, `EvalLawS.sound`).  Inside an update over any modality
+(`Tm.EvalRefinesAt`, `EvalLaw.sound`).  Inside an update over any modality
 the replacement may halt where the read did not, so the update has to hold
 the write the law reads back (`Upd.coversEval`, as `Upd.covers` for the
 storage laws): then the two return alike wherever the update returns
-(`EvalLawS.back`). -/
+(`EvalLaw.back`). -/
 
 section MemEval
 
@@ -1608,25 +1608,24 @@ theorem Tm.apart?_eval {σ : EState C Γ} (a b : Tm C Γ .addr) (h : a.apart? b 
   · nomatch h
 
 /-- A law of a memory read, at the value or the identity sort: where the
-read returns, the replacement returns the same (`EvalLaw`, scoped;
-`EvalLawS.sound`). -/
-inductive EvalLawS : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
+read returns, the replacement returns the same (`EvalLaw.sound`). -/
+inductive EvalLaw : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   /-- **`readOnWrite`**: `read(write(m, a, v), a) ⇝ v` (`readAddr_writeAddr_same`). -/
   | readOnWrite {m : Tm C Γ .mem} {a : Tm C Γ .addr} {v : Value} :
-      EvalLawS tm{ read(write(m, a, lit(v)), a) } tm{ lit(v) }
+      EvalLaw tm{ read(write(m, a, lit(v)), a) } tm{ lit(v) }
   /-- **`findCopyMem`**: a member read out of a memory object copied into
   storage is read out of memory,
   `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i, f)` (`copyMem_member`). -/
   | findCopyMem {s : Tm C Γ .st} {p : Tm C Γ .path} {m : Tm C Γ .mem} {i : Tm C Γ .ident} {f : Name}
       (hf : (f == "length") = false := by rfl) :
-      EvalLawS tm{ find(save(s, p, copyMem(mtSt, m, i)), p.f) } tm{ read(m, i, f) }
+      EvalLaw tm{ find(save(s, p, copyMem(mtSt, m, i)), p.f) } tm{ read(m, i, f) }
   /-- **`readCopySt`**: a member read out of a copy of a storage struct is
   read out of storage,
   `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))), f) ⇝ find(s, p.f)`
   (`copyStToM_member`). -/
   | readCopySt {m : Tm C Γ .mem} {s : Tm C Γ .st} {p : Tm C Γ .path} {f : Name}
       (hf : (f == "length") = false := by rfl) :
-      EvalLawS tm{ read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))), f) }
+      EvalLaw tm{ read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))), f) }
         tm{ find(s, p.f) }
   /-- **`readAddEqual`**: a primitive member or fixed element of a fresh
   object holds its type's default, `read(addM(m, R), a) ⇝ default`, where
@@ -1634,37 +1633,37 @@ inductive EvalLawS : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   primitive (`copyStToM_default_readPath`). -/
   | readAddEqual {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr} {q : PrimTy}
       (h : (a.freshPath? m R).bind (Ty.ref R).memberTy = some (.prim q) := by rfl) :
-      EvalLawS (Tm.app2 .read (Tm.app1 (.addM R) rfl m) a) (Tm.lit (PrimTy.default q))
+      EvalLaw (Tm.app2 .read (Tm.app1 (.addM R) rfl m) a) (Tm.lit (PrimTy.default q))
   /-- **`readAddDifferent`**: an allocation leaves every object allocated
   before it, `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is
   allocated strictly earlier on `m`'s spine (`Tm.boundedIn`, `readAddr_heapExt`). -/
   | readAddDifferent {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr}
       (h : a.boundedIn m = true := by rfl) :
-      EvalLawS (Tm.app2 .read (Tm.app1 (.addM R) rfl m) a) (Tm.app2 .read m a)
+      EvalLaw (Tm.app2 .read (Tm.app1 (.addM R) rfl m) a) (Tm.app2 .read m a)
   /-- **`readAddDifferentIdentity`**: `readAddDifferent` at the identity sort. -/
   | readAddDifferentIdentity {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr}
       (h : a.boundedIn m = true := by rfl) :
-      EvalLawS (Tm.app2 .iread (Tm.app1 (.addM R) rfl m) a) (Tm.app2 .iread m a)
+      EvalLaw (Tm.app2 .iread (Tm.app1 (.addM R) rfl m) a) (Tm.app2 .iread m a)
   /-- **`readWriteDifferent`**: a write leaves every other address,
   `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet
   (`Tm.apart?`, `writeAddr_setObj`). -/
   | readWriteDifferent {m : Tm C Γ .mem} {a b : Tm C Γ .addr} {v : Tm C Γ .mv}
       (h : a.apart? b = true := by rfl) :
-      EvalLawS tm{ read(write(m, a, v), b) } tm{ read(m, b) }
+      EvalLaw tm{ read(write(m, a, v), b) } tm{ read(m, b) }
   /-- **`readWriteDifferentIdentity`**: `readWriteDifferent` at the identity sort. -/
   | readWriteDifferentIdentity {m : Tm C Γ .mem} {a b : Tm C Γ .addr} {v : Tm C Γ .mv}
       (h : a.apart? b = true := by rfl) :
-      EvalLawS (Tm.app2 .iread (.app3 .write m a v) b) (Tm.app2 .iread m b)
+      EvalLaw (Tm.app2 .iread (.app3 .write m a v) b) (Tm.app2 .iread m b)
   /-- **`readOnWriteIdentity`**: `readOnWrite` at the identity sort,
   `read(write(m, a, ref(i)), a) ⇝ i` (`readAddr_writeAddr_same`). -/
   | readOnWriteIdentity {m : Tm C Γ .mem} {a : Tm C Γ .addr} {i : Tm C Γ .ident} :
-      EvalLawS (Tm.app2 .iread (.app3 .write m a (.app1 .ref rfl i)) a) i
+      EvalLaw (Tm.app2 .iread (.app3 .write m a (.app1 .ref rfl i)) a) i
 
 section EvalLawSound
 
 variable {σ : EState C Γ}
 
-theorem EvalLawS.readOnWrite_le {m : Tm C Γ .mem} {a : Tm C Γ .addr} {v : Value}
+theorem EvalLaw.readOnWrite_le {m : Tm C Γ .mem} {a : Tm C Γ .addr} {v : Value}
     {τ : Semantics.State} (hw : (Tm.app3 .write m a (.app1 .mval rfl (Tm.lit v))).eval σ = .ok τ) :
     (Tm.app2 .read (.app3 .write m a (.app1 .mval rfl (Tm.lit v))) a).eval σ = .ok v := by
   rw [Tm.read_eval, hw, Res.ok_bind']
@@ -1674,7 +1673,7 @@ theorem EvalLawS.readOnWrite_le {m : Tm C Γ .mem} {a : Tm C Γ .addr} {v : Valu
   obtain ⟨ad, had, hw⟩ := bind_ok_inv hw
   rw [had, Res.ok_bind', Close.readAddr_writeAddr_same hw, Res.ok_bind', Value.toMVal_asValue]
 
-theorem EvalLawS.findCopyMem_eval {s : Tm C Γ .st} {p : Tm C Γ .path} {m : Tm C Γ .mem}
+theorem EvalLaw.findCopyMem_eval {s : Tm C Γ .st} {p : Tm C Γ .path} {m : Tm C Γ .mem}
     {i : Tm C Γ .ident} {f : Name} (hf : (f == "length") = false) {τ : Semantics.State}
     (hw : (Tm.app3 .save s p (.app2 .copyMem m i)).eval σ = .ok τ) :
     Res.Le ((Tm.app2 .find (.app3 .save s p (.app2 .copyMem m i)) (.app1 (.field f) rfl p)).eval σ)
@@ -1699,7 +1698,7 @@ theorem EvalLawS.findCopyMem_eval {s : Tm C Γ .st} {p : Tm C Γ .path} {m : Tm 
     exact ⟨fun x hx => (Close.copyLeaf_asValue τm id mv x).1 hx,
       fun x hx => (Close.copyLeaf_asValue τm id mv x).2 hx⟩
 
-theorem EvalLawS.readCopySt_eval {m : Tm C Γ .mem} {s : Tm C Γ .st} {p : Tm C Γ .path} {f : Name}
+theorem EvalLaw.readCopySt_eval {m : Tm C Γ .mem} {s : Tm C Γ .st} {p : Tm C Γ .path} {f : Name}
     (hf : (f == "length") = false) {μ : Semantics.State}
     (hw : (Tm.app2 .copySt m (.app2 .sfind s p)).eval σ = .ok μ) :
     Res.Le ((Tm.app2 .read (.app2 .copySt m (.app2 .sfind s p))
@@ -1752,7 +1751,7 @@ theorem EvalLawS.readCopySt_eval {m : Tm C Γ .mem} {s : Tm C Γ .st} {p : Tm C 
     rw [this']
     exact ⟨Res.Le.refl _, Res.Le.refl _⟩
 
-theorem EvalLawS.readAddEqual_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr} {q : PrimTy}
+theorem EvalLaw.readAddEqual_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr} {q : PrimTy}
     (h : (a.freshPath? m R).bind (Ty.ref R).memberTy = some (.prim q)) {μ₁ : Semantics.State}
     (hw : (Tm.app1 (.addM R) rfl m).eval σ = .ok μ₁) :
     (Tm.app2 .read (.app1 (.addM R) rfl m) a).eval σ = .ok (PrimTy.default q) := by
@@ -1775,7 +1774,7 @@ theorem EvalLawS.readAddEqual_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .
     simp only [State.readPath]
     rw [hmv', Res.ok_bind', Value.toMVal_asValue]
 
-theorem EvalLawS.readAddDifferent_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr}
+theorem EvalLaw.readAddDifferent_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr}
     (h : a.boundedIn m = true) {μ₁ : Semantics.State} (hw : (Tm.app1 (.addM R) rfl m).eval σ = .ok μ₁) :
     (Tm.app2 .read (.app1 (.addM R) rfl m) a).eval σ = (Tm.app2 .read m a).eval σ := by
   have hμ := hw
@@ -1790,7 +1789,7 @@ theorem EvalLawS.readAddDifferent_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C 
     simp only [Res.ok_bind']
     rw [readAddr_heapExt (allocDefault_heapExt ha) (Tm.boundedIn_eval hm a h ad had)]
 
-theorem EvalLawS.readAddDifferentIdentity_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr}
+theorem EvalLaw.readAddDifferentIdentity_eval {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ .addr}
     (h : a.boundedIn m = true) {μ₁ : Semantics.State} (hw : (Tm.app1 (.addM R) rfl m).eval σ = .ok μ₁) :
     (Tm.app2 .iread (.app1 (.addM R) rfl m) a).eval σ = (Tm.app2 .iread m a).eval σ := by
   have hμ := hw
@@ -1805,7 +1804,7 @@ theorem EvalLawS.readAddDifferentIdentity_eval {m : Tm C Γ .mem} {R : RefTy} {a
     simp only [Res.ok_bind']
     rw [readAddr_heapExt (allocDefault_heapExt ha) (Tm.boundedIn_eval hm a h ad had)]
 
-theorem EvalLawS.readWriteDifferent_eval {m : Tm C Γ .mem} {a b : Tm C Γ .addr} {v : Tm C Γ .mv}
+theorem EvalLaw.readWriteDifferent_eval {m : Tm C Γ .mem} {a b : Tm C Γ .addr} {v : Tm C Γ .mv}
     (h : a.apart? b = true) {τ : Semantics.State} (hw : (Tm.app3 .write m a v).eval σ = .ok τ) :
     (Tm.app2 .read (.app3 .write m a v) b).eval σ = (Tm.app2 .read m b).eval σ := by
   have hμ := hw
@@ -1821,7 +1820,7 @@ theorem EvalLawS.readWriteDifferent_eval {m : Tm C Γ .mem} {a b : Tm C Γ .addr
     obtain ⟨-, -, -, hfr⟩ := Close.writeAddr_setObj hw
     rw [hfr bd (Tm.apart?_eval a b h had hbd)]
 
-theorem EvalLawS.readWriteDifferentIdentity_eval {m : Tm C Γ .mem} {a b : Tm C Γ .addr}
+theorem EvalLaw.readWriteDifferentIdentity_eval {m : Tm C Γ .mem} {a b : Tm C Γ .addr}
     {v : Tm C Γ .mv} (h : a.apart? b = true) {τ : Semantics.State}
     (hw : (Tm.app3 .write m a v).eval σ = .ok τ) :
     (Tm.app2 .iread (.app3 .write m a v) b).eval σ = (Tm.app2 .iread m b).eval σ := by
@@ -1838,7 +1837,7 @@ theorem EvalLawS.readWriteDifferentIdentity_eval {m : Tm C Γ .mem} {a b : Tm C 
     obtain ⟨-, -, -, hfr⟩ := Close.writeAddr_setObj hw
     rw [hfr bd (Tm.apart?_eval a b h had hbd)]
 
-theorem EvalLawS.readOnWriteIdentity_eval {m : Tm C Γ .mem} {a : Tm C Γ .addr} {i : Tm C Γ .ident}
+theorem EvalLaw.readOnWriteIdentity_eval {m : Tm C Γ .mem} {a : Tm C Γ .addr} {i : Tm C Γ .ident}
     {τ : Semantics.State} (hw : (Tm.app3 .write m a (.app1 .ref rfl i)).eval σ = .ok τ) :
     (Tm.app2 .iread (.app3 .write m a (.app1 .ref rfl i)) a).eval σ = i.eval σ := by
   have hμ := hw
@@ -1854,55 +1853,55 @@ theorem EvalLawS.readOnWriteIdentity_eval {m : Tm C Γ .mem} {a : Tm C Γ .addr}
 
 /-- **A law of a memory read refines evaluation**: where the read returns,
 its replacement returns the same. -/
-theorem EvalLawS.sound {u : Srt} {t t' : Tm C Γ u} : EvalLawS t t' → Tm.EvalRefinesAt t t'
+theorem EvalLaw.sound {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → Tm.EvalRefinesAt t t'
   | .readOnWrite => fun σ x hx => by
     have hx0 := hx
     rw [Tm.read_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
-    rw [EvalLawS.readOnWrite_le hτ] at hx0
+    rw [EvalLaw.readOnWrite_le hτ] at hx0
     obtain rfl := Except.ok.inj hx0
     rfl
   | .findCopyMem hf => fun σ x hx => by
     have hx0 := hx
     rw [Tm.find_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
-    exact (EvalLawS.findCopyMem_eval hf hτ).1 x hx0
+    exact (EvalLaw.findCopyMem_eval hf hτ).1 x hx0
   | .readCopySt hf => fun σ x hx => by
     have hx0 := hx
     rw [Tm.read_eval] at hx
     obtain ⟨μ, hμ, -⟩ := bind_ok_inv hx
-    exact (EvalLawS.readCopySt_eval hf hμ).1 x hx0
+    exact (EvalLaw.readCopySt_eval hf hμ).1 x hx0
   | .readAddEqual h => fun σ x hx => by
     have hx0 := hx
     rw [Tm.read_eval] at hx
     obtain ⟨μ₁, hμ, -⟩ := bind_ok_inv hx
-    rw [EvalLawS.readAddEqual_eval h hμ] at hx0
+    rw [EvalLaw.readAddEqual_eval h hμ] at hx0
     exact hx0.symm ▸ rfl
   | .readAddDifferent h => fun σ x hx => by
     have hx0 := hx
     rw [Tm.read_eval] at hx
     obtain ⟨μ₁, hμ, -⟩ := bind_ok_inv hx
-    rwa [EvalLawS.readAddDifferent_eval h hμ] at hx0
+    rwa [EvalLaw.readAddDifferent_eval h hμ] at hx0
   | .readAddDifferentIdentity h => fun σ x hx => by
     have hx0 := hx
     rw [Tm.iread_eval] at hx
     obtain ⟨μ₁, hμ, -⟩ := bind_ok_inv hx
-    rwa [EvalLawS.readAddDifferentIdentity_eval h hμ] at hx0
+    rwa [EvalLaw.readAddDifferentIdentity_eval h hμ] at hx0
   | .readWriteDifferent h => fun σ x hx => by
     have hx0 := hx
     rw [Tm.read_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
-    rwa [EvalLawS.readWriteDifferent_eval h hτ] at hx0
+    rwa [EvalLaw.readWriteDifferent_eval h hτ] at hx0
   | .readWriteDifferentIdentity h => fun σ x hx => by
     have hx0 := hx
     rw [Tm.iread_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
-    rwa [EvalLawS.readWriteDifferentIdentity_eval h hτ] at hx0
+    rwa [EvalLaw.readWriteDifferentIdentity_eval h hτ] at hx0
   | .readOnWriteIdentity => fun σ x hx => by
     have hx0 := hx
     rw [Tm.iread_eval] at hx
     obtain ⟨τ, hτ, -⟩ := bind_ok_inv hx
-    rwa [EvalLawS.readOnWriteIdentity_eval hτ] at hx0
+    rwa [EvalLaw.readOnWriteIdentity_eval hτ] at hx0
 
 end EvalLawSound
 
@@ -1941,7 +1940,7 @@ def Upd.coversEval {Δ : Ctx} (U : Upd C Γ Δ) : {u : Srt} → Tm C Γ u × Tm 
 
 /-- **Where the update returns, a covered memory law is exact**: its
 replacement returns what the replaced term returns. -/
-theorem EvalLawS.back {u : Srt} {t t' : Tm C Γ u} (r : EvalLawS t t') {Δ : Ctx} {U : Upd C Γ Δ}
+theorem EvalLaw.back {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') {Δ : Ctx} {U : Upd C Γ Δ}
     (hc : U.coversEval (t, t') = true) {σ : EState C Γ} {τ : EState C Δ} (hU : U.apply σ = .ok τ) :
     Srt.Le u (t'.eval σ) (t.eval σ) := by
   cases r with
@@ -1949,43 +1948,43 @@ theorem EvalLawS.back {u : Srt} {t t' : Tm C Γ u} (r : EvalLawS t t') {Δ : Ctx
     obtain ⟨τw, hw⟩ := Upd.holdsMem_eval (w := .app3 .write _ _ _) hc hU
     intro x hx
     cases hx
-    exact EvalLawS.readOnWrite_le hw
+    exact EvalLaw.readOnWrite_le hw
   | readAddEqual h =>
     obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval (w := .app1 (.addM _) _ _) hc hU
     intro x hx
     cases hx
-    exact EvalLawS.readAddEqual_eval h hw
+    exact EvalLaw.readAddEqual_eval h hw
   | readAddDifferent h =>
     obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval (w := .app1 (.addM _) _ _) hc hU
-    rw [EvalLawS.readAddDifferent_eval h hw]
+    rw [EvalLaw.readAddDifferent_eval h hw]
     exact Res.Le.refl _
   | readAddDifferentIdentity h =>
     obtain ⟨μ₁, hw⟩ := Upd.holdsMem_eval (w := .app1 (.addM _) _ _) hc hU
-    rw [EvalLawS.readAddDifferentIdentity_eval h hw]
+    rw [EvalLaw.readAddDifferentIdentity_eval h hw]
     exact Res.Le.refl _
   | readWriteDifferent h =>
     obtain ⟨τw, hw⟩ := Upd.holdsMem_eval (w := .app3 .write _ _ _) hc hU
-    rw [EvalLawS.readWriteDifferent_eval h hw]
+    rw [EvalLaw.readWriteDifferent_eval h hw]
     exact Res.Le.refl _
   | readWriteDifferentIdentity h =>
     obtain ⟨τw, hw⟩ := Upd.holdsMem_eval (w := .app3 .write _ _ _) hc hU
-    rw [EvalLawS.readWriteDifferentIdentity_eval h hw]
+    rw [EvalLaw.readWriteDifferentIdentity_eval h hw]
     exact Res.Le.refl _
   | readOnWriteIdentity =>
     obtain ⟨τw, hw⟩ := Upd.holdsMem_eval (w := .app3 .write _ _ _) hc hU
-    rw [EvalLawS.readOnWriteIdentity_eval hw]
+    rw [EvalLaw.readOnWriteIdentity_eval hw]
     exact Res.Le.refl _
   | findCopyMem hf =>
     have hc' : (_ && U.holdsWrite (.app3 .save _ _ (.app2 .copyMem _ _))) = true := hc
     rw [Bool.and_eq_true] at hc'
     obtain ⟨b, F, hb, τ₁, hbe⟩ := Upd.holdsWrite_eval hc'.2 hU
     obtain ⟨τ', hs⟩ := Tm.save_returns_of_base hb hbe
-    exact (EvalLawS.findCopyMem_eval hf hs).2
+    exact (EvalLaw.findCopyMem_eval hf hs).2
   | readCopySt hf =>
     have hc' : (_ && U.holdsMem (.app2 .copySt _ _)) = true := hc
     rw [Bool.and_eq_true] at hc'
     obtain ⟨μ, hw⟩ := Upd.holdsMem_eval hc'.2 hU
-    exact (EvalLawS.readCopySt_eval hf hw).2
+    exact (EvalLaw.readCopySt_eval hf hw).2
 
 /-! ## The laws, bundled -/
 
@@ -2000,7 +1999,7 @@ structure LawCov (C : Contract) (Γ : Ctx) (u : Srt) (t t' : Tm C Γ u) where
 
 /-- A term taclet onto a literal, where the update holds the storage write
 its left side reads back (`Upd.covers`). -/
-def LawCov.covered {t t' : Tm C Γ .val} (r : TermTacletS t t') (ht : t'.isLit = true) :
+def LawCov.covered {t t' : Tm C Γ .val} (r : TermTaclet t t') (ht : t'.isLit = true) :
     LawCov C Γ .val t t' where
   chk U := U.covers (t, t')
   fwd := Tm.evalRefinesAt_of_theq r.sound ht
@@ -2008,7 +2007,7 @@ def LawCov.covered {t t' : Tm C Γ .val} (r : TermTacletS t t') (ht : t'.isLit =
 
 /-- A frame or delete-value law, where the update holds its storage
 operation (`Upd.coversRef`). -/
-def LawCov.ref {t t' : Tm C Γ .val} {r : TermTacletS t t'} (hr : TermTacletS.RefLaw r) :
+def LawCov.ref {t t' : Tm C Γ .val} {r : TermTaclet t t'} (hr : TermTaclet.RefLaw r) :
     LawCov C Γ .val t t' where
   chk U := U.coversRef (t, t')
   fwd := hr.evalRefines
@@ -2022,7 +2021,7 @@ def LawCov.eqv {t t' : Tm C Γ .val} (h : Tm.sameBase t t' = true) : LawCov C Γ
 
 /-- A memory law, where the update holds the write it reads back
 (`Upd.coversEval`). -/
-def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLawS t t') : LawCov C Γ u t t' where
+def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') : LawCov C Γ u t t' where
   chk U := U.coversEval (t, t')
   fwd := r.sound
   back _ _ _ hc hU := r.back hc hU
@@ -2099,29 +2098,29 @@ example : LitLaw (C := StandardExample) (Γ := [])
     (.app2 (.binop .add .uint) (Tm.lit (.int 250)) (Tm.lit (.int 10))) (Tm.lit (.int 260)) :=
   .add_literals
 
-example : TermTacletS.RefLaw (TermTacletS.findOnSaveFrame (s := .app0 .storage) (p := aliceAge)
+example : TermTaclet.RefLaw (TermTaclet.findOnSaveFrame (s := .app0 .storage) (p := aliceAge)
     (q := aliceName) (v := .app1 .sval rfl (Tm.lit (.int 42)))) :=
   .findOnSaveFrame
 
-example : TermTacletS.RefLaw (TermTacletS.lenOnDelAtFrame (s := .app0 .storage) (q := aliceAge)
+example : TermTaclet.RefLaw (TermTaclet.lenOnDelAtFrame (s := .app0 .storage) (q := aliceAge)
     (p := .app0 (.root "values"))) :=
   .lenOnDelAtFrame
 
-example : EvalLawS (Tm.app2 .read added (.app2 .mat fresh (Tm.lit (.int 0))))
+example : EvalLaw (Tm.app2 .read added (.app2 .mat fresh (Tm.lit (.int 0))))
     (Tm.lit (PrimTy.default .uint)) :=
   .readAddEqual
 
-example : EvalLawS (Tm.app2 .read (.app1 (.addM uints) rfl added) (.app2 .mat fresh (Tm.lit (.int 0))))
+example : EvalLaw (Tm.app2 .read (.app1 (.addM uints) rfl added) (.app2 .mat fresh (Tm.lit (.int 0))))
     (Tm.app2 .read added (.app2 .mat fresh (Tm.lit (.int 0)))) :=
   .readAddDifferent
 
 example (v : Tm StandardExample [] .mv) :
-    EvalLawS (Tm.app2 .read (.app3 .write (.app0 .memory) (.app1 (.mfield "a") rfl fresh) v)
+    EvalLaw (Tm.app2 .read (.app3 .write (.app0 .memory) (.app1 (.mfield "a") rfl fresh) v)
       (.app1 (.mfield "b") rfl fresh))
       (Tm.app2 .read (.app0 .memory) (.app1 (.mfield "b") rfl fresh)) :=
   .readWriteDifferent
 
-example : EvalLawS (Tm.app2 .read (.app3 .write (.app0 .memory) (.app2 .mat fresh (Tm.lit (.int 0)))
+example : EvalLaw (Tm.app2 .read (.app3 .write (.app0 .memory) (.app2 .mat fresh (Tm.lit (.int 0)))
       (.app1 .mval rfl (Tm.lit (.int 1))))
       (.app2 .mat fresh (Tm.lit (.int 1))))
       (Tm.app2 .read (.app0 .memory) (.app2 .mat fresh (Tm.lit (.int 1)))) :=

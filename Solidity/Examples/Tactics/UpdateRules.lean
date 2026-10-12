@@ -7,13 +7,13 @@ import Solidity.Calculus.RewriteSyntax
 # Update simplification: one update instead of a stack
 
 Symbolic execution leaves one update per terminal rule in front of the
-postcondition; KeY merges them as it goes (`Calculus/NFmlUpdateRules.lean`,
+postcondition; KeY merges them as it goes (`Calculus/UpdRuleScoped.lean`,
 mini-solkey's update examples).  Here the same derivation is shown
 rule by rule with `sol_upd`, all at once with `sol_merge` on `⊨`, and with
 `refine merge rfl ?_`/`refine simplify ?_` on `⊢`.  The goals are under the box: a
-leaf is closed on its scoped form (`sol_leaf`, the scoped `sol_close`), read
-on the erased state (`Calculus/CloseScoped.lean`, `docs/intrinsic.md`, "What
-is left"), where a write under the diamond may fail.
+leaf is closed on its scoped form (`sol_leaf`, the scoped `sol_close`,
+`Calculus/CloseScoped.lean`), its storage read untyped (`docs/intrinsic.md`,
+"What is left"), where a write under the diamond may fail.
 
 The formulas read scoped (`open scoped Solidity.Scoped`), and so do the
 rules: `sol_upd` and `sol_merge` rewrite the scoped leaf itself

@@ -689,13 +689,13 @@ example : dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 4
 /-- `findOnSave`, twice under one name. -/
 theorem Laws.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
     {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
-    TermTacletS tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
+    TermTaclet tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 @[inherit_doc Laws.readBack]
 theorem Laws'.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
     {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
-    TermTacletS tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
+    TermTaclet tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 -- Two laws by one name: the arrow says so rather than pick one.

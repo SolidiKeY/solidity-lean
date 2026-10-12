@@ -2,7 +2,7 @@ import Solidity.Calculus.Decide
 import Solidity.Calculus.Logic
 import Solidity.Calculus.FirstOrder
 import Solidity.Semantics.StateErase
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 
 /-!
 # Closing a reduction by its terms: `LFml.syn`

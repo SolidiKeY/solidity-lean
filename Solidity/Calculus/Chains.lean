@@ -555,11 +555,11 @@ def lawUpdCands (C : Expr) (c : Lean.Name) (evalLaw : Bool) (φ : Expr) (scopes 
   let is := is.filter fun (t, _, _) => keep t
   if is.isEmpty then return (#[], failed)
   let refCtor? :=
-    if c == ``TermTacletS.findOnSaveFrame then some ``TermTacletS.RefLaw.findOnSaveFrame
-    else if c == ``TermTacletS.findOnDelAtValue then some ``TermTacletS.RefLaw.findOnDelAtValue
-    else if c == ``TermTacletS.findOnDelAtFrame then some ``TermTacletS.RefLaw.findOnDelAtFrame
-    else if c == ``TermTacletS.lenOnSaveFrame then some ``TermTacletS.RefLaw.lenOnSaveFrame
-    else if c == ``TermTacletS.lenOnDelAtFrame then some ``TermTacletS.RefLaw.lenOnDelAtFrame
+    if c == ``TermTaclet.findOnSaveFrame then some ``TermTaclet.RefLaw.findOnSaveFrame
+    else if c == ``TermTaclet.findOnDelAtValue then some ``TermTaclet.RefLaw.findOnDelAtValue
+    else if c == ``TermTaclet.findOnDelAtFrame then some ``TermTaclet.RefLaw.findOnDelAtFrame
+    else if c == ``TermTaclet.lenOnSaveFrame then some ``TermTaclet.RefLaw.lenOnSaveFrame
+    else if c == ``TermTaclet.lenOnDelAtFrame then some ``TermTaclet.RefLaw.lenOnDelAtFrame
     else none
   let mut out := #[]
   for (t, t', pf) in is do
@@ -614,7 +614,7 @@ order they are tried: `applyOnRigid` at each update of the spine, along the
 skeleton of the formula under it; `concrete` below each number of updates; a
 literal law at each instance (found among the line's closed terms, as
 past the program) in each update's right-hand sides; a term taclet onto a literal
-in each box update's, its scoped twin (`TermTacletS`, `scopedLaw?`) matched
+in each box update's, its scoped twin (`TermTaclet`, `scopedLaw?`) matched
 against the line's closed terms read at the empty scope
 (`Tm.closedNilVals`); a law in the equations along the
 skeleton below each number of updates (`FmlRw.litEq`, `FmlRw.lawEq`);
