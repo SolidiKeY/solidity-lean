@@ -10,30 +10,36 @@ leaves leaves `Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
 by the elaborators below, which read it with `close_rw_s`
 (`Calculus/Close.lean` declares the syntax and the simp sets).
 
-**The leaf as the closer reads it.**  `holds` asks an update's rest of every
-typed state that erases to where the update ends, with a heap typing that
-extends the one before (`Calculus/Logic.lean`).  Read as it stands, each
-update leaves a quantifier over typed states and an equation on their
-erasure, which `simp` can only use in context: three times the work of the
-erased leaf.  `sol_close_unwrap` therefore first takes the leaf to
-`holdsE`, what it says of the erased state (`valid_of_holdsE`,
-`holds_of_holdsE`): an update's rest is read where the update ends, a
-hidden binder over the erased values of its type, a negation and a
-precondition only of a first-order formula (`fo`, where the two readings
-agree, `holds_iff_holdsE`).  This is one way, and as strong: the binders still range over the values of
-their types where the type is primitive (decision 82): a parameter
-(`∀ uint a`) and a hidden binder of a value type (`LTy.forallE`) range over
-`PrimTy.Denote`, a `uint` over `[0, 2²⁵⁶)` (`forall_uint`).
+**The leaf as the closer reads it**: `holds` itself, over the typed state
+(W9.7.2; the erased reading `holdsE` is gone).  A term reads the state's
+global part (`State.globE`) and its locals by position (`State.loc`, a
+stack of `Locs.push`es over the root state's).  An update is computed on
+the state it is applied in (`Upd.applyV`: its global part and its locals'
+values), and its rest is read in every typed state it lands on
+(`CloseS.holds_upd`, from `Upd.afterT_applyV`): `LandedAll H g ℓ`, the
+states `Landed H g ℓ` whose type carries what they read, so a plain rewrite
+reads them (`Landed.globE_eq`, `Landed.loc_eq`) with no contextual pass and
+no hypothesis.  Three choices keep it as cheap as the erased reading was:
+the rest is a constant until the update's result is known
+(`LandedRest`, else `simp` reads it twice, first with the result
+abstract); the binder is a constant, not a `∀`, so no binder lemma is
+tried at it (`LandedAll`, opened at the end, `landedAll_def`); and a landed
+state names the heap typing before, not the state, so a hidden binder
+pushed before an update is not read after it (`H_push`).  A negation and a
+precondition read as they stand (`holds` is exact).  The binders range
+over the values of their types: a parameter (`∀ uint a`) and a hidden
+binder of a value type over `PrimTy.Denote`, a `uint` over `[0, 2²⁵⁶)`
+(`forall_uint`); a hidden binder of a reference type over the typed
+references, read erased (`LTy.TDenote.erase`).
 
-**The set** states lemmas about `Calculus/Logic.lean`'s readings only
-(`Tm.eval`, `Tm.denote`, `Upd.apply`, `UpdElem.write`, `Rhs.eval`) and the
-erased state's operations (`EState.get`, `push`, `setLocal`, `withGlob`,
-`glob`, `drop`, `thin`, `anon`), never its fields, so that the state can
-change underneath (W9.6) without touching the tactic.  A term is read
-constructor by constructor (each equation follows from the symbol's,
-`Calculus/CloseLemmas.lean`); the
-locals sit in a stack of `push`es, which `setLocal`, `drop` and `thin`
-reach by position.  What the interpreter knows is `close_rw`'s, shared.
+**The set** states lemmas about `Calculus/Lands.lean`'s typed readers
+only (`Tm.evalT`, `Tm.denoteT`, `Rhs.evalT`, `Upd.applyV`, `UpdElem.globT`)
+and the typed state's operations as `State.loc`/`State.globE` read them
+(`push`, `setLocal`, `anon`, `havoc`, `drop`), never its fields.  A term is
+read constructor by constructor (each equation follows from the symbol's,
+`Calculus/CloseLemmas.lean`).  What the interpreter knows is `close_rw`'s,
+shared; its write-naming lemmas are restated without the locals' fact
+(`CloseS.wp_box_saveStorage`, …), which no typed leaf reads.
 -/
 
 namespace Solidity
@@ -42,9 +48,6 @@ open Semantics SemanticsProperties
 
 variable {C : Contract}
 
-/-- A local of the erased state, by its position. -/
-def EState.get {Γ : Ctx} {t : LTy} (σ : EState C Γ) (i : Idx Γ t) : t.Denote C := Env.get i σ.env
-
 /-- A `Res` of an optional value: an unset local reverts. -/
 def Close.optRes {α : Type} : Option α → Res α
   | some a => .ok a
@@ -52,302 +55,392 @@ def Close.optRes {α : Type} : Option α → Res α
 
 namespace CloseS
 
-/-! ## The erased state's operations
+/-! ## The typed state's parts
 
-A leaf's state is the typed state's erasure with what its updates did: a
-stack of `push`es over `withGlob`, which `setLocal`, `drop` and `thin`
-reach by position. -/
+A leaf's state is a typed state, read by its global part (`State.globE`)
+and its locals by position (`State.getE`); after an update, a typed state
+it lands on, of which those two are known (`Upd.Lands`).  The pushes, sets
+and havocs are `Calculus/Lands.lean`'s (`State.getE_push_here`, …). -/
 
-section EStateAPI
+section StateAPI
 
-variable {Γ : Ctx} {t t' : LTy}
+variable {Γ : Ctx}
 
-theorem get_push_here (σ : EState C Γ) (v : t.Denote C) : (σ.push v).get .here = v := rfl
-theorem get_push_there (σ : EState C Γ) (v : t.Denote C) (i : Idx Γ t') :
-    (σ.push v).get (.there i) = σ.get i := rfl
-theorem glob_push (σ : EState C Γ) (v : t.Denote C) : (σ.push v).glob = σ.glob := rfl
-theorem glob_withGlob (σ : EState C Γ) (g : Semantics.State) :
-    (σ.withGlob g).glob = { g with env := [] } := rfl
-theorem glob_env (σ : EState C Γ) : σ.glob.env = [] := rfl
-theorem withGlob_push (σ : EState C Γ) (v : t.Denote C) (g : Semantics.State) :
-    (σ.push v).withGlob g = (σ.withGlob g).push v := rfl
-theorem withGlob_withGlob (σ : EState C Γ) (g g' : Semantics.State) :
-    (σ.withGlob g).withGlob g' = σ.withGlob g' := rfl
-theorem setLocal_push_here (σ : EState C Γ) (w v : t.Denote C) :
-    (σ.push w).setLocal .here v = σ.push v := rfl
-theorem setLocal_push_there (σ : EState C Γ) (w : t.Denote C) (i : Idx Γ t') (v : t'.Denote C) :
-    (σ.push w).setLocal (.there i) v = (σ.setLocal i v).push w := rfl
-theorem drop_refl (σ : EState C Γ) : σ.drop .refl = σ := rfl
-theorem drop_push {Δ : Ctx} (h : Ext Γ Δ) (σ : EState C Δ) (v : t.Denote C) :
-    (σ.push v).drop (.push h) = σ.drop h := rfl
-theorem thin_refl (σ : EState C Γ) : σ.thin .refl = σ := rfl
-theorem thin_keep {Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) (v : t.Denote C) :
-    (σ.push v).thin (.keep h) = (σ.thin h).push v := rfl
-theorem thin_drop {Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) (v : t.Denote C) :
-    (σ.push v).thin (.drop h) = σ.thin h := rfl
-theorem anon_nil (σ : EState C Γ) (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
-    σ.anon [] b = σ := rfl
-theorem anon_cons (σ : EState C Γ) (x : (t : LTy) × Idx Γ t) (xs : List ((t : LTy) × Idx Γ t))
-    (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) :
-    σ.anon (x :: xs) b = (σ.setLocal x.2 (b x)).anon xs b := rfl
+/-! A typed state's locals are read as one function (`State.loc`), which a
+push, a set, a havoc and a pop rewrite to a `Locs` expression; a landed
+state's is the update's (`holds_upd`): one equation, not one a local. -/
 
+theorem loc_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).loc = σ.loc.push (LTy.TDenote.erase t v) := State.loc_push σ v
+theorem loc_setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
+    (σ.setLocal i v).loc = σ.loc.set i (LTy.TDenote.erase t v) := by
+  funext u j
+  by_cases h : i.toNat = j.toNat
+  · obtain rfl := Idx.ty_eq_of_toNat h
+    obtain rfl := Idx.toNat_inj i j h
+    rw [Locs.set_same]
+    exact State.getE_setLocal_same σ i v
+  · rw [Locs.set_ne _ _ _ h]
+    exact State.getE_setLocal_ne σ i j h v
+theorem loc_havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+    (σ.havoc st nt).loc = σ.loc := rfl
+theorem loc_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).loc = σ.loc.drop h :=
+  State.loc_drop h σ
+
+theorem globE_env (σ : State C Γ) : σ.globE.env = [] := rfl
 theorem optRes_some {α : Type} (a : α) : Close.optRes (some a) = .ok a := rfl
 theorem optRes_none {α : Type} : Close.optRes (none : Option α) = .error .revert := rfl
+theorem optRes_map_some {α β : Type} (f : α → β) (a : α) :
+    Close.optRes ((some a).map f) = .ok (f a) := rfl
 
-/-- The typed state's erasure after a loop body's `{anon(xs)}`. -/
-theorem anon_erase (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
-    (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C σ.H) :
-    (σ.anon xs b).erase = σ.erase.anon xs fun x => LTy.TDenote.erase x.1 (b x) := by
-  have key : ∀ (ys : List ((t : LTy) × Idx Γ t)) (e : TEnv C σ.H Γ),
-      (σ.withEnv (ys.foldl (fun e x => TEnv.set x.2 (b x) e) e)).erase =
-        ys.foldl (fun τ x => τ.setLocal x.2 (LTy.TDenote.erase x.1 (b x))) (σ.withEnv e).erase := by
-    intro ys
-    induction ys with
-    | nil => intro e; rfl
-    | cons x ys ih =>
-      intro e
-      rw [List.foldl_cons, List.foldl_cons, ih]
-      exact congrArg (fun τ => List.foldl _ τ ys) (State.setLocal_erase (σ.withEnv e) x.2 (b x))
-  exact key xs σ.env
+theorem erase_val {H : HTy} (p : PrimTy) (v : (LTy.val p).TDenote C H) :
+    LTy.TDenote.erase (.val p) v = PrimTy.erase (p := p) v := rfl
+theorem erase_alias {H : HTy} (R : RefTy) (v : (LTy.alias R).TDenote C H) :
+    LTy.TDenote.erase (C := C) (.alias R) v = v.map SRef.erase := rfl
+theorem erase_mem {H : HTy} (R : RefTy) (v : (LTy.mem R).TDenote C H) :
+    LTy.TDenote.erase (C := C) (.mem R) v = v.map (·.id) := rfl
+theorem erase_old {H : HTy} (v : LTy.old.TDenote C H) :
+    LTy.TDenote.erase (C := C) (H := H) .old v = Storage.erase (v : Storage C) := rfl
+theorem erase_oldNet {H : HTy} (v : LTy.oldNet.TDenote C H) :
+    LTy.TDenote.erase (C := C) (H := H) .oldNet v = v := rfl
 
-end EStateAPI
+end StateAPI
 
 /-! ## Terms, one constructor at a time
 
 Each as `close_rw`'s equation for the closer's term (`Calculus/Close.lean`),
-a local read by its position, a symbol on the global part (`EState.glob`). -/
+a local read by its position, a symbol on the global part (`State.globE`). -/
 
 section Terms
 
-variable {Γ : Ctx} (σ : EState C Γ)
+variable {Γ : Ctx} (σ : State C Γ)
 
 theorem eval_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
-    (Tm.pvV i : Tm C Γ .val).eval σ = .ok (σ.get i) :=
+    (Tm.pvV i : Tm C Γ .val).evalT σ = .ok (σ.loc _ i) :=
   rfl
 theorem eval_pvP {R : RefTy} (i : Idx Γ (.alias R)) :
-    (Tm.pvP i : Tm C Γ .path).eval σ = Close.optRes (σ.get i) := by
-  simp only [Tm.eval, aliasPath, EState.get]
-  split <;> rename_i h <;> simp only [h] <;> rfl
+    (Tm.pvP i : Tm C Γ .path).evalT σ = Close.optRes (σ.loc _ i) := by
+  show σ.aliasPathT i = _
+  unfold State.aliasPathT State.loc State.getE
+  generalize (TEnv.get i σ.env : Option (SRef C (.ref R))) = x
+  cases x <;> rfl
 theorem eval_pvS (i : Idx Γ .old) :
-    (Tm.pvS i : Tm C Γ .st).eval σ = .ok { σ.glob with storage := σ.get i } := rfl
+    (Tm.pvS i : Tm C Γ .st).evalT σ = .ok { σ.globE with storage := σ.loc _ i } := rfl
 theorem eval_pvI {R : RefTy} (i : Idx Γ (.mem R)) :
-    (Tm.pvI i : Tm C Γ .ident).eval σ = Close.optRes (σ.get i) := by
-  simp only [Tm.eval, memRef, EState.get]
-  split <;> rename_i h <;> simp only [h] <;> rfl
-theorem eval_netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) : (Tm.netOf i a).eval σ =
-    a.eval σ >>= Value.asInt >>= fun n => .ok (.int ((lookupBy n (σ.get i)).getD 0)) := by
-  simp only [Tm.eval, bind, Except.bind, EState.get]
-  cases a.eval σ <;> rfl
+    (Tm.pvI i : Tm C Γ .ident).evalT σ = Close.optRes (σ.loc _ i) := by
+  show σ.memRefT i = _
+  unfold State.memRefT State.loc State.getE
+  generalize (TEnv.get i σ.env : Option (HRef σ.H R)) = x
+  cases x <;> rfl
+theorem eval_netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) : (Tm.netOf i a).evalT σ =
+    a.evalT σ >>= Value.asInt >>= fun n => .ok (.int ((lookupBy n (σ.loc _ i)).getD 0)) := by
+  simp only [Tm.evalT, bind, Except.bind]
+  cases a.evalT σ <;> rfl
 
-theorem eval_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).eval σ = .ok v := rfl
+theorem eval_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).evalT σ = .ok v := rfl
 theorem eval_env (k : EnvKey) :
-    (Tm.app0 (.env k) : Tm C Γ .val).eval σ = .ok (.int (σ.glob.envVal k)) := rfl
-theorem eval_root (r : Name) : (Tm.app0 (.root r) : Tm C Γ .path).eval σ = .ok (r, []) := rfl
-theorem eval_storage : (Tm.app0 .storage : Tm C Γ .st).eval σ = .ok σ.glob := rfl
-theorem eval_memory : (Tm.app0 .memory : Tm C Γ .mem).eval σ = .ok σ.glob := rfl
-theorem eval_mtSt (vs : List (Name × Ty)) : (Tm.app0 (.mtSt vs) : Tm C Γ .st).eval σ =
-    .ok { σ.glob with storage := vs.map fun (n, T) => (n, defaultForTy T) } := rfl
+    (Tm.app0 (.env k) : Tm C Γ .val).evalT σ = .ok (.int (σ.globE.envVal k)) := rfl
+theorem eval_root (r : Name) : (Tm.app0 (.root r) : Tm C Γ .path).evalT σ = .ok (r, []) := rfl
+theorem eval_storage : (Tm.app0 .storage : Tm C Γ .st).evalT σ = .ok σ.globE := rfl
+theorem eval_memory : (Tm.app0 .memory : Tm C Γ .mem).evalT σ = .ok σ.globE := rfl
+theorem eval_mtSt (vs : List (Name × Ty)) : (Tm.app0 (.mtSt vs) : Tm C Γ .st).evalT σ =
+    .ok { σ.globE with storage := vs.map fun (n, T) => (n, defaultForTy T) } := rfl
 
 theorem eval_unop (op : UnOp) (p : PrimTy) (h : (Op1.unop op p).named = false) (a : Tm C Γ .val) :
-    (Tm.app1 (.unop op p) h a).eval σ = a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p :=
+    (Tm.app1 (.unop op p) h a).evalT σ =
+      a.evalT σ >>= fun x => applyUnOp op x >>= unopCheck op p :=
   rfl
-theorem eval_net (h : Op1.net.named = false) (a : Tm C Γ .val) : (Tm.app1 .net h a).eval σ =
-    a.eval σ >>= Value.asInt >>= fun n => .ok (.int (σ.glob.getNet n)) :=
+theorem eval_net (h : Op1.net.named = false) (a : Tm C Γ .val) : (Tm.app1 .net h a).evalT σ =
+    a.evalT σ >>= Value.asInt >>= fun n => .ok (.int (σ.globE.getNet n)) :=
   Close.Op1.eval_net _ _
 theorem eval_field (f : Name) (h : (Op1.field f).named = false) (p : Tm C Γ .path) :
-    (Tm.app1 (.field f) h p).eval σ = p.eval σ >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) := rfl
-theorem eval_next (h : Op1.next.named = false) (p : Tm C Γ .path) : (Tm.app1 .next h p).eval σ =
-    p.eval σ >>= fun rs => σ.glob.findStorage rs.1 rs.2 >>= Close.pastEnd rs :=
+    (Tm.app1 (.field f) h p).evalT σ = p.evalT σ >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) :=
+  rfl
+theorem eval_next (h : Op1.next.named = false) (p : Tm C Γ .path) : (Tm.app1 .next h p).evalT σ =
+    p.evalT σ >>= fun rs => σ.globE.findStorage rs.1 rs.2 >>= Close.pastEnd rs :=
   Close.Op1.eval_next _ _
 theorem eval_sval (h : Op1.sval.named = false) (t : Tm C Γ .val) :
-    (Tm.app1 .sval h t).eval σ = t.eval σ >>= fun v => .ok v.toSVal := rfl
+    (Tm.app1 .sval h t).evalT σ = t.evalT σ >>= fun v => .ok v.toSVal := rfl
 theorem eval_alloc (R : RefTy) (h : (Op1.alloc R).named = false) (m : Tm C Γ .mem) :
-    (Tm.app1 (.alloc R) h m).eval σ = m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 :=
+    (Tm.app1 (.alloc R) h m).evalT σ =
+      m.evalT σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 :=
   rfl
 theorem eval_mfield (f : Name) (h : (Op1.mfield f).named = false) (i : Tm C Γ .ident) :
-    (Tm.app1 (.mfield f) h i).eval σ = i.eval σ >>= fun id => .ok (.memoryField id f) := rfl
+    (Tm.app1 (.mfield f) h i).evalT σ = i.evalT σ >>= fun id => .ok (.memoryField id f) := rfl
 theorem eval_addM (R : RefTy) (h : (Op1.addM R).named = false) (m : Tm C Γ .mem) :
-    (Tm.app1 (.addM R) h m).eval σ = m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 :=
+    (Tm.app1 (.addM R) h m).evalT σ =
+      m.evalT σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 :=
   rfl
 theorem eval_mval (h : Op1.mval.named = false) (t : Tm C Γ .val) :
-    (Tm.app1 .mval h t).eval σ = t.eval σ >>= fun v => .ok v.toMVal := rfl
+    (Tm.app1 .mval h t).evalT σ = t.evalT σ >>= fun v => .ok v.toMVal := rfl
 theorem eval_ref (h : Op1.ref.named = false) (i : Tm C Γ .ident) :
-    (Tm.app1 .ref h i).eval σ = i.eval σ >>= fun id => .ok (.ref id) := rfl
+    (Tm.app1 .ref h i).evalT σ = i.evalT σ >>= fun id => .ok (.ref id) := rfl
 
 theorem eval_binop (op : BinOp) (p : PrimTy) (a b : Tm C Γ .val) :
-    (Tm.app2 (.binop op p) a b).eval σ = a.eval σ >>= fun x => evalBinop op p x (b.eval σ) := rfl
-theorem eval_find (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .find s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= SVal.asValue := rfl
-theorem eval_len (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .len s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= Close.arrLen :=
+    (Tm.app2 (.binop op p) a b).evalT σ = a.evalT σ >>= fun x => evalBinop op p x (b.evalT σ) :=
+  rfl
+theorem eval_find (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .find s p).evalT σ =
+    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= SVal.asValue := rfl
+theorem eval_len (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .len s p).evalT σ =
+    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= Close.arrLen :=
   Close.Op2.eval_len _ _ _
-theorem eval_read (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .read m a).eval σ =
-    m.eval σ >>= fun τ => a.eval σ >>= fun addr => Close.readVal τ addr := rfl
-theorem eval_at (p : Tm C Γ .path) (i : Tm C Γ .val) : (Tm.app2 .at p i).eval σ =
-    p.eval σ >>= fun rs => i.eval σ >>= Value.asInt >>= fun k =>
-      σ.glob.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) :=
+theorem eval_read (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .read m a).evalT σ =
+    m.evalT σ >>= fun τ => a.evalT σ >>= fun addr => Close.readVal τ addr := rfl
+theorem eval_at (p : Tm C Γ .path) (i : Tm C Γ .val) : (Tm.app2 .at p i).evalT σ =
+    p.evalT σ >>= fun rs => i.evalT σ >>= Value.asInt >>= fun k =>
+      σ.globE.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) :=
   Close.Op2.eval_at _ _ _
-theorem eval_delAt (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .delAt s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
+theorem eval_delAt (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .delAt s p).evalT σ =
+    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
       τ.saveStorage rs.1 rs.2 cur.defaultOf := rfl
 theorem eval_pushSlot (E : Ty) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 (.pushSlot E) s p).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+    (Tm.app2 (.pushSlot E) s p).evalT σ = s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= Close.pushOn τ E rs.1 rs.2 pure :=
   Close.Op2.eval_pushSlot _ _ _ _
-theorem eval_pop (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .pop s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+theorem eval_pop (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .pop s p).evalT σ =
+    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= Close.popOn τ false rs.1 rs.2 :=
   Close.Op2.eval_pop _ _ _
-theorem eval_shrink (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .shrink s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+theorem eval_shrink (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .shrink s p).evalT σ =
+    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= Close.popOn τ true rs.1 rs.2 :=
   Close.Op2.eval_shrink _ _ _
-theorem eval_sfind (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .sfind s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 := rfl
-theorem eval_copyMem (m : Tm C Γ .mem) (i : Tm C Γ .ident) : (Tm.app2 .copyMem m i).eval σ =
-    m.eval σ >>= fun τ => i.eval σ >>= fun id => copyMem τ (.ref id) := rfl
-theorem eval_iread (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .iread m a).eval σ =
-    m.eval σ >>= fun τ => a.eval σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
-theorem eval_copy (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copy m v).eval σ =
-    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
-theorem eval_mat (i : Tm C Γ .ident) (k : Tm C Γ .val) : (Tm.app2 .mat i k).eval σ =
-    i.eval σ >>= fun id => k.eval σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) :=
+theorem eval_sfind (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .sfind s p).evalT σ =
+    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 := rfl
+theorem eval_copyMem (m : Tm C Γ .mem) (i : Tm C Γ .ident) : (Tm.app2 .copyMem m i).evalT σ =
+    m.evalT σ >>= fun τ => i.evalT σ >>= fun id => copyMem τ (.ref id) := rfl
+theorem eval_iread (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .iread m a).evalT σ =
+    m.evalT σ >>= fun τ => a.evalT σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
+theorem eval_copy (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copy m v).evalT σ =
+    v.evalT σ >>= fun sv => m.evalT σ >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
+theorem eval_mat (i : Tm C Γ .ident) (k : Tm C Γ .val) : (Tm.app2 .mat i k).evalT σ =
+    i.evalT σ >>= fun id => k.evalT σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) :=
   Close.Op2.eval_mat _ _ _
-theorem eval_copySt (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copySt m v).eval σ =
-    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
+theorem eval_copySt (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copySt m v).evalT σ =
+    v.evalT σ >>= fun sv => m.evalT σ >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
 
-theorem eval_ite (c a b : Tm C Γ .val) : (Tm.app3 .ite c a b).eval σ =
-    c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ) := rfl
+theorem eval_ite (c a b : Tm C Γ .val) : (Tm.app3 .ite c a b).evalT σ =
+    c.evalT σ >>= fun cv => pickBranch cv (a.evalT σ) (b.evalT σ) := rfl
 theorem eval_save (s : Tm C Γ .st) (p : Tm C Γ .path) (h : Op1.sval.named = false)
-    (t : Tm C Γ .val) : (Tm.app3 .save s p (.app1 .sval h t)).eval σ =
-    t.eval σ >>= fun x => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+    (t : Tm C Γ .val) : (Tm.app3 .save s p (.app1 .sval h t)).evalT σ =
+    t.evalT σ >>= fun x => s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.saveStorage rs.1 rs.2 x.toSVal :=
   Close.Op3.eval_save_val _ _ _ _
 theorem eval_save_find (s s' : Tm C Γ .st) (p p' : Tm C Γ .path) :
-    (Tm.app3 .save s p (.app2 .sfind s' p')).eval σ =
-    (Tm.app2 .sfind s' p').eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+    (Tm.app3 .save s p (.app2 .sfind s' p')).evalT σ =
+    (Tm.app2 .sfind s' p').evalT σ >>= fun sv => s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) :=
   Close.Op3.eval_save_find _ _ _ _ _
 theorem eval_save_copyMem (s : Tm C Γ .st) (p : Tm C Γ .path) (m : Tm C Γ .mem)
-    (i : Tm C Γ .ident) : (Tm.app3 .save s p (.app2 .copyMem m i)).eval σ =
-    (Tm.app2 .copyMem m i).eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+    (i : Tm C Γ .ident) : (Tm.app3 .save s p (.app2 .copyMem m i)).evalT σ =
+    (Tm.app2 .copyMem m i).evalT σ >>= fun sv => s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) :=
   Close.Op3.eval_save_copyMem _ _ _ _ _
 theorem eval_push (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) :
-    (Tm.app3 .push s p v).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
+    (Tm.app3 .push s p v).evalT σ = s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>=
-        Close.pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ >>= fun sv => pure sv.strip) :=
+        Close.pushOn τ .uint rs.1 rs.2 (fun _ => v.evalT σ >>= fun sv => pure sv.strip) :=
   Close.Op3.eval_push _ _ _ _
 theorem eval_write (m : Tm C Γ .mem) (a : Tm C Γ .addr) (v : Tm C Γ .mv) :
-    (Tm.app3 .write m a v).eval σ =
-    v.eval σ >>= fun mv => m.eval σ >>= fun τ => a.eval σ >>= fun addr => writeAddr τ mv addr :=
+    (Tm.app3 .write m a v).evalT σ =
+    v.evalT σ >>= fun mv => m.evalT σ >>= fun τ => a.evalT σ >>= fun addr => writeAddr τ mv addr :=
   rfl
 
-theorem denote_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).denote σ = .prim v := rfl
+theorem denote_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).denoteT σ = .prim v := rfl
 theorem denote_env (k : EnvKey) :
-    (Tm.app0 (.env k) : Tm C Γ .val).denote σ = .prim (.int (σ.glob.envVal k)) := rfl
+    (Tm.app0 (.env k) : Tm C Γ .val).denoteT σ = .prim (.int (σ.globE.envVal k)) := rfl
 theorem denote_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
-    (Tm.pvV i : Tm C Γ .val).denote σ = .prim (σ.get i) := rfl
+    (Tm.pvV i : Tm C Γ .val).denoteT σ = .prim (σ.loc _ i) := rfl
 
 end Terms
 
-/-! ## Updates: right-hand sides read in the state before, written into the
-state so far -/
+/-! ## Updates: the global part and the locals' values
+
+An update is computed on the state it is applied in (`Upd.applyV`, below
+element by element, every right-hand side read in the state before): its
+global part and the values it leaves in the locals, a `Locs` stack. -/
 
 section Updates
 
-variable {Γ Δ : Ctx} (σ₀ : EState C Γ)
+variable {Γ Δ : Ctx} (σ₀ : State C Γ)
 
-theorem rhs_val {p : PrimTy} (t : Tm C Γ .val) : (Rhs.val (p := p) t).eval σ₀ = t.eval σ₀ := rfl
+theorem rhs_val {p : PrimTy} (t : Tm C Γ .val) : (Rhs.val (p := p) t).evalT σ₀ = t.evalT σ₀ := rfl
 theorem rhs_path {R : RefTy} (p : Tm C Γ .path) :
-    (Rhs.path (R := R) p).eval σ₀ = p.eval σ₀ >>= fun r => .ok (some r) := rfl
-theorem rhs_unset {R : RefTy} : (Rhs.unset (R := R) : Rhs C Γ _).eval σ₀ = .ok none := rfl
+    (Rhs.path (R := R) p).evalT σ₀ = p.evalT σ₀ >>= fun r => .ok (some r) := rfl
+theorem rhs_unset {R : RefTy} : (Rhs.unset (R := R) : Rhs C Γ _).evalT σ₀ = .ok none := rfl
 theorem rhs_mref {R : RefTy} (i : Tm C Γ .ident) :
-    (Rhs.mref (R := R) i).eval σ₀ = i.eval σ₀ >>= fun id => .ok (some id) := rfl
-theorem rhs_store (s : Tm C Γ .st) : (Rhs.store s).eval σ₀ = s.eval σ₀ >>= fun g => .ok g.storage :=
-  rfl
-theorem rhs_saveNet : (Rhs.saveNet : Rhs C Γ _).eval σ₀ = .ok σ₀.glob.net := rfl
-theorem rhs_saveNetMt : (Rhs.saveNetMt : Rhs C Γ _).eval σ₀ = .ok [] := rfl
+    (Rhs.mref (R := R) i).evalT σ₀ = i.evalT σ₀ >>= fun id => .ok (some id) := rfl
+theorem rhs_store (s : Tm C Γ .st) :
+    (Rhs.store s).evalT σ₀ = s.evalT σ₀ >>= fun g => .ok g.storage := rfl
+theorem rhs_saveNet : (Rhs.saveNet : Rhs C Γ _).evalT σ₀ = .ok σ₀.globE.net := rfl
+theorem rhs_saveNetMt : (Rhs.saveNetMt : Rhs C Γ _).evalT σ₀ = .ok [] := rfl
 
-theorem write_local {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) (τ : EState C Δ) :
-    (UpdElem.local i r).write σ₀ τ = r.eval σ₀ >>= fun v => .ok (τ.setLocal i v) := rfl
-theorem write_storage (s : Tm C Γ .st) (τ : EState C Δ) :
-    (UpdElem.storage s : UpdElem C Γ Δ).write σ₀ τ =
-      s.eval σ₀ >>= fun g => .ok (τ.withGlob { τ.glob with storage := g.storage }) := rfl
-theorem write_memory (m : Tm C Γ .mem) (τ : EState C Δ) :
-    (UpdElem.memory m : UpdElem C Γ Δ).write σ₀ τ =
-      m.eval σ₀ >>= fun μ => .ok (τ.withGlob { τ.glob with heap := μ.heap, nextId := μ.nextId }) :=
-  rfl
-theorem write_selfBalance (op : IntOp) (a : Tm C Γ .val) (τ : EState C Δ) :
-    (UpdElem.selfBalance op a : UpdElem C Γ Δ).write σ₀ τ = a.eval σ₀ >>= Value.asInt >>= fun amt =>
-      .ok (τ.withGlob { τ.glob with selfBalance := op.apply σ₀.glob.selfBalance amt }) := by
-  simp only [UpdElem.write, bind, Except.bind]
-  cases a.eval σ₀ <;> rfl
-theorem write_net (r : Tm C Γ .val) (op : IntOp) (a : Tm C Γ .val) (τ : EState C Δ) :
-    (UpdElem.net r op a : UpdElem C Γ Δ).write σ₀ τ =
-      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        .ok (τ.withGlob { τ.glob with
-          net := setBy addr (op.apply (τ.glob.getNet addr) amt) τ.glob.net }) := by
-  simp only [UpdElem.write, bind, Except.bind]
-  cases r.eval σ₀ with
+theorem glob_storage (s : Tm C Γ .st) (g : Semantics.State) :
+    (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g =
+      s.evalT σ₀ >>= fun g' => .ok { g with storage := g'.storage } := rfl
+theorem glob_memory (m : Tm C Γ .mem) (g : Semantics.State) :
+    (UpdElem.memory m : UpdElem C Γ Δ).globT σ₀ g =
+      m.evalT σ₀ >>= fun μ => .ok { g with heap := μ.heap, nextId := μ.nextId } := rfl
+theorem glob_selfBalance (op : IntOp) (a : Tm C Γ .val) (g : Semantics.State) :
+    (UpdElem.selfBalance op a : UpdElem C Γ Δ).globT σ₀ g = a.evalT σ₀ >>= Value.asInt >>=
+      fun amt => .ok { g with selfBalance := op.apply σ₀.globE.selfBalance amt } := by
+  simp only [UpdElem.globT, bind, Except.bind]
+  cases a.evalT σ₀ <;> rfl
+theorem glob_net (r : Tm C Γ .val) (op : IntOp) (a : Tm C Γ .val) (g : Semantics.State) :
+    (UpdElem.net r op a : UpdElem C Γ Δ).globT σ₀ g =
+      r.evalT σ₀ >>= Value.asInt >>= fun addr => a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+        .ok { g with net := setBy addr (op.apply (g.getNet addr) amt) g.net } := by
+  simp only [UpdElem.globT, bind, Except.bind]
+  cases r.evalT σ₀ with
   | error => rfl
   | ok v =>
     cases v with
     | bool b => rfl
     | int addr =>
-      cases a.eval σ₀ with
+      cases a.evalT σ₀ with
       | error => rfl
       | ok w => cases w <;> rfl
-theorem write_pay (r a : Tm C Γ .val) (τ : EState C Δ) :
-    (UpdElem.pay r a : UpdElem C Γ Δ).write σ₀ τ =
-      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
+theorem glob_pay (r a : Tm C Γ .val) (g : Semantics.State) :
+    (UpdElem.pay r a : UpdElem C Γ Δ).globT σ₀ g =
+      r.evalT σ₀ >>= Value.asInt >>= fun addr => a.evalT σ₀ >>= Value.asInt >>= fun amt =>
         if amt < 0 then .error .revert
-        else .ok (τ.withGlob { τ.glob with
-          net := if addr = σ₀.glob.tx.selfAddress then τ.glob.net
-            else setBy addr (τ.glob.getNet addr - amt) τ.glob.net }) := by
-  simp only [UpdElem.write, bind, Except.bind]
-  cases r.eval σ₀ with
+        else .ok { g with
+          net := if addr = σ₀.globE.tx.selfAddress then g.net
+            else setBy addr (g.getNet addr - amt) g.net } := by
+  simp only [UpdElem.globT, bind, Except.bind]
+  cases r.evalT σ₀ with
   | error => rfl
   | ok v =>
     cases v with
     | bool b => rfl
     | int addr =>
-      cases a.eval σ₀ with
+      cases a.evalT σ₀ with
       | error => rfl
       | ok w => cases w <;> rfl
-theorem write_netMt (r a : Tm C Γ .val) (τ : EState C Δ) :
-    (UpdElem.netMt r a : UpdElem C Γ Δ).write σ₀ τ =
-      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        .ok (τ.withGlob { τ.glob with net := [(addr, amt)] }) := by
-  simp only [UpdElem.write, bind, Except.bind]
-  cases r.eval σ₀ with
+theorem glob_netMt (r a : Tm C Γ .val) (g : Semantics.State) :
+    (UpdElem.netMt r a : UpdElem C Γ Δ).globT σ₀ g =
+      r.evalT σ₀ >>= Value.asInt >>= fun addr => a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+        .ok { g with net := [(addr, amt)] } := by
+  simp only [UpdElem.globT, bind, Except.bind]
+  cases r.evalT σ₀ with
   | error => rfl
   | ok v =>
     cases v with
     | bool b => rfl
     | int addr =>
-      cases a.eval σ₀ with
+      cases a.evalT σ₀ with
       | error => rfl
       | ok w => cases w <;> rfl
-theorem write_setBalance (a : Tm C Γ .val) (τ : EState C Δ) :
-    (UpdElem.setBalance a : UpdElem C Γ Δ).write σ₀ τ = a.eval σ₀ >>= Value.asInt >>= fun amt =>
-      .ok (τ.withGlob { τ.glob with selfBalance := amt }) := by
-  simp only [UpdElem.write, bind, Except.bind]
-  cases a.eval σ₀ <;> rfl
+theorem glob_setBalance (a : Tm C Γ .val) (g : Semantics.State) :
+    (UpdElem.setBalance a : UpdElem C Γ Δ).globT σ₀ g = a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+      .ok { g with selfBalance := amt } := by
+  simp only [UpdElem.globT, bind, Except.bind]
+  cases a.evalT σ₀ <;> rfl
 
-theorem apply_nil : (Upd.nil : Upd C Γ Γ).apply σ₀ = .ok σ₀ := rfl
-theorem apply_snoc (U : Upd C Γ Δ) (e : UpdElem C Γ Δ) :
-    (U.snoc e).apply σ₀ = U.apply σ₀ >>= fun τ => e.write σ₀ τ := rfl
-theorem apply_decl {t : LTy} (U : Upd C Γ Δ) (x : Var) (r : Rhs C Γ t) :
-    (U.decl x r).apply σ₀ = U.apply σ₀ >>= fun τ => r.eval σ₀ >>= fun v => .ok (τ.push v) := rfl
-theorem apply_pop {Δ' : Ctx} (U : Upd C Γ Δ) (h : Ext Δ' Δ) :
-    (U.pop h).apply σ₀ = U.apply σ₀ >>= fun τ => .ok (τ.drop h) := by
-  simp only [Upd.apply, bind, Except.bind]
-  cases U.apply σ₀ <;> rfl
-theorem apply_drop {Δ' : Ctx} (U : Upd C Γ Δ) (h : Thin Δ' Δ) :
-    (U.drop h).apply σ₀ = U.apply σ₀ >>= fun τ => .ok (τ.thin h) := by
-  simp only [Upd.apply, bind, Except.bind]
-  cases U.apply σ₀ <;> rfl
+theorem applyV_nil : (Upd.nil : Upd C Γ Γ).applyV σ₀ = .ok (σ₀.globE, σ₀.loc) := rfl
+theorem applyV_snoc (U : Upd C Γ Δ) (e : UpdElem C Γ Δ) :
+    (U.snoc e).applyV σ₀ = U.applyV σ₀ >>= fun p => e.applyV σ₀ p.1 p.2 := rfl
+theorem applyV_decl {t : LTy} (U : Upd C Γ Δ) (x : Var) (r : Rhs C Γ t) :
+    (U.decl x r).applyV σ₀ = U.applyV σ₀ >>= fun p => r.evalT σ₀ >>= fun v => .ok (p.1, p.2.push v) :=
+  rfl
+theorem applyV_pop {Δ' : Ctx} (U : Upd C Γ Δ) (h : Ext Δ' Δ) :
+    (U.pop h).applyV σ₀ = U.applyV σ₀ >>= fun p => .ok (p.1, p.2.drop h) := rfl
+theorem applyV_drop {Δ' : Ctx} (U : Upd C Γ Δ) (h : Thin Δ' Δ) :
+    (U.drop h).applyV σ₀ = U.applyV σ₀ >>= fun p => .ok (p.1, p.2.thin h) := rfl
+
+theorem elem_local {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.local i r).applyV σ₀ g ℓ = r.evalT σ₀ >>= fun v => .ok (g, ℓ.set i v) := rfl
+theorem elem_storage (s : Tm C Γ .st) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.storage s : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+theorem elem_memory (m : Tm C Γ .mem) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.memory m : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.memory m : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+theorem elem_selfBalance (op : IntOp) (a : Tm C Γ .val) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.selfBalance op a : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.selfBalance op a : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+theorem elem_net (r : Tm C Γ .val) (op : IntOp) (a : Tm C Γ .val) (g : Semantics.State)
+    (ℓ : Locs C Δ) : (UpdElem.net r op a : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.net r op a : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+theorem elem_pay (r a : Tm C Γ .val) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.pay r a : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+theorem elem_netMt (r a : Tm C Γ .val) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.netMt r a : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.netMt r a : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+theorem elem_setBalance (a : Tm C Γ .val) (g : Semantics.State) (ℓ : Locs C Δ) :
+    (UpdElem.setBalance a : UpdElem C Γ Δ).applyV σ₀ g ℓ =
+      (UpdElem.setBalance a : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
+
+/-! The locals an update leaves, by position. -/
+
+theorem push_here {t : LTy} (ℓ : Locs C Δ) (v : t.Denote C) : ℓ.push v t .here = v := rfl
+theorem push_there {t u : LTy} (ℓ : Locs C Δ) (v : t.Denote C) (i : Idx Δ u) :
+    ℓ.push v u (.there i) = ℓ u i := rfl
+theorem set_here_here {t : LTy} (ℓ : Locs C (t :: Δ)) (v : t.Denote C) :
+    ℓ.set .here v t .here = v := Locs.set_same ℓ .here v
+theorem set_here_there {t u : LTy} (ℓ : Locs C (t :: Δ)) (v : t.Denote C) (j : Idx Δ u) :
+    ℓ.set .here v u (.there j) = ℓ u (.there j) :=
+  Locs.set_ne ℓ .here (.there j) (fun h => nomatch h) v
+theorem set_there_here {t u : LTy} (ℓ : Locs C (u :: Δ)) (i : Idx Δ t) (v : t.Denote C) :
+    ℓ.set (.there i) v u .here = ℓ u .here :=
+  Locs.set_ne ℓ (.there i) .here (fun h => nomatch h) v
+theorem set_there_there {t u w : LTy} (ℓ : Locs C (w :: Δ)) (i : Idx Δ t) (v : t.Denote C)
+    (j : Idx Δ u) :
+    ℓ.set (.there i) v u (.there j) = Locs.set (fun _ k => ℓ _ (.there k)) i v u j := by
+  by_cases h : i.toNat = j.toNat
+  · obtain rfl := Idx.ty_eq_of_toNat h
+    obtain rfl := Idx.toNat_inj i j h
+    rw [Locs.set_same, Locs.set_same]
+  · rw [Locs.set_ne _ _ _ h, Locs.set_ne _ (.there i) (.there j) (fun h' => h (Nat.add_right_cancel h'))]
+/-! The locals an update leaves kept as a stack of pushes over the state's
+own (`set` and `drop` absorbed), as the erased state's were: a read is then
+a walk down the stack. -/
+
+theorem set_push_here {t : LTy} (ℓ : Locs C Δ) (w v : t.Denote C) :
+    (ℓ.push w).set .here v = ℓ.push v := by
+  funext u j
+  cases j with
+  | here => exact Locs.set_same _ _ _
+  | there j => exact Locs.set_ne _ .here (.there j) (by simp only [Idx.toNat]; omega) v
+theorem set_push_there {t u : LTy} (ℓ : Locs C Δ) (w : u.Denote C) (i : Idx Δ t) (v : t.Denote C) :
+    (ℓ.push w).set (.there i) v = (ℓ.set i v).push w := by
+  funext u' j
+  cases j with
+  | here => exact Locs.set_ne _ (.there i) .here (by simp only [Idx.toNat]; omega) v
+  | there j =>
+    by_cases h : i.toNat = j.toNat
+    · obtain rfl := Idx.ty_eq_of_toNat h
+      obtain rfl := Idx.toNat_inj i j h
+      rw [Locs.set_same]
+      exact (Locs.set_same _ _ _).symm
+    · rw [Locs.set_ne _ (.there i) (.there j) (fun h' => h (Nat.add_right_cancel h'))]
+      exact (Locs.set_ne ℓ i j h v).symm
+theorem drop_refl' (ℓ : Locs C Δ) : ℓ.drop .refl = ℓ := rfl
+theorem drop_push' {Δ' : Ctx} {t : LTy} (h : Ext Δ' Δ) (ℓ : Locs C Δ) (w : t.Denote C) :
+    (ℓ.push w).drop (.push h) = ℓ.drop h := rfl
+theorem thin_refl' (ℓ : Locs C Δ) : ℓ.thin .refl = ℓ := rfl
+theorem thin_keep' {Δ' : Ctx} {t : LTy} (h : Thin Δ' Δ) (ℓ : Locs C Δ) (w : t.Denote C) :
+    (ℓ.push w).thin (.keep h) = (ℓ.thin h).push w := by
+  funext u j
+  cases j <;> rfl
+theorem thin_drop' {Δ' : Ctx} {t : LTy} (h : Thin Δ' Δ) (ℓ : Locs C Δ) (w : t.Denote C) :
+    (ℓ.push w).thin (.drop h) = ℓ.thin h := rfl
+
+theorem drop_apply {Δ' : Ctx} {t : LTy} (h : Ext Δ' Δ) (ℓ : Locs C Δ) (i : Idx Δ' t) :
+    ℓ.drop h t i = ℓ t (i.ext h) := rfl
+theorem thin_apply {Δ' : Ctx} {t : LTy} (h : Thin Δ' Δ) (ℓ : Locs C Δ) (i : Idx Δ' t) :
+    ℓ.thin h t i = ℓ t (i.wk h) := rfl
+theorem ext_refl {t : LTy} (i : Idx Δ t) : i.ext .refl = i := rfl
+theorem ext_push {Δ' : Ctx} {t u : LTy} (i : Idx Δ' t) (h : Ext Δ' Δ) :
+    i.ext (Ext.push (t := u) h) = .there (i.ext h) := rfl
+theorem wk_refl {t : LTy} (i : Idx Δ t) : i.wk .refl = i := rfl
+theorem wk_keep_here {Δ' : Ctx} {t : LTy} (h : Thin Δ' Δ) :
+    (Idx.here : Idx (t :: Δ') t).wk (.keep h) = .here := rfl
+theorem wk_keep_there {Δ' : Ctx} {t u : LTy} (h : Thin Δ' Δ) (i : Idx Δ' t) :
+    (Idx.there (u := u) i).wk (.keep h) = .there (i.wk h) := rfl
+theorem wk_drop {Δ' : Ctx} {t u : LTy} (h : Thin Δ' Δ) (i : Idx Δ' t) :
+    i.wk (Thin.drop (t := u) h) = .there (i.wk h) := rfl
 
 end Updates
 
@@ -369,195 +462,266 @@ theorem erase_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
 theorem erase_int (n : Int) (h : PrimTy.int.inRange n = true) :
     PrimTy.erase (p := .int) ⟨n, h⟩ = .int n := rfl
 theorem erase_bool (b : Bool) : PrimTy.erase (p := .bool) b = .bool b := rfl
+/-- A natural literal cast to an integer is the integer literal: the bounds
+`uintBound`, `intBound` and the bitwise results then compare by the
+literal simprocs (`Int.reduceLT`), not by unfolding the cast. -/
+theorem natCast_ofNat (n : Nat) : ((no_index (OfNat.ofNat n) : Nat) : Int) = OfNat.ofNat n := rfl
 
-
-
-
-/-! ## The leaf on the erased state -/
+/-! ## The leaf, as `holds` reads it -/
 
 section Leaf
 
 variable {Γ : Ctx}
 
-/-- A formula with no update, hidden binder or modality (a `∀` allowed): it
-reads the erasure only, so its two readings agree (`holds_iff_holdsE`). -/
-def fo : {Γ : Ctx} → Fml C Γ → Bool
-  | _, .tt | _, .eq .. | _, .defined _ => true
-  | _, .not φ | _, .all _ _ φ => fo φ
-  | _, .and φ ψ | _, .imp φ ψ => fo φ && fo ψ
-  | _, _ => false
+/-- A scoped leaf is valid where it holds in every typed state. -/
+theorem valid_of_holds {φ : Fml C []} (h : ∀ σ : State C [], holds σ φ) : Valid φ := h
 
-/-- A binder over the values of `t`: a primitive type's typed values, the
-erased values of any other. -/
-def _root_.Solidity.LTy.forallE (t : LTy) (P : t.Denote C → Prop) : Prop :=
-  match t, P with
-  | .val p, P => ∀ v : p.Denote, P (PrimTy.erase v)
-  | .alias _, P | .mem _, P | .old, P | .oldNet, P => ∀ u, P u
-
-/-- What `φ` says of the erased state `τ`, as `sol_close` reads a leaf. -/
-def holdsE : {Γ : Ctx} → EState C Γ → Fml C Γ → Prop
-  | _, _, .tt => True
-  | _, τ, .eq a b => Theory.StValue.Equiv (a.denote τ) (b.denote τ)
-  | _, τ, .defined t => ∃ x, t.eval τ = .ok x
-  | _, τ, .not φ => fo φ = true ∧ ¬ holdsE τ φ
-  | _, τ, .and φ ψ => holdsE τ φ ∧ holdsE τ ψ
-  | _, τ, .imp φ ψ => fo φ = true ∧ (holdsE τ φ → holdsE τ ψ)
-  | _, τ, .upd m U φ => m.wp (U.apply τ) (holdsE · φ)
-  | _, _, .modal .. => False
-  | _, τ, .havoc φ => ∀ (st : Storage C) nt, holdsE (τ.withGlob (τ.glob.havoc st.erase nt)) φ
-  | _, τ, .all _ p φ => ∀ v : p.Denote, holdsE (τ.push (t := .val p) (PrimTy.erase v)) φ
-  | _, τ, .bind _ _ t φ => t.forallE fun u => holdsE (τ.push u) φ
-  | _, τ, .anon xs φ => ∀ b, holdsE (τ.anon xs b) φ
-
-/-- A first-order formula reads as much on the erasure as on the typed state:
-what a negation or a precondition may hold. -/
-theorem holds_iff_holdsE : {Γ : Ctx} → {φ : Fml C Γ} → fo φ = true → (σ : State C Γ) →
-    (holds σ φ ↔ holdsE σ.erase φ)
-  | _, .tt, _, _ => Iff.rfl
-  | _, .eq _ _, _, _ => Iff.rfl
-  | _, .defined _, _, _ => Iff.rfl
-  | _, .not φ, h, σ => by
-    have h' : fo φ = true := h
-    exact (not_congr (holds_iff_holdsE h' σ)).trans ⟨fun hn => ⟨h', hn⟩, fun hn => hn.2⟩
-  | _, .and _ _, h, σ => by
-    simp only [fo, Bool.and_eq_true] at h
-    exact and_congr (holds_iff_holdsE h.1 σ) (holds_iff_holdsE h.2 σ)
-  | _, .imp _ _, h, σ => by
-    simp only [fo, Bool.and_eq_true] at h
-    exact (imp_congr (holds_iff_holdsE h.1 σ) (holds_iff_holdsE h.2 σ)).trans
-      ⟨fun hi => ⟨h.1, hi⟩, fun hi => hi.2⟩
-  | _, .all _ p φ, h, σ => by
-    have h' : fo φ = true := h
-    exact forall_congr' fun v => holds_iff_holdsE h' (σ.push (t := .val p) v)
-  | _, .upd .., h, _ | _, .modal .., h, _ | _, .havoc _, h, _ | _, .bind .., h, _
-  | _, .anon .., h, _ => by cases h
-
-/-- **The leaf read on the erasure is sound**: what `holdsE` says of a
-typed state's erasure holds there. -/
-theorem holds_of_holdsE : {Γ : Ctx} → (φ : Fml C Γ) → (σ : State C Γ) →
-    holdsE σ.erase φ → holds σ φ
-  | _, .tt, _, h | _, .eq _ _, _, h | _, .defined _, _, h => h
-  | _, .not φ, σ, h => fun hp => h.2 ((holds_iff_holdsE h.1 σ).1 hp)
-  | _, .and φ ψ, σ, h => ⟨holds_of_holdsE φ σ h.1, holds_of_holdsE ψ σ h.2⟩
-  | _, .imp φ ψ, σ, h => fun hp => holds_of_holdsE ψ σ (h.2 ((holds_iff_holdsE h.1 σ).1 hp))
-  | _, .upd m U φ, σ, h => by
-    rw [holds_upd_erased]
-    simp only [holdsE] at h
-    cases hU : U.apply σ.erase with
-    | error e => rw [hU] at h; exact h
-    | ok τ =>
-      rw [hU] at h
-      exact fun σ' he _ => holds_of_holdsE φ σ' (he ▸ h)
-  | _, .modal .., _, h => h.elim
-  | _, .havoc φ, σ, h => fun st nt => holds_of_holdsE φ (σ.havoc st nt) (h st nt)
-  | _, .all _ p φ, σ, h => fun v => holds_of_holdsE φ (σ.push (t := .val p) v) (h v)
-  | _, .bind m _ t φ, σ, h => by
-    show m.forallB _
-    intro v
-    refine holds_of_holdsE φ (σ.push v) ?_
-    rw [State.push_erase]
-    cases t with
-    | val p => exact h v
-    | «alias» _ | mem _ | old | oldNet => exact h _
-  | _, .anon xs φ, σ, h => fun b => holds_of_holdsE φ (σ.anon xs b) (by
-      rw [anon_erase]; exact h _)
-
-/-- A scoped leaf is valid where it holds of every typed state's erasure. -/
-theorem valid_of_holdsE {φ : Fml C []} (h : ∀ σ : State C [], holdsE σ.erase φ) : Valid φ :=
-  fun σ => holds_of_holdsE φ σ (h σ)
-
-theorem holdsE_tt (τ : EState C Γ) : holdsE τ (.tt : Fml C Γ) ↔ True := Iff.rfl
-theorem holdsE_not (τ : EState C Γ) (φ : Fml C Γ) :
-    holdsE τ (.not φ) ↔ fo φ = true ∧ ¬ holdsE τ φ := Iff.rfl
-theorem holdsE_and (τ : EState C Γ) (φ ψ : Fml C Γ) :
-    holdsE τ (.and φ ψ) ↔ holdsE τ φ ∧ holdsE τ ψ := Iff.rfl
-theorem holdsE_imp (τ : EState C Γ) (φ ψ : Fml C Γ) :
-    holdsE τ (.imp φ ψ) ↔ fo φ = true ∧ (holdsE τ φ → holdsE τ ψ) := Iff.rfl
-theorem holdsE_eq (τ : EState C Γ) (a b : Tm C Γ .val) :
-    holdsE τ (.eq a b) ↔ Theory.StValue.Equiv (a.denote τ) (b.denote τ) := Iff.rfl
-theorem holdsE_defined (τ : EState C Γ) (t : Tm C Γ .val) : holdsE τ (.defined t) ↔
-    Modality.diamond.wp (t.eval τ) fun _ => True := by
-  simp only [holdsE]
-  cases t.eval τ <;> simp [Modality.wp, Modality.onHalt]
-theorem holdsE_eqD (τ : EState C Γ) (a b : Tm C Γ .val) : holdsE τ (Fml.eqD a b) ↔
-    Modality.diamond.wp (a.eval τ) fun x => Modality.diamond.wp (b.eval τ) fun y => x = y := by
-  have key : holdsE τ (Fml.eqD a b) ↔ ∃ x, a.eval τ = .ok x ∧ b.eval τ = .ok x := by
+theorem holds_tt (σ : State C Γ) : holds σ (.tt : Fml C Γ) ↔ True := Iff.rfl
+theorem holds_not (σ : State C Γ) (φ : Fml C Γ) : holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rfl
+theorem holds_and (σ : State C Γ) (φ ψ : Fml C Γ) :
+    holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
+theorem holds_imp (σ : State C Γ) (φ ψ : Fml C Γ) :
+    holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
+theorem holds_eq (σ : State C Γ) (a b : Tm C Γ .val) :
+    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) := Iff.rfl
+theorem holds_defined (σ : State C Γ) (t : Tm C Γ .val) : holds σ (.defined t) ↔
+    Modality.diamond.wp (t.evalT σ) fun _ => True := by
+  show (∃ x, t.evalT σ = .ok x) ↔ _
+  cases t.evalT σ <;> simp [Modality.wp, Modality.onHalt]
+theorem holds_eqD (σ : State C Γ) (a b : Tm C Γ .val) : holds σ (Fml.eqD a b) ↔
+    Modality.diamond.wp (a.evalT σ) fun x => Modality.diamond.wp (b.evalT σ) fun y => x = y := by
+  have key : holds σ (Fml.eqD a b) ↔ ∃ x, a.evalT σ = .ok x ∧ b.evalT σ = .ok x := by
     constructor
     · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
       have he' : Theory.StValue.Equiv (.prim x) (.prim y) := by
-        rw [← Tm.denote_eval τ a x hx, ← Tm.denote_eval τ b y hy]; exact he
+        rw [← Tm.denoteT_evalT σ a x hx, ← Tm.denoteT_evalT σ b y hy]; exact he
       rw [Theory.StValue.Equiv.prim_iff] at he'
       cases he'
       exact ⟨x, hx, hy⟩
     · rintro ⟨x, hx, hy⟩
       refine ⟨⟨x, hx⟩, ⟨x, hy⟩, ?_⟩
-      show Theory.StValue.Equiv (a.denote τ) (b.denote τ)
-      rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b x hy]
+      show Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ)
+      rw [Tm.denoteT_evalT σ a x hx, Tm.denoteT_evalT σ b x hy]
       exact Theory.StValue.Equiv.refl _
   rw [key]
-  cases a.eval τ <;> cases b.eval τ <;>
+  cases a.evalT σ <;> cases b.evalT σ <;>
     simp only [Modality.wp, Modality.onHalt, Except.ok.injEq, reduceCtorEq, false_and, and_false,
       and_self, exists_false, exists_eq_left', eq_comm]
-theorem holdsE_upd {Δ : Ctx} (τ : EState C Γ) (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
-    holdsE τ (.upd m U φ) ↔ m.wp (U.apply τ) (holdsE · φ) := Iff.rfl
-theorem holdsE_havoc (τ : EState C Γ) (φ : Fml C Γ) : holdsE τ (.havoc φ) ↔
-    ∀ (st : Storage C) nt, holdsE (τ.withGlob (τ.glob.havoc st.erase nt)) φ := Iff.rfl
-theorem holdsE_all (τ : EState C Γ) (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) :
-    holdsE τ (.all x p φ) ↔ ∀ v : p.Denote, holdsE (τ.push (t := .val p) (PrimTy.erase v)) φ :=
+/-- A typed state an update lands on: the global part `g`, the locals `ℓ`,
+a heap typing that extends `H`, the one of the state it is applied in
+(`Upd.afterT_applyV`).  What it reads is in its type, so a plain rewrite
+reads it (`Landed.globE_eq`, `Landed.loc_eq`): no contextual pass, no
+hypothesis.  It names the heap typing before, not the state: a hidden
+binder pushed before the update is then not read by the states after it. -/
+structure Landed {Δ : Ctx} (H : HTy) (g : Semantics.State) (ℓ : Locs C Δ) : Type where
+  /-- The state landed on. -/
+  val : State C Δ
+  globE_eq : val.globE = g
+  loc_eq : val.loc = ℓ
+  ext : H <+: val.H
+
+/-- `p` of every typed state that lands on `g` and `ℓ`: a constant, not a
+binder, so that `simp` tries no binder lemma at it (`forall_const` and its
+kin, which ask an instance of every binder's type) and only enters its
+body; unfolded at the end (`landedAll_def`). -/
+def LandedAll {Δ : Ctx} (H : HTy) (g : Semantics.State) (ℓ : Locs C Δ)
+    (p : Landed (C := C) H g ℓ → Prop) : Prop :=
+  ∀ x, p x
+
+theorem landedAll_def {Δ : Ctx} (H : HTy) (g : Semantics.State) (ℓ : Locs C Δ)
+    (p : Landed (C := C) H g ℓ → Prop) : LandedAll H g ℓ p ↔ ∀ x, p x := Iff.rfl
+
+/-- A landed state the rest no longer reads: only whether there is one. -/
+theorem landedAll_const {Δ : Ctx} (H : HTy) (g : Semantics.State) (ℓ : Locs C Δ) (P : Prop) :
+    LandedAll H g ℓ (fun _ => P) ↔ (Nonempty (Landed (C := C) H g ℓ) → P) :=
+  ⟨fun h ⟨x⟩ => h x, fun h x => h ⟨x⟩⟩
+
+/-- What follows an update applied over the heap typing `H`, read in every
+typed state it lands on: a constant, so that `simp` reads it only once the
+update's result is known (`landedRest_def`), not first with the result
+abstract. -/
+def LandedRest {Δ : Ctx} (H : HTy) (φ : Fml C Δ) (q : Semantics.State × Locs C Δ) : Prop :=
+  LandedAll H q.1 q.2 fun x => holds x.val φ
+
+theorem landedRest_def {Δ : Ctx} (H : HTy) (φ : Fml C Δ) (g : Semantics.State)
+    (ℓ : Locs C Δ) : LandedRest H φ (g, ℓ) ↔ LandedAll H g ℓ fun x => holds x.val φ := Iff.rfl
+
+/-- **An update's rest**, read in every typed state it lands on
+(`Upd.afterT_applyV`): one with the global part and the locals the update
+leaves. -/
+theorem holds_upd {Δ : Ctx} (σ : State C Γ) (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    holds σ (.upd m U φ) ↔ m.wp (U.applyV σ) (LandedRest σ.H φ) := by
+  show U.afterT m σ (holds · φ) ↔ _
+  rw [Upd.afterT_applyV]
+  cases U.applyV σ with
+  | error => rfl
+  | ok q =>
+    show (∀ σ' : State C Δ, _) ↔ LandedAll σ.H q.1 q.2 _
+    rw [landedAll_def]
+    refine ⟨fun h x => h x.val x.globE_eq (fun i => ?_) x.ext, fun h σ' hg hl hH =>
+      h ⟨σ', hg, funext fun _ => funext fun i => hl i, hH⟩⟩
+    exact congrFun (congrFun x.loc_eq _) i
+
+/-! The heap typing of a pushed, set, havocked, anonymised or popped state:
+the state's own. -/
+
+theorem H_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : (σ.push v).H = σ.H := rfl
+theorem H_setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
+    (σ.setLocal i v).H = σ.H := rfl
+theorem H_havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+    (σ.havoc st nt).H = σ.H := rfl
+theorem H_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).H = σ.H := rfl
+
+theorem holds_havoc (σ : State C Γ) (φ : Fml C Γ) :
+    holds σ (.havoc φ) ↔ ∀ (st : Storage C) nt, holds (σ.havoc st nt) φ := Iff.rfl
+theorem holds_all (σ : State C Γ) (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) :
+    holds σ (.all x p φ) ↔ ∀ v : p.Denote, holds (σ.push (t := .val p) v) φ := Iff.rfl
+theorem holds_bind (σ : State C Γ) (m : Modality) (x : Var) (t : LTy) (φ : Fml C (t :: Γ)) :
+    holds σ (.bind m x t φ) ↔ ∀ v : t.TDenote C σ.H, holds (σ.push v) φ := Iff.rfl
+/-! A hidden binder at each type, its domain written out (no `LTy.TDenote`
+to reduce at every step). -/
+theorem holds_bind_val (σ : State C Γ) (m : Modality) (x : Var) (p : PrimTy)
+    (φ : Fml C (.val p :: Γ)) :
+    holds σ (.bind m x (.val p) φ) ↔ ∀ v : p.Denote, holds (σ.push (t := .val p) v) φ := Iff.rfl
+theorem holds_bind_alias (σ : State C Γ) (m : Modality) (x : Var) (R : RefTy)
+    (φ : Fml C (.alias R :: Γ)) : holds σ (.bind m x (.alias R) φ) ↔
+      ∀ v : Option (SRef C (.ref R)), holds (σ.push (t := .alias R) v) φ := Iff.rfl
+theorem holds_bind_mem (σ : State C Γ) (m : Modality) (x : Var) (R : RefTy)
+    (φ : Fml C (.mem R :: Γ)) : holds σ (.bind m x (.mem R) φ) ↔
+      ∀ v : Option (HRef σ.H R), holds (σ.push (t := .mem R) v) φ := Iff.rfl
+theorem holds_bind_old (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.old :: Γ)) :
+    holds σ (.bind m x .old φ) ↔ ∀ v : Storage C, holds (σ.push (t := .old) v) φ := Iff.rfl
+theorem holds_bind_oldNet (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.oldNet :: Γ)) :
+    holds σ (.bind m x .oldNet φ) ↔ ∀ v : List (Int × Int), holds (σ.push (t := .oldNet) v) φ :=
   Iff.rfl
-theorem holdsE_bind (τ : EState C Γ) (m : Modality) (x : Var) (t : LTy) (φ : Fml C (t :: Γ)) :
-    holdsE τ (.bind m x t φ) ↔ t.forallE fun u => holdsE (τ.push u) φ := Iff.rfl
-theorem holdsE_anon (τ : EState C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
-    holdsE τ (.anon xs φ) ↔ ∀ b, holdsE (τ.anon xs b) φ := Iff.rfl
+theorem holds_anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
+    holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
 
-theorem forallE_val (p : PrimTy) (P : Value → Prop) :
-    LTy.forallE (C := C) (.val p) P ↔ ∀ v : p.Denote, P (PrimTy.erase v) := Iff.rfl
-theorem forallE_alias (R : RefTy) (P : Option (Name × List Seg) → Prop) :
-    LTy.forallE (C := C) (.alias R) P ↔ ∀ u, P u := Iff.rfl
-theorem forallE_mem (R : RefTy) (P : Option Nat → Prop) :
-    LTy.forallE (C := C) (.mem R) P ↔ ∀ u, P u := Iff.rfl
-theorem forallE_old (P : List (Name × Semantics.SVal) → Prop) :
-    LTy.forallE (C := C) .old P ↔ ∀ u, P u := Iff.rfl
-theorem forallE_oldNet (P : List (Int × Int) → Prop) :
-    LTy.forallE (C := C) .oldNet P ↔ ∀ u, P u := Iff.rfl
-
-theorem fo_tt : fo (.tt : Fml C Γ) = true := rfl
-theorem fo_eq (a b : Tm C Γ .val) : fo (.eq a b) = true := rfl
-theorem fo_defined (t : Tm C Γ .val) : fo (.defined t) = true := rfl
-theorem fo_not (φ : Fml C Γ) : fo (.not φ) = fo φ := rfl
-theorem fo_and (φ ψ : Fml C Γ) : fo (.and φ ψ) = (fo φ && fo ψ) := rfl
-theorem fo_imp (φ ψ : Fml C Γ) : fo (.imp φ ψ) = (fo φ && fo ψ) := rfl
-theorem fo_all (x : Var) (p : PrimTy) (φ : Fml C (.val p :: Γ)) : fo (.all x p φ) = fo φ := rfl
+theorem forall_val {H : HTy} (p : PrimTy) (P : (LTy.val p).TDenote C H → Prop) :
+    (∀ v : (LTy.val p).TDenote C H, P v) ↔ ∀ v : p.Denote, P v := Iff.rfl
 
 end Leaf
 
 end CloseS
 
 
+/-! ## Writes under the box, for the typed state
+
+`Calculus/CloseLemmas.lean`'s naming lemmas without the locals' fact
+(`getEnv`): a typed state's locals are not in its global part (`State.globE`
+has none), so the fact is never read, and each write is one hypothesis
+lighter. -/
+
+namespace CloseS
+
+open Semantics in
+theorem wp_box_saveStorage {σ : Semantics.State} {r : Name} {p : List Seg} {v : Semantics.SVal}
+    {P : Semantics.State → Prop} :
+    Modality.box.wp (σ.saveStorage r p v) P ↔
+      ∀ τ, σ.saveStorage r p v = .ok τ → τ.findStorage r p = .ok v →
+        (∀ q, Close.Prefix p q → τ.findStorage r q = v.find (Close.after p q)) →
+        (∀ r' q, r' ≠ r ∨ Close.Diverge p q → τ.findStorage r' q = σ.findStorage r' q) →
+        (∀ r' q k, r' ≠ r ∨ ¬ Close.Prefix p q → τ.checkIndex r' q k = σ.checkIndex r' q k) →
+        (∀ q k, Close.Prefix p q → τ.checkIndex r q k = v.find (Close.after p q) >>= Close.idxOk k) →
+        (∀ a, readAddr τ a = readAddr σ a) →
+        (∀ a, Close.readVal τ a = Close.readVal σ a) →
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → τ.net = σ.net → P τ := by
+  rw [Modality.wp_box_saveStorage]
+  exact ⟨fun h τ hs a b c d e f g i j k => h τ hs a b c d e (Close.getEnv_saveStorage hs) f g i j k,
+    fun h τ hs a b c d e _ f g i j k => h τ hs a b c d e f g i j k⟩
+
+open Semantics in
+theorem wp_box_writeAddr {σ : Semantics.State} {mv : Semantics.MVal} {a : Addr}
+    {P : Semantics.State → Prop} :
+    Modality.box.wp (writeAddr σ mv a) P ↔
+      ∀ τ, writeAddr σ mv a = .ok τ → readAddr τ a = .ok mv → Close.readVal τ a = mv.asValue →
+        (∀ a', Close.Apart a a' → readAddr τ a' = readAddr σ a') →
+        (∀ a', Close.Apart a a' → Close.readVal τ a' = Close.readVal σ a') →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) →
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P τ := by
+  rw [Modality.wp_box_writeAddr]
+  refine ⟨fun h τ hs a b c d e f g i => ?_, fun h τ hs a b c d e f _ g i => h τ hs a b c d e f g i⟩
+  obtain ⟨id, obj, rfl, -⟩ := Close.writeAddr_setObj hs
+  exact h _ hs a b c d e f (fun _ => rfl) g i
+
+open Semantics in
+theorem wp_box_copyStToM {σ : Semantics.State} {v : Semantics.SVal} {P : Semantics.State × Semantics.MVal → Prop} :
+    Modality.box.wp (copyStToM σ v) P ↔
+      ∀ τ mv, copyStToM σ v = .ok (τ, mv) →
+        (∀ id f, mv = .ref id → f ≠ "length" →
+          Close.readVal τ (.memoryField id f) = v.find [.field f] >>= SVal.asValue) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) →
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P (τ, mv) := by
+  rw [Modality.wp_box_copyStToM]
+  exact ⟨fun h τ mv hs a b c d e => h τ mv hs a b c (Close.copyStToM_frame' hs).2 d e,
+    fun h τ mv hs a b c _ d e => h τ mv hs a b c d e⟩
+
+open Semantics in
+theorem wp_box_allocDefault {σ : Semantics.State} {R : RefTy} {P : Semantics.State × Nat → Prop} :
+    Modality.box.wp (allocDefault σ R) P ↔
+      ∀ τ id, allocDefault σ R = .ok (τ, id) →
+        (∀ f, f ≠ "length" →
+          Close.readVal τ (.memoryField id f) =
+            (defaultForRef R).find [.field f] >>= SVal.asValue) →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) →
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance → P (τ, id) := by
+  rw [Modality.wp_box_allocDefault]
+  exact ⟨fun h τ id hs a b c d e =>
+      h τ id hs a b c (Close.copyStToM_frame' (Close.allocDefault_copy hs)).2 d e,
+    fun h τ id hs a b c _ d e => h τ id hs a b c d e⟩
+
+open Semantics in
+theorem wp_box_transferAt {σ : Semantics.State} {addr amt : Int} {P : Semantics.State → Prop} :
+    Modality.box.wp (transferAt σ addr amt) P ↔
+      ∀ τ, transferAt σ addr amt = .ok τ →
+        (∀ r q, τ.findStorage r q = σ.findStorage r q) →
+        (∀ r q k, τ.checkIndex r q k = σ.checkIndex r q k) →
+        (∀ a, readAddr τ a = readAddr σ a) → (∀ a, Close.readVal τ a = Close.readVal σ a) →
+        τ.tx = σ.tx → τ.selfBalance = σ.selfBalance →
+        τ.net = (σ.pay addr amt).net → P τ := by
+  rw [Modality.wp_box_transferAt]
+  exact ⟨fun h τ hs a b c d e f g => h τ hs a b (Close.transferAt_frame hs).2.1 c d e f g,
+    fun h τ hs a b _ c d e f g => h τ hs a b c d e f g⟩
+
+end CloseS
+
 /-! ## The set -/
 
-attribute [close_rw_s high] CloseS.holdsE_eqD
+attribute [close_rw_s high] CloseS.holds_eqD
 
 attribute [close_rw_s]
   -- formulas
-  CloseS.holdsE_tt CloseS.holdsE_not CloseS.holdsE_and CloseS.holdsE_imp CloseS.holdsE_eq
-  CloseS.holdsE_defined CloseS.holdsE_upd CloseS.holdsE_havoc CloseS.holdsE_all
-  CloseS.holdsE_bind CloseS.holdsE_anon CloseS.forallE_val CloseS.forallE_alias
-  CloseS.forallE_mem CloseS.forallE_old CloseS.forallE_oldNet
-  CloseS.fo_tt CloseS.fo_eq CloseS.fo_defined CloseS.fo_not CloseS.fo_and CloseS.fo_imp
-  CloseS.fo_all
+  CloseS.holds_tt CloseS.holds_not CloseS.holds_and CloseS.holds_imp CloseS.holds_eq
+  CloseS.holds_defined CloseS.holds_upd CloseS.holds_havoc CloseS.holds_all
+  CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
+  CloseS.holds_bind_oldNet CloseS.holds_anon
   CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool
+  CloseS.natCast_ofNat
   CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Close.equiv_prim_left_iff
   Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
-  -- the erased state
-  CloseS.get_push_here CloseS.get_push_there CloseS.glob_push CloseS.glob_withGlob CloseS.glob_env
-  CloseS.withGlob_push CloseS.withGlob_withGlob CloseS.setLocal_push_here CloseS.setLocal_push_there
-  CloseS.drop_refl CloseS.drop_push CloseS.thin_refl CloseS.thin_keep CloseS.thin_drop
-  CloseS.anon_nil CloseS.anon_cons CloseS.optRes_some CloseS.optRes_none
+  -- the typed state
+  CloseS.loc_push CloseS.loc_setLocal CloseS.loc_havoc CloseS.loc_drop CloseS.Landed.globE_eq
+  CloseS.set_push_here CloseS.set_push_there CloseS.drop_refl' CloseS.drop_push' CloseS.thin_refl'
+  CloseS.thin_keep' CloseS.thin_drop'
+  CloseS.Landed.loc_eq CloseS.landedAll_const CloseS.landedRest_def CloseS.H_push CloseS.H_setLocal
+  CloseS.H_havoc CloseS.H_drop
+  State.globE_push State.globE_setLocal State.anon_nil State.anon_cons
+  State.globE_havoc State.globE_drop CloseS.globE_env
+  CloseS.erase_val CloseS.erase_alias CloseS.erase_mem CloseS.erase_old CloseS.erase_oldNet
+  CloseS.optRes_some CloseS.optRes_none CloseS.optRes_map_some
   -- updates
-  CloseS.apply_nil CloseS.apply_snoc CloseS.apply_decl CloseS.apply_pop CloseS.apply_drop
-  CloseS.write_local CloseS.write_storage CloseS.write_memory CloseS.write_selfBalance
-  CloseS.write_net CloseS.write_pay CloseS.write_netMt CloseS.write_setBalance
+  CloseS.applyV_nil CloseS.applyV_snoc CloseS.applyV_decl CloseS.applyV_pop CloseS.applyV_drop
+  CloseS.elem_local CloseS.elem_storage CloseS.elem_memory CloseS.elem_selfBalance
+  CloseS.elem_net CloseS.elem_pay CloseS.elem_netMt CloseS.elem_setBalance
+  CloseS.glob_storage CloseS.glob_memory CloseS.glob_selfBalance
+  CloseS.glob_net CloseS.glob_pay CloseS.glob_netMt CloseS.glob_setBalance
+  CloseS.push_here CloseS.push_there CloseS.set_here_here CloseS.set_here_there
+  CloseS.set_there_here CloseS.set_there_there CloseS.drop_apply CloseS.thin_apply
+  CloseS.ext_refl CloseS.ext_push CloseS.wk_refl CloseS.wk_keep_here
+  CloseS.wk_keep_there CloseS.wk_drop
   CloseS.rhs_val CloseS.rhs_path CloseS.rhs_unset CloseS.rhs_mref CloseS.rhs_store
   CloseS.rhs_saveNet CloseS.rhs_saveNetMt IntOp.apply
   -- terms
@@ -622,9 +786,9 @@ attribute [close_rw_s]
   reduceCtorEq reduceIte reduceDIte String.reduceEq Nat.reduceEqDiff Nat.reducePow Int.reduceEq
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
 
-attribute [close_rw_s] Modality.wp_box_saveStorage Modality.wp_box_findStorage
-  Modality.wp_box_writeAddr Modality.wp_box_copyStToM Modality.wp_box_allocDefault
-  Modality.wp_box_copyMem Modality.wp_box_transferAt
+attribute [close_rw_s] CloseS.wp_box_saveStorage Modality.wp_box_findStorage
+  CloseS.wp_box_writeAddr CloseS.wp_box_copyStToM CloseS.wp_box_allocDefault
+  Modality.wp_box_copyMem CloseS.wp_box_transferAt
 
 attribute [close_rw_s_last] Modality.wp_box
 
@@ -634,15 +798,15 @@ attribute [close_rw_s_last] Modality.wp_box
 
 open Lean Elab Tactic Meta
 
-/-- `sol_close_unwrap` on a scoped leaf `Valid ψ`: the leaf as `holdsE`
-reads it (`CloseS.valid_of_holdsE`). -/
+/-- `sol_close_unwrap` on a scoped leaf `Valid ψ`: `holds` in every typed
+state (`CloseS.valid_of_holds`). -/
 @[tactic Solidity.tacticSol_close_unwrap]
 def evalSolCloseUnwrapS : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
   unless ty.isAppOf ``Solidity.Valid do throwUnsupportedSyntax
   let tag ← g.getTag
-  let gs ← g.apply (← mkConstWithFreshMVarLevels ``CloseS.valid_of_holdsE)
+  let gs ← g.apply (← mkConstWithFreshMVarLevels ``CloseS.valid_of_holds)
   for g' in gs do g'.setTag tag
   replaceMainGoal gs
 

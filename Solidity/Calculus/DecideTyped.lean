@@ -87,16 +87,33 @@ state its pops and drops leave. -/
 theorem zero_typed {Γ : Ctx} (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
     (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (τ : State C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → U.view = .zero →
-      ∃ τ' : State C Δ, U.apply τ.erase = .ok τ'.erase ∧ τ'.H = τ.H
+      ∃ τ' : State C Δ, U.applyV τ = .ok (τ'.globE, τ'.loc) ∧ τ'.H = τ.H
   | _, .nil, _ => ⟨τ, rfl, rfl⟩
   | _, .snoc U e, hv => absurd hv (UView.add_ne_zero U.view e.toElemS)
   | _, .decl U _ r, hv => absurd hv (UView.add_ne_zero U.view (.rhs r))
   | _, .pop U hx, hv => by
     obtain ⟨τ', hτ, hH⟩ := zero_typed aE aR τ U hv
-    exact ⟨τ'.drop hx, by show (U.apply τ.erase).map _ = _; rw [hτ, State.drop_erase]; rfl, hH⟩
+    exact ⟨τ'.drop hx, by rw [applyV_pop_map, hτ, State.loc_drop]; rfl, hH⟩
   | _, .drop U hx, hv => by
     obtain ⟨τ', hτ, hH⟩ := zero_typed aE aR τ U hv
-    exact ⟨τ'.thin hx, by show (U.apply τ.erase).map _ = _; rw [hτ, State.thin_erase]; rfl, hH⟩
+    exact ⟨τ'.thin hx, by rw [applyV_drop_map, hτ, State.loc_thin]; rfl, hH⟩
+
+/-- A typed state with the global part and the locals an update leaves
+stands where the update's result does. -/
+theorem RelT.of_lands {Δ : Ctx} {ρ : SymS} {q : Semantics.State × Locs C Δ}
+    (h : RelU σ ρ q.1 q.2) {σ' : State C Δ} (hg : σ'.globE = q.1)
+    (hl : ∀ {t : LTy} (i : Idx Δ t), σ'.getE i = q.2 t i) : RelT σ ρ σ' := by
+  have hl' : σ'.loc = q.2 := funext fun _ => funext fun i => hl i
+  show RelU σ ρ σ'.globE σ'.loc
+  rw [hg, hl']
+  exact h
+
+/-- A pushed typed state stands where the pushed locals do. -/
+theorem RelT.push {Γ : Ctx} {ρ : SymS} {τ : State C Γ} {t : LTy} {v : t.TDenote C τ.H}
+    (h : RelU σ ρ τ.globE (τ.loc.push (LTy.TDenote.erase t v))) : RelT σ ρ (τ.push v) := by
+  show RelU σ ρ (τ.push v).globE (τ.push v).loc
+  rw [State.loc_push]
+  exact h
 
 /-- **Peeling keeps the relation, the reduction's symbols and its shape.** -/
 theorem peel_sym : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS} {φ' : Fml C Γ'},
@@ -125,8 +142,8 @@ theorem peel_sym : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
 /-- **Peeling, read one way**: a formula holds where what it peels to holds
 in every typed state the peeled constructors reach. -/
 theorem peel_pos : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS} {φ' : Fml C Γ'},
-    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelU σ ρ τ.erase →
-      (∀ τ' : State C Γ', RelU σ ρ' τ'.erase → holds τ' φ') → holds τ φ := by
+    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelT σ ρ τ →
+      (∀ τ' : State C Γ', RelT σ ρ' τ' → holds τ' φ') → holds τ φ := by
   intro Γ φ
   induction φ with
   | upd m U φ ih =>
@@ -137,12 +154,10 @@ theorem peel_pos : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
     · rename_i hv
       rw [← Fml.peelS_eq_peelSM] at hp
       obtain ⟨τe, hτ, h', hs⟩ := RelU.zero noActE noActR h U hv
-      rw [holds_upd_erased]
-      show m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → τ.H <+: σ'.H → holds σ' φ)
-        (U.apply τ.erase)
-      rw [hτ]
-      intro σ' he _
-      refine ih (ρ := U.replayS noActE noActR ρ) hp σ' (he ▸ h') hk
+      show U.afterT m τ (holds · φ)
+      rw [Upd.afterT_applyV, hτ]
+      intro σ' hg hl _
+      exact ih (ρ := U.replayS noActE noActR ρ) hp σ' (RelT.of_lands h' hg hl) hk
     · cases hp; exact hk τ h
   | bind m x t φ ih =>
     intro ρ Γ' ρ' φ' hp τ h hk
@@ -150,16 +165,14 @@ theorem peel_pos : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
     simp only [Fml.peelSM] at hp
     rw [← Fml.peelS_eq_peelSM] at hp
     intro v
-    refine ih (ρ := ρ.push .keep) hp (τ.push v) ?_ hk
-    rw [State.push_erase]
-    exact h.pushFree _
+    exact ih (ρ := ρ.push .keep) hp (τ.push v) (RelT.push (h.pushFree _)) hk
   | _ => intro ρ Γ' ρ' φ' hp τ h hk; cases hp; exact hk τ h
 
 /-- **Peeling, read the other way**: where a formula holds, what it peels
 to holds in a typed state the peeled constructors reach. -/
 theorem peel_neg : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS} {φ' : Fml C Γ'},
-    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelU σ ρ τ.erase → holds τ φ →
-      ∃ τ' : State C Γ', RelU σ ρ' τ'.erase ∧ holds τ' φ' := by
+    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelT σ ρ τ → holds τ φ →
+      ∃ τ' : State C Γ', RelT σ ρ' τ' ∧ holds τ' φ' := by
   intro Γ φ
   induction φ with
   | upd m U φ ih =>
@@ -173,12 +186,10 @@ theorem peel_neg : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
       obtain ⟨τ'', hτ'', hH⟩ := zero_typed noActE noActR τ U hv
       rw [hτ''] at hτ
       cases hτ
-      rw [holds_upd_erased] at hφ
-      change m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → τ.H <+: σ'.H → holds σ' φ)
-        (U.apply τ.erase) at hφ
-      rw [hτ''] at hφ
+      have hφ' : U.afterT m τ (holds · φ) := hφ
+      rw [Upd.afterT_applyV, hτ''] at hφ'
       exact ih (ρ := U.replayS noActE noActR ρ) hp τ'' h'
-        (hφ τ'' rfl (hH ▸ List.prefix_refl _))
+        (hφ' τ'' rfl (fun _ => rfl) (hH ▸ List.prefix_refl _))
     · cases hp; exact ⟨τ, h, hφ⟩
   | bind m x t φ ih =>
     intro ρ Γ' ρ' φ' hp τ h hφ
@@ -186,15 +197,13 @@ theorem peel_neg : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
     simp only [Fml.peelSM] at hp
     rw [← Fml.peelS_eq_peelSM] at hp
     obtain ⟨v⟩ := LTy.tdenote_nonempty (C := C) (H := τ.H) t
-    refine ih (ρ := ρ.push .keep) hp (τ.push v) ?_ (hφ v)
-    rw [State.push_erase]
-    exact h.pushFree _
+    exact ih (ρ := ρ.push .keep) hp (τ.push v) (RelT.push (h.pushFree _)) (hφ v)
   | _ => intro ρ Γ' ρ' φ' hp τ h hφ; cases hp; exact ⟨τ, h, hφ⟩
 
 /-- Peeling reaches a typed state. -/
 theorem peel_exists : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS}
-    {φ' : Fml C Γ'}, φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelU σ ρ τ.erase →
-      ∃ τ' : State C Γ', RelU σ ρ' τ'.erase := by
+    {φ' : Fml C Γ'}, φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelT σ ρ τ →
+      ∃ τ' : State C Γ', RelT σ ρ' τ' := by
   intro Γ φ
   induction φ with
   | upd m U φ ih =>
@@ -216,9 +225,7 @@ theorem peel_exists : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ
     simp only [Fml.peelSM] at hp
     rw [← Fml.peelS_eq_peelSM] at hp
     obtain ⟨v⟩ := LTy.tdenote_nonempty (C := C) (H := τ.H) t
-    refine ih (ρ := ρ.push .keep) hp (τ.push v) ?_
-    rw [State.push_erase]
-    exact h.pushFree _
+    exact ih (ρ := ρ.push .keep) hp (τ.push v) (RelT.push (h.pushFree _))
   | _ => intro ρ Γ' ρ' φ' hp τ h; cases hp; exact ⟨τ, h⟩
 
 theorem Fml.asDefinedS_some {Γ : Ctx} {φ : Fml C Γ} {a : Tm C Γ .val}
@@ -313,8 +320,8 @@ section Sound
 variable {Γ : Ctx}
 
 /-- A literal, `msg.sender` or a local reads a value. -/
-theorem Tm.eval_of_atomLike {t : Tm C Γ .val} (τ : EState C Γ)
-    (h : t.isLitLikeS = true ∨ t.isAtomS = true) : ∃ x, t.eval τ = .ok x := by
+theorem Tm.eval_of_atomLike {t : Tm C Γ .val} (τ : State C Γ)
+    (h : t.isLitLikeS = true ∨ t.isAtomS = true) : ∃ x, t.evalT τ = .ok x := by
   cases t with
   | app0 o => cases o <;> exact ⟨_, rfl⟩
   | pvV i => exact ⟨_, rfl⟩
@@ -323,17 +330,17 @@ theorem Tm.eval_of_atomLike {t : Tm C Γ .val} (τ : EState C Γ)
 /-- Between two terms that return, the equation is equality of the
 values. -/
 theorem holds_eq_of_eval {τ : State C Γ} {a b : Tm C Γ .val} {x y : Value}
-    (ha : a.eval τ.erase = .ok x) (hb : b.eval τ.erase = .ok y) :
+    (ha : a.evalT τ = .ok x) (hb : b.evalT τ = .ok y) :
     holds τ (.eq a b) ↔ x = y := by
-  show Theory.StValue.Equiv (a.denote τ.erase) (b.denote τ.erase) ↔ x = y
-  rw [Tm.denote_eval τ.erase a x ha, Tm.denote_eval τ.erase b y hb,
+  show Theory.StValue.Equiv (a.denoteT τ) (b.denoteT τ) ↔ x = y
+  rw [Tm.denoteT_evalT τ a x ha, Tm.denoteT_evalT τ b y hb,
     Theory.StValue.Equiv.prim_iff]
   exact ⟨fun h => by injection h, fun h => h ▸ rfl⟩
 
 /-- **An equation through peeled constructors** (`eqDViewS`): both
 readings return one value, read in every typed state the peels reach. -/
 theorem eqD_sound {φ ψ : Fml C Γ} {σ : Semantics.State} {ρ : SymS}
-    {τ : State C Γ} (h : RelU σ ρ τ.erase) {Γa Γb : Ctx} {ρa ρb : SymS} {a : Tm C Γa .val}
+    {τ : State C Γ} (h : RelT σ ρ τ) {Γa Γb : Ctx} {ρa ρb : SymS} {a : Tm C Γa .val}
     {b : Tm C Γb .val} (hv : eqDViewS ρ φ ψ = some (⟨Γa, ρa, a⟩, ⟨Γb, ρb, b⟩))
     (ha : a.inLS ρa = true) (hb : b.inLS ρb = true) :
     holds τ (.and φ ψ) ↔ (LFml.eq (a.toLS ρa) (b.toLS ρb)).holds σ := by
@@ -349,17 +356,17 @@ theorem eqD_sound {φ ψ : Fml C Γ} {σ : Semantics.State} {ρ : SymS}
   -- the equation's readings lower as the definedness conjuncts' do
   have ea := sameAt_toLS hsa (by rw [sa, sc, s']) hra.ok hrc.ok
   have eb := sameAt_toLS hsb (by rw [sb, sc]) hrb.ok hrc.ok
-  have A2 : ∀ τa' : State C Γa, RelU σ ρa τa'.erase →
-      Sim ((a.toLS ρa).eval σ) (a.eval τa'.erase) := fun _ hr => hr.val ha
-  have B2 : ∀ τb' : State C Γb, RelU σ ρb τb'.erase →
-      Sim ((b.toLS ρb).eval σ) (b.eval τb'.erase) := fun _ hr => hr.val hb
-  have A3 : ∀ τc' : State C Γc, RelU σ ρc τc'.erase →
-      Sim ((a.toLS ρa).eval σ) (a'.eval τc'.erase) := by
+  have A2 : ∀ τa' : State C Γa, RelT σ ρa τa' →
+      Sim ((a.toLS ρa).eval σ) (a.evalT τa') := fun _ hr => hr.val ha
+  have B2 : ∀ τb' : State C Γb, RelT σ ρb τb' →
+      Sim ((b.toLS ρb).eval σ) (b.evalT τb') := fun _ hr => hr.val hb
+  have A3 : ∀ τc' : State C Γc, RelT σ ρc τc' →
+      Sim ((a.toLS ρa).eval σ) (a'.evalT τc') := by
     intro τc' hr
     rw [← ea.1]
     exact hr.val (by rw [ea.2]; exact ha)
-  have B3 : ∀ τc' : State C Γc, RelU σ ρc τc'.erase →
-      Sim ((b.toLS ρb).eval σ) (b'.eval τc'.erase) := by
+  have B3 : ∀ τc' : State C Γc, RelT σ ρc τc' →
+      Sim ((b.toLS ρb).eval σ) (b'.evalT τc') := by
     intro τc' hr
     rw [← eb.1]
     exact hr.val (by rw [eb.2]; exact hb)
@@ -387,7 +394,7 @@ polarity `pos`: where the fragment takes a formula, its reduction read in
 the formula gives its reduction (negative, where it is first-order). -/
 theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool)
     {σ : Semantics.State} {ρ : SymS} (τ : State C Γ),
-    RelU σ ρ τ.erase → φ.inLSM pos ρ = true →
+    RelT σ ρ τ → φ.inLSM pos ρ = true →
     (pos = true → (φ.toLSM ρ).holds σ → holds τ φ) ∧
       (pos = false → holds τ φ → (φ.toLSM ρ).holds σ) := by
   intro Γ φ
@@ -404,8 +411,8 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
         rcases hl with ⟨h1, h2⟩ | ⟨h1, h2⟩
         · exact ⟨.inl h1, .inr h2⟩
         · exact ⟨.inr h2, .inl h1⟩
-      obtain ⟨x, hx⟩ := Tm.eval_of_atomLike τ.erase hab.1
-      obtain ⟨y, hy⟩ := Tm.eval_of_atomLike τ.erase hab.2
+      obtain ⟨x, hx⟩ := Tm.eval_of_atomLike τ hab.1
+      obtain ⟨y, hy⟩ := Tm.eval_of_atomLike τ hab.2
       rw [holds_eq_of_eval hx hy]
       simp only [Fml.toLSM]
       rw [LFml.holds_eq_iff]
@@ -426,7 +433,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
     have key : holds τ (.defined t) ↔ (Fml.toLSM ρ (.defined t)).holds σ := by
       simp only [Fml.toLSM]
       rw [holds_eq_self]
-      show (∃ x, t.eval τ.erase = .ok x) ↔ _
+      show (∃ x, t.evalT τ = .ok x) ↔ _
       exact ⟨fun ⟨x, hx⟩ => ⟨x, (st x).2 hx⟩, fun ⟨x, hx⟩ => ⟨x, (st x).1 hx⟩⟩
     exact ⟨fun _ hL => key.2 hL, fun _ hφ => key.1 hφ⟩
   | not φ ih =>
@@ -466,22 +473,21 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
     simp only [Fml.inLSM, Bool.and_eq_true] at hf
     obtain ⟨rfl, hf⟩ := hf
     refine ⟨fun _ hL => ?_, fun hp => Bool.noConfusion hp⟩
-    rw [holds_upd_erased]
-    show m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → τ.H <+: σ'.H → holds σ' φ)
-      (U.apply τ.erase)
+    show U.afterT m τ (holds · φ)
+    rw [Upd.afterT_applyV]
     cases hv : U.view with
     | zero =>
       simp only [Fml.toLSM, hv] at hL
       simp only [hv] at hf
       obtain ⟨τe, hτ, h', -⟩ := RelU.zero noActE noActR h U hv
       rw [hτ]
-      intro σ' he _
-      exact (ih true σ' (by rw [he]; exact h') hf).1 rfl hL
+      intro σ' hg hl _
+      exact (ih true σ' (RelT.of_lands h' hg hl) hf).1 rfl hL
     | one a =>
       simp only [Fml.toLSM, hv] at hL
       simp only [hv, Bool.and_eq_true] at hf
       obtain ⟨hg, hr⟩ := RelU.one h U hv hf.1
-      cases hap : U.apply τ.erase with
+      cases hap : U.applyV τ with
       | error e =>
         cases m with
         | box => trivial
@@ -490,13 +496,13 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
           obtain ⟨τ', h'⟩ := hg.1 hL.1
           rw [hap] at h'; cases h'
       | ok τe =>
-        intro σ' he _
+        intro σ' hg' hl _
         have hgret : ∃ v, (a.guard ρ).eval σ = .ok v := hg.2 ⟨τe, hap⟩
         have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds σ := by
           cases m with
           | box => exact (guardM_box σ _ _).1 hL hgret
           | diamond => exact ((guardM_diamond σ _ _).1 hL).2
-        exact (ih true σ' (by rw [he]; exact hr τe hap) hf.2).1 rfl hL'
+        exact (ih true σ' (RelT.of_lands (hr τe hap) hg' hl) hf.2).1 rfl hL'
     | two a b =>
       simp only [Fml.toLSM, hv] at hL
       simp only [hv] at hf
@@ -504,7 +510,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
       | none =>
         simp only [hp, Bool.and_eq_true] at hf hL
         obtain ⟨hg, hr⟩ := RelU.par h U hv hf.1
-        cases hap : U.apply τ.erase with
+        cases hap : U.applyV τ with
         | error e =>
           cases m with
           | box => trivial
@@ -513,14 +519,14 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
             obtain ⟨τ', h'⟩ := hg.1 hL.1
             rw [hap] at h'; cases h'
         | ok τe =>
-          intro σ' he _
+          intro σ' hg' hl _
           have hgret : ∃ v, (seqL (a.guard ρ) (b.guard ρ)).eval σ = .ok v := hg.2 ⟨τe, hap⟩
           have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds
               σ := by
             cases m with
             | box => exact (guardM_box σ _ _).1 hL hgret
             | diamond => exact ((guardM_diamond σ _ _).1 hL).2
-          exact (ih true σ' (by rw [he]; exact hr τe hap) hf.2).1 rfl hL'
+          exact (ih true σ' (RelT.of_lands (hr τe hap) hg' hl) hf.2).1 rfl hL'
       | some p =>
         obtain ⟨i, mm⟩ := p
         cases hq : pairLS ρ i mm with
@@ -529,7 +535,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
           obtain ⟨g, M⟩ := q
           simp only [hp, hq, Bool.and_eq_true] at hf hL
           obtain ⟨hg, hr⟩ := RelU.two h hq hf.1.1 U hv hp
-          cases hap : U.apply τ.erase with
+          cases hap : U.applyV τ with
           | error e =>
             cases m with
             | box => trivial
@@ -538,13 +544,13 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
               obtain ⟨τ', h'⟩ := hg.1 hL.1
               rw [hap] at h'; cases h'
           | ok τe =>
-            intro σ' he _
+            intro σ' hg' hl _
             have hgret : ∃ v, g.eval σ = .ok v := hg.2 ⟨τe, hap⟩
             have hL' : (φ.toLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ)).holds σ := by
               cases m with
               | box => exact (guardM_box σ _ _).1 hL hgret
               | diamond => exact ((guardM_diamond σ _ _).1 hL).2
-            exact (ih true σ' (by rw [he]; exact hr τe hap) hf.2).1 rfl hL'
+            exact (ih true σ' (RelT.of_lands (hr τe hap) hg' hl) hf.2).1 rfl hL'
     | many => simp only [hv, Bool.false_eq_true] at hf
   | modal m P κ φ ih =>
     intro pos σ ρ τ h hf
@@ -565,10 +571,10 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
     obtain ⟨hx, hf⟩ := hf
     simp only [Fml.toLSM, LFml.holds]
     refine ⟨fun hp hL v => ?_, fun hp hφ w hw => ?_⟩
-    · exact (ih pos (τ.push v) (by rw [State.push_erase]; exact h.pushQ hx (PrimTy.erase v))
+    · exact (ih pos (τ.push v) (RelT.push (h.pushQ hx (PrimTy.erase v)))
         hf).1 hp (hL _ (PrimTy.admits_erase v))
     · obtain ⟨v, rfl⟩ := PrimTy.exists_of_admits hw
-      exact (ih pos (τ.push v) (by rw [State.push_erase]; exact h.pushQ hx (PrimTy.erase v))
+      exact (ih pos (τ.push v) (RelT.push (h.pushQ hx (PrimTy.erase v)))
         hf).2 hp (hφ v)
   | bind m x t φ ih =>
     intro pos σ ρ τ h hf
@@ -577,15 +583,15 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
     refine ⟨fun _ hL => ?_, fun hp => Bool.noConfusion hp⟩
     simp only [Fml.toLSM] at hL
     intro v
-    exact (ih true (τ.push v) (by rw [State.push_erase]; exact h.pushFree _) hf).1 rfl hL
+    exact (ih true (τ.push v) (RelT.push (h.pushFree _)) hf).1 rfl hL
 
 /-- The state a typed state's reduction is read in: its global part, no
 local. -/
 def _root_.Solidity.State.redState {Γ : Ctx} (τ : State C Γ) : Semantics.State :=
-  withLocals τ.erase.glob []
+  withLocals τ.globE []
 
 /-- The reduction's start: no update, no local. -/
-theorem RelU.empty (τ : State C []) : RelU τ.redState SymS.empty τ.erase :=
+theorem RelU.empty (τ : State C []) : RelT τ.redState SymS.empty τ :=
   { ok := rfl, len := rfl, nodup := List.nodup_nil,
     fresh := fun _ _ => ⟨List.not_mem_nil, rfl⟩, stor := rfl,
     env := fun _ hm => (nomatch hm), tx := fun k => by cases k <;> rfl,

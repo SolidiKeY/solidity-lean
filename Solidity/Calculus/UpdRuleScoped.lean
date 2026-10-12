@@ -79,12 +79,9 @@ theorem holds_congr_erase : {Γ : Ctx} → (φ : Fml C Γ) → φ.modalFree = tr
     (σ σ' : State C Γ) → σ.H = σ'.H → σ.erase = σ'.erase → (holds σ φ ↔ holds σ' φ)
   | _, .tt, _, _, _, _, _ => Iff.rfl
   | _, .eq a b, _, σ, σ', _, he => by
-    show Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase) ↔
-      Theory.StValue.Equiv (a.denote σ'.erase) (b.denote σ'.erase)
-    rw [he]
+    rw [holds_eq_erased, holds_eq_erased, he]
   | _, .defined t, _, σ, σ', _, he => by
-    show (∃ x, t.eval σ.erase = .ok x) ↔ (∃ x, t.eval σ'.erase = .ok x)
-    rw [he]
+    rw [holds_defined_erased, holds_defined_erased, he]
   | _, .not φ, hm, σ, σ', hH, he => not_congr (holds_congr_erase φ hm σ σ' hH he)
   | _, .and φ ψ, hm, σ, σ', hH, he => by
     have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm

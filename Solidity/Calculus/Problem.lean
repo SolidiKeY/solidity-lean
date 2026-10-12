@@ -128,7 +128,8 @@ def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
 the test. -/
 theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
     holds σ (Fml.wt C) ↔ storageWtB C.vars σ.erase.glob.storage = true := by
-  simp only [Fml.wt, holds, Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
+  rw [Fml.wt, holds_defined_erased]
+  simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
   cases storageWtB C.vars σ.erase.glob.storage with
   | true => exact ⟨fun _ => rfl, fun _ => ⟨_, rfl⟩⟩
   | false => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩

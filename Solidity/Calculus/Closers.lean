@@ -9,8 +9,8 @@ import Solidity.Calculus.UpdRuleScoped
 After `sol_symex` on a scoped goal (`Valid ψ`, `⊨ dl!{ … }`), or `sol_leaf`
 on a leaf `sol_prove` left, a leaf is closed on its scoped form:
 `sol_close`, `sol_close_mt` and `sol_spec_close` read it through
-`sol_close_unwrap` (`CloseS.valid_of_holdsE`, `Calculus/CloseScoped.lean`),
-with no erasure.  `sol_close_eval` on the bare leaf `Valid ψ`, before its
+`sol_close_unwrap` (`CloseS.valid_of_holds`, `Calculus/CloseScoped.lean`),
+`holds` on the typed state.  `sol_close_eval` on the bare leaf `Valid ψ`, before its
 state is introduced, takes the same first step here.  `sol_decide`'s parts
 reduce the scoped leaf by position (below).  `sol_upd` and `sol_merge`
 rewrite the scoped formula itself (M6c, W7 `w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s
@@ -22,7 +22,7 @@ namespace Solidity
 
 open Lean Elab Tactic
 
-/-- `sol_close_eval` on a bare scoped leaf `Valid ψ`: the leaf as `holdsE`
+/-- `sol_close_eval` on a bare scoped leaf `Valid ψ`: the leaf as `holds`
 reads it (`sol_close_unwrap`), its state introduced, then the scoped step
 (`Calculus/CloseScoped.lean`). -/
 @[tactic Solidity.tacticSol_close_eval]

@@ -323,9 +323,13 @@ def _root_.Solidity.Upd.pushSplit (m : Modality) {Δ : Ctx} : Upd C Γ Δ → Fm
     | _, _ => none
   | _, _ => none
 
-theorem keyFreeS_eval {σ : EState C Γ} {τ : Semantics.State} :
-    (k : Tm C Γ .val) → k.keyFreeS = true → k.eval (σ.withGlob τ) = k.eval σ
-  | .pvV _, _ => rfl
+/-! The push's proofs read two typed states: `σ`, the update applied in,
+and `x`, a state the storage write lands on (its global part `σ`'s with
+the storage `τ` written, `hx`, the same locals, `hl`). -/
+
+theorem keyFreeS_evalT {σ x : State C Γ} (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
+    (k : Tm C Γ .val) → k.keyFreeS = true → k.evalT x = k.evalT σ
+  | .pvV i, _ => by simp only [Tm.evalT, hl i]
   | .app0 (.lit _), _ => rfl
 
 theorem withGlob_saveStorage {σ : Semantics.State} {τ : Semantics.State} {r : Name} {P : List Seg}
@@ -338,39 +342,40 @@ theorem withGlob_saveStorage {σ : Semantics.State} {τ : Semantics.State} {r : 
 /-- **A path below which the storage was written names the same
 location**: its checks are of locations
 above the write. -/
-theorem stable_evalS {σ : EState C Γ} {τ : Semantics.State} {r : Name} {P : List Seg} {X : Semantics.SVal}
-    (hsv : σ.glob.saveStorage r P X = .ok τ) :
+theorem stable_evalS {σ x : State C Γ} {τ : Semantics.State} {r : Name} {P : List Seg}
+    {X : Semantics.SVal} (hsv : σ.globE.saveStorage r P X = .ok τ) (hx : x.globE = τ)
+    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
     (p : Tm C Γ .path) → p.stablePathSM = true → ∀ {r' : Name} {segs : List Seg},
-      p.eval σ = .ok (r', segs) → (r' = r → ∃ rest, P = segs ++ rest) →
-        p.eval (σ.withGlob τ) = .ok (r', segs)
+      p.evalT σ = .ok (r', segs) → (r' = r → ∃ rest, P = segs ++ rest) →
+        p.evalT x = .ok (r', segs)
   | .app0 (.root _), _, _, _, h, _ => h
-  | .pvP _, _, _, _, h, _ => h
+  | .pvP i, _, _, _, h, _ => by
+    simp only [Tm.evalT, State.aliasPathT_getE, hl i] at h ⊢
+    exact h
   | .app1 (.field f) _ q, hp, r', segs, h, hpre => by
     simp only [Tm.stablePathSM] at hp
-    simp only [Tm.eval, Op1.eval] at h ⊢
+    simp only [Tm.evalT, Op1.eval] at h ⊢
     obtain ⟨⟨r₀, segs₀⟩, h₀, he⟩ := Res.bind_eq_ok.1 h
     cases he
-    rw [stable_evalS hsv q hp h₀ fun hr => by
+    rw [stable_evalS hsv hx hl q hp h₀ fun hr => by
       obtain ⟨rest, hrest⟩ := hpre hr
       exact ⟨.field f :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
           List.nil_append]⟩]
     rfl
   | .app2 .at q k, hp, r', segs, h, hpre => by
     simp only [Tm.stablePathSM, Bool.and_eq_true] at hp
-    simp only [Tm.eval, Op2.eval] at h ⊢
+    simp only [Tm.evalT, Op2.eval] at h ⊢
     obtain ⟨⟨r₀, segs₀⟩, h₀, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨v, hv, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨_, hc, he⟩ := Res.bind_eq_ok.1 h
     cases he
-    rw [stable_evalS hsv q hp.1 h₀ fun hr => by
+    rw [stable_evalS hsv hx hl q hp.1 h₀ fun hr => by
       obtain ⟨rest, hrest⟩ := hpre hr
       exact ⟨.at i :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
-          List.nil_append]⟩, Res.ok_bind, keyFreeS_eval k hp.2, hv, Res.ok_bind, hi,
+          List.nil_append]⟩, Res.ok_bind, keyFreeS_evalT hl k hp.2, hv, Res.ok_bind, hi,
       Res.ok_bind]
-    have hτ : (σ.withGlob τ).glob = τ := by
-      rw [withGlob_saveStorage hsv]; rfl
-    rw [hτ, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
+    rw [hx, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
     · rfl
     by_cases hr : r₀ = r
     · subst hr
@@ -385,12 +390,13 @@ theorem stable_evalS {σ : EState C Γ} {τ : Semantics.State} {r : Name} {P : L
   | .app3 .atIn _ _ _, h, _, _, _, _ => by simp only [Tm.stablePathSM, Bool.false_eq_true] at h
 
 /-- **The last slot after the push is the slot past the end before it.** -/
-theorem lastSlotS_eval {σ : EState C Γ} {P : Tm C Γ .path} (hP : P.stablePathSM = true) {E : Ty}
+theorem lastSlotS_eval {σ x : State C Γ} {P : Tm C Γ .path} (hP : P.stablePathSM = true) {E : Ty}
     {τ : Semantics.State}
-    (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ = .ok τ) :
-    (lastSlotS P).eval (σ.withGlob { σ.glob with storage := τ.storage }) =
-      (Tm.app1 .next rfl P).eval σ := by
-  simp only [Tm.eval, Op2.eval, Op0.eval, pure_bind] at hs
+    (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).evalT σ = .ok τ)
+    (hx : x.globE = { σ.globE with storage := τ.storage })
+    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
+    (lastSlotS P).evalT x = (Tm.app1 .next rfl P).evalT σ := by
+  simp only [Tm.evalT, Op2.eval, Op0.eval, pure_bind] at hs
   obtain ⟨⟨r, segs⟩, hp, hs⟩ := Res.bind_eq_ok.1 hs
   obtain ⟨⟨τ', n⟩, hpp, he⟩ := Res.bind_eq_ok.1 hs
   cases he
@@ -401,14 +407,11 @@ theorem lastSlotS_eval {σ : EState C Γ} {P : Tm C Γ .path} (hP : P.stablePath
     obtain ⟨τ'', hsv, he⟩ := Res.bind_eq_ok.1 hpp
     cases he
     have hst := withGlob_saveStorage hsv
-    have hp' := stable_evalS hsv P hP hp (fun _ => ⟨[], by simp only [List.append_nil]⟩)
+    have hx' : x.globE = τ' := by rw [hx, ← hst]
+    have hp' := stable_evalS hsv hx' hl P hP hp (fun _ => ⟨[], by simp only [List.append_nil]⟩)
     have hf := State.findStorage_saveStorage_same hsv
-    have hτ : ({ σ.glob with storage := τ'.storage } : Semantics.State) = τ' := hst.symm
-    dsimp only
-    rw [hτ]
-    simp only [lastSlotS, Tm.eval, Op2.eval, Op1.eval, Op0.eval, hp', hp, hc, Res.ok_bind]
-    have hg : (σ.withGlob τ').glob = τ' := by rw [hst]; rfl
-    simp only [hg, Close.arrayLen_eq, hf, Close.arrLen, evalBinop,
+    simp only [lastSlotS, Tm.evalT, Op2.eval, Op1.eval, Op0.eval, hp', hp, hc, Res.ok_bind]
+    simp only [hx', Close.arrayLen_eq, hf, Close.arrLen, evalBinop,
       Semantics.applyBinOp, Semantics.Value.asInt, bind, Except.bind, Semantics.checkArith,
       BinOp.retTy, BinOp.isArith, Close.checkIndex_eq, List.length_append, List.length_singleton,
       pure, Except.pure]
@@ -418,66 +421,68 @@ theorem lastSlotS_eval {σ : EState C Γ} {P : Tm C Γ .path} (hP : P.stablePath
     done
   | prim _ | struct _ | map _ _ => nomatch hpp
 
-theorem _root_.Solidity.Env.set_get_self {Γ : Ctx} {t : LTy} (i : Idx Γ t) (e : Env C Γ) :
-    Env.set i (Env.get i e) e = e := by
-  induction i with
-  | here => rfl
-  | there i ih => exact congrArg (e.1, ·) (ih e.2)
-
 /-- `extend(storage, a)` returns where `next(a)` does. -/
-theorem next_eval_of_extend {σ : EState C Γ} {P : Tm C Γ .path} {E : Ty} {τ : Semantics.State}
-    (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ = .ok τ) :
-    ∃ v, (Tm.app1 .next rfl P).eval σ = .ok v := by
-  simp only [Tm.eval, Op2.eval, Op0.eval, pure_bind] at hs
+theorem next_eval_of_extend {σ : State C Γ} {P : Tm C Γ .path} {E : Ty} {τ : Semantics.State}
+    (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).evalT σ = .ok τ) :
+    ∃ v, (Tm.app1 .next rfl P).evalT σ = .ok v := by
+  simp only [Tm.evalT, Op2.eval, Op0.eval, pure_bind] at hs
   obtain ⟨⟨r, segs⟩, hp, hs⟩ := Res.bind_eq_ok.1 hs
   obtain ⟨⟨τ', n⟩, hpp, -⟩ := Res.bind_eq_ok.1 hs
   simp only [pushPlaceAt] at hpp
   obtain ⟨c, hc, hpp⟩ := Res.bind_eq_ok.1 hpp
   cases c with
   | array elems sh fx =>
-    exact ⟨_, by simp only [Tm.eval, Op1.eval, hp, hc, Res.ok_bind]; rfl⟩
+    exact ⟨_, by simp only [Tm.evalT, Op1.eval, hp, hc, Res.ok_bind]; rfl⟩
   | prim _ | struct _ | map _ _ => nomatch hpp
 
-/-- `pushSplit`'s soundness on the update it splits. -/
+/-- `pushSplit`'s soundness on the update it splits: a state the parallel
+update lands on, its alias set back to what it held before, is a state the
+push alone lands on, and the alias's own update then lands on the first. -/
 theorem holds_push_alias {m : Modality} {E : Ty} {P : Tm C Γ .path} {R : RefTy}
     {i : Idx Γ (.alias R)} {φ : Fml C Γ} (hP : P.stablePathSM = true) (σ : State C Γ)
     (hψ : holds σ (.upd m (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))
       (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ))) :
     holds σ (.upd m ((Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P))).snoc
       (.local i (.path (.app1 .next rfl P)))) φ) := by
-  rw [holds_upd_erased]
-  show m.afterC (fun τ => ∀ σ' : State C Γ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
-    (Upd.apply σ.erase _)
-  have hψ' : m.afterC (fun τ => ∀ σ' : State C Γ, σ'.erase = τ → σ.H <+: σ'.H →
-      holds σ' (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ))
-      (Upd.apply σ.erase (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))) :=
-        (holds_upd_erased _ _ _ _).1 hψ
-  simp only [Upd.apply, UpdElem.write, pure_bind] at hψ' ⊢
-  cases hS : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ.erase with
+  have hψ' : Upd.afterT m σ (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))
+      (holds · (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ)) := hψ
+  show Upd.afterT m σ _ (holds · φ)
+  rw [Upd.afterT_applyV] at hψ' ⊢
+  simp only [Upd.applyV, UpdElem.applyV, UpdElem.globT, Rhs.evalT, pure_bind, bind_assoc] at hψ' ⊢
+  cases hS : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).evalT σ with
   | error e => simp only [hS, Res.error_bind] at hψ' ⊢; exact hψ'
   | ok τ =>
     obtain ⟨v, hv⟩ := next_eval_of_extend hS
-    have hl := lastSlotS_eval hP hS
-    rw [hv] at hl
-    simp only [hS, Res.ok_bind, Rhs.eval, hv] at hψ' ⊢
-    intro σ'' he hH
-    let τ₁ := σ.erase.withGlob { σ.erase.glob with storage := τ.storage }
+    simp only [hS, Res.ok_bind, hv] at hψ' ⊢
+    intro σ'' hg hl hH
+    -- the state the push alone lands on: `σ''` with the alias as it was
     let w : Option (SRef C (.ref R)) := TEnv.get i σ.env
     let σ' : State C Γ := σ''.setLocal i w
-    have he' : σ'.erase = τ₁ := by
-      simp only [σ', State.setLocal_erase, he, EState.setLocal_setLocal]
-      have hw : LTy.TDenote.erase (H := σ''.H) (LTy.alias R) w = Env.get i τ₁.env :=
-        (TEnv.get_erase i σ.env).symm
-      show τ₁.withEnv (Env.set i (LTy.TDenote.erase (H := σ''.H) (LTy.alias R) w) τ₁.env) = τ₁
-      rw [hw, Env.set_get_self]
-      rfl
-    have h₂ := hψ' σ' he' hH
-    rw [holds_upd_erased] at h₂
-    change m.afterC _ (Upd.apply σ'.erase _) at h₂
-    dsimp only at hl
-    rw [he'] at h₂
-    simp only [τ₁, Upd.apply, UpdElem.write, Rhs.eval, pure_bind, hl, Res.ok_bind] at h₂
-    exact h₂ σ'' he (List.prefix_refl _)
+    have hg' : σ'.globE = { σ.globE with storage := τ.storage } := hg
+    have hl' : ∀ {t : LTy} (j : Idx Γ t), σ'.getE j = σ.loc t j := by
+      intro t j
+      by_cases h : i.toNat = j.toNat
+      · obtain rfl := Idx.ty_eq_of_toNat h
+        obtain rfl := Idx.toNat_inj i j h
+        exact State.getE_setLocal_same σ'' i w
+      · rw [State.getE_setLocal_ne σ'' i j h w, hl j]
+        dsimp only
+        rw [Locs.set_ne _ _ _ h]
+    have h₂ := hψ' σ' hg' hl' hH
+    have h₂' : Upd.afterT m σ' (Upd.nil.snoc (.local i (.path (lastSlotS P)))) (holds · φ) := h₂
+    rw [Upd.afterT_applyV] at h₂'
+    have hlast := lastSlotS_eval hP hS hg' (fun j => (hl' j).trans rfl)
+    simp only [Upd.applyV, UpdElem.applyV, Rhs.evalT, pure_bind, hlast, hv, Res.ok_bind] at h₂'
+    refine h₂' σ'' (by show σ''.globE = σ'.globE; rw [hg']; exact hg) (fun j => ?_)
+      (List.prefix_refl _)
+    rw [hl j]
+    dsimp only
+    by_cases h : i.toNat = j.toNat
+    · obtain rfl := Idx.ty_eq_of_toNat h
+      obtain rfl := Idx.toNat_inj i j h
+      rw [Locs.set_same, Locs.set_same]
+    · rw [Locs.set_ne _ _ _ h, Locs.set_ne _ _ _ h]
+      exact (hl' j).symm
 
 /-- **The push, then its alias, give the parallel update**: a state the
 first leaves in reads the alias at the last slot where the second read it

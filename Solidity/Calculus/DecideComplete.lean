@@ -1354,7 +1354,7 @@ its type (`LayoutOk`). -/
 any state with the same storage (`layoutOk_of_wt`, scoped). -/
 theorem layoutOk_of_wtS {Γ : Ctx} {τ : State C Γ} {a : Fml C Γ} {vs : List (Name × Ty)}
     (hw : a.wtRootsS? = some vs) (ha : holds τ a) {σ : Semantics.State}
-    (hs : σ.storage = τ.erase.storage) : LayoutOk vs σ := by
+    (hs : σ.storage = τ.globE.storage) : LayoutOk vs σ := by
   unfold Fml.wtRootsS? at hw
   split at hw
   · rename_i vs' _
@@ -1362,7 +1362,7 @@ theorem layoutOk_of_wtS {Γ : Ctx} {τ : State C Γ} {a : Fml C Γ} {vs : List (
     obtain ⟨x, hx⟩ := ha
     have hwb : storageWtB vs σ.storage = true := by
       rw [hs]
-      simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at hx
+      simp only [Tm.evalT, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at hx
       split at hx
       · rename_i hw'
         exact hw'
@@ -1384,12 +1384,12 @@ theorem layoutOk_nil (σ : Semantics.State) : LayoutOk [] σ :=
 /-- **A leaf holds where it does with its `wt(storage)` set aside**, in
 every state whose storage holds the layout the premise gives. -/
 theorem holds_of_dropWtSM : ∀ {Γ : Ctx} (φ : Fml C Γ) (τ : State C Γ) (σ : Semantics.State),
-    σ.storage = τ.erase.storage → (LayoutOk φ.layoutSM σ → holds τ φ.dropWtSM) → holds τ φ := by
+    σ.storage = τ.globE.storage → (LayoutOk φ.layoutSM σ → holds τ φ.dropWtSM) → holds τ φ := by
   intro Γ φ
   induction φ with
   | all x p φ ih =>
     intro τ σ hs h v
-    refine ih (τ.push (t := .val p) v) σ (by rw [hs, State.push_erase]; rfl) fun hL => ?_
+    refine ih (τ.push (t := .val p) v) σ hs fun hL => ?_
     exact h hL v
   | imp a ψ _ _ =>
     intro τ σ hs h

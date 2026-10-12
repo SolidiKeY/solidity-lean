@@ -7,12 +7,10 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
 (`State`, `Semantics/State.lean`) and the typed run (`Prog.run`,
 `Frames.run`): `holds`, `Valid`.
 
-* A term in an equation or a definedness test means what `Update.lean`'s
-  term means on the state's erasure (`State.erase`, `Semantics/Erased.lean`):
-  a local is read by its position, a symbol on the global part; its symbols
-  are untyped (decision 83).  The typed readers (`Tm.evalT`, `Tm.denoteT`,
-  `Calculus/Lands.lean`) equal these on the erasure; these clauses move to
-  them with the closer (W9.7.2).
+* A term in an equation or a definedness test is read on the typed state
+  (`Tm.denoteT`, `Tm.evalT`, `Calculus/Lands.lean`): a local by its
+  position, erased at its type (`State.getE`), a symbol on the global part
+  erased (`State.globE`); its symbols are untyped (decision 83).
 * An update is parallel (every right-hand side read in the state it is
   applied in) and leaves the context `Δ` its type says: a declaration
   pushes, a pop drops a suffix, a `drop` thins.  What follows it is read in
@@ -21,8 +19,10 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
   (`Upd.held`), read on the typed state it is applied in, and a heap typing
   that extends that state's, as a typed run's does (`Out.ext`).  Those are
   the typed states that erase to what `Upd.apply` computes on the erasure
-  (`Upd.lands_iff`), so the clause is also read there (`holds_upd_erased`,
-  what the layers above read until W9.7.2 ports them).  The rules' updates
+  (`Upd.lands_iff`), so the clause is also read there (`holds_upd_erased`;
+  with `holds_eq_erased` and `holds_defined_erased`, what the update laws
+  read until W9.7.3; the closer and the decision procedure read the typed
+  clauses, W9.7.2).  The rules' updates
   land on the state the statement's typed run ends in; an update that
   lands on no typed state (a value of another type) says nothing.
 * A modality runs the program and its frames with the typed run: a `bool`
@@ -83,8 +83,8 @@ def Prog.runFrames {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁
 /-- **Whether `φ` holds in the typed state `σ`.** -/
 def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
-  | _, σ, .eq a b => Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase)
-  | _, σ, .defined t => ∃ x, t.eval σ.erase = .ok x
+  | _, σ, .eq a b => Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ)
+  | _, σ, .defined t => ∃ x, t.evalT σ = .ok x
   | _, σ, .not φ => ¬ holds σ φ
   | _, σ, .and φ ψ => holds σ φ ∧ holds σ ψ
   | _, σ, .imp φ ψ => holds σ φ → holds σ ψ
@@ -103,6 +103,19 @@ theorem holds_upd_erased {Γ Δ : Ctx} (σ : State C Γ) (m : Modality) (U : Upd
       m.afterC (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
         (U.apply σ.erase) :=
   Upd.afterT_iff m σ U _
+
+/-- `holds`' equation clause, read on the erasure (`Tm.denoteT_eq`): what
+the layers above `Logic` unfolded before W9.7.2. -/
+theorem holds_eq_erased {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
+    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase) := by
+  show Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) ↔ _
+  rw [Tm.denoteT_eq, Tm.denoteT_eq]
+
+/-- `holds`' definedness clause, read on the erasure (`Tm.evalT_eq`). -/
+theorem holds_defined_erased {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
+    holds σ (.defined t) ↔ ∃ x, t.eval σ.erase = .ok x := by
+  show (∃ x, t.evalT σ = .ok x) ↔ _
+  rw [Tm.evalT_eq]
 
 /-- Every local's type has a value in every typed state: an alias and a
 memory local unset among them (decision 17'). -/

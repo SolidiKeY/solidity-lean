@@ -56,8 +56,8 @@ has fixed `p`, so the law is named bare.
 
 The formulas and the sequent are the scoped ones (`open scoped
 Solidity.Scoped`): the leaf `ageWriteRead` reads by hand is the scoped
-leaf (`sol_leaf`) read on the erased state (`sol_close_unwrap`,
-`CloseS.holdsE`, its terms a constructor at a time), the interpreter, where
+leaf (`sol_leaf`) read on the typed state (`sol_close_unwrap`, `holds`,
+its terms a constructor at a time), the interpreter, where
 the `consr` path is; the merge, the
 split and the rewrite of `ageWriteReadKeY` are the scoped sequent's
 (`Calculus/UpdateRules.lean`, read by today's lines in
@@ -89,18 +89,20 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   sol_leaf
   sol_close_unwrap
   intro σ
-  -- the leaf read on the erased state (`CloseS.holdsE`), a term at a time
-  simp only [CloseS.holdsE, CloseS.apply_snoc, CloseS.apply_nil, CloseS.write_storage,
-    CloseS.write_local, CloseS.rhs_val, CloseS.eval_save, CloseS.eval_find, CloseS.eval_lit,
-    CloseS.eval_storage, CloseS.eval_field, CloseS.eval_root, Modality.wp_bind, Modality.wp_ok,
-    LTy.forallE, CloseS.glob_push, CloseS.glob_withGlob, CloseS.setLocal_push_here,
-    CloseS.eval_pvV, CloseS.denote_pvV, CloseS.denote_lit, CloseS.get_push_here]
+  -- the leaf read on the typed state (`holds`), a term at a time; the
+  -- states the updates land on read as `Upd.applyV` leaves them
+  simp only [CloseS.holds_upd, CloseS.applyV_snoc, CloseS.applyV_nil, CloseS.elem_storage,
+    CloseS.glob_storage, CloseS.elem_local, CloseS.rhs_val, CloseS.eval_save, CloseS.eval_find,
+    CloseS.eval_lit, CloseS.eval_storage, CloseS.eval_field, CloseS.eval_root, Modality.wp_bind,
+    Modality.wp_ok, CloseS.holds_bind, CloseS.holds_eqD, CloseS.landedRest_def,
+    CloseS.Landed.globE_eq, CloseS.Landed.loc_eq, State.globE_push, CloseS.loc_push,
+    CloseS.eval_pvV, CloseS.set_here_here]
   rw [Modality.wp_box]
-  intro τ hsave y
+  intro τ hsave x y
   -- select on save, by hand: what did the write leave at `alice`?
   unfold State.saveStorage at hsave
   unfold State.findStorage
-  cases hv : lookupBy "alice" σ.erase.glob.storage with
+  cases hv : lookupBy "alice" σ.globE.storage with
   | none =>
     rw [hv] at hsave
     cases hsave
@@ -130,7 +132,7 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
         dsimp only
         rw [Semantics.SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok]
         -- `x = 42`
-        exact ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
+        exact fun _ => rfl
     | _ =>
       rw [List.nil_append, Semantics.SVal.save] at hsave
       cases hsave
