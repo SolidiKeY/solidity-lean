@@ -3,17 +3,15 @@ import Solidity.Semantics.Run
 /-!
 # The value-level erasure
 
-What the closer's terms, read on a typed state's erasure (its global part
-`State.globE` and its locals `State.loc`, the pair an update computes,
-`Upd.applyV`), see of the typed run, below the statements: a typed result against an untyped one (`TRes.Agrees`: the
-value erased, the same `revert` or `panic`; a typed `diverge` and a typed
-`exhausted` against anything), and each storage, heap and state operation
-against its untyped namesake (`SRef.erase_field`, `MAddr.erase`,
-`writeAddr_erase`, `opStoreT_erase`, `bumpStoreT_erase`,
-`TRun.clearT_erase`, …), from `Semantics/StorageErase.lean` and
-`Semantics/HeapErase.lean`.  The rules' soundness (`Calculus/Sound*.lean`)
-reads the typed run against the rules' terms through these
-(`Calculus/LowerRun.lean`); no program is evaluated on the erasure.
+The typed run's values against the untyped interpreter's, below the
+statements: an expression's evaluators do not panic (`Val.evalT_noPanic`
+and kin), and the value-level erasure lemmas the EVM backend and the
+Theory's abstraction read (`MAddr.erase`, `newArrT_erase`, `compound_erase`,
+`evalBinop_short`/`_long`, …), from `Semantics/StorageErase.lean` and
+`Semantics/HeapErase.lean`.  Since W9.8.3 the rules' soundness reads the
+typed run against typed terms with nothing erased (`Calculus/LowerRun.lean`,
+`TRes.AgreesO`); the statement-level erasure lemmas (`TRes.Agrees`,
+`opStoreT_erase`, …) are gone.
 
 A storage copy overlays a struct by position in the typed run and by name in
 the erasure (`SVal.overlay_erase`), which agree since no struct repeats a
@@ -27,68 +25,7 @@ open Semantics (Value Res lookupBy)
 
 variable {C : Contract}
 
-/-! ## Agreement of results -/
-
-/-- A typed result against an untyped one: the value erased, the same
-`revert` or `panic`; a typed `diverge` or `exhausted` against anything. -/
-def TRes.Agrees {α β : Type} (f : α → β) : TRes α → Res β → Prop
-  | .ok a, u => u = .ok (f a)
-  | .error .revert, u => u = .error .revert
-  | .error .panic, u => u = .error .panic
-  | .error .diverge, _ => True
-  | .error .exhausted, _ => True
-
-namespace TRes.Agrees
-
-variable {α β γ δ : Type} {f : α → β} {g : γ → δ}
-
-theorem pure (a : α) : TRes.Agrees f (.ok a) (.ok (f a)) := rfl
-
-theorem bind {t : TRes α} {u : Res β} (h : TRes.Agrees f t u) {k : α → TRes γ}
-    {k' : β → Res δ} (hk : ∀ a, TRes.Agrees g (k a) (k' (f a))) :
-    TRes.Agrees g (t >>= k) (u >>= k') := by
-  match t, h with
-  | .ok a, h => subst h; exact hk a
-  | .error .revert, h => subst h; rfl
-  | .error .panic, h => subst h; rfl
-  | .error .diverge, _ => trivial
-  | .error .exhausted, _ => trivial
-
-theorem map {t : TRes α} {u : Res β} (h : TRes.Agrees f t u) {k : α → γ} {k' : β → δ}
-    (hk : ∀ a, k' (f a) = g (k a)) : TRes.Agrees g (k <$> t) (k' <$> u) := by
-  match t, h with
-  | .ok a, h => subst h; exact congrArg Except.ok (hk a)
-  | .error .revert, h => subst h; rfl
-  | .error .panic, h => subst h; rfl
-  | .error .diverge, _ => trivial
-  | .error .exhausted, _ => trivial
-
-theorem ofOpt (x : Option α) : TRes.Agrees f (TRes.ofOpt x) (toRes f x) := by
-  cases x <;> rfl
-
-theorem of_eq {a : α} {u : Res β} (h : u = .ok (f a)) : TRes.Agrees f (.ok a) u := h
-
-/-- A typed result against an untyped one followed by a step that only
-converts the value. -/
-theorem bind_pure {t : TRes α} {u : Res β} (h : TRes.Agrees f t u) {k' : β → Res δ}
-    {g' : α → δ} (hk : ∀ a, k' (f a) = .ok (g' a)) : TRes.Agrees g' t (u >>= k') := by
-  match t, h with
-  | .ok a, h => subst h; exact hk a
-  | .error .revert, h => subst h; rfl
-  | .error .panic, h => subst h; rfl
-  | .error .diverge, _ => trivial
-  | .error .exhausted, _ => trivial
-
-theorem congr {f' : α → β} {t : TRes α} {u : Res β} (h : TRes.Agrees f t u)
-    (hf : ∀ a, f a = f' a) : TRes.Agrees f' t u := by
-  match t, h with
-  | .ok a, h => subst h; exact congrArg Except.ok (hf a)
-  | .error .revert, h => exact h
-  | .error .panic, h => exact h
-  | .error .diverge, _ => trivial
-  | .error .exhausted, _ => trivial
-
-end TRes.Agrees
+/-! ## Typed results -/
 
 /-- A typed result that does not panic (an expression's: it reverts or
 diverges only). -/
@@ -120,12 +57,6 @@ theorem SVal.asValue_erase_prim {p : PrimTy} (v : SVal (.prim p)) :
 theorem MVal.asValue_erase_prim {H : HTy} {p : PrimTy} (x : MVal H (.prim p)) :
     (MVal.erase (.prim p) x).asValue = .ok (PrimTy.erase (p := p) x) := by
   cases p <;> rfl
-
-theorem SRef.erase_field {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
-    (h : C.fieldType s f = some T) :
-    (r.field h).erase = (r.root, r.path.erase ++ [.field f]) := by
-  simp only [SRef.field, SRef.erase, SRef.append, Path.erase_append]
-  rfl
 
 theorem SRef.erase_index {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R))
     (it : IndexTy R k V) (i : Int) : (r.index it i).erase = (r.root, r.path.erase ++ [.at i]) := by
@@ -223,17 +154,10 @@ theorem Value.toSVal_erase {p : PrimTy} (x : p.Denote) :
     (PrimTy.erase x).toSVal = (SVal.prim x).erase := by
   rw [SVal.erase_prim]; cases p <;> rfl
 
-theorem Value.toMVal_erase {H : HTy} {p : PrimTy} (x : p.Denote) :
-    (PrimTy.erase x).toMVal = MVal.erase (H := H) (.prim p) x := by
-  cases p <;> rfl
-
 theorem Src.valueT_noPanic (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valueT σ).NoPanic := by
   cases r with
   | val v => exact (v.evalT_noPanic σ).bind fun _ => fun h => nomatch h
   | copy p _ => exact (p.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-
-theorem State.withHeap_globE (σ : State C Γ) (hp : Heap σ.H) :
-    (σ.withHeap hp).globE = { σ.globE with heap := hp.erase } := rfl
 
 theorem newArrT_erase : (R : RefTy) → (n : PrimTy.uint.Denote) → (h : R.newArrOk = true) →
     (newArrT R n h).erase = newArrVal R n.1
@@ -254,45 +178,11 @@ theorem MAddr.erase_wk {H H' : HTy} (e : H <+: H') {T : Ty} (a : MAddr H T) :
     (a.wk e).erase = a.erase := by
   cases a <;> rfl
 
-theorem writeAddr_erase (σ : State C Γ) {T : Ty} (a : MAddr σ.H T) (v : MVal σ.H T) :
-    writeAddr σ.globE (MVal.erase T v) a.erase =
-      toRes (fun hp : Heap σ.H => { σ.globE with heap := hp.erase }) (σ.heap.writeAddr a v) := by
-  cases a with
-  | field r h => exact Heap.memWriteField_erase (σ := σ.globE) rfl r h v
-  | index r a i => exact Heap.memWriteIndex_erase (σ := σ.globE) rfl r a i v
-
-theorem readLoc_erase (σ : State C Γ) {p : PrimTy} (a : MAddr σ.H (.prim p)) :
-    Semantics.readLoc σ.globE a.erase = toRes PrimTy.erase (σ.heap.readAddr a) := by
-  cases a with
-  | field r h =>
-    simp only [Semantics.readLoc, MAddr.erase, Heap.getObj_erase (σ := σ.globE) rfl r, bind,
-      Except.bind]
-    show (match lookupBy _ (MFields.erase _ (σ.heap.get r)) with
-      | some v => v.asValue | none => .error .undef) = _
-    rw [MFields.lookupBy_erase _ (σ.heap.get r) h]
-    exact MVal.asValue_erase_prim _
-  | index r a i =>
-    simp only [Semantics.readLoc, MAddr.erase, Heap.getObj_erase (σ := σ.globE) rfl r, bind,
-      Except.bind, MObj.erase_arr a (σ.heap.get r), Heap.readAddr, Heap.index]
-    by_cases h0 : 0 ≤ i
-    · by_cases hl : i.toNat < (MObj.elems a (σ.heap.get r)).length
-      · simp only [List.length_map, h0, hl, and_self, ↓reduceDIte, ↓reduceIte,
-          List.get_eq_getElem, List.getElem_map, List.getElem?_eq_getElem hl, toRes]
-        exact MVal.asValue_erase_prim _
-      · simp only [List.length_map, h0, hl, and_false, ↓reduceDIte, ↓reduceIte,
-          List.getElem?_eq_none (Nat.le_of_not_lt hl), toRes]
-    · simp only [h0, false_and, ↓reduceDIte, ↓reduceIte, toRes]
-
 theorem writeLoc_eq (s : Semantics.State) (a : Semantics.Addr) (v : Value) :
     Semantics.writeLoc s a v = writeAddr s v.toMVal a := by
   cases a <;> rfl
 
 /-! ### Compound assignments and `++` -/
-
-theorem bind_bind_eq {ε α β γ : Type} {x : Except ε α} {f : α → Except ε β}
-    {K : β → Except ε γ} {y : Except ε β} (h : x >>= f = y) :
-    (x >>= fun a => f a >>= K) = y >>= K := by
-  rw [← h, bind_assoc]
 
 theorem PrimTy.erase_numeric {p : PrimTy} (hp : p.isNumeric = true) (x : p.Denote) :
     PrimTy.erase x = .int (PrimTy.key x) := by
@@ -310,184 +200,14 @@ theorem compound_erase {op : BinOp} (hop : op.hasCompoundAssign = true) {p : Pri
   | none => rfl
   | some n => exact PrimTy.checkArith_ofInt hp n
 
-theorem compound_erase' {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy}
-    (hp : p.isNumeric = true) (x y : p.Denote) :
-    (Semantics.applyBinOp op (PrimTy.erase x) (PrimTy.erase y) >>= Semantics.checkArith (.prim p)) =
-      toRes PrimTy.erase (compoundT op p (PrimTy.key x) (PrimTy.key y)) := by
-  rw [PrimTy.erase_numeric hp x, PrimTy.erase_numeric hp y]
-  exact compound_erase hop hp _ _
-
-theorem asInt_erase_numeric {p : PrimTy} (hp : p.isNumeric = true) (x : p.Denote) :
-    (PrimTy.erase x).asInt = .ok (PrimTy.key x) := by
-  rw [PrimTy.erase_numeric hp x]
-  rfl
-
 theorem bump_erase {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) (x : Int) :
     Semantics.checkArith (.prim p) (.int (if op.isIncrement then x + 1 else x - 1)) =
       toRes PrimTy.erase (bumpT op p x) :=
   PrimTy.checkArith_ofInt hp _
 
-theorem opStoreT_erase (σ : State C Γ) {op : BinOp} (hop : op.hasCompoundAssign = true)
-    {p : PrimTy} (hp : p.isNumeric = true) (r : SRef C (.prim p)) (v : p.Denote) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (opStoreT σ op r v)
-      ((·, σ.loc) <$> opStore σ.globE op p r.root r.path.erase (PrimTy.erase v)) := by
-  simp only [opStoreT, opStore, Storage.findStorage_erase (σ := σ.globE) rfl r]
-  cases σ.storage.find r with
-  | none => rfl
-  | some old =>
-    simp only [TRes.ofOpt, toRes, ok_bind, SVal.asValue_erase_prim]
-    rw [bind_bind_eq (compound_erase' hop hp _ _)]
-    cases compoundT op p (PrimTy.key (SVal.view old)) (PrimTy.key v) with
-    | none => rfl
-    | some new =>
-      simp only [toRes, ok_bind, Value.toSVal_erase,
-        Storage.saveStorage_erase (σ := σ.globE) rfl r]
-      cases σ.storage.save r (SVal.prim new) <;> rfl
-
-theorem opMemT_erase (σ : State C Γ) {op : BinOp} (hop : op.hasCompoundAssign = true)
-    {p : PrimTy} (hp : p.isNumeric = true) (a : MAddr σ.H (.prim p)) (v : p.Denote) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (opMemT σ op a v)
-      ((·, σ.loc) <$> opMem σ.globE op p a.erase (PrimTy.erase v)) := by
-  simp only [opMemT, opMem, readLoc_erase σ a]
-  cases σ.heap.readAddr a with
-  | none => rfl
-  | some old =>
-    simp only [TRes.ofOpt, toRes, ok_bind]
-    rw [bind_bind_eq (compound_erase' hop hp _ _)]
-    cases compoundT op p (PrimTy.key (p := p) old) (PrimTy.key v) with
-    | none => rfl
-    | some new =>
-      simp only [toRes, ok_bind, writeLoc_eq, Value.toMVal_erase (H := σ.H),
-        writeAddr_erase σ a]
-      cases σ.heap.writeAddr a new <;> rfl
-
-theorem bumpStoreT_erase (σ : State C Γ) (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true)
-    (r : SRef C (.prim p)) {k' : Semantics.State × Value → (Semantics.State × Locs C Γ) × Value}
-    (hk : ∀ τ v, k' (τ, v) = ((τ, σ.loc), v)) :
-    TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2))
-      (bumpStoreT σ op r) (k' <$> bumpStore σ.globE op p r.root r.path.erase) := by
-  simp only [bumpStoreT, bumpStore, Storage.findStorage_erase (σ := σ.globE) rfl r]
-  cases σ.storage.find r with
-  | none => rfl
-  | some old =>
-    simp only [TRes.ofOpt, toRes, ok_bind, SVal.asValue_erase_prim, asInt_erase_numeric hp,
-      bump_erase hp]
-    cases bumpT op p (PrimTy.key (SVal.view old)) with
-    | none => rfl
-    | some new =>
-      simp only [toRes, ok_bind, Value.toSVal_erase,
-        Storage.saveStorage_erase (σ := σ.globE) rfl r]
-      cases σ.storage.save r (SVal.prim new) with
-      | none => rfl
-      | some st =>
-        refine TRes.Agrees.of_eq ?_
-        simp only [ok_bind]
-        cases op.isPre <;> exact congrArg Except.ok (hk _ _)
-
-theorem bumpMemT_erase (σ : State C Γ) (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true)
-    (a : MAddr σ.H (.prim p)) {k' : Semantics.State × Value → (Semantics.State × Locs C Γ) × Value}
-    (hk : ∀ τ v, k' (τ, v) = ((τ, σ.loc), v)) :
-    TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2))
-      (bumpMemT σ op a) (k' <$> bumpMem σ.globE op p a.erase) := by
-  simp only [bumpMemT, bumpMem, readLoc_erase σ a]
-  cases σ.heap.readAddr a with
-  | none => rfl
-  | some old =>
-    simp only [TRes.ofOpt, toRes, ok_bind, asInt_erase_numeric hp, bump_erase hp]
-    cases bumpT op p (PrimTy.key (p := p) old) with
-    | none => rfl
-    | some new =>
-      simp only [toRes, ok_bind, writeLoc_eq, Value.toMVal_erase (H := σ.H), writeAddr_erase σ a]
-      cases σ.heap.writeAddr a new with
-      | none => rfl
-      | some hp' =>
-        refine TRes.Agrees.of_eq ?_
-        simp only [ok_bind]
-        cases op.isPre <;> exact congrArg Except.ok (hk _ _)
-
 theorem LTy.TDenote.erase_val {H : HTy} {p : PrimTy} (x : (LTy.val p).TDenote C H) :
     LTy.TDenote.erase (.val p) x = PrimTy.erase (p := p) x := rfl
 
-/-! ### Calls and payments -/
-
-theorem State.withEnv_globE {Δ : Ctx} (σ : State C Γ) (e : TEnv C σ.H Δ) :
-    (σ.withEnv e).globE = σ.globE := rfl
-
 end Eval
-
-/-! ## Statements -/
-
-theorem PrimTy.uint_nonneg (x : PrimTy.uint.Denote) : 0 ≤ x.1 := by
-  have h := x.2
-  simp only [PrimTy.inRange, decide_eq_true_eq] at h
-  exact h.1
-
-namespace TRun
-
-variable {Γ : Ctx}
-
-theorem clearT_erase (σ : State C Γ) {T : Ty} (a : MAddr σ.H T) (hm : T.mapFree = true) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (clearT σ a hm)
-      ((·, σ.loc) <$> memClear σ.globE a.erase T) := by
-  cases T with
-  | prim p =>
-    show TRes.Agrees _ (do
-        let hp ← TRes.ofOpt (σ.heap.writeAddr a (PrimTy.dflt p))
-        pure (⟨σ.withHeap hp, List.prefix_refl _⟩ : Out C σ.H Γ))
-      ((·, σ.loc) <$> writeAddr σ.globE (PrimTy.default p).toMVal a.erase)
-    rw [← PrimTy.erase_dflt, Value.toMVal_erase (H := σ.H), writeAddr_erase σ a]
-    cases σ.heap.writeAddr a (PrimTy.dflt p) <;> rfl
-  | ref R =>
-    simp only [clearT, memClear]
-    rw [State.allocDefault_erase σ R hm, ok_bind]
-    dsimp only
-    have hw := writeAddr_erase (σ.allocDefaultG R hm).st (a.wk (σ.allocDefaultG R hm).ext)
-      (σ.allocDefaultG R hm).val
-    rw [MAddr.erase_wk] at hw
-    rw [show writeAddr (σ.allocDefault R hm).1.globE (.ref (σ.allocDefault R hm).2.id)
-      a.erase = _ from hw]
-    cases (σ.allocDefaultG R hm).st.heap.writeAddr (a.wk (σ.allocDefaultG R hm).ext)
-      (σ.allocDefaultG R hm).val with
-    | none => rfl
-    | some hp =>
-      refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
-      show (_, σ.loc) = (((σ.allocDefaultG R hm).st.withHeap hp).globE,
-        ((σ.allocDefaultG R hm).st.withHeap hp).loc)
-      rw [State.withHeap_globE]
-      exact congrArg _ (State.adopt_loc σ _).symm
-
-end TRun
-
-namespace TRes.Agrees
-
-variable {α β γ : Type} {f : α → β}
-
-/-- An agreement ending in a value: the untyped side ends there too. -/
-theorem eq_ok {t : TRes α} {u : Res β} (h : TRes.Agrees f t u) {a : α} (ht : t = .ok a) :
-    u = .ok (f a) := by
-  subst ht; exact h
-
-/-- An agreement with a typed halt that is not a divergence nor an
-exhaustion: the untyped side halts too. -/
-theorem eq_error {t : TRes α} {u : Res β} (h : TRes.Agrees f t u) {e : THalt}
-    (ht : t = .error e) (hd : e ≠ .diverge) (hx : e ≠ .exhausted) : ∃ e', u = .error e' := by
-  subst ht
-  cases e with
-  | revert => exact ⟨_, h⟩
-  | panic => exact ⟨_, h⟩
-  | diverge => exact absurd rfl hd
-  | exhausted => exact absurd rfl hx
-
-/-- An agreement read through an equation of the untyped side. -/
-theorem of_eq_right {t : TRes α} {u u' : Res β} (h : TRes.Agrees f t u) (e : u = u') :
-    TRes.Agrees f t u' := e ▸ h
-
-/-- A pair's agreement read at its first component. -/
-theorem bind_fst {α₁ α₂ β₁ β₂ : Type} {f₁ : α₁ → β₁} {f₂ : α₂ → β₂} {t : TRes (α₁ × α₂)}
-    {u : Res (β₁ × β₂)} (h : TRes.Agrees (fun x => (f₁ x.1, f₂ x.2)) t u) :
-    TRes.Agrees f₁ (t >>= fun x => Pure.pure x.1) (u >>= fun y => Pure.pure y.1) :=
-  TRes.Agrees.bind h fun _ => rfl
-
-end TRes.Agrees
 
 end Solidity

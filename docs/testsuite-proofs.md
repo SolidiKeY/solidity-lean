@@ -341,7 +341,7 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   (`Update.lean`): `Modality.after` and the run is not a panic.  So no
   modality holds of a panic; `revert` and `stuck` keep their meaning (box
   true, diamond false).  An update keeps `Modality.after`: a term never
-  panics (`Calculus/NoPanic.lean`, `Upd.apply_noPanic`), so the two
+  panics (`Calculus/NoPanic` until W9.8.3, `Upd.apply_noPanic`), so the two
   readings agree on it.  The closers, `Decide` and the chains read updates;
   their one change is the revert case of a modality (`holds_revert` in
   the closer's module of the time, `NFmlClose`, the modal case of `Fml.toL_holds` in
