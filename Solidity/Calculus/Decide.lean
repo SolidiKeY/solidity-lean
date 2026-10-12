@@ -409,43 +409,49 @@ fragment): an identity the name of an object (`LId`), an address the name
 and what selects in it, a memory the writes and allocations (`LMem`), a
 memory value what the slot holds. -/
 @[reducible] def _root_.Solidity.Srt.LTy : Srt → Type
-  | .val => LTerm
-  | .path => LPath
+  | .val _ => LTerm
+  | .path _ => LPath
   | .st => LStor
-  | .sv => LVal
-  | .ident => Option (LId × LTerm)
-  | .addr => Option (LId × LSel × LTerm)
+  | .sv _ => LVal
+  | .ident _ => Option (LId × LTerm)
+  | .addr _ => Option (LId × LSel × LTerm)
   | .mem => Option (LMem × LTerm)
-  | .mv => Option (LMV × LTerm)
+  | .mv _ => Option (LMV × LTerm)
+  -- under a `select`: out of the fragment
+  | .sts _ => LStor
+  | .spath _ _ => LPath
 
-/-- A constant with the updates `ρ` pushed in. -/
-def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 s → s.LTy
-  | .lit v => key{ lit(v) }
+/-- A constant with the updates `ρ` pushed in; a literal erased to KeY's
+untyped value (`PrimTy.erase`). -/
+def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 C s → s.LTy
+  | .lit v => .lit (PrimTy.erase v)
   | .env k => key{ env(k) }
-  | .root r => .root r
+  | .root r _ => .root r
   | .storage => ρ.stor
   | .memory => some (ρ.mem, key{ true })
   -- out of the fragment (`inL`): nothing reads it
-  | .mtSt _ => ρ.stor
+  | .mtSt => ρ.stor
+  | .member _ _ _ => .undef
 
 /-- A unary symbol over its argument's `toL`. -/
-def _root_.Solidity.Op1.toL : Op1 a s → a.LTy → s.LTy
-  | .unop op p, x => LTerm.mkUn op p x
+def _root_.Solidity.Op1.toL : Op1 C a s → a.LTy → s.LTy
+  | @Op1.unop _ op p _, x => LTerm.mkUn op p x
   | .net, _ => .err
-  | .netOf _, _ => .err
   | .delValue, _ => .err
-  | .field f, x => key{ x.f }
+  | @Op1.field _ _ f _ _, x => key{ x.f }
   | .next, _ => .undef
-  | .select _, _ => .init
+  | .select _ _, _ => .init
+  | .selectIn _, _ => .init
+  | .fieldIn _, _ => .undef
   | .sval, x => .word x
-  | .newArr R, x => .arr R x
-  | .alloc _, _ => none
-  | .mfield f, i => i.map fun p => (p.1, .fld f, p.2)
-  | .addM R, m => m.bind fun p =>
+  | @Op1.newArr _ R _, x => .arr R x
+  | .alloc _ _, _ => none
+  | @Op1.mfield _ _ f _ _, i => i.map fun p => (p.1, .fld f, p.2)
+  | .addM R _, m => m.bind fun p =>
     if allocOk R then some (key{ addM(‹p.1›, shaped(‹p.1.nAlloc›, R)) }, p.2) else none
   | .mval, x => some (.word x, x)
   | .ref, i => i.map fun p => (.ref p.1, p.2)
-  | .wt _, _ => .err
+  | .wt, _ => .err
 
 /-- `read(m, a)` pushed in: the memory's guard, the address's, then the word
 `LMem.readT` finds (`readOnWrite`, `readOnAddM`); none where it finds none. -/
@@ -512,28 +518,32 @@ theorem newM_memL (m x : Option (LMem × LTerm)) (y : Option (LId × LTerm)) :
   rcases memL_getD x y with h | ⟨M, j, h⟩ <;> rw [h] <;> rcases m with _ | ⟨_, _⟩ <;> rfl
 
 /-- A binary symbol over its arguments' `toL`. -/
-def _root_.Solidity.Op2.toL : Op2 a b s → a.LTy → b.LTy → s.LTy
-  | .binop op p, x, y => LTerm.mkBin op p x y
+def _root_.Solidity.Op2.toL : Op2 C a b s → a.LTy → b.LTy → s.LTy
+  | @Op2.binop _ op p _, x, y => LTerm.mkBin op p x y
   | .find, x, y => key{ find(x, y) }
   | .len, x, y => key{ find(x, y.length) }
   | .read, m, a => (readM m a).getD .err
   | .mlen, m, i => (lenM m i).getD .err
-  | .at, x, y => key{ x[y] }
+  | .at _, x, y => key{ x[y] }
   | .nextIn, _, _ => .undef
   | .delAt, x, y => key{ delAt(x, y) }
-  | .pushSlot E, x, y => key{ arr(slot(E), x, y, true) }
+  | @Op2.pushSlot _ E, x, y => key{ arr(slot(E), x, y, true) }
   | .pop, x, y => key{ arr(pop(false), x, y, true) }
   | .shrink, x, y => key{ arr(pop(true), x, y, true) }
-  | .extend E, x, y => key{ arr(slot(E), x, y, true) }
+  | @Op2.extend _ E, x, y => key{ arr(slot(E), x, y, true) }
   | .sfind, x, y => .sub x y
   | .copyMem, m, i => (memL m i).getD (.word .err)
   | .iread, m, a => ireadM m a
-  | .copy, _, _ => none
-  | .mat, i, t => i.map fun p => (p.1, key{ at(t) }, seqL p.2 (isIntL t))
-  | .copySt, m, v => newM m v
+  | .copy _, _, _ => none
+  | .mat _, i, t => i.map fun p => (p.1, key{ at(t) }, seqL p.2 (isIntL t))
+  | .copySt _, m, v => newM m v
+  -- under a `select`: out of the fragment
+  | .findIn, _, _ => .err
+  | .delAtIn, x, _ => x
+  | .sfindIn, _, _ => .word .err
 
 /-- A ternary symbol over its arguments' `toL`. -/
-def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LTy
+def _root_.Solidity.Op3.toL : Op3 C a b c s → a.LTy → b.LTy → c.LTy → s.LTy
   | .ite, x, y, z => key{ if(x) then y else z }
   | .save, x, y, .word t => key{ save(x, y, t) }
   | .save, x, y, .sub s q => key{ save(x, y, find(s, q)) }
@@ -543,8 +553,9 @@ def _root_.Solidity.Op3.toL : Op3 a b c s → a.LTy → b.LTy → c.LTy → s.LT
   | .push, x, y, .sub s q =>
     key{ save(arr(slot(‹.uint›), x, y, true), y[find(x, y.length)], find(s, q)) }
   | .push, x, _, .arr _ _ | .push, x, _, .mem _ _ => x
-  | .atIn, _, _, _ => .undef
+  | .atIn _, _, _, _ => .undef
   | .write, m, a, v => writeM m a v
+  | .saveIn, x, _, _ => x
 
 /-- The path has no index: `alice.account`, not `people[i]`. -/
 def LPath.noAt : LPath → Bool
@@ -588,17 +599,17 @@ def Sym.vars (ρ : Sym) : List Var :=
 
 /-- A constant in the fragment: a literal, a value of the transaction, a
 root, `storage`; not yet `mtSt`, a deployment's storage. -/
-def _root_.Solidity.Op0.inL : Op0 s → Bool
-  | .lit _ | .env _ | .root _ | .storage | .memory => true
-  | .mtSt _ => false
+def _root_.Solidity.Op0.inL : Op0 C s → Bool
+  | .lit _ | .env _ | .root _ _ | .storage | .memory => true
+  | .mtSt | .member _ _ _ => false
 
 /-- A unary symbol in the fragment, its argument in it (`hb`); an
 allocation where its default copies (`allocOk`).  The identity an allocation
 takes only with it (`allocPairS?`, `freshRefS`). -/
-def _root_.Solidity.Op1.inL : Op1 a s → a.LTy → Bool → Bool
+def _root_.Solidity.Op1.inL : Op1 C a s → a.LTy → Bool → Bool
   | .unop .., _, hb | .field _, _, hb | .sval, _, hb => hb
   | .newArr _, _, hb | .mfield _, _, hb | .mval, _, hb | .ref, _, hb => hb
-  | .addM R, x, hb => hb && Option.isSome (Op1.toL (.addM R) x)
+  | .addM R h, x, hb => hb && Option.isSome (Op1.toL (C := C) (.addM R h) x)
   | _, _, _ => false
 
 /-- A name a reference slot holds, of an object the memory before the update
@@ -609,7 +620,7 @@ def irOk (ρ : Sym) : Option (LId × LTerm) → Bool
   | none => false
 
 /-- A unary symbol of `sameShape`: `¬`, a member. -/
-def _root_.Solidity.Op1.shape : Op1 a s → Bool → Bool
+def _root_.Solidity.Op1.shape : Op1 C a s → Bool → Bool
   | .unop .., b | .field _, b => b
   | _, _ => false
 

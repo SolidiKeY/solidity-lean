@@ -84,17 +84,19 @@ example : ⊢ dl!{ defined(wt(storage)) → [
 
 `storagePushValueSave` at the slot: the inner array the outer `push()`
 recycles has the pushed word, and its length is one
-(`findDefinitionSize`, then `selectOnSaveCons` on `size`). -/
+(`findDefinitionSize`, then `selectOnSaveCons` on `size`).  Not closed
+since W9.8.3d: a push through a stale alias is outside the fragment
+(`Tm.staleWriteS` takes a `save` only).  The typed push halts at the bound
+(`Storage.full`), and the guard that says so (`Decide.pushBound`) reads the
+live length, which a stale slot does not have; the walk leaves the one leaf
+below open. -/
 
-/--
-info: Try this:
-  sol_prove
--/
-#guard_msgs in
-example : ⊢ dl!{ defined(wt(storage)) → [
+/-- The push through a dangling alias, one leaf left. -/
+def matrixPush : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete matrix; matrix.push(); uint[] storage ptr = matrix[0]; matrix.pop();
-    ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 } := by
-  sol_prove?
+    ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 }
+
+#guard (Seq.residue .all .nil matrixPush).map List.length == some 1
 
 /-! ## Rounds of `pop`, write, `push()`
 
@@ -102,10 +104,11 @@ Each round adds a stale write and a pop below the slot reader, whose
 guards repeat at every read: the leaf grows quadratically with the rounds
 and the reduction by about 1.6 times a round.  Two rounds close; four
 (twelve statements) make a leaf within `closeSize` whose reduction is past
-`elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
-`Examples/ProofTree.lean`.  Six are the most whose leaf is within
-`closeSize` (1799 nodes, reduction 44719), so the largest reduction
-`leafFitsOn` builds before refusing; seven are refused by the leaf's size.
+`elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes16` in
+`Examples/ProofTree.lean`.  Five are the most whose leaf is within
+`closeSize`, so the largest reduction `leafFitsOn` builds before refusing;
+six are refused by the leaf's size (before W9.8.3d, when a push carried
+no bound guard, `Decide.pushBound`, six fitted and seven were refused).
 The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
 read as the scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`,
 `Fml.toLS`). -/
@@ -124,15 +127,14 @@ def rounds4 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 3; persons.push();
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
-/-- Six rounds: the most whose leaf is within `closeSize`. -/
-def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+/-- Five rounds: the most whose leaf is within `closeSize`. -/
+def rounds5 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
     persons.pop(); r.age = 3; persons.push();
     persons.pop(); r.age = 4; persons.push();
-    persons.pop(); r.age = 5; persons.push();
-    persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
+    persons.pop(); r.age = 5; persons.push(); ] persons[0].age == 5 }
 
 #guard (Seq.residue .all .nil rounds2).map List.isEmpty == some true
 #guard (Seq.residue .all .nil rounds4).map
@@ -140,7 +142,7 @@ def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
-#guard (Seq.residue .all .nil rounds6).map
+#guard (Seq.residue .all .nil rounds5).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
     (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]

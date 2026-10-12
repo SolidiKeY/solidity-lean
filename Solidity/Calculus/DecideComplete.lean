@@ -1350,33 +1350,49 @@ aside (`Fml.dropWtS`) and read as the layout its roots hold
 (`Fml.layoutS`): the closer then knows each root is there, canonical at
 its type (`LayoutOk`). -/
 
+theorem isWtStorageS_eq {Γ : Ctx} {p : PrimTy} {t : Tm C Γ (.val p)} (h : t.isWtStorageS = true) :
+    ∃ hp : p = .bool, hp ▸ t = .app1 .wt (.app0 .storage) := by
+  cases t with
+  | app1 o x =>
+    simp only [Tm.isWtStorageS, Bool.and_eq_true] at h
+    obtain ⟨ho, hx⟩ := h
+    cases o <;> cases ho
+    obtain rfl := isStorageS_st hx
+    exact ⟨rfl, rfl⟩
+  | _ => simp only [Tm.isWtStorageS, Bool.false_eq_true] at h
+
 /-- A `wt(storage)` premise that holds gives the layout of its roots, in
 any state with the same storage (`layoutOk_of_wt`, scoped). -/
 theorem layoutOk_of_wtS {Γ : Ctx} {τ : State C Γ} {a : Fml C Γ} {vs : List (Name × Ty)}
     (hw : a.wtRootsS? = some vs) (ha : holds τ a) {σ : Semantics.State}
     (hs : σ.storage = τ.globE.storage) : LayoutOk vs σ := by
-  unfold Fml.wtRootsS? at hw
-  split at hw
-  · rename_i vs' _
-    cases hw
-    obtain ⟨x, hx⟩ := ha
-    have hwb : storageWtB vs σ.storage = true := by
-      rw [hs]
-      simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at hx
-      split at hx
-      · rename_i hw'
-        exact hw'
-      · cases hx
-    simp only [storageWtB, storageShapeB, Bool.and_eq_true, List.all_eq_true] at hwb
-    intro r T hT
-    have := hwb.1.2 (r, T) (SemanticsProperties.lookupBy_eq_some_mem hT)
-    revert this
-    split
-    · rename_i v hv
-      simp only [Bool.and_eq_true]
-      exact fun h => ⟨v, hv, h.1⟩
-    · exact fun h => nomatch h
-  · cases hw
+  cases a with
+  | defined t =>
+    simp only [Fml.wtRootsS?] at hw
+    split at hw
+    · rename_i ht
+      cases hw
+      obtain ⟨rfl, rfl⟩ := isWtStorageS_eq ht
+      have hwb : storageWtB C.vars σ.storage = true := by
+        rw [hs]
+        have hx : (Tm.app1 (C := C) (Γ := Γ) .wt (.app0 .storage)).eval τ ≠ none := ha
+        rw [CloseS.eval_wt, CloseS.eval_storage, Option.bind_some] at hx
+        unfold Storage.wtT at hx
+        split at hx
+        · rename_i hw'
+          exact hw'
+        · exact absurd rfl hx
+      simp only [storageWtB, storageShapeB, Bool.and_eq_true, List.all_eq_true] at hwb
+      intro r T hT
+      have := hwb.1.2 (r, T) (SemanticsProperties.lookupBy_eq_some_mem hT)
+      revert this
+      split
+      · rename_i v hv
+        simp only [Bool.and_eq_true]
+        exact fun h => ⟨v, hv, h.1⟩
+      · exact fun h => nomatch h
+    · cases hw
+  | _ => simp only [Fml.wtRootsS?, reduceCtorEq] at hw
 
 theorem layoutOk_nil (σ : Semantics.State) : LayoutOk [] σ :=
   fun _ _ hT => by simp only [lookupBy, reduceCtorEq] at hT

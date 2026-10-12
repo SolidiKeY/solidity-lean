@@ -6218,6 +6218,91 @@ last CPU tick sampled every 20 ms, load 0.2.
 **Checked**: per-file diagnostics of every module and example above;
 `sorry` count 19.
 
+### W9.8.3d dec record (2026-10-13, branch `w98-dec`)
+
+The closer and the decision procedure on the typed terms: `CloseScoped`,
+`Decide`, `DecideScoped`, `DecideErase` (new), `DecideRel`, `DecideTyped`,
+`DecideComplete`, `LeafDerive`.  `DecideSyn`, `Closer`, `ProvesDerive` and
+`Tools/Inspect` elaborate unchanged.
+
+**`sol_decide`'s language stays untyped, and has one bridge.**  `LTerm`,
+`LStor`, `LMem` and `LFml` are a Presburger-and-arrays fragment over
+`Semantics.Value`: `LFml.elim` splits on key equalities and array lengths
+over every untyped storage, and `DecideComplete`'s realizability argument
+quantifies over those storages.  A typed language would need one
+elimination per sort and a realizer per typed storage, for no gain in what
+it decides.  The bridge is the typed reading erased, nothing else:
+`Tm.evalE τ t := toRes (Srt.erase …) (t.eval τ)` and `Upd.applyVE`, equal
+to the erased `Upd.applyV` (`Upd.applyVE_eq`), in `Calculus/DecideErase.lean`.
+`RelT σ ρ τ := RelU σ ρ τ.globE τ.loc` is unchanged.  Each symbol's erased
+reading is the interpreter's (`Tm.evalE_*`): equal, or `Sim` (`binop`),
+exact under a premise where the typed run halts and the untyped one does
+not: `PushRoom` (a push below the bound), `AddrOk`/`IdentOk` (an address
+or identity in the heap).
+
+**A push carries its bound.**  The typed push is exhausted at
+`Storage.full` (`2^256 - 1` elements); the language's appends.  A storage
+element's guard (`ElemS.guard`, `Rhs.guardS`) is now `pushBound` (the live
+length below the bound, else `err`) before the write, through `Tm.boundS`.
+Consequences: a diamond leaf with a push needs a length bound that `wt`
+does not give, so `Examples/ProofTree.lean`'s three `wt` push examples are
+box obligations now; the leaves grow, so `pushes22` is `pushes16` there and
+`Examples/Tactics/Dangling.lean`'s largest fitting round count is five.
+
+**A push through a stale alias left the fragment.**  `Tm.staleWriteS`
+takes a `save` only: the bound reads the live length, which a stale slot
+does not have.  `Dangling`'s `matrixPush` is a pin of the one leaf the walk
+leaves (`#guard`).  Restoring it needs a slot-level length term in
+`LTerm` and its `Sim` lemma.
+
+**Memory identities are bounded.**  `IdOKS` carries `IdOk τ.H R id`,
+`AddrOKS` `ad.Ok τ.H`, `MValOKS` `MvT.Ok τ.H T w`; an identity `iread`
+returns is below `τ.H.length` (`Births.eval_interval`,
+`RelT.lt_of_births`).
+
+**Symbol views, not nested patterns.**  A `match` with symbol patterns
+nested over a fixed typed sort timed out in `whnf` or failed its equation
+lemmas (`Op3.inLS`'s push, `pairViewS`).  Every recogniser is a view on
+the symbol alone, generic in the sort (`Op1.addMOf?`, `Op2.sfindPath?`,
+`Op3.isSave`, `Tm.isStorageS`, `Rhs.mrefS?`, …), with `cases` proofs.
+`LeafDerive`'s push split reads the typed storage the same way
+(`Upd.pushOf?`, `Rhs.pushAlias?`, `lastSlotS`).
+
+**Vanished.**  The untyped `toL` table's sort tests (an argument at
+another sort cannot be written); every `Op*.toL` arm is one constructor
+pattern.  `member`, `select` and the `…In` symbols are outside the
+fragment, as W9.8.3c's equations omit them.
+
+**The closer** (`CloseScoped`, `close_rw_s`) reads a leaf's `Option`
+results (`Close.optRes`), the landed states by `Landed`, and now the typed
+operators: `binopT_*`, a checked result as `if inRange then some (uintOf n)
+else none` with no proof inside (`ofInt?_uint`, `uintOf_val'`), bitwise
+numerals, the ledger (`lookupBy_ite`, `lookupBy_setBy_int`, `getD_ite`),
+roots of fields and indices, a mapping key at a root (`atT_map_root`), a
+checked index as its check then its reference (`atT_bind`).  It does not
+close a memory read (the memory symbols' `eval_*` are not restated) or a
+read of `b[i]` after a write below `b[j]` in a diamond, which needs
+`checkIndex` framed (the chain lane's `Storage.len_save_frame`).
+
+**Pins moved**: `Tactics/Decide`'s `inLS` example reads `net(a) = 0` (its
+local was a `uint`, `net` an `int`); the `ProofTree` and `Dangling` changes
+above.
+
+**Checked** in `w98-dec`: every module above elaborates, no warning;
+`sorry` count 19; `#print axioms Valid.of_reduceS`: `propext`,
+`Classical.choice`, `Quot.sound`.  `Closers` and `Deploy` import the chain
+lane's `Problem`/`Spec` and do not build here: Deploy skipped.  In a
+throwaway merge with `w98-chain` (clean): `Closers` builds;
+`ProofTree`, `Tactics/{Decide,Dangling,Checked,Loops,Operators,Payment}`
+clean; `Tactics/Net` (one memory read), `Tactics/Values` (one index frame)
+and `Tactics/StorageSteps` (index frames, a `len` binder) not; the other
+examples not run.
+
+**Timing** (copied under `Solidity/Scratch/`, a fresh worker through the
+MCP, `/proc` sampled every 20 ms, wall to the last CPU tick): `Tactics/Decide`
+32.6–33.4 s (gate 45.0, W9.6.4 39.4); `ProofTree` 9.8 s (11.7), its pins
+as moved above.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

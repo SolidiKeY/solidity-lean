@@ -533,7 +533,11 @@ info: Try this:
 example : ⊢ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
   sol_prove?
 
-/-- `wt(storage)`, the premise of a diamond obligation (`Fml.wt`). -/
+/-- `wt(storage)`, the premise of a storage obligation (`Fml.wt`).  The
+three below are box obligations: a typed push is exhausted at a full array
+(`Storage.full`), where the walk's update `{storage := save(…, len + 1)}` is
+undefined, so a diamond push leaf needs a bound on the length that `wt` does
+not give (W9.8.3d). -/
 def wtStd : Fml StandardExample [] := Fml.wt StandardExample
 
 /--
@@ -541,7 +545,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ ⟨ values.push(3); values.pop(); ⟩ true } := by
+example : ⊢ .imp wtStd dl!{ [ values.push(3); values.pop(); ] true } := by
   sol_prove?
 
 /--
@@ -549,7 +553,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); persons[0].age = 1; ⟩ true } := by
+example : ⊢ .imp wtStd dl!{ [ persons.push(); persons[0].age = 1; ] true } := by
   sol_prove?
 
 /--
@@ -557,7 +561,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; ⟩ true } := by
+example : ⊢ .imp wtStd dl!{ [ Person storage p = persons.push(); p.age = 1; ] true } := by
   sol_prove?
 
 /-! Intervals: a premise `x <= 100` bounds the `uint` local `x`, so the
@@ -624,17 +628,17 @@ is within `closeSize` and its reduction past `elimSize`: refused in
 milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), read as the
 scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`, `Fml.toLS`). -/
 
-/-- Twenty-two pushes onto one array. -/
-def pushes22 : Fml StandardExample [] :=
+/-- Sixteen pushes onto one array (twenty-two before each push carried its
+bound guard, `Decide.pushBound`: the leaf grew past `closeSize`). -/
+def pushes16 : Fml StandardExample [] :=
   dl!{ [
     values.push(0); values.push(1); values.push(2); values.push(3); values.push(4);
     values.push(5); values.push(6); values.push(7); values.push(8); values.push(9);
     values.push(10); values.push(11); values.push(12); values.push(13); values.push(14);
-    values.push(15); values.push(16); values.push(17); values.push(18); values.push(19);
-    values.push(20); values.push(21); ]
+    values.push(15); ]
     values.length > 0 }
 
-#guard (Seq.residue .all .nil pushes22).map
+#guard (Seq.residue .all .nil pushes16).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
     (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
