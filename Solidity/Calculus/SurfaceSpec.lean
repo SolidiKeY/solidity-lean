@@ -569,11 +569,16 @@ macro "sol_spec_prep" : tactic => `(tactic|
    sol_close_eval
    all_goals try sol_close_facts
    all_goals try sol_close_reads
+   -- the states an update lands on (`CloseS.LandedAll`), opened to binders
+   all_goals (try simp only [CloseS.landedAll_def])
    all_goals try (intros; sol_close_reads_all)
    all_goals try (subst_vars; sol_close_reads_all)
    all_goals (try intros)
    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
-   all_goals (try simp only [Close.asValue_eq_ok] at *)))
+   all_goals (try simp only [Close.asValue_eq_ok] at *)
+   -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
+   -- state: every premise introduced, every conjunct its own goal
+   all_goals (repeat' (first | intro _ | apply And.intro))))
 
 /-- The last step of `sol_spec_close`: `omega` or `grind`, `grind`'s
 instantiation bounded, since the layout premises are quantified. -/

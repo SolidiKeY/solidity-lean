@@ -4,6 +4,7 @@ import Solidity.Update
 import Solidity.Theory.Observe
 import Solidity.Typing.Soundness
 import Solidity.Semantics.RunFrame
+import Solidity.Theory.Bridge.Denote
 
 /-!
 # Terms and updates read in a state; where an update lands
@@ -639,5 +640,357 @@ theorem Upd.afterT.of_apply {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U : 
   exact h σ' rfl hH
 
 end Lands
+
+/-! ## W9.7.2 `close` lane: the typed state's readers, by position
+
+What `sol_close`'s kit (`Calculus/CloseScoped.lean`) and the decision
+procedure read a typed state by: its global part (`State.globE`) and its
+locals (`State.getE`) after a push, a set, an anonymisation, a havoc, a pop
+and a thinning. -/
+
+section CloseKit
+
+variable {Γ : Ctx}
+
+theorem State.globE_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).globE = σ.globE := rfl
+theorem State.getE_push_here {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).getE .here = LTy.TDenote.erase t v := rfl
+theorem State.getE_push_there {t u : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (i : Idx Γ u) :
+    (σ.push v).getE (.there i) = σ.getE i := rfl
+theorem State.globE_setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
+    (σ.setLocal i v).globE = σ.globE := rfl
+theorem State.getE_setLocal_same {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
+    (σ.setLocal i v).getE i = LTy.TDenote.erase t v := by
+  show LTy.TDenote.erase t (TEnv.get i (TEnv.set i v σ.env)) = _
+  rw [TEnv.get_set]
+theorem State.getE_setLocal_ne {t u : LTy} (σ : State C Γ) (i : Idx Γ t) (j : Idx Γ u)
+    (h : i.toNat ≠ j.toNat) (v : t.TDenote C σ.H) : (σ.setLocal i v).getE j = σ.getE j := by
+  show LTy.TDenote.erase u (TEnv.get j (TEnv.set i v σ.env)) = _
+  rw [TEnv.get_set_ne i j v σ.env h]
+theorem State.anon_nil (σ : State C Γ) (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C σ.H) :
+    σ.anon [] b = σ := rfl
+theorem State.anon_cons (σ : State C Γ) (x : (t : LTy) × Idx Γ t)
+    (xs : List ((t : LTy) × Idx Γ t)) (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C σ.H) :
+    σ.anon (x :: xs) b = (σ.setLocal x.2 (b x)).anon xs b := rfl
+theorem State.globE_havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+    (σ.havoc st nt).globE = σ.globE.havoc st.erase nt := rfl
+theorem State.getE_havoc {t : LTy} (σ : State C Γ) (st : Storage C) (nt : List (Int × Int))
+    (i : Idx Γ t) : (σ.havoc st nt).getE i = σ.getE i := rfl
+theorem State.globE_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).globE = σ.globE :=
+  rfl
+theorem State.getE_drop {Δ : Ctx} {t : LTy} (h : Ext Γ Δ) (σ : State C Δ) (i : Idx Γ t) :
+    (σ.drop h).getE i = σ.getE (i.ext h) := by
+  show LTy.TDenote.erase t (TEnv.get i (TEnv.drop h σ.env)) = _
+  rw [← TEnv.get_ext_drop]
+
+/-! ### Where an update lands, computed
+
+The global part and the locals an update leaves, as values: `Upd.applyV`
+computes the pair a landed state's `State.globE` and `State.getE` read
+(`Upd.lands_iff_applyV`), each right-hand side read once in the state the
+update is applied in.  The closer reads an update's rest by it
+(`CloseS.holds_upd`), and the decision procedure relates its symbols to
+it. -/
+
+/-- The locals of `Δ`, erased, by position. -/
+abbrev Locs (C : Contract) (Δ : Ctx) : Type := (t : LTy) → Idx Δ t → t.Denote C
+
+/-- A typed state's locals, erased. -/
+def State.loc (σ : State C Γ) : Locs C Γ := fun _ i => σ.getE i
+
+/-- A local pushed. -/
+def Locs.push {Δ : Ctx} {t : LTy} (ℓ : Locs C Δ) (v : t.Denote C) : Locs C (t :: Δ) :=
+  fun _ j => match j with
+    | .here => v
+    | .there i => ℓ _ i
+
+/-- A local set. -/
+def Locs.set {Δ : Ctx} (ℓ : Locs C Δ) {t : LTy} (i : Idx Δ t) (v : t.Denote C) : Locs C Δ :=
+  fun _ j => if h : i.toNat = j.toNat then Idx.ty_eq_of_toNat h ▸ v else ℓ _ j
+
+/-- A suffix popped. -/
+def Locs.drop {Δ Δ' : Ctx} (h : Ext Δ' Δ) (ℓ : Locs C Δ) : Locs C Δ' := fun _ j => ℓ _ (j.ext h)
+
+/-- A frame thinned. -/
+def Locs.thin {Δ Δ' : Ctx} (h : Thin Δ' Δ) (ℓ : Locs C Δ) : Locs C Δ' := fun _ j => ℓ _ (j.wk h)
+
+theorem Locs.set_same {Δ : Ctx} (ℓ : Locs C Δ) {t : LTy} (i : Idx Δ t) (v : t.Denote C) :
+    ℓ.set i v t i = v := by
+  unfold Locs.set
+  rw [dif_pos rfl]
+
+theorem Locs.set_ne {Δ : Ctx} (ℓ : Locs C Δ) {t u : LTy} (i : Idx Δ t) (j : Idx Δ u)
+    (h : i.toNat ≠ j.toNat) (v : t.Denote C) : ℓ.set i v u j = ℓ u j := by
+  unfold Locs.set
+  rw [dif_neg h]
+
+/-- One element applied to a global part and locals, its right-hand sides
+read in `σ₀`. -/
+def UpdElem.applyV {Δ : Ctx} (σ₀ : State C Γ) :
+    UpdElem C Γ Δ → Semantics.State → Locs C Δ → Res (Semantics.State × Locs C Δ)
+  | .local i r, g, ℓ => do pure (g, ℓ.set i (← r.evalT σ₀))
+  | .storage s, g, ℓ => do pure (← (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+  | .memory m, g, ℓ => do pure (← (UpdElem.memory m : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+  | .selfBalance op a, g, ℓ => do
+    pure (← (UpdElem.selfBalance op a : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+  | .net r op a, g, ℓ => do pure (← (UpdElem.net r op a : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+  | .pay r a, g, ℓ => do pure (← (UpdElem.pay r a : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+  | .netMt r a, g, ℓ => do pure (← (UpdElem.netMt r a : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+  | .setBalance a, g, ℓ => do pure (← (UpdElem.setBalance a : UpdElem C Γ Δ).globT σ₀ g, ℓ)
+
+/-- **What an update applied in `σ₀` leaves**: the global part and the
+locals' values. -/
+def Upd.applyV (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res (Semantics.State × Locs C Δ)
+  | _, .nil => pure (σ₀.globE, σ₀.loc)
+  | _, .snoc U e => do let p ← U.applyV σ₀; e.applyV σ₀ p.1 p.2
+  | _, .decl U _ r => do
+    let p ← U.applyV σ₀
+    let v ← r.evalT σ₀
+    pure (p.1, p.2.push v)
+  | _, .pop U h => do let p ← U.applyV σ₀; pure (p.1, p.2.drop h)
+  | _, .drop U h => do let p ← U.applyV σ₀; pure (p.1, p.2.thin h)
+
+/-- What `U` left in a local, as a value read in `σ₀`. -/
+def Held.OKV {t : LTy} (σ₀ : State C Γ) (v : t.Denote C) : Held C Γ t → Prop
+  | .pos j => v = σ₀.getE j
+  | .rhs r => r.evalT σ₀ = .ok v
+
+theorem Held.OKV.unique {t : LTy} {σ₀ : State C Γ} {v w : t.Denote C} :
+    (x : Held C Γ t) → Held.OKV σ₀ v x → Held.OKV σ₀ w x → v = w
+  | .pos _, h₁, h₂ => h₁.trans h₂.symm
+  | .rhs _, h₁, h₂ => Except.ok.inj (h₁.symm.trans h₂)
+
+private theorem elem_applyV_ok {Δ : Ctx} {σ₀ : State C Γ} (e : UpdElem C Γ Δ)
+    {g g' : Semantics.State} {ℓ ℓ' : Locs C Δ} (h : e.applyV σ₀ g ℓ = .ok (g', ℓ')) :
+    e.globT σ₀ g = .ok g' ∧
+      ((∃ (u : LTy) (i : Idx Δ u) (r : Rhs C Γ u) (v : u.Denote C), e = .local i r ∧
+        r.evalT σ₀ = .ok v ∧ ℓ' = ℓ.set i v) ∨ ((∀ (u : LTy) (i : Idx Δ u) (r : Rhs C Γ u),
+          e ≠ .local i r) ∧ ℓ' = ℓ)) := by
+  cases e with
+  | «local» i r =>
+    obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    cases h
+    refine ⟨?_, .inl ⟨_, i, r, v, rfl, hv, rfl⟩⟩
+    show (do let _ ← r.evalT σ₀; pure g) = _
+    rw [hv]; rfl
+  | storage _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ =>
+    obtain ⟨g₁, hg, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    cases h
+    exact ⟨hg, .inr ⟨fun _ _ _ he => UpdElem.noConfusion he, rfl⟩⟩
+
+/-- **What `applyV` computes is the global part `globT` computes and, in
+each local, what `Upd.held` says.** -/
+theorem Upd.applyV_ok {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    {g : Semantics.State} → {ℓ : Locs C Δ} → U.applyV σ₀ = .ok (g, ℓ) →
+    U.globT σ₀ = .ok g ∧ ∀ {t : LTy} (i : Idx Δ t), Held.OKV σ₀ (ℓ t i) (U.held i)
+  | _, .nil, g, ℓ, h => by
+    cases h
+    exact ⟨rfl, fun _ => rfl⟩
+  | _, .snoc U e, g, ℓ, h => by
+    obtain ⟨p, hp, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨g₁, ℓ₁⟩ := p
+    obtain ⟨hg₁, hh₁⟩ := Upd.applyV_ok U hp
+    obtain ⟨hg, hl⟩ := elem_applyV_ok e h
+    refine ⟨?_, ?_⟩
+    · show (do e.globT σ₀ (← U.globT σ₀)) = _
+      rw [hg₁]; exact hg
+    · intro t i
+      rcases hl with ⟨u, k, r, v, rfl, hv, rfl⟩ | ⟨hne, rfl⟩
+      · show Held.OKV σ₀ _ (Subst.set (Upd.held U) k r i)
+        unfold Subst.set
+        split
+        · rename_i hki
+          obtain rfl := Idx.ty_eq_of_toNat hki
+          obtain rfl := Idx.toNat_inj k i hki
+          show r.evalT σ₀ = .ok (ℓ₁.set k v _ k)
+          rw [Locs.set_same]; exact hv
+        · rename_i hki
+          rw [Locs.set_ne ℓ₁ k i hki]
+          exact hh₁ i
+      · have hheld : (Upd.snoc U e).held i = U.held i := by
+          cases e with
+          | «local» k r => exact absurd rfl (hne _ k r)
+          | _ => rfl
+        rw [hheld]
+        exact hh₁ i
+  | _, .decl U _ r, g, ℓ, h => by
+    obtain ⟨p, hp, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨g₁, ℓ₁⟩ := p
+    cases h
+    obtain ⟨hg₁, hh₁⟩ := Upd.applyV_ok U hp
+    refine ⟨?_, ?_⟩
+    · show (do let g ← U.globT σ₀; let _ ← r.evalT σ₀; pure g) = _
+      rw [hg₁, hv]; rfl
+    · intro t i
+      cases i with
+      | here => exact hv
+      | there j => exact hh₁ j
+  | _, .pop U hx, g, ℓ, h => by
+    obtain ⟨p, hp, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨g₁, ℓ₁⟩ := p
+    cases h
+    obtain ⟨hg₁, hh₁⟩ := Upd.applyV_ok U hp
+    exact ⟨hg₁, fun i => hh₁ (i.ext hx)⟩
+  | _, .drop U hx, g, ℓ, h => by
+    obtain ⟨p, hp, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨g₁, ℓ₁⟩ := p
+    cases h
+    obtain ⟨hg₁, hh₁⟩ := Upd.applyV_ok U hp
+    exact ⟨hg₁, fun i => hh₁ (i.wk hx)⟩
+
+/-- Where `globT` returns, so does `applyV`. -/
+theorem Upd.applyV_of_globT {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    {g : Semantics.State} → U.globT σ₀ = .ok g → ∃ ℓ, U.applyV σ₀ = .ok (g, ℓ)
+  | _, .nil, g, h => by cases h; exact ⟨_, rfl⟩
+  | _, .snoc U e, g, h => by
+    obtain ⟨g₁, hg₁, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨ℓ₁, hℓ₁⟩ := Upd.applyV_of_globT U hg₁
+    show ∃ ℓ, (do let p ← U.applyV σ₀; e.applyV σ₀ p.1 p.2) = _
+    rw [hℓ₁, Solidity.SemanticsProperties.Res.ok_bind]
+    cases e with
+    | «local» i r =>
+      obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+      cases h
+      exact ⟨_, by show (do pure (_, ℓ₁.set i (← r.evalT σ₀))) = _; rw [hv]; rfl⟩
+    | _ => exact ⟨ℓ₁, by simp only [UpdElem.applyV, h]; rfl⟩
+  | _, .decl U _ r, g, h => by
+    obtain ⟨g₁, hg₁, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
+    cases h
+    obtain ⟨ℓ₁, hℓ₁⟩ := Upd.applyV_of_globT U hg₁
+    exact ⟨_, by
+      show (do let p ← U.applyV σ₀; let v ← r.evalT σ₀; pure (p.1, p.2.push v)) = _
+      rw [hℓ₁, hv]; rfl⟩
+  | _, .pop U hx, g, h => by
+    obtain ⟨ℓ₁, hℓ₁⟩ := Upd.applyV_of_globT U h
+    exact ⟨_, by show (do let p ← U.applyV σ₀; pure (p.1, p.2.drop hx)) = _; rw [hℓ₁]; rfl⟩
+  | _, .drop U hx, g, h => by
+    obtain ⟨ℓ₁, hℓ₁⟩ := Upd.applyV_of_globT U h
+    exact ⟨_, by show (do let p ← U.applyV σ₀; pure (p.1, p.2.thin hx)) = _; rw [hℓ₁]; rfl⟩
+
+/-- **Landing, computed**: `U` lands on `σ'` exactly where `applyV`
+returns `σ'`'s global part and locals. -/
+theorem Upd.lands_iff_applyV {Δ : Ctx} {σ₀ : State C Γ} {U : Upd C Γ Δ} {g : Semantics.State}
+    {σ' : State C Δ} : U.Lands σ₀ g σ' ↔
+      ∃ ℓ, U.applyV σ₀ = .ok (g, ℓ) ∧ σ'.globE = g ∧ ∀ {t : LTy} (i : Idx Δ t), σ'.getE i = ℓ t i := by
+  constructor
+  · rintro ⟨hg, hσ, hh⟩
+    obtain ⟨ℓ, hℓ⟩ := Upd.applyV_of_globT U hg
+    refine ⟨ℓ, hℓ, hσ, fun i => ?_⟩
+    have hv := (Upd.applyV_ok U hℓ).2 i
+    have ho : Held.OKV σ₀ (σ'.getE i) (U.held i) := by
+      have := hh i
+      revert this
+      cases U.held i with
+      | pos j => exact id
+      | rhs r => exact id
+    exact Held.OKV.unique _ ho hv
+  · rintro ⟨ℓ, hℓ, hσ, he⟩
+    obtain ⟨hg, hh⟩ := Upd.applyV_ok U hℓ
+    refine ⟨hg, hσ, fun i => ?_⟩
+    have hv := hh i
+    rw [← he i] at hv
+    revert hv
+    cases U.held i with
+    | pos j => exact id
+    | rhs r => exact id
+
+/-- **`afterT`, computed**: `p` of every typed state with the global part
+and the locals `applyV` returns, or `m.onHalt` where it halts. -/
+theorem Upd.afterT_applyV {Δ : Ctx} (m : Modality) (σ₀ : State C Γ) (U : Upd C Γ Δ)
+    (p : State C Δ → Prop) :
+    U.afterT m σ₀ p ↔ m.afterC (fun q => ∀ σ' : State C Δ, σ'.globE = q.1 →
+      (∀ {t : LTy} (i : Idx Δ t), σ'.getE i = q.2 t i) → σ₀.H <+: σ'.H → p σ') (U.applyV σ₀) := by
+  unfold Upd.afterT
+  split
+  · rename_i e he
+    cases ha : U.applyV σ₀ with
+    | error => exact Iff.rfl
+    | ok q =>
+      obtain ⟨g, ℓ⟩ := q
+      rw [(Upd.applyV_ok U ha).1] at he; cases he
+  · rename_i g hg
+    obtain ⟨ℓ, hℓ⟩ := Upd.applyV_of_globT U hg
+    rw [hℓ]
+    show (∀ σ' : State C Δ, U.Lands σ₀ g σ' → _) ↔ (∀ σ' : State C Δ, σ'.globE = g → _)
+    refine forall_congr' fun σ' => ⟨fun h hσ he hH => h (Upd.lands_iff_applyV.2 ⟨ℓ, hℓ, hσ, he⟩) hH,
+      fun h hl hH => ?_⟩
+    obtain ⟨ℓ', hℓ', hσ, he⟩ := Upd.lands_iff_applyV.1 hl
+    rw [hℓ] at hℓ'
+    cases hℓ'
+    exact h hσ he hH
+
+theorem State.loc_apply (σ : State C Γ) {t : LTy} (i : Idx Γ t) : σ.loc t i = σ.getE i := rfl
+
+theorem State.aliasPathT_getE (σ : State C Γ) {R : RefTy} (i : Idx Γ (.alias R)) :
+    σ.aliasPathT i = match σ.getE i with
+      | some p => .ok p
+      | none => .error .revert := by
+  unfold State.aliasPathT State.getE
+  generalize (TEnv.get i σ.env : Option (SRef C (.ref R))) = x
+  cases x <;> rfl
+
+theorem State.memRefT_getE (σ : State C Γ) {R : RefTy} (i : Idx Γ (.mem R)) :
+    σ.memRefT i = match σ.getE i with
+      | some n => .ok n
+      | none => .error .revert := by
+  unfold State.memRefT State.getE
+  generalize (TEnv.get i σ.env : Option (HRef σ.H R)) = x
+  cases x <;> rfl
+
+theorem TEnv.get_thin_wk {H : HTy} : {Δ Δ' : Ctx} → (h : Thin Δ' Δ) → {t : LTy} → (j : Idx Δ' t) →
+    (e : TEnv C H Δ) → TEnv.get j (TEnv.thin h e) = TEnv.get (j.wk h) e
+  | _, _, .refl, _, _, _ => rfl
+  | _, _, .keep _, _, .here, _ => rfl
+  | _, _, .keep h, _, .there j, e => TEnv.get_thin_wk h j e.2
+  | _, _, .drop h, _, j, e => TEnv.get_thin_wk h j e.2
+
+theorem State.loc_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).loc = σ.loc.push (LTy.TDenote.erase t v) := by
+  funext u j
+  cases j <;> rfl
+theorem State.loc_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).loc = σ.loc.drop h := by
+  funext u j
+  exact State.getE_drop h σ j
+theorem State.globE_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).globE = σ.globE :=
+  rfl
+theorem State.loc_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).loc = σ.loc.thin h := by
+  funext u j
+  show LTy.TDenote.erase u (TEnv.get j (TEnv.thin h σ.env)) = _
+  rw [TEnv.get_thin_wk]
+  rfl
+
+open Semantics (bind_ok_inv) in
+/-- **The term bridge, typed** (`Tm.denote_eval`): a term's denotation
+agrees with its reading in a typed state wherever the reading returns. -/
+theorem _root_.Solidity.Tm.denoteT_evalT (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
+    Srt.Bridge s (t.denoteT σ) (t.evalT σ)
+  | _, .pvV _ => by intro x h; cases h; rfl
+  | _, .pvP i => by
+    intro r segs h
+    have h' : σ.aliasPathT i = .ok (r, segs) := h
+    simp only [Tm.denoteT, h']
+  | _, .pvS _ => by intro τ h; cases h; exact StValue.Equiv.refl _
+  | _, .pvI _ => trivial
+  | _, .netOf i a => by
+    intro x h
+    obtain ⟨va, ha, h⟩ := bind_ok_inv h
+    obtain ⟨n, hn, h⟩ := bind_ok_inv h
+    cases h
+    cases va with
+    | bool => cases hn
+    | int n' =>
+      cases hn
+      simp only [Tm.denoteT, Tm.denoteT_evalT σ a _ ha]
+  | _, .app0 o => Op0.denote_eval o
+  | _, .app1 o _ a => Op1.denote_eval o (Tm.denoteT_evalT σ a)
+  | _, .app2 o a b => Op2.denote_eval o (Tm.denoteT_evalT σ a) (Tm.denoteT_evalT σ b)
+  | _, .app3 o a b c =>
+    Op3.denote_eval o (Tm.denoteT_evalT σ a) (Tm.denoteT_evalT σ b) (Tm.denoteT_evalT σ c)
+
+
+end CloseKit
 
 end Solidity

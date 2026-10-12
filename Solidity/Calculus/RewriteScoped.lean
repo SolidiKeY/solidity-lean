@@ -542,6 +542,8 @@ theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalE
     (φ : Fml C Γ) (σ : State C Γ) : holds σ (Fml.lawAtom q exact φ) ↔ holds σ φ := by
   cases φ with
   | eq a b =>
+    show holds σ (.eq _ _) ↔ holds σ (.eq _ _)
+    rw [holds_eq_erased, holds_eq_erased]
     show Equiv ((a.sideC q).denote σ.erase) ((b.sideC q).denote σ.erase) ↔
       Equiv (a.denote σ.erase) (b.denote σ.erase)
     have ha := Tm.sideC_denote hq σ.erase a
@@ -551,6 +553,8 @@ theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalE
     cases exact with
     | false => exact Iff.rfl
     | true =>
+      show holds σ (.defined _) ↔ holds σ (.defined _)
+      rw [holds_defined_erased, holds_defined_erased]
       show (∃ x, (t.rwC q).eval σ.erase = .ok x) ↔ (∃ x, t.eval σ.erase = .ok x)
       rw [Tm.rwC_eval_eq (hx rfl)]
   | _ => exact Iff.rfl
@@ -810,10 +814,14 @@ theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : EState C Γ} (σ : Sta
     (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ σ.erase i (h i)) :
     (s : Skel) → (φ : Fml C Δ) → (holds σ (Fml.litPVAlong h s φ) ↔ holds σ φ)
   | .lit, .eq a b => by
+    show holds σ (.eq _ _) ↔ holds σ (.eq _ _)
+    rw [holds_eq_erased, holds_eq_erased]
     show Theory.StValue.Equiv ((a.litPV h).denote σ.erase) ((b.litPV h).denote σ.erase) ↔
       Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase)
     rw [(Tm.litPV_eq hok a).2, (Tm.litPV_eq hok b).2]
   | .lit, .defined t => by
+    show holds σ (.defined _) ↔ holds σ (.defined _)
+    rw [holds_defined_erased, holds_defined_erased]
     show (∃ x, (t.litPV h).eval σ.erase = .ok x) ↔ (∃ x, t.eval σ.erase = .ok x)
     rw [(Tm.litPV_eq hok t).1]
   | .and _ _ l r, .and a b =>

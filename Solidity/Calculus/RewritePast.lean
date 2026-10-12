@@ -1522,6 +1522,8 @@ theorem Fml.withStS_holds {S : Tm C Γ .st} {σ : State C Γ} {τ : Semantics.St
       have hk : σ.erase.glob.Keeps τ := (Tm.eval_st_glob σ.erase S τ hs).symm
       have ea := Tm.withStS_denote hs hk a hab.1
       have eb := Tm.withStS_denote hs hk b hab.2
+      show holds σ (.eq _ _) ↔ holds σ' (.eq _ _)
+      rw [holds_eq_erased, holds_eq_erased]
       show Equiv ((Tm.withStS S a).denote σ.erase) ((Tm.withStS S b).denote σ.erase) ↔
         Equiv (a.denote σ'.erase) (b.denote σ'.erase)
       rw [he]
@@ -1533,6 +1535,8 @@ theorem Fml.withStS_holds {S : Tm C Γ .st} {σ : State C Γ} {τ : Semantics.St
     · rename_i ht
       cases h
       have hk : σ.erase.glob.Keeps τ := (Tm.eval_st_glob σ.erase S τ hs).symm
+      show holds σ (.defined _) ↔ holds σ' (.defined _)
+      rw [holds_defined_erased, holds_defined_erased]
       show (∃ x, (Tm.withStS S t).eval σ.erase = .ok x) ↔ (∃ x, t.eval σ'.erase = .ok x)
       rw [Tm.withStS_eval hs hk t ht, he]
     · cases h
@@ -2021,11 +2025,15 @@ theorem Fml.thinFO?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C
     obtain ⟨a', ha, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     obtain ⟨b', hb, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     cases hφ
+    show holds (σ.thin h) (.eq _ _) ↔ holds σ (.eq _ _)
+    rw [holds_eq_erased, holds_eq_erased]
     show Theory.StValue.Equiv (a'.denote (σ.thin h).erase) (b'.denote (σ.thin h).erase) ↔
       Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase)
     rw [State.thin_erase, Tm.denote_thinS? h σ.erase a ha, Tm.denote_thinS? h σ.erase b hb]
   | _, _, h, .defined t, _, hφ, σ => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hφ
+    show holds (σ.thin h) (.defined _) ↔ holds σ (.defined _)
+    rw [holds_defined_erased, holds_defined_erased]
     show (∃ x, t'.eval (σ.thin h).erase = .ok x) ↔ (∃ x, t.eval σ.erase = .ok x)
     rw [State.thin_erase, Tm.eval_thinS? h σ.erase t ht]
   | _, _, h, .not φ, _, hφ, σ => by

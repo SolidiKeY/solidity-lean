@@ -49,11 +49,9 @@ theorem holds_FO_erase : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true →
     ∀ {σ σ' : State C Γ}, σ.erase = σ'.erase → (holds σ φ ↔ holds σ' φ)
   | _, .tt, _, _, _, _ => Iff.rfl
   | _, .eq a b, _, σ, σ', e => by
-    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
-    rw [e]
+    rw [holds_eq_erased, holds_eq_erased, e]
   | _, .defined t, _, σ, σ', e => by
-    show (∃ x, _) ↔ (∃ x, _)
-    rw [e]
+    rw [holds_defined_erased, holds_defined_erased, e]
   | _, .not φ, h, _, _, e => not_congr (holds_FO_erase φ h e)
   | _, .and φ ψ, h, _, _, e => by
     have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
@@ -600,12 +598,10 @@ theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} →
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
-    rw [Tm.reclose_denote ha _ _ hg, Tm.reclose_denote hb _ _ hg]
+    rw [holds_eq_erased, holds_eq_erased, Tm.reclose_denote ha _ _ hg, Tm.reclose_denote hb _ _ hg]
   | .defined t, _, h, σ, τ, hg => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (∃ x, _) ↔ (∃ x, _)
-    rw [Tm.reclose_eval ht _ _ hg]
+    rw [holds_defined_erased, holds_defined_erased, Tm.reclose_eval ht _ _ hg]
   | .not φ, _, h, σ, τ, hg => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (holds_reclose φ hφ σ τ hg)

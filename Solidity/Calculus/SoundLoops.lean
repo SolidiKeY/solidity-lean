@@ -59,13 +59,14 @@ theorem holds_isBoolD (t : Tm C Γ .val) (σ : State C Γ) (b : Bool) :
     holds σ (Fml.isBoolD t b) ↔ t.eval σ.erase = .ok (.bool b) := by
   constructor
   · rintro ⟨⟨x, hx⟩, _, he⟩
+    rw [Tm.evalT_eq] at hx
     have he' : Theory.StValue.Equiv (.prim x) (.prim (.bool b)) := by
-      rw [← Tm.denote_eval σ.erase t x hx]; exact he
+      rw [← Tm.denote_eval σ.erase t x hx]; exact (holds_eq_erased σ _ _).1 he
     rw [Theory.StValue.Equiv.prim_iff] at he'
     cases he'
     exact hx
   · intro h
-    refine ⟨⟨_, h⟩, ⟨_, rfl⟩, ?_⟩
+    refine ⟨⟨_, (Tm.evalT_eq σ t).trans h⟩, ⟨_, rfl⟩, (holds_eq_erased σ _ _).2 ?_⟩
     show Theory.StValue.Equiv (t.denote σ.erase) (.prim (.bool b))
     rw [Tm.denote_eval σ.erase t _ h]
     exact Theory.StValue.Equiv.refl _
@@ -76,13 +77,16 @@ theorem holds_eqD_iffS {σ : State C Γ} {a b : Tm C Γ .val} :
     holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ.erase = .ok x ∧ b.eval σ.erase = .ok x := by
   constructor
   · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
+    rw [Tm.evalT_eq] at hx hy
     have he' : Theory.StValue.Equiv (.prim x) (.prim y) := by
-      rw [← Tm.denote_eval σ.erase a x hx, ← Tm.denote_eval σ.erase b y hy]; exact he
+      rw [← Tm.denote_eval σ.erase a x hx, ← Tm.denote_eval σ.erase b y hy]
+      exact (holds_eq_erased σ _ _).1 he
     rw [Theory.StValue.Equiv.prim_iff] at he'
     cases he'
     exact ⟨x, hx, hy⟩
   · rintro ⟨x, hx, hy⟩
-    refine ⟨⟨x, hx⟩, ⟨x, hy⟩, ?_⟩
+    refine ⟨⟨x, (Tm.evalT_eq σ a).trans hx⟩, ⟨x, (Tm.evalT_eq σ b).trans hy⟩,
+      (holds_eq_erased σ _ _).2 ?_⟩
     show Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase)
     rw [Tm.denote_eval σ.erase a x hx, Tm.denote_eval σ.erase b x hy]
     exact Theory.StValue.Equiv.refl _

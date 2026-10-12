@@ -182,12 +182,10 @@ theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : F
   | .tt, _, e, σ => by cases e; exact Iff.rfl
   | .eq a b, _, e, σ => by
     cases e
-    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
-    rw [Tm.denote_wk, Tm.denote_wk, State.thin_erase]
+    rw [holds_eq_erased, holds_eq_erased, Tm.denote_wk, Tm.denote_wk, State.thin_erase]
   | .defined t, _, e, σ => by
     cases e
-    show (∃ x, _ = _) ↔ (∃ x, _ = _)
-    rw [Tm.eval_wk, State.thin_erase]
+    rw [holds_defined_erased, holds_defined_erased, Tm.eval_wk, State.thin_erase]
   | .not φ, _, e, σ => by
     cases hφ : φ.wkFO h with
     | none => simp only [Fml.wkFO_not, hφ, Option.map_none, reduceCtorEq] at e

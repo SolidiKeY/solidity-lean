@@ -46,7 +46,7 @@ set knows of the interpreter is `Calculus/CloseLemmas.lean`'s.
 What does not close, and why (on either side):
 
 * a write under the diamond: the closer reads the leaf's storage untyped
-  (`EState.glob`), where `find`/`save` at `alice` is not known
+  (`State.globE`), where `find`/`save` at `alice` is not known
   to be defined, so `⟨ alice.age = 1; ⟩ true` stays open at
   `{ storage := save(storage, alice.age, 1) } true`.  Write the box, or put
   the well-formedness of the storage in the premise;
@@ -192,12 +192,12 @@ namespace Close
 
 open Lean Elab Tactic Meta in
 /-- Whether the main goal is a scoped leaf's: it or its context reads a
-typed state (`Solidity.State`, `EState`, `Valid`, `CloseS.holdsE`).  The
+typed state (`Solidity.State`, `Valid`, `holds`).  The
 steps below then step aside for `Calculus/CloseScoped.lean`'s, which read
 it with `close_rw_s`. -/
 def scopedGoal : TacticM Bool := withMainContext do
   let names : List Lean.Name :=
-    [`Solidity.State, `Solidity.EState, `Solidity.Valid, `Solidity.CloseS.holdsE]
+    [`Solidity.State, `Solidity.Valid, `Solidity.holds]
   let hit (e : Expr) : Bool := (e.find? fun x => x.isConst && names.contains x.constName!).isSome
   if hit (← instantiateMVars (← getMainTarget)) then return true
   for d in ← getLCtx do
@@ -236,8 +236,8 @@ elab "sol_close_reads_all" : tactic => do
   evalTactic (← `(tactic|
     simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last]))
 
-/-- `sol_close`'s first step: a scoped leaf (`Valid ψ`) read as
-`CloseS.holdsE` reads it (`Calculus/CloseScoped.lean`); any other goal is
+/-- `sol_close`'s first step: a scoped leaf (`Valid ψ`) read as `holds`
+in every typed state (`Calculus/CloseScoped.lean`); any other goal is
 left as it is. -/
 syntax "sol_close_unwrap" : tactic
 
@@ -256,11 +256,16 @@ macro "sol_close" : tactic => `(tactic|
     sol_close_eval
     all_goals try sol_close_facts
     all_goals try sol_close_reads
+    -- the states an update lands on (`CloseS.LandedAll`), opened to binders
+    all_goals (try simp only [CloseS.landedAll_def])
     all_goals try (intros; sol_close_reads_all)
     all_goals try (subst_vars; sol_close_reads_all)
     all_goals (try intros)
     -- a bounds check returns `()`: nothing is left to choose
     all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
+    -- state: every premise introduced, every conjunct its own goal
+    all_goals (repeat' (first | intro _ | apply And.intro))
     all_goals first | omega | grind))
 
 open Lean Elab Tactic in
@@ -290,8 +295,10 @@ macro "sol_close_mt" : tactic => `(tactic|
     sol_close_mt_eval
     all_goals try sol_close_facts
     all_goals try sol_close_reads
+    all_goals (try simp only [CloseS.landedAll_def])
     all_goals try (intros; sol_close_reads_all)
     all_goals (try intros)
+    all_goals (repeat' (first | intro _ | apply And.intro))
     all_goals first | omega | grind))
 
 end Solidity

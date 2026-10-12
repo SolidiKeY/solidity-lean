@@ -656,8 +656,8 @@ theorem Fml.rwEqC_holds {q : Tm C [] .val × Tm C [] .val} (hq : Tm.Theq q.1 q.2
     {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : State C Γ, (holds σ (φ.rwEqC q) ↔ holds σ φ)
   | _, .tt, _ => Iff.rfl
   | _, .eq a b, σ => by
-    show Equiv ((a.sideC q).denote σ.erase) ((b.sideC q).denote σ.erase) ↔
-      Equiv (a.denote σ.erase) (b.denote σ.erase)
+    show holds σ (.eq (a.sideC q) (b.sideC q)) ↔ _
+    rw [holds_eq_erased, holds_eq_erased]
     have ha := Tm.sideC_denote hq σ.erase a
     have hb := Tm.sideC_denote hq σ.erase b
     exact ⟨fun h => (ha.symm.trans h).trans hb, fun h => (ha.trans h).trans hb.symm⟩

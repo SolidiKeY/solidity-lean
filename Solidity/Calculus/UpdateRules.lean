@@ -205,12 +205,10 @@ theorem Fml.substU_holds {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : EState C Γ} {
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    show Equiv (a'.denote σ.erase) (b'.denote σ.erase) ↔ Equiv (a.denote σ'.erase) (b.denote σ'.erase)
-    rw [e, e', Tm.denote_substH hU a ha, Tm.denote_substH hU b hb]
+    rw [holds_eq_erased, holds_eq_erased, e, e', Tm.denote_substH hU a ha, Tm.denote_substH hU b hb]
   | .defined t, _, h, σ, σ', e, e' => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (∃ x, t'.eval σ.erase = .ok x) ↔ (∃ x, t.eval σ'.erase = .ok x)
-    rw [e, e', Tm.eval_substH hU (st := none) (fun _ h => Option.noConfusion h) t ht]
+    rw [holds_defined_erased, holds_defined_erased, e, e', Tm.eval_substH hU (st := none) (fun _ h => Option.noConfusion h) t ht]
   | .not φ, _, h, σ, σ', e, e' => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (Fml.substU_holds hU φ hφ σ σ' e e')
