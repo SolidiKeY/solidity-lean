@@ -4197,6 +4197,45 @@ The confirmed findings of the W9.5a review, fixed:
   and its term vocabulary stay as the closer's IR") left "What is left":
   superseded by W9, which removed that IR.
 
+## W9.6 plan (the state IR, the notation's front end)
+
+Asked by the user on 2026-10-12 ("put the types on it"; chosen: W9.6 and
+the typed notation, the reader's shim frozen, side-projects untouched).
+Speed warning given first: the closer's `simp` reads typed locals
+(`LTy.TDenote C σ.H`), so `sol_close` may slow; no kernel path evaluates
+`Tm.eval` (`sol_decide` decides `inLS`/`closeS` over the syntax, the
+refutation `TRes.isPanic` over the typed run).  Gates: the W9 table.
+
+**Three parts of the state IR.** (1) The program evaluators
+(`Semantics/Erased.lean`'s `Val.eval`, `Loc.resolve`, `OpLoc.*`, …), read
+only by `StepErase`, `SoundArms`' equations and `Typing/`'s `EKeeps`/
+`SRuns`.  (2) The term reader: `Tm.eval`/`Tm.denote` read `σ.glob` and
+`Env.get`; over `State C Γ` they read `State.globE σ` (the global part
+from the value-level erasure) and `TDenote.erase (TEnv.get i σ.env)`, equal
+by `rfl` per constructor.  The symbols `Op0`–`Op3` stay untyped over
+`Semantics.State` (decision 83: `save` of an untyped `sv` may build an
+ill-typed storage).  (3) An update's result: an untyped `MObj` does not fix
+the heap typing, an allocation pair writes the local before the heap that
+types it, and `net`/`pay` read the intermediate global part, so an update
+cannot be applied element by element to a typed state.  Two carriers:
+- **U1, the pair**: `Upd.apply σ₀ : Res (Semantics.State × Env C Δ)`,
+  `Env` kept as `TEnv.erase`'s target; `EState` goes, `holdsE` becomes a
+  reading at the pair.
+- **U2, landing**: `Upd.Lands σ₀ U g σ'` relates the typed result directly;
+  `holdsE` and `Env` go, every update law is restated, the closer reads
+  `holds` (measured at about 3× `holdsE`'s work at W9.3).
+
+| Wave | Lanes | Work | Rows at risk |
+|---|---|---|---|
+| W9.6.0 | spike (scratch) ‖ `notation` | **spike**: the typed `Tm.eval` (`rfl` against today's); U2's `Lands` for every `UpdElem` with `decl`/`pop`/`drop`, `Lands ↔ σ'.erase = τ`, `holds_upd_graft` and `Premise.sound_update` for the allocation pair; `sol_close` on `Derived7`'s leaves and `SelectOnSaveConsr` read through U1 and U2 against `holdsE`.  Chooses U1 or U2.  **notation (W9.6N)**: `tm{}`, `st!{}`/`pt!{}`, a chain's by-name key and the spec front end parse to `Tm C Γ`/`Upd` directly; `delabTmS` prints a scoped term without `tmSurface`; the twin check goes; `Surface.*`, `Tm.erase`, `Delab.tr`, `NFml` stay as the reader's frozen shim, read by nothing in the prover | notation pins |
+| W9.6.1 | `logic` ‖ `inv` | `Logic.lean`'s readers on the typed state with the chosen carrier (old ones kept as `rfl` twins), `holdsC`, `Deploy`; `RunInv.HoldsT` over `State` in `Typing/TypedRunInv.lean`, `TKeeps` per statement against `TRun` (replaces `EKeeps`, `canonInv.ekeeps`, `SRuns.of_agrees`, `Faithfulness`' `RunWT`) | all rebuild, no pin |
+| W9.6.2 | `sound` ‖ `laws` | `Premise.sound_update` and `SoundArms`' equations against `TRun.*`, then `SoundCalls`/`Local`/`Loops`, `CallbackSound`, `ProvesSound`; the update laws (`Graft`, `UpdRuleScoped`, `RewritePast`, `TermLaws`, `UpdateRules`, `RewriteScoped`, `SeqRewrite`, `StatePartsScoped`, `LeafDerive`, …) | `Chains/*`, `ChainRewrites*`, Derived |
+| W9.6.3 | `decide` ‖ `close` | `RelB`/`RelU`, `peelS`, `redState`, `Valid.of_reduceSL` on the typed state; `CloseScoped` without `EState` (U2) or on the pair (U1); `Close`, `CloseTests`, `Closers`, `State.lift?` | `Tactics/Decide`, Derived, `Solkey/TestSuite`, `ProofTree` |
+| W9.6.4 | master | delete Erased's evaluators and `EState` (and `Env` under U2), the twins, `StepErase` (its `State`/`TEnv` erase lemmas move to `State.lean`), the old `RunInv.Holds`/`EKeeps`; docs | all |
+
+**Fallback**: if U2 fails the gate, U1 (the evaluators, `EState`,
+`StepErase` and the erased invariant still go).
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
@@ -4228,10 +4267,8 @@ and `SValT.denote_eval`, and `Calculus/NoPanic.lean`'s
 `Surface.Tm.eval_noPanic`, `Surface.UpdElem.write_noPanic`,
 `Surface.Upd.apply_ne_panic`.
 
-**W9.6 (the state IR)**, a proposal: `Tm.eval` over `State C Γ`, the
-Sound* files against `TRun.*`, the run invariants over `State`; the
-closer's untyped reading of a leaf's state (`CloseS.holdsE`,
-`EState.glob`) goes with it.
+**W9.6 (the state IR) and W9.6N (the notation's front end)**: under
+way, "W9.6 plan" below.
 
 **Open items:**
 - The reduction's symbols over the typed state (decision 83): a scoped
