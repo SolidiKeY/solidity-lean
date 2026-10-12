@@ -17,8 +17,8 @@ Three of the four facts `fits` asks are the typed state's by construction: a
 word is a `PrimTy.Denote`, in range; a fixed-size array has exactly its
 type's length; a dynamic array fewer than `2^256` live elements
 (`SVal.array`'s bound).  The fourth is not, and is a third run invariant
-beside `canonInv` and `tightInv` (`fitsInv`, on the erasure, as
-`Typing/TypedRunInv.lean` reads them): every mapping key is in its key
+beside `canonInv` and `tightInv` (`fitsInv`, of the typed state's erasure,
+as `Typing/TypedRunInv.lean` reads them): every mapping key is in its key
 type's range (`SMap`'s keys are `Int`s; a key is written through
 `PrimTy.key` of a typed index, or along an alias's path, which the locals
 part of the invariant keeps, `LTy.KeysFit`), and every dynamic array's live
@@ -27,10 +27,10 @@ takes a recycled slot or checks the bound (`Storage.full`), `pop` and
 `delete` move slots, never add one, and a copy keeps the larger of the old
 slot count and the new length.
 
-The leaves read the typed step (`TRun.*`) where storage changes, through the
-storage erasure lemmas (`Semantics/StorageErase.lean`): the typed reference
-carries the keys' range and the path's type, the typed `push` its bound.  The
-others read the erasure, as the `tight_*` leaves do.
+The leaves read the typed step (`TRun.*`), through the storage erasure
+lemmas (`Semantics/StorageErase.lean`) where storage changes: the typed
+reference carries the keys' range and the path's type, the typed `push` its
+bound.
 -/
 
 namespace Solidity
@@ -825,12 +825,6 @@ invariant on aliases, its keys' range (`SRef.KeysFit`). -/
 /-- Every key along a typed reference's path in range. -/
 def SRef.KeysFit {U : Ty} (r : SRef C U) : Prop := Solidity.KeysFit r.ty r.path.erase
 
-theorem TRes.ofOpt_ok {α : Type} {x : Option α} {a : α} (h : TRes.ofOpt x = .ok a) :
-    x = some a := by
-  cases x with
-  | none => exact nomatch h
-  | some b => cases h; rfl
-
 namespace Storage
 
 variable {st st' : Storage C}
@@ -944,11 +938,11 @@ variable {Γ : Ctx} (σ : State C Γ)
 mutual
 
 /-- A typed path resolves along keys in range, its aliases' included. -/
-theorem SPath.resolveT_keysFit (he : Env.All (LTy.KeysFit C) σ.erase.env) :
+theorem SPath.resolveT_keysFit (he : Env.All (LTy.KeysFit C) (TEnv.erase Γ σ.env)) :
     {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef C T}, b.resolveT σ = .ok r → r.KeysFit
   | _, .alias i, r, h => by
     have hk := he.get i
-    rw [State.erase_get] at hk
+    rw [TEnv.get_erase] at hk
     change (match (TEnv.get i σ.env : Option (SRef C _)) with
       | some r => .ok r
       | none => .error .revert : TRes _) = .ok r at h
@@ -964,7 +958,7 @@ theorem SPath.resolveT_keysFit (he : Env.All (LTy.KeysFit C) σ.erase.env) :
     · exact nomatch h
   | _, .loc l, r, h => Loc.resolveT_keysFit he l h
 
-theorem Loc.resolveT_keysFit (he : Env.All (LTy.KeysFit C) σ.erase.env) :
+theorem Loc.resolveT_keysFit (he : Env.All (LTy.KeysFit C) (TEnv.erase Γ σ.env)) :
     {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T}, l.resolveT σ = .ok r → r.KeysFit
   | _, .root _ _, r, h => by
     cases h
@@ -972,7 +966,7 @@ theorem Loc.resolveT_keysFit (he : Env.All (LTy.KeysFit C) σ.erase.env) :
   | _, .field b f hf, r, h => by
     obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
     cases h
-    have hp := congrArg Prod.snd (SRef.erase_field r0 hf)
+    have hp := congrArg Prod.snd (SRef.field_erase r0 hf)
     show Solidity.KeysFit r0.ty (r0.field hf).path.erase
     rw [show (r0.field hf).path.erase = r0.path.erase ++ [.field f] from hp]
     exact KeysFit_append _ (SPath.resolveT_keysFit he b h0) (tyAtSegs_erase r0.path) trivial
@@ -981,7 +975,7 @@ theorem Loc.resolveT_keysFit (he : Env.All (LTy.KeysFit C) σ.erase.env) :
     obtain ⟨k, _, h⟩ := tbind_ok_inv h
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
-    have hp := congrArg Prod.snd (SRef.erase_index r0 it (PrimTy.key k))
+    have hp := congrArg Prod.snd (SRef.index_erase r0 it (PrimTy.key k))
     show Solidity.KeysFit r0.ty (r0.index it (PrimTy.key k)).path.erase
     rw [show (r0.index it (PrimTy.key k)).path.erase = r0.path.erase ++ [.at (PrimTy.key k)]
       from hp]
@@ -1005,26 +999,21 @@ def fitsInv (C : Contract) : RunInv C where
   reglob _ h := h
 
 /-- The storage bounded, every alias along keys in range. -/
-abbrev RunFits (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : EState C Γ) : Prop :=
-  (fitsInv C).Holds H σ
+abbrev RunFits (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+  (fitsInv C).HoldsT H σ
+
+theorem fitsInv.valMemOk : (fitsInv C).ValMemOk :=
+  ⟨fun _ _ _ => trivial, fun _ _ _ => trivial, fun _ _ _ _ hs h => by
+    show BndStorage C _; rw [hs]; exact h⟩
 
 namespace RunFits
 
-variable {Γ : Ctx} {H : HeapTy} {σ : EState C Γ}
-
-theorem setLocal (h : RunFits C H σ) {t : LTy} (i : Idx Γ t) {v : t.Denote C}
-    (hv : LTy.KeysFit C t v) : RunFits C H (σ.setLocal i v) :=
-  ⟨h.1, Env.All.set i h.2 hv⟩
-
-theorem push (h : RunFits C H σ) {t : LTy} {v : t.Denote C} (hv : LTy.KeysFit C t v) :
-    RunFits C H (σ.push v) :=
-  ⟨h.1, hv, h.2⟩
+variable {Γ : Ctx} {H : HeapTy}
 
 /-- A typed state's heap grown, its storage and locals as they were. -/
-theorem adopt {α : HTy → Type} {σ : State C Γ} (g : Grown σ.H α) (h : RunFits C H σ.erase) :
-    RunFits C H (σ.adopt g).1.erase := by
-  rw [State.adopt_erase]
-  exact ⟨h.1, h.2⟩
+theorem adopt {α : HTy → Type} {σ : State C Γ} (g : Grown σ.H α) (h : RunFits C H σ) :
+    RunFits C H (σ.adopt g).1 :=
+  ⟨h.1, Env.All.twk _ h.2⟩
 
 end RunFits
 
@@ -1053,7 +1042,7 @@ theorem SRef.keysFit_root {U : Ty} {r : SRef C U} (h : r.KeysFit) :
 
 /-- `p = alice;`, `p = persons.push();`: the storage bounded (a push below
 the bound), the path along keys in range. -/
-theorem ARhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) {R : RefTy} :
+theorem ARhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ) {R : RefTy} :
     (r : ARhs C Γ R) → {st : Storage C} → {ref : SRef C (.ref R)} →
       r.evalT σ = .ok (st, ref) → BndStorage C st.erase ∧ ref.KeysFit
   | .path p, st, ref, h => by
@@ -1073,7 +1062,7 @@ theorem ARhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) {R : RefT
       rw [TRes.ofOpt_ok hp] at he
       refine ⟨bnd_pushPlaceAt hσ.1 (SRef.tyAt_erase ref0) (SRef.keysFit_root hk)
         (Storage.len_of_full rfl ref0 hfull') he, ?_⟩
-      have hpe := congrArg Prod.snd (SRef.erase_index ref0 (IndexTy.arr ArrTy.dyn) (n : Int))
+      have hpe := congrArg Prod.snd (SRef.index_erase ref0 (IndexTy.arr ArrTy.dyn) (n : Int))
       show Solidity.KeysFit ref0.ty (ref0.index (IndexTy.arr ArrTy.dyn) (n : Int)).path.erase
       rw [show (ref0.index (IndexTy.arr ArrTy.dyn) (n : Int)).path.erase =
         ref0.path.erase ++ [.at (n : Int)] from hpe]
@@ -1081,8 +1070,8 @@ theorem ARhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) {R : RefT
 
 /-- `m = n;`, `m = alice;`: the heap grown, storage and locals as they
 were. -/
-theorem MRhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) {R : RefTy} :
-    (r : MRhs C Γ R) → {g : Grew C Γ σ.H (HRef · R)} → r.evalT σ = .ok g → RunFits C H g.st.erase
+theorem MRhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ) {R : RefTy} :
+    (r : MRhs C Γ R) → {g : Grew C Γ σ.H (HRef · R)} → r.evalT σ = .ok g → RunFits C H g.st
   | .alias _, g, h => by
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
@@ -1096,9 +1085,9 @@ theorem MRhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) {R : RefT
     cases h
     exact RunFits.adopt _ hσ
 
-theorem opStoreT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : BinOp)
+theorem opStoreT_fits (σ : State C Γ) (hσ : RunFits C H σ) (op : BinOp)
     {p : PrimTy} (r : SRef C (.prim p)) (hk : r.KeysFit) (v : p.Denote) {o : Out C σ.H Γ}
-    (h : opStoreT σ op r v = .ok o) : RunFits C H o.st.erase := by
+    (h : opStoreT σ op r v = .ok o) : RunFits C H o.st := by
   unfold opStoreT at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨new, _, h⟩ := tbind_ok_inv h
@@ -1106,9 +1095,9 @@ theorem opStoreT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : BinOp
   cases h
   exact ⟨Storage.save_bnd hσ.1 r hk (by rw [SVal.erase_prim]; trivial) (TRes.ofOpt_ok hst), hσ.2⟩
 
-theorem opMemT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : BinOp)
+theorem opMemT_fits (σ : State C Γ) (hσ : RunFits C H σ) (op : BinOp)
     {p : PrimTy} (a : MAddr σ.H (.prim p)) (v : p.Denote) {o : Out C σ.H Γ}
-    (h : opMemT σ op a v = .ok o) : RunFits C H o.st.erase := by
+    (h : opMemT σ op a v = .ok o) : RunFits C H o.st := by
   unfold opMemT at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
@@ -1116,14 +1105,13 @@ theorem opMemT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : BinOp)
   cases h
   exact ⟨hσ.1, hσ.2⟩
 
-theorem OpLoc.storeT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : BinOp) :
+theorem OpLoc.storeT_fits (σ : State C Γ) (hσ : RunFits C H σ) (op : BinOp) :
     {p : PrimTy} → (l : OpLoc C Γ p) → (v : p.Denote) → {o : Out C σ.H Γ} →
-      l.storeT σ op v = .ok o → RunFits C H o.st.erase
+      l.storeT σ op v = .ok o → RunFits C H o.st
   | _, .local i, _, o, h => by
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
-    rw [State.setLocal_erase]
-    exact RunFits.setLocal hσ i trivial
+    exact hσ.setLocal i trivial
   | _, .root r hr, v, o, h =>
     opStoreT_fits σ hσ op (SRef.ofRoot r hr) (show Solidity.KeysFit _ [] from trivial) v h
   | _, .field b f hf, v, o, h => by
@@ -1139,9 +1127,9 @@ theorem OpLoc.storeT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : B
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
     exact opMemT_fits σ hσ op a v h
 
-theorem bumpStoreT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : IncDec)
+theorem bumpStoreT_fits (σ : State C Γ) (hσ : RunFits C H σ) (op : IncDec)
     {p : PrimTy} (r : SRef C (.prim p)) (hk : r.KeysFit) {o : Out C σ.H Γ} {w : p.Denote}
-    (h : bumpStoreT σ op r = .ok (o, w)) : RunFits C H o.st.erase := by
+    (h : bumpStoreT σ op r = .ok (o, w)) : RunFits C H o.st := by
   unfold bumpStoreT at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨new, _, h⟩ := tbind_ok_inv h
@@ -1149,9 +1137,9 @@ theorem bumpStoreT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : Inc
   cases h
   exact ⟨Storage.save_bnd hσ.1 r hk (by rw [SVal.erase_prim]; trivial) (TRes.ofOpt_ok hst), hσ.2⟩
 
-theorem bumpMemT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : IncDec)
+theorem bumpMemT_fits (σ : State C Γ) (hσ : RunFits C H σ) (op : IncDec)
     {p : PrimTy} (a : MAddr σ.H (.prim p)) {o : Out C σ.H Γ} {w : p.Denote}
-    (h : bumpMemT σ op a = .ok (o, w)) : RunFits C H o.st.erase := by
+    (h : bumpMemT σ op a = .ok (o, w)) : RunFits C H o.st := by
   unfold bumpMemT at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
@@ -1159,14 +1147,13 @@ theorem bumpMemT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : IncDe
   cases h
   exact ⟨hσ.1, hσ.2⟩
 
-theorem OpLoc.bumpT_fits (σ : State C Γ) (hσ : RunFits C H σ.erase) (op : IncDec) :
+theorem OpLoc.bumpT_fits (σ : State C Γ) (hσ : RunFits C H σ) (op : IncDec) :
     {p : PrimTy} → (l : OpLoc C Γ p) → {o : Out C σ.H Γ} → {w : p.Denote} →
-      l.bumpT σ op = .ok (o, w) → RunFits C H o.st.erase
+      l.bumpT σ op = .ok (o, w) → RunFits C H o.st
   | _, .local i, o, w, h => by
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
-    rw [State.setLocal_erase]
-    exact RunFits.setLocal hσ i trivial
+    exact hσ.setLocal i trivial
   | _, .root r hr, o, w, h =>
     bumpStoreT_fits σ hσ op (SRef.ofRoot r hr) (show Solidity.KeysFit _ [] from trivial) h
   | _, .field b f hf, o, w, h => by
@@ -1200,8 +1187,7 @@ theorem fits_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
   obtain ⟨⟨st, ref⟩, he, h⟩ := tbind_ok_inv h
   cases h
   obtain ⟨hst, hk⟩ := ARhs.evalT_fits σ hσ r he
-  rw [State.setLocal_erase]
-  exact RunFits.setLocal (σ := (σ.withStorage st).erase) ⟨hst, hσ.2⟩ i
+  exact RunInv.HoldsT.setLocal (σ := σ.withStorage st) ⟨hst, hσ.2⟩ i
     (SRef.keysFit_local hk)
 
 theorem fits_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
@@ -1210,8 +1196,7 @@ theorem fits_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
   unfold TRun.assignLocal at h
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   cases h
-  rw [State.setLocal_erase]
-  exact RunFits.setLocal hσ i trivial
+  exact hσ.setLocal i trivial
 
 theorem fits_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
     (fitsInv C).TKeeps (TRun.declLocal p init) := by
@@ -1220,12 +1205,12 @@ theorem fits_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
   cases init with
   | none =>
     cases h
-    exact RunFits.push hσ trivial
+    exact hσ.push (t := .val p) trivial
   | some e =>
     dsimp only at h
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
-    exact RunFits.push hσ trivial
+    exact hσ.push (t := .val p) trivial
 
 theorem fits_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
     (fitsInv C).TKeeps (TRun.declStorage R init) := by
@@ -1234,12 +1219,13 @@ theorem fits_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
   cases init with
   | none =>
     cases h
-    exact RunFits.push hσ (t := .alias R) (fun _ _ h => nomatch h)
+    exact hσ.push (t := .alias R) (fun _ _ h => nomatch h)
   | some r =>
     obtain ⟨⟨st, ref⟩, he, h⟩ := tbind_ok_inv h
     cases h
     obtain ⟨hst, hk⟩ := ARhs.evalT_fits σ hσ r he
-    exact RunFits.push (σ := (σ.withStorage st).erase) ⟨hst, hσ.2⟩ (SRef.keysFit_local hk)
+    exact RunInv.HoldsT.push (σ := σ.withStorage st) (t := .alias R) (v := some ref)
+      ⟨hst, hσ.2⟩ (SRef.keysFit_local hk)
 
 theorem fits_opAssign {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (r : Val C Γ p) :
     (fitsInv C).TKeeps (TRun.opAssign op l r) := by
@@ -1262,8 +1248,7 @@ theorem fits_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : 
   unfold TRun.assignIncDec at h
   obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
   cases h
-  rw [State.setLocal_erase]
-  exact RunFits.setLocal (OpLoc.bumpT_fits σ hσ op l hb) i trivial
+  exact (OpLoc.bumpT_fits σ hσ op l hb).setLocal i trivial
 
 theorem fits_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) :
     (fitsInv C).TKeeps (TRun.push b v) := by
@@ -1329,12 +1314,9 @@ theorem fits_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
   cases h
   unfold sendT
   split
-  · rw [State.setLocal_erase]
-    exact RunFits.setLocal (σ := (σ.pay _ _).erase) ⟨hσ.1, hσ.2⟩ pv trivial
-  · rw [State.setLocal_erase]
-    exact RunFits.setLocal (σ := (σ.pay _ _).erase) ⟨hσ.1, hσ.2⟩ pv trivial
-  · rw [State.setLocal_erase]
-    exact RunFits.setLocal hσ pv trivial
+  · exact RunInv.HoldsT.setLocal (σ := σ.pay _ _) ⟨hσ.1, hσ.2⟩ pv trivial
+  · exact RunInv.HoldsT.setLocal (σ := σ.pay _ _) ⟨hσ.1, hσ.2⟩ pv trivial
+  · exact hσ.setLocal pv trivial
 
 theorem fits_declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).mapFree = true) :
     (fitsInv C).TKeeps (TRun.declMem R init hm) := by
@@ -1343,11 +1325,11 @@ theorem fits_declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).
   cases init with
   | none =>
     cases h
-    exact RunFits.push (RunFits.adopt _ hσ) trivial
+    exact (RunFits.adopt _ hσ).push (t := .mem R) trivial
   | some r =>
     obtain ⟨g, hg, h⟩ := tbind_ok_inv h
     cases h
-    exact RunFits.push (MRhs.evalT_fits σ hσ r hg) trivial
+    exact (MRhs.evalT_fits σ hσ r hg).push (t := .mem R) trivial
 
 theorem fits_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
     (fitsInv C).TKeeps (TRun.rebindMem i r) := by
@@ -1355,8 +1337,7 @@ theorem fits_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
   unfold TRun.rebindMem at h
   obtain ⟨g, hg, h⟩ := tbind_ok_inv h
   cases h
-  rw [State.setLocal_erase]
-  exact RunFits.setLocal (MRhs.evalT_fits σ hσ r hg) i trivial
+  exact (MRhs.evalT_fits σ hσ r hg).setLocal i trivial
 
 theorem fits_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
     (fitsInv C).TKeeps (TRun.assignFromMem l p) := by
@@ -1389,9 +1370,9 @@ theorem fits_delete {T : Ty} (l : Loc C Γ T) : (fitsInv C).TKeeps (TRun.delete 
   exact ⟨Storage.delete_bnd hσ.1 ref (Loc.resolveT_keysFit σ hσ.2 l href) (TRes.ofOpt_ok hst),
     hσ.2⟩
 
-theorem fits_clearT (σ : State C Γ) (hσ : RunFits C H σ.erase) :
+theorem fits_clearT (σ : State C Γ) (hσ : RunFits C H σ) :
     {T : Ty} → (a : MAddr σ.H T) → (hm : T.mapFree = true) → {o : Out C σ.H Γ} →
-      TRun.clearT σ a hm = .ok o → RunFits C H o.st.erase
+      TRun.clearT σ a hm = .ok o → RunFits C H o.st
   | .prim _, _, _, o, h => by
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
@@ -1409,8 +1390,7 @@ theorem fits_deleteMem {T : Ty} (p : MPath C Γ T) : (fitsInv C).TKeeps (TRun.de
   cases p with
   | var i _ =>
     cases h
-    rw [State.setLocal_erase]
-    exact RunFits.setLocal (RunFits.adopt _ hσ) i trivial
+    exact (RunFits.adopt _ hσ).setLocal i trivial
   | loc l =>
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
     exact fits_clearT σ hσ a l.mapFree h
@@ -1420,7 +1400,7 @@ theorem fits_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
   intro σ o hσ h
   unfold TRun.assignNew at h
   have hg : RunFits C (HTy.toHeapTy 0 σ.H)
-      (σ.copyStToMG (newArrT R (n.evalT σ) hn) (RefTy.mapFree_of_newArrOk hn)).st.erase :=
+      (σ.copyStToMG (newArrT R (n.evalT σ) hn) (RefTy.mapFree_of_newArrOk hn)).st :=
     RunFits.adopt _ hσ
   cases l with
   | store l =>
@@ -1441,51 +1421,6 @@ theorem fits_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
 end Leaves
 
 /-! ### Scopes and calls -/
-
-/-- A call's arguments, return variables and decoded data are values or
-fresh memory objects: no alias. -/
-theorem Args.eval_keysFit {Γ : Ctx} {σ : EState C Γ} : {ps : Ctx} → (args : Args C Γ ps) →
-    {a : Env C ps} → args.eval σ = .ok a → Env.All (LTy.KeysFit C) a
-  | _, .nil, _, _ => trivial
-  | _, .snoc as _ _ _, _, h => by
-    obtain ⟨r, hr, h⟩ := bind_ok_inv h
-    obtain ⟨v, _, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨trivial, Args.eval_keysFit as hr⟩
-
-theorem Binders.keysFit : {ρ : Ctx} → (bs : Binders ρ) → (r : Env C ρ) →
-    Env.All (LTy.KeysFit C) r
-  | _, .nil, _ => trivial
-  | _, .snoc bs _ _, r => ⟨trivial, Binders.keysFit bs r.2⟩
-
-theorem CodeBinder.keysFit {κ : Ctx} (code : CodeBinder κ) (r : Env C κ) :
-    Env.All (LTy.KeysFit C) r := by
-  cases code with
-  | none => trivial
-  | some _ => exact ⟨trivial, trivial⟩
-
-theorem CallRet.enter_fits {Γ rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {τ τ' : Semantics.State}
-    {r : Env C rs} (h : ret.enter τ = .ok (τ', r)) :
-    τ'.storage = τ.storage ∧ Env.All (LTy.KeysFit C) r := by
-  cases ret with
-  | none => cases h; exact ⟨rfl, trivial⟩
-  | val p x res => cases h; exact ⟨rfl, trivial, trivial⟩
-  | rets bs => cases h; exact ⟨rfl, Binders.keysFit bs _⟩
-  | mem R x hd hm =>
-    obtain ⟨⟨τ₁, id⟩, ha, h⟩ := bind_ok_inv h
-    cases h
-    exact ⟨(allocDefault_se ha).1, trivial, trivial⟩
-
-/-- A call's entry keeps the storage bounded: no return variable is an
-alias. -/
-theorem fitsInv.enter {Γ Γ' ps rs : Ctx} (ret : CallRet Γ rs Γ') (σ : State C Γ)
-    (a : TEnv C σ.H ps) (h : RunFits C (HTy.toHeapTy 0 σ.H) (σ.withEnv a).erase) :
-    RunFits C (HTy.toHeapTy 0 (ret.enterT (σ.withEnv a)).st.H)
-      (ret.enterT (σ.withEnv a)).st.erase := by
-  obtain ⟨τ', r, hen, he⟩ := CallRet.enterT_ok ret σ a
-  obtain ⟨hs, hk⟩ := CallRet.enter_fits ret hen
-  rw [he]
-  exact ⟨show BndStorage C τ'.storage by rw [hs]; exact h.1, Env.All.append rs hk h.2⟩
 
 mutual
 
@@ -1517,11 +1452,9 @@ theorem Stmt.keeps_fits : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (fitsInv C)
   | _, _, .assert c => RunInv.tkeeps_assert c
   | _, _, .revert => RunInv.tkeeps_revert
   | _, _, .call _ args ret body =>
-    RunInv.tkeeps_call args ret body.ext (fun _ _ _ _ ha => Args.eval_keysFit args ha)
-      (fitsInv.enter ret) (Prog.keeps_fits body)
+    RunInv.tkeeps_call fitsInv.valMemOk args ret body.ext (Prog.keeps_fits body)
   | _, _, .tryCall call rets ok err code pnc other =>
-    RunInv.tkeeps_tryCall call rets ok.ext err.ext code pnc.ext other.ext
-      (fun _ _ r _ _ => Binders.keysFit rets r) (fun _ _ r _ => CodeBinder.keysFit code r)
+    RunInv.tkeeps_tryCall fitsInv.valMemOk call rets ok.ext err.ext code pnc.ext other.ext
       (Prog.keeps_fits ok) (Prog.keeps_fits err) (Prog.keeps_fits pnc) (Prog.keeps_fits other)
   | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_fits body)
   | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_fits body)
@@ -1549,9 +1482,11 @@ contract's initial state has its keys in range and its arrays' slots below
 theorem reachable_bnd {st : List (Name × Semantics.SVal)} (h : Reachable C st) :
     BndStorage C st := by
   obtain ⟨Γ', P, o, hrun, rfl⟩ := h
-  have hi : RunFits C (HTy.toHeapTy 0 (State.init C).H) (State.init C).erase := by
-    rw [Reachable.init_erase]
-    exact ⟨BndStorage.init, trivial⟩
+  have hi : RunFits C (HTy.toHeapTy 0 (State.init C).H) (State.init C) := by
+    refine ⟨?_, trivial⟩
+    show BndStorage C (State.init C).storage.erase
+    rw [State.init_storage_erase]
+    exact BndStorage.init
   exact (Prog.keeps_fits P (State.init C) o hi hrun).1
 
 /-- A bounded typed storage fits, its fixed sizes within `2^256`. -/
