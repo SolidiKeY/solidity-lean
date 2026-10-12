@@ -482,23 +482,6 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                       Token))),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 :=
-              read(write(addM(write(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket),
-                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                      9),
-                    Token),
-                  read(write(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket),
-                            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                        9),
-                      freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
-                  freshId(addM(write(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket),
-                            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                        9),
-                      Token))),
-                freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -531,6 +514,23 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                             9),
                           Token))),
                     freshId(addM(memory, TokenBucket)).tokens)[1 + 1]) ‖
+            mv5 :=
+              read(write(addM(write(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket),
+                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                      9),
+                    Token),
+                  read(write(addM(memory, TokenBucket),
+                        read(addM(memory, TokenBucket),
+                            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                        9),
+                      freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
+                  freshId(addM(write(addM(memory, TokenBucket),
+                        read(addM(memory, TokenBucket),
+                            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                        9),
+                      Token))),
+                freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -613,19 +613,6 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                       Token))),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 :=
-              read(write(addM(write(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket),
-                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                      9),
-                    Token),
-                  read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
-                  freshId(addM(write(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket),
-                            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                        9),
-                      Token))),
-                freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -650,6 +637,19 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                             9),
                           Token))),
                     freshId(addM(memory, TokenBucket)).tokens)[1 + 1]) ‖
+            mv5 :=
+              read(write(addM(write(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket),
+                          read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                      9),
+                    Token),
+                  read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1],
+                  freshId(addM(write(addM(memory, TokenBucket),
+                        read(addM(memory, TokenBucket),
+                            read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                        9),
+                      Token))),
+                freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -720,13 +720,6 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                       Token))),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 :=
-              read(addM(write(addM(memory, TokenBucket),
-                    read(addM(memory, TokenBucket),
-                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                    9),
-                  Token),
-                freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -745,6 +738,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                         9),
                       Token),
                     freshId(addM(memory, TokenBucket)).tokens)[1 + 1]) ‖
+            mv5 :=
+              read(addM(write(addM(memory, TokenBucket),
+                    read(addM(memory, TokenBucket),
+                        read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                    9),
+                  Token),
+                freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -809,12 +809,6 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                       Token))),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 :=
-              read(write(addM(memory, TokenBucket),
-                  read(addM(memory, TokenBucket),
-                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
-                  9),
-                freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -832,6 +826,12 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                       9),
                     freshId(addM(memory, TokenBucket)).tokens)[1 + 1]) ‖
+            mv5 :=
+              read(write(addM(memory, TokenBucket),
+                  read(addM(memory, TokenBucket),
+                      read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
+                  9),
+                freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -895,7 +895,6 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                       Token))),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -909,6 +908,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                         9),
                       Token))),
                 read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -968,13 +968,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                       Token))),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -1021,13 +1021,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                   Token),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -1073,13 +1073,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                   9),
                 read(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) ‖
-            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -1118,13 +1118,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                       9),
                     Token))) ‖
-            oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-            mv4 :=
+            oldValue := 9 ‖ mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(write(addM(write(addM(memory, TokenBucket),
                       read(addM(memory, TokenBucket),
@@ -1163,13 +1163,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                       9),
                     Token))) ‖
-            oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-            mv4 :=
+            oldValue := 9 ‖ mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue :=
               read(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
@@ -1202,13 +1202,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                       9),
                     Token))) ‖
-            oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-            mv4 :=
+            oldValue := 9 ‖ mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue := 0 }
           φ }
     ~[add_literals]~> dl![m]{
@@ -1230,13 +1230,13 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]).value,
                       9),
                     Token))) ‖
-            oldValue := 9 ‖ mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
-            mv4 :=
+            oldValue := 9 ‖ mv4 :=
               freshId(addM(write(addM(memory, TokenBucket),
                     read(addM(memory, TokenBucket),
                         read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]).value,
                     9),
                   Token)) ‖
+            mv5 := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             newValue := 0 }
           φ } := by
   sol_chain

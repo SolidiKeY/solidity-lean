@@ -408,7 +408,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖
+            aliceTok := alice.account.token ‖ sp := alice.account ‖
             v :=
               find(save(storage, alice.account.token,
                   copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
@@ -422,7 +422,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖
+            aliceTok := alice.account.token ‖ sp := alice.account ‖
             v :=
               find(select(save(storage, alice.account.token,
                     copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
@@ -437,7 +437,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖
+            aliceTok := alice.account.token ‖ sp := alice.account ‖
             v :=
               find(select(select(save(storage, alice.account.token,
                       copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
@@ -453,7 +453,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖
+            aliceTok := alice.account.token ‖ sp := alice.account ‖
             v :=
               find(select(save(select(storage, alice), account.token,
                     copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
@@ -468,7 +468,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖
+            aliceTok := alice.account.token ‖ sp := alice.account ‖
             v :=
               find(save(select(select(storage, alice), account), token,
                   copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
@@ -482,7 +482,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖
+            aliceTok := alice.account.token ‖ sp := alice.account ‖
             v :=
               read(write(addM(memory, Token), freshId(addM(memory, Token)).value, 99), freshId(addM(memory, Token)).value) }
           φ }
@@ -493,7 +493,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
               save(storage, alice.account.token,
                 copyMem(mtSt, write(addM(memory, Token), freshId(addM(memory, Token)).value, 99),
                   freshId(addM(memory, Token)))) ‖
-            sp := alice.account ‖ aliceTok := alice.account.token ‖ v := 99 }
+            aliceTok := alice.account.token ‖ sp := alice.account ‖ v := 99 }
           φ } := by
   sol_chain
 

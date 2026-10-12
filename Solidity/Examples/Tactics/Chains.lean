@@ -89,7 +89,7 @@ def balProgram : cdl![m]{ ⟨[ alice.account.balance = 10; ]⟩ φ }
 error: #last_line: balProgram does not end at a last line:
   dl{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) } φ }
 3 updates stand in front of
-  ↑φ
+  dl{ φ }
 (one parallel update does: `~[sequentialToParallel]~>`)
 sequentialToParallel still applies (under either modality), and gives
   dl{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) } φ }
@@ -230,8 +230,8 @@ end
 
 /-! ## A scoped line with a parameter
 
-The rewrites past the program are searched on the erasure with its outer
-`∀ uint ageVal;` dropped, the line `Fml.ViaE` checks (`Examples/Chains/Storage.lean`'s
+The rewrites past the program rewrite the scoped line under its outer
+`∀ uint ageVal;`, which the lines keep (`Examples/Chains/Storage.lean`'s
 `AgeWrite.chain`). -/
 
 section
@@ -241,7 +241,7 @@ variable (m : Modality) (φ : Post StandardExample [.val .uint])
 info: theorem chain :
     cdl![m]{ ∀ uint ageVal; { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
     ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint ageVal; { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
-    ~[sequentialToParallel]~> cdl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
+    ~[sequentialToParallel]~> cdl![m]{ ∀ uint ageVal; { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
   sol_chain
 -/
 #guard_msgs in
@@ -251,7 +251,7 @@ info: theorem chain :
 theorem ageWriteChain :
     cdl![m]{ ∀ uint ageVal; { ageVal := 42 } ⟨[ alice.age = ageVal; ]⟩ φ }
     ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint ageVal; { ageVal := 42 } { storage := save(storage, alice.age, ageVal) } φ }
-    ~[sequentialToParallel]~> cdl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
+    ~[sequentialToParallel]~> cdl![m]{ ∀ uint ageVal; { ageVal := 42 ‖ storage := save(storage, alice.age, 42) } φ } := by
   sol_chain
 
 #last_line ageWriteChain
@@ -385,8 +385,8 @@ end
 /-! ## `#chain`, `sol_rws`: past the program
 
 `#chain φ` writes the whole chain from `φ`: the program's steps, then,
-from the erasure of the line the program ends at, one rewrite a link until
-the line is last, written as one chain term to paste
+from the line the program ends at, one rewrite a link until the line is
+last, written as one chain term to paste
 (`Calculus/ChainGen.lean`).
 The strategy's steps are grouped as the worked examples print them
 (`NFml.Chain.groupSteps`): a declaration with the binding or read it leaves
@@ -401,7 +401,7 @@ info: theorem chain :
     cdl![m]{ ∀ uint x; ∀ uint v; ⟨[ alice.age = v; x = 1; ]⟩ φ }
     ~[storageFieldWriteSave]~> cdl![m]{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) } ⟨[ x = 1; ]⟩ φ }
     ~[localValueAssign]~> cdl![m]{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) } { x := 1 } φ }
-    ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
+    ~[sequentialToParallel]~> cdl![m]{ ∀ uint x; ∀ uint v; { storage := save(storage, alice.age, v) ‖ x := 1 } φ } := by
   sol_chain
 -/
 #guard_msgs in

@@ -228,9 +228,9 @@ theorem tokenRead (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "T
           { mv := read(memory, b.tokens) } { tk := read(memory, mv[i]) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { i := 2 ‖ b := freshId(addM(memory, TokenBucket)) ‖ memory := addM(memory, TokenBucket) ‖
-            mv := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖
             tk :=
-              read(addM(memory, TokenBucket), read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]) }
+              read(addM(memory, TokenBucket), read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens)[2]) ‖
+            mv := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) }
           φ } := by
   sol_chain
 #last_line tokenRead

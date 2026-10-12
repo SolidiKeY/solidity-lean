@@ -1,6 +1,7 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Surface
 import Solidity.Examples.Chains.Storage
@@ -20,9 +21,9 @@ computed line's erasure.
 * `φ ~> ψ` — the strategy's step does;
 * `φ ~*> ψ` — several steps;
 * `φ ~*> φ₁ ~[r]~> φ₂ ~*> …` — a chain, every link holding; `sol_chain`;
-* `φ ~~> ψ` — to prove `φ`, prove `ψ` (`Fml.Leads`; past the program,
-  where `ψ` is `Update.lean`'s line, `Fml.LeadsE`): what a chain composes
-  to, and how segments compose (`Fml.Leads.via`, `Fml.LeadsE.viaE`);
+* `φ ~~> ψ` — to prove `φ`, prove `ψ` (`Fml.Leads`; past the program the
+  line `ψ` names, `Fml.LeadsK`): what a chain composes to, and how segments
+  compose (`Fml.Leads.via`, `Fml.Leads.leadsK`);
 * `calc` — the same chain, one line per step, each with its reason, its line
   computed from the one before (`by sol_chain`).
 
@@ -164,22 +165,20 @@ example : dl!{ ⟨ alice.account.balance = 10; ⟩ alice.account.balance == 10 }
 The headline's trace (`Chains.Storage.BalanceWrite.chain`, one chain term, for every modality
 `m` and postcondition `φ`) proves its first line from its last.  Here under the box, where the
 write is valid, at the postcondition the statement is written for: past the program the chain
-goes on on the erasure (`Fml.ViaE`), its last scoped line closed by `Proves.close`
-(`Fml.ViaE.valid_close`), the erasure's last line by `sol_close`.  The chain keeps its
-captures, which `sol_close` does not drop: `simplifyUpdate` drops them first. -/
+rewrites the scoped line (`Fml.Via.valid`), its last line closed by `sol_decide`.  The chain keeps its
+captures, which `sol_decide` does not drop: `simplifyUpdate` drops them first. -/
 
 theorem headline_valid : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 } := by
-  refine (show dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
+  refine Fml.Via.valid (show dl!{ [ alice.account.balance = 10; ] alice.account.balance == 10 }
       ~*> dl![.box]{ { se1 := 10 } { sp1 := alice.account } { storage := save(storage, sp1.balance, se1) }
         alice.account.balance == 10 }
       ~[sequentialToParallel]~> dl![.box]{
         { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10) }
           alice.account.balance == 10 }
       ~[simplifyUpdate]~> dl![.box]{ { storage := save(storage, alice.account.balance, 10) }
-        alice.account.balance == 10 } by sol_chain).valid_close ?_
-  show NFml.Valid _
-  dsimp only [Solidity.NFml.Via.last]
-  sol_close
+        alice.account.balance == 10 } by sol_chain) ?_
+  dsimp only [Fml.Via.last]
+  sol_decide
 
 /-- A box derivation's last line, written: an update with no modality under
 it is judged at the box in `dl![.box]{ … }` (in `dl!{ … }`, at the diamond).
@@ -539,7 +538,7 @@ def stacked : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
 error: #last_line: stacked does not end at a last line:
   dl{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
 2 updates stand in front of
-  ↑φ
+  dl{ φ }
 (one parallel update does: `~[sequentialToParallel]~>`)
 sequentialToParallel still applies (under either modality), and gives
   dl{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
@@ -548,7 +547,7 @@ sequentialToParallel still applies (under either modality), and gives
 #last_line stacked
 
 /-- The stack merged, the read of the write not yet resolved: `~~>` past the program
-(`Fml.LeadsE`), its last line `Update.lean`'s. -/
+(`Fml.LeadsK`), to a scoped line whose erasure is the one written. -/
 theorem unresolved : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ } := by
@@ -576,8 +575,8 @@ example : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
   sol_chain
 
 /-! A chain term ends at its last line; a long one is cut into segments, the
-second starting where the first ends, composed by `Fml.LeadsE.viaE` (by
-`Fml.Leads.via` where both are scoped). -/
+second starting where the first ends, composed by `Fml.Leads.via`, and past the
+program to the line written by `Fml.Leads.leadsK`. -/
 
 /-- `uint x = alice.age;` over `alice.age` at `42`: the program and the merge. -/
 theorem readSeg :
@@ -614,7 +613,7 @@ theorem resolveSeg :
 theorem composed :
     dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } :=
-  (readSeg ..).leads.viaE (resolveSeg ..)
+  ((readSeg ..).leads.via (resolveSeg ..)).leadsK
 
 #guard_msgs in
 #last_line resolveSeg
@@ -627,7 +626,7 @@ from one line to another (`Calculus/ChainGen.lean`). -/
 
 /--
 info: Try this:
-  exact Solidity.Fml.ViaE.leads (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
+  exact Solidity.Fml.Via.leadsK (show cdl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
         ~*> cdl![m]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } φ }
         ~[sequentialToParallel]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) } φ }
         ~[findOnSave]~> cdl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } by sol_chain)
