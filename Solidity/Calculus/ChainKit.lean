@@ -584,8 +584,13 @@ def Fml.eraseNames : {Γ : Ctx} → Fml C Γ → Fml C Γ
 theorem Upd.globT_eraseNames {Γ : Ctx} (σ : State C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.globT σ = U.globT σ
   | _, .nil => rfl
-  | _, .snoc U _ => by simp only [Upd.eraseNames, Upd.globT, Upd.globT_eraseNames σ U]
-  | _, .decl U _ _ => by simp only [Upd.eraseNames, Upd.globT, Upd.globT_eraseNames σ U]
+  | _, .snoc U e => by
+    show (U.eraseNames.globT σ).bind (e.globT σ) = (U.globT σ).bind (e.globT σ)
+    rw [Upd.globT_eraseNames σ U]
+  | _, .decl U _ r => by
+    show (U.eraseNames.globT σ).bind (fun g => (r.eval σ).bind fun _ => some g) =
+      (U.globT σ).bind (fun g => (r.eval σ).bind fun _ => some g)
+    rw [Upd.globT_eraseNames σ U]
   | _, .pop U _ => Upd.globT_eraseNames σ U
   | _, .drop U _ => Upd.globT_eraseNames σ U
 

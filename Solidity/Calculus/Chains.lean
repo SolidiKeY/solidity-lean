@@ -553,6 +553,8 @@ def lawUpdCands (C : Expr) (c : Lean.Name) (evalLaw : Bool) (φ : Expr) (scopes 
     else if c == ``TermTaclet.findOnDelAtFrame then some ``TermTaclet.RefLaw.findOnDelAtFrame
     else if c == ``TermTaclet.lenOnSaveFrame then some ``TermTaclet.RefLaw.lenOnSaveFrame
     else if c == ``TermTaclet.lenOnDelAtFrame then some ``TermTaclet.RefLaw.lenOnDelAtFrame
+    else if c == ``TermTaclet.findOnPushFrame then some ``TermTaclet.RefLaw.findOnPushFrame
+    else if c == ``TermTaclet.findOnPopFrame then some ``TermTaclet.RefLaw.findOnPopFrame
     else none
   let mut out := #[]
   for (t, t', pf) in is do
@@ -561,7 +563,7 @@ def lawUpdCands (C : Expr) (c : Lean.Name) (evalLaw : Bool) (φ : Expr) (scopes 
     unless ty.isAppOfArity ``Tm 3 do continue
     let Γt := ty.getArg! 1
     let u := ty.getArg! 2
-    let some un := (← whnfR u).constName? | continue
+    let some un := (← whnfR u).getAppFn.constName? | continue
     if un == ``Srt.st || un == ``Srt.mem then continue
     -- the law's coverings of an update
     let mut Es : Array Expr := #[]
@@ -574,7 +576,8 @@ def lawUpdCands (C : Expr) (c : Lean.Name) (evalLaw : Bool) (φ : Expr) (scopes 
         let hr := mkAppN (mkConst refCtor) pf.getAppArgs
         Es := Es.push (← mkAppM ``LawCov.ref #[hr])
       if ← isDefEq (← mkAppM ``Tm.sameBase #[t, t']) (mkConst ``Bool.true) then
-        Es := Es.push (← mkAppOptM ``LawCov.eqv #[none, none, t, t', ← mkEqRefl (mkConst ``Bool.true)])
+        Es := Es.push (← mkAppOptM ``LawCov.eqv
+          #[none, none, none, t, t', ← mkEqRefl (mkConst ``Bool.true)])
     if Es.isEmpty then continue
     let q ← mkAppOptM ``LawPair.mk #[C, Γt, u, t, t']
     for (Γi, i) in scopes.zipIdx do
