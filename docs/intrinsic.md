@@ -6218,6 +6218,78 @@ last CPU tick sampled every 20 ms, load 0.2.
 **Checked**: per-file diagnostics of every module and example above;
 `sorry` count 19.
 
+### W9.8.3e record (2026-10-13, branch `w98-fix`)
+
+The `chain` lane's findings fixed.
+
+**`FmlRw.applyStorageBoxP` ported** (`Calculus/RewritePast.lean`).
+`{storage := S}_□ φ ⇝ φ[S/storage]` is `Fml.substSt`, the storage merge's
+substitution (`Tm.substP`, `Calculus/StatePartsScoped.lean`: `storage` by
+`S`, a push slot and an index check read in `S`), so `Tm.substP_eval` gives
+the `defined` atoms.  An equation reads `denote`, which the substitution
+keeps up to `Equiv` (`Tm.substP_denote`), over the typed symbols'
+congruences: `Srt.DEquiv` (`Equiv` for a value or a storage, equal paths),
+`Op0.denote_congrP`, `Op1.denote_congrP`, `Op2.denote_congrP` (a memory
+read by its arguments' readings, `Op2.eval_sameP`), `Op3.denote_congr`;
+`S` denotes the storage it leaves (`Tm.denote_eval`).  One storage element
+under the box, as before.  Checked on `ChainRewrites`' two
+`applyStorageBox` chains in a scratch copy (the file itself imports the
+closer lane's modules).
+
+**`Chains/StorageDelete` `SubtreeDelete` builds unchanged.**
+`TermTaclet.findOnDelAtBelowIn` (`TermLib`; `find_delAt_below`,
+`delValueDefault`; a row in `lean-key-rule-map.md`): `findIn(delAtIn(s, p),
+q) ⇝ defVal`, `q` below `p` by members (`Tm.extendsIn`), `s`'s member-wise
+writes giving the word there (`Tm.findLitIn?`, `Tm.divergesU`; `shape?`
+reads `member`/`fieldIn`).  `Tm.KindFreeAt` is over a storage or a storage
+of members (`Srt.pathAt`), so the chain's `pt!{ account }` is read in the
+frame of `Person` (`pt!{}` reduces its expected sort); `KindFreeAt.ofNil`
+likewise.  Coverage: `Upd.coversLit` also accepts a read by members below
+a delete the update holds (`Tm.findDelBelowAt`, `Tm.fieldsBelow_found`: the
+delete leaves its path found, a struct every member), which covers the
+root `findOnDelAtBelow` too.
+
+**`Tactics/Spec`: `msg.value` widened** (choice recorded).  solkey declares
+`msgValue` and the ledger's entries KeY `int`s (`netHeader.key`), and
+`SpecCompiler` types every integer `int`.  Lean keeps `msg.value` a `uint`
+(the program reads it so) and the ledger entry an `int`; the conversion
+KeY need not write is `Op1.toInt : val uint → val int` (`none` past
+`2^255 - 1`; Theory denotation the identity, `Op1.denote_eval` by
+`erase_of_ofValue?`), printed bare as solkey prints it.  The reader
+inserts it where a `uint` is checked at an `int` or paired with one
+(`NTm.widen`, `resolvePair`; `Op1.isCast` keeps it out of keys, so a
+printed line reads back to the same term); `SurfaceSpec` types `net(a)` an
+`int` and a mixed operation `int`.  An `int` `+` with a widened operand
+prints (`isToIntS`); other `int` arithmetic still escapes.  The `add` pin
+is unchanged.  `CloseLemmas`' symbol equations (the `dec` lane's) have none
+for `toInt`.
+
+**`Chains/MemoryDelete` `IndexedDelete` passes at the default 200000.**
+Profile of its statement (`profiler`, a `def` of the statement in a scratch
+module): 7.6 s, of which 56 `Decidable` instance searches of 40 ms each
+(2.3 s) and failing `Tm.KindFreeAt.ofNil` elaborations, both in
+`Chain.lawAt` (`Calculus/RewriteChains.lean`) trying `decide` and `ofNil`
+on every law instance whose `rfl` side condition fails (`a.apart? b =
+true` at an address the write meets).  `lawAt` now closes a side condition
+by its shape: a closed `Bool`/`Option` equation by `rfl` alone (`decide`
+evaluates the same test), `KindFreeAt` by a hypothesis or `ofNil`, the rest
+as before.  Statement 5.0 s, between 100000 and 150000 heartbeats; the
+front end's own readers (`elabAgainst`'s interpreted readers, 0.9 s,
+`cacheLookups`, `tm_side`) were not the cost.
+
+**Gate, `Chains/Storage`**: the W9.6.4 method (a scratch copy, fresh
+worker, after a warm-up, `/proc` every 20 ms) gives 10.5–10.7 s wall, 11.2–
+11.5 s CPU, over the 9.0 gate; the same file at the lane's base
+`556017ff`, measured interleaved, 11.2–11.5 s CPU: nothing here moved it,
+the load is the session's (the d record's 9.3 s at 10.8 s CPU).  Profile
+(`profiler`, 200 ms): no declaration dominates (the largest,
+`PushAfterPop`, 0.7 s elaboration; two `sol_chain`s 0.26 s): the cost is
+spread over the 23 chains' line elaboration.
+
+**Checked**: `lean_build` of the default targets: all but the `dec` lane's
+`CloseScoped`, `Decide`, `Deploy` (unchanged failures); `Tactics/Spec`,
+`Chains/StorageDelete`, `Chains/MemoryDelete` now build.  `sorry` count 19.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
