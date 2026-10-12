@@ -4,18 +4,22 @@ import Solidity.Theory.Bridge.Denote
 import Solidity.Calculus.ReadWrite
 
 /-!
-# Facts about the interpreter's states and symbols
+# Facts about the interpreter's states and the typed symbols
 
-What the scoped calculus reads of the interpreter, by the symbols `Op0`–`Op3`
-and the untyped state they run on (`Semantics.State`): a result refining
-another (`Res.Le`, `Srt.Le`, `Op1.eval_le`, …), two results returning alike
-(`Res.OkEq`), the parts of a state a symbol reads (`Srt.AgreePart`,
-`Semantics.State.HeapEq`, `StPartEq`, `MemPartEq`), what a symbol keeps
-(`Semantics.State.Keeps`, `Op2.stExplicit`), denotations that agree (`Srt.DEquiv`,
-`Op1.denote_congr`), a root read member-wise (`Semantics.State.selectRoot`,
-`Semantics.State.frameOf`), and the shapes of the paths a law's side condition reads
-(`SegT`).  Collected from the modules of the erased syntax as they went
-(`docs/intrinsic.md`, W9.5a); each is about states and symbols only.
+Two kinds of facts.  Of the untyped interpreter (`Semantics.State`), which
+the decision procedure and the Theory bridge still read: a result refining
+another (`Res.Le`), two results returning alike (`Res.OkEq`), the parts of a
+state a write reads (`State.HeapEq`, `StPartEq`, `MemPartEq`), a root read
+member-wise (`State.selectRoot`, `State.frameOf`), and the shapes of the
+paths a law's side condition reads (`SegT`).  Of the typed signature
+(`Signature.lean`): its symbols are monotone in their arguments (`OLe`,
+`Op1.eval_le` …), what a rewrite of an update's right-hand sides reads
+(`Calculus/SeqRewrite.lean`).
+
+The facts about the untyped symbols (`Srt.Le`, `Srt.DEquiv`,
+`Srt.AgreePart`, `OpN.eval_part`, `State.Keeps`, …) went with those symbols
+(W9.8.3c): a typed term reads the typed state, and the facts a law needs are
+stated on it where the law is.
 -/
 
 namespace Solidity
