@@ -27,6 +27,7 @@ families; it is `partial`, since it is never unfolded.
 namespace Solidity
 
 deriving instance Lean.ToExpr for Semantics.PrimVal
+deriving instance Lean.ToExpr for Srt
 
 open Lean (Expr mkAppN mkConst mkApp mkApp2 mkApp3 mkApp4 toExpr levelZero)
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality IntOp rflTrue rflPrim rflSome optE quoteRefl)
@@ -48,15 +49,7 @@ def qCtxRaw : Ctx → Expr
   | [] => mkApp (mkConst ``List.nil [levelZero]) ltyE
   | t :: Γ => mkApp3 (mkConst ``List.cons [levelZero]) ltyE (qLTy t) (qCtxRaw Γ)
 
-def qSrt : Srt → Expr
-  | .val => mkConst ``Srt.val
-  | .path => mkConst ``Srt.path
-  | .st => mkConst ``Srt.st
-  | .sv => mkConst ``Srt.sv
-  | .ident => mkConst ``Srt.ident
-  | .addr => mkConst ``Srt.addr
-  | .mem => mkConst ``Srt.mem
-  | .mv => mkConst ``Srt.mv
+def qSrt (s : Srt) : Expr := toExpr s
 
 /-- `b = b`, at `Bool`. -/
 def rflBool (b : Bool) : Expr := quoteRefl (mkConst ``Bool) (toExpr b)
@@ -318,78 +311,120 @@ end
 
 /-! ## Terms, updates, formulas -/
 
-def qOp0 : {s : Srt} → Op0 s → Expr
-  | _, .lit v => mkApp (mkConst ``Op0.lit) (toExpr v)
-  | _, .env k => mkApp (mkConst ``Op0.env) (toExpr k)
-  | _, .root r => mkApp (mkConst ``Op0.root) (toExpr r)
-  | _, .storage => mkConst ``Op0.storage
-  | _, .memory => mkConst ``Op0.memory
-  | _, .mtSt vs => mkApp (mkConst ``Op0.mtSt) (toExpr vs)
+/-- A value of a primitive type: a `Bool`, or `PrimTy.ofLit p n rfl` (the
+lowering's literal, `Simple.lower`), its range checked by the kernel. -/
+def qPrimVal : (p : PrimTy) → p.Denote → Expr
+  | .bool, b => toExpr (show Bool from b)
+  | .uint, v => mkApp3 (mkConst ``PrimTy.ofLit) (toExpr PrimTy.uint)
+      (toExpr (v : {n : Int // PrimTy.uint.inRange n = true}).1) rflTrue
+  | .int, v => mkApp3 (mkConst ``PrimTy.ofLit) (toExpr PrimTy.int)
+      (toExpr (v : {n : Int // PrimTy.int.inRange n = true}).1) rflTrue
 
-def qOp1 : {a s : Srt} → Op1 a s → Expr
-  | _, _, .unop op p => mkApp2 (mkConst ``Op1.unop) (toExpr op) (toExpr p)
-  | _, _, .net => mkConst ``Op1.net
-  | _, _, .netOf x => mkApp (mkConst ``Op1.netOf) (toExpr x)
-  | _, _, .delValue => mkConst ``Op1.delValue
-  | _, _, .field f => mkApp (mkConst ``Op1.field) (toExpr f)
-  | _, _, .next => mkConst ``Op1.next
-  | _, _, .select r => mkApp (mkConst ``Op1.select) (toExpr r)
-  | _, _, .sval => mkConst ``Op1.sval
-  | _, _, .newArr R => mkApp (mkConst ``Op1.newArr) (toExpr R)
-  | _, _, .alloc R => mkApp (mkConst ``Op1.alloc) (toExpr R)
-  | _, _, .mfield f => mkApp (mkConst ``Op1.mfield) (toExpr f)
-  | _, _, .addM R => mkApp (mkConst ``Op1.addM) (toExpr R)
-  | _, _, .mval => mkConst ``Op1.mval
-  | _, _, .ref => mkConst ``Op1.ref
-  | _, _, .wt vs => mkApp (mkConst ``Op1.wt) (toExpr vs)
+/-! A symbol is quoted with its implicit arguments and its proofs: a
+contract lookup `Eq.refl (some T)` (`rflSome`), a Boolean side condition
+`Eq.refl true` (`rflTrue`), as `Syntax/Quote.lean` quotes a program's, so
+the kernel re-checks each by evaluation; an `IndexTy` or `ArrTy` as its
+constructor. -/
 
-def qOp2 : {a b s : Srt} → Op2 a b s → Expr
-  | _, _, _, .binop op p => mkApp2 (mkConst ``Op2.binop) (toExpr op) (toExpr p)
-  | _, _, _, .find => mkConst ``Op2.find
-  | _, _, _, .len => mkConst ``Op2.len
-  | _, _, _, .read => mkConst ``Op2.read
-  | _, _, _, .mlen => mkConst ``Op2.mlen
-  | _, _, _, .at => mkConst ``Op2.at
-  | _, _, _, .nextIn => mkConst ``Op2.nextIn
-  | _, _, _, .delAt => mkConst ``Op2.delAt
-  | _, _, _, .pushSlot E => mkApp (mkConst ``Op2.pushSlot) (toExpr E)
-  | _, _, _, .pop => mkConst ``Op2.pop
-  | _, _, _, .shrink => mkConst ``Op2.shrink
-  | _, _, _, .extend E => mkApp (mkConst ``Op2.extend) (toExpr E)
-  | _, _, _, .sfind => mkConst ``Op2.sfind
-  | _, _, _, .copyMem => mkConst ``Op2.copyMem
-  | _, _, _, .iread => mkConst ``Op2.iread
-  | _, _, _, .copy => mkConst ``Op2.copy
-  | _, _, _, .mat => mkConst ``Op2.mat
-  | _, _, _, .copySt => mkConst ``Op2.copySt
+def qOp0 : {s : Srt} → Op0 C s → QM Expr
+  | _, @Op0.lit _ p v => do return mkApp3 (mkConst ``Op0.lit) (← contract) (toExpr p) (qPrimVal p v)
+  | _, .env k => do return mkApp2 (mkConst ``Op0.env) (← contract) (toExpr k)
+  | _, @Op0.root _ r T _ => do
+    return mkApp4 (mkConst ``Op0.root) (← contract) (toExpr r) (toExpr T) (rflSome T)
+  | _, .storage => do return mkApp (mkConst ``Op0.storage) (← contract)
+  | _, .memory => do return mkApp (mkConst ``Op0.memory) (← contract)
+  | _, .mtSt => do return mkApp (mkConst ``Op0.mtSt) (← contract)
+  | _, @Op0.member _ s f T _ => do
+    return mkAppN (mkConst ``Op0.member) #[← contract, toExpr s, toExpr f, toExpr T, rflSome T]
 
-def qOp3 : {a b c s : Srt} → Op3 a b c s → Expr
-  | _, _, _, _, .ite => mkConst ``Op3.ite
-  | _, _, _, _, .save => mkConst ``Op3.save
-  | _, _, _, _, .push => mkConst ``Op3.push
-  | _, _, _, _, .atIn => mkConst ``Op3.atIn
-  | _, _, _, _, .write => mkConst ``Op3.write
+def qOp1 : {a s : Srt} → Op1 C a s → QM Expr
+  | _, _, @Op1.unop _ op p _ => do
+    return mkAppN (mkConst ``Op1.unop) #[← contract, toExpr op, toExpr p, rflTrue]
+  | _, _, .net => do return mkApp (mkConst ``Op1.net) (← contract)
+  | _, _, @Op1.delValue _ p => do return mkApp2 (mkConst ``Op1.delValue) (← contract) (toExpr p)
+  | _, _, @Op1.field _ s f T _ => do
+    return mkAppN (mkConst ``Op1.field) #[← contract, toExpr s, toExpr f, toExpr T, rflSome T]
+  | _, _, @Op1.next _ E => do return mkApp2 (mkConst ``Op1.next) (← contract) (toExpr E)
+  | _, _, @Op1.sval _ p => do return mkApp2 (mkConst ``Op1.sval) (← contract) (toExpr p)
+  | _, _, @Op1.newArr _ R _ => do
+    return mkApp3 (mkConst ``Op1.newArr) (← contract) (toExpr R) rflTrue
+  | _, _, .alloc R _ => do return mkApp3 (mkConst ``Op1.alloc) (← contract) (toExpr R) rflTrue
+  | _, _, @Op1.mfield _ s f T _ => do
+    return mkAppN (mkConst ``Op1.mfield) #[← contract, toExpr s, toExpr f, toExpr T, rflSome T]
+  | _, _, .addM R _ => do return mkApp3 (mkConst ``Op1.addM) (← contract) (toExpr R) rflTrue
+  | _, _, @Op1.mval _ p => do return mkApp2 (mkConst ``Op1.mval) (← contract) (toExpr p)
+  | _, _, @Op1.ref _ R => do return mkApp2 (mkConst ``Op1.ref) (← contract) (toExpr R)
+  | _, _, .wt => do return mkApp (mkConst ``Op1.wt) (← contract)
+  | _, _, @Op1.select _ s r _ => do
+    return mkAppN (mkConst ``Op1.select) #[← contract, toExpr s, toExpr r,
+      rflSome (.ref (.struct s))]
+  | _, _, @Op1.selectIn _ s s' f _ => do
+    return mkAppN (mkConst ``Op1.selectIn) #[← contract, toExpr s, toExpr s', toExpr f,
+      rflSome (.ref (.struct s'))]
+  | _, _, @Op1.fieldIn _ s s' f T _ => do
+    return mkAppN (mkConst ``Op1.fieldIn) #[← contract, toExpr s, toExpr s', toExpr f, toExpr T,
+      rflSome T]
+
+def qOp2 : {a b s : Srt} → Op2 C a b s → QM Expr
+  | _, _, _, @Op2.binop _ op p _ => do
+    return mkAppN (mkConst ``Op2.binop) #[← contract, toExpr op, toExpr p, rflTrue]
+  | _, _, _, @Op2.find _ p => do return mkApp2 (mkConst ``Op2.find) (← contract) (toExpr p)
+  | _, _, _, @Op2.len _ E => do return mkApp2 (mkConst ``Op2.len) (← contract) (toExpr E)
+  | _, _, _, @Op2.read _ p => do return mkApp2 (mkConst ``Op2.read) (← contract) (toExpr p)
+  | _, _, _, @Op2.mlen _ E => do return mkApp2 (mkConst ``Op2.mlen) (← contract) (toExpr E)
+  | _, _, _, @Op2.at _ R k V it => do
+    return mkAppN (mkConst ``Op2.at) #[← contract, toExpr R, toExpr k, toExpr V, IndexTy.quote it]
+  | _, _, _, @Op2.nextIn _ E => do return mkApp2 (mkConst ``Op2.nextIn) (← contract) (toExpr E)
+  | _, _, _, @Op2.delAt _ T => do return mkApp2 (mkConst ``Op2.delAt) (← contract) (toExpr T)
+  | _, _, _, @Op2.pushSlot _ E => do return mkApp2 (mkConst ``Op2.pushSlot) (← contract) (toExpr E)
+  | _, _, _, @Op2.pop _ E => do return mkApp2 (mkConst ``Op2.pop) (← contract) (toExpr E)
+  | _, _, _, @Op2.shrink _ E => do return mkApp2 (mkConst ``Op2.shrink) (← contract) (toExpr E)
+  | _, _, _, @Op2.extend _ E => do return mkApp2 (mkConst ``Op2.extend) (← contract) (toExpr E)
+  | _, _, _, @Op2.sfind _ T => do return mkApp2 (mkConst ``Op2.sfind) (← contract) (toExpr T)
+  | _, _, _, @Op2.copyMem _ R => do return mkApp2 (mkConst ``Op2.copyMem) (← contract) (toExpr R)
+  | _, _, _, @Op2.iread _ R => do return mkApp2 (mkConst ``Op2.iread) (← contract) (toExpr R)
+  | _, _, _, @Op2.copy _ R _ => do return mkApp3 (mkConst ``Op2.copy) (← contract) (toExpr R) rflTrue
+  | _, _, _, @Op2.mat _ R E a => do
+    return mkAppN (mkConst ``Op2.mat) #[← contract, toExpr R, toExpr E, ArrTy.quote a]
+  | _, _, _, @Op2.copySt _ T _ => do
+    return mkApp3 (mkConst ``Op2.copySt) (← contract) (toExpr T) rflTrue
+  | _, _, _, @Op2.findIn _ s p => do
+    return mkApp3 (mkConst ``Op2.findIn) (← contract) (toExpr s) (toExpr p)
+  | _, _, _, @Op2.delAtIn _ s T => do
+    return mkApp3 (mkConst ``Op2.delAtIn) (← contract) (toExpr s) (toExpr T)
+  | _, _, _, @Op2.sfindIn _ s T => do
+    return mkApp3 (mkConst ``Op2.sfindIn) (← contract) (toExpr s) (toExpr T)
+
+def qOp3 : {a b c s : Srt} → Op3 C a b c s → QM Expr
+  | _, _, _, _, @Op3.ite _ p => do return mkApp2 (mkConst ``Op3.ite) (← contract) (toExpr p)
+  | _, _, _, _, @Op3.save _ T => do return mkApp2 (mkConst ``Op3.save) (← contract) (toExpr T)
+  | _, _, _, _, @Op3.push _ E => do return mkApp2 (mkConst ``Op3.push) (← contract) (toExpr E)
+  | _, _, _, _, @Op3.atIn _ R k V it => do
+    return mkAppN (mkConst ``Op3.atIn) #[← contract, toExpr R, toExpr k, toExpr V, IndexTy.quote it]
+  | _, _, _, _, @Op3.write _ T => do return mkApp2 (mkConst ``Op3.write) (← contract) (toExpr T)
+  | _, _, _, _, @Op3.saveIn _ s T => do
+    return mkApp3 (mkConst ``Op3.saveIn) (← contract) (toExpr s) (toExpr T)
 
 partial def qTm (Γ : Ctx) : (s : Srt) → Tm C Γ s → QM Expr
   | _, @Tm.pvV _ _ p i => do ctor ``Tm.pvV Γ #[toExpr p, ← qIdx Γ (.val p) i]
   | _, @Tm.pvP _ _ R i => do ctor ``Tm.pvP Γ #[toExpr R, ← qIdx Γ (.alias R) i]
   | _, .pvS i => do ctor ``Tm.pvS Γ #[← qIdx Γ .old i]
   | _, @Tm.pvI _ _ R i => do ctor ``Tm.pvI Γ #[toExpr R, ← qIdx Γ (.mem R) i]
-  | _, .netOf i a => do ctor ``Tm.netOf Γ #[← qIdx Γ .oldNet i, ← qTm Γ .val a]
-  | s, .app0 o => ctor ``Tm.app0 Γ #[qSrt s, qOp0 o]
-  | s, @Tm.app1 _ _ a _ o _ x => do
-    ctor ``Tm.app1 Γ #[qSrt a, qSrt s, qOp1 o, rflBool false, ← qTm Γ a x]
+  | _, .netOf i a => do ctor ``Tm.netOf Γ #[← qIdx Γ .oldNet i, ← qTm Γ (.val .uint) a]
+  | s, .app0 o => do ctor ``Tm.app0 Γ #[qSrt s, ← qOp0 o]
+  | s, @Tm.app1 _ _ a _ o x => do
+    ctor ``Tm.app1 Γ #[qSrt a, qSrt s, ← qOp1 o, ← qTm Γ a x]
   | s, @Tm.app2 _ _ a b _ o x y => do
-    ctor ``Tm.app2 Γ #[qSrt a, qSrt b, qSrt s, qOp2 o, ← qTm Γ a x, ← qTm Γ b y]
+    ctor ``Tm.app2 Γ #[qSrt a, qSrt b, qSrt s, ← qOp2 o, ← qTm Γ a x, ← qTm Γ b y]
   | s, @Tm.app3 _ _ a b c _ o x y z => do
-    ctor ``Tm.app3 Γ #[qSrt a, qSrt b, qSrt c, qSrt s, qOp3 o, ← qTm Γ a x, ← qTm Γ b y,
+    ctor ``Tm.app3 Γ #[qSrt a, qSrt b, qSrt c, qSrt s, ← qOp3 o, ← qTm Γ a x, ← qTm Γ b y,
       ← qTm Γ c z]
 
 def qRhs (Γ : Ctx) : (t : LTy) → Rhs C Γ t → QM Expr
-  | _, @Rhs.val _ _ p t => do ctor ``Rhs.val Γ #[toExpr p, ← qTm Γ .val t]
-  | _, @Rhs.path _ _ R p => do ctor ``Rhs.path Γ #[toExpr R, ← qTm Γ .path p]
+  | _, @Rhs.val _ _ p t => do ctor ``Rhs.val Γ #[toExpr p, ← qTm Γ (.val p) t]
+  | _, @Rhs.path _ _ R p => do ctor ``Rhs.path Γ #[toExpr R, ← qTm Γ (.path (.ref R)) p]
   | _, @Rhs.unset _ _ R => ctor ``Rhs.unset Γ #[toExpr R]
-  | _, @Rhs.mref _ _ R i => do ctor ``Rhs.mref Γ #[toExpr R, ← qTm Γ .ident i]
+  | _, @Rhs.mref _ _ R i => do ctor ``Rhs.mref Γ #[toExpr R, ← qTm Γ (.ident R) i]
   | _, .store s => do ctor ``Rhs.store Γ #[← qTm Γ .st s]
   | _, .saveNet => ctor ``Rhs.saveNet Γ #[]
   | _, .saveNetMt => ctor ``Rhs.saveNetMt Γ #[]
@@ -401,11 +436,12 @@ def qUpdElem (Γ Δ : Ctx) (e : UpdElem C Γ Δ) : QM Expr := do
   | @UpdElem.local _ _ _ t i r => return mk ``UpdElem.local #[qLTy t, ← qIdx Δ t i, ← qRhs Γ t r]
   | .storage s => return mk ``UpdElem.storage #[← qTm Γ .st s]
   | .memory m => return mk ``UpdElem.memory #[← qTm Γ .mem m]
-  | .selfBalance op a => return mk ``UpdElem.selfBalance #[IntOp.quote op, ← qTm Γ .val a]
-  | .net r op a => return mk ``UpdElem.net #[← qTm Γ .val r, IntOp.quote op, ← qTm Γ .val a]
-  | .pay r a => return mk ``UpdElem.pay #[← qTm Γ .val r, ← qTm Γ .val a]
-  | .netMt r a => return mk ``UpdElem.netMt #[← qTm Γ .val r, ← qTm Γ .val a]
-  | .setBalance a => return mk ``UpdElem.setBalance #[← qTm Γ .val a]
+  | .selfBalance op a => return mk ``UpdElem.selfBalance #[IntOp.quote op, ← qTm Γ (.val .uint) a]
+  | .net r op a =>
+    return mk ``UpdElem.net #[← qTm Γ (.val .uint) r, IntOp.quote op, ← qTm Γ (.val .uint) a]
+  | .pay r a => return mk ``UpdElem.pay #[← qTm Γ (.val .uint) r, ← qTm Γ (.val .uint) a]
+  | .netMt r a => return mk ``UpdElem.netMt #[← qTm Γ (.val .uint) r, ← qTm Γ (.val .uint) a]
+  | .setBalance a => return mk ``UpdElem.setBalance #[← qTm Γ (.val .uint) a]
 
 partial def qUpd (Γ : Ctx) : (Δ : Ctx) → Upd C Γ Δ → QM Expr
   | _, .nil => ctor ``Upd.nil Γ #[]
@@ -446,8 +482,8 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   let Γe ← qCtx Γ
   match φ with
   | .tt => sctor ``Fml.tt #[Γe]
-  | .eq a b => sctor ``Fml.eq #[Γe, ← qTm Γ .val a, ← qTm Γ .val b]
-  | .defined t => sctor ``Fml.defined #[Γe, ← qTm Γ .val t]
+  | @Fml.eq _ _ p a b => sctor ``Fml.eq #[Γe, toExpr p, ← qTm Γ (.val p) a, ← qTm Γ (.val p) b]
+  | @Fml.defined _ _ p t => sctor ``Fml.defined #[Γe, toExpr p, ← qTm Γ (.val p) t]
   | .not φ => sctor ``Fml.not #[Γe, ← qFml Γ φ]
   | .and φ ψ => sctor ``Fml.and #[Γe, ← qFml Γ φ, ← qFml Γ ψ]
   | .imp φ ψ => sctor ``Fml.imp #[Γe, ← qFml Γ φ, ← qFml Γ ψ]

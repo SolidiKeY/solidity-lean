@@ -149,9 +149,9 @@ def SpecExpr.isNum : SpecExpr → Bool
 /-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`, `!t`
 defined for a `bool`. -/
 def rangeFml (t : NTerm C) : PrimTy → NRead C
-  | .uint => .and (NRead.cmp .le .uint (.lit (.int 0)) t) (NRead.cmp .le .uint t (.lit (.int (uintBound - 1))))
-  | .int => .and (NRead.cmp .le .int (.lit (.int (-intBound))) t) (NRead.cmp .le .int t (.lit (.int (intBound - 1))))
-  | .bool => .eqD (.unop .not .bool t) (.unop .not .bool t)
+  | .uint => .and (NRead.cmp .le (.num 0) t) (NRead.cmp .le t (.num (uintBound - 1)))
+  | .int => .and (NRead.cmp .le (.num (-intBound)) t) (NRead.cmp .le t (.num (intBound - 1)))
+  | .bool => .eqD (.unop .not t) (.unop .not t)
 
 /-- **The layout, as premises**: every word the declared state holds is a
 value of its type, `0 <= count <= 2^256 - 1`, and so at every key of a
@@ -214,8 +214,8 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
 /-- A value, and its type: a state variable is read from the context's
 storage, `find(storage, count)`, or `find(old, count)` under `\old`. -/
 partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
-  | .num n => pure (.uint, .lit (.int n))
-  | .bool b => pure (.bool, .lit (.bool b))
+  | .num n => pure (.uint, .num n)
+  | .bool b => pure (.bool, .bool b)
   | .result => do
     unless ctx.ensures do throw "\\result is only allowed in ensures"
     let some p := ctx.result | throw "\\result needs a function that returns one value"
@@ -242,14 +242,14 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
       if b == "this" && m == "balance" then return (.uint, .env .selfBalance)
       let some ms := lookupBy b C.enums | throw s!"unknown name {b}"
       let some i := ms.findIdx? (· == m) | throw s!"enum {b} has no member {m}"
-      return (.uint, .lit (.int i))
+      return (.uint, .num i)
     SpecExpr.read ctx (.field (.name b) m)
   | e@(.field ..) | e@(.index ..) => SpecExpr.read ctx e
-  | .unop .neg (.num n) => pure (.int, .lit (.int (-(n : Int))))
+  | .unop .neg (.num n) => pure (.int, .num (-(n : Int)))
   | .unop op a => do
     let (p, t) ← a.term ctx
     unless op.accepts p do throw s!"operator {UnOp.sym op} does not take {p.toStr}"
-    pure (op.ret p, .unop op p t)
+    pure (op.ret p, .unop op t)
   | .binop op a b => do
     let (pa, ta) ← a.term ctx
     let (pb, tb) ← b.term ctx
@@ -257,7 +257,7 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
     unless a.isNum || b.isNum || pa = pb do
       throw s!"operands of {BinOp.sym op} of types {pa.toStr} and {pb.toStr}"
     unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {p.toStr}"
-    pure (op.ret p, .binop op p ta tb)
+    pure (op.ret p, .binop op ta tb)
   | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
 
 /-- A read: `.length` of an array, or the word at a path. -/
@@ -266,7 +266,7 @@ partial def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
     let (T, p) ← e.path ctx
     match T with
     | .ref (.array _) => pure (.uint, .len ctx.storage p)
-    | .ref (.fixed _ n) => pure (.uint, .lit (.int n))
+    | .ref (.fixed _ n) => pure (.uint, .num n)
     | _ => throw "`.length` of something that is not an array"
   | e => do
     let (T, p) ← e.path ctx
@@ -405,11 +405,11 @@ partial def frameAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (hyps 
     let i : Var := .ofName s!"k{k}"
     owe (.len .storage p) (.len (.pv oldVar) p) ::
       frameAt E (.at p (.pv i)) ((i, .uint) :: keys)
-        (hyps ++ [NRead.cmp .lt .uint (.pv i) (.len .storage p)]) (enterKey C i ls) (k + 1)
+        (hyps ++ [NRead.cmp .lt (.pv i) (.len .storage p)]) (enterKey C i ls) (k + 1)
   | .ref (.fixed E n) =>
     let i : Var := .ofName s!"k{k}"
     frameAt E (.at p (.pv i)) ((i, .uint) :: keys)
-      (hyps ++ [NRead.cmp .lt .uint (.pv i) (.lit (.int n))]) (enterKey C i ls) (k + 1)
+      (hyps ++ [NRead.cmp .lt (.pv i) (.num n)]) (enterKey C i ls) (k + 1)
   | _ => []
 
 /-- The frame of an `assignable` clause over every state variable of the
@@ -485,7 +485,7 @@ def specPieces (f : String) :
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
   -- the storage it discards)
-  let start : NSTerm C := if ctor then .mtSt C.vars else .storage
+  let start : NSTerm C := if ctor then .mtSt else .storage
   let snap : List (NUpdElem C) :=
     (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar start]
       else []) ++
@@ -498,11 +498,11 @@ def specPieces (f : String) :
   -- `{storage := mtSt ‖ old := mtSt ‖ oldNet := mtSt ‖ net := storeSt(mtSt,
   -- at(msgSender), msgValue) ‖ selfBalance := msgValue}`, payable or not
   let U := if ctor then
-    [.storage (.mtSt C.vars)] ++ snap ++ [.netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
+    [.storage (.mtSt)] ++ snap ++ [.netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
   else snap ++ if d.payable then
     [.net (.env .msgSender) .add (.env .msgValue), .selfBalance .add (.env .msgValue)] else []
-  let msgValue : NRead C := if d.payable then NRead.cmp .ge .uint (.env .msgValue) (.lit (.int 0))
-    else .eqD (.env .msgValue) (.lit (.int 0))
+  let msgValue : NRead C := if d.payable then NRead.cmp .ge (.env .msgValue) (.num 0)
+    else .eqD (.env .msgValue) (.num 0)
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
     (d.spec.assignable.getD []).flatMap SpecLoc.names
   -- a deployment assumes no invariant and no layout: both are of the

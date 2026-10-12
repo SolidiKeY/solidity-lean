@@ -32,7 +32,7 @@ variable {C : Contract} [FreshNames] (c : Lean.Expr)
 def fmtCat (cat : Lean.Name) (stx : Lean.Syntax) : MetaM String := do
   return (← PrettyPrinter.ppCategory cat stx).pretty 100000
 
-def Tm.show {Γ : Ctx} (ns : List Var) (t : Tm C Γ .val) : MetaM String := do
+def Tm.show {Γ : Ctx} {s : Srt} (ns : List Var) (t : Tm C Γ s) : MetaM String := do
   let new ← fmtCat `dl_term (← Delab.ppTermS (ns.map toExpr) (t.quote c))
   return new
 
@@ -75,16 +75,19 @@ def Fml.visible : {Γ : Ctx} → Fml C Γ → (Δ : Ctx) × Fml C Δ
 
 /-- Whether two terms read where the locals are named `ns` are the same
 text (`Delab.eqTmS`). -/
-def Tm.sameAt {Γ : Ctx} (ns : List Var) (a a' : Tm C Γ .val) : MetaM Bool := do
+def Tm.sameAt {Γ : Ctx} {s s' : Srt} (ns : List Var) (a : Tm C Γ s) (a' : Tm C Γ s') :
+    MetaM Bool := do
   let ns' := ns.map toExpr
   let new ← Delab.eqTmS ns' (a.quote c) ns' (a'.quote c)
   return new
 
 /-- `a = b` as `Fml.eqD` writes it: `defined(a) ∧ defined(b) ∧ a ≐ b`. -/
 def Fml.eqDParts? {Γ : Ctx} (ns : List Var) :
-    Fml C Γ → MetaM (Option (Tm C Γ .val × Tm C Γ .val))
-  | .and (.defined a) (.and (.defined b) (.eq a' b')) => do
-    if (← a.sameAt c ns a') && (← b.sameAt c ns b') then return some (a, b) else return none
+    Fml C Γ → MetaM (Option ((p : PrimTy) × Tm C Γ (.val p) × Tm C Γ (.val p)))
+  | .and (.defined (p := p) a) (.and (.defined (p := q) b) (.eq a' b')) => do
+    if h : q = p then
+      if (← a.sameAt c ns a') && (← b.sameAt c ns b') then return some ⟨p, a, h ▸ b⟩
+    return none
   | _ => return none
 
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
@@ -94,17 +97,34 @@ def Fml.isConnective {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Bool := 
     | .and .. | .imp .. | .all .. => true
     | _ => false
 
+/-- The literal `true`. -/
+def Tm.isTrue {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
+  | _, .app0 o => match o with
+    | @Op0.lit _ .bool v => show Bool from v
+    | _ => false
+  | _, _ => false
+
+/-- A binary operator's application, its operator and operands. -/
+def Tm.binopParts? {Γ : Ctx} : {s : Srt} → Tm C Γ s →
+    Option (BinOp × (q : PrimTy) × Tm C Γ (.val q) × Tm C Γ (.val q))
+  | _, .app2 o x y => match o, x, y with
+    | .binop op _, l, r => some (op, ⟨_, l, r⟩)
+    | _, _, _ => none
+  | _, _ => none
+
 /-- `a < b` as a specification writes it, `defined(a < b) ∧ … ∧ a < b ≐ true`:
 the operator and the operands. -/
-def cmpParts? {Γ : Ctx} : Tm C Γ .val → Tm C Γ .val → Option (String × Tm C Γ .val × Tm C Γ .val)
-  | .app2 (.binop op _) l r, .app0 (.lit (.bool true)) =>
-    match op with
-    | .lt => some ("<", l, r)
-    | .le => some ("<=", l, r)
-    | .gt => some (">", l, r)
-    | .ge => some (">=", l, r)
+def cmpParts? {Γ : Ctx} {s s' : Srt} (a : Tm C Γ s) (b : Tm C Γ s') :
+    Option (String × (q : PrimTy) × Tm C Γ (.val q) × Tm C Γ (.val q)) := do
+  guard (Tm.isTrue b)
+  let (op, ⟨q, l, r⟩) ← Tm.binopParts? a
+  let sym ← match op with
+    | .lt => some "<"
+    | .le => some "<="
+    | .gt => some ">"
+    | .ge => some ">="
     | _ => none
-  | _, _ => none
+  pure (sym, ⟨q, l, r⟩)
 
 def primName : PrimTy → String
   | .uint => "uint"
@@ -134,10 +154,10 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
   | .defined t => return (s!"defined({← t.show c ns})", 1024)
   | .all x p ψ => return (s!"∀ {primName p} {x}; {← sub (x :: ns) ψ 25}", 25)
   | .and ψ χ =>
-    if let some (a, b) ← φ.eqDParts? c ns then
-      if let some (sym, l, r) := cmpParts? a b then
+    if let some a ← φ.eqDParts? c ns then
+      if let some (sym, ⟨_, l, r⟩) := cmpParts? a.2.1 a.2.2 then
         return (s!"{← l.show c ns} {sym} {← r.show c ns}", 55)
-      return (s!"{← a.show c ns} = {← b.show c ns}", 50)
+      return (s!"{← a.2.1.show c ns} = {← a.2.2.show c ns}", 50)
     if let .imp a b := ψ then
       if let .imp b' a' := χ then
         let iff := a.quote c == a'.quote c && b.quote c == b'.quote c
@@ -181,27 +201,28 @@ def showFml {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Unit := do
 private def x : Var := .user "x"
 private def y : Var := .user "y"
 private def p : Var := .user "p"
-private def lit {Γ : Ctx} (n : Int) : Tm SE Γ .val := .app0 (.lit (.int n))
-private def tru {Γ : Ctx} : Tm SE Γ .val := .app0 (.lit (.bool true))
-private def pv {Γ : Ctx} {q : PrimTy} (i : Idx Γ (.val q)) : Tm SE Γ .val := .pvV i
+private def lit {Γ : Ctx} (n : Int) (h : PrimTy.uint.inRange n = true := by rfl) :
+    Tm SE Γ (.val .uint) := .app0 (.lit (PrimTy.ofLit .uint n h))
+private def tru {Γ : Ctx} : Tm SE Γ (.val .bool) := .app0 (.lit (p := .bool) true)
+private def pv {Γ : Ctx} {q : PrimTy} (i : Idx Γ (.val q)) : Tm SE Γ (.val q) := .pvV i
 private def alice {Γ : Ctx} : SPath SE Γ (.struct "Person") := .loc (.root "alice" rfl)
 private def litV {Γ : Ctx} (n : Int) (h : PrimTy.uint.inRange n = true := by rfl) :
     Val SE Γ .uint := .simple (.lit n h)
 private def locV {Γ : Ctx} {q : PrimTy} (i : Idx Γ (.val q)) : Val SE Γ q := .simple (.local i)
 
-/-- `{ x := 3 ‖ p := alice.age } x = 3`: two locals declared by the update. -/
+/-- `{ x := 3 ‖ p := alice.account } x = 3`: two locals declared by the update. -/
 private def upd₁ : Fml SE [] :=
-  .upd .box ((Upd.nil.decl x (.val (p := .uint) (lit 3))).decl (t := .alias (.struct "Person")) p
-      (.path (.app1 (.field "age") rfl (.app0 (.root "alice")))))
+  .upd .box ((Upd.nil.decl x (.val (p := .uint) (lit 3))).decl p
+      (.path (.app1 (.field (s := "Person") (f := "account") rfl) (.app0 (.root "alice" rfl)))))
     (.eqD (pv (.there .here)) (lit 3))
 
-/-- info: { x := 3 ‖ p := alice.age } x = 3 -/
+/-- info: { x := 3 ‖ p := alice.account } x = 3 -/
 #guard_msgs in #eval showFml cSE [] upd₁
 
 /-- A connective under `∀`, `¬`, `∨`, `∃`, `↔` and a comparison. -/
 private def conn₁ : Fml SE [] :=
   .all x .uint (.and
-    (.imp (.eqD (.app2 (.binop .lt .uint) (pv .here) (lit 3)) tru) (.not (.and (.not .tt) (.not .ff))))
+    (.imp (.eqD (.app2 (.binop .lt rfl) (pv (q := .uint) .here) (lit 3)) tru) (.not (.and (.not .tt) (.not .ff))))
     (.and (.imp .tt .ff) (.imp .ff .tt)))
 
 /-- info: ∀ uint x; (x < 3 → true ∨ false) ∧ (true ↔ false) -/
@@ -224,7 +245,8 @@ private def thn₁ : Prog SE [.val .uint] [.val .uint, .val .uint] :=
 private def els₁ : Prog SE [.val .uint] [.val .uint] := .cons .revert .nil
 
 /-- `x > 0`, as the condition of a goal. -/
-private def pos₁ : Fml SE [.val .uint] := .eqD (.app2 (.binop .gt .uint) (pv .here) (lit 0)) tru
+private def pos₁ : Fml SE [.val .uint] :=
+  .eqD (.app2 (.binop .gt rfl) (pv (q := .uint) .here) (lit 0)) tru
 
 /-- `ifElseSplit` on `if (x > 0) …; x = 2;`: each branch ends with a `}`. -/
 private def split₁ : Fml SE [.val .uint] :=

@@ -5710,6 +5710,133 @@ modules, `Tools/`, `Examples/`, `TestSuite/`.  `KeyNotation` and the
 reach: both sit above the closer.  `TypedLands` imports `Lower` now (it
 imported `TypedTerm`); its content is W9.8.2's, on the old names.
 
+### W9.8.3b front record (2026-10-12, branch `w98-front`)
+
+The notation's front end and the quoting over the typed terms; same
+surface syntax, same printed text (`Calculus/Print.lean`'s pins unchanged
+but one, below).
+
+**Design call: a term by name is indexed by its sort's kind, and resolves
+bidirectionally** (`Calculus/NamedTerm.lean`).  A name's type is known only
+where it resolves, so `NTm C k` is at a kind (`SrtK`: `val`, `path`, `st`,
+…; `sts`/`spath` are `st`/`path`), the reader's position, and carries
+- `resolve : (Γ : NCtx) → Except String ((s : Srt) × Tm C Γ.ctx s)`
+  (`Resolved`): synthesis, the sort with the term;
+- `checkAt?`: how a term the context types is checked (a numeral is a
+  literal at the type it is checked at; `NSValT.val`/`NMValT.val` pass the
+  expected type to their value).  `NTm.check t s` is `checkAt?`, else
+  synthesis compared (`Srt` is decidable).
+Each symbol is picked by its arguments' sorts (`NTerm.find` is `Op2.find`
+over a storage, `Op2.findIn` under a `select`; `NPTerm.field` `field` or
+`fieldIn`; `NSTerm.save` `save`/`saveIn`), an operand pair (`=`, `≐`,
+`+`, `c ? a : b`) synthesizes the side that is no numeral and checks the
+other (`NTm.resolvePair`), and the proofs are found at resolution, in the
+compiled reader: a contract lookup by `match h : C.rootType r with`
+(`NTm.fieldOf`: `Option.some_get`), a side condition by `if h : … = true`
+(`accepts`, `mapFree`, `newArrOk`), an index's `IndexTy`/`ArrTy` from the
+receiver's type (`RefTy.indexTy?`, `arrTy?`; a `bool` key through
+`Tm.keyAt`).  Errors name the term as written (`text`, a second string
+beside `key`): "`true` is a `bool`, used as a `uint`", "`!` does not apply
+to a `uint` (`alice.age`)", "`alice.account` is a path to a `Account`,
+used as a path to a value".  Rejected: a sort parameter fixed by the reader
+(the reader does not know a local's type), and a resolver taking only the
+expected sort (`find(s, p)` has none for `p`).
+- **Keys** stay context-free: a symbol's key is its untyped namesake's,
+  without types (`Op0.key` … `Op3.key`: `findIn` is `find`, `member f`
+  `root f`), and `Tm.keyStr` moved here from `Calculus/Chains.lean`, so a
+  written line's `NTm.key` and a computed line's `Tm.keyStr` are one
+  function's.  A literal's key is its value (`lit 5`, `lit true`).
+- **The API changed where the type is now inferred**: `NTerm.binop op a b`,
+  `NTerm.unop op a`, `NRead.cmp op a b` (no `PrimTy`), `NTerm.wt s`,
+  `NSTerm.mtSt`, `pushSlot`/`extend` (no element type), `NTerm.num (n :
+  Int)` (a numeral; a negative one synthesizes an `int`), `NTerm.bool`,
+  `NTerm.lit (v : p.Denote)`.  `elemTy` (`Calculus/NotationResolve.lean`)
+  types an update's new local by what its right-hand side synthesizes
+  (`x := alice.account` an alias of `Account`), where it took `uint`.
+- **`select` frames** (`Calculus/SurfaceNotation.lean`): the reader reads
+  the struct a `select` names off the contract (`selectStruct?`), and a
+  path in its frame starts at `NPTerm.member S x` (`pathIn`; `fpath` takes
+  `S`).  `arrayElemTy` deleted (the resolver says it).
+- **`st!{}`/`pt!{}`** quote the synthesized term; `pt!{ p }` reads `p` in
+  the frame of `S` when it is expected at `Tm C [] (.spath S T)`
+  (`ptFrame?`), from a root otherwise (`Tm.KindFreeAt`'s typed statement,
+  the laws lane's, decides which `StorageDelete`'s `pt!{ account }` meets).
+
+**Slots.**  A Lean formula's slot was `defined(find(storage, ⟪i⟫))`, a root
+the contract does not declare, which a typed root cannot be: it is now
+`Fml.slotMark i`, `∀ bool ⟪i⟫; true` (`Calculus/NotationResolve.lean`, with
+`Fml.slotMark?`); `Fml.slotC`, `slotIdxC?` (`Calculus/Notation.lean`),
+`Fml.chainSlot`, `Fml.slot?` (`Calculus/Chains.lean`) read it.
+
+**Quoting** (`Calculus/Quote.lean`).  `qSrt` is `toExpr` (`deriving
+ToExpr` for `Srt`); `qOp0` … `qOp3` run in `QM` (the contract is each
+symbol's first argument) and write every implicit type and every proof: a
+lookup `rflSome T`, a side condition `rflTrue`, an `IndexTy`/`ArrTy` by
+its constructor (`IndexTy.quote`), as `Syntax/Quote.lean` quotes a
+program's.  A literal is `PrimTy.ofLit p n rfl` (`qPrimVal`: the lowering's
+form, which the printers read), a `bool` its `Bool`.  `Fml.eq`/`defined`
+pass their `PrimTy`.
+
+**The lookups cached** (`cacheLookups`, `Calculus/Notation.lean`).  Each
+`Eq.refl` of `C.rootType r = some T`/`C.fieldType s f = some T` in a quoted
+formula (`Op0.root`, `Op1.field`, …, and a program's `Loc.root`,
+`Loc.field`, `MLoc.field`, `OpLoc.*`) becomes an auxiliary lemma of its
+statement (`mkAuxLemma`, which reuses one of the same statement), so the
+kernel evaluates each lookup once per module.  Applied to `cdl!{}`/`dl!{}`
+and `st!{}`/`pt!{}`.  Printed terms show the lemma's name where they showed
+`⋯` (`#check st!{ … }`).
+
+**Timing** (`profiler` on 13 `dl!{}` definitions in a scratch module, the
+same file on master `02b1025d` and here): elaboration 55 ms before, 58–65
+ms after; kernel checking 13 ms before (two over the 1 ms threshold),
+88 ms after without the cache, 22 ms with it.  The kernel cost was the
+lookups, as W9.8.1 measured; no other cost moved.
+
+**`Calculus/Print.lean`**: `Tm.show`/`sameAt` generic in the sort,
+`eqDParts?` dependent in the type, `cmpParts?` over `Tm.isTrue` and
+`Tm.binopParts?`; the examples typed.  One pin moved: `upd₁` binds `p :=
+alice.account` (it bound an alias of `Person` to `alice.age`, which no
+longer types).
+
+**Not touched, nothing to port**: `Calculus/KeyNotation.lean` and
+`Calculus/DecideLang.lean` read and print the closer's own language
+(`LTerm` …), no `Tm`; `Tools/Inspect.lean` quotes by `Fml.quote` only.
+
+**Checked**: per-file diagnostics, no error and no warning:
+`Calculus/NamedTerm.lean`, `Calculus/NotationResolve.lean`,
+`Calculus/SurfaceNotation.lean`, `Calculus/Quote.lean`,
+`Calculus/Notation.lean`, `Calculus/Print.lean` (its six pins), and a
+scratch module of `dl!{}` formulas (programs, updates, `select` frames,
+memory, a Lean postcondition, `st!{}`, `pt!{}`) as kernel-checked
+definitions.  These are every module importing the touched ones that
+elaborates on this branch.
+
+**Edited, not checkable here** (each imports `Theory/Bridge/Denote.lean`
+or `Calculus/Logic.lean`, the `logic` lane's):
+- `Calculus/SurfaceSpec.lean`: `.lit (.int n)` → `.num n`, the
+  `PrimTy` arguments of `binop`/`unop`/`NRead.cmp` dropped, `.mtSt`.
+  Its own typing (`SpecExpr.term`) still runs before the terms resolve;
+  the two must agree, and a numeral's type now comes from `check`.
+- `Calculus/TermLib.lean`, the `tm{}` part only: `unfoldTmsSyms`' argument
+  positions (`Tm.app1`'s term is argument 5, no `named` proof;
+  `Tm.bumped`'s 5), `delabTmS` reading a sort's head (`.val p` is an
+  application), `sts`/`spath` printed as storages and paths.  The
+  elaborator (`schemaTerm`, `coreNames`) is the rule table's, typed at
+  W9.8.3a.
+- `Calculus/Chains.lean`: `Tm.keyStr` deleted (moved), the slots.
+
+**Next errors, expected** (the later lanes'):
+- `Examples/Tactics/DlNotation.lean`'s push pin writes the untyped
+  `Tms.Term.lit (.int 7)`; `Examples/ChainRewrites.lean` pins `Op1.field
+  "age"`; the `‹…›` printings of terms that print `⋯` now print a lemma
+  name.
+- `Tm.KindFreeAt` (`Calculus/TermLaws.lean`) at typed sorts decides what
+  `pt!{ account }` (`Examples/Chains/StorageDelete.lean`) is expected at.
+- `Calculus/Chains.lean`'s `Fml.maxIdx`/`active` certificates of a slot
+  (lines 911, 963) meet an `Fml.all` under the `anon` now.
+- Every lemma about `NTm`'s old fields or `NRead.cmp`'s `PrimTy`
+  (`Calculus/Spec.lean`'s `Upd.resolveN` declarations).
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

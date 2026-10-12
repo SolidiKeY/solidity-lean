@@ -86,8 +86,8 @@ partial def unfoldTmsSyms (e : Lean.Expr) : MetaM Lean.Expr := do
     | some e' => return ← unfoldTmsSyms (← whnfCore e')
     | none => return e
   let terms : List Nat :=
-    if n == ``Tm.netOf then [3] else if n == ``Tm.bumped || n == ``Tms.Term.bumped then [4]
-    else if n == ``Tm.app1 then [6]
+    if n == ``Tm.netOf then [3] else if n == ``Tm.bumped || n == ``Tms.Term.bumped then [5]
+    else if n == ``Tm.app1 then [5]
     else if n == ``Tm.app2 then [6, 7] else if n == ``Tm.app3 then [7, 8, 9] else []
   let mut args := e.getAppArgs
   for i in terms do
@@ -129,7 +129,7 @@ def delabTmsField : Delab := do
   let recv? ← do
     let ty ← whnfR (← inferType args[i₀]!)
     let_expr Solidity.Tm _ _ s := ty | pure false
-    pure ((← whnf s).isConstOf srt)
+    pure ((← whnf s).getAppFn.isConstOf srt)
   if recv? then
     let rest := stxs.extract 1 stxs.size
     let fld : Lean.Term ← `($(stxs[0]!).$(mkIdent f):ident)
@@ -153,11 +153,11 @@ def delabTmS : Delab := do
   let fvs := (collectFVars {} e').fvarIds
   guard (← fvs.anyM fun fv => return !(← isContractOrCtx (← fv.getType)))
   let_expr Solidity.Tm _ _ s := (← whnfR (← inferType e)) | failure
-  let some srt := (← whnf s).constName? | failure
+  let some srt := (← whnf s).getAppFn.constName? | failure
   let printer : Lean.Expr → MetaM (TSyntax `dl_term) ← match srt with
     | ``Srt.val => pure (Delab.ppTermS [])
-    | ``Srt.path => pure (Delab.ppPTermS [])
-    | ``Srt.st => pure (Delab.ppSTermS [])
+    | ``Srt.path | ``Srt.spath => pure (Delab.ppPTermS [])
+    | ``Srt.st | ``Srt.sts => pure (Delab.ppSTermS [])
     | ``Srt.sv => pure (Delab.ppSValS [])
     | ``Srt.ident => pure (Delab.ppITermS [])
     | ``Srt.addr => pure (Delab.ppMAddrS [])

@@ -64,10 +64,9 @@ def _root_.Solidity.LocalTy.toLTy : LocalTy → LTy
   | .store => .old
 
 /-- `Fml.slot i` at the context `Γ`: the `i`th Lean formula, read as a
-formula no reading writes (`{anon()}` over `find(storage, ⟪i⟫)`), and put
-back after (`fillSlotsC`). -/
-def Fml.slotC {Γ : Ctx} (i : Nat) : Fml C Γ :=
-  .anon [] (.defined (.app2 .find (.app0 .storage) (.app0 (.root s!"⟪{i}⟫"))))
+formula no reading writes (`{anon()}` over the mark `Fml.slotMark i`), and
+put back after (`fillSlotsC`). -/
+def Fml.slotC {Γ : Ctx} (i : Nat) : Fml C Γ := .anon [] (Fml.slotMark i)
 
 /-! ## A line's key -/
 
@@ -206,7 +205,7 @@ def elabAtomN : RawFml → ElabM (NRead C)
     pure (.not (.eqD a b))
   | .cmp op a b => do
     let (Γ, _) ← get
-    pure (NRead.cmp op .uint (← tVal C Γ a) (← tVal C Γ b))
+    pure (NRead.cmp op (← tVal C Γ a) (← tVal C Γ b))
   | _ => throw "internal: not an atom"
 
 /-- A `where` clause's locals, with their types. -/
@@ -370,8 +369,8 @@ def elabKeyFml : RawFml → ElabM LineKey
     pure (.not (.eqD a.key b.key))
   | .cmp op a b => do
     let (Γ, _) ← get
-    let t : NTerm C := .binop op .uint (← tVal C Γ a) (← tVal C Γ b)
-    pure (.eqD t.key (NTerm.lit (C := C) (.bool true)).key)
+    let t : NTerm C := .binop op (← tVal C Γ a) (← tVal C Γ b)
+    pure (.eqD t.key (NTerm.bool (C := C) true).key)
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabKeyFml φ))
@@ -409,14 +408,10 @@ open Lean Elab Term Meta
 def slotIdxC? (e : Lean.Expr) : Option (Nat × Lean.Expr) := do
   guard (e.isAppOfArity ``Fml.anon 4)
   let d := e.appArg!
-  guard (d.isAppOfArity ``Fml.defined 3)
-  let t := d.appArg!
-  guard (t.isAppOfArity ``Tm.app2 8)
-  let r := t.appArg!
-  guard (r.isAppOfArity ``Tm.app0 4)
-  let o := r.appArg!
-  guard (o.isAppOfArity ``Op0.root 1)
-  let .lit (.strVal s) := o.appArg! | none
+  guard (d.isAppOfArity ``Fml.all 5)
+  let x := d.getArg! 2
+  guard (x.isAppOfArity ``Var.user 1)
+  let .lit (.strVal s) := x.appArg!.consumeMData | none
   guard (s.startsWith "⟪" && s.endsWith "⟫")
   let i ← ((s.drop 1).dropRight 1).toNat?
   pure (i, e.getArg! 1)
@@ -465,6 +460,37 @@ syntax (name := cdlSeq) "cdl[" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " 
 @[inherit_doc cdlSeq] syntax "cdl[" term ", " term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
 @[inherit_doc cdlSeq] syntax "cdl!{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
 @[inherit_doc cdlSeq] syntax "cdl![" term "]{ " sepBy1(dl_fml, ", ") " ⟹ " dl_fml " }" : term
+
+/-! ## The contract lookups, checked once
+
+A quoted symbol or location carries its contract lookup as `Eq.refl`
+(`C.rootType r = some T`, `C.fieldType s f = some T`), which the kernel
+checks by evaluating the lookup: string comparisons down the contract's
+roots, the cost W9.8.1 measured (6–7× a term literal's elaboration).
+`cacheLookups` replaces each by an auxiliary lemma of its statement
+(`mkAuxLemma`, which reuses one of the same statement), so the kernel
+evaluates each lookup once per module, not once per formula. -/
+
+/-- The constants whose last argument is a contract lookup's proof. -/
+def lookupProofHeads : List Lean.Name :=
+  [``Op0.root, ``Op0.member, ``Op1.field, ``Op1.mfield, ``Op1.select, ``Op1.selectIn,
+    ``Op1.fieldIn, ``Loc.root, ``Loc.field, ``MLoc.field, ``OpLoc.root, ``OpLoc.field,
+    ``OpLoc.mfield]
+
+open Lean Meta in
+/-- Every closed `Eq.refl` proof of a contract lookup in `e` (`lookupProofHeads`)
+replaced by an auxiliary lemma of its statement. -/
+def cacheLookups (e : Lean.Expr) : MetaM Lean.Expr :=
+  Meta.transform e (post := fun e => do
+    let .const n _ := e.getAppFn | return .continue
+    unless lookupProofHeads.contains n do return .continue
+    let args := e.getAppArgs
+    let some h := args.back? | return .continue
+    unless h.isAppOf ``Eq.refl do return .continue
+    let .forallE _ d _ _ ← whnf (← inferType (mkAppN e.getAppFn args.pop)) | return .continue
+    if d.hasLooseBVars || d.hasFVar || d.hasMVar then return .continue
+    let l ← mkAuxLemma [] d h
+    return .done (mkAppN e.getAppFn (args.pop.push (mkConst l))))
 
 open Lean Elab Term Meta in
 /-- `elabAgainst` with no kernel check of the throwaway definition it
@@ -520,9 +546,9 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
                 fun r => Fml.markExplicitAnd r.1 r.2.1 (Fml.quote $q r.2.2))
         let #[_, _, d, b] := e.getAppArgs | throwError "cdl[C, m]: not two readings{indentExpr e}"
         pure (d, b)
-  if holes.isEmpty && d == b then return d
+  if holes.isEmpty && d == b then return ← cacheLookups d
   let cE ← withTransparency .instances <| whnf (← elabTermAndSynthesize c (mkConst ``Contract))
-  fillSlotsC cE m? holes d b
+  cacheLookups (← fillSlotsC cE m? holes d b)
 
 open Lean Elab Term Meta in
 elab_rules : term
@@ -562,24 +588,42 @@ def elabDlAuto : TermElab := fun stx ty? => do
 /-! ## A storage term and a path, scoped -/
 
 /-- `st!{ s }`, `pt!{ p }`: a storage term and a storage path read against the
-file's contract at the empty scope, as `dl!{ … }` reads them: the operands of
-a law's premise (`Tm.KindFreeAt st!{ save(storage, alice.age, 1) } pt!{ alice }`).
-The path is read as in the frame of a `select`: its root may be a member
-(`account`). -/
+file's contract at the empty scope, as `dl!{ … }` reads them, at the sort
+they synthesize: the operands of a law's premise
+(`Tm.KindFreeAt st!{ save(storage, alice.age, 1) } pt!{ alice }`).  A path
+expected under a `select` of the struct `S` (a `Tm C [] (.spath S T)`) is
+read in its frame, its root a member (`account`). -/
 syntax "st!{ " dl_term " }" : term
 @[inherit_doc «termSt!{_}»] syntax "pt!{ " dl_term " }" : term
 
+/-- The struct `S` of an expected type `Tm _ _ (Srt.spath S _)`, `S` a
+literal. -/
+def ptFrame? (ty : Lean.Expr) : Option String := do
+  let ty := ty.consumeMData
+  guard (ty.isAppOfArity ``Tm 3)
+  let s := ty.appArg!.consumeMData
+  guard (s.isAppOfArity ``Srt.spath 2)
+  let .lit (.strVal S) := (s.getArg! 0).consumeMData | none
+  pure S
+
 open Lean Elab Term Meta in
-elab_rules : term
+elab_rules : term <= ty
   | `(st!{ $t:dl_term }) => do
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
-    elabAgainst c fun q =>
-      `((tStor $c [] $raw).bind (·.resolve []) |>.map (Tm.quote $q))
+    cacheLookups <| ← elabAgainst c fun q =>
+      `((tStor $c [] $raw).bind (·.resolve []) |>.map fun (r : Resolved $c []) => Tm.quote $q r.2)
   | `(pt!{ $t:dl_term }) => do
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
-    elabAgainst c fun q =>
-      `((tFPath $c [] $raw).bind (·.resolve []) |>.map (Tm.quote $q))
+    let ty ← instantiateMVars ty
+    match ptFrame? ty with
+    | some S =>
+      let S := quote S
+      cacheLookups <| ← elabAgainst c fun q =>
+        `((tFPath $c [] $S $raw).bind (·.resolve []) |>.map fun (r : Resolved $c []) => Tm.quote $q r.2)
+    | none =>
+      cacheLookups <| ← elabAgainst c fun q =>
+        `((tPath $c [] $raw).bind (·.resolve []) |>.map fun (r : Resolved $c []) => Tm.quote $q r.2)
 
 end Solidity

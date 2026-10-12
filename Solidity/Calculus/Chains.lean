@@ -81,7 +81,7 @@ def Ctx.positions : (Γ : Ctx) → List ((t : LTy) × Idx Γ t)
 with no modality and no fresh name, as a postcondition is, that names
 every position of its context (`{anon(…)}`). -/
 def Fml.chainSlot {Γ : Ctx} (i : Nat) : Fml C Γ :=
-  .anon (Ctx.positions Γ) (.defined (.app2 .find (.app0 .storage) (.app0 (.root s!"⟪{i}⟫"))))
+  .anon (Ctx.positions Γ) (Fml.slotMark i)
 
 /-- `Fml.stepFocusR` as compiled code (`Fml.stepAt`'s shape). -/
 def Fml.stepFocusAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Focus C × Fml C Γ)
@@ -127,14 +127,8 @@ the key of a line (`Fml.lineKey`) names each position as the line binds it
 binder, a scope end, a pop.  A line the strategy reaches and the line
 written that names it are then one key, whatever bookkeeping each keeps. -/
 
-/-- A term as text, its positions named by `ns`. -/
-def Tm.keyStr {Γ : Ctx} (ns : List Var) : {s : Srt} → Tm C Γ s → String
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i => reprStr (i.name ns)
-  | _, .netOf i a => s!"({reprStr (i.name ns)})[{Tm.keyStr ns a}]"
-  | _, .app0 o => reprStr o
-  | _, .app1 o _ x => s!"{reprStr o}({Tm.keyStr ns x})"
-  | _, .app2 o x y => s!"{reprStr o}({Tm.keyStr ns x}, {Tm.keyStr ns y})"
-  | _, .app3 o x y z => s!"{reprStr o}({Tm.keyStr ns x}, {Tm.keyStr ns y}, {Tm.keyStr ns z})"
+/-! `Tm.keyStr`, a term's text by name, is `Calculus/NamedTerm.lean`'s, beside
+the key `NTm` reads a written term to. -/
 
 /-- `x := r` as text, its right-hand side named by `ns`. -/
 def Rhs.keyStr {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t → String
@@ -220,11 +214,10 @@ def Frames.keyStrs (ns : List Var) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → 
   | _, _, .pop _ h κ => κ.keyStrs (ns.drop h.depth)
   | _, _, .drop h κ => κ.keyStrs (h.names ns)
 
-/-- The slot a formula is, if it is one: `{anon(…)} defined(find(storage, ⟪i⟫))`
-(`Fml.chainSlot`, `Fml.slotC`). -/
+/-- The slot a formula is, if it is one: `{anon(…)}` over a slot's mark
+(`Fml.slotMark`; `Fml.chainSlot`, `Fml.slotC`). -/
 def Fml.slot? {Γ : Ctx} : Fml C Γ → Option Nat
-  | .anon _ (.defined (.app2 .find (.app0 .storage) (.app0 (.root r)))) =>
-    if r.startsWith "⟪" && r.endsWith "⟫" then ((r.drop 1).dropRight 1).toNat? else none
+  | .anon _ φ => φ.slotMark?
   | _ => none
 
 /-- **A line's comparison key**, the positions named by `ns`: its terms and

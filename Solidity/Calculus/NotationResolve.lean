@@ -64,27 +64,47 @@ attribute [coe] Post.fml
 
 instance {Γ : Ctx} : Coe (Post C Γ) (Fml C Γ) := ⟨Post.fml⟩
 
+/-! ## Slots
+
+A Lean formula where a formula stands is read as a slot and put back
+after (`Calculus/Notation.lean`'s `Fml.slotC`, `Calculus/Chains.lean`'s
+`Fml.chainSlot`): a formula no reading writes, `∀ bool ⟪i⟫; true`, its
+binder's name the slot's number.  (A root `⟪i⟫` marked it before W9.8.3,
+when a root needed no proof that the contract declares it.) -/
+
+/-- The mark of slot `i`. -/
+def Fml.slotMark {Γ : Ctx} (i : Nat) : Fml C Γ := .all (.user s!"⟪{i}⟫") .bool .tt
+
+/-- The slot a mark is, if it is one. -/
+def Fml.slotMark? {Γ : Ctx} : Fml C Γ → Option Nat
+  | .all (.user r) .bool .tt =>
+    if r.startsWith "⟪" && r.endsWith "⟫" then ((r.drop 1).dropRight 1).toNat? else none
+  | _ => none
+
 section Resolve
 
 variable [FreshNames]
 
 /-! ## Updates -/
 
-/-- The right-hand side an element gives a local of type `t`, read in `Γ`. -/
+/-- The right-hand side an element gives a local of type `t`, read in `Γ`:
+its term checked at `t`'s sort. -/
 def Rhs.resolveN (Γ : NCtx) : (t : LTy) → NUpdElem C → Except String (Rhs C Γ.ctx t)
-  | .val _, .val _ r => do pure (.val (← r.resolve Γ))
-  | .alias _, .path _ p => do pure (.path (← p.resolve Γ))
+  | .val p, .val _ r => do pure (.val (← r.check (.val p) Γ))
+  | .alias R, .path _ p => do pure (.path (← p.check (.path (.ref R)) Γ))
   | .alias _, .unset _ => pure .unset
-  | .mem _, .mref _ i => do pure (.mref (← i.resolve Γ))
-  | .old, .store _ s => do pure (.store (← s.resolve Γ))
+  | .mem R, .mref _ i => do pure (.mref (← i.check (.ident R) Γ))
+  | .old, .store _ s => do pure (.store (← s.check .st Γ))
   | .oldNet, .saveNet _ => pure .saveNet
   | .oldNet, .saveNetMt _ => pure .saveNetMt
   | t, _ => .error s!"an update sets a local of type {t.toStr} to a term of another kind"
 
 /-- The type of the local `x` the element `e` sets, in the targets `Δ`: the
 reader's (`hint`), the newest local of that name if it fits, or the
-element's own. -/
-def elemTy (hint : Var → Option LTy) (Δ : NCtx) (x : Var) (e : NUpdElem C) :
+element's own: what its right-hand side synthesizes in `Γ` (a value's type,
+an alias's or a memory local's reference type), a storage's `old`, a
+ledger's `oldNet`. -/
+def elemTy (hint : Var → Option LTy) (Γ Δ : NCtx) (x : Var) (e : NUpdElem C) :
     Except String LTy :=
   match hint x with
   | some t => if e.fits t then pure t else fallback
@@ -95,10 +115,22 @@ where
     | .ok ⟨t, _⟩ => if e.fits t then pure t else own
     | .error _ => own
   own : Except String LTy :=
-    match e.ownTy? with
-    | some t => pure t
-    | none => .error s!"`{x}`: an update binds it, and nothing says its type \
-        (declare it: `φ where Person storage {x}`)"
+    match e with
+    | .val _ t => do
+      let ⟨p, _⟩ ← t.resolveVal Γ
+      pure (.val p)
+    | .path _ p => do
+      match ← p.resolve Γ with
+      | ⟨.path (.ref R), _⟩ => pure (.alias R)
+      | ⟨σ, _⟩ => useError p.text σ "a storage alias's path"
+    | .mref _ i => do
+      match ← i.resolve Γ with
+      | ⟨.ident R, _⟩ => pure (.mem R)
+      | ⟨σ, _⟩ => useError i.text σ "a memory reference"
+    | e => match e.ownTy? with
+      | some t => pure t
+      | none => .error s!"`{x}`: an update binds it, and nothing says its type \
+          (declare it: `φ where Person storage {x}`)"
 
 /-- A parallel update read in `Γ`, its elements appended to `U`, which
 leaves `Δ`: a local in scope at the element's type is assigned, any other
@@ -108,22 +140,22 @@ def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
       Except String ((Δ' : NCtx) × Upd C Γ.ctx Δ'.ctx)
   | Δ, U, [] => pure ⟨Δ, U⟩
   | Δ, U, .storage s :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.storage (← s.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.storage (← s.check .st Γ))) es
   | Δ, U, .memory m :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.memory (← m.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.memory (← m.check .mem Γ))) es
   | Δ, U, .selfBalance op a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.selfBalance op (← a.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.selfBalance op (← a.check (.val .uint) Γ))) es
   | Δ, U, .net r op a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.net (← r.resolve Γ) op (← a.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.net (← r.check (.val .uint) Γ) op (← a.check (.val .uint) Γ))) es
   | Δ, U, .pay r a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.pay (← r.resolve Γ) (← a.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.pay (← r.check (.val .uint) Γ) (← a.check (.val .uint) Γ))) es
   | Δ, U, .netMt r a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.netMt (← r.resolve Γ) (← a.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.netMt (← r.check (.val .uint) Γ) (← a.check (.val .uint) Γ))) es
   | Δ, U, .setBalance a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.setBalance (← a.resolve Γ))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.setBalance (← a.check (.val .uint) Γ))) es
   | Δ, U, e :: es => do
     let some x := e.setsLocal? | .error "an update element of no kind"
-    let t ← elemTy hint Δ x e
+    let t ← elemTy hint Γ Δ x e
     let r ← Rhs.resolveN Γ t e
     match Δ.find x t with
     | .ok ⟨i, _⟩ => Upd.resolveN hint Γ Δ (U.snoc (.local i r)) es
@@ -144,12 +176,18 @@ namespace NRead
 def tt : NRead C := fun _ => pure .tt
 /-- `false`. -/
 def ff : NRead C := fun _ => pure .ff
-/-- `a ≐ b`, KeY's `=`. -/
-def eq (a b : NTerm C) : NRead C := fun Γ => do pure (.eq (← a.resolve Γ) (← b.resolve Γ))
+/-- `a ≐ b`, KeY's `=`, at the sides' type. -/
+def eq (a b : NTerm C) : NRead C := fun Γ => do
+  let ⟨_, a', b'⟩ ← NTm.resolvePair a b Γ
+  pure (.eq a' b')
 /-- `a = b`, both sides defined (`Fml.eqD`). -/
-def eqD (a b : NTerm C) : NRead C := fun Γ => do pure (.eqD (← a.resolve Γ) (← b.resolve Γ))
+def eqD (a b : NTerm C) : NRead C := fun Γ => do
+  let ⟨_, a', b'⟩ ← NTm.resolvePair a b Γ
+  pure (.eqD a' b')
 /-- `defined(t)`. -/
-def defined (t : NTerm C) : NRead C := fun Γ => do pure (.defined (← t.resolve Γ))
+def defined (t : NTerm C) : NRead C := fun Γ => do
+  let ⟨_, t'⟩ ← t.resolveVal Γ
+  pure (.defined t')
 /-- `¬φ`. -/
 def not (φ : NRead C) : NRead C := fun Γ => do pure (.not (← φ Γ))
 /-- `φ ∧ ψ`. -/
@@ -163,10 +201,10 @@ def all (x : Var) (p : PrimTy) (φ : NRead C) : NRead C := fun Γ => do
 def conj (φs : List (NRead C)) : NRead C := fun Γ => do pure (Fml.conj (← φs.mapM (· Γ)))
 
 /-- `t = true`, both sides defined: a condition as a formula. -/
-def bool (t : NTerm C) : NRead C := eqD t (.lit (.bool true))
+def bool (t : NTerm C) : NRead C := eqD t (.bool true)
 
-/-- `a ⊕ b = true`, defined: a comparison as a formula. -/
-def cmp (op : BinOp) (p : PrimTy) (a b : NTerm C) : NRead C := bool (.binop op p a b)
+/-- `a ⊕ b = true`, defined: a comparison as a formula, at the operands' type. -/
+def cmp (op : BinOp) (a b : NTerm C) : NRead C := bool (.binop op a b)
 
 end NRead
 
