@@ -5371,6 +5371,98 @@ modules without warning; `sorry` count unchanged (19); `check-orphans`
 (311 reachable; the one orphan is the spike's git-ignored scratch module),
 `check-doc-paths`.
 
+### W9.8.2 lands record (2026-10-12, branch `w98-lands`)
+
+Additive: one new module, `Calculus/TypedLands.lean` (above `Logic` and
+`TypedTerm`, imported by nothing but `Solidity.lean`, so the `lower` lane's
+edits to `Signature`/`TypedTerm` do not meet it); nothing existing changed,
+no pin moved.
+
+**The readings**, on the typed state, nothing erased:
+- `RhsT.eval σ₀ r : Option (t.VDen C)`.  `LTy.VDen` is `LTy.TDenote` with
+  a memory local's value an identity, bare (`Option Nat`), as the sort
+  `ident R` denotes it; the rest at their types (a `p.Denote`, an `SRef`,
+  a `Storage C`, a ledger).  `State.getV`, `State.locV` read a typed
+  state's locals so (`VDen.ofT`: a reference's identity).
+- `UpdElemT.globT`, `UpdT.globT : Option (GlobT C σ₀.H)`, where
+  `GlobT C H = {g : State C [] // H <+: g.H}`: the typed global part and
+  the extension of the heap typing it was applied in.  A memory element
+  takes its term's `Grown σ₀.H` heap (`GlobT.withMem`); a balance written
+  is range-checked (`PrimTy.uint.ofInt?`); `pay`'s `amt < 0` test is gone
+  (an amount is a `uint`).
+- `HeldT`, `SubstT`, `UpdT.held` (`UpdT.held_erase`: erases to
+  `Upd.held`); `HeldT.OK`; `UpdT.Lands σ₀ U g σ'` (`globT` returns `g`,
+  `σ'.glob = g.1`, each local holds what `held` says); `UpdT.afterT`, with
+  no heap-prefix premise (`UpdT.Lands.prefix` derives it from `g`).
+- `UpdT.applyV : Option (GlobT C σ₀.H × LocsV C Δ)`, the U1 pair typed;
+  `UpdT.applyV_ok`, `applyV_of_globT`, `lands_iff_applyV` as in `Lands`.
+- `holdsUpdT m σ U φ := U.afterT m σ (holds · φ)`, beside `holds`; no
+  `FmlT` (the bridge reads `holds σ (.upd m U.erase φ)`).
+- Every evaluator is a recursor or `casesOn` with a `match` twin and a
+  link theorem (`*_eq_*M`, G0).  A literal update
+  (`UpdT.aliceAgeWrite`) is read back by `decide +kernel`.
+
+**Design call: the `Grown` heap is carried, no `IdOk` premise.**  The
+typed global part carries the heap it grew to (`GlobT`'s extension, from
+the `mem` sort's `Grown σ₀.H`), and a memory local's identity is typed
+only where it lands: `HeldT.OK` compares identities, and the landed
+state's own `HRef` types the identity in `σ'.H = g.1.H`.  So no landing,
+`afterT` or bridge takes `IdOk`.  Why: the identity is not typable when
+the right-hand side is read (an allocation pair writes the local with
+`alloc(memory)` before `addM` grows the heap, and a later memory element
+replaces the heap from `σ₀`'s), so typing it there needs either the final
+heap in `RhsT.eval` or a premise; at the landing it is free, and an
+identity the grown heap does not type admits no landing, in the typed
+reading as in the erased one (whose `σ'.getE` of a memory local is an
+`HRef`'s identity too).  `IdOk` stays only where W9.8.1 put it, in the
+symbols' `OpT2.Exact`/`OpT3.Exact`.
+
+**Bridges** (premise `UpdT.Exact σ₀ U`: every term's `TmT.Exact` in
+`σ₀`, and `op.apply` of a `selfBalance` element in `uint` range):
+- both ways, as `OAgree f x r` (`some a` is `.ok (f a)`, `none` some
+  halt): `RhsT.eval_agree` (`f = VDen.erase`), `UpdElemT.globT_agree`,
+  `UpdT.globT_agree` (`f = (·.1.globE)`), `UpdT.applyV_agree`
+  (`f = (·.1.1.globE, ·.2.erase)`);
+- both ways at the typed global part: `HeldT.ok_iff` (`HeldT.OK ↔
+  Held.OKT` of the erasure; by the new `LTy.VDen.erase_injective`,
+  `SRef.erase_injective`, `Path.erase_injective`,
+  `Storage.erase_injective`) and `UpdT.lands_iff`: `U.Lands σ₀ g σ' ↔
+  U.globT σ₀ = some g ∧ σ'.glob = g.1 ∧ U.erase.Lands σ₀ σ'.globE σ'`;
+  `UpdT.Lands.erase` its forward half;
+- **one way only**: `UpdT.afterT_of_erase` (`U.erase.afterT m σ₀ p →
+  U.afterT m σ₀ p`) and `holdsUpdT_of_holds`.  The converse fails: an
+  erased landing fixes `σ'.globE` and not `σ'.glob`, and `MObj.erase`
+  drops an object's type (an empty `uint[]` and an empty `bool[]` are
+  both `.array [] false`), so the erased clause quantifies over heap
+  typings of the allocated objects the typed one excludes.  The storage,
+  ledger, balance and transaction are fixed by the erasure; only `H` and
+  the heap are not.  Without `Exact`, the agreements hold only where the
+  typed reading returns (a non-exact symbol is `none` where the untyped
+  one returns).
+
+**Open for switching `holds` to typed terms.**
+- `holds`' `.eq`/`.defined` clauses read `Tm.denote`/`Tm.eval`; typed,
+  `.eq` needs `TmT.denote` through `SVal.absT` (W9.8.0's decision), and
+  `.defined` is `TmT.eval ≠ none`.
+- Switching `.upd` to `UpdT.afterT` changes its meaning on allocating
+  updates (the one-way bridge above): every law proved over `Upd.afterT`
+  (`afterT_seq`, `afterT_congr`, the `RewritePast`/`UpdRuleScoped` laws,
+  `Premise.sound_update_typed`) needs its typed twin, and the rules'
+  update arms must produce `UpdT` (the `lower` lane).
+- `Exact` is a side condition the closer must discharge per leaf; a push
+  at the bound, a `net` entry outside `int`, a balance overflow and an
+  ill-typed identity are where typed and erased readings part.
+- `select(s, r)` still has no typed symbol (W9.8.1), so a chain line
+  using it has no `UpdT` reading.
+- `Srt.IsHalt`/`OAgree`/`SrtT.Agree` overlap; one agreement relation
+  should remain at W9.8.5.
+
+**Checked**: `lean_build` of the default targets (294 jobs), the new
+module without warning; `#print axioms` of `UpdT.lands_iff`,
+`UpdT.applyV_agree`, `holdsUpdT_of_holds`, `UpdT.lands_iff_applyV`:
+`propext`, `Classical.choice`, `Quot.sound`; `sorry` count 19;
+`check-orphans` (312 reachable), `check-doc-paths`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
