@@ -5,13 +5,17 @@ import Solidity.Theory.Bridge.Push
 /-!
 # The term bridge
 
-`Tm.denote` (`Update.lean`) reads a formula's terms in the Theory algebra;
-`Tm.eval` is the interpreter's reading.  The term bridge
-(`Tm.denote_eval`, and per sort `Term.denote_eval` …) says the two agree wherever
-`eval` returns — literally for a value and a path, up to `StValue.Equiv` for
-a storage and a stored value — so an equation between terms that return
-means what it meant before `holds` read it through `denote`
-(`Term.holdsEq_of_eval`, `holds_eqD_iff`).
+A symbol's denotation (`Op0.denote` … `Op3.denote`, `Update.lean`) reads a
+term in the Theory algebra; its `eval` is the interpreter's reading.  The
+symbol bridge (`Op0.denote_eval` … `Op3.denote_eval`) says the two agree
+wherever `eval` returns — literally for a value and a path, up to
+`StValue.Equiv` for a storage and a stored value.  The scoped term bridge
+(`Tm.denote_eval`, `Calculus/SeqRewrite.lean`) is one induction over these,
+so an equation between terms that return means what it meant before `holds`
+read it through `denote` (`holds_eqD_iffS`, `Calculus/SoundLoops.lean`).
+
+`Surface.Tm.denote_eval` and `SValT.denote_eval` are kept as the external
+reader's shim (no prover code uses them).
 
 This is the only Theory module that imports `Update` (design R10).
 -/

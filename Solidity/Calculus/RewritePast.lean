@@ -646,8 +646,8 @@ def Tm.spineHasM (S : Tm C Γ .st) : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .app0 _ => false
 
 /-- `S` is read first, strictly inside `T`: `T` a storage operation over `S`
-or over a term with `S` on its spine (`Surface.Tm.spineAny`).  Generic in
-the sort, by the recursor. -/
+or over a term with `S` on its spine (`Tm.spineAny`).  Generic in the
+sort, by the recursor. -/
 @[implemented_by Tm.spineHasM]
 def Tm.spineHas (S : Tm C Γ .st) {s : Srt} (T : Tm C Γ s) : Bool :=
   Tm.rec (motive := fun _ _ => Bool)
@@ -665,8 +665,8 @@ theorem Tm.spineHas_eq_spineHasM (S : Tm C Γ .st) {s : Srt} (T : Tm C Γ s) :
   | app2 o a _ ih _ => simp only [Tm.spineHasM, ← ih]; rfl
   | app3 o a _ _ ih _ _ => simp only [Tm.spineHasM, ← ih]; rfl
 
-/-- `S` is read before anything else of `T` (`Surface.Tm.onSpine`): `T` is
-`S`, or `S` is on its spine. -/
+/-- `S` is read before anything else of `T` (`Tm.onSpine`): `T` is `S`, or
+`S` is on its spine. -/
 def Tm.onSpineS (T S : Tm C Γ .st) : Bool := T.beqR S || Tm.spineHas S T
 
 /-- `Tm.memSpineHas`' compiled twin. -/
@@ -677,7 +677,7 @@ def Tm.memSpineHasM (M : Tm C Γ .mem) : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .app0 _ => false
 
 /-- `M` is read first, strictly inside `N`, on the memory spine
-(`Surface.Tm.memSpineAny`), by the recursor. -/
+(`Tm.memSpineAny`), by the recursor. -/
 @[implemented_by Tm.memSpineHasM]
 def Tm.memSpineHas (M : Tm C Γ .mem) {s : Srt} (N : Tm C Γ s) : Bool :=
   Tm.rec (motive := fun _ _ => Bool)

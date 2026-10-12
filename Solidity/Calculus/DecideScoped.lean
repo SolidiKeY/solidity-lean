@@ -129,7 +129,8 @@ def _root_.Solidity.Tm.isPvSS : Tm C Γ .st → Bool
   | .pvS _ => true
   | _ => false
 
-/-- `Op2.toLAt`, by position. -/
+/-- A binary symbol pushed in: a `find` on a storage local reads its
+snapshot, its path guarded. -/
 def _root_.Solidity.Op2.toLAtS {a b s : Srt} (ρ : SymS) : Op2 a b s → Tm C Γ a → a.LTy → b.LTy →
     s.LTy
   | .find, t, x, y =>
@@ -138,18 +139,19 @@ def _root_.Solidity.Op2.toLAtS {a b s : Srt} (ρ : SymS) : Op2 a b s → Tm C Γ
     | none => .find x y
   | o, _, x, y => o.toL x y
 
-/-- The type `addM(memory)` allocates (`addMOf?`). -/
+/-- The type `addM(memory)` allocates. -/
 def addMOfS? : Tm C Γ .mem → Option RefTy
   | .app1 (.addM R) _ (.app0 .memory) => some R
   | _ => none
 
-/-- The type `freshId(addM(memory))`, written as a reference, allocates
-(`allocRefOf?`). -/
+/-- The type `freshId(addM(memory))`, written as a reference, allocates. -/
 def allocRefOfS? : Tm C Γ .mv → Option RefTy
   | .app1 .ref _ (.app1 (.alloc R) _ (.app0 .memory)) => some R
   | _ => none
 
-/-- `freshRef`, by position. -/
+/-- A reference written into the object `m` allocates, when it is that
+object's own identity (as a `delete` writes it): the identity of the next
+ordinal; `z` otherwise. -/
 def freshRefS (ρ : SymS) (m : Tm C Γ .mem) (v : Tm C Γ .mv) (z : Option (LMV × LTerm)) :
     Option (LMV × LTerm) :=
   match addMOfS? m, allocRefOfS? v with
@@ -157,7 +159,8 @@ def freshRefS (ρ : SymS) (m : Tm C Γ .mem) (v : Tm C Γ .mv) (z : Option (LMV 
     if R = R' then some (.ref key{ idC(‹ρ.sym.mem.nAlloc›, nil) }, key{ true }) else z
   | _, _ => z
 
-/-- `Op3.toLAt`, by position. -/
+/-- A ternary symbol pushed in: a memory write's fresh reference named
+(`freshRefS`). -/
 def _root_.Solidity.Op3.toLAtS {a b c s : Srt} (ρ : SymS) : Op3 a b c s → Tm C Γ a → Tm C Γ c →
     a.LTy → b.LTy → c.LTy → s.LTy
   | .write, m, v, x, y, z => writeM x y (freshRefS ρ m v z)
@@ -208,7 +211,9 @@ def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
     (fun o a _ iha ihb => Op2.toLAtS ρ o a iha ihb)
     (fun o a _ c iha ihb ihc => Op3.toLAtS ρ o a c iha ihb ihc) t
 
-/-- `Op2.inL`, by position. -/
+/-- A binary symbol in the fragment, its arguments in it (`ha`, `hb`): a
+storage operation on `storage` (a `find` also on a storage local), a memory
+read that resolves. -/
 def _root_.Solidity.Op2.inLS {a b s : Srt} (ρ : SymS) : Op2 a b s → Tm C Γ a → a.LTy → b.LTy →
     Bool → Bool → Bool
   | .binop .., _, _, _, ha, hb | .at, _, _, _, ha, hb => ha && hb
@@ -225,7 +230,7 @@ def _root_.Solidity.Op2.inLS {a b s : Srt} (ρ : SymS) : Op2 a b s → Tm C Γ a
   | .copyMem, _, x, y, ha, hb => ha && hb && (memL x y).isSome
   | _, _, _, _, _, _ => false
 
-/-- `Op3.inL`, by position. -/
+/-- A ternary symbol in the fragment, its arguments in it. -/
 def _root_.Solidity.Op3.inLS {a b c s : Srt} (ρ : SymS) : Op3 a b c s → Tm C Γ a → Tm C Γ c →
     a.LTy → b.LTy → c.LTy → Bool → Bool → Bool → Bool
   | .ite, _, _, _, _, _, hc, ha, hb => hc && ha && hb
@@ -296,7 +301,8 @@ theorem _root_.Solidity.Tm.inLS_eq_inLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
 
 /-! ### Equations and stale writes -/
 
-/-- `Op2.shape`, by position. -/
+/-- A binary symbol whose terms `sameAt` compares, its arguments'
+compared. -/
 def _root_.Solidity.Op2.shapeS {a b s : Srt} : Op2 a b s → Tm C Γ a → Bool → Bool → Bool
   | .binop .., _, x, y | .at, _, x, y => x && y
   | .find, s, _, y => (s.isStorageS || s.isPvSS) && y
@@ -316,17 +322,17 @@ def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
     | .ite => a.sameShapeS && b.sameShapeS && c.sameShapeS
     | _ => false
 
-/-- A literal or a local (`Term.isAtom`). -/
+/-- A literal or a local. -/
 def _root_.Solidity.Tm.isAtomS : Tm C Γ .val → Bool
   | .app0 (.lit _) | .pvV _ => true
   | _ => false
 
-/-- A literal, or a value of the transaction (`Term.isLitLike`). -/
+/-- A literal, or a value of the transaction. -/
 def _root_.Solidity.Tm.isLitLikeS : Tm C Γ .val → Bool
   | .app0 (.lit _) | .app0 (.env _) => true
   | _ => false
 
-/-- A total equation the fragment takes (`Term.eqLit`). -/
+/-- A total equation the fragment takes. -/
 def _root_.Solidity.Tm.eqLitS (a b : Tm C Γ .val) : Bool :=
   (a.isLitLikeS && b.isAtomS) || (b.isLitLikeS && a.isAtomS)
 
@@ -339,20 +345,20 @@ def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Optio
   | _, .app1 (.field f) _ p => (Tm.slotPathS ρ p).map fun q => key{ q.f }
   | _, _ => none
 
-/-- A write through a stale alias (`STerm.staleWrite?`). -/
+/-- A write through a stale alias. -/
 def _root_.Solidity.Tm.staleWriteS (ρ : SymS) : Tm C Γ .st → Option (Option AOp × LPath × Tm C Γ .val)
   | .app3 .save (.app0 .storage) p (.app1 .sval _ t) => (p.slotPathS ρ).map fun q => (none, q, t)
   | .app3 .push (.app0 .storage) p (.app1 .sval _ t) =>
     (p.slotPathS ρ).map fun q => (some .push, q, t)
   | _ => none
 
-/-- A storage update pushed in (`STerm.toLS`). -/
+/-- A storage update pushed in. -/
 def _root_.Solidity.Tm.toLSt (ρ : SymS) (s : Tm C Γ .st) : LStor :=
   match s.staleWriteS ρ with
   | some (op, q, t) => .stale op ρ.sym.stor q (t.toLS ρ)
   | none => s.toLS ρ
 
-/-- The storage updates `toLSt` is exact on (`STerm.inLS`). -/
+/-- The storage updates `toLSt` is exact on. -/
 def _root_.Solidity.Tm.inLSt (ρ : SymS) (s : Tm C Γ .st) : Bool :=
   match s.staleWriteS ρ with
   | some (_, _, t) => t.inLS ρ
@@ -630,13 +636,13 @@ memory set after a memory set, an alias after a storage set). -/
 def ElemS.parOk (ρ : SymS) (a b : ElemS C Γ) : Bool :=
   a.inLS ρ && b.inLS ρ && !(a.setsMem && b.needsMem) && !(a.setsStor && b.needsStor)
 
-/-- An allocation's pair: the identity and the memory (`pairView`). -/
+/-- An allocation's pair: the identity and the memory. -/
 def pairViewS : ElemS C Γ → ElemS C Γ → Option (Tm C Γ .ident × Tm C Γ .mem)
   | .rhs (.mref i), .glob (.memory mm) | .glob (.local _ (.mref i)), .glob (.memory mm) =>
     some (i, mm)
   | _, _ => none
 
-/-- `allocPair?`, a syntactic test on the pair's two terms: one allocation
+/-- An allocation's pair, a syntactic test on its two terms: one allocation
 of one type, or two copies of the same value (`Tm.beqR`). -/
 def allocPairS? (i : Tm C Γ .ident) (mm : Tm C Γ .mem) : Bool :=
   match i, mm with
@@ -644,12 +650,13 @@ def allocPairS? (i : Tm C Γ .ident) (mm : Tm C Γ .mem) : Bool :=
   | .app2 .copy (.app0 .memory) v, .app2 .copySt (.app0 .memory) v' => v.beqR v'
   | _, _ => false
 
-/-- A copy from storage (`copyOf?`): its path. -/
+/-- A copy from storage: its path. -/
 def copyOfS? : Tm C Γ .mem → Option (Tm C Γ .path)
   | .app2 .copySt (.app0 .memory) (.app2 .sfind (.app0 .storage) p) => some p
   | _ => none
 
-/-- `pairMem`, by position. -/
+/-- The memory a pair leaves, and its guard: a copy from storage made
+explicit (`copySt` of the storage read), any other memory pushed in. -/
 def pairMemS (ρ : SymS) (mm : Tm C Γ .mem) : Option (LMem × LTerm) :=
   match copyOfS? mm with
   | some p =>
@@ -657,13 +664,13 @@ def pairMemS (ρ : SymS) (mm : Tm C Γ .mem) : Option (LMem × LTerm) :=
       copyG ρ.sym.stor (p.toLS ρ))
   | none => mm.toLS ρ
 
-/-- `pairIn`, by position. -/
+/-- The pair's memory in the fragment. -/
 def pairInS (ρ : SymS) (mm : Tm C Γ .mem) : Bool :=
   match copyOfS? mm with
   | some p => p.inLS ρ
   | none => mm.inLS ρ
 
-/-- The pair's guard and the memory it leaves (`pairL`). -/
+/-- The pair's guard and the memory it leaves, within `memSize`. -/
 def pairLS (ρ : SymS) (i : Tm C Γ .ident) (mm : Tm C Γ .mem) : Option (LTerm × LMem) :=
   if allocPairS? i mm then
     (pairMemS ρ mm).bind fun p => if p.1.within memSize then some (p.2, p.1) else none

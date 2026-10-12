@@ -23,7 +23,7 @@ link, every capture kept, which `#last_line` checks.  The first line's update gi
 and the token copied a `value` of 10.  The pushed `makeValue()` ends at `7`; a struct read
 (`find(…, bob.account.token)`, `find(…, tok)`) has no literal, and a starting length has no spelling
 (`Examples/Chains/Storage.lean`), so the lengths stay symbolic.  A push's alias
-`{ storage := … ‖ sp := p[p.length] }` merges with the update after it (`Upd.mergeStL`), the alias standing
+`{ storage := … ‖ sp := p[p.length] }` merges with the update after it (`Upd.mergeSt?`), the alias standing
 for the pre-state slot.
 -/
 

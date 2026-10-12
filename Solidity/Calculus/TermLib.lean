@@ -12,11 +12,12 @@ scoped path, and the term functions a scoped closer compares terms with.
 Soundness is over the scoped `Tm.denote` (`Calculus/Logic.lean`).
 
 **Notation.** `tm{ … }` at a scoped term type writes the scoped term: the
-text is read as the closer's term is (`RuleSyntax.schemaTerm`) and its
+text is read as an untyped term is (`RuleSyntax.schemaTerm`) and its
 symbols turned into their scoped twins (`Tms`, `Calculus/Rules.lean`;
 `RuleSyntax.coreNames`).  At any other type, or where the type is not
-known, it is the closer's term as before.  A scoped term over schema
-variables prints back as `tm{ … }`, through the closer's term printers.
+known, it is the untyped term (`Surface.Tm`, the notation's front end).  A
+scoped term over schema variables prints back as `tm{ … }` through the
+untyped term's printer (`delabTmS`, `ppTerm`: the reader's shim).
 
 **Sort-generic recursion.**  A recursive function on `Tm` is generic in the
 sort: on one fixed sort it compiles by well-founded recursion and stops
@@ -83,8 +84,8 @@ def tmsTwin? (n : Lean.Name) : Option Lean.Name :=
   else if (`Solidity.Tms).isPrefixOf n then some (n.replacePrefix `Solidity.Tms `Solidity)
   else none
 
-/-- A scoped term's `Expr` as the closer's term of the same text, for the
-closer's printers: each scoped symbol its twin, the context (and an
+/-- A scoped term's `Expr` as the untyped term of the same text (the
+reader's shim, `Surface.Tm`), for its printers: each scoped symbol its twin, the context (and an
 `app1`'s proof that its symbol names no local) dropped, and each schema
 variable its twin (`twins`). -/
 partial def tmSurface (twins : Std.HashMap FVarId Lean.Expr) (e : Lean.Expr) : Lean.Expr :=
@@ -106,7 +107,7 @@ partial def tmSurface (twins : Std.HashMap FVarId Lean.Expr) (e : Lean.Expr) : L
       | none => mkAppN f args
   | _ => mkAppN f args
 
-/-- The closer's type of a sort's terms, as `Update.lean` names it. -/
+/-- The untyped type of a sort's terms, as `Update.lean` names it. -/
 def sortType? : Lean.Name → Option Lean.Name
   | ``Srt.val => some ``Term
   | ``Srt.path => some ``PTerm
@@ -119,7 +120,7 @@ def sortType? : Lean.Name → Option Lean.Name
   | _ => none
 
 /-- `k` with a twin for every variable of `fvs` of a scoped term type: a
-local of the same name at the closer's type of its sort. -/
+local of the same name at the untyped type of its sort. -/
 partial def withTmTwins {α : Type} (fvs : List FVarId) (twins : Std.HashMap FVarId Lean.Expr)
     (k : Std.HashMap FVarId Lean.Expr → MetaM α) : MetaM α := do
   match fvs with
@@ -139,7 +140,7 @@ def isContractOrCtx (ty : Lean.Expr) : MetaM Bool := do
   return ty.isConstOf ``Contract || (ty.isAppOfArity ``List 1 && (ty.getArg! 0).isConstOf ``LTy)
 
 /-- A scoped term over schema variables, as `tm{ t }`: printed by the
-closer's term printers (`delabTm`, `Calculus/RuleSyntax.lean`) from its
+untyped term printers (`delabTm`, `Calculus/RuleSyntax.lean`) from its
 twin (`tmSurface`), and only up to `tmCutoff` nodes. -/
 def delabTmS : Delab := do
   unless ← ppOn do failure
@@ -198,8 +199,7 @@ section Theq
 
 variable {Γ : Ctx}
 
-/-- The two terms have the same Theory value in every state (`Term.Theq`,
-scoped): what a law of the Theory says about the terms that denote its
+/-- The two terms have the same Theory value in every state: what a law of the Theory says about the terms that denote its
 sides. -/
 def Tm.Theq (t t' : Tm C Γ .val) : Prop :=
   ∀ σ : EState C Γ, Theory.StValue.Equiv (t.denote σ) (t'.denote σ)
@@ -339,8 +339,8 @@ def Tm.beqM : {s s' : Srt} → Tm C Γ s → Tm C Γ s' → Bool
     | .app3 o' x' y' z' => Op3.hbeq o o' && x.beqM x' && y.beqM y' && z.beqM z'
     | _ => false
 
-/-- **Structural equality of two terms**, their sorts compared too (what
-comparing `Tm.eraseR` decided), by the recursor. -/
+/-- **Structural equality of two terms**, their sorts compared too, by the
+recursor. -/
 @[implemented_by Tm.beqM]
 def Tm.beqR {s s' : Srt} (t : Tm C Γ s) (t' : Tm C Γ s') : Bool :=
   Tm.rec (motive := fun _ _ => {s' : Srt} → Tm C Γ s' → Bool)
@@ -449,12 +449,12 @@ section Side
 
 variable {Γ : Ctx}
 
-/-- The path is never empty: anything but a bare alias (`PTerm.hasSeg`). -/
+/-- The path is never empty: anything but a bare alias. -/
 def Tm.hasSeg : Tm C Γ .path → Bool
   | .pvP _ => false
   | _ => true
 
-/-- An integer literal (`Term.litInt?`). -/
+/-- An integer literal. -/
 def Tm.litInt? : Tm C Γ .val → Option Int
   | .app0 (.lit (.int i)) => some i
   | _ => none
@@ -466,8 +466,7 @@ theorem Tm.eq_of_litInt? {t : Tm C Γ .val} {i : Int} (h : t.litInt? = some i) :
   · cases h; rfl
   · cases h
 
-/-- A path's shape, read off its syntax (`Surface.Tm.shape?`): `none`
-through an alias.  Generic in the sort. -/
+/-- A path's shape, read off its syntax: `none` through an alias.  Generic in the sort. -/
 def Tm.shape? : {u : Srt} → Tm C Γ u → Option (List SegT)
   | _, .app0 (.root r) => some [.field r]
   | _, .app1 (.field f) _ p => p.shape?.map (· ++ [.field f])
@@ -477,20 +476,19 @@ def Tm.shape? : {u : Srt} → Tm C Γ u → Option (List SegT)
   | _, .app3 .atIn _ p i => p.shape?.map (· ++ [.at i.litInt?])
   | _, _ => none
 
-/-- The two paths leave each other (`PTerm.diverges`). -/
+/-- The two paths leave each other. -/
 def Tm.diverges (p q : Tm C Γ .path) : Bool :=
   match p.shape?, q.shape? with
   | some a, some b => SegT.diverges a b
   | _, _ => false
 
-/-- `q` leaves `p.length` (`PTerm.divergesLen`). -/
+/-- `q` leaves `p.length`. -/
 def Tm.divergesLen (q p : Tm C Γ .path) : Bool :=
   match q.shape?, p.shape? with
   | some a, some b => SegT.diverges a (b ++ [.field "length"])
   | _, _ => false
 
-/-- The path its checks aside (`Surface.Tm.eraseChecks`): `p[i]@S` is
-`p[i]`.  Generic in the sort. -/
+/-- The path its checks aside: `p[i]@S` is `p[i]`.  Generic in the sort. -/
 def Tm.eraseChecks : {u : Srt} → Tm C Γ u → Tm C Γ u
   | _, .app1 (.field f) h p => .app1 (.field f) h p.eraseChecks
   | _, .app1 .next h p => .app1 .next h p.eraseChecks
@@ -500,12 +498,12 @@ def Tm.eraseChecks : {u : Srt} → Tm C Γ u → Tm C Γ u
   | _, p => p
 
 /-- The two paths have the same segments in every state, their checks aside
-(`PTerm.sameSegs`), compared by `Tm.beqR`. -/
+compared by `Tm.beqR`. -/
 def Tm.sameSegs (p q : Tm C Γ .path) : Bool := p.eraseChecks.beqR q.eraseChecks
 
 theorem Tm.sameSegs_refl (p : Tm C Γ .path) : p.sameSegs p = true := Tm.beqR_self _
 
-/-- `f` of some path on the way down to `t`'s root (`Surface.Tm.extendsAny`).
+/-- `f` of some path on the way down to `t`'s root.
 Generic in the sort. -/
 def Tm.extendsAny (f : Tm C Γ .path → Bool) : {u : Srt} → Tm C Γ u → Bool
   | _, .app1 (.field _) _ q => f q || q.extendsAny f
@@ -513,7 +511,7 @@ def Tm.extendsAny (f : Tm C Γ .path → Bool) : {u : Srt} → Tm C Γ u → Boo
   | _, .app3 .atIn _ q _ => f q || q.extendsAny f
   | _, _ => false
 
-/-- `q` goes on below `p` (`PTerm.extends`). -/
+/-- `q` goes on below `p`. -/
 def Tm.extends (q p : Tm C Γ .path) : Bool := q.extendsAny (·.beqR p)
 
 /-- The state variable a path is, if it is one alone. -/
@@ -521,8 +519,8 @@ def Tm.root? : {u : Srt} → Tm C Γ u → Option Name
   | _, .app0 (.root r) => some r
   | _, _ => none
 
-/-- A path read from its head (`Surface.Tm.shift?`): the root, and the rest
-rooted at its first member.  Generic in the sort. -/
+/-- A path read from its head: the root, and the rest rooted at its first
+member.  Generic in the sort. -/
 def Tm.shift? : {u : Srt} → Tm C Γ u → Option (Name × Tm C Γ .path)
   | _, .app1 (.field f) _ p => match p.root? with
     | some r => some (r, .app0 (.root f))
@@ -535,23 +533,21 @@ def Tm.shift? : {u : Srt} → Tm C Γ u → Option (Name × Tm C Γ .path)
     | none => p.shift?.map fun (r, p') => (r, .app3 .atIn S p' i)
   | _, _ => none
 
-/-- The word a written value is, if it is a literal (`SValT.lit?`). -/
+/-- The word a written value is, if it is a literal. -/
 def Tm.svLit? : Tm C Γ .sv → Option Value
   | .app1 .sval _ (.app0 (.lit v)) => some v
   | _ => none
 
-/-- The word a storage term reads at a path, read off its writes
-(`Surface.Tm.findLitBy`).  Generic in the sort. -/
+/-- The word a storage term reads at a path, read off its writes.  Generic in the sort. -/
 def Tm.findLitBy (eq div : Tm C Γ .path → Bool) : {u : Srt} → Tm C Γ u → Option Value
   | _, .app3 .save s p v => if eq p then v.svLit? else if div p then s.findLitBy eq div else none
   | _, _ => none
 
-/-- The word `s` reads at `q`, read off its writes (`STerm.findLit?`). -/
+/-- The word `s` reads at `q`, read off its writes. -/
 def Tm.findLit? (s : Tm C Γ .st) (q : Tm C Γ .path) : Option Value :=
   if q.hasSeg then s.findLitBy (·.sameSegs q) (·.diverges q) else none
 
-/-- The node at `p` in `s` is not a mapping, in every state
-(`STerm.KindFreeAt`). -/
+/-- The node at `p` in `s` is not a mapping, in every state. -/
 def Tm.KindFreeAt (s : Tm C Γ .st) (p : Tm C Γ .path) : Prop :=
   ∀ σ : EState C Γ, (findSt (s.denote σ) (p.denote σ)).kindFree = true
 
@@ -964,7 +960,7 @@ theorem Tm.find_fill_theq {s s' : Tm C Γ .st} (h : ∀ σ : EState C Γ, s.deno
   simp only [Tm.denote, Op2.denote, SCtxS.fill_denote h K σ]
   exact Equiv.refl _
 
-/-- The word read off the writes is the word read (`Surface.Tm.findLitBy_theq`). -/
+/-- The word read off the writes is the word read. -/
 theorem Tm.findLitBy_theq {q : Tm C Γ .path} (hq : q.hasSeg = true) :
     (s : Tm C Γ .st) → {w : Value} → s.findLitBy (·.sameSegs q) (·.diverges q) = some w →
       Tm.Theq tm{ find(s, q) } tm{ lit(w) }

@@ -11,10 +11,10 @@ read from its `Expr`, schema variables and all: `ppStmtS`, `ppProgS`,
 Terms and updates are printed by `Calculus/PrintTerm.lean`'s printers of
 the scoped terms (`ppTermS`, `ppUpdS`), at the same name stack.
 
-**Twin check.**  While the closer's IR exists, the option
-`pp.sol.twinCheck` also prints each term and update through its erasure
-(`Delab.tr`, `ppTerm`, `ppUpd`) and fails where the two differ
-(`twinCompare`); W9.5 deletes it with the erasure.
+**Twin check.**  The option `pp.sol.twinCheck` (off by default) also prints
+each term and update through its erasure (`Delab.tr`, `ppTerm`, `ppUpd`) and
+fails where the two differ (`twinCompare`).  It reads the reader's shim
+(`Calculus/DelabErase.lean`) and goes with it.
 
 **The name-stack walker** (the API a reader of the scoped syntax uses, the
 SolKey reader's port among them): the names of the context a part is read

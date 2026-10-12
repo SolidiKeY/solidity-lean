@@ -6,8 +6,8 @@ import Solidity.Theory.Bridge.Denote
 # What both closers know of the interpreter
 
 The lemmas `sol_close` reads the interpreter with, shared by its two sets:
-`close_rw` (`Calculus/Close.lean`, the closer's untyped formulas) and
-`close_rw_s` (`Calculus/CloseScoped.lean`, a scoped leaf).  Each is about
+`close_rw` (`Calculus/Close.lean`, the interpreter's states and values) and
+`close_rw_s` (`Calculus/CloseScoped.lean`, a scoped leaf's terms).  Each is about
 `Semantics.State` and its operations, never about a formula or a term
 language: weakest preconditions (`Modality.wp`, a write named with what is
 known of its result), values read back, the operators, and the symbols

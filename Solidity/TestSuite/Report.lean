@@ -27,7 +27,7 @@ and no `sorry`.  solkey `1b4341a303`'s twenty new functions (`send`,
 internal calls, `return`, tuples) are derived in `Derived14.lean`.
 `testArrayCopyClearsOldElements` writes through an alias bound through an
 index after a `pop` made it dangle (`SymB.stale`) and reads the slot again after a copy: its leaf's
-reduction is past `Derive.elimSize`, and the `push()` takes its slot from a
+reduction is past `Decide.elimSize`, and the `push()` takes its slot from a
 storage with writes at another root below it, which the slot facts do not
 read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
 `storagePushReadBack` is not valid in the model (the length delta,

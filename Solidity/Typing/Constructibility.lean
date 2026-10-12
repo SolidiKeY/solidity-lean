@@ -1569,7 +1569,7 @@ theorem okDeep_tyAtSegs : ∀ {segs : List Seg} {T T' : Ty}, T.okDeep = true →
   | seg :: rest, T, T', h, hs => by
     simp only [tyAtSegs] at hs
     split at hs
-    · rename_i Surface.Tm hm; exact okDeep_tyAtSegs (okDeep_segTy h hm) hs
+    · rename_i Tseg hm; exact okDeep_tyAtSegs (okDeep_segTy h hm) hs
     · exact nomatch hs
 
 /-- Every mapping on the way is indexed by a number: an alias bound along
@@ -1593,7 +1593,7 @@ theorem KeysOK_append : ∀ {segs : List Seg} {T T₁ : Ty} (seg : Seg),
     obtain ⟨hk₁, hk₂⟩ := hk₀
     refine ⟨hk₁, ?_⟩
     split at hs
-    · rename_i Surface.Tm hm
+    · rename_i Tseg hm
       simp only [hm] at hk₂ ⊢
       exact KeysOK_append seg hk₂ hs hk
     · exact nomatch hs
@@ -1711,7 +1711,7 @@ theorem find_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w :
     simp only [tyAtSegs] at hs
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Surface.Tm =>
+    | some Tseg =>
       rw [hseg] at hs
       have hokm := okDeep_segTy hok hseg
       cases seg with
@@ -1808,7 +1808,7 @@ theorem save_tight : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
     obtain ⟨hk₁, hk₂⟩ := hk
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Surface.Tm =>
+    | some Tseg =>
       rw [hseg] at hs
       simp only [hseg] at hk₂
       have hokm := okDeep_segTy hok hseg

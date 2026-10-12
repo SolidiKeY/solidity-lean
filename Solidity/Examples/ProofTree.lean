@@ -659,7 +659,7 @@ def writes6 : Fml StandardExample [] :=
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
     Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [false]
 
-/-! The reduction is bounded apart (`Derive.elimSize`): a read below a
+/-! The reduction is bounded apart (`Decide.elimSize`): a read below a
 `delete` carries the read before it twice, so ten deletes make a leaf of
 330 nodes, within `closeSize`, whose reduction has 79587. -/
 

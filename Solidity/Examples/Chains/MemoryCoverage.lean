@@ -26,7 +26,7 @@ update on the first line, and a member the statement reads a value there,
 `{ memory := write(memory, carol.age, 42) }`, so a value read ends at a literal.  A memory reference (`tok`,
 `acc`, `carolToken`) has no literal and stays free.
 
-The literal laws and `findOnSave` rewrite inside a memory term too (`Upd.rwEv`), so a sum written to memory
+The literal laws and `findOnSave` rewrite inside a memory term too (`Upd.rwG`), so a sum written to memory
 folds (`write(…, carol.age, 47)`), an index `2 + 1` in a memory address folds to `3` (and the read at it
 resolves), and a storage read written to memory resolves.  What has no literal: a memory reference (a struct
 or reference write, an alias, an allocation, a delete).

@@ -209,8 +209,8 @@ def Upd.totalBM {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .pop U _ | _, .drop U _ => Upd.totalBM U
 
 /-- An update that cannot halt: it sets and declares locals to what cannot
-halt, and pops, by the recursor.  It admits what the erased `Upd.total`
-does, and locals, `unset` and the ledger's saves besides. -/
+halt, and pops, by the recursor: locals, `unset` and the ledger's saves
+among them. -/
 @[implemented_by Upd.totalBM]
 def Upd.totalB {Γ Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
   Upd.rec (motive := fun _ _ => Bool) true (fun _ e ih => e.totalB && ih)

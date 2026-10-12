@@ -66,8 +66,9 @@ local normal form rewriting the other (KeY's `applyEq`).
   `Facts.split`).
 
 `LFml.fits` counts a term as a tree and stops at its bound; it bounds
-the work only where it counts what the closer walks.  `Derive.synClose`
-counts both the leaf and its reduction (`Derive.fitsClose`): the
+the work only where it counts what the closer walks.  `Seq.leafFitsOn`
+counts both the leaf and its reduction (`Decide.closeSize`,
+`Decide.elimSize`): the
 reduction grows faster than the leaf (two to three times per write that
 reads the storage before it, and per `delete` with nothing to show in the
 leaf), and the closer's normal forms walk it as a tree.  A bound raised,

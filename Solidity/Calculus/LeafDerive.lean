@@ -28,7 +28,7 @@ A leaf the fragment does not read as it is is read prepared (`Fml.prepS`,
 each step only implies the leaf, `holds_of_prepS`): a push's returned
 alias, `{storage := extend(storage, a) ‖ x := next(a)}` (`T storage x =
 a.push();`), is the push and then the alias to the last slot, the length
-read after the push (`Upd.pushSplit`, the scoped `Derive.pushAlias?`).
+read after the push (`Upd.pushSplit`).
 
 A split's branch whose condition is ground under the context
 (`Hyps.groundS`) is asked of the closer first: `if (v < 0)` after
@@ -240,7 +240,7 @@ old end, which the push makes live, so the fragment does not read the two
 in one state (`ElemS.parOk`).  `Upd.pushSplit` reads it as the push, then
 the alias to the last slot, the length read after the push (`lastSlotS`):
 the two agree where the path to the array reads the storage only to check
-its indices (`Tm.stablePathS`).  The scoped `Derive.pushAlias?`. -/
+its indices (`Tm.stablePathS`). -/
 
 section PushAlias
 
@@ -264,8 +264,7 @@ def _root_.Solidity.Tm.stablePathSM : {s : Srt} → Tm C Γ s → Bool
   | _, _ => false
 
 /-- **A path that reads the storage only to check its indices**: roots,
-aliases, members, and indices by locals or literals (`Tm.stablePath` by
-position).  A write below it leaves it naming the same location.  By the
+aliases, members, and indices by locals or literals.  A write below it leaves it naming the same location.  By the
 recursor. -/
 @[implemented_by Tm.stablePathSM]
 def _root_.Solidity.Tm.stablePathS {s : Srt} (t : Tm C Γ s) : Bool :=
@@ -291,7 +290,7 @@ theorem _root_.Solidity.Tm.stablePathS_eq_stablePathSM {s : Srt} (t : Tm C Γ s)
   | app2 o x y ihx ihy => cases o <;> first | rfl | (simp only [Tm.stablePathSM, ← ihx]; rfl)
 
 /-- Where `p = a.push();` leaves its alias: the last slot, once the push
-is made (`a[a.length - 1]`, the length unchecked), as `Derive.lastSlot`. -/
+is made (`a[a.length - 1]`, the length unchecked). -/
 def lastSlotS (P : Tm C Γ .path) : Tm C Γ .path :=
   .app2 .at P (.app2 (.binop .sub .bool) (.app2 .len (.app0 .storage) P) (.app0 (.lit (.int 1))))
 
@@ -337,7 +336,7 @@ theorem withGlob_saveStorage {σ : Semantics.State} {τ : Semantics.State} {r : 
   · cases h
 
 /-- **A path below which the storage was written names the same
-location** (`Derive.stable_eval` by position): its checks are of locations
+location**: its checks are of locations
 above the write. -/
 theorem stable_evalS {σ : EState C Γ} {τ : Semantics.State} {r : Name} {P : List Seg} {X : Semantics.SVal}
     (hsv : σ.glob.saveStorage r P X = .ok τ) :
@@ -385,8 +384,7 @@ theorem stable_evalS {σ : EState C Γ} {τ : Semantics.State} {r : Name} {P : L
   | .app1 .next _ _, h, _, _, _, _ | .app2 .nextIn _ _, h, _, _, _, _
   | .app3 .atIn _ _ _, h, _, _, _, _ => by simp only [Tm.stablePathSM, Bool.false_eq_true] at h
 
-/-- **The last slot after the push is the slot past the end before it**
-(`Derive.lastSlot_eval` by position). -/
+/-- **The last slot after the push is the slot past the end before it.** -/
 theorem lastSlotS_eval {σ : EState C Γ} {P : Tm C Γ .path} (hP : P.stablePathSM = true) {E : Ty}
     {τ : Semantics.State}
     (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ = .ok τ) :

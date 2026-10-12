@@ -33,9 +33,6 @@ type has a value, an unset memory local among them (decision 17').
 `Premise C Γ Γ'` is what a rule on a statement `Stmt C Γ Γ'` leaves, and
 `Premise.fml` puts it in front of the rest `ω` and the frames `κ`.  A split
 has two goals, KeY's: a condition cannot be stuck, so there is no third.
-
-`Fml.erase` is the bridge to `Update.lean`'s formulas until the closer is
-ported (Decision 6): positions become the names of their binders.
 -/
 
 namespace Solidity
@@ -277,7 +274,7 @@ def Fml.conj {Γ : Ctx} : List (Fml C Γ) → Fml C Γ
   | φ :: ψs => .and φ (Fml.conj ψs)
 
 /-- `∀ xs. φ`: `φ` for every value of the locals the binders declare, the
-first bound outermost (`Update.lean`'s `Fml.alls`). -/
+first bound outermost. -/
 def Binders.all {Γ : Ctx} : {ρ : Ctx} → Binders ρ → Fml C (ρ ++ Γ) → Fml C Γ
   | _, bs, φ => Binders.casesOn (motive := fun ρ _ => Fml C (ρ ++ Γ) → Fml C Γ) bs (fun φ => φ)
       (fun bs p x φ => Binders.all bs (.all x p φ)) φ

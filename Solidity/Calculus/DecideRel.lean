@@ -172,7 +172,8 @@ def _root_.Solidity.Tm.lsize : {s : Srt} → Tm C Γ s → Nat
 macro "lsizeS_tac" : tactic => `(tactic| (simp only [Tm.lsize] at *; omega))
 
 /-! The readings of the scoped symbols the proofs below unfold, on the
-state's global part (`NFmlClose`'s `Close.Term.eval_find`, …). -/
+state's global part (`Calculus/CloseLemmas.lean`'s `Close.Op2.eval_find`,
+…). -/
 
 theorem evalS_len (τ : EState C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
     (Tm.app2 .len s p).eval τ = s.eval τ >>= fun τ' => p.eval τ >>= fun rs =>
@@ -1222,7 +1223,7 @@ theorem RelU.stor_eval (h : RelU σ ρ τ) :
     exact write_bridge hb _
 
 /-- A stale alias's slot-level path reads as the path the alias holds, and
-so do its members (`PTerm.slotPath?_eval`). -/
+so do its members. -/
 theorem RelU.slotPath_eval (h : RelU σ ρ τ) : (p : Tm C Γ .path) → (q : LPath) →
     p.slotPathS ρ = some q → ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧ p.eval τ = .ok (r, segs)
   | .pvP i, q, hq => by
@@ -1316,7 +1317,7 @@ theorem RelU.stale_push (h : RelU σ ρ τ) {p : Tm C Γ .path} {q : LPath}
 
 /-- **A storage update, pushed in by `toLSt`, is the write it made**:
 through a stale alias at the slot level, otherwise as `RelU.stor_eval`
-says (`STerm.toLS_eval`). -/
+says. -/
 theorem RelU.storT (h : RelU σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ = true) :
     Sim ((s.toLSt ρ).eval σ) (s.eval τ >>= fun τ' => .ok (.struct τ'.storage)) := by
   unfold Tm.toLSt
@@ -2150,7 +2151,7 @@ theorem copyOfS?_some {mm : Tm C Γ .mem} {p : Tm C Γ .path} (h : copyOfS? mm =
   · cases h
 
 /-- A stored value pushed in as `new R(n)` reads to `R`'s array of the
-length `n` returns (`SValT.arr_eval`). -/
+length `n` returns. -/
 theorem RelU.arr_eval (h : RelU σ ρ₀ τ₀) : (v : Tm C Γ .sv) →
     v.inLSM ρ₀ = true → ∀ {R : RefTy} {n : LTerm}, v.toLSM ρ₀ = .arr R n → ∀ sv,
       v.eval τ₀ = .ok sv ↔ ∃ c, n.eval σ = .ok (.int c) ∧ sv = newArrVal R c

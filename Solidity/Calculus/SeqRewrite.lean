@@ -557,11 +557,6 @@ theorem Tm.pickClosed_le (hq : Tm.EvalRefines q.1 q.2) (σ : EState C Γ) :
   rw [Tm.eval_closedAs hc σ, Tm.eval_ofNil σ]
   exact hq σ.nil
 
-/-- **Rewriting keeps every value a term returns.** -/
-theorem Tm.rwC_eval (hq : Tm.EvalRefines q.1 q.2) (σ : EState C Γ) {s : Srt} (t : Tm C Γ s) :
-    Srt.Le s (t.eval σ) ((t.rwC q).eval σ) :=
-  Tm.rwBy_eval σ (Tm.pickClosed_le hq σ) t
-
 /-- **Where an update returns, its rewrite returns the same state.** -/
 theorem Upd.rwC_apply (hq : Tm.EvalRefines q.1 q.2) (σ₀ : EState C Γ) {Δ : Ctx}
     (U : Upd C Γ Δ) : Res.Le (U.apply σ₀) ((U.rwC q).apply σ₀) :=

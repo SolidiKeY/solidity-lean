@@ -35,18 +35,18 @@ by computation, that of symbolic keys (`balances[k]`, `balances[j]`) by a
 hypothesis `k != j` of the formula or a branch.  Every step is a lemma or a
 hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
-**A scoped leaf** (`open scoped Solidity.Scoped`) is read by
-`Calculus/CloseScoped.lean`'s steps, which each step below steps aside for
-(`Close.scopedGoal`): the scoped formula with `close_rw_s`, its parameters
-at their types.  This module's set `close_rw` holds what the interpreter's
-states and values are made of, which `sol_decide`'s unfolding
-(`Calculus/Decide.lean`) reads too.  What either set knows of the
-interpreter is `Calculus/CloseLemmas.lean`'s.
+**Every leaf is scoped** and read by `Calculus/CloseScoped.lean`'s steps,
+which each step below steps aside for (`Close.scopedGoal`): the scoped
+formula with `close_rw_s`, its parameters at their types.  This module
+declares the syntax and the simp sets; its set `close_rw` holds what the
+interpreter's states and values are made of, which `close_rw_s` and
+`sol_decide`'s unfolding (`Calculus/Decide.lean`) read too.  What either
+set knows of the interpreter is `Calculus/CloseLemmas.lean`'s.
 
 What does not close, and why (on either side):
 
-* a write under the diamond: the closer reads the write's update on the
-  erasure's untyped term model, where `find`/`save` at `alice` is not known
+* a write under the diamond: the closer reads the leaf's storage untyped
+  (`EState.glob`), where `find`/`save` at `alice` is not known
   to be defined, so `⟨ alice.age = 1; ⟩ true` stays open at
   `{ storage := save(storage, alice.age, 1) } true`.  Write the box, or put
   the well-formedness of the storage in the premise;
@@ -274,7 +274,7 @@ elab "sol_close_mt_eval" : tactic => do
       Close.storage_setEnv, Except.ok.injEq, exists_eq_left']))
 
 /-- `sol_close` from a deployment's storage, `{storage := mtSt ‖ …}` in
-front (`STerm.eval_mtSt`): the storage is then a list of the roots at their
+front (`CloseS.eval_mtSt`): the storage is then a list of the roots at their
 defaults, and the storage evaluators are unfolded over it — solkey's
 `selectOnEmptyStorage` and `saveOnEmptyStorage` (`structRules.key`), read off
 that list, which is what lets a write under the diamond return.  Not in

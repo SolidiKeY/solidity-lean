@@ -38,8 +38,8 @@ Each part on a scoped leaf `Valid ψ` reduces the leaf by position
 (`sol_reduce`) and takes the step it names on it: the constraints with the
 parameters typed (`sol_decide_cons`, `sol_decide_typed`'s step; `sol_reads`
 its first part), or the finish without them, the parameters free
-(`sol_decide_heuristic`, `sol_decide_unconstrained`).  On today's goal
-each steps aside for today's macro. -/
+(`sol_decide_heuristic`, `sol_decide_unconstrained`).  On a goal that is
+not a scoped leaf each steps aside. -/
 
 open Meta in
 /-- A part of `sol_decide` on a scoped goal: the leaf reduced by position,

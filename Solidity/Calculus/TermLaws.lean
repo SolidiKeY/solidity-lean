@@ -222,8 +222,7 @@ theorem Upd.memory_eval_of_apply {Δ : Ctx} {U : Upd C Γ Δ} {σ : EState C Γ}
 storage operation whose storage argument has `s` on its spine.  So `t` halts
 wherever `s` does (`Tm.onSpine_error`); the memory twin is `Tm.onMemSpine`. -/
 
-/-- `f` of each storage term on `t`'s spine (`Surface.Tm.spineAny`).
-Generic in the sort. -/
+/-- `f` of each storage term on `t`'s spine.  Generic in the sort. -/
 def Tm.spineAny (f : Tm C Γ .st → Bool) : {u : Srt} → Tm C Γ u → Bool
   | _, .app1 (.select r) h a => f (.app1 (.select r) h a) || a.spineAny f
   | _, .app2 .delAt a p => f (.app2 .delAt a p) || a.spineAny f
@@ -273,8 +272,7 @@ theorem Tm.onSpine_error {s : Tm C Γ .st} {σ : EState C Γ} {e : Halt} (hs : s
     simp only [Tm.onSpine, Tm.spineAny] at ht
     rw [Tm.eq_of_beqR ht]; exact ⟨e, hs⟩
 
-/-- `f` of each memory term on `t`'s memory spine (`Surface.Tm.memSpineAny`).
-Generic in the sort. -/
+/-- `f` of each memory term on `t`'s memory spine.  Generic in the sort. -/
 def Tm.memSpineAny (f : Tm C Γ .mem → Bool) : {u : Srt} → Tm C Γ u → Bool
   | _, .app1 (.addM R) h a => f (.app1 (.addM R) h a) || a.memSpineAny f
   | _, .app2 .copySt a v => f (.app2 .copySt a v) || a.memSpineAny f
@@ -387,7 +385,7 @@ section Paths
 variable {σ : EState C Γ}
 
 /-- Two paths whose shapes diverge, where both resolve, have different roots
-or divergent tails (`PTerm.diverges_eval_any`). -/
+or divergent tails. -/
 theorem Tm.diverges_eval {p q : Tm C Γ .path} {r r' : Name} {segs segs' : List Seg}
     (hd : p.diverges q = true) (hp : p.eval σ = .ok (r, segs)) (hq : q.eval σ = .ok (r', segs')) :
     r' ≠ r ∨ Close.Diverge segs segs' := by
@@ -398,7 +396,7 @@ theorem Tm.diverges_eval {p q : Tm C Γ .path} {r r' : Name} {segs segs' : List 
   · exact Or.inr h
 
 /-- Paths of the same segments, their checks aside, resolve alike where both
-resolve (`PTerm.sameSegs_eval`). -/
+resolve. -/
 theorem Tm.sameSegs_eval {p q : Tm C Γ .path} {r r' : Name} {segs segs' : List Seg}
     (heq : p.sameSegs q = true) (hp : p.eval σ = .ok (r, segs)) (hq : q.eval σ = .ok (r', segs')) :
     r = r' ∧ segs = segs' := by
@@ -407,7 +405,7 @@ theorem Tm.sameSegs_eval {p q : Tm C Γ .path} {r r' : Name} {segs segs' : List 
   exact ⟨Seg.field.inj (List.cons.inj heq').1, (List.cons.inj heq').2⟩
 
 /-- `q` leaving `p.length`, where both resolve: the write at `q` is at another
-root or not above `p` (`PTerm.divergesLen_eval`). -/
+root or not above `p`. -/
 theorem Tm.divergesLen_eval {q p : Tm C Γ .path} {r r' : Name} {segs segs' : List Seg}
     (hd : q.divergesLen p = true) (hq : q.eval σ = .ok (r, segs)) (hp : p.eval σ = .ok (r', segs')) :
     r' ≠ r ∨ ¬ Close.Prefix segs segs' := by
@@ -419,14 +417,14 @@ theorem Tm.divergesLen_eval {q p : Tm C Γ .path} {r r' : Name} {segs segs' : Li
 
 end Paths
 
-/-- `f` of some path on the way down to `t`'s root through members only
-(`Surface.Tm.fieldsBelowAny`).  Generic in the sort. -/
+/-- `f` of some path on the way down to `t`'s root through members only.
+Generic in the sort. -/
 def Tm.fieldsBelowAny (f : Tm C Γ .path → Bool) : {u : Srt} → Tm C Γ u → Bool
   | _, .app1 (.field _) _ q => f q || q.fieldsBelowAny f
   | _, _ => false
 
 /-- `q` is `p` with one or more member selectors after it: a read below `p`
-that no index check can halt (`PTerm.fieldsBelow`). -/
+that no index check can halt. -/
 def Tm.fieldsBelow (q p : Tm C Γ .path) : Bool := q.fieldsBelowAny (·.beqR p)
 
 /-- `q.fieldsBelow p` in a run: `q` resolves wherever `p` does, to `p`'s
@@ -452,7 +450,7 @@ theorem Tm.fieldsBelow_eval {p : Tm C Γ .path} {σ : EState C Γ} {r : Name} {s
   | .app2 .nextIn _ _, h | .app3 .atIn _ _ _, h => nomatch h
 
 /-- `q` is `p`, or goes on below it through members: a read at or below `p`
-that no index check can halt (`PTerm.atOrBelow`). -/
+that no index check can halt. -/
 def Tm.atOrBelow (q p : Tm C Γ .path) : Bool := q.beqR p || q.fieldsBelow p
 
 theorem Tm.atOrBelow_eval {p : Tm C Γ .path} {σ : EState C Γ} {r : Name} {segs : List Seg}
@@ -503,8 +501,7 @@ theorem Tm.findLit?_eval {s : Tm C Γ .st} {q : Tm C Γ .path} {w : Value} (h : 
 
 /-- A word at or below a deleted node, in a run: the storage before the
 delete reads the word there (`Tm.findLit?_eval`), so the reset node, which
-keeps its members (`SVal.find_defaultOf_prim`), reads a word there
-(`Upd.delAtBelow_eval`). -/
+keeps its members (`SVal.find_defaultOf_prim`), reads a word there. -/
 theorem Tm.delAtBelow_eval {s : Tm C Γ .st} {p q : Tm C Γ .path} {w : Value}
     (hb : q.atOrBelow p = true) (hw : s.findLit? q = some w) {σ : EState C Γ} {τ'' : Semantics.State}
     (hd : (Tm.app2 .delAt s p).eval σ = .ok τ'') :
@@ -651,8 +648,7 @@ theorem Tm.foldr_prefixRoot_eval {σ : EState C Γ} (p : Tm C Γ .path) (hf : p.
 
 /-- A storage term read member-wise, as the term it reads and the frame it
 reads it in: `save(select(s, r), p, v)` reads `save(s, r.p, v)` in the frame
-`[r]`; `s` alone reads itself at the top (`STerm.base?`).  Generic in the
-sort. -/
+`[r]`; `s` alone reads itself at the top.  Generic in the sort. -/
 def Tm.baseAny : {u : Srt} → Tm C Γ u → Option (Tm C Γ u × List Name)
   | _, .app1 (.select r) _ s => s.baseAny.map fun bF => (bF.1, bF.2 ++ [r])
   | _, .app3 .save s p v =>
@@ -662,7 +658,7 @@ def Tm.baseAny : {u : Srt} → Tm C Γ u → Option (Tm C Γ u × List Name)
   | _, s => some (s, [])
 
 /-- A read, member-wise, as the read it is: `find(select(s, r), p)` is
-`find(s, r.p)` (`Term.base?`). -/
+`find(s, r.p)`. -/
 def Tm.base? : Tm C Γ .val → Option (Tm C Γ .val)
   | .app2 .find s q => s.baseAny.bind fun bF => (Tm.under? bF.2 q).map fun q' => .app2 .find bF.1 q'
   | _ => none
@@ -712,7 +708,7 @@ theorem Tm.under?_eval {σ : EState C Γ} {r₁ : Name} {F' : List Name} {p p' :
   · nomatch h
 
 /-- **A storage term read member-wise runs as the term it reads, in its
-frame** (`STerm.base_eval`). -/
+frame**. -/
 theorem Tm.baseAny_eval : (s : Tm C Γ .st) → {b : Tm C Γ .st} → {F : List Name} →
     s.baseAny = some (b, F) → ∀ σ : EState C Γ, Res.OkEq (s.eval σ) (b.eval σ >>= State.frameOf F)
   | .app1 (.select r) hr s, b, F, h, σ => by
@@ -778,7 +774,7 @@ theorem Tm.baseAny_eval : (s : Tm C Γ .st) → {b : Tm C Γ .st} → {F : List 
     exact Res.OkEq.refl _
 
 /-- **A read, member-wise, returns where the read it is returns**, the same
-value (`Term.base_eval`). -/
+value. -/
 theorem Tm.base_eval : (t : Tm C Γ .val) → {t' : Tm C Γ .val} → t.base? = some t' →
     ∀ σ : EState C Γ, Res.OkEq (t.eval σ) (t'.eval σ)
   | .app2 .find s q, t', h, σ => by
@@ -2028,8 +2024,6 @@ def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') : LawCov C Γ u 
   fwd := r.sound
   back _ _ _ hc hU := r.back hc hU
 
-/-! ## Pins: the checks decide by `rfl` -/
-
 /-! ## A premise about closed terms, at any scope -/
 
 /-- `KindFreeAt` of closed terms holds at any scope they are read in: a
@@ -2040,6 +2034,8 @@ theorem Tm.KindFreeAt.ofNil {s : Tm C Γ .st} {p : Tm C Γ .path} {s₀ : Tm C [
     (hp : p.toNil? = some p₀) : Tm.KindFreeAt s p := fun σ => by
   rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
   exact h σ.nil
+
+/-! ## Pins: the checks decide by `rfl` -/
 
 section Pins
 

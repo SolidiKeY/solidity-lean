@@ -181,7 +181,6 @@ section
 open Semantics
 variable {C : Contract}
 section SubstDenote
-variable {U : Surface.Upd C} {ns : List Var} {σ τ : State}
 open Theory Theory.StValue
 
 theorem Srt.DEquiv.of_eq {s : Srt} {d d' e : s.Den} (h : d = d') (he : Srt.DEquiv s d' e) :

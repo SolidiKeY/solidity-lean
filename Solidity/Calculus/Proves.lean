@@ -57,7 +57,7 @@ or `try` under the diamond, no loop), so a derivation of `⊢ₖ` fires
 `Calculus/SolkeyFragment.lean`; decision 36).  `Stmt.stepIn` is the
 step with `R`'s rules, the walk's (`Calculus/ProvesDerive.lean`).
 The fresh index `k` is one above every index in the sequent
-(`Hyps.fresh`), as `Hyp.fresh` numbers it.  `Hyps.wrap` is written with
+(`Hyps.fresh`).  `Hyps.wrap` is written with
 `casesOn` (Gate G0, condition 1): the kernel evaluates it when it checks
 that index.
 
@@ -239,8 +239,8 @@ def Hyps.rwEqCM (q : Tm C [] .val × Tm C [] .val) {Γ₀ : Ctx} :
   | _, .anon H xs => .anon (Hyps.rwEqCM q H) xs
 
 /-- A Theory rewrite of the context (`Fml.rwEqC`): in every precondition;
-an update, a `havoc`, a quantifier or a binder stays as it is, as today's
-`Hyp.rwEq` leaves them.  By the recursor, as `Fml.rwEqC`
+an update, a `havoc`, a quantifier or a binder stays as it is.  By the
+recursor, as `Fml.rwEqC`
 (`Calculus/SeqRewrite.lean`). -/
 @[implemented_by Hyps.rwEqCM]
 def Hyps.rwEqC (q : Tm C [] .val × Tm C [] .val) {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) :

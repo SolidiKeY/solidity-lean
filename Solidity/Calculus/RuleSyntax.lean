@@ -152,8 +152,7 @@ syntax dl_term " := " dl_term:56 " == " dl_term:56 : dl_upd_elem
 syntax dl_term " := " dl_term:56 " != " dl_term:56 : dl_upd_elem
 /-- `u`: an update schema variable, its elements in place (KeY's `{u}`). -/
 syntax ident : dl_upd_elem
-/-- `{u}u2`: the update `u2` with `u` applied to its right-hand sides
-(`Upd.subst`), KeY's `{u}u2` in `{u ‖ {u}u2}`. -/
+/-- `{u}u2`: the update `u2` with `u` applied to its right-hand sides, KeY's `{u}u2` in `{u ‖ {u}u2}`. -/
 syntax "{" ident "}" ident : dl_upd_elem
 
 /-- A parallel update `{ a ‖ b }`. -/
@@ -288,7 +287,7 @@ syntax (priority := high) "{ " &"havoc" " }" : dl_hyp
 /-- `{ anon(i, s) }`: a loop's anonymising update of the locals `i`, `s`. -/
 syntax (priority := high) "{ " &"anon" "(" sepBy(ident, ", ") ")" " }" : dl_hyp
 syntax dl_fml : dl_hyp
-/-- `∀ T x`: the local `x` holds any value of `T` (`Hyp.all`), KeY's skolem
+/-- `∀ T x`: the local `x` holds any value of `T` (`Hyps.all`), KeY's skolem
 constant. -/
 syntax "∀ " ident ident : dl_hyp
 /-- `..Γ`: the rest of the context, a Lean term, written first: `..Γ, c` is

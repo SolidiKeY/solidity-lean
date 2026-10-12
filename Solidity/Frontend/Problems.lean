@@ -46,7 +46,7 @@ is elaborated at the width (`paramCtx`).
   compiled code and lists what it leaves, with times: a search, to choose the
   theorems to state.  It is not used in a checked file.  `#solkey_scan N
   walk` lists the leaves without closing them; the closer skips a leaf
-  past its bounds (`Derive.fitsClose`: the leaf's nodes and its
+  past its bounds (`Seq.leafFitsOn`: the leaf's nodes and its
   reduction's, which grows faster).
 * `#solkey_derive? N` searches `⊢ N.f.problem` (`scopedSearch`) and prints
   the theorems that close.

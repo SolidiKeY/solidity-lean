@@ -54,7 +54,7 @@ def Modality.onHalt : Modality → Prop
   | .box => True
 
 /-- `p` after a run under `m`: `p` of the state it ends in, or `m.onHalt`.
-An update reads so: a term never panics (`Upd.apply_ne_panic`). -/
+An update reads so: a term never panics (`Upd.apply_noPanic`). -/
 def Modality.after (m : Modality) (p : State → Prop) : Res State → Prop
   | .ok τ => p τ
   | .error _ => m.onHalt
@@ -546,6 +546,10 @@ returns.  An equation is read through `denote` (`holds`).
   of the laws, not a halt.  `PTerm.next` reads the length in `σ`, as
   `Tm.eval` does; `PTerm.nextIn` reads it in its storage term, and
   `PTerm.atIn` is `PTerm.at` (the check is `eval`'s alone).
+
+`Surface.Tm.denote` is kept as the external reader's shim (no prover code
+uses it); the scoped `Tm.denote` (`Calculus/Logic.lean`) reads through the
+same `Op0.denote` … `Op3.denote`.
 -/
 
 section Denote
@@ -897,7 +901,8 @@ def PrimTy.admits : PrimTy → Value → Prop
 What a formula does not mention, it does not see: two states that agree off
 `ns` satisfy a formula that avoids `ns` alike.  This is what lets a rule
 declare a fresh `se1` in front of the rest of the program and the
-postcondition. -/
+postcondition.  The lemmas over `Surface.*` here are kept as the external
+reader's shim (no prover code uses them). -/
 
 /-- The variables a term reads. -/
 def Surface.Tm.vars : Surface.Tm C s → List Var
@@ -1264,7 +1269,10 @@ theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res S
 
 end Frame
 
-/-! ## Keys as words -/
+/-! ## Keys as words
+
+`Term.keyAt` is kept as the external reader's shim (no prover code uses
+it). -/
 
 /-- An index of key type `k` as the word it is hashed as: a `bool` key `b`
 is `b ? 1 : 0`, as solc pads it (`Value.keyAt`; the solc frontend writes it so,

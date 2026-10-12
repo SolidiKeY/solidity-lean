@@ -70,9 +70,8 @@ theorem holds_isBoolD (t : Tm C Γ .val) (σ : State C Γ) (b : Bool) :
     rw [Tm.denote_eval σ.erase t _ h]
     exact Theory.StValue.Equiv.refl _
 
-/-- **`eqD` is the interpreter's equation** over the typed state
-(`holds_eqD_iff`, scoped): both sides return, with one value, on the
-erasure. -/
+/-- **`eqD` is the interpreter's equation** over the typed state: both
+sides return, with one value, on the erasure. -/
 theorem holds_eqD_iffS {σ : State C Γ} {a b : Tm C Γ .val} :
     holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ.erase = .ok x ∧ b.eval σ.erase = .ok x := by
   constructor

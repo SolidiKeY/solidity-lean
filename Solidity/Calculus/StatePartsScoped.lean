@@ -562,8 +562,7 @@ theorem holds_upd_mergeMem {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ �
 
 /-! ## `{L ‖ memory := M}` substituted
 
-`ChainRewrites`' locals-then-memory merge (`Surface.Upd.mergeMem`): `U`
-an update of locals with a memory write last, `{L ‖ memory := M}{V}` is
+The locals-then-memory merge (`Upd.mergeMemL?`): `U` an update of locals with a memory write last, `{L ‖ memory := M}{V}` is
 `{L ‖ memory := M ‖ V[L, M/memory]}`, the locals `L` leaves and `memory`
 substituted in one pass (`Tm.substMemS`), read where a write looks. -/
 

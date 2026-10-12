@@ -289,7 +289,7 @@ theorem find_canon : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {w :
     simp only [tyAtSegs] at hs
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Surface.Tm =>
+    | some Tseg =>
       rw [hseg] at hs
       cases seg with
       | field n =>
@@ -357,7 +357,7 @@ theorem save_canon : ∀ {segs : List Seg} {v : Semantics.SVal} {T T' : Ty} {new
     simp only [tyAtSegs] at hs
     cases hseg : segTy T seg with
     | none => rw [hseg] at hs; exact nomatch hs
-    | some Surface.Tm =>
+    | some Tseg =>
       rw [hseg] at hs
       cases seg with
       | field n =>

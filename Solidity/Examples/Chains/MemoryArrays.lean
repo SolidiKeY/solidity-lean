@@ -382,7 +382,7 @@ element written.  The receiver is not re-aliased, as the printed first line does
 merge `seed` is read in the starting storage (`findOnSave`, in the write too) and the index folds.  The
 starting storage is an update of its
 own: `sequentialToParallel` merges an update that writes memory only where its other elements bind
-locals (`Upd.merge`). -/
+locals (`Upd.mergeMemL?`). -/
 theorem incrementIndex (φ : Post Calls [.mem (.fixed (.prim .uint) 3), .val .uint]) :
     dl![m]{
       { storage := save(storage, seed, 7) }

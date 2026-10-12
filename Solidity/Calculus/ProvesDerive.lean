@@ -36,8 +36,7 @@ condition 1); `n` bounds the steps down a path, `b` the steps of the whole
 walk, handed from a goal to the next.
 
 A leaf behind updates of either modality is read: an update's reading asks
-only of the typed states it may end in, as the `Valid` route's `Fml.posB`
-takes it too.
+only of the typed states it may end in.
 
 A split whose condition is ground under the context (`Hyps.groundS`, by
 position) and whose branch the closer refutes keeps only the other branch,

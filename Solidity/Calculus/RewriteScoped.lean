@@ -76,11 +76,6 @@ inductive Skel where
   | upd (s : Skel)
   deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
 
-/-- A connective. -/
-def Skel.isConn : Skel → Bool
-  | .and .. | .imp .. | .not .. => true
-  | _ => false
-
 /-- A connective somewhere, through the updates: a rewrite under a branch
 has somewhere to act. -/
 def Skel.hasConn : Skel → Bool
@@ -638,7 +633,7 @@ The merge of `Calculus/Merge.lean` at a position of the line below its
 spine, reached along a path the elaborator reads off the line: through a
 conjunction, the right of an implication, an update, a quantifier or a
 hidden binder, the positive positions, where a one-way rewrite gives the
-line (`ChainBranches`' `LineRw.mergeIn` on the erasure). -/
+line. -/
 
 /-- A step of a path into a line. -/
 inductive PathStep where

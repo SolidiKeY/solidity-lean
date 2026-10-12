@@ -274,8 +274,8 @@ A law in an update's right-hand side is the box's where the rewritten update
 may run where the read halts.  Where the update itself holds the write the
 law reads back — `{ storage := save(storage, alice.age, 42) ‖ x := find(save(storage, alice.age, 42), alice.age) }`,
 the merged line of every write-then-read — the two updates halt alike, and
-the law applies under `m` (`LineRw.lawUpdAny`, `Upd.covers`).  Two storage
-writes merge under `m` too, into one element (`Upd.mergeSt`): the merge
+the law applies under `m` (`FmlRw.lawUpdS`, `Upd.covers`).  Two storage
+writes merge under `m` too, into one element (`Upd.mergeSt?`): the merge
 compares the modalities, which `sol_chain` decides by `cases m`. -/
 
 section AnyModality
@@ -305,7 +305,7 @@ example (φ : Post StandardExample [.val .uint]) (hk : Tm.KindFreeAt st!{ save(s
 
 /-- The read of the write, member-wise, inside the update under `m`: solkey's
 `findMemberCons`, `selectOnSaveMember`, then `findOnSave` at the member.  Each
-intermediate form reads what the first does (`Term.base_eval`), so the steps
+intermediate form reads what the first does (`Tm.base_eval`), so the steps
 need no modality. -/
 example (φ : Post StandardExample [.val .uint]) : dl![m]{ { storage := save(storage, alice.age, 42) ‖
       x := find(save(storage, alice.age, 42), alice.age) } φ }
@@ -326,7 +326,7 @@ example : dl![m]{ { storage := save(storage, alice.age, 1) } { storage := save(s
 
 /-- A storage write among locals merged into the update after it, which
 writes the storage over it: the locals are substituted into the update after,
-the shadowed write goes (`Upd.mergeStL`), and an index check moves with the
+the shadowed write goes (`Upd.mergeSt?`), and an index check moves with the
 storage it is performed in, `balances[10]@S`. -/
 example (φ : Post StandardExample [.val .uint]) : dl![m]{ { se1 := 10 ‖ storage := save(storage, alice.age, 1) ‖ sp1 := alice.account }
       { storage := save(storage, balances[se1], 2) ‖ x := find(storage, balances[se1]) } φ }
@@ -359,9 +359,9 @@ primitive member of a fresh object is its default), `readAddDifferent` and
 their twins at the identity sort (`…Identity`, with `readOnWriteIdentity`).
 Each applies in an update under `m` where the update holds the write or
 allocation it reads back (`Upd.coversEval`), at the sort of the law
-(`Tm.rwEv`).  The merges feed them: a memory write merges into the update
-after it (`Upd.mergeMem`), and a storage write into one with memory terms
-(`withStM`).  A reference member of a fresh root,
+(`Tm.rwG`).  The merges feed them: a memory write merges into the update
+after it (`Upd.mergeMem?`, `Upd.mergeMemL?`), and a storage write into one
+with memory terms (`Upd.mergeSt?`).  A reference member of a fresh root,
 `read(addM(m, R), freshId(addM(m, R)).account)`, is the normal form. -/
 
 section MemoryReads
@@ -502,7 +502,7 @@ connectives (`applyOnRigid`: `FmlRw.applyOnRigid`,
 `Calculus/RewriteScoped.lean`, while the revert is still to run;
 `Calculus/RewritePast.lean` past the program), the literal
 connectives fold (`concrete`: `FmlRw.concrete`), and a merge finds the first spine
-under a branch (`sequentialToParallel`, `LineRw.mergeIn`).  Each rewrite
+under a branch (`sequentialToParallel`, `FmlRw.mergeIn`).  Each rewrite
 under a branch reads the skeleton of the line the elaborator wrote for it, so
 the postcondition `φ` is a part it never looks at, and the line is proved by
 `rfl` over it. -/

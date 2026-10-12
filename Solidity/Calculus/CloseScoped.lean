@@ -20,8 +20,7 @@ erased leaf.  `sol_close_unwrap` therefore first takes the leaf to
 `holds_of_holdsE`): an update's rest is read where the update ends, a
 hidden binder over the erased values of its type, a negation and a
 precondition only of a first-order formula (`fo`, where the two readings
-agree, `holds_iff_holdsE`).  This is one way, as the erased leaf was
-(`Fml.posB`), and as strong: the binders still range over the values of
+agree, `holds_iff_holdsE`).  This is one way, and as strong: the binders still range over the values of
 their types where the type is primitive (decision 82): a parameter
 (`∀ uint a`) and a hidden binder of a value type (`LTy.forallE`) range over
 `PrimTy.Denote`, a `uint` over `[0, 2²⁵⁶)` (`forall_uint`).
@@ -31,8 +30,8 @@ their types where the type is primitive (decision 82): a parameter
 erased state's operations (`EState.get`, `push`, `setLocal`, `withGlob`,
 `glob`, `drop`, `thin`, `anon`), never its fields, so that the state can
 change underneath (W9.6) without touching the tactic.  A term is read
-constructor by constructor, as `close_rw` reads the closer's term (each
-equation follows from the symbol's, `Calculus/CloseLemmas.lean`); the
+constructor by constructor (each equation follows from the symbol's,
+`Calculus/CloseLemmas.lean`); the
 locals sit in a stack of `push`es, which `setLocal`, `drop` and `thin`
 reach by position.  What the interpreter knows is `close_rw`'s, shared.
 -/

@@ -75,26 +75,26 @@ that every choice meeting them is a storage's (mini-solkey's
 included; the target language reads and writes the live storage
 (`SVal.findLive`, `SVal.saveLive`), where an index past the end halts.  The
 two agree where the path is checked against the storage it reads, which is
-what the fragment keeps to (`PTerm.toL_chk`, `live_bridge`).  Binding an
+what the fragment keeps to (`PathOKS`, `live_bridge`).  Binding an
 alias returns where its indices are in bounds (`guardPath`); an alias
 through an index is checked then and not when used, so a write to the
 storage leaves it stale (`SymB.onWrite`).  A stale alias keeps the
 slot-level path it was bound to, as KeY's `consr(sp, at(i))` does: a write
 or a push of a word through it is the slot-level node `LStor.stale`
-(`STerm.toLS`), and a read through it is outside the fragment.  The slot
+(`Tm.staleWriteS`), and a read through it is outside the fragment.  The slot
 readers (`LStor.slotU`, `slotHasU`, `slotLenU`) see such a write where a
 later `push()` recycles the slot it lands in.
 
 **The fragment** (`Fml.inLS`): no modality (run `sol_symex` first) but the
-`⟨[ revert(); ]⟩` a branch's cover keeps (`Premise.coverFml`: `true` under
-the box, `false` under the diamond), one
+`⟨[ revert(); ]⟩` a branch's cover keeps (`true` under the box, `false`
+under the diamond), one
 element per update, a local, an alias or the storage updated; an equation
 as `eqD a b`, both sides defined (a bare `a ≐ b` compares the Theory
 values, and a term that halts still denotes one: `eqDViewS`), or a bare
 `a ≐ b` of a literal (or `msg.sender`) and a literal or a local, where the
-two readings agree (`Term.eqLit`: the branch condition `se1 ≐ true` of an
+two readings agree (`Tm.eqLitS`: the branch condition `se1 ≐ true` of an
 `if`); literals, values of the transaction (`msg.sender`, which no update
-changes: `Rel.tx`), locals, operators, conditionals, reads of `storage` and an array's length
+changes), locals, operators, conditionals, reads of `storage` and an array's length
 (`values.length`, `LStor.lenU`); one write of a value, one `delete`, one
 `push` or `pop` (`LStor.arr`), or one copy of a subtree of `storage`
 (`alice = bob;`, `LStor.copy`) over `storage` per update; every alias bound by an update
@@ -104,8 +104,8 @@ variable bound to the storage (`old` of a specification, read as a snapshot:
 the fragment reads; a quantifier over a local the updates before it do not
 read (`LFml.all`, a specification's `\forall`).  Memory is in it as solkey
 writes it (`LMem`): `memory`, its allocations (an identity only in the pair
-that allocates it, `pairL`, or as the reference a `delete` writes,
-`freshRef`), a copy from storage in its pair (`pairMem`), and writes,
+that allocates it, `pairLS`, or as the reference a `delete` writes,
+`freshRefS`), a copy from storage in its pair (`pairMemS`), and writes,
 within `memSize` of them, and the reads the clauses of
 `Calculus/MemRead.lean` resolve; a write of a memory object into storage
 (`alice = carol;`), as a copy of its view (`memL`, `LStor.view`), where the
@@ -175,8 +175,8 @@ def allocOk (R : RefTy) : Bool := (Ty.ref R).mapFree && (Ty.ref R).okDeep
 /-- The most writes and allocations a leaf's memory may hold: each read of
 memory walks them (`LMem.readT`), so the translation costs their number
 times the reads.  The bound is enforced where the memory is built, so the
-translation never walks a longer one: `UpdElem.toL` of a memory and `pairL`
-refuse a memory past it, before any read (`fitsClose` runs before `inL`).
+translation never walks a longer one: a memory element (`ElemS.inLS`) and
+`pairLS` refuse a memory past it, before any read.
 `TestSuite` needs at most 9. -/
 def memSize : Nat := 400
 
@@ -358,7 +358,7 @@ inductive SymB where
   /-- An alias through an index, bound before the storage last changed: it
   was checked against a storage that is gone.  It keeps its slot-level path
   `q`, as KeY's `consr(sp, at(i))` does: a write through it is a slot-level
-  write (`STerm.staleWrite?`), a read through it is outside the fragment. -/
+  write (`Tm.staleWriteS`), a read through it is outside the fragment. -/
   | stale (q : LPath)
   /-- A storage variable bound to a storage: `old` of `{ old := storage }`. -/
   | stor (s : LStor)
@@ -594,7 +594,7 @@ def _root_.Solidity.Op0.inL : Op0 s → Bool
 
 /-- A unary symbol in the fragment, its argument in it (`hb`); an
 allocation where its default copies (`allocOk`).  The identity an allocation
-takes only with it (`allocPair?`, `freshRef`). -/
+takes only with it (`allocPairS?`, `freshRefS`). -/
 def _root_.Solidity.Op1.inL : Op1 a s → a.LTy → Bool → Bool
   | .unop .., _, hb | .field _, _, hb | .sval, _, hb => hb
   | .newArr _, _, hb | .mfield _, _, hb | .mval, _, hb | .ref, _, hb => hb
@@ -672,7 +672,7 @@ def lastAtSegs (qs : List Seg) : List Seg := (qs.reverse.dropWhile fun s => !Seg
 
 /-- Every index of the path is in bounds of what the storage holds live:
 the location up to the last index is there, live.  What the program's checks
-leave of a path it took (`PTerm.toL_chk`). -/
+leave of a path it took (`PathOKS`). -/
 def LiveTo (T : Semantics.SVal) (qs : List Seg) : Prop := ∃ c, T.findLive (lastAtSegs qs) = .ok c
 
 /-- The memory `M` runs from `σ` to the heap and the next identity of `τ`. -/
@@ -707,7 +707,7 @@ The program checks each index of a path against the live length where it
 takes the path (`State.checkIndex`), and then reads or writes the slot; the
 target language reads and writes the live storage with no check.  Where the
 path was checked against the storage it reads, the two agree
-(`PTerm.toL_chk`, `live_bridge`). -/
+(`PathOKS`, `live_bridge`). -/
 
 /-- A path with no index evaluates to one. -/
 theorem LPath.noAt_eval (σ : Semantics.State) : ∀ {q : LPath} {qs : List Seg}, q.noAt = true →
@@ -951,7 +951,7 @@ theorem guardPath_ok {σ : Semantics.State} {s : LStor} {T : Semantics.SVal} (hs
       exact ⟨_, _, ⟨qs, hq, rfl⟩, _, (LPath.lastAt_eval σ hq).2 q' hl, c, hc, rfl⟩
 
 /-- **The read of a checked path is the live read**: given what the checks
-of a path amount to (`PTerm.toL_chk`), a read returns the same either way. -/
+of a path amount to (`PathOKS`), a read returns the same either way. -/
 theorem live_bridge {τ : Semantics.State} {P : Res (Name × List Seg)} {L : Res (List Seg)}
     (hA : ∀ qs, (∃ rs, P = .ok rs ∧ qs = .field rs.1 :: rs.2) ↔
       (L = .ok qs ∧ LiveTo (.struct τ.storage) qs)) (qs : List Seg) (c : Semantics.SVal) :
@@ -2176,7 +2176,7 @@ termination_by structural q => q
 /-- Returns exactly when the writes of `s` succeed.  A copy within one
 storage (`tokens = bucket.tokens;`) checks it once where it holds a stale
 write (`LStor.dangles`): the guard is repeated at every read, and twice it
-would put those leaves past `Derive.elimSize`. -/
+would put those leaves past `Decide.elimSize`. -/
 def LStor.okE : LStor → LTerm
   -- Lean only: KeY's save and delAt are total, the interpreter's halt
   | key{ storage } => key{ true }
