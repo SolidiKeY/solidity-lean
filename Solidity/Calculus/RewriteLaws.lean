@@ -27,11 +27,13 @@ traversal, `Upd.rwBy`, at `LawPair.pick`; any sort: a memory law rewrites
 an identity too).
 
 **Why it holds.**  The right side returns what the left side returns
-(`LawPair.Refines`), so where the update returns its rewrite returns the
-same state (`Upd.rwG_apply`).  Where the rewritten update returns, the
-law refines back there (`LawCov.back`), so the update returns the same
-state (`Upd.rwG_apply_rev`).  Two updates that halt in the same states and
-return the same states are one to either modality (`holds_upd_rwG`).
+(`LawPair.Refines`), so where the update lands its rewrite lands
+(`Upd.rwBy_lands`).  Where the rewritten update returns, the law refines
+back there (`LawCov.back`), so the update returns the same global part
+(`Upd.rwBy_globT_rev`) and halts only where the rewrite does
+(`holds_upd_rwG`).  `LawCov.back` (`Calculus/TermLaws.lean`) states the
+update's return by its erased run; the one bridge to it is
+`Upd.apply_glob`, in `FmlRw.lawUpdS`.
 
 These functions run once a link and use `match` on the indexed families,
 under the exemption of `Calculus/RewriteScoped.lean`'s walks (proposal 104).
@@ -56,9 +58,16 @@ structure LawPair (C : Contract) (Γ : Ctx) where
 def LawPair.rhsAt? {Γ : Ctx} (q : LawPair C Γ) (s : Srt) : Option (Tm C Γ s) :=
   if h : q.k = s then some (h ▸ q.rhs) else none
 
-/-- The right side returns what the left side returns, in every state. -/
+/-- The right side returns what the left side returns, in every typed
+state. -/
 def LawPair.Refines {Γ : Ctx} (q : LawPair C Γ) : Prop :=
-  ∀ σ : EState C Γ, Srt.Le q.k (q.lhs.eval σ) (q.rhs.eval σ)
+  ∀ σ : State C Γ, Srt.Le q.k (q.lhs.evalT σ) (q.rhs.evalT σ)
+
+/-- A law that refines in every erased state refines in every typed one. -/
+theorem LawPair.Refines.of_at {Γ : Ctx} {q : LawPair C Γ} (h : Tm.EvalRefinesAt q.lhs q.rhs) :
+    q.Refines := fun σ => by
+  rw [Tm.evalT_eq, Tm.evalT_eq]
+  exact h σ.erase
 
 section Rw
 
@@ -103,29 +112,18 @@ theorem LawPair.pick_some {s : Srt} {t t' : Tm C Γ s} (h : q.pick t = some t') 
   · cases h
 
 /-- **A law that refines keeps every value a term returns.** -/
-theorem LawPair.pick_le (hq : q.Refines) (σ : EState C Γ) : PickLe q.pick σ := fun h => by
+theorem LawPair.pick_le (hq : q.Refines) (σ : State C Γ) : PickLe q.pick σ := fun h => by
   obtain ⟨e, rfl, rfl⟩ := LawPair.pick_some h
   subst e
   exact hq σ
 
 /-- **A law that refines back at one state keeps every value its rewrite
 returns there.** -/
-theorem LawPair.pick_ge (σ : EState C Γ) (hq : Srt.Le q.k (q.rhs.eval σ) (q.lhs.eval σ)) :
+theorem LawPair.pick_ge (σ : State C Γ) (hq : Srt.Le q.k (q.rhs.evalT σ) (q.lhs.evalT σ)) :
     PickGe q.pick σ := fun h => by
   obtain ⟨e, rfl, rfl⟩ := LawPair.pick_some h
   subst e
   exact hq
-
-/-- **Where an update returns, its rewrite returns the same state.** -/
-theorem Upd.rwG_apply (hq : q.Refines) (σ₀ : EState C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
-    Res.Le (U.apply σ₀) ((Upd.rwG q U).apply σ₀) :=
-  Upd.rwBy_apply σ₀ (LawPair.pick_le hq σ₀) U
-
-/-- **Where the rewrite returns, at a state where the law refines back, the
-update returns the same state.** -/
-theorem Upd.rwG_apply_rev (σ₀ : EState C Γ) (hq : Srt.Le q.k (q.rhs.eval σ₀) (q.lhs.eval σ₀))
-    {Δ : Ctx} (U : Upd C Γ Δ) : Res.Le ((Upd.rwG q U).apply σ₀) (U.apply σ₀) :=
-  Upd.rwBy_apply_rev σ₀ (LawPair.pick_ge σ₀ hq) U
 
 end RwEval
 
@@ -144,21 +142,15 @@ variable {Γ₀ : Ctx}
 refines, and refines back wherever the rewritten update returns. -/
 theorem holds_upd_rwG {q : LawPair C Γ₀} (hr : q.Refines) {m : Modality} {Δ : Ctx}
     {U : Upd C Γ₀ Δ} {φ : Fml C Δ} (σ : State C Γ₀)
-    (hb : ∀ τ, (Upd.rwG q U).apply σ.erase = .ok τ →
-      Srt.Le q.k (q.rhs.eval σ.erase) (q.lhs.eval σ.erase))
+    (hb : ∀ g, (Upd.rwG q U).globT σ = .ok g → Srt.Le q.k (q.rhs.evalT σ) (q.lhs.evalT σ))
     (h : holds σ (.upd m (Upd.rwG q U) φ)) : holds σ (.upd m U φ) := by
-  rw [holds_upd_erased]
-  show m.afterC _ (U.apply σ.erase)
-  have h : m.afterC _ ((Upd.rwG q U).apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
-  have hle := Upd.rwG_apply hr σ.erase U
-  cases hB : (Upd.rwG q U).apply σ.erase with
-  | ok τ =>
-    have hA := Upd.rwG_apply_rev σ.erase (hb τ hB) U τ hB
-    rw [hA]; rw [hB] at h; exact h
-  | error e =>
-    cases hA : U.apply σ.erase with
-    | ok τ => rw [hle τ hA] at hB; cases hB
-    | error e' => rw [hB] at h; exact h
+  refine Upd.afterT_intro (fun e he => ?_) fun g σ' hL hH =>
+    h.of_lands (Upd.rwBy_lands σ (LawPair.pick_le hr σ) U hL) hH
+  cases hB : (Upd.rwG q U).globT σ with
+  | error e' => exact h.of_error hB
+  | ok g =>
+    rw [Upd.rwBy_globT_rev σ (LawPair.pick_ge σ (hb g hB)) U g hB] at he
+    cases he
 
 /-- The law `E` in the right-hand sides of `{U}_m φ`, `U` at the law's scope. -/
 def Fml.updRwS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs)
@@ -188,7 +180,14 @@ def FmlRw.lawUpdS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs) (i 
       · rename_i hc
         cases h
         simp only [Bool.and_eq_true] at hc
-        exact holds_upd_rwG E.fwd σ (fun τ hB => E.back (Upd.rwG q U) σ.erase τ hc.2 hB) hψ
+        refine holds_upd_rwG (LawPair.Refines.of_at E.fwd) σ (fun g hB => ?_) hψ
+        have hm := Upd.apply_glob σ (Upd.rwG q U)
+        rw [hB] at hm
+        cases hA : (Upd.rwG q U).apply σ.erase with
+        | error e => rw [hA] at hm; cases hm
+        | ok τ =>
+          rw [Tm.evalT_eq, Tm.evalT_eq]
+          exact E.back (Upd.rwG q U) σ.erase τ hc.2 hA
       · cases h
     · cases h) i
 

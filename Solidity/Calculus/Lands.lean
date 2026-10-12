@@ -640,4 +640,258 @@ theorem Upd.afterT.of_apply {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U : 
 
 end Lands
 
+/-! ## The typed kit
+
+What the update laws read `afterT` by (W9.7.2), with no erasure: two
+states a term reads alike (`State.ReadsAs`), what a local holds after an
+update as a value (`Held.OKV`), landing introduced and eliminated
+(`Upd.afterT_intro`, `Upd.afterT.of_lands`), and two updates in turn read
+as one (`Upd.afterT_seq`). -/
+
+section Kit
+
+variable {Γ : Ctx}
+
+theorem State.aliasPathT_getE (σ : State C Γ) {R : RefTy} (i : Idx Γ (.alias R)) :
+    σ.aliasPathT i =
+      (match (σ.getE i : Option (Name × List Seg)) with
+        | some p => pure p
+        | none => .error .revert) := by
+  unfold State.aliasPathT State.getE
+  generalize (TEnv.get i σ.env : Option (SRef C (.ref R))) = x
+  cases x <;> rfl
+
+theorem State.memRefT_getE (σ : State C Γ) {R : RefTy} (i : Idx Γ (.mem R)) :
+    σ.memRefT i =
+      (match (σ.getE i : Option Nat) with
+        | some id => pure id
+        | none => .error .revert) := by
+  unfold State.memRefT State.getE
+  generalize (TEnv.get i σ.env : Option (HRef σ.H R)) = x
+  cases x <;> rfl
+
+/-- Two typed states a term reads alike: one global part erased, one local
+erased at each position. -/
+def State.ReadsAs (σ σ' : State C Γ) : Prop :=
+  σ.globE = σ'.globE ∧ ∀ {t : LTy} (i : Idx Γ t), σ.getE i = σ'.getE i
+
+theorem State.ReadsAs.refl (σ : State C Γ) : σ.ReadsAs σ := ⟨rfl, fun _ => rfl⟩
+
+theorem State.ReadsAs.symm {σ σ' : State C Γ} (h : σ.ReadsAs σ') : σ'.ReadsAs σ :=
+  ⟨h.1.symm, fun i => (h.2 i).symm⟩
+
+/-- Two typed states of one erasure read alike. -/
+theorem State.ReadsAs.of_erase {σ σ' : State C Γ} (he : σ.erase = σ'.erase) : σ.ReadsAs σ' :=
+  ⟨by rw [State.globE_eq, State.globE_eq, he], fun i => by rw [State.getE_eq, State.getE_eq, he]⟩
+
+/-- Two typed states that read alike have one erasure. -/
+theorem State.ReadsAs.erase_eq {σ σ' : State C Γ} (h : σ.ReadsAs σ') : σ.erase = σ'.erase := by
+  have hg : σ.erase.glob = σ'.erase.glob := by rw [← State.globE_eq, ← State.globE_eq, h.1]
+  refine EState.ext_glob hg (Env.ext_get _ _ fun i => ?_)
+  rw [← State.getE_eq, ← State.getE_eq, h.2 i]
+
+theorem Tm.evalT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {s : Srt} → (t : Tm C Γ s) → t.evalT σ = t.evalT σ'
+  | _, .pvV i => by simp only [Tm.evalT, h.2 i]
+  | _, .pvP i => by simp only [Tm.evalT, State.aliasPathT_getE, h.2 i]
+  | _, .pvS i => by simp only [Tm.evalT, h.1, h.2 i]
+  | _, .pvI i => by simp only [Tm.evalT, State.memRefT_getE, h.2 i]
+  | _, .netOf i a => by simp only [Tm.evalT, h.2 i, Tm.evalT_congr h a]
+  | _, .app0 _ => by simp only [Tm.evalT, h.1]
+  | _, .app1 _ _ a => by simp only [Tm.evalT, h.1, Tm.evalT_congr h a]
+  | _, .app2 _ a b => by simp only [Tm.evalT, h.1, Tm.evalT_congr h a, Tm.evalT_congr h b]
+  | _, .app3 _ a b c => by
+    simp only [Tm.evalT, h.1, Tm.evalT_congr h a, Tm.evalT_congr h b, Tm.evalT_congr h c]
+
+theorem Tm.denoteT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {s : Srt} → (t : Tm C Γ s) → t.denoteT σ = t.denoteT σ'
+  | _, .pvV i => by simp only [Tm.denoteT, h.2 i]
+  | _, .pvP i => by simp only [Tm.denoteT, State.aliasPathT_getE, h.2 i]
+  | _, .pvS i => by simp only [Tm.denoteT, h.2 i]
+  | _, .pvI _ => rfl
+  | _, .netOf i a => by simp only [Tm.denoteT, h.2 i, Tm.denoteT_congr h a]
+  | _, .app0 _ => by simp only [Tm.denoteT, h.1]
+  | _, .app1 _ _ a => by simp only [Tm.denoteT, h.1, Tm.denoteT_congr h a]
+  | _, .app2 _ a b => by
+    simp only [Tm.denoteT, h.1, Tm.denoteT_congr h a, Tm.denoteT_congr h b, Tm.evalT_congr h a,
+      Tm.evalT_congr h b]
+  | _, .app3 _ a b c => by
+    simp only [Tm.denoteT, Tm.denoteT_congr h a, Tm.denoteT_congr h b, Tm.denoteT_congr h c]
+
+theorem Rhs.evalT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {t : LTy} → (r : Rhs C Γ t) → r.evalT σ = r.evalT σ'
+  | _, .val t => Tm.evalT_congr h t
+  | _, .path p => by simp only [Rhs.evalT, Tm.evalT_congr h p]
+  | _, .unset => rfl
+  | _, .mref i => by simp only [Rhs.evalT, Tm.evalT_congr h i]
+  | _, .store s => by simp only [Rhs.evalT, Tm.evalT_congr h s]
+  | _, .saveNet => by
+    have hn : σ.net = σ'.net := congrArg Semantics.State.net h.1
+    simp only [Rhs.evalT, hn]
+  | _, .saveNetMt => rfl
+
+theorem UpdElem.globT_congr {Δ : Ctx} {σ σ' : State C Γ} (h : σ.ReadsAs σ') (e : UpdElem C Γ Δ)
+    (g : Semantics.State) : e.globT σ g = e.globT σ' g := by
+  cases e <;> simp only [UpdElem.globT, Rhs.evalT_congr h, Tm.evalT_congr h, h.1]
+
+theorem Upd.globT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.globT σ = U.globT σ'
+  | _, .nil => by simp only [Upd.globT, h.1]
+  | _, .snoc U e => by simp only [Upd.globT, Upd.globT_congr h U, UpdElem.globT_congr h e]
+  | _, .decl U _ r => by simp only [Upd.globT, Upd.globT_congr h U, Rhs.evalT_congr h r]
+  | _, .pop U _ => Upd.globT_congr h U
+  | _, .drop U _ => Upd.globT_congr h U
+
+/-- What a local holds after an update, as a value: a local of the state
+before, or a right-hand side read in it. -/
+def Held.OKV {t : LTy} (σ₀ : State C Γ) (v : t.Denote C) : Held C Γ t → Prop
+  | .pos j => v = σ₀.getE j
+  | .rhs r => r.evalT σ₀ = .ok v
+
+theorem Held.OKT_iff_OKV {Δ : Ctx} (σ₀ : State C Γ) (σ' : State C Δ) {t : LTy} (i : Idx Δ t)
+    (x : Held C Γ t) : Held.OKT σ₀ σ' i x ↔ Held.OKV σ₀ (σ'.getE i) x := by
+  cases x <;> exact Iff.rfl
+
+theorem Held.OKV_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') {t : LTy} (v : t.Denote C) :
+    (x : Held C Γ t) → (Held.OKV σ v x ↔ Held.OKV σ' v x)
+  | .pos j => by simp only [Held.OKV, h.2 j]
+  | .rhs r => by simp only [Held.OKV, Rhs.evalT_congr h r]
+
+theorem Upd.lands_congr {Δ : Ctx} {σ σ' : State C Γ} (h : σ.ReadsAs σ') (U : Upd C Γ Δ)
+    (g : Semantics.State) (τ : State C Δ) : U.Lands σ g τ ↔ U.Lands σ' g τ := by
+  unfold Upd.Lands
+  simp only [Upd.globT_congr h U, Held.OKT_iff_OKV, Held.OKV_congr h]
+
+/-- **States a term reads alike, of one heap typing, give one `afterT`.** -/
+theorem Upd.afterT_congr {Δ : Ctx} (m : Modality) {σ σ' : State C Γ} (h : σ.ReadsAs σ')
+    (hH : σ.H = σ'.H) (U : Upd C Γ Δ) (p : State C Δ → Prop) :
+    U.afterT m σ p ↔ U.afterT m σ' p := by
+  unfold Upd.afterT
+  rw [Upd.globT_congr h U]
+  split
+  · exact Iff.rfl
+  · rename_i g _
+    simp only [Upd.lands_congr h U g, hH]
+
+/-- `afterT` from what it asks: `m.onHalt` where the update halts, `p` of
+every typed state it lands on. -/
+theorem Upd.afterT_intro {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U : Upd C Γ Δ}
+    {p : State C Δ → Prop} (hh : ∀ e, U.globT σ₀ = .error e → m.onHalt)
+    (hp : ∀ g σ', U.Lands σ₀ g σ' → σ₀.H <+: σ'.H → p σ') : U.afterT m σ₀ p := by
+  unfold Upd.afterT
+  split
+  · rename_i e he; exact hh e he
+  · exact fun σ' hl hH => hp _ σ' hl hH
+
+/-- What holds after an update holds of a typed state it lands on. -/
+theorem Upd.afterT.of_lands {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U : Upd C Γ Δ}
+    {p : State C Δ → Prop} (h : U.afterT m σ₀ p) {g : Semantics.State} {σ' : State C Δ}
+    (hl : U.Lands σ₀ g σ') (hH : σ₀.H <+: σ'.H) : p σ' := by
+  unfold Upd.afterT at h
+  rw [hl.1] at h
+  exact h σ' hl hH
+
+/-- Where an update halts, `afterT` is `m.onHalt`. -/
+theorem Upd.afterT.of_error {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U : Upd C Γ Δ}
+    {p : State C Δ → Prop} (h : U.afterT m σ₀ p) {e : Halt} (he : U.globT σ₀ = .error e) :
+    m.onHalt := by
+  unfold Upd.afterT at h
+  rw [he] at h
+  exact h
+
+/-- **Two updates in turn, read as one**: `W` gives `U` then `V` where
+`W` halts where `U` does, and past a state `U` lands on, `W` computes the
+global part `V` does there and leaves in each local what `V` leaves. -/
+theorem Upd.afterT_seq {Δ₁ Δ₂ : Ctx} {m : Modality} {σ₀ : State C Γ} {U : Upd C Γ Δ₁}
+    {V : Upd C Δ₁ Δ₂} {W : Upd C Γ Δ₂} {p : State C Δ₂ → Prop}
+    (herr : ∀ e, U.globT σ₀ = .error e → ∃ e', W.globT σ₀ = .error e')
+    (hglob : ∀ g₁ σ₁, U.Lands σ₀ g₁ σ₁ → W.globT σ₀ = V.globT σ₁)
+    (hheld : ∀ g₁ σ₁, U.Lands σ₀ g₁ σ₁ → ∀ {t : LTy} (i : Idx Δ₂ t) (v : t.Denote C),
+      Held.OKV σ₁ v (V.held i) → Held.OKV σ₀ v (W.held i))
+    (h : W.afterT m σ₀ p) : U.afterT m σ₀ (fun σ₁ => V.afterT m σ₁ p) := by
+  refine Upd.afterT_intro (fun e he => ?_) fun g₁ σ₁ hl₁ hH₁ => ?_
+  · obtain ⟨e', he'⟩ := herr e he
+    exact h.of_error he'
+  · refine Upd.afterT_intro (fun e he => h.of_error ((hglob g₁ σ₁ hl₁).trans he))
+      fun g₂ σ₂ hl₂ hH₂ => h.of_lands (g := g₂) ?_ (hH₁.trans hH₂)
+    refine ⟨(hglob g₁ σ₁ hl₁).trans hl₂.1, hl₂.2.1, fun i => ?_⟩
+    rw [Held.OKT_iff_OKV]
+    exact hheld g₁ σ₁ hl₁ i _ ((Held.OKT_iff_OKV _ _ _ _).1 (hl₂.2.2 i))
+
+/-- `U` gives `U'`'s `afterT` where `U` lands only where `U'` does, and
+`m.onHalt` holds where `U` halts and `U'`'s `afterT` holds. -/
+theorem Upd.afterT_of_lands {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U U' : Upd C Γ Δ}
+    {p : State C Δ → Prop} (he : ∀ e, U.globT σ₀ = .error e → U'.afterT m σ₀ p → m.onHalt)
+    (hl : ∀ g σ', U.Lands σ₀ g σ' → U'.Lands σ₀ g σ') (h : U'.afterT m σ₀ p) :
+    U.afterT m σ₀ p :=
+  Upd.afterT_intro (fun e hU => he e hU h) fun _ _ hL hH => h.of_lands (hl _ _ hL) hH
+
+/-- Landing on `σ'` from its two parts: the global part, and what each
+local holds as a value. -/
+theorem Upd.lands_of {Δ : Ctx} {σ₀ : State C Γ} {U U' : Upd C Γ Δ}
+    (hg : ∀ g, U.globT σ₀ = .ok g → U'.globT σ₀ = .ok g)
+    (hh : ∀ {t : LTy} (i : Idx Δ t) (v : t.Denote C), Held.OKV σ₀ v (U.held i) →
+      Held.OKV σ₀ v (U'.held i))
+    {g : Semantics.State} {σ' : State C Δ} (hL : U.Lands σ₀ g σ') : U'.Lands σ₀ g σ' :=
+  ⟨hg g hL.1, hL.2.1, fun i => (Held.OKT_iff_OKV _ _ _ _).2
+    (hh i _ ((Held.OKT_iff_OKV _ _ _ _).1 (hL.2.2 i)))⟩
+
+/-! ### The state an update leaves, by constructor -/
+
+theorem State.globE_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).globE = σ.globE :=
+  rfl
+
+theorem State.globE_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).globE = σ.globE :=
+  rfl
+
+theorem State.globE_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).globE = σ.globE := rfl
+
+theorem State.globE_setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
+    (σ.setLocal i v).globE = σ.globE := rfl
+
+theorem State.getE_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) {t : LTy} (i : Idx Γ t) :
+    (σ.drop h).getE i = σ.getE (i.ext h) := by
+  obtain ⟨st, H, hp, env, nt, sb, tx⟩ := σ
+  show LTy.TDenote.erase t (TEnv.get i (TEnv.drop h env)) = LTy.TDenote.erase t (TEnv.get (i.ext h) env)
+  congr 1
+  induction h with
+  | refl => rfl
+  | push h ih => exact ih env.2
+
+theorem State.getE_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) {t : LTy} (i : Idx Γ t) :
+    (σ.thin h).getE i = σ.getE (i.wk h) := by
+  obtain ⟨st, H, hp, env, nt, sb, tx⟩ := σ
+  show LTy.TDenote.erase t (TEnv.get i (TEnv.thin h env)) = LTy.TDenote.erase t (TEnv.get (i.wk h) env)
+  congr 1
+  induction h with
+  | refl => rfl
+  | keep h ih =>
+    cases i with
+    | here => rfl
+    | there i => exact ih i env.2
+  | drop h ih => exact ih i env.2
+
+theorem State.getE_push_here {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
+    (σ.push v).getE .here = LTy.TDenote.erase t v := rfl
+
+theorem State.getE_push_there {t u : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (i : Idx Γ u) :
+    (σ.push v).getE i.there = σ.getE i := rfl
+
+/-- `{}` lands on the state it is applied in. -/
+theorem Upd.lands_nil (σ : State C Γ) : (Upd.nil : Upd C Γ Γ).Lands σ σ.globE σ :=
+  ⟨rfl, rfl, fun _ => rfl⟩
+
+/-- A scope's end lands on the state with its locals popped. -/
+theorem Upd.lands_pop_nil {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) :
+    (Upd.pop .nil h : Upd C Δ Γ).Lands σ σ.globE (σ.drop h) :=
+  ⟨rfl, rfl, fun i => State.getE_drop h σ i⟩
+
+/-- A thinning lands on the state with its dropped locals gone. -/
+theorem Upd.lands_drop_nil {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+    (Upd.drop .nil h : Upd C Δ Γ).Lands σ σ.globE (σ.thin h) :=
+  ⟨rfl, rfl, fun i => State.getE_thin h σ i⟩
+
+end Kit
+
 end Solidity
