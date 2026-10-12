@@ -144,6 +144,59 @@ def Rhs.evalE {Γ : Ctx} (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) : Res (
 /-- The locals, erased. -/
 def LocsV.erase {Γ : Ctx} (ℓ : LocsV C Γ) : Locs C Γ := fun t i => LTy.VDen.erase t (ℓ t i)
 
+/-- A path is its segments. -/
+theorem Path.erase_injective {T U : Ty} (p : Path T U) :
+    ∀ q : Path T U, p.erase = q.erase → p = q := by
+  induction p
+  case nil =>
+    intro q hq
+    cases q <;> simp only [Path.erase, List.nil_eq, reduceCtorEq] at hq ⊢
+  case field hl p ih =>
+    intro q hq
+    cases q with
+    | nil => simp only [Path.erase, reduceCtorEq] at hq
+    | field hl' q =>
+      simp only [Path.erase, List.cons.injEq, Semantics.Seg.field.injEq] at hq
+      obtain ⟨rfl, hq⟩ := hq
+      obtain rfl := Option.some.inj (hl.symm.trans hl')
+      rw [ih q hq]
+  all_goals
+    rename_i i p ih
+    intro q hq
+    cases q <;> simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq, reduceCtorEq] at hq
+    obtain ⟨rfl, hq⟩ := hq
+    rw [ih _ hq]
+
+/-- A storage reference is its root and segments. -/
+theorem SRef.erase_injective {U : Ty} {r r' : SRef C U} (h : r.erase = r'.erase) : r = r' := by
+  obtain ⟨n, hn, p⟩ := r
+  obtain ⟨n', hn', p'⟩ := r'
+  simp only [SRef.erase, Prod.mk.injEq] at h
+  obtain ⟨rfl, hp⟩ := h
+  obtain rfl := Option.some.inj (hn.symm.trans hn')
+  rw [Path.erase_injective p p' hp]
+
+/-- Two paths read alike erased read alike typed. -/
+theorem Tm.eval_path_of_evalE {Γ Γ' : Ctx} {T : Ty} {τ : State C Γ} {τ' : State C Γ'}
+    {p : Tm C Γ (.path T)} {q : Tm C Γ' (.path T)} (h : ∀ v, p.evalE τ = .ok v ↔ q.evalE τ' = .ok v) :
+    p.eval τ = q.eval τ' := by
+  simp only [Tm.evalE] at h
+  cases hp : p.eval τ with
+  | none =>
+    cases hq : q.eval τ' with
+    | none => rfl
+    | some r =>
+      have := (h r.erase).2 (by rw [hq]; rfl)
+      rw [hp] at this; cases this
+  | some r =>
+    have := (h r.erase).1 (by rw [hp]; rfl)
+    cases hq : q.eval τ' with
+    | none => rw [hq] at this; cases this
+    | some r' =>
+      rw [hq] at this
+      simp only [toRes, Except.ok.injEq] at this
+      rw [SRef.erase_injective this.symm]
+
 /-! ## The erased locals -/
 
 namespace Locs

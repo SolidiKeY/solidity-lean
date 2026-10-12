@@ -249,18 +249,33 @@ open SemanticsProperties
 
 variable {Γ : Ctx}
 
+/-- A root. -/
+def _root_.Solidity.Op0.isRoot {s : Srt} : Op0 C s → Bool
+  | .root _ _ => true
+  | _ => false
+
+/-- A member. -/
+def _root_.Solidity.Op1.isField {a s : Srt} : Op1 C a s → Bool
+  | .field _ => true
+  | _ => false
+
+/-- An index. -/
+def _root_.Solidity.Op2.isAt {a b s : Srt} : Op2 C a b s → Bool
+  | .at _ => true
+  | _ => false
+
 /-- A key that reads no storage: a local or a literal. -/
-def _root_.Solidity.Tm.keyFreeS : Tm C Γ .val → Bool
+def _root_.Solidity.Tm.keyFreeS {s : Srt} : Tm C Γ s → Bool
   | .pvV _ => true
-  | .app0 (.lit _) => true
+  | .app0 o => o.isLit
   | _ => false
 
 /-- `Tm.stablePathS`' compiled twin. -/
 def _root_.Solidity.Tm.stablePathSM : {s : Srt} → Tm C Γ s → Bool
-  | _, .app0 (.root _) => true
+  | _, .app0 o => o.isRoot
   | _, .pvP _ => true
-  | _, .app1 (.field _) _ q => q.stablePathSM
-  | _, .app2 .at q k => q.stablePathSM && k.keyFreeS
+  | _, .app1 o q => o.isField && q.stablePathSM
+  | _, .app2 o q k => o.isAt && q.stablePathSM && k.keyFreeS
   | _, _ => false
 
 /-- **A path that reads the storage only to check its indices**: roots,
@@ -270,253 +285,406 @@ recursor. -/
 def _root_.Solidity.Tm.stablePathS {s : Srt} (t : Tm C Γ s) : Bool :=
   Tm.rec (motive := fun _ _ => Bool)
     (fun _ => false) (fun _ => true) (fun _ => false) (fun _ => false) (fun _ _ _ => false)
-    (@fun s o => match s, o with
-      | _, .root _ => true
-      | _, _ => false)
-    (@fun a s o _ _ ih => match a, s, o with
-      | _, _, .field _ => ih
-      | _, _, _ => false)
-    (@fun a b s o _ y iha _ => match a, b, s, o, y with
-      | _, _, _, .at, y => iha && y.keyFreeS
-      | _, _, _, _, _ => false)
+    (fun o => o.isRoot) (fun o _ ih => o.isField && ih)
+    (fun o _ y iha _ => o.isAt && iha && y.keyFreeS)
     (fun _ _ _ _ _ _ _ => false) t
 
 theorem _root_.Solidity.Tm.stablePathS_eq_stablePathSM {s : Srt} (t : Tm C Γ s) :
     t.stablePathS = t.stablePathSM := by
   induction t with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app3 _ _ _ _ => rfl
-  | app0 o => cases o <;> rfl
-  | app1 o _ x ih => cases o <;> first | rfl | (simp only [Tm.stablePathSM, ← ih]; rfl)
-  | app2 o x y ihx ihy => cases o <;> first | rfl | (simp only [Tm.stablePathSM, ← ihx]; rfl)
+  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app0 _ | app3 _ _ _ _ => rfl
+  | app1 o x ih => simp only [Tm.stablePathSM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [Tm.stablePathSM, ← ihx]; rfl
 
 /-- Where `p = a.push();` leaves its alias: the last slot, once the push
-is made (`a[a.length - 1]`, the length unchecked). -/
-def lastSlotS (P : Tm C Γ .path) : Tm C Γ .path :=
-  .app2 .at P (.app2 (.binop .sub .bool) (.app2 .len (.app0 .storage) P) (.app0 (.lit (.int 1))))
+is made (`a[a.length - 1]`). -/
+def lastSlotS {E : Ty} (P : Tm C Γ (.path (.ref (.array E)))) : Tm C Γ (.path E) :=
+  .app2 (.at (.arr .dyn)) P (.app2 (.binop .sub rfl) (.app2 .len (.app0 .storage) P) (Tm.one .uint rfl))
+
+/-- `extend(storage, a)`: the array's path. -/
+def _root_.Solidity.Op2.extendArg? {a b s : Srt} : Op2 C a b s → Tm C Γ a → Tm C Γ b →
+    Option ((E : Ty) × Tm C Γ (.path (.ref (.array E))))
+  | .extend, st, P => if st.isStorageS then some ⟨_, P⟩ else none
+  | _, _, _ => none
 
 /-- `extend(storage, a)`: the array's type and path. -/
-def _root_.Solidity.Tm.extendOf? : Tm C Γ .st → Option (Ty × Tm C Γ .path)
-  | .app2 (.extend E) (.app0 .storage) P => some (E, P)
+def _root_.Solidity.Tm.extendOf? {s : Srt} : Tm C Γ s →
+    Option ((E : Ty) × Tm C Γ (.path (.ref (.array E))))
+  | .app2 o st P => o.extendArg? st P
   | _ => none
 
 /-- `next(a)`: the array's path. -/
-def _root_.Solidity.Tm.nextOf? : Tm C Γ .path → Option (Tm C Γ .path)
-  | .app1 .next _ P => some P
+def _root_.Solidity.Op1.nextArg? {a : Srt} {T : Ty} : Op1 C a (.path T) → Tm C Γ a →
+    Option (Tm C Γ (.path (.ref (.array T))))
+  | .next, P => some P
+  | _, _ => none
+
+/-- `next(a)`: the array's path. -/
+def _root_.Solidity.Tm.nextOf? {T : Ty} : Tm C Γ (.path T) → Option (Tm C Γ (.path (.ref (.array T))))
+  | .app1 o P => o.nextArg? P
   | _ => none
 
 /-- `{storage := extend(storage, a)}`, the push alone: the array's path,
 read before the update and after it (one scope). -/
-def _root_.Solidity.Upd.pushOf? {Δ : Ctx} : Upd C Γ Δ → Option (Tm C Γ .path × Tm C Δ .path)
-  | .snoc .nil (.storage S) => S.extendOf?.map fun p => (p.2, p.2)
+def _root_.Solidity.Upd.pushOf? {Δ : Ctx} : Upd C Γ Δ →
+    Option ((E : Ty) × Tm C Γ (.path (.ref (.array E))) × Tm C Δ (.path (.ref (.array E))))
+  | .snoc .nil (.storage S) => S.extendOf?.map fun p => ⟨p.1, p.2, p.2⟩
+  | _ => none
+
+/-- `x := next(a)`: the alias's type, the array's path, and the right-hand
+side at the alias's type rebuilt from a path. -/
+def _root_.Solidity.Rhs.pushAlias? {Δ : Ctx} {t : LTy} : Rhs C Γ t →
+    Option ((R : RefTy) × Tm C Γ (.path (.ref (.array (.ref R)))) ×
+      (Tm C Δ (.path (.ref R)) → Rhs C Δ t))
+  | .path n => n.nextOf?.map fun P => ⟨_, P, fun q => .path q⟩
   | _ => none
 
 /-- **The push and its alias, one after the other**: `{storage :=
 extend(storage, a) ‖ x := next(a)} φ` read as `{storage := extend(storage,
 a)}{x := a[a.length - 1]} φ`, where `a` is a stable path. -/
 def _root_.Solidity.Upd.pushSplit (m : Modality) {Δ : Ctx} : Upd C Γ Δ → Fml C Δ → Option (Fml C Γ)
-  | .snoc V (.local i (.path n)), φ =>
-    match V.pushOf?, n.nextOf? with
-    | some (P, Q), some P' =>
-      bif P.stablePathS && P.beqR P' then
-        some (.upd m V (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS Q)))) φ))
+  | .snoc V (.local i r), φ =>
+    match V.pushOf?, r.pushAlias? (Δ := Δ) with
+    | some ⟨E, P, Q⟩, some ⟨R, P', mk⟩ =>
+      if h : E = .ref R then
+        bif P.stablePathS && P.beqR P' then
+          some (.upd m V (.upd m (Upd.nil.snoc (.local i (mk (lastSlotS (h ▸ Q))))) φ))
+        else none
       else none
     | _, _ => none
   | _, _ => none
 
 /-! The push's proofs read two typed states: `σ`, the update applied in,
-and `x`, a state the storage write lands on (its global part `σ`'s with
-the storage `τ` written, `hx`, the same locals, `hl`). -/
+and `x`, a state the storage write lands on (its global part `σ`'s with the
+storage written, the same locals).  That a stable path names the same
+location after the write is read on the erasure (`stable_evalE`, the
+interpreter's frame lemmas); the rest on the typed storage. -/
 
-theorem keyFreeS_eval {σ x : State C Γ} (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
-    (k : Tm C Γ .val) → k.keyFreeS = true → k.eval x = k.eval σ
-  | .pvV i, _ => by simp only [Tm.eval, hl i]
-  | .app0 (.lit _), _ => rfl
+theorem keyFreeS_evalE {σ x : State C Γ} (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i)
+    {s : Srt} (k : Tm C Γ s) (h : k.keyFreeS = true) : k.evalE x = k.evalE σ := by
+  cases k with
+  | pvV i => rw [Tm.evalE_pvV, Tm.evalE_pvV, hl i]
+  | app0 o =>
+    cases o <;> simp only [Tm.keyFreeS, Op0.isLit, Bool.false_eq_true] at h
+    rw [Tm.evalE_lit, Tm.evalE_lit]
+  | _ => simp only [Tm.keyFreeS, Bool.false_eq_true] at h
 
-theorem withGlob_saveStorage {σ : Semantics.State} {τ : Semantics.State} {r : Name} {P : List Seg}
-    {X : Semantics.SVal} (h : σ.saveStorage r P X = .ok τ) : τ = { σ with storage := τ.storage } := by
-  unfold Semantics.State.saveStorage at h
-  split at h
-  · obtain ⟨_, _, he⟩ := SemanticsProperties.Res.bind_eq_ok.1 h; cases he; rfl
-  · cases h
+/-- `stable_evalE` below a size. -/
+theorem stable_evalE_n {σ x : State C Γ} {τ : Semantics.State} {r : Name} {Pr : List Seg}
+    {X : Semantics.SVal} (hsv : σ.globE.saveStorage r Pr X = .ok τ) (hx : x.globE = τ)
+    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
+    (n : Nat) → ∀ {T : Ty} (p : Tm C Γ (.path T)), p.lsize < n → p.stablePathSM = true →
+      ∀ {r' : Name} {segs : List Seg},
+      p.evalE σ = .ok (r', segs) → (r' = r → ∃ rest, Pr = segs ++ rest) →
+        p.evalE x = .ok (r', segs)
+  | 0, _, _, hn, _, _, _, _, _ => absurd hn (Nat.not_lt_zero _)
+  | n + 1, T, p, hn, hp, r', segs, h, hpre => by
+    cases p with
+    | app0 o =>
+      cases o
+      rw [Tm.evalE_root] at h ⊢
+      exact h
+    | pvP i =>
+      rw [Tm.evalE_pvP] at h ⊢
+      rw [hl i]
+      exact h
+    | app1 o q =>
+      cases o with
+      | @field s f T hfld =>
+        simp only [Tm.stablePathSM, Op1.isField, Bool.true_and] at hp
+        rw [Tm.evalE_field] at h ⊢
+        obtain ⟨⟨r₀, segs₀⟩, h₀, he⟩ := Res.bind_eq_ok.1 h
+        cases he
+        rw [stable_evalE_n hsv hx hl n q (by lsizeS_tac) hp h₀ fun hr => by
+          obtain ⟨rest, hrest⟩ := hpre hr
+          exact ⟨.field f :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
+              List.nil_append]⟩]
+        rfl
+      | next => simp only [Tm.stablePathSM, Op1.isField, Bool.false_and, Bool.false_eq_true] at hp
+    | app2 o q k =>
+      cases o with
+      | «at» it =>
+        simp only [Tm.stablePathSM, Op2.isAt, Bool.true_and, Bool.and_eq_true] at hp
+        rw [Tm.evalE_at] at h ⊢
+        obtain ⟨⟨r₀, segs₀⟩, h₀, h⟩ := Res.bind_eq_ok.1 h
+        obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
+        obtain ⟨v, hv, hi⟩ := Res.bind_eq_ok.1 hi
+        obtain ⟨_, hc, he⟩ := Res.bind_eq_ok.1 h
+        cases he
+        rw [stable_evalE_n hsv hx hl n q (by lsizeS_tac) hp.1 h₀ fun hr => by
+          obtain ⟨rest, hrest⟩ := hpre hr
+          exact ⟨.at i :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
+              List.nil_append]⟩, Res.ok_bind, keyFreeS_evalE hl k hp.2, hv, Res.ok_bind, hi,
+          Res.ok_bind]
+        rw [hx, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
+        by_cases hr : r₀ = r
+        · subst hr
+          obtain ⟨rest, hrest⟩ := hpre rfl
+          refine .inr fun hpf => ?_
+          have hl := congrArg List.length (Close.prefix_append hpf)
+          rw [hrest] at hl
+          simp only [List.length_append, List.length_cons, List.length_nil] at hl
+          omega
+        · exact .inl hr
+      | nextIn => simp only [Tm.stablePathSM, Op2.isAt, Bool.false_and, Bool.false_eq_true] at hp
+    | app3 o _ _ _ =>
+      cases o
+      simp only [Tm.stablePathSM, Bool.false_eq_true] at hp
 
 /-- **A path below which the storage was written names the same
-location**: its checks are of locations
-above the write. -/
-theorem stable_evalS {σ x : State C Γ} {τ : Semantics.State} {r : Name} {P : List Seg}
-    {X : Semantics.SVal} (hsv : σ.globE.saveStorage r P X = .ok τ) (hx : x.globE = τ)
-    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
-    (p : Tm C Γ .path) → p.stablePathSM = true → ∀ {r' : Name} {segs : List Seg},
-      p.eval σ = .ok (r', segs) → (r' = r → ∃ rest, P = segs ++ rest) →
-        p.eval x = .ok (r', segs)
-  | .app0 (.root _), _, _, _, h, _ => h
-  | .pvP i, _, _, _, h, _ => by
-    simp only [Tm.eval, State.aliasPathT_getE, hl i] at h ⊢
-    exact h
-  | .app1 (.field f) _ q, hp, r', segs, h, hpre => by
-    simp only [Tm.stablePathSM] at hp
-    simp only [Tm.eval, Op1.eval] at h ⊢
-    obtain ⟨⟨r₀, segs₀⟩, h₀, he⟩ := Res.bind_eq_ok.1 h
-    cases he
-    rw [stable_evalS hsv hx hl q hp h₀ fun hr => by
-      obtain ⟨rest, hrest⟩ := hpre hr
-      exact ⟨.field f :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
-          List.nil_append]⟩]
-    rfl
-  | .app2 .at q k, hp, r', segs, h, hpre => by
-    simp only [Tm.stablePathSM, Bool.and_eq_true] at hp
-    simp only [Tm.eval, Op2.eval] at h ⊢
-    obtain ⟨⟨r₀, segs₀⟩, h₀, h⟩ := Res.bind_eq_ok.1 h
-    obtain ⟨v, hv, h⟩ := Res.bind_eq_ok.1 h
-    obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
-    obtain ⟨_, hc, he⟩ := Res.bind_eq_ok.1 h
-    cases he
-    rw [stable_evalS hsv hx hl q hp.1 h₀ fun hr => by
-      obtain ⟨rest, hrest⟩ := hpre hr
-      exact ⟨.at i :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
-          List.nil_append]⟩, Res.ok_bind, keyFreeS_eval hl k hp.2, hv, Res.ok_bind, hi,
-      Res.ok_bind]
-    rw [hx, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
-    · rfl
-    by_cases hr : r₀ = r
-    · subst hr
-      obtain ⟨rest, hrest⟩ := hpre rfl
-      refine .inr fun hpf => ?_
-      have hl := congrArg List.length (Close.prefix_append hpf)
-      rw [hrest] at hl
-      simp only [List.length_append, List.length_cons, List.length_nil] at hl
-      omega
-    · exact .inl hr
-  | .app1 .next _ _, h, _, _, _, _ | .app2 .nextIn _ _, h, _, _, _, _
-  | .app3 .atIn _ _ _, h, _, _, _, _ => by simp only [Tm.stablePathSM, Bool.false_eq_true] at h
+location**, erased: its checks are of locations above the write. -/
+theorem stable_evalE {σ x : State C Γ} {τ : Semantics.State} {r : Name} {Pr : List Seg}
+    {X : Semantics.SVal} (hsv : σ.globE.saveStorage r Pr X = .ok τ) (hx : x.globE = τ)
+    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) {T : Ty} (p : Tm C Γ (.path T))
+    (hp : p.stablePathSM = true) {r' : Name} {segs : List Seg}
+    (h : p.evalE σ = .ok (r', segs)) (hpre : r' = r → ∃ rest, Pr = segs ++ rest) :
+    p.evalE x = .ok (r', segs) :=
+  stable_evalE_n hsv hx hl _ p (Nat.lt_succ_self _) hp h hpre
+
+/-- A write's storage reads back what it wrote. -/
+theorem Storage.find_save_self {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
+    (h : st.save r v = some st') : st'.find r = some v := by
+  obtain ⟨x', hs, rfl⟩ := Storage.save_some h
+  simp only [Storage.find, SFields.get_set_same]
+  exact SVal.find_save_same _ _ _ hs
+
+/-- `extend(storage, a)` returns where `next(a)` does, the push read on the
+typed storage: the array found, its slot past the end. -/
+theorem extend_typed {σ : State C Γ} {E : Ty} {P : Tm C Γ (.path (.ref (.array E)))}
+    {st' : Storage C} (hs : (Tm.app2 .extend (.app0 .storage) P : Tm C Γ .st).eval σ = some st') :
+    ∃ r w nv, P.eval σ = some r ∧ σ.storage.find r = some w ∧ σ.storage.save r nv = some st' ∧
+      ∃ h : (SVal.view w : ArrView E).n + 1 < 2 ^ 256,
+        nv = .array (SVec.ofList ((SVal.view w : ArrView E).elems.toList ++
+          [(pushSlot E (SVal.view w : ArrView E).shadow.toList).1]))
+          (.ofList (pushSlot E (SVal.view w : ArrView E).shadow.toList).2)
+          (SVec.snoc_lt_bound _ _ h) := by
+  rw [CloseS.eval_extend, CloseS.eval_storage, Option.bind_some] at hs
+  cases hP : P.eval σ with
+  | none => rw [hP] at hs; cases hs
+  | some r =>
+    rw [hP, Option.bind_some] at hs
+    cases hp : σ.storage.pushPlace r with
+    | none => rw [hp] at hs; cases hs
+    | some x =>
+      rw [hp, Option.bind_some, Option.some.injEq] at hs
+      subst hs
+      unfold Storage.pushPlace at hp
+      cases hf : σ.storage.find r with
+      | none => rw [hf] at hp; cases hp
+      | some w =>
+        rw [hf] at hp
+        simp only [Option.bind_eq_bind, Option.bind_some] at hp
+        split at hp
+        · rename_i hb
+          cases hsv : σ.storage.save r _ with
+          | none => rw [hsv] at hp; cases hp
+          | some st'' =>
+            rw [hsv, Option.bind_some, Option.some.injEq] at hp
+            subst hp
+            exact ⟨r, w, _, rfl, hf, hsv, hb, rfl⟩
+        · cases hp
+
+theorem binopT_sub_one_lenU (n : Nat) (h : n + 1 < 2 ^ 256) :
+    binopT .sub (p := .uint) (lenU (n + 1) h) (some (PrimTy.ofLit .uint 1 rfl)) =
+      some (lenU n (by omega)) := by
+  have hr : PrimTy.uint.inRange (((n + 1 : Nat) : Int) - 1) = true := by
+    have : (((n + 1 : Nat) : Int) - 1) = (n : Int) := by omega
+    rw [this]; exact lenU_inRange (by omega)
+  simp only [binopT, BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum, BinOp.arithInt,
+    lenU, PrimTy.ofLit, PrimTy.ofInt?, PrimTy.ofValue?, hr, dite_true, Option.some.injEq,
+    Subtype.mk.injEq]
+  exact Subtype.ext (by show ((n + 1 : Nat) : Int) - 1 = (n : Int); omega)
+
+theorem Storage.atT_dyn {E : Ty} {st : Storage C} {r : SRef C (.ref (.array E))} {m : Nat}
+    {e : SVec E m} {sh : SList E} {hm : m < 2 ^ 256} (hf : st.find r = some (.array e sh hm))
+    (i : PrimTy.uint.Denote) (hi : i.1 < m) :
+    st.atT (.arr .dyn) r i = some (r.index (.arr .dyn) i.1) := by
+  have h0 : 0 ≤ i.1 := by
+    have := i.2
+    simp only [PrimTy.inRange, decide_eq_true_eq] at this
+    exact this.1
+  have hk : PrimTy.key (p := PrimTy.uint.keyTy) i = i.1 := rfl
+  simp only [Storage.atT, Storage.checkIndex, hf, Option.bind_eq_bind, Option.bind_some,
+    Storage.inBounds, SVal.view_array, hk]
+  rw [if_pos ⟨h0, by omega⟩]
+  rfl
 
 /-- **The last slot after the push is the slot past the end before it.** -/
-theorem lastSlotS_eval {σ x : State C Γ} {P : Tm C Γ .path} (hP : P.stablePathSM = true) {E : Ty}
-    {τ : Semantics.State}
-    (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ = .ok τ)
-    (hx : x.globE = { σ.globE with storage := τ.storage })
-    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
-    (lastSlotS P).eval x = (Tm.app1 .next rfl P).eval σ := by
-  simp only [Tm.eval, Op2.eval, Op0.eval, pure_bind] at hs
-  obtain ⟨⟨r, segs⟩, hp, hs⟩ := Res.bind_eq_ok.1 hs
-  obtain ⟨⟨τ', n⟩, hpp, he⟩ := Res.bind_eq_ok.1 hs
-  cases he
-  simp only [pushPlaceAt] at hpp
-  obtain ⟨c, hc, hpp⟩ := Res.bind_eq_ok.1 hpp
-  cases c with
-  | array elems sh fx =>
-    obtain ⟨τ'', hsv, he⟩ := Res.bind_eq_ok.1 hpp
-    cases he
-    have hst := withGlob_saveStorage hsv
-    have hx' : x.globE = τ' := by rw [hx, ← hst]
-    have hp' := stable_evalS hsv hx' hl P hP hp (fun _ => ⟨[], by simp only [List.append_nil]⟩)
-    have hf := State.findStorage_saveStorage_same hsv
-    simp only [lastSlotS, Tm.eval, Op2.eval, Op1.eval, Op0.eval, hp', hp, hc, Res.ok_bind]
-    simp only [hx', Close.arrayLen_eq, hf, Close.arrLen, evalBinop,
-      Semantics.applyBinOp, Semantics.Value.asInt, bind, Except.bind, Semantics.checkArith,
-      BinOp.retTy, BinOp.isArith, Close.checkIndex_eq, List.length_append, List.length_singleton,
-      pure, Except.pure]
-    simp only [↓reduceIte, Int.natCast_add, Int.cast_ofNat_Int, Int.add_sub_cancel, Close.idxOk,
-      Int.ofNat_zero_le, Int.toNat_natCast, List.length_append, List.length_cons, List.length_nil,
-      Nat.zero_add, Nat.lt_add_one, and_self]
-    done
-  | prim _ | struct _ | map _ _ => nomatch hpp
+theorem lastSlotS_evalT {σ x : State C Γ} {E : Ty} {P : Tm C Γ (.path (.ref (.array E)))}
+    (hP : P.stablePathSM = true) {st' : Storage C}
+    (hs : (Tm.app2 .extend (.app0 .storage) P : Tm C Γ .st).eval σ = some st')
+    (hx : x.glob = { σ.glob with storage := st' })
+    (hl : ∀ {t : LTy} (i : Idx Γ t), x.getV i = σ.getV i) :
+    (lastSlotS P).eval x = (Tm.app1 .next P).eval σ := by
+  obtain ⟨r, w, nv, hr, hw, hsv, hb, hnv⟩ := extend_typed hs
+  -- the path names the same location after the write (on the erasure)
+  have hle : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i := fun i => by
+    rw [← State.getV_erase, ← State.getV_erase, hl i]
+  have hsvE := Storage.saveStorage_erase (σ := σ.globE) (st := σ.storage) rfl r nv
+  rw [hsv] at hsvE
+  have hxE : x.globE = Storage.into σ.globE st' := by
+    rw [← State.glob_globE, hx]; rfl
+  have hPE : P.evalE σ = .ok (r.root, r.path.erase) := by rw [Tm.evalE_def, hr]; rfl
+  have hPx := stable_evalE hsvE hxE hle P hP hPE (fun _ => ⟨[], by simp only [List.append_nil]⟩)
+  have hPx' : P.eval x = some r := by
+    have := Tm.eval_path_of_evalE (p := P) (q := P) (τ := x) (τ' := σ)
+      (fun v => by rw [hPx, hPE])
+    rw [this, hr]
+  have hxs : x.storage = st' := congrArg State.storage hx
+  -- the array after the push: one element more
+  have hfind := Storage.find_save_self hsv
+  rw [← hxs] at hfind
+  -- the right-hand side: the slot past the end
+  have hrhs : (Tm.app1 .next P).eval σ =
+      some (r.index (.arr .dyn) ((SVal.view w : ArrView E).n : Int)) := by
+    rw [CloseS.eval_next, hr, Option.bind_some]
+    simp only [Storage.nextT, hw, Option.map_some]
+  rw [hrhs]
+  simp only [lastSlotS, CloseS.eval_at, CloseS.eval_binop, CloseS.eval_len, CloseS.eval_storage,
+    hPx', Option.bind_some, Storage.len, hfind, SVal.view_array]
+  subst hnv
+  have hn1 : (w.view.elems.toList ++ [(pushSlot E w.view.shadow.toList).fst]).length =
+      w.view.n + 1 := by
+    rw [List.length_append, SVec.length_toList, List.length_singleton]
+  have hlen : ∀ hL, lenU (w.view.elems.toList ++ [(pushSlot E w.view.shadow.toList).fst]).length hL =
+      lenU (w.view.n + 1) hb := fun hL => Subtype.ext (by
+    show (((w.view.elems.toList ++ [(pushSlot E w.view.shadow.toList).fst]).length : Nat) : Int) =
+      ((w.view.n + 1 : Nat) : Int)
+    rw [hn1])
+  have hone : (Tm.one (C := C) (Γ := Γ) PrimTy.uint rfl).eval x = some (PrimTy.ofLit .uint 1 rfl) :=
+    rfl
+  simp only [Option.bind_eq_bind, Option.bind_some, SVal.view_array, hlen, hone,
+    binopT_sub_one_lenU]
+  rw [Storage.atT_dyn hfind _ (by show ((w.view.n : Nat) : Int) <
+    ((w.view.elems.toList ++ [(pushSlot E w.view.shadow.toList).fst]).length : Int); omega)]
+  rfl
 
-/-- `extend(storage, a)` returns where `next(a)` does. -/
-theorem next_eval_of_extend {σ : State C Γ} {P : Tm C Γ .path} {E : Ty} {τ : Semantics.State}
-    (hs : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ = .ok τ) :
-    ∃ v, (Tm.app1 .next rfl P).eval σ = .ok v := by
-  simp only [Tm.eval, Op2.eval, Op0.eval, pure_bind] at hs
-  obtain ⟨⟨r, segs⟩, hp, hs⟩ := Res.bind_eq_ok.1 hs
-  obtain ⟨⟨τ', n⟩, hpp, -⟩ := Res.bind_eq_ok.1 hs
-  simp only [pushPlaceAt] at hpp
-  obtain ⟨c, hc, hpp⟩ := Res.bind_eq_ok.1 hpp
-  cases c with
-  | array elems sh fx =>
-    exact ⟨_, by simp only [Tm.eval, Op1.eval, hp, hc, Res.ok_bind]; rfl⟩
-  | prim _ | struct _ | map _ _ => nomatch hpp
+theorem extendOf?_some {S : Tm C Γ .st} {E : Ty} {P : Tm C Γ (.path (.ref (.array E)))}
+    (h : S.extendOf? = some ⟨E, P⟩) : S = .app2 .extend (.app0 .storage) P := by
+  cases S with
+  | app2 o st P₀ =>
+    cases o <;> simp only [Tm.extendOf?, Op2.extendArg?, reduceCtorEq] at h
+    split at h
+    · rename_i hst
+      obtain rfl := isStorageS_st hst
+      simp only [Option.some.injEq, Sigma.mk.injEq, Ty.ref.injEq, RefTy.array.injEq] at h
+      obtain ⟨rfl, h⟩ := h
+      cases h
+      rfl
+    · cases h
+  | _ => simp only [Tm.extendOf?, reduceCtorEq] at h
+
+theorem pushOf?_some {Δ : Ctx} {V : Upd C Γ Δ} {E : Ty} {P : Tm C Γ (.path (.ref (.array E)))}
+    {Q : Tm C Δ (.path (.ref (.array E)))} (h : V.pushOf? = some ⟨E, P, Q⟩) :
+    ∃ hΔ : Γ = Δ, V = hΔ ▸ Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) P)) ∧
+      Q = hΔ ▸ P := by
+  unfold Upd.pushOf? at h
+  split at h
+  · rename_i S
+    simp only [Option.map_eq_some_iff] at h
+    obtain ⟨⟨E', P'⟩, hS, he⟩ := h
+    simp only [Sigma.mk.injEq] at he
+    obtain ⟨rfl, he⟩ := he
+    simp only [heq_eq_eq, Prod.mk.injEq] at he
+    obtain ⟨rfl, rfl⟩ := he
+    obtain rfl := extendOf?_some hS
+    exact ⟨rfl, rfl, rfl⟩
+  · cases h
+
+theorem nextOf?_some {T : Ty} {n : Tm C Γ (.path T)} {P : Tm C Γ (.path (.ref (.array T)))}
+    (h : n.nextOf? = some P) : n = .app1 .next P := by
+  cases n with
+  | app1 o P₀ =>
+    cases o <;> simp only [Tm.nextOf?, Op1.nextArg?, reduceCtorEq, Option.some.injEq] at h
+    subst h
+    rfl
+  | _ => simp only [Tm.nextOf?, reduceCtorEq] at h
 
 /-- `pushSplit`'s soundness on the update it splits: a state the parallel
 update lands on, its alias set back to what it held before, is a state the
 push alone lands on, and the alias's own update then lands on the first. -/
-theorem holds_push_alias {m : Modality} {E : Ty} {P : Tm C Γ .path} {R : RefTy}
+theorem holds_push_alias {m : Modality} {R : RefTy} {P : Tm C Γ (.path (.ref (.array (.ref R))))}
     {i : Idx Γ (.alias R)} {φ : Fml C Γ} (hP : P.stablePathSM = true) (σ : State C Γ)
-    (hψ : holds σ (.upd m (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))
+    (hψ : holds σ (.upd m (Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) P)))
       (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ))) :
-    holds σ (.upd m ((Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P))).snoc
-      (.local i (.path (.app1 .next rfl P)))) φ) := by
-  have hψ' : Upd.afterT m σ (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))
+    holds σ (.upd m ((Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) P))).snoc
+      (.local i (.path (.app1 .next P)))) φ) := by
+  have hψ' : Upd.afterT m σ (Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) P)))
       (holds · (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ)) := hψ
   show Upd.afterT m σ _ (holds · φ)
   rw [Upd.afterT_applyV] at hψ' ⊢
-  simp only [Upd.applyV, UpdElem.applyV, UpdElem.globT, Rhs.eval, pure_bind, bind_assoc] at hψ' ⊢
-  cases hS : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ with
-  | error e => simp only [hS, Res.error_bind] at hψ' ⊢; exact hψ'
-  | ok τ =>
-    obtain ⟨v, hv⟩ := next_eval_of_extend hS
-    simp only [hS, Res.ok_bind, hv] at hψ' ⊢
-    intro σ'' hg hl hH
+  simp only [CloseS.applyV_snoc, CloseS.applyV_nil, Option.bind_some, CloseS.elem_storage,
+    CloseS.glob_storageE, CloseS.elem_local, CloseS.rhs_path] at hψ' ⊢
+  cases hS : (Tm.app2 .extend (.app0 .storage) P : Tm C Γ .st).eval σ with
+  | none => simp only [hS, Option.map_none, Option.bind_none] at hψ' ⊢; exact hψ'
+  | some st' =>
+    obtain ⟨r, w, nv, hr, hw, -, -, -⟩ := extend_typed hS
+    have hv : (Tm.app1 .next P).eval σ =
+        some (r.index (.arr .dyn) ((SVal.view w : ArrView (.ref R)).n : Int)) := by
+      rw [CloseS.eval_next, hr, Option.bind_some]
+      simp only [Storage.nextT, hw, Option.map_some]
+    simp only [hS, hv, Option.map_some, Option.bind_some] at hψ' ⊢
+    intro σ'' hg hl
     -- the state the push alone lands on: `σ''` with the alias as it was
-    let w : Option (SRef C (.ref R)) := TEnv.get i σ.env
-    let σ' : State C Γ := σ''.setLocal i w
-    have hg' : σ'.globE = { σ.globE with storage := τ.storage } := hg
-    have hl' : ∀ {t : LTy} (j : Idx Γ t), σ'.getE j = σ.loc t j := by
+    let σ' : State C Γ := σ''.setLocal i
+      (show (LTy.alias R).TDenote C σ''.H from (TEnv.get i σ.env : Option (SRef C (.ref R))))
+    have hg' : σ'.glob = { σ.glob with storage := st' } := hg
+    have hl' : ∀ {t : LTy} (j : Idx Γ t), σ'.getV j = σ.locV t j := by
       intro t j
       by_cases h : i.toNat = j.toNat
       · obtain rfl := Idx.ty_eq_of_toNat h
         obtain rfl := Idx.toNat_inj i j h
-        exact State.getE_setLocal_same σ'' i w
-      · rw [State.getE_setLocal_ne σ'' i j h w, hl j]
-        dsimp only
-        rw [Locs.set_ne _ _ _ h]
-    have h₂ := hψ' σ' hg' hl' hH
+        exact (State.getV_setLocal_same σ'' i _).trans rfl
+      · rw [State.getV_setLocal_ne σ'' i j h, hl j, LocsV.set_ne _ _ _ h]
+    have h₂ := hψ' σ' hg' hl'
     have h₂' : Upd.afterT m σ' (Upd.nil.snoc (.local i (.path (lastSlotS P)))) (holds · φ) := h₂
     rw [Upd.afterT_applyV] at h₂'
-    have hlast := lastSlotS_eval hP hS hg' (fun j => (hl' j).trans rfl)
-    simp only [Upd.applyV, UpdElem.applyV, Rhs.eval, pure_bind, hlast, hv, Res.ok_bind] at h₂'
-    refine h₂' σ'' (by show σ''.globE = σ'.globE; rw [hg']; exact hg) (fun j => ?_)
-      (List.prefix_refl _)
+    have hlast := lastSlotS_evalT hP hS hg' (fun j => hl' j)
+    simp only [CloseS.applyV_snoc, CloseS.applyV_nil, Option.bind_some, CloseS.elem_local,
+      CloseS.rhs_path, hlast, hv, Option.map_some] at h₂'
+    refine h₂' σ'' rfl (fun j => ?_)
     rw [hl j]
-    dsimp only
     by_cases h : i.toNat = j.toNat
     · obtain rfl := Idx.ty_eq_of_toNat h
       obtain rfl := Idx.toNat_inj i j h
-      rw [Locs.set_same, Locs.set_same]
-    · rw [Locs.set_ne _ _ _ h, Locs.set_ne _ _ _ h]
+      rw [LocsV.set_same, LocsV.set_same]
+    · rw [LocsV.set_ne _ _ _ h, LocsV.set_ne _ _ _ h]
       exact (hl' j).symm
 
 /-- **The push, then its alias, give the parallel update**: a state the
 first leaves in reads the alias at the last slot where the second read it
-past the end before the push (`lastSlotS_eval`); the typed state between
+past the end before the push (`lastSlotS_evalT`); the typed state between
 the two is the one the parallel update ends in, its alias as before. -/
 theorem holds_pushSplit {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} {ψ : Fml C Γ}
     (h : U.pushSplit m φ = some ψ) (σ : State C Γ) (hψ : holds σ ψ) : holds σ (.upd m U φ) := by
   unfold Upd.pushSplit at h
   split at h
-  · rename_i V t i n
+  · rename_i V t i r
     split at h
-    · rename_i P Q P' hV hn
-      cases hb : (P.stablePathS && P.beqR P')
-      · simp only [hb, cond_false, reduceCtorEq] at h
-      simp only [hb, cond_true, Option.some.injEq] at h
-      subst h
-      simp only [Bool.and_eq_true] at hb
-      obtain ⟨hs, hbeq⟩ := hb
-      cases Tm.eq_of_beqR hbeq
-      unfold Tm.nextOf? at hn
-      split at hn
-      · rename_i P₀ _
-        cases hn
-        unfold Upd.pushOf? at hV
-        split at hV
-        · rename_i S
-          unfold Tm.extendOf? at hV
-          split at hV
-          · rename_i E P
-            cases hV
-            exact holds_push_alias (Tm.stablePathS_eq_stablePathSM P ▸ hs) σ hψ
-          · cases hV
-        · cases hV
-      · cases hn
+    · rename_i E P Q R P' mk hV hr
+      split at h
+      · rename_i hE
+        subst hE
+        cases hb : (P.stablePathS && P.beqR P')
+        · simp only [hb, cond_false, reduceCtorEq] at h
+        simp only [hb, cond_true, Option.some.injEq] at h
+        subst h
+        simp only [Bool.and_eq_true] at hb
+        obtain ⟨hs, hbeq⟩ := hb
+        cases Tm.eq_of_beqR hbeq
+        obtain ⟨rfl, rfl, rfl⟩ := pushOf?_some hV
+        cases r with
+        | path n =>
+          simp only [Rhs.pushAlias?, Option.map_eq_some_iff, Sigma.mk.injEq] at hr
+          obtain ⟨P₀, hn, he⟩ := hr
+          obtain ⟨hR, he⟩ := he
+          cases hR
+          simp only [heq_eq_eq, Prod.mk.injEq] at he
+          obtain ⟨rfl, rfl⟩ := he
+          obtain rfl := nextOf?_some hn
+          exact holds_push_alias ((Tm.stablePathS_eq_stablePathSM _).symm.trans hs) σ hψ
+        | _ => simp only [Rhs.pushAlias?, reduceCtorEq] at hr
+      · cases h
     · cases h
   · cases h
 
