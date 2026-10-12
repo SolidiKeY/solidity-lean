@@ -340,32 +340,8 @@ computed one by its key (`LineKey`, `Calculus/Chains.lean`'s `Fml.lineKey`),
 which reads a line in names.  So it is read by name too: its terms by the
 readers of `Calculus/SurfaceNotation.lean`, as `elabAtomN` reads them, with
 no type asked of a local a line past the program no longer declares (a
-memory local the program wrote, a capture).  The key's text is the scoped
-line's (`Tm.keyStr`). -/
-
-/-- A term as text, as `Tm.keyStr` writes the scoped term it names. -/
-def Surface.Tm.keyStr {s : Srt} : Surface.Tm C s → String
-  | .pvV x | .pvP x | .pvS x | .pvI x => reprStr x
-  | .app1 (.netOf x) a => s!"({reprStr x})[{Surface.Tm.keyStr a}]"
-  | .app0 o => reprStr o
-  | .app1 o x => s!"{reprStr o}({Surface.Tm.keyStr x})"
-  | .app2 o x y => s!"{reprStr o}({Surface.Tm.keyStr x}, {Surface.Tm.keyStr y})"
-  | .app3 o x y z =>
-    s!"{reprStr o}({Surface.Tm.keyStr x}, {Surface.Tm.keyStr y}, {Surface.Tm.keyStr z})"
-
-/-- An element as text, as `UpdElem.keyStr` writes it. -/
-def Surface.UpdElem.keyStr : Surface.UpdElem C → String
-  | .val x t | .path x t | .mref x t | .store x t => s!"{reprStr x} := {t.keyStr}"
-  | .unset x => s!"{reprStr x} := unset"
-  | .saveNet x => s!"{reprStr x} := net"
-  | .saveNetMt x => s!"{reprStr x} := mtNet"
-  | .storage t => s!"storage := {t.keyStr}"
-  | .memory t => s!"memory := {t.keyStr}"
-  | .selfBalance op a => s!"selfBalance {reprStr op} {a.keyStr}"
-  | .net r op a => s!"net {r.keyStr} {reprStr op} {a.keyStr}"
-  | .pay r a => s!"pay {r.keyStr} {a.keyStr}"
-  | .netMt r a => s!"netMt {r.keyStr} {a.keyStr}"
-  | .setBalance a => s!"setBalance {a.keyStr}"
+memory local the program wrote, a capture): a term's key (`NTm.key`) is
+the text `Tm.keyStr` writes of the scoped term it names. -/
 
 /-- `a = b` with both sides defined, as `Fml.eqD`'s key. -/
 def LineKey.eqD (a b : String) : LineKey := .and (.defined a) (.and (.defined b) (.eq a b))
@@ -377,25 +353,25 @@ def elabKeyFml : RawFml → ElabM LineKey
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
-    pure (.eqD (← tVal C Γ a).keyStr (← tVal C Γ b).keyStr)
+    pure (.eqD (← tVal C Γ a).key (← tVal C Γ b).key)
   | .teq a b => do
     let (Γ, _) ← get
-    pure (.eq (← tVal C Γ a).keyStr (← tVal C Γ b).keyStr)
+    pure (.eq (← tVal C Γ a).key (← tVal C Γ b).key)
   | .defined t => do
     let (Γ, _) ← get
-    pure (.defined (← tVal C Γ t).keyStr)
+    pure (.defined (← tVal C Γ t).key)
   | .peq a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.eqD a.keyStr b.keyStr)
+    pure (.eqD a.key b.key)
   | .pne a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.not (.eqD a.keyStr b.keyStr))
+    pure (.not (.eqD a.key b.key))
   | .cmp op a b => do
     let (Γ, _) ← get
-    let t : Surface.Tm C .val := .app2 (.binop op .uint) (← tVal C Γ a) (← tVal C Γ b)
-    pure (.eqD t.keyStr (Surface.Tm.app0 (.lit (.bool true)) : Surface.Tm C .val).keyStr)
+    let t : NTerm C := .binop op .uint (← tVal C Γ a) (← tVal C Γ b)
+    pure (.eqD t.key (NTerm.lit (C := C) (.bool true)).key)
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabKeyFml φ))
@@ -599,11 +575,11 @@ elab_rules : term
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
     elabAgainst c fun q =>
-      `((tStor $c [] $raw).bind (Tm.resolveN (C := $c) []) |>.map (Tm.quote $q))
+      `((tStor $c [] $raw).bind (·.resolve []) |>.map (Tm.quote $q))
   | `(pt!{ $t:dl_term }) => do
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
     elabAgainst c fun q =>
-      `((tFPath $c [] $raw).bind (Tm.resolveN (C := $c) []) |>.map (Tm.quote $q))
+      `((tFPath $c [] $raw).bind (·.resolve []) |>.map (Tm.quote $q))
 
 end Solidity

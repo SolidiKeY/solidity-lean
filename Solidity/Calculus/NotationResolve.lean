@@ -1,18 +1,17 @@
 import Solidity.Calculus.Step
+import Solidity.Calculus.NamedTerm
 
 /-!
 # Names to positions in formulas
 
 The elaborator reads a program's names as positions (`NCtx.find`,
-`Syntax/Elab.lean`); this module does the same for `Update.lean`'s terms, updates and formulas, so that a
+`Syntax/Elab.lean`); this module does the same for the notation's updates and formulas, so that a
 formula read with names (`dl!{ … }`, a specification's obligation, a
 problem) becomes a scoped one, `Fml C Γ`, over a named context
 `Γ : NCtx` (`docs/intrinsic.md`, M6b).
 
-* **A term's local** is the newest local of its name, which must be of the
-  kind its sort says: a `pv` at the value sort a `.val`, at the path sort an
-  alias, a storage term `old` (`LTy.old`), an identity a memory local, and
-  the ledger `x` of `x[a]` (`netOf`) an `LTy.oldNet`.
+* **A term** is read by name (`NTm`, `Calculus/NamedTerm.lean`): the scoped
+  term it is where it stands, its locals the newest of their names.
 * **An update** assigns a local in scope and declares one that is not: the
   target's type is the reader's (`hint`, what the scope says of the name
   after the update), else the newest local of that name if its kind fits
@@ -65,89 +64,19 @@ attribute [coe] Post.fml
 
 instance {Γ : Ctx} : Coe (Post C Γ) (Fml C Γ) := ⟨Post.fml⟩
 
-/-! ## Terms -/
-
 section Resolve
 
 variable [FreshNames]
 
-/-- The newest local named `x`, of whatever type. -/
-def NCtx.findAny (x : Var) : (Γ : NCtx) → Except String ((t : LTy) × Idx Γ.ctx t)
-  | [] => .error s!"unknown name {x}"
-  | (y, u) :: Γ =>
-    if y = x then .ok ⟨u, .here⟩
-    else do
-      let ⟨t, i⟩ ← NCtx.findAny x Γ
-      pure ⟨t, .there i⟩
-
-/-- `x` read as `what`, where it is a local of type `t`. -/
-def kindError {α : Type} (x : Var) (t : LTy) (what : String) : Except String α :=
-  .error s!"`{x}` is declared as {t.toStr}, read as {what}"
-
-/-- A term of `Update.lean`, its locals read as positions in `Γ`. -/
-def Tm.resolveN (Γ : NCtx) : {s : Srt} → Surface.Tm C s → Except String (Tm C Γ.ctx s)
-  | _, .pvV x => do
-    let ⟨t, i⟩ ← Γ.findAny x
-    match t, i with
-    | .val _, i => pure (.pvV i)
-    | t, _ => kindError x t "a value"
-  | _, .pvP x => do
-    let ⟨t, i⟩ ← Γ.findAny x
-    match t, i with
-    | .alias _, i => pure (.pvP i)
-    | t, _ => kindError x t "a storage alias"
-  | _, .pvS x => do
-    let ⟨t, i⟩ ← Γ.findAny x
-    match t, i with
-    | .old, i => pure (.pvS i)
-    | t, _ => kindError x t "a storage"
-  | _, .pvI x => do
-    let ⟨t, i⟩ ← Γ.findAny x
-    match t, i with
-    | .mem _, i => pure (.pvI i)
-    | t, _ => kindError x t "a memory reference"
-  | _, .app0 o => pure (.app0 o)
-  | _, .app1 o a => do
-    let a' ← Tm.resolveN Γ a
-    match o, a' with
-    | .netOf x, a' => do
-      let ⟨t, i⟩ ← Γ.findAny x
-      match t, i with
-      | .oldNet, i => pure (.netOf i a')
-      | t, _ => kindError x t "a ledger"
-    | o, a' => if h : o.named = false then pure (.app1 o h a') else .error "a named symbol"
-  | _, .app2 o a b => do pure (.app2 o (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
-  | _, .app3 o a b c => do
-    pure (.app3 o (← Tm.resolveN Γ a) (← Tm.resolveN Γ b) (← Tm.resolveN Γ c))
-
 /-! ## Updates -/
 
-/-- The local an element sets, if it sets one. -/
-def _root_.Solidity.Surface.UpdElem.setsLocal? : Surface.UpdElem C → Option Var
-  | .val x _ | .path x _ | .unset x | .mref x _ | .store x _ | .saveNet x | .saveNetMt x => some x
-  | _ => none
-
-/-- Whether a local of type `t` is what the element sets. -/
-def _root_.Solidity.Surface.UpdElem.fits : Surface.UpdElem C → LTy → Bool
-  | .val .., .val _ | .path .., .alias _ | .unset _, .alias _ | .mref .., .mem _
-  | .store .., .old | .saveNet _, .oldNet | .saveNetMt _, .oldNet => true
-  | _, _ => false
-
-/-- The type of the local an element sets, when nothing else says: a
-storage's `old`, a ledger's `oldNet`, a value's `uint`. -/
-def _root_.Solidity.Surface.UpdElem.ownTy? : Surface.UpdElem C → Option LTy
-  | .val .. => some (.val .uint)
-  | .store .. => some .old
-  | .saveNet _ | .saveNetMt _ => some .oldNet
-  | _ => none
-
 /-- The right-hand side an element gives a local of type `t`, read in `Γ`. -/
-def Rhs.resolveN (Γ : NCtx) : (t : LTy) → Surface.UpdElem C → Except String (Rhs C Γ.ctx t)
-  | .val _, .val _ r => do pure (.val (← Tm.resolveN Γ r))
-  | .alias _, .path _ p => do pure (.path (← Tm.resolveN Γ p))
+def Rhs.resolveN (Γ : NCtx) : (t : LTy) → NUpdElem C → Except String (Rhs C Γ.ctx t)
+  | .val _, .val _ r => do pure (.val (← r.resolve Γ))
+  | .alias _, .path _ p => do pure (.path (← p.resolve Γ))
   | .alias _, .unset _ => pure .unset
-  | .mem _, .mref _ i => do pure (.mref (← Tm.resolveN Γ i))
-  | .old, .store _ s => do pure (.store (← Tm.resolveN Γ s))
+  | .mem _, .mref _ i => do pure (.mref (← i.resolve Γ))
+  | .old, .store _ s => do pure (.store (← s.resolve Γ))
   | .oldNet, .saveNet _ => pure .saveNet
   | .oldNet, .saveNetMt _ => pure .saveNetMt
   | t, _ => .error s!"an update sets a local of type {t.toStr} to a term of another kind"
@@ -155,7 +84,7 @@ def Rhs.resolveN (Γ : NCtx) : (t : LTy) → Surface.UpdElem C → Except String
 /-- The type of the local `x` the element `e` sets, in the targets `Δ`: the
 reader's (`hint`), the newest local of that name if it fits, or the
 element's own. -/
-def elemTy (hint : Var → Option LTy) (Δ : NCtx) (x : Var) (e : Surface.UpdElem C) :
+def elemTy (hint : Var → Option LTy) (Δ : NCtx) (x : Var) (e : NUpdElem C) :
     Except String LTy :=
   match hint x with
   | some t => if e.fits t then pure t else fallback
@@ -175,23 +104,23 @@ where
 leaves `Δ`: a local in scope at the element's type is assigned, any other
 declared. -/
 def Upd.resolveN (hint : Var → Option LTy) (Γ : NCtx) :
-    (Δ : NCtx) → Upd C Γ.ctx Δ.ctx → List (Surface.UpdElem C) →
+    (Δ : NCtx) → Upd C Γ.ctx Δ.ctx → List (NUpdElem C) →
       Except String ((Δ' : NCtx) × Upd C Γ.ctx Δ'.ctx)
   | Δ, U, [] => pure ⟨Δ, U⟩
   | Δ, U, .storage s :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.storage (← Tm.resolveN Γ s))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.storage (← s.resolve Γ))) es
   | Δ, U, .memory m :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.memory (← Tm.resolveN Γ m))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.memory (← m.resolve Γ))) es
   | Δ, U, .selfBalance op a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.selfBalance op (← Tm.resolveN Γ a))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.selfBalance op (← a.resolve Γ))) es
   | Δ, U, .net r op a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.net (← Tm.resolveN Γ r) op (← Tm.resolveN Γ a))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.net (← r.resolve Γ) op (← a.resolve Γ))) es
   | Δ, U, .pay r a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.pay (← Tm.resolveN Γ r) (← Tm.resolveN Γ a))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.pay (← r.resolve Γ) (← a.resolve Γ))) es
   | Δ, U, .netMt r a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.netMt (← Tm.resolveN Γ r) (← Tm.resolveN Γ a))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.netMt (← r.resolve Γ) (← a.resolve Γ))) es
   | Δ, U, .setBalance a :: es => do
-    Upd.resolveN hint Γ Δ (U.snoc (.setBalance (← Tm.resolveN Γ a))) es
+    Upd.resolveN hint Γ Δ (U.snoc (.setBalance (← a.resolve Γ))) es
   | Δ, U, e :: es => do
     let some x := e.setsLocal? | .error "an update element of no kind"
     let t ← elemTy hint Δ x e
@@ -216,11 +145,11 @@ def tt : NRead C := fun _ => pure .tt
 /-- `false`. -/
 def ff : NRead C := fun _ => pure .ff
 /-- `a ≐ b`, KeY's `=`. -/
-def eq (a b : Term C) : NRead C := fun Γ => do pure (.eq (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
+def eq (a b : NTerm C) : NRead C := fun Γ => do pure (.eq (← a.resolve Γ) (← b.resolve Γ))
 /-- `a = b`, both sides defined (`Fml.eqD`). -/
-def eqD (a b : Term C) : NRead C := fun Γ => do pure (.eqD (← Tm.resolveN Γ a) (← Tm.resolveN Γ b))
+def eqD (a b : NTerm C) : NRead C := fun Γ => do pure (.eqD (← a.resolve Γ) (← b.resolve Γ))
 /-- `defined(t)`. -/
-def defined (t : Term C) : NRead C := fun Γ => do pure (.defined (← Tm.resolveN Γ t))
+def defined (t : NTerm C) : NRead C := fun Γ => do pure (.defined (← t.resolve Γ))
 /-- `¬φ`. -/
 def not (φ : NRead C) : NRead C := fun Γ => do pure (.not (← φ Γ))
 /-- `φ ∧ ψ`. -/
@@ -234,10 +163,10 @@ def all (x : Var) (p : PrimTy) (φ : NRead C) : NRead C := fun Γ => do
 def conj (φs : List (NRead C)) : NRead C := fun Γ => do pure (Fml.conj (← φs.mapM (· Γ)))
 
 /-- `t = true`, both sides defined: a condition as a formula. -/
-def bool (t : Term C) : NRead C := eqD t (.lit (.bool true))
+def bool (t : NTerm C) : NRead C := eqD t (.lit (.bool true))
 
 /-- `a ⊕ b = true`, defined: a comparison as a formula. -/
-def cmp (op : BinOp) (p : PrimTy) (a b : Term C) : NRead C := bool (.binop op p a b)
+def cmp (op : BinOp) (p : PrimTy) (a b : NTerm C) : NRead C := bool (.binop op p a b)
 
 end NRead
 

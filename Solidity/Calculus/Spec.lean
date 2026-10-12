@@ -13,7 +13,7 @@ names (`NRead`, `Calculus/NotationResolve.lean`), are read with their
 locals as positions where they stand; its
 snapshots are declared by its update at their own types (`Upd.resolveN`),
 `old := storage` an `LTy.old` and `oldNet := net` an `LTy.oldNet`
-(`UpdElem.ownTy?`), so `find(old, count)` reads a local of type `old`; the
+(`NUpdElem.ownTy?`), so `find(old, count)` reads a local of type `old`; the
 call, elaborated scoped in the parameters' context, is placed past them
 (`SProg.chain`), and `result` is declared by it.  The parameters are bound
 by hidden binders (`Fml.bind`, every value), as the closer's free locals

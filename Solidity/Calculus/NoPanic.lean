@@ -11,10 +11,6 @@ panics (`Semantics/NoPanicOps.lean`), so neither does a symbol (`Op1.eval_noPani
 reads a revert (`Modality.after`) while the typed run reads a program with
 `Modality.afterRunTR`: an update taclet's premise and its statement then agree
 on what the box says of a halt.
-
-The `Surface.*` lemmas below (`Surface.Tm.eval_noPanic`,
-`Surface.UpdElem.write_noPanic`, `Surface.Upd.apply_ne_panic`) are kept as the
-external reader's shim (no prover code uses them).
 -/
 
 namespace Solidity
@@ -59,39 +55,5 @@ theorem Op3.eval_noPanic (σ : State) {a b c s : Srt} (o : Op3 a b c s) {ra : a.
     exact NoPanic.bind ha fun _ _ => NoPanic.bind hb fun _ _ =>
       pushAt_noPanic _ _ _ _ fun _ => by simpa only [bind_pure_comp, ne_eq, NoPanic.map] using hc
   all_goals no_panic
-
-/-- **A term never panics.** -/
-theorem Surface.Tm.eval_noPanic (σ : State) {s : Srt} : (t : Surface.Tm C s) → s.NoPanic (t.eval σ)
-  | .pvV x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
-  | .pvP x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
-  | .pvS x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
-  | .pvI x => by simp only [Surface.Tm.eval, Srt.NoPanic]; no_panic
-  | .app0 o => Op0.eval_noPanic σ o
-  | .app1 o a => Op1.eval_noPanic σ o (Surface.Tm.eval_noPanic σ a)
-  | .app2 o a b => Op2.eval_noPanic σ o (Surface.Tm.eval_noPanic σ a) (Surface.Tm.eval_noPanic σ b)
-  | .app3 o a b c =>
-    Op3.eval_noPanic σ o (Surface.Tm.eval_noPanic σ a) (Surface.Tm.eval_noPanic σ b) (Surface.Tm.eval_noPanic σ c)
-
-theorem Surface.UpdElem.write_noPanic (σ₀ : State) (e : Surface.UpdElem C) (τ : State) :
-    NoPanic (e.write σ₀ τ) := by
-  have hv : ∀ t : Term C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
-  have hp : ∀ t : PTerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
-  have hi : ∀ t : ITerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
-  have hs : ∀ t : STerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
-  have hm : ∀ t : MTerm C, NoPanic (t.eval σ₀) := fun t => Surface.Tm.eval_noPanic σ₀ t
-  cases e <;> simp only [Surface.UpdElem.write] <;> no_panic
-
-/-- **An update never panics**: what it reads are terms. -/
-theorem Surface.Upd.apply_ne_panic (U : Surface.Upd C) (σ : State) : U.apply σ ≠ .error .panic := by
-  unfold Surface.Upd.apply
-  suffices h : ∀ (V : Surface.Upd C) (τ : State),
-      NoPanic (V.foldlM (fun τ e => e.write σ τ) τ) from h U σ
-  intro V
-  induction V with
-  | nil => intro τ; simp only [List.foldlM_nil, ne_eq, NoPanic.pure, not_false_eq_true]
-  | cons e V ih =>
-    intro τ
-    simp only [List.foldlM_cons]
-    exact NoPanic.bind (Surface.UpdElem.write_noPanic σ e τ) fun τ' _ => ih τ'
 
 end Solidity

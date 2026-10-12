@@ -52,7 +52,7 @@ section
 open Semantics SemanticsProperties Theory
 variable {C : Contract}
 section Denote
-variable {q : Term C × Term C} {σ : State}
+variable {σ : State}
 
 /-- Two denotations of a sort agree in the Theory: `Equiv` for a value or a
 storage, equal paths. -/
@@ -316,7 +316,6 @@ section
 open Semantics
 variable {C : Contract}
 section RwEval
-variable {q : Term C × Term C}
 
 /-- Where the first reading returns, the second returns the same. -/
 def Srt.Le : (s : Srt) → s.Ev → s.Ev → Prop

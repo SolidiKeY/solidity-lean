@@ -87,6 +87,7 @@ import Solidity.Calculus.ChainRules
 import Solidity.Calculus.Chains
 import Solidity.Calculus.ChainGen
 import Solidity.Calculus.LastLine
+import Solidity.Calculus.NamedTerm
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Spec
@@ -230,6 +231,7 @@ import Solidity.Theory.Bridge.Delete
 import Solidity.Theory.Bridge.Copy
 import Solidity.Theory.Bridge.Push
 import Solidity.Theory.Bridge.Denote
+import Solidity.Calculus.ShimFacts
 import Solidity.Theory.StateWrites
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain

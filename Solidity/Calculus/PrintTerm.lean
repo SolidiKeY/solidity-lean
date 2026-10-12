@@ -25,6 +25,12 @@ namespace Solidity
 
 open Lean Meta
 
+register_option pp.sol.tmField : Bool := {
+  defValue := false
+  descr := "a scoped term symbol inside a `‹…›` of `tm{ … }` prints with field notation \
+            (`s.save p v`); set by `tm{ … }`'s printer (`delabTmS`)"
+}
+
 namespace Delab
 
 section PrintTerm

@@ -14,9 +14,6 @@ wherever `eval` returns — literally for a value and a path, up to
 so an equation between terms that return means what it meant before `holds`
 read it through `denote` (`holds_eqD_iffS`, `Calculus/SoundLoops.lean`).
 
-`Surface.Tm.denote_eval` and `SValT.denote_eval` are kept as the external
-reader's shim (no prover code uses them).
-
 This is the only Theory module that imports `Update` (design R10).
 -/
 
@@ -313,36 +310,5 @@ theorem Op3.denote_eval {σ : State} :
       exact Struct.Equiv.pushT (hs' τ0 hs)
         (StValue.Equiv.trans (StValue.Equiv.stripVal (hv' w hrv)) (SVal.abs_strip w)) _
   | .write, _, _, _, _, _, _, _, _, _ => trivial
-
-/-- **The term bridge**: a term's denotation agrees with its reading
-wherever the reading returns (`Srt.Bridge`). -/
-theorem Surface.Tm.denote_eval {σ : State} : (t : Surface.Tm C s) → Srt.Bridge s (t.denote σ) (t.eval σ)
-  | .pvV y => by
-    intro x h
-    obtain ⟨b, hb, h⟩ := bind_ok_inv h
-    cases b <;> cases h
-    simp only [Surface.Tm.denote, hb]
-  | .pvP y => by
-    intro r segs h
-    have h' : aliasPath σ y = .ok (r, segs) := h
-    simp only [Surface.Tm.denote, h']
-  | .pvS y => by
-    intro τ h
-    obtain ⟨b, hb, h⟩ := bind_ok_inv h
-    cases b with
-    | store st =>
-      cases h
-      simp only [Surface.Tm.denote, hb]
-      exact StValue.Equiv.refl _
-    | _ => cases h
-  | .pvI _ => trivial
-  | .app0 o => o.denote_eval
-  | .app1 o a => o.denote_eval a.denote_eval
-  | .app2 o a b => o.denote_eval a.denote_eval b.denote_eval
-  | .app3 o a b c => o.denote_eval a.denote_eval b.denote_eval c.denote_eval
-
-/-- A stored value that returns denotes it, up to `Equiv`. -/
-theorem SValT.denote_eval {σ : State} {v : SValT C} {w : SVal} (h : v.eval σ = .ok w) :
-    StValue.Equiv (v.denote σ) w.abs := Surface.Tm.denote_eval v w h
 
 end Solidity

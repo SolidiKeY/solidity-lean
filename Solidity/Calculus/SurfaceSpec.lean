@@ -87,7 +87,7 @@ variable {C : Contract}
 whether `\old` and `\result` mean something (an `ensures`), the locals in
 scope (the parameters and the quantified variables), and `\result`'s type. -/
 structure SpecCtx (C : Contract) where
-  storage : STerm C
+  storage : NSTerm C
   ensures : Bool
   locals : List (String × PrimTy)
   result : Option PrimTy
@@ -148,7 +148,7 @@ def SpecExpr.isNum : SpecExpr → Bool
 
 /-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`, `!t`
 defined for a `bool`. -/
-def rangeFml (t : Term C) : PrimTy → NRead C
+def rangeFml (t : NTerm C) : PrimTy → NRead C
   | .uint => .and (NRead.cmp .le .uint (.lit (.int 0)) t) (NRead.cmp .le .uint t (.lit (.int (uintBound - 1))))
   | .int => .and (NRead.cmp .le .int (.lit (.int (-intBound))) t) (NRead.cmp .le .int t (.lit (.int (intBound - 1))))
   | .bool => .eqD (.unop .not .bool t) (.unop .not .bool t)
@@ -160,7 +160,7 @@ storage the contract reaches has them; `⊨` ranges over every storage, where
 `balances` may be no mapping (`balances[a] == \old(balances[a])` is then
 false: a side is undefined) or hold a `bool` (which `delete` resets to
 `false`, not `0`).  solkey's reads are total and typed, and need none. -/
-partial def layoutAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (k : Nat) : List (NRead C) :=
+partial def layoutAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (k : Nat) : List (NRead C) :=
   match T with
   | .prim q =>
     [keys.foldl (fun φ (x, q) => .all x q φ) (rangeFml (.find .storage p) q)]
@@ -188,7 +188,7 @@ mutual
 
 /-- A path of state variables, members and entries, and the type it names:
 `balances[a]` is `balances[a]` at `uint`. -/
-partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × PTerm C)
+partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × NPTerm C)
   | .name x =>
     match C.rootType x with
     | some T => pure (T, .root x)
@@ -213,7 +213,7 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
 
 /-- A value, and its type: a state variable is read from the context's
 storage, `find(storage, count)`, or `find(old, count)` under `\old`. -/
-partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × Term C)
+partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
   | .num n => pure (.uint, .lit (.int n))
   | .bool b => pure (.bool, .lit (.bool b))
   | .result => do
@@ -261,7 +261,7 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
   | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
 
 /-- A read: `.length` of an array, or the word at a path. -/
-partial def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × Term C)
+partial def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
   | .field e "length" => do
     let (T, p) ← e.path ctx
     match T with
@@ -318,7 +318,7 @@ where
 the entry at a key (read in the pre-state), or every entry. -/
 inductive SpecStep (C : Contract) where
   | field (f : String)
-  | key (t : Term C)
+  | key (t : NTerm C)
   | all
 
 /-- A location, checked against the contract: its state variable, the type
@@ -382,7 +382,7 @@ going down, each with the conditions on the keys it was entered at; a word
 one of them covers under conditions `c` is owed only where `¬c`
 (`k ≠ e` for `m[e]`).  A mapping entry is every key, `∀ k`; an array's
 element every index below its length. -/
-partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps : List (NRead C))
+partial def frameAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (hyps : List (NRead C))
     (ls : List (List (NRead C) × List (SpecStep C))) (k : Nat) : List (NRead C) :=
   let here := ls.filter (·.2.isEmpty)
   if here.any (·.1.isEmpty) then [] else
@@ -390,7 +390,7 @@ partial def frameAt (T : Ty) (p : PTerm C) (keys : List (Var × PrimTy)) (hyps :
   let ls := ls.filter (!·.2.isEmpty)
   -- owed where the word was there to begin with: `⊨` also ranges over
   -- storages without it, where both sides halt
-  let owe (a b : Term C) : NRead C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
+  let owe (a b : NTerm C) : NRead C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
   match T with
   | .prim _ => [owe (.find .storage p) (.find (.pv oldVar) p)]
   | .ref (.mapping (.prim K) V) =>
@@ -433,7 +433,7 @@ elaborated scoped, from the parameters in scope (newest first), each
 statement typed where it is read (`SProg`): the scoped obligation places it
 past the locals the update declares (`SProg.chain`, `Calculus/Spec.lean`). -/
 def specPieces (f : String) :
-    Except String (List (NRead C) × List (NRead C) × Surface.Upd C × SProg C × List (NRead C)) := do
+    Except String (List (NRead C) × List (NRead C) × List (NUpdElem C) × SProg C × List (NRead C)) := do
   -- `constructor` names the contract's constructor (`Contract.ctor`)
   let ctor := f == "constructor"
   let some d := if ctor then C.ctor else lookupBy f C.funs
@@ -485,8 +485,8 @@ def specPieces (f : String) :
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
   -- oldNet := mtSt`: the update is parallel, so `old := storage` would bind
   -- the storage it discards)
-  let start : STerm C := if ctor then .mtSt C.vars else .storage
-  let snap : Surface.Upd C :=
+  let start : NSTerm C := if ctor then .mtSt C.vars else .storage
+  let snap : List (NUpdElem C) :=
     (if d.spec.ensures.any SpecExpr.usesOld || d.spec.assignable.isSome then [.store oldVar start]
       else []) ++
     if d.spec.ensures.any SpecExpr.usesOldNet || (d.spec.assignable.getD []).any SpecLoc.usesNet

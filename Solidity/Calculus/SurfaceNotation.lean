@@ -1,6 +1,7 @@
 import Solidity.Calculus.Hyp
 import Solidity.Syntax.Quote
 import Solidity.Calculus.Lower
+import Solidity.Calculus.NamedTerm
 
 /-!
 # Reading concrete formulas: `dl[C]{ φ }`
@@ -59,7 +60,8 @@ What a name is:
   compare program expressions, typed like the operands of Solidity's `==`
   and lowered with `Val.lower`;
 * in a term (either side of `=`, an update) the position decides the sort,
-  since terms are untyped: a state variable is a root, anything else a
+  since a term is read by name (`NTm`, resolved where it stands,
+  `Calculus/NamedTerm.lean`): a state variable is a root, anything else a
   program variable (`pv`); a bare state variable or path in a value position
   is `find(storage, p)`;
 * a name no program in the formula declares is a **parameter**, in scope
@@ -574,7 +576,7 @@ def pathTy (Γ : ECtx) : RawTerm → Option Ty
   | _ => none
 
 /-- The element type of the array a path term names. -/
-def Surface.elemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
+def arrayElemTy (Γ : ECtx) (t : RawTerm) : Except String Ty :=
   match pathTy C Γ t with
   | some (.ref (.array E)) => pure E
   | _ => throw "a push or a pop on a path the contract does not type as an array"
@@ -619,26 +621,27 @@ def memTy (Γ : ECtx) : RawTerm → Option RefTy
 one sort reads through a term of another.  They are one cycle (a value reads
 a storage, a storage a path, a path a value index), tied once by `readers`
 rather than as a `mutual` block, which the compiler handles badly at this
-size. -/
+size.  Each reads a term by name (`NTm`): the scoped term it is where it
+stands. -/
 structure Readers (C : Contract) where
-  val : RawTerm → Except String (Term C)
-  path : RawTerm → Except String (PTerm C)
+  val : RawTerm → Except String (NTerm C)
+  path : RawTerm → Except String (NPTerm C)
   /-- A path in the frame of a `select`: its root a member (`account.balance`
   under `select(storage, alice)`), where `path` would read a name. -/
-  fpath : RawTerm → Except String (PTerm C)
-  stor : RawTerm → Except String (STerm C)
-  sval : RawTerm → Except String (SValT C)
-  ident : RawTerm → Except String (ITerm C)
-  addr : RawTerm → Except String (Surface.MAddr C)
-  mem : RawTerm → Except String (MTerm C)
-  mval : RawTerm → Except String (MValT C)
+  fpath : RawTerm → Except String (NPTerm C)
+  stor : RawTerm → Except String (NSTerm C)
+  sval : RawTerm → Except String (NSValT C)
+  ident : RawTerm → Except String (NITerm C)
+  addr : RawTerm → Except String (NMAddr C)
+  mem : RawTerm → Except String (NMTerm C)
+  mval : RawTerm → Except String (NMValT C)
 
 instance : Inhabited (Readers C) :=
   ⟨⟨fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw "",
     fun _ => throw "", fun _ => throw "", fun _ => throw "", fun _ => throw ""⟩⟩
 
 /-- A term at the value sort. -/
-def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (Term C)
+def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NTerm C)
   | .num n => pure (.lit (.int n))
   | .name "true" => pure (.lit (.bool true))
   | .name "false" => pure (.lit (.bool false))
@@ -676,7 +679,7 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (Term C)
   | .env k => pure (.env k)
 
 /-- A term at the storage-path sort. -/
-def rPath (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
+def rPath (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NPTerm C)
   | .name x =>
     match nameKind C Γ x with
     | .root => pure (.root x)
@@ -699,7 +702,7 @@ def rPath (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
   | _ => throw "not a storage path: a name, `p.f`, `p[t]` or `p[t]@S`"
 
 /-- `rPath` in the frame of a `select`: a name that is no alias is a member, the frame's root. -/
-def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
+def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NPTerm C)
   | .name x =>
     match nameKind C Γ x with
     | .mem => throw s!"`{x}` is a memory reference, not a storage path"
@@ -722,7 +725,7 @@ def rPathFrame (R : Readers C) (Γ : ECtx) : RawTerm → Except String (PTerm C)
 
 /-- A term at the storage sort; a push and a pop are nested
 `save`s over the length. -/
-def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
+def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NSTerm C)
   | .name "storage" => pure .storage
   | .name "mtSt" => pure (.mtSt C.vars)
   | .name x =>
@@ -734,9 +737,9 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
     | .app "save" [s', .at _ _, w], .add _ (.num 1) =>
       pure (.push (← R.stor s') (← R.path b) (← R.sval w))
     | .app "delAt" [s', .at _ _], .add _ (.num 1) =>
-      pure (.pushSlot (← R.stor s') (← R.path b) (← Surface.elemTy C Γ b))
+      pure (.pushSlot (← R.stor s') (← R.path b) (← arrayElemTy C Γ b))
     | .app "delAt" [s', .at _ _], .sub _ (.num 1) => pure (.pop (← R.stor s') (← R.path b))
-    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← Surface.elemTy C Γ b))
+    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b) (← arrayElemTy C Γ b))
     | _, .sub _ (.num 1) => pure (.shrink (← R.stor s) (← R.path b))
     | _, _ => throw "the length of an array is written by a push or a pop"
   | .app "save" [s, p, v] => do
@@ -747,7 +750,7 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (STerm C)
       `select(s, r)`"
 
 /-- What a storage `save` writes. -/
-def rSVal (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (SValT C)
+def rSVal (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (NSValT C)
   | .app "find" [s, p] => do pure (.find (← R.stor s) (← (if s.hasSelect then R.fpath else R.path) p))
   | .app "copyMem" [_, m, i] => do pure (.copyMem (← R.mem m) (← R.ident i))
   | .app "newArr" [T, n] => do pure (.newArr (← allocTy C T) (← R.val n))
@@ -755,7 +758,7 @@ def rSVal (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (SValT C)
   | t => do pure (.val (← R.val t))
 
 /-- A term at the memory-identity sort. -/
-def rIdent (R : Readers C) (Γ : ECtx) : RawTerm → Except String (ITerm C)
+def rIdent (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NITerm C)
   | .name x =>
     match nameKind C Γ x with
     | .root => throw s!"`{x}` is a state variable, not a memory reference"
@@ -770,13 +773,13 @@ def rIdent (R : Readers C) (Γ : ECtx) : RawTerm → Except String (ITerm C)
   | _ => throw "not a memory reference"
 
 /-- A term at the memory-location sort: a member or an element. -/
-def rAddr (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (Surface.MAddr C)
+def rAddr (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (NMAddr C)
   | .field t f => do pure (.field (← R.ident t) f)
   | .at t k => do pure (.at (← R.ident t) (← R.val k))
   | _ => throw "not a memory location: `i.f` or `i[k]`"
 
 /-- A term at the memory sort. -/
-def rMem (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (MTerm C)
+def rMem (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (NMTerm C)
   | .name "memory" => pure .memory
   | .app "write" [m, a, v] => do pure (.write (← R.mem m) (← R.addr a) (← R.mval v))
   | .app "copySt" [m, v] => do pure (.copySt (← R.mem m) (← R.sval v))
@@ -786,7 +789,7 @@ def rMem (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (MTerm C)
 
 /-- What a memory `write` writes: a memory local, a fresh identity or a read
 of a reference (`memTy`) is a reference, anything else a value. -/
-def rMVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (MValT C)
+def rMVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NMValT C)
   | t@(.name x) => do
     if nameKind C Γ x matches .mem then pure (.ref (← R.ident t)) else pure (.val (← R.val t))
   | t@(.app "freshId" _) => do pure (.ref (← R.ident t))
@@ -803,23 +806,23 @@ partial def readers (Γ : ECtx) : Readers C :=
     mem := fun t => rMem C (readers Γ) Γ t, mval := fun t => rMVal C (readers Γ) Γ t }
 
 /-- A term at the value sort. -/
-def tVal (Γ : ECtx) (t : RawTerm) : Except String (Term C) := (readers C Γ).val t
+def tVal (Γ : ECtx) (t : RawTerm) : Except String (NTerm C) := (readers C Γ).val t
 /-- A term at the storage-path sort. -/
-def tPath (Γ : ECtx) (t : RawTerm) : Except String (PTerm C) := (readers C Γ).path t
+def tPath (Γ : ECtx) (t : RawTerm) : Except String (NPTerm C) := (readers C Γ).path t
 /-- A path in the frame of a `select`, its root a member. -/
-def tFPath (Γ : ECtx) (t : RawTerm) : Except String (PTerm C) := (readers C Γ).fpath t
+def tFPath (Γ : ECtx) (t : RawTerm) : Except String (NPTerm C) := (readers C Γ).fpath t
 /-- A term at the storage sort. -/
-def tStor (Γ : ECtx) (t : RawTerm) : Except String (STerm C) := (readers C Γ).stor t
+def tStor (Γ : ECtx) (t : RawTerm) : Except String (NSTerm C) := (readers C Γ).stor t
 /-- What a storage `save` writes. -/
-def tSVal (Γ : ECtx) (t : RawTerm) : Except String (SValT C) := (readers C Γ).sval t
+def tSVal (Γ : ECtx) (t : RawTerm) : Except String (NSValT C) := (readers C Γ).sval t
 /-- A term at the memory-identity sort. -/
-def tIdent (Γ : ECtx) (t : RawTerm) : Except String (ITerm C) := (readers C Γ).ident t
+def tIdent (Γ : ECtx) (t : RawTerm) : Except String (NITerm C) := (readers C Γ).ident t
 /-- A term at the memory-location sort. -/
-def tAddr (Γ : ECtx) (t : RawTerm) : Except String (Surface.MAddr C) := (readers C Γ).addr t
+def tAddr (Γ : ECtx) (t : RawTerm) : Except String (NMAddr C) := (readers C Γ).addr t
 /-- A term at the memory sort. -/
-def tMem (Γ : ECtx) (t : RawTerm) : Except String (MTerm C) := (readers C Γ).mem t
+def tMem (Γ : ECtx) (t : RawTerm) : Except String (NMTerm C) := (readers C Γ).mem t
 /-- What a memory `write` writes. -/
-def tMVal (Γ : ECtx) (t : RawTerm) : Except String (MValT C) := (readers C Γ).mval t
+def tMVal (Γ : ECtx) (t : RawTerm) : Except String (NMValT C) := (readers C Γ).mval t
 
 /-- The type of a storage path expression, from the contract alone. -/
 def RawExpr.pathTy : RawExpr → Option Ty
@@ -858,7 +861,7 @@ object `i` whose type the scope gives (`memTy`: `freshId(addM(memory, S))`,
 `read(memory, carol.account)`, `carol`) binds it as a memory local of that
 type, and `x := t` for a `bool` term `t` (`se1 := x <= 255`) as a `bool`
 local, where `x` is a parameter.  Every right-hand side is read in the scope in front of the update. -/
-def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (Surface.Upd C × ECtx)
+def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) × ECtx)
   | [] => pure ([], Γ)
   | .selfBalance op a :: U => do
     let (U', Γ') ← elabUpd Γ U
@@ -1013,11 +1016,11 @@ where
 
 /-- `a == b`: the operands typed as Solidity types them (the first that is
 not a literal gives the type), then lowered. -/
-def elabCompare (Γ : ECtx) (a b : RawExpr) : Except String (Term C × Term C) := do
+def elabCompare (Γ : ECtx) (a b : RawExpr) : Except String (NTerm C × NTerm C) := do
   let Γn := ECtx.toNCtx Γ
   let t ← if a.isLit then synth C Γn b else synth C Γn a
   let some ⟨p, _⟩ := t.toVal? | throw "`==` compares values, not storage or memory references"
-  pure (((← check C Γn p a).lower.erase Γn.names), ((← check C Γn p b).lower.erase Γn.names))
+  pure (NTm.ofTm Γn.names (← check C Γn p a).lower, NTm.ofTm Γn.names (← check C Γn p b).lower)
 
 /-- Run `x`, then restore the locals in scope (not the capture counter). -/
 def inScope (x : ElabM α) : ElabM α := do
