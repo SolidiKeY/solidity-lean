@@ -592,10 +592,11 @@ def lawUpdCands (C : Expr) (c : Lean.Name) (evalLaw : Bool) (φ : Expr) (scopes 
 variable, or a member of one. -/
 partial def plainStorageS (s : Expr) : Bool :=
   let args := s.getAppArgs
-  if s.isAppOf ``Tm.app0 then (args.back?.map (·.isConstOf ``Op0.storage)).getD false
+  if s.isAppOf ``Tm.app0 then (args.back?.map (·.isAppOf ``Op0.storage)).getD false
   else if s.isAppOf ``Tm.pvS then true
-  else if s.isAppOf ``Tm.app1 && args.size ≥ 3 then
-    args[args.size - 3]!.isAppOf ``Op1.select && plainStorageS args.back!
+  else if s.isAppOf ``Tm.app1 && args.size ≥ 2 then
+    (args[args.size - 2]!.isAppOf ``Op1.select || args[args.size - 2]!.isAppOf ``Op1.selectIn) &&
+      plainStorageS args.back!
   else false
 
 /-- A read of the state as the program found it (`find(storage, p)`,
@@ -603,7 +604,8 @@ partial def plainStorageS (s : Expr) : Bool :=
 that apply to it only respell it, so a search does not take them. -/
 def plainReadAny (t : Expr) : Bool :=
   t.isAppOf ``Tm.app2 && t.getAppArgs.size ≥ 3 &&
-    t.getAppArgs[t.getAppArgs.size - 3]!.isConstOf ``Op2.find &&
+    (t.getAppArgs[t.getAppArgs.size - 3]!.isAppOf ``Op2.find ||
+      t.getAppArgs[t.getAppArgs.size - 3]!.isAppOf ``Op2.findIn) &&
     plainStorageS t.getAppArgs[t.getAppArgs.size - 2]!
 
 /-- The rewrites `~[r]~>` names on the scoped line `φ` while its program is

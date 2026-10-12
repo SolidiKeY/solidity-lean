@@ -56,7 +56,7 @@ example : Fml StandardExample [] := dl!{ { p := unset } true where Person storag
 example : dl!{ { storage := save(save(storage, values[values.length], 7), values.length,
     values.length + 1) } true } =
     (Fml.upd .diamond (Upd.nil.snoc (.storage (Tms.STerm.push Tms.STerm.storage
-      (Tms.PTerm.root "values") (Tms.SValT.val (Tms.Term.lit (.int 7)))))) .tt :
+      (Tms.PTerm.root "values" rfl) (Tms.SValT.val (Tms.Term.lit (p := .uint) ⟨7, rfl⟩))))) .tt :
       Fml StandardExample []) := rfl
 
 /-- info: dl{ ⟨ uint x = 10; ⟩ x = 10 } : Fml StandardExample [] -/
@@ -87,16 +87,16 @@ example : dl!{ ∃ uint y; y == a } = dl!{ ¬(∀ uint y; ¬y == a) } := rfl
 
 /-- `=` is `==`'s equation; `≐` the total one, and `defined` is its own atom. -/
 example : dl!{ a = 1 } = (Fml.bind .box (.user "a") (.val .uint)
-    (.eqD (.pvV .here) (Tms.Term.lit (.int 1))) : Fml StandardExample []) := rfl
+    (.eqD (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample []) := rfl
 example : dl!{ a ≐ 1 } = (Fml.bind .box (.user "a") (.val .uint)
-    (.eq (.pvV .here) (Tms.Term.lit (.int 1))) : Fml StandardExample []) := rfl
+    (.eq (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample []) := rfl
 
 /-- info: dl{ (defined(a) ∧ a ≐ 1) → a = 1 } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ defined(a) ∧ a ≐ 1 → a = 1 }
 
 /-- info: dl{ a = 1 } : Fml StandardExample [] -/
 #guard_msgs in #check (Fml.bind .box (.user "a") (.val .uint)
-  (Fml.eqD (.pvV .here) (Tms.Term.lit (.int 1))) : Fml StandardExample [])
+  (Fml.eqD (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample [])
 
 /-- info: dl{ ¬a = 1 ∧ a < 2 } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ a != 1 ∧ a < 2 }
@@ -196,7 +196,7 @@ error: `⟨[ … ]⟩` is either modality: read the formula at one, `dl![m]{ …
 the place it stands in. -/
 example (φ : Fml StandardExample [.val .uint]) :
     dl!{ { x := 1 } φ } =
-      Fml.upd .diamond (Upd.nil.decl (.user "x") (.val (Tms.Term.lit (.int 1)))) φ := rfl
+      Fml.upd .diamond (Upd.nil.decl (.user "x") (.val (Tms.Term.lit (p := .uint) ⟨1, rfl⟩))) φ := rfl
 
 /-- So is `‹t›`; `true` stays the keyword. -/
 example (φ ψ : Fml StandardExample []) : dl!{ ‹φ› ∧ ψ ∧ true } = Fml.and φ (Fml.and ψ .tt) := rfl
@@ -245,8 +245,9 @@ example (m : Modality) : dl![m]{ a == 1 ⟹ ⟨[ x = 1; ]⟩ true } =
 
 /-- `0 <= se <= selfBalance`, and the read of the ledger. -/
 example : dl!{ 0 <= 5 <= selfBalance } = dl!{ 0 <= 5 ∧ 5 <= selfBalance } := rfl
-example : dl!{ { net := store(net, at(to), select(net, at(to)) - 5) } select(net, at(to)) = x } =
-    dl!{ { net := store(net, at(to), net(to) - 5) } net(to) = x } := rfl
+example : dl!{ { net := store(net, at(to), select(net, at(to)) - 5) } select(net, at(to)) = x
+    where int x } =
+    dl!{ { net := store(net, at(to), net(to) - 5) } net(to) = x where int x } := rfl
 
 end Examples
 

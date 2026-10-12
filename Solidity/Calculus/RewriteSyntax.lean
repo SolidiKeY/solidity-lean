@@ -421,7 +421,7 @@ partial def Walk.valSubterms (t : Expr) (acc : Array Expr := #[]) : MetaM (Array
   let mut acc := acc
   if !acc.contains t && t.getAppFn.constName?.any (·.getPrefix == ``Tm) then
     let ty ← whnf (← inferType t)
-    if ty.isAppOfArity ``Tm 3 && (← whnf (ty.getArg! 2)).isConstOf ``Srt.val then
+    if ty.isAppOfArity ``Tm 3 && (← whnf (ty.getArg! 2)).isAppOf ``Srt.val then
       acc := acc.push t
   for a in t.getAppArgs do acc ← Walk.valSubterms a acc
   return acc
@@ -502,7 +502,7 @@ def Walk.rwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit
     let (C, _, _) ← withMainContext do Walk.provesParts (← getMainTarget)
     for (t₀, inGoal) in ← Walk.rwCandidates do
       unless t₀.isAppOfArity ``Tm.app2 8 &&
-          ((t₀.getArg! 5).isConstOf ``Op2.find || (t₀.getArg! 5).isConstOf ``Op2.len) do continue
+          ((t₀.getArg! 5).isAppOf ``Op2.find || (t₀.getArg! 5).isAppOf ``Op2.len) do continue
       let some (u', pf) ← withMainContext (theoryRewriteS thms C t₀) | continue
       let saved ← saveState
       try
