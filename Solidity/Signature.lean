@@ -1,6 +1,7 @@
 import Solidity.Update
-import Solidity.Semantics.Run
+import Solidity.Semantics.TypedErase
 import Solidity.Semantics.StorageErase
+import Solidity.Theory.StateWrites
 
 /-!
 # KeY's signature, typed
@@ -508,8 +509,9 @@ theorem OpT3.eval_eq_evalM (g : State C []) {a b c s : SrtT} (o : OpT3 C a b c s
 
 /-! ## The bridge: the typed evaluation erased -/
 
-/-- A halt of the untyped evaluation, of any kind. -/
-def Srt.Halts : (s : Srt) → s.Ev → Prop
+/-- A halt of the untyped evaluation, of any kind (`Calculus/RewritePast.lean`'s
+`Srt.Halts`, which sits above this module; one goes at W9.8.5). -/
+def Srt.IsHalt : (s : Srt) → s.Ev → Prop
   | .val, r => ∃ h, r = .error h
   | .path, r => ∃ h, r = .error h
   | .st, r => ∃ h, r = .error h
@@ -535,7 +537,7 @@ def SrtT.okE (g : State C []) : (s : SrtT) → s.Den C g.H → s.erase.Ev
 or some halt where `x` is `none`. -/
 def SrtT.Agree (g : State C []) (s : SrtT) : Option (s.Den C g.H) → s.erase.Ev → Prop
   | some v, r => r = s.okE g v
-  | none, r => s.erase.Halts r
+  | none, r => s.erase.IsHalt r
 
 /-- Where `OpT1.eval` is exact: `net(a)` an `int`. -/
 def OpT1.Exact (g : State C []) {a s : SrtT} : OpT1 C a s → a.Den C g.H → Prop
@@ -599,15 +601,6 @@ theorem SrtT.agree_sv {T : Ty} (x : Option (SVal T)) :
   cases x
   · exact ⟨.revert, rfl⟩
   · rfl
-
-/-- `new R(n)`'s value erased. -/
-theorem newArrT_erase : (R : RefTy) → (n : PrimTy.uint.Denote) → (h : R.newArrOk = true) →
-    (newArrT R n h).erase = newArrVal R n.1
-  | .array E, n, _ => by
-    simp only [newArrT, SVal.erase_array, SVec.erase_ofList, List.map_replicate, SVal.dflt_erase,
-      SList.erase_nil, newArrVal]
-  | .struct _, _, h | .fixed .., _, h | .mapping .., _, h => by
-    simp only [RefTy.newArrOk, Bool.false_eq_true] at h
 
 /-- **The bridge for unary symbols**: exact where `OpT1.Exact` holds. -/
 theorem OpT1.eval_agree {a s : SrtT} (o : OpT1 C a s) {x : Option (a.Den C g.H)}
@@ -867,19 +860,6 @@ theorem OpT2.eval_agree {a b s : SrtT} (o : OpT2 C a b s) {x : Option (a.Den C g
     | (subst hx; subst hy; exact OpT2.agree_some g _ _ _ (he _ _ rfl rfl))
     | (subst hx; obtain ⟨h', rfl⟩ := hy; exact binopT_none_agree g _ _ h')
 
-
-/-- A push whose element is a constant: the element type is not read
-(`Op3.push` passes `.uint`). -/
-theorem pushAt_const (σ : Semantics.State) (E E' : Ty) (r : Name) (segs : List Seg)
-    (val : Res Semantics.SVal) :
-    pushAt σ E r segs (fun _ => val) = pushAt σ E' r segs (fun _ => val) := by
-  unfold pushAt
-  cases σ.findStorage r segs with
-  | error => rfl
-  | ok d =>
-    cases d with
-    | array elems sh fx => cases sh <;> rfl
-    | _ => rfl
 
 /-- A push whose element halts halts. -/
 theorem pushAt_error (σ : Semantics.State) (E : Ty) (r : Name) (segs : List Seg) (h : Halt) :

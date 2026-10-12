@@ -5286,6 +5286,91 @@ jobs), so every `#guard_msgs` pin is unchanged; `sorry` count unchanged
 `check-doc-paths`.  `rg -w 'Tm\.evalT|Tm\.denoteT|Rhs\.evalT'` is empty
 outside this file's earlier records.
 
+### W9.8.1 record (2026-10-12, branch `w98-sorts`)
+
+Additive: two new modules, nothing existing changed, no pin moved.
+
+**`Signature.lean`** (beside `Update.lean`; named for what it is, KeY's
+signature, so the name survives W9.8.5 when `Update.lean`'s untyped one
+goes).  `SrtT` as the spike designed it; `OpT0`–`OpT3` cover every symbol
+of `Op0`–`Op3` but two: `netOf` is a local's (`TmT.netOf`, as `Tm.netOf`),
+and `select(s, r)` has none (a struct's members read as a storage are not a
+`Storage C`; its typed reading is `sfind(s, r)`).  The typed global part is
+`State C []` (`State.glob`), so `globE` and every `_erase` lemma of
+`Semantics/` apply to it unchanged.  An argument is an `Option`, as the
+untyped one is a `Res`, so `&&`/`||` (`binopT`, `BinOp.shortT`) and
+`c ? a : b` stay lazy.  `save` is the program's write (`Storage.write`, a
+struct or an array laid over what is there), as `Op3.save` is
+`writeStorage`.  An index (`at`, `atIn`) takes the word its key is hashed
+as, at `PrimTy.keyTy` (`bool` at `uint`), as `Tm.keyAt` writes it.  The
+evaluators are `casesOn` with `evalM` twins and link theorems (G0); the
+bridge is proved on the twins.
+
+**The bridge** (`OpTn.eval_agree`): on the erased global part the untyped
+evaluation agrees with the typed one (`SrtT.Agree`: `some x` is `.ok` of
+`x` erased, a storage or memory as the global part with it; `none` is some
+halt, its kind not kept, `revert` and `panic` alike).  Exact everywhere
+but where `OpTn.Exact` asks:
+- a memory read or write through an identity (`read`, `iread`, `mlen`,
+  `copyMem`, `write`): the identity has its type in the memory read
+  (`IdOk`).  An identity is a bare `Nat` (a fresh one's type is not
+  static), and the untyped read takes any object with the member, so a term
+  reading one memory's fresh identity in another can read where the typed
+  one reverts;
+- a push onto `2^256 - 1` elements (`pushSlot`, `extend`, `push`): the typed
+  one is out of gas (`Storage.full`), the untyped one writes;
+- `net(a)` and `x[a]`: the entry an `int` (the ledger is unbounded).
+Non-trivial cases: `binop` (the short circuit, `binopT_none_agree`),
+`push` (`Op3.push` passes `.uint` as the element type: `pushAt_const`; a
+halting element, `pushAt_error`), the memory reads and writes
+(`Grown.readT_erase`, `Grown.writeT_erase`, by `HeapErase`'s lemmas), `at`
+(`Storage.atT_erase`); the rest are `Semantics/StorageErase.lean`'s and
+`Semantics/HeapErase.lean`'s `_erase` lemmas.
+
+**`SVal.absT`** (`Storage.absT`): `abs ∘ erase`; `Storage.abs_into`,
+`State.abs_globE` are `rfl`.
+
+**Laws** (`Storage.findOnSave`, `findOnSaveFrameRoot`, `findOnSaveFrame`):
+solkey's `findOnSave` and `findOnSaveDifferent`, the Theory's
+`find_copyTo_same`/`find_copyTo_frame`, where the write lands.  The frame
+below one root is over `Path.Diverges` (two members, slots or keys, across
+the types the paths reach; `SVal.findM_saveM_diverges`), feasible in about
+the lines of `findM_saveM`.
+
+**`Calculus/TypedTerm.lean`**: `TmT` (and `RhsT`, `UpdElemT`, `UpdT`, an
+amount and an address a `uint`), `TmT.erase`, `TmT.eval` (`TmT.rec`,
+`evalM` twin), the term bridge `TmT.eval_agree` under `TmT.Exact`,
+`TmT.findOnSave`, `TmT.findOnSaveFrameRoot`.  The literal
+`find(save(storage, alice.age, sval(1)), alice.age)` (`TmT.aliceAgeRead`)
+elaborates and reads `1` by `decide +kernel`.  Elaboration (three runs,
+`IO.monoNanosNow`): 15–17 ms against 2.2–2.6 ms for the `Tm` literal
+(6–7×, the spike's 2.2–3.6× was on smaller terms); `root "alice" rfl`
+alone is 8.6 ms, `alice.age` 12 ms, `lit ⟨1, rfl⟩` 1.3 ms: the cost is the
+`rfl` of `C.rootType` (`lookupBy` by `String` equality over the roots).
+
+**Open for W9.8.2.**
+- The lowering emits `TmT`: the `rootType`/`fieldType` proofs exist at the
+  scoped syntax (`Loc.root r h`, `Loc.field b f h`) and pass through, so no
+  `rfl` is re-elaborated; a notation reading to `TmT` should do the same
+  (a root by position, or a proof cached per contract).
+- `Lands` on `TmT`: `RhsT` has no `eval` yet.  A memory local's right-hand
+  side is an identity of a grown heap (`alloc`, `copy`), so `Upd.held`'s
+  typed form must carry the `Grown` heap the update leaves (as
+  `UpdElem.memory` does) and type the identity in it (`HRef.ofId?`), or
+  take `IdOk` as a landing premise.
+- `select`: a chain line `find(select(s, alice), age)` has no typed
+  reading; either a struct-rooted storage sort or the chains print
+  `find(s, alice.age)`.
+- `Srt.IsHalt` duplicates `Calculus/RewritePast.lean`'s `Srt.Halts`
+  (above this module); one goes at W9.8.5.
+- The term-level frame below one root needs a divergence test on `TmT`
+  paths (W9.8.4).
+
+**Checked**: `lean_build` of the default targets (293 jobs), both new
+modules without warning; `sorry` count unchanged (19); `check-orphans`
+(311 reachable; the one orphan is the spike's git-ignored scratch module),
+`check-doc-paths`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
