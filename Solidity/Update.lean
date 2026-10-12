@@ -656,7 +656,6 @@ def Surface.Tm.denote (σ : State) : Surface.Tm C s → s.Den
 
 attribute [tm_denote] Surface.Tm.denote Op0.denote Op1.denote Op2.denote Op3.denote
 
-
 /-- A binop that returns on a halting right operand short-circuited, so it
 returns the same on any.  `denote` hands `evalBinop` the right operand's
 `toRes`, which is not `eval`'s halt where `eval` halts. -/
@@ -679,7 +678,6 @@ an index and `newArr`'s size are read with the Theory's total cast. -/
 theorem Denote.asInt_prim_of_asInt {v : Value} {i : Int} (h : v.asInt = .ok i) :
     asInt (.prim v) = i := by
   cases v <;> cases h; rfl
-
 
 end Denote
 
@@ -893,14 +891,6 @@ def PrimTy.admits : PrimTy → Value → Prop
   | .uint, .int n => 0 ≤ n ∧ n < uintBound
   | .int, .int n => -intBound ≤ n ∧ n < intBound
   | _, _ => False
-
-/-- A value of the type is one decoding accepts. -/
-theorem PrimTy.admits_iff_fits (p : PrimTy) (v : Value) : p.admits v ↔ v.fits p = true := by
-  cases p <;> cases v <;> simp [PrimTy.admits, PrimVal.fits]
-
-/-- `σ'` is `σ` with the locals `xs` bound to values of their types, as an
-outcome's data binds them. -/
-def Binds (xs : List (PrimTy × Var)) (σ σ' : State) : Prop := ∃ vs, bindData xs vs σ = .ok σ'
 
 /-! ## Frames
 
@@ -1264,20 +1254,6 @@ theorem Surface.UpdElem.write_frame {σ₀ σ₀' τ τ' : State} (h₀ : EnvAgr
     simp only [Surface.UpdElem.write, a.eval_frame h₀ hv]
     agree_run h
     exact ⟨h.storage, h.heap, h.nextId, h.net, h.env, rfl, h.tx⟩
-
-theorem Surface.Upd.foldl_frame {σ₀ σ₀' : State} (h₀ : EnvAgreeExcept ns σ₀ σ₀') :
-    (U : Surface.Upd C) → Avoids (Surface.Upd.vars U) ns → ∀ {τ τ' : State}, EnvAgreeExcept ns τ τ' →
-      ResultsAgree ns (U.foldlM (fun τ e => e.write σ₀ τ) τ)
-        (U.foldlM (fun τ e => e.write σ₀' τ) τ')
-  | [], _, _, _, h => h
-  | e :: U, hv, _, _, h => by
-    simp only [List.foldlM_cons]
-    exact ResultsAgree.bind (e.write_frame h₀ h hv.left) fun _ _ h' =>
-      Surface.Upd.foldl_frame h₀ U hv.right h'
-
-theorem Surface.Upd.apply_frame {σ τ : State} (hag : EnvAgreeExcept ns σ τ) (U : Surface.Upd C)
-    (hv : Avoids (Surface.Upd.vars U) ns) : ResultsAgree ns (U.apply σ) (U.apply τ) :=
-  Surface.Upd.foldl_frame hag U hv hag
 
 theorem Modality.after_frame (m : Modality) {p q : State → Prop} {r r' : Res State}
     (hr : ResultsAgree ns r r') (hpq : ∀ a b, EnvAgreeExcept ns a b → (p a ↔ q b)) :

@@ -465,8 +465,7 @@ theorem Tm.atOrBelow_eval {p : Tm C Γ .path} {σ : EState C Γ} {r : Name} {seg
   · obtain ⟨tail, -, hf, hq⟩ := Tm.fieldsBelow_eval hp q h
     exact ⟨tail, hf, hq⟩
 
-/-- The word read off the writes (`Tm.findLitBy`) is the word a run reads
-(`Surface.Tm.findLitFBy_eval`). -/
+/-- The word read off the writes (`Tm.findLitBy`) is the word a run reads. -/
 theorem Tm.findLitBy_eval {q : Tm C Γ .path} {σ : EState C Γ} {r : Name} {sq : List Seg}
     (eq : q.eval σ = .ok (r, sq)) :
     (s : Tm C Γ .st) → {w : Value} → s.findLitBy (·.sameSegs q) (·.diverges q) = some w →
@@ -2028,12 +2027,6 @@ def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLawS t t') : LawCov C Γ u
   fwd := r.sound
   back _ _ _ hc hU := r.back hc hU
 
-/-- A literal law, under any update: it is exact. -/
-def LawCov.lit {t t' : Tm C Γ .val} (r : LitLaw t t') : LawCov C Γ .val t t' where
-  chk _ := true
-  fwd σ _ hx := (r.evalEq σ) ▸ hx
-  back _ σ _ _ _ _ hx := (r.evalEq σ) ▸ hx
-
 /-! ## Pins: the checks decide by `rfl` -/
 
 /-! ## A premise about closed terms, at any scope -/
@@ -2135,6 +2128,5 @@ example : EvalLawS (Tm.app2 .read (.app3 .write (.app0 .memory) (.app2 .mat fres
   .readWriteDifferent
 
 end Pins
-
 
 end Solidity

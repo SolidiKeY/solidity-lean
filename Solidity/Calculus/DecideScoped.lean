@@ -111,7 +111,7 @@ section Terms
 
 variable {Γ : Ctx}
 
-/-- The storage a storage variable is bound to (`Surface.Tm.storLocal?`). -/
+/-- The storage a storage variable is bound to. -/
 def _root_.Solidity.Tm.storLocalS (ρ : SymS) : Tm C Γ .st → Option LStor
   | .pvS i =>
     match ρ.get i.toNatR with
@@ -119,12 +119,12 @@ def _root_.Solidity.Tm.storLocalS (ρ : SymS) : Tm C Γ .st → Option LStor
     | _ => none
   | _ => none
 
-/-- `storage` itself (`Surface.Tm.isStorage`). -/
+/-- `storage` itself. -/
 def _root_.Solidity.Tm.isStorageS {s : Srt} : Tm C Γ s → Bool
   | .app0 .storage => true
   | _ => false
 
-/-- A storage variable (`Surface.Tm.isPvS`). -/
+/-- A storage variable. -/
 def _root_.Solidity.Tm.isPvSS : Tm C Γ .st → Bool
   | .pvS _ => true
   | _ => false
@@ -185,8 +185,8 @@ def _root_.Solidity.Tm.toLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
   | _, .app2 o a b => Op2.toLAtS ρ o a (a.toLSM ρ) (b.toLSM ρ)
   | _, .app3 o a b c => Op3.toLAtS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ)
 
-/-- **A term with the updates pushed in, its locals read by position**
-(`Surface.Tm.toL`), by the recursor. -/
+/-- **A term with the updates pushed in, its locals read by position**, by
+the recursor. -/
 @[implemented_by Tm.toLSM]
 def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
   Tm.rec (motive := fun s _ => s.LTy)
@@ -255,7 +255,7 @@ def _root_.Solidity.Tm.inLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → Bool
   | _, .app3 o a b c =>
     Op3.inLS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ) (a.inLSM ρ) (b.inLSM ρ) (c.inLSM ρ)
 
-/-- **The fragment, by position** (`Surface.Tm.inL`), by the recursor. -/
+/-- **The fragment, by position**, by the recursor. -/
 @[implemented_by Tm.inLSM]
 def _root_.Solidity.Tm.inLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : Bool :=
   Tm.rec (motive := fun _ _ => Bool)
@@ -303,7 +303,7 @@ def _root_.Solidity.Op2.shapeS {a b s : Srt} : Op2 a b s → Tm C Γ a → Bool 
   | .len, s, _, y => s.isStorageS && y
   | _, _, _, _ => false
 
-/-- The terms `sameAt` compares (`Surface.Tm.sameShape`). -/
+/-- The terms `sameAt` compares. -/
 def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ => true
   | _, .pvS _ | _, .pvI _ | _, .netOf _ _ => false
@@ -330,8 +330,7 @@ def _root_.Solidity.Tm.isLitLikeS : Tm C Γ .val → Bool
 def _root_.Solidity.Tm.eqLitS (a b : Tm C Γ .val) : Bool :=
   (a.isLitLikeS && b.isAtomS) || (b.isLitLikeS && a.isAtomS)
 
-/-- The slot-level path of a stale alias, and of its members
-(`Surface.Tm.slotPath?`). -/
+/-- The slot-level path of a stale alias, and of its members. -/
 def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Option LPath
   | _, .pvP i =>
     match ρ.get i.toNatR with
@@ -527,7 +526,7 @@ def _root_.Solidity.Upd.view {Δ : Ctx} (U : Upd C Γ Δ) : UView C Γ :=
   Upd.rec (motive := fun _ _ => UView C Γ) .zero (fun _ e ih => ih.add e.toElemS)
     (fun _ _ r ih => ih.add (.rhs r)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
-/-- What a right-hand side binds its local to (`Surface.UpdElem.toL`). -/
+/-- What a right-hand side binds its local to. -/
 def _root_.Solidity.Rhs.actS (ρ : SymS) {t : LTy} : Rhs C Γ t → Option SymB
   | .val t => some (.val (t.toLS ρ))
   | .path p => some (.path (p.toLS ρ))
@@ -580,7 +579,7 @@ def ElemS.guard (ρ : SymS) : ElemS C Γ → LTerm
     | none => .err
   | .glob _ => .err
 
-/-- An element in the fragment (`Surface.UpdElem.inL`). -/
+/-- An element in the fragment. -/
 def ElemS.inLS (ρ : SymS) : ElemS C Γ → Bool
   | .rhs r => r.inLS ρ
   | .glob (.local _ r) => r.inLS ρ

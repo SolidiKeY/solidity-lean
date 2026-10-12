@@ -22,23 +22,6 @@ def maxIdx : List Var → Nat
   | [] => 0
   | x :: xs => max x.idx (maxIdx xs)
 
-/-- Every variable's index is at most the largest index in the list.
-
-Example: after Step 2 on `alice.account.balance = 10; uint x = alice.account.balance;`
-the formula mentions `sp1`, so `maxIdx` is at least `1`, and the read's
-receiver is captured as `sp2`, not as `sp1` again. -/
-theorem le_maxIdx {x : Var} : ∀ {xs : List Var}, x ∈ xs → x.idx ≤ maxIdx xs
-  | _ :: _, .head _ => Nat.le_max_left _ _
-  | _ :: _, .tail _ h => Nat.le_trans (le_maxIdx h) (Nat.le_max_right _ _)
-
-/-- A list whose variables all occur in another has no larger `maxIdx`. -/
-theorem maxIdx_le {xs ys : List Var} (h : ∀ x ∈ ys, x ∈ xs) : maxIdx ys ≤ maxIdx xs := by
-  induction ys with
-  | nil => exact Nat.zero_le _
-  | cons y ys ih =>
-    simp only [maxIdx]
-    exact Nat.max_le.2 ⟨le_maxIdx (h y (.head _)), ih (fun x hx => h x (.tail _ hx))⟩
-
 /-- The largest index of two lists is the larger of theirs: `[x, se1] ++ [sp2]`
 has `2`.  With it the fresh index of a line whose postcondition `φ` names no
 fresh variable is computed without knowing `φ` (`Chains.lean`). -/
@@ -46,7 +29,6 @@ theorem maxIdx_append (xs ys : List Var) : maxIdx (xs ++ ys) = max (maxIdx xs) (
   induction xs with
   | nil => exact (Nat.zero_max _).symm
   | cons x xs ih => simp only [List.cons_append, maxIdx, ih, Nat.max_assoc]
-
 
 /-- Which rules a derivation may use: solkey's (`Taclet`), or all of them
 (`LeanTaclet` too). -/
@@ -95,7 +77,6 @@ def sequentFml (hs : Array (TSyntax `dl_hyp)) (φ : TSyntax `dl_fml) : MacroM (T
     | _ => Macro.throwUnsupported
 
 end Expand
-
 
 end Sequent
 

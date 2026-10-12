@@ -110,10 +110,8 @@ example : ⊨ dl!{ { y := 3 } { y := 4 } y = 4 } := by
   sol_upd .applyOnRigid
   sol_close
 
-/-- `x = x;` leaves `x := x`.  On the erasure it halts where `x` holds no
-value, and dropping it was a lemma applied by hand
-(`Surface.UpdElem.elimSelf_box`); in a typed state a local always holds
-one, so the scoped leaf closes as it is. -/
+/-- `x = x;` leaves `x := x`.  In a typed state a local always holds a
+value, so the scoped leaf closes as it is. -/
 theorem selfAssign : ⊨ dl!{ [ x = x; y = 3; ] y == 3 } := by
   sol_symex
   sol_merge

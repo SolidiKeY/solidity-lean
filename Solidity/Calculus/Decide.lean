@@ -675,19 +675,6 @@ the location up to the last index is there, live.  What the program's checks
 leave of a path it took (`PTerm.toL_chk`). -/
 def LiveTo (T : Semantics.SVal) (qs : List Seg) : Prop := ∃ c, T.findLive (lastAtSegs qs) = .ok c
 
-/-- What a name holds after the updates, against what its symbol says; a
-memory local's name read in the births `B` of the updates' memory. -/
-def EnvRel (σ τ : Semantics.State) (B : MemNames.Births) (x : Var) : Option SymB → Prop
-  | none => τ.getEnv x = σ.getEnv x
-  | some (.val t) => ∃ v, t.eval σ = .ok v ∧ τ.getEnv x = .ok (.val v)
-  | some (.path q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
-      τ.getEnv x = .ok (.spath r segs) ∧ LiveTo (.struct τ.storage) (.field r :: segs)
-  | some (.stale q) => ∃ r segs, q.eval σ = .ok (.field r :: segs) ∧
-      τ.getEnv x = .ok (.spath r segs)
-  | some (.stor s) => ∃ st, s.eval σ = .ok (.struct st) ∧ τ.getEnv x = .ok (.store st)
-  | some (.mref i) => ∃ n, LId.evalR B i = .ok n ∧ τ.getEnv x = .ok (.mref n)
-  | some .unset => τ.getEnv x = .ok .unset
-
 /-- The memory `M` runs from `σ` to the heap and the next identity of `τ`. -/
 def MemAt (σ : Semantics.State) (M : LMem) (τ : Semantics.State) : Prop :=
   ∃ μ B, M.run σ = .ok (μ, B) ∧ μ.HeapEq τ
@@ -697,31 +684,6 @@ theorem MemAt.of_heap {σ τ τ' : Semantics.State} {M : LMem} (h : MemAt σ M �
     (hn : τ'.nextId = τ.nextId) : MemAt σ M τ' := by
   obtain ⟨μ, B, hr, h₁, h₂⟩ := h
   exact ⟨μ, B, hr, h₁.trans hh.symm, h₂.trans hn.symm⟩
-
-/-- `τ` is what the updates `ρ` stand for, applied in `σ`: its storage is the
-stack of writes read in `σ`, each name holds what its symbol reads in `σ`,
-and its heap and next identity are what the memory's run leaves. -/
-structure Rel (σ : Semantics.State) (ρ : Sym) (τ : Semantics.State) : Prop where
-  stor : ρ.stor.eval σ = .ok (.struct τ.storage)
-  env : ∀ x, EnvRel σ τ (ρ.mem.births σ) x (lookupBy x ρ.env)
-  tx : ∀ k, τ.envVal k = σ.envVal k
-  mem : MemAt σ ρ.mem τ
-
-/-- Binding a name keeps the relation: after `uint y = balances[k];`, `y`
-holds what `balances[k]` reads. -/
-theorem Rel.bind {σ τ : Semantics.State} {ρ : Sym} (h : Rel σ ρ τ) (x : Var) (b : SymB) (bd : Binding)
-    (hb : EnvRel σ (τ.setEnv x bd) (ρ.mem.births σ) x (some b)) :
-    Rel σ { ρ with env := (x, b) :: ρ.env } (τ.setEnv x bd) := by
-  refine ⟨h.stor, fun y => ?_, fun k => by rw [← h.tx k]; cases k <;> rfl,
-    h.mem.of_heap rfl rfl⟩
-  by_cases hy : y = x
-  · subst hy; simpa only [lookupBy, ↓reduceIte] using hb
-  · have := h.env y
-    simp only [lookupBy, hy, if_false]
-    revert this
-    have hst : (τ.setEnv x bd).storage = τ.storage := rfl
-    rcases lookupBy y ρ.env with _ | ⟨t⟩ | ⟨q⟩ | _ <;>
-      simp only [EnvRel, State.getEnv_setEnv_ne hy, imp_self, hst]
 
 /-- A symbol the updates bound reads only what the updates read. -/
 theorem lookupBy_vars {x y : Var} {b : SymB} : (env : List (Var × SymB)) →
@@ -1338,25 +1300,6 @@ theorem isIntL_ret (σ : Semantics.State) (t : LTerm) :
         | bool b => rw [ht] at hv; cases hv
     · rintro ⟨i, hi⟩
       exact ⟨.bool true, by simp only [LTerm.eval, hi, Res.ok_bind, Value.asInt, ite_self]⟩
-
-/-- The symbols of a term, the measure the proofs below recurse on. -/
-def _root_.Solidity.Surface.Tm.lsize : Surface.Tm C s → Nat
-  | .app1 _ a => a.lsize + 1
-  | .app2 _ a b => a.lsize + b.lsize + 1
-  | .app3 _ a b c => a.lsize + b.lsize + c.lsize + 1
-  | .pvV _ | .pvP _ | .pvS _ | .pvI _ | .app0 _ => 0
-
-/-- `x.lsize < n` for a direct subterm `x` of a term of size below `n + 1`. -/
-macro "lsize_tac" : tactic => `(tactic| (simp only [Surface.Tm.lsize] at *; omega))
-
-/-! The statements below, one per sort, for the terms of fewer than `n`
-symbols: each sort's step is its own declaration, proved from the others at
-`n` (`Rel.all_ok` puts them together by induction on `n`). -/
-
-section
-variable {σ τ : Semantics.State} {ρ : Sym}
-
-end
 
 /-- An equation of the target language holds when both sides return, with
 one value. -/

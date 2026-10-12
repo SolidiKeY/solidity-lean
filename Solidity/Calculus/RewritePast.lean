@@ -1297,7 +1297,7 @@ def Op0.withStS (S : Tm C Γ .st) : {s : Srt} → Op0 s → Tm C Γ s
   | _, .memory => .app0 .memory
   | _, .mtSt vs => .app0 (.mtSt vs)
 
-/-- A term with `S` for every `storage` (`Surface.Tm.withSt`). -/
+/-- A term with `S` for every `storage`. -/
 def Tm.withStS (S : Tm C Γ .st) : {s : Srt} → Tm C Γ s → Tm C Γ s
   | _, .pvV i => .pvV i
   | _, .pvP i => .pvP i
@@ -1310,7 +1310,7 @@ def Tm.withStS (S : Tm C Γ .st) : {s : Srt} → Tm C Γ s → Tm C Γ s
   | _, .app3 o a b c => .app3 o (Tm.withStS S a) (Tm.withStS S b) (Tm.withStS S c)
 
 /-- Every storage read of the term is a `storage` term, and no ledger
-variable is read (`Surface.Tm.stExplicit`). -/
+variable is read. -/
 def Tm.stExplicitS : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => true
   | _, .netOf _ _ => false

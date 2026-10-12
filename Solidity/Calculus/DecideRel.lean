@@ -5,10 +5,8 @@ import Solidity.Calculus.DecideScoped
 
 `Fml.toLS` (`Calculus/DecideScoped.lean`) lowers a scoped term by position.
 Its soundness is proved here on the scoped term itself, over the scoped
-state (`EState`) and the scoped reading `Tm.eval`, not through the term's
-erasure: each statement and each step below is the erased reduction's
-(`Calculus/Decide.lean`, `TermOK` to `MValOK`, `STerm.toL_eval`,
-`pair_sound`, `Surface.UpdElem.toL_sound`) restated on `Tm C Γ s`.
+state (`EState`) and the scoped reading `Tm.eval`: one statement a sort
+(`TermOKS` to `MValOKS`), proved together by induction on the size.
 
 `RelU σ ρ τ` is what relates the reduction's state `ρ` to the scoped state
 `τ`, read in `σ`: the positions are `ρ`'s keys (`SymS.Ok`, distinct, none
@@ -162,8 +160,7 @@ section Terms
 
 variable {Γ : Ctx}
 
-/-- The symbols of a term, the measure the proofs below recurse on
-(`Surface.Tm.lsize`). -/
+/-- The symbols of a term, the measure the proofs below recurse on. -/
 def _root_.Solidity.Tm.lsize : {s : Srt} → Tm C Γ s → Nat
   | _, .app1 _ _ a => a.lsize + 1
   | _, .app2 _ a b => a.lsize + b.lsize + 1
@@ -1061,7 +1058,7 @@ theorem save_rootS (τ : EState C Γ) (r : Name) (segs : List Seg) (new : Semant
       τ.glob.saveStorage r segs new >>= fun τ' => .ok (.struct τ'.storage) :=
   save_root τ.glob r segs new
 
-/-- **A storage term, pushed in, is the write it made** (`STerm.toL_eval`). -/
+/-- **A storage term, pushed in, is the write it made.** -/
 theorem RelU.stor_eval (h : RelU σ ρ τ) :
     (s : Tm C Γ .st) → s.inLSM ρ = true →
       Sim ((s.toLSM ρ).eval σ) (s.eval τ >>= fun τ' => .ok (.struct τ'.storage))
@@ -1585,8 +1582,7 @@ theorem storage_eq_of_stor {Δ : Ctx} {ρ₁ : SymS} {τ₁ : EState C Δ} {B₀
   exact e.symm
 
 /-- **A right-hand side, read**: its guard returns exactly where it does,
-and what it binds holds its value (`Surface.UpdElem.toL_sound` on one
-local). -/
+and what it binds holds its value. -/
 theorem RelU.rhs (h₀ : RelU σ ρ₀ τ₀) {t : LTy} (r : Rhs C Γ t) (hr : r.inLS ρ₀ = true)
     {st : List (Name × Semantics.SVal)} {B : MemNames.Births}
     (hB : r.needsMem = true → ρ₀.sym.mem.births σ <+: B)
@@ -1694,7 +1690,7 @@ theorem writeS_pay {Δ : Ctx} (τ : EState C Δ) (r a : Tm C Γ .val) :
 
 /-- **One element, written**, its terms read in `τ₀` (`ρ₀`) and written
 into `τ₁` (`ρ₁`): its guard returns exactly where it writes, and the state
-it leaves is its act's (`Surface.UpdElem.toL_sound`, by position).  What
+it leaves is its act's.  What
 it binds reads the memory or the storage `ρ₀` left, so `ρ₁` must leave
 them as they were where it does. -/
 theorem RelU.elem (h₀ : RelU σ ρ₀ τ₀) {Δ : Ctx} {ρ₁ : SymS} {τ₁ : EState C Δ}
@@ -2271,7 +2267,7 @@ theorem RelU.pairCopy_key (h : RelU σ ρ₀ τ₀) {p : Tm C Γ .path} (hp : p.
 open MemNames in
 /-- **An allocation's pair, read**: its guard returns exactly where the
 identity and the memory do, and the memory's run names the identity at the
-next ordinal (`pair_sound`'s, by position). -/
+next ordinal. -/
 theorem RelU.pairKey (h : RelU σ ρ₀ τ₀) {i : Tm C Γ .ident} {mm : Tm C Γ .mem} {g : LTerm}
     {M : LMem} (hq : pairLS ρ₀ i mm = some (g, M)) (hm : pairInS ρ₀ mm = true) :
     (Rets (g.eval σ) ↔ ∃ id μ', i.eval τ₀ = .ok id ∧ mm.eval τ₀ = .ok μ') ∧

@@ -230,11 +230,6 @@ def imp (φ ψ : NRead C) : NRead C := fun Γ => do pure (.imp (← φ Γ) (← 
 /-- `∀ p x; φ`: `φ` read with `x` pushed. -/
 def all (x : Var) (p : PrimTy) (φ : NRead C) : NRead C := fun Γ => do
   pure (.all x p (← φ ((x, .val p) :: Γ)))
-/-- `{U} φ`: `φ` read past the locals the update declares (`Upd.resolveN`). -/
-def upd (hint : Var → Option LTy) (m : Modality) (U : Surface.Upd C) (φ : NRead C) : NRead C :=
-  fun Γ => do
-    let ⟨Δ, U'⟩ ← Upd.resolveN hint Γ Γ .nil U
-    pure (.upd m U' (← φ Δ))
 /-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none (`Fml.conj`). -/
 def conj (φs : List (NRead C)) : NRead C := fun Γ => do pure (Fml.conj (← φs.mapM (· Γ)))
 

@@ -545,7 +545,7 @@ def Tm.extendsAny (f : Tm C Γ .path → Bool) : {u : Srt} → Tm C Γ u → Boo
 /-- `q` goes on below `p` (`PTerm.extends`). -/
 def Tm.extends (q p : Tm C Γ .path) : Bool := q.extendsAny (·.beqR p)
 
-/-- The state variable a path is, if it is one alone (`Surface.Tm.root?`). -/
+/-- The state variable a path is, if it is one alone. -/
 def Tm.root? : {u : Srt} → Tm C Γ u → Option Name
   | _, .app0 (.root r) => some r
   | _, _ => none

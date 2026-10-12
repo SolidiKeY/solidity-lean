@@ -33,11 +33,6 @@ section WP
 
 variable {α β : Type} {m : Modality}
 
-/-- `Modality.after` is `wp` at `State`: `⟨ x = 1; ⟩ x == 1` holds where
-running `x = 1;` returns a state with `x == 1`. -/
-theorem Modality.after_eq_wp (p : State → Prop) (r : Res State) : m.after p r = m.wp r p := by
-  cases r <;> rfl
-
 /-- A run that returns: `uint x = 10;` leaves `x == 10` to check. -/
 @[simp] theorem Modality.wp_ok {a : α} {P : α → Prop} : m.wp (.ok a) P ↔ P a := Iff.rfl
 

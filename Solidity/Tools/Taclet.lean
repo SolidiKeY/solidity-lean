@@ -170,7 +170,7 @@ def scopedOnlyRoots : List Lean.Name :=
    ``Solidity.Fold, ``Solidity.FShape, ``Solidity.Grew,
    ``Solidity.Grown, ``Solidity.Heap, ``Solidity.Held, ``Solidity.HRef, ``Solidity.HTy,
    ``Solidity.Hyps, ``Solidity.LeanTaclet, ``Solidity.MFields, ``Solidity.MObj,
-   ``Solidity.MVal, ``Solidity.Natural, ``Solidity.NaturalA, ``Solidity.NCtx, ``Solidity.Objs,
+   ``Solidity.MVal, ``Solidity.NCtx, ``Solidity.Objs,
    ``Solidity.Out, ``Solidity.Path, ``Solidity.Proves, ``Solidity.ProvesC, ``Solidity.RemOk,
    ``Solidity.Rhs, ``Solidity.Rule, ``Solidity.RunInv, ``Solidity.RunWT,
    ``Solidity.SFields, ``Solidity.Shape, ``Solidity.SList, ``Solidity.SMap, ``Solidity.SRef,

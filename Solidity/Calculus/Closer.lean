@@ -87,9 +87,6 @@ def Keeps (σ : Semantics.State) (a b : LTerm) : Prop := ∀ v, a.eval σ = .ok 
 
 theorem Keeps.refl (σ : Semantics.State) (a : LTerm) : Keeps σ a a := fun _ h => h
 
-theorem Keeps.trans {σ : Semantics.State} {a b c : LTerm} (h₁ : Keeps σ a b) (h₂ : Keeps σ b c) :
-    Keeps σ a c := fun v h => h₂ v (h₁ v h)
-
 /-- `a ⊕ b` on two literals, evaluated (not a power past `powBig`);
 `false && b` and `true || b` too. -/
 def foldBin (op : BinOp) (p : PrimTy) (a b : LTerm) : LTerm :=

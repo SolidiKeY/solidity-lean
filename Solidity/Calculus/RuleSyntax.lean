@@ -1529,41 +1529,6 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
         `storage` or `memory`"
   | _ => Macro.throwUnsupported
 
-/-- An update schema variable among the elements: `u` (its elements), or
-`{u}u2` (`u2` with `u` applied, `Upd.subst`). -/
-def updVar? : TSyntax `dl_upd_elem → MacroM (Option Lean.Term)
-  | `(dl_upd_elem| $u:ident) => pure (some u)
-  | `(dl_upd_elem| { $u:ident } $v:ident) => some <$> `($(mkIdent `Solidity.Surface.Upd.subst) $v $u)
-  | _ => pure none
-
-/-- Whether an update has a schema variable among its elements: the formula
-under it is then judged under the schema's modality `m`. -/
-def hasUpdVar (U : TSyntax `dl_upd) : Bool :=
-  match U with
-  | `(dl_upd| ‹ $_:term ›) => false
-  | _ => U.raw[1].getSepArgs.any fun e => match (⟨e⟩ : TSyntax `dl_upd_elem) with
-    | `(dl_upd_elem| $_:ident) => true
-    | `(dl_upd_elem| { $_:ident } $_:ident) => true
-    | _ => false
-
-def schemaUpd (Γ : Scope) (U : TSyntax `dl_upd) : MacroM Lean.Term := do
-  if let `(dl_upd| ‹ $t:term ›) := U then return t
-  -- the elements, read off the `sepBy1` node: `‖` does not splice in a pattern
-  let mut segs : Array Lean.Term := #[]
-  let mut run : Array Lean.Term := #[]
-  for e in U.raw[1].getSepArgs do
-    match ← updVar? ⟨e⟩ with
-    | some u =>
-      unless run.isEmpty do segs := segs.push (← `([$run,*]))
-      run := #[]
-      segs := segs.push u
-    | none => run := run.push (← schemaUpdElem Γ ⟨e⟩)
-  -- no schema variable: the list of the elements, as ever
-  if segs.isEmpty then return ← `(([$run,*] : Surface.Upd _))
-  unless run.isEmpty do segs := segs.push (← `([$run,*]))
-  -- the parts appended, left-nested as `u ++ u2.subst u` is written
-  segs[1:].foldlM (init := segs[0]!) fun acc t => `($acc ++ $t)
-
 /-- The modality of the formula under an update: an update is judged as the
 goal it came from.  `⟨[ ]⟩` is `either`: the taclet's `m` in `dl{ … }`, the
 formula's modality in `dl![m]{ … }` (`Notation.lean`). -/
@@ -2070,7 +2035,6 @@ register_option pp.sol.reduce : Bool := {
             `tm{ … }` prints a term as it is written, with this off"
 }
 
-
 def nameIdent (s : String) : Ident := mkIdent (Name.mkSimple s)
 
 /-- Lean's own printing of `e`, with this notation off. -/
@@ -2376,12 +2340,6 @@ constructor's name all the same. -/
 def whnfPP (e : Lean.Expr) : MetaM Lean.Expr := do
   if pp.sol.reduce.get (← getOptions) then whnfTm e
   else foldTmHead (red := false) (← instantiateMVars e)
-
-/-- Every term of `e` folded back to its constructors' names: what a `simp`
-over the generic `Tm` functions leaves (`Tm.app2 C Op2.find s p`) read as it
-was written (`Term.find C s p`), so that `rw` finds it and it prints. -/
-def foldTms (e : Lean.Expr) : MetaM Lean.Expr :=
-  Meta.transform e (post := fun e => return .done (← foldTmHead e))
 
 mutual
 

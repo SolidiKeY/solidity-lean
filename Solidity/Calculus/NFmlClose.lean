@@ -71,7 +71,6 @@ namespace Solidity
 
 open Semantics SemanticsProperties
 
-
 namespace Close
 
 /-! ## Evaluation, one constructor at a time
@@ -105,9 +104,6 @@ theorem bindingRef_mref (id : Nat) : bindingRef (.mref id) = .ok id := rfl
 theorem bindingRef_eq_ok {b : Binding} {id : Nat} :
     bindingRef b = .ok id ↔ b = .mref id := by
   cases b <;> simp [bindingRef]
-
-/-- `p.age`, with `p` an alias, is the path `p` holds, then `age`. -/
-theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= bindingPath := rfl
 
 section Eval
 
