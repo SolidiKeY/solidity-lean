@@ -17,16 +17,16 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 | `Ch01_Syntax`, `Ch02_Elab` | `AST.lean`, `Scope.lean`, `Syntax/Scoped.lean` (`Stmt C Γ Γ'`), `Syntax.lean` (the grammar), `Syntax/Elab.lean` (`sol[C]{}`, its output `Prog C Γ Γ'`) |
 | `Ch03_Theory` | `Theory/` |
 | `Ch04_Semantics` | `Semantics/Run.lean` (`Stmt.run`, typed), `Semantics/State.lean`, `Semantics.lean` (the untyped state's operations), `Semantics/Agree.lean` |
-| `Ch05_Logic` | `Calculus/Fml.lean` (`Fml C Γ`, both modalities), `Calculus/Logic.lean` (`holds`), `Update.lean` (terms, updates, the closer's `NFml`) |
+| `Ch05_Logic` | `Calculus/Fml.lean` (`Fml C Γ`, both modalities), `Calculus/Logic.lean` (`holds`), `Update.lean` (terms, updates) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/SurfaceNotation.lean` (`dl[C]{}`) |
 | `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Taclet.lean` (`Taclet.toStep`), `Calculus/Sound*.lean` (`Stmt.sound`), `Calculus/Proves.lean` (`Proves`) |
-| `Ch07_Symex` | `Calculus/Step.lean`, `Calculus/Symex.lean`, `Calculus/Close.lean` |
+| `Ch07_Symex` | `Calculus/Step.lean`, `Calculus/Symex.lean`, `Calculus/Close.lean`, `Calculus/CloseScoped.lean` |
 | `Ch08_EVM`-`Ch10_Correctness` | `Evm/` (`docs/compiler-verification.md`) |
 | `Ch11_Completeness` | `Calculus/Step.lean` (`Stmt.step`), `Calculus/RuleExists.lean` (`Stmt.rule_exists`); progress (`Fml.active_iff_step`) retired at W4 `calc-del` of `docs/intrinsic.md` |
 | `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |
 | `Ch13_Chains` | `Calculus/Chains.lean` |
-| `Ch14_Updates` | `Calculus/NFmlUpdateRules.lean`, `Calculus/UpdateRules.lean` |
-| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `NFml.valid_iff_cons`) |
+| `Ch14_Updates` | `Calculus/UpdRuleScoped.lean`, `Calculus/UpdateRules.lean` |
+| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `LFml.valid_iff_cons`) |
 | `Examples/` | `Solidity/Examples/` |
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
@@ -47,18 +47,17 @@ and the run, and moved the calculus onto both.
   theorems (`run_erase`) are deleted.  The untyped statement went at W8
   (decision 11): the elaborator emits the scoped syntax
   (`Syntax/Elab.lean`) and the printers print it
-  (`Calculus/PrintStmt.lean`).  What stays of the untyped side is the
-  closer's input below.
-- **The closer (M6c, done with an IR).** `sol_decide` reduces and closes
+  (`Calculus/PrintStmt.lean`).  What stays untyped is the global part of
+  the erased state the terms are read on (`EState`, `Semantics/Erased.lean`).
+- **The closer (M6c; its IR deleted at W9.5a).** `sol_decide` reduces and closes
   the scoped leaf by position (`Calculus/DecideScoped.lean`,
   `Calculus/DecideTyped.lean`: `Valid.of_reduceS`, sound over the typed
   state), `sol_close` reads a leaf's parameters at their types,
   `sol_prove` walks scoped sequents, the update rules rewrite the scoped
-  leaf, and a chain's links are scoped while the program is open.  Below
-  these the leaf still erases (`Fml.erase`, `Calculus/CloseErase.lean`) to
-  `NFml` (`Update.lean`) over the untyped state of `Semantics.lean`, as
-  decision 7's IR; `docs/intrinsic.md` lists its readers ("M6c") and the
-  optional ports ("What is left").
+  leaf, and a chain's links are scoped, while the program is open and
+  past it.  No leaf is erased any more: decision 7's untyped formula IR and
+  the erasure to it went at W9.5a (`docs/intrinsic.md`); what the reduction
+  compiles a leaf to is `LFml` (`Calculus/DecideLang.lean`).
 
 - **Calls.** Parameters and return values of reference type (`Person storage
   p`, `uint[] memory xs`) are elaboration errors (`Syntax.lean`).  An external
@@ -112,7 +111,7 @@ and the run, and moved the calculus onto both.
 
 - **`Meta.reduce` through indexed families is about 100 times slower.**
   Closed goals are evaluated as compiled code (`evalExpr`) and quoted back by
-  hand-written quoters (`Calculus/NFmlQuote.lean`); the kernel re-checks.  This
+  hand-written quoters (`Calculus/Quote.lean`, `Syntax/Quote.lean`); the kernel re-checks.  This
   works only for a contract that is a named constant, and every new syntax
   constructor needs an arm in every quoter.
 - **`deriving ToExpr` fails on constructors with proof fields.**  Quote the

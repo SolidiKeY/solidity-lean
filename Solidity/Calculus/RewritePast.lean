@@ -39,6 +39,183 @@ open Semantics (Res)
 
 variable {C : Contract}
 
+/-! ## Read with fewer locals
+
+A term, a right-hand side read in a context with fewer locals, where it
+reads none of those dropped (`Tm.thinS?`, `Rhs.thinS?`). -/
+
+section ThinS
+
+/-- A position of `Δ` read in `Γ`, where the thinning keeps it. -/
+def Idx.unwk? : {Γ Δ : Ctx} → {t : LTy} → Thin Γ Δ → Idx Δ t → Option (Idx Γ t)
+  | _, _, _, .refl, i => some i
+  | _, _, _, .keep _, .here => some .here
+  | _, _, _, .keep h, .there i => (Idx.unwk? h i).map .there
+  | _, _, _, .drop _, .here => none
+  | _, _, _, .drop h, .there i => Idx.unwk? h i
+
+theorem Idx.unwk?_wk : {Γ Δ : Ctx} → {t : LTy} → (h : Thin Γ Δ) → (i : Idx Δ t) →
+    {j : Idx Γ t} → Idx.unwk? h i = some j → j.wk h = i
+  | _, _, _, .refl, _, _, hj => by cases hj; exact Idx.wk_refl _
+  | _, _, _, .keep _, .here, _, hj => by cases hj; rfl
+  | _, _, _, .keep h, .there i, _, hj => by
+    obtain ⟨j', hj', rfl⟩ := Option.map_eq_some_iff.1 hj
+    exact congrArg Idx.there (Idx.unwk?_wk h i hj')
+  | _, _, _, .drop _, .here, _, hj => by cases hj
+  | _, _, _, .drop h, .there i, _, hj => congrArg Idx.there (Idx.unwk?_wk h i hj)
+
+variable {Γ Γ' : Ctx}
+
+/-- A term of `Γ` read in `Γ'`, where it reads no local the thinning drops. -/
+def Tm.thinS? (h : Thin Γ' Γ) : {s : Srt} → Tm C Γ s → Option (Tm C Γ' s)
+  | _, .pvV i => (Idx.unwk? h i).map .pvV
+  | _, .pvP i => (Idx.unwk? h i).map .pvP
+  | _, .pvS i => (Idx.unwk? h i).map .pvS
+  | _, .pvI i => (Idx.unwk? h i).map .pvI
+  | _, .netOf i a => do pure (.netOf (← Idx.unwk? h i) (← Tm.thinS? h a))
+  | _, .app0 o => some (.app0 o)
+  | _, .app1 o ho x => (Tm.thinS? h x).map (.app1 o ho)
+  | _, .app2 o x y => do pure (.app2 o (← Tm.thinS? h x) (← Tm.thinS? h y))
+  | _, .app3 o x y z => do pure (.app3 o (← Tm.thinS? h x) (← Tm.thinS? h y) (← Tm.thinS? h z))
+
+theorem Env.get_unwk? {h : Thin Γ' Γ} {t : LTy} {i : Idx Γ t} {j : Idx Γ' t}
+    (hj : Idx.unwk? h i = some j) (e : Env C Γ) : Env.get j (Env.thin h e) = Env.get i e := by
+  rw [Env.get_thin, Idx.unwk?_wk h i hj]
+
+/-- **A term that reads no dropped local reads alike with them dropped.** -/
+theorem Tm.eval_thinS? (h : Thin Γ' Γ) (σ : EState C Γ) :
+    {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
+      t'.eval (σ.thin h) = t.eval σ
+  | _, .pvV i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show pure (Env.get j (Env.thin h σ.env)) = pure (Env.get i σ.env)
+    rw [Env.get_unwk? hj]
+  | _, .pvP i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show aliasPath (σ.thin h) j = aliasPath σ i
+    simp only [aliasPath, EState.thin, EState.withEnv, Env.get_unwk? hj]
+  | _, .pvS i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show pure { (σ.thin h).glob with storage := Env.get j (Env.thin h σ.env) } =
+      pure { σ.glob with storage := Env.get i σ.env }
+    rw [Env.get_unwk? hj]; rfl
+  | _, .pvI i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show memRef (σ.thin h) j = memRef σ i
+    simp only [memRef, EState.thin, EState.withEnv, Env.get_unwk? hj]
+  | _, .netOf i a, _, ht => by
+    obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
+    cases ht
+    show (do
+        let l : List (Int × Int) := Env.get j (Env.thin h σ.env)
+        pure (Semantics.Value.int ((Semantics.lookupBy (← (← a'.eval (σ.thin h)).asInt) l).getD 0))) =
+      (do
+        let l : List (Int × Int) := Env.get i σ.env
+        pure (Semantics.Value.int ((Semantics.lookupBy (← (← a.eval σ).asInt) l).getD 0)))
+    rw [Env.get_unwk? hj, Tm.eval_thinS? h σ a ha]
+  | _, .app0 _, _, ht => by cases ht; rfl
+  | _, .app1 o ho x, _, ht => by
+    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show o.eval (σ.thin h).glob (x'.eval (σ.thin h)) = o.eval σ.glob (x.eval σ)
+    rw [Tm.eval_thinS? h σ x hx]; rfl
+  | _, .app2 o x y, _, ht => by
+    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
+    cases ht
+    show o.eval (σ.thin h).glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) =
+      o.eval σ.glob (x.eval σ) (y.eval σ)
+    rw [Tm.eval_thinS? h σ x hx, Tm.eval_thinS? h σ y hy]; rfl
+  | _, .app3 o x y z, _, ht => by
+    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨z', hz, ht⟩ := Option.bind_eq_some_iff.1 ht
+    cases ht
+    show o.eval (σ.thin h).glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) (z'.eval (σ.thin h)) =
+      o.eval σ.glob (x.eval σ) (y.eval σ) (z.eval σ)
+    rw [Tm.eval_thinS? h σ x hx, Tm.eval_thinS? h σ y hy, Tm.eval_thinS? h σ z hz]; rfl
+
+/-- **A term that reads no dropped local denotes alike with them dropped.** -/
+theorem Tm.denote_thinS? (h : Thin Γ' Γ) (σ : EState C Γ) :
+    {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
+      t'.denote (σ.thin h) = t.denote σ
+  | _, .pvV i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show Theory.StValue.prim (Env.get j (Env.thin h σ.env)) = .prim (Env.get i σ.env)
+    rw [Env.get_unwk? hj]
+  | _, .pvP i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    simp only [Tm.denote, aliasPath, EState.thin, EState.withEnv, Env.get_unwk? hj]
+  | _, .pvS i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    simp only [Tm.denote, EState.thin, EState.withEnv, Env.get_unwk? hj]
+  | _, .pvI i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    rfl
+  | _, .netOf i a, _, ht => by
+    obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
+    cases ht
+    have ha' := Tm.denote_thinS? h σ a ha
+    simp only [EState.thin, EState.withEnv] at ha'
+    simp only [Tm.denote, EState.thin, EState.withEnv, Env.get_unwk? hj, ha']
+  | _, .app0 _, _, ht => by cases ht; rfl
+  | _, .app1 o ho x, _, ht => by
+    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show o.denote (σ.thin h).glob (x'.denote (σ.thin h)) = o.denote σ.glob (x.denote σ)
+    rw [Tm.denote_thinS? h σ x hx]; rfl
+  | _, .app2 o x y, _, ht => by
+    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
+    cases ht
+    show o.denote (σ.thin h).glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) (x'.denote (σ.thin h))
+        (y'.denote (σ.thin h)) = o.denote σ.glob (x.eval σ) (y.eval σ) (x.denote σ) (y.denote σ)
+    rw [Tm.denote_thinS? h σ x hx, Tm.denote_thinS? h σ y hy, Tm.eval_thinS? h σ x hx,
+      Tm.eval_thinS? h σ y hy]; rfl
+  | _, .app3 o x y z, _, ht => by
+    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
+    obtain ⟨z', hz, ht⟩ := Option.bind_eq_some_iff.1 ht
+    cases ht
+    show o.denote (x'.denote (σ.thin h)) (y'.denote (σ.thin h)) (z'.denote (σ.thin h)) =
+      o.denote (x.denote σ) (y.denote σ) (z.denote σ)
+    rw [Tm.denote_thinS? h σ x hx, Tm.denote_thinS? h σ y hy, Tm.denote_thinS? h σ z hz]
+
+/-- A right-hand side of `Γ` read in `Γ'`. -/
+def Rhs.thinS? (h : Thin Γ' Γ) : {t : LTy} → Rhs C Γ t → Option (Rhs C Γ' t)
+  | _, .val t => (Tm.thinS? h t).map .val
+  | _, .path p => (Tm.thinS? h p).map .path
+  | _, .unset => some .unset
+  | _, .mref i => (Tm.thinS? h i).map .mref
+  | _, .store s => (Tm.thinS? h s).map .store
+  | _, .saveNet => some .saveNet
+  | _, .saveNetMt => some .saveNetMt
+
+theorem Rhs.eval_thinS? (h : Thin Γ' Γ) (σ : EState C Γ) :
+    {t : LTy} → (r : Rhs C Γ t) → {r' : Rhs C Γ' t} → Rhs.thinS? h r = some r' →
+      r'.eval (σ.thin h) = r.eval σ
+  | _, .val t, _, hr => by
+    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hr
+    exact Tm.eval_thinS? h σ t ht
+  | _, .path p, _, hr => by
+    obtain ⟨p', hp, rfl⟩ := Option.map_eq_some_iff.1 hr
+    show (do pure (some (← p'.eval (σ.thin h)))) = (do pure (some (← p.eval σ)))
+    rw [Tm.eval_thinS? h σ p hp]
+  | _, .unset, _, hr => by cases hr; rfl
+  | _, .mref i, _, hr => by
+    obtain ⟨i', hi, rfl⟩ := Option.map_eq_some_iff.1 hr
+    show (do pure (some (← i'.eval (σ.thin h)))) = (do pure (some (← i.eval σ)))
+    rw [Tm.eval_thinS? h σ i hi]
+  | _, .store s, _, hr => by
+    obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 hr
+    show (do pure (← s'.eval (σ.thin h)).storage) = (do pure (← s.eval σ).storage)
+    rw [Tm.eval_thinS? h σ s hs]
+  | _, .saveNet, _, hr => by cases hr; rfl
+  | _, .saveNetMt, _, hr => by cases hr; rfl
+
+
+end ThinS
+
 /-! ## Out of the top local's scope -/
 
 section Down
@@ -46,31 +223,14 @@ section Down
 variable {Γ : Ctx} {u : LTy}
 
 /-- A position of `u :: Γ` read in `Γ`: none for the top one. -/
-def Idx.down? {t : LTy} : Idx (u :: Γ) t → Option (Idx Γ t)
-  | .here => none
-  | .there j => some j
+abbrev Idx.down? {t : LTy} (i : Idx (u :: Γ) t) : Option (Idx Γ t) := Idx.unwk? (.drop .refl) i
 
 /-- A term of `u :: Γ` read in `Γ`, where it does not read the top local. -/
-def Tm.down? : {s : Srt} → Tm C (u :: Γ) s → Option (Tm C Γ s)
-  | _, .pvV i => i.down?.map .pvV
-  | _, .pvP i => i.down?.map .pvP
-  | _, .pvS i => i.down?.map .pvS
-  | _, .pvI i => i.down?.map .pvI
-  | _, .netOf i a => do pure (.netOf (← i.down?) (← Tm.down? a))
-  | _, .app0 o => some (.app0 o)
-  | _, .app1 o ho x => (Tm.down? x).map (.app1 o ho)
-  | _, .app2 o x y => do pure (.app2 o (← Tm.down? x) (← Tm.down? y))
-  | _, .app3 o x y z => do pure (.app3 o (← Tm.down? x) (← Tm.down? y) (← Tm.down? z))
+abbrev Tm.down? {s : Srt} (t : Tm C (u :: Γ) s) : Option (Tm C Γ s) := Tm.thinS? (.drop .refl) t
 
 /-- A right-hand side of `u :: Γ` read in `Γ`. -/
-def Rhs.down? : {t : LTy} → Rhs C (u :: Γ) t → Option (Rhs C Γ t)
-  | _, .val t => t.down?.map .val
-  | _, .path p => p.down?.map .path
-  | _, .unset => some .unset
-  | _, .mref i => i.down?.map .mref
-  | _, .store s => s.down?.map .store
-  | _, .saveNet => some .saveNet
-  | _, .saveNetMt => some .saveNetMt
+abbrev Rhs.down? {t : LTy} (r : Rhs C (u :: Γ) t) : Option (Rhs C Γ t) :=
+  Rhs.thinS? (.drop .refl) r
 
 /-- An element whose right-hand sides are read in `u :: Γ`, read in `Γ`. -/
 def UpdElem.down? {Δ : Ctx} : UpdElem C (u :: Γ) Δ → Option (UpdElem C Γ Δ)
@@ -83,84 +243,14 @@ def UpdElem.down? {Δ : Ctx} : UpdElem C (u :: Γ) Δ → Option (UpdElem C Γ �
   | .netMt r a => do pure (.netMt (← r.down?) (← a.down?))
   | .setBalance a => a.down?.map .setBalance
 
-theorem Idx.down?_get {t : LTy} : (i : Idx (u :: Γ) t) → {j : Idx Γ t} → i.down? = some j →
-    ∀ (v : u.Denote C) (e : Env C Γ), Env.get i ((v, e) : Env C (u :: Γ)) = Env.get j e
-  | .there _, _, h, _, _ => by cases h; rfl
-
 /-- **A term that does not read the top local reads alike below it.** -/
-theorem Tm.eval_down? (σ : EState C Γ) (v : u.Denote C) :
-    {s : Srt} → (t : Tm C (u :: Γ) s) → {t' : Tm C Γ s} → t.down? = some t' →
-      t'.eval σ = t.eval (σ.push v)
-  | _, .pvV i, _, h => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 h
-    show pure (Env.get j σ.env) = pure (Env.get i (v, σ.env))
-    rw [Idx.down?_get i hj]
-  | _, .pvP i, _, h => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 h
-    show aliasPath σ j = aliasPath (σ.push v) i
-    simp only [aliasPath, EState.push, EState.withEnv, Idx.down?_get i hj]
-  | _, .pvS i, _, h => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 h
-    show pure { σ.glob with storage := Env.get j σ.env } =
-      pure { (σ.push v).glob with storage := Env.get i (v, σ.env) }
-    rw [Idx.down?_get i hj]; rfl
-  | _, .pvI i, _, h => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 h
-    show memRef σ j = memRef (σ.push v) i
-    simp only [memRef, EState.push, EState.withEnv, Idx.down?_get i hj]
-  | _, .netOf i a, _, h => by
-    obtain ⟨j, hj, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show (do
-        let l : List (Int × Int) := Env.get j σ.env
-        pure (Semantics.Value.int ((Semantics.lookupBy (← (← a'.eval σ).asInt) l).getD 0))) =
-      (do
-        let l : List (Int × Int) := Env.get i (v, σ.env)
-        pure (Semantics.Value.int ((Semantics.lookupBy (← (← a.eval (σ.push v)).asInt) l).getD 0)))
-    rw [Idx.down?_get i hj, Tm.eval_down? σ v a ha]
-  | _, .app0 _, _, h => by cases h; rfl
-  | _, .app1 o ho x, _, h => by
-    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
-    show o.eval σ.glob (x'.eval σ) = o.eval (σ.push v).glob (x.eval (σ.push v))
-    rw [Tm.eval_down? σ v x hx]; rfl
-  | _, .app2 o x y, _, h => by
-    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.eval σ.glob (x'.eval σ) (y'.eval σ) =
-      o.eval (σ.push v).glob (x.eval (σ.push v)) (y.eval (σ.push v))
-    rw [Tm.eval_down? σ v x hx, Tm.eval_down? σ v y hy]; rfl
-  | _, .app3 o x y z, _, h => by
-    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.eval σ.glob (x'.eval σ) (y'.eval σ) (z'.eval σ) =
-      o.eval (σ.push v).glob (x.eval (σ.push v)) (y.eval (σ.push v)) (z.eval (σ.push v))
-    rw [Tm.eval_down? σ v x hx, Tm.eval_down? σ v y hy, Tm.eval_down? σ v z hz]; rfl
+theorem Tm.eval_down? (σ : EState C Γ) (v : u.Denote C) {s : Srt} (t : Tm C (u :: Γ) s)
+    {t' : Tm C Γ s} (h : t.down? = some t') : t'.eval σ = t.eval (σ.push v) :=
+  Tm.eval_thinS? (.drop .refl) (σ.push v) t h
 
-theorem Rhs.eval_down? (σ : EState C Γ) (v : u.Denote C) :
-    {t : LTy} → (r : Rhs C (u :: Γ) t) → {r' : Rhs C Γ t} → r.down? = some r' →
-      r'.eval σ = r.eval (σ.push v)
-  | _, .val t, _, h => by
-    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact Tm.eval_down? σ v t ht
-  | _, .path p, _, h => by
-    obtain ⟨p', hp, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (do pure (some (← p'.eval σ))) = (do pure (some (← p.eval (σ.push v))))
-    rw [Tm.eval_down? σ v p hp]
-  | _, .unset, _, h => by cases h; rfl
-  | _, .mref i, _, h => by
-    obtain ⟨i', hi, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (do pure (some (← i'.eval σ))) = (do pure (some (← i.eval (σ.push v))))
-    rw [Tm.eval_down? σ v i hi]
-  | _, .store s, _, h => by
-    obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (do pure (← s'.eval σ).storage) = (do pure (← s.eval (σ.push v)).storage)
-    rw [Tm.eval_down? σ v s hs]
-  | _, .saveNet, _, h => by cases h; rfl
-  | _, .saveNetMt, _, h => by cases h; rfl
+theorem Rhs.eval_down? (σ : EState C Γ) (v : u.Denote C) {t : LTy} (r : Rhs C (u :: Γ) t)
+    {r' : Rhs C Γ t} (h : r.down? = some r') : r'.eval σ = r.eval (σ.push v) :=
+  Rhs.eval_thinS? (.drop .refl) (σ.push v) r h
 
 theorem UpdElem.write_down? {Δ : Ctx} (σ : EState C Γ) (v : u.Denote C) :
     (e : UpdElem C (u :: Γ) Δ) → {e' : UpdElem C Γ Δ} → e.down? = some e' →
@@ -1511,24 +1601,6 @@ not halt (`Rhs.totalB`), so the update halts where it did. -/
 
 section Thinning
 
-/-- A position of `Δ` read in `Γ`, where the thinning keeps it. -/
-def Idx.unwk? : {Γ Δ : Ctx} → {t : LTy} → Thin Γ Δ → Idx Δ t → Option (Idx Γ t)
-  | _, _, _, .refl, i => some i
-  | _, _, _, .keep _, .here => some .here
-  | _, _, _, .keep h, .there i => (Idx.unwk? h i).map .there
-  | _, _, _, .drop _, .here => none
-  | _, _, _, .drop h, .there i => Idx.unwk? h i
-
-theorem Idx.unwk?_wk : {Γ Δ : Ctx} → {t : LTy} → (h : Thin Γ Δ) → (i : Idx Δ t) →
-    {j : Idx Γ t} → Idx.unwk? h i = some j → j.wk h = i
-  | _, _, _, .refl, _, _, hj => by cases hj; exact Idx.wk_refl _
-  | _, _, _, .keep _, .here, _, hj => by cases hj; rfl
-  | _, _, _, .keep h, .there i, _, hj => by
-    obtain ⟨j', hj', rfl⟩ := Option.map_eq_some_iff.1 hj
-    exact congrArg Idx.there (Idx.unwk?_wk h i hj')
-  | _, _, _, .drop _, .here, _, hj => by cases hj
-  | _, _, _, .drop h, .there i, _, hj => congrArg Idx.there (Idx.unwk?_wk h i hj)
-
 theorem Env.thin_set_some : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {t : LTy} → (i : Idx Δ t) →
     {j : Idx Γ t} → Idx.unwk? h i = some j → (v : t.Denote C) → (e : Env C Δ) →
       Env.thin h (Env.set i v e) = Env.set j v (Env.thin h e)
@@ -1618,155 +1690,6 @@ theorem Env.thin_meet : {Δo Δ : Ctx} → (h : Thin Δo Δ) → {Δ' : Ctx} →
   | _, _, .drop _, _, .refl, _ => rfl
   | _, _, .drop h, _, .keep th, e => Env.thin_meet h th e.2
   | _, _, .drop h, _, .drop th, e => Env.thin_meet h th e.2
-
-variable {Γ Γ' : Ctx}
-
-/-- A term of `Γ` read in `Γ'`, where it reads no local the thinning drops. -/
-def Tm.thinS? (h : Thin Γ' Γ) : {s : Srt} → Tm C Γ s → Option (Tm C Γ' s)
-  | _, .pvV i => (Idx.unwk? h i).map .pvV
-  | _, .pvP i => (Idx.unwk? h i).map .pvP
-  | _, .pvS i => (Idx.unwk? h i).map .pvS
-  | _, .pvI i => (Idx.unwk? h i).map .pvI
-  | _, .netOf i a => do pure (.netOf (← Idx.unwk? h i) (← Tm.thinS? h a))
-  | _, .app0 o => some (.app0 o)
-  | _, .app1 o ho x => (Tm.thinS? h x).map (.app1 o ho)
-  | _, .app2 o x y => do pure (.app2 o (← Tm.thinS? h x) (← Tm.thinS? h y))
-  | _, .app3 o x y z => do pure (.app3 o (← Tm.thinS? h x) (← Tm.thinS? h y) (← Tm.thinS? h z))
-
-theorem Env.get_unwk? {h : Thin Γ' Γ} {t : LTy} {i : Idx Γ t} {j : Idx Γ' t}
-    (hj : Idx.unwk? h i = some j) (e : Env C Γ) : Env.get j (Env.thin h e) = Env.get i e := by
-  rw [Env.get_thin, Idx.unwk?_wk h i hj]
-
-/-- **A term that reads no dropped local reads alike with them dropped.** -/
-theorem Tm.eval_thinS? (h : Thin Γ' Γ) (σ : EState C Γ) :
-    {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
-      t'.eval (σ.thin h) = t.eval σ
-  | _, .pvV i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show pure (Env.get j (Env.thin h σ.env)) = pure (Env.get i σ.env)
-    rw [Env.get_unwk? hj]
-  | _, .pvP i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show aliasPath (σ.thin h) j = aliasPath σ i
-    simp only [aliasPath, EState.thin, EState.withEnv, Env.get_unwk? hj]
-  | _, .pvS i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show pure { (σ.thin h).glob with storage := Env.get j (Env.thin h σ.env) } =
-      pure { σ.glob with storage := Env.get i σ.env }
-    rw [Env.get_unwk? hj]; rfl
-  | _, .pvI i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show memRef (σ.thin h) j = memRef σ i
-    simp only [memRef, EState.thin, EState.withEnv, Env.get_unwk? hj]
-  | _, .netOf i a, _, ht => by
-    obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
-    cases ht
-    show (do
-        let l : List (Int × Int) := Env.get j (Env.thin h σ.env)
-        pure (Semantics.Value.int ((Semantics.lookupBy (← (← a'.eval (σ.thin h)).asInt) l).getD 0))) =
-      (do
-        let l : List (Int × Int) := Env.get i σ.env
-        pure (Semantics.Value.int ((Semantics.lookupBy (← (← a.eval σ).asInt) l).getD 0)))
-    rw [Env.get_unwk? hj, Tm.eval_thinS? h σ a ha]
-  | _, .app0 _, _, ht => by cases ht; rfl
-  | _, .app1 o ho x, _, ht => by
-    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show o.eval (σ.thin h).glob (x'.eval (σ.thin h)) = o.eval σ.glob (x.eval σ)
-    rw [Tm.eval_thinS? h σ x hx]; rfl
-  | _, .app2 o x y, _, ht => by
-    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
-    cases ht
-    show o.eval (σ.thin h).glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) =
-      o.eval σ.glob (x.eval σ) (y.eval σ)
-    rw [Tm.eval_thinS? h σ x hx, Tm.eval_thinS? h σ y hy]; rfl
-  | _, .app3 o x y z, _, ht => by
-    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨z', hz, ht⟩ := Option.bind_eq_some_iff.1 ht
-    cases ht
-    show o.eval (σ.thin h).glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) (z'.eval (σ.thin h)) =
-      o.eval σ.glob (x.eval σ) (y.eval σ) (z.eval σ)
-    rw [Tm.eval_thinS? h σ x hx, Tm.eval_thinS? h σ y hy, Tm.eval_thinS? h σ z hz]; rfl
-
-/-- **A term that reads no dropped local denotes alike with them dropped.** -/
-theorem Tm.denote_thinS? (h : Thin Γ' Γ) (σ : EState C Γ) :
-    {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
-      t'.denote (σ.thin h) = t.denote σ
-  | _, .pvV i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show Theory.StValue.prim (Env.get j (Env.thin h σ.env)) = .prim (Env.get i σ.env)
-    rw [Env.get_unwk? hj]
-  | _, .pvP i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.denote, aliasPath, EState.thin, EState.withEnv, Env.get_unwk? hj]
-  | _, .pvS i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.denote, EState.thin, EState.withEnv, Env.get_unwk? hj]
-  | _, .pvI i, _, ht => by
-    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    rfl
-  | _, .netOf i a, _, ht => by
-    obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
-    cases ht
-    have ha' := Tm.denote_thinS? h σ a ha
-    simp only [EState.thin, EState.withEnv] at ha'
-    simp only [Tm.denote, EState.thin, EState.withEnv, Env.get_unwk? hj, ha']
-  | _, .app0 _, _, ht => by cases ht; rfl
-  | _, .app1 o ho x, _, ht => by
-    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 ht
-    show o.denote (σ.thin h).glob (x'.denote (σ.thin h)) = o.denote σ.glob (x.denote σ)
-    rw [Tm.denote_thinS? h σ x hx]; rfl
-  | _, .app2 o x y, _, ht => by
-    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
-    cases ht
-    show o.denote (σ.thin h).glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) (x'.denote (σ.thin h))
-        (y'.denote (σ.thin h)) = o.denote σ.glob (x.eval σ) (y.eval σ) (x.denote σ) (y.denote σ)
-    rw [Tm.denote_thinS? h σ x hx, Tm.denote_thinS? h σ y hy, Tm.eval_thinS? h σ x hx,
-      Tm.eval_thinS? h σ y hy]; rfl
-  | _, .app3 o x y z, _, ht => by
-    obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
-    obtain ⟨z', hz, ht⟩ := Option.bind_eq_some_iff.1 ht
-    cases ht
-    show o.denote (x'.denote (σ.thin h)) (y'.denote (σ.thin h)) (z'.denote (σ.thin h)) =
-      o.denote (x.denote σ) (y.denote σ) (z.denote σ)
-    rw [Tm.denote_thinS? h σ x hx, Tm.denote_thinS? h σ y hy, Tm.denote_thinS? h σ z hz]
-
-/-- A right-hand side of `Γ` read in `Γ'`. -/
-def Rhs.thinS? (h : Thin Γ' Γ) : {t : LTy} → Rhs C Γ t → Option (Rhs C Γ' t)
-  | _, .val t => (Tm.thinS? h t).map .val
-  | _, .path p => (Tm.thinS? h p).map .path
-  | _, .unset => some .unset
-  | _, .mref i => (Tm.thinS? h i).map .mref
-  | _, .store s => (Tm.thinS? h s).map .store
-  | _, .saveNet => some .saveNet
-  | _, .saveNetMt => some .saveNetMt
-
-theorem Rhs.eval_thinS? (h : Thin Γ' Γ) (σ : EState C Γ) :
-    {t : LTy} → (r : Rhs C Γ t) → {r' : Rhs C Γ' t} → Rhs.thinS? h r = some r' →
-      r'.eval (σ.thin h) = r.eval σ
-  | _, .val t, _, hr => by
-    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hr
-    exact Tm.eval_thinS? h σ t ht
-  | _, .path p, _, hr => by
-    obtain ⟨p', hp, rfl⟩ := Option.map_eq_some_iff.1 hr
-    show (do pure (some (← p'.eval (σ.thin h)))) = (do pure (some (← p.eval σ)))
-    rw [Tm.eval_thinS? h σ p hp]
-  | _, .unset, _, hr => by cases hr; rfl
-  | _, .mref i, _, hr => by
-    obtain ⟨i', hi, rfl⟩ := Option.map_eq_some_iff.1 hr
-    show (do pure (some (← i'.eval (σ.thin h)))) = (do pure (some (← i.eval σ)))
-    rw [Tm.eval_thinS? h σ i hi]
-  | _, .store s, _, hr => by
-    obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 hr
-    show (do pure (← s'.eval (σ.thin h)).storage) = (do pure (← s.eval σ).storage)
-    rw [Tm.eval_thinS? h σ s hs]
-  | _, .saveNet, _, hr => by cases hr; rfl
-  | _, .saveNetMt, _, hr => by cases hr; rfl
 
 /-- An element that sets no local, its right-hand sides read in `Γ'`, at
 another target context. -/

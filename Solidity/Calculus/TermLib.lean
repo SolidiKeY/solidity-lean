@@ -21,11 +21,11 @@ variables prints back as `tm{ … }`, through the closer's term printers.
 **Sort-generic recursion.**  A recursive function on `Tm` is generic in the
 sort: on one fixed sort it compiles by well-founded recursion and stops
 reducing by `rfl` and `decide`.  The ones a kernel check evaluates
-(`Tm.reads`, `Tm.litVarsS`, `Tm.beqR`) are written by the recursor, each
+(`Tm.litVarsS`, `Tm.beqR`) are written by the recursor, each
 with its `match` form as the compiled twin (`…M`) and a link theorem
 (`…_eq_…M`), as Gate G0 asks (`Calculus/DecideScoped.lean`).
 
-`holds_eqD_iffS` (the scoped `holds_eqD_iff`) is in
+`holds_eqD_iffS` is in
 `Calculus/SoundLoops.lean`: it needs the term bridge `Tm.denote_eval`
 (`Calculus/SeqRewrite.lean`), which imports this module.
 -/
@@ -230,35 +230,6 @@ variable {Γ : Ctx}
 
 /-- A local of the context, at its type. -/
 abbrev AnyIdx (Γ : Ctx) : Type := (t : LTy) × Idx Γ t
-
-/-- `Tm.reads`' compiled twin. -/
-def Tm.readsM : {s : Srt} → Tm C Γ s → List (AnyIdx Γ)
-  | _, .pvV i => [⟨_, i⟩]
-  | _, .pvP i => [⟨_, i⟩]
-  | _, .pvS i => [⟨_, i⟩]
-  | _, .pvI i => [⟨_, i⟩]
-  | _, .netOf i a => ⟨_, i⟩ :: a.readsM
-  | _, .app0 _ => []
-  | _, .app1 _ _ a => a.readsM
-  | _, .app2 _ a b => a.readsM ++ b.readsM
-  | _, .app3 _ a b c => a.readsM ++ b.readsM ++ c.readsM
-
-/-- **The locals a term reads**, by position (`Surface.Tm.vars`), by the
-recursor. -/
-@[implemented_by Tm.readsM]
-def Tm.reads {s : Srt} (t : Tm C Γ s) : List (AnyIdx Γ) :=
-  Tm.rec (motive := fun _ _ => List (AnyIdx Γ))
-    (fun i => [⟨_, i⟩]) (fun i => [⟨_, i⟩]) (fun i => [⟨_, i⟩]) (fun i => [⟨_, i⟩])
-    (fun i _ ih => ⟨_, i⟩ :: ih) (fun _ => []) (fun _ _ _ ih => ih)
-    (fun _ _ _ iha ihb => iha ++ ihb) (fun _ _ _ _ iha ihb ihc => iha ++ ihb ++ ihc) t
-
-theorem Tm.reads_eq_readsM {s : Srt} (t : Tm C Γ s) : t.reads = t.readsM := by
-  induction t with
-  | pvV _ | pvP _ | pvS _ | pvI _ | app0 _ => rfl
-  | netOf i a ih => simp only [Tm.readsM, ← ih]; rfl
-  | app1 o _ x ih => simp only [Tm.readsM, ← ih]; rfl
-  | app2 o x y ihx ihy => simp only [Tm.readsM, ← ihx, ← ihy]; rfl
-  | app3 o x y z ihx ihy ihz => simp only [Tm.readsM, ← ihx, ← ihy, ← ihz]; rfl
 
 /-- `Tm.litVarsS`' compiled twin. -/
 def Tm.litVarsSM : {s : Srt} → Tm C Γ s → Option (List (AnyIdx Γ))
@@ -1143,9 +1114,6 @@ example (s : Tm C Γ .st) (w : Value) :
 /-- The recursors reduce in the kernel. -/
 example : (Tm.app2 (.binop .add .uint) (.pvV (.here (Γ := []))) (.app0 (.lit (.int 1))) :
     Tm C [.val .uint] .val).litVarsS = some [⟨_, .here⟩] := rfl
-
-example : (Tm.netOf (Idx.there .here) (.pvV .here) :
-    Tm C [.val .uint, .oldNet] .val).reads = [⟨_, .there .here⟩, ⟨_, .here⟩] := rfl
 
 example : (Tm.app2 .at (.app0 (.root "xs")) (.pvV .here) : Tm C [.val .uint] .path).beqR
     (Tm.app2 .at (.app0 (.root "xs")) (.pvV .here) : Tm C [.val .uint] .path) = true := rfl

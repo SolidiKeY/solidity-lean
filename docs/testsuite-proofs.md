@@ -14,10 +14,13 @@ obligations are scoped formulas (`TestSuite/ScopedProblems.lean`,
 `Fml Solkey.TestSuite []`, each written on the import's scoped program
 `Solkey.TestSuite.f`; `TestSuite/Problems.lean` prints them in solkey's
 syntax), `⊢` is the scoped sequent over the typed run, and
-`sol_prove` walks it (`Calculus/ProvesDerive.lean`), its leaves erased and
-closed by the closer of the sections below.  The sections are dated records:
+`sol_prove` walks it (`Calculus/ProvesDerive.lean`), its leaves closed on
+their scoped form (`Calculus/LeafDerive.lean`) by the closer of the sections
+below (`LFml.close`, `Calculus/Closer.lean`).  The sections are dated records:
 the modules and theorems they name are the ones of their date (the untyped
-run, `Taclet.sound`, the cover goal `cov` are gone).
+run, `Taclet.sound`, the cover goal `cov` are gone, and since W9.5a the
+closer's untyped formulas and the erasure to them); a module since deleted
+is cited by its bare name.
 
 ## Decisions (2026-10-05)
 
@@ -147,7 +150,7 @@ What they say:
 
 ## M1 results (2026-10-05)
 
-`Calculus/NFmlDerive.lean`. `Derive.residue n close b Γ φ` is `sol_derive`'s walk
+`NFmlDerive`. `Derive.residue n close b Γ φ` is `sol_derive`'s walk
 as a function. It numbers fresh names per goal (`Hyp.fresh Γ φ`, as the
 `Proves` constructors do), takes any number of `branches` outcomes, and
 drops a leaf the closer accepts. `Proves.of_residue` is the soundness
@@ -341,7 +344,7 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   panics (`Calculus/NoPanic.lean`, `Upd.apply_ne_panic`), so the two
   readings agree on it.  The closers, `Decide` and the chains read updates;
   their one change is the revert case of a modality (`holds_revert` in
-  `Calculus/Close.lean`, the modal case of `Fml.toL_holds` in
+  the closer's module of the time, `NFmlClose`, the modal case of `Fml.toL_holds` in
   `Calculus/Decide.lean`), whose `simp only` now unfolds
   `Modality.afterRun`.  That only an `assert` panics holds of the
   typed run on every state, inside the EVM fragment or not
@@ -534,9 +537,9 @@ did not blow up on this file.  The search (`#solkey_derive?`) took about
 
 **What changed below.**  `Op1.wt` is a new symbol, so `Update.lean` and the
 modules that match on `Op1` (`Theory/Bridge/Denote.lean`,
-`Calculus/TermRules.lean`, `Calculus/NFmlUpdateRules.lean`,
-`Calculus/StateParts.lean`, `Calculus/Decide.lean`,
-`Calculus/ChainRewrites.lean`, `Calculus/NFmlQuote.lean`,
+`TermRules`, `NFmlUpdateRules`,
+`StateParts`, `Calculus/Decide.lean`,
+`ChainRewrites`, `NFmlQuote`,
 `Calculus/RuleSyntax.lean`, `Calculus/SurfaceNotation.lean`) gained one case each;
 `Derive.synClose` filters the context first (a `List.filter` in the kernel
 check, for every `sol_prove`).  The default build passes; the benchmark
@@ -767,7 +770,7 @@ storage writes, and the closer reads past them.
   only dispatches; with `termination_by structural` on each of its
   theorems, its `maxHeartbeats 400000` override is gone (it now checks at
   the default).
-- **The alias a push returns** (`Derive.pushAlias?`, `Calculus/NFmlDerive.lean`):
+- **The alias a push returns** (`Derive.pushAlias?`, `NFmlDerive`):
   `T storage x = arr.push();` leaves `{ storage := extend(storage, arr) ‖ x
   := arr[arr.length] }`, the alias past the old end; `Fml.seqUpd` reads it
   as the push, then `x := arr[arr.length - 1]` after it (`lastSlot`), where
@@ -911,7 +914,7 @@ in `pushOn` (`docs/solc-alignment.md`, "Remaining deltas").
   near (the most pushes and pops in one is six,
   `testNestedIndexWriteImpureReceiverAndIndex`, over several arrays).
 - **`simp only`.**  The 336 bare `simp`/`simpa`/`simp_all` calls of
-  `Calculus/Decide.lean` (not only M5's) and the 7 of `Calculus/NFmlDerive.lean`
+  `Calculus/Decide.lean` (not only M5's) and the 7 of `NFmlDerive`
   are now `simp only` with the lemmas `simp?` printed (the union, where a
   `<;>` fan printed several), and three unused arguments the linter
   reported are gone.
@@ -1350,7 +1353,7 @@ as merged.
   interpreter's.  `Calculus/Decide.lean` runs the updates on that heap
   (`readL`, `mlenL`, `writeL`, `kchainL` for an index that is no literal)
   with a guard that returns exactly where the interpreter's operation does.
-- **An allocation one element at a time** (`Calculus/NFmlDerive.lean`).
+- **An allocation one element at a time** (`NFmlDerive`).
   `{ x := freshId(addM(memory)) ‖ memory := addM(memory) }` is split into
   `x` first and then the memory where the allocation does not read `x`
   (`memAlloc?`, `peelMem_sound`), so `Fml.toL` sees the identity before the
@@ -2318,7 +2321,7 @@ A finder and a skeptic over W6 and W7; what the skeptic confirmed, fixed:
 
 The W7 review's follow-up, in `Derive.residue`.
 
-- **The rule.**  `Proves.closeFalse` (`Calculus/NFmlLogic.lean`):
+- **The rule.**  `Proves.closeFalse` (`NFmlLogic`):
   `dl{ ..Γ ⟹[R] false }` gives `dl{ ..Γ ⟹[R] φ }` for any `φ`.  It is a
   deviation in shape from KeY's `closeFalse` (`propRule.key`), which has no
   premise and closes a literal `false ⟹`, the antecedent the split
@@ -2434,7 +2437,7 @@ Branch `merge-ctor-loops-prune`, from master `2979bb8`: `derive-prune`
 (fast-forward), then `ctor`, then `loops`.  The conflicts of the `loops`
 merge, each resolved keeping both lanes:
 
-- `Calculus/NFmlDerive.lean`: `premiseRes` takes the closer (pruning's
+- `NFmlDerive`: `premiseRes` takes the closer (pruning's
   `splitRes`) and has the `.inv` arm (loops'); `groundIn` gained a
   `Hyp.anon` arm (a local a loop anonymised is not ground), and
   `UpdElem.binds` the `.saveNetMt` element (ctor's), which binds a local as

@@ -187,89 +187,32 @@ section Laws
 
 variable {Γ : Ctx} {q : Tm C [] .val × Tm C [] .val}
 
-/-- Whether `Tm.pickC` rewrites `t`: a closed value term reading `q.1` at
-the empty scope. -/
-def Tm.firesC (q : Tm C [] .val × Tm C [] .val) : {s : Srt} → Tm C Γ s → Bool
-  | .val, t => t.closedAs q.1
-  | _, _ => false
-
 /-- Whether `Tm.rwC` rewrites something in `t`. -/
-def Tm.hasC (q : Tm C [] .val × Tm C [] .val) : {s : Srt} → Tm C Γ s → Bool
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => false
-  | _, .netOf _ a => Tm.hasC q a
-  | _, t@(.app0 _) => Tm.firesC q t
-  | _, t@(.app1 _ _ x) => Tm.firesC q t || Tm.hasC q x
-  | _, t@(.app2 _ x y) => Tm.firesC q t || Tm.hasC q x || Tm.hasC q y
-  | _, t@(.app3 _ x y z) => Tm.firesC q t || Tm.hasC q x || Tm.hasC q y || Tm.hasC q z
-
-/-- Whether `Rhs.rwC` rewrites something. -/
-def Rhs.hasC (q : Tm C [] .val × Tm C [] .val) : {t : LTy} → Rhs C Γ t → Bool
-  | _, .val t => t.hasC q
-  | _, .path p => p.hasC q
-  | _, .mref i => i.hasC q
-  | _, .store s => s.hasC q
-  | _, _ => false
-
-/-- Whether `UpdElem.rwC` rewrites something. -/
-def UpdElem.hasC {Δ : Ctx} (q : Tm C [] .val × Tm C [] .val) : UpdElem C Γ Δ → Bool
-  | .local _ r => r.hasC q
-  | .storage s => s.hasC q
-  | .memory m => m.hasC q
-  | .selfBalance _ a | .setBalance a => a.hasC q
-  | .net r _ a | .pay r a | .netMt r a => r.hasC q || a.hasC q
+abbrev Tm.hasC (q : Tm C [] .val × Tm C [] .val) {s : Srt} (t : Tm C Γ s) : Bool :=
+  Tm.hasBy (Tm.pickClosed q) t
 
 /-- Whether `Upd.rwC` rewrites something. -/
-def Upd.hasC (q : Tm C [] .val × Tm C [] .val) : {Δ : Ctx} → Upd C Γ Δ → Bool
-  | _, .nil => false
-  | _, .snoc U e => Upd.hasC q U || e.hasC q
-  | _, .decl U _ r => Upd.hasC q U || r.hasC q
-  | _, .pop U _ | _, .drop U _ => Upd.hasC q U
+abbrev Upd.hasC (q : Tm C [] .val × Tm C [] .val) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
+  Upd.hasBy (Tm.pickClosed q) U
 
 /-- Two closed terms that return alike in every state: a literal law's. -/
 def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : EState C [], t.eval σ = t'.eval σ
 
-theorem Tm.pickC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) :
-    {s : Srt} → {t d : Tm C Γ s} → d.eval σ = t.eval σ → (Tm.pickC q t d).eval σ = t.eval σ
-  | .val, t, d, hd => by
-    simp only [Tm.pickC]
-    split
-    · rename_i hc
-      show (Tm.ofNil q.2).eval σ = t.eval σ
-      rw [Tm.eval_ofNil σ, Tm.eval_closedAs hc σ, hq]
-    · exact hd
-  | .path, _, _, hd | .st, _, _, hd | .sv, _, _, hd | .ident, _, _, hd | .addr, _, _, hd
-  | .mem, _, _, hd | .mv, _, _, hd => hd
+theorem Tm.pickClosed_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) :
+    PickEq (Tm.pickClosed q) σ := fun h => by
+  obtain ⟨rfl, hc, rfl⟩ := Tm.pickClosed_some h
+  show (Tm.ofNil q.2).eval σ = _
+  rw [Tm.eval_ofNil σ, Tm.eval_closedAs hc σ, hq]
 
 /-- **An exact law keeps what every term returns.** -/
-theorem Tm.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) :
-    {s : Srt} → (t : Tm C Γ s) → (t.rwC q).eval σ = t.eval σ
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => rfl
-  | _, .netOf i a => by simp only [Tm.rwC, Tm.eval, Tm.rwC_eval_eq hq σ a]
-  | _, .app0 _ => Tm.pickC_eval_eq hq σ rfl
-  | _, .app1 o _ x => Tm.pickC_eval_eq hq σ (by simp only [Tm.eval, Tm.rwC_eval_eq hq σ x])
-  | _, .app2 o x y =>
-    Tm.pickC_eval_eq hq σ (by simp only [Tm.eval, Tm.rwC_eval_eq hq σ x, Tm.rwC_eval_eq hq σ y])
-  | _, .app3 o x y z => Tm.pickC_eval_eq hq σ (by
-      simp only [Tm.eval, Tm.rwC_eval_eq hq σ x, Tm.rwC_eval_eq hq σ y, Tm.rwC_eval_eq hq σ z])
-
-theorem Rhs.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) {t : LTy} (r : Rhs C Γ t) :
-    (r.rwC q).eval σ = r.eval σ := by
-  cases r <;> simp only [Rhs.rwC, Rhs.eval, Tm.rwC_eval_eq hq σ]
-
-theorem UpdElem.rwC_write_eq (hq : Tm.EvalEq q.1 q.2) {Δ : Ctx} (σ₀ : EState C Γ)
-    (e : UpdElem C Γ Δ) (τ : EState C Δ) : (e.rwC q).write σ₀ τ = e.write σ₀ τ := by
-  cases e <;> simp only [UpdElem.rwC, UpdElem.write, Rhs.rwC_eval_eq hq σ₀, Tm.rwC_eval_eq hq σ₀]
+theorem Tm.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) {s : Srt} (t : Tm C Γ s) :
+    (t.rwC q).eval σ = t.eval σ :=
+  Tm.rwBy_eval_eq σ (Tm.pickClosed_eq hq σ) t
 
 /-- **An exact law keeps where every update ends.** -/
-theorem Upd.rwC_apply_eq (hq : Tm.EvalEq q.1 q.2) (σ₀ : EState C Γ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → (U.rwC q).apply σ₀ = U.apply σ₀
-  | _, .nil => rfl
-  | _, .snoc U e => by
-    simp only [Upd.rwC, Upd.apply, Upd.rwC_apply_eq hq σ₀ U, UpdElem.rwC_write_eq hq σ₀]
-  | _, .decl U x r => by
-    simp only [Upd.rwC, Upd.apply, Upd.rwC_apply_eq hq σ₀ U, Rhs.rwC_eval_eq hq σ₀]
-  | _, .pop U h => by simp only [Upd.rwC, Upd.apply, Upd.rwC_apply_eq hq σ₀ U]
-  | _, .drop U h => by simp only [Upd.rwC, Upd.apply, Upd.rwC_apply_eq hq σ₀ U]
+theorem Upd.rwC_apply_eq (hq : Tm.EvalEq q.1 q.2) (σ₀ : EState C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
+    (U.rwC q).apply σ₀ = U.apply σ₀ :=
+  Upd.rwBy_apply_eq σ₀ (Tm.pickClosed_eq hq σ₀) U
 
 theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
     {φ : Fml C Δ} (σ : State C Γ) : holds σ (.upd m (U.rwC q) φ) ↔ holds σ (.upd m U φ) := by
@@ -572,7 +515,7 @@ def Fml.lawAtom (q : Tm C [] .val × Tm C [] .val) (exact : Bool) : Fml C Γ →
 
 /-- Whether `Fml.lawAtom` rewrites something. -/
 def Fml.lawAtomFires (q : Tm C [] .val × Tm C [] .val) (exact : Bool) : Fml C Γ → Bool
-  | .eq a b => Tm.firesC q a || Tm.firesC q b
+  | .eq a b => a.closedAs q.1 || b.closedAs q.1
   | .defined t => exact && t.hasC q
   | _ => false
 
@@ -770,11 +713,6 @@ the update returns, the state it leaves holds the literal there
 section ApplyOnPV
 
 variable {Γ Δ : Ctx}
-
-/-- The literal a term is, if it is one. -/
-def Tm.litVal? {Γ : Ctx} : Tm C Γ .val → Option Semantics.Value
-  | .app0 (.lit v) => some v
-  | _ => none
 
 /-- The literal a local holds after an update, if it holds one. -/
 def Held.litVal? {p : PrimTy} : Held C Γ (.val p) → Option Semantics.Value
