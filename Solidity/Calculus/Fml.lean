@@ -3,8 +3,8 @@ import Solidity.Update
 /-!
 # Terms, updates and formulas, scoped
 
-`Update.lean`'s terms, updates and formulas read in a context `Γ : Ctx`
-(`docs/intrinsic.md`, M6a), over the scoped programs of `Syntax/Scoped.lean`.
+Terms over `Update.lean`'s signature, updates and formulas, read in a
+context `Γ : Ctx` (`docs/intrinsic.md`, M6a), over the scoped programs of `Syntax/Scoped.lean`.
 A program variable is a position (`Tm.pvV i`, `i : Idx Γ (.val p)`), so a
 formula cannot read a local that is not in scope.
 
@@ -67,18 +67,6 @@ inductive Tm (C : Contract) (Γ : Ctx) : Srt → Type where
   | app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C Γ a) (y : Tm C Γ b) : Tm C Γ s
   | app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C Γ b) (z : Tm C Γ c) : Tm C Γ s
 
-/-- `Update.lean`'s term, the positions named by `ns` (innermost first). -/
-def Tm.erase {Γ : Ctx} (ns : List Var) : {s : Srt} → Tm C Γ s → Surface.Tm C s
-  | _, .pvV i => .pvV (i.name ns)
-  | _, .pvP i => .pvP (i.name ns)
-  | _, .pvS i => .pvS (i.name ns)
-  | _, .pvI i => .pvI (i.name ns)
-  | _, .netOf i a => .app1 (.netOf (i.name ns)) (a.erase ns)
-  | _, .app0 o => .app0 o
-  | _, .app1 o _ x => .app1 o (x.erase ns)
-  | _, .app2 o x y => .app2 o (x.erase ns) (y.erase ns)
-  | _, .app3 o x y z => .app3 o (x.erase ns) (y.erase ns) (z.erase ns)
-
 /-! ## Updates -/
 
 /-- What a local of type `t` is set to, read in `Γ`. -/
@@ -133,28 +121,6 @@ inductive Upd (C : Contract) (Γ : Ctx) : Ctx → Type where
   invisible). -/
   | drop {Δ Δ' : Ctx} (U : Upd C Γ Δ) (h : Thin Δ' Δ) : Upd C Γ Δ'
 
-/-- The element setting the local named `x` to `r`, in `Update.lean`'s terms. -/
-def Rhs.erase {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t → Surface.UpdElem C
-  | _, .val t => .val x (t.erase ns)
-  | _, .path p => .path x (p.erase ns)
-  | _, .unset => .unset x
-  | _, .mref i => .mref x (i.erase ns)
-  | _, .store s => .store x (s.erase ns)
-  | _, .saveNet => .saveNet x
-  | _, .saveNetMt => .saveNetMt x
-
-/-- The element, its right-hand sides named by `ns` (`Γ`'s names) and its
-target by `ms` (`Δ`'s). -/
-def UpdElem.erase {Γ Δ : Ctx} (ns ms : List Var) : UpdElem C Γ Δ → Surface.UpdElem C
-  | .local i r => r.erase ns (i.name ms)
-  | .storage s => .storage (s.erase ns)
-  | .memory m => .memory (m.erase ns)
-  | .selfBalance op a => .selfBalance op (a.erase ns)
-  | .net r op a => .net (r.erase ns) op (a.erase ns)
-  | .pay r a => .pay (r.erase ns) (a.erase ns)
-  | .netMt r a => .netMt (r.erase ns) (a.erase ns)
-  | .setBalance a => .setBalance (a.erase ns)
-
 /-- The names of the locals a thinning keeps, from the names `ns` of the
 context it thins into. -/
 def Thin.names : {Γ Δ : Ctx} → Thin Γ Δ → List Var → List Var
@@ -171,15 +137,6 @@ def Upd.names {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → List V
   | _, .decl U x _ => x :: U.names ns
   | _, .pop U h => (U.names ns).drop h.depth
   | _, .drop U h => h.names (U.names ns)
-
-/-- `Update.lean`'s update: the elements in order, a pop none (there, a
-local outlives its scope). -/
-def Upd.erase {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Surface.Upd C
-  | _, .nil => []
-  | _, .snoc U e => U.erase ns ++ [e.erase ns (U.names ns)]
-  | _, .decl U x r => U.erase ns ++ [r.erase ns x]
-  | _, .pop U _ => U.erase ns
-  | _, .drop U _ => U.erase ns
 
 /-! ## Frames: what follows the program -/
 

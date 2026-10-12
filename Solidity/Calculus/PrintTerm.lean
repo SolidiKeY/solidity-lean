@@ -8,9 +8,8 @@ read from their `Expr`, schema variables and all, at a name stack `ns` (the
 names of the context, innermost first) as `Calculus/PrintStmt.lean` reads
 statements: `ppTermS`, `ppPTermS`, …, `ppUpdS`, in the grammar of
 `RuleSyntax.lean`, with its builders (`lenTerms`, `elemTerm`, `dotTerm`,
-`allocTy?`, `ppVar?`), meant to print the text the untyped printers
-(`ppTerm`, `ppUpd`) print of the erasure: a design intent, which nothing
-checks since the twin check went (W9.6N).  Nothing here erases: a term is
+`allocTy?`, `ppVar?`); the untyped printers they once matched are gone
+(W9.7.1).  Nothing here erases: a term is
 read by its view (`viewTmS`), a position by its name (`idxName`), a symbol by
 its constructor (`Op2.find`), and an update by its pieces (`updPiecesS`).
 
@@ -150,7 +149,7 @@ def escapeS (e : Expr) : MetaM (TSyntax `dl_term) := escapeDl e
 
 mutual
 
-/-- A value term read at `ns`, as `ppTerm` prints the closer's. -/
+/-- A value term read at `ns`. -/
 partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -238,7 +237,7 @@ partial def keyAddrS? (ns : List Expr) (a : Expr) :
   | .sym ``Op2.mat #[] #[i, k] => return some (← ppITermS ns i, ← `(dl_term| at($(← ppTermS ns k))))
   | _ => return none
 
-/-- A storage path read at `ns` (`ppPTerm`). -/
+/-- A storage path read at `ns`. -/
 partial def ppPTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -264,7 +263,7 @@ partial def ppPTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
     `(dl_term| $p:dl_term[$len:dl_term]@$(← ppSTermS ns s):dl_term)
   | _ => escapeS e
 
-/-- A storage read at `ns` (`ppSTerm`). -/
+/-- A storage read at `ns`. -/
 partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -300,7 +299,7 @@ partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
     `(dl_term| select($(← ppSTermS ns s), $(nameIdent r):ident))
   | _ => escapeS e
 
-/-- What a storage `save` writes, read at `ns` (`ppSVal`). -/
+/-- What a storage `save` writes, read at `ns`. -/
 partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -328,7 +327,7 @@ partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     | none => `(dl_term| newArr($(← ppTermS ns n)))
   | _ => escapeS e
 
-/-- A memory identity read at `ns` (`ppITerm`). -/
+/-- A memory identity read at `ns`. -/
 partial def ppITermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -349,7 +348,7 @@ partial def ppITermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .sym ``Op2.copy #[] #[m, v] => `(dl_term| freshId(copySt($(← ppMTermS ns m), $(← ppSValS ns v))))
   | _ => escapeS e
 
-/-- A member or an element of a memory object, read at `ns` (`ppMAddr`). -/
+/-- A member or an element of a memory object, read at `ns`. -/
 partial def ppMAddrS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -361,7 +360,7 @@ partial def ppMAddrS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .sym ``Op2.mat #[] #[i, k] => `(dl_term| $(← ppITermS ns i):dl_term[$(← ppTermS ns k):dl_term])
   | _ => escapeS e
 
-/-- A memory read at `ns` (`ppMTerm`). -/
+/-- A memory read at `ns`. -/
 partial def ppMTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -381,7 +380,7 @@ partial def ppMTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .sym ``Op2.copySt #[] #[m, v] => `(dl_term| copySt($(← ppMTermS ns m), $(← ppSValS ns v)))
   | _ => escapeS e
 
-/-- What a memory `write` writes, read at `ns` (`ppMVal`). -/
+/-- What a memory `write` writes, read at `ns`. -/
 partial def ppMValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   let (ns, v, e) ← viewTmS (← reduceOn) ns e
   if let .var x := v then
@@ -488,7 +487,7 @@ def rhsElemS (ns : List Expr) (x r : Expr) : MetaM (Option (TSyntax `dl_upd_elem
   | _ => return none
 
 /-- An assigning element, its right-hand sides read at `ns` and its target at
-`ms` (`ppUpdElem?`); none where it does not print. -/
+`ms`; none where it does not print. -/
 def updElemS (ns ms : List Expr) (e : Expr) : MetaM (Option (TSyntax `dl_upd_elem)) := do
   let e ← whnf (← instantiateMVars e)
   let args := e.getAppArgs
@@ -557,8 +556,7 @@ def updElemsS (ps : Array UPiece) : MetaM (Option (Array (TSyntax `dl_upd_elem))
     | .stuck => return none
   return some out
 
-/-- The update `U`, of pieces `ps`, as `ppUpd` prints the closer's: `‹U›`
-where it does not print. -/
+/-- The update `U`, of pieces `ps`: `‹U›` where it does not print. -/
 def ppUpdPiecesS (U : Expr) (ps : Array UPiece) : MetaM (TSyntax `dl_upd) := do
   if ps.isEmpty then return ← `(dl_upd| ‹$(← `([])):term›)
   let some out ← updElemsS ps | `(dl_upd| ‹$(← escapeTerm U):term›)

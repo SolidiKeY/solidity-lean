@@ -21,7 +21,7 @@ def Simple.lower {Γ : Ctx} {p : PrimTy} : Simple C Γ p → Tm C Γ .val
   | .env k _ => .app0 (.env k)
 
 /-- An index of key type `k` as the word it is hashed as: a `bool` key `b`
-is `b ? 1 : 0` (`Term.keyAt`). -/
+is `b ? 1 : 0`, as solc pads it (`Value.keyAt`). -/
 def Tm.keyAt {Γ : Ctx} : PrimTy → Tm C Γ .val → Tm C Γ .val
   | .bool, t => .app3 .ite t (.app0 (.lit (.int 1))) (.app0 (.lit (.int 0)))
   | .uint, t => t

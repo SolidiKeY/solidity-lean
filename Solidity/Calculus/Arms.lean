@@ -550,7 +550,7 @@ def incStep {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ
   | none => .upd1 (l.set (l.op op.binOp .one))
 
 /-- The value `t++` has: the bumped one for `++t`, the old one for `t++`
-(`Update.lean`'s `Term.bumped`). -/
+(the rule table's `Term.bumped`, `Calculus/Rules.lean`). -/
 def Tm.bumped (op : IncDec) (p : PrimTy) (t : Tm C Γ .val) : Tm C Γ .val :=
   if op.isPre then .app2 (.binop op.binOp p) t .one else t
 

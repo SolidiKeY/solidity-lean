@@ -134,7 +134,6 @@ families, its conclusion, printed with the notation on (`pp.sol.dl`, and
 term left escaped: no escape `‹…›` names a scoped constant, printed with
 full names (`‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
 `‹@Solidity.Val.…›`, `‹Solidity.Ext.push …›`, `‹Solidity.Tms.STerm.save …›`;
-`‹Solidity.Surface.…›`, the reader's shim's, passes, and so does
 `‹Solidity.Stmt.call …›`, `functionCallArgCapture`'s call, which has no
 line of KeY's: `Calculus/DelabLean.lean`).  The constructors whose line does not print
 are listed.  Today's rule table, which the scoped lines were once diffed
@@ -187,7 +186,7 @@ def isScopedName (env : Environment) (tok : String) : Bool :=
   let rec go : Lean.Name → Bool
     | .anonymous => false
     | n@(.str p _) => n != `Solidity &&
-        (Delab.isScopedFamily env n || scopedOnlyRoots.contains n || go p)
+        (Delab.isScopedFamily n || scopedOnlyRoots.contains n || go p)
     | .num p _ => go p
   tok.startsWith "Solidity." && tok != "Solidity.Stmt.call" && go tok.toName
 

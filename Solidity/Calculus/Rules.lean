@@ -36,8 +36,9 @@ variable {C : Contract} {Γ : Ctx}
 
 /-! ## The term symbols the rule lines write
 
-`Update.lean`'s constructors of terms (`Term.find`, `STerm.save`, …) at a
-context: the reader's names, turned into their scoped twins under `Tms`. -/
+The term symbols by their KeY sort and name (`Term.find`, `STerm.save`, …),
+over `Update.lean`'s signature, at a context: the names the rule lines
+write, turned into these under `Tms` (`RuleSyntax.coreNames`). -/
 
 namespace Tms
 

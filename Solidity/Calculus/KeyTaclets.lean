@@ -25,9 +25,9 @@ awk '/^    [A-Za-z0-9_]+ \{$/ { if (nm != "") print nm "\t" h; nm=$1; h=""; next
 ```
 
 and rebuild the three tables below in that order.  The `SolKey` reader's
-`SolKey.Corpus.keyTaclets_eq_corpus` checks the result *is* the
-`.key` file it vendors, in order, so a stale table fails that build rather
-than going unnoticed.
+`SolKey.Corpus.keyTaclets_eq_corpus` checked the result *is* the `.key`
+file it vendors; that reader is outdated since W9.7 and no longer builds
+against this package, so a stale table is no longer caught there.
 
 `name` is deliberately a `match` and not a lookup in `all`: the corpus check is
 a `native_decide` over 323 strings, and a lookup would make it quadratic.
