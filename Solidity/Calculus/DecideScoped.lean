@@ -119,9 +119,79 @@ def _root_.Solidity.Tm.storLocalS (ρ : SymS) : Tm C Γ .st → Option LStor
     | _ => none
   | _ => none
 
+/-! The symbols the tests below recognise, each by a `match` on the symbol
+alone: a pattern nesting a symbol under a term of a fixed sort compiles to
+casts that the equation lemmas, `simp` and the splitter do not see through
+(`Calculus/TermLib.lean`'s convention). -/
+
+/-- `storage`. -/
+def _root_.Solidity.Op0.isStorage {s : Srt} : Op0 C s → Bool
+  | .storage => true
+  | _ => false
+
+/-- `memory`. -/
+def _root_.Solidity.Op0.isMemory {s : Srt} : Op0 C s → Bool
+  | .memory => true
+  | _ => false
+
+/-- A literal. -/
+def _root_.Solidity.Op0.isLit {s : Srt} : Op0 C s → Bool
+  | .lit _ => true
+  | _ => false
+
+/-- A literal, or a value of the transaction. -/
+def _root_.Solidity.Op0.isLitLike {s : Srt} : Op0 C s → Bool
+  | .lit _ | .env _ => true
+  | _ => false
+
+/-- The type `addM` allocates. -/
+def _root_.Solidity.Op1.addMOf? {a s : Srt} : Op1 C a s → Option RefTy
+  | .addM R _ => some R
+  | _ => none
+
+/-- The type `alloc` allocates. -/
+def _root_.Solidity.Op1.allocOf? {a s : Srt} : Op1 C a s → Option RefTy
+  | .alloc R _ => some R
+  | _ => none
+
+/-- `ref`. -/
+def _root_.Solidity.Op1.isRef {a s : Srt} : Op1 C a s → Bool
+  | .ref => true
+  | _ => false
+
+/-- The member a field selects. -/
+def _root_.Solidity.Op1.fieldName? {a s : Srt} : Op1 C a s → Option Name
+  | @Op1.field _ _ f _ _ => some f
+  | _ => none
+
+/-- `wt`. -/
+def _root_.Solidity.Op1.isWt {a s : Srt} : Op1 C a s → Bool
+  | .wt => true
+  | _ => false
+
+/-- `copy`. -/
+def _root_.Solidity.Op2.isCopy {a b s : Srt} : Op2 C a b s → Bool
+  | .copy _ => true
+  | _ => false
+
+/-- `copySt`. -/
+def _root_.Solidity.Op2.isCopySt {a b s : Srt} : Op2 C a b s → Bool
+  | .copySt _ => true
+  | _ => false
+
+/-- `save`. -/
+def _root_.Solidity.Op3.isSave {a b c s : Srt} : Op3 C a b c s → Bool
+  | .save => true
+  | _ => false
+
 /-- `storage` itself. -/
 def _root_.Solidity.Tm.isStorageS {s : Srt} : Tm C Γ s → Bool
-  | .app0 .storage => true
+  | .app0 o => o.isStorage
+  | _ => false
+
+/-- `memory` itself. -/
+def _root_.Solidity.Tm.isMemoryS {s : Srt} : Tm C Γ s → Bool
+  | .app0 o => o.isMemory
   | _ => false
 
 /-- A storage variable. -/
@@ -140,13 +210,18 @@ def _root_.Solidity.Op2.toLAtS {a b s : Srt} (ρ : SymS) : Op2 C a b s → Tm C 
   | o, _, x, y => o.toL x y
 
 /-- The type `addM(memory)` allocates. -/
-def addMOfS? : Tm C Γ .mem → Option RefTy
-  | .app1 (.addM R _) (.app0 .memory) => some R
+def addMOfS? {s : Srt} : Tm C Γ s → Option RefTy
+  | .app1 o x => if x.isMemoryS then o.addMOf? else none
+  | _ => none
+
+/-- The type `alloc(memory)` allocates. -/
+def allocOfS? {s : Srt} : Tm C Γ s → Option RefTy
+  | .app1 o x => if x.isMemoryS then o.allocOf? else none
   | _ => none
 
 /-- The type `freshId(addM(memory))`, written as a reference, allocates. -/
-def allocRefOfS? {T : Ty} : Tm C Γ (.mv T) → Option RefTy
-  | .app1 .ref (.app1 (.alloc R _) (.app0 .memory)) => some R
+def allocRefOfS? {s : Srt} : Tm C Γ s → Option RefTy
+  | .app1 o x => if o.isRef then allocOfS? x else none
   | _ => none
 
 /-- A reference written into the object `m` allocates, when it is that
@@ -230,13 +305,25 @@ def _root_.Solidity.Op2.inLS {a b s : Srt} (ρ : SymS) : Op2 C a b s → Tm C Γ
   | .copyMem, _, x, y, ha, hb => ha && hb && (memL x y).isSome
   | _, _, _, _, _, _ => false
 
+/-- A value a push takes: a word (`sval`) or a subtree (`sfind`); by a
+`match` on the symbol alone, the sort generic. -/
+def _root_.Solidity.Tm.pushValS : {s : Srt} → Tm C Γ s → Bool
+  | _, .app1 o _ =>
+    match o with
+    | .sval => true
+    | _ => false
+  | _, .app2 o _ _ =>
+    match o with
+    | .sfind => true
+    | _ => false
+  | _, _ => false
+
 /-- A ternary symbol in the fragment, its arguments in it. -/
 def _root_.Solidity.Op3.inLS {a b c s : Srt} (ρ : SymS) : Op3 C a b c s → Tm C Γ a → Tm C Γ c →
     a.LTy → b.LTy → c.LTy → Bool → Bool → Bool → Bool
   | .ite, _, _, _, _, _, hc, ha, hb => hc && ha && hb
   | .save, s, _, _, _, z, _, hp, hv => s.isStorageS && hp && hv && z.storable
-  | .push, s, .app1 .sval _, _, _, _, _, hp, hv | .push, s, .app2 .sfind _ _, _, _, _, _, hp, hv =>
-    s.isStorageS && hp && hv
+  | .push, s, v, _, _, _, _, hp, hv => s.isStorageS && v.pushValS && hp && hv
   | .write, m, v, x, y, z, hm, ha, hv =>
     hm && ha && (hv || (freshRefS ρ m v none).isSome) && (writeM x y (freshRefS ρ m v z)).isSome
   | _, _, _, _, _, _, _, _, _ => false
@@ -323,18 +410,30 @@ def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
     | _ => false
 
 /-- A literal or a local. -/
-def _root_.Solidity.Tm.isAtomS {p : PrimTy} : Tm C Γ (.val p) → Bool
-  | .app0 (.lit _) | .pvV _ => true
+def _root_.Solidity.Tm.isAtomS {s : Srt} : Tm C Γ s → Bool
+  | .app0 o => o.isLit
+  | .pvV _ => true
   | _ => false
 
 /-- A literal, or a value of the transaction. -/
-def _root_.Solidity.Tm.isLitLikeS {p : PrimTy} : Tm C Γ (.val p) → Bool
-  | .app0 (.lit _) | .app0 (.env _) => true
+def _root_.Solidity.Tm.isLitLikeS {s : Srt} : Tm C Γ s → Bool
+  | .app0 o => o.isLitLike
   | _ => false
 
 /-- A total equation the fragment takes. -/
 def _root_.Solidity.Tm.eqLitS {p : PrimTy} (a b : Tm C Γ (.val p)) : Bool :=
   (a.isLitLikeS && b.isAtomS) || (b.isLitLikeS && a.isAtomS)
+
+/-- The word a stored value writes: `sval(t)`. -/
+def _root_.Solidity.Op1.svalArg? {a s : Srt} : Op1 C a s → Tm C Γ a →
+    Option ((p : PrimTy) × Tm C Γ (.val p))
+  | .sval, t => some ⟨_, t⟩
+  | _, _ => none
+
+/-- The word a stored value writes. -/
+def _root_.Solidity.Tm.svalArgS {s : Srt} : Tm C Γ s → Option ((p : PrimTy) × Tm C Γ (.val p))
+  | .app1 o t => o.svalArg? t
+  | _ => none
 
 /-- The slot-level path of a stale alias, and of its members. -/
 def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Option LPath
@@ -342,16 +441,43 @@ def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Optio
     match ρ.get i.toNatR with
     | some (.stale q) => some q
     | _ => none
-  | _, .app1 (@Op1.field _ _ f _ _) p => (Tm.slotPathS ρ p).map fun q => key{ q.f }
+  | _, .app1 o p => o.fieldName?.bind fun f => (Tm.slotPathS ρ p).map fun q => key{ q.f }
   | _, _ => none
 
 /-- A write through a stale alias. -/
-def _root_.Solidity.Tm.staleWriteS (ρ : SymS) :
-    Tm C Γ .st → Option (Option AOp × LPath × (p : PrimTy) × Tm C Γ (.val p))
-  | .app3 .save (.app0 .storage) q (.app1 .sval t) => (q.slotPathS ρ).map fun l => (none, l, ⟨_, t⟩)
-  | .app3 .push (.app0 .storage) q (.app1 .sval t) =>
-    (q.slotPathS ρ).map fun l => (some .push, l, ⟨_, t⟩)
+def _root_.Solidity.Tm.staleWriteS (ρ : SymS) {s : Srt} :
+    Tm C Γ s → Option (Option AOp × LPath × (p : PrimTy) × Tm C Γ (.val p))
+  | .app3 o st q v =>
+    if o.isSave && st.isStorageS then
+      (q.slotPathS ρ).bind fun l => v.svalArgS.map fun t => (none, l, t)
+    else none
   | _ => none
+
+/-- The array at `q` of `s` has room for one more element: fewer than
+`2^256 - 1` live ones (`Storage.full`), else it halts. -/
+def pushBound (s : LStor) (q : LPath) : LTerm :=
+  .ite (.binop .lt .uint (.len s q) (.lit (.int (2 ^ 256 - 1)))) (.lit (.bool true)) .err
+
+/-- `Tm.boundS` of a binary symbol. -/
+def _root_.Solidity.Op2.boundAt {a b s : Srt} (ρ : SymS) : Op2 C a b s → Tm C Γ a → Tm C Γ b →
+    LTerm
+  | .pushSlot, st, q | .extend, st, q =>
+    if st.isStorageS then pushBound ρ.sym.stor (q.toLS ρ) else .lit (.bool true)
+  | _, _, _ => .lit (.bool true)
+
+/-- `Tm.boundS` of a ternary symbol. -/
+def _root_.Solidity.Op3.boundAt {a b c s : Srt} (ρ : SymS) : Op3 C a b c s → Tm C Γ a → Tm C Γ b →
+    LTerm
+  | .push, st, q => if st.isStorageS then pushBound ρ.sym.stor (q.toLS ρ) else .lit (.bool true)
+  | _, _, _ => .lit (.bool true)
+
+/-- What a push onto `storage` must have, beside its write returning: room
+for the element (`pushBound`).  The typed push is out of gas at the bound
+(`Storage.full`), where the decision procedure's untyped one appends. -/
+def _root_.Solidity.Tm.boundS (ρ : SymS) {s : Srt} : Tm C Γ s → LTerm
+  | .app3 o st q _ => o.boundAt ρ st q
+  | .app2 o st q => o.boundAt ρ st q
+  | _ => .lit (.bool true)
 
 /-- A storage update pushed in. -/
 def _root_.Solidity.Tm.toLSt (ρ : SymS) (s : Tm C Γ .st) : LStor :=
@@ -551,7 +677,7 @@ def _root_.Solidity.Rhs.guardS (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
     match i.toLS ρ with
     | some (_, g) => g
     | none => .err
-  | .store s => .sok (s.toLS ρ)
+  | .store s => seqL (s.boundS ρ) (.sok (s.toLS ρ))
   | .saveNet | .saveNetMt => .err
 
 /-- A right-hand side in the fragment. -/
@@ -577,7 +703,7 @@ def _root_.Solidity.UpdElem.actS (ρ : SymS) {Δ : Ctx} : UpdElem C Γ Δ → Ac
 def ElemS.guard (ρ : SymS) : ElemS C Γ → LTerm
   | .rhs r => r.guardS ρ
   | .glob (.local _ r) => r.guardS ρ
-  | .glob (.storage s) => .sok (s.toLSt ρ)
+  | .glob (.storage s) => seqL (s.boundS ρ) (.sok (s.toLSt ρ))
   | .glob (.net r _ a) => .kite (r.toLS ρ) (a.toLS ρ) (.lit (.bool true)) (.lit (.bool true))
   | .glob (.pay r a) => .kite (r.toLS ρ) (a.toLS ρ) (payGuard (a.toLS ρ)) (payGuard (a.toLS ρ))
   | .glob (.memory m) =>
@@ -637,6 +763,16 @@ memory set after a memory set, an alias after a storage set). -/
 def ElemS.parOk (ρ : SymS) (a b : ElemS C Γ) : Bool :=
   a.inLS ρ && b.inLS ρ && !(a.setsMem && b.needsMem) && !(a.setsStor && b.needsStor)
 
+/-- What `copy(memory, v)` copies. -/
+def _root_.Solidity.Tm.copyArgS {s : Srt} : Tm C Γ s → Option ((s' : Srt) × Tm C Γ s')
+  | .app2 o m v => if o.isCopy && m.isMemoryS then some ⟨_, v⟩ else none
+  | _ => none
+
+/-- What `copySt(memory, v)` copies. -/
+def _root_.Solidity.Tm.copyStArgS {s : Srt} : Tm C Γ s → Option ((s' : Srt) × Tm C Γ s')
+  | .app2 o m v => if o.isCopySt && m.isMemoryS then some ⟨_, v⟩ else none
+  | _ => none
+
 /-- An allocation's pair: the identity and the memory. -/
 def pairViewS : ElemS C Γ → ElemS C Γ → Option ((R : RefTy) × Tm C Γ (.ident R) × Tm C Γ .mem)
   | .rhs (.mref i), .glob (.memory mm) | .glob (.local _ (.mref i)), .glob (.memory mm) =>
@@ -646,14 +782,27 @@ def pairViewS : ElemS C Γ → ElemS C Γ → Option ((R : RefTy) × Tm C Γ (.i
 /-- An allocation's pair, a syntactic test on its two terms: one allocation
 of one type, or two copies of the same value (`Tm.beqR`). -/
 def allocPairS? {R : RefTy} (i : Tm C Γ (.ident R)) (mm : Tm C Γ .mem) : Bool :=
-  match i, mm with
-  | .app1 (.alloc R₁ _) (.app0 .memory), .app1 (.addM R₂ _) (.app0 .memory) => decide (R₁ = R₂)
-  | .app2 (.copy _) (.app0 .memory) v, .app2 (.copySt _) (.app0 .memory) v' => v.beqR v'
-  | _, _ => false
+  match allocOfS? i, addMOfS? mm with
+  | some R₁, some R₂ => decide (R₁ = R₂)
+  | _, _ =>
+    match i.copyArgS, mm.copyStArgS with
+    | some ⟨_, v⟩, some ⟨_, v'⟩ => v.beqR v'
+    | _, _ => false
+
+/-- The path `sfind(storage, p)` reads. -/
+def _root_.Solidity.Op2.sfindPath? {a b s : Srt} : Op2 C a b s → Tm C Γ a → Tm C Γ b →
+    Option ((T : Ty) × Tm C Γ (.path T))
+  | .sfind, st, p => if st.isStorageS then some ⟨_, p⟩ else none
+  | _, _, _ => none
+
+/-- The path `sfind(storage, p)` reads. -/
+def _root_.Solidity.Tm.sfindPathS {s : Srt} : Tm C Γ s → Option ((T : Ty) × Tm C Γ (.path T))
+  | .app2 o st p => o.sfindPath? st p
+  | _ => none
 
 /-- A copy from storage: its path. -/
-def copyOfS? : Tm C Γ .mem → Option ((T : Ty) × Tm C Γ (.path T))
-  | .app2 (.copySt _) (.app0 .memory) (.app2 .sfind (.app0 .storage) p) => some ⟨_, p⟩
+def copyOfS? {s : Srt} : Tm C Γ s → Option ((T : Ty) × Tm C Γ (.path T))
+  | .app2 o m v => if o.isCopySt && m.isMemoryS then v.sfindPathS else none
   | _ => none
 
 /-- The memory a pair leaves, and its guard: a copy from storage made
@@ -939,9 +1088,14 @@ def _root_.Solidity.Fml.reduceS (φ : Fml C []) : LFml := (φ.toLS SymS.empty).e
 
 /-! ### The layout a `wt(storage)` premise gives (proposal 100) -/
 
+/-- `wt(storage)`. -/
+def _root_.Solidity.Tm.isWtStorageS {s : Srt} : Tm C Γ s → Bool
+  | .app1 o x => o.isWt && x.isStorageS
+  | _ => false
+
 /-- The roots a premise `wt(storage)` names. -/
 def _root_.Solidity.Fml.wtRootsS? {Γ : Ctx} : Fml C Γ → Option (List (Name × Ty))
-  | .defined (.app1 .wt (.app0 .storage)) => some C.vars
+  | .defined t => if t.isWtStorageS then some C.vars else none
   | _ => none
 
 /-- `Fml.layoutS`'s compiled twin. -/
