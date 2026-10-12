@@ -12,7 +12,7 @@ of `Typing/StoragePreservation.lean`:
   cost nothing;
 - `heapTypedB` / `StateWT`, the invariant of a state's global part
   (storage, heap, allocation counter).  The locals are typed by their
-  context (`Typing/Soundness.lean`'s `RunWT`, over the scoped syntax);
+  context (`LTy.WT`, `Typing/Soundness.lean`);
 - the weakening lemmas (a store typing extended keeps what was typed),
   the copies' lengths, and `CopyOut`, what a storage→memory copy keeps
   (`Typing/Reachability.lean`'s copies read it).
@@ -132,8 +132,8 @@ def heapTypedB (H : HeapTy) (heap : List (Nat × MObj)) : Bool :=
 /-- The global part of a state is well-typed: layout keys and store typing
 unique, storage well-typed, heap matching `H`, allocation counter fresh.
 The executable model of the `wellFormed` assumption the solkey proof
-obligations need; `Soundness.lean` adds the locals (`RunWT`), which every
-erased typed state satisfies (`State.erase_wt`). -/
+obligations need, which every erased typed state's global part satisfies
+(`State.glob_wt`). -/
 structure StateWT (H : HeapTy) (L : Layout) (s : State) : Prop where
   layoutNodup : nodupKeysB L.globals = true
   heapTyNodup : nodupKeysB H = true

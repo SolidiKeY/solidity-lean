@@ -141,7 +141,7 @@ def bindingPath : Binding → Res (Name × List Seg)
   | .val _ | .mref _ | .store _ | .ledger _ => .error .undef
 
 /-- The object a memory local holds: `m` after `Person memory m;`; an unset
-one reverts, as `MPath.mval` does. -/
+one reverts, as `MPath.mvalT` does. -/
 def bindingRef : Binding → Res Nat
   | .mref id => .ok id
   | .unset => .error .revert

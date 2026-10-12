@@ -11,7 +11,7 @@ and the copies, lookups in a nodup-keyed list, a fresh default inhabits
 its type (`defaultForTy_hasTy`: `defaultOk_true`, since no struct repeats
 a member name), arithmetic gives ints (`applyBinOp_arith_int`), and the
 slot a `push` recycles (`pushSlot_prim`).  The typed run keeps its storage
-typed by construction (`State.erase_wt`, `Typing/TypedWT.lean`), so no
+typed by construction (`State.glob_wt`, `Typing/TypedWT.lean`), so no
 preservation lemma for a write is left here.
 -/
 

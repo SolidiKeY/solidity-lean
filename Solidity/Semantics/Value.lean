@@ -11,7 +11,7 @@ type's range.  Arithmetic stays on `Int`, so the kernel never unfolds
 `PrimTy.erase` is the value the untyped interpreter holds for it
 (`Semantics.Value`), and `PrimTy.ofValue?` reads one back, where the untyped
 value has the type: what a typed step's erasure reads
-(`Semantics/StepErase.lean`).
+(`Semantics/TypedErase.lean`).
 -/
 
 namespace Solidity

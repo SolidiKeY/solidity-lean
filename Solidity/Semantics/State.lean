@@ -17,7 +17,7 @@ a memory local's proof: the identities stay, so the erasure does too.
 `State.erase` is the `EState` the closer reads, so each operation's
 agreement is one lemma here (`State.adopt_erase`, `State.copyStToM_erase`,
 …), from which each typed step's erasure follows
-(`Semantics/StepErase.lean`).
+(`Semantics/TypedErase.lean`).
 -/
 
 namespace Solidity

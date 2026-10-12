@@ -28,7 +28,7 @@ on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
 state it simulates.  (2) is never stuck, by construction: the typed run halts
 only by `revert`, `panic`, `diverge` or `exhausted` (`THalt`), and its states
 hold values of their types, so their erasure is well-typed
-(`State.erase_wt`, `Typing/TypedWT.lean`) and the closer's term model, which
+(`State.glob_wt`, `Typing/TypedWT.lean`) and the closer's term model, which
 reads that erasure, meets its ill-sorted value (`Halt.undef`) on no state a
 run reaches (`docs/intrinsic.md`, decisions 39, 40 and 50).  There is no
 untyped run of a statement left to be stuck.
@@ -328,7 +328,7 @@ Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`
 measurement (F, `docs/corpus-parity.md`), not a theorem.
 
 **M. Symbolic execution is exact; premises as equivalences.** The rules are
-equivalences in substance (an update arm is an equation between runs, `StepAgrees.erased`);
+equivalences in substance (an update arm is an equation between runs, `*_agrees`, `Calculus/SoundArms.lean`);
 the update rules are one way only (`UpdRuleS.sound`: over the typed state a merged update
 may reach a state the two in turn do not). Missing: `Premise.Sound` as an equivalence and
 `symex_complete : holds σ φ → holds σ (symex n φ)`. Then a loop-free formula is valid

@@ -401,7 +401,7 @@ def OpLoc.bumpT (σ : State C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p 
   | _, .mfield b f h => do bumpMemT σ op (← (MLoc.field b f h).addrT σ)
   | _, .mindex a b i => do bumpMemT σ op (← (MLoc.index a b (.simple i)).addrT σ)
 
-/-- `pv = a.send(v);` with both evaluated (`sendAt`): a payment refused books
+/-- `pv = a.send(v);` with both evaluated (`sendT`): a payment refused books
 nothing and sets `pv` to `false`. -/
 def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : Int) : Out C σ.H Γ :=
   match lookupBy (sendKey addr amt) σ.tx.ext with

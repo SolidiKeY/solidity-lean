@@ -31,10 +31,11 @@ way: no `sorry`, no new hypothesis.
   `SoundLoops`).
 - **Update premise** (`Calculus/SoundArms.lean`): an update is a term of
   `Update.lean`, read on the erasure, so state an equation between the
-  update applied to an erased state and what the statement's typed step
-  erases to (`*_run`, against `StepAgrees.erased` of its `TRun.x_erase`,
-  `Semantics/StepErase.lean`), and close with `Premise.sound_update_erased`.
-  A new typed step needs its erasure lemma first.
+  update applied to an erased state and the statement's typed step
+  (`*_agrees`, `TRes.Agrees` of `TRun.x` against `U.apply σ.erase`, the
+  operands read through `Calculus/LowerRun.lean`), and close with
+  `Premise.sound_update_typed`.  A new storage or heap operation needs its
+  erasure lemma first (`Semantics/TypedErase.lean`).
 - **Unfold premise** (`Calculus/SoundCapture.lean`, `SoundLocal`, …): the
   fresh local is pushed and popped by the premise's frame; the runs compare
   up to the halt (`TRes.Sim`, `sound_unfoldSim`), the schema variables read

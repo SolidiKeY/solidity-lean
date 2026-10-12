@@ -21,7 +21,7 @@ array read or write out of bounds reverts, as does `pop()` on an empty
 array and `/` or `%` by zero; `a.transfer(v)` books
 `net(a) := net(a) - v` unless `a` is the contract itself (solkey's
 `\if(a = self)`), and `pv = a.send(v);` books as `transfer` does when the
-recipient takes the payment (`sendAt`), which the transaction's oracle says
+recipient takes the payment (`sendT`), which the transaction's oracle says
 (`TxEnv.ext`).
 
 An operation ends in a value or halts: `revert`, `panic` (an `assert`
@@ -236,7 +236,7 @@ structure ExtKey where
 variables `msgSender` and `msgValue` (`netHeader.key`) and the block's
 timestamp; and how each external call it makes ends (`ext`), a call it has
 no entry for reaching an address with no code (which a `try` reverts on, and
-a `send` pays: `sendAt`).  Two identical calls, or two `send`s of one amount
+a `send` pays: `sendT`).  Two identical calls, or two `send`s of one amount
 to one address, read the same entry.  No statement changes them,
 and a callback leaves them as they were (`State.havoc`): a re-entrant call
 runs in its own transaction, which the caller never sees.  The calculus
@@ -418,7 +418,7 @@ reference to the popped element is seen again, and so is a mapping nested in
 it.
 
 `push(se)` and `push(sp)` write their value to the slot instead, as on
-fresh slots (`Src.pushVal`, `SVal.strip`).  They still *consume* the slot,
+fresh slots (`SVal.strip`).  They still *consume* the slot,
 since it becomes live again.  (solc copies the value member by member over
 the recycled slot, so the one difference is past the end of an array nested
 in the element, which only a write through a reference to a popped element
@@ -448,7 +448,7 @@ theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
 /-! A path's segments address *slots*: `Seg.at i` into an array is its
 `i`-th slot, a live element or one past the end (the `shadow`).  Whether an
 index is in bounds is checked where the program takes it (`State.checkIndex`,
-in `Loc.resolve` and `Tm.eval`), not here, so that a reference bound to an
+in `Loc.resolveT` and `Tm.eval`), not here, so that a reference bound to an
 element keeps addressing its slot after a `pop` (solc). -/
 
 def SVal.find : SVal -> List Seg -> Res SVal
@@ -512,7 +512,7 @@ def SVal.save : SVal -> List Seg -> SVal -> Res SVal
   | SVal.map _ _, Seg.field _ :: _, _ => .error .undef
 
 /-- A read that checks every index against the live length, as a program
-path's resolution does (`State.checkIndex` in `Loc.resolve`) before the slot
+path's resolution does (`State.checkIndex` in `Loc.resolveT`) before the slot
 is read: on a path a program resolved it is `find`, and past the end it
 reverts where `find` would read the slot.  The EVM compiler states what its
 storage holds with it (`Evm.compile_storage`), and `sol_decide` reads with it

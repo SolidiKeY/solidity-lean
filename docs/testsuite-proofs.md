@@ -332,7 +332,7 @@ modules.
 
 ## M3a results (2026-10-05): a failed `assert` panics
 
-Decision A is in: a failed `assert` is `Halt.panic` (`assertOk`,
+Decision A is in: a failed `assert` is `Halt.panic` (`TRun.assert`,
 `Semantics.lean`), solc's `Panic(0x01)`, distinct from `require`'s revert.
 solc's other panics (overflow, a zero divisor, an index out of bounds, `pop`
 of an empty array) stay reverts, as in KeY, where a box accepts them.
@@ -351,7 +351,7 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   (`Semantics/NoPanic.lean`: `Prog.run_noPanic`, a program whose
   `Prog.asserts` is `false` never ends in `panic`), as master proved it of
   the untyped run; an expression of the typed run does not panic
-  (`Val.evalT_noPanic`, `Semantics/StepErase.lean`), nor does any step but
+  (`Val.evalT_noPanic`, `Semantics/TypedErase.lean`), nor does any step but
   `assert` (`TRun.push_noPanic` … `TRun.seq_noPanic`).  The untyped
   operations' lemmas stay (`Semantics/NoPanicOps.lean`, the `no_panic`
   tactic), for the closer's terms.

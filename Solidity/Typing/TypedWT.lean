@@ -4,12 +4,11 @@ import Solidity.Semantics.State
 /-!
 # A typed state erases to a well-typed one
 
-`RunWT` by construction (`docs/intrinsic.md`, W1, lane `typing`): a typed
-state (`State`, `Semantics/State.lean`) holds storage values
-of their types, a heap whose objects are of the types its typing lists, and
-locals of their types, so its erasure is a `RunWT` state under the store
-typing its heap typing lists (`HTy.toHeapTy`), with no run to follow
-(`State.erase_wt`): type soundness of the typed run, with no
+By construction (`docs/intrinsic.md`, W1, lane `typing`): a typed
+state (`State`, `Semantics/State.lean`) holds storage values of their
+types and a heap whose objects are of the types its typing lists, so its
+erasure's global part is well-typed under the store typing its heap typing
+lists (`HTy.toHeapTy`), with no run to follow (`State.glob_wt`): type soundness of the typed run, with no
 preservation proof (the scoped run's `Stmt.run_wt` went with that run,
 `docs/intrinsic.md`, decision 40).
 
@@ -224,43 +223,7 @@ theorem Objs.lookupBy_erase_ge {H : HTy} {start k : Nat} : (Rs : List RefTy) →
     simp only [Objs.erase, lookupBy, show k ≠ start by omega, ↓reduceIte]
     exact Objs.lookupBy_erase_ge Rs os.2 (by omega)
 
-/-! ## The locals -/
-
-/-- A typed local erases to one of its type. -/
-theorem LTy.TDenote.erase_wt {H : HTy} : (t : LTy) → (v : t.TDenote C H) →
-    LTy.WT C (HTy.toHeapTy 0 H) t (LTy.TDenote.erase t v)
-  | .val .uint, _ | .val .int, _ | .val .bool, _ => rfl
-  | .alias _, a => by
-    intro r segs h
-    cases a with
-    | none => cases h
-    | some ref =>
-      simp only [LTy.TDenote.erase, Option.map_some, Option.some.injEq] at h
-      have := SRef.tyAt_erase ref
-      rw [h] at this
-      exact this
-  | .mem _, none => fun _ h => nomatch h
-  | .mem _, some r => fun _ h => by
-    cases h
-    simp only [Semantics.MVal.hasTyH, HRef.lookupBy_toHeapTy, beq_self_eq_true]
-  | .old, _ | .oldNet, _ => trivial
-
-theorem TEnv.erase_wt {H : HTy} : (Γ : Ctx) → (e : TEnv C H Γ) →
-    Env.All (LTy.WT C (HTy.toHeapTy 0 H)) (TEnv.erase Γ e)
-  | [], _ => trivial
-  | t :: Γ, e => ⟨LTy.TDenote.erase_wt t e.1, TEnv.erase_wt Γ e.2⟩
-
 /-! ## The state -/
-
-/-- **A typed state erases to a well-typed one**, under the store typing its
-heap typing lists: `RunWT` by construction, for a contract whose state
-variables have distinct names. -/
-theorem State.erase_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : State C Γ) :
-    RunWT C (HTy.toHeapTy 0 σ.H) σ.erase :=
-  ⟨⟨hnd, HTy.nodup_toHeapTy _, Storage.erase_wt hnd σ.storage,
-      Objs.erase_typed 0 σ.H σ.heap,
-      fun _ hid => Objs.lookupBy_erase_ge σ.H σ.heap (by simpa only [Nat.zero_add] using hid)⟩,
-    TEnv.erase_wt Γ σ.env⟩
 
 /-- The global part of a typed state's erasure is well-typed under the store
 typing its heap typing lists. -/
@@ -268,9 +231,5 @@ theorem State.glob_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : State C 
     Semantics.StateWT (HTy.toHeapTy 0 σ.H) C.layout σ.erase.glob :=
   ⟨hnd, HTy.nodup_toHeapTy _, Storage.erase_wt hnd σ.storage, Objs.erase_typed 0 σ.H σ.heap,
     fun _ hid => Objs.lookupBy_erase_ge σ.H σ.heap (by simpa only [Nat.zero_add] using hid)⟩
-
-/-- The initial state of `StandardExample` erases to a well-typed one. -/
-example : RunWT StandardExample [] (State.init StandardExample).erase :=
-  State.erase_wt (by decide) (State.init StandardExample)
 
 end Solidity

@@ -1555,7 +1555,7 @@ theorem canon_reachable (hnd : nodupKeysB C.vars = true) (hok : C.vars.all (·.2
 initially and that every program keeps, by the typed run from any typed
 state whose storage is canonical, holds of every canonical, tight storage.
 The typed state is well-typed and its heap canonical by construction
-(`State.erase_wt`, `State.erase_canonHeap`), so the step asks only the
+(`State.glob_wt`, `State.erase_canonHeap`), so the step asks only the
 storage's canonicity, which a typed storage does not give (decision 75). -/
 theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true)
     (hok : C.vars.all (·.2.defaultOkS) = true) (P : List (Name × Semantics.SVal) → Prop)

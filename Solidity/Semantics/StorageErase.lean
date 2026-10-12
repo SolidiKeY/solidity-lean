@@ -7,7 +7,7 @@ Every typed storage operation (`Semantics/Storage.lean`) erases to its
 untyped namesake in `Semantics.lean`, which is therefore never `undef` on an
 erased input: each lemma reads `untyped op (erase x) = toRes erase (typed op
 x)`, and `toRes` has no `undef`.  This is the storage half of a typed step
-read on the erasure (`Semantics/StepErase.lean`, M4b).
+read on the erasure (`Semantics/TypedErase.lean`, M4b).
 
 A struct is copied member by member in order (solc), and the untyped
 `overlay` looks each member up by name, which agrees because a struct's

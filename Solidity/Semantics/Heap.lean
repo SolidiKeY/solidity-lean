@@ -211,7 +211,7 @@ namespace Heap
 
 variable {H : HTy}
 
-/-- `mv.f` (`MLoc.read`'s member arm). -/
+/-- `mv.f` (`readAddr`'s member arm). -/
 def field {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
     (h : lookupBy f (structDef s) = some T) : MVal H T :=
   MFields.get (structDef s) (hp.get r) h
@@ -221,7 +221,7 @@ def setField {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
     (h : lookupBy f (structDef s) = some T) (v : MVal H T) : Heap H :=
   hp.set r (MFields.set (structDef s) (hp.get r) h v)
 
-/-- `mv[i]` (`MLoc.read`'s index arm): `none`, a revert, out of bounds. -/
+/-- `mv[i]` (`readAddr`'s index arm): `none`, a revert, out of bounds. -/
 def index {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (i : Int) :
     Option (MVal H E) :=
   if 0 ≤ i then (MObj.elems a (hp.get r))[i.toNat]? else none

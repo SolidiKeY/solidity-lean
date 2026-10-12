@@ -127,7 +127,7 @@ once for every invariant (`RunInv.tkeeps_loop`: the invariant at the loop
 head, the body's locals popped each iteration). In more detail:
 
 `Stmt.run_frame`/`Prog.run_frame` (`Semantics/RunFrame.lean`: a body runs
-within its frame), `RunWT` (a typed state's erasure is well-typed by
+within its frame), `State.glob_wt` (a typed state's erasure is well-typed by
 construction, `Typing/TypedWT.lean`), `Prog.run_canon` and
 `Prog.run_tight` (`Typing/Reachability.lean`,
 `Typing/Constructibility.lean`; `reachable_iff` stays true, since a loop
@@ -306,7 +306,7 @@ loop is `Stmt C Γ Γ`: its condition and annotation are read in `Γ`, its body
 is a `Prog C Γ Γb` whose locals the typed run pops every iteration
 (`TRun.loop`), as for `ite`; the invariants of `Typing/` are kept at every
 head (`RunInv.tkeeps_loop`, `Typing/TypedRunInv.lean`), and the state is
-typed by construction (`State.erase_wt`). A local the body declares is
+typed by construction (`State.glob_wt`). A local the body declares is
 popped at the end of each iteration and declared again in the next, as solc
 re-initialises it; it is not in the frame (`Prog.frame` lists locals of `Γ`
 only), and the invariant, typed at `Γ`, cannot name it.

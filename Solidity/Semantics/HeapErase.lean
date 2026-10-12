@@ -510,7 +510,7 @@ theorem memArrayLen_erase (hh : σ.heap = hp.erase) {R : RefTy} {E : Ty}
     MObj.erase_arr a (hp.get r), List.length_map, Heap.len]
   rfl
 
-/-- A member read on the erasure (`MLoc.read`'s member arm). -/
+/-- A member read on the erasure (`readAddr`'s member arm). -/
 theorem readField_erase (hh : σ.heap = hp.erase) {s f : Name} {T : Ty}
     (r : HRef H (.struct s)) (h : lookupBy f (structDef s) = some T) :
     (do
@@ -527,7 +527,7 @@ theorem readField_erase (hh : σ.heap = hp.erase) {s f : Name} {T : Ty}
   rw [MFields.lookupBy_erase (structDef s) (hp.get r) h]
   rfl
 
-/-- An element read on the erasure (`MLoc.read`'s index arm): a revert out
+/-- An element read on the erasure (`readAddr`'s index arm): a revert out
 of bounds. -/
 theorem readIndex_erase (hh : σ.heap = hp.erase) {R : RefTy} {E : Ty}
     (r : HRef H R) (a : ArrTy R E) (i : Int) :

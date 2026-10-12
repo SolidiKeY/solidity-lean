@@ -60,8 +60,8 @@ claim does need the invariant). A `\forall` clause over a mapping is provable
 in Lean only under the layout premises `layoutAt` states (`Calculus/SurfaceSpec.lean`);
 solkey's obligation states none.
 
-**Lean evidence.** Every typed state's erasure is `RunWT`
-(`State.erase_wt`, `Typing/TypedWT.lean`), so the invariant can be
+**Lean evidence.** Every typed state's erasure is well-typed
+(`State.glob_wt`, `Typing/TypedWT.lean`), so the invariant can be
 assumed once. It is not tight:
 `SVal.canon` adds what `hasTy` forgets (mapping default is the type's default,
 mapping keys are unique, a struct carries exactly its declared members), and
@@ -258,14 +258,14 @@ resume, where KeY puts `pv := TRUE` into the anonymising update.
 - **Unconstrained returns.** `function g() returns (uint r) {}` followed by
   `assert(g() == 0)` holds in solc and is unprovable in KeY:
   `ExpandFunctionBody` declares `R ri;` with no value. Lean declares each
-  return variable at its default (`CallRet.enter`).
+  return variable at its default (`CallRet.enterT`).
 - **An `address` named return starts unconstrained.** `ExpandFunctionBody`
   starts only `int` and `bool` returns at their default, so after
   `function z() internal pure returns (address r) {}`,
   `assert(z() == address(0))` leaves `r = 0` open; solc returns
   `address(0)`. solkey records it in `docs/bugs.md` ("True facts that
   cannot be proved"). Lean follows solc: every return, `address` included,
-  starts at its type's default (`CallRet.enter`; an `address` is a `uint`,
+  starts at its type's default (`CallRet.enterT`; an `address` is a `uint`,
   so `0`).
 - **Dropped tuple components (diamond).** `(uint x, ) = (1, arr[5]);` reverts
   in solc, but `ParserUtils.tupleAssignment` drops a component that is not a

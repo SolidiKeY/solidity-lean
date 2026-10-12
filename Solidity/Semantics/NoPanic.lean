@@ -1,4 +1,4 @@
-import Solidity.Semantics.StepErase
+import Solidity.Semantics.TypedErase
 
 /-!
 # Only an `assert` panics
@@ -6,7 +6,7 @@ import Solidity.Semantics.StepErase
 `THalt.panic` is the halt no modality accepts, and the typed run raises it
 in one place, a failed `assert` (`TRun.assert`).  Every other step halts
 with `revert`, `exhausted` or `diverge`: an expression does not panic
-(`Val.evalT_noPanic`, `Semantics/StepErase.lean`), nor does a write, an
+(`Val.evalT_noPanic`, `Semantics/TypedErase.lean`), nor does a write, an
 allocation, a call's entry or a `try`'s decoding.  So a program with no
 `assert` in it (`Prog.asserts`, in a branch, a block, a loop or a called
 body) never panics (`Prog.run_noPanic`), on every typed state, inside the
