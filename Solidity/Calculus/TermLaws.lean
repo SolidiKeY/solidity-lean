@@ -1,6 +1,6 @@
 import Solidity.Calculus.TermLib
 import Solidity.Calculus.SeqRewrite
-import Solidity.Calculus.ChainRewrites
+import Solidity.Calculus.StateFacts
 
 /-!
 # The term laws at an update's right-hand sides, scoped

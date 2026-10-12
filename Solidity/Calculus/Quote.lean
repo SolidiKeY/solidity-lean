@@ -1,5 +1,5 @@
 import Solidity.Calculus.Fml
-import Solidity.Calculus.NFmlQuote
+import Solidity.Syntax.Quote
 
 /-!
 # Quoting scoped formulas back into Lean
@@ -25,6 +25,8 @@ families; it is `partial`, since it is never unfolded.
 -/
 
 namespace Solidity
+
+deriving instance Lean.ToExpr for Semantics.PrimVal
 
 open Lean (Expr mkAppN mkConst mkApp mkApp2 mkApp3 mkApp4 toExpr levelZero)
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality IntOp rflTrue rflPrim rflSome optE quoteRefl)

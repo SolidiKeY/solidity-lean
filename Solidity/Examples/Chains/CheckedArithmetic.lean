@@ -1,5 +1,4 @@
 import Solidity.Calculus.RewriteChains
-import Solidity.Calculus.ChainRewrites
 import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.LastLine

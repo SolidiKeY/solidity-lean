@@ -1,5 +1,5 @@
 import Solidity.Calculus.UpdRuleScoped
-import Solidity.Calculus.StateParts
+import Solidity.Calculus.StateFacts
 
 /-!
 # Merges over a storage or memory write, on scoped updates

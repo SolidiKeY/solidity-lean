@@ -1,6 +1,6 @@
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Rules
-import Solidity.Calculus.TermTaclets
+import Solidity.Calculus.StateFacts
 
 /-!
 # Term taclets on scoped terms

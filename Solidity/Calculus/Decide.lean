@@ -1,6 +1,6 @@
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.MemRead
-import Solidity.Calculus.StateParts
+import Solidity.Calculus.StateFacts
 import Solidity.Calculus.SlotLemmas
 import Solidity.Theory.Bridge.Denote
 import Solidity.Typing.CanonTest

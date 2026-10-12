@@ -37,6 +37,39 @@ aside (`Fml.dropWtS`) and read as the layout its roots hold
 
 namespace Solidity
 
+/-! ## A primitive value and the values its type admits -/
+
+section
+open Semantics (Value Seg Halt Res Binding lookupBy setBy)
+open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
+variable {C : Contract}
+
+theorem _root_.Solidity.PrimTy.admits_erase : {p : PrimTy} → (v : p.Denote) → p.admits (PrimTy.erase v)
+  | .bool, _ => trivial
+  | .uint, ⟨_, h⟩ => by
+    simp only [PrimTy.inRange, decide_eq_true_eq] at h
+    exact h
+  | .int, ⟨_, h⟩ => by
+    simp only [PrimTy.inRange, decide_eq_true_eq] at h
+    exact h
+
+theorem _root_.Solidity.PrimTy.exists_of_admits :
+    {p : PrimTy} → {v : Semantics.Value} → p.admits v → ∃ w : p.Denote, PrimTy.erase w = v
+  | .bool, .bool b, _ => ⟨b, rfl⟩
+  | .uint, .int n, h =>
+    ⟨(⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ :
+      {n : Int // PrimTy.uint.inRange n = true}), rfl⟩
+  | .int, .int n, h =>
+    ⟨(⟨n, by
+        simp only [PrimTy.inRange, decide_eq_true_eq]
+        exact h⟩ :
+      {n : Int // PrimTy.int.inRange n = true}), rfl⟩
+  | .bool, .int _, h | .uint, .bool _, h | .int, .bool _, h => h.elim
+
+end
+
+
+
 namespace Decide
 
 open Semantics SemanticsProperties

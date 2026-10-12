@@ -1,6 +1,8 @@
 import Solidity.Calculus.Graft
 import Solidity.Calculus.Sound
-import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.Logic
+import Solidity.Calculus.Closable
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.NFmlClose
 
 /-!

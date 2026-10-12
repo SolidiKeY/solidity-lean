@@ -1,5 +1,5 @@
 import Solidity.Calculus.Proves
-import Solidity.Calculus.HoldsErase
+import Solidity.Semantics.StateErase
 
 /-!
 # The scoped sequent is sound: the structure

@@ -1,5 +1,5 @@
 import Solidity.Calculus.Hyp
-import Solidity.Calculus.NFmlQuote
+import Solidity.Syntax.Quote
 import Solidity.Calculus.Lower
 
 /-!

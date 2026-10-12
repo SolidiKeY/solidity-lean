@@ -688,13 +688,15 @@ example : dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 4
     ~[findOnSave]~> dl![m]{ { x := 42 } x ≐ 42 } := by sol_chain
 
 /-- `findOnSave`, twice under one name. -/
-theorem Laws.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
-    (hp : p.hasSeg = true := by rfl) : TermTaclet (.find (.save s p (.val (.lit v))) p) (.lit v) :=
+theorem Laws.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
+    {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
+    TermTacletS tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 @[inherit_doc Laws.readBack]
-theorem Laws'.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
-    (hp : p.hasSeg = true := by rfl) : TermTaclet (.find (.save s p (.val (.lit v))) p) (.lit v) :=
+theorem Laws'.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
+    {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
+    TermTacletS tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 -- Two laws by one name: the arrow says so rather than pick one.

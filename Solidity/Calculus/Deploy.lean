@@ -1,5 +1,7 @@
 import Solidity.Calculus.Spec
-import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.Logic
+import Solidity.Calculus.Closable
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.SoundKit
 
