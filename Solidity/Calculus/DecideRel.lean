@@ -485,7 +485,7 @@ theorem TermOKS.step (h : RelT σ ρ τ) {n : Nat}
       rw [Tm.evalE_unop]
       simp only [Tm.toLSM, Op1.toL, LTerm.mkUn_eval, LTerm.eval]
       exact Sim.bind (hT a (by lsizeS_tac) hf) fun _ => Sim.refl _
-    | net | delValue | wt => simp only [Tm.inLSM, Op1.inL, Bool.false_eq_true] at hf
+    | net | delValue | wt | toInt => simp only [Tm.inLSM, Op1.inL, Bool.false_eq_true] at hf
   | app2 o x y =>
     cases o with
     | binop op hop =>

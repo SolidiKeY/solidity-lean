@@ -39,10 +39,9 @@ and funds, and reads none of the parameters. -/
 theorem Problem.deployUpd_lands (C : Contract) (tx : TTx) {Δ : Ctx}
     (e : TEnv C (State.deploy C tx).H Δ) :
     (Problem.deployUpd C).Lands ((State.deploy C tx).withEnv e)
-      ((State.deploy C tx).withEnv e).globE ((State.deploy C tx).withEnv e) := by
+      ((State.deploy C tx).withEnv e).globG ((State.deploy C tx).withEnv e) := by
   refine ⟨?_, rfl, fun _ => rfl⟩
-  simp only [Problem.deployUpd, Upd.globT, UpdElem.globT, Tm.eval, Op0.eval, State.globE,
-    State.withEnv, State.deploy, Storage.init_erase]
+  simp only [Problem.deployUpd, Upd.globT, State.withEnv, State.deploy]
   rfl
 
 /-- A closed formula holds of a state with every value of the locals it
@@ -68,7 +67,7 @@ theorem Problem.deploy_of_valid {m : Modality} {xs : List (PrimTy × Var)} {Γ' 
     (e : TEnv C (State.deploy C tx).H (paramsN xs).ctx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames ((State.deploy C tx).withEnv e) P .nil) := by
   exact Upd.afterT.of_lands (holds_closeN (paramsN xs) (h (State.deploy C tx)) e)
-    (Problem.deployUpd_lands C tx e) (List.prefix_refl _)
+    (Problem.deployUpd_lands C tx e)
 
 /-- **A derived constructor obligation of no parameters holds of the typed
 deployment**: its program runs under `m` from `State.deploy`, and does not
@@ -77,7 +76,6 @@ theorem Problem.deploy_of_valid_typed {m : Modality} {Γ' : Ctx} {P : Prog C [] 
     (h : Valid (Problem.ctorFml m [] P)) (tx : TTx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames (State.deploy C tx) P .nil) := by
   exact Upd.afterT.of_lands (h (State.deploy C tx)) (Problem.deployUpd_lands C tx (Δ := []) ())
-    (List.prefix_refl _)
 
 /-- **The typed deployment** (master's `Contract.deploy`, over the typed run): a
 constructor that is not `payable`, the implicit one too, refuses value, as

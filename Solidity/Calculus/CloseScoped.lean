@@ -32,11 +32,9 @@ The binders range over the values of their types: a `uint` over
 only (`Tm.eval`, `Tm.denote`, `Rhs.eval`, `Upd.applyV`, `UpdElem.globT`)
 and the typed state's operations as `State.locV` and the global part's
 fields read them.  A storage write under the box is named on the spot with
-the typed laws (`CloseS.wp_box_write_prim`: solkey's `findOnSave` and
-`findOnSaveDifferent` across roots, `Signature.lean`).  The untyped
-interpreter's write-naming lemmas (`close_rw`'s) no longer meet a scoped
-leaf, whose storage is typed; what the typed laws do not yet give (a frame
-below one root, memory) the closer leaves open, and `sol_decide` decides.
+the typed laws in `Calculus/CloseFrame.lean` (above `TermLaws`, whose frame
+laws it reads).  The untyped interpreter's write-naming lemmas
+(`close_rw`'s) no longer meet a scoped leaf, whose storage is typed.
 -/
 
 namespace Solidity
@@ -182,6 +180,8 @@ theorem eval_wt (s : Tm C Γ .st) : (Tm.app1 .wt s).eval σ = (s.eval σ).bind S
 theorem eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s)))
     (t : Tm C Γ .st) :
     (Tm.app1 (.select r h) t).eval σ = (t.eval σ).map fun st => Storage.selectT st h := rfl
+theorem eval_toInt (a : Tm C Γ (.val .uint)) :
+    (Tm.app1 .toInt a).eval σ = (a.eval σ).bind fun n => PrimTy.int.ofInt? n.1 := rfl
 
 theorem eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
     (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op x (b.eval σ) := rfl
@@ -221,6 +221,34 @@ theorem eval_mat {R : RefTy} {E : Ty} (a : ArrTy R E) (i : Tm C Γ (.ident R))
     (k : Tm C Γ (.val .uint)) : (Tm.app2 (.mat a) i k).eval σ =
       (i.eval σ).bind fun id => (k.eval σ).bind fun j => some (.index id a j.1) := rfl
 
+/-! The memory symbols, on the memory a term reads (`Grown σ.H`). -/
+
+theorem eval_memory : (Tm.app0 .memory : Tm C Γ .mem).eval σ = some σ.glob.memT := rfl
+theorem eval_alloc (R : RefTy) (h : (Ty.ref R).mapFree = true) (m : Tm C Γ .mem) :
+    (Tm.app1 (.alloc R h) m).eval σ = (m.eval σ).map fun g => (g.heap.allocDefault R h).val.id :=
+  rfl
+theorem eval_addM (R : RefTy) (h : (Ty.ref R).mapFree = true) (m : Tm C Γ .mem) :
+    (Tm.app1 (.addM R h) m).eval σ = (m.eval σ).map fun g => g.then (g.heap.allocDefault R h) :=
+  rfl
+theorem eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))) :
+    (Tm.app2 .read m a).eval σ = (m.eval σ).bind fun g => (a.eval σ).bind fun ad => g.readT ad :=
+  rfl
+theorem eval_mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
+    (Tm.app2 .mlen m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
+      (HRef.ofId? g.H' (.array E) id).bind fun r => some (g.heap.lenU r) := rfl
+theorem eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
+    (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
+      (HRef.ofId? g.H' R id).bind fun r => some (MVal.copyMToSt g.heap (T := .ref R) r) := rfl
+theorem eval_iread {R : RefTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.ref R))) :
+    (Tm.app2 .iread m a).eval σ = (m.eval σ).bind fun g => (a.eval σ).bind fun ad =>
+      (g.readT ad).bind fun (r : HRef _ R) => some r.id := rfl
+theorem eval_copy {R : RefTy} (h : (Ty.ref R).mapFree = true) (m : Tm C Γ .mem)
+    (v : Tm C Γ (.sv (.ref R))) : (Tm.app2 (.copy h) m v).eval σ =
+      (m.eval σ).bind fun g => (v.eval σ).bind fun w => some (w.copyStToM g.heap h).val.id := rfl
+theorem eval_copySt {T : Ty} (h : T.mapFree = true) (m : Tm C Γ .mem) (v : Tm C Γ (.sv T)) :
+    (Tm.app2 (.copySt h) m v).eval σ =
+      (m.eval σ).bind fun g => (v.eval σ).bind fun w => some (g.then (w.copyStToM g.heap h)) := rfl
+
 theorem eval_ite {p : PrimTy} (c : Tm C Γ (.val .bool)) (a b : Tm C Γ (.val p)) :
     (Tm.app3 .ite c a b).eval σ = (c.eval σ).bind fun cv => cond cv (a.eval σ) (b.eval σ) := rfl
 theorem eval_save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
@@ -229,6 +257,9 @@ theorem eval_save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C �
 theorem eval_push {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E))))
     (v : Tm C Γ (.sv E)) : (Tm.app3 .push s q v).eval σ = (s.eval σ).bind fun st =>
       (q.eval σ).bind fun r => st.push r fun _ => (v.eval σ).map SVal.strip := rfl
+theorem eval_write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C Γ (.mv T)) :
+    (Tm.app3 .write m a v).eval σ = (m.eval σ).bind fun g => (a.eval σ).bind fun ad =>
+      (v.eval σ).bind fun w => g.writeT ad w := rfl
 
 theorem denote_lit {p : PrimTy} (v : p.Denote) :
     (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = .prim (PrimTy.erase v) := rfl
@@ -741,43 +772,11 @@ theorem holds_anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : F
 
 end Leaf
 
-/-! ## Writes under the box, typed
-
-A storage write named on the spot with what the typed laws say of the
-storage it returns (`Storage.findOnSave`, `findOnSaveFrameRoot`,
-`Signature.lean`): solkey's `findOnSave` at the path written, and
-`findOnSaveDifferent` across roots. -/
-
-theorem wp_box_write {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
-    {P : Storage C → Prop} :
-    Modality.box.wp (Close.optRes (st.write r v)) P ↔
-      ∀ st', st.write r v = some st' →
-        (∀ {W : Ty} (q : SRef C W), r.root ≠ q.root → st'.find q = st.find q) → P st' := by
-  cases h : st.write r v with
-  | none => simp only [Close.optRes, Modality.wp, Modality.onHalt, reduceCtorEq, false_implies,
-      implies_true]
-  | some st' =>
-    simp only [Close.optRes, Modality.wp, Option.some.injEq, forall_eq']
-    exact ⟨fun hP _ => hP, fun hP => hP fun q hne => Storage.findOnSaveFrameRoot st r q hne v h⟩
-
-theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {x : p.Denote}
-    {P : Storage C → Prop} :
-    Modality.box.wp (Close.optRes (st.write r (.prim x))) P ↔
-      ∀ st', st.write r (.prim x) = some st' → st'.find r = some (.prim x) →
-        (∀ {W : Ty} (q : SRef C W), r.root ≠ q.root → st'.find q = st.find q) → P st' := by
-  cases h : st.write r (.prim x) with
-  | none => simp only [Close.optRes, Modality.wp, Modality.onHalt, reduceCtorEq, false_implies,
-      implies_true]
-  | some st' =>
-    simp only [Close.optRes, Modality.wp, Option.some.injEq, forall_eq']
-    exact ⟨fun hP _ _ => hP, fun hP => hP (Storage.findOnSave st r x h)
-      fun q hne => Storage.findOnSaveFrameRoot st r q hne _ h⟩
-
 end CloseS
 
 /-! ## The set -/
 
-attribute [close_rw_s high] CloseS.holds_eqD CloseS.wp_box_write_prim CloseS.atT_map_root
+attribute [close_rw_s high] CloseS.holds_eqD CloseS.atT_map_root
 
 attribute [close_rw_s]
   -- formulas
@@ -832,11 +831,13 @@ attribute [close_rw_s]
   CloseS.eval_lit CloseS.eval_env CloseS.eval_root CloseS.eval_storage CloseS.eval_mtSt
   CloseS.eval_unop CloseS.eval_net CloseS.eval_delValue CloseS.eval_field CloseS.eval_next
   CloseS.eval_sval CloseS.eval_newArr CloseS.eval_mfield CloseS.eval_mval CloseS.eval_ref
-  CloseS.eval_wt CloseS.eval_select
+  CloseS.eval_wt CloseS.eval_select CloseS.eval_toInt
   CloseS.eval_binop CloseS.eval_find CloseS.eval_sfind CloseS.eval_delAt CloseS.eval_at
   CloseS.eval_len CloseS.eval_pushSlot CloseS.eval_pop CloseS.eval_shrink CloseS.eval_extend
   CloseS.eval_nextIn CloseS.eval_mat
   CloseS.eval_ite CloseS.eval_save CloseS.eval_push
+  CloseS.eval_memory CloseS.eval_alloc CloseS.eval_addM CloseS.eval_read CloseS.eval_mlen
+  CloseS.eval_copyMem CloseS.eval_iread CloseS.eval_copy CloseS.eval_copySt CloseS.eval_write
   SVal.view_prim
   -- runs
   Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
@@ -865,8 +866,6 @@ attribute [close_rw_s]
   CloseS.getD_ite Option.getD_some CloseS.erase_uint' CloseS.erase_int'
   CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
-
-attribute [close_rw_s] CloseS.wp_box_write
 
 attribute [close_rw_s_last] Modality.wp_box
 

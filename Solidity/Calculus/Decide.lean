@@ -452,6 +452,8 @@ def _root_.Solidity.Op1.toL : Op1 C a s → a.LTy → s.LTy
   | .mval, x => some (.word x, x)
   | .ref, i => i.map fun p => (.ref p.1, p.2)
   | .wt, _ => .err
+  -- out of the fragment (`inL`): a `uint` widened to an `int`
+  | .toInt, _ => .err
 
 /-- `read(m, a)` pushed in: the memory's guard, the address's, then the word
 `LMem.readT` finds (`readOnWrite`, `readOnAddM`); none where it finds none. -/

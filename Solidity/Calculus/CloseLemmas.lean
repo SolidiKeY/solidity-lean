@@ -374,6 +374,8 @@ theorem Op1.eval_addM (R : RefTy) (h : (Ty.ref R).mapFree = true)
     (x : Option (Grown g.H (fun _ => Unit))) :
     Op1.eval g (.addM R h) x = x.map fun m => m.then (m.heap.allocDefault R h) := rfl
 theorem Op1.eval_wt (x : Option (Storage C)) : Op1.eval g .wt x = x.bind Storage.wtT := rfl
+theorem Op1.eval_toInt (x : Option PrimTy.uint.Denote) :
+    Op1.eval g .toInt x = x.bind fun n => PrimTy.int.ofInt? n.1 := rfl
 theorem Op1.eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s)))
     (x : Option (Storage C)) :
     Op1.eval g (.select r h) x = x.map fun st => Storage.selectT st h := rfl

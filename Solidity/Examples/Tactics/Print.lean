@@ -79,13 +79,13 @@ run_meta do
 /-- info: dl{ ∀ uint x; x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1 } : Fml SE [] -/
 #guard_msgs in
 #check (Fml.all (.user "x") .uint
-  (.imp (.eqD (.app2 (.binop .gt .uint) (.pvV .here) (.app0 (.lit (.int 0))))
-      (.app0 (.lit (.bool true))))
+  (.imp (.eqD (.app2 (.binop .gt (p := .uint) rfl) (.pvV .here) (.app0 (.lit (p := .uint) ⟨0, rfl⟩)))
+      (.app0 (.lit (p := .bool) true)))
     (.modal .box
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local .here))))
         (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil))
       (.pop .block (.push .refl) (.seq (.cons (.assignLocal .here (.simple (.lit 2 rfl))) .nil) .nil))
-      (.eqD (.pvV .here) (.app0 (.lit (.int 1)))))) : Fml SE [])
+      (.eqD (.pvV .here) (.app0 (.lit (p := .uint) ⟨1, rfl⟩))))) : Fml SE [])
 
 /-- The scoped strategy's formula after `n` steps on `φ`, printed from its
 quoted `Expr` and checked against `Fml.show` on the value. -/
@@ -163,7 +163,7 @@ top of it after it (a position it did not declare is `_`). -/
 /-- info: fun U => dl{ { U ‖ _ := 1 } true } : Upd SE [] [LTy.val PrimTy.uint] → Fml SE [] -/
 #guard_msgs in
 #check fun (U : Upd SE [] [.val .uint]) =>
-  (Fml.upd .box (U.snoc (.local .here (.val (.app0 (.lit (.int 1)))))) .tt : Fml SE [])
+  (Fml.upd .box (U.snoc (.local .here (.val (.app0 (.lit (p := .uint) ⟨1, rfl⟩))))) .tt : Fml SE [])
 
 /-! ## Calls and `try`
 
@@ -316,7 +316,7 @@ info: dl{ ∀ uint x, x = 1, { y := x } ⟹ [ x = y; ] true } : Prop
 -/
 #guard_msgs in
 #check (Proves SE .all [] (((Hyps.nil.all (.user "x") .uint).pre
-    (.eqD (.pvV .here) (.app0 (.lit (.int 1))))).upd .box
+    (.eqD (.pvV .here) (.app0 (.lit (p := .uint) ⟨1, rfl⟩)))).upd .box
       (Upd.nil.decl (.user "y") (.val (.pvV .here))))
   (.modal .box (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil) .nil .tt))
 
@@ -325,7 +325,7 @@ info: fun H => dl{ ..H ⟹ₖ _ = 1 } : Hyps SE [] [LTy.val PrimTy.uint] → Pro
 -/
 #guard_msgs in
 #check fun (H : Hyps SE [] [.val .uint]) =>
-  Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (.int 1))))
+  Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (p := .uint) ⟨1, rfl⟩)))
 
 -- A goal of a walk prints as the line it is.
 /--

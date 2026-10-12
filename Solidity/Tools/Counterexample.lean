@@ -277,114 +277,73 @@ and the transaction are the starting state's (a snapshot `old := storage`
 is that storage), every local a value of its type, an unset alias or
 memory local, a ledger. -/
 
-/-- The locals' values, typed over the empty heap: a snapshot of the
-storage only where it is `st`'s erasure. -/
-def TEnv.lift? (st : Storage C) : (Δ : Ctx) → Locs C Δ → Option (TEnv C [] Δ)
+/-- The locals' values, typed over the heap typing `H`: `none` where a
+memory local's identity is no object of its type there. -/
+def TEnv.liftV? (H : HTy) : (Δ : Ctx) → LocsV C Δ → Option (TEnv C H Δ)
   | [], _ => some ()
-  | .val p :: Δ, ℓ => do
-    pure (← PrimTy.ofValue? p (ℓ _ .here), ← TEnv.lift? st Δ fun _ i => ℓ _ (.there i))
-  | .alias _ :: Δ, ℓ => match ℓ _ .here with
-    | none => do pure (none, ← TEnv.lift? st Δ fun _ i => ℓ _ (.there i))
-    | some _ => none
-  | .mem _ :: Δ, ℓ => match ℓ _ .here with
-    | none => do pure (none, ← TEnv.lift? st Δ fun _ i => ℓ _ (.there i))
-    | some _ => none
-  | .old :: Δ, ℓ =>
-    if Semantics.SVal.fieldsBeqK (ℓ _ .here) st.erase then
-      do pure (st, ← TEnv.lift? st Δ fun _ i => ℓ _ (.there i))
-    else none
-  | .oldNet :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.lift? st Δ fun _ i => ℓ _ (.there i))
+  | .val _ :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
+  | .alias _ :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
+  | .mem R :: Δ, ℓ => match (ℓ _ .here : Option Nat) with
+    | none => do pure (none, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
+    | some id => do
+      pure (some (← HRef.ofId? H R id), ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
+  | .old :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
+  | .oldNet :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
 
-theorem TEnv.lift?_get (st : Storage C) : (Δ : Ctx) → (ℓ : Locs C Δ) → (e' : TEnv C [] Δ) →
-    TEnv.lift? st Δ ℓ = some e' → ∀ {t : LTy} (i : Idx Δ t),
-      LTy.TDenote.erase t (TEnv.get i e') = ℓ t i
+theorem TEnv.liftV?_get (H : HTy) : (Δ : Ctx) → (ℓ : LocsV C Δ) → (e' : TEnv C H Δ) →
+    TEnv.liftV? H Δ ℓ = some e' → ∀ {t : LTy} (i : Idx Δ t),
+      LTy.VDen.ofT t (TEnv.get i e') = ℓ t i
   | [], _, (), _, _, i => nomatch i
-  | .val p :: Δ, ℓ, e', h, t, i => by
-    simp only [TEnv.lift?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
-      Option.some.injEq] at h
-    obtain ⟨w, hw, e'', he, rfl⟩ := h
-    cases i with
-    | here => exact PrimTy.erase_of_ofValue? hw
-    | there j => exact TEnv.lift?_get st Δ _ e'' he j
-  | .alias _ :: Δ, ℓ, e', h, t, i => by
-    simp only [TEnv.lift?] at h
-    split at h
-    · rename_i hn
-      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
-        Option.some.injEq] at h
-      obtain ⟨e'', he, rfl⟩ := h
-      cases i with
-      | here => rw [hn]; rfl
-      | there j => exact TEnv.lift?_get st Δ _ e'' he j
-    · cases h
-  | .mem _ :: Δ, ℓ, e', h, t, i => by
-    simp only [TEnv.lift?] at h
-    split at h
-    · rename_i hn
-      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
-        Option.some.injEq] at h
-      obtain ⟨e'', he, rfl⟩ := h
-      cases i with
-      | here => rw [hn]; rfl
-      | there j => exact TEnv.lift?_get st Δ _ e'' he j
-    · cases h
-  | .old :: Δ, ℓ, e', h, t, i => by
-    simp only [TEnv.lift?] at h
-    split at h
-    · rename_i hs
-      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
-        Option.some.injEq] at h
-      obtain ⟨e'', he, rfl⟩ := h
-      cases i with
-      | here => exact (Semantics.SVal.eq_of_fieldsBeqK _ _ hs).symm
-      | there j => exact TEnv.lift?_get st Δ _ e'' he j
-    · cases h
+  | .val _ :: Δ, ℓ, e', h, t, i | .alias _ :: Δ, ℓ, e', h, t, i | .old :: Δ, ℓ, e', h, t, i
   | .oldNet :: Δ, ℓ, e', h, t, i => by
-    simp only [TEnv.lift?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+    simp only [TEnv.liftV?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
       Option.some.injEq] at h
     obtain ⟨e'', he, rfl⟩ := h
     cases i with
     | here => rfl
-    | there j => exact TEnv.lift?_get st Δ _ e'' he j
+    | there j => exact TEnv.liftV?_get H Δ _ e'' he j
+  | .mem R :: Δ, ℓ, e', h, t, i => by
+    simp only [TEnv.liftV?] at h
+    split at h
+    · rename_i hn
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+        Option.some.injEq] at h
+      obtain ⟨e'', he, rfl⟩ := h
+      cases i with
+      | here => rw [hn]; rfl
+      | there j => exact TEnv.liftV?_get H Δ _ e'' he j
+    · rename_i id hn
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+        Option.some.injEq] at h
+      obtain ⟨r, hr, e'', he, rfl⟩ := h
+      cases i with
+      | here =>
+        rw [hn]
+        show Option.map (·.id) (some r) = some id
+        unfold HRef.ofId? at hr
+        split at hr
+        · cases hr; rfl
+        · cases hr
+      | there j => exact TEnv.liftV?_get H Δ _ e'' he j
 
-/-- **A typed state with the global part and the locals `q`**, over the
-empty heap, with `σ`'s storage and transaction: `none` where `σ`'s heap
-typing is not empty or `q` holds memory, another storage or transaction,
-or a local no typed value of its type erases to. -/
-def State.lift? {Γ Δ : Ctx} (σ : State C Γ) (q : Semantics.State × Locs C Δ) :
-    Option (State C Δ) :=
-  if σ.H.isEmpty && q.1.heap.isEmpty && q.1.nextId == 0 && q.1.env.isEmpty &&
-      Semantics.SVal.fieldsBeqK q.1.storage σ.storage.erase &&
-      decide (q.1.tx = σ.tx.erase) then do
-    let bal ← PrimTy.ofValue? .uint (.int q.1.selfBalance)
-    let env ← TEnv.lift? σ.storage Δ q.2
-    pure { storage := σ.storage, H := [], heap := Heap.empty, env, net := q.1.net,
-           selfBalance := bal, tx := σ.tx }
-  else none
+/-- **A typed state with the global part and the locals `q`**: `none`
+where a memory local's identity is no object of its type in the global
+part's heap. -/
+def State.lift? {Γ Δ : Ctx} (σ : State C Γ) (q : GlobT C σ.H × LocsV C Δ) :
+    Option (State C Δ) := do
+  let g := q.1.1
+  let env ← TEnv.liftV? g.H Δ q.2
+  pure { storage := g.storage, H := g.H, heap := g.heap, env, net := g.net,
+         selfBalance := g.selfBalance, tx := g.tx }
 
-theorem State.lift?_spec {Γ Δ : Ctx} {σ : State C Γ} {q : Semantics.State × Locs C Δ}
+theorem State.lift?_spec {Γ Δ : Ctx} {σ : State C Γ} {q : GlobT C σ.H × LocsV C Δ}
     {σ' : State C Δ} (h : σ.lift? q = some σ') :
-    σ'.globE = q.1 ∧ (∀ {t : LTy} (i : Idx Δ t), σ'.getE i = q.2 t i) ∧ σ.H <+: σ'.H := by
+    σ'.glob = q.1.1 ∧ (∀ {t : LTy} (i : Idx Δ t), σ'.getV i = q.2 t i) := by
   unfold State.lift? at h
-  split at h
-  · rename_i hc
-    simp only [Bool.and_eq_true, List.isEmpty_iff, beq_iff_eq, decide_eq_true_eq] at hc
-    obtain ⟨⟨⟨⟨⟨hH, hheap⟩, hid⟩, henv⟩, hst⟩, htx⟩ := hc
-    have hst' := Semantics.SVal.eq_of_fieldsBeqK _ _ hst
-    simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
-      Option.some.injEq] at h
-    obtain ⟨bal, hbal, env, hlift, rfl⟩ := h
-    refine ⟨?_, fun i => TEnv.lift?_get σ.storage Δ q.2 env hlift i,
-      by rw [hH]; exact List.nil_prefix⟩
-    have hb : bal.1 = q.1.selfBalance := by
-      have := PrimTy.erase_of_ofValue? hbal
-      simp only [PrimTy.erase] at this
-      exact Semantics.PrimVal.int.inj this
-    obtain ⟨⟨st, hp, nid, en, net, sb, tx⟩, ℓ⟩ := q
-    simp only at hheap hid henv hst' htx hb
-    cases hheap; cases hid; cases henv; cases hst'; cases htx; cases hb
-    rfl
-  · cases h
+  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
+    Option.some.injEq] at h
+  obtain ⟨env, hlift, rfl⟩ := h
+  exact ⟨rfl, fun i => TEnv.liftV?_get _ Δ q.2 env hlift i⟩
 
 /-! ## Evaluation -/
 
@@ -432,24 +391,14 @@ quantifier over `p` is tried on.  The twin of `Fml.eval3` (`Fml.eval3_eq`). -/
 def Fml.eval3C (dom : TDom) : {Γ : Ctx} → State C Γ → Fml C Γ → Tri
   | _, _, .tt => .tt
   | _, σ, .eq a b =>
-    match a.eval σ, b.eval σ with
-    | .ok x, .ok y => if x = y then .tt else .ff
-    | _, _ => .unknown
-  | _, σ, .defined t =>
-    match t.eval σ with
-    | .ok _ => .tt
-    | .error _ => .ff
+    (a.eval σ).elim .unknown fun x => (b.eval σ).elim .unknown fun y => if x = y then .tt else .ff
+  | _, σ, .defined t => (t.eval σ).elim .ff fun _ => .tt
   | _, σ, .not φ => (φ.eval3C dom σ).not
   | _, σ, .and φ ψ => (φ.eval3C dom σ).and (ψ.eval3C dom σ)
   | _, σ, .imp φ ψ => (φ.eval3C dom σ).imp (ψ.eval3C dom σ)
   | _, σ, .upd m U φ =>
-    match U.applyV σ with
-    | .error _ => match m with
-      | .box => .tt
-      | .diamond => .ff
-    | .ok τ => match σ.lift? τ with
-      | some σ' => if φ.eval3C dom σ' = .ff then .ff else .unknown
-      | none => .unknown
+    (U.applyV σ).elim (if m = .box then .tt else .ff) fun τ =>
+      (σ.lift? τ).elim .unknown fun σ' => if φ.eval3C dom σ' = .ff then .ff else .unknown
   | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3C dom τ) (Prog.runFramesF loopFuel σ P κ)
   | _, σ, .havoc φ =>
     if φ.eval3C dom σ = .ff || φ.eval3C dom (σ.havoc σ.storage []) = .ff then .ff else .unknown
@@ -465,22 +414,26 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
   | _, .tt, _ => ⟨fun _ => trivial, nofun⟩
   | _, .eq a b, σ => by
     simp only [Fml.eval3C, holds]
-    split
-    · rename_i x y ha hb
-      have hda := Tm.denote_eval σ a x ha
-      have hdb := Tm.denote_eval σ b y hb
+    cases ha : a.eval σ with
+    | none => simp only [Option.elim, reduceCtorEq, false_implies, and_self]
+    | some x =>
+    cases hb : b.eval σ with
+    | none => simp only [Option.elim, reduceCtorEq, false_implies, and_self]
+    | some y =>
+      simp only [Option.elim]
+      have hda : a.denote σ = .prim (PrimTy.erase x) := Tm.denote_eval σ a x ha
+      have hdb : b.denote σ = .prim (PrimTy.erase y) := Tm.denote_eval σ b y hb
       rw [hda, hdb, Theory.StValue.Equiv.prim_iff]
       by_cases hxy : x = y
       · subst hxy
         simp only [if_true, reduceCtorEq, false_implies, and_true]
         exact fun _ => trivial
       · simp only [hxy, if_false, reduceCtorEq, false_implies, true_and]
-        exact fun _ h => hxy (Theory.StValue.prim.inj h)
-    · simp only [reduceCtorEq, false_implies, and_self]
+        exact fun _ h => hxy (PrimTy.erase_injective (Theory.StValue.prim.inj h))
   | _, .defined t, σ => by
     simp only [Fml.eval3C, holds]
-    split <;> rename_i h <;> simp only [h, Except.ok.injEq, exists_eq', exists_false, imp_self,
-      reduceCtorEq, not_true_eq_false, not_false_eq_true, and_self]
+    cases h : t.eval σ <;> simp only [Option.elim, ne_eq, reduceCtorEq, not_false_eq_true,
+      imp_self, not_true_eq_false, and_self, implies_true, false_implies, true_implies]
   | _, .not φ, σ => by
     have ih := Fml.eval3C_sound dom φ σ
     simp only [Fml.eval3C, holds]
@@ -506,19 +459,20 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
     show (_ → U.afterT m σ (holds · φ)) ∧ (_ → ¬ U.afterT m σ (holds · φ))
     rw [Upd.afterT_applyV]
     cases hU : U.applyV σ with
-    | error e => cases m <;> simp only [Modality.afterC, Modality.onHalt, reduceCtorEq,
-        imp_self, not_true_eq_false, not_false_eq_true, and_self]
-    | ok τ =>
-      simp only [Modality.afterC]
+    | none => cases m <;> simp only [Option.elim, Modality.onHalt, reduceCtorEq, imp_self,
+        not_true_eq_false, not_false_eq_true, and_self, true_implies, false_implies, if_true,
+        if_false]
+    | some τ =>
+      simp only [Option.elim]
       cases hl : σ.lift? τ with
       | none => exact ⟨fun h => Tri.noConfusion h, fun h => Tri.noConfusion h⟩
       | some σ' =>
         simp only
         split
         · rename_i hff
-          obtain ⟨hg, hl', hp⟩ := State.lift?_spec hl
+          obtain ⟨hg, hl'⟩ := State.lift?_spec hl
           exact ⟨fun h => Tri.noConfusion h,
-            fun _ hall => (Fml.eval3C_sound dom φ σ').2 hff (hall σ' hg hl' hp)⟩
+            fun _ hall => (Fml.eval3C_sound dom φ σ').2 hff (hall σ' hg hl')⟩
         · exact ⟨fun h => Tri.noConfusion h, fun h => Tri.noConfusion h⟩
   | _, .modal m P κ φ, σ => by
     simp only [Fml.eval3C, holds]
@@ -586,22 +540,14 @@ what the kernel runs in a certificate.  Compiled as `Fml.eval3C`. -/
 def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
   Fml.rec (motive := fun Γ _ => State C Γ → Tri)
     (fun _ => .tt)
-    (fun a b σ => match a.eval σ, b.eval σ with
-      | .ok x, .ok y => if x = y then .tt else .ff
-      | _, _ => .unknown)
-    (fun t σ => match t.eval σ with
-      | .ok _ => .tt
-      | .error _ => .ff)
+    (fun a b σ => (a.eval σ).elim .unknown fun x =>
+      (b.eval σ).elim .unknown fun y => if x = y then .tt else .ff)
+    (fun t σ => (t.eval σ).elim .ff fun _ => .tt)
     (fun _ ih σ => (ih σ).not)
     (fun _ _ ih₁ ih₂ σ => (ih₁ σ).and (ih₂ σ))
     (fun _ _ ih₁ ih₂ σ => (ih₁ σ).imp (ih₂ σ))
-    (fun m U _ ih σ => match U.applyV σ with
-      | .error _ => match m with
-        | .box => .tt
-        | .diamond => .ff
-      | .ok τ => match σ.lift? τ with
-        | some σ' => if ih σ' = .ff then .ff else .unknown
-        | none => .unknown)
+    (fun m U _ ih σ => (U.applyV σ).elim (if m = .box then .tt else .ff) fun τ =>
+      (σ.lift? τ).elim .unknown fun σ' => if ih σ' = .ff then .ff else .unknown)
     (fun m P κ _ ih σ => Tri.afterT m (fun τ => ih τ) (Prog.runFramesF loopFuel σ P κ))
     (fun _ ih σ => if ih σ = .ff || ih (σ.havoc σ.storage []) = .ff then .ff else .unknown)
     (fun _ p _ ih σ =>
@@ -937,8 +883,8 @@ def Fml.outcome (dom : TDom) : {Γ : Ctx} → State C Γ →
     | v :: _ => Fml.outcome dom (σ.push v) ψ
     | [] => none
   | _, σ, .upd _ U ψ => match U.applyV σ with
-    | .error h => some (.error h)
-    | .ok τ => match σ.lift? τ with
+    | none => some (.error .revert)
+    | some τ => match σ.lift? τ with
       | some σ' => match Fml.outcome dom σ' ψ with
         | some r => some r
         | none => some (.ok σ'.storage.erase)
@@ -956,8 +902,8 @@ no typed state. -/
 def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → State C Γ →
     Fml C Γ → Option (Option Semantics.Halt × List Nat)
   | _, σ, .upd _ U ψ => match U.applyV σ with
-    | .error h => some (some h, [])
-    | .ok τ => match σ.lift? τ with
+    | none => some (some .revert, [])
+    | some τ => match σ.lift? τ with
       | some σ' => Fml.postFails dom n σ' ψ
       | none => none
   | _, σ, .modal _ P κ φ => match Prog.runFramesF loopFuel σ P κ with

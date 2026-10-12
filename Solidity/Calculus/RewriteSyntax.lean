@@ -180,11 +180,17 @@ elab "core_apply_upd" : tactic => withMainContext do
 
 /-! ## A Theory lemma as a rewrite rule, on scoped terms
 
-On a scoped closed term `u : Tm C [] .val`: `u.denote σ` unfolded by the denotation of its symbols
-(the `Tm.denote_*S` lemmas, `rfl`), rewritten by the laws, and read back as a
-scoped term (`reifyTermS`).  The two `simp` runs prove
-`∀ σ, u.denote σ = u'.denote σ`, which `Tm.Theq.of_eq` makes a Theory
-equation. -/
+On a scoped closed term `u : Tm C [] (.val p)`: `u.denote σ` unfolded by the
+denotation of its symbols (the `Tm.denote_*S` lemmas, `rfl`), rewritten by
+the laws, and read back as a scoped term (`reifyTermS`).  The two `simp`
+runs prove `∀ σ, u.denote σ = u'.denote σ`, which `Tm.Theq.of_eq` makes a
+Theory equation.
+
+A typed term carries the proofs of its roots and members, which a Theory
+value does not: so a value is read back first as a subterm of `u` that
+denotes it (`reifyTable`), and only a word is built, at the type it is read
+at (a literal in range, by `rfl`).  A Theory law's result is made of its
+left side's parts, so this is what a rewrite needs. -/
 
 section TheoryS
 
@@ -192,31 +198,33 @@ open Theory Theory.StValue
 
 variable {C : Contract} {Γ : Ctx}
 
-theorem Tm.denote_litS (σ : State C Γ) (v : Semantics.Value) :
-    (Tm.app0 (.lit v) : Tm C Γ .val).denote σ = .prim v := rfl
-theorem Tm.denote_findS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .find s p : Tm C Γ .val).denote σ = findSt (s.denote σ) (p.denote σ) := rfl
-theorem Tm.denote_lenS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .len s p : Tm C Γ .val).denote σ = findSt (s.denote σ) (p.denote σ ++ [lengthSeg]) :=
-  rfl
-theorem Tm.denote_storageS (σ : State C Γ) : (Tm.app0 .storage : Tm C Γ .st).denote σ = σ.globE.abs :=
-  rfl
-theorem Tm.denote_saveS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) :
-    (Tm.app3 .save s p v : Tm C Γ .st).denote σ = copyTo (s.denote σ) (p.denote σ) (v.denote σ) :=
-  rfl
-theorem Tm.denote_delAtS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .delAt s p : Tm C Γ .st).denote σ = StValue.delAt (s.denote σ) (p.denote σ) := rfl
-theorem Tm.denote_svalS (σ : State C Γ) (h : Op1.sval.named = false) (t : Tm C Γ .val) :
-    (Tm.app1 .sval h t : Tm C Γ .sv).denote σ = t.denote σ := rfl
-theorem Tm.denote_sfindS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .sfind s p : Tm C Γ .sv).denote σ = findSt (s.denote σ) (p.denote σ) := rfl
-theorem Tm.denote_rootS (σ : State C Γ) (r : Name) :
-    (Tm.app0 (.root r) : Tm C Γ .path).denote σ = [.field r] := rfl
-theorem Tm.denote_fieldS (σ : State C Γ) (f : Name) (h : (Op1.field f).named = false)
-    (p : Tm C Γ .path) : (Tm.app1 (.field f) h p : Tm C Γ .path).denote σ = p.denote σ ++ [.field f] :=
-  rfl
-theorem Tm.denote_atS (σ : State C Γ) (p : Tm C Γ .path) (i : Tm C Γ .val) :
-    (Tm.app2 .at p i : Tm C Γ .path).denote σ = p.denote σ ++ [.at (asInt (i.denote σ))] := rfl
+theorem Tm.denote_litS (σ : State C Γ) {p : PrimTy} (v : p.Denote) :
+    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = .prim (PrimTy.erase v) := rfl
+theorem Tm.denote_findS (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
+    (q : Tm C Γ (.path (.prim p))) :
+    (Tm.app2 .find s q).denote σ = findSt (s.denote σ) (q.denote σ) := rfl
+theorem Tm.denote_lenS (σ : State C Γ) {E : Ty} (s : Tm C Γ .st)
+    (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app2 .len s q).denote σ = findSt (s.denote σ) (q.denote σ ++ [lengthSeg]) := rfl
+theorem Tm.denote_storageS (σ : State C Γ) :
+    (Tm.app0 .storage : Tm C Γ .st).denote σ = σ.glob.storage.absT := rfl
+theorem Tm.denote_saveS (σ : State C Γ) {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T))
+    (v : Tm C Γ (.sv T)) :
+    (Tm.app3 .save s q v).denote σ = copyTo (s.denote σ) (q.denote σ) (v.denote σ) := rfl
+theorem Tm.denote_delAtS (σ : State C Γ) {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
+    (Tm.app2 .delAt s q).denote σ = StValue.delAt (s.denote σ) (q.denote σ) := rfl
+theorem Tm.denote_svalS (σ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p)) :
+    (Tm.app1 .sval t).denote σ = t.denote σ := rfl
+theorem Tm.denote_sfindS (σ : State C Γ) {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
+    (Tm.app2 .sfind s q).denote σ = findSt (s.denote σ) (q.denote σ) := rfl
+theorem Tm.denote_rootS (σ : State C Γ) (r : Name) {T : Ty} (h : C.rootType r = some T) :
+    (Tm.app0 (.root r h) : Tm C Γ (.path T)).denote σ = [.field r] := rfl
+theorem Tm.denote_fieldS (σ : State C Γ) {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
+    (q : Tm C Γ (.path (.ref (.struct s)))) :
+    (Tm.app1 (.field h) q).denote σ = q.denote σ ++ [.field f] := rfl
+theorem Tm.denote_atS (σ : State C Γ) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k.keyTy)) :
+    (Tm.app2 (.at it) q i).denote σ = q.denote σ ++ [.at (asInt (i.denote σ))] := rfl
 
 end TheoryS
 
@@ -227,103 +235,111 @@ def theoryUnfoldLemmasS : List Lean.Name :=
     ``Tm.denote_saveS, ``Tm.denote_delAtS, ``Tm.denote_svalS, ``Tm.denote_sfindS,
     ``Tm.denote_rootS, ``Tm.denote_fieldS, ``Tm.denote_atS]
 
-/-- `e`, a `denote` of a scoped term of the sort `srt` at `σ`, is that term. -/
-def reifyFoldedS? (srt : Lean.Name) (σ e : Expr) : MetaM (Option Expr) := do
-  unless e.isAppOfArity ``Tm.denote 5 do return none
-  unless (← whnf (e.getArg! 3)).isConstOf srt do return none
-  if ← isDefEq (e.getArg! 2) σ then return some e.appArg! else return none
+/-- The subterms of `t` (scoped terms, `t` first). -/
+partial def tmSubterms (t : Expr) (acc : Array Expr := #[]) : MetaM (Array Expr) := do
+  let mut acc := acc
+  if !acc.contains t && t.getAppFn.constName?.any (·.getPrefix == ``Tm) then
+    if (← whnf (← inferType t)).isAppOfArity ``Tm 3 then acc := acc.push t
+  for a in t.getAppArgs do acc ← tmSubterms a acc
+  return acc
 
 open Theory Theory.StValue in
-mutual
-
-/-- A value of the Theory, written as a scoped term of the context `Γ`: the
-inverse of `Tm.denote σ`, for the values it gives (`reifyTerm`'s twin). -/
-partial def reifyTermS (C Γ σ e : Expr) : MetaM Expr := do
-  let e ← instantiateMVars e
-  if let some t ← reifyFoldedS? ``Srt.val σ e then return t
-  let lit (v : Expr) : MetaM Expr := mkAppOptM ``Tms.Term.lit #[C, Γ, v]
+/-- A word of the Theory at the type `p`: a literal of `p` in its range,
+or `none`. -/
+def reifyWordS (C Γ p e : Expr) : MetaM (Option Expr) := do
+  let lit (v : Expr) : MetaM Expr := mkAppOptM ``Tms.Term.lit #[C, Γ, p, v]
   match_expr e with
-  | StValue.prim v => lit v
-  | StValue.int n => lit (mkApp (mkConst ``Semantics.PrimVal.int) n)
-  | StValue.bool b => lit (mkApp (mkConst ``Semantics.PrimVal.bool) b)
-  | findSt s p =>
-    let s ← reifySTermS C Γ σ s
-    if let some p' ← lengthOf? p then
-      return ← mkAppOptM ``Tms.Term.len #[C, Γ, s, ← reifyPTermS C Γ σ p']
-    mkAppOptM ``Tms.Term.find #[C, Γ, s, ← reifyPTermS C Γ σ p]
+  | StValue.prim v =>
+    match_expr v with
+    | PrimTy.erase _ x => return some (← lit x)
+    | Semantics.PrimVal.bool b =>
+      unless (← whnf p).isConstOf ``PrimTy.bool do return none
+      return some (← lit b)
+    | Semantics.PrimVal.int n =>
+      let p' ← whnf p
+      unless p'.isConstOf ``PrimTy.uint || p'.isConstOf ``PrimTy.int do return none
+      let inR := mkApp2 (mkConst ``PrimTy.inRange) p n
+      let ty ← mkEq inR (mkConst ``Bool.true)
+      let pf ← mkEqRefl (mkConst ``Bool.true)
+      unless ← withAtLeastTransparency .default <| isDefEq (← inferType pf) ty do return none
+      let sub ← mkAppOptM ``Subtype.mk #[mkConst ``Int, none, n, pf]
+      return some (← lit sub)
+    | _ => return none
+  | _ => return none
+
+open Theory Theory.StValue in
+/-- A value of the Theory, read back as a scoped term of the sort `srt`:
+a subterm of the term rewritten that denotes it (`table`), a word built at
+its type, or a read, a write or a delete of parts read back. -/
+partial def reifyS (C Γ : Expr) (table : Array (Expr × Expr)) (srt e : Expr) :
+    MetaM Expr := do
+  let e ← instantiateMVars e
+  for (d, t) in table do
+    if d == e then
+      if ← isDefEq (← inferType t) (mkApp3 (mkConst ``Tm) C Γ srt) then return t
+  let srt ← whnf srt
+  if srt.isAppOfArity ``Srt.val 1 then
+    if let some t ← reifyWordS C Γ srt.appArg! e then return t
+  match_expr e with
+  | findSt s q =>
+    let s ← reifyS C Γ table (mkConst ``Srt.st) s
+    if let some q' ← lengthOf? q then
+      let T ← mkFreshExprMVar (mkConst ``Ty)
+      let q ← reifyS C Γ table (mkApp (mkConst ``Srt.path) T) q'
+      return ← mkAppM ``Tms.Term.len #[s, q]
+    let T ← mkFreshExprMVar (mkConst ``Ty)
+    let q ← reifyS C Γ table (mkApp (mkConst ``Srt.path) T) q
+    if srt.isAppOfArity ``Srt.sv 1 then return ← mkAppM ``Tms.SValT.find #[s, q]
+    mkAppM ``Tms.Term.find #[s, q]
+  | copyTo s q v =>
+    let s ← reifyS C Γ table (mkConst ``Srt.st) s
+    let T ← mkFreshExprMVar (mkConst ``Ty)
+    let q ← reifyS C Γ table (mkApp (mkConst ``Srt.path) T) q
+    let T ← instantiateMVars T
+    let v ← match_expr (← whnf T) with
+      | Ty.prim p => do
+        let w ← reifyS C Γ table (mkApp (mkConst ``Srt.val) p) v
+        mkAppM ``Tms.SValT.val #[w]
+      | _ => reifyS C Γ table (mkApp (mkConst ``Srt.sv) T) v
+    mkAppM ``Tms.STerm.save #[s, q, v]
+  | StValue.delAt s q =>
+    let s ← reifyS C Γ table (mkConst ``Srt.st) s
+    let T ← mkFreshExprMVar (mkConst ``Ty)
+    let q ← reifyS C Γ table (mkApp (mkConst ``Srt.path) T) q
+    mkAppM ``Tms.STerm.delAt #[s, q]
   | _ => throwError "not a term: {e}"
 
-/-- A storage node, written as a scoped storage term. -/
-partial def reifySTermS (C Γ σ e : Expr) : MetaM Expr := do
-  let e ← instantiateMVars e
-  if let some s ← reifyFoldedS? ``Srt.st σ e then return s
-  match_expr e with
-  | Semantics.State.abs g =>
-    unless ← isDefEq g (← mkAppM ``State.globE #[σ]) do throwError "not a storage term: {e}"
-    mkAppOptM ``Tms.STerm.storage #[C, Γ]
-  | copyTo s p v =>
-    mkAppOptM ``Tms.STerm.save #[C, Γ, ← reifySTermS C Γ σ s, ← reifyPTermS C Γ σ p,
-      ← reifySValTS C Γ σ v]
-  | StValue.delAt s p =>
-    mkAppOptM ``Tms.STerm.delAt #[C, Γ, ← reifySTermS C Γ σ s, ← reifyPTermS C Γ σ p]
-  | _ => throwError "not a storage term: {e}"
-
-/-- A value stored by a `save`, written as its right-hand side. -/
-partial def reifySValTS (C Γ σ e : Expr) : MetaM Expr := do
-  let e ← instantiateMVars e
-  if let some v ← reifyFoldedS? ``Srt.sv σ e then return v
-  match_expr e with
-  | findSt s p =>
-    mkAppOptM ``Tms.SValT.find #[C, Γ, ← reifySTermS C Γ σ s, ← reifyPTermS C Γ σ p]
-  | _ => mkAppOptM ``Tms.SValT.val #[C, Γ, ← reifyTermS C Γ σ e]
-
-/-- A list of segments, written as a scoped path term. -/
-partial def reifyPTermS (C Γ σ e : Expr) : MetaM Expr := do
-  let e ← instantiateMVars e
-  if let some p ← reifyFoldedS? ``Srt.path σ e then return p
-  if let some (p, q) := append? e then
-    let some segs := listLit? q | throwError "not a path term: {e}"
-    return ← segs.foldlM (extendS C Γ σ) (← reifyPTermS C Γ σ p)
-  let some (a :: segs) := listLit? e | throwError "not a path term: {e}"
-  let_expr Semantics.Seg.field r := a | throwError "not a path term: {e}"
-  segs.foldlM (extendS C Γ σ) (← mkAppOptM ``Tms.PTerm.root #[C, Γ, r])
-
-/-- The scoped path `p` one segment further. -/
-partial def extendS (C Γ σ : Expr) (p a : Expr) : MetaM Expr := do
-  match_expr a with
-  | Semantics.Seg.field f => mkAppOptM ``Tms.PTerm.field #[C, Γ, p, f]
-  | Semantics.Seg.at i =>
-    let i ← match_expr i with
-      | asInt t => reifyTermS C Γ σ t
-      | _ => mkAppOptM ``Tms.Term.lit #[C, Γ, mkApp (mkConst ``Semantics.PrimVal.int) i]
-    mkAppOptM ``Tms.PTerm.at #[C, Γ, p, i]
-  | _ => throwError "not a segment: {a}"
-
-end
-
-/-- The scoped term `u : Tm C Γ .val` rewritten by the laws `thms` in the
-Theory: the term `u'` and a proof of `Tm.Theq u u'`, if a law applies and
-the result is a term. -/
+/-- The scoped term `u : Tm C Γ (.val p)` rewritten by the laws `thms` in
+the Theory: the term `u'` and a proof of `Tm.Theq u u'`, if a law applies
+and the result is a term. -/
 def theoryRewriteS (thms : SimpTheorems) (C u : Expr) : MetaM (Option (Expr × Expr)) := do
   let ty ← whnf (← inferType u)
   unless ty.isAppOfArity ``Tm 3 do return none
   let Γ := ty.getArg! 1
+  let srt := ty.getArg! 2
   withLocalDeclD `σ (mkApp2 (mkConst ``Solidity.State) C Γ) fun σ => do
-    let denote (t : Expr) : Expr := mkAppN (mkConst ``Tm.denote) #[C, Γ, σ, mkConst ``Srt.val, t]
-    let lhs := denote u
+    let denote (t : Expr) : MetaM Expr := mkAppM ``Tm.denote #[σ, t]
+    let lhs ← denote u
     let mut unfold : SimpTheorems := {}
     for n in theoryUnfoldLemmasS do unfold ← unfold.addConst n
-    let (r₁, _) ← simp lhs (← Simp.mkContext (simpTheorems := #[unfold]))
+    let ctx ← Simp.mkContext (simpTheorems := #[unfold])
+    let (r₁, _) ← simp lhs ctx
     let (r₂, _) ← simp r₁.expr (← Simp.mkContext (simpTheorems := #[thms]))
       (discharge? := dischargeTheory)
     if r₂.expr == r₁.expr then return none
-    let some u' ← (try some <$> reifyTermS C Γ σ r₂.expr catch _ => pure none) | return none
+    let mut table : Array (Expr × Expr) := #[]
+    for t in ← tmSubterms u do
+      let (r, _) ← simp (← denote t) ctx
+      table := table.push (← instantiateMVars r.expr, t)
+    let some u' ← (try some <$> reifyS C Γ table srt r₂.expr catch _ => pure none) | return none
+    let u' ← instantiateMVars u'
+    if u'.hasExprMVar then return none
     if ← isDefEq u' u then return none
-    let ty ← mkEq lhs (denote u')
+    let ty ← mkEq lhs (← denote u')
     let pf ← mkEqTrans (← r₁.getProof) (← r₂.getProof)
     unless ← isDefEq (← inferType pf) ty do return none
     let h ← mkLambdaFVars #[σ] (← mkExpectedTypeHint pf ty)
-    return some (u', mkAppN (mkConst ``Tm.Theq.of_eq) #[C, Γ, u, u', h])
+    return some (u', ← mkAppM ``Tm.Theq.of_eq #[h])
 
 /-! ## Rewriting with a term taclet or the Theory's laws -/
 

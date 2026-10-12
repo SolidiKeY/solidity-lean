@@ -932,16 +932,32 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) �
     | .root => throw s!"`{x}` is a state variable: an update writes it through `storage := …`"
     | .store => throw s!"`{x}` is a storage variable: its right-hand side is a storage"
     | .local =>
-      -- `se1 := x <= 255`: a `bool` capture, which a program under it reads as one
-      let Γ' := if isBool t && (lookupBy x Γ' matches none | some (.val .uint 256)) then
-        setBy x (.val .bool) Γ' else Γ'
+      -- `se1 := x <= 255`, `se1 := find(storage, flags[a])`: a capture at the type of its
+      -- right-hand side, which a program under it reads at that type (a `uint` otherwise)
+      let Γ' := match valTy? t with
+        | some p =>
+          if p != .uint && (lookupBy x Γ' matches none | some (.val .uint 256)) then
+            setBy x (.val p) Γ' else Γ'
+        | none => Γ'
       return (.val (Var.ofName x) (← tVal C Γ t) :: U', Γ')
 where
-  /-- A `bool` term: a comparison, a negation, a literal, a `bool` local. -/
-  isBool : RawTerm → Bool
-    | .cmp .. | .app "!" _ | .name "true" | .name "false" => true
-    | .name y => (lookupBy y Γ matches some (.val .bool _))
-    | _ => false
+  /-- A word's type, where the term shows it: a comparison, a negation, a
+  literal, a local, a read of a storage word (`find(s, p)`, or the path
+  bare). -/
+  valTy? : RawTerm → Option PrimTy
+    | .cmp .. | .app "!" _ | .name "true" | .name "false" => some .bool
+    | .app "find" [_, q] => match pathTy C Γ q with
+      | some (.prim p) => some p
+      | _ => none
+    | .name y => match lookupBy y Γ with
+      | some (.val p _) => some p
+      | some _ => none
+      | none => match C.rootType y with
+        | some (.prim p) => some p
+        | _ => none
+    | t => match pathTy C Γ t with
+      | some (.prim p) => some p
+      | _ => none
   /-- A storage term: `storage`, a storage variable, or a write over one. -/
   isStorTerm : RawTerm → Bool
     | .name "storage" | .name "mtSt" => true

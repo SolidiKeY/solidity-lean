@@ -4,7 +4,7 @@ import Solidity.Calculus.ProofTree
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.TreeData
-import Solidity.Calculus.CloseScoped
+import Solidity.Calculus.CloseFrame
 
 /-!
 # The scoped strategy as a walk: `sol_derive`, and `sol_close` on a leaf

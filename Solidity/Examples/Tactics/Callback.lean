@@ -215,11 +215,13 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   case inv =>
     simp only [holdsC, holds]
     refine ⟨?_, ?_, ?_⟩
-    · exact ⟨_, by with_unfolding_all rfl⟩
-    · exact ⟨_, by with_unfolding_all rfl⟩
+    · exact Option.ne_none_iff_exists'.2 ⟨_, by with_unfolding_all rfl⟩
+    · exact Option.ne_none_iff_exists'.2 ⟨_, by with_unfolding_all rfl⟩
     · with_unfolding_all exact Theory.StValue.Equiv.refl _
-  case exit => with_unfolding_all exact ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
-  case resume => with_unfolding_all exact ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
+  case exit => with_unfolding_all exact ⟨Option.ne_none_iff_exists'.2 ⟨_, rfl⟩,
+    Option.ne_none_iff_exists'.2 ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
+  case resume => with_unfolding_all exact ⟨Option.ne_none_iff_exists'.2 ⟨_, rfl⟩,
+    Option.ne_none_iff_exists'.2 ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩
   have H2 := H _ ExecF.nil
   simp only [COut.after, holdsC, holds] at H2
   obtain ⟨-, -, hE⟩ := H2

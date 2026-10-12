@@ -125,6 +125,7 @@ import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.CloseLemmas
 import Solidity.Calculus.Close
 import Solidity.Calculus.CloseScoped
+import Solidity.Calculus.CloseFrame
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.MemNames
 import Solidity.Calculus.DecideLang
