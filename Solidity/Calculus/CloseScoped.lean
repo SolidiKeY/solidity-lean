@@ -478,18 +478,121 @@ theorem ofLit_int (n : Int) (h : PrimTy.int.inRange n = true) :
     PrimTy.ofLit .int n h = (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true}) := rfl
 
 /-! The typed operators at their operand types, so a closer leaf's
-arithmetic is `Int` arithmetic and a range check (`PrimTy.ofInt?`). -/
+arithmetic is `Int` arithmetic under a range check.  A checked result is
+`if inRange then some (uintOf n) else none`, with no proof inside: an
+`uintOf n` the leaf meets under its range reads back as `n`
+(`uintOf_val`), and nothing depends on the check's proof, so `simp`'s
+`exists_eq_left'`/`forall_eq'` take it apart. -/
 
-theorem shortT_uint (op : BinOp) (x : PrimTy.uint.Denote) : op.shortT x = none := by
+/-- `n` as a `uint`, `0` out of range: `ofInt?`'s value without the proof. -/
+def uintOf (n : Int) : PrimTy.uint.Denote :=
+  if h : PrimTy.uint.inRange n = true then ⟨n, h⟩ else ⟨0, by decide⟩
+/-- `n` as an `int`, `0` out of range. -/
+def intOf (n : Int) : PrimTy.int.Denote :=
+  if h : PrimTy.int.inRange n = true then ⟨n, h⟩ else ⟨0, by decide⟩
+
+theorem uintOf_val {n : Int} (h : 0 ≤ n ∧ n < uintBound) : (uintOf n).val = n := by
+  have h' : PrimTy.uint.inRange n = true := by
+    simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+  simp only [uintOf, h', dite_true]
+theorem intOf_val {n : Int} (h : -intBound ≤ n ∧ n < intBound) : (intOf n).val = n := by
+  have h' : PrimTy.int.inRange n = true := by
+    simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+  simp only [intOf, h', dite_true]
+theorem eq_uintOf {n : Int} (h : 0 ≤ n ∧ n < uintBound) (a : PrimTy.uint.Denote) :
+    a = uintOf n ↔ a.val = n :=
+  ⟨fun e => e ▸ uintOf_val h, fun e => Subtype.ext (e.trans (uintOf_val h).symm)⟩
+theorem eq_intOf {n : Int} (h : -intBound ≤ n ∧ n < intBound) (a : PrimTy.int.Denote) :
+    a = intOf n ↔ a.val = n :=
+  ⟨fun e => e ▸ intOf_val h, fun e => Subtype.ext (e.trans (intOf_val h).symm)⟩
+/-- `uintOf_val` for every `n`: the closer's form, which `grind` splits. -/
+theorem uintOf_val' (n : Int) :
+    (uintOf n).val = if 0 ≤ n ∧ n < uintBound then n else 0 := by
+  by_cases h : 0 ≤ n ∧ n < uintBound
+  · rw [if_pos h, uintOf_val h]
+  · have h' : ¬PrimTy.uint.inRange n = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+    simp only [uintOf, h', Bool.false_eq_true, dite_false, if_neg h]
+theorem intOf_val' (n : Int) :
+    (intOf n).val = if -intBound ≤ n ∧ n < intBound then n else 0 := by
+  by_cases h : -intBound ≤ n ∧ n < intBound
+  · rw [if_pos h, intOf_val h]
+  · have h' : ¬PrimTy.int.inRange n = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+    simp only [intOf, h', Bool.false_eq_true, dite_false, if_neg h]
+theorem eq_uintOf' (n : Int) (a : PrimTy.uint.Denote) :
+    a = uintOf n ↔ a.val = if 0 ≤ n ∧ n < uintBound then n else 0 :=
+  ⟨fun e => e ▸ uintOf_val' n, fun e => Subtype.ext (e.trans (uintOf_val' n).symm)⟩
+theorem eq_intOf' (n : Int) (a : PrimTy.int.Denote) :
+    a = intOf n ↔ a.val = if -intBound ≤ n ∧ n < intBound then n else 0 :=
+  ⟨fun e => e ▸ intOf_val' n, fun e => Subtype.ext (e.trans (intOf_val' n).symm)⟩
+theorem root_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
+    (SRef.ofRoot r h).root = r := rfl
+/-- A key of a mapping at a root: always a slot (`inBounds` at `map`), so
+two reads of `balances[0]` name the same reference, before a write and after. -/
+theorem atT_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
+    (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : k.keyTy.Denote) :
+    st.atT IndexTy.map (SRef.ofRoot r h) i =
+      some ((SRef.ofRoot r h).index IndexTy.map (PrimTy.key i)) := rfl
+theorem getD_ite {α : Type} {c : Prop} [Decidable c] (x y : Option α) (d : α) :
+    (if c then x else y).getD d = if c then x.getD d else y.getD d := by
+  split <;> rfl
+theorem erase_uint' (a : PrimTy.uint.Denote) : PrimTy.erase a = .int a.val := rfl
+theorem erase_int' (a : PrimTy.int.Denote) : PrimTy.erase a = .int a.val := rfl
+theorem uint_eq_iff (a b : PrimTy.uint.Denote) : a = b ↔ a.val = b.val :=
+  ⟨fun e => e ▸ rfl, Subtype.ext⟩
+theorem int_eq_iff (a b : PrimTy.int.Denote) : a = b ↔ a.val = b.val :=
+  ⟨fun e => e ▸ rfl, Subtype.ext⟩
+/-- A stored word against a value: their integers (`Shape (.prim p)` is the
+value's type, which `uint_eq_iff` does not see through). -/
+theorem view_eq_uint (x : SVal (.prim .uint)) (b : PrimTy.uint.Denote) :
+    @Eq (Shape (.prim .uint)) x.view b ↔ (x.view : PrimTy.uint.Denote).val = b.val :=
+  uint_eq_iff _ _
+theorem view_eq_int (x : SVal (.prim .int)) (b : PrimTy.int.Denote) :
+    @Eq (Shape (.prim .int)) x.view b ↔ (x.view : PrimTy.int.Denote).val = b.val :=
+  int_eq_iff _ _
+theorem ofInt?_uint (n : Int) : PrimTy.uint.ofInt? n =
+    if 0 ≤ n ∧ n < uintBound then some (uintOf n) else none := by
+  by_cases h : 0 ≤ n ∧ n < uintBound
+  · have h' : PrimTy.uint.inRange n = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', dite_true, if_pos h, uintOf]
+  · have h' : ¬PrimTy.uint.inRange n = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', Bool.false_eq_true, dite_false, if_neg h]
+theorem ofInt?_int (n : Int) : PrimTy.int.ofInt? n =
+    if -intBound ≤ n ∧ n < intBound then some (intOf n) else none := by
+  by_cases h : -intBound ≤ n ∧ n < intBound
+  · have h' : PrimTy.int.inRange n = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', dite_true, if_pos h, intOf]
+  · have h' : ¬PrimTy.int.inRange n = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
+    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', Bool.false_eq_true, dite_false, if_neg h]
+theorem optRes_ite_ok {α : Type} {c : Prop} [Decidable c] (x a : α) :
+    Close.optRes (if c then some x else none) = .ok a ↔ x = a ∧ c := by
+  by_cases hc : c
+  · simp only [hc, ite_true, optRes_some, Except.ok.injEq, and_true]
+  · simp only [hc, ite_false, optRes_none, reduceCtorEq, and_false]
+theorem optRes_ite {α : Type} {c : Prop} [Decidable c] (x y : Option α) :
+    Close.optRes (if c then x else y) = if c then Close.optRes x else Close.optRes y :=
+  apply_ite _ _ _ _
+
+theorem binopT_uint (op : BinOp) (a : PrimTy.uint.Denote) (y : Option PrimTy.uint.Denote) :
+    binopT op a y = y.bind fun b => BinOp.evalNum .uint a.1 b.1 op := by
   cases op <;> rfl
-theorem shortT_int (op : BinOp) (x : PrimTy.int.Denote) : op.shortT x = none := by
+theorem binopT_int (op : BinOp) (a : PrimTy.int.Denote) (y : Option PrimTy.int.Denote) :
+    binopT op a y = y.bind fun b => BinOp.evalNum .int a.1 b.1 op := by
   cases op <;> rfl
-theorem shortT_and (x : PrimTy.bool.Denote) :
-    BinOp.and.shortT x = if x = true then none else some (false : Bool) := rfl
-theorem shortT_or (x : PrimTy.bool.Denote) :
-    BinOp.or.shortT x = if x = true then some (true : Bool) else none := rfl
-theorem shortT_bool (op : BinOp) (h₁ : op ≠ .and) (h₂ : op ≠ .or) (x : PrimTy.bool.Denote) :
-    op.shortT x = none := by
+theorem binopT_and (a : PrimTy.bool.Denote) (y : Option PrimTy.bool.Denote) :
+    binopT .and a y = if a = true then y.bind (fun b => some (a && b)) else some false := by
+  cases a <;> rfl
+theorem binopT_or (a : PrimTy.bool.Denote) (y : Option PrimTy.bool.Denote) :
+    binopT .or a y = if a = true then some true else y.bind (fun b => some (a || b)) := by
+  cases a <;> rfl
+theorem binopT_bool (op : BinOp) (h₁ : op ≠ .and) (h₂ : op ≠ .or) (a : PrimTy.bool.Denote)
+    (y : Option PrimTy.bool.Denote) :
+    binopT op a y = y.bind fun b => BinOp.evalBool a b op := by
   cases op <;> first | rfl | exact absurd rfl h₁ | exact absurd rfl h₂
 theorem evalT_uint (op : BinOp) (a b : PrimTy.uint.Denote) :
     op.evalT a b = BinOp.evalNum .uint a.1 b.1 op := rfl
@@ -497,23 +600,17 @@ theorem evalT_int (op : BinOp) (a b : PrimTy.int.Denote) :
     op.evalT a b = BinOp.evalNum .int a.1 b.1 op := rfl
 theorem evalT_bool (op : BinOp) (a b : PrimTy.bool.Denote) :
     op.evalT a b = BinOp.evalBool a b op := rfl
-theorem ofInt?_uint (n : Int) : PrimTy.uint.ofInt? n =
-    if h : PrimTy.uint.inRange n = true then
-      some (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) else none := rfl
-theorem ofInt?_int (n : Int) : PrimTy.int.ofInt? n =
-    if h : PrimTy.int.inRange n = true then
-      some (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true}) else none := rfl
-theorem optRes_dite_ok {α : Type} {c : Prop} [Decidable c] (f : c → α) (a : α) :
-    Close.optRes (if h : c then some (f h) else none) = .ok a ↔ ∃ h : c, f h = a := by
-  by_cases hc : c
-  · simp only [hc, dite_true, optRes_some, Except.ok.injEq, exists_true_left]
-  · rw [dif_neg hc, optRes_none]
-    exact ⟨fun e => (nomatch e), fun ⟨h, _⟩ => absurd h hc⟩
 theorem uint_eq_mk (a : PrimTy.uint.Denote) (n : Int) (h : PrimTy.uint.inRange n = true) :
     a = (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) ↔ a.val = n :=
   ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
 theorem int_eq_mk (a : PrimTy.int.Denote) (n : Int) (h : PrimTy.int.inRange n = true) :
     a = (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true}) ↔ a.val = n :=
+  ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
+theorem mk_eq_uint (a : PrimTy.uint.Denote) (n : Int) (h : PrimTy.uint.inRange n = true) :
+    @Eq PrimTy.uint.Denote ⟨n, h⟩ a ↔ n = a.val :=
+  ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
+theorem mk_eq_int (a : PrimTy.int.Denote) (n : Int) (h : PrimTy.int.inRange n = true) :
+    @Eq PrimTy.int.Denote ⟨n, h⟩ a ↔ n = a.val :=
   ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
 /-- A natural literal cast to an integer is the integer literal: the bounds
 `uintBound`, `intBound` and the bitwise results then compare by the
@@ -679,8 +776,10 @@ attribute [close_rw_s]
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
   CloseS.holds_bind_oldNet CloseS.holds_anon
   CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool CloseS.ofLit_uint CloseS.ofLit_int
-  CloseS.shortT_uint CloseS.shortT_int CloseS.shortT_and CloseS.shortT_or CloseS.shortT_bool
-  CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int CloseS.optRes_dite_ok CloseS.uint_eq_mk CloseS.int_eq_mk exists_prop
+  CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
+  CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
+  CloseS.optRes_ite_ok CloseS.optRes_ite CloseS.uintOf_val' CloseS.intOf_val' CloseS.eq_uintOf' CloseS.eq_intOf'
+  CloseS.uint_eq_mk CloseS.int_eq_mk CloseS.mk_eq_uint CloseS.mk_eq_int and_assoc exists_prop
   BinOp.evalNum BinOp.evalBool BinOp.arithInt UnOp.evalT PrimTy.inRange
   CloseS.natCast_ofNat
   CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Close.equiv_prim_left_iff
@@ -728,7 +827,7 @@ attribute [close_rw_s]
   CloseS.eval_len CloseS.eval_pushSlot CloseS.eval_pop CloseS.eval_shrink CloseS.eval_extend
   CloseS.eval_nextIn CloseS.eval_mat
   CloseS.eval_ite CloseS.eval_save CloseS.eval_push
-  SVal.view_prim binopT
+  SVal.view_prim
   -- runs
   Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
   Modality.wp_diamond Modality.onHalt_box Modality.onHalt_diamond
@@ -749,6 +848,12 @@ attribute [close_rw_s]
   Bool.or_eq_false_iff
   -- computation
   reduceCtorEq reduceIte reduceDIte String.reduceEq Nat.reduceEqDiff Nat.reducePow Int.reduceEq
+  Int.reduceMod Int.reduceDiv Int.reduceTMod Int.reduceTDiv Semantics.uintBound Semantics.intBound
+  Close.uintBitwise_ofNat Close.uintBitwise_ofNat_cast Close.uintBitwise_cast_ofNat
+  Semantics.uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
+  Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.atT_map_root
+  CloseS.getD_ite Option.getD_some CloseS.erase_uint' CloseS.erase_int'
+  CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
 
 attribute [close_rw_s] CloseS.wp_box_write
