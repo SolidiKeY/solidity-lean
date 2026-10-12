@@ -122,17 +122,18 @@ theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name
 
 /-- `wt(storage)`: the storage is one `C` can be in. -/
 def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
-  .defined (.app1 (.wt C.vars) rfl (.app0 .storage))
+  .defined (.app1 .wt (.app0 .storage))
 
 /-- `wt(storage)` holds in a typed state exactly when its storage passes
 the test. -/
 theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
-    holds σ (Fml.wt C) ↔ storageWtB C.vars σ.globE.storage = true := by
+    holds σ (Fml.wt C) ↔ storageWtB C.vars σ.storage.erase = true := by
   rw [Fml.wt, holds_defined]
-  simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
-  cases storageWtB C.vars σ.globE.storage with
-  | true => exact ⟨fun _ => rfl, fun _ => ⟨_, rfl⟩⟩
-  | false => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
+  show (Storage.wtT σ.storage) ≠ none ↔ _
+  unfold Storage.wtT
+  cases storageWtB C.vars σ.storage.erase with
+  | true => exact ⟨fun _ => rfl, fun _ h => nomatch h⟩
+  | false => exact ⟨fun h => absurd rfl h, fun h => nomatch h⟩
 
 /-- A reachable storage passes the shape test. -/
 theorem shape_of_reachable (hnd : nodupKeysB C.vars = true)
@@ -191,7 +192,9 @@ theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
 it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : holds (State.init C) (Fml.wt C) := by
-  rw [holds_wt, Reachable.init_globE]
+  rw [holds_wt]
+  show storageWtB C.vars (State.init C).globE.storage = true
+  rw [Reachable.init_globE]
   exact wt_of_reachable hnd hdeep
     ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, rfl, Storage.init_erase C⟩
     (storageWordsB_init hnd)
@@ -219,7 +222,7 @@ def Problem.fml (m : Modality) (xs : List (PrimTy × Var)) {Γ' : Ctx}
 the empty storage, a ledger holding the deployer's payment, and the value
 sent as the contract's funds (`Contract.deployState`). -/
 def Problem.deployUpd (C : Contract) {Γ : Ctx} : Upd C Γ Γ :=
-  ((Upd.nil.snoc (.storage (.app0 (.mtSt C.vars)))).snoc
+  ((Upd.nil.snoc (.storage (.app0 .mtSt))).snoc
     (.netMt (.app0 (.env .msgSender)) (.app0 (.env .msgValue)))).snoc
     (.setBalance (.app0 (.env .msgValue)))
 
@@ -275,12 +278,12 @@ macro_rules (kind := problemCtorBang)
 
 /-- Whether a term is `wt(storage)`. -/
 def Problem.isWt {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
-  | _, .app1 (.wt _) _ (.app0 .storage) => true
+  | _, .app1 .wt (.app0 .storage) => true
   | _, _ => false
 
 /-- Whether an update is the deployment's, `Problem.deployUpd`'s shape. -/
 def Problem.isDeploy {Γ Δ : Ctx} : Upd C Γ Δ → Bool
-  | .snoc (.snoc (.snoc .nil (.storage (.app0 (.mtSt _))))
+  | .snoc (.snoc (.snoc .nil (.storage (.app0 .mtSt)))
       (.netMt (.app0 (.env .msgSender)) (.app0 (.env .msgValue))))
       (.setBalance (.app0 (.env .msgValue))) => true
   | _ => false

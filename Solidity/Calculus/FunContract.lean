@@ -70,7 +70,7 @@ def Tm.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {s : Srt} → Tm C Γ s → Tm C Δ s
     (pvV := fun i => .pvV (i.wk h)) (pvP := fun i => .pvP (i.wk h))
     (pvS := fun i => .pvS (i.wk h)) (pvI := fun i => .pvI (i.wk h))
     (netOf := fun i a => .netOf (i.wk h) (Tm.wk h a)) (app0 := fun o => .app0 o)
-    (app1 := fun o ho a => .app1 o ho (Tm.wk h a))
+    (app1 := fun o a => .app1 o (Tm.wk h a))
     (app2 := fun o a b => .app2 o (Tm.wk h a) (Tm.wk h b))
     (app3 := fun o a b c => .app3 o (Tm.wk h a) (Tm.wk h b) (Tm.wk h c))
   termination_by structural _ t => t
@@ -89,49 +89,70 @@ theorem Tm.wk_pvP {R : RefTy} (i : Idx Γ (.alias R)) :
 theorem Tm.wk_pvS (i : Idx Γ .old) : (Tm.pvS (C := C) i).wk h = .pvS (i.wk h) := rfl
 theorem Tm.wk_pvI {R : RefTy} (i : Idx Γ (.mem R)) :
     (Tm.pvI (C := C) i).wk h = .pvI (i.wk h) := rfl
-theorem Tm.wk_netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) :
+theorem Tm.wk_netOf (i : Idx Γ .oldNet) (a : Tm C Γ (.val .uint)) :
     (Tm.netOf i a).wk h = .netOf (i.wk h) (a.wk h) := rfl
-theorem Tm.wk_app0 {s : Srt} (o : Op0 s) : (Tm.app0 (C := C) (Γ := Γ) o).wk h = .app0 o := rfl
-theorem Tm.wk_app1 {a s : Srt} (o : Op1 a s) (ho : o.named = false) (x : Tm C Γ a) :
-    (Tm.app1 o ho x).wk h = .app1 o ho (x.wk h) := rfl
-theorem Tm.wk_app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C Γ a) (y : Tm C Γ b) :
+theorem Tm.wk_app0 {s : Srt} (o : Op0 C s) : (Tm.app0 (C := C) (Γ := Γ) o).wk h = .app0 o := rfl
+theorem Tm.wk_app1 {a s : Srt} (o : Op1 C a s) (x : Tm C Γ a) :
+    (Tm.app1 o x).wk h = .app1 o (x.wk h) := rfl
+theorem Tm.wk_app2 {a b s : Srt} (o : Op2 C a b s) (x : Tm C Γ a) (y : Tm C Γ b) :
     (Tm.app2 o x y).wk h = .app2 o (x.wk h) (y.wk h) := rfl
-theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C Γ b)
+theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 C a b c s) (x : Tm C Γ a) (y : Tm C Γ b)
     (z : Tm C Γ c) : (Tm.app3 o x y z).wk h = .app3 o (x.wk h) (y.wk h) (z.wk h) := rfl
 
 end WkEqns
 
 theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).eval σ = t.eval (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.eval, State.getE_thin]
-  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.eval, State.aliasPathT_getE, State.getE_thin]
-  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.eval, State.getE_thin]; rfl
-  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.eval, State.memRefT_getE, State.getE_thin]
-  | _, .netOf i a => by simp only [Tm.wk_netOf, Tm.eval, Tm.eval_wk h σ a, State.getE_thin]
+  | _, .pvV i => by
+    show some (TEnv.get (i.wk h) σ.env) = some (TEnv.get i (TEnv.thin h σ.env))
+    rw [TEnv.get_thin_wk]
+  | _, .pvP i => by
+    show TEnv.get (i.wk h) σ.env = TEnv.get i (TEnv.thin h σ.env)
+    rw [TEnv.get_thin_wk]
+  | _, .pvS i => by
+    show some (TEnv.get (i.wk h) σ.env) = some (TEnv.get i (TEnv.thin h σ.env))
+    rw [TEnv.get_thin_wk]
+  | _, .pvI i => by
+    show (TEnv.get (i.wk h) σ.env).map (·.id) = (TEnv.get i (TEnv.thin h σ.env)).map (·.id)
+    rw [TEnv.get_thin_wk]
+  | _, .netOf i a => by
+    show ((a.wk h).eval σ).bind _ = (a.eval (σ.thin h)).bind (Tm.netOfT (TEnv.get i (TEnv.thin h σ.env)))
+    rw [Tm.eval_wk h σ a, TEnv.get_thin_wk]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.eval, Tm.eval_wk h σ a]; rfl
+  | _, .app1 o a => by
+    show o.eval σ.glob ((a.wk h).eval σ) = o.eval σ.glob (a.eval (σ.thin h))
+    rw [Tm.eval_wk h σ a]
   | _, .app2 o a b => by
-    simp only [Tm.wk_app2, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b]; rfl
+    show o.eval σ.glob ((a.wk h).eval σ) ((b.wk h).eval σ) =
+      o.eval σ.glob (a.eval (σ.thin h)) (b.eval (σ.thin h))
+    rw [Tm.eval_wk h σ a, Tm.eval_wk h σ b]
   | _, .app3 o a b c => by
-    simp only [Tm.wk_app3, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]; rfl
+    show o.eval σ.glob ((a.wk h).eval σ) ((b.wk h).eval σ) ((c.wk h).eval σ) =
+      o.eval σ.glob (a.eval (σ.thin h)) (b.eval (σ.thin h)) (c.eval (σ.thin h))
+    rw [Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]
 
 theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).denote σ = t.denote (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, State.getE_thin]
-  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.denote, State.aliasPathT_getE, State.getE_thin]
-  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, State.getE_thin]
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, State.thin, State.withEnv, TEnv.get_thin_wk]
+  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.denote, State.thin, State.withEnv, TEnv.get_thin_wk]; split <;> rfl
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, State.thin, State.withEnv, TEnv.get_thin_wk]
   | _, .pvI i => rfl
   | _, .netOf i a => by
-    simp only [Tm.wk_netOf, Tm.denote, Tm.denote_wk h σ a, State.getE_thin]
+    simp only [Tm.wk_netOf, Tm.denote, Tm.denote_wk h σ a, State.thin, State.withEnv,
+      TEnv.get_thin_wk]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denote, Tm.denote_wk h σ a]; rfl
+  | _, .app1 o a => by
+    show o.denote σ.glob ((a.wk h).denote σ) = o.denote σ.glob (a.denote (σ.thin h))
+    rw [Tm.denote_wk h σ a]
   | _, .app2 o a b => by
-    simp only [Tm.wk_app2, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.eval_wk h σ a,
-      Tm.eval_wk h σ b]
-    rfl
+    show o.denote σ.glob ((a.wk h).eval σ) ((b.wk h).eval σ) ((a.wk h).denote σ) ((b.wk h).denote σ) =
+      o.denote σ.glob (a.eval (σ.thin h)) (b.eval (σ.thin h)) (a.denote (σ.thin h))
+        (b.denote (σ.thin h))
+    rw [Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.eval_wk h σ a, Tm.eval_wk h σ b]
   | _, .app3 o a b c => by
-    simp only [Tm.wk_app3, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b,
-      Tm.denote_wk h σ c]
+    show o.denote ((a.wk h).denote σ) ((b.wk h).denote σ) ((c.wk h).denote σ) =
+      o.denote (a.denote (σ.thin h)) (b.denote (σ.thin h)) (c.denote (σ.thin h))
+    rw [Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.denote_wk h σ c]
 
 /-- A first-order formula read with more locals around it; `none` on an
 update, a modality, a `havoc`, a hidden binder or an anonymising update. -/
@@ -260,7 +281,7 @@ def State.snap {Δ : Ctx} (σ : State C Δ) : State C (Olds ++ Δ) :=
 /-- What a formula says past `snapOld`, it says of the snapshots. -/
 theorem holds_snapOld {Δ : Ctx} {X : Fml C (Olds ++ Δ)} {σ : State C Δ}
     (h : holds σ (.upd .box snapOld X)) : holds σ.snap X := by
-  refine h.of_lands (g := σ.globE) ⟨rfl, rfl, fun i => ?_⟩ (List.prefix_refl _)
+  refine Upd.afterT.of_lands (U := snapOld) h (g := σ.globG) ⟨rfl, rfl, fun i => ?_⟩
   cases i with
   | here => rfl
   | there i =>
