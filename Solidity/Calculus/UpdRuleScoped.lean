@@ -101,12 +101,12 @@ theorem holds_congr_reads : {Γ : Ctx} → (φ : Fml C Γ) → φ.modalFree = tr
     (σ σ' : State C Γ) → σ.H = σ'.H → σ.ReadsAs σ' → (holds σ φ ↔ holds σ' φ)
   | _, .tt, _, _, _, _, _ => Iff.rfl
   | _, .eq a b, _, σ, σ', _, he => by
-    show Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) ↔
-      Theory.StValue.Equiv (a.denoteT σ') (b.denoteT σ')
-    rw [Tm.denoteT_congr he a, Tm.denoteT_congr he b]
+    show Theory.StValue.Equiv (a.denote σ) (b.denote σ) ↔
+      Theory.StValue.Equiv (a.denote σ') (b.denote σ')
+    rw [Tm.denote_congr he a, Tm.denote_congr he b]
   | _, .defined t, _, σ, σ', _, he => by
-    show (∃ x, t.evalT σ = .ok x) ↔ (∃ x, t.evalT σ' = .ok x)
-    rw [Tm.evalT_congr he t]
+    show (∃ x, t.eval σ = .ok x) ↔ (∃ x, t.eval σ' = .ok x)
+    rw [Tm.eval_congr he t]
   | _, .not φ, hm, σ, σ', hH, he => not_congr (holds_congr_reads φ hm σ σ' hH he)
   | _, .and φ ψ, hm, σ, σ', hH, he => by
     have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm
@@ -221,28 +221,28 @@ theorem Upd.totalB_eq_totalBM {Γ Δ : Ctx} (U : Upd C Γ Δ) : U.totalB = U.tot
   | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
     simp only [Upd.totalBM, ← ih]; rfl
 
-theorem Tm.totalB_evalT {Γ : Ctx} (σ : State C Γ) :
-    (t : Tm C Γ .val) → t.totalB = true → ∃ v, t.evalT σ = .ok v
+theorem Tm.totalB_eval {Γ : Ctx} (σ : State C Γ) :
+    (t : Tm C Γ .val) → t.totalB = true → ∃ v, t.eval σ = .ok v
   | .pvV _, _ => ⟨_, rfl⟩
   | .app0 (.lit v), _ => ⟨v, rfl⟩
 
 /-- A root and its fields read as a path: `Op0.root` and `Op1.field` do
 not halt. -/
-theorem Tm.totalP_evalT {Γ : Ctx} (σ : State C Γ) :
-    (p : Tm C Γ .path) → p.totalP = true → ∃ v, p.evalT σ = .ok v
+theorem Tm.totalP_eval {Γ : Ctx} (σ : State C Γ) :
+    (p : Tm C Γ .path) → p.totalP = true → ∃ v, p.eval σ = .ok v
   | .app0 (.root r), _ => ⟨(r, []), rfl⟩
   | .app1 (.field f) _ p, h => by
-    obtain ⟨⟨r, segs⟩, hv⟩ := Tm.totalP_evalT σ p h
+    obtain ⟨⟨r, segs⟩, hv⟩ := Tm.totalP_eval σ p h
     exact ⟨(r, segs ++ [.field f]), by
-      show (do let (r, segs) ← p.evalT σ; pure (r, segs ++ [Semantics.Seg.field f])) = _
+      show (do let (r, segs) ← p.eval σ; pure (r, segs ++ [Semantics.Seg.field f])) = _
       rw [hv]; rfl⟩
 
-theorem Rhs.totalB_evalT {Γ : Ctx} (σ : State C Γ) :
-    {t : LTy} → (r : Rhs C Γ t) → r.totalB = true → ∃ v, r.evalT σ = .ok v
-  | _, .val t, h => Tm.totalB_evalT σ t h
+theorem Rhs.totalB_eval {Γ : Ctx} (σ : State C Γ) :
+    {t : LTy} → (r : Rhs C Γ t) → r.totalB = true → ∃ v, r.eval σ = .ok v
+  | _, .val t, h => Tm.totalB_eval σ t h
   | _, .path p, h => by
-    obtain ⟨v, hv⟩ := Tm.totalP_evalT σ p h
-    exact ⟨some v, by show (do pure (some (← p.evalT σ))) = _; rw [hv]; rfl⟩
+    obtain ⟨v, hv⟩ := Tm.totalP_eval σ p h
+    exact ⟨some v, by show (do pure (some (← p.eval σ))) = _; rw [hv]; rfl⟩
   | _, .unset, _ => ⟨_, rfl⟩
   | _, .saveNet, _ => ⟨_, rfl⟩
   | _, .saveNetMt, _ => ⟨_, rfl⟩
@@ -254,11 +254,11 @@ theorem Upd.totalBM_globT {Γ : Ctx} (σ₀ : State C Γ) :
   | _, .snoc U (.local i r), h => by
     have h : r.totalB = true ∧ U.totalBM = true := Bool.and_eq_true_iff.mp h
     obtain ⟨g, hg⟩ := Upd.totalBM_globT σ₀ U h.2
-    obtain ⟨v, hv⟩ := Rhs.totalB_evalT σ₀ r h.1
+    obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r h.1
     exact ⟨g, by
       change (do UpdElem.globT σ₀ (.local i r) (← U.globT σ₀)) = _
       rw [hg]
-      change (do let _ ← r.evalT σ₀; pure g) = _
+      change (do let _ ← r.eval σ₀; pure g) = _
       rw [hv]; rfl⟩
   | _, .snoc _ (.storage _), h | _, .snoc _ (.memory _), h | _, .snoc _ (.selfBalance ..), h
   | _, .snoc _ (.net ..), h | _, .snoc _ (.pay ..), h | _, .snoc _ (.netMt ..), h
@@ -266,9 +266,9 @@ theorem Upd.totalBM_globT {Γ : Ctx} (σ₀ : State C Γ) :
   | _, .decl U _ r, h => by
     have h : r.totalB = true ∧ U.totalBM = true := Bool.and_eq_true_iff.mp h
     obtain ⟨g, hg⟩ := Upd.totalBM_globT σ₀ U h.2
-    obtain ⟨v, hv⟩ := Rhs.totalB_evalT σ₀ r h.1
+    obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r h.1
     exact ⟨g, by
-      change (do let g ← U.globT σ₀; let _ ← r.evalT σ₀; pure g) = _
+      change (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g) = _
       rw [hg, hv]; rfl⟩
   | _, .pop U _, h => Upd.totalBM_globT σ₀ U h
   | _, .drop U _, h => Upd.totalBM_globT σ₀ U h
@@ -516,13 +516,13 @@ theorem Upd.unsetAt_globT {Γ : Ctx} (box : Bool) (i : Nat) (σ₀ : State C Γ)
           | error => exact ih.elim
           | ok g' =>
             cases (ih : g = g')
-            show ResRel box _ (do let _ ← r.evalT σ₀; pure g) (.ok g)
-            cases hr : r.evalT σ₀ with
+            show ResRel box _ (do let _ ← r.eval σ₀; pure g) (.ok g)
+            cases hr : r.eval σ₀ with
             | error =>
               show box = true
               rcases Bool.or_eq_true_iff.mp hd.2 with hb | ht
               · exact hb
-              · obtain ⟨v, hv⟩ := Rhs.totalB_evalT σ₀ r ht
+              · obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r ht
                 rw [hv] at hr; cases hr
             | ok v => rfl
       · exact ResRel.bind_eq ih _
@@ -575,9 +575,9 @@ theorem Upd.redecl_globT {Γ : Ctx} (box : Bool) (σ₀ : State C Γ) :
         cases U.globT σ₀ with
         | error => trivial
         | ok g =>
-          show ResRel box _ (e.globT σ₀ g >>= fun g' => do let _ ← r.evalT σ₀; pure g')
-            ((do let _ ← r.evalT σ₀; pure g) >>= e.globT σ₀)
-          cases r.evalT σ₀ with
+          show ResRel box _ (e.globT σ₀ g >>= fun g' => do let _ ← r.eval σ₀; pure g')
+            ((do let _ ← r.eval σ₀; pure g) >>= e.globT σ₀)
+          cases r.eval σ₀ with
           | error => cases e.globT σ₀ g <;> trivial
           | ok v =>
             show ResRel box _ (e.globT σ₀ g >>= fun g' => pure g') (e.globT σ₀ g)
@@ -589,24 +589,24 @@ theorem Upd.redecl_globT {Γ : Ctx} (box : Bool) (σ₀ : State C Γ) :
     · rename_i hb
       cases h
       show ResRel box _
-        ((do let g ← U.globT σ₀; let _ ← r0.evalT σ₀; pure g) >>= (UpdElem.local .here r).globT σ₀)
-        (do let g ← U.globT σ₀; let _ ← r.evalT σ₀; pure g)
+        ((do let g ← U.globT σ₀; let _ ← r0.eval σ₀; pure g) >>= (UpdElem.local .here r).globT σ₀)
+        (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g)
       cases U.globT σ₀ with
       | error => trivial
       | ok g =>
-        cases h0 : r0.evalT σ₀ with
+        cases h0 : r0.eval σ₀ with
         | error =>
-          show ResRel box _ (.error _) (do let _ ← r.evalT σ₀; pure g)
-          cases r.evalT σ₀ with
+          show ResRel box _ (.error _) (do let _ ← r.eval σ₀; pure g)
+          cases r.eval σ₀ with
           | error => trivial
           | ok =>
             show box = true
             rcases Bool.or_eq_true_iff.mp hb with hb | ht
             · exact hb
-            · obtain ⟨v, hv⟩ := Rhs.totalB_evalT σ₀ r0 ht
+            · obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r0 ht
               rw [hv] at h0; cases h0
         | ok v0 =>
-          show ResRel box _ (do let _ ← r.evalT σ₀; pure g) (do let _ ← r.evalT σ₀; pure g)
+          show ResRel box _ (do let _ ← r.eval σ₀; pure g) (do let _ ← r.eval σ₀; pure g)
           exact ResRel.refl (fun _ => rfl) _
     · cases h
   | _, .nil, _, _, _, _, h | _, .pop .., _, _, _, _, h | _, .drop .., _, _, _, _, h => by

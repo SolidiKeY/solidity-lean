@@ -109,7 +109,7 @@ the funds and the transaction. -/
 structure GraftOK {Γ Δ : Ctx} (σ₀ : State C Γ) (σ₁ : State C Δ)
     (F : {k : Srt} → Tm C Δ k → Option (Tm C Γ k)) : Prop where
   tm : ∀ {k : Srt} (t : Tm C Δ k) {t' : Tm C Γ k}, F t = some t' →
-    Srt.AgreePart k (t'.evalT σ₀) (t.evalT σ₁)
+    Srt.AgreePart k (t'.eval σ₀) (t.eval σ₁)
   rest : σ₀.globE.Rest σ₁.globE
 
 section GraftFSound
@@ -117,26 +117,26 @@ section GraftFSound
 variable {Γ Δ : Ctx} {F : {k : Srt} → Tm C Δ k → Option (Tm C Γ k)} {σ₀ : State C Γ}
   {σ₁ : State C Δ}
 
-theorem Rhs.evalT_mapF (hF : GraftOK σ₀ σ₁ F) :
+theorem Rhs.eval_mapF (hF : GraftOK σ₀ σ₁ F) :
     {t : LTy} → (r : Rhs C Δ t) → {r' : Rhs C Γ t} → r.mapF F = some r' →
-      r'.evalT σ₀ = r.evalT σ₁
+      r'.eval σ₀ = r.eval σ₁
   | _, .val t, r', h => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
     exact hF.tm t ht
   | _, .path p, r', h => by
     obtain ⟨p', hp, rfl⟩ := Option.map_eq_some_iff.1 h
-    have hp : p'.evalT σ₀ = p.evalT σ₁ := hF.tm p hp
-    show (do pure (some (← p'.evalT σ₀))) = (do pure (some (← p.evalT σ₁)))
+    have hp : p'.eval σ₀ = p.eval σ₁ := hF.tm p hp
+    show (do pure (some (← p'.eval σ₀))) = (do pure (some (← p.eval σ₁)))
     rw [hp]
   | _, .unset, r', h => by cases h; rfl
   | _, .mref i, r', h => by
     obtain ⟨i', hi, rfl⟩ := Option.map_eq_some_iff.1 h
-    have hi : i'.evalT σ₀ = i.evalT σ₁ := hF.tm i hi
-    show (do pure (some (← i'.evalT σ₀))) = (do pure (some (← i.evalT σ₁)))
+    have hi : i'.eval σ₀ = i.eval σ₁ := hF.tm i hi
+    show (do pure (some (← i'.eval σ₀))) = (do pure (some (← i.eval σ₁)))
     rw [hi]
   | _, .store x, r', h => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
-    show (do pure (← x'.evalT σ₀).storage) = (do pure (← x.evalT σ₁).storage)
+    show (do pure (← x'.eval σ₀).storage) = (do pure (← x.eval σ₁).storage)
     rcases Res.stPart_cases (hF.tm x hx).eq with ⟨e, h₁, h₂⟩ | ⟨τ₁, τ₂, h₁, h₂, hs⟩
     · rw [h₁, h₂]
     · rw [h₁, h₂]; exact congrArg (fun st => (pure st : Res _)) hs
@@ -152,7 +152,7 @@ theorem UpdElem.globT_mapF (hF : GraftOK σ₀ σ₁ F) {Ε : Ctx} (e : UpdElem 
   cases e with
   | «local» i r =>
     obtain ⟨r', hr, rfl⟩ := Option.map_eq_some_iff.1 h
-    simp only [UpdElem.globT, Rhs.evalT_mapF hF r hr]
+    simp only [UpdElem.globT, Rhs.eval_mapF hF r hr]
   | storage x =>
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
     rcases Res.stPart_cases (hF.tm x hx).eq with ⟨e, h₁, h₂⟩ | ⟨τ₁, τ₂, h₁, h₂, hs⟩
@@ -165,32 +165,32 @@ theorem UpdElem.globT_mapF (hF : GraftOK σ₀ σ₁ F) {Ε : Ctx} (e : UpdElem 
     · simp only [UpdElem.globT, h₁, h₂, bind, Except.bind, hs.1, hs.2]
   | selfBalance op a =>
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-    have ha : a'.evalT σ₀ = a.evalT σ₁ := hF.tm a ha
+    have ha : a'.eval σ₀ = a.eval σ₁ := hF.tm a ha
     simp only [UpdElem.globT, ha, hF.rest.selfBalance]
   | net r op a =>
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have hr : r'.evalT σ₀ = r.evalT σ₁ := hF.tm r hr
-    have ha : a'.evalT σ₀ = a.evalT σ₁ := hF.tm a ha
+    have hr : r'.eval σ₀ = r.eval σ₁ := hF.tm r hr
+    have ha : a'.eval σ₀ = a.eval σ₁ := hF.tm a ha
     simp only [UpdElem.globT, hr, ha]
   | pay r a =>
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have hr : r'.evalT σ₀ = r.evalT σ₁ := hF.tm r hr
-    have ha : a'.evalT σ₀ = a.evalT σ₁ := hF.tm a ha
+    have hr : r'.eval σ₀ = r.eval σ₁ := hF.tm r hr
+    have ha : a'.eval σ₀ = a.eval σ₁ := hF.tm a ha
     simp only [UpdElem.globT, hr, ha, hF.rest.tx]
   | netMt r a =>
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have hr : r'.evalT σ₀ = r.evalT σ₁ := hF.tm r hr
-    have ha : a'.evalT σ₀ = a.evalT σ₁ := hF.tm a ha
+    have hr : r'.eval σ₀ = r.eval σ₁ := hF.tm r hr
+    have ha : a'.eval σ₀ = a.eval σ₁ := hF.tm a ha
     simp only [UpdElem.globT, hr, ha]
   | setBalance a =>
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-    have ha : a'.evalT σ₀ = a.evalT σ₁ := hF.tm a ha
+    have ha : a'.eval σ₀ = a.eval σ₁ := hF.tm a ha
     simp only [UpdElem.globT, ha]
 
 end GraftFSound
@@ -250,7 +250,7 @@ theorem Upd.globT_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ
     obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    simp only [Upd.globT, Upd.globT_graftFM hL hF V hW, Rhs.evalT_mapF hF r hr]
+    simp only [Upd.globT, Upd.globT_graftFM hL hF V hW, Rhs.eval_mapF hF r hr]
   | _, .pop V _, W, h => by
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
     exact Upd.globT_graftFM hL hF V hW
@@ -286,8 +286,8 @@ theorem Upd.held_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ�
         rw [dif_pos hki] at hv
         obtain rfl := Idx.ty_eq_of_toNat hki
         obtain rfl := Idx.toNat_inj k i hki
-        show r'.evalT σ₀ = .ok v
-        rw [Rhs.evalT_mapF hF r hr]
+        show r'.eval σ₀ = .ok v
+        rw [Rhs.eval_mapF hF r hr]
         exact hv
       · rename_i hki
         rw [dif_neg hki] at hv
@@ -311,8 +311,8 @@ theorem Upd.held_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ�
     cases h
     cases i with
     | here =>
-      show r'.evalT σ₀ = .ok v
-      rw [Rhs.evalT_mapF hF r hr]
+      show r'.eval σ₀ = .ok v
+      rw [Rhs.eval_mapF hF r hr]
       exact hv
     | there j => exact Upd.held_graftFM hL hF V hW j v hv
   | _, .pop V e, W, h, t, i, v, hv => by
@@ -380,43 +380,43 @@ section SubstStSound
 variable {Γ Δ : Ctx} {U : Upd C Γ Δ} {S : Tm C Γ .st} {σ₀ : State C Γ} {σ₁ : State C Δ}
   {g : Semantics.State}
 
-theorem Tm.substStS_evalT_app1 (hg : StChg σ₀.globE σ₁.globE)
-    (hS : S.evalT σ₀ = pure σ₁.globE) {a k : Srt} (o : Op1 a k) (ho : o.named = false)
+theorem Tm.substStS_eval_app1 (hg : StChg σ₀.globE σ₁.globE)
+    (hS : S.eval σ₀ = pure σ₁.globE) {a k : Srt} (o : Op1 a k) (ho : o.named = false)
     (x : Tm C Δ a)
     (ih : ∀ {x' : Tm C Γ a}, Tm.substStS U.held S x = some x' →
-      Srt.AgreePart a (x'.evalT σ₀) (x.evalT σ₁))
+      Srt.AgreePart a (x'.eval σ₀) (x.eval σ₁))
     {t' : Tm C Γ k} (h : Tm.substStS U.held S (.app1 o ho x) = some t') :
-    Srt.AgreePart k (t'.evalT σ₀) ((Tm.app1 o ho x).evalT σ₁) := by
+    Srt.AgreePart k (t'.eval σ₀) ((Tm.app1 o ho x).eval σ₁) := by
   have hr : σ₁.globE = { σ₀.globE with storage := σ₁.globE.storage } := hg
   have hrest : σ₀.globE.Rest σ₁.globE := by rw [hr]; exact ⟨rfl, rfl, rfl⟩
   cases o with
   | next =>
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
-    have hp : x'.evalT σ₀ = x.evalT σ₁ := ih hx
-    show Op2.eval σ₀.globE .nextIn (S.evalT σ₀) (x'.evalT σ₀) = Op1.eval σ₁.globE .next (x.evalT σ₁)
+    have hp : x'.eval σ₀ = x.eval σ₁ := ih hx
+    show Op2.eval σ₀.globE .nextIn (S.eval σ₀) (x'.eval σ₀) = Op1.eval σ₁.globE .next (x.eval σ₁)
     simp only [Op1.eval, Op2.eval, hS, hp, bind, Except.bind]
     rfl
   | _ =>
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
     exact Op1.eval_part hrest _ (fun _ _ => by rw [hr]; rfl) (by exact Or.inl rfl) (ih hx)
 
-theorem Tm.substStS_evalT_app2 (hS : S.evalT σ₀ = pure σ₁.globE) {a b k : Srt} (o : Op2 a b k)
+theorem Tm.substStS_eval_app2 (hS : S.eval σ₀ = pure σ₁.globE) {a b k : Srt} (o : Op2 a b k)
     (x : Tm C Δ a) (y : Tm C Δ b)
     (ihx : ∀ {x' : Tm C Γ a}, Tm.substStS U.held S x = some x' →
-      Srt.AgreePart a (x'.evalT σ₀) (x.evalT σ₁))
+      Srt.AgreePart a (x'.eval σ₀) (x.eval σ₁))
     (ihy : ∀ {y' : Tm C Γ b}, Tm.substStS U.held S y = some y' →
-      Srt.AgreePart b (y'.evalT σ₀) (y.evalT σ₁))
+      Srt.AgreePart b (y'.eval σ₀) (y.eval σ₁))
     {t' : Tm C Γ k} (h : Tm.substStS U.held S (.app2 o x y) = some t') :
-    Srt.AgreePart k (t'.evalT σ₀) ((Tm.app2 o x y).evalT σ₁) := by
+    Srt.AgreePart k (t'.eval σ₀) ((Tm.app2 o x y).eval σ₁) := by
   cases o with
   | «at» =>
     obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have hp : x'.evalT σ₀ = x.evalT σ₁ := ihx hx
-    have hi : y'.evalT σ₀ = y.evalT σ₁ := ihy hy
-    show Op3.eval σ₀.globE .atIn (S.evalT σ₀) (x'.evalT σ₀) (y'.evalT σ₀) =
-      Op2.eval σ₁.globE .«at» (x.evalT σ₁) (y.evalT σ₁)
+    have hp : x'.eval σ₀ = x.eval σ₁ := ihx hx
+    have hi : y'.eval σ₀ = y.eval σ₁ := ihy hy
+    show Op3.eval σ₀.globE .atIn (S.eval σ₀) (x'.eval σ₀) (y'.eval σ₀) =
+      Op2.eval σ₁.globE .«at» (x.eval σ₁) (y.eval σ₁)
     simp only [Op2.eval, Op3.eval, hS, hp, hi, bind, Except.bind]
     rfl
   | _ =>
@@ -427,19 +427,19 @@ theorem Tm.substStS_evalT_app2 (hS : S.evalT σ₀ = pure σ₁.globE) {a b k : 
 
 /-- **Read before `{L ‖ storage := S}`, the substituted term reads as the
 term in a typed state it lands on**, where a write looks. -/
-theorem Tm.substStS_evalT (hL : U.Lands σ₀ g σ₁) (hg : StChg σ₀.globE σ₁.globE)
-    (hS : S.evalT σ₀ = pure σ₁.globE) :
+theorem Tm.substStS_eval (hL : U.Lands σ₀ g σ₁) (hg : StChg σ₀.globE σ₁.globE)
+    (hS : S.eval σ₀ = pure σ₁.globE) :
     {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → Tm.substStS U.held S t = some t' →
-      Srt.AgreePart k (t'.evalT σ₀) (t.evalT σ₁)
+      Srt.AgreePart k (t'.eval σ₀) (t.eval σ₁)
   | _, .pvV i, _, h => by
     simp only [Tm.substStS] at h
-    exact Tm.evalT_substH_pvV _ (hL.2.2 i) h
+    exact Tm.eval_substH_pvV _ (hL.2.2 i) h
   | _, .pvP i, _, h => by
     simp only [Tm.substStS] at h
-    exact Tm.evalT_substH_pvP _ (hL.2.2 i) h
+    exact Tm.eval_substH_pvP _ (hL.2.2 i) h
   | _, .pvI i, _, h => by
     simp only [Tm.substStS] at h
-    exact Tm.evalT_substH_pvI _ (hL.2.2 i) h
+    exact Tm.eval_substH_pvI _ (hL.2.2 i) h
   | _, .pvS i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
@@ -455,8 +455,8 @@ theorem Tm.substStS_evalT (hL : U.Lands σ₀ g σ₁) (hg : StChg σ₀.globE �
       cases r with
       | store x =>
         cases h
-        have hx : (do pure (← t'.evalT σ₀).storage) = Except.ok (σ₁.getE i) := hx
-        cases ht : t'.evalT σ₀ with
+        have hx : (do pure (← t'.eval σ₀).storage) = Except.ok (σ₁.getE i) := hx
+        cases ht : t'.eval σ₀ with
         | error e => rw [ht] at hx; cases hx
         | ok τ =>
           rw [ht] at hx
@@ -472,9 +472,9 @@ theorem Tm.substStS_evalT (hL : U.Lands σ₀ g σ₁) (hg : StChg σ₀.globE �
     | pos j =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
       have hx : σ₁.getE i = σ₀.getE j := hx
-      have ha : a'.evalT σ₀ = a.evalT σ₁ := Tm.substStS_evalT hL hg hS a ha
-      show Tm.evalT σ₀ (.netOf j a') = Tm.evalT σ₁ (.netOf i a)
-      simp only [Tm.evalT, ha, hx]
+      have ha : a'.eval σ₀ = a.eval σ₁ := Tm.substStS_eval hL hg hS a ha
+      show Tm.eval σ₀ (.netOf j a') = Tm.eval σ₁ (.netOf i a)
+      simp only [Tm.eval, ha, hx]
   | _, .app0 o, t', h => by
     have hr : σ₁.globE = { σ₀.globE with storage := σ₁.globE.storage } := hg
     cases o with
@@ -491,17 +491,17 @@ theorem Tm.substStS_evalT (hL : U.Lands σ₀ g σ₁) (hg : StChg σ₀.globE �
       show Srt.AgreePart _ (Op0.eval σ₀.globE _) (Op0.eval σ₁.globE _)
       rw [hr]; exact Srt.AgreePart.refl _ _
   | _, .app1 o ho x, _, h =>
-    Tm.substStS_evalT_app1 hg hS o ho x (fun hx => Tm.substStS_evalT hL hg hS x hx) h
+    Tm.substStS_eval_app1 hg hS o ho x (fun hx => Tm.substStS_eval hL hg hS x hx) h
   | _, .app2 o x y, _, h =>
-    Tm.substStS_evalT_app2 hS o x y (fun hx => Tm.substStS_evalT hL hg hS x hx)
-      (fun hy => Tm.substStS_evalT hL hg hS y hy) h
+    Tm.substStS_eval_app2 hS o x y (fun hx => Tm.substStS_eval hL hg hS x hx)
+      (fun hy => Tm.substStS_eval hL hg hS y hy) h
   | _, .app3 o x y z, t', h => by
     obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    exact Op3.eval_part o (Tm.substStS_evalT hL hg hS x hx) (Tm.substStS_evalT hL hg hS y hy)
-      (Tm.substStS_evalT hL hg hS z hz)
+    exact Op3.eval_part o (Tm.substStS_eval hL hg hS x hx) (Tm.substStS_eval hL hg hS y hy)
+      (Tm.substStS_eval hL hg hS z hz)
 
 end SubstStSound
 
@@ -526,9 +526,9 @@ theorem holds_upd_mergeSt {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ
     · rename_i S hS
       refine holds_upd_graftF σ (fun g₁ σ₁ hL => ?_) hW h
       have hg : StChg σ.globE σ₁.globE := by rw [hL.2.1]; exact Upd.stOnly_globT U hst hL.1
-      have hSe : S.evalT σ = pure σ₁.globE := by rw [hL.2.1]; exact Upd.lastSt_evalT U hL.1 S hS
+      have hSe : S.eval σ = pure σ₁.globE := by rw [hL.2.1]; exact Upd.lastSt_eval U hL.1 S hS
       have hr : σ₁.globE = { σ.globE with storage := σ₁.globE.storage } := hg
-      exact ⟨fun t _ ht => Tm.substStS_evalT hL hg hSe t ht, by rw [hr]; exact ⟨rfl, rfl, rfl⟩⟩
+      exact ⟨fun t _ ht => Tm.substStS_eval hL hg hSe t ht, by rw [hr]; exact ⟨rfl, rfl, rfl⟩⟩
     · cases hW
   · cases hW
 
@@ -560,28 +560,28 @@ variable {Γ : Ctx} {M : Tm C Γ .mem} {σ₀ σ₁ : State C Γ} {μ : Semantic
 /-- **Read before `{memory := M}`, the substituted term reads as the term in
 a typed state it lands on**, where a write looks: that state has the
 storage and the locals of the state before, and the heap `M` leaves. -/
-theorem Tm.withMemS_evalT (hM : M.evalT σ₀ = .ok μ)
+theorem Tm.withMemS_eval (hM : M.eval σ₀ = .ok μ)
     (hg : σ₁.globE = { σ₀.globE with heap := μ.heap, nextId := μ.nextId })
     (hl : ∀ {t : LTy} (i : Idx Γ t), σ₁.getE i = σ₀.getE i) :
-    {k : Srt} → (t : Tm C Γ k) → Srt.AgreePart k ((Tm.withMemS M t).evalT σ₀) (t.evalT σ₁)
+    {k : Srt} → (t : Tm C Γ k) → Srt.AgreePart k ((Tm.withMemS M t).eval σ₀) (t.eval σ₁)
   | _, .pvV i => by
-    show Tm.evalT σ₀ (.pvV i) = Tm.evalT σ₁ (.pvV i)
-    simp only [Tm.evalT, hl i]
+    show Tm.eval σ₀ (.pvV i) = Tm.eval σ₁ (.pvV i)
+    simp only [Tm.eval, hl i]
   | _, .pvP i => by
-    show Tm.evalT σ₀ (.pvP i) = Tm.evalT σ₁ (.pvP i)
-    simp only [Tm.evalT, State.aliasPathT_getE, hl i]
+    show Tm.eval σ₀ (.pvP i) = Tm.eval σ₁ (.pvP i)
+    simp only [Tm.eval, State.aliasPathT_getE, hl i]
   | _, .pvI i => by
-    show Tm.evalT σ₀ (.pvI i) = Tm.evalT σ₁ (.pvI i)
-    simp only [Tm.evalT, State.memRefT_getE, hl i]
+    show Tm.eval σ₀ (.pvI i) = Tm.eval σ₁ (.pvI i)
+    simp only [Tm.eval, State.memRefT_getE, hl i]
   | _, .pvS i => Res.stPart_ok (hl i).symm
   | _, .netOf i a => by
-    have ha : (Tm.withMemS M a).evalT σ₀ = a.evalT σ₁ := Tm.withMemS_evalT hM hg hl a
-    show Tm.evalT σ₀ (.netOf i (Tm.withMemS M a)) = Tm.evalT σ₁ (.netOf i a)
-    simp only [Tm.evalT, ha, hl i]
+    have ha : (Tm.withMemS M a).eval σ₀ = a.eval σ₁ := Tm.withMemS_eval hM hg hl a
+    show Tm.eval σ₀ (.netOf i (Tm.withMemS M a)) = Tm.eval σ₁ (.netOf i a)
+    simp only [Tm.eval, ha, hl i]
   | _, .app0 o => by
     cases o with
     | memory =>
-      show MemPartEq (M.evalT σ₀) (pure σ₁.globE)
+      show MemPartEq (M.eval σ₀) (pure σ₁.globE)
       rw [hM, hg]; exact ⟨rfl⟩
     | storage =>
       show StPartEq (pure σ₀.globE) (pure σ₁.globE)
@@ -594,13 +594,13 @@ theorem Tm.withMemS_evalT (hM : M.evalT σ₀ = .ok μ)
       rw [hg]; exact Srt.AgreePart.refl _ _
   | _, .app1 o _ x =>
     Op1.eval_part (by rw [hg]; exact ⟨rfl, rfl, rfl⟩) o (fun _ _ => by rw [hg]; rfl)
-      (Or.inr (by rw [hg])) (Tm.withMemS_evalT hM hg hl x)
+      (Or.inr (by rw [hg])) (Tm.withMemS_eval hM hg hl x)
   | _, .app2 o x y =>
-    Op2.eval_part o (Or.inr (by rw [hg])) (Tm.withMemS_evalT hM hg hl x)
-      (Tm.withMemS_evalT hM hg hl y)
+    Op2.eval_part o (Or.inr (by rw [hg])) (Tm.withMemS_eval hM hg hl x)
+      (Tm.withMemS_eval hM hg hl y)
   | _, .app3 o x y z =>
-    Op3.eval_part o (Tm.withMemS_evalT hM hg hl x) (Tm.withMemS_evalT hM hg hl y)
-      (Tm.withMemS_evalT hM hg hl z)
+    Op3.eval_part o (Tm.withMemS_eval hM hg hl x) (Tm.withMemS_eval hM hg hl y)
+      (Tm.withMemS_eval hM hg hl z)
 
 end WithMemSound
 
@@ -630,16 +630,16 @@ theorem holds_upd_mergeMem {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ �
       | memory M =>
         refine holds_upd_graftF σ (fun g₁ σ₁ hL => ?_) hW h
         have h1 : (do
-            let μ ← M.evalT σ
+            let μ ← M.eval σ
             pure { σ.globE with heap := μ.heap, nextId := μ.nextId }) = Except.ok g₁ := hL.1
-        cases hM : M.evalT σ with
+        cases hM : M.eval σ with
         | error => rw [hM] at h1; cases h1
         | ok μ =>
           rw [hM] at h1
           have hg : σ₁.globE = { σ.globE with heap := μ.heap, nextId := μ.nextId } :=
             hL.2.1.trans (Except.ok.inj h1).symm
           have hl : ∀ {t : LTy} (i : Idx Γ t), σ₁.getE i = σ.getE i := fun i => hL.2.2 i
-          exact ⟨fun t _ ht => by cases ht; exact Tm.withMemS_evalT hM hg hl t,
+          exact ⟨fun t _ ht => by cases ht; exact Tm.withMemS_eval hM hg hl t,
             by rw [hg]; exact ⟨rfl, rfl, rfl⟩⟩
       | _ => cases hW
     | _ => cases hW
@@ -701,7 +701,7 @@ variable {Γ Δ : Ctx} {U : Upd C Γ Δ} {M : Tm C Γ .mem} {σ₀ : State C Γ}
 /-- After `{L ‖ memory := M}` the global part is the one before with the
 heap `M` leaves. -/
 theorem Upd.memLast?_globT (hm : U.memLast? = some M) (hU : U.globT σ₀ = .ok g) :
-    ∃ μ : Semantics.State, M.evalT σ₀ = .ok μ ∧
+    ∃ μ : Semantics.State, M.eval σ₀ = .ok μ ∧
       g = { σ₀.globE with heap := μ.heap, nextId := μ.nextId } := by
   cases U with
   | snoc L e =>
@@ -720,20 +720,20 @@ theorem Upd.memLast?_globT (hm : U.memLast? = some M) (hU : U.globT σ₀ = .ok 
     | _ => cases hm
   | _ => cases hm
 
-theorem Tm.substMemS_evalT (hL : U.Lands σ₀ g σ₁)
+theorem Tm.substMemS_eval (hL : U.Lands σ₀ g σ₁)
     (hg : σ₁.globE = { σ₀.globE with heap := μ.heap, nextId := μ.nextId })
-    (hM : M.evalT σ₀ = .ok μ) :
+    (hM : M.eval σ₀ = .ok μ) :
     {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → Tm.substMemS U.held M t = some t' →
-      Srt.AgreePart k (t'.evalT σ₀) (t.evalT σ₁)
+      Srt.AgreePart k (t'.eval σ₀) (t.eval σ₁)
   | _, .pvV i, _, h => by
     simp only [Tm.substMemS] at h
-    exact Tm.evalT_substH_pvV _ (hL.2.2 i) h
+    exact Tm.eval_substH_pvV _ (hL.2.2 i) h
   | _, .pvP i, _, h => by
     simp only [Tm.substMemS] at h
-    exact Tm.evalT_substH_pvP _ (hL.2.2 i) h
+    exact Tm.eval_substH_pvP _ (hL.2.2 i) h
   | _, .pvI i, _, h => by
     simp only [Tm.substMemS] at h
-    exact Tm.evalT_substH_pvI _ (hL.2.2 i) h
+    exact Tm.eval_substH_pvI _ (hL.2.2 i) h
   | _, .pvS i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
@@ -749,8 +749,8 @@ theorem Tm.substMemS_evalT (hL : U.Lands σ₀ g σ₁)
       cases r with
       | store x =>
         cases h
-        have hx : (do pure (← t'.evalT σ₀).storage) = Except.ok (σ₁.getE i) := hx
-        cases ht : t'.evalT σ₀ with
+        have hx : (do pure (← t'.eval σ₀).storage) = Except.ok (σ₁.getE i) := hx
+        cases ht : t'.eval σ₀ with
         | error e => rw [ht] at hx; cases hx
         | ok τ =>
           rw [ht] at hx
@@ -766,14 +766,14 @@ theorem Tm.substMemS_evalT (hL : U.Lands σ₀ g σ₁)
     | pos j =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
       have hx : σ₁.getE i = σ₀.getE j := hx
-      have ha : a'.evalT σ₀ = a.evalT σ₁ := Tm.substMemS_evalT hL hg hM a ha
-      show Tm.evalT σ₀ (.netOf j a') = Tm.evalT σ₁ (.netOf i a)
-      simp only [Tm.evalT, ha, hx]
+      have ha : a'.eval σ₀ = a.eval σ₁ := Tm.substMemS_eval hL hg hM a ha
+      show Tm.eval σ₀ (.netOf j a') = Tm.eval σ₁ (.netOf i a)
+      simp only [Tm.eval, ha, hx]
   | _, .app0 o, t', h => by
     cases o with
     | memory =>
       cases h
-      show MemPartEq (M.evalT σ₀) (pure σ₁.globE)
+      show MemPartEq (M.eval σ₀) (pure σ₁.globE)
       rw [hM, hg]; exact ⟨rfl⟩
     | storage =>
       cases h
@@ -791,20 +791,20 @@ theorem Tm.substMemS_evalT (hL : U.Lands σ₀ g σ₁)
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
     have hrest : σ₀.globE.Rest σ₁.globE := by rw [hg]; exact ⟨rfl, rfl, rfl⟩
     exact Op1.eval_part hrest o (fun _ _ => by rw [hg]; rfl) (Or.inr (by rw [hg]))
-      (Tm.substMemS_evalT hL hg hM x hx)
+      (Tm.substMemS_eval hL hg hM x hx)
   | _, .app2 o x y, t', h => by
     obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    exact Op2.eval_part o (Or.inr (by rw [hg])) (Tm.substMemS_evalT hL hg hM x hx)
-      (Tm.substMemS_evalT hL hg hM y hy)
+    exact Op2.eval_part o (Or.inr (by rw [hg])) (Tm.substMemS_eval hL hg hM x hx)
+      (Tm.substMemS_eval hL hg hM y hy)
   | _, .app3 o x y z, t', h => by
     obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    exact Op3.eval_part o (Tm.substMemS_evalT hL hg hM x hx) (Tm.substMemS_evalT hL hg hM y hy)
-      (Tm.substMemS_evalT hL hg hM z hz)
+    exact Op3.eval_part o (Tm.substMemS_eval hL hg hM x hx) (Tm.substMemS_eval hL hg hM y hy)
+      (Tm.substMemS_eval hL hg hM z hz)
 
 end SubstMemSound
 
@@ -826,7 +826,7 @@ theorem holds_upd_mergeMemL {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ 
     refine holds_upd_graftF σ (fun g₁ σ₁ hL => ?_) hW h
     obtain ⟨μ, hM, hg⟩ := Upd.memLast?_globT hm hL.1
     have hg : σ₁.globE = { σ.globE with heap := μ.heap, nextId := μ.nextId } := hL.2.1.trans hg
-    exact ⟨fun t _ ht => Tm.substMemS_evalT hL hg hM t ht, by rw [hg]; exact ⟨rfl, rfl, rfl⟩⟩
+    exact ⟨fun t _ ht => Tm.substMemS_eval hL hg hM t ht, by rw [hg]; exact ⟨rfl, rfl, rfl⟩⟩
   · cases hW
 
 /-! ## The merges at a position -/

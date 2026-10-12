@@ -19,7 +19,7 @@ return a number where `total : uint`?  Split by what the question is about:
   symbol `root(total)` (`SPath.lower`, the term `Calculus/LowerRun.lean`
   proves the typed run reads); the symbols of `find(storage, root(total))`,
   evaluated on `badStore` (`Op2.eval`, `Op0.eval`), give that `bool`, and
-  so would the term reader (`Tm.evalT`) on any typed state whose global
+  so would the term reader (`Tm.eval`) on any typed state whose global
   part were `badStore`.  The `storageRootReadSelect` row — the one
   `faithful_storageRootReadSelect` proves of every typed state — is false
   of that value.
@@ -62,7 +62,7 @@ theorem readSelect_row :
 conjunct of a well-typed global state but `storage`, and the local `x` the
 read binds may be a `uint` (`.int 0`).  The read of `x = total;` is the path
 `total`, lowered to `root(total)`; `find(storage, root(total))`'s symbols,
-evaluated on `badStore`, give a `bool`, as `Tm.evalT` would on a typed state
+evaluated on `badStore`, give a `bool`, as `Tm.eval` would on a typed state
 whose global part were `badStore` (no typed state is: the implication is
 vacuous there, which is the point), where the row's `\hasSort` read
 promises a `uint`. -/
@@ -77,10 +77,10 @@ theorem readSelect_needs_storage :
     Op2.eval badStore .find (Op0.eval badStore .storage) (Op0.eval badStore (.root "total")) =
       .ok (.bool true) ∧
     (∀ σ : State Total [.val .uint], σ.globE = badStore →
-      (Tm.app2 .find (.app0 .storage) totalPath.lower).evalT σ = .ok (.bool true)) ∧
+      (Tm.app2 .find (.app0 .storage) totalPath.lower).eval σ = .ok (.bool true)) ∧
     SortOkS (.generic .hasSort) (.prim .uint) (.prim (.bool true)) = false :=
   ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, rfl, rfl, rfl, rfl,
-    fun σ h => by simp only [Tm.evalT, totalPath, SPath.lower, h]; rfl, rfl⟩
+    fun σ h => by simp only [Tm.eval, totalPath, SPath.lower, h]; rfl, rfl⟩
 
 end WellTypedNecessity
 end Counterexamples

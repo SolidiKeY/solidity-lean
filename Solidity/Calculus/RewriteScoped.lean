@@ -190,7 +190,7 @@ abbrev Upd.hasC (q : Tm C [] .val × Tm C [] .val) {Δ : Ctx} (U : Upd C Γ Δ) 
   Upd.hasBy (Tm.pickClosed q) U
 
 /-- Two closed terms that return alike in every state: a literal law's. -/
-def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : State C [], t.evalT σ = t'.evalT σ
+def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : State C [], t.eval σ = t'.eval σ
 
 /-- A literal law's two sides return alike. -/
 theorem LitLaw.evalEqT {t t' : Tm C [] .val} (r : LitLaw t t') : Tm.EvalEq t t' := fun σ =>
@@ -199,12 +199,12 @@ theorem LitLaw.evalEqT {t t' : Tm C [] .val} (r : LitLaw t t') : Tm.EvalEq t t' 
 theorem Tm.pickClosed_eq (hq : Tm.EvalEq q.1 q.2) (σ : State C Γ) :
     PickEq (Tm.pickClosed q) σ := fun h => by
   obtain ⟨rfl, hc, rfl⟩ := Tm.pickClosed_some h
-  show (Tm.ofNil q.2).evalT σ = _
-  rw [Tm.evalT_ofNil σ, Tm.evalT_closedAs hc σ, hq]
+  show (Tm.ofNil q.2).eval σ = _
+  rw [Tm.eval_ofNil σ, Tm.eval_closedAs hc σ, hq]
 
 /-- **An exact law keeps what every term returns.** -/
 theorem Tm.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : State C Γ) {s : Srt} (t : Tm C Γ s) :
-    (t.rwC q).evalT σ = t.evalT σ :=
+    (t.rwC q).eval σ = t.eval σ :=
   Tm.rwBy_eval_eq σ (Tm.pickClosed_eq hq σ) t
 
 theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
@@ -277,15 +277,15 @@ def Upd.totalS {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .decl U _ r => Upd.totalS U && r.totalS
   | _, .pop U _ | _, .drop U _ => Upd.totalS U
 
-theorem Tm.totalV_evalT {Γ : Ctx} (σ : State C Γ) :
-    (t : Tm C Γ .val) → t.totalV = true → ∃ v, t.evalT σ = .ok v
+theorem Tm.totalV_eval {Γ : Ctx} (σ : State C Γ) :
+    (t : Tm C Γ .val) → t.totalV = true → ∃ v, t.eval σ = .ok v
   | .pvV _, _ => ⟨_, rfl⟩
   | .app0 (.lit v), _ => ⟨v, rfl⟩
   | .app0 (.env _), h | .netOf .., h | .app1 .., h | .app2 .., h | .app3 .., h => by cases h
 
-theorem Rhs.totalS_evalT {Γ : Ctx} (σ : State C Γ) :
-    {t : LTy} → (r : Rhs C Γ t) → r.totalS = true → ∃ v, r.evalT σ = .ok v
-  | _, .val t, h => Tm.totalV_evalT σ t h
+theorem Rhs.totalS_eval {Γ : Ctx} (σ : State C Γ) :
+    {t : LTy} → (r : Rhs C Γ t) → r.totalS = true → ∃ v, r.eval σ = .ok v
+  | _, .val t, h => Tm.totalV_eval σ t h
   | _, .unset, _ => ⟨_, rfl⟩
   | _, .saveNetMt, _ => ⟨_, rfl⟩
   | _, .path _, h | _, .mref _, h | _, .store _, h | _, .saveNet, h => by cases h
@@ -296,7 +296,7 @@ theorem Upd.totalS_globT {Γ : Ctx} (σ₀ : State C Γ) :
   | _, .snoc U (.local i r), h => by
     obtain ⟨hU, hr⟩ := Bool.and_eq_true_iff.1 h
     obtain ⟨g, hg⟩ := Upd.totalS_globT σ₀ U hU
-    obtain ⟨v, hv⟩ := Rhs.totalS_evalT σ₀ r hr
+    obtain ⟨v, hv⟩ := Rhs.totalS_eval σ₀ r hr
     refine ⟨g, ?_⟩
     simp only [Upd.globT, UpdElem.globT, hg, hv]
     rfl
@@ -306,7 +306,7 @@ theorem Upd.totalS_globT {Γ : Ctx} (σ₀ : State C Γ) :
   | _, .decl U x r, h => by
     obtain ⟨hU, hr⟩ := Bool.and_eq_true_iff.1 h
     obtain ⟨g, hg⟩ := Upd.totalS_globT σ₀ U hU
-    obtain ⟨v, hv⟩ := Rhs.totalS_evalT σ₀ r hr
+    obtain ⟨v, hv⟩ := Rhs.totalS_eval σ₀ r hr
     refine ⟨g, ?_⟩
     simp only [Upd.globT, hg, hv]
     rfl
@@ -521,16 +521,16 @@ theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalE
   cases φ with
   | eq a b =>
     show holds σ (.eq (a.sideC q) (b.sideC q)) ↔ holds σ (.eq a b)
-    rw [holds_eqT, holds_eqT]
-    have ha := Tm.sideC_denoteT hq σ a
-    have hb := Tm.sideC_denoteT hq σ b
+    rw [holds_eq, holds_eq]
+    have ha := Tm.sideC_denote hq σ a
+    have hb := Tm.sideC_denote hq σ b
     exact ⟨fun h => (ha.symm.trans h).trans hb, fun h => (ha.trans h).trans hb.symm⟩
   | defined t =>
     cases exact with
     | false => exact Iff.rfl
     | true =>
       show holds σ (.defined (t.rwC q)) ↔ holds σ (.defined t)
-      rw [holds_definedT, holds_definedT, Tm.rwC_eval_eq (hx rfl)]
+      rw [holds_defined, holds_defined, Tm.rwC_eval_eq (hx rfl)]
   | _ => exact Iff.rfl
 
 /-- Two formulas alike in every state are alike after an update. -/
@@ -689,8 +689,8 @@ def Held.litVal? {p : PrimTy} : Held C Γ (.val p) → Option Semantics.Value
   | .rhs (.val t) => t.litVal?
   | _ => none
 
-theorem Tm.litVal?_evalT {Γ : Ctx} (σ : State C Γ) :
-    (t : Tm C Γ .val) → {v : Semantics.Value} → t.litVal? = some v → t.evalT σ = .ok v
+theorem Tm.litVal?_eval {Γ : Ctx} (σ : State C Γ) :
+    (t : Tm C Γ .val) → {v : Semantics.Value} → t.litVal? = some v → t.eval σ = .ok v
   | .app0 (.lit _), _, h => by cases h; rfl
   | .pvV _, _, h | .netOf .., _, h | .app1 .., _, h | .app2 .., _, h | .app3 .., _, h => by
     cases h
@@ -706,8 +706,8 @@ theorem Held.litVal?_get {σ₀ : State C Γ} {σ₁ : State C Δ} {p : PrimTy} 
   | rhs r =>
     cases r with
     | val t =>
-      have hok : t.evalT σ₀ = .ok (σ₁.getE i) := hok
-      rw [Tm.litVal?_evalT σ₀ t h] at hok
+      have hok : t.eval σ₀ = .ok (σ₁.getE i) := hok
+      rw [Tm.litVal?_eval σ₀ t h] at hok
       exact (Except.ok.inj hok).symm
 
 /-- A term with each value local `s` leaves holding a literal read as it. -/
@@ -734,31 +734,31 @@ def Tm.litPVFires (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Bool
 theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
     (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OKT σ₀ τ i (s i)) :
     {k : Srt} → (t : Tm C Δ k) →
-      (t.litPV s).evalT τ = t.evalT τ ∧ (t.litPV s).denoteT τ = t.denoteT τ
+      (t.litPV s).eval τ = t.eval τ ∧ (t.litPV s).denote τ = t.denote τ
   | _, .pvV i => by
     simp only [Tm.litPV]
     split
     · rename_i v hv
       have hg := Held.litVal?_get (hok i) hv
-      exact ⟨by simp only [Tm.evalT, hg]; rfl, by simp only [Tm.denoteT, hg]; rfl⟩
+      exact ⟨by simp only [Tm.eval, hg]; rfl, by simp only [Tm.denote, hg]; rfl⟩
     · exact ⟨rfl, rfl⟩
   | _, .netOf i a => by
     obtain ⟨he, hd⟩ := Tm.litPV_eq hok a
-    exact ⟨by simp only [Tm.litPV, Tm.evalT, he], by simp only [Tm.litPV, Tm.denoteT, hd]⟩
+    exact ⟨by simp only [Tm.litPV, Tm.eval, he], by simp only [Tm.litPV, Tm.denote, hd]⟩
   | _, .app1 o ho x => by
     obtain ⟨he, hd⟩ := Tm.litPV_eq hok x
-    exact ⟨by simp only [Tm.litPV, Tm.evalT, he], by simp only [Tm.litPV, Tm.denoteT, hd]⟩
+    exact ⟨by simp only [Tm.litPV, Tm.eval, he], by simp only [Tm.litPV, Tm.denote, hd]⟩
   | _, .app2 o x y => by
     obtain ⟨hex, hdx⟩ := Tm.litPV_eq hok x
     obtain ⟨hey, hdy⟩ := Tm.litPV_eq hok y
-    exact ⟨by simp only [Tm.litPV, Tm.evalT, hex, hey],
-      by simp only [Tm.litPV, Tm.denoteT, hex, hey, hdx, hdy]⟩
+    exact ⟨by simp only [Tm.litPV, Tm.eval, hex, hey],
+      by simp only [Tm.litPV, Tm.denote, hex, hey, hdx, hdy]⟩
   | _, .app3 o x y z => by
     obtain ⟨hex, hdx⟩ := Tm.litPV_eq hok x
     obtain ⟨hey, hdy⟩ := Tm.litPV_eq hok y
     obtain ⟨hez, hdz⟩ := Tm.litPV_eq hok z
-    exact ⟨by simp only [Tm.litPV, Tm.evalT, hex, hey, hez],
-      by simp only [Tm.litPV, Tm.denoteT, hdx, hdy, hdz]⟩
+    exact ⟨by simp only [Tm.litPV, Tm.eval, hex, hey, hez],
+      by simp only [Tm.litPV, Tm.denote, hdx, hdy, hdz]⟩
   | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ => ⟨rfl, rfl⟩
 
 /-- The atoms along the skeleton `s`, not past an update, with the locals
@@ -785,10 +785,10 @@ theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : State C Γ} (σ : Stat
     (s : Skel) → (φ : Fml C Δ) → (holds σ (Fml.litPVAlong h s φ) ↔ holds σ φ)
   | .lit, .eq a b => by
     show holds σ (.eq (a.litPV h) (b.litPV h)) ↔ holds σ (.eq a b)
-    rw [holds_eqT, holds_eqT, (Tm.litPV_eq hok a).2, (Tm.litPV_eq hok b).2]
+    rw [holds_eq, holds_eq, (Tm.litPV_eq hok a).2, (Tm.litPV_eq hok b).2]
   | .lit, .defined t => by
     show holds σ (.defined (t.litPV h)) ↔ holds σ (.defined t)
-    rw [holds_definedT, holds_definedT, (Tm.litPV_eq hok t).1]
+    rw [holds_defined, holds_defined, (Tm.litPV_eq hok t).1]
   | .and _ _ l r, .and a b =>
     and_congr (Fml.litPVAlong_holds σ hok l a) (Fml.litPVAlong_holds σ hok r b)
   | .imp _ _ l r, .imp a b =>

@@ -59,43 +59,43 @@ section Denote
 
 variable {Γ Δ : Ctx} {σ₀ : State C Γ} {σ₁ : State C Δ} {U : Upd C Γ Δ} {g : Semantics.State}
 
-theorem Tm.denoteT_substH_pvV {p : PrimTy} {i : Idx Δ (.val p)} {t' : Tm C Γ .val} :
+theorem Tm.denote_substH_pvV {p : PrimTy} {i : Idx Δ (.val p)} {t' : Tm C Γ .val} :
     (x : Held C Γ (.val p)) → Held.OKT σ₀ σ₁ i x →
       (match x with | .pos j => some (Tm.pvV j) | .rhs (.val t) => some t) = some t' →
-      t'.denoteT σ₀ = (Tm.pvV i).denoteT σ₁
+      t'.denote σ₀ = (Tm.pvV i).denote σ₁
   | .pos j, hok, h => by
     cases h
     have hok : σ₁.getE i = σ₀.getE j := hok
     show StValue.prim _ = StValue.prim _
     rw [hok]
-  | .rhs (.val t), hok, h => by cases h; exact Tm.denoteT_evalT σ₀ t' _ hok
+  | .rhs (.val t), hok, h => by cases h; exact Tm.denote_eval σ₀ t' _ hok
 
-theorem Tm.denoteT_substH_pvP {R : RefTy} {i : Idx Δ (.alias R)} {t' : Tm C Γ .path} :
+theorem Tm.denote_substH_pvP {R : RefTy} {i : Idx Δ (.alias R)} {t' : Tm C Γ .path} :
     (x : Held C Γ (.alias R)) → Held.OKT σ₀ σ₁ i x →
       (match x with
         | .pos j => some (Tm.pvP j) | .rhs (.path p) => some p | .rhs .unset => none) = some t' →
-      t'.denoteT σ₀ = (Tm.pvP i).denoteT σ₁
+      t'.denote σ₀ = (Tm.pvP i).denote σ₁
   | .pos j, hok, h => by
     cases h
     have hok : σ₁.getE i = σ₀.getE j := hok
-    simp only [Tm.denoteT, State.aliasPathT_getE, hok]
+    simp only [Tm.denote, State.aliasPathT_getE, hok]
   | .rhs (.path p), hok, h => by
     cases h
-    have hok : (do pure (some (← t'.evalT σ₀))) = Except.ok (σ₁.getE i) := hok
-    cases hp : t'.evalT σ₀ with
+    have hok : (do pure (some (← t'.eval σ₀))) = Except.ok (σ₁.getE i) := hok
+    cases hp : t'.eval σ₀ with
     | error e => rw [hp] at hok; cases hok
     | ok q =>
       rw [hp] at hok
       injection hok with hq
       show _ = (match σ₁.aliasPathT i with | .ok (r, segs) => rootPath r segs | .error _ => [])
       rw [State.aliasPathT_getE, ← hq]
-      exact Tm.denoteT_evalT σ₀ t' q.1 q.2 hp
+      exact Tm.denote_eval σ₀ t' q.1 q.2 hp
   | .rhs .unset, _, h => by cases h
 
-theorem Tm.denoteT_substH_pvS {b : Bool} {i : Idx Δ .old} {t' : Tm C Γ .st} :
+theorem Tm.denote_substH_pvS {b : Bool} {i : Idx Δ .old} {t' : Tm C Γ .st} :
     (x : Held C Γ .old) → Held.OKT σ₀ σ₁ i x →
       (match x with | .pos j => if b then some (Tm.pvS j) else none | .rhs _ => none) = some t' →
-      t'.denoteT σ₀ = (Tm.pvS i).denoteT σ₁
+      t'.denote σ₀ = (Tm.pvS i).denote σ₁
   | .pos j, hok, h => by
     cases b with
     | false => cases h
@@ -109,12 +109,12 @@ theorem Tm.denoteT_substH_pvS {b : Bool} {i : Idx Δ .old} {t' : Tm C Γ .st} :
 /-- **A term read before an update denotes what it denotes in every typed
 state the update lands on**, its locals replaced by what the update leaves
 in them. -/
-theorem Tm.denoteT_substH (hL : U.Lands σ₀ g σ₁) :
+theorem Tm.denote_substH (hL : U.Lands σ₀ g σ₁) :
     {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → t.substH U.held U.envOnly none = some t' →
-      t'.denoteT σ₀ = t.denoteT σ₁
-  | _, .pvV i, _, h => Tm.denoteT_substH_pvV _ (hL.2.2 i) h
-  | _, .pvP i, _, h => Tm.denoteT_substH_pvP _ (hL.2.2 i) h
-  | _, .pvS i, _, h => Tm.denoteT_substH_pvS _ (hL.2.2 i) h
+      t'.denote σ₀ = t.denote σ₁
+  | _, .pvV i, _, h => Tm.denote_substH_pvV _ (hL.2.2 i) h
+  | _, .pvP i, _, h => Tm.denote_substH_pvP _ (hL.2.2 i) h
+  | _, .pvS i, _, h => Tm.denote_substH_pvS _ (hL.2.2 i) h
   | _, .pvI _, _, h => by
     simp only [Tm.substH] at h
     split at h <;> cases h <;> rfl
@@ -128,8 +128,8 @@ theorem Tm.denoteT_substH (hL : U.Lands σ₀ g σ₁) :
     | pos j =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
       have hx : σ₁.getE i = σ₀.getE j := hx
-      simp only [Tm.denoteT]
-      rw [Tm.denoteT_substH hL a ha, hx]
+      simp only [Tm.denote]
+      rw [Tm.denote_substH hL a ha, hx]
   | _, .app0 o, t', h => by
     simp only [Tm.substH] at h
     split at h
@@ -146,8 +146,8 @@ theorem Tm.denoteT_substH (hL : U.Lands σ₀ g σ₁) :
     split at h
     · rename_i hc
       obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
-      show o.denote σ₀.globE (x'.denoteT σ₀) = o.denote σ₁.globE (x.denoteT σ₁)
-      rw [Tm.denoteT_substH hL x hx]
+      show o.denote σ₀.globE (x'.denote σ₀) = o.denote σ₁.globE (x.denote σ₁)
+      rw [Tm.denote_substH hL x hx]
       rcases Bool.or_eq_true _ _ ▸ hc with hg | hg
       · rw [hL.globE_of_envOnly hg]
       · exact Op1.denote_globFree hg _ _ _
@@ -159,12 +159,12 @@ theorem Tm.denoteT_substH (hL : U.Lands σ₀ g σ₁) :
       obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
       obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
       cases h
-      have hst : ∀ z, (none : Option (Tm C Γ .st)) = some z → z.evalT σ₀ = pure g :=
+      have hst : ∀ z, (none : Option (Tm C Γ .st)) = some z → z.eval σ₀ = pure g :=
         fun _ h => Option.noConfusion h
-      show o.denote σ₀.globE (x'.evalT σ₀) (y'.evalT σ₀) (x'.denoteT σ₀) (y'.denoteT σ₀) =
-        o.denote σ₁.globE (x.evalT σ₁) (y.evalT σ₁) (x.denoteT σ₁) (y.denoteT σ₁)
-      rw [Tm.denoteT_substH hL x hx, Tm.denoteT_substH hL y hy, Tm.evalT_substH hL hst x hx,
-        Tm.evalT_substH hL hst y hy]
+      show o.denote σ₀.globE (x'.eval σ₀) (y'.eval σ₀) (x'.denote σ₀) (y'.denote σ₀) =
+        o.denote σ₁.globE (x.eval σ₁) (y.eval σ₁) (x.denote σ₁) (y.denote σ₁)
+      rw [Tm.denote_substH hL x hx, Tm.denote_substH hL y hy, Tm.eval_substH hL hst x hx,
+        Tm.eval_substH hL hst y hy]
       rcases Bool.or_eq_true _ _ ▸ hc with hg | hg
       · rw [hL.globE_of_envOnly hg]
       · exact Op2.denote_globFree hg _ _ _ _ _ _
@@ -175,9 +175,9 @@ theorem Tm.denoteT_substH (hL : U.Lands σ₀ g σ₁) :
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    show o.denote (x'.denoteT σ₀) (y'.denoteT σ₀) (z'.denoteT σ₀) =
-      o.denote (x.denoteT σ₁) (y.denoteT σ₁) (z.denoteT σ₁)
-    rw [Tm.denoteT_substH hL x hx, Tm.denoteT_substH hL y hy, Tm.denoteT_substH hL z hz]
+    show o.denote (x'.denote σ₀) (y'.denote σ₀) (z'.denote σ₀) =
+      o.denote (x.denote σ₁) (y.denote σ₁) (z.denote σ₁)
+    rw [Tm.denote_substH hL x hx, Tm.denote_substH hL y hy, Tm.denote_substH hL z hz]
 
 end Denote
 
@@ -205,11 +205,11 @@ theorem Fml.substU_holds {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g : 
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    rw [holds_eqT, holds_eqT, Tm.denoteT_substH hL a ha, Tm.denoteT_substH hL b hb]
+    rw [holds_eq, holds_eq, Tm.denote_substH hL a ha, Tm.denote_substH hL b hb]
   | .defined t, _, h => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [holds_definedT, holds_definedT,
-      Tm.evalT_substH hL (st := none) (fun _ h => Option.noConfusion h) t ht]
+    rw [holds_defined, holds_defined,
+      Tm.eval_substH hL (st := none) (fun _ h => Option.noConfusion h) t ht]
   | .not φ, _, h => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (Fml.substU_holds hL φ hφ)
@@ -273,7 +273,7 @@ theorem Upd.simp_globT {Γ : Ctx} (σ₀ : State C Γ) : {Δ : Ctx} → (n : Nat
       · exact ih
       · show (do (UpdElem.local i r).globT σ₀ (← (U.simp n).globT σ₀)) = _
         rw [ih]
-        show (do let _ ← r.evalT σ₀; pure g) = _
+        show (do let _ ← r.eval σ₀; pure g) = _
         rw [hv]; rfl
     | _ =>
       change ((U.simp n).globT σ₀ >>= UpdElem.globT σ₀ _) = _
@@ -283,7 +283,7 @@ theorem Upd.simp_globT {Γ : Ctx} (σ₀ : State C Γ) : {Δ : Ctx} → (n : Nat
     obtain ⟨g₀, h₀, h⟩ := Semantics.bind_ok_inv h
     obtain ⟨v, hv, h⟩ := Semantics.bind_ok_inv h
     cases h
-    show (do let g ← (U.simp (n - 1)).globT σ₀; let _ ← r.evalT σ₀; pure g) = _
+    show (do let g ← (U.simp (n - 1)).globT σ₀; let _ ← r.eval σ₀; pure g) = _
     rw [Upd.simp_globT σ₀ (n - 1) U h₀, hv]; rfl
   | _, n, .pop U e, _, h => Upd.simp_globT σ₀ (n + e.depth) U h
   | _, _, .drop U _, _, h => Upd.simp_globT σ₀ 0 U h

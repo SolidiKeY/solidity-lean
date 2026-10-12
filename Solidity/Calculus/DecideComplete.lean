@@ -1362,7 +1362,7 @@ theorem layoutOk_of_wtS {Γ : Ctx} {τ : State C Γ} {a : Fml C Γ} {vs : List (
     obtain ⟨x, hx⟩ := ha
     have hwb : storageWtB vs σ.storage = true := by
       rw [hs]
-      simp only [Tm.evalT, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at hx
+      simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind] at hx
       split at hx
       · rename_i hw'
         exact hw'

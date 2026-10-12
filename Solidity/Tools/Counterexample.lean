@@ -432,11 +432,11 @@ quantifier over `p` is tried on.  The twin of `Fml.eval3` (`Fml.eval3_eq`). -/
 def Fml.eval3C (dom : TDom) : {Γ : Ctx} → State C Γ → Fml C Γ → Tri
   | _, _, .tt => .tt
   | _, σ, .eq a b =>
-    match a.evalT σ, b.evalT σ with
+    match a.eval σ, b.eval σ with
     | .ok x, .ok y => if x = y then .tt else .ff
     | _, _ => .unknown
   | _, σ, .defined t =>
-    match t.evalT σ with
+    match t.eval σ with
     | .ok _ => .tt
     | .error _ => .ff
   | _, σ, .not φ => (φ.eval3C dom σ).not
@@ -467,8 +467,8 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
     simp only [Fml.eval3C, holds]
     split
     · rename_i x y ha hb
-      have hda := Tm.denoteT_evalT σ a x ha
-      have hdb := Tm.denoteT_evalT σ b y hb
+      have hda := Tm.denote_eval σ a x ha
+      have hdb := Tm.denote_eval σ b y hb
       rw [hda, hdb, Theory.StValue.Equiv.prim_iff]
       by_cases hxy : x = y
       · subst hxy
@@ -586,10 +586,10 @@ what the kernel runs in a certificate.  Compiled as `Fml.eval3C`. -/
 def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
   Fml.rec (motive := fun Γ _ => State C Γ → Tri)
     (fun _ => .tt)
-    (fun a b σ => match a.evalT σ, b.evalT σ with
+    (fun a b σ => match a.eval σ, b.eval σ with
       | .ok x, .ok y => if x = y then .tt else .ff
       | _, _ => .unknown)
-    (fun t σ => match t.evalT σ with
+    (fun t σ => match t.eval σ with
       | .ok _ => .tt
       | .error _ => .ff)
     (fun _ ih σ => (ih σ).not)

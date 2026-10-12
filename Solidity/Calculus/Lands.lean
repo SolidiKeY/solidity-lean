@@ -10,7 +10,7 @@ import Solidity.Theory.Bridge.Denote
 
 What `holds` (`Calculus/Logic.lean`) reads a term and an update by.
 
-* The readers (`Tm.evalT`, `Tm.denoteT`, `Rhs.evalT`): a term on the typed
+* The readers (`Tm.eval`, `Tm.denote`, `Rhs.eval`): a term on the typed
   state, its global part erased (`State.globE`), a local read by its
   position and erased at its type (`State.getE`).
 * What an update leaves in each local (`Upd.held`: a local it kept, or the
@@ -101,43 +101,43 @@ def State.memRefT (σ : State C Γ) {R : RefTy} (i : Idx Γ (.mem R)) : Res Nat 
 
 /-- A term read in the typed state `σ`: a local by its position, a symbol on
 the global part. -/
-def Tm.evalT (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Ev
+def Tm.eval (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Ev
   | _, .pvV i => pure (σ.getE i)
   | _, .pvP i => σ.aliasPathT i
   | _, .pvS i => pure { σ.globE with storage := σ.getE i }
   | _, .pvI i => σ.memRefT i
   | _, .netOf i a => do
     let l : List (Int × Int) := σ.getE i
-    pure (.int ((lookupBy (← (← a.evalT σ).asInt) l).getD 0))
+    pure (.int ((lookupBy (← (← a.eval σ).asInt) l).getD 0))
   | _, .app0 o => o.eval σ.globE
-  | _, .app1 o _ a => o.eval σ.globE (a.evalT σ)
-  | _, .app2 o a b => o.eval σ.globE (a.evalT σ) (b.evalT σ)
-  | _, .app3 o a b c => o.eval σ.globE (a.evalT σ) (b.evalT σ) (c.evalT σ)
+  | _, .app1 o _ a => o.eval σ.globE (a.eval σ)
+  | _, .app2 o a b => o.eval σ.globE (a.eval σ) (b.eval σ)
+  | _, .app3 o a b c => o.eval σ.globE (a.eval σ) (b.eval σ) (c.eval σ)
 
 /-- A term in the Theory, read in the typed state `σ` (over
 `State.abs σ.globE`, `Update.lean`'s `OpN.denote`). -/
-def Tm.denoteT (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Den
+def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.Den
   | _, .pvV i => .prim (σ.getE i)
   | _, .pvP i => match σ.aliasPathT i with
     | .ok (r, segs) => rootPath r segs
     | .error _ => []
   | _, .pvS i => SVal.abs.fields (σ.getE i)
   | _, .pvI _ => ()
-  | _, .netOf i a => match a.denoteT σ with
+  | _, .netOf i a => match a.denote σ with
     | .prim (.int n) => .prim (.int ((lookupBy n (σ.getE i : List (Int × Int))).getD 0))
     | _ => .st .mtSt
   | _, .app0 o => o.denote σ.globE
-  | _, .app1 o _ a => o.denote σ.globE (a.denoteT σ)
-  | _, .app2 o a b => o.denote σ.globE (a.evalT σ) (b.evalT σ) (a.denoteT σ) (b.denoteT σ)
-  | _, .app3 o a b c => o.denote (a.denoteT σ) (b.denoteT σ) (c.denoteT σ)
+  | _, .app1 o _ a => o.denote σ.globE (a.denote σ)
+  | _, .app2 o a b => o.denote σ.globE (a.eval σ) (b.eval σ) (a.denote σ) (b.denote σ)
+  | _, .app3 o a b c => o.denote (a.denote σ) (b.denote σ) (c.denote σ)
 
 /-- What a local is set to, read in the typed state `σ₀`. -/
-def Rhs.evalT (σ₀ : State C Γ) : {t : LTy} → Rhs C Γ t → Res (t.Denote C)
-  | _, .val t => t.evalT σ₀
-  | _, .path p => do pure (some (← p.evalT σ₀))
+def Rhs.eval (σ₀ : State C Γ) : {t : LTy} → Rhs C Γ t → Res (t.Denote C)
+  | _, .val t => t.eval σ₀
+  | _, .path p => do pure (some (← p.eval σ₀))
   | _, .unset => pure none
-  | _, .mref i => do pure (some (← i.evalT σ₀))
-  | _, .store s => do pure (← s.evalT σ₀).storage
+  | _, .mref i => do pure (some (← i.eval σ₀))
+  | _, .store s => do pure (← s.eval σ₀).storage
   | _, .saveNet => pure σ₀.net
   | _, .saveNetMt => pure []
 
@@ -158,33 +158,33 @@ variable {Γ : Ctx}
 (a local's right-hand side is read for its halt). -/
 def UpdElem.globT {Δ : Ctx} (σ₀ : State C Γ) :
     UpdElem C Γ Δ → Semantics.State → Res Semantics.State
-  | .local _ r, g => do let _ ← r.evalT σ₀; pure g
+  | .local _ r, g => do let _ ← r.eval σ₀; pure g
   | .storage s, g => do
-    let st := (← s.evalT σ₀).storage
+    let st := (← s.eval σ₀).storage
     pure { g with storage := st }
   | .memory m, g => do
-    let μ ← m.evalT σ₀
+    let μ ← m.eval σ₀
     pure { g with heap := μ.heap, nextId := μ.nextId }
   | .selfBalance op a, g => do
-    let amt ← (← a.evalT σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
     pure { g with selfBalance := op.apply σ₀.globE.selfBalance amt }
   | .net r op a, g => do
-    let addr ← (← r.evalT σ₀).asInt
-    let amt ← (← a.evalT σ₀).asInt
+    let addr ← (← r.eval σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
     pure { g with net := setBy addr (op.apply (g.getNet addr) amt) g.net }
   | .pay r a, g => do
-    let addr ← (← r.evalT σ₀).asInt
-    let amt ← (← a.evalT σ₀).asInt
+    let addr ← (← r.eval σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
     if amt < 0 then .error .revert
     else pure { g with
       net := if addr = σ₀.globE.tx.selfAddress then g.net
         else setBy addr (g.getNet addr - amt) g.net }
   | .netMt r a, g => do
-    let addr ← (← r.evalT σ₀).asInt
-    let amt ← (← a.evalT σ₀).asInt
+    let addr ← (← r.eval σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
     pure { g with net := [(addr, amt)] }
   | .setBalance a, g => do
-    let amt ← (← a.evalT σ₀).asInt
+    let amt ← (← a.eval σ₀).asInt
     pure { g with selfBalance := amt }
 
 /-- The global part an update applied in `σ₀` leaves. -/
@@ -193,7 +193,7 @@ def Upd.globT (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res Semantic
   | _, .snoc U e => do e.globT σ₀ (← U.globT σ₀)
   | _, .decl U _ r => do
     let g ← U.globT σ₀
-    let _ ← r.evalT σ₀
+    let _ ← r.eval σ₀
     pure g
   | _, .pop U _ => U.globT σ₀
   | _, .drop U _ => U.globT σ₀
@@ -202,7 +202,7 @@ def Upd.globT (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res Semantic
 def Held.OKT {Δ : Ctx} (σ₀ : State C Γ) (σ' : State C Δ) {t : LTy} (i : Idx Δ t) :
     Held C Γ t → Prop
   | .pos j => σ'.getE i = σ₀.getE j
-  | .rhs r => r.evalT σ₀ = .ok (σ'.getE i)
+  | .rhs r => r.eval σ₀ = .ok (σ'.getE i)
 
 /-- **`U` applied in `σ₀` lands on `σ'`**: it leaves the global part `g`,
 which is `σ'`'s, and in each local of `σ'` what `Upd.held` says. -/
@@ -278,55 +278,55 @@ theorem State.ReadsAs.refl (σ : State C Γ) : σ.ReadsAs σ := ⟨rfl, fun _ =>
 theorem State.ReadsAs.symm {σ σ' : State C Γ} (h : σ.ReadsAs σ') : σ'.ReadsAs σ :=
   ⟨h.1.symm, fun i => (h.2 i).symm⟩
 
-theorem Tm.evalT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
-    {s : Srt} → (t : Tm C Γ s) → t.evalT σ = t.evalT σ'
-  | _, .pvV i => by simp only [Tm.evalT, h.2 i]
-  | _, .pvP i => by simp only [Tm.evalT, State.aliasPathT_getE, h.2 i]
-  | _, .pvS i => by simp only [Tm.evalT, h.1, h.2 i]
-  | _, .pvI i => by simp only [Tm.evalT, State.memRefT_getE, h.2 i]
-  | _, .netOf i a => by simp only [Tm.evalT, h.2 i, Tm.evalT_congr h a]
-  | _, .app0 _ => by simp only [Tm.evalT, h.1]
-  | _, .app1 _ _ a => by simp only [Tm.evalT, h.1, Tm.evalT_congr h a]
-  | _, .app2 _ a b => by simp only [Tm.evalT, h.1, Tm.evalT_congr h a, Tm.evalT_congr h b]
+theorem Tm.eval_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {s : Srt} → (t : Tm C Γ s) → t.eval σ = t.eval σ'
+  | _, .pvV i => by simp only [Tm.eval, h.2 i]
+  | _, .pvP i => by simp only [Tm.eval, State.aliasPathT_getE, h.2 i]
+  | _, .pvS i => by simp only [Tm.eval, h.1, h.2 i]
+  | _, .pvI i => by simp only [Tm.eval, State.memRefT_getE, h.2 i]
+  | _, .netOf i a => by simp only [Tm.eval, h.2 i, Tm.eval_congr h a]
+  | _, .app0 _ => by simp only [Tm.eval, h.1]
+  | _, .app1 _ _ a => by simp only [Tm.eval, h.1, Tm.eval_congr h a]
+  | _, .app2 _ a b => by simp only [Tm.eval, h.1, Tm.eval_congr h a, Tm.eval_congr h b]
   | _, .app3 _ a b c => by
-    simp only [Tm.evalT, h.1, Tm.evalT_congr h a, Tm.evalT_congr h b, Tm.evalT_congr h c]
+    simp only [Tm.eval, h.1, Tm.eval_congr h a, Tm.eval_congr h b, Tm.eval_congr h c]
 
-theorem Tm.denoteT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
-    {s : Srt} → (t : Tm C Γ s) → t.denoteT σ = t.denoteT σ'
-  | _, .pvV i => by simp only [Tm.denoteT, h.2 i]
-  | _, .pvP i => by simp only [Tm.denoteT, State.aliasPathT_getE, h.2 i]
-  | _, .pvS i => by simp only [Tm.denoteT, h.2 i]
+theorem Tm.denote_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {s : Srt} → (t : Tm C Γ s) → t.denote σ = t.denote σ'
+  | _, .pvV i => by simp only [Tm.denote, h.2 i]
+  | _, .pvP i => by simp only [Tm.denote, State.aliasPathT_getE, h.2 i]
+  | _, .pvS i => by simp only [Tm.denote, h.2 i]
   | _, .pvI _ => rfl
-  | _, .netOf i a => by simp only [Tm.denoteT, h.2 i, Tm.denoteT_congr h a]
-  | _, .app0 _ => by simp only [Tm.denoteT, h.1]
-  | _, .app1 _ _ a => by simp only [Tm.denoteT, h.1, Tm.denoteT_congr h a]
+  | _, .netOf i a => by simp only [Tm.denote, h.2 i, Tm.denote_congr h a]
+  | _, .app0 _ => by simp only [Tm.denote, h.1]
+  | _, .app1 _ _ a => by simp only [Tm.denote, h.1, Tm.denote_congr h a]
   | _, .app2 _ a b => by
-    simp only [Tm.denoteT, h.1, Tm.denoteT_congr h a, Tm.denoteT_congr h b, Tm.evalT_congr h a,
-      Tm.evalT_congr h b]
+    simp only [Tm.denote, h.1, Tm.denote_congr h a, Tm.denote_congr h b, Tm.eval_congr h a,
+      Tm.eval_congr h b]
   | _, .app3 _ a b c => by
-    simp only [Tm.denoteT, Tm.denoteT_congr h a, Tm.denoteT_congr h b, Tm.denoteT_congr h c]
+    simp only [Tm.denote, Tm.denote_congr h a, Tm.denote_congr h b, Tm.denote_congr h c]
 
-theorem Rhs.evalT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
-    {t : LTy} → (r : Rhs C Γ t) → r.evalT σ = r.evalT σ'
-  | _, .val t => Tm.evalT_congr h t
-  | _, .path p => by simp only [Rhs.evalT, Tm.evalT_congr h p]
+theorem Rhs.eval_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
+    {t : LTy} → (r : Rhs C Γ t) → r.eval σ = r.eval σ'
+  | _, .val t => Tm.eval_congr h t
+  | _, .path p => by simp only [Rhs.eval, Tm.eval_congr h p]
   | _, .unset => rfl
-  | _, .mref i => by simp only [Rhs.evalT, Tm.evalT_congr h i]
-  | _, .store s => by simp only [Rhs.evalT, Tm.evalT_congr h s]
+  | _, .mref i => by simp only [Rhs.eval, Tm.eval_congr h i]
+  | _, .store s => by simp only [Rhs.eval, Tm.eval_congr h s]
   | _, .saveNet => by
     have hn : σ.net = σ'.net := congrArg Semantics.State.net h.1
-    simp only [Rhs.evalT, hn]
+    simp only [Rhs.eval, hn]
   | _, .saveNetMt => rfl
 
 theorem UpdElem.globT_congr {Δ : Ctx} {σ σ' : State C Γ} (h : σ.ReadsAs σ') (e : UpdElem C Γ Δ)
     (g : Semantics.State) : e.globT σ g = e.globT σ' g := by
-  cases e <;> simp only [UpdElem.globT, Rhs.evalT_congr h, Tm.evalT_congr h, h.1]
+  cases e <;> simp only [UpdElem.globT, Rhs.eval_congr h, Tm.eval_congr h, h.1]
 
 theorem Upd.globT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
     {Δ : Ctx} → (U : Upd C Γ Δ) → U.globT σ = U.globT σ'
   | _, .nil => by simp only [Upd.globT, h.1]
   | _, .snoc U e => by simp only [Upd.globT, Upd.globT_congr h U, UpdElem.globT_congr h e]
-  | _, .decl U _ r => by simp only [Upd.globT, Upd.globT_congr h U, Rhs.evalT_congr h r]
+  | _, .decl U _ r => by simp only [Upd.globT, Upd.globT_congr h U, Rhs.eval_congr h r]
   | _, .pop U _ => Upd.globT_congr h U
   | _, .drop U _ => Upd.globT_congr h U
 
@@ -334,7 +334,7 @@ theorem Upd.globT_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') :
 before, or a right-hand side read in it. -/
 def Held.OKV {t : LTy} (σ₀ : State C Γ) (v : t.Denote C) : Held C Γ t → Prop
   | .pos j => v = σ₀.getE j
-  | .rhs r => r.evalT σ₀ = .ok v
+  | .rhs r => r.eval σ₀ = .ok v
 
 theorem Held.OKT_iff_OKV {Δ : Ctx} (σ₀ : State C Γ) (σ' : State C Δ) {t : LTy} (i : Idx Δ t)
     (x : Held C Γ t) : Held.OKT σ₀ σ' i x ↔ Held.OKV σ₀ (σ'.getE i) x := by
@@ -343,7 +343,7 @@ theorem Held.OKT_iff_OKV {Δ : Ctx} (σ₀ : State C Γ) (σ' : State C Δ) {t :
 theorem Held.OKV_congr {σ σ' : State C Γ} (h : σ.ReadsAs σ') {t : LTy} (v : t.Denote C) :
     (x : Held C Γ t) → (Held.OKV σ v x ↔ Held.OKV σ' v x)
   | .pos j => by simp only [Held.OKV, h.2 j]
-  | .rhs r => by simp only [Held.OKV, Rhs.evalT_congr h r]
+  | .rhs r => by simp only [Held.OKV, Rhs.eval_congr h r]
 
 theorem Upd.lands_congr {Δ : Ctx} {σ σ' : State C Γ} (h : σ.ReadsAs σ') (U : Upd C Γ Δ)
     (g : Semantics.State) (τ : State C Δ) : U.Lands σ g τ ↔ U.Lands σ' g τ := by
@@ -478,10 +478,10 @@ theorem Upd.lands_drop_nil {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
 declared local pushed. -/
 theorem Upd.lands_decl {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Semantics.State}
     {σ' : State C Δ} (hL : U.Lands σ₀ g σ') (x : Var) {t : LTy} {r : Rhs C Γ t}
-    {v : t.TDenote C σ'.H} (hr : r.evalT σ₀ = .ok (LTy.TDenote.erase t v)) :
+    {v : t.TDenote C σ'.H} (hr : r.eval σ₀ = .ok (LTy.TDenote.erase t v)) :
     (U.decl x r).Lands σ₀ g (σ'.push v) := by
   refine ⟨?_, hL.2.1, fun i => ?_⟩
-  · show (do let g' ← U.globT σ₀; let _ ← r.evalT σ₀; pure g') = _
+  · show (do let g' ← U.globT σ₀; let _ ← r.eval σ₀; pure g') = _
     rw [hL.1, hr]; rfl
   · cases i with
     | here => exact hr
@@ -501,12 +501,12 @@ theorem State.getE_setLocal_other {t u : LTy} (σ : State C Γ) (i : Idx Γ t) (
 set. -/
 theorem Upd.lands_snoc_local {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Semantics.State}
     {σ' : State C Δ} (hL : U.Lands σ₀ g σ') {t : LTy} (i : Idx Δ t) {r : Rhs C Γ t}
-    {v : t.TDenote C σ'.H} (hr : r.evalT σ₀ = .ok (LTy.TDenote.erase t v)) :
+    {v : t.TDenote C σ'.H} (hr : r.eval σ₀ = .ok (LTy.TDenote.erase t v)) :
     (U.snoc (.local i r)).Lands σ₀ g (σ'.setLocal i v) := by
   refine ⟨?_, hL.2.1, fun j => ?_⟩
   · show (do let g' ← U.globT σ₀; (UpdElem.local i r).globT σ₀ g') = _
     rw [hL.1]
-    show (do let _ ← r.evalT σ₀; pure g) = _
+    show (do let _ ← r.eval σ₀; pure g) = _
     rw [hr]; rfl
   · show Held.OKT σ₀ (σ'.setLocal i v) j (Subst.set (Upd.held U) i r j)
     unfold Subst.set
@@ -514,7 +514,7 @@ theorem Upd.lands_snoc_local {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {
     · rename_i hij
       obtain rfl := Idx.ty_eq_of_toNat hij
       obtain rfl := Idx.toNat_inj i j hij
-      show r.evalT σ₀ = .ok ((σ'.setLocal i v).getE i)
+      show r.eval σ₀ = .ok ((σ'.setLocal i v).getE i)
       rw [State.getE_setLocal_self]
       exact hr
     · rename_i hij
@@ -583,7 +583,7 @@ theorem Locs.set_ne {Δ : Ctx} (ℓ : Locs C Δ) {t u : LTy} (i : Idx Δ t) (j :
 read in `σ₀`. -/
 def UpdElem.applyV {Δ : Ctx} (σ₀ : State C Γ) :
     UpdElem C Γ Δ → Semantics.State → Locs C Δ → Res (Semantics.State × Locs C Δ)
-  | .local i r, g, ℓ => do pure (g, ℓ.set i (← r.evalT σ₀))
+  | .local i r, g, ℓ => do pure (g, ℓ.set i (← r.eval σ₀))
   | .storage s, g, ℓ => do pure (← (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g, ℓ)
   | .memory m, g, ℓ => do pure (← (UpdElem.memory m : UpdElem C Γ Δ).globT σ₀ g, ℓ)
   | .selfBalance op a, g, ℓ => do
@@ -600,7 +600,7 @@ def Upd.applyV (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res (Semant
   | _, .snoc U e => do let p ← U.applyV σ₀; e.applyV σ₀ p.1 p.2
   | _, .decl U _ r => do
     let p ← U.applyV σ₀
-    let v ← r.evalT σ₀
+    let v ← r.eval σ₀
     pure (p.1, p.2.push v)
   | _, .pop U h => do let p ← U.applyV σ₀; pure (p.1, p.2.drop h)
   | _, .drop U h => do let p ← U.applyV σ₀; pure (p.1, p.2.thin h)
@@ -615,14 +615,14 @@ private theorem elem_applyV_ok {Δ : Ctx} {σ₀ : State C Γ} (e : UpdElem C Γ
     {g g' : Semantics.State} {ℓ ℓ' : Locs C Δ} (h : e.applyV σ₀ g ℓ = .ok (g', ℓ')) :
     e.globT σ₀ g = .ok g' ∧
       ((∃ (u : LTy) (i : Idx Δ u) (r : Rhs C Γ u) (v : u.Denote C), e = .local i r ∧
-        r.evalT σ₀ = .ok v ∧ ℓ' = ℓ.set i v) ∨ ((∀ (u : LTy) (i : Idx Δ u) (r : Rhs C Γ u),
+        r.eval σ₀ = .ok v ∧ ℓ' = ℓ.set i v) ∨ ((∀ (u : LTy) (i : Idx Δ u) (r : Rhs C Γ u),
           e ≠ .local i r) ∧ ℓ' = ℓ)) := by
   cases e with
   | «local» i r =>
     obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
     cases h
     refine ⟨?_, .inl ⟨_, i, r, v, rfl, hv, rfl⟩⟩
-    show (do let _ ← r.evalT σ₀; pure g) = _
+    show (do let _ ← r.eval σ₀; pure g) = _
     rw [hv]; rfl
   | storage _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ =>
     obtain ⟨g₁, hg, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
@@ -653,7 +653,7 @@ theorem Upd.applyV_ok {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) �
         · rename_i hki
           obtain rfl := Idx.ty_eq_of_toNat hki
           obtain rfl := Idx.toNat_inj k i hki
-          show r.evalT σ₀ = .ok (ℓ₁.set k v _ k)
+          show r.eval σ₀ = .ok (ℓ₁.set k v _ k)
           rw [Locs.set_same]; exact hv
         · rename_i hki
           rw [Locs.set_ne ℓ₁ k i hki]
@@ -671,7 +671,7 @@ theorem Upd.applyV_ok {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) �
     cases h
     obtain ⟨hg₁, hh₁⟩ := Upd.applyV_ok U hp
     refine ⟨?_, ?_⟩
-    · show (do let g ← U.globT σ₀; let _ ← r.evalT σ₀; pure g) = _
+    · show (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g) = _
       rw [hg₁, hv]; rfl
     · intro t i
       cases i with
@@ -703,7 +703,7 @@ theorem Upd.applyV_of_globT {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ 
     | «local» i r =>
       obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
       cases h
-      exact ⟨_, by show (do pure (_, ℓ₁.set i (← r.evalT σ₀))) = _; rw [hv]; rfl⟩
+      exact ⟨_, by show (do pure (_, ℓ₁.set i (← r.eval σ₀))) = _; rw [hv]; rfl⟩
     | _ => exact ⟨ℓ₁, by simp only [UpdElem.applyV, h]; rfl⟩
   | _, .decl U _ r, g, h => by
     obtain ⟨g₁, hg₁, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
@@ -711,7 +711,7 @@ theorem Upd.applyV_of_globT {σ₀ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ 
     cases h
     obtain ⟨ℓ₁, hℓ₁⟩ := Upd.applyV_of_globT U hg₁
     exact ⟨_, by
-      show (do let p ← U.applyV σ₀; let v ← r.evalT σ₀; pure (p.1, p.2.push v)) = _
+      show (do let p ← U.applyV σ₀; let v ← r.eval σ₀; pure (p.1, p.2.push v)) = _
       rw [hℓ₁, hv]; rfl⟩
   | _, .pop U hx, g, h => by
     obtain ⟨ℓ₁, hℓ₁⟩ := Upd.applyV_of_globT U h
@@ -808,13 +808,13 @@ theorem State.loc_setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDe
 open Semantics (bind_ok_inv) in
 /-- **The term bridge** (`Theory/Bridge/Denote.lean`): a term's denotation
 agrees with its reading in a typed state wherever the reading returns. -/
-theorem _root_.Solidity.Tm.denoteT_evalT (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
-    Srt.Bridge s (t.denoteT σ) (t.evalT σ)
+theorem _root_.Solidity.Tm.denote_eval (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
+    Srt.Bridge s (t.denote σ) (t.eval σ)
   | _, .pvV _ => by intro x h; cases h; rfl
   | _, .pvP i => by
     intro r segs h
     have h' : σ.aliasPathT i = .ok (r, segs) := h
-    simp only [Tm.denoteT, h']
+    simp only [Tm.denote, h']
   | _, .pvS _ => by intro τ h; cases h; exact StValue.Equiv.refl _
   | _, .pvI _ => trivial
   | _, .netOf i a => by
@@ -826,12 +826,12 @@ theorem _root_.Solidity.Tm.denoteT_evalT (σ : State C Γ) : {s : Srt} → (t : 
     | bool => cases hn
     | int n' =>
       cases hn
-      simp only [Tm.denoteT, Tm.denoteT_evalT σ a _ ha]
+      simp only [Tm.denote, Tm.denote_eval σ a _ ha]
   | _, .app0 o => Op0.denote_eval o
-  | _, .app1 o _ a => Op1.denote_eval o (Tm.denoteT_evalT σ a)
-  | _, .app2 o a b => Op2.denote_eval o (Tm.denoteT_evalT σ a) (Tm.denoteT_evalT σ b)
+  | _, .app1 o _ a => Op1.denote_eval o (Tm.denote_eval σ a)
+  | _, .app2 o a b => Op2.denote_eval o (Tm.denote_eval σ a) (Tm.denote_eval σ b)
   | _, .app3 o a b c =>
-    Op3.denote_eval o (Tm.denoteT_evalT σ a) (Tm.denoteT_evalT σ b) (Tm.denoteT_evalT σ c)
+    Op3.denote_eval o (Tm.denote_eval σ a) (Tm.denote_eval σ b) (Tm.denote_eval σ c)
 
 
 end CloseKit

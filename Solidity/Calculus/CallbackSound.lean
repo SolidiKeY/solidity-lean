@@ -50,9 +50,9 @@ theorem holds_FO_reads : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true →
     ∀ {σ σ' : State C Γ}, σ.ReadsAs σ' → (holds σ φ ↔ holds σ' φ)
   | _, .tt, _, _, _, _ => Iff.rfl
   | _, .eq a b, _, σ, σ', e => by
-    rw [holds_eqT, holds_eqT, Tm.denoteT_congr e a, Tm.denoteT_congr e b]
+    rw [holds_eq, holds_eq, Tm.denote_congr e a, Tm.denote_congr e b]
   | _, .defined t, _, σ, σ', e => by
-    rw [holds_definedT, holds_definedT, Tm.evalT_congr e t]
+    rw [holds_defined, holds_defined, Tm.eval_congr e t]
   | _, .not φ, h, _, _, e => not_congr (holds_FO_reads φ h e)
   | _, .and φ ψ, h, _, _, e => by
     have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
@@ -561,19 +561,19 @@ def Hyps.openInv {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀
   | _, .bind H m x t => .bind (Hyps.openInv H) m x t
   | _, .anon H xs => .anon (Hyps.openInv H) xs
 
-theorem Tm.reclose_evalT {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
+theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
     (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.globE = τ.globE) :
-    t'.evalT τ = t.evalT σ := by
+    t'.eval τ = t.eval σ := by
   obtain ⟨t₀, ht₀, rfl⟩ := Option.map_eq_some_iff.1 h
-  rw [Tm.evalT_ofNil τ, Tm.evalT_toNilS σ t ht₀]
-  exact Tm.evalT_congr ⟨hg.symm, fun i => by cases i⟩ t₀
+  rw [Tm.eval_ofNil τ, Tm.eval_toNilS σ t ht₀]
+  exact Tm.eval_congr ⟨hg.symm, fun i => by cases i⟩ t₀
 
-theorem Tm.reclose_denoteT {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
+theorem Tm.reclose_denote {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
     (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.globE = τ.globE) :
-    t'.denoteT τ = t.denoteT σ := by
+    t'.denote τ = t.denote σ := by
   obtain ⟨t₀, ht₀, rfl⟩ := Option.map_eq_some_iff.1 h
-  rw [Tm.denoteT_ofNil τ, Tm.denoteT_toNilS σ t ht₀]
-  exact Tm.denoteT_congr ⟨hg.symm, fun i => by cases i⟩ t₀
+  rw [Tm.denote_ofNil τ, Tm.denote_toNilS σ t ht₀]
+  exact Tm.denote_congr ⟨hg.symm, fun i => by cases i⟩ t₀
 
 /-- **A closed formula reads alike at another scope**, over the same global
 part. -/
@@ -585,10 +585,10 @@ theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} →
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    rw [holds_eqT, holds_eqT, Tm.reclose_denoteT ha _ _ hg, Tm.reclose_denoteT hb _ _ hg]
+    rw [holds_eq, holds_eq, Tm.reclose_denote ha _ _ hg, Tm.reclose_denote hb _ _ hg]
   | .defined t, _, h, σ, τ, hg => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [holds_definedT, holds_definedT, Tm.reclose_evalT ht _ _ hg]
+    rw [holds_defined, holds_defined, Tm.reclose_eval ht _ _ hg]
   | .not φ, _, h, σ, τ, hg => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (holds_reclose φ hφ σ τ hg)

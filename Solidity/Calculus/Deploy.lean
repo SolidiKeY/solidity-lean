@@ -41,7 +41,7 @@ theorem Problem.deployUpd_lands (C : Contract) (tx : TTx) {Δ : Ctx}
     (Problem.deployUpd C).Lands ((State.deploy C tx).withEnv e)
       ((State.deploy C tx).withEnv e).globE ((State.deploy C tx).withEnv e) := by
   refine ⟨?_, rfl, fun _ => rfl⟩
-  simp only [Problem.deployUpd, Upd.globT, UpdElem.globT, Tm.evalT, Op0.eval, State.globE,
+  simp only [Problem.deployUpd, Upd.globT, UpdElem.globT, Tm.eval, Op0.eval, State.globE,
     State.withEnv, State.deploy, Storage.init_erase]
   rfl
 

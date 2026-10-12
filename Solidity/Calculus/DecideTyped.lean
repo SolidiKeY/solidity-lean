@@ -322,7 +322,7 @@ variable {Γ : Ctx}
 
 /-- A literal, `msg.sender` or a local reads a value. -/
 theorem Tm.eval_of_atomLike {t : Tm C Γ .val} (τ : State C Γ)
-    (h : t.isLitLikeS = true ∨ t.isAtomS = true) : ∃ x, t.evalT τ = .ok x := by
+    (h : t.isLitLikeS = true ∨ t.isAtomS = true) : ∃ x, t.eval τ = .ok x := by
   cases t with
   | app0 o => cases o <;> exact ⟨_, rfl⟩
   | pvV i => exact ⟨_, rfl⟩
@@ -331,10 +331,10 @@ theorem Tm.eval_of_atomLike {t : Tm C Γ .val} (τ : State C Γ)
 /-- Between two terms that return, the equation is equality of the
 values. -/
 theorem holds_eq_of_eval {τ : State C Γ} {a b : Tm C Γ .val} {x y : Value}
-    (ha : a.evalT τ = .ok x) (hb : b.evalT τ = .ok y) :
+    (ha : a.eval τ = .ok x) (hb : b.eval τ = .ok y) :
     holds τ (.eq a b) ↔ x = y := by
-  show Theory.StValue.Equiv (a.denoteT τ) (b.denoteT τ) ↔ x = y
-  rw [Tm.denoteT_evalT τ a x ha, Tm.denoteT_evalT τ b y hb,
+  show Theory.StValue.Equiv (a.denote τ) (b.denote τ) ↔ x = y
+  rw [Tm.denote_eval τ a x ha, Tm.denote_eval τ b y hb,
     Theory.StValue.Equiv.prim_iff]
   exact ⟨fun h => by injection h, fun h => h ▸ rfl⟩
 
@@ -358,16 +358,16 @@ theorem eqD_sound {φ ψ : Fml C Γ} {σ : Semantics.State} {ρ : SymS}
   have ea := sameAt_toLS hsa (by rw [sa, sc, s']) hra.ok hrc.ok
   have eb := sameAt_toLS hsb (by rw [sb, sc]) hrb.ok hrc.ok
   have A2 : ∀ τa' : State C Γa, RelT σ ρa τa' →
-      Sim ((a.toLS ρa).eval σ) (a.evalT τa') := fun _ hr => hr.val ha
+      Sim ((a.toLS ρa).eval σ) (a.eval τa') := fun _ hr => hr.val ha
   have B2 : ∀ τb' : State C Γb, RelT σ ρb τb' →
-      Sim ((b.toLS ρb).eval σ) (b.evalT τb') := fun _ hr => hr.val hb
+      Sim ((b.toLS ρb).eval σ) (b.eval τb') := fun _ hr => hr.val hb
   have A3 : ∀ τc' : State C Γc, RelT σ ρc τc' →
-      Sim ((a.toLS ρa).eval σ) (a'.evalT τc') := by
+      Sim ((a.toLS ρa).eval σ) (a'.eval τc') := by
     intro τc' hr
     rw [← ea.1]
     exact hr.val (by rw [ea.2]; exact ha)
   have B3 : ∀ τc' : State C Γc, RelT σ ρc τc' →
-      Sim ((b.toLS ρb).eval σ) (b'.evalT τc') := by
+      Sim ((b.toLS ρb).eval σ) (b'.eval τc') := by
     intro τc' hr
     rw [← eb.1]
     exact hr.val (by rw [eb.2]; exact hb)
@@ -434,7 +434,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
     have key : holds τ (.defined t) ↔ (Fml.toLSM ρ (.defined t)).holds σ := by
       simp only [Fml.toLSM]
       rw [holds_eq_self]
-      show (∃ x, t.evalT τ = .ok x) ↔ _
+      show (∃ x, t.eval τ = .ok x) ↔ _
       exact ⟨fun ⟨x, hx⟩ => ⟨x, (st x).2 hx⟩, fun ⟨x, hx⟩ => ⟨x, (st x).1 hx⟩⟩
     exact ⟨fun _ hL => key.2 hL, fun _ hφ => key.1 hφ⟩
   | not φ ih =>

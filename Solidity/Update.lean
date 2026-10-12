@@ -399,9 +399,9 @@ def Op1.vars : Op1 a s → List Var
 
 /-! ## What a term denotes in the Theory
 
-`Tm.denoteT` (`Calculus/Lands.lean`) reads a formula's terms in the Theory
+`Tm.denote` (`Calculus/Lands.lean`) reads a formula's terms in the Theory
 algebra over the storage node `State.abs σ`, total, as KeY reads them: a
-read off the end of what is there is a node, not a halt.  `Tm.evalT` is the
+read off the end of what is there is a node, not a halt.  `Tm.eval` is the
 interpreter's reading; the
 term bridge (`Theory/Bridge/Denote.lean`) says the two agree wherever `eval`
 returns.  An equation is read through `denote` (`holds`).
@@ -415,7 +415,7 @@ returns.  An equation is read through `denote` (`holds`).
   no `denote`.
 - A path is not bounds-checked (`PTerm.at`): that is KeY's guard, a premise
   of the laws, not a halt.  `PTerm.next` reads the length in `σ`, as
-  `Tm.evalT` does; `PTerm.nextIn` reads it in its storage term, and
+  `Tm.eval` does; `PTerm.nextIn` reads it in its storage term, and
   `PTerm.atIn` is `PTerm.at` (the check is `eval`'s alone).
 
 Both read a symbol through `Op0.eval` … `Op3.eval` and `Op0.denote` …

@@ -59,7 +59,7 @@ def LawPair.rhsAt? {Γ : Ctx} (q : LawPair C Γ) (s : Srt) : Option (Tm C Γ s) 
 /-- The right side returns what the left side returns, in every typed
 state. -/
 def LawPair.Refines {Γ : Ctx} (q : LawPair C Γ) : Prop :=
-  ∀ σ : State C Γ, Srt.Le q.k (q.lhs.evalT σ) (q.rhs.evalT σ)
+  ∀ σ : State C Γ, Srt.Le q.k (q.lhs.eval σ) (q.rhs.eval σ)
 
 /-- A law that refines at its scope refines as a pair. -/
 theorem LawPair.Refines.of_at {Γ : Ctx} {q : LawPair C Γ} (h : Tm.EvalRefinesAt q.lhs q.rhs) :
@@ -115,7 +115,7 @@ theorem LawPair.pick_le (hq : q.Refines) (σ : State C Γ) : PickLe q.pick σ :=
 
 /-- **A law that refines back at one state keeps every value its rewrite
 returns there.** -/
-theorem LawPair.pick_ge (σ : State C Γ) (hq : Srt.Le q.k (q.rhs.evalT σ) (q.lhs.evalT σ)) :
+theorem LawPair.pick_ge (σ : State C Γ) (hq : Srt.Le q.k (q.rhs.eval σ) (q.lhs.eval σ)) :
     PickGe q.pick σ := fun h => by
   obtain ⟨e, rfl, rfl⟩ := LawPair.pick_some h
   subst e
@@ -138,7 +138,7 @@ variable {Γ₀ : Ctx}
 refines, and refines back wherever the rewritten update returns. -/
 theorem holds_upd_rwG {q : LawPair C Γ₀} (hr : q.Refines) {m : Modality} {Δ : Ctx}
     {U : Upd C Γ₀ Δ} {φ : Fml C Δ} (σ : State C Γ₀)
-    (hb : ∀ g, (Upd.rwG q U).globT σ = .ok g → Srt.Le q.k (q.rhs.evalT σ) (q.lhs.evalT σ))
+    (hb : ∀ g, (Upd.rwG q U).globT σ = .ok g → Srt.Le q.k (q.rhs.eval σ) (q.lhs.eval σ))
     (h : holds σ (.upd m (Upd.rwG q U) φ)) : holds σ (.upd m U φ) := by
   refine Upd.afterT_intro (fun e he => ?_) fun g σ' hL hH =>
     h.of_lands (Upd.rwBy_lands σ (LawPair.pick_le hr σ) U hL) hH

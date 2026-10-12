@@ -101,37 +101,37 @@ theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C �
 
 end WkEqns
 
-theorem Tm.evalT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
-    {s : Srt} → (t : Tm C Γ s) → (t.wk h).evalT σ = t.evalT (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.evalT, State.getE_thin]
-  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.evalT, State.aliasPathT_getE, State.getE_thin]
-  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.evalT, State.getE_thin]; rfl
-  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.evalT, State.memRefT_getE, State.getE_thin]
-  | _, .netOf i a => by simp only [Tm.wk_netOf, Tm.evalT, Tm.evalT_wk h σ a, State.getE_thin]
+theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+    {s : Srt} → (t : Tm C Γ s) → (t.wk h).eval σ = t.eval (σ.thin h)
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.eval, State.getE_thin]
+  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.eval, State.aliasPathT_getE, State.getE_thin]
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.eval, State.getE_thin]; rfl
+  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.eval, State.memRefT_getE, State.getE_thin]
+  | _, .netOf i a => by simp only [Tm.wk_netOf, Tm.eval, Tm.eval_wk h σ a, State.getE_thin]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.evalT, Tm.evalT_wk h σ a]; rfl
+  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.eval, Tm.eval_wk h σ a]; rfl
   | _, .app2 o a b => by
-    simp only [Tm.wk_app2, Tm.evalT, Tm.evalT_wk h σ a, Tm.evalT_wk h σ b]; rfl
+    simp only [Tm.wk_app2, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b]; rfl
   | _, .app3 o a b c => by
-    simp only [Tm.wk_app3, Tm.evalT, Tm.evalT_wk h σ a, Tm.evalT_wk h σ b, Tm.evalT_wk h σ c]; rfl
+    simp only [Tm.wk_app3, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]; rfl
 
-theorem Tm.denoteT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
-    {s : Srt} → (t : Tm C Γ s) → (t.wk h).denoteT σ = t.denoteT (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denoteT, State.getE_thin]
-  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.denoteT, State.aliasPathT_getE, State.getE_thin]
-  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denoteT, State.getE_thin]
+theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+    {s : Srt} → (t : Tm C Γ s) → (t.wk h).denote σ = t.denote (σ.thin h)
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, State.getE_thin]
+  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.denote, State.aliasPathT_getE, State.getE_thin]
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, State.getE_thin]
   | _, .pvI i => rfl
   | _, .netOf i a => by
-    simp only [Tm.wk_netOf, Tm.denoteT, Tm.denoteT_wk h σ a, State.getE_thin]
+    simp only [Tm.wk_netOf, Tm.denote, Tm.denote_wk h σ a, State.getE_thin]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denoteT, Tm.denoteT_wk h σ a]; rfl
+  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denote, Tm.denote_wk h σ a]; rfl
   | _, .app2 o a b => by
-    simp only [Tm.wk_app2, Tm.denoteT, Tm.denoteT_wk h σ a, Tm.denoteT_wk h σ b, Tm.evalT_wk h σ a,
-      Tm.evalT_wk h σ b]
+    simp only [Tm.wk_app2, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.eval_wk h σ a,
+      Tm.eval_wk h σ b]
     rfl
   | _, .app3 o a b c => by
-    simp only [Tm.wk_app3, Tm.denoteT, Tm.denoteT_wk h σ a, Tm.denoteT_wk h σ b,
-      Tm.denoteT_wk h σ c]
+    simp only [Tm.wk_app3, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b,
+      Tm.denote_wk h σ c]
 
 /-- A first-order formula read with more locals around it; `none` on an
 update, a modality, a `havoc`, a hidden binder or an anonymising update. -/
@@ -174,10 +174,10 @@ theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : F
   | .tt, _, e, σ => by cases e; exact Iff.rfl
   | .eq a b, _, e, σ => by
     cases e
-    rw [holds_eqT, holds_eqT, Tm.denoteT_wk, Tm.denoteT_wk]
+    rw [holds_eq, holds_eq, Tm.denote_wk, Tm.denote_wk]
   | .defined t, _, e, σ => by
     cases e
-    rw [holds_definedT, holds_definedT, Tm.evalT_wk]
+    rw [holds_defined, holds_defined, Tm.eval_wk]
   | .not φ, _, e, σ => by
     cases hφ : φ.wkFO h with
     | none => simp only [Fml.wkFO_not, hφ, Option.map_none, reduceCtorEq] at e

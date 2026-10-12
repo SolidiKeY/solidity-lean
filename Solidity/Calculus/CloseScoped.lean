@@ -32,7 +32,7 @@ binder of a value type over `PrimTy.Denote`, a `uint` over `[0, 2²⁵⁶)`
 references, read erased (`LTy.TDenote.erase`).
 
 **The set** states lemmas about `Calculus/Lands.lean`'s typed readers
-only (`Tm.evalT`, `Tm.denoteT`, `Rhs.evalT`, `Upd.applyV`, `UpdElem.globT`)
+only (`Tm.eval`, `Tm.denote`, `Rhs.eval`, `Upd.applyV`, `UpdElem.globT`)
 and the typed state's operations as `State.loc`/`State.globE` read them
 (`push`, `setLocal`, `anon`, `havoc`, `drop`), never its fields.  A term is
 read constructor by constructor (each equation follows from the symbol's,
@@ -115,141 +115,141 @@ section Terms
 variable {Γ : Ctx} (σ : State C Γ)
 
 theorem eval_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
-    (Tm.pvV i : Tm C Γ .val).evalT σ = .ok (σ.loc _ i) :=
+    (Tm.pvV i : Tm C Γ .val).eval σ = .ok (σ.loc _ i) :=
   rfl
 theorem eval_pvP {R : RefTy} (i : Idx Γ (.alias R)) :
-    (Tm.pvP i : Tm C Γ .path).evalT σ = Close.optRes (σ.loc _ i) := by
+    (Tm.pvP i : Tm C Γ .path).eval σ = Close.optRes (σ.loc _ i) := by
   show σ.aliasPathT i = _
   unfold State.aliasPathT State.loc State.getE
   generalize (TEnv.get i σ.env : Option (SRef C (.ref R))) = x
   cases x <;> rfl
 theorem eval_pvS (i : Idx Γ .old) :
-    (Tm.pvS i : Tm C Γ .st).evalT σ = .ok { σ.globE with storage := σ.loc _ i } := rfl
+    (Tm.pvS i : Tm C Γ .st).eval σ = .ok { σ.globE with storage := σ.loc _ i } := rfl
 theorem eval_pvI {R : RefTy} (i : Idx Γ (.mem R)) :
-    (Tm.pvI i : Tm C Γ .ident).evalT σ = Close.optRes (σ.loc _ i) := by
+    (Tm.pvI i : Tm C Γ .ident).eval σ = Close.optRes (σ.loc _ i) := by
   show σ.memRefT i = _
   unfold State.memRefT State.loc State.getE
   generalize (TEnv.get i σ.env : Option (HRef σ.H R)) = x
   cases x <;> rfl
-theorem eval_netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) : (Tm.netOf i a).evalT σ =
-    a.evalT σ >>= Value.asInt >>= fun n => .ok (.int ((lookupBy n (σ.loc _ i)).getD 0)) := by
-  simp only [Tm.evalT, bind, Except.bind]
-  cases a.evalT σ <;> rfl
+theorem eval_netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) : (Tm.netOf i a).eval σ =
+    a.eval σ >>= Value.asInt >>= fun n => .ok (.int ((lookupBy n (σ.loc _ i)).getD 0)) := by
+  simp only [Tm.eval, bind, Except.bind]
+  cases a.eval σ <;> rfl
 
-theorem eval_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).evalT σ = .ok v := rfl
+theorem eval_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).eval σ = .ok v := rfl
 theorem eval_env (k : EnvKey) :
-    (Tm.app0 (.env k) : Tm C Γ .val).evalT σ = .ok (.int (σ.globE.envVal k)) := rfl
-theorem eval_root (r : Name) : (Tm.app0 (.root r) : Tm C Γ .path).evalT σ = .ok (r, []) := rfl
-theorem eval_storage : (Tm.app0 .storage : Tm C Γ .st).evalT σ = .ok σ.globE := rfl
-theorem eval_memory : (Tm.app0 .memory : Tm C Γ .mem).evalT σ = .ok σ.globE := rfl
-theorem eval_mtSt (vs : List (Name × Ty)) : (Tm.app0 (.mtSt vs) : Tm C Γ .st).evalT σ =
+    (Tm.app0 (.env k) : Tm C Γ .val).eval σ = .ok (.int (σ.globE.envVal k)) := rfl
+theorem eval_root (r : Name) : (Tm.app0 (.root r) : Tm C Γ .path).eval σ = .ok (r, []) := rfl
+theorem eval_storage : (Tm.app0 .storage : Tm C Γ .st).eval σ = .ok σ.globE := rfl
+theorem eval_memory : (Tm.app0 .memory : Tm C Γ .mem).eval σ = .ok σ.globE := rfl
+theorem eval_mtSt (vs : List (Name × Ty)) : (Tm.app0 (.mtSt vs) : Tm C Γ .st).eval σ =
     .ok { σ.globE with storage := vs.map fun (n, T) => (n, defaultForTy T) } := rfl
 
 theorem eval_unop (op : UnOp) (p : PrimTy) (h : (Op1.unop op p).named = false) (a : Tm C Γ .val) :
-    (Tm.app1 (.unop op p) h a).evalT σ =
-      a.evalT σ >>= fun x => applyUnOp op x >>= unopCheck op p :=
+    (Tm.app1 (.unop op p) h a).eval σ =
+      a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p :=
   rfl
-theorem eval_net (h : Op1.net.named = false) (a : Tm C Γ .val) : (Tm.app1 .net h a).evalT σ =
-    a.evalT σ >>= Value.asInt >>= fun n => .ok (.int (σ.globE.getNet n)) :=
+theorem eval_net (h : Op1.net.named = false) (a : Tm C Γ .val) : (Tm.app1 .net h a).eval σ =
+    a.eval σ >>= Value.asInt >>= fun n => .ok (.int (σ.globE.getNet n)) :=
   Close.Op1.eval_net _ _
 theorem eval_field (f : Name) (h : (Op1.field f).named = false) (p : Tm C Γ .path) :
-    (Tm.app1 (.field f) h p).evalT σ = p.evalT σ >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) :=
+    (Tm.app1 (.field f) h p).eval σ = p.eval σ >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) :=
   rfl
-theorem eval_next (h : Op1.next.named = false) (p : Tm C Γ .path) : (Tm.app1 .next h p).evalT σ =
-    p.evalT σ >>= fun rs => σ.globE.findStorage rs.1 rs.2 >>= Close.pastEnd rs :=
+theorem eval_next (h : Op1.next.named = false) (p : Tm C Γ .path) : (Tm.app1 .next h p).eval σ =
+    p.eval σ >>= fun rs => σ.globE.findStorage rs.1 rs.2 >>= Close.pastEnd rs :=
   Close.Op1.eval_next _ _
 theorem eval_sval (h : Op1.sval.named = false) (t : Tm C Γ .val) :
-    (Tm.app1 .sval h t).evalT σ = t.evalT σ >>= fun v => .ok v.toSVal := rfl
+    (Tm.app1 .sval h t).eval σ = t.eval σ >>= fun v => .ok v.toSVal := rfl
 theorem eval_alloc (R : RefTy) (h : (Op1.alloc R).named = false) (m : Tm C Γ .mem) :
-    (Tm.app1 (.alloc R) h m).evalT σ =
-      m.evalT σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 :=
+    (Tm.app1 (.alloc R) h m).eval σ =
+      m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 :=
   rfl
 theorem eval_mfield (f : Name) (h : (Op1.mfield f).named = false) (i : Tm C Γ .ident) :
-    (Tm.app1 (.mfield f) h i).evalT σ = i.evalT σ >>= fun id => .ok (.memoryField id f) := rfl
+    (Tm.app1 (.mfield f) h i).eval σ = i.eval σ >>= fun id => .ok (.memoryField id f) := rfl
 theorem eval_addM (R : RefTy) (h : (Op1.addM R).named = false) (m : Tm C Γ .mem) :
-    (Tm.app1 (.addM R) h m).evalT σ =
-      m.evalT σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 :=
+    (Tm.app1 (.addM R) h m).eval σ =
+      m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 :=
   rfl
 theorem eval_mval (h : Op1.mval.named = false) (t : Tm C Γ .val) :
-    (Tm.app1 .mval h t).evalT σ = t.evalT σ >>= fun v => .ok v.toMVal := rfl
+    (Tm.app1 .mval h t).eval σ = t.eval σ >>= fun v => .ok v.toMVal := rfl
 theorem eval_ref (h : Op1.ref.named = false) (i : Tm C Γ .ident) :
-    (Tm.app1 .ref h i).evalT σ = i.evalT σ >>= fun id => .ok (.ref id) := rfl
+    (Tm.app1 .ref h i).eval σ = i.eval σ >>= fun id => .ok (.ref id) := rfl
 
 theorem eval_binop (op : BinOp) (p : PrimTy) (a b : Tm C Γ .val) :
-    (Tm.app2 (.binop op p) a b).evalT σ = a.evalT σ >>= fun x => evalBinop op p x (b.evalT σ) :=
+    (Tm.app2 (.binop op p) a b).eval σ = a.eval σ >>= fun x => evalBinop op p x (b.eval σ) :=
   rfl
-theorem eval_find (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .find s p).evalT σ =
-    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= SVal.asValue := rfl
-theorem eval_len (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .len s p).evalT σ =
-    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= Close.arrLen :=
+theorem eval_find (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .find s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= SVal.asValue := rfl
+theorem eval_len (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .len s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= Close.arrLen :=
   Close.Op2.eval_len _ _ _
-theorem eval_read (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .read m a).evalT σ =
-    m.evalT σ >>= fun τ => a.evalT σ >>= fun addr => Close.readVal τ addr := rfl
-theorem eval_at (p : Tm C Γ .path) (i : Tm C Γ .val) : (Tm.app2 .at p i).evalT σ =
-    p.evalT σ >>= fun rs => i.evalT σ >>= Value.asInt >>= fun k =>
+theorem eval_read (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .read m a).eval σ =
+    m.eval σ >>= fun τ => a.eval σ >>= fun addr => Close.readVal τ addr := rfl
+theorem eval_at (p : Tm C Γ .path) (i : Tm C Γ .val) : (Tm.app2 .at p i).eval σ =
+    p.eval σ >>= fun rs => i.eval σ >>= Value.asInt >>= fun k =>
       σ.globE.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) :=
   Close.Op2.eval_at _ _ _
-theorem eval_delAt (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .delAt s p).evalT σ =
-    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
+theorem eval_delAt (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .delAt s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
       τ.saveStorage rs.1 rs.2 cur.defaultOf := rfl
 theorem eval_pushSlot (E : Ty) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 (.pushSlot E) s p).evalT σ = s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+    (Tm.app2 (.pushSlot E) s p).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= Close.pushOn τ E rs.1 rs.2 pure :=
   Close.Op2.eval_pushSlot _ _ _ _
-theorem eval_pop (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .pop s p).evalT σ =
-    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+theorem eval_pop (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .pop s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= Close.popOn τ false rs.1 rs.2 :=
   Close.Op2.eval_pop _ _ _
-theorem eval_shrink (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .shrink s p).evalT σ =
-    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+theorem eval_shrink (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .shrink s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= Close.popOn τ true rs.1 rs.2 :=
   Close.Op2.eval_shrink _ _ _
-theorem eval_sfind (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .sfind s p).evalT σ =
-    s.evalT σ >>= fun τ => p.evalT σ >>= fun rs => τ.findStorage rs.1 rs.2 := rfl
-theorem eval_copyMem (m : Tm C Γ .mem) (i : Tm C Γ .ident) : (Tm.app2 .copyMem m i).evalT σ =
-    m.evalT σ >>= fun τ => i.evalT σ >>= fun id => copyMem τ (.ref id) := rfl
-theorem eval_iread (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .iread m a).evalT σ =
-    m.evalT σ >>= fun τ => a.evalT σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
-theorem eval_copy (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copy m v).evalT σ =
-    v.evalT σ >>= fun sv => m.evalT σ >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
-theorem eval_mat (i : Tm C Γ .ident) (k : Tm C Γ .val) : (Tm.app2 .mat i k).evalT σ =
-    i.evalT σ >>= fun id => k.evalT σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) :=
+theorem eval_sfind (s : Tm C Γ .st) (p : Tm C Γ .path) : (Tm.app2 .sfind s p).eval σ =
+    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 := rfl
+theorem eval_copyMem (m : Tm C Γ .mem) (i : Tm C Γ .ident) : (Tm.app2 .copyMem m i).eval σ =
+    m.eval σ >>= fun τ => i.eval σ >>= fun id => copyMem τ (.ref id) := rfl
+theorem eval_iread (m : Tm C Γ .mem) (a : Tm C Γ .addr) : (Tm.app2 .iread m a).eval σ =
+    m.eval σ >>= fun τ => a.eval σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
+theorem eval_copy (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copy m v).eval σ =
+    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
+theorem eval_mat (i : Tm C Γ .ident) (k : Tm C Γ .val) : (Tm.app2 .mat i k).eval σ =
+    i.eval σ >>= fun id => k.eval σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) :=
   Close.Op2.eval_mat _ _ _
-theorem eval_copySt (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copySt m v).evalT σ =
-    v.evalT σ >>= fun sv => m.evalT σ >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
+theorem eval_copySt (m : Tm C Γ .mem) (v : Tm C Γ .sv) : (Tm.app2 .copySt m v).eval σ =
+    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
 
-theorem eval_ite (c a b : Tm C Γ .val) : (Tm.app3 .ite c a b).evalT σ =
-    c.evalT σ >>= fun cv => pickBranch cv (a.evalT σ) (b.evalT σ) := rfl
+theorem eval_ite (c a b : Tm C Γ .val) : (Tm.app3 .ite c a b).eval σ =
+    c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ) := rfl
 theorem eval_save (s : Tm C Γ .st) (p : Tm C Γ .path) (h : Op1.sval.named = false)
-    (t : Tm C Γ .val) : (Tm.app3 .save s p (.app1 .sval h t)).evalT σ =
-    t.evalT σ >>= fun x => s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+    (t : Tm C Γ .val) : (Tm.app3 .save s p (.app1 .sval h t)).eval σ =
+    t.eval σ >>= fun x => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.saveStorage rs.1 rs.2 x.toSVal :=
   Close.Op3.eval_save_val _ _ _ _
 theorem eval_save_find (s s' : Tm C Γ .st) (p p' : Tm C Γ .path) :
-    (Tm.app3 .save s p (.app2 .sfind s' p')).evalT σ =
-    (Tm.app2 .sfind s' p').evalT σ >>= fun sv => s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+    (Tm.app3 .save s p (.app2 .sfind s' p')).eval σ =
+    (Tm.app2 .sfind s' p').eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) :=
   Close.Op3.eval_save_find _ _ _ _ _
 theorem eval_save_copyMem (s : Tm C Γ .st) (p : Tm C Γ .path) (m : Tm C Γ .mem)
-    (i : Tm C Γ .ident) : (Tm.app3 .save s p (.app2 .copyMem m i)).evalT σ =
-    (Tm.app2 .copyMem m i).evalT σ >>= fun sv => s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+    (i : Tm C Γ .ident) : (Tm.app3 .save s p (.app2 .copyMem m i)).eval σ =
+    (Tm.app2 .copyMem m i).eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) :=
   Close.Op3.eval_save_copyMem _ _ _ _ _
 theorem eval_push (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) :
-    (Tm.app3 .push s p v).evalT σ = s.evalT σ >>= fun τ => p.evalT σ >>= fun rs =>
+    (Tm.app3 .push s p v).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
       τ.findStorage rs.1 rs.2 >>=
-        Close.pushOn τ .uint rs.1 rs.2 (fun _ => v.evalT σ >>= fun sv => pure sv.strip) :=
+        Close.pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ >>= fun sv => pure sv.strip) :=
   Close.Op3.eval_push _ _ _ _
 theorem eval_write (m : Tm C Γ .mem) (a : Tm C Γ .addr) (v : Tm C Γ .mv) :
-    (Tm.app3 .write m a v).evalT σ =
-    v.evalT σ >>= fun mv => m.evalT σ >>= fun τ => a.evalT σ >>= fun addr => writeAddr τ mv addr :=
+    (Tm.app3 .write m a v).eval σ =
+    v.eval σ >>= fun mv => m.eval σ >>= fun τ => a.eval σ >>= fun addr => writeAddr τ mv addr :=
   rfl
 
-theorem denote_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).denoteT σ = .prim v := rfl
+theorem denote_lit (v : Value) : (Tm.app0 (.lit v) : Tm C Γ .val).denote σ = .prim v := rfl
 theorem denote_env (k : EnvKey) :
-    (Tm.app0 (.env k) : Tm C Γ .val).denoteT σ = .prim (.int (σ.globE.envVal k)) := rfl
+    (Tm.app0 (.env k) : Tm C Γ .val).denote σ = .prim (.int (σ.globE.envVal k)) := rfl
 theorem denote_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
-    (Tm.pvV i : Tm C Γ .val).denoteT σ = .prim (σ.loc _ i) := rfl
+    (Tm.pvV i : Tm C Γ .val).denote σ = .prim (σ.loc _ i) := rfl
 
 end Terms
 
@@ -263,84 +263,84 @@ section Updates
 
 variable {Γ Δ : Ctx} (σ₀ : State C Γ)
 
-theorem rhs_val {p : PrimTy} (t : Tm C Γ .val) : (Rhs.val (p := p) t).evalT σ₀ = t.evalT σ₀ := rfl
+theorem rhs_val {p : PrimTy} (t : Tm C Γ .val) : (Rhs.val (p := p) t).eval σ₀ = t.eval σ₀ := rfl
 theorem rhs_path {R : RefTy} (p : Tm C Γ .path) :
-    (Rhs.path (R := R) p).evalT σ₀ = p.evalT σ₀ >>= fun r => .ok (some r) := rfl
-theorem rhs_unset {R : RefTy} : (Rhs.unset (R := R) : Rhs C Γ _).evalT σ₀ = .ok none := rfl
+    (Rhs.path (R := R) p).eval σ₀ = p.eval σ₀ >>= fun r => .ok (some r) := rfl
+theorem rhs_unset {R : RefTy} : (Rhs.unset (R := R) : Rhs C Γ _).eval σ₀ = .ok none := rfl
 theorem rhs_mref {R : RefTy} (i : Tm C Γ .ident) :
-    (Rhs.mref (R := R) i).evalT σ₀ = i.evalT σ₀ >>= fun id => .ok (some id) := rfl
+    (Rhs.mref (R := R) i).eval σ₀ = i.eval σ₀ >>= fun id => .ok (some id) := rfl
 theorem rhs_store (s : Tm C Γ .st) :
-    (Rhs.store s).evalT σ₀ = s.evalT σ₀ >>= fun g => .ok g.storage := rfl
-theorem rhs_saveNet : (Rhs.saveNet : Rhs C Γ _).evalT σ₀ = .ok σ₀.globE.net := rfl
-theorem rhs_saveNetMt : (Rhs.saveNetMt : Rhs C Γ _).evalT σ₀ = .ok [] := rfl
+    (Rhs.store s).eval σ₀ = s.eval σ₀ >>= fun g => .ok g.storage := rfl
+theorem rhs_saveNet : (Rhs.saveNet : Rhs C Γ _).eval σ₀ = .ok σ₀.globE.net := rfl
+theorem rhs_saveNetMt : (Rhs.saveNetMt : Rhs C Γ _).eval σ₀ = .ok [] := rfl
 
 theorem glob_storage (s : Tm C Γ .st) (g : Semantics.State) :
     (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g =
-      s.evalT σ₀ >>= fun g' => .ok { g with storage := g'.storage } := rfl
+      s.eval σ₀ >>= fun g' => .ok { g with storage := g'.storage } := rfl
 theorem glob_memory (m : Tm C Γ .mem) (g : Semantics.State) :
     (UpdElem.memory m : UpdElem C Γ Δ).globT σ₀ g =
-      m.evalT σ₀ >>= fun μ => .ok { g with heap := μ.heap, nextId := μ.nextId } := rfl
+      m.eval σ₀ >>= fun μ => .ok { g with heap := μ.heap, nextId := μ.nextId } := rfl
 theorem glob_selfBalance (op : IntOp) (a : Tm C Γ .val) (g : Semantics.State) :
-    (UpdElem.selfBalance op a : UpdElem C Γ Δ).globT σ₀ g = a.evalT σ₀ >>= Value.asInt >>=
+    (UpdElem.selfBalance op a : UpdElem C Γ Δ).globT σ₀ g = a.eval σ₀ >>= Value.asInt >>=
       fun amt => .ok { g with selfBalance := op.apply σ₀.globE.selfBalance amt } := by
   simp only [UpdElem.globT, bind, Except.bind]
-  cases a.evalT σ₀ <;> rfl
+  cases a.eval σ₀ <;> rfl
 theorem glob_net (r : Tm C Γ .val) (op : IntOp) (a : Tm C Γ .val) (g : Semantics.State) :
     (UpdElem.net r op a : UpdElem C Γ Δ).globT σ₀ g =
-      r.evalT σ₀ >>= Value.asInt >>= fun addr => a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
         .ok { g with net := setBy addr (op.apply (g.getNet addr) amt) g.net } := by
   simp only [UpdElem.globT, bind, Except.bind]
-  cases r.evalT σ₀ with
+  cases r.eval σ₀ with
   | error => rfl
   | ok v =>
     cases v with
     | bool b => rfl
     | int addr =>
-      cases a.evalT σ₀ with
+      cases a.eval σ₀ with
       | error => rfl
       | ok w => cases w <;> rfl
 theorem glob_pay (r a : Tm C Γ .val) (g : Semantics.State) :
     (UpdElem.pay r a : UpdElem C Γ Δ).globT σ₀ g =
-      r.evalT σ₀ >>= Value.asInt >>= fun addr => a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
         if amt < 0 then .error .revert
         else .ok { g with
           net := if addr = σ₀.globE.tx.selfAddress then g.net
             else setBy addr (g.getNet addr - amt) g.net } := by
   simp only [UpdElem.globT, bind, Except.bind]
-  cases r.evalT σ₀ with
+  cases r.eval σ₀ with
   | error => rfl
   | ok v =>
     cases v with
     | bool b => rfl
     | int addr =>
-      cases a.evalT σ₀ with
+      cases a.eval σ₀ with
       | error => rfl
       | ok w => cases w <;> rfl
 theorem glob_netMt (r a : Tm C Γ .val) (g : Semantics.State) :
     (UpdElem.netMt r a : UpdElem C Γ Δ).globT σ₀ g =
-      r.evalT σ₀ >>= Value.asInt >>= fun addr => a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
         .ok { g with net := [(addr, amt)] } := by
   simp only [UpdElem.globT, bind, Except.bind]
-  cases r.evalT σ₀ with
+  cases r.eval σ₀ with
   | error => rfl
   | ok v =>
     cases v with
     | bool b => rfl
     | int addr =>
-      cases a.evalT σ₀ with
+      cases a.eval σ₀ with
       | error => rfl
       | ok w => cases w <;> rfl
 theorem glob_setBalance (a : Tm C Γ .val) (g : Semantics.State) :
-    (UpdElem.setBalance a : UpdElem C Γ Δ).globT σ₀ g = a.evalT σ₀ >>= Value.asInt >>= fun amt =>
+    (UpdElem.setBalance a : UpdElem C Γ Δ).globT σ₀ g = a.eval σ₀ >>= Value.asInt >>= fun amt =>
       .ok { g with selfBalance := amt } := by
   simp only [UpdElem.globT, bind, Except.bind]
-  cases a.evalT σ₀ <;> rfl
+  cases a.eval σ₀ <;> rfl
 
 theorem applyV_nil : (Upd.nil : Upd C Γ Γ).applyV σ₀ = .ok (σ₀.globE, σ₀.loc) := rfl
 theorem applyV_snoc (U : Upd C Γ Δ) (e : UpdElem C Γ Δ) :
     (U.snoc e).applyV σ₀ = U.applyV σ₀ >>= fun p => e.applyV σ₀ p.1 p.2 := rfl
 theorem applyV_decl {t : LTy} (U : Upd C Γ Δ) (x : Var) (r : Rhs C Γ t) :
-    (U.decl x r).applyV σ₀ = U.applyV σ₀ >>= fun p => r.evalT σ₀ >>= fun v => .ok (p.1, p.2.push v) :=
+    (U.decl x r).applyV σ₀ = U.applyV σ₀ >>= fun p => r.eval σ₀ >>= fun v => .ok (p.1, p.2.push v) :=
   rfl
 theorem applyV_pop {Δ' : Ctx} (U : Upd C Γ Δ) (h : Ext Δ' Δ) :
     (U.pop h).applyV σ₀ = U.applyV σ₀ >>= fun p => .ok (p.1, p.2.drop h) := rfl
@@ -348,7 +348,7 @@ theorem applyV_drop {Δ' : Ctx} (U : Upd C Γ Δ) (h : Thin Δ' Δ) :
     (U.drop h).applyV σ₀ = U.applyV σ₀ >>= fun p => .ok (p.1, p.2.thin h) := rfl
 
 theorem elem_local {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) (g : Semantics.State) (ℓ : Locs C Δ) :
-    (UpdElem.local i r).applyV σ₀ g ℓ = r.evalT σ₀ >>= fun v => .ok (g, ℓ.set i v) := rfl
+    (UpdElem.local i r).applyV σ₀ g ℓ = r.eval σ₀ >>= fun v => .ok (g, ℓ.set i v) := rfl
 theorem elem_storage (s : Tm C Γ .st) (g : Semantics.State) (ℓ : Locs C Δ) :
     (UpdElem.storage s : UpdElem C Γ Δ).applyV σ₀ g ℓ =
       (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g >>= fun g' => .ok (g', ℓ) := rfl
@@ -482,29 +482,29 @@ theorem holds_and (σ : State C Γ) (φ ψ : Fml C Γ) :
 theorem holds_imp (σ : State C Γ) (φ ψ : Fml C Γ) :
     holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
 theorem holds_eq (σ : State C Γ) (a b : Tm C Γ .val) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) := Iff.rfl
+    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
 theorem holds_defined (σ : State C Γ) (t : Tm C Γ .val) : holds σ (.defined t) ↔
-    Modality.diamond.wp (t.evalT σ) fun _ => True := by
-  show (∃ x, t.evalT σ = .ok x) ↔ _
-  cases t.evalT σ <;> simp only [reduceCtorEq, exists_false, Except.ok.injEq, exists_eq', Modality.wp,
+    Modality.diamond.wp (t.eval σ) fun _ => True := by
+  show (∃ x, t.eval σ = .ok x) ↔ _
+  cases t.eval σ <;> simp only [reduceCtorEq, exists_false, Except.ok.injEq, exists_eq', Modality.wp,
     Modality.onHalt]
 theorem holds_eqD (σ : State C Γ) (a b : Tm C Γ .val) : holds σ (Fml.eqD a b) ↔
-    Modality.diamond.wp (a.evalT σ) fun x => Modality.diamond.wp (b.evalT σ) fun y => x = y := by
-  have key : holds σ (Fml.eqD a b) ↔ ∃ x, a.evalT σ = .ok x ∧ b.evalT σ = .ok x := by
+    Modality.diamond.wp (a.eval σ) fun x => Modality.diamond.wp (b.eval σ) fun y => x = y := by
+  have key : holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
     constructor
     · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
       have he' : Theory.StValue.Equiv (.prim x) (.prim y) := by
-        rw [← Tm.denoteT_evalT σ a x hx, ← Tm.denoteT_evalT σ b y hy]; exact he
+        rw [← Tm.denote_eval σ a x hx, ← Tm.denote_eval σ b y hy]; exact he
       rw [Theory.StValue.Equiv.prim_iff] at he'
       cases he'
       exact ⟨x, hx, hy⟩
     · rintro ⟨x, hx, hy⟩
       refine ⟨⟨x, hx⟩, ⟨x, hy⟩, ?_⟩
-      show Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ)
-      rw [Tm.denoteT_evalT σ a x hx, Tm.denoteT_evalT σ b x hy]
+      show Theory.StValue.Equiv (a.denote σ) (b.denote σ)
+      rw [Tm.denote_eval σ a x hx, Tm.denote_eval σ b x hy]
       exact Theory.StValue.Equiv.refl _
   rw [key]
-  cases a.evalT σ <;> cases b.evalT σ <;>
+  cases a.eval σ <;> cases b.eval σ <;>
     simp only [Modality.wp, Modality.onHalt, Except.ok.injEq, reduceCtorEq, false_and, and_false,
       and_self, exists_false, exists_eq_left', eq_comm]
 /-- A typed state an update lands on: the global part `g`, the locals `ℓ`,

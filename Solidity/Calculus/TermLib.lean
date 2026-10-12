@@ -10,7 +10,7 @@ The Theory's rules on terms, KeY's term taclets, stated on the
 scoped terms `Tm C Γ .val` (`Calculus/Fml.lean`), with what they need: the
 Theory equality of two terms (`Tm.Theq`), the side conditions read off a
 scoped path, and the term functions a scoped closer compares terms with.
-Soundness is over the scoped `Tm.denoteT` (`Calculus/Lands.lean`).
+Soundness is over the scoped `Tm.denote` (`Calculus/Lands.lean`).
 
 **Notation.** `tm{ … }` writes the scoped term: the text is read as a rule
 line reads a term (`RuleSyntax.schemaTerm`), its symbols the scoped ones
@@ -26,7 +26,7 @@ with its `match` form as the compiled twin (`…M`) and a link theorem
 (`…_eq_…M`), as Gate G0 asks (`Calculus/DecideScoped.lean`).
 
 `holds_eqD_iffS` is in `Calculus/SoundLoops.lean`, with the term bridge
-`Tm.denoteT_evalT` (`Calculus/Lands.lean`).
+`Tm.denote_eval` (`Calculus/Lands.lean`).
 -/
 
 namespace Solidity
@@ -202,7 +202,7 @@ variable {Γ : Ctx}
 /-- The two terms have the same Theory value in every state: what a law of the Theory says about the terms that denote its
 sides. -/
 def Tm.Theq (t t' : Tm C Γ .val) : Prop :=
-  ∀ σ : State C Γ, Theory.StValue.Equiv (t.denoteT σ) (t'.denoteT σ)
+  ∀ σ : State C Γ, Theory.StValue.Equiv (t.denote σ) (t'.denote σ)
 
 theorem Tm.Theq.refl (t : Tm C Γ .val) : Tm.Theq t t := fun _ => StValue.Equiv.refl _
 
@@ -214,7 +214,7 @@ theorem Tm.Theq.trans {t₁ t₂ t₃ : Tm C Γ .val} (h₁ : Tm.Theq t₁ t₂)
   fun σ => (h₁ σ).trans (h₂ σ)
 
 /-- Terms whose Theory values are equal are equal in the Theory. -/
-theorem Tm.Theq.of_eq {t t' : Tm C Γ .val} (h : ∀ σ : State C Γ, t.denoteT σ = t'.denoteT σ) :
+theorem Tm.Theq.of_eq {t t' : Tm C Γ .val} (h : ∀ σ : State C Γ, t.denote σ = t'.denote σ) :
     Tm.Theq t t' :=
   fun σ => h σ ▸ StValue.Equiv.refl _
 
@@ -549,7 +549,7 @@ def Tm.findLit? (s : Tm C Γ .st) (q : Tm C Γ .path) : Option Value :=
 
 /-- The node at `p` in `s` is not a mapping, in every state. -/
 def Tm.KindFreeAt (s : Tm C Γ .st) (p : Tm C Γ .path) : Prop :=
-  ∀ σ : State C Γ, (findSt (s.denoteT σ) (p.denoteT σ)).kindFree = true
+  ∀ σ : State C Γ, (findSt (s.denote σ) (p.denote σ)).kindFree = true
 
 end Side
 
@@ -560,48 +560,48 @@ section SideDenote
 variable {Γ : Ctx} (σ : State C Γ)
 
 /-- `hasSeg` gives the Theory's `p ≠ []` in every state. -/
-theorem Tm.denote_ne_nil {p : Tm C Γ .path} (hp : p.hasSeg = true) : p.denoteT σ ≠ [] := by
+theorem Tm.denote_ne_nil {p : Tm C Γ .path} (hp : p.hasSeg = true) : p.denote σ ≠ [] := by
   match p, hp with
   | .pvP _, hp => nomatch hp
-  | .app0 (.root _), _ => simp only [Tm.denoteT, Op0.denote, ne_eq, List.cons_ne_nil, not_false_eq_true]
+  | .app0 (.root _), _ => simp only [Tm.denote, Op0.denote, ne_eq, List.cons_ne_nil, not_false_eq_true]
   | .app1 (.field _) _ _, _ | .app1 .next _ _, _ | .app2 .at _ _, _ | .app2 .nextIn _ _, _
   | .app3 .atIn _ _ _, _ =>
-    simp only [Tm.denoteT, Op1.denote, Op2.denote, Op3.denote, ne_eq, List.append_eq_nil_iff,
+    simp only [Tm.denote, Op1.denote, Op2.denote, Op3.denote, ne_eq, List.append_eq_nil_iff,
       List.cons_ne_nil, and_false, not_false_eq_true]
 
 /-- A path has its shape in every state. -/
 theorem Tm.shape?_matches : (p : Tm C Γ .path) → {a : List SegT} →
-    p.shape? = some a → SegT.matches a (p.denoteT σ) = true
+    p.shape? = some a → SegT.matches a (p.denote σ) = true
   | .pvP _, _, h => nomatch h
   | .app0 (.root _), _, h => by
     simp only [Tm.shape?, Option.some.injEq] at h
     subst h
-    simp only [Tm.denoteT, Op0.denote, SegT.matches, SegT.fits, BEq.rfl, Bool.and_self]
+    simp only [Tm.denote, Op0.denote, SegT.matches, SegT.fits, BEq.rfl, Bool.and_self]
   | .app1 (.field _) _ p, _, h => by
     simp only [Tm.shape?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
-    simp only [Tm.denoteT, Op1.denote]
+    simp only [Tm.denote, Op1.denote]
     exact SegT.matches_append _ _ _ _ (Tm.shape?_matches p ha)
       (by simp only [SegT.matches, SegT.fits, BEq.rfl, Bool.and_self])
   | .app1 .next _ p, _, h | .app2 .nextIn _ p, _, h => by
     simp only [Tm.shape?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
-    simp only [Tm.denoteT, Op1.denote, Op2.denote]
+    simp only [Tm.denote, Op1.denote, Op2.denote]
     exact SegT.matches_append _ _ _ _ (Tm.shape?_matches p ha) rfl
   | .app2 .at p i, _, h | .app3 .atIn _ p i, _, h => by
     simp only [Tm.shape?, Option.map_eq_some_iff] at h
     obtain ⟨a, ha, rfl⟩ := h
-    simp only [Tm.denoteT, Op2.denote, Op3.denote]
+    simp only [Tm.denote, Op2.denote, Op3.denote]
     refine SegT.matches_append _ _ _ _ (Tm.shape?_matches p ha) ?_
     cases hi : Tm.litInt? i with
     | none => rfl
     | some k =>
       rw [Tm.eq_of_litInt? hi]
-      simp only [Tm.denoteT, Op0.denote, asInt, SegT.matches, SegT.fits, BEq.rfl, Bool.and_self]
+      simp only [Tm.denote, Op0.denote, asInt, SegT.matches, SegT.fits, BEq.rfl, Bool.and_self]
 
 /-- `Tm.diverges` gives the Theory's `diverges` in every state. -/
 theorem Tm.diverges_denote {p q : Tm C Γ .path} (h : p.diverges q = true) :
-    Theory.StValue.diverges (p.denoteT σ) (q.denoteT σ) = true := by
+    Theory.StValue.diverges (p.denote σ) (q.denote σ) = true := by
   unfold Tm.diverges at h
   split at h
   · rename_i a b ha hb
@@ -610,7 +610,7 @@ theorem Tm.diverges_denote {p q : Tm C Γ .path} (h : p.diverges q = true) :
 
 /-- `Tm.divergesLen` gives the Theory's `diverges q (p ++ [lengthSeg])`. -/
 theorem Tm.divergesLen_denote {q p : Tm C Γ .path} (h : q.divergesLen p = true) :
-    Theory.StValue.diverges (q.denoteT σ) (p.denoteT σ ++ [lengthSeg]) = true := by
+    Theory.StValue.diverges (q.denote σ) (p.denote σ ++ [lengthSeg]) = true := by
   unfold Tm.divergesLen at h
   split at h
   · rename_i a b ha hb
@@ -619,11 +619,11 @@ theorem Tm.divergesLen_denote {q p : Tm C Γ .path} (h : q.divergesLen p = true)
   · exact absurd h Bool.false_ne_true
 
 /-- A check erased leaves the Theory's path, in every state. -/
-theorem Tm.eraseChecks_denote : (p : Tm C Γ .path) → p.eraseChecks.denoteT σ = p.denoteT σ
+theorem Tm.eraseChecks_denote : (p : Tm C Γ .path) → p.eraseChecks.denote σ = p.denote σ
   | .pvP _ | .app0 (.root _) => rfl
   | .app1 (.field _) _ p | .app1 .next _ p | .app2 .at p _ | .app2 .nextIn _ p
   | .app3 .atIn _ p _ => by
-    simp only [Tm.eraseChecks, Tm.denoteT, Op1.denote, Op2.denote, Op3.denote,
+    simp only [Tm.eraseChecks, Tm.denote, Op1.denote, Op2.denote, Op3.denote,
       Tm.eraseChecks_denote p]
 
 /-- A check erased leaves a segment where there was one. -/
@@ -633,7 +633,7 @@ theorem Tm.eraseChecks_hasSeg : (p : Tm C Γ .path) → p.eraseChecks.hasSeg = p
 
 /-- `sameSegs` gives one Theory path in every state. -/
 theorem Tm.sameSegs_denote {p q : Tm C Γ .path} (h : p.sameSegs q = true) :
-    p.denoteT σ = q.denoteT σ := by
+    p.denote σ = q.denote σ := by
   rw [← Tm.eraseChecks_denote σ p, ← Tm.eraseChecks_denote σ q, Tm.eq_of_beqR h]
 
 /-- Paths of the same segments are both bare aliases or neither. -/
@@ -643,26 +643,26 @@ theorem Tm.sameSegs_hasSeg {p q : Tm C Γ .path} (h : p.sameSegs q = true) :
 
 /-- `q.extends p` gives the Theory's `q = p ++ r`, `r ≠ []`, in every state. -/
 theorem Tm.extends_denote {p : Tm C Γ .path} :
-    (q : Tm C Γ .path) → q.extends p = true → ∃ r, r ≠ [] ∧ q.denoteT σ = p.denoteT σ ++ r
+    (q : Tm C Γ .path) → q.extends p = true → ∃ r, r ≠ [] ∧ q.denote σ = p.denote σ ++ r
   | .app1 (.field f) _ q, h => by
     simp only [Tm.extends, Tm.extendsAny, Bool.or_eq_true] at h
     rcases h with h | h
     · obtain rfl := Tm.eq_of_beqR h
-      exact ⟨[.field f], List.cons_ne_nil _ _, by simp only [Tm.denoteT, Op1.denote]⟩
+      exact ⟨[.field f], List.cons_ne_nil _ _, by simp only [Tm.denote, Op1.denote]⟩
     · obtain ⟨r, -, hq⟩ := Tm.extends_denote q h
       exact ⟨r ++ [.field f], by simp only [ne_eq, List.append_eq_nil_iff, List.cons_ne_nil, and_false,
         not_false_eq_true],
-        by simp only [Tm.denoteT, Op1.denote, hq, List.append_assoc]⟩
+        by simp only [Tm.denote, Op1.denote, hq, List.append_assoc]⟩
   | .app2 .at q i, h | .app3 .atIn _ q i, h => by
     simp only [Tm.extends, Tm.extendsAny, Bool.or_eq_true] at h
     rcases h with h | h
     · obtain rfl := Tm.eq_of_beqR h
-      exact ⟨[.at (asInt (i.denoteT σ))], List.cons_ne_nil _ _,
-        by simp only [Tm.denoteT, Op2.denote, Op3.denote]⟩
+      exact ⟨[.at (asInt (i.denote σ))], List.cons_ne_nil _ _,
+        by simp only [Tm.denote, Op2.denote, Op3.denote]⟩
     · obtain ⟨r, -, hq⟩ := Tm.extends_denote q h
-      exact ⟨r ++ [.at (asInt (i.denoteT σ))], by simp only [ne_eq, List.append_eq_nil_iff, List.cons_ne_nil, and_false,
+      exact ⟨r ++ [.at (asInt (i.denote σ))], by simp only [ne_eq, List.append_eq_nil_iff, List.cons_ne_nil, and_false,
         not_false_eq_true],
-        by simp only [Tm.denoteT, Op2.denote, Op3.denote, hq, List.append_assoc]⟩
+        by simp only [Tm.denote, Op2.denote, Op3.denote, hq, List.append_assoc]⟩
   | .pvP _, h | .app0 (.root _), h | .app1 .next _ _, h | .app2 .nextIn _ _, h => nomatch h
 
 theorem Tm.eq_root_of_root? : (p : Tm C Γ .path) → {r : Name} → p.root? = some r →
@@ -676,7 +676,7 @@ theorem Tm.eq_root_of_root? : (p : Tm C Γ .path) → {r : Name} → p.root? = s
 
 /-- `shift?` splits the Theory's path at its head, in every state. -/
 theorem Tm.shift?_denote : (p : Tm C Γ .path) → {r : Name} → {p' : Tm C Γ .path} →
-    p.shift? = some (r, p') → p.denoteT σ = .field r :: p'.denoteT σ
+    p.shift? = some (r, p') → p.denote σ = .field r :: p'.denote σ
   | .app1 (.field f) _ p, _, _, h => by
     simp only [Tm.shift?] at h
     split at h
@@ -684,13 +684,13 @@ theorem Tm.shift?_denote : (p : Tm C Γ .path) → {r : Name} → {p' : Tm C Γ 
       obtain rfl := Tm.eq_root_of_root? p hr
       simp only [Option.some.injEq, Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
-      simp only [Tm.denoteT, Op0.denote, Op1.denote, List.singleton_append]
+      simp only [Tm.denote, Op0.denote, Op1.denote, List.singleton_append]
     · simp only [Option.map_eq_some_iff] at h
       obtain ⟨⟨r, p'⟩, hp, h⟩ := h
       simp only [Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
       have ih := Tm.shift?_denote p hp
-      simp only [Tm.denoteT, Op1.denote, ih, List.cons_append]
+      simp only [Tm.denote, Op1.denote, ih, List.cons_append]
   | .app2 .at p i, _, _, h => by
     simp only [Tm.shift?] at h
     split at h
@@ -700,7 +700,7 @@ theorem Tm.shift?_denote : (p : Tm C Γ .path) → {r : Name} → {p' : Tm C Γ 
       simp only [Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
       have ih := Tm.shift?_denote p hp
-      simp only [Tm.denoteT, Op2.denote, ih, List.cons_append]
+      simp only [Tm.denote, Op2.denote, ih, List.cons_append]
   | .app3 .atIn _ p i, _, _, h => by
     simp only [Tm.shift?] at h
     split at h
@@ -710,7 +710,7 @@ theorem Tm.shift?_denote : (p : Tm C Γ .path) → {r : Name} → {p' : Tm C Γ 
       simp only [Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
       have ih := Tm.shift?_denote p hp
-      simp only [Tm.denoteT, Op3.denote, ih, List.cons_append]
+      simp only [Tm.denote, Op3.denote, ih, List.cons_append]
   | .pvP _, _, _, h | .app0 (.root _), _, _, h | .app1 .next _ _, _, _, h
   | .app2 .nextIn _ _, _, _, h => nomatch h
 
@@ -777,12 +777,12 @@ def SCtxS.fill : SCtxS C Γ → Tm C Γ .st → Tm C Γ .st
   | .select K r, s => .app1 (.select r) rfl (K.fill s)
 
 /-- Two storages that denote alike fill a context alike. -/
-theorem SCtxS.fill_denote {s s' : Tm C Γ .st} (h : ∀ σ : State C Γ, s.denoteT σ = s'.denoteT σ) :
-    (K : SCtxS C Γ) → ∀ σ : State C Γ, (K.fill s).denoteT σ = (K.fill s').denoteT σ
+theorem SCtxS.fill_denote {s s' : Tm C Γ .st} (h : ∀ σ : State C Γ, s.denote σ = s'.denote σ) :
+    (K : SCtxS C Γ) → ∀ σ : State C Γ, (K.fill s).denote σ = (K.fill s').denote σ
   | .hole, σ => h σ
-  | .save K p v, σ => by simp only [SCtxS.fill, Tm.denoteT, Op3.denote, SCtxS.fill_denote h K σ]
-  | .delAt K p, σ => by simp only [SCtxS.fill, Tm.denoteT, Op2.denote, SCtxS.fill_denote h K σ]
-  | .select K r, σ => by simp only [SCtxS.fill, Tm.denoteT, Op1.denote, SCtxS.fill_denote h K σ]
+  | .save K p v, σ => by simp only [SCtxS.fill, Tm.denote, Op3.denote, SCtxS.fill_denote h K σ]
+  | .delAt K p, σ => by simp only [SCtxS.fill, Tm.denote, Op2.denote, SCtxS.fill_denote h K σ]
+  | .select K r, σ => by simp only [SCtxS.fill, Tm.denote, Op1.denote, SCtxS.fill_denote h K σ]
 
 end Ctx
 
@@ -920,44 +920,44 @@ variable {Γ : Ctx}
 
 theorem Tm.selectOnSaveMember_denote {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name}
     {p' : Tm C Γ .path} {v : Tm C Γ .sv} (h : p.shift? = some (r, p')) (σ : State C Γ) :
-    (tm{ select(save(s, p, v), r) } : Tm C Γ .st).denoteT σ =
-      (tm{ save(select(s, r), p', v) } : Tm C Γ .st).denoteT σ := by
+    (tm{ select(save(s, p, v), r) } : Tm C Γ .st).denote σ =
+      (tm{ save(select(s, r), p', v) } : Tm C Γ .st).denote σ := by
   have hne := Tm.denote_ne_nil σ (Tm.shift?_hasSeg p h)
-  simp only [Tm.denoteT, Op1.denote, Op3.denote, Tm.shift?_denote σ p h, copyTo,
+  simp only [Tm.denote, Op1.denote, Op3.denote, Tm.shift?_denote σ p h, copyTo,
     StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne, if_false, asStruct_st,
     find_cons _ _ hne]
 
 theorem Tm.selectOnSaveFrame_denote {s : Tm C Γ .st} {p : Tm C Γ .path} {r r' : Name}
     {p' : Tm C Γ .path} {v : Tm C Γ .sv} (h : p.shift? = some (r', p')) (hr : r' ≠ r)
     (σ : State C Γ) :
-    (tm{ select(save(s, p, v), r) } : Tm C Γ .st).denoteT σ =
-      (tm{ select(s, r) } : Tm C Γ .st).denoteT σ := by
-  simp only [Tm.denoteT, Op1.denote, Op3.denote, Tm.shift?_denote σ p h, copyTo,
+    (tm{ select(save(s, p, v), r) } : Tm C Γ .st).denote σ =
+      (tm{ select(s, r) } : Tm C Γ .st).denote σ := by
+  simp only [Tm.denote, Op1.denote, Op3.denote, Tm.shift?_denote σ p h, copyTo,
     StValue.selectOnSaveCons]
   rw [if_neg (fun e => hr (Seg.field.inj e))]
 
 theorem Tm.selectOnDelAtMember_denote {s : Tm C Γ .st} {p : Tm C Γ .path} {r : Name}
     {p' : Tm C Γ .path} (h : p.shift? = some (r, p')) (σ : State C Γ) :
-    (tm{ select(delAt(s, p), r) } : Tm C Γ .st).denoteT σ =
-      (tm{ delAt(select(s, r), p') } : Tm C Γ .st).denoteT σ := by
+    (tm{ select(delAt(s, p), r) } : Tm C Γ .st).denote σ =
+      (tm{ delAt(select(s, r), p') } : Tm C Γ .st).denote σ := by
   have hne := Tm.denote_ne_nil σ (Tm.shift?_hasSeg p h)
-  simp only [Tm.denoteT, Op1.denote, Op2.denote, Tm.shift?_denote σ p h, Theory.StValue.delAt,
+  simp only [Tm.denote, Op1.denote, Op2.denote, Tm.shift?_denote σ p h, Theory.StValue.delAt,
     StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne, if_false, asStruct_st,
     find_cons _ _ hne]
 
 theorem Tm.selectOnDelAtFrame_denote {s : Tm C Γ .st} {p : Tm C Γ .path} {r r' : Name}
     {p' : Tm C Γ .path} (h : p.shift? = some (r', p')) (hr : r' ≠ r) (σ : State C Γ) :
-    (tm{ select(delAt(s, p), r) } : Tm C Γ .st).denoteT σ =
-      (tm{ select(s, r) } : Tm C Γ .st).denoteT σ := by
-  simp only [Tm.denoteT, Op1.denote, Op2.denote, Tm.shift?_denote σ p h, Theory.StValue.delAt,
+    (tm{ select(delAt(s, p), r) } : Tm C Γ .st).denote σ =
+      (tm{ select(s, r) } : Tm C Γ .st).denote σ := by
+  simp only [Tm.denote, Op1.denote, Op2.denote, Tm.shift?_denote σ p h, Theory.StValue.delAt,
     StValue.selectOnSaveCons]
   rw [if_neg (fun e => hr (Seg.field.inj e))]
 
 /-- Two storages that denote alike are read alike, in any context. -/
-theorem Tm.find_fill_theq {s s' : Tm C Γ .st} (h : ∀ σ : State C Γ, s.denoteT σ = s'.denoteT σ)
+theorem Tm.find_fill_theq {s s' : Tm C Γ .st} (h : ∀ σ : State C Γ, s.denote σ = s'.denote σ)
     (K : SCtxS C Γ) (q : Tm C Γ .path) :
     Tm.Theq tm{ find(‹K.fill s›, q) } tm{ find(‹K.fill s'›, q) } := fun σ => by
-  simp only [Tm.denoteT, Op2.denote, SCtxS.fill_denote h K σ]
+  simp only [Tm.denote, Op2.denote, SCtxS.fill_denote h K σ]
   exact Equiv.refl _
 
 /-- The word read off the writes is the word read. -/
@@ -970,13 +970,13 @@ theorem Tm.findLitBy_theq {q : Tm C Γ .path} (hq : q.hasSeg = true) :
     · rename_i hpq
       obtain rfl := Tm.svLit?_eq h
       have hp : p.hasSeg = true := (Tm.sameSegs_hasSeg hpq).trans hq
-      simp only [Tm.denoteT, Op0.denote, Op1.denote, Op2.denote, Op3.denote,
+      simp only [Tm.denote, Op0.denote, Op1.denote, Op2.denote, Op3.denote,
         ← Tm.sameSegs_denote σ hpq, find_copyTo_same _ (Tm.denote_ne_nil σ hp), copyVal]
       exact Equiv.refl _
     · split at h
       · rename_i hd
         have ih := Tm.findLitBy_theq hq s h σ
-        simp only [Tm.denoteT, Op0.denote, Op2.denote, Op3.denote] at ih ⊢
+        simp only [Tm.denote, Op0.denote, Op2.denote, Op3.denote] at ih ⊢
         rw [find_copyTo_frame _ _ _ _ (Tm.diverges_denote σ hd)]
         exact ih
       · nomatch h
@@ -994,14 +994,14 @@ theorem Tm.findLit?_theq {s : Tm C Γ .st} {q : Tm C Γ .path} {w : Value}
 in every state (`TermTaclet.sound`). -/
 theorem TermTaclet.sound {t t' : Tm C Γ .val} : TermTaclet t t' → Tm.Theq t t'
   | @findOnSave _ _ s p q v hp hq => fun σ => by
-    simp only [Tm.denoteT, Op0.denote, Op1.denote, Op2.denote, Op3.denote,
+    simp only [Tm.denote, Op0.denote, Op1.denote, Op2.denote, Op3.denote,
       ← Tm.sameSegs_denote σ hq, find_copyTo_same _ (Tm.denote_ne_nil σ hp), copyVal]
     exact Equiv.refl _
   | .findOnSaveFrame h => fun σ => by
-    simp only [Tm.denoteT, Op2.denote, Op3.denote, find_copyTo_frame _ _ _ _ (Tm.diverges_denote σ h)]
+    simp only [Tm.denote, Op2.denote, Op3.denote, find_copyTo_frame _ _ _ _ (Tm.diverges_denote σ h)]
     exact Equiv.refl _
   | @findMemberCons _ _ s p r p' h => fun σ => by
-    simp only [Tm.denoteT, Op1.denote, Op2.denote, Tm.shift?_denote σ p h,
+    simp only [Tm.denote, Op1.denote, Op2.denote, Tm.shift?_denote σ p h,
       find_cons _ _ (Tm.denote_ne_nil σ (Tm.shift?_hasSeg p h))]
     exact Equiv.refl _
   | @selectOnSaveMember _ _ s p r p' v q h =>
@@ -1021,39 +1021,39 @@ theorem TermTaclet.sound {t t' : Tm C Γ .val} : TermTaclet t t' → Tm.Theq t t
   | @selectOnDelAtFrameIn _ _ K s p r r' p' q h hr =>
     Tm.find_fill_theq (Tm.selectOnDelAtFrame_denote h hr) K q
   | @findOnDelAt _ _ s p q w hw hp hq => fun σ => by
-    have hr : findSt (s.denoteT σ) (p.denoteT σ) = .prim w := Equiv.prim_iff.1 (hw.sound σ)
-    simp only [Tm.denoteT, Op0.denote, Op2.denote, ← Tm.sameSegs_denote σ hq,
+    have hr : findSt (s.denote σ) (p.denote σ) = .prim w := Equiv.prim_iff.1 (hw.sound σ)
+    simp only [Tm.denote, Op0.denote, Op2.denote, ← Tm.sameSegs_denote σ hq,
       find_delAt_same _ (Tm.denote_ne_nil σ hp), hr, delValueDefault]
     exact Equiv.refl _
   | @findOnDelAtValue _ _ s p q hp hq => fun σ => by
-    simp only [Tm.denoteT, Op1.denote, Op2.denote, ← Tm.sameSegs_denote σ hq,
+    simp only [Tm.denote, Op1.denote, Op2.denote, ← Tm.sameSegs_denote σ hq,
       find_delAt_same _ (Tm.denote_ne_nil σ hp)]
     exact Equiv.refl _
   | .delValueLit => fun σ => by
-    simp only [Tm.denoteT, Op0.denote, Op1.denote, delValueDefault]
+    simp only [Tm.denote, Op0.denote, Op1.denote, delValueDefault]
     exact Equiv.refl _
   | @findOnDelAtBelow _ _ s p q w hk hw hp hq => fun σ => by
     obtain ⟨r, hr, hqr⟩ := Tm.extends_denote σ q hq
     have hw' := Tm.findLit?_theq hw σ
-    simp only [Tm.denoteT, Op0.denote, Op2.denote] at hw' ⊢
+    simp only [Tm.denote, Op0.denote, Op2.denote] at hw' ⊢
     rw [hqr, find_delAt_below _ (Tm.denote_ne_nil σ hp) hr (hk σ), ← hqr,
       Equiv.prim_iff.1 hw', delValueDefault]
     exact Equiv.refl _
   | .findOnDelAtFrame h => fun σ => by
-    simp only [Tm.denoteT, Op2.denote, find_delAt_frame _ (Tm.diverges_denote σ h)]
+    simp only [Tm.denote, Op2.denote, find_delAt_frame _ (Tm.diverges_denote σ h)]
     exact Equiv.refl _
   | .findOnPushFrame h => fun σ => by
-    simp only [Tm.denoteT, Op2.denote, Op3.denote, find_pushT_frame _ _ (Tm.diverges_denote σ h)]
+    simp only [Tm.denote, Op2.denote, Op3.denote, find_pushT_frame _ _ (Tm.diverges_denote σ h)]
     exact Equiv.refl _
   | .findOnPopFrame h => fun σ => by
-    simp only [Tm.denoteT, Op2.denote, find_popT_frame _ (Tm.diverges_denote σ h)]
+    simp only [Tm.denote, Op2.denote, find_popT_frame _ (Tm.diverges_denote σ h)]
     exact Equiv.refl _
   | .lenOnSaveFrame h => fun σ => by
-    simp only [Tm.denoteT, Op2.denote, Op3.denote,
+    simp only [Tm.denote, Op2.denote, Op3.denote,
       find_copyTo_frame _ _ _ _ (Tm.divergesLen_denote σ h)]
     exact Equiv.refl _
   | .lenOnDelAtFrame h => fun σ => by
-    simp only [Tm.denoteT, Op2.denote, find_delAt_frame _ (Tm.divergesLen_denote σ h)]
+    simp only [Tm.denote, Op2.denote, find_delAt_frame _ (Tm.divergesLen_denote σ h)]
     exact Equiv.refl _
   | .theory h => h
   | .symm r => r.sound.symm

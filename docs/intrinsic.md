@@ -5226,6 +5226,41 @@ stays solkey's.  Speed warned first: the kernel walks the sort index in
 | W9.8.0 | `rename` ‖ spike: `Tm.evalT`/`denoteT`/`Rhs.evalT` → `Tm.eval`/`denote`/`Rhs.eval` (by references, not text); the spike types the sorts on a slice (storage reads and writes, one memory symbol), times `Tactics/Decide`'s kernel checks and the closer on it, and sizes the port |
 | W9.8.1+ | from the spike's record |
 
+### W9.8.0 rename record (2026-10-12, branch `w98-rename`)
+
+With the erased readers gone (W9.7.3), the scoped term readers take the
+plain names: `Tm.evalT` → `Tm.eval`, `Tm.denoteT` → `Tm.denote`,
+`Rhs.evalT` → `Rhs.eval` (`Calculus/Lands.lean`), and every lemma whose
+`T` meant "the typed reader of a term": `Tm.evalT_*`/`denoteT_*`/
+`Rhs.evalT_*` → `Tm.eval_*`/`denote_*`/`Rhs.eval_*`, the bridge
+`Tm.denoteT_evalT` → `Tm.denote_eval`, the `_evalT`/`_denoteT` suffixes of
+`Tm` (`reclose`, `sideC`, `substStS`/`_app1`/`_app2`, `substMemS`,
+`withStS`, `withMemS`, `litVal?`, `totalB`/`totalP`/`totalV`), `Rhs`
+(`totalB`, `totalS`), `Upd.lastSt_eval`, `keyFreeS_eval`, and `holds_eq`/
+`holds_defined` (`Calculus/Logic.lean`; `CloseS.holds_eq`/`holds_defined`
+are other names).  No plain name was taken; no alias is left.
+
+Kept: the typed run's evaluators and their lemmas (`Val`/`Simple`/`ARhs`/
+`MRhs`/`Args.evalT`, `BinOp`/`UnOp.evalT`, `Loc.resolveT`, …), and
+`Val`/`Simple.lower_evalT` (their `evalT` is the run's);
+`Simple.denote_lowerT` keeps its name.
+
+Method: the full dotted names by `rg -w`; dot notation by elaboration
+errors.  The Calculus files that read no run evaluator took `.evalT` →
+`.eval` wholesale; the ten that do (`LowerRun`, `Sound*`) took only
+`.lower.evalT` and then what `Invalid field` errors named, in both
+directions (`FunContract`'s `args.evalT` came back the same way) (no `Val.eval` or `Simple.eval` exists, so a wrong rename fails
+rather than elaborating to another function).  Earlier records in this
+file keep the names they were written with: there the plain `Tm.eval`/
+`Tm.denote` are the erased readers, so they are history, not stale.
+
+**Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
+(added to `defaultTargets` for the build, not committed), clean (312
+jobs), so every `#guard_msgs` pin is unchanged; `sorry` count unchanged
+(19 by `rg -c '\bsorry\b'`); `check-orphans` (309 reachable),
+`check-doc-paths`.  `rg -w 'Tm\.evalT|Tm\.denoteT|Rhs\.evalT'` is empty
+outside this file's earlier records.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

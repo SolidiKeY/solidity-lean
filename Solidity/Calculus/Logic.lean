@@ -8,7 +8,7 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
 `Frames.run`): `holds`, `Valid`.
 
 * A term in an equation or a definedness test is read on the typed state
-  (`Tm.denoteT`, `Tm.evalT`, `Calculus/Lands.lean`): a local by its
+  (`Tm.denote`, `Tm.eval`, `Calculus/Lands.lean`): a local by its
   position, erased at its type (`State.getE`), a symbol on the global part
   erased (`State.globE`); its symbols are untyped (decision 83).
 * An update is parallel (every right-hand side read in the state it is
@@ -75,8 +75,8 @@ def Prog.runFrames {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁
 /-- **Whether `φ` holds in the typed state `σ`.** -/
 def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
-  | _, σ, .eq a b => Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ)
-  | _, σ, .defined t => ∃ x, t.evalT σ = .ok x
+  | _, σ, .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
+  | _, σ, .defined t => ∃ x, t.eval σ = .ok x
   | _, σ, .not φ => ¬ holds σ φ
   | _, σ, .and φ ψ => holds σ φ ∧ holds σ ψ
   | _, σ, .imp φ ψ => holds σ φ → holds σ ψ
@@ -88,12 +88,12 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
 
 /-- An equation of `holds`, read by the typed readers. -/
-theorem holds_eqT {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) := Iff.rfl
+theorem holds_eq {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
+    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
 
 /-- A `defined` of `holds`, read by the typed readers. -/
-theorem holds_definedT {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
-    holds σ (.defined t) ↔ ∃ x, t.evalT σ = .ok x := Iff.rfl
+theorem holds_defined {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
+    holds σ (.defined t) ↔ ∃ x, t.eval σ = .ok x := Iff.rfl
 
 /-- Every local's type has a value in every typed state: an alias and a
 memory local unset among them (decision 17'). -/

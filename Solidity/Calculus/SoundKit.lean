@@ -41,7 +41,7 @@ section NoPanic
 variable {Γ : Ctx}
 
 /-- **A scoped term never panics**: its symbols are `Update.lean`'s. -/
-theorem Tm.evalT_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s.NoPanic (t.evalT σ)
+theorem Tm.eval_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s.NoPanic (t.eval σ)
   | _, .pvV _ => NoPanic.pure _
   | _, .pvP i => by
     show NoPanic (σ.aliasPathT i)
@@ -51,40 +51,40 @@ theorem Tm.evalT_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s
     show NoPanic (σ.memRefT i)
     unfold State.memRefT; split <;> no_panic
   | _, .netOf i a => by
-    have ha : NoPanic (a.evalT σ) := Tm.evalT_noPanic σ a
-    simp only [Tm.evalT, Srt.NoPanic]
+    have ha : NoPanic (a.eval σ) := Tm.eval_noPanic σ a
+    simp only [Tm.eval, Srt.NoPanic]
     no_panic
   | _, .app0 o => Op0.eval_noPanic σ.globE o
-  | _, .app1 o _ a => Op1.eval_noPanic σ.globE o (Tm.evalT_noPanic σ a)
-  | _, .app2 o a b => Op2.eval_noPanic σ.globE o (Tm.evalT_noPanic σ a) (Tm.evalT_noPanic σ b)
+  | _, .app1 o _ a => Op1.eval_noPanic σ.globE o (Tm.eval_noPanic σ a)
+  | _, .app2 o a b => Op2.eval_noPanic σ.globE o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b)
   | _, .app3 o a b c =>
-    Op3.eval_noPanic σ.globE o (Tm.evalT_noPanic σ a) (Tm.evalT_noPanic σ b)
-      (Tm.evalT_noPanic σ c)
+    Op3.eval_noPanic σ.globE o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b)
+      (Tm.eval_noPanic σ c)
 
-theorem Rhs.evalT_noPanic (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic (r.evalT σ) := by
+theorem Rhs.eval_noPanic (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic (r.eval σ) := by
   cases r with
-  | val t => exact Tm.evalT_noPanic σ t
-  | path p => have := Tm.evalT_noPanic σ p; simp only [Rhs.evalT]; no_panic
+  | val t => exact Tm.eval_noPanic σ t
+  | path p => have := Tm.eval_noPanic σ p; simp only [Rhs.eval]; no_panic
   | unset => exact NoPanic.pure _
-  | mref i => have := Tm.evalT_noPanic σ i; simp only [Rhs.evalT]; no_panic
-  | store s => have := Tm.evalT_noPanic σ s; simp only [Rhs.evalT]; no_panic
+  | mref i => have := Tm.eval_noPanic σ i; simp only [Rhs.eval]; no_panic
+  | store s => have := Tm.eval_noPanic σ s; simp only [Rhs.eval]; no_panic
   | saveNet => exact NoPanic.pure _
   | saveNetMt => exact NoPanic.pure _
 
 theorem UpdElem.globT_noPanic {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)
     (g : Semantics.State) : NoPanic (e.globT σ₀ g) := by
-  have hv : ∀ t : Tm C Γ .val, NoPanic (t.evalT σ₀) := fun t => Tm.evalT_noPanic σ₀ t
-  have hs : ∀ t : Tm C Γ .st, NoPanic (t.evalT σ₀) := fun t => Tm.evalT_noPanic σ₀ t
-  have hm : ∀ t : Tm C Γ .mem, NoPanic (t.evalT σ₀) := fun t => Tm.evalT_noPanic σ₀ t
+  have hv : ∀ t : Tm C Γ .val, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
+  have hs : ∀ t : Tm C Γ .st, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
+  have hm : ∀ t : Tm C Γ .mem, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
   cases e with
-  | «local» i r => have := Rhs.evalT_noPanic σ₀ r; simp only [UpdElem.globT]; no_panic
+  | «local» i r => have := Rhs.eval_noPanic σ₀ r; simp only [UpdElem.globT]; no_panic
   | _ => simp only [UpdElem.globT]; no_panic
 
 theorem UpdElem.applyV_noPanic {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)
     (g : Semantics.State) (ℓ : Locs C Δ) : NoPanic (e.applyV σ₀ g ℓ) := by
   cases e with
   | «local» i r =>
-    have := Rhs.evalT_noPanic σ₀ r
+    have := Rhs.eval_noPanic σ₀ r
     simp only [UpdElem.applyV]; no_panic
   | _ =>
     simp only [UpdElem.applyV]
@@ -98,7 +98,7 @@ theorem Upd.applyV_noPanic (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ �
     NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun p _ => UpdElem.applyV_noPanic σ₀ e p.1 p.2
   | _, .decl U _ r =>
     NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun _ _ =>
-      NoPanic.bind (Rhs.evalT_noPanic σ₀ r) fun _ _ => NoPanic.pure _
+      NoPanic.bind (Rhs.eval_noPanic σ₀ r) fun _ _ => NoPanic.pure _
   | _, .pop U _ =>
     NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun _ _ => NoPanic.pure _
   | _, .drop U _ =>
@@ -112,7 +112,7 @@ A rule that captures a part evaluates it first, where the statement may read
 another part first (`sp[e]` with `sp` an alias: the alias first, then `e`).
 The two runs then halt alike but maybe not with the same halt; a modality
 tells a halt only from a panic (`Modality.afterRunTR`), and an expression
-never panics (`Tm.evalT_noPanic`), so the two are alike (`Res.Sim`, today's
+never panics (`Tm.eval_noPanic`), so the two are alike (`Res.Sim`, today's
 `SameOk` with no fresh names). -/
 
 section Sim

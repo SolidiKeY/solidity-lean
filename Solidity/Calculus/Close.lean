@@ -7,7 +7,7 @@ import Solidity.Calculus.CloseLemmas
 
 `sol_symex` leaves `{U₁} … {Uₙ} φ` with no modality in it.  Its updates are
 not rewritten away, as mini-solkey's `Ch14_Updates` does: a term here *is* a
-call of the interpreter (`Tm.evalT`), so applying an update
+call of the interpreter (`Tm.eval`), so applying an update
 in an arbitrary state `σ` is running it, and what remains is a statement
 about what `saveStorage`, `findStorage`, `readAddr` and `getEnv` return on a
 `σ` nobody knows.  `sol_close` proves that statement with one contextual
