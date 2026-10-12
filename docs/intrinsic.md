@@ -4156,15 +4156,77 @@ shim's docs.
 | `ChainRewritesOpen` | 4.1 | 5.0 (cpu 3.7) | 3.5 |
 | `Solkey/TestSuite` | 13.2 | 6.8 | 6.9 |
 
+### W9.5 review fixes (2026-10-12, branch `w9-tidy`)
+
+The confirmed findings of the W9.5a review, fixed:
+- **Dead code** deleted: `Tm.rwC_eval` (`Calculus/SeqRewrite.lean`),
+  `Skel.isConn` (`Calculus/RewriteScoped.lean`), an unused
+  `variable {U : Surface.Upd C} …` (`Calculus/StateFacts.lean`).
+- **Kept as the reader's shim**, with no prover user: the lemmas over
+  `Surface.*` listed under W9.5b below.  Their section docstrings now say
+  so; they are not deleted because the user keeps the reader untouched.
+- **`docs/module-map.md`**: the Closers, CloseTests and DecideLang rows no
+  longer describe an erased leaf (`sol_fold_terms`, `Derive.eraseLeaf`,
+  `Valid.of_erase`, the erased fallback, an erased atom's name); dangling
+  names fixed or dropped (`Idx.nameR_eq`, `lawResolveQ`, `pairL`/`pairMem`
+  → `pairLS`/`pairMemS`/`allocPairS?`, `Config.erased`, `Stmt.complete`,
+  `Proves.close_leaf`, `State.glob` → `EState.glob`); `Update.lean` holds
+  the terms, updates and the shim, not the closer's formulas (here and in
+  `AGENTS.md`); the DelabErase and NoPanic rows say what reads them.
+- **`docs/lean-key-rule-map.md`**: the old `pair_sound` is `RelU.two`
+  (with `RelU.pairKey`).
+- **Docstrings** that described the deleted erased side as live, or cited
+  a deleted name, rewritten (prose only): `Fml.erase`, the twin check,
+  `close_rw`'s "untyped formulas", `STerm.eval_mtSt`, "today's macro",
+  `NFmlClose`, `ChainBranches`/`LineRw.*`, `Surface.Upd.mergeMem`,
+  `holds_eqD_iff`, `Surface.Tm.spineAny` and kin, the `PTerm.*`/`STerm.*`/
+  `Term.*`/`SValT.*` twins in `Calculus/TermLib.lean`,
+  `Calculus/TermLaws.lean`, `Calculus/Decide.lean`,
+  `Calculus/DecideScoped.lean` (each "`X`, by position" now says what it
+  does), `Calculus/DecideRel.lean`, `Calculus/LeafDerive.lean`
+  (`Derive.*`), `Calculus/Proves.lean` (`Hyp.*`), `Derive.fitsClose` →
+  `Seq.leafFitsOn`, `Derive.elimSize` → `Decide.elimSize`, and the
+  examples' `Upd.mergeSt`/`mergeStL`/`mergeMem`/`withStM`/`Tm.rwEv`/
+  `LineRw.lawUpdAny`/`Upd.rwEv`; the misplaced "Pins" heading of
+  `Calculus/TermLaws.lean` moved to its section.
+- **`docs/testsuite-proofs.md`**: `Calculus/ChainRewrites` (deleted) for
+  the bare `ChainRewrites`.  `Typing/Reachability.lean` and
+  `Typing/Constructibility.lean` bound a pattern variable named
+  `Surface.Tm` (a W5 rename's leftover): renamed `Tseg`.
+- The lead's note of 2026-10-11 (2) (proposals 106–128 approved; "`NFml`
+  and its term vocabulary stay as the closer's IR") left "What is left":
+  superseded by W9, which removed that IR.
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
 in the side-projects reader).  `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`,
 `Tm.erase`/`Upd.erase`, `Delab.tr` with its helpers and the `NFml` stub
 (`NFml.eq`, the one constructor `Delab.tr` emits) remain as the SolKey
-reader's interface and the notation's parser front end (`tm{}`, `st!{}`,
-a chain's by-name key, all resolved to `Tm C Γ`); no prover code reads
-them.  Deleting them is the reader's port, if the user asks for it.
+reader's interface; no prover code reads them.  Besides the reader, the
+shim is read by:
+- the notation's parsers: `tm{}`, `st!{}`/`pt!{}` and a chain's by-name key
+  are parsed into `Surface.Tm` and resolved to `Tm C Γ` (`Tm.resolveN`) or
+  printed (`Surface.Tm.keyStr`);
+- `Calculus/TermLib.lean`'s `delabTmS`: a scoped term over schema variables
+  is printed through its untyped twin (`tmSurface`) by the untyped
+  `ppTerm`/`delabTm` (`Calculus/RuleSyntax.lean`);
+- `Calculus/PrintStmt.lean`'s twin check (`pp.sol.twinCheck`, off by
+  default), which runs `Delab.tr` beside the scoped printer;
+- the spec front end: `Calculus/SurfaceSpec.lean` builds its obligation's
+  snapshot update as a `Surface.Upd`, resolved by `Upd.resolveN`
+  (`Calculus/Spec.lean`).
+
+Deleting the shim would port each of these, and is the reader's port, if
+the user asks for it.  Kept with it, with no prover user (W9.5 review,
+their section docstrings say so): `Update.lean`'s "Frames" lemmas over
+`Surface.*` (`Surface.Tm.vars`, `Surface.Upd.vars`, `Surface.Tm.eval_frame`,
+`Surface.MAddr.eval_frame`, `Surface.Tm.denote_frame`,
+`Surface.UpdElem.write_frame`, …), `Surface.Tm.denote`, `Term.keyAt`/
+`Term.keyAt_eval`, `Theory/Bridge/Denote.lean`'s `Surface.Tm.denote_eval`
+and `SValT.denote_eval`, and `Calculus/NoPanic.lean`'s
+`Surface.Tm.eval_noPanic`, `Surface.UpdElem.write_noPanic`,
+`Surface.Upd.apply_ne_panic`.
 
 **W9.6 (the state IR)**, a proposal: `Tm.eval` over `State C Γ`, the
 Sound* files against `TRun.*`, the run invariants over `State`; the
@@ -4194,7 +4256,3 @@ closer's untyped reading of a leaf's state (`CloseS.holdsE`,
   checkout of solkey `1b4341a303` (`TestSuite.sol` `2fe50a03`);
   `../solkey` itself is stale (`4150e0a8`).
 - Lean docstrings may still call the erased side "today's" in places.
-
-**Lead, 2026-10-11 (2):** proposals 106–128 (W8) are approved. Decision 11
-is done: no untyped statement, program or formula remains; `NFml` and its
-term vocabulary stay as the closer's IR (decision 7).

@@ -92,7 +92,7 @@ Layering: types and names in `AST.lean`, contexts in `Scope.lean`, the grammar
 and raw syntax in `Syntax.lean`, elaborated (`Syntax/Elab.lean`) to the scoped
 syntax of `Syntax/Scoped.lean`, the state's
 operations in `Semantics.lean` and the run in `Semantics/Run.lean`, terms and
-the closer's formulas in `Update.lean`, scoped formulas in `Calculus/Fml.lean`,
+updates in `Update.lean`, scoped formulas in `Calculus/Fml.lean`,
 the taclets in `Calculus/Rules.lean`, everything proved about them after. Keep
 imports acyclic and local. Add new modules to `Solidity.lean`:
 `node scripts/check-orphans.mjs` fails on a module nothing imports.

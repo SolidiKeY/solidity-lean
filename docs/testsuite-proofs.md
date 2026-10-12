@@ -539,7 +539,7 @@ did not blow up on this file.  The search (`#solkey_derive?`) took about
 modules that match on `Op1` (`Theory/Bridge/Denote.lean`,
 `TermRules`, `NFmlUpdateRules`,
 `StateParts`, `Calculus/Decide.lean`,
-`ChainRewrites`, `NFmlQuote`,
+`Calculus/ChainRewrites`, `NFmlQuote`,
 `Calculus/RuleSyntax.lean`, `Calculus/SurfaceNotation.lean`) gained one case each;
 `Derive.synClose` filters the context first (a `List.filter` in the kernel
 check, for every `sol_prove`).  The default build passes; the benchmark
