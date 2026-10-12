@@ -29,8 +29,7 @@ before are compared up to that typing (`Srt.SameO`: a memory by its grown
 heap, any other sort equal).  A symbol that touches the memory counts as
 reading the global part (`Op1.globFree` …: `alloc`, `addM`, `read`, `mlen`,
 `copyMem`, `iread`, `copy`, `copySt`, `write`), as every memory term starts
-at `memory`, which does.  An `old` local set by `U` (`old := s`) is replaced
-by `s`: a storage term reads the storage alone.
+at `memory`, which does.
 
 **Soundness reads `holds`' typed clause** (`Upd.afterT`, `Calculus/Lands.lean`):
 `V` substituted (`Tm.substH`) reads in the state before what `V` reads in
@@ -257,7 +256,7 @@ def Tm.substH : {k : Srt} → Tm C Δ k → Option (Tm C Γ k)
     | .rhs .unset => none
   | _, .pvS i => match s i with
     | .pos j => some (.pvS j)
-    | .rhs (.store x) => some x
+    | .rhs _ => none
   | _, .pvI i => match s i with
     | .pos j => some (.pvI j)
     | .rhs (.mref t) => some t
@@ -403,7 +402,7 @@ theorem Tm.eval_substH (hL : U.Lands σ₀ g σ₁)
   | _, .pvS i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
-        | .pos j => some (Tm.pvS j) | .rhs (.store x) => some x) = some t' := h
+        | .pos j => some (Tm.pvS j) | .rhs _ => none) = some t' := h
     generalize U.held i = x at h hx
     rw [Srt.sameO_st]
     match x, hx, h with
@@ -412,13 +411,7 @@ theorem Tm.eval_substH (hL : U.Lands σ₀ g σ₁)
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
       show some (TEnv.get j σ₀.env) = some (TEnv.get i σ₁.env)
       rw [hx]
-    | .rhs (.store y), hx, h =>
-      cases h
-      have hx : (t'.eval σ₀).bind (fun st => some st) = some (TEnv.get i σ₁.env) := hx
-      show t'.eval σ₀ = some (TEnv.get i σ₁.env)
-      cases hp : t'.eval σ₀ with
-      | none => rw [hp] at hx; cases hx
-      | some q => rw [hp] at hx; exact hx
+    | .rhs _, _, h => cases h
   | _, .pvI i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
