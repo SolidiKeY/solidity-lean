@@ -4158,11 +4158,13 @@ shim's docs.
 
 ## What is left
 
-**W9.5b (the reader).**  Port the SolKey reader to the scoped syntax, then
-delete the shim: `Surface.Tm`/`MAddr`/`Upd`/`UpdElem` as the reader's
-interface, `Tm.erase`/`Upd.erase`, `Delab.tr` and its helpers, the `NFml`
-stub.  The notation front end (`tm{}`, `st!{}`, a chain's by-name key)
-then parses straight to `Tm C Γ`.
+**W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
+in the side-projects reader).  `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`,
+`Tm.erase`/`Upd.erase`, `Delab.tr` with its helpers and the `NFml` stub
+(`NFml.eq`, the one constructor `Delab.tr` emits) remain as the SolKey
+reader's interface and the notation's parser front end (`tm{}`, `st!{}`,
+a chain's by-name key, all resolved to `Tm C Γ`); no prover code reads
+them.  Deleting them is the reader's port, if the user asks for it.
 
 **W9.6 (the state IR)**, a proposal: `Tm.eval` over `State C Γ`, the
 Sound* files against `TRun.*`, the run invariants over `State`; the
