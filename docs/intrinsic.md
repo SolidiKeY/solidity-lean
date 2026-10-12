@@ -24,7 +24,7 @@ versions.  It names files by the paths they had at each step, which is why
 | Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits it directly, a local by `NCtx.find` (`Syntax/Elab.lean`), and the printers print it (`Calculus/PrintStmt.lean`): the untyped `Surface.Stmt` and `resolve` went at W8 (decision 11) |
 | State | untyped `Semantics.State`: values, storage and heap by name, with junk | `State C Γ` (`Semantics/State.lean`): typed values (`PrimTy.Denote`, a `uint` an `Int` in range), typed storage (`SVal T` over `structDef`, `Storage C`), a typed heap (`HRef H R`, no mapping object), locals computed from the context (`TEnv`) |
 | Run | `Stmt.run` on the untyped state, halting by `revert`, `panic`, `diverge` or `stuck` | `Stmt.run` (`Semantics/Run.lean`) on the typed state, halting by `revert`, `panic`, `diverge` or `exhausted` (a push at the bound, decision 15): never stuck; the only run of a statement (W4) |
-| Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `TypedErase`), and the erased state `EState C Γ` (`Semantics/Erased.lean`): what the closer's terms read |
+| Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `TypedErase`), and what the closer's terms read of a typed state: its global part and its locals, erased (`State.globE`, `State.getE`, `Semantics/State.lean`; the erased state `EState C Γ` went at W9.7.3) |
 | Compiler | `compileStmt` with `wtStmt`, `not_stuck` | over the scoped syntax, locals at their level (`Evm/Compile.lean`), `inFrag` the fragment alone, `compile_correct` over the typed run (`Evm/Correct.lean`), no `not_stuck` |
 | Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; a `dl!{}` with a modality reads scoped, one without reads as `NFml` (`Surface.Fml` went at W8) |
 | Rules | `Taclet C k m s p` on `Stmt C`, `Taclet.sound` by case | the same 159 lines read scoped (`Calculus/Rules.lean`, `open scoped Solidity.Schema`); `Taclet.toStep` (`Calculus/Taclet.lean`) says each is the rule `Stmt.step` fires, so soundness is `Stmt.sound` (`Calculus/Sound.lean`) with no proof per taclet; `blockEmpty` and `functionFrameEmpty` claimed; no cover goal (KeY's two goals); the step rules read the rule set (`⊢ₖ`, decision 36) |
@@ -4987,6 +4987,148 @@ master (s of `simp`, the three passes): `compoundStorage` 1.7 against 3.4,
 3.0 (memory leaves remain the costliest class: an allocation pair and its
 hidden binders).
 
+### W9.7.3 record (2026-10-12, branch `w97-del`)
+
+**The merge** (`8ff7f2d1`): `w97-close` into master's `laws` lane.  The
+conflicts in `CallbackSound`, `FunContract`, `RewritePast`, `RewriteScoped`,
+`SeqRewrite` and `UpdateRules` took the `laws` side, whose `holds_eqT` and
+`holds_definedT` already read the typed atoms.  `Lands.lean` keeps both
+sections; the `close` section's duplicates of the kit went (`State.globE_push`,
+`getE_push_here`/`_there`, `globE_setLocal`, `globE_drop`, `getE_drop`,
+`globE_thin`, `aliasPathT_getE`, `memRefT_getE`, `Held.OKV`).  One fix:
+`DecideRel` reads `memRefT_getE` through `pure`, as the kit states it.
+Default targets and `SolkeyTestSuite` built clean.
+
+**Deleted** (`git diff --stat 8ff7f2d1 87df6fe9`: 51 Lean files, 1,505
+lines added, 2,485 removed):
+- `Semantics/Erased.lean` (180 lines): `Env` and its lemmas, `EState`
+  (`glob`, `ofGlob`, `withGlob`, `withEnv`, `push`, `setLocal`, `drop`,
+  `ofSem`), `aliasPath`/`memRef`.  `LTy.Denote` moved to the end of
+  `Semantics.lean` (`Typing/Soundness.lean` cannot import
+  `Semantics/State.lean`: its `open Semantics` would clash on `State` and
+  `MObj`), the example programs (`guardLowCore`, …) to `Semantics/Run.lean`.
+- `Semantics/State.lean`: `TEnv.erase` with `erase_wk`, `get_erase`,
+  `set_erase`, `drop_erase`; `State.erase`, `init_erase`, `push_erase`,
+  `setLocal_erase`, `drop_erase`, `withStorage_erase`, `glob_heap`,
+  `glob_nextId`, `adopt_erase`.  In their place: `State.globE` (moved from
+  `Lands`), `State.getE`, `Locs`, `State.loc`, `Locs.push`, `init_globE`,
+  `withStorage_globE`, `globE_heap`, `globE_nextId`, `adopt_globE`,
+  `adopt_getE`, `adopt_loc`; `TEnv.get_wk` moved here from `RunWk`.
+- `Semantics/StateErase.lean` (229 → 47 lines): `Env.erase`,
+  `EState.erase`, the `Env.mem_erase_*` lemmas, `Agree` and
+  `Agree.drop`/`erase`, `lookupBy_of_mem_nodup`.  `LTy.enc`, `withLocals`,
+  `Idx.name_mem`/`name_there` stay (`DecideRel`'s untyped state).
+- `Semantics/TypedErase.lean`: `State.withHeap_erase`, `withGlob_adopt`,
+  `erase_get`, `withEnv_erase`, `TRun.State.allocDefault_glob`,
+  `State.erase_env_adopt`.
+- `Calculus/Lands.lean` (1,274 → 853 lines): `Tm.eval`, `Tm.denote`,
+  `Env.thin`, `EState.thin`, `Rhs.eval`, `UpdElem.write`, `Upd.apply`,
+  `Held.OK` and its `Env` lemmas, `Upd.held_ok`, `Env.ext_get`,
+  `State.globE_eq`/`getE_eq`/`aliasPathT_eq`/`memRefT_eq`,
+  `Tm.evalT_eq`/`denoteT_eq`, `Rhs.evalT_eq`, `Held.OKT_iff`,
+  `Held.OK.unique`, `EState.ext_glob`, `UpdElem.write_glob`,
+  `Upd.apply_glob`, `Upd.lands_iff`, `Upd.afterT_iff`,
+  `Upd.afterT.of_apply`, `State.ReadsAs.of_erase`/`erase_eq`.
+- `Logic`: `EState.anon`, `holds_upd_erased`, `holds_eq_erased`,
+  `holds_defined_erased`, `State.havoc_erase`, `State.anon_erase`
+  (`holds_eqT`/`holds_definedT` moved here from `Graft`, now `Iff.rfl`).
+  `CallbackHolds`: `holdsC_upd_erased`.  `ProvesSound`: `TEnv.thin_erase`,
+  `State.thin_erase`.  `SeqRewrite`: `EState.nil`, `Tm.eval_toNilS`,
+  `Tm.denote_toNilS`, `Tm.denote_eval`, `Tm.denoteT_eval` (its readers take
+  `Lands`' `Tm.denoteT_evalT`).  `Graft`: `Env.thin_ofExt`.  `SoundLocal`:
+  `Env.set_set`, `EState.setLocal_setLocal`, `EState.get_setLocal`.
+  `Deploy`: `State.deploy_erase`, `deployUpd_deploy`, `deployUpd_deployEnv`.
+  `Typing/Soundness`: `Env.All` and its lemmas, `RunInv.reglob`,
+  `StateWT.reglob`.  `Tools/Taclet`'s scoped roots: `Agree`, `EState`, `Env`.
+
+**Ported** (the readers the `laws` record left):
+- **The update arms** (`SoundKit`, `SoundArms`): `Premise.Runs`' update
+  clause is `U.applyV σ = .ok (τ.globE, τ.loc)` where the run ends in `τ`,
+  and `∃ e', U.applyV σ = .error e'` where it halts;
+  `Premise.sound_updateH` lands by `Upd.lands_iff_applyV` and halts by
+  `Upd.globT_error_of_applyV` (new).  Each `*_agrees` is
+  `TRes.Agrees (fun o => (o.st.globE, o.st.loc)) (TRun.x σ) (U.applyV σ)`,
+  an element read by `storage_applyV`, `memory_applyV`, `local_applyV`,
+  a local set by `pair_setLocal` (`State.loc_setLocal`, new in `Lands`);
+  the no-panic lemmas are `Tm.evalT_noPanic` … `Upd.applyV_noPanic`.
+  `CallbackSound`'s `holdsC_update` and `transfer_booking` alike;
+  `LowerRun` against `Tm.evalT`/`denoteT`; `TypedErase`'s step lemmas
+  against the pair.  `Deploy`: `Problem.deployUpd_lands`, read by
+  `Upd.afterT.of_lands`.
+- **The term laws** (`TermLib`, `TermLaws`, `RewriteSyntax`,
+  `RewriteLaws`): `Tm.Theq`, `Tm.KindFreeAt`, `Tm.EvalRefinesAt` quantify
+  over typed states and read `Tm.denoteT`/`evalT`; `LawCov.back` asks where
+  the update's global part returns (`U.globT σ = .ok g`:
+  `Upd.globT_ok_prefix`, `storage_eval_of_globT`, `memory_eval_of_globT`),
+  so `FmlRw.lawUpdS` needs no bridge; `theoryRewriteS` abstracts a typed
+  state.  The lemma names stay (`Tm.denote_ne_nil`, … now state `denoteT`).
+- `UpdRuleScoped`: `holds_congr_erase` became `holds_congr_reads`, over
+  `State.ReadsAs` (`TEnv.foldl_set_erase_congr` for `{anon}`).
+  `SoundLoops` (`holds_isBoolD`, `holds_eqD_iffS`, `Val.lower_eval_ok`),
+  `SoundControl` (`holds_isBool`), `Problem` (`holds_wt` on `σ.globE`,
+  `Reachable.init_globE`).
+- **Typing**: `TEnv.All P e`, every local erased satisfying `P`, by
+  structure on `TEnv` (`Typing/TypedRunInv.lean`: `mono`, `get`, `append`,
+  `take`, `drop`, `set`, `wk`, `of_valMem`), replaces
+  `Env.All P (TEnv.erase Γ e)`; `RunInv.HoldsT` reads `σ.globE`.
+  Constructibility's `Bound σ a r segs` reads `σ.loc`, its run lemmas end in
+  `σ'.globE = τ ∧ σ'.loc = σ.loc` (`run_decl` in `σ.loc.push`), `Wrote` on
+  `σ.globE.storage`; `Fits`, `Reachability`, `TypedWT` on `σ.globE`.  No
+  proof grew: Constructibility's diff is the restatement.
+- `Counterexamples/WellTypedNecessity`: the read is the lowered path's
+  symbols on `badStore` (`Op2.eval`), the local's typing `LTy.WT` of
+  `.int 0`; no state of locals is needed.
+
+**Not renamed**: `Tm.evalT`, `Tm.denoteT`, `Rhs.evalT` keep the `T` the
+`lands` record meant to drop here.  `Val.evalT`, `Simple.evalT`,
+`Loc.resolveT` share the suffix and the name `Tm.eval` is free, but a rename
+by text cannot tell `t.evalT σ` on a term from `v.evalT σ` on a value; it
+is a mechanical change for its own commit, if wanted.
+
+**What the grep leaves**: `rg -w 'EState|holdsE|Upd\.apply|State\.erase'
+Solidity` is empty.  `Env` is gone, and `TEnv.erase` with it.  What is still
+called an erasure is value-level and stays: `PrimTy.erase`, `Storage.erase`,
+`Heap.erase`, `LTy.TDenote.erase`, `SRef.erase`, `MAddr.erase`, and
+`Semantics.State` with `Op0`…`Op3`, which `State.globE`/`State.getE` read a
+typed state into.
+
+**Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
+(added to `defaultTargets` for the build, not committed), clean (312 jobs);
+the touched modules have no warning; `sorry` count 19; `#print axioms
+Proves.valid`: `propext`, `Classical.choice`, `Quot.sound`;
+`check-orphans` (309 reachable), `check-doc-paths`.
+
+**Gates** (each file copied under `Solidity/Scratch/` of both trees, a fresh
+worker through the MCP, one at a time after a warm-up, `/proc` sampled every
+20 ms, wall to the end of work, the worker killed after 4 s idle; master
+`ff6ea202` in the main checkout and this branch in alternation, load
+0.8–1.4, no other Lean agent; the minimum of two runs for the named rows,
+three for `ProofTree`, one run per `Derived` file but `Derived7`; wall s,
+CPU s in brackets):
+
+| Row | Gate | master `ff6ea202` | W9.7.3 |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 184.6 (187.3) | 185.0 (188.2) |
+| `Derived7` | 61.7 | 48.2 (49.3) | 48.2 (49.3) |
+| `Tactics/Decide` | 45.0 | 39.4 (39.4) | 38.8 (38.9) |
+| `ProofTree` | 11.7 | 8.8 (8.0) | 9.3 (8.5) |
+| `Chains/Storage` | 9.0 | 8.9 (9.5) | 8.9 (9.4) |
+| `ChainRewrites` | 8.2 | 7.9 (7.8) | 8.0 (7.9) |
+| `ChainRewritesOpen` | 4.1 | 4.2 (3.6) | 4.2 (3.6) |
+| `Solkey/TestSuite` | 13.2 | 7.5 (6.9) | 7.5 (6.9) |
+
+Per file, this branch: `Derived1` 7.8, `2` 8.6, `3` 12.4, `4` 16.1, `5` 6.9,
+`6` 10.9, `7` 48.2, `8` 25.7, `9` 6.6, `10` 9.4, `11` 3.4, `12` 13.0, `13`
+7.0, `14` 9.3.  Every row is within 1% of master but two.
+`ChainRewritesOpen` is over its gate by 0.1 s of wall on both trees (its CPU,
+3.6, is under; the rest is the worker's start).  `ProofTree` is 6% over
+master on both CPU and wall, under its gate: the merge commit `8ff7f2d1`,
+timed the same way in a third worktree, gives 9.4 (8.6), so the step is the
+`close` lane's (its record: 8.2 → 8.6), not this wave's.  Two first runs on
+this branch (`Chains/Storage` 18.5, `ChainRewrites` 16.0) waited about 8 s
+idle with their CPU unchanged; the second runs did not, and the table takes
+the minimum.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -4994,18 +5136,24 @@ side-projects reader is outdated.
 
 **W9.6 (the state IR)**: done (records above, W9.6.0 to W9.6.4).  No
 program is evaluated on the erasure: the soundness and the invariants read
-the typed run only.  What stays untyped: `EState` (`Env`, `State.erase`, `aliasPath`/`memRef`) as an
-update's result and what the terms are read on (decision U1, W9.6.0
-record): an untyped `MObj` does not fix the heap typing, an allocation pair
-writes the local before the heap that types it, and `net`/`pay` read the
-intermediate global part, so an update cannot be applied element by
-element to a typed state; landing on a typed state (U2) costs a leaf 1.8×
-and restates every law over hypotheses.
+the typed run only.
+
+**W9.7 (the last untyped parts)**: done (records above, W9.7.1 to W9.7.3).
+The erased state is gone: `holds`, the update laws, the closer, the decision
+procedure and the rules' soundness read the typed state, an update by where
+it lands (`Upd.Lands`, `Upd.afterT`) or by what it computes (`Upd.applyV`).
+What stays untyped is the value-level reading of a typed state (decisions
+40, 83): a term's symbols read its global part erased (`State.globE`, a
+`Semantics.State`) and a local erased at its type (`State.getE`), and an
+update computes a global part and the locals' values
+(`Semantics.State × Locs C Δ`), not a typed state: an untyped `MObj` does
+not fix the heap typing, an allocation pair writes the local before the
+heap that types it, and `net`/`pay` read the intermediate global part
+(decision U1).  The side-projects reader is outdated (W9.7.1).
 
 **Open items:**
 - The reduction's symbols over the typed state (decision 83): a scoped
-  term's symbols still read the global part untyped (`State.globE`, since
-  W9.7.2).
+  term's symbols still read the global part untyped (`State.globE`).
 - `Close`'s `simp` set over typed symbols (decision 82: done for the
   scoped leaf at W9.3, `Calculus/CloseScoped.lean`).
 - A write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩

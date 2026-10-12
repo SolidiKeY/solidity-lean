@@ -30,9 +30,9 @@ the program is open (`Calculus/RewriteScoped.lean`) and past it
 (`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
 erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
 erased program evaluators (W9.6.4), and so are the untyped terms by name
-(`Surface.Tm`, W9.7.1). What stays untyped is the state an update yields
-and the terms are read on (`EState`, `Semantics/Erased.lean`, what
-`State.erase` gives).
+(`Surface.Tm`, W9.7.1), and so is the erased state (W9.7.3). What stays
+untyped is what a term reads of the typed state: its global part
+(`State.globE`) and each local at its type (`State.getE`).
 
 **Updates are terms** (`Update.lean`'s signature, `Calculus/Fml.lean`'s
 terms): `STerm` at `structRules.key`'s

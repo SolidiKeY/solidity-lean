@@ -30,11 +30,12 @@ way: no `sorry`, no new hypothesis.
   (`Calculus/SoundStep.lean`), or to the blocks' (`SoundCalls`,
   `SoundLoops`).
 - **Update premise** (`Calculus/SoundArms.lean`): an update is a term of
-  `Update.lean`, read on the erasure, so state an equation between the
-  update applied to an erased state and the statement's typed step
-  (`*_agrees`, `TRes.Agrees` of `TRun.x` against `U.apply σ.erase`, the
-  operands read through `Calculus/LowerRun.lean`), and close with
-  `Premise.sound_update_typed`.  A new storage or heap operation needs its
+  `Update.lean`, computed on the typed state as a global part and the
+  locals' values (`Upd.applyV`), so state an equation between what it
+  computes and the statement's typed step (`*_agrees`, `TRes.Agrees` of
+  `TRun.x` against `U.applyV σ`, the step's state read as
+  `(o.st.globE, o.st.loc)`, the operands through
+  `Calculus/LowerRun.lean`), and close with `Premise.sound_update_typed`.  A new storage or heap operation needs its
   erasure lemma first (`Semantics/TypedErase.lean`).
 - **Unfold premise** (`Calculus/SoundCapture.lean`, `SoundLocal`, …): the
   fresh local is pushed and popped by the premise's frame; the runs compare

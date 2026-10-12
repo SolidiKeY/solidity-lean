@@ -47,8 +47,9 @@ and the run, and moved the calculus onto both.
   theorems (`run_erase`) are deleted.  The untyped statement went at W8
   (decision 11): the elaborator emits the scoped syntax
   (`Syntax/Elab.lean`) and the printers print it
-  (`Calculus/PrintStmt.lean`).  What stays untyped is the global part of
-  the erased state the terms are read on (`EState`, `Semantics/Erased.lean`).
+  (`Calculus/PrintStmt.lean`).  What stays untyped is what the terms read
+  of the typed state: its global part and its locals, erased
+  (`State.globE`, `State.getE`, `Semantics/State.lean`).
 - **The closer (M6c; its IR deleted at W9.5a).** `sol_decide` reduces and closes
   the scoped leaf by position (`Calculus/DecideScoped.lean`,
   `Calculus/DecideTyped.lean`: `Valid.of_reduceS`, sound over the typed
