@@ -1,5 +1,6 @@
 import Solidity.Calculus.Decide
-import Solidity.Calculus.Close
+import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.NFmlClose
 
 /-!
 # Closing a reduction by its terms: `LFml.syn`

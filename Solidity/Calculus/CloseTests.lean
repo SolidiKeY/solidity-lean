@@ -7,8 +7,8 @@ import Solidity.Calculus.Closers
 
 Goals `sol_close` is expected to close, each a leaf the scoped strategy
 leaves (`open scoped Solidity.Scoped`), read scoped
-(`Calculus/CloseScoped.lean`), and, after `refine close ?_`, the closer's
-own formula (`Calculus/NFmlClose.lean`).
+(`Calculus/CloseScoped.lean`), on `⊨` and on a sequent's leaf after
+`sol_leaf`.
 -/
 
 namespace Solidity.CloseTests
@@ -76,19 +76,17 @@ example : ⊨ dl!{ [ age = amount; ] age == amount } := by
   sol_symex
   sol_close
 
-/-! ## After `refine close ?_` -/
+/-! ## A sequent's leaf, after `sol_leaf` -/
 
 example : ⊢ dl!{ a == 1 → a == 1 } := by
   apply intro
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 example : ⊢ dl!{ [ x = 1; ] x == 1 } := by
   apply update .localValueAssign
   apply empty
-  refine close ?_
-  sol_symex
+  sol_leaf
   sol_close
 
 /-- Each goal of a split (the scoped split has KeY's two). -/
@@ -101,14 +99,12 @@ example : ⊢ dl!{ a == b → ⟨ if (a == b) { x = 2; } else { x = 1; }; ⟩ x 
   case thn =>
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
   case els =>
     apply update .localValueAssign
     apply empty
-    refine close ?_
-    sol_symex
+    sol_leaf
     sol_close
 
 /-! ## Parameters read at their types (M6c)

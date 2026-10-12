@@ -47,7 +47,6 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
   | empty _ ih => exact .empty ih
   | closeTrue h => exact .closeTrue h
   | closeFalse _ ih => exact .closeFalse ih
-  | close ns hlen hnd h hc hB => exact .close ns hlen hnd h hc hB
   | merge hU hW _ ih => exact .merge hU hW ih
   | updRw q hq _ ih => exact .updRw q hq ih
   | rewrite q hq _ ih => exact .rewrite q hq ih
@@ -161,7 +160,6 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
     exact .empty (ih (by rw [Frames.exit_inSolkey]; simpa only [Prog.inSolkey, Bool.true_and] using h'))
   | closeTrue h => exact .closeTrue h
   | closeFalse _ ih => exact .closeFalse (ih rfl)
-  | close ns hlen hnd h hc hB => exact .close ns hlen hnd h hc hB
   | merge hU hW _ ih => exact .merge hU hW (ih hφ)
   | updRw q hq _ ih => exact .updRw q hq (ih hφ)
   | rewrite q hq _ ih => exact .rewrite q hq (ih (by rw [Fml.inSolkey_rwEqC]; exact hφ))
@@ -193,22 +191,6 @@ theorem Hyps.modalFree_wrap {Γ₀ : Ctx} : {Γ : Ctx} → (H : Hyps C Γ₀ Γ)
   | _, .bind H _ _ _, _, h => Hyps.modalFree_wrap H (φ := .bind _ _ _ _) h
   | _, .anon H _, _, h => Hyps.modalFree_wrap H (φ := .anon _ _) h
 
-/-- A sequent `close` takes has no modality left in its formula. -/
-theorem Hyps.closable_wrap {Γ₀ : Ctx} : {Γ : Ctx} → (H : Hyps C Γ₀ Γ) → {φ : Fml C Γ} →
-    {ns : List Var} → (H.wrap φ).Closable ns → ∃ ns', φ.Closable ns'
-  | _, .nil, _, _, h => ⟨_, h⟩
-  | _, .pre H a, _, _, h => by
-    obtain ⟨_, h'⟩ := Hyps.closable_wrap H h
-    exact ⟨_, (h' : _ ∧ _).2⟩
-  | _, .upd H _ _, _, _, h => by
-    obtain ⟨_, h'⟩ := Hyps.closable_wrap H h
-    exact ⟨_, (h' : _ ∧ _ ∧ _ ∧ _).2.2.2⟩
-  | _, .havoc H, _, _, h => Hyps.closable_wrap H (φ := .havoc _) h
-  | _, .anon H _, _, _, h => Hyps.closable_wrap H (φ := .anon _ _) h
-  | _, .all H _ _, _, _, h | _, .bind H _ _ _, _, _, h => by
-    obtain ⟨_, h'⟩ := Hyps.closable_wrap H h
-    exact ⟨_, (h' : _ ∧ _ ∧ _).2.2⟩
-
 /-- **A step `⊢ₖ` cannot take leaves it nothing but `closeFalse`**: a
 derivation by solkey's rules of a modality whose first statement has no rule
 of solkey's is a refutation of its context. -/
@@ -224,12 +206,6 @@ theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C
   | intro | allIntro | updIntro | bindIntro | empty | closeTrue =>
     exact absurd hφ Bool.false_ne_true
   | closeFalse h _ => exact h
-  | @close Γ H φ ns _ _ _ hc _ =>
-    obtain ⟨B, hB⟩ := Option.isSome_iff_exists.1 hc
-    obtain ⟨_, hφ'⟩ := Hyps.closable_wrap H (Fml.bindsB_sound _ hB).1
-    cases φ with
-    | modal => exact hφ'.elim
-    | _ => exact absurd hφ Bool.false_ne_true
   | @closeHolds Γ H φ _ hm =>
     have hφ' := Hyps.modalFree_wrap H hm
     cases φ with

@@ -32,12 +32,6 @@ under solkey's names where solkey has the rule:
   `Proves.closeFalse` (`Calculus/NFmlLogic.lean`), the shape of KeY's `cut` on
   `false` and `closeFalse`; `sol_prove` closes a split's branch so when its
   condition is ground under the context (`Calculus/ProvesDerive.lean`);
-* `close`: a leaf whose erasure is valid (`Calculus/CloseErase.lean`),
-  as today's closer reads a leaf, behind any context of updates, under either
-  modality, hidden binders and `∀`s.  Since W9.4 the erased fallback only:
-  a leaf is left by `sol_leaf` (`Proves.closeHolds`, `Proves.closeValid`)
-  for the scoped closers, and `close` is taken by a chain's last line past
-  the program (`Calculus/ChainKit.lean`) and the erased closer's tests;
 * the rules on the context's updates, today's `Proves`'s: `merge`
   (`sequentialToParallel`, over a storage write too, KeY's `mergeStorage`;
   past the hidden binders between the two updates) and `updRw` (a term
@@ -49,7 +43,7 @@ under solkey's names where solkey has the rule:
   `Calculus/SeqRewrite.lean`): today's `Proves.rewrite`, the closer's
   rewrite, on the scoped sequent (decision 90);
 * `closeHolds`: a sequent with no modality left, proved over the typed
-  reading, today's `Proves.close`; the steps after the program
+  reading (`sol_leaf`, `Proves.closeValid`); the steps after the program
   (`Proves.eqDSplit`, `definedWritten`, `applyOnRigidBox`, `simplify`, the
   rewrites of the goal) are derived from it (`Calculus/UpdateRules.lean`).
 
@@ -394,17 +388,6 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   premise, which the closer proves.  A deviation in shape. -/
   | closeFalse {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : Proves C R Γ₀ H .ff) :
       Proves C R Γ₀ H φ
-  /-- Leave the calculus: the sequent, its context in front, erased
-  (`Fml.erase`, the outer locals named `ns`) and proved in the logic, where
-  its erasure gives it, with no modality left (`Fml.closableB`, as today's
-  `close` asks `modalFree`).  The kernel decides both side conditions
-  (`rfl`, `decide`).  An update in the context may be a diamond: its reading
-  asks only of the typed states that erase to the one it ends in. -/
-  | close {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (ns : List Var)
-      (hlen : ns.length = Γ₀.length) (hnd : ns.Nodup)
-      (h : NFml.Valid ((H.wrap φ).erase ns))
-      (hc : (H.wrap φ).closableB ns = true := by first | rfl | decide)
-      (hB : Solidity.Avoids (H.wrap φ).bindNames ns := by decide) : Proves C R Γ₀ H φ
   /-- **`sequentialToParallel`** (`merge`, and `mergeStorage` over a storage
   write): the last update and the one before it, past the hidden binders `bs`
   between them, as one parallel update, the later one read in the earlier
@@ -432,8 +415,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (hq : Tm.Theq q.1 q.2) (h : Proves C R Γ₀ (H.rwEqC q) (φ.rwEqC q)) :
       Proves C R Γ₀ H φ
   /-- Leave the calculus: with no modality left anywhere in the sequent
-  (`Fml.modalFree`), what is left is proved over the typed reading, as
-  today's `Proves.close` proves it over today's.  The steps KeY takes after
+  (`Fml.modalFree`), what is left is proved over the typed reading.  The
+  steps KeY takes after
   the program are derived from it (`Calculus/UpdateRules.lean`). -/
   | closeHolds {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (h : ∀ σ, holds σ (H.wrap φ))
       (hm : (H.wrap φ).modalFree = true := by first | rfl | decide) : Proves C R Γ₀ H φ
@@ -453,14 +436,5 @@ branches, and there is no third goal. -/
 example : Proves StandardExample .all [.val .bool] .nil
     (.modal .diamond (.cons (.ite (.simple (.local .here)) .nil .nil) .nil) .nil .tt) :=
   .split rfl (.updIntro (.closeTrue rfl)) (.updIntro (.closeTrue rfl))
-
-/-- `close` on a leaf behind a box update and a hidden binder,
-`x = x` after `x := 1` with `x` any `uint`: the kernel decides
-`Fml.closableB` and the binder's `Avoids` (the defaults), and the erasure
-`{x := 1} x = x` is valid by `rfl`. -/
-example : Proves StandardExample .all [] (((Hyps.nil.bind .box (.user "x") (.val .uint)).upd .box
-      (Upd.nil.snoc (.local .here (.val (.app0 (.lit (.int 1))))))))
-    (.eq (.pvV .here) (.pvV .here)) :=
-  .close [] rfl List.nodup_nil fun _ _ => rfl
 
 end Solidity

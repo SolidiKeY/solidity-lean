@@ -1,5 +1,6 @@
 import Solidity.Calculus.Decide
-import Solidity.Calculus.Close
+import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.TermLib
 
 /-!

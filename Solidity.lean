@@ -63,7 +63,6 @@ import Solidity.Calculus.SoundMem
 import Solidity.Calculus.SoundStep
 import Solidity.Calculus.HoldsErase
 import Solidity.Calculus.Closable
-import Solidity.Calculus.CloseErase
 import Solidity.Calculus.Sound
 import Solidity.Calculus.DelabErase
 import Solidity.Calculus.PrintTerm
@@ -93,7 +92,6 @@ import Solidity.Calculus.Spec
 import Solidity.Calculus.Deploy
 import Solidity.Calculus.FunContract
 import Solidity.Calculus.Symex
-import Solidity.Calculus.Close
 import Solidity.Calculus.Derive
 import Solidity.Calculus.LeafDerive
 import Solidity.Calculus.ProvesDerive

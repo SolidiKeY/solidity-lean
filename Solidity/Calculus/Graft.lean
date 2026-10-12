@@ -1,4 +1,4 @@
-import Solidity.Calculus.CloseErase
+import Solidity.Calculus.HoldsErase
 import Solidity.Calculus.NFmlUpdateRules
 
 /-!

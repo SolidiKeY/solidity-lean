@@ -3,7 +3,8 @@ import Solidity.Calculus.Problem
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Spec
 import Solidity.Calculus.HoldsErase
-import Solidity.Calculus.Close
+import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.NFmlClose
 import Solidity.Solkey.TestSuite
 
 /-!

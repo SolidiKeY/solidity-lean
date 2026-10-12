@@ -1,5 +1,5 @@
 import Solidity.Calculus.Proves
-import Solidity.Calculus.CloseErase
+import Solidity.Calculus.HoldsErase
 
 /-!
 # The scoped sequent is sound: the structure
@@ -305,8 +305,6 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
   | @closeFalse Γ H φ _ ih =>
     exact fun σ => H.wrap_mono (φ := .ff) (fun _ h => (h trivial).elim) σ (ih σ)
-  | close ns hlen hnd h hc hB =>
-    exact fun σ => holds_of_erase_valid _ hlen hnd (Fml.closableB_sound _ hc) hB h σ
   | @merge Γ Δ Ε H m bs U U' V W φ hU hW _ ih =>
     intro σ
     have h : holds σ (H.wrap (Fml.binds bs (.upd m W φ))) := by

@@ -1,6 +1,7 @@
 import Solidity.Calculus.Graft
 import Solidity.Calculus.Sound
-import Solidity.Calculus.Close
+import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.NFmlClose
 
 /-!
 # `sequentialToParallel` on scoped lines
