@@ -185,6 +185,11 @@ inductive Op1 (C : Contract) : Srt → Srt → Type where
   /-- `p.f` under a `select`. -/
   | fieldIn {s s' f : Name} {T : Ty} (h : C.fieldType s' f = some T) :
       Op1 C (.spath s (.ref (.struct s'))) (.spath s T)
+  /-- A `uint` read as an `int`: KeY has one `int` sort, so solkey writes
+  nothing (its `msgValue` and the ledger's entries are `int`s, `netHeader.key`)
+  and neither does the printer; a specification's `net(a) + msg.value` reads
+  `msg.value` so.  `none` past `2^255 - 1`. -/
+  | toInt : Op1 C (.val .uint) (.val .int)
 
 /-- Binary symbols. -/
 inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
@@ -302,6 +307,7 @@ def Op1.evalM (g : State C []) {a s : Srt} :
   | .select _ h, x => x.map fun st => Storage.selectT st h
   | .selectIn h, x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h
   | .fieldIn h, x => x.map (SRef.field · h)
+  | .toInt, x => x.bind fun n => PrimTy.int.ofInt? n.1
 
 /-- A unary symbol on the typed global part. -/
 @[implemented_by Op1.evalM]
@@ -324,6 +330,7 @@ def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     (fun {_} _ h x => x.map fun st => Storage.selectT st h)
     (fun {_} {_} {_} h x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h)
     (fun {_} {_} {_} {_} h x => x.map (SRef.field · h))
+    (fun x => x.bind fun n => PrimTy.int.ofInt? n.1)
 
 theorem Op1.eval_eq_evalM (g : State C []) {a s : Srt} (o : Op1 C a s) :
     o.eval g = o.evalM g := by

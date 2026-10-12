@@ -1353,6 +1353,7 @@ theorem Op1.denote_congrP {a s : Srt} (o : Op1 C a s) (hr : g₀.SameRest g₁)
     exact StValue.Equiv.asStruct (StValue.Equiv.select h _)
   | alloc _ _ | mfield _ | addM _ _ | mval | ref => trivial
   | wt => exact StValue.Equiv.refl _
+  | toInt => exact h
 
 /-- A binary symbol respects `Equiv` of its arguments' denotations, and a
 memory read its arguments' readings, in two global parts with one ledger,

@@ -364,6 +364,7 @@ def qOp1 : {a s : Srt} → Op1 C a s → QM Expr
   | _, _, @Op1.fieldIn _ s s' f T _ => do
     return mkAppN (mkConst ``Op1.fieldIn) #[← contract, toExpr s, toExpr s', toExpr f, toExpr T,
       rflSome T]
+  | _, _, .toInt => do return mkApp (mkConst ``Op1.toInt) (← contract)
 
 def qOp2 : {a b s : Srt} → Op2 C a b s → QM Expr
   | _, _, _, @Op2.binop _ op p _ => do

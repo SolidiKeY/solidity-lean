@@ -102,6 +102,7 @@ def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen → s.TDen
   | .select r _, ds => asStruct (selectSt ds (.field r))
   | @Op1.selectIn _ _ _ f _, ds => asStruct (selectSt ds (.field f))
   | @Op1.fieldIn _ _ _ f _ _, dp => dp ++ [.field f]
+  | .toInt, da => da
 
 /-- A binary symbol in the Theory, its arguments' typed readings and
 denotations given. -/
@@ -299,6 +300,11 @@ theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {
     subst hv
     simp only [Srt.Bridge] at hu ⊢
     rw [Op1.denote, hu, SRef.absT_field]
+  | toInt =>
+    simp only [Op1.evalM, Option.bind_some] at hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu, PrimTy.erase_of_ofValue? hv]
+    rfl
 
 /-- A push that returns had room. -/
 theorem Storage.full_of_push {C : Contract} {E : Ty} {st st' : Storage C}

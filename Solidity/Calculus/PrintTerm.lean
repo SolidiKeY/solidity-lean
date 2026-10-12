@@ -154,6 +154,11 @@ partial def eqTmS (n₁ : List Expr) (x : Expr) (n₂ : List Expr) (y : Expr) : 
 /-- `‹e›`. -/
 def escapeS (e : Expr) : MetaM (TSyntax `dl_term) := escapeDl e
 
+/-- Whether a value term is a `uint` widened to an `int` (`Op1.toInt`). -/
+def isToIntS (ns : List Expr) (e : Expr) : MetaM Bool := do
+  let (_, v, _) ← viewTmS (← reduceOn) ns e
+  return v matches .sym ``Op1.toInt _ _
+
 mutual
 
 /-- A value term read at `ns`. -/
@@ -191,8 +196,11 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   | .sym ``Op2.binop #[op, ty, _] #[a, b] =>
     let some sym ← termOpSym? op | escapeS e
     -- `+ - * /` read back as `uint` arithmetic only (`schemaTerm0`): an
-    -- `int` (or unchecked `bool`) one escapes
-    unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint do return ← escapeS e
+    -- `int` (or unchecked `bool`) one escapes, but one with a widened
+    -- operand (`net(a) + msg.value`), which the reader widens again
+    -- (`NTm.resolvePair`)
+    unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint ||
+        (← isToIntS ns a) || (← isToIntS ns b) do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
   | .sym ``Op1.unop #[op, _, _] #[a] =>
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTermS ns a))
@@ -224,6 +232,7 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.selfBalance => `(dl_term| selfBalance)
     | EnvKey.selfAddress => if ← keyOn then `(dl_term| self) else `(dl_term| this)
     | _ => escapeS e
+  | .sym ``Op1.toInt _ #[a] => ppTermS ns a
   | .sym ``Op1.net _ #[a] =>
     if ← keyOn then return ← `(dl_term| selectSt(net, at($(← ppTermS ns a))))
     `(dl_term| net($(← ppTermS ns a)))

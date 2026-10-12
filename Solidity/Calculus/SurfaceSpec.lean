@@ -73,8 +73,10 @@ arithmetic is Solidity's, checked at its operands' type, where solkey's is
 KeY's unbounded `int`: an overflowing side makes its equation false rather
 than true of a larger number.  Every equation compiled here is the
 interpreter's, `Fml.eqD` (both sides return, with one value), not the total
-`Fml.eq`.  `net(a)` is read as a `uint`, as `msg.value`
-is, so `\old(net(a)) + msg.value` is checked too.
+`Fml.eq`.  `net(a)` is a ledger entry, an `int`; `msg.value` is a `uint`
+(solkey's `msgValue` and its ledger are both KeY `int`s, `netHeader.key`), so
+beside an `int` a `uint` is widened (`Op1.toInt`, printed bare as solkey
+prints it), and `\old(net(a)) + msg.value` is checked `int` arithmetic.
 -/
 
 namespace Solidity
@@ -227,8 +229,8 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
     let (p, t) ← e.term ctx
     unless p = .uint || e.isNum do throw s!"net(…) of a {p.toStr}, where an address is expected"
     match ctx.ledger with
-    | none => pure (.uint, .net t)
-    | some x => pure (.uint, .netOf x t)
+    | none => pure (.int, .net t)
+    | some x => pure (.int, .netOf x t)
   | .name x =>
     match lookupBy x ctx.locals with
     | some p => pure (p, .pv (.ofName x))
@@ -253,8 +255,10 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy
   | .binop op a b => do
     let (pa, ta) ← a.term ctx
     let (pb, tb) ← b.term ctx
-    let p := if a.isNum then pb else pa
-    unless a.isNum || b.isNum || pa = pb do
+    -- a `uint` beside an `int` is widened (`NTm.resolvePair`)
+    let p := if a.isNum then pb else if b.isNum then pa
+      else if pa = .int && pb = .uint || pa = .uint && pb = .int then .int else pa
+    unless a.isNum || b.isNum || pa = pb || p = .int && pa.isNumeric && pb.isNumeric do
       throw s!"operands of {BinOp.sym op} of types {pa.toStr} and {pb.toStr}"
     unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {p.toStr}"
     pure (op.ret p, .binop op ta tb)
