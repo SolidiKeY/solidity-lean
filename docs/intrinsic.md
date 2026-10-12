@@ -4242,7 +4242,8 @@ cannot be applied element by element to a typed state.  Two carriers:
 
 **U1 chosen.**  U2 is sound and complete: `Upd.lands_iff : U.Lands σ₀
 σ'.globE σ' ↔ U.apply σ₀.erase = .ok σ'.erase`, `holds_upd_iff` (U2's
-clause equals `holds`'), and the allocation pair lands on
+clause equals `holds`'; landed at W9.7.1 as `Upd.afterT_iff` and
+`holds_upd_erased`, both deleted at W9.7.3), and the allocation pair lands on
 `(σ.allocDefault R hm).1.push (some id)` with no `EState`.  But a leaf read
 through `Lands` costs 1.8× `holdsE`'s (`ageWriteRead`: 116–131 ms against
 70–78 ms; `sol_close` 103–105 ms), and every law would be restated over
@@ -4623,7 +4624,7 @@ with its leaf class, not hidden.
 
 | Wave | Lanes | Work |
 |---|---|---|
-| W9.7.1 | `shim` ‖ `lands` | **shim**: delete `Surface.Tm`/`MAddr`/`Upd`/`UpdElem` and their lemmas, `Tm.erase`/`Upd.erase`, `Delab.tr` and helpers, the `NFml` stub, `RuleSyntax`'s untyped `tm{}`/`ppTerm`/`delabTm` (the rule table prints scoped terms); AGENTS.md's reader paragraph says the reader is outdated.  **lands**: `Tm.eval`/`Rhs.eval` over `State C Γ` (`State.globE`, `TEnv.get` erased), `Upd.globT`/`Held.OKT`/`Upd.Lands`/`Upd.afterT` (W9.6.0's sketch), `holds`' `.upd` clause by `afterT`, `holds_upd_iff` against the old clause while it exists |
+| W9.7.1 | `shim` ‖ `lands` | **shim**: delete `Surface.Tm`/`MAddr`/`Upd`/`UpdElem` and their lemmas, `Tm.erase`/`Upd.erase`, `Delab.tr` and helpers, the `NFml` stub, `RuleSyntax`'s untyped `tm{}`/`ppTerm`/`delabTm` (the rule table prints scoped terms); AGENTS.md's reader paragraph says the reader is outdated.  **lands**: `Tm.eval`/`Rhs.eval` over `State C Γ` (`State.globE`, `TEnv.get` erased), `Upd.globT`/`Held.OKT`/`Upd.Lands`/`Upd.afterT` (W9.6.0's sketch), `holds`' `.upd` clause by `afterT`, `holds_upd_erased` (planned as `holds_upd_iff`) against the old clause while it exists |
 | W9.7.2 | `laws` ‖ `close` | the update laws (`Graft`, `UpdRuleScoped`, `RewritePast`, `TermLaws`, `UpdateRules`, `RewriteScoped`, `SeqRewrite`, `StatePartsScoped`, `LeafDerive`, …) over `Lands`: a typed substitution lemma and `Lands` composition; `CloseScoped` reads `holds` by `Lands` (no `holdsE`), `RelB`/`RelU`/`peelS`/`redState` on the typed state, `Counterexample`'s `State.lift?` |
 | W9.7.3 | master | delete `EState`, `Env` (if `TEnv.erase` has no other reader), `Upd.apply`/`UpdElem.write`, `holdsE`, `Erased.lean`; gates; review |
 
@@ -5041,6 +5042,11 @@ lines added, 2,485 removed):
   `Typing/Soundness`: `Env.All` and its lemmas, `RunInv.reglob`,
   `StateWT.reglob`.  `Tools/Taclet`'s scoped roots: `Agree`, `EState`, `Env`.
 
+**The `.upd` clause's equivalence** with the erased one it replaced
+(`Upd.afterT_iff`, `Upd.lands_iff`, `holds_upd_erased`, all proved without
+`sorry`) was kernel-checked at `87df6fe9^` (the merge `8ff7f2d1`, built
+clean above) before this commit deleted it with `EState`.
+
 **Ported** (the readers the `laws` record left):
 - **The update arms** (`SoundKit`, `SoundArms`): `Premise.Runs`' update
   clause is `U.applyV σ = .ok (τ.globE, τ.loc)` where the run ends in `τ`,
@@ -5128,6 +5134,79 @@ timed the same way in a third worktree, gives 9.4 (8.6), so the step is the
 this branch (`Chains/Storage` 18.5, `ChainRewrites` 16.0) waited about 8 s
 idle with their CPU unchanged; the second runs did not, and the table takes
 the minimum.
+
+### W9.7 review record (2026-10-12, branch `w97-review`)
+
+A read-only review of W9.7 (a finder and a skeptic) gave ten findings;
+each was checked against the code first.
+
+1. **`Counterexamples/WellTypedNecessity.lean` overstated its read:
+   confirmed and fixed.**  No term reader was applied to `badStore`: the
+   theorem evaluates the symbols `find`, `storage`, `root(total)`
+   (`Op2.eval`, `Op0.eval`).  The docstrings now say that, and a new
+   conjunct states it with the real reader: every typed state whose global
+   part is `badStore` reads `find(storage, total.lower)` as the `bool`
+   (`Tm.evalT`, by `simp only`); there is no such state, which is the
+   point.
+2. **The W9.7.3 record and `holds_upd_iff`: confirmed and fixed.**
+   `Upd.afterT_iff`, `Upd.lands_iff` and `holds_upd_erased` are proved
+   without `sorry` at `87df6fe9^` (= `8ff7f2d1`, built clean); the record
+   says so.  `holds_upd_iff` (W9.6.0's spike name, and the W9.7 plan's) is
+   annotated as landed under those names and deleted at W9.7.3.
+3. **Stale names in the docs: confirmed and fixed.**  `solc-alignment.md`
+   (`State.aliasPathT`, `State.memRefT`, `Rhs.unset` for the nonexistent
+   `UpdElem.unset`; "the terms read on the erasure" now "the terms the
+   calculus reads"), `lean-key-rule-map.md` (`State.memRefT`,
+   `holds_congr_reads`, `CloseS.holds_havoc`), `loops.md`
+   (`CloseS.holds_anon`, twice), `module-map.md` (the `Agree` that went is
+   the one relating a typed state to its erasure, `DecideComplete`'s
+   `Agree` stays; `Tm.denoteT`/`Tm.evalT`; `evalT_noPanic`/
+   `applyV_noPanic`).
+4. **Lean docstrings naming deleted things: confirmed and fixed.**
+   `Update.lean`, `NoPanic`, `SoundKit` (`*_noPanic`), `RewriteScoped`
+   (`Upd.Lands`, `Held.OKT` for `Upd.held_ok`), `DecideTyped` (`RelU σ ρ g
+   ℓ`, `RelT`), `CallbackSound` (`State.ReadsAs` for "the erasure"),
+   `Typing/CanonTest.lean` (the closer reads the storage untyped),
+   `Lands.lean` (`applyV` is U1's pair, for computing; `holds` reads U2's
+   `Lands`).
+5. **Dead declarations: confirmed and deleted** (`rg -w` found only the
+   declaration): `Modality.afterC_imp`, `CloseS.forall_val`,
+   `State.getE_havoc`, `State.getE_push_there`, `State.globE_thin`,
+   `Upd.globT_decl_error`, `State.loc_apply`, `State.withStorage_globE`,
+   `State.globE_toNil`, `Upd.rwBy_lands_rev`.  The lemmas the last read
+   (`Rhs.rwBy_eval_rev`, `Upd.rwBy_globT_rev`) have other readers.  The
+   module map did not name `globT_decl_error`; the W9.7.2 and W9.7.3
+   records still do, as history.
+6. **Blank lines in `Typing/Soundness.lean`: confirmed and fixed.**
+7. **`isScopedFamily` lost `MAddr`: confirmed and fixed.**  Before W9.7.1
+   a family was scoped when an erased twin `Solidity.Surface.X` existed:
+   `Tm`, `MAddr`, `Upd`, `UpdElem`, with `Fml` (`NFml`) and `Idx`; the
+   W9.7.1 record's "the same set" was wrong.  `MAddr` is back in
+   `Delab.isScopedFamily` (quoted with one backtick: `DelabErase` sees
+   only the namespace `Solidity.MAddr` of `MAddr.field`/`MAddr.at`, not the
+   run's `MAddr`), so `isScopedName "Solidity.MAddr.field"` is `true`
+   again (checked by `#eval`).  `scopedOnlyRoots`' docstring says it lists
+   the roots besides `isScopedFamily`'s; `isScopedName`/`isRuleLine` lost
+   their unused `env`.
+8. **Bare `simp` in `CloseScoped` and `DecideRel`: confirmed and fixed**
+   with the lists `simp?` printed (the union over the cases).
+9. **`Close.scopedGoal` missed `Landed`: confirmed and fixed.**  It is
+   reachable: `landedAll_const` leaves `Nonempty (Landed …) → P`, and once
+   `P` reads no state nothing else named a typed state, so
+   `sol_close_reads_all` took the erased `close_rw` pass.  The key now also
+   holds `CloseS.Landed`, `CloseS.LandedAll` and `Locs`; every pin is
+   unchanged (the build below).
+10. **Renaming `Tm.evalT`/`denoteT`/`Rhs.evalT`: skipped.**  `evalT` and
+    `denoteT` occur 2,066 times in 68 files, 1,388 of them `.evalT`, which
+    as dot notation is a term's, a value's (`Val.evalT`, kept) or a
+    `Simple`'s: not separable by text, and the elaborator's errors would be
+    the only guide through files that take minutes each.
+
+**Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
+(added to `defaultTargets` for the build, not committed), clean (312
+jobs), so every `#guard_msgs` pin is unchanged; the touched files have no
+warning; `sorry` count unchanged (23 textual matches in 10 files, as at
+`85188047`); `check-orphans` (309 reachable), `check-doc-paths`.
 
 ## What is left
 

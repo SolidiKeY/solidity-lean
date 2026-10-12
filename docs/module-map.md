@@ -31,9 +31,9 @@ the taclets (`Calculus/Rules`), then what is proved about them
 module goes in `Solidity.lean` (`scripts/check-orphans.mjs` fails on a module
 nothing imports).
 
-**Formulas read storage through the Theory.** Programs run in the typed run
-and updates on its erasure, but `a ≐ b` (`Fml.eq`) compares `Tm.denote`s
-over `State.abs`, the state as a Theory term, and is total as KeY's `=` is.
+**Formulas read storage through the Theory.** Programs run in the typed run,
+an update is read by where it lands (`Upd.Lands`), but `a ≐ b` (`Fml.eq`)
+compares `Tm.denoteT`s over `State.abs`, the state as a Theory term, and is total as KeY's `=` is.
 A program comparison `a == b` is `Fml.eqD`, `defined(a) ∧ defined(b) ∧ a ≐ b`.
 `Theory/Bridge/` proves once that the interpreter's reads and writes are the
 Theory's on `abs` (up to `StValue.Equiv`). A derivation rewrites terms by
@@ -78,9 +78,9 @@ by its Theory lemma (`TermTaclet.sound`).
 | `Semantics/RunFrame.lean` | A body within a mutability runs within its frame, typed (`Stmt.run_frame`, `Prog.run_frame`, W1): the heap and its typing kept (`TGFrame`, heaps compared by `HEq`), the locals below kept but where `writesAt d` lists them (`TLocAgree`); `State.anon`, `State.havoc`, and a state in a loop body's frame is one `{anon(xs)}`/`{havoc}` covers (`State.eq_anonHavoc`, `Prog.run_frame_anon`). |
 | `Semantics/RunFuel.lean` | The typed run with each loop entered at most `n` iterations (`Stmt.runF`, `Prog.runF`, `Frames.runF`; `loopF` on `TLoop.iterN`), its compiled twin (`Stmt.runF_eq`), and its agreement with the typed run but where it says `diverge` (`TRes.Approx`, `Prog.runF_approx`): the counterexample search and its kernel certificates run it. |
 | `Semantics/ToSem.lean` | A typed state printed as `Semantics.lean`'s, for `#run` (`State.toSem ns`): bindings `LTy.TDenote.bind`, locals `TEnv.toSem`. |
-| `Semantics/StateErase.lean` | A local's binding, untyped: `LTy.enc` (a local's value as `Semantics.lean` binds it), `withLocals`, `Idx.name_mem`/`name_there`, which `Calculus/DecideRel.lean`'s untyped state reads.  The erased state (`EState.erase`, `Agree`) went at W9.7.3. |
+| `Semantics/StateErase.lean` | A local's binding, untyped: `LTy.enc` (a local's value as `Semantics.lean` binds it), `withLocals`, `Idx.name_mem`/`name_there`, which `Calculus/DecideRel.lean`'s untyped state reads.  The erased state (`EState.erase`, and `Agree` relating a typed state to it) went at W9.7.3. |
 | `TermSimp.lean` | The simp sets `tm_eval` and `tm_denote` of the generic term functions. |
-| `Update.lean` | The terms' signature (`Srt`, `Op0`…`Op3`; `Term`, `STerm`, … name its sorts) and what each symbol means (`OpN.eval`, `OpN.denote`, read by the scoped `Tm.eval`/`Tm.denote`), `Modality.after`, `IntOp` (the ledger updates' arithmetic), `State.havoc`/`State.anon`, `PrimTy.admits`.  The untyped terms by name (`Surface.Tm`, `Surface.Upd`), their frame lemmas, `Term.keyAt` and `NFml` are deleted (W9.7.1): the terms are `Calculus/Fml.lean`'s |
+| `Update.lean` | The terms' signature (`Srt`, `Op0`…`Op3`; `Term`, `STerm`, … name its sorts) and what each symbol means (`OpN.eval`, `OpN.denote`, read by the scoped `Tm.evalT`/`Tm.denoteT`), `Modality.after`, `IntOp` (the ledger updates' arithmetic), `State.havoc`/`State.anon`, `PrimTy.admits`.  The untyped terms by name (`Surface.Tm`, `Surface.Upd`), their frame lemmas, `Term.keyAt` and `NFml` are deleted (W9.7.1): the terms are `Calculus/Fml.lean`'s |
 | `Theorems.lean` | The headline theorems in notation, over the scoped calculus and the typed run, their axioms pinned: soundness, the rule table against the strategy (`rule_exists`, `rule_of_step`), the solkey fragment at the rule level (`solkey_rule_exists`, `solkey_rule_lt_calculus`, `solkey_step_taclet`) and at the judgement level (`solkey_eq_calculus`, `solkey_lt_calculus`), the compiler.  Not restated: termination (`symex_terminates`, retired at W2; `docs/intrinsic.md`, W4 `theorems`). |
 
 ## The calculus
@@ -167,7 +167,7 @@ by its Theory lemma (`TermTaclet.sound`).
 | `Calculus/KeyTaclets.lean` | The 323 taclets of `solidityProgramRules.key` as one type, with `KeyOrigin`. |
 | `Calculus/RuleShapes.lean` | Which solkey taclets each `Taclet`, `LeanTaclet` and `CallbackTaclet` constructor transcribes, checked (`taclets_partitioned`; `blockEmpty`, and `functionFrameEmpty` with the call expansions, claimed); KeY's taclet of an operator family at an operator (`keyTacletAt`). |
 | `Calculus/PrintedRules.lean` | The printed rules and the `Taclet` constructor for each (`blockEmpty` a solkey taclet not printed). |
-| `Calculus/NoPanic.lean` | A symbol never panics (`Op0.eval_noPanic` … `Op3.eval_noPanic`, `Srt.NoPanic`), which `Calculus/SoundKit.lean`'s `Tm.eval_noPanic`, `Upd.apply_noPanic` read. |
+| `Calculus/NoPanic.lean` | A symbol never panics (`Op0.eval_noPanic` … `Op3.eval_noPanic`, `Srt.NoPanic`), which `Calculus/SoundKit.lean`'s `Tm.evalT_noPanic`, `Upd.applyV_noPanic` read. |
 | `Calculus/Hyp.lean` | The scoped sequents' shared parts: `RuleSet`, the fresh index (`maxIdx`), the arrow and keywords of `sequent[C]{ Γ ⟹ φ }`, `sequentFml` |
 | `Calculus/TacticSyntax.lean` | The strategy's tactics, declared once for the scoped and the closer's elaborators (`sol_step`, `sol_symex`, `sol_derive`, `sol_prove`, `sol_prove?`, `sol_derive?`, `sol_chain?`); `normValid`, `applyValid`, `Derive.kernelLemma`; `sol_symex` on a goal with no modality left. |
 | `Calculus/CloseLemmas.lean` | What both `sol_close` sets know of the interpreter, about `Semantics.State` only: `Modality.wp` and its lemmas (a write, a read, a copy, a payment under the box named with what is known of its result), values read back, the operators, the ledger, `Close.State.havoc_eq_mk`, and the symbols read one constructor at a time (`Close.Op0.eval_lit` … `Close.Op3.eval_write`), from which each set's term equations follow. |

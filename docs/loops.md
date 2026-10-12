@@ -288,7 +288,7 @@ diamond) for a walk, its goals `init` ("invariant initially valid") and
 preserves invariant", "use case"), which the proof tree labels as solkey
 does. (Before the intrinsic refactor: `Premise.invFml`, `Proves.invLean`,
 `Hyp.loopAnon` and a third goal `cov`.)
-`sol_close` reads `{anon(…)}` (`CloseS.holdsE_anon`, `CloseS.anon_cons`:
+`sol_close` reads `{anon(…)}` (`CloseS.holds_anon`, `CloseS.anon_cons`:
 an anonymised local is set to `b x`, a binding nobody knows);
 `sol_decide` and `sol_prove`'s closer do not (`Fml.inLS` is `false` on `anon`,
 as on `havoc`), so `sol_prove` leaves such a leaf to `sol_close`. Under the
@@ -351,7 +351,7 @@ and their soundness onto `Calculus/SoundLoops.lean`.
 | **L1 Syntax and semantics** (built) | `Syntax.lean`: `LoopAnn`, `Stmt.loop`, `RawStmt.while/for/doWhile/brk/cont`, the lowering of Decision 2, printers, `Stmt.quote`, `renameStmts`. `Semantics.lean`: `Halt.diverge`, `Loop.iterN`, `Loop.run`, `implemented_by`. `Semantics/Agree.lean`: `Stmt.vars`, `run_frame`. `Semantics/Callback.lean`: `forks`, `hasTransfer`. The quoters in `Syntax/Quote.lean`, `Calculus/SurfaceNotation.lean`. | Done: `Stmt.run` stays structural (the loop arm calls the body's run under a binder), `#eval` runs `Loop.runImpl`. |
 | **L2 Typing** (built) | The loop cases of `Typing/{Soundness,Reachability,Constructibility}.lean`, by induction on `iterN`. | Done. |
 | **L3 Unwinding** (built) | `Calculus/Rules.lean` (`whileUnwind`, `loopExit`), `Completeness`, `Uniqueness`, `Termination` (weight), `Logic` (`Proves.checkLean`), `RuleSoundness`, `RuleSyntax` (the clause in a taclet, `if` without `else`, a program spliced into a block), `SolkeyFragment`. Examples: the hand-unrolled solc ports as real loops. | Low to medium: the weight arithmetic is new. |
-| **L4 Invariant rule** (built) | `Calculus/Fml.lean` (`Fml.anon`), `Update.lean` (`State.anon`), `Calculus/Blocks.lean` (`Prog.frame`, the frame `Stmt.within`'s), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic`, `Termination`, `CloseScoped` (`CloseS.holdsE_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
+| **L4 Invariant rule** (built) | `Calculus/Fml.lean` (`Fml.anon`), `Update.lean` (`State.anon`), `Calculus/Blocks.lean` (`Prog.frame`, the frame `Stmt.within`'s), `Calculus/Rules.lean` (`whileInvariantBox`, `whileInvariantDiamond`, `Premise.inv`), `SoundKit` (`Premise.invFml`), `SoundLoop`, `Logic`, `Termination`, `CloseScoped` (`CloseS.holds_anon`). `sol_decide` does not read `anon`. Examples: a counting loop (both modalities), a sum with a closed form, a loop with `break`. | Done; the diamond is slow in the closer. |
 | **L5 Quantified invariants** | After `Fml.all` in an invariant: a table of invariants by index. Ballot's `winningProposal`. | High: depends on `Fml.all` and `grind` instantiation. |
 | **L6 Callbacks** | `Calculus/Callback.lean` (the loop rules under `ProvesC`; the `ExecS` constructors are L1's). | Medium. |
 | **L7 EVM** | `Evm/{Machine,Compile,Correct}.lean`, as above. | High: the largest stage. |
