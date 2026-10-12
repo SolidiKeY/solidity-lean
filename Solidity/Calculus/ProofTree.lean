@@ -30,8 +30,9 @@ What the scoped calculus adds is not a node:
 A leaf is closed by `closeTrue` (`true` behind a context of scope ends and
 box updates), else as a walk ends: `sol_leaf` takes the sequent, its
 context in front, to `⊨ ψ` (`Proves.closeValid`), which the scoped
-`sol_close` closes (`closeTacs`, `Calculus/CloseScoped.lean`), then by the
-tactics `Config.closers` lists.  `sol_leaf` takes a leaf behind updates of
+`sol_close` closes on the typed state, `holds` itself, an update's rest
+read in the states it lands on (`closeTacs`, `Calculus/CloseScoped.lean`),
+then by the tactics `Config.closers` lists.  `sol_leaf` takes a leaf behind updates of
 either modality.
 
 A rule of an operator family prints as KeY's taclet at its operator
