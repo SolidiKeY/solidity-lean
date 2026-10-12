@@ -199,7 +199,17 @@ def matchLaw (lhs e : Lean.Expr) : MetaM Bool := do
           if (← isDefEq X T) && (← isDefEq K Kpos) && (← isDefEq la[7]! ea[7]!) then return true
           s.restore
         return false
-  isDefEq lhs e
+  if ← isDefEq lhs e then return true
+  -- again, the arguments right to left: a proof in an earlier argument
+  -- (`copySt`'s) may type only once a later one fixed its indices
+  let ea := e.getAppArgs
+  unless lhs.getAppFn == e.getAppFn && la.size == ea.size do return false
+  let s ← saveState
+  for k in (List.range la.size).reverse do
+    unless ← isDefEq la[k]! ea[k]! do
+      s.restore
+      return false
+  return true
 
 /-- The law `c` at the subterm `e`: `(t, t', h)` when `e` is its left side,
 its arguments found there by unification and its side conditions
@@ -297,7 +307,7 @@ def rwLaws : List Lean.Name :=
 
 /-- The laws of memory reads `~=>` tries, after the term taclets. -/
 def rwEvalLaws : List Lean.Name :=
-  [``EvalLaw.readOnWrite, `Solidity.EvalLaw.findCopyMem, `Solidity.EvalLaw.readCopySt,
+  [``EvalLaw.readOnWrite, ``EvalLaw.findCopyMem, ``EvalLaw.findCopyMemIn, ``EvalLaw.readCopySt,
     ``EvalLaw.readAddEqual, ``EvalLaw.readAddDifferent,
     ``EvalLaw.readAddDifferentIdentity, ``EvalLaw.readWriteDifferent,
     ``EvalLaw.readWriteDifferentIdentity, ``EvalLaw.readOnWriteIdentity]

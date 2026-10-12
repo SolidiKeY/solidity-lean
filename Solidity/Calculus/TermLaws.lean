@@ -2507,6 +2507,163 @@ theorem Tm.readAddEqual_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
       cases P <;> exact Semantics.MVal.prim.inj hd
     rw [PrimTy.erase_injective hv]
 
+/-! ## Copies between storage and memory
+
+A member read out of a copy is answered on the erasure too: a copy of a
+storage struct into memory (`SVal.copyStToM_erase`, `Close.copyStToM_member`),
+and of a memory struct into storage (`MVal.copyMem_erase`,
+`Close.copyMem_member`), its write laid over the old value
+(`SVal.overlay_erase`, `Close.find_overlay_fields`). -/
+
+/-- A read one member below a root's path, untyped. -/
+theorem Semantics.State.findStorage_snoc (σ : Semantics.State) (root : Name)
+    (segs : List Semantics.Seg) (sg : Semantics.Seg) :
+    σ.findStorage root (segs ++ [sg]) = σ.findStorage root segs >>= fun w => w.find [sg] := by
+  unfold Semantics.State.findStorage
+  cases lookupBy root σ.storage with
+  | none => rfl
+  | some v => exact SemanticsProperties.SVal.find_append v segs [sg]
+
+theorem HRef.ofId?_self {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.id = some r := by
+  simp only [HRef.ofId?, r.get?, dite_true]
+
+/-- A member read out of a copy of a storage struct, on the erasure: what
+the storage holds at the member. -/
+theorem Tm.readCopySt_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
+    {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
+    {hT : (Ty.ref (.struct sn)).mapFree = true} {hf : C.fieldType sn f = some (.prim P)}
+    (hl : (f == "length") = false)
+    (hX : (Tms.MTerm.copySt m (Tms.SValT.find s p) hT).eval σ ≠ none) :
+    (Tms.Term.read (Tms.MTerm.copySt m (Tms.SValT.find s p) hT)
+        (Tms.MAddr.field (Tms.ITerm.copy m (Tms.SValT.find s p) hT) f hf)).eval σ =
+      (Tms.Term.find s (Tms.PTerm.field p f hf)).eval σ := by
+  obtain ⟨μ₁, hX⟩ := Option.ne_none_iff_exists'.1 hX
+  simp only [Tms.MTerm.copySt, Tms.SValT.find, Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM,
+    Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hX
+  obtain ⟨μ₀, hm, sv, ⟨st, hs, r, hp, hsv⟩, rfl⟩ := hX
+  have hv : (Tms.SValT.find s p).eval σ = some sv := by
+    simp only [Tms.SValT.find, Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM, hs, hp, hsv,
+      Option.bind_eq_bind, Option.bind_some]
+  have hX' : (Tms.MTerm.copySt m (Tms.SValT.find s p) hT).eval σ =
+      some (μ₀.then (sv.copyStToM μ₀.heap hT)) := by
+    simp only [Tms.MTerm.copySt, Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM, hm, hv,
+      Option.bind_eq_bind, Option.bind_some]
+  have hI : (Tms.ITerm.copy m (Tms.SValT.find s p) hT).eval σ =
+      some (sv.copyStToM μ₀.heap hT).val.id := by
+    simp only [Tms.ITerm.copy, Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM, hm, hv,
+      Option.bind_eq_bind, Option.bind_some]
+  have hL : (Tms.Term.read (Tms.MTerm.copySt m (Tms.SValT.find s p) hT)
+        (Tms.MAddr.field (Tms.ITerm.copy m (Tms.SValT.find s p) hT) f hf)).eval σ =
+      some ((sv.copyStToM μ₀.heap hT).heap.field (sv.copyStToM μ₀.heap hT).val hf) := by
+    rw [Tm.read_evalT, hX', Option.bind_some]
+    simp only [Tms.MAddr.field, Tm.eval_app1, Op1.eval_eq_evalM, Op1.evalM, hI, Option.map_some,
+      Option.bind_some]
+    show ((MAddrT.field (sv.copyStToM μ₀.heap hT).val.id hf).resolve
+      (sv.copyStToM μ₀.heap hT).H').bind (sv.copyStToM μ₀.heap hT).heap.readAddr = _
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some,
+      Option.bind_some]
+    rfl
+  rw [hL]
+  let g := sv.copyStToM μ₀.heap hT
+  let τ₀ : Semantics.State := Heap.into { storage := st.erase } μ₀.heap
+  have hc : Semantics.copyStToM τ₀ sv.erase = .ok (Heap.into τ₀ g.heap, .ref g.val.id) :=
+    SVal.copyStToM_erase sv hT μ₀.heap τ₀ rfl rfl
+  have hmem := Close.copyStToM_member hc (by simpa only [beq_eq_false_iff_ne, ne_eq] using hl)
+  have hrd : Close.readVal (Heap.into τ₀ g.heap) (.memoryField g.val.id f) =
+      .ok (PrimTy.erase (g.heap.field g.val hf)) := by
+    have h₁ := Heap.readAddr_erase (σ := Heap.into τ₀ g.heap) (hp := g.heap) rfl
+      (MAddr.field g.val hf)
+    simp only [Close.readVal]
+    rw [show (Semantics.Addr.memoryField g.val.id f) = (MAddr.field g.val hf).erase from rfl, h₁]
+    simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind']
+    exact MVal.asValue_erase_prim _
+  have hfs := Storage.findStorage_erase (σ := Heap.into τ₀ g.heap) (st := st) rfl (r.field hf)
+  have hfs₀ := Storage.findStorage_erase (σ := Heap.into τ₀ g.heap) (st := st) rfl r
+  rw [hsv] at hfs₀
+  have hpe : (r.field hf).path.erase = r.path.erase ++ [Semantics.Seg.field f] := by
+    simp only [SRef.field, SRef.append, Path.erase_append]
+    rfl
+  rw [hpe, Semantics.State.findStorage_snoc, show (r.field hf).root = r.root from rfl, hfs₀] at hfs
+  simp only [toRes, Semantics.Res.ok_bind'] at hfs
+  rw [hmem, hfs] at hrd
+  simp only [Tms.Term.find, Tms.PTerm.field, Tm.eval_app2, Tm.eval_app1, Op2.eval_eq_evalM,
+    Op2.evalM, Op1.eval_eq_evalM, Op1.evalM, hs, hp, Option.map_some, Option.bind_eq_bind,
+    Option.bind_some]
+  cases hw : Storage.find st (r.field hf) with
+  | none => rw [hw] at hrd; cases hrd
+  | some w =>
+    rw [hw] at hrd
+    simp only [Semantics.Res.ok_bind', SVal.asValue_erase_prim, Except.ok.injEq] at hrd
+    simp only [Option.bind_some, PrimTy.erase_injective hrd]
+    rfl
+
+/-- A member read out of a memory struct copied into storage, on the
+erasure: what the memory holds at the member. -/
+theorem Tm.findCopyMem_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
+    {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))} {i : Tm C Γ (.ident (.struct sn))}
+    {hf : C.fieldType sn f = some (.prim P)} (hl : (f == "length") = false)
+    (hS : (Tms.STerm.save s p (Tms.SValT.copyMem m i)).eval σ ≠ none) :
+    (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.copyMem m i)) (Tms.PTerm.field p f hf)).eval σ =
+      (Tms.Term.read m (Tms.MAddr.field i f hf)).eval σ := by
+  obtain ⟨st', hS⟩ := Option.ne_none_iff_exists'.1 hS
+  have hS' := hS
+  simp only [Tms.STerm.save, Tms.SValT.copyMem, Tm.eval_app3, Tm.eval_app2, Op3.eval_eq_evalM,
+    Op3.evalM, Op2.eval_eq_evalM, Op2.evalM, Option.bind_eq_bind, Option.bind_eq_some_iff,
+    Option.some.injEq] at hS
+  obtain ⟨st, hs, r, hp, v, ⟨μ, hm, id, hi, ref, href, rfl⟩, hw⟩ := hS
+  have hid : ref.id = id := by
+    simp only [HRef.ofId?] at href
+    split at href
+    · cases href; rfl
+    · cases href
+  simp only [Storage.write, SVal.isPrim, Ty.isPrimitive, Bool.false_eq_true, ite_false,
+    Option.bind_eq_bind, Option.bind_eq_some_iff] at hw
+  obtain ⟨cur, hcur, hsave⟩ := hw
+  have hfind := Storage.find_save_same hsave
+  have hR : (Tms.Term.read m (Tms.MAddr.field i f hf)).eval σ = some (μ.heap.field ref hf) := by
+    rw [Tm.read_evalT, hm, Option.bind_some]
+    simp only [Tms.MAddr.field, Tm.eval_app1, Op1.eval_eq_evalM, Op1.evalM, hi, Option.map_some,
+      Option.bind_some]
+    show ((MAddrT.field id hf).resolve μ.H').bind μ.heap.readAddr = _
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, href, Option.map_some,
+      Option.bind_some]
+    rfl
+  rw [hR]
+  have hfs := Storage.findStorage_erase (σ := { storage := st'.erase }) (st := st') rfl
+    (r.field hf)
+  have hfs₀ := Storage.findStorage_erase (σ := { storage := st'.erase }) (st := st') rfl r
+  rw [hfind] at hfs₀
+  have hpe : (r.field hf).path.erase = r.path.erase ++ [Semantics.Seg.field f] := by
+    simp only [SRef.field, SRef.append, Path.erase_append]
+    rfl
+  rw [hpe, Semantics.State.findStorage_snoc, show (r.field hf).root = r.root from rfl, hfs₀] at hfs
+  simp only [toRes, Semantics.Res.ok_bind', SVal.overlay_erase] at hfs
+  rw [Close.find_overlay_fields _ _ _ rfl] at hfs
+  let τ : Semantics.State := Heap.into { storage := [] } μ.heap
+  have hcm := MVal.copyMem_erase (σ := τ) (hp := μ.heap) rfl (T := .ref (.struct sn)) ref
+  have hmem := Close.copyMem_member hcm (by simpa only [beq_eq_false_iff_ne, ne_eq] using hl)
+  have h₁ := Heap.readAddr_erase (σ := τ) (hp := μ.heap) rfl (MAddr.field ref hf)
+  rw [show (MAddr.field ref hf).erase = Semantics.Addr.memoryField ref.id f from rfl] at h₁
+  rw [h₁] at hmem
+  simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind', MVal.erase, Close.copyLeaf_prim] at hmem
+  rw [hmem] at hfs
+  simp only [Semantics.Res.ok_bind', Close.layAt_prim] at hfs
+  simp only [Tms.Term.find, Tms.PTerm.field, Tm.eval_app2, Tm.eval_app1, Op2.eval_eq_evalM,
+    Op2.evalM, Op1.eval_eq_evalM, Op1.evalM, hS', hp, Option.map_some, Option.bind_eq_bind,
+    Option.bind_some]
+  cases hw' : Storage.find st' (r.field hf) with
+  | none => rw [hw'] at hfs; cases hfs
+  | some w =>
+    rw [hw'] at hfs
+    simp only [Except.ok.injEq] at hfs
+    have ha := SVal.asValue_erase_prim w
+    rw [← hfs] at ha
+    have hv : PrimTy.erase w.view = PrimTy.erase (μ.heap.field ref hf) := by
+      revert ha
+      cases PrimTy.erase (μ.heap.field ref hf) <;>
+        simp only [Semantics.SVal.asValue, Except.ok.injEq] <;> exact fun ha => ha.symm
+    rw [Option.bind_some, PrimTy.erase_injective hv]
+
 /-- A law of a memory read, at the value or the identity sort: where the
 read returns, the replacement returns the same (`EvalLaw.exact`). -/
 inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
@@ -2530,6 +2687,39 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   | readOnWriteIdentity {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ (.addr (.ref R))}
       {i : Tm C Γ (.ident R)} :
       EvalLaw (Tms.ITerm.read (Tms.MTerm.write m a (Tms.MValT.ref i)) a) i
+  /-- **`findCopyMem`**: a member read out of a memory object copied into
+  storage is read out of memory,
+  `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)` (`Tm.findCopyMem_exact`). -/
+  | findCopyMem {s : Tm C Γ .st} {sn f : Name} {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
+      {m : Tm C Γ .mem} {i : Tm C Γ (.ident (.struct sn))} {hf : C.fieldType sn f = some (.prim P)}
+      (hl : (f == "length") = false := by rfl) :
+      EvalLaw (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.copyMem m i)) (Tms.PTerm.field p f hf))
+        (Tms.Term.read m (Tms.MAddr.field i f hf))
+  /-- **`findCopyMemIn`**: `findCopyMem` in a storage of members,
+  `find(save(select(s, r), q, copyMem(mtSt, m, i)), q.f) ⇝ read(m, i.f)`, where the
+  read is the plain one (`Tm.base?`). -/
+  | findCopyMemIn {s0 sn f : Name} {P : PrimTy} {S : Tm C Γ (.sts s0)}
+      {q : Tm C Γ (.spath s0 (.ref (.struct sn)))} {m : Tm C Γ .mem}
+      {i : Tm C Γ (.ident (.struct sn))} {hf : C.fieldType sn f = some (.prim P)}
+      {s : Tm C Γ .st} {p : Tm C Γ (.path (.ref (.struct sn)))}
+      (hb : (Tm.app2 .findIn (Tm.app3 .saveIn S q (Tms.SValT.copyMem m i))
+          (Tm.app1 (.fieldIn hf) q)).base? =
+        some (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.copyMem m i)) (Tms.PTerm.field p f hf))
+        := by rfl)
+      (hl : (f == "length") = false := by rfl) :
+      EvalLaw (Tm.app2 .findIn (Tm.app3 .saveIn S q (Tms.SValT.copyMem m i))
+          (Tm.app1 (.fieldIn hf) q))
+        (Tms.Term.read m (Tms.MAddr.field i f hf))
+  /-- **`readCopySt`**: a member read out of a copy of a storage struct is
+  read out of storage,
+  `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)`
+  (`Tm.readCopySt_exact`). -/
+  | readCopySt {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name} {P : PrimTy}
+      {p : Tm C Γ (.path (.ref (.struct sn)))} {hT : (Ty.ref (.struct sn)).mapFree = true}
+      {hf : C.fieldType sn f = some (.prim P)} (hl : (f == "length") = false := by rfl) :
+      EvalLaw (Tms.Term.read (Tms.MTerm.copySt m (Tms.SValT.find s p) hT)
+          (Tms.MAddr.field (Tms.ITerm.copy m (Tms.SValT.find s p) hT) f hf))
+        (Tms.Term.find s (Tms.PTerm.field p f hf))
   /-- **`readAddEqual`**: a primitive member or fixed element of a fresh
   object holds its type's default, `read(addM(m, R), a) ⇝ default`, where `a`
   reads at a path below the fresh root whose declared type is the primitive
@@ -2553,32 +2743,63 @@ section EvalLawSound
 
 variable {Γ : Ctx} {σ : State C Γ}
 
-/-- The memory a read reads. -/
-def Op2.memArg {a b s : Srt} : Op2 C a b s → Tm C Γ a → Option (Tm C Γ .mem)
-  | .read, x => some x
-  | .iread, x => some x
+/-- What a law's left side reads: the memory of a read, or the storage of a
+`find`. -/
+inductive LawAnchor (C : Contract) (Γ : Ctx) where
+  | mem (X : Tm C Γ .mem)
+  | st (S : Tm C Γ .st)
+
+/-- The anchor returns. -/
+def LawAnchor.Evals (σ : State C Γ) : LawAnchor C Γ → Prop
+  | .mem X => X.eval σ ≠ none
+  | .st S => S.eval σ ≠ none
+
+/-- The anchor of a read or a `find`. -/
+def Op2.anchorArg {a b s : Srt} : Op2 C a b s → Tm C Γ a → Option (LawAnchor C Γ)
+  | .read, x => some (.mem x)
+  | .iread, x => some (.mem x)
+  | .find, x => some (.st x)
   | _, _ => none
 
-/-- The memory a read reads (`read(m, a)`, at either sort).  Generic in the
-sort. -/
-def Tm.readMem? {u : Srt} : Tm C Γ u → Option (Tm C Γ .mem)
-  | .app2 o x _ => o.memArg x
+/-- The anchor of a read (`read(m, a)`, at either sort, or `find(s, p)`).
+Generic in the sort. -/
+def Tm.lawAnchor0? {u : Srt} : Tm C Γ u → Option (LawAnchor C Γ)
+  | .app2 o x _ => o.anchorArg x
   | _ => none
 
-theorem Tm.readMem?_eval {u : Srt} {t : Tm C Γ u} {X : Tm C Γ .mem} (h : t.readMem? = some X)
-    (ht : t.eval σ ≠ none) : X.eval σ ≠ none := by
+/-- The anchor of a law's left side: its own, or, for a read in a storage of
+members, its plain read's (`Tm.base?`). -/
+def Tm.lawAnchor? {u : Srt} (t : Tm C Γ u) : Option (LawAnchor C Γ) :=
+  (Tm.lawAnchor0? t).orElse fun _ => t.base?.bind Tm.lawAnchor0?
+
+theorem Tm.lawAnchor0?_eval {u : Srt} {t : Tm C Γ u} {A : LawAnchor C Γ}
+    (h : t.lawAnchor0? = some A) (ht : t.eval σ ≠ none) : A.Evals σ := by
   cases t with
   | app2 o x y =>
-    cases o <;> simp only [Tm.readMem?, Op2.memArg, Option.some.injEq, reduceCtorEq] at h
+    cases o <;> simp only [Tm.lawAnchor0?, Op2.anchorArg, Option.some.injEq, reduceCtorEq] at h
     all_goals
       subst h
       exact fun hx => ht (Tm.eval_app2_none _ x y hx)
-  | _ => simp only [Tm.readMem?, reduceCtorEq] at h
+  | _ => simp only [Tm.lawAnchor0?, reduceCtorEq] at h
+
+theorem Tm.lawAnchor?_eval {u : Srt} {t : Tm C Γ u} {A : LawAnchor C Γ} (h : t.lawAnchor? = some A)
+    (ht : t.eval σ ≠ none) : A.Evals σ := by
+  unfold Tm.lawAnchor? at h
+  cases h0 : Tm.lawAnchor0? t with
+  | some A' =>
+    rw [h0] at h
+    cases h
+    exact Tm.lawAnchor0?_eval h0 ht
+  | none =>
+    rw [h0] at h
+    simp only [Option.orElse, Option.bind_eq_some_iff] at h
+    obtain ⟨t', hb, ha⟩ := h
+    exact Tm.lawAnchor0?_eval ha (by rw [← Tm.base?_eval σ hb]; exact ht)
 
 /-- **A memory law is exact past its write**: the read's memory returns
 wherever the read does, and where it returns the two sides return alike. -/
-theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.readMem? = some X ∧
-    ∀ σ : State C Γ, X.eval σ ≠ none → t.eval σ = t'.eval σ
+theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ A, t.lawAnchor? = some A ∧
+    ∀ σ : State C Γ, A.Evals σ → t.eval σ = t'.eval σ
   | .readOnWrite => ⟨_, rfl, fun σ hX => by
       obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
       obtain ⟨μ, ad, w, ra, mv, hp, -, ha, hv, hra, hmv, hw, rfl⟩ := Tm.write_some hX
@@ -2628,6 +2849,11 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.r
       split at hmv
       · cases hmv; rfl
       · cases hmv⟩
+  | .findCopyMem hl => ⟨_, rfl, fun _ hS => Tm.findCopyMem_exact hl hS⟩
+  | .findCopyMemIn hb hl => ⟨.st (Tms.STerm.save _ _ (Tms.SValT.copyMem _ _)),
+      by simp only [Tm.lawAnchor?, Option.orElse, hb]; rfl,
+      fun σ hS => (Tm.base?_eval σ hb).trans (Tm.findCopyMem_exact hl hS)⟩
+  | .readCopySt hl => ⟨_, rfl, fun _ hX => Tm.readCopySt_exact hl hX⟩
   | .readAddEqual h => ⟨_, rfl, fun _ hX => Tm.readAddEqual_exact h hX⟩
   | .readAddDifferent h => ⟨_, rfl, fun _ hX => Tm.readAddDifferent_exact h hX⟩
   | .readAddDifferentIdentity h => ⟨_, rfl, fun _ hX => Tm.readAddDifferentIdentity_exact h hX⟩
@@ -2636,7 +2862,7 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.r
 theorem EvalLaw.evalRefines {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') :
     Tm.EvalRefinesAt t t' := fun σ x hx => by
   obtain ⟨X, hX, he⟩ := r.exact
-  rw [← he σ (Tm.readMem?_eval hX (by rw [hx]; exact Option.some_ne_none _))]
+  rw [← he σ (Tm.lawAnchor?_eval hX (by rw [hx]; exact Option.some_ne_none _))]
   exact hx
 
 /-- The memory terms an element writes the memory with. -/
@@ -2692,18 +2918,25 @@ theorem Upd.holdsMem_eval {Δ : Ctx} {U : Upd C Γ Δ} {w : Tm C Γ .mem} (h : U
 
 /-- A covered memory law's write is held by the update. -/
 def Upd.coversEval {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (q : Tm C Γ u × Tm C Γ u) : Bool :=
-  match q.1.readMem? with
-  | some X => U.holdsMem X
+  match q.1.lawAnchor? with
+  | some (.mem X) => U.holdsMem X
+  | some (.st S) => U.holdsWrite S
   | none => false
 
 /-- **Wherever a covered update returns, a memory law refines back.** -/
 theorem EvalLaw.back {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') {Δ : Ctx} {U : Upd C Γ Δ}
     (hc : U.coversEval (t, t') = true) {g : GlobT C σ.H} (hU : U.globT σ = some g) :
     OLe (t'.eval σ) (t.eval σ) := by
-  obtain ⟨X, hX, he⟩ := r.exact
-  simp only [Upd.coversEval, hX] at hc
-  rw [he σ (Upd.holdsMem_eval hc hU)]
-  exact OLe.refl _
+  obtain ⟨A, hA, he⟩ := r.exact
+  cases A with
+  | mem X =>
+    simp only [Upd.coversEval, hA] at hc
+    rw [he σ (Upd.holdsMem_eval hc hU)]
+    exact OLe.refl _
+  | st S =>
+    simp only [Upd.coversEval, hA] at hc
+    rw [he σ (Upd.holdsWrite_eval hc hU)]
+    exact OLe.refl _
 
 end EvalLawSound
 
