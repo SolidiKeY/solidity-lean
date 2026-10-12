@@ -154,38 +154,43 @@ partial def subtermsLike (p e : Lean.Expr) : Array Lean.Expr :=
     | _ => acc
   go e #[]
 
-/-- The positions on the spine of the scoped storage term `S`: each storage
-subterm reached through the storage argument of a save, a delete or a
-select, with the context (`SCtxS`) a hole there stands in. -/
-partial def spinePositions (C Γ S : Lean.Expr) (mk : Lean.Expr → Lean.Expr := id) :
+/-- The positions on the spine of the scoped storage of members `S`: each
+storage of members reached through the first argument of a `saveIn`, a
+`delAtIn` or a `selectIn`, with the context (`SCtxS`) a hole there stands
+in. -/
+partial def spinePositions (S : Lean.Expr) (mk : Lean.Expr → MetaM Lean.Expr) :
     MetaM (Array (Lean.Expr × Lean.Expr)) := do
-  let here := (S, mk (mkApp2 (mkConst ``SCtxS.hole) C Γ))
+  let ty ← whnfR (← inferType S)
+  unless ty.isAppOfArity ``Tm 3 do return #[]
+  let srt ← whnfR (ty.getArg! 2)
+  unless srt.isAppOfArity ``Srt.sts 1 do return #[]
+  let here := (S, ← mk (mkApp3 (mkConst ``SCtxS.hole) (ty.getArg! 0) (ty.getArg! 1) srt.appArg!))
   let args := S.getAppArgs
-  if S.isAppOfArity ``Tm.app3 10 && args[6]!.isConstOf ``Op3.save then
+  if S.isAppOfArity ``Tm.app3 10 && args[6]!.isAppOf ``Op3.saveIn then
     let (S', p, v) := (args[7]!, args[8]!, args[9]!)
-    return #[here] ++ (← spinePositions C Γ S' fun K => mk (mkAppN (mkConst ``SCtxS.save) #[C, Γ, K, p, v]))
-  else if S.isAppOfArity ``Tm.app2 8 && args[5]!.isConstOf ``Op2.delAt then
+    return #[here] ++ (← spinePositions S' fun K => do mk (← mkAppM ``SCtxS.save #[K, p, v]))
+  else if S.isAppOfArity ``Tm.app2 8 && args[5]!.isAppOf ``Op2.delAtIn then
     let (S', p) := (args[6]!, args[7]!)
-    return #[here] ++ (← spinePositions C Γ S' fun K => mk (mkAppN (mkConst ``SCtxS.delAt) #[C, Γ, K, p]))
-  else if S.isAppOfArity ``Tm.app1 7 && args[4]!.isAppOfArity ``Op1.select 1 then
-    let (r, S') := (args[4]!.appArg!, args[6]!)
-    return #[here] ++ (← spinePositions C Γ S' fun K => mk (mkAppN (mkConst ``SCtxS.select) #[C, Γ, K, r]))
+    return #[here] ++ (← spinePositions S' fun K => do mk (← mkAppM ``SCtxS.delAt #[K, p]))
+  else if S.isAppOfArity ``Tm.app1 6 && args[4]!.isAppOf ``Op1.selectIn then
+    let (hf, S') := (args[4]!.appArg!, args[5]!)
+    return #[here] ++ (← spinePositions S' fun K => do mk (← mkAppM ``SCtxS.select #[K, hf]))
   else return #[here]
 
-/-- `lhs` matched against `e`: by unification, or, for a law in a storage
-context (`find(K[X], q)` with `K` to find), `X` against a position on the
-spine of `e`'s storage and `K` the context there. -/
+/-- `lhs` matched against `e`: by unification, or, for a law in a context of
+storages of members (`findIn(K[X], q)` with `K` to find), `X` against a
+position on the spine of `e`'s storage and `K` the context there. -/
 def matchLaw (lhs e : Lean.Expr) : MetaM Bool := do
   let la := lhs.getAppArgs
-  if lhs.isAppOfArity ``Tm.app2 8 && la[5]!.isConstOf ``Op2.find then
+  if lhs.isAppOfArity ``Tm.app2 8 && la[5]!.isAppOf ``Op2.findIn then
     let st := la[6]!
-    if st.isAppOfArity ``SCtxS.fill 4 then
-      let K := st.getArg! 2
-      let X := st.getArg! 3
+    if st.isAppOfArity ``SCtxS.fill 6 then
+      let K := st.getArg! 4
+      let X := st.getArg! 5
       if (← instantiateMVars K).isMVar then
         let ea := e.getAppArgs
-        unless e.isAppOfArity ``Tm.app2 8 && ea[5]!.isConstOf ``Op2.find do return false
-        for (T, Kpos) in ← spinePositions la[0]! la[1]! ea[6]! do
+        unless e.isAppOfArity ``Tm.app2 8 && ea[5]!.isAppOf ``Op2.findIn do return false
+        for (T, Kpos) in ← spinePositions ea[6]! pure do
           let s ← saveState
           if (← isDefEq X T) && (← isDefEq K Kpos) && (← isDefEq la[7]! ea[7]!) then return true
           s.restore
@@ -262,8 +267,9 @@ def rwLaws : List Lean.Name :=
 
 /-- The laws of memory reads `~=>` tries, after the term taclets. -/
 def rwEvalLaws : List Lean.Name :=
-  [``EvalLaw.readOnWrite, ``EvalLaw.findCopyMem, ``EvalLaw.readCopySt, ``EvalLaw.readAddEqual,
-    ``EvalLaw.readAddDifferent, ``EvalLaw.readAddDifferentIdentity, ``EvalLaw.readWriteDifferent,
+  [``EvalLaw.readOnWrite, `Solidity.EvalLaw.findCopyMem, `Solidity.EvalLaw.readCopySt,
+    `Solidity.EvalLaw.readAddEqual, `Solidity.EvalLaw.readAddDifferent,
+    `Solidity.EvalLaw.readAddDifferentIdentity, ``EvalLaw.readWriteDifferent,
     ``EvalLaw.readWriteDifferentIdentity, ``EvalLaw.readOnWriteIdentity]
 
 /-- The literal laws `~=>` tries, after the laws of memory reads. -/
