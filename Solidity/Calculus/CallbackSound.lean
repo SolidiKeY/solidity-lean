@@ -73,10 +73,12 @@ theorem holdsC_closedAt_iff {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfe
     {Γ : Ctx} (τ : State C Γ) : holdsC I τ (Fml.closedAt I) ↔ I.stateInv.at τ := by
   constructor
   · intro h
-    have h : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) := h
+    have h : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) :=
+      (holdsC_upd_erased _ _ _ _).1 h
     have h' := h (τ.withEnv (Δ := []) ()) rfl (List.prefix_refl _)
     exact (holdsC_iff_holds I hT _).1 h'
   · intro h
+    refine (holdsC_upd_erased _ _ _ _).2 ?_
     show Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase)
     intro σ'' e _
     refine (holdsC_iff_holds I hT σ'').2 ((holds_FO_erase I hI ?_).1 h)
@@ -134,12 +136,14 @@ theorem holdsC_exit_after {I : Fml C []} {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Fr
   | _, .pop _ e κ, φ, σ, h, o', he => by
     cases he with
     | pop hκ =>
-      exact holdsC_exit_after κ φ (σ.drop e) (h (σ.drop e) (State.drop_erase e σ)
+      exact holdsC_exit_after κ φ (σ.drop e) ((holdsC_upd_erased _ _ _ _).1 h (σ.drop e)
+        (State.drop_erase e σ)
         (List.prefix_refl _)) _ hκ
   | _, .drop e κ, φ, σ, h, o', he => by
     cases he with
     | drop hκ =>
-      exact holdsC_exit_after κ φ (σ.thin e) (h (σ.thin e) (State.thin_erase e σ)
+      exact holdsC_exit_after κ φ (σ.thin e) ((holdsC_upd_erased _ _ _ _).1 h (σ.thin e)
+        (State.thin_erase e σ)
         (List.prefix_refl _)) _ hκ
 
 /-- The rest of the program, gone into the frames when it is empty, gives
@@ -225,7 +229,7 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
   rw [ExecS.det_inv he hs]
   obtain ⟨h₁, h₂⟩ := hr
   have h : m.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H →
-      holdsC I σ' (Fml.modalK m ω κ φ)) (U.apply σ.erase) := h
+      holdsC I σ' (Fml.modalK m ω κ φ)) (U.apply σ.erase) := (holdsC_upd_erased _ _ _ _).1 h
   cases ht : s.run σ with
   | ok o =>
     have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
@@ -313,7 +317,7 @@ theorem Hyps.wrapC_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | upd H m U ih =>
     intro φ ψ χ h
     exact ih (φ := .upd m U φ) (ψ := .upd m U ψ) (χ := .upd m U χ) fun τ f g =>
-      Modality.afterC_and f g fun _ x y σ' e hx => h σ' (x σ' e hx) (y σ' e hx)
+      Upd.afterT_and f g fun σ' x y => h σ' x y
   | havoc H ih =>
     intro φ ψ χ h
     exact ih (φ := .havoc φ) (ψ := .havoc ψ) (χ := .havoc χ) fun τ f g st nt =>
@@ -376,12 +380,12 @@ theorem holdsC_transferCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | det hf => nomatch hf
   | transferHalt h => nomatch h
   | transferViolated h hn =>
-    have hx : Modality.afterC .box _ _ := hx
+    have hx : Modality.afterC .box _ _ := (holdsC_upd_erased _ _ _ _).1 hx
     rw [transfer_booking sadr se h] at hx
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (hx _ rfl (by exact (‹Out C σ.H Γ›).ext)))).elim
   | transferResume h hJ hJ' =>
     rename_i st nt o₂
-    have hr : Modality.afterC .box _ _ := hr
+    have hr : Modality.afterC .box _ _ := (holdsC_upd_erased _ _ _ _).1 hr
     rw [transfer_booking sadr se h] at hr
     exact COut.after_seq (holdsC_modalK _ ω κ φ
       (hr o₂.st rfl o₂.ext st nt ((holdsC_closedAt_iff hI hT _).2 hJ')))
@@ -403,19 +407,19 @@ theorem holdsC_sendCb (hI : I.FO = true) (hT : I.hasTransfer = false) (pv : Idx 
   | det hf => nomatch hf
   | sendHalt h => nomatch h
   | sendFailed h =>
-    have hf : Modality.afterC .box _ _ := hf
+    have hf : Modality.afterC .box _ _ := (holdsC_upd_erased _ _ _ _).1 hf
     have e : (Upd.nil.snoc (UpdElem.local pv (.val (Tm.lit (.bool false))))).apply σ.erase =
         .ok (σ.setLocal pv (false : Bool)).erase := by
       rw [State.setLocal_erase]; rfl
     rw [e] at hf
     exact COut.after_seq (holdsC_modalK _ ω κ φ (hf _ rfl (List.prefix_refl _)))
   | sendViolated h hn =>
-    have hx : Modality.afterC .box _ _ := hx
+    have hx : Modality.afterC .box _ _ := (holdsC_upd_erased _ _ _ _).1 hx
     rw [transfer_booking sadr se h] at hx
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (hx _ rfl (by exact (‹Out C σ.H Γ›).ext)))).elim
   | sendResume h hJ hJ' =>
     rename_i st nt o₂
-    have hok : Modality.afterC .box _ _ := hok
+    have hok : Modality.afterC .box _ _ := (holdsC_upd_erased _ _ _ _).1 hok
     have e : ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
         (UpdElem.local pv (.val (Tm.lit (.bool true))))).apply σ.erase =
         .ok (o₂.st.setLocal pv (true : Bool)).erase := by
@@ -643,10 +647,12 @@ theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {I : Fml C []} (hφ :
   | _, .nil, _, σ, e => (holds_reclose φ hφ σ τ₀ e).1 h
   | _, .seq .nil κ, hκ, σ, e => holds_exit_closed hφ h κ hκ σ e
   | _, .pop _ e' κ, hκ, σ, e => by
+    refine (holds_upd_erased _ _ _ _).2 ?_
     show Modality.afterC .box _ ((Upd.nil.pop e').apply σ.erase)
     intro σ' he _
     exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
   | _, .drop e' κ, hκ, σ, e => by
+    refine (holds_upd_erased _ _ _ _).2 ?_
     show Modality.afterC .box _ ((Upd.nil.drop e').apply σ.erase)
     intro σ' he _
     exact holds_exit_closed hφ h κ hκ σ' (by rw [he]; exact e)
@@ -662,7 +668,8 @@ theorem Proves.assumeInv {R : RuleSet} {Γ₀ Γ Δ : Ctx} {H : Hyps C Γ₀ Γ}
     Proves C R Γ₀ (H.pre (Fml.closedAt I)) (κ.exit .box φ) := by
   refine .closeHolds (fun σ => H.wrap_valid (φ := .imp (Fml.closedAt I) (κ.exit .box φ)) hb
     (fun τ hτ => ?_) σ) hm
-  have hτ : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) := hτ
+  have hτ : Modality.afterC .box _ ((Upd.nil.drop (Thin.nilTo Γ)).apply τ.erase) :=
+    (holds_upd_erased _ _ _ _).1 hτ
   exact holds_exit_closed he (hτ (τ.withEnv (Δ := []) ()) rfl (List.prefix_refl _)) κ hκ τ rfl
 
 /-- An assumption gives it opened. -/
@@ -673,7 +680,8 @@ theorem holds_openInv {Γ : Ctx} (a : Fml C Γ) (τ : State C Γ) (h : holds τ 
   · rename_i Δ e φ
     split
     · rename_i φ' hφ
-      have h : Modality.afterC .box _ ((Upd.nil.drop e).apply τ.erase) := h
+      have h : Modality.afterC .box _ ((Upd.nil.drop e).apply τ.erase) :=
+        (holds_upd_erased _ _ _ _).1 h
       exact (holds_reclose φ hφ (τ.thin e) τ rfl).2 (h (τ.thin e) (State.thin_erase e τ)
         (List.prefix_refl _))
     · exact h
@@ -691,7 +699,7 @@ theorem Hyps.wrap_openInv {Γ₀ Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | upd H m U ih =>
     intro φ ψ h
     exact ih (φ := .upd m U φ) (ψ := .upd m U ψ) fun τ f =>
-      Modality.afterC_imp f fun _ x σ' e hx => h σ' (x σ' e hx)
+      Upd.afterT_imp f fun σ' x => h σ' x
   | havoc H ih =>
     intro φ ψ h
     exact ih (φ := .havoc φ) (ψ := .havoc ψ) fun τ f st nt => h _ (f st nt)

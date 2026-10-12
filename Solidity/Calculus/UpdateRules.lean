@@ -232,6 +232,7 @@ theorem Fml.substU_holds {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : EState C Γ} {
 theorem holds_upd_of_substU {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} {φ' : Fml C Γ}
     (hs : Fml.substU U φ = some φ') (σ : State C Γ) (h : holds σ φ') :
     holds σ (.upd .box U φ) := by
+  rw [holds_upd_erased]
   show Modality.afterC .box _ (U.apply σ.erase)
   cases hU : U.apply σ.erase with
   | error => trivial
@@ -241,14 +242,6 @@ theorem holds_upd_of_substU {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} {φ'
 /-! ## Dropping what an update pops -/
 
 section Simp
-
-theorem Env.ext_get : {Γ : Ctx} → (e e' : Env C Γ) →
-    (∀ {t : LTy} (i : Idx Γ t), Env.get i e = Env.get i e') → e = e'
-  | [], (), (), _ => rfl
-  | _ :: _, (a, e), (a', e'), h => by
-    have h0 : a = a' := h .here
-    have h1 : e = e' := Env.ext_get e e' fun i => h (.there i)
-    rw [h0, h1]
 
 /-- An update with each element that sets a local it pops later dropped:
 `n` of the top locals of `Δ` are popped after it. -/
@@ -394,8 +387,9 @@ theorem Upd.simp_apply {Γ : Ctx} (σ₀ : EState C Γ) : {Δ : Ctx} → (n : Na
 /-- Under the box, an update with what it pops dropped gives the update. -/
 theorem holds_upd_simp {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} (σ : State C Γ)
     (h : holds σ (.upd .box (U.simp 0) φ)) : holds σ (.upd .box U φ) := by
+  rw [holds_upd_erased]
   show Modality.afterC .box _ (U.apply σ.erase)
-  have h : Modality.afterC .box _ ((U.simp 0).apply σ.erase) := h
+  have h : Modality.afterC .box _ ((U.simp 0).apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   cases hU : U.apply σ.erase with
   | error => trivial
   | ok τ =>

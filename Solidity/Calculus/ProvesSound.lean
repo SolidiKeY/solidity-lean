@@ -79,9 +79,11 @@ theorem holds_exit (m : Modality) {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C 
     rw [Prog.runFrames_seq]
     exact h
   | _, .pop _ e κ, φ, σ, h =>
-    holds_exit m κ φ (σ.drop e) (h (σ.drop e) (State.drop_erase e σ) (List.prefix_refl _))
+    holds_exit m κ φ (σ.drop e) ((holds_upd_erased _ _ _ _).1 h (σ.drop e) (State.drop_erase e σ)
+      (List.prefix_refl _))
   | _, .drop e κ, φ, σ, h =>
-    holds_exit m κ φ (σ.thin e) (h (σ.thin e) (State.thin_erase e σ) (List.prefix_refl _))
+    holds_exit m κ φ (σ.thin e) ((holds_upd_erased _ _ _ _).1 h (σ.thin e) (State.thin_erase e σ)
+      (List.prefix_refl _))
 
 /-! ## Outcomes -/
 
@@ -123,7 +125,7 @@ theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
   | upd H m U ih =>
     intro φ ψ χ h
     exact ih (φ := .upd m U φ) (ψ := .upd m U ψ) (χ := .upd m U χ) fun τ f g =>
-      Modality.afterC_and f g fun _ x y σ' e hx => h σ' (x σ' e hx) (y σ' e hx)
+      Upd.afterT_and f g fun σ' x y => h σ' x y
   | havoc H ih =>
     intro φ ψ χ h
     exact ih (φ := .havoc φ) (ψ := .havoc ψ) (χ := .havoc χ) fun τ f g st nt =>
@@ -168,6 +170,7 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     cases m with
     | box =>
       refine ih (φ := .upd .box U φ) hb fun τ => ?_
+      rw [holds_upd_erased]
       show Modality.afterC .box _ _
       cases U.apply τ.erase with
       | ok _ => exact fun σ' _ _ => h σ'
@@ -176,6 +179,7 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
       have hb' : U.popsOnly = true ∧ H.boxOnly = true := Bool.and_eq_true_iff.mp hb
       refine ih (φ := .upd .diamond U φ) hb'.2 fun τ => ?_
       obtain ⟨a, ha⟩ := Upd.apply_popsOnly τ.erase U hb'.1
+      rw [holds_upd_erased]
       show Modality.afterC .diamond _ _
       rw [ha]
       exact fun σ' _ _ => h σ'
@@ -288,8 +292,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     have hX : holds σ ((H.anonHavoc xs hv).wrap X) :=
       (H.anonHavoc xs hv).wrap_and (φ := .imp I (.upd m U (.imp c A)))
         (ψ := .imp I (.upd m U (.imp c' B))) (χ := X)
-        (fun τ x y hI => Modality.afterC_and (x hI) (y hI) fun _ f g σ' e hx =>
-          ⟨f σ' e hx, g σ' e hx⟩) σ (ihT σ) (ihE σ)
+        (fun τ x y hI => Upd.afterT_and (x hI) (y hI) fun _ f g => ⟨f, g⟩) σ (ihT σ) (ihE σ)
     rw [Hyps.wrap_anonHavoc] at hX
     have hF : holds σ (H.wrap ((Premise.inv I xs hv U c c' hu hb P post).fml m ω κ φ)) :=
       H.wrap_and (φ := I) (ψ := Fml.anonHavoc xs hv X) (χ := .and I (Fml.anonHavoc xs hv X))

@@ -302,15 +302,20 @@ theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
                pure (τ₀.push (t := .val .bool) (← c.lower.eval a.st.erase))) = _
       rw [Val.lower_eval_ok c a.st hc]
       rfl
+    rw [holds_upd_erased] at hY
     change Modality.afterC .box _ (Upd.apply _ _) at hY
     rw [hU] at hY
     obtain ⟨hT, hF⟩ := hY _ rfl (List.prefix_refl _)
     cases v with
     | false =>
-      have hF' := hF ((holds_isBoolD _ _ _).2 rfl) a.st rfl (List.prefix_refl _)
+      have hF' :=
+        (holds_upd_erased _ _ _ _).1 (hF ((holds_isBoolD _ _ _).2 rfl))
+          a.st rfl (List.prefix_refl _)
       exact (holds_modal_iff a.st ω κ φ).1 (holds_modalK a.st ω κ φ hF')
     | true =>
-      have hT' := hT ((holds_isBoolD _ _ _).2 rfl) a.st rfl (List.prefix_refl _)
+      have hT' :=
+        (holds_upd_erased _ _ _ _).1 (hT ((holds_isBoolD _ _ _).2 rfl))
+          a.st rfl (List.prefix_refl _)
       have h' := (holds_modal_iff a.st body _ _).1 (holds_modalK a.st body _ _ hT')
       unfold Prog.runSt at h'
       dsimp only
@@ -424,6 +429,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     ⟨TGFrame.refl σ, TLocAgree.refl _, hI0⟩
   rintro a ⟨hg, hag, hI⟩
   have hY := holds_anonHavoc hxs hg hag hA hI
+  rw [holds_upd_erased] at hY
   change Modality.afterC .diamond _ (Upd.apply _ _) at hY
   have hUe : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
       (.val (p := .bool) c.lower)).apply a.st.erase =
@@ -457,11 +463,14 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     · exact .inl rfl
   · have hcv : cv = false := Except.ok.inj hc'
     subst hcv
-    have hF' := hF ((holds_isBoolD _ _ _).2 rfl) a.st rfl (List.prefix_refl _)
+    have hF' :=
+      (holds_upd_erased _ _ _ _).1 (hF ((holds_isBoolD _ _ _).2 rfl)) a.st rfl (List.prefix_refl _)
     exact hF'
   · have hcv : cv = true := Except.ok.inj hc'
     subst hcv
-    have hT' := hT ((holds_isBoolD _ _ _).2 rfl) (a.st.push (t := .val .uint) dv) rfl
+    have hT' :=
+      (holds_upd_erased _ _ _ _).1 (hT ((holds_isBoolD _ _ _).2 rfl))
+        (a.st.push (t := .val .uint) dv) rfl
       (List.prefix_refl _)
     have h' := (holds_modal_iff _ _ _ _).1 (holds_modalK _ _ _ _ hT')
     unfold Prog.runSt at h'
@@ -487,6 +496,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       · change c.evalT τ₀ = _ at hc₁
         have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
           rw [Val.evalT_up]; exact hc₁
+        rw [holds_upd_erased] at hdec
         change Modality.afterC .diamond _ (Upd.apply _ _) at hdec
         have hU₁ : (Upd.nil.decl (fse k) (.val (p := .bool) c.up.lower)).apply
             (τ₀.push (t := .val .uint) dv).erase =

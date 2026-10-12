@@ -443,7 +443,7 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
       rw [h₁] at h
       obtain ⟨f', φ'⟩ := q
       cases h
-      exact Modality.afterC_imp hψ fun τ a σ' e hx => Fml.stepFocusR_sound φ h₁ σ' (a σ' e hx)
+      exact Upd.afterT_imp hψ fun σ' a => Fml.stepFocusR_sound φ h₁ σ' a
   | _, .havoc φ, f, ψ, h, σ, hψ => by
     have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = some (f, ψ) := h
     cases h₁ : φ.stepFocusR k with
@@ -598,6 +598,7 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
   | _, σ, .and φ ψ => and_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
   | _, σ, .imp φ ψ => imp_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
   | _, σ, .upd m U φ => by
+    refine (holds_upd_erased _ _ _ _).trans (Iff.trans ?_ (holds_upd_erased _ _ _ _).symm)
     show m.afterC _ (U.eraseNames.apply σ.erase) ↔ m.afterC _ (U.apply σ.erase)
     rw [Upd.apply_eraseNames]
     cases U.apply σ.erase with

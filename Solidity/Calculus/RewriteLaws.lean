@@ -147,8 +147,9 @@ theorem holds_upd_rwG {q : LawPair C Γ₀} (hr : q.Refines) {m : Modality} {Δ 
     (hb : ∀ τ, (Upd.rwG q U).apply σ.erase = .ok τ →
       Srt.Le q.k (q.rhs.eval σ.erase) (q.lhs.eval σ.erase))
     (h : holds σ (.upd m (Upd.rwG q U) φ)) : holds σ (.upd m U φ) := by
+  rw [holds_upd_erased]
   show m.afterC _ (U.apply σ.erase)
-  have h : m.afterC _ ((Upd.rwG q U).apply σ.erase) := h
+  have h : m.afterC _ ((Upd.rwG q U).apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   have hle := Upd.rwG_apply hr σ.erase U
   cases hB : (Upd.rwG q U).apply σ.erase with
   | ok τ =>

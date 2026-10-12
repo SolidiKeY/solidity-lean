@@ -445,11 +445,13 @@ theorem holds_push_alias {m : Modality} {E : Ty} {P : Tm C Γ .path} {R : RefTy}
       (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ))) :
     holds σ (.upd m ((Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P))).snoc
       (.local i (.path (.app1 .next rfl P)))) φ) := by
+  rw [holds_upd_erased]
   show m.afterC (fun τ => ∀ σ' : State C Γ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
     (Upd.apply σ.erase _)
   have hψ' : m.afterC (fun τ => ∀ σ' : State C Γ, σ'.erase = τ → σ.H <+: σ'.H →
       holds σ' (.upd m (Upd.nil.snoc (.local i (.path (lastSlotS P)))) φ))
-      (Upd.apply σ.erase (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))) := hψ
+      (Upd.apply σ.erase (Upd.nil.snoc (.storage (.app2 (.extend E) (.app0 .storage) P)))) :=
+        (holds_upd_erased _ _ _ _).1 hψ
   simp only [Upd.apply, UpdElem.write, pure_bind] at hψ' ⊢
   cases hS : (Tm.app2 (.extend E) (.app0 .storage) P : Tm C Γ .st).eval σ.erase with
   | error e => simp only [hS, Res.error_bind] at hψ' ⊢; exact hψ'
@@ -470,6 +472,7 @@ theorem holds_push_alias {m : Modality} {E : Ty} {P : Tm C Γ .path} {R : RefTy}
       rw [hw, Env.set_get_self]
       rfl
     have h₂ := hψ' σ' he' hH
+    rw [holds_upd_erased] at h₂
     change m.afterC _ (Upd.apply σ'.erase _) at h₂
     dsimp only at hl
     rw [he'] at h₂
@@ -573,15 +576,8 @@ theorem _root_.Solidity.Fml.prepS_eq_prepSM {Γ : Ctx} (φ : Fml C Γ) : φ.prep
 /-- An update's reading is monotone in what it asks after. -/
 theorem holds_upd_imp {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ ψ : Fml C Δ}
     (hφ : ∀ σ' : State C Δ, holds σ' φ → holds σ' ψ) (σ : State C Γ)
-    (h : holds σ (.upd m U φ)) : holds σ (.upd m U ψ) := by
-  change m.afterC (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' ψ)
-    (U.apply σ.erase)
-  have h' : m.afterC (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
-    (U.apply σ.erase) := h
-  revert h'
-  cases U.apply σ.erase with
-  | error _ => exact id
-  | ok τ => exact fun h' σ' he hH => hφ σ' (h' σ' he hH)
+    (h : holds σ (.upd m U φ)) : holds σ (.upd m U ψ) :=
+  Upd.afterT_imp h hφ
 
 /-- **The prepared leaf implies the leaf.** -/
 theorem holds_of_prepS {Γ : Ctx} (φ : Fml C Γ) : ∀ σ : State C Γ, holds σ φ.prepS → holds σ φ := by

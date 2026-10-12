@@ -93,6 +93,7 @@ theorem holds_congr_erase : {Γ : Ctx} → (φ : Fml C Γ) → φ.modalFree = tr
     have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm
     exact imp_congr (holds_congr_erase φ hm.1 σ σ' hH he) (holds_congr_erase ψ hm.2 σ σ' hH he)
   | _, .upd m U φ, _, σ, σ', hH, he => by
+    rw [holds_upd_erased, holds_upd_erased]
     show m.afterC (fun τ => ∀ σ'' : State C _, σ''.erase = τ → σ.H <+: σ''.H → holds σ'' φ)
         (U.apply σ.erase) ↔
       m.afterC (fun τ => ∀ σ'' : State C _, σ''.erase = τ → σ'.H <+: σ''.H → holds σ'' φ)
@@ -131,6 +132,7 @@ theorem State.H_eq_of_erase {Γ : Ctx} {σ σ' : State C Γ} (he : σ'.erase = �
 /-- `{} φ` holds where `φ` does, for `φ` with no modality. -/
 theorem holds_upd_nil {Γ : Ctx} (m : Modality) {φ : Fml C Γ} (hm : φ.modalFree = true)
     (σ : State C Γ) : holds σ (.upd m .nil φ) ↔ holds σ φ := by
+  rw [holds_upd_erased]
   show m.afterC (fun τ => ∀ σ' : State C Γ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
     (pure σ.erase) ↔ holds σ φ
   refine ⟨fun h => h σ rfl (List.prefix_refl _), fun h σ' he hp => ?_⟩
@@ -142,8 +144,7 @@ theorem holds_upd_nil {Γ : Ctx} (m : Modality) {φ : Fml C Γ} (hm : φ.modalFr
 theorem holds_upd_mono {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ ψ : Fml C Δ}
     (hφ : ∀ τ, holds τ ψ → holds τ φ) (σ : State C Γ) (h : holds σ (.upd m U ψ)) :
     holds σ (.upd m U φ) :=
-  Modality.afterC_imp (p := fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' ψ)
-    h fun _ h' σ' he hp => hφ σ' (h' σ' he hp)
+  Upd.afterT_imp h hφ
 
 /-- What gives `φ` after a run gives it after the run. -/
 theorem _root_.Solidity.Modality.afterRunTR_imp {α : Type} {m : Modality} {p q : α → Prop}
@@ -159,17 +160,19 @@ theorem holds_upd_of_apply {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ �
     {W : Upd C Γ Δ₂} {φ : Fml C Δ₂} (σ : State C Γ)
     (hg : W.apply σ.erase = (U.apply σ.erase >>= V.apply))
     (h : holds σ (.upd m W φ)) : holds σ (.upd m U (.upd m V φ)) := by
+  rw [holds_upd_erased]
   show m.afterC
     (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' (.upd m V φ))
     (U.apply σ.erase)
   have h : m.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
-    (W.apply σ.erase) := h
+    (W.apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   rw [hg] at h
   cases hU : U.apply σ.erase with
   | error e => rw [hU] at h; exact h
   | ok σ₁ =>
     rw [hU] at h
     intro σ' he hext
+    rw [holds_upd_erased]
     show m.afterC _ (V.apply σ'.erase)
     rw [he]
     exact Modality.afterC_imp h fun τ h σ'' e₂ hext₂ => h σ'' e₂ (hext.trans hext₂)
@@ -289,6 +292,7 @@ update, under the diamond for one that cannot halt. -/
 theorem holds_upd_of_substU' {m : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ}
     {φ' : Fml C Γ} (hs : Fml.substU U φ = some φ') (ht : m = .box ∨ U.totalB = true)
     (σ : State C Γ) (h : holds σ φ') : holds σ (.upd m U φ) := by
+  rw [holds_upd_erased]
   show Modality.afterC m _ (U.apply σ.erase)
   cases hU : U.apply σ.erase with
   | error =>
@@ -825,8 +829,10 @@ any write, under the diamond a write that cannot halt. -/
 theorem holds_upd_shadow {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
     (σ : State C Γ) (h : holds σ (.upd m (U.shadow m.isBoxS) φ)) : holds σ (.upd m U φ) := by
   rw [Upd.shadow_eq_shadowM] at h
+  rw [holds_upd_erased]
   show Modality.afterC m _ (U.apply σ.erase)
-  have h : Modality.afterC m _ ((U.shadowM m.isBoxS).apply σ.erase) := h
+  have h : Modality.afterC m _ ((U.shadowM m.isBoxS).apply σ.erase) :=
+    (holds_upd_erased _ _ _ _).1 h
   have hr := Upd.shadow_apply m.isBoxS σ.erase U
   generalize U.apply σ.erase = a at hr ⊢
   generalize (U.shadowM m.isBoxS).apply σ.erase = b at hr h

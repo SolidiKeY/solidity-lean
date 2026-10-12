@@ -565,8 +565,9 @@ theorem Upd.rwC_apply (hq : Tm.EvalRefines q.1 q.2) (σ₀ : EState C Γ) {Δ : 
 /-- **Under the box, a rewritten update gives the update.** -/
 theorem holds_upd_rwC (hq : Tm.EvalRefines q.1 q.2) {Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ}
     (σ : State C Γ) (h : holds σ (.upd .box (U.rwC q) φ)) : holds σ (.upd .box U φ) := by
+  rw [holds_upd_erased]
   show Modality.afterC .box _ (U.apply σ.erase)
-  have h : Modality.afterC .box _ ((U.rwC q).apply σ.erase) := h
+  have h : Modality.afterC .box _ ((U.rwC q).apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   cases hU : U.apply σ.erase with
   | error => trivial
   | ok τ => rw [Upd.rwC_apply hq σ.erase U τ hU] at h; exact h
