@@ -1,5 +1,5 @@
 import Solidity.Calculus.RewritePast
-import Solidity.Calculus.HoldsErase
+import Solidity.Calculus.TermLaws
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
 
@@ -14,26 +14,22 @@ x := find(save(storage, p, 10), p) }` halts exactly where
 ‖ x := 10 }`: the read returns wherever the write it reads back does, and
 the write is an element of the update.
 
-**The law is the erasure's.**  solkey's taclets are transcribed once, on
-`Update.lean`'s terms (`TermTaclet`, `EvalLaw`), with what makes them exact
-in an update (`Upd.covers`, `Upd.coversRef`, `Upd.coversEval`,
-`Term.base?`: `LineRw.lawUpdAny`, `lawUpdRef`, `lawUpdEq`, `lawUpdEval`).
-Here they are read on the scoped update through its erasure
-(`ErasedCov`): a scoped term reads as its erasure (`Tm.eval_erase`) and an
-update returns where its erasure does (`Upd.apply_erase`).
+**The law is solkey's taclet** (`Calculus/TermLaws.lean`): a term taclet
+(`TermTacletS`), a law of a memory read (`EvalLawS`), with what makes it
+exact in an update (`LawCov`: `Upd.covers`, `Upd.coversRef`,
+`Tm.sameBase`, `Upd.coversEval`), all on the scoped terms.
 
 **The rewrite.**  The law's two sides are scoped terms at one sort and at
-the update's scope (`LawPair`), the erasure's read back at the update's
-names (`Tm.resolveN`); every occurrence of the left side in an update's
-right-hand sides becomes the right side (`Tm.rwG`, `Upd.rwG`, any sort: a
-memory law rewrites an identity too).
+the update's scope (`LawPair`), the instance found on the scoped line;
+every occurrence of the left side in an update's right-hand sides becomes
+the right side (`Tm.rwG`, `Upd.rwG`, any sort: a memory law rewrites an
+identity too).
 
 **Why it holds.**  The right side returns what the left side returns
 (`LawPair.Refines`), so where the update returns its rewrite returns the
-same state (`Upd.rwG_apply`).  Where the rewritten update returns, its
-erasure returns, and the erasure's law refines back there
-(`LawPair.back_ofErased`), so the update returns the same state
-(`Upd.rwG_apply_rev`).  Two updates that halt in the same states and
+same state (`Upd.rwG_apply`).  Where the rewritten update returns, the
+law refines back there (`LawCov.back`), so the update returns the same
+state (`Upd.rwG_apply_rev`).  Two updates that halt in the same states and
 return the same states are one to either modality (`holds_upd_rwG`).
 
 These functions run once a link and use `match` on the indexed families,
@@ -297,96 +293,16 @@ theorem Upd.rwG_apply_rev (σ₀ : EState C Γ) (hq : Srt.Le q.k (q.rhs.eval σ�
 
 end RwEval
 
-/-! ## A law of the erasure, in an update's right-hand sides
+/-! ## A law in an update's right-hand sides
 
-The erasure's laws in an update's right-hand sides (`LineRw.lawUpdAny`,
-`lawUpdRef`, `lawUpdEq`, `lawUpdEval`), read on the scoped update through
-its erasure: a scoped term reads as its erasure (`Tm.eval_erase`), and the
-update returns where its erasure does (`Upd.apply_erase`).  The law is the
-erasure's, solkey's taclet (`TermTaclet`, `EvalLaw`); the scoped line only
-carries its two sides, read back at the update's scope. -/
+A law (`LawCov`, `Calculus/TermLaws.lean`) in the right-hand sides of an
+update at its scope: it refines (`LawCov.fwd`), and refines back wherever an
+update its check accepts returns (`LawCov.back`), checked on the rewritten
+update. -/
 
-section Erased
+section Laws
 
-/-- The sorts whose readings carry no locals (`Srt.wl` is the identity). -/
-def Srt.plain : Srt → Bool
-  | .st | .mem => false
-  | _ => true
-
-theorem Srt.wl_plain {k : Srt} (h : k.plain = true) (e : List (Var × Semantics.Binding)) (x : k.Ev) :
-    Srt.wl e k x = x := by
-  cases k <;> first | rfl | cases h
-
-/-- An erased law at an update's right-hand sides: the right side returns
-what the left side does (`fwd`), and wherever an update the check `chk`
-accepts returns, the left side returns what the right side does (`back`). -/
-structure ErasedCov (C : Contract) (u : Srt) (t t' : Surface.Tm C u) where
-  chk : Surface.Upd C → Bool
-  fwd : Surface.Tm.EvalRefinesAt t t'
-  back : ∀ (U : Surface.Upd C) (σ τ : Semantics.State), chk U = true → Surface.Upd.apply U σ = .ok τ →
-    Srt.Le u (t'.eval σ) (t.eval σ)
-
-/-- A term taclet onto a term that cannot halt, where the update holds the
-write it reads back (`LineRw.lawUpdAny`, `Upd.covers`). -/
-def ErasedCov.covered {t t' : Term C} (r : TermTaclet t t') (ht : t'.total = true) :
-    ErasedCov C .val t t' :=
-  ⟨fun U => U.covers (t, t'), (Term.EvalRefines.of_theq r.sound ht).at,
-    fun _ _ _ hc hU => Surface.Upd.covers_le (Term.EvalRefines.of_theq r.sound ht) hc hU⟩
-
-/-- A frame or delete-value law, where the update holds its storage
-operation (`LineRw.lawUpdRef`, `Upd.coversRef`). -/
-def ErasedCov.ref {t t' : Term C} {r : TermTaclet t t'} (hr : TermTaclet.RefLaw r) :
-    ErasedCov C .val t t' :=
-  ⟨fun U => U.coversRef (t, t'), hr.evalRefines.at, fun _ _ _ hc hU => hr.back hc hU⟩
-
-/-- Two terms that are one read member-wise (`Term.base?`). -/
-def Term.sameBase (t t' : Term C) : Bool := (Term.base? t).isSome && (Term.base? t == Term.base? t')
-
-/-- A member-wise law: its two terms are one read member-wise
-(`LineRw.lawUpdEq`, `Term.base_eval`). -/
-def ErasedCov.eqv {t t' : Term C} (h : Term.sameBase t t' = true) : ErasedCov C .val t t' :=
-  ⟨fun _ => true,
-    fun σ => by
-      simp only [Term.sameBase, Bool.and_eq_true, beq_iff_eq, Option.isSome_iff_exists] at h
-      obtain ⟨⟨b, hb⟩, he⟩ := h
-      exact ((Term.base_eval t hb σ).trans (Term.base_eval t' (he ▸ hb) σ).symm).le,
-    fun _ σ _ _ _ => by
-      simp only [Term.sameBase, Bool.and_eq_true, beq_iff_eq, Option.isSome_iff_exists] at h
-      obtain ⟨⟨b, hb⟩, he⟩ := h
-      exact ((Term.base_eval t hb σ).trans (Term.base_eval t' (he ▸ hb) σ).symm).ge⟩
-
-/-- A memory law, where the update holds the write it reads past
-(`LineRw.lawUpdEval`, `Upd.coversEval`). -/
-def ErasedCov.eval {u : Srt} {t t' : Surface.Tm C u} (r : EvalLaw t t') : ErasedCov C u t t' :=
-  ⟨fun U => U.coversEval (t, t'), r.sound, fun _ _ _ hc hU => r.back hc hU⟩
-
-variable {Γ₀ : Ctx} {ns : List Var}
-
-/-- **A law refines where its erasure does**, at a sort that carries no locals. -/
-theorem LawPair.refines_ofErased {q : LawPair C Γ₀} (hnd : ns.Nodup) (hlen : ns.length = Γ₀.length)
-    (hp : q.k.plain = true) (hf : Surface.Tm.EvalRefinesAt (q.lhs.erase ns) (q.rhs.erase ns)) :
-    q.Refines := fun σ => by
-  have hag := Agree.erase σ hnd hlen
-  have h := hf (σ.erase ns)
-  rw [Tm.eval_erase hag, Tm.eval_erase hag, Srt.wl_plain hp, Srt.wl_plain hp] at h
-  exact h
-
-/-- **Where an update its erased law accepts returns, the law refines back.** -/
-theorem LawPair.back_ofErased {q : LawPair C Γ₀} (hnd : ns.Nodup) (hlen : ns.length = Γ₀.length)
-    (hp : q.k.plain = true) (E : ErasedCov C q.k (q.lhs.erase ns) (q.rhs.erase ns)) {Δ : Ctx}
-    {U : Upd C Γ₀ Δ} (hc : E.chk (U.eraseNR ns).1 = true) (hfr : U.freshB ns = true)
-    (σ₀ : EState C Γ₀) {τ : EState C Δ} (hU : U.apply σ₀ = .ok τ) :
-    Srt.Le q.k (q.rhs.eval σ₀) (q.lhs.eval σ₀) := by
-  have hag := Agree.erase σ₀ hnd hlen
-  have hrel := Upd.apply_erase hag U (Upd.freshB_sound U hfr)
-  rw [hU] at hrel
-  rw [Upd.eraseNR_eq] at hc
-  cases he : Surface.Upd.apply (U.erase ns) (σ₀.erase ns) with
-  | error e => rw [he] at hrel; exact (hrel : False).elim
-  | ok τ' =>
-    have h := E.back _ _ _ hc he
-    rw [Tm.eval_erase hag, Tm.eval_erase hag, Srt.wl_plain hp, Srt.wl_plain hp] at h
-    exact h
+variable {Γ₀ : Ctx}
 
 /-- **A law in an update's right-hand sides, under any modality**, where it
 refines, and refines back wherever the rewritten update returns. -/
@@ -407,60 +323,45 @@ theorem holds_upd_rwG {q : LawPair C Γ₀} (hr : q.Refines) {m : Modality} {Δ 
     | ok τ => rw [hle τ hA] at hB; cases hB
     | error e' => rw [hB] at h; exact h
 
-/-- The erased law `E` in the right-hand sides of `{U}_m φ`, `U` at the law's scope. -/
-def Fml.updRwE (q : LawPair C Γ₀) (ns : List Var) (E : ErasedCov C q.k (q.lhs.erase ns) (q.rhs.erase ns))
+/-- The law `E` in the right-hand sides of `{U}_m φ`, `U` at the law's scope. -/
+def Fml.updRwS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs)
     {Δ : Ctx} (m : Modality) (U : Upd C Γ₀ Δ) (φ : Fml C Δ) : Option (Fml C Γ₀) :=
-  if (Upd.hasG q U && E.chk ((Upd.rwG q U).eraseNR ns).1 && (Upd.rwG q U).freshB ns) = true then
-    some (.upd m (Upd.rwG q U) φ)
-  else none
+  if (Upd.hasG q U && E.chk (Upd.rwG q U)) = true then some (.upd m (Upd.rwG q U) φ) else none
 
-/-- `Fml.updRwE` on an update read at the law's scope `Γ₀`. -/
-def Fml.updRwEAt (q : LawPair C Γ₀) (ns : List Var) (E : ErasedCov C q.k (q.lhs.erase ns) (q.rhs.erase ns))
+/-- `Fml.updRwS` on an update read at the law's scope `Γ₀`. -/
+def Fml.updRwSAt (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs)
     {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
   if h : Γ = Γ₀ then
     cast (congrArg (fun G => Option (Fml C G)) h.symm)
-      (Fml.updRwE q ns E m (cast (congrArg (fun G => Upd C G Δ) h) U) φ)
+      (Fml.updRwS q E m (cast (congrArg (fun G => Upd C G Δ) h) U) φ)
   else none
 
-/-- **`updRw` past the program, by the erasure's law**: the law `E` in the
-right-hand sides of the update at position `i`, under any modality, its two
-sides read at the update's scope `Γ₀` with the names `ns`. -/
-def FmlRw.lawUpdE (q : LawPair C Γ₀) (ns : List Var) (hnd : ns.Nodup) (hlen : ns.length = Γ₀.length)
-    (hp : q.k.plain = true) (E : ErasedCov C q.k (q.lhs.erase ns) (q.rhs.erase ns)) (i : Nat) :
-    FmlRw C :=
-  FmlRw.atSpine (fun m U φ => Fml.updRwEAt q ns E m U φ) (fun {Γ _ m U φ ψ} h σ hψ => by
-    dsimp only [Fml.updRwEAt] at h
+/-- **`updRw` past the program**: the law `E` in the right-hand sides of the
+update at position `i`, under any modality, its two sides at the update's
+scope `Γ₀`. -/
+def FmlRw.lawUpdS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs) (i : Nat) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.updRwSAt q E m U φ) (fun {Γ _ m U φ ψ} h σ hψ => by
+    dsimp only [Fml.updRwSAt] at h
     split at h
     · rename_i he
       subst he
       simp only [cast_eq] at h
-      dsimp only [Fml.updRwE] at h
+      dsimp only [Fml.updRwS] at h
       split at h
       · rename_i hc
         cases h
         simp only [Bool.and_eq_true] at hc
-        obtain ⟨⟨-, hc⟩, hfr⟩ := hc
-        exact holds_upd_rwG (q.refines_ofErased hnd hlen hp E.fwd) σ
-          (fun _ hB => LawPair.back_ofErased hnd hlen hp E hc hfr _ hB) hψ
+        exact holds_upd_rwG E.fwd σ (fun τ hB => E.back (Upd.rwG q U) σ.erase τ hc.2 hB) hψ
       · cases h
     · cases h) i
 
-/-- The named scopes of the updates along the spine: each update's context
-and the names its locals erase to. -/
-def Fml.spineScopes : (Γ : Ctx) → List Var → Fml C Γ → List (Ctx × List Var)
-  | _, ns, .all x _ φ => Fml.spineScopes _ (x :: ns) φ
-  | _, ns, .bind _ x _ φ => Fml.spineScopes _ (x :: ns) φ
-  | Γ, ns, .upd _ U ψ => (Γ, ns) :: Fml.spineScopes _ (U.names ns) ψ
-  | _, _, _ => []
+/-- The scopes of the updates along the spine, each update's context. -/
+def Fml.spineScopes : (Γ : Ctx) → Fml C Γ → List Ctx
+  | _, .all _ _ φ => Fml.spineScopes _ φ
+  | _, .bind _ _ _ φ => Fml.spineScopes _ φ
+  | Γ, .upd _ _ ψ => Γ :: Fml.spineScopes _ ψ
+  | _, _ => []
 
-/-- The erased law's two sides read at a named scope, quoted: `none` where a
-side names no local of the scope. -/
-def lawResolveQ (c : Lean.Expr) (Γ : Ctx) (ns : List Var) {u : Srt} (t t' : Surface.Tm C u) :
-    Option (Lean.Expr × Lean.Expr) :=
-  match Tm.resolveN (ns.zip Γ) t, Tm.resolveN (ns.zip Γ) t' with
-  | .ok a, .ok b => some (Tm.quote c a, Tm.quote c b)
-  | _, _ => none
-
-end Erased
+end Laws
 
 end Solidity

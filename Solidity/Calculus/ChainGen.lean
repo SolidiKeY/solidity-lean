@@ -27,47 +27,47 @@ open Lean Elab Term Meta
 /-! ## Past the program: the scoped rewrites -/
 
 /-- A rewrite of a line past the program: its name, the line it leaves,
-that line's erasures, and the rewrite (`FmlRw`). -/
+that line's keys, and the rewrite (`FmlRw`). -/
 structure PastStep where
   name : String
   fml : Expr
-  erased : Array Expr
+  keys : Array Expr
   rw : Expr
 
 /-- The rewrite `a` named `n` on the line `L` past the program, at the
 first place it applies (`scopedRwCands`), a read of the state as the program
 found it left as it is (`plainReadAny`). -/
-def pastStepOf? (L : Expr) (n : String) (a : NFml.Chain.RwArrow) : TermElabM (Option PastStep) := do
+def pastStepOf? (L : Expr) (n : String) (a : RwArrow) : TermElabM (Option PastStep) := do
   let run ← runChain L
   let st ← saveState
   try
-    let (_, cands, _) ← scopedRwCands L a run.erased[0]! (past := true) (keep := (!plainReadAny ·))
+    let (_, cands, _) ← scopedRwCands L a (past := true) (keep := (!plainReadAny ·))
     -- a rewrite that leaves a line printed alike (a hidden binder absorbed) is no step
-    return (cands.find? (·.erased != run.erased)).map fun c =>
-      { name := n, fml := c.fml, erased := c.erased, rw := c.rw }
+    return (cands.find? (·.keys != run.keys)).map fun c =>
+      { name := n, fml := c.fml, keys := c.keys, rw := c.rw }
   catch _ =>
     st.restore
     return none
 
 /-- The rewrites a chain takes past the program on the line `L`
-(`NFml.Chain.chainRewrite`; with `every`, `simplifyUpdate` too), each at the
+(`chainRewrite`; with `every`, `simplifyUpdate` too), each at the
 first place it applies, in the generator's order: the merge first, then
 `~=>`'s. -/
 def pastSteps (L : Expr) (every : Bool := false) : TermElabM (Array PastStep) := do
-  let arrows := (← NFml.Chain.rwAnyArrows).toArray.filter fun (n, _) =>
-    every || NFml.Chain.chainRewrite n
+  let arrows := (← rwAnyArrows).toArray.filter fun (n, _) =>
+    every || chainRewrite n
   let run ← runChain L
   let st ← saveState
   -- every arrow's rewrites computed at once (`scopedRwCandsMany`)
   let rs ← try
-      pure (← scopedRwCandsMany L (arrows.map (·.2)) run.erased[0]! (past := true)
+      pure (← scopedRwCandsMany L (arrows.map (·.2)) (past := true)
         (keep := (!plainReadAny ·))).2
     catch _ => st.restore; pure #[]
   let mut out := #[]
   for ((n, _), (cands, _)) in arrows.zip rs do
     -- a rewrite that leaves a line printed alike (a hidden binder absorbed) is no step
-    if let some c := cands.find? (·.erased != run.erased) then
-      out := out.push { name := n, fml := c.fml, erased := c.erased, rw := c.rw }
+    if let some c := cands.find? (·.keys != run.keys) then
+      out := out.push { name := n, fml := c.fml, keys := c.keys, rw := c.rw }
   return out.filter (·.name == "sequentialToParallel") ++ out.filter (·.name != "sequentialToParallel")
 
 /-- What the search past the program keeps: the lines tried, the smallest
@@ -80,14 +80,14 @@ structure PastSearch where
   found : Option (Array PastStep) := none
   failed : Option MessageData := none
 
-/-- Depth first from `L` (`NFml.Chain.searchFrom` on the scoped line): a
+/-- Depth first from `L`, on the scoped line: a
 line no rewrite applies to is a last line, and the smallest wins; with a
 goal, the first path to it ends the search.  Each line has its own
 heartbeats, and one whose search fails is a leaf. -/
 partial def pastSearchFrom (goal? : Option (Expr → TermElabM Bool)) (path : Array PastStep)
     (L : Expr) : StateRefT PastSearch TermElabM Unit := do
   let s ← get
-  if s.found.isSome || s.nodes ≥ NFml.Chain.genNodes || s.seen.contains L then return
+  if s.found.isSome || s.nodes ≥ genNodes || s.seen.contains L then return
   set { s with nodes := s.nodes + 1, seen := s.seen.insert L }
   if let some g := goal? then
     if ← g L then
@@ -99,7 +99,7 @@ partial def pastSearchFrom (goal? : Option (Expr → TermElabM Bool)) (path : Ar
   | .error e => modify fun s => { s with failed := s.failed <|> some e.toMessageData }
   | .ok steps =>
     if steps.isEmpty then
-      let n := NFml.Chain.lineSize L
+      let n := lineSize L
       modify fun s => match s.best with
         | some (b, _) => if n < b then { s with best := some (n, path) } else s
         | none => { s with best := some (n, path) }
@@ -112,31 +112,30 @@ goal accepts, and a note when the search did not finish. -/
 def pastSearch (L : Expr) (goal? : Option (Expr → TermElabM Bool) := none) :
     TermElabM (Option (Array PastStep) × Option MessageData) := do
   let ((), s) ← (pastSearchFrom goal? #[] L).run {}
-  let note := if s.nodes ≥ NFml.Chain.genNodes then
-      some m!"the search stopped after {NFml.Chain.genNodes} lines; this is the best it found"
+  let note := if s.nodes ≥ genNodes then
+      some m!"the search stopped after {genNodes} lines; this is the best it found"
     else s.failed.map fun m => m!"a step of the search failed: {m}"
   match goal? with
   | some _ => return (s.found, note)
   | none => return (s.best.map (·.2), note)
 
-/-- A line's key past the program: its erasure, its parameters free. -/
-def pastKey (B : Expr) : MetaM Expr := do
+/-- A line with its binders' names blanked (`Fml.eraseNames`). -/
+def namesErased (B : Expr) : MetaM Expr := do
   let (C, Γ) ← lineType B
-  return mkApp2 (mkConst ``Solidity.NFml.dropAlls) C
-    (mkAppN (mkConst ``Fml.erase) #[C, Γ, mkApp (mkConst ``List.nil [0]) (mkConst ``Solidity.Var), B])
+  return mkApp3 (mkConst ``Fml.eraseNames) C Γ B
 
-/-- Whether the line `B` is the one the line written names, read as its
-erasure `L` (`Fml.LeadsK`). -/
+/-- Whether the line `B` is the line written `L` up to its binders' names
+(`Fml.LeadsK`). -/
 def namesLine (L B : Expr) : MetaM Bool := do
-  kernelDefEq (← pastKey B) L
+  kernelDefEq (← namesErased B) (← namesErased L)
 
 /-- The derivation's last line from `A` (`A` itself where no step applies). -/
 def lastLineOf (A : Expr) : TermElabM Expr := do
   return ((← runChain A).lines.getLast?.map (·.fml)).getD A
 
 /-- The scoped last line of a chain's statement: past the program
-(`Fml.LeadsK`), the scoped line whose erasure is the one written, found again by the search
-from the derivation's last line. -/
+(`Fml.LeadsK`), the line the line written names up to its binders' names, found again by
+the search from the derivation's last line. -/
 def scopedEnd? (ty : Expr) : TermElabM (Option Expr) := do
   let ty ← instantiateMVars ty
   if ty.isAppOfArity ``Fml.LeadsK 3 then
@@ -168,17 +167,17 @@ def PastStep.leads (L : Expr) (st : PastStep) : TermElabM Expr := do
     (mkApp4 (mkConst ``Fml.Leads) C Γ L st.fml)
 
 /-- A generated chain: the strategy's lines with the rule that reached each
-(and each line's erasures), the rewrites after with theirs, and why it
+(and each line's keys), the rewrites after with theirs, and why it
 stopped early, if it did. -/
 structure Gen where
   splice : Splice
-  /-- The erasures of the first line. -/
-  erased : Array Expr
+  /-- The keys of the first line. -/
+  keys : Array Expr
   steps : Array (String × Expr × Array Expr)
   /-- Rewrites of a line while its program is open, after `steps`
-  (`openRwPath`), each with its line's erasures. -/
+  (`openRwPath`), each with its line's keys. -/
   openRws : Array (String × Expr × Array Expr) := #[]
-  /-- Rewrites past the program, each with its line's erasures. -/
+  /-- Rewrites past the program, each with its line's keys. -/
   rewrites : Array (String × Expr × Array Expr)
   stop : Option MessageData
 
@@ -194,29 +193,29 @@ def generate (φ : Expr) : TermElabM Gen := do
         | some (n, _) => pure n.toString
         | none => pure ""
       catch _ => pure ""
-    steps := steps.push (n, l.fml, l.erased)
+    steps := steps.push (n, l.fml, l.keys)
   if run.modalStop then
-    return { splice := run.splice, erased := run.erased, steps, rewrites := #[],
+    return { splice := run.splice, keys := run.keys, steps, rewrites := #[],
              stop := some (modalStopNote run) }
   if steps.size ≥ runFuel then
-    return { splice := run.splice, erased := run.erased, steps, rewrites := #[],
+    return { splice := run.splice, keys := run.keys, steps, rewrites := #[],
              stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
   unless (← whnfR Γ).isAppOf ``List.nil do
-    return { splice := run.splice, erased := run.erased, steps, rewrites := #[], stop := none }
+    return { splice := run.splice, keys := run.keys, steps, rewrites := #[], stop := none }
   let Z := (steps.back?.map (·.2.1)).getD φ
   let (rws, stop) ← pastSearch Z
-  return { splice := run.splice, erased := run.erased, steps, stop,
-           rewrites := (rws.getD #[]).map fun st => (st.name, st.fml, st.erased) }
+  return { splice := run.splice, keys := run.keys, steps, stop,
+           rewrites := (rws.getD #[]).map fun st => (st.name, st.fml, st.keys) }
 
 /-- The links of a generated chain: the strategy's steps grouped
 (`groupSteps`), then one `~[r]~>` per rewrite; each with its line. -/
 def Gen.links (g : Gen) : Array (String × Expr) :=
-  NFml.Chain.groupSteps (g.steps.map fun (n, l, _) => (n, l)) ++
+  groupSteps (g.steps.map fun (n, l, _) => (n, l)) ++
     g.openRws.map (fun (n, l, _) => (s!"~[{n}]~>", l)) ++
     g.rewrites.map fun (n, l, _) => (s!"~[{n}]~>", l)
 
-/-- The erasures of a line of a generated chain. -/
-def Gen.erasedOf (g : Gen) (l : Expr) : Array Expr :=
+/-- The keys of a line of a generated chain. -/
+def Gen.keysOf (g : Gen) (l : Expr) : Array Expr :=
   ((g.steps.find? (·.2.1 == l)).map (·.2.2) <|> (g.openRws.find? (·.2.1 == l)).map (·.2.2) <|>
     (g.rewrites.find? (·.2.1 == l)).map (·.2.2)).getD #[]
 
@@ -238,14 +237,14 @@ def wrappers (m? : Option Expr) (φ : TSyntax `dl_fml) : MetaM (Array Lean.Term)
       ← `(cdl![$(dot `diamond)]{ $φ:dl_fml })]
 
 /-- A line as text: the first wrapper that reads back as it. -/
-def lineText (sp : Splice) (C e : Expr) (erased : Array Expr) : TermElabM (Array String) := do
+def lineText (sp : Splice) (C e : Expr) (keys : Array Expr) : TermElabM (Array String) := do
   let t ← ppCoreLine e
   let some φ := dlFmlOf? t | return ← Solidity.ProofTree.termLines t
   let cands ← wrappers sp.modality φ
   let mut pick := cands[0]!
   for c in cands do
     let ok ← withoutModifyingState do
-      try matchWritten sp C (Written.of c) e erased
+      try matchWritten sp C (Written.of c) e keys
       catch _ => pure false
     if ok then
       pick := c
@@ -256,9 +255,9 @@ def lineText (sp : Splice) (C e : Expr) (erased : Array Expr) : TermElabM (Array
 def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array String) := do
   let (C, _) ← lineType φ
   let ind (ls : Array String) : Array String := ls.map ("    " ++ ·)
-  let mut out := ind (← lineText g.splice C φ g.erased)
+  let mut out := ind (← lineText g.splice C φ g.keys)
   for (arrow, l) in g.links do
-    let line ← lineText g.splice C l (g.erasedOf l)
+    let line ← lineText g.splice C l (g.keysOf l)
     out := out ++ ind (#[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·))
   let kw := if g.links.size == 1 && (g.links[0]!.1 == "~*>") then "def" else "theorem"
   return #[s!"{kw} {name} :"] ++ out.modify (out.size - 1) (· ++ " := by") |>.push "  sol_chain"
@@ -267,7 +266,7 @@ def Gen.decl (g : Gen) (φ : Expr) (name : String := "chain") : TermElabM (Array
 def Gen.tableRows (g : Gen) (φ : Expr) : Array String := Id.run do
   let mut seen : Array String := #[]
   for e in #[φ] ++ g.steps.map (·.2.1) ++ g.rewrites.map (·.2.1) do
-    for s in NFml.Chain.freshSpellings e do
+    for s in freshSpellings e do
       unless seen.contains s do seen := seen.push s
   return seen.map fun s => s!"(\"?\", \"{s}\")"
 
@@ -296,8 +295,8 @@ elab_rules : command
     logInfo (m!"{"\n".intercalate (← g.decl φ).toList}" ++ table ++ g.stopNote)
 
 /-- The last line of a scoped chain's statement (a chain term, or `A ~~> B`),
-and whether it is scoped (`false`: past the program, the line written read
-as its erasure, `Fml.LeadsK`). -/
+and whether it is a line of the chain (`false`: past the program, the line
+written, `Fml.LeadsK`). -/
 def chainEnd? (ty : Expr) : MetaM (Option (Expr × Bool)) := do
   let ty ← instantiateMVars ty
   let lastOf (ws : Expr) (dflt : Expr) : MetaM (Option Expr) := do
@@ -329,7 +328,7 @@ elab_rules : command
         return
       let mut out : Array String := #[]
       for (arrow, l) in links do
-        let line ← lineText sp C l (← runChain l).erased
+        let line ← lineText sp C l (← runChain l).keys
         out := out ++ #[s!"    {arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("      " ++ ·)
       let note := match stop with
         | some m => m!"\n\nthe chain stops early: {m}"
@@ -400,23 +399,24 @@ partial def leadsSteps (A B : Expr) : TermElabM Expr := do
       {(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
 
 
-/-- `A ~~> B` past the program (`Fml.LeadsK`, `B` the line written read as
-its erasure): the derivation to its last line, then the rewrites `ns` of
-the scoped line in turn, each at the first place it applies, to the line
-`B` names. -/
+/-- `A ~~> B` past the program (`Fml.LeadsK`, `B` the line written): the
+derivation to its last line, then the rewrites `ns` of the scoped line in
+turn, each at the first place it applies, to the line `B` names up to its
+binders' names. -/
 def pastLeads (A B : Expr) (ns : Array Lean.Name) : TermElabM Expr := do
   let Z ← lastLineOf A
   let mut pf ← leadsSteps A Z
   let mut cur := Z
   for n in ns do
-    let some a ← NFml.Chain.rwArrow? (mkIdent n) | throwError "sol_rws: {n} is no rewrite"
+    let some a ← rwArrow? (mkIdent n) | throwError "sol_rws: {n} is no rewrite"
     let some st ← pastStepOf? cur n.toString a
       | throwError "sol_rws: {n} does not apply to{← indentLine cur}"
     pf ← mkAppM ``Fml.Leads.comp #[pf, ← st.leads cur]
     cur := st.fml
   unless ← namesLine B cur do
     throwError "sol_rws: the rewrites give{← indentLine cur}\nnot{indentExpr B}"
-  let he ← mkExpectedTypeHint (← mkEqRefl B) (← mkEq (← pastKey cur) B)
+  let ec ← namesErased cur
+  let he ← mkExpectedTypeHint (← mkEqRefl ec) (← mkEq ec (← namesErased B))
   mkAppM ``Fml.Leads.leadsK #[pf, he]
 
 /-- Prove a goal `A ~~> B`: scoped, by the derivation; past the program, by
@@ -447,9 +447,9 @@ elab_rules : tactic
 line (`Gen.links`). -/
 def chainText (g : Gen) (φ : Expr) : TermElabM (Array String) := do
   let (C, _) ← lineType φ
-  let mut out := ← lineText g.splice C φ g.erased
+  let mut out := ← lineText g.splice C φ g.keys
   for (arrow, l) in g.links do
-    let line ← lineText g.splice C l (g.erasedOf l)
+    let line ← lineText g.splice C l (g.keysOf l)
     out := out ++ #[s!"{arrow} {line[0]!}"] ++ (line.extract 1 line.size).map ("  " ++ ·)
   return out
 
@@ -470,7 +470,7 @@ elab_rules : tactic
         let gen ← generate (← instantiateMVars B)
         unless gen.links.isEmpty do
           let lines ← chainText gen B
-          let start := (← lineText gen.splice (← lineType B).1 B gen.erased).size
+          let start := (← lineText gen.splice (← lineType B).1 B gen.keys).size
           logInfoAt tk (m!"the chain goes on to a last line; append to its statement:\n\
             {"\n".intercalate (lines.extract start lines.size |>.map ("    " ++ ·)).toList}" ++
             gen.stopNote)
@@ -491,7 +491,7 @@ elab_rules : tactic
           let some (i, path) := found
             | throwError "sol_chain?: the derivation of{← indentLine A}\ndoes not reach\
                 {← indentLine B}{(note.map (m!"\n(" ++ · ++ m!")")).getD m!""}"
-          let openRws := path.toArray.map fun st => (st.name.toString, st.fml, st.erased)
+          let openRws := path.toArray.map fun st => (st.name.toString, st.fml, st.keys)
           pure { gen with steps := gen.steps.extract 0 i, rewrites := #[], stop := none, openRws }
       | Fml.LeadsK _ _ B =>
         let B ← instantiateMVars B
@@ -500,7 +500,7 @@ elab_rules : tactic
         let some path := path
           | throwError "sol_chain?: no run of rewrites from{← indentLine Z}\nreaches{← indentLine B}\
               {(note.map (m!"\n" ++ ·)).getD m!""}"
-        pure { gen with rewrites := path.map (fun st => (st.name, st.fml, st.erased)), stop := none }
+        pure { gen with rewrites := path.map (fun st => (st.name, st.fml, st.keys)), stop := none }
       | _ => throwUnsupportedSyntax
     let links := gen.links
     let lines ← if links.isEmpty then

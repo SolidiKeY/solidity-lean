@@ -1,6 +1,6 @@
 import Solidity.Calculus.StatePartsScoped
 import Solidity.Calculus.Merge
-import Solidity.Calculus.Literals
+import Solidity.Calculus.TermLaws
 import Solidity.Calculus.SeqRewrite
 
 /-!
@@ -36,8 +36,8 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 **Where.**  The spine of a line is its updates, through its quantifiers and
 hidden binders (`Fml.belowS`, as `Fml.mergeAt` walks it): a rewrite of an
 update names its position, a fold the number of updates above it.  Under a
-branch a rewrite follows the line's propositional skeleton (`Skel`,
-`Calculus/ChainBranches.lean`), which the elaborator computes from the line
+branch a rewrite follows the line's propositional skeleton (`Skel`, below),
+which the elaborator computes from the line
 with its postconditions in slots (`Fml.skelS`): a postcondition variable,
 a program, a quantifier is a part the rewrite never looks at, so the
 kernel computes it past them by `rfl`.
@@ -57,6 +57,43 @@ namespace Solidity
 open Solidity (Srt Op0 Modality)
 open Semantics (Value)
 open Theory Theory.StValue
+
+/-! ## The skeleton of a line -/
+
+/-- The propositional skeleton of a formula, as the elaborator reads it off
+a line: a connective, a literal leaf (`true`, `a ≐ b`, `defined(t)`), an
+update with the skeleton under it, or a part not looked at — a
+postcondition variable, a program, a quantifier, a `havoc`.  A connective
+carries whether each of its parts, once rewritten, may be a formula not to
+look at (`lo`, `ro`, `o`), which the folds of `concrete` read before
+testing a part for `true` or `false`. -/
+inductive Skel where
+  | opaque
+  | lit
+  | and (lo ro : Bool) (l r : Skel)
+  | imp (lo ro : Bool) (l r : Skel)
+  | not (o : Bool) (s : Skel)
+  | upd (s : Skel)
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
+/-- A connective. -/
+def Skel.isConn : Skel → Bool
+  | .and .. | .imp .. | .not .. => true
+  | _ => false
+
+/-- A connective somewhere, through the updates: a rewrite under a branch
+has somewhere to act. -/
+def Skel.hasConn : Skel → Bool
+  | .and .. | .imp .. | .not .. => true
+  | .upd s => s.hasConn
+  | _ => false
+
+/-- A literal leaf or a connective somewhere: a fold or a literal law has
+somewhere to act. -/
+def Skel.hasLit : Skel → Bool
+  | .lit | .and .. | .imp .. | .not .. => true
+  | .upd s => s.hasLit
+  | .opaque => false
 
 variable {C : Contract}
 
@@ -188,36 +225,8 @@ def Upd.hasC (q : Tm C [] .val × Tm C [] .val) : {Δ : Ctx} → Upd C Γ Δ →
   | _, .decl U _ r => Upd.hasC q U || r.hasC q
   | _, .pop U _ | _, .drop U _ => Upd.hasC q U
 
-/-- A law whose two sides return alike in every state: a literal law. -/
-def Term.EvalEq (t t' : Solidity.Term C) : Prop := ∀ g, t.eval g = t'.eval g
-
-theorem LitLaw.evalEq {t t' : Solidity.Term C} (r : LitLaw t t') : Term.EvalEq t t' := by
-  obtain ⟨v, rfl, h⟩ := r.exact
-  intro g
-  rw [h g]
-  rfl
-
-/-- `Term.EvalEq` on scoped terms. -/
+/-- Two closed terms that return alike in every state: a literal law's. -/
 def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : EState C [], t.eval σ = t'.eval σ
-
-/-- A literal law's sides, the closer's closed terms, at the empty scope
-(`Tm.ofClosed?`): the law `FmlRw.lit` and `FmlRw.litEq` read on the line. -/
-def Term.closedPairS? (t t' : Solidity.Term C) : Option (Tm C [] .val × Tm C [] .val) := do
-  pure (← Tm.ofClosed? t, ← Tm.ofClosed? t')
-
-theorem LitLaw.closedPairS {t t' : Solidity.Term C} (r : LitLaw t t')
-    {q : Tm C [] .val × Tm C [] .val} (h : Term.closedPairS? t t' = some q) :
-    Tm.Theq q.1 q.2 ∧ Tm.EvalEq q.1 q.2 := by
-  obtain ⟨a, ha, h⟩ := Option.bind_eq_some_iff.1 h
-  obtain ⟨b, hb, h⟩ := Option.bind_eq_some_iff.1 h
-  cases h
-  refine ⟨fun σ => ?_, fun σ => ?_⟩
-  · show Equiv (a.denote σ) (b.denote σ)
-    rw [Tm.denote_ofClosed σ t ha, Tm.denote_ofClosed σ t' hb]
-    exact r.theq σ.glob
-  · show a.eval σ = b.eval σ
-    rw [Tm.eval_ofClosed σ t ha, Tm.eval_ofClosed σ t' hb]
-    exact r.evalEq σ.glob
 
 theorem Tm.pickC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : EState C Γ) :
     {s : Srt} → {t d : Tm C Γ s} → d.eval σ = t.eval σ → (Tm.pickC q t d).eval σ = t.eval σ
@@ -284,13 +293,12 @@ namespace FmlRw
 
 /-- **A literal law** (`add_literals`, …) in the right-hand sides of the
 update at position `i`, under any modality: it is exact. -/
-def lit {t t' : Solidity.Term C} (r : LitLaw t t') (i : Nat) : FmlRw C :=
-  FmlRw.atSpine (fun m U φ => (Term.closedPairS? t t').bind fun q => Fml.updRwEq q m U φ)
+def lit {t t' : Tm C [] .val} (r : LitLaw t t') (i : Nat) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.updRwEq (t, t') m U φ)
     (fun {_ _ m U φ ψ} h σ hψ => by
-      obtain ⟨q, hq, h⟩ := Option.bind_eq_some_iff.1 h
       dsimp only [Fml.updRwEq] at h
       split at h
-      · cases h; exact (holds_upd_rwC_iff (r.closedPairS hq).2 σ).1 hψ
+      · cases h; exact (holds_upd_rwC_iff (q := (t, t')) r.evalEq σ).1 hψ
       · cases h) i
 
 /-- **A term taclet** onto a literal, in the right-hand sides of the box
@@ -667,11 +675,9 @@ namespace FmlRw
 /-- **A literal law** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation, and every closed
 occurrence in a `defined(…)` term. -/
-def litEq {t t' : Solidity.Term C} (r : LitLaw t t') (n : Nat) (s : Skel) : FmlRw C :=
-  FmlRw.below (fun φ => (Term.closedPairS? t t').bind fun q => Fml.lawOnS q true s φ)
-    (fun h σ hψ => by
-      obtain ⟨q, hq, h⟩ := Option.bind_eq_some_iff.1 h
-      exact Fml.lawOnS_sound (r.closedPairS hq).1 (fun _ => (r.closedPairS hq).2) h σ hψ) n
+def litEq {t t' : Tm C [] .val} (r : LitLaw t t') (n : Nat) (s : Skel) : FmlRw C :=
+  FmlRw.below (fun φ => Fml.lawOnS (t, t') true s φ)
+    (fun h σ hψ => Fml.lawOnS_sound (q := (t, t')) r.theq (fun _ => r.evalEq) h σ hψ) n
 
 /-- **A term taclet** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation (solkey's `\find` on an

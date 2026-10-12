@@ -296,7 +296,7 @@ example (φ : Post StandardExample [.val .uint]) : dl![m]{ { storage := delAt(sa
 `alice.account.balance = 100;` and `delete alice.account;`, the balance reads its
 default, the account being no mapping (which would keep its members).  The update
 holds the delete the read goes through, so the law applies under `m`. -/
-example (φ : Post StandardExample [.val .uint]) (hk : STerm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
+example (φ : Post StandardExample [.val .uint]) (hk : Tm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
     dl![m]{ { storage := delAt(save(storage, alice.account.balance, 100), alice.account) ‖
       b := find(delAt(save(storage, alice.account.balance, 100), alice.account), alice.account.balance) } φ }
     ~[findOnDelAtBelow]~>
@@ -576,8 +576,9 @@ example (ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 :=
 error: ~[add_literals]~>: add_literals does not apply to
   dl{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
 (the side condition
-  0 ≤ 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 ∧
-    115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 < Semantics.uintBound
+  0 ≤ Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935 + Int.ofNat 1 ∧
+    Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935 + Int.ofNat 1 <
+      Semantics.uintBound
 of add_literals closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
@@ -638,7 +639,9 @@ example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~=> dl!{ 4
 error: ~[findOnSaveFrame]~>: findOnSaveFrame does not apply to
   dl{ find(save(storage, alice.age, 1), alice.age) ≐ 0 }
 (the side condition
-  ((PTerm.root "alice").field "age").diverges ((PTerm.root "alice").field "age") = true
+  (Tm.app1 (Op1.field "age") ⋯ (Tm.app0 (Op0.root "alice"))).diverges
+      (Tm.app1 (Op1.field "age") ⋯ (Tm.app0 (Op0.root "alice"))) =
+    true
 of findOnSaveFrame closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in

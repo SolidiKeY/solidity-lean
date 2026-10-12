@@ -659,8 +659,8 @@ def fitsCore (ψ : Fml C []) : Bool :=
     (let l := ψ'.toLS SymS.empty
      (l.fits Decide.closeSize).isSome && (l.elim.fits Decide.elimSize).isSome)
 
-/-- **The closer's bounds on a wrapped leaf** (`Derive.leafFits` by
-position), which `sol_prove?` asks before it tries a step that reduces the
+/-- **The closer's bounds on a wrapped leaf**, by
+position, which `sol_prove?` asks before it tries a step that reduces the
 leaf (the reduction, its quoting and its kernel check heed no heartbeats):
 the scoped closer reads it, as it is or prepared (`Fml.prepS`), within
 `closeSize` with its updates pushed in, and its reduction is within

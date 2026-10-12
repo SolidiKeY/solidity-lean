@@ -2589,7 +2589,7 @@ end
 
 The elimination's `.arr` cases pass the old length and the old value to
 their leaf as strict arguments: two recursive calls on the same storage, so
-compiled code (`Derive.leafFits`, run through `evalExpr`, which heeds no
+compiled code (`Seq.leafFitsOn`, run through `evalExpr`, which heeds no
 heartbeats) does `2^k` calls for `k` operations on arrays where the term it
 builds is small; twelve pushes alternating between two arrays took 106 s.
 The `F` copies below differ only there (`CaseTree.toTermLazy`): a leaf

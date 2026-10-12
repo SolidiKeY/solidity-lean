@@ -14,7 +14,7 @@ as the worked examples print them (`groupSteps`).  `#chain`, `#chain_rest`,
 
 namespace Solidity
 
-namespace NFml.Chain
+namespace Chain
 
 open Lean Elab Term Meta
 
@@ -152,9 +152,9 @@ def groupSteps (steps : Array (String × Expr)) : Array (String × Expr) := Id.r
       (if ns[0]!.isEmpty then "~>" else s!"~[{ns[0]!}]~>", l)
     else ("~*>", l)
 
-end NFml.Chain
+end Chain
 
-namespace NFml.Chain
+namespace Chain
 open Lean Elab Command Term Meta
 
 /-- `#last_line c`: the chain `c` ends at a last line (`Calculus/LastLine.lean`). -/
@@ -168,9 +168,9 @@ syntax "#chain " term : command
 scoped chains' (`Calculus/ChainGen.lean`). -/
 syntax "#chain_rest " ident : command
 
-end NFml.Chain
+end Chain
 
-namespace NFml.Chain
+namespace Chain
 open Lean Elab Tactic Meta
 
 syntax "sol_rws" " [" ident,* "]" : tactic
@@ -179,6 +179,6 @@ syntax "sol_rws" " [" ident,* "]" : tactic
 after, suggested as `sol_rws [r₁, …, rₙ]`. -/
 syntax (name := solRwsQ) "sol_rws?" : tactic
 
-end NFml.Chain
+end Chain
 
 end Solidity

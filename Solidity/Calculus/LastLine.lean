@@ -48,7 +48,7 @@ def lastLineProblems (L : Expr) : TermElabM (Array MessageData) := do
     if n ≥ 2 then
       problems := problems.push m!"{n} updates stand in front of{← indentLine g}\n\
         (one parallel update does: `~[sequentialToParallel]~>`)"
-  let ms ← NFml.Chain.modalityVars L
+  let ms ← modalityVars L
   if ms.size ≥ 2 then throwError "#last_line: the last line is under two modalities{← indentLine L}"
   let lines : List (Option String × Expr) := match ms[0]? with
     | some m => [(some "under the box", L.replaceFVar (.fvar m) (mkConst ``Modality.box)),

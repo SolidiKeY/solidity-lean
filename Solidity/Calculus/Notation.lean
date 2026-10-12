@@ -49,7 +49,7 @@ binders rather than `∀`.
 namespace Solidity
 
 open Solidity (RawFml RawStmt RawUpdElem ECtx LocalTy ElabM inScope nextFree elabUpd
-  scopeHints elabFml elabTy Reading expandFml fmlHoles fmlHole?)
+  scopeHints elabTy Reading expandFml fmlHoles fmlHole?)
 open Semantics (lookupBy setBy)
 
 variable {C : Contract}
@@ -68,6 +68,45 @@ formula no reading writes (`{anon()}` over `find(storage, ⟪i⟫)`), and put
 back after (`fillSlotsC`). -/
 def Fml.slotC {Γ : Ctx} (i : Nat) : Fml C Γ :=
   .anon [] (.defined (.app2 .find (.app0 .storage) (.app0 (.root s!"⟪{i}⟫"))))
+
+/-! ## A line's key -/
+
+/-- What a line is compared by (`Fml.lineKey`): its connectives, its terms
+and updates as text, a modality's program as its text, a postcondition by
+its slot. -/
+inductive LineKey where
+  | tt
+  | eq (a b : String)
+  | defined (t : String)
+  | not (k : LineKey)
+  | and (k l : LineKey)
+  | imp (k l : LineKey)
+  | upd (m : Modality) (U : List String) (k : LineKey)
+  /-- `⟨ P ⟩ k` or `[ P ] k`: the statements of the program and of its
+  frames, each as `Prog.toStrs` prints it (`Prog.keyStrs`: a block
+  flattened, a scope end nothing). -/
+  | modal (m : Modality) (P : List String) (k : LineKey)
+  | havoc (k : LineKey)
+  | all (x : Var) (p : PrimTy) (k : LineKey)
+  | anon (xs : List Var) (k : LineKey)
+  /-- The postcondition in slot `i` (`Fml.chainSlot`, `Fml.slotC`). -/
+  | slot (i : Nat)
+  deriving Inhabited
+
+/-- A key, quoted. -/
+def LineKey.quote : LineKey → Lean.Expr
+  | .tt => Lean.mkConst ``LineKey.tt
+  | .eq a b => Lean.mkApp2 (Lean.mkConst ``LineKey.eq) (Lean.toExpr a) (Lean.toExpr b)
+  | .defined t => Lean.mkApp (Lean.mkConst ``LineKey.defined) (Lean.toExpr t)
+  | .not k => Lean.mkApp (Lean.mkConst ``LineKey.not) k.quote
+  | .and k l => Lean.mkApp2 (Lean.mkConst ``LineKey.and) k.quote l.quote
+  | .imp k l => Lean.mkApp2 (Lean.mkConst ``LineKey.imp) k.quote l.quote
+  | .upd m U k => Lean.mkApp3 (Lean.mkConst ``LineKey.upd) (Lean.toExpr m) (Lean.toExpr U) k.quote
+  | .modal m P k => Lean.mkApp3 (Lean.mkConst ``LineKey.modal) (Lean.toExpr m) (Lean.toExpr P) k.quote
+  | .havoc k => Lean.mkApp (Lean.mkConst ``LineKey.havoc) k.quote
+  | .all x p k => Lean.mkApp3 (Lean.mkConst ``LineKey.all) (Lean.toExpr x) (Lean.toExpr p) k.quote
+  | .anon xs k => Lean.mkApp2 (Lean.mkConst ``LineKey.anon) (Lean.toExpr xs) k.quote
+  | .slot i => Lean.mkApp (Lean.mkConst ``LineKey.slot) (Lean.toExpr i)
 
 section Read
 
@@ -276,13 +315,13 @@ the program's declaration shadows it, as `dl!` reads it.  With the number
 of parameters bound, the outermost binders (`Fml.markExplicit`).  A
 value parameter is bound by `∀` when `useAll` (`cdl!`), by a hidden binder,
 printing as nothing, otherwise (`dl!` outside the flip, `elabDlAuto`). -/
-def elabDlCN (φ : RawFml) (pastAll : Bool := false) (useAll : Bool := true) :
-    Except String (Nat × Fml C []) := do
+def elabDlCN (φ : RawFml) (pastAll : Bool := false) (useAll : Bool := true)
+    (keepAll : Bool := false) (keep : List String := []) : Except String (Nat × Fml C []) := do
   let (params, declared, taken) := dlParams C φ pastAll
   let run (ps : ECtx) : Except String (Fml C []) :=
     (elabDlIn C φ pastAll declared taken ps).map fun r => Fml.closeN useAll r.1 r.2
   let mut ps := params
-  for p in params do
+  for p in if keepAll then [] else params.filter (!keep.contains ·.1) do
     let ps' := ps.erase p
     if let .ok _ := run ps' then ps := ps'
   return (ps.length, ← run ps)
@@ -293,6 +332,94 @@ free (`Calculus/Chains.lean`'s `readings`). -/
 def elabDlOpen (φ : RawFml) : Except String ((Γ : NCtx) × Fml C Γ.ctx) :=
   let (params, declared, taken) := dlParams C φ false
   elabDlIn C φ false declared taken params
+
+/-! ### A written line's key, read by name
+
+A written line with no modality (one past the program) is compared with a
+computed one by its key (`LineKey`, `Calculus/Chains.lean`'s `Fml.lineKey`),
+which reads a line in names.  So it is read by name too: its terms by the
+readers of `Calculus/SurfaceNotation.lean`, as `elabAtomN` reads them, with
+no type asked of a local a line past the program no longer declares (a
+memory local the program wrote, a capture).  The key's text is the scoped
+line's (`Tm.keyStr`). -/
+
+/-- A term as text, as `Tm.keyStr` writes the scoped term it names. -/
+def Surface.Tm.keyStr {s : Srt} : Surface.Tm C s → String
+  | .pvV x | .pvP x | .pvS x | .pvI x => reprStr x
+  | .app1 (.netOf x) a => s!"({reprStr x})[{Surface.Tm.keyStr a}]"
+  | .app0 o => reprStr o
+  | .app1 o x => s!"{reprStr o}({Surface.Tm.keyStr x})"
+  | .app2 o x y => s!"{reprStr o}({Surface.Tm.keyStr x}, {Surface.Tm.keyStr y})"
+  | .app3 o x y z =>
+    s!"{reprStr o}({Surface.Tm.keyStr x}, {Surface.Tm.keyStr y}, {Surface.Tm.keyStr z})"
+
+/-- An element as text, as `UpdElem.keyStr` writes it. -/
+def Surface.UpdElem.keyStr : Surface.UpdElem C → String
+  | .val x t | .path x t | .mref x t | .store x t => s!"{reprStr x} := {t.keyStr}"
+  | .unset x => s!"{reprStr x} := unset"
+  | .saveNet x => s!"{reprStr x} := net"
+  | .saveNetMt x => s!"{reprStr x} := mtNet"
+  | .storage t => s!"storage := {t.keyStr}"
+  | .memory t => s!"memory := {t.keyStr}"
+  | .selfBalance op a => s!"selfBalance {reprStr op} {a.keyStr}"
+  | .net r op a => s!"net {r.keyStr} {reprStr op} {a.keyStr}"
+  | .pay r a => s!"pay {r.keyStr} {a.keyStr}"
+  | .netMt r a => s!"netMt {r.keyStr} {a.keyStr}"
+  | .setBalance a => s!"setBalance {a.keyStr}"
+
+/-- `a = b` with both sides defined, as `Fml.eqD`'s key. -/
+def LineKey.eqD (a b : String) : LineKey := .and (.defined a) (.and (.defined b) (.eq a b))
+
+/-- A written line with no modality, its key read by name (`Fml.lineKey`'s
+shapes: `Fml.eqD` a conjunction, a comparison `a < b` the equation
+`a < b = true`, a Lean formula its slot). -/
+def elabKeyFml : RawFml → ElabM LineKey
+  | .tt => pure .tt
+  | .eq a b => do
+    let (Γ, _) ← get
+    pure (.eqD (← tVal C Γ a).keyStr (← tVal C Γ b).keyStr)
+  | .teq a b => do
+    let (Γ, _) ← get
+    pure (.eq (← tVal C Γ a).keyStr (← tVal C Γ b).keyStr)
+  | .defined t => do
+    let (Γ, _) ← get
+    pure (.defined (← tVal C Γ t).keyStr)
+  | .peq a b => do
+    let (Γ, _) ← get
+    let (a, b) ← elabCompare C Γ a b
+    pure (.eqD a.keyStr b.keyStr)
+  | .pne a b => do
+    let (Γ, _) ← get
+    let (a, b) ← elabCompare C Γ a b
+    pure (.not (.eqD a.keyStr b.keyStr))
+  | .cmp op a b => do
+    let (Γ, _) ← get
+    let t : Surface.Tm C .val := .app2 (.binop op .uint) (← tVal C Γ a) (← tVal C Γ b)
+    pure (.eqD t.keyStr (Surface.Tm.app0 (.lit (.bool true)) : Surface.Tm C .val).keyStr)
+  | .all p x φ => inScope do
+    modify fun (Γ, k) => (setBy x (.val p) Γ, k)
+    pure (.all (Var.ofName x) p (← elabKeyFml φ))
+  | .not φ => do pure (.not (← inScope (elabKeyFml φ)))
+  | .and φ ψ => do pure (.and (← inScope (elabKeyFml φ)) (← inScope (elabKeyFml ψ)))
+  | .imp φ ψ => do pure (.imp (← inScope (elabKeyFml φ)) (← inScope (elabKeyFml ψ)))
+  | .upd m U φ => inScope do
+    let (Γ, k) ← get
+    let (U', Γ') ← elabUpd C Γ U
+    set (Γ', k)
+    let k' ← elabKeyFml φ
+    pure (if U'.isEmpty then k' else .upd m (U'.map (·.keyStr)) k')
+  | .modal .. => throw "a modality is read scoped (`elabDlOpen`)"
+  | .lean i => pure (.slot i)
+  | .decl ds φ => inScope do
+    for (x, t) in ← whereLocals C ds do
+      modify fun (Γ, k) => (setBy x t Γ, k)
+    elabKeyFml φ
+
+/-- **A written line's key, by name**, quoted: `elabDlOpen`'s parameters in
+scope, the line read by `elabKeyFml`. -/
+def elabKeyQ (φ : RawFml) : Except String Lean.Expr :=
+  let (params, _, _) := dlParams C φ false
+  ((elabKeyFml C φ).run { funs := C.funs }).run' (params, 1) |>.map LineKey.quote
 
 end Read
 
@@ -377,7 +504,8 @@ modality that is no constructor is read twice, at the diamond and at the
 box, and `fillSlotsC` puts it and the Lean formulas back.  `useAll` as
 `elabDlCN`'s. -/
 def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
-    (useAll : Bool := true) : TermElabM Lean.Expr := do
+    (useAll : Bool := true) (keepAll : Bool := false) (keep : List String := []) :
+    TermElabM Lean.Expr := do
   let holes := fmlHoles φ
   let m? ← m?.mapM fun m => do instantiateMVars (← elabTermEnsuringType m (mkConst ``Modality))
   -- a hole that is no postcondition may write fresh variables the reading
@@ -391,11 +519,13 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
       catch _ => return true
   let pastAll := quote opaqueHole
   let useAllQ := quote useAll
+  let keepAllQ := quote keepAll
+  let keepQ := quote keep
   let read (μ : Option Lean.Name) : TermElabM Lean.Term :=
     liftMacroM (expandFml { either := μ.map fun n => (mkCIdent n : Lean.Term), holes } φ)
   let once (μ : Option Lean.Name) : TermElabM Lean.Expr := do
     let raw ← read μ
-    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll $useAllQ).map fun r =>
+    elabAgainstQ c fun q => `((elabDlCN $c $raw $pastAll $useAllQ $keepAllQ $keepQ).map fun r =>
       Fml.markExplicit r.1 (Fml.quote $q r.2))
   let (d, b) ← match m? with
     | none => do let e ← once none; pure (e, e)
@@ -408,8 +538,8 @@ def elabCdlAt (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyntax `dl_fml)
         let rb ← read ``Modality.box
         let e ← elabAgainstQ c fun q =>
           `(((do
-              let (n₁, d) ← elabDlCN $c $rd $pastAll $useAllQ
-              let (n₂, b) ← elabDlCN $c $rb $pastAll $useAllQ
+              let (n₁, d) ← elabDlCN $c $rd $pastAll $useAllQ $keepAllQ $keepQ
+              let (n₂, b) ← elabDlCN $c $rb $pastAll $useAllQ $keepAllQ $keepQ
               pure (n₁, n₂, Fml.and d b)) : Except String (Nat × Nat × Fml $c [])).map
                 fun r => Fml.markExplicitAnd r.1 r.2.1 (Fml.quote $q r.2.2))
         let #[_, _, d, b] := e.getAppArgs | throwError "cdl[C, m]: not two readings{indentExpr e}"
@@ -452,5 +582,28 @@ def elabDlAuto : TermElab := fun stx ty? => do
   if let some ty := ty? then tryPostponeIfMVar ty
   elabCdlAt c m? φ (useAll := false)
 
+
+/-! ## A storage term and a path, scoped -/
+
+/-- `st!{ s }`, `pt!{ p }`: a storage term and a storage path read against the
+file's contract at the empty scope, as `dl!{ … }` reads them: the operands of
+a law's premise (`Tm.KindFreeAt st!{ save(storage, alice.age, 1) } pt!{ alice }`).
+The path is read as in the frame of a `select`: its root may be a member
+(`account`). -/
+syntax "st!{ " dl_term " }" : term
+@[inherit_doc «termSt!{_}»] syntax "pt!{ " dl_term " }" : term
+
+open Lean Elab Term Meta in
+elab_rules : term
+  | `(st!{ $t:dl_term }) => do
+    let raw ← liftMacroM (expandTerm t)
+    let c ← `(InContract.contract)
+    elabAgainst c fun q =>
+      `((tStor $c [] $raw).bind (Tm.resolveN (C := $c) []) |>.map (Tm.quote $q))
+  | `(pt!{ $t:dl_term }) => do
+    let raw ← liftMacroM (expandTerm t)
+    let c ← `(InContract.contract)
+    elabAgainst c fun q =>
+      `((tFPath $c [] $raw).bind (Tm.resolveN (C := $c) []) |>.map (Tm.quote $q))
 
 end Solidity

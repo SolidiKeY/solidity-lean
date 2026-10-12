@@ -35,12 +35,13 @@ by computation, that of symbolic keys (`balances[k]`, `balances[j]`) by a
 hypothesis `k != j` of the formula or a branch.  Every step is a lemma or a
 hypothesis: nothing evaluated is trusted, the kernel checks the proof.
 
-**A scoped leaf** (`open scoped Solidity.Scoped`) does not come here: each
-step below steps aside on it (`Close.scopedGoal`) for
-`Calculus/CloseScoped.lean`'s, which read the scoped formula with
-`close_rw_s`, its parameters at their types.  This module's set stays for
-the closer's own formulas (`NFml.Valid`, the goal `refine close ?_` leaves).
-What either set knows of the interpreter is `Calculus/CloseLemmas.lean`'s.
+**A scoped leaf** (`open scoped Solidity.Scoped`) is read by
+`Calculus/CloseScoped.lean`'s steps, which each step below steps aside for
+(`Close.scopedGoal`): the scoped formula with `close_rw_s`, its parameters
+at their types.  This module's set `close_rw` holds what the interpreter's
+states and values are made of, which `sol_decide`'s unfolding
+(`Calculus/Decide.lean`) reads too.  What either set knows of the
+interpreter is `Calculus/CloseLemmas.lean`'s.
 
 What does not close, and why (on either side):
 
@@ -110,395 +111,11 @@ theorem aliasPath_eq (σ : State) (x : Var) : aliasPath σ x = σ.getEnv x >>= b
 
 section Eval
 
-variable {C : Contract} (σ : State)
-
-/-- `10` is `10`. -/
-theorem Term.eval_lit (v : Value) : (Term.lit v : Term C).eval σ = .ok v := rfl
-/-- `x` is what `x` is bound to. -/
-theorem Term.eval_pv (x : Var) : (Term.pv x : Term C).eval σ = σ.getEnv x >>= bindingVal := rfl
-/-- `x + 1`: `x`, then the operator on `1`. -/
-theorem Term.eval_binop (op : BinOp) (p : PrimTy) (a b : Term C) : (Term.binop op p a b).eval σ =
-    a.eval σ >>= fun x => evalBinop op p x (b.eval σ) := rfl
-/-- `-x`, `!flag`: the operand, the operator, the range check. -/
-theorem Term.eval_unop (op : UnOp) (p : PrimTy) (a : Term C) : (Term.unop op p a).eval σ =
-    a.eval σ >>= fun x => applyUnOp op x >>= unopCheck op p := rfl
-/-- `find(storage, alice.age)`: the storage, the path, the word there. -/
-theorem Term.eval_find (s : STerm C) (p : PTerm C) : (Term.find s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= SVal.asValue := rfl
-/-- `values.length`: the array there, counted. -/
-theorem Term.eval_len (s : STerm C) (p : PTerm C) : (Term.len s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= arrLen := by
-  simp only [tm_eval, bind, Except.bind]
-  cases s.eval σ <;> try rfl
-  all_goals cases p.eval σ <;> try rfl
-  all_goals exact arrayLen_eq _ _ _
-/-- `read(memory, m.age)`: the memory, the address, the value there. -/
-theorem Term.eval_read (m : MTerm C) (a : Surface.MAddr C) : (Term.read m a).eval σ =
-    m.eval σ >>= fun τ => a.eval σ >>= fun addr => readVal τ addr := rfl
-/-- `c ? a : b`: the condition, then the branch it picks. -/
-theorem Term.eval_ite (c a b : Term C) : (Term.ite c a b).eval σ =
-    c.eval σ >>= fun cv => pickBranch cv (a.eval σ) (b.eval σ) := rfl
-/-- `msg.sender` is the transaction's, `address(this).balance` the funds. -/
-theorem Term.eval_env (k : EnvKey) :
-    (Term.env k : Term C).eval σ = .ok (.int (σ.envVal k)) := rfl
-/-- `net(a)`: the address, then the ledger's entry for it. -/
-theorem Term.eval_net (a : Term C) : (Term.net a).eval σ =
-    a.eval σ >>= Value.asInt >>= fun n => .ok (.int (σ.getNet n)) := by
-  simp only [tm_eval, bind, Except.bind]
-  cases a.eval σ <;> rfl
-/-- `net(oldNet, a)`: the ledger `oldNet` holds, then its entry for the address. -/
-theorem Term.eval_netOf (x : Var) (a : Term C) : (Term.netOf x a).eval σ =
-    σ.getEnv x >>= bindingLedger >>= fun l => a.eval σ >>= Value.asInt >>= fun n =>
-      .ok (.int ((lookupBy n l).getD 0)) := by
-  simp only [tm_eval, bind, Except.bind]
-  cases σ.getEnv x with
-  | error _ => rfl
-  | ok b =>
-    cases b <;> try rfl
-    cases a.eval σ <;> rfl
-/-- `alice` is the root `alice`. -/
-theorem PTerm.eval_root (r : Name) : (PTerm.root r : PTerm C).eval σ = .ok (r, []) := rfl
-/-- `p`, an alias, is the path it holds. -/
-theorem PTerm.eval_pv (x : Var) : (PTerm.pv x : PTerm C).eval σ = σ.getEnv x >>= bindingPath :=
-  aliasPath_eq σ x
-/-- `alice.age` is `alice`, then `age`. -/
-theorem PTerm.eval_field (p : PTerm C) (f : Name) : (PTerm.field p f).eval σ =
-    p.eval σ >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) := rfl
-/-- `balances[k]` is `balances`, then the integer `k` holds, checked against
-the array's length where the receiver is one. -/
-theorem PTerm.eval_at (p : PTerm C) (i : Term C) : (PTerm.at p i).eval σ =
-    p.eval σ >>= fun rs => i.eval σ >>= Value.asInt >>= fun k =>
-      σ.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) := by
-  simp only [tm_eval, bind, Except.bind]
-  cases p.eval σ <;> try rfl
-  cases i.eval σ <;> rfl
-/-- `values[values.length]`: the slot one past the end. -/
-theorem PTerm.eval_next (p : PTerm C) : (PTerm.next p).eval σ =
-    p.eval σ >>= fun rs => σ.findStorage rs.1 rs.2 >>= Close.pastEnd rs := by
-  simp only [tm_eval, bind, Except.bind]
-  cases p.eval σ <;> rfl
-/-- `storage` is the storage of the state it is read in. -/
-theorem STerm.eval_storage : (STerm.storage : STerm C).eval σ = .ok σ := rfl
-/-- `mtSt`, a deployment's storage: every root of the contract at its default
-(`Contract.initStorage`). -/
-theorem STerm.eval_mtSt (vs : List (Name × Ty)) : (STerm.mtSt vs : STerm C).eval σ =
-    .ok { σ with storage := vs.map fun (n, T) => (n, defaultForTy T) } := rfl
-/-- `old` is the storage it was bound to, in the state it is read in. -/
-theorem STerm.eval_pv (x : Var) : (STerm.pv x : STerm C).eval σ =
-    σ.getEnv x >>= bindingStore >>= fun st => .ok { σ with storage := st } := by
-  simp only [tm_eval, bind, Except.bind]
-  cases σ.getEnv x with
-  | error _ => rfl
-  | ok b => cases b <;> rfl
-/-- `save(storage, alice.age, 10)`: the value, the storage, the path, the
-write. -/
-theorem STerm.eval_save (s : STerm C) (p : PTerm C) (t : Term C) :
-    (STerm.save s p (.val t)).eval σ =
-    t.eval σ >>= fun x => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.saveStorage rs.1 rs.2 x.toSVal := by
-  simp only [tm_eval, bind_assoc, pure_bind, State.writeStorage_toSVal]
-/-- `save(storage, alice, find(storage, bob))`: `bob`'s tree laid over
-`alice`'s (`SVal.overlay`). -/
-theorem STerm.eval_save_find (s s' : STerm C) (p p' : PTerm C) :
-    (STerm.save s p (.find s' p')).eval σ =
-    (SValT.find s' p').eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) := by
-  simp only [tm_eval, Close.writeStorage_eq]
-/-- `save(storage, alice, copyMem(mtSt, memory, m))`: the memory object laid
-over `alice`'s tree. -/
-theorem STerm.eval_save_copyMem (s : STerm C) (p : PTerm C) (m : MTerm C) (i : ITerm C) :
-    (STerm.save s p (.copyMem m i)).eval σ =
-    (SValT.copyMem m i).eval σ >>= fun sv => s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>= fun cur => τ.saveStorage rs.1 rs.2 (cur.overlay sv) := by
-  simp only [tm_eval, Close.writeStorage_eq]
-/-- `delAt(storage, alice.age)`: the word there, reset to its default. -/
-theorem STerm.eval_delAt (s : STerm C) (p : PTerm C) : (STerm.delAt s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 >>= fun cur =>
-      τ.saveStorage rs.1 rs.2 cur.defaultOf := rfl
-/-- `values.push(5)`: the array, then the array one longer written back. -/
-theorem STerm.eval_push (s : STerm C) (p : PTerm C) (v : SValT C) : (STerm.push s p v).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>=
-        pushOn τ .uint rs.1 rs.2 (fun _ => v.eval σ >>= fun sv => pure sv.strip) := by
-  simp only [tm_eval, bind, Except.bind]
-  cases s.eval σ <;> try rfl
-  all_goals cases p.eval σ <;> try rfl
-  all_goals exact pushAt_eq _ _ _ _ _
-/-- `persons.push()`: the recycled or default slot appended. -/
-theorem STerm.eval_pushSlot (s : STerm C) (p : PTerm C) (E : Ty) :
-    (STerm.pushSlot s p E).eval σ = s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>= pushOn τ E rs.1 rs.2 pure := by
-  simp only [tm_eval, bind, Except.bind]
-  cases s.eval σ <;> try rfl
-  all_goals cases p.eval σ <;> try rfl
-  all_goals exact pushAt_eq _ _ _ _ _
-/-- `values.pop()`: the array, then the array one shorter written back. -/
-theorem STerm.eval_pop (s : STerm C) (p : PTerm C) : (STerm.pop s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>= popOn τ false rs.1 rs.2 := by
-  simp only [tm_eval, bind, Except.bind]
-  cases s.eval σ <;> try rfl
-  all_goals cases p.eval σ <;> try rfl
-  all_goals exact popAt_eq _ _ _ _
-/-- `m.pop()` on an array of mappings: the array one shorter, the element
-kept. -/
-theorem STerm.eval_shrink (s : STerm C) (p : PTerm C) : (STerm.shrink s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs =>
-      τ.findStorage rs.1 rs.2 >>= popOn τ true rs.1 rs.2 := by
-  simp only [tm_eval, bind, Except.bind]
-  cases s.eval σ <;> try rfl
-  all_goals cases p.eval σ <;> try rfl
-  all_goals exact popAt_eq _ _ _ _
-/-- The `10` of `alice.age = 10;`, as a word to store. -/
-theorem SValT.eval_val (t : Term C) : (SValT.val t).eval σ = t.eval σ >>= fun v => .ok v.toSVal :=
-  rfl
-/-- The `bob` of `alice = bob;`: the subtree read there. -/
-theorem SValT.eval_find (s : STerm C) (p : PTerm C) : (SValT.find s p).eval σ =
-    s.eval σ >>= fun τ => p.eval σ >>= fun rs => τ.findStorage rs.1 rs.2 := rfl
-/-- The `m` of `alice = m;`: the memory object, copied out. -/
-theorem SValT.eval_copyMem (m : MTerm C) (i : ITerm C) : (SValT.copyMem m i).eval σ =
-    m.eval σ >>= fun τ => i.eval σ >>= fun id => copyMem τ (.ref id) := rfl
-/-- `m`, a memory local, is the object it holds. -/
-theorem ITerm.eval_pv (x : Var) : (ITerm.pv x : ITerm C).eval σ = σ.getEnv x >>= bindingRef :=
-  rfl
-/-- `m.account`, a reference held in memory. -/
-theorem ITerm.eval_read (m : MTerm C) (a : Surface.MAddr C) : (ITerm.read m a).eval σ =
-    m.eval σ >>= fun τ => a.eval σ >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
-/-- `freshId(addM(memory))`: the object a default allocation takes. -/
-theorem ITerm.eval_alloc (m : MTerm C) (R : RefTy) : (ITerm.alloc m R).eval σ =
-    m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 := rfl
-/-- `freshId(copySt(memory, alice))`: the object a copy takes. -/
-theorem ITerm.eval_copy (m : MTerm C) (v : SValT C) : (ITerm.copy m v).eval σ =
-    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
-/-- `m.age` is the member `age` of the object `m` holds. -/
-theorem MAddr.eval_field (i : ITerm C) (f : Name) : (Surface.MAddr.field i f).eval σ =
-    i.eval σ >>= fun id => .ok (.memoryField id f) := rfl
-/-- `xs[k]` is the element `k` of the object `xs` holds. -/
-theorem MAddr.eval_at (i : ITerm C) (k : Term C) : (Surface.MAddr.at i k).eval σ =
-    i.eval σ >>= fun id => k.eval σ >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) := by
-  simp only [tm_eval, bind, Except.bind]
-  cases i.eval σ <;> try rfl
-  cases k.eval σ <;> rfl
-/-- `memory` is the memory of the state it is read in. -/
-theorem MTerm.eval_memory : (MTerm.memory : MTerm C).eval σ = .ok σ := rfl
-/-- `write(memory, m.age, 5)`: the value, the memory, the address, the write. -/
-theorem MTerm.eval_write (m : MTerm C) (a : Surface.MAddr C) (v : MValT C) : (MTerm.write m a v).eval σ =
-    v.eval σ >>= fun mv => m.eval σ >>= fun τ => a.eval σ >>= fun addr => writeAddr τ mv addr :=
-  rfl
-/-- `addM(memory)`: the memory with a default object allocated. -/
-theorem MTerm.eval_addM (m : MTerm C) (R : RefTy) : (MTerm.addM m R).eval σ =
-    m.eval σ >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 := rfl
-/-- `copySt(memory, alice)`: the memory with a copy of `alice` in it. -/
-theorem MTerm.eval_copySt (m : MTerm C) (v : SValT C) : (MTerm.copySt m v).eval σ =
-    v.eval σ >>= fun sv => m.eval σ >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
-/-- The `5` of `m.age = 5;`, as a memory value. -/
-theorem MValT.eval_val (t : Term C) : (MValT.val t).eval σ = t.eval σ >>= fun v => .ok v.toMVal :=
-  rfl
-/-- The `n` of `m.account = n;`: a reference. -/
-theorem MValT.eval_ref (i : ITerm C) :
-    (MValT.ref i).eval σ = i.eval σ >>= fun id => .ok (.ref id) := rfl
-/-- `{y := alice.age}` reads `alice.age` in the state it is applied in and
-binds `y`. -/
-theorem UpdElem.write_val (σ₀ τ : State) (x : Var) (t : Term C) : (Surface.UpdElem.val x t).write σ₀ τ =
-    t.eval σ₀ >>= fun v => .ok (τ.setEnv x (.val v)) := rfl
-/-- `{p := alice}` binds the alias `p`. -/
-theorem UpdElem.write_path (σ₀ τ : State) (x : Var) (p : PTerm C) :
-    (Surface.UpdElem.path x p).write σ₀ τ = p.eval σ₀ >>= fun rs => .ok (τ.setEnv x (.spath rs.1 rs.2)) :=
-  rfl
-/-- `{m := freshId(addM(memory))}` binds the memory local `m`. -/
-theorem UpdElem.write_mref (σ₀ τ : State) (x : Var) (i : ITerm C) :
-    (Surface.UpdElem.mref x i).write σ₀ τ = i.eval σ₀ >>= fun id => .ok (τ.setEnv x (.mref id)) := rfl
-/-- `{storage := save(…)}` replaces the storage, and nothing else. -/
-theorem UpdElem.write_storage (σ₀ τ : State) (s : STerm C) : (Surface.UpdElem.storage s).write σ₀ τ =
-    s.eval σ₀ >>= fun τ' => .ok { τ with storage := τ'.storage } := rfl
-/-- `{old := storage}` binds the storage variable `old` to the storage. -/
-theorem UpdElem.write_store (σ₀ τ : State) (x : Var) (s : STerm C) :
-    (Surface.UpdElem.store x s).write σ₀ τ = s.eval σ₀ >>= fun τ' => .ok (τ.setEnv x (.store τ'.storage)) :=
-  rfl
-/-- `{memory := write(…)}` replaces the heap, and nothing else. -/
-theorem UpdElem.write_memory (σ₀ τ : State) (m : MTerm C) : (Surface.UpdElem.memory m).write σ₀ τ =
-    m.eval σ₀ >>= fun μ => .ok { τ with heap := μ.heap, nextId := μ.nextId } := rfl
-/-- `{selfBalance := selfBalance - 5}`: the amount, then the funds. -/
-theorem UpdElem.write_selfBalance (σ₀ τ : State) (op : IntOp) (a : Term C) :
-    (Surface.UpdElem.selfBalance op a).write σ₀ τ = a.eval σ₀ >>= Value.asInt >>= fun amt =>
-      .ok { τ with selfBalance := op.apply σ₀.selfBalance amt } := by
-  simp only [Surface.UpdElem.write, bind, Except.bind]
-  cases a.eval σ₀ <;> rfl
-/-- `{net := store(net, at(to), net(to) - 5)}`: the address, the amount, then
-the entry, moved on the ledger written so far. -/
-theorem UpdElem.write_net (σ₀ τ : State) (r : Term C) (op : IntOp) (a : Term C) :
-    (Surface.UpdElem.net r op a).write σ₀ τ =
-      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        .ok { τ with net := setBy addr (op.apply (τ.getNet addr) amt) τ.net } := by
-  simp only [Surface.UpdElem.write, bind, Except.bind]
-  cases r.eval σ₀ with
-  | error => rfl
-  | ok v =>
-    cases v with
-    | bool b => rfl
-    | int addr =>
-      cases a.eval σ₀ with
-      | error => rfl
-      | ok w => cases w <;> rfl
-
-/-- `{net := if(to = this) then net else store(net, at(to), net(to) - 5)}`: the
-address, the amount (a word, else the update halts), then the entry down,
-unless `to` is the contract itself. -/
-theorem UpdElem.write_pay (σ₀ τ : State) (r a : Term C) :
-    (Surface.UpdElem.pay r a).write σ₀ τ =
-      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        if amt < 0 then .error .revert
-        else .ok { τ with
-          net := if addr = σ₀.tx.selfAddress then τ.net else setBy addr (τ.getNet addr - amt) τ.net } := by
-  simp only [Surface.UpdElem.write, bind, Except.bind]
-  cases r.eval σ₀ with
-  | error => rfl
-  | ok v =>
-    cases v with
-    | bool b => rfl
-    | int addr =>
-      cases a.eval σ₀ with
-      | error => rfl
-      | ok w => cases w <;> rfl
-
-/-- `{net := store(mtSt, at(r), a)}`: a deployment's ledger, the address and
-the amount read, then a ledger holding that entry only. -/
-theorem UpdElem.write_netMt (σ₀ τ : State) (r a : Term C) :
-    (Surface.UpdElem.netMt r a).write σ₀ τ =
-      r.eval σ₀ >>= Value.asInt >>= fun addr => a.eval σ₀ >>= Value.asInt >>= fun amt =>
-        .ok { τ with net := [(addr, amt)] } := by
-  simp only [Surface.UpdElem.write, bind, Except.bind]
-  cases r.eval σ₀ with
-  | error => rfl
-  | ok v =>
-    cases v with
-    | bool b => rfl
-    | int addr =>
-      cases a.eval σ₀ with
-      | error => rfl
-      | ok w => cases w <;> rfl
-
-/-- `{selfBalance := msgValue}`: the funds set to the amount. -/
-theorem UpdElem.write_setBalance (σ₀ τ : State) (a : Term C) :
-    (Surface.UpdElem.setBalance a).write σ₀ τ = a.eval σ₀ >>= Value.asInt >>= fun amt =>
-      .ok { τ with selfBalance := amt } := by
-  simp only [Surface.UpdElem.write, bind, Except.bind]
-  cases a.eval σ₀ <;> rfl
-
-/-- `{oldNet := net}` binds the ledger variable `oldNet` to the ledger. -/
-theorem UpdElem.write_saveNet (σ₀ τ : State) (x : Var) :
-    (Surface.UpdElem.saveNet x : Surface.UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger σ₀.net)) := rfl
-/-- `{oldNet := mtSt}` binds the ledger variable `oldNet` to the empty ledger. -/
-theorem UpdElem.write_saveNetMt (σ₀ τ : State) (x : Var) :
-    (Surface.UpdElem.saveNetMt x : Surface.UpdElem C).write σ₀ τ = .ok (τ.setEnv x (.ledger [])) := rfl
-/-- `{lsv := unset}` binds the alias `lsv` to no path. -/
-theorem UpdElem.write_unset (σ₀ τ : State) (x : Var) :
-    (Surface.UpdElem.unset x : Surface.UpdElem C).write σ₀ τ = .ok (τ.setEnv x .unset) := rfl
 /-- Binding a local leaves the ledger. -/
 theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
 /-- Binding a local leaves the storage. -/
 theorem storage_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).storage = σ.storage :=
   rfl
-
-/-- `true` holds. -/
-theorem holds_tt : NFml.holds σ (NFml.tt : NFml C) ↔ True := Iff.rfl
-/-- `¬ φ`. -/
-theorem holds_not (φ : NFml C) : NFml.holds σ (.not φ) ↔ ¬ NFml.holds σ φ := Iff.rfl
-/-- `φ ∧ ψ`. -/
-theorem holds_and (φ ψ : NFml C) : NFml.holds σ (.and φ ψ) ↔ NFml.holds σ φ ∧ NFml.holds σ ψ := Iff.rfl
-/-- `a == 1 → …`. -/
-theorem holds_imp (φ ψ : NFml C) : NFml.holds σ (.imp φ ψ) ↔ (NFml.holds σ φ → NFml.holds σ ψ) := Iff.rfl
-/-- `y == 10` (`Fml.eqD`) holds when both sides are defined and equal: as a
-diamond on each side, since a side that halts makes it false. -/
-theorem holds_eqD (a b : Term C) : NFml.holds σ (NFml.eqD a b) ↔
-    Modality.diamond.wp (a.eval σ) fun x => Modality.diamond.wp (b.eval σ) fun y => x = y := by
-  rw [holds_eqD_iff]
-  cases a.eval σ <;> cases b.eval σ <;>
-    simp only [Modality.wp, Modality.onHalt, Except.ok.injEq, reduceCtorEq, false_and, and_false,
-      and_self, exists_false, exists_eq_left', eq_comm]
-/-- `se1 ≐ true` (`Fml.eq`, the total equation a taclet writes): the Theory
-values of the two sides agree.  Of a literal and a bound local, which is
-what a branch condition compares, that is their values
-(`Term.denote_lit`, `Term.denote_pv`, `Theory.StValue.Equiv.prim_iff`). -/
-theorem holds_eq (a b : Term C) : NFml.holds σ (.eq a b) ↔
-    Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
-/-- A literal denotes its value. -/
-theorem Term.denote_lit (v : Value) : (Term.lit v : Term C).denote σ = .prim v := rfl
-/-- A local denotes its value, if it is bound to one. -/
-theorem Term.denote_pv (x : Var) : (Term.pv x : Term C).denote σ = match σ.getEnv x with
-    | .ok (.val v) => .prim v
-    | _ => .st .mtSt := rfl
-/-- `defined t`: `t` returns, a diamond with nothing after. -/
-theorem holds_defined (t : Term C) : NFml.holds σ (.defined t) ↔
-    Modality.diamond.wp (t.eval σ) fun _ => True := by
-  simp only [NFml.holds]
-  cases t.eval σ <;> simp [Modality.wp, Modality.onHalt]
-/-- `{y := alice.age} y == 10`: apply the update, under the modality it was
-produced in. -/
-theorem holds_upd (m : Modality) (U : Surface.Upd C) (φ : NFml C) :
-    NFml.holds σ (.upd m U φ) ↔ m.wp (U.apply σ) (NFml.holds · φ) := by
-  simp only [NFml.holds, Modality.after_eq_wp]
-/-- `∀ uint a; φ`: `φ` for every `a` of the type. -/
-theorem holds_all (x : Var) (p : PrimTy) (φ : NFml C) :
-    NFml.holds σ (.all x p φ) ↔ ∀ v, p.admits v → NFml.holds (σ.setEnv x (.val v)) φ := Iff.rfl
-
-/-! ### A loop's anonymising update
-
-`{anon(i, s)} φ` (`Fml.anon`) is `φ` in `σ` with `i`, `s` bound to anything,
-or unbound: a read of `i` there is `anonRead (b i)`, a binding nobody knows,
-which the closer names as it names `σ.getEnv x` of a local `σ` does not bind
-(`Close.bindingVal_eq_ok`). -/
-
-/-- What a read of an anonymised local returns. -/
-def anonRead (o : Option Binding) : Res Binding :=
-  match o with
-  | some v => .ok v
-  | none => .error .undef
-
-/-- `{anon(i)} φ`: `φ` whatever `i` holds. -/
-theorem holds_anon (xs : List Var) (φ : NFml C) :
-    NFml.holds σ (.anon xs φ) ↔ ∀ b, NFml.holds (σ.anon xs b) φ := Iff.rfl
-
-theorem State.anon_nil (σ : State) (b : Var → Option Binding) : σ.anon [] b = σ := by
-  cases σ; rfl
-
-/-- The local read is the last one anonymised, or one before it. -/
-theorem State.getEnv_anon_cons (σ : State) (x : Var) (xs : List Var) (b : Var → Option Binding)
-    (y : Var) : (σ.anon (x :: xs) b).getEnv y =
-      if y = x then anonRead (b y) else (σ.anon xs b).getEnv y := by
-  simp only [State.anon, State.getEnv, anonEnv]
-  by_cases h : y = x
-  · subst h
-    cases b y with
-    | some v => simp only [SemanticsProperties.lookupBy_setBy_self, anonRead, if_true]
-    | none => simp only [lookupBy_filter_self, anonRead, if_true]
-  · cases b x with
-    | some v => simp only [SemanticsProperties.lookupBy_setBy_ne h, h, if_false]
-    | none => simp only [lookupBy_filter_ne h, h, if_false]
-
-theorem State.findStorage_anon (σ : State) (xs : List Var) (b : Var → Option Binding)
-    (r : Name) (segs : List Seg) : (σ.anon xs b).findStorage r segs = σ.findStorage r segs := rfl
-theorem State.checkIndex_anon (σ : State) (xs : List Var) (b : Var → Option Binding)
-    (r : Name) (segs : List Seg) (i : Int) :
-    (σ.anon xs b).checkIndex r segs i = σ.checkIndex r segs i := rfl
-theorem State.getObj_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (id : Nat) :
-    (σ.anon xs b).getObj id = σ.getObj id := rfl
-theorem arrayLen_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (r : Name)
-    (segs : List Seg) : arrayLen (σ.anon xs b) r segs = arrayLen σ r segs := rfl
-theorem memArrayLen_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (id : Nat) :
-    memArrayLen (σ.anon xs b) id = memArrayLen σ id := rfl
-theorem readAddr_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (a : Addr) :
-    readAddr (σ.anon xs b) a = readAddr σ a := by
-  cases a <;> rfl
-theorem readVal_anon (σ : State) (xs : List Var) (b : Var → Option Binding) (a : Addr) :
-    readVal (σ.anon xs b) a = readVal σ a := by
-  simp only [readVal, readAddr_anon]
-theorem tx_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
-    (σ.anon xs b).tx = σ.tx := rfl
-theorem selfBalance_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
-    (σ.anon xs b).selfBalance = σ.selfBalance := rfl
-theorem net_anon (σ : State) (xs : List Var) (b : Var → Option Binding) :
-    (σ.anon xs b).net = σ.net := rfl
 
 end Eval
 
@@ -506,39 +123,15 @@ end Close
 
 /-! ## The tactic -/
 
--- `Fml.eqD` is a conjunction: its lemma goes first, ahead of `holds_and`.
-attribute [close_rw high] Close.holds_eqD
-
 attribute [close_rw]
-  -- formulas and updates
-  Close.holds_tt Close.holds_not Close.holds_and Close.holds_imp Close.holds_upd
-  Close.holds_defined Close.holds_all
-  Close.holds_eq Close.Term.denote_lit Close.Term.denote_pv Close.equiv_prim_left_iff
   Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
-  Hyp.wrap Surface.Upd.apply List.foldlM_cons List.foldlM_nil
-  Close.UpdElem.write_val Close.UpdElem.write_path Close.UpdElem.write_mref
-  Close.UpdElem.write_storage Close.UpdElem.write_store Close.UpdElem.write_memory
-  Close.UpdElem.write_selfBalance Close.UpdElem.write_net Close.UpdElem.write_pay
-  Close.UpdElem.write_saveNet Close.UpdElem.write_saveNetMt Close.UpdElem.write_unset
-  Close.UpdElem.write_netMt
-  Close.UpdElem.write_setBalance IntOp.apply
-  -- terms
-  Close.Term.eval_lit Close.Term.eval_pv Close.Term.eval_binop Close.Term.eval_unop
-  Close.Term.eval_find Close.Term.eval_len Close.Term.eval_read Close.Term.eval_ite
-  Close.Term.eval_env State.envVal Close.Term.eval_net Close.Term.eval_netOf State.getNet
-  Close.PTerm.eval_root Close.PTerm.eval_field Close.PTerm.eval_at Close.PTerm.eval_next
-  Close.PTerm.eval_pv Close.idxOk_array Close.idxOk_map Close.pastEnd_array
   Close.forall_unit Close.exists_unit
   Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
   Close.fieldPath_at
-  Close.STerm.eval_storage Close.STerm.eval_mtSt Close.STerm.eval_pv Close.STerm.eval_save Close.STerm.eval_save_find
-  Close.STerm.eval_save_copyMem Close.STerm.eval_delAt Close.STerm.eval_push
-  Close.STerm.eval_pushSlot Close.STerm.eval_pop Close.STerm.eval_shrink
-  Close.SValT.eval_val Close.SValT.eval_find Close.SValT.eval_copyMem
-  Close.ITerm.eval_pv Close.ITerm.eval_read Close.ITerm.eval_alloc Close.ITerm.eval_copy
-  Close.MAddr.eval_field Close.MAddr.eval_at
-  Close.MTerm.eval_memory Close.MTerm.eval_write Close.MTerm.eval_addM Close.MTerm.eval_copySt
-  Close.MValT.eval_val Close.MValT.eval_ref
+  -- values and the state's parts
+  Close.equiv_prim_left_iff IntOp.apply State.envVal State.getNet
+  Close.idxOk_array Close.idxOk_map Close.pastEnd_array
+  Close.lookupBy_setBy_int State.pay State.setNet
   -- operators
   Close.evalBinop_strict Close.evalBinop_and Close.evalBinop_or applyBinOp applyUnOp unopCheck
   Close.pickBranch_eq BinOp.retTy BinOp.isArith checkArith uintBound intBound
@@ -562,11 +155,6 @@ attribute [close_rw]
   State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
   Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
   Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_ite
-  -- a loop's anonymising update
-  Close.holds_anon Close.State.anon_nil Close.State.getEnv_anon_cons Close.State.findStorage_anon
-  Close.State.checkIndex_anon Close.State.getObj_anon Close.arrayLen_anon Close.memArrayLen_anon
-  Close.readAddr_anon Close.readVal_anon Close.tx_anon Close.selfBalance_anon Close.net_anon
-  Close.lookupBy_setBy_int State.pay State.setNet
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
   Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil
@@ -652,16 +240,14 @@ elab "sol_close_reads_all" : tactic => do
   evalTactic (← `(tactic|
     simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last]))
 
-open Lean Elab Tactic Meta in
-/-- The goal `refine close ?_` leaves, `Valid (Hyp.wrap Γ φ)`, with the context
-put back and the taclet's instance computed (`normValid`): its terms are
-still the premise's, `(Simple.lit 1 _).lower` for `1`.  A scoped leaf's
-(`Valid ψ`) is `Calculus/CloseScoped.lean`'s. -/
-elab "sol_close_unwrap" : tactic => do
-  let g ← getMainGoal
-  let ty ← instantiateMVars (← g.getType)
-  if ty.isAppOf ``NFml.Valid && (ty.find? (·.isConstOf ``Hyp.wrap)).isSome then
-    replaceMainGoal [← normValid g]
+/-- `sol_close`'s first step: a scoped leaf (`Valid ψ`) read as
+`CloseS.holdsE` reads it (`Calculus/CloseScoped.lean`); any other goal is
+left as it is. -/
+syntax "sol_close_unwrap" : tactic
+
+open Lean Elab Tactic in
+elab_rules : tactic
+  | `(tactic| sol_close_unwrap) => pure ()
 
 /-- `sol_close`: prove a formula with no modality left in an arbitrary state
 (`Calculus/NFmlClose.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s

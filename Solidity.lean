@@ -73,6 +73,7 @@ import Solidity.Calculus.ProvesSound
 import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft
 import Solidity.Calculus.SeqRewrite
+import Solidity.Calculus.TermLaws
 import Solidity.Calculus.Merge
 import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.RewritePast
@@ -110,14 +111,12 @@ import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.RuleKit
 import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.TermRules
-import Solidity.Calculus.NFmlLogic
 import Solidity.Calculus.Hyp
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.CloseLemmas
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.CloseScoped
-import Solidity.Calculus.CloseHavoc
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.MemNames
 import Solidity.Calculus.DecideLang
@@ -138,8 +137,6 @@ import Solidity.Calculus.RewriteChainGen
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.NFmlUpdateRules
 import Solidity.Calculus.ChainRewrites
-import Solidity.Calculus.ChainBranches
-import Solidity.Calculus.Literals
 import Solidity.Calculus.TermTaclets
 import Solidity.Calculus.TermLib
 import Solidity.Examples.Chains.Storage

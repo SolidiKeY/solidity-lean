@@ -390,21 +390,6 @@ partial def ppMValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
 
 end
 
-/-- A scoped term of any sort read at `ns`, by its sort's printer. -/
-def ppTmAnyS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let ty ← whnfR (← inferType e)
-  let some srt := (← whnf (ty.getArg! 2)).constName? | escapeS e
-  match srt with
-  | ``Srt.val => ppTermS ns e
-  | ``Srt.path => ppPTermS ns e
-  | ``Srt.st => ppSTermS ns e
-  | ``Srt.sv => ppSValS ns e
-  | ``Srt.ident => ppITermS ns e
-  | ``Srt.addr => ppMAddrS ns e
-  | ``Srt.mem => ppMTermS ns e
-  | ``Srt.mv => ppMValS ns e
-  | _ => escapeS e
-
 /-- `a < b = true`, a comparison as the specification writes one, read at
 `na` and `nb`: its operator and operands, with their names. -/
 def cmpPartsS (na : List Expr) (a : Expr) (nb : List Expr) (b : Expr) :
