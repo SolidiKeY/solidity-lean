@@ -3,6 +3,7 @@ import Solidity.Calculus.NoPanic
 import Solidity.Calculus.ProvesSound
 import Solidity.Semantics.Ends
 import Solidity.Semantics.StepErase
+import Solidity.Calculus.LowerRun
 import Solidity.Semantics.Callback
 
 /-!
@@ -931,6 +932,25 @@ theorem Premise.sound_update_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : 
       intro _; rfl) : Premise.Runs m s (.update U) σ :=
   Premise.sound_updateSim_erased ha σ (hs ▸ Res.Sim.refl _) hd ht
 
+/-- **An update, against the typed run, up to the halt**: an update that
+ends, up to the halt (`Res.Sim`), as what the statement's typed step agrees
+with on the erasure (`X`). -/
+theorem Premise.sound_updateSim_typed {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
+    (σ : State C Γ) {X : Res (EState C Γ')}
+    (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (t σ) X)
+    (hs : Res.Sim (U.apply σ.erase) X)
+    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
+    Premise.Runs m s (.update U) σ :=
+  Premise.sound_updateSim_agrees σ (by rw [ht]; exact ha) hs hd
+
+/-- **An update, against the typed run**: the statement's typed step agrees
+with the update applied to the erasure. -/
+theorem Premise.sound_update_typed {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
+    (σ : State C Γ) (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (t σ) (U.apply σ.erase))
+    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
+    Premise.Runs m s (.update U) σ :=
+  Premise.sound_updateSim_typed σ ha (Res.Sim.refl _) hd ht
+
 theorem holds_conj {σ : State C Γ} :
     (l : List (Fml C Γ)) → (holds σ (Fml.conj l) ↔ ∀ ψ ∈ l, holds σ ψ)
   | [] => by simp only [Fml.conj, holds, List.not_mem_nil, false_implies, implies_true]
@@ -953,6 +973,22 @@ theorem Premise.sound_cases_erased {fs : List (Fml C Γ)} {us : List (Upd C Γ �
   have hp' := (holds_conj _).1 hp
   obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
   exact (Premise.sound_updateSim_erased ha σ hs hd ht).sound ω κ φ
+    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
+
+/-- **Labelled goals, against the typed run**: the formulas `fs`, then the
+rest after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas
+holding, one of the updates ends as what the statement's typed step agrees
+with, up to the halt. -/
+theorem Premise.sound_cases_typed {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
+    {t : TStep C Γ Γ} (σ : State C Γ) {X : Res (EState C Γ)}
+    (ha : TRes.Agrees (fun o : Out C σ.H Γ => o.st.erase) (t σ) X)
+    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) X)
+    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
+    Premise.Sound m s (.cases fs us) σ := by
+  intro Γ₁ Γ₀ ω κ φ hp
+  have hp' := (holds_conj _).1 hp
+  obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
+  exact (Premise.sound_updateSim_typed σ ha hs hd ht).sound ω κ φ
     (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
 
 end Bridge
