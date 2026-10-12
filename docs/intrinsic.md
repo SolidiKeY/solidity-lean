@@ -4253,6 +4253,75 @@ local case.  What W9.6 removes, then: the program evaluators, `StepErase`,
 the erased run invariant (`EKeeps`, `SRuns.of_agrees`), so the soundness
 and the invariants read the typed run only.
 
+### W9.6.1 inv record (2026-10-12, branch `w96-inv`)
+
+The run invariants and the typing results read the typed run only: nothing
+in `Typing/` or `SortCheck/` imports or names `Semantics/StepErase.lean`,
+`TRes.Agrees`, `StepAgrees` or `Semantics/Erased.lean`'s program evaluators
+(`Val.eval`, `Loc.resolve`, `OpLoc.*`, `MRhs.eval`, `CallRet.enter`, …),
+but `Typing/Soundness.lean`, left as it was so that `Calculus/Logic.lean`
+and everything above it do not rebuild.
+- **`RunInv.HoldsT`** (`Typing/TypedRunInv.lean`) beside the old
+  `RunInv.Holds`: the invariant of a typed state, its global part read as
+  `σ.erase.glob` and its locals as `TEnv.erase Γ σ.env` (definitionally
+  `Holds H σ.erase`).  `TKeeps` reads it; `EKeeps`, `TKeeps.of_agrees`,
+  `StepAgrees.ok` and `CallRet.enterT_ok` are gone.  A call's and a `try`'s
+  locals are values or a fresh memory object, and every invariant here
+  reads the global state through its storage alone (`RunInv.ValMemOk`), so
+  `tkeeps_call`/`tkeeps_tryCall` lost their argument, entry and decoding
+  hypotheses.  The `TEnv` facts it needs are restated over `Env.All`
+  (`Env.All.tappend`, `ttake`, `tset`, `tdrop`, `twk`), and
+  `SRef.field_erase`/`SRef.index_erase` are `StepErase`'s
+  `SRef.erase_field`/`erase_index` under new names (both modules are
+  imported together above `Typing/`).
+- **The leaves on `TRun.*`**: `Typing/Reachability.lean` (`keepsC_*`,
+  through `Storage.find_canon`, `save_canon`, `write_canon`,
+  `delete_canon`, `push_canon`, `pushPlace_canon`, `pop_canon`: each typed
+  storage operation through its erasure lemma, over `Storage.glob st`, the
+  untyped state of the storage alone, under the empty store typing),
+  `Typing/Constructibility.lean`'s `tight_*` (`Tight` is now of a typed
+  state; keys by `SPath.resolveT_keys`, live indices by
+  `Loc.resolveT_live` through `Storage.checkIndex_erase`) and the builder
+  (`Resolves σ q r segs`: the typed path resolves to a reference erasing to
+  `r.segs`; `run_push`, `run_pop`, `run_delete`, `run_assignLit`,
+  `run_decl` compute the typed step and read it back through
+  `pushAt_erase`, `popAt_erase`, `delete_erase`, `writeStorage_erase`;
+  `SRuns.of_agrees`, `push_none_ends` and `TRes.Agrees.ok_of_ends` are
+  gone), `Typing/Fits.lean` (its leaves were typed already; its scopes and
+  `RunFits` moved to `HoldsT`).  `State.glob_wt` (`Typing/TypedWT.lean`)
+  states the global part's well-typedness without `RunWT`.
+- **`SortCheck/Faithfulness.lean`**: `Read.SortOk σ rs` reads the typed
+  evaluators (`resolveT`, `Storage.find`, `mvalT`, `Val.evalT`) of a typed
+  state, erased; `Read.sortOk` needs no invariant (the values are of their
+  types, `SVal.erase_hasTy`, `MVal.erase_hasTyH`), and `RowFaithful`
+  quantifies over typed states.  `Counterexamples/PreFixSortAnnotations.lean`
+  refutes the pre-fix rows on `State.init` (`person_not_int`,
+  `bool_not_int`); `Counterexamples/WellTypedNecessity.lean` states its
+  ill-typed store by `findStorage` and `SortOkS` (no typed state is it).
+
+**Statements changed** (only by reading `State` for `EState`):
+`Prog.run_canon` and `Prog.run_tight` take and give `σ.storage.erase`
+(`CanonStorage C σ.storage.erase`, `Tight C σ` of the typed state);
+`Tight.init : Tight C (State.init C)`; `no_hidden_invariant`'s step reads
+`σ.storage.erase`; `RunCanon`/`RunTight`/`RunFits` are over `State`;
+`RowFaithful`/`Read.SortOk` as above (no `RunWT` hypothesis);
+`readSelect_needs_storage`'s last conjunct.  `reachable_canon`,
+`reachable_tight`, `reachable_iff`, `reachable_iff_fits`, `canon_reachable`
+and the witnesses are unchanged (axioms: `propext`, `Classical.choice`,
+`Quot.sound`).  The `keepsC_*` leaves lost their unused side conditions.
+
+**`EState` as a carrier, where it stays**: `HoldsT` reads `σ.erase.glob`
+(an update's result is the pair, decision U1); the builder tracks
+`σ.erase.storage` and `σ.erase.env` through `Wrote`, `Bound` (the alias on
+the erased locals) and `Wrote.saveCore`; `Reachable.init_erase` is kept
+for `Calculus/Problem.lean`.
+
+**Deleted at W9.6.4**, with no `Typing/` reader now: `RunInv.Holds`,
+`RunWT`, `wtInv`, `Holds.withEnv`/`drop`, `RunWT.*` and the evaluators'
+typing (`Loc.resolve_wt`, `SPath.resolve_wt`, `MPath.mval_wt`,
+`MLoc.read_wt`, `Val.eval_wt`, `Simple.eval_wt`) in `Typing/Soundness.lean`,
+`State.erase_wt` (`Typing/TypedWT.lean`), and `CallRet.leave_all`.
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
