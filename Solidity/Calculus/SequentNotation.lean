@@ -6,8 +6,7 @@ import Solidity.Calculus.RuleSyntax
 
 `Calculus/Delab.lean` prints a scoped goal `Proves C R Γ₀ H φ` as
 the sequent `dl{ ..H, a ⟹[R] φ }`, and the same text reads back as the
-scoped judgement (since W9.4 wherever this module is imported; the closer's
-sequent is `open scoped Solidity.NFmlSeq`'s, `Calculus/RuleSyntax.lean`), so
+scoped judgement wherever this module is imported, so
 a rule of `Proves` (or a goal) can be stated as it prints.  The context is a telescope (`Hyps`), built from the left:
 `..H, a, {U} [ ]` is `((H.pre a).upd .box U)`, and with no `..H` it starts
 at `Hyps.nil`.

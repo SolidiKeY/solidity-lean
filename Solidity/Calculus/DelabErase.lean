@@ -4,14 +4,15 @@ import Solidity.Calculus.RuleKit
 /-!
 # A scoped term's erasure, with its schema variables
 
-The `Expr` of a scoped term, update or formula with no modality, its schema
-variables free, translated to the `Expr` of its erasure, the `Update.lean`
-term that `Fml.erase` would compute (`Delab.tr`, run under
-`Delab.withTwins`), which `RuleSyntax.lean`'s term printers print.  The
-printers no longer read it (W9.1 `print`: `Calculus/PrintTerm.lean` prints
-the scoped terms themselves); it stays for the twin check
-(`pp.sol.twinCheck`, `Calculus/PrintStmt.lean`) and for the SolKey reader,
-which W9.5 ports.
+The `Expr` of a scoped term, update or equation, its schema variables free,
+translated to the `Expr` of its erasure, the `Update.lean` term by name
+(`Delab.tr`, run under `Delab.withTwins`), which `RuleSyntax.lean`'s term
+printers print.  The printers do not read it (W9.1 `print`:
+`Calculus/PrintTerm.lean` prints the scoped terms themselves); it stays as
+the SolKey reader's shim, with the twin check (`pp.sol.twinCheck`,
+`Calculus/PrintStmt.lean`) that compares the printers with it.  An
+equation translates to the shim's `NFml.eq` (`Update.lean`); any other
+connective stays scoped.
 
 * **Schema variables** get twins: each free variable of a scoped term type
   (`t : Tm C Γ .val`, `U : Upd C Γ Δ`) stands, for the printer, as a local
@@ -39,15 +40,14 @@ namespace Delab
 /-! ## The erased types -/
 
 /-- The erased twins `Solidity.X` may have, in order: a formula ↦ the
-closer's (`Solidity.NFml`), any other family ↦ its twin of the closer's
-terms (`Solidity.Surface.X`: `Tm`, `Upd`, `UpdElem`) or the closer's
-(`Solidity.NFml.X`). -/
+reader's shim (`Solidity.NFml`: an equation only), any other family ↦ its
+twin of the erased terms (`Solidity.Surface.X`: `Tm`, `Upd`, `UpdElem`). -/
 def legacyNames (n : Lean.Name) : List Lean.Name :=
   if (`Solidity.Fml).isPrefixOf n then
     [n.replacePrefix `Solidity.Fml `Solidity.NFml]
   else if (`Solidity).isPrefixOf n then
     let x := n.replacePrefix `Solidity .anonymous
-    [`Solidity.Surface ++ x, `Solidity.NFml ++ x]
+    [`Solidity.Surface ++ x]
   else []
 
 /-- The first erased twin of `n` that `env` declares. -/
@@ -274,24 +274,7 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
     return ← mkAppM ``Solidity.Term.bumped #[args[2]!, args[3]!, ← tr ns args[4]!]
   if n == ``Tm.app1 && args.size == 7 then
     return ← mkAppM ``Surface.Tm.app1 #[args[4]!, ← tr ns args[6]!]
-  if n == ``Fml.upd && args.size == 6 then
-    let (es, ms) ← updParts ns args[4]!
-    let φ ← tr ms args[5]!
-    if es.isEmpty then return φ
-    -- built unchecked: a blocked update stays scoped, and prints as `‹…›`
-    return mkApp4 (mkConst ``Solidity.NFml.upd) args[0]! args[3]! (← updList args[0]! args[4]! es) φ
-  if n == ``Fml.all && args.size == 5 then
-    -- an explicit `∀`'s mark (`Fml.markExplicit`) prints as nothing
-    let x := args[2]!.consumeMData
-    return ← mkAppM ``Solidity.NFml.all #[x, args[3]!, ← tr (x :: ns) args[4]!]
   if n == ``Fml.bind && args.size == 6 then return ← tr (args[3]! :: ns) args[5]!
-  if n == ``Fml.anon && args.size == 4 then
-    let some xs ← Solidity.listElems? args[2]! | return e
-    let xs ← xs.mapM fun x => do
-      let x ← whnf x
-      trIdx ns x.appArg!
-    let xs ← mkListLit (mkConst ``Solidity.Var) xs.toList
-    return ← mkAppM ``Solidity.NFml.anon #[xs, ← tr ns args[3]!]
   -- a lowering: of a schema variable, the local of its name; of a
   -- constructor, what it computes to
   if lowerFns.contains n && args.size > 0 then
@@ -301,17 +284,11 @@ partial def tr (ns : List Expr) (e : Expr) : TrM Expr := do
       | none => pure e
     if let some c := e'.getAppFn.constName? then
       if c != n && (lowerFns.contains c || (← getEnv).isConstructor c) then return ← tr ns e'
-  -- a postcondition `↑φ`: the closer's `↑φ'` of its twin `φ' : NFml.Post C`,
-  -- else, for a local `φ`, the coercion itself; `ppFml` prints either as `φ`
-  -- (unfolded, it would be the projection `φ.1`).  A defined postcondition
-  -- computes, as below.
+  -- a postcondition `↑φ` of a local `φ`: the coercion itself (unfolded, it
+  -- would be the projection `φ.1`).  A defined postcondition computes, as
+  -- below.
   if n == `Solidity.Post.fml && args.size == 3 then
-    let p ← tr ns args[2]!
-    if p == args[2]! then
-      if p.getAppFn.isFVar then return e
-    else if ← (try return (← whnfR (← inferType p)).isAppOf `Solidity.NFml.Post
-        catch _ => return false) then
-      return mkApp2 (mkConst `Solidity.NFml.Post.fml) args[0]! p
+    if args[2]!.getAppFn.isFVar then return e
   if let some r ← generic ns e n then return r
   -- a definition: what it computes to
   let e' ← whnf e

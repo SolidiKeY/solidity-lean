@@ -361,16 +361,4 @@ theorem Term.holdsEq_of_eval {σ : State} {a b : Term C} {x y : Value}
   rw [Term.denote_eval ha, Term.denote_eval hb, Equiv.prim_iff]
   exact ⟨fun h => by injection h, fun h => h ▸ rfl⟩
 
-/-- `eqD` is the interpreter's equation: both sides return, with one value.
-This is what `holds (a = b)` meant before it read `denote`. -/
-theorem holds_eqD_iff {σ : State} {a b : Term C} :
-    NFml.holds σ (NFml.eqD a b) ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
-  simp only [NFml.holds]
-  constructor
-  · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
-    obtain rfl : x = y := (Term.holdsEq_of_eval hx hy).1 he
-    exact ⟨x, hx, hy⟩
-  · rintro ⟨x, hx, hy⟩
-    exact ⟨⟨x, hx⟩, ⟨x, hy⟩, (Term.holdsEq_of_eval hx hy).2 rfl⟩
-
 end Solidity

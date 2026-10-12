@@ -1,5 +1,5 @@
 import Solidity.Calculus.Taclet
-import Solidity.Calculus.Closable
+import Solidity.Calculus.FirstOrder
 import Solidity.Calculus.Graft
 import Solidity.Calculus.Hyp
 import Solidity.Calculus.SeqRewrite

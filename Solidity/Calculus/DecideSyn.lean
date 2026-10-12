@@ -1,6 +1,6 @@
 import Solidity.Calculus.Decide
 import Solidity.Calculus.Logic
-import Solidity.Calculus.Closable
+import Solidity.Calculus.FirstOrder
 import Solidity.Semantics.StateErase
 import Solidity.Calculus.NFmlClose
 

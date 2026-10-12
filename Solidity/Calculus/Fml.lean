@@ -268,28 +268,6 @@ abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt
 abbrev Fml.eqD {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ :=
   .and (.defined a) (.and (.defined b) (.eq a b))
 
-/-- `Update.lean`'s formula, the closer's input, the positions named by
-`ns`: a pop and a hidden binder are nothing, and an update of pops only
-(`Frames.exit`) its formula.  A modality has no erasure there (the closer's
-formulas have none): it erases to `false`, and nothing reads that, since
-the closer takes only a formula with none (`Fml.Closable`). -/
-def Fml.erase : {Γ : Ctx} → List Var → Fml C Γ → Solidity.NFml C
-  | _, _, .tt => .tt
-  | _, ns, .eq a b => .eq (a.erase ns) (b.erase ns)
-  | _, ns, .defined t => .defined (t.erase ns)
-  | _, ns, .not φ => .not (φ.erase ns)
-  | _, ns, .and φ ψ => .and (φ.erase ns) (ψ.erase ns)
-  | _, ns, .imp φ ψ => .imp (φ.erase ns) (ψ.erase ns)
-  | _, ns, .upd m U φ =>
-    match U.erase ns with
-    | [] => φ.erase (U.names ns)
-    | U' => .upd m U' (φ.erase (U.names ns))
-  | _, _, .modal .. => .ff
-  | _, ns, .havoc φ => .havoc (φ.erase ns)
-  | _, ns, .all x p φ => .all x p (φ.erase (x :: ns))
-  | _, ns, .bind _ x _ φ => φ.erase (x :: ns)
-  | _, ns, .anon xs φ => .anon (xs.map fun x => x.2.name ns) (φ.erase ns)
-
 /-! ## Premises -/
 
 /-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none (`Update.lean`'s `Fml.conj`). -/

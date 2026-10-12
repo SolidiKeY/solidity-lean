@@ -178,7 +178,7 @@ def scopedOnlyRoots : List Lean.Name :=
    ``Solidity.SVal, ``Solidity.SVec, ``Solidity.Taclet, ``Solidity.TEnv, ``Solidity.TGFrame,
    ``Solidity.THalt, ``Solidity.Thin, ``Solidity.TLocAgree, `Solidity.TLoop, ``Solidity.TRes,
    `Solidity.TRun, ``Solidity.TStep, ``Solidity.TTx, ``Solidity.TWkRel, ``Solidity.TyLe,
-   ``Solidity.TyLt, `Solidity.Tms, ``Solidity.UpdE, ``Solidity.VShape]
+   ``Solidity.TyLt, `Solidity.Tms, ``Solidity.VShape]
 
 /-- Whether a full name printed in an escape is a scoped constant: it, or a
 namespace it is in, is a scoped family (`Delab.isScopedFamily`) or one of

@@ -61,7 +61,7 @@ import Solidity.Calculus.SoundControl
 import Solidity.Calculus.SoundStore
 import Solidity.Calculus.SoundMem
 import Solidity.Calculus.SoundStep
-import Solidity.Calculus.Closable
+import Solidity.Calculus.FirstOrder
 import Solidity.Calculus.Sound
 import Solidity.Calculus.DelabErase
 import Solidity.Calculus.PrintTerm
