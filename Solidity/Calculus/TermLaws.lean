@@ -974,174 +974,427 @@ becomes `findIn(select(save(storage, alice.age, 42), alice), age)`, then
 `findIn(saveIn(select(storage, alice), age, 42), age)`.  On the typed
 storage `select(s, r)` is the struct at `r` as a storage of its members
 (`Storage.selectT`), and a save or a delete of a member path in it is the
-save or delete of the path from `r`, seen from `r` (`Storage.save_under`,
-`Storage.delete_under`).  So a storage of members built by `saveIn` and
-`delAtIn` over one `select` is the storage term it reads seen from its root
-(`Tm.base`), and a read of it returns exactly what the read it is returns
+save or delete of the path from `r`, seen from `r` (`Storage.save_underAt`,
+`Storage.delete_underAt`); under a `selectIn(…, f)`, from `r.f`.  So a
+storage of members built by `saveIn`, `delAtIn` and `selectIn` over one
+`select` is the storage term it reads seen from a struct's path (`Tm.base`),
+and a read of it returns exactly what the read it is returns
 (`Tm.base?_eval`): two member-wise forms of one read have one base
 (`Tm.sameBase`), and a law between them is exact under any update
-(`LawCov.eqv`).  A `select` under a `select` (`selectIn`) has no base. -/
+(`LawCov.eqv`). -/
 
 section MemberWise
 
-/-- A save of a member path seen from the root `r` is the save of the path
-from `r`. -/
-theorem Storage.save_under {s r : Name} {U : Ty} (st : Storage C)
-    (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U) (w : SVal U) :
-    (st.save (q.under h) w).map (·.selectT h) = (st.selectT h).save q w := by
-  unfold Storage.save Storage.selectT SRef.under
-  generalize hx : st.get h = x
-  cases x with
-  | struct fs =>
-    simp only [SVal.view_struct, SVal.save_eq_saveM, SVal.saveM, Option.bind_eq_bind]
-    cases hy : (fs.get q.hroot).saveM q.path w with
+/-! ### Paths and references below a prefix -/
+
+theorem Path.append_assoc : {T U V W : Ty} → (p : Path T U) → (q : Path U V) → (r : Path V W) →
+    (p.append q).append r = p.append (q.append r)
+  | _, _, _, _, .nil, q, r => by rw [Path.append_nil, Path.append_nil]
+  | _, _, _, _, .field h p, q, r => by
+    rw [Path.append_field, Path.append_field, Path.append_field, Path.append_assoc p q r]
+  | _, _, _, _, .at i p, q, r => by
+    rw [Path.append_at, Path.append_at, Path.append_at, Path.append_assoc p q r]
+  | _, _, _, _, .atF i p, q, r => by
+    rw [Path.append_atF, Path.append_atF, Path.append_atF, Path.append_assoc p q r]
+  | _, _, _, _, .key k p, q, r => by
+    rw [Path.append_key, Path.append_key, Path.append_key, Path.append_assoc p q r]
+
+/-- A read below a path is the read of what is found at the path. -/
+theorem SVal.findM_append {T U W : Ty} : (x : SVal T) → (p : Path T U) → (r : Path U W) →
+    x.findM (p.append r) = (x.findM p).bind (·.findM r)
+  | x, .nil, r => by rw [Path.append_nil]; cases x <;> rfl
+  | .struct fs, .field hf p, r => by
+    rw [Path.append_field]
+    simp only [SVal.findM]
+    exact SVal.findM_append _ p r
+  | .array e sh hn, .at i p, r => by
+    rw [Path.append_at]
+    simp only [SVal.findM]
+    split
+    · split
+      · rename_i x0 _
+        exact SVal.findM_append x0 p r
+      · rfl
+    · rfl
+  | .fixed e, .atF i p, r => by
+    rw [Path.append_atF]
+    simp only [SVal.findM]
+    split
+    · split
+      · rename_i x0 _
+        exact SVal.findM_append x0 p r
+      · rfl
+    · rfl
+  | .map m d, .key k p, r => by
+    rw [Path.append_key]
+    simp only [SVal.findM]
+    split
+    · rename_i x0 _
+      exact SVal.findM_append x0 p r
+    · exact SVal.findM_append d p r
+
+/-- A save below a path is the save, at the path, of what is found there with
+the save below it; its compiled form. -/
+theorem SVal.saveM_append_eq {T U W : Ty} : (x : SVal T) → (p : Path T U) → (r : Path U W) →
+    (v : SVal W) → x.saveM (p.append r) v =
+      (x.findM p).bind fun y => (y.saveM r v).bind fun y' => x.saveM p y'
+  | x, .nil, r, v => by
+    rw [Path.append_nil]
+    cases x <;> (simp only [SVal.findM, Option.bind_some]; cases SVal.saveM _ r v <;> rfl)
+  | .struct fs, .field hf p, r, v => by
+    rw [Path.append_field]
+    simp only [SVal.saveM, SVal.findM, Option.bind_eq_bind]
+    rw [SVal.saveM_append_eq _ p r v]
+    cases (fs.get hf).findM p with
     | none => rfl
     | some y =>
-      simp only [Option.bind_some, Option.map_some, SFields.get_set_same, SVal.view_struct]
+      simp only [Option.bind_some]
+      cases y.saveM r v with
+      | none => rfl
+      | some y' => rfl
+  | .array e sh hn, .at i p, r, v => by
+    rw [Path.append_at]
+    simp only [SVal.saveM, SVal.findM]
+    split
+    · rename_i hi
+      split
+      · rename_i x0 hx
+        simp only [Option.bind_eq_bind]
+        rw [SVal.saveM_append_eq x0 p r v]
+        cases x0.findM p with
+        | none => rfl
+        | some y =>
+          simp only [Option.bind_some]
+          cases y.saveM r v with
+          | none => rfl
+          | some y' => simp only [Option.bind_some, SVal.saveM, hi, if_true, hx]
+      · rfl
+    · rfl
+  | .fixed e, .atF i p, r, v => by
+    rw [Path.append_atF]
+    simp only [SVal.saveM, SVal.findM]
+    split
+    · rename_i hi
+      split
+      · rename_i x0 hx
+        simp only [Option.bind_eq_bind]
+        rw [SVal.saveM_append_eq x0 p r v]
+        cases x0.findM p with
+        | none => rfl
+        | some y =>
+          simp only [Option.bind_some]
+          cases y.saveM r v with
+          | none => rfl
+          | some y' => simp only [Option.bind_some, SVal.saveM, hi, if_true, hx]
+      · rfl
+    · rfl
+  | .map m d, .key k p, r, v => by
+    rw [Path.append_key]
+    simp only [SVal.saveM, SVal.findM]
+    split
+    · rename_i x0 hx
+      simp only [Option.bind_eq_bind]
+      rw [SVal.saveM_append_eq x0 p r v]
+      cases x0.findM p with
+      | none => rfl
+      | some y =>
+        simp only [Option.bind_some]
+        cases y.saveM r v with
+        | none => rfl
+        | some y' => simp only [Option.bind_some, SVal.saveM, hx]
+    · rename_i hx
+      simp only [Option.bind_eq_bind]
+      rw [SVal.saveM_append_eq d p r v]
+      cases d.findM p with
+      | none => rfl
+      | some y =>
+        simp only [Option.bind_some]
+        cases y.saveM r v with
+        | none => rfl
+        | some y' => simp only [Option.bind_some, SVal.saveM, hx]
 
-/-- A read of a member path seen from the root `r` is the read of the path
-from `r` (`Storage.find_selectT`). -/
-theorem Storage.write_under {s r : Name} {U : Ty} (st : Storage C)
-    (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U) (w : SVal U) :
-    (st.write (q.under h) w).map (·.selectT h) = (st.selectT h).write q w := by
+/-- Where a path finds a value, a save at it lands. -/
+theorem SVal.saveM_of_findM {T U : Ty} : (x : SVal T) → (p : Path T U) → {y : SVal U} →
+    x.findM p = some y → ∀ v : SVal U, ∃ x', x.saveM p v = some x'
+  | x, .nil, _, _, v => ⟨v, by cases x <;> rfl⟩
+  | .struct fs, .field hf p, y, h, v => by
+    simp only [SVal.findM] at h
+    obtain ⟨z, hz⟩ := SVal.saveM_of_findM _ p h v
+    exact ⟨_, by simp only [SVal.saveM, hz, Option.bind_eq_bind, Option.bind_some]; rfl⟩
+  | .array e sh hn, .at i p, y, h, v => by
+    simp only [SVal.findM] at h
+    split at h
+    · rename_i hi
+      split at h
+      · rename_i x0 hx
+        obtain ⟨z, hz⟩ := SVal.saveM_of_findM x0 p h v
+        exact ⟨_, by simp only [SVal.saveM, hi, if_true, hx, hz, Option.bind_eq_bind,
+          Option.bind_some]; rfl⟩
+      · cases h
+    · cases h
+  | .fixed e, .atF i p, y, h, v => by
+    simp only [SVal.findM] at h
+    split at h
+    · rename_i hi
+      split at h
+      · rename_i x0 hx
+        obtain ⟨z, hz⟩ := SVal.saveM_of_findM x0 p h v
+        exact ⟨_, by simp only [SVal.saveM, hi, if_true, hx, hz, Option.bind_eq_bind,
+          Option.bind_some]; rfl⟩
+      · cases h
+    · cases h
+  | .map m d, .key k p, y, h, v => by
+    simp only [SVal.findM] at h
+    split at h
+    · rename_i x0 hx
+      obtain ⟨z, hz⟩ := SVal.saveM_of_findM x0 p h v
+      exact ⟨_, by simp only [SVal.saveM, hx, hz, Option.bind_eq_bind, Option.bind_some]; rfl⟩
+    · rename_i hx
+      obtain ⟨z, hz⟩ := SVal.saveM_of_findM d p h v
+      exact ⟨_, by simp only [SVal.saveM, hx, hz, Option.bind_eq_bind, Option.bind_some]; rfl⟩
+
+/-- A member path under the struct at `ref`, as a path from the root. -/
+def SRef.underAt {C : Contract} {s : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
+    (ref : SRef C (.ref (.struct s))) : SRef C U :=
+  ref.append (.field q.hroot q.path)
+
+theorem SRef.underAt_ofRoot {C : Contract} {s r : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
+    (h : C.rootType r = some (.ref (.struct s))) : q.underAt (SRef.ofRoot r h) = q.under h := by
+  simp only [SRef.underAt, SRef.ofRoot, SRef.append, SRef.under, Path.append_nil]
+
+/-- A member after a member path, under `ref`. -/
+theorem SRef.underAt_field {C : Contract} {s s' f : Name} {T : Ty}
+    (q : SRef (Contract.ofStruct s) (.ref (.struct s'))) (hg : C.fieldType s' f = some T)
+    (ref : SRef C (.ref (.struct s))) :
+    (q.field (C := Contract.ofStruct s) hg).underAt ref = (q.underAt ref).field hg := by
+  simp only [SRef.underAt, SRef.field, SRef.append, Path.append_assoc, Path.append_field]
+
+/-- A member under `ref`. -/
+theorem SRef.ofRoot_underAt {C : Contract} {s f : Name} {T : Ty}
+    (hf : C.fieldType s f = some T) (ref : SRef C (.ref (.struct s))) :
+    (SRef.ofRoot (C := Contract.ofStruct s) f hf).underAt ref = ref.field hf := rfl
+
+namespace Storage
+
+variable {C : Contract}
+
+/-- The value of a struct at a reference, as a storage of its members. -/
+abbrev viewAt {s : Name} (v : SVal (.ref (.struct s))) : Storage (Contract.ofStruct s) :=
+  (SVal.view v : SFields (Semantics.structDef s))
+
+theorem find_append {U W : Ty} (st : Storage C) (r : SRef C U) (q : Path U W) :
+    st.find (r.append q) = (st.find r).bind (·.find q) := by
+  simp only [Storage.find, SRef.append, SVal.find_eq_findM, SVal.findM_append]
+
+/-- A read of a member path under `ref`: the read of the member path in the
+struct found at `ref`. -/
+theorem find_underAt {s : Name} {U : Ty} (st : Storage C) (ref : SRef C (.ref (.struct s)))
+    (q : SRef (Contract.ofStruct s) U) :
+    st.find (q.underAt ref) = (st.find ref).bind fun v => (viewAt v).find q := by
+  rw [SRef.underAt, find_append]
+  cases st.find ref with
+  | none => rfl
+  | some v =>
+    cases v with
+    | struct fs =>
+      simp only [Option.bind_some, SVal.find_eq_findM, SVal.findM, Storage.find]
+      rfl
+
+/-- A member of the struct found at `ref`, as a storage. -/
+theorem find_field_viewAt {s s' f : Name} (st : Storage C) (ref : SRef C (.ref (.struct s)))
+    (hf : C.fieldType s f = some (.ref (.struct s'))) :
+    ((st.find ref).map viewAt).map (fun fs => fs.selectT (C := Contract.ofStruct s) hf) =
+      (st.find (ref.field hf)).map viewAt := by
+  rw [SRef.field, find_append]
+  cases st.find ref with
+  | none => rfl
+  | some v =>
+    cases v with
+    | struct fs =>
+      simp only [Option.map_some, Option.bind_some, SVal.find_eq_findM, SVal.findM]
+      rfl
+
+/-- A save of a member path under `ref`, seen from `ref`, is the save in the
+struct found there. -/
+theorem save_underAt {s : Name} {U : Ty} (st : Storage C) (ref : SRef C (.ref (.struct s)))
+    (q : SRef (Contract.ofStruct s) U) (w : SVal U) :
+    (st.save (q.underAt ref) w).bind (fun st' => (st'.find ref).map viewAt) =
+      (st.find ref).bind fun v => (viewAt v).save q w := by
+  rcases ref with ⟨n, hr, p⟩
+  simp only [SRef.underAt, SRef.append, Storage.save, Storage.find, SVal.save_eq_saveM,
+    SVal.find_eq_findM, Option.bind_eq_bind]
+  rw [SVal.saveM_append_eq]
+  cases hy : (st.get hr).findM p with
+  | none => rfl
+  | some y =>
+    cases y with
+    | struct fs =>
+      simp only [Option.bind_some, SVal.saveM, Option.bind_eq_bind, Storage.viewAt, SVal.view_struct]
+      cases hz : (fs.get q.hroot).saveM q.path w with
+      | none => simp only [Option.bind_none]
+      | some z =>
+        simp only [Option.bind_some]
+        obtain ⟨x', hx'⟩ := SVal.saveM_of_findM _ p hy (.struct (fs.set q.hroot z))
+        rw [hx']
+        simp only [Option.bind_some, SFields.get_set_same, SVal.findM_saveM _ p _ hx',
+          Option.map_some, SVal.view_struct]
+
+theorem write_underAt {s : Name} {U : Ty} (st : Storage C) (ref : SRef C (.ref (.struct s)))
+    (q : SRef (Contract.ofStruct s) U) (w : SVal U) :
+    (st.write (q.underAt ref) w).bind (fun st' => (st'.find ref).map viewAt) =
+      (st.find ref).bind fun v => (viewAt v).write q w := by
   unfold Storage.write
   split
-  · exact Storage.save_under st h q w
-  · rw [← Storage.find_selectT st h q]
-    cases (st.selectT h).find q with
+  · exact save_underAt st ref q w
+  · rw [find_underAt]
+    cases hf : st.find ref with
+    | none => rfl
+    | some v =>
+      simp only [Option.bind_some, Option.bind_eq_bind]
+      cases (viewAt v).find q with
+      | none => rfl
+      | some x =>
+        simp only [Option.bind_some]
+        rw [save_underAt, hf, Option.bind_some]
+
+theorem delete_underAt {s : Name} {U : Ty} (st : Storage C) (ref : SRef C (.ref (.struct s)))
+    (q : SRef (Contract.ofStruct s) U) :
+    (st.delete (q.underAt ref)).bind (fun st' => (st'.find ref).map viewAt) =
+      (st.find ref).bind fun v => (viewAt v).delete q := by
+  unfold Storage.delete
+  rw [find_underAt]
+  cases hf : st.find ref with
+  | none => rfl
+  | some v =>
+    simp only [Option.bind_some, Option.bind_eq_bind]
+    cases (viewAt v).find q with
     | none => rfl
     | some x =>
-      simp only [Option.bind_eq_bind, Option.bind_some]
-      exact Storage.save_under st h q _
+      simp only [Option.bind_some]
+      rw [save_underAt, hf, Option.bind_some]
 
-theorem Storage.delete_under {s r : Name} {U : Ty} (st : Storage C)
-    (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U) :
-    (st.delete (q.under h)).map (·.selectT h) = (st.selectT h).delete q := by
-  unfold Storage.delete
-  rw [← Storage.find_selectT st h q]
-  cases (st.selectT h).find q with
-  | none => rfl
-  | some x =>
-    simp only [Option.bind_eq_bind, Option.bind_some]
-    exact Storage.save_under st h q _
+end Storage
 
 variable {Γ : Ctx}
 
-/-- What `Tm.unshift` gives at a sort: a member path as a path from a
+/-- What `Tm.unshift` gives at a sort: a member path as a path from the
 root. -/
 @[reducible] def Srt.Unsh (C : Contract) (Γ : Ctx) : Srt → Type
   | .spath _ T => Tm C Γ (.path T)
   | _ => PUnit
 
-/-- A member under the root `r`. -/
-def Op0.unshStep (r : Name) {sn : Name} (hr : C.rootType r = some (.ref (.struct sn))) {u : Srt} :
+/-- A member under the struct at `pre`. -/
+def Op0.unshStep {sn : Name} (pre : Tm C Γ (.path (.ref (.struct sn)))) {u : Srt} :
     Op0 C u → Option (Srt.Unsh C Γ u)
-  | .member s f hf => if h : s = sn then some (.app1 (.field hf) (.app0 (.root r (h ▸ hr))))
-    else none
+  | .member s _ hf => if h : s = sn then some (.app1 (.field (h ▸ hf)) pre) else none
   | _ => none
 
-/-- A member after a member path, under its root. -/
+/-- A member after a member path, under its prefix. -/
 def Op1.unshStep {a u : Srt} : Op1 C a u → Option (Srt.Unsh C Γ a) → Option (Srt.Unsh C Γ u)
   | .fieldIn hf, ih => ih.map fun p => .app1 (.field hf) p
   | _, _ => none
 
-/-- A member path read from the root `r` of the struct `sn` it is in: `age`
+/-- A member path read from the path `pre` of the struct `sn` it is in: `age`
 under `alice` is `alice.age`.  Generic in the sort; `none` on anything but
 members. -/
-def Tm.unshift (r : Name) {sn : Name} (hr : C.rootType r = some (.ref (.struct sn))) :
+def Tm.unshift {sn : Name} (pre : Tm C Γ (.path (.ref (.struct sn)))) :
     {u : Srt} → Tm C Γ u → Option (Srt.Unsh C Γ u)
-  | _, .app0 o => o.unshStep r hr
-  | _, .app1 o x => o.unshStep (Tm.unshift r hr x)
+  | _, .app0 o => o.unshStep pre
+  | _, .app1 o x => o.unshStep (Tm.unshift pre x)
   | _, _ => none
 
 /-- What `unshift` gives reads, from the root, the member path it read. -/
-def Srt.UnshOK (σ : State C Γ) (r : Name) : (u : Srt) → Option (u.Den C σ.H) →
-    Option (Srt.Unsh C Γ u) → Prop
-  | .spath s _, x, some p' => ∀ hr : C.rootType r = some (.ref (.struct s)),
-      p'.eval σ = x.map fun q => q.under hr
+def Srt.UnshOK (σ : State C Γ) {sn : Name} (pre : Tm C Γ (.path (.ref (.struct sn)))) :
+    (u : Srt) → Option (u.Den C σ.H) → Option (Srt.Unsh C Γ u) → Prop
+  | .spath s _, x, some p' => ∀ (h : s = sn) (ref : SRef C (.ref (.struct sn))),
+      pre.eval σ = some ref → p'.eval σ = x.map fun q => (h ▸ q).underAt ref
   | _, _, _ => True
 
-theorem Srt.UnshOK.none (σ : State C Γ) (r : Name) {u : Srt} (x : Option (u.Den C σ.H)) :
-    Srt.UnshOK σ r u x none := by
+theorem Srt.UnshOK.none (σ : State C Γ) {sn : Name} (pre : Tm C Γ (.path (.ref (.struct sn))))
+    {u : Srt} (x : Option (u.Den C σ.H)) : Srt.UnshOK σ pre u x none := by
   cases u <;> trivial
 
-theorem Tm.unshift_eval (σ : State C Γ) (r : Name) {sn : Name}
-    (hr : C.rootType r = some (.ref (.struct sn))) {u : Srt} (p : Tm C Γ u) :
-    Srt.UnshOK σ r u (p.eval σ) (Tm.unshift r hr p) := by
+theorem Tm.unshift_eval (σ : State C Γ) {sn : Name} (pre : Tm C Γ (.path (.ref (.struct sn))))
+    {u : Srt} (p : Tm C Γ u) : Srt.UnshOK σ pre u (p.eval σ) (Tm.unshift pre p) := by
   induction p with
   | app0 o =>
     cases o with
     | member s f hf =>
-      show Srt.UnshOK σ r _ _ (if h : s = sn then _ else none)
+      show Srt.UnshOK σ pre _ _ (if h : s = sn then _ else none)
       split
       · rename_i h
         subst h
-        intro hr'
-        show some ((SRef.ofRoot r _).field hf) = some ((SRef.ofRoot (C := Contract.ofStruct s) f hf).under hr')
-        rw [SRef.ofRoot_field_under]
-      · exact Srt.UnshOK.none σ r _
-    | _ => exact Srt.UnshOK.none σ r _
+        intro _ ref hpre
+        show (pre.eval σ).map (·.field hf) = some ((SRef.ofRoot (C := Contract.ofStruct s) f hf).underAt ref)
+        rw [hpre]
+        rfl
+      · exact Srt.UnshOK.none σ pre _
+    | _ => exact Srt.UnshOK.none σ pre _
   | app1 o x ih =>
     cases o with
     | fieldIn hf =>
-      show Srt.UnshOK σ r _ _ ((Tm.unshift r hr x).map _)
+      show Srt.UnshOK σ pre _ _ ((Tm.unshift pre x).map _)
       revert ih
-      cases Tm.unshift r hr x with
-      | none => intro _; exact Srt.UnshOK.none σ r _
+      cases Tm.unshift pre x with
+      | none => intro _; exact Srt.UnshOK.none σ pre _
       | some p' =>
-        intro ih hr'
-        have ih : p'.eval σ = (x.eval σ).map fun q => q.under hr' := ih hr'
+        intro ih h ref hpre
+        subst h
+        have ih : p'.eval σ = (x.eval σ).map fun q => q.underAt ref := ih rfl ref hpre
         show (Tm.app1 (.field hf) p').eval σ = ((Tm.app1 (.fieldIn hf) x).eval σ).map _
         rw [Tm.eval_app1, Tm.eval_app1, Op1.eval_eq_evalM, Op1.eval_eq_evalM]
         simp only [Op1.evalM]
         rw [ih]
         cases x.eval σ with
         | none => rfl
-        | some q => exact congrArg some (SRef.under_field hf q hr')
-    | _ => exact Srt.UnshOK.none σ r _
-  | _ => exact Srt.UnshOK.none σ r _
+        | some q => exact congrArg some (SRef.underAt_field q hf ref).symm
+    | _ => exact Srt.UnshOK.none σ pre _
+  | _ => exact Srt.UnshOK.none σ pre _
 
-/-- A storage of members' base: the root it is seen from and the storage
-term it reads there. -/
+/-- A storage of members' base: the storage term it reads, and the path of
+the struct it is seen from. -/
 structure Based (C : Contract) (Γ : Ctx) (s : Name) where
-  r : Name
-  h : C.rootType r = some (.ref (.struct s))
   b : Tm C Γ .st
+  pre : Tm C Γ (.path (.ref (.struct s)))
 
 /-- What `Tm.base` gives at a sort. -/
 @[reducible] def Srt.BaseD (C : Contract) (Γ : Ctx) : Srt → Type
   | .sts s => Based C Γ s
   | _ => PUnit
 
-def Op1.baseStep {a u : Srt} : Op1 C a u → Tm C Γ a → Option (Srt.BaseD C Γ u)
-  | .select r h, x => some ⟨r, h, x⟩
-  | _, _ => none
+def Op1.baseStep {a u : Srt} : Op1 C a u → Tm C Γ a → Option (Srt.BaseD C Γ a) →
+    Option (Srt.BaseD C Γ u)
+  | .select r h, x, _ => some ⟨x, .app0 (.root r h)⟩
+  | .selectIn hf, _, ih => ih.map fun bd => ⟨bd.b, .app1 (.field hf) bd.pre⟩
+  | _, _, _ => none
 
 def Op2.baseStep {a b u : Srt} : Op2 C a b u → Tm C Γ b → Option (Srt.BaseD C Γ a) →
     Option (Srt.BaseD C Γ u)
   | .delAtIn, y, ih => ih.bind fun bd =>
-    (Tm.unshift bd.r bd.h y).map fun p' => ⟨bd.r, bd.h, .app2 .delAt bd.b p'⟩
+    (Tm.unshift bd.pre y).map fun p' => ⟨.app2 .delAt bd.b p', bd.pre⟩
   | _, _, _ => none
 
 def Op3.baseStep {a b c u : Srt} : Op3 C a b c u → Tm C Γ b → Tm C Γ c →
     Option (Srt.BaseD C Γ a) → Option (Srt.BaseD C Γ u)
   | .saveIn, y, z, ih => ih.bind fun bd =>
-    (Tm.unshift bd.r bd.h y).map fun p' => ⟨bd.r, bd.h, .app3 .save bd.b p' z⟩
+    (Tm.unshift bd.pre y).map fun p' => ⟨.app3 .save bd.b p' z, bd.pre⟩
   | _, _, _, _ => none
 
-/-- A storage of members as the storage term it reads seen from its root:
-`saveIn(select(s, r), p, v)` is `save(s, r.p, v)` seen from `r`.  Generic in
-the sort. -/
+/-- A storage of members as the storage term it reads seen from a struct's
+path: `saveIn(select(s, r), p, v)` is `save(s, r.p, v)` seen from `r`, and
+`selectIn(…, f)` the same seen from `r.f`.  Generic in the sort. -/
 def Tm.base : {u : Srt} → Tm C Γ u → Option (Srt.BaseD C Γ u)
-  | _, .app1 o x => o.baseStep x
+  | _, .app1 o x => o.baseStep x (Tm.base x)
   | _, .app2 o x y => o.baseStep y (Tm.base x)
   | _, .app3 o x y z => o.baseStep y z (Tm.base x)
   | _, _ => none
 
-/-- What `base` gives evaluates, seen from its root, as the storage of
+/-- What `base` gives evaluates, seen from its prefix, as the storage of
 members. -/
 def Srt.BaseOK (σ : State C Γ) : (u : Srt) → Option (u.Den C σ.H) → Option (Srt.BaseD C Γ u) → Prop
-  | .sts _, x, some bd => x = (bd.b.eval σ).map fun st => st.selectT bd.h
+  | .sts _, x, some bd => (∃ ref, bd.pre.eval σ = some ref) ∧
+      x = (bd.b.eval σ).bind fun st => (bd.pre.eval σ).bind fun ref =>
+        (st.find ref).map Storage.viewAt
   | _, _, _ => True
 
 theorem Srt.BaseOK.none (σ : State C Γ) {u : Srt} (x : Option (u.Den C σ.H)) :
@@ -1151,9 +1404,37 @@ theorem Srt.BaseOK.none (σ : State C Γ) {u : Srt} (x : Option (u.Den C σ.H)) 
 theorem Tm.base_eval (σ : State C Γ) {u : Srt} (t : Tm C Γ u) :
     Srt.BaseOK σ u (t.eval σ) (Tm.base t) := by
   induction t with
-  | app1 o x _ =>
+  | app1 o x ihx =>
     cases o with
-    | select r h => rfl
+    | select r h =>
+      refine ⟨⟨_, rfl⟩, ?_⟩
+      show (x.eval σ).map (fun st => st.selectT h) = _
+      cases x.eval σ with
+      | none => rfl
+      | some st =>
+        show some _ = (st.find (SRef.ofRoot r h)).map Storage.viewAt
+        simp only [Storage.find, SRef.ofRoot, SVal.find_eq_findM, SVal.findM, Option.map_some]
+        rfl
+    | selectIn hf =>
+      show Srt.BaseOK σ _ _ ((Tm.base x).map _)
+      revert ihx
+      cases Tm.base x with
+      | none => intro _; exact Srt.BaseOK.none σ _
+      | some bd =>
+        intro ⟨⟨ref, hpre⟩, ihx⟩
+        refine ⟨⟨ref.field hf, ?_⟩, ?_⟩
+        · show (bd.pre.eval σ).map (·.field hf) = _
+          rw [hpre]; rfl
+        · show (x.eval σ).map (fun fs => Storage.selectT (C := Contract.ofStruct _) fs hf) = _
+          rw [ihx]
+          show _ = (bd.b.eval σ).bind fun st => ((bd.pre.eval σ).map (·.field hf)).bind fun ref =>
+            (st.find ref).map Storage.viewAt
+          rw [hpre]
+          cases bd.b.eval σ with
+          | none => rfl
+          | some st =>
+            simp only [Option.bind_some, Option.map_some]
+            rw [← Storage.find_field_viewAt st ref hf]
     | _ => exact Srt.BaseOK.none σ _
   | app2 o x y ihx _ =>
     cases o with
@@ -1163,28 +1444,30 @@ theorem Tm.base_eval (σ : State C Γ) {u : Srt} (t : Tm C Γ u) :
       cases Tm.base x with
       | none => intro _; exact Srt.BaseOK.none σ _
       | some bd =>
-        intro ihx
-        have ihx : x.eval σ = (bd.b.eval σ).map fun st => st.selectT bd.h := ihx
-        have hy := Tm.unshift_eval σ bd.r bd.h y
+        intro ⟨⟨ref, hpre⟩, ihx⟩
+        have hy := Tm.unshift_eval σ bd.pre y
         revert hy
-        show _ → Srt.BaseOK σ _ _ ((Tm.unshift bd.r bd.h y).map _)
-        cases Tm.unshift bd.r bd.h y with
+        show _ → Srt.BaseOK σ _ _ ((Tm.unshift bd.pre y).map _)
+        cases Tm.unshift bd.pre y with
         | none => intro _; exact Srt.BaseOK.none σ _
         | some p' =>
           intro hy
-          have hy : p'.eval σ = (y.eval σ).map fun q => q.under bd.h := hy bd.h
+          have hy : p'.eval σ = (y.eval σ).map fun q => q.underAt ref := hy rfl ref hpre
+          refine ⟨⟨ref, hpre⟩, ?_⟩
           show ((x.eval σ).bind fun st => (y.eval σ).bind fun q => st.delete q) =
-            (((bd.b.eval σ).bind fun st => (p'.eval σ).bind fun q => st.delete q)).map _
-          rw [ihx, hy]
+            ((bd.b.eval σ).bind fun st => (p'.eval σ).bind fun q => st.delete q).bind _
+          rw [ihx, hy, hpre]
           cases bd.b.eval σ with
           | none => rfl
           | some st =>
+            simp only [Option.bind_some]
             cases y.eval σ with
-            | none => rfl
+            | none => cases st.find ref <;> rfl
             | some q =>
               simp only [Option.map_some, Option.bind_some]
-              exact (Storage.delete_under st bd.h q).symm
-    | _ => trivial
+              rw [Storage.delete_underAt st ref q]
+              cases st.find ref <;> rfl
+    | _ => exact Srt.BaseOK.none σ _
   | app3 o x y z ihx _ _ =>
     cases o with
     | saveIn =>
@@ -1193,32 +1476,34 @@ theorem Tm.base_eval (σ : State C Γ) {u : Srt} (t : Tm C Γ u) :
       cases Tm.base x with
       | none => intro _; exact Srt.BaseOK.none σ _
       | some bd =>
-        intro ihx
-        have ihx : x.eval σ = (bd.b.eval σ).map fun st => st.selectT bd.h := ihx
-        have hy := Tm.unshift_eval σ bd.r bd.h y
+        intro ⟨⟨ref, hpre⟩, ihx⟩
+        have hy := Tm.unshift_eval σ bd.pre y
         revert hy
-        show _ → Srt.BaseOK σ _ _ ((Tm.unshift bd.r bd.h y).map _)
-        cases Tm.unshift bd.r bd.h y with
+        show _ → Srt.BaseOK σ _ _ ((Tm.unshift bd.pre y).map _)
+        cases Tm.unshift bd.pre y with
         | none => intro _; exact Srt.BaseOK.none σ _
         | some p' =>
           intro hy
-          have hy : p'.eval σ = (y.eval σ).map fun q => q.under bd.h := hy bd.h
+          have hy : p'.eval σ = (y.eval σ).map fun q => q.underAt ref := hy rfl ref hpre
+          refine ⟨⟨ref, hpre⟩, ?_⟩
           show ((x.eval σ).bind fun st => (y.eval σ).bind fun q => (z.eval σ).bind fun w =>
               st.write q w) =
-            (((bd.b.eval σ).bind fun st => (p'.eval σ).bind fun q => (z.eval σ).bind fun w =>
-              st.write q w)).map _
-          rw [ihx, hy]
+            ((bd.b.eval σ).bind fun st => (p'.eval σ).bind fun q => (z.eval σ).bind fun w =>
+              st.write q w).bind _
+          rw [ihx, hy, hpre]
           cases bd.b.eval σ with
           | none => rfl
           | some st =>
+            simp only [Option.bind_some]
             cases y.eval σ with
-            | none => rfl
+            | none => cases st.find ref <;> rfl
             | some q =>
               cases z.eval σ with
-              | none => rfl
+              | none => simp only [Option.map_some, Option.bind_some, Option.bind_none]; cases st.find ref <;> rfl
               | some w =>
                 simp only [Option.map_some, Option.bind_some]
-                exact (Storage.write_under st bd.h q w).symm
+                rw [Storage.write_underAt st ref q w]
+                cases st.find ref <;> rfl
     | _ => exact Srt.BaseOK.none σ _
   | _ => exact Srt.BaseOK.none σ _
 
@@ -1228,7 +1513,7 @@ def Op2.readBase {a b u : Srt} : Op2 C a b u → Tm C Γ a → Tm C Γ b → Opt
     Option (Tm C Γ u)
   | .find, x, y, _ => some (.app2 .find x y)
   | .findIn, _, y, ih => ih.bind fun bd =>
-    (Tm.unshift bd.r bd.h y).map fun q' => .app2 .find bd.b q'
+    (Tm.unshift bd.pre y).map fun q' => .app2 .find bd.b q'
   | _, _, _, _ => none
 
 /-- A read as the read of the storage term it reads, from the root.
@@ -1255,31 +1540,33 @@ theorem Tm.base?_eval (σ : State C Γ) {u : Srt} {t t' : Tm C Γ u} (h : t.base
       cases hbx : Tm.base x with
       | none => rw [hbx] at h; simp only [Option.bind_none, reduceCtorEq] at h
       | some bd =>
-        intro hb
-        have hb : x.eval σ = (bd.b.eval σ).map fun st => st.selectT bd.h := hb
+        intro ⟨⟨ref, hpre⟩, hb⟩
         rw [hbx] at h
         simp only [Option.bind_some] at h
-        have hy := Tm.unshift_eval σ bd.r bd.h y
+        have hy := Tm.unshift_eval σ bd.pre y
         revert hy
-        cases hu : Tm.unshift bd.r bd.h y with
+        cases hu : Tm.unshift bd.pre y with
         | none => rw [hu] at h; simp only [Option.map_none, reduceCtorEq] at h
         | some q' =>
           rw [hu] at h
           simp only [Option.map_some, Option.some.injEq] at h
           subst h
           intro hy
-          have hy : q'.eval σ = (y.eval σ).map fun q => q.under bd.h := hy bd.h
+          have hy : q'.eval σ = (y.eval σ).map fun q => q.underAt ref := hy rfl ref hpre
           show ((x.eval σ).bind fun st => (y.eval σ).bind fun q => (st.find q).bind fun v =>
               some v.view) =
             ((bd.b.eval σ).bind fun st => (q'.eval σ).bind fun q => (st.find q).bind fun v =>
               some v.view)
-          rw [hb, hy]
+          rw [hb, hy, hpre]
           cases bd.b.eval σ with
           | none => rfl
           | some st =>
+            simp only [Option.bind_some]
             cases y.eval σ with
-            | none => rfl
-            | some q => simp only [Option.map_some, Option.bind_some, Storage.find_selectT]
+            | none => cases st.find ref <;> rfl
+            | some q =>
+              simp only [Option.map_some, Option.bind_some, Storage.find_underAt]
+              cases st.find ref <;> rfl
     | _ => simp only [Tm.base?, Op2.readBase, reduceCtorEq] at h
   | _ => simp only [Tm.base?, reduceCtorEq] at h
 
@@ -1299,18 +1586,6 @@ theorem Tm.sameBase_eval {u : Srt} {t t' : Tm C Γ u} (h : Tm.sameBase t t' = tr
     obtain rfl := Tm.eq_of_beqR h
     rw [Tm.base?_eval σ hb, Tm.base?_eval σ hb']
   · nomatch h
-
-/-- A write read member-wise returns where the write it reads returns:
-the update holding `save(s, r.p, v)` holds `saveIn(select(s, r), p, v)`. -/
-theorem Tm.base_returns {s : Name} {S : Tm C Γ (.sts s)} {bd : Based C Γ s}
-    (h : Tm.base S = some bd) {σ : State C Γ} (hb : bd.b.eval σ ≠ none) : S.eval σ ≠ none := by
-  have e : S.eval σ = (bd.b.eval σ).map fun st => st.selectT bd.h := by
-    have := Tm.base_eval σ S
-    rw [h] at this
-    exact this
-  rw [e]
-  intro h'
-  exact hb (Option.map_eq_none_iff.1 h')
 
 end MemberWise
 

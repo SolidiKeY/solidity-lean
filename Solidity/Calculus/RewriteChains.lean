@@ -212,18 +212,35 @@ def lawAt (c : Lean.Name) (e : Lean.Expr) :
   let some (lhs, rhs) := lawSides? ty | return .error none
   let lhs ← whnfR (← instantiateMVars lhs)
   unless ← matchLaw lhs e do return .error none
-  for a in args do
+  -- the side conditions, in passes: one closed by `rfl` may fix the arguments
+  -- another needs (`findMemberCons`' `h : p.shift? = some ⟨r, sn, hr, p'⟩`
+  -- fixes the `hr` before it)
+  let mut pending := args.toList.reverse
+  let mut progress := true
+  while progress do
+    progress := false
+    let mut rest := []
+    for a in pending do
+      let g := a.mvarId!
+      if (← g.isAssigned) || !(← isProp (← g.getType)) then continue
+      let s ← saveState
+      let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
+      let g ← g.replaceTargetDefEq ty
+      let closed ← try
+          pure (← Term.withoutErrToSorry <|
+            Tactic.run g (evalTactic (← `(tactic| first | rfl | decide | with_reducible assumption | exact Tm.KindFreeAt.ofNil (by with_reducible assumption) rfl rfl)))).isEmpty
+        catch _ => pure false
+      if closed then progress := true
+      else
+        s.restore
+        rest := rest ++ [a]
+    pending := rest
+  for a in pending do
     let g := a.mvarId!
     if (← g.isAssigned) || !(← isProp (← g.getType)) then continue
     let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
-    let g ← g.replaceTargetDefEq ty
-    let closed ← try
-        pure (← Term.withoutErrToSorry <|
-          Tactic.run g (evalTactic (← `(tactic| first | rfl | decide | with_reducible assumption | exact Tm.KindFreeAt.ofNil (by with_reducible assumption) rfl rfl)))).isEmpty
-      catch _ => pure false
-    unless closed do
-      return .error (some m!"the side condition{indentExpr ty}\nof {lastName c} closes by neither \
-        `rfl`, `decide` nor a hypothesis")
+    return .error (some m!"the side condition{indentExpr ty}\nof {lastName c} closes by neither \
+      `rfl`, `decide` nor a hypothesis")
   let pf ← instantiateMVars (mkAppN pf args)
   let t' ← instantiateMVars rhs
   if pf.hasExprMVar || t'.hasExprMVar then return .error none
@@ -252,10 +269,18 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
     | .error m => if failed.isNone then failed := m
   return (out, failed)
 
+/-- The law `c` and its twin in a storage of members (`findOnSave` and
+`findOnSaveIn`, `findMemberCons` and `findMemberConsIn`): a link names
+either by the first. -/
+def lawTwins (env : Environment) (c : Lean.Name) : List Lean.Name :=
+  let t := c.appendAfter "In"
+  if env.contains t then [c, t] else [c]
+
 /-- The term taclets `~=>` tries, after the update rules of `rwTable`: the
 named rules of `TermTaclet`, and `findOnDelAtSave`. -/
 def rwLaws : List Lean.Name :=
-  [``TermTaclet.findOnSave, ``TermTaclet.findOnSaveFrame, ``TermTaclet.findMemberCons,
+  [``TermTaclet.findOnSave, ``TermTaclet.findOnSaveIn, ``TermTaclet.findOnSaveFrame,
+    ``TermTaclet.findMemberCons, ``TermTaclet.findMemberConsIn,
     ``TermTaclet.selectOnSaveMember, ``TermTaclet.selectOnSaveFrame,
     ``TermTaclet.selectOnDelAtMember, ``TermTaclet.selectOnDelAtFrame,
     ``TermTaclet.selectOnSaveMemberIn, ``TermTaclet.selectOnSaveFrameIn,

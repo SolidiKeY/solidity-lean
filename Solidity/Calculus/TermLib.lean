@@ -384,6 +384,49 @@ def Tm.shift? : {u : Srt} → Tm C Γ u → Option (u.ShiftD C Γ)
   | _, .app1 o x => o.shiftStep x x.shift?
   | _, _ => none
 
+/-- A member path read from its head under a `select`: the member `f` (a
+struct `sn`), and the rest, a member path in the frame of `sn` (solkey's
+`findMemberCons` in a storage of members). -/
+structure ShiftedIn (C : Contract) (Γ : Ctx) (s : Name) (T : Ty) where
+  f : Name
+  sn : Name
+  h : C.fieldType s f = some (.ref (.struct sn))
+  p : Tm C Γ (.spath sn T)
+
+/-- What `Tm.shiftIn?` gives at a sort: a member path's head and rest. -/
+@[reducible] def Srt.ShiftInD (C : Contract) (Γ : Ctx) : Srt → Type
+  | .spath s T => ShiftedIn C Γ s T
+  | _ => PUnit
+
+/-- What `Tm.memberOf?` gives at a sort: a member and its type's proof. -/
+@[reducible] def Srt.MemberOf (C : Contract) : Srt → Type
+  | .spath s T => (f : Name) ×' C.fieldType s f = some T
+  | _ => PUnit
+
+/-- A member, with its type's proof. -/
+def Op0.memberOf? {s : Srt} : Op0 C s → Option (s.MemberOf C)
+  | .member _ f h => some ⟨f, h⟩
+  | _ => none
+
+/-- The member a member path is, if it is one alone. -/
+def Tm.memberOf? {u : Srt} : Tm C Γ u → Option (u.MemberOf C)
+  | .app0 o => o.memberOf?
+  | _ => none
+
+/-- A member after a member path, read from its head. -/
+def Op1.shiftInStep {a s : Srt} : Op1 C a s → Tm C Γ a → Option (a.ShiftInD C Γ) →
+    Option (s.ShiftInD C Γ)
+  | .fieldIn (s' := sn') (f := g) hg, x, ih => match x.memberOf? with
+    | some ⟨f, hf⟩ => some ⟨f, sn', hf, .app0 (.member sn' g hg)⟩
+    | none => ih.map fun sh => ⟨sh.f, sh.sn, sh.h, .app1 (.fieldIn hg) sh.p⟩
+  | _, _, _ => none
+
+/-- A member path read from its head (`account.balance` under `select(s,
+alice)` as `account` and `balance` under it). -/
+def Tm.shiftIn? : {u : Srt} → Tm C Γ u → Option (u.ShiftInD C Γ)
+  | _, .app1 o x => o.shiftInStep x x.shiftIn?
+  | _, _ => none
+
 /-- A written value's word. -/
 def Op1.svStep {a s : Srt} : Op1 C a s → Tm C Γ a → Option ((p : PrimTy) × p.Denote)
   | .sval, x => x.litW?
@@ -676,6 +719,53 @@ theorem Tm.shift?_denote {T : Ty} (p : Tm C Γ (.path T)) {sh : Shifted C Γ T}
     (h : p.shift? = some sh) : p.denote σ = .field sh.r :: sh.p.denote σ ∧ sh.p.denote σ ≠ [] := by
   exact Tm.shift?_ok σ p sh h
 
+/-- What `shiftIn?` gives splits the Theory's member path at its head. -/
+def Srt.ShiftInOK (σ : State C Γ) : (u : Srt) → u.ShiftInD C Γ → u.TDen → Prop
+  | .spath _ _, sh, d => d = .field sh.f :: sh.p.denote σ ∧ sh.p.denote σ ≠ []
+  | _, _, _ => True
+
+theorem Tm.shiftIn?_ok {u : Srt} (p : Tm C Γ u) :
+    ∀ sh, p.shiftIn? = some sh → Srt.ShiftInOK σ u sh (p.denote σ) := by
+  induction p with
+  | app1 o x ih =>
+    cases o with
+    | fieldIn hg =>
+      rename_i s sn' g T
+      intro sh h
+      have h : (match x.memberOf? with
+        | some ⟨f, hf⟩ => some ⟨f, sn', hf, .app0 (.member sn' g hg)⟩
+        | none => x.shiftIn?.map fun sh => ⟨sh.f, sh.sn, sh.h, .app1 (.fieldIn hg) sh.p⟩) =
+          some sh := h
+      cases hx : x.memberOf? with
+      | some mm =>
+        rw [hx] at h
+        obtain ⟨f, hf⟩ := mm
+        cases h
+        have hd : x.denote σ = [.field f] := by
+          cases x with
+          | app0 o =>
+            cases o with
+            | member _ f' hf' => cases hx; rfl
+            | _ => cases hx
+          | _ => cases hx
+        exact ⟨by show x.denote σ ++ _ = _; rw [hd]; rfl, List.cons_ne_nil _ _⟩
+      | none =>
+        rw [hx] at h
+        obtain ⟨sh', hs, rfl⟩ := Option.map_eq_some_iff.1 h
+        obtain ⟨ih, -⟩ := ih sh' hs
+        exact ⟨by show x.denote σ ++ _ = _; rw [ih]; rfl,
+          List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)⟩
+    | _ => intro sh h; cases h
+  | _ => intro sh h; cases h
+
+/-- A member path is never empty. -/
+theorem Tm.denote_ne_nil_spath {s : Name} {T : Ty} (p : Tm C Γ (.spath s T)) : p.denote σ ≠ [] := by
+  cases p with
+  | app0 o => cases o; exact List.cons_ne_nil _ _
+  | app1 o _ => cases o; exact List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)
+  | app2 o _ _ => cases o
+  | app3 o _ _ _ => cases o
+
 end SideDenote
 
 section SideSyntax
@@ -786,6 +876,20 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       {hr : C.rootType r = some (.ref (.struct sn))} {p' : Tm C Γ (.spath sn (.prim P))}
       (h : p.shift? = some ⟨r, sn, hr, p'⟩ := by rfl) :
       TermTaclet (Tms.Term.find s p) (.app2 .findIn (Tms.STerm.select s r hr) p')
+  /-- **`findMemberCons`** in a storage of members: `findIn(s, f.p) ⇝
+  findIn(select(s, f), p)` (`find_cons`). -/
+  | findMemberConsIn {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
+      {p : Tm C Γ (.spath sn (.prim P))} {f sn' : Name}
+      {hf : C.fieldType sn f = some (.ref (.struct sn'))} {p' : Tm C Γ (.spath sn' (.prim P))}
+      (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩ := by rfl) :
+      TermTaclet (.app2 .findIn s p) (.app2 .findIn (.app1 (.selectIn hf) s) p')
+  /-- **`findOnSave`** in a storage of members: `findIn(saveIn(s, p, v), p) ⇝ v`
+  for a word `v` (`find_copyTo_same`). -/
+  | findOnSaveIn {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
+      {p q : Tm C Γ (.spath sn (.prim P))} {v : P.Denote}
+      (hq : p.beqR q = true := by first | rfl | exact Tm.beqR_self _) :
+      TermTaclet (.app2 .findIn (.app3 .saveIn s p (Tms.SValT.val (Tms.Term.lit v))) q)
+        (Tms.Term.lit v)
   /-- **`selectOnSaveMember`**: solkey's `selectOnSaveCons` at `a1 = a2`. -/
   | selectOnSaveMember {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)} {v : Tm C Γ (.sv T)}
       {r sn : Name} {hr : C.rootType r = some (.ref (.struct sn))} {p' : Tm C Γ (.spath sn T)}
@@ -1053,6 +1157,18 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
     show Equiv (findSt (s.denote σ) (p.denote σ))
       (findSt (asStruct (selectSt (s.denote σ) (.field r))) (p'.denote σ))
     rw [hd, find_cons _ _ hne]
+    exact Equiv.refl _
+  | @findMemberConsIn _ _ sn s _ p f sn' hf p' h => fun σ => by
+    obtain ⟨hd, hne⟩ := Tm.shiftIn?_ok σ p _ h
+    show Equiv (findSt (s.denote σ) (p.denote σ))
+      (findSt (asStruct (selectSt (s.denote σ) (.field f))) (p'.denote σ))
+    rw [hd, find_cons _ _ hne]
+    exact Equiv.refl _
+  | @findOnSaveIn _ _ sn s _ p q v hq => fun σ => by
+    obtain rfl := Tm.eq_of_beqR hq
+    show Equiv (findSt (copyTo (s.denote σ) (p.denote σ) (.prim (PrimTy.erase v))) (p.denote σ))
+      (.prim (PrimTy.erase v))
+    rw [find_copyTo_same _ (Tm.denote_ne_nil_spath σ p)]
     exact Equiv.refl _
   | @selectOnSaveMember _ _ s _ p v r sn hr p' _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnSaveMember_denote h) .hole q

@@ -575,7 +575,9 @@ def lawUpdCands (C : Expr) (c : Lean.Name) (evalLaw : Bool) (φ : Expr) (scopes 
       if let some refCtor := refCtor? then
         let hr := mkAppN (mkConst refCtor) pf.getAppArgs
         Es := Es.push (← mkAppM ``LawCov.ref #[hr])
-      if ← isDefEq (← mkAppM ``Tm.sameBase #[t, t']) (mkConst ``Bool.true) then
+      -- by the kernel: the base reads compare member names (`String`s)
+      let sb ← instantiateMVars (← mkAppM ``Tm.sameBase #[t, t'])
+      if !sb.hasMVar && Kernel.isDefEqGuarded (← getEnv) (← getLCtx) sb (mkConst ``Bool.true) then
         Es := Es.push (← mkAppOptM ``LawCov.eqv
           #[none, none, none, t, t', ← mkEqRefl (mkConst ``Bool.true)])
     if Es.isEmpty then continue
@@ -729,38 +731,41 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
       for (t, t', pf) in is do
         unless keep t do continue
         for i in List.range k do
-          rs := rs.push (mkAppN (mkConst ``FmlRw.lit) #[C, t, t', pf, toExpr i])
+          rs := rs.push (← mkAppM ``FmlRw.lit #[pf, toExpr i])
         for i in List.range (k + 1) do
           let s := skels[i]!
           if s.hasLit then
-            rs := rs.push (mkAppN (mkConst ``FmlRw.litEq) #[C, t, t', pf, toExpr i, toExpr s])
-    | .law c =>
-      -- the law matched against the line's closed terms read at the empty scope
+            rs := rs.push (← mkAppM ``FmlRw.litEq #[pf, toExpr i, toExpr s])
+    | .law c₀ =>
+      -- the law matched against the line's closed terms read at the empty scope;
+      -- a law with a twin in a storage of members (`findOnSave` and
+      -- `findOnSaveIn`, …) is either
       let ts ← match tsMemo with
         | some ts => pure ts
         | none => Tm.closedNilVals φb
       tsMemo := some ts
-      let (is, f) ← if h : 0 < ts.size then
-          lawInstances c (← mkListLit (← inferType ts[0]) ts.toList)
-        else pure (#[], none)
-      failed := f
-      for (t, t', pf) in is do
-        unless keep t do continue
-        if ← isDefEq (← mkAppM ``Tm.isLit #[t']) (mkConst ``Bool.true) then
-          let ht ← mkEqRefl (mkConst ``Bool.true)
-          for i in List.range k do
-            rs := rs.push (mkAppN (mkConst ``FmlRw.lawUpd) #[C, t, t', pf, ht, toExpr i])
-        for i in List.range (k + 1) do
-          let s := skels[i]!
-          if s.hasLit then
-            rs := rs.push (mkAppN (mkConst ``FmlRw.lawEq) #[C, t, t', pf, toExpr i, toExpr s])
-      -- past the program: in an update's right-hand sides under any modality,
-      -- the law at the update's scope (`FmlRw.lawUpdS`)
-      if past then
-        let (es, f) ← lawUpdCands C c false φb scopes keep
-        rs := rs ++ es
-        -- the side condition, as solkey's taclet states it
-        if f.isSome then failed := f
+      for c in Chain.lawTwins (← getEnv) c₀ do
+        let (is, f) ← if h : 0 < ts.size then
+            lawInstances c (← mkListLit (← inferType ts[0]) ts.toList)
+          else pure (#[], none)
+        if failed.isNone then failed := f
+        for (t, t', pf) in is do
+          unless keep t do continue
+          if ← isDefEq (← mkAppM ``Tm.isLit #[t']) (mkConst ``Bool.true) then
+            let ht ← mkEqRefl (mkConst ``Bool.true)
+            for i in List.range k do
+              rs := rs.push (← mkAppM ``FmlRw.lawUpd #[pf, ht, toExpr i])
+          for i in List.range (k + 1) do
+            let s := skels[i]!
+            if s.hasLit then
+              rs := rs.push (← mkAppM ``FmlRw.lawEq #[pf, toExpr i, toExpr s])
+        -- past the program: in an update's right-hand sides under any modality,
+        -- the law at the update's scope (`FmlRw.lawUpdS`)
+        if past then
+          let (es, f) ← lawUpdCands C c false φb scopes keep
+          rs := rs ++ es
+          -- the side condition, as solkey's taclet states it
+          if f.isSome then failed := f
     | .evalLaw c =>
       -- a law of a memory read, in an update's right-hand sides under any
       -- modality, where the update holds the write it reads past
