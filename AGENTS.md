@@ -28,11 +28,11 @@ on `⊨` are scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`),
 `sol_upd`/`sol_merge` rewrite the scoped leaf, and a chain rewrites while
 the program is open (`Calculus/RewriteScoped.lean`) and past it
 (`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
-erased: the untyped formulas (`NFml`) are gone (W9.5a). What stays
-untyped is the state a reduction is read over (`Semantics/Erased.lean`,
-`EState.erase`), and `Update.lean`'s untyped terms (`Surface.Tm`), which
-remain only as the notation's front end and the `SolKey` reader's
-interface.
+erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
+erased program evaluators (W9.6.4). What stays untyped is the state an
+update yields and the terms read (`EState`, `Semantics/Erased.lean`, what
+`State.erase` gives), and the `SolKey` reader's frozen shim
+(`Update.lean`'s `Surface.Tm`).
 
 **Updates are terms** (`Update.lean`): `STerm` at `structRules.key`'s
 signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do

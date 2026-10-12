@@ -4448,6 +4448,95 @@ default build (the modules above `Logic.lean` lost only its two unused
 `Simple` lemmas and a docstring) and `SolkeyTestSuite`; no speed
 measurement (no row is time-sensitive).
 
+### W9.6.4 record (2026-10-12, branch `w96-del`)
+
+**Merged master built first**: the three lanes (`w96-notation`, `w96-inv`,
+`w96-sound`) build together, default targets and `SolkeyTestSuite`, with
+no fix needed.
+
+**Deleted** (`git diff --stat master`: 2,164 Lean lines removed, 515
+added, all of them moved; 18 Lean files):
+- `Semantics/Erased.lean`'s program evaluators: `Simple.eval`,
+  `SPath`/`Loc.resolve`, `MPath.mval`, `MLoc.read`/`write`/`addr`/`write_eq`,
+  `Val.eval`, `Src.value`/`pushVal`, `MSrc.mval`, `MRhs.eval`, `ARhs.eval`,
+  `opLocal`, `OpLoc.store`, `bumpLocal`, `OpLoc.bump`, `sendAt`,
+  `ExtCall.key`, `Args.eval`, `Binders.defaults`/`decode`,
+  `CodeBinder.decode`, `CallRet.enter`/`leave`, `guardOk`, `assertOk`
+  (453 → 181 lines).  `Env`, `EState` and `aliasPath`/`memRef` stay.
+- `Semantics/StepErase.lean` (1,361 lines), merged into
+  `Semantics/TypedErase.lean` (58 → 509 lines; it sits above `Run`, which
+  the `TRun.*` lemmas need, so not `State.lean`): every lemma stating an
+  agreement with an erased evaluator went (`Val.evalT_erase` and its mutual
+  kin, `Src.valueT_erase`, `MSrc.mvalT_erase`, `ARhs`/`MRhs.evalT_erase`,
+  `MLoc.addrT_erase`, `OpLoc.storeT_erase`/`bumpT_erase`,
+  `Args.evalT_erase`, `ExtCall.keyT_erase`, `Binders`/`CodeBinder.decodeT_erase`,
+  `CallRet.enterT_erase`/`leaveT_erase`, `StepAgrees`, `StepAgrees.erased`,
+  and the 21 step lemmas `TRun.*_erase`, `assign_erase` to `assert_erase`;
+  `TRun.clearT_erase`, `State.allocDefault_glob`, `State.erase_env_adopt`
+  stay), and the value-level lemmas
+  moved unchanged (`TRes.Agrees` and its kit, `TRes.NoPanic`, the
+  evaluators' `*_noPanic`, `SRef.erase_field`/`erase_index`, `MAddr.erase`,
+  `writeAddr_erase`, `opStoreT_erase`, `bumpStoreT_erase`, `opMemT_erase`,
+  `bumpMemT_erase`, `compound_erase`, `bump_erase`, …).  Then the ones left
+  with no reader: `State.withStorage_into`, `PrimTy.ofValue?_fits`,
+  `TEnv.append_erase`/`take_erase`, `Binders.defaultsT_erase`,
+  `State.pay_erase`, `TRes.Agrees.emap`/`mapLeft`,
+  `TRun.State.withGlob_copyStToMG`.  `Semantics/NoPanic.lean` imports
+  `TypedErase`.
+- `Typing/Soundness.lean` (706 → 280 lines): `RunInv.Holds`,
+  `Holds.withEnv`/`drop`, `wtInv`, `RunWT` and `RunWT.*` (`init` too),
+  `CallRet.leave_all`, the evaluators' typing (`Simple.eval_wt`,
+  `aliasPath_wt`, `SPath`/`Loc.resolve_wt`, `MPath.mval_wt`,
+  `MLoc.read_wt`, `Val.eval_wt`, `Binders.defaults_wt`), and the lemmas
+  only they read (`evalBinop_wt`, `evalUnop_wt`, `mHasTyHFields_lookup`,
+  `mHasTyHElems_mem`, `MObj.hasTyH_arrElem`, `RefTy.arrElem?`,
+  `ArrTy.arrElem`, `MVal.asValue_hasTy`, `Value.toMVal_hasTyH`,
+  `SVal.asValue_hasTy`, `MVal.asRef_ok`, `int_toSVal_hasTy`,
+  `applyBinOp_nonarith_bool`, `StateWT.ofCopyOut`, `compound_isArith`,
+  `newArrVal_hasTy`, `map_ok_inv`, `LTy.WT.mem_some`,
+  `Contract.layout_tyAt_root`).  `RunInv`, `RunInv.env_mono`, `Env.All`,
+  `LTy.WT` stay (`Typing/TypedRunInv.lean`, `WellTypedNecessity`).
+- `Typing/TypedWT.lean`: `State.erase_wt`, its example, and
+  `LTy.TDenote.erase_wt`/`TEnv.erase_wt` (read only by it);
+  `State.glob_wt` stays.  `Tools/Taclet.lean`'s scoped-family list lost
+  `RunWT`.
+- Prose naming them: the module docstrings of `Erased`, `TypedErase`,
+  `Typing/Soundness`, `TypedWT`, `Typing/State`; docstring citations in
+  `Semantics.lean`, `Run`, `Heap`, `HeapErase`, `StateWrites`,
+  `Constructibility`, `StoragePreservation`; `.claude/rules/typing.md` and
+  `soundness.md` (an update arm is now `*_agrees` closed by
+  `Premise.sound_update_typed`); `docs/module-map.md`,
+  `solc-alignment.md`, `solc-validation.md`, `solkey-feedback.md`,
+  `loops.md`, `testsuite-proofs.md`, `lean-key-rule-map.md`.
+
+**Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
+(`SolkeyTestSuite` added to `defaultTargets` for the build, not
+committed), clean; `check-orphans` (310 reachable), `check-doc-paths`;
+`sorry` count unchanged (19 occurrences, prose and strings); `#print axioms
+Proves.valid`: `propext`, `Classical.choice`, `Quot.sound`.
+`check-testsuite.sh` refuses the local `../solkey` (`4150e0a8`, stale, as
+before).
+
+**Gates** (each file copied under `Solidity/Scratch/`, a fresh worker
+through the MCP, one at a time after a warm-up, `/proc` sampled every
+20 ms, wall to the last CPU tick, wall s; load 1–5, no other Lean agent;
+no base measured, the W9.5a column is the last record's):
+
+| Row | Gate | W9.5a | W9.6.4 |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 180.9 | 177.8 |
+| `Derived7` | 61.7 | 48.5 | 48.0 |
+| `Tactics/Decide` | 45.0 | 39.1 | 39.4 |
+| `ProofTree` | 11.7 | 8.3 | 8.3 |
+| `Chains/Storage` | 9.0 | 8.3 | 8.3 |
+| `ChainRewrites` | 8.2 | 7.1 | 7.2 |
+| `ChainRewritesOpen` | 4.1 | 3.5 | 3.5 |
+| `Solkey/TestSuite` | 13.2 | 6.9 | 7.0 |
+
+Per file: `Derived1` 7.0, `2` 7.9, `3` 11.7, `4` 15.4, `5` 8.0, `6` 10.3,
+`7` 48.0, `8` 25.2, `9` 5.8, `10` 8.7, `11` 2.7, `12` 12.2, `13` 6.3,
+`14` 8.6.
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
@@ -4467,8 +4556,16 @@ no prover user: `Update.lean`'s "Frames" lemmas over `Surface.*`
 term bridge).  Deleting the shim is the reader's port, if the user asks
 for it.
 
-**W9.6 (the state IR)**: under way, "W9.6 plan" above; W9.6N (the
-notation's front end) is done, its record there.
+**W9.6 (the state IR)**: done (records above, W9.6.0 to W9.6.4).  No
+program is evaluated on the erasure: the soundness and the invariants read
+the typed run only.  What stays untyped: the reader's frozen shim (W9.5b
+above), and `EState` (`Env`, `State.erase`, `aliasPath`/`memRef`) as an
+update's result and what the terms are read on (decision U1, W9.6.0
+record): an untyped `MObj` does not fix the heap typing, an allocation pair
+writes the local before the heap that types it, and `net`/`pay` read the
+intermediate global part, so an update cannot be applied element by
+element to a typed state; landing on a typed state (U2) costs a leaf 1.8×
+and restates every law over hypotheses.
 
 **Open items:**
 - The reduction's symbols over the typed state (decision 83): a scoped
