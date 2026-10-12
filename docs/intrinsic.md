@@ -4612,6 +4612,21 @@ the default targets (with the printer pins `Examples/ProofTree.lean`,
 `Examples/Tactics/Print.lean`, `Examples/Notation.lean`), clean;
 `check-orphans` (309 reachable), `check-doc-paths`; `sorry` count 19.
 
+## W9.7 plan (the last untyped parts)
+
+Asked by the user on 2026-10-12 ("put the types here as well, and let lean
+solkey outdated"): the reader's shim goes, and so does `EState` as an
+update's result.  The side-projects SolKey reader is left to break; it is
+not edited.  Warned before: U2 costs about 1.8× `holdsE`'s work on a leaf
+(W9.6.0); the gates stay the W9 table, and a row that fails is reported
+with its leaf class, not hidden.
+
+| Wave | Lanes | Work |
+|---|---|---|
+| W9.7.1 | `shim` ‖ `lands` | **shim**: delete `Surface.Tm`/`MAddr`/`Upd`/`UpdElem` and their lemmas, `Tm.erase`/`Upd.erase`, `Delab.tr` and helpers, the `NFml` stub, `RuleSyntax`'s untyped `tm{}`/`ppTerm`/`delabTm` (the rule table prints scoped terms); AGENTS.md's reader paragraph says the reader is outdated.  **lands**: `Tm.eval`/`Rhs.eval` over `State C Γ` (`State.globE`, `TEnv.get` erased), `Upd.globT`/`Held.OKT`/`Upd.Lands`/`Upd.afterT` (W9.6.0's sketch), `holds`' `.upd` clause by `afterT`, `holds_upd_iff` against the old clause while it exists |
+| W9.7.2 | `laws` ‖ `close` | the update laws (`Graft`, `UpdRuleScoped`, `RewritePast`, `TermLaws`, `UpdateRules`, `RewriteScoped`, `SeqRewrite`, `StatePartsScoped`, `LeafDerive`, …) over `Lands`: a typed substitution lemma and `Lands` composition; `CloseScoped` reads `holds` by `Lands` (no `holdsE`), `RelB`/`RelU`/`peelS`/`redState` on the typed state, `Counterexample`'s `State.lift?` |
+| W9.7.3 | master | delete `EState`, `Env` (if `TEnv.erase` has no other reader), `Upd.apply`/`UpdElem.write`, `holdsE`, `Erased.lean`; gates; review |
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
