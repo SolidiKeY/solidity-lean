@@ -94,11 +94,9 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   simp only [CloseS.holds_upd, CloseS.applyV_snoc, CloseS.applyV_nil, CloseS.elem_storage,
     CloseS.glob_storage, CloseS.elem_local, CloseS.rhs_val, CloseS.eval_save, CloseS.eval_find,
     CloseS.eval_lit, CloseS.eval_storage, CloseS.eval_field, CloseS.eval_root, Modality.wp_bind,
-    Modality.wp_ok, CloseS.holds_bind, CloseS.holds_eqD, CloseS.landedRest_def, CloseS.Landed.globE_eq,
-    CloseS.Landed.loc_eq,
-    State.globE_push,
-    CloseS.loc_push, CloseS.eval_pvV, CloseS.denote_pvV, CloseS.denote_lit, CloseS.push_here,
-    CloseS.set_here_here]
+    Modality.wp_ok, CloseS.holds_bind, CloseS.holds_eqD, CloseS.landedRest_def,
+    CloseS.Landed.globE_eq, CloseS.Landed.loc_eq, State.globE_push, CloseS.loc_push,
+    CloseS.eval_pvV, CloseS.set_here_here]
   rw [Modality.wp_box]
   intro τ hsave x y
   -- select on save, by hand: what did the write leave at `alice`?

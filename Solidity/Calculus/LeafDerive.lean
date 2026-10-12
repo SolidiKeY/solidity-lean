@@ -327,8 +327,7 @@ def _root_.Solidity.Upd.pushSplit (m : Modality) {Δ : Ctx} : Upd C Γ Δ → Fm
 and `x`, a state the storage write lands on (its global part `σ`'s with
 the storage `τ` written, `hx`, the same locals, `hl`). -/
 
-theorem keyFreeS_evalT {σ x : State C Γ} (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i)
-    (hg : x.globE.tx = σ.globE.tx) :
+theorem keyFreeS_evalT {σ x : State C Γ} (hl : ∀ {t : LTy} (i : Idx Γ t), x.getE i = σ.getE i) :
     (k : Tm C Γ .val) → k.keyFreeS = true → k.evalT x = k.evalT σ
   | .pvV i, _ => by simp only [Tm.evalT, hl i]
   | .app0 (.lit _), _ => rfl
@@ -371,12 +370,10 @@ theorem stable_evalS {σ x : State C Γ} {τ : Semantics.State} {r : Name} {P : 
     obtain ⟨i, hi, h⟩ := Res.bind_eq_ok.1 h
     obtain ⟨_, hc, he⟩ := Res.bind_eq_ok.1 h
     cases he
-    have htx : x.globE.tx = σ.globE.tx := by
-      rw [hx, withGlob_saveStorage hsv]
     rw [stable_evalS hsv hx hl q hp.1 h₀ fun hr => by
       obtain ⟨rest, hrest⟩ := hpre hr
       exact ⟨.at i :: rest, by simp only [hrest, List.append_assoc, List.cons_append,
-          List.nil_append]⟩, Res.ok_bind, keyFreeS_evalT hl htx k hp.2, hv, Res.ok_bind, hi,
+          List.nil_append]⟩, Res.ok_bind, keyFreeS_evalT hl k hp.2, hv, Res.ok_bind, hi,
       Res.ok_bind]
     rw [hx, Close.checkIndex_saveStorage_apart i hsv ?_, hc, Res.ok_bind]
     · rfl
@@ -475,8 +472,7 @@ theorem holds_push_alias {m : Modality} {E : Ty} {P : Tm C Γ .path} {R : RefTy}
     have h₂' : Upd.afterT m σ' (Upd.nil.snoc (.local i (.path (lastSlotS P)))) (holds · φ) := h₂
     rw [Upd.afterT_applyV] at h₂'
     have hlast := lastSlotS_eval hP hS hg' (fun j => (hl' j).trans rfl)
-    simp only [Upd.applyV, UpdElem.applyV, Rhs.evalT, pure_bind, bind_assoc, hlast, hv,
-      Res.ok_bind] at h₂'
+    simp only [Upd.applyV, UpdElem.applyV, Rhs.evalT, pure_bind, hlast, hv, Res.ok_bind] at h₂'
     refine h₂' σ'' (by show σ''.globE = σ'.globE; rw [hg']; exact hg) (fun j => ?_)
       (List.prefix_refl _)
     rw [hl j]

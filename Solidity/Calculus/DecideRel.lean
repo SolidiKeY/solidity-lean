@@ -810,7 +810,7 @@ theorem IdOKS.step (h : RelT σ ρ τ) {n : Nat}
       refine ⟨j, .lit (.bool true), by simp only [Tm.toLSM, hb], fun _ => ⟨n', ?_⟩,
         fun id hid => ?_⟩
       · simp only [Tm.evalT, State.memRefT_getE, he]
-      · simp only [Tm.evalT, State.memRefT_getE, he, pure, Except.pure, Except.ok.injEq] at hid
+      · simp only [Tm.evalT, State.memRefT_getE, he, Except.ok.injEq] at hid
         subst hid
         exact ⟨⟨_, rfl⟩, hn'⟩
     · cases hf
