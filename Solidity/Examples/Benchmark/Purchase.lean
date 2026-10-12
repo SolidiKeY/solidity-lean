@@ -1,4 +1,4 @@
-import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.NFmlClose
 import Solidity.Calculus.Surface

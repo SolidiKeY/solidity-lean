@@ -1,8 +1,9 @@
 import Solidity.Calculus.Symex
-import Solidity.Calculus.Close
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.ProofTree
-import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.DecideComplete
+import Solidity.Calculus.SurfaceSpec
+import Solidity.Calculus.TreeData
 import Solidity.Calculus.CloseScoped
 
 /-!
@@ -14,8 +15,7 @@ strategy and the closer as one kernel evaluation, the leaves it leaves
 the walk's own sequents.  This module has what that walk shares with
 the tactics that write it out: `Derive.fuel`, the steps `sol_derive`'s
 walk is given (`sol_prove`'s walk is bounded by `Seq.fuel`,
-`NFml.Derive.budget`), `Derive.eraseLeaf` (a scoped leaf erased, for the
-closers that still read the erasure: `Calculus/Closers.lean`'s), and
+`Derive.budget`), the leaf search of `sol_prove?` (`Derive.searchLeaf`), and
 `sol_derive`/`sol_derive?`, the strategy as one `apply` per rule.
 `sol_close` reads a scoped leaf without the erasure
 (`Calculus/CloseScoped.lean`).
@@ -34,76 +34,103 @@ def fuel : Nat := 5000
 
 end Derive
 
-/-! ## `sol_close` on a scoped leaf -/
+/-! ## The leaf search: `sol_prove?`'s tries
 
-/-- A formula valid with `x` free is valid under `∀ p x`: the erasure of a
-scoped leaf binds the parameters by `∀` (`cdl!`), today's leaf has them free. -/
-theorem _root_.Solidity.NFml.Valid.all_of_free {φ : Solidity.NFml C} (x : Var) (p : PrimTy)
-    (h : NFml.Valid φ) : NFml.Valid (.all x p φ) :=
-  fun _ _ _ => h _
-
-/-- Today's formula without its leading quantifiers: a scoped leaf's
-erasure with its parameters free, as today's leaves have them. -/
-def _root_.Solidity.NFml.stripAlls : Solidity.NFml C → Solidity.NFml C
-  | .all _ _ φ => φ.stripAlls
-  | φ => φ
-
-/-- A formula is valid where it is with its leading quantifiers' locals free. -/
-theorem _root_.Solidity.NFml.Valid.of_stripAlls : {φ : Solidity.NFml C} →
-    NFml.Valid φ.stripAlls → NFml.Valid φ
-  | .all x p φ, h => NFml.Valid.all_of_free x p (NFml.Valid.of_stripAlls (φ := φ) h)
-  | .tt, h | .eq _ _, h | .not _, h | .and _ _, h | .imp _ _, h
-  | .upd _ _ _, h | .havoc _, h | .anon _ _, h | .defined _, h => h
+`sol_prove?` runs the scoped `sol_prove` (`Calculus/ProvesDerive.lean`) and
+then tries each leaf it leaves, a scoped sequent, with the scoped leaf
+tactics (`leafTacs`), each try with its own heartbeats; the replay is
+`sol_prove` and each leaf's lines (`replayLines`). -/
 
 namespace Derive
 
 open Lean Elab Tactic Meta
 
-/-- Today's goal `Valid (∀ p x. … φ)` as `Valid φ`, its leading quantifiers'
-locals free, as today's leaves have them (`Valid.all_of_free`): the first
-`n` of them, every one where `n` is `none`. -/
-partial def stripAlls (g : MVarId) (n : Option Nat := none) : MetaM MVarId := do
-  if n == some 0 then return g
-  let ty ← instantiateMVars (← g.getType)
-  let_expr NFml.Valid C φ := ty | return g
-  let_expr Solidity.NFml.all _ x p φ' := φ | return g
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``NFml.Valid) C φ') (← g.getTag)
-  g.assign (mkAppN (mkConst ``NFml.Valid.all_of_free) #[C, φ', x, p, g'])
-  stripAlls g'.mvarId! (n.map (· - 1))
+/-- The steps `sol_prove`'s walk is given, down a path and in all. -/
+def budget : Nat := 20000
 
-/-- A scoped leaf `Valid ψ` with no modality left, as today's goal: the
-leaf taken by `Fml.posB` (checked by the kernel), its erasure computed
-(`Solidity.normValid`), the goal `Solidity.Valid` of it (`Valid.of_erase`),
-the parameters' quantifiers stripped (`stripAlls`), an explicit `∀` kept
-with its range (`Symex.paramCount`, decision 28).  `tac` names the tactic
-in the error. -/
-def eraseLeaf (tac : String) (g : MVarId) (C ψ : Expr) : TacticM MVarId := do
-  let bool := mkConst ``Bool
-  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-  let nilVar := mkApp (mkConst ``List.nil [0]) (mkConst ``Var)
-  let hpTy := mkApp3 (mkConst ``Eq [1]) bool
-    (mkApp2 (mkConst ``Option.isSome [0]) (mkApp (mkConst ``List [0]) (mkConst ``Var))
-      (mkAppN (mkConst ``Fml.posB) #[C, nilCtx, ψ, nilVar])) (mkConst ``Bool.true)
-  let hp ← try NFml.Derive.kernelLemma hpTy (mkApp2 (mkConst ``Eq.refl [1]) bool (mkConst ``Bool.true))
-    catch _ => throwError "{tac}: the leaf is not one its erasure closes (`Fml.posB`): a \
-      hidden binder under a negation, a precondition or a modality, or named twice, or what \
-      is negated or assumed is not first-order (an update, a modality or a `havoc` there)"
-  let erased := mkAppN (mkConst ``Fml.erase) #[C, nilCtx, nilVar, ψ]
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``NFml.Valid) C erased) (← g.getTag)
-  g.assign (mkAppN (mkConst ``Valid.of_erase) #[C, ψ, hp, g'])
-  let g' ← Solidity.normValid g'.mvarId!
-  stripAlls g' (← Symex.paramCount ψ)
+/-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
+lines: `sol_leaf` (the sequent as `⊨ ψ`, `Calculus/ProvesDerive.lean`), then
+`sol_decide` on the scoped leaf (its layout read from `wt(storage)`), then
+`sol_close` and `sol_spec_close` (`Calculus/CloseScoped.lean`).  A leaf past
+the closer's bounds (`small = false`) gets no step that reduces it, only
+`sol_close` and `sol_spec_close`, whose `simp`, `omega` and `grind` heed
+heartbeats. -/
+def leafTacs (small : Bool := true) : Array (Array String) :=
+  (if small then #[#["sol_leaf", "sol_decide"]] else #[]) ++
+    #[#["sol_leaf", "sol_close"], #["sol_leaf", "sol_spec_close"]]
 
-/-- Run today's closer `stx` on a scoped leaf: the leaf erased
-(`eraseLeaf`), then `stx` itself on today's goal, where today's tactic
-takes it.  Throws `unsupportedSyntax` on a goal that is not scoped, so
-today's tactic runs there. -/
-def onErased (tac : String) (stx : Syntax) : Tactic := fun _ => withMainContext do
-  let g ← getMainGoal
-  let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
-  Symex.reporting g do
-    replaceMainGoal [← eraseLeaf tac g C ψ]
-    evalTactic stx
+/-- The first of `leafTacs` that closes the leaf `l`, with the raw
+heartbeats it used; `none` when none does.  Each try runs with its own
+heartbeats and its state rolled back when it fails.  A leaf past the
+closer's bounds (`fits`, the scoped leaf's `Seq.goalFits`,
+`Calculus/ProvesDerive.lean`) is not reduced. -/
+def searchLeaf (l : MVarId) (fits : MVarId → MetaM Bool) :
+    TacticM (Option (Array String × Nat)) := do
+  let env ← getEnv
+  for src in leafTacs (← fits l) do
+    let t ← src.mapM fun line =>
+      match Parser.runParserCategory env `tactic line with
+      | .ok stx => pure (⟨stx⟩ : TSyntax `tactic)
+      | .error e => throwError "sol_prove?: {e}"
+    let s ← saveState
+    let h0 ← IO.getNumHeartbeats
+    let ok ← tryCatchRuntimeEx
+      (withCurrHeartbeats do
+        setGoals [l]
+        for x in t do Term.withoutErrToSorry (withoutRecover (evalTactic x))
+        pure (← getUnsolvedGoals).isEmpty)
+      fun _ => pure false
+    if ok then return some (src, (← IO.getNumHeartbeats) - h0)
+    s.restore
+  return none
+
+/-- What `proveSearch` found: each leaf's name and lines (`sorry` for one
+no try closes), the leaves no try closes, and the raw heartbeats the replay
+needs, the walk's and the closing tries' (the failed tries are not
+replayed). -/
+structure Search where
+  found : List (Lean.Name × Array String)
+  open_ : List MVarId
+  heartbeats : Nat
+
+/-- The walk `prove` on `g`, then `searchLeaf` on each leaf it leaves, the
+open ones left as goals; with `stopAtOpen`, the search ends at the first
+open leaf.  The one loop of `#solkey_derive?`. -/
+def proveSearch (g : MVarId) (prove : MVarId → MetaM (List MVarId))
+    (fits : MVarId → MetaM Bool) (stopAtOpen : Bool := false) : TacticM Search := do
+  let h0 ← IO.getNumHeartbeats
+  let leaves ← prove g
+  let mut hb : Nat := (← IO.getNumHeartbeats) - h0
+  let mut found : List (Lean.Name × Array String) := []
+  let mut open_ : List MVarId := []
+  for l in leaves do
+    let name ← l.getTag
+    match ← searchLeaf l fits with
+    | some (t, h) =>
+      found := found ++ [(name, t)]
+      hb := hb + h
+    | none =>
+      open_ := open_ ++ [l]
+      found := found ++ [(name, #["sorry"])]
+      if stopAtOpen then break
+  return { found, open_, heartbeats := hb }
+
+/-- Whether a replay of `hb` raw heartbeats fits in one declaration's
+`maxHeartbeats`.  Each try ran with heartbeats of its own; the replay runs
+them all in one declaration, so their sum is what it needs, up to the
+elaboration of the statement and the `case` lines. -/
+def replayFits (hb : Nat) : CoreM Bool := do
+  let max := (← read).maxHeartbeats
+  return max == 0 || hb ≤ max
+
+/-- The replay of a `sol_prove` whose leaves are closed by `found`:
+`sol_prove`, then each leaf's lines, under `case leafᵢ =>` when there are
+several. -/
+def replayLines (found : List (Lean.Name × Array String)) : Array String :=
+  match found with
+  | [(_, body)] => #["sol_prove"] ++ body
+  | _ => found.foldl (fun ls (n, body) =>
+      (ls.push s!"case {n} =>") ++ body.map ("  " ++ ·)) #["sol_prove"]
 
 end Derive
 

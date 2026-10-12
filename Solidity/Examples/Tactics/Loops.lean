@@ -1,7 +1,7 @@
 import Solidity.Tools.Run
 import Solidity.Tools.Inspect
 import Solidity.Tools.ProofTree
-import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.Chains

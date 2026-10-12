@@ -1,4 +1,4 @@
-import Solidity.Calculus.Rewrite
+import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.RewriteSyntax

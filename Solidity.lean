@@ -112,7 +112,6 @@ import Solidity.Calculus.RuleShapes
 import Solidity.Calculus.RuleKit
 import Solidity.Calculus.PrintedRules
 import Solidity.Calculus.TermRules
-import Solidity.Calculus.TheoryRewrite
 import Solidity.Calculus.NFmlLogic
 import Solidity.Calculus.Hyp
 import Solidity.Calculus.TacticSyntax
@@ -134,7 +133,6 @@ import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideRel
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.NFmlDerive
 import Solidity.Calculus.Problem
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.RewriteChains
@@ -146,7 +144,6 @@ import Solidity.Calculus.ChainBranches
 import Solidity.Calculus.Literals
 import Solidity.Calculus.TermTaclets
 import Solidity.Calculus.TermLib
-import Solidity.Calculus.Rewrite
 import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays
 import Solidity.Examples.Chains.StorageDelete

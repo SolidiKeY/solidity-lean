@@ -1295,12 +1295,12 @@ open Lean Meta in
 def nodupLemma (xs : Expr) : MetaM Expr := do
   let fst := mkApp2 (mkConst ``Prod.fst [0, 0]) (mkConst ``Var) (mkConst ``PrimTy)
   let p ← mkDecide (← mkAppM ``List.Nodup #[← mkAppM ``List.map #[fst, xs]])
-  NFml.Derive.kernelLemma (← mkEq p (mkConst ``Bool.true)) (← mkEqRefl (mkConst ``Bool.true))
+  Derive.kernelLemma (← mkEq p (mkConst ``Bool.true)) (← mkEqRefl (mkConst ``Bool.true))
 
 open Lean Meta in
 /-- `b = true` for a closed `Bool` term `b`, checked by the kernel. -/
 def trueLemma (b : Expr) : MetaM Expr := do
-  NFml.Derive.kernelLemma (← mkEq b (mkConst ``Bool.true)) (← mkEqRefl (mkConst ``Bool.true))
+  Derive.kernelLemma (← mkEq b (mkConst ``Bool.true)) (← mkEqRefl (mkConst ``Bool.true))
 
 open Lean Elab Tactic Meta in
 /-- `syn` on the body, the parameters known to return (`LFml.syn_valid_alls`). -/
@@ -1460,14 +1460,14 @@ theorem LFml.forall_layout {L : List (Name × Ty)} {φ : LFml} (h : ∀ σ, φ.h
     ∀ σ, LayoutOk L σ → φ.holds σ := fun σ _ => h σ
 
 /-- The closer on a scoped leaf's reduction (`Fml.reduceS`, decision 81):
-within the bound `NFml.Derive.elimSize` (`Calculus/Closer.lean`) the erased
+within the bound `Decide.elimSize` (`Calculus/Closer.lean`) the erased
 route keeps too, and with the layout `L` a `wt(storage)` premise gives
 (`Fml.layoutS`, proposal 100; `[]` without one): a typed state's storage is
 typed but not canonical (`LayoutOk` asks `SVal.canonB` of each root;
 `SVal.map`'s default is any value of its type), so the layout comes from
 the premise, not from the typed state. -/
 def LFml.closeS (L : List (Name × Ty)) (φ : LFml) : Bool :=
-  (φ.fits NFml.Derive.elimSize).isSome && LFml.close L φ
+  (φ.fits Decide.elimSize).isSome && LFml.close L φ
 
 /-- **The closer, on a scoped leaf's reduction**: what it accepts holds in
 every state that holds the layout. -/

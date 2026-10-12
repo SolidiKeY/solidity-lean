@@ -239,9 +239,9 @@ def leafQuoteS (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ) (
   | some true => some []
   | _ => some [SLeaf.quote c np H φ]
 
-/-- The steps the walk is given, down a path and in all (today's
-`Derive.budget`). -/
-def fuel : Nat := NFml.Derive.budget
+/-- The steps the walk is given, down a path and in all
+(`Derive.budget`). -/
+def fuel : Nat := Derive.budget
 
 /-- **`sol_prove`'s check**: the leaves the walk leaves, none when every
 leaf closes.  A split's branch is refuted as its leaf is read. -/
@@ -517,7 +517,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
     let someLs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``List [0]) leafTy) ls
     let type := mkApp3 (mkConst ``Eq [1]) resTy
       (mkAppN (mkConst ``residue) #[C, R, Γ, H, φ]) someLs
-    NFml.Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
+    Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
   let assignWith (ls h : Expr) (hl : Expr) : MetaM Unit :=
     g.assign (mkAppN (mkConst ``Proves.of_residue) #[C, R, Γ, H, φ, ls, h, hl])
   let nil := mkApp (mkConst ``List.nil [0]) leafTy
@@ -561,10 +561,10 @@ def prove (g : MVarId) (C R Γ H φ : Expr) : MetaM (List MVarId) := do
   return goals.toList
 
 /-- `leafFitsS` on a leaf goal `H ⊢ φ` the walk left, run as compiled
-code; today's `goalFits` on any other goal. -/
+code; `true` on any other goal. -/
 def goalFits (l : MVarId) : MetaM Bool := do
   let ty ← instantiateMVars (← l.getType)
-  let_expr Proves C _ Γ₀ Γ H φ := ty | NFml.Derive.goalFits l
+  let_expr Proves C _ Γ₀ Γ H φ := ty | return true
   if ty.hasFVar || ty.hasMVar || !(← whnfR Γ₀).isAppOf ``List.nil then return true
   let φe ← Symex.evaluable φ
   unsafe evalExpr Bool (mkConst ``Bool) (mkAppN (mkConst ``leafFitsS) #[C, Γ, H, φe])

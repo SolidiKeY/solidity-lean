@@ -2,7 +2,7 @@ import Solidity.Tools.ProofTree
 import Solidity.Tools.Inspect
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Closers
-import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.ProvesDerive
 
 /-!
 # The proof tree, pinned

@@ -3706,14 +3706,4 @@ def elimSize : Nat := 8000
 
 end Decide
 
-namespace NFml.Derive
-
-/-- `Decide.closeSize`, under the closer's name. -/
-abbrev closeSize : Nat := Decide.closeSize
-
-/-- `Decide.elimSize`, under the closer's name. -/
-abbrev elimSize : Nat := Decide.elimSize
-
-end NFml.Derive
-
 end Solidity

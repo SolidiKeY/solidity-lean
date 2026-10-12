@@ -62,7 +62,7 @@ def applyValid (tac : String) (lem : Lean.Term) (unchanged : Option MessageData 
     if (← instantiateMVars (← g''.getType)) == before then throwError "{tac}: {msg}"
   replaceMainGoal [g'']
 
-namespace NFml.Derive
+namespace Derive
 
 open Lean Meta in
 /-- A lemma `type` proved by `value`, checked by the kernel now, as
@@ -71,7 +71,7 @@ def kernelLemma (type value : Expr) : MetaM Expr := do
   let n ← withOptions (Elab.async.set · false) <| mkAuxLemma [] type value
   return mkConst n
 
-end NFml.Derive
+end Derive
 
 /-! ## The syntax -/
 

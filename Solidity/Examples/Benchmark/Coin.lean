@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Surface

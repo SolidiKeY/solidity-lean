@@ -1,4 +1,4 @@
-import Solidity.Syntax
+import Solidity.Syntax.Quote
 import Solidity.Update
 
 /-!
@@ -18,6 +18,7 @@ namespace Solidity
 open Semantics
 
 deriving instance Lean.ToExpr for Semantics.PrimVal
+
 
 section Quote
 open Lean (mkAppN mkConst toExpr)
@@ -126,11 +127,6 @@ def NFml.quote : NFml C → Lean.Expr
   | .all x p φ => mkAppN (mkConst ``NFml.all) #[c, toExpr x, toExpr p, NFml.quote φ]
   | .anon xs φ => mkAppN (mkConst ``NFml.anon) #[c, toExpr xs, NFml.quote φ]
 
-/-- The expression `Lean.mkConst n []`: the `c` a quoter takes for the
-contract named `n`, when the quoter runs as compiled code (`evalExpr`). -/
-def quoteConstName (n : Lean.Name) : Lean.Expr :=
-  mkAppN (mkConst ``Lean.mkConst)
-    #[toExpr n, mkAppN (mkConst ``List.nil [0]) #[mkConst ``Lean.Level]]
 
 end Quote
 
