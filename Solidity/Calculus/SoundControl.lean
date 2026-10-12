@@ -112,7 +112,7 @@ theorem sendStep_sound (k : Nat) (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uin
 theorem holds_isBool (se : Simple C Γ .bool) (b : Bool) :
     holds σ (Fml.isBool se.lower b) ↔ se.evalT σ = b := by
   show Theory.StValue.Equiv _ _ ↔ _
-  rw [Simple.denote_lower se σ.erase (Simple.evalT_erase σ se)]
+  rw [Simple.denote_lowerT σ se]
   show Theory.StValue.Equiv (.prim _) (.prim (.bool b)) ↔ _
   rw [Theory.StValue.Equiv.prim_iff]
   exact ⟨fun h => by injection h with h; injection h, fun h => by rw [← h]; rfl⟩

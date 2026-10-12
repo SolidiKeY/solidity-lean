@@ -15,20 +15,6 @@ open Semantics (Value SVal MVal Seg Halt Res)
 
 variable {C : Contract}
 
-section Mem
-
-variable {Γ : Ctx} {m : Modality} (σ : EState C Γ)
-
-theorem MSrc.mval_noPanic {T : Ty} (r : MSrc C Γ T) : NoPanic (r.mval σ) := by
-  cases r with
-  | val v => exact NoPanic.bind (Val.eval_noPanic σ v) fun _ _ => NoPanic.pure _
-  | ref p =>
-    simp only [MSrc.mval]
-    exact NoPanic.bind (MPath.mval_noPanic σ p) fun _ _ =>
-      NoPanic.bind (Semantics.MVal.asRef_noPanic _) fun _ _ => NoPanic.pure _
-
-end Mem
-
 open Solidity (Modality Srt Op0 Op1 Op2 Op3)
 
 section Mem
@@ -88,13 +74,11 @@ theorem rebindMemStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.mem R)) (r : MRh
     simp only [rebindMemStep] at hs
     split at hs
     · cases hs
-      refine sound_allocCopy σ i _ _ ?_
-      simp only [MRhs.eval, Tm.eval, Op2.eval, Op0.eval, SPath.eval_lower, bind_assoc, pure_bind]
+      exact sound_allocCopy σ i _ _ (allocCopy_copy σ sp hm)
     · cases hs; exact sound_memCopyCapture σ i sp hm _
   | newArr n h =>
     cases hs
-    refine sound_allocCopy σ i _ _ ?_
-    simp only [MRhs.eval, Tm.eval, Op1.eval, Simple.eval_lower, bind_assoc, pure_bind]
+    exact sound_allocCopy σ i _ _ (allocCopy_newArr σ n h)
 
 /-- **A memory reference written** (`memRefStep`). -/
 theorem memRefStep_sound (k : Nat) {R : RefTy} (l : MLoc C Γ (.ref R))

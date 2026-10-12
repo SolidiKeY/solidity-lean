@@ -42,10 +42,11 @@ when `r` allocates.  So every type has a value
 (`LTy.tdenote_nonempty`) and the binder is universal under both modalities
 (`Modality.forallB`).
 
-Before the formulas: the term and update lemmas on the erasure that the
-rules' soundness (`Calculus/Sound*.lean`) reads, each typed step read
-on the erasure (`Semantics/StepErase.lean`) being what relates the
-typed run to `Update.lean`'s terms.
+The rules' soundness (`Calculus/Sound*.lean`) relates the typed run to
+`Update.lean`'s terms directly: a statement's typed step agrees with its
+update applied to the erasure (`TRes.Agrees`, `Calculus/SoundArms.lean`),
+each lowered expression's term reading what the typed evaluator returns
+(`Calculus/LowerRun.lean`); no program evaluator of the erasure is between.
 -/
 
 namespace Solidity
@@ -177,24 +178,6 @@ def _root_.Solidity.Modality.afterC {α : Type} (m : Modality) (p : α → Prop)
 def EState.anon {Γ : Ctx} (σ : EState C Γ) (xs : List ((t : LTy) × Idx Γ t))
     (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : EState C Γ :=
   xs.foldl (fun τ x => τ.setLocal x.2 (b x)) σ
-
-/-! ## Rules -/
-
-section Rules
-
-variable {Γ Γ₁ Γ₀ : Ctx} {m : Modality}
-
-/-- A simple value lowered reads as it evaluates. -/
-theorem Simple.eval_lower {p : PrimTy} (s : Simple C Γ p) (σ : EState C Γ) :
-    s.lower.eval σ = s.eval σ := by
-  cases s <;> rfl
-
-/-- A simple value denotes what it evaluates to. -/
-theorem Simple.denote_lower {p : PrimTy} (se : Simple C Γ p) (σ : EState C Γ) {v : Value}
-    (h : se.eval σ = .ok v) : se.lower.denote σ = .prim v := by
-  cases se <;> cases h <;> rfl
-
-end Rules
 
 /-! ## Formulas -/
 

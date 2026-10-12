@@ -2,7 +2,6 @@ import Solidity.Calculus.Logic
 import Solidity.Calculus.NoPanic
 import Solidity.Calculus.ProvesSound
 import Solidity.Semantics.Ends
-import Solidity.Semantics.StepErase
 import Solidity.Calculus.LowerRun
 import Solidity.Semantics.Callback
 
@@ -21,10 +20,11 @@ typing (`Stmt.runSt_ext`, from `Out.ext`), which an update's reading asks.
 An update rule needs that its update, applied to the erasure, ends in the
 erasure of the state the typed run ends in, and halts where the run halts
 under the diamond (`Premise.sound_update`); the update is a term of
-`Update.lean`, so an arm states its equation against what the statement's
-typed step erases to (`StepAgrees`, `Semantics/StepErase.lean`:
-`Premise.sound_update_erased`).  Also here: the term lemmas on the erased
-state the arms read (`Val.eval_lower` and kin, `Res.Sim`).
+`Update.lean`, so an arm states that the statement's typed step agrees with
+the update applied to the erasure (`TRes.Agrees`,
+`Premise.sound_update_typed`), from the lowered expressions' agreements
+(`Calculus/LowerRun.lean`).  Also here: outcomes alike up to the halt
+(`Res.Sim`, `TRes.Sim`).
 -/
 
 namespace Solidity
@@ -96,90 +96,13 @@ theorem Upd.apply_noPanic (σ₀ : EState C Γ) : {Δ : Ctx} → (U : Upd C Γ �
 
 end NoPanic
 
-/-! ## A lowered expression reads what it evaluates to -/
-
-section Lower
-
-variable {Γ : Ctx} (σ : EState C Γ)
-
-/-- A key's term reads the word the key is hashed as (`Term.keyAt_eval`). -/
-theorem Tm.keyAt_eval (k : PrimTy) (t : Tm C Γ .val) {β : Type} (f : Int → Res β) :
-    ((Tm.keyAt k t).eval σ >>= fun v => v.asInt >>= f) =
-      (t.eval σ >>= fun v => v.keyAt k >>= f) := by
-  cases k with
-  | uint | int => rfl
-  | bool =>
-    simp only [Tm.keyAt, Tm.eval, Op3.eval, Op0.eval]
-    cases t.eval σ with
-    | error _ => rfl
-    | ok v => cases v with
-      | int _ => rfl
-      | bool b => cases b <;> rfl
-
-mutual
-
-theorem SPath.eval_lower : {T : Ty} → (b : SPath C Γ T) → b.lower.eval σ = b.resolve σ
-  | _, .alias _ => rfl
-  | _, .loc l => Loc.eval_lower l
-
-theorem Loc.eval_lower : {T : Ty} → (l : Loc C Γ T) → l.lower.eval σ = l.resolve σ
-  | _, .root .. => rfl
-  | _, .field b f _ => by
-    simp only [Loc.lower, Tm.eval, Op1.eval, Loc.resolve, SPath.eval_lower b]
-  | _, .index (k := k) _ b i => by
-    simp only [Loc.lower, Tm.eval, Op2.eval, Loc.resolve, SPath.eval_lower b, bind_assoc]
-    simp only [Tm.keyAt_eval, Val.eval_lower i]
-
-theorem MPath.eval_lower : {T : Ty} → (b : MPath C Γ T) →
-    b.lower.eval σ = (do (← b.mval σ).asRef)
-  | _, .var i _ => by
-    simp only [MPath.lower, Tm.eval, MPath.mval, bind_assoc, pure_bind]
-    cases memRef σ i <;> rfl
-  | _, .loc l => by
-    simp only [MPath.lower, Tm.eval, Op2.eval, Op0.eval, MPath.mval, ← MLoc.eval_lower l,
-      bind_assoc, pure_bind]
-
-theorem MLoc.eval_lower : {T : Ty} → (l : MLoc C Γ T) →
-    (do readAddr σ.glob (← l.lower.eval σ)) = l.read σ
-  | _, .field b f _ => by
-    simp only [MLoc.lower, Tm.eval, Op1.eval, MLoc.read, MPath.eval_lower b, bind_assoc, pure_bind]
-    rfl
-  | _, .index _ b i => by
-    simp only [MLoc.lower, Tm.eval, Op2.eval, MLoc.read, MPath.eval_lower b, Val.eval_lower i,
-      bind_assoc, pure_bind]
-    rfl
-
-theorem Val.eval_lower : {p : PrimTy} → (v : Val C Γ p) → v.lower.eval σ = v.eval σ
-  | _, .simple s => Simple.eval_lower s σ
-  | _, .read l => by
-    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, Loc.eval_lower l, pure_bind]
-  | _, .binop _ _ _ a b => by
-    simp only [Val.lower, Tm.eval, Op2.eval, Val.eval, Val.eval_lower a, Val.eval_lower b]
-  | _, .unop _ _ _ a => by
-    simp only [Val.lower, Tm.eval, Op1.eval, Val.eval, Val.eval_lower a]
-  | _, .ternary c a b => by
-    simp only [Val.lower, Tm.eval, Op3.eval, Val.eval, Val.eval_lower c, Val.eval_lower a,
-      Val.eval_lower b]
-  | _, .readMem l => by
-    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, ← MLoc.eval_lower l, bind_assoc,
-      pure_bind]
-  | _, .len b _ => by
-    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, SPath.eval_lower b, pure_bind]
-  | _, .mlen b _ => by
-    simp only [Val.lower, Tm.eval, Op2.eval, Op0.eval, Val.eval, MPath.eval_lower b, bind_assoc,
-      pure_bind]
-
-end
-
-end Lower
-
 /-! ## Outcomes a modality cannot tell apart
 
 A rule that captures a part evaluates it first, where the statement may read
 another part first (`sp[e]` with `sp` an alias: the alias first, then `e`).
 The two runs then halt alike but maybe not with the same halt; a modality
 tells a halt only from a panic (`Modality.afterRunTR`), and an expression
-never panics (`Val.eval_noPanic`), so the two are alike (`Res.Sim`, today's
+never panics (`Tm.eval_noPanic`), so the two are alike (`Res.Sim`, today's
 `SameOk` with no fresh names). -/
 
 section Sim
@@ -208,29 +131,6 @@ theorem Res.Sim.bind {r r' : Res α} (h : Res.Sim r r') (f : α → Res β) :
     | error e' => exact h
 
 end Sim
-
-/-! ## Expressions never panic -/
-
-section NoPanicE
-
-variable {Γ : Ctx} (σ : EState C Γ)
-
-theorem Val.eval_noPanic {p : PrimTy} (v : Val C Γ p) : NoPanic (v.eval σ) := by
-  have h := Tm.eval_noPanic σ v.lower
-  rw [Val.eval_lower] at h
-  exact h
-
-theorem SPath.resolve_noPanic {T : Ty} (b : SPath C Γ T) : NoPanic (b.resolve σ) := by
-  have h := Tm.eval_noPanic σ b.lower
-  rw [SPath.eval_lower] at h
-  exact h
-
-theorem Loc.resolve_noPanic {T : Ty} (l : Loc C Γ T) : NoPanic (l.resolve σ) := by
-  have h := Tm.eval_noPanic σ l.lower
-  rw [Loc.eval_lower] at h
-  exact h
-
-end NoPanicE
 
 open Solidity (Modality)
 
@@ -853,11 +753,10 @@ end ShapesSim
 /-! ## An update, through its erasure
 
 An update rule's update is a term of `Update.lean`, read on the erasure, so
-what it needs of the typed run (`Premise.sound_update`) follows from its
-statement's typed step read on the erasure (`StepAgrees`,
-`Semantics/StepErase.lean`): the update ends where what the step
-erases to ends, up to the halt, and the typed run does not diverge under the
-diamond.  A typed `diverge` agrees with any untyped outcome, so under the
+what it needs of the typed run (`Premise.sound_update`) follows from the
+statement's typed step agreeing with it (`TRes.Agrees`, the erased state, the
+same `revert` or `panic`): the update ends where the step ends, up to the
+halt, and the typed run does not diverge under the diamond.  A typed `diverge` agrees with any untyped outcome, so under the
 diamond the arm shows that it does not happen (no update arm's statement
 loops; a push at the bound is exhausted, `TRun.push_nd`, which agrees with
 anything too and which both modalities accept). -/
@@ -914,24 +813,6 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
       | diverge => exact ⟨nofun, fun hm _ => absurd ht (hd hm)⟩
       | exhausted => exact ⟨nofun, fun _ hx => absurd rfl hx⟩
 
-/-- **An update, through the erasure, up to the halt**, given the statement's
-step read on the erasure. -/
-theorem Premise.sound_updateSim_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
-    {u : EState C Γ → Res (EState C Γ')} (ha : StepAgrees t u) (σ : State C Γ)
-    (hs : Res.Sim (U.apply σ.erase) (u σ.erase))
-    (hd : m = .diamond → (s.run σ).NoDiv) (ht : ∀ σ : State C Γ, s.run σ = t σ := by
-      intro _; rfl) : Premise.Runs m s (.update U) σ :=
-  Premise.sound_updateSim_agrees σ ((ht σ).symm ▸ ha σ) hs hd
-
-/-- **An update, through the erasure**: an update that ends as the
-statement's typed step does on the erasure (`StepAgrees`). -/
-theorem Premise.sound_update_erased {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
-    {u : EState C Γ → Res (EState C Γ')} (ha : StepAgrees t u) (σ : State C Γ)
-    (hs : U.apply σ.erase = u σ.erase)
-    (hd : m = .diamond → (s.run σ).NoDiv) (ht : ∀ σ : State C Γ, s.run σ = t σ := by
-      intro _; rfl) : Premise.Runs m s (.update U) σ :=
-  Premise.sound_updateSim_erased ha σ (hs ▸ Res.Sim.refl _) hd ht
-
 /-- **An update, against the typed run, up to the halt**: an update that
 ends, up to the halt (`Res.Sim`), as what the statement's typed step agrees
 with on the erasure (`X`). -/
@@ -959,21 +840,6 @@ theorem holds_conj {σ : State C Γ} :
     show holds σ φ ∧ holds σ (Fml.conj (ψ :: l)) ↔ _
     rw [holds_conj (ψ :: l)]
     simp only [List.mem_cons, forall_eq_or_imp]
-
-/-- **Labelled goals, through the erasure**: the formulas `fs`, then the rest
-after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas holding,
-the statement's step on the erasure ends as one of the updates, up to the
-halt. -/
-theorem Premise.sound_cases_erased {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
-    {t : TStep C Γ Γ} {u : EState C Γ → Res (EState C Γ)} (ha : StepAgrees t u) (σ : State C Γ)
-    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) (u σ.erase))
-    (hd : m = .diamond → (s.run σ).NoDiv) (ht : ∀ σ : State C Γ, s.run σ = t σ := by
-      intro _; rfl) : Premise.Sound m s (.cases fs us) σ := by
-  intro Γ₁ Γ₀ ω κ φ hp
-  have hp' := (holds_conj _).1 hp
-  obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
-  exact (Premise.sound_updateSim_erased ha σ hs hd ht).sound ω κ φ
-    (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
 
 /-- **Labelled goals, against the typed run**: the formulas `fs`, then the
 rest after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas
