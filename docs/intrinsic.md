@@ -6108,6 +6108,116 @@ lane).
   `ChainKit`, `Chains`, `LeafDerive`, `Derive`, `ProvesDerive`,
   `WalkSyntax`, `FunContract`, `SurfaceSpec`, `Problem`, `Spec`.
 
+### W9.8.3d chain record (2026-10-12, branch `w98-chain`)
+
+The laws finished and the chain modules ported over the typed terms, up to
+the closer lane's modules; then the examples that do not import them.
+
+**`Calculus/TermLaws.lean`**, finished:
+- **Frame laws** (`TermTaclet.RefLaw`: `findOnSaveFrame`, `findOnDelAtValue`,
+  `findOnDelAtFrame`, `findOnPushFrame`, `findOnPopFrame`, `lenOnSaveFrame`,
+  `lenOnDelAtFrame`, the binders of their `TermTaclet` twins).  A delete, a
+  push and a pop are `Storage.save` at their reference (`Storage.delete_save`,
+  `push_save`, `pop_save`), so one frame lemma covers them
+  (`Storage.find_save_frame`, `len_save_frame`), a path shape's divergence
+  read as `Path.Diverges` (`Path.diverges_of_erase`).  Exact at the eval level
+  (`RefLaw.exact`), covered where the update holds the operation
+  (`Upd.coversRef`, `Tm.onSpine`).
+- **Member-wise reads of a write**: `SRef.underAt`, `Storage.viewAt`,
+  `Tm.unshift` (a member path back to a path from the root), `Tm.base`
+  (`saveIn(select(s, r), p, v)` is `save(s, r.p, v)` seen from `r`),
+  `Tm.base?`, `Tm.sameBase`; `Upd.coversLit` reads a literal law's write
+  through them.
+- **Memory laws** (`EvalLaw`): `readOnWrite`, `readWriteDifferent[Identity]`,
+  `readOnWriteIdentity` on the typed heap's get/set (`Heap.readAddr_writeAddr_same`,
+  `_apart`, `Tm.apart?`); `readAddEqual`, `readAddDifferent[Identity]` on the
+  erasure of an allocation (`Heap.readAddr_erase`, `Heap.allocDefault_erase`,
+  `allocDefault_heapExt`, `copyStToM_default_readPath`): an address whose
+  object is older than the memory read (`Tm.boundedIn`, `Tm.onSpine_grows`:
+  the typing only grows along a memory spine) reads what it read, and one at
+  a path below the fresh root (`Tm.freshPath?`, `Srt.FreshRead`) whose
+  declared type is a primitive reads its default; `findCopyMem`,
+  `findCopyMemIn` (the plain read by `Tm.base?`) and `readCopySt` on the
+  erasure of a copy (`SVal.copyStToM_erase`, `MVal.copyMem_erase`,
+  `Close.copyStToM_member`, `Close.copyMem_member`, `SVal.overlay_erase`).
+  Each is exact past its anchor (`LawAnchor`: the memory a read reads, or the
+  storage a `find` reads, `Tm.lawAnchor?`), covered where the update holds it
+  (`Upd.coversEval`: `holdsMem` or `holdsWrite`).  A typed `Tm.boundedIn` needs
+  no fresh path for an identity read out of a memory: the reference a typed
+  read returns is below that memory's typing.
+- `LawCov.covered`, `.ref`, `.eqv`, `.eval` beside W9.8.3c's.
+
+**`Calculus/TermLib.lean`**: `findMemberConsIn`, `findOnSaveIn` and
+`selectOn{Save,DelAt}{Member,Frame}At` one member further down a storage of
+members (`Tm.shiftIn?`), with their `_denote` lemmas.
+
+**Ported**: `StatePartsScoped` (`GraftOK` over `Srt.SameO` and
+`State.SameRest`; `Tm.substP`; `mergeSt?`/`mergeMem?`/`mergeMemL?`),
+`RewriteChains` (`spinePositions` over `saveIn`/`delAtIn`/`selectIn`;
+`matchLaw` unifies right to left where left to right fails: a proof
+argument, `copySt`'s, types only once a later argument fixed its indices;
+`lawTwins`, also for the memory laws), `Merge`, `RewriteScoped`,
+`RewritePast` (`State.ThinOf`, `Tm.eval_thinS?`; the absorb and shadow
+sections over `Option`), `RewriteLaws` (over `OLe`), `ChainKit`, `Chains`
+(`lawUpdCands`: `sameBase` decided by the kernel, `String` member names;
+`plainStorageS`/`plainReadAny` through `selectIn`/`findIn`), `ChainGen`,
+`Surface`, `LastLine`, `SurfaceSpec`, `Spec`, `Problem` (`Fml.wt` as
+`.app1 .wt (.app0 .storage)`), `FunContract`.  **Stubbed**:
+`FmlRw.applyStorageBoxP` (past the program) applies nowhere; its typed port
+needs an `Equiv` congruence of the typed symbols.
+
+**Examples that build**: `Chains/{Storage, StorageArrays, StorageCoverage,
+Memory, MemoryArrays, MemoryToStorage, StorageToMemory, Arithmetic,
+CheckedArithmetic, EvaluationOrder, MemoryCoverage, Payment}`,
+`Tactics/{Chains, DlNotation}`; `Chains/StorageDelete` and
+`Chains/MemoryDelete` but for one chain each (below).
+
+**Moved pins**:
+- `Tactics/DlNotation`: the push's printed term is the typed one,
+  `(Tms.PTerm.root "values" rfl) (Tms.SValT.val (Tms.Term.lit (p := .uint) ⟨7, rfl⟩))`,
+  and `Tms.Term.lit (.int 1)` is `Tms.Term.lit (p := .uint) ⟨1, rfl⟩`: a
+  literal is a `P.Denote` with its range; the `net` example writes
+  `where int x` on both sides, `net(a)` being an `int`.
+- `Chains/StorageCoverage`: `where bool se1` on two lines of
+  `requireConditionCapture`; the capture of a condition is a `bool` and the
+  line no longer infers it.
+- `Tactics/Chains`: `Upd.afterT_intro` takes the typed landing's arguments
+  (W9.8.2).
+- Not checked (the closer lane's imports): `ChainRewrites`' `Op1.field "age"`,
+  the `Chains` slot certificates.
+
+**Findings**:
+- `Chains/StorageDelete` `SubtreeDelete`: its premise
+  `hk : Tm.KindFreeAt st!{ … select … } pt!{ account }` no longer types
+  (`KindFreeAt` is over `.st` and `.path`; the read is member-wise, over
+  `.sts`), and `findOnDelAtBelow` has no member-wise twin: to add
+  `findOnDelAtBelowIn` with a `KindFreeAt` over a storage of members and the
+  coverage of a read below a delete.  The other chains of the file build.
+- `Chains/MemoryDelete` `IndexedDelete`: every line holds (`sol_chain` proves
+  it with 400000 heartbeats in a scratch copy), but the statement alone takes
+  over 200000 (master: 80000–200000): the typed notation elaborates the
+  long lines dearer.  Not raised; to split the chain or speed up the
+  front end.
+- `Tactics/Spec`: `cspec!{ add }` fails, ``msg.value` is a `uint`, used as a
+  `int`'': the spec's `net(msg.sender) = net(oldNet, msg.sender) + msg.value`
+  mixes the ledger's `int` with `msg.value`'s `uint`, and the typed
+  signature has no conversion (W9.8.3a/b).
+
+**Blocked by the closer lane** (`Derive` imports `DecideComplete` and
+`CloseScoped`): `LeafDerive`, `Derive`, `ProvesDerive`, `WalkSyntax`,
+`RewriteSyntax` (its two `isConstOf` tests made `isAppOf` ahead), `SolSpec`,
+`Tools/Inspect`, `Tools/Counterexample`, `Tools/ProofTree`; through them
+`ChainRewrites`, `ChainRewritesOpen`, `ChainNotation`, `Notation`,
+`Tactics/{Specs, SolSpec, Print}`.  So `ChainRewrites` and
+`ChainRewritesOpen` are not timed.
+
+**Gate**: `Chains/Storage` 9.3 s (gate 9.0, W9.6.4 8.3), one run after a
+warm-up (10.0 s at load 1.4), a fresh worker, wall from the first to the
+last CPU tick sampled every 20 ms, load 0.2.
+
+**Checked**: per-file diagnostics of every module and example above;
+`sorry` count 19.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
