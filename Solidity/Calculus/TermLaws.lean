@@ -1589,6 +1589,111 @@ theorem Tm.sameBase_eval {u : Srt} {t t' : Tm C Γ u} (h : Tm.sameBase t t' = tr
 
 end MemberWise
 
+/-! ## A read below a delete, covered -/
+
+/-- `f` of the path a member is of, or on the way down from it, by members
+only. -/
+def Op1.fieldsStep (f : {T : Ty} → Tm C Γ (.path T) → Bool) {a s : Srt} :
+    Op1 C a s → Tm C Γ a → Bool → Bool
+  | .field _, x, ih => f x || ih
+  | _, _, _ => false
+
+/-- `f` of some path the term goes on below by members only.  Generic in
+the sort. -/
+def Tm.fieldsBelowAny (f : {T : Ty} → Tm C Γ (.path T) → Bool) : {u : Srt} → Tm C Γ u → Bool
+  | _, .app1 o x => o.fieldsStep f x (x.fieldsBelowAny f)
+  | _, _ => false
+
+/-- A path read where the storage `st` has a value: generic in the sort,
+nothing asked of the others. -/
+def Srt.FoundIn (st : Storage C) {H : HTy} : (u : Srt) → Option (u.Den C H) → Prop
+  | .path _, x => ∃ r, x = some r ∧ st.find r ≠ none
+  | _, _ => True
+
+/-- **Members below a path found are found**: a struct has every member. -/
+theorem Tm.fieldsBelow_found {σ : State C Γ} {U : Ty} {p : Tm C Γ (.path U)} {st : Storage C}
+    {r : SRef C U} (hp : p.eval σ = some r) (hr : st.find r ≠ none) {u : Srt} (q : Tm C Γ u) :
+    q.fieldsBelowAny (·.beqR p) = true → Srt.FoundIn st u (q.eval σ) := by
+  induction q with
+  | app1 o x ih =>
+    intro h
+    cases o with
+    | field hf =>
+      have hx : Srt.FoundIn st _ (x.eval σ) := by
+        rcases Bool.or_eq_true_iff.mp h with h | h
+        · cases Tm.sigma_eq_of_beqR h
+          exact ⟨r, hp, hr⟩
+        · exact ih h
+      obtain ⟨rx, hrx, hfx⟩ := hx
+      refine ⟨rx.field hf, ?_, ?_⟩
+      · rw [Tm.eval_app1, hrx, Op1.eval_eq_evalM]
+        rfl
+      · obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 hfx
+        rw [SRef.field, Storage.find_append, hv]
+        cases v with
+        | struct fs =>
+          simp only [Option.bind_some, SVal.find_eq_findM, SVal.findM]
+          exact Option.some_ne_none _
+    | _ => simp only [Tm.fieldsBelowAny, Op1.fieldsStep, Bool.false_eq_true] at h
+  | _ => intro h; simp only [Tm.fieldsBelowAny, Bool.false_eq_true] at h
+
+/-- A delete's path. -/
+def Op2.delAtPath? {a b u : Srt} : Op2 C a b u → Tm C Γ b → Option ((T : Ty) × Tm C Γ (.path T))
+  | .delAt, y => some ⟨_, y⟩
+  | _, _ => none
+
+/-- A storage term's path, where it deletes. -/
+def Tm.delAtPath? {u : Srt} : Tm C Γ u → Option ((T : Ty) × Tm C Γ (.path T))
+  | .app2 o _ y => o.delAtPath? y
+  | _ => none
+
+/-- A read of a delete, by members below its path, the delete held by `U`. -/
+def Op2.findDelBelowStep {Δ : Ctx} (U : Upd C Γ Δ) {a b u : Srt} :
+    Op2 C a b u → Tm C Γ a → Tm C Γ b → Bool
+  | .find, x, y => (x.delAtPath?.any fun p => y.fieldsBelowAny (·.beqR p.2)) && U.holdsWrite x
+  | _, _, _ => false
+
+/-- `find(delAt(s, p), p.f₁…fₖ)`, the delete held by `U` (`findOnDelAtBelow`'s
+reads). -/
+def Tm.findDelBelowAt {Δ : Ctx} (U : Upd C Γ Δ) {u : Srt} : Tm C Γ u → Bool
+  | .app2 o x y => o.findDelBelowStep U x y
+  | _ => false
+
+/-- **A read by members below a delete the update holds returns**: the
+delete leaves its path found (`Storage.delete_save`), and a struct has every
+member. -/
+theorem Tm.findDelBelowAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g : GlobT C σ.H}
+    (hU : U.globT σ = some g) {u : Srt} (b : Tm C Γ u) (h : Tm.findDelBelowAt U b = true) :
+    b.eval σ ≠ none := by
+  cases b with
+  | app2 o x y =>
+    cases o <;> simp only [Tm.findDelBelowAt, Op2.findDelBelowStep, Bool.false_eq_true,
+      Bool.and_eq_true, Option.any_eq_true] at h
+    obtain ⟨⟨⟨T, p⟩, hp, hpy⟩, hw⟩ := h
+    obtain ⟨st', hst'⟩ := Option.ne_none_iff_exists'.1 (Upd.holdsWrite_eval hw hU)
+    cases x with
+    | app2 o' S p₀ =>
+      cases o' <;> simp only [Tm.delAtPath?, Op2.delAtPath?, reduceCtorEq] at hp
+      simp only [Option.some.injEq, Sigma.mk.injEq] at hp
+      obtain ⟨rfl, hp⟩ := hp
+      cases hp
+      have he : ((S.eval σ).bind fun st => (p₀.eval σ).bind fun r => st.delete r) = some st' :=
+        hst'
+      simp only [Option.bind_eq_some_iff] at he
+      obtain ⟨st, -, r, hr, hd⟩ := he
+      obtain ⟨v₀, -, hsave⟩ := Storage.delete_save hd
+      have hf : st'.find r ≠ none := by
+        rw [Storage.find_save_same hsave]
+        exact Option.some_ne_none _
+      obtain ⟨rq, hrq, hfq⟩ := Tm.fieldsBelow_found hr hf y hpy
+      obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 hfq
+      show ((Tm.app2 .delAt S p₀).eval σ).bind (fun st => (y.eval σ).bind fun r =>
+        (st.find r).bind fun v => some v.view) ≠ none
+      rw [hst', Option.bind_some, hrq, Option.bind_some, hv]
+      exact Option.some_ne_none _
+    | _ => simp only [Tm.delAtPath?, reduceCtorEq] at hp
+  | _ => simp only [Tm.findDelBelowAt, Bool.false_eq_true] at h
+
 /-! ## A read of a word written, covered -/
 
 /-- A save's path, where it writes a literal word. -/
@@ -1615,10 +1720,12 @@ def Tm.findSaveLitAt {Δ : Ctx} (U : Upd C Γ Δ) {u : Srt} : Tm C Γ u → Bool
 
 /-- `t` reads, member-wise or not, the word a save writes at the path it
 reads, and `U` holds the save: `find(save(s, p, sval(w)), p)` over
-`storage := save(s, p, sval(w))`.  Syntactic, so that `rfl` decides it. -/
+`storage := save(s, p, sval(w))`; or a word by members below a delete `U`
+holds (`Tm.findDelBelowAt`, `findOnDelAtBelow`'s reads).  Syntactic, so
+that `rfl` decides it. -/
 def Upd.coversLit {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (t : Tm C Γ u) : Bool :=
   match t.base? with
-  | some b => Tm.findSaveLitAt U b
+  | some b => Tm.findSaveLitAt U b || Tm.findDelBelowAt U b
   | none => false
 
 theorem Tm.findSaveLitAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g : GlobT C σ.H}
@@ -1664,7 +1771,9 @@ theorem Upd.coversLit_eval {Δ : Ctx} {U : Upd C Γ Δ} {u : Srt} {t : Tm C Γ u
   split at hc
   · rename_i b hb
     rw [Tm.base?_eval σ hb]
-    exact Tm.findSaveLitAt_eval hU b hc
+    rcases Bool.or_eq_true_iff.mp hc with hc | hc
+    · exact Tm.findSaveLitAt_eval hU b hc
+    · exact Tm.findDelBelowAt_eval hU b hc
   · nomatch hc
 
 
@@ -3018,8 +3127,8 @@ def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') : LawCov C Γ u 
 /-- `KindFreeAt` of closed terms holds at any scope they are read in: a
 chain's hypothesis about terms at the empty scope (`st!{ … }`, `pt!{ … }`)
 gives a law's premise at an update's scope. -/
-theorem Tm.KindFreeAt.ofNil {T : Ty} {s : Tm C Γ .st} {p : Tm C Γ (.path T)} {s₀ : Tm C [] .st}
-    {p₀ : Tm C [] (.path T)} (h : Tm.KindFreeAt s₀ p₀) (hs : s.toNil? = some s₀)
+theorem Tm.KindFreeAt.ofNil {u : Srt} {T : Ty} {s : Tm C Γ u} {p : Tm C Γ (u.pathAt T)}
+    {s₀ : Tm C [] u} {p₀ : Tm C [] (u.pathAt T)} (h : Tm.KindFreeAt s₀ p₀) (hs : s.toNil? = some s₀)
     (hp : p.toNil? = some p₀) : Tm.KindFreeAt s p := fun σ => by
   rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
   exact h σ.toNil

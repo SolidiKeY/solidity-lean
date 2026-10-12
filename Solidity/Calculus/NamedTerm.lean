@@ -58,6 +58,12 @@ variable {C : Contract}
 
 /-! ## Names in a named context -/
 
+/-- A conversion the notation writes nothing for (`toInt`): its key and
+its text are its argument's. -/
+def Op1.isCast {a s : Srt} : Op1 C a s → Bool
+  | .toInt => true
+  | _ => false
+
 /-- The newest local named `x`, of whatever type. -/
 def NCtx.findAny (x : Var) : (Γ : NCtx) → Except String ((t : LTy) × Idx Γ.ctx t)
   | [] => .error s!"unknown name {x}"
@@ -147,6 +153,7 @@ def Op1.key {a s : Srt} : Op1 C a s → String
   | .select r _ => s!"select {r}"
   | @Op1.selectIn _ _ _ f _ => s!"select {f}"
   | @Op1.fieldIn _ _ _ f _ _ => s!"field {f}"
+  | .toInt => "toInt"
 
 def Op2.key {a b s : Srt} : Op2 C a b s → String
   | .binop op _ => s!"binop {op.sym}"
@@ -181,7 +188,7 @@ def Tm.keyStr {Γ : Ctx} (ns : List Var) : {s : Srt} → Tm C Γ s → String
   | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i => reprStr (i.name ns)
   | _, .netOf i a => s!"({reprStr (i.name ns)})[{Tm.keyStr ns a}]"
   | _, .app0 o => o.key
-  | _, .app1 o x => s!"{o.key}({Tm.keyStr ns x})"
+  | _, .app1 o x => if o.isCast then Tm.keyStr ns x else s!"{o.key}({Tm.keyStr ns x})"
   | _, .app2 o x y => s!"{o.key}({Tm.keyStr ns x}, {Tm.keyStr ns y})"
   | _, .app3 o x y z => s!"{o.key}({Tm.keyStr ns x}, {Tm.keyStr ns y}, {Tm.keyStr ns z})"
 
@@ -212,14 +219,20 @@ namespace NTm
 
 variable {k : SrtK}
 
-/-- `t` at the sort `s`: synthesized and compared, or checked by its own
-`checkAt?`. -/
+/-- A term of sort `s'` used at `s`: itself, a `uint` used as an `int`
+widened (`Op1.toInt`: KeY has one `int` sort), else the mismatch. -/
+def widen (text : String) {Γ : Ctx} : (s' s : Srt) → Tm C Γ s' → Except String (Tm C Γ s)
+  | .val .uint, .val .int, x => pure (.app1 .toInt x)
+  | s', s, x => if h : s' = s then pure (h ▸ x) else sortError text s' s
+
+/-- `t` at the sort `s`: synthesized and compared (a `uint` widened to an
+`int`, `widen`), or checked by its own `checkAt?`. -/
 def check (t : NTm C k) (s : Srt) (Γ : NCtx) : Except String (Tm C Γ.ctx s) :=
   match t.checkAt? with
   | some f => f s Γ
   | none => do
     let ⟨s', x⟩ ← t.resolve Γ
-    if h : s' = s then pure (h ▸ x) else sortError t.text s' s
+    widen t.text s' s x
 
 /-- A term at a value sort, and its type. -/
 def resolveVal (t : NTm C .val) (Γ : NCtx) :
@@ -237,7 +250,12 @@ def resolvePair (a b : NTm C .val) (Γ : NCtx) :
     pure ⟨p, ← a.check (.val p) Γ, b'⟩
   else
     let ⟨p, a'⟩ ← a.resolveVal Γ
-    pure ⟨p, a', ← b.check (.val p) Γ⟩
+    if b.checkAt?.isSome then return ⟨p, a', ← b.check (.val p) Γ⟩
+    -- a `uint` beside an `int` is widened, on either side (`widen`)
+    let ⟨q, b'⟩ ← b.resolve Γ
+    match p, a', q, b' with
+    | .uint, a', .val .int, b' => pure ⟨.int, .app1 .toInt a', b'⟩
+    | p, a', q, b' => pure ⟨p, a', ← widen b.text q (.val p) b'⟩
 
 /-- A term that synthesizes: no `checkAt?`. -/
 def syn (key text : String) (resolve : (Γ : NCtx) → Except String (Resolved C Γ)) : NTm C k :=

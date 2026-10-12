@@ -616,7 +616,11 @@ elab_rules : term <= ty
   | `(pt!{ $t:dl_term }) => do
     let raw ← liftMacroM (expandTerm t)
     let c ← `(InContract.contract)
-    let ty ← instantiateMVars ty
+    let ty := (← instantiateMVars ty).consumeMData
+    -- the sort read as far as it goes: `Srt.pathAt (.sts S) T` (`Tm.KindFreeAt`)
+    -- is a path in the frame of `S`
+    let ty ← if ty.isAppOfArity ``Tm 3 then pure (mkApp ty.appFn! (← whnfR ty.appArg!))
+      else pure ty
     match ptFrame? ty with
     | some S =>
       let S := quote S

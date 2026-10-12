@@ -85,7 +85,7 @@ inductive Op1Code where
   | unop (op : UnOp) (p : PrimTy) | net | delValue (p : PrimTy) | field (s f : Name) (T : Ty)
   | next (E : Ty) | sval (p : PrimTy) | newArr (R : RefTy) | alloc (R : RefTy)
   | mfield (s f : Name) (T : Ty) | addM (R : RefTy) | mval (p : PrimTy) | ref (R : RefTy) | wt
-  | select (s r : Name) | selectIn (s s' f : Name) | fieldIn (s s' f : Name) (T : Ty)
+  | select (s r : Name) | selectIn (s s' f : Name) | fieldIn (s s' f : Name) (T : Ty) | toInt
   deriving DecidableEq
 
 /-- A binary symbol's constructor, data and types, its proofs dropped. -/
@@ -122,6 +122,7 @@ def Op1.code {a s : Srt} : Op1 C a s → Op1Code
   | @Op1.select _ s r _ => .select s r
   | @Op1.selectIn _ s s₂ f _ => .selectIn s s₂ f
   | @Op1.fieldIn _ s s₂ f T _ => .fieldIn s s₂ f T
+  | .toInt => .toInt
 
 /-- A binary symbol's code. -/
 def Op2.code {a b s : Srt} : Op2 C a b s → Op2Code
