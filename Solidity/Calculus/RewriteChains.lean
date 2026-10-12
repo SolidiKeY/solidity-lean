@@ -240,9 +240,19 @@ def lawAt (c : Lean.Name) (e : Lean.Expr) :
       let s ← saveState
       let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
       let g ← g.replaceTargetDefEq ty
+      -- by its shape: a chain's premise (`KindFreeAt`) by a hypothesis, a
+      -- closed `Bool` or `Option` test by `rfl` alone (where `rfl` fails,
+      -- `decide` evaluates the same test, at the price of an instance search
+      -- over the whole term), anything else by `rfl` or `decide`
+      let tac ← if ty.isAppOf ``Tm.KindFreeAt then
+          `(tactic| first | with_reducible assumption |
+              exact Tm.KindFreeAt.ofNil (by with_reducible assumption) rfl rfl)
+        else if ty.isAppOfArity ``Eq 3 && !ty.hasExprMVar &&
+            ((ty.getArg! 0).isConstOf ``Bool || (ty.getArg! 0).isAppOfArity ``Option 1) then
+          `(tactic| rfl)
+        else `(tactic| first | rfl | decide | with_reducible assumption)
       let closed ← try
-          pure (← Term.withoutErrToSorry <|
-            Tactic.run g (evalTactic (← `(tactic| first | rfl | decide | with_reducible assumption | exact Tm.KindFreeAt.ofNil (by with_reducible assumption) rfl rfl)))).isEmpty
+          pure (← Term.withoutErrToSorry <| Tactic.run g (evalTactic tac)).isEmpty
         catch _ => pure false
       if closed then progress := true
       else
