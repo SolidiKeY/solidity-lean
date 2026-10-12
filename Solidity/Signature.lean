@@ -27,8 +27,12 @@ name, but two:
 - `Op1.netOf` is a local's (`TmT.netOf`, `Calculus/TypedTerm.lean`), as it
   is `Tm.netOf`;
 - `Op1.select` (`select(s, r)`, a line of a chain's read taken head first)
-  has none: a struct's members read as a storage are not a `Storage C`.
-  Its typed reading is `sfind(s, r)` (W9.8.2 decides the chain lines).
+  reads at its own sorts (W9.8.2): `sts s`, the struct `s`'s members read
+  as a storage (`Storage (Contract.ofStruct s)`), and `spath s T`, a path
+  from one of them; `select` from the storage at a root, `selectIn` from
+  an `sts` at a member, and `member`/`fieldIn`/`findIn`/`sfindIn`/
+  `delAtIn`/`saveIn` the symbols under it.  Each erases to its untyped
+  namesake, so a chain line reads typed as solkey writes it.
 An index (`at`, `atIn`) takes the word its key is hashed as, at
 `PrimTy.keyTy` (a `bool` key at `uint`), as `Tm.keyAt` writes it.
 
@@ -78,6 +82,11 @@ inductive SrtT where
   | mem
   /-- `MValT` of type `T`. -/
   | mv (T : Ty)
+  /-- `STerm` at a struct's members: `select(s, r)`, the struct `s` read as
+  a storage whose roots are its members (`Contract.ofStruct`). -/
+  | sts (s : Name)
+  /-- `PTerm` under `select`: from a member of the struct `s` to a `T`. -/
+  | spath (s : Name) (T : Ty)
   deriving DecidableEq, Repr
 
 /-- The untyped sort (the printer's, the sort check's). -/
@@ -90,6 +99,8 @@ def SrtT.erase : SrtT → Srt
   | .addr _ => .addr
   | .mem => .mem
   | .mv _ => .mv
+  | .sts _ => .st
+  | .spath _ _ => .path
 
 /-- The type an index of key type `k` is hashed at: a `bool` key is the
 word `0` or `1` (`Tm.keyAt`). -/
@@ -169,6 +180,12 @@ def MvT.toMVal (H : HTy) : (T : Ty) → MvT T → Option (MVal H T)
 
 /-! ## What the sorts denote -/
 
+/-- A struct's members as the state variables of a contract: what
+`select(s, r)` reads as a storage (`Storage (Contract.ofStruct s)`), and
+where a path under it is rooted (`SRef (Contract.ofStruct s) T`), so the
+storage's operations read it unchanged. -/
+def Contract.ofStruct (s : Name) : Contract := { vars := structDef s }
+
 /-- A typed sort's values, over the global part's heap typing `H`. -/
 @[reducible] def SrtT.Den (C : Contract) (H : HTy) : SrtT → Type
   | .val p => p.Denote
@@ -179,6 +196,8 @@ def MvT.toMVal (H : HTy) : (T : Ty) → MvT T → Option (MVal H T)
   | .addr T => MAddrT T
   | .mem => Grown H (fun _ => Unit)
   | .mv T => MvT T
+  | .sts s => Storage (Contract.ofStruct s)
+  | .spath s T => SRef (Contract.ofStruct s) T
 
 /-- The global part of a typed state: the state without its locals. -/
 def State.glob {Γ : Ctx} (σ : State C Γ) : State C [] :=
@@ -201,6 +220,8 @@ inductive OpT0 (C : Contract) : SrtT → Type where
   | memory : OpT0 C .mem
   /-- `mtSt`: every root of the contract at its default (`Storage.init`). -/
   | mtSt : OpT0 C .st
+  /-- A member `f` of the struct `s` as a root under `select` (`Op0.root f`). -/
+  | member (s f : Name) {T : Ty} (h : C.fieldType s f = some T) : OpT0 C (.spath s T)
 
 /-- Unary symbols. -/
 inductive OpT1 (C : Contract) : SrtT → SrtT → Type where
@@ -220,6 +241,16 @@ inductive OpT1 (C : Contract) : SrtT → SrtT → Type where
   | mval {p : PrimTy} : OpT1 C (.val p) (.mv (.prim p))
   | ref {R : RefTy} : OpT1 C (.ident R) (.mv (.ref R))
   | wt : OpT1 C .st (.val .bool)
+  /-- `select(s, r)`: the struct at the root `r`, read as a storage of its
+  members (KeY's `selectSt<[Struct]>(s, r)`). -/
+  | select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s))) :
+      OpT1 C .st (.sts s)
+  /-- `select(s, f)` under a `select`: the struct at the member `f`. -/
+  | selectIn {s s' f : Name} (h : C.fieldType s f = some (.ref (.struct s'))) :
+      OpT1 C (.sts s) (.sts s')
+  /-- `p.f` under a `select`. -/
+  | fieldIn {s s' f : Name} {T : Ty} (h : C.fieldType s' f = some T) :
+      OpT1 C (.spath s (.ref (.struct s'))) (.spath s T)
 
 /-- Binary symbols. -/
 inductive OpT2 (C : Contract) : SrtT → SrtT → SrtT → Type where
@@ -243,6 +274,12 @@ inductive OpT2 (C : Contract) : SrtT → SrtT → SrtT → Type where
   | copy {R : RefTy} (h : (Ty.ref R).mapFree = true) : OpT2 C .mem (.sv (.ref R)) (.ident R)
   | mat {R : RefTy} {E : Ty} (a : ArrTy R E) : OpT2 C (.ident R) (.val .uint) (.addr E)
   | copySt {T : Ty} (h : T.mapFree = true) : OpT2 C .mem (.sv T) .mem
+  /-- `find(s, p)` under a `select`. -/
+  | findIn {s : Name} {p : PrimTy} : OpT2 C (.sts s) (.spath s (.prim p)) (.val p)
+  /-- `delAt(s, p)` under a `select`. -/
+  | delAtIn {s : Name} {T : Ty} : OpT2 C (.sts s) (.spath s T) (.sts s)
+  /-- `sfind(s, p)` under a `select`. -/
+  | sfindIn {s : Name} {T : Ty} : OpT2 C (.sts s) (.spath s T) (.sv T)
 
 /-- Ternary symbols. -/
 inductive OpT3 (C : Contract) : SrtT → SrtT → SrtT → SrtT → Type where
@@ -252,6 +289,8 @@ inductive OpT3 (C : Contract) : SrtT → SrtT → SrtT → SrtT → Type where
   | atIn {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
       OpT3 C .st (.path (.ref R)) (.val k.keyTy) (.path V)
   | write {T : Ty} : OpT3 C .mem (.addr T) (.mv T) .mem
+  /-- `save(s, p, v)` under a `select`. -/
+  | saveIn {s : Name} {T : Ty} : OpT3 C (.sts s) (.spath s T) (.sv T) (.sts s)
 
 /-! ## Erasure to `Update.lean`'s symbols -/
 
@@ -262,6 +301,7 @@ def OpT0.erase {s : SrtT} : OpT0 C s → Op0 s.erase
   | .storage => .storage
   | .memory => .memory
   | .mtSt => .mtSt C.vars
+  | .member _ f _ => .root f
 
 def OpT1.erase {a s : SrtT} : OpT1 C a s → Op1 a.erase s.erase
   | .unop op (p := p) _ => .unop op p
@@ -277,6 +317,9 @@ def OpT1.erase {a s : SrtT} : OpT1 C a s → Op1 a.erase s.erase
   | .mval => .mval
   | .ref => .ref
   | .wt => .wt C.vars
+  | .select r _ => .select r
+  | @OpT1.selectIn _ _ _ f _ => .select f
+  | @OpT1.fieldIn _ _ _ f _ _ => .field f
 
 def OpT2.erase {a b s : SrtT} : OpT2 C a b s → Op2 a.erase b.erase s.erase
   | .binop op (p := p) _ => .binop op p
@@ -297,6 +340,9 @@ def OpT2.erase {a b s : SrtT} : OpT2 C a b s → Op2 a.erase b.erase s.erase
   | .copy _ => .copy
   | .mat _ => .mat
   | .copySt _ => .copySt
+  | .findIn => .find
+  | .delAtIn => .delAt
+  | .sfindIn => .sfind
 
 def OpT3.erase {a b c s : SrtT} : OpT3 C a b c s → Op3 a.erase b.erase c.erase s.erase
   | .ite => .ite
@@ -304,6 +350,7 @@ def OpT3.erase {a b c s : SrtT} : OpT3 C a b c s → Op3 a.erase b.erase c.erase
   | .push => .push
   | .atIn _ => .atIn
   | .write => .write
+  | .saveIn => .save
 
 
 /-! ## Evaluation on the typed global part
@@ -330,6 +377,17 @@ def Storage.atT {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (it : IndexTy
   st.checkIndex r it (PrimTy.key i)
   some (r.index it (PrimTy.key i))
 
+/-- A path under `select(s, r)` as a path from the root `r`: its member
+first. -/
+def SRef.under {C : Contract} {s r : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
+    (h : C.rootType r = some (.ref (.struct s))) : SRef C U :=
+  ⟨r, h, .field q.hroot q.path⟩
+
+/-- The struct at the root `r` of `st`, as a storage of its members. -/
+def Storage.selectT {C : Contract} {s r : Name} (st : Storage C)
+    (h : C.rootType r = some (.ref (.struct s))) : Storage (Contract.ofStruct s) :=
+  (SVal.view (st.get h) : SFields (structDef s))
+
 /-- `OpT0.eval` by `match`, its compiled form. -/
 def OpT0.evalM (g : State C []) {s : SrtT} : OpT0 C s → Option (s.Den C g.H)
   | .lit v => some v
@@ -338,6 +396,7 @@ def OpT0.evalM (g : State C []) {s : SrtT} : OpT0 C s → Option (s.Den C g.H)
   | .storage => some g.storage
   | .memory => some g.memT
   | .mtSt => some (Storage.init C)
+  | .member _ f h => some (SRef.ofRoot (C := Contract.ofStruct _) f h)
 
 /-- A constant on the typed global part. -/
 @[implemented_by OpT0.evalM]
@@ -345,6 +404,7 @@ def OpT0.eval (g : State C []) {s : SrtT} (o : OpT0 C s) : Option (s.Den C g.H) 
   @OpT0.casesOn C (fun s _ => Option (s.Den C g.H)) s o
     (fun {_} v => some v) (fun k => some (g.envVal k)) (fun r {_} h => some (SRef.ofRoot r h))
     (some g.storage) (some g.memT) (some (Storage.init C))
+    (fun _ f {_} h => some (SRef.ofRoot (C := Contract.ofStruct _) f h))
 
 theorem OpT0.eval_eq_evalM (g : State C []) {s : SrtT} (o : OpT0 C s) : o.eval g = o.evalM g := by
   cases o <;> rfl
@@ -365,6 +425,9 @@ def OpT1.evalM (g : State C []) {a s : SrtT} :
   | .mval, x => x
   | .ref, x => x
   | .wt, x => x.bind Storage.wtT
+  | .select _ h, x => x.map fun st => Storage.selectT st h
+  | .selectIn h, x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h
+  | .fieldIn h, x => x.map (SRef.field · h)
 
 /-- A unary symbol on the typed global part. -/
 @[implemented_by OpT1.evalM]
@@ -384,6 +447,9 @@ def OpT1.eval (g : State C []) {a s : SrtT} (o : OpT1 C a s) :
     (fun {_} x => x)
     (fun {_} x => x)
     (fun x => x.bind Storage.wtT)
+    (fun {_} _ h x => x.map fun st => Storage.selectT st h)
+    (fun {_} {_} {_} h x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h)
+    (fun {_} {_} {_} {_} h x => x.map (SRef.field · h))
 
 theorem OpT1.eval_eq_evalM (g : State C []) {a s : SrtT} (o : OpT1 C a s) :
     o.eval g = o.evalM g := by
@@ -439,6 +505,9 @@ def OpT2.evalM (g : State C []) {a b s : SrtT} :
   | .copySt h, x, y => do
     let m ← x
     some (m.then ((← y).copyStToM m.heap h))
+  | .findIn, x, y => do let v ← (← x).find (← y); some v.view
+  | .delAtIn, x, y => do (← x).delete (← y)
+  | .sfindIn, x, y => do (← x).find (← y)
 
 /-- A binary symbol on the typed global part. -/
 @[implemented_by OpT2.evalM]
@@ -475,6 +544,9 @@ def OpT2.eval (g : State C []) {a b s : SrtT} (o : OpT2 C a b s) :
     (fun {_} h x y => do
       let m ← x
       some (m.then ((← y).copyStToM m.heap h)))
+    (fun {_} {_} x y => do let v ← (← x).find (← y); some v.view)
+    (fun {_} {_} x y => do (← x).delete (← y))
+    (fun {_} {_} x y => do (← x).find (← y))
 
 theorem OpT2.eval_eq_evalM (g : State C []) {a b s : SrtT} (o : OpT2 C a b s) :
     o.eval g = o.evalM g := by
@@ -489,6 +561,7 @@ def OpT3.evalM (g : State C []) {a b c s : SrtT} :
   | .push, x, y, z => do (← x).push (← y) fun _ => z.map SVal.strip
   | .atIn it, x, y, z => do (← x).atT it (← y) (← z)
   | .write, x, y, z => do (← x).writeT (← y) (← z)
+  | .saveIn, x, y, z => do (← x).write (← y) (← z)
 
 /-- A ternary symbol on the typed global part. -/
 @[implemented_by OpT3.evalM]
@@ -501,6 +574,7 @@ def OpT3.eval (g : State C []) {a b c s : SrtT} (o : OpT3 C a b c s) :
     (fun {_} x y z => do (← x).push (← y) fun _ => z.map SVal.strip)
     (fun {_} {_} {_} it x y z => do (← x).atT it (← y) (← z))
     (fun {_} x y z => do (← x).writeT (← y) (← z))
+    (fun {_} {_} x y z => do (← x).write (← y) (← z))
 
 theorem OpT3.eval_eq_evalM (g : State C []) {a b c s : SrtT} (o : OpT3 C a b c s) :
     o.eval g = o.evalM g := by
@@ -532,6 +606,8 @@ def SrtT.okE (g : State C []) : (s : SrtT) → s.Den C g.H → s.erase.Ev
   | .addr _, a => .ok (MAddrT.erase a)
   | .mem, m => .ok (Heap.into g.globE m.heap)
   | .mv T, v => .ok (MvT.erase T v)
+  | .sts _, w => .ok (Storage.into g.globE w)
+  | .spath _ _, r => .ok (SRef.erase r)
 
 /-- The untyped evaluation `r` agrees with the typed `x`: `x`'s value erased,
 or some halt where `x` is `none`. -/
@@ -574,6 +650,17 @@ theorem OpT0.eval_agree (g : State C []) {s : SrtT} (o : OpT0 C s) :
   | _ => rfl
 
 
+/-- `select(s, r)` on the erasure: the struct at `r`, its members erased. -/
+theorem Storage.findStorage_selectT {C : Contract} {s r : Name} (σ : Semantics.State)
+    (st : Storage C) (hs : σ.storage = st.erase) (h : C.rootType r = some (.ref (.struct s))) :
+    σ.findStorage r [] = .ok (.struct (SFields.erase (Storage.selectT st h))) := by
+  simp only [Semantics.State.findStorage, hs, Storage.erase, SFields.lookupBy_erase st h,
+    Storage.selectT]
+  generalize st.get h = w
+  cases w
+  simp only [SVal.erase_struct, Semantics.SVal.find]
+  rfl
+
 section Bridge
 
 variable (g : State C [])
@@ -592,6 +679,12 @@ theorem SrtT.agree_path {T : Ty} (x : Option (SRef C T)) :
 
 theorem SrtT.agree_st (x : Option (Storage C)) :
     SrtT.Agree g .st x (toRes (Storage.into g.globE) x) := by
+  cases x
+  · exact ⟨.revert, rfl⟩
+  · rfl
+
+theorem SrtT.agree_sts {s : Name} (x : Option (Storage (Contract.ofStruct s))) :
+    SrtT.Agree g (.sts s) x (toRes (Storage.into g.globE) x) := by
   cases x
   · exact ⟨.revert, rfl⟩
   · rfl
@@ -673,6 +766,21 @@ theorem OpT1.eval_agree {a s : SrtT} (o : OpT1 C a s) {x : Option (a.Den C g.H)}
       split
       · rfl
       · exact ⟨.undef, rfl⟩
+    | select r h =>
+      subst hx
+      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.map_some, bind, Except.bind,
+        Storage.findStorage_selectT (Storage.into g.globE v) v rfl h]
+      rfl
+    | selectIn h =>
+      subst hx
+      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.map_some, bind, Except.bind,
+        Storage.findStorage_selectT (C := Contract.ofStruct _) (Storage.into g.globE v) v rfl h]
+      rfl
+    | fieldIn h =>
+      subst hx
+      show Except.ok _ = Except.ok (SRef.erase (v.field h))
+      simp only [SRef.erase, SRef.field, SRef.append, Path.erase_append]
+      rfl
 
 
 theorem binopT_some (op : BinOp) {p : PrimTy} (a b : p.Denote) :
@@ -732,7 +840,7 @@ theorem OpT2.agree_some {a b s : SrtT} (o : OpT2 C a b s) (u : a.Den C g.H) (v :
     show SrtT.Agree g (.val _) _ (evalBinop op _ (PrimTy.erase u) (.ok (PrimTy.erase v)))
     rw [BinOp.evalT_erase op h u v]
     exact SrtT.agree_val g _
-  | find =>
+  | find | findIn =>
     simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
       bind, Except.bind, SRef.erase,
       Storage.findStorage_erase (σ := Storage.into g.globE u) (st := u) rfl]
@@ -782,13 +890,13 @@ theorem OpT2.agree_some {a b s : SrtT} (o : OpT2 C a b s) (u : a.Den C g.H) (v :
           SRef.append, SVal.view_array, SrtT.Agree, SrtT.okE, SRef.erase, Path.erase_append,
           Path.erase_index]
         rfl
-  | delAt =>
+  | delAt | delAtIn =>
     simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
       bind, Except.bind, SRef.erase]
     have hd := Storage.delete_erase (σ := Storage.into g.globE u) (st := u) rfl v
     simp only [bind, Except.bind] at hd
     rw [hd]
-    exact SrtT.agree_st g _
+    first | exact SrtT.agree_st g _ | exact SrtT.agree_sts g _
   | pushSlot =>
     simp only [OpT2.Exact] at he
     simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
@@ -814,7 +922,7 @@ theorem OpT2.agree_some {a b s : SrtT} (o : OpT2 C a b s) (u : a.Den C g.H) (v :
     cases u.pushPlace v with
     | none => exact ⟨.revert, rfl⟩
     | some w => rfl
-  | sfind =>
+  | sfind | sfindIn =>
     simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
       bind, Except.bind, SRef.erase,
       Storage.findStorage_erase (σ := Storage.into g.globE u) (st := u) rfl]
@@ -907,10 +1015,10 @@ theorem OpT3.agree_some {a b c s : SrtT} (o : OpT3 C a b c s) (u : a.Den C g.H)
       (Op3.eval g.globE o.erase (a.okE g u) (b.okE g v) (c.okE g w)) := by
   cases o with
   | ite => cases u <;> rfl
-  | save =>
+  | save | saveIn =>
     simp only [OpT3.evalM, OpT3.erase, Op3.eval, SrtT.okE, Option.bind_some, bind, Except.bind,
       SRef.erase, Storage.writeStorage_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    exact SrtT.agree_st g _
+    first | exact SrtT.agree_st g _ | exact SrtT.agree_sts g _
   | push =>
     simp only [OpT3.Exact] at he
     simp only [OpT3.evalM, OpT3.erase, Op3.eval, SrtT.okE, Option.bind_some, bind, Except.bind,
@@ -1275,6 +1383,22 @@ theorem findOnSaveFrame {T U W : Ty} (st : Storage C) (r : Name) (hr : C.rootTyp
   rw [SVal.save_eq_saveM] at hs
   rw [SVal.find_eq_findM, SVal.find_eq_findM]
   exact SVal.findM_saveM_diverges hd _ w hs
+
+/-! ### Under `select`
+
+A path under `select(s, r)` is a path from `r`'s member: `SRef.under`.
+The laws above are over any contract, so over `Contract.ofStruct s` they
+are the laws of `sts s` (`findOnSave (C := Contract.ofStruct s)`, …). -/
+
+/-- **`findMemberCons`**, typed: a read under `select(s, r)` is the read at
+`r` followed by its path (Theory `find_cons`). -/
+theorem find_selectT {s r : Name} {U : Ty} (st : Storage C)
+    (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U) :
+    (st.selectT h).find q = st.find (q.under h) := by
+  simp only [Storage.find, Storage.selectT, SRef.under]
+  generalize st.get h = w
+  cases w
+  rfl
 
 end Storage
 

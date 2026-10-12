@@ -19,7 +19,8 @@ by `OpTn.eval` on the global part (`State.glob`); no value is erased.
 `OpTn.Exact`, and `x[a]`'s entry an `int`).
 
 The laws on terms are `Storage`'s (`Signature.lean`) read through `TmT.eval`:
-`TmT.findOnSave`, `TmT.findOnSaveFrameRoot`; the frame below one root
+`TmT.findOnSave`, `TmT.findOnSaveFrameRoot`, `TmT.findOnSaveIn` (under a
+`select`); the frame below one root
 (`Storage.findOnSaveFrame`, over `Path.Diverges`) waits for a term-level
 divergence test (W9.8.4).
 -/
@@ -299,6 +300,24 @@ theorem findOnSaveFrameRoot (σ : State C Γ) {T U : Ty} (s : TmT C Γ .st) (q :
       simp only [Option.bind_some,
         Storage.findOnSaveFrameRoot st r r' (hne r r' hq hq') w hw]
 
+/-- **`findOnSave`** under a `select`: `find(save(select(s, r), p, sval(v)), p) = v`
+where the write lands (`Storage.findOnSave` over `Contract.ofStruct`). -/
+theorem findOnSaveIn (σ : State C Γ) {sn : Name} {p : PrimTy} (s : TmT C Γ (.sts sn))
+    (q : TmT C Γ (.spath sn (.prim p))) (v : TmT C Γ (.val p))
+    (hd : (TmT.app3 .saveIn s q (.app1 .sval v)).eval σ ≠ none) :
+    (TmT.app2 .findIn (.app3 .saveIn s q (.app1 .sval v)) q).eval σ = v.eval σ := by
+  simp only [eval_app1, eval_app2, eval_app3, OpT1.eval_eq_evalM, OpT2.eval_eq_evalM,
+    OpT3.eval_eq_evalM, OpT1.evalM, OpT2.evalM, OpT3.evalM, Option.bind_eq_bind] at hd ⊢
+  cases hs : s.eval σ <;> cases hq : q.eval σ <;> cases hv : v.eval σ <;>
+    simp only [hs, hq, hv, Option.bind_none, Option.bind_some, Option.map_some, Option.map_none,
+      ne_eq, not_true_eq_false] at hd ⊢
+  rename_i st r w
+  cases hw : st.write r (.prim w) with
+  | none => simp only [hw, not_true_eq_false] at hd
+  | some st' =>
+    simp only [Option.bind_some, Storage.findOnSave st r w hw]
+    rfl
+
 end TmT
 
 /-! ## A literal
@@ -317,6 +336,18 @@ def TmT.aliceAgeRead : TmT StandardExample [] (.val .uint) :=
 
 /-- It reads `1` in the initial state, by the kernel. -/
 example : (TmT.aliceAgeRead.eval (State.init StandardExample)).map (·.1) = some 1 := by
+  decide +kernel
+
+/-- `find(select(save(storage, alice.age, sval(1)), alice), age)`, the chain
+line `selectOnSaveMember` rewrites, at its typed sorts (`sts`, `spath`). -/
+def TmT.aliceSelectRead : TmT StandardExample [] (.val .uint) :=
+  .app2 .findIn
+    (.app1 (.select (s := "Person") "alice" rfl)
+      (.app3 .save (.app0 .storage) TmT.aliceAge (.app1 .sval (.app0 (.lit ⟨1, rfl⟩)))))
+    (.app0 (.member "Person" "age" rfl))
+
+/-- It reads `1` too, by the kernel. -/
+example : (TmT.aliceSelectRead.eval (State.init StandardExample)).map (·.1) = some 1 := by
   decide +kernel
 
 end Solidity
