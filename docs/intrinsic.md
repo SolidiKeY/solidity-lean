@@ -5208,6 +5208,24 @@ jobs), so every `#guard_msgs` pin is unchanged; the touched files have no
 warning; `sorry` count unchanged (23 textual matches in 10 files, as at
 `85188047`); `check-orphans` (309 reachable), `check-doc-paths`.
 
+## W9.8 plan (typed sorts)
+
+Asked by the user on 2026-10-12 ("type what was left untyped and rename
+evalT"; chosen: typed sorts).  What was left: KeY's signature itself, its
+sorts (`Srt`) untyped and its symbols (`Op0`–`Op3`) read on
+`Semantics.State` (decision 83), so `save(s, p, v)` can build an ill-typed
+storage.  Target: the sorts indexed by Solidity types (`val p`, `path T`,
+`st`, `sv T`, `ident R`, `addr`, `mem`, `mv`), the symbols read the typed
+global part, the value-level erasure (`State.globE`, `getE`,
+`TDenote.erase`, `Storage.erase`, `Heap.erase`) gone; the printed notation
+stays solkey's.  Speed warned first: the kernel walks the sort index in
+`sol_decide`'s `inLS`/`closeS` (G0's recursor forms).
+
+| Wave | Work |
+|---|---|
+| W9.8.0 | `rename` ‖ spike: `Tm.evalT`/`denoteT`/`Rhs.evalT` → `Tm.eval`/`denote`/`Rhs.eval` (by references, not text); the spike types the sorts on a slice (storage reads and writes, one memory symbol), times `Tactics/Decide`'s kernel checks and the closer on it, and sizes the port |
+| W9.8.1+ | from the spike's record |
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
