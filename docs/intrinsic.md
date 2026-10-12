@@ -4321,6 +4321,64 @@ the default targets (every example pin: `Examples/ProofTree.lean`,
 `Calculus/TermLaws.lean`'s), clean; `check-orphans`, `check-doc-paths`; no
 new `sorry`.  Not run: `SolkeyTestSuite` (it reads no notation front end).
 
+### W9.6.2 sound record (2026-10-12, branch `w96-sound`)
+
+The rules' soundness reads the typed run against the rules' terms directly:
+`Calculus/` neither imports nor names `Semantics/StepErase.lean`, nor any
+program evaluator of `Semantics/Erased.lean` (`Val.eval`, `Loc.resolve`,
+`MLoc.addr`, `OpLoc.store`/`bump`, `MRhs.eval`, `Src.value`, …).  Carrier U1:
+an update is still applied to `σ.erase` (`EState`), and `holds`/`Tm.eval`
+read it there (`aliasPath`/`memRef` stay, as the term readers).
+
+- **The evaluators against the terms** (`Calculus/LowerRun.lean`, new):
+  `Val.lower_evalT : TRes.Agrees PrimTy.erase (v.evalT σ) (v.lower.eval σ.erase)`
+  and its mutual kin (`SPath`/`Loc.lower_resolveT`, `MPath.lower_mvalT` at
+  a reference type, `MLoc.lower_addrT`), `Simple.lower_evalT`,
+  `Simple.denote_lowerT`, `Src.lower_valueT`, `MSrc.lower_mvalT`,
+  `readAddr_erase`; by induction on the syntax over the typed evaluator,
+  from `TEnv.get_erase` and the storage/heap erasure.  The mutual block
+  recurses on `MPath` at `.ref R` (well-founded, found by Lean).
+- **The seam** (`Semantics/TypedErase.lean`, new): imports `StepErase` for
+  its value-level lemmas (`TRes.Agrees`, `opStoreT_erase`,
+  `bumpStoreT_erase`, `writeAddr_erase`, `MAddr.erase`, `TRun.clearT_erase`,
+  …) and adds `TRes.Agrees.eq_ok`/`eq_error`/`of_eq_right`/`bind_fst`.  At
+  W9.6.4, when those lemmas move below it, it imports their new home.
+- **The kit** (`Calculus/SoundKit.lean`): `Premise.sound_update_typed`,
+  `sound_updateSim_typed`, `sound_cases_typed` take the statement's typed
+  step agreeing with the update on the erasure; `sound_update_erased`,
+  `sound_updateSim_erased`, `sound_cases_erased`, the erased `*.eval_lower`
+  lemmas, `Tm.keyAt_eval` and `Val`/`SPath`/`Loc.*_noPanic` are deleted.
+- **The arms** (`Calculus/SoundArms.lean`): each `*_run` equation against
+  `StepAgrees.erased` is now `*_agrees` (typed step against `U.apply σ.erase`).
+  A compound target is read once as a term (`save_compound`,
+  `write_compound`, `save_bump`, `write_bump`, `save_bump_assign`,
+  `write_bump_assign`, `bumped_find`, `bumped_read`), the typed side by the
+  global ops' erasure; `send_sim`, `clearMem_sim` are up to the halt.
+- **Statements changed**: `sound_allocCopy`'s hypothesis is the right-hand
+  side's typed agreement (`TRes.Agrees … (r.evalT σ) …`, given by
+  `allocCopy_copy`/`allocCopy_newArr`) where it was an equation of
+  `MRhs.eval`; `Val.eval_erase_ok`/`_error` (`SoundLoops`) are
+  `Val.lower_eval_ok`/`_error`; `Simple.eval_lower`/`denote_lower`
+  (`Logic.lean`) are deleted for `Simple.lower_evalT`/`denote_lowerT`.  No
+  `*_sound`, `Stmt.sound`, `Proves.valid` statement changed; their axioms
+  are `propext`, `Classical.choice`, `Quot.sound`.
+- **Deleted, unused**: `MPath.mval_noPanic` (`SoundStore`),
+  `MSrc.mval_noPanic` (`SoundMem`), `Res.map_bind'`,
+  `Res.Sim.err_of_not_ok`.
+- **Still on `StepErase`/the erased evaluators**: `Typing/` (`EKeeps`,
+  `SRuns.of_agrees`, `Constructibility`, `Reachability`, `Fits`,
+  `TypedRunInv`: the `inv` lane), and the value-level lemmas the seam
+  re-exports.  `Theory/StateWrites.lean` names `MPath.mval` in a docstring.
+
+**Checked**: per-file diagnostics of `LowerRun`, `TypedErase`, `SoundKit`,
+`SoundArms`, `SoundStore`, `SoundMem`, `SoundControl`, `SoundLoops`,
+`Sound`, `CallbackSound`, `Theorems` (and the Sound chain they import),
+clean; `#print axioms` above; no new `sorry`; `check-orphans`,
+`check-doc-paths`; no removed name is read elsewhere (`rg`).  Not run: the
+default build (the modules above `Logic.lean` lost only its two unused
+`Simple` lemmas and a docstring) and `SolkeyTestSuite`; no speed
+measurement (no row is time-sensitive).
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
