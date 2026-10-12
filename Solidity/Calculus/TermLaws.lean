@@ -1446,7 +1446,7 @@ theorem Tm.freshRoot_read_lt {m₀ : Tm C Γ .mem} {R₀ : RefTy} {i : Tm C Γ .
   obtain ⟨T', -, hd⟩ :=
     (copyStToM_default_readPath (p ++ [s]) (Close.allocDefault_copy ha) (State.HeapExt.refl μ₁')).1 _ hpath
   cases T' with
-  | prim q => cases q <;> simp [DefaultMVal, PrimTy.default, Value.toMVal] at hd
+  | prim q => cases q <;> simp only [DefaultMVal, Value.toMVal, PrimTy.default, reduceCtorEq] at hd
   | ref _ =>
     obtain ⟨id', hid', hlt⟩ := hd
     cases hid'
@@ -1732,16 +1732,18 @@ theorem EvalLaw.readCopySt_eval {m : Tm C Γ .mem} {s : Tm C Γ .st} {p : Tm C �
     · intro x hx
       exfalso
       cases sv with
-      | prim _ => simp [Semantics.SVal.find, bind, Except.bind] at hx
+      | prim _ => simp only [bind, Except.bind, Semantics.SVal.find, reduceCtorEq] at hx
       | map _ _ => nomatch hc
       | struct fields =>
         rw [copyStToM] at hc
         rcases hcf : copyStFields τm fields with _ | ⟨s', mf⟩ <;>
-          simp [hcf, bind, Except.bind] at hc
+          simp only [bind, Except.bind, hcf, State.alloc_id, Except.ok.injEq, Prod.mk.injEq, reduceCtorEq,
+            and_false] at hc
       | array elems _ _ =>
         rw [copyStToM] at hc
         rcases hcf : copyStElems τm elems with _ | ⟨s', me⟩ <;>
-          simp [hcf, bind, Except.bind] at hc
+          simp only [bind, Except.bind, hcf, State.alloc_id, Except.ok.injEq, Prod.mk.injEq, reduceCtorEq,
+            and_false] at hc
   | ref id =>
     have this := Close.copyStToM_member hc hf'
     simp only [Close.readVal] at this

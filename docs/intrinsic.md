@@ -59,7 +59,7 @@ fresh-name numbering (`Taclet C k`: labels only, so pins keep `se1`, `sp1`).
 | M5 | done 2026-10-07 | the EVM on the scoped syntax, `Sim` by position, `compile_correct`; `wtStmt`, `not_stuck` deleted |
 | M6a | done; gate passed (decision 9) | the scoped calculus: `Fml C Γ`, `Frames`, `Premise`, `Stmt.step`, symex, chains, ProofTree |
 | M6b | done 2026-10-07 | formula frontends: `cdl!{}`, specs, obligations, callbacks |
-| M6c | **done with IR** (W6–W7, merged 2026-10-11; gates passed) | the closer on `Fml C Γ`: 6a (`DecideSyn`, `DecideComplete`, `NFmlClose`), 6b (`Decide.lean` as a scoped front end), 6c (update rules, merges, `⊢`/`⊨` leaves, the chains' rewrites while the program is open); W7: atoms by position and the closer on the scoped reduction, the `⊨` route on the walk, the scoped update rules given their consumers.  `NFml`, `Fml.erase` and `Semantics/Erased.lean` stay as decision 7's IR, every reader listed ("M6c", W7 merge) |
+| M6c | **done with IR** (W6–W7, merged 2026-10-11; gates passed) | the closer on `Fml C Γ`: 6a (`DecideSyn`, `DecideComplete`, `NFmlClose`), 6b (`Decide.lean` as a scoped front end), 6c (update rules, merges, `⊢`/`⊨` leaves, the chains' rewrites while the program is open); W7: atoms by position and the closer on the scoped reduction, the `⊨` route on the walk, the scoped update rules given their consumers.  `NFml`, `Fml.erase` and `Semantics/Erased.lean` stay as decision 7's IR, every reader listed ("M6c", W7 merge); `NFml` and `Fml.erase` deleted at W9.5a ("W9.5a `delete` record") |
 | M7 | done 2026-10-09 | the docs; the review pass ("M7 review"; proposals 75–77) |
 | W0 | done | the four M6 lanes merged; `Proves.valid` unconditional; `resolve`'s output `Fresh` |
 | W1 | done 2026-10-08 | off M3's run: typed-run lemmas (`runlemmas`), typing (`typing`), the EVM (`evm`), the rule table read scoped (`rules`) |
@@ -4048,57 +4048,150 @@ tree close a leaf by `sol_leaf` and the scoped closers.
   `FmlRw.applyStorageBoxP`, `Upd.apply_absorb`: `propext`,
   `Classical.choice`, `Quot.sound`.
 
+### W9.5a `delete` record (2026-10-12, branch `w9-del`)
+
+The syntax IR is deleted.  No prover code builds, reads or proves anything
+about an untyped formula: every closer, chain, walk and printer reads
+`Fml C Γ`.  160 files, +6.5k/−21.4k lines.
+
+**Deleted modules**: `Calculus/{NFmlLogic, NFmlDerive, NFmlUpdateRules,
+NFmlQuote, HoldsErase, CloseErase, Closable, CloseHavoc, Rewrite,
+TheoryRewrite, ChainRewrites, ChainBranches, Literals, StateParts,
+TermRules, TermTaclets}`, and the old `Calculus/Close` (`Valid.of_erase`).
+**Deleted names**: `NFml` but its stub (`holds`, `Valid`, `Post`,
+`NFml.Proves`, `NFml.Chain.*`, `NFml.toL`/`inL`/`valid_iff_reduce`, the
+erased lowering in `Decide`), `Fml.erase`, `Proves.close` (with its
+`SolkeyProves` case), `Hyp` and its rules, `Atom.name` (proposal 99: an
+atom is a position, `key{}` spells a local `pos(k)` and reads no
+identifier as a local; `Var.isSlot`, `LFml.slotKeys` check the quantified
+keys where `LFml.syn_valid_alls` reads them), `dl_schema{}` and
+`NFmlSeq`'s sequents, the erased delaborators, `holds_eqD_iff`, the erased
+`TermTaclet`/`EvalLaw`/`Term.Theq`.
+
+**Renamed / new**: `TermTacletS` → `TermTaclet`, `EvalLawS` → `EvalLaw`
+(the rule map's column follows); `Calculus/NFmlClose.lean` →
+`Calculus/Close.lean` (the simp sets and syntax of `sol_close`; the
+elaborators are `CloseScoped`'s); `Calculus/Closable.lean` →
+`Calculus/FirstOrder.lean` (`Fml.FO`, `Idx.nameR`, `Thin.namesR`);
+`Calculus/TermLaws.lean` (the laws past the program, scoped: `LitLaw`,
+`TermTaclet.RefLaw`, `EvalLaw`, `Upd.covers`/`coversRef`/`coversEval`,
+`LawCov`, the evidence `FmlRw.lawUpdS` asks, sound by `TermTaclet.sound`
+and `EvalLaw.sound`, no erasure lemma); `Calculus/StateFacts.lean` (the
+state and symbol lemmas the deleted modules held, moved verbatim).
+`FmlRw.lawUpdE`/`ErasedCov` became `FmlRw.lawUpdS`/`LawCov`.
+
+**Chains past the program.**  A line's key (`Fml.lineKey`) is text: its
+terms and updates printed by name (`Tm.keyStr`, `Upd.keyStrs`), a
+program as its statements, a postcondition by its slot.  A written line
+with no modality is read by name into the same key (`elabKeyQ`), so it
+need not declare a memory local it no longer writes.  `Fml.LeadsK φ L` is
+`∃ B, Fml.Leads φ B ∧ B.eraseNames = L.eraseNames` (`L` read where it
+stands, the binders' names aside: `Fml.eraseNames`, `holds_eraseNames`),
+and `Fml.LeadsK.valid h hL : Valid φ` from `Valid L` (the coordinator's
+point: `ChainNotation`'s `composed` now proves `Valid` by it).  A law's
+instances are found on the scoped line (`lawInstances`, `spinePositions`
+for the `…In` laws), its side conditions closed by `rfl`/`decide` or a
+`Tm.KindFreeAt` hypothesis (`Tm.KindFreeAt.ofNil`).  The line's closed
+terms are read once a candidate search, not once a law (`tsMemo`:
+`Chains/Storage` 9.05 → 8.25 s).
+
+**Folded**: one traversal for every rewrite of an update's right-hand
+sides (`Tm.rwBy`, `Upd.rwBy`, `Upd.hasBy`, sound by `Upd.rwBy_apply`,
+`_rev`, `_eq` over `PickLe`/`PickGe`/`PickEq`), of which `Upd.rwC`
+(`Tm.pickClosed`) and `Upd.rwG` (`LawPair.pick`) are instances;
+`Tm.down?`/`Rhs.down?` as `thinS? (.drop .refl)`; `Tm.isLit` as
+`(Tm.litVal? t).isSome`.  Dead code the deletion left (a probe over the
+environment, kept only where the name had a user at `887f4d1a`): the
+erasure's `*_nat`/`*_wl`/`Agree.*` lemmas, `Decide.Rel`/`EnvRel`, the
+`Surface.*` frame lemmas, `Tm.reads`, `Surface.Tm.lsize`, and others.
+
+**What remains of the untyped syntax, and why.**  `Surface.Tm`/`MAddr`/
+`Upd`/`UpdElem`, `Tm.erase`/`Upd.erase`, `DelabErase`'s `Delab.tr` and
+its helpers (`Delab.Env`, `loweredVar?`, `wkUp?`, `isUp`, `isCtx`,
+`unknownVar`, `stmtOutNames`, `withTwins`, `updParts`, `updList`) and
+`inductive NFml (C) | eq (a b : Term C)` (`Update.lean`, the one
+constructor `Delab.tr` emits) remain only as the SolKey reader's shim
+(the user's decision: the reader is not ported, side-projects untouched);
+no prover code reads them.  The untyped terms are also the notation's
+front end: `tm{}`, `st!{}`/`pt!{}` and a chain's by-name key are parsed
+into `Surface.Tm` and resolved to `Tm C Γ` (`Tm.resolveN`) or printed
+(`Surface.Tm.keyStr`).  The state IR (`Env`, `EState`, `State.erase`,
+`CloseS.holdsE`) stays for W9.6.
+
+**Pins moved**: `ChainRewrites` (the `add_literals` side condition now
+prints `Int.ofNat …`, `findOnSaveFrame`'s the scoped `Tm.app1 … diverges`;
+`Laws.readBack`/`Laws'.readBack` stated as scoped `TermTaclet`s, `hk` a
+`Tm.KindFreeAt`); `Chains/StorageDelete` (`hk` a `Tm.KindFreeAt`);
+`Tactics/Chains` (the memory `~~>`/`sol_rws` example is the explicit
+`Via` chain `#chain` writes: its last line read where it stands cannot
+match the computed line's binders); `ChainNotation` (a new
+`(composed m φ).valid h`); `KeyNotation` (named locals spelled `pos(k)`,
+the `se1` example gone); `Tactics/Decide`'s memory clauses (`at(pos(0))`
+for `at(i)`; the `#eval` results unchanged); `TermLib`'s `Tm.reads`
+example gone; `CloseTests` (`sol_leaf` for `refine close ?_; sol_symex`).
+
+**Checks.**  `lake build` of `Solidity`, `solkeycheck`, `SolidityCorpus`
+and `SolkeyTestSuite` (a temporary default-target list, restored):
+green.  `.lake/build/bin/solkeycheck`: OK (326 taclets at the local
+`../solkey`).  `check-orphans`: only `Solidity/Scratch`.
+`check-doc-paths`: no missing path.  `sorry` lines 19, as at
+`887f4d1a`.  `#print axioms` of `FmlRw.lawUpdS`, `Fml.LeadsK.valid`,
+`holds_eraseNames`, `LawCov.covered`, `Upd.rwBy_apply(_rev, _eq)`,
+`holds_upd_rwG`, `Proves.sound`, `Valid.of_reduceS`,
+`LFml.syn_valid_alls`: `propext`, `Classical.choice`, `Quot.sound`.
+`check-testsuite.sh` refuses the local `../solkey` (`4150e0a8`, stale, as
+before).  `rg "\bNFml\b"` outside the records: the stub and the reader
+shim's docs.
+
+**Gates** (fresh worker, wall s; base measured at `887f4d1a` the same day):
+
+| Row | Gate | Base | W9.5a |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 179.1 | 180.9 |
+| `Derived7` | 61.7 | 47.9 | 48.5 |
+| `Tactics/Decide` | 45.0 | 38.9 | 39.1 |
+| `ProofTree` | 11.7 | 8.3 | 8.3 |
+| `Chains/Storage` | 9.0 | 8.7 | 8.3 |
+| `ChainRewrites` | 8.2 | 7.6 | 7.1 |
+| `ChainRewritesOpen` | 4.1 | 5.0 (cpu 3.7) | 3.5 |
+| `Solkey/TestSuite` | 13.2 | 6.8 | 6.9 |
+
 ## What is left
 
-**On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
-Each item below is gated against the final W7 table, and a module that
-fails stays on the IR:
-- `NFmlClose`'s `simp` set over typed symbols (decision 82); the
-  reduction's symbols over the typed state (W9.2 reads a scoped term on
-  the scoped state, its symbols still untyped on `EState.glob`, decision
-  83); `Atom.name` with `NFml.toL` (proposal 99).  The scoped closer's
-  layout from a `wt(storage)` premise landed at W9.2 (proposal 100).
-- `NFmlClose`'s `simp` set over typed symbols (decision 82: done for the
-  scoped leaf at W9.3, `Calculus/CloseScoped.lean`); the
-  reduction's symbols over the typed state (a term still reads them on
-  the erasure, `Tm.toLS_eq`, decision 83); `Atom.name` with `NFml.toL`
-  (proposal 99); the scoped closer's layout from a `wt(storage)`
-  premise, if wanted (proposal 100).
-- `simplifyUpdate` (scoped) dropping unread locals with their hidden
-  binders (the formula strengthened out of the local's scope), and what an
-  update pops under the diamond (decision 87's rest; W7 `w7-rewrites` did
-  the shadowed writes, under either modality).
-- While the program is open, not yet scoped: the laws of memory reads
-  (`EvalLaw`), a law in an update's right-hand side where the update holds
-  the write it reads back (`Upd.covers`) or member-wise (`Term.base?`), a
-  term taclet in a diamond update or under a modality variable (`lawUpd`).
-- Past the program (proposal 101): a merge across a hidden binder, then
-  `sol_chain.scopedPast` on by default and the laws, `~~>` and `calc`
-  steps on the scoped line; `sol_apply_upd`, `sol_fold_terms` on the
-  scoped leaf.
+**W9.5b (the reader).**  Port the SolKey reader to the scoped syntax, then
+delete the shim: `Surface.Tm`/`MAddr`/`Upd`/`UpdElem` as the reader's
+interface, `Tm.erase`/`Upd.erase`, `Delab.tr` and its helpers, the `NFml`
+stub.  The notation front end (`tm{}`, `st!{}`, a chain's by-name key)
+then parses straight to `Tm C Γ`.
+
+**W9.6 (the state IR)**, a proposal: `Tm.eval` over `State C Γ`, the
+Sound* files against `TRun.*`, the run invariants over `State`; the
+closer's untyped reading of a leaf's state (`CloseS.holdsE`,
+`EState.glob`) goes with it.
+
+**Open items:**
+- The reduction's symbols over the typed state (decision 83): a scoped
+  term's symbols still read `EState.glob`, untyped.
+- `Close`'s `simp` set over typed symbols (decision 82: done for the
+  scoped leaf at W9.3, `Calculus/CloseScoped.lean`).
 - A write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩
   true`, pinned in `Examples/ProofTree.lean`): the closer reads the
-  reduction over untyped states with no contract roots (since W9.3 on the
-  scoped leaf, with no layout without a `wt(storage)` premise).
-- Each of these shortens the reader list ("M6c"); `NFml`, `Fml.erase` and
-  `Semantics/Erased.lean` go only when it is empty.
-
-**Besides M6c:**
-- At the merge into `master`: the SolKey reader's require back to
-  `../../../solidity-lean` (side-projects `lean/solkey`, branch
-  `intrinsic`, ported: "W8 reader port record"), and that branch merged.
-- The IR's removal: "W9 plan" (supersedes the optional rename).
-- Not run since W4: `check-corpus.sh` (its probes need `lake`),
-  the `solkeycheck` executable (built), the reader's
-  `keycheck` executable as a target and the VS Code extension's tests.  No
-  read-only finder/skeptic pass of W6's or W7's merge.
+  storage untyped, with no layout without a `wt(storage)` premise
+  (proposal 100).
+- `simplifyUpdate` while the program is open does not drop unread locals
+  with their hidden binders (past the program it does, `FmlRw.simplifyPast`);
+  what an update pops under the diamond (decision 87's rest).
+- A `~~>` line read where it stands is matched up to its binders' names
+  (`Fml.LeadsK`); a line whose context order differs from the computed one
+  (`Tactics/Chains`' memory example) is written as an explicit chain.
+- Printing a reduction's atoms by their binders' names (proposal 99) would
+  take the leaf's context to `KeyNotation`'s printer.
+- Not run since W4: `check-corpus.sh` (its probes need `lake`), the
+  reader's `keycheck` executable and the VS Code extension's tests.
 - `check-testsuite.sh` passes at the W8.5 gate with `--solkey` at a
   checkout of solkey `1b4341a303` (`TestSuite.sol` `2fe50a03`);
   `../solkey` itself is stale (`4150e0a8`).
-- Lean docstrings still call the erased side "today's" in places and cite
-  this record's sections (at `ad728b16` and `b8565d23`).
-- `Delab.withTwins` (`Calculus/DelabErase.lean`) does not pass `schema` on
-  its `frames = true` path; nothing calls it with both set.
+- Lean docstrings may still call the erased side "today's" in places.
 
 **Lead, 2026-10-11 (2):** proposals 106–128 (W8) are approved. Decision 11
 is done: no untyped statement, program or formula remains; `NFml` and its
