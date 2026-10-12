@@ -847,53 +847,58 @@ theorem Tm.readStore?_eval {σ : State C Γ} {u : Srt} {t : Tm C Γ u} {X : Tm C
       exact ht rfl
   | _ => simp only [Tm.readStore?, reduceCtorEq] at h
 
-/-- A storage operation on the spine of a storage term: its first argument. -/
-def Op2.spineStep (w : Tm C Γ .st) {a b s : Srt} : Op2 C a b s → Tm C Γ a → Bool → Bool
-  | .delAt, x, ih | .pop, x, ih | .shrink, x, ih | .pushSlot, x, ih | .extend, x, ih =>
-    x.beqR w || ih
-  | _, _, _ => false
+/-- A symbol's value is strict in its first argument: where it halts, so
+does the term. -/
+theorem Tm.eval_app1_none {σ : State C Γ} {a u : Srt} (o : Op1 C a u) (x : Tm C Γ a)
+    (hx : x.eval σ = none) : (Tm.app1 o x).eval σ = none := by
+  rw [Tm.eval_app1, hx, Op1.eval_eq_evalM]
+  cases o <;> rfl
 
-/-- A storage operation on the spine of a storage term: its first argument. -/
-def Op3.spineStep (w : Tm C Γ .st) {a b c s : Srt} : Op3 C a b c s → Tm C Γ a → Bool → Bool
-  | .save, x, ih | .push, x, ih => x.beqR w || ih
-  | _, _, _ => false
+theorem Tm.eval_app2_none {σ : State C Γ} {a b u : Srt} (o : Op2 C a b u) (x : Tm C Γ a)
+    (y : Tm C Γ b) (hx : x.eval σ = none) : (Tm.app2 o x y).eval σ = none := by
+  rw [Tm.eval_app2, hx, Op2.eval_eq_evalM]
+  cases o <;> rfl
 
-/-- `w` is on the spine below `t`: a storage operation's first argument, or
-one below it.  Generic in the sort. -/
-def Tm.onSpineAny (w : Tm C Γ .st) : {u : Srt} → Tm C Γ u → Bool
-  | _, .app2 o x _ => o.spineStep w x (Tm.onSpineAny w x)
-  | _, .app3 o x _ _ => o.spineStep w x (Tm.onSpineAny w x)
+theorem Tm.eval_app3_none {σ : State C Γ} {a b c u : Srt} (o : Op3 C a b c u) (x : Tm C Γ a)
+    (y : Tm C Γ b) (z : Tm C Γ c) (hx : x.eval σ = none) : (Tm.app3 o x y z).eval σ = none := by
+  rw [Tm.eval_app3, hx, Op3.eval_eq_evalM]
+  cases o <;> rfl
+
+/-- `w` is on the spine below `t`: a symbol's first argument, or one below
+it.  Generic in both sorts. -/
+def Tm.onSpineAny {k : Srt} (w : Tm C Γ k) : {u : Srt} → Tm C Γ u → Bool
+  | _, .app1 _ x => x.beqR w || Tm.onSpineAny w x
+  | _, .app2 _ x _ => x.beqR w || Tm.onSpineAny w x
+  | _, .app3 _ x _ _ => x.beqR w || Tm.onSpineAny w x
   | _, _ => false
 
 /-- `w` is `t` or on its spine: where `t` returns, `w` does. -/
-def Tm.onSpine (t w : Tm C Γ .st) : Bool := t.beqR w || Tm.onSpineAny w t
+def Tm.onSpine {k : Srt} (t w : Tm C Γ k) : Bool := t.beqR w || Tm.onSpineAny w t
 
-theorem Tm.onSpineAny_eval {σ : State C Γ} {w : Tm C Γ .st} {u : Srt} (t : Tm C Γ u)
+theorem Tm.onSpineAny_eval {σ : State C Γ} {k : Srt} {w : Tm C Γ k} {u : Srt} (t : Tm C Γ u)
     (h : Tm.onSpineAny w t = true) (ht : t.eval σ ≠ none) : w.eval σ ≠ none := by
   induction t with
+  | app1 o x ihx =>
+    have hx : x.eval σ ≠ none := fun hx => ht (Tm.eval_app1_none o x hx)
+    simp only [Tm.onSpineAny, Bool.or_eq_true] at h
+    rcases h with h | h
+    · cases Tm.sigma_eq_of_beqR h; exact hx
+    · exact ihx h hx
   | app2 o x y ihx _ =>
-    have hx : x.eval σ ≠ none := fun hx => ht (by
-      rw [Tm.eval_app2, hx, Op2.eval_eq_evalM]
-      cases o <;> rfl)
-    cases o <;> simp only [Tm.onSpineAny, Op2.spineStep, Bool.false_eq_true,
-      Bool.or_eq_true] at h
-    all_goals
-      rcases h with h | h
-      · obtain rfl := Tm.eq_of_beqR h; exact hx
-      · exact ihx h hx
+    have hx : x.eval σ ≠ none := fun hx => ht (Tm.eval_app2_none o x y hx)
+    simp only [Tm.onSpineAny, Bool.or_eq_true] at h
+    rcases h with h | h
+    · cases Tm.sigma_eq_of_beqR h; exact hx
+    · exact ihx h hx
   | app3 o x y z ihx _ _ =>
-    have hx : x.eval σ ≠ none := fun hx => ht (by
-      rw [Tm.eval_app3, hx, Op3.eval_eq_evalM]
-      cases o <;> rfl)
-    cases o <;> simp only [Tm.onSpineAny, Op3.spineStep, Bool.false_eq_true,
-      Bool.or_eq_true] at h
-    all_goals
-      rcases h with h | h
-      · obtain rfl := Tm.eq_of_beqR h; exact hx
-      · exact ihx h hx
+    have hx : x.eval σ ≠ none := fun hx => ht (Tm.eval_app3_none o x y z hx)
+    simp only [Tm.onSpineAny, Bool.or_eq_true] at h
+    rcases h with h | h
+    · cases Tm.sigma_eq_of_beqR h; exact hx
+    · exact ihx h hx
   | _ => simp only [Tm.onSpineAny, Bool.false_eq_true] at h
 
-theorem Tm.onSpine_eval {σ : State C Γ} {t w : Tm C Γ .st} (h : t.onSpine w = true)
+theorem Tm.onSpine_eval {σ : State C Γ} {k : Srt} {t w : Tm C Γ k} (h : t.onSpine w = true)
     (ht : t.eval σ ≠ none) : w.eval σ ≠ none := by
   rcases Bool.or_eq_true_iff.mp h with h | h
   · obtain rfl := Tm.eq_of_beqR h; exact ht
@@ -1388,6 +1393,491 @@ theorem Upd.coversLit_eval {Δ : Ctx} {U : Upd C Γ Δ} {u : Srt} {t : Tm C Γ u
   · nomatch hc
 
 
+/-! ## The laws of memory reads
+
+A memory read is no Theory equation (its Theory denotation is opaque), so a
+law of one is a refinement of the run: where the read returns, its
+replacement returns the same (`EvalLaw.exact`), on the typed heap
+(`Heap.readAddr_writeAddr_same`, `Heap.readAddr_writeAddr_apart`).  Inside
+an update over either modality the update must hold the write the law reads
+past (`Upd.coversEval`), as `Upd.coversRef` for the storage. -/
+
+section Heap
+
+theorem Objs.get_set_same {H : HTy} {R : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) →
+    (i : Nat) → (h : Rs[i]? = some R) → (o : MObj H R) → Objs.get Rs (Objs.set Rs os i h o) i h = o
+  | [], _, _, h, _ => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
+  | R' :: _, _, 0, h, _ => by
+    obtain rfl : R' = R := Option.some.inj (by simpa only [List.getElem?_cons_zero] using h)
+    rfl
+  | _ :: Rs, os, i + 1, h, o => Objs.get_set_same Rs os.2 i _ o
+
+theorem Objs.get_set_ne {H : HTy} {R R₂ : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) →
+    (i j : Nat) → i ≠ j → (h : Rs[i]? = some R) → (h₂ : Rs[j]? = some R₂) → (o : MObj H R) →
+    Objs.get Rs (Objs.set Rs os i h o) j h₂ = Objs.get Rs os j h₂
+  | [], _, _, _, _, h, _, _ => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
+  | _ :: _, _, 0, 0, hij, _, _, _ => absurd rfl hij
+  | _ :: _, _, 0, _ + 1, _, _, _, _ => rfl
+  | _ :: _, _, _ + 1, 0, _, _, _, _ => rfl
+  | _ :: Rs, os, i + 1, j + 1, hij, h, h₂, o =>
+    Objs.get_set_ne Rs os.2 i j (fun e => hij (congrArg (· + 1) e)) _ _ o
+
+theorem Heap.get_set_same {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) (o : MObj H R) :
+    (hp.set r o).get r = o :=
+  Objs.get_set_same H hp r.id r.get? o
+
+theorem Heap.get_set_ne {H : HTy} {R R₂ : RefTy} (hp : Heap H) (r : HRef H R) (r₂ : HRef H R₂)
+    (hne : r.id ≠ r₂.id) (o : MObj H R) : (hp.set r o).get r₂ = hp.get r₂ :=
+  Objs.get_set_ne H hp r.id r₂.id hne r.get? r₂.get? o
+
+/-- Two references of one identity are one reference. -/
+theorem HRef.heq_of_id {H : HTy} {R R₂ : RefTy} (r : HRef H R) (r₂ : HRef H R₂) (e : r.id = r₂.id) :
+    R = R₂ ∧ HEq r r₂ := by
+  rcases r with ⟨i, h⟩
+  rcases r₂ with ⟨j, h₂⟩
+  simp only at e
+  subst e
+  obtain rfl : R = R₂ := Option.some.inj (h.symm.trans h₂)
+  exact ⟨rfl, HEq.rfl⟩
+
+theorem MFields.get_set_same {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} →
+    (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) → (v : MVal H T) →
+    MFields.get fs (MFields.set fs x h v) h = v
+  | [], _, _, h, _ => absurd h (by simp only [Semantics.lookupBy, reduceCtorEq, not_false_eq_true])
+  | (f', T') :: fs, T, x, h, v => by
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      simp only [MFields.get, MFields.set, e, dite_true]
+    · simp only [MFields.get, MFields.set, e, dite_false]
+      exact MFields.get_set_same fs x.2 _ v
+
+theorem MFields.get_set_ne {H : HTy} {f g : Name} : (fs : List (Name × Ty)) → {T U : Ty} →
+    (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) →
+    (hg : Semantics.lookupBy g fs = some U) → f ≠ g →
+    (v : MVal H T) → MFields.get fs (MFields.set fs x h v) hg = MFields.get fs x hg
+  | [], _, _, _, h, _, _, _ => absurd h (by simp only [Semantics.lookupBy, reduceCtorEq, not_false_eq_true])
+  | (f', T') :: fs, T, U, x, h, hg, hfg, v => by
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      have eg : ¬ g = f' := fun h' => hfg (e.trans h'.symm)
+      simp only [MFields.get, MFields.set, e, dite_true, eg, dite_false]
+    · by_cases eg : g = f'
+      · simp only [MFields.get, MFields.set, e, dite_false, eg, dite_true]
+      · simp only [MFields.get, MFields.set, e, dite_false, eg]
+        exact MFields.get_set_ne fs x.2 _ _ hfg v
+
+theorem MObj.elems_setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) (o : MObj H R) (i : Nat)
+    (v : MVal H E) : MObj.elems a (MObj.setElem a o i v) = (MObj.elems a o).set i v := by
+  cases a <;> simp only [MObj.setElem_dyn, MObj.elems_dyn, MObj.setElem_fixed, MObj.elems_fixed]
+
+/-- An array object is not a struct. -/
+theorem ArrTy.ne_struct {R : RefTy} {E : Ty} (a : ArrTy R E) (s : Name) : R ≠ .struct s := by
+  cases a <;> exact fun h => RefTy.noConfusion h
+
+/-- Two addresses that never meet: two members, or a member and an element
+(two kinds of object), or two elements of one array at two indices. -/
+def MAddr.Apart {H : HTy} {T U : Ty} : MAddr H T → MAddr H U → Prop
+  | @MAddr.field _ _ f _ _ _, @MAddr.field _ _ g _ _ _ => f ≠ g
+  | .field .., .index .. => True
+  | .index .., .field .. => True
+  | .index r _ i, .index r' _ j => r.id = r'.id → i ≠ j
+
+/-- **A write reads back where it lands** (`readOnWrite`). -/
+theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : MAddr H T}
+    {v : MVal H T} (h : hp.writeAddr ad v = some hp') : hp'.readAddr ad = some v := by
+  cases ad with
+  | field r hf =>
+    simp only [Heap.writeAddr, Option.some.injEq] at h
+    subst h
+    simp only [Heap.readAddr, Heap.field, Heap.setField, Heap.get_set_same, MFields.get_set_same]
+  | index r a i =>
+    simp only [Heap.writeAddr, Heap.setIndex] at h
+    split at h
+    · rename_i hb
+      simp only [Option.some.injEq] at h
+      subst h
+      simp only [Heap.readAddr, Heap.index, hb.1, if_true, Heap.get_set_same, MObj.elems_setElem,
+        List.getElem?_set_self hb.2]
+    · simp only [reduceCtorEq] at h
+
+/-- **A write leaves an address apart from it** (`readWriteDifferent`). -/
+theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
+    {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp') (hab : ad.Apart bd) :
+    hp'.readAddr bd = hp.readAddr bd := by
+  cases ad with
+  | field r hf =>
+    simp only [Heap.writeAddr, Option.some.injEq] at h
+    subst h
+    cases bd with
+    | field r' hg =>
+      simp only [Heap.readAddr, Heap.field, Heap.setField, Option.some.injEq]
+      by_cases e : r.id = r'.id
+      · obtain ⟨hR, hr⟩ := HRef.heq_of_id r r' e
+        cases hR
+        cases hr
+        rw [Heap.get_set_same, MFields.get_set_ne _ _ _ _ hab]
+      · rw [Heap.get_set_ne _ r r' e]
+    | index r' a j =>
+      have e : r.id ≠ r'.id := fun e => ArrTy.ne_struct a _ (HRef.heq_of_id r r' e).1.symm
+      simp only [Heap.readAddr, Heap.index, Heap.setField, Heap.get_set_ne _ r r' e]
+  | index r a i =>
+    simp only [Heap.writeAddr, Heap.setIndex] at h
+    split at h
+    · rename_i hb
+      simp only [Option.some.injEq] at h
+      subst h
+      cases bd with
+      | field r' hg =>
+        have e : r.id ≠ r'.id := fun e => ArrTy.ne_struct a _ (HRef.heq_of_id r r' e).1
+        simp only [Heap.readAddr, Heap.field, Heap.get_set_ne _ r r' e]
+      | index r' a' j =>
+        by_cases e : r.id = r'.id
+        · obtain ⟨hR, hr⟩ := HRef.heq_of_id r r' e
+          cases hR
+          cases hr
+          have hij : i ≠ j := hab e
+          cases a <;> cases a' <;>
+          · simp only [Heap.readAddr, Heap.index, Heap.get_set_same, MObj.elems_setElem]
+            by_cases hj : 0 ≤ j
+            · have hn : i.toNat ≠ j.toNat := by omega
+              simp only [hj, if_true, List.getElem?_set_ne hn]
+            · simp only [hj, if_false]
+        · simp only [Heap.readAddr, Heap.index, Heap.get_set_ne _ r r' e]
+    · simp only [reduceCtorEq] at h
+
+end Heap
+
+section MemEval
+
+variable {Γ : Ctx}
+
+/-- An address term's shape: a member, or an element of an identity at an
+index, literal or not. -/
+inductive AddrShape (C : Contract) (Γ : Ctx) where
+  | field (f : Name)
+  | index (i : (R : RefTy) × Tm C Γ (.ident R)) (k : Option Int)
+
+def Op1.addrStep {a u : Srt} : Op1 C a u → Option (AddrShape C Γ)
+  | .mfield (f := f) _ => some (.field f)
+  | _ => none
+
+def Op2.addrStep {a b u : Srt} : Op2 C a b u → Tm C Γ a → Tm C Γ b → Option (AddrShape C Γ)
+  | .mat _, x, y => some (.index ⟨_, x⟩ y.litInt?)
+  | _, _, _ => none
+
+/-- An address term's shape.  Generic in the sort. -/
+def Tm.addrShape? {u : Srt} : Tm C Γ u → Option (AddrShape C Γ)
+  | .app1 o _ => o.addrStep
+  | .app2 o x y => o.addrStep x y
+  | _ => none
+
+/-- Two address terms that never meet: two members, a member and an element,
+or two elements of one identity at two literal indices.  Syntactic, so that
+`rfl` decides it. -/
+def Tm.apart? {T U : Ty} (a : Tm C Γ (.addr T)) (b : Tm C Γ (.addr U)) : Bool :=
+  match a.addrShape?, b.addrShape? with
+  | some (.field f), some (.field g) => f != g
+  | some (.field _), some (.index _ _) => true
+  | some (.index _ _), some (.field _) => true
+  | some (.index i (some k)), some (.index j (some k')) => i.2.beqR j.2 && k != k'
+  | _, _ => false
+
+/-- What an address term's shape says of the address it reads. -/
+def AddrShape.Reads (σ : State C Γ) {T : Ty} : AddrShape C Γ → MAddrT T → Prop
+  | .field f, ad => ∃ (s : Name) (id : Nat) (h : Semantics.lookupBy f (Semantics.structDef s) = some T),
+      ad = MAddrT.field id h
+  | .index ⟨R, i⟩ k, ad => ∃ (id : Nat) (E : Ty) (a : ArrTy R T) (j : Int), i.eval σ = some id ∧
+      ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j = k'
+
+theorem Tm.litInt?_uint {σ : State C Γ} {y : Tm C Γ (.val .uint)} {k : Int} (h : y.litInt? = some k)
+    {w : PrimTy.uint.Denote} (hw : y.eval σ = some w) : w.1 = k := by
+  obtain ⟨⟨P, v⟩, hv, rfl⟩ := Option.map_eq_some_iff.1 h
+  cases y with
+  | app0 o =>
+    cases o with
+    | lit v' =>
+      simp only [Tm.litW?, Op0.litW?, Option.some.injEq, Sigma.mk.injEq] at hv
+      obtain ⟨rfl, hv⟩ := hv
+      cases hv
+      have : (Tm.app0 (Γ := Γ) (Op0.lit v')).eval σ = some v' := rfl
+      rw [this] at hw
+      cases hw
+      rfl
+    | _ => simp only [Tm.litW?, Op0.litW?, reduceCtorEq] at hv
+  | _ => simp only [Tm.litW?, reduceCtorEq] at hv
+
+theorem Tm.addrShape?_eval (σ : State C Γ) {T : Ty} {a : Tm C Γ (.addr T)} {sh : AddrShape C Γ}
+    (h : a.addrShape? = some sh) {ad : MAddrT T} (ha : a.eval σ = some ad) : sh.Reads σ ad := by
+  cases a with
+  | app1 o x =>
+    cases o <;> simp only [Tm.addrShape?, Op1.addrStep, reduceCtorEq, Option.some.injEq] at h
+    subst h
+    rename_i s f hf
+    have ha : (x.eval σ).map (fun id => MAddrT.field id hf) = some ad := ha
+    obtain ⟨id, -, rfl⟩ := Option.map_eq_some_iff.1 ha
+    exact ⟨s, id, hf, rfl⟩
+  | app2 o x y =>
+    cases o <;> simp only [Tm.addrShape?, Op2.addrStep, reduceCtorEq, Option.some.injEq] at h
+    subst h
+    rename_i R arr
+    have ha : ((x.eval σ).bind fun id => (y.eval σ).bind fun k => some (MAddrT.index id arr k.1)) =
+      some ad := ha
+    simp only [Option.bind_eq_some_iff, Option.some.injEq] at ha
+    obtain ⟨id, hi, w, hw, rfl⟩ := ha
+    exact ⟨id, T, arr, w.1, hi, rfl, fun k' hk => Tm.litInt?_uint hk hw⟩
+  | _ => simp only [Tm.addrShape?, reduceCtorEq] at h
+
+/-- Two apart address terms resolve, in one heap typing, to apart
+addresses. -/
+theorem Tm.apart?_resolve (σ : State C Γ) {T U : Ty} {a : Tm C Γ (.addr T)} {b : Tm C Γ (.addr U)}
+    (h : a.apart? b = true) {ad : MAddrT T} {bd : MAddrT U} (ha : a.eval σ = some ad)
+    (hb : b.eval σ = some bd) {H : HTy} {ra : MAddr H T} {rb : MAddr H U}
+    (hra : ad.resolve H = some ra) (hrb : bd.resolve H = some rb) : ra.Apart rb := by
+  unfold Tm.apart? at h
+  split at h
+  · rename_i f g hfa hfb
+    obtain ⟨s, id, hf, rfl⟩ := Tm.addrShape?_eval σ hfa ha
+    obtain ⟨s', id', hg, rfl⟩ := Tm.addrShape?_eval σ hfb hb
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at hra hrb
+    obtain ⟨r, -, rfl⟩ := hra
+    obtain ⟨r', -, rfl⟩ := hrb
+    simpa only [bne_iff_ne, ne_eq] using h
+  · rename_i f i k hfa hfb
+    obtain ⟨s, id, hf, rfl⟩ := Tm.addrShape?_eval σ hfa ha
+    obtain ⟨id', E, arr, j, -, rfl, -⟩ := Tm.addrShape?_eval σ hfb hb
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at hra hrb
+    obtain ⟨r, -, rfl⟩ := hra
+    obtain ⟨r', -, rfl⟩ := hrb
+    trivial
+  · rename_i i k f hfa hfb
+    obtain ⟨id', E, arr, j, -, rfl, -⟩ := Tm.addrShape?_eval σ hfa ha
+    obtain ⟨s, id, hf, rfl⟩ := Tm.addrShape?_eval σ hfb hb
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at hra hrb
+    obtain ⟨r, -, rfl⟩ := hra
+    obtain ⟨r', -, rfl⟩ := hrb
+    trivial
+  · rename_i i k j k' hfa hfb
+    simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at h
+    obtain ⟨hij, hk⟩ := h
+    obtain ⟨R, i⟩ := i
+    obtain ⟨R', j⟩ := j
+    cases Tm.sigma_eq_of_beqR hij
+    obtain ⟨id, E, arr, n, hi, rfl, hn⟩ := Tm.addrShape?_eval σ hfa ha
+    obtain ⟨id', E', arr', n', hi', rfl, hn'⟩ := Tm.addrShape?_eval σ hfb hb
+    rw [hi] at hi'
+    cases hi'
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at hra hrb
+    obtain ⟨r, -, rfl⟩ := hra
+    obtain ⟨r', -, rfl⟩ := hrb
+    intro _
+    rw [hn k rfl, hn' k' rfl]
+    exact hk
+  · nomatch h
+
+end MemEval
+
+/-- A law of a memory read, at the value or the identity sort: where the
+read returns, the replacement returns the same (`EvalLaw.exact`). -/
+inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
+  /-- **`readOnWrite`**: `read(write(m, a, v), a) ⇝ v` (`Heap.readAddr_writeAddr_same`). -/
+  | readOnWrite {m : Tm C Γ .mem} {P : PrimTy} {a : Tm C Γ (.addr (.prim P))} {v : P.Denote} :
+      EvalLaw (Tms.Term.read (Tms.MTerm.write m a (Tms.MValT.val (Tms.Term.lit v))) a)
+        (Tms.Term.lit v)
+  /-- **`readWriteDifferent`**: a write leaves every other address,
+  `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet
+  (`Tm.apart?`, `Heap.readAddr_writeAddr_apart`). -/
+  | readWriteDifferent {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
+      {P : PrimTy} {b : Tm C Γ (.addr (.prim P))} (h : a.apart? b = true := by rfl) :
+      EvalLaw (Tms.Term.read (Tms.MTerm.write m a v) b) (Tms.Term.read m b)
+  /-- **`readWriteDifferentIdentity`**: `readWriteDifferent` at the identity sort. -/
+  | readWriteDifferentIdentity {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)}
+      {v : Tm C Γ (.mv T)} {R : RefTy} {b : Tm C Γ (.addr (.ref R))}
+      (h : a.apart? b = true := by rfl) :
+      EvalLaw (Tms.ITerm.read (Tms.MTerm.write m a v) b) (Tms.ITerm.read m b)
+  /-- **`readOnWriteIdentity`**: `readOnWrite` at the identity sort,
+  `read(write(m, a, ref(i)), a) ⇝ i` (`Heap.readAddr_writeAddr_same`). -/
+  | readOnWriteIdentity {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ (.addr (.ref R))}
+      {i : Tm C Γ (.ident R)} :
+      EvalLaw (Tms.ITerm.read (Tms.MTerm.write m a (Tms.MValT.ref i)) a) i
+
+section EvalLawSound
+
+variable {Γ : Ctx} {σ : State C Γ}
+
+/-- The memory a read reads. -/
+def Op2.memArg {a b s : Srt} : Op2 C a b s → Tm C Γ a → Option (Tm C Γ .mem)
+  | .read, x => some x
+  | .iread, x => some x
+  | _, _ => none
+
+/-- The memory a read reads (`read(m, a)`, at either sort).  Generic in the
+sort. -/
+def Tm.readMem? {u : Srt} : Tm C Γ u → Option (Tm C Γ .mem)
+  | .app2 o x _ => o.memArg x
+  | _ => none
+
+theorem Tm.readMem?_eval {u : Srt} {t : Tm C Γ u} {X : Tm C Γ .mem} (h : t.readMem? = some X)
+    (ht : t.eval σ ≠ none) : X.eval σ ≠ none := by
+  cases t with
+  | app2 o x y =>
+    cases o <;> simp only [Tm.readMem?, Op2.memArg, Option.some.injEq, reduceCtorEq] at h
+    all_goals
+      subst h
+      exact fun hx => ht (Tm.eval_app2_none _ x y hx)
+  | _ => simp only [Tm.readMem?, reduceCtorEq] at h
+
+/-- A memory write that returns: its parts, and the heap it leaves. -/
+theorem Tm.write_some {T : Ty} {m : Tm C Γ .mem} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
+    {μ' : Grown σ.H (fun _ => Unit)} (h : (Tms.MTerm.write m a v).eval σ = some μ') :
+    ∃ (μ : Grown σ.H (fun _ => Unit)) (ad : MAddrT T) (w : MvT T) (ra : MAddr μ.H' T)
+      (mv : MVal μ.H' T) (hp : Heap μ.H'), m.eval σ = some μ ∧ a.eval σ = some ad ∧
+      v.eval σ = some w ∧ ad.resolve μ.H' = some ra ∧ MvT.toMVal μ.H' T w = some mv ∧
+      μ.heap.writeAddr ra mv = some hp ∧ μ' = ⟨μ.ext, hp, ()⟩ := by
+  have h : ((m.eval σ).bind fun μ => (a.eval σ).bind fun ad => (v.eval σ).bind fun w =>
+      μ.writeT ad w) = some μ' := h
+  simp only [Grown.writeT, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+  obtain ⟨μ, hm, ad, ha, w, hv, ra, hra, mv, hmv, hp, hw, rfl⟩ := h
+  exact ⟨μ, ad, w, ra, mv, hp, hm, ha, hv, hra, hmv, hw, rfl⟩
+
+theorem Tm.eval_read {P : PrimTy} (X : Tm C Γ .mem) (b : Tm C Γ (.addr (.prim P))) :
+    (Tms.Term.read X b).eval σ = (X.eval σ).bind fun μ => (b.eval σ).bind fun bd =>
+      (bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb := rfl
+
+theorem Tm.eval_iread {R : RefTy} (X : Tm C Γ .mem) (b : Tm C Γ (.addr (.ref R))) :
+    (Tms.ITerm.read X b).eval σ = (X.eval σ).bind fun μ => (b.eval σ).bind fun bd =>
+      ((bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb).bind fun r => some r.id := rfl
+
+/-- **A memory law is exact past its write**: the read's memory returns
+wherever the read does, and where it returns the two sides return alike. -/
+theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.readMem? = some X ∧
+    ∀ σ : State C Γ, X.eval σ ≠ none → t.eval σ = t'.eval σ
+  | .readOnWrite => ⟨_, rfl, fun σ hX => by
+      obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
+      obtain ⟨μ, ad, w, ra, mv, hp, -, ha, hv, hra, hmv, hw, rfl⟩ := Tm.write_some hX
+      cases hv
+      cases hmv
+      rw [Tm.eval_read, hX, Option.bind_some, ha, Option.bind_some]
+      show (ad.resolve μ.H').bind (fun rb => hp.readAddr rb) = _
+      rw [hra, Option.bind_some, Heap.readAddr_writeAddr_same hw]
+      rfl⟩
+  | @EvalLaw.readWriteDifferent _ _ m T a v P b h => ⟨_, rfl, fun σ hX => by
+      obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
+      obtain ⟨μ, ad, w, ra, mv, hp, hm, ha, -, hra, -, hw, rfl⟩ := Tm.write_some hX
+      rw [Tm.eval_read, Tm.eval_read, hX, hm, Option.bind_some, Option.bind_some]
+      cases hb : b.eval σ with
+      | none => rfl
+      | some bd =>
+        simp only [Option.bind_some]
+        show (bd.resolve μ.H').bind (fun rb => hp.readAddr rb) = _
+        cases hrb : bd.resolve μ.H' with
+        | none => rfl
+        | some rb =>
+          simp only [Option.bind_some]
+          exact Heap.readAddr_writeAddr_apart hw (Tm.apart?_resolve σ h ha hb hra hrb)⟩
+  | @EvalLaw.readWriteDifferentIdentity _ _ m T a v R b h => ⟨_, rfl, fun σ hX => by
+      obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
+      obtain ⟨μ, ad, w, ra, mv, hp, hm, ha, -, hra, -, hw, rfl⟩ := Tm.write_some hX
+      rw [Tm.eval_iread, Tm.eval_iread, hX, hm, Option.bind_some, Option.bind_some]
+      cases hb : b.eval σ with
+      | none => rfl
+      | some bd =>
+        simp only [Option.bind_some]
+        show ((bd.resolve μ.H').bind fun rb => hp.readAddr rb).bind _ = _
+        cases hrb : bd.resolve μ.H' with
+        | none => rfl
+        | some rb =>
+          simp only [Option.bind_some]
+          rw [Heap.readAddr_writeAddr_apart hw (Tm.apart?_resolve σ h ha hb hra hrb)]⟩
+  | @EvalLaw.readOnWriteIdentity _ _ m R a i => ⟨_, rfl, fun σ hX => by
+      obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
+      obtain ⟨μ, ad, w, ra, mv, hp, -, ha, hv, hra, hmv, hw, rfl⟩ := Tm.write_some hX
+      rw [Tm.eval_iread, hX, Option.bind_some, ha, Option.bind_some]
+      show ((ad.resolve μ.H').bind fun rb => hp.readAddr rb).bind _ = _
+      rw [hra, Option.bind_some, Heap.readAddr_writeAddr_same hw, Option.bind_some]
+      have hv : i.eval σ = some w := hv
+      rw [hv]
+      simp only [MvT.toMVal, HRef.ofId?] at hmv
+      split at hmv
+      · cases hmv; rfl
+      · cases hmv⟩
+
+/-- **A memory law keeps every value its left side returns.** -/
+theorem EvalLaw.evalRefines {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') :
+    Tm.EvalRefinesAt t t' := fun σ x hx => by
+  obtain ⟨X, hX, he⟩ := r.exact
+  rw [← he σ (Tm.readMem?_eval hX (by rw [hx]; exact Option.some_ne_none _))]
+  exact hx
+
+/-- The memory terms an element writes the memory with. -/
+def UpdElem.memTerms {Δ : Ctx} : UpdElem C Γ Δ → List (Tm C Γ .mem)
+  | .memory m => [m]
+  | _ => []
+
+/-- The right-hand sides of an update's `memory :=` elements. -/
+def Upd.memTerms : {Δ : Ctx} → Upd C Γ Δ → List (Tm C Γ .mem)
+  | _, .nil => []
+  | _, .snoc U e => U.memTerms ++ e.memTerms
+  | _, .decl U _ _ => U.memTerms
+  | _, .pop U _ => U.memTerms
+  | _, .drop U _ => U.memTerms
+
+/-- **A memory write that is an element of an update that returns,
+returns.** -/
+theorem Upd.memory_eval_of_globT {σ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    {g : GlobT C σ.H} → U.globT σ = some g → ∀ s ∈ U.memTerms, s.eval σ ≠ none
+  | _, .nil, _, _ => fun _ h => nomatch h
+  | _, .snoc U e, g, h => by
+    change (U.globT σ).bind (e.globT σ) = some g at h
+    rw [Option.bind_eq_some_iff] at h
+    obtain ⟨g₀, hU, hw⟩ := h
+    intro s hs
+    rcases List.mem_append.1 hs with hs | hs
+    · exact Upd.memory_eval_of_globT U hU s hs
+    · cases e with
+      | memory s' =>
+        simp only [UpdElem.memTerms, List.mem_singleton] at hs
+        subst hs
+        rw [UpdElem.globT_eq_globTM] at hw
+        simp only [UpdElem.globTM, Option.bind_eq_some_iff] at hw
+        obtain ⟨μ, hμ, -⟩ := hw
+        rw [hμ]
+        exact Option.some_ne_none _
+      | _ => nomatch hs
+  | _, .decl U _ r, g, h => by
+    change (U.globT σ).bind (fun g => (r.eval σ).bind fun _ => some g) = some g at h
+    rw [Option.bind_eq_some_iff] at h
+    obtain ⟨g₀, hU, -⟩ := h
+    exact Upd.memory_eval_of_globT U hU
+  | _, .pop U _, _, h | _, .drop U _, _, h => Upd.memory_eval_of_globT U h
+
+/-- `U` writes the memory with a term on whose spine the memory `w` lies. -/
+def Upd.holdsMem {Δ : Ctx} (U : Upd C Γ Δ) (w : Tm C Γ .mem) : Bool :=
+  U.memTerms.any (·.onSpine w)
+
+theorem Upd.holdsMem_eval {Δ : Ctx} {U : Upd C Γ Δ} {w : Tm C Γ .mem} (h : U.holdsMem w = true)
+    {g : GlobT C σ.H} (hU : U.globT σ = some g) : w.eval σ ≠ none := by
+  obtain ⟨S, hS, hs⟩ := List.any_eq_true.1 h
+  exact Tm.onSpine_eval hs (Upd.memory_eval_of_globT U hU S hS)
+
+/-- A covered memory law's write is held by the update. -/
+def Upd.coversEval {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (q : Tm C Γ u × Tm C Γ u) : Bool :=
+  match q.1.readMem? with
+  | some X => U.holdsMem X
+  | none => false
+
+/-- **Wherever a covered update returns, a memory law refines back.** -/
+theorem EvalLaw.back {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') {Δ : Ctx} {U : Upd C Γ Δ}
+    (hc : U.coversEval (t, t') = true) {g : GlobT C σ.H} (hU : U.globT σ = some g) :
+    OLe (t'.eval σ) (t.eval σ) := by
+  obtain ⟨X, hX, he⟩ := r.exact
+  simp only [Upd.coversEval, hX] at hc
+  rw [he σ (Upd.holdsMem_eval hc hU)]
+  exact OLe.refl _
+
+end EvalLawSound
+
 /-! ## The laws, bundled -/
 
 /-- A law at an update's right-hand sides, scoped: the right side returns what the
@@ -1453,6 +1943,13 @@ def LawCov.eqv {u : Srt} {t t' : Tm C Γ u} (h : Tm.sameBase t t' = true) : LawC
   chk _ := true
   fwd σ := Tm.sameBase_eval h σ ▸ OLe.refl _
   back _ σ _ _ _ := Tm.sameBase_eval h σ ▸ OLe.refl _
+
+/-- **A memory law, where the update holds the write it reads past**
+(`Upd.coversEval`). -/
+def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') : LawCov C Γ u t t' where
+  chk U := U.coversEval (t, t')
+  fwd := r.evalRefines
+  back _ _ _ hc hU := r.back hc hU
 
 /-! ## A premise about closed terms, at any scope -/
 
