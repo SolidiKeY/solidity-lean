@@ -145,20 +145,19 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
   `apply` refuses a rule whose `\find` or side conditions do not match.
   `sol_derive` runs the walk; `sol_derive?` prints it as a `Try this`.
 - **by a chain**: `chain.valid h`, with `h` proving its last line
-  (`Fml.Via.valid`, `Fml.Steps.valid`, `Fml.Leads.valid`) while the
-  program is open, and `chain.valid_close h` (`Fml.ViaE.valid_close`)
-  for a chain that goes on past it.
+  (`Fml.Via.valid`, `Fml.Steps.valid`, `Fml.Leads.valid`); the lines
+  past the program are scoped too (`Calculus/RewritePast.lean`).
 
 **Chains** (`Calculus/Chains.lean`) state a derivation with every line
 written, as one chain term proved `by sol_chain`:
 `A ~[r]~> B ~*> C ~[sequentialToParallel]~> D ~[findOnSave]~> E` — `~[r]~>`
 a rule of the strategy (a wrong name is an elaboration error), `~>` one
 step, `~*>` several, and the rewrite links
-`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/ChainRewrites.lean`
-past the program, `Calculus/RewriteScoped.lean` while it is open).
-`Fml.Via.leads`/`Fml.ViaE.leads` make a chain `A ~~> E` (`Fml.LeadsE`
-past the program), and `Fml.Leads.via`, `Fml.Leads.viaE` and
-`Fml.LeadsE.via` compose segments of a long one. `#derivation φ` prints the strategy's lines, in the
+`~[sequentialToParallel]~>`, `~[findOnSave]~>`, … (`Calculus/RewriteScoped.lean`
+while the program is open, `Calculus/RewritePast.lean` past it).
+`Fml.Via.leads` makes a chain `A ~~> E` (`Fml.Via.leadsK`/`Fml.LeadsK`
+when it ends on a written last line), and `Fml.Leads.via` composes
+segments of a long one. `#derivation φ` prints the strategy's lines, in the
 rules' fresh names (`se1`, `sp1`); `#chain φ` (`Calculus/ChainGen.lean`)
 writes the whole chain, the program and then one rewrite a link to a last
 line, as the declaration to paste (`#chain_rest c` from the end of the chain

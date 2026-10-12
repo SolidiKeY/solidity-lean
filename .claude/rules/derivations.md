@@ -18,13 +18,12 @@ Two directories, by proof style:
   The convention:
   1. **One chain term, every line written.** A worked chain is
      `theorem chain : A ~[r]~> B ~*> C ~[findOnSave]~> D … := by sol_chain`
-     over a scoped line (`dl![m]{ … }` on `Post`): `Fml.Via`, and
-     `Fml.ViaE` once rewrites go on past the program
-     (`Calculus/ChainKit.lean`), propositions. No `calc`, no `_` line,
+     over a scoped line (`dl![m]{ … }` on `Post`): `Fml.Via`, past the
+     program too (`Calculus/ChainKit.lean`), propositions. No `calc`, no `_` line,
      the statement shows the whole trace. Every worked chain reads the scoped
      calculus; `φ : Post C Γ` stands at the context of the line's user
      locals (the fresh ones, a rule's or the elaborator's captures, dropped).
-     `~~>` (`Fml.Leads`, `Fml.LeadsE` past the program) and `calc`
+     `~~>` (`Fml.Leads`, `Fml.LeadsK` to a written last line) and `calc`
      are the notation's (`ChainNotation`), not a worked chain's. (A lone
      `~*>` is the derivation itself, data: a `def`.)
   2. **No binding is dropped.** No `~[simplifyUpdate]~>`: the fresh captures
