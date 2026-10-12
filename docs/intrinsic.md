@@ -5837,6 +5837,106 @@ or `Calculus/Logic.lean`, the `logic` lane's):
 - Every lemma about `NTm`'s old fields or `NRead.cmp`'s `PrimTy`
   (`Calculus/Spec.lean`'s `Upd.resolveN` declarations).
 
+### W9.8.3b record (2026-10-12, branch `w98-logic`)
+
+The semantics and soundness layer reads the typed terms, nothing erased.
+
+**`holds`, typed** (`Calculus/Logic.lean`).  `.eq a b` (both at `val p`)
+reads the Theory, as W9.8.0 decided: `Tm.denote` (`Calculus/Lands.lean`)
+over the typed symbols' `Op0.denote` … `Op3.denote`
+(`Theory/Bridge/Denote.lean`, ported: `Srt.TDen`, the storage abstracted by
+`Storage.absT`, a path by `SRef.absT`, the memory island by its typed
+reading), with the bridge `Tm.denote_eval` (`Srt.BridgeO`: where `eval`
+returns, the denotation is the value abstracted, up to `Equiv` for a storage),
+each case a storage erasure lemma composed with the Theory's.  `.defined t`
+is `t.eval σ ≠ none`; `holds_eqD`: both sides one typed value.  `.upd` is
+the typed landing.
+
+**`Lands` merged** (`TypedLands.lean` deleted): `Rhs.eval` (`LTy.VDen`),
+`Upd.globT` (`GlobT`), `Held.OK`, `Upd.Lands`, `Upd.afterT`, `Upd.applyV`
+(`LocsV`) under the plain names; the bridges through `.erase` (`OAgree`,
+`*.Exact`, `*_agree`, `lands_iff`, `afterT_of_erase`, `holdsUpdT`, the
+`erase_injective` lemmas) are gone, and so are `State.aliasPathT`/`memRefT`,
+`Held.OKT`, `Locs.*` and the `getE`/`globE`/`loc` lemmas, replaced by
+`State.getV`/`locV`/`glob` ones.  `Upd.afterT` has no heap-prefix premise
+(`Upd.Lands.prefix` derives it); `afterT.of_error` is `afterT.of_none`.
+Not ported (no reader in this layer, the laws' to restate): `State.ReadsAs`
+and the congruences, `Upd.afterT_congr`, `Upd.afterT_seq` (its `globT`
+equation compares global parts over two heap typings).
+
+**`Calculus/NoPanic.lean` deleted**: a typed symbol returns an `Option`, no
+panic to rule out; `readAddr_noPanic` had no reader left.
+
+**The kit** (`Calculus/SoundKit.lean`, `Calculus/LowerRun.lean`).  An update
+premise asks `U.applyP σ = some (τ.glob, τ.locV)` of the state the run ends
+in, and `U.applyV σ = none` where the diamond needs a halt (was `.ok
+(τ.globE, τ.loc)` and `∃ e', .error e'`); `Res.Sim` is gone (the reading has
+no halt kinds: equality).  `TRes.AgreesO f t u`: the typed value, `none` for
+`revert`, `False` for `panic`, anything for `diverge`/`exhausted`;
+`LowerRun`'s lemmas are "the typed run evaluates as the lowered term
+evaluates" over typed values (`MAddr.toT`, `MVal.toT`: an address's and a
+slot's identity bare).
+
+**The arms, against the typed run** (`Calculus/SoundArms.lean`, rewritten):
+each update is computed on the typed operations the run calls
+(`applyP_storage1` … `Tm.eval_save` …), and each agreement follows the run's
+binds (`TRes.AgreesO.cases`).  The allocating updates (`declMemFresh`,
+`allocFresh`, `allocCopy`, `clearMem` at a reference) are proved directly:
+the update's `Grown` heap is the run's adopted one (`State.locV_adopt`), so
+the typed clause's narrowing of heap typings (W9.8.2) costs nothing and no
+statement gained a premise.  Changed shapes, no new hypothesis:
+`sound_pop` states `popStep`'s `if b.elemMapping` premise;
+`sound_allocCopy` is `sound_allocCopy_copy`/`_newArr`; `sound_rebindPath`/
+`sound_rebindMemAlias` take `UpdElem.rebind`/`rebindMem`.  `SoundLoops`'
+conditions read by `holds_eqD`; `evalBinop_cmp_true` gone.
+
+**Split for the boundary.**  `Proves` imports `Graft` and `SeqRewrite`
+(the laws), so `Premise.Sound`, `Stmt.Sound`, `holds_exit` moved to
+`Calculus/PremiseSound.lean` (below `Proves`; `SoundKit` imports it), and
+`Stmt.stepSound`/`sound`/`runs` to `Calculus/StmtSound.lean`;
+`Calculus/Sound.lean` keeps `Proves.sound`/`Proves.valid` above
+`StmtSound` and `ProvesSound`.  **`Stmt.sound` elaborates**, axioms
+`propext`, `Classical.choice`, `Quot.sound` (its `#guard_msgs` pin).
+**`Proves.valid` does not yet**: it waits on the laws.
+
+**Erasure kept, with readers**: `TDenote.erase`, `Storage.erase`,
+`Heap.erase`, `State.globE` (the Theory's abstraction `SVal.absT`/`Storage.absT`,
+`Typing/`, the EVM backend).  Deleted from `Semantics/TypedErase.lean`
+(last readers were the old arms): `TRes.Agrees` and its lemmas,
+`opStoreT_erase`, `opMemT_erase`, `bumpStoreT_erase`, `bumpMemT_erase`,
+`TRun.clearT_erase`, `writeAddr_erase`, `readLoc_erase`, `compound_erase'`,
+`asInt_erase_numeric`, `SRef.erase_field`, `Value.toMVal_erase`,
+`State.withEnv_globE`/`withHeap_globE`, `PrimTy.uint_nonneg`,
+`bind_bind_eq`.  `Semantics/StateErase.lean` unchanged (the decision
+procedure's).  `Counterexamples/WellTypedNecessity` restated: the untyped
+interpreter's read of `total` on `badStore` (`State.findStorage`), the term
+reader reading typed states only.
+
+**Checked**: per-file diagnostics; `lean_build` of the default targets:
+every module but the ones below elaborates (among them `Theory/Bridge/Denote`,
+`Lands`, `Logic`, `LowerRun`, `PremiseSound`, `SoundKit`, `SoundArms`,
+`SoundCapture`, `SoundLocal`, `SoundStore`, `SoundMem`, `SoundControl`,
+`SoundCalls`, `SoundLoops`, `SoundStep`, `StmtSound`, `CallbackHolds`,
+`Typing/`, `SortCheck/`, `Counterexamples/`); `sorry` count unchanged (19);
+`check-orphans` (314 reachable), `check-doc-paths`.
+
+**Next modules' first errors** (failing on their own):
+- `Calculus/StateFacts.lean:31` — `Op2 a b s` without its contract: the
+  untyped symbols' facts on `Semantics.State`; blocks `Graft`, `TermLib`
+  and so `SeqRewrite`, `Proves`, `ProvesSound`, `Sound`, `Callback`,
+  `CallbackSound`, `Delab`, the laws, `Decide*`.
+- `Calculus/CloseLemmas.lean:80` — the untyped readers (`Srt.Ev`,
+  `State.findStorage` on a typed state); blocks `Close`, `Deploy`.
+- `Calculus/NamedTerm.lean:60`, `Calculus/Quote.lean:52` — lane `front`'s.
+For `Proves.valid`: `Graft`'s `Upd.seqPar`/`holds_upd_seqPar`/`holds_liftBinds`
+(the substitution lemma `Tm.eval_substH` over `Upd.Lands`), `SeqRewrite`'s
+`Fml.rwEqC`/`Fml.rwEqC_holds`/`Upd.rwC`/`holds_upd_rwC`, `TermLib`'s
+`Tm.Theq`; then `ProvesSound` (its `merge`/`updRw`/`rewrite` cases) and
+`Sound` follow.  `CallbackSound` reads `State.ReadsAs` (states with one
+global part and one `getV` per local are equal, so its congruences become
+`subst`), `Upd.globT_error_of_applyV` (now `_none_`), `afterT.of_error`
+(`of_none`), the old `lands_snoc_local`/`applyV` shapes.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

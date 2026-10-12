@@ -1,247 +1,289 @@
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Lower
-import Solidity.Semantics.TypedErase
 
 /-!
-# A lowered expression reads what the typed run evaluates
+# A lowered expression evaluates as the typed run evaluates
 
 The typed run's evaluators (`Semantics/Run.lean`: `Val.evalT`,
 `Loc.resolveT`, `MLoc.addrT`, …) against the terms the rules lower their
 expressions to (`Calculus/Lower.lean`), read on the typed state
-(`Tm.eval`, `Calculus/Lands.lean`): the same value erased, the same
-`revert` or `panic` (`TRes.Agrees`).  One lemma per evaluator, by
-induction on the syntax, from the value-level erasure lemmas
-(`Semantics/StorageErase.lean`, `Semantics/HeapErase.lean`); these are what
-the update arms' soundness (`Calculus/SoundArms.lean`) composes.
+(`Tm.eval`, `Calculus/TermEval.lean`): the same typed value, `none` where
+the run reverts (`TRes.AgreesO`).  Nothing is erased (W9.8.3): a term reads
+the typed operations the run does, so each lemma is one induction on the
+syntax; these are what the update arms' soundness
+(`Calculus/SoundArms.lean`) composes.
 -/
 
 namespace Solidity
-open Solidity (Op0 Op3 evalBinop)
-open Semantics (Value Seg Res)
 
-variable {C : Contract} {Γ : Ctx} (σ : State C Γ)
+variable {C : Contract}
+
+/-! ## A typed result against a term's reading -/
+
+/-- A typed result against an `Option` reading: the value through `f`,
+`none` for a `revert`; a `panic` against nothing; a `diverge` or an
+`exhausted` against anything. -/
+def TRes.AgreesO {α β : Type} (f : α → β) : TRes α → Option β → Prop
+  | .ok a, u => u = some (f a)
+  | .error .revert, u => u = none
+  | .error .panic, _ => False
+  | .error .diverge, _ => True
+  | .error .exhausted, _ => True
+
+namespace TRes.AgreesO
+
+variable {α β γ δ : Type} {f : α → β} {g : γ → δ}
+
+theorem pure (a : α) : TRes.AgreesO f (.ok a) (some (f a)) := rfl
+
+theorem bind {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u) {k : α → TRes γ}
+    {k' : β → Option δ} (hk : ∀ a, TRes.AgreesO g (k a) (k' (f a))) :
+    TRes.AgreesO g (t >>= k) (u.bind k') := by
+  match t, h with
+  | .ok a, h => subst h; exact hk a
+  | .error .revert, h => subst h; rfl
+  | .error .diverge, _ => trivial
+  | .error .exhausted, _ => trivial
+
+theorem map {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u) {k : α → γ} {k' : β → δ}
+    (hk : ∀ a, k' (f a) = g (k a)) : TRes.AgreesO g (k <$> t) (u.map k') := by
+  match t, h with
+  | .ok a, h => subst h; exact congrArg some (hk a)
+  | .error .revert, h => subst h; rfl
+  | .error .diverge, _ => trivial
+  | .error .exhausted, _ => trivial
+
+theorem ofOpt (x : Option α) : TRes.AgreesO f (TRes.ofOpt x) (x.map f) := by
+  cases x <;> rfl
+
+theorem ofOpt_id (x : Option α) : TRes.AgreesO id (TRes.ofOpt x) x := by
+  cases x <;> rfl
+
+theorem of_eq {a : α} {u : Option β} (h : u = some (f a)) : TRes.AgreesO f (.ok a) u := h
+
+theorem congr {f' : α → β} {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u)
+    (hf : ∀ a, f a = f' a) : TRes.AgreesO f' t u := by
+  match t, h with
+  | .ok a, h => subst h; exact congrArg some (hf a)
+  | .error .revert, h => exact h
+  | .error .diverge, _ => trivial
+  | .error .exhausted, _ => trivial
+
+/-- A typed result that agrees with a reading does not panic. -/
+theorem noPanic {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u) : t ≠ .error .panic := by
+  rintro rfl
+  exact h
+
+end TRes.AgreesO
+
+/-! ## Addresses -/
+
+/-- A typed address with its identity bare (`MAddrT`). -/
+def MAddr.toT {H : HTy} {T : Ty} : MAddr H T → MAddrT T
+  | .field r h => .field r.id h
+  | .index r a i => .index r.id a i
+
+theorem HRef.ofId?_id {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.id = some r := by
+  unfold HRef.ofId?
+  rw [dif_pos r.get?]
+
+/-- A bare address resolves back in its heap typing. -/
+theorem MAddr.resolve_toT {H : HTy} {T : Ty} (a : MAddr H T) : a.toT.resolve H = some a := by
+  rw [MAddrT.resolve_eq_resolveM]
+  cases a <;> simp only [MAddr.toT, MAddrT.resolveM, HRef.ofId?_id, Option.map_some]
+
+/-! ## Expressions -/
+
+variable {Γ : Ctx} (σ : State C Γ)
 
 theorem Simple.lower_evalT {p : PrimTy} (s : Simple C Γ p) :
-    s.lower.eval σ = .ok (PrimTy.erase (s.evalT σ)) := by
+    s.lower.eval σ = some (s.evalT σ) := by
   cases s with
-  | lit n h => cases p <;> first | rfl | simp only [PrimTy.inRange, Bool.false_eq_true] at h
+  | lit n h => rfl
   | bool b => rfl
   | «local» i => rfl
-  | env k hp => subst hp; cases k <;> rfl
+  | env k hp => subst hp; rfl
 
 /-- A simple value denotes its typed value. -/
 theorem Simple.denote_lowerT {p : PrimTy} (s : Simple C Γ p) :
-    s.lower.denote σ = .prim (PrimTy.erase (s.evalT σ)) := by
-  cases s with
-  | lit n h => cases p <;> first | rfl | simp only [PrimTy.inRange, Bool.false_eq_true] at h
-  | bool b => rfl
-  | «local» i => rfl
-  | env k hp => subst hp; cases k <;> rfl
+    s.lower.denote σ = .prim (PrimTy.erase (s.evalT σ)) :=
+  Tm.denote_eval σ s.lower _ (Simple.lower_evalT σ s)
 
-/-- The slot at an address, on the erased global part (`Update.lean`'s
-`readAddr`). -/
-theorem readAddr_erase {T : Ty} (a : MAddr σ.H T) :
-    readAddr σ.globE a.erase = toRes (MVal.erase T) (σ.heap.readAddr a) := by
-  cases a with
-  | field r h => exact Heap.readField_erase (σ := σ.globE) rfl r h
-  | index r a i => exact Heap.readIndex_erase (σ := σ.globE) rfl r a i
+/-- The word a key is hashed as, at its key type (`Tm.keyAt`). -/
+def PrimTy.keyWord : {k : PrimTy} → k.Denote → k.keyTy.Denote
+  | .bool, b => (cond (b : Bool) ⟨1, rfl⟩ ⟨0, rfl⟩ : PrimTy.uint.Denote)
+  | .uint, n => n
+  | .int, n => n
+
+theorem PrimTy.key_keyWord : {k : PrimTy} → (v : k.Denote) → PrimTy.key (PrimTy.keyWord v) = PrimTy.key v
+  | .bool, b => by cases b <;> rfl
+  | .uint, _ | .int, _ => rfl
+
+/-- An index's term reads the word its key is hashed as. -/
+theorem Tm.keyAt_eval {k : PrimTy} (t : Tm C Γ (.val k)) :
+    (Tm.keyAt k t).eval σ = (t.eval σ).map PrimTy.keyWord := by
+  cases k with
+  | uint | int =>
+    show t.eval σ = _
+    cases t.eval σ <;> rfl
+  | bool =>
+    show (Tm.app3 .ite t _ _).eval σ = _
+    rw [Tm.eval_app3, Op3.eval_eq_evalM]
+    cases t.eval σ with
+    | none => rfl
+    | some b => cases b <;> rfl
 
 mutual
 
 theorem SPath.lower_resolveT : {T : Ty} → (b : SPath C Γ T) →
-    TRes.Agrees SRef.erase (b.resolveT σ) (b.lower.eval σ)
+    TRes.AgreesO id (b.resolveT σ) (b.lower.eval σ)
   | _, .alias i => by
-    show TRes.Agrees SRef.erase
+    show TRes.AgreesO id
       (match (TEnv.get i σ.env : Option (SRef C _)) with
         | some r => .ok r
         | none => .error .revert)
-      (σ.aliasPathT i)
-    unfold State.aliasPathT
+      (TEnv.get i σ.env)
     cases (TEnv.get i σ.env : Option (SRef C _)) <;> rfl
   | _, .loc l => Loc.lower_resolveT l
 
 theorem Loc.lower_resolveT : {T : Ty} → (l : Loc C Γ T) →
-    TRes.Agrees SRef.erase (l.resolveT σ) (l.lower.eval σ)
+    TRes.AgreesO id (l.resolveT σ) (l.lower.eval σ)
   | _, .root r h => rfl
   | _, .field b f h => by
-    refine TRes.Agrees.bind (SPath.lower_resolveT b) fun r => ?_
-    exact TRes.Agrees.of_eq (congrArg Except.ok (SRef.erase_field r h).symm)
+    show TRes.AgreesO id ((fun r => r.field h) <$> b.resolveT σ) ((b.lower.eval σ).map (·.field h))
+    exact TRes.AgreesO.map (SPath.lower_resolveT b) fun _ => rfl
   | _, .index (k := k) it b i => by
-    refine TRes.Agrees.bind (SPath.lower_resolveT b) fun r => ?_
-    show TRes.Agrees SRef.erase
-      (do
-        let k ← i.evalT σ
-        TRes.ofOpt (σ.storage.checkIndex r it (PrimTy.key k))
-        pure (r.atKey it k))
-      (do
-        let i ← (← (Tm.keyAt k i.lower).eval σ).asInt
-        σ.globE.checkIndex r.root r.path.erase i
-        pure (r.root, r.path.erase ++ [.at i]))
-    have hk : ∀ {β : Type} (g : Int → Res β),
-        ((Tm.keyAt k i.lower).eval σ >>= fun v => v.asInt >>= g) =
-          (i.lower.eval σ >>= fun v => v.keyAt k >>= g) := fun g => by
-      cases k with
-      | uint | int => rfl
-      | bool =>
-        simp only [Tm.keyAt, Tm.eval, Op3.eval, Op0.eval]
-        cases i.lower.eval σ with
-        | error _ => rfl
-        | ok v => cases v with
-          | int _ => rfl
-          | bool b => cases b <;> rfl
-    rw [hk]
-    refine TRes.Agrees.bind (Val.lower_evalT i) fun x => ?_
-    rw [PrimTy.keyAt_erase_key, ok_bind,
-      Storage.checkIndex_erase (σ := σ.globE) rfl r it]
-    refine TRes.Agrees.bind (TRes.Agrees.ofOpt _) fun _ => ?_
-    exact TRes.Agrees.of_eq (congrArg Except.ok (SRef.erase_index r it _).symm)
+    show TRes.AgreesO id _ ((Tm.app2 (.at it) b.lower (Tm.keyAt k i.lower)).eval σ)
+    rw [Tm.eval_app2, Op2.eval_eq_evalM, Tm.keyAt_eval]
+    show TRes.AgreesO id _ ((b.lower.eval σ).bind fun r =>
+      ((i.lower.eval σ).map PrimTy.keyWord).bind fun y => σ.storage.atT it r y)
+    refine TRes.AgreesO.bind (SPath.lower_resolveT b) fun r => ?_
+    rw [Option.bind_map]
+    refine TRes.AgreesO.bind (Val.lower_evalT i) fun x => ?_
+    show TRes.AgreesO id (TRes.ofOpt (σ.storage.checkIndex r it (PrimTy.key x)) >>= fun _ =>
+      pure (r.atKey it x)) (σ.storage.atT it r (PrimTy.keyWord x))
+    simp only [Storage.atT, PrimTy.key_keyWord, SRef.atKey]
+    cases σ.storage.checkIndex r it (PrimTy.key x) <;> rfl
 
 theorem MPath.lower_mvalT : {R : RefTy} → (b : MPath C Γ (.ref R)) →
-    TRes.Agrees (fun r : HRef σ.H R => r.id) (b.mvalT σ) (b.lower.eval σ)
+    TRes.AgreesO (fun r : HRef σ.H R => r.id) (b.mvalT σ) (b.lower.eval σ)
   | _, .var i _ => by
-    simp only [MPath.mvalT, MPath.lower, Tm.eval, State.memRefT]
+    show TRes.AgreesO _
+      (match (TEnv.get i σ.env : Option (HRef σ.H _)) with
+        | some r => .ok r
+        | none => .error .revert)
+      ((TEnv.get i σ.env : Option (HRef σ.H _)).map (·.id))
     cases (TEnv.get i σ.env : Option (HRef σ.H _)) <;> rfl
   | _, .loc l => by
-    show TRes.Agrees _ (do TRes.ofOpt (σ.heap.readAddr (← l.addrT σ)))
-      (do
-        let τ ← pure σ.globE
-        (← readAddr τ (← l.lower.eval σ)).asRef)
-    simp only [pure_bind]
-    refine TRes.Agrees.bind (MLoc.lower_addrT l) fun a => ?_
-    rw [readAddr_erase]
+    show TRes.AgreesO _ (do TRes.ofOpt (σ.heap.readAddr (← l.addrT σ)))
+      ((Tm.app2 .iread (.app0 .memory) l.lower).eval σ)
+    rw [Tm.eval_app2, Op2.eval_eq_evalM]
+    show TRes.AgreesO _ _ ((l.lower.eval σ).bind fun a =>
+      ((σ.glob.memT.readT a).bind fun r => some (HRef.id r)))
+    refine TRes.AgreesO.bind (MLoc.lower_addrT l) fun a => ?_
+    simp only [Grown.readT, State.memT, MAddr.resolve_toT, Option.bind_eq_bind, Option.bind_some]
+    show TRes.AgreesO _ (TRes.ofOpt (σ.heap.readAddr a)) ((σ.heap.readAddr a).bind fun r => some r.id)
     cases σ.heap.readAddr a <;> rfl
 
 theorem MLoc.lower_addrT : {T : Ty} → (l : MLoc C Γ T) →
-    TRes.Agrees MAddr.erase (l.addrT σ) (l.lower.eval σ)
-  | _, .field b f _ => by
-    show TRes.Agrees _ (do let r ← b.mvalT σ; pure (MAddr.field r _))
-      (do pure (Semantics.Addr.memoryField (← b.lower.eval σ) f))
-    exact TRes.Agrees.bind (MPath.lower_mvalT b) fun _ => rfl
+    TRes.AgreesO MAddr.toT (l.addrT σ) (l.lower.eval σ)
+  | _, .field b _ h => by
+    show TRes.AgreesO _ (do let r ← b.mvalT σ; pure (MAddr.field r h))
+      ((b.lower.eval σ).map fun id => MAddrT.field id h)
+    exact TRes.AgreesO.map (MPath.lower_mvalT b) fun _ => rfl
   | _, .index a b i => by
-    show TRes.Agrees _ (do let r ← b.mvalT σ; let k ← i.evalT σ; pure (MAddr.index r a k.1))
-      (do
-        let id ← b.lower.eval σ
-        pure (Semantics.Addr.memoryIndex id (← (← i.lower.eval σ).asInt)))
-    refine TRes.Agrees.bind (MPath.lower_mvalT b) fun _ => ?_
-    exact TRes.Agrees.bind (Val.lower_evalT i) fun _ => rfl
+    show TRes.AgreesO _ (do let r ← b.mvalT σ; let k ← i.evalT σ; pure (MAddr.index r a k.1))
+      ((b.lower.eval σ).bind fun x => (i.lower.eval σ).bind fun y => some (MAddrT.index x a y.1))
+    refine TRes.AgreesO.bind (MPath.lower_mvalT b) fun _ => ?_
+    exact TRes.AgreesO.bind (Val.lower_evalT i) fun _ => rfl
 
 theorem Val.lower_evalT : {p : PrimTy} → (v : Val C Γ p) →
-    TRes.Agrees PrimTy.erase (v.evalT σ) (v.lower.eval σ)
-  | _, .simple s => TRes.Agrees.of_eq (Simple.lower_evalT σ s)
+    TRes.AgreesO id (v.evalT σ) (v.lower.eval σ)
+  | _, .simple s => TRes.AgreesO.of_eq (Simple.lower_evalT σ s)
   | _, .read l => by
-    show TRes.Agrees _ (do
+    show TRes.AgreesO _ (do
         let r ← l.resolveT σ
         let v ← TRes.ofOpt (σ.storage.find r)
-        pure (SVal.view v))
-      (do
-        let τ ← pure σ.globE
-        let (r, segs) ← l.lower.eval σ
-        (← τ.findStorage r segs).asValue)
-    simp only [pure_bind]
-    refine TRes.Agrees.bind (Loc.lower_resolveT l) fun r => ?_
-    show TRes.Agrees _ (do let v ← TRes.ofOpt (σ.storage.find r); pure (SVal.view v))
-      (do let v ← σ.globE.findStorage r.root r.path.erase; v.asValue)
-    rw [Storage.findStorage_erase (σ := σ.globE) rfl r]
-    exact TRes.Agrees.bind (TRes.Agrees.ofOpt _) fun v =>
-      TRes.Agrees.of_eq (SVal.asValue_erase_prim v)
+        pure v.view)
+      ((l.lower.eval σ).bind fun r => (σ.storage.find r).bind fun v => some v.view)
+    refine TRes.AgreesO.bind (Loc.lower_resolveT l) fun r => ?_
+    exact TRes.AgreesO.bind (TRes.AgreesO.ofOpt_id _) fun _ => TRes.AgreesO.pure _
   | _, .binop op h hq a b => by
     subst hq
-    show TRes.Agrees _ _ (do evalBinop op _ (← a.lower.eval σ) (b.lower.eval σ))
-    refine TRes.Agrees.bind (Val.lower_evalT a) fun x => ?_
-    show TRes.Agrees _ (match op.shortT x with
-      | some y => pure y
+    show TRes.AgreesO _ _ ((a.lower.eval σ).bind fun x => binopT op x (b.lower.eval σ))
+    refine TRes.AgreesO.bind (Val.lower_evalT a) fun x => ?_
+    show TRes.AgreesO _ (match op.shortT x with
+      | some y => .ok y
       | none => do
         let y ← b.evalT σ
-        TRes.ofOpt (op.evalT x y)) (evalBinop op _ (PrimTy.erase x) (b.lower.eval σ))
-    cases hs : op.shortT x with
-    | some y => rw [evalBinop_short hs]; rfl
+        TRes.ofOpt (op.evalT x y)) (binopT op x (b.lower.eval σ))
+    unfold binopT
+    cases op.shortT x with
+    | some y => rfl
     | none =>
-      rw [evalBinop_long hs]
-      refine TRes.Agrees.bind (Val.lower_evalT b) fun y => ?_
-      rw [BinOp.evalT_erase op h x y]
-      exact TRes.Agrees.ofOpt _
+      refine TRes.AgreesO.bind (Val.lower_evalT b) fun y => ?_
+      exact TRes.AgreesO.ofOpt_id _
   | _, .unop op h hq a => by
     subst hq
-    show TRes.Agrees _ _
-      (do unopCheck op _ (← Semantics.applyUnOp op (← a.lower.eval σ)))
-    refine TRes.Agrees.bind (Val.lower_evalT a) fun x => ?_
-    show TRes.Agrees _ (TRes.ofOpt (op.evalT x)) _
-    rw [UnOp.evalT_erase op h x]
-    exact TRes.Agrees.ofOpt _
+    show TRes.AgreesO _ _ ((a.lower.eval σ).bind op.evalT)
+    refine TRes.AgreesO.bind (Val.lower_evalT a) fun x => ?_
+    show TRes.AgreesO _ (TRes.ofOpt (op.evalT x)) _
+    exact TRes.AgreesO.ofOpt_id _
   | _, .ternary c a b => by
-    show TRes.Agrees _ _ (do
-      pickBranch (← c.lower.eval σ) (a.lower.eval σ)
-        (b.lower.eval σ))
-    refine TRes.Agrees.bind (Val.lower_evalT c) fun x => ?_
+    show TRes.AgreesO _ _ ((c.lower.eval σ).bind fun x => cond x (a.lower.eval σ) (b.lower.eval σ))
+    refine TRes.AgreesO.bind (Val.lower_evalT c) fun x => ?_
     cases x
     · exact Val.lower_evalT b
     · exact Val.lower_evalT a
   | _, .readMem l => by
-    show TRes.Agrees _ (do TRes.ofOpt (σ.heap.readAddr (← l.addrT σ)))
-      (do
-        let τ ← pure σ.globE
-        (← readAddr τ (← l.lower.eval σ)).asValue)
-    simp only [pure_bind]
-    refine TRes.Agrees.bind (MLoc.lower_addrT l) fun a => ?_
-    rw [readAddr_erase]
-    cases σ.heap.readAddr a with
-    | none => rfl
-    | some x => exact MVal.asValue_erase_prim x
+    show TRes.AgreesO _ (do TRes.ofOpt (σ.heap.readAddr (← l.addrT σ)))
+      ((l.lower.eval σ).bind fun a => σ.glob.memT.readT a)
+    refine TRes.AgreesO.bind (MLoc.lower_addrT l) fun a => ?_
+    simp only [Grown.readT, State.memT, MAddr.resolve_toT, Option.bind_eq_bind, Option.bind_some]
+    exact TRes.AgreesO.ofOpt_id _
   | _, .len b hp => by
     subst hp
-    show TRes.Agrees _ _ (do
-      let τ ← pure σ.globE
-      let (r, segs) ← b.lower.eval σ
-      arrayLen τ r segs)
-    simp only [pure_bind]
-    refine TRes.Agrees.bind (SPath.lower_resolveT b) fun r => ?_
-    show TRes.Agrees _ (do let n ← TRes.ofOpt (σ.storage.len r); pure n)
-      (arrayLen σ.globE r.root r.path.erase)
-    rw [Storage.arrayLen_erase (σ := σ.globE) rfl r]
+    show TRes.AgreesO _ (do
+        let r ← b.resolveT σ
+        let n ← TRes.ofOpt (σ.storage.len r)
+        pure n)
+      ((b.lower.eval σ).bind fun r => σ.storage.len r)
+    refine TRes.AgreesO.bind (SPath.lower_resolveT b) fun r => ?_
+    show TRes.AgreesO id (TRes.ofOpt (σ.storage.len r) >>= fun n => pure n) (σ.storage.len r)
     cases σ.storage.len r <;> rfl
   | _, .mlen b hp => by
     subst hp
-    show TRes.Agrees _ _ (do
-      let τ ← pure σ.globE
-      memArrayLen τ (← b.lower.eval σ))
-    simp only [pure_bind]
-    refine TRes.Agrees.bind (MPath.lower_mvalT b) fun r => ?_
-    show TRes.Agrees _ (.ok (σ.heap.lenU r)) (memArrayLen σ.globE r.id)
-    rw [Heap.memArrayLen_erase (σ := σ.globE) rfl r .dyn]
+    show TRes.AgreesO _ (do let r ← b.mvalT σ; pure (σ.heap.lenU r))
+      ((b.lower.eval σ).bind fun id =>
+        (HRef.ofId? σ.H (.array _) id).bind fun r => some (σ.heap.lenU r))
+    refine TRes.AgreesO.bind (MPath.lower_mvalT b) fun r => ?_
+    simp only [HRef.ofId?_id, Option.bind_some]
     rfl
 
 end
 
 /-- A storage write's source. -/
 theorem Src.lower_valueT {T : Ty} (r : Src C Γ T) :
-    TRes.Agrees SVal.erase (r.valueT σ) (r.lower.eval σ) := by
+    TRes.AgreesO id (r.valueT σ) (r.lower.eval σ) := by
   cases r with
   | val v =>
-    show TRes.Agrees _ _ (do pure (← v.lower.eval σ).toSVal)
-    exact TRes.Agrees.bind (Val.lower_evalT σ v) fun x =>
-      TRes.Agrees.of_eq (congrArg Except.ok (Value.toSVal_erase x))
+    show TRes.AgreesO _ (do pure (SVal.prim (← v.evalT σ))) ((v.lower.eval σ).map SVal.prim)
+    exact TRes.AgreesO.map (Val.lower_evalT σ v) (k' := SVal.prim) fun _ => rfl
   | copy p _ =>
-    show TRes.Agrees _ _ (do
-      let τ ← pure σ.globE
-      let (r, segs) ← p.lower.eval σ
-      τ.findStorage r segs)
-    simp only [pure_bind]
-    refine TRes.Agrees.bind (SPath.lower_resolveT σ p) fun r => ?_
-    show TRes.Agrees _ (TRes.ofOpt (σ.storage.find r))
-      (σ.globE.findStorage r.root r.path.erase)
-    rw [Storage.findStorage_erase (σ := σ.globE) rfl r]
-    exact TRes.Agrees.ofOpt _
+    show TRes.AgreesO _ (do let r ← p.resolveT σ; TRes.ofOpt (σ.storage.find r))
+      ((p.lower.eval σ).bind fun r => σ.storage.find r)
+    exact TRes.AgreesO.bind (SPath.lower_resolveT σ p) fun r => TRes.AgreesO.ofOpt_id _
+
+/-- A memory slot as a memory write writes it: a word, or an identity. -/
+def MVal.toT {H : HTy} : (T : Ty) → MVal H T → MvT T
+  | .prim _, v => v
+  | .ref _, r => (r : HRef H _).id
 
 /-- A memory write's source. -/
 theorem MSrc.lower_mvalT {T : Ty} (r : MSrc C Γ T) :
-    TRes.Agrees (MVal.erase T) (r.mvalT σ) (r.lower.eval σ) := by
+    TRes.AgreesO (MVal.toT T) (r.mvalT σ) (r.lower.eval σ) := by
   cases r with
-  | val v =>
-    show TRes.Agrees _ _ (do pure (← v.lower.eval σ).toMVal)
-    exact TRes.Agrees.bind_pure (Val.lower_evalT σ v) fun x =>
-      congrArg Except.ok (Value.toMVal_erase x)
-  | ref p =>
-    show TRes.Agrees _ _ (do pure (Semantics.MVal.ref (← p.lower.eval σ)))
-    exact TRes.Agrees.bind_pure (MPath.lower_mvalT σ p) fun _ => rfl
+  | val v => exact Val.lower_evalT σ v
+  | ref p => exact MPath.lower_mvalT σ p
 
 end Solidity

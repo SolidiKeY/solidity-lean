@@ -31,77 +31,47 @@ open Solidity (Modality Mutability)
 
 variable {C : Contract}
 
-/-- `a < b`, `a <= b` between `uint`s true: both sides are numbers, so
-ordered (master's `Term.cmp_true`, `Calculus/SoundLoop` at `ad728b16`,
-on values). -/
-theorem evalBinop_cmp_true {op : BinOp} (hop : op = .lt ∨ op = .le) {a : Value} {rb : Res Value}
-    (h : evalBinop op .uint a rb = .ok (.bool true)) :
-    ∃ x y : Int, a = .int x ∧ rb = .ok (.int y) ∧ (op = .lt → x < y) ∧ (op = .le → x ≤ y) := by
-  rcases hop with rfl | rfl <;> cases rb with
-  | error e => cases a <;> cases h
-  | ok vb =>
-    cases a with
-    | bool => cases h
-    | int x =>
-      cases vb with
-      | bool => cases h
-      | int y =>
-        have h' : decide _ = true := Semantics.PrimVal.bool.inj (Except.ok.inj h)
-        refine ⟨x, y, rfl, rfl, fun hh => ?_, fun hh => ?_⟩ <;>
-          first | exact of_decide_eq_true h' | cases hh
-
 section Cond
 
 variable {Γ : Ctx}
 
 /-- `t ≐ b` holds over the typed state where `t` returns `b`. -/
-theorem holds_isBoolD (t : Tm C Γ .val) (σ : State C Γ) (b : Bool) :
-    holds σ (Fml.isBoolD t b) ↔ t.eval σ = .ok (.bool b) := by
+theorem holds_isBoolD (t : Tm C Γ (.val .bool)) (σ : State C Γ) (b : Bool) :
+    holds σ (Fml.isBoolD t b) ↔ t.eval σ = some b := by
+  rw [holds_eqD]
   constructor
-  · rintro ⟨⟨x, hx⟩, _, he⟩
-    have he' : Theory.StValue.Equiv (.prim x) (.prim (.bool b)) := by
-      rw [← Tm.denote_eval σ t x hx]; exact (holds_eq σ _ _).1 he
-    rw [Theory.StValue.Equiv.prim_iff] at he'
-    cases he'
+  · rintro ⟨x, hx, hb⟩
+    cases hb
     exact hx
   · intro h
-    refine ⟨⟨_, h⟩, ⟨_, rfl⟩, (holds_eq σ _ _).2 ?_⟩
-    show Theory.StValue.Equiv (t.denote σ) (.prim (.bool b))
-    rw [Tm.denote_eval σ t _ h]
-    exact Theory.StValue.Equiv.refl _
+    exact ⟨b, h, rfl⟩
 
-/-- **`eqD` is the interpreter's equation** over the typed state: both
-sides return, with one value. -/
-theorem holds_eqD_iffS {σ : State C Γ} {a b : Tm C Γ .val} :
-    holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
-  constructor
-  · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
-    have he' : Theory.StValue.Equiv (.prim x) (.prim y) := by
-      rw [← Tm.denote_eval σ a x hx, ← Tm.denote_eval σ b y hy]
-      exact (holds_eq σ _ _).1 he
-    rw [Theory.StValue.Equiv.prim_iff] at he'
-    cases he'
-    exact ⟨x, hx, hy⟩
-  · rintro ⟨x, hx, hy⟩
-    refine ⟨⟨x, hx⟩, ⟨x, hy⟩,
-      (holds_eq σ _ _).2 ?_⟩
-    show Theory.StValue.Equiv (a.denote σ) (b.denote σ)
-    rw [Tm.denote_eval σ a x hx, Tm.denote_eval σ b x hy]
-    exact Theory.StValue.Equiv.refl _
+/-- **`eqD` is the typed reading's equation**: both sides return, with one
+value. -/
+theorem holds_eqD_iffS {p : PrimTy} {σ : State C Γ} {a b : Tm C Γ (.val p)} :
+    holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ = some x ∧ b.eval σ = some x :=
+  holds_eqD σ a b
 
-/-- A value that returns over the typed state: its lowered term reads its
-erasure (`Val.lower_evalT`). -/
+/-- A value that returns over the typed state: its lowered term reads it
+(`Val.lower_evalT`). -/
 theorem Val.lower_eval_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
-    (h : v.evalT σ = .ok x) : v.lower.eval σ = .ok (PrimTy.erase x) :=
-  (Val.lower_evalT σ v).eq_ok h
+    (h : v.evalT σ = .ok x) : v.lower.eval σ = some x := by
+  have h' := Val.lower_evalT σ v
+  rw [h] at h'
+  exact h'
 
-/-- What a value's lowered term reads where the typed value halts: a halt
-too, for it never diverges. -/
+/-- What a value's lowered term reads where the typed value halts: `none`,
+for it never diverges nor panics. -/
 theorem Val.lower_eval_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e : THalt}
-    (h : v.evalT σ = .error e) : ∃ e', v.lower.eval σ = .error e' := by
+    (h : v.evalT σ = .error e) : v.lower.eval σ = none := by
   have hnd := Val.evalT_ends σ v
-  rw [h] at hnd
-  exact (Val.lower_evalT σ v).eq_error h (fun hd => hnd.1 (hd ▸ rfl)) (fun hx => hnd.2 (hx ▸ rfl))
+  have h' := Val.lower_evalT σ v
+  rw [h] at hnd h'
+  cases e with
+  | revert => exact h'
+  | panic => exact h'.elim
+  | diverge => exact absurd rfl hnd.1
+  | exhausted => exact absurd rfl hnd.2
 
 /-- **A lowered condition** holds `b` over the typed state where it
 evaluates to `b`. -/
@@ -111,16 +81,9 @@ theorem holds_isBoolD_lower (c : Val C Γ .bool) (σ : State C Γ) (b : Bool) :
   cases h : c.evalT σ with
   | ok v =>
     rw [Val.lower_eval_ok c σ h]
-    constructor
-    · intro h'
-      have : v = b := Semantics.PrimVal.bool.inj (Except.ok.inj h')
-      rw [this]
-    · intro h'
-      rw [show v = b from Except.ok.inj h']
-      rfl
+    exact ⟨fun h' => by cases h'; rfl, fun h' => by cases h'; rfl⟩
   | error e =>
-    obtain ⟨e', he'⟩ := Val.lower_eval_error c σ h
-    rw [he']
+    rw [Val.lower_eval_error c σ h]
     exact ⟨nofun, nofun⟩
 
 end Cond
@@ -299,19 +262,19 @@ theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
     exact Val.evalT_noPanic a.st c hc
   | ok v =>
     have hcl : (Rhs.val (p := .bool) c.lower).eval a.st =
-        .ok (LTy.TDenote.erase (H := a.st.H) (.val .bool) v) := by
+        some (LTy.VDen.ofT (H := a.st.H) (.val .bool) v) := by
       show c.lower.eval a.st = _
       exact Val.lower_eval_ok c a.st hc
     obtain ⟨hT, hF⟩ :=
-      hY.of_lands (Upd.lands_decl (Upd.lands_nil a.st) (fse k) hcl) (List.prefix_refl _)
+      hY.of_lands (Upd.lands_decl (Upd.lands_nil a.st) (fse k) hcl)
     cases v with
     | false =>
       have hF' : holds a.st _ := Upd.afterT.of_lands (hF ((holds_isBoolD _ _ _).2 rfl))
-          (Upd.lands_pop_nil _ _) (List.prefix_refl _)
+          (Upd.lands_pop_nil _ _)
       exact (holds_modal_iff a.st ω κ φ).1 (holds_modalK a.st ω κ φ hF')
     | true =>
       have hT' : holds a.st _ := Upd.afterT.of_lands (hT ((holds_isBoolD _ _ _).2 rfl))
-          (Upd.lands_pop_nil _ _) (List.prefix_refl _)
+          (Upd.lands_pop_nil _ _)
       have h' := (holds_modal_iff a.st body _ _).1 (holds_modalK a.st body _ _ hT')
       unfold Prog.runSt at h'
       dsimp only
@@ -427,33 +390,28 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   have hY := holds_anonHavoc hxs hg hag hA hI
   have hglob : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
       (.val (p := .bool) c.lower)).globT a.st =
-      (do
-        let g ← (do let g ← pure a.st.globE; let _ ← d.lower.eval a.st; pure g)
-        let _ ← c.lower.eval a.st
-        pure g) := rfl
+      ((d.lower.eval a.st).bind fun _ => some a.st.globG).bind fun g =>
+        (c.lower.eval a.st).bind fun _ => some g := rfl
   cases hd : d.evalT a.st with
   | error e =>
-    obtain ⟨e', he'⟩ := Val.lower_eval_error d a.st hd
-    rw [he'] at hglob
-    exact (hY.of_error hglob).elim
+    rw [Val.lower_eval_error d a.st hd] at hglob
+    exact (hY.of_none hglob).elim
   | ok dv =>
   cases hc : c.evalT a.st with
   | error e =>
-    obtain ⟨e', he'⟩ := Val.lower_eval_error c a.st hc
-    rw [Val.lower_eval_ok d a.st hd, he'] at hglob
-    exact (hY.of_error hglob).elim
+    rw [Val.lower_eval_ok d a.st hd, Val.lower_eval_error c a.st hc] at hglob
+    exact (hY.of_none hglob).elim
   | ok cv =>
   have hdl : (Rhs.val (p := .uint) d.lower).eval a.st =
-      .ok (LTy.TDenote.erase (H := a.st.H) (.val .uint) dv) := by
+      some (LTy.VDen.ofT (H := a.st.H) (.val .uint) dv) := by
     show d.lower.eval a.st = _
     exact Val.lower_eval_ok d a.st hd
   have hcl : (Rhs.val (p := .bool) c.lower).eval a.st =
-      .ok (LTy.TDenote.erase (H := a.st.H) (.val .bool) cv) := by
+      some (LTy.VDen.ofT (H := a.st.H) (.val .bool) cv) := by
     show c.lower.eval a.st = _
     exact Val.lower_eval_ok c a.st hc
   obtain ⟨hT, hF⟩ := hY.of_lands
     (Upd.lands_decl (Upd.lands_decl (Upd.lands_nil a.st) (fie k) hdl) (fse k) hcl)
-    (List.prefix_refl _)
   refine ⟨dv.1, by show (d.evalT a.st).map _ = _; rw [hd]; rfl, ?_, fun hc' => ?_, fun hc' => ?_⟩
   · cases cv
     · exact .inr rfl
@@ -461,12 +419,10 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   · have hcv : cv = false := Except.ok.inj hc'
     subst hcv
     exact Upd.afterT.of_lands (hF ((holds_isBoolD _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
-      (List.prefix_refl _)
   · have hcv : cv = true := Except.ok.inj hc'
     subst hcv
     have hT' : holds (a.st.push (t := .val .uint) dv) _ :=
       Upd.afterT.of_lands (hT ((holds_isBoolD _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
-        (List.prefix_refl _)
     have h' := (holds_modal_iff _ _ _ _).1 (holds_modalK _ _ _ _ hT')
     unfold Prog.runSt at h'
     rw [frames_pop_nil_run, State.push_lift,
@@ -492,38 +448,31 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
         have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
           rw [Val.evalT_up]; exact hc₁
         have hcl₁ : (Rhs.val (p := .bool) c.up.lower).eval (τ₀.push (t := .val .uint) dv) =
-            .ok (LTy.TDenote.erase (H := τ₀.H) (.val .bool) true) := by
+            some (LTy.VDen.ofT (H := τ₀.H) (.val .bool) true) := by
           show c.up.lower.eval _ = _
           exact Val.lower_eval_ok _ _ hcu
         obtain ⟨hle, hlt⟩ := hdec.of_lands
           (Upd.lands_decl (Upd.lands_nil (τ₀.push (t := .val .uint) dv)) (fse k) hcl₁)
-          (List.prefix_refl _) ((holds_isBoolD _ _ _).2 rfl)
+          ((holds_isBoolD _ _ _).2 rfl)
         rw [holds_isBoolD] at hle hlt
-        change evalBinop .le .uint (.int 0) (d.up.up.lower.eval _) = _ at hle
-        change (d.up.up.lower.eval _ >>= fun a => evalBinop .lt .uint a (pure (.int dv.1))) = _
-          at hlt
         cases hdx : d.evalT τ₀ with
         | error e =>
           have hd₂ : (d.up.up (t := .val .bool)).evalT
               ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .error e := by
             rw [Val.evalT_up, Val.evalT_up]; exact hdx
-          obtain ⟨e', he'⟩ := Val.lower_eval_error _ _ hd₂
-          rw [he'] at hle
-          obtain ⟨_, _, -, hy, -, -⟩ := evalBinop_cmp_true (.inr rfl) hle
-          cases hy
+          rw [Tm.eval_binop, Tm.eval_lit, Option.bind_some, Val.lower_eval_error _ _ hd₂] at hle
+          exact absurd hle (by unfold binopT; exact nofun)
         | ok x =>
           have hd₂ : (d.up.up (t := .val .bool)).evalT
               ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .ok x := by
             rw [Val.evalT_up, Val.evalT_up]; exact hdx
-          rw [Val.lower_eval_ok _ _ hd₂] at hle hlt
-          obtain ⟨_, y, hx0, hy, -, hle'⟩ := evalBinop_cmp_true (.inr rfl) hle
-          cases hx0
-          cases hy
-          change evalBinop .lt .uint (.int x.1) (pure (.int dv.1)) = _ at hlt
-          obtain ⟨x', z, hx', hz, hlt', -⟩ := evalBinop_cmp_true (.inl rfl) hlt
-          cases hx'
-          cases hz
-          exact ⟨x.1, by show (d.evalT τ₀).map _ = _; rw [hdx]; rfl, hle' rfl, hlt' rfl⟩
+          rw [Tm.eval_binop, Tm.eval_lit, Option.bind_some, Val.lower_eval_ok _ _ hd₂,
+            binopT_some] at hle
+          rw [Tm.eval_binop, Val.lower_eval_ok _ _ hd₂, Option.bind_some, Tm.eval_pvV,
+            binopT_some] at hlt
+          have h₁ : (0 : Int) ≤ x.1 := of_decide_eq_true (Option.some.inj hle)
+          have h₂ : x.1 < dv.1 := of_decide_eq_true (Option.some.inj hlt)
+          exact ⟨x.1, by show (d.evalT τ₀).map _ = _; rw [hdx]; rfl, h₁, h₂⟩
 
 end Inv
 

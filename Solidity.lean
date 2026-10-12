@@ -53,7 +53,6 @@ import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
 import Solidity.Calculus.TermEval
-import Solidity.Calculus.TypedLands
 import Solidity.Calculus.Logic
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundArms
@@ -66,6 +65,7 @@ import Solidity.Calculus.SoundStore
 import Solidity.Calculus.SoundMem
 import Solidity.Calculus.SoundStep
 import Solidity.Calculus.FirstOrder
+import Solidity.Calculus.StmtSound
 import Solidity.Calculus.Sound
 import Solidity.Calculus.DelabErase
 import Solidity.Calculus.PrintTerm
@@ -73,6 +73,7 @@ import Solidity.Calculus.PrintStmt
 import Solidity.Calculus.DelabRules
 import Solidity.Calculus.Delab
 import Solidity.Calculus.Proves
+import Solidity.Calculus.PremiseSound
 import Solidity.Calculus.ProvesSound
 import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft

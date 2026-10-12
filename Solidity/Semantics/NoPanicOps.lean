@@ -7,7 +7,9 @@ import Solidity.Semantics.NoPanicSimp
 `Halt.panic` is the one halt no modality accepts.  The untyped operations
 the term model keeps halt with `revert` or `undef` only: the state's reads
 and writes, the copies and allocations, a payment.  A term or an update reads the state through these
-operations, so neither panics (`Calculus/NoPanic.lean`).
+operations, so neither panics.  Since W9.8.3 a term reads typed operations
+returning an `Option`, which has no panic to rule out, and the term-level
+lemmas (`Calculus/NoPanic`) are gone; these remain for the interpreter.
 
 Each lemma follows its operation's definition, the recursive ones by the same
 recursion; `no_panic` discharges an unfolded definition.  Split out of

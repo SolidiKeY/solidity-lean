@@ -7,17 +7,18 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
 (`State`, `Semantics/State.lean`) and the typed run (`Prog.run`,
 `Frames.run`): `holds`, `Valid`.
 
-* A term in an equation or a definedness test is read on the typed state
-  (`Tm.denote`, `Tm.eval`, `Calculus/Lands.lean`): a local by its
-  position, erased at its type (`State.getE`), a symbol on the global part
-  erased (`State.globE`); its symbols are untyped (decision 83).
+* A term in an equation is read in the Theory (`Tm.denote`,
+  `Calculus/Lands.lean`, KeY's total model, the W9.8.0 decision), a typed
+  value through its abstraction (`SVal.absT`); a definedness test reads it on
+  the typed state (`Tm.eval`, `Calculus/TermEval.lean`): `none` where it
+  reverts.
 * An update is parallel (every right-hand side read in the state it is
   applied in) and leaves the context `Δ` its type says: a declaration
   pushes, a pop drops a suffix, a `drop` thins.  What follows it is read in
-  every typed state it lands on (`Upd.afterT`, `Upd.Lands`, W9.7.1): the
-  global part it computes, each local holding what it left there
-  (`Upd.held`), read on the typed state it is applied in, and a heap typing
-  that extends that state's, as a typed run's does (`Out.ext`).  The
+  every typed state it lands on (`Upd.afterT`, `Upd.Lands`, W9.7.1 and
+  W9.8.3): the typed global part it computes, whose heap typing extends the
+  state's it is applied in (`GlobT`), each local holding what it left there
+  (`Upd.held`), read on the typed state it is applied in.  The
   closer and the decision procedure compute it (`Upd.applyV`,
   `Upd.afterT_applyV`).  The rules' updates land on the state the
   statement's typed run ends in; an update that lands on no typed state (a
@@ -39,18 +40,16 @@ when `r` allocates.  So every type has a value
 (`LTy.tdenote_nonempty`) and the binder is universal under both modalities
 (`Modality.forallB`).
 
-The rules' soundness (`Calculus/Sound*.lean`) relates the typed run to
-`Update.lean`'s terms directly: a statement's typed step agrees with what
-its update computes (`TRes.Agrees` against `Upd.applyV`,
-`Calculus/SoundArms.lean`), each lowered expression's term reading what the
-typed evaluator returns (`Calculus/LowerRun.lean`).
+The rules' soundness (`Calculus/Sound*.lean`) relates the typed run to the
+terms directly: a statement's typed step agrees with what its update
+computes (`TRes.AgreesO` against `Upd.applyV`, `Calculus/SoundArms.lean`),
+each lowered expression's term reading what the typed evaluator returns
+(`Calculus/LowerRun.lean`).
 -/
 
 namespace Solidity
-open Semantics (Value SVal MVal Seg Halt Res lookupBy setBy allocDefault applyUnOp)
-open Solidity (evalBinop unopCheck)
 open Theory Theory.StValue
-open Solidity (Srt Op0 Op1 Op2 Op3 Modality IntOp)
+open Solidity (Srt Modality)
 
 variable {C : Contract}
 
@@ -76,7 +75,7 @@ def Prog.runFrames {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁
 def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
   | _, σ, .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
-  | _, σ, .defined t => ∃ x, t.eval σ = .ok x
+  | _, σ, .defined t => t.eval σ ≠ none
   | _, σ, .not φ => ¬ holds σ φ
   | _, σ, .and φ ψ => holds σ φ ∧ holds σ ψ
   | _, σ, .imp φ ψ => holds σ φ → holds σ ψ
@@ -88,12 +87,33 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
 
 /-- An equation of `holds`, read by the typed readers. -/
-theorem holds_eq {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
+theorem holds_eq {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
     holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
 
 /-- A `defined` of `holds`, read by the typed readers. -/
-theorem holds_defined {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
-    holds σ (.defined t) ↔ ∃ x, t.eval σ = .ok x := Iff.rfl
+theorem holds_defined {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (t : Tm C Γ (.val p)) :
+    holds σ (.defined t) ↔ t.eval σ ≠ none := Iff.rfl
+
+/-- An equation of two defined values holds where they read alike. -/
+theorem holds_eqD {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
+    holds σ (.eqD a b) ↔ ∃ x, a.eval σ = some x ∧ b.eval σ = some x := by
+  constructor
+  · rintro ⟨ha, hb, he⟩
+    rw [holds_defined] at ha hb
+    rw [holds_eq] at he
+    obtain ⟨x, hx⟩ := Option.ne_none_iff_exists'.1 ha
+    obtain ⟨y, hy⟩ := Option.ne_none_iff_exists'.1 hb
+    have ex : a.denote σ = .prim (PrimTy.erase x) := Tm.denote_eval σ a x hx
+    have ey : b.denote σ = .prim (PrimTy.erase y) := Tm.denote_eval σ b y hy
+    rw [ex, ey, StValue.Equiv.prim_iff] at he
+    obtain rfl := PrimTy.erase_injective (StValue.prim.inj he)
+    exact ⟨x, hx, hy⟩
+  · rintro ⟨x, hx, hy⟩
+    refine ⟨(holds_defined σ a).2 (by rw [hx]; exact nofun),
+      (holds_defined σ b).2 (by rw [hy]; exact nofun), ?_⟩
+    show StValue.Equiv _ _
+    rw [Tm.denote_eval σ a x hx, Tm.denote_eval σ b x hy]
+    exact StValue.Equiv.refl _
 
 /-- Every local's type has a value in every typed state: an alias and a
 memory local unset among them (decision 17'). -/
