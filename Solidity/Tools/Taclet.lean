@@ -134,7 +134,7 @@ families, its conclusion, printed with the notation on (`pp.sol.dl`, and
 term left escaped: no escape `‹…›` names a scoped constant, printed with
 full names (`‹Solidity.Val.…›`, `‹(Solidity.Upd.…).snd›`,
 `‹@Solidity.Val.…›`, `‹Solidity.Ext.push …›`, `‹Solidity.Tms.STerm.save …›`;
-`‹Solidity.Surface.…›`, the closer's, passes, and so does
+`‹Solidity.Surface.…›`, the reader's shim's, passes, and so does
 `‹Solidity.Stmt.call …›`, `functionCallArgCapture`'s call, which has no
 line of KeY's: `Calculus/DelabLean.lean`).  The constructors whose line does not print
 are listed.  Today's rule table, which the scoped lines were once diffed

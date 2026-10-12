@@ -1,6 +1,7 @@
 import Solidity.Calculus.Logic
 import Solidity.Calculus.Rules
 import Solidity.Calculus.StateFacts
+import Solidity.Calculus.PrintTerm
 
 /-!
 # Term taclets on scoped terms
@@ -11,13 +12,11 @@ Theory equality of two terms (`Tm.Theq`), the side conditions read off a
 scoped path, and the term functions a scoped closer compares terms with.
 Soundness is over the scoped `Tm.denote` (`Calculus/Logic.lean`).
 
-**Notation.** `tm{ … }` at a scoped term type writes the scoped term: the
-text is read as an untyped term is (`RuleSyntax.schemaTerm`) and its
-symbols turned into their scoped twins (`Tms`, `Calculus/Rules.lean`;
-`RuleSyntax.coreNames`).  At any other type, or where the type is not
-known, it is the untyped term (`Surface.Tm`, the notation's front end).  A
-scoped term over schema variables prints back as `tm{ … }` through the
-untyped term's printer (`delabTmS`, `ppTerm`: the reader's shim).
+**Notation.** `tm{ … }` writes the scoped term: the text is read as a rule
+line reads a term (`RuleSyntax.schemaTerm`), its symbols the scoped ones
+(`Tms`, `Calculus/Rules.lean`; `RuleSyntax.coreNames`).  A scoped term over
+schema variables prints back as `tm{ … }` through the scoped term printers
+(`delabTmS`, `Delab.ppTermS`).
 
 **Sort-generic recursion.**  A recursive function on `Tm` is generic in the
 sort: on one fixed sort it compiles by well-founded recursion and stops
@@ -43,26 +42,21 @@ variable {C : Contract}
 section Notation
 open Lean Elab Term Meta
 
-/-- `tm{ t }` read at the expected type: the scoped term at `Tm C Γ s`, the
-closer's elsewhere. -/
+/-- `tm{ t }`, the scoped term `Tm C Γ s`. -/
 syntax (name := tmAt) "tm_at% " dl_term : term
 
 macro_rules
   | `(tm{ $t:dl_term }) => `(tm_at% $t)
 
-/-- Whether the expected type is a scoped term's, `Tm C Γ s`; postponed
-while it is unknown, and the closer's term once it stays so. -/
-def tmScopedExpected (expectedType? : Option Lean.Expr) : TermElabM Bool := do
-  let some ety := expectedType? | tryPostpone; return false
-  let ety ← whnfR (← instantiateMVars ety)
-  if ety.getAppFn.isMVar then tryPostpone; return false
-  return ety.isAppOf ``Solidity.Tm
-
+/-- `tm{ t }` read as the scoped term: the text read as a rule line reads a
+term (`RuleSyntax.schemaTerm`), its symbols the scoped ones (`Tms`,
+`RuleSyntax.coreNames`), elaborated once its expected type is known. -/
 @[term_elab tmAt] def elabTmAt : TermElab := fun stx expectedType? => do
   let t : TSyntax `dl_term := ⟨stx[1]⟩
-  let surface ← liftMacroM (schemaTerm rawScope (tmSort t) t)
-  let out ← if ← tmScopedExpected expectedType? then liftMacroM (coreNames surface)
-    else pure surface.raw
+  match expectedType? with
+  | some ety => if (← instantiateMVars ety).getAppFn.isMVar then tryPostpone
+  | none => tryPostpone
+  let out ← liftMacroM (coreNames (← liftMacroM (schemaTerm rawScope (tmSort t) t)))
   withMacroExpansion stx out (elabTerm out expectedType?)
 
 end Notation
@@ -72,78 +66,83 @@ end Notation
 section Print
 open Lean Meta PrettyPrinter Delaborator SubExpr
 
-/-- The closer's twin of a scoped term symbol (`Tms.Term.find` ↦
-`Term.find`), applied to the same arguments with the context dropped. -/
-def tmsTwin? (n : Lean.Name) : Option Lean.Name :=
-  if n == ``Tm.lit then some ``Term.lit
-  else if n == ``Tm.storage then some ``STerm.storage
-  else if n == ``Tm.memory then some ``MTerm.memory
-  else if n == ``Tm.bumped then some ``Term.bumped
-  else if (`Solidity.Tms.MAddr).isPrefixOf n then
-    some (n.replacePrefix `Solidity.Tms `Solidity.Surface)
-  else if (`Solidity.Tms).isPrefixOf n then some (n.replacePrefix `Solidity.Tms `Solidity)
-  else none
+/-- Whether `n` is a scoped term symbol a rule line writes (`Tms.Term.find`,
+`Tm.lit`, …): an abbreviation of a constructor application (`Tm.app2
+Op2.find …`).  `Tm.bumped` is no symbol: it computes. -/
+def isTmsSym (n : Lean.Name) : Bool :=
+  n == ``Tm.lit || n == ``Tm.storage || n == ``Tm.memory ||
+    ((`Solidity.Tms).isPrefixOf n && n != ``Tms.Term.bumped)
 
-/-- A scoped term's `Expr` as the untyped term of the same text (the
-reader's shim, `Surface.Tm`), for its printers: each scoped symbol its twin, the context (and an
-`app1`'s proof that its symbol names no local) dropped, and each schema
-variable its twin (`twins`). -/
-partial def tmSurface (twins : Std.HashMap FVarId Lean.Expr) (e : Lean.Expr) : Lean.Expr :=
-  let f := e.getAppFn
-  let args := e.getAppArgs.map (tmSurface twins)
-  match f with
-  | .fvar fv => mkAppN (twins.getD fv f) args
-  | .const n us =>
-    let pick (c : Lean.Name) (is : List Nat) : Lean.Expr :=
-      mkAppN (.const c us) (is.toArray.map fun i => args[i]!)
-    if n == ``Tm.app0 && args.size == 4 then pick ``Surface.Tm.app0 [0, 2, 3]
-    else if n == ``Tm.app1 && args.size == 7 then pick ``Surface.Tm.app1 [0, 2, 3, 4, 6]
-    else if n == ``Tm.app2 && args.size == 8 then pick ``Surface.Tm.app2 [0, 2, 3, 4, 5, 6, 7]
-    else if n == ``Tm.app3 && args.size == 10 then
-      pick ``Surface.Tm.app3 [0, 2, 3, 4, 5, 6, 7, 8, 9]
-    else match tmsTwin? n with
-      | some n' => if args.size ≥ 2 then mkAppN (.const n' us) (args.eraseIdxIfInBounds 1)
-        else mkAppN f args
-      | none => mkAppN f args
-  | _ => mkAppN f args
-
-/-- The untyped type of a sort's terms, as `Update.lean` names it. -/
-def sortType? : Lean.Name → Option Lean.Name
-  | ``Srt.val => some ``Term
-  | ``Srt.path => some ``PTerm
-  | ``Srt.st => some ``STerm
-  | ``Srt.sv => some ``SValT
-  | ``Srt.ident => some ``ITerm
-  | ``Srt.addr => some ``Surface.MAddr
-  | ``Srt.mem => some ``MTerm
-  | ``Srt.mv => some ``MValT
-  | _ => none
-
-/-- `k` with a twin for every variable of `fvs` of a scoped term type: a
-local of the same name at the untyped type of its sort. -/
-partial def withTmTwins {α : Type} (fvs : List FVarId) (twins : Std.HashMap FVarId Lean.Expr)
-    (k : Std.HashMap FVarId Lean.Expr → MetaM α) : MetaM α := do
-  match fvs with
-  | [] => k twins
-  | fv :: rest =>
-    let ty ← whnfR (← instantiateMVars (← fv.getType))
-    let skip := withTmTwins rest twins k
-    let_expr Solidity.Tm c _ s := ty | skip
-    let some srt := (← whnf s).constName? | skip
-    let some T := sortType? srt | skip
-    withLocalDeclD (← fv.getUserName) (mkApp (mkConst T) c) fun x =>
-      withTmTwins rest (twins.insert fv x) k
+/-- A scoped term with its symbols (`isTmsSym`) unfolded to the constructor
+applications they abbreviate, down through the terms it is applied to: what
+the scoped printers read of a term they do not compute (`viewTmS`,
+`pp.sol.reduce false`).  Anything else (a variable, `K.fill t`) is left as
+it is. -/
+partial def unfoldTmsSyms (e : Lean.Expr) : MetaM Lean.Expr := do
+  let e ← instantiateMVars e
+  let .const n _ := e.getAppFn | return e
+  if isTmsSym n then
+    match ← unfoldDefinition? e with
+    | some e' => return ← unfoldTmsSyms (← whnfCore e')
+    | none => return e
+  let terms : List Nat :=
+    if n == ``Tm.netOf then [3] else if n == ``Tm.app1 then [6]
+    else if n == ``Tm.app2 then [6, 7] else if n == ``Tm.app3 then [7, 8, 9] else []
+  let mut args := e.getAppArgs
+  for i in terms do
+    if h : i < args.size then args := args.set i (← unfoldTmsSyms args[i])
+  return mkAppN e.getAppFn args
 
 /-- Whether `ty` is a contract or a context: no schema variable of a term. -/
 def isContractOrCtx (ty : Lean.Expr) : MetaM Bool := do
   let ty ← whnfR ty
   return ty.isConstOf ``Contract || (ty.isAppOfArity ``List 1 && (ty.getArg! 0).isConstOf ``LTy)
 
+/-- The sort a family of scoped term symbols is at (`Tms.STerm` ↦ `.st`). -/
+def tmsFamilySort? : Lean.Name → Option Lean.Name
+  | `Term => some ``Srt.val
+  | `PTerm => some ``Srt.path
+  | `STerm => some ``Srt.st
+  | `SValT => some ``Srt.sv
+  | `ITerm => some ``Srt.ident
+  | `MAddr => some ``Srt.addr
+  | `MTerm => some ``Srt.mem
+  | `MValT => some ``Srt.mv
+  | _ => none
+
+/-- A scoped term symbol inside a `‹…›` of `tm{ … }` (`pp.sol.tmField`):
+`Tms.STerm.save s p v` as `s.save p v`, its first explicit argument the
+receiver when that is a term of the family's sort, else `STerm.save s p v`. -/
+def delabTmsField : Delab := do
+  unless pp.sol.tmField.get (← getOptions) do failure
+  let e ← getExpr
+  let .const n _ := e.getAppFn | failure
+  let [`Solidity, `Tms, fam, f] := n.components | failure
+  let some srt := tmsFamilySort? fam | failure
+  let args := e.getAppArgs
+  guard (args.size == (← getConstInfo n).type.getNumHeadForalls)
+  let bis ← forallTelescope (← inferType e.getAppFn) fun xs _ => xs.mapM fun x => x.fvarId!.getBinderInfo
+  let expl := (List.range args.size).filter fun i => bis[i]! == .default
+  let some i₀ := expl.head? | failure
+  let stxs ← expl.toArray.mapM fun i => withNaryArg i delab
+  let recv? ← do
+    let ty ← whnfR (← inferType args[i₀]!)
+    let_expr Solidity.Tm _ _ s := ty | pure false
+    pure ((← whnf s).isConstOf srt)
+  if recv? then
+    let rest := stxs.extract 1 stxs.size
+    let fld : Lean.Term ← `($(stxs[0]!).$(mkIdent f):ident)
+    if rest.isEmpty then return fld
+    `($fld $rest*)
+  else
+    `($(mkIdent (fam ++ f)) $stxs*)
+
 /-- A scoped term over schema variables, as `tm{ t }`: printed by the
-untyped term printers (`delabTm`, `Calculus/RuleSyntax.lean`) from its
-twin (`tmSurface`), and only up to `tmCutoff` nodes. -/
+scoped term printers (`Delab.ppTermS`, `Calculus/PrintTerm.lean`) as
+written (`pp.sol.reduce false`, its symbols unfolded, `unfoldTmsSyms`), a
+schema variable by its name, and only up to `tmCutoff` nodes. -/
 def delabTmS : Delab := do
-  unless ← ppOn do failure
+  unless ← ppOn do return ← delabTmsField
   let e ← getExpr
   let some c := e.getAppFn.constName? | failure
   guard (e.getAppNumArgs == (← getConstInfo c).type.getNumHeadForalls)
@@ -155,17 +154,17 @@ def delabTmS : Delab := do
   let_expr Solidity.Tm _ _ s := (← whnfR (← inferType e)) | failure
   let some srt := (← whnf s).constName? | failure
   let printer : Lean.Expr → MetaM (TSyntax `dl_term) ← match srt with
-    | ``Srt.val => pure ppTerm
-    | ``Srt.path => pure ppPTerm
-    | ``Srt.st => pure ppSTerm
-    | ``Srt.sv => pure ppSVal
-    | ``Srt.ident => pure ppITerm
-    | ``Srt.addr => pure ppMAddr
-    | ``Srt.mem => pure ppMTerm
-    | ``Srt.mv => pure ppMVal
+    | ``Srt.val => pure (Delab.ppTermS [])
+    | ``Srt.path => pure (Delab.ppPTermS [])
+    | ``Srt.st => pure (Delab.ppSTermS [])
+    | ``Srt.sv => pure (Delab.ppSValS [])
+    | ``Srt.ident => pure (Delab.ppITermS [])
+    | ``Srt.addr => pure (Delab.ppMAddrS [])
+    | ``Srt.mem => pure (Delab.ppMTermS [])
+    | ``Srt.mv => pure (Delab.ppMValS [])
     | _ => failure
-  let t ← withTmTwins fvs.toList {} fun twins =>
-    withOptions (fun o => pp.sol.reduce.set o false) (printer (tmSurface twins e'))
+  let t ← withOptions (fun o => pp.sol.tmField.set (pp.sol.reduce.set o false) true)
+    (printer (← unfoldTmsSyms e'))
   guard !(isEscape t)
   `(tm{ $t })
 

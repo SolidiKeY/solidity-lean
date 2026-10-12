@@ -11,11 +11,6 @@ read from its `Expr`, schema variables and all: `ppStmtS`, `ppProgS`,
 Terms and updates are printed by `Calculus/PrintTerm.lean`'s printers of
 the scoped terms (`ppTermS`, `ppUpdS`), at the same name stack.
 
-**Twin check.**  The option `pp.sol.twinCheck` (off by default) also prints
-each term and update through its erasure (`Delab.tr`, `ppTerm`, `ppUpd`) and
-fails where the two differ (`twinCompare`).  It reads the reader's shim
-(`Calculus/DelabErase.lean`) and goes with it.
-
 **The name-stack walker** (the API a reader of the scoped syntax uses, the
 SolKey reader's port among them): the names of the context a part is read
 in are a stack `ns` (innermost first) of `Var` terms, the ones the binders
@@ -39,35 +34,7 @@ namespace Solidity
 
 open Lean Meta
 
-register_option pp.sol.twinCheck : Bool := {
-  defValue := false
-  descr := "the scoped printers also print terms and updates through the erasure \
-            (`Delab.tr`) and fail with an error where the two differ"
-}
-
 namespace Delab
-
-/-- Whether the twin check is on (`pp.sol.twinCheck`). -/
-def twinCheckOn : MetaM Bool := return pp.sol.twinCheck.get (← getOptions)
-
-/-- Under `pp.sol.twinCheck`: an error where `new` (the scoped printer's) and
-`old` (the erasure's) print differently.  Thrown, so that it shows in the
-printed text too (a message's expressions are printed lazily, where a logged
-error is lost). -/
-def twinCompare (what : String) (new old : Option Syntax) (cat : Lean.Name := `term) :
-    MetaM Unit := do
-  let fmt (s : Option Syntax) : MetaM String := do
-    match s with
-    | some s =>
-      try return toString ((← PrettyPrinter.ppCategory cat s).pretty 100000)
-      catch _ => return "‹does not format›"
-    | none => return "‹none›"
-  let a ← fmt new
-  let b ← fmt old
-  unless a == b do
-    let msg := m!"twin check ({what}): the scoped printer prints\n{a}\nthe erasure's\n{b}"
-    logError msg
-    throwError msg
 
 section Print
 set_option hygiene false
@@ -99,18 +66,13 @@ structure Wheres where
   hidden : IO.Ref (Array (Expr × Expr))
   copied : IO.Ref (Array Expr)
 
-/-- The printer's state: the erasure's twins (what `Delab.tr` reads, for the
-twin check only), whether a block's end in a formula's frames prints
+/-- The printer's state: whether a block's end in a formula's frames prints
 (`}`), and where a `where` clause is collected. -/
 structure PEnv where
-  tr : Env := {}
   blockEnds : Bool := false
   wheres : Option Wheres := none
 
 abbrev PrM := ReaderT PEnv MetaM
-
-/-- `Delab.tr`'s monad, run on the printer's twins (the twin check). -/
-def runTr {α : Type} (x : TrM α) : PrM α := do x.run (← read).tr
 
 /-- The `fill`s of the holes (`Calculus/Arms.lean`): a hole schema variable
 filled prints as the rule line writes it (`lhs = nsp.fld`). -/
@@ -761,20 +723,12 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
     if !shown then return ← viewF ms (e.getArg! 5)
   return (ns, e)
 
-/-- The erased term of a term read at `ns` (the twin check). -/
-def termS (ns : List Expr) (t : Expr) : PrM Expr := do
-  instantiateMVars (← runTr (tr ns t))
-
-/-- A value term read at `ns` (`ppTermS`), twin-checked. -/
-def termPP (ns : List Expr) (t : Expr) : PrM (TSyntax `dl_term) := do
-  let new ← ppTermS ns t
-  if ← twinCheckOn then twinCompare "term" new (← ppTerm (← termS ns t)) `dl_term
-  return new
+/-- A value term read at `ns` (`ppTermS`). -/
+def termPP (ns : List Expr) (t : Expr) : PrM (TSyntax `dl_term) := ppTermS ns t
 
 /-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
 `a = b` prints: `a` and `b`, each with its names.  The two reads of a term
-are the same when their erasures are (the same term at the same names, else
-the erasures compared). -/
+are the same when they are the same text (`eqTmS`). -/
 def eqDPartsS (ns : List Expr) (e : Expr) :
     PrM (Option ((List Expr × Expr) × (List Expr × Expr))) := do
   let (ns, e) ← viewF ns e
@@ -787,18 +741,8 @@ def eqDPartsS (ns : List Expr) (e : Expr) :
   let_expr Fml.defined _ _ b := l' | return none
   let (nr', r') ← viewF nr r'
   let_expr Fml.eq _ _ a' b' := r' | return none
-  let same (n₁ : List Expr) (x : Expr) (n₂ : List Expr) (y : Expr) : PrM Bool := do
-    let new ← eqTmS n₁ x n₂ y
-    if ← twinCheckOn then
-      let old ← do
-        let (x, y) := (← instantiateMVars x, ← instantiateMVars y)
-        if x == y && n₁ == n₂ then pure true else pure ((← termS n₁ x) == (← termS n₂ y))
-      unless new == old do
-        twinCompare "same term" (some (Syntax.mkStrLit (toString new)))
-          (some (Syntax.mkStrLit (toString old)))
-    return new
-  unless ← same nl a nr' a' do return none
-  unless ← same nl' b nr' b' do return none
+  unless ← eqTmS nl a nr' a' do return none
+  unless ← eqTmS nl' b nr' b' do return none
   return some ((nl, a), (nl', b))
 
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
@@ -847,15 +791,9 @@ def iffPartsS (ns : List Expr) (e : Expr) :
     ← instantiateMVars ψ')
   return if φ == φ' && ψ == ψ' && nl == nr then some ((nl, φ), (nl, ψ)) else none
 
-/-- The update of an `{U}` read at `ns` (`ppUpdS`), twin-checked, and the
-names of the context it leaves. -/
-def updS (ns : List Expr) (U : Expr) : PrM (TSyntax `dl_upd × List Expr) := do
-  let (u, ms) ← ppUpdS ns U
-  if ← twinCheckOn then
-    let (es, _) ← runTr (updParts ns U)
-    let c ← contractOf U
-    twinCompare "update" u (← ppUpd (← runTr (updList c U es))) `dl_upd
-  return (u, ms)
+/-- The update of an `{U}` read at `ns` (`ppUpdS`), and the names of the
+context it leaves. -/
+def updS (ns : List Expr) (U : Expr) : PrM (TSyntax `dl_upd × List Expr) := ppUpdS ns U
 
 /-- A scoped formula read at `ns`, as `ppFml` prints the closer's. -/
 partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
@@ -885,11 +823,6 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   | Fml.and _ _ φ ψ =>
     if let some ((na, a), (nb, b)) ← eqDPartsS ns e then
       let cmp ← cmpPartsS na a nb b
-      if ← twinCheckOn then
-        let old := (← Surface.cmpParts? (← termS na a) (← termS nb b)).map (·.1)
-        unless cmp.map (·.1) == old do
-          twinCompare "comparison" (some (Syntax.mkStrLit (toString (cmp.map (·.1)))))
-            (some (Syntax.mkStrLit (toString old)))
       if let some (sym, (nl, l), (nr, r)) := cmp then
         let l ← termPP nl l
         let r ← termPP nr r
@@ -1060,16 +993,14 @@ end Print
 /-! ## Running it -/
 
 /-- `k` with the printer's state for `e`: block ends printed when `frames`
-(and `e` has a contract), and under the twin check the twins of its schema
-variables (`withTwins`, for the terms and updates `Delab.tr` erases). -/
+(and `e` has a contract). -/
 def withPrinter {α : Type} (e : Expr) (frames : Bool) (k : PrM α)
     (contract? : Option Expr := none) (wheres : Option Wheres := none) : MetaM α := do
   let ends ← if !frames then pure false else
     match contract? with
     | some _ => pure true
     | none => try (do let _ ← contractOf (← instantiateMVars e); pure true) catch _ => pure false
-  unless ← twinCheckOn do return ← k.run { blockEnds := ends, wheres }
-  withTwins e fun env => k.run { tr := env, blockEnds := ends, wheres }
+  k.run { blockEnds := ends, wheres }
 
 end Delab
 

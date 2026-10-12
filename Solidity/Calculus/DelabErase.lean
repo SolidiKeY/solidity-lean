@@ -8,9 +8,9 @@ The `Expr` of a scoped term, update or equation, its schema variables free,
 translated to the `Expr` of its erasure, the `Update.lean` term by name
 (`Delab.tr`, run under `Delab.withTwins`), which `RuleSyntax.lean`'s term
 printers print.  The printers do not read it (W9.1 `print`:
-`Calculus/PrintTerm.lean` prints the scoped terms themselves); it stays as
-the SolKey reader's shim, with the twin check (`pp.sol.twinCheck`,
-`Calculus/PrintStmt.lean`) that compares the printers with it.  An
+`Calculus/PrintTerm.lean` prints the scoped terms themselves); it stays,
+frozen, as the SolKey reader's shim, which nothing in the prover reads
+(W9.6N: the twin check that compared the printers with it is gone).  An
 equation translates to the shim's `NFml.eq` (`Update.lean`); any other
 connective stays scoped.
 
