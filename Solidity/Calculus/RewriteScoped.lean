@@ -10,8 +10,9 @@ A chain's rewrite links on the scoped line itself (`Fml C Γ`), so that a
 rewrite goes in while the program is still open and the strategy's steps go
 on after it: `{ x := 250 ‖ se1 := 250 + 10 <= 255 } (… ∧ (se1 ≐ false → [ revert(); ] φ))`
 folds its literals, pushes the update through the branches and folds them,
-and `revertBox` then fires on what is left.  Past the program the rewrites
-stay `Calculus/ChainRewrites.lean`'s on the erasure (`Fml.ViaE`).
+and `revertBox` then fires on what is left.  Past the program they rewrite
+the scoped line too, with `Calculus/RewritePast.lean`'s and
+`Calculus/RewriteLaws.lean`'s (W9.4).
 
 A rewrite is a function on the whole line with the one fact a chain needs
 of it: wherever the line after holds, the line before does (`FmlRw`).  A

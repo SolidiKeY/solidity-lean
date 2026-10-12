@@ -3754,6 +3754,76 @@ erased closer is the fallback for a leaf the scoped one does not read.
   fallback classes above need an erasing closer (`sol_close`,
   `sol_close_mt`: the `close` lane's).
 
+### W9.4 `chains` record (2026-10-12, branch `w9-chains`)
+
+- **Landed.**  Past the program a chain's lines are scoped (`Fml C Γ`):
+  every link is an `FmlRw` checked by the kernel on the written line.
+  - The classes as scoped rewrites with their soundness
+    (`Calculus/RewritePast.lean`): `mergePast` (KeY's
+    `sequentialToParallel`, across a hidden binder too: `Upd.absorb`
+    moves a write to a local into the base of the elements it is read in,
+    `Upd.apply_absorb` up to `Res.OkEq`), `simplifyPast`
+    (`simplifyUpdate`: drops unread locals with their binders, `Thin.mask`,
+    identity thins normalised), `applyStorageBoxP`.
+  - The laws in an update's right side (`Calculus/RewriteLaws.lean`,
+    `FmlRw.lawUpdE`): solkey's term taclets on the erasure, lifted to the
+    scoped term by `ErasedCov` (`covered`, `ref`, `eqv`, `eval`): a law
+    instance is sound when the erasure of both sides agrees
+    (`Tm.eval_erase`, `Upd.apply_erase`).
+  - `~~>` past the program: `Fml.LeadsK φ L` (`Calculus/ChainKit.lean`),
+    a scoped `Fml.Leads φ B` whose last line's erasure is the written
+    line; `Fml.Via.leadsK`, `Fml.Leads.leadsK`, `Fml.LeadsK.valid`.
+  - `#chain`, `#chain_rest`, `#last_line`, `sol_rws`/`sol_rws?`
+    search the scoped line (`ChainGen.pastSearch`, batched evaluation of
+    the candidates: `scopedRwCandsMany`, `lawUpdECands`).
+  - Gone: `Fml.ViaE`, `Fml.LeadsE`, `NFml.Via`, `sol_chain.scopedPast`,
+    the erased elaboration of `sol_chain` (a goal that is not a chain is
+    refused), the erased `#chain`/`#last_line` paths
+    (`RewriteChains`/`RewriteChainGen` keep syntax and the IR's law
+    instances only).
+- **Gates** (fresh worker, end of work, base `2c07be6b`):
+
+  | Row | base | after | gate |
+  |---|---|---|---|
+  | `ChainRewrites` | 6.82 s (CPU 7.73) | 7.52 s (CPU 8.35) | 8.2 s |
+  | `ChainRewritesOpen` | 3.48 s | 3.43 s | 4.1 s |
+  | `Chains/Storage` | 7.68 s (CPU 8.05) | 8.72 s (CPU 10.07) | 9.0 s |
+  | `ProofTree` | 9.13 s | 9.01 s | 11.7 s |
+
+  `Chains/Storage` is 7.53 s without its 24 `#last_line` pins: the cost is
+  the scoped search, which evaluates its candidates in one compiled batch
+  per line (17 s before batching).  No fallback was needed.
+- **Pins moved.**
+  - `#last_line` prints the line as written, `dl{ φ }` for a post (was
+    `↑φ`, the erasure's coercion); `#chain` lines keep their `∀`.
+  - `ChainNotation`: `sol_chain?` suggests `Fml.Via.leadsK`;
+    `composed` ends in `.leadsK`; `headline_valid` by `sol_decide`.
+  - `ChainRewrites`: `readBackValue`, `headlineValue` by
+    `Fml.Via.valid` (no `ViaE`).
+  - `Chains/Memory` (`t` before `carolAcc`), `MemoryArrays` (`tk` before
+    `mv`), `MemoryDelete` (`mv4` before `mv5`), `MemoryToStorage`
+    (`aliceTok` before `sp`): a merge across a hidden binder declares the
+    late local first (`Fml.absorbAllMergeP`), so the parallel update
+    prints in that order — a deviation from KeY's order, marked in the
+    rule map.  `mergePast` tries the order-keeping merge first, so the
+    storage chains keep their pins.
+  - `ChainRewritesOpen`: its `set_option` is gone.
+- **On the IR, and why.**  Law instances are found on the line's
+  erasure (`NFml.Chain.lawInstances`) and lifted by `ErasedCov`: the
+  taclets are solkey's term taclets, stated once, on the IR.  `LeadsK`
+  keys its last line by erasure (`pastKey`), so a written line need not
+  match binder names; `legacyWritten`/`ppLegacyLine` print it.  The erased
+  `LineRw` library (`Calculus/ChainRewrites.lean`) and `NFml.Post` stay
+  for W9.5.
+- **Checks.**  Per-file diagnostics clean (`ChainRewrites`,
+  `ChainRewritesOpen`, `ChainNotation`, `Tactics/Chains`, `ProofTree`,
+  `CallOperands`, `ExampleNames`, `FreshNames`, `Chains/*`);
+  `lean_build` of the default targets; `check-orphans`,
+  `check-doc-paths`; `sorry` count unchanged (20 lines); axioms of
+  `FmlRw.lawUpdE`, `FmlRw.mergePast`, `FmlRw.simplifyPast`,
+  `FmlRw.applyStorageBoxP`, `Upd.apply_absorb`: `propext`,
+  `Classical.choice`, `Quot.sound`.
+
 ## What is left
 
 **On the IR, optional.**  M6c is done with `NFml` as decision 7's IR.
