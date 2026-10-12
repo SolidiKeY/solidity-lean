@@ -677,8 +677,8 @@ binds it, `{x := v} x ⇝ v`, where the update cannot be applied whole
 (it writes the storage, or halts): a local the update leaves holding a
 literal (`Upd.held`) is that literal in the atoms along the skeleton
 below it (not past a further update), the update kept in front.  Wherever
-the update returns, the state it leaves holds the literal there
-(`Upd.held_ok`); where it halts nothing below it is read. -/
+the update returns, the state it lands on holds the literal there
+(`Upd.Lands`, `Held.OKT`); where it halts nothing below it is read. -/
 
 section ApplyOnPV
 

@@ -112,7 +112,7 @@ A rule that captures a part evaluates it first, where the statement may read
 another part first (`sp[e]` with `sp` an alias: the alias first, then `e`).
 The two runs then halt alike but maybe not with the same halt; a modality
 tells a halt only from a panic (`Modality.afterRunTR`), and an expression
-never panics (`Tm.eval_noPanic`), so the two are alike (`Res.Sim`, today's
+never panics (`Tm.evalT_noPanic`), so the two are alike (`Res.Sim`, today's
 `SameOk` with no fresh names). -/
 
 section Sim

@@ -108,10 +108,4 @@ theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → Nonempty (t.TDenote C H)
 context. -/
 def Valid (φ : Fml C []) : Prop := ∀ σ : State C [], holds σ φ
 
-theorem _root_.Solidity.Modality.afterC_imp {α : Type} {m : Modality} {p q : α → Prop}
-    {r : Semantics.Res α} (h : m.afterC p r) (hpq : ∀ a, p a → q a) : m.afterC q r := by
-  cases r with
-  | ok a => exact hpq a h
-  | error _ => exact h
-
 end Solidity

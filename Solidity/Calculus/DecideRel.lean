@@ -1826,7 +1826,8 @@ theorem elemV_pay {Δ : Ctx} (τ : Semantics.State × Locs C Δ) (r a : Tm C Γ 
       | ok w =>
         cases w with
         | bool => rfl
-        | int amt => by_cases h : amt < 0 <;> simp [Value.asInt, h, pure, Except.pure]
+        | int amt => by_cases h : amt < 0 <;> simp only [Value.asInt, h, ↓reduceIte, pure,
+          Except.pure]
 
 /-- **One element, written**, its terms read in `τ₀` (`ρ₀`) and written
 into `τ₁` (`ρ₁`): its guard returns exactly where it writes, and the state

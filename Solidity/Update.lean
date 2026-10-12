@@ -54,7 +54,7 @@ def Modality.onHalt : Modality → Prop
   | .box => True
 
 /-- `p` after a run under `m`: `p` of the state it ends in, or `m.onHalt`.
-An update reads so: a term never panics (`Upd.apply_noPanic`). -/
+An update reads so: a term never panics (`Upd.applyV_noPanic`). -/
 def Modality.after (m : Modality) (p : State → Prop) : Res State → Prop
   | .ok τ => p τ
   | .error _ => m.onHalt

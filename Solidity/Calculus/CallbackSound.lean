@@ -12,7 +12,8 @@ back into the contract and the callee leaves the invariant as it found it
 (`holdsC`, `ValidC`, `Calculus/CallbackHolds.lean`).  `ProvesC.sound_of`
 and `ProvesC.valid` take the invariant first-order (`Fml.FO`, a contract
 invariant of the storage and the ledger; `Invariant.fo` carries it): "the invariant holds" is then a
-fact of the state's erasure, which the callee's run and the updates read.
+fact of what the state's terms read (`State.ReadsAs`: its global part and
+its locals erased), which the callee's run and the updates preserve.
 
 * A rule of the calculus fires on a statement that runs no other by a
   choice and pays nothing (`ProvesC.update`, `unfold`, `bind`): such a
@@ -41,7 +42,7 @@ open Solidity (Modality RuleSet)
 
 variable {C : Contract}
 
-/-! ## First-order formulas read on the erasure -/
+/-! ## First-order formulas read alike (`State.ReadsAs`) -/
 
 /-- **A first-order formula holds alike in two typed states a term reads
 alike.** -/

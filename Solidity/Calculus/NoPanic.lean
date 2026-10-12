@@ -6,7 +6,7 @@ import Solidity.Semantics.NoPanicOps
 
 A term reads the state through the interpreter's operations, none of which
 panics (`Semantics/NoPanicOps.lean`), so neither does a symbol (`Op1.eval_noPanic`
-…), a scoped term nor an update (`Tm.eval_noPanic`, `Upd.apply_noPanic`,
+…), a scoped term nor an update (`Tm.evalT_noPanic`, `Upd.applyV_noPanic`,
 `Calculus/SoundKit.lean`).  That is what lets a formula read an update as a box
 reads a revert (`Modality.after`) while the typed run reads a program with
 `Modality.afterRunTR`: an update taclet's premise and its statement then agree

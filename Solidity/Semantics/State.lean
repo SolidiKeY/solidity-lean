@@ -181,9 +181,6 @@ def drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : State C Γ :=
 /-- The storage replaced. -/
 def withStorage (σ : State C Γ) (st : Storage C) : State C Γ := { σ with storage := st }
 
-theorem withStorage_globE (σ : State C Γ) (st : Storage C) :
-    (σ.withStorage st).globE = { σ.globE with storage := st.erase } := rfl
-
 theorem globE_heap (σ : State C Γ) : σ.globE.heap = σ.heap.erase := rfl
 
 theorem globE_nextId (σ : State C Γ) : σ.globE.nextId = σ.H.length := rfl

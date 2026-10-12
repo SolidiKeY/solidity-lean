@@ -486,7 +486,8 @@ theorem holds_eq (σ : State C Γ) (a b : Tm C Γ .val) :
 theorem holds_defined (σ : State C Γ) (t : Tm C Γ .val) : holds σ (.defined t) ↔
     Modality.diamond.wp (t.evalT σ) fun _ => True := by
   show (∃ x, t.evalT σ = .ok x) ↔ _
-  cases t.evalT σ <;> simp [Modality.wp, Modality.onHalt]
+  cases t.evalT σ <;> simp only [reduceCtorEq, exists_false, Except.ok.injEq, exists_eq', Modality.wp,
+    Modality.onHalt]
 theorem holds_eqD (σ : State C Γ) (a b : Tm C Γ .val) : holds σ (Fml.eqD a b) ↔
     Modality.diamond.wp (a.evalT σ) fun x => Modality.diamond.wp (b.evalT σ) fun y => x = y := by
   have key : holds σ (Fml.eqD a b) ↔ ∃ x, a.evalT σ = .ok x ∧ b.evalT σ = .ok x := by
@@ -595,9 +596,6 @@ theorem holds_bind_oldNet (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C
   Iff.rfl
 theorem holds_anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
     holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
-
-theorem forall_val {H : HTy} (p : PrimTy) (P : (LTy.val p).TDenote C H → Prop) :
-    (∀ v : (LTy.val p).TDenote C H, P v) ↔ ∀ v : p.Denote, P v := Iff.rfl
 
 end Leaf
 

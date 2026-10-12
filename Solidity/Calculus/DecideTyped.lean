@@ -13,8 +13,9 @@ leaf's erasure (decision 83's rest): `Fml.toLSM_sound` follows the leaf's
 binders, updates and connectives as `holds` reads them, and
 `Valid.of_reduceS` puts it together with the elimination (`LFml.elim_holds`).
 
-What relates the reduction's state to the scoped state is `RelU σ ρ τ`
-(`Calculus/DecideRel.lean`), and what a term or an update pushed in reads
+What relates the reduction's state to the scoped state is `RelU σ ρ g ℓ`,
+on a global part and the locals' values (`RelT σ ρ τ` on a typed state, its
+`τ.globE` and `τ.loc`; `Calculus/DecideRel.lean`), and what a term or an update pushed in reads
 is proved there, on the scoped terms (`RelU.val`, `RelU.one`, `RelU.two`,
 `RelU.par`).
 

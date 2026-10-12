@@ -192,12 +192,15 @@ namespace Close
 
 open Lean Elab Tactic Meta in
 /-- Whether the main goal is a scoped leaf's: it or its context reads a
-typed state (`Solidity.State`, `Valid`, `holds`).  The
-steps below then step aside for `Calculus/CloseScoped.lean`'s, which read
-it with `close_rw_s`. -/
+typed state (`Solidity.State`, `Valid`, `holds`), or what the scoped closer
+leaves of one past an update (`CloseS.Landed`, `CloseS.LandedAll`, a
+`Locs`: a premise `Nonempty (Landed …)` once the rest reads no landed
+state).  The steps below then step aside for
+`Calculus/CloseScoped.lean`'s, which read it with `close_rw_s`. -/
 def scopedGoal : TacticM Bool := withMainContext do
   let names : List Lean.Name :=
-    [`Solidity.State, `Solidity.Valid, `Solidity.holds]
+    [`Solidity.State, `Solidity.Valid, `Solidity.holds, `Solidity.CloseS.Landed,
+     `Solidity.CloseS.LandedAll, `Solidity.Locs]
   let hit (e : Expr) : Bool := (e.find? fun x => x.isConst && names.contains x.constName!).isSome
   if hit (← instantiateMVars (← getMainTarget)) then return true
   for d in ← getLCtx do

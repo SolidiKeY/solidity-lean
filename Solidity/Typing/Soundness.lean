@@ -144,8 +144,6 @@ structure RunInv (C : Contract) where
   loc_mono : ∀ {H H' : HeapTy} {t : LTy} {v : t.Denote C}, H.Extends H' → loc H t v →
     loc H' t v
 
-
-
 /-! ## The typed locals -/
 
 /-- A local's value is of its type: a value of its primitive type, an alias

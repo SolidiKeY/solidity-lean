@@ -133,7 +133,8 @@ end
 
 /-- A default is canonical: the slot `persons.push()` takes where nothing
 was popped.  The premise is vacuous since `defaultOk_true`; the closer's
-callers keep it while the closer reads the erasure (decision 7's IR;
+callers keep it while the closer reads the storage untyped (`State.globE`,
+decision 7's IR;
 `docs/intrinsic.md`, "What is left"). -/
 theorem defaultForTy_canonB {T : Ty} (_h : T.okDeep = true) : (defaultForTy T).canonB T = true :=
   SVal.canonB_iff.2 defaultForTy_canon

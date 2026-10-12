@@ -22,10 +22,13 @@ open Lean Meta
 
 namespace Delab
 
-/-- Whether `n` names a scoped family: a term, an update or its element, a
-formula, or a position. -/
+/-- Whether `n` names a scoped family: a term, a memory address term
+(`MAddr.field`, `MAddr.at`), an update or its element, a formula, or a
+position.  These are the families the erased twins named until W9.7.1.
+`MAddr` is a namespace here, not a constant (the run's `MAddr` is not
+imported), so it is quoted with one backtick. -/
 def isScopedFamily (n : Lean.Name) : Bool :=
-  [``Tm, ``Upd, ``UpdElem, ``Fml, ``Idx].contains n
+  [``Tm, `Solidity.MAddr, ``Upd, ``UpdElem, ``Fml, ``Idx].contains n
 
 /-- A position that is no local the term declared. -/
 def unknownVar : Expr := mkApp (mkConst ``Solidity.Var.user) (toExpr "_")

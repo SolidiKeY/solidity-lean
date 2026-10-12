@@ -150,8 +150,9 @@ def ruleLine (c : Lean.Name) (full : Bool := false) : MetaM String := do
         `pp.fullNames full) do
       return (← Meta.ppExpr body).pretty 100000
 
-/-- The scoped families and namespaces that have no erased twin, which the
-prefix `Solidity.Core` once kept apart: the program's (`Stmt`, `Val`, …,
+/-- The scoped families and namespaces besides `Delab.isScopedFamily`'s (the
+ones that never had an erased twin), which the prefix `Solidity.Core` once
+kept apart: the program's (`Stmt`, `Val`, …,
 the holes, `Premise`), and every root of a type or a namespace that was
 declared under it, but the shared vocabulary that only gained lemmas there
 (`Contract`, `PrimTy`, `BinOp`, `Op0`–`Op3`, `Srt`, `Binds`, `Res`, `Value`,
@@ -182,7 +183,7 @@ def scopedOnlyRoots : List Lean.Name :=
 /-- Whether a full name printed in an escape is a scoped constant: it, or a
 namespace it is in, is a scoped family (`Delab.isScopedFamily`) or one of
 `scopedOnlyRoots`. -/
-def isScopedName (env : Environment) (tok : String) : Bool :=
+def isScopedName (tok : String) : Bool :=
   let rec go : Lean.Name → Bool
     | .anonymous => false
     | n@(.str p _) => n != `Solidity &&
@@ -193,11 +194,11 @@ def isScopedName (env : Environment) (tok : String) : Bool :=
 /-- Whether a conclusion printed with full names is a rule line: the
 judgement's delaborator wrote it, and no escape `‹…›` in it names a scoped
 constant (a scoped term, however parenthesized or explicit). -/
-def isRuleLine (env : Environment) (t : String) : Bool :=
+def isRuleLine (t : String) : Bool :=
   t.startsWith "dl" && !((t.splitOn "‹").drop 1).any fun s =>
     (((s.splitOn "›").headD "").split fun c =>
       !(c.isAlphanum || c == '_' || c == '.' || c == '\'' || c == '?' || c == '!' ||
-        c.toNat > 127)).any (isScopedName env)
+        c.toNat > 127)).any isScopedName
 
 /-- The constructors of the family `J` whose line does not print, and how
 many there are in all. -/
@@ -205,7 +206,7 @@ def unprinted (J : Lean.Name) : MetaM (Nat × Array Lean.Name) := do
   let some (.inductInfo i) := (← getEnv).find? J | throwError "no `{J}`"
   let mut bad := #[]
   for c in i.ctors do
-    unless isRuleLine (← getEnv) (← ruleLine c (full := true)) do bad := bad.push c
+    unless isRuleLine (← ruleLine c (full := true)) do bad := bad.push c
   return (i.ctors.length, bad)
 
 /-- `#check_rule_text`: every rule of the three families prints as a rule

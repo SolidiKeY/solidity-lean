@@ -21,7 +21,9 @@ What `holds` (`Calculus/Logic.lean`) reads a term and an update by.
 * What an update leaves, computed on the typed state: `Upd.applyV`, its
   global part and the locals' values (`Locs`), what a landed state reads
   (`Upd.lands_iff_applyV`, `Upd.afterT_applyV`); the closer, the decision
-  procedure and the rules' soundness read updates by it.
+  procedure and the rules' soundness read updates by it.  So both readings
+  of W9.6.0 stay, each where it is cheap: `applyV`'s pair is U1's carrier,
+  used for computing, and `holds` reads U2's `Lands`.
 -/
 
 namespace Solidity
@@ -427,9 +429,6 @@ theorem Upd.lands_of {Δ : Ctx} {σ₀ : State C Γ} {U U' : Upd C Γ Δ}
 theorem State.globE_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).globE = σ.globE :=
   rfl
 
-theorem State.globE_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).globE = σ.globE :=
-  rfl
-
 theorem State.globE_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).globE = σ.globE := rfl
 
@@ -461,9 +460,6 @@ theorem State.getE_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) {t : LTy} 
 theorem State.getE_push_here {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).getE .here = LTy.TDenote.erase t v := rfl
 
-theorem State.getE_push_there {t u : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (i : Idx Γ u) :
-    (σ.push v).getE i.there = σ.getE i := rfl
-
 /-- `{}` lands on the state it is applied in. -/
 theorem Upd.lands_nil (σ : State C Γ) : (Upd.nil : Upd C Γ Γ).Lands σ σ.globE σ :=
   ⟨rfl, rfl, fun _ => rfl⟩
@@ -490,13 +486,6 @@ theorem Upd.lands_decl {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Se
   · cases i with
     | here => exact hr
     | there j => exact hL.2.2 j
-
-/-- A declaration whose right-hand side halts halts. -/
-theorem Upd.globT_decl_error {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Semantics.State}
-    (hU : U.globT σ₀ = .ok g) (x : Var) {t : LTy} {r : Rhs C Γ t} {e : Halt}
-    (hr : r.evalT σ₀ = .error e) : (U.decl x r).globT σ₀ = .error e := by
-  show (do let g' ← U.globT σ₀; let _ ← r.evalT σ₀; pure g') = _
-  rw [hU, hr]; rfl
 
 theorem State.getE_setLocal_self {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).getE i = LTy.TDenote.erase t v := by
@@ -560,8 +549,6 @@ theorem State.anon_cons (σ : State C Γ) (x : (t : LTy) × Idx Γ t)
     σ.anon (x :: xs) b = (σ.setLocal x.2 (b x)).anon xs b := rfl
 theorem State.globE_havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
     (σ.havoc st nt).globE = σ.globE.havoc st.erase nt := rfl
-theorem State.getE_havoc {t : LTy} (σ : State C Γ) (st : Storage C) (nt : List (Int × Int))
-    (i : Idx Γ t) : (σ.havoc st nt).getE i = σ.getE i := rfl
 
 /-! ### Where an update lands, computed
 
@@ -785,7 +772,6 @@ theorem Upd.afterT_applyV {Δ : Ctx} (m : Modality) (σ₀ : State C Γ) (U : Up
     cases hℓ'
     exact h hσ he hH
 
-theorem State.loc_apply (σ : State C Γ) {t : LTy} (i : Idx Γ t) : σ.loc t i = σ.getE i := rfl
 
 
 

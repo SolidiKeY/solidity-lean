@@ -88,8 +88,6 @@ theorem Tm.closedAs_toNil {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs 
 /-- The typed state's global part, with no local. -/
 def State.toNil (σ : State C Γ) : State C [] := σ.withEnv (Δ := []) ()
 
-theorem State.globE_toNil (σ : State C Γ) : σ.toNil.globE = σ.globE := rfl
-
 /-- A closed term reads what it reads at the empty scope. -/
 theorem Tm.evalT_toNilS (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
     t.toNil? = some t₀ → t.evalT σ = t₀.evalT σ.toNil
@@ -511,18 +509,6 @@ theorem Upd.rwBy_lands (hf : PickLe f σ) {Δ : Ctx} (U : Upd C Γ Δ) {g : Sema
   cases x with
   | pos j => exact h
   | rhs r => exact Rhs.rwBy_eval σ hf r v h
-
-/-- **Where the rewrite lands, the update lands.** -/
-theorem Upd.rwBy_lands_rev (hf : PickGe f σ) {Δ : Ctx} (U : Upd C Γ Δ) {g : Semantics.State}
-    {σ' : State C Δ} (hL : (Upd.rwBy f U).Lands σ g σ') : U.Lands σ g σ' := by
-  refine ⟨Upd.rwBy_globT_rev σ hf U g hL.1, hL.2.1, fun i => ?_⟩
-  have h := (Held.OKT_iff_OKV _ _ _ _).1 (hL.2.2 i)
-  rw [Upd.held_rwBy] at h
-  rw [Held.OKT_iff_OKV]
-  generalize U.held i = x at h
-  cases x with
-  | pos j => exact h
-  | rhs r => exact Rhs.rwBy_eval_rev σ hf r _ h
 
 /-- **An exact rewrite lands where the update does.** -/
 theorem Upd.rwBy_lands_iff (hf : PickEq f σ) {Δ : Ctx} (U : Upd C Γ Δ) (g : Semantics.State)
