@@ -4236,6 +4236,23 @@ cannot be applied element by element to a typed state.  Two carriers:
 **Fallback**: if U2 fails the gate, U1 (the evaluators, `EState`,
 `StepErase` and the erased invariant still go).
 
+### W9.6.0 record (the spike)
+
+**U1 chosen.**  U2 is sound and complete: `Upd.lands_iff : U.Lands σ₀
+σ'.globE σ' ↔ U.apply σ₀.erase = .ok σ'.erase`, `holds_upd_iff` (U2's
+clause equals `holds`'), and the allocation pair lands on
+`(σ.allocDefault R hm).1.push (some id)` with no `EState`.  But a leaf read
+through `Lands` costs 1.8× `holdsE`'s (`ageWriteRead`: 116–131 ms against
+70–78 ms; `sol_close` 103–105 ms), and every law would be restated over
+hypotheses instead of a computed state.  `EState` is the pair `U1` names,
+so it stays as an update's result and nothing else: what a typed state
+erases to and what the laws compute on.  The typed reader
+`Tm.evalT σ t = Tm.eval σ.erase t` is not `rfl` at an abstract position
+(`Env.get i (TEnv.erase x)` recurses on `i`): one `TEnv.get_erase` per
+local case.  What W9.6 removes, then: the program evaluators, `StepErase`,
+the erased run invariant (`EKeeps`, `SRuns.of_agrees`), so the soundness
+and the invariants read the typed run only.
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
