@@ -5224,7 +5224,32 @@ stays solkey's.  Speed warned first: the kernel walks the sort index in
 | Wave | Work |
 |---|---|
 | W9.8.0 | `rename` ‖ spike: `Tm.evalT`/`denoteT`/`Rhs.evalT` → `Tm.eval`/`denote`/`Rhs.eval` (by references, not text); the spike types the sorts on a slice (storage reads and writes, one memory symbol), times `Tactics/Decide`'s kernel checks and the closer on it, and sizes the port |
-| W9.8.1+ | from the spike's record |
+| W9.8.1 | `SrtT`, `OpT0`–`OpT3` (over the contract), `SrtT.Den`/`OpTn.eval` on the typed global part (a revert is `none`), `SVal.absT` (the Theory's abstraction), the typed get/set and find/save laws; `TmT`/`RhsT`/`UpdT` beside `Tm` in `Fml`, `TmT.erase` the bridge |
+| W9.8.2 | `lower` ‖ `lands`: `Lower`/`Arms`/`Rules` emit `TmT`; `Lands`' readers on `TmT` |
+| W9.8.3 | `decide` ‖ `close`: `toLS`/`inLS` on `TmT` (G0 forms, twins, links); `CloseScoped`/`StateParts` |
+| W9.8.4 | `laws`, two lanes by file: `TermLib`/`TermLaws`/`Rewrite*` |
+| W9.8.5 | soundness, printers, notation switched; `Tm`, `Op0`–`Op3`, `Srt.Ev`, `globE`/`getE`/`TDenote.erase` deleted; `solkeycheck`; gates; review |
+
+### W9.8.0 spike record
+
+**Go.**  Design: `SrtT` = `val p | path T | st | sv T | ident R | addr T |
+mem | mv T`; the symbols take the contract (`root r (h : C.rootType r =
+some T)`, `field (h : C.fieldType s f = some T)`); `SrtT.Den C H` is the
+typed value (`p.Denote`, `SRef C T`, `Storage C`, `SVal T`, …, `mem` a
+`Grown H` heap: `addM` extends it, an `ident R` is checked where it is read,
+since a `copySt`'s growth is not static); a revert is `none`, no `undef`.
+`mtSt` is `Storage.init C`; `delValue : val p → val p`.  Kernel:
+`decide +kernel` on the fragment check in G0 form costs the same as on the
+untyped terms (128 writes: 61–73 ms against 73–76 ms); a term literal
+elaborates 2.2–3.6× slower (the `rfl`s of `rootType`/`fieldType`).
+`findOnSave` and the frame across roots are proved typed in about the
+untyped lines; the frame below one root needs `Path.Diverges` across types.
+Size: 3,626 lines in 122 files (`TermLaws`, `DecideRel`, `TermLib`,
+`SoundArms`, `RewritePast`, `CloseScoped` heaviest); `KeyTaclets` and
+`SortCheck` none.  **Decision (lead):** `Fml.eq` keeps reading the Theory
+(`Theory.StValue`, KeY's own total model, so solkey's laws need no "the
+write lands" premise), through a typed abstraction `SVal.absT`; the Theory
+stays untyped, the erasure to `Semantics.State` goes.
 
 ### W9.8.0 rename record (2026-10-12, branch `w98-rename`)
 
