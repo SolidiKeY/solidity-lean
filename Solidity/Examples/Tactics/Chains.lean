@@ -389,7 +389,7 @@ from the line the program ends at, one rewrite a link until the line is
 last, written as one chain term to paste
 (`Calculus/ChainGen.lean`).
 The strategy's steps are grouped as the worked examples print them
-(`NFml.Chain.groupSteps`): a declaration with the binding or read it leaves
+(`Chain.groupSteps`): a declaration with the binding or read it leaves
 is one `~*>`; no `emptyModality` follows a rule that leaves no statement. -/
 
 section
@@ -422,14 +422,37 @@ info: theorem chain :
 #chain dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
 
 /-- The program by the strategy, then the merge and the read of the fresh
-`Person`: past the program the rewrites are named (`sol_rws`), the
-derivation to the program's end found. -/
+`Person`, written out as links: its last line declares `mv1`, the line the
+merge leaves, whose binders a `~~>` to a line written past the program
+would have to name as the reading of the text does (`Fml.LeadsK`). -/
 example (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
-    dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
-            ⟨[ v = carol.account.balance; ]⟩ φ }
-    ~~> dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
-          mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖ v := 0 } φ } := by
-  sol_rws [sequentialToParallel, readAddEqual]
+    cdl![m]{
+      ∀ uint v;
+        { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) } ⟨[ v = carol.account.balance; ]⟩ φ }
+    ~[memoryFieldRead_unfold_rightFst]~> cdl![m]{
+        ∀ uint v;
+          { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+            ⟨[ Account memory mv1 = carol.account; v = mv1.balance; ]⟩ φ }
+    ~*> cdl![m]{
+        ∀ uint v;
+          { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+            { mv1 := read(memory, carol.account) } ⟨[ v = mv1.balance; ]⟩ φ }
+    ~[memoryFieldRead]~> cdl![m]{
+        ∀ uint v;
+          { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
+            { mv1 := read(memory, carol.account) } { v := read(memory, mv1.balance) } φ }
+    ~[sequentialToParallel]~> cdl![m]{
+        ∀ uint v;
+          { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+              mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
+              v := read(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).balance) }
+            φ }
+    ~[readAddEqual]~> cdl![m]{
+        ∀ uint v;
+          { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
+              mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖ v := 0 }
+            φ } := by
+  sol_chain
 
 variable (φ : Post StandardExample [.val .uint, .val .uint]) in
 /--

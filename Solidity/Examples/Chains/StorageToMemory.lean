@@ -14,7 +14,7 @@ printed names (`FreshNames` tables).  The root `r` the copy allocates is `freshI
 Where the worked example prints the updates merged before the copy (the alias `sp`, `aliceTok`), the chain merges
 there too (`~[sequentialToParallel]~>` under the open modality, `Calculus/Merge.lean`; in `FieldCopy` all but
 `sp`, which a hidden binder separates from the stack), and again past the program.  The read of the
-copy is then resolved one law a link (`Calculus/ChainRewrites.lean`): `readCopySt` reads the copy out of the
+copy is then resolved one law a link (`Calculus/RewriteLaws.lean`): `readCopySt` reads the copy out of the
 storage it copied, `findOnSave` the write.  Every capture stays to the last line, which `#last_line` checks.
 The copied struct itself (`find(S, alice)`) is a struct read and has no literal: no law reads a struct
 through a write below it.

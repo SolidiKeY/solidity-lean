@@ -244,4 +244,30 @@ theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → Nonempty (t.TDenote C H)
 context. -/
 def Valid (φ : Fml C []) : Prop := ∀ σ : State C [], holds σ φ
 
+/-! ## A callee's and a loop's state, erased -/
+
+theorem State.havoc_erase {Γ : Ctx} (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+    (σ.havoc st nt).erase = σ.erase.withGlob (σ.erase.glob.havoc st.erase nt) := rfl
+
+theorem State.anon_erase {Γ : Ctx} (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
+    (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C σ.H) :
+    (σ.anon xs b).erase = σ.erase.anon xs fun x => LTy.TDenote.erase x.1 (b x) := by
+  have key : ∀ (ys : List ((t : LTy) × Idx Γ t)) (e : TEnv C σ.H Γ),
+      (σ.withEnv (ys.foldl (fun e x => TEnv.set x.2 (b x) e) e)).erase =
+        ys.foldl (fun τ x => τ.setLocal x.2 (LTy.TDenote.erase x.1 (b x))) (σ.withEnv e).erase := by
+    intro ys
+    induction ys with
+    | nil => intro e; rfl
+    | cons x ys ih =>
+      intro e
+      rw [List.foldl_cons, List.foldl_cons, ih]
+      exact congrArg (fun τ => List.foldl _ τ ys) (State.setLocal_erase (σ.withEnv e) x.2 (b x))
+  exact key xs σ.env
+
+theorem _root_.Solidity.Modality.afterC_imp {α : Type} {m : Modality} {p q : α → Prop}
+    {r : Semantics.Res α} (h : m.afterC p r) (hpq : ∀ a, p a → q a) : m.afterC q r := by
+  cases r with
+  | ok a => exact hpq a h
+  | error _ => exact h
+
 end Solidity

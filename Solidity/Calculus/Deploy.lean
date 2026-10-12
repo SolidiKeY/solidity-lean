@@ -1,4 +1,7 @@
 import Solidity.Calculus.Spec
+import Solidity.Calculus.Logic
+import Solidity.Calculus.FirstOrder
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.Close
 import Solidity.Calculus.SoundKit
 

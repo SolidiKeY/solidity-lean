@@ -1,465 +1,297 @@
-import Solidity.Calculus.HoldsErase
-import Solidity.Calculus.CloseErase
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.SurfaceNotation
+import Solidity.Calculus.TacticSyntax
+import Solidity.Calculus.CloseLemmas
 
 /-!
-# Closing a scoped leaf by its erasure
+# Closing the first-order goal: `sol_close`
 
-What the scoped strategy leaves (`symex`, `Calculus/Step.lean`)
-is closed by today's closer (Decision 6: `Fml.erase` is the bridge until
-the closer is ported): a scoped formula is valid when its erasure is
-(`Valid.of_erase`), and the erasure goes to `NFmlClose.lean`'s `sol_close` or to
-`NFml.Derive.proves`, the closer `sol_prove`'s walk runs on each leaf
-(`Calculus/ProvesDerive.lean`).
+`sol_symex` leaves `{U₁} … {Uₙ} φ` with no modality in it.  Its updates are
+not rewritten away, as mini-solkey's `Ch14_Updates` does: a term here *is* a
+call of the interpreter (`Tm.eval`), so applying an update
+in an arbitrary state `σ` is running it, and what remains is a statement
+about what `saveStorage`, `findStorage`, `readAddr` and `getEnv` return on a
+`σ` nobody knows.  `sol_close` proves that statement with one contextual
+`simp` over the `close_rw` set, then `omega` or `grind` for the arithmetic.
 
-A first-order formula reads as its erasure (`holds_erase_fo`); a leaf has
-more: updates, of either modality (the reading of an update asks only of
-the typed states that erase to the state it ends in), and hidden binders
-(`uint r = e;` binds `r`, `localValueDeclInitDrop`).  A hidden binder
-erases to its body read at the name's current binding, which one untyped
-state does not range over, but a valid erasure does: in every state, so
-for every binding of the name.  The induction carries that as its
-hypothesis: the erasure holds in every state that differs from the one at
-hand only at the names `B` the binders below declare
-(`holds_of_erase_pos`).  It goes through an update, a precondition or a
-quantifier that does not mention those names, and through `{anon(…)}`,
-whose untyped reading ranges over every binding of the names it anonymises
-(a loop's frame, with the body's binders under it); `Fml.posB` checks this:
-the binders sit outside negations and preconditions, what is negated or
-assumed is first-order, and no update, precondition or quantifier names
-them.  A leaf with a modality is not taken.
+**Weakest preconditions.**  `Modality.wp m x P` is `P` of what `x` returns,
+or `m.onHalt` when it halts; `Modality.after` is its instance at `State`.
+Pushed through the binds of the evaluators (`Modality.wp_bind`, and one
+equation per constructor below), it turns the goal into a nest of `∀ τ,
+x = .ok τ → …` (the box) or `∃ τ, x = .ok τ ∧ …` (the diamond).  A
+`split` on the unfolded `match`es does not get there: it splits the
+outermost one only, and leaves the evaluator's inner matches in
+hypotheses.
 
-`posB` is evaluated by the kernel inside `sol_prove`'s check, so it is
-written by `Fml.rec`, and the checks it calls by a recursor or by `casesOn`
-with the motive generalising the index (Gate G0, condition 1), as the
-strategy is.
+**Read after write.**  Under the box, a write is named on the spot, together
+with what `ReadWrite.lean` knows of the state it returns: a storage write
+(`Modality.wp_box_saveStorage`) reads back at and below the path written
+and as before apart from it, a memory write (`wp_box_writeAddr`) likewise
+at an address, a copy (`wp_box_copyStToM`, `wp_box_copyMem`) member by
+member, and each leaves the other components alone.  A read of a subtree
+(`wp_box_findStorage`) is named with the reads below it, which is what
+settles a read above a write.  The `simp` is contextual, so every such
+fact rewrites what follows it; the apartness of concrete paths is decided
+by computation, that of symbolic keys (`balances[k]`, `balances[j]`) by a
+hypothesis `k != j` of the formula or a branch.  Every step is a lemma or a
+hypothesis: nothing evaluated is trusted, the kernel checks the proof.
+
+**A scoped leaf** (`open scoped Solidity.Scoped`) is read by
+`Calculus/CloseScoped.lean`'s steps, which each step below steps aside for
+(`Close.scopedGoal`): the scoped formula with `close_rw_s`, its parameters
+at their types.  This module's set `close_rw` holds what the interpreter's
+states and values are made of, which `sol_decide`'s unfolding
+(`Calculus/Decide.lean`) reads too.  What either set knows of the
+interpreter is `Calculus/CloseLemmas.lean`'s.
+
+What does not close, and why (on either side):
+
+* a write under the diamond: the closer reads the write's update on the
+  erasure's untyped term model, where `find`/`save` at `alice` is not known
+  to be defined, so `⟨ alice.age = 1; ⟩ true` stays open at
+  `{ storage := save(storage, alice.age, 1) } true`.  Write the box, or put
+  the well-formedness of the storage in the premise;
+* two symbolic keys the formula does not tell apart: there is no case
+  split on `k = j`, so `[ balances[k] = 5; balances[j] = 6; ] balances[k] == 5`
+  stays open (it is false at `k = j`);
+* two memory objects: nothing says that two allocations are different
+  objects, since `⊨` includes states whose heap already holds an object at
+  `nextId`;
+* a read of an array a push wrote, the array known only by its shape:
+  `[ uint n = values.length; values.push(42); ] values.length == n + 1`
+  stays open, since the push's write is left as `saveStorage … = .ok τ`
+  with none of the facts `wp_box_saveStorage` names
+  (`Examples/Tactics/CallOperands.lean` pins it open, and writes its push rows as
+  chains for this);
+* a default read out of a fresh memory object (`Person memory m;
+  uint x = m.age;`): the default of a struct type is a well-founded
+  definition (`defaultForTy`) that `simp` does not unfold.
 -/
 
 namespace Solidity
 
-open Semantics (EnvAgreeExcept ResultsAgree)
-open Solidity (Modality)
+open Semantics SemanticsProperties
 
-variable {C : Contract}
+namespace Close
 
-/-! ## The checks
+/-! ## Evaluation, one constructor at a time
 
-Each by the recursor, which the kernel unfolds with no `brecOn`, and a
-compiled twin by `match` (`implemented_by`) for the tactics' first look. -/
+The evaluators' own equations end in `match`es on a binding or a pair,
+which `simp` cannot see through while the scrutinee is unknown.  These
+restate them as binds of named functions, so that `Modality.wp_bind`
+applies and the scrutinee is named first.  A read of memory stays whole
+(`readVal`), since what is known of it is known of the value. -/
 
-/-- `Upd.freshK`'s compiled twin. -/
-def Upd.freshM {Γ : Ctx} (ns : List Var) : {Δ : Ctx} → Upd C Γ Δ → Bool
-  | _, .nil => true
-  | _, .snoc U _ => U.freshM ns
-  | _, .decl U x _ => U.freshM ns && !(U.names ns).contains x
-  | _, .pop U _ => U.freshM ns
-  | _, .drop U _ => U.freshM ns
+/-- `oldNet` bound to a ledger reads it. -/
+@[simp] theorem bindingLedger_ledger (l : List (Int × Int)) :
+    bindingLedger (.ledger l) = .ok l := rfl
 
-/-- Every local an update declares takes a name not in scope (`Upd.Fresh`):
-`Closable.lean`'s `Upd.freshB` by `List.contains`, which the kernel evaluates
-faster, with a compiled twin. -/
-@[implemented_by Upd.freshM]
-def Upd.freshK {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
-  Upd.rec (motive := fun _ _ => Bool) true (fun _ _ ih => ih)
-    (fun U x _ ih => ih && !(U.names ns).contains x) (fun _ _ ih => ih) (fun _ _ ih => ih) U
+/-- `old` bound to a storage reads it. -/
+@[simp] theorem bindingStore_store (st : List (Name × SVal)) :
+    bindingStore (.store st) = .ok st := rfl
 
-/-- `Fml.plainB`'s compiled twin. -/
-def Fml.plainM : {Γ : Ctx} → Fml C Γ → List Var → Bool
-  | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => true
-  | _, .not φ, ns => φ.plainM ns
-  | _, .and φ ψ, ns | _, .imp φ ψ, ns => φ.plainM ns && ψ.plainM ns
-  | _, .all x _ φ, ns => !ns.contains x && φ.plainM (x :: ns)
-  | _, .upd .., _ | _, .havoc _, _ | _, .modal .., _ | _, .bind .., _ | _, .anon .., _ => false
+/-- `x` bound to `10` reads `10`. -/
+@[simp] theorem bindingVal_val (v : Value) : bindingVal (.val v) = .ok v := rfl
+/-- `p` bound to `alice.account` reads that path. -/
+@[simp] theorem bindingPath_spath (r : Name) (segs : List Seg) :
+    bindingPath (.spath r segs) = .ok (r, segs) := rfl
+/-- `m` bound to the object `3` reads `3`. -/
+theorem bindingRef_mref (id : Nat) : bindingRef (.mref id) = .ok id := rfl
+/-- A local read as a value was bound to one: `a == 1` says `a` holds `1`. -/
+@[simp] theorem bindingVal_eq_ok {b : Binding} {v : Value} :
+    bindingVal b = .ok v ↔ b = .val v := by
+  cases b <;> simp [bindingVal]
+/-- A local read as an object was bound to one. -/
+theorem bindingRef_eq_ok {b : Binding} {id : Nat} :
+    bindingRef b = .ok id ↔ b = .mref id := by
+  cases b <;> simp [bindingRef]
 
-/-- `Fml.Plain` and `Fml.FO`, decided: a first-order formula whose `∀`s bind
-fresh names, which reads as its erasure both ways (`holds_erase_fo`). -/
-@[implemented_by Fml.plainM]
-def Fml.plainB {Γ : Ctx} (φ : Fml C Γ) : List Var → Bool :=
-  Fml.rec (motive := fun _ _ => List Var → Bool)
-    (tt := fun _ => true) (eq := fun _ _ _ => true) (defined := fun _ _ => true)
-    (not := fun _ ih ns => ih ns)
-    (and := fun _ _ ihφ ihψ ns => ihφ ns && ihψ ns)
-    (imp := fun _ _ iha ihφ ns => iha ns && ihφ ns)
-    (upd := fun _ _ _ _ _ => false)
-    (modal := fun _ _ _ _ _ _ => false)
-    (havoc := fun _ _ _ => false)
-    (all := fun x _ _ ih ns => !ns.contains x && ih (x :: ns))
-    (bind := fun _ _ _ _ _ _ => false) (anon := fun _ _ _ _ => false) φ
+section Eval
 
-/-- No name of `vs` is in `B`. -/
-def disjointB (B vs : List Var) : Bool := !vs.any B.contains
+/-- Binding a local leaves the ledger. -/
+theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
+/-- Binding a local leaves the storage. -/
+theorem storage_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).storage = σ.storage :=
+  rfl
 
-/-- `Fml.posB`'s compiled twin. -/
-def Fml.posM : {Γ : Ctx} → Fml C Γ → List Var → Option (List Var)
-  | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => some []
-  | _, .not φ, ns => if φ.plainB ns then some [] else none
-  | _, .anon _ φ, ns => φ.posM ns
-  | _, .and φ ψ, ns => (φ.posM ns).bind fun B₁ => (ψ.posM ns).map (B₁ ++ ·)
-  | _, .imp a φ, ns =>
-    if a.plainB ns then (φ.posM ns).bind fun B =>
-      if disjointB B (a.erase ns).vars then some B else none
-    else none
-  | _, .upd _ U φ, ns =>
-    if U.freshK ns then (φ.posM (U.names ns)).bind fun B =>
-      if disjointB B (Surface.Upd.vars (U.erase ns)) then some B else none
-    else none
-  | _, .modal .., _ => none
-  | _, .havoc φ, ns => φ.posM ns
-  | _, .all x _ φ, ns =>
-    if ns.contains x then none
-    else (φ.posM (x :: ns)).bind fun B => if B.contains x then none else some B
-  | _, .bind _ x _ φ, ns => if ns.contains x then none else (φ.posM (x :: ns)).map (x :: ·)
+end Eval
 
-/-- **A leaf closable by its erasure**: `some B`, `B` the names its hidden
-binders declare, when they sit where `holds_of_erase_pos` takes them (no
-binder under a negation, a precondition or a modality, but one under
-`{anon(…)}` or an update of either modality taken; no update, precondition
-or quantifier naming one; every binder fresh), and what is negated or
-assumed is first-order (`Fml.plainB`); `none` otherwise. -/
-@[implemented_by Fml.posM]
-def Fml.posB {Γ : Ctx} (φ : Fml C Γ) : List Var → Option (List Var) :=
-  Fml.rec (motive := fun _ _ => List Var → Option (List Var))
-    (tt := fun _ => some []) (eq := fun _ _ _ => some []) (defined := fun _ _ => some [])
-    (not := fun φ _ ns => if φ.plainB ns then some [] else none)
-    (and := fun _ _ ihφ ihψ ns => (ihφ ns).bind fun B₁ => (ihψ ns).map (B₁ ++ ·))
-    (imp := fun a _ _ ihφ ns =>
-      if a.plainB ns then (ihφ ns).bind fun B =>
-        if disjointB B (a.erase ns).vars then some B else none
-      else none)
-    (upd := fun _ U _ ih ns =>
-      if U.freshK ns then (ih (U.names ns)).bind fun B =>
-        if disjointB B (Surface.Upd.vars (U.erase ns)) then some B else none
-      else none)
-    (modal := fun _ _ _ _ _ _ => none)
-    (havoc := fun _ ih ns => ih ns)
-    (all := fun x _ _ ih ns =>
-      if ns.contains x then none
-      else (ih (x :: ns)).bind fun B => if B.contains x then none else some B)
-    (bind := fun _ x _ _ ih ns => if ns.contains x then none else (ih (x :: ns)).map (x :: ·))
-    (anon := fun _ _ ih ns => ih ns) φ
+end Close
 
-/-! ## The compiled twins
+/-! ## The tactic -/
 
-Each kernel-evaluated check is its compiled twin (Gate G0, condition 2). -/
+attribute [close_rw]
+  Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
+  Close.forall_unit Close.exists_unit
+  Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
+  Close.fieldPath_at
+  -- values and the state's parts
+  Close.equiv_prim_left_iff IntOp.apply State.envVal State.getNet
+  Close.idxOk_array Close.idxOk_map Close.pastEnd_array
+  Close.lookupBy_setBy_int State.pay State.setNet
+  -- operators
+  Close.evalBinop_strict Close.evalBinop_and Close.evalBinop_or applyBinOp applyUnOp unopCheck
+  Close.pickBranch_eq BinOp.retTy BinOp.isArith checkArith uintBound intBound
+  Close.uintBitwise_ofNat Close.uintBitwise_ofNat_cast Close.uintBitwise_cast_ofNat
+  uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
+  -- runs
+  Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
+  Modality.wp_diamond Modality.onHalt_box Modality.onHalt_diamond
+  Close.pure_eq_ok Res.ok_bind Res.error_bind Close.bind_ok_right bind_assoc
+  Close.saveStorage_bind_restore Close.writeAddr_bind_restore
+  -- values
+  Close.bindingVal_val Close.bindingPath_spath Close.bindingRef_mref Close.bindingStore_store
+  Close.bindingLedger_ledger
+  Close.bindingVal_eq_ok
+  Close.bindingRef_eq_ok Close.asInt_eq_ok Close.asBool_eq_ok Close.asRef_eq_ok Close.toMVal_eq
+  Close.toSVal_int Close.toSVal_bool Close.asValue_toSVal Close.asValue_toMVal Close.asValue_int
+  Close.asValue_bool Close.mval_asValue_prim Close.mval_asValue_ref Close.mval_asRef_ref
+  Close.defaultOf_int Close.defaultOf_bool Close.asInt_int Close.asBool_bool
+  -- states
+  State.findStorage_setEnv State.checkIndex_setEnv Close.checkIndex_mk
+  State.getEnv_setEnv_self State.getEnv_setEnv_ne Close.findStorage_mk
+  Close.getEnv_mk Close.readAddr_mk Close.readVal_mk Close.readAddr_setEnv Close.readVal_setEnv
+  Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_ite
+  -- paths, arrays, copies
+  Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
+  Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil
+  List.nil_append List.cons_append List.append_nil
+  Close.arrLen_array Close.arrLen_eq_ok Close.pushOn_array Close.popOn_push Close.popOn_push_keep Close.find_push_last
+  Close.copyLeaf_prim Close.apart_field Close.apart_index Close.apart_field_index
+  Close.apart_index_field
+  -- logic
+  Except.ok.injEq Binding.val.injEq Binding.mref.injEq Binding.store.injEq Binding.ledger.injEq
+  PrimVal.int.injEq
+  PrimVal.bool.injEq
+  MVal.prim.injEq MVal.ref.injEq SVal.prim.injEq Prod.mk.injEq Seg.field.injEq Seg.at.injEq
+  Var.user.injEq Var.fresh.injEq Int.ofNat.injEq
+  forall_eq' forall_eq exists_eq_left' exists_eq_left exists_eq' exists_eq forall_exists_index
+  and_imp
+  true_and and_true and_self implies_true forall_const ne_eq not_false_eq_true not_true_eq_false
+  true_or or_true or_false false_or not_and not_exists Classical.not_not true_implies
+  false_implies decide_eq_true_eq decide_eq_false_iff_not
+  Bool.and_true Bool.and_false Bool.true_and Bool.false_and Bool.or_true Bool.or_false
+  Bool.true_or Bool.false_or Bool.not_true Bool.not_false Bool.not_not
+  Bool.not_eq_true' Bool.not_eq_false' Bool.and_eq_true Bool.or_eq_true Bool.and_eq_false_iff
+  Bool.or_eq_false_iff
+  -- computation
+  reduceCtorEq reduceIte reduceDIte String.reduceEq Nat.reduceEqDiff Nat.reducePow Int.reduceEq
+  Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
 
-theorem Upd.freshK_eq_freshM {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ) :
-    U.freshK ns = U.freshM ns := by
-  induction U with
-  | nil => rfl
-  | snoc U _ ih | pop U _ ih | drop U _ ih => simp only [Upd.freshM, ← ih]; rfl
-  | decl U x _ ih => simp only [Upd.freshM, ← ih]; rfl
+-- A write, a subtree read, a copy is named together with what is known of it.
+attribute [close_rw] Modality.wp_box_saveStorage Modality.wp_box_findStorage
+  Modality.wp_box_writeAddr Modality.wp_box_copyStToM Modality.wp_box_allocDefault
+  Modality.wp_box_copyMem Modality.wp_box_transferAt
 
-theorem Fml.plainB_eq_plainM {Γ : Ctx} (φ : Fml C Γ) (ns : List Var) :
-    φ.plainB ns = φ.plainM ns := by
-  induction φ generalizing ns with
-  | tt | eq | defined | upd | modal | havoc | bind | anon => simp only [Fml.plainM]; rfl
-  | not φ ih | all x p φ ih => simp only [Fml.plainM, ← ih]; rfl
-  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.plainM, ← ihφ, ← ihψ]; rfl
+-- The bare box names a result with nothing, so it waits in a set of its own
+-- (`close_rw_last`, consulted after `close_rw`) until every fact is in scope:
+-- a push is not named before the array it pushes onto is known.  The diamond
+-- is named at once, since what a premise says is what the rest needs.
+attribute [close_rw_last] Modality.wp_box
 
-theorem Fml.posB_eq_posM {Γ : Ctx} (φ : Fml C Γ) (ns : List Var) :
-    φ.posB ns = φ.posM ns := by
-  induction φ generalizing ns with
-  | tt | eq | defined | not | modal => simp only [Fml.posM]; rfl
-  | havoc φ ih | anon xs φ ih | upd m U φ ih | all x p φ ih | bind m x t φ ih =>
-    simp only [Fml.posM, ← ih]; rfl
-  | imp a φ _ ih => simp only [Fml.posM, ← ih]; rfl
-  | and φ ψ ihφ ihψ => simp only [Fml.posM, ← ihφ, ← ihψ]; rfl
+namespace Close
 
-/-! ## The checks are sound -/
+open Lean Elab Tactic Meta in
+/-- Whether the main goal is a scoped leaf's: it or its context reads a
+typed state (`Solidity.State`, `EState`, `Valid`, `CloseS.holdsE`).  The
+steps below then step aside for `Calculus/CloseScoped.lean`'s, which read
+it with `close_rw_s`. -/
+def scopedGoal : TacticM Bool := withMainContext do
+  let names : List Lean.Name :=
+    [`Solidity.State, `Solidity.EState, `Solidity.Valid, `Solidity.CloseS.holdsE]
+  let hit (e : Expr) : Bool := (e.find? fun x => x.isConst && names.contains x.constName!).isSome
+  if hit (← instantiateMVars (← getMainTarget)) then return true
+  for d in ← getLCtx do
+    if !d.isImplementationDetail && hit (← instantiateMVars d.type) then return true
+  return false
 
-theorem Upd.fresh_of_freshK {Γ : Ctx} (ns : List Var) {Δ : Ctx} (U : Upd C Γ Δ)
-    (h : U.freshK ns = true) : U.Fresh ns := by
-  induction U with
-  | nil => trivial
-  | snoc U _ ih => exact ih h
-  | decl U x _ ih =>
-    have h' : U.freshK ns = true ∧ (U.names ns).contains x = false := by
-      simpa only [Upd.freshK, Bool.and_eq_true, Bool.not_eq_eq_eq_not, Bool.not_true] using h
-    exact ⟨ih h'.1, fun hx => by rw [List.contains_iff_mem.2 hx] at h'; cases h'.2⟩
-  | pop U _ ih => exact ih h
-  | drop U _ ih => exact ih h
+end Close
 
-theorem Fml.plain_of_plainB {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns : List Var}, φ.plainB ns = true →
-    φ.Plain ns ∧ φ.FO = true := by
-  induction φ with
-  | tt | eq | defined => intro _ _; exact ⟨trivial, rfl⟩
-  | not φ ih => intro ns h; exact ih h
-  | and φ ψ ihφ ihψ =>
-    intro ns h
-    have h' : φ.plainB ns = true ∧ ψ.plainB ns = true := Bool.and_eq_true _ _ ▸ h
-    exact ⟨⟨(ihφ h'.1).1, (ihψ h'.2).1⟩, Bool.and_eq_true_iff.mpr ⟨(ihφ h'.1).2, (ihψ h'.2).2⟩⟩
-  | imp a φ iha ihφ =>
-    intro ns h
-    have h' : a.plainB ns = true ∧ φ.plainB ns = true := Bool.and_eq_true _ _ ▸ h
-    exact ⟨⟨(iha h'.1).1, (ihφ h'.2).1⟩, Bool.and_eq_true_iff.mpr ⟨(iha h'.1).2, (ihφ h'.2).2⟩⟩
-  | upd | modal | havoc | bind | anon => intro _ h; cases h
-  | all x p φ ih =>
-    intro ns h
-    have h' : (!ns.contains x) = true ∧ φ.plainB (x :: ns) = true := Bool.and_eq_true _ _ ▸ h
-    refine ⟨⟨fun hx => ?_, (ih h'.2).1⟩, (ih h'.2).2⟩
-    rw [List.contains_iff_mem.2 hx] at h'
-    cases h'.1
+open Lean Elab Tactic in
+/-- The first pass of `sol_close`: evaluate, and name every write with what
+is known of it. -/
+elab "sol_close_eval" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic| simp only [close_rw]))
 
-theorem disjointB_avoids {B vs : List Var} (h : disjointB B vs = true) : Solidity.Avoids vs B := by
-  intro x hx hB
-  simp only [disjointB, Bool.not_eq_eq_eq_not, Bool.not_true, List.any_eq_false] at h
-  exact h x hx (List.contains_iff_mem.2 hB)
+open Lean Elab Tactic in
+/-- The second: each premise in scope for what follows it, so that the facts
+about a write rewrite the reads after it.  Nothing is named bare yet: a
+result a later fact decides (the array a push lands on) is decided first. -/
+elab "sol_close_facts" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw]))
 
-/-! ## Untyped states alike off some names -/
+open Lean Elab Tactic in
+/-- The third: what is left is named bare, under the box. -/
+elab "sol_close_reads" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp (config := { contextual := true, maxSteps := 400000 }) only [close_rw, close_rw_last]))
 
-section Untyped
+open Lean Elab Tactic in
+/-- `sol_close_reads` on the goal and every hypothesis. -/
+elab "sol_close_reads_all" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp_all (config := { maxSteps := 400000 }) only [close_rw, close_rw_last]))
 
-open Semantics
+/-- `sol_close`'s first step: a scoped leaf (`Valid ψ`) read as
+`CloseS.holdsE` reads it (`Calculus/CloseScoped.lean`); any other goal is
+left as it is. -/
+syntax "sol_close_unwrap" : tactic
 
-theorem envAgree_symm {ns : List Var} {σ τ : Semantics.State} (h : EnvAgreeExcept ns σ τ) :
-    EnvAgreeExcept ns τ σ :=
-  ⟨h.storage.symm, h.heap.symm, h.nextId.symm, h.net.symm, fun n hn => (h.env n hn).symm,
-    h.selfBalance.symm, h.tx.symm⟩
+open Lean Elab Tactic in
+elab_rules : tactic
+  | `(tactic| sol_close_unwrap) => pure ()
 
-/-- Two states alike but for their locals, whose lookups agree, satisfy the
-same formulas. -/
-theorem holds_of_envAgree_nil {φ : Solidity.NFml C} {σ τ : Semantics.State} (h : EnvAgreeExcept [] σ τ) :
-    NFml.holds σ φ → NFml.holds τ φ :=
-  (Solidity.holds_frame φ (fun _ _ => List.not_mem_nil) h).1
+/-- `sol_close`: prove a formula with no modality left in an arbitrary state
+(`Calculus/Close.lean`; a scoped leaf by `Calculus/CloseScoped.lean`'s
+steps of the same names).  Run `sol_symex` first; with no goal left it does
+nothing. -/
+macro "sol_close" : tactic => `(tactic|
+  all_goals
+   (sol_close_unwrap
+    intro σ
+    sol_close_eval
+    all_goals try sol_close_facts
+    all_goals try sol_close_reads
+    all_goals try (intros; sol_close_reads_all)
+    all_goals try (subst_vars; sol_close_reads_all)
+    all_goals (try intros)
+    -- a bounds check returns `()`: nothing is left to choose
+    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
+    all_goals first | omega | grind))
 
-/-- `τ` with the names `B` bound as in `ρ`. -/
-def mergeOn (B : List Var) (τ ρ : Semantics.State) : Semantics.State := τ.anon B fun y => lookupBy y ρ.env
+open Lean Elab Tactic in
+/-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
+evaluators unfolded over a deployment's storage. -/
+elab "sol_close_mt_eval" : tactic => do
+  if ← Close.scopedGoal then throwUnsupportedSyntax
+  evalTactic (← `(tactic|
+    simp (config := { decide := true }) only [close_rw, List.map_cons, List.map_nil,
+      defaultForTy, State.saveStorage, State.findStorage, lookupBy, setBy, SVal.save, SVal.find,
+      Close.storage_setEnv, Except.ok.injEq, exists_eq_left']))
 
-theorem mergeOn_agree (B : List Var) (τ ρ : Semantics.State) : EnvAgreeExcept B τ (mergeOn B τ ρ) :=
-  ⟨rfl, rfl, rfl, rfl, fun n hn => by
-    simp only [mergeOn, Semantics.State.anon, lookupBy_anonEnv, hn, if_false], rfl, rfl⟩
-
-theorem lookupBy_mergeOn {B : List Var} {τ ρ : Semantics.State} {y : Var} (hy : y ∈ B) :
-    lookupBy y (mergeOn B τ ρ).env = lookupBy y ρ.env := by
-  simp only [mergeOn, Semantics.State.anon, lookupBy_anonEnv, hy, if_true]
-
-end Untyped
-
-/-! ## The scoped side -/
-
-theorem erase_upd_holds {Γ Δ : Ctx} {ns : List Var} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
-    {τ : Semantics.State} :
-    NFml.holds τ (Fml.erase ns (.upd m U φ)) ↔
-      m.after (NFml.holds · (φ.erase (U.names ns))) (Surface.Upd.apply (U.erase ns) τ) := by
-  simp only [Fml.erase]
-  split
-  · rename_i h
-    rw [h]
-    rfl
-  · rfl
-
-/-- **A leaf holds where its erasure is valid off its binders' names**:
-the erasure in every state that differs from `τ` only at `B` gives the
-scoped formula in a typed state whose erasure agrees with `τ`. -/
-theorem holds_of_erase_pos {Γ : Ctx} (φ : Fml C Γ) : ∀ {ns B : List Var}, φ.posB ns = some B →
-    ∀ {σ : State C Γ} {τ : Semantics.State}, Agree ns σ.erase τ →
-    (∀ ρ, EnvAgreeExcept B τ ρ → NFml.holds ρ (φ.erase ns)) → holds σ φ := by
-  induction φ with
-  | tt => intro _ _ _ _ _ _ _; trivial
-  | eq a b =>
-    intro ns B _ σ τ hag H
-    exact (holds_erase_fo (.eq a b) trivial rfl hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
-  | defined t =>
-    intro ns B _ σ τ hag H
-    exact (holds_erase_fo (.defined t) trivial rfl hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
-  | not φ _ =>
-    intro ns B h σ τ hag H
-    have hp : φ.plainB ns = true := by
-      cases hn : φ.plainB ns
-      · simp only [Fml.posB, hn] at h; cases h
-      · rfl
-    have hp' := Fml.plain_of_plainB φ hp
-    exact (holds_erase_fo (.not φ) hp'.1 hp'.2 hag).2 (H τ (Semantics.EnvAgreeExcept.refl _ _))
-  | anon xs φ ih =>
-    intro ns B h σ τ hag H
-    change φ.posB ns = some B at h
-    -- a binding of the anonymised locals, on both sides: `τ₁` is `τ` but at
-    -- their names
-    intro b
-    obtain ⟨τ₁, h₁, h₂⟩ := Agree.anon (fun x => LTy.TDenote.erase x.1 (b x)) xs hag
-    rw [← State.anon_erase] at h₁
-    have hτ₁ : withLocals σ.erase.glob τ₁.env = τ₁ := by
-      have hg := h₁.glob
-      rwa [State.anon_erase, EState.glob_anon _ xs σ.erase] at hg
-    have hττ₁ : EnvAgreeExcept (xs.map fun x => x.2.name ns) τ τ₁ := by
-      rw [← hag.glob, ← hτ₁]
-      exact ⟨rfl, rfl, rfl, rfl, fun y hy => (h₂ y hy).symm, rfl, rfl⟩
-    refine ih h h₁ fun ρ hρ => ?_
-    -- `ρ` is `τ` with `B` as `ρ` has them, then the anonymised names as `ρ` has them
-    have hτρ := Solidity.Semantics.EnvAgreeExcept.trans
-      (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_append_left B hy) hττ₁)
-      (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_append_right _ hy) hρ)
-    have Hρ₀ : NFml.holds ((mergeOn B τ ρ).anon (xs.map fun x => x.2.name ns)
-        fun y => Semantics.lookupBy y ρ.env) (φ.erase ns) :=
-      H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) _
-    refine holds_of_envAgree_nil (EnvAgreeExcept.mk (s₁ := (mergeOn B τ ρ).anon
-      (xs.map fun x => x.2.name ns) fun y => Semantics.lookupBy y ρ.env) (s₂ := ρ)
-      hτρ.storage hτρ.heap hτρ.nextId hτρ.net (fun y _ => ?_) hτρ.selfBalance hτρ.tx) Hρ₀
-    simp only [Semantics.State.anon, lookupBy_anonEnv]
-    split
-    · rfl
-    · rename_i hyn
-      by_cases hyB : y ∈ B
-      · exact lookupBy_mergeOn hyB
-      · rw [← (mergeOn_agree B τ ρ).env y hyB]
-        exact hτρ.env y fun hm => (List.mem_append.1 hm).elim hyn hyB
-  | modal => intro _ _ h; cases h
-  | and φ ψ ihφ ihψ =>
-    intro ns B h σ τ hag H
-    change (φ.posB ns).bind (fun B₁ => (ψ.posB ns).map (B₁ ++ ·)) = some B at h
-    obtain ⟨B₁, h₁, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨B₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact ⟨ihφ h₁ hag fun ρ hρ =>
-        (H ρ (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hx => List.mem_append_left _ hx) hρ)).1,
-      ihψ h₂ hag fun ρ hρ =>
-        (H ρ (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hx => List.mem_append_right _ hx) hρ)).2⟩
-  | imp a φ _ ihφ =>
-    intro ns B h σ τ hag H
-    have ha : a.plainB ns = true := by
-      cases hn : a.plainB ns
-      · simp only [Fml.posB, hn] at h; cases h
-      · rfl
-    change (if a.plainB ns then (φ.posB ns).bind fun B =>
-        if disjointB B (a.erase ns).vars then some B else none else none) = some B at h
-    rw [if_pos ha] at h
-    obtain ⟨B', h₁, h⟩ := Option.bind_eq_some_iff.1 h
-    split at h
-    · cases h
-      rename_i hd
-      intro hσa
-      have ha' := Fml.plain_of_plainB a ha
-      have hτa := (holds_erase_fo a ha'.1 ha'.2 hag).1 hσa
-      exact ihφ h₁ hag fun ρ hρ =>
-        H ρ hρ ((Solidity.holds_frame (a.erase ns) (disjointB_avoids hd) hρ).1 hτa)
-    · cases h
-  | upd m U φ ih =>
-    intro ns B h σ τ hag H
-    change (if U.freshK ns then (φ.posB (U.names ns)).bind fun B =>
-        if disjointB B (Surface.Upd.vars (U.erase ns)) then some B else none else none) =
-      some B at h
-    have hU : U.freshK ns = true := by
-      cases hn : U.freshK ns
-      · rw [hn] at h; cases h
-      · rfl
-    rw [if_pos hU] at h
-    obtain ⟨B', h₁, h⟩ := Option.bind_eq_some_iff.1 h
-    split at h
-    · cases h
-      rename_i hd
-      have hav := disjointB_avoids hd
-      have hrel := Upd.apply_erase hag U (Upd.fresh_of_freshK ns U hU)
-      have H₀ := erase_upd_holds.1 (H τ (Semantics.EnvAgreeExcept.refl _ _))
-      show m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → σ.H <+: σ'.H → holds σ' φ)
-        (U.apply σ.erase)
-      revert hrel H₀
-      cases U.apply σ.erase with
-      | error e =>
-        cases Surface.Upd.apply (U.erase ns) τ with
-        | error _ => intro _ H₀; exact H₀
-        | ok _ => intro hrel; exact hrel.elim
-      | ok σ₁ =>
-        cases hτ : Surface.Upd.apply (U.erase ns) τ with
-        | error _ => intro hrel; exact hrel.elim
-        | ok τ₁ =>
-          intro hrel _ σ' e _
-          subst e
-          refine ih h₁ hrel fun ρ hρ => ?_
-          let ρ₀ := mergeOn B τ ρ
-          have hfr := Surface.Upd.apply_frame (mergeOn_agree B τ ρ) (U.erase ns) hav
-          have Hρ₀ := erase_upd_holds.1 (H ρ₀ (mergeOn_agree B τ ρ))
-          rw [hτ] at hfr
-          revert hfr Hρ₀
-          cases hρ₁ : Surface.Upd.apply (U.erase ns) ρ₀ with
-          | error _ => intro hfr; exact hfr.elim
-          | ok ρ₁ =>
-            intro hfr Hρ₁
-            refine holds_of_envAgree_nil ?_ Hρ₁
-            have h₁ρ := Solidity.Semantics.EnvAgreeExcept.trans (envAgree_symm hfr) hρ
-            refine ⟨h₁ρ.storage, h₁ρ.heap, h₁ρ.nextId, h₁ρ.net, fun y _ => ?_, h₁ρ.selfBalance,
-              h₁ρ.tx⟩
-            by_cases hy : y ∈ B
-            · rw [Surface.Upd.foldl_lookup (U.erase ns) (fun hv => hav y hv hy) hρ₁]
-              exact lookupBy_mergeOn hy
-            · exact h₁ρ.env y hy
-    · cases h
-  | havoc φ ih =>
-    intro ns B h σ τ hag H
-    change φ.posB ns = some B at h
-    intro st nt
-    have e : τ.havoc st.erase nt = withLocals (σ.erase.glob.havoc st.erase nt) τ.env := by
-      have hw := hag.wl
-      generalize τ.env = env at hw ⊢
-      subst hw; rfl
-    have hag' := hag.withGlob (σ.erase.glob.havoc st.erase nt)
-    rw [← e, ← State.havoc_erase] at hag'
-    refine ih h hag' fun ρ hρ => ?_
-    refine holds_of_envAgree_nil ?_ (H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) st.erase nt)
-    refine ⟨hρ.storage, hρ.heap, hρ.nextId, hρ.net, fun y _ => ?_, hρ.selfBalance, hρ.tx⟩
-    by_cases hy : y ∈ B
-    · exact lookupBy_mergeOn hy
-    · exact ((mergeOn_agree B τ ρ).env y hy).symm.trans (hρ.env y hy)
-  | all x p φ ih =>
-    intro ns B h σ τ hag H
-    have hx : ns.contains x = false := by
-      cases hn : ns.contains x
-      · rfl
-      · simp only [Fml.posB, hn, if_true] at h; cases h
-    change (if ns.contains x then none
-      else (φ.posB (x :: ns)).bind fun B => if B.contains x then none else some B) = some B at h
-    rw [if_neg (by simp only [hx]; decide)] at h
-    obtain ⟨B', h₁, h⟩ := Option.bind_eq_some_iff.1 h
-    split at h
-    · cases h
-    · cases h
-      rename_i hxB
-      have hxn : x ∉ ns := fun hm => by simp only [List.contains_iff_mem.2 hm] at hx; cases hx
-      have hxB' : x ∉ B := fun hm => hxB (List.contains_iff_mem.2 hm)
-      intro w
-      refine ih h₁ (σ := σ.push (t := .val p) w) (hag.push (t := .val p) hxn (PrimTy.erase w))
-        fun ρ hρ => ?_
-      refine holds_of_envAgree_nil ?_
-        (H (mergeOn B τ ρ) (mergeOn_agree B τ ρ) (PrimTy.erase w) (PrimTy.admits_erase w))
-      refine ⟨hρ.storage, hρ.heap, hρ.nextId, hρ.net, fun y _ => ?_, hρ.selfBalance, hρ.tx⟩
-      by_cases hy : y ∈ B
-      · have hyx : y ≠ x := fun e => hxB' (e ▸ hy)
-        simp only [Semantics.State.setEnv, SemanticsProperties.lookupBy_setBy_ne hyx]
-        exact lookupBy_mergeOn hy
-      · rw [← hρ.env y hy]
-        by_cases hyx : y = x
-        · subst hyx
-          simp only [Semantics.State.setEnv, SemanticsProperties.lookupBy_setBy_self]
-          rfl
-        · simp only [Semantics.State.setEnv, SemanticsProperties.lookupBy_setBy_ne hyx]
-          exact ((mergeOn_agree B τ ρ).env y hy).symm
-  | bind m x t φ ih =>
-    intro ns B h σ τ hag H
-    have hx : ns.contains x = false := by
-      cases hn : ns.contains x
-      · rfl
-      · simp only [Fml.posB, hn, if_true] at h; cases h
-    change (if ns.contains x then none else (φ.posB (x :: ns)).map (x :: ·)) = some B at h
-    rw [if_neg (by simp only [hx]; decide)] at h
-    obtain ⟨B', h₁, rfl⟩ := Option.map_eq_some_iff.1 h
-    have hxn : x ∉ ns := fun hm => by simp only [List.contains_iff_mem.2 hm] at hx; cases hx
-    refine Modality.forallB_intro fun v => ?_
-    refine ih h₁ (σ := σ.push v) (hag.push hxn (LTy.TDenote.erase t v)) fun ρ hρ => H ρ ?_
-    exact Solidity.Semantics.EnvAgreeExcept.trans
-      ((Solidity.Semantics.EnvAgreeExcept.refl _ τ).setEnv_right List.mem_cons_self _)
-      (Solidity.Semantics.EnvAgreeExcept.of_sub (fun _ hy => List.mem_cons_of_mem _ hy) hρ)
-
-/-- The empty context agrees with the global part alone. -/
-theorem Agree.nil (σ : EState C []) : Agree [] σ (withLocals σ.glob []) where
-  len := rfl
-  nodup := List.nodup_nil
-  glob := rfl
-  env _ hm := nomatch hm
-
-/-- **A leaf is valid when its erasure is**, its hidden binders where
-`Fml.posB` takes them. -/
-theorem Valid.of_erase {φ : Fml C []} (hp : (φ.posB []).isSome = true)
-    (h : NFml.Valid (φ.erase [])) : Valid φ := by
-  intro σ
-  obtain ⟨B, hB⟩ := Option.isSome_iff_exists.1 hp
-  exact holds_of_erase_pos φ hB (Agree.nil σ.erase) fun ρ _ => h ρ
+/-- `sol_close` from a deployment's storage, `{storage := mtSt ‖ …}` in
+front (`STerm.eval_mtSt`): the storage is then a list of the roots at their
+defaults, and the storage evaluators are unfolded over it — solkey's
+`selectOnEmptyStorage` and `saveOnEmptyStorage` (`structRules.key`), read off
+that list, which is what lets a write under the diamond return.  Not in
+`close_rw`: an arbitrary storage is left to the read-after-write facts.
+Known limits (pinned open in `Examples/Tactics/Constructors.lean`): a read
+at a free key of a mapping the deployment does not write (the default
+map's `checkIndex`), and a member of a struct root (`defaultForTy` of a
+struct, `defaultForFields` of the struct table, is not unfolded). -/
+macro "sol_close_mt" : tactic => `(tactic|
+  all_goals
+   (sol_close_unwrap
+    intro σ
+    sol_close_mt_eval
+    all_goals try sol_close_facts
+    all_goals try sol_close_reads
+    all_goals try (intros; sol_close_reads_all)
+    all_goals (try intros)
+    all_goals first | omega | grind))
 
 end Solidity

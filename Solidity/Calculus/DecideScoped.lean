@@ -1,4 +1,7 @@
 import Solidity.Calculus.Decide
+import Solidity.Calculus.Logic
+import Solidity.Calculus.FirstOrder
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.Close
 import Solidity.Calculus.TermLib
 
@@ -108,7 +111,7 @@ section Terms
 
 variable {Γ : Ctx}
 
-/-- The storage a storage variable is bound to (`Surface.Tm.storLocal?`). -/
+/-- The storage a storage variable is bound to. -/
 def _root_.Solidity.Tm.storLocalS (ρ : SymS) : Tm C Γ .st → Option LStor
   | .pvS i =>
     match ρ.get i.toNatR with
@@ -116,12 +119,12 @@ def _root_.Solidity.Tm.storLocalS (ρ : SymS) : Tm C Γ .st → Option LStor
     | _ => none
   | _ => none
 
-/-- `storage` itself (`Surface.Tm.isStorage`). -/
+/-- `storage` itself. -/
 def _root_.Solidity.Tm.isStorageS {s : Srt} : Tm C Γ s → Bool
   | .app0 .storage => true
   | _ => false
 
-/-- A storage variable (`Surface.Tm.isPvS`). -/
+/-- A storage variable. -/
 def _root_.Solidity.Tm.isPvSS : Tm C Γ .st → Bool
   | .pvS _ => true
   | _ => false
@@ -166,7 +169,7 @@ def _root_.Solidity.Tm.toLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
     match ρ.get i.toNat with
     | some (.val t) => t
     | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
-    | none => .var (.name (i.name ρ.names))
+    | none => .err
   | _, .pvP i =>
     match ρ.get i.toNat with
     | some (.path q) => q
@@ -182,8 +185,8 @@ def _root_.Solidity.Tm.toLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
   | _, .app2 o a b => Op2.toLAtS ρ o a (a.toLSM ρ) (b.toLSM ρ)
   | _, .app3 o a b c => Op3.toLAtS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ)
 
-/-- **A term with the updates pushed in, its locals read by position**
-(`Surface.Tm.toL`), by the recursor. -/
+/-- **A term with the updates pushed in, its locals read by position**, by
+the recursor. -/
 @[implemented_by Tm.toLSM]
 def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
   Tm.rec (motive := fun s _ => s.LTy)
@@ -191,7 +194,7 @@ def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
       match ρ.get i.toNatR with
       | some (.val t) => t
       | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
-      | none => .var (.name (i.nameR ρ.names)))
+      | none => .err)
     (fun i =>
       match ρ.get i.toNatR with
       | some (.path q) => q
@@ -252,7 +255,7 @@ def _root_.Solidity.Tm.inLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → Bool
   | _, .app3 o a b c =>
     Op3.inLS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ) (a.inLSM ρ) (b.inLSM ρ) (c.inLSM ρ)
 
-/-- **The fragment, by position** (`Surface.Tm.inL`), by the recursor. -/
+/-- **The fragment, by position**, by the recursor. -/
 @[implemented_by Tm.inLSM]
 def _root_.Solidity.Tm.inLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : Bool :=
   Tm.rec (motive := fun _ _ => Bool)
@@ -275,7 +278,7 @@ def _root_.Solidity.Tm.inLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : Bool :=
 theorem _root_.Solidity.Tm.toLS_eq_toLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
     t.toLS ρ = t.toLSM ρ := by
   induction t with
-  | pvV i | pvP i | pvI i => simp only [Tm.toLSM, ← Idx.toNatR_eq, ← Idx.nameR_eq]; rfl
+  | pvV i | pvP i | pvI i => simp only [Tm.toLSM, ← Idx.toNatR_eq]; rfl
   | pvS _ | netOf _ _ | app0 _ => rfl
   | app1 o _ x ih => simp only [Tm.toLSM, ← ih]; rfl
   | app2 o x y ihx ihy => simp only [Tm.toLSM, ← ihx, ← ihy]; rfl
@@ -300,7 +303,7 @@ def _root_.Solidity.Op2.shapeS {a b s : Srt} : Op2 a b s → Tm C Γ a → Bool 
   | .len, s, _, y => s.isStorageS && y
   | _, _, _, _ => false
 
-/-- The terms `sameAt` compares (`Surface.Tm.sameShape`). -/
+/-- The terms `sameAt` compares. -/
 def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ => true
   | _, .pvS _ | _, .pvI _ | _, .netOf _ _ => false
@@ -327,8 +330,7 @@ def _root_.Solidity.Tm.isLitLikeS : Tm C Γ .val → Bool
 def _root_.Solidity.Tm.eqLitS (a b : Tm C Γ .val) : Bool :=
   (a.isLitLikeS && b.isAtomS) || (b.isLitLikeS && a.isAtomS)
 
-/-- The slot-level path of a stale alias, and of its members
-(`Surface.Tm.slotPath?`). -/
+/-- The slot-level path of a stale alias, and of its members. -/
 def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Option LPath
   | _, .pvP i =>
     match ρ.get i.toNatR with
@@ -461,11 +463,6 @@ def _root_.Solidity.UpdElem.tgt {Γ Δ : Ctx} : UpdElem C Γ Δ → Option Nat
   | .local i _ => some i.toNatR
   | _ => none
 
-/-- The target's name. -/
-def _root_.Solidity.UpdElem.tgtName {Γ Δ : Ctx} (ms : List Var) : UpdElem C Γ Δ → Var
-  | .local i _ => i.name ms
-  | _ => .user "_"
-
 section Upd
 
 variable {Γ : Ctx}
@@ -490,14 +487,6 @@ def _root_.Solidity.Upd.replayS (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
   Upd.rec (motive := fun _ _ => SymS) ρ₀ (fun _ e ih => ih.act e.tgt (aE e))
     (fun _ _ r ih => ih.push (aR r)) (fun _ h ih => ⟨ih.loc.drop h.depth, ih.sym, ih.next⟩)
     (fun _ h ih => ⟨Thin.sel h ih.loc, ih.sym, ih.next⟩) U
-
-theorem _root_.Solidity.Upd.replayS_eq_replaySM (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
-    (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (ρ₀ : SymS) {Δ : Ctx} (U : Upd C Γ Δ) :
-    U.replayS aE aR ρ₀ = U.replaySM aE aR ρ₀ := by
-  induction U with
-  | nil => rfl
-  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
-    simp only [Upd.replaySM, ← ih]; rfl
 
 /-- An element of an update: a right-hand side (an assignment's or a
 declaration's), or an element that assigns no local. -/
@@ -537,12 +526,7 @@ def _root_.Solidity.Upd.view {Δ : Ctx} (U : Upd C Γ Δ) : UView C Γ :=
   Upd.rec (motive := fun _ _ => UView C Γ) .zero (fun _ e ih => ih.add e.toElemS)
     (fun _ _ r ih => ih.add (.rhs r)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
 
-theorem _root_.Solidity.Upd.view_eq_viewM {Δ : Ctx} (U : Upd C Γ Δ) : U.view = U.viewM := by
-  induction U with
-  | nil => rfl
-  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih => simp only [Upd.viewM, ← ih]; rfl
-
-/-- What a right-hand side binds its local to (`Surface.UpdElem.toL`). -/
+/-- What a right-hand side binds its local to. -/
 def _root_.Solidity.Rhs.actS (ρ : SymS) {t : LTy} : Rhs C Γ t → Option SymB
   | .val t => some (.val (t.toLS ρ))
   | .path p => some (.path (p.toLS ρ))
@@ -595,7 +579,7 @@ def ElemS.guard (ρ : SymS) : ElemS C Γ → LTerm
     | none => .err
   | .glob _ => .err
 
-/-- An element in the fragment (`Surface.UpdElem.inL`). -/
+/-- An element in the fragment. -/
 def ElemS.inLS (ρ : SymS) : ElemS C Γ → Bool
   | .rhs r => r.inLS ρ
   | .glob (.local _ r) => r.inLS ρ
@@ -766,8 +750,8 @@ def _root_.Solidity.Fml.asEqS {Γ : Ctx} : Fml C Γ → Option (Tm C Γ .val × 
   | .eq a b => some (a, b)
   | _ => none
 
-/-- `eqD a b` (`NFml.eqDView`), through the constructors the erasure
-drops: each side with the state it is read in. -/
+/-- `eqD a b`, through the pops and hidden binders an update leaves
+around it: each side with the state it is read in. -/
 def eqDViewS {Γ : Ctx} (ρ : SymS) (φ ψ : Fml C Γ) :
     Option (((Γ' : Ctx) × SymS × Tm C Γ' .val) × ((Γ' : Ctx) × SymS × Tm C Γ' .val)) :=
   let pa := φ.peelS ρ
@@ -938,7 +922,7 @@ theorem _root_.Solidity.Fml.inLS_eq_inLSM {Γ : Ctx} (pos : Bool) (ρ : SymS) (�
   | upd m U φ ih => simp only [Fml.inLSM, ← ih]; rfl
 
 /-- What `sol_decide` proves of a scoped leaf: its updates pushed in by
-position, the reads of writes eliminated (`NFml.reduce`). -/
+position, the reads of writes eliminated (`LFml.elim`). -/
 def _root_.Solidity.Fml.reduceS (φ : Fml C []) : LFml := (φ.toLS SymS.empty).elim
 
 /-! ### The layout a `wt(storage)` premise gives (proposal 100) -/
@@ -1062,25 +1046,6 @@ theorem SymS.bindAt_ok (hok : ρ.Ok ms) (hnd : ms.Nodup) {n : Nat} (hn : n < ms.
     · have hk' : k < ms.length := by simpa only [List.length_map] using h₂
       have hne : ms[k] ≠ ms[n] := nodup_getElem_ne hnd hk' hn (Ne.symm hk)
       simp only [hk, hne, if_false]
-
-theorem SymS.act_ok (hok : ρ.Ok ms) (hnd : ms.Nodup) {Γ Δ : Ctx} (hl : ms.length = Δ.length)
-    (e : UpdElem C Γ Δ) (a : Act) (hb : ∀ b, a = .bind b → e.tgt.isSome = true) :
-    (ρ.act e.tgt a).Ok ms ∧ (ρ.act e.tgt a).sym = (a.named (e.tgtName ms)).apply ρ.sym := by
-  cases a with
-  | keep => exact ⟨hok, rfl⟩
-  | mem M => exact ⟨hok, rfl⟩
-  | write s =>
-    refine ⟨?_, rfl⟩
-    unfold SymS.Ok at hok ⊢
-    simp only [SymS.act, hok, List.map_map, Function.comp_def, lookupBy_map_snd]
-  | bind b =>
-    cases e with
-    | «local» i r =>
-      have hi : i.toNat < ms.length := hl ▸ i.toNat_lt
-      simp only [UpdElem.tgt, Idx.toNatR_eq]
-      exact SymS.bindAt_ok hok hnd hi b
-    | _ => exact absurd (hb b rfl) (by simp only [UpdElem.tgt, Option.isSome_none,
-        Bool.false_eq_true, not_false_eq_true])
 
 theorem SymS.push_ok (hok : ρ.Ok ms) (a : Act) (ha : a = .keep ∨ ∃ b, a = .bind b)
     (hx : ρ.key ∉ ms) :

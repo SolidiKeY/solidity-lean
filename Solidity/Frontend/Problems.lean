@@ -220,9 +220,9 @@ open Tactic in
 /-- `Derive.proveSearch` (`stopAtOpen`) on a scoped goal `⊢ N.f.problem`:
 `sol_prove` (the scoped walk, `Calculus/ProvesDerive.lean`), then
 `Derive.searchLeaf` on each leaf it leaves (`Seq.goalFits`). -/
-def scopedSearch (g : MVarId) : TacticM NFml.Derive.Search := do
+def scopedSearch (g : MVarId) : TacticM Derive.Search := do
   let_expr Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
-  NFml.Derive.proveSearch g (stopAtOpen := true) (prove := fun g => Seq.prove g C R Γ H φ)
+  Derive.proveSearch g (fun g => Seq.prove g C R Γ H φ) (stopAtOpen := true)
     (fits := Seq.goalFits)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?
@@ -268,7 +268,7 @@ def elabSolkeyDerive : CommandElab := fun stx => do
         mkApp2 (mkConst ``Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
       let g ← mkFreshExprSyntheticOpaqueMVar ty
       tryCatchRuntimeEx (do
-          let out ← IO.mkRef (none : Option NFml.Derive.Search)
+          let out ← IO.mkRef (none : Option Derive.Search)
           let _ ← Tactic.run g.mvarId! do
             out.set (some (← scopedSearch g.mvarId!))
           let some s ← out.get | return .error "the search did not run"
@@ -276,7 +276,7 @@ def elabSolkeyDerive : CommandElab := fun stx => do
           unless ← Derive.replayFits s.heartbeats do
             let hb := if timed then s!" ({s.heartbeats / 1000} heartbeats)" else ""
             return .error s!"its replay is past maxHeartbeats as one declaration{hb}"
-          return .ok (NFml.Derive.replayLines s.found))
+          return .ok (Derive.replayLines s.found))
         fun e => do return .error (← e.toMessageData.toString)
     let t1 ← IO.monoMsNow
     let ms := if timed then s!", {t1 - t0} ms" else ""

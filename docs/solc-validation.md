@@ -328,8 +328,9 @@ Proved: every statement has exactly one rule, the strategy's (`Stmt.rule_exists`
 measurement (F, `docs/corpus-parity.md`), not a theorem.
 
 **M. Symbolic execution is exact; premises as equivalences.** The rules are
-equivalences in substance (an update arm is an equation between runs, `StepAgrees.erased`;
-`UpdRule.sound` and `NFml.simpUpds_holds` hold both ways). Missing: `Premise.Sound` as an equivalence and
+equivalences in substance (an update arm is an equation between runs, `StepAgrees.erased`);
+the update rules are one way only (`UpdRuleS.sound`: over the typed state a merged update
+may reach a state the two in turn do not). Missing: `Premise.Sound` as an equivalence and
 `symex_complete : holds σ φ → holds σ (symex n φ)`. Then a loop-free formula is valid
 exactly when its modality-free form is: relative completeness, so the calculus is never
 why a proof fails, and L3 becomes a theorem.  The typed run has no `stuck` (it halts by
@@ -340,8 +341,8 @@ invariants.
 
 **N. Reflective decision procedures.** A tactic cannot be proved complete; a function
 `dec : LFml → Bool` with `dec ψ = true ↔ ∀ σ, ψ.holds σ` can, and `sol_decide`'s
-reductions are already equivalences (`NFml.valid_iff_reduce`, `NFml.valid_iff_cons`; the
-last step is `omega | grind`). Replace that step by fragment: key equalities and
+reduction is sound (`Valid.of_reduceS`) and its reads' elimination an equivalence
+(`LFml.valid_iff_cons`; the last step is `omega | grind`). Replace that step by fragment: key equalities and
 reads-of-writes (congruence closure over symbolic keys; small; first), linear arithmetic
 over bounded integers, then nonlinear, `**` and bitwise on 256-bit words (finite, so
 decidable: `bv_decide` gives kernel-checked LRAT certificates, so stating the arithmetic

@@ -1,7 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.ChainRewrites
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.FreshNames
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Surface
@@ -31,7 +30,7 @@ section
 variable (m : Modality) (φ : Post TestSuite [])
 
 namespace SubtreeDelete
-variable (hk : STerm.KindFreeAt st!{ save(save(select(storage, alice), account.balance, 100), account.token.value, 7) } pt!{ account })
+variable (hk : Tm.KindFreeAt st!{ save(save(select(storage, alice), account.balance, 100), account.token.value, 7) } pt!{ account })
 
 include hk in
 /-- `alice.account.balance = 100; alice.account.token.value = 7; delete alice.account;

@@ -29,6 +29,12 @@ open Lean (mkConst mkAppN toExpr)
 
 deriving instance Lean.ToExpr for LTy
 
+/-- The expression `Lean.mkConst n []`: the `c` a quoter takes for the
+contract named `n`, when the quoter runs as compiled code (`evalExpr`). -/
+def quoteConstName (n : Lean.Name) : Lean.Expr :=
+  mkAppN (mkConst ``Lean.mkConst)
+    #[toExpr n, mkAppN (mkConst ``List.nil [0]) #[mkConst ``Lean.Level]]
+
 /-- `LTy`, the type of a context's elements. -/
 def ltyE : Lean.Expr := mkConst ``LTy
 

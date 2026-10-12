@@ -337,40 +337,8 @@ theorem Surface.Tm.denote_eval {σ : State} : (t : Surface.Tm C s) → Srt.Bridg
   | .app2 o a b => o.denote_eval a.denote_eval b.denote_eval
   | .app3 o a b c => o.denote_eval a.denote_eval b.denote_eval c.denote_eval
 
-/-- A value term that returns denotes its value. -/
-theorem Term.denote_eval {σ : State} {t : Term C} {x : Value} (h : t.eval σ = .ok x) :
-    t.denote σ = .prim x := Surface.Tm.denote_eval t x h
-
-/-- A path that resolves denotes its Theory path. -/
-theorem PTerm.denote_eval {σ : State} {p : PTerm C} {r : Name} {segs : List Seg}
-    (h : p.eval σ = .ok (r, segs)) : p.denote σ = rootPath r segs := Surface.Tm.denote_eval p r segs h
-
-/-- A storage term that returns denotes its storage, up to `Equiv`. -/
-theorem STerm.denote_eval {σ τ : State} {s : STerm C} (h : s.eval σ = .ok τ) :
-    Struct.Equiv (s.denote σ) τ.abs := Surface.Tm.denote_eval s τ h
-
 /-- A stored value that returns denotes it, up to `Equiv`. -/
 theorem SValT.denote_eval {σ : State} {v : SValT C} {w : SVal} (h : v.eval σ = .ok w) :
     StValue.Equiv (v.denote σ) w.abs := Surface.Tm.denote_eval v w h
-
-/-- Between two terms that return, `Equiv` of the denotations is equality of
-the values: the old meaning of `holds (a = b)`. -/
-theorem Term.holdsEq_of_eval {σ : State} {a b : Term C} {x y : Value}
-    (ha : a.eval σ = .ok x) (hb : b.eval σ = .ok y) :
-    StValue.Equiv (a.denote σ) (b.denote σ) ↔ x = y := by
-  rw [Term.denote_eval ha, Term.denote_eval hb, Equiv.prim_iff]
-  exact ⟨fun h => by injection h, fun h => h ▸ rfl⟩
-
-/-- `eqD` is the interpreter's equation: both sides return, with one value.
-This is what `holds (a = b)` meant before it read `denote`. -/
-theorem holds_eqD_iff {σ : State} {a b : Term C} :
-    NFml.holds σ (NFml.eqD a b) ↔ ∃ x, a.eval σ = .ok x ∧ b.eval σ = .ok x := by
-  simp only [NFml.holds]
-  constructor
-  · rintro ⟨⟨x, hx⟩, ⟨y, hy⟩, he⟩
-    obtain rfl : x = y := (Term.holdsEq_of_eval hx hy).1 he
-    exact ⟨x, hx, hy⟩
-  · rintro ⟨x, hx, hy⟩
-    exact ⟨⟨x, hx⟩, ⟨x, hy⟩, (Term.holdsEq_of_eval hx hy).2 rfl⟩
 
 end Solidity

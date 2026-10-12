@@ -14,7 +14,7 @@ is a theorem `⊨ dl!{ … }`, proved one of two ways:
   `sol_close` applies the updates in an arbitrary state and reads back the
   writes;
 * for a worked example, by a **walk**: `apply Proves.valid` turns
-  the goal into the judgement `⊢ φ` (`Calculus/NFmlLogic.lean`), and the derivation
+  the goal into the judgement `⊢ φ` (`Calculus/Proves.lean`), and the derivation
   is built one `apply` per taclet, so each rule the derivation names is named here —
   `unfold r` for Steps 1 and 2, `update r` for Step 3, `empty` for
   `emptyModality`, `intro` for a precondition.  Put the cursor after an `apply`
@@ -35,7 +35,7 @@ order), Step 3 turns a statement whose parts are simple into an update.  The
 rule names are solkey's (`Calculus/Rules.lean`).
 
 Writes are under the box: the closer does not close the diamond of a write
-(`NFmlClose.lean`, "What does not close").  The programs of solkey's `taclets` suite, and the
+(`Calculus/Close.lean`, "What does not close").  The programs of solkey's `taclets` suite, and the
 claims that need the contract's initial store, are `StorageSuite.lean`.
 
 A Step 1 rule whose read lands in a hole (`storageFieldRead_unfold_rightFst`,
@@ -374,7 +374,7 @@ theorem refIndexWriteNonsimpleReceiver : ⊨ dl[TestSuite]{ [ bucket.tokens[i] =
 
 `push` writes the new element and the length in one update; `pop` deletes the
 last element and shortens.  What they write is not read back by `sol_close`
-(`NFmlClose.lean`), so the walks end in `true`: they are the rule, and the runs
+(`Calculus/Close.lean`), so the walks end in `true`: they are the rule, and the runs
 from the initial store in `StorageSuite.lean` are the values. -/
 
 /-- `values.push(42);` -/
@@ -647,7 +647,7 @@ theorem assertConditionCaptured : ⊨ dl!{ a == b → [ assert(a == b); ] a == b
 
 The same compound assignments and increments on a memory object: `read`/`write`
 on the heap in place of `find`/`save`.  `sol_close` has no equations for the heap
-(`NFmlClose.lean`), so these are the walks, ending in `true`. -/
+(`Calculus/Close.lean`), so these are the walks, ending in `true`. -/
 
 /-- `Person memory m; m.age++;` (`memoryFieldIncrement`). -/
 theorem memoryFieldIncrement : ⊨ dl!{ [ Person memory m; m.age++; ] true } := by

@@ -13,7 +13,7 @@ component (`State.saveStorage_with`, `pushAt_with`, `popAt_with`), an
 operator's evaluation unfolded (`evalBinop_compound`, `evalBinop_bump`),
 and what a binding holds (`Close.bindingVal`, …).  Today's taclet soundness
 (`Calculus/SoundKit.lean`, `Calculus/SoundArms.lean`), the scoped one
-(`Calculus/SoundArms.lean`) and the closer (`Calculus/NFmlClose.lean`,
+(`Calculus/SoundArms.lean`) and the closer (`Calculus/Close.lean`,
 `Calculus/Decide.lean`) share them.  Moved out of `SoundKit.lean` and
 `Calculus/SoundArms.lean` (`docs/intrinsic.md`, W4 item 11).
 -/
@@ -106,11 +106,9 @@ theorem writeAddr_with (σ : State) (mv : MVal) (a : Addr) :
       writeAddr σ mv a := by
   rw [writeAddr_eq]; cases heapRes σ mv a <;> rfl
 
-
 theorem evalBinop_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p : PrimTy) (lv : Value)
     (b : Res Value) : evalBinop op p lv b = (do checkArith (.prim p) (← applyBinOp op lv (← b))) := by
   cases op <;> simp [BinOp.hasCompoundAssign] at hop <;> rfl
-
 
 theorem evalBinop_bump (op : IncDec) (p : PrimTy) (lv : Value) (b : Res Value) :
     evalBinop op.binOp p lv b = (do
@@ -121,7 +119,6 @@ theorem applyBinOp_bump (op : IncDec) (lv : Value) :
     applyBinOp op.binOp lv (.int 1) =
       (do let n ← lv.asInt; pure (.int (if op.isIncrement then n + 1 else n - 1))) := by
   cases op <;> cases lv <;> rfl
-
 
 /-! ### What a binding holds
 
@@ -161,7 +158,6 @@ def bindingLedger : Binding → Res (List (Int × Int))
   | .val _ | .spath .. | .mref _ | .store _ | .unset => .error .undef
 
 end Close
-
 
 /-! ### A memory location read and written -/
 
@@ -231,7 +227,6 @@ theorem allocDefault_eq (σ : State) (R : RefTy) :
     allocDefault σ R = (allocHN σ R >>= fun q => pure ({ σ with heap := q.1, nextId := q.2.1 }, q.2.2)) :=
   res_frame_eq (allocDefault_frame σ R)
 
-
 theorem pushAt_const (σ : State) (E E' : Ty) (r : Name) (segs : List Seg) (f : Res SVal) :
     pushAt σ E r segs (fun _ => f) = pushAt σ E' r segs (fun _ => f) := by
   unfold pushAt
@@ -241,7 +236,6 @@ theorem pushAt_const (σ : State) (E E' : Ty) (r : Name) (segs : List Seg) (f : 
     cases v with
     | array elems shadow => cases shadow <;> rfl
     | _ => rfl
-
 
 theorem pushAt_with (σ : State) (E : Ty) (r : Name) (segs : List Seg) (f : SVal → Res SVal) :
     (pushAt σ E r segs f >>= fun τ => pure { σ with storage := τ.storage }) = pushAt σ E r segs f := by
@@ -275,35 +269,5 @@ theorem popAt_with (σ : State) (keep : Bool) (r : Name) (segs : List Seg) :
     | _ => rfl
 
 /-! ### An update keeps the locals it does not write -/
-
-theorem Surface.UpdElem.write_lookup {σ₀ τ τ' : State} {x : Var} :
-    (e : Surface.UpdElem C) → x ∉ e.vars → e.write σ₀ τ = .ok τ' → lookupBy x τ'.env = lookupBy x τ.env
-  | .val y t, hx, h | .path y t, hx, h | .mref y t, hx, h | .store y t, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp only [Surface.UpdElem.vars, e, List.mem_cons, true_or])
-    simp only [Surface.UpdElem.write, bind, Except.bind, pure, Except.pure] at h
-    repeat' split at h
-    all_goals first
-      | (cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy])
-      | cases h
-  | .saveNet y, hx, h | .saveNetMt y, hx, h | .unset y, hx, h => by
-    have hy : x ≠ y := fun e => hx (by simp only [Surface.UpdElem.vars, e, List.mem_cons,
-      List.not_mem_nil, or_false])
-    simp only [Surface.UpdElem.write, pure, Except.pure] at h
-    cases h; simp only [State.setEnv, SemanticsProperties.lookupBy_setBy_ne hy]
-  | .storage s, _, h | .memory s, _, h | .selfBalance _ s, _, h | .net _ _ s, _, h
-  | .pay _ s, _, h | .netMt _ s, _, h | .setBalance s, _, h => by
-    simp only [Surface.UpdElem.write, bind, Except.bind, pure, Except.pure] at h
-    repeat' split at h
-    all_goals first | (cases h; rfl) | cases h
-
-theorem Surface.Upd.foldl_lookup {σ₀ : State} {x : Var} :
-    (U : Surface.Upd C) → x ∉ Surface.Upd.vars U → ∀ {τ ρ : State},
-      U.foldlM (fun τ e => e.write σ₀ τ) τ = .ok ρ → lookupBy x ρ.env = lookupBy x τ.env
-  | [], _, _, _, h => by cases h; rfl
-  | e :: U, hx, τ, ρ, h => by
-    simp only [Surface.Upd.vars, List.mem_append, not_or] at hx
-    simp only [List.foldlM_cons] at h
-    obtain ⟨τ', h₁, h₂⟩ := SemanticsProperties.Res.bind_eq_ok.1 h
-    rw [Surface.Upd.foldl_lookup U hx.2 h₂, Surface.UpdElem.write_lookup e hx.1 h₁]
 
 end Solidity

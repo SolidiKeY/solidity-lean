@@ -1,5 +1,7 @@
-import Solidity.Calculus.CloseErase
-import Solidity.Calculus.NFmlUpdateRules
+import Solidity.Calculus.Logic
+import Solidity.Calculus.FirstOrder
+import Solidity.Semantics.StateErase
+import Solidity.Calculus.StateFacts
 
 /-!
 # One update for two: `sequentialToParallel`'s side conditions on scoped updates

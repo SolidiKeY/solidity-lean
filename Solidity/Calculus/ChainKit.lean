@@ -1,6 +1,5 @@
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Taclet
-import Solidity.Calculus.HoldsErase
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Merge
 import Solidity.Calculus.RewriteScoped
@@ -286,179 +285,6 @@ theorem Fml.maxIdx_anon_eq {xs : List ((t : LTy) × Idx Γ t)} {φ : Fml C Γ} {
 
 end Equations
 
-/-! ## A postcondition, erased
-
-Past the program a chain goes on by `Calculus/ChainRewrites.lean`'s rewrites,
-on the erasure of its line (`Fml.erase`): its postcondition `φ : Post C Γ`
-is then `Update.lean`'s postcondition `φ.erase ns` (`Chains.lean`'s
-`Post`), which names no fresh variable when the names `ns` of its context
-do not (`Post.erase`). -/
-
-section Erase
-
-/-- Every variable of the list has an index at most `n`. -/
-def IdxLe (n : Nat) (xs : List Var) : Prop := ∀ x ∈ xs, x.idx ≤ n
-
-theorem IdxLe.mono {n n' : Nat} {xs : List Var} (h : IdxLe n xs) (hn : n ≤ n') : IdxLe n' xs :=
-  fun x hx => Nat.le_trans (h x hx) hn
-
-theorem IdxLe.append {n : Nat} {xs ys : List Var} (h : IdxLe n xs) (h' : IdxLe n ys) :
-    IdxLe n (xs ++ ys) := fun x hx => by
-  rcases List.mem_append.1 hx with hx | hx
-  · exact h x hx
-  · exact h' x hx
-
-theorem IdxLe.cons {n : Nat} {x : Var} {xs : List Var} (hx : x.idx ≤ n) (h : IdxLe n xs) :
-    IdxLe n (x :: xs) := fun y hy => by
-  rcases List.mem_cons.1 hy with rfl | hy
-  · exact hx
-  · exact h y hy
-
-theorem IdxLe.maxIdx (xs : List Var) : IdxLe (Solidity.maxIdx xs) xs := fun _ hx => le_maxIdx hx
-
-theorem IdxLe.maxIdx_le {n : Nat} {xs : List Var} (h : IdxLe n xs) : Solidity.maxIdx xs ≤ n := by
-  induction xs with
-  | nil => exact Nat.zero_le _
-  | cons x xs ih =>
-    exact Nat.max_le.2 ⟨h x List.mem_cons_self, ih fun y hy => h y (List.mem_cons_of_mem _ hy)⟩
-
-theorem Idx.name_idxLe {Γ : Ctx} {t : LTy} {n : Nat} {ns : List Var} (h : IdxLe n ns)
-    (i : Idx Γ t) : (i.name ns).idx ≤ n := by
-  unfold Idx.name
-  rw [List.getD_eq_getElem?_getD]
-  cases hg : ns[i.toNat]? with
-  | none => exact Nat.zero_le _
-  | some x => exact h x (List.mem_of_getElem? hg)
-
-theorem Tm.erase_idxLe {Γ : Ctx} {n : Nat} {ns : List Var} (h : IdxLe n ns) :
-    {s : Srt} → (t : Tm C Γ s) → IdxLe n (t.erase ns).vars
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i =>
-    IdxLe.cons (Idx.name_idxLe h i) fun _ hx => nomatch hx
-  | _, .netOf i a => IdxLe.cons (Idx.name_idxLe h i) (Tm.erase_idxLe h a)
-  | _, .app0 _ => fun _ hx => nomatch hx
-  | _, .app1 o ho a => by
-    have ih := Tm.erase_idxLe h a
-    show IdxLe n (Surface.Tm.app1 o (a.erase ns)).vars
-    cases o <;> first
-      | exact ih
-      | cases ho
-  | _, .app2 _ a b => IdxLe.append (Tm.erase_idxLe h a) (Tm.erase_idxLe h b)
-  | _, .app3 _ a b c =>
-    IdxLe.append (IdxLe.append (Tm.erase_idxLe h a) (Tm.erase_idxLe h b)) (Tm.erase_idxLe h c)
-
-theorem Rhs.erase_idxLe {Γ : Ctx} {n : Nat} {ns : List Var} (h : IdxLe n ns) {x : Var}
-    (hx : x.idx ≤ n) : {t : LTy} → (r : Rhs C Γ t) → IdxLe n (r.erase ns x).vars
-  | _, .val t | _, .path t | _, .mref t | _, .store t => IdxLe.cons hx (Tm.erase_idxLe h t)
-  | _, .unset | _, .saveNet | _, .saveNetMt => IdxLe.cons hx fun _ hx => nomatch hx
-
-theorem UpdElem.erase_idxLe {Γ Δ : Ctx} {n : Nat} {ns ms : List Var} (h : IdxLe n ns)
-    (hm : IdxLe n ms) : (e : UpdElem C Γ Δ) → IdxLe n (e.erase ns ms).vars
-  | .local i r => Rhs.erase_idxLe h (Idx.name_idxLe hm i) r
-  | .storage s => Tm.erase_idxLe h s
-  | .memory m => Tm.erase_idxLe h m
-  | .selfBalance _ a | .setBalance a => Tm.erase_idxLe h a
-  | .net r _ a | .pay r a | .netMt r a => IdxLe.append (Tm.erase_idxLe h r) (Tm.erase_idxLe h a)
-
-theorem Thin.names_subset : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List Var) →
-    ∀ x ∈ h.names ns, x ∈ ns
-  | _, _, .refl, _, _, hx => hx
-  | _, _, .keep h, n :: ns, x, hx => by
-    rcases List.mem_cons.1 hx with rfl | hx
-    · exact List.mem_cons_self
-    · exact List.mem_cons_of_mem _ (Thin.names_subset h ns x hx)
-  | _, _, .keep h, [], x, hx => Thin.names_subset h [] x hx
-  | _, _, .drop h, ns, x, hx => List.mem_of_mem_tail (Thin.names_subset h ns.tail x hx)
-
-theorem Upd.names_idxLe {Γ : Ctx} {ns : List Var} :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → IdxLe (max (Solidity.maxIdx ns) U.maxIdx) (U.names ns)
-  | _, .nil => (IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)
-  | _, .snoc U _ => Upd.names_idxLe U
-  | _, .decl U x _ => by
-    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx x.idx)) (x :: U.names ns)
-    refine IdxLe.cons (by omega) ((Upd.names_idxLe U).mono (by omega))
-  | _, .pop U _ => fun x hx => Upd.names_idxLe U x (List.mem_of_mem_drop hx)
-  | _, .drop U h => fun x hx => Upd.names_idxLe U x (Thin.names_subset h _ x hx)
-
-theorem _root_.Solidity.Surface.Upd.vars_append (U V : Surface.Upd C) :
-    Surface.Upd.vars (U ++ V) = Surface.Upd.vars U ++ Surface.Upd.vars V := by
-  induction U with
-  | nil => rfl
-  | cons e U ih => simp only [List.cons_append, Surface.Upd.vars, ih, List.append_assoc]
-
-theorem Upd.erase_idxLe {Γ : Ctx} {ns : List Var} :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → IdxLe (max (Solidity.maxIdx ns) U.maxIdx) (Surface.Upd.vars (U.erase ns))
-  | _, .nil => fun _ hx => nomatch hx
-  | _, .snoc U e => by
-    show IdxLe _ (Surface.Upd.vars (U.erase ns ++ [e.erase ns (U.names ns)]))
-    rw [Surface.Upd.vars_append]
-    exact IdxLe.append (Upd.erase_idxLe U)
-      (IdxLe.append (UpdElem.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _))
-        (Upd.names_idxLe U) e) fun _ hx => nomatch hx)
-  | _, .decl U x r => by
-    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx x.idx)) (Surface.Upd.vars (U.erase ns ++ [r.erase ns x]))
-    rw [Surface.Upd.vars_append]
-    exact IdxLe.append ((Upd.erase_idxLe U).mono (by omega))
-      (IdxLe.append (Rhs.erase_idxLe ((IdxLe.maxIdx ns).mono (by omega)) (by omega) r)
-        fun _ hx => nomatch hx)
-  | _, .pop U _ => Upd.erase_idxLe U
-  | _, .drop U _ => Upd.erase_idxLe U
-
-/-- The variables of a formula with no modality, erased: its context's names
-and the names its binders give. -/
-theorem Fml.erase_idxLe : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false → (ns : List Var) →
-    IdxLe (max (Solidity.maxIdx ns) φ.maxIdx) (φ.erase ns).vars
-  | _, .tt, _, _ => fun _ hx => nomatch hx
-  | _, .eq a b, _, ns => IdxLe.append (Tm.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)) a)
-      (Tm.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)) b)
-  | _, .defined t, _, ns => Tm.erase_idxLe ((IdxLe.maxIdx ns).mono (Nat.le_max_left _ _)) t
-  | _, .not φ, h, ns => Fml.erase_idxLe φ h ns
-  | _, .and φ ψ, h, ns => by
-    have h' := Bool.or_eq_false_iff.mp h
-    show IdxLe (max _ (max φ.maxIdx ψ.maxIdx)) ((φ.erase ns).vars ++ (ψ.erase ns).vars)
-    exact IdxLe.append ((Fml.erase_idxLe φ h'.1 ns).mono (by omega))
-      ((Fml.erase_idxLe ψ h'.2 ns).mono (by omega))
-  | _, .imp φ ψ, h, ns => by
-    have h' := Bool.or_eq_false_iff.mp h
-    show IdxLe (max _ (max φ.maxIdx ψ.maxIdx)) ((φ.erase ns).vars ++ (ψ.erase ns).vars)
-    exact IdxLe.append ((Fml.erase_idxLe φ h'.1 ns).mono (by omega))
-      ((Fml.erase_idxLe ψ h'.2 ns).mono (by omega))
-  | _, .upd m U φ, h, ns => by
-    show IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx φ.maxIdx)) (Fml.erase ns (.upd m U φ)).vars
-    have hφ : IdxLe (max (Solidity.maxIdx ns) (max U.maxIdx φ.maxIdx)) (φ.erase (U.names ns)).vars :=
-      (Fml.erase_idxLe φ h (U.names ns)).mono
-        (Nat.max_le.2 ⟨Nat.le_trans (Upd.names_idxLe U).maxIdx_le (by omega), by omega⟩)
-    simp only [Fml.erase]
-    split
-    · exact hφ
-    · exact IdxLe.append ((Upd.erase_idxLe U).mono (by omega)) hφ
-  | _, .modal .., h, _ => nomatch h
-  | _, .havoc φ, h, ns => Fml.erase_idxLe φ h ns
-  | _, .all x p φ, h, ns => by
-    show IdxLe (max _ (max x.idx φ.maxIdx)) (x :: (φ.erase (x :: ns)).vars)
-    refine IdxLe.cons (by omega) ((Fml.erase_idxLe φ h (x :: ns)).mono ?_)
-    show max (max x.idx (Solidity.maxIdx ns)) _ ≤ _
-    omega
-  | _, .bind _ x _ φ, h, ns => by
-    show IdxLe (max _ (max x.idx φ.maxIdx)) (φ.erase (x :: ns)).vars
-    refine (Fml.erase_idxLe φ h (x :: ns)).mono ?_
-    show max (max x.idx (Solidity.maxIdx ns)) _ ≤ _
-    omega
-  | _, .anon xs φ, h, ns => by
-    show IdxLe _ ((xs.map fun x => x.2.name ns) ++ (φ.erase ns).vars)
-    refine IdxLe.append (fun y hy => ?_) (Fml.erase_idxLe φ h ns)
-    obtain ⟨x, _, rfl⟩ := List.mem_map.1 hy
-    exact Nat.le_trans (Idx.name_idxLe (IdxLe.maxIdx ns) x.2) (Nat.le_max_left _ _)
-
-/-- `Update.lean`'s postcondition, the context's locals named by `ns`, which
-name no fresh variable. -/
-def Post.erase {Γ : Ctx} (φ : Post C Γ) (ns : List Var) (hns : Solidity.maxIdx ns = 0 := by decide) :
-    NFml.Post C where
-  fml := φ.fml.erase ns
-  noFresh := Nat.le_zero.1 (Nat.le_trans (Fml.erase_idxLe φ.fml φ.inactive ns).maxIdx_le
-    (by rw [hns, φ.noFresh]; exact Nat.le_refl _))
-
-end Erase
-
 /-! ## The relations -/
 
 /-- A rule as a chain names it: a derivation of a taclet at the fresh index
@@ -525,20 +351,6 @@ def Fml.Via.last : Fml C Γ → List (Link C × Fml C Γ) → Fml C Γ
   | _, (_, ψ) :: ws => Fml.Via.last ψ ws
 
 end Relations
-
-/-- `Update.lean`'s formula with its outer quantifiers dropped: the
-parameters a scoped line binds outermost (`∀ uint v;`, `Notation.lean`),
-left free, as `dl!{ … }` reads them, so that the rewrites see the update. -/
-def _root_.Solidity.NFml.dropAlls : Solidity.NFml C → Solidity.NFml C
-  | .all _ _ φ => φ.dropAlls
-  | φ => φ
-
-/-- A formula is valid where it is with its outer quantifiers dropped. -/
-theorem _root_.Solidity.NFml.holds_of_dropAlls : (φ : Solidity.NFml C) →
-    (∀ τ, NFml.holds τ φ.dropAlls) → ∀ τ, NFml.holds τ φ
-  | .all _ _ φ, h, _ => fun _ _ => Solidity.NFml.holds_of_dropAlls φ h _
-  | .tt, h, τ | .eq .., h, τ | .defined _, h, τ | .not _, h, τ | .and .., h, τ | .imp .., h, τ
-  | .upd .., h, τ | .havoc .., h, τ | .anon .., h, τ => h τ
 
 section Build
 
@@ -728,11 +540,8 @@ theorem Fml.StepBy.valid {r : StepRule C} {φ ψ : Fml C []} (s : Fml.StepBy r �
 `φ ~~> ψ` on scoped lines is `Fml.Leads` (wherever `ψ` holds, `φ` does):
 what a chain composes to, and a segment's link to the next
 (`(seg₁ ..).leads.via (seg₂ ..)`).  Past the program the line written is
-read as the line it names (`Fml.LeadsK φ L`, `L` the line written read
-as its erasure): some line the chain reaches whose erasure is `L`.  The line a
-rewrite leaves keeps the update's bookkeeping (a scope end, a hidden
-binder) where the line written has its own, so the two are one line by
-their key, not as terms (`Calculus/Chains.lean`'s `Fml.lineKey`). -/
+read where it stands and names the line the chain reaches up to its
+binders' names (`Fml.LeadsK φ L`). -/
 
 theorem Fml.Leads.self (φ : Fml C Γ) : Fml.Leads φ φ := fun _ h => h
 
@@ -744,29 +553,88 @@ theorem Fml.Leads.via {ψ : Fml C Γ} {ws : List (Link C × Fml C Γ)} (h : Fml.
 theorem Fml.Leads.valid {φ ψ : Fml C []} (h : Fml.Leads φ ψ) (hψ : Valid ψ) : Valid φ :=
   fun σ => h σ (hψ σ)
 
-/-- `φ ~~> L` past the program: `φ` leads to a line `B` whose erasure, its
-parameters free, is `L`, the line written read as its erasure: the line
-written names it. -/
-def Fml.LeadsK (φ : Fml C []) (L : Solidity.NFml C) : Prop :=
-  ∃ B : Fml C [], (B.erase []).dropAlls = L ∧ Fml.Leads φ B
+/-! ### Binder names
 
-/-- A `~~>` to a line the line written names. -/
-theorem Fml.Leads.leadsK {φ B : Fml C []} {L : Solidity.NFml C} (h : Fml.Leads φ B)
-    (he : (B.erase []).dropAlls = L := by rfl) : Fml.LeadsK φ L :=
-  ⟨B, he, h⟩
+A binder's name (`∀ uint x;`, a hidden binder, an update's declaration) is
+for printing: a local is read by its position.  Two lines that differ in
+their binders' names alone hold alike (`holds_eraseNames`), which is how the
+line written past the program names the line a chain reaches. -/
+
+/-- The update with its declarations' names blanked. -/
+def Upd.eraseNames {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Upd C Γ Δ
+  | _, .nil => .nil
+  | _, .snoc U e => .snoc (Upd.eraseNames U) e
+  | _, .decl U _ r => .decl (Upd.eraseNames U) (.user "_") r
+  | _, .pop U h => .pop (Upd.eraseNames U) h
+  | _, .drop U h => .drop (Upd.eraseNames U) h
+
+/-- The formula with its binders' names blanked; a modality's program is
+kept as it is. -/
+def Fml.eraseNames : {Γ : Ctx} → Fml C Γ → Fml C Γ
+  | _, .not φ => .not (Fml.eraseNames φ)
+  | _, .and φ ψ => .and (Fml.eraseNames φ) (Fml.eraseNames ψ)
+  | _, .imp φ ψ => .imp (Fml.eraseNames φ) (Fml.eraseNames ψ)
+  | _, .upd m U φ => .upd m U.eraseNames (Fml.eraseNames φ)
+  | _, .havoc φ => .havoc (Fml.eraseNames φ)
+  | _, .all _ p φ => .all (.user "_") p (Fml.eraseNames φ)
+  | _, .bind m _ t φ => .bind m (.user "_") t (Fml.eraseNames φ)
+  | _, .anon xs φ => .anon xs (Fml.eraseNames φ)
+  | _, φ => φ
+
+theorem Upd.apply_eraseNames {Γ : Ctx} (σ : EState C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.apply σ = U.apply σ
+  | _, .nil => rfl
+  | _, .snoc U _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
+  | _, .decl U _ _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
+  | _, .pop U _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
+  | _, .drop U _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
+
+/-- **A binder's name is for printing**: a formula holds where it does with
+its binders' names blanked. -/
+theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) →
+    (holds σ φ.eraseNames ↔ holds σ φ)
+  | _, _, .tt | _, _, .eq _ _ | _, _, .defined _ | _, _, .modal _ _ _ _ => Iff.rfl
+  | _, σ, .not φ => not_congr (holds_eraseNames σ φ)
+  | _, σ, .and φ ψ => and_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
+  | _, σ, .imp φ ψ => imp_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
+  | _, σ, .upd m U φ => by
+    show m.afterC _ (U.eraseNames.apply σ.erase) ↔ m.afterC _ (U.apply σ.erase)
+    rw [Upd.apply_eraseNames]
+    cases U.apply σ.erase with
+    | ok τ =>
+      exact forall_congr' fun σ' => forall_congr' fun _ => forall_congr' fun _ =>
+        holds_eraseNames σ' φ
+    | error _ => exact Iff.rfl
+  | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
+  | _, σ, .anon _ φ => forall_congr' fun _ => holds_eraseNames _ φ
+
+/-- `φ ~~> L` past the program: `φ` leads to a line `B` that is the line
+written `L` up to its binders' names (`Fml.eraseNames`).  The line written
+is read where it stands (`dl![m]{ … }`), so it names `B` by its text, and
+`Fml.LeadsK.valid` proves `φ` from `L`. -/
+def Fml.LeadsK (φ L : Fml C []) : Prop :=
+  ∃ B : Fml C [], Fml.Leads φ B ∧ B.eraseNames = L.eraseNames
+
+/-- A `~~>` to a line that is the one written up to its binders' names. -/
+theorem Fml.Leads.leadsK {φ B L : Fml C []} (h : Fml.Leads φ B)
+    (he : B.eraseNames = L.eraseNames := by rfl) : Fml.LeadsK φ L :=
+  ⟨B, h, he⟩
 
 /-- A chain past the program, as `~~>` to the line written. -/
-theorem Fml.Via.leadsK {φ : Fml C []} {L : Solidity.NFml C} {ws : List (Link C × Fml C [])}
-    (v : Fml.Via φ ws) (he : ((Fml.Via.last φ ws).erase []).dropAlls = L := by rfl) :
+theorem Fml.Via.leadsK {φ L : Fml C []} {ws : List (Link C × Fml C [])}
+    (v : Fml.Via φ ws) (he : (Fml.Via.last φ ws).eraseNames = L.eraseNames := by rfl) :
     Fml.LeadsK φ L :=
   v.leads.leadsK he
 
-/-- **`~~>` past the program is a proof** where every line the line written
-names is valid. -/
-theorem Fml.LeadsK.valid {φ : Fml C []} {L : Solidity.NFml C} (h : Fml.LeadsK φ L)
-    (hB : ∀ B : Fml C [], (B.erase []).dropAlls = L → Valid B) : Valid φ := by
-  obtain ⟨B, he, hl⟩ := h
-  exact hl.valid (hB B he)
+/-- **`~~>` past the program is a proof**: `φ` is valid where the line
+written is. -/
+theorem Fml.LeadsK.valid {φ L : Fml C []} (h : Fml.LeadsK φ L) (hL : Valid L) : Valid φ := by
+  obtain ⟨B, hl, he⟩ := h
+  refine hl.valid fun σ => (holds_eraseNames σ B).1 ?_
+  rw [he]
+  exact (holds_eraseNames σ L).2 (hL σ)
 
 /-! `calc` chains `~>`, `~*>`, `~[r]~>` and the scoped merges; the result is
 a derivation `~*>` where every link is a step, `~~>` otherwise. -/

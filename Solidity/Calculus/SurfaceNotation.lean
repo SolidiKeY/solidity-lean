@@ -1,5 +1,5 @@
 import Solidity.Calculus.Hyp
-import Solidity.Calculus.NFmlQuote
+import Solidity.Syntax.Quote
 import Solidity.Calculus.Lower
 
 /-!
@@ -22,9 +22,7 @@ prints `{U} ψ` whatever the modality it is judged at.  The reading is
 mini-solkey's: the macros here build a raw formula, which
 `Calculus/Notation.lean`'s `elabDlAuto` reads scoped at compile time
 (`elabAgainst`, as `sol[C]{ … }` does), a `Fml C []`, with or without a
-modality; the examples are there.  `elabDl` below, the closer's reading
-(`NFml`), is read only by `Calculus/Chains.lean`'s lines past the program
-(`elabDlN`).
+modality; the examples are there.
 
 **Lean terms in a formula.**  `dl![m]{ φ }` (`dl[C, m]{ φ }`) reads `φ` at
 the modality `m`, a Lean term — a variable, `.box`, `.diamond`: `⟨[ P ]⟩ ψ`
@@ -183,7 +181,7 @@ inductive RawFml where
   | upd (m : Modality) (U : List RawUpdElem) (φ : RawFml)
   | modal (m : Modality) (P : List RawStmt) (φ : RawFml)
   /-- `φ` or `‹t›` where a formula stands: the formula's `i`th Lean formula,
-  read as `NFml.slot i` and put back after (`fillSlots`). -/
+  read as a slot (`Fml.slotC i`) and put back after (`fillSlotsC`). -/
   | lean (i : Nat)
   /-- `φ where Person memory carol`: the locals declared, in scope in `φ`. -/
   | decl (ds : List RawStmt) (φ : RawFml)
@@ -527,18 +525,6 @@ def RawFml.stmts : RawFml → List RawStmt
   | .and φ ψ | .imp φ ψ => φ.stmts ++ ψ.stmts
   | .modal _ P φ => P ++ φ.stmts
   | _ => []
-
-/-- `t = true`, both sides defined: a condition as a formula. -/
-def boolFml {C : Contract} (t : Term C) : NFml C := .eqD t (.lit (.bool true))
-
-/-- `a ⊕ b = true`, defined: a comparison as a formula (`a < b` and the like). -/
-def cmpFml {C : Contract} (op : BinOp) (p : PrimTy) (a b : Term C) : NFml C :=
-  boolFml (.binop op p a b)
-
-/-- The slot of a formula's `i`th Lean formula while it is read:
-`defined(⟪i⟫)`, a local no program can name, with index `0` and no modality,
-as the formula it stands for (`Post`, `Chains.lean`). -/
-def NFml.slot {C : Contract} (i : Nat) : NFml C := .defined (.pv (.user s!"⟪{i}⟫"))
 
 /-! ## Elaboration -/
 
@@ -1017,7 +1003,7 @@ where
       go decls ss acc
 
 /-- The least index `k` or above that the formula does not write: what a
-capture is numbered while a formula is read (`elabDl`). -/
+capture is numbered while a formula is read (`elabDlCN`). -/
 def nextFree (taken : List Nat) (k : Nat) : Nat :=
   go taken.length k
 where
@@ -1040,129 +1026,7 @@ def inScope (x : ElabM α) : ElabM α := do
   modify fun (_, k) => (Γ, k)
   pure r
 
-/-- A formula with no modality, the closer's (a modality is the scoped
-reader's, `Calculus/Notation.lean`).  `taken` are the indices of the fresh
-variables the formula writes, which `Calculus/Notation.lean`'s reading of a
-program keeps clear of (`nextFree`). -/
-def elabFml (taken : List Nat) : RawFml → ElabM (NFml C)
-  | .tt => pure .tt
-  | .eq a b => do
-    let (Γ, _) ← get
-    pure (.eqD (← tVal C Γ a) (← tVal C Γ b))
-  | .teq a b => do
-    let (Γ, _) ← get
-    pure (.eq (← tVal C Γ a) (← tVal C Γ b))
-  | .defined t => do
-    let (Γ, _) ← get
-    pure (.defined (← tVal C Γ t))
-  | .peq a b => do
-    let (Γ, _) ← get
-    let (a, b) ← elabCompare C Γ a b
-    pure (.eqD a b)
-  | .pne a b => do
-    let (Γ, _) ← get
-    let (a, b) ← elabCompare C Γ a b
-    pure (.not (.eqD a b))
-  | .cmp op a b => do
-    let (Γ, _) ← get
-    pure (cmpFml op .uint (← tVal C Γ a) (← tVal C Γ b))
-  | .all p x φ => inScope do
-    modify fun (Γ, k) => (setBy x (.val p) Γ, k)
-    pure (.all (Var.ofName x) p (← elabFml taken φ))
-  | .not φ => do pure (.not (← inScope (elabFml taken φ)))
-  | .and φ ψ => do pure (.and (← inScope (elabFml taken φ)) (← inScope (elabFml taken ψ)))
-  | .imp φ ψ => do pure (.imp (← inScope (elabFml taken φ)) (← inScope (elabFml taken ψ)))
-  | .upd m U φ => inScope do
-    let (Γ, k) ← get
-    let (U', Γ') ← elabUpd C Γ U
-    set (Γ', k)
-    pure (.upd m U' (← elabFml taken φ))
-  | .modal .. => throw "a modality is read by the scoped calculus (`Calculus/Notation.lean`)"
-  | .lean i => pure (NFml.slot i)
-  | .decl ds φ => inScope do
-    for d in ds do
-      let (x, t) ← match d with
-        | .declMemory T x none => do
-          let .ref R ← ElabM.lift (elabTy C T) | throw s!"`{x}`: a memory local is of a reference type"
-          pure (x, LocalTy.mem R)
-        | .declStorage T x none => do
-          let .ref R ← ElabM.lift (elabTy C T) | throw s!"`{x}`: a storage alias is of a reference type"
-          pure (x, LocalTy.alias R)
-        | .decl T x none => do
-          let .prim p ← ElabM.lift (elabTy C T) | throw s!"`{x}`: a local without a location is a value"
-          pure (x, LocalTy.val p)
-        | _ => throw "`where` declares locals: `Person memory carol`, `Account storage p`, `uint v`"
-      modify fun (Γ, k) => (setBy x t Γ, k)
-    elabFml taken φ
-
-/-- Elaborate a formula against `C`.  Its parameters (the names nothing
-declares) are in scope from the start: an alias if a program binds one to a
-storage path, else a `uint` local.  A capture takes the least index no fresh
-variable the formula writes has (`elabFml`): a line of a derivation leaves a
-gap exactly where the elaborator numbered a capture it does not show, the
-locals of a callee its call statement carries.  With `pastAll`, a capture
-is numbered past every written index instead: a Lean formula in the formula
-(`‹…›`) may write fresh variables the reading does not see. -/
-def elabDl (φ : RawFml) (pastAll : Bool := false) : Except String (NFml C) :=
-  let (used, declared) := φ.names
-  let hints := φ.stmts.flatMap (RawStmt.aliasHints C)
-  -- an enum's name (`State` in `State.Locked`) is no parameter
-  let free := (used.filter fun x => !declared.contains x && (C.rootType x).isNone &&
-    (lookupBy x C.enums).isNone).eraseDups
-  let unsets := φ.unsets
-  let params := free.filterMap fun x =>
-    match lookupBy x hints, Var.ofName x with
-    | some R, _ => some (x, LocalTy.alias R)
-    | none, .fresh "sp" _ | none, .fresh "mv" _ => none
-    | none, _ => if unsets.contains x then none else some (x, LocalTy.val .uint)
-  let taken := ((used ++ declared).map fun x => (Var.ofName x).idx).filter (· > 0)
-  let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
-  ((elabFml C taken φ).run { funs := C.funs }).run' (params, 1)
-
-/-- `elabDl`, under the name `Calculus/Chains.lean` reads a written line past
-the program with. -/
-abbrev elabDlN (φ : RawFml) (pastAll : Bool := false) : Except String (NFml C) :=
-  elabDl C φ pastAll
-
 end Read
-
-/-! ## Putting the Lean terms back -/
-
-section Fill
-open Lean (mkApp mkApp2 mkConst mkStrLit)
-
-/-- `NFml.slot i`, quoted, for the contract `c`. -/
-def slotExpr (c : Lean.Expr) (i : Nat) : Lean.Expr :=
-  mkApp2 (mkConst ``NFml.defined) c
-    (mkApp2 (mkConst ``Term.pv) c (mkApp (mkConst ``Var.user) (mkStrLit s!"⟪{i}⟫")))
-
-/-- The `i` of a quoted `NFml.slot i`. -/
-def slotIdx? (e : Lean.Expr) : Option Nat := do
-  guard (e.isAppOfArity ``NFml.defined 2)
-  let t := e.appArg!
-  guard (t.isAppOfArity ``Term.pv 2)
-  let x := t.appArg!
-  guard (x.isAppOfArity ``Var.user 1)
-  let .lit (.strVal s) := x.appArg! | none
-  guard (s.startsWith "⟪" && s.endsWith "⟫")
-  ((s.drop 1).dropRight 1).toNat?
-
-/-- The formula whose readings at the diamond (`d`) and at the box (`b`) are
-given, with its Lean terms back: `m` where `d` has the diamond and `b` the
-box, the formula `φs[i]` at the slot `i`.  Elsewhere the two agree.  A quoted
-formula has no binders, so a term is put back as it is. -/
-partial def fillSlots (m? : Option Lean.Expr) (φs : Array Lean.Expr) (d b : Lean.Expr) :
-    Except String Lean.Expr := do
-  if let some m := m? then
-    if d.isConstOf ``Modality.diamond && b.isConstOf ``Modality.box then return m
-  if let some i := slotIdx? d then
-    if let some φ := φs[i]? then
-      if slotIdx? b == some i then return φ
-  match d, b with
-  | .app f x, .app g y => return .app (← fillSlots m? φs f g) (← fillSlots m? φs x y)
-  | _, _ => if d == b then pure d else throw "the readings at the diamond and at the box differ"
-
-end Fill
 
 /-! ## `dl[C]{ … }` and `dl!{ … }` -/
 
@@ -1197,23 +1061,5 @@ macro_rules
   | `(dl!{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) => `(dl[InContract.contract]{ ($[$as],* ⟹ $φ) })
   | `(dl![ $m ]{ $[$as:dl_fml],* ⟹ $φ:dl_fml }) =>
     `(dl[InContract.contract, $m]{ ($[$as],* ⟹ $φ) })
-
-/-- `st!{ s }`, `pt!{ p }`: a storage term and a storage path read against the
-file's contract, as `dl!{ … }` reads them: the operands of a law's premise
-(`STerm.KindFreeAt st!{ save(storage, alice.age, 1) } pt!{ alice }`).  The path
-is read as in the frame of a `select`: its root may be a member (`account`). -/
-syntax "st!{ " dl_term " }" : term
-@[inherit_doc «termSt!{_}»] syntax "pt!{ " dl_term " }" : term
-
-open Lean Elab Term Meta in
-elab_rules : term
-  | `(st!{ $t:dl_term }) => do
-    let raw ← liftMacroM (expandTerm t)
-    let c ← `(InContract.contract)
-    elabAgainst c fun q => `((tStor $c [] $raw).map (Surface.Tm.quote $q))
-  | `(pt!{ $t:dl_term }) => do
-    let raw ← liftMacroM (expandTerm t)
-    let c ← `(InContract.contract)
-    elabAgainst c fun q => `((tFPath $c [] $raw).map (Surface.Tm.quote $q))
 
 end Solidity

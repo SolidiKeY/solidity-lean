@@ -1,4 +1,4 @@
-import Solidity.Calculus.Rewrite
+import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.RewriteSyntax
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
@@ -7,10 +7,10 @@ import Solidity.Calculus.Closers
 # Term taclets on a sequent
 
 `rw [findOnSave]` on a sequent applies the term taclet
-`TermTacletS.findOnSave` (`Calculus/TermLib.lean`) by `Proves.rewrite`:
+`TermTaclet.findOnSave` (`Calculus/TermLib.lean`) by `Proves.rewrite`:
 its paths are found in the sequent and its side conditions closed on them.
 `sol_rw [find_delAt_same, …]` builds a rule from the Theory's own lemmas
-instead (`TermTaclet.theory`, `Calculus/TheoryRewrite.lean`).
+instead (`Calculus/RewriteSyntax.lean`).
 
 The sequents are scoped (`open scoped Solidity.Scoped`, `⊢ φ`), over
 `StandardExample`: they hold terms only, with no local, no update and no

@@ -49,10 +49,9 @@ The sort of a term is read off its head, then off the argument position.
 `‹e›` is the Lean term `e` at any position, and `_` a hole.  Reserved
 names: `storage`, `memory`, `mtSt`, `err`, `size`, `nil`, `true`, `false`,
 `this`, and `length` as a path's last member.  In `key!{ }`, `idp0` is the
-allocation `0`, and an identifier in a term is the program variable of
-that name (`Atom.name` of `Var.ofName` when it ends in a digit, so that `se1`
-is the fresh one); `pos(k)` is the local at the position `k` of a scoped
-leaf's context.  `ok(x)` is `okSt` or `okPath` by the shape of `x`; of a variable it
+allocation `0`; a local is `pos(k)`, the local at the position `k` of a
+scoped leaf's context (an identifier in a term is no local: a reduction's
+binders carry no names).  `ok(x)` is `okSt` or `okPath` by the shape of `x`; of a variable it
 is written out.
 
 ## Printing
@@ -199,11 +198,6 @@ def keyErr (stx : Syntax) (what : String) (s : KSort) : MacroM α :=
 def idpOrd? (s : String) : Option Nat :=
   if s.startsWith "idp" then (s.drop 3).toNat? else none
 
-/-- The program variable `n`: a name ending in a digit may be a fresh one,
-which the file's `FreshNames` reads (`se1`); any other is a user's. -/
-def keyVar (n : String) : MacroM Lean.Term :=
-  if n.back.isDigit then `(Var.ofName $(quote n)) else `(Var.user $(quote n))
-
 /-- A one-part name at the sort `s`: a reserved name, a literal (`key!`),
 or a Lean variable (`key`). -/
 def keyName1 (lit : Bool) (s : KSort) (x : Ident) (n : String) : MacroM Lean.Term := do
@@ -242,8 +236,6 @@ def keyName1 (lit : Bool) (s : KSort) (x : Ident) (n : String) : MacroM Lean.Ter
     if keyReserved.contains n then keyErr x s!"`{n}`" s
     else if !lit then pure x
     else match s with
-      | .term => `(LTerm.var (Atom.name $(← keyVar n)))
-      | .var => `(Atom.name $(← keyVar n))
       | .path => `(LPath.root $(quote n))
       | .sel => `(LSel.fld $(quote n))
       | .name => pure (quote n)
@@ -294,8 +286,6 @@ partial def keyAt (lit : Bool) (s : KSort) (stx : TSyntax `key_term) : MacroM Le
     match s with
     | .name => return v
     | .path => `(LPath.root $v)
-    | .term => `(LTerm.var (Atom.name $(← keyVar vs)))
-    | .var => `(Atom.name $(← keyVar vs))
     | .sel => `(LSel.fld $v)
     | .seg => `(Seg.field $v)
     | .ty => `(Ty.ref (RefTy.struct $v))
@@ -645,27 +635,6 @@ def kName (e : Expr) : KeyM (TSyntax `key_term) := do
   if let some x ← kFVar? e then return x
   kEsc e
 
-/-- The default spelling of fresh variables, `se1`. -/
-def keyFresh : FreshNames := .ofPrefixes "se" "sp" "ie" "mv"
-
-/-- A variable of the program (`Var`). -/
-def kVar? (e : Expr) : KeyM (Option (TSyntax `key_term)) := do
-  let e := e.consumeMData
-  let s? : Option String :=
-    if e.isAppOfArity ``Var.ofName 2 then keyStrLit? e.appArg!
-    else if e.isAppOfArity ``Var.user 1 then
-      (keyStrLit? e.appArg!).filter fun s => (keyFresh.parse s).isNone
-    else if e.isAppOfArity ``Var.fresh 2 then
-      match keyStrLit? (e.getArg! 0), keyNatLit? (e.getArg! 1) with
-      | some b, some k =>
-        let s := keyFresh.name b k
-        if keyFresh.parse s == some (b, k) then some s else none
-      | _, _ => none
-    else none
-  match s? with
-  | some s => return some (← kLitName s)
-  | none => return none
-
 /-- A constructor named in `key!{ }`, escaped in `key{ }`. -/
 def kCtor (e : Expr) (ns : Lean.Name) : KeyM (TSyntax `key_term) := do
   match e.consumeMData with
@@ -728,10 +697,6 @@ partial def pkTerm (e : Expr) : KeyM (TSyntax `key_term) := do
     `(key_term| lit($x))
   | LTerm.var a =>
     let a := a.consumeMData
-    if a.isAppOfArity ``Atom.name 1 then
-      if let some t ← kVar? a.appArg! then
-        -- a literal in `key{ }` is a string, which the term position reads as one
-        return t
     if a.isAppOfArity ``Atom.pos 1 then
       if let some k := keyNatLit? a.appArg! then return ← `(key_term| pos($(← kNum k)))
     let a' ← match ← kFVar? a with
@@ -1060,9 +1025,9 @@ example : key!{ find(save(storage, balances[msg.sender], find(storage, balances[
       (.binop .sub .uint (.find .init (.at (.root "balances") (.env .msgSender))) (.lit (.int 1))))
       (.root "total") := rfl
 
-example : key!{ if(i = j) then 7 else find(delAt(storage, values), values[i]) } =
-    LTerm.kite (.var (.name (.user "i"))) (.var (.name (.user "j"))) (.lit (.int 7))
-      (.find (.delAt .init (.root "values")) (.at (.root "values") (.var (.name (.user "i"))))) := rfl
+example : key!{ if(pos(0) = pos(1)) then 7 else find(delAt(storage, values), values[pos(0)]) } =
+    LTerm.kite (.var (.pos 0)) (.var (.pos 1)) (.lit (.int 7))
+      (.find (.delAt .init (.root "values")) (.at (.root "values") (.var (.pos 0)))) := rfl
 
 -- a copy, a read written, a length
 example : key!{ save(storage, alice, find(storage, bob)) } =
@@ -1072,10 +1037,10 @@ example : key!{ save(storage, total, select(storage, values.length)) } =
 
 -- memory: an array allocated and written, copied back to storage
 example : key!{ save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])),
-      idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))) } =
+      idC(idp0, nil), size, pos(0)), idC(idp0, nil), at(pos(1)), 7), idC(idp0, nil))) } =
     LStor.copy .init (.root "values")
-      (.view (.write (.newArr .init 0 (.array (.prim .uint)) (.var (.name (.user "n")))) ⟨0, []⟩
-        (.idx (.var (.name (.user "i")))) (.word (.lit (.int 7)))) ⟨0, []⟩) (.root viewRoot) := rfl
+      (.view (.write (.newArr .init 0 (.array (.prim .uint)) (.var (.pos 0))) ⟨0, []⟩
+        (.idx (.var (.pos 1))) (.word (.lit (.int 7)))) ⟨0, []⟩) (.root viewRoot) := rfl
 
 example : key!{ write(memory, idC(idp0, [account, at(2)]), balance, idC(idp1, nil)) } =
     LMem.write .init ⟨0, [.field "account", .at 2]⟩ (.fld "balance") (.ref ⟨1, []⟩) := rfl
@@ -1084,13 +1049,10 @@ example : key!{ staleSave(stale(pop(false), storage, values, 0), values[0], -1) 
     LStor.stale none (.stale (some (.pop false)) .init (.root "values") (.lit (.int 0)))
       (.at (.root "values") (.lit (.int 0))) (.lit (.int (-1))) := rfl
 
-example : key!{ (ok(alice.age); if(0 < x) then true else err) } =
+example : key!{ (ok(alice.age); if(0 < pos(0)) then true else err) } =
     LTerm.seq (.pok (.field (.root "alice") "age"))
-      (.ite (.binop .lt .uint (.lit (.int 0)) (.var (.name (.user "x")))) (.lit (.bool true))
+      (.ite (.binop .lt .uint (.lit (.int 0)) (.var (.pos 0))) (.lit (.bool true))
         .err) := rfl
-
--- a fresh variable reads as `FreshNames` spells it
-example : key!{ se1 } = LTerm.var (.name (Var.ofName "se1")) := rfl
 
 -- a position of a scoped leaf's context
 example : key!{ pos(2) + 1 } = LTerm.binop .add .uint (.var (.pos 2)) (.lit (.int 1)) := rfl
@@ -1120,12 +1082,13 @@ info: key!{ find(save(storage, balances[msg.sender], find(storage, balances[msg.
 /--
 info: key!{
   save(storage, values,
-    copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7),
+    copyMem(mtSt,
+      write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, pos(0)), idC(idp0, nil), at(pos(1)), 7),
       idC(idp0, nil))) } : LStor
 -/
 #guard_msgs in
 #check key!{ save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])),
-  idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))) }
+  idC(idp0, nil), size, pos(0)), idC(idp0, nil), at(pos(1)), 7), idC(idp0, nil))) }
 
 /-- info: key!{ save(storage, total, select(storage, values.length)) } : LStor -/
 #guard_msgs in #check key!{ save(storage, total, select(storage, values.length)) }
@@ -1137,17 +1100,17 @@ info: key!{
 #guard_msgs in #check key!{ staleSave(stale(pop(false), storage, values, 0), values[0], -1) }
 
 /--
-info: key!{ binop(add, int, delValue(x), address(this).balance) && msg.value >= block.timestamp } : LTerm
+info: key!{ binop(add, int, delValue(pos(0)), address(this).balance) && msg.value >= block.timestamp } : LTerm
 -/
 #guard_msgs in
-#check key!{ binop(add, int, delValue(x), address(this).balance) && msg.value >= block.timestamp }
+#check key!{ binop(add, int, delValue(pos(0)), address(this).balance) && msg.value >= block.timestamp }
 
 /-- info: key!{ orElse(findP(storage, alice.age), has(storage, alice)) || ok(storage) } : LTerm -/
 #guard_msgs in #check key!{ orElse(findP(storage, alice.age), has(storage, alice)) || ok(storage) }
 
--- a fresh variable, and a name that is reserved
-/-- info: key!{ save(storage, "storage", se1) } : LStor -/
-#guard_msgs in #check LStor.save .init (.root "storage") (.var (.name (.fresh "se" 1)))
+-- a name that is reserved
+/-- info: key!{ save(storage, "storage", pos(1)) } : LStor -/
+#guard_msgs in #check LStor.save .init (.root "storage") (.var (.pos 1))
 
 -- a position of a scoped leaf's context
 /-- info: key!{ pos(2) + 1 } : LTerm -/

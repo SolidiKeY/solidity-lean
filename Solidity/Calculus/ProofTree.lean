@@ -1,6 +1,6 @@
 import Solidity.Calculus.TreeData
 import Solidity.Calculus.RuleShapes
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.Delab
 
@@ -73,11 +73,9 @@ namespace ProofTree
 open Lean Meta Elab Tactic
 open Solidity.ProofTree (Tree Act short dotIdent runOn)
 
-/-- How the tree is grown: whether a leaf is closed as a walk ends
-(`closeTacs`), the tactics tried after it (each list a closing script), and
-at most how many nodes. -/
+/-- How the tree is grown: the tactics tried on a leaf after `closeTrue` and
+`closeTacs` (each list a closing script), and at most how many nodes. -/
 structure Config where
-  erased : Bool := true
   closers : Array (Array (TSyntax `tactic)) := #[]
   maxNodes : Nat := 10000
 
@@ -112,7 +110,7 @@ def operatorOf? (env : Environment) (s : Expr) : Option Lean.Name :=
 KeY's taclet at the operator, for a row of an operator family; else `c`'s
 own. -/
 def keyName (c : Lean.Name) (s : Expr) : MetaM Lean.Name := do
-  let own := NFml.Chain.lastName c
+  let own := Chain.lastName c
   let row := (`Solidity.Taclet).append own
   if (RuleShapes.operatorOrder.lookup row).isNone then return own
   let s ← instantiateMVars s
@@ -197,7 +195,7 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     let some ctor := provesCtor premise | return #[]
     let toStep := if (`Solidity.LeanTaclet).isPrefixOf c then ``LeanTaclet.toStep
       else ``Taclet.toStep
-    let d ← `(($(← short toStep) $(dotIdent (NFml.Chain.lastName c))))
+    let d ← `(($(← short toStep) $(dotIdent (Chain.lastName c))))
     let name ← keyName c s
     -- an `if`'s condition, as `ifElseSplit`'s labels name it
     let se ← if premise == ``Premise.split then condOf? H s else pure none
@@ -287,8 +285,7 @@ partial def grow (cfg : Config) (fuel : IO.Ref Nat) (label : Option Lean.Name) (
       cs := cs.push (if pre.isEmpty then t else prefixTacs pre t)
     return .node g sequent label (.rule mv.name tacs mv.se) cs
   -- a leaf
-  let erased ← if cfg.erased then pure #[← closeTacs] else pure #[]
-  for tacs in #[← closeTrueTacs] ++ erased ++ cfg.closers do
+  for tacs in #[← closeTrueTacs, ← closeTacs] ++ cfg.closers do
     let s ← saveState
     try
       if (← runOn g tacs).isEmpty then return .node g sequent label (.closed tacs) #[]

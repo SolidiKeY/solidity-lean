@@ -1,4 +1,4 @@
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Evm.Examples
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers

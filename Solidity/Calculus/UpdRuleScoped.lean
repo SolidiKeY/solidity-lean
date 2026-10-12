@@ -3,16 +3,16 @@ import Solidity.Calculus.UpdateRules
 /-!
 # Update simplification on scoped formulas
 
-`Calculus/NFmlUpdateRules.lean`'s rules (`updateRules.key`) on `Fml C Γ`
-and its updates `Upd C Γ Δ`, read over the typed state (`holds`):
+KeY's update simplification (`updateRules.key`) on `Fml C Γ` and its
+updates `Upd C Γ Δ`, read over the typed state (`holds`):
 
-| KeY taclet | here | erased form |
-|---|---|---|
-| `sequentialToParallel1/2/3`: `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` | `UpdRuleS.sequentialToParallel` (`Upd.seqPar`, `Calculus/Graft.lean`) | `UpdRule.sequentialToParallel` |
-| `simplifyUpdate1/2/3` (`\dropEffectlessElementaries`) | `UpdRuleS.simplifyUpdate` (`Upd.simpS`: `Upd.simp`, `Calculus/UpdateRules.lean`, under the box; the shadowed writes, `Upd.shadow`, under either modality) | `UpdRule.simplifyUpdate` |
-| `applySkip1/2/3`: `{skip}φ ⇝ φ` | `UpdRuleS.applySkip` | `UpdRule.applySkip` |
-| `applyOnRigidFormula`, `applyOnPV`, `applyOnDifferentPV` | `UpdRuleS.applyOnRigid` (`Fml.substU`) | `UpdRule.applyOnRigid` |
-| — (Lean only) | `UpdRuleS.mergeHidden` (`Fml.mergeB`: `sequentialToParallel` through hidden binders), `UpdRuleS.absorbPops` (`Fml.absorbPops`: scope ends merged in), `UpdRuleS.trans` | — |
+| KeY taclet | here |
+|---|---|
+| `sequentialToParallel1/2/3`: `{u}{u2}φ ⇝ {u ‖ {u}u2}φ` | `UpdRuleS.sequentialToParallel` (`Upd.seqPar`, `Calculus/Graft.lean`) |
+| `simplifyUpdate1/2/3` (`\dropEffectlessElementaries`) | `UpdRuleS.simplifyUpdate` (`Upd.simpS`: `Upd.simp`, `Calculus/UpdateRules.lean`, under the box; the shadowed writes, `Upd.shadow`, under either modality) |
+| `applySkip1/2/3`: `{skip}φ ⇝ φ` | `UpdRuleS.applySkip` |
+| `applyOnRigidFormula`, `applyOnPV`, `applyOnDifferentPV` | `UpdRuleS.applyOnRigid` (`Fml.substU`) |
+| — (Lean only) | `UpdRuleS.mergeHidden` (`Fml.mergeB`: `sequentialToParallel` through hidden binders), `UpdRuleS.absorbPops` (`Fml.absorbPops`: scope ends merged in), `UpdRuleS.trans` |
 
 `sol_upd sequentialToParallel` is `mergeHidden` (`Fml.mergeB`), and
 `sol_upd simplifyUpdate` is `absorbPops` then `simplifyUpdate`
@@ -21,7 +21,7 @@ constructors named after them.
 
 **One way.**  Each rule rewrites `φ` to a `ψ` that gives it
 (`UpdRuleS.sound`: `holds σ ψ → holds σ φ`), the direction a derivation
-uses.  The erased rules are equivalences; here the converse fails, because
+uses.  The converse fails, because
 `{U} φ` reads `φ` in every *typed* state the update's result erases to
 (`holds`), and a merged update may reach a typed state the two updates in
 turn do not: `{x := 300}{x := 1} φ` for a `uint8` local `x` holds
@@ -30,25 +30,23 @@ vacuously (no typed state holds `300` in `x`), its merge
 positive positions of a formula only (`Fml.updAtS`, `Fml.simpUpdsS`): under
 an update, a conjunction, the right of an implication, a binder, `{havoc}`,
 `{anon}` and a modality's postcondition, not under a negation or on the
-left of an implication, where the erased form also rewrites.
+left of an implication.
 
 **What the scope changes.**  An update's locals are positions, so what
-the erased `dropEffectless` drops by name splits in two: an element that
+KeY's `dropEffectless` drops by name splits in two: an element that
 sets a local the same update pops later (a capture's `se1`, `sp1`) goes
 (`Upd.simp`, under the box, as `Proves.simplify`), and so does a write a
 later one to the same local shadows (`Upd.shadow`, under either modality);
-an element that sets a local still in scope that `φ` does not read stays
-(the erased form drops it).  `applySkip` asks a formula with no modality (`Fml.modalFree`): such a
+an element that sets a local still in scope that `φ` does not read stays.  `applySkip` asks a formula with no modality (`Fml.modalFree`): such a
 formula holds in a typed state by its erasure and its heap typing alone
 (`holds_congr_erase`), and the states `{}` reads `φ` in are those.
 `applyOnRigid` under the diamond asks an update that cannot halt
-(`Upd.totalB`): what the erased `Upd.total` admits (a literal, an alias to a
-root and its fields, `sp1 := alice.account`), and also a local, which a
-typed state always binds, `unset` and the ledger's saves; under the box any
+(`Upd.totalB`): a literal, an alias to a root and its fields
+(`sp1 := alice.account`), a local, which a typed state always binds,
+`unset` and the ledger's saves; under the box any
 update applies, as `Proves.applyOnRigidBox`.
 
-`elimSelfUpdate` (commented out in solkey; theorems only in the erased
-form) is not ported.
+`elimSelfUpdate` (commented out in solkey) is not ported.
 
 The kernel evaluates these functions (the examples' `rfl`), so they keep
 Gate G0's first two conditions: the walks over a whole formula or update

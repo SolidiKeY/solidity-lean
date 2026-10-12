@@ -193,10 +193,9 @@ attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.defined,
 
 /-! ## Sequents -/
 
-/-- An update `U` of a sequent's context, of pieces `ps`, produced under `m`,
-as `Calculus/Hyp.lean`'s `ppHyp?` prints the closer's: `{U}`, or `{U} [ ]`
-and `{U} ⟨ ⟩` for a rule's update at a fixed modality; none where it
-escapes (it would read back as a precondition). -/
+/-- An update `U` of a sequent's context, of pieces `ps`, produced under `m`:
+`{U}`, or `{U} [ ]` and `{U} ⟨ ⟩` for a rule's update at a fixed modality;
+none where it escapes (it would read back as a precondition). -/
 def updHypS (m U : Expr) (ps : Array UPiece) : MetaM (Option (TSyntax `dl_hyp)) := do
   let u ← ppUpdPiecesS U ps
   if Solidity.isEscape u then return none
@@ -209,16 +208,13 @@ def updHypS (m U : Expr) (ps : Array UPiece) : MetaM (Option (TSyntax `dl_hyp)) 
 
 /-- A sequent's context for the scoped printer: the rest `..H` when it is a
 variable, the entries printed (a precondition by `ppFmlS`, an update by
-`updHypS`, the rest as `Calculus/Hyp.lean`'s `Hyp`s), and the names of the last
+`updHypS`, `{ havoc }`, `∀ T x`, `{ anon(…) }`), and the names of the last
 scope.  What prints as nothing: an update of pops only, and the hidden
 binder.  An error where an entry does not print. -/
 partial def hypsPartsS (c H : Expr) : PrM (Option Lean.Name × Array (TSyntax `dl_hyp) × List Expr) := do
   let H := (← instantiateMVars H).consumeMData
   let unknown (Γ : Expr) : MetaM (List Expr) := do
     return List.replicate ((← ctxLength? Γ).getD 0) unknownVar
-  let hyp (h : Expr) : MetaM (TSyntax `dl_hyp) := do
-    let some h ← Solidity.ppHyp? h | throwError "an entry that does not print"
-    return h
   if let .fvar fv := H then
     let ty ← whnfR (← fv.getType)
     return (some (← fv.getDecl).userName, #[], ← unknown (ty.getArg! 2))
@@ -235,20 +231,17 @@ partial def hypsPartsS (c H : Expr) : PrM (Option Lean.Name × Array (TSyntax `d
     let (ps, ms) ← updPiecesS ns U
     if ps.isEmpty then return (r, hs, ms)
     let h ← updHypS args[5]! U ps
-    if ← twinCheckOn then
-      let (es, _) ← runTr (updParts ns U)
-      let old ← Solidity.ppHyp? (mkApp3 (mkConst ``Solidity.Hyp.upd) c args[5]!
-        (← runTr (updList c U es)))
-      twinCompare "context update" (h.map (·.raw)) (old.map (·.raw)) `dl_hyp
     let some h := h | throwError "an entry that does not print"
     return (r, hs.push h, ms)
   | some ``Hyps.havoc =>
     let (r, hs, ns) ← hypsPartsS c args[3]!
-    return (r, hs.push (← hyp (mkApp (mkConst ``Solidity.Hyp.havoc) c)), ns)
+    return (r, hs.push (← `(dl_hyp| { havoc })), ns)
   | some ``Hyps.all =>
     let (r, hs, ns) ← hypsPartsS c args[3]!
-    return (r, hs.push (← hyp (mkApp3 (mkConst ``Solidity.Hyp.all) c args[4]! args[5]!)),
-      args[4]! :: ns)
+    let some x ← Solidity.ppVar? args[4]! | throwError "an entry that does not print"
+    let some T ← (do pure ((← Solidity.primName? args[5]!) <|> (← Solidity.fvarName? args[5]!)))
+      | throwError "an entry that does not print"
+    return (r, hs.push (← `(dl_hyp| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident)), args[4]! :: ns)
   | some ``Hyps.bind =>
     let (r, hs, ns) ← hypsPartsS c args[3]!
     return (r, hs, args[5]! :: ns)
@@ -256,8 +249,10 @@ partial def hypsPartsS (c H : Expr) : PrM (Option Lean.Name × Array (TSyntax `d
     let (r, hs, ns) ← hypsPartsS c args[3]!
     let some xs ← Solidity.listElems? args[4]! | throwError "anon"
     let xs ← xs.mapM fun x => do idxName ns (← whnf x).appArg!
-    let xs ← mkListLit (mkConst ``Solidity.Var) xs.toList
-    return (r, hs.push (← hyp (mkApp2 (mkConst ``Solidity.Hyp.anon) c xs)), ns)
+    let ids ← xs.mapM fun x => (Solidity.ppVar? x : MetaM _)
+    if ids.any Option.isNone then throwError "an entry that does not print"
+    let ids : Array Ident := ids.filterMap id
+    return (r, hs.push (← `(dl_hyp| { anon($ids,*) })), ns)
   | _ => throwError "not a context"
 
 /-- The names of the last scope of a sequent's context `H` (`hypsPartsS`'s,

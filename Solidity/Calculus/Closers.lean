@@ -1,7 +1,6 @@
 import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.DecideComplete
-import Solidity.Calculus.Rewrite
 import Solidity.Calculus.UpdRuleScoped
 
 /-!
@@ -13,13 +12,8 @@ on a leaf `sol_prove` left, a leaf is closed on its scoped form:
 `sol_close_unwrap` (`CloseS.valid_of_holdsE`, `Calculus/CloseScoped.lean`),
 with no erasure.  `sol_close_eval` on the bare leaf `Valid ψ`, before its
 state is introduced, takes the same first step here.  `sol_decide`'s parts
-reduce the scoped leaf by position (below).  `sol_apply_upd` and
-`sol_fold_terms` have no scoped reading yet: their second elaborator erases
-the leaf (`Derive.eraseLeaf`: `Fml.posB`, checked by the kernel, then
-`Valid.of_erase`) and runs the same tactic on today's goal.  Today's macro
-is tried first and fails on a scoped goal; on today's goal the second
-elaborator steps aside.  `sol_upd` and `sol_merge` rewrite the scoped
-formula itself (M6c, W7 `w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s
+reduce the scoped leaf by position (below).  `sol_upd` and `sol_merge`
+rewrite the scoped formula itself (M6c, W7 `w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s
 rules, the leaf staying scoped.  `sol_prove?` runs the scoped `sol_prove`
 and the scoped leaf search after it.
 -/
@@ -82,8 +76,12 @@ def evalSolReadsCore : Tactic := Decide.onReduced false <| some do
   replaceMainGoal [← Decide.typedCons (← getMainGoal)]
   evalTactic (← `(tactic| sol_reads))
 
-@[tactic Solidity.tacticSol_apply_upd]
-def evalSolApplyUpdCore : Tactic := fun stx => Derive.onErased "sol_apply_upd" stx stx
+/-- `sol_merge`: every stack of updates merged into one and what is dead
+dropped. -/
+syntax "sol_merge" : tactic
+
+/-- `sol_upd r`: the update rule `r` at the first update where it fits. -/
+syntax "sol_upd " term : tactic
 
 open Meta in
 /-- `sol_merge` on a scoped goal: every stack of updates merged and cleaned
@@ -94,9 +92,6 @@ def evalSolMergeCore : Tactic := fun _ => withMainContext do
   let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
   Symex.reporting g do
     replaceMainGoal [← Symex.applyValid "sol_merge" g (mkApp (mkConst ``Valid.of_simpUpdsS) C)]
-
-@[tactic Solidity.tacticSol_fold_terms]
-def evalSolFoldTermsCore : Tactic := fun stx => Derive.onErased "sol_fold_terms" stx stx
 
 open Meta in
 /-- `sol_upd r` on a scoped goal: the update rule `r` (`UpdRuleNameS`) at
@@ -119,10 +114,10 @@ The scoped `sol_prove` (`Valid φ` and `⊢ φ`, `Calculus/ProvesDerive.lean`),
 then each leaf it leaves (a scoped sequent, `sol_leaf` its first line),
 closed by the first of the scoped leaf tactics (`Derive.searchLeaf`,
 `Derive.leafTacs`, its bounds read on the scoped leaf, `Seq.goalFits`); the
-replay suggested as today's (`Derive.replayLines`). -/
+replay suggested (`Derive.replayLines`). -/
 
 open Meta in
-/-- `sol_prove?` on a scoped goal; on today's goal it steps aside. -/
+/-- `sol_prove?` on a scoped goal. -/
 @[tactic Solidity.tacticSol_prove?]
 def evalSolProveQCore : Tactic := fun stx => withMainContext do
   let g ← getMainGoal
@@ -137,7 +132,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
   let mut open_ : List MVarId := []
   for l in leaves do
     let name ← l.getTag
-    match ← NFml.Derive.searchLeaf l Seq.goalFits with
+    match ← Derive.searchLeaf l Seq.goalFits with
     | some (t, h) =>
       found := found ++ [(name, t)]
       hb := hb + h
@@ -150,7 +145,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
     logWarning m!"sol_prove?: the replay needs about {hb / 1000} heartbeats in one \
       declaration, past `maxHeartbeats`"
   setGoals (open_ ++ rest)
-  ProofTree.suggest stx[0] (NFml.Derive.replayLines found)
+  ProofTree.suggest stx[0] (Derive.replayLines found)
 
 /-! ## A scoped formula refuted at a state
 

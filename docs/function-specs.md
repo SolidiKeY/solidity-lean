@@ -154,7 +154,7 @@ obligations, not `spec!`.
   invariant to one, and a strategy for `ProvesC` (below).
 - **The invariant under callbacks** (`ValidC`, `ProvesC`,
   `Calculus/Callback.lean`) per function: `ProvesC` has no strategy yet.
-- **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `NFml.inL`/`Fml.inLS`.
+- **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `Fml.inLS`.
 - **The benchmarks' `net(a)` clauses** (EtherWallet, Purchase,
   SimpleAuction) are not tried.
 - **The corpus's 23 `concretized` rows** (TestSuite 14, SolcExpressions 4,

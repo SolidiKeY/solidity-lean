@@ -3,17 +3,15 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.TacticSyntax
 
 /-!
-# Today's walk on a scoped goal
+# The walk on a scoped goal
 
-Under `open scoped Solidity.Scoped` a walk keeps today's text: one
+Under `open scoped Solidity.Scoped` a walk keeps solkey's text: one
 `apply` per rule, the rule named as solkey names it (`apply update
 .storageFieldWriteSave`, `apply unfold .localValueDeclInitDrop`, `apply
 empty`, …), and a leaf is left by `sol_leaf` for the scoped closers
 (`Calculus/ProofTree.lean`, `Calculus/ProvesDerive.lean`).  On a scoped goal (`Proves`) each line
 is the scoped rule of the same kind, its premise the named taclet's
-(`Taclet.step_eq`, `LeanTaclet.toStep`); on today's goal (a leaf's
-erasure) only the rules today's calculus kept are read today's way (`intro`,
-`allIntro`, `updIntro`, `empty`, `close`: `Calculus/NFmlLogic.lean`).
+(`Taclet.step_eq`, `LeanTaclet.toStep`).
 
 Where the scoped calculus takes a step today's names otherwise:
 
@@ -40,16 +38,11 @@ Where the scoped calculus takes a step today's names otherwise:
   `allRight` at once, as today's walk leaves them free (`core_params`); an
   explicit `∀ uint x;` (`cdl!` marks it, decision 28) is left to its own
   `apply allRight`;
-* `refine close ?_` is the erased fallback (`Proves.close`, the leaf's
-  erasure for today's closers): since W9.4 `sol_leaf` is the leaf step the
-  walks and the tree write, and no example leaf needs the fallback; the
-  erased closer's own tests (`Calculus/CloseTests.lean`) and a chain's last
-  line past the program (`Calculus/ChainKit.lean`) still take it.
+* a leaf is left by `sol_leaf` (`Proves.closeValid`), the leaf step the
+  walks and the tree write.
 
 Each reading is a `scoped macro_rules` of the namespace `Solidity.Scoped`,
-tried before today's `apply`: the scoped rule first, today's last where
-today's calculus has it, for today's goals a file still meets (a leaf
-today's `sol_prove` leaves).
+tried before Lean's `apply`.
 -/
 
 namespace Solidity
@@ -246,44 +239,31 @@ scoped macro_rules
       | (core_silent; core_inv (Solidity.LeanTaclet.toStep $r)))
   | `(tactic| apply updIntro) =>
     `(tactic| first
-      | (core_silent; apply Solidity.Proves.updIntro) <;> core_silent
-      | apply Solidity.NFml.Proves.updIntro)
+      | (core_silent; apply Solidity.Proves.updIntro) <;> core_silent)
   | `(tactic| apply impRight) =>
     `(tactic| first
-      | (core_silent; apply Solidity.Proves.intro) <;> core_silent
-      | apply Solidity.NFml.Proves.impRight)
+      | (core_silent; apply Solidity.Proves.intro) <;> core_silent)
   | `(tactic| apply allRight) =>
     `(tactic| first
-      | (core_silent; apply Solidity.Proves.allIntro) <;> core_silent
-      | apply Solidity.NFml.Proves.allRight)
+      | (core_silent; apply Solidity.Proves.allIntro) <;> core_silent)
   | `(tactic| apply emptyModality) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.empty) <;> core_silent
-      | core_skip empty
-      | apply Solidity.NFml.Proves.emptyModality)
+      | core_skip empty)
   | `(tactic| apply empty) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.empty) <;> core_silent
-      | core_skip empty
-      | apply Solidity.NFml.Proves.empty)
+      | core_skip empty)
   | `(tactic| apply intro) =>
     `(tactic| first
-      | (core_silent; apply Solidity.Proves.intro) <;> core_silent
-      | apply Solidity.NFml.Proves.intro)
+      | (core_silent; apply Solidity.Proves.intro) <;> core_silent)
   | `(tactic| apply allIntro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.allIntro) <;> core_silent
-      | core_skip allIntro
-      | apply Solidity.NFml.Proves.allIntro)
+      | core_skip allIntro)
   | `(tactic| apply Proves.valid) =>
     `(tactic| first
-      | (refine Solidity.Proves.valid (R := RuleSet.all) ?_; core_params)
-      | apply Solidity.NFml.Proves.valid)
-  | `(tactic| refine close ?_) =>
-    `(tactic| first
-      | refine Solidity.Proves.close [] rfl List.nodup_nil ?_ (by decide +kernel)
-          (by decide +kernel)
-      | refine Solidity.NFml.Proves.close ?_)
+      | (refine Solidity.Proves.valid (R := RuleSet.all) ?_; core_params))
 
 end Scoped
 

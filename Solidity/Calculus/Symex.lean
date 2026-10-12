@@ -215,10 +215,8 @@ def applyValid (tac : String) (g : MVarId) (lem : Expr) (unchanged : Option Mess
 def fuel : Nat := 5000
 
 /-- Run a scoped tactic `k` on its goal `g`, an error logged where the
-tactic is and the goal closed by `sorry`: the closer's elaborator of the
-same syntax (`sol_symex` on an `NFml.Valid` goal, `Calculus/TacticSyntax.lean`)
-is tried after this one, does not read scoped goals, and would report its
-own error in place of this one's.  Where errors are not
+tactic is and the goal closed by `sorry`, so that the rest of the proof is
+still checked.  Where errors are not
 recovered from (`fail_if_success`, `first`'s alternatives), the error is
 thrown instead, so that the tactic fails there; an abort keeps the errors
 it logged. -/

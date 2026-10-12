@@ -7,7 +7,7 @@ import Solidity.Tools.Inspect
 /-!
 # `sol_decide`: the storage goals, decided
 
-`sol_close` (`Calculus/NFmlClose.lean`) finishes a goal with `simp` and `grind`
+`sol_close` (`Calculus/Close.lean`) finishes a goal with `simp` and `grind`
 on whatever facts the formula states; it cannot split on two keys being
 equal.  `sol_decide` (`Calculus/Decide.lean`) reduces the leaf, its
 locals and its binders' locals by position (`Fml.reduceS`,
@@ -17,10 +17,8 @@ reduction is sound over the typed state (`Valid.of_reduceS`,
 `Calculus/DecideTyped.lean`), not an equivalence.  The second step, into a
 statement about free reads under the constraints a storage puts on them,
 is on a scoped leaf `LFml.valid_alls_of_cons`: sound, not an equivalence
-(decision 79); `NFml.valid_iff_cons` (`Calculus/DecideComplete.lean`) is
-the erased route's equivalence.  The result is then closed.  Only the erased route's reduction is exact
-(`NFml.valid_iff_reduce`), so on a scoped leaf a goal it does not close may
-still be valid: besides being outside the fragment or beyond the final
+(decision 79).  The result is then closed.  Neither step is an
+equivalence, so a goal `sol_decide` does not close may still be valid: besides being outside the fragment or beyond the final
 `omega`/`grind`, it may hold only because of what the one-way reduction
 drops (decision 83, and the note on the scoped route in
 `Calculus/DecideComplete.lean`).
@@ -131,7 +129,7 @@ A read at or below a deleted location, before any key, reads the default of
 what was there (`find_defaultOf`): `0` for a `uint` that held one. -/
 
 /-- `alice.account.balance = 100; delete alice.account;` — the member below
-the deleted struct reads `0`.  The gap `NFmlClose.lean` lists: `sol_close` does
+the deleted struct reads `0`.  The gap `Calculus/Close.lean` lists: `sol_close` does
 not read below a deleted struct. -/
 theorem deleteBelow :
     ⊨ dl!{ [ alice.account.balance = 100; delete alice.account; ]
@@ -490,10 +488,10 @@ open Solidity.Decide
 private def pNew : LMem := key!{ addM(memory, shaped(idp0, Person)) }
 /-- `p.age = 5;` -/
 private def pAge : LMem := key!{ write(‹pNew›, idC(idp0, nil), age, 5) }
-/-- `uint[] memory xs = new uint[](3); xs[i] = 7;` -/
+/-- `uint[] memory xs = new uint[](3); xs[i] = 7;`, `i` the local at position `0`. -/
 private def xsNew : LMem :=
   key!{ write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, 3),
-    idC(idp0, nil), at(i), 7) }
+    idC(idp0, nil), at(pos(0)), 7) }
 /-- `Person memory a = alice; Person memory q;` -/
 private def aCopy : LMem :=
   key!{ addM(copySt(memory, idp0, find(storage, alice)), shaped(idp1, Person)) }
@@ -513,7 +511,7 @@ private def aCopy : LMem :=
 /-- info: true -/
 #guard_msgs in -- `readOnWrite` at a symbolic index: one `kite`; `initElement` below it
 #eval xsNew.readT ⟨0, []⟩ (.idx (.lit (.int 1))) ==
-  some (.kite (.lit (.int 1)) (.var (.name (.user "i"))) (.lit (.int 7)) (.lit (.int 0)))
+  some (.kite (.lit (.int 1)) (.var (.pos 0)) (.lit (.int 7)) (.lit (.int 0)))
 
 /-- info: true -/
 #guard_msgs in -- `memoryArrayFreshAlloc`: the length allocated
@@ -535,8 +533,8 @@ private def aCopy : LMem :=
 
 /-- info: true -/
 #guard_msgs in -- the write guard (Lean only): an index below the length
-#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.name (.user "j")))) ==
-  some (ltG (.var (.name (.user "j"))) (.lit (.int 3)))
+#eval xsNew.writeG ⟨0, []⟩ (.idx (.var (.pos 1))) ==
+  some (ltG (.var (.pos 1)) (.lit (.int 3)))
 
 /-- info: [true, false] -/
 #guard_msgs in -- `refDesc` (Lean only): a reference written names an older root
@@ -594,8 +592,8 @@ private def aCopy : LMem :=
 /-- info: true -/
 #guard_msgs in -- `initElement`: an element of a fresh `uint[3]` is `0` below the length
 #eval (LMem.addM .init 0 (.struct "FixedTriple")).readT ⟨0, [.field "items"]⟩
-    (.idx (.var (.name (.user "i")))) ==
-  some (seqL (ltR (.var (.name (.user "i"))) (.lit (.int 3))) (.lit (.int 0)))
+    (.idx (.var (.pos 0))) ==
+  some (seqL (ltR (.var (.pos 0)) (.lit (.int 3))) (.lit (.int 0)))
 
 /-- info: true -/
 #guard_msgs in -- `defaultValueBool`: a fresh `bool` member is `false`

@@ -1,6 +1,6 @@
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Surface
@@ -14,16 +14,18 @@ A derivation, stated (`Calculus/Chains.lean`): both ends written in
 `dl!{ … }`, and in between as many lines as you like (mini-solkey's chain
 examples).  The scoped calculus (`open scoped Solidity.Scoped`): a line
 after the first is computed by the strategy, its text checked against the
-computed line's erasure.
+computed line's key (`Fml.lineKey`: the line as text, in names).
 
 * `φ ~[r]~> ψ` — the rule `r` turns `φ` into `ψ`, as `#derivation` prints a
   line; a wrong `r` does not elaborate;
 * `φ ~> ψ` — the strategy's step does;
 * `φ ~*> ψ` — several steps;
 * `φ ~*> φ₁ ~[r]~> φ₂ ~*> …` — a chain, every link holding; `sol_chain`;
-* `φ ~~> ψ` — to prove `φ`, prove `ψ` (`Fml.Leads`; past the program the
-  line `ψ` names, `Fml.LeadsK`): what a chain composes to, and how segments
-  compose (`Fml.Leads.via`, `Fml.Leads.leadsK`);
+* `φ ~~> ψ` — to prove `φ`, prove `ψ` (`Fml.Leads`; past the program a
+  line the rewrites reach that is `ψ` up to its binders' names,
+  `Fml.LeadsK`, and `Fml.LeadsK.valid` proves `φ` from `ψ`): what a chain
+  composes to, and how segments compose (`Fml.Leads.via`,
+  `Fml.Leads.leadsK`);
 * `calc` — the same chain, one line per step, each with its reason, its line
   computed from the one before (`by sol_chain`).
 
@@ -547,7 +549,7 @@ sequentialToParallel still applies (under either modality), and gives
 #last_line stacked
 
 /-- The stack merged, the read of the write not yet resolved: `~~>` past the program
-(`Fml.LeadsK`), to a scoped line whose erasure is the one written. -/
+(`Fml.LeadsK`), to a line that is the one written up to its binders' names. -/
 theorem unresolved : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ } := by
@@ -609,11 +611,17 @@ theorem resolveSeg :
     ~[findOnSave]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } := by
   sol_chain
 
-/-- The two segments composed. -/
+/-- The two segments composed: to prove the first line, prove the last
+(`Fml.LeadsK.valid`, below). -/
 theorem composed :
     dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ } :=
   ((readSeg ..).leads.via (resolveSeg ..)).leadsK
+
+/-- What `composed` proves: the first line is valid where the line written is. -/
+example (h : Valid dl![m]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } φ }) :
+    Valid dl![m]{ { storage := save(storage, alice.age, 42) } ⟨[ uint x = alice.age; ]⟩ φ } :=
+  (composed m φ).valid h
 
 #guard_msgs in
 #last_line resolveSeg

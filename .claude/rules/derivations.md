@@ -44,7 +44,7 @@ Two directories, by proof style:
      `⇝*` is one `~*>`; a step it prints as `⇝` is its own `~[rule]~>`, or
      one `~*>` where Lean takes several rules for it (an alias bound and read,
      a capture and its binding).  `#chain` groups the steps
-     (`NFml.Chain.groupSteps`): declarations dropped with the bindings they
+     (`Chain.groupSteps`): declarations dropped with the bindings they
      leave are one `~*>`, and so is a rule with the `emptyModality` after it
      (the paper never shows the `⟨[ ]⟩` line).  The paper's grouping wins over
      `#chain`'s: where it folds more, join links into one `~*>`; where it
@@ -95,14 +95,14 @@ reading `Calculus/Notation.lean`); if a goal prints with a `‹…›` escape,
 extend the printer (`Calculus/RuleSyntax.lean`, `Calculus/Delab.lean`).
 
 **Valid means every typed state** (`Valid`, `Calculus/Logic.lean`), but the
-closer reads a leaf's erasure over every untyped state (decision 7's IR;
-`docs/intrinsic.md`, "What is left"), including ones without the contract's
-roots, so a write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩ true`,
+closer reads a leaf's storage untyped (`docs/intrinsic.md`, "What is
+left"), including storages without the contract's roots, so a write under
+the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩ true`,
 pinned in `Examples/ProofTree.lean`). Write the box, or state the
 precondition. A claim about the contract's initial store is a typed run
 (`Prog.runT` from `State.exampleStore`, `Tools/Run.lean`), pinned
 with `#guard_msgs in #eval`.
 
 When `sol_close` does not close a true goal, the gap belongs in
-`Calculus/NFmlClose.lean` (its docstring lists what it cannot do yet), not in a
+`Calculus/Close.lean` (its docstring lists what it cannot do yet), not in a
 bespoke proof in the example.

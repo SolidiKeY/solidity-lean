@@ -1,4 +1,4 @@
-import Solidity.Calculus.NFmlDerive
+import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.Surface
@@ -21,7 +21,7 @@ The clauses are proved twice.  `spec!{f}` is the obligation solkey's
 as `⊢` (`spec_inc`, `spec_dec`): the snapshot `{ old := storage }` joins the
 context (`Proves.updIntro`), the program runs, and each leaf closes by
 the closer (`LFml.close`), all in one kernel evaluation (`sol_prove`,
-`Calculus/NFmlDerive.lean`).  Before it, the same clauses by hand, also by
+`Calculus/ProvesDerive.lean`).  Before it, the same clauses by hand, also by
 `sol_prove`, the premise `c == count` rewriting `count` to `c` (KeY's
 `applyEq`): `ensures count == \old(count) + 1` with a parameter `c` for
 the old value, and no `requires count >= 1`, which the box does not need (a `dec()` that

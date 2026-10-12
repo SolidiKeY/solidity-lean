@@ -1,4 +1,4 @@
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.FunContract
@@ -21,7 +21,7 @@ once, from its obligation
 variable (`getTotal`).  A contract's formulas are read at the callee's frame
 (`cdlIn![…]{ … }`, the locals outermost first: the parameters, then for
 `ensures` the snapshots `old` and `oldNet`, then the return variables).
-`sol_close` reads `{havoc}` (`Calculus/CloseHavoc.lean`), so every goal
+`sol_close` reads `{havoc}` (`Calculus/CloseScoped.lean`), so every goal
 closes by the strategy.
 
 `core_contract μ req ens` takes the call at the head of the goal's box,

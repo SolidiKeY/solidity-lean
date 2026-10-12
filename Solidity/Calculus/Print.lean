@@ -13,9 +13,6 @@ of the scoped terms (`ppTermS`, `ppUpdS`); a block is quoted as it is
 (`Prog.quoteShared`) and printed by `Calculus/PrintStmt.lean`'s printer of
 the scoped syntax (`ppProgS`); each with the names of its context.  This
 module only walks the formula, with the names of its context beside it.
-Under `pp.sol.twinCheck` each term and update is printed through its
-erasure too (`Tm.erase`, `Upd.erase`), and a difference is an error
-(`Delab.twinCompare`).
 
 What has no KeY text prints as KeY would have it: a frame's statements
 follow the program, a block's end is `}`, and a capture's end, a pop of an
@@ -28,8 +25,6 @@ The contract is passed as the expression `c` that names it
 namespace Solidity
 
 open Lean Meta
-open Solidity (ppTerm ppUpd)
-open Solidity.Delab (twinCheckOn twinCompare)
 
 variable {C : Contract} [FreshNames] (c : Lean.Expr)
 
@@ -39,9 +34,6 @@ def fmtCat (cat : Lean.Name) (stx : Lean.Syntax) : MetaM String := do
 
 def Tm.show {Γ : Ctx} (ns : List Var) (t : Tm C Γ .val) : MetaM String := do
   let new ← fmtCat `dl_term (← Delab.ppTermS (ns.map toExpr) (t.quote c))
-  if ← twinCheckOn then
-    let old ← fmtCat `dl_term (← ppTerm (Surface.Tm.quote c (t.erase ns)))
-    twinCompare "term" (some (Syntax.mkStrLit new)) (some (Syntax.mkStrLit old))
   return new
 
 /-- Whether an update has an element: else it prints as nothing (pops and
@@ -55,9 +47,6 @@ def Upd.hasElem {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
 /-- An update read where the locals are named `ns`, printed. -/
 def Upd.show {Γ Δ : Ctx} (ns : List Var) (U : Upd C Γ Δ) : MetaM String := do
   let new ← fmtCat `dl_upd (← Delab.ppUpdS (ns.map toExpr) (U.quote c)).1
-  if ← twinCheckOn then
-    let old ← fmtCat `dl_upd (← ppUpd (Surface.Upd.quote c (U.erase ns)))
-    twinCompare "update" (some (Syntax.mkStrLit new)) (some (Syntax.mkStrLit old))
   return new
 
 /-- The statements of a block read where the locals are named `ns`, each
@@ -89,11 +78,6 @@ text (`Delab.eqTmS`). -/
 def Tm.sameAt {Γ : Ctx} (ns : List Var) (a a' : Tm C Γ .val) : MetaM Bool := do
   let ns' := ns.map toExpr
   let new ← Delab.eqTmS ns' (a.quote c) ns' (a'.quote c)
-  if ← twinCheckOn then
-    let old := (a.erase ns).quote c == (a'.erase ns).quote c
-    unless new == old do
-      twinCompare "same term" (some (Syntax.mkStrLit (toString new)))
-        (some (Syntax.mkStrLit (toString old)))
   return new
 
 /-- `a = b` as `Fml.eqD` writes it: `defined(a) ∧ defined(b) ∧ a ≐ b`. -/
@@ -157,12 +141,6 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
     if let .imp a b := ψ then
       if let .imp b' a' := χ then
         let iff := a.quote c == a'.quote c && b.quote c == b'.quote c
-        if ← twinCheckOn then
-          let old := (a.erase ns).quote c == (a'.erase ns).quote c &&
-            (b.erase ns).quote c == (b'.erase ns).quote c
-          unless iff == old do
-            twinCompare "iff" (some (Syntax.mkStrLit (toString iff)))
-              (some (Syntax.mkStrLit (toString old)))
         if iff then
           return (s!"{← sub ns a 21} ↔ {← sub ns b 21}", 20)
     let r ← if χ matches .imp .. then pure s!"({(← Fml.showP ns χ).1})" else sub ns χ 35

@@ -3,14 +3,12 @@ import Solidity.Calculus.Sound
 /-!
 # The steps after the program, on the scoped sequent
 
-Today's `Calculus/Rewrite.lean` closes what symbolic execution leaves as KeY
-closes it: the updates merged (`merge`, `mergeStorage`), the terms
-rewritten inside the sequent, the goal split and closed.  The rules on the
-context's updates are constructors of `Proves`
-(`Calculus/Proves.lean`: `merge`, `updRw`), so they apply while a
-modality is still open.  The steps that finish a goal are derived here from
-`Proves.closeHolds`, today's `Proves.close` over the typed reading, as
-today's are derived from its `close`; each needs a sequent with no modality
+What symbolic execution leaves is closed as KeY closes it: the updates
+merged (`merge`, `mergeStorage`), the terms rewritten inside the sequent,
+the goal split and closed.  The rules on the context's updates are
+constructors of `Proves` (`Calculus/Proves.lean`: `merge`, `updRw`), so
+they apply while a modality is still open.  The steps that finish a goal
+are derived here from `Proves.closeHolds`; each needs a sequent with no modality
 left (`Fml.modalFree`), and those that drop a fact a context gives, no
 diamond in it (`Hyps.boxOnly`):
 
@@ -18,10 +16,10 @@ diamond in it (`Hyps.boxOnly`):
   `defined(b)` and `a ≐ b`;
 * `definedWritten`, `definedLit`, `eqRefl`, `eqClose`, `eqDClose`: a local
   of the typed state always holds a value of its type, so `defined(x)`
-  needs no update that wrote `x`, where today's `definedWritten` asks one;
+  needs no update that wrote `x`;
 * `applyOnRigidBox` (`applyOnRigidFormula` under the box): the last update
   applied to a first-order goal and dropped (`Fml.substU`; a goal that reads
-  no global part where the update writes one, as today's asks `stFree`);
+  no global part where the update writes one);
 * `simplify` (`simplifyUpdate`, under the box): an element setting a local
   the same update pops later is dropped (`Upd.simp`);
 * `rewrite'`: `Proves.rewrite` (a rule of the calculus, decision 90) with

@@ -1,5 +1,5 @@
 import Solidity.Calculus.Proves
-import Solidity.Calculus.CloseErase
+import Solidity.Semantics.StateErase
 
 /-!
 # The scoped sequent is sound: the structure
@@ -15,8 +15,7 @@ implication, an update or a universal; `closeTrue` holds behind a context
 with no diamond update but scope ends (`Hyps.wrap_valid`; a rule with no
 goal would not be sound behind a diamond update that halts, so `branches`
 and `cases` have at least one goal); `emptyModality` goes into the frames
-(`holds_exit`); and `close` is `holds_of_erase_valid`
-(`Calculus/CloseErase.lean`).
+(`holds_exit`).
 
 An update's reading asks of every typed state that erases to the one it
 ends in, so a rule's premise gives its conclusion in the state the typed
@@ -305,8 +304,6 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | @closeTrue Γ H h => exact H.wrap_valid (φ := .tt) h fun _ => trivial
   | @closeFalse Γ H φ _ ih =>
     exact fun σ => H.wrap_mono (φ := .ff) (fun _ h => (h trivial).elim) σ (ih σ)
-  | close ns hlen hnd h hc hB =>
-    exact fun σ => holds_of_erase_valid _ hlen hnd (Fml.closableB_sound _ hc) hB h σ
   | @merge Γ Δ Ε H m bs U U' V W φ hU hW _ ih =>
     intro σ
     have h : holds σ (H.wrap (Fml.binds bs (.upd m W φ))) := by

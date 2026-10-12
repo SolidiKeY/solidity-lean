@@ -330,8 +330,11 @@ theorem keyFreeS_eval {σ : EState C Γ} {τ : Semantics.State} :
   | .app0 (.lit _), _ => rfl
 
 theorem withGlob_saveStorage {σ : Semantics.State} {τ : Semantics.State} {r : Name} {P : List Seg}
-    {X : Semantics.SVal} (h : σ.saveStorage r P X = .ok τ) : τ = { σ with storage := τ.storage } :=
-  NFml.Derive.saveStorage_state h
+    {X : Semantics.SVal} (h : σ.saveStorage r P X = .ok τ) : τ = { σ with storage := τ.storage } := by
+  unfold Semantics.State.saveStorage at h
+  split at h
+  · obtain ⟨_, _, he⟩ := SemanticsProperties.Res.bind_eq_ok.1 h; cases he; rfl
+  · cases h
 
 /-- **A path below which the storage was written names the same
 location** (`Derive.stable_eval` by position): its checks are of locations
@@ -656,8 +659,8 @@ def fitsCore (ψ : Fml C []) : Bool :=
     (let l := ψ'.toLS SymS.empty
      (l.fits Decide.closeSize).isSome && (l.elim.fits Decide.elimSize).isSome)
 
-/-- **The closer's bounds on a wrapped leaf** (`Derive.leafFits` by
-position), which `sol_prove?` asks before it tries a step that reduces the
+/-- **The closer's bounds on a wrapped leaf**, by
+position, which `sol_prove?` asks before it tries a step that reduces the
 leaf (the reduction, its quoting and its kernel check heed no heartbeats):
 the scoped closer reads it, as it is or prepared (`Fml.prepS`), within
 `closeSize` with its updates pushed in, and its reduction is within

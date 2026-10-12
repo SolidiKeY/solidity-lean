@@ -1,5 +1,5 @@
 import Solidity.Tools.Run
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Theory.Storage
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers

@@ -1,6 +1,6 @@
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Notation
-import Solidity.Calculus.CloseHavoc
+import Solidity.Calculus.Close
 
 /-!
 # Function contracts over the typed call run

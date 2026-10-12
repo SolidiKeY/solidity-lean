@@ -2,7 +2,7 @@ import Solidity.Corpus.Basic
 import Solidity.Calculus.Problem
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Spec
-import Solidity.Calculus.HoldsErase
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.Close
 import Solidity.Solkey.TestSuite
 

@@ -1,5 +1,5 @@
 import Solidity.Frontend.Problems
-import Solidity.Calculus.NFmlClose
+import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 
 /-!

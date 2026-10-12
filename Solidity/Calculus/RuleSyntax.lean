@@ -16,15 +16,14 @@ pp.sol.dl false` shows the constructors again.
 
 | notation | term |
 |---|---|
-| `dl_schema{ φ }` | a formula whose names are Lean variables (schema variables) |
 | `dl{ ⟨[ s; ]⟩ ⇝ p }` | the taclet `Taclet C k m s p`, for either modality (solkey's `#mod`) |
 | `dl{ [ s; ] ⇝ p }`, `dl{ ⟨ s; ⟩ ⇝ p }` | a taclet for the box only, the diamond only |
 | `dl[LeanTaclet C k]{ ⟨ s; ⟩ ⇝ p }` | a rule of another judgement, `LeanTaclet C k .diamond s p` |
 | `dl{ p }` | a premise |
-| `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`); under `open scoped Solidity.NFmlSeq` the closer's `NFml.Proves R (Γ ++ [.pre c] ++ [.upd m U]) φ` (`Calculus/NFmlLogic.lean`) |
+| `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
 | `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
-| `⊨ φ` | `Valid φ` of a scoped `φ` (`Calculus/Logic.lean`), the closer's `NFml.Valid φ` of any other |
+| `⊨ φ` | `Valid φ` of a scoped `φ` (`Calculus/Logic.lean`) |
 | `σ ⊧ φ` | `holds σ φ`, likewise |
 
 At a state variable a write is `save(storage, gsp, se)` and a read
@@ -303,8 +302,6 @@ syntax (priority := low) ident : sol_stmt
 /-- `catch Error errorBody`: the `Error` clause as KeY's schema writes it. -/
 syntax "catch " &"Error" sol_block : sol_catch
 
-/-- A formula whose names are Lean variables. -/
-syntax "dl_schema{ " dl_fml " }" : term
 /-- A formula, as the printers show one. -/
 syntax (priority := high) "dl{ " dl_fml " }" : term
 /-- A sequent `Γ ⟹ φ`. -/
@@ -341,8 +338,7 @@ syntax:50 (name := holdsSyntax) term:51 " ⊧ " term:51 : term
 
 open Lean Elab Term Meta in
 /-- `⊨ φ` is `Valid φ` and `σ ⊧ φ` is `holds σ φ` for a scoped formula
-(`Fml`, `Calculus/Logic.lean`); for any other, the closer's (`NFml.Valid`,
-`NFml.holds`: a chain's line past the program, `Calculus/RewriteChains.lean`). -/
+(`Fml`, `Calculus/Logic.lean`). -/
 def elabValidHolds (σ? : Option Lean.Term) (φ : Lean.Term) : TermElabM Lean.Expr := do
   let φ ← elabTerm φ none
   synthesizeSyntheticMVarsNoPostponing
@@ -350,13 +346,11 @@ def elabValidHolds (σ? : Option Lean.Term) (φ : Lean.Term) : TermElabM Lean.Ex
   let ty ← whnf (← inferType φ)
   match σ?, ty.getAppFn.constName?, ty.getAppArgs with
   | none, some `Solidity.Fml, #[_, _] => mkAppM `Solidity.Valid #[φ]
-  | none, _, _ => mkAppM ``NFml.Valid #[φ]
+  | none, _, _ => throwError "⊨ reads a scoped formula (`Fml C []`), not{indentExpr φ}"
   | some σ, some `Solidity.Fml, #[C, Γ] =>
     let σ ← elabTermEnsuringType σ (mkApp2 (mkConst `Solidity.State) C Γ)
     return mkApp4 (mkConst `Solidity.holds) C Γ σ φ
-  | some σ, _, _ =>
-    let σ ← elabTermEnsuringType σ (mkConst ``Semantics.State)
-    mkAppM ``NFml.holds #[σ, φ]
+  | some _, _, _ => throwError "⊧ reads a scoped formula (`Fml C Γ`), not{indentExpr φ}"
 
 open Lean Elab Term in
 elab_rules : term
@@ -1535,41 +1529,6 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
         `storage` or `memory`"
   | _ => Macro.throwUnsupported
 
-/-- An update schema variable among the elements: `u` (its elements), or
-`{u}u2` (`u2` with `u` applied, `Upd.subst`). -/
-def updVar? : TSyntax `dl_upd_elem → MacroM (Option Lean.Term)
-  | `(dl_upd_elem| $u:ident) => pure (some u)
-  | `(dl_upd_elem| { $u:ident } $v:ident) => some <$> `($(mkIdent `Solidity.Surface.Upd.subst) $v $u)
-  | _ => pure none
-
-/-- Whether an update has a schema variable among its elements: the formula
-under it is then judged under the schema's modality `m`. -/
-def hasUpdVar (U : TSyntax `dl_upd) : Bool :=
-  match U with
-  | `(dl_upd| ‹ $_:term ›) => false
-  | _ => U.raw[1].getSepArgs.any fun e => match (⟨e⟩ : TSyntax `dl_upd_elem) with
-    | `(dl_upd_elem| $_:ident) => true
-    | `(dl_upd_elem| { $_:ident } $_:ident) => true
-    | _ => false
-
-def schemaUpd (Γ : Scope) (U : TSyntax `dl_upd) : MacroM Lean.Term := do
-  if let `(dl_upd| ‹ $t:term ›) := U then return t
-  -- the elements, read off the `sepBy1` node: `‖` does not splice in a pattern
-  let mut segs : Array Lean.Term := #[]
-  let mut run : Array Lean.Term := #[]
-  for e in U.raw[1].getSepArgs do
-    match ← updVar? ⟨e⟩ with
-    | some u =>
-      unless run.isEmpty do segs := segs.push (← `([$run,*]))
-      run := #[]
-      segs := segs.push u
-    | none => run := run.push (← schemaUpdElem Γ ⟨e⟩)
-  -- no schema variable: the list of the elements, as ever
-  if segs.isEmpty then return ← `(([$run,*] : Surface.Upd _))
-  unless run.isEmpty do segs := segs.push (← `([$run,*]))
-  -- the parts appended, left-nested as `u ++ u2.subst u` is written
-  segs[1:].foldlM (init := segs[0]!) fun acc t => `($acc ++ $t)
-
 /-- The modality of the formula under an update: an update is judged as the
 goal it came from.  `⟨[ ]⟩` is `either`: the taclet's `m` in `dl{ … }`, the
 formula's modality in `dl![m]{ … }` (`Notation.lean`). -/
@@ -1585,71 +1544,6 @@ partial def fmlModality? (either : Lean.Term) : TSyntax `dl_fml → MacroM (Opti
   | `(dl_fml| $_:dl_upd $φ:dl_fml) | `(dl_fml| { havoc } $φ:dl_fml) => fmlModality? either φ
   | `(dl_fml| ( $φ:dl_fml )) => fmlModality? either φ
   | _ => pure none
-
-partial def schemaFml : TSyntax `dl_fml → MacroM Lean.Term
-  | `(dl_fml| true) => `(NFml.tt)
-  | `(dl_fml| false) => `(NFml.not NFml.tt)
-  | `(dl_fml| $a:dl_term = $b:dl_term) => do
-    -- KeY's `b = TRUE`: the condition defined and true (`Fml.eqD`)
-    if let `(dl_term| $c:ident) := b then
-      let n := c.getId.toString
-      if n == "TRUE" || n == "FALSE" then
-        let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
-        return ← `(NFml.eqD $(← schemaTerm [] .val a) (Term.lit (.bool $v)))
-    `(NFml.eq $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
-  | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
-    `(NFml.eq $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
-  | `(dl_fml| defined( $t:dl_term )) => do `(NFml.defined $(← schemaTerm [] .val t))
-  | `(dl_fml| ¬ $φ:dl_fml) => do `(NFml.not $(← schemaFml φ))
-  | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) | `(dl_fml| $φ:dl_fml && $ψ:dl_fml) => do
-    `(NFml.and $(← schemaFml φ) $(← schemaFml ψ))
-  | `(dl_fml| $φ:dl_fml → $ψ:dl_fml) => do `(NFml.imp $(← schemaFml φ) $(← schemaFml ψ))
-  | `(dl_fml| $φ:dl_fml ∨ $ψ:dl_fml) => do
-    `(NFml.not (NFml.and (NFml.not $(← schemaFml φ)) (NFml.not $(← schemaFml ψ))))
-  | `(dl_fml| $φ:dl_fml ↔ $ψ:dl_fml) => do
-    let φ ← schemaFml φ
-    let ψ ← schemaFml ψ
-    `(NFml.and (NFml.imp $φ $ψ) (NFml.imp $ψ $φ))
-  | `(dl_fml| { havoc } $φ:dl_fml) => do `(NFml.havoc $(← schemaFml φ))
-  | `(dl_fml| { anon($xs:ident,*) } $φ:dl_fml) => do
-    let ts : Array Lean.Term := xs.getElems.map fun x => ⟨x.raw⟩
-    `(NFml.anon [$ts,*] $(← schemaFml φ))
-  | `(dl_fml| $U:dl_upd $φ:dl_fml) => do
-    -- an update schema variable is judged under the schema's modality
-    let m ← match ← fmlModality? (schemaIdent "m") φ with
-      | some m => pure m
-      | none => if hasUpdVar U then pure (schemaIdent "m") else `(Modality.diamond)
-    `(NFml.upd $m $(← schemaUpd [] U) $(← schemaFml φ))
-  | stx@`(dl_fml| ⟨ $[$_:sol_stmt;]* ⟩ $_:dl_fml) | stx@`(dl_fml| [ $[$_:sol_stmt;]* ] $_:dl_fml)
-  | stx@`(dl_fml| ⟨[ $[$_:sol_stmt;]* ]⟩ $_:dl_fml)
-  | stx@`(dl_fml| ⟨[ $[$_:sol_stmt;]* .. $_:term ]⟩ $_:dl_fml)
-  | stx@`(dl_fml| ⟨ $[$_:sol_stmt;]* .. $_:term ⟩ $_:dl_fml)
-  | stx@`(dl_fml| [ $[$_:sol_stmt;]* .. $_:term ] $_:dl_fml)
-  | stx@`(dl_fml| ⟨[ $_:sol_block ]⟩ $_:dl_fml) | stx@`(dl_fml| ⟨ $_:sol_block ⟩ $_:dl_fml)
-  | stx@`(dl_fml| [ $_:sol_block ] $_:dl_fml) =>
-    Macro.throwErrorAt stx
-      "a modality is the scoped calculus's: a scoped taclet or sequent (`Calculus/Rules.lean`), \
-      or `cdl!{ … }`"
-  | `(dl_fml| ( $φ:dl_fml )) => schemaFml φ
-  | `(dl_fml| ‹ $t:term ›) => pure t
-  | `(dl_fml| $x:ident) => pure x
-  | stx@`(dl_fml| $_:dl_term == $_:dl_term) | stx@`(dl_fml| $_:dl_term != $_:dl_term) =>
-    Macro.throwErrorAt stx "a program comparison is read against a contract: write `dl{ … }`"
-  | `(dl_fml| $a:dl_term <= $b:dl_term) => do
-    -- in a taclet, between `uint`s: `se <= selfBalance`
-    `(NFml.eqD (Term.binop BinOp.le PrimTy.uint $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
-        (Term.lit (.bool true)))
-  | `(dl_fml| $a:dl_term < $b:dl_term) => do
-    -- in a taclet, between `uint`s: `dec < variant`
-    `(NFml.eqD (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm [] .val a) $(← schemaTerm [] .val b))
-        (Term.lit (.bool true)))
-  | stx@`(dl_fml| $_:dl_term > $_:dl_term) | stx@`(dl_fml| $_:dl_term >= $_:dl_term) =>
-    Macro.throwErrorAt stx
-      "an order between values is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
-  | stx@`(dl_fml| ∀ $_:ident $_:ident; $_:dl_fml) | stx@`(dl_fml| ∃ $_:ident $_:ident; $_:dl_fml) =>
-    Macro.throwErrorAt stx
-      "a quantifier is read against a contract: write `dl[C]{ … }` or `dl!{ … }`"
-  | _ => Macro.throwUnsupported
 
 /-- One goal of `Premise.branches`: the locals it binds (`∀ rets.`; `∀ code.`
 the `Panic` code's, `CodeBinder.binders`), and its block.  The label is dropped. -/
@@ -1890,7 +1784,7 @@ def schemaUpdCore (Γ : Scope) (found : Option String) (U : TSyntax `dl_upd) :
   return (acc, Γ')
 
 /-- `Solidity.Fml.c`, a constructor of the scoped formulas, by its full
-name: no term of the closer's (`NFml`) is written for `coreNames` to turn. -/
+name, so that `coreNames` leaves it as it is. -/
 def fmlC (c : String) : Lean.Term := Lean.mkCIdent (`Solidity.Fml ++ Name.mkSimple c)
 
 /-- A scoped formula, its names read in `Γ`: a fresh local an update in it
@@ -2046,7 +1940,7 @@ def schemaTacletCore (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_pr
     `(taclet_side% $t $[($hs : $cs)]*)
   return ⟨← coreNames t⟩
 
-/-- A primitive type of a schema: `uint`, `int`, `bool`, or a variable. -/
+/-- A quantifier's type written by name: `uint`, `int`, `bool`, or a Lean term. -/
 def schemaPrim (T : Ident) : MacroM Lean.Term :=
   match T.getId.toString with
   | "uint" => `(PrimTy.uint)
@@ -2054,53 +1948,10 @@ def schemaPrim (T : Ident) : MacroM Lean.Term :=
   | "bool" => `(PrimTy.bool)
   | _ => pure T
 
-def schemaHyp : TSyntax `dl_hyp → MacroM Lean.Term
-  | `(dl_hyp| { havoc }) => `($(mkIdent `Solidity.Hyp.havoc))
-  | `(dl_hyp| { anon($xs:ident,*) }) => do
-    let ts : Array Lean.Term := xs.getElems.map fun x => ⟨x.raw⟩
-    `($(mkIdent `Solidity.Hyp.anon) [$ts,*])
-  | `(dl_hyp| $U:dl_upd [ ]) => do `($(mkIdent `Solidity.Hyp.upd) .box $(← schemaUpd [] U))
-  | `(dl_hyp| $U:dl_upd ⟨ ⟩) => do `($(mkIdent `Solidity.Hyp.upd) .diamond $(← schemaUpd [] U))
-  | `(dl_hyp| $U:dl_upd) => do `($(mkIdent `Solidity.Hyp.upd) $(schemaIdent "m") $(← schemaUpd [] U))
-  | `(dl_hyp| ∀ $T:ident $x:ident) => do `($(mkIdent `Solidity.Hyp.all) $x $(← schemaPrim T))
-  | stx@`(dl_hyp| .. $_:term) => Macro.throwErrorAt stx "`..Γ`, the rest of the context, comes first"
-  | `(dl_hyp| $φ:dl_fml) => do `($(mkIdent `Solidity.Hyp.pre) $(← schemaFml φ))
-  | _ => Macro.throwUnsupported
-
-/-- A context: `[h₁, …]`, or with the rest `..Γ` first, `Γ ++ [h₁] ++ …`
-(left-nested, as the rules write `Γ ++ [.pre c]`). -/
-def schemaHyps (hs : Array (TSyntax `dl_hyp)) : MacroM Lean.Term := do
-  if let some (h : TSyntax `dl_hyp) := hs[0]? then
-    if let `(dl_hyp| .. $Γ:term) := h then
-      return ← (hs.extract 1 hs.size).foldlM (init := Γ) fun acc h => do
-        `($acc ++ [$(← schemaHyp h)])
-  `([$(← hs.mapM schemaHyp),*])
-
 macro_rules
-  | `(dl_schema{ $φ:dl_fml }) => schemaFml φ
-  | `(dl{ $φ:dl_fml }) => schemaFml φ
   | `(tm{ $t:dl_term }) => schemaTerm rawScope (tmSort t) t
 
 end Expand
-
-/-! Under `open scoped Solidity.NFmlSeq`, a sequent `dl{ ..Γ ⟹[R] φ }` is
-the closer's (`NFml.Proves`, `Calculus/NFmlLogic.lean`).  Elsewhere it is
-the scoped judgement `Proves` (`Calculus/SequentNotation.lean`). -/
-namespace NFmlSeq
-
-open Lean (mkIdent)
-
-scoped macro_rules
-  | `(dl{ $[$hs:dl_hyp],* ⟹ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.NFml.Proves) $(mkIdent `Solidity.RuleSet.all) $(← schemaHyps hs)
-      $(← schemaFml φ))
-  | `(dl{ $[$hs:dl_hyp],* ⟹ₖ $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.NFml.Proves) $(mkIdent `Solidity.RuleSet.solkey) $(← schemaHyps hs)
-      $(← schemaFml φ))
-  | `(dl{ $[$hs:dl_hyp],* ⟹[ $R:term ] $φ:dl_fml }) => do
-    `($(mkIdent `Solidity.NFml.Proves) $R $(← schemaHyps hs) $(← schemaFml φ))
-
-end NFmlSeq
 
 namespace Schema
 
@@ -2183,7 +2034,6 @@ register_option pp.sol.reduce : Bool := {
   descr := "the notation's printers compute (`whnf`) each term before they print it; \
             `tm{ … }` prints a term as it is written, with this off"
 }
-
 
 def nameIdent (s : String) : Ident := mkIdent (Name.mkSimple s)
 
@@ -2490,12 +2340,6 @@ constructor's name all the same. -/
 def whnfPP (e : Lean.Expr) : MetaM Lean.Expr := do
   if pp.sol.reduce.get (← getOptions) then whnfTm e
   else foldTmHead (red := false) (← instantiateMVars e)
-
-/-- Every term of `e` folded back to its constructors' names: what a `simp`
-over the generic `Tm` functions leaves (`Tm.app2 C Op2.find s p`) read as it
-was written (`Term.find C s p`), so that `rw` finds it and it prints. -/
-def foldTms (e : Lean.Expr) : MetaM Lean.Expr :=
-  Meta.transform e (post := fun e => return .done (← foldTmHead e))
 
 mutual
 
@@ -2831,24 +2675,6 @@ def ppUpd (e : Lean.Expr) : MetaM (TSyntax `dl_upd) := do
 /-- `whnf`, what the formula printers match on. -/
 def whnfF (e : Lean.Expr) : MetaM Lean.Expr := whnf e
 
-/-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
-`a = b` prints: `a` and `b`. -/
-def eqDParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
-  let_expr NFml.and _ l r := (← whnfF (← instantiateMVars e)) | return none
-  let_expr NFml.defined _ a := (← whnfF l) | return none
-  let_expr NFml.and _ l' r' := (← whnfF r) | return none
-  let_expr NFml.defined _ b := (← whnfF l') | return none
-  let_expr NFml.eq _ a' b' := (← whnfF r') | return none
-  let (a, b, a', b') := (← instantiateMVars a, ← instantiateMVars b, ← instantiateMVars a',
-    ← instantiateMVars b')
-  return if a == a' && b == b' then some (a, b) else none
-
-/-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
-def isConnective (e : Lean.Expr) : MetaM Bool := do
-  if (← eqDParts? e).isSome then return false
-  let e ← whnfF e
-  return e.isAppOfArity ``NFml.and 3 || e.isAppOfArity ``NFml.imp 3 || e.isAppOfArity ``NFml.all 4
-
 /-- `a < b = true`, a comparison as the specification writes one: its
 operator and operands. -/
 def Surface.cmpParts? (a b : Lean.Expr) : MetaM (Option (String × Lean.Expr × Lean.Expr)) := do
@@ -2873,30 +2699,6 @@ def primName? (p : Lean.Expr) : MetaM (Option String) := do
   | PrimTy.bool => return "bool"
   | _ => return none
 
-/-- `¬(¬φ ∧ ¬ψ)`, which `φ ∨ ψ` spells: `φ` and `ψ`. -/
-def orParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
-  let_expr NFml.not _ a := (← whnfF e) | return none
-  let_expr NFml.and _ l r := (← whnfF a) | return none
-  let_expr NFml.not _ φ := (← whnfF l) | return none
-  let_expr NFml.not _ ψ := (← whnfF r) | return none
-  return some (φ, ψ)
-
-/-- `¬(∀ T x; ¬φ)`, which `∃ T x; φ` spells: `x`, `T` and `φ`. -/
-def exParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr × Lean.Expr)) := do
-  let_expr NFml.not _ a := (← whnfF e) | return none
-  let_expr NFml.all _ x p b := (← whnfF a) | return none
-  let_expr NFml.not _ φ := (← whnfF b) | return none
-  return some (x, p, φ)
-
-/-- `(φ → ψ) ∧ (ψ → φ)`, which `φ ↔ ψ` spells: `φ` and `ψ`. -/
-def iffParts? (e : Lean.Expr) : MetaM (Option (Lean.Expr × Lean.Expr)) := do
-  let_expr NFml.and _ l r := (← whnfF e) | return none
-  let_expr NFml.imp _ φ ψ := (← whnfF l) | return none
-  let_expr NFml.imp _ ψ' φ' := (← whnfF r) | return none
-  let (φ, ψ, φ', ψ') := (← instantiateMVars φ, ← instantiateMVars ψ, ← instantiateMVars φ',
-    ← instantiateMVars ψ')
-  return if φ == φ' && ψ == ψ' then some (φ, ψ) else none
-
 /-- A formula that is a Lean variable, or the coercion of one (`↑φ` for
 `φ : Post C`, `Chains.lean`): its name, which reads back as `‹φ›` does.  Not
 an inaccessible one (`φ✝`): its bare name would read back as another variable,
@@ -2913,56 +2715,6 @@ def fmlVar? (e : Lean.Expr) : MetaM (Option Ident) := do
   if n.hasMacroScopes || n.isInaccessibleUserName then return none
   return (← fvarName? x).map nameIdent
 
-partial def ppFml (e : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
-  let e ← instantiateMVars e
-  if let some x ← fmlVar? e then return ← `(dl_fml| $x:ident)
-  let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)
-  let arg (φ : Lean.Expr) : MetaM (TSyntax `dl_fml) := do
-    let s ← ppFml φ
-    if ← isConnective φ then `(dl_fml| ($s)) else pure s
-  match_expr (← whnfF e) with
-  | NFml.tt _ => `(dl_fml| true)
-  | NFml.not _ φ =>
-    if (← whnfF φ).isAppOfArity ``NFml.tt 1 then return ← `(dl_fml| false)
-    if let some (a, b) ← orParts? e then
-      return ← `(dl_fml| $(← ppFml a):dl_fml ∨ $(← ppFml b):dl_fml)
-    if let some (x, p, a) ← exParts? e then
-      if let (some x, some T) := (← ppVar? x, ← primName? p) then
-        return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml a):dl_fml)
-    `(dl_fml| ¬$(← arg φ):dl_fml)
-  | NFml.eq _ a b => `(dl_fml| $(← ppTerm a):dl_term ≐ $(← ppTerm b):dl_term)
-  | NFml.defined _ t => `(dl_fml| defined($(← ppTerm t):dl_term))
-  | NFml.all _ x p φ =>
-    let some x ← ppVar? x | escape
-    let some T ← primName? p | escape
-    `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFml φ):dl_fml)
-  | NFml.and _ φ ψ =>
-    if let some (a, b) ← eqDParts? e then
-      if let some (sym, l, r) ← Surface.cmpParts? a b then
-        let l ← ppTerm l
-        let r ← ppTerm r
-        return ← match sym with
-          | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
-          | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
-          | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
-          | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
-      return ← `(dl_fml| $(← ppTerm a):dl_term = $(← ppTerm b):dl_term)
-    if let some (a, b) ← iffParts? e then
-      return ← `(dl_fml| $(← ppFml a):dl_fml ↔ $(← ppFml b):dl_fml)
-    let ψ' ← ppFml ψ
-    let ψ' ← if (← whnfF ψ).isAppOfArity ``NFml.imp 3 then `(dl_fml| ($ψ')) else pure ψ'
-    `(dl_fml| $(← arg φ):dl_fml ∧ $ψ')
-  | NFml.imp _ φ ψ => `(dl_fml| $(← arg φ):dl_fml → $(← ppFml ψ):dl_fml)
-  | NFml.upd _ _ U φ => `(dl_fml| $(← ppUpd U):dl_upd $(← arg φ):dl_fml)
-  | NFml.havoc _ φ => `(dl_fml| { havoc } $(← arg φ):dl_fml)
-  | NFml.anon _ xs φ =>
-    let some xs ← listElems? xs | escape
-    let ids ← xs.mapM ppVar?
-    if ids.any Option.isNone then return ← escape
-    let ids : Array Ident := ids.filterMap id
-    `(dl_fml| { anon($ids,*) } $(← arg φ):dl_fml)
-  | _ => escape
-
 /-! ### The delaborators
 
 Each stands aside (`failure`, and Lean prints the term its own way) when all
@@ -2971,54 +2723,12 @@ it would print is one `‹…›`, and `⊨`, `⊧` when it is a name: `⊨ φ`.
 /-- Printed as `‹…›` as a whole. -/
 def isEscape (s : Syntax) : Bool := s[0].isToken "‹"
 
-/-- Printed as `‹…›` or as a name (`fmlVar?`): what Lean prints as well. -/
-def isEscapeOrVar (s : Syntax) : Bool := isEscape s || s.isOfKind ``dlFmlVar
-
 /-- Only a full application: `Fml.modal m P` alone is a function. -/
 def fullApp : DelabM Unit := do
   let e ← getExpr
   let some c := e.getAppFn.constName? | failure
-  if c == ``NFml.eqD then
-    guard (e.getAppNumArgs == 3)
-    return
   let info ← getConstInfoCtor c
   guard (e.getAppNumArgs == info.numParams + info.numFields)
-
-/-- A formula standing alone: `dl{ φ }`. -/
-def delabFml : Delab := do
-  unless ← ppOn do failure
-  fullApp
-  let e ← getExpr
-  let φ ← ppFml e
-  guard !(isEscape φ)
-  `(dl{ $φ:dl_fml })
-
-attribute [delab app.Solidity.NFml.eq, delab app.Solidity.NFml.eqD, delab app.Solidity.NFml.defined,
-  delab app.Solidity.NFml.not,
-  delab app.Solidity.NFml.and, delab app.Solidity.NFml.imp, delab app.Solidity.NFml.upd,
-  delab app.Solidity.NFml.all, delab app.Solidity.NFml.havoc,
-  delab app.Solidity.NFml.anon] delabFml
-
-/-- `Valid φ`: `⊨ φ`. -/
-@[delab app.Solidity.NFml.Valid]
-def delabValid : Delab := do
-  unless ← ppOn do failure
-  let e ← getExpr
-  guard (e.getAppNumArgs == 2)
-  let φ ← ppFml e.appArg!
-  guard !(isEscapeOrVar φ)
-  `(⊨ dl{ $φ:dl_fml })
-
-/-- `holds σ φ`: `σ ⊧ φ`, what `Valid` leaves once its state is introduced. -/
-@[delab app.Solidity.NFml.holds]
-def delabHolds : Delab := do
-  unless ← ppOn do failure
-  let e ← getExpr
-  guard (e.getAppNumArgs == 3)
-  let φ ← ppFml e.appArg!
-  guard !(isEscapeOrVar φ)
-  let σ ← withNaryArg 1 delab
-  `($σ ⊧ dl{ $φ:dl_fml })
 
 /-- Whether `e` has at most `n` nodes (shared ones counted each time). -/
 partial def sizeAtMost (n : Nat) (e : Lean.Expr) : Bool :=

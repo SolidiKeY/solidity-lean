@@ -1,19 +1,18 @@
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.WalkSyntax
-import Solidity.Calculus.Rewrite
 import Solidity.Calculus.ProvesDerive
 
 /-!
-# Today's steps after the program, on a scoped goal
+# The steps after the program, on a scoped goal
 
 Under `open scoped Solidity.Scoped` the lines that finish a goal keep
-today's text (`Calculus/Rewrite.lean`): `refine merge rfl ?_` and
+their text: `refine merge rfl ?_` and
 `refine Proves.mergeStorage ?_` (`sequentialToParallel`), `refine simplify
 ?_`, `refine Proves.eqDSplit ?_ ?_ ?_`, `exact Proves.definedWritten`,
 `exact Proves.definedLit`, `exact Proves.eqRefl`, `exact Proves.eqDClose`,
 `sol_apply_upd`, and `rw [r]`/`sol_rw [r, …]`.  On a scoped goal
 (`Proves`) each is the scoped rule of `Calculus/Proves.lean` or
-`Calculus/UpdateRules.lean`; on today's goal, today's.
+`Calculus/UpdateRules.lean`.
 
 The scoped context has what today's does not show: hidden binders (a
 declaration's local) and scope ends (an update that only pops).  So a merge
@@ -30,6 +29,56 @@ terms; the kernel checks it (`rfl`).
 namespace Solidity
 
 open Lean Elab Tactic Meta
+
+/-! ## Side conditions and path literals -/
+
+/-- Close a side condition of a law, `h : p.hasSeg = true` and the like, by
+`rfl` and then `decide`: once the law's terms are known the condition is a
+closed `Bool` computation.  A failure is `sol_rw`'s, naming the condition,
+rather than the error of whichever tactic was tried last. -/
+def solRwSide (h : Lean.Term) (g : MVarId) : TacticM Unit := do
+  let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
+  let g ← g.replaceTargetDefEq ty
+  let closed ← try
+      let gs ← Term.withoutErrToSorry <|
+        Tactic.run g (evalTactic (← `(tactic| first | rfl | decide)))
+      pure gs.isEmpty
+    catch _ => pure false
+  unless closed do
+    throwError "sol_rw: the side condition{indentExpr ty}\nof {h} closes by neither \
+      `rfl` nor `decide`"
+
+/-- The elements of a list literal `[a, b, …]`. -/
+partial def listLit? (e : Expr) : Option (List Expr) :=
+  if e.isAppOfArity ``List.nil 1 then some []
+  else if e.isAppOfArity ``List.cons 3 then (listLit? e.appArg!).map (e.appFn!.appArg! :: ·)
+  else none
+
+/-- The two sides of `p ++ q`. -/
+def append? (e : Expr) : Option (Expr × Expr) :=
+  if e.isAppOfArity ``HAppend.hAppend 6 then some (e.appFn!.appArg!, e.appArg!) else none
+
+/-- `p`, where `e` is `p ++ [lengthSeg]`: the path of a `len`. -/
+def lengthOf? (e : Expr) : MetaM (Option Expr) := do
+  let some (p, q) := append? e | return none
+  let some [a] := listLit? q | return none
+  if ← isDefEq a (mkConst ``Theory.StValue.lengthSeg) then return some p
+  return none
+
+/-- A proof of a closed decidable fact, by `decide`, if it is true. -/
+def decideProof? (prop : Expr) : MetaM (Option Expr) := do
+  if prop.hasMVar then return none
+  try
+    let d ← mkDecide prop
+    if (← withAtLeastTransparency .default <| whnf d).isConstOf ``true then
+      return some (← mkDecideProof prop)
+    return none
+  catch _ => return none
+
+/-- The side conditions of a law, on the paths the terms fix: `p ≠ []`,
+`diverges p q = true`, anything decidable once they are literal lists. -/
+def dischargeTheory : Simp.Discharge := fun e => do
+  decideProof? (← instantiateMVars e)
 
 /-! ## Computing and quoting -/
 
@@ -131,8 +180,7 @@ elab "core_apply_upd" : tactic => withMainContext do
 
 /-! ## A Theory lemma as a rewrite rule, on scoped terms
 
-`theoryRewrite` (`Calculus/TheoryRewrite.lean`) on a scoped closed term
-`u : Tm C [] .val`: `u.denote σ` unfolded by the denotation of its symbols
+On a scoped closed term `u : Tm C [] .val`: `u.denote σ` unfolded by the denotation of its symbols
 (the `Tm.denote_*S` lemmas, `rfl`), rewritten by the laws, and read back as a
 scoped term (`reifyTermS`).  The two `simp` runs prove
 `∀ σ, u.denote σ = u'.denote σ`, which `Tm.Theq.of_eq` makes a Theory
@@ -393,11 +441,11 @@ def Walk.rwCandidates : TacticM (Array (Expr × Bool)) := withMainContext do
         for u in ← Walk.valSubterms t do out := out.push (u, false)
   return out
 
-/-- `h`, a term taclet's name, as the scoped one (`TermTacletS.h`). -/
+/-- `h`, a term taclet's name, as the scoped one (`TermTaclet.h`). -/
 def qualifyTacletS (h : Lean.Term) : TermElabM Lean.Term := do
   let qual (id : Syntax) : TermElabM (Option Syntax) := do
     unless id.isIdent do return none
-    let n := ``TermTacletS ++ id.getId
+    let n := ``TermTaclet ++ id.getId
     if (← getEnv).contains n then return some (mkCIdentFrom id n) else return none
   if let some q ← qual h.raw then return ⟨q⟩
   if h.raw.isOfKind ``Lean.Parser.Term.app then
@@ -405,13 +453,13 @@ def qualifyTacletS (h : Lean.Term) : TermElabM Lean.Term := do
   return h
 
 /-- `pf` as a scoped term taclet: itself, or, for a Theory equation
-`Tm.Theq t t'`, the rule `TermTacletS.theory` makes of it. -/
+`Tm.Theq t t'`, the rule `TermTaclet.theory` makes of it. -/
 def asTacletS (pf : Expr) : MetaM Expr := do
   if (← whnfR (← instantiateMVars (← inferType pf))).isAppOf ``Tm.Theq then
-    mkAppM ``TermTacletS.theory #[pf]
+    mkAppM ``TermTaclet.theory #[pf]
   else pure pf
 
-/-- `rw [r]` with a term taclet (`TermTacletS`) or a Theory equation
+/-- `rw [r]` with a term taclet (`TermTaclet`) or a Theory equation
 (`Tm.Theq`) `r` on a scoped goal: its left side matched against each place
 a rewrite may reach, in turn. -/
 def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContext do
@@ -425,8 +473,8 @@ def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContex
         | _ => elabTerm h' none (mayPostpone := true)
       let (args, _, _) ← forallMetaTelescope (← instantiateMVars (← inferType pf))
       let pf ← asTacletS (mkAppN pf args)
-      let pf ← if symm then mkAppM ``TermTacletS.symm #[pf] else pure pf
-      let_expr TermTacletS _ _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
+      let pf ← if symm then mkAppM ``TermTaclet.symm #[pf] else pure pf
+      let_expr TermTaclet _ _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
         | throwError "rw: {h} is not a term taclet or a Theory equation"
       unless ← isDefEq lhs t₀ do throwError "no match"
       for a in args do
@@ -439,7 +487,7 @@ def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContex
       if !inGoal then
         unless (← whnfR rhs).isAppOf ``Tm.app0 do throwError "not a literal"
       let q ← mkAppM ``Prod.mk #[t₀, rhs]
-      Walk.rwWith C q (← mkAppM ``TermTacletS.sound #[pf]) inGoal
+      Walk.rwWith C q (← mkAppM ``TermTaclet.sound #[pf]) inGoal
       return
     catch _ => saved.restore
   throwError "rw: {h} rewrites nothing in the sequent"
@@ -469,7 +517,7 @@ def Walk.rwTheory (thms : SimpTheorems) (names : Array Lean.Term) : TacticM Unit
     throwError "sol_rw: no term of the sequent is rewritten to a term by {names}"
 
 /-- `core_rw [r, …]`: `sol_rw`'s rules on a scoped goal, in order (a term
-taclet (`TermTacletS`) or Theory equation by `Walk.rwTaclet`, a run of Theory laws by
+taclet (`TermTaclet`) or Theory equation by `Walk.rwTaclet`, a run of Theory laws by
 `Walk.rwTheory`).  It fails on a goal that is not a scoped sequent. -/
 def Walk.rwRules (rs : Array Syntax) : TacticM Unit := do
   unless (← instantiateMVars (← getMainTarget)).isAppOf ``Proves do
@@ -481,14 +529,12 @@ def Walk.rwRules (rs : Array Syntax) : TacticM Unit := do
     let symm := !r[0].isNone
     let isTheq ← withMainContext do
       unless h.raw.isIdent do return true
-      if (← getEnv).contains (``TermTacletS ++ h.raw.getId) ||
-          (← getEnv).contains (``TermTaclet ++ h.raw.getId) then return true
+      if (← getEnv).contains (``TermTaclet ++ h.raw.getId) then return true
       let some n ← (try some <$> realizeGlobalConstNoOverloadWithInfo h
           catch _ => pure none) | return true
       forallTelescope (← getConstInfo n).type fun _ ty => do
         let ty ← whnfR ty
-        return ty.isAppOf ``Solidity.Term.Theq || ty.isAppOf ``Solidity.TermTaclet ||
-          ty.isAppOf ``Solidity.Tm.Theq || ty.isAppOf ``Solidity.TermTacletS
+        return ty.isAppOf ``Solidity.Tm.Theq || ty.isAppOf ``Solidity.TermTaclet
     if isTheq then
       unless names.isEmpty do
         Walk.rwTheory thms names
@@ -508,35 +554,44 @@ syntax "core_rw " "[" Lean.Parser.Tactic.rwRule,+ "]" : tactic
 elab_rules : tactic
   | `(tactic| core_rw [$rs,*]) => Walk.rwRules (rs.getElems.map (·.raw))
 
-/-! ## Today's lines, read on a scoped goal -/
+/-! ## The lines after the program, read on a scoped goal -/
+
+/-- `sol_rw [h₁, ← h₂, …]`: rewrite a scoped sequent with each rule in turn
+(`core_rw`, under `open scoped Solidity.Scoped`). -/
+syntax "sol_rw " "[" Lean.Parser.Tactic.rwRule,+ "]" : tactic
+
+/-- `sol_apply_upd`: the last update of the context applied to the
+first-order goal and dropped (`core_apply_upd`, under `open scoped
+Solidity.Scoped`). -/
+syntax "sol_apply_upd" : tactic
 
 namespace Scoped
 
 scoped macro_rules
   | `(tactic| refine merge rfl ?_) =>
-    `(tactic| first | core_merge | refine Solidity.NFml.Proves.merge rfl ?_)
+    `(tactic| core_merge)
   | `(tactic| refine Proves.merge rfl ?_) =>
-    `(tactic| first | core_merge | refine Solidity.NFml.Proves.merge rfl ?_)
+    `(tactic| core_merge)
   | `(tactic| refine mergeStorage ?_) =>
-    `(tactic| first | core_merge | refine Solidity.NFml.Proves.mergeStorage ?_)
+    `(tactic| core_merge)
   | `(tactic| refine Proves.mergeStorage ?_) =>
-    `(tactic| first | core_merge | refine Solidity.NFml.Proves.mergeStorage ?_)
+    `(tactic| core_merge)
   | `(tactic| refine simplify ?_) =>
-    `(tactic| first | core_simplify | refine Solidity.NFml.Proves.simplify ?_)
+    `(tactic| core_simplify)
   | `(tactic| refine Proves.simplify ?_) =>
-    `(tactic| first | core_simplify | refine Solidity.NFml.Proves.simplify ?_)
+    `(tactic| core_simplify)
   | `(tactic| refine Proves.eqDSplit ?_ ?_ ?_) =>
-    `(tactic| first | refine Solidity.Proves.eqDSplit ?_ ?_ ?_ | refine Solidity.NFml.Proves.eqDSplit ?_ ?_ ?_)
+    `(tactic| refine Solidity.Proves.eqDSplit ?_ ?_ ?_)
   | `(tactic| exact Proves.definedWritten) =>
-    `(tactic| first | exact Solidity.Proves.definedWritten | exact Solidity.NFml.Proves.definedWritten)
+    `(tactic| exact Solidity.Proves.definedWritten)
   | `(tactic| exact Proves.definedLit) =>
-    `(tactic| first | exact Solidity.Proves.definedLit | exact Solidity.NFml.Proves.definedLit)
+    `(tactic| exact Solidity.Proves.definedLit)
   | `(tactic| exact Proves.eqRefl) =>
-    `(tactic| first | exact Solidity.Proves.eqRefl | exact Solidity.NFml.Proves.eqRefl)
+    `(tactic| exact Solidity.Proves.eqRefl)
   | `(tactic| exact Proves.eqClose) =>
-    `(tactic| first | exact Solidity.Proves.eqClose | exact Solidity.NFml.Proves.eqClose)
+    `(tactic| exact Solidity.Proves.eqClose)
   | `(tactic| exact Proves.eqDClose) =>
-    `(tactic| first | exact Solidity.Proves.eqDClose | exact Solidity.NFml.Proves.eqDClose)
+    `(tactic| exact Solidity.Proves.eqDClose)
   | `(tactic| sol_apply_upd) => `(tactic| core_apply_upd)
   | `(tactic| sol_rw [$rs,*]) => `(tactic| core_rw [$rs,*])
   | `(tactic| rw [$rs,*]) => `(tactic| core_rw [$rs,*])

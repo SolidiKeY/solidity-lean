@@ -1,11 +1,14 @@
 import Solidity.Calculus.Decide
+import Solidity.Calculus.Logic
+import Solidity.Calculus.FirstOrder
+import Solidity.Semantics.StateErase
 import Solidity.Calculus.Close
 
 /-!
 # Closing a reduction by its terms: `LFml.syn`
 
 KeY closes `select(store(h, o, f, v), o, f) = v` by rewriting and syntactic
-equality; it never evaluates the heap.  What `NFml.reduce` leaves is mostly of
+equality; it never evaluates the heap.  What `Fml.reduceS` leaves is mostly of
 that kind: a chain of premises `t ≐ t`, one per term an update computed, each
 saying that the term returns, and a conclusion `a ≐ b` whose two sides compute
 the same thing under different guards (`seq d a`: `a`, once `d` returns).
@@ -999,11 +1002,6 @@ theorem LFml.syn_holds : (φ : LFml) → ∀ (σ : Semantics.State) (known : Lis
       rw [LTerm.eval_setEnv _ (by simpa using hq'.2)] at hy'
       exact hne q hq x' y' hx' hy'
 
-/-- **A formula `syn` accepts holds in every state.** -/
-theorem LFml.syn_valid (φ : LFml) (h : φ.syn [] [] = true) : ∀ σ, φ.holds σ :=
-  fun σ => LFml.syn_holds φ σ [] [] (fun _ hu => by simp at hu) (fun _ hp => by simp at hp) h
-
-
 /-! ## A scoped leaf (M6c)
 
 `sol_decide` takes the scoped leaf `Valid φ` (`φ : Fml C []`) itself and
@@ -1027,10 +1025,10 @@ def Bound (σ : Semantics.State) (q : Var × PrimTy) : Prop :=
   ∃ v, σ.getEnv q.1 = .ok (.val v) ∧ q.2.admits v
 
 /-- A bound local returns. -/
-theorem Bound.returns {σ : Semantics.State} {q : Var × PrimTy} (h : Bound σ q) :
-    Returns σ (.var (Atom.ofKey q.1)) := by
+theorem Bound.returns {σ : Semantics.State} {q : Var × PrimTy} (h : Bound σ q)
+    (hs : q.1.isSlot = true) : Returns σ (.var (Atom.ofKey q.1)) := by
   obtain ⟨v, hv, -⟩ := h
-  exact ⟨v, by simp only [LTerm.eval, Atom.key_ofKey, hv, Res.ok_bind, Close.bindingVal]⟩
+  exact ⟨v, by simp only [LTerm.eval, Atom.key_ofKey hs, hv, Res.ok_bind, Close.bindingVal]⟩
 
 /-- **The leading quantifiers, by their locals**: `alls xs body` holds where
 `body` holds in every state that binds each local of `xs` at its type.
@@ -1062,9 +1060,12 @@ theorem LFml.alls_holds (body : LFml) : (xs ys : List (Var × PrimTy)) → (σ :
       · exact .inl hq
       · exact .inr (.inr hq)
 
+/-- Every local of `xs` is a position's slot, as a scoped reduction binds. -/
+def LFml.slotKeys (xs : List (Var × PrimTy)) : Bool := xs.all fun q => q.1.isSlot
+
 /-- **`syn` with the leading quantifiers' locals known to return.** -/
 theorem LFml.syn_valid_alls (xs : List (Var × PrimTy)) (body : LFml)
-    (hn : decide (xs.map Prod.fst).Nodup = true)
+    (hn : decide (xs.map Prod.fst).Nodup = true) (hs : LFml.slotKeys xs = true)
     (h : body.syn (xs.map fun q => LTerm.var (Atom.ofKey q.1)) [] = true) :
     ∀ σ, (LFml.alls xs body).holds σ := by
   intro σ
@@ -1072,7 +1073,7 @@ theorem LFml.syn_valid_alls (xs : List (Var × PrimTy)) (body : LFml)
     (fun _ hq => nomatch hq) fun σ' hb => ?_
   refine LFml.syn_holds body σ' _ [] (fun u hu => ?_) (fun _ hp => nomatch hp) h
   obtain ⟨q, hq, rfl⟩ := List.mem_map.1 hu
-  exact (hb q (by simpa only [List.append_nil] using hq)).returns
+  exact (hb q (by simpa only [List.append_nil] using hq)).returns (List.all_eq_true.1 hs q hq)
 
 end Decide
 

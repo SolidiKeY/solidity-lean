@@ -1,5 +1,5 @@
 import Solidity.Calculus.RewriteChains
-import Solidity.Calculus.Rewrite
+import Solidity.Calculus.RewriteSyntax
 import Solidity.Examples.Chains.Storage
 import Solidity.Calculus.LastLine
 import Solidity.Calculus.Surface
@@ -296,7 +296,7 @@ example (φ : Post StandardExample [.val .uint]) : dl![m]{ { storage := delAt(sa
 `alice.account.balance = 100;` and `delete alice.account;`, the balance reads its
 default, the account being no mapping (which would keep its members).  The update
 holds the delete the read goes through, so the law applies under `m`. -/
-example (φ : Post StandardExample [.val .uint]) (hk : STerm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
+example (φ : Post StandardExample [.val .uint]) (hk : Tm.KindFreeAt st!{ save(storage, alice.account.balance, 100) } pt!{ alice.account }) :
     dl![m]{ { storage := delAt(save(storage, alice.account.balance, 100), alice.account) ‖
       b := find(delAt(save(storage, alice.account.balance, 100), alice.account), alice.account.balance) } φ }
     ~[findOnDelAtBelow]~>
@@ -496,13 +496,12 @@ end MemoryReads
 
 A check leaves its goals behind one update, as a conjunction of implications
 over the captured condition.  The literals fold (`add_literals`, `leq_literals`,
-`Calculus/Literals.lean`: exact laws, so in an update's right-hand side under
+`LitLaw`, `Calculus/TermLaws.lean`: exact laws, so in an update's right-hand side under
 any modality and with no premise), the update is pushed through the
 connectives (`applyOnRigid`: `FmlRw.applyOnRigid`,
 `Calculus/RewriteScoped.lean`, while the revert is still to run;
-`NFml.push`, `Calculus/ChainBranches.lean`, past the program), the literal
-connectives fold (`concrete`: `FmlRw.concrete` while the program is open,
-`Calculus/ChainRewrites.lean`'s past it), and a merge finds the first spine
+`Calculus/RewritePast.lean` past the program), the literal
+connectives fold (`concrete`: `FmlRw.concrete`), and a merge finds the first spine
 under a branch (`sequentialToParallel`, `LineRw.mergeIn`).  Each rewrite
 under a branch reads the skeleton of the line the elaborator wrote for it, so
 the postcondition `φ` is a part it never looks at, and the line is proved by
@@ -576,8 +575,9 @@ example (ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 :=
 error: ~[add_literals]~>: add_literals does not apply to
   dl{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
 (the side condition
-  0 ≤ 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 ∧
-    115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 < Semantics.uintBound
+  0 ≤ Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935 + Int.ofNat 1 ∧
+    Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935 + Int.ofNat 1 <
+      Semantics.uintBound
 of add_literals closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
@@ -638,7 +638,9 @@ example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~=> dl!{ 4
 error: ~[findOnSaveFrame]~>: findOnSaveFrame does not apply to
   dl{ find(save(storage, alice.age, 1), alice.age) ≐ 0 }
 (the side condition
-  ((PTerm.root "alice").field "age").diverges ((PTerm.root "alice").field "age") = true
+  (Tm.app1 (Op1.field "age") ⋯ (Tm.app0 (Op0.root "alice"))).diverges
+      (Tm.app1 (Op1.field "age") ⋯ (Tm.app0 (Op0.root "alice"))) =
+    true
 of findOnSaveFrame closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
@@ -685,13 +687,15 @@ example : dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 4
     ~[findOnSave]~> dl![m]{ { x := 42 } x ≐ 42 } := by sol_chain
 
 /-- `findOnSave`, twice under one name. -/
-theorem Laws.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
-    (hp : p.hasSeg = true := by rfl) : TermTaclet (.find (.save s p (.val (.lit v))) p) (.lit v) :=
+theorem Laws.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
+    {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
+    TermTaclet tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 @[inherit_doc Laws.readBack]
-theorem Laws'.readBack {s : STerm StandardExample} {p : PTerm StandardExample} {v : Semantics.Value}
-    (hp : p.hasSeg = true := by rfl) : TermTaclet (.find (.save s p (.val (.lit v))) p) (.lit v) :=
+theorem Laws'.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
+    {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
+    TermTaclet tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 -- Two laws by one name: the arrow says so rather than pick one.

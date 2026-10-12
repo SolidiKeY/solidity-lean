@@ -23,7 +23,7 @@ dropped with the binding it leaves) is one `~*>`.  Past the program the
 updates merge into one, the declaration's included — the memory write
 substituted for `memory` in the storage write, as the printed `S₁` reads
 `copyMem(mtSt, M₁, carol)` — and the read is resolved one law a link
-(`Calculus/ChainRewrites.lean`), every capture kept to the last line:
+(`Calculus/RewriteLaws.lean`), every capture kept to the last line:
 `findMemberCons` and `selectOnSaveMember` walk the path down to the copy,
 `findCopyMem` sends the `find` back into memory, `readOnWrite` reads the
 write.  In the member-source example the copied identity is read after the

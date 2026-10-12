@@ -52,8 +52,7 @@ def surfaceOn : TermElabM Bool := do
   let some stx ← liftMacroM (expandMacro? (← `(core_surface%))) | return false
   return stx.isIdent && stx.getId.eraseMacroScopes == `true
 
-/-- `valid% φ`: `Valid φ` for a scoped formula, `Solidity.Valid φ`
-for any other. -/
+/-- `valid% φ`: `Valid φ` of a scoped formula. -/
 syntax (name := validDispatch) "valid% " term:max : term
 
 @[term_elab validDispatch]
@@ -62,8 +61,8 @@ def elabValidDispatch : TermElab := fun stx _ => do
   synthesizeSyntheticMVarsNoPostponing
   let φ ← instantiateMVars φ
   let ty ← whnf (← inferType φ)
-  if ty.isAppOfArity ``Fml 2 then return ← mkAppM ``Valid #[φ]
-  mkAppM ``NFml.Valid #[φ]
+  unless ty.isAppOfArity ``Fml 2 do throwError "valid%: not a scoped formula{indentExpr φ}"
+  mkAppM ``Valid #[φ]
 
 /-- `Valid φ` prints as `⊨ φ`. -/
 @[app_unexpander Valid]

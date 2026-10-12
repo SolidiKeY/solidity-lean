@@ -542,7 +542,7 @@ A memory allocation changes the heap only above the counter: every object
 below it reads as it did (`State.HeapExt`).  `copyStToM` and `allocDefault`
 extend the heap, and the reference a copy returns is below the counter it
 leaves — what the laws of memory reads over a fresh allocation rest on
-(`Calculus/ChainRewrites.lean`). -/
+(`Calculus/TermLaws.lean`). -/
 
 /-- `τ` extends the heap of `σ`: the counter has not gone back, and every
 object below `σ`'s counter reads as it did. -/
