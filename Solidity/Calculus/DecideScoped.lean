@@ -773,10 +773,26 @@ def _root_.Solidity.Tm.copyStArgS {s : Srt} : Tm C Γ s → Option ((s' : Srt) �
   | .app2 o m v => if o.isCopySt && m.isMemoryS then some ⟨_, v⟩ else none
   | _ => none
 
+/-- The identity a memory local is bound to. -/
+def _root_.Solidity.Rhs.mrefS? {t : LTy} : Rhs C Γ t → Option ((R : RefTy) × Tm C Γ (.ident R))
+  | .mref i => some ⟨_, i⟩
+  | _ => none
+
+/-- The identity an element binds a memory local to. -/
+def ElemS.mrefS? : ElemS C Γ → Option ((R : RefTy) × Tm C Γ (.ident R))
+  | .rhs r => r.mrefS?
+  | .glob (.local _ r) => r.mrefS?
+  | .glob _ => none
+
+/-- The memory an element sets. -/
+def ElemS.memoryS? : ElemS C Γ → Option (Tm C Γ .mem)
+  | .glob (.memory m) => some m
+  | _ => none
+
 /-- An allocation's pair: the identity and the memory. -/
-def pairViewS : ElemS C Γ → ElemS C Γ → Option ((R : RefTy) × Tm C Γ (.ident R) × Tm C Γ .mem)
-  | .rhs (.mref i), .glob (.memory mm) | .glob (.local _ (.mref i)), .glob (.memory mm) =>
-    some ⟨_, i, mm⟩
+def pairViewS (a b : ElemS C Γ) : Option ((R : RefTy) × Tm C Γ (.ident R) × Tm C Γ .mem) :=
+  match a.mrefS?, b.memoryS? with
+  | some ⟨R, i⟩, some mm => some ⟨R, i, mm⟩
   | _, _ => none
 
 /-- An allocation's pair, a syntactic test on its two terms: one allocation
