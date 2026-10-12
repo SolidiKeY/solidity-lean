@@ -137,6 +137,7 @@ theorem peel_pos : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
     · rename_i hv
       rw [← Fml.peelS_eq_peelSM] at hp
       obtain ⟨τe, hτ, h', hs⟩ := RelU.zero noActE noActR h U hv
+      rw [holds_upd_erased]
       show m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → τ.H <+: σ'.H → holds σ' φ)
         (U.apply τ.erase)
       rw [hτ]
@@ -172,6 +173,7 @@ theorem peel_neg : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' :
       obtain ⟨τ'', hτ'', hH⟩ := zero_typed noActE noActR τ U hv
       rw [hτ''] at hτ
       cases hτ
+      rw [holds_upd_erased] at hφ
       change m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → τ.H <+: σ'.H → holds σ' φ)
         (U.apply τ.erase) at hφ
       rw [hτ''] at hφ
@@ -464,6 +466,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
     simp only [Fml.inLSM, Bool.and_eq_true] at hf
     obtain ⟨rfl, hf⟩ := hf
     refine ⟨fun _ hL => ?_, fun hp => Bool.noConfusion hp⟩
+    rw [holds_upd_erased]
     show m.afterC (fun τ' => ∀ σ' : State C _, σ'.erase = τ' → τ.H <+: σ'.H → holds σ' φ)
       (U.apply τ.erase)
     cases hv : U.view with

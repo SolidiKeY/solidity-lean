@@ -143,8 +143,7 @@ theorem Fml.belowS_sound
     exact fun σ hs => Modality.forallB_imp (fun v => Fml.belowS_sound hf n φ hψ _) hs
   | _, n + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
-      Fml.belowS_sound hf n φ hψ σ' (a σ' e hx)
+    exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.belowS_sound hf n φ hψ σ' a
   | _, 0, .tt, _, h | _, 0, .eq .., _, h | _, 0, .defined _, _, h | _, 0, .not _, _, h
   | _, 0, .and .., _, h | _, 0, .imp .., _, h | _, 0, .upd .., _, h | _, 0, .modal .., _, h
   | _, 0, .havoc _, _, h | _, 0, .anon .., _, h => hf h
@@ -211,6 +210,7 @@ theorem Upd.rwC_apply_eq (hq : Tm.EvalEq q.1 q.2) (σ₀ : EState C Γ) {Δ : Ct
 
 theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
     {φ : Fml C Δ} (σ : State C Γ) : holds σ (.upd m (U.rwC q) φ) ↔ holds σ (.upd m U φ) := by
+  rw [holds_upd_erased, holds_upd_erased]
   show Modality.afterC m _ ((U.rwC q).apply σ.erase) ↔ Modality.afterC m _ (U.apply σ.erase)
   rw [Upd.rwC_apply_eq hq]
 
@@ -370,6 +370,7 @@ theorem holds_upd_of_ok {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ} {σ : S
     (k : ∀ σ₁, U.apply σ.erase = .ok σ₁ → ∀ σ' : State C Δ, σ'.erase = σ₁ → σ.H <+: σ'.H →
       holds σ' φ) :
     holds σ (.upd m U φ) := by
+  rw [holds_upd_erased]
   show Modality.afterC m _ (U.apply σ.erase)
   cases hr : U.apply σ.erase with
   | ok σ₁ => exact k σ₁ hr
@@ -381,8 +382,9 @@ theorem holds_upd_of_ok {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ} {σ : S
 /-- The update in front of a conjunction, from it in front of each part. -/
 theorem holds_upd_and {m : Modality} {U : Upd C Γ Δ} {a b : Fml C Δ} {σ : State C Γ}
     (ha : holds σ (.upd m U a)) (hb : holds σ (.upd m U b)) : holds σ (.upd m U (.and a b)) := by
-  have ha : Modality.afterC m _ (U.apply σ.erase) := ha
-  have hb : Modality.afterC m _ (U.apply σ.erase) := hb
+  have ha : Modality.afterC m _ (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 ha
+  have hb : Modality.afterC m _ (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 hb
+  rw [holds_upd_erased]
   show Modality.afterC m _ (U.apply σ.erase)
   cases hr : U.apply σ.erase with
   | ok σ₁ =>
@@ -409,7 +411,7 @@ theorem Fml.pushS_sound {m : Modality} {U : Upd C Γ Δ} {σ : State C Γ}
         · rename_i a' hs
           refine holds_upd_of_ok hU fun σ₁ hr σ' e x ha => ?_
           have hb := Fml.pushS_sound hU r b (h ((Fml.substU_holds hr a hs σ σ' rfl e).2 ha))
-          have hb : Modality.afterC m _ (U.apply σ.erase) := hb
+          have hb : Modality.afterC m _ (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 hb
           rw [hr] at hb
           exact hb σ' e x
         · exact h
@@ -557,6 +559,7 @@ theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalE
 theorem holds_upd_congr {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {ψ ψ' : Fml C Δ}
     (h : ∀ τ : State C Δ, holds τ ψ' ↔ holds τ ψ) (σ : State C Γ) :
     holds σ (.upd m U ψ') ↔ holds σ (.upd m U ψ) := by
+  rw [holds_upd_erased, holds_upd_erased]
   show Modality.afterC m _ (U.apply σ.erase) ↔ Modality.afterC m _ (U.apply σ.erase)
   have key : (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' ψ') =
       (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' ψ) :=
@@ -842,8 +845,9 @@ theorem Fml.applyOnPVTop_sound {s : Skel} {m : Modality} {U : Upd C Γ Δ} {φ :
   unfold Fml.applyOnPVTop at h
   split at h
   · cases h
+    rw [holds_upd_erased]
     show Modality.afterC m _ (U.apply σ.erase)
-    have hψ : Modality.afterC m _ (U.apply σ.erase) := hψ
+    have hψ : Modality.afterC m _ (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 hψ
     cases hU : U.apply σ.erase with
     | error => rw [hU] at hψ; exact hψ
     | ok τ =>

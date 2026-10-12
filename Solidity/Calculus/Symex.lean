@@ -63,7 +63,7 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     intro χ h σ hχ
     change (Fml.stepR k φ).map (Fml.upd m U) = some χ at h
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact Modality.afterC_imp hχ fun τ h σ' e hx => ih hφ σ' (h σ' e hx)
+    exact Upd.afterT_imp hχ fun σ' h => ih hφ σ' h
   | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound k m P κ φ h σ hχ
   | havoc φ ih =>
     intro χ h σ hχ

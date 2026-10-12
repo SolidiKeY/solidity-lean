@@ -41,6 +41,7 @@ theorem ageBox : cdl!{ [ alice.age = 3; ] true }
 
 example : Valid cdl!{ [ alice.age = 3; ] true } :=
   ageBox.valid fun _ => by
+    rw [holds_upd_erased]
     show Modality.afterC _ _ _
     unfold Modality.afterC
     split <;> first | trivial | exact fun _ _ _ => trivial

@@ -441,7 +441,7 @@ theorem holds_of_holdsE : {Γ : Ctx} → (φ : Fml C Γ) → (σ : State C Γ) �
   | _, .and φ ψ, σ, h => ⟨holds_of_holdsE φ σ h.1, holds_of_holdsE ψ σ h.2⟩
   | _, .imp φ ψ, σ, h => fun hp => holds_of_holdsE ψ σ (h.2 ((holds_iff_holdsE h.1 σ).1 hp))
   | _, .upd m U φ, σ, h => by
-    simp only [holds]
+    rw [holds_upd_erased]
     simp only [holdsE] at h
     cases hU : U.apply σ.erase with
     | error e => rw [hU] at h; exact h

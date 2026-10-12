@@ -76,42 +76,6 @@ theorem _root_.Solidity.Op3.eval_any {a b c s : Srt} (o : Op3 a b c s) (g g' : S
     (x : a.Ev) (y : b.Ev) (z : c.Ev) : o.eval g x y z = o.eval g' x y z := by
   cases o <;> rfl
 
-/-! ## What an update leaves in a local -/
-
-/-- What a local of type `t` holds after an update applied in `Γ`: a local
-of `Γ` it kept, or the right-hand side last written to it. -/
-inductive Held (C : Contract) (Γ : Ctx) (t : LTy) : Type where
-  | pos (i : Idx Γ t)
-  | rhs (r : Rhs C Γ t)
-
-/-- What every local of `Δ` holds after an update from `Γ` to `Δ`. -/
-def Subst (C : Contract) (Γ Δ : Ctx) : Type := {t : LTy} → Idx Δ t → Held C Γ t
-
-theorem Idx.ty_eq_of_toNat {Γ : Ctx} {t u : LTy} {i : Idx Γ t} {j : Idx Γ u}
-    (h : i.toNat = j.toNat) : t = u := by
-  have hi := i.getElem?_toNat
-  have hj := j.getElem?_toNat
-  rw [h, hj] at hi
-  exact (Option.some.inj hi).symm
-
-/-- The local `i` holds `r`. -/
-def Subst.set {Γ Δ : Ctx} (s : Subst C Γ Δ) {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) :
-    Subst C Γ Δ :=
-  fun j => if h : i.toNat = j.toNat then .rhs (Idx.ty_eq_of_toNat h ▸ r) else s j
-
-/-- A local pushed, holding `h`. -/
-def Subst.cons {Γ Δ : Ctx} {t : LTy} (s : Subst C Γ Δ) (h : Held C Γ t) : Subst C Γ (t :: Δ)
-  | _, .here => h
-  | _, .there j => s j
-
-/-- What an update leaves in each local. -/
-def Upd.held {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Subst C Γ Δ
-  | _, .nil => fun i => .pos i
-  | _, .snoc U (.local i r) => Subst.set (Upd.held U) i r
-  | _, .snoc U _ => Upd.held U
-  | _, .decl U _ r => Subst.cons (Upd.held U) (.rhs r)
-  | _, .pop U h => fun j => Upd.held U (j.ext h)
-  | _, .drop U h => fun j => Upd.held U (j.wk h)
 
 /-- An update that writes locals only: the global part of the state it is
 applied in is the one it leaves. -/
@@ -197,96 +161,6 @@ def Upd.graft {Γ Δ₁ : Ctx} (U : Upd C Γ Δ₁) (s : Subst C Γ Δ₁) (g : 
 section Sound
 
 variable {Γ : Ctx}
-
-/-- What `U` left in a local, read in the states before (`σ₀`) and after
-(`σ₁`). -/
-def Held.OK {Δ : Ctx} (σ₀ : EState C Γ) (σ₁ : EState C Δ) {t : LTy} (i : Idx Δ t) :
-    Held C Γ t → Prop
-  | .pos j => Env.get i σ₁.env = Env.get j σ₀.env
-  | .rhs r => r.eval σ₀ = .ok (Env.get i σ₁.env)
-
-theorem Env.get_set_other {Δ : Ctx} {t u : LTy} (i : Idx Δ t) (j : Idx Δ u) (h : i.toNat ≠ j.toNat)
-    (v : t.Denote C) (e : Env C Δ) : Env.get j (Env.set i v e) = Env.get j e := by
-  induction i with
-  | here =>
-    cases j with
-    | here => exact absurd rfl h
-    | there j => rfl
-  | there i ih =>
-    cases j with
-    | here => rfl
-    | there j => exact ih j (fun h' => h (congrArg (· + 1) h')) v e.2
-
-theorem Env.get_drop {Δ Δ' : Ctx} {t : LTy} (h : Ext Δ' Δ) (j : Idx Δ' t) (e : Env C Δ) :
-    Env.get j (Env.drop h e) = Env.get (j.ext h) e := by
-  induction h with
-  | refl => rfl
-  | push h ih => exact ih e.2
-
-theorem Env.get_thin : {Δ Δ' : Ctx} → (h : Thin Δ' Δ) → {t : LTy} → (j : Idx Δ' t) → (e : Env C Δ) →
-    Env.get j (Env.thin h e) = Env.get (j.wk h) e
-  | _, _, .refl, _, _, _ => rfl
-  | _, _, .keep _, _, .here, _ => rfl
-  | _, _, .keep h, _, .there j, e => Env.get_thin h j e.2
-  | _, _, .drop h, _, j, e => Env.get_thin h j e.2
-
-/-- A local read alike in two states keeps what it holds. -/
-theorem Held.OK.congr {Δ Δ' : Ctx} {σ₀ : EState C Γ} {σ₁ : EState C Δ} {σ₁' : EState C Δ'} {t : LTy}
-    {i : Idx Δ t} {i' : Idx Δ' t} (he : Env.get i' σ₁'.env = Env.get i σ₁.env) :
-    (x : Held C Γ t) → Held.OK σ₀ σ₁ i x → Held.OK σ₀ σ₁' i' x
-  | .pos _, h => he.trans h
-  | .rhs _, h => h.trans (congrArg _ he.symm)
-
-/-- **What `U` leaves in each local** is what `Upd.held` says. -/
-theorem Upd.held_ok {σ₀ : EState C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → {σ₁ : EState C Δ} →
-    U.apply σ₀ = .ok σ₁ → ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ σ₁ i (U.held i)
-  | _, .nil, _, h, _, i => by cases h; rfl
-  | _, .snoc U e, σ₁, h, t, i => by
-    change (do e.write σ₀ (← U.apply σ₀)) = .ok σ₁ at h
-    obtain ⟨τ, hτ, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
-    cases e with
-    | «local» k r =>
-      change (do pure (τ.setLocal k (← r.eval σ₀))) = .ok σ₁ at h
-      obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
-      cases h
-      show Held.OK σ₀ _ i (Subst.set (Upd.held U) k r i)
-      unfold Subst.set
-      split
-      · rename_i hki
-        obtain rfl := Idx.ty_eq_of_toNat hki
-        obtain rfl := Idx.toNat_inj k i hki
-        show r.eval σ₀ = .ok (Env.get k (Env.set k v τ.env))
-        rw [Env.get_set]; exact hv
-      · rename_i hki
-        exact Held.OK.congr (Env.get_set_other k i hki v τ.env) _ (Upd.held_ok U hτ i)
-    | storage x | memory x | selfBalance op x | net r op x | pay r x | netMt r x | setBalance x =>
-      have henv : σ₁.env = τ.env := by
-        simp only [UpdElem.write, bind, Except.bind, pure, Except.pure] at h
-        repeat' split at h
-        all_goals first | (cases h; rfl) | cases h
-      exact Held.OK.congr (by rw [henv]) _ (Upd.held_ok U hτ i)
-  | _, .decl U _ r, σ₁, h, t, i => by
-    change (do let τ ← U.apply σ₀; pure (τ.push (← r.eval σ₀))) = .ok σ₁ at h
-    obtain ⟨τ, hτ, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
-    obtain ⟨v, hv, h⟩ := Solidity.SemanticsProperties.Res.bind_eq_ok.1 h
-    cases h
-    cases i with
-    | here => exact hv
-    | there j => exact Held.OK.congr (σ₁ := τ) (i := j) rfl _ (Upd.held_ok U hτ j)
-  | _, .pop U e, σ₁, h, t, i => by
-    change (U.apply σ₀).map (EState.drop e) = .ok σ₁ at h
-    cases hτ : U.apply σ₀ with
-    | error => rw [hτ] at h; cases h
-    | ok τ =>
-      rw [hτ] at h; cases h
-      exact Held.OK.congr (Env.get_drop e i τ.env) _ (Upd.held_ok U hτ (i.ext e))
-  | _, .drop U e, σ₁, h, t, i => by
-    change (U.apply σ₀).map (EState.thin e) = .ok σ₁ at h
-    cases hτ : U.apply σ₀ with
-    | error => rw [hτ] at h; cases h
-    | ok τ =>
-      rw [hτ] at h; cases h
-      exact Held.OK.congr (Env.get_thin e i τ.env) _ (Upd.held_ok U hτ (i.wk e))
 
 /-- An update of locals only leaves the global part as it found it. -/
 theorem Upd.envOnly_glob {σ₀ : EState C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → U.envOnly = true →
@@ -773,6 +647,7 @@ theorem Fml.upd_bind_of_apply {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} 
       (U.apply σ.erase).map (·.push (LTy.TDenote.erase t v)) :=
     fun v => hap σ.erase _
   obtain ⟨v₀⟩ := LTy.tdenote_nonempty (C := C) (H := σ.H) t
+  rw [holds_upd_erased]
   show m.afterC
     (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' (.bind m' x t ψ))
     (U.apply σ.erase)
@@ -780,7 +655,7 @@ theorem Fml.upd_bind_of_apply {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} 
   | error e =>
     have h₀ : m.afterC
         (fun τ => ∀ σ' : State C _, σ'.erase = τ → (σ.push v₀).H <+: σ'.H → holds σ' ψ)
-        (U'.apply (σ.push v₀).erase) := Modality.forallB_all hψ v₀
+        (U'.apply (σ.push v₀).erase) := (holds_upd_erased _ _ _ _).1 (Modality.forallB_all hψ v₀)
     rw [hg, hU] at h₀
     exact h₀
   | ok σ₁ =>
@@ -798,7 +673,7 @@ theorem Fml.upd_bind_of_apply {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} 
     obtain ⟨v, hv⟩ := hv
     have h : m.afterC
         (fun τ => ∀ σ' : State C _, σ'.erase = τ → (σ.push v).H <+: σ'.H → holds σ' ψ)
-        (U'.apply (σ.push v).erase) := Modality.forallB_all hψ v
+        (U'.apply (σ.push v).erase) := (holds_upd_erased _ _ _ _).1 (Modality.forallB_all hψ v)
     rw [hg, hU] at h
     refine h (σ'.push v') ?_ hext
     show (σ'.erase.push (LTy.TDenote.erase t v') : EState C _) = σ₁.push (LTy.TDenote.erase t v)
@@ -1115,17 +990,19 @@ theorem holds_upd_graft {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ�
     (hW : U.graft U.held U.envOnly st V = some W) {φ : Fml C Δ₂} (σ : State C Γ)
     (h : holds σ (.upd m W φ)) : holds σ (.upd m U (.upd m V φ)) := by
   have hg := Upd.apply_graft U σ.erase (hst σ.erase) V hW
+  rw [holds_upd_erased]
   show m.afterC
     (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' (.upd m V φ))
     (U.apply σ.erase)
   have h : m.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
-    (W.apply σ.erase) := h
+    (W.apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   rw [hg] at h
   cases hU : U.apply σ.erase with
   | error e => rw [hU] at h; exact h
   | ok σ₁ =>
     rw [hU] at h
     intro σ' he hext
+    rw [holds_upd_erased]
     show m.afterC _ (V.apply σ'.erase)
     rw [he]
     exact Modality.afterC_imp h fun τ h σ'' e₂ hext₂ => h σ'' e₂ (hext.trans hext₂)

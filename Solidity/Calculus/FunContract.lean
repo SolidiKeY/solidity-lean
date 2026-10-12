@@ -271,7 +271,7 @@ def State.snap {Δ : Ctx} (σ : State C Δ) : State C (Olds ++ Δ) :=
 theorem holds_snapOld {Δ : Ctx} {X : Fml C (Olds ++ Δ)} {σ : State C Δ}
     (h : holds σ (.upd .box snapOld X)) : holds σ.snap X := by
   have e : σ.snap.erase = (σ.erase.push σ.erase.glob.storage).push σ.erase.net := rfl
-  exact h σ.snap e (List.prefix_refl _)
+  exact (holds_upd_erased _ _ _ _).1 h σ.snap e (List.prefix_refl _)
 
 /-- The callee's frame `τ` with the snapshots `n` (the ledger) and `s` (the
 storage) declared under its return variables. -/

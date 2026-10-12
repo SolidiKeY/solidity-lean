@@ -594,10 +594,12 @@ theorem holds_bind_absorb {m m' : Modality} {x : Var} {reorder : Bool} {Δ : Ctx
     (σ : State C Γ)
     (h : holds σ (.upd m' V' ψ)) : holds σ (.bind m x u (.upd m' V ψ)) :=
   Modality.forallB_intro fun w => by
+    rw [holds_upd_erased]
     show m'.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ → (σ.push w).H <+: σ'.H → holds σ' ψ)
       (V.apply (σ.push w).erase)
     rw [State.push_erase]
-    exact Modality.afterC_okEq (Upd.apply_absorb x reorder σ.erase _ V hV) h
+    exact Modality.afterC_okEq (Upd.apply_absorb x reorder σ.erase _ V hV)
+      ((holds_upd_erased _ _ _ _).1 h)
 
 end Absorb
 
@@ -1099,8 +1101,9 @@ theorem Upd.dropSh_rel (σ₀ : EState C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) 
 /-- **`{U} φ` from `U` with its shadowed writes dropped.** -/
 theorem holds_upd_dropSh {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} (σ : State C Γ)
     (h : holds σ (.upd m (U.dropSh [] []) φ)) : holds σ (.upd m U φ) := by
+  rw [holds_upd_erased]
   show m.afterC _ (U.apply σ.erase)
-  have h : m.afterC _ ((U.dropSh [] []).apply σ.erase) := h
+  have h : m.afterC _ ((U.dropSh [] []).apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   rcases Upd.dropSh_rel σ.erase U [] [] with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, h'⟩
   · obtain ⟨rfl, rfl⟩ := h₂ rfl
     rw [h₁ rfl, EState.withSHN_self] at hb
@@ -1125,8 +1128,9 @@ def Modality.mergeP (m : Modality) (ut : Bool) (m' : Modality) (vt : Bool) : Opt
 theorem holds_upd_total {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} (hU : U.totalB = true)
     {φ : Fml C Δ} (σ : State C Γ) (h : holds σ (.upd m U φ)) : holds σ (.upd m' U φ) := by
   obtain ⟨τ, hτ⟩ := Upd.totalB_apply σ.erase U hU
+  rw [holds_upd_erased]
   show m'.afterC _ (U.apply σ.erase)
-  have h : m.afterC _ (U.apply σ.erase) := h
+  have h : m.afterC _ (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   rw [hτ] at h ⊢
   exact h
 
@@ -1333,8 +1337,7 @@ theorem Fml.mergeAtP_sound (reorder : Bool) : {Γ : Ctx} → (k : Nat) → (φ :
   | _, 0, .upd m U φ, _, h => Fml.merge2P_sound U φ h
   | _, k + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
-      Fml.mergeAtP_sound reorder k φ hψ σ' (a σ' e hx)
+    exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.mergeAtP_sound reorder k φ hψ σ' a
   | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .defined _, _, h | _, k, .not _, _, h
   | _, k, .and .., _, h | _, k, .imp .., _, h | _, k, .modal .., _, h | _, k, .havoc _, _, h
   | _, k, .anon .., _, h => by
@@ -1568,6 +1571,7 @@ theorem Fml.applyStTop_sound {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : F
         cases e with
         | storage S =>
           have h : Fml.withStS S φ = some ψ := h
+          rw [holds_upd_erased]
           show Modality.afterC .box _ ((Upd.snoc .nil (UpdElem.storage S)).apply σ.erase)
           cases hs : S.eval σ.erase with
           | error e =>
@@ -2090,17 +2094,18 @@ theorem Fml.thinS?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C 
   | _, _, h, .upd m U φ, _, hφ, σ, hs => by
     obtain ⟨⟨n, R⟩, hR, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     have hap := Upd.apply_thinIO h (fun _ => false) σ.erase U hR
+    rw [holds_upd_erased]
     show m.afterC _ (U.apply σ.erase)
     simp only at hφ
     split at hφ
     · rename_i U' hc
       cases hφ
-      have hs : m.afterC _ (U'.apply (σ.thin h).erase) := hs
+      have hs : m.afterC _ (U'.apply (σ.thin h).erase) := (holds_upd_erased _ _ _ _).1 hs
       rw [State.thin_erase, UThin.close?_apply hc _ _ hap] at hs
       exact hs
     · obtain ⟨φ', h₁, hφ⟩ := Option.bind_eq_some_iff.1 hφ
       cases hφ
-      have hs : m.afterC _ (R.U.apply (σ.thin h).erase) := hs
+      have hs : m.afterC _ (R.U.apply (σ.thin h).erase) := (holds_upd_erased _ _ _ _).1 hs
       rw [State.thin_erase, hap] at hs
       cases hU : U.apply σ.erase with
       | error e => rw [hU] at hs; exact hs
@@ -2174,17 +2179,18 @@ theorem Fml.dropDeclsTop_sound {Δ : Ctx} {drop : Nat → Bool} {m : Modality} {
   obtain ⟨⟨n, R⟩, hR, h⟩ := Option.bind_eq_some_iff.1 h
   have hap := Upd.apply_thinIO .refl drop σ.erase U hR
   rw [show σ.erase.thin .refl = σ.erase from rfl] at hap
+  rw [holds_upd_erased]
   show m.afterC _ (U.apply σ.erase)
   simp only at h
   split at h
   · rename_i U' hc
     cases h
-    have hφ : m.afterC _ (U'.apply σ.erase) := hφ
+    have hφ : m.afterC _ (U'.apply σ.erase) := (holds_upd_erased _ _ _ _).1 hφ
     rw [UThin.close?_apply hc _ _ hap] at hφ
     exact hφ
   · obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have hφ : m.afterC _ (R.U.apply σ.erase) := hφ
+    have hφ : m.afterC _ (R.U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 hφ
     rw [hap] at hφ
     cases hU : U.apply σ.erase with
     | error e => rw [hU] at hφ; exact hφ
@@ -2263,8 +2269,9 @@ theorem Fml.dropBindTop_sound {Δ : Ctx} {t : LTy} {m₀ : Modality} {x : Var} {
       refine Modality.forallB_intro fun w => ?_
       have hap := Upd.apply_thinIO (Thin.drop .refl) (fun _ => false) (σ.erase.push
         (LTy.TDenote.erase t w)) U hU
+      rw [holds_upd_erased]
       show m.afterC _ (U.apply (σ.push w).erase)
-      have hφ : m.afterC _ (U'.apply σ.erase) := hφ
+      have hφ : m.afterC _ (U'.apply σ.erase) := (holds_upd_erased _ _ _ _).1 hφ
       rw [State.push_erase]
       rw [show U'.apply σ.erase = U'.apply ((σ.erase.push (LTy.TDenote.erase t w)).thin
         (Thin.drop .refl)) from rfl, hap] at hφ
@@ -2337,8 +2344,7 @@ theorem Fml.simpPastAt_sound (every absorb : Bool) : {Γ : Ctx} → (n : Nat) �
   | _, 0, .upd m U φ, _, h => fun σ hs => Fml.simpPastTop_sound h σ hs
   | _, n + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
-      Fml.simpPastAt_sound every absorb n φ hψ σ' (a σ' e hx)
+    exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.simpPastAt_sound every absorb n φ hψ σ' a
   | _, n, .tt, _, h | _, n, .eq .., _, h | _, n, .defined _, _, h | _, n, .not _, _, h
   | _, n, .and .., _, h | _, n, .imp .., _, h | _, n, .modal .., _, h | _, n, .havoc _, _, h
   | _, n, .anon .., _, h => by

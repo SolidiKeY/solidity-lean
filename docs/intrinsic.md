@@ -4682,6 +4682,73 @@ targets, clean (the printer pins `Examples/ProofTree.lean`,
 `#check_rule_text`); `check-orphans` (309 reachable), `check-doc-paths`;
 `sorry` count unchanged.  Diff: 10 Lean files, about 1,480 lines removed.
 
+### W9.7.1 `lands` record (2026-10-12, branch `w97-lands`)
+
+**U2 in `holds`.**  `holds`' update clause is `Upd.afterT m σ (holds · φ)`
+(`Calculus/Logic.lean`), and so is `holdsC`'s (`Calculus/CallbackHolds.lean`):
+`p` of every typed state the update lands on, `m.onHalt` where its global
+part halts.  The new module `Calculus/Lands.lean`, just below `Logic`,
+holds what that reads:
+- the `EState` readers moved out of `Logic` unchanged (`Tm.eval`,
+  `Tm.denote`, `Rhs.eval`, `UpdElem.write`, `Upd.apply`, `Modality.afterC`),
+  with `Graft`'s `Held`, `Subst`, `Subst.set`/`cons`, `Upd.held`,
+  `Held.OK`, `Upd.held_ok` and its `Env` lemmas, and `UpdateRules`'
+  `Env.ext_get`;
+- the typed readers, W9.6.0's sketch: `State.globE`, `State.getE`,
+  `State.aliasPathT`/`memRefT`, `Tm.evalT`, `Tm.denoteT`, `Rhs.evalT`,
+  each equal to its twin on the erasure (`Tm.evalT_eq`, `Tm.denoteT_eq`,
+  `Rhs.evalT_eq`, by `TEnv.get_erase` per local case);
+- landing: `UpdElem.globT`, `Upd.globT`, `Held.OKT`, `Upd.Lands`,
+  `Upd.afterT`; `Upd.apply_glob` (the global part `Upd.apply` computes is
+  `globT`'s), `Upd.lands_iff` (`U.Lands σ₀ g σ' ↔ U.apply σ₀.erase = .ok
+  σ'.erase ∧ σ'.globE = g`), `Upd.afterT_iff` (the old clause); the typed
+  kit `Upd.afterT_imp`, `afterT_and`, `afterT.of_apply`.
+
+`holds_upd_erased` (`Logic`) and `holdsC_upd_erased` state the old clause.
+Naming: the typed readers are the `T` twins (`ARhs.evalT`'s convention),
+not `Tm.eval` renamed: renaming would touch every `EState` reader above
+while the `shim` lane edits `Update.lean`; W9.7.3 renames when the twins
+go.  The equation and definedness clauses still read `Tm.denote`/`Tm.eval`
+on `σ.erase`: switching them breaks about 40 leaf proofs (`CloseScoped`,
+`DecideTyped`, `SoundLoops`, `UpdRuleScoped`, …) that the `close` lane
+rewrites anyway.
+
+**Ported** (typed kit, no erased reading): `holds_upd_mono`
+(`UpdRuleScoped`), `holds_upd_imp` (`LeafDerive`), `Hyps.wrap_and` and the
+`inv` case (`ProvesSound`), `holdsC`'s `Hyps.wrap` (`CallbackSound`),
+`Fml.stepR_sound` (`Symex`), `Fml.mergeAt_leads` (`Merge`),
+`Fml.belowS_sound` (`RewriteScoped`), `Fml.mergeAtP_sound`,
+`Fml.simpPastAt_sound` (`RewritePast`), `ChainKit`'s `stepFocusR`,
+`Deploy`'s two theorems (`Upd.afterT.of_apply`).
+
+**Through `holds_upd_erased`** (the W9.7.2 worklist; uses per file, the
+`show`/`change`/`have … := h` sites that unfolded the old clause):
+`RewritePast` 15, `CallbackSound` 14 (`holdsC_upd_erased` mostly),
+`RewriteScoped` 9, `UpdRuleScoped` 8, `SoundLoops` 7, `Graft` 6,
+`ProvesSound` 4, `UpdateRules` 3, `LeafDerive` 3, `DecideTyped` 3,
+`SeqRewrite` 2, `RewriteLaws` 2, `CloseScoped` 1, `ChainKit` 1,
+`FunContract` 1, `SoundKit` 1, `Tools/Counterexample` 1,
+`Examples/Tactics/Chains` 1.
+
+**Checked**: `lean_build` of the default targets, clean; `check-orphans`
+(310 reachable), `check-doc-paths`; `sorry` count unchanged.
+
+**Timings** (each file copied under `Solidity/Scratch/`, a fresh worker
+after a warm-up, `/proc` sampled every 20 ms; the `shim` lane ran in
+parallel, load 1–5, so CPU seconds are the steadier column):
+
+| Row | before wall | before CPU | after wall | after CPU |
+|---|---|---|---|---|
+| `Derived7` | 51.1 | 53.2 | 48.6 | 50.6 |
+| `Tactics/Decide` | 39.3 | 40.0 | 39.4 | 40.5 |
+| `ProofTree` | 8.3 | 8.4 | 18–20 | 8.4 |
+
+No row moves (`ProofTree`'s wall waited on the other lane; its CPU is
+unchanged).  Expected: the closer still reads a leaf through `holdsE` and
+`Upd.apply` (`holds_of_holdsE` rewrites by `holds_upd_erased`), so the
+1.8× of W9.6.0 lands with W9.7.2's `close` lane, when a leaf is read by
+`Lands`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

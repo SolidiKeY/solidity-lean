@@ -50,9 +50,7 @@ def holdsC (I : Fml C []) : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .not φ => ¬ holdsC I σ φ
   | _, σ, .and φ ψ => holdsC I σ φ ∧ holdsC I σ ψ
   | _, σ, .imp φ ψ => holdsC I σ φ → holdsC I σ ψ
-  | _, σ, .upd m U φ =>
-    m.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holdsC I σ' φ)
-      (U.apply σ.erase)
+  | _, σ, .upd m U φ => U.afterT m σ (holdsC I · φ)
   | _, σ, .modal m P κ φ =>
     ∀ o, ExecP I.stateInv σ P o → o.thenF I.stateInv κ m (holdsC I · φ)
   | _, σ, .havoc φ => ∀ st nt, holdsC I (σ.havoc st nt) φ
@@ -162,6 +160,14 @@ end Frames
 
 /-! ## The two readings -/
 
+/-- `holdsC`'s update clause, read on the erasure (`Upd.afterT_iff`). -/
+theorem holdsC_upd_erased {I : Fml C []} {Γ Δ : Ctx} (σ : State C Γ) (m : Modality)
+    (U : Upd C Γ Δ) (φ : Fml C Δ) :
+    holdsC I σ (.upd m U φ) ↔
+      m.afterC (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holdsC I σ' φ)
+        (U.apply σ.erase) :=
+  Upd.afterT_iff m σ U _
+
 /-- **With no payment, the two readings agree.** -/
 theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.hasTransfer = false →
     ∀ σ : State C Γ, (holdsC I σ φ ↔ holds σ φ)
@@ -175,11 +181,9 @@ theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.
     rw [Fml.hasTransfer_imp, Bool.or_eq_false_iff] at h
     exact imp_congr (holdsC_iff_holds φ h.1 σ) (holdsC_iff_holds ψ h.2 σ)
   | _, .upd m U φ, h, σ => by
-    have e : (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holdsC I σ' φ) =
-        (fun τ => ∀ σ' : State C _, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ) :=
-      funext fun _ => propext (forall_congr' fun σ' => imp_congr_right fun _ =>
-        imp_congr_right fun _ => holdsC_iff_holds φ h σ')
-    show m.afterC _ _ ↔ m.afterC _ _
+    have e : (holdsC I · φ) = (holds · φ) :=
+      funext fun σ' => propext (holdsC_iff_holds φ h σ')
+    show U.afterT m σ _ ↔ U.afterT m σ _
     rw [e]
   | _, .modal m P κ φ, h, σ => by
     rw [Fml.hasTransfer_modal, Bool.or_eq_false_iff, Bool.or_eq_false_iff] at h

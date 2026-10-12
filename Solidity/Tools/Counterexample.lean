@@ -484,7 +484,7 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
       simp_all only [Tri.imp, reduceCtorEq, false_implies, forall_const, true_and, and_true,
         and_self, implies_true, not_true_eq_false, not_false_eq_true, not_imp]
   | _, .upd m U φ, σ => by
-    simp only [Fml.eval3C, holds]
+    simp only [Fml.eval3C, holds_upd_erased]
     cases hU : U.apply σ.erase with
     | error e => cases m <;> simp only [Modality.afterC, Modality.onHalt, reduceCtorEq,
         imp_self, not_true_eq_false, not_false_eq_true, and_self]

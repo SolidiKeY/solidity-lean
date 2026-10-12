@@ -246,7 +246,7 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
   intro _ _ ω κ φ h
   have h' : m.afterC
       (fun τ => ∀ σ' : State C Γ', σ'.erase = τ → σ.H <+: σ'.H → holds σ' (Fml.modalK m ω κ φ))
-      (U.apply σ.erase) := h
+      (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   rw [holds_modal_iff, runSt_cons_frames]
   cases hτ : Stmt.runSt σ s with
   | ok τ =>

@@ -107,8 +107,7 @@ theorem Fml.mergeAt_leads : {Γ : Ctx} → (k : Nat) → (φ : Fml C Γ) → {ψ
   | _, 0, .upd m U φ, _, h => Fml.merge2_leads U φ h
   | _, k + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact fun σ hs => Modality.afterC_imp hs fun τ a σ' e hx =>
-      Fml.mergeAt_leads k φ hψ σ' (a σ' e hx)
+    exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.mergeAt_leads k φ hψ σ' a
   | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .defined _, _, h | _, k, .not _, _, h
   | _, k, .and .., _, h | _, k, .imp .., _, h | _, k, .modal .., _, h | _, k, .havoc _, _, h
   | _, k, .anon .., _, h => by

@@ -76,12 +76,8 @@ theorem Problem.deploy_of_valid {m : Modality} {xs : List (PrimTy × Var)} {Γ' 
     {P : Prog C (paramsN xs).ctx Γ'} (h : Valid (Problem.ctorFml m xs P)) (tx : TTx)
     (e : TEnv C (State.deploy C tx).H (paramsN xs).ctx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames ((State.deploy C tx).withEnv e) P .nil) := by
-  have hσ := holds_closeN (paramsN xs) (h (State.deploy C tx)) e
-  have hσ : m.afterC (fun τ => ∀ σ' : State C _, σ'.erase = τ →
-      ((State.deploy C tx).withEnv e).H <+: σ'.H → holds σ' (.modal m P .nil .tt))
-      ((Problem.deployUpd C).apply ((State.deploy C tx).withEnv e).erase) := hσ
-  rw [Problem.deployUpd_deployEnv] at hσ
-  exact hσ _ rfl (List.prefix_refl _)
+  exact Upd.afterT.of_apply (holds_closeN (paramsN xs) (h (State.deploy C tx)) e)
+    (Problem.deployUpd_deployEnv C tx e) (List.prefix_refl _)
 
 /-- **A derived constructor obligation of no parameters holds of the typed
 deployment**: its program runs under `m` from `State.deploy`, and does not
@@ -89,11 +85,8 @@ panic. -/
 theorem Problem.deploy_of_valid_typed {m : Modality} {Γ' : Ctx} {P : Prog C [] Γ'}
     (h : Valid (Problem.ctorFml m [] P)) (tx : TTx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames (State.deploy C tx) P .nil) := by
-  have hσ : m.afterC (fun τ => ∀ σ' : State C [], σ'.erase = τ →
-      (State.deploy C tx).H <+: σ'.H → holds σ' (.modal m P .nil .tt))
-      ((Problem.deployUpd C).apply (State.deploy C tx).erase) := h (State.deploy C tx)
-  rw [Problem.deployUpd_deploy] at hσ
-  exact hσ _ rfl (List.prefix_refl _)
+  exact Upd.afterT.of_apply (h (State.deploy C tx)) (Problem.deployUpd_deploy C tx)
+    (List.prefix_refl _)
 
 /-- **The typed deployment** (master's `Contract.deploy`, over the typed run): a
 constructor that is not `payable`, the implicit one too, refuses value, as
