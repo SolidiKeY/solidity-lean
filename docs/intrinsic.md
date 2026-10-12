@@ -5225,10 +5225,8 @@ stays solkey's.  Speed warned first: the kernel walks the sort index in
 |---|---|
 | W9.8.0 | `rename` ‖ spike: `Tm.evalT`/`denoteT`/`Rhs.evalT` → `Tm.eval`/`denote`/`Rhs.eval` (by references, not text); the spike types the sorts on a slice (storage reads and writes, one memory symbol), times `Tactics/Decide`'s kernel checks and the closer on it, and sizes the port |
 | W9.8.1 | `SrtT`, `OpT0`–`OpT3` (over the contract), `SrtT.Den`/`OpTn.eval` on the typed global part (a revert is `none`), `SVal.absT` (the Theory's abstraction), the typed get/set and find/save laws; `TmT`/`RhsT`/`UpdT` beside `Tm` in `Fml`, `TmT.erase` the bridge |
-| W9.8.2 | `lower` ‖ `lands`: `Lower`/`Arms`/`Rules` emit `TmT`; `Lands`' readers on `TmT` |
-| W9.8.3 | `decide` ‖ `close`: `toLS`/`inLS` on `TmT` (G0 forms, twins, links); `CloseScoped`/`StateParts` |
-| W9.8.4 | `laws`, two lanes by file: `TermLib`/`TermLaws`/`Rewrite*` |
-| W9.8.5 | soundness, printers, notation switched; `Tm`, `Op0`–`Op3`, `Srt.Ev`, `globE`/`getE`/`TDenote.erase` deleted; `solkeycheck`; gates; review |
+| W9.8.2 | `lower` ‖ `lands` (done, additive) |
+| W9.8.3 | the switch, layer by layer on one branch `w98-switch` (no twin formulas): (a) `Signature`/`TypedTerm`/`LowerT` move under `Lower.lean`, `Tm` *is* the typed term (`TmT` renamed, the untyped `Tm`, `Op0`–`Op3`, `Srt` deleted), `Fml`/`Rhs`/`Upd` over it, the arms and `Rules` emit typed terms, `dl{}`/`tm{}` and the printers read and print them; (b) `Logic`/`Lands`/`TypedLands` (`holds` typed: `.eq` through `SVal.absT`, `.defined` as `≠ none`, `.upd` by the typed landing), `Sound*`; (c) the laws and decide, two lanes by file; (d) the closer, chains, examples, TestSuite; gates; review |
 
 ### W9.8.0 spike record
 
