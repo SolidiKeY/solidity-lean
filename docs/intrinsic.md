@@ -4749,6 +4749,122 @@ unchanged).  Expected: the closer still reads a leaf through `holdsE` and
 1.8× of W9.6.0 lands with W9.7.2's `close` lane, when a leaf is read by
 `Lands`.
 
+### W9.7.2 close record (2026-10-12, branch `w97-close`)
+
+**The closer and the decision procedure read the typed state.**  No
+`holdsE`, no `EState`, no `Upd.apply` in `CloseScoped`, `DecideRel`,
+`DecideTyped`, `DecideComplete`, `LeafDerive`, `Close*`, `Closers`,
+`ProofTree` or `Tools/Counterexample`.
+
+- **`holds`' equation and definedness clauses** read `Tm.denoteT`/`Tm.evalT`
+  on the typed state (`Calculus/Logic.lean`).  The erased readings stay as
+  lemmas for the update laws until W9.7.3: `holds_upd_erased`,
+  `holds_eq_erased`, `holds_defined_erased`.
+- **An update computed on the typed state** (`Calculus/Lands.lean`, this
+  lane's section): `Upd.applyV σ₀ U`, the global part and the locals'
+  values (`Locs C Δ`, a function by position; `Locs.push`/`set`/`drop`/
+  `thin`), each right-hand side read once in `σ₀`.  `Upd.applyV_ok` (what
+  it computes is `globT`'s global part and `Upd.held`'s locals),
+  `Upd.lands_iff_applyV`, `Upd.afterT_applyV` (`holds`' update clause read
+  by it).  Also there: `State.loc`, the typed state's reads by position
+  (`getE_push_*`, `getE_setLocal_*`, `getE_drop`, `loc_push`/`drop`/`thin`,
+  `aliasPathT_getE`, `memRefT_getE`, `TEnv.get_thin_wk`) and the typed term
+  bridge `Tm.denoteT_evalT` (the module now imports
+  `Theory/Bridge/Denote.lean`).
+- **`sol_close`** (`Calculus/CloseScoped.lean`) reads `holds` itself.
+  `CloseS.holds_upd : holds σ (.upd m U φ) ↔ m.wp (U.applyV σ)
+  (LandedRest σ.H φ)`; `LandedRest` unfolds, once the result is a literal
+  pair, to `LandedAll H g ℓ fun x => holds x.val φ`, over the structure
+  `Landed H g ℓ` (a typed state with that global part and those locals,
+  its heap typing extending `H`).  A landed state's reads are rewrites
+  (`Landed.globE_eq`, `Landed.loc_eq`); the locals are a stack of
+  `Locs.push` over the root's (`loc_push`, `set_push_here`/`_there`).  The
+  first design, `∀ σ'` with `Lands` destructured into one `getE` equation a
+  local and read by the contextual pass, cost 2–10× the erased leaf; what
+  brought it to par, each measured on `Tactics/Operators`, `CrossDomain`
+  and `Memory` leaves: (1) the rest a constant until the update's result is
+  known (`LandedRest`: as a lambda, `simp` simplified the rest first with
+  the result abstract, then again, 2× a level); (2) the landed state in the
+  binder's type, not in hypotheses (no contextual pass needed); (3) the
+  binder a constant (`LandedAll`), so `forall_const` and its kin, each
+  synthesising `Nonempty` of the binder's type, are not tried at it; it is
+  opened by `landedAll_def` after the reads pass; (4) `Landed` names the
+  heap typing before, not the state (`H_push`), so a hidden binder pushed
+  before an update is unread after it and `forall_const` drops it, as the
+  erased reading did; (5) natural literals cast to `Int` as literals
+  (`CloseS.natCast_ofNat`: `uintBound` and the bitwise results compare by
+  `Int.reduceLT`); (6) the write-naming lemmas without the locals' fact
+  (`CloseS.wp_box_saveStorage` …, the erased state's `getEnv`, never read).
+  A landed state the rest no longer reads leaves a premise `Nonempty
+  (Landed …)` (`landedAll_const`); `sol_close`'s last step therefore
+  introduces every premise and splits every conjunct before `omega |
+  grind` (`Calculus/Close.lean`, and `sol_spec_prep` in
+  `Calculus/SurfaceSpec.lean`).  Hidden binders read at their types
+  (`holds_bind_val` … `_oldNet`).  `Examples/Tactics/SelectOnSaveConsr.lean`'s
+  hand reading is restated on these lemmas.
+- **`sol_decide`** (`Calculus/DecideRel.lean`): `RelB`/`RelU σ ρ g ℓ` relate
+  the reduction's state to a global part and `Locs` (the env field over
+  `Locs.erase`, `Locs.mem_erase_*` ported from `Env`'s); `RelT σ ρ τ` at a
+  typed state; the terms' soundness (`TermOKS` … `MValOKS`) over
+  `Tm.evalT`; the update lemmas (`RelU.elem`, `decl`, `zero`, `one`, `par`,
+  `half`, `two`) over `Upd.applyV`'s pairs, so no typed state is needed
+  between an allocation pair's two writes.  `DecideTyped`: `zero_typed`,
+  `peel_*`, `Fml.toLSM_sound` read updates by `Upd.afterT_applyV`
+  (`RelT.of_lands`, `RelT.push`); `State.redState := withLocals τ.globE []`;
+  `RelU.empty`.  `DecideComplete`'s layout lemmas read `τ.globE.storage`.
+- **`LeafDerive`**: the push split (`holds_push_alias`) over two typed
+  states (`stable_evalS`, `lastSlotS_eval`, `keyFreeS_evalT` read `x` with
+  `σ`'s locals and the storage written); `Env.set_get_self` gone.
+- **`Tools/Counterexample`**: `State.lift? σ q` lifts `Upd.applyV`'s pair
+  (`TEnv.lift?` over `Locs`), `State.lift?_spec` gives the landing facts;
+  `Fml.eval3`/`eval3C` evaluate updates by `Upd.applyV`.
+
+**Outside this lane's files, the smallest fixes** (each a `show` of the
+old equation clause replaced by `holds_eq_erased`/`holds_defined_erased`,
+or `Tm.evalT_eq` at a definedness witness): `SeqRewrite` (`rwEqC_holds`),
+`SoundLoops` (`holds_isBoolD`, `holds_eqD_iffS`), `SoundControl`
+(`holds_isBool`), `UpdateRules`, `FunContract` (`holds_wkFO`),
+`CallbackSound` (`holds_FO_erase`, `holds_reclose`), `UpdRuleScoped`
+(`holds_congr_erase`), `RewriteScoped` (`lawAtom_holds`,
+`litPVAlong_holds`), `RewritePast` (`withStS_holds`, `thinFO`), `Problem`
+(`holds_wt`).  The `laws` lane rewrites these on `Lands`.
+
+**Left** (`rg 'holdsE|EState|Upd\.apply|holds_upd_erased'` over this lane's
+files): `Lands.lean`'s `EState` twins and `Upd.apply`, and `Logic.lean`'s
+`holds_upd_erased` and `EState.anon`: what the update laws (laws lane) still
+read; they go at W9.7.3.
+
+**Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
+(added to `defaultTargets` for the build, not committed), clean; every pin
+built unchanged (`Examples/ProofTree.lean`, `CloseTests`, `Verify`'s
+`#verify` outputs); `check-orphans` (310 reachable), `check-doc-paths`;
+`sorry` count unchanged; `#print axioms Valid.of_reduceS`: `propext`,
+`Classical.choice`, `Quot.sound`.
+
+**Gates** (each file copied under `Solidity/Scratch/`, a fresh worker, `/proc`
+sampled every 20 ms, wall to the last CPU tick; before: this branch's base,
+master at `f009cc96`, measured at the start; the `laws` lane ran in
+parallel, load 1–8):
+
+| Row | Gate | before wall | before CPU | after wall | after CPU |
+|---|---|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 219.3 | 225.5 | 216.7 | 220.8 |
+| `Derived7` | 61.7 | 55.2 | 57.2 | 47.9 | 49.7 |
+| `Tactics/Decide` | 45.0 | 39.2 | 39.9 | 38.3 | 39.1 |
+| `ProofTree` | 11.7 | 8.2 | 8.1 | 8.6 | 8.5 |
+| `Solkey/TestSuite` | 13.2 | 6.9 | 7.0 | 6.8 | 6.9 |
+
+Per file after: `Derived1` 7.0, `2` 7.8, `3` 12.2, `4` 16.7, `5` 7.2, `6` 12.5,
+`7` 47.9, `8` 53.7, `9` 9.0, `10` 9.4, `11` 5.8, `12` 12.0, `13` 6.3, `14` 9.2.
+`Derived8` varies on either tree (this branch 48.9–53.7; master's file
+re-measured back to back 31.4 and 55.5): its `sol_prove` leaves split in
+four files measured alike on both.  Single leaves of `sol_close` against
+master (s of `simp`, the three passes): `compoundStorage` 1.7 against 3.4,
+`storageToMemoryAssign` 3.6 against 4.1, `storageToMemoryUnfold` 3.3 against
+3.7, `precedence` 0.5 against 1.0, `memoryFieldDeleteRef`'s leaf 3.8 against
+3.0 (memory leaves remain the costliest class: an allocation pair and its
+hidden binders).
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -4766,7 +4882,8 @@ and restates every law over hypotheses.
 
 **Open items:**
 - The reduction's symbols over the typed state (decision 83): a scoped
-  term's symbols still read `EState.glob`, untyped.
+  term's symbols still read the global part untyped (`State.globE`, since
+  W9.7.2).
 - `Close`'s `simp` set over typed symbols (decision 82: done for the
   scoped leaf at W9.3, `Calculus/CloseScoped.lean`).
 - A write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩

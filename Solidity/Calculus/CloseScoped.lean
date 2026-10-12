@@ -10,28 +10,36 @@ leaves leaves `Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
 by the elaborators below, which read it with `close_rw_s`
 (`Calculus/Close.lean` declares the syntax and the simp sets).
 
-**The leaf as the closer reads it**: `holds` itself, over the typed state.
-A term reads the state's global part (`State.globE`) and its locals by
-position (`State.getE`).  An update's rest is read in every typed state the
-update lands on (`Upd.afterT`): `CloseS.holds_upd` names such a state `σ'`
-with what is known of it, `σ'.globE = g` for the global part the update
-computes (`Upd.globT`, element by element) and `σ'.getE i = v` for what
-each local holds (`Upd.held`, position by position, `Held.OKT`); the
-contextual passes then rewrite `σ'`'s reads by them.  A negation and a
-precondition read as they stand (`holds` is exact, so no first-order
-restriction).  The binders range over the values of their types: a
-parameter (`∀ uint a`) and a hidden binder of a value type over
-`PrimTy.Denote`, a `uint` over `[0, 2²⁵⁶)` (`forall_uint`); a hidden binder
-of a reference type over the typed references, read erased
-(`LTy.TDenote.erase`).
+**The leaf as the closer reads it**: `holds` itself, over the typed state
+(W9.7.2; the erased reading `holdsE` is gone).  A term reads the state's
+global part (`State.globE`) and its locals by position (`State.loc`, a
+stack of `Locs.push`es over the root state's).  An update is computed on
+the state it is applied in (`Upd.applyV`: its global part and its locals'
+values), and its rest is read in every typed state it lands on
+(`CloseS.holds_upd`, from `Upd.afterT_applyV`): `LandedAll H g ℓ`, the
+states `Landed H g ℓ` whose type carries what they read, so a plain rewrite
+reads them (`Landed.globE_eq`, `Landed.loc_eq`) with no contextual pass and
+no hypothesis.  Three choices keep it as cheap as the erased reading was:
+the rest is a constant until the update's result is known
+(`LandedRest`, else `simp` reads it twice, first with the result
+abstract); the binder is a constant, not a `∀`, so no binder lemma is
+tried at it (`LandedAll`, opened at the end, `landedAll_def`); and a landed
+state names the heap typing before, not the state, so a hidden binder
+pushed before an update is not read after it (`H_push`).  A negation and a
+precondition read as they stand (`holds` is exact).  The binders range
+over the values of their types: a parameter (`∀ uint a`) and a hidden
+binder of a value type over `PrimTy.Denote`, a `uint` over `[0, 2²⁵⁶)`
+(`forall_uint`); a hidden binder of a reference type over the typed
+references, read erased (`LTy.TDenote.erase`).
 
 **The set** states lemmas about `Calculus/Lands.lean`'s typed readers
-only (`Tm.evalT`, `Tm.denoteT`, `Rhs.evalT`, `Upd.globT`, `UpdElem.globT`,
-`Upd.held`) and the typed state's operations as `State.getE`/`State.globE`
-read them (`push`, `setLocal`, `anon`, `havoc`, `drop`), never its fields.
-A term is read constructor by constructor (each equation follows from the
-symbol's, `Calculus/CloseLemmas.lean`).  What the interpreter knows is
-`close_rw`'s, shared.
+only (`Tm.evalT`, `Tm.denoteT`, `Rhs.evalT`, `Upd.applyV`, `UpdElem.globT`)
+and the typed state's operations as `State.loc`/`State.globE` read them
+(`push`, `setLocal`, `anon`, `havoc`, `drop`), never its fields.  A term is
+read constructor by constructor (each equation follows from the symbol's,
+`Calculus/CloseLemmas.lean`).  What the interpreter knows is `close_rw`'s,
+shared; its write-naming lemmas are restated without the locals' fact
+(`CloseS.wp_box_saveStorage`, …), which no typed leaf reads.
 -/
 
 namespace Solidity
@@ -246,14 +254,11 @@ theorem denote_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
 
 end Terms
 
-/-! ## Updates: the global part, then what each local holds
+/-! ## Updates: the global part and the locals' values
 
-An update's rest is read in every typed state it lands on (`Upd.afterT`):
-`holds_upd` names that state with what is known of it, its global part
-(`Upd.globT`, computed below element by element, every right-hand side read
-in the state before) and, position by position, what each local holds
-(`Upd.held`, `Held.OKT`): a contextual `simp` then rewrites the state's
-reads by them. -/
+An update is computed on the state it is applied in (`Upd.applyV`, below
+element by element, every right-hand side read in the state before): its
+global part and the values it leaves in the locals, a `Locs` stack. -/
 
 section Updates
 

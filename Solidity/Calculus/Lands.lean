@@ -25,6 +25,10 @@ What `holds` (`Calculus/Logic.lean`) reads a term and an update by.
   The states it lands on are the typed states that erase to what
   `Upd.apply` computes (`Upd.lands_iff`), so `Upd.afterT`, `holds`' update
   clause, is the erased reading (`Upd.afterT_iff`).
+* What an update leaves, computed on the typed state (W9.7.2's section):
+  `Upd.applyV`, its global part and the locals' values (`Locs`), what a
+  landed state reads (`Upd.lands_iff_applyV`, `Upd.afterT_applyV`); the
+  closer and the decision procedure read updates by it.
 -/
 
 namespace Solidity

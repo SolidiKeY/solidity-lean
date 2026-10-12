@@ -19,8 +19,10 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
   (`Upd.held`), read on the typed state it is applied in, and a heap typing
   that extends that state's, as a typed run's does (`Out.ext`).  Those are
   the typed states that erase to what `Upd.apply` computes on the erasure
-  (`Upd.lands_iff`), so the clause is also read there (`holds_upd_erased`,
-  what the layers above read until W9.7.2 ports them).  The rules' updates
+  (`Upd.lands_iff`), so the clause is also read there (`holds_upd_erased`;
+  with `holds_eq_erased` and `holds_defined_erased`, what the update laws
+  read until W9.7.3; the closer and the decision procedure read the typed
+  clauses, W9.7.2).  The rules' updates
   land on the state the statement's typed run ends in; an update that
   lands on no typed state (a value of another type) says nothing.
 * A modality runs the program and its frames with the typed run: a `bool`
