@@ -607,9 +607,9 @@ theorem requireConditionCapture :
     ~*> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) } ⟨[ require(se1); ]⟩ φ
         where bool se1 }
     ~*> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) where bool se1 }
     ~[revertBox]~> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) where bool se1 }
     ~[sequentialToParallel]~> dl![.box]{
         { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
           ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
