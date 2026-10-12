@@ -5937,6 +5937,64 @@ global part and one `getV` per local are equal, so its congruences become
 `subst`), `Upd.globT_error_of_applyV` (now `_none_`), `afterT.of_error`
 (`of_none`), the old `lands_snoc_local`/`applyV` shapes.
 
+### W9.8.3c closer record (2026-10-12, branch `w98-decide`)
+
+The closer's lemma layer, as far as the `laws` lane's modules allow.
+
+**Name resolution, the main breakage.**  `Theory/Bridge/Denote.lean` now
+imports `Signature.lean`, so `Semantics/Run.lean`'s typed `State C Γ`,
+`SVal T`, `MVal H T` and their functions sit in `Solidity` under every
+closer module, and a bare `State` inside `namespace Solidity` resolves to
+the typed one before `open Semantics` is consulted (`open Semantics (State)`
+does not help).  The untyped interpreter's files write those names
+qualified.  The colliding names (computed over the environment of
+`Calculus/Close.lean`): `MObj`, `MVal`, `SVal` and `SVal.{array, map,
+prim, struct, find, findLive, defaultOf, overlay, save, strip}`, `State`
+and `State.{alloc, env, envVal, heap, mk, net, pay, selfBalance, storage,
+tx}`, `pushSlot`, `writeLoc_eq` (`Semantics.`), and
+`SVal.find_nil`/`SVal.find_save_same` (`SemanticsProperties.`).  Silent
+ones (elaborating to the typed name with no error) were in `close_rw`:
+`State.envVal`, `State.pay`, `SVal.find_nil`, `SVal.prim.injEq`, and
+`sol_close_mt_eval`'s `SVal.save`/`SVal.find`; all qualified.  Every
+untyped-interpreter module above `Signature` needs the same pass
+(`Decide`, `DecideSyn`, `Closer`, the `Semantics`-reading parts of
+`DecideScoped`/`DecideRel`), done by a comment-aware script on the
+identifiers above, never on a module whose `State` means the typed one.
+
+**`Calculus/CloseLemmas.lean`.**  The interpreter part (`Modality.wp_*`,
+values, operators, ledgers, `Close.State.havoc_eq_mk`) unchanged but for
+the qualification.  The symbols section is restated on the typed symbols:
+`Close.Op0.eval_lit` … `Op3.eval_write` over `g : State C []`, each its
+`casesOn` arm by `rfl` (42 equations, every symbol but `fieldIn`,
+`selectIn`, `member`, `findIn`, `sfindIn`, `delAtIn`, `saveIn`, `atIn`).
+**Vanished** with the untyped symbols (a typed argument is at its type; a
+revert is `none`; nothing is `undef`): the conversions inside the symbol
+equations (`Value.asInt` of `net` and `at`, `toSVal` of `sval`, `toMVal`
+of `mval`, `MVal.asRef` of `copy`/`iread`, `arrLen` of `len`, `pastEnd`
+of `next`, `checkIndex` on the untyped storage, now `Storage.atT`),
+`pickBranch`'s `undef` arm (`ite` is `cond`), `push`'s `.uint` element
+type, and the three `save` equations (`eval_save_val`/`_find`/`_copyMem`,
+one per right-hand side because `writeStorage` overlaid a struct):
+`Storage.write` is one `eval_save`.  The value lemmas of the interpreter
+(`asInt_eq_ok`, `mval_asValue_ref`'s `undef`, `pickBranch_eq`, …) stay,
+read by `close_rw` and `sol_decide`'s language over `Semantics.State`.
+
+**Elaborates, no error and no warning**: `CloseLemmas`, `ReadWrite`,
+`Close` (the `close_rw`/`close_rw_last` sets, `sol_close`,
+`sol_close_mt`), `DecideLang`, `KeyNotation`, `MemRead`, `SlotLemmas`,
+`MemTheory`.  `sorry` count 19.
+
+**Next first errors** (none of them this lane's to reach):
+- `Calculus/CloseScoped.lean`: imports `SeqRewrite` (lane `laws`); its
+  `CloseS.eval_*` restate `Close.Op*.eval_*` on `Tm` and must take the
+  typed ones (`Tm.eval_app2` then the symbol's equation), the save trio
+  becoming one.
+- `Calculus/Decide.lean`: imports `StateFacts` (lane `laws`); expect the
+  qualification pass first.  `DecideSyn`, `DecideScoped`, `DecideRel`,
+  `DecideTyped`, `DecideComplete`, `Closer`, `Closers` follow it.
+- `Calculus/Deploy.lean`: `Calculus/Problem.lean` (the front end's
+  `SurfaceSpec`/`Spec`).
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
