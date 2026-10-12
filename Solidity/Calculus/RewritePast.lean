@@ -1257,19 +1257,432 @@ end Merge
 
 /-! ## A storage write applied to a first-order line (`applyStorageBox`)
 
-`[{storage := S}] φ ⇝ φ[S/storage]`, past the program.  **Not ported to the
-typed sorts yet** (`docs/intrinsic.md`, W9.8.3d chain record): an equation
-reads its terms through `denote`, so the substitution needs the Theory's
-operations to respect `Equiv` symbol by symbol (`Struct.Equiv.copyTo` …, a
-typed `Srt.DEquiv`); until then the rewrite applies nowhere, and
-`applyStorageBox` past the program is `Calculus/RewriteScoped.lean`'s on a
-box update of the storage and locals. -/
+`[{storage := S}] φ ⇝ φ[S/storage]`, past the program, `φ` first-order.
+The substitution is the storage merge's (`Tm.substP`,
+`Calculus/StatePartsScoped.lean`: `storage` by `S`, a push slot and an index
+check read in `S`), so a substituted term reads before the write as the term
+reads where it lands (`Tm.substP_eval`).  An equation reads its terms
+through `denote`, which the substitution keeps up to `Equiv`
+(`Tm.substP_denote`): each typed symbol's denotation respects `Equiv` of its
+arguments' (`Srt.DEquiv`, `Op0.denote_congrP` … `Op3.denote_congr`), and
+`S` denotes, up to `Equiv`, the storage it leaves (`Tm.denote_eval`). -/
 
-/-- **`applyStorageBox`** past the program, at position `i` of the spine: not
-ported to the typed sorts, so it applies nowhere. -/
-def FmlRw.applyStorageBoxP (_i : Nat) : FmlRw C where
-  apply := fun _ => none
-  sound := fun h => nomatch h
+section WithSt
+
+open Theory Theory.StValue
+
+/-- Two denotations of a sort agree in the Theory: `Equiv` for a value or a
+storage, equal paths. -/
+def Srt.DEquiv : (s : Srt) → s.TDen → s.TDen → Prop
+  | .val _ => StValue.Equiv
+  | .path _ => Eq
+  | .st => Struct.Equiv
+  | .sv _ => StValue.Equiv
+  | .sts _ => Struct.Equiv
+  | .spath _ _ => Eq
+  | .ident _ | .addr _ | .mem | .mv _ => fun _ _ => True
+
+theorem Srt.DEquiv.refl : (s : Srt) → (d : s.TDen) → Srt.DEquiv s d d
+  | .val _, _ | .st, _ | .sv _, _ | .sts _, _ => StValue.Equiv.refl _
+  | .path _, _ | .spath _ _, _ => rfl
+  | .ident _, _ | .addr _, _ | .mem, _ | .mv _, _ => trivial
+
+theorem Srt.sameO_sv {H₀ H₁ : HTy} {T : Ty} {x : Option ((Srt.sv T).Den C H₀)}
+    {y : Option ((Srt.sv T).Den C H₁)} : Srt.SameO (.sv T) x y ↔ x = y :=
+  ⟨fun h => by
+    cases x <;> cases y <;>
+      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
+   fun h => by rw [h]; rfl⟩
+
+variable {g₀ g₁ : State C []}
+
+/-- A constant that reads no storage denotes alike in two global parts with
+one ledger, funds and transaction. -/
+theorem Op0.denote_congrP {s : Srt} (o : Op0 C s) (hr : g₀.SameRest g₁)
+    (hs : g₁.storage = g₀.storage ∨ o.stFree = true) :
+    Srt.DEquiv s (o.denote g₀) (o.denote g₁) := by
+  rcases g₀ with ⟨st₀, H₀, hp₀, ⟨⟩, n₀, b₀, t₀⟩
+  rcases g₁ with ⟨st₁, H₁, hp₁, ⟨⟩, n₁, b₁, t₁⟩
+  obtain ⟨hn, hb, ht⟩ := hr
+  dsimp only at hn hb ht
+  subst hn hb ht
+  cases o with
+  | storage =>
+    rcases hs with hs | hs
+    · dsimp only at hs; subst hs; exact Srt.DEquiv.refl _ _
+    · exact absurd hs Bool.false_ne_true
+  | _ => exact Srt.DEquiv.refl _ _
+
+/-- A unary symbol respects `Equiv` of its argument's denotation, in two
+global parts with one ledger, funds and transaction. -/
+theorem Op1.denote_congrP {a s : Srt} (o : Op1 C a s) (hr : g₀.SameRest g₁)
+    (hs : g₁.storage = g₀.storage ∨ o.stFree = true) {d d' : a.TDen}
+    (h : Srt.DEquiv a d d') : Srt.DEquiv s (o.denote g₀ d) (o.denote g₁ d') := by
+  rcases g₀ with ⟨st₀, H₀, hp₀, ⟨⟩, n₀, b₀, t₀⟩
+  rcases g₁ with ⟨st₁, H₁, hp₁, ⟨⟩, n₁, b₁, t₁⟩
+  obtain ⟨hn, hb, ht⟩ := hr
+  dsimp only at hn hb ht
+  subst hn hb ht
+  cases o with
+  | unop op ho =>
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    rw [h.toRes]
+    exact StValue.Equiv.refl _
+  | net =>
+    simp only [Srt.DEquiv] at h ⊢
+    rcases h.eq_or_st with h | ⟨s, t, hs, ht⟩
+    · rw [h]; exact StValue.Equiv.refl _
+    · simp only [Op1.denote, hs, ht]; exact StValue.Equiv.refl _
+  | delValue =>
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    exact StValue.Equiv.delValue h
+  | field hf | fieldIn hf =>
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢; rw [h]
+  | next =>
+    rcases hs with hs | hs
+    · dsimp only at hs; subst hs
+      simp only [Srt.DEquiv, Op1.denote] at h ⊢; rw [h]
+    · exact absurd hs Bool.false_ne_true
+  | sval => exact h
+  | newArr hR =>
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    rw [h.asInt]
+    exact StValue.Equiv.refl _
+  | select r hr' | selectIn hr' =>
+    simp only [Srt.DEquiv, Op1.denote] at h ⊢
+    exact StValue.Equiv.asStruct (StValue.Equiv.select h _)
+  | alloc _ _ | mfield _ | addM _ _ | mval | ref => trivial
+  | wt => exact StValue.Equiv.refl _
+
+/-- A binary symbol respects `Equiv` of its arguments' denotations, and a
+memory read its arguments' readings, in two global parts with one ledger,
+funds and transaction. -/
+theorem Op2.denote_congrP {a b s : Srt} (o : Op2 C a b s) (hr : g₀.SameRest g₁)
+    {x : Option (a.Den C g₀.H)} {x' : Option (a.Den C g₁.H)} {y : Option (b.Den C g₀.H)}
+    {y' : Option (b.Den C g₁.H)} (hx : Srt.SameO a x x') (hy : Srt.SameO b y y')
+    {da da' : a.TDen} {db db' : b.TDen} (ha : Srt.DEquiv a da da') (hb : Srt.DEquiv b db db') :
+    Srt.DEquiv s (o.denote g₀ x y da db) (o.denote g₁ x' y' da' db') := by
+  cases o with
+  | binop op ho =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [ha.toRes, hb.toRes]
+    exact StValue.Equiv.refl _
+  | find | sfind | len | findIn | sfindIn =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [hb]
+    exact StValue.Equiv.findSt ha _
+  | read =>
+    have he := Srt.sameO_val.1 (Op2.eval_sameP .read hr (.inr rfl) hx hy)
+    simp only [Srt.DEquiv, Op2.denote]
+    rw [he]
+    exact StValue.Equiv.refl _
+  | mlen =>
+    have he := Srt.sameO_val.1 (Op2.eval_sameP .mlen hr (.inr rfl) hx hy)
+    simp only [Srt.DEquiv, Op2.denote]
+    rw [he]
+    exact StValue.Equiv.refl _
+  | copyMem =>
+    have he := Srt.sameO_sv.1 (Op2.eval_sameP .copyMem hr (.inr rfl) hx hy)
+    simp only [Srt.DEquiv, Op2.denote]
+    revert he
+    generalize Op2.eval g₀ .copyMem x y = u
+    generalize Op2.eval g₁ .copyMem x' y' = v
+    intro he
+    subst he
+    cases u <;> exact StValue.Equiv.refl _
+  | «at» it =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [ha, hb.asInt]
+  | nextIn =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [hb, Struct.Equiv.lenAt ha]
+  | delAt | delAtIn =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [hb]
+    exact Struct.Equiv.delAt ha _
+  | pushSlot | extend =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [hb]
+    exact Struct.Equiv.pushSlotT _ _ ha _
+  | pop =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [hb]
+    exact Struct.Equiv.popT ha _
+  | shrink =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rw [hb]
+    exact Struct.Equiv.shrinkT ha _
+  | iread | copy _ | mat _ | copySt _ => trivial
+
+/-- A ternary symbol respects `Equiv` of its arguments' denotations. -/
+theorem Op3.denote_congr {a b c s : Srt} (o : Op3 C a b c s) {da da' : a.TDen}
+    {db db' : b.TDen} {dc dc' : c.TDen} (ha : Srt.DEquiv a da da') (hb : Srt.DEquiv b db db')
+    (hc : Srt.DEquiv c dc dc') : Srt.DEquiv s (o.denote da db dc) (o.denote da' db' dc') := by
+  cases o with
+  | ite =>
+    simp only [Srt.DEquiv, Op3.denote] at ha hb hc ⊢
+    rcases ha.eq_or_st with h | ⟨s, t, hs, ht⟩
+    · rw [h]
+      split
+      · exact hb
+      · exact hc
+      · exact StValue.Equiv.refl _
+    · simp only [hs, ht]
+      exact StValue.Equiv.refl _
+  | atIn it =>
+    simp only [Srt.DEquiv, Op3.denote] at hb hc ⊢
+    rw [hb, hc.asInt]
+  | save | saveIn =>
+    simp only [Srt.DEquiv, Op3.denote] at ha hb hc ⊢
+    rw [hb]
+    exact Struct.Equiv.copyTo ha hc _
+  | push =>
+    simp only [Srt.DEquiv, Op3.denote] at ha hb hc ⊢
+    rw [hb]
+    exact Struct.Equiv.pushT ha (StValue.Equiv.stripVal hc) _
+  | write => trivial
+
+variable {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {σ₁ : State C Δ} {g : GlobT C σ₀.H}
+  {stS : Option (Tm C Γ .st)} {memS : Option (Tm C Γ .mem)}
+
+/-- **Read before the update, the substituted term denotes, up to `Equiv`,
+what the term denotes in a typed state it lands on.** -/
+theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ₁.glob)
+    (hst : StOK σ₀ σ₁ stS) (hmem : MemOK σ₀ σ₁ memS) :
+    {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → Tm.substP U.held stS memS t = some t' →
+      Srt.DEquiv k (t'.denote σ₀) (t.denote σ₁)
+  | _, .pvV i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvV j) | .rhs (.val t) => some t) = some t' := h
+    generalize U.held i = x at h hx
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show StValue.Equiv (.prim (PrimTy.erase (TEnv.get j σ₀.env)))
+        (.prim (PrimTy.erase (TEnv.get i σ₁.env)))
+      rw [hx]
+      exact StValue.Equiv.refl _
+    | .rhs (.val t), hx, h =>
+      cases h
+      have hb := Tm.denote_eval σ₀ t' _ hx
+      show StValue.Equiv _ (.prim (PrimTy.erase (TEnv.get i σ₁.env)))
+      rw [hb]
+      exact StValue.Equiv.refl _
+  | _, .pvP i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvP j) | .rhs (.path p) => some p | .rhs .unset => none) =
+          some t' := h
+    generalize U.held i = x at h hx
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show (Tm.pvP j).denote σ₀ = (Tm.pvP i).denote σ₁
+      simp only [Tm.denote, hx]
+      split <;> rfl
+    | .rhs (.path p), hx, h =>
+      cases h
+      have hx : (t'.eval σ₀).bind (fun r => some (some r)) = some (TEnv.get i σ₁.env) := hx
+      cases hp : t'.eval σ₀ with
+      | none => rw [hp] at hx; cases hx
+      | some q =>
+        rw [hp] at hx
+        have hq : TEnv.get i σ₁.env = some q := (Option.some.inj hx).symm
+        show t'.denote σ₀ = (Tm.pvP i).denote σ₁
+        simp only [Tm.denote, hq]
+        exact Tm.denote_eval σ₀ t' q hp
+  | _, .pvS i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvS j) | .rhs (.store x) => some x) = some t' := h
+    generalize U.held i = x at h hx
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show Struct.Equiv (Storage.absT (TEnv.get j σ₀.env : Storage C))
+        (Storage.absT (TEnv.get i σ₁.env : Storage C))
+      rw [hx]
+      exact StValue.Equiv.refl _
+    | .rhs (.store x), hx, h =>
+      cases h
+      have hx : (t'.eval σ₀).bind (fun st => some st) = some (TEnv.get i σ₁.env) := hx
+      cases hp : t'.eval σ₀ with
+      | none => rw [hp] at hx; cases hx
+      | some q =>
+        rw [hp] at hx
+        have hq : q = TEnv.get i σ₁.env := Option.some.inj hx
+        show Struct.Equiv (t'.denote σ₀) (Storage.absT (TEnv.get i σ₁.env : Storage C))
+        rw [← hq]
+        exact Tm.denote_eval σ₀ t' q hp
+  | _, .pvI _, _, _ => trivial
+  | _, .netOf i a, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => (Tm.substP U.held stS memS a).map (Tm.netOf j) | .rhs _ => none) =
+          some t' := h
+    generalize U.held i = x at h hx
+    match x, hx, h with
+    | .rhs _, _, h => cases h
+    | .pos j, hx, h =>
+      obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      have ih : StValue.Equiv (a'.denote σ₀) (a.denote σ₁) :=
+        Tm.substP_denote hL hr hst hmem a ha
+      show StValue.Equiv (Tm.denote σ₀ (.netOf j a')) (Tm.denote σ₁ (.netOf i a))
+      rcases ih.eq_or_st with e | ⟨s, t, hs, ht⟩
+      · simp only [Tm.denote, e, hx]; exact StValue.Equiv.refl _
+      · simp only [Tm.denote, hs, ht]; exact StValue.Equiv.refl _
+  | _, .app0 o, t', h => by
+    cases h
+    cases o with
+    | storage =>
+      cases stS with
+      | some S => exact Tm.denote_eval σ₀ S σ₁.storage hst
+      | none => exact Op0.denote_congrP .storage hr (.inl hst)
+    | memory => trivial
+    | lit v => exact Op0.denote_congrP (.lit v) hr (.inr rfl)
+    | env k => exact Op0.denote_congrP (.env k) hr (.inr rfl)
+    | root r hr' => exact Op0.denote_congrP (.root r hr') hr (.inr rfl)
+    | mtSt => exact Op0.denote_congrP .mtSt hr (.inr rfl)
+    | member s f hf => exact Op0.denote_congrP (.member s f hf) hr (.inr rfl)
+  | _, .app1 o x, t', h => by
+    obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
+    have ihx := Tm.substP_denote hL hr hst hmem x hx
+    by_cases hn : o.stFree = true
+    · rw [Op1.substStep_of_stFree stS hn]
+      exact Op1.denote_congrP o hr (.inr hn) ihx
+    cases o with
+    | next =>
+      cases stS with
+      | some S =>
+        have hS : Struct.Equiv (S.denote σ₀) σ₁.storage.absT := Tm.denote_eval σ₀ S σ₁.storage hst
+        have ihx : x'.denote σ₀ = x.denote σ₁ := ihx
+        show Tm.denote σ₀ (Tm.app2 .nextIn S x') = Tm.denote σ₁ (Tm.app1 .next x)
+        simp only [Tm.denote, Op2.denote, Op1.denote, ihx, Struct.Equiv.lenAt hS]
+        rfl
+      | none => exact Op1.denote_congrP .next hr (.inl hst) ihx
+    | _ => exact absurd rfl hn
+  | _, .app2 o x y, t', h => by
+    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    have ihx := Tm.substP_denote hL hr hst hmem x hx
+    have ihy := Tm.substP_denote hL hr hst hmem y hy
+    have evx := Tm.substP_eval hL hr hst hmem x hx
+    have evy := Tm.substP_eval hL hr hst hmem y hy
+    by_cases hn : o.stFree = true
+    · rw [Op2.substStep_of_stFree stS hn]
+      exact Op2.denote_congrP o hr evx evy ihx ihy
+    cases o with
+    | «at» it =>
+      cases stS with
+      | some S =>
+        have ihx : x'.denote σ₀ = x.denote σ₁ := ihx
+        have ihy : StValue.Equiv (y'.denote σ₀) (y.denote σ₁) := ihy
+        show Tm.denote σ₀ (Tm.app3 (.atIn it) S x' y') = Tm.denote σ₁ (Tm.app2 (.at it) x y)
+        simp only [Tm.denote, Op3.denote, Op2.denote, ihx, ihy.asInt]
+      | none => exact Op2.denote_congrP (.at it) hr evx evy ihx ihy
+    | _ => exact absurd rfl hn
+  | _, .app3 o x y z, t', h => by
+    obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Op3.denote_congr o (Tm.substP_denote hL hr hst hmem x hx)
+      (Tm.substP_denote hL hr hst hmem y hy) (Tm.substP_denote hL hr hst hmem z hz)
+
+/-- A first-order formula of `Δ` read in `Γ` before an update of locals and
+the storage (`Tm.substP`); `none` past anything else. -/
+def Fml.substSt (s : Subst C Γ Δ) (S : Tm C Γ .st) : Fml C Δ → Option (Fml C Γ)
+  | .tt => some .tt
+  | .eq a b => do pure (.eq (← Tm.substP s (some S) none a) (← Tm.substP s (some S) none b))
+  | .defined t => (Tm.substP s (some S) none t).map .defined
+  | .not φ => (Fml.substSt s S φ).map .not
+  | .and φ ψ => do pure (.and (← Fml.substSt s S φ) (← Fml.substSt s S ψ))
+  | .imp φ ψ => do pure (.imp (← Fml.substSt s S φ) (← Fml.substSt s S ψ))
+  | _ => none
+
+/-- **A first-order formula substituted holds before the update as the
+formula holds in a typed state it lands on.** -/
+theorem Fml.substSt_holds {S : Tm C Γ .st} (hL : U.Lands σ₀ g σ₁)
+    (hr : σ₀.glob.SameRest σ₁.glob) (hst : StOK σ₀ σ₁ (some S))
+    (hmem : MemOK σ₀ σ₁ (none : Option (Tm C Γ .mem))) :
+    (φ : Fml C Δ) → {φ' : Fml C Γ} → Fml.substSt U.held S φ = some φ' →
+      (holds σ₀ φ' ↔ holds σ₁ φ)
+  | .tt, _, h => by cases h; exact Iff.rfl
+  | .eq a b, _, h => by
+    obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    have ea : StValue.Equiv (a'.denote σ₀) (a.denote σ₁) := Tm.substP_denote hL hr hst hmem a ha
+    have eb : StValue.Equiv (b'.denote σ₀) (b.denote σ₁) := Tm.substP_denote hL hr hst hmem b hb
+    rw [holds_eq, holds_eq]
+    exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
+  | .defined t, _, h => by
+    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
+    rw [holds_defined, holds_defined, Srt.sameO_val.1 (Tm.substP_eval hL hr hst hmem t ht)]
+  | .not φ, _, h => by
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact not_congr (Fml.substSt_holds hL hr hst hmem φ hφ)
+  | .and φ ψ, _, h => by
+    obtain ⟨φ', hφ, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact and_congr (Fml.substSt_holds hL hr hst hmem φ hφ) (Fml.substSt_holds hL hr hst hmem ψ hψ)
+  | .imp φ ψ, _, h => by
+    obtain ⟨φ', hφ, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact imp_congr (Fml.substSt_holds hL hr hst hmem φ hφ) (Fml.substSt_holds hL hr hst hmem ψ hψ)
+  | .upd .., _, h | .modal .., _, h | .havoc _, _, h | .all .., _, h | .bind .., _, h
+  | .anon .., _, h => by cases h
+
+/-- `[{storage := S}] φ ⇝ φ[S/storage]` on the update in front. -/
+def Fml.applyStTop {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
+  match m, U with
+  | .box, .snoc .nil (.storage S) => Fml.substSt (Upd.snoc .nil (.storage S)).held S φ
+  | _, _ => none
+
+theorem Fml.applyStTop_sound {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
+    {ψ : Fml C Γ} (h : Fml.applyStTop m U φ = some ψ) (σ : State C Γ) (hψ : holds σ ψ) :
+    holds σ (.upd m U φ) := by
+  cases m with
+  | diamond => cases h
+  | box =>
+    cases U with
+    | snoc U e =>
+      cases U with
+      | nil =>
+        cases e with
+        | storage S =>
+          have h : Fml.substSt (Upd.snoc .nil (.storage S)).held S φ = some ψ := h
+          refine Upd.afterT_intro (fun _ => trivial) fun g σ₁ hL => ?_
+          obtain ⟨hr, hm⟩ := Upd.stOnly_glob (Upd.snoc (C := C) .nil (.storage S)) rfl hL.1
+          have hg : σ₁.glob = g.1 := hL.2.1
+          have hr' : σ.glob.SameRest σ₁.glob := hg ▸ hr
+          have hS : StOK σ σ₁ (some S) := by
+            show S.eval σ = some σ₁.storage
+            rw [Upd.lastSt_eval _ hL.1 S rfl, ← hg]
+            rfl
+          have hm' : MemOK σ σ₁ (none : Option (Tm C Γ .mem)) := by
+            show Srt.forget .mem σ₁.glob.memT = _
+            rw [hg]
+            exact hm
+          exact (Fml.substSt_holds hL hr' hS hm' φ h).1 hψ
+        | _ => cases h
+      | _ => cases h
+    | _ => cases h
+
+/-- **`applyStorageBox`** past the program, at position `i` of the spine:
+`[{storage := S}] φ ⇝ φ[S/storage]` (`Fml.applyStTop`). -/
+def FmlRw.applyStorageBoxP (i : Nat) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.applyStTop m U φ) (fun h σ hψ => Fml.applyStTop_sound h σ hψ) i
+
+end WithSt
 
 /-! ## Out of a thinning's scope
 
