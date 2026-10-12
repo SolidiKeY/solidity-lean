@@ -54,6 +54,7 @@ import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
 import Solidity.Calculus.TypedTerm
 import Solidity.Calculus.TypedLands
+import Solidity.Calculus.LowerT
 import Solidity.Calculus.Logic
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundArms

@@ -5463,6 +5463,109 @@ module without warning; `#print axioms` of `UpdT.lands_iff`,
 `propext`, `Classical.choice`, `Quot.sound`; `sorry` count 19;
 `check-orphans` (312 reachable), `check-doc-paths`.
 
+### W9.8.2 lower record (2026-10-12, branch `w98-lower`)
+
+Additive: nothing existing changed meaning, no pin moved.
+
+**`select` typed** (`Signature.lean`).  Two sorts: `sts s`, the struct `s`'s
+members read as a storage, and `spath s T`, a path from one of them.  Both
+denote through `Contract.ofStruct s` (a contract whose state variables are
+`structDef s`): `Storage (Contract.ofStruct s)` and `SRef (Contract.ofStruct s) T`,
+so every storage operation, its erase lemma and its law apply unchanged.
+Symbols: `select r h : st → sts s` (at a root), `selectIn h : sts s → sts s'`
+(at a member), `member s f h : spath s T` (a member as a root),
+`fieldIn`, `findIn`, `sfindIn`, `delAtIn`, `saveIn`; each erases to its
+untyped namesake (`Op1.select r`, `Op0.root f`, `.field`, `.find`, …), so
+`find(select(s, alice), age)` reads typed as solkey writes it
+(`TmT.aliceSelectRead`, `1` by `decide +kernel`).  Deviation from the plan's
+`st → path (struct s) → sts s`: `select` takes the root (or member) name,
+as `Op1.select r` and `findMemberCons` do; the path reading is
+`SRef.under` with `Storage.find_selectT` (a read under `select(s, r)` is
+the read at `r.q`, solkey's `findMemberCons`).  Eval cases, `okE`, the
+bridge cases (`Storage.findStorage_selectT`; `find`/`delAt`/`sfind`/`save`
+share their proofs with the `In` twins), and `TmT.findOnSaveIn`
+(`Storage.findOnSave` at `Contract.ofStruct`).  Not done: the typed
+`selectOnSave*`/`selectOnDelAt*` (a `select` of a write), and an index
+under `select` (`atIn` over `sts`).  Found: the untyped `at` under a
+`select` checks its index against the global storage at the *member's*
+name (`Op2.at` reads `σ`, not the `select`ed state).
+
+**`Calculus/LowerT.lean`** (new; above `TypedTerm`, since `TmT` sits above
+`Arms` and `Rules`): `Simple`/`SPath`/`Loc`/`MPath`/`MLoc`/`Val`/`Src`/`MSrc.lowerT`,
+`TmT.keyAt`, the root and member proofs passed through.  Bridges
+`x.lowerT.erase = x.lower` for each (`MPath` through `MPath.eraseT`).
+The arms' update elements typed, each with its bridge to the element as
+the arm writes it: `UpdElemT.setLocal`, `save`, `saveMem`, `delAt`,
+`writeMem`, `clearMem`, `pushSlot`, `extend`, `push`, `pop`, `shrink`,
+`payTo`, `rebind`, `rebindMem`; `UpdT.allocCopy`, `allocFresh`, `pushBind`;
+`OpLoc.curT`/`setT`/`opT`, `TmT.bumped`, `TmT.one`.
+
+*Lowered shapes with no typed form*: `MPath.loc l` at a word (`iread` of a
+word slot; lowered to its address, `Ty.mpathSrt`, and `MPath.eraseT` puts
+the `iread` back; no arm reads one).  *Typed only under a premise the
+statement carries*: `Premise.saveMem` at one reference type (the untyped
+takes any two), `clearMem`/`allocCopy`/`allocFresh` a `mapFree` proof
+(`MPath.var`, `MRhs.mapFree`), `opT`/`bumped` `op.hasCompoundAssign` and
+`p.isNumeric` (`BinOp.compound_accepts`/`compound_ret`).
+
+**Rules: the W9.8.3 worklist.**  Every taclet's terms come from the arm's
+builders, through `lower` (or a literal); none builds a term the typed
+lowering lacks.
+
+| Taclets | Terms built by | Typed form | Blocker |
+|---|---|---|---|
+| program-only premises: every `*_unfold_*`, `*Capture*`, `*InitDrop`, `binopUnfoldLeft/Right`, `unopCapture`, `logical{And,Or}ShortCircuitRhs`, `ternaryToIf`, `ternaryCaptureCond`, `*UnfoldLeftFst`, `newArrayCapture`, `memoryStorageCopyUnfold`, `ifElseUnfold`, `functionBodyExpand`, `internalCallExpand`, `blockEmpty`, `whileUnwind`, `functionCallArgCapture`; closers `revertBox/Diamond`, `tryCallDiamond`, `transferDiamond`, `whileClose`, `whileNoVariantDiamond`, `tryCallNoCallbackBox` | no term | n/a | none |
+| `localValueAssign`, `binopAssignment`, `unopAssignment`, `storageRootReadSelect`, `storageFieldReadFind`, `storageIndexRead{Mapping,Array}Find`, `storageLengthRead`, `memoryLengthRead`, `memoryFieldRead`, `memoryIndexReadArrayValue` | `Premise.setLocal` (`Val.lower`) | y, `UpdElemT.setLocal` | none |
+| `valueDeclSkip`, `storageLocalDeclSkip` | literal `defVal(T)`, `unset` | y (`lit (PrimTy.dflt p)`, `RhsT.unset`) | none |
+| `storageRootWriteStore`, `storageRootWriteCopySource`, `storageFieldReadStoreRoot`, `storageIndexRead{Mapping,Array}StoreRoot`, `storageFieldWriteSave`, `storageFieldWriteCopySource`, `storageIndexWrite{Mapping,Array}{Save,CopySource}` | `Premise.save` | y, `UpdElemT.save` | none |
+| `storageRootDelete`, `storageFieldDelete`, `storageIndexDelete`, `storageIndexArrayDelete` | `Premise.delAt` | y, `UpdElemT.delAt` | none |
+| `storageLocalRootRebind`, `storageFieldReadBindLocalRoot`, `storageIndexRead{Mapping,Array}BindLocalRoot`, `…ArrayBindLocalRootMappingElement` | `SPath.lower` | y, `UpdElemT.rebind` | none |
+| `storageLocalRootPushBind`, `…MappingElement` | `extend`, `next` | y, `UpdT.pushBind` | none |
+| `localOpAssign`, `storage{Root,Field}OpAssign`, `storageIndex{Mapping,Array}OpAssign`, `memory{Field,IndexArray}OpAssign` | `OpLoc.set`/`op` | y, `setT`/`opT` | `hop`, `hp` passed (the statement has them) |
+| `localIncrement`, `storage{Root,Field,Index}Increment`, `memory{Field,IndexArray}Increment`, `localAssignIncrement`, `storage{Root,Field,Index}IncrementAssignment`, `memory{Field,IndexArray}IncrementAssignment` | `OpLoc.set`/`op`, `Tm.one`, `Tm.bumped` | y, `setT`/`opT`/`TmT.one`/`TmT.bumped` | `hp` passed |
+| `storagePushValueSave`, `storagePushValueCopySource`, `storagePushLengthSave`, `…ReferenceElement`, `storagePopSave`, `storagePopSaveMappingElement` | `push`/`pushSlot`/`extend`/`pop`/`shrink` | y, `UpdElemT.push` … | none |
+| `transferNoCallbackBox`, `sendNoCallbackBox` | `UpdElem.payTo`, `pv := true/false` | y, `UpdElemT.payTo` | none |
+| `sendNoCallbackDiamond` | `payTo`; `0 <= se` | updates y; atom n | no typed formula (`Fml` atoms are `Tm`) |
+| `memoryRootRebind`, `memoryFieldReadAliasRoot`, `memoryIndexReadArrayMemory` | `MPath.lower` | y, `UpdElemT.rebindMem` | none |
+| `memoryFieldWrite`, `memoryIndexWriteArray`, `memoryFieldWriteCopy`, `memoryIndexWriteCopy` | `Premise.writeMem` | y, `UpdElemT.writeMem` | none |
+| `memoryReferenceDeclFreshAlloc`, `memoryRootDeleteFreshRebind` | `alloc`/`addM` | y, `UpdT.allocFresh` | `mapFree` passed |
+| `memoryArrayFreshAlloc`, `memoryStorageCopy` | `Premise.allocCopy` | y, `UpdT.allocCopy` | `mapFree` passed (`RefTy.mapFree_of_newArrOk`, `MRhs.copy`) |
+| `memory{Field,Index}Delete{Primitive,Reference}` | `Premise.clearMem` | y, `UpdElemT.clearMem` | `mapFree` passed (`Ty.mapFree_field`) |
+| `memoryToStorage{StoreRoot,FieldCopyRoot,IndexMappingCopyRoot,IndexArrayCopyRoot}` | `Premise.saveMem` | y, `UpdElemT.saveMem` | one `R` (the statement has one) |
+| `ifElseSplit`, `requireSimple`, `assertSimple`, `loopExit`, `whileInvariantBox`, `whileInvariantDiamond` | `Fml.isBool`/`isBoolD`/`eqD` of `lower`; updates `b := cond`, `variant := dec` | updates y; atoms n | no typed formula |
+
+Blockers common to all (W9.8.3): (1) placement: `TmT`, its erasure and
+`LowerT` must move under `Calculus/Lower.lean` (`Signature.lean` imports
+nothing from `Calculus/`, so it fits; `TmT.eval` stays above, with
+`Lands`); (2) `Premise` holds `Upd`/`Fml`: a typed rule either builds
+`UpdT` and erases (the bridges here are the equations), or `Premise` takes
+`UpdT`; (3) `dl{}` (`RuleSyntax`'s `Tms`, `Simple.keyLower`,
+`DelabErase`'s list of `lower` names) emits `Tm`: it needs typed `Tms`
+twins and their printer; (4) the formula atoms need a typed `Fml` (W9.8.5).
+
+**Timing** (`IO.monoNanosNow` around `elabTerm` in a scratch module, seven
+runs, steady state; first run in brackets):
+
+| Term | untyped | typed |
+|---|---|---|
+| `alice.age` as scoped syntax, lowered (`Val.read …`) | 2.0 ms (12) `lower` | 2.0 ms (12) `lowerT` |
+| the syntax alone | 2.0 ms (16) | — |
+| `find(storage, alice.age)` by hand | 0.82 ms (1.2) `Tm` | 2.05 ms (12) `TmT` |
+| `alice.age + alice.account.balance` (locations defined) | 1.15 ms | 1.15 ms |
+| `storage := save(storage, alice.age, …)` (`UpdElemT.save`) | 0.84 ms | 0.48 ms |
+| `alice.age += 1` (`OpLoc.set`/`op`) | 3.95 ms | 4.3 ms |
+| `OpLoc.set`, the six-arm builder, as a definition | 14.0–14.5 ms | 13.1–13.4 ms |
+| kernel: `decide +kernel` on the read in `State.init` | 18–19.6 ms (`Tm.eval`) | 15.5–17 ms (`TmT.eval`) |
+
+The cost W9.8.1 measured (6–7×) is the `rfl` of `rootType`/`fieldType`,
+which a hand `TmT` literal pays and the scoped syntax already pays: the
+typed lowering adds nothing to it, and a builder over schema variables is
+no slower.  `Rules.lean` is unchanged, so its check is too.
+
+**Checked**: `lean_build` of the default targets (294 jobs), the three
+files without warning; `sorry` count unchanged (19); `check-orphans` (312
+reachable), `check-doc-paths`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
