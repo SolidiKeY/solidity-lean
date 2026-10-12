@@ -14,16 +14,13 @@ walks the path from the left: `SVal.save` and `SVal.find` unfold only on
 `Seg.field name :: rest`, as the theory's `findDefinitionCons` and
 `selectOnSaveCons` match `cons(a, flds)`.
 
-`ageWriteRead` shows the problem where it bites, at the interpreter: `apply`
-for every step of the calculus, then `rw` on the semantics until the goal is
-closed, with no `sol_close`.  Once the program is gone the path in the goal,
-`[] ++ [.field "age"]`, blocks every rewrite until it is reassociated into
-`cons` form — a step solkey has no taclet for (`consr(nil, a) ⇝ cons(a, nil)`).
-Each `fail_if_success` marks a rewrite that the `consr` path blocks.
-`Modality.wp_box_saveStorage` would hand over the read-after-write at any path
-and hide the problem, so the write is read back by hand.  (`sol_close` does
-the reassociation silently: `List.nil_append` and `List.cons_append` are in
-its `close_rw` set.)
+`ageWriteRead` reads the leaf on the typed state, where the problem no
+longer bites: a typed reference is a root followed by a typed path
+(`SRef.append`, built on the right as KeY builds it), and the typed laws
+read a write at the reference it wrote, whole (`Storage.findOnSave`), so
+no step reassociates a path.  The write is named with what those laws say
+(`CloseS.wp_box_write_prim`, `sol_close`'s first pass), and the read after
+it is the write's by that fact alone.
 
 `ageWriteReadKeY` proves the same program in solkey's order and never leaves
 the sequent: after the calculus steps there is no interpreter reasoning at
@@ -89,53 +86,18 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   sol_leaf
   sol_close_unwrap
   intro σ
-  -- the leaf read on the typed state (`holds`), a term at a time; the
-  -- states the updates land on read as `Upd.applyV` leaves them
-  simp only [CloseS.holds_upd, CloseS.applyV_snoc, CloseS.applyV_nil, CloseS.elem_storage,
-    CloseS.glob_storage, CloseS.elem_local, CloseS.rhs_val, CloseS.eval_save, CloseS.eval_find,
-    CloseS.eval_lit, CloseS.eval_storage, CloseS.eval_field, CloseS.eval_root, Modality.wp_bind,
-    Modality.wp_ok, CloseS.holds_bind, CloseS.holds_eqD, CloseS.landedRest_def,
-    CloseS.Landed.globE_eq, CloseS.Landed.loc_eq, State.globE_push, CloseS.loc_push,
-    CloseS.eval_pvV, CloseS.set_here_here]
-  rw [Modality.wp_box]
-  intro τ hsave x y
-  -- select on save, by hand: what did the write leave at `alice`?
-  unfold State.saveStorage at hsave
-  unfold State.findStorage
-  cases hv : lookupBy "alice" σ.globE.storage with
-  | none =>
-    rw [hv] at hsave
-    cases hsave
-  | some v =>
-    rw [hv] at hsave
-    dsimp only at hsave
-    cases v with
-    | struct fields =>
-      -- the path is `[] ++ [age]`, the equation wants `age :: rest`
-      fail_if_success rw [Semantics.SVal.save] at hsave
-      rw [List.nil_append, Semantics.SVal.save] at hsave
-      cases ha : lookupBy "age" fields with
-      | none =>
-        rw [ha] at hsave
-        cases hsave
-      | some old =>
-        rw [ha] at hsave
-        dsimp only at hsave
-        rw [Semantics.SVal.save] at hsave
-        cases hsave
-        dsimp only
-        rw [lookupBy_setBy_self]
-        dsimp only
-        -- the same block on the read
-        fail_if_success rw [Semantics.SVal.find]
-        rw [List.nil_append, Semantics.SVal.find, lookupBy_setBy_self]
-        dsimp only
-        rw [Semantics.SVal.find, Modality.wp_ok, asValue_toSVal, Modality.wp_ok]
-        -- `x = 42`
-        exact fun _ => rfl
-    | _ =>
-      rw [List.nil_append, Semantics.SVal.save] at hsave
-      cases hsave
+  -- the leaf read on the typed state (`holds`), a term at a time: the write
+  -- named with what the typed laws say of the storage it leaves
+  -- (`CloseS.wp_box_write_prim`: solkey's `findOnSave` at `alice.age`, the
+  -- frame elsewhere), the read after it named `w`
+  sol_close_eval
+  intro st' _ hread _ _ _
+  rw [CloseS.landedAll_def]
+  intro x n _ _ w hw _ _
+  -- the read is of the write: `w` is `42`
+  rw [hread, Option.some.injEq] at hw
+  subst hw
+  rfl
 
 /-- The same program as solkey takes it: the calculus steps, the updates
 merged, the comparison split, the merged update applied, the read of the

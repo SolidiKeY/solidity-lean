@@ -233,7 +233,8 @@ open Theory Theory.StValue in
 def theoryUnfoldLemmasS : List Lean.Name :=
   [``Tm.denote_litS, ``Tm.denote_findS, ``Tm.denote_lenS, ``Tm.denote_storageS,
     ``Tm.denote_saveS, ``Tm.denote_delAtS, ``Tm.denote_svalS, ``Tm.denote_sfindS,
-    ``Tm.denote_rootS, ``Tm.denote_fieldS, ``Tm.denote_atS]
+    ``Tm.denote_rootS, ``Tm.denote_fieldS, ``Tm.denote_atS, ``CloseS.erase_uint,
+    ``CloseS.erase_int, ``CloseS.erase_bool, ``CloseS.ofLit_uint, ``CloseS.ofLit_int]
 
 /-- The subterms of `t` (scoped terms, `t` first). -/
 partial def tmSubterms (t : Expr) (acc : Array Expr := #[]) : MetaM (Array Expr) := do
@@ -262,7 +263,9 @@ def reifyWordS (C Γ p e : Expr) : MetaM (Option Expr) := do
       let ty ← mkEq inR (mkConst ``Bool.true)
       let pf ← mkEqRefl (mkConst ``Bool.true)
       unless ← withAtLeastTransparency .default <| isDefEq (← inferType pf) ty do return none
-      let sub ← mkAppOptM ``Subtype.mk #[mkConst ``Int, none, n, pf]
+      let pred ← withLocalDeclD `n (mkConst ``Int) fun x => do
+        mkLambdaFVars #[x] (← mkEq (mkApp2 (mkConst ``PrimTy.inRange) p x) (mkConst ``Bool.true))
+      let sub := mkApp4 (mkConst ``Subtype.mk [levelOne]) (mkConst ``Int) pred n pf
       return some (← lit sub)
     | _ => return none
   | _ => return none
@@ -348,7 +351,7 @@ the connectives, updates, quantifiers, hidden binders and an open
 modality's postcondition, as `Fml.rwEqC` rewrites them. -/
 partial def Walk.eqSides (φ : Expr) : MetaM (Array Expr) := do
   let φ ← whnf φ
-  if φ.isAppOfArity ``Fml.eq 4 then return #[φ.getArg! 2, φ.getArg! 3]
+  if φ.isAppOfArity ``Fml.eq 5 then return #[φ.getArg! 3, φ.getArg! 4]
   if φ.isAppOfArity ``Fml.and 4 || φ.isAppOfArity ``Fml.imp 4 then
     return (← Walk.eqSides (φ.getArg! 2)) ++ (← Walk.eqSides (φ.getArg! 3))
   if φ.isAppOfArity ``Fml.not 3 || φ.isAppOfArity ``Fml.havoc 3 ||
@@ -490,7 +493,7 @@ def Walk.rwTaclet (h : Lean.Term) (symm : Bool) : TacticM Unit := withMainContex
       let (args, _, _) ← forallMetaTelescope (← instantiateMVars (← inferType pf))
       let pf ← asTacletS (mkAppN pf args)
       let pf ← if symm then mkAppM ``TermTaclet.symm #[pf] else pure pf
-      let_expr TermTaclet _ _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
+      let_expr TermTaclet _ _ _ lhs rhs ← (← whnfR (← instantiateMVars (← inferType pf)))
         | throwError "rw: {h} is not a term taclet or a Theory equation"
       unless ← isDefEq lhs t₀ do throwError "no match"
       for a in args do

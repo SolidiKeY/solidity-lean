@@ -66,8 +66,7 @@ example : ⊢ dl!{ find(save(storage, alice.account, 1), alice.account.balance) 
 runs once the other path is found. -/
 example : ⊢ dl!{ find(save(storage, alice.account.balance, 7), alice.age)
     ≐ find(storage, alice.age) } := by
-  rw [findOnSaveFrame (p := Tms.PTerm.field (Tms.PTerm.field (Tms.PTerm.root "alice") "account")
-    "balance")]
+  rw [findOnSaveFrame (p := pt!{ alice.account.balance })]
   exact Proves.eqRefl
 
 /-- Not a sequent: `rw` is Lean's, and so is its error. -/

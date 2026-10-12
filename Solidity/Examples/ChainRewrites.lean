@@ -575,9 +575,9 @@ example (ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 :=
 error: ~[add_literals]~>: add_literals does not apply to
   dl{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
 (the side condition
-  0 ≤ Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935 + Int.ofNat 1 ∧
-    Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935 + Int.ofNat 1 <
-      Semantics.uintBound
+  BinOp.add.evalT ⟨Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935, ⋯⟩
+      ⟨Int.ofNat 1, ⋯⟩ =
+    some ?_
 of add_literals closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
@@ -638,8 +638,8 @@ example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~=> dl!{ 4
 error: ~[findOnSaveFrame]~>: findOnSaveFrame does not apply to
   dl{ find(save(storage, alice.age, 1), alice.age) ≐ 0 }
 (the side condition
-  (Tm.app1 (Op1.field "age") ⋯ (Tm.app0 (Op0.root "alice"))).diverges
-      (Tm.app1 (Op1.field "age") ⋯ (Tm.app0 (Op0.root "alice"))) =
+  (Tm.app1 (Op1.field ageWriteReadValue._proof_1) (Tm.app0 (Op0.root "alice" balanceWrite._proof_3))).diverges
+      (Tm.app1 (Op1.field ageWriteReadValue._proof_1) (Tm.app0 (Op0.root "alice" balanceWrite._proof_3))) =
     true
 of findOnSaveFrame closes by neither `rfl`, `decide` nor a hypothesis)
 -/
@@ -687,14 +687,14 @@ example : dl![m]{ { x := find(save(storage, alice.age, 42), alice.age) } x ≐ 4
     ~[findOnSave]~> dl![m]{ { x := 42 } x ≐ 42 } := by sol_chain
 
 /-- `findOnSave`, twice under one name. -/
-theorem Laws.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
-    {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
+theorem Laws.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {P : PrimTy}
+    {p : Tm StandardExample Γ (.path (.prim P))} {v : P.Denote} (hp : p.hasSeg = true := by rfl) :
     TermTaclet tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 
 @[inherit_doc Laws.readBack]
-theorem Laws'.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {p : Tm StandardExample Γ .path}
-    {v : Semantics.Value} (hp : p.hasSeg = true := by rfl) :
+theorem Laws'.readBack {Γ : Ctx} {s : Tm StandardExample Γ .st} {P : PrimTy}
+    {p : Tm StandardExample Γ (.path (.prim P))} {v : P.Denote} (hp : p.hasSeg = true := by rfl) :
     TermTaclet tm{ find(save(s, p, lit(v)), p) } tm{ lit(v) } :=
   .findOnSave hp
 

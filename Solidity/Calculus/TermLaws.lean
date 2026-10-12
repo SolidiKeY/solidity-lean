@@ -1650,11 +1650,12 @@ def Tm.delAtPath? {u : Srt} : Tm C Γ u → Option ((T : Ty) × Tm C Γ (.path T
 /-- A read of a delete, by members below its path, the delete held by `U`. -/
 def Op2.findDelBelowStep {Δ : Ctx} (U : Upd C Γ Δ) {a b u : Srt} :
     Op2 C a b u → Tm C Γ a → Tm C Γ b → Bool
-  | .find, x, y => (x.delAtPath?.any fun p => y.fieldsBelowAny (·.beqR p.2)) && U.holdsWrite x
+  | .find, x, y =>
+    (x.delAtPath?.any fun p => y.beqR p.2 || y.fieldsBelowAny (·.beqR p.2)) && U.holdsWrite x
   | _, _, _ => false
 
-/-- `find(delAt(s, p), p.f₁…fₖ)`, the delete held by `U` (`findOnDelAtBelow`'s
-reads). -/
+/-- `find(delAt(s, p), p)` or `find(delAt(s, p), p.f₁…fₖ)`, the delete held by
+`U` (`findOnDelAt`'s and `findOnDelAtBelow`'s reads). -/
 def Tm.findDelBelowAt {Δ : Ctx} (U : Upd C Γ Δ) {u : Srt} : Tm C Γ u → Bool
   | .app2 o x y => o.findDelBelowStep U x y
   | _ => false
@@ -1685,7 +1686,12 @@ theorem Tm.findDelBelowAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g
       have hf : st'.find r ≠ none := by
         rw [Storage.find_save_same hsave]
         exact Option.some_ne_none _
-      obtain ⟨rq, hrq, hfq⟩ := Tm.fieldsBelow_found hr hf y hpy
+      have hfound : Srt.FoundIn st' _ (y.eval σ) := by
+        rcases Bool.or_eq_true_iff.mp hpy with hpy | hpy
+        · cases Tm.sigma_eq_of_beqR hpy
+          exact ⟨r, hr, hf⟩
+        · exact Tm.fieldsBelow_found hr hf y hpy
+      obtain ⟨rq, hrq, hfq⟩ := hfound
       obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 hfq
       show ((Tm.app2 .delAt S p₀).eval σ).bind (fun st => (y.eval σ).bind fun r =>
         (st.find r).bind fun v => some v.view) ≠ none

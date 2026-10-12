@@ -118,6 +118,33 @@ theorem SVal.find_overlay_field {s f : Name} {T U : Ty} (o n : SVal (.ref (.stru
       rw [SVal.overlay_struct, SVal.find_field, SFields.get_overlay, SVal.find_field,
         SVal.find_nil, Option.bind_some, SVal.view_struct]
 
+/-! ## A delete, member by member -/
+
+theorem SFields.get_defaultOf {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
+    (xs : SFields fs) → (h : lookupBy f fs = some T) →
+    xs.defaultOf.get h = (xs.get h).defaultOf
+  | [], _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
+  | (f', T') :: fs, T, .cons x xs, h => by
+    rw [SFields.defaultOf_cons, SFields.get_cons, SFields.get_cons]
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      simp only [e, dite_true]
+    · simp only [e, dite_false]
+      exact SFields.get_defaultOf xs _
+
+/-- A word reset is the type's default, whatever it held. -/
+theorem SVal.defaultOf_prim' {p : PrimTy} (x : SVal (.prim p)) :
+    x.defaultOf = .prim (PrimTy.dflt p) := by
+  cases x; exact SVal.defaultOf_prim _
+
+/-- A member of a struct reset is the member reset. -/
+theorem SVal.find_defaultOf_field {s f : Name} {T U : Ty} (x : SVal (.ref (.struct s)))
+    (h : lookupBy f (structDef s) = some T) (p : Path T U) :
+    x.defaultOf.find (.field h p) = (((SVal.view x : SFields _).get h).defaultOf).find p := by
+  cases x with
+  | struct fs => rw [SVal.defaultOf_struct, SVal.find_field, SFields.get_defaultOf]; rfl
+
 /-! ## Memory, read by identity
 
 A memory read returns a value over the heap typing it reads in, so two
@@ -278,6 +305,9 @@ theorem key_int (n : Int) (h : PrimTy.int.inRange n = true) :
 theorem checkIndex_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
     (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : Int) :
     st.checkIndex (SRef.ofRoot r h) IndexTy.map i = some () := rfl
+theorem dflt_bool : PrimTy.dflt .bool = (false : Bool) := rfl
+theorem dflt_uint_val : (PrimTy.dflt .uint).val = 0 := rfl
+theorem dflt_int_val : (PrimTy.dflt .int).val = 0 := rfl
 theorem writeVal_prim {p : PrimTy} (st : Storage C) (r : SRef C (.prim p))
     (x : p.Denote) : st.writeVal r (.prim x) = some (.prim x) := rfl
 
@@ -296,6 +326,11 @@ alice.age == 7`, `alice.age` reads `7` wherever `alice` is found. -/
 theorem bind_const_eq_some {α β : Type} (x : Option α) (y w : β) :
     (x.bind fun _ => some y) = some w ↔ y = w ∧ ∃ a, x = some a := by
   cases x <;> simp only [Option.bind_none, Option.bind_some, reduceCtorEq, Option.some.injEq,
+    exists_false, and_false, exists_eq', and_true]
+
+theorem map_const_eq_some {α β : Type} (x : Option α) (y w : β) :
+    (x.map fun _ => y) = some w ↔ y = w ∧ ∃ a, x = some a := by
+  cases x <;> simp only [Option.map_none, Option.map_some, reduceCtorEq, Option.some.injEq,
     exists_false, and_false, exists_eq', and_true]
 
 /-- **A subtree read under the box** (the untyped `Modality.wp_box_findStorage`):
@@ -407,6 +442,35 @@ theorem wp_box_write {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
       (fun q it i hd => Storage.checkIndex_save_frame it i hd hs)
     rw [Storage.find_append, hf, hw]
 
+/-- **A storage delete under the box**: at the reference deleted and below
+it, the value there reset (`SVal.defaultOf`); the frame as for a write. -/
+theorem wp_box_delete {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C → Prop} :
+    Modality.box.wp (Close.optRes (st.delete r)) P ↔
+      ∀ st', st.delete r = some st' →
+        st'.find r = (st.find r).map (fun x => x.defaultOf) →
+        (∀ {W : Ty} (p : Path T W), st'.find (r.append p) =
+          (st.find r).bind fun x => x.defaultOf.find p) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {E : Ty} (q : SRef C (.ref (.array E))),
+          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
+          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+            st'.checkIndex q it i = st.checkIndex q it i) →
+        P st' := by
+  cases h : st.delete r with
+  | none => simp only [Close.optRes, Modality.wp, Modality.onHalt, reduceCtorEq, false_implies,
+      implies_true]
+  | some st' =>
+    simp only [Close.optRes, Modality.wp, Option.some.injEq, forall_eq']
+    refine ⟨fun hP _ _ _ _ _ => hP, fun hP => ?_⟩
+    obtain ⟨x, hx, hs⟩ := Storage.delete_save h
+    have hf : st'.find r = some x.defaultOf := Storage.find_save_same hs
+    refine hP (by rw [hf, hx]; rfl) (fun p => ?_) (fun q hd => Storage.find_save_frame hd hs)
+      (fun q hd => Storage.len_save_frame hd hs)
+      (fun q it i hd => Storage.checkIndex_save_frame it i hd hs)
+    rw [Storage.find_append, hf, hx]
+    rfl
+
 /-- The same for a word: it reads back at the reference written. -/
 theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {x : p.Denote}
     {P : Storage C → Prop} :
@@ -436,6 +500,8 @@ attribute [close_rw_s]
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
   CloseS.readT_prim CloseS.readT_ident CloseS.Landed.memT_readId CloseS.push_memT_readId
   CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart
+  CloseS.wp_box_delete CloseS.map_const_eq_some SVal.defaultOf_prim' SVal.find_defaultOf_field
+  Option.map_map CloseS.dflt_bool CloseS.dflt_uint_val CloseS.dflt_int_val
   CloseS.bind_const_eq_some CloseS.optRes_eq_ok CloseS.forall_val_eq_uint CloseS.forall_val_eq_int
   CloseS.forall_val_ne_uint CloseS.forall_val_ne_int CloseS.exists_val_eq_uint
   CloseS.exists_val_eq_int

@@ -263,7 +263,9 @@ def lawAt (c : Lean.Name) (e : Lean.Expr) :
     let g := a.mvarId!
     if (← g.isAssigned) || !(← isProp (← g.getType)) then continue
     let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
-    return .error (some m!"the side condition{indentExpr ty}\nof {lastName c} closes by neither \
+    -- an argument the condition fixes, not yet known, prints as `?_`
+    let fmt ← withOptions (fun o => o.setBool `pp.mvars false) (ppExpr ty)
+    return .error (some m!"the side condition{indentD fmt}\nof {lastName c} closes by neither \
       `rfl`, `decide` nor a hypothesis")
   let pf ← instantiateMVars (mkAppN pf args)
   let t' ← instantiateMVars rhs
