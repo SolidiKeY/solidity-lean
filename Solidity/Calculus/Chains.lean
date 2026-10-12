@@ -648,6 +648,8 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
     else do
       let scopesE := mkAppN (mkConst ``Fml.spineScopes) #[C, Γ, φb]
       unsafe evalQuoted (List Ctx) (mkApp (mkConst ``List [0]) (mkConst ``Ctx)) scopesE
+  -- the line's closed terms read at the empty scope, once for every law
+  let mut tsMemo : Option (Array Expr) := none
   let mut rsAll : Array Expr := #[]
   let mut owner : Array Nat := #[]
   let mut fails : Array (Option MessageData) := #[]
@@ -720,7 +722,10 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
             rs := rs.push (mkApp3 (mkConst ``FmlRw.mergeIn) C (toExpr p) (toExpr (j + 1)))
     | .litLaw c =>
       -- a literal law at each closed term of the line read at the empty scope
-      let ts ← Tm.closedNilVals φb
+      let ts ← match tsMemo with
+        | some ts => pure ts
+        | none => Tm.closedNilVals φb
+      tsMemo := some ts
       let (is, f) ← if h : 0 < ts.size then
           lawInstances c (← mkListLit (← inferType ts[0]) ts.toList)
         else pure (#[], none)
@@ -735,7 +740,10 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
             rs := rs.push (mkAppN (mkConst ``FmlRw.litEq) #[C, t, t', pf, toExpr i, toExpr s])
     | .law c =>
       -- the law matched against the line's closed terms read at the empty scope
-      let ts ← Tm.closedNilVals φb
+      let ts ← match tsMemo with
+        | some ts => pure ts
+        | none => Tm.closedNilVals φb
+      tsMemo := some ts
       let (is, f) ← if h : 0 < ts.size then
           lawInstances c (← mkListLit (← inferType ts[0]) ts.toList)
         else pure (#[], none)
