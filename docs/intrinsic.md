@@ -24,7 +24,7 @@ versions.  It names files by the paths they had at each step, which is why
 | Syntax | `Stmt C`, locals by name, unscoped (a branch's local outlived it), a locals check `Stmt.wt` beside it | `Stmt C Γ Γ'` (`Syntax/Scoped.lean`): a local is a position `Idx Γ t` carrying its type (`Scope.lean`), branches, loop bodies and blocks are scopes, a call's body is closed over its own frame; the elaborator emits it directly, a local by `NCtx.find` (`Syntax/Elab.lean`), and the printers print it (`Calculus/PrintStmt.lean`): the untyped `Surface.Stmt` and `resolve` went at W8 (decision 11) |
 | State | untyped `Semantics.State`: values, storage and heap by name, with junk | `State C Γ` (`Semantics/State.lean`): typed values (`PrimTy.Denote`, a `uint` an `Int` in range), typed storage (`SVal T` over `structDef`, `Storage C`), a typed heap (`HRef H R`, no mapping object), locals computed from the context (`TEnv`) |
 | Run | `Stmt.run` on the untyped state, halting by `revert`, `panic`, `diverge` or `stuck` | `Stmt.run` (`Semantics/Run.lean`) on the typed state, halting by `revert`, `panic`, `diverge` or `exhausted` (a push at the bound, decision 15): never stuck; the only run of a statement (W4) |
-| Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `StepErase`), and the erased state `EState C Γ` (`Semantics/Erased.lean`): what the closer's terms read |
+| Untyped side kept | | the state's operations (`Semantics.lean`), which the typed ones erase to (`StorageErase`, `HeapErase`, `TypedErase`), and the erased state `EState C Γ` (`Semantics/Erased.lean`): what the closer's terms read |
 | Compiler | `compileStmt` with `wtStmt`, `not_stuck` | over the scoped syntax, locals at their level (`Evm/Compile.lean`), `inFrag` the fragment alone, `compile_correct` over the typed run (`Evm/Correct.lean`), no `not_stuck` |
 | Formulas | `Fml C` with modalities over `Stmt C` | `Fml C Γ` (`Calculus/Fml.lean`) with frames (`seq`, `pop .block`/`.capture`) and the hidden binder `bind`; `Update.lean`'s formulas without the modality are `NFml`, the closer's input; a `dl!{}` with a modality reads scoped, one without reads as `NFml` (`Surface.Fml` went at W8) |
 | Rules | `Taclet C k m s p` on `Stmt C`, `Taclet.sound` by case | the same 159 lines read scoped (`Calculus/Rules.lean`, `open scoped Solidity.Schema`); `Taclet.toStep` (`Calculus/Taclet.lean`) says each is the rule `Stmt.step` fires, so soundness is `Stmt.sound` (`Calculus/Sound.lean`) with no proof per taclet; `blockEmpty` and `functionFrameEmpty` claimed; no cover goal (KeY's two goals); the step rules read the rule set (`⊢ₖ`, decision 36) |
@@ -733,7 +733,9 @@ W5); **no recorded call yet**: 54–74, implemented as proposed.
     canonical and tight invariants are carried along the typed run on its
     erasure (`RunInv.TKeeps`, `Typing/TypedRunInv.lean`), each leaf through
     its erasure lemma (`TKeeps.of_agrees`), so their leaf proofs are the old
-    ones read on the erased step.
+    ones read on the erased step.  *2026-10-12 (W9.6.1):* `Read.sortOk_typed`
+    and `TKeeps.of_agrees` are gone: `Read.sortOk` reads a typed state with
+    no hypothesis, and `TKeeps` the typed step (`RunInv.HoldsT`).
 58. *Proposed (W4 `run40`), the lead's call:* `Halt.stuck` is `Halt.undef`,
     the term model's ill-sorted value, and the term model's own `.stuck`s
     are `.undef` (`Term.undef`, `PTerm.undef`, `ITerm.undef`, `STerm.undef`,
@@ -4286,9 +4288,12 @@ trees, resolved once where they stand, as `NRead` already was.
 - **The spec front end** (`Calculus/SurfaceSpec.lean`) writes its clauses,
   layout and frame over `NTerm`/`NPTerm`/`NSTerm`, its snapshot update as a
   `List (NUpdElem C)`, which `Upd.resolveN` declares (`Calculus/Spec.lean`).
-- **`tm{ … }`** (`Calculus/TermLib.lean`) is always the scoped term (the
-  untyped fallback where the expected type was not a `Tm` is gone; it
-  postpones until the type is known).  It still reads its text by
+- **`tm{ … }`** (`Calculus/TermLib.lean`) is always the scoped term where
+  `TermLib` is imported (its untyped fallback where the expected type was
+  not a `Tm` is gone; it postpones until the type is known).  The untyped
+  `tm{ … }` of `Calculus/RuleSyntax.lean` (`schemaTerm` building
+  `Surface.Tm`) and its printer `delabTm` remain, for the reader and the
+  rule table, in modules that do not import `TermLib`.  It still reads its text by
   `RuleSyntax.schemaTerm` and turns the names into the scoped symbols by
   `coreNames`, the rule table's own path: syntax only, no untyped value.
 - **`delabTmS`** prints by `Calculus/PrintTerm.lean`'s `ppTermS` …
@@ -4308,7 +4313,8 @@ trees, resolved once where they stand, as `NRead` already was.
   of `Calculus/NoPanic.lean` and `Theory/Bridge/Denote.lean`
   (`Surface.Tm.eval_noPanic`, `Surface.UpdElem.write_noPanic`,
   `Surface.Upd.apply_ne_panic`, `Surface.Tm.denote_eval`,
-  `SValT.denote_eval`) to `Calculus/ShimFacts.lean`, unchanged.  Two unused
+  `SValT.denote_eval`) to a module of their own, unchanged; it had no
+  consumer and was deleted at the W9.6 review.  Two unused
   `variable {q : Term C × Term C}` of `Calculus/StateFacts.lean` deleted.
 
 **Checked**: per-file diagnostics of every touched module; `lean_build` of
@@ -4364,16 +4370,25 @@ and everything above it do not rebuild.
   types, `SVal.erase_hasTy`, `MVal.erase_hasTyH`), and `RowFaithful`
   quantifies over typed states.  `Counterexamples/PreFixSortAnnotations.lean`
   refutes the pre-fix rows on `State.init` (`person_not_int`,
-  `bool_not_int`); `Counterexamples/WellTypedNecessity.lean` states its
-  ill-typed store by `findStorage` and `SortOkS` (no typed state is it).
+  `bool_not_int`).  `Read.sortOk_typed` is deleted: `Read.sortOk` is its
+  statement, with no `nodupKeysB` hypothesis.
+  `Counterexamples/WellTypedNecessity.lean`'s ill-typed store is no typed
+  state, so its last conjunct could no longer be `¬ Read.SortOk`; it was
+  replaced by two facts stated apart (`badStore.findStorage "total" [] =
+  .ok (.bool true)` and `SortOkS … (.bool true) = false`), which no longer
+  linked the read to the store: restored at the W9.6 review (record below).
 
-**Statements changed** (only by reading `State` for `EState`):
+**Statements changed** (by reading `State` for `EState`; for
+`RowFaithful` and `Read.SortOk` that is a narrower claim, below):
 `Prog.run_canon` and `Prog.run_tight` take and give `σ.storage.erase`
 (`CanonStorage C σ.storage.erase`, `Tight C σ` of the typed state);
 `Tight.init : Tight C (State.init C)`; `no_hidden_invariant`'s step reads
 `σ.storage.erase`; `RunCanon`/`RunTight`/`RunFits` are over `State`;
-`RowFaithful`/`Read.SortOk` as above (no `RunWT` hypothesis);
-`readSelect_needs_storage`'s last conjunct.  `reachable_canon`,
+`RowFaithful`/`Read.SortOk` as above: they quantified over every erased
+state meeting `RunWT` and now over the typed states, a subset (every
+typed state erases to a `RunWT` one), so the positive `faithful_*` results
+claim less; kept, since every reachable state is typed;
+`readSelect_needs_storage`'s last conjunct (above).  `reachable_canon`,
 `reachable_tight`, `reachable_iff`, `reachable_iff_fits`, `canon_reachable`
 and the witnesses are unchanged (axioms: `propext`, `Classical.choice`,
 `Quot.sound`).  The `keepsC_*` leaves lost their unused side conditions.
@@ -4454,8 +4469,8 @@ measurement (no row is time-sensitive).
 `w96-sound`) build together, default targets and `SolkeyTestSuite`, with
 no fix needed.
 
-**Deleted** (`git diff --stat master`: 2,164 Lean lines removed, 515
-added, all of them moved; 18 Lean files):
+**Deleted** (`git diff --stat master`: 2,165 Lean lines removed, 515
+added, all of them moved; 19 Lean files):
 - `Semantics/Erased.lean`'s program evaluators: `Simple.eval`,
   `SPath`/`Loc.resolve`, `MPath.mval`, `MLoc.read`/`write`/`addr`/`write_eq`,
   `Val.eval`, `Src.value`/`pushVal`, `MSrc.mval`, `MRhs.eval`, `ARhs.eval`,
@@ -4537,6 +4552,66 @@ Per file: `Derived1` 7.0, `2` 7.9, `3` 11.7, `4` 15.4, `5` 8.0, `6` 10.3,
 `7` 48.0, `8` 25.2, `9` 5.8, `10` 8.7, `11` 2.7, `12` 12.2, `13` 6.3,
 `14` 8.6.
 
+### W9.6 review record (2026-10-12, branch `w96-review`)
+
+A read-only review of W9.6 (finder and skeptic per area); each finding
+checked against the code before it was acted on.
+
+**Typing.**
+- T1, confirmed and fixed: `readSelect_needs_storage`'s read and store were
+  stated apart (the `Env.All` conjunct over a free `(.int 0, ())`).  It
+  now reads the statement's path on `badCore` (`badStore` with the local
+  `x`): the term `Val.lower` writes for the read, `find(storage,
+  totalPath.lower)`, evaluates (`Tm.eval`) to `.bool true`, where the
+  row's `SortOkS` is false; `Env.All` is of `badCore.env`.
+  `Calculus/LowerRun.lean` is what makes that term the typed run's read.
+- T2, confirmed and kept: `RowFaithful` over typed states is a narrower
+  claim than over `RunWT` erased states; kept (reachable states are
+  typed), and the W9.6.1 record now says so, with the
+  `WellTypedNecessity` change and `Read.sortOk_typed`'s deletion;
+  decision 57 has a dated note.
+- T5, confirmed and fixed with T1: the docstring named `StateWT`.
+
+**Soundness.**
+- S2, confirmed and fixed: `RefTy.arrElem?`, `ArrTy.arrElem`,
+  `MVal.asValue_hasTy`, `SVal.asValue_hasTy` deleted (no reader).
+- S3, confirmed and fixed: the empty sections of `Typing/Soundness.lean`
+  removed.
+- S4, confirmed and fixed: unused `open` names trimmed in
+  `Semantics/Erased.lean`, `Semantics/TypedErase.lean`,
+  `Calculus/LowerRun.lean`.
+- S5–S7, confirmed and fixed: the summary row names `TypedErase`;
+  `solc-alignment.md` names `OpLoc.storeT`/`bumpT`, `MPath.mvalT`/`memRef`,
+  `Loc.resolveT`; `kernel-port.md` `CallRet.enterT`/`leaveT`.
+- S8, confirmed and fixed: `git diff --shortstat 09cd8878 f3d43a08` is 19
+  files, 2,165 lines removed.
+
+**Notation.**
+- N1, N2, confirmed and fixed: `module-map.md`'s `Update.lean` row and its
+  docstring say the untyped terms are the reader's shim only (and
+  `RuleSyntax.lean`'s `tm{ … }` where `TermLib` is not imported).
+- N3, confirmed and fixed: `Calculus/ShimFacts.lean` was outside the
+  import closure of `Rules`, `DelabErase`, `KeyTaclets` (33 modules) and
+  had no importer but `Solidity.lean`; deleted with its row and the
+  records' mentions.  `testsuite-proofs.md` cited `Upd.apply_ne_panic`,
+  now `Upd.apply_noPanic`.
+- N4, confirmed and kept: `RuleSyntax.lean`'s untyped `tm{ … }` and
+  `delabTm` are in the reader's closure.  The W9.6N record and
+  `RuleSyntax.lean`'s notation table now say so.
+- N5, confirmed and fixed: `termPP`/`updS` inlined (11 call sites).
+- N6, confirmed and fixed: `PrintTerm.lean`'s docstring states the equal
+  text as a design intent, unchecked since the twin check went.
+- N7, confirmed and fixed: `unfoldTmsSyms` did not descend into
+  `Tms.Term.bumped`'s operand, so `tm{ find(s, q)⊕⊕ }` printed as
+  `tm{ ‹Term.find s q›⊕⊕ }`.  It now unfolds the operand (index 4) and
+  keeps the `bumped` head for the printer's `t⊕⊕`; pinned
+  (`bumped_pin`, `Calculus/TermLib.lean`).
+
+**Checked**: per-file diagnostics of every touched module; `lean_build` of
+the default targets (with the printer pins `Examples/ProofTree.lean`,
+`Examples/Tactics/Print.lean`, `Examples/Notation.lean`), clean;
+`check-orphans` (309 reachable), `check-doc-paths`; `sorry` count 19.
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
@@ -4552,8 +4627,8 @@ no prover user: `Update.lean`'s "Frames" lemmas over `Surface.*`
 `Surface.MAddr.eval_frame`, `Surface.Tm.denote_frame`,
 `Surface.UpdElem.write_frame`, …), `Surface.Tm.denote`, `Term.keyAt`/
 `Term.keyAt_eval`, `RuleSyntax.lean`'s untyped printers (`ppTerm`, `ppUpd`,
-`delabTm`), and `Calculus/ShimFacts.lean` (the shim's no-panic lemmas and
-term bridge).  Deleting the shim is the reader's port, if the user asks
+`delabTm`; the untyped `tm{ … }` where `Calculus/TermLib.lean` is not
+imported).  Deleting the shim is the reader's port, if the user asks
 for it.
 
 **W9.6 (the state IR)**: done (records above, W9.6.0 to W9.6.4).  No
