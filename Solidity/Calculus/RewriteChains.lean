@@ -301,7 +301,8 @@ def rwLaws : List Lean.Name :=
     ``TermTaclet.selectOnSaveMemberAt, ``TermTaclet.selectOnSaveFrameAt,
     ``TermTaclet.selectOnDelAtMemberAt, ``TermTaclet.selectOnDelAtFrameAt,
     ``TermTaclet.findOnDelAt, ``TermTaclet.findOnDelAtSave, ``TermTaclet.findOnDelAtValue,
-    ``TermTaclet.delValueLit, ``TermTaclet.findOnDelAtBelow, ``TermTaclet.findOnDelAtFrame,
+    ``TermTaclet.delValueLit, ``TermTaclet.findOnDelAtBelow,
+    ``TermTaclet.findOnDelAtBelowIn, ``TermTaclet.findOnDelAtFrame,
     ``TermTaclet.findOnPushFrame, ``TermTaclet.findOnPopFrame, ``TermTaclet.lenOnSaveFrame,
     ``TermTaclet.lenOnDelAtFrame]
 

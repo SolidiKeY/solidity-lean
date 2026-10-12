@@ -235,11 +235,13 @@ def Tm.litInt? {u : Srt} (t : Tm C Γ u) : Option Int :=
 /-- A root's segment. -/
 def Op0.shapeLeaf? {s : Srt} : Op0 C s → Option (List SegT)
   | .root r _ => some [.field r]
+  | .member _ f _ => some [.field f]
   | _ => none
 
 /-- A member or an element after a path's shape. -/
 def Op1.shapeStep {a s : Srt} : Op1 C a s → Option (List SegT) → Option (List SegT)
   | .field (f := f) _, ih => ih.map (· ++ [.field f])
+  | .fieldIn (f := f) _, ih => ih.map (· ++ [.field f])
   | .next, ih => ih.map (· ++ [.at none])
   | _, _ => none
 
@@ -459,9 +461,52 @@ def Tm.findLit? {P : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim P))) :
       if h : w.1 = P then some (h ▸ w.2) else none
   else none
 
-/-- The node at `p` in `s` is not a mapping, in every state. -/
-def Tm.KindFreeAt {T : Ty} (s : Tm C Γ .st) (p : Tm C Γ (.path T)) : Prop :=
-  ∀ σ : State C Γ, (findSt (s.denote σ) (p.denote σ)).kindFree = true
+/-- The two paths, of any sorts, leave each other: `Tm.diverges` for two
+member paths under a `select`. -/
+def Tm.divergesU {u v : Srt} (p : Tm C Γ u) (q : Tm C Γ v) : Bool :=
+  match p.shape?, q.shape? with
+  | some a, some b => SegT.diverges a b
+  | _, _ => false
+
+/-- A member-wise save's word where it writes the path, past it where it
+leaves it. -/
+def Op3.findStepIn (eq div : {u : Srt} → Tm C Γ u → Bool) {a b c s : Srt} :
+    Op3 C a b c s → Tm C Γ b → Tm C Γ c → Option ((p : PrimTy) × p.Denote) →
+      Option ((p : PrimTy) × p.Denote)
+  | .saveIn, y, z, ih => if eq y then z.svLit? else if div y then ih else none
+  | _, _, _, _ => none
+
+/-- The word a storage of members reads at a path, read off its writes.
+Generic in the sort. -/
+def Tm.findLitInBy (eq div : {u : Srt} → Tm C Γ u → Bool) :
+    {u : Srt} → Tm C Γ u → Option ((p : PrimTy) × p.Denote)
+  | _, .app3 o x y z => o.findStepIn eq div y z (x.findLitInBy eq div)
+  | _, _ => none
+
+/-- The word the storage of members `s` reads at the member path `q`, read
+off its writes (`Tm.findLit?` under a `select`). -/
+def Tm.findLitIn? {sn : Name} {P : PrimTy} (s : Tm C Γ (.sts sn))
+    (q : Tm C Γ (.spath sn (.prim P))) : Option P.Denote :=
+  (s.findLitInBy (·.beqR q) (·.divergesU q)).bind fun w =>
+    if h : w.1 = P then some (h ▸ w.2) else none
+
+/-- `f` of the member path a member is of, or on the way down from it. -/
+def Op1.extStepIn (f : {u : Srt} → Tm C Γ u → Bool) {a s : Srt} :
+    Op1 C a s → Tm C Γ a → Bool → Bool
+  | .fieldIn _, x, ih => f x || ih
+  | _, _, _ => false
+
+/-- `f` of some member path on the way down to `t`'s member.  Generic in
+the sort. -/
+def Tm.extendsAnyIn (f : {u : Srt} → Tm C Γ u → Bool) : {u : Srt} → Tm C Γ u → Bool
+  | _, .app1 o x => o.extStepIn f x (x.extendsAnyIn f)
+  | _, _ => false
+
+/-- `q` goes on below `p`, two member paths under a `select` (members only:
+a member path has no index). -/
+def Tm.extendsIn {sn : Name} {T U : Ty} (q : Tm C Γ (.spath sn T)) (p : Tm C Γ (.spath sn U)) :
+    Bool :=
+  q.extendsAnyIn (·.beqR p)
 
 end Side
 
@@ -477,7 +522,19 @@ def Srt.segs : (u : Srt) → u.TDen → List Seg
 rest. -/
 def Srt.stDen : (u : Srt) → u.TDen → Struct
   | .st, d => d
+  | .sts _, d => d
   | _, _ => .mtSt
+
+/-- The sort of a path below a storage sort's roots: from the contract's
+roots for a storage, from the members under a `select`. -/
+@[reducible] def Srt.pathAt : Srt → Ty → Srt
+  | .sts sn, T => .spath sn T
+  | _, T => .path T
+
+/-- The node at `p` in `s` is not a mapping, in every state: `s` a storage,
+or a storage of members (`select`) and `p` a member path. -/
+def Tm.KindFreeAt {Γ : Ctx} {u : Srt} {T : Ty} (s : Tm C Γ u) (p : Tm C Γ (u.pathAt T)) : Prop :=
+  ∀ σ : State C Γ, (findSt (u.stDen (s.denote σ)) ((u.pathAt T).segs (p.denote σ))).kindFree = true
 
 section SideDenote
 
@@ -521,11 +578,19 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
       cases h
       simp only [Srt.segs, Tm.denote, Op0.denote, rootPath, SegT.matches, SegT.fits,
         beq_self_eq_true, Bool.and_self]
+    | member sn f hf =>
+      cases h
+      simp only [Srt.segs, Tm.denote, Op0.denote, rootPath, SegT.matches, SegT.fits,
+        beq_self_eq_true, Bool.and_self]
     | _ => cases h
   | app1 o x ih =>
     intro a h
     cases o with
     | field hf =>
+      obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      exact SegT.matches_append _ _ _ _ (ih ha)
+        (by simp only [SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
+    | fieldIn hf =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
       exact SegT.matches_append _ _ _ _ (ih ha)
         (by simp only [SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
@@ -1013,6 +1078,15 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       (hw : s.findLit? q = some w := by rfl) (hp : p.hasSeg = true := by rfl)
       (hq : q.extends p = true := by rfl) :
       TermTaclet (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.dflt P)
+  /-- **`findOnDelAtBelow`** in a storage of members:
+  `findIn(delAtIn(s, p), q) ⇝ defVal` below a deleted member that is not a
+  mapping, `q` going on below `p` by members (`Tm.extendsIn`) and `s`
+  writing the word there (`Tm.findLitIn?`) (`find_delAt_below`,
+  `delValueDefault`). -/
+  | findOnDelAtBelowIn {sn : Name} {s : Tm C Γ (.sts sn)} {T : Ty} {p : Tm C Γ (.spath sn T)}
+      {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote} (hk : s.KindFreeAt p)
+      (hw : s.findLitIn? q = some w := by rfl) (hq : q.extendsIn p = true := by rfl) :
+      TermTaclet (.app2 .findIn (.app2 .delAtIn s p) q) (Tms.Term.dflt P)
   /-- **`findOnDelAtFrame`**: a read off the deleted path does not see the
   delete (`find_delAt_frame`). -/
   | findOnDelAtFrame {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)} {P : PrimTy}
@@ -1222,6 +1296,82 @@ theorem Tm.findLit?_theq {s : Tm C Γ .st} {P : PrimTy} {q : Tm C Γ (.path (.pr
     · cases h
   · cases h
 
+/-- `Tm.divergesU` gives the Theory's `diverges` in every state. -/
+theorem Tm.divergesU_denote (σ : State C Γ) {u v : Srt} {p : Tm C Γ u} {q : Tm C Γ v}
+    (h : p.divergesU q = true) :
+    Theory.StValue.diverges (u.segs (p.denote σ)) (v.segs (q.denote σ)) = true := by
+  unfold Tm.divergesU at h
+  split at h
+  · rename_i a b ha hb
+    exact SegT.diverges_sound a b _ _ h (p.shape?_matches' σ ha) (q.shape?_matches' σ hb)
+  · exact absurd h Bool.false_ne_true
+
+/-- The word read off the member-wise writes is the word read; generic in
+the sort, a storage read by `Srt.stDen`. -/
+theorem Tm.findLitInBy_theq {sn : Name} {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))}
+    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote},
+      s.findLitInBy (·.beqR q) (·.divergesU q) = some w →
+      Equiv (findSt (u.stDen (s.denote σ)) (q.denote σ)) (.prim (PrimTy.erase w.2)) := by
+  induction s with
+  | app3 o x y z ihx _ _ =>
+    intro w h
+    cases o with
+    | saveIn =>
+      have h2 : (if y.beqR q then z.svLit? else if y.divergesU q then
+          x.findLitInBy (·.beqR q) (·.divergesU q) else none) = some w := h
+      clear h
+      show Equiv (findSt (copyTo (x.denote σ) (y.denote σ) (z.denote σ)) (q.denote σ)) _
+      split at h2
+      · rename_i hpq
+        cases Tm.sigma_eq_of_beqR hpq
+        rw [find_copyTo_same _ (Tm.denote_ne_nil_spath σ q), Tm.svLit?_denote σ h2]
+        exact Equiv.refl _
+      · split at h2
+        · rename_i hd
+          have hd : Theory.StValue.diverges (y.denote σ) (q.denote σ) = true :=
+            Tm.divergesU_denote σ hd
+          rw [find_copyTo_frame _ _ _ _ hd]
+          exact ihx h2
+        · cases h2
+    | _ => cases h
+  | _ => intro w h; cases h
+
+/-- `findLitIn?` reads the word the storage of members holds there. -/
+theorem Tm.findLitIn?_denote {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
+    {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote} (h : s.findLitIn? q = some w)
+    (σ : State C Γ) : findSt (s.denote σ) (q.denote σ) = .prim (PrimTy.erase w) := by
+  unfold Tm.findLitIn? at h
+  obtain ⟨w', hw', h⟩ := Option.bind_eq_some_iff.1 h
+  split at h
+  · rename_i he
+    cases h
+    obtain ⟨P', v⟩ := w'
+    dsimp only at he
+    subst he
+    exact Equiv.prim_iff.1 (Tm.findLitInBy_theq σ s hw')
+  · cases h
+
+/-- `q.extendsIn p` gives the Theory's `q = p ++ r`, `r ≠ []`, in every
+state; generic in the sort. -/
+theorem Tm.extendsIn_denote' (σ : State C Γ) {sn : Name} {U : Ty} {p : Tm C Γ (.spath sn U)}
+    {u : Srt} (q : Tm C Γ u) :
+    q.extendsAnyIn (·.beqR p) = true → ∃ r, r ≠ [] ∧ u.segs (q.denote σ) = p.denote σ ++ r := by
+  induction q with
+  | app1 o x ih =>
+    intro h
+    cases o with
+    | fieldIn hf =>
+      rename_i f _
+      rcases Bool.or_eq_true_iff.mp h with h | h
+      · cases Tm.sigma_eq_of_beqR h
+        exact ⟨[.field f], List.cons_ne_nil _ _, rfl⟩
+      · obtain ⟨r, -, hq⟩ := ih h
+        refine ⟨r ++ [.field f], List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _), ?_⟩
+        show x.denote σ ++ _ = _
+        rw [show x.denote σ = _ from hq, List.append_assoc]
+    | _ => cases h
+  | _ => intro h; cases h
+
 /-- **Each scoped term taclet is sound**: its two terms have one Theory value
 in every state (`TermTaclet.sound`). -/
 theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t' → Tm.Theq t t'
@@ -1300,8 +1450,19 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
     have hw'' : findSt (s.denote σ) (q.denote σ) = .prim (PrimTy.erase w) := Equiv.prim_iff.1 hw'
     show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
       (.prim (PrimTy.erase (PrimTy.dflt P)))
-    rw [hqr, find_delAt_below _ (Tm.denote_ne_nil σ hp) hr (hk σ), ← hqr, hw'', delValueDefault,
+    have hk' : (findSt (s.denote σ) (p.denote σ)).kindFree = true := hk σ
+    rw [hqr, find_delAt_below _ (Tm.denote_ne_nil σ hp) hr hk', ← hqr, hw'', delValueDefault,
       primDefault_erase]
+    exact Equiv.refl _
+  | @findOnDelAtBelowIn _ _ sn s _ p P q w hk hw hq => fun σ => by
+    obtain ⟨r, hr, hqr⟩ := Tm.extendsIn_denote' σ q hq
+    have hqr : q.denote σ = p.denote σ ++ r := hqr
+    have hw' := Tm.findLitIn?_denote hw σ
+    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
+      (.prim (PrimTy.erase (PrimTy.dflt P)))
+    have hk' : (findSt (s.denote σ) (p.denote σ)).kindFree = true := hk σ
+    rw [hqr, find_delAt_below _ (Tm.denote_ne_nil_spath σ p) hr hk', ← hqr, hw',
+      delValueDefault, primDefault_erase]
     exact Equiv.refl _
   | @findOnDelAtFrame _ _ s _ p _ q h => fun σ => by
     show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
