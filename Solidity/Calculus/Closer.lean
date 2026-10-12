@@ -328,26 +328,6 @@ def cmpOp : BinOp → Int → Int → Bool
   | .ge, i, j => decide (j ≤ i)
   | _, _, _ => false
 
-/-- A comparison its operands' intervals decide. -/
-def cmpDecide (op : BinOp) (la ha lb hb : Int) : Option Bool :=
-  match op with
-  | .lt => if ha < lb then some true else if hb ≤ la then some false else none
-  | .le => if ha ≤ lb then some true else if hb < la then some false else none
-  | .gt => if hb < la then some true else if ha ≤ lb then some false else none
-  | .ge => if hb ≤ la then some true else if ha < lb then some false else none
-  | _ => none
-
-theorem cmpDecide_sound {op : BinOp} {la ha lb hb i j : Int} {c : Bool}
-    (h : cmpDecide op la ha lb hb = some c) (hi : la ≤ i ∧ i ≤ ha) (hj : lb ≤ j ∧ j ≤ hb) :
-    cmpOp op i j = c := by
-  cases op <;> simp only [cmpDecide, reduceCtorEq] at h
-  all_goals
-    split at h
-    · cases h; simp only [cmpOp, decide_eq_true_eq]; omega
-    · split at h
-      · cases h; simp only [cmpOp, decide_eq_false_iff_not]; omega
-      · cases h
-
 theorem evalBinop_cmp {op : BinOp} (hop : op = .lt ∨ op = .le ∨ op = .gt ∨ op = .ge) {p : PrimTy}
     {x : Value} {rb : Res Value} {v : Value} (h : evalBinop op p x rb = .ok v) :
     ∃ i j, x = .int i ∧ rb = .ok (.int j) ∧ v = .bool (cmpOp op i j) := by
@@ -700,7 +680,6 @@ theorem LStor.simpE_eval {σ : Semantics.State} {O : Orc} {E : Eqs} (hO : O.Ok �
   | .view _ _, _, h => h
 
 end
-
 
 /-! ## What a well-formed storage holds
 
@@ -1670,7 +1649,6 @@ theorem Facts.slot_resolve {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {N 
   have hs := F.slot_find hF ht hv hq
   obtain ⟨w, hw⟩ := hs.2 N hN hin
   exact ⟨v, qs, w, hv, hq, hw, hs.1 w hw⟩
-
 
 /-- The type is a `uint` or an `int`. -/
 def tyInt : Option Ty → Bool
@@ -2960,9 +2938,6 @@ theorem Facts.nf_lit {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTer
 /-- What returns, by the typed normal form. -/
 def Facts.rets (F : Facts) : LTerm → Bool := F.retsW F.nf
 
-/-- Every key returns an integer, by the typed normal form. -/
-def Facts.keysRet (F : Facts) : LPath → Bool := F.keysRetW F.nf
-
 theorem Facts.rets_sound {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) (t : LTerm)
     (h : F.rets t = true) : Returns σ t :=
   F.retsW_sound hF (F.nf_keeps hF) t h
@@ -3686,7 +3661,6 @@ def LFml.fits : Nat → LFml → Option Nat
   | n + 1, .not φ => φ.fits n
   | n + 1, .and φ ψ | n + 1, .imp φ ψ => (φ.fits n).bind fun m => ψ.fits m
   | n + 1, .all _ _ φ => φ.fits n
-
 
 /-- The most nodes the closer takes in a leaf's formula with its updates
 pushed in, counted as a tree (`LFml.fits`).  A storage written from a read

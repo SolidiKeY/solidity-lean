@@ -462,11 +462,6 @@ def _root_.Solidity.UpdElem.tgt {Γ Δ : Ctx} : UpdElem C Γ Δ → Option Nat
   | .local i _ => some i.toNatR
   | _ => none
 
-/-- The target's name. -/
-def _root_.Solidity.UpdElem.tgtName {Γ Δ : Ctx} (ms : List Var) : UpdElem C Γ Δ → Var
-  | .local i _ => i.name ms
-  | _ => .user "_"
-
 section Upd
 
 variable {Γ : Ctx}
@@ -491,14 +486,6 @@ def _root_.Solidity.Upd.replayS (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
   Upd.rec (motive := fun _ _ => SymS) ρ₀ (fun _ e ih => ih.act e.tgt (aE e))
     (fun _ _ r ih => ih.push (aR r)) (fun _ h ih => ⟨ih.loc.drop h.depth, ih.sym, ih.next⟩)
     (fun _ h ih => ⟨Thin.sel h ih.loc, ih.sym, ih.next⟩) U
-
-theorem _root_.Solidity.Upd.replayS_eq_replaySM (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
-    (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (ρ₀ : SymS) {Δ : Ctx} (U : Upd C Γ Δ) :
-    U.replayS aE aR ρ₀ = U.replaySM aE aR ρ₀ := by
-  induction U with
-  | nil => rfl
-  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
-    simp only [Upd.replaySM, ← ih]; rfl
 
 /-- An element of an update: a right-hand side (an assignment's or a
 declaration's), or an element that assigns no local. -/
@@ -537,11 +524,6 @@ def _root_.Solidity.Upd.viewM : {Δ : Ctx} → Upd C Γ Δ → UView C Γ
 def _root_.Solidity.Upd.view {Δ : Ctx} (U : Upd C Γ Δ) : UView C Γ :=
   Upd.rec (motive := fun _ _ => UView C Γ) .zero (fun _ e ih => ih.add e.toElemS)
     (fun _ _ r ih => ih.add (.rhs r)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
-
-theorem _root_.Solidity.Upd.view_eq_viewM {Δ : Ctx} (U : Upd C Γ Δ) : U.view = U.viewM := by
-  induction U with
-  | nil => rfl
-  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih => simp only [Upd.viewM, ← ih]; rfl
 
 /-- What a right-hand side binds its local to (`Surface.UpdElem.toL`). -/
 def _root_.Solidity.Rhs.actS (ρ : SymS) {t : LTy} : Rhs C Γ t → Option SymB
@@ -1063,25 +1045,6 @@ theorem SymS.bindAt_ok (hok : ρ.Ok ms) (hnd : ms.Nodup) {n : Nat} (hn : n < ms.
     · have hk' : k < ms.length := by simpa only [List.length_map] using h₂
       have hne : ms[k] ≠ ms[n] := nodup_getElem_ne hnd hk' hn (Ne.symm hk)
       simp only [hk, hne, if_false]
-
-theorem SymS.act_ok (hok : ρ.Ok ms) (hnd : ms.Nodup) {Γ Δ : Ctx} (hl : ms.length = Δ.length)
-    (e : UpdElem C Γ Δ) (a : Act) (hb : ∀ b, a = .bind b → e.tgt.isSome = true) :
-    (ρ.act e.tgt a).Ok ms ∧ (ρ.act e.tgt a).sym = (a.named (e.tgtName ms)).apply ρ.sym := by
-  cases a with
-  | keep => exact ⟨hok, rfl⟩
-  | mem M => exact ⟨hok, rfl⟩
-  | write s =>
-    refine ⟨?_, rfl⟩
-    unfold SymS.Ok at hok ⊢
-    simp only [SymS.act, hok, List.map_map, Function.comp_def, lookupBy_map_snd]
-  | bind b =>
-    cases e with
-    | «local» i r =>
-      have hi : i.toNat < ms.length := hl ▸ i.toNat_lt
-      simp only [UpdElem.tgt, Idx.toNatR_eq]
-      exact SymS.bindAt_ok hok hnd hi b
-    | _ => exact absurd (hb b rfl) (by simp only [UpdElem.tgt, Option.isSome_none,
-        Bool.false_eq_true, not_false_eq_true])
 
 theorem SymS.push_ok (hok : ρ.Ok ms) (a : Act) (ha : a = .keep ∨ ∃ b, a = .bind b)
     (hx : ρ.key ∉ ms) :

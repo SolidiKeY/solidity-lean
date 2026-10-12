@@ -655,9 +655,6 @@ theorem Agree.append_left {E o o'} {R R' : List LPath} (h : Agree E o o' (R ++ R
 theorem Agree.append_right {E o o'} {R R' : List LPath} (h : Agree E o o' (R ++ R')) :
     Agree E o o' R' := fun Q hQ => h Q (List.mem_append_right _ hQ)
 
-theorem Agree.cons {E o o'} {Q : LPath} {R : List LPath} (h : Agree E o o' (Q :: R)) :
-    Agree E o o' R := fun Q' hQ => h Q' (List.mem_cons_of_mem _ hQ)
-
 theorem Agree.sub {E o o'} {R R' : List LPath} (h : Agree E o o' R) (hs : ∀ Q ∈ R', Q ∈ R) :
     Agree E o o' R' := fun Q hQ => h Q (hs Q hQ)
 
@@ -954,18 +951,6 @@ theorem LFml.valid_iff_cons (ψ : LFml) (h : ψ.initOnly = true) :
     exact (LFml.holdsA_iff σ ψ h).1
       (hv σ _ ((consAll_iff _).2 fun Q _ => consA_obsAt σ Q))
 
-/-- **`⊨ φ` is exactly the reduction under the constraints**, for every `φ`
-in the fragment whose reduction reads the initial storage only.  Example:
-`[ uint y = x.a; uint z = x.a.b; ] false` is valid, since a word has
-nothing below it: the constraint of `x.a.b` says that where `x.a` shows a
-word, `x.a.b` shows nothing. -/
-theorem _root_.Solidity.NFml.valid_iff_cons {C : Contract} (φ : NFml C)
-    (hf : φ.inL Sym.empty = true) (hi : φ.reduce.initOnly = true) :
-    NFml.Valid φ ↔ ∀ σ (o : List Seg → Obs),
-      consAll (envOf σ) o φ.reduce.reads → φ.reduce.holdsA (envOf σ) o := by
-  rw [NFml.valid_iff_reduce φ hf]
-  exact LFml.valid_iff_cons _ hi
-
 /-! ## The tactic, with the constraints -/
 
 /-! The equations of `evalA` and `holdsA`, the local's aside: a local is
@@ -1014,7 +999,6 @@ theorem LTerm.evalA_kite (a b t e : LTerm) : (LTerm.kite a b t e).evalA E o =
 theorem LTerm.evalA_zero (a : LTerm) :
     (LTerm.zero a).evalA E o = a.evalA E o >>= fun v => .ok (zeroV v) := rfl
 theorem LTerm.evalA_err : LTerm.err.evalA E o = .error .undef := rfl
-theorem LTerm.evalA_var (x : Atom) : (LTerm.var x).evalA E o = E x.key := rfl
 /-- A position reads at its slot, as the binders' keys spell it. -/
 theorem LTerm.evalA_pos (k : Nat) : (LTerm.var (.pos k)).evalA E o = E (.fresh "#" k) := rfl
 theorem LTerm.evalA_name (x : Var) : (LTerm.var (.name x)).evalA E o = E x := rfl
@@ -1173,40 +1157,21 @@ macro "sol_decide_cons" : tactic => `(tactic| (
     sol_decide_finishA))
 
 /-- `sol_decide` without the constraints: the reduction, then
-`sol_decide_heuristic`, which reads the initial storage as unrelated atoms.
-What `sol_decide` did before the reads were proved realizable; the examples
-use it to show a goal that needs the constraints. -/
-macro "sol_decide_unconstrained" : tactic => `(tactic|
-  all_goals
-   (refine (NFml.valid_iff_reduce _ (by decide)).2 ?_
-    sol_reduce
-    sol_decide_heuristic))
+`sol_decide_heuristic`, which reads the initial storage as unrelated atoms
+(`Calculus/Closers.lean`).  What `sol_decide` did before the reads were
+proved realizable; the examples use it to show a goal that needs the
+constraints. -/
+syntax "sol_decide_unconstrained" : tactic
 
 /-- `sol_decide`: prove `⊨ φ` for a `φ` whose modalities are gone (run
-`sol_symex` first) and which is in the fragment (`NFml.inL`).  It rewrites
-the goal by `NFml.valid_iff_reduce`, computes the reduction, closes it by its terms where it can (`LFml.syn`,
-`Calculus/DecideSyn.lean`: KeY's syntactic closing), and otherwise, where the
-reduction reads the initial storage only, rewrites it once more by
-`LFml.valid_iff_cons`: a statement about free reads under the constraints
-the storage puts on them, which it closes by splitting on the locals and on
-the shapes of the locations above the reads, and `omega` or `grind`.  Both
-steps are equivalences, so it fails on an invalid formula; on a valid one it
-fails only where `omega`/`grind` do.  Where the reduction still writes
-through a member named `length` it falls back to `sol_decide_heuristic`.
-It says so when `φ` is outside the fragment; with no goal left it does
-nothing. -/
-macro "sol_decide" : tactic => `(tactic|
-  all_goals
-   (refine (NFml.valid_iff_reduce _ (by
-      first
-      | decide +kernel
-      | fail "sol_decide: the formula is outside the fragment (a push of a memory object, a copy of memory whose guards are not literals, a copy from storage outside its allocation's pair, a memory past memSize, a read of the ledger, an alias no update binds, or one through an index used after a write)")).2 ?_
-    sol_reduce
-    first
-    | exact LFml.syn_valid _ (by decide +kernel)
-    | sol_decide_cons
-    | sol_decide_heuristic))
-
+`sol_symex` first) and which is in the fragment (`Fml.inLS`): the leaf
+reduced by position, then closed by its terms where it can (`LFml.syn`,
+`Calculus/DecideSyn.lean`: KeY's syntactic closing), by the closer, or,
+where the reduction reads the initial storage only, by the constraints
+(`LFml.valid_iff_cons`), splitting on the locals and on the shapes of the
+locations above the reads, and `omega` or `grind`; else by
+`sol_decide_heuristic` (`evalSolDecideScoped`, below). -/
+syntax "sol_decide" : tactic
 
 /-! ## A scoped leaf, its parameters typed (M6c)
 
@@ -1545,8 +1510,7 @@ with its parameters known (`LFml.syn_valid_alls`), or by the closer
 with its parameters typed (`LFml.valid_alls_of_cons`), or by
 `sol_decide_heuristic` with them free.  With a premise `wt(storage)`
 (`Valid.of_reduceSL`) the closer reads its layout, and the other steps run
-without it (`LFml.forall_layout`).  Today's `sol_decide` runs on today's
-goal. -/
+without it (`LFml.forall_layout`). -/
 @[tactic Solidity.Decide.tacticSol_decide]
 def evalSolDecideScoped : Tactic := fun _ => withMainContext do
   let g ← getMainGoal

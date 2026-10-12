@@ -1000,11 +1000,6 @@ theorem LFml.syn_holds : (φ : LFml) → ∀ (σ : Semantics.State) (known : Lis
       rw [LTerm.eval_setEnv _ (by simpa using hq'.2)] at hy'
       exact hne q hq x' y' hx' hy'
 
-/-- **A formula `syn` accepts holds in every state.** -/
-theorem LFml.syn_valid (φ : LFml) (h : φ.syn [] [] = true) : ∀ σ, φ.holds σ :=
-  fun σ => LFml.syn_holds φ σ [] [] (fun _ hu => by simp at hu) (fun _ hp => by simp at hp) h
-
-
 /-! ## A scoped leaf (M6c)
 
 `sol_decide` takes the scoped leaf `Valid φ` (`φ : Fml C []`) itself and
