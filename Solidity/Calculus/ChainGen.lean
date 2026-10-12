@@ -135,7 +135,7 @@ def lastLineOf (A : Expr) : TermElabM Expr := do
   return ((← runChain A).lines.getLast?.map (·.fml)).getD A
 
 /-- The scoped last line of a chain's statement: past the program
-(`Fml.LeadsK`), the line the line written names, found again by the search
+(`Fml.LeadsK`), the scoped line whose erasure is the one written, found again by the search
 from the derivation's last line. -/
 def scopedEnd? (ty : Expr) : TermElabM (Option Expr) := do
   let ty ← instantiateMVars ty

@@ -547,7 +547,7 @@ sequentialToParallel still applies (under either modality), and gives
 #last_line stacked
 
 /-- The stack merged, the read of the write not yet resolved: `~~>` past the program
-(`Fml.LeadsK`), to the line the line written names. -/
+(`Fml.LeadsK`), to a scoped line whose erasure is the one written. -/
 theorem unresolved : dl![m]{ ⟨[ alice.age = 42; uint x = alice.age; ]⟩ φ }
     ~~> dl![m]{ { storage := save(storage, alice.age, 42) ‖
           x := find(save(storage, alice.age, 42), alice.age) } φ } := by
