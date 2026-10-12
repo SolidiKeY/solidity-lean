@@ -41,13 +41,13 @@ open Theory.Memory (resolveFrom step)
 
 /-- What the selector `a` reads in the object `n` of the memory `μ`: the
 word at a member or an element, or the length. -/
-def LSel.read (σ μ : State) (n : Nat) : LSel → Res Value
+def LSel.read (σ μ : Semantics.State) (n : Nat) : LSel → Res Value
   | .fld f => readAddr μ (.memoryField n f) >>= MVal.asValue
   | .idx t => t.eval σ >>= Value.asInt >>= fun j => readAddr μ (.memoryIndex n j) >>= MVal.asValue
   | .size => memArrayLen μ n
 
 /-- The object the reference slot `a` of the object `n` names. -/
-def LSel.iread (σ μ : State) (n : Nat) (a : LSel) : Res Nat :=
+def LSel.iread (σ μ : Semantics.State) (n : Nat) (a : LSel) : Res Nat :=
   a.addr σ n >>= readAddr μ >>= MVal.asRef
 
 /-- How a selector read stands to a selector written: the same slot, apart,
@@ -294,7 +294,7 @@ def LMem.refDesc : LMem → Bool
 
 /-! ### Soundness: the runs -/
 
-theorem readPath_ref_iff (τ : State) : ∀ (p : List Seg) (r n : Nat),
+theorem readPath_ref_iff (τ : Semantics.State) : ∀ (p : List Seg) (r n : Nat),
     resolveFrom τ.heap r p = some n ↔ (MVal.ref r).readPath τ p = .ok (.ref n)
   | [], r, n => by
     simp only [resolveFrom, MVal.readPath, Option.some.injEq, Except.ok.injEq, MVal.ref.injEq]
@@ -328,13 +328,13 @@ theorem LId.evalR_ok {B : Births} {i : LId} {n : Nat} :
   unfold LId.evalR
   split <;> rename_i h <;> simp only [h, Except.ok.injEq, Option.some.injEq, reduceCtorEq]
 
-theorem asRef_ok {mv : MVal} {id : Nat} (h : MVal.asRef mv = .ok id) : mv = .ref id := by
+theorem asRef_ok {mv : Semantics.MVal} {id : Nat} (h : MVal.asRef mv = .ok id) : mv = .ref id := by
   cases mv with
   | ref r => cases h; rfl
   | prim _ => cases h
 
 /-- A run's allocations are births in order (`MemNames.Births.Ok`). -/
-theorem LMem.run_births (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births},
+theorem LMem.run_births (σ : Semantics.State) : (m : LMem) → ∀ {μ : Semantics.State} {B : Births},
     m.run σ = .ok (μ, B) → B.Ok σ.nextId μ
   | .init, μ, B, h => by
     simp only [LMem.run, Except.ok.injEq, Prod.mk.injEq] at h
@@ -386,7 +386,7 @@ theorem LMem.run_births (σ : State) : (m : LMem) → ∀ {μ : State} {B : Birt
 /-- What a term returns, where it returns. -/
 def Rets (x : Res Value) : Prop := ∃ v, x = .ok v
 
-theorem ltG_rets (σ : State) (k n : LTerm) :
+theorem ltG_rets (σ : Semantics.State) (k n : LTerm) :
     Rets ((ltG k n).eval σ) ↔
       ∃ c d, k.eval σ = .ok (.int c) ∧ n.eval σ = .ok (.int d) ∧ 0 ≤ c ∧ c < d := by
   unfold ltG Rets
@@ -421,7 +421,7 @@ theorem ltG_rets (σ : State) (k n : LTerm) :
             Bool.and_false, pickBranch, reduceCtorEq, exists_false, Except.ok.injEq, exists_eq',
             PrimVal.int.injEq, exists_and_left, exists_eq_left', and_self, and_false, and_true]
 
-theorem ltR_rets (σ : State) (k n : LTerm) :
+theorem ltR_rets (σ : Semantics.State) (k n : LTerm) :
     Rets ((ltR k n).eval σ) ↔
       ∃ c d, k.eval σ = .ok (.int c) ∧ n.eval σ = .ok (.int d) ∧ 0 ≤ c ∧ c < d := by
   unfold ltR
@@ -436,7 +436,7 @@ theorem ltR_rets (σ : State) (k n : LTerm) :
       exact h ⟨h0, h1⟩
   · exact ltG_rets σ k n
 
-theorem seqL_rets (σ : State) (g a : LTerm) :
+theorem seqL_rets (σ : Semantics.State) (g a : LTerm) :
     Rets ((seqL g a).eval σ) ↔ Rets (g.eval σ) ∧ Rets (a.eval σ) := by
   rw [seqL_eval]
   unfold Rets
@@ -444,7 +444,7 @@ theorem seqL_rets (σ : State) (g a : LTerm) :
   | error e => simp only [bind, Except.bind, reduceCtorEq, exists_false, false_and]
   | ok x => simp only [Res.ok_bind', Except.ok.injEq, exists_eq', true_and]
 
-theorem natL_eval (σ : State) (n : LTerm) {c : Int} (hn : n.eval σ = .ok (.int c)) :
+theorem natL_eval (σ : Semantics.State) (n : LTerm) {c : Int} (hn : n.eval σ = .ok (.int c)) :
     (natL n).eval σ = .ok (.int c.toNat) := by
   unfold natL
   split
@@ -462,12 +462,12 @@ theorem natL_eval (σ : State) (n : LTerm) {c : Int} (hn : n.eval σ = .ok (.int
 /-! ### Soundness: writes and allocations leave the other slots -/
 
 /-- An object's kind: a struct (`none`), or an array of its length. -/
-def objKind (μ : State) (n : Nat) : Res (Option Nat) :=
+def objKind (μ : Semantics.State) (n : Nat) : Res (Option Nat) :=
   μ.getObj n >>= fun o => match o with
     | .struct _ => .ok none
     | .array es _ => .ok (some es.length)
 
-theorem memArrayLen_objKind (μ : State) (n : Nat) :
+theorem memArrayLen_objKind (μ : Semantics.State) (n : Nat) :
     memArrayLen μ n = objKind μ n >>= fun o => match o with
       | none => .error .undef
       | some l => .ok (.int l) := by
@@ -477,7 +477,8 @@ theorem memArrayLen_objKind (μ : State) (n : Nat) :
   | ok o => cases o <;> rfl
 
 /-- A write changes no object's kind, nor an array's length. -/
-theorem objKind_writeAddr {μ μ' : State} {mv : MVal} {ad : Addr} (h : writeAddr μ' mv ad = .ok μ)
+theorem objKind_writeAddr {μ μ' : Semantics.State} {mv : Semantics.MVal} {ad : Addr} (h : writeAddr
+    μ' mv ad = .ok μ)
     (n : Nat) : objKind μ n = objKind μ' n := by
   cases ad with
   | memoryField id f =>
@@ -516,12 +517,12 @@ theorem objKind_writeAddr {μ μ' : State} {mv : MVal} {ad : Addr} (h : writeAdd
           · simp only [objKind, State.getObj, State.setObj, lookupBy_setBy_ne hn]
         · cases h
 
-theorem memArrayLen_writeAddr {μ μ' : State} {mv : MVal} {ad : Addr}
+theorem memArrayLen_writeAddr {μ μ' : Semantics.State} {mv : Semantics.MVal} {ad : Addr}
     (h : writeAddr μ' mv ad = .ok μ) (n : Nat) : memArrayLen μ n = memArrayLen μ' n := by
   rw [memArrayLen_objKind, memArrayLen_objKind, objKind_writeAddr h]
 
 /-- A write at another object leaves every read of this one. -/
-theorem LSel.read_write_ne {σ μ μ' : State} {mv : MVal} {ad : Addr} {n : Nat}
+theorem LSel.read_write_ne {σ μ μ' : Semantics.State} {mv : Semantics.MVal} {ad : Addr} {n : Nat}
     (h : writeAddr μ' mv ad = .ok μ) (hn : ad.id ≠ n) (a : LSel) :
     a.read σ μ n = a.read σ μ' n := by
   obtain ⟨_, _, _, hfr⟩ := Close.writeAddr_setObj h
@@ -537,7 +538,7 @@ theorem LSel.read_write_ne {σ μ μ' : State} {mv : MVal} {ad : Addr} {n : Nat}
     exact hfr _ (hap (.memoryIndex n j) rfl)
   | size => exact memArrayLen_writeAddr h n
 
-theorem LSel.iread_write_ne {σ μ μ' : State} {mv : MVal} {ad : Addr} {n : Nat}
+theorem LSel.iread_write_ne {σ μ μ' : Semantics.State} {mv : Semantics.MVal} {ad : Addr} {n : Nat}
     (h : writeAddr μ' mv ad = .ok μ) (hn : ad.id ≠ n) (a : LSel) :
     a.iread σ μ n = a.iread σ μ' n := by
   obtain ⟨_, _, _, hfr⟩ := Close.writeAddr_setObj h
@@ -559,7 +560,8 @@ theorem LSel.iread_write_ne {σ μ μ' : State} {mv : MVal} {ad : Addr} {n : Nat
     simp only [Res.ok_bind', hfr _ hap]
 
 /-- An allocation leaves every read of an older object. -/
-theorem LSel.read_heapExt {σ μ μ' : State} (hx : μ'.HeapExt μ) {n : Nat} (hn : n < μ'.nextId)
+theorem LSel.read_heapExt {σ μ μ' : Semantics.State} (hx : μ'.HeapExt μ) {n : Nat} (hn : n <
+    μ'.nextId)
     (a : LSel) : a.read σ μ n = a.read σ μ' n := by
   cases a with
   | fld f => simp only [LSel.read, readAddr_heapExt hx (a := .memoryField n f) hn]
@@ -569,7 +571,8 @@ theorem LSel.read_heapExt {σ μ μ' : State} (hx : μ'.HeapExt μ) {n : Nat} (h
     exact readAddr_heapExt hx (a := .memoryIndex n j) hn
   | size => simp only [LSel.read, memArrayLen, State.getObj_heapExt hx hn]
 
-theorem LSel.iread_heapExt {σ μ μ' : State} (hx : μ'.HeapExt μ) {n : Nat} (hn : n < μ'.nextId)
+theorem LSel.iread_heapExt {σ μ μ' : Semantics.State} (hx : μ'.HeapExt μ) {n : Nat} (hn : n <
+    μ'.nextId)
     (a : LSel) : a.iread σ μ n = a.iread σ μ' n := by
   unfold LSel.iread
   cases ha : a.addr σ n with
@@ -585,14 +588,15 @@ theorem LSel.iread_heapExt {σ μ μ' : State} (hx : μ'.HeapExt μ) {n : Nat} (
       | size => cases ha
     simp only [Res.ok_bind', readAddr_heapExt hx (a := a') (hid ▸ hn)]
 
-theorem objKind_heapExt {μ μ' : State} (hx : μ'.HeapExt μ) {n : Nat} (hn : n < μ'.nextId) :
+theorem objKind_heapExt {μ μ' : Semantics.State} (hx : μ'.HeapExt μ) {n : Nat} (hn : n <
+    μ'.nextId) :
     objKind μ n = objKind μ' n := by
   simp only [objKind, State.getObj_heapExt hx hn]
 
 /-! ### Soundness: a fresh default -/
 
 /-- `findLive` of a default reads the default of the declared type. -/
-theorem findLive_default : ∀ (p : List Seg) (T : Ty) {T' : Ty} {v : SVal},
+theorem findLive_default : ∀ (p : List Seg) (T : Ty) {T' : Ty} {v : Semantics.SVal},
     (defaultForTy T).findLive p = .ok v → T.memberTy p = some T' → v = defaultForTy T'
   | [], T, T', v, h, hT => by
     simp only [SVal.findLive_nil, Except.ok.injEq] at h
@@ -613,7 +617,7 @@ theorem findLive_default : ∀ (p : List Seg) (T : Ty) {T' : Ty} {v : SVal},
           | field f =>
             simp only [Ty.at] at hs
             rw [defaultForTy] at h
-            simp only [SVal.findLive, lookupBy_defaultForFields, hs, Option.map_some] at h
+            simp only [Semantics.SVal.findLive, lookupBy_defaultForFields, hs, Option.map_some] at h
             exact findLive_default rest T₁ h hT
           | «at» k => simp only [Ty.at, reduceCtorEq] at hs
         | fixed E n =>
@@ -625,7 +629,7 @@ theorem findLive_default : ∀ (p : List Seg) (T : Ty) {T' : Ty} {v : SVal},
             · rename_i hk
               cases hs
               rw [defaultForTy] at h
-              simp only [SVal.findLive, List.length_replicate] at h
+              simp only [Semantics.SVal.findLive, List.length_replicate] at h
               split at h
               · simp only [List.get_eq_getElem, List.getElem_replicate] at h
                 exact findLive_default rest T₁ h hT
@@ -636,7 +640,7 @@ theorem findLive_default : ∀ (p : List Seg) (T : Ty) {T' : Ty} {v : SVal},
 
 /-- The object a path below a fresh default reaches is a fresh default of the
 declared type there. -/
-theorem dflt_obj {τ : State} {T : Ty} {r n : Nat} {p : List Seg}
+theorem dflt_obj {τ : Semantics.State} {T : Ty} {r n : Nat} {p : List Seg}
     (hc : CopiedTo τ (defaultForTy T) (.ref r)) (hr : resolveFrom τ.heap r p = some n) :
     ∃ R, T.memberTy p = some (.ref R) ∧ CopiedTo τ (defaultForTy (.ref R)) (.ref n) := by
   have hrp := (readPath_ref_iff τ p r n).1 hr
@@ -651,7 +655,7 @@ theorem dflt_obj {τ : State} {T : Ty} {r n : Nat} {p : List Seg}
     cases q <;> simp only [PrimTy.default, Value.toMVal, reduceCtorEq] at h'
   | ref R => exact ⟨R, hT', hc'⟩
 
-theorem readPath_single (τ : State) (n : Nat) (s : Seg) :
+theorem readPath_single (τ : Semantics.State) (n : Nat) (s : Seg) :
     (MVal.ref n).readPath τ [s] = readAddr τ (.ofSeg n s) := by
   simp only [MVal.readPath]
   cases readAddr τ (.ofSeg n s) <;> rfl
@@ -666,7 +670,7 @@ theorem asValue_toMVal (v : Value) : (Value.toMVal v).asValue = .ok v := by
 /-- **A slot of a fresh default** (`initMember`, `initElement`,
 `defaultValueInt`/`Bool`): the default of the declared type, where it is a
 primitive. -/
-theorem slot_default (σ : State) {τ : State} {T : Ty} {n : Nat}
+theorem slot_default (σ : Semantics.State) {τ : Semantics.State} {T : Ty} {n : Nat}
     (hc : CopiedTo τ (defaultForTy T) (.ref n)) (s : Seg) :
     Sim ((dfltWord (T.at s)).eval σ) (readAddr τ (.ofSeg n s) >>= MVal.asValue) := by
   obtain ⟨σ₁, σ₂, hcp, hx⟩ := hc
@@ -706,7 +710,7 @@ theorem defaultForTy_fixed (E : Ty) (n : Nat) :
 
 /-- **What a selector reads in a fresh default** (`initMember`,
 `initElement`, `initSize`, `sizeOfFixed`). -/
-theorem dfltSel_sim (σ : State) {τ : State} {T : Ty} {n : Nat}
+theorem dfltSel_sim (σ : Semantics.State) {τ : Semantics.State} {T : Ty} {n : Nat}
     (hc : CopiedTo τ (defaultForTy T) (.ref n)) :
     (a : LSel) → Sim ((dfltSel (some T) a).eval σ) (a.read σ τ n)
   | .fld f => by
@@ -795,12 +799,12 @@ theorem dfltSel_sim (σ : State) {τ : State} {T : Ty} {n : Nat}
         exact Sim.refl _
 
 /-- The object a path from `r` reaches in the heap `h`; it halts on none. -/
-def resolveR (h : List (Nat × MObj)) (r : Nat) (p : List Seg) : Res Nat :=
+def resolveR (h : List (Nat × Semantics.MObj)) (r : Nat) (p : List Seg) : Res Nat :=
   match resolveFrom h r p with
   | some n => .ok n
   | none => .error .undef
 
-theorem resolveR_ok {h : List (Nat × MObj)} {r n : Nat} {p : List Seg} :
+theorem resolveR_ok {h : List (Nat × Semantics.MObj)} {r n : Nat} {p : List Seg} :
     resolveR h r p = .ok n ↔ resolveFrom h r p = some n := by
   unfold resolveR
   split <;> rename_i hr <;> simp only [hr, Except.ok.injEq, Option.some.injEq, reduceCtorEq]
@@ -813,7 +817,7 @@ theorem evalR_last (B : Births) (b : Birth) {i : LId} (hk : i.root = B.length) :
   rw [hk, Births.eval_last]
   rfl
 
-theorem dflt_resolve {τ : State} {T : Ty} {r : Nat} {p : List Seg} {R : RefTy}
+theorem dflt_resolve {τ : Semantics.State} {T : Ty} {r : Nat} {p : List Seg} {R : RefTy}
     (hc : CopiedTo τ (defaultForTy T) (.ref r)) (hT : T.memberTy p = some (.ref R)) :
     ∃ n, resolveFrom τ.heap r p = some n := by
   obtain ⟨σ₁, σ₂, hcp, hx⟩ := hc
@@ -821,7 +825,7 @@ theorem dflt_resolve {τ : State} {T : Ty} {r : Nat} {p : List Seg} {R : RefTy}
   exact ⟨id, (readPath_ref_iff τ p r id).2 hmv⟩
 
 /-- A fresh default of a reference type is a struct exactly for a struct type. -/
-theorem dflt_struct_iff {τ : State} {R : RefTy} {n : Nat}
+theorem dflt_struct_iff {τ : Semantics.State} {R : RefTy} {n : Nat}
     (hc : CopiedTo τ (defaultForTy (.ref R)) (.ref n)) :
     (∃ fs, τ.getObj n = .ok (.struct fs)) ↔ ∃ sn, R = .struct sn := by
   rcases copiedTo_ref_obj hc with ⟨fs, mfs, hv, hobj⟩ | ⟨es, sh, fx, mes, hv, hobj, -⟩
@@ -839,7 +843,7 @@ theorem dflt_struct_iff {τ : State} {R : RefTy} {n : Nat}
     intro fs h; cases h
 
 /-- **A read below a fresh default**, along the path of a name. -/
-theorem dflt_read_sim (σ : State) {τ : State} {T : Ty} {r : Nat}
+theorem dflt_read_sim (σ : Semantics.State) {τ : Semantics.State} {T : Ty} {r : Nat}
     (hc : CopiedTo τ (defaultForTy T) (.ref r)) (p : List Seg) (a : LSel) :
     Sim ((dfltSel (T.memberTy p) a).eval σ) (resolveR τ.heap r p >>= fun n => a.read σ τ n) := by
   cases hres : resolveFrom τ.heap r p with
@@ -861,7 +865,7 @@ theorem dflt_read_sim (σ : State) {τ : State} {T : Ty} {r : Nat}
       | prim q =>
         cases a <;> simp only [hT, dfltSel, Ty.at_prim, dfltWord, LTerm.eval, reduceCtorEq] at h
 
-theorem dfltRef_rets (σ : State) {τ : State} {T : Ty} {r : Nat}
+theorem dfltRef_rets (σ : Semantics.State) {τ : Semantics.State} {T : Ty} {r : Nat}
     (hc : CopiedTo τ (defaultForTy T) (.ref r)) (p : List Seg) :
     Rets ((dfltRef (T.memberTy p)).eval σ) ↔ ∃ n, resolveFrom τ.heap r p = some n := by
   constructor
@@ -876,7 +880,7 @@ theorem dfltRef_rets (σ : State) {τ : State} {T : Ty} {r : Nat}
     obtain ⟨R, hT, -⟩ := dflt_obj hc hn
     simp only [hT, dfltRef, Rets, LTerm.eval, Except.ok.injEq, exists_eq']
 
-theorem dfltStruct_rets (σ : State) {τ : State} {T : Ty} {r : Nat}
+theorem dfltStruct_rets (σ : Semantics.State) {τ : Semantics.State} {T : Ty} {r : Nat}
     (hc : CopiedTo τ (defaultForTy T) (.ref r)) (p : List Seg) :
     Rets ((dfltStruct (T.memberTy p)).eval σ) ↔
       ∃ n fs, resolveFrom τ.heap r p = some n ∧ τ.getObj n = .ok (.struct fs) := by
@@ -904,7 +908,7 @@ theorem dfltStruct_rets (σ : State) {τ : State} {T : Ty} {r : Nat}
 
 /-- An element read below a length: `seqL (ltR t n) W` against the read at
 each index. -/
-theorem seqL_ltR_sim (σ : State) (t n W : LTerm) {c : Int} (hn : n.eval σ = .ok (.int c))
+theorem seqL_ltR_sim (σ : Semantics.State) (t n W : LTerm) {c : Int} (hn : n.eval σ = .ok (.int c))
     (F : Int → Res Value) (hF : ∀ j, 0 ≤ j → j < c → Sim (W.eval σ) (F j))
     (hout : ∀ j u, ¬ (0 ≤ j ∧ j < c) → F j ≠ .ok u) :
     Sim ((seqL (ltR t n) W).eval σ) (t.eval σ >>= Value.asInt >>= F) := by
@@ -941,7 +945,7 @@ theorem seqL_ltR_sim (σ : State) (t n W : LTerm) {c : Int} (hn : n.eval σ = .o
         exact ⟨fun h => absurd h (hhalt hr u), fun h => absurd h (hout j u hj)⟩
 
 /-- The word a copy of a default holds: its default, where it is a primitive. -/
-theorem dfltWord_copied (σ : State) {τ : State} {E : Ty} {mv : MVal}
+theorem dfltWord_copied (σ : Semantics.State) {τ : Semantics.State} {E : Ty} {mv : Semantics.MVal}
     (hc : CopiedTo τ (defaultForTy E) mv) : Sim ((dfltWord (some E)).eval σ) mv.asValue := by
   obtain ⟨σ₁, σ₂, hcp, -⟩ := hc
   rw [Close.copyStToM_asValue hcp]
@@ -952,7 +956,7 @@ theorem dfltWord_copied (σ : State) {τ : State} {E : Ty} {mv : MVal}
     | fixed E k => rw [defaultForTy_fixed]; exact Sim.refl _
     | _ => rw [defaultForTy]; exact Sim.refl _
 
-theorem copied_default_prim {τ : State} {E : Ty} {pv : PrimVal}
+theorem copied_default_prim {τ : Semantics.State} {E : Ty} {pv : PrimVal}
     (hc : CopiedTo τ (defaultForTy E) (.prim pv)) : ∃ q, E = .prim q := by
   obtain ⟨σ₁, σ₂, hcp, -⟩ := hc
   cases E with
@@ -979,19 +983,20 @@ theorem newArrVal_other {R : RefTy} (hR : ∀ E, R ≠ .array E) (c : Int) :
   | _ => rfl
 
 /-- `new R(n)`'s root is an array, for an array type. -/
-theorem newArr_root {μ' μ : State} {E : Ty} {c : Int} {r : Nat}
+theorem newArr_root {μ' μ : Semantics.State} {E : Ty} {c : Int} {r : Nat}
     (hcp : copyStToM μ' (newArrVal (.array E) c) = .ok (μ, .ref r)) :
     ∃ es, lookupBy r μ.heap = some (.array es false) := by
   rcases copiedTo_ref_obj ⟨μ', μ, hcp, State.HeapExt.refl μ⟩ with
     ⟨fs, mfs, hv, -⟩ | ⟨es, sh, fx, mes, hv, hobj, -⟩
   · simp only [newArrVal, reduceCtorEq] at hv
-  · simp only [newArrVal, SVal.array.injEq] at hv
+  · simp only [newArrVal, Semantics.SVal.array.injEq] at hv
     obtain ⟨-, -, rfl⟩ := hv
     exact ⟨mes, hobj⟩
 
 /-- **A read below `new R(n)`** (`memoryArrayFreshAlloc`, then
 `readOnWrite` at `size` and `initElement`). -/
-theorem new_read_sim (σ : State) {μ' μ : State} {R : RefTy} {n : LTerm} {c : Int} {r : Nat}
+theorem new_read_sim (σ : Semantics.State) {μ' μ : Semantics.State} {R : RefTy} {n : LTerm} {c :
+    Int} {r : Nat}
     (hn : n.eval σ = .ok (.int c)) (hcp : copyStToM μ' (newArrVal R c) = .ok (μ, .ref r))
     (p : List Seg) (a : LSel) :
     Sim ((newSel R n p a).eval σ) (resolveR μ.heap r p >>= fun x => a.read σ μ x) := by
@@ -1078,7 +1083,8 @@ theorem new_read_sim (σ : State) {μ' μ : State} {R : RefTy} {n : LTerm} {c : 
     exact dflt_read_sim σ ⟨μ', μ, hcp, State.HeapExt.refl μ⟩ p a
 
 /-- A test of the object at a path below `new R(n)`, by its declared type. -/
-theorem newObj_rets (σ : State) {μ' μ : State} {R : RefTy} {n : LTerm} {c : Int} {r : Nat}
+theorem newObj_rets (σ : Semantics.State) {μ' μ : Semantics.State} {R : RefTy} {n : LTerm} {c :
+    Int} {r : Nat}
     (hn : n.eval σ = .ok (.int c)) (hcp : copyStToM μ' (newArrVal R c) = .ok (μ, .ref r))
     (g : Option Ty → LTerm) (Q : Nat → Prop)
     (hg : ∀ (T : Ty) (r' : Nat) (p : List Seg), CopiedTo μ (defaultForTy T) (.ref r') →
@@ -1132,7 +1138,7 @@ theorem newObj_rets (σ : State) {μ' μ : State} {R : RefTy} {n : LTerm} {c : I
 
 /-! ### Soundness: a copy from storage -/
 
-theorem LPath.ext_eval (σ : State) : (p : List Seg) → (q : LPath) →
+theorem LPath.ext_eval (σ : Semantics.State) : (p : List Seg) → (q : LPath) →
     (q.ext p).eval σ = q.eval σ >>= fun qs => .ok (qs ++ p)
   | [], q => by
     simp only [LPath.ext, List.append_nil]
@@ -1159,11 +1165,11 @@ theorem noLen_mem {p : List Seg} (h : noLen p = true) : ∀ s ∈ p, s ≠ .fiel
 
 /-- The setting of a copy from storage: the storage `s` and the path `q` read
 the subtree `w`, which copies to the root `r`. -/
-structure CopyAt (σ μ : State) (s : LStor) (q : LPath) (r : Nat) where
-  v : SVal
+structure CopyAt (σ μ : Semantics.State) (s : LStor) (q : LPath) (r : Nat) where
+  v : Semantics.SVal
   qs : List Seg
-  w : SVal
-  μ' : State
+  w : Semantics.SVal
+  μ' : Semantics.State
   hv : s.eval σ = .ok v
   hq : q.eval σ = .ok qs
   hw : v.findLive qs = .ok w
@@ -1284,7 +1290,7 @@ theorem copy_obj (h : CopyAt σ μ s q r) {p : List Seg} {x : Nat}
     (hx : resolveFrom μ.heap r p = some x) : ∃ w', h.w.findLive p = .ok w' ∧ CopiedTo μ w' (.ref x) :=
   (copyStToM_readPath p h.hc (State.HeapExt.refl μ)).1 _ ((readPath_ref_iff μ p r x).1 hx)
 
-theorem copy_obj' (h : CopyAt σ μ s q r) {p : List Seg} (hl : noLen p = true) {w' : SVal}
+theorem copy_obj' (h : CopyAt σ μ s q r) {p : List Seg} (hl : noLen p = true) {w' : Semantics.SVal}
     (hw : h.w.findLive p = .ok w') (hp : ∀ pv, w' ≠ .prim pv) :
     ∃ x, resolveFrom μ.heap r p = some x ∧ CopiedTo μ w' (.ref x) := by
   obtain ⟨mv', hmv, hc'⟩ :=
@@ -1299,7 +1305,8 @@ theorem copy_obj' (h : CopyAt σ μ s q r) {p : List Seg} (hl : noLen p = true) 
   obtain ⟨x, rfl⟩ := hr
   exact ⟨x, (readPath_ref_iff μ p r x).2 hmv, σ₁, σ₂, hcp, hx₂⟩
 
-theorem copiedTo_not_prim {τ : State} {pv : PrimVal} {x : Nat} : ¬ CopiedTo τ (.prim pv) (.ref x) := by
+theorem copiedTo_not_prim {τ : Semantics.State} {pv : PrimVal} {x : Nat} : ¬ CopiedTo τ (.prim
+    pv) (.ref x) := by
   rintro ⟨σ₁, σ₂, hcp, -⟩
   cases (copyStToM_prim_inv hcp).2
 
@@ -1310,7 +1317,7 @@ theorem CopyAt.term_eval (h : CopyAt σ μ s q r) (p : List Seg) :
   simp only [LTerm.eval, h.hv, Res.ok_bind', LPath.ext_eval, h.hq, SVal.findLive_append, h.hw,
     and_self]
 
-theorem ite_isT_rets (σ : State) (c b : LTerm) :
+theorem ite_isT_rets (σ : Semantics.State) (c b : LTerm) :
     Rets ((LTerm.ite (isT c) .err b).eval σ) ↔ ¬ Rets (c.eval σ) ∧ Rets (b.eval σ) := by
   simp only [LTerm.eval, isT_eval, Res.ok_bind']
   unfold Rets
@@ -1375,7 +1382,7 @@ theorem copy_struct_rets (h : CopyAt σ μ s q r) {p : List Seg} (hl : noLen p =
 /-! ### Soundness: the readers -/
 
 /-- A read of a name older than an allocation is the read before it. -/
-theorem alloc_frame {σ μ' : State} {B' : Births} {b : Birth} {i : LId}
+theorem alloc_frame {σ μ' : Semantics.State} {B' : Births} {b : Birth} {i : LId}
     (hB : B'.Ok σ.nextId μ') (hk : i.root ≠ B'.length) {β : Type} (F G : Nat → Res β)
     (hF : ∀ n, n < μ'.nextId → F n = G n) :
     (LId.evalR (B' ++ [b]) i >>= F) = (LId.evalR B' i >>= G) := by
@@ -1388,13 +1395,15 @@ theorem alloc_frame {σ μ' : State} {B' : Births} {b : Birth} {i : LId}
     simp only [Res.ok_bind', hF n hn]
 
 /-- Two names of one run are one object exactly when they are one name. -/
-theorem evalR_ne {σ μ : State} {B : Births} (hB : B.Ok σ.nextId μ) {i j : LId} (hij : i ≠ j)
+theorem evalR_ne {σ μ : Semantics.State} {B : Births} (hB : B.Ok σ.nextId μ) {i j : LId} (hij : i ≠
+    j)
     {n n' : Nat} (hi : LId.evalR B i = .ok n) (hj : LId.evalR B j = .ok n') : n ≠ n' := by
   rintro rfl
   obtain ⟨h₁, h₂⟩ := Births.eval_inj hB (LId.evalR_ok.1 hi) (LId.evalR_ok.1 hj)
   exact hij (by cases i; cases j; simp only at h₁ h₂; subst h₁ h₂; rfl)
 
-theorem LSel.addr_id {σ : State} {n : Nat} {b : LSel} {ad : Addr} (h : b.addr σ n = .ok ad) :
+theorem LSel.addr_id {σ : Semantics.State} {n : Nat} {b : LSel} {ad : Addr} (h : b.addr σ n = .ok
+    ad) :
     ad.id = n := by
   cases b with
   | fld f => cases h; rfl
@@ -1404,7 +1413,8 @@ theorem LSel.addr_id {σ : State} {n : Nat} {b : LSel} {ad : Addr} (h : b.addr �
     cases h; rfl
   | size => cases h
 
-theorem selRel_same {σ μ : State} {n : Nat} {b a : LSel} {ad : Addr} (h : selRel b a = .same)
+theorem selRel_same {σ μ : Semantics.State} {n : Nat} {b a : LSel} {ad : Addr} (h : selRel b a =
+    .same)
     (hb : b.addr σ n = .ok ad) : a.read σ μ n = readAddr μ ad >>= MVal.asValue := by
   cases b with
   | fld f =>
@@ -1431,7 +1441,8 @@ theorem selRel_same {σ μ : State} {n : Nat} {b a : LSel} {ad : Addr} (h : selR
     | _ => simp only [selRel, reduceCtorEq] at h
   | size => cases hb
 
-theorem selRel_apart {σ μ μ' : State} {n : Nat} {b a : LSel} {ad : Addr} {mv : MVal}
+theorem selRel_apart {σ μ μ' : Semantics.State} {n : Nat} {b a : LSel} {ad : Addr} {mv :
+    Semantics.MVal}
     (h : selRel b a = .apart) (hb : b.addr σ n = .ok ad) (hw : writeAddr μ' mv ad = .ok μ) :
     a.read σ μ n = a.read σ μ' n := by
   obtain ⟨_, _, _, hfr⟩ := Close.writeAddr_setObj hw
@@ -1491,7 +1502,8 @@ theorem selRel_key {b a : LSel} {r w : LTerm} (h : selRel b a = .key r w) :
     | _ => simp only [selRel, reduceCtorEq] at h
   | size => cases a <;> simp only [selRel, reduceCtorEq] at h
 
-theorem LMV.wordT_sim {σ : State} {B : Births} {v : LMV} {mv : MVal} (h : v.eval σ B = .ok mv) :
+theorem LMV.wordT_sim {σ : Semantics.State} {B : Births} {v : LMV} {mv : Semantics.MVal} (h :
+    v.eval σ B = .ok mv) :
     Sim (v.wordT.eval σ) mv.asValue := by
   cases v with
   | word t =>
@@ -1505,7 +1517,7 @@ theorem LMV.wordT_sim {σ : State} {B : Births} {v : LMV} {mv : MVal} (h : v.eva
     exact Sim.halt (fun _ h => by cases h) (fun _ h => by cases h)
 
 /-- What a run's step leaves, by the kind of the step. -/
-theorem LMem.run_addM {σ μ : State} {B : Births} {m : LMem} {k : Nat} {R : RefTy}
+theorem LMem.run_addM {σ μ : Semantics.State} {B : Births} {m : LMem} {k : Nat} {R : RefTy}
     (h : (LMem.addM m k R).run σ = .ok (μ, B)) : ∃ μ' B' id, m.run σ = .ok (μ', B') ∧
       k = B'.length ∧ copyStToM μ' (defaultForTy (.ref R)) = .ok (μ, .ref id) ∧
       B = B' ++ [Birth.ofCopy μ' μ id] := by
@@ -1520,7 +1532,8 @@ theorem LMem.run_addM {σ μ : State} {B : Births} {m : LMem} {k : Nat} {R : Ref
     exact ⟨μ', B', a.2, hr, hk, Close.allocDefault_copy ha, rfl⟩
   · cases h
 
-theorem LMem.run_newArr {σ μ : State} {B : Births} {m : LMem} {k : Nat} {R : RefTy} {n : LTerm}
+theorem LMem.run_newArr {σ μ : Semantics.State} {B : Births} {m : LMem} {k : Nat} {R : RefTy} {n :
+    LTerm}
     (h : (LMem.newArr m k R n).run σ = .ok (μ, B)) : ∃ μ' B' id c, m.run σ = .ok (μ', B') ∧
       k = B'.length ∧ n.eval σ = .ok (.int c) ∧ copyStToM μ' (newArrVal R c) = .ok (μ, .ref id) ∧
       B = B' ++ [Birth.ofCopy μ' μ id] := by
@@ -1539,7 +1552,8 @@ theorem LMem.run_newArr {σ μ : State} {B : Births} {m : LMem} {k : Nat} {R : R
     exact ⟨μ', B', id, c, hr, hk, hn, by rw [ha, ← asRef_ok hid], rfl⟩
   · cases h
 
-theorem LMem.run_copySt {σ μ : State} {B : Births} {m : LMem} {k : Nat} {s : LStor} {q : LPath}
+theorem LMem.run_copySt {σ μ : Semantics.State} {B : Births} {m : LMem} {k : Nat} {s : LStor} {q :
+    LPath}
     (h : (LMem.copySt m k s q).run σ = .ok (μ, B)) : ∃ μ' B' id, m.run σ = .ok (μ', B') ∧
       k = B'.length ∧ (∃ c : CopyAt σ μ s q id, c.μ' = μ') ∧
       B = B' ++ [Birth.ofCopy μ' μ id] := by
@@ -1554,7 +1568,8 @@ theorem LMem.run_copySt {σ μ : State} {B : Births} {m : LMem} {k : Nat} {s : L
     exact ⟨μ', B', id, hr, hk, ⟨⟨v, qs, w, μ', hv, hq, hw, by rw [ha, ← asRef_ok hid]⟩, rfl⟩, rfl⟩
   · cases h
 
-theorem LMem.run_write {σ μ : State} {B : Births} {m : LMem} {j : LId} {b : LSel} {v : LMV}
+theorem LMem.run_write {σ μ : Semantics.State} {B : Births} {m : LMem} {j : LId} {b : LSel} {v :
+    LMV}
     (h : (LMem.write m j b v).run σ = .ok (μ, B)) : ∃ μ' n' ad mv, m.run σ = .ok (μ', B) ∧
       LId.evalR B j = .ok n' ∧ b.addr σ n' = .ok ad ∧ v.eval σ B = .ok mv ∧
       writeAddr μ' mv ad = .ok μ := by
@@ -1566,7 +1581,8 @@ theorem LMem.run_write {σ μ : State} {B : Births} {m : LMem} {j : LId} {b : LS
 
 /-- **A read of memory is the term `readT` gives**: under the run of the
 memory, the term returns what the interpreter's read of the slot does. -/
-theorem LMem.readT_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births} (i : LId) (a : LSel)
+theorem LMem.readT_sim (σ : Semantics.State) : (m : LMem) → ∀ {μ : Semantics.State} {B : Births} (i
+    : LId) (a : LSel)
     {t : LTerm}, m.run σ = .ok (μ, B) → m.readT i a = some t →
     Sim (t.eval σ) (LId.evalR B i >>= fun n => a.read σ μ n)
   | .init, _, _, _, _, _, _, ht => by simp only [LMem.readT, reduceCtorEq] at ht
@@ -1663,7 +1679,8 @@ theorem LMem.readT_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Birth
         exact (LSel.read_write_ne hw (by rw [LSel.addr_id hb]; exact
           (evalR_ne hB hij hi hn').symm) a).symm
 
-theorem LSel.seg_iread {σ μ : State} {n : Nat} {a : LSel} {sg : Seg} (h : a.seg? = some sg) :
+theorem LSel.seg_iread {σ μ : Semantics.State} {n : Nat} {a : LSel} {sg : Seg} (h : a.seg? = some
+    sg) :
     a.iread σ μ n = readAddr μ (.ofSeg n sg) >>= MVal.asRef := by
   cases a with
   | fld f => cases h; rfl
@@ -1677,7 +1694,7 @@ theorem LSel.seg_iread {σ μ : State} {n : Nat} {a : LSel} {sg : Seg} (h : a.se
 
 /-- A reference slot below a name is the name one segment longer, read in its
 birth heap (`MemNames.birth_slot`). -/
-theorem resolveR_snoc_sim (μ : State) (r : Nat) (p : List Seg) (sg : Seg) :
+theorem resolveR_snoc_sim (μ : Semantics.State) (r : Nat) (p : List Seg) (sg : Seg) :
     Sim (resolveR μ.heap r (p ++ [sg]))
       (resolveR μ.heap r p >>= fun n => readAddr μ (.ofSeg n sg) >>= MVal.asRef) := by
   intro m'
@@ -1704,7 +1721,8 @@ theorem resolveR_snoc_sim (μ : State) (r : Nat) (p : List Seg) (sg : Seg) :
       exact ⟨c, (step_iff_readAddr μ n c sg).2 hmv, rfl⟩
     | prim _ => cases h
 
-theorem selRel_same_addr {σ : State} {n : Nat} {b a : LSel} {ad : Addr} (h : selRel b a = .same)
+theorem selRel_same_addr {σ : Semantics.State} {n : Nat} {b a : LSel} {ad : Addr} (h : selRel b a =
+    .same)
     (hb : b.addr σ n = .ok ad) : a.addr σ n = .ok ad := by
   cases b with
   | fld f =>
@@ -1731,7 +1749,8 @@ theorem selRel_same_addr {σ : State} {n : Nat} {b a : LSel} {ad : Addr} (h : se
     | _ => simp only [selRel, reduceCtorEq] at h
   | size => cases hb
 
-theorem selRel_apart_iread {σ μ μ' : State} {n : Nat} {b a : LSel} {ad : Addr} {mv : MVal}
+theorem selRel_apart_iread {σ μ μ' : Semantics.State} {n : Nat} {b a : LSel} {ad : Addr} {mv :
+    Semantics.MVal}
     (h : selRel b a = .apart) (hb : b.addr σ n = .ok ad) (hw : writeAddr μ' mv ad = .ok μ) :
     a.iread σ μ n = a.iread σ μ' n := by
   obtain ⟨_, _, _, hfr⟩ := Close.writeAddr_setObj hw
@@ -1780,7 +1799,8 @@ theorem evalR_root_lt {B : Births} {j : LId} {x : Nat} (h : LId.evalR B j = .ok 
   obtain ⟨b, hb, -⟩ := Births.eval_some (LId.evalR_ok.1 h)
   exact (List.getElem?_eq_some_iff.1 hb).1
 
-theorem readI_alloc (σ : State) {m : LMem} {μ' μ : State} {B' : Births} {id k : Nat}
+theorem readI_alloc (σ : Semantics.State) {m : LMem} {μ' μ : Semantics.State} {B' : Births} {id k :
+    Nat}
     (hr : m.run σ = .ok (μ', B')) (hk : k = B'.length) (hx : μ'.HeapExt μ)
     (ih : ∀ (i : LId) (a : LSel) {j : LId}, m.readI i a = some j →
       (j.root = i.root ∨ j.root < B'.length) ∧
@@ -1815,7 +1835,8 @@ theorem readI_alloc (σ : State) {m : LMem} {μ' μ : State} {B' : Births} {id k
 
 /-- **The object a reference slot names is the name `readI` gives**
 (`initIdentity`, `readFromCopyToStorageIdentity`, `readOnWrite`). -/
-theorem LMem.readI_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births} (i : LId) (a : LSel)
+theorem LMem.readI_sim (σ : Semantics.State) : (m : LMem) → ∀ {μ : Semantics.State} {B : Births} (i
+    : LId) (a : LSel)
     {j : LId}, m.run σ = .ok (μ, B) → m.readI i a = some j →
     (j.root = i.root ∨ j.root < B.length) ∧
       Sim (LId.evalR B j) (LId.evalR B i >>= fun n => a.iread σ μ n)
@@ -1872,7 +1893,7 @@ theorem evalR_snoc_ne {B : Births} {b : Birth} {i : LId} (hk : i.root ≠ B.leng
     LId.evalR (B ++ [b]) i = LId.evalR B i := by
   unfold LId.evalR; rw [Births.eval_snoc_ne hk]
 
-theorem struct_iff_objKind (μ : State) (n : Nat) :
+theorem struct_iff_objKind (μ : Semantics.State) (n : Nat) :
     (∃ fs, μ.getObj n = .ok (.struct fs)) ↔ objKind μ n = .ok none := by
   unfold objKind
   cases μ.getObj n with
@@ -1882,7 +1903,7 @@ theorem struct_iff_objKind (μ : State) (n : Nat) :
     | struct fs => simp only [Res.ok_bind', Except.ok.injEq, MObj.struct.injEq, exists_eq']
     | array es fx => simp only [Res.ok_bind', Except.ok.injEq, reduceCtorEq, exists_false]
 
-theorem dfltRef_prim (σ : State) (q : PrimTy) (p : List Seg) :
+theorem dfltRef_prim (σ : Semantics.State) (q : PrimTy) (p : List Seg) :
     ¬ Rets ((dfltRef ((Ty.prim q).memberTy p)).eval σ) := by
   rintro ⟨v, hv⟩
   cases p with
@@ -1890,7 +1911,7 @@ theorem dfltRef_prim (σ : State) (q : PrimTy) (p : List Seg) :
   | cons s p => simp only [Ty.memberTy, Ty.at_prim, Option.bind_none, dfltRef, LTerm.eval,
       reduceCtorEq] at hv
 
-theorem dfltStruct_prim (σ : State) (q : PrimTy) (p : List Seg) :
+theorem dfltStruct_prim (σ : Semantics.State) (q : PrimTy) (p : List Seg) :
     ¬ Rets ((dfltStruct ((Ty.prim q).memberTy p)).eval σ) := by
   rintro ⟨v, hv⟩
   cases p with
@@ -1899,7 +1920,7 @@ theorem dfltStruct_prim (σ : State) (q : PrimTy) (p : List Seg) :
       reduceCtorEq] at hv
 
 /-- An allocation leaves which older objects are structs. -/
-theorem structG_alloc {σ μ' μ : State} {B' : Births} {i : LId} (hB : B'.Ok σ.nextId μ')
+theorem structG_alloc {σ μ' μ : Semantics.State} {B' : Births} {i : LId} (hB : B'.Ok σ.nextId μ')
     (hx : μ'.HeapExt μ) :
     (∃ n fs, LId.evalR B' i = .ok n ∧ μ'.getObj n = .ok (.struct fs)) ↔
       (∃ n fs, LId.evalR B' i = .ok n ∧ μ.getObj n = .ok (.struct fs)) := by
@@ -1912,7 +1933,8 @@ theorem structG_alloc {σ μ' μ : State} {B' : Births} {i : LId} (hB : B'.Ok σ
     exact ⟨n, fs, hn, by rw [← State.getObj_heapExt hx hlt]; exact hfs⟩
 
 /-- **A name denotes an object exactly where `nameG` returns.** -/
-theorem LMem.nameG_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births} (i : LId) {g : LTerm},
+theorem LMem.nameG_sim (σ : Semantics.State) : (m : LMem) → ∀ {μ : Semantics.State} {B : Births} (i
+    : LId) {g : LTerm},
     m.run σ = .ok (μ, B) → m.nameG i = some g → (Rets (g.eval σ) ↔ ∃ n, LId.evalR B i = .ok n)
   | .init, _, _, _, _, _, hg => by simp only [LMem.nameG, reduceCtorEq] at hg
   | .addM m k R, μ, B, i, g, h, hg => by
@@ -1964,7 +1986,8 @@ theorem LMem.nameG_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Birth
 
 /-- **A name denotes a struct exactly where `structG` returns**: what a member
 write needs. -/
-theorem LMem.structG_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births} (i : LId)
+theorem LMem.structG_sim (σ : Semantics.State) : (m : LMem) → ∀ {μ : Semantics.State} {B :
+    Births} (i : LId)
     {g : LTerm}, m.run σ = .ok (μ, B) → m.structG i = some g →
     (Rets (g.eval σ) ↔ ∃ n fs, LId.evalR B i = .ok n ∧ μ.getObj n = .ok (.struct fs))
   | .init, _, _, _, _, _, hg => by simp only [LMem.structG, reduceCtorEq] at hg
@@ -2028,7 +2051,7 @@ theorem LMem.structG_sim (σ : State) : (m : LMem) → ∀ {μ : State} {B : Bir
         ((objKind_writeAddr hw n) ▸ (struct_iff_objKind μ n).1 ⟨fs, hfs⟩)
       exact ⟨n, fs', hn, hfs'⟩
 
-theorem writeField_ok (μ : State) (mv : MVal) (n : Nat) (f : Name) :
+theorem writeField_ok (μ : Semantics.State) (mv : Semantics.MVal) (n : Nat) (f : Name) :
     (∃ μ₁, writeAddr μ mv (.memoryField n f) = .ok μ₁) ↔ ∃ fs, μ.getObj n = .ok (.struct fs) := by
   simp only [writeAddr, memWriteField]
   cases μ.getObj n with
@@ -2038,7 +2061,7 @@ theorem writeField_ok (μ : State) (mv : MVal) (n : Nat) (f : Name) :
     | struct fs => simp only [Res.ok_bind', Except.ok.injEq, exists_eq', MObj.struct.injEq]
     | array es fx => simp only [Res.ok_bind', reduceCtorEq, exists_false, Except.ok.injEq]
 
-theorem writeIndex_ok (μ : State) (mv : MVal) (n : Nat) (c : Int) :
+theorem writeIndex_ok (μ : Semantics.State) (mv : Semantics.MVal) (n : Nat) (c : Int) :
     (∃ μ₁, writeAddr μ mv (.memoryIndex n c) = .ok μ₁) ↔
       ∃ d, memArrayLen μ n = .ok (.int d) ∧ 0 ≤ c ∧ c < d := by
   simp only [writeAddr, memWriteIndex, memArrayLen]
@@ -2058,9 +2081,9 @@ theorem writeIndex_ok (μ : State) (mv : MVal) (n : Nat) (c : Int) :
 
 /-- **A write returns exactly where `writeG` does** (Lean only): a member in a
 struct, an element below the length. -/
-theorem LMem.writeG_sim (σ : State) {m : LMem} {μ : State} {B : Births}
+theorem LMem.writeG_sim (σ : Semantics.State) {m : LMem} {μ : Semantics.State} {B : Births}
     (h : m.run σ = .ok (μ, B)) (i : LId) (a : LSel) {g : LTerm} (hg : m.writeG i a = some g)
-    (mv : MVal) :
+    (mv : Semantics.MVal) :
     Rets (g.eval σ) ↔
       ∃ n ad μ₁, LId.evalR B i = .ok n ∧ a.addr σ n = .ok ad ∧ writeAddr μ mv ad = .ok μ₁ := by
   cases a with
@@ -2097,7 +2120,7 @@ theorem LMem.writeG_sim (σ : State) {m : LMem} {μ : State} {B : Births}
       obtain ⟨d, hlen, h0, h1⟩ := (writeIndex_ok μ mv n c).1 ⟨μ₁, hw⟩
       exact ⟨c, d, hti, (hs _).2 (by rw [hn, Res.ok_bind']; exact hlen), h0, h1⟩
 
-theorem refDesc_alloc {μ' μ : State} {base : Nat} {v : SVal} {id : Nat}
+theorem refDesc_alloc {μ' μ : Semantics.State} {base : Nat} {v : Semantics.SVal} {id : Nat}
     (hle : base ≤ μ'.nextId) (hd : DescFrom μ'.heap base μ'.nextId)
     (hc : copyStToM μ' v = .ok (μ, .ref id)) : DescFrom μ.heap base μ.nextId := by
   have hx := copyStToM_heapExt μ' v μ _ hc
@@ -2107,7 +2130,7 @@ theorem refDesc_alloc {μ' μ : State} {base : Nat} {v : SVal} {id : Nat}
 /-- **A memory whose references all name older roots holds no cycle**
 (`LMem.refDesc`): every object of the run references only older ones, so a
 copy out of it returns (`MemNames.copyMem_ok_desc`). -/
-theorem LMem.refDesc_desc (σ : State) : (m : LMem) → ∀ {μ : State} {B : Births},
+theorem LMem.refDesc_desc (σ : Semantics.State) : (m : LMem) → ∀ {μ : Semantics.State} {B : Births},
     m.run σ = .ok (μ, B) → m.refDesc = true → MemNames.DescFrom μ.heap σ.nextId μ.nextId
   | .init, μ, B, h, _ => by
     simp only [LMem.run, Except.ok.injEq, Prod.mk.injEq] at h
@@ -2152,7 +2175,7 @@ def LSel.ofSeg : Seg → LSel
   | .field f => .fld f
   | .at j => .idx (.lit (.int j))
 
-theorem LSel.ofSeg_addr (σ : State) (n : Nat) (s : Seg) :
+theorem LSel.ofSeg_addr (σ : Semantics.State) (n : Nat) (s : Seg) :
     (LSel.ofSeg s).addr σ n = .ok (.ofSeg n s) := by
   cases s <;> rfl
 
@@ -2165,7 +2188,7 @@ def LPath.lit? : LPath → Option (Name × List Seg)
     | some (.int j) => (q.lit?).map fun rp => (rp.1, rp.2 ++ [.at j])
     | _ => none
 
-theorem LPath.lit?_eval (σ : State) : (Q : LPath) → ∀ {r : Name} {p : List Seg},
+theorem LPath.lit?_eval (σ : Semantics.State) : (Q : LPath) → ∀ {r : Name} {p : List Seg},
     Q.lit? = some (r, p) → Q.eval σ = .ok (.field r :: p)
   | .root r', r, p, h => by
     simp only [LPath.lit?, Option.some.injEq, Prod.mk.injEq] at h
@@ -2204,7 +2227,7 @@ def LMem.walk (m : LMem) (i : LId) : List Seg → Option LId
 
 /-- **A literal path from a name reaches the name `walk` gives** (`readREmpty`,
 `readRCons`). -/
-theorem LMem.walk_sim (σ : State) {m : LMem} {μ : State} {B : Births}
+theorem LMem.walk_sim (σ : Semantics.State) {m : LMem} {μ : Semantics.State} {B : Births}
     (h : m.run σ = .ok (μ, B)) : (p : List Seg) → ∀ {i j : LId}, m.walk i p = some j →
     Sim (LId.evalR B j) (LId.evalR B i >>= fun n => (MVal.ref n).readPath μ p >>= MVal.asRef)
   | [], i, j, hw => by
@@ -2240,7 +2263,8 @@ theorem LMem.walk_sim (σ : State) {m : LMem} {μ : State} {B : Births}
           subst hpa; cases hra
         | cons _ _ => simp only [MVal.readPath, reduceCtorEq] at hpa
 
-theorem copyMToSt_asValue_sim {σ : State} {rem : List Nat} {mv : MVal} {w : SVal}
+theorem copyMToSt_asValue_sim {σ : Semantics.State} {rem : List Nat} {mv : Semantics.MVal} {w :
+    Semantics.SVal}
     (h : copyMToSt σ rem mv = .ok w) : Sim w.asValue mv.asValue := by
   cases mv with
   | prim pv =>
@@ -2253,8 +2277,10 @@ theorem copyMToSt_asValue_sim {σ : State} {rem : List Nat} {mv : MVal} {w : SVa
 
 /-- The view of the object `n`: what `copyMem` gives, read along `P`, against
 memory read along `P` (`findOnCopy`, `selectOnCopyMemPrim`/`Ref`). -/
-theorem view_sim {μ : State} {n : Nat} {cv : SVal} (hcv : copyMem μ (.ref n) = .ok cv)
-    {P : List Seg} (hl : noLen P = true) {β : Type} (F : SVal → Res β) (G : MVal → Res β)
+theorem view_sim {μ : Semantics.State} {n : Nat} {cv : Semantics.SVal} (hcv : copyMem μ (.ref n) =
+    .ok cv)
+    {P : List Seg} (hl : noLen P = true) {β : Type} (F : Semantics.SVal → Res β) (G :
+        Semantics.MVal → Res β)
     (hFG : ∀ rem mv w, copyMToSt μ rem mv = .ok w → Sim (F w) (G mv)) :
     Sim (cv.findLive P >>= F) ((MVal.ref n).readPath μ P >>= G) := by
   have hc : IsCopy μ cv := ⟨_, _, hcv⟩
@@ -2276,7 +2302,8 @@ theorem view_sim {μ : State} {n : Nat} {cv : SVal} (hcv : copyMem μ (.ref n) =
     exact (hFG _ _ _ hcw u).2 hu
 
 /-- A view holds no mapping (Lean only). -/
-theorem view_noMap {μ : State} {n : Nat} {cv : SVal} (hcv : copyMem μ (.ref n) = .ok cv)
+theorem view_noMap {μ : Semantics.State} {n : Nat} {cv : Semantics.SVal} (hcv : copyMem μ (.ref n)
+    = .ok cv)
     (P : List Seg) (u : Value) : (cv.findLive P >>= kmapF) ≠ .ok u := by
   intro h
   rw [IsCopy.findLive_eq P ⟨_, _, hcv⟩, Res.bind_eq_ok] at h
@@ -2292,8 +2319,9 @@ theorem view_noMap {μ : State} {n : Nat} {cv : SVal} (hcv : copyMem μ (.ref n)
 theorem Sim.symm {α : Type} {x y : Res α} (h : Sim x y) : Sim y x := fun a => (h a).symm
 
 /-- A slot below a path: the object the path reaches, then the slot. -/
-theorem readPath_snoc_sim {β : Type} (μ : State) (mv : MVal) (p : List Seg) (s : Seg)
-    (G : MVal → Res β) :
+theorem readPath_snoc_sim {β : Type} (μ : Semantics.State) (mv : Semantics.MVal) (p : List Seg) (s
+    : Seg)
+    (G : Semantics.MVal → Res β) :
     Sim ((mv.readPath μ p >>= MVal.asRef) >>= fun n' => readAddr μ (.ofSeg n' s) >>= G)
       (mv.readPath μ (p ++ [s]) >>= G) := by
   rw [MVal.readPath_snoc]
@@ -2324,12 +2352,12 @@ def viewObj (Q : LPath) : Option (List Seg) :=
   | some (r, p) => if r = viewRoot ∧ noLen p = true then some p else none
   | none => none
 
-theorem view_findLive (cv : SVal) (P : List Seg) :
-    (SVal.struct [(viewRoot, cv)]).findLive (.field viewRoot :: P) = cv.findLive P := by
-  simp only [SVal.findLive, lookupBy, if_true]
+theorem view_findLive (cv : Semantics.SVal) (P : List Seg) :
+    (Semantics.SVal.struct [(viewRoot, cv)]).findLive (.field viewRoot :: P) = cv.findLive P := by
+  simp only [Semantics.SVal.findLive, lookupBy, if_true]
 
 /-- The slot a path below a view reads, segment by segment. -/
-theorem viewPath_eval (σ : State) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
+theorem viewPath_eval (σ : Semantics.State) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
     (hQ : viewPath Q = some (p, a)) (hq : Q.eval σ = .ok qs) :
     ∃ s, noLen (p ++ [s]) = true ∧ qs = .field viewRoot :: (p ++ [s]) ∧
       (∀ n μ, a.read σ μ n = readAddr μ (.ofSeg n s) >>= MVal.asValue) ∧
@@ -2376,7 +2404,7 @@ theorem viewPath_eval (σ : State) {Q : LPath} {p : List Seg} {a : LSel} {qs : L
       · cases hQ
     · cases hQ
 
-theorem viewObj_eval (σ : State) {Q : LPath} {p : List Seg} {qs : List Seg}
+theorem viewObj_eval (σ : Semantics.State) {Q : LPath} {p : List Seg} {qs : List Seg}
     (hQ : viewObj Q = some p) (hq : Q.eval σ = .ok qs) :
     noLen p = true ∧ qs = .field viewRoot :: p := by
   unfold viewObj at hQ
@@ -2393,11 +2421,12 @@ theorem viewObj_eval (σ : State) {Q : LPath} {p : List Seg} {qs : List Seg}
 
 /-- The setting of a read below a view: the memory runs, the name denotes
 `n`, and its copy out is `cv`. -/
-structure ViewAt (σ : State) (m : LMem) (i : LId) (μ : State) (B : Births) (cv : SVal) : Prop where
+structure ViewAt (σ : Semantics.State) (m : LMem) (i : LId) (μ : Semantics.State) (B : Births) (cv
+    : Semantics.SVal) : Prop where
   run : m.run σ = .ok (μ, B)
   obj : ∃ n, LId.evalR B i = .ok n ∧ copyMem μ (.ref n) = .ok cv
 
-theorem LStor.eval_view {σ : State} {m : LMem} {i : LId} {v : SVal}
+theorem LStor.eval_view {σ : Semantics.State} {m : LMem} {i : LId} {v : Semantics.SVal}
     (h : (LStor.view m i).eval σ = .ok v) :
     ∃ μ B cv, ViewAt σ m i μ B cv ∧ v = .struct [(viewRoot, cv)] := by
   simp only [LStor.eval, Res.bind_eq_ok, Except.ok.injEq] at h
@@ -2406,11 +2435,12 @@ theorem LStor.eval_view {σ : State} {m : LMem} {i : LId} {v : SVal}
 
 /-- **A word read below a view** (`findOnCopy`, `selectOnCopyMemPrim`): the
 slot the same path reads in memory. -/
-theorem view_read_sim {σ : State} {m : LMem} {i j : LId} {μ : State} {B : Births} {cv : SVal}
+theorem view_read_sim {σ : Semantics.State} {m : LMem} {i j : LId} {μ : Semantics.State} {B :
+    Births} {cv : Semantics.SVal}
     (hv : ViewAt σ m i μ B cv) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
     (hQ : viewPath Q = some (p, a)) (hq : Q.eval σ = .ok qs) (hw : m.walk i p = some j) :
     Sim (LId.evalR B j >>= fun n' => a.read σ μ n')
-      ((SVal.struct [(viewRoot, cv)]).findLive qs >>= SVal.asValue) := by
+      ((Semantics.SVal.struct [(viewRoot, cv)]).findLive qs >>= SVal.asValue) := by
   obtain ⟨s, hl, rfl, hrd, -⟩ := viewPath_eval σ hQ hq
   obtain ⟨n, hn, hcv⟩ := hv.obj
   rw [view_findLive]
@@ -2422,11 +2452,12 @@ theorem view_read_sim {σ : State} {m : LMem} {i j : LId} {μ : State} {B : Birt
   exact Sim.trans (Sim.bind hW fun _ => Sim.refl _) (readPath_snoc_sim μ _ p s _)
 
 /-- **The length below a view** (`selectOnCopyMemPrim` at `size`). -/
-theorem view_len_sim {σ : State} {m : LMem} {i j : LId} {μ : State} {B : Births} {cv : SVal}
+theorem view_len_sim {σ : Semantics.State} {m : LMem} {i j : LId} {μ : Semantics.State} {B :
+    Births} {cv : Semantics.SVal}
     (hv : ViewAt σ m i μ B cv) {Q : LPath} {p : List Seg} {qs : List Seg}
     (hQ : viewObj Q = some p) (hq : Q.eval σ = .ok qs) (hw : m.walk i p = some j) :
     Sim (LId.evalR B j >>= fun n' => memArrayLen μ n')
-      ((SVal.struct [(viewRoot, cv)]).findLive qs >>= Close.arrLen) := by
+      ((Semantics.SVal.struct [(viewRoot, cv)]).findLive qs >>= Close.arrLen) := by
   obtain ⟨hl, rfl⟩ := viewObj_eval σ hQ hq
   obtain ⟨n, hn, hcv⟩ := hv.obj
   rw [view_findLive]
@@ -2447,14 +2478,15 @@ theorem view_len_sim {σ : State} {m : LMem} {i j : LId} {μ : State} {B : Birth
 
 /-- **Whether a slot below a view is there**: a word is read, or a reference
 names an object. -/
-theorem view_has_sim {σ : State} {m : LMem} {i j j' : LId} {μ : State} {B : Births} {cv : SVal}
+theorem view_has_sim {σ : Semantics.State} {m : LMem} {i j j' : LId} {μ : Semantics.State} {B :
+    Births} {cv : Semantics.SVal}
     (hv : ViewAt σ m i μ B cv) {Q : LPath} {p : List Seg} {a : LSel} {qs : List Seg}
     (hQ : viewPath Q = some (p, a)) (hq : Q.eval σ = .ok qs) (hw : m.walk i p = some j)
     {W N : LTerm} (hW : Sim (W.eval σ) (LId.evalR B j >>= fun n' => a.read σ μ n'))
     (hI : Sim (LId.evalR B j') (LId.evalR B j >>= fun n' => a.iread σ μ n'))
     (hN : Rets (N.eval σ) ↔ ∃ x, LId.evalR B j' = .ok x) :
     Sim ((LTerm.orElse (.seq W (.lit (.bool true))) (.seq N (.lit (.bool true)))).eval σ)
-      ((SVal.struct [(viewRoot, cv)]).findLive qs >>= fun _ => .ok (.bool true)) := by
+      ((Semantics.SVal.struct [(viewRoot, cv)]).findLive qs >>= fun _ => .ok (.bool true)) := by
   obtain ⟨s, hl, rfl, hrd, had⟩ := viewPath_eval σ hQ hq
   obtain ⟨n, hn, hcv⟩ := hv.obj
   rw [view_findLive]
@@ -2518,7 +2550,7 @@ theorem view_has_sim {σ : State} {m : LMem} {i j j' : LId} {μ : State} {B : Bi
 theorem rets_of_sim {x y : Res Value} (h : Sim x y) : Rets x ↔ Rets y :=
   ⟨fun ⟨v, hv⟩ => ⟨v, (h v).1 hv⟩, fun ⟨v, hv⟩ => ⟨v, (h v).2 hv⟩⟩
 
-theorem ltR_val {σ : State} {k n : LTerm} {v : Value} (h : (ltR k n).eval σ = .ok v) :
+theorem ltR_val {σ : Semantics.State} {k n : LTerm} {v : Value} (h : (ltR k n).eval σ = .ok v) :
     v = .bool true := by
   unfold ltR at h
   split at h
@@ -2532,7 +2564,8 @@ theorem ltR_val {σ : State} {k n : LTerm} {v : Value} (h : (ltR k n).eval σ = 
                 <;> exact h.symm
     | int _ => cases h
 
-theorem ltR_congr (σ : State) (k : LTerm) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ)) :
+theorem ltR_congr (σ : Semantics.State) (k : LTerm) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval
+    σ)) :
     Sim ((ltR k n').eval σ) ((ltR k n).eval σ) := by
   have hr : Rets ((ltR k n').eval σ) ↔ Rets ((ltR k n).eval σ) := by
     rw [ltR_rets, ltR_rets]
@@ -2548,7 +2581,7 @@ theorem ltR_congr (σ : State) (k : LTerm) {n n' : LTerm} (hn : Sim (n'.eval σ)
     obtain ⟨v, hv⟩ := hr.2 ⟨u, h⟩
     rw [ltR_val h, ← ltR_val hv]; exact hv
 
-theorem natL_ok {σ : State} {n : LTerm} {v : Value} :
+theorem natL_ok {σ : Semantics.State} {n : LTerm} {v : Value} :
     (natL n).eval σ = .ok v ↔ ∃ c, n.eval σ = .ok (.int c) ∧ v = .int c.toNat := by
   constructor
   · intro h
@@ -2575,19 +2608,20 @@ theorem natL_ok {σ : State} {n : LTerm} {v : Value} :
   · rintro ⟨c, hc, rfl⟩
     exact natL_eval σ n hc
 
-theorem natL_congr (σ : State) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ)) :
+theorem natL_congr (σ : Semantics.State) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ)) :
     Sim ((natL n').eval σ) ((natL n).eval σ) := by
   intro u
   rw [natL_ok, natL_ok]
   exact ⟨fun ⟨c, hc, hu⟩ => ⟨c, (hn _).1 hc, hu⟩, fun ⟨c, hc, hu⟩ => ⟨c, (hn _).2 hc, hu⟩⟩
 
-theorem seqL_congr (σ : State) {g g' a a' : LTerm} (hg : Sim (g'.eval σ) (g.eval σ))
+theorem seqL_congr (σ : Semantics.State) {g g' a a' : LTerm} (hg : Sim (g'.eval σ) (g.eval σ))
     (ha : Sim (a'.eval σ) (a.eval σ)) : Sim ((seqL g' a').eval σ) ((seqL g a).eval σ) := by
   rw [seqL_eval, seqL_eval]
   exact Sim.bind hg fun _ => ha
 
 /-- `new R(n)`'s reads agree where the lengths do. -/
-theorem newSel_congr (σ : State) (R : RefTy) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval σ))
+theorem newSel_congr (σ : Semantics.State) (R : RefTy) {n n' : LTerm} (hn : Sim (n'.eval σ) (n.eval
+    σ))
     (p : List Seg) (a : LSel) : Sim ((newSel R n' p a).eval σ) ((newSel R n p a).eval σ) := by
   unfold newSel
   split
@@ -2598,7 +2632,7 @@ theorem newSel_congr (σ : State) (R : RefTy) {n n' : LTerm} (hn : Sim (n'.eval 
   · exact Sim.refl _
   · exact Sim.refl _
 
-theorem newObj_congr (σ : State) (g : Option Ty → LTerm) (R : RefTy) {n n' : LTerm}
+theorem newObj_congr (σ : Semantics.State) (g : Option Ty → LTerm) (R : RefTy) {n n' : LTerm}
     (hn : Sim (n'.eval σ) (n.eval σ)) (p : List Seg) :
     Sim ((newObj g R n' p).eval σ) ((newObj g R n p).eval σ) := by
   unfold newObj
@@ -2608,7 +2642,8 @@ theorem newObj_congr (σ : State) (g : Option Ty → LTerm) (R : RefTy) {n n' : 
   · exact Sim.refl _
   · exact Sim.refl _
 
-theorem kite_congr (σ : State) {a a' b b' t t' e e' : LTerm} (ha : Sim (a'.eval σ) (a.eval σ))
+theorem kite_congr (σ : Semantics.State) {a a' b b' t t' e e' : LTerm} (ha : Sim (a'.eval σ)
+    (a.eval σ))
     (hb : Sim (b'.eval σ) (b.eval σ)) (ht : Sim (t'.eval σ) (t.eval σ))
     (he : Sim (e'.eval σ) (e.eval σ)) :
     Sim ((LTerm.kite a' b' t' e').eval σ) ((LTerm.kite a b t e).eval σ) :=
@@ -2618,7 +2653,7 @@ theorem kite_congr (σ : State) {a a' b b' t t' e e' : LTerm} (ha : Sim (a'.eval
       · simp only [hij, if_true]; exact ht
       · simp only [hij, if_false]; exact he
 
-theorem LPath.ext_congr (σ : State) {q q' : LPath} (hq : Sim (q'.eval σ) (q.eval σ))
+theorem LPath.ext_congr (σ : Semantics.State) {q q' : LPath} (hq : Sim (q'.eval σ) (q.eval σ))
     (p : List Seg) : Sim ((q'.ext p).eval σ) ((q.ext p).eval σ) := by
   rw [LPath.ext_eval, LPath.ext_eval]
   exact Sim.bind hq fun _ => Sim.refl _
@@ -2627,7 +2662,8 @@ theorem LPath.ext_congr (σ : State) {q q' : LPath} (hq : Sim (q'.eval σ) (q.ev
 
 mutual
 
-theorem copyStToM_ok_any (v : SVal) : ∀ (σ σ' : State) (r : State × MVal),
+theorem copyStToM_ok_any (v : Semantics.SVal) : ∀ (σ σ' : Semantics.State) (r : Semantics.State ×
+    Semantics.MVal),
     copyStToM σ v = .ok r → ∃ r', copyStToM σ' v = .ok r' := by
   intro σ σ' r h
   cases v with
@@ -2642,8 +2678,8 @@ theorem copyStToM_ok_any (v : SVal) : ∀ (σ σ' : State) (r : State × MVal),
     obtain ⟨⟨τ', mes'⟩, he'⟩ := copyStElems_ok_any es σ σ' _ he
     exact ⟨_, by rw [copyStToM, he']; rfl⟩
 
-theorem copyStFields_ok_any (fs : List (Name × SVal)) : ∀ (σ σ' : State)
-    (r : State × List (Name × MVal)), copyStFields σ fs = .ok r →
+theorem copyStFields_ok_any (fs : List (Name × Semantics.SVal)) : ∀ (σ σ' : Semantics.State)
+    (r : Semantics.State × List (Name × Semantics.MVal)), copyStFields σ fs = .ok r →
     ∃ r', copyStFields σ' fs = .ok r' := by
   intro σ σ' r h
   cases fs with
@@ -2655,7 +2691,8 @@ theorem copyStFields_ok_any (fs : List (Name × SVal)) : ∀ (σ σ' : State)
     obtain ⟨⟨τ', mrest'⟩, h2'⟩ := copyStFields_ok_any rest σ₁ σ₁' _ h2
     exact ⟨_, by rw [copyStFields, h1', Res.ok_bind']; dsimp only; rw [h2']; rfl⟩
 
-theorem copyStElems_ok_any (es : List SVal) : ∀ (σ σ' : State) (r : State × List MVal),
+theorem copyStElems_ok_any (es : List Semantics.SVal) : ∀ (σ σ' : Semantics.State) (r :
+    Semantics.State × List Semantics.MVal),
     copyStElems σ es = .ok r → ∃ r', copyStElems σ' es = .ok r' := by
   intro σ σ' r h
   cases es with

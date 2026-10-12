@@ -75,7 +75,7 @@ theorem LId.toTheory_inj {sh : Nat → Theory.Shape} {i j : LId}
   exact ⟨rootT_inj hr, hp⟩
 
 /-- The segment a selector reads: the length is the member `length`. -/
-def LSel.toSeg (σ : State) : LSel → Option Seg
+def LSel.toSeg (σ : Semantics.State) : LSel → Option Seg
   | .fld f => if f = "length" then none else some (.field f)
   | .idx t => match t.eval σ >>= Value.asInt with
     | .ok c => some (.at c)
@@ -83,13 +83,13 @@ def LSel.toSeg (σ : State) : LSel → Option Seg
   | .size => some (.field "length")
 
 /-- The segment a selector writes: no length. -/
-def LSel.wseg (σ : State) : LSel → Option Seg
+def LSel.wseg (σ : Semantics.State) : LSel → Option Seg
   | .fld f => LSel.toSeg σ (.fld f)
   | .idx t => LSel.toSeg σ (.idx t)
   | .size => none
 
 /-- A memory value: a word evaluated, a reference by its identity. -/
-def LMV.toTheory (σ : State) (sh : Nat → Theory.Shape) : LMV → Option Theory.MemValue
+def LMV.toTheory (σ : Semantics.State) (sh : Nat → Theory.Shape) : LMV → Option Theory.MemValue
   | .word t => match t.eval σ with
     | .ok p => some (.prim p)
     | .error _ => none
@@ -104,7 +104,7 @@ def newT (M : Theory.Memory) (r : Theory.IdentityPrim) (R : RefTy) (c : Int) : T
 
 /-- **The memory as a Theory term**, its operands evaluated in `σ`: `init` is
 `pre(σ.heap)`, a copy from storage is `copySt` of the subtree's `abs`. -/
-def LMem.toTheory (σ : State) (sh : Nat → Theory.Shape) : LMem → Option Theory.Memory
+def LMem.toTheory (σ : Semantics.State) (sh : Nat → Theory.Shape) : LMem → Option Theory.Memory
   | .init => some (.pre σ.heap)
   | .addM m k R => (m.toTheory σ sh).map fun M => .addM M (rootT sh k) R
   | .newArr m k R n => (m.toTheory σ sh).bind fun M =>
@@ -147,7 +147,8 @@ def castLike (decl : Name → Ty) (loc : Theory.Identity) (a : Seg) (mv : Theory
 
 /-! ## Inversions -/
 
-theorem toTheory_addM {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {k : Nat} {R : RefTy}
+theorem toTheory_addM {σ : Semantics.State} {sh : Nat → Theory.Shape} {m : LMem} {k : Nat} {R :
+    RefTy}
     {M : Theory.Memory} (h : (LMem.addM m k R).toTheory σ sh = some M) :
     ∃ M', m.toTheory σ sh = some M' ∧ M = .addM M' (rootT sh k) R := by
   cases hm : m.toTheory σ sh with
@@ -156,7 +157,8 @@ theorem toTheory_addM {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {k : N
     simp only [LMem.toTheory, hm, Option.map_some, Option.some.injEq] at h
     exact ⟨M', rfl, h.symm⟩
 
-theorem toTheory_newArr {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {k : Nat} {R : RefTy}
+theorem toTheory_newArr {σ : Semantics.State} {sh : Nat → Theory.Shape} {m : LMem} {k : Nat} {R :
+    RefTy}
     {n : LTerm} {M : Theory.Memory} (h : (LMem.newArr m k R n).toTheory σ sh = some M) :
     ∃ M' c, m.toTheory σ sh = some M' ∧ (n.eval σ >>= Value.asInt) = .ok c ∧
       M = newT M' (rootT sh k) R c := by
@@ -171,7 +173,8 @@ theorem toTheory_newArr {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {k :
           Option.some.injEq] at h
       exact ⟨M', c, rfl, rfl, h.symm⟩
 
-theorem toTheory_copySt {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {k : Nat} {s : LStor}
+theorem toTheory_copySt {σ : Semantics.State} {sh : Nat → Theory.Shape} {m : LMem} {k : Nat} {s :
+    LStor}
     {q : LPath} {M : Theory.Memory} (h : (LMem.copySt m k s q).toTheory σ sh = some M) :
     ∃ M' sv, m.toTheory σ sh = some M' ∧
       (s.eval σ >>= fun v => q.eval σ >>= v.findLive) = .ok sv ∧
@@ -187,7 +190,8 @@ theorem toTheory_copySt {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {k :
           Option.some.injEq] at h
       exact ⟨M', sv, rfl, rfl, h.symm⟩
 
-theorem toTheory_write {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {j : LId} {b : LSel}
+theorem toTheory_write {σ : Semantics.State} {sh : Nat → Theory.Shape} {m : LMem} {j : LId} {b :
+    LSel}
     {v : LMV} {M : Theory.Memory} (h : (LMem.write m j b v).toTheory σ sh = some M) :
     ∃ M' sb w, m.toTheory σ sh = some M' ∧ b.wseg σ = some sb ∧ v.toTheory σ sh = some w ∧
       M = .write M' (j.toTheory sh) sb w := by
@@ -206,7 +210,7 @@ theorem toTheory_write {σ : State} {sh : Nat → Theory.Shape} {m : LMem} {j : 
             Option.some.injEq] at h
         exact ⟨M', sb, w, rfl, rfl, rfl, h.symm⟩
 
-theorem toSeg_fld {σ : State} {f : Name} {sg : Seg} (h : (LSel.fld f).toSeg σ = some sg) :
+theorem toSeg_fld {σ : Semantics.State} {f : Name} {sg : Seg} (h : (LSel.fld f).toSeg σ = some sg) :
     f ≠ "length" ∧ sg = .field f := by
   simp only [LSel.toSeg] at h
   split at h
@@ -215,7 +219,8 @@ theorem toSeg_fld {σ : State} {f : Name} {sg : Seg} (h : (LSel.fld f).toSeg σ 
     cases h
     exact ⟨hf, rfl⟩
 
-theorem toSeg_idx {σ : State} {t : LTerm} {sg : Seg} (h : (LSel.idx t).toSeg σ = some sg) :
+theorem toSeg_idx {σ : Semantics.State} {t : LTerm} {sg : Seg} (h : (LSel.idx t).toSeg σ = some
+    sg) :
     ∃ c, (t.eval σ >>= Value.asInt) = .ok c ∧ sg = .at c := by
   simp only [LSel.toSeg] at h
   split at h
@@ -224,7 +229,8 @@ theorem toSeg_idx {σ : State} {t : LTerm} {sg : Seg} (h : (LSel.idx t).toSeg σ
     exact ⟨c, hc, rfl⟩
   · cases h
 
-theorem eval_asInt {σ : State} {t : LTerm} {c : Int} (h : (t.eval σ >>= Value.asInt) = .ok c) :
+theorem eval_asInt {σ : Semantics.State} {t : LTerm} {c : Int} (h : (t.eval σ >>= Value.asInt) =
+    .ok c) :
     t.eval σ = .ok (.int c) := by
   cases ht : t.eval σ with
   | error e => simp only [bind, Except.bind, ht, reduceCtorEq] at h
@@ -235,7 +241,7 @@ theorem eval_asInt {σ : State} {t : LTerm} {c : Int} (h : (t.eval σ >>= Value.
 
 /-! ## Selectors -/
 
-theorem selRel_same_seg {σ : State} {b a : LSel} {sb sg : Seg} (h : selRel b a = .same)
+theorem selRel_same_seg {σ : Semantics.State} {b a : LSel} {sb sg : Seg} (h : selRel b a = .same)
     (hb : b.wseg σ = some sb) (ha : a.toSeg σ = some sg) : sb = sg := by
   cases b with
   | size => simp only [LSel.wseg, reduceCtorEq] at hb
@@ -267,7 +273,7 @@ theorem selRel_same_seg {σ : State} {b a : LSel} {sb sg : Seg} (h : selRel b a 
     | fld g => simp only [selRel, reduceCtorEq] at h
     | size => simp only [selRel, reduceCtorEq] at h
 
-theorem selRel_apart_seg {σ : State} {b a : LSel} {sb sg : Seg} (h : selRel b a = .apart)
+theorem selRel_apart_seg {σ : Semantics.State} {b a : LSel} {sb sg : Seg} (h : selRel b a = .apart)
     (hb : b.wseg σ = some sb) (ha : a.toSeg σ = some sg) : sb ≠ sg := by
   cases b with
   | size => simp only [LSel.wseg, reduceCtorEq] at hb
@@ -312,7 +318,7 @@ theorem selRel_apart_seg {σ : State} {b a : LSel} {sb sg : Seg} (h : selRel b a
       subst ha
       simp only [ne_eq, reduceCtorEq, not_false_eq_true]
 
-theorem selRel_key_seg {σ : State} {b a : LSel} {r w : LTerm} {sb sg : Seg}
+theorem selRel_key_seg {σ : Semantics.State} {b a : LSel} {r w : LTerm} {sb sg : Seg}
     (h : selRel b a = .key r w) (hb : b.wseg σ = some sb) (ha : a.toSeg σ = some sg) :
     ∃ cr cw, (r.eval σ >>= Value.asInt) = .ok cr ∧ (w.eval σ >>= Value.asInt) = .ok cw ∧
       sg = .at cr ∧ sb = .at cw := by
@@ -327,7 +333,7 @@ theorem castLike_prim (decl : Name → Ty) (loc : Theory.Identity) (a : Seg) (p 
     castLike decl loc a (.prim p) p = p := by
   cases p <;> rfl
 
-theorem seqL_ok {σ : State} {g a : LTerm} {v : Value} (h : (seqL g a).eval σ = .ok v) :
+theorem seqL_ok {σ : Semantics.State} {g a : LTerm} {v : Value} (h : (seqL g a).eval σ = .ok v) :
     a.eval σ = .ok v := by
   rw [seqL_eval] at h
   cases hg : g.eval σ with
@@ -336,7 +342,7 @@ theorem seqL_ok {σ : State} {g a : LTerm} {v : Value} (h : (seqL g a).eval σ =
 
 /-- A primitive default read where `init<[int]>` is `0` (`initMember`,
 `initElement`) is the cast of `dflt`. -/
-theorem dfltWord_cast {σ : State} {decl : Name → Ty} {loc : Theory.Identity} {a : Seg}
+theorem dfltWord_cast {σ : Semantics.State} {decl : Name → Ty} {loc : Theory.Identity} {a : Seg}
     (h0 : Theory.MemValue.asIntAt decl .dflt loc a = 0) {T : Option Ty} {v : Value}
     (hv : (dfltWord T).eval σ = .ok v) : v = castLike decl loc a .dflt v := by
   match T, hv with
@@ -400,7 +406,8 @@ theorem shapeAt_memberTy {decl : Name → Ty} : ∀ (p : List Seg) (T U : Ty),
 
 /-- **The default of a fresh object** (`readAddEqual`'s `dflt`, then
 `initMember`, `initElement`, `initSize`): `dfltSel` is the cast of `dflt`. -/
-theorem dfltSel_agree (σ : State) {decl : Name → Ty} {T : Option Ty} {r : Theory.IdentityPrim}
+theorem dfltSel_agree (σ : Semantics.State) {decl : Name → Ty} {T : Option Ty} {r :
+    Theory.IdentityPrim}
     {sh : Theory.Shape} {p : List Seg} {a : LSel} {sg : Seg} {v : Value}
     (hT : ∀ U, T = some U → Theory.shapeAt decl sh p = Theory.Shape.ofTy U)
     (hs : a.toSeg σ = some sg) (hv : (dfltSel T a).eval σ = .ok v) :
@@ -428,7 +435,7 @@ theorem dfltSel_agree (σ : State) {decl : Name → Ty} {T : Option Ty} {r : The
 
 /-- A read of `new R(n)` (`memoryArrayFreshAlloc`: `readOnWrite` at the length
 written, `readAddEqual` below it). -/
-theorem newSel_agree (σ : State) {decl : Name → Ty} {M : Theory.Memory}
+theorem newSel_agree (σ : Semantics.State) {decl : Name → Ty} {M : Theory.Memory}
     {r : Theory.IdentityPrim} {R : RefTy} {n : LTerm} {c : Int}
     (hn : (n.eval σ >>= Value.asInt) = .ok c) {p : List Seg} (hd : DeclAlong decl (.ref R) p)
     {a : LSel} {sg : Seg} {v : Value}
@@ -510,7 +517,7 @@ theorem readAt_append : ∀ (P Q : List Seg) (w : Theory.StValue),
 
 /-- A word the interpreter finds below a copy is `findSt` of its `abs`
 (`SVal.abs_find`). -/
-theorem copy_word {sv : SVal} {P : List Seg} {v : Value}
+theorem copy_word {sv : Semantics.SVal} {P : List Seg} {v : Value}
     (h : (sv.findLive P >>= SVal.asValue) = .ok v) (hP : P ≠ []) :
     Theory.StValue.findSt sv.abs.asStruct P = .prim v := by
   cases hw : sv.findLive P with
@@ -527,7 +534,7 @@ theorem copy_word {sv : SVal} {P : List Seg} {v : Value}
 
 /-- A length the interpreter reads below a copy is the `length` member of its
 `abs`. -/
-theorem copy_len {sv : SVal} {P : List Seg} {v : Value}
+theorem copy_len {sv : Semantics.SVal} {P : List Seg} {v : Value}
     (h : (sv.findLive P >>= Close.arrLen) = .ok v) :
     Theory.StValue.findSt sv.abs.asStruct (P ++ [.field "length"]) = .prim v := by
   cases hw : sv.findLive P with
@@ -544,19 +551,22 @@ theorem copy_len {sv : SVal} {P : List Seg} {v : Value}
       rfl
     | prim _ | struct _ | map _ _ => simp only [Close.arrLen, reduceCtorEq] at h
 
-theorem LPath.ext_field_eval {σ : State} {q : LPath} {qs p : List Seg} (hq : q.eval σ = .ok qs)
+theorem LPath.ext_field_eval {σ : Semantics.State} {q : LPath} {qs p : List Seg} (hq : q.eval σ =
+    .ok qs)
     (f : Name) : ((q.ext p).field f).eval σ = .ok (qs ++ (p ++ [.field f])) := by
   simp only [LPath.eval, LPath.ext_eval, hq, Res.ok_bind, List.append_assoc]
 
-theorem LPath.ext_at_eval {σ : State} {q : LPath} {qs p : List Seg} (hq : q.eval σ = .ok qs)
+theorem LPath.ext_at_eval {σ : Semantics.State} {q : LPath} {qs p : List Seg} (hq : q.eval σ = .ok
+    qs)
     {t : LTerm} {c : Int} (ht : (t.eval σ >>= Value.asInt) = .ok c) :
     ((q.ext p).at t).eval σ = .ok (qs ++ (p ++ [.at c])) := by
   simp only [LPath.eval, LPath.ext_eval, hq, Res.ok_bind, ht, List.append_assoc]
 
 /-- **A read of a copy from storage** (`readCopySt`, and `readFromCopyToStorage`
 with `findDefinitionSize` at the length). -/
-theorem copySel_agree (σ : State) (decl : Name → Ty) (loc : Theory.Identity) {s : LStor}
-    {q : LPath} {sv : SVal} (hsv : (s.eval σ >>= fun v => q.eval σ >>= v.findLive) = .ok sv)
+theorem copySel_agree (σ : Semantics.State) (decl : Name → Ty) (loc : Theory.Identity) {s : LStor}
+    {q : LPath} {sv : Semantics.SVal} (hsv : (s.eval σ >>= fun v => q.eval σ >>= v.findLive) = .ok
+        sv)
     {p : List Seg} {a : LSel} {t : LTerm} {sg : Seg} {v : Value}
     (hc : copySel s q p a = some t) (hs : a.toSeg σ = some sg) (hv : t.eval σ = .ok v) :
     v = castLike decl loc sg
@@ -610,7 +620,7 @@ answer evaluates, the answer is the Theory's read of the memory's term, cast
 at its sort.  `hsh` asks that the read root carry its allocated shape, which
 `LMem.shapes` does (`LMem.readT_agree_shapes`), and that `decl` be the
 declarations along the read's path below the allocated type. -/
-theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (sh : Nat → Theory.Shape) :
+theorem LMem.readT_agree (σ : Semantics.State) {decl : Name → Ty} (sh : Nat → Theory.Shape) :
     (m : LMem) → ∀ (i : LId) (a : LSel) {t : LTerm} {M : Theory.Memory} {sg : Seg} {v : Value},
     (∀ R, m.allocTy? i.root = some R →
       sh i.root = Theory.Shape.ofRefTy R ∧ DeclAlong decl (.ref R) i.path) →
@@ -705,7 +715,7 @@ theorem LMem.readT_agree (σ : State) {decl : Name → Ty} (sh : Nat → Theory.
       exact LMem.readT_agree σ sh m i a hsh' hM' hs ht hv
 
 /-- `readT_agree` with each root shaped by its allocation. -/
-theorem LMem.readT_agree_shapes (σ : State) {decl : Name → Ty} {m : LMem} {i : LId}
+theorem LMem.readT_agree_shapes (σ : Semantics.State) {decl : Name → Ty} {m : LMem} {i : LId}
     (hd : ∀ R, m.allocTy? i.root = some R → DeclAlong decl (.ref R) i.path)
     {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {v : Value}
     (hM : m.toTheory σ m.shapes = some M) (hs : a.toSeg σ = some sg) (ht : m.readT i a = some t)
@@ -718,8 +728,8 @@ theorem LMem.readT_agree_shapes (σ : State) {decl : Name → Ty} {m : LMem} {i 
 /-- **The interpreter's read is the Theory's.**  `readT_sim` and `readT_agree`
 together: what the interpreter reads at a name the closer answers for is
 `readIn` of the memory's term. -/
-theorem LMem.read_agree (σ : State) {decl : Name → Ty} {m : LMem}
-    {μ : State} {B : MemNames.Births} {i : LId}
+theorem LMem.read_agree (σ : Semantics.State) {decl : Name → Ty} {m : LMem}
+    {μ : Semantics.State} {B : MemNames.Births} {i : LId}
     (hd : ∀ R, m.allocTy? i.root = some R → DeclAlong decl (.ref R) i.path)
     {a : LSel} {t : LTerm} {M : Theory.Memory} {sg : Seg} {n : Nat} {v : Value}
     (hrun : m.run σ = .ok (μ, B))
@@ -741,7 +751,7 @@ theorem readId_fresh {M : Theory.Memory} {loc : Theory.Identity} {sg : Seg}
   | prim _ => rfl
   | dflt => rfl
 
-theorem seg_toSeg {σ : State} {a : LSel} {g sg : Seg} (hg : a.seg? = some g)
+theorem seg_toSeg {σ : Semantics.State} {a : LSel} {g sg : Seg} (hg : a.seg? = some g)
     (hs : a.toSeg σ = some sg) : g = sg := by
   cases a with
   | fld f =>
@@ -770,7 +780,7 @@ theorem extend_toTheory (sh : Nat → Theory.Shape) (i : LId) (sg : Seg) :
 name is the identity the Theory reads: `initIdentity` one segment below an
 allocation or a copy (`readFromCopyToStorageIdentity`), the identity written
 otherwise (`readOnWrite`). -/
-theorem LMem.readI_agree (σ : State) (sh : Nat → Theory.Shape) :
+theorem LMem.readI_agree (σ : Semantics.State) (sh : Nat → Theory.Shape) :
     (m : LMem) → ∀ (i : LId) (a : LSel) {j : LId} {M : Theory.Memory} {sg : Seg},
     m.toTheory σ sh = some M → a.toSeg σ = some sg → m.readI i a = some j →
     Theory.Memory.readId M (i.toTheory sh) sg = j.toTheory sh
@@ -863,7 +873,7 @@ global struct table could not be one member table: below a `Basket`, `items`
 is `uint[]`, although `FixedTriple.items` is `uint[3]`. -/
 
 /-- The length of a fresh `Basket`'s `items` is `initSize`'s. -/
-example (σ : State) :
+example (σ : Semantics.State) :
     let m : LMem := .addM .init 0 (.struct "Basket")
     let i : LId := ⟨0, [.field "items"]⟩
     Value.int 0 = castLike (fun _ => .ref (.array Ty.uint)) (i.toTheory m.shapes)

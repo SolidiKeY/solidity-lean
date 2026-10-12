@@ -10,9 +10,14 @@ The lemmas `sol_close` reads the interpreter with, shared by its two sets:
 `close_rw_s` (`Calculus/CloseScoped.lean`, a scoped leaf's terms).  Each is about
 `Semantics.State` and its operations, never about a formula or a term
 language: weakest preconditions (`Modality.wp`, a write named with what is
-known of its result), values read back, the operators, and the symbols
-`Op0`–`Op3` read one constructor at a time (`Close.Op2.eval_find`, …), from
-which each set's term equations follow.
+known of its result), values read back, the operators; and the typed
+symbols `Op0`–`Op3` (`Signature.lean`) read one constructor at a time on
+the typed global part (`Close.Op2.eval_find`, …, each its `casesOn` arm by
+`rfl`), from which the scoped set's term equations follow.
+
+The untyped interpreter's names are written qualified (`Semantics.State`,
+`Semantics.SVal`): `Signature.lean` brings the typed `State`/`SVal` into
+`Solidity`, which a bare name resolves to first.
 -/
 
 namespace Solidity
@@ -77,8 +82,9 @@ after the first write reads `10` at `alice.age` and below it, reads as `σ`
 does at `bob` and at `alice.account`, and has the locals, the heap and the
 `net` ledger of `σ` (so a ledger read crosses it: `[ to.transfer(5); total =
 1; ] net(to) = 2`). -/
-theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : SVal}
-    {P : State → Prop} :
+theorem Modality.wp_box_saveStorage {σ : Semantics.State} {r : Name} {p : List Seg} {v :
+    Semantics.SVal}
+    {P : Semantics.State → Prop} :
     Modality.box.wp (σ.saveStorage r p v) P ↔
       ∀ τ, σ.saveStorage r p v = .ok τ → τ.findStorage r p = .ok v →
         (∀ q, Close.Prefix p q → τ.findStorage r q = v.find (Close.after p q)) →
@@ -103,8 +109,8 @@ theorem Modality.wp_box_saveStorage {σ : State} {r : Name} {p : List Seg} {v : 
 /-- **A subtree read under the box**: in `[ bob = alice; ] bob.age ==
 alice.age`, the tree `a` read at `alice` reads at `age` what the storage
 reads at `alice.age`. -/
-theorem Modality.wp_box_findStorage {σ : State} {r : Name} {p : List Seg}
-    {P : SVal → Prop} :
+theorem Modality.wp_box_findStorage {σ : Semantics.State} {r : Name} {p : List Seg}
+    {P : Semantics.SVal → Prop} :
     Modality.box.wp (σ.findStorage r p) P ↔
       ∀ a, σ.findStorage r p = .ok a → (∀ q, a.find q = σ.findStorage r (p ++ q)) → P a := by
   rw [Modality.wp_box]
@@ -113,7 +119,8 @@ theorem Modality.wp_box_findStorage {σ : State} {r : Name} {p : List Seg}
 /-- **A memory write under the box**: after `m.age = 5;` the state reads `5`
 at `m.age`, as before at every address apart from it, and has the storage
 and the locals of the state before. -/
-theorem Modality.wp_box_writeAddr {σ : State} {mv : MVal} {a : Addr} {P : State → Prop} :
+theorem Modality.wp_box_writeAddr {σ : Semantics.State} {mv : Semantics.MVal} {a : Addr} {P :
+    Semantics.State → Prop} :
     Modality.box.wp (writeAddr σ mv a) P ↔
       ∀ τ, writeAddr σ mv a = .ok τ → readAddr τ a = .ok mv → Close.readVal τ a = mv.asValue →
         (∀ a', Close.Apart a a' → readAddr τ a' = readAddr σ a') →
@@ -131,7 +138,8 @@ theorem Modality.wp_box_writeAddr {σ : State} {mv : MVal} {a : Addr} {P : State
 
 /-- **A copy into memory under the box**: after `Person memory m = alice;`,
 `m.age` reads what `alice.age` held; storage and locals are as before. -/
-theorem Modality.wp_box_copyStToM {σ : State} {v : SVal} {P : State × MVal → Prop} :
+theorem Modality.wp_box_copyStToM {σ : Semantics.State} {v : Semantics.SVal} {P : Semantics.State ×
+    Semantics.MVal → Prop} :
     Modality.box.wp (copyStToM σ v) P ↔
       ∀ τ mv, copyStToM σ v = .ok (τ, mv) →
         (∀ id f, mv = .ref id → f ≠ "length" →
@@ -147,7 +155,8 @@ theorem Modality.wp_box_copyStToM {σ : State} {v : SVal} {P : State × MVal →
 
 /-- **A fresh memory object under the box**: `Person memory m;` binds `m` to
 an object whose members read the defaults of `Person`'s. -/
-theorem Modality.wp_box_allocDefault {σ : State} {R : RefTy} {P : State × Nat → Prop} :
+theorem Modality.wp_box_allocDefault {σ : Semantics.State} {R : RefTy} {P : Semantics.State × Nat →
+    Prop} :
     Modality.box.wp (allocDefault σ R) P ↔
       ∀ τ id, allocDefault σ R = .ok (τ, id) →
         (∀ f, f ≠ "length" →
@@ -165,7 +174,7 @@ theorem Modality.wp_box_allocDefault {σ : State} {R : RefTy} {P : State × Nat 
 
 /-- **A copy out of memory under the box**: after `alice = m;`, `alice.age`
 holds what `m.age` held. -/
-theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
+theorem Modality.wp_box_copyMem {σ : Semantics.State} {id : Nat} {P : Semantics.SVal → Prop} :
     Modality.box.wp (copyMem σ (.ref id)) P ↔
       ∀ v, copyMem σ (.ref id) = .ok v →
         (∀ f, f ≠ "length" → v.find [.field f] =
@@ -176,7 +185,8 @@ theorem Modality.wp_box_copyMem {σ : State} {id : Nat} {P : SVal → Prop} :
 /-- **A transfer under the box**: `to.transfer(5);` leaves the storage, the
 locals, the heap, `msg.sender` and `address(this).balance` as they were, and
 moves `5` on the ledger from `this` to `to` (`State.pay`). -/
-theorem Modality.wp_box_transferAt {σ : State} {addr amt : Int} {P : State → Prop} :
+theorem Modality.wp_box_transferAt {σ : Semantics.State} {addr amt : Int} {P : Semantics.State →
+    Prop} :
     Modality.box.wp (transferAt σ addr amt) P ↔
       ∀ τ, transferAt σ addr amt = .ok τ →
         (∀ r q, τ.findStorage r q = σ.findStorage r q) →
@@ -204,7 +214,7 @@ namespace Close
 theorem asBool_eq_ok {v : Value} {b : Bool} : v.asBool = .ok b ↔ v = .bool b := by
   cases v <;> simp [Value.asBool]
 /-- A memory slot read as a reference holds one. -/
-theorem asRef_eq_ok {mv : MVal} {id : Nat} : mv.asRef = .ok id ↔ mv = .ref id := by
+theorem asRef_eq_ok {mv : Semantics.MVal} {id : Nat} : mv.asRef = .ok id ↔ mv = .ref id := by
   cases mv <;> simp [MVal.asRef, pure, Except.pure]
 /-- `alice.age = 10;` stores the word `10`. -/
 @[simp] theorem toSVal_int (v : Int) : Value.toSVal (.int v) = .int v := rfl
@@ -226,7 +236,7 @@ theorem asValue_toMVal (v : Value) : (Value.toMVal v).asValue = .ok v := by
 @[simp] theorem asValue_bool (b : Bool) : (SVal.bool b).asValue = .ok (.bool b) := rfl
 /-- A read that gives a word read one: `delete balances[a];` then leaves that
 word's default. -/
-theorem asValue_eq_ok {v : SVal} {p : PrimVal} : v.asValue = .ok p ↔ v = .prim p := by
+theorem asValue_eq_ok {v : Semantics.SVal} {p : PrimVal} : v.asValue = .ok p ↔ v = .prim p := by
   rcases v with p' | _ | _ | _ <;> (try cases p') <;> cases p <;> simp [SVal.asValue]
 /-- A memory slot holding `10` reads `10`. -/
 theorem mval_asValue_prim (p : PrimVal) : (MVal.prim p).asValue = .ok p := by
@@ -314,128 +324,130 @@ theorem equiv_prim_left_iff {p : Value} {v : Theory.StValue} :
 
 /-- The state a `{havoc}` leaves, as the structure: its locals, heap,
 funds and transaction `σ`'s. -/
-theorem State.havoc_eq_mk (σ : State) (st : List (Name × SVal)) (nt : List (Int × Int)) :
-    σ.havoc st nt = State.mk st σ.heap σ.nextId σ.env nt σ.selfBalance σ.tx := rfl
+theorem State.havoc_eq_mk (σ : Semantics.State) (st : List (Name × Semantics.SVal))
+    (nt : List (Int × Int)) :
+    σ.havoc st nt = Semantics.State.mk st σ.heap σ.nextId σ.env nt σ.selfBalance σ.tx := rfl
 
 /-! ## The symbols, one at a time -/
 
 section Ops
 
-variable (σ : State)
+/-! The typed symbols (`Signature.lean`) on the typed global part `g`, one
+constructor at a time: each is its `casesOn` arm, by `rfl`, so the kernel
+reads no `match`.  An argument is an `Option` (a revert is `none`); no
+symbol is `undef`, and none converts a value (`asInt`, `asBool`, `asRef`,
+`toSVal`, `toMVal` are gone: a typed argument is at its type already). -/
 
-theorem Op0.eval_lit (v : Value) : Op0.eval σ (.lit v) = .ok v := rfl
-theorem Op0.eval_env (k : EnvKey) : Op0.eval σ (.env k) = .ok (.int (σ.envVal k)) := rfl
-theorem Op0.eval_root (r : Name) : Op0.eval σ (.root r) = .ok (r, []) := rfl
-theorem Op0.eval_storage : Op0.eval σ .storage = .ok σ := rfl
-theorem Op0.eval_memory : Op0.eval σ .memory = .ok σ := rfl
-theorem Op0.eval_mtSt (vs : List (Name × Ty)) : Op0.eval σ (.mtSt vs) =
-    .ok { σ with storage := vs.map fun (n, T) => (n, defaultForTy T) } := rfl
+variable {C : Contract} (g : State C [])
 
-theorem Op1.eval_unop (op : UnOp) (p : PrimTy) (ra : Res Value) : Op1.eval σ (.unop op p) ra =
-    ra >>= fun x => applyUnOp op x >>= unopCheck op p := rfl
-theorem Op1.eval_net (ra : Res Value) : Op1.eval σ .net ra =
-    ra >>= Value.asInt >>= fun n => .ok (.int (σ.getNet n)) := by
-  simp only [Op1.eval, bind, Except.bind]
-  cases ra <;> rfl
-theorem Op1.eval_field (f : Name) (rp : Res (Name × List Seg)) : Op1.eval σ (.field f) rp =
-    rp >>= fun rs => .ok (rs.1, rs.2 ++ [.field f]) := rfl
-theorem Op1.eval_next (rp : Res (Name × List Seg)) : Op1.eval σ .next rp =
-    rp >>= fun rs => σ.findStorage rs.1 rs.2 >>= Close.pastEnd rs := by
-  simp only [Op1.eval, bind, Except.bind]
-  cases rp <;> rfl
-theorem Op1.eval_sval (rt : Res Value) : Op1.eval σ .sval rt = rt >>= fun v => .ok v.toSVal := rfl
-theorem Op1.eval_alloc (R : RefTy) (rm : Res State) : Op1.eval σ (.alloc R) rm =
-    rm >>= fun τ => allocDefault τ R >>= fun r => .ok r.2 := rfl
-theorem Op1.eval_mfield (f : Name) (ri : Res Nat) : Op1.eval σ (.mfield f) ri =
-    ri >>= fun id => .ok (.memoryField id f) := rfl
-theorem Op1.eval_addM (R : RefTy) (rm : Res State) : Op1.eval σ (.addM R) rm =
-    rm >>= fun τ => allocDefault τ R >>= fun r => .ok r.1 := rfl
-theorem Op1.eval_mval (rt : Res Value) : Op1.eval σ .mval rt = rt >>= fun v => .ok v.toMVal := rfl
-theorem Op1.eval_ref (ri : Res Nat) : Op1.eval σ .ref ri = ri >>= fun id => .ok (.ref id) := rfl
+theorem Op0.eval_lit {p : PrimTy} (v : p.Denote) : Op0.eval g (.lit v) = some v := rfl
+theorem Op0.eval_env (k : EnvKey) : Op0.eval g (.env k) = some (g.envVal k) := rfl
+theorem Op0.eval_root (r : Name) {T : Ty} (h : C.rootType r = some T) :
+    Op0.eval g (.root r h) = some (SRef.ofRoot r h) := rfl
+theorem Op0.eval_storage : Op0.eval g .storage = some g.storage := rfl
+theorem Op0.eval_memory : Op0.eval g .memory = some g.memT := rfl
+theorem Op0.eval_mtSt : Op0.eval g .mtSt = some (Storage.init C) := rfl
 
-theorem Op2.eval_binop (op : BinOp) (p : PrimTy) (ra rb : Res Value) :
-    Op2.eval σ (.binop op p) ra rb = ra >>= fun x => evalBinop op p x rb := rfl
-theorem Op2.eval_find (rs : Res State) (rp : Res (Name × List Seg)) : Op2.eval σ .find rs rp =
-    rs >>= fun τ => rp >>= fun r => τ.findStorage r.1 r.2 >>= SVal.asValue := rfl
-theorem Op2.eval_len (rs : Res State) (rp : Res (Name × List Seg)) : Op2.eval σ .len rs rp =
-    rs >>= fun τ => rp >>= fun r => τ.findStorage r.1 r.2 >>= arrLen := by
-  simp only [Op2.eval, bind, Except.bind]
-  cases rs <;> try rfl
-  all_goals cases rp <;> try rfl
-  all_goals exact arrayLen_eq _ _ _
-theorem Op2.eval_read (rm : Res State) (ra : Res Addr) : Op2.eval σ .read rm ra =
-    rm >>= fun τ => ra >>= fun addr => readVal τ addr := rfl
-theorem Op2.eval_at (rp : Res (Name × List Seg)) (ri : Res Value) : Op2.eval σ .at rp ri =
-    rp >>= fun rs => ri >>= Value.asInt >>= fun k =>
-      σ.checkIndex rs.1 rs.2 k >>= fun _ => .ok (rs.1, rs.2 ++ [.at k]) := by
-  simp only [Op2.eval, bind, Except.bind]
-  cases rp <;> try rfl
-  cases ri <;> rfl
-theorem Op2.eval_delAt (rs : Res State) (rp : Res (Name × List Seg)) : Op2.eval σ .delAt rs rp =
-    rs >>= fun τ => rp >>= fun r => τ.findStorage r.1 r.2 >>= fun cur =>
-      τ.saveStorage r.1 r.2 cur.defaultOf := rfl
-theorem Op2.eval_pushSlot (E : Ty) (rs : Res State) (rp : Res (Name × List Seg)) :
-    Op2.eval σ (.pushSlot E) rs rp = rs >>= fun τ => rp >>= fun r =>
-      τ.findStorage r.1 r.2 >>= pushOn τ E r.1 r.2 pure := by
-  simp only [Op2.eval, bind, Except.bind]
-  cases rs <;> try rfl
-  all_goals cases rp <;> try rfl
-  all_goals exact pushAt_eq _ _ _ _ _
-theorem Op2.eval_pop (rs : Res State) (rp : Res (Name × List Seg)) : Op2.eval σ .pop rs rp =
-    rs >>= fun τ => rp >>= fun r => τ.findStorage r.1 r.2 >>= popOn τ false r.1 r.2 := by
-  simp only [Op2.eval, bind, Except.bind]
-  cases rs <;> try rfl
-  all_goals cases rp <;> try rfl
-  all_goals exact popAt_eq _ _ _ _
-theorem Op2.eval_shrink (rs : Res State) (rp : Res (Name × List Seg)) : Op2.eval σ .shrink rs rp =
-    rs >>= fun τ => rp >>= fun r => τ.findStorage r.1 r.2 >>= popOn τ true r.1 r.2 := by
-  simp only [Op2.eval, bind, Except.bind]
-  cases rs <;> try rfl
-  all_goals cases rp <;> try rfl
-  all_goals exact popAt_eq _ _ _ _
-theorem Op2.eval_sfind (rs : Res State) (rp : Res (Name × List Seg)) : Op2.eval σ .sfind rs rp =
-    rs >>= fun τ => rp >>= fun r => τ.findStorage r.1 r.2 := rfl
-theorem Op2.eval_copyMem (rm : Res State) (ri : Res Nat) : Op2.eval σ .copyMem rm ri =
-    rm >>= fun τ => ri >>= fun id => copyMem τ (.ref id) := rfl
-theorem Op2.eval_iread (rm : Res State) (ra : Res Addr) : Op2.eval σ .iread rm ra =
-    rm >>= fun τ => ra >>= fun addr => readAddr τ addr >>= MVal.asRef := rfl
-theorem Op2.eval_copy (rm : Res State) (rv : Res SVal) : Op2.eval σ .copy rm rv =
-    rv >>= fun sv => rm >>= fun τ => copyStToM τ sv >>= fun r => r.2.asRef := rfl
-theorem Op2.eval_mat (ri : Res Nat) (rk : Res Value) : Op2.eval σ .mat ri rk =
-    ri >>= fun id => rk >>= Value.asInt >>= fun j => .ok (.memoryIndex id j) := by
-  simp only [Op2.eval, bind, Except.bind]
-  cases ri <;> try rfl
-  cases rk <;> rfl
-theorem Op2.eval_copySt (rm : Res State) (rv : Res SVal) : Op2.eval σ .copySt rm rv =
-    rv >>= fun sv => rm >>= fun τ => copyStToM τ sv >>= fun r => .ok r.1 := rfl
+theorem Op1.eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true)
+    (x : Option p.Denote) : Op1.eval g (.unop op h) x = x.bind op.evalT := rfl
+theorem Op1.eval_net (x : Option PrimTy.uint.Denote) : Op1.eval g .net x =
+    x.bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 g.net).getD 0) := rfl
+theorem Op1.eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
+    (x : Option (SRef C (.ref (.struct s)))) : Op1.eval g (.field h) x = x.map (·.field h) := rfl
+theorem Op1.eval_next {E : Ty} (x : Option (SRef C (.ref (.array E)))) :
+    Op1.eval g .next x = x.bind g.storage.nextT := rfl
+theorem Op1.eval_sval {p : PrimTy} (x : Option p.Denote) :
+    Op1.eval g .sval x = x.map .prim := rfl
+theorem Op1.eval_mval {p : PrimTy} (x : Option p.Denote) : Op1.eval g .mval x = x := rfl
+theorem Op1.eval_ref {R : RefTy} (x : Option Nat) : Op1.eval g (.ref (R := R)) x = x := rfl
 
-theorem Op3.eval_ite (rc ra rb : Res Value) : Op3.eval σ .ite rc ra rb =
-    rc >>= fun cv => pickBranch cv ra rb := rfl
-theorem Op3.eval_save_val (rs : Res State) (rp : Res (Name × List Seg)) (rt : Res Value) :
-    Op3.eval σ .save rs rp (Op1.eval σ .sval rt) =
-      rt >>= fun x => rs >>= fun τ => rp >>= fun r => τ.saveStorage r.1 r.2 x.toSVal := by
-  simp only [Op3.eval, Op1.eval, bind_assoc, pure_bind, State.writeStorage_toSVal]
-theorem Op3.eval_save_find (rs rs' : Res State) (rp rp' : Res (Name × List Seg)) :
-    Op3.eval σ .save rs rp (Op2.eval σ .sfind rs' rp') =
-      Op2.eval σ .sfind rs' rp' >>= fun sv => rs >>= fun τ => rp >>= fun r =>
-        τ.findStorage r.1 r.2 >>= fun cur => τ.saveStorage r.1 r.2 (cur.overlay sv) := by
-  simp only [Op3.eval, Close.writeStorage_eq]
-theorem Op3.eval_save_copyMem (rs rm : Res State) (rp : Res (Name × List Seg)) (ri : Res Nat) :
-    Op3.eval σ .save rs rp (Op2.eval σ .copyMem rm ri) =
-      Op2.eval σ .copyMem rm ri >>= fun sv => rs >>= fun τ => rp >>= fun r =>
-        τ.findStorage r.1 r.2 >>= fun cur => τ.saveStorage r.1 r.2 (cur.overlay sv) := by
-  simp only [Op3.eval, Close.writeStorage_eq]
-theorem Op3.eval_push (rs : Res State) (rp : Res (Name × List Seg)) (rv : Res SVal) :
-    Op3.eval σ .push rs rp rv = rs >>= fun τ => rp >>= fun r =>
-      τ.findStorage r.1 r.2 >>=
-        pushOn τ .uint r.1 r.2 (fun _ => rv >>= fun sv => pure sv.strip) := by
-  simp only [Op3.eval, bind, Except.bind]
-  cases rs <;> try rfl
-  all_goals cases rp <;> try rfl
-  all_goals exact pushAt_eq _ _ _ _ _
-theorem Op3.eval_write (rm : Res State) (ra : Res Addr) (rv : Res MVal) :
-    Op3.eval σ .write rm ra rv = rv >>= fun mv => rm >>= fun τ => ra >>= fun addr =>
-      writeAddr τ mv addr := rfl
+theorem Op1.eval_delValue {p : PrimTy} (x : Option p.Denote) :
+    Op1.eval g .delValue x = x.map fun _ => PrimTy.dflt p := rfl
+theorem Op1.eval_newArr {R : RefTy} (h : R.newArrOk = true) (x : Option PrimTy.uint.Denote) :
+    Op1.eval g (.newArr h) x = x.map fun n => newArrT R n h := rfl
+theorem Op1.eval_alloc (R : RefTy) (h : (Ty.ref R).mapFree = true)
+    (x : Option (Grown g.H (fun _ => Unit))) :
+    Op1.eval g (.alloc R h) x = x.map fun m => (m.heap.allocDefault R h).val.id := rfl
+theorem Op1.eval_mfield {s f : Name} {T : Ty} (h : C.fieldType s f = some T) (x : Option Nat) :
+    Op1.eval g (.mfield h) x = x.map fun id => .field id h := rfl
+theorem Op1.eval_addM (R : RefTy) (h : (Ty.ref R).mapFree = true)
+    (x : Option (Grown g.H (fun _ => Unit))) :
+    Op1.eval g (.addM R h) x = x.map fun m => m.then (m.heap.allocDefault R h) := rfl
+theorem Op1.eval_wt (x : Option (Storage C)) : Op1.eval g .wt x = x.bind Storage.wtT := rfl
+theorem Op1.eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s)))
+    (x : Option (Storage C)) :
+    Op1.eval g (.select r h) x = x.map fun st => Storage.selectT st h := rfl
+
+theorem Op2.eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true)
+    (x y : Option p.Denote) : Op2.eval g (.binop op h) x y = x.bind fun a => binopT op a y := rfl
+theorem Op2.eval_find {p : PrimTy} (x : Option (Storage C)) (y : Option (SRef C (.prim p))) :
+    Op2.eval g .find x y =
+      x.bind fun st => y.bind fun r => (st.find r).bind fun v => some v.view := rfl
+theorem Op2.eval_sfind {T : Ty} (x : Option (Storage C)) (y : Option (SRef C T)) :
+    Op2.eval g .sfind x y = x.bind fun st => y.bind fun r => st.find r := rfl
+theorem Op2.eval_delAt {T : Ty} (x : Option (Storage C)) (y : Option (SRef C T)) :
+    Op2.eval g .delAt x y = x.bind fun st => y.bind fun r => st.delete r := rfl
+theorem Op2.eval_at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (x : Option (SRef C (.ref R))) (y : Option k.keyTy.Denote) :
+    Op2.eval g (.at it) x y = x.bind fun r => y.bind fun i => g.storage.atT it r i := rfl
+
+theorem Op2.eval_len {E : Ty} (x : Option (Storage C)) (y : Option (SRef C (.ref (.array E)))) :
+    Op2.eval g .len x y = x.bind fun st => y.bind fun r => st.len r := rfl
+theorem Op2.eval_read {p : PrimTy} (x : Option (Grown g.H (fun _ => Unit)))
+    (y : Option (MAddrT (.prim p))) :
+    Op2.eval g .read x y = x.bind fun m => y.bind fun a => m.readT a := rfl
+theorem Op2.eval_pushSlot {E : Ty} (x : Option (Storage C))
+    (y : Option (SRef C (.ref (.array E)))) :
+    Op2.eval g .pushSlot x y = x.bind fun st => y.bind fun r => st.push r some := rfl
+theorem Op2.eval_pop {E : Ty} (x : Option (Storage C)) (y : Option (SRef C (.ref (.array E)))) :
+    Op2.eval g .pop x y = x.bind fun st => y.bind fun r => st.pop false r := rfl
+theorem Op2.eval_shrink {E : Ty} (x : Option (Storage C))
+    (y : Option (SRef C (.ref (.array E)))) :
+    Op2.eval g .shrink x y = x.bind fun st => y.bind fun r => st.pop true r := rfl
+theorem Op2.eval_mat {R : RefTy} {E : Ty} (a : ArrTy R E) (x : Option Nat)
+    (y : Option PrimTy.uint.Denote) :
+    Op2.eval g (.mat a) x y = x.bind fun id => y.bind fun i => some (.index id a i.1) := rfl
+
+theorem Op2.eval_extend {E : Ty} (x : Option (Storage C))
+    (y : Option (SRef C (.ref (.array E)))) :
+    Op2.eval g .extend x y = x.bind fun st => y.bind fun r => (st.pushPlace r).bind fun q => some q.1 :=
+      rfl
+theorem Op2.eval_nextIn {E : Ty} (x : Option (Storage C))
+    (y : Option (SRef C (.ref (.array E)))) :
+    Op2.eval g .nextIn x y = x.bind fun st => y.bind fun r => st.nextT r := rfl
+theorem Op2.eval_mlen {E : Ty} (x : Option (Grown g.H (fun _ => Unit))) (y : Option Nat) :
+    Op2.eval g (.mlen (E := E)) x y = x.bind fun m => y.bind fun id =>
+      (HRef.ofId? m.H' (.array E) id).bind fun r => some (m.heap.lenU r) := rfl
+theorem Op2.eval_copyMem {R : RefTy} (x : Option (Grown g.H (fun _ => Unit))) (y : Option Nat) :
+    Op2.eval g (.copyMem (R := R)) x y = x.bind fun m => y.bind fun id =>
+      (HRef.ofId? m.H' R id).bind fun r =>
+        some ( MVal.copyMToSt m.heap (T := .ref R) r) := rfl
+theorem Op2.eval_iread {R : RefTy} (x : Option (Grown g.H (fun _ => Unit)))
+    (y : Option (MAddrT (.ref R))) :
+    Op2.eval g .iread x y = x.bind fun m => y.bind fun a =>
+      (m.readT a).bind fun (r : HRef _ R) => some r.id := rfl
+theorem Op2.eval_copy {R : RefTy} (h : (Ty.ref R).mapFree = true)
+    (x : Option (Grown g.H (fun _ => Unit))) (y : Option (SVal (.ref R))) :
+    Op2.eval g (.copy h) x y = x.bind fun m => y.bind fun v =>
+      some (v.copyStToM m.heap h).val.id := rfl
+theorem Op2.eval_copySt {T : Ty} (h : T.mapFree = true)
+    (x : Option (Grown g.H (fun _ => Unit))) (y : Option (SVal T)) :
+    Op2.eval g (.copySt h) x y = x.bind fun m => y.bind fun v =>
+      some (m.then (v.copyStToM m.heap h)) := rfl
+
+theorem Op3.eval_ite {p : PrimTy} (x : Option Bool) (y z : Option p.Denote) :
+    Op3.eval g .ite x y z = x.bind fun c => cond c y z := rfl
+theorem Op3.eval_save {T : Ty} (x : Option (Storage C)) (y : Option (SRef C T))
+    (z : Option (SVal T)) :
+    Op3.eval g .save x y z = x.bind fun st => y.bind fun r => z.bind fun v => st.write r v := rfl
+
+theorem Op3.eval_push {E : Ty} (x : Option (Storage C)) (y : Option (SRef C (.ref (.array E))))
+    (z : Option (SVal E)) :
+    Op3.eval g .push x y z = x.bind fun st => y.bind fun r => st.push r fun _ => z.map SVal.strip :=
+  rfl
+theorem Op3.eval_write {T : Ty} (x : Option (Grown g.H (fun _ => Unit))) (y : Option (MAddrT T))
+    (z : Option (MvT T)) :
+    Op3.eval g .write x y z = x.bind fun m => y.bind fun a => z.bind fun v => m.writeT a v := rfl
 
 end Ops
 

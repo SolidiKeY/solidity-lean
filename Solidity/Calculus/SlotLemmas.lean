@@ -32,12 +32,14 @@ open Semantics SemanticsProperties
 A slot-level write into an array rewrites `elems ++ shadow` and splits it
 back at the live length. -/
 
-private theorem take_set_length (elems shadow : List SVal) (k : Nat) (x : SVal) :
+private theorem take_set_length (elems shadow : List Semantics.SVal) (k : Nat) (x :
+    Semantics.SVal) :
     (((elems ++ shadow).set k x).take elems.length).length = elems.length := by
   simp only [List.length_take, List.length_set, List.length_append]
   omega
 
-private theorem take_set_getElem (elems shadow : List SVal) (k j : Nat) (x : SVal)
+private theorem take_set_getElem (elems shadow : List Semantics.SVal) (k j : Nat) (x :
+    Semantics.SVal)
     (hj : j < (((elems ++ shadow).set k x).take elems.length).length) :
     (((elems ++ shadow).set k x).take elems.length)[j] =
       if k = j then x else elems[j]'(by rw [take_set_length] at hj; exact hj) := by
@@ -54,25 +56,26 @@ live read at `ps` is the old value there with `r` written into it, and halts
 where the old one did.  The index of an alias names a slot, so the write
 may land past an array's end; the live read at `ps` checks every index of
 `ps`, and the write keeps every length. -/
-theorem findLive_save_prefix {new : SVal} : ∀ {v u : SVal} {ps : List Seg} (r : List Seg),
+theorem findLive_save_prefix {new : Semantics.SVal} : ∀ {v u : Semantics.SVal} {ps : List Seg} (r :
+    List Seg),
     v.save (ps ++ r) new = .ok u → u.findLive ps = (v.findLive ps >>= fun c => c.save r new)
   | v, u, [], r, h => by
     simp only [List.nil_append] at h
     simp only [SVal.findLive_nil, Res.ok_bind, h]
   | .prim _, _, a :: _, _, h => by
-    cases a <;> simp only [List.cons_append, SVal.save, reduceCtorEq] at h
+    cases a <;> simp only [List.cons_append, Semantics.SVal.save, reduceCtorEq] at h
   | .struct fields, u, .field n :: ps, r, h => by
-    simp only [List.cons_append, SVal.save] at h
+    simp only [List.cons_append, Semantics.SVal.save] at h
     split at h
     · rename_i old hl
       obtain ⟨upd, hu, h⟩ := Res.bind_eq_ok.1 h
       cases h
-      simp only [SVal.findLive, lookupBy_setBy_self, hl, findLive_save_prefix r hu]
+      simp only [Semantics.SVal.findLive, lookupBy_setBy_self, hl, findLive_save_prefix r hu]
     · simp only [reduceCtorEq] at h
   | .struct _, _, .at _ :: _, _, h => by
-    simp only [List.cons_append, SVal.save, reduceCtorEq] at h
+    simp only [List.cons_append, Semantics.SVal.save, reduceCtorEq] at h
   | .array elems shadow fx, u, .at i :: ps, r, h => by
-    simp only [List.cons_append, SVal.save] at h
+    simp only [List.cons_append, Semantics.SVal.save] at h
     split at h
     · rename_i hi
       obtain ⟨upd, hu, h⟩ := Res.bind_eq_ok.1 h
@@ -83,34 +86,34 @@ theorem findLive_save_prefix {new : SVal} : ∀ {v u : SVal} {ps : List Seg} (r 
             (((elems ++ shadow).set i.toNat upd).take elems.length).length := by
           rw [take_set_length]; exact hl
         rw [List.getElem_append_left hl.2] at hu
-        simp only [SVal.findLive, dif_pos hl, dif_pos hl', List.get_eq_getElem,
+        simp only [Semantics.SVal.findLive, dif_pos hl, dif_pos hl', List.get_eq_getElem,
           take_set_getElem, if_true, findLive_save_prefix r hu]
       · have hl' : ¬ (0 ≤ i ∧ i.toNat <
             (((elems ++ shadow).set i.toNat upd).take elems.length).length) := by
           rw [take_set_length]; exact hl
-        simp only [SVal.findLive, dif_neg hl, dif_neg hl']
+        simp only [Semantics.SVal.findLive, dif_neg hl, dif_neg hl']
         rfl
     · simp only [reduceCtorEq] at h
   | .array _ _ _, _, .field _ :: _, _, h => by
-    simp only [List.cons_append, SVal.save, reduceCtorEq] at h
+    simp only [List.cons_append, Semantics.SVal.save, reduceCtorEq] at h
   | .map entries dflt, u, .at i :: ps, r, h => by
-    simp only [List.cons_append, SVal.save] at h
+    simp only [List.cons_append, Semantics.SVal.save] at h
     split at h
     · rename_i old hl
       obtain ⟨upd, hu, h⟩ := Res.bind_eq_ok.1 h
       cases h
-      simp only [SVal.findLive, lookupBy_setBy_self, hl, findLive_save_prefix r hu]
+      simp only [Semantics.SVal.findLive, lookupBy_setBy_self, hl, findLive_save_prefix r hu]
     · rename_i hl
       obtain ⟨upd, hu, h⟩ := Res.bind_eq_ok.1 h
       cases h
-      simp only [SVal.findLive, lookupBy_setBy_self, hl, findLive_save_prefix r hu]
+      simp only [Semantics.SVal.findLive, lookupBy_setBy_self, hl, findLive_save_prefix r hu]
   | .map _ _, _, .field _ :: _, _, h => by
-    simp only [List.cons_append, SVal.save, reduceCtorEq] at h
+    simp only [List.cons_append, Semantics.SVal.save, reduceCtorEq] at h
 
 /-- **Read at a slot write** (`selectOnSaveCons`, `a1 = a2`): the written
 value where the old path was live, a halt where it was not, since a slot
 write keeps every length. -/
-theorem findLive_save_live {new v u : SVal} {ps : List Seg} (h : v.save ps new = .ok u) :
+theorem findLive_save_live {new v u : Semantics.SVal} {ps : List Seg} (h : v.save ps new = .ok u) :
     u.findLive ps = (v.findLive ps >>= fun _ => .ok new) := by
   rw [← List.append_nil ps] at h
   rw [findLive_save_prefix [] h]
@@ -120,38 +123,39 @@ theorem findLive_save_live {new v u : SVal} {ps : List Seg} (h : v.save ps new =
 
 /-- **Frame of a slot write** (`selectOnSaveCons`, `a1 ≠ a2`): the live read
 apart from the written slot is as it was. -/
-theorem findLive_save_diverge {new : SVal} :
-    ∀ {p q : List Seg} {old upd : SVal}, Close.Diverge p q → old.save p new = .ok upd →
+theorem findLive_save_diverge {new : Semantics.SVal} :
+    ∀ {p q : List Seg} {old upd : Semantics.SVal}, Close.Diverge p q → old.save p new = .ok upd →
       upd.findLive q = old.findLive q
   | [], _, _, _, h, _ => h.elim
   | _ :: _, [], _, _, h, _ => (Close.not_diverge_nil_right h).elim
   | a :: p, b :: q, old, upd, h, hs => by
     cases old with
-    | prim v => cases a <;> simp only [SVal.save, reduceCtorEq] at hs
+    | prim v => cases a <;> simp only [Semantics.SVal.save, reduceCtorEq] at hs
     | struct fields =>
       cases a with
-      | «at» i => simp only [SVal.save, reduceCtorEq] at hs
+      | «at» i => simp only [Semantics.SVal.save, reduceCtorEq] at hs
       | field n =>
-        simp only [SVal.save] at hs
+        simp only [Semantics.SVal.save] at hs
         split at hs
         · rename_i old' hl
           obtain ⟨u, hu, hs⟩ := Res.bind_eq_ok.1 hs
           cases hs
           cases b with
-          | «at» j => simp only [SVal.findLive]
+          | «at» j => simp only [Semantics.SVal.findLive]
           | field m =>
             by_cases hnm : m = n
             · subst hnm
               have hd : Close.Diverge p q := by simpa only [Close.diverge_cons, ne_eq,
                   not_true_eq_false, false_or] using h
-              simp only [SVal.findLive, lookupBy_setBy_self, findLive_save_diverge hd hu, hl]
-            · simp only [SVal.findLive, lookupBy_setBy_ne hnm]
+              simp only [Semantics.SVal.findLive, lookupBy_setBy_self, findLive_save_diverge hd hu,
+                  hl]
+            · simp only [Semantics.SVal.findLive, lookupBy_setBy_ne hnm]
         · simp only [reduceCtorEq] at hs
     | array elems shadow fx =>
       cases a with
-      | field n => simp only [SVal.save, reduceCtorEq] at hs
+      | field n => simp only [Semantics.SVal.save, reduceCtorEq] at hs
       | «at» i =>
-        simp only [SVal.save] at hs
+        simp only [Semantics.SVal.save] at hs
         split at hs
         · rename_i hi
           obtain ⟨u, hu, hs⟩ := Res.bind_eq_ok.1 hs
@@ -162,15 +166,15 @@ theorem findLive_save_diverge {new : SVal} :
             -- `length` reads the live extent, which a slot write keeps
             by_cases hm : m = "length"
             · subst hm
-              cases fx <;> simp only [SVal.findLive, Bool.false_eq_true, ↓reduceIte,
+              cases fx <;> simp only [Semantics.SVal.findLive, Bool.false_eq_true, ↓reduceIte,
                 take_set_length]
-            · simp only [SVal.findLive]
+            · simp only [Semantics.SVal.findLive]
           | «at» j =>
             by_cases hj : 0 ≤ j ∧ j.toNat < elems.length
             · have hj' : 0 ≤ j ∧ j.toNat <
                   (((elems ++ shadow).set i.toNat u).take elems.length).length := by
                 rw [take_set_length]; exact hj
-              simp only [SVal.findLive, dif_pos hj, dif_pos hj', List.get_eq_getElem,
+              simp only [Semantics.SVal.findLive, dif_pos hj, dif_pos hj', List.get_eq_getElem,
                 take_set_getElem]
               by_cases hij : i.toNat = j.toNat
               · have hij' : j = i := by omega
@@ -183,43 +187,43 @@ theorem findLive_save_diverge {new : SVal} :
             · have hj' : ¬ (0 ≤ j ∧ j.toNat <
                   (((elems ++ shadow).set i.toNat u).take elems.length).length) := by
                 rw [take_set_length]; exact hj
-              simp only [SVal.findLive, dif_neg hj, dif_neg hj']
+              simp only [Semantics.SVal.findLive, dif_neg hj, dif_neg hj']
         · simp only [reduceCtorEq] at hs
     | map entries dflt =>
       cases a with
-      | field n => simp only [SVal.save, reduceCtorEq] at hs
+      | field n => simp only [Semantics.SVal.save, reduceCtorEq] at hs
       | «at» i =>
-        simp only [SVal.save] at hs
+        simp only [Semantics.SVal.save] at hs
         -- the slot written: the entry at `i`, or the default when there is none
-        obtain ⟨old', hold, hfind⟩ : ∃ old' : SVal, (old'.save p new >>= fun u =>
-            Except.ok (SVal.map (setBy i u entries) dflt)) = Except.ok upd ∧
-            (SVal.map entries dflt).findLive (.at i :: q) = old'.findLive q := by
-          split at hs <;> rename_i hl <;> exact ⟨_, hs, by simp only [SVal.findLive, hl]⟩
+        obtain ⟨old', hold, hfind⟩ : ∃ old' : Semantics.SVal, (old'.save p new >>= fun u =>
+            Except.ok (Semantics.SVal.map (setBy i u entries) dflt)) = Except.ok upd ∧
+            (Semantics.SVal.map entries dflt).findLive (.at i :: q) = old'.findLive q := by
+          split at hs <;> rename_i hl <;> exact ⟨_, hs, by simp only [Semantics.SVal.findLive, hl]⟩
         obtain ⟨u, hu, hold⟩ := Res.bind_eq_ok.1 hold
         cases hold
         cases b with
-        | field m => simp only [SVal.findLive]
+        | field m => simp only [Semantics.SVal.findLive]
         | «at» j =>
           by_cases hij : j = i
           · subst hij
             have hd : Close.Diverge p q := by simpa only [Close.diverge_cons, ne_eq,
                 not_true_eq_false, false_or] using h
-            simp only [SVal.findLive, lookupBy_setBy_self] at hfind ⊢
+            simp only [Semantics.SVal.findLive, lookupBy_setBy_self] at hfind ⊢
             rw [hfind, findLive_save_diverge hd hu]
-          · simp only [SVal.findLive, lookupBy_setBy_ne hij]
+          · simp only [Semantics.SVal.findLive, lookupBy_setBy_ne hij]
 
 /-- A write below a value keeps its shape: a struct stays a struct, an
 array an array of the same length and kind, a mapping a mapping. -/
-theorem save_cons_shape {a : Seg} {r : List Seg} {new c c' : SVal}
+theorem save_cons_shape {a : Seg} {r : List Seg} {new c c' : Semantics.SVal}
     (h : c.save (a :: r) new = .ok c') :
     Close.arrLen c' = Close.arrLen c ∧ isMapV c' = isMapV c ∧ isFixV c' = isFixV c := by
   cases c with
-  | prim _ => cases a <;> simp only [SVal.save, reduceCtorEq] at h
+  | prim _ => cases a <;> simp only [Semantics.SVal.save, reduceCtorEq] at h
   | struct fields =>
     cases a with
-    | «at» _ => simp only [SVal.save, reduceCtorEq] at h
+    | «at» _ => simp only [Semantics.SVal.save, reduceCtorEq] at h
     | field n =>
-      simp only [SVal.save] at h
+      simp only [Semantics.SVal.save] at h
       split at h
       · obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h
         cases h
@@ -227,9 +231,9 @@ theorem save_cons_shape {a : Seg} {r : List Seg} {new c c' : SVal}
       · simp only [reduceCtorEq] at h
   | array elems shadow fx =>
     cases a with
-    | field _ => simp only [SVal.save, reduceCtorEq] at h
+    | field _ => simp only [Semantics.SVal.save, reduceCtorEq] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [Semantics.SVal.save] at h
       split at h
       · obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h
         cases h
@@ -237,27 +241,27 @@ theorem save_cons_shape {a : Seg} {r : List Seg} {new c c' : SVal}
       · simp only [reduceCtorEq] at h
   | map entries dflt =>
     cases a with
-    | field _ => simp only [SVal.save, reduceCtorEq] at h
+    | field _ => simp only [Semantics.SVal.save, reduceCtorEq] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [Semantics.SVal.save] at h
       split at h <;>
         (obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h; cases h; exact ⟨rfl, rfl, rfl⟩)
 
 /-- **Read below a slot write of a word**: it halts, as a read below any
 word does. -/
-theorem findLive_save_below {x : PrimVal} {v u : SVal} {ps : List Seg} (a : Seg)
-    (r : List Seg) (h : v.save ps (.prim x) = .ok u) (y : SVal) :
+theorem findLive_save_below {x : PrimVal} {v u : Semantics.SVal} {ps : List Seg} (a : Seg)
+    (r : List Seg) (h : v.save ps (.prim x) = .ok u) (y : Semantics.SVal) :
     u.findLive (ps ++ a :: r) ≠ .ok y := by
   rw [SVal.findLive_append, findLive_save_live h]
   cases v.findLive ps with
   | error _ => simp only [Res.error_bind, ne_eq, reduceCtorEq, not_false_eq_true]
-  | ok _ => cases a <;> simp only [Res.ok_bind, SVal.findLive, ne_eq, reduceCtorEq,
+  | ok _ => cases a <;> simp only [Res.ok_bind, Semantics.SVal.findLive, ne_eq, reduceCtorEq,
       not_false_eq_true]
 
 /-- A write below a value leaves no word there. -/
-theorem save_cons_noWord {a : Seg} {r : List Seg} {new c c' : SVal}
+theorem save_cons_noWord {a : Seg} {r : List Seg} {new c c' : Semantics.SVal}
     (h : c.save (a :: r) new = .ok c') (y : Value) : c'.asValue ≠ .ok y := by
-  have hw : ∀ c' : SVal, (match c' with | .prim _ => False | _ => True) →
+  have hw : ∀ c' : Semantics.SVal, (match c' with | .prim _ => False | _ => True) →
       c'.asValue ≠ .ok y := fun c' hc => by
     cases c' with
     | prim _ => exact hc.elim
@@ -265,12 +269,12 @@ theorem save_cons_noWord {a : Seg} {r : List Seg} {new c c' : SVal}
         not_false_eq_true]
   apply hw
   cases c with
-  | prim _ => cases a <;> simp only [SVal.save, reduceCtorEq] at h
+  | prim _ => cases a <;> simp only [Semantics.SVal.save, reduceCtorEq] at h
   | struct fields =>
     cases a with
-    | «at» _ => simp only [SVal.save, reduceCtorEq] at h
+    | «at» _ => simp only [Semantics.SVal.save, reduceCtorEq] at h
     | field n =>
-      simp only [SVal.save] at h
+      simp only [Semantics.SVal.save] at h
       split at h
       · obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h
         cases h
@@ -278,9 +282,9 @@ theorem save_cons_noWord {a : Seg} {r : List Seg} {new c c' : SVal}
       · simp only [reduceCtorEq] at h
   | array elems shadow fx =>
     cases a with
-    | field _ => simp only [SVal.save, reduceCtorEq] at h
+    | field _ => simp only [Semantics.SVal.save, reduceCtorEq] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [Semantics.SVal.save] at h
       split at h
       · obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h
         cases h
@@ -288,14 +292,14 @@ theorem save_cons_noWord {a : Seg} {r : List Seg} {new c c' : SVal}
       · simp only [reduceCtorEq] at h
   | map entries dflt =>
     cases a with
-    | field _ => simp only [SVal.save, reduceCtorEq] at h
+    | field _ => simp only [Semantics.SVal.save, reduceCtorEq] at h
     | «at» i =>
-      simp only [SVal.save] at h
+      simp only [Semantics.SVal.save] at h
       split at h <;> (obtain ⟨_, _, h⟩ := Res.bind_eq_ok.1 h; cases h; trivial)
 
 /-- **Read above a slot write**: the live read there returns no word, since
 the write went through it. -/
-theorem findLive_save_above {new v u : SVal} {ps : List Seg} (a : Seg) (r : List Seg)
+theorem findLive_save_above {new v u : Semantics.SVal} {ps : List Seg} (a : Seg) (r : List Seg)
     (h : v.save (ps ++ a :: r) new = .ok u) (y : Value) :
     (u.findLive ps >>= SVal.asValue) ≠ .ok y := by
   rw [findLive_save_prefix (a :: r) h]
@@ -314,45 +318,51 @@ its `shadow`, the slot a `push()` of a struct or an array recycles as it is
 (`pushSlot`, `storagePushLengthSaveReferenceElement`). -/
 
 /-- The slot past the end reads the head of the slots past the end. -/
-theorem find_shadow_head (es : List SVal) (c : SVal) (sh : List SVal) (fx : Bool)
-    (r : List Seg) : (SVal.array es (c :: sh) fx).find (.at es.length :: r) = c.find r := by
-  simp only [SVal.find, Int.ofNat_zero_le, Int.toNat_natCast, List.length_append,
+theorem find_shadow_head (es : List Semantics.SVal) (c : Semantics.SVal) (sh : List
+    Semantics.SVal) (fx : Bool)
+    (r : List Seg) : (Semantics.SVal.array es (c :: sh) fx).find (.at es.length ::
+        r) = c.find r := by
+  simp only [Semantics.SVal.find, Int.ofNat_zero_le, Int.toNat_natCast, List.length_append,
     List.length_cons, true_and, Nat.lt_add_of_pos_right (Nat.succ_pos _), ↓reduceDIte,
     List.get_eq_getElem, Nat.le_refl, List.getElem_append_right, Nat.sub_self,
     List.getElem_cons_zero]
 
 /-- An array with no slot past its end has none to read there. -/
-theorem find_shadow_nil (es : List SVal) (fx : Bool) (r : List Seg) :
-    (SVal.array es [] fx).find (.at es.length :: r) = .error .revert := by
-  simp only [SVal.find, Int.ofNat_zero_le, Int.toNat_natCast, List.append_nil,
+theorem find_shadow_nil (es : List Semantics.SVal) (fx : Bool) (r : List Seg) :
+    (Semantics.SVal.array es [] fx).find (.at es.length :: r) = .error .revert := by
+  simp only [Semantics.SVal.find, Int.ofNat_zero_le, Int.toNat_natCast, List.append_nil,
     Nat.lt_irrefl, and_false, ↓reduceDIte]
 
 /-- A write at the slot past the end writes the head of the slots past the
 end, and leaves the live elements and the length as they were. -/
-theorem save_shadow_head (es : List SVal) (c : SVal) (sh : List SVal) (fx : Bool)
-    (r : List Seg) (new : SVal) :
-    (SVal.array es (c :: sh) fx).save (.at es.length :: r) new =
+theorem save_shadow_head (es : List Semantics.SVal) (c : Semantics.SVal) (sh : List
+    Semantics.SVal) (fx : Bool)
+    (r : List Seg) (new : Semantics.SVal) :
+    (Semantics.SVal.array es (c :: sh) fx).save (.at es.length :: r) new =
       (c.save r new >>= fun c' => .ok (.array es (c' :: sh) fx)) := by
-  simp only [SVal.save, Int.ofNat_zero_le, Int.toNat_natCast, List.length_append,
+  simp only [Semantics.SVal.save, Int.ofNat_zero_le, Int.toNat_natCast, List.length_append,
     List.length_cons, true_and, Nat.lt_add_of_pos_right (Nat.succ_pos _), ↓reduceDIte,
     List.get_eq_getElem, Nat.le_refl, List.getElem_append_right, Nat.sub_self,
     List.getElem_cons_zero, List.set_append_right, List.set_cons_zero,
     List.take_left', List.drop_left']
 
 /-- An array with no slot past its end has none to write there. -/
-theorem save_shadow_nil (es : List SVal) (fx : Bool) (r : List Seg) (new : SVal) :
-    (SVal.array es [] fx).save (.at es.length :: r) new = .error .revert := by
-  simp only [SVal.save, Int.ofNat_zero_le, Int.toNat_natCast, List.append_nil,
+theorem save_shadow_nil (es : List Semantics.SVal) (fx : Bool) (r : List Seg) (new :
+    Semantics.SVal) :
+    (Semantics.SVal.array es [] fx).save (.at es.length :: r) new = .error .revert := by
+  simp only [Semantics.SVal.save, Int.ofNat_zero_le, Int.toNat_natCast, List.append_nil,
     Nat.lt_irrefl, and_false, ↓reduceDIte]
 
 /-- The slot past the end of a live array, read at the slot level. -/
-theorem find_past_end {v : SVal} {ps : List Seg} {es : List SVal} {c : SVal} {sh : List SVal}
+theorem find_past_end {v : Semantics.SVal} {ps : List Seg} {es : List Semantics.SVal} {c :
+    Semantics.SVal} {sh : List Semantics.SVal}
     {fx : Bool} (h : v.findLive ps = .ok (.array es (c :: sh) fx)) (r : List Seg) :
     v.find (ps ++ .at es.length :: r) = c.find r := by
   rw [SVal.find_append, SVal.find_of_findLive h, Res.ok_bind, find_shadow_head]
 
 /-- A live array with no slot past its end: the slot-level read there halts. -/
-theorem find_past_end_nil {v : SVal} {ps : List Seg} {es : List SVal} {fx : Bool}
+theorem find_past_end_nil {v : Semantics.SVal} {ps : List Seg} {es : List Semantics.SVal} {fx :
+    Bool}
     (h : v.findLive ps = .ok (.array es [] fx)) (r : List Seg) :
     v.find (ps ++ .at es.length :: r) = .error .revert := by
   rw [SVal.find_append, SVal.find_of_findLive h, Res.ok_bind, find_shadow_nil]
@@ -360,8 +370,9 @@ theorem find_past_end_nil {v : SVal} {ps : List Seg} {es : List SVal} {fx : Bool
 /-- **A write through a dangling alias** (`storageFieldWriteSave` with `sp` an
 alias bound to `a[n-1]` before a `pop`): the array is as long as it was, and
 the slot the next `push()` recycles holds the write. -/
-theorem findLive_save_past_end {new v u : SVal} {ps r : List Seg} {es : List SVal} {c : SVal}
-    {sh : List SVal} {fx : Bool} (h : v.findLive ps = .ok (.array es (c :: sh) fx))
+theorem findLive_save_past_end {new v u : Semantics.SVal} {ps r : List Seg} {es : List
+    Semantics.SVal} {c : Semantics.SVal}
+    {sh : List Semantics.SVal} {fx : Bool} (h : v.findLive ps = .ok (.array es (c :: sh) fx))
     (hs : v.save (ps ++ .at es.length :: r) new = .ok u) :
     ∃ c', c.save r new = .ok c' ∧ u.findLive ps = .ok (.array es (c' :: sh) fx) := by
   have hu := findLive_save_prefix (.at es.length :: r) hs
@@ -377,59 +388,63 @@ theorem findLive_save_past_end {new v u : SVal} {ps r : List Seg} {es : List SVa
 /-- **`delete` of an empty dynamic array** (`delAtEmpty`, then
 `selectStDelNodeIndexStruct` at `iv ≥ size`): the slots past its end are
 kept as they were. -/
-theorem defaultOf_array_nil (sh : List SVal) :
-    (SVal.array [] sh false).defaultOf = .array [] sh false := by
-  simp only [SVal.defaultOf, SVal.defaultOf.defaultOfElems, List.nil_append]
+theorem defaultOf_array_nil (sh : List Semantics.SVal) :
+    (Semantics.SVal.array [] sh false).defaultOf = .array [] sh false := by
+  simp only [Semantics.SVal.defaultOf, Semantics.SVal.defaultOf.defaultOfElems, List.nil_append]
 
 /-- **The length of a deleted array** (`delFieldIndexStruct`,
 `selectStDelNodeDefault` on `size`): `0` for a dynamic one, its own for a
 fixed-size one. -/
-theorem defaultOf_arrLen (es sh : List SVal) (fx : Bool) :
-    Close.arrLen (SVal.array es sh fx).defaultOf = .ok (.int (if fx then es.length else 0)) := by
-  cases fx <;> simp only [SVal.defaultOf, Close.arrLen, defaultOfElems_eq_map, List.length_map,
+theorem defaultOf_arrLen (es sh : List Semantics.SVal) (fx : Bool) :
+    Close.arrLen (Semantics.SVal.array es sh fx).defaultOf = .ok (.int (if fx then es.length else
+        0)) := by
+  cases fx <;> simp only [Semantics.SVal.defaultOf, Close.arrLen, defaultOfElems_eq_map,
+      List.length_map,
     List.length_nil, Bool.false_eq_true, ↓reduceIte, Int.natCast_zero]
 
-private theorem stripElems_len : ∀ (vs : List SVal),
-    (SVal.strip.stripElems vs).length = vs.length
+private theorem stripElems_len : ∀ (vs : List Semantics.SVal),
+    (Semantics.SVal.strip.stripElems vs).length = vs.length
   | [] => rfl
-  | v :: vs => by simp only [SVal.strip.stripElems, List.length_cons, stripElems_len vs]
+  | v :: vs => by simp only [Semantics.SVal.strip.stripElems, List.length_cons, stripElems_len vs]
 
-private theorem overlayElems_len : ∀ (os vs : List SVal),
-    (SVal.overlay.overlayElems os vs).length = vs.length
+private theorem overlayElems_len : ∀ (os vs : List Semantics.SVal),
+    (Semantics.SVal.overlay.overlayElems os vs).length = vs.length
   | [], [] => rfl
   | _ :: _, [] => rfl
-  | [], v :: vs => by simp only [SVal.overlay.overlayElems, stripElems_len]
+  | [], v :: vs => by simp only [Semantics.SVal.overlay.overlayElems, stripElems_len]
   | o :: os, v :: vs => by
-    simp only [SVal.overlay.overlayElems, List.length_cons, overlayElems_len os vs]
+    simp only [Semantics.SVal.overlay.overlayElems, List.length_cons, overlayElems_len os vs]
 
 /-- **A copy over a longer array** (`selectOnSaveEmptyIndexStruct`, its
 second branch, `selectOnCopyIndexClear`): the first slot past the new end is
 the old element there, deleted. -/
-theorem overlay_shadow_lt {oel osh nel nsh : List SVal} {ofx nfx : Bool}
+theorem overlay_shadow_lt {oel osh nel nsh : List Semantics.SVal} {ofx nfx : Bool}
     (h : nel.length < oel.length) :
-    ∃ el' sh', (SVal.array oel osh ofx).overlay (.array nel nsh nfx) =
+    ∃ el' sh', (Semantics.SVal.array oel osh ofx).overlay (.array nel nsh nfx) =
       .array el' ((oel[nel.length]'h).defaultOf :: sh') nfx ∧ el'.length = nel.length := by
-  refine ⟨SVal.overlay.overlayElems (oel ++ osh) nel,
-    SVal.defaultOf.defaultOfElems (oel.drop (nel.length + 1)) ++
+  refine ⟨Semantics.SVal.overlay.overlayElems (oel ++ osh) nel,
+    Semantics.SVal.defaultOf.defaultOfElems (oel.drop (nel.length + 1)) ++
     osh.drop (nel.length - oel.length), ?_, overlayElems_len _ _⟩
-  simp only [SVal.overlay, defaultOfElems_eq_map, List.drop_eq_getElem_cons h, List.map_cons,
+  simp only [Semantics.SVal.overlay, defaultOfElems_eq_map, List.drop_eq_getElem_cons h,
+      List.map_cons,
     List.cons_append]
 
 /-- **A copy over an array as long** (`selectOnSaveEmptyIndexStruct`, its
 third branch, `selectOnCopyIndexKeep`): the slots past the end are the old
 ones. -/
-theorem overlay_shadow_eq {oel osh nel nsh : List SVal} {ofx nfx : Bool}
+theorem overlay_shadow_eq {oel osh nel nsh : List Semantics.SVal} {ofx nfx : Bool}
     (h : nel.length = oel.length) :
-    ∃ el', (SVal.array oel osh ofx).overlay (.array nel nsh nfx) = .array el' osh nfx ∧
+    ∃ el', (Semantics.SVal.array oel osh ofx).overlay (.array nel nsh nfx) = .array el' osh nfx ∧
       el'.length = nel.length := by
-  refine ⟨SVal.overlay.overlayElems (oel ++ osh) nel, ?_, overlayElems_len _ _⟩
-  simp only [SVal.overlay, h, List.drop_length, defaultOfElems_eq_map, List.map_nil,
+  refine ⟨Semantics.SVal.overlay.overlayElems (oel ++ osh) nel, ?_, overlayElems_len _ _⟩
+  simp only [Semantics.SVal.overlay, h, List.drop_length, defaultOfElems_eq_map, List.map_nil,
     Nat.sub_self, List.drop_zero, List.nil_append]
 
 /-- **A push of a word** (`storagePushValueSave`): the array one longer, the
 word at its old length. -/
-theorem AOp.apply_push_eq {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok c') :
-    ∃ es sh fx, c = .array es sh fx ∧ c' = .array (es ++ [w.toSVal]) (pushSlot .uint sh).2 fx := by
+theorem AOp.apply_push_eq {w : Value} {c c' : Semantics.SVal} (h : AOp.push.apply w c = .ok c') :
+    ∃ es sh fx, c = .array es sh fx ∧ c' = .array (es ++ [w.toSVal]) (Semantics.pushSlot .uint
+        sh).2 fx := by
   cases c with
   | array es sh fx =>
     simp only [AOp.apply, Except.ok.injEq] at h
@@ -440,14 +455,14 @@ theorem AOp.apply_push_eq {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .o
 `selectOnSaveCons` on the `size` and the `at(n)` writes): the length is one
 more, the slot at the old length is the word, the elements below it are as
 they were. -/
-theorem apply_push_find {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok c') :
+theorem apply_push_find {w : Value} {c c' : Semantics.SVal} (h : AOp.push.apply w c = .ok c') :
     ∃ n : Nat, Close.arrLen c = .ok (.int n) ∧ Close.arrLen c' = .ok (.int (n + 1)) ∧
       c'.findLive [.at n] = .ok w.toSVal ∧
       ∀ (j : Int) (r : List Seg), j ≠ n → c'.findLive (.at j :: r) = c.findLive (.at j :: r) := by
   obtain ⟨es, sh, fx, rfl, rfl⟩ := AOp.apply_push_eq h
   refine ⟨es.length, rfl, by simp only [Close.arrLen, List.length_append, List.length_cons,
     List.length_nil, Nat.zero_add, Int.natCast_add, Int.cast_ofNat_Int], ?_, ?_⟩
-  · simp only [SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast, List.length_append,
+  · simp only [Semantics.SVal.findLive, Int.ofNat_zero_le, Int.toNat_natCast, List.length_append,
       List.length_cons, List.length_nil, Nat.zero_add, Nat.lt_add_one, and_self, ↓reduceDIte,
       List.get_eq_getElem, Nat.le_refl, List.getElem_append_right, Nat.sub_self,
       List.getElem_cons_zero, SVal.findLive_nil]
@@ -455,17 +470,18 @@ theorem apply_push_find {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok 
     by_cases hl : 0 ≤ j ∧ j.toNat < es.length
     · have hl' : 0 ≤ j ∧ j.toNat < (es ++ [w.toSVal]).length := by
         simp only [List.length_append, List.length_cons, List.length_nil]; omega
-      simp only [SVal.findLive, dif_pos hl, dif_pos hl', List.get_eq_getElem,
+      simp only [Semantics.SVal.findLive, dif_pos hl, dif_pos hl', List.get_eq_getElem,
         List.getElem_append_left hl.2]
     · have hl' : ¬ (0 ≤ j ∧ j.toNat < (es ++ [w.toSVal]).length) := by
         simp only [List.length_append, List.length_cons, List.length_nil]; omega
-      simp only [SVal.findLive, dif_neg hl, dif_neg hl']
+      simp only [Semantics.SVal.findLive, dif_neg hl, dif_neg hl']
 
 /-- Below a pushed array an array is read only at an old element, as it
 was: the pushed word has nothing below it, and the one member of an array
 is its length. -/
-theorem apply_push_findLive_array {w : Value} {c c' : SVal} (h : AOp.push.apply w c = .ok c')
-    {f : Seg} {r : List Seg} {es sh : List SVal} {fx : Bool}
+theorem apply_push_findLive_array {w : Value} {c c' : Semantics.SVal} (h : AOp.push.apply w c = .ok
+    c')
+    {f : Seg} {r : List Seg} {es sh : List Semantics.SVal} {fx : Bool}
     (hn : c'.findLive (f :: r) = .ok (.array es sh fx)) :
     c.findLive (f :: r) = .ok (.array es sh fx) := by
   obtain ⟨n, -, -, hnew, hold⟩ := apply_push_find h
@@ -476,7 +492,7 @@ theorem apply_push_findLive_array {w : Value} {c c' : SVal} (h : AOp.push.apply 
       exfalso
       rw [show (Seg.at (n : Int) :: r) = [Seg.at n] ++ r from rfl, SVal.findLive_append,
         hnew, Res.ok_bind] at hn
-      cases w <;> cases r <;> simp only [Value.toSVal, SVal.findLive, Except.ok.injEq,
+      cases w <;> cases r <;> simp only [Value.toSVal, Semantics.SVal.findLive, Except.ok.injEq,
         reduceCtorEq] at hn
     · rw [← hold j r hj]; exact hn
   | field g =>
@@ -484,10 +500,10 @@ theorem apply_push_findLive_array {w : Value} {c c' : SVal} (h : AOp.push.apply 
     obtain ⟨es0, sh0, fx0, -, rfl⟩ := AOp.apply_push_eq h
     by_cases hg : g = "length"
     · subst hg
-      cases fx0 <;> cases r <;> simp only [SVal.findLive, Bool.false_eq_true, ↓reduceIte,
+      cases fx0 <;> cases r <;> simp only [Semantics.SVal.findLive, Bool.false_eq_true, ↓reduceIte,
         Except.ok.injEq, reduceCtorEq] at hn
-    · rw [SVal.findLive.eq_def] at hn
-      split at hn <;> simp_all only [ne_eq, imp_false, SVal.array.injEq, List.cons.injEq,
+    · rw [Semantics.SVal.findLive.eq_def] at hn
+      split at hn <;> simp_all only [ne_eq, imp_false, Semantics.SVal.array.injEq, List.cons.injEq,
         Seg.field.injEq, reduceCtorEq, false_and]
 
 /-! ## A slot write against the slot past the end
@@ -520,7 +536,7 @@ theorem diverge_append_split : ∀ {q p r : List Seg}, Close.Diverge q (p ++ r) 
     · exact .inl (Close.diverge_cons.2 (.inl hab))
 
 /-- A slot write succeeds only where the slot-level read of its path does. -/
-theorem find_ok_of_save_ok {v new u : SVal} {ps : List Seg} (h : v.save ps new = .ok u) :
+theorem find_ok_of_save_ok {v new u : Semantics.SVal} {ps : List Seg} (h : v.save ps new = .ok u) :
     ∃ c, v.find ps = .ok c := by
   cases hf : v.find ps with
   | ok c => exact ⟨c, rfl⟩
@@ -528,20 +544,20 @@ theorem find_ok_of_save_ok {v new u : SVal} {ps : List Seg} (h : v.save ps new =
 
 /-- A slot write succeeds where the slot-level read of its path does, on a
 path with no `length` member (a write has no `length` arm). -/
-theorem save_ok_of_find_ok {new : SVal} : ∀ {v c : SVal} {ps : List Seg},
+theorem save_ok_of_find_ok {new : Semantics.SVal} : ∀ {v c : Semantics.SVal} {ps : List Seg},
     (∀ s ∈ ps, s ≠ .field "length") → v.find ps = .ok c → ∃ u, v.save ps new = .ok u
   | v, _, [], _, _ => ⟨new, SVal.save_nil v new⟩
   | v, c, s :: ps, hn, h => by
     have hn' : ∀ t ∈ ps, t ≠ .field "length" := fun t ht => hn t (.tail _ ht)
     have hs : s ≠ .field "length" := hn s (.head _)
     cases v with
-    | prim p => cases s <;> simp only [SVal.find, reduceCtorEq] at h
+    | prim p => cases s <;> simp only [Semantics.SVal.find, reduceCtorEq] at h
     | struct fields =>
       cases s with
-      | «at» _ => simp only [SVal.find, reduceCtorEq] at h
+      | «at» _ => simp only [Semantics.SVal.find, reduceCtorEq] at h
       | field n =>
-        simp only [SVal.find] at h
-        simp only [SVal.save]
+        simp only [Semantics.SVal.find] at h
+        simp only [Semantics.SVal.save]
         split at h
         · rename_i old hl
           obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
@@ -551,10 +567,10 @@ theorem save_ok_of_find_ok {new : SVal} : ∀ {v c : SVal} {ps : List Seg},
       cases s with
       | field n =>
         have : n ≠ "length" := fun e => hs (by rw [e])
-        simp only [SVal.find, reduceCtorEq] at h
+        simp only [Semantics.SVal.find, reduceCtorEq] at h
       | «at» i =>
-        simp only [SVal.find] at h
-        simp only [SVal.save]
+        simp only [Semantics.SVal.find] at h
+        simp only [Semantics.SVal.save]
         split at h
         · rename_i hi
           obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
@@ -562,10 +578,10 @@ theorem save_ok_of_find_ok {new : SVal} : ∀ {v c : SVal} {ps : List Seg},
         · cases h
     | map entries dflt =>
       cases s with
-      | field _ => simp only [SVal.find, reduceCtorEq] at h
+      | field _ => simp only [Semantics.SVal.find, reduceCtorEq] at h
       | «at» i =>
-        simp only [SVal.find] at h
-        simp only [SVal.save]
+        simp only [Semantics.SVal.find] at h
+        simp only [Semantics.SVal.save]
         split at h
         · rename_i old hl
           obtain ⟨u, hu⟩ := save_ok_of_find_ok (new := new) hn' h
@@ -576,19 +592,20 @@ theorem save_ok_of_find_ok {new : SVal} : ∀ {v c : SVal} {ps : List Seg},
 
 /-- A slot write through `p` writes the node at `p`: the slot-level read
 there is the old node with the rest written. -/
-theorem find_save_append {new v u : SVal} {p t : List Seg} (h : v.save (p ++ t) new = .ok u) :
+theorem find_save_append {new v u : Semantics.SVal} {p t : List Seg} (h : v.save (p ++ t) new = .ok
+    u) :
     ∃ c c', v.find p = .ok c ∧ c.save t new = .ok c' ∧ u.find p = .ok c' := by
   obtain ⟨y, hy⟩ := find_ok_of_save_ok h
   rw [SVal.find_append] at hy
   obtain ⟨c, hc, -⟩ := Res.bind_eq_ok.1 hy
   rw [SVal.save_append v p t new c hc] at h
   obtain ⟨c', hc', hu⟩ := Res.bind_eq_ok.1 h
-  exact ⟨c, c', hc, hc', SVal.find_save_same hu⟩
+  exact ⟨c, c', hc, hc', SemanticsProperties.SVal.find_save_same hu⟩
 
 /-- A slot write against a slot it does not reach, read at `r` below the
 node at `p`: either the node is as it was, or the write runs through `p` and
 parts from `r` below it. -/
-theorem find_save_diverge_tail {new v u : SVal} {qs p r : List Seg}
+theorem find_save_diverge_tail {new v u : Semantics.SVal} {qs p r : List Seg}
     (h : v.save qs new = .ok u) (hd : Close.Diverge qs (p ++ r)) :
     u.find p = v.find p ∨ ∃ t c c', qs = p ++ t ∧ Close.Diverge t r ∧ v.find p = .ok c ∧
       c.save t new = .ok c' ∧ u.find p = .ok c' := by
@@ -599,7 +616,8 @@ theorem find_save_diverge_tail {new v u : SVal} {qs p r : List Seg}
 
 /-- A slot write below a live node: the node there is still live, the write
 into it returns, and it is the new live node. -/
-theorem save_prefix_ok {new v u c : SVal} {ps r : List Seg} (h : v.save (ps ++ r) new = .ok u)
+theorem save_prefix_ok {new v u c : Semantics.SVal} {ps r : List Seg} (h : v.save (ps ++ r) new =
+    .ok u)
     (hc : v.findLive ps = .ok c) : ∃ c', c.save r new = .ok c' ∧ u.findLive ps = .ok c' := by
   have hu := findLive_save_prefix r h
   rw [SVal.save_append v ps r new c (SVal.find_of_findLive hc)] at h
@@ -607,7 +625,8 @@ theorem save_prefix_ok {new v u c : SVal} {ps r : List Seg} (h : v.save (ps ++ r
   exact ⟨c', hc', by rw [hu, hc, Res.ok_bind, hc']⟩
 
 /-- A slot write below a path keeps whether the live read there returns. -/
-theorem findLive_save_prefix_has {new v u : SVal} {ps r : List Seg} (h : v.save (ps ++ r) new = .ok u) :
+theorem findLive_save_prefix_has {new v u : Semantics.SVal} {ps r : List Seg} (h : v.save (ps ++ r)
+    new = .ok u) :
     (u.findLive ps >>= fun _ => .ok (Value.bool true)) =
       (v.findLive ps >>= fun _ => .ok (Value.bool true)) := by
   cases hc : v.findLive ps with
@@ -618,8 +637,8 @@ theorem findLive_save_prefix_has {new v u : SVal} {ps r : List Seg} (h : v.save 
     rw [hu]; rfl
 
 /-- A word written at or above a path leaves no array there. -/
-theorem save_prim_not_array {x : PrimVal} {v u : SVal} {qs : List Seg} (z : List Seg)
-    (h : v.save qs (.prim x) = .ok u) {es sh : List SVal} {fx : Bool} :
+theorem save_prim_not_array {x : PrimVal} {v u : Semantics.SVal} {qs : List Seg} (z : List Seg)
+    (h : v.save qs (.prim x) = .ok u) {es sh : List Semantics.SVal} {fx : Bool} :
     u.findLive (qs ++ z) ≠ .ok (.array es sh fx) := by
   cases z with
   | nil =>
@@ -630,16 +649,17 @@ theorem save_prim_not_array {x : PrimVal} {v u : SVal} {qs : List Seg} (z : List
 
 /-- The slot past the end of a live array, as a result: its head, a halt
 where it has none. -/
-def headR : List SVal → Res SVal
+def headR : List Semantics.SVal → Res Semantics.SVal
   | c :: _ => .ok c
   | [] => .error .revert
 
 /-- The slot-level read one past the live end reads the first slot past it. -/
-theorem find_slot_head {v : SVal} {ps : List Seg} {es sh : List SVal} {fx : Bool}
+theorem find_slot_head {v : Semantics.SVal} {ps : List Seg} {es sh : List Semantics.SVal} {fx :
+    Bool}
     (h : v.findLive ps = .ok (.array es sh fx)) : v.find (ps ++ [.at es.length]) = headR sh := by
   cases sh with
   | nil => exact find_past_end_nil h []
-  | cons c t => rw [find_past_end h [], SVal.find_nil]; rfl
+  | cons c t => rw [find_past_end h [], SemanticsProperties.SVal.find_nil]; rfl
 
 end Decide
 

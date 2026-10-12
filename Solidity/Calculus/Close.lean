@@ -86,7 +86,7 @@ applies and the scrutinee is named first.  A read of memory stays whole
     bindingLedger (.ledger l) = .ok l := rfl
 
 /-- `old` bound to a storage reads it. -/
-@[simp] theorem bindingStore_store (st : List (Name × SVal)) :
+@[simp] theorem bindingStore_store (st : List (Name × Semantics.SVal)) :
     bindingStore (.store st) = .ok st := rfl
 
 /-- `x` bound to `10` reads `10`. -/
@@ -108,9 +108,10 @@ theorem bindingRef_eq_ok {b : Binding} {id : Nat} :
 section Eval
 
 /-- Binding a local leaves the ledger. -/
-theorem net_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
+theorem net_setEnv (σ : Semantics.State) (x : Var) (b : Binding) : (σ.setEnv x b).net = σ.net := rfl
 /-- Binding a local leaves the storage. -/
-theorem storage_setEnv (σ : State) (x : Var) (b : Binding) : (σ.setEnv x b).storage = σ.storage :=
+theorem storage_setEnv (σ : Semantics.State) (x : Var) (b : Binding) :
+    (σ.setEnv x b).storage = σ.storage :=
   rfl
 
 end Eval
@@ -125,9 +126,9 @@ attribute [close_rw]
   Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
   Close.fieldPath_at
   -- values and the state's parts
-  Close.equiv_prim_left_iff IntOp.apply State.envVal State.getNet
+  Close.equiv_prim_left_iff IntOp.apply Semantics.State.envVal State.getNet
   Close.idxOk_array Close.idxOk_map Close.pastEnd_array
-  Close.lookupBy_setBy_int State.pay State.setNet
+  Close.lookupBy_setBy_int Semantics.State.pay State.setNet
   -- operators
   Close.evalBinop_strict Close.evalBinop_and Close.evalBinop_or applyBinOp applyUnOp unopCheck
   Close.pickBranch_eq BinOp.retTy BinOp.isArith checkArith uintBound intBound
@@ -153,7 +154,8 @@ attribute [close_rw]
   Close.tx_setEnv Close.selfBalance_setEnv Close.net_setEnv Close.lookupBy_ite
   -- paths, arrays, copies
   Close.diverge_cons' Close.not_diverge_nil_left Close.not_diverge_nil_right Close.prefix_nil
-  Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons SVal.find_nil
+  Close.prefix_cons Close.prefix_cons_nil Close.after_nil Close.after_cons
+  SemanticsProperties.SVal.find_nil
   List.nil_append List.cons_append List.append_nil
   Close.arrLen_array Close.arrLen_eq_ok Close.pushOn_array Close.popOn_push Close.popOn_push_keep Close.find_push_last
   Close.copyLeaf_prim Close.apart_field Close.apart_index Close.apart_field_index
@@ -162,7 +164,8 @@ attribute [close_rw]
   Except.ok.injEq Binding.val.injEq Binding.mref.injEq Binding.store.injEq Binding.ledger.injEq
   PrimVal.int.injEq
   PrimVal.bool.injEq
-  MVal.prim.injEq MVal.ref.injEq SVal.prim.injEq Prod.mk.injEq Seg.field.injEq Seg.at.injEq
+  MVal.prim.injEq MVal.ref.injEq Semantics.SVal.prim.injEq Prod.mk.injEq Seg.field.injEq
+  Seg.at.injEq
   Var.user.injEq Var.fresh.injEq Int.ofNat.injEq
   forall_eq' forall_eq exists_eq_left' exists_eq_left exists_eq' exists_eq forall_exists_index
   and_imp
@@ -278,7 +281,8 @@ elab "sol_close_mt_eval" : tactic => do
   if ← Close.scopedGoal then throwUnsupportedSyntax
   evalTactic (← `(tactic|
     simp (config := { decide := true }) only [close_rw, List.map_cons, List.map_nil,
-      defaultForTy, State.saveStorage, State.findStorage, lookupBy, setBy, SVal.save, SVal.find,
+      defaultForTy, State.saveStorage, State.findStorage, lookupBy, setBy, Semantics.SVal.save,
+      Semantics.SVal.find,
       Close.storage_setEnv, Except.ok.injEq, exists_eq_left']))
 
 /-- `sol_close` from a deployment's storage, `{storage := mtSt ‖ …}` in
