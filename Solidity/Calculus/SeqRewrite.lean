@@ -13,8 +13,7 @@ closed term reads what it reads at the empty scope over the same global
 part (`Tm.eval_toNilS`, `Tm.denote_ofNil`, the state's global part
 `EState.nil`), so nothing below reads the closer's terms or the erasure.
 
-*In an equation* (the twin of `NFml.rwEq` and `Hyp.rwEq`,
-`Calculus/Hyp.lean`): a side of an equation that is `t` becomes `t'`
+*In an equation*: a side of an equation that is `t` becomes `t'`
 (`Tm.sideC`), in every equation of the formula, at any depth of its
 connectives, updates, quantifiers and hidden binders, and in the
 postcondition of a modality still open (`Fml.rwEqC`).  A Theory equation

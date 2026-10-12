@@ -327,29 +327,33 @@ context position `k` under (counted from the outermost, `Fml.toLS`): a
 name no program spells (`#`), so a position never meets a program's local. -/
 def slotVar (k : Nat) : Var := .fresh "#" k
 
-/-- An atom of the reduction, a local it reads: on a scoped leaf the local
-at a position of its context (`pos k`, decision 78), the names its binders
-give only printed; on an erased leaf (`NFml.toL`, the `⊨` route and
-`sol_prove`'s leaves until `NFml` goes) the local of that name.  Both read
-the state at their `key`. -/
+/-- An atom of the reduction, a local it reads: the local at a position of
+the scoped leaf's context (`pos k`, decision 78), the names its binders give
+only printed.  It reads the state at its `key`. -/
 inductive Atom where
   | pos (k : Nat)
-  | name (x : Var)
   deriving Inhabited, Repr, DecidableEq, Lean.ToExpr
 
 /-- The local the state holds the atom under. -/
 def Atom.key : Atom → Var
   | .pos k => slotVar k
-  | .name x => x
 
-/-- The atom a binder's key reads: a position's slot is that position. -/
+/-- A key a position's slot: what every binder of a scoped reduction takes. -/
+def _root_.Solidity.Var.isSlot : Var → Bool
+  | .fresh "#" _ => true
+  | _ => false
+
+/-- The atom a binder's key reads: a position's slot is that position (a
+key no scoped reduction binds reads position `0`). -/
 def Atom.ofKey : Var → Atom
   | .fresh "#" k => .pos k
-  | x => .name x
+  | _ => .pos 0
 
-theorem Atom.key_ofKey (x : Var) : (Atom.ofKey x).key = x := by
-  unfold Atom.ofKey
-  split <;> rfl
+theorem Atom.key_ofKey {x : Var} (h : x.isSlot = true) : (Atom.ofKey x).key = x := by
+  unfold Var.isSlot at h
+  split at h
+  · rfl
+  · exact absurd h Bool.false_ne_true
 
 mutual
 

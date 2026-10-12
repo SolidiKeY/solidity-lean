@@ -264,7 +264,7 @@ inductive Fml (C : Contract) : Ctx → Type where
 /-- `false` is `¬true`. -/
 abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt
 
-/-- `a = b` with both sides defined (`Solidity.NFml.eqD`). -/
+/-- `a = b` with both sides defined. -/
 abbrev Fml.eqD {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ :=
   .and (.defined a) (.and (.defined b) (.eq a b))
 

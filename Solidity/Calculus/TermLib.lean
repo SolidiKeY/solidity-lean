@@ -5,13 +5,11 @@ import Solidity.Calculus.StateFacts
 /-!
 # Term taclets on scoped terms
 
-The Theory's rules on terms (`Calculus/TermTaclets.lean`) restated on the
+The Theory's rules on terms, KeY's term taclets, stated on the
 scoped terms `Tm C Γ .val` (`Calculus/Fml.lean`), with what they need: the
 Theory equality of two terms (`Tm.Theq`), the side conditions read off a
 scoped path, and the term functions a scoped closer compares terms with.
-This is W9.1's `terms` lane (`docs/intrinsic.md`, "W9 plan"): nothing below
-reads the closer's IR (`Surface.Tm`, `NFml`), and soundness is over the
-scoped `Tm.denote` (`Calculus/Logic.lean`).
+Soundness is over the scoped `Tm.denote` (`Calculus/Logic.lean`).
 
 **Notation.** `tm{ … }` at a scoped term type writes the scoped term: the
 text is read as the closer's term is (`RuleSyntax.schemaTerm`) and its

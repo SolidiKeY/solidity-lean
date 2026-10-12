@@ -496,13 +496,12 @@ end MemoryReads
 
 A check leaves its goals behind one update, as a conjunction of implications
 over the captured condition.  The literals fold (`add_literals`, `leq_literals`,
-`Calculus/Literals.lean`: exact laws, so in an update's right-hand side under
+`LitLaw`, `Calculus/TermLaws.lean`: exact laws, so in an update's right-hand side under
 any modality and with no premise), the update is pushed through the
 connectives (`applyOnRigid`: `FmlRw.applyOnRigid`,
 `Calculus/RewriteScoped.lean`, while the revert is still to run;
-`NFml.push`, `Calculus/ChainBranches.lean`, past the program), the literal
-connectives fold (`concrete`: `FmlRw.concrete` while the program is open,
-`Calculus/ChainRewrites.lean`'s past it), and a merge finds the first spine
+`Calculus/RewritePast.lean` past the program), the literal
+connectives fold (`concrete`: `FmlRw.concrete`), and a merge finds the first spine
 under a branch (`sequentialToParallel`, `LineRw.mergeIn`).  Each rewrite
 under a branch reads the skeleton of the line the elaborator wrote for it, so
 the postcondition `φ` is a part it never looks at, and the line is proved by

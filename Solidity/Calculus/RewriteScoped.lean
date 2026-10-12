@@ -529,10 +529,10 @@ def FmlRw.applyOnRigid (i : Nat) (s : Skel) : FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.pushAt s m U φ) (fun h σ hψ => Fml.pushAt_sound h σ hψ) i
 
 /-- `applyOnRigid` on a box update that writes no global part but the
-storage (`Upd.stOnly`): storage writes and locals.  Wider than the
-erasure's `Proves.applyStorageBox` (`NFml.applyStorageBoxTop`), which asks
-a lone `{storage := s}`, so the same link may apply while the program is
-open and be refused past it (proposal 105). -/
+storage (`Upd.stOnly`): storage writes and locals.  Wider than
+`applyStorageBox` past the program (`Calculus/RewritePast.lean`), which
+asks a lone `{storage := s}`, so the same link may apply while the program
+is open and be refused past it (proposal 105). -/
 def Fml.pushStAt (s : Skel) {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
     Option (Fml C Γ) :=
   if (m.isBoxS && U.stOnly) = true then Fml.pushAt s m U φ else none
@@ -765,8 +765,7 @@ binds it, `{x := v} x ⇝ v`, where the update cannot be applied whole
 literal (`Upd.held`) is that literal in the atoms along the skeleton
 below it (not past a further update), the update kept in front.  Wherever
 the update returns, the state it leaves holds the literal there
-(`Upd.held_ok`); where it halts nothing below it is read.
-`ChainBranches`' `NFml.applyOnPVTop` on the erasure. -/
+(`Upd.held_ok`); where it halts nothing below it is read. -/
 
 section ApplyOnPV
 

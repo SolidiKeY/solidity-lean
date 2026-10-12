@@ -78,8 +78,8 @@ def Ctx.positions : (Γ : Ctx) → List ((t : LTy) × Idx Γ t)
   | t :: Γ => ⟨t, .here⟩ :: (Ctx.positions Γ).map fun x => ⟨x.1, .there x.2⟩
 
 /-- The slot of the `i`th postcondition while the strategy runs: a formula
-with no modality and no fresh name, as a postcondition is, whose erasure
-lists the names of its context (`{anon(…)}` of every position). -/
+with no modality and no fresh name, as a postcondition is, that names
+every position of its context (`{anon(…)}`). -/
 def Fml.chainSlot {Γ : Ctx} (i : Nat) : Fml C Γ :=
   .anon (Ctx.positions Γ) (.defined (.app2 .find (.app0 .storage) (.app0 (.root s!"⟪{i}⟫"))))
 
@@ -109,8 +109,7 @@ def Focus.quoteRaw (c : Lean.Expr) : Focus C → Lean.Expr
 /-- A line of a derivation as compiled code leaves it: the line and the
 statement the step that reached it fired on (`Prod.mk f φ`, hash-consed
 together), the step's fresh index, and the line's key (`Fml.lineKey`,
-quoted: the erasure where there is no modality, a modality's program as
-text). -/
+quoted). -/
 structure LineQ where
   pair : Lean.Expr
   fresh : Nat
@@ -277,24 +276,21 @@ def Fml.chainLines (c : Lean.Expr) {Γ : Ctx} : Nat → Fml C Γ → List LineQ
       ⟨pair, k, ψ.lineKeyQ Γ.blankNames⟩ :: Fml.chainLines c n ψ
     | none => []
 
-/-- The lines of the derivation of `φ` and its key (`Fml.lineKey`, quoted:
-the erasure where there is no modality, a modality's program as text): one
-evaluation. -/
+/-- The lines of the derivation of `φ` and its key (`Fml.lineKey`, quoted):
+one evaluation. -/
 def Fml.chainRunQ (c : Lean.Expr) {Γ : Ctx} (n : Nat) (φ : Fml C Γ) : List LineQ × Lean.Expr :=
   (Fml.chainLines c n φ, φ.lineKeyQ Γ.blankNames)
 
 /-- The merges of `φ`'s update spine (`Fml.mergeRun`), quoted: for each
 position `k` and count `n`, the longest first, that merges, the line and its
-key (`Fml.lineKey`, quoted: the erasure where there is no modality, a
-modality's program as text). -/
+key (`Fml.lineKey`, quoted). -/
 def Fml.mergeCandsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     List (Nat × Nat × Lean.Expr × Lean.Expr) :=
   (List.range 8).flatMap fun k => (List.range 8).reverse.filterMap fun n =>
     (φ.mergeRun k (n + 1)).map fun ψ => (k, n + 1, (Quote.qFml Γ ψ).run c, ψ.lineKeyQ Γ.blankNames)
 
 /-- Each rewrite of `fs` on `φ` (`Calculus/RewriteScoped.lean`), quoted: the
-line it leaves and that line's key (`Fml.lineKey`, quoted: the erasure where
-there is no modality, a modality's program as text), or `none`. -/
+line it leaves and that line's key (`Fml.lineKey`, quoted), or `none`. -/
 def Fml.rwResultsQ (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ)
     (fs : List (Fml C Γ → Option (Fml C Γ))) : List (Option (Lean.Expr × Lean.Expr)) :=
   fs.map fun f => (f φ).map fun ψ => ((Quote.qFml Γ ψ).run c, ψ.lineKeyQ Γ.blankNames)
@@ -417,7 +413,7 @@ def indentLine (e : Expr) : MetaM MessageData := do
 
 /-- A line of a derivation: the line and the statement the step that reached
 it fired on (`Focus`), its Lean terms back; the step's fresh index; and the
-line's erasure, its postconditions in their slots, once per modality it was
+line's key, its postconditions in their slots, once per modality it was
 run under (the diamond first). -/
 structure Line where
   fml : Expr
@@ -442,7 +438,7 @@ initialize closedCache : EnvExtension (Std.HashMap Expr (List LineQ × Expr)) �
   registerEnvExtension (pure {}) (asyncMode := .local)
 
 /-- The lines of the derivation of the closed formula `φ : Fml C Γ`, and
-its erasure, quoted. -/
+its key, quoted. -/
 def closedRun (n : Lean.Name) (C Γ φ : Expr) : MetaM (List LineQ × Expr) := do
   if let some r := (closedCache.getState (← getEnv))[φ]? then return r
   let ty := mkApp2 (mkConst ``Prod [0, 0]) (mkApp (mkConst ``List [0]) (mkConst ``LineQ))
@@ -452,7 +448,7 @@ def closedRun (n : Lean.Name) (C Γ φ : Expr) : MetaM (List LineQ × Expr) := d
   modifyEnv fun env => closedCache.modifyState env (·.insert φ r)
   return r
 
-/-- A derivation: the Lean terms of its first line, the erasure of that line
+/-- A derivation: the Lean terms of its first line, the key of that line
 (once per modality), its lines, and whether they stop because the next rule
 depends on the modality. -/
 structure Run where
@@ -485,7 +481,7 @@ def isCoreLine (e : Expr) : MetaM Bool := do
 def unpair (e : Expr) : Expr × Expr := (e.appFn!.appArg!, e.appArg!)
 
 /-- A merge of a line's update spine: the position, the count, the line it
-leaves, and that line's erasures (once per modality it was computed under). -/
+leaves, and that line's keys (once per modality it was computed under). -/
 structure MergeCand where
   k : Nat
   n : Nat
@@ -538,7 +534,7 @@ partial def updPaths (e : Expr) : Nat → List (List PathStep)
     else []
 
 /-- A rewrite of a scoped line while its program is open: the rewrite
-(`FmlRw`), the line it leaves, and that line's erasures (once per modality
+(`FmlRw`), the line it leaves, and that line's keys (once per modality
 it was computed under). -/
 structure RwCand where
   rw : Expr
@@ -616,8 +612,8 @@ def plainReadAny (t : Expr) : Bool :=
 open (`Calculus/RewriteScoped.lean`), each with the line it leaves, in the
 order they are tried: `applyOnRigid` at each update of the spine, along the
 skeleton of the formula under it; `concrete` below each number of updates; a
-literal law at each instance (found in the line's erasure `keys`, as past
-the program) in each update's right-hand sides; a term taclet onto a literal
+literal law at each instance (found among the line's closed terms, as
+past the program) in each update's right-hand sides; a term taclet onto a literal
 in each box update's, its scoped twin (`TermTacletS`, `scopedLaw?`) matched
 against the line's closed terms read at the empty scope
 (`Tm.closedNilVals`); a law in the equations along the
@@ -663,8 +659,8 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
     | .table n =>
       if n == `applyOnRigid || n == `applyOnRigidBox then
         -- under the box `applyOnRigid` applies any update, under the diamond one
-        -- that cannot halt (`FmlRw.applyOnRigid`): the erasure's
-        -- `applyOnRigidBox` too (proposal 105)
+        -- that cannot halt (`FmlRw.applyOnRigid`): `applyOnRigidBox` too
+        -- (proposal 105)
         for i in List.range k do
           let s := skels[i + 1]!
           if s.pushable then
@@ -1330,7 +1326,7 @@ def readWritten (sp : Splice) (c : Lean.Term) (m? : Option Lean.Term) (φ : TSyn
   return some (es, rs)
 
 /-- Whether the readings `rs` of a written text, its holes `es`, are the
-computed line whose erasures are `keys` (once per modality run). -/
+computed line whose keys are `keys` (once per modality run). -/
 def readingMatches (sp : Splice) (es rs keys : Array Expr) : Bool :=
   let es' := keys.map (toWrittenSlots sp es)
   -- the written text may leave out the parameters `cdl!` binds outermost
@@ -1339,9 +1335,9 @@ def readingMatches (sp : Splice) (es rs keys : Array Expr) : Bool :=
   -- a constant modality read once against both runs: the run's own
   else es'.any (same rs[0]! ·)
 
-/-- Whether the written line `w` is the computed line whose erasures are
+/-- Whether the written line `w` is the computed line whose keys are
 `keys` (once per modality run), the formulas of the computed lines `sp`. -/
-def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (keys : Array Expr) :
+def matchWritten (sp : Splice) (w : Written) (B : Expr) (keys : Array Expr) :
     TermElabM Bool := do
   match w with
   | .hole => return true
@@ -1358,7 +1354,7 @@ def matchWritten (sp : Splice) (C : Expr) (w : Written) (B : Expr) (keys : Array
 merges): the written text read once, on the first line it is checked
 against, since its reading (two evaluations under a modality variable) does
 not depend on the line. -/
-def writtenMatcher (C : Expr) (w : Written) :
+def writtenMatcher (w : Written) :
     TermElabM (Splice → Expr → Array Expr → TermElabM Bool) := do
   match w with
   | .text c m? φ =>
@@ -1372,7 +1368,7 @@ def writtenMatcher (C : Expr) (w : Written) :
           pure r
       let some (es, rs) := r | return false
       return readingMatches sp es rs keys
-  | _ => return fun sp B keys => matchWritten sp C w B keys
+  | _ => return fun sp B keys => matchWritten sp w B keys
 
 /-- The computed line, shown (`#derivation`). -/
 def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
@@ -1446,7 +1442,7 @@ def openRwNames : List Lean.Name :=
   [`sequentialToParallel, `applyOnRigid, `applyOnPV, `concrete, `simplifyUpdate]
 
 /-- One rewrite of a line while its program is open: the line it leaves,
-that line's splice and erasures, the KeY name a chain writes it by, its
+that line's splice and keys, the KeY name a chain writes it by, its
 link (`Link.merge`, `Link.rw`), and the proof of `L ~~> it`, built when
 asked. -/
 structure OpenStep where
@@ -1555,9 +1551,8 @@ def linkTy (C : Expr) : Expr := mkApp (mkConst ``Link) C
 
 /-- Why no rewrite past the program gives the line written `w` after `L`:
 the rewrite applies nowhere (and why: a side condition, a modality), or
-what it gives; `~=>`, what each rewrite that applies gives.  The line
-written is printed as it reads on the erasure. -/
-def pastRefusal (C L : Expr) (w : Written) (rw? : Option (Option (Ident × RwArrow))) :
+what it gives; `~=>`, what each rewrite that applies gives. -/
+def pastRefusal (L : Expr) (w : Written) (rw? : Option (Option (Ident × RwArrow))) :
     TermElabM MessageData := do
   let written : TermElabM MessageData := writtenMsg w
   match rw? with
@@ -1587,7 +1582,8 @@ def pastRefusal (C L : Expr) (w : Written) (rw? : Option (Option (Ident × RwArr
 
 /-- A written chain whose first line `A` is a scoped formula: every line
 after it computed, checked against its text (`matchWritten`), past the
-program by `Calculus/RewriteChains.lean`'s rewrites on the erasure. -/
+program by `Calculus/RewritePast.lean`'s and `Calculus/RewriteLaws.lean`'s
+rewrites. -/
 def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
   let (C, Γ) ← lineType A
   let fml := mkApp2 (mkConst ``Fml) C Γ
@@ -1622,7 +1618,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       if onScoped then
         -- past the program the merges are `FmlRw.mergePast`'s (`scopedRwCands`)
         let (sp, cands) ← if isOpen then mergeCands cur else pure ({}, [])
-        let fits ← writtenMatcher C w
+        let fits ← writtenMatcher w
         if let some c ← cands.findM? fun c => fitsS fits sp c.fml c.keys then
           let lnk := mkApp3 (mkConst ``Link.merge) C (toExpr c.k) (toExpr c.n)
           ws := ws.push (mk lnk c.fml)
@@ -1651,7 +1647,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       if onScoped then
         let run ← runChain cur
         let (sp, cands, failed) ← scopedRwCands cur a (past := !isOpen)
-        let fits ← writtenMatcher C w
+        let fits ← writtenMatcher w
         if let some c ← cands.findM? fun c => fitsS fits sp c.fml c.keys then
           let n := toExpr r.getId.toString
           ws := ws.push (mk (mkApp3 (mkConst ``Link.rw) C n c.rw) c.fml)
@@ -1674,7 +1670,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       if onScoped then
         -- `~=>`: the first merge or rewrite of the scoped line that gives the
         -- line written (`openRwSteps`)
-        let fits ← writtenMatcher C w
+        let fits ← writtenMatcher w
         if let some st ← (← openRwSteps cur).findM?
             fun st => fitsS fits st.splice st.fml st.keys then
           ws := ws.push (mk st.link st.fml)
@@ -1699,7 +1695,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
           cur := c.fml
           continue
     if onScoped && !isOpen then
-      throwError (← pastRefusal C cur w rw?)
+      throwError (← pastRefusal cur w rw?)
     let run ← runChain cur
     -- the line written, as a line prints where it elaborates alone (no
     -- hole, no postcondition of the line before), else its text; lazily, so
@@ -1732,7 +1728,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
       let pick ← match w with
         | .hole => pure (cands.getLast?.map (·.1))
         | _ => do
-          let fits ← writtenMatcher C w
+          let fits ← writtenMatcher w
           cands.findSomeM? fun (B, er) => do
             if ← fits run.splice B er then pure (some B) else pure none
       let some B := pick | notReached run.lines
@@ -1751,7 +1747,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         match run.modalStop, run.splice.modality with
         | true, some m => throwError "sol_chain: the line after{← indentLine cur}\n{modalityStop m}"
         | _, _ => throwError "sol_chain: no rule applies to{← indentLine cur}"
-      unless ← matchWritten run.splice C w B.fml B.keys do notReached [B]
+      unless ← matchWritten run.splice w B.fml B.keys do notReached [B]
       ws := ws.push (mk (mkApp (mkConst ``Link.one) C) B.fml)
       if links.size == 1 then single := some (mkAppN (mkConst ``Fml.OneStep) #[C, Γ, cur, B.fml])
       cur := B.fml
@@ -1760,7 +1756,7 @@ def elabCoreChain (stx : Syntax) (A : Expr) : TermElabM Expr := do
         match run.modalStop, run.splice.modality with
         | true, some m => throwError "sol_chain: the line after{← indentLine cur}\n{modalityStop m}"
         | _, _ => throwError "sol_chain: no rule applies to{← indentLine cur}"
-      unless ← matchWritten run.splice C w B.fml B.keys do notReached [B]
+      unless ← matchWritten run.splice w B.fml B.keys do notReached [B]
       match arrow with
       | `(chain_arrow| ~[ $r:ident ]~>) =>
         let lbl ← labelFor r.getId B.focus cur
@@ -1855,7 +1851,8 @@ reads `B` as the line of `A`'s derivation it is written as (`Fml.Leads`),
 else as a scoped line with a program still open (a merged line, or one up
 to `openRwDepth` merges and rewrites past a line of the derivation,
 `Fml.Leads`), else past the program, the line it names (`Fml.LeadsK`,
-`B` read as its erasure, from the erasure of the strategy's last line); where the
+`B` read where it stands, equal up to its binders' names to a line the
+rewrites reach from the strategy's last line); where the
 derivation stops on a modality variable the program is still open, and
 that last reading is refused. -/
 
@@ -1878,7 +1875,7 @@ syntax (name := leadsAnyStx) "leads% " term:max term:max : term
   let w := Written.of bStx
   let run ← runChain A
   let cands : List (Expr × Array Expr) := (A, run.keys) :: run.lines.map fun l => (l.fml, l.keys)
-  let fits ← writtenMatcher C w
+  let fits ← writtenMatcher w
   if let some B ← cands.findSomeM? (fun (B, er) => do
       if ← fits run.splice B er then pure (some B) else pure none) then
     return mkApp4 (mkConst ``Fml.Leads) C Γ A B
@@ -1963,16 +1960,14 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
   if let some (wStx, rule?) := pend? then
     let A := args[args.size - 2]!
     let B := args.back!
-    let C := ty.getArg! 0
     let w := Written.of wStx
     -- the line after: the text, while unknown; the line `calc` gave it, else
-    let written ← writtenMatcher C w
+    let written ← writtenMatcher w
     let fits (B' : Expr) (sp : Splice) (er : Array Expr) : TermElabM Bool := do
       if B.isMVar then written sp B' er else isDefEq B B'
     if ty.isAppOf ``Fml.RwBy then
       let some r := rule? | throwError "sol_chain: no rewrite named"
       let some a ← rwArrow? (mkIdent r) | throwError "~[{r}]~>: no rewrite"
-      let run ← runChain A
       let (sp, cands, _) ← scopedRwCands A a
       let some c ← cands.findM? fun c => fits c.fml sp c.keys
         | throwError "~[{r}]~>: no rewrite by {r} of{← indentLine A}\nis the line written"
@@ -2047,7 +2042,7 @@ partial def solveCore (g : MVarId) : TermElabM Unit := do
     g.assign (mkApp4 (mkConst ``And.intro) P Q a b)
   | Eq T a b =>
     unless ← kernelDefEq a b do
-      throwError "sol_chain: the erasure of the last scoped line is not{indentExpr b}"
+      throwError "sol_chain: the last scoped line, its binders' names aside, is not{indentExpr b}"
     g.assign (← mkExpectedTypeHint (← mkEqRefl b) (mkApp3 (mkConst ``Eq [1]) T a b))
   | True => g.assign (mkConst ``True.intro)
   | _ =>

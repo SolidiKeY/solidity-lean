@@ -695,8 +695,7 @@ def IntOp.apply : IntOp → Int → Int → Int
   | .add, a, b => a + b
   | .sub, a, b => a - b
 
-/-- The operator as a Lean term, for the quoters (`Calculus/NFmlQuote.lean`,
-`Calculus/Quote.lean`). -/
+/-- The operator as a Lean term, for the quoter (`Calculus/Quote.lean`). -/
 def IntOp.quote : IntOp → Lean.Expr
   | .add => Lean.mkConst ``IntOp.add
   | .sub => Lean.mkConst ``IntOp.sub
@@ -963,8 +962,7 @@ A symbol reads its arguments and, at most, the state's environment, ledger
 and storage.  So two states that agree off `ns` read a symbol alike once its
 arguments read alike (`OpN.eval_agree`), and a term that avoids `ns` reads
 alike (`Tm.eval_frame`): a value equal, a storage or memory to states that
-agree off `ns` (`Srt.Agree`).  Substitution (`Calculus/NFmlUpdateRules.lean`)
-reuses the per-symbol lemmas, with the variables read after the update. -/
+agree off `ns` (`Srt.Agree`). -/
 
 /-- Two readings of a sort agree off `ns`: equal, and for a storage or a
 memory, states that agree off `ns`. -/

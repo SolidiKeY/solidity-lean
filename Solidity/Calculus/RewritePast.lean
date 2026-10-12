@@ -26,8 +26,7 @@ two do.  An update of locals only moves under the binder instead
 `S` read before anything else of `T` (`Tm.onSpineS`), is the update without
 `storage := S` (`Upd.dropSh`): no element reads the state it writes into
 but the ledger, `T` writes the storage over `S`'s, and `T` halts where `S`
-does.  So for memory writes (`Tm.onMemSpineS`).  The erased merge drops a
-storage write so (`Surface.Upd.mergeStL`, `Surface.Upd.dropStorage_holds`).
+does.  So for memory writes (`Tm.onMemSpineS`).
 
 These functions run once a link and use `match` on the indexed families,
 under the exemption of `Calculus/RewriteScoped.lean`'s walks (proposal 104).
@@ -1224,7 +1223,7 @@ def Fml.mergeAtP {Γ : Ctx} (reorder : Bool) : Nat → Fml C Γ → Option (Fml 
   | _, _ => none
 
 /-- `Fml.mergeAtP` `n` times: the `n + 1` updates from position `k` merged
-into one, the innermost pair first (`NFml.mergeRun`'s order: a merge over
+into one, the innermost pair first (a merge over
 a memory write asks the write last in the update before, which the pair
 after it is merged into first). -/
 def Fml.mergeRunP {Γ : Ctx} (reorder : Bool) (k : Nat) : Nat → Fml C Γ → Option (Fml C Γ)
@@ -1278,8 +1277,7 @@ end Merge
 /-! ## A storage write applied to a first-order line (`applyStorageBox`)
 
 `[{storage := S}] φ ⇝ φ[S/storage]`, `φ` first-order and every storage
-read of it a `storage` term (`Tm.stExplicitS`): the erasure's
-`NFml.withSt_box`, on the scoped line.  An equation reads its terms
+read of it a `storage` term (`Tm.stExplicitS`).  An equation reads its terms
 through `denote`, so the substitution is exact up to `Equiv`: `S` denotes
 the storage its run leaves (`Tm.denote_eval`), and the rest of the state is
 the one before (`Semantics.State.Keeps`, `Tm.eval_st_glob`). -/
@@ -2203,8 +2201,8 @@ end Thinning
 
 `{U}_m ψ` with the locals `U` declares and no one reads afterwards dropped,
 with every write to them (`Upd.thinIO`): those `U` pops itself, and those
-`ψ` does not read (`Fml.thinS?`, `ψ` read without them), the erasure's
-`dropEffectless` (`NFml.simplifyAt`) on the scoped line.  Before, the scope
+`ψ` does not read (`Fml.thinS?`, `ψ` read without them): KeY's
+`dropEffectless`.  Before, the scope
 ends `ψ` begins with are merged into `U` (`Fml.absorbPops`) and the writes
 a later one shadows dropped (`Upd.shadow`); a hidden binder in front of
 `U` whose local `U` sets first is absorbed (`Upd.absorb`), so its local

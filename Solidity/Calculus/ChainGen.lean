@@ -244,7 +244,7 @@ def lineText (sp : Splice) (C e : Expr) (keys : Array Expr) : TermElabM (Array S
   let mut pick := cands[0]!
   for c in cands do
     let ok ← withoutModifyingState do
-      try matchWritten sp C (Written.of c) e keys
+      try matchWritten sp (Written.of c) e keys
       catch _ => pure false
     if ok then
       pick := c

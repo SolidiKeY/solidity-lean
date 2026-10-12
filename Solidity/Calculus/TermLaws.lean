@@ -27,8 +27,7 @@ second, decided by `rfl`.
   `readOnWrite`, `readAddEqual`, … with their side conditions
   (`Tm.freshPath?`, `Tm.boundedIn`, `Tm.apart?`).
 
-Nothing here reads the closer's IR (`Surface.Tm`, `NFml`) or the erasure:
-a scoped term's symbols are read on the state's global part (`EState.glob`),
+A scoped term's symbols are read on the state's global part (`EState.glob`),
 so the reasoning is about `Semantics.State` and its lemmas.
 
 **Kernel-checked side conditions.**  Every `Bool` a law's side condition or

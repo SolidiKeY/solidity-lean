@@ -4,8 +4,8 @@ import Solidity.Typing.CanonTest
 /-!
 # The closer: KeY's first-order and arithmetic taclets as one `Bool`
 
-`sol_prove`'s leaves are first-order formulas over the initial state
-(`NFml.reduce`).  KeY closes them with a few hundred simplification taclets,
+`sol_prove`'s leaves, reduced (`Fml.reduceS`), are first-order formulas
+over the initial state.  KeY closes them with a few hundred simplification taclets,
 each a proof step; here they are clauses of one function, `LFml.close`,
 proved sound once (`LFml.close_holds`), so that the kernel checks a leaf by
 evaluation.  `docs/lean-key-rule-map.md` maps each taclet family to its

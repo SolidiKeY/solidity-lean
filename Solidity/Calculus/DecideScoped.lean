@@ -169,7 +169,7 @@ def _root_.Solidity.Tm.toLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
     match ρ.get i.toNat with
     | some (.val t) => t
     | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
-    | none => .var (.name (i.name ρ.names))
+    | none => .err
   | _, .pvP i =>
     match ρ.get i.toNat with
     | some (.path q) => q
@@ -194,7 +194,7 @@ def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
       match ρ.get i.toNatR with
       | some (.val t) => t
       | some (.path _) | some (.stale _) | some (.stor _) | some (.mref _) | some .unset => .err
-      | none => .var (.name (i.nameR ρ.names)))
+      | none => .err)
     (fun i =>
       match ρ.get i.toNatR with
       | some (.path q) => q
@@ -278,7 +278,7 @@ def _root_.Solidity.Tm.inLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : Bool :=
 theorem _root_.Solidity.Tm.toLS_eq_toLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
     t.toLS ρ = t.toLSM ρ := by
   induction t with
-  | pvV i | pvP i | pvI i => simp only [Tm.toLSM, ← Idx.toNatR_eq, ← Idx.nameR_eq]; rfl
+  | pvV i | pvP i | pvI i => simp only [Tm.toLSM, ← Idx.toNatR_eq]; rfl
   | pvS _ | netOf _ _ | app0 _ => rfl
   | app1 o _ x ih => simp only [Tm.toLSM, ← ih]; rfl
   | app2 o x y ihx ihy => simp only [Tm.toLSM, ← ihx, ← ihy]; rfl
@@ -751,8 +751,8 @@ def _root_.Solidity.Fml.asEqS {Γ : Ctx} : Fml C Γ → Option (Tm C Γ .val × 
   | .eq a b => some (a, b)
   | _ => none
 
-/-- `eqD a b` (`NFml.eqDView`), through the constructors the erasure
-drops: each side with the state it is read in. -/
+/-- `eqD a b`, through the pops and hidden binders an update leaves
+around it: each side with the state it is read in. -/
 def eqDViewS {Γ : Ctx} (ρ : SymS) (φ ψ : Fml C Γ) :
     Option (((Γ' : Ctx) × SymS × Tm C Γ' .val) × ((Γ' : Ctx) × SymS × Tm C Γ' .val)) :=
   let pa := φ.peelS ρ
@@ -923,7 +923,7 @@ theorem _root_.Solidity.Fml.inLS_eq_inLSM {Γ : Ctx} (pos : Bool) (ρ : SymS) (�
   | upd m U φ ih => simp only [Fml.inLSM, ← ih]; rfl
 
 /-- What `sol_decide` proves of a scoped leaf: its updates pushed in by
-position, the reads of writes eliminated (`NFml.reduce`). -/
+position, the reads of writes eliminated (`LFml.elim`). -/
 def _root_.Solidity.Fml.reduceS (φ : Fml C []) : LFml := (φ.toLS SymS.empty).elim
 
 /-! ### The layout a `wt(storage)` premise gives (proposal 100) -/

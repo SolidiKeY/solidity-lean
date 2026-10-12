@@ -6,7 +6,7 @@ import Solidity.Calculus.Symex
 /-!
 # The reads are realizable: `sol_decide` decides
 
-`NFml.valid_iff_reduce` (`Decide.lean`) leaves `∀ σ, ψ.holds σ`, where `ψ`
+`Valid.of_reduceS` (`Calculus/DecideTyped.lean`) leaves `∀ σ, ψ.holds σ`, where `ψ`
 reads the starting storage at finitely many paths, and a statement about
 `σ`'s storage is not something `omega` or `grind` can decide: two reads are
 unrelated atoms to them, while in a storage they are not.  This module is
@@ -28,22 +28,19 @@ them, and nothing is lost.
   what some storage shows (`realize`, built level by level).  The
   constraints are local — each read path against the one above it — because
   the read paths include every prefix (`LTerm.reads`).
-* **Completeness** (`LFml.valid_iff_cons`, `NFml.valid_iff_cons`): for a
+* **Completeness** (`LFml.valid_iff_cons`): for a
   reduction that reads the starting storage only, and no value of the
   transaction (`LFml.initOnly`; `msg.sender` is decided by `LFml.syn` or the
   heuristic finish),
   `∀ σ, ψ.holds σ` is exactly `ψ` over free reads `o` under the
   constraints of its read paths (`consAll`).
-* **`sol_decide`** rewrites by both equivalences, splits on the locals and
-  on the shape of every location with a read below it, and closes what is
-  left by `omega` or `grind`.
-* **On a scoped leaf** (M6c) it reduces the leaf itself, its locals by
-  position (`Valid.of_reduceS`, `Calculus/DecideTyped.lean`), and reads
-  the leaf's parameters, the
-  reduction's leading quantifiers, at their types (`Typed`,
-  `LFml.valid_alls_of_cons`): a `uint` parameter is an integer in range
-  rather than a name split three ways.  That direction is sound, not an
-  equivalence: the storage is still read untyped.
+* **`sol_decide`** reduces the scoped leaf, its locals by position
+  (`Valid.of_reduceS`), rewrites by the equivalence, reads the leaf's
+  parameters, the reduction's leading quantifiers, at their types
+  (`Typed`, `LFml.valid_alls_of_cons`: a `uint` parameter is an integer in
+  range), splits on the shape of every location with a read below it, and
+  closes what is left by `omega` or `grind`.  The first step is sound, not
+  an equivalence: the storage is still read untyped.
 
 **What is decided.**  After the splits the goal is quantifier-free up to the
 values the reads return: equalities between reads and the shapes and words
@@ -53,7 +50,7 @@ operators of the program.  `sol_decide` closes a valid goal exactly when
 (`grind` instantiates the quantifiers over values, and a product of two
 variables is outside linear arithmetic).
 
-**The fragment covered** is `NFml.inL`'s, all of it but a write or `delete`
+**The fragment covered** is `Fml.inLS`'s, all of it but a write or `delete`
 through a member named `length` (`LStor.okE` keeps such a write whole, so
 the reduction reads a written storage there and `initOnly` fails), and the
 two reads the elimination keeps whole: the slot a `push()` of a struct or
@@ -1001,7 +998,6 @@ theorem LTerm.evalA_zero (a : LTerm) :
 theorem LTerm.evalA_err : LTerm.err.evalA E o = .error .undef := rfl
 /-- A position reads at its slot, as the binders' keys spell it. -/
 theorem LTerm.evalA_pos (k : Nat) : (LTerm.var (.pos k)).evalA E o = E (.fresh "#" k) := rfl
-theorem LTerm.evalA_name (x : Var) : (LTerm.var (.name x)).evalA E o = E x := rfl
 end
 
 open Lean Elab Tactic Meta in
@@ -1119,7 +1115,7 @@ attribute [decide_evalA] LFml.holdsA_tt LFml.holdsA_not LFml.holdsA_and LFml.hol
   LFml.holdsA_eq LTerm.evalA_lit LTerm.evalA_binop LTerm.evalA_unop LTerm.evalA_ite
   LTerm.evalA_find LTerm.evalA_has LTerm.evalA_kmap LTerm.evalA_len LTerm.evalA_sok
   LTerm.evalA_pok LTerm.evalA_seq LTerm.evalA_orElse LTerm.evalA_kite LTerm.evalA_zero
-  LTerm.evalA_err LTerm.evalA_pos LTerm.evalA_name LPath.evalA LPath.consA zeroV_int zeroV_bool orElseR_ok
+  LTerm.evalA_err LTerm.evalA_pos LPath.evalA LPath.consA zeroV_int zeroV_bool orElseR_ok
   orElseR_error Obs.find_eq_ok Obs.has_eq_ok Obs.test_map_eq_ok Obs.test_fixed_eq_ok Obs.len_eq_ok
 
 /-- Unfold the reduced formula over free reads into `sol_close`'s weakest
@@ -1177,14 +1173,11 @@ syntax "sol_decide" : tactic
 
 The leaf's parameters are the reduction's leading quantifiers
 (`LFml.alls`, `Calculus/DecideSyn.lean`), one per position of the context
-the leaf's body is read in.  Where the erased leaf read each as a name bound
-to anything, split three ways (it halts, is an integer, is a boolean), the
-constraints' step reads it at its type (`Typed`): a `uint` is an integer in
-range, a `bool` a boolean, with no split.  A hidden binder's local is no
+the leaf's body is read in.  The constraints' step reads each at its type
+(`Typed`): a `uint` is an integer in range, a `bool` a boolean, with no
+split.  A hidden binder's local is no
 atom: its position is bound to what the update after it binds
-(`SymS.push`), and a read before that is outside the fragment (`Tm.inLS`);
-only the erased route (`NFml.toL`, `Atom.name`) still splits a free name
-three ways. -/
+(`SymS.push`), and a read before that is outside the fragment (`Tm.inLS`). -/
 
 /-- What a local of type `p` reads: a value of `p`, in range. -/
 def _root_.Solidity.PrimTy.atom : PrimTy → Res Value → Prop
@@ -1279,7 +1272,8 @@ elab "sol_decide_syn_alls" : tactic => withMainContext do
   let nilKeys ← mkListLit (← mkAppM ``Prod #[mkConst ``Bool, ← mkAppM ``Prod
     #[mkConst ``LTerm, mkConst ``LTerm]]) []
   let h ← trueLemma (mkApp3 (mkConst ``LFml.syn) known nilKeys body)
-  let prf := mkApp4 (mkConst ``LFml.syn_valid_alls) xs body hn h
+  let hs ← trueLemma (mkApp (mkConst ``LFml.slotKeys) xs)
+  let prf := mkApp5 (mkConst ``LFml.syn_valid_alls) xs body hn hs h
   unless ← isDefEq (← inferType prf) (← g.getType) do
     throwError "sol_decide: the reduction is not its parameters' quantifiers over a body"
   g.assign prf
@@ -1354,7 +1348,7 @@ elab "sol_decide_body" : tactic => withMainContext do
 A leaf's premise `wt(storage)`, under its parameters' quantifiers, is set
 aside (`Fml.dropWtS`) and read as the layout its roots hold
 (`Fml.layoutS`): the closer then knows each root is there, canonical at
-its type (`LayoutOk`), as the erased route's `wrap_topWt` knows it. -/
+its type (`LayoutOk`). -/
 
 /-- A `wt(storage)` premise that holds gives the layout of its roots, in
 any state with the same storage (`layoutOk_of_wt`, scoped). -/
@@ -1425,8 +1419,7 @@ theorem LFml.forall_layout {L : List (Name × Ty)} {φ : LFml} (h : ∀ σ, φ.h
     ∀ σ, LayoutOk L σ → φ.holds σ := fun σ _ => h σ
 
 /-- The closer on a scoped leaf's reduction (`Fml.reduceS`, decision 81):
-within the bound `Decide.elimSize` (`Calculus/Closer.lean`) the erased
-route keeps too, and with the layout `L` a `wt(storage)` premise gives
+within the bound `Decide.elimSize` (`Calculus/Closer.lean`), and with the layout `L` a `wt(storage)` premise gives
 (`Fml.layoutS`, proposal 100; `[]` without one): a typed state's storage is
 typed but not canonical (`LayoutOk` asks `SVal.canonB` of each root;
 `SVal.map`'s default is any value of its type), so the layout comes from

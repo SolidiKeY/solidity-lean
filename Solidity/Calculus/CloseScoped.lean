@@ -7,10 +7,8 @@ import Solidity.Calculus.SeqRewrite
 `sol_symex` on a scoped goal (`⊨ dl!{ … }` under `open scoped Solidity.Scoped`)
 leaves leaves `Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
 `sol_close_mt` and `sol_spec_close` close them here, on the scoped formula,
-with no erasure to `NFml`: the steps of the same names
-(`Calculus/NFmlClose.lean`) step aside on a scoped goal
-(`Close.scopedGoal`) for the elaborators below, which read it with
-`close_rw_s`.
+by the elaborators below, which read it with `close_rw_s`
+(`Calculus/NFmlClose.lean` declares the syntax and the simp sets).
 
 **The leaf as the closer reads it.**  `holds` asks an update's rest of every
 typed state that erases to where the update ends, with a heap typing that

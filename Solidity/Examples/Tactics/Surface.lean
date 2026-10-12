@@ -8,8 +8,7 @@ import Solidity.Tools.Inspect
 `open scoped Solidity.Scoped` (`Calculus/Surface.lean`): today's
 text read scoped, `dl!{ … }` a `Fml C []`, `⊨` scoped validity, `⊢`
 the scoped sequent, and the commands on it.  Outside the scope a formula
-with no modality is today's (`NFml`); one with a modality reads scoped
-either way (W8.2).  The callback taclets print as today's
+with a modality reads scoped too (W8.2).  The callback taclets print as today's
 (`Calculus/Callback.lean`).
 -/
 

@@ -17,10 +17,12 @@ a deleted struct is the other.  This module is mini-solkey's Chapter 15
 (`Ch15_Decide`) for the storage fragment: the search replaced by a function,
 and a proof that the function loses nothing.
 
-* `NFml.toL` pushes the updates `sol_symex` leaves into the formula
+* `Fml.toLS` (`Calculus/DecideScoped.lean`) pushes the updates
+  `sol_symex` leaves into the formula, its locals by position
   (mini-solkey's `Fml.applyUpds`).  A term here halts, so a box update's
   term becomes a premise that it returns and a diamond update's a conjunct;
-  `NFml.toL_holds` is exact, halts included.
+  `holds_of_reduceS` (`Calculus/DecideTyped.lean`) is its soundness, halts
+  included.
 * `LFml.elim` turns every read of a write into a case tree over key
   equalities whose leaves read the initial storage only.  At each write the
   written path and the read one are compared from the root (`cmpSegs`,
@@ -30,10 +32,10 @@ and a proof that the function loses nothing.
   `hasU`/`mapU` for whether a location, or a mapping, is there, `lenU` for
   an array's length: a `delete` empties a dynamic array and keeps a
   fixed-size one's length).
-* `NFml.valid_iff_reduce`: `⊨ φ` exactly when `φ.reduce`, the two steps
-  composed, holds in every state.  Every step is an equivalence.
-* `sol_decide` (`DecideComplete.lean`) rewrites the goal by it, computes the
-  reduction, and rewrites once more by `NFml.valid_iff_cons`: the reads of the
+* `Valid.of_reduceS`: `⊨ φ` where `φ.reduceS`, the two steps composed,
+  holds in every state.  The elimination is an equivalence.
+* `sol_decide` (`DecideComplete.lean`) reduces the goal by it, computes the
+  reduction, and rewrites once more by `LFml.valid_iff_cons`: the reads of the
   starting storage free, under the constraints a storage puts on them.
   `sol_decide_heuristic`, here, is the finishing step without them.
 
@@ -83,12 +85,12 @@ or a push of a word through it is the slot-level node `LStor.stale`
 readers (`LStor.slotU`, `slotHasU`, `slotLenU`) see such a write where a
 later `push()` recycles the slot it lands in.
 
-**The fragment** (`NFml.inL`): no modality (run `sol_symex` first) but the
+**The fragment** (`Fml.inLS`): no modality (run `sol_symex` first) but the
 `⟨[ revert(); ]⟩` a branch's cover keeps (`Premise.coverFml`: `true` under
 the box, `false` under the diamond), one
 element per update, a local, an alias or the storage updated; an equation
 as `eqD a b`, both sides defined (a bare `a ≐ b` compares the Theory
-values, and a term that halts still denotes one: `NFml.eqDView`), or a bare
+values, and a term that halts still denotes one: `eqDViewS`), or a bare
 `a ≐ b` of a literal (or `msg.sender`) and a literal or a local, where the
 two readings agree (`Term.eqLit`: the branch condition `se1 ≐ true` of an
 `if`); literals, values of the transaction (`msg.sender`, which no update
@@ -7560,7 +7562,7 @@ theorem zeroV_bool (b : Bool) : zeroV (.bool b) = .bool false := rfl
 /-! ## The tactic -/
 
 open Lean Elab Tactic Meta in
-/-- Compute `φ.reduce` in a goal `∀ σ, (NFml.reduce φ).holds σ`: the formula
+/-- Compute `φ.reduceS` in a goal `∀ σ, (Fml.reduceS φ).holds σ`: the formula
 is closed after `sol_symex`, so it is run as compiled code and quoted back,
 and the kernel checks the result (`replaceTargetDefEq`), as mini-solkey's
 `reduceGoal` does. -/
@@ -7575,7 +7577,7 @@ def reduceGoal (g : MVarId) : MetaM MVarId := do
   g.replaceTargetDefEq (.forallE n d (mkApp2 (mkConst ``LFml.holds) (.bvar 0) r') bi)
 
 open Lean Elab Tactic in
-/-- Replace `NFml.reduce φ` by the formula it computes to. -/
+/-- Replace `Fml.reduceS φ` by the formula it computes to. -/
 elab "sol_reduce" : tactic => do replaceMainGoal [← reduceGoal (← getMainGoal)]
 
 /-- The free locals of a formula. -/
