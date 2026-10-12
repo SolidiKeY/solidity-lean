@@ -4627,29 +4627,69 @@ with its leaf class, not hidden.
 | W9.7.2 | `laws` ‖ `close` | the update laws (`Graft`, `UpdRuleScoped`, `RewritePast`, `TermLaws`, `UpdateRules`, `RewriteScoped`, `SeqRewrite`, `StatePartsScoped`, `LeafDerive`, …) over `Lands`: a typed substitution lemma and `Lands` composition; `CloseScoped` reads `holds` by `Lands` (no `holdsE`), `RelB`/`RelU`/`peelS`/`redState` on the typed state, `Counterexample`'s `State.lift?` |
 | W9.7.3 | master | delete `EState`, `Env` (if `TEnv.erase` has no other reader), `Upd.apply`/`UpdElem.write`, `holdsE`, `Erased.lean`; gates; review |
 
+### W9.7.1 shim record (2026-10-12, branch `w97-shim`)
+
+The SolKey reader's shim is deleted; the reader in side-projects is left
+outdated, not edited (the user, 2026-10-12).  No speed change expected:
+only dead code and one name lookup went.
+
+- **`Update.lean`**: `Surface.Tm` and its sorts' abbreviations (`Term`,
+  `PTerm`, `STerm`, `SValT`, `ITerm`, `Surface.MAddr`, `MTerm`, `MValT`)
+  with their constructor patterns (`Term.find`, …, `Term.bumped`),
+  `Surface.Tm.eval`, `Surface.Tm.denote`, `Surface.UpdElem`/`Surface.Upd`
+  with `write`/`apply`, `NFml`, the "Frames" section (`Surface.Tm.vars`,
+  `Surface.UpdElem.vars`, `Surface.Upd.vars`, `Op0`…`Op3.eval_agree`,
+  `Op0`…`Op2.denote_agree`, `Surface.Tm.eval_frame` and the per-sort
+  `eval_frame`s, `Surface.Tm.denote_frame`, `Surface.UpdElem.write_frame`,
+  `readAddr_congr`, `arrayLen_congr`, `ResultsAgree.bindEq`, `Srt.Agree`,
+  `Modality.after_frame`), `Term.keyAt`/`Term.keyAt_eval`.  Kept: the
+  signature and the symbols' meaning (`Srt`, `Op0`…`Op3`, `OpN.eval`,
+  `OpN.denote`, `Op1.vars`, which `Calculus/StateFacts.lean` reads),
+  `IntOp`, `State.havoc`/`State.anon`, `PrimTy.admits`.
+- **`Calculus/Fml.lean`**: `Tm.erase`, `Rhs.erase`, `UpdElem.erase`,
+  `Upd.erase` (`Upd.names`, `Thin.names` kept: the printers read them).
+- **`Calculus/DelabErase.lean`**: `Delab.tr` and its helpers (`generic`,
+  `trArg`, `trIdx`, `updParts`, `elem`, `rhs`, `updList`, `Piece`,
+  `loweredVar?`, `withProofHoles`, `legacyNames`/`legacyName?`/
+  `legacyType?`, `isCtx`, `Env`/`TrM`, `twinsFrom`, `withTwins`).  What
+  stays is the printers' name stack (`stmtOutNames`, `thinNames`,
+  `extDepth`, `isUp`, `stripUps`, `wkUp?`, …); the module keeps its name.
+  `isScopedFamily` named the scoped families by their erased twins; it now
+  lists them (`Tm`, `Upd`, `UpdElem`, `Fml`, `Idx`), the same set, and
+  takes no environment (`Tools/Taclet.lean`).
+- **`Calculus/RuleSyntax.lean`**: the untyped `tm{ … }` (`macro_rules` to
+  `schemaTerm`), its printer `delabTm` and the untyped printers
+  (`ppTerm` … `ppMVal`, `keyAddr?`, `ppUpdElem?`, `updParts?`, `ppUpd`,
+  `Surface.cmpParts?`, `foldTmHead`, `whnfTm`, `whnfPP`, `whnfF`).
+  `elemTerm`/`lenTerms` stay (the scoped printers build with them).
+  `schemaTerm` still writes the symbols by their KeY names (`Term.find`,
+  `MAddr.field`, `UpdElem.storage`), now resolved by nothing below the rule
+  table; `coreNames` maps such a name by its family (`coreFamily?`) to the
+  scoped symbol (`Tms.Term.find`, `UpdElem.storage`) as it mapped the
+  quotation's resolution before, and still fails on a missing one.  The
+  `Surface` branch of `coreName?` is gone.
+- **Docstrings**: `Arms.lean`, `Lower.lean`, `PrintTerm.lean`,
+  `Rules.lean`, `KeyTaclets.lean` (the reader's corpus check no longer
+  runs), `Tools/Taclet.lean`; `AGENTS.md`'s reader paragraph,
+  `module-map.md`'s rows, `solc-alignment.md` (`Tm.keyAt`).
+
+Printed output: unchanged (every pin builds).  **Checked**: per-file
+diagnostics of `Update`, `Calculus/Fml`, `Calculus/RuleSyntax`,
+`Calculus/Rules`, `Calculus/DelabErase`; `lean_build` of the default
+targets, clean (the printer pins `Examples/ProofTree.lean`,
+`Examples/Tactics/Print.lean`, `Examples/Notation.lean`,
+`Examples/Tactics/DlNotation.lean`, the `#taclet` pins and
+`#check_rule_text`); `check-orphans` (309 reachable), `check-doc-paths`;
+`sorry` count unchanged.  Diff: 10 Lean files, about 1,480 lines removed.
+
 ## What is left
 
-**W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
-in the side-projects reader).  `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`,
-`Tm.erase`/`Upd.erase`, `Delab.tr` with its helpers and the `NFml` stub
-(`NFml.eq`, the one constructor `Delab.tr` emits) remain, frozen, as the
-SolKey reader's interface, in the modules it imports.  Only the reader
-reads them: since W9.6N (record above) the notation's front end reads to
-the scoped terms (`NTm`, `Calculus/NamedTerm.lean`), `tm{ … }` prints by
-the scoped printers, and the twin check is gone.  Kept with the shim, with
-no prover user: `Update.lean`'s "Frames" lemmas over `Surface.*`
-(`Surface.Tm.vars`, `Surface.Upd.vars`, `Surface.Tm.eval_frame`,
-`Surface.MAddr.eval_frame`, `Surface.Tm.denote_frame`,
-`Surface.UpdElem.write_frame`, …), `Surface.Tm.denote`, `Term.keyAt`/
-`Term.keyAt_eval`, `RuleSyntax.lean`'s untyped printers (`ppTerm`, `ppUpd`,
-`delabTm`; the untyped `tm{ … }` where `Calculus/TermLib.lean` is not
-imported).  Deleting the shim is the reader's port, if the user asks
-for it.
+**W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
+side-projects reader is outdated.
 
 **W9.6 (the state IR)**: done (records above, W9.6.0 to W9.6.4).  No
 program is evaluated on the erasure: the soundness and the invariants read
-the typed run only.  What stays untyped: the reader's frozen shim (W9.5b
-above), and `EState` (`Env`, `State.erase`, `aliasPath`/`memRef`) as an
+the typed run only.  What stays untyped: `EState` (`Env`, `State.erase`, `aliasPath`/`memRef`) as an
 update's result and what the terms are read on (decision U1, W9.6.0
 record): an untyped `MObj` does not fix the heap typing, an allocation pair
 writes the local before the heap that types it, and `net`/`pay` read the

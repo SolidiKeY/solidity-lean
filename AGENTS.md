@@ -29,12 +29,13 @@ on `⊨` are scoped sequents (`rw` in them, `Calculus/SeqRewrite.lean`),
 the program is open (`Calculus/RewriteScoped.lean`) and past it
 (`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
 erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
-erased program evaluators (W9.6.4). What stays untyped is the state an
-update yields and the terms read (`EState`, `Semantics/Erased.lean`, what
-`State.erase` gives), and the `SolKey` reader's frozen shim
-(`Update.lean`'s `Surface.Tm`).
+erased program evaluators (W9.6.4), and so are the untyped terms by name
+(`Surface.Tm`, W9.7.1). What stays untyped is the state an update yields
+and the terms are read on (`EState`, `Semantics/Erased.lean`, what
+`State.erase` gives).
 
-**Updates are terms** (`Update.lean`): `STerm` at `structRules.key`'s
+**Updates are terms** (`Update.lean`'s signature, `Calculus/Fml.lean`'s
+terms): `STerm` at `structRules.key`'s
 signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do
 `write`/`addM`/`copySt`.  An allocation is the two parallel elements KeY
 writes, a push and a pop are nested writes over `size`, and
@@ -59,16 +60,11 @@ effects stay out of values — an `++` inside an expression or a conditional
 of references is captured by the elaborator before its statement, in solc's
 evaluation order.
 
-A second consumer is **the `SolKey` reader**, a Lean reader for KeY `.key`
-files in a separate repository. It imports only `Solidity.Calculus.Rules`,
-`Solidity.Calculus.DelabErase` and `Solidity.Calculus.KeyTaclets` (and through
-them the syntax), and walks the scoped constructors directly
-(`docs/intrinsic.md`, "W8 reader port record"). That is its
-whole dependency surface: renaming a `Taclet` constructor breaks its
-correspondence proofs, which is the point of it. It lives in the
-side-projects repository (`lean/solkey`, requiring this checkout by path):
-after renaming a constructor, regenerate its correspondence file (its
-`GenProved` script) on a branch there and check that it builds.
+**The `SolKey` reader** (side-projects, `lean/solkey`), a Lean reader for
+KeY `.key` files that once consumed this package, is outdated since W9.7: it
+read the erased terms (`Surface.Tm`, `Delab.tr`, `NFml`), now deleted, and
+no longer builds against this checkout. It is not maintained from here; do
+not edit it or keep anything for it.
 
 ## The one hard constraint
 
