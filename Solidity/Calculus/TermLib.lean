@@ -68,7 +68,8 @@ open Lean Meta PrettyPrinter Delaborator SubExpr
 
 /-- Whether `n` is a scoped term symbol a rule line writes (`Tms.Term.find`,
 `Tm.lit`, …): an abbreviation of a constructor application (`Tm.app2
-Op2.find …`).  `Tm.bumped` is no symbol: it computes. -/
+Op2.find …`).  `Tm.bumped` is no symbol: it computes, so the printers
+read it whole (`t⊕⊕`), its operand unfolded. -/
 def isTmsSym (n : Lean.Name) : Bool :=
   n == ``Tm.lit || n == ``Tm.storage || n == ``Tm.memory ||
     ((`Solidity.Tms).isPrefixOf n && n != ``Tms.Term.bumped)
@@ -86,7 +87,8 @@ partial def unfoldTmsSyms (e : Lean.Expr) : MetaM Lean.Expr := do
     | some e' => return ← unfoldTmsSyms (← whnfCore e')
     | none => return e
   let terms : List Nat :=
-    if n == ``Tm.netOf then [3] else if n == ``Tm.app1 then [6]
+    if n == ``Tm.netOf then [3] else if n == ``Tm.bumped || n == ``Tms.Term.bumped then [4]
+    else if n == ``Tm.app1 then [6]
     else if n == ``Tm.app2 then [6, 7] else if n == ``Tm.app3 then [7, 8, 9] else []
   let mut args := e.getAppArgs
   for i in terms do
@@ -1092,6 +1094,17 @@ info: @TermTaclet.selectOnSaveMemberIn : ∀ {C : Contract} {Γ : Ctx} (K : SCtx
 -/
 #guard_msgs in
 #check @TermTaclet.selectOnSaveMemberIn
+
+/-- `t⊕⊕` prints with its operand's symbols unfolded (W9.6 review). -/
+theorem bumped_pin (op : IncDec) (p : PrimTy) (s : Tm C Γ .st) (q : Tm C Γ .path) :
+    (tm{ find(s, q)⊕⊕ + 1 } : Tm C Γ .val) = tm{ find(s, q)⊕⊕ + 1 } := rfl
+
+/--
+info: Solidity.bumped_pin {C : Contract} {Γ : Ctx} (op : IncDec) (p : PrimTy) (s : Tm C Γ Srt.st) (q : Tm C Γ Srt.path) :
+  tm{ find(s, q)⊕⊕ + 1 } = tm{ find(s, q)⊕⊕ + 1 }
+-/
+#guard_msgs in
+#check bumped_pin
 
 /-- The side conditions close by `rfl` on closed paths. -/
 example (s : Tm C Γ .st) (v : Tm C Γ .sv) :

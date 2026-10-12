@@ -723,9 +723,6 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
     if !shown then return ← viewF ms (e.getArg! 5)
   return (ns, e)
 
-/-- A value term read at `ns` (`ppTermS`). -/
-def termPP (ns : List Expr) (t : Expr) : PrM (TSyntax `dl_term) := ppTermS ns t
-
 /-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
 `a = b` prints: `a` and `b`, each with its names.  The two reads of a term
 are the same when they are the same text (`eqTmS`). -/
@@ -791,10 +788,6 @@ def iffPartsS (ns : List Expr) (e : Expr) :
     ← instantiateMVars ψ')
   return if φ == φ' && ψ == ψ' && nl == nr then some ((nl, φ), (nl, ψ)) else none
 
-/-- The update of an `{U}` read at `ns` (`ppUpdS`), and the names of the
-context it leaves. -/
-def updS (ns : List Expr) (U : Expr) : PrM (TSyntax `dl_upd × List Expr) := ppUpdS ns U
-
 /-- A scoped formula read at `ns`, as `ppFml` prints the closer's. -/
 partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   let (ns, e) ← viewF ns e
@@ -813,8 +806,8 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
       if let (some x, some T) := (← ppVar? x, ← primName? p) then
         return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFmlS na a):dl_fml)
     `(dl_fml| ¬$(← arg ns φ):dl_fml)
-  | Fml.eq _ _ a b => `(dl_fml| $(← termPP ns a):dl_term ≐ $(← termPP ns b):dl_term)
-  | Fml.defined _ _ t => `(dl_fml| defined($(← termPP ns t):dl_term))
+  | Fml.eq _ _ a b => `(dl_fml| $(← ppTermS ns a):dl_term ≐ $(← ppTermS ns b):dl_term)
+  | Fml.defined _ _ t => `(dl_fml| defined($(← ppTermS ns t):dl_term))
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | escape
@@ -824,14 +817,14 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
     if let some ((na, a), (nb, b)) ← eqDPartsS ns e then
       let cmp ← cmpPartsS na a nb b
       if let some (sym, (nl, l), (nr, r)) := cmp then
-        let l ← termPP nl l
-        let r ← termPP nr r
+        let l ← ppTermS nl l
+        let r ← ppTermS nr r
         return ← match sym with
           | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
           | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
           | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
           | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
-      return ← `(dl_fml| $(← termPP na a):dl_term = $(← termPP nb b):dl_term)
+      return ← `(dl_fml| $(← ppTermS na a):dl_term = $(← ppTermS nb b):dl_term)
     if let some ((na, a), (nb, b)) ← iffPartsS ns e then
       return ← `(dl_fml| $(← ppFmlS na a):dl_fml ↔ $(← ppFmlS nb b):dl_fml)
     let ψ' ← ppFmlS ns ψ
@@ -839,7 +832,7 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
     `(dl_fml| $(← arg ns φ):dl_fml ∧ $ψ')
   | Fml.imp _ _ φ ψ => `(dl_fml| $(← arg ns φ):dl_fml → $(← ppFmlS ns ψ):dl_fml)
   | Fml.upd _ _ _ _ U φ =>
-    let (u, ms) ← updS ns U
+    let (u, ms) ← ppUpdS ns U
     `(dl_fml| $u:dl_upd $(← arg ms φ):dl_fml)
   | Fml.havoc _ _ φ => `(dl_fml| { havoc } $(← arg ns φ):dl_fml)
   | Fml.anon _ _ xs φ =>
@@ -905,7 +898,7 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))
   match_expr (← whnf e) with
   | Premise.update _ _ _ U =>
-    let (u, _) ← updS ns U
+    let (u, _) ← ppUpdS ns U
     return some (← `(dl_premise| $u:dl_upd ⟨[ ]⟩))
   | Premise.unfold _ _ _ _ P _ => unfold ns P
   | Premise.inline _ _ _ _ P _ => unfold ns P
@@ -967,7 +960,7 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
       out := out.push (← `(dl_case| $[$l:str :]? $(← ppFmlS ns fs[i]):dl_fml))
     for h : j in [0:us.size] do
       let l := lbl (fs.size + j)
-      let (u, _) ← updS ns us[j]
+      let (u, _) ← ppUpdS ns us[j]
       out := out.push (← `(dl_case| $[$l:str :]? $u:dl_upd ⟨[ ]⟩))
     let some c := out[0]? | return none
     if out.size < 2 then return none
@@ -983,7 +976,7 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     if ps.isEmpty then
       return some (← `(dl_premise| $[$l0:str :]? $I:dl_fml ; $[$l1:str :]? { anon($b) } ($I →
         $c:dl_fml ⟹ ⟨[ $b ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩)))
-    let (u, _) ← updS ns U
+    let (u, _) ← ppUpdS ns U
     return some (← `(dl_premise| $[$l0:str :]? $I:dl_fml ; $[$l1:str :]? { anon($b) } ($I →
       $u:dl_upd ($c:dl_fml ⟹ ⟨[ $b ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩))))
   | _ => return none

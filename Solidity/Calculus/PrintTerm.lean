@@ -8,8 +8,9 @@ read from their `Expr`, schema variables and all, at a name stack `ns` (the
 names of the context, innermost first) as `Calculus/PrintStmt.lean` reads
 statements: `ppTermS`, `ppPTermS`, …, `ppUpdS`, in the grammar of
 `RuleSyntax.lean`, with its builders (`lenTerms`, `elemTerm`, `dotTerm`,
-`allocTy?`, `ppVar?`), so the text is the one the closer's printers
-(`ppTerm`, `ppUpd`) print of the erasure.  Nothing here erases: a term is
+`allocTy?`, `ppVar?`), meant to print the text the untyped printers
+(`ppTerm`, `ppUpd`) print of the erasure: a design intent, which nothing
+checks since the twin check went (W9.6N).  Nothing here erases: a term is
 read by its view (`viewTmS`), a position by its name (`idxName`), a symbol by
 its constructor (`Op2.find`), and an update by its pieces (`updPiecesS`).
 

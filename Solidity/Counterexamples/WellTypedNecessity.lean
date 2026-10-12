@@ -13,10 +13,12 @@ return a number where `total : uint`?  Split by what the question is about:
   predicate.
 - **Of the values the interpreter finds: yes.**  Well-typedness minus its
   storage conjunct does not carry the claim: `readSelect_needs_storage` is
-  an untyped state meeting every other conjunct, where `total` holds a `bool`
-  and the current `storageRootReadSelect` row — the one
-  `faithful_storageRootReadSelect` proves of every typed state — is false of
-  what the read finds.
+  an untyped state meeting every other conjunct, where `total` holds a
+  `bool`.  There the read of `x = total;` (its path lowered and found in
+  storage, the term `Val.lower` writes and `Calculus/LowerRun.lean` proves
+  the typed run reads) finds that `bool`, and the current
+  `storageRootReadSelect` row — the one `faithful_storageRootReadSelect`
+  proves of every typed state — is false of it.
 
 So any claim that a sorted read denotes the value really stored needs
 `wellFormed(storage)` in the proof obligation and its preservation by every
@@ -39,6 +41,12 @@ def Total : Contract := contract!{ uint total; }
 /-- The minimal ill-typed store: `total` holds a `bool`. -/
 def badStore : Semantics.State := { storage := [("total", .bool true)] }
 
+/-- `badStore`, as a state over the local `uint x` the read binds. -/
+def badCore : EState Total [.val .uint] := EState.ofGlob badStore (.int 0, ())
+
+/-- The path `total`. -/
+def totalPath : SPath Total [.val .uint] (.prim .uint) := .loc (.root "total" rfl)
+
 /-- `x = total;`, as `storageRootReadSelect` matches it. -/
 def totalRead : Stmt Total [.val .uint] [.val .uint] :=
   stmtOf (@Taclet.storageRootReadSelect Total 0 .box [.val .uint] .uint .here "total" rfl)
@@ -50,18 +58,19 @@ theorem readSelect_row :
   decide +kernel
 
 /-- **Storage well-typedness is the boundary.**  `badStore` meets every
-conjunct of `StateWT` but `storage` (with `x`, the local the read binds, a
-`uint`), and there the read of `x = total;` finds a `bool` where the row's
-`\hasSort` read promises a `uint`. -/
+conjunct of a well-typed global state but `storage` (with `x`, the local
+the read binds, a `uint`), and there the read of `x = total;` — its path
+lowered and found in storage, as `Val.lower` reads `total` — finds a `bool`
+where the row's `\hasSort` read promises a `uint`. -/
 theorem readSelect_needs_storage :
     nodupKeysB Total.vars = true ∧
     nodupKeysB ([] : HeapTy) = true ∧ heapTypedB [] badStore.heap = true ∧
     HeapWellFormed badStore ∧
     wellTypedStorageB Total.layout badStore.storage = false ∧
-    Env.All (LTy.WT Total []) (Γ := [.val .uint]) (.int 0, ()) ∧
-    Stmt.read? totalRead = some (.storage (.prim .uint) (.loc (.root "total" rfl))) ∧
-    badStore.findStorage "total" [] = .ok (.bool true) ∧
-    SortOkS (.generic .hasSort) (.prim .uint) (.bool true) = false :=
+    Env.All (LTy.WT Total []) badCore.env ∧
+    Stmt.read? totalRead = some (.storage (.prim .uint) totalPath) ∧
+    (Tm.app2 .find (.app0 .storage) totalPath.lower).eval badCore = .ok (.bool true) ∧
+    SortOkS (.generic .hasSort) (.prim .uint) (.prim (.bool true)) = false :=
   ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, ⟨rfl, trivial⟩, rfl, rfl, rfl⟩
 
 end WellTypedNecessity

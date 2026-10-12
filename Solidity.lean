@@ -232,7 +232,6 @@ import Solidity.Theory.Bridge.Delete
 import Solidity.Theory.Bridge.Copy
 import Solidity.Theory.Bridge.Push
 import Solidity.Theory.Bridge.Denote
-import Solidity.Calculus.ShimFacts
 import Solidity.Theory.StateWrites
 import Solidity.Theory.Memory
 import Solidity.Theory.CrossDomain

@@ -17,8 +17,8 @@ program evaluator of the erasure between.
 -/
 
 namespace Solidity
-open Solidity (Srt Op0 Op1 Op2 Op3 evalBinop)
-open Semantics (Value Seg Res lookupBy)
+open Solidity (Op0 Op3 evalBinop)
+open Semantics (Value Seg Res)
 
 variable {C : Contract} {Γ : Ctx} (σ : State C Γ)
 

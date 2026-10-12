@@ -23,10 +23,12 @@ of elementary updates, applied in parallel: every right-hand side is read in
 the state the update is applied in.  Nothing runs when a rule produces one.
 
 The formulas are the scoped calculus's (`Calculus/Fml.lean`, read by the
-typed run over terms at positions, `Tm`); these terms, by name, are what the
-notation reads a formula's text into before it resolves the names
-(`Calculus/NotationResolve.lean`), and the SolKey reader's shim
-(`Calculus/DelabErase.lean`).
+typed run over terms at positions, `Tm`); these terms, by name, are only
+the SolKey reader's shim (`Calculus/DelabErase.lean`), frozen.  The
+notation reads a formula's text to the scoped terms by name
+(`Calculus/NamedTerm.lean`, `Calculus/NotationResolve.lean`); only
+`RuleSyntax.lean`'s `tm{ … }`, where `Calculus/TermLib.lean` is not
+imported, still writes these.
 
 Unlike KeY's, these terms can halt: they are read by the interpreter's own
 functions, so `a + b` reverts on overflow and `values[i]` on an index out of

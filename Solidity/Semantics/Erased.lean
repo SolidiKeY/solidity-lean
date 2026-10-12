@@ -20,8 +20,7 @@ Where the kernel evaluates: `Env`'s functions recurse on `Idx`/`Ext` by
 
 namespace Solidity
 
-open Semantics (Value SVal MVal Seg Halt Res copyStToM allocDefault copyMem applyBinOp
-  applyUnOp checkArith lookupBy)
+open Semantics (Value SVal Seg Res)
 
 variable {C : Contract}
 

@@ -22,7 +22,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ p }` | a premise |
 | `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
-| `tm{ find(save(s, p, v), q) }` | a term (`Tm`), every name a Lean variable |
+| `tm{ find(save(s, p, v), q) }` | a term, every name a Lean variable: the reader's untyped `Surface.Tm` here, the scoped `Tm` where `Calculus/TermLib.lean` is imported |
 | `⊨ φ` | `Valid φ` of a scoped `φ` (`Calculus/Logic.lean`) |
 | `σ ⊧ φ` | `holds σ φ`, likewise |
 

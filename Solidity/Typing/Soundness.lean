@@ -57,48 +57,12 @@ theorem heapTypedB_obj {heap : List (Nat × MObj)} {id : Nat} {ty : Ty}
   | none => intro h; exact absurd h (by simp)
   | some obj => intro h; exact ⟨obj, rfl, h⟩
 
-/-- The element type of an array type of either kind: `uint` of `uint[]` and
-of `uint[3]`. -/
-def RefTy.arrElem? : RefTy → Option Ty
-  | .array E | .fixed E _ => some E
-  | _ => none
-
-theorem ArrTy.arrElem {R : RefTy} {E : Ty} : ArrTy R E → R.arrElem? = some E
-  | .dyn | .fixed => rfl
-
-/-- A primitive slot read out is a stack value of the slot's type. -/
-theorem Semantics.MVal.asValue_hasTy {mv : MVal} {ty : Ty} {v : Value}
-    (h : MVal.hasTyH H mv ty = true) (hval : mv.asValue = .ok v) :
-    (Value.toSVal v).hasTy ty = true := by
-  cases mv with
-  | prim p =>
-      cases p <;> simp only [MVal.asValue] at hval <;> cases hval <;>
-        cases ty with
-        | prim pt => cases pt <;> simp_all [MVal.hasTyH, Value.toSVal, SVal.hasTy]
-        | ref r => simp [MVal.hasTyH] at h
-  | ref id => exact nomatch hval
-
-/-- A stored primitive read out is a stack value of its type. -/
-theorem Semantics.SVal.asValue_hasTy {sv : SVal} {ty : Ty} {v : Value}
-    (h : sv.hasTy ty = true) (hval : sv.asValue = .ok v) : (Value.toSVal v).hasTy ty = true := by
-  rw [SVal.asValue_toSVal hval]; exact h
-
 /-- An integer is a value of every numeric type. -/
 theorem int_toSVal_hasTy {p : PrimTy} (hp : p.isNumeric = true) (n : Int) :
     (Value.toSVal (.int n)).hasTy (.prim p) = true := by
   cases p <;> simp_all [PrimTy.isNumeric, Value.toSVal, SVal.hasTy]
 
 end Lemmas
-
-/-! ## Operators -/
-
-/-! ## The global invariant along an allocation -/
-
-namespace Semantics.StateWT
-
-variable {H : HeapTy} {σ σ' : State}
-
-end Semantics.StateWT
 
 /-! ## The values the statements write are typed -/
 
@@ -166,8 +130,6 @@ open Semantics hiding State
 open SemanticsProperties (HeapWellFormed)
 
 variable {C : Contract}
-
-/-! ## Results -/
 
 /-! ## Locals that satisfy a predicate -/
 

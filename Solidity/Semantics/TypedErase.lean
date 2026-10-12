@@ -23,7 +23,7 @@ hashed as `0`/`1` by both (`Value.keyAt`, `PrimTy.key`; decisions 10 and 14).
 
 namespace Solidity
 
-open Semantics (Value Seg Halt Res lookupBy setBy ExtKey ExtResult structDef)
+open Semantics (Value Res lookupBy)
 
 variable {C : Contract}
 
