@@ -4236,39 +4236,95 @@ cannot be applied element by element to a typed state.  Two carriers:
 **Fallback**: if U2 fails the gate, U1 (the evaluators, `EState`,
 `StepErase` and the erased invariant still go).
 
+### W9.6N record (2026-10-12, branch `w96-notation`)
+
+The notation's front end reads straight to the scoped terms: nothing in
+the prover or the notation builds, reads or prints a `Surface.*` term, and
+`Tm.erase`, `Delab.tr` and `NFml` are read by nothing in the package.  They
+stay, frozen and unrenamed, in the modules the reader imports (`Update.lean`,
+`Calculus/Fml.lean`, `Calculus/RuleSyntax.lean`, `Calculus/DelabErase.lean`).
+No speed change expected: the readers build closures instead of untyped
+trees, resolved once where they stand, as `NRead` already was.
+
+- **Terms by name** (`Calculus/NamedTerm.lean`, new): `NTm C s` is a
+  term's text (`key`, what `Tm.keyStr` writes of the term it names) and
+  the scoped term it is at each named context (`resolve : (Γ : NCtx) →
+  Except String (Tm C Γ.ctx s)`), a local the newest of its name and of its
+  sort's kind, with `Tm.resolveN`'s error texts.  `NTerm` … `NMValT` carry
+  `Update.lean`'s symbol names (`.find .storage p` reads as before),
+  `NTm.ofTm ns t` reads a scoped term by its names, `NUpdElem` is an
+  update's element (`keyStr`, `setsLocal?`, `fits`, `ownTy?`).
+  `NCtx.findAny` and `kindError` moved here (no `FreshNames`).
+- **The readers** (`Calculus/SurfaceNotation.lean`: `readers`, `tVal` …,
+  `elabUpd`) return `NTm`s and `NUpdElem`s; `elabCompare` reads the
+  lowered scoped operands by name (`NTm.ofTm`), where it erased them.
+  `Surface.elemTy` is `arrayElemTy`.
+- **Resolution** (`Calculus/NotationResolve.lean`): `Tm.resolveN` and the
+  `Surface.UpdElem.*` helpers deleted; `Rhs.resolveN`/`Upd.resolveN` read
+  `NUpdElem`s, `NRead.eq`/`eqD`/`defined`/`bool`/`cmp` `NTerm`s.
+- **`st!{}`/`pt!{}`** resolve the read term at `[]` (`(·.resolve [])`).
+- **A chain's by-name key** (`elabKeyFml`) is the terms' `key`s and the
+  elements' `NUpdElem.keyStr`: `Surface.Tm.keyStr` and
+  `Surface.UpdElem.keyStr` deleted.  Not left on the shim.
+- **The spec front end** (`Calculus/SurfaceSpec.lean`) writes its clauses,
+  layout and frame over `NTerm`/`NPTerm`/`NSTerm`, its snapshot update as a
+  `List (NUpdElem C)`, which `Upd.resolveN` declares (`Calculus/Spec.lean`).
+- **`tm{ … }`** (`Calculus/TermLib.lean`) is always the scoped term (the
+  untyped fallback where the expected type was not a `Tm` is gone; it
+  postpones until the type is known).  It still reads its text by
+  `RuleSyntax.schemaTerm` and turns the names into the scoped symbols by
+  `coreNames`, the rule table's own path: syntax only, no untyped value.
+- **`delabTmS`** prints by `Calculus/PrintTerm.lean`'s `ppTermS` …
+  `ppMValS` at `[]`, under `pp.sol.reduce false`, after unfolding the
+  scoped symbols (`Tms.*`, `Tm.lit`/`storage`/`memory`) down the term
+  positions (`unfoldTmsSyms`); `tmSurface`, `tmsTwin?`, `sortType?`,
+  `withTmTwins` deleted.  Inside a `‹…›` of its own a scoped symbol prints
+  with the field notation the twin printed (`s.save p v`,
+  `delabTmsField`, under the new `pp.sol.tmField`, which only `delabTmS`
+  sets), so `TermLib`'s pins are unchanged; elsewhere (`pp.sol.dl false`,
+  `Examples/Notation.lean`) a `Tms.*` application prints as Lean prints it.
+- **The twin check is deleted** (`Calculus/PrintStmt.lean`):
+  `pp.sol.twinCheck`, `twinCompare`, `PEnv.tr`, `runTr`, `termS`, and the
+  checks in `termPP`, `eqDPartsS`, `updS`, `ppFmlS`'s comparison and
+  `withPrinter`.
+- **Moved**, no reader use and prover-only modules: the `Surface.*` lemmas
+  of `Calculus/NoPanic.lean` and `Theory/Bridge/Denote.lean`
+  (`Surface.Tm.eval_noPanic`, `Surface.UpdElem.write_noPanic`,
+  `Surface.Upd.apply_ne_panic`, `Surface.Tm.denote_eval`,
+  `SValT.denote_eval`) to `Calculus/ShimFacts.lean`, unchanged.  Two unused
+  `variable {q : Term C × Term C}` of `Calculus/StateFacts.lean` deleted.
+
+**Checked**: per-file diagnostics of every touched module; `lean_build` of
+the default targets (every example pin: `Examples/ProofTree.lean`,
+`Examples/Tactics/Print.lean`, `Examples/Tactics/DlNotation.lean`,
+`Examples/Notation.lean`, `Examples/ChainNotation.lean`,
+`Examples/ChainRewrites.lean`, `Examples/ChainRewritesOpen.lean`, the
+`Examples/Chains/` modules, `Examples/Tactics/Spec.lean`,
+`Examples/Tactics/Specs.lean`, `Examples/Tactics/SolSpec.lean`, `Calculus/TermLib.lean`'s and
+`Calculus/TermLaws.lean`'s), clean; `check-orphans`, `check-doc-paths`; no
+new `sorry`.  Not run: `SolkeyTestSuite` (it reads no notation front end).
+
 ## What is left
 
 **W9.5b: the reader's shim stays** (the user, 2026-10-12: nothing is done
 in the side-projects reader).  `Surface.Tm`/`MAddr`/`Upd`/`UpdElem`,
 `Tm.erase`/`Upd.erase`, `Delab.tr` with its helpers and the `NFml` stub
-(`NFml.eq`, the one constructor `Delab.tr` emits) remain as the SolKey
-reader's interface; no prover code reads them.  Besides the reader, the
-shim is read by:
-- the notation's parsers: `tm{}`, `st!{}`/`pt!{}` and a chain's by-name key
-  are parsed into `Surface.Tm` and resolved to `Tm C Γ` (`Tm.resolveN`) or
-  printed (`Surface.Tm.keyStr`);
-- `Calculus/TermLib.lean`'s `delabTmS`: a scoped term over schema variables
-  is printed through its untyped twin (`tmSurface`) by the untyped
-  `ppTerm`/`delabTm` (`Calculus/RuleSyntax.lean`);
-- `Calculus/PrintStmt.lean`'s twin check (`pp.sol.twinCheck`, off by
-  default), which runs `Delab.tr` beside the scoped printer;
-- the spec front end: `Calculus/SurfaceSpec.lean` builds its obligation's
-  snapshot update as a `Surface.Upd`, resolved by `Upd.resolveN`
-  (`Calculus/Spec.lean`).
-
-Deleting the shim would port each of these, and is the reader's port, if
-the user asks for it.  Kept with it, with no prover user (W9.5 review,
-their section docstrings say so): `Update.lean`'s "Frames" lemmas over
-`Surface.*` (`Surface.Tm.vars`, `Surface.Upd.vars`, `Surface.Tm.eval_frame`,
+(`NFml.eq`, the one constructor `Delab.tr` emits) remain, frozen, as the
+SolKey reader's interface, in the modules it imports.  Only the reader
+reads them: since W9.6N (record above) the notation's front end reads to
+the scoped terms (`NTm`, `Calculus/NamedTerm.lean`), `tm{ … }` prints by
+the scoped printers, and the twin check is gone.  Kept with the shim, with
+no prover user: `Update.lean`'s "Frames" lemmas over `Surface.*`
+(`Surface.Tm.vars`, `Surface.Upd.vars`, `Surface.Tm.eval_frame`,
 `Surface.MAddr.eval_frame`, `Surface.Tm.denote_frame`,
 `Surface.UpdElem.write_frame`, …), `Surface.Tm.denote`, `Term.keyAt`/
-`Term.keyAt_eval`, `Theory/Bridge/Denote.lean`'s `Surface.Tm.denote_eval`
-and `SValT.denote_eval`, and `Calculus/NoPanic.lean`'s
-`Surface.Tm.eval_noPanic`, `Surface.UpdElem.write_noPanic`,
-`Surface.Upd.apply_ne_panic`.
+`Term.keyAt_eval`, `RuleSyntax.lean`'s untyped printers (`ppTerm`, `ppUpd`,
+`delabTm`), and `Calculus/ShimFacts.lean` (the shim's no-panic lemmas and
+term bridge).  Deleting the shim is the reader's port, if the user asks
+for it.
 
-**W9.6 (the state IR) and W9.6N (the notation's front end)**: under
-way, "W9.6 plan" below.
+**W9.6 (the state IR)**: under way, "W9.6 plan" above; W9.6N (the
+notation's front end) is done, its record there.
 
 **Open items:**
 - The reduction's symbols over the typed state (decision 83): a scoped
