@@ -5995,6 +5995,119 @@ read by `close_rw` and `sol_decide`'s language over `Semantics.State`.
 - `Calculus/Deploy.lean`: `Calculus/Problem.lean` (the front end's
   `SurfaceSpec`/`Spec`).
 
+### W9.8.3c laws record (2026-10-12, branch `w98-laws`)
+
+The laws over the typed terms, in dependency order, up to the closer
+lane's modules.  **`Proves.valid` elaborates**, axioms `propext`,
+`Classical.choice`, `Quot.sound` (its `#guard_msgs` pin in
+`Calculus/Sound.lean`; mid-lane commit `d0ba6f84`); so does
+`ProvesC.valid` (`Calculus/CallbackSound.lean`'s pin).
+
+**`Calculus/StateFacts.lean`.**  The facts about the untyped symbols went
+with them: `Op2.opaque`, `Srt.DEquiv`, `OpN.denote_congr`, `State.Keeps`,
+`OpN.stExplicit`, `OpN.eval_keeps`/`denote_keeps`, `Srt.Le`,
+`OpN.eval_le`, `Srt.AgreePart`, `OpN.stDirect`, `OpN.eval_part`,
+`evalBinop_le`, `pickBranch_le`, `pushAt_le`.  The interpreter's facts stay
+(`Semantics.State`/`SVal` now written qualified: `Solidity.State` is the
+typed one).  New: `OLe` (where one option returns, the other returns the
+same) and `Op1.eval_le` … (the typed symbols are monotone in their
+arguments, a lazy operand too: `binopT_le`, `cond_le`, `Storage.push_none`).
+
+**`Calculus/Graft.lean`** (the merge).  A value depends on the heap typing
+only at `mem` (a `Grown` heap), so a term of `V` read where `U` lands and
+its substitute read before are compared up to it: `Srt.SameO`
+(`Srt.forget`: a memory as its grown heap), `Srt.SameO.eq` at one typing.
+The symbols that touch the memory count as reading the global part
+(`Op1.globFree` …: `alloc`, `addM`, `read`, `mlen`, `copyMem`, `iread`,
+`copy`, `copySt`, `write`); no merge is lost, every memory term starting at
+`memory`, which reads it.  `Upd.globT_graft` compares global parts over two
+heap typings by their states (`(·.1)`), and `holds_upd_graft` is proved
+from it directly: `Upd.afterT_seq` (W9.8.3b's open item) is not needed.
+`Upd.lastSt_eval` gives the storage of the global part (a storage term is a
+`Storage C` now), so `StChg`, `Tm.eval_stChg`, `Tm.eval_st_glob` and
+`Upd.stOnly_globT` are gone.  `Fml.upd_bind_of_liftG` reads a binder's value
+by `LTy.VDen.ofT` (`LTy.vden_of_notMem`), the heap typing kept by
+`Upd.keepsNext_globT`.
+
+**`Calculus/TermEq.lean`** (new, split from `TermLib`): `Tm.Theq` (at
+`.val P`), `Tm.beqR`, `Tm.litVarsS`, so that `SeqRewrite` and `Proves` do
+not wait on the term taclets.  A typed symbol is compared by a code of its
+constructor, data and types (`Op1Code` …, `deriving DecidableEq`): deriving
+it on `Op1`–`Op3` fails (index unification against `op.ret p`, `k.keyTy`),
+and a hand `hbeq` by nested `match` timed out; `IndexTy`/`ArrTy` are fixed by
+their indices (`IndexTy.eq`, `ArrTy.eq`).  `Op0` derives `DecidableEq`.
+
+**`Calculus/SeqRewrite.lean`, `Calculus/Proves.lean`.**  A rewrite pair is
+at one type (`q : Tm C [] (.val p) × Tm C [] (.val p)`, `p` implicit in
+`Proves.rewrite`/`updRw`, `Hyps.rwEqC`); `Tm.sideC` rewrites the sides of
+that type only.  `Tm.EvalRefines` is over `OLe`; `State.toNil` is
+`σ.glob`.
+
+**`Calculus/UpdateRules.lean`, `Calculus/UpdRuleScoped.lean`,
+`Calculus/CallbackSound.lean`.**  `Tm.denote_substH` typed
+(`Op0.denote_same` …; an `old` local set by `U` is still not replaced: the
+Theory reads a storage up to `Equiv`).  **`State.ReadsAs`** (one global part,
+one `getV` per local) gives one state (`State.eq_of_readsAs`), so
+`holds_congr_reads`, `holds_FO_reads` and `Tm.eval_congr` are `subst`, and
+`holds_upd_nil` needs no heap-typing equality.  `ResRel` is over `Option`.
+
+**`Calculus/TermLib.lean`** (the term taclets).  Same names; what typing
+changed:
+- `findOnSave`'s word is a `P.Denote`, `findOnDelAt`/`delValueLit`/
+  `findOnDelAtBelow` give `defVal(P)` (`primDefault_erase`); the paths keep
+  their types, two compared paths may differ (`sameSegs` compares them by
+  `beqR`, so the types too).
+- `findMemberCons`, `selectOn{Save,DelAt}{Member,Frame}[In]`: the head of a
+  path is read by `Tm.shift?` to a `Shifted` (the root, its struct, its
+  proof and the rest as a member path, `spath`), and the right sides read
+  under `select` by `findIn`/`saveIn`/`delAtIn`.  **Restriction**: a path
+  through an index is not shifted (no index symbol under `select`, W9.8.2).
+  `SCtxS` is a chain of `saveIn`/`delAtIn`/`selectIn` over storages of
+  members (a `save` at `.st` above a `select` no longer types).
+- `findOnPushFrame`/`findOnPopFrame` read `push(s, p, v)`/`pop(s, p)` (the
+  typed signature writes no `p.length` path); `lenOnSaveFrame`/
+  `lenOnDelAtFrame` read `len(s, p)`.
+- Side conditions gone with the types: a written value being a word, a
+  `select`'s root being a struct.
+- The functions are generic in the sort with the symbol read by a `match`
+  on the symbol alone (`Op1.shapeStep` …): a pattern nesting a symbol under
+  a term of a fixed sort compiles to casts that `rfl`, `simp` and the
+  splitter do not see through.
+
+**`Calculus/TermLaws.lean`**, reduced: `Tm.EvalRefinesAt`, `LitLaw` (the
+side condition is `BinOp.evalT`, the range check in it), `LawCov` with
+`LawCov.lit`, `LawCov.findOnSave` (`Upd.storage_eval_of_globT`,
+`Storage.findOnSave`), `LawCov.findMemberCons` (`Tm.shift?_eval`,
+`Storage.find_selectT`), `Tm.KindFreeAt.ofNil`.  **Not ported**:
+`TermTaclet.RefLaw`/`Upd.coversRef` (they need the typed frame laws of a
+delete, a push and a pop, and a shape's divergence as `Path.Diverges`),
+`EvalLaw`/`Upd.coversEval` (a typed heap's get/set laws, none exist yet),
+`Upd.covers` beyond `findOnSave`, and the member-wise reads of a write
+(`Tm.baseAny`, `Tm.under?`, `Tm.sameBase`: the erased `select`'s frame).
+
+Also fixed: `SolkeyProves` (`Fml.inSolkey_rwEqC` typed), `Tools/Taclet`
+(`StChg` gone).
+
+**Checked**: per-file diagnostics, no error: `StateFacts`, `Graft`,
+`TermEq`, `SeqRewrite`, `Proves`, `ProvesSound`, `Sound`, `Callback`,
+`CallbackSound`, `Delab`, `DelabLean`, `UpdateRules`, `UpdRuleScoped`,
+`TermLib`, `TermLaws`, `Symex`, `SolkeyProves`, `SolkeyFragment`,
+`SequentNotation`, `Tools/Taclet`, `Theorems`, `Examples/Tactics/CallbackRuns`
+(every module importing the ported ones that does not import the closer
+lane's); `sorry` count 19; `check-orphans` (315 reachable),
+`check-doc-paths`.  No `lean_build` (the default targets need the closer
+lane).
+
+**Next modules' first errors**:
+- `Calculus/StatePartsScoped.lean:48` — `Srt.AgreePart` over `s.Ev`: the
+  graft through a write's state parts reads the erased symbols
+  (`OpN.eval_part`); to restate over `Srt.SameO` and the typed global part.
+- `Calculus/RewriteChains.lean:103` — `EvalLaw` (not ported above).
+- Blocked by the closer lane (`CloseLemmas`, `Close`): `Merge`,
+  `RewriteScoped`, `RewritePast`, `RewriteLaws`, `RewriteSyntax`,
+  `ChainKit`, `Chains`, `LeafDerive`, `Derive`, `ProvesDerive`,
+  `WalkSyntax`, `FunContract`, `SurfaceSpec`, `Problem`, `Spec`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

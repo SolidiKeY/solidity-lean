@@ -78,6 +78,7 @@ import Solidity.Calculus.ProvesSound
 import Solidity.Calculus.DelabLean
 import Solidity.Calculus.Graft
 import Solidity.Calculus.SeqRewrite
+import Solidity.Calculus.TermEq
 import Solidity.Calculus.StateFacts
 import Solidity.Calculus.TermLaws
 import Solidity.Calculus.Merge

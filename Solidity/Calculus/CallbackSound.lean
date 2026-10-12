@@ -46,28 +46,9 @@ variable {C : Contract}
 
 /-- **A first-order formula holds alike in two typed states a term reads
 alike.** -/
-theorem holds_FO_reads : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true →
-    ∀ {σ σ' : State C Γ}, σ.ReadsAs σ' → (holds σ φ ↔ holds σ' φ)
-  | _, .tt, _, _, _, _ => Iff.rfl
-  | _, .eq a b, _, σ, σ', e => by
-    rw [holds_eq, holds_eq, Tm.denote_congr e a, Tm.denote_congr e b]
-  | _, .defined t, _, σ, σ', e => by
-    rw [holds_defined, holds_defined, Tm.eval_congr e t]
-  | _, .not φ, h, _, _, e => not_congr (holds_FO_reads φ h e)
-  | _, .and φ ψ, h, _, _, e => by
-    have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
-    exact and_congr (holds_FO_reads φ h'.1 e) (holds_FO_reads ψ h'.2 e)
-  | _, .imp φ ψ, h, _, _, e => by
-    have h' : φ.FO = true ∧ ψ.FO = true := Bool.and_eq_true_iff.mp h
-    exact imp_congr (holds_FO_reads φ h'.1 e) (holds_FO_reads ψ h'.2 e)
-  | _, .all _ p φ, h, σ, σ', e => forall_congr' fun v =>
-    holds_FO_reads φ h (σ := σ.push (t := .val p) v) (σ' := σ'.push (t := .val p) v)
-      ⟨e.1, fun i => by
-        cases i with
-        | here => rfl
-        | there j => exact e.2 j⟩
-  | _, .upd .., h, _, _, _ | _, .modal .., h, _, _, _ | _, .havoc _, h, _, _, _
-  | _, .bind .., h, _, _, _ | _, .anon .., h, _, _, _ => nomatch h
+theorem holds_FO_reads {Γ : Ctx} (φ : Fml C Γ) (_ : φ.FO = true) {σ σ' : State C Γ}
+    (e : σ.ReadsAs σ') : holds σ φ ↔ holds σ' φ := by
+  rw [State.eq_of_readsAs e]
 
 /-- The invariant at a state: of its global part (`StateInv.at`), read as a
 closed formula after a frame end (`Fml.closedAt`). -/
@@ -75,13 +56,13 @@ theorem holdsC_closedAt_iff {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfe
     {Γ : Ctx} (τ : State C Γ) : holdsC I τ (Fml.closedAt I) ↔ I.stateInv.at τ := by
   constructor
   · intro h
-    have h' := Upd.afterT.of_lands h (Upd.lands_drop_nil (Thin.nilTo Γ) τ) (List.prefix_refl _)
+    have h' := Upd.afterT.of_lands h (Upd.lands_drop_nil (Thin.nilTo Γ) τ)
     exact (holdsC_iff_holds I hT _).1 h'
   · intro h
-    refine Upd.afterT_intro (fun _ _ => trivial) fun g σ'' hL _ => ?_
+    refine Upd.afterT_intro (fun _ => trivial) fun g σ'' hL => ?_
     refine (holdsC_iff_holds I hT σ'').2 ((holds_FO_reads I hI ?_).1 h)
-    have hg : g = τ.globE := (Except.ok.inj hL.1).symm
-    exact ⟨(hL.2.1.trans hg).symm, fun i => nomatch i⟩
+    have hg : g = τ.globG := (Option.some.inj hL.1).symm
+    exact ⟨(hL.2.1.trans (congrArg Subtype.val hg)).symm, fun i => nomatch i⟩
 
 /-! ## Outcomes, through the frames -/
 
@@ -136,12 +117,12 @@ theorem holdsC_exit_after {I : Fml C []} {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Fr
     cases he with
     | pop hκ =>
       exact holdsC_exit_after κ φ (σ.drop e)
-        (Upd.afterT.of_lands h (Upd.lands_pop_nil e σ) (List.prefix_refl _)) _ hκ
+        (Upd.afterT.of_lands h (Upd.lands_pop_nil e σ)) _ hκ
   | _, .drop e κ, φ, σ, h, o', he => by
     cases he with
     | drop hκ =>
       exact holdsC_exit_after κ φ (σ.thin e)
-        (Upd.afterT.of_lands h (Upd.lands_drop_nil e σ) (List.prefix_refl _)) _ hκ
+        (Upd.afterT.of_lands h (Upd.lands_drop_nil e σ)) _ hκ
 
 /-- The rest of the program, gone into the frames when it is empty, gives
 the modality over it, with callbacks. -/
@@ -229,7 +210,7 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
   | ok o =>
     have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
     exact COut.after_seq (holdsC_modalK o.st ω κ φ
-      (Upd.afterT.of_lands h (Upd.lands_iff_applyV.2 ⟨_, h₁ _ hst, rfl, fun _ => rfl⟩) o.ext))
+      (Upd.afterT.of_lands h (Upd.lands_of_applyP (h₁ _ hst)).choose_spec))
   | error e =>
     have hst : Stmt.runSt σ s = .error e := by simp only [Stmt.runSt, ht]; rfl
     obtain ⟨hp, hd⟩ := h₂ e hst
@@ -240,9 +221,7 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
       show e = .exhausted
       by_cases hx : e = .exhausted
       · exact hx
-      · obtain ⟨e', he'⟩ := hd rfl hx
-        obtain ⟨e'', hg⟩ := Upd.globT_error_of_applyV he'
-        exact (Upd.afterT.of_error h hg).elim
+      · exact (Upd.afterT.of_none h (Upd.globT_none_of_applyV (hd rfl hx))).elim
 
 /-- **A block that pays nothing, with callbacks.** -/
 theorem holdsC_unfold {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
@@ -357,7 +336,7 @@ variable {I : Fml C []} {Γ Γ₁ Γ₀ : Ctx} {σ : State C Γ} {ω : Prog C Γ
 transfer returns, the booking ends in its state. -/
 theorem transfer_booking (sadr se : Simple C Γ .uint) {o₁ : Out C σ.H Γ}
     (h : TRun.transfer (.simple sadr) (.simple se) σ = .ok o₁) :
-    (Upd.nil.snoc (UpdElem.payTo sadr se)).applyV σ = .ok (o₁.st.globE, o₁.st.loc) :=
+    (Upd.nil.snoc (UpdElem.payTo sadr se)).applyP σ = some (o₁.st.glob, o₁.st.locV) :=
   (Stmt.runs 0 .box (.transfer (.simple sadr) (.simple se)) (.upd1 (.payTo sadr se)) rfl σ).1
     o₁.st (by show (TRun.transfer _ _ σ).map _ = _; rw [h]; rfl)
 
@@ -376,11 +355,11 @@ theorem holdsC_transferCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | transferHalt h => nomatch h
   | transferViolated h hn =>
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx
-      (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) (‹Out C σ.H Γ›).ext))).elim
+      (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec))).elim
   | transferResume h hJ hJ' =>
     rename_i st nt o₂
     exact COut.after_seq (holdsC_modalK _ ω κ φ
-      (Upd.afterT.of_lands hr (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) o₂.ext st nt
+      (Upd.afterT.of_lands hr (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec st nt
         ((holdsC_closedAt_iff hI hT _).2 hJ')))
 
 /-- **`sendWithCallbackBox` is sound with callbacks**: the invariant on exit
@@ -391,8 +370,8 @@ theorem holdsC_sendCb (hI : I.FO = true) (hT : I.hasTransfer = false) (pv : Idx 
     (sadr se : Simple C Γ .uint)
     (hx : holdsC I σ (.upd .box (Upd.nil.snoc (UpdElem.payTo sadr se)) (Fml.closedAt I)))
     (hok : holdsC I σ (.upd .box ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
-      (.local pv (.val (Tm.lit (.bool true))))) (.havoc (.imp (Fml.closedAt I) (Fml.modalK .box ω κ φ)))))
-    (hf : holdsC I σ (.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (.bool false)))))
+      (.local pv (.val (Tm.lit (p := .bool) true)))) (.havoc (.imp (Fml.closedAt I) (Fml.modalK .box ω κ φ)))))
+    (hf : holdsC I σ (.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
       (Fml.modalK .box ω κ φ))) :
     holdsC I σ (.modal .box (.cons (.send pv (.simple sadr) (.simple se)) ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
@@ -401,15 +380,15 @@ theorem holdsC_sendCb (hI : I.FO = true) (hT : I.hasTransfer = false) (pv : Idx 
   | sendHalt h => nomatch h
   | sendFailed h =>
     exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hf
-      (Upd.lands_snoc_local (Upd.lands_nil σ) pv (v := (false : Bool)) rfl) (List.prefix_refl _)))
+      (Upd.lands_snoc_local (Upd.lands_nil σ) pv (v := (false : Bool)) rfl)))
   | sendViolated h hn =>
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx
-      (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) (‹Out C σ.H Γ›).ext))).elim
+      (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec))).elim
   | sendResume h hJ hJ' =>
     rename_i st nt o₂
     exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hok
-      (Upd.lands_snoc_local (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) pv
-        (v := (true : Bool)) rfl) o₂.ext st nt ((holdsC_closedAt_iff hI hT _).2 hJ')))
+      (Upd.lands_snoc_local (Upd.lands_of_applyP (transfer_booking sadr se h)).choose_spec pv
+        (v := (true : Bool)) rfl) st nt ((holdsC_closedAt_iff hI hT _).2 hJ')))
 
 /-- **`tryCallWithCallbackBox` is sound with callbacks**: the invariant where
 control leaves; the call's success, from any state the callee leaves in which
@@ -562,23 +541,26 @@ def Hyps.openInv {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Hyps C Γ₀
   | _, .anon H xs => .anon (Hyps.openInv H) xs
 
 theorem Tm.reclose_eval {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
-    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.globE = τ.globE) :
-    t'.eval τ = t.eval σ := by
+    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
+    Srt.SameO s (t'.eval τ) (t.eval σ) := by
   obtain ⟨t₀, ht₀, rfl⟩ := Option.map_eq_some_iff.1 h
   rw [Tm.eval_ofNil τ, Tm.eval_toNilS σ t ht₀]
-  exact Tm.eval_congr ⟨hg.symm, fun i => by cases i⟩ t₀
+  have key : ∀ g g' : State C [], g = g' → Srt.SameO s (t₀.eval g') (t₀.eval g) := by
+    intro g g' e; subst e; exact Srt.SameO.refl _ _
+  exact key _ _ hg
 
 theorem Tm.reclose_denote {Γ Γ' : Ctx} {s : Srt} {t : Tm C Γ s} {t' : Tm C Γ' s}
-    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.globE = τ.globE) :
+    (h : t.reclose? = some t') (σ : State C Γ) (τ : State C Γ') (hg : σ.glob = τ.glob) :
     t'.denote τ = t.denote σ := by
   obtain ⟨t₀, ht₀, rfl⟩ := Option.map_eq_some_iff.1 h
   rw [Tm.denote_ofNil τ, Tm.denote_toNilS σ t ht₀]
-  exact Tm.denote_congr ⟨hg.symm, fun i => by cases i⟩ t₀
+  show t₀.denote τ.glob = t₀.denote σ.glob
+  rw [hg]
 
 /-- **A closed formula reads alike at another scope**, over the same global
 part. -/
 theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} → φ.reclose? = some φ' →
-    (σ : State C Γ) → (τ : State C Γ') → σ.globE = τ.globE →
+    (σ : State C Γ) → (τ : State C Γ') → σ.glob = τ.glob →
       (holds τ φ' ↔ holds σ φ)
   | .tt, _, h, _, _, _ => by cases h; exact Iff.rfl
   | .eq a b, _, h, σ, τ, hg => by
@@ -588,7 +570,7 @@ theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} →
     rw [holds_eq, holds_eq, Tm.reclose_denote ha _ _ hg, Tm.reclose_denote hb _ _ hg]
   | .defined t, _, h, σ, τ, hg => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [holds_defined, holds_defined, Tm.reclose_eval ht _ _ hg]
+    rw [holds_defined, holds_defined, Srt.sameO_val.1 (Tm.reclose_eval ht _ _ hg)]
   | .not φ, _, h, σ, τ, hg => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (holds_reclose φ hφ σ τ hg)
@@ -626,15 +608,17 @@ at the empty scope holds, over the same global part. -/
 theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {I : Fml C []} (hφ : φ.reclose? = some I)
     {τ₀ : State C []} (h : holds τ₀ I) :
     {Γ : Ctx} → (κ : Frames C Γ Γ₀) → κ.popsOnly = true → ∀ σ : State C Γ,
-      σ.globE = τ₀.globE → holds σ (κ.exit .box φ)
+      σ.glob = τ₀.glob → holds σ (κ.exit .box φ)
   | _, .nil, _, σ, e => (holds_reclose φ hφ σ τ₀ e).1 h
   | _, .seq .nil κ, hκ, σ, e => holds_exit_closed hφ h κ hκ σ e
   | _, .pop _ _ κ, hκ, _, e =>
-    Upd.afterT_intro (fun _ _ => trivial) fun _ σ' hL _ =>
-      holds_exit_closed hφ h κ hκ σ' ((hL.2.1.trans (Except.ok.inj hL.1).symm).trans e)
+    Upd.afterT_intro (fun _ => trivial) fun _ σ' hL =>
+      holds_exit_closed hφ h κ hκ σ'
+        ((hL.2.1.trans (congrArg Subtype.val (Option.some.inj hL.1).symm)).trans e)
   | _, .drop _ κ, hκ, _, e =>
-    Upd.afterT_intro (fun _ _ => trivial) fun _ σ' hL _ =>
-      holds_exit_closed hφ h κ hκ σ' ((hL.2.1.trans (Except.ok.inj hL.1).symm).trans e)
+    Upd.afterT_intro (fun _ => trivial) fun _ σ' hL =>
+      holds_exit_closed hφ h κ hκ σ'
+        ((hL.2.1.trans (congrArg Subtype.val (Option.some.inj hL.1).symm)).trans e)
 
 /-- **The invariant assumed is the goal**: `…, {havoc}, I ⟹ I`, the
 assumption past a frame end that drops every local, the goal past the
@@ -648,7 +632,7 @@ theorem Proves.assumeInv {R : RuleSet} {Γ₀ Γ Δ : Ctx} {H : Hyps C Γ₀ Γ}
   refine .closeHolds (fun σ => H.wrap_valid (φ := .imp (Fml.closedAt I) (κ.exit .box φ)) hb
     (fun τ hτ => ?_) σ) hm
   exact holds_exit_closed he
-    (Upd.afterT.of_lands hτ (Upd.lands_drop_nil (Thin.nilTo Γ) τ) (List.prefix_refl _)) κ hκ τ rfl
+    (Upd.afterT.of_lands hτ (Upd.lands_drop_nil (Thin.nilTo Γ) τ)) κ hκ τ rfl
 
 /-- An assumption gives it opened. -/
 theorem holds_openInv {Γ : Ctx} (a : Fml C Γ) (τ : State C Γ) (h : holds τ a) :
@@ -659,7 +643,7 @@ theorem holds_openInv {Γ : Ctx} (a : Fml C Γ) (τ : State C Γ) (h : holds τ 
     split
     · rename_i φ' hφ
       exact (holds_reclose φ hφ (τ.thin e) τ rfl).2
-        (Upd.afterT.of_lands h (Upd.lands_drop_nil e τ) (List.prefix_refl _))
+        (Upd.afterT.of_lands h (Upd.lands_drop_nil e τ))
     · exact h
   · exact h
 

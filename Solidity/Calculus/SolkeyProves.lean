@@ -54,7 +54,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
 
 /-- A Theory rewrite keeps a formula in the fragment: it changes only the
 sides of its equations. -/
-theorem Fml.inSolkey_rwEqC (q : Tm C [] .val × Tm C [] .val) :
+theorem Fml.inSolkey_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) :
     {Γ : Ctx} → (φ : Fml C Γ) → (φ.rwEqC q).inSolkey = φ.inSolkey
   | _, .tt | _, .eq .. | _, .defined _ => rfl
   | _, .not φ => Fml.inSolkey_rwEqC q φ
@@ -213,7 +213,7 @@ theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C
     | _ => exact absurd hφ Bool.false_ne_true
   | merge hU hW _ ih => exact .merge hU hW (ih hφ)
   | updRw q hq _ ih => exact .updRw q hq (ih hφ)
-  | @rewrite Γ H φ q hq _ ih =>
+  | @rewrite Γ H φ _ q hq _ ih =>
     refine .rewrite q hq (ih ?_)
     cases φ with
     | modal m P κ ψ => cases P <;> exact hφ
@@ -227,7 +227,8 @@ def loopFalse : Fml C [] :=
 condition false assumed, and that it is false. -/
 theorem loopFalse_derived : Proves C .all [] .nil (loopFalse (C := C)) := by
   refine .check (LeanTaclet.toStep .loopExit) (.closeTrue rfl)
-    (.closeHolds (fun _ => ⟨⟨_, rfl⟩, ⟨_, rfl⟩, Theory.StValue.Equiv.refl _⟩))
+    (.closeHolds (fun _ => ⟨fun h => Option.noConfusion h, fun h => Option.noConfusion h,
+      Theory.StValue.Equiv.refl _⟩))
 
 /-- **Off the fragment solkey's rules fall short**: the calculus derives
 `[ while (false) { } ] true`, solkey's rules do not (today's

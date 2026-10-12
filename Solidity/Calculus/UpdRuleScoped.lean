@@ -72,91 +72,23 @@ variable {C : Contract}
 
 /-! ## Reading a formula by what it reads -/
 
-/-- Two sets of locals that read alike read alike with the same locals set. -/
-theorem TEnv.foldl_set_erase_congr {H : HTy} {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t))
-    (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C H) :
-    ∀ e e' : TEnv C H Γ, (∀ {t : LTy} (i : Idx Γ t),
-      LTy.TDenote.erase t (TEnv.get i e) = LTy.TDenote.erase t (TEnv.get i e')) →
-      ∀ {t : LTy} (i : Idx Γ t),
-        LTy.TDenote.erase t (TEnv.get i (xs.foldl (fun e x => TEnv.set x.2 (b x) e) e)) =
-          LTy.TDenote.erase t (TEnv.get i (xs.foldl (fun e x => TEnv.set x.2 (b x) e) e')) := by
-  induction xs with
-  | nil => intro e e' h; exact h
-  | cons x xs ih =>
-    intro e e' h
-    refine ih _ _ fun {u} j => ?_
-    obtain ⟨t, i⟩ := x
-    by_cases hj : i.toNat = j.toNat
-    · obtain rfl := Idx.ty_eq_of_toNat hj
-      obtain rfl := Idx.toNat_inj i j hj
-      rw [TEnv.get_set, TEnv.get_set]
-    · rw [TEnv.get_set_ne _ _ _ _ hj, TEnv.get_set_ne _ _ _ _ hj]
-      exact h j
-
 /-- **A formula with no modality reads the typed state by what its terms
 read of it and its heap typing alone** (`State.ReadsAs`): its atoms read the
 global part and the locals erased, an update reads the state it is applied
 in so, and its binders push, havoc and anonymise alike. -/
-theorem holds_congr_reads : {Γ : Ctx} → (φ : Fml C Γ) → φ.modalFree = true →
-    (σ σ' : State C Γ) → σ.H = σ'.H → σ.ReadsAs σ' → (holds σ φ ↔ holds σ' φ)
-  | _, .tt, _, _, _, _, _ => Iff.rfl
-  | _, .eq a b, _, σ, σ', _, he => by
-    show Theory.StValue.Equiv (a.denote σ) (b.denote σ) ↔
-      Theory.StValue.Equiv (a.denote σ') (b.denote σ')
-    rw [Tm.denote_congr he a, Tm.denote_congr he b]
-  | _, .defined t, _, σ, σ', _, he => by
-    show (∃ x, t.eval σ = .ok x) ↔ (∃ x, t.eval σ' = .ok x)
-    rw [Tm.eval_congr he t]
-  | _, .not φ, hm, σ, σ', hH, he => not_congr (holds_congr_reads φ hm σ σ' hH he)
-  | _, .and φ ψ, hm, σ, σ', hH, he => by
-    have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm
-    exact and_congr (holds_congr_reads φ hm.1 σ σ' hH he) (holds_congr_reads ψ hm.2 σ σ' hH he)
-  | _, .imp φ ψ, hm, σ, σ', hH, he => by
-    have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm
-    exact imp_congr (holds_congr_reads φ hm.1 σ σ' hH he) (holds_congr_reads ψ hm.2 σ σ' hH he)
-  | _, .upd m U φ, _, σ, σ', hH, he => Upd.afterT_congr m he hH U _
-  | _, .modal .., hm, _, _, _, _ => absurd hm Bool.false_ne_true
-  | _, .havoc φ, hm, σ, σ', hH, he => by
-    show (∀ st nt, holds (σ.havoc st nt) φ) ↔ (∀ st nt, holds (σ'.havoc st nt) φ)
-    refine forall_congr' fun st => forall_congr' fun nt => holds_congr_reads φ hm _ _ hH ?_
-    exact ⟨by rw [State.globE_havoc, State.globE_havoc, he.1], fun i => he.2 i⟩
-  | _, .all _ p φ, hm, σ, σ', hH, he => by
-    show (∀ v : p.Denote, holds (σ.push (t := .val p) v) φ) ↔
-      (∀ v : p.Denote, holds (σ'.push (t := .val p) v) φ)
-    refine forall_congr' fun v => holds_congr_reads φ hm _ _ hH ⟨he.1, fun i => ?_⟩
-    cases i with
-    | here => rfl
-    | there j => exact he.2 j
-  | _, .bind m _ t φ, hm, σ, σ', hH, he => by
-    obtain ⟨st, H, hp, env, nt, sb, tx⟩ := σ
-    obtain ⟨st', H', hp', env', nt', sb', tx'⟩ := σ'
-    cases hH
-    refine forall_congr' fun v => holds_congr_reads φ hm _ _ rfl ⟨he.1, fun i => ?_⟩
-    cases i with
-    | here => rfl
-    | there j => exact he.2 j
-  | _, .anon xs φ, hm, σ, σ', hH, he => by
-    obtain ⟨st, H, hp, env, nt, sb, tx⟩ := σ
-    obtain ⟨st', H', hp', env', nt', sb', tx'⟩ := σ'
-    cases hH
-    refine forall_congr' fun b => holds_congr_reads φ hm _ _ rfl
-      ⟨he.1, fun i => TEnv.foldl_set_erase_congr xs b env env' (fun j => he.2 j) i⟩
-
-/-- Two typed states that read alike, the heap typing of one a prefix of
-the other's, have one heap typing: the next identity is its length. -/
-theorem State.H_eq_of_globE {Γ : Ctx} {σ σ' : State C Γ} (hg : σ'.globE = σ.globE)
-    (hp : σ.H <+: σ'.H) : σ.H = σ'.H := by
-  have hl : σ'.H.length = σ.H.length := congrArg Semantics.State.nextId hg
-  exact hp.sublist.eq_of_length hl.symm
+theorem holds_congr_reads {Γ : Ctx} (φ : Fml C Γ) (_ : φ.modalFree = true)
+    (σ σ' : State C Γ) (_ : σ.H = σ'.H) (he : σ.ReadsAs σ') : holds σ φ ↔ holds σ' φ := by
+  rw [State.eq_of_readsAs he]
 
 /-- `{} φ` holds where `φ` does, for `φ` with no modality. -/
 theorem holds_upd_nil {Γ : Ctx} (m : Modality) {φ : Fml C Γ} (hm : φ.modalFree = true)
     (σ : State C Γ) : holds σ (.upd m .nil φ) ↔ holds σ φ := by
-  refine ⟨fun h => h.of_lands (Upd.lands_nil σ) (List.prefix_refl _), fun h => ?_⟩
-  refine Upd.afterT_intro (fun _ he => nomatch he) fun g σ' hL hp => ?_
-  have hg : g = σ.globE := (Except.ok.inj hL.1).symm
-  have hr : σ.ReadsAs σ' := ⟨(hL.2.1.trans hg).symm, fun i => (hL.2.2 i).symm⟩
-  exact (holds_congr_reads φ hm σ σ' (State.H_eq_of_globE hr.1.symm hp) hr).1 h
+  refine ⟨fun h => h.of_lands (Upd.lands_nil σ), fun h => ?_⟩
+  refine Upd.afterT_intro (fun he => nomatch he) fun g σ' hL => ?_
+  have hg : g = σ.globG := (Option.some.inj hL.1).symm
+  have hr : σ.ReadsAs σ' :=
+    ⟨(hL.2.1.trans (congrArg Subtype.val hg)).symm, fun i => (hL.2.2 i).symm⟩
+  exact (holds_congr_reads φ hm σ σ' (congrArg (fun g : State C [] => g.H) hr.1) hr).1 h
 
 /-! ## Updates read one way -/
 
@@ -176,7 +108,7 @@ theorem _root_.Solidity.Modality.afterRunTR_imp {α : Type} {m : Modality} {p q 
 /-! ## Updates that cannot halt -/
 
 /-- A value that cannot halt: a local, a literal. -/
-def Tm.totalB {Γ : Ctx} : Tm C Γ .val → Bool
+def Tm.totalB {Γ : Ctx} {p : PrimTy} : Tm C Γ (.val p) → Bool
   | .pvV _ => true
   | .app0 (.lit _) => true
   | _ => false
@@ -184,8 +116,8 @@ def Tm.totalB {Γ : Ctx} : Tm C Γ .val → Bool
 /-- A path that cannot halt: a root and its fields (`alice.account`), not
 an alias, which may be unset. -/
 def Tm.totalP {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
-  | _, .app0 (.root _) => true
-  | _, .app1 (.field _) _ p => Tm.totalP p
+  | _, .app0 (.root _ _) => true
+  | _, .app1 (.field _) p => Tm.totalP p
   | _, _ => false
 
 /-- A right-hand side that cannot halt. -/
@@ -221,44 +153,57 @@ theorem Upd.totalB_eq_totalBM {Γ Δ : Ctx} (U : Upd C Γ Δ) : U.totalB = U.tot
   | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
     simp only [Upd.totalBM, ← ih]; rfl
 
-theorem Tm.totalB_eval {Γ : Ctx} (σ : State C Γ) :
-    (t : Tm C Γ .val) → t.totalB = true → ∃ v, t.eval σ = .ok v
-  | .pvV _, _ => ⟨_, rfl⟩
-  | .app0 (.lit v), _ => ⟨v, rfl⟩
+theorem Tm.totalB_eval {Γ : Ctx} (σ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p))
+    (h : t.totalB = true) : ∃ v, t.eval σ = some v := by
+  cases t with
+  | pvV i => exact ⟨_, rfl⟩
+  | app0 o =>
+    cases o with
+    | lit v => exact ⟨v, rfl⟩
+    | _ => simp only [Tm.totalB, Bool.false_eq_true] at h
+  | _ => simp only [Tm.totalB, Bool.false_eq_true] at h
 
 /-- A root and its fields read as a path: `Op0.root` and `Op1.field` do
 not halt. -/
-theorem Tm.totalP_eval {Γ : Ctx} (σ : State C Γ) :
-    (p : Tm C Γ .path) → p.totalP = true → ∃ v, p.eval σ = .ok v
-  | .app0 (.root r), _ => ⟨(r, []), rfl⟩
-  | .app1 (.field f) _ p, h => by
-    obtain ⟨⟨r, segs⟩, hv⟩ := Tm.totalP_eval σ p h
-    exact ⟨(r, segs ++ [.field f]), by
-      show (do let (r, segs) ← p.eval σ; pure (r, segs ++ [Semantics.Seg.field f])) = _
-      rw [hv]; rfl⟩
+theorem Tm.totalP_eval {Γ : Ctx} (σ : State C Γ) {s : Srt} (p : Tm C Γ s)
+    (h : p.totalP = true) : ∃ v, p.eval σ = some v := by
+  induction p with
+  | app0 o =>
+    cases o with
+    | root r hr => exact ⟨_, rfl⟩
+    | _ => simp only [Tm.totalP, Bool.false_eq_true] at h
+  | app1 o p ih =>
+    cases o with
+    | field hf =>
+      obtain ⟨v, hv⟩ := ih h
+      exact ⟨v.field hf, by
+        show (p.eval σ).map (·.field hf) = _
+        rw [hv]; rfl⟩
+    | _ => simp only [Tm.totalP, Bool.false_eq_true] at h
+  | _ => simp only [Tm.totalP, Bool.false_eq_true] at h
 
 theorem Rhs.totalB_eval {Γ : Ctx} (σ : State C Γ) :
-    {t : LTy} → (r : Rhs C Γ t) → r.totalB = true → ∃ v, r.eval σ = .ok v
+    {t : LTy} → (r : Rhs C Γ t) → r.totalB = true → ∃ v, r.eval σ = some v
   | _, .val t, h => Tm.totalB_eval σ t h
   | _, .path p, h => by
     obtain ⟨v, hv⟩ := Tm.totalP_eval σ p h
-    exact ⟨some v, by show (do pure (some (← p.eval σ))) = _; rw [hv]; rfl⟩
+    exact ⟨some v, by show (p.eval σ).bind (fun r => some (some r)) = _; rw [hv]; rfl⟩
   | _, .unset, _ => ⟨_, rfl⟩
   | _, .saveNet, _ => ⟨_, rfl⟩
   | _, .saveNetMt, _ => ⟨_, rfl⟩
 
 /-- An update that cannot halt computes a global part (on the twin). -/
 theorem Upd.totalBM_globT {Γ : Ctx} (σ₀ : State C Γ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → U.totalBM = true → ∃ g, U.globT σ₀ = .ok g
-  | _, .nil, _ => ⟨σ₀.globE, rfl⟩
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.totalBM = true → ∃ g, U.globT σ₀ = some g
+  | _, .nil, _ => ⟨σ₀.globG, rfl⟩
   | _, .snoc U (.local i r), h => by
     have h : r.totalB = true ∧ U.totalBM = true := Bool.and_eq_true_iff.mp h
     obtain ⟨g, hg⟩ := Upd.totalBM_globT σ₀ U h.2
     obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r h.1
     exact ⟨g, by
-      change (do UpdElem.globT σ₀ (.local i r) (← U.globT σ₀)) = _
-      rw [hg]
-      change (do let _ ← r.eval σ₀; pure g) = _
+      change (U.globT σ₀).bind (UpdElem.globT σ₀ (.local i r)) = _
+      rw [hg, Option.bind_some]
+      change (r.eval σ₀).bind (fun _ => some g) = _
       rw [hv]; rfl⟩
   | _, .snoc _ (.storage _), h | _, .snoc _ (.memory _), h | _, .snoc _ (.selfBalance ..), h
   | _, .snoc _ (.net ..), h | _, .snoc _ (.pay ..), h | _, .snoc _ (.netMt ..), h
@@ -268,14 +213,14 @@ theorem Upd.totalBM_globT {Γ : Ctx} (σ₀ : State C Γ) :
     obtain ⟨g, hg⟩ := Upd.totalBM_globT σ₀ U h.2
     obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r h.1
     exact ⟨g, by
-      change (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g) = _
-      rw [hg, hv]; rfl⟩
+      change (U.globT σ₀).bind (fun g => (r.eval σ₀).bind fun _ => some g) = _
+      rw [hg, Option.bind_some, hv]; rfl⟩
   | _, .pop U _, h => Upd.totalBM_globT σ₀ U h
   | _, .drop U _, h => Upd.totalBM_globT σ₀ U h
 
 /-- An update that cannot halt computes a global part. -/
 theorem Upd.totalB_globT {Γ Δ : Ctx} (σ₀ : State C Γ) (U : Upd C Γ Δ) (h : U.totalB = true) :
-    ∃ g, U.globT σ₀ = .ok g :=
+    ∃ g, U.globT σ₀ = some g :=
   Upd.totalBM_globT σ₀ U (U.totalB_eq_totalBM ▸ h)
 
 /-- **`applyOnRigidFormula`**: a first-order goal read before the update
@@ -284,7 +229,7 @@ update, under the diamond for one that cannot halt. -/
 theorem holds_upd_of_substU' {m : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ}
     {φ' : Fml C Γ} (hs : Fml.substU U φ = some φ') (ht : m = .box ∨ U.totalB = true)
     (σ : State C Γ) (h : holds σ φ') : holds σ (.upd m U φ) := by
-  refine Upd.afterT_intro (fun e he => ?_) fun _ _ hL _ => (Fml.substU_holds hL φ hs).1 h
+  refine Upd.afterT_intro (fun he => ?_) fun _ _ hL => (Fml.substU_holds hL φ hs).1 h
   rcases ht with rfl | ht
   · trivial
   · obtain ⟨_, h'⟩ := Upd.totalB_globT σ U ht
@@ -452,37 +397,37 @@ theorem Upd.shadow_eq_shadowM {Γ : Ctx} (box : Bool) {Δ : Ctx} (U : Upd C Γ �
 /-- An update's outcome and the outcome of it with writes dropped: both
 return, to states `R` relates; both halt; or only the first halts, under
 the box. -/
-def ResRel {α : Type} (box : Bool) (R : α → α → Prop) : Semantics.Res α → Semantics.Res α → Prop
-  | .ok a, .ok b => R a b
-  | .error _, .error _ => True
-  | .error _, .ok _ => box = true
-  | .ok _, .error _ => False
+def ResRel {α : Type} (box : Bool) (R : α → α → Prop) : Option α → Option α → Prop
+  | some a, some b => R a b
+  | none, none => True
+  | none, some _ => box = true
+  | some _, none => False
 
 theorem ResRel.refl {α : Type} {box : Bool} {R : α → α → Prop} (hR : ∀ a, R a a) :
-    (x : Semantics.Res α) → ResRel box R x x
-  | .ok a => hR a
-  | .error _ => trivial
+    (x : Option α) → ResRel box R x x
+  | some a => hR a
+  | none => trivial
 
-theorem ResRel.trans_eq {α : Type} {box : Bool} {a b c : Semantics.Res α}
+theorem ResRel.trans_eq {α : Type} {box : Bool} {a b c : Option α}
     (h₁ : ResRel box (· = ·) a b) (h₂ : ResRel box (· = ·) b c) : ResRel box (· = ·) a c := by
   cases a <;> cases b <;> cases c <;>
     first | trivial | exact h₁.elim | exact h₂.elim | exact h₁ | exact h₂ | exact h₁.trans h₂
 
 /-- The same continuation after two related outcomes. -/
-theorem ResRel.bind_eq {α β : Type} {box : Bool} {a b : Semantics.Res α}
-    (h : ResRel box (· = ·) a b) (f : α → Semantics.Res β) :
-    ResRel box (· = ·) (a >>= f) (b >>= f) := by
+theorem ResRel.bind_eq {α β : Type} {box : Bool} {a b : Option α}
+    (h : ResRel box (· = ·) a b) (f : α → Option β) :
+    ResRel box (· = ·) (a.bind f) (b.bind f) := by
   cases a with
-  | error => cases b with
-    | error => trivial
-    | ok y =>
-      show ResRel box _ (.error _) (f y)
+  | none => cases b with
+    | none => trivial
+    | some y =>
+      show ResRel box _ none (f y)
       cases f y with
-      | error => trivial
-      | ok => exact h
-  | ok x => cases b with
-    | error => exact h.elim
-    | ok y =>
+      | none => trivial
+      | some => exact h
+  | some x => cases b with
+    | none => exact h.elim
+    | some y =>
       cases (h : x = y)
       exact ResRel.refl (fun _ => rfl) _
 
@@ -498,7 +443,7 @@ theorem Upd.unsetAt_globT {Γ : Ctx} (box : Bool) (i : Nat) (σ₀ : State C Γ)
   | _, .drop U h => ResRel.refl (fun _ => rfl) _
   | _, .snoc U e => by
     have ih := Upd.unsetAt_globT box i σ₀ U
-    show ResRel box _ (U.globT σ₀ >>= e.globT σ₀)
+    show ResRel box _ ((U.globT σ₀).bind (e.globT σ₀))
       ((UpdElem.unsetSnoc box i (U.unsetAtM box i) e).globT σ₀)
     cases e with
     | «local» j r =>
@@ -508,23 +453,23 @@ theorem Upd.unsetAt_globT {Γ : Ctx} (box : Bool) (i : Nat) (σ₀ : State C Γ)
         generalize U.globT σ₀ = a at ih ⊢
         generalize (U.unsetAtM box i).globT σ₀ = b at ih ⊢
         cases a with
-        | error => cases b with
-          | error => trivial
-          | ok => exact ih
-        | ok g =>
+        | none => cases b with
+          | none => trivial
+          | some => exact ih
+        | some g =>
           cases b with
-          | error => exact ih.elim
-          | ok g' =>
+          | none => exact ih.elim
+          | some g' =>
             cases (ih : g = g')
-            show ResRel box _ (do let _ ← r.eval σ₀; pure g) (.ok g)
+            show ResRel box _ ((r.eval σ₀).bind fun _ => some g) (some g)
             cases hr : r.eval σ₀ with
-            | error =>
+            | none =>
               show box = true
               rcases Bool.or_eq_true_iff.mp hd.2 with hb | ht
               · exact hb
               · obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r ht
                 rw [hv] at hr; cases hr
-            | ok v => rfl
+            | some v => rfl
       · exact ResRel.bind_eq ih _
     | _ => exact ResRel.bind_eq ih _
 
@@ -570,17 +515,18 @@ theorem Upd.redecl_globT {Γ : Ctx} (box : Bool) (σ₀ : State C Γ) :
       have ih := Upd.redecl_globT box σ₀ U i r hU'
       have hc : ResRel box (· = ·) ((Upd.snoc (.snoc U e) (.local i r)).globT σ₀)
           ((Upd.snoc (.snoc U (.local i r)) e).globT σ₀) := by
-        show ResRel box _ ((U.globT σ₀ >>= e.globT σ₀) >>= (UpdElem.local i r).globT σ₀)
-          ((U.globT σ₀ >>= (UpdElem.local i r).globT σ₀) >>= e.globT σ₀)
+        show ResRel box _ (((U.globT σ₀).bind (e.globT σ₀)).bind
+            ((UpdElem.local i r).globT σ₀))
+          (((U.globT σ₀).bind ((UpdElem.local i r).globT σ₀)).bind (e.globT σ₀))
         cases U.globT σ₀ with
-        | error => trivial
-        | ok g =>
-          show ResRel box _ (e.globT σ₀ g >>= fun g' => do let _ ← r.eval σ₀; pure g')
-            ((do let _ ← r.eval σ₀; pure g) >>= e.globT σ₀)
+        | none => trivial
+        | some g =>
+          show ResRel box _ ((e.globT σ₀ g).bind fun g' => (r.eval σ₀).bind fun _ => some g')
+            (((r.eval σ₀).bind fun _ => some g).bind (e.globT σ₀))
           cases r.eval σ₀ with
-          | error => cases e.globT σ₀ g <;> trivial
-          | ok v =>
-            show ResRel box _ (e.globT σ₀ g >>= fun g' => pure g') (e.globT σ₀ g)
+          | none => cases e.globT σ₀ g <;> trivial
+          | some v =>
+            show ResRel box _ ((e.globT σ₀ g).bind fun g' => some g') (e.globT σ₀ g)
             cases e.globT σ₀ g <;> exact ResRel.refl (fun _ => rfl) _
       exact ResRel.trans_eq hc (ResRel.bind_eq ih _)
   | _, .decl U x r0, _, .here, r, W', h => by
@@ -589,24 +535,25 @@ theorem Upd.redecl_globT {Γ : Ctx} (box : Bool) (σ₀ : State C Γ) :
     · rename_i hb
       cases h
       show ResRel box _
-        ((do let g ← U.globT σ₀; let _ ← r0.eval σ₀; pure g) >>= (UpdElem.local .here r).globT σ₀)
-        (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g)
+        (((U.globT σ₀).bind fun g => (r0.eval σ₀).bind fun _ => some g).bind
+          ((UpdElem.local .here r).globT σ₀))
+        ((U.globT σ₀).bind fun g => (r.eval σ₀).bind fun _ => some g)
       cases U.globT σ₀ with
-      | error => trivial
-      | ok g =>
+      | none => trivial
+      | some g =>
         cases h0 : r0.eval σ₀ with
-        | error =>
-          show ResRel box _ (.error _) (do let _ ← r.eval σ₀; pure g)
+        | none =>
+          show ResRel box _ none ((r.eval σ₀).bind fun _ => some g)
           cases r.eval σ₀ with
-          | error => trivial
-          | ok =>
+          | none => trivial
+          | some =>
             show box = true
             rcases Bool.or_eq_true_iff.mp hb with hb | ht
             · exact hb
             · obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r0 ht
               rw [hv] at h0; cases h0
-        | ok v0 =>
-          show ResRel box _ (do let _ ← r.eval σ₀; pure g) (do let _ ← r.eval σ₀; pure g)
+        | some v0 =>
+          show ResRel box _ ((r.eval σ₀).bind fun _ => some g) ((r.eval σ₀).bind fun _ => some g)
           exact ResRel.refl (fun _ => rfl) _
     · cases h
   | _, .nil, _, _, _, _, h | _, .pop .., _, _, _, _, h | _, .drop .., _, _, _, _, h => by
@@ -714,19 +661,19 @@ theorem holds_upd_shadow {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fm
     (σ : State C Γ) (h : holds σ (.upd m (U.shadow m.isBoxS) φ)) : holds σ (.upd m U φ) := by
   rw [Upd.shadow_eq_shadowM] at h
   have hr := Upd.shadow_globT m.isBoxS σ U
-  refine Upd.afterT_of_lands (fun e he h' => ?_) (fun g σ' hL => ?_) h
+  refine Upd.afterT_of_lands (fun he h' => ?_) (fun g σ' hL => ?_) h
   · rw [he] at hr
     cases m with
     | box => trivial
     | diamond =>
       cases hb : (U.shadowM Modality.diamond.isBoxS).globT σ with
-      | error e' => exact h'.of_error hb
-      | ok => rw [hb] at hr; exact absurd hr Bool.false_ne_true
+      | none => exact h'.of_none hb
+      | some => rw [hb] at hr; exact absurd hr Bool.false_ne_true
   · refine ⟨?_, hL.2.1, fun k => ?_⟩
     · rw [hL.1] at hr
       cases hb : (U.shadowM m.isBoxS).globT σ with
-      | error => rw [hb] at hr; exact hr.elim
-      | ok g' => rw [hb] at hr; cases (hr : g = g'); rfl
+      | none => rw [hb] at hr; exact hr.elim
+      | some g' => rw [hb] at hr; cases (hr : g = g'); rfl
     · rw [Upd.shadow_held]
       exact hL.2.2 k
 
