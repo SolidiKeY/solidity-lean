@@ -551,6 +551,10 @@ theorem view_eq_uint (x : SVal (.prim .uint)) (b : PrimTy.uint.Denote) :
 theorem view_eq_int (x : SVal (.prim .int)) (b : PrimTy.int.Denote) :
     @Eq (Shape (.prim .int)) x.view b ↔ (x.view : PrimTy.int.Denote).val = b.val :=
   int_eq_iff _ _
+theorem root_field {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
+    (h : C.fieldType s f = some T) : (r.field h).root = r.root := rfl
+theorem root_index {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R)) (it : IndexTy R k V)
+    (i : Int) : (r.index it i).root = r.root := rfl
 theorem ofInt?_uint (n : Int) : PrimTy.uint.ofInt? n =
     if 0 ≤ n ∧ n < uintBound then some (uintOf n) else none := by
   by_cases h : 0 ≤ n ∧ n < uintBound
@@ -851,7 +855,7 @@ attribute [close_rw_s]
   Int.reduceMod Int.reduceDiv Int.reduceTMod Int.reduceTDiv Semantics.uintBound Semantics.intBound
   Close.uintBitwise_ofNat Close.uintBitwise_ofNat_cast Close.uintBitwise_cast_ofNat
   Semantics.uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
-  Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.atT_map_root
+  Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.atT_map_root CloseS.root_field CloseS.root_index
   CloseS.getD_ite Option.getD_some CloseS.erase_uint' CloseS.erase_int'
   CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
