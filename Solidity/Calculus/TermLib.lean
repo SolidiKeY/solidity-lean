@@ -956,6 +956,41 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       (h : p.shift? = some ⟨r', sn', hr', p'⟩ := by rfl) (hne : r' ≠ r := by decide) :
       TermTaclet (.app2 .findIn (K.fill (Tms.STerm.select (Tms.STerm.delAt s p) r hr)) q)
         (.app2 .findIn (K.fill (Tms.STerm.select s r hr)) q)
+  /-- **`selectOnSaveMember`** at a member under a `select`: the write at
+  `f.p` in a storage of members, seen from `f`, is a write at `p`. -/
+  | selectOnSaveMemberAt {sn sn' f : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+      {p : Tm C Γ (.spath sn T)} {v : Tm C Γ (.sv T)}
+      {hf : C.fieldType sn f = some (.ref (.struct sn'))} {p' : Tm C Γ (.spath sn' T)}
+      {sn₁ : Name} (K : SCtxS C Γ sn' sn₁) {P : PrimTy} {q : Tm C Γ (.spath sn₁ (.prim P))}
+      (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩ := by rfl) :
+      TermTaclet (.app2 .findIn (K.fill (.app1 (.selectIn hf) (.app3 .saveIn s p v))) q)
+        (.app2 .findIn (K.fill (.app3 .saveIn (.app1 (.selectIn hf) s) p' v)) q)
+  /-- **`selectOnSaveFrame`** at a member under a `select`: a write under
+  another member is not seen from `f`. -/
+  | selectOnSaveFrameAt {sn sn' sn'' f f' : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+      {p : Tm C Γ (.spath sn T)} {v : Tm C Γ (.sv T)}
+      {hf : C.fieldType sn f = some (.ref (.struct sn'))}
+      {hf' : C.fieldType sn f' = some (.ref (.struct sn''))} {p' : Tm C Γ (.spath sn'' T)}
+      {sn₁ : Name} (K : SCtxS C Γ sn' sn₁) {P : PrimTy} {q : Tm C Γ (.spath sn₁ (.prim P))}
+      (h : p.shiftIn? = some ⟨f', sn'', hf', p'⟩ := by rfl) (hne : f' ≠ f := by decide) :
+      TermTaclet (.app2 .findIn (K.fill (.app1 (.selectIn hf) (.app3 .saveIn s p v))) q)
+        (.app2 .findIn (K.fill (.app1 (.selectIn hf) s)) q)
+  /-- **`selectOnDelAtMember`** at a member under a `select`. -/
+  | selectOnDelAtMemberAt {sn sn' f : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+      {p : Tm C Γ (.spath sn T)} {hf : C.fieldType sn f = some (.ref (.struct sn'))}
+      {p' : Tm C Γ (.spath sn' T)}
+      {sn₁ : Name} (K : SCtxS C Γ sn' sn₁) {P : PrimTy} {q : Tm C Γ (.spath sn₁ (.prim P))}
+      (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩ := by rfl) :
+      TermTaclet (.app2 .findIn (K.fill (.app1 (.selectIn hf) (.app2 .delAtIn s p))) q)
+        (.app2 .findIn (K.fill (.app2 .delAtIn (.app1 (.selectIn hf) s) p')) q)
+  /-- **`selectOnDelAtFrame`** at a member under a `select`. -/
+  | selectOnDelAtFrameAt {sn sn' sn'' f f' : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+      {p : Tm C Γ (.spath sn T)} {hf : C.fieldType sn f = some (.ref (.struct sn'))}
+      {hf' : C.fieldType sn f' = some (.ref (.struct sn''))} {p' : Tm C Γ (.spath sn'' T)}
+      {sn₁ : Name} (K : SCtxS C Γ sn' sn₁) {P : PrimTy} {q : Tm C Γ (.spath sn₁ (.prim P))}
+      (h : p.shiftIn? = some ⟨f', sn'', hf', p'⟩ := by rfl) (hne : f' ≠ f := by decide) :
+      TermTaclet (.app2 .findIn (K.fill (.app1 (.selectIn hf) (.app2 .delAtIn s p))) q)
+        (.app2 .findIn (K.fill (.app1 (.selectIn hf) s)) q)
   /-- **`findOnDelAt`**: where `s` reads the word `w` at `p`, the delete
   leaves its default (`find_delAt_same`, `delValueDefault`). -/
   | findOnDelAt {s : Tm C Γ .st} {P : PrimTy} {p q : Tm C Γ (.path (.prim P))} {w : P.Denote}
@@ -1083,6 +1118,54 @@ theorem Tm.selectOnDelAtFrame_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.p
   simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons]
   rw [if_neg (fun e => hne (Seg.field.inj e))]
 
+theorem Tm.selectOnSaveMemberAt_denote {sn sn' f : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+    {p : Tm C Γ (.spath sn T)} {v : Tm C Γ (.sv T)}
+    {hf : C.fieldType sn f = some (.ref (.struct sn'))} {p' : Tm C Γ (.spath sn' T)}
+    (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩) (σ : State C Γ) :
+    (.app1 (.selectIn hf) (.app3 .saveIn s p v) : Tm C Γ (.sts sn')).denote σ =
+      (.app3 .saveIn (.app1 (.selectIn hf) s) p' v : Tm C Γ (.sts sn')).denote σ := by
+  obtain ⟨hd, hne⟩ := Tm.shiftIn?_ok σ p _ h
+  show asStruct (selectSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (.field f)) =
+    copyTo (asStruct (selectSt (s.denote σ) (.field f))) (p'.denote σ) (v.denote σ)
+  simp only [hd, copyTo, StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne, if_false,
+    asStruct_st, find_cons _ _ hne]
+
+theorem Tm.selectOnSaveFrameAt_denote {sn sn' sn'' f f' : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+    {p : Tm C Γ (.spath sn T)} {v : Tm C Γ (.sv T)}
+    {hf : C.fieldType sn f = some (.ref (.struct sn'))}
+    {hf' : C.fieldType sn f' = some (.ref (.struct sn''))} {p' : Tm C Γ (.spath sn'' T)}
+    (h : p.shiftIn? = some ⟨f', sn'', hf', p'⟩) (hne : f' ≠ f) (σ : State C Γ) :
+    (.app1 (.selectIn hf) (.app3 .saveIn s p v) : Tm C Γ (.sts sn')).denote σ =
+      (.app1 (.selectIn hf) s : Tm C Γ (.sts sn')).denote σ := by
+  obtain ⟨hd, -⟩ := Tm.shiftIn?_ok σ p _ h
+  show asStruct (selectSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (.field f)) =
+    asStruct (selectSt (s.denote σ) (.field f))
+  simp only [hd, copyTo, StValue.selectOnSaveCons]
+  rw [if_neg (fun e => hne (Seg.field.inj e))]
+
+theorem Tm.selectOnDelAtMemberAt_denote {sn sn' f : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+    {p : Tm C Γ (.spath sn T)} {hf : C.fieldType sn f = some (.ref (.struct sn'))}
+    {p' : Tm C Γ (.spath sn' T)} (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩) (σ : State C Γ) :
+    (.app1 (.selectIn hf) (.app2 .delAtIn s p) : Tm C Γ (.sts sn')).denote σ =
+      (.app2 .delAtIn (.app1 (.selectIn hf) s) p' : Tm C Γ (.sts sn')).denote σ := by
+  obtain ⟨hd, hne⟩ := Tm.shiftIn?_ok σ p _ h
+  show asStruct (selectSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (.field f)) =
+    Theory.StValue.delAt (asStruct (selectSt (s.denote σ) (.field f))) (p'.denote σ)
+  simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne,
+    if_false, asStruct_st, find_cons _ _ hne]
+
+theorem Tm.selectOnDelAtFrameAt_denote {sn sn' sn'' f f' : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
+    {p : Tm C Γ (.spath sn T)} {hf : C.fieldType sn f = some (.ref (.struct sn'))}
+    {hf' : C.fieldType sn f' = some (.ref (.struct sn''))} {p' : Tm C Γ (.spath sn'' T)}
+    (h : p.shiftIn? = some ⟨f', sn'', hf', p'⟩) (hne : f' ≠ f) (σ : State C Γ) :
+    (.app1 (.selectIn hf) (.app2 .delAtIn s p) : Tm C Γ (.sts sn')).denote σ =
+      (.app1 (.selectIn hf) s : Tm C Γ (.sts sn')).denote σ := by
+  obtain ⟨hd, -⟩ := Tm.shiftIn?_ok σ p _ h
+  show asStruct (selectSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (.field f)) =
+    asStruct (selectSt (s.denote σ) (.field f))
+  simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons]
+  rw [if_neg (fun e => hne (Seg.field.inj e))]
+
 /-- Two storages of members that denote alike are read alike, in any
 context. -/
 theorem Tm.findIn_fill_theq {sn sn₁ : Name} {s s' : Tm C Γ (.sts sn)}
@@ -1186,6 +1269,14 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
     Tm.findIn_fill_theq (Tm.selectOnDelAtMember_denote h) K q
   | @selectOnDelAtFrameIn _ _ s _ p r sn r' sn' hr hr' p' _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtFrame_denote h hne) K q
+  | @selectOnSaveMemberAt _ _ sn sn' f s _ p v hf p' _ K _ q h =>
+    Tm.findIn_fill_theq (Tm.selectOnSaveMemberAt_denote h) K q
+  | @selectOnSaveFrameAt _ _ sn sn' sn'' f f' s _ p v hf hf' p' _ K _ q h hne =>
+    Tm.findIn_fill_theq (Tm.selectOnSaveFrameAt_denote h hne) K q
+  | @selectOnDelAtMemberAt _ _ sn sn' f s _ p hf p' _ K _ q h =>
+    Tm.findIn_fill_theq (Tm.selectOnDelAtMemberAt_denote h) K q
+  | @selectOnDelAtFrameAt _ _ sn sn' sn'' f f' s _ p hf hf' p' _ K _ q h hne =>
+    Tm.findIn_fill_theq (Tm.selectOnDelAtFrameAt_denote h hne) K q
   | @findOnDelAt _ _ s P p q w hw hp hq => fun σ => by
     have hr : findSt (s.denote σ) (p.denote σ) = .prim (PrimTy.erase w) :=
       Equiv.prim_iff.1 (hw.sound σ)

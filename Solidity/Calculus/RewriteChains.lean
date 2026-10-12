@@ -172,9 +172,13 @@ partial def spinePositions (S : Lean.Expr) (mk : Lean.Expr → MetaM Lean.Expr) 
   else if S.isAppOfArity ``Tm.app2 8 && args[5]!.isAppOf ``Op2.delAtIn then
     let (S', p) := (args[6]!, args[7]!)
     return #[here] ++ (← spinePositions S' fun K => do mk (← mkAppM ``SCtxS.delAt #[K, p]))
-  else if S.isAppOfArity ``Tm.app1 6 && args[4]!.isAppOf ``Op1.selectIn then
-    let (hf, S') := (args[4]!.appArg!, args[5]!)
-    return #[here] ++ (← spinePositions S' fun K => do mk (← mkAppM ``SCtxS.select #[K, hf]))
+  else if S.isAppOfArity ``Tm.app1 6 && args[4]!.isAppOfArity ``Op1.selectIn 5 then
+    -- the member's names from the symbol: its proof may be a computed line's
+    -- `rfl`, whose type the unifier cannot read the names off
+    let oa := args[4]!.getAppArgs
+    let (sn, sn', f, hf, S') := (oa[1]!, oa[2]!, oa[3]!, oa[4]!, args[5]!)
+    return #[here] ++ (← spinePositions S' fun K => do
+      mk (← mkAppOptM ``SCtxS.select #[none, none, none, sn, sn', f, K, hf]))
   else return #[here]
 
 /-- `lhs` matched against `e`: by unification, or, for a law in a context of
@@ -269,12 +273,11 @@ def lawInstances (c : Lean.Name) (φ : Lean.Expr) :
     | .error m => if failed.isNone then failed := m
   return (out, failed)
 
-/-- The law `c` and its twin in a storage of members (`findOnSave` and
-`findOnSaveIn`, `findMemberCons` and `findMemberConsIn`): a link names
-either by the first. -/
+/-- The law `c` and its twins in a storage of members (`findOnSave` and
+`findOnSaveIn`; `selectOnSaveMember`, `selectOnSaveMemberIn` and
+`selectOnSaveMemberAt`, …): a link names each by the first. -/
 def lawTwins (env : Environment) (c : Lean.Name) : List Lean.Name :=
-  let t := c.appendAfter "In"
-  if env.contains t then [c, t] else [c]
+  c :: ([c.appendAfter "In", c.appendAfter "At"].filter env.contains)
 
 /-- The term taclets `~=>` tries, after the update rules of `rwTable`: the
 named rules of `TermTaclet`, and `findOnDelAtSave`. -/
@@ -285,6 +288,8 @@ def rwLaws : List Lean.Name :=
     ``TermTaclet.selectOnDelAtMember, ``TermTaclet.selectOnDelAtFrame,
     ``TermTaclet.selectOnSaveMemberIn, ``TermTaclet.selectOnSaveFrameIn,
     ``TermTaclet.selectOnDelAtMemberIn, ``TermTaclet.selectOnDelAtFrameIn,
+    ``TermTaclet.selectOnSaveMemberAt, ``TermTaclet.selectOnSaveFrameAt,
+    ``TermTaclet.selectOnDelAtMemberAt, ``TermTaclet.selectOnDelAtFrameAt,
     ``TermTaclet.findOnDelAt, ``TermTaclet.findOnDelAtSave, ``TermTaclet.findOnDelAtValue,
     ``TermTaclet.delValueLit, ``TermTaclet.findOnDelAtBelow, ``TermTaclet.findOnDelAtFrame,
     ``TermTaclet.findOnPushFrame, ``TermTaclet.findOnPopFrame, ``TermTaclet.lenOnSaveFrame,
