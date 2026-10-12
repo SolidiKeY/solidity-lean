@@ -179,28 +179,40 @@ def FmlRw.atSpine (g : {Γ Δ : Ctx} → Modality → Upd C Γ Δ → Fml C Δ �
 
 section Laws
 
-variable {Γ : Ctx} {q : Tm C [] .val × Tm C [] .val}
+variable {Γ : Ctx} {p : PrimTy} {q : Tm C [] (.val p) × Tm C [] (.val p)}
 
 /-- Whether `Tm.rwC` rewrites something in `t`. -/
-abbrev Tm.hasC (q : Tm C [] .val × Tm C [] .val) {s : Srt} (t : Tm C Γ s) : Bool :=
+abbrev Tm.hasC (q : Tm C [] (.val p) × Tm C [] (.val p)) {s : Srt} (t : Tm C Γ s) : Bool :=
   Tm.hasBy (Tm.pickClosed q) t
 
 /-- Whether `Upd.rwC` rewrites something. -/
-abbrev Upd.hasC (q : Tm C [] .val × Tm C [] .val) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
+abbrev Upd.hasC (q : Tm C [] (.val p) × Tm C [] (.val p)) {Δ : Ctx} (U : Upd C Γ Δ) : Bool :=
   Upd.hasBy (Tm.pickClosed q) U
 
 /-- Two closed terms that return alike in every state: a literal law's. -/
-def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : State C [], t.eval σ = t'.eval σ
+def Tm.EvalEq (t t' : Tm C [] (.val p)) : Prop := ∀ σ : State C [], t.eval σ = t'.eval σ
 
 /-- A literal law's two sides return alike. -/
-theorem LitLaw.evalEqT {t t' : Tm C [] .val} (r : LitLaw t t') : Tm.EvalEq t t' := fun σ =>
+theorem LitLaw.evalEqT {t t' : Tm C [] (.val p)} (r : LitLaw t t') : Tm.EvalEq t t' := fun σ =>
   r.evalEq σ
 
 theorem Tm.pickClosed_eq (hq : Tm.EvalEq q.1 q.2) (σ : State C Γ) :
-    PickEq (Tm.pickClosed q) σ := fun h => by
-  obtain ⟨rfl, hc, rfl⟩ := Tm.pickClosed_some h
-  show (Tm.ofNil q.2).eval σ = _
-  rw [Tm.eval_ofNil σ, Tm.eval_closedAs hc σ, hq]
+    PickEq (Tm.pickClosed q) σ := by
+  intro s t t' h
+  cases s with
+  | val p' =>
+    simp only [Tm.pickClosed] at h
+    split at h
+    · rename_i e
+      subst e
+      split at h
+      · rename_i hc
+        cases h
+        rw [Tm.eval_closedAs hc σ, Tm.eval_ofNil σ]
+        exact (hq σ.toNil).symm
+      · cases h
+    · cases h
+  | _ => simp only [Tm.pickClosed, reduceCtorEq] at h
 
 /-- **An exact law keeps what every term returns.** -/
 theorem Tm.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : State C Γ) {s : Srt} (t : Tm C Γ s) :
@@ -214,12 +226,12 @@ theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U 
 end Laws
 
 /-- An exact law in the update's right-hand sides, under any modality. -/
-def Fml.updRwEq (q : Tm C [] .val × Tm C [] .val) {Γ Δ : Ctx} (m : Modality)
+def Fml.updRwEq {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ Δ : Ctx} (m : Modality)
     (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
   if U.hasC q then some (.upd m (U.rwC q) φ) else none
 
 /-- A law in the right-hand sides of a box update. -/
-def Fml.updRwBox (q : Tm C [] .val × Tm C [] .val) {Γ Δ : Ctx} :
+def Fml.updRwBox {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ Δ : Ctx} :
     Modality → Upd C Γ Δ → Fml C Δ → Option (Fml C Γ)
   | .box, U, φ => if U.hasC q then some (.upd .box (U.rwC q) φ) else none
   | .diamond, _, _ => none
@@ -228,7 +240,7 @@ namespace FmlRw
 
 /-- **A literal law** (`add_literals`, …) in the right-hand sides of the
 update at position `i`, under any modality: it is exact. -/
-def lit {t t' : Tm C [] .val} (r : LitLaw t t') (i : Nat) : FmlRw C :=
+def lit {p : PrimTy} {t t' : Tm C [] (.val p)} (r : LitLaw t t') (i : Nat) : FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.updRwEq (t, t') m U φ)
     (fun {_ _ m U φ ψ} h σ hψ => by
       dsimp only [Fml.updRwEq] at h
@@ -238,7 +250,8 @@ def lit {t t' : Tm C [] .val} (r : LitLaw t t') (i : Nat) : FmlRw C :=
 
 /-- **A term taclet** onto a literal, in the right-hand sides of the box
 update at position `i` (solkey's `updRw`). -/
-def lawUpd {t t' : Tm C [] .val} (r : TermTaclet t t') (ht : t'.isLit = true) (i : Nat) :
+def lawUpd {p : PrimTy} {t t' : Tm C [] (.val p)} (r : TermTaclet t t') (ht : t'.isLit = true)
+    (i : Nat) :
     FmlRw C :=
   FmlRw.atSpine (fun m U φ => Fml.updRwBox (t, t') m U φ) (fun {_ _ m U φ ψ} h σ hψ => by
     cases m with
@@ -255,10 +268,16 @@ end FmlRw
 
 section Push
 
-/-- A value term that cannot halt: a local, a literal. -/
-def Tm.totalV {Γ : Ctx} : Tm C Γ .val → Bool
+/-- A constant that cannot halt: a literal. -/
+def Op0.totalV {u : Srt} : Op0 C u → Bool
+  | .lit _ => true
+  | _ => false
+
+/-- A value term that cannot halt: a local, a literal.  Generic in the
+sort. -/
+def Tm.totalV {Γ : Ctx} {u : Srt} : Tm C Γ u → Bool
   | .pvV _ => true
-  | .app0 (.lit _) => true
+  | .app0 o => o.totalV
   | _ => false
 
 /-- A right-hand side that cannot halt. -/
@@ -277,39 +296,44 @@ def Upd.totalS {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .decl U _ r => Upd.totalS U && r.totalS
   | _, .pop U _ | _, .drop U _ => Upd.totalS U
 
-theorem Tm.totalV_eval {Γ : Ctx} (σ : State C Γ) :
-    (t : Tm C Γ .val) → t.totalV = true → ∃ v, t.eval σ = .ok v
-  | .pvV _, _ => ⟨_, rfl⟩
-  | .app0 (.lit v), _ => ⟨v, rfl⟩
-  | .app0 (.env _), h | .netOf .., h | .app1 .., h | .app2 .., h | .app3 .., h => by cases h
+theorem Tm.totalV_eval {Γ : Ctx} (σ : State C Γ) {u : Srt} :
+    (t : Tm C Γ u) → t.totalV = true → t.eval σ ≠ none
+  | .pvV _, _ => Option.some_ne_none _
+  | .app0 o, h => by
+    cases o with
+    | lit v => exact Option.some_ne_none _
+    | _ => cases h
+  | .pvP _, h | .pvS _, h | .pvI _, h | .netOf .., h | .app1 .., h | .app2 .., h
+  | .app3 .., h => by cases h
 
 theorem Rhs.totalS_eval {Γ : Ctx} (σ : State C Γ) :
-    {t : LTy} → (r : Rhs C Γ t) → r.totalS = true → ∃ v, r.eval σ = .ok v
+    {t : LTy} → (r : Rhs C Γ t) → r.totalS = true → r.eval σ ≠ none
   | _, .val t, h => Tm.totalV_eval σ t h
-  | _, .unset, _ => ⟨_, rfl⟩
-  | _, .saveNetMt, _ => ⟨_, rfl⟩
+  | _, .unset, _ => Option.some_ne_none _
+  | _, .saveNetMt, _ => Option.some_ne_none _
   | _, .path _, h | _, .mref _, h | _, .store _, h | _, .saveNet, h => by cases h
 
 theorem Upd.totalS_globT {Γ : Ctx} (σ₀ : State C Γ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → U.totalS = true → ∃ g, U.globT σ₀ = .ok g
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.totalS = true → ∃ g, U.globT σ₀ = some g
   | _, .nil, _ => ⟨_, rfl⟩
   | _, .snoc U (.local i r), h => by
     obtain ⟨hU, hr⟩ := Bool.and_eq_true_iff.1 h
     obtain ⟨g, hg⟩ := Upd.totalS_globT σ₀ U hU
-    obtain ⟨v, hv⟩ := Rhs.totalS_eval σ₀ r hr
+    obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 (Rhs.totalS_eval σ₀ r hr)
     refine ⟨g, ?_⟩
-    simp only [Upd.globT, UpdElem.globT, hg, hv]
-    rfl
+    show (U.globT σ₀).bind (UpdElem.globT σ₀ (.local i r)) = some g
+    rw [hg, Option.bind_some, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, hv, Option.bind_some]
   | _, .snoc _ (.storage _), h | _, .snoc _ (.memory _), h | _, .snoc _ (.selfBalance ..), h
   | _, .snoc _ (.net ..), h | _, .snoc _ (.pay ..), h | _, .snoc _ (.netMt ..), h
   | _, .snoc _ (.setBalance _), h => by cases h
   | _, .decl U x r, h => by
     obtain ⟨hU, hr⟩ := Bool.and_eq_true_iff.1 h
     obtain ⟨g, hg⟩ := Upd.totalS_globT σ₀ U hU
-    obtain ⟨v, hv⟩ := Rhs.totalS_eval σ₀ r hr
+    obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 (Rhs.totalS_eval σ₀ r hr)
     refine ⟨g, ?_⟩
-    simp only [Upd.globT, hg, hv]
-    rfl
+    show (U.globT σ₀).bind (fun g => (r.eval σ₀).bind fun _ => some g) = some g
+    rw [hg, Option.bind_some, hv, Option.bind_some]
   | _, .pop U _, h => Upd.totalS_globT σ₀ U h
   | _, .drop U _, h => Upd.totalS_globT σ₀ U h
 
@@ -359,10 +383,10 @@ def Fml.pushS (m : Modality) (U : Upd C Γ Δ) : Skel → Fml C Δ → Fml C Γ
 /-- The update in front, where it returns: what it leaves read in each typed
 state it lands on. -/
 theorem holds_upd_of_ok {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ} {σ : State C Γ}
-    (hU : (∃ g, U.globT σ = .ok g) ∨ m = .box)
-    (k : ∀ g (σ' : State C Δ), U.Lands σ g σ' → σ.H <+: σ'.H → holds σ' φ) :
+    (hU : (∃ g, U.globT σ = some g) ∨ m = .box)
+    (k : ∀ g (σ' : State C Δ), U.Lands σ g σ' → holds σ' φ) :
     holds σ (.upd m U φ) := by
-  refine Upd.afterT_intro (fun e he => ?_) k
+  refine Upd.afterT_intro (fun he => ?_) k
   rcases hU with ⟨g, hg⟩ | rfl
   · rw [he] at hg; cases hg
   · trivial
@@ -375,7 +399,7 @@ theorem holds_upd_and {m : Modality} {U : Upd C Γ Δ} {a b : Fml C Δ} {σ : St
 /-- **The update pushed through gives the update in front**, where the
 update returns or under the box. -/
 theorem Fml.pushS_sound {m : Modality} {U : Upd C Γ Δ} {σ : State C Γ}
-    (hU : (∃ g, U.globT σ = .ok g) ∨ m = .box) :
+    (hU : (∃ g, U.globT σ = some g) ∨ m = .box) :
     (s : Skel) → (φ : Fml C Δ) → holds σ (Fml.pushS m U s φ) → holds σ (.upd m U φ)
   | .and _ _ l r, φ, h => by
     cases φ with
@@ -389,9 +413,9 @@ theorem Fml.pushS_sound {m : Modality} {U : Upd C Γ Δ} {σ : State C Γ}
       split at h
       · split at h
         · rename_i a' hs
-          refine holds_upd_of_ok hU fun g σ' hL x ha => ?_
+          refine holds_upd_of_ok hU fun g σ' hL ha => ?_
           have hb := Fml.pushS_sound hU r b (h ((Fml.substU_holds hL a hs).2 ha))
-          exact hb.of_lands hL x
+          exact hb.of_lands hL
         · exact h
       · exact h
     | _ => exact h
@@ -402,7 +426,7 @@ theorem Fml.pushS_sound {m : Modality} {U : Upd C Γ Δ} {σ : State C Γ}
       split at h
       · split at h
         · rename_i a' hs
-          exact holds_upd_of_ok hU fun g σ' hL _ ha =>
+          exact holds_upd_of_ok hU fun g σ' hL ha =>
             h ((Fml.substU_holds hL a hs).2 ha)
         · exact h
       · exact h
@@ -411,7 +435,7 @@ theorem Fml.pushS_sound {m : Modality} {U : Upd C Γ Δ} {σ : State C Γ}
     simp only [Fml.pushS] at h
     split at h
     · rename_i φ' hs
-      exact holds_upd_of_ok hU fun g σ' hL _ => (Fml.substU_holds hL φ hs).1 h
+      exact holds_upd_of_ok hU fun g σ' hL => (Fml.substU_holds hL φ hs).1 h
     · exact h
   | .opaque, _, h | .upd _, _, h => h
 
@@ -479,23 +503,23 @@ equivalence, so it applies at any position, negative ones included. -/
 
 section LawEq
 
-variable {Γ : Ctx}
+variable {Γ : Ctx} {p : PrimTy}
 
 /-- An atom with the law `q` read in it; `exact` for a law whose two sides
 return alike. -/
-def Fml.lawAtom (q : Tm C [] .val × Tm C [] .val) (exact : Bool) : Fml C Γ → Fml C Γ
+def Fml.lawAtom (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) : Fml C Γ → Fml C Γ
   | .eq a b => .eq (a.sideC q) (b.sideC q)
   | .defined t => if exact then .defined (t.rwC q) else .defined t
   | φ => φ
 
 /-- Whether `Fml.lawAtom` rewrites something. -/
-def Fml.lawAtomFires (q : Tm C [] .val × Tm C [] .val) (exact : Bool) : Fml C Γ → Bool
-  | .eq a b => a.closedAs q.1 || b.closedAs q.1
+def Fml.lawAtomFires (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) : Fml C Γ → Bool
+  | .eq a b => (Tm.pickClosed q a).isSome || (Tm.pickClosed q b).isSome
   | .defined t => exact && t.hasC q
   | _ => false
 
 /-- The law `q` in the atoms along the skeleton `s`. -/
-def Fml.lawAlongS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) :
+def Fml.lawAlongS (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) :
     {Γ : Ctx} → Skel → Fml C Γ → Fml C Γ
   | _, .lit, φ => Fml.lawAtom q exact φ
   | _, .and _ _ l r, .and a b => .and (Fml.lawAlongS q exact l a) (Fml.lawAlongS q exact r b)
@@ -505,7 +529,7 @@ def Fml.lawAlongS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) :
   | _, _, φ => φ
 
 /-- Whether `Fml.lawAlongS` rewrites something. -/
-def Fml.lawFiresS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) :
+def Fml.lawFiresS (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) :
     {Γ : Ctx} → Skel → Fml C Γ → Bool
   | _, .lit, φ => Fml.lawAtomFires q exact φ
   | _, .and _ _ l r, .and a b => Fml.lawFiresS q exact l a || Fml.lawFiresS q exact r b
@@ -514,7 +538,7 @@ def Fml.lawFiresS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) :
   | _, .upd s, .upd _ _ ψ => Fml.lawFiresS q exact s ψ
   | _, _, _ => false
 
-variable {q : Tm C [] .val × Tm C [] .val} {exact : Bool}
+variable {q : Tm C [] (.val p) × Tm C [] (.val p)} {exact : Bool}
 
 theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalEq q.1 q.2)
     (φ : Fml C Γ) (σ : State C Γ) : holds σ (Fml.lawAtom q exact φ) ↔ holds σ φ := by
@@ -569,7 +593,7 @@ theorem Fml.lawAlongS_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.Eva
   | _, .opaque, _, _ => Iff.rfl
 
 /-- The law along the skeleton, where it rewrites something. -/
-def Fml.lawOnS (q : Tm C [] .val × Tm C [] .val) (exact : Bool) (s : Skel) (φ : Fml C Γ) :
+def Fml.lawOnS (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) (s : Skel) (φ : Fml C Γ) :
     Option (Fml C Γ) :=
   if Fml.lawFiresS q exact s φ then some (Fml.lawAlongS q exact s φ) else none
 
@@ -588,14 +612,16 @@ namespace FmlRw
 /-- **A literal law** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation, and every closed
 occurrence in a `defined(…)` term. -/
-def litEq {t t' : Tm C [] .val} (r : LitLaw t t') (n : Nat) (s : Skel) : FmlRw C :=
+def litEq {p : PrimTy} {t t' : Tm C [] (.val p)} (r : LitLaw t t') (n : Nat) (s : Skel) :
+    FmlRw C :=
   FmlRw.below (fun φ => Fml.lawOnS (t, t') true s φ)
     (fun h σ hψ => Fml.lawOnS_sound (q := (t, t')) r.theq (fun _ => r.evalEqT) h σ hψ) n
 
 /-- **A term taclet** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation (solkey's `\find` on an
 equation's side). -/
-def lawEq {t t' : Tm C [] .val} (r : TermTaclet t t') (n : Nat) (s : Skel) : FmlRw C :=
+def lawEq {p : PrimTy} {t t' : Tm C [] (.val p)} (r : TermTaclet t t') (n : Nat) (s : Skel) :
+    FmlRw C :=
   FmlRw.below (fun φ => Fml.lawOnS (t, t') false s φ)
     (fun h σ hψ => Fml.lawOnS_sound (q := (t, t')) r.sound (fun h => absurd h Bool.false_ne_true)
       h σ hψ) n
@@ -685,30 +711,28 @@ section ApplyOnPV
 variable {Γ Δ : Ctx}
 
 /-- The literal a local holds after an update, if it holds one. -/
-def Held.litVal? {p : PrimTy} : Held C Γ (.val p) → Option Semantics.Value
+def Held.litVal? {p : PrimTy} : Held C Γ (.val p) → Option p.Denote
   | .rhs (.val t) => t.litVal?
   | _ => none
 
-theorem Tm.litVal?_eval {Γ : Ctx} (σ : State C Γ) :
-    (t : Tm C Γ .val) → {v : Semantics.Value} → t.litVal? = some v → t.eval σ = .ok v
-  | .app0 (.lit _), _, h => by cases h; rfl
-  | .pvV _, _, h | .netOf .., _, h | .app1 .., _, h | .app2 .., _, h | .app3 .., _, h => by
-    cases h
-  | .app0 (.env _), _, h => by cases h
+theorem Tm.litVal?_eval {Γ : Ctx} (σ : State C Γ) {p : PrimTy} {t : Tm C Γ (.val p)}
+    {v : p.Denote} (h : t.litVal? = some v) : t.eval σ = some v := by
+  rw [Tm.eq_of_litVal? h]
+  rfl
 
 /-- A local holding a literal after an update holds it in every typed state
 the update lands on. -/
 theorem Held.litVal?_get {σ₀ : State C Γ} {σ₁ : State C Δ} {p : PrimTy} {i : Idx Δ (.val p)}
-    {x : Held C Γ (.val p)} (hok : Held.OKT σ₀ σ₁ i x) {v : Semantics.Value}
-    (h : x.litVal? = some v) : σ₁.getE i = v := by
+    {x : Held C Γ (.val p)} (hok : Held.OK σ₀ σ₁ i x) {v : p.Denote}
+    (h : x.litVal? = some v) : TEnv.get i σ₁.env = v := by
   cases x with
   | pos j => cases h
   | rhs r =>
     cases r with
     | val t =>
-      have hok : t.eval σ₀ = .ok (σ₁.getE i) := hok
-      rw [Tm.litVal?_eval σ₀ t h] at hok
-      exact (Except.ok.inj hok).symm
+      have hok : t.eval σ₀ = some (TEnv.get i σ₁.env) := hok
+      rw [Tm.litVal?_eval σ₀ h] at hok
+      exact (Option.some.inj hok).symm
 
 /-- A term with each value local `s` leaves holding a literal read as it. -/
 def Tm.litPV (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Tm C Δ k
@@ -716,7 +740,7 @@ def Tm.litPV (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Tm C Δ k
     | some v => .app0 (.lit v)
     | none => .pvV i
   | _, .netOf i a => .netOf i (Tm.litPV s a)
-  | _, .app1 o ho x => .app1 o ho (Tm.litPV s x)
+  | _, .app1 o x => .app1 o (Tm.litPV s x)
   | _, .app2 o x y => .app2 o (Tm.litPV s x) (Tm.litPV s y)
   | _, .app3 o x y z => .app3 o (Tm.litPV s x) (Tm.litPV s y) (Tm.litPV s z)
   | _, t => t
@@ -725,14 +749,14 @@ def Tm.litPV (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Tm C Δ k
 def Tm.litPVFires (s : Subst C Γ Δ) : {k : Srt} → Tm C Δ k → Bool
   | _, .pvV i => ((s i).litVal?).isSome
   | _, .netOf _ a => Tm.litPVFires s a
-  | _, .app1 _ _ x => Tm.litPVFires s x
+  | _, .app1 _ x => Tm.litPVFires s x
   | _, .app2 _ x y => Tm.litPVFires s x || Tm.litPVFires s y
   | _, .app3 _ x y z => Tm.litPVFires s x || Tm.litPVFires s y || Tm.litPVFires s z
   | _, _ => false
 
 /-- **A local read as the literal it holds** reads and denotes as before. -/
 theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
-    (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OKT σ₀ τ i (s i)) :
+    (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ τ i (s i)) :
     {k : Srt} → (t : Tm C Δ k) →
       (t.litPV s).eval τ = t.eval τ ∧ (t.litPV s).denote τ = t.denote τ
   | _, .pvV i => by
@@ -740,25 +764,48 @@ theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
     split
     · rename_i v hv
       have hg := Held.litVal?_get (hok i) hv
-      exact ⟨by simp only [Tm.eval, hg]; rfl, by simp only [Tm.denote, hg]; rfl⟩
+      refine ⟨?_, ?_⟩
+      · show some v = some (TEnv.get i τ.env)
+        rw [hg]
+      · show Theory.StValue.prim (PrimTy.erase v) = Theory.StValue.prim (PrimTy.erase (TEnv.get i τ.env))
+        rw [hg]
     · exact ⟨rfl, rfl⟩
   | _, .netOf i a => by
     obtain ⟨he, hd⟩ := Tm.litPV_eq hok a
-    exact ⟨by simp only [Tm.litPV, Tm.eval, he], by simp only [Tm.litPV, Tm.denote, hd]⟩
-  | _, .app1 o ho x => by
+    refine ⟨?_, ?_⟩
+    · show ((a.litPV s).eval τ).bind _ = (a.eval τ).bind _
+      rw [he]
+    · show (match (a.litPV s).denote τ with
+        | .prim (.int n) => _ | _ => _) = (match a.denote τ with | .prim (.int n) => _ | _ => _)
+      rw [hd]
+  | _, .app1 o x => by
     obtain ⟨he, hd⟩ := Tm.litPV_eq hok x
-    exact ⟨by simp only [Tm.litPV, Tm.eval, he], by simp only [Tm.litPV, Tm.denote, hd]⟩
+    refine ⟨?_, ?_⟩
+    · show o.eval τ.glob ((x.litPV s).eval τ) = o.eval τ.glob (x.eval τ)
+      rw [he]
+    · show o.denote τ.glob ((x.litPV s).denote τ) = o.denote τ.glob (x.denote τ)
+      rw [hd]
   | _, .app2 o x y => by
     obtain ⟨hex, hdx⟩ := Tm.litPV_eq hok x
     obtain ⟨hey, hdy⟩ := Tm.litPV_eq hok y
-    exact ⟨by simp only [Tm.litPV, Tm.eval, hex, hey],
-      by simp only [Tm.litPV, Tm.denote, hex, hey, hdx, hdy]⟩
+    refine ⟨?_, ?_⟩
+    · show o.eval τ.glob ((x.litPV s).eval τ) ((y.litPV s).eval τ) =
+        o.eval τ.glob (x.eval τ) (y.eval τ)
+      rw [hex, hey]
+    · show o.denote τ.glob ((x.litPV s).eval τ) ((y.litPV s).eval τ) ((x.litPV s).denote τ)
+        ((y.litPV s).denote τ) = o.denote τ.glob (x.eval τ) (y.eval τ) (x.denote τ) (y.denote τ)
+      rw [hex, hey, hdx, hdy]
   | _, .app3 o x y z => by
     obtain ⟨hex, hdx⟩ := Tm.litPV_eq hok x
     obtain ⟨hey, hdy⟩ := Tm.litPV_eq hok y
     obtain ⟨hez, hdz⟩ := Tm.litPV_eq hok z
-    exact ⟨by simp only [Tm.litPV, Tm.eval, hex, hey, hez],
-      by simp only [Tm.litPV, Tm.denote, hdx, hdy, hdz]⟩
+    refine ⟨?_, ?_⟩
+    · show o.eval τ.glob ((x.litPV s).eval τ) ((y.litPV s).eval τ) ((z.litPV s).eval τ) =
+        o.eval τ.glob (x.eval τ) (y.eval τ) (z.eval τ)
+      rw [hex, hey, hez]
+    · show o.denote ((x.litPV s).denote τ) ((y.litPV s).denote τ) ((z.litPV s).denote τ) =
+        o.denote (x.denote τ) (y.denote τ) (z.denote τ)
+      rw [hdx, hdy, hdz]
   | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ => ⟨rfl, rfl⟩
 
 /-- The atoms along the skeleton `s`, not past an update, with the locals
@@ -781,7 +828,7 @@ def Fml.litPVFires (h : Subst C Γ Δ) : Skel → Fml C Δ → Bool
   | _, _ => false
 
 theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : State C Γ} (σ : State C Δ)
-    (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OKT σ₀ σ i (h i)) :
+    (hok : ∀ {t : LTy} (i : Idx Δ t), Held.OK σ₀ σ i (h i)) :
     (s : Skel) → (φ : Fml C Δ) → (holds σ (Fml.litPVAlong h s φ) ↔ holds σ φ)
   | .lit, .eq a b => by
     show holds σ (.eq (a.litPV h) (b.litPV h)) ↔ holds σ (.eq a b)
@@ -818,8 +865,8 @@ theorem Fml.applyOnPVTop_sound {s : Skel} {m : Modality} {U : Upd C Γ Δ} {φ :
   unfold Fml.applyOnPVTop at h
   split at h
   · cases h
-    exact Upd.afterT_intro (fun _ he => hψ.of_error he) fun _ σ' hL hx =>
-      (Fml.litPVAlong_holds σ' hL.2.2 s φ).1 (hψ.of_lands hL hx)
+    exact Upd.afterT_intro (fun he => hψ.of_none he) fun _ σ' hL =>
+      (Fml.litPVAlong_holds σ' hL.2.2 s φ).1 (hψ.of_lands hL)
   · cases h
 
 end ApplyOnPV
@@ -902,8 +949,10 @@ def Fml.notCS (o : Bool) (φ : Fml C Γ) : Fml C Γ :=
 /-- A literal leaf folded: two literals compared (`eqClose`), a literal
 defined. -/
 def Fml.litCS : Fml C Γ → Fml C Γ
-  | .eq (.app0 (.lit v)) (.app0 (.lit w)) => if v = w then .tt else .ff
-  | .defined (.app0 (.lit _)) => .tt
+  | .eq a b => match a.litVal?, b.litVal? with
+    | some v, some w => if v = w then .tt else .ff
+    | _, _ => .eq a b
+  | .defined t => if t.isLit then .tt else .defined t
   | φ => φ
 
 /-- Whether a fold fires on a connective's parts. -/
@@ -912,7 +961,8 @@ def Fml.connFiresS (lo ro : Bool) (φ ψ : Fml C Γ) : Bool :=
 
 /-- Whether a fold fires on a literal leaf. -/
 def Fml.litFiresS : Fml C Γ → Bool
-  | .eq (.app0 (.lit _)) (.app0 (.lit _)) | .defined (.app0 (.lit _)) => true
+  | .eq a b => a.isLit && b.isLit
+  | .defined t => t.isLit
   | _ => false
 
 theorem Fml.andCS_holds (lo ro : Bool) (φ ψ : Fml C Γ) (σ : State C Γ) :
@@ -976,19 +1026,37 @@ theorem Fml.notCS_holds (o : Bool) (φ : Fml C Γ) (σ : State C Γ) :
   exact Iff.rfl
 
 theorem Fml.litCS_holds (φ : Fml C Γ) (σ : State C Γ) : holds σ φ.litCS ↔ holds σ φ := by
-  unfold Fml.litCS
-  split
-  · rename_i v w
+  cases φ with
+  | eq a b =>
+    show holds σ (match a.litVal?, b.litVal? with
+      | some v, some w => if v = w then .tt else .ff
+      | _, _ => .eq a b) ↔ _
+    cases ha : a.litVal? with
+    | none => exact Iff.rfl
+    | some v =>
+      cases hb : b.litVal? with
+      | none => exact Iff.rfl
+      | some w =>
+        obtain rfl := Tm.eq_of_litVal? ha
+        obtain rfl := Tm.eq_of_litVal? hb
+        show holds σ (if v = w then .tt else .ff) ↔ _
+        split
+        · rename_i hvw
+          subst hvw
+          exact ⟨fun _ => Equiv.refl _, fun _ => trivial⟩
+        · rename_i hvw
+          refine ⟨fun h => absurd trivial h, fun h => ?_⟩
+          exact absurd (PrimTy.erase_injective (StValue.prim.inj (Equiv.prim_iff.1 h))) hvw
+  | defined t =>
+    show holds σ (if t.isLit then .tt else .defined t) ↔ _
     split
-    · rename_i hvw
-      subst hvw
-      exact ⟨fun _ => Equiv.refl _, fun _ => trivial⟩
-    · rename_i hvw
-      refine ⟨fun h => absurd trivial h, fun h => ?_⟩
-      exact absurd (StValue.prim.inj (Equiv.prim_iff.1 h)) hvw
-  · rename_i v
-    exact ⟨fun _ => ⟨v, rfl⟩, fun _ => trivial⟩
-  · exact Iff.rfl
+    · rename_i ht
+      obtain ⟨v, hv⟩ := Option.isSome_iff_exists.1 ht
+      refine ⟨fun _ => ?_, fun _ => trivial⟩
+      rw [holds_defined, Tm.litVal?_eval σ hv]
+      exact Option.some_ne_none _
+    · exact Iff.rfl
+  | _ => exact Iff.rfl
 
 /-- The folds, bottom-up along the skeleton `s`. -/
 def Fml.concreteAlongS : Skel → Fml C Γ → Fml C Γ

@@ -74,76 +74,85 @@ def Tm.thinS? (h : Thin Γ' Γ) : {s : Srt} → Tm C Γ s → Option (Tm C Γ' s
   | _, .pvI i => (Idx.unwk? h i).map .pvI
   | _, .netOf i a => do pure (.netOf (← Idx.unwk? h i) (← Tm.thinS? h a))
   | _, .app0 o => some (.app0 o)
-  | _, .app1 o ho x => (Tm.thinS? h x).map (.app1 o ho)
+  | _, .app1 o x => (Tm.thinS? h x).map (.app1 o)
   | _, .app2 o x y => do pure (.app2 o (← Tm.thinS? h x) (← Tm.thinS? h y))
   | _, .app3 o x y z => do pure (.app3 o (← Tm.thinS? h x) (← Tm.thinS? h y) (← Tm.thinS? h z))
 
-/-- `σ'` is `σ` with the locals the thinning drops left out, as a term reads
-them: one global part, each kept local where `h` puts it. -/
-def State.ThinOf (h : Thin Γ' Γ) (σ' : State C Γ') (σ : State C Γ) : Prop :=
-  σ'.globE = σ.globE ∧ ∀ {t : LTy} (j : Idx Γ' t), σ'.getE j = σ.getE (j.wk h)
+/-- `σ'` is `σ` with the locals the thinning drops left out. -/
+def State.ThinOf (h : Thin Γ' Γ) (σ' : State C Γ') (σ : State C Γ) : Prop := σ' = σ.thin h
 
-theorem State.ThinOf.thin (h : Thin Γ' Γ) (σ : State C Γ) : State.ThinOf h (σ.thin h) σ :=
-  ⟨rfl, fun j => State.getE_thin h σ j⟩
+theorem State.ThinOf.thin (h : Thin Γ' Γ) (σ : State C Γ) : State.ThinOf h (σ.thin h) σ := rfl
 
-theorem State.ThinOf.getE_unwk? {h : Thin Γ' Γ} {σ' : State C Γ'} {σ : State C Γ}
-    (hr : State.ThinOf h σ' σ) {t : LTy} {i : Idx Γ t} {j : Idx Γ' t}
-    (hj : Idx.unwk? h i = some j) : σ'.getE j = σ.getE i := by
-  rw [hr.2 j, Idx.unwk?_wk h i hj]
+/-- A local the thinning keeps reads alike with the rest dropped. -/
+theorem TEnv.get_unwk? {H : HTy} {h : Thin Γ' Γ} (e : TEnv C H Γ) {t : LTy} {i : Idx Γ t}
+    {j : Idx Γ' t} (hj : Idx.unwk? h i = some j) : TEnv.get j (TEnv.thin h e) = TEnv.get i e := by
+  rw [TEnv.get_thin_wk, Idx.unwk?_wk h i hj]
 
 /-- **A term that reads no dropped local reads alike with them dropped.** -/
-theorem Tm.eval_thinS? {h : Thin Γ' Γ} {σ' : State C Γ'} {σ : State C Γ}
-    (hr : State.ThinOf h σ' σ) :
+theorem Tm.eval_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
     {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
-      t'.eval σ' = t.eval σ
+      t'.eval (σ.thin h) = t.eval σ
   | _, .pvV i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.eval, hr.getE_unwk? hj]
+    show some (TEnv.get j (TEnv.thin h σ.env)) = _
+    rw [TEnv.get_unwk? σ.env hj]
+    rfl
   | _, .pvP i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.eval, State.aliasPathT_getE, hr.getE_unwk? hj]
+    show TEnv.get j (TEnv.thin h σ.env) = _
+    rw [TEnv.get_unwk? σ.env hj]
+    rfl
   | _, .pvS i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.eval, hr.1, hr.getE_unwk? hj]
+    show some (TEnv.get j (TEnv.thin h σ.env)) = _
+    rw [TEnv.get_unwk? σ.env hj]
+    rfl
   | _, .pvI i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.eval, State.memRefT_getE, hr.getE_unwk? hj]
+    show (TEnv.get j (TEnv.thin h σ.env)).map (·.id) = _
+    rw [TEnv.get_unwk? σ.env hj]
+    rfl
   | _, .netOf i a, _, ht => by
     obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
     cases ht
-    simp only [Tm.eval, hr.getE_unwk? hj, Tm.eval_thinS? hr a ha]
-  | _, .app0 _, _, ht => by cases ht; simp only [Tm.eval, hr.1]
-  | _, .app1 o ho x, _, ht => by
+    show (a'.eval (σ.thin h)).bind (Tm.netOfT (TEnv.get j (TEnv.thin h σ.env))) = _
+    rw [TEnv.get_unwk? σ.env hj, Tm.eval_thinS? h σ a ha]
+    rfl
+  | _, .app0 _, _, ht => by cases ht; rfl
+  | _, .app1 o x, _, ht => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.eval, hr.1, Tm.eval_thinS? hr x hx]
+    show o.eval σ.glob (x'.eval (σ.thin h)) = o.eval σ.glob (x.eval σ)
+    rw [Tm.eval_thinS? h σ x hx]
   | _, .app2 o x y, _, ht => by
     obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
     cases ht
-    simp only [Tm.eval, hr.1, Tm.eval_thinS? hr x hx, Tm.eval_thinS? hr y hy]
+    show o.eval σ.glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) = o.eval σ.glob (x.eval σ) (y.eval σ)
+    rw [Tm.eval_thinS? h σ x hx, Tm.eval_thinS? h σ y hy]
   | _, .app3 o x y z, _, ht => by
     obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨z', hz, ht⟩ := Option.bind_eq_some_iff.1 ht
     cases ht
-    simp only [Tm.eval, hr.1, Tm.eval_thinS? hr x hx, Tm.eval_thinS? hr y hy,
-      Tm.eval_thinS? hr z hz]
+    show o.eval σ.glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) (z'.eval (σ.thin h)) =
+      o.eval σ.glob (x.eval σ) (y.eval σ) (z.eval σ)
+    rw [Tm.eval_thinS? h σ x hx, Tm.eval_thinS? h σ y hy, Tm.eval_thinS? h σ z hz]
 
 /-- **A term that reads no dropped local denotes alike with them dropped.** -/
-theorem Tm.denote_thinS? {h : Thin Γ' Γ} {σ' : State C Γ'} {σ : State C Γ}
-    (hr : State.ThinOf h σ' σ) :
+theorem Tm.denote_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
     {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
-      t'.denote σ' = t.denote σ
+      t'.denote (σ.thin h) = t.denote σ
   | _, .pvV i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.denote, hr.getE_unwk? hj]
+    simp only [Tm.denote, State.thin, State.withEnv, TEnv.get_unwk? σ.env hj]
   | _, .pvP i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.denote, State.aliasPathT_getE, hr.getE_unwk? hj]
+    simp only [Tm.denote, State.thin, State.withEnv, TEnv.get_unwk? σ.env hj]
+    split <;> rfl
   | _, .pvS i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.denote, hr.getE_unwk? hj]
+    simp only [Tm.denote, State.thin, State.withEnv, TEnv.get_unwk? σ.env hj]
   | _, .pvI i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
     rfl
@@ -151,24 +160,30 @@ theorem Tm.denote_thinS? {h : Thin Γ' Γ} {σ' : State C Γ'} {σ : State C Γ}
     obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
     cases ht
-    simp only [Tm.denote, hr.getE_unwk? hj, Tm.denote_thinS? hr a ha]
-  | _, .app0 _, _, ht => by cases ht; simp only [Tm.denote, hr.1]
-  | _, .app1 o ho x, _, ht => by
+    simp only [Tm.denote]
+    rw [Tm.denote_thinS? h σ a ha]
+    simp only [State.thin, State.withEnv, TEnv.get_unwk? σ.env hj]
+  | _, .app0 _, _, ht => by cases ht; rfl
+  | _, .app1 o x, _, ht => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 ht
-    simp only [Tm.denote, hr.1, Tm.denote_thinS? hr x hx]
+    show o.denote σ.glob (x'.denote (σ.thin h)) = o.denote σ.glob (x.denote σ)
+    rw [Tm.denote_thinS? h σ x hx]
   | _, .app2 o x y, _, ht => by
     obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
     cases ht
-    simp only [Tm.denote, hr.1, Tm.denote_thinS? hr x hx, Tm.denote_thinS? hr y hy,
-      Tm.eval_thinS? hr x hx, Tm.eval_thinS? hr y hy]
+    show o.denote σ.glob (x'.eval (σ.thin h)) (y'.eval (σ.thin h)) (x'.denote (σ.thin h))
+        (y'.denote (σ.thin h)) = o.denote σ.glob (x.eval σ) (y.eval σ) (x.denote σ) (y.denote σ)
+    rw [Tm.denote_thinS? h σ x hx, Tm.denote_thinS? h σ y hy, Tm.eval_thinS? h σ x hx,
+      Tm.eval_thinS? h σ y hy]
   | _, .app3 o x y z, _, ht => by
     obtain ⟨x', hx, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨y', hy, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨z', hz, ht⟩ := Option.bind_eq_some_iff.1 ht
     cases ht
-    simp only [Tm.denote, Tm.denote_thinS? hr x hx, Tm.denote_thinS? hr y hy,
-      Tm.denote_thinS? hr z hz]
+    show o.denote (x'.denote (σ.thin h)) (y'.denote (σ.thin h)) (z'.denote (σ.thin h)) =
+      o.denote (x.denote σ) (y.denote σ) (z.denote σ)
+    rw [Tm.denote_thinS? h σ x hx, Tm.denote_thinS? h σ y hy, Tm.denote_thinS? h σ z hz]
 
 /-- A right-hand side of `Γ` read in `Γ'`. -/
 def Rhs.thinS? (h : Thin Γ' Γ) : {t : LTy} → Rhs C Γ t → Option (Rhs C Γ' t)
@@ -180,27 +195,26 @@ def Rhs.thinS? (h : Thin Γ' Γ) : {t : LTy} → Rhs C Γ t → Option (Rhs C Γ
   | _, .saveNet => some .saveNet
   | _, .saveNetMt => some .saveNetMt
 
-theorem Rhs.eval_thinS? {h : Thin Γ' Γ} {σ' : State C Γ'} {σ : State C Γ}
-    (hr : State.ThinOf h σ' σ) :
+theorem Rhs.eval_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
     {t : LTy} → (r : Rhs C Γ t) → {r' : Rhs C Γ' t} → Rhs.thinS? h r = some r' →
-      r'.eval σ' = r.eval σ
+      r'.eval (σ.thin h) = r.eval σ
   | _, .val t, _, hx => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hx
-    exact Tm.eval_thinS? hr t ht
+    exact Tm.eval_thinS? h σ t ht
   | _, .path p, _, hx => by
     obtain ⟨p', hp, rfl⟩ := Option.map_eq_some_iff.1 hx
-    simp only [Rhs.eval, Tm.eval_thinS? hr p hp]
+    show (p'.eval (σ.thin h)).bind _ = (p.eval σ).bind _
+    rw [Tm.eval_thinS? h σ p hp]
   | _, .unset, _, hx => by cases hx; rfl
   | _, .mref i, _, hx => by
     obtain ⟨i', hi, rfl⟩ := Option.map_eq_some_iff.1 hx
-    simp only [Rhs.eval, Tm.eval_thinS? hr i hi]
+    show (i'.eval (σ.thin h)).bind _ = (i.eval σ).bind _
+    rw [Tm.eval_thinS? h σ i hi]
   | _, .store s, _, hx => by
     obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 hx
-    simp only [Rhs.eval, Tm.eval_thinS? hr s hs]
-  | _, .saveNet, _, hx => by
-    cases hx
-    have hn : σ'.net = σ.net := congrArg Semantics.State.net hr.1
-    simp only [Rhs.eval, hn]
+    show (s'.eval (σ.thin h)).bind _ = (s.eval σ).bind _
+    rw [Tm.eval_thinS? h σ s hs]
+  | _, .saveNet, _, hx => by cases hx; rfl
   | _, .saveNetMt, _, hx => by cases hx; rfl
 
 end ThinS
@@ -233,52 +247,62 @@ def UpdElem.down? {Δ : Ctx} : UpdElem C (u :: Γ) Δ → Option (UpdElem C Γ �
   | .setBalance a => a.down?.map .setBalance
 
 /-- A state below a pushed local is the state with it left out. -/
-theorem State.ThinOf.push (σ : State C Γ) (v : u.TDenote C σ.H) :
-    State.ThinOf (.drop .refl) σ (σ.push v) :=
-  ⟨rfl, fun _ => rfl⟩
+theorem State.thin_push (σ : State C Γ) (v : u.TDenote C σ.H) :
+    (σ.push v).thin (.drop .refl) = σ := rfl
 
 /-- **A term that does not read the top local reads alike below it.** -/
 theorem Tm.eval_down? (σ : State C Γ) (v : u.TDenote C σ.H) {s : Srt} (t : Tm C (u :: Γ) s)
     {t' : Tm C Γ s} (h : t.down? = some t') : t'.eval σ = t.eval (σ.push v) :=
-  Tm.eval_thinS? (State.ThinOf.push σ v) t h
+  Tm.eval_thinS? (.drop .refl) (σ.push v) t h
 
 theorem Rhs.eval_down? (σ : State C Γ) (v : u.TDenote C σ.H) {t : LTy} (r : Rhs C (u :: Γ) t)
     {r' : Rhs C Γ t} (h : r.down? = some r') : r'.eval σ = r.eval (σ.push v) :=
-  Rhs.eval_thinS? (State.ThinOf.push σ v) r h
+  Rhs.eval_thinS? (.drop .refl) (σ.push v) r h
 
 theorem UpdElem.globT_down? {Δ : Ctx} (σ : State C Γ) (v : u.TDenote C σ.H) :
     (e : UpdElem C (u :: Γ) Δ) → {e' : UpdElem C Γ Δ} → e.down? = some e' →
       ∀ G, e'.globT σ G = e.globT (σ.push v) G
   | .local i r, _, h, G => by
     obtain ⟨r', hr, rfl⟩ := Option.map_eq_some_iff.1 h
-    simp only [UpdElem.globT, Rhs.eval_down? σ v r hr]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Rhs.eval_down? σ v r hr]
   | .storage s, _, h, G => by
     obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 h
-    simp only [UpdElem.globT, Tm.eval_down? σ v s hs]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v s hs]
   | .memory m, _, h, G => by
     obtain ⟨m', hm, rfl⟩ := Option.map_eq_some_iff.1 h
-    simp only [UpdElem.globT, Tm.eval_down? σ v m hm]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v m hm]
+    rfl
   | .selfBalance op a, _, h, G => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-    simp only [UpdElem.globT, Tm.eval_down? σ v a ha]; rfl
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v a ha]
+    rfl
   | .net r op a, _, h, G => by
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    simp only [UpdElem.globT, Tm.eval_down? σ v r hr, Tm.eval_down? σ v a ha]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v r hr, Tm.eval_down? σ v a ha]
   | .pay r a, _, h, G => by
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    simp only [UpdElem.globT, Tm.eval_down? σ v r hr, Tm.eval_down? σ v a ha]; rfl
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v r hr, Tm.eval_down? σ v a ha]
+    rfl
   | .netMt r a, _, h, G => by
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    simp only [UpdElem.globT, Tm.eval_down? σ v r hr, Tm.eval_down? σ v a ha]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v r hr, Tm.eval_down? σ v a ha]
   | .setBalance a, _, h, G => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-    simp only [UpdElem.globT, Tm.eval_down? σ v a ha]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_down? σ v a ha]
 
 end Down
 
@@ -358,10 +382,10 @@ binder's right-hand side and then the update's global part**, whatever the
 binder's local holds. -/
 theorem Upd.rebase_globT (x : Var) (b : Rhs C Γ u) (σ : State C Γ) (w : u.TDenote C σ.H) :
     {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.rebase x b = some V' →
-      V'.globT σ = (b.eval σ >>= fun _ => V.globT (σ.push w))
+      V'.globT σ = (b.eval σ).bind fun _ => V.globT (σ.push w)
   | _, .nil, _, h => by
     cases h
-    show (do let g ← pure σ.globE; let _ ← b.eval σ; pure g) = _
+    show (some σ.globG).bind (fun g => (b.eval σ).bind fun _ => some g) = _
     cases b.eval σ <;> rfl
   | _, .snoc V e, _, h => by
     simp only [Upd.rebase] at h
@@ -371,7 +395,7 @@ theorem Upd.rebase_globT (x : Var) (b : Rhs C Γ u) (σ : State C Γ) (w : u.TDe
     · obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
       obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
       cases h
-      show (W.globT σ >>= e'.globT σ) = _
+      show (W.globT σ).bind (e'.globT σ) = _
       rw [Upd.rebase_globT x b σ w V hW]
       have he' : e'.globT σ = e.globT (σ.push w) := funext (UpdElem.globT_down? σ w e he)
       rw [he']
@@ -380,7 +404,7 @@ theorem Upd.rebase_globT (x : Var) (b : Rhs C Γ u) (σ : State C Γ) (w : u.TDe
     obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    show (do let g ← W.globT σ; let _ ← r'.eval σ; pure g) = _
+    show (W.globT σ).bind (fun g => (r'.eval σ).bind fun _ => some g) = _
     rw [Upd.rebase_globT x b σ w V hW, Rhs.eval_down? σ w r hr]
     cases b.eval σ <;> rfl
   | _, .pop .., _, h => by cases h
@@ -391,7 +415,7 @@ side, and every other local what the update leaves there.** -/
 theorem Upd.rebase_held (x : Var) (b : Rhs C Γ u) (σ : State C Γ) (w : u.TDenote C σ.H) :
     {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.rebase x b = some V' →
       {j : Idx Δ u} → V.baseIdx = some j →
-      V'.held j = .rhs b ∧ ∀ {t : LTy} (i : Idx Δ t), i.toNat ≠ j.toNat → ∀ v : t.Denote C,
+      V'.held j = .rhs b ∧ ∀ {t : LTy} (i : Idx Δ t), i.toNat ≠ j.toNat → ∀ v : t.VDen C,
         Held.OKV (σ.push w) v (V.held i) → Held.OKV σ v (V'.held i)
   | _, .nil, _, h, j, hj => by
     cases h
@@ -429,7 +453,7 @@ theorem Upd.rebase_held (x : Var) (b : Rhs C Γ u) (σ : State C Γ) (w : u.TDen
           · obtain rfl := Idx.ty_eq_of_toNat hki
             obtain rfl := Idx.toNat_inj k i hki
             rw [dif_pos rfl] at hv ⊢
-            show r'.eval σ = .ok v
+            show r'.eval σ = some v
             rw [Rhs.eval_down? σ w r hr]
             exact hv
           · rw [dif_neg hki] at hv ⊢
@@ -455,29 +479,18 @@ theorem Upd.rebase_held (x : Var) (b : Rhs C Γ u) (σ : State C Γ) (w : u.TDen
     refine ⟨ih.1, fun i hi v hv => ?_⟩
     cases i with
     | here =>
-      show r'.eval σ = .ok v
+      show r'.eval σ = some v
       rw [Rhs.eval_down? σ w r hr]
       exact hv
     | there k => exact ih.2 k (fun hc => hi (by simp only [Idx.toNat, hc])) v hv
   | _, .pop .., _, h, _, _ => by cases h
   | _, .drop .., _, h, _, _ => by cases h
 
-theorem Semantics.Res.OkEq.bind' {α β : Type} {a b : Res α} (h : Res.OkEq a b) (f : α → Res β) :
-    Res.OkEq (a >>= f) (b >>= f) := fun y => by
-  cases ha : a with
-  | ok x =>
-    rw [(h x).1 ha]
-  | error e =>
-    cases hb : b with
-    | ok x => rw [(h x).2 hb] at ha; cases ha
-    | error e' => exact ⟨fun hh => (nomatch hh), fun hh => (nomatch hh)⟩
-
 /-- **The absorbed update computes, from the state above the binder, the
-global part the update computes from any value of the binder's local**, up
-to which halt comes first. -/
+global part the update computes from any value of the binder's local.** -/
 theorem Upd.absorb_globT (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDenote C σ.H) :
     {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.absorb x reorder = some V' →
-      Res.OkEq (V'.globT σ) (V.globT (σ.push w))
+      V'.globT σ = V.globT (σ.push w)
   | _, .nil, _, h => by cases h
   | _, .snoc V e, V', h => by
     simp only [Upd.absorb] at h
@@ -487,10 +500,9 @@ theorem Upd.absorb_globT (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDe
       obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
       cases h
       have ih := Upd.absorb_globT x reorder σ w V hr
-      show Res.OkEq (W.globT σ >>= e'.globT σ) (V.globT (σ.push w) >>= e.globT (σ.push w))
+      show (W.globT σ).bind (e'.globT σ) = (V.globT (σ.push w)).bind (e.globT (σ.push w))
       have he' : e'.globT σ = e.globT (σ.push w) := funext (UpdElem.globT_down? σ w e he)
-      rw [he']
-      exact ih.bind' _
+      rw [he', ih]
     | none =>
       rw [hr] at h
       simp only [Upd.absorbSnoc, Upd.absorbFirst] at h
@@ -510,14 +522,12 @@ theorem Upd.absorb_globT (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDe
             subst hij
             obtain ⟨r', hr', h⟩ := Option.bind_eq_some_iff.1 h
             rw [Upd.rebase_globT x r' σ w V h]
-            intro y
-            show (do let _ ← r'.eval σ; V.globT (σ.push w)) = .ok y ↔
-              (do let g ← V.globT (σ.push w); let _ ← r.eval (σ.push w); pure g) = .ok y
+            show (r'.eval σ).bind (fun _ => V.globT (σ.push w)) =
+              (V.globT (σ.push w)).bind fun g => (r.eval (σ.push w)).bind fun _ => some g
             rw [Rhs.eval_down? σ w r hr']
             cases r.eval (σ.push w) with
-            | error e =>
-              cases V.globT (σ.push w) <;> exact ⟨fun hh => (nomatch hh), fun hh => (nomatch hh)⟩
-            | ok a => cases V.globT (σ.push w) <;> exact Iff.rfl
+            | none => cases V.globT (σ.push w) <;> rfl
+            | some a => cases V.globT (σ.push w) <;> rfl
           · cases h
         · cases h
       | _ => cases h
@@ -525,10 +535,10 @@ theorem Upd.absorb_globT (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDe
     obtain ⟨W, hW, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    show Res.OkEq (do let g ← W.globT σ; let _ ← r'.eval σ; pure g)
-      (do let g ← V.globT (σ.push w); let _ ← r.eval (σ.push w); pure g)
-    rw [Rhs.eval_down? σ w r hr]
-    exact (Upd.absorb_globT x reorder σ w V hW).bind' _
+    show (W.globT σ).bind (fun g => (r'.eval σ).bind fun _ => some g) =
+      (V.globT (σ.push w)).bind fun g => (r.eval (σ.push w)).bind fun _ => some g
+    rw [Rhs.eval_down? σ w r hr, Upd.absorb_globT x reorder σ w V hW]
+    rfl
   | _, .pop V _, _, h => by
     obtain ⟨W, hW, rfl⟩ := Option.map_eq_some_iff.1 h
     exact Upd.absorb_globT x reorder σ w V hW
@@ -540,7 +550,7 @@ theorem Upd.absorb_globT (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDe
 read from the state above the binder. -/
 theorem Upd.absorb_held (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDenote C σ.H) :
     {Δ : Ctx} → (V : Upd C (u :: Γ) Δ) → {V' : Upd C Γ Δ} → V.absorb x reorder = some V' →
-      ∀ {t : LTy} (i : Idx Δ t) (v : t.Denote C), Held.OKV (σ.push w) v (V.held i) →
+      ∀ {t : LTy} (i : Idx Δ t) (v : t.VDen C), Held.OKV (σ.push w) v (V.held i) →
         Held.OKV σ v (V'.held i)
   | _, .nil, _, h => by cases h
   | _, .snoc V e, V', h => by
@@ -550,7 +560,7 @@ theorem Upd.absorb_held (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDen
       rw [hr] at h
       obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
       cases h
-      have ih : ∀ {t : LTy} (i : Idx _ t) (v : t.Denote C), Held.OKV (σ.push w) v (V.held i) →
+      have ih : ∀ {t : LTy} (i : Idx _ t) (v : t.VDen C), Held.OKV (σ.push w) v (V.held i) →
           Held.OKV σ v (W.held i) := fun i v hv => Upd.absorb_held x reorder σ w V hr i v hv
       intro i v hv
       cases e with
@@ -563,7 +573,7 @@ theorem Upd.absorb_held (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDen
         · obtain rfl := Idx.ty_eq_of_toNat hki
           obtain rfl := Idx.toNat_inj k i hki
           rw [dif_pos rfl] at hv ⊢
-          show r'.eval σ = .ok v
+          show r'.eval σ = some v
           rw [Rhs.eval_down? σ w r hr']
           exact hv
         · rw [dif_neg hki] at hv ⊢
@@ -607,7 +617,7 @@ theorem Upd.absorb_held (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDen
               obtain rfl := Idx.toNat_inj i₀ i hki
               rw [dif_pos rfl] at hv
               rw [hb.1]
-              show r'.eval σ = .ok v
+              show r'.eval σ = some v
               rw [Rhs.eval_down? σ w r hr']
               exact hv
             · rw [dif_neg hki] at hv
@@ -622,7 +632,7 @@ theorem Upd.absorb_held (x : Var) (reorder : Bool) (σ : State C Γ) (w : u.TDen
     intro i v hv
     cases i with
     | here =>
-      show r'.eval σ = .ok v
+      show r'.eval σ = some v
       rw [Rhs.eval_down? σ w r hr]
       exact hv
     | there k => exact Upd.absorb_held x reorder σ w V hW k v hv
@@ -640,13 +650,9 @@ theorem holds_bind_absorb {m m' : Modality} {x : Var} {reorder : Bool} {Δ : Ctx
     (h : holds σ (.upd m' V' ψ)) : holds σ (.bind m x u (.upd m' V ψ)) :=
   Modality.forallB_intro fun w => by
     have hg := Upd.absorb_globT x reorder σ w V hV
-    refine Upd.afterT_intro (fun e he => ?_) fun g σ' hL hH => ?_
-    · cases hb : V'.globT σ with
-      | error e' => exact h.of_error hb
-      | ok y => rw [(hg y).1 hb] at he; cases he
-    · refine h.of_lands (g := g) ⟨(hg g).2 hL.1, hL.2.1, fun i => ?_⟩ hH
-      rw [Held.OKT_iff_OKV]
-      exact Upd.absorb_held x reorder σ w V hV i _ ((Held.OKT_iff_OKV _ _ _ _).1 (hL.2.2 i))
+    refine Upd.afterT_intro (fun he => h.of_none (hg.trans he)) fun g σ' hL => ?_
+    exact h.of_lands (g := g) ⟨hg.trans hL.1, hL.2.1, fun i => (Held.OK_iff_OKV _ _ _ _).2
+      (Upd.absorb_held x reorder σ w V hV i _ ((Held.OK_iff_OKV _ _ _ _).1 (hL.2.2 i)))⟩
 
 end Absorb
 
@@ -656,217 +662,67 @@ section Shadow
 
 variable {Γ : Ctx}
 
-/-- A storage operation over its first argument (`select`, `delAt`, a push
-or pop's slot, `save`): what a storage spine runs through. -/
-def Op1.stSpine {a s : Srt} : Op1 a s → Bool
-  | .select _ => true
-  | _ => false
-
-@[inherit_doc Op1.stSpine]
-def Op2.stSpine {a b s : Srt} : Op2 a b s → Bool
-  | .delAt | .pushSlot _ | .pop | .shrink | .extend _ => true
-  | _ => false
-
-@[inherit_doc Op1.stSpine]
-def Op3.stSpine {a b c s : Srt} : Op3 a b c s → Bool
-  | .save | .push => true
-  | _ => false
-
-/-- A memory operation over its first argument (`addM`, `copySt`, `write`). -/
-def Op1.memSpine {a s : Srt} : Op1 a s → Bool
-  | .addM _ => true
-  | _ => false
-
-@[inherit_doc Op1.memSpine]
-def Op2.memSpine {a b s : Srt} : Op2 a b s → Bool
-  | .copySt => true
-  | _ => false
-
-@[inherit_doc Op1.memSpine]
-def Op3.memSpine {a b c s : Srt} : Op3 a b c s → Bool
-  | .write => true
-  | _ => false
-
 /-- `Tm.spineHas`' compiled twin. -/
-def Tm.spineHasM (S : Tm C Γ .st) : {s : Srt} → Tm C Γ s → Bool
-  | _, .app1 o _ a => o.stSpine && (a.beqR S || Tm.spineHasM S a)
-  | _, .app2 o a _ => o.stSpine && (a.beqR S || Tm.spineHasM S a)
-  | _, .app3 o a _ _ => o.stSpine && (a.beqR S || Tm.spineHasM S a)
+def Tm.spineHasM {k : Srt} (S : Tm C Γ k) : {s : Srt} → Tm C Γ s → Bool
+  | _, .app1 _ a => a.beqR S || Tm.spineHasM S a
+  | _, .app2 _ a _ => a.beqR S || Tm.spineHasM S a
+  | _, .app3 _ a _ _ => a.beqR S || Tm.spineHasM S a
   | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .app0 _ => false
 
-/-- `S` is read first, strictly inside `T`: `T` a storage operation over `S`
-or over a term with `S` on its spine (`Tm.spineAny`).  Generic in the
-sort, by the recursor. -/
+/-- `S` is read first, strictly inside `T`: the first argument of a symbol of
+`T`, or of one below it (every symbol reads its first argument first: where
+it halts, the symbol does).  Generic in both sorts, by the recursor. -/
 @[implemented_by Tm.spineHasM]
-def Tm.spineHas (S : Tm C Γ .st) {s : Srt} (T : Tm C Γ s) : Bool :=
+def Tm.spineHas {k : Srt} (S : Tm C Γ k) {s : Srt} (T : Tm C Γ s) : Bool :=
   Tm.rec (motive := fun _ _ => Bool)
     (fun _ => false) (fun _ => false) (fun _ => false) (fun _ => false) (fun _ _ _ => false)
     (fun _ => false)
-    (fun o _ a ih => o.stSpine && (a.beqR S || ih))
-    (fun o a _ iha _ => o.stSpine && (a.beqR S || iha))
-    (fun o a _ _ iha _ _ => o.stSpine && (a.beqR S || iha)) T
+    (fun _ a ih => a.beqR S || ih)
+    (fun _ a _ iha _ => a.beqR S || iha)
+    (fun _ a _ _ iha _ _ => a.beqR S || iha) T
 
-theorem Tm.spineHas_eq_spineHasM (S : Tm C Γ .st) {s : Srt} (T : Tm C Γ s) :
+theorem Tm.spineHas_eq_spineHasM {k : Srt} (S : Tm C Γ k) {s : Srt} (T : Tm C Γ s) :
     Tm.spineHas S T = Tm.spineHasM S T := by
   induction T with
   | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ => rfl
-  | app1 o _ a ih => simp only [Tm.spineHasM, ← ih]; rfl
+  | app1 o a ih => simp only [Tm.spineHasM, ← ih]; rfl
   | app2 o a _ ih _ => simp only [Tm.spineHasM, ← ih]; rfl
   | app3 o a _ _ ih _ _ => simp only [Tm.spineHasM, ← ih]; rfl
 
-/-- `S` is read before anything else of `T` (`Tm.onSpine`): `T` is `S`, or
-`S` is on its spine. -/
-def Tm.onSpineS (T S : Tm C Γ .st) : Bool := T.beqR S || Tm.spineHas S T
-
-/-- `Tm.memSpineHas`' compiled twin. -/
-def Tm.memSpineHasM (M : Tm C Γ .mem) : {s : Srt} → Tm C Γ s → Bool
-  | _, .app1 o _ a => o.memSpine && (a.beqR M || Tm.memSpineHasM M a)
-  | _, .app2 o a _ => o.memSpine && (a.beqR M || Tm.memSpineHasM M a)
-  | _, .app3 o a _ _ => o.memSpine && (a.beqR M || Tm.memSpineHasM M a)
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .app0 _ => false
-
-/-- `M` is read first, strictly inside `N`, on the memory spine
-(`Tm.memSpineAny`), by the recursor. -/
-@[implemented_by Tm.memSpineHasM]
-def Tm.memSpineHas (M : Tm C Γ .mem) {s : Srt} (N : Tm C Γ s) : Bool :=
-  Tm.rec (motive := fun _ _ => Bool)
-    (fun _ => false) (fun _ => false) (fun _ => false) (fun _ => false) (fun _ _ _ => false)
-    (fun _ => false)
-    (fun o _ a ih => o.memSpine && (a.beqR M || ih))
-    (fun o a _ iha _ => o.memSpine && (a.beqR M || iha))
-    (fun o a _ _ iha _ _ => o.memSpine && (a.beqR M || iha)) N
-
-theorem Tm.memSpineHas_eq_memSpineHasM (M : Tm C Γ .mem) {s : Srt} (N : Tm C Γ s) :
-    Tm.memSpineHas M N = Tm.memSpineHasM M N := by
-  induction N with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ => rfl
-  | app1 o _ a ih => simp only [Tm.memSpineHasM, ← ih]; rfl
-  | app2 o a _ ih _ => simp only [Tm.memSpineHasM, ← ih]; rfl
-  | app3 o a _ _ ih _ _ => simp only [Tm.memSpineHasM, ← ih]; rfl
-
-/-- `M` is read before anything else of `N` on the memory spine. -/
-def Tm.onMemSpineS (N M : Tm C Γ .mem) : Bool := N.beqR M || Tm.memSpineHas M N
-
-/-- An outcome that halted, at any sort. -/
-def Srt.Halts : (s : Srt) → s.Ev → Prop
-  | .val, r => ∃ e, r = .error e
-  | .path, r => ∃ e, r = .error e
-  | .st, r => ∃ e, r = .error e
-  | .sv, r => ∃ e, r = .error e
-  | .ident, r => ∃ e, r = .error e
-  | .addr, r => ∃ e, r = .error e
-  | .mem, r => ∃ e, r = .error e
-  | .mv, r => ∃ e, r = .error e
+/-- `S` is read before anything else of `T`: `T` is `S`, or `S` is on its
+spine. -/
+def Tm.onSpineS {k : Srt} (T S : Tm C Γ k) : Bool := T.beqR S || Tm.spineHas S T
 
 /-- A term with `S` on its spine halts wherever `S` does. -/
-theorem Tm.spineHas_haltsM {S : Tm C Γ .st} {σ : State C Γ} {e : Semantics.Halt}
-    (hS : S.eval σ = .error e) {s : Srt} (T : Tm C Γ s) (h : Tm.spineHasM S T = true) :
-    Srt.Halts s (T.eval σ) := by
+theorem Tm.spineHas_none {k : Srt} {S : Tm C Γ k} {σ : State C Γ} (hS : S.eval σ = none)
+    {s : Srt} (T : Tm C Γ s) (h : Tm.spineHasM S T = true) : T.eval σ = none := by
   induction T with
   | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ => exact absurd h Bool.false_ne_true
-  | app1 o ho a iha =>
-    simp only [Tm.spineHasM, Bool.and_eq_true, Bool.or_eq_true] at h
-    obtain ⟨ho', h'⟩ := h
-    cases o <;> simp only [Op1.stSpine, Bool.false_eq_true] at ho'
-    all_goals
-      obtain ⟨e', ha⟩ : ∃ e', a.eval σ = .error e' := by
-        rcases h' with h' | h'
-        · exact ⟨e, (Tm.eq_of_beqR h') ▸ hS⟩
-        · exact iha h'
-      exact ⟨e', by show Op1.eval _ _ (a.eval σ) = _; rw [ha]; rfl⟩
+  | app1 o a iha =>
+    simp only [Tm.spineHasM, Bool.or_eq_true] at h
+    refine Tm.eval_app1_none o a ?_
+    rcases h with h | h
+    · cases Tm.sigma_eq_of_beqR h; exact hS
+    · exact iha h
   | app2 o a b iha _ =>
-    simp only [Tm.spineHasM, Bool.and_eq_true, Bool.or_eq_true] at h
-    obtain ⟨ho', h'⟩ := h
-    cases o <;> simp only [Op2.stSpine, Bool.false_eq_true] at ho'
-    all_goals
-      obtain ⟨e', ha⟩ : ∃ e', a.eval σ = .error e' := by
-        rcases h' with h' | h'
-        · exact ⟨e, (Tm.eq_of_beqR h') ▸ hS⟩
-        · exact iha h'
-      first
-        | exact ⟨e', by show Op2.eval _ _ (a.eval σ) (b.eval σ) = _; rw [ha]; rfl⟩
-        | (show ∃ e'', Op2.eval _ _ (a.eval σ) (b.eval σ) = _
-           rw [ha]
-           generalize b.eval σ = r
-           cases r <;> exact ⟨_, rfl⟩)
+    simp only [Tm.spineHasM, Bool.or_eq_true] at h
+    refine Tm.eval_app2_none o a b ?_
+    rcases h with h | h
+    · cases Tm.sigma_eq_of_beqR h; exact hS
+    · exact iha h
   | app3 o a b c iha _ _ =>
-    simp only [Tm.spineHasM, Bool.and_eq_true, Bool.or_eq_true] at h
-    obtain ⟨ho', h'⟩ := h
-    cases o <;> simp only [Op3.stSpine, Bool.false_eq_true] at ho'
-    all_goals
-      obtain ⟨e', ha⟩ : ∃ e', a.eval σ = .error e' := by
-        rcases h' with h' | h'
-        · exact ⟨e, (Tm.eq_of_beqR h') ▸ hS⟩
-        · exact iha h'
-      first
-        | exact ⟨e', by show Op3.eval _ _ (a.eval σ) (b.eval σ) (c.eval σ) = _; rw [ha]; rfl⟩
-        | (show ∃ e'', Op3.eval _ _ (a.eval σ) (b.eval σ) (c.eval σ) = _
-           rw [ha]
-           generalize c.eval σ = r
-           cases r <;> exact ⟨_, rfl⟩)
+    simp only [Tm.spineHasM, Bool.or_eq_true] at h
+    refine Tm.eval_app3_none o a b c ?_
+    rcases h with h | h
+    · cases Tm.sigma_eq_of_beqR h; exact hS
+    · exact iha h
 
 /-- A term on the spine of `S` halts wherever `S` does. -/
-theorem Tm.onSpineS_error {S : Tm C Γ .st} {σ : State C Γ} {e : Semantics.Halt}
-    (hS : S.eval σ = .error e) (T : Tm C Γ .st) (h : T.onSpineS S = true) :
-    ∃ e', T.eval σ = .error e' := by
+theorem Tm.onSpineS_none {k : Srt} {S : Tm C Γ k} {σ : State C Γ} (hS : S.eval σ = none)
+    (T : Tm C Γ k) (h : T.onSpineS S = true) : T.eval σ = none := by
   rcases Bool.or_eq_true_iff.mp h with h | h
-  · rw [Tm.eq_of_beqR h]; exact ⟨e, hS⟩
-  · exact Tm.spineHas_haltsM hS T (Tm.spineHas_eq_spineHasM S T ▸ h)
-
-/-- A term with `M` on its memory spine halts wherever `M` does. -/
-theorem Tm.memSpineHas_haltsM {M : Tm C Γ .mem} {σ : State C Γ} {e : Semantics.Halt}
-    (hM : M.eval σ = .error e) {s : Srt} (N : Tm C Γ s) (h : Tm.memSpineHasM M N = true) :
-    Srt.Halts s (N.eval σ) := by
-  induction N with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ => exact absurd h Bool.false_ne_true
-  | app1 o ho a iha =>
-    simp only [Tm.memSpineHasM, Bool.and_eq_true, Bool.or_eq_true] at h
-    obtain ⟨ho', h'⟩ := h
-    cases o <;> simp only [Op1.memSpine, Bool.false_eq_true] at ho'
-    all_goals
-      obtain ⟨e', ha⟩ : ∃ e', a.eval σ = .error e' := by
-        rcases h' with h' | h'
-        · exact ⟨e, (Tm.eq_of_beqR h') ▸ hM⟩
-        · exact iha h'
-      exact ⟨e', by show Op1.eval _ _ (a.eval σ) = _; rw [ha]; rfl⟩
-  | app2 o a b iha _ =>
-    simp only [Tm.memSpineHasM, Bool.and_eq_true, Bool.or_eq_true] at h
-    obtain ⟨ho', h'⟩ := h
-    cases o <;> simp only [Op2.memSpine, Bool.false_eq_true] at ho'
-    all_goals
-      obtain ⟨e', ha⟩ : ∃ e', a.eval σ = .error e' := by
-        rcases h' with h' | h'
-        · exact ⟨e, (Tm.eq_of_beqR h') ▸ hM⟩
-        · exact iha h'
-      first
-        | exact ⟨e', by show Op2.eval _ _ (a.eval σ) (b.eval σ) = _; rw [ha]; rfl⟩
-        | (show ∃ e'', Op2.eval _ _ (a.eval σ) (b.eval σ) = _
-           rw [ha]
-           generalize b.eval σ = r
-           cases r <;> exact ⟨_, rfl⟩)
-  | app3 o a b c iha _ _ =>
-    simp only [Tm.memSpineHasM, Bool.and_eq_true, Bool.or_eq_true] at h
-    obtain ⟨ho', h'⟩ := h
-    cases o <;> simp only [Op3.memSpine, Bool.false_eq_true] at ho'
-    all_goals
-      obtain ⟨e', ha⟩ : ∃ e', a.eval σ = .error e' := by
-        rcases h' with h' | h'
-        · exact ⟨e, (Tm.eq_of_beqR h') ▸ hM⟩
-        · exact iha h'
-      first
-        | exact ⟨e', by show Op3.eval _ _ (a.eval σ) (b.eval σ) (c.eval σ) = _; rw [ha]; rfl⟩
-        | (show ∃ e'', Op3.eval _ _ (a.eval σ) (b.eval σ) (c.eval σ) = _
-           rw [ha]
-           generalize c.eval σ = r
-           cases r <;> exact ⟨_, rfl⟩)
-
-/-- A term on the memory spine of `M` halts wherever `M` does. -/
-theorem Tm.onMemSpineS_error {M : Tm C Γ .mem} {σ : State C Γ} {e : Semantics.Halt}
-    (hM : M.eval σ = .error e) (N : Tm C Γ .mem) (h : N.onMemSpineS M = true) :
-    ∃ e', N.eval σ = .error e' := by
-  rcases Bool.or_eq_true_iff.mp h with h | h
-  · rw [Tm.eq_of_beqR h]; exact ⟨e, hM⟩
-  · exact Tm.memSpineHas_haltsM hM N (Tm.memSpineHas_eq_memSpineHasM M N ▸ h)
+  · rw [Tm.eq_of_beqR h]; exact hS
+  · exact Tm.spineHas_none hS T (Tm.spineHas_eq_spineHasM S T ▸ h)
 
 /-- The update with each storage write whose storage a later one reads first
 dropped (`P` the storage terms written later), and so each memory write
@@ -878,129 +734,108 @@ def Upd.dropSh (P : List (Tm C Γ .st)) (Q : List (Tm C Γ .mem)) :
     | .storage S =>
       if P.any (·.onSpineS S) then Upd.dropSh P Q U else .snoc (Upd.dropSh (S :: P) Q U) (.storage S)
     | .memory M =>
-      if Q.any (·.onMemSpineS M) then Upd.dropSh P Q U else .snoc (Upd.dropSh P (M :: Q) U) (.memory M)
+      if Q.any (·.onSpineS M) then Upd.dropSh P Q U else .snoc (Upd.dropSh P (M :: Q) U) (.memory M)
     | e => .snoc (Upd.dropSh P Q U) e
   | _, .decl U x r => .decl (Upd.dropSh P Q U) x r
   | _, .pop U h => .pop (Upd.dropSh P Q U) h
   | _, .drop U h => .drop (Upd.dropSh P Q U) h
 
-/-- A global part with its storage and memory replaced. -/
-abbrev Semantics.State.withSHN (τ : Semantics.State) (st : List (Name × Semantics.SVal))
-    (hp : List (Nat × Semantics.MObj)) (n : Nat) : Semantics.State :=
-  { τ with storage := st, heap := hp, nextId := n }
+/-- A typed global part's memory, as a heap grown from `H`. -/
+def GlobT.memG {H : HTy} (g : GlobT C H) : Grown H (fun _ => Unit) := ⟨g.2, g.1.heap, ()⟩
+
+/-- A typed global part with its storage and memory replaced. -/
+def GlobT.withSM {H : HTy} (g : GlobT C H) (st : Storage C) (μ : Grown H (fun _ => Unit)) :
+    GlobT C H :=
+  ⟨State.mk st μ.H' μ.heap () g.1.net g.1.selfBalance g.1.tx, μ.ext⟩
+
+theorem GlobT.withSM_self {H : HTy} (g : GlobT C H) : g.withSM g.1.storage g.memG = g := rfl
 
 /-- An element that writes neither the storage nor the memory computes alike
 from a global part with another storage and memory. -/
-theorem UpdElem.globT_withSHN {Δ : Ctx} (σ₀ : State C Γ) (st : List (Name × Semantics.SVal))
-    (hp : List (Nat × Semantics.MObj)) (n : Nat) (τ : Semantics.State) :
+theorem UpdElem.globT_withSM {Δ : Ctx} (σ₀ : State C Γ) (st : Storage C)
+    (μ : Grown σ₀.H (fun _ => Unit)) (τ : GlobT C σ₀.H) :
     (e : UpdElem C Γ Δ) → (∀ S, e ≠ .storage S) → (∀ M, e ≠ .memory M) →
-      e.globT σ₀ (τ.withSHN st hp n) = (e.globT σ₀ τ).map (·.withSHN st hp n)
+      e.globT σ₀ (τ.withSM st μ) = (e.globT σ₀ τ).map (·.withSM st μ)
   | .local i r, _, _ => by
-    simp only [UpdElem.globT]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM]
     cases r.eval σ₀ <;> rfl
   | .storage S, h, _ => absurd rfl (h S)
   | .memory M, _, h => absurd rfl (h M)
   | .selfBalance op a, _, _ => by
-    simp only [UpdElem.globT]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM]
     cases a.eval σ₀ with
-    | error => rfl
-    | ok v => cases v <;> rfl
+    | none => rfl
+    | some v =>
+      simp only [Option.bind_some]
+      cases PrimTy.uint.ofInt? (op.apply σ₀.selfBalance.1 v.1) <;> rfl
   | .net r op a, _, _ => by
-    simp only [UpdElem.globT]
-    cases r.eval σ₀ with
-    | error => rfl
-    | ok v =>
-      cases v with
-      | bool => rfl
-      | int =>
-        cases a.eval σ₀ with
-        | error => rfl
-        | ok w => cases w <;> rfl
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM]
+    cases r.eval σ₀ <;> cases a.eval σ₀ <;> rfl
   | .pay r a, _, _ => by
-    simp only [UpdElem.globT]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM]
     cases r.eval σ₀ with
-    | error => rfl
-    | ok v =>
-      cases v with
-      | bool => rfl
-      | int =>
-        cases a.eval σ₀ with
-        | error => rfl
-        | ok w =>
-          cases w with
-          | bool => rfl
-          | int =>
-            simp only [bind, Except.bind, Semantics.Value.asInt, pure, Except.pure]
-            split <;> rfl
+    | none => rfl
+    | some v =>
+      cases a.eval σ₀ with
+      | none => rfl
+      | some w =>
+        simp only [Option.bind_some, Option.map_some]
+        split <;> rfl
   | .netMt r a, _, _ => by
-    simp only [UpdElem.globT]
-    cases r.eval σ₀ with
-    | error => rfl
-    | ok v =>
-      cases v with
-      | bool => rfl
-      | int =>
-        cases a.eval σ₀ with
-        | error => rfl
-        | ok w => cases w <;> rfl
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM]
+    cases r.eval σ₀ <;> cases a.eval σ₀ <;> rfl
   | .setBalance a, _, _ => by
-    simp only [UpdElem.globT]
-    cases a.eval σ₀ with
-    | error => rfl
-    | ok v => cases v <;> rfl
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM]
+    cases a.eval σ₀ <;> rfl
 
-theorem UpdElem.globT_storage_ok {Δ : Ctx} {σ₀ : State C Γ} {S : Tm C Γ .st}
-    {g : Semantics.State} (hs : S.eval σ₀ = .ok g) (τ : Semantics.State) :
-    (UpdElem.storage S : UpdElem C Γ Δ).globT σ₀ τ = .ok { τ with storage := g.storage } := by
-  simp only [UpdElem.globT, hs]; rfl
+theorem UpdElem.globT_storage {Δ : Ctx} (σ₀ : State C Γ) (S : Tm C Γ .st) (τ : GlobT C σ₀.H) :
+    (UpdElem.storage S : UpdElem C Γ Δ).globT σ₀ τ = (S.eval σ₀).map τ.withStorage := by
+  rw [UpdElem.globT_eq_globTM]
+  simp only [UpdElem.globTM]
+  cases S.eval σ₀ <;> rfl
 
-theorem UpdElem.globT_storage_error {Δ : Ctx} {σ₀ : State C Γ} {S : Tm C Γ .st}
-    {e : Semantics.Halt} (hs : S.eval σ₀ = .error e) (τ : Semantics.State) :
-    (UpdElem.storage S : UpdElem C Γ Δ).globT σ₀ τ = .error e := by
-  simp only [UpdElem.globT, hs]; rfl
-
-theorem UpdElem.globT_memory_ok {Δ : Ctx} {σ₀ : State C Γ} {M : Tm C Γ .mem}
-    {g : Semantics.State} (hs : M.eval σ₀ = .ok g) (τ : Semantics.State) :
-    (UpdElem.memory M : UpdElem C Γ Δ).globT σ₀ τ =
-      .ok { τ with heap := g.heap, nextId := g.nextId } := by
-  simp only [UpdElem.globT, hs]; rfl
-
-theorem UpdElem.globT_memory_error {Δ : Ctx} {σ₀ : State C Γ} {M : Tm C Γ .mem}
-    {e : Semantics.Halt} (hs : M.eval σ₀ = .error e) (τ : Semantics.State) :
-    (UpdElem.memory M : UpdElem C Γ Δ).globT σ₀ τ = .error e := by
-  simp only [UpdElem.globT, hs]; rfl
+theorem UpdElem.globT_memory {Δ : Ctx} (σ₀ : State C Γ) (M : Tm C Γ .mem) (τ : GlobT C σ₀.H) :
+    (UpdElem.memory M : UpdElem C Γ Δ).globT σ₀ τ = (M.eval σ₀).map τ.withMem := by
+  rw [UpdElem.globT_eq_globTM]
+  simp only [UpdElem.globTM]
+  cases M.eval σ₀ <;> rfl
 
 /-- How the global part an update computes and the one with the shadowed
 writes dropped (`P`, `Q` the writes still to come) relate: one but for the
-storage (where a write is to come) and the memory, or both halted, or the
-first halted on a write whose shadowing write halts too. -/
+storage (where a write is to come) and the memory, or the first halted, and
+the second too or on a shadowing write that halts. -/
 def ShRel (σ₀ : State C Γ) (P : List (Tm C Γ .st)) (Q : List (Tm C Γ .mem))
-    (a b : Res Semantics.State) : Prop :=
-  (∃ τ st hp n, a = .ok τ ∧ b = .ok (τ.withSHN st hp n) ∧ (P = [] → st = τ.storage) ∧
-      (Q = [] → hp = τ.heap ∧ n = τ.nextId)) ∨
-    ((∃ e, a = .error e) ∧ ((∃ e, b = .error e) ∨ (∃ T ∈ P, ∃ e, T.eval σ₀ = .error e) ∨
-      (∃ M ∈ Q, ∃ e, M.eval σ₀ = .error e)))
+    (a b : Option (GlobT C σ₀.H)) : Prop :=
+  (∃ τ st μ, a = some τ ∧ b = some (τ.withSM st μ) ∧ (P = [] → st = τ.1.storage) ∧
+      (Q = [] → μ = τ.memG)) ∨
+    (a = none ∧ (b = none ∨ (∃ T ∈ P, T.eval σ₀ = none) ∨ (∃ M ∈ Q, M.eval σ₀ = none)))
 
 theorem ShRel.bind_globT {σ₀ : State C Γ} {P : List (Tm C Γ .st)} {Q : List (Tm C Γ .mem)}
-    {Δ : Ctx} {a b : Res Semantics.State} (h : ShRel σ₀ P Q a b) (e : UpdElem C Γ Δ)
+    {Δ : Ctx} {a b : Option (GlobT C σ₀.H)} (h : ShRel σ₀ P Q a b) (e : UpdElem C Γ Δ)
     (hS : ∀ S, e ≠ .storage S) (hM : ∀ M, e ≠ .memory M) :
-    ShRel σ₀ P Q (a >>= e.globT σ₀) (b >>= e.globT σ₀) := by
-  rcases h with ⟨τ, st, hp, n, rfl, rfl, h₁, h₂⟩ | ⟨⟨e₁, rfl⟩, h⟩
-  · show ShRel σ₀ P Q (e.globT σ₀ τ) (e.globT σ₀ (τ.withSHN st hp n))
-    rw [UpdElem.globT_withSHN σ₀ st hp n τ e hS hM]
-    have hτ := UpdElem.globT_withSHN σ₀ τ.storage τ.heap τ.nextId τ e hS hM
+    ShRel σ₀ P Q (a.bind (e.globT σ₀)) (b.bind (e.globT σ₀)) := by
+  rcases h with ⟨τ, st, μ, rfl, rfl, h₁, h₂⟩ | ⟨rfl, h⟩
+  · simp only [Option.bind_some]
+    rw [UpdElem.globT_withSM σ₀ st μ τ e hS hM]
     cases hw : e.globT σ₀ τ with
-    | error e₂ => exact .inr ⟨⟨e₂, rfl⟩, .inl ⟨e₂, rfl⟩⟩
-    | ok ρ =>
-      rw [hw] at hτ
-      have hρ : ρ = ρ.withSHN τ.storage τ.heap τ.nextId := by
-        simp only [Except.map] at hτ; exact Except.ok.inj hτ
-      refine .inl ⟨ρ, st, hp, n, rfl, rfl, fun hP => ?_, fun hQ => ?_⟩
-      · rw [h₁ hP, hρ]
-      · obtain ⟨rfl, rfl⟩ := h₂ hQ; rw [hρ]; exact ⟨rfl, rfl⟩
-  · refine .inr ⟨⟨e₁, rfl⟩, ?_⟩
-    rcases h with ⟨e₂, rfl⟩ | h
-    · exact .inl ⟨e₂, rfl⟩
+    | none => exact .inr ⟨rfl, .inl rfl⟩
+    | some ρ =>
+      have hρ : ρ.withSM ρ.1.storage ρ.memG = ρ := rfl
+      have hτ := UpdElem.globT_withSM σ₀ τ.1.storage τ.memG τ e hS hM
+      rw [GlobT.withSM_self, hw] at hτ
+      have hτ : ρ = ρ.withSM τ.1.storage τ.memG := Option.some.inj hτ
+      refine .inl ⟨ρ, st, μ, rfl, rfl, fun hP => ?_, fun hQ => ?_⟩
+      · rw [h₁ hP, hτ]; rfl
+      · rw [h₂ hQ, hτ]; rfl
+  · refine .inr ⟨rfl, ?_⟩
+    rcases h with rfl | h
+    · exact .inl rfl
     · exact .inr h
 
 /-- **Dropping the shadowed writes leaves the global part, or a halt a
@@ -1008,98 +843,88 @@ halt.** -/
 theorem Upd.dropSh_rel (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) →
     (P : List (Tm C Γ .st)) → (Q : List (Tm C Γ .mem)) →
       ShRel σ₀ P Q (U.globT σ₀) ((U.dropSh P Q).globT σ₀)
-  | _, .nil, P, Q => .inl ⟨σ₀.globE, σ₀.globE.storage, σ₀.globE.heap, σ₀.globE.nextId, rfl, rfl,
-      fun _ => rfl, fun _ => ⟨rfl, rfl⟩⟩
+  | _, .nil, P, Q => .inl ⟨σ₀.globG, σ₀.globG.1.storage, σ₀.globG.memG, rfl, rfl,
+      fun _ => rfl, fun _ => rfl⟩
   | Δ₁, .snoc U (.storage S), P, Q => by
     simp only [Upd.dropSh]
     split
     · rename_i hP
       obtain ⟨T, hT, hTS⟩ := List.any_eq_true.1 hP
-      show ShRel σ₀ P Q (U.globT σ₀ >>= UpdElem.globT (Δ := Δ₁) σ₀ (.storage S)) ((U.dropSh P Q).globT σ₀)
-      rcases Upd.dropSh_rel σ₀ U P Q with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, h⟩
-      · rw [ha, hb]
-        show ShRel σ₀ P Q (UpdElem.globT (Δ := Δ₁) σ₀ (.storage S) τ) _
+      show ShRel σ₀ P Q ((U.globT σ₀).bind (UpdElem.globT (Δ := Δ₁) σ₀ (.storage S)))
+        ((U.dropSh P Q).globT σ₀)
+      rcases Upd.dropSh_rel σ₀ U P Q with ⟨τ, st, μ, ha, hb, h₁, h₂⟩ | ⟨ha, h⟩
+      · rw [ha, hb, Option.bind_some, UpdElem.globT_storage]
         cases hs : S.eval σ₀ with
-        | error e₂ =>
-          rw [UpdElem.globT_storage_error hs]
-          exact .inr ⟨⟨e₂, rfl⟩, .inr (.inl ⟨T, hT, Tm.onSpineS_error hs T hTS⟩)⟩
-        | ok g =>
-          rw [UpdElem.globT_storage_ok hs]
-          refine .inl ⟨{ τ with storage := g.storage }, st, hp, n, rfl, rfl,
+        | none => exact .inr ⟨rfl, .inr (.inl ⟨T, hT, Tm.onSpineS_none hs T hTS⟩)⟩
+        | some g =>
+          refine .inl ⟨τ.withStorage g, st, μ, rfl, rfl,
             fun hP' => absurd hP' (List.ne_nil_of_mem hT), fun hQ => ?_⟩
-          obtain ⟨rfl, rfl⟩ := h₂ hQ; exact ⟨rfl, rfl⟩
+          rw [h₂ hQ]; rfl
       · rw [ha]
-        exact .inr ⟨⟨e₁, rfl⟩, h⟩
-    · show ShRel σ₀ P Q (U.globT σ₀ >>= UpdElem.globT (Δ := Δ₁) σ₀ (.storage S))
-        ((U.dropSh (S :: P) Q).globT σ₀ >>= UpdElem.globT (Δ := Δ₁) σ₀ (.storage S))
-      rcases Upd.dropSh_rel σ₀ U (S :: P) Q with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, h⟩
-      · rw [ha, hb]
-        show ShRel σ₀ P Q (UpdElem.globT (Δ := Δ₁) σ₀ (.storage S) τ)
-          (UpdElem.globT (Δ := Δ₁) σ₀ (.storage S) (τ.withSHN st hp n))
+        exact .inr ⟨rfl, h⟩
+    · show ShRel σ₀ P Q ((U.globT σ₀).bind (UpdElem.globT (Δ := Δ₁) σ₀ (.storage S)))
+        (((U.dropSh (S :: P) Q).globT σ₀).bind (UpdElem.globT (Δ := Δ₁) σ₀ (.storage S)))
+      rcases Upd.dropSh_rel σ₀ U (S :: P) Q with ⟨τ, st, μ, ha, hb, h₁, h₂⟩ | ⟨ha, h⟩
+      · rw [ha, hb, Option.bind_some, Option.bind_some, UpdElem.globT_storage,
+          UpdElem.globT_storage]
         cases hs : S.eval σ₀ with
-        | error e₂ =>
-          rw [UpdElem.globT_storage_error hs, UpdElem.globT_storage_error hs]
-          exact .inr ⟨⟨e₂, rfl⟩, .inl ⟨e₂, rfl⟩⟩
-        | ok g =>
-          rw [UpdElem.globT_storage_ok hs, UpdElem.globT_storage_ok hs]
-          refine .inl ⟨{ τ with storage := g.storage }, g.storage, hp, n, rfl, rfl,
-            fun _ => rfl, fun hQ => ?_⟩
-          obtain ⟨rfl, rfl⟩ := h₂ hQ; exact ⟨rfl, rfl⟩
+        | none => exact .inr ⟨rfl, .inl rfl⟩
+        | some g =>
+          refine .inl ⟨τ.withStorage g, g, μ, rfl, rfl, fun _ => rfl, fun hQ => ?_⟩
+          rw [h₂ hQ]; rfl
       · rw [ha]
-        refine .inr ⟨⟨e₁, rfl⟩, ?_⟩
-        rcases h with ⟨e₂, hb⟩ | ⟨T, hT, e₂, hTe⟩ | hM
-        · rw [hb]; exact .inl ⟨e₂, rfl⟩
+        refine .inr ⟨rfl, ?_⟩
+        rcases h with hb | ⟨T, hT, hTe⟩ | hM
+        · rw [hb]; exact .inl rfl
         · rcases List.mem_cons.1 hT with rfl | hT
-          · cases hb : (U.dropSh (T :: P) Q).globT σ₀ with
-            | error e₃ => exact .inl ⟨e₃, rfl⟩
-            | ok ρ => exact .inl ⟨e₂, UpdElem.globT_storage_error (Δ := Δ₁) hTe ρ⟩
-          · exact .inr (.inl ⟨T, hT, e₂, hTe⟩)
+          · cases (U.dropSh (T :: P) Q).globT σ₀ with
+            | none => exact .inl rfl
+            | some ρ =>
+              refine .inl ?_
+              rw [Option.bind_some, UpdElem.globT_storage, hTe]
+              rfl
+          · exact .inr (.inl ⟨T, hT, hTe⟩)
         · exact .inr (.inr hM)
   | Δ₁, .snoc U (.memory M), P, Q => by
     simp only [Upd.dropSh]
     split
     · rename_i hQ
       obtain ⟨N, hN, hNM⟩ := List.any_eq_true.1 hQ
-      show ShRel σ₀ P Q (U.globT σ₀ >>= UpdElem.globT (Δ := Δ₁) σ₀ (.memory M)) ((U.dropSh P Q).globT σ₀)
-      rcases Upd.dropSh_rel σ₀ U P Q with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, h⟩
-      · rw [ha, hb]
-        show ShRel σ₀ P Q (UpdElem.globT (Δ := Δ₁) σ₀ (.memory M) τ) _
+      show ShRel σ₀ P Q ((U.globT σ₀).bind (UpdElem.globT (Δ := Δ₁) σ₀ (.memory M)))
+        ((U.dropSh P Q).globT σ₀)
+      rcases Upd.dropSh_rel σ₀ U P Q with ⟨τ, st, μ, ha, hb, h₁, h₂⟩ | ⟨ha, h⟩
+      · rw [ha, hb, Option.bind_some, UpdElem.globT_memory]
         cases hs : M.eval σ₀ with
-        | error e₂ =>
-          rw [UpdElem.globT_memory_error hs]
-          exact .inr ⟨⟨e₂, rfl⟩, .inr (.inr ⟨N, hN, Tm.onMemSpineS_error hs N hNM⟩)⟩
-        | ok g =>
-          rw [UpdElem.globT_memory_ok hs]
-          refine .inl ⟨{ τ with heap := g.heap, nextId := g.nextId }, st, hp, n, rfl,
-            rfl, fun hP => ?_, fun hQ' => absurd hQ' (List.ne_nil_of_mem hN)⟩
-          rw [h₁ hP]
+        | none => exact .inr ⟨rfl, .inr (.inr ⟨N, hN, Tm.onSpineS_none hs N hNM⟩)⟩
+        | some g =>
+          refine .inl ⟨τ.withMem g, st, μ, rfl, rfl, fun hP => ?_,
+            fun hQ' => absurd hQ' (List.ne_nil_of_mem hN)⟩
+          rw [h₁ hP]; rfl
       · rw [ha]
-        exact .inr ⟨⟨e₁, rfl⟩, h⟩
-    · show ShRel σ₀ P Q (U.globT σ₀ >>= UpdElem.globT (Δ := Δ₁) σ₀ (.memory M))
-        ((U.dropSh P (M :: Q)).globT σ₀ >>= UpdElem.globT (Δ := Δ₁) σ₀ (.memory M))
-      rcases Upd.dropSh_rel σ₀ U P (M :: Q) with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, h⟩
-      · rw [ha, hb]
-        show ShRel σ₀ P Q (UpdElem.globT (Δ := Δ₁) σ₀ (.memory M) τ)
-          (UpdElem.globT (Δ := Δ₁) σ₀ (.memory M) (τ.withSHN st hp n))
+        exact .inr ⟨rfl, h⟩
+    · show ShRel σ₀ P Q ((U.globT σ₀).bind (UpdElem.globT (Δ := Δ₁) σ₀ (.memory M)))
+        (((U.dropSh P (M :: Q)).globT σ₀).bind (UpdElem.globT (Δ := Δ₁) σ₀ (.memory M)))
+      rcases Upd.dropSh_rel σ₀ U P (M :: Q) with ⟨τ, st, μ, ha, hb, h₁, h₂⟩ | ⟨ha, h⟩
+      · rw [ha, hb, Option.bind_some, Option.bind_some, UpdElem.globT_memory,
+          UpdElem.globT_memory]
         cases hs : M.eval σ₀ with
-        | error e₂ =>
-          rw [UpdElem.globT_memory_error hs, UpdElem.globT_memory_error hs]
-          exact .inr ⟨⟨e₂, rfl⟩, .inl ⟨e₂, rfl⟩⟩
-        | ok g =>
-          rw [UpdElem.globT_memory_ok hs, UpdElem.globT_memory_ok hs]
-          refine .inl ⟨{ τ with heap := g.heap, nextId := g.nextId }, st, g.heap,
-            g.nextId, rfl, rfl, fun hP => ?_, fun _ => ⟨rfl, rfl⟩⟩
-          rw [h₁ hP]
+        | none => exact .inr ⟨rfl, .inl rfl⟩
+        | some g =>
+          refine .inl ⟨τ.withMem g, st, g, rfl, rfl, fun hP => ?_, fun _ => rfl⟩
+          rw [h₁ hP]; rfl
       · rw [ha]
-        refine .inr ⟨⟨e₁, rfl⟩, ?_⟩
-        rcases h with ⟨e₂, hb⟩ | hP | ⟨N, hN, e₂, hNe⟩
-        · rw [hb]; exact .inl ⟨e₂, rfl⟩
+        refine .inr ⟨rfl, ?_⟩
+        rcases h with hb | hP | ⟨N, hN, hNe⟩
+        · rw [hb]; exact .inl rfl
         · exact .inr (.inl hP)
         · rcases List.mem_cons.1 hN with rfl | hN
-          · cases hb : (U.dropSh P (N :: Q)).globT σ₀ with
-            | error e₃ => exact .inl ⟨e₃, rfl⟩
-            | ok ρ => exact .inl ⟨e₂, UpdElem.globT_memory_error (Δ := Δ₁) hNe ρ⟩
-          · exact .inr (.inr ⟨N, hN, e₂, hNe⟩)
+          · cases (U.dropSh P (N :: Q)).globT σ₀ with
+            | none => exact .inl rfl
+            | some ρ =>
+              refine .inl ?_
+              rw [Option.bind_some, UpdElem.globT_memory, hNe]
+              rfl
+          · exact .inr (.inr ⟨N, hN, hNe⟩)
   | _, .snoc U (.local i r), P, Q =>
     (Upd.dropSh_rel σ₀ U P Q).bind_globT _ (fun _ h => nomatch h) (fun _ h => nomatch h)
   | _, .snoc U (.selfBalance op a), P, Q =>
@@ -1114,18 +939,17 @@ theorem Upd.dropSh_rel (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) �
     (Upd.dropSh_rel σ₀ U P Q).bind_globT _ (fun _ h => nomatch h) (fun _ h => nomatch h)
   | _, .decl U x r, P, Q => by
     have ih := Upd.dropSh_rel σ₀ U P Q
-    show ShRel σ₀ P Q (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g)
-      (do let g ← (U.dropSh P Q).globT σ₀; let _ ← r.eval σ₀; pure g)
-    rcases ih with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, h⟩
-    · rw [ha, hb]
-      cases hr : r.eval σ₀ with
-      | error e₂ => exact .inr ⟨⟨e₂, rfl⟩, .inl ⟨e₂, rfl⟩⟩
-      | ok w => exact .inl ⟨τ, st, hp, n, rfl, rfl, h₁, h₂⟩
+    show ShRel σ₀ P Q ((U.globT σ₀).bind fun g => (r.eval σ₀).bind fun _ => some g)
+      (((U.dropSh P Q).globT σ₀).bind fun g => (r.eval σ₀).bind fun _ => some g)
+    rcases ih with ⟨τ, st, μ, ha, hb, h₁, h₂⟩ | ⟨ha, h⟩
+    · rw [ha, hb, Option.bind_some, Option.bind_some]
+      cases r.eval σ₀ with
+      | none => exact .inr ⟨rfl, .inl rfl⟩
+      | some w => exact .inl ⟨τ, st, μ, rfl, rfl, h₁, h₂⟩
     · rw [ha]
-      refine .inr ⟨⟨e₁, rfl⟩, ?_⟩
-      rcases h with ⟨e₂, hb⟩ | h
-      · rw [hb]
-        cases r.eval σ₀ <;> exact .inl ⟨e₂, rfl⟩
+      refine .inr ⟨rfl, ?_⟩
+      rcases h with hb | h
+      · rw [hb]; exact .inl rfl
       · exact .inr h
   | _, .pop U _, P, Q => Upd.dropSh_rel σ₀ U P Q
   | _, .drop U _, P, Q => Upd.dropSh_rel σ₀ U P Q
@@ -1164,19 +988,17 @@ theorem Upd.dropSh_held : {Δ : Ctx} → (U : Upd C Γ Δ) → (P : List (Tm C �
 theorem holds_upd_dropSh {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} (σ : State C Γ)
     (h : holds σ (.upd m (U.dropSh [] []) φ)) : holds σ (.upd m U φ) := by
   have hr := Upd.dropSh_rel σ U [] []
-  refine Upd.afterT_of_lands (fun e he h' => ?_) (fun g σ' hL => ?_) h
-  · rcases hr with ⟨τ, _, _, _, ha, _⟩ | ⟨_, h'' | ⟨_, hT, _⟩ | ⟨_, hM, _⟩⟩
+  refine Upd.afterT_of_lands (fun he h' => ?_) (fun g σ' hL => ?_) h
+  · rcases hr with ⟨τ, _, _, ha, _⟩ | ⟨_, hb | ⟨_, hT, _⟩ | ⟨_, hM, _⟩⟩
     · rw [he] at ha; cases ha
-    · obtain ⟨e₂, hb⟩ := h''
-      exact h'.of_error hb
+    · exact h'.of_none hb
     · nomatch hT
     · nomatch hM
   · refine ⟨?_, hL.2.1, fun i => ?_⟩
-    · rcases hr with ⟨τ, st, hp, n, ha, hb, h₁, h₂⟩ | ⟨⟨e₁, ha⟩, _⟩
+    · rcases hr with ⟨τ, st, μ, ha, hb, h₁, h₂⟩ | ⟨ha, _⟩
       · rw [hL.1] at ha
         cases ha
-        obtain ⟨rfl, rfl⟩ := h₂ rfl
-        rw [h₁ rfl] at hb
+        rw [h₁ rfl, h₂ rfl, GlobT.withSM_self] at hb
         exact hb
       · rw [hL.1] at ha; cases ha
     · rw [Upd.dropSh_held]
@@ -1197,7 +1019,7 @@ def Modality.mergeP (m : Modality) (ut : Bool) (m' : Modality) (vt : Bool) : Opt
 theorem holds_upd_total {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} (hU : U.totalB = true)
     {φ : Fml C Δ} (σ : State C Γ) (h : holds σ (.upd m U φ)) : holds σ (.upd m' U φ) := by
   obtain ⟨g, hg⟩ := Upd.totalB_globT σ U hU
-  refine Upd.afterT_intro (fun e he => ?_) fun _ σ' hL hH => h.of_lands hL hH
+  refine Upd.afterT_intro (fun he => ?_) fun _ σ' hL => h.of_lands hL
   rw [hg] at he; cases he
 
 /-- `{U}{V}` as one update, by the first merge that reads it: `V` read in
@@ -1435,236 +1257,19 @@ end Merge
 
 /-! ## A storage write applied to a first-order line (`applyStorageBox`)
 
-`[{storage := S}] φ ⇝ φ[S/storage]`, `φ` first-order and every storage
-read of it a `storage` term (`Tm.stExplicitS`).  An equation reads its terms
-through `denote`, so the substitution is exact up to `Equiv`: `S` denotes
-the storage its run leaves (`Tm.denote_eval`), and the rest of the state is
-the one before (`Semantics.State.Keeps`, `Tm.eval_st_glob`). -/
+`[{storage := S}] φ ⇝ φ[S/storage]`, past the program.  **Not ported to the
+typed sorts yet** (`docs/intrinsic.md`, W9.8.3d chain record): an equation
+reads its terms through `denote`, so the substitution needs the Theory's
+operations to respect `Equiv` symbol by symbol (`Struct.Equiv.copyTo` …, a
+typed `Srt.DEquiv`); until then the rewrite applies nowhere, and
+`applyStorageBox` past the program is `Calculus/RewriteScoped.lean`'s on a
+box update of the storage and locals. -/
 
-section WithSt
-
-variable {Γ : Ctx}
-
-open Theory Theory.StValue
-
-/-- `storage` replaced by `S`. -/
-def Op0.withStS (S : Tm C Γ .st) : {s : Srt} → Op0 s → Tm C Γ s
-  | _, .storage => S
-  | _, .lit v => .app0 (.lit v)
-  | _, .env k => .app0 (.env k)
-  | _, .root r => .app0 (.root r)
-  | _, .memory => .app0 .memory
-  | _, .mtSt vs => .app0 (.mtSt vs)
-
-/-- A term with `S` for every `storage`. -/
-def Tm.withStS (S : Tm C Γ .st) : {s : Srt} → Tm C Γ s → Tm C Γ s
-  | _, .pvV i => .pvV i
-  | _, .pvP i => .pvP i
-  | _, .pvS i => .pvS i
-  | _, .pvI i => .pvI i
-  | _, .netOf i a => .netOf i (Tm.withStS S a)
-  | _, .app0 o => o.withStS S
-  | _, .app1 o ho a => .app1 o ho (Tm.withStS S a)
-  | _, .app2 o a b => .app2 o (Tm.withStS S a) (Tm.withStS S b)
-  | _, .app3 o a b c => .app3 o (Tm.withStS S a) (Tm.withStS S b) (Tm.withStS S c)
-
-/-- Every storage read of the term is a `storage` term, and no ledger
-variable is read. -/
-def Tm.stExplicitS : {s : Srt} → Tm C Γ s → Bool
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => true
-  | _, .netOf _ _ => false
-  | _, .app0 o => o.stExplicit
-  | _, .app1 o _ a => o.stExplicit && a.stExplicitS
-  | _, .app2 o a b => o.stExplicit && a.stExplicitS && b.stExplicitS
-  | _, .app3 _ a b c => a.stExplicitS && b.stExplicitS && c.stExplicitS
-
-variable {σ σ' : State C Γ} {S : Tm C Γ .st} {τ : Semantics.State}
-
-/-- **Read before `{storage := S}`, the substituted term reads what the term
-reads in every typed state it lands on.** -/
-theorem Tm.withStS_eval (hs : S.eval σ = .ok τ) (hk : σ.globE.Keeps τ)
-    (hg : σ'.globE = τ) (hl : ∀ {t : LTy} (i : Idx Γ t), σ'.getE i = σ.getE i) :
-    {s : Srt} → (t : Tm C Γ s) → t.stExplicitS = true →
-      (Tm.withStS S t).eval σ = t.eval σ'
-  | _, .pvV i, _ => by simp only [Tm.withStS, Tm.eval, hl i]
-  | _, .pvP i, _ => by simp only [Tm.withStS, Tm.eval, State.aliasPathT_getE, hl i]
-  | _, .pvS i, _ => by
-    show pure { σ.globE with storage := σ.getE i } = pure { σ'.globE with storage := σ'.getE i }
-    rw [hl i, hg, ← hk]
-  | _, .pvI i, _ => by simp only [Tm.withStS, Tm.eval, State.memRefT_getE, hl i]
-  | _, .netOf _ _, he => absurd he Bool.false_ne_true
-  | _, .app0 o, he => by
-    cases o with
-    | storage => show S.eval σ = pure σ'.globE; rw [hs, hg]; rfl
-    | memory => exact absurd he Bool.false_ne_true
-    | lit _ | root _ => rfl
-    | env _ | mtSt _ => show _ = Op0.eval σ'.globE _; rw [hg, ← hk]; rfl
-  | _, .app1 o ho a, he => by
-    simp only [Tm.stExplicitS, Bool.and_eq_true] at he
-    show o.eval σ.globE ((Tm.withStS S a).eval σ) = o.eval σ'.globE (a.eval σ')
-    rw [Tm.withStS_eval hs hk hg hl a he.2, hg]
-    exact o.eval_keeps hk he.1 _
-  | _, .app2 o a b, he => by
-    simp only [Tm.stExplicitS, Bool.and_eq_true] at he
-    show o.eval σ.globE ((Tm.withStS S a).eval σ) ((Tm.withStS S b).eval σ) =
-      o.eval σ'.globE (a.eval σ') (b.eval σ')
-    rw [Tm.withStS_eval hs hk hg hl a he.1.2, Tm.withStS_eval hs hk hg hl b he.2, hg]
-    exact o.eval_keeps hk he.1.1 _ _
-  | _, .app3 o a b c, he => by
-    simp only [Tm.stExplicitS, Bool.and_eq_true] at he
-    show o.eval σ.globE ((Tm.withStS S a).eval σ) ((Tm.withStS S b).eval σ)
-        ((Tm.withStS S c).eval σ) =
-      o.eval σ'.globE (a.eval σ') (b.eval σ') (c.eval σ')
-    rw [Tm.withStS_eval hs hk hg hl a he.1.1, Tm.withStS_eval hs hk hg hl b he.1.2,
-      Tm.withStS_eval hs hk hg hl c he.2]
-    rfl
-
-/-- **Read before `{storage := S}`, the substituted term denotes, up to
-`Equiv`, what the term denotes in every typed state it lands on.** -/
-theorem Tm.withStS_denote (hs : S.eval σ = .ok τ) (hk : σ.globE.Keeps τ)
-    (hg : σ'.globE = τ) (hl : ∀ {t : LTy} (i : Idx Γ t), σ'.getE i = σ.getE i) :
-    {s : Srt} → (t : Tm C Γ s) → t.stExplicitS = true →
-      Srt.DEquiv s ((Tm.withStS S t).denote σ) (t.denote σ')
-  | _, .pvV i, _ => by
-    have he : (Tm.pvV i).denote σ' = (Tm.pvV (C := C) i).denote σ := by
-      simp only [Tm.denote, hl i]
-    rw [show Tm.withStS S (.pvV i) = .pvV i from rfl, he]
-    exact Srt.DEquiv.refl _ _
-  | _, .pvS i, _ => by
-    have he : (Tm.pvS i).denote σ' = (Tm.pvS (C := C) i).denote σ := by
-      simp only [Tm.denote, hl i]
-    rw [show Tm.withStS S (.pvS i) = .pvS i from rfl, he]
-    exact Srt.DEquiv.refl _ _
-  | _, .pvP i, _ => by
-    show (Tm.pvP i).denote σ = (Tm.pvP i).denote σ'
-    simp only [Tm.denote, State.aliasPathT_getE, hl i]
-  | _, .pvI _, _ => trivial
-  | _, .netOf _ _, he => absurd he Bool.false_ne_true
-  | _, .app0 o, he => by
-    cases o with
-    | storage =>
-      show Struct.Equiv (S.denote σ) (Op0.denote σ'.globE .storage)
-      rw [hg]
-      exact Tm.denote_eval σ S τ hs
-    | memory => exact absurd he Bool.false_ne_true
-    | lit _ | root _ | mtSt _ => exact Srt.DEquiv.refl _ _
-    | env _ =>
-      show Srt.DEquiv _ (Op0.denote σ.globE _) (Op0.denote σ'.globE _)
-      rw [hg, ← hk]; exact Srt.DEquiv.refl _ _
-  | _, .app1 o ho a, he => by
-    simp only [Tm.stExplicitS, Bool.and_eq_true] at he
-    show Srt.DEquiv _ (o.denote σ.globE ((Tm.withStS S a).denote σ))
-      (o.denote σ'.globE (a.denote σ'))
-    rw [hg]
-    exact Srt.DEquiv.of_eq (o.denote_keeps hk he.1 _)
-      (o.denote_congr (Tm.withStS_denote hs hk hg hl a he.2))
-  | _, .app2 o a b, he => by
-    simp only [Tm.stExplicitS, Bool.and_eq_true] at he
-    show Srt.DEquiv _ (o.denote σ.globE ((Tm.withStS S a).eval σ) ((Tm.withStS S b).eval σ)
-        ((Tm.withStS S a).denote σ) ((Tm.withStS S b).denote σ))
-      (o.denote σ'.globE (a.eval σ') (b.eval σ') (a.denote σ') (b.denote σ'))
-    rw [hg]
-    exact Srt.DEquiv.of_eq (o.denote_keeps hk he.1.1 _ (a.eval σ') _ (b.eval σ') _ _)
-      (o.denote_congr (Op2.opaque_of_stExplicit he.1.1) (Tm.withStS_denote hs hk hg hl a he.1.2)
-        (Tm.withStS_denote hs hk hg hl b he.2))
-  | _, .app3 o a b c, he => by
-    simp only [Tm.stExplicitS, Bool.and_eq_true] at he
-    exact o.denote_congr (Tm.withStS_denote hs hk hg hl a he.1.1)
-      (Tm.withStS_denote hs hk hg hl b he.1.2) (Tm.withStS_denote hs hk hg hl c he.2)
-
-/-- A first-order formula with `S` for every `storage`, where every storage
-read of it is a `storage` term; `none` past anything else. -/
-def Fml.withStS (S : Tm C Γ .st) : Fml C Γ → Option (Fml C Γ)
-  | .tt => some .tt
-  | .eq a b => if (a.stExplicitS && b.stExplicitS) = true then some (.eq (Tm.withStS S a) (Tm.withStS S b))
-    else none
-  | .defined t => if t.stExplicitS = true then some (.defined (Tm.withStS S t)) else none
-  | .not φ => (Fml.withStS S φ).map .not
-  | .and φ ψ => do pure (.and (← Fml.withStS S φ) (← Fml.withStS S ψ))
-  | .imp φ ψ => do pure (.imp (← Fml.withStS S φ) (← Fml.withStS S ψ))
-  | _ => none
-
-/-- **A first-order formula with `S` for `storage` holds before the write as
-the formula holds in every typed state it lands on.** -/
-theorem Fml.withStS_holds (hs : S.eval σ = .ok τ) (hg : σ'.globE = τ)
-    (hl : ∀ {t : LTy} (i : Idx Γ t), σ'.getE i = σ.getE i) :
-    (φ : Fml C Γ) → {φ' : Fml C Γ} → Fml.withStS S φ = some φ' → (holds σ φ' ↔ holds σ' φ)
-  | .tt, _, h => by cases h; exact Iff.rfl
-  | .eq a b, _, h => by
-    simp only [Fml.withStS] at h
-    split at h
-    · rename_i hab
-      cases h
-      simp only [Bool.and_eq_true] at hab
-      have hk : σ.globE.Keeps τ := (Tm.eval_st_glob σ S τ hs).symm
-      have ea := Tm.withStS_denote hs hk hg hl a hab.1
-      have eb := Tm.withStS_denote hs hk hg hl b hab.2
-      rw [holds_eq, holds_eq]
-      exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
-    · cases h
-  | .defined t, _, h => by
-    simp only [Fml.withStS] at h
-    split at h
-    · rename_i ht
-      cases h
-      have hk : σ.globE.Keeps τ := (Tm.eval_st_glob σ S τ hs).symm
-      rw [holds_defined, holds_defined, Tm.withStS_eval hs hk hg hl t ht]
-    · cases h
-  | .not φ, _, h => by
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
-    exact not_congr (Fml.withStS_holds hs hg hl φ hφ)
-  | .and φ ψ, _, h => by
-    obtain ⟨φ', hφ, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    exact and_congr (Fml.withStS_holds hs hg hl φ hφ) (Fml.withStS_holds hs hg hl ψ hψ)
-  | .imp φ ψ, _, h => by
-    obtain ⟨φ', hφ, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    exact imp_congr (Fml.withStS_holds hs hg hl φ hφ) (Fml.withStS_holds hs hg hl ψ hψ)
-  | .upd .., _, h | .modal .., _, h | .havoc _, _, h | .all .., _, h | .bind .., _, h
-  | .anon .., _, h => by cases h
-
-/-- `[{storage := S}] φ ⇝ φ[S/storage]` on the update in front. -/
-def Fml.applyStTop {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
-  match m, U with
-  | .box, .snoc .nil (.storage S) => Fml.withStS S φ
-  | _, _ => none
-
-theorem Fml.applyStTop_sound {Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
-    {ψ : Fml C Γ} (h : Fml.applyStTop m U φ = some ψ) (σ : State C Γ) (hψ : holds σ ψ) :
-    holds σ (.upd m U φ) := by
-  cases m with
-  | diamond => cases h
-  | box =>
-    cases U with
-    | snoc U e =>
-      cases U with
-      | nil =>
-        cases e with
-        | storage S =>
-          have h : Fml.withStS S φ = some ψ := h
-          refine Upd.afterT_intro (fun _ _ => trivial) fun g σ' hL _ => ?_
-          have h1 : (do let st ← S.eval σ; pure { σ.globE with storage := st.storage }) =
-              Except.ok g := hL.1
-          cases hs : S.eval σ with
-          | error e => rw [hs] at h1; cases h1
-          | ok τ =>
-            rw [hs] at h1
-            have hk : σ.globE.Keeps τ := (Tm.eval_st_glob σ S τ hs).symm
-            have hg : σ'.globE = τ := hL.2.1.trans ((Except.ok.inj h1).symm.trans hk)
-            exact (Fml.withStS_holds hs hg (fun i => hL.2.2 i) φ h).1 hψ
-        | _ => cases h
-      | _ => cases h
-    | _ => cases h
-
-/-- **`applyStorageBox`** past the program, at position `i` of the spine:
-`[{storage := S}] φ ⇝ φ[S/storage]` (`Fml.applyStTop`). -/
-def FmlRw.applyStorageBoxP (i : Nat) : FmlRw C :=
-  FmlRw.atSpine (fun m U φ => Fml.applyStTop m U φ) (fun h σ hψ => Fml.applyStTop_sound h σ hψ) i
-
-end WithSt
+/-- **`applyStorageBox`** past the program, at position `i` of the spine: not
+ported to the typed sorts, so it applies nowhere. -/
+def FmlRw.applyStorageBoxP (_i : Nat) : FmlRw C where
+  apply := fun _ => none
+  sound := fun h => nomatch h
 
 /-! ## Out of a thinning's scope
 
@@ -1782,38 +1387,47 @@ def UpdElem.thinG? (h : Thin Γ' Γ) {Δ Δ' : Ctx} : UpdElem C Γ Δ → Option
 
 /-- An element that sets no local, read in a state with locals dropped,
 computes the global part it did. -/
-theorem UpdElem.globT_thinG? {h : Thin Γ' Γ} {σ₀' : State C Γ'} {σ₀ : State C Γ}
-    (hr : State.ThinOf h σ₀' σ₀) {Δ Δ' : Ctx} (G : Semantics.State) :
+theorem UpdElem.globT_thinG? (h : Thin Γ' Γ) (σ₀ : State C Γ) {Δ Δ' : Ctx} (G : GlobT C σ₀.H) :
     (e : UpdElem C Γ Δ) → {e' : UpdElem C Γ' Δ'} → e.thinG? h = some e' →
-      e'.globT σ₀' G = e.globT σ₀ G
+      e'.globT (σ₀.thin h) G = e.globT σ₀ G
   | .local .., _, he => by cases he
   | .storage s, _, he => by
     obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr s hs]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ s hs]
   | .memory m, _, he => by
     obtain ⟨m', hm, rfl⟩ := Option.map_eq_some_iff.1 he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr m hm]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ m hm]
+    rfl
   | .selfBalance op a, _, he => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr a ha, hr.1]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ a ha]
+    rfl
   | .net r op a, _, he => by
     obtain ⟨r', hr', he⟩ := Option.bind_eq_some_iff.1 he
     obtain ⟨a', ha, he⟩ := Option.bind_eq_some_iff.1 he
     cases he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr r hr', Tm.eval_thinS? hr a ha]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ r hr', Tm.eval_thinS? h σ₀ a ha]
   | .pay r a, _, he => by
     obtain ⟨r', hr', he⟩ := Option.bind_eq_some_iff.1 he
     obtain ⟨a', ha, he⟩ := Option.bind_eq_some_iff.1 he
     cases he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr r hr', Tm.eval_thinS? hr a ha, hr.1]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ r hr', Tm.eval_thinS? h σ₀ a ha]
+    rfl
   | .netMt r a, _, he => by
     obtain ⟨r', hr', he⟩ := Option.bind_eq_some_iff.1 he
     obtain ⟨a', ha, he⟩ := Option.bind_eq_some_iff.1 he
     cases he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr r hr', Tm.eval_thinS? hr a ha]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ r hr', Tm.eval_thinS? h σ₀ a ha]
   | .setBalance a, _, he => by
     obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 he
-    simp only [UpdElem.globT, Tm.eval_thinS? hr a ha]
+    rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, Tm.eval_thinS? h σ₀ a ha]
 
 /-- What an element `thinG?` gives sets no local. -/
 theorem UpdElem.thinG?_held {h : Thin Γ' Γ} {Δ' : Ctx} {Δ : Ctx} (U : Upd C Γ' Δ') :
@@ -1947,14 +1561,13 @@ def Upd.thinIO (h : Thin Γ' Γ) (dropDecl : Nat → Bool) : {Δ : Ctx} → Upd 
 
 /-- **The thinned update computes, read with locals dropped, the global part
 the update computes**: a write it leaves out cannot halt. -/
-theorem Upd.globT_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C Γ'} {σ₀ : State C Γ}
-    (hr : State.ThinOf h σ₀' σ₀) :
+theorem Upd.globT_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) (σ₀ : State C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → {n : Nat} → {R : UThin C Γ' Δ} →
-      U.thinIO h dd = some (n, R) → R.U.globT σ₀' = U.globT σ₀
-  | _, .nil, _, _, hU => by cases hU; exact congrArg pure hr.1
+      U.thinIO h dd = some (n, R) → R.U.globT (σ₀.thin h) = U.globT σ₀
+  | _, .nil, _, _, hU => by cases hU; rfl
   | _, .snoc U e, n', R', hU => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
-    have ih := Upd.globT_thinIO h dd hr U hR
+    have ih := Upd.globT_thinIO h dd σ₀ U hR
     cases e with
     | «local» i r =>
       simp only at hU
@@ -1962,69 +1575,77 @@ theorem Upd.globT_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C
       · rename_i j hj
         obtain ⟨r', hr', hU⟩ := Option.bind_eq_some_iff.1 hU
         cases hU
-        show (R.U.globT σ₀' >>= fun g => do let _ ← r'.eval σ₀'; pure g) =
-          (U.globT σ₀ >>= fun g => do let _ ← r.eval σ₀; pure g)
-        rw [ih, Rhs.eval_thinS? hr r hr']
+        show (R.U.globT (σ₀.thin h)).bind (UpdElem.globT (σ₀.thin h) (.local j r')) =
+          (U.globT σ₀).bind (UpdElem.globT σ₀ (.local i r))
+        rw [ih]
+        congr 1
+        funext G
+        rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
+        simp only [UpdElem.globTM, Rhs.eval_thinS? h σ₀ r hr']
       · split at hU
         · rename_i ht
           cases hU
           obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r ht
-          change _ = (U.globT σ₀ >>= fun g => do let _ ← r.eval σ₀; pure g)
-          rw [ih, hv]
-          cases U.globT σ₀ <;> rfl
+          show _ = (U.globT σ₀).bind (UpdElem.globT σ₀ (.local i r))
+          rw [ih]
+          cases U.globT σ₀ with
+          | none => rfl
+          | some G =>
+            rw [Option.bind_some, UpdElem.globT_eq_globTM]
+            simp only [UpdElem.globTM, hv, Option.bind_some]
         · cases hU
     | _ =>
       obtain ⟨e', he, hU⟩ := Option.bind_eq_some_iff.1 hU
       cases hU
-      show (R.U.globT σ₀' >>= e'.globT σ₀') = (U.globT σ₀ >>= UpdElem.globT σ₀ _)
+      show (R.U.globT (σ₀.thin h)).bind (e'.globT (σ₀.thin h)) = (U.globT σ₀).bind (UpdElem.globT σ₀ _)
       rw [ih]
       congr 1
       funext G
-      exact UpdElem.globT_thinG? hr G _ he
+      exact UpdElem.globT_thinG? h σ₀ G _ he
   | _, .decl U y r, n', R', hU => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
-    have ih := Upd.globT_thinIO h dd hr U hR
+    have ih := Upd.globT_thinIO h dd σ₀ U hR
     simp only at hU
     split at hU
     · split at hU
       · rename_i ht
         cases hU
         obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r ht
-        change _ = (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g)
+        show _ = (U.globT σ₀).bind fun g => (r.eval σ₀).bind fun _ => some g
         rw [ih, hv]
         cases U.globT σ₀ <;> rfl
       · cases hU
     · obtain ⟨r', hr', hU⟩ := Option.bind_eq_some_iff.1 hU
       cases hU
-      show (do let g ← R.U.globT σ₀'; let _ ← r'.eval σ₀'; pure g) =
-        (do let g ← U.globT σ₀; let _ ← r.eval σ₀; pure g)
-      rw [ih, Rhs.eval_thinS? hr r hr']
+      show ((R.U.globT (σ₀.thin h)).bind fun g => (r'.eval (σ₀.thin h)).bind fun _ => some g) =
+        (U.globT σ₀).bind fun g => (r.eval σ₀).bind fun _ => some g
+      rw [ih, Rhs.eval_thinS? h σ₀ r hr']
+      rfl
   | _, .pop U e, n', R', hU => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
     cases hU
-    exact (Upd.popOrSkip_globT σ₀' R.U _).trans (Upd.globT_thinIO h dd hr U hR)
+    exact (Upd.popOrSkip_globT (σ₀.thin h) R.U _).trans (Upd.globT_thinIO h dd σ₀ U hR)
   | _, .drop U e, n', R', hU => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
     cases hU
-    exact (Upd.dropOrSkip_globT σ₀' R.U _).trans (Upd.globT_thinIO h dd hr U hR)
+    exact (Upd.dropOrSkip_globT (σ₀.thin h) R.U _).trans (Upd.globT_thinIO h dd σ₀ U hR)
 
 /-- **The thinned update leaves in each local it keeps what the update
 leaves there.** -/
-theorem Upd.held_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C Γ'} {σ₀ : State C Γ}
-    (hr : State.ThinOf h σ₀' σ₀) :
+theorem Upd.held_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) (σ₀ : State C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → {n : Nat} → {R : UThin C Γ' Δ} →
-      U.thinIO h dd = some (n, R) → ∀ {t : LTy} (k : Idx R.Δ' t) (v : t.Denote C),
-        Held.OKV σ₀ v (U.held (k.wk R.th)) → Held.OKV σ₀' v (R.U.held k)
+      U.thinIO h dd = some (n, R) → ∀ {t : LTy} (k : Idx R.Δ' t) (v : t.VDen C),
+        Held.OKV σ₀ v (U.held (k.wk R.th)) → Held.OKV (σ₀.thin h) v (R.U.held k)
   | _, .nil, _, _, hU, _, k, v, hv => by
     cases hU
-    have hv : v = σ₀.getE (k.wk h) := hv
-    show v = σ₀'.getE k
-    rw [hv, hr.2 k]
+    have hv : v = σ₀.getV (k.wk h) := hv
+    show v = (σ₀.thin h).getV k
+    rw [hv, State.getV_thin]
   | _, .snoc U e, n', R', hU, _, k, v, hv => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
-    have ih : ∀ {t : LTy} (k : Idx R.Δ' t) (v : t.Denote C),
-        Held.OKV σ₀ v (U.held (k.wk R.th)) → Held.OKV σ₀' v (R.U.held k) :=
-      fun k v hv => Upd.held_thinIO h dd hr U hR k v hv
+    have ih : ∀ {t : LTy} (k : Idx R.Δ' t) (v : t.VDen C),
+        Held.OKV σ₀ v (U.held (k.wk R.th)) → Held.OKV (σ₀.thin h) v (R.U.held k) :=
+      fun k v hv => Upd.held_thinIO h dd σ₀ U hR k v hv
     cases e with
     | «local» i r =>
       simp only at hU
@@ -2032,7 +1653,7 @@ theorem Upd.held_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C 
       · rename_i j hj
         obtain ⟨r', hr', hU⟩ := Option.bind_eq_some_iff.1 hU
         cases hU
-        show Held.OKV σ₀' v (Subst.set (Upd.held R.U) j r' k)
+        show Held.OKV (σ₀.thin h) v (Subst.set (Upd.held R.U) j r' k)
         have hv : Held.OKV σ₀ v (Subst.set (Upd.held U) i r (k.wk R.th)) := hv
         have hi : j.wk R.th = i := Idx.unwk?_wk R.th i hj
         subst hi
@@ -2041,8 +1662,8 @@ theorem Upd.held_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C 
         · obtain rfl := Idx.ty_eq_of_toNat hjk
           obtain rfl := Idx.toNat_inj j k hjk
           rw [dif_pos rfl] at hv ⊢
-          show r'.eval σ₀' = .ok v
-          rw [Rhs.eval_thinS? hr r hr']
+          show r'.eval (σ₀.thin h) = some v
+          rw [Rhs.eval_thinS? h σ₀ r hr']
           exact hv
         · have hjk' : ¬ (j.wk R.th).toNat = (k.wk R.th).toNat := fun hc => by
             obtain rfl := Idx.ty_eq_of_toNat hc
@@ -2068,9 +1689,9 @@ theorem Upd.held_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C 
       exact ih k v hv
   | _, .decl U y r, n', R', hU, _, k, v, hv => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
-    have ih : ∀ {t : LTy} (k : Idx R.Δ' t) (v : t.Denote C),
-        Held.OKV σ₀ v (U.held (k.wk R.th)) → Held.OKV σ₀' v (R.U.held k) :=
-      fun k v hv => Upd.held_thinIO h dd hr U hR k v hv
+    have ih : ∀ {t : LTy} (k : Idx R.Δ' t) (v : t.VDen C),
+        Held.OKV σ₀ v (U.held (k.wk R.th)) → Held.OKV (σ₀.thin h) v (R.U.held k) :=
+      fun k v hv => Upd.held_thinIO h dd σ₀ U hR k v hv
     simp only at hU
     split at hU
     · split at hU
@@ -2081,56 +1702,56 @@ theorem Upd.held_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C 
       cases hU
       cases k with
       | here =>
-        show r'.eval σ₀' = .ok v
-        rw [Rhs.eval_thinS? hr r hr']
+        show r'.eval (σ₀.thin h) = some v
+        rw [Rhs.eval_thinS? h σ₀ r hr']
         exact hv
       | there k => exact ih k v hv
   | _, .pop U e, n', R', hU, _, k, v, hv => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
     cases hU
     rw [Upd.popOrSkip_held]
-    refine Upd.held_thinIO h dd hr U hR _ v ?_
+    refine Upd.held_thinIO h dd σ₀ U hR _ v ?_
     rw [Idx.wk_popExt]
     exact hv
   | _, .drop U e, n', R', hU, _, k, v, hv => by
     obtain ⟨⟨n, R⟩, hR, hU⟩ := Option.bind_eq_some_iff.1 hU
     cases hU
     rw [Upd.dropOrSkip_held]
-    refine Upd.held_thinIO h dd hr U hR _ v ?_
+    refine Upd.held_thinIO h dd σ₀ U hR _ v ?_
     rw [Idx.wk_meet]
     exact hv
 
 /-- **Where the update lands, its thinning lands on the state with the
 locals it drops left out.** -/
-theorem Upd.lands_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C Γ'} {σ₀ : State C Γ}
-    (hr : State.ThinOf h σ₀' σ₀) {Δ : Ctx} {U : Upd C Γ Δ} {n : Nat} {R : UThin C Γ' Δ}
-    (hU : U.thinIO h dd = some (n, R)) {g : Semantics.State} {σ' : State C Δ}
-    (hL : U.Lands σ₀ g σ') : R.U.Lands σ₀' g (σ'.thin R.th) := by
-  refine ⟨(Upd.globT_thinIO h dd hr U hU).trans hL.1, hL.2.1, fun k => ?_⟩
-  rw [Held.OKT_iff_OKV, State.getE_thin]
-  exact Upd.held_thinIO h dd hr U hU k _ ((Held.OKT_iff_OKV _ _ _ _).1 (hL.2.2 (k.wk R.th)))
+theorem Upd.lands_thinIO (h : Thin Γ' Γ) (dd : Nat → Bool) (σ₀ : State C Γ) {Δ : Ctx}
+    {U : Upd C Γ Δ} {n : Nat} {R : UThin C Γ' Δ}
+    (hU : U.thinIO h dd = some (n, R)) {g : GlobT C σ₀.H} {σ' : State C Δ}
+    (hL : U.Lands σ₀ g σ') : R.U.Lands (σ₀.thin h) g (σ'.thin R.th) := by
+  refine ⟨(Upd.globT_thinIO h dd σ₀ U hU).trans hL.1, hL.2.1, fun k => ?_⟩
+  rw [Held.OK_iff_OKV, State.getV_thin]
+  exact Upd.held_thinIO h dd σ₀ U hU k _ ((Held.OK_iff_OKV _ _ _ _).1 (hL.2.2 (k.wk R.th)))
 
 /-- …and where its thinning drops nothing, the closed update lands where the
 update does. -/
-theorem Upd.lands_thinIO_close (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C Γ'}
-    {σ₀ : State C Γ} (hr : State.ThinOf h σ₀' σ₀) {Δ : Ctx} {U : Upd C Γ Δ} {n : Nat}
+theorem Upd.lands_thinIO_close (h : Thin Γ' Γ) (dd : Nat → Bool) (σ₀ : State C Γ) {Δ : Ctx}
+    {U : Upd C Γ Δ} {n : Nat}
     {R : UThin C Γ' Δ} (hU : U.thinIO h dd = some (n, R)) {U' : Upd C Γ' Δ}
-    (hc : R.close? = some U') {g : Semantics.State} {σ' : State C Δ}
-    (hL : U.Lands σ₀ g σ') : U'.Lands σ₀' g σ' := by
-  obtain ⟨hcg, hch⟩ := Thin.closeU_spec hc σ₀'
-  refine ⟨hcg.trans ((Upd.globT_thinIO h dd hr U hU).trans hL.1), hL.2.1, fun i => ?_⟩
+    (hc : R.close? = some U') {g : GlobT C σ₀.H} {σ' : State C Δ}
+    (hL : U.Lands σ₀ g σ') : U'.Lands (σ₀.thin h) g σ' := by
+  obtain ⟨hcg, hch⟩ := Thin.closeU_spec hc (σ₀.thin h)
+  refine ⟨hcg.trans ((Upd.globT_thinIO h dd σ₀ U hU).trans hL.1), hL.2.1, fun i => ?_⟩
   obtain ⟨j, hj, he⟩ := hch i
   rw [Idx.wk_norm] at hj
   subst hj
-  rw [Held.OKT_iff_OKV, he]
-  exact Upd.held_thinIO h dd hr U hU j _ ((Held.OKT_iff_OKV _ _ _ _).1 (hL.2.2 (j.wk R.th)))
+  rw [Held.OK_iff_OKV, he]
+  exact Upd.held_thinIO h dd σ₀ U hU j _ ((Held.OK_iff_OKV _ _ _ _).1 (hL.2.2 (j.wk R.th)))
 
 /-- …and the closed update computes the update's global part. -/
-theorem Upd.globT_thinIO_close (h : Thin Γ' Γ) (dd : Nat → Bool) {σ₀' : State C Γ'}
-    {σ₀ : State C Γ} (hr : State.ThinOf h σ₀' σ₀) {Δ : Ctx} {U : Upd C Γ Δ} {n : Nat}
+theorem Upd.globT_thinIO_close (h : Thin Γ' Γ) (dd : Nat → Bool) (σ₀ : State C Γ) {Δ : Ctx}
+    {U : Upd C Γ Δ} {n : Nat}
     {R : UThin C Γ' Δ} (hU : U.thinIO h dd = some (n, R)) {U' : Upd C Γ' Δ}
-    (hc : R.close? = some U') : U'.globT σ₀' = U.globT σ₀ :=
-  (Thin.closeU_spec hc σ₀').1.trans (Upd.globT_thinIO h dd hr U hU)
+    (hc : R.close? = some U') : U'.globT (σ₀.thin h) = U.globT σ₀ :=
+  (Thin.closeU_spec hc (σ₀.thin h)).1.trans (Upd.globT_thinIO h dd σ₀ U hU)
 
 /-- A first-order formula of `Γ` read in `Γ'` (no update, no modality). -/
 def Fml.thinFO? : {Γ' Γ : Ctx} → Thin Γ' Γ → Fml C Γ → Option (Fml C Γ')
@@ -2152,11 +1773,10 @@ theorem Fml.thinFO?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C
     obtain ⟨a', ha, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     obtain ⟨b', hb, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     cases hφ
-    rw [holds_eq, holds_eq, Tm.denote_thinS? (State.ThinOf.thin h σ) a ha,
-      Tm.denote_thinS? (State.ThinOf.thin h σ) b hb]
+    rw [holds_eq, holds_eq, Tm.denote_thinS? h σ a ha, Tm.denote_thinS? h σ b hb]
   | _, _, h, .defined t, _, hφ, σ => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hφ
-    rw [holds_defined, holds_defined, Tm.eval_thinS? (State.ThinOf.thin h σ) t ht]
+    rw [holds_defined, holds_defined, Tm.eval_thinS? h σ t ht]
   | _, _, h, .not φ, _, hφ, σ => by
     obtain ⟨φ', hφ', rfl⟩ := Option.map_eq_some_iff.1 hφ
     exact not_congr (Fml.thinFO?_holds h φ hφ' σ)
@@ -2222,19 +1842,18 @@ theorem Fml.thinS?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C 
     exact fun ha => Fml.thinS?_holds h ψ h₂ σ (hs ((Fml.thinFO?_holds h φ h₁ σ).2 ha))
   | _, _, h, .upd m U φ, _, hφ, σ, hs => by
     obtain ⟨⟨n, R⟩, hR, hφ⟩ := Option.bind_eq_some_iff.1 hφ
-    have hr := State.ThinOf.thin h σ
     simp only at hφ
     split at hφ
     · rename_i U' hc
       cases hφ
-      refine Upd.afterT_intro (fun e he => hs.of_error (e := e) ?_) fun g σ' hL hH =>
-        hs.of_lands (Upd.lands_thinIO_close h _ hr hR hc hL) hH
-      rw [Upd.globT_thinIO_close h _ hr hR hc, he]
+      refine Upd.afterT_intro (fun he => hs.of_none ?_) fun g σ' hL =>
+        hs.of_lands (Upd.lands_thinIO_close h _ σ hR hc hL)
+      rw [Upd.globT_thinIO_close h _ σ hR hc, he]
     · obtain ⟨φ', h₁, hφ⟩ := Option.bind_eq_some_iff.1 hφ
       cases hφ
-      refine Upd.afterT_intro (fun e he => hs.of_error (e := e) ?_) fun g σ' hL hH =>
-        Fml.thinS?_holds R.th φ h₁ σ' (hs.of_lands (Upd.lands_thinIO h _ hr hR hL) hH)
-      rw [Upd.globT_thinIO h _ hr U hR, he]
+      refine Upd.afterT_intro (fun he => hs.of_none ?_) fun g σ' hL =>
+        Fml.thinS?_holds R.th φ h₁ σ' (hs.of_lands (Upd.lands_thinIO h _ σ hR hL))
+      rw [Upd.globT_thinIO h _ σ U hR, he]
   | _, _, h, .all x p φ, _, hφ, σ, hs => by
     obtain ⟨φ', hφ', rfl⟩ := Option.map_eq_some_iff.1 hφ
     exact fun v => Fml.thinS?_holds (.keep h) φ hφ' (σ.push (t := .val p) v) (hs v)
@@ -2299,19 +1918,18 @@ theorem Fml.dropDeclsTop_sound {Δ : Ctx} {drop : Nat → Bool} {m : Modality} {
     {ψ : Fml C Δ} {φ : Fml C Γ} (h : Fml.dropDeclsTop drop m U ψ = some φ) (σ : State C Γ)
     (hφ : holds σ φ) : holds σ (.upd m U ψ) := by
   obtain ⟨⟨n, R⟩, hR, h⟩ := Option.bind_eq_some_iff.1 h
-  have hr : State.ThinOf .refl σ σ := ⟨rfl, fun _ => rfl⟩
   simp only at h
   split at h
   · rename_i U' hc
     cases h
-    refine Upd.afterT_intro (fun e he => hφ.of_error (e := e) ?_) fun g σ' hL hH =>
-      hφ.of_lands (Upd.lands_thinIO_close .refl drop hr hR hc hL) hH
-    rw [Upd.globT_thinIO_close .refl drop hr hR hc, he]
+    refine Upd.afterT_intro (fun he => hφ.of_none ?_) fun g σ' hL =>
+      hφ.of_lands (Upd.lands_thinIO_close .refl drop σ hR hc hL)
+    exact (Upd.globT_thinIO_close .refl drop σ hR hc).trans he
   · obtain ⟨ψ', hψ, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    refine Upd.afterT_intro (fun e he => hφ.of_error (e := e) ?_) fun g σ' hL hH =>
-      Fml.thinS?_holds R.th ψ hψ σ' (hφ.of_lands (Upd.lands_thinIO .refl drop hr hR hL) hH)
-    rw [Upd.globT_thinIO .refl drop hr U hR, he]
+    refine Upd.afterT_intro (fun he => hφ.of_none ?_) fun g σ' hL =>
+      Fml.thinS?_holds R.th ψ hψ σ' (hφ.of_lands (Upd.lands_thinIO .refl drop σ hR hL))
+    exact (Upd.globT_thinIO .refl drop σ U hR).trans he
 
 /-- `{U}_m ψ`, the scope ends `ψ` begins with merged in where `absorb`
 (`Fml.absorbPops`): asked only where `ψ` is an update, so that the kernel
@@ -2381,10 +1999,9 @@ theorem Fml.dropBindTop_sound {Δ : Ctx} {t : LTy} {m₀ : Modality} {x : Var} {
     · rename_i n U' hU
       cases h
       refine Modality.forallB_intro fun w => ?_
-      have hr := State.ThinOf.push σ w
-      refine Upd.afterT_intro (fun e he => hφ.of_error (e := e) ?_) fun g σ' hL hH => hφ.of_lands (g := g) ?_ hH
-      · rw [Upd.globT_thinIO (Thin.drop .refl) _ hr U hU, he]
-      · exact Upd.lands_thinIO (Thin.drop .refl) _ hr hU hL
+      refine Upd.afterT_intro (fun he => hφ.of_none ?_) fun g σ' hL => hφ.of_lands (g := g) ?_
+      · exact (Upd.globT_thinIO (Thin.drop .refl) _ (σ.push w) U hU).trans he
+      · exact Upd.lands_thinIO (Thin.drop .refl) _ (σ.push w) hU hL
     · cases h
   | _ => cases h
 

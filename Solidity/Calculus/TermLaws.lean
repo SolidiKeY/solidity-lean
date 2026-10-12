@@ -657,14 +657,14 @@ section RefEval
 
 variable {σ : State C Γ}
 
-theorem Tm.eval_find {P : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim P))) :
+theorem Tm.find_evalT {P : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim P))) :
     (Tms.Term.find s q).eval σ =
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.find r).bind fun v => some v.view :=
   rfl
-theorem Tm.eval_len {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+theorem Tm.len_evalT {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tms.Term.len s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.len r :=
   rfl
-theorem Tm.eval_delValue {P : PrimTy} (t : Tm C Γ (.val P)) :
+theorem Tm.delValue_evalT {P : PrimTy} (t : Tm C Γ (.val P)) :
     (Tms.Term.delValue t).eval σ = (t.eval σ).map fun _ => PrimTy.dflt P := rfl
 
 /-- Two paths whose shapes part reach references that part. -/
@@ -752,7 +752,7 @@ theorem Tm.find_frame_eval {s s' : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
     (hd : p.diverges q = true) {st' : Storage C} (he : s'.eval σ = some st') :
     (Tms.Term.find s' q).eval σ = (Tms.Term.find s q).eval σ := by
   obtain ⟨st, r, w, hs, hp, hw⟩ := hS st' he
-  rw [Tm.eval_find, Tm.eval_find, he, hs, Option.bind_some, Option.bind_some]
+  rw [Tm.find_evalT, Tm.find_evalT, he, hs, Option.bind_some, Option.bind_some]
   cases hq : q.eval σ with
   | none => rfl
   | some rq => simp only [Option.bind_some, Storage.find_save_frame (Tm.diverges_eval hd hp hq) hw]
@@ -763,7 +763,7 @@ theorem Tm.len_frame_eval {s s' : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)} 
     (hd : q.divergesLen p = true) {st' : Storage C} (he : s'.eval σ = some st') :
     (Tms.Term.len s' p).eval σ = (Tms.Term.len s p).eval σ := by
   obtain ⟨st, r, w, hs, hq, hw⟩ := hS st' he
-  rw [Tm.eval_len, Tm.eval_len, he, hs, Option.bind_some, Option.bind_some]
+  rw [Tm.len_evalT, Tm.len_evalT, he, hs, Option.bind_some, Option.bind_some]
   cases hp : p.eval σ with
   | none => rfl
   | some rp => simp only [Option.bind_some, Storage.len_save_frame (Tm.divergesLen_eval hd hq hp) hw]
@@ -779,7 +779,7 @@ theorem Tm.find_delAt_value_eval {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path 
   simp only [Option.bind_eq_some_iff] at he'
   obtain ⟨st, hs, r, hp, hd⟩ := he'
   obtain ⟨x, hx, hsave⟩ := Storage.delete_save hd
-  rw [Tm.eval_find, Tm.eval_delValue, Tm.eval_find, he, hs, Option.bind_some, Option.bind_some]
+  rw [Tm.find_evalT, Tm.delValue_evalT, Tm.find_evalT, he, hs, Option.bind_some, Option.bind_some]
   cases hqe : q.eval σ with
   | none => rfl
   | some rq =>
@@ -1741,11 +1741,11 @@ theorem Tm.write_some {T : Ty} {m : Tm C Γ .mem} {a : Tm C Γ (.addr T)} {v : T
   obtain ⟨μ, hm, ad, ha, w, hv, ra, hra, mv, hmv, hp, hw, rfl⟩ := h
   exact ⟨μ, ad, w, ra, mv, hp, hm, ha, hv, hra, hmv, hw, rfl⟩
 
-theorem Tm.eval_read {P : PrimTy} (X : Tm C Γ .mem) (b : Tm C Γ (.addr (.prim P))) :
+theorem Tm.read_evalT {P : PrimTy} (X : Tm C Γ .mem) (b : Tm C Γ (.addr (.prim P))) :
     (Tms.Term.read X b).eval σ = (X.eval σ).bind fun μ => (b.eval σ).bind fun bd =>
       (bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb := rfl
 
-theorem Tm.eval_iread {R : RefTy} (X : Tm C Γ .mem) (b : Tm C Γ (.addr (.ref R))) :
+theorem Tm.iread_evalT {R : RefTy} (X : Tm C Γ .mem) (b : Tm C Γ (.addr (.ref R))) :
     (Tms.ITerm.read X b).eval σ = (X.eval σ).bind fun μ => (b.eval σ).bind fun bd =>
       ((bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb).bind fun r => some r.id := rfl
 
@@ -1758,14 +1758,14 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.r
       obtain ⟨μ, ad, w, ra, mv, hp, -, ha, hv, hra, hmv, hw, rfl⟩ := Tm.write_some hX
       cases hv
       cases hmv
-      rw [Tm.eval_read, hX, Option.bind_some, ha, Option.bind_some]
+      rw [Tm.read_evalT, hX, Option.bind_some, ha, Option.bind_some]
       show (ad.resolve μ.H').bind (fun rb => hp.readAddr rb) = _
       rw [hra, Option.bind_some, Heap.readAddr_writeAddr_same hw]
       rfl⟩
   | @EvalLaw.readWriteDifferent _ _ m T a v P b h => ⟨_, rfl, fun σ hX => by
       obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
       obtain ⟨μ, ad, w, ra, mv, hp, hm, ha, -, hra, -, hw, rfl⟩ := Tm.write_some hX
-      rw [Tm.eval_read, Tm.eval_read, hX, hm, Option.bind_some, Option.bind_some]
+      rw [Tm.read_evalT, Tm.read_evalT, hX, hm, Option.bind_some, Option.bind_some]
       cases hb : b.eval σ with
       | none => rfl
       | some bd =>
@@ -1779,7 +1779,7 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.r
   | @EvalLaw.readWriteDifferentIdentity _ _ m T a v R b h => ⟨_, rfl, fun σ hX => by
       obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
       obtain ⟨μ, ad, w, ra, mv, hp, hm, ha, -, hra, -, hw, rfl⟩ := Tm.write_some hX
-      rw [Tm.eval_iread, Tm.eval_iread, hX, hm, Option.bind_some, Option.bind_some]
+      rw [Tm.iread_evalT, Tm.iread_evalT, hX, hm, Option.bind_some, Option.bind_some]
       cases hb : b.eval σ with
       | none => rfl
       | some bd =>
@@ -1793,7 +1793,7 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ X, t.r
   | @EvalLaw.readOnWriteIdentity _ _ m R a i => ⟨_, rfl, fun σ hX => by
       obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
       obtain ⟨μ, ad, w, ra, mv, hp, -, ha, hv, hra, hmv, hw, rfl⟩ := Tm.write_some hX
-      rw [Tm.eval_iread, hX, Option.bind_some, ha, Option.bind_some]
+      rw [Tm.iread_evalT, hX, Option.bind_some, ha, Option.bind_some]
       show ((ad.resolve μ.H').bind fun rb => hp.readAddr rb).bind _ = _
       rw [hra, Option.bind_some, Heap.readAddr_writeAddr_same hw, Option.bind_some]
       have hv : i.eval σ = some w := hv
