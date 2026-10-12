@@ -17,11 +17,11 @@ end in (`Stmt.runSt`, `Prog.runSt`, `Frames.runSt`), so that a block and
 the statement it replaces compare as states; a run only grows the heap
 typing (`Stmt.runSt_ext`, from `Out.ext`), which an update's reading asks.
 
-An update rule needs that its update, applied to the erasure, ends in the
-erasure of the state the typed run ends in, and halts where the run halts
-under the diamond (`Premise.sound_update`); the update is a term of
-`Update.lean`, so an arm states that the statement's typed step agrees with
-the update applied to the erasure (`TRes.Agrees`,
+An update rule needs that its update computes the global part and the
+locals of the state the typed run ends in (`Upd.applyV`), and halts where
+the run halts under the diamond (`Premise.sound_update`); the update is a
+term of `Update.lean`, so an arm states that the statement's typed step
+agrees with what the update computes (`TRes.Agrees`,
 `Premise.sound_update_typed`), from the lowered expressions' agreements
 (`Calculus/LowerRun.lean`).  Also here: outcomes alike up to the halt
 (`Res.Sim`, `TRes.Sim`).
@@ -41,58 +41,68 @@ section NoPanic
 variable {Γ : Ctx}
 
 /-- **A scoped term never panics**: its symbols are `Update.lean`'s. -/
-theorem Tm.eval_noPanic (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → s.NoPanic (t.eval σ)
+theorem Tm.evalT_noPanic (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → s.NoPanic (t.evalT σ)
   | _, .pvV _ => NoPanic.pure _
   | _, .pvP i => by
-    show NoPanic (aliasPath σ i)
-    unfold aliasPath; split <;> no_panic
+    show NoPanic (σ.aliasPathT i)
+    unfold State.aliasPathT; split <;> no_panic
   | _, .pvS _ => NoPanic.pure _
   | _, .pvI i => by
-    show NoPanic (memRef σ i)
-    unfold memRef; split <;> no_panic
+    show NoPanic (σ.memRefT i)
+    unfold State.memRefT; split <;> no_panic
   | _, .netOf i a => by
-    have ha : NoPanic (a.eval σ) := Tm.eval_noPanic σ a
-    simp only [Tm.eval, Srt.NoPanic]
+    have ha : NoPanic (a.evalT σ) := Tm.evalT_noPanic σ a
+    simp only [Tm.evalT, Srt.NoPanic]
     no_panic
-  | _, .app0 o => Op0.eval_noPanic σ.glob o
-  | _, .app1 o _ a => Op1.eval_noPanic σ.glob o (Tm.eval_noPanic σ a)
-  | _, .app2 o a b => Op2.eval_noPanic σ.glob o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b)
+  | _, .app0 o => Op0.eval_noPanic σ.globE o
+  | _, .app1 o _ a => Op1.eval_noPanic σ.globE o (Tm.evalT_noPanic σ a)
+  | _, .app2 o a b => Op2.eval_noPanic σ.globE o (Tm.evalT_noPanic σ a) (Tm.evalT_noPanic σ b)
   | _, .app3 o a b c =>
-    Op3.eval_noPanic σ.glob o (Tm.eval_noPanic σ a) (Tm.eval_noPanic σ b) (Tm.eval_noPanic σ c)
+    Op3.eval_noPanic σ.globE o (Tm.evalT_noPanic σ a) (Tm.evalT_noPanic σ b)
+      (Tm.evalT_noPanic σ c)
 
-theorem Rhs.eval_noPanic (σ : EState C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic (r.eval σ) := by
+theorem Rhs.evalT_noPanic (σ : State C Γ) {t : LTy} (r : Rhs C Γ t) : NoPanic (r.evalT σ) := by
   cases r with
-  | val t => exact Tm.eval_noPanic σ t
-  | path p => have := Tm.eval_noPanic σ p; simp only [Rhs.eval]; no_panic
+  | val t => exact Tm.evalT_noPanic σ t
+  | path p => have := Tm.evalT_noPanic σ p; simp only [Rhs.evalT]; no_panic
   | unset => exact NoPanic.pure _
-  | mref i => have := Tm.eval_noPanic σ i; simp only [Rhs.eval]; no_panic
-  | store s => have := Tm.eval_noPanic σ s; simp only [Rhs.eval]; no_panic
+  | mref i => have := Tm.evalT_noPanic σ i; simp only [Rhs.evalT]; no_panic
+  | store s => have := Tm.evalT_noPanic σ s; simp only [Rhs.evalT]; no_panic
   | saveNet => exact NoPanic.pure _
   | saveNetMt => exact NoPanic.pure _
 
-theorem UpdElem.write_noPanic {Δ : Ctx} (σ₀ : EState C Γ) (e : UpdElem C Γ Δ) (τ : EState C Δ) :
-    NoPanic (e.write σ₀ τ) := by
-  have hv : ∀ t : Tm C Γ .val, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  have hs : ∀ t : Tm C Γ .st, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
-  have hm : ∀ t : Tm C Γ .mem, NoPanic (t.eval σ₀) := fun t => Tm.eval_noPanic σ₀ t
+theorem UpdElem.globT_noPanic {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)
+    (g : Semantics.State) : NoPanic (e.globT σ₀ g) := by
+  have hv : ∀ t : Tm C Γ .val, NoPanic (t.evalT σ₀) := fun t => Tm.evalT_noPanic σ₀ t
+  have hs : ∀ t : Tm C Γ .st, NoPanic (t.evalT σ₀) := fun t => Tm.evalT_noPanic σ₀ t
+  have hm : ∀ t : Tm C Γ .mem, NoPanic (t.evalT σ₀) := fun t => Tm.evalT_noPanic σ₀ t
   cases e with
-  | «local» i r => have := Rhs.eval_noPanic σ₀ r; simp only [UpdElem.write]; no_panic
-  | _ => simp only [UpdElem.write]; no_panic
+  | «local» i r => have := Rhs.evalT_noPanic σ₀ r; simp only [UpdElem.globT]; no_panic
+  | _ => simp only [UpdElem.globT]; no_panic
+
+theorem UpdElem.applyV_noPanic {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)
+    (g : Semantics.State) (ℓ : Locs C Δ) : NoPanic (e.applyV σ₀ g ℓ) := by
+  cases e with
+  | «local» i r =>
+    have := Rhs.evalT_noPanic σ₀ r
+    simp only [UpdElem.applyV]; no_panic
+  | _ =>
+    simp only [UpdElem.applyV]
+    exact NoPanic.bind (UpdElem.globT_noPanic σ₀ _ g) fun _ _ => NoPanic.pure _
 
 /-- **An update never panics.** -/
-theorem Upd.apply_noPanic (σ₀ : EState C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → NoPanic (U.apply σ₀)
+theorem Upd.applyV_noPanic (σ₀ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    NoPanic (U.applyV σ₀)
   | _, .nil => NoPanic.pure _
   | _, .snoc U e =>
-    NoPanic.bind (Upd.apply_noPanic σ₀ U) fun τ _ => UpdElem.write_noPanic σ₀ e τ
+    NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun p _ => UpdElem.applyV_noPanic σ₀ e p.1 p.2
   | _, .decl U _ r =>
-    NoPanic.bind (Upd.apply_noPanic σ₀ U) fun _ _ =>
-      NoPanic.bind (Rhs.eval_noPanic σ₀ r) fun _ _ => NoPanic.pure _
-  | _, .pop U h => by
-    show NoPanic (EState.drop h <$> U.apply σ₀)
-    rw [NoPanic.map]; exact Upd.apply_noPanic σ₀ U
-  | _, .drop U h => by
-    show NoPanic (EState.thin h <$> U.apply σ₀)
-    rw [NoPanic.map]; exact Upd.apply_noPanic σ₀ U
+    NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun _ _ =>
+      NoPanic.bind (Rhs.evalT_noPanic σ₀ r) fun _ _ => NoPanic.pure _
+  | _, .pop U _ =>
+    NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun _ _ => NoPanic.pure _
+  | _, .drop U _ =>
+    NoPanic.bind (Upd.applyV_noPanic σ₀ U) fun _ _ => NoPanic.pure _
 
 end NoPanic
 
@@ -234,20 +244,29 @@ section Shapes
 
 variable {Γ Γ' Γ₁ Γ₀ : Ctx} {m : Modality}
 
-/-- **An update**: `{U} ⟨ ω κ ⟩ φ` gives `⟨ s; ω κ ⟩ φ` when `U`, applied to
-the erasure, ends in the erasure of the state `s` ends in, and `s` halts
-only where `U` does under the diamond (but when it is exhausted, which both
-modalities accept), never in a panic. -/
+/-- An update that halts computed halts in its global part. -/
+theorem Upd.globT_error_of_applyV {Δ : Ctx} {σ₀ : State C Γ} {U : Upd C Γ Δ} {e : Halt}
+    (h : U.applyV σ₀ = .error e) : ∃ e', U.globT σ₀ = .error e' := by
+  cases hg : U.globT σ₀ with
+  | error e' => exact ⟨e', rfl⟩
+  | ok g =>
+    obtain ⟨ℓ, hℓ⟩ := Upd.applyV_of_globT U hg
+    rw [hℓ] at h; cases h
+
+/-- **An update**: `{U} ⟨ ω κ ⟩ φ` gives `⟨ s; ω κ ⟩ φ` when `U` computes the
+global part and the locals of the state `s` ends in (`Upd.applyV`), and `s`
+halts only where `U` does under the diamond (but when it is exhausted, which
+both modalities accept), never in a panic. -/
 theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State C Γ)
-    (hs : ∀ τ, Stmt.runSt σ s = .ok τ → U.apply σ.erase = .ok τ.erase)
+    (hs : ∀ τ, Stmt.runSt σ s = .ok τ → U.applyV σ = .ok (τ.globE, τ.loc))
     (hh : ∀ e, Stmt.runSt σ s = .error e →
-      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.apply σ.erase = .error e')) :
+      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.applyV σ = .error e')) :
     Premise.Sound m s (.update U) σ := by
   intro _ _ ω κ φ h
   rw [holds_modal_iff, runSt_cons_frames]
   cases hτ : Stmt.runSt σ s with
   | ok τ =>
-    have hl : U.Lands σ τ.globE τ := Upd.lands_iff.2 ⟨hs τ hτ, rfl⟩
+    have hl : U.Lands σ τ.globE τ := Upd.lands_iff_applyV.2 ⟨τ.loc, hs τ hτ, rfl, fun _ => rfl⟩
     exact (holds_modal_iff τ ω κ φ).1 (holds_modalK τ ω κ φ (h.of_lands hl (Stmt.runSt_ext hτ)))
   | error e =>
     obtain ⟨hp, hd⟩ := hh e hτ
@@ -259,7 +278,7 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
       by_cases hx : e = .exhausted
       · exact hx
       · obtain ⟨e', he'⟩ := hd rfl hx
-        have hg : U.globT σ = .error e' := by rw [← Upd.apply_glob σ U, he']; rfl
+        obtain ⟨e'', hg⟩ := Upd.globT_error_of_applyV he'
         exact (h.of_error hg).elim
 
 /-- **A block dropping a frame from under what it keeps**
@@ -519,9 +538,9 @@ over runs that may call back. -/
 /-- **What the premise `p` asks of the typed run of `s` from `σ`**, by its
 kind. -/
 def Premise.Runs (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → State C Γ → Prop
-  | _, _, s, .update U, σ => (∀ τ, Stmt.runSt σ s = .ok τ → U.apply σ.erase = .ok τ.erase) ∧
+  | _, _, s, .update U, σ => (∀ τ, Stmt.runSt σ s = .ok τ → U.applyV σ = .ok (τ.globE, τ.loc)) ∧
       (∀ e, Stmt.runSt σ s = .error e →
-        e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.apply σ.erase = .error e'))
+        e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.applyV σ = .error e'))
   | _, _, s, .unfold P h, σ => TRes.Sim ((Prog.runSt σ P).map (State.drop h)) (Stmt.runSt σ s)
   | _, _, s, .bind _ t P, σ => ∃ v : t.TDenote C σ.H, Prog.runSt (σ.push v) P = Stmt.runSt σ s
   | _, _, s, .split _ c c' P Q, σ =>
@@ -552,9 +571,9 @@ theorem Premise.Runs.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {p 
 
 /-- **An update** (`Premise.sound_updateH`'s conditions). -/
 theorem Premise.sound_update {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State C Γ)
-    (hs : ∀ τ, Stmt.runSt σ s = .ok τ → U.apply σ.erase = .ok τ.erase)
+    (hs : ∀ τ, Stmt.runSt σ s = .ok τ → U.applyV σ = .ok (τ.globE, τ.loc))
     (hh : ∀ e, Stmt.runSt σ s = .error e →
-      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.apply σ.erase = .error e')) :
+      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.applyV σ = .error e')) :
     Premise.Runs m s (.update U) σ := ⟨hs, hh⟩
 
 /-- **A block**, up to the halt. -/
@@ -747,12 +766,13 @@ theorem Premise.sound_captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
 
 end ShapesSim
 
-/-! ## An update, through its erasure
+/-! ## An update, against the typed step
 
-An update rule's update is a term of `Update.lean`, read on the erasure, so
-what it needs of the typed run (`Premise.sound_update`) follows from the
-statement's typed step agreeing with it (`TRes.Agrees`, the erased state, the
-same `revert` or `panic`): the update ends where the step ends, up to the
+An update rule's update is a term of `Update.lean`, computed on the typed
+state as a global part and the locals' values (`Upd.applyV`), so what it
+needs of the typed run (`Premise.sound_update`) follows from the statement's
+typed step agreeing with it (`TRes.Agrees`, the state the step ends in read
+so, the same `revert` or `panic`): the update ends where the step ends, up to the
 halt, and the typed run does not diverge under the diamond.  A typed `diverge` agrees with any untyped outcome, so under the
 diamond the arm shows that it does not happen (no update arm's statement
 loops; a push at the bound is exhausted, `TRun.push_nd`, which agrees with
@@ -762,15 +782,16 @@ section Bridge
 
 variable {Γ Γ' : Ctx} {m : Modality}
 
-/-- **An update, through the erasure, up to the halt**: an update that ends
-as what the statement's typed run agrees with (`X`), up to the halt
-(`Res.Sim`), is sound over the typed state, where the typed run does not
-diverge under the diamond. -/
+/-- **An update, up to the halt**: an update that ends as what the
+statement's typed run agrees with (`X`), up to the halt (`Res.Sim`), is
+sound over the typed state, where the typed run does not diverge under the
+diamond. -/
 theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State C Γ)
-    {X : Res (EState C Γ')} (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (s.run σ) X)
-    (hs : Res.Sim (U.apply σ.erase) X)
+    {X : Res (Semantics.State × Locs C Γ')}
+    (ha : TRes.Agrees (fun o : Out C σ.H Γ' => (o.st.globE, o.st.loc)) (s.run σ) X)
+    (hs : Res.Sim (U.applyV σ) X)
     (hd : m = .diamond → (s.run σ).NoDiv) : Premise.Runs m s (.update U) σ := by
-  have hU := Upd.apply_noPanic σ.erase U
+  have hU := Upd.applyV_noPanic σ U
   apply Premise.sound_update σ
   · intro τ hτ
     simp only [Stmt.runSt] at hτ
@@ -779,10 +800,10 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
     | ok o =>
       rw [ht] at hτ ha
       obtain rfl : o.st = τ := Except.ok.inj hτ
-      have ha' : X = .ok o.st.erase := ha
+      have ha' : X = .ok (o.st.globE, o.st.loc) := ha
       rw [ha'] at hs
       revert hs
-      cases U.apply σ.erase with
+      cases U.applyV σ with
       | ok a => intro hs; exact congrArg Except.ok hs
       | error => intro hs; exact hs.elim
   · intro e he
@@ -797,14 +818,14 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
         have ha' : X = .error .revert := ha
         rw [ha'] at hs
         revert hs
-        cases U.apply σ.erase with
+        cases U.applyV σ with
         | ok => intro hs; exact hs.elim
         | error e'' => exact fun _ => ⟨nofun, fun _ _ => ⟨e'', rfl⟩⟩
       | panic =>
         have ha' : X = .error .panic := ha
         rw [ha'] at hs
         revert hs hU
-        cases U.apply σ.erase with
+        cases U.applyV σ with
         | ok => intro hs _; exact hs.elim
         | error e'' => exact fun hs hU => absurd (congrArg Except.error (hs.2 rfl)) hU
       | diverge => exact ⟨nofun, fun hm _ => absurd ht (hd hm)⟩
@@ -812,19 +833,20 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
 
 /-- **An update, against the typed run, up to the halt**: an update that
 ends, up to the halt (`Res.Sim`), as what the statement's typed step agrees
-with on the erasure (`X`). -/
+with (`X`). -/
 theorem Premise.sound_updateSim_typed {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
-    (σ : State C Γ) {X : Res (EState C Γ')}
-    (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (t σ) X)
-    (hs : Res.Sim (U.apply σ.erase) X)
+    (σ : State C Γ) {X : Res (Semantics.State × Locs C Γ')}
+    (ha : TRes.Agrees (fun o : Out C σ.H Γ' => (o.st.globE, o.st.loc)) (t σ) X)
+    (hs : Res.Sim (U.applyV σ) X)
     (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
     Premise.Runs m s (.update U) σ :=
   Premise.sound_updateSim_agrees σ (by rw [ht]; exact ha) hs hd
 
 /-- **An update, against the typed run**: the statement's typed step agrees
-with the update applied to the erasure. -/
+with what the update computes. -/
 theorem Premise.sound_update_typed {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
-    (σ : State C Γ) (ha : TRes.Agrees (fun o : Out C σ.H Γ' => o.st.erase) (t σ) (U.apply σ.erase))
+    (σ : State C Γ)
+    (ha : TRes.Agrees (fun o : Out C σ.H Γ' => (o.st.globE, o.st.loc)) (t σ) (U.applyV σ))
     (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
     Premise.Runs m s (.update U) σ :=
   Premise.sound_updateSim_typed σ ha (Res.Sim.refl _) hd ht
@@ -843,9 +865,9 @@ rest after each update of `us`, give `⟨ s; ω κ ⟩ φ` when, the formulas
 holding, one of the updates ends as what the statement's typed step agrees
 with, up to the halt. -/
 theorem Premise.sound_cases_typed {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ)} {s : Stmt C Γ Γ}
-    {t : TStep C Γ Γ} (σ : State C Γ) {X : Res (EState C Γ)}
-    (ha : TRes.Agrees (fun o : Out C σ.H Γ => o.st.erase) (t σ) X)
-    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.apply σ.erase) X)
+    {t : TStep C Γ Γ} (σ : State C Γ) {X : Res (Semantics.State × Locs C Γ)}
+    (ha : TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (t σ) X)
+    (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, Res.Sim (U.applyV σ) X)
     (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
     Premise.Sound m s (.cases fs us) σ := by
   intro Γ₁ Γ₀ ω κ φ hp

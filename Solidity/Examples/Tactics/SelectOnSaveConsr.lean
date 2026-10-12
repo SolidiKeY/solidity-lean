@@ -9,7 +9,7 @@ import Solidity.Calculus.RewriteSyntax
 
 KeY builds a path by appending on the right: `storageFieldWriteSave` writes
 `{storage := save(storage, consr(sp, fld), se)}`, and the interpreter's
-`Tm.eval` returns `segs ++ [.field f]` the same way.  Reading a write back
+`Tm.evalT` returns `segs ++ [.field f]` the same way.  Reading a write back
 walks the path from the left: `SVal.save` and `SVal.find` unfold only on
 `Seg.field name :: rest`, as the theory's `findDefinitionCons` and
 `selectOnSaveCons` match `cons(a, flds)`.
@@ -45,7 +45,7 @@ write, is the term taclet `findOnSave` on scoped terms
 
 The `consr` path has not gone away, it has moved into the Theory.
 `alice.age` still denotes `[.field "alice"] ++ [.field "age"]`
-(`Tm.denote` of `.field`), and the Theory's laws are stated at a list path:
+(`Tm.denoteT` of `.field`), and the Theory's laws are stated at a list path:
 `find_copyTo_same` at any `p ≠ []`, and the rule-shaped `findDelAt` at
 `p ++ [a]` (`find_delAt_field`, which splits the read with `find_append`).
 The reassociation happens once, inside the proof of the law

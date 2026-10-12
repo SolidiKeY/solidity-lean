@@ -68,7 +68,7 @@ theorem Tm.denoteT_substH_pvV {p : PrimTy} {i : Idx Δ (.val p)} {t' : Tm C Γ .
     have hok : σ₁.getE i = σ₀.getE j := hok
     show StValue.prim _ = StValue.prim _
     rw [hok]
-  | .rhs (.val t), hok, h => by cases h; exact Tm.denoteT_eval σ₀ t' _ hok
+  | .rhs (.val t), hok, h => by cases h; exact Tm.denoteT_evalT σ₀ t' _ hok
 
 theorem Tm.denoteT_substH_pvP {R : RefTy} {i : Idx Δ (.alias R)} {t' : Tm C Γ .path} :
     (x : Held C Γ (.alias R)) → Held.OKT σ₀ σ₁ i x →
@@ -89,7 +89,7 @@ theorem Tm.denoteT_substH_pvP {R : RefTy} {i : Idx Δ (.alias R)} {t' : Tm C Γ 
       injection hok with hq
       show _ = (match σ₁.aliasPathT i with | .ok (r, segs) => rootPath r segs | .error _ => [])
       rw [State.aliasPathT_getE, ← hq]
-      exact Tm.denoteT_eval σ₀ t' q.1 q.2 hp
+      exact Tm.denoteT_evalT σ₀ t' q.1 q.2 hp
   | .rhs .unset, _, h => by cases h
 
 theorem Tm.denoteT_substH_pvS {b : Bool} {i : Idx Δ .old} {t' : Tm C Γ .st} :

@@ -228,7 +228,7 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
   | ok o =>
     have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
     exact COut.after_seq (holdsC_modalK o.st ω κ φ
-      (Upd.afterT.of_lands h (Upd.lands_iff.2 ⟨h₁ _ hst, rfl⟩) o.ext))
+      (Upd.afterT.of_lands h (Upd.lands_iff_applyV.2 ⟨_, h₁ _ hst, rfl, fun _ => rfl⟩) o.ext))
   | error e =>
     have hst : Stmt.runSt σ s = .error e := by simp only [Stmt.runSt, ht]; rfl
     obtain ⟨hp, hd⟩ := h₂ e hst
@@ -240,7 +240,7 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
       by_cases hx : e = .exhausted
       · exact hx
       · obtain ⟨e', he'⟩ := hd rfl hx
-        have hg : U.globT σ = .error e' := by rw [← Upd.apply_glob σ U, he']; rfl
+        obtain ⟨e'', hg⟩ := Upd.globT_error_of_applyV he'
         exact (Upd.afterT.of_error h hg).elim
 
 /-- **A block that pays nothing, with callbacks.** -/
@@ -356,7 +356,7 @@ variable {I : Fml C []} {Γ Γ₁ Γ₀ : Ctx} {σ : State C Γ} {ω : Prog C Γ
 transfer returns, the booking ends in its state. -/
 theorem transfer_booking (sadr se : Simple C Γ .uint) {o₁ : Out C σ.H Γ}
     (h : TRun.transfer (.simple sadr) (.simple se) σ = .ok o₁) :
-    (Upd.nil.snoc (UpdElem.payTo sadr se)).apply σ.erase = .ok o₁.st.erase :=
+    (Upd.nil.snoc (UpdElem.payTo sadr se)).applyV σ = .ok (o₁.st.globE, o₁.st.loc) :=
   (Stmt.runs 0 .box (.transfer (.simple sadr) (.simple se)) (.upd1 (.payTo sadr se)) rfl σ).1
     o₁.st (by show (TRun.transfer _ _ σ).map _ = _; rw [h]; rfl)
 
@@ -375,11 +375,11 @@ theorem holdsC_transferCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | transferHalt h => nomatch h
   | transferViolated h hn =>
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx
-      (Upd.lands_iff.2 ⟨transfer_booking sadr se h, rfl⟩) (‹Out C σ.H Γ›).ext))).elim
+      (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) (‹Out C σ.H Γ›).ext))).elim
   | transferResume h hJ hJ' =>
     rename_i st nt o₂
     exact COut.after_seq (holdsC_modalK _ ω κ φ
-      (Upd.afterT.of_lands hr (Upd.lands_iff.2 ⟨transfer_booking sadr se h, rfl⟩) o₂.ext st nt
+      (Upd.afterT.of_lands hr (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) o₂.ext st nt
         ((holdsC_closedAt_iff hI hT _).2 hJ')))
 
 /-- **`sendWithCallbackBox` is sound with callbacks**: the invariant on exit
@@ -403,11 +403,11 @@ theorem holdsC_sendCb (hI : I.FO = true) (hT : I.hasTransfer = false) (pv : Idx 
       (Upd.lands_snoc_local (Upd.lands_nil σ) pv (v := (false : Bool)) rfl) (List.prefix_refl _)))
   | sendViolated h hn =>
     exact (hn ((holdsC_closedAt_iff hI hT _).1 (Upd.afterT.of_lands hx
-      (Upd.lands_iff.2 ⟨transfer_booking sadr se h, rfl⟩) (‹Out C σ.H Γ›).ext))).elim
+      (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) (‹Out C σ.H Γ›).ext))).elim
   | sendResume h hJ hJ' =>
     rename_i st nt o₂
     exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hok
-      (Upd.lands_snoc_local (Upd.lands_iff.2 ⟨transfer_booking sadr se h, rfl⟩) pv
+      (Upd.lands_snoc_local (Upd.lands_iff_applyV.2 ⟨_, transfer_booking sadr se h, rfl, fun _ => rfl⟩) pv
         (v := (true : Bool)) rfl) o₂.ext st nt ((holdsC_closedAt_iff hI hT _).2 hJ')))
 
 /-- **`tryCallWithCallbackBox` is sound with callbacks**: the invariant where

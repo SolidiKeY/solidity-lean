@@ -11,10 +11,7 @@ has no local and reads `t` at the empty scope (`Tm.closedAs`: `Tm.toNil?`,
 compared by `Tm.beqR`); it becomes `t'` read at its scope (`Tm.ofNil`).  A
 closed term reads what it reads at the empty scope over the same global
 part (`Tm.evalT_toNilS`, `Tm.denoteT_ofNil`, the typed state's global part
-`State.toNil`), so nothing below reads the closer's terms or the erasure.
-`EState.nil` and `Tm.eval_toNilS`/`Tm.denote_toNilS` stay for
-`Calculus/TermLaws.lean`'s laws, read on the erasure, and so does the term
-bridge `Tm.denote_eval` (its typed twin `Tm.denoteT_eval`).
+`State.toNil`).
 
 *In an equation*: a side of an equation that is `t` becomes `t'`
 (`Tm.sideC`), in every equation of the formula, at any depth of its
@@ -72,66 +69,11 @@ def Tm.ofNil : {s : Srt} → Tm C [] s → Tm C Γ s
   | _, .app2 o x y => .app2 o (Tm.ofNil x) (Tm.ofNil y)
   | _, .app3 o x y z => .app3 o (Tm.ofNil x) (Tm.ofNil y) (Tm.ofNil z)
 
-/-- The state's global part, with no local. -/
-def EState.nil (σ : EState C Γ) : EState C [] := σ.withEnv (Δ := []) ()
-
 /-- `t` has no local and reads `q` at the empty scope. -/
 def Tm.closedAs (t : Tm C Γ .val) (q : Tm C [] .val) : Bool :=
   match t.toNil? with
   | some t₀ => t₀.beqR q
   | none => false
-
-/-- A closed term reads what it reads at the empty scope. -/
-theorem Tm.eval_toNilS (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
-    t.toNil? = some t₀ → t.eval σ = t₀.eval σ.nil
-  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
-    nomatch h
-  | _, .app0 o, _, h => by cases h; rfl
-  | _, .app1 o ho x, _, h => by
-    obtain ⟨x₀, hx, rfl⟩ := Option.map_eq_some_iff.1 h
-    show o.eval σ.glob (x.eval σ) = o.eval σ.glob (x₀.eval σ.nil)
-    rw [Tm.eval_toNilS σ x hx]
-  | _, .app2 o x y, _, h => by
-    obtain ⟨x₀, hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y₀, hy, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.eval σ.glob (x.eval σ) (y.eval σ) = o.eval σ.glob (x₀.eval σ.nil) (y₀.eval σ.nil)
-    rw [Tm.eval_toNilS σ x hx, Tm.eval_toNilS σ y hy]
-  | _, .app3 o x y z, _, h => by
-    obtain ⟨x₀, hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y₀, hy, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨z₀, hz, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.eval σ.glob (x.eval σ) (y.eval σ) (z.eval σ) =
-      o.eval σ.glob (x₀.eval σ.nil) (y₀.eval σ.nil) (z₀.eval σ.nil)
-    rw [Tm.eval_toNilS σ x hx, Tm.eval_toNilS σ y hy, Tm.eval_toNilS σ z hz]
-
-/-- A closed term denotes what it denotes at the empty scope. -/
-theorem Tm.denote_toNilS (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
-    t.toNil? = some t₀ → t.denote σ = t₀.denote σ.nil
-  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
-    nomatch h
-  | _, .app0 o, _, h => by cases h; rfl
-  | _, .app1 o ho x, _, h => by
-    obtain ⟨x₀, hx, rfl⟩ := Option.map_eq_some_iff.1 h
-    show o.denote σ.glob (x.denote σ) = o.denote σ.glob (x₀.denote σ.nil)
-    rw [Tm.denote_toNilS σ x hx]
-  | _, .app2 o x y, _, h => by
-    obtain ⟨x₀, hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y₀, hy, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.denote σ.glob (x.eval σ) (y.eval σ) (x.denote σ) (y.denote σ) =
-      o.denote σ.glob (x₀.eval σ.nil) (y₀.eval σ.nil) (x₀.denote σ.nil) (y₀.denote σ.nil)
-    rw [Tm.denote_toNilS σ x hx, Tm.denote_toNilS σ y hy, Tm.eval_toNilS σ x hx,
-      Tm.eval_toNilS σ y hy]
-  | _, .app3 o x y z, _, h => by
-    obtain ⟨x₀, hx, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨y₀, hy, h⟩ := Option.bind_eq_some_iff.1 h
-    obtain ⟨z₀, hz, h⟩ := Option.bind_eq_some_iff.1 h
-    cases h
-    show o.denote (x.denote σ) (y.denote σ) (z.denote σ) =
-      o.denote (x₀.denote σ.nil) (y₀.denote σ.nil) (z₀.denote σ.nil)
-    rw [Tm.denote_toNilS σ x hx, Tm.denote_toNilS σ y hy, Tm.denote_toNilS σ z hz]
 
 theorem Tm.closedAs_toNil {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs q = true) :
     t.toNil? = some q := by
@@ -140,7 +82,6 @@ theorem Tm.closedAs_toNil {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs 
   · rename_i t₀ ht
     rw [ht, Tm.eq_of_beqR h]
   · cases h
-
 
 /-! ### Closed terms on the typed state -/
 
@@ -248,49 +189,6 @@ theorem Tm.denoteT_closedAs {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedA
 
 end Closed
 
-/-! ## The term bridge -/
-
-section Bridge
-
-open Semantics (bind_ok_inv)
-
-variable {Γ : Ctx}
-
-/-- **The term bridge** on scoped terms (`Theory/Bridge/Denote.lean`): a term's denotation agrees with its
-reading wherever the reading returns. -/
-theorem Tm.denote_eval (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) →
-    Srt.Bridge s (t.denote σ) (t.eval σ)
-  | _, .pvV _ => by intro x h; cases h; rfl
-  | _, .pvP i => by
-    intro r segs h
-    have h' : aliasPath σ i = .ok (r, segs) := h
-    simp only [Tm.denote, h']
-  | _, .pvS _ => by intro τ h; cases h; exact StValue.Equiv.refl _
-  | _, .pvI _ => trivial
-  | _, .netOf i a => by
-    intro x h
-    obtain ⟨va, ha, h⟩ := bind_ok_inv h
-    obtain ⟨n, hn, h⟩ := bind_ok_inv h
-    cases h
-    cases va with
-    | bool => cases hn
-    | int n' =>
-      cases hn
-      simp only [Tm.denote, Tm.denote_eval σ a _ ha]
-  | _, .app0 o => Op0.denote_eval o
-  | _, .app1 o _ a => Op1.denote_eval o (Tm.denote_eval σ a)
-  | _, .app2 o a b => Op2.denote_eval o (Tm.denote_eval σ a) (Tm.denote_eval σ b)
-  | _, .app3 o a b c =>
-    Op3.denote_eval o (Tm.denote_eval σ a) (Tm.denote_eval σ b) (Tm.denote_eval σ c)
-
-/-- The term bridge on the typed readers. -/
-theorem Tm.denoteT_eval (σ : State C Γ) {s : Srt} (t : Tm C Γ s) :
-    Srt.Bridge s (t.denoteT σ) (t.evalT σ) := by
-  rw [Tm.denoteT_eq, Tm.evalT_eq]
-  exact Tm.denote_eval σ.erase t
-
-end Bridge
-
 /-! ## Rewriting the right-hand sides of an update -/
 
 section RwC
@@ -310,12 +208,12 @@ def Tm.EvalRefines (t t' : Tm C [] .val) : Prop :=
   ∀ σ : State C [], Res.Le (t.evalT σ) (t'.evalT σ)
 
 /-- **A Theory equation onto a literal refines evaluation**: where `t`
-returns `x` it denotes `x` (`Tm.denote_eval`), the two denote alike, and
+returns `x` it denotes `x` (`Tm.denoteT_evalT`), the two denote alike, and
 the literal returns what it denotes. -/
 theorem Tm.EvalRefines.of_theq {t t' : Tm C [] .val} (h : Tm.Theq t t') (ht : t'.isLit = true) :
     Tm.EvalRefines t t' := fun σ x hx => by
-  have e := h σ.erase
-  rw [← Tm.denoteT_eq, ← Tm.denoteT_eq, Tm.denoteT_eval σ t x hx] at e
+  have e := h σ
+  rw [Tm.denoteT_evalT σ t x hx] at e
   match t', ht, e with
   | .app0 (.lit v), _, e =>
     cases Theory.StValue.Equiv.prim_iff.1 e
@@ -780,8 +678,8 @@ theorem Tm.sideC_denoteT {q : Tm C [] .val × Tm C [] .val} (hq : Tm.Theq q.1 q.
   unfold Tm.sideC
   split
   · rename_i hc
-    rw [Tm.denoteT_ofNil σ, Tm.denoteT_closedAs hc σ, Tm.denoteT_eq, Tm.denoteT_eq]
-    exact (hq σ.toNil.erase).symm
+    rw [Tm.denoteT_ofNil σ, Tm.denoteT_closedAs hc σ]
+    exact (hq σ.toNil).symm
   · exact Equiv.refl _
 
 /-- **A formula rewritten by a Theory equation holds where it does.** -/

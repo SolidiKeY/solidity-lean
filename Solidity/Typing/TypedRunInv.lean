@@ -6,8 +6,8 @@ import Solidity.Typing.TypedWT
 # Invariants of the typed run
 
 `Typing/Soundness.lean`'s `RunInv` (a part on the untyped global state, a
-part on each erased local) read of a typed state (`RunInv.HoldsT`: the
-global part of its erasure, its locals erased) and carried along the typed
+part on each erased local) read of a typed state (`RunInv.HoldsT`: its
+global part erased, `State.globE`, its locals erased, `TEnv.All`) and carried along the typed
 run (`Semantics/Run.lean`): `RunInv.TKeeps t` says the step `t`, from a typed
 state the invariant holds of, ends, if in a state, in one it holds of, each
 under the store typing its own heap typing lists (`HTy.toHeapTy 0 σ.H`,
@@ -76,49 +76,77 @@ def Ctx.ValMem : Ctx → Prop
   | .mem _ :: Γ => Ctx.ValMem Γ
   | _ :: _ => False
 
-namespace Env.All
+/-- Every local of `e`, erased, satisfies `P` at its type. -/
+def TEnv.All {H : HTy} (P : (t : LTy) → t.Denote C → Prop) : {Γ : Ctx} → TEnv C H Γ → Prop
+  | [], _ => True
+  | t :: _, e => P t (LTy.TDenote.erase t e.1) ∧ TEnv.All P e.2
+
+theorem TEnv.All.mono {H : HTy} {P Q : (t : LTy) → t.Denote C → Prop}
+    (hPQ : ∀ t v, P t v → Q t v) : {Γ : Ctx} → {e : TEnv C H Γ} → TEnv.All P e → TEnv.All Q e
+  | [], _, _ => trivial
+  | _ :: _, _, he => ⟨hPQ _ _ he.1, mono hPQ he.2⟩
+
+theorem TEnv.All.get {H : HTy} {P : (t : LTy) → t.Denote C → Prop} {Γ : Ctx} {t : LTy}
+    (i : Idx Γ t) : {e : TEnv C H Γ} → TEnv.All P e → P t (LTy.TDenote.erase t (TEnv.get i e)) := by
+  induction i with
+  | here => intro e h; exact h.1
+  | there i ih => intro e h; exact ih h.2
+
+namespace RunInv
+
+variable {I : RunInv C}
+
+theorem env_mono {Γ : Ctx} {H H' : HeapTy} {K : HTy} (hext : H.Extends H') {e : TEnv C K Γ}
+    (h : TEnv.All (I.loc H) e) : TEnv.All (I.loc H') e :=
+  TEnv.All.mono (fun _ _ => I.loc_mono hext) h
+
+end RunInv
+
+namespace TEnv.All
 
 variable {P : (t : LTy) → t.Denote C → Prop} {H : HTy}
 
-theorem tappend {Γ : Ctx} : (ρ : Ctx) → {r : TEnv C H ρ} → {e : TEnv C H Γ} →
-    Env.All P (TEnv.erase ρ r) → Env.All P (TEnv.erase Γ e) →
-    Env.All P (TEnv.erase (ρ ++ Γ) (TEnv.append ρ r e))
+theorem append {Γ : Ctx} : (ρ : Ctx) → {r : TEnv C H ρ} → {e : TEnv C H Γ} →
+    TEnv.All P r → TEnv.All P e → TEnv.All P (TEnv.append ρ r e)
   | [], _, _, _, he => he
-  | _ :: ρ, _, _, hr, he => ⟨hr.1, tappend ρ hr.2 he⟩
+  | _ :: ρ, _, _, hr, he => ⟨hr.1, append ρ hr.2 he⟩
 
-theorem ttake {Γ : Ctx} : (ρ : Ctx) → {e : TEnv C H (ρ ++ Γ)} →
-    Env.All P (TEnv.erase (ρ ++ Γ) e) → Env.All P (TEnv.erase ρ (TEnv.take ρ e))
+theorem take {Γ : Ctx} : (ρ : Ctx) → {e : TEnv C H (ρ ++ Γ)} →
+    TEnv.All P e → TEnv.All P (TEnv.take ρ e)
   | [], _, _ => trivial
-  | _ :: ρ, _, he => ⟨he.1, ttake ρ he.2⟩
+  | _ :: ρ, _, he => ⟨he.1, take ρ he.2⟩
 
-theorem tdrop {Γ Δ : Ctx} (h : Ext Γ Δ) {e : TEnv C H Δ} (he : Env.All P (TEnv.erase Δ e)) :
-    Env.All P (TEnv.erase Γ (TEnv.drop h e)) := by
-  rw [← TEnv.drop_erase]
-  exact Env.All.drop h he
+theorem drop {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → {e : TEnv C H Δ} → TEnv.All P e →
+    TEnv.All P (TEnv.drop h e) := by
+  intro Δ h
+  induction h with
+  | refl => intro e he; exact he
+  | push h ih => intro e he; exact ih he.2
 
-theorem tset {Γ : Ctx} {t : LTy} (i : Idx Γ t) {e : TEnv C H Γ} {v : t.TDenote C H}
-    (he : Env.All P (TEnv.erase Γ e)) (hv : P t (LTy.TDenote.erase t v)) :
-    Env.All P (TEnv.erase Γ (TEnv.set i v e)) := by
-  rw [← TEnv.set_erase]
-  exact Env.All.set i he hv
+theorem set : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {e : TEnv C H Γ} → {v : t.TDenote C H} →
+    TEnv.All P e → P t (LTy.TDenote.erase t v) → TEnv.All P (TEnv.set i v e) := by
+  intro Γ t i
+  induction i with
+  | here => intro e v h hv; exact ⟨hv, h.2⟩
+  | there i ih => intro e v h hv; exact ⟨h.1, ih h.2 hv⟩
 
-theorem twk {Γ : Ctx} {H' : HTy} (x : H <+: H') {e : TEnv C H Γ}
-    (he : Env.All P (TEnv.erase Γ e)) : Env.All P (TEnv.erase Γ (TEnv.wk x Γ e)) := by
-  rw [TEnv.erase_wk]
-  exact he
+theorem wk {H' : HTy} (x : H <+: H') : {Γ : Ctx} → {e : TEnv C H Γ} →
+    TEnv.All P e → TEnv.All P (TEnv.wk x Γ e)
+  | [], _, _ => trivial
+  | t :: _, e, he => ⟨by show P t (LTy.TDenote.erase t (LTy.TDenote.wk x t e.1)); rw [LTy.TDenote.erase_wk]; exact he.1, wk x he.2⟩
 
 /-- A predicate that every value and every memory local satisfies holds of
 locals of those types. -/
 theorem of_valMem (hv : ∀ p v, P (.val p) v) (hm : ∀ R v, P (.mem R) v) :
-    {Γ : Ctx} → Ctx.ValMem Γ → (e : Env C Γ) → Env.All P e
+    {Γ : Ctx} → Ctx.ValMem Γ → (e : TEnv C H Γ) → TEnv.All P e
   | [], _, _ => trivial
-  | .val _ :: Γ, h, e => ⟨hv _ e.1, of_valMem hv hm (Γ := Γ) h e.2⟩
-  | .mem _ :: Γ, h, e => ⟨hm _ e.1, of_valMem hv hm (Γ := Γ) h e.2⟩
+  | .val _ :: Γ, h, e => ⟨hv _ _, of_valMem hv hm (Γ := Γ) h e.2⟩
+  | .mem _ :: Γ, h, e => ⟨hm _ _, of_valMem hv hm (Γ := Γ) h e.2⟩
   | .alias _ :: _, h, _ => nomatch h
   | .old :: _, h, _ => nomatch h
   | .oldNet :: _, h, _ => nomatch h
 
-end Env.All
+end TEnv.All
 
 theorem Args.valMem {Γ : Ctx} : {ps : Ctx} → Args C Γ ps → Ctx.ValMem ps
   | _, .nil => trivial
@@ -135,15 +163,15 @@ theorem CodeBinder.valMem {κ : Ctx} (code : CodeBinder κ) : Ctx.ValMem κ := b
 frame's return variables do. -/
 theorem CallRet.leaveT_all {P : (t : LTy) → t.Denote C → Prop} {H : HTy} {Γ rs Γ' : Ctx}
     (ret : CallRet Γ rs Γ') {e : TEnv C H Γ} {r : TEnv C H rs}
-    (he : Env.All P (TEnv.erase Γ e)) (hr : Env.All P (TEnv.erase rs r)) :
-    Env.All P (TEnv.erase Γ' (ret.leaveT e r)) := by
+    (he : TEnv.All P e) (hr : TEnv.All P r) :
+    TEnv.All P (ret.leaveT e r) := by
   cases ret with
   | none => exact he
   | val p x res =>
     cases res with
     | none => exact he
-    | some i => exact Env.All.tset i he hr.1
-  | rets bs => exact Env.All.tappend _ hr he
+    | some i => exact TEnv.All.set i he hr.1
+  | rets bs => exact TEnv.All.append _ hr he
   | mem R x hd hm => exact ⟨hr.1, he⟩
 
 /-- Entering a call leaves the storage alone. -/
@@ -155,14 +183,14 @@ theorem CallRet.enterT_storage {Γ rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (�
 object, on top of the parameters. -/
 theorem CallRet.enterT_env {P : (t : LTy) → t.Denote C → Prop} {Γ rs Γ' ps : Ctx}
     (ret : CallRet Γ rs Γ') (τ : State C ps) (hv : ∀ p v, P (.val p) v)
-    (hm : ∀ R v, P (.mem R) v) (he : Env.All P (TEnv.erase ps τ.env)) :
-    Env.All P (TEnv.erase (rs ++ ps) (ret.enterT τ).st.env) := by
+    (hm : ∀ R v, P (.mem R) v) (he : TEnv.All P τ.env) :
+    TEnv.All P (ret.enterT τ).st.env := by
   cases ret with
   | none => exact he
   | val p x res => exact ⟨hv _ _, he⟩
   | rets bs =>
-    exact Env.All.tappend _ (Env.All.of_valMem hv hm (Binders.valMem bs) _) he
-  | mem R x hd hm' => exact ⟨hm _ _, Env.All.twk _ he⟩
+    exact TEnv.All.append _ (TEnv.All.of_valMem hv hm (Binders.valMem bs) _) he
+  | mem R x hd hm' => exact ⟨hm _ _, TEnv.All.wk _ he⟩
 
 /-! ## Invariants of the typed run -/
 
@@ -171,23 +199,23 @@ namespace RunInv
 variable {I : RunInv C}
 
 /-- The invariant holds of a typed state under the store typing `H`: of the
-global part of its erasure, and of each local erased. -/
+global part erased, and of each local erased. -/
 def HoldsT (I : RunInv C) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
-  I.glob H σ.erase.glob ∧ Env.All (I.loc H) (TEnv.erase Γ σ.env)
+  I.glob H σ.globE ∧ TEnv.All (I.loc H) σ.env
 
 /-- The locals replaced. -/
 theorem HoldsT.withEnv {Γ Δ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.HoldsT H σ)
-    {e : TEnv C σ.H Δ} (he : Env.All (I.loc H) (TEnv.erase Δ e)) : I.HoldsT H (σ.withEnv e) :=
+    {e : TEnv C σ.H Δ} (he : TEnv.All (I.loc H) e) : I.HoldsT H (σ.withEnv e) :=
   ⟨h.1, he⟩
 
 theorem HoldsT.drop {Γ Δ : Ctx} {H : HeapTy} {σ : State C Δ} (h : I.HoldsT H σ) (x : Ext Γ Δ) :
     I.HoldsT H (σ.drop x) :=
-  ⟨h.1, Env.All.tdrop x h.2⟩
+  ⟨h.1, TEnv.All.drop x h.2⟩
 
 theorem HoldsT.setLocal {Γ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.HoldsT H σ) {t : LTy}
     (i : Idx Γ t) {v : t.TDenote C σ.H} (hv : I.loc H t (LTy.TDenote.erase t v)) :
     I.HoldsT H (σ.setLocal i v) :=
-  ⟨h.1, Env.All.tset i h.2 hv⟩
+  ⟨h.1, TEnv.All.set i h.2 hv⟩
 
 theorem HoldsT.push {Γ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.HoldsT H σ) {t : LTy}
     {v : t.TDenote C σ.H} (hv : I.loc H t (LTy.TDenote.erase t v)) :
@@ -294,16 +322,16 @@ theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (hI : I.ValMemOk) (args : Args C Γ
   obtain ⟨o₂, hr, h⟩ := tbind_ok_inv h
   cases h
   have h₀ : I.HoldsT (HTy.toHeapTy 0 σ.H) (σ.withEnv a) :=
-    hσ.withEnv (Env.All.of_valMem (hI.val _) (hI.mem _) (Args.valMem args) _)
+    hσ.withEnv (TEnv.All.of_valMem (hI.val _) (hI.mem _) (Args.valMem args) _)
   have h₁ : I.HoldsT (HTy.toHeapTy 0 (ret.enterT (σ.withEnv a)).st.H)
       (ret.enterT (σ.withEnv a)).st :=
-    ⟨hI.glob _ _ (σ.withEnv a).erase.glob _
+    ⟨hI.glob _ _ (σ.withEnv a).globE _
       (congrArg Storage.erase (CallRet.enterT_storage ret (σ.withEnv a))) h₀.1,
       CallRet.enterT_env ret _ (hI.val _) (hI.mem _)
         (env_mono (HTy.toHeapTy_extends (ret.enterT (σ.withEnv a)).ext) h₀.2)⟩
   have h₂ := hb _ o₂ h₁ hr
-  refine ⟨h₂.1, CallRet.leaveT_all ret (Env.All.twk _ ?_)
-    (Env.All.ttake rs (Env.All.tdrop x h₂.2))⟩
+  refine ⟨h₂.1, CallRet.leaveT_all ret (TEnv.All.wk _ ?_)
+    (TEnv.All.take rs (TEnv.All.drop x h₂.2))⟩
   exact env_mono (HTy.toHeapTy_extends ((ret.enterT (σ.withEnv a)).ext.trans o₂.ext)) hσ.2
 
 theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hI : I.ValMemOk) (call : ExtCall C Γ)
@@ -319,13 +347,13 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hI : I.ValMemOk
   · cases h
   · obtain ⟨⟨r, rest⟩, _, h⟩ := tbind_ok_inv h
     refine hok.drop ((Ext.append Γ ρ).trans h₁) (σ.withEnv (TEnv.append ρ r σ.env)) o
-      (hσ.withEnv (Env.All.tappend ρ ?_ hσ.2)) h
-    exact Env.All.of_valMem (hI.val _) (hI.mem _) (Binders.valMem rets) _
+      (hσ.withEnv (TEnv.All.append ρ ?_ hσ.2)) h
+    exact TEnv.All.of_valMem (hI.val _) (hI.mem _) (Binders.valMem rets) _
   · exact herr.drop h₂ σ o hσ h
   · obtain ⟨r, _, h⟩ := tbind_ok_inv h
     refine hpnc.drop ((Ext.append Γ κ).trans h₃) (σ.withEnv (TEnv.append κ r σ.env)) o
-      (hσ.withEnv (Env.All.tappend κ ?_ hσ.2)) h
-    exact Env.All.of_valMem (hI.val _) (hI.mem _) (CodeBinder.valMem code) _
+      (hσ.withEnv (TEnv.All.append κ ?_ hσ.2)) h
+    exact TEnv.All.of_valMem (hI.val _) (hI.mem _) (CodeBinder.valMem code) _
   · exact hoth.drop h₄ σ o hσ h
 
 end RunInv

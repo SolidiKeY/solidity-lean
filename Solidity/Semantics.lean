@@ -9,8 +9,8 @@ the locals, the `net` payment ledger and the contract's funds
 (`netHeader.key`), and the transaction's environment (`msg.sender`, …);
 the evaluators of program expressions, the storage and memory reads and
 writes, a call's binding and decoding.  The closer's terms read it
-(`Update.lean`'s `Tm.eval`), and the typed state erases to it
-(`Semantics/StateErase.lean`).
+(`Tm.evalT`, `Calculus/Lands.lean`), on the typed state's global part
+erased (`State.globE`, `Semantics/State.lean`).
 
 Statements run in the typed interpreter (`Semantics/Run.lean`,
 `docs/intrinsic.md`); there is no untyped run of a statement (decisions 39
@@ -448,7 +448,7 @@ theorem pushSlot_isPrim {elemTy : Ty} {shadow : List SVal}
 /-! A path's segments address *slots*: `Seg.at i` into an array is its
 `i`-th slot, a live element or one past the end (the `shadow`).  Whether an
 index is in bounds is checked where the program takes it (`State.checkIndex`,
-in `Loc.resolveT` and `Tm.eval`), not here, so that a reference bound to an
+in `Loc.resolveT` and `Tm.evalT`), not here, so that a reference bound to an
 element keeps addressing its slot after a `pop` (solc). -/
 
 def SVal.find : SVal -> List Seg -> Res SVal
@@ -1372,5 +1372,19 @@ theorem initStorage_solcControlFlow :
     defaultForTy]
 
 end
+
+/-! ## A scoped local, untyped -/
+
+/-- What a local of type `t` holds, erased: a value, the storage path an
+alias is bound to (`none` while unset), a memory object's identity (`none`
+while unset: only a hidden binder leaves one so, decision 17'), a whole
+storage (`old`) or ledger (`oldNet`).  Reducible, so a local's value finds
+the instances of its type. -/
+@[reducible] def LTy.Denote (_C : Contract) : LTy → Type
+  | .val _ => Semantics.Value
+  | .alias _ => Option (Name × List Semantics.Seg)
+  | .mem _ => Option Nat
+  | .old => List (Name × Semantics.SVal)
+  | .oldNet => List (Int × Int)
 
 end Solidity

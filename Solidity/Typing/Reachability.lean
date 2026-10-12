@@ -1228,9 +1228,9 @@ open SemanticsProperties (HeapWellFormed)
 variable {C : Contract}
 
 /-- Every local satisfies the trivial predicate. -/
-theorem Env.all_true : {Γ : Ctx} → (e : Env C Γ) → Env.All (C := C) (fun _ _ => True) e
+theorem TEnv.all_true {H : HTy} : {Γ : Ctx} → (e : TEnv C H Γ) → TEnv.All (C := C) (fun _ _ => True) e
   | [], _ => trivial
-  | _ :: _, e => ⟨trivial, Env.all_true e.2⟩
+  | _ :: _, e => ⟨trivial, TEnv.all_true e.2⟩
 
 /-- A struct's members, erased, keep their names. -/
 theorem MFields.erase_names {H : HTy} : (fs : List (Name × Ty)) → (x : MFields H fs) →
@@ -1257,7 +1257,7 @@ theorem Objs.erase_canon {H : HTy} (start : Nat) : (Rs : List RefTy) → (os : O
 /-- **The heap is canonical by construction**: a typed state's erasure,
 under the store typing its heap typing lists. -/
 theorem State.erase_canonHeap {Γ : Ctx} (σ : State C Γ) :
-    CanonHeap (HTy.toHeapTy 0 σ.H) σ.erase.glob.heap :=
+    CanonHeap (HTy.toHeapTy 0 σ.H) σ.globE.heap :=
   Objs.erase_canon 0 σ.H σ.heap
 
 /-- What a run keeps beyond its types: canonical storage.  The heap is
@@ -1267,7 +1267,6 @@ def canonInv (C : Contract) : RunInv C where
   glob _ τ := CanonStorage C τ.storage
   loc _ _ _ := True
   loc_mono _ h := h
-  reglob _ h := h
 
 /-- The storage canonical. -/
 abbrev RunCanon (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
@@ -1282,11 +1281,11 @@ namespace RunCanon
 variable {Γ : Ctx} {H : HeapTy} {σ : State C Γ}
 
 theorem of_storage (h : CanonStorage C σ.storage.erase) : RunCanon C H σ :=
-  ⟨h, Env.all_true _⟩
+  ⟨h, TEnv.all_true _⟩
 
 /-- A typed state whose storage erases canonical is canonical, its heap by
 construction. -/
-theorem typed (h : RunCanon C H σ) : Canon C (HTy.toHeapTy 0 σ.H) σ.erase.glob :=
+theorem typed (h : RunCanon C H σ) : Canon C (HTy.toHeapTy 0 σ.H) σ.globE :=
   ⟨h.1, State.erase_canonHeap σ⟩
 
 end RunCanon
@@ -1821,10 +1820,10 @@ def Reachable (C : Contract) (st : List (Name × Semantics.SVal)) : Prop :=
   ∃ (Γ' : Ctx) (P : Prog C [] Γ') (o : Out C (State.init C).H Γ'),
     P.run (State.init C) = .ok o ∧ o.st.storage.erase = st
 
-/-- The erasure of the state a contract starts in (read by
+/-- The global part of the state a contract starts in, erased (read by
 `Calculus/Problem.lean`). -/
-theorem Reachable.init_erase : (State.init C).erase = EState.ofSem C.initState :=
-  State.init_erase C
+theorem Reachable.init_globE : (State.init C).globE = C.initState :=
+  State.init_globE C
 
 /-- The storage a contract starts with, erased: each root at its default. -/
 theorem State.init_storage_erase : (State.init C).storage.erase = C.initStorage :=

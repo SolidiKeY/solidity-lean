@@ -1,5 +1,4 @@
 import Solidity.Typing.State
-import Solidity.Semantics.Erased
 
 /-!
 # Type soundness: the layout, the typed values, the invariants' shape
@@ -121,8 +120,8 @@ end Solidity
 
 /-! # Over the scoped syntax
 
-The locals are typed by their context: `Env.All (LTy.WT C H) σ.env` says each
-local holds what its type says. -/
+A local, erased, is typed by its context (`LTy.WT`); `TEnv.All`
+(`Typing/TypedRunInv.lean`) reads it of every local of a typed state. -/
 
 namespace Solidity
 
@@ -131,59 +130,6 @@ open SemanticsProperties (HeapWellFormed)
 
 variable {C : Contract}
 
-/-! ## Locals that satisfy a predicate -/
-
-/-- Every local of `e` satisfies `P` at its type. -/
-def Env.All (P : (t : LTy) → t.Denote C → Prop) : {Γ : Ctx} → Env C Γ → Prop
-  | [], _ => True
-  | _ :: _, e => P _ e.1 ∧ Env.All P e.2
-
-namespace Env.All
-
-variable {P Q : (t : LTy) → t.Denote C → Prop}
-
-theorem get : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {e : Env C Γ} → Env.All P e →
-    P t (Env.get i e) := by
-  intro Γ t i
-  induction i with
-  | here => intro e h; exact h.1
-  | there i ih => intro e h; exact ih h.2
-
-theorem set : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {e : Env C Γ} → {v : t.Denote C} →
-    Env.All P e → P t v → Env.All P (Env.set i v e) := by
-  intro Γ t i
-  induction i with
-  | here => intro e v h hv; exact ⟨hv, h.2⟩
-  | there i ih => intro e v h hv; exact ⟨h.1, ih h.2 hv⟩
-
-theorem drop {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → {e : Env C Δ} → Env.All P e →
-    Env.All P (Env.drop h e) := by
-  intro Δ h
-  induction h with
-  | refl => intro e he; exact he
-  | push h ih => intro e he; exact ih he.2
-
-theorem append {Γ : Ctx} : (ρ : Ctx) → {r : Env C ρ} → {e : Env C Γ} → Env.All P r →
-    Env.All P e → Env.All P (Env.append ρ r e)
-  | [], _, _, _, he => he
-  | _ :: ρ, _, _, hr, he => ⟨hr.1, append ρ hr.2 he⟩
-
-theorem take {Γ : Ctx} : (ρ : Ctx) → {e : Env C (ρ ++ Γ)} → Env.All P e → Env.All P (Env.take ρ e)
-  | [], _, _ => trivial
-  | _ :: ρ, _, he => ⟨he.1, take ρ he.2⟩
-
-theorem mono (hPQ : ∀ t v, P t v → Q t v) : {Γ : Ctx} → {e : Env C Γ} → Env.All P e →
-    Env.All Q e
-  | [], _, _ => trivial
-  | _ :: _, _, he => ⟨hPQ _ _ he.1, mono hPQ he.2⟩
-
-theorem and : {Γ : Ctx} → {e : Env C Γ} → Env.All P e → Env.All Q e →
-    Env.All (fun t v => P t v ∧ Q t v) e
-  | [], _, _, _ => trivial
-  | _ :: _, _, hp, hq => ⟨⟨hp.1, hq.1⟩, and hp.2 hq.2⟩
-
-end Env.All
-
 /-! ## Invariants of runs
 
 What a run keeps is a part on the global state and a part on each local,
@@ -191,24 +137,14 @@ the latter kept as the store typing grows (`Typing/TypedRunInv.lean` carries
 it along the typed run). -/
 
 /-- An invariant of runs: a part on the global state, a part on each
-local, kept as the store typing `H` grows, and blind to the locals. -/
+local, kept as the store typing `H` grows. -/
 structure RunInv (C : Contract) where
   glob : HeapTy → Semantics.State → Prop
   loc : HeapTy → (t : LTy) → t.Denote C → Prop
   loc_mono : ∀ {H H' : HeapTy} {t : LTy} {v : t.Denote C}, H.Extends H' → loc H t v →
     loc H' t v
-  reglob : ∀ {H : HeapTy} {τ : Semantics.State} {Γ : Ctx} (e : Env C Γ), glob H τ →
-    glob H (EState.ofGlob τ e).glob
 
-namespace RunInv
 
-variable {I : RunInv C}
-
-theorem env_mono {Γ : Ctx} {H H' : HeapTy} (hext : H.Extends H') {e : Env C Γ}
-    (h : Env.All (I.loc H) e) : Env.All (I.loc H') e :=
-  Env.All.mono (fun _ _ => I.loc_mono hext) h
-
-end RunInv
 
 /-! ## The typed locals -/
 
@@ -233,10 +169,5 @@ theorem LTy.WT.mono {H H' : HeapTy} (hext : H.Extends H') :
 
 theorem LTy.WT.default (p : PrimTy) : LTy.WT C H (.val p) (PrimTy.default p) := by
   cases p <;> rfl
-
-/-- A storage-and-heap invariant is blind to the locals. -/
-theorem _root_.Solidity.Semantics.StateWT.reglob {H : HeapTy} {L : Layout} {τ : Semantics.State}
-    {Γ : Ctx} (h : StateWT H L τ) (e : Env C Γ) : StateWT H L (EState.ofGlob τ e).glob :=
-  ⟨h.1, h.2, h.3, h.4, h.5⟩
 
 end Solidity

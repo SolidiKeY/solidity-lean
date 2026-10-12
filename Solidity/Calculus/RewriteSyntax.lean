@@ -180,10 +180,10 @@ elab "core_apply_upd" : tactic => withMainContext do
 
 /-! ## A Theory lemma as a rewrite rule, on scoped terms
 
-On a scoped closed term `u : Tm C [] .val`: `u.denote σ` unfolded by the denotation of its symbols
+On a scoped closed term `u : Tm C [] .val`: `u.denoteT σ` unfolded by the denotation of its symbols
 (the `Tm.denote_*S` lemmas, `rfl`), rewritten by the laws, and read back as a
 scoped term (`reifyTermS`).  The two `simp` runs prove
-`∀ σ, u.denote σ = u'.denote σ`, which `Tm.Theq.of_eq` makes a Theory
+`∀ σ, u.denoteT σ = u'.denoteT σ`, which `Tm.Theq.of_eq` makes a Theory
 equation. -/
 
 section TheoryS
@@ -192,31 +192,31 @@ open Theory Theory.StValue
 
 variable {C : Contract} {Γ : Ctx}
 
-theorem Tm.denote_litS (σ : EState C Γ) (v : Semantics.Value) :
-    (Tm.app0 (.lit v) : Tm C Γ .val).denote σ = .prim v := rfl
-theorem Tm.denote_findS (σ : EState C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .find s p : Tm C Γ .val).denote σ = findSt (s.denote σ) (p.denote σ) := rfl
-theorem Tm.denote_lenS (σ : EState C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .len s p : Tm C Γ .val).denote σ = findSt (s.denote σ) (p.denote σ ++ [lengthSeg]) :=
+theorem Tm.denote_litS (σ : State C Γ) (v : Semantics.Value) :
+    (Tm.app0 (.lit v) : Tm C Γ .val).denoteT σ = .prim v := rfl
+theorem Tm.denote_findS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
+    (Tm.app2 .find s p : Tm C Γ .val).denoteT σ = findSt (s.denoteT σ) (p.denoteT σ) := rfl
+theorem Tm.denote_lenS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
+    (Tm.app2 .len s p : Tm C Γ .val).denoteT σ = findSt (s.denoteT σ) (p.denoteT σ ++ [lengthSeg]) :=
   rfl
-theorem Tm.denote_storageS (σ : EState C Γ) : (Tm.app0 .storage : Tm C Γ .st).denote σ = σ.glob.abs :=
+theorem Tm.denote_storageS (σ : State C Γ) : (Tm.app0 .storage : Tm C Γ .st).denoteT σ = σ.globE.abs :=
   rfl
-theorem Tm.denote_saveS (σ : EState C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) :
-    (Tm.app3 .save s p v : Tm C Γ .st).denote σ = copyTo (s.denote σ) (p.denote σ) (v.denote σ) :=
+theorem Tm.denote_saveS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) :
+    (Tm.app3 .save s p v : Tm C Γ .st).denoteT σ = copyTo (s.denoteT σ) (p.denoteT σ) (v.denoteT σ) :=
   rfl
-theorem Tm.denote_delAtS (σ : EState C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .delAt s p : Tm C Γ .st).denote σ = StValue.delAt (s.denote σ) (p.denote σ) := rfl
-theorem Tm.denote_svalS (σ : EState C Γ) (h : Op1.sval.named = false) (t : Tm C Γ .val) :
-    (Tm.app1 .sval h t : Tm C Γ .sv).denote σ = t.denote σ := rfl
-theorem Tm.denote_sfindS (σ : EState C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
-    (Tm.app2 .sfind s p : Tm C Γ .sv).denote σ = findSt (s.denote σ) (p.denote σ) := rfl
-theorem Tm.denote_rootS (σ : EState C Γ) (r : Name) :
-    (Tm.app0 (.root r) : Tm C Γ .path).denote σ = [.field r] := rfl
-theorem Tm.denote_fieldS (σ : EState C Γ) (f : Name) (h : (Op1.field f).named = false)
-    (p : Tm C Γ .path) : (Tm.app1 (.field f) h p : Tm C Γ .path).denote σ = p.denote σ ++ [.field f] :=
+theorem Tm.denote_delAtS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
+    (Tm.app2 .delAt s p : Tm C Γ .st).denoteT σ = StValue.delAt (s.denoteT σ) (p.denoteT σ) := rfl
+theorem Tm.denote_svalS (σ : State C Γ) (h : Op1.sval.named = false) (t : Tm C Γ .val) :
+    (Tm.app1 .sval h t : Tm C Γ .sv).denoteT σ = t.denoteT σ := rfl
+theorem Tm.denote_sfindS (σ : State C Γ) (s : Tm C Γ .st) (p : Tm C Γ .path) :
+    (Tm.app2 .sfind s p : Tm C Γ .sv).denoteT σ = findSt (s.denoteT σ) (p.denoteT σ) := rfl
+theorem Tm.denote_rootS (σ : State C Γ) (r : Name) :
+    (Tm.app0 (.root r) : Tm C Γ .path).denoteT σ = [.field r] := rfl
+theorem Tm.denote_fieldS (σ : State C Γ) (f : Name) (h : (Op1.field f).named = false)
+    (p : Tm C Γ .path) : (Tm.app1 (.field f) h p : Tm C Γ .path).denoteT σ = p.denoteT σ ++ [.field f] :=
   rfl
-theorem Tm.denote_atS (σ : EState C Γ) (p : Tm C Γ .path) (i : Tm C Γ .val) :
-    (Tm.app2 .at p i : Tm C Γ .path).denote σ = p.denote σ ++ [.at (asInt (i.denote σ))] := rfl
+theorem Tm.denote_atS (σ : State C Γ) (p : Tm C Γ .path) (i : Tm C Γ .val) :
+    (Tm.app2 .at p i : Tm C Γ .path).denoteT σ = p.denoteT σ ++ [.at (asInt (i.denoteT σ))] := rfl
 
 end TheoryS
 
@@ -229,7 +229,7 @@ def theoryUnfoldLemmasS : List Lean.Name :=
 
 /-- `e`, a `denote` of a scoped term of the sort `srt` at `σ`, is that term. -/
 def reifyFoldedS? (srt : Lean.Name) (σ e : Expr) : MetaM (Option Expr) := do
-  unless e.isAppOfArity ``Tm.denote 5 do return none
+  unless e.isAppOfArity ``Tm.denoteT 5 do return none
   unless (← whnf (e.getArg! 3)).isConstOf srt do return none
   if ← isDefEq (e.getArg! 2) σ then return some e.appArg! else return none
 
@@ -237,7 +237,7 @@ open Theory Theory.StValue in
 mutual
 
 /-- A value of the Theory, written as a scoped term of the context `Γ`: the
-inverse of `Tm.denote σ`, for the values it gives (`reifyTerm`'s twin). -/
+inverse of `Tm.denoteT σ`, for the values it gives (`reifyTerm`'s twin). -/
 partial def reifyTermS (C Γ σ e : Expr) : MetaM Expr := do
   let e ← instantiateMVars e
   if let some t ← reifyFoldedS? ``Srt.val σ e then return t
@@ -259,7 +259,7 @@ partial def reifySTermS (C Γ σ e : Expr) : MetaM Expr := do
   if let some s ← reifyFoldedS? ``Srt.st σ e then return s
   match_expr e with
   | Semantics.State.abs g =>
-    unless ← isDefEq g (← mkAppM ``EState.glob #[σ]) do throwError "not a storage term: {e}"
+    unless ← isDefEq g (← mkAppM ``State.globE #[σ]) do throwError "not a storage term: {e}"
     mkAppOptM ``Tms.STerm.storage #[C, Γ]
   | copyTo s p v =>
     mkAppOptM ``Tms.STerm.save #[C, Γ, ← reifySTermS C Γ σ s, ← reifyPTermS C Γ σ p,
@@ -308,8 +308,8 @@ def theoryRewriteS (thms : SimpTheorems) (C u : Expr) : MetaM (Option (Expr × E
   let ty ← whnf (← inferType u)
   unless ty.isAppOfArity ``Tm 3 do return none
   let Γ := ty.getArg! 1
-  withLocalDeclD `σ (mkApp2 (mkConst ``EState) C Γ) fun σ => do
-    let denote (t : Expr) : Expr := mkAppN (mkConst ``Tm.denote) #[C, Γ, σ, mkConst ``Srt.val, t]
+  withLocalDeclD `σ (mkApp2 (mkConst ``Solidity.State) C Γ) fun σ => do
+    let denote (t : Expr) : Expr := mkAppN (mkConst ``Tm.denoteT) #[C, Γ, σ, mkConst ``Srt.val, t]
     let lhs := denote u
     let mut unfold : SimpTheorems := {}
     for n in theoryUnfoldLemmasS do unfold ← unfold.addConst n

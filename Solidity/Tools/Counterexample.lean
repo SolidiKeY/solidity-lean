@@ -8,10 +8,10 @@ import Solidity.Tools.Common
 # Counterexamples: scoped formulas evaluated in a typed state
 
 `holds σ φ` (`Calculus/Logic.lean`) is a `Prop`: a quantifier ranges
-over `2^256` values, an update over the typed states that erase to where it
-ends, `{havoc}` over every storage, so it cannot be computed.
+over `2^256` values, an update over the typed states it lands on, `{havoc}` over every storage, so it cannot be computed.
 `Fml.eval3` is its three-valued shadow over the typed state
-(`State`): terms and updates are read on the erasure, the programs under a
+(`State`): terms are read by the typed readers and updates computed
+(`Upd.applyV`), the programs under a
 modality are run by the typed run with fuel (`Prog.runF`,
 `Semantics/RunFuel.lean`: a loop entered at most `loopFuel`
 iterations, `unknown` past them), a quantifier and a hidden binder are

@@ -51,18 +51,6 @@ open Semantics (Res)
 
 variable {C : Contract}
 
-/-! ## The atoms, read on the typed state -/
-
-/-- An equation of `holds`, read by the typed readers. -/
-theorem holds_eqT {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) := by
-  simp only [holds, Tm.denoteT_eq]
-
-/-- A `defined` of `holds`, read by the typed readers. -/
-theorem holds_definedT {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
-    holds σ (.defined t) ↔ ∃ x, t.evalT σ = .ok x := by
-  simp only [holds, Tm.evalT_eq]
-
 /-! ## Symbols that read no global part -/
 
 /-- A constant that reads nothing of the state. -/
@@ -868,11 +856,6 @@ theorem Fml.upd_bind_of_lift {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} {
     (hψ : m'.forallB fun v : t.TDenote C σ.H => holds (σ.push v) (.upd m U' ψ)) :
     holds σ (.upd m U (.bind m' x t ψ)) :=
   Fml.upd_bind_of_liftG (Upd.liftG?_of_lift? U hU') ht σ hψ
-
-theorem Env.thin_ofExt {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → (e : Env C Δ) →
-    Env.thin (Thin.ofExt h) e = Env.drop h e
-  | _, .refl, _ => rfl
-  | _, .push h, e => Env.thin_ofExt h e.2
 
 /-! ## The storage an update leaves
 

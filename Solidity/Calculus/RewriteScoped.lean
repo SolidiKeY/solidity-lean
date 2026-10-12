@@ -193,9 +193,8 @@ abbrev Upd.hasC (q : Tm C [] .val × Tm C [] .val) {Δ : Ctx} (U : Upd C Γ Δ) 
 def Tm.EvalEq (t t' : Tm C [] .val) : Prop := ∀ σ : State C [], t.evalT σ = t'.evalT σ
 
 /-- A literal law's two sides return alike. -/
-theorem LitLaw.evalEqT {t t' : Tm C [] .val} (r : LitLaw t t') : Tm.EvalEq t t' := fun σ => by
-  rw [Tm.evalT_eq, Tm.evalT_eq]
-  exact r.evalEq σ.erase
+theorem LitLaw.evalEqT {t t' : Tm C [] .val} (r : LitLaw t t') : Tm.EvalEq t t' := fun σ =>
+  r.evalEq σ
 
 theorem Tm.pickClosed_eq (hq : Tm.EvalEq q.1 q.2) (σ : State C Γ) :
     PickEq (Tm.pickClosed q) σ := fun h => by

@@ -127,10 +127,10 @@ def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
 /-- `wt(storage)` holds in a typed state exactly when its storage passes
 the test. -/
 theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
-    holds σ (Fml.wt C) ↔ storageWtB C.vars σ.erase.glob.storage = true := by
-  rw [Fml.wt, holds_defined_erased]
-  simp only [Tm.eval, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
-  cases storageWtB C.vars σ.erase.glob.storage with
+    holds σ (Fml.wt C) ↔ storageWtB C.vars σ.globE.storage = true := by
+  rw [Fml.wt, holds_definedT]
+  simp only [Tm.evalT, Op1.eval, Op0.eval, pure, Except.pure, bind, Except.bind]
+  cases storageWtB C.vars σ.globE.storage with
   | true => exact ⟨fun _ => rfl, fun _ => ⟨_, rfl⟩⟩
   | false => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
 
@@ -191,7 +191,7 @@ theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
 it, and its words are defaults), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) : holds (State.init C) (Fml.wt C) := by
-  rw [holds_wt, Reachable.init_erase]
+  rw [holds_wt, Reachable.init_globE]
   exact wt_of_reachable hnd hdeep
     ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, rfl, Storage.init_erase C⟩
     (storageWordsB_init hnd)

@@ -183,11 +183,6 @@ theorem wk_self (e : H <+: H) : (Γ : Ctx) → (x : TEnv C H Γ) → TEnv.wk e �
     rw [LTy.TDenote.wk_self, wk_self e Γ x.2]
     rfl
 
-theorem get_wk {H' : HTy} (e : H <+: H') {t : LTy} : {Γ : Ctx} → (i : Idx Γ t) →
-    (x : TEnv C H Γ) → TEnv.get i (TEnv.wk e Γ x) = LTy.TDenote.wk e t (TEnv.get i x)
-  | _, .here, _ => rfl
-  | _, .there i, x => get_wk e i x.2
-
 theorem set_wk {H' : HTy} (e : H <+: H') {t : LTy} : {Γ : Ctx} → (i : Idx Γ t) →
     (v : t.TDenote C H) → (x : TEnv C H Γ) →
     TEnv.wk e Γ (TEnv.set i v x) = TEnv.set i (LTy.TDenote.wk e t v) (TEnv.wk e Γ x)

@@ -17,14 +17,11 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
   every typed state it lands on (`Upd.afterT`, `Upd.Lands`, W9.7.1): the
   global part it computes, each local holding what it left there
   (`Upd.held`), read on the typed state it is applied in, and a heap typing
-  that extends that state's, as a typed run's does (`Out.ext`).  Those are
-  the typed states that erase to what `Upd.apply` computes on the erasure
-  (`Upd.lands_iff`), so the clause is also read there (`holds_upd_erased`;
-  with `holds_eq_erased` and `holds_defined_erased`, what the update laws
-  read until W9.7.3; the closer and the decision procedure read the typed
-  clauses, W9.7.2).  The rules' updates
-  land on the state the statement's typed run ends in; an update that
-  lands on no typed state (a value of another type) says nothing.
+  that extends that state's, as a typed run's does (`Out.ext`).  The
+  closer and the decision procedure compute it (`Upd.applyV`,
+  `Upd.afterT_applyV`).  The rules' updates land on the state the
+  statement's typed run ends in; an update that lands on no typed state (a
+  value of another type) says nothing.
 * A modality runs the program and its frames with the typed run: a `bool`
   local holds a `bool`, so a branch is never stuck and the diamond needs no
   guard.  Both modalities accept a run exhausted (a push at the bound,
@@ -43,10 +40,10 @@ when `r` allocates.  So every type has a value
 (`Modality.forallB`).
 
 The rules' soundness (`Calculus/Sound*.lean`) relates the typed run to
-`Update.lean`'s terms directly: a statement's typed step agrees with its
-update applied to the erasure (`TRes.Agrees`, `Calculus/SoundArms.lean`),
-each lowered expression's term reading what the typed evaluator returns
-(`Calculus/LowerRun.lean`); no program evaluator of the erasure is between.
+`Update.lean`'s terms directly: a statement's typed step agrees with what
+its update computes (`TRes.Agrees` against `Upd.applyV`,
+`Calculus/SoundArms.lean`), each lowered expression's term reading what the
+typed evaluator returns (`Calculus/LowerRun.lean`).
 -/
 
 namespace Solidity
@@ -56,11 +53,6 @@ open Theory Theory.StValue
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality IntOp)
 
 variable {C : Contract}
-
-/-- The locals `xs` set as `b` says: a loop body's frame anonymised. -/
-def EState.anon {Γ : Ctx} (σ : EState C Γ) (xs : List ((t : LTy) × Idx Γ t))
-    (b : (x : (t : LTy) × Idx Γ t) → x.1.Denote C) : EState C Γ :=
-  xs.foldl (fun τ x => τ.setLocal x.2 (b x)) σ
 
 /-! ## Formulas -/
 
@@ -95,27 +87,13 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, σ, .bind m _ t φ => m.forallB fun v : t.TDenote C σ.H => holds (σ.push v) φ
   | _, σ, .anon xs φ => ∀ b, holds (σ.anon xs b) φ
 
-/-- `holds`' update clause, read on the erasure (`Upd.afterT_iff`): what
-the layers above `Logic` unfolded before W9.7.1. -/
-theorem holds_upd_erased {Γ Δ : Ctx} (σ : State C Γ) (m : Modality) (U : Upd C Γ Δ)
-    (φ : Fml C Δ) :
-    holds σ (.upd m U φ) ↔
-      m.afterC (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holds σ' φ)
-        (U.apply σ.erase) :=
-  Upd.afterT_iff m σ U _
+/-- An equation of `holds`, read by the typed readers. -/
+theorem holds_eqT {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
+    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) := Iff.rfl
 
-/-- `holds`' equation clause, read on the erasure (`Tm.denoteT_eq`): what
-the layers above `Logic` unfolded before W9.7.2. -/
-theorem holds_eq_erased {Γ : Ctx} (σ : State C Γ) (a b : Tm C Γ .val) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ.erase) (b.denote σ.erase) := by
-  show Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) ↔ _
-  rw [Tm.denoteT_eq, Tm.denoteT_eq]
-
-/-- `holds`' definedness clause, read on the erasure (`Tm.evalT_eq`). -/
-theorem holds_defined_erased {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
-    holds σ (.defined t) ↔ ∃ x, t.eval σ.erase = .ok x := by
-  show (∃ x, t.evalT σ = .ok x) ↔ _
-  rw [Tm.evalT_eq]
+/-- A `defined` of `holds`, read by the typed readers. -/
+theorem holds_definedT {Γ : Ctx} (σ : State C Γ) (t : Tm C Γ .val) :
+    holds σ (.defined t) ↔ ∃ x, t.evalT σ = .ok x := Iff.rfl
 
 /-- Every local's type has a value in every typed state: an alias and a
 memory local unset among them (decision 17'). -/
@@ -129,26 +107,6 @@ theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → Nonempty (t.TDenote C H)
 /-- Valid over the typed states: true in every typed state of the empty
 context. -/
 def Valid (φ : Fml C []) : Prop := ∀ σ : State C [], holds σ φ
-
-/-! ## A callee's and a loop's state, erased -/
-
-theorem State.havoc_erase {Γ : Ctx} (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
-    (σ.havoc st nt).erase = σ.erase.withGlob (σ.erase.glob.havoc st.erase nt) := rfl
-
-theorem State.anon_erase {Γ : Ctx} (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
-    (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C σ.H) :
-    (σ.anon xs b).erase = σ.erase.anon xs fun x => LTy.TDenote.erase x.1 (b x) := by
-  have key : ∀ (ys : List ((t : LTy) × Idx Γ t)) (e : TEnv C σ.H Γ),
-      (σ.withEnv (ys.foldl (fun e x => TEnv.set x.2 (b x) e) e)).erase =
-        ys.foldl (fun τ x => τ.setLocal x.2 (LTy.TDenote.erase x.1 (b x))) (σ.withEnv e).erase := by
-    intro ys
-    induction ys with
-    | nil => intro e; rfl
-    | cons x ys ih =>
-      intro e
-      rw [List.foldl_cons, List.foldl_cons, ih]
-      exact congrArg (fun τ => List.foldl _ τ ys) (State.setLocal_erase (σ.withEnv e) x.2 (b x))
-  exact key xs σ.env
 
 theorem _root_.Solidity.Modality.afterC_imp {α : Type} {m : Modality} {p q : α → Prop}
     {r : Semantics.Res α} (h : m.afterC p r) (hpq : ∀ a, p a → q a) : m.afterC q r := by

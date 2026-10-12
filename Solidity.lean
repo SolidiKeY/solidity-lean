@@ -23,7 +23,6 @@ import Solidity.Semantics.Storage
 import Solidity.Semantics.StorageErase
 import Solidity.Semantics.Heap
 import Solidity.Semantics.HeapErase
-import Solidity.Semantics.Erased
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
 import Solidity.Semantics.TypedErase

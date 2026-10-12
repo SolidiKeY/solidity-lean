@@ -41,9 +41,6 @@ def Total : Contract := contract!{ uint total; }
 /-- The minimal ill-typed store: `total` holds a `bool`. -/
 def badStore : Semantics.State := { storage := [("total", .bool true)] }
 
-/-- `badStore`, as a state over the local `uint x` the read binds. -/
-def badCore : EState Total [.val .uint] := EState.ofGlob badStore (.int 0, ())
-
 /-- The path `total`. -/
 def totalPath : SPath Total [.val .uint] (.prim .uint) := .loc (.root "total" rfl)
 
@@ -60,18 +57,21 @@ theorem readSelect_row :
 /-- **Storage well-typedness is the boundary.**  `badStore` meets every
 conjunct of a well-typed global state but `storage` (with `x`, the local
 the read binds, a `uint`), and there the read of `x = total;` — its path
-lowered and found in storage, as `Val.lower` reads `total` — finds a `bool`
-where the row's `\hasSort` read promises a `uint`. -/
+lowered and found in storage, as `Val.lower` reads `total`, the term's
+symbols read on `badStore` — finds a `bool` where the row's `\hasSort`
+read promises a `uint`. -/
 theorem readSelect_needs_storage :
     nodupKeysB Total.vars = true ∧
     nodupKeysB ([] : HeapTy) = true ∧ heapTypedB [] badStore.heap = true ∧
     HeapWellFormed badStore ∧
     wellTypedStorageB Total.layout badStore.storage = false ∧
-    Env.All (LTy.WT Total []) badCore.env ∧
+    LTy.WT Total [] (.val .uint) (.int 0) ∧
     Stmt.read? totalRead = some (.storage (.prim .uint) totalPath) ∧
-    (Tm.app2 .find (.app0 .storage) totalPath.lower).eval badCore = .ok (.bool true) ∧
+    totalPath.lower = .app0 (.root "total") ∧
+    Op2.eval badStore .find (Op0.eval badStore .storage) (Op0.eval badStore (.root "total")) =
+      .ok (.bool true) ∧
     SortOkS (.generic .hasSort) (.prim .uint) (.prim (.bool true)) = false :=
-  ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, ⟨rfl, trivial⟩, rfl, rfl, rfl⟩
+  ⟨by decide, rfl, rfl, (fun _ _ => rfl), by decide, rfl, rfl, rfl, rfl, rfl⟩
 
 end WellTypedNecessity
 end Counterexamples

@@ -228,7 +228,7 @@ theorem Objs.lookupBy_erase_ge {H : HTy} {start k : Nat} : (Rs : List RefTy) →
 /-- The global part of a typed state's erasure is well-typed under the store
 typing its heap typing lists. -/
 theorem State.glob_wt {Γ : Ctx} (hnd : nodupKeysB C.vars = true) (σ : State C Γ) :
-    Semantics.StateWT (HTy.toHeapTy 0 σ.H) C.layout σ.erase.glob :=
+    Semantics.StateWT (HTy.toHeapTy 0 σ.H) C.layout σ.globE :=
   ⟨hnd, HTy.nodup_toHeapTy _, Storage.erase_wt hnd σ.storage, Objs.erase_typed 0 σ.H σ.heap,
     fun _ hid => Objs.lookupBy_erase_ge σ.H σ.heap (by simpa only [Nat.zero_add] using hid)⟩
 

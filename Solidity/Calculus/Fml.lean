@@ -193,7 +193,7 @@ theorem _root_.Solidity.Modality.forallB_intro {m : Modality} {α : Sort _} {p :
 /-- A formula about programs of `C`, read in `Γ`. -/
 inductive Fml (C : Contract) : Ctx → Type where
   | tt {Γ : Ctx} : Fml C Γ
-  /-- `a = b`, read in the Theory (`Tm.denote`). -/
+  /-- `a = b`, read in the Theory (`Tm.denoteT`). -/
   | eq {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ
   /-- `t` returns. -/
   | defined {Γ : Ctx} (t : Tm C Γ .val) : Fml C Γ

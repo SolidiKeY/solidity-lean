@@ -17,9 +17,9 @@ goal would not be sound behind a diamond update that halts, so `branches`
 and `cases` have at least one goal); `emptyModality` goes into the frames
 (`holds_exit`).
 
-An update's reading asks of every typed state that erases to the one it
-ends in, so a rule's premise gives its conclusion in the state the typed
-run ends in, one of them: only that direction is needed here.
+An update's reading asks of every typed state it lands on, so a rule's
+premise gives its conclusion in the state the typed run ends in, one of
+them: only that direction is needed here.
 -/
 
 namespace Solidity
@@ -45,16 +45,6 @@ def Stmt.Sound (C : Contract) : Prop :=
 
 /-! ## Scope ends -/
 
-theorem TEnv.thin_erase {H : HTy} : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (e : TEnv C H Δ) →
-    TEnv.erase Γ (TEnv.thin h e) = Env.thin h (TEnv.erase Δ e)
-  | _, _, .refl, _ => rfl
-  | _, _, .keep h, e => congrArg (Prod.mk _) (TEnv.thin_erase h e.2)
-  | _, _, .drop h, e => TEnv.thin_erase h e.2
-
-theorem State.thin_erase {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
-    (σ.thin h).erase = σ.erase.thin h := by
-  simp only [State.erase, State.thin, State.withEnv, EState.thin, EState.withEnv, TEnv.thin_erase]
-
 theorem Prog.runFrames_seq {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) : Prog.runFrames σ .nil (.seq ω κ) = Prog.runFrames σ ω κ := by
   simp only [Prog.runFrames, Prog.run_nil, Frames.run, TRun.seq, bind, Except.bind]
@@ -66,7 +56,7 @@ theorem Prog.runFrames_seq {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (ω : Prog C
 
 /-- A finished program's frames, as the formula `emptyModality` leaves
 (`Frames.exit`), give the modality: each scope end's update is read in the
-state the frame pops to, one of the states its erasure reaches. -/
+state the frame pops to, one of the states it lands on. -/
 theorem holds_exit (m : Modality) {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C Γ Γ₀) →
     ∀ (φ : Fml C Γ₀) (σ : State C Γ), holds σ (κ.exit m φ) → holds σ (.modal m .nil κ φ)
   | _, .nil, φ, σ, h => ⟨h, nofun⟩

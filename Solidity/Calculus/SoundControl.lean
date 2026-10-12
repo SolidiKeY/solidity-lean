@@ -108,11 +108,11 @@ theorem sendStep_sound (k : Nat) (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uin
 
 /-! ### `if`, `require`, `assert` -/
 
-/-- `se = b` holds where `se` is `b`: the condition read on the erasure. -/
+/-- `se = b` holds where `se` is `b`: the condition read on the typed state. -/
 theorem holds_isBool (se : Simple C Γ .bool) (b : Bool) :
     holds σ (Fml.isBool se.lower b) ↔ se.evalT σ = b := by
   show holds σ (.eq _ _) ↔ _
-  rw [holds_eq_erased, Simple.denote_lowerT σ se]
+  rw [holds_eqT, Simple.denote_lowerT σ se]
   show Theory.StValue.Equiv (.prim _) (.prim (.bool b)) ↔ _
   rw [Theory.StValue.Equiv.prim_iff]
   exact ⟨fun h => by injection h with h; injection h, fun h => by rw [← h]; rfl⟩

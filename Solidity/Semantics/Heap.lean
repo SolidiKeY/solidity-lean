@@ -10,7 +10,7 @@ word of `T` or a reference `HRef H R`, an identity `H` types at `R`.  An
 object of type `R` (`MObj H R`) holds a struct's members in `structDef`'s
 order, an array's elements, or exactly `n` elements of a `T[n]`; a mapping
 type has none (`Empty`), so a heap holds no mapping.  These are computed from
-the typing, as `Env` is from its context (Gate G0, condition 4): no indexed
+the typing, as `TEnv` is from its context (Gate G0, condition 4): no indexed
 family, no cast but the one at an object's own type.
 
 Allocation appends, so it returns a heap over `H ++ [R]` and the reference,

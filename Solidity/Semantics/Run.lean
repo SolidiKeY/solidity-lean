@@ -4,9 +4,8 @@ import Solidity.Semantics.Ops
 /-!
 # The typed run
 
-The run on typed values, whose steps erase to `Semantics/Erased.lean`'s
-evaluators (`docs/intrinsic.md`,
-"M4 lane", wiring items 3 and 4): a state is a `State` (typed storage, a
+The run on typed values (`docs/intrinsic.md`, "M4 lane", wiring items 3
+and 4): a state is a `State` (typed storage, a
 heap and its typing, the locals typed over it), a storage path resolves to
 an `SRef` (an index by `SRef.atKey`, a mapping's key as it is hashed), a
 memory path to a heap reference read through `Heap.field`/`Heap.index`, and
@@ -919,10 +918,16 @@ end Equations
 
 /-! ## Examples
 
-The example programs of `Semantics/Erased.lean`, run on typed states: the storage the contract
-deploys with, no memory, no locals. -/
+Scoped programs run on typed states: the storage the contract deploys with,
+no memory, no locals. -/
 
 section Examples
+
+def guardLowCore := sol[StandardExample]{ require(age > 3); }
+def assertLowCore := sol[StandardExample]{ assert(age > 3); }
+def incOrderCore := sol[TestSuite]{ uint i = 1; uint x = i++ + i; assert(x == 2); assert(i == 2); }
+def indexOrderCore := sol[TestSuite]{ uint i = 0; values.push(100);
+  values.push(100); values.push(100); values[++i] = ++i; assert(values[2] == 1); }
 
 /-- A failing guard reverts. -/
 example : (Prog.run (State.ofStorage Storage.standardExample) guardLowCore).halt? =

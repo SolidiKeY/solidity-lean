@@ -31,9 +31,7 @@ an identity too).
 (`Upd.rwBy_lands`).  Where the rewritten update returns, the law refines
 back there (`LawCov.back`), so the update returns the same global part
 (`Upd.rwBy_globT_rev`) and halts only where the rewrite does
-(`holds_upd_rwG`).  `LawCov.back` (`Calculus/TermLaws.lean`) states the
-update's return by its erased run; the one bridge to it is
-`Upd.apply_glob`, in `FmlRw.lawUpdS`.
+(`holds_upd_rwG`).
 
 These functions run once a link and use `match` on the indexed families,
 under the exemption of `Calculus/RewriteScoped.lean`'s walks (proposal 104).
@@ -63,11 +61,9 @@ state. -/
 def LawPair.Refines {Γ : Ctx} (q : LawPair C Γ) : Prop :=
   ∀ σ : State C Γ, Srt.Le q.k (q.lhs.evalT σ) (q.rhs.evalT σ)
 
-/-- A law that refines in every erased state refines in every typed one. -/
+/-- A law that refines at its scope refines as a pair. -/
 theorem LawPair.Refines.of_at {Γ : Ctx} {q : LawPair C Γ} (h : Tm.EvalRefinesAt q.lhs q.rhs) :
-    q.Refines := fun σ => by
-  rw [Tm.evalT_eq, Tm.evalT_eq]
-  exact h σ.erase
+    q.Refines := h
 
 section Rw
 
@@ -180,14 +176,8 @@ def FmlRw.lawUpdS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs) (i 
       · rename_i hc
         cases h
         simp only [Bool.and_eq_true] at hc
-        refine holds_upd_rwG (LawPair.Refines.of_at E.fwd) σ (fun g hB => ?_) hψ
-        have hm := Upd.apply_glob σ (Upd.rwG q U)
-        rw [hB] at hm
-        cases hA : (Upd.rwG q U).apply σ.erase with
-        | error e => rw [hA] at hm; cases hm
-        | ok τ =>
-          rw [Tm.evalT_eq, Tm.evalT_eq]
-          exact E.back (Upd.rwG q U) σ.erase τ hc.2 hA
+        exact holds_upd_rwG (LawPair.Refines.of_at E.fwd) σ
+          (fun g hB => E.back (Upd.rwG q U) σ g hc.2 hB) hψ
       · cases h
     · cases h) i
 

@@ -79,10 +79,9 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 #proof_tree dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 }
 
 /-! A write under the diamond is valid over typed states, but the closer
-reads its leaf on the erased state, over every untyped storage (one with no
-`alice` among its roots: `CloseS.holdsE`, and the reduction has no layout
-without a `wt(storage)` premise; `docs/intrinsic.md`, "What is left"): the
-leaf stays open and shows its sequent. -/
+reads its leaf's storage untyped (`State.globE`), with no layout without a
+`wt(storage)` premise (`docs/intrinsic.md`, "What is left"): the leaf stays
+open and shows its sequent. -/
 /--
 info: 0: storageFieldWriteSave
 1: OPEN GOAL

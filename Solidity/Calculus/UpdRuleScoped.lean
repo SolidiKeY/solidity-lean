@@ -22,8 +22,8 @@ constructors named after them.
 **One way.**  Each rule rewrites `φ` to a `ψ` that gives it
 (`UpdRuleS.sound`: `holds σ ψ → holds σ φ`), the direction a derivation
 uses.  The converse fails, because
-`{U} φ` reads `φ` in every *typed* state the update's result erases to
-(`holds`), and a merged update may reach a typed state the two updates in
+`{U} φ` reads `φ` in every *typed* state the update lands on
+(`holds`, `Upd.Lands`), and a merged update may reach a typed state the two updates in
 turn do not: `{x := 300}{x := 1} φ` for a `uint8` local `x` holds
 vacuously (no typed state holds `300` in `x`), its merge
 `{x := 300 ‖ x := 1} φ` only where `φ` does.  So a rule applies at the
@@ -38,8 +38,9 @@ sets a local the same update pops later (a capture's `se1`, `sp1`) goes
 (`Upd.simp`, under the box, as `Proves.simplify`), and so does a write a
 later one to the same local shadows (`Upd.shadow`, under either modality);
 an element that sets a local still in scope that `φ` does not read stays.  `applySkip` asks a formula with no modality (`Fml.modalFree`): such a
-formula holds in a typed state by its erasure and its heap typing alone
-(`holds_congr_erase`), and the states `{}` reads `φ` in are those.
+formula holds in a typed state by what its terms read of it and its heap
+typing alone (`holds_congr_reads`), and the states `{}` reads `φ` in are
+those.
 `applyOnRigid` under the diamond asks an update that cannot halt
 (`Upd.totalB`): a literal, an alias to a root and its fields
 (`sp1 := alice.account`), a local, which a typed state always binds,
@@ -69,49 +70,77 @@ open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
 
 variable {C : Contract}
 
-/-! ## Reading a formula by its erasure -/
+/-! ## Reading a formula by what it reads -/
 
-/-- **A formula with no modality reads the typed state by its erasure and
-its heap typing alone.**  Its atoms read the erasure (`Tm.eval`,
-`Tm.denote`), an update the erasure of the state it is applied in, and its
-binders push, havoc and anonymise erasure-wise. -/
-theorem holds_congr_erase : {Γ : Ctx} → (φ : Fml C Γ) → φ.modalFree = true →
-    (σ σ' : State C Γ) → σ.H = σ'.H → σ.erase = σ'.erase → (holds σ φ ↔ holds σ' φ)
+/-- Two sets of locals that read alike read alike with the same locals set. -/
+theorem TEnv.foldl_set_erase_congr {H : HTy} {Γ : Ctx} (xs : List ((t : LTy) × Idx Γ t))
+    (b : (x : (t : LTy) × Idx Γ t) → x.1.TDenote C H) :
+    ∀ e e' : TEnv C H Γ, (∀ {t : LTy} (i : Idx Γ t),
+      LTy.TDenote.erase t (TEnv.get i e) = LTy.TDenote.erase t (TEnv.get i e')) →
+      ∀ {t : LTy} (i : Idx Γ t),
+        LTy.TDenote.erase t (TEnv.get i (xs.foldl (fun e x => TEnv.set x.2 (b x) e) e)) =
+          LTy.TDenote.erase t (TEnv.get i (xs.foldl (fun e x => TEnv.set x.2 (b x) e) e')) := by
+  induction xs with
+  | nil => intro e e' h; exact h
+  | cons x xs ih =>
+    intro e e' h
+    refine ih _ _ fun {u} j => ?_
+    obtain ⟨t, i⟩ := x
+    by_cases hj : i.toNat = j.toNat
+    · obtain rfl := Idx.ty_eq_of_toNat hj
+      obtain rfl := Idx.toNat_inj i j hj
+      rw [TEnv.get_set, TEnv.get_set]
+    · rw [TEnv.get_set_ne _ _ _ _ hj, TEnv.get_set_ne _ _ _ _ hj]
+      exact h j
+
+/-- **A formula with no modality reads the typed state by what its terms
+read of it and its heap typing alone** (`State.ReadsAs`): its atoms read the
+global part and the locals erased, an update reads the state it is applied
+in so, and its binders push, havoc and anonymise alike. -/
+theorem holds_congr_reads : {Γ : Ctx} → (φ : Fml C Γ) → φ.modalFree = true →
+    (σ σ' : State C Γ) → σ.H = σ'.H → σ.ReadsAs σ' → (holds σ φ ↔ holds σ' φ)
   | _, .tt, _, _, _, _, _ => Iff.rfl
   | _, .eq a b, _, σ, σ', _, he => by
-    rw [holds_eq_erased, holds_eq_erased, he]
+    show Theory.StValue.Equiv (a.denoteT σ) (b.denoteT σ) ↔
+      Theory.StValue.Equiv (a.denoteT σ') (b.denoteT σ')
+    rw [Tm.denoteT_congr he a, Tm.denoteT_congr he b]
   | _, .defined t, _, σ, σ', _, he => by
-    rw [holds_defined_erased, holds_defined_erased, he]
-  | _, .not φ, hm, σ, σ', hH, he => not_congr (holds_congr_erase φ hm σ σ' hH he)
+    show (∃ x, t.evalT σ = .ok x) ↔ (∃ x, t.evalT σ' = .ok x)
+    rw [Tm.evalT_congr he t]
+  | _, .not φ, hm, σ, σ', hH, he => not_congr (holds_congr_reads φ hm σ σ' hH he)
   | _, .and φ ψ, hm, σ, σ', hH, he => by
     have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm
-    exact and_congr (holds_congr_erase φ hm.1 σ σ' hH he) (holds_congr_erase ψ hm.2 σ σ' hH he)
+    exact and_congr (holds_congr_reads φ hm.1 σ σ' hH he) (holds_congr_reads ψ hm.2 σ σ' hH he)
   | _, .imp φ ψ, hm, σ, σ', hH, he => by
     have hm : φ.modalFree = true ∧ ψ.modalFree = true := Bool.and_eq_true_iff.mp hm
-    exact imp_congr (holds_congr_erase φ hm.1 σ σ' hH he) (holds_congr_erase ψ hm.2 σ σ' hH he)
-  | _, .upd m U φ, _, σ, σ', hH, he => Upd.afterT_congr m (State.ReadsAs.of_erase he) hH U _
+    exact imp_congr (holds_congr_reads φ hm.1 σ σ' hH he) (holds_congr_reads ψ hm.2 σ σ' hH he)
+  | _, .upd m U φ, _, σ, σ', hH, he => Upd.afterT_congr m he hH U _
   | _, .modal .., hm, _, _, _, _ => absurd hm Bool.false_ne_true
   | _, .havoc φ, hm, σ, σ', hH, he => by
     show (∀ st nt, holds (σ.havoc st nt) φ) ↔ (∀ st nt, holds (σ'.havoc st nt) φ)
-    refine forall_congr' fun st => forall_congr' fun nt => holds_congr_erase φ hm _ _ hH ?_
-    rw [State.havoc_erase, State.havoc_erase, he]
+    refine forall_congr' fun st => forall_congr' fun nt => holds_congr_reads φ hm _ _ hH ?_
+    exact ⟨by rw [State.globE_havoc, State.globE_havoc, he.1], fun i => he.2 i⟩
   | _, .all _ p φ, hm, σ, σ', hH, he => by
     show (∀ v : p.Denote, holds (σ.push (t := .val p) v) φ) ↔
       (∀ v : p.Denote, holds (σ'.push (t := .val p) v) φ)
-    refine forall_congr' fun v => holds_congr_erase φ hm _ _ hH ?_
-    rw [State.push_erase, State.push_erase, he]; rfl
+    refine forall_congr' fun v => holds_congr_reads φ hm _ _ hH ⟨he.1, fun i => ?_⟩
+    cases i with
+    | here => rfl
+    | there j => exact he.2 j
   | _, .bind m _ t φ, hm, σ, σ', hH, he => by
     obtain ⟨st, H, hp, env, nt, sb, tx⟩ := σ
     obtain ⟨st', H', hp', env', nt', sb', tx'⟩ := σ'
     cases hH
-    refine forall_congr' fun v => holds_congr_erase φ hm _ _ rfl ?_
-    rw [State.push_erase, State.push_erase, he]
+    refine forall_congr' fun v => holds_congr_reads φ hm _ _ rfl ⟨he.1, fun i => ?_⟩
+    cases i with
+    | here => rfl
+    | there j => exact he.2 j
   | _, .anon xs φ, hm, σ, σ', hH, he => by
     obtain ⟨st, H, hp, env, nt, sb, tx⟩ := σ
     obtain ⟨st', H', hp', env', nt', sb', tx'⟩ := σ'
     cases hH
-    refine forall_congr' fun b => holds_congr_erase φ hm _ _ rfl ?_
-    rw [State.anon_erase, State.anon_erase, he]
+    refine forall_congr' fun b => holds_congr_reads φ hm _ _ rfl
+      ⟨he.1, fun i => TEnv.foldl_set_erase_congr xs b env env' (fun j => he.2 j) i⟩
 
 /-- Two typed states that read alike, the heap typing of one a prefix of
 the other's, have one heap typing: the next identity is its length. -/
@@ -127,7 +156,7 @@ theorem holds_upd_nil {Γ : Ctx} (m : Modality) {φ : Fml C Γ} (hm : φ.modalFr
   refine Upd.afterT_intro (fun _ he => nomatch he) fun g σ' hL hp => ?_
   have hg : g = σ.globE := (Except.ok.inj hL.1).symm
   have hr : σ.ReadsAs σ' := ⟨(hL.2.1.trans hg).symm, fun i => (hL.2.2 i).symm⟩
-  exact (holds_congr_erase φ hm σ σ' (State.H_eq_of_globE hr.1.symm hp) hr.erase_eq).1 h
+  exact (holds_congr_reads φ hm σ σ' (State.H_eq_of_globE hr.1.symm hp) hr).1 h
 
 /-! ## Updates read one way -/
 

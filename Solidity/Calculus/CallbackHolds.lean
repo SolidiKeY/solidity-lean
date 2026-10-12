@@ -160,14 +160,6 @@ end Frames
 
 /-! ## The two readings -/
 
-/-- `holdsC`'s update clause, read on the erasure (`Upd.afterT_iff`). -/
-theorem holdsC_upd_erased {I : Fml C []} {Γ Δ : Ctx} (σ : State C Γ) (m : Modality)
-    (U : Upd C Γ Δ) (φ : Fml C Δ) :
-    holdsC I σ (.upd m U φ) ↔
-      m.afterC (fun τ => ∀ σ' : State C Δ, σ'.erase = τ → σ.H <+: σ'.H → holdsC I σ' φ)
-        (U.apply σ.erase) :=
-  Upd.afterT_iff m σ U _
-
 /-- **With no payment, the two readings agree.** -/
 theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.hasTransfer = false →
     ∀ σ : State C Γ, (holdsC I σ φ ↔ holds σ φ)

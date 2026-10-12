@@ -1438,7 +1438,7 @@ end Merge
 `[{storage := S}] φ ⇝ φ[S/storage]`, `φ` first-order and every storage
 read of it a `storage` term (`Tm.stExplicitS`).  An equation reads its terms
 through `denote`, so the substitution is exact up to `Equiv`: `S` denotes
-the storage its run leaves (`Tm.denoteT_eval`), and the rest of the state is
+the storage its run leaves (`Tm.denoteT_evalT`), and the rest of the state is
 the one before (`Semantics.State.Keeps`, `Tm.evalT_st_glob`). -/
 
 section WithSt
@@ -1545,7 +1545,7 @@ theorem Tm.withStS_denoteT (hs : S.evalT σ = .ok τ) (hk : σ.globE.Keeps τ)
     | storage =>
       show Struct.Equiv (S.denoteT σ) (Op0.denote σ'.globE .storage)
       rw [hg]
-      exact Tm.denoteT_eval σ S τ hs
+      exact Tm.denoteT_evalT σ S τ hs
     | memory => exact absurd he Bool.false_ne_true
     | lit _ | root _ | mtSt _ => exact Srt.DEquiv.refl _ _
     | env _ =>

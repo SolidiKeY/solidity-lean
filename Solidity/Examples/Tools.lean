@@ -390,8 +390,8 @@ solkey's `TestSuite.sol` pins it: a binary operator's right operand first
       assert(matrix[0][0] == 77); assert(matrix[1][0] == 0); })).isOk)
 
 /-! `x = 10` through an alias, typed from `StandardExample`'s store: the
-write lands in `alice` (`Semantics/Erased.lean`'s pin of M3's run until its
-deletion, `docs/intrinsic.md`, decision 40). -/
+write lands in `alice` (the pin of M3's erased run until its deletion,
+`docs/intrinsic.md`, decision 40). -/
 
 /-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 10)) -/
 #guard_msgs in

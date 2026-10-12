@@ -59,7 +59,7 @@ theorem Thin.names_sublist : {Γ Δ : Ctx} → (h : Thin Γ Δ) → (ns : List V
 def Locs.tail {t : LTy} {Δ : Ctx} (ℓ : Locs C (t :: Δ)) : Locs C Δ := fun _ i => ℓ _ (.there i)
 
 /-- The locals as `Semantics.lean`'s environment, named by `ns` (innermost
-first; `Env.erase`'s reading). -/
+first). -/
 def Locs.erase : {Γ : Ctx} → List Var → Locs C Γ → List (Var × Binding)
   | [], _, _ => []
   | _ :: _, [], _ => []

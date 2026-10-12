@@ -938,11 +938,10 @@ variable {Γ : Ctx} (σ : State C Γ)
 mutual
 
 /-- A typed path resolves along keys in range, its aliases' included. -/
-theorem SPath.resolveT_keysFit (he : Env.All (LTy.KeysFit C) (TEnv.erase Γ σ.env)) :
+theorem SPath.resolveT_keysFit (he : TEnv.All (LTy.KeysFit C) σ.env) :
     {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef C T}, b.resolveT σ = .ok r → r.KeysFit
   | _, .alias i, r, h => by
     have hk := he.get i
-    rw [TEnv.get_erase] at hk
     change (match (TEnv.get i σ.env : Option (SRef C _)) with
       | some r => .ok r
       | none => .error .revert : TRes _) = .ok r at h
@@ -958,7 +957,7 @@ theorem SPath.resolveT_keysFit (he : Env.All (LTy.KeysFit C) (TEnv.erase Γ σ.e
     · exact nomatch h
   | _, .loc l, r, h => Loc.resolveT_keysFit he l h
 
-theorem Loc.resolveT_keysFit (he : Env.All (LTy.KeysFit C) (TEnv.erase Γ σ.env)) :
+theorem Loc.resolveT_keysFit (he : TEnv.All (LTy.KeysFit C) σ.env) :
     {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T}, l.resolveT σ = .ok r → r.KeysFit
   | _, .root _ _, r, h => by
     cases h
@@ -996,7 +995,6 @@ def fitsInv (C : Contract) : RunInv C where
   glob _ τ := BndStorage C τ.storage
   loc _ t v := LTy.KeysFit C t v
   loc_mono _ h := h
-  reglob _ h := h
 
 /-- The storage bounded, every alias along keys in range. -/
 abbrev RunFits (C : Contract) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
@@ -1013,7 +1011,7 @@ variable {Γ : Ctx} {H : HeapTy}
 /-- A typed state's heap grown, its storage and locals as they were. -/
 theorem adopt {α : HTy → Type} {σ : State C Γ} (g : Grown σ.H α) (h : RunFits C H σ) :
     RunFits C H (σ.adopt g).1 :=
-  ⟨h.1, Env.All.twk _ h.2⟩
+  ⟨h.1, TEnv.All.wk _ h.2⟩
 
 end RunFits
 
@@ -1058,7 +1056,7 @@ theorem ARhs.evalT_fits (σ : State C Γ) (hσ : RunFits C H σ) {R : RefTy} :
       have hfull' : σ.storage.full ref0 = false := by simpa only [Bool.not_eq_true] using hfull
       obtain ⟨⟨st', n⟩, hp, h⟩ := tbind_ok_inv h
       cases h
-      have he := Storage.pushPlaceAt_erase (σ := σ.erase.glob) rfl ref0 hfull'
+      have he := Storage.pushPlaceAt_erase (σ := σ.globE) rfl ref0 hfull'
       rw [TRes.ofOpt_ok hp] at he
       refine ⟨bnd_pushPlaceAt hσ.1 (SRef.tyAt_erase ref0) (SRef.keysFit_root hk)
         (Storage.len_of_full rfl ref0 hfull') he, ?_⟩
@@ -1276,7 +1274,7 @@ theorem fits_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     have hfull' : σ.storage.full ref = false := by simpa only [Bool.not_eq_true] using hfull
     obtain ⟨st, hst, h⟩ := tbind_ok_inv h
     cases h
-    have he := Storage.pushAt_erase (σ := σ.erase.glob) rfl ref
+    have he := Storage.pushAt_erase (σ := σ.globE) rfl ref
       (fun s => .ok ((x.map SVal.erase).getD s)) (fun slot => some (x.getD slot))
       (fun y => by cases x <;> rfl) (Or.inl hfull')
     rw [TRes.ofOpt_ok hst] at he
@@ -1292,7 +1290,7 @@ theorem fits_pop {E : Ty} (b : SPath C Γ (.array E)) : (fitsInv C).TKeeps (TRun
   obtain ⟨ref, href, h⟩ := tbind_ok_inv h
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
-  have he := Storage.popAt_erase (σ := σ.erase.glob) rfl E.isMapping ref
+  have he := Storage.popAt_erase (σ := σ.globE) rfl E.isMapping ref
   rw [TRes.ofOpt_ok hst] at he
   exact ⟨bnd_popAt hσ.1 (SRef.tyAt_erase ref)
     (SRef.keysFit_root (SPath.resolveT_keysFit σ hσ.2 b href)) he, hσ.2⟩

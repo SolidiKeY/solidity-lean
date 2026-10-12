@@ -1,7 +1,6 @@
 import Solidity.Calculus.Spec
 import Solidity.Calculus.Logic
 import Solidity.Calculus.FirstOrder
-import Solidity.Semantics.StateErase
 import Solidity.Calculus.Close
 import Solidity.Calculus.SoundKit
 
@@ -34,24 +33,16 @@ def State.deploy (C : Contract) (tx : TTx) : State C [] :=
   { storage := Storage.init C, H := [], heap := Heap.empty, env := (),
     net := [(tx.msgSender.1, tx.msgValue.1)], selfBalance := tx.msgValue, tx := tx }
 
-theorem State.deploy_erase (C : Contract) (tx : TTx) :
-    (State.deploy C tx).erase = EState.ofSem (C.deployState tx.erase) := by
-  simp only [State.erase, State.deploy, Storage.init_erase]
-  rfl
-
-/-- The deployment update leaves the deployment's state as it is. -/
-theorem Problem.deployUpd_deploy (C : Contract) (tx : TTx) :
-    (Problem.deployUpd C).apply (State.deploy C tx).erase = .ok (State.deploy C tx).erase := by
-  rw [State.deploy_erase]
-  rfl
-
-/-- The same, with the constructor's parameters bound: the update reads
-none of them. -/
-theorem Problem.deployUpd_deployEnv (C : Contract) (tx : TTx) {Δ : Ctx}
+/-- **The deployment update lands on the deployment's state**, with the
+constructor's parameters bound: it writes the deployment's storage, ledger
+and funds, and reads none of the parameters. -/
+theorem Problem.deployUpd_lands (C : Contract) (tx : TTx) {Δ : Ctx}
     (e : TEnv C (State.deploy C tx).H Δ) :
-    (Problem.deployUpd C).apply ((State.deploy C tx).withEnv e).erase =
-      .ok ((State.deploy C tx).withEnv e).erase := by
-  rw [State.withEnv_erase, State.deploy_erase]
+    (Problem.deployUpd C).Lands ((State.deploy C tx).withEnv e)
+      ((State.deploy C tx).withEnv e).globE ((State.deploy C tx).withEnv e) := by
+  refine ⟨?_, rfl, fun _ => rfl⟩
+  simp only [Problem.deployUpd, Upd.globT, UpdElem.globT, Tm.evalT, Op0.eval, State.globE,
+    State.withEnv, State.deploy, Storage.init_erase]
   rfl
 
 /-- A closed formula holds of a state with every value of the locals it
@@ -76,8 +67,8 @@ theorem Problem.deploy_of_valid {m : Modality} {xs : List (PrimTy × Var)} {Γ' 
     {P : Prog C (paramsN xs).ctx Γ'} (h : Valid (Problem.ctorFml m xs P)) (tx : TTx)
     (e : TEnv C (State.deploy C tx).H (paramsN xs).ctx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames ((State.deploy C tx).withEnv e) P .nil) := by
-  exact Upd.afterT.of_apply (holds_closeN (paramsN xs) (h (State.deploy C tx)) e)
-    (Problem.deployUpd_deployEnv C tx e) (List.prefix_refl _)
+  exact Upd.afterT.of_lands (holds_closeN (paramsN xs) (h (State.deploy C tx)) e)
+    (Problem.deployUpd_lands C tx e) (List.prefix_refl _)
 
 /-- **A derived constructor obligation of no parameters holds of the typed
 deployment**: its program runs under `m` from `State.deploy`, and does not
@@ -85,7 +76,7 @@ panic. -/
 theorem Problem.deploy_of_valid_typed {m : Modality} {Γ' : Ctx} {P : Prog C [] Γ'}
     (h : Valid (Problem.ctorFml m [] P)) (tx : TTx) :
     m.afterRunTR (fun _ => True) (Prog.runFrames (State.deploy C tx) P .nil) := by
-  exact Upd.afterT.of_apply (h (State.deploy C tx)) (Problem.deployUpd_deploy C tx)
+  exact Upd.afterT.of_lands (h (State.deploy C tx)) (Problem.deployUpd_lands C tx (Δ := []) ())
     (List.prefix_refl _)
 
 /-- **The typed deployment** (master's `Contract.deploy`, over the typed run): a

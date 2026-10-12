@@ -10,8 +10,7 @@ leaves leaves `Valid ψ`, `ψ : Fml C []` with no modality.  `sol_close`,
 by the elaborators below, which read it with `close_rw_s`
 (`Calculus/Close.lean` declares the syntax and the simp sets).
 
-**The leaf as the closer reads it**: `holds` itself, over the typed state
-(W9.7.2; the erased reading `holdsE` is gone).  A term reads the state's
+**The leaf as the closer reads it**: `holds` itself, over the typed state.  A term reads the state's
 global part (`State.globE`) and its locals by position (`State.loc`, a
 stack of `Locs.push`es over the root state's).  An update is computed on
 the state it is applied in (`Upd.applyV`: its global part and its locals'
