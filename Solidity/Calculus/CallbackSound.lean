@@ -628,11 +628,11 @@ theorem holds_exit_closed {Γ₀ : Ctx} {φ : Fml C Γ₀} {I : Fml C []} (hφ :
       σ.globE = τ₀.globE → holds σ (κ.exit .box φ)
   | _, .nil, _, σ, e => (holds_reclose φ hφ σ τ₀ e).1 h
   | _, .seq .nil κ, hκ, σ, e => holds_exit_closed hφ h κ hκ σ e
-  | _, .pop _ e' κ, hκ, σ, e =>
-    Upd.afterT_intro (fun _ _ => trivial) fun g σ' hL _ =>
+  | _, .pop _ _ κ, hκ, _, e =>
+    Upd.afterT_intro (fun _ _ => trivial) fun _ σ' hL _ =>
       holds_exit_closed hφ h κ hκ σ' ((hL.2.1.trans (Except.ok.inj hL.1).symm).trans e)
-  | _, .drop e' κ, hκ, σ, e =>
-    Upd.afterT_intro (fun _ _ => trivial) fun g σ' hL _ =>
+  | _, .drop _ κ, hκ, _, e =>
+    Upd.afterT_intro (fun _ _ => trivial) fun _ σ' hL _ =>
       holds_exit_closed hφ h κ hκ σ' ((hL.2.1.trans (Except.ok.inj hL.1).symm).trans e)
 
 /-- **The invariant assumed is the goal**: `…, {havoc}, I ⟹ I`, the

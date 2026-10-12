@@ -4749,6 +4749,128 @@ unchanged).  Expected: the closer still reads a leaf through `holdsE` and
 1.8× of W9.6.0 lands with W9.7.2's `close` lane, when a leaf is read by
 `Lands`.
 
+### W9.7.2 laws record (2026-10-12, branch `w97-laws`)
+
+**Merged master built first**: `shim` and `lands` build together (default
+targets), no fix needed.
+
+**The typed kit** (`Calculus/Lands.lean`, section "The typed kit"): what
+the laws read `holds`' update clause by, with no erasure.
+- `State.ReadsAs` (one `globE`, one `getE` at each position), its
+  congruences `Tm.evalT_congr`, `Tm.denoteT_congr`, `Rhs.evalT_congr`,
+  `UpdElem.globT_congr`, `Upd.globT_congr`, `Held.OKV_congr`,
+  `Upd.lands_congr`, `Upd.afterT_congr`; `State.aliasPathT_getE`,
+  `State.memRefT_getE`; `ReadsAs.of_erase`/`erase_eq` (the bridge
+  `holds_congr_erase` still states itself by).
+- `Held.OKV` (what a local holds, as a value), `Held.OKT_iff_OKV`.
+- `Upd.afterT_intro`, `Upd.afterT.of_lands`, `Upd.afterT.of_error`,
+  `Upd.afterT_of_lands` (one update for another where it lands only where
+  the other does), `Upd.lands_of`.
+- **Composition**: `Upd.afterT_seq`: `W` gives `U` then `V` where `W` halts
+  where `U` does and, past a typed state `U` lands on, computes `V`'s global
+  part and leaves `V`'s locals.  The converse is not stated: a merged update
+  may reach a typed state the two in turn do not (`UpdRuleScoped`'s
+  docstring), so every law stays one way.
+- Landing by constructor: `Upd.lands_nil`, `lands_pop_nil`,
+  `lands_drop_nil`, `lands_decl`, `lands_snoc_local`, `globT_decl_error`;
+  `State.globE_*`, `State.getE_drop`/`_thin`/`_push_*`/`_setLocal_*`.
+
+**The substitution lemma** (`Calculus/Graft.lean`): given `U.Lands σ₀ g σ₁`,
+`t.substH U.held U.envOnly st = some t' → t'.evalT σ₀ = t.evalT σ₁`
+(`Tm.evalT_substH`, `Rhs.evalT_substH`, `UpdElem.globT_substH`;
+`Tm.denoteT_substH` in `UpdateRules`), the global part read only where `U`
+writes none (`Upd.envOnly_globT`, `Upd.Lands.globE_of_envOnly`) or the
+storage it last wrote (`Upd.lastSt_evalT`, `Upd.stOnly_globT`,
+`Tm.evalT_stChg`).  The graft: `Upd.globT_graft_error`, `Upd.globT_graft`,
+`Upd.held_graft`, `holds_upd_graft` by `Upd.afterT_seq`.  The lift under a
+binder: `Upd.globT_liftG?`, `held_liftG?_here`/`_there`,
+`Upd.lands_liftG?`, `Fml.upd_bind_of_liftG` (was `…_of_apply`).  The atoms
+read typed: `holds_eqT`, `holds_definedT` (they hold whether `holds`' atoms
+read `Tm.denote σ.erase` or `Tm.denoteT σ`, so the `close` lane's switch
+does not break them).
+
+**Ported** (each law now states `globT` and `held` facts, not `Upd.apply`):
+`UpdateRules` (`Fml.substU_holds` over `Lands`, `Upd.simp_globT`,
+`Upd.simp_held`), `UpdRuleScoped` (`holds_upd_nil`, `Upd.totalB_globT`,
+the shadow: `Upd.unsetAt_globT`/`_held`, `Upd.redecl_globT`/`_held`,
+`Upd.shadow_globT`/`_held`; `holds_upd_of_apply` deleted),
+`StatePartsScoped` (not on this lane's list, but its merges were the only
+reader of Graft's `EState` lemmas: `GraftOK` typed, `holds_upd_graftF`,
+`Tm.substStS_evalT`, `Tm.withMemS_evalT`, `Tm.substMemS_evalT`,
+`Upd.memLast?_globT`), `SeqRewrite` (`PickLe`/`PickGe`/`PickEq` and
+`Tm.EvalRefines` over `State C []`; `Upd.rwBy_globT`/`_rev`/`_eq`,
+`Upd.held_rwBy`, `Upd.rwBy_lands`/`_rev`/`_iff`, `Upd.rwBy_afterT`;
+`State.toNil`, `Tm.evalT_toNilS`, …, `Tm.denoteT_eval`,
+`Tm.sideC_denoteT`), `RewriteScoped` (`Tm.EvalEq` typed,
+`LitLaw.evalEqT`, `holds_upd_of_ok`, `holds_upd_and`, `applyOnPV`),
+`RewritePast` (`State.ThinOf`, the absorb: `Upd.rebase_globT`/`_held`,
+`Upd.absorb_globT`/`_held`; the shadowed write: `ShRel` on global parts,
+`Upd.dropSh_rel`, `Upd.dropSh_held`; `Tm.withStS_evalT`/`_denoteT`; the
+thinning: `Upd.globT_thinIO`, `Upd.held_thinIO`, `Upd.lands_thinIO`,
+`…_close`, `Idx.wk_popExt`, `Idx.wk_meet`, `Idx.wk_norm`), `RewriteLaws`,
+`ChainKit` (`Upd.globT_eraseNames`, `Upd.held_eraseNames`), `FunContract`
+(`Tm.evalT_wk`, `Tm.denoteT_wk`, `holds_snapOld`), `ProvesSound`
+(`holds_exit`, `Upd.popsOnly_globT`, `Hyps.wrap_valid`), `SoundKit`
+(`Premise.sound_updateH`), `SoundLoops`, `CallbackSound`
+(`holds_FO_reads`, `Tm.reclose_evalT`/`denoteT`, the callback taclets),
+`Examples/Tactics/Chains`.  Deleted with no reader left: Graft's `EState`
+section (`Upd.envOnly_glob`, `Tm.eval_substH`, `Upd.apply_graft`,
+`Upd.apply_lift?`/`liftG?`, `Tm.eval_stChg`, `Upd.stOnly_glob`,
+`Upd.lastSt_eval`, …), `EState.AgreeAbove`/`AgreeBut`, `ResRel.bind_write`,
+the `write_*` lemmas, `Upd.apply_*` of every law,
+`Modality.afterC_okEq`/`afterC_and`, `EState.nil_eq_of_glob`,
+`Tm.eval_ofNil`/`denote_ofNil`/`eval_closedAs`/`denote_closedAs`.
+
+**What the grep leaves** (`rg 'holds_upd_erased|holdsC_upd_erased|Upd\.apply|EState'`
+over the lane's files), each a bridge to a part not on this lane:
+- `SoundKit`: `Tm.eval_noPanic` … `Upd.apply_noPanic` and the "update,
+  through its erasure" section (`sound_updateSim_agrees`, `_typed`,
+  `sound_cases_typed`): the update arms' interface (`Premise.Runs`'
+  update clause, `SoundArms`' `*_agrees`) states the update's run on the
+  erasure; `Premise.sound_updateH` turns it into landing by
+  `Upd.lands_iff`/`Upd.apply_glob` (one hit, and one in `CallbackSound`'s
+  `holdsC_update`).  Retyping the arms is its own wave.
+- `RewriteLaws`: `LawCov.back` (`Calculus/TermLaws.lean`) states where an
+  update returns by `Upd.apply`; `FmlRw.lawUpdS` bridges by `Upd.apply_glob`
+  (one site, and the docstring that names it).
+- `SeqRewrite`: `EState.nil`, `Tm.eval_toNilS`/`denote_toNilS` (read by
+  `TermLaws`), `Tm.denote_eval` (the term bridge, read by `TermLib`,
+  `TermLaws`, `CloseScoped`, `DecideTyped`, `Tools/Counterexample`).
+- `ProvesSound`: `State.thin_erase` (read by `DecideTyped`, the `close`
+  lane's).
+`holds_upd_erased` is left to `CloseScoped`, `LeafDerive`, `DecideTyped`,
+`Tools/Counterexample` (the `close` lane); `holdsC_upd_erased` has no
+reader.
+
+**Checked**: per-file diagnostics of every touched module (no warning);
+`lean_build` of the default targets, clean (two runs lost
+`Examples/ProofTree`, `Tactics/CrossDomain`, `Tactics/Calls` to exit 135
+under the `close` lane's memory load; each built on the rerun);
+`check-orphans` (310 reachable), `check-doc-paths`; `sorry` count 19.
+Diff against `f009cc96`: 16 Lean files, 2,890 lines added, 2,472 removed.
+
+**Timings** (each file copied under `Solidity/Scratch/`, a fresh worker,
+`/proc` sampled; *before* is master `f009cc96` in the main checkout, *after*
+this branch, run in pairs at the same moment, since the `close` lane's
+builds kept the load at 2–19 and the i9's E-cores move CPU seconds by up to
+2×; walls in s, CPU s in brackets, the low-load pass):
+
+| Row | Gate | before | after |
+|---|---|---|---|
+| `Derived7` | 61.7 | 48.2 (50.1) | 49.0 (50.7) |
+| `ChainRewrites` | 8.2 | 9.1 (9.8) | 9.0 (9.7) |
+| `ChainRewritesOpen` | 4.1 | 4.1 (4.3) | 4.5 (4.2) |
+| `Chains/Storage` | 9.0 | 10.3 (11.7) | 10.3 (11.6) |
+
+Three more paired passes give the same: CPU within 2% either way
+(`ChainRewrites` 10.6/10.8 before, 10.7/10.8 after; `Storage` 12.5/12.9,
+12.6/12.6).  No row moves: the laws are theorems, applied, not
+re-elaborated, and no computed function changed.  `ChainRewrites`,
+`ChainRewritesOpen` and `Chains/Storage` are over their gates in both
+columns: master is too under this load (at the session's start, load 4,
+master measured `ChainRewrites` 7.5 (8.3), `ChainRewritesOpen` 5.7 (3.6),
+`Storage` 8.6 (9.9), `Derived7` 49.6 (50.2)); a quiet rerun is W9.7.3's.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
