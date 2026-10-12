@@ -6,54 +6,34 @@ import Solidity.Theory.StateWrites
 /-!
 # KeY's signature, typed
 
-The sorts of `Update.lean` indexed by Solidity types (`SrtT`: `val p`,
-`path T`, `st`, `sv T`, `ident R`, `addr T`, `mem`, `mv T`), and the
-symbols over the contract (`OpT0` … `OpT3`), each read on the typed global
-part (`State C []`, `State.glob`) by the typed operations of
-`Semantics/Storage.lean`, `Semantics/Heap.lean` and `Semantics/Run.lean`:
-`OpTn.eval`, where a revert is `none` and nothing is `undef`.  It is the
-signature W9.8 moves the terms to (`docs/intrinsic.md`, "W9.8 plan"); the
-name stays when `Update.lean`'s untyped one goes.
+KeY's sorts indexed by Solidity types (`Srt`: `val p`, `path T`, `st`,
+`sv T`, `ident R`, `addr T`, `mem`, `mv T`, and under `select` `sts s`,
+`spath s T`), and the symbols over the contract (`Op0` … `Op3`), each read
+on the typed global part (`State C []`, `State.glob`) by the typed
+operations of `Semantics/Storage.lean`, `Semantics/Heap.lean` and
+`Semantics/Run.lean`: `OpN.eval`, where a revert is `none` and nothing is
+`undef`.  The terms over them are `Calculus/Fml.lean`'s (W9.8.3: the
+untyped signature of `Update.lean` and its bridge are gone,
+`docs/intrinsic.md`).
 
-**What the sorts denote** (`SrtT.Den C H`, over the heap typing `H` of the
+**What the sorts denote** (`Srt.Den C H`, over the heap typing `H` of the
 global part): a value of its type, a storage reference `SRef C T`, a
 storage `Storage C`, a storage value `SVal T`; a memory a heap grown from
 `H` (`Grown H`: `addM`/`copySt` extend it); an identity a bare `Nat` and an
 address its `MAddrT`, checked against the typing of the memory they are
 read in (`HRef.ofId?`), since a fresh identity's type is not static.
 
-**Symbols.**  Every symbol of `Op0` … `Op3` has a typed one of the same
-name, but two:
-- `Op1.netOf` is a local's (`TmT.netOf`, `Calculus/TypedTerm.lean`), as it
-  is `Tm.netOf`;
-- `Op1.select` (`select(s, r)`, a line of a chain's read taken head first)
-  reads at its own sorts (W9.8.2): `sts s`, the struct `s`'s members read
-  as a storage (`Storage (Contract.ofStruct s)`), and `spath s T`, a path
-  from one of them; `select` from the storage at a root, `selectIn` from
-  an `sts` at a member, and `member`/`fieldIn`/`findIn`/`sfindIn`/
-  `delAtIn`/`saveIn` the symbols under it.  Each erases to its untyped
-  namesake, so a chain line reads typed as solkey writes it.
-An index (`at`, `atIn`) takes the word its key is hashed as, at
-`PrimTy.keyTy` (a `bool` key at `uint`), as `Tm.keyAt` writes it.
-
-**The bridge** (`OpTn.erase`, `OpTn.eval_agree`): a typed symbol erases to
-its untyped namesake, and on the erased global part (`State.globE`) the
-untyped evaluation agrees with the typed one (`SrtT.Agree`: `some x` reads
-`.ok` of `x` erased, `none` some halt; the halt's kind is not kept: `Res`'s
-`revert` and `panic` are both `none`).  It is exact where the typed symbol
-is (`OpTn.Exact`), everywhere but:
-- a memory read or write through an identity (`read`, `iread`, `mlen`,
-  `copyMem`, `write`): the identity must have its type in the memory read
-  (`IdOk`); the untyped read takes any object with the member;
-- a push onto a full array (`pushSlot`, `extend`, `push`): the typed one is
-  `none`, out of gas (`Storage.full`), the untyped one writes;
-- `net(a)`: the entry must be an `int` (the ledger is unbounded).
-The untyped symbols' kernel forms are kept: the twin-then-switch of W9.8
-reads its laws across this bridge.
+**Symbols.**  `netOf` is a local's (`Tm.netOf`, `Calculus/Fml.lean`).
+`select(s, r)` reads at its own sorts: `sts s`, the struct `s`'s members
+read as a storage (`Storage (Contract.ofStruct s)`), and `spath s T`, a
+path from one of them; `select` from the storage at a root, `selectIn`
+from an `sts` at a member, and `member`/`fieldIn`/`findIn`/`sfindIn`/
+`delAtIn`/`saveIn` the symbols under it.  An index (`at`, `atIn`) takes
+the word its key is hashed as, at `PrimTy.keyTy` (a `bool` key at `uint`),
+as `Tm.keyAt` writes it.
 
 The evaluators are kernel-evaluated: each is a `casesOn` with a `match`
-twin as its `implemented_by` and a link theorem (Gate G0); the bridge is
-proved on the twin.
+twin as its `implemented_by` and a link theorem (Gate G0).
 -/
 
 namespace Solidity
@@ -65,7 +45,7 @@ variable {C : Contract}
 /-! ## Sorts -/
 
 /-- KeY's sorts (`Srt`), indexed by Solidity types. -/
-inductive SrtT where
+inductive Srt where
   /-- `Term` at a primitive type. -/
   | val (p : PrimTy)
   /-- `PTerm` to a `T`. -/
@@ -89,19 +69,6 @@ inductive SrtT where
   | spath (s : Name) (T : Ty)
   deriving DecidableEq, Repr
 
-/-- The untyped sort (the printer's, the sort check's). -/
-def SrtT.erase : SrtT → Srt
-  | .val _ => .val
-  | .path _ => .path
-  | .st => .st
-  | .sv _ => .sv
-  | .ident _ => .ident
-  | .addr _ => .addr
-  | .mem => .mem
-  | .mv _ => .mv
-  | .sts _ => .st
-  | .spath _ _ => .path
-
 /-- The type an index of key type `k` is hashed at: a `bool` key is the
 word `0` or `1` (`Tm.keyAt`). -/
 def PrimTy.keyTy : PrimTy → PrimTy
@@ -109,37 +76,16 @@ def PrimTy.keyTy : PrimTy → PrimTy
   | .uint => .uint
   | .int => .int
 
-/-- An index's word is the integer the untyped interpreter reads. -/
-theorem PrimTy.asInt_erase_keyTy : (k : PrimTy) → (i : k.keyTy.Denote) →
-    (PrimTy.erase i).asInt = .ok (PrimTy.key i)
-  | .bool, _ | .uint, _ | .int, _ => rfl
-
 /-! ## Identities and addresses -/
 
 /-- An identity of an `R` in the heap typing `H`: `none` off it. -/
 def HRef.ofId? (H : HTy) (R : RefTy) (id : Nat) : Option (HRef H R) :=
   if h : H[id]? = some R then some ⟨id, h⟩ else none
 
-/-- The identity `id` names an `R` in `H`: where a typed memory read is exact. -/
-def IdOk (H : HTy) (R : RefTy) (id : Nat) : Prop := H[id]? = some R
-
-theorem HRef.ofId?_of_ok {H : HTy} {R : RefTy} {id : Nat} (h : IdOk H R id) :
-    HRef.ofId? H R id = some ⟨id, h⟩ := dif_pos h
-
 /-- A memory address (`MAddr`), its identity unchecked. -/
 inductive MAddrT : Ty → Type where
   | field {s f : Name} {T : Ty} (id : Nat) (h : lookupBy f (structDef s) = some T) : MAddrT T
   | index {R : RefTy} {E : Ty} (id : Nat) (a : ArrTy R E) (i : Int) : MAddrT E
-
-/-- The untyped address. -/
-def MAddrT.erase {T : Ty} : MAddrT T → Addr
-  | @MAddrT.field _ f _ id _ => .memoryField id f
-  | .index id _ i => .memoryIndex id i
-
-/-- Its identity names the object it addresses in `H`. -/
-def MAddrT.Ok (H : HTy) {T : Ty} : MAddrT T → Prop
-  | @MAddrT.field s _ _ id _ => IdOk H (.struct s) id
-  | @MAddrT.index R _ id _ _ => IdOk H R id
 
 /-- `resolve` by `match`, its compiled form. -/
 def MAddrT.resolveM (H : HTy) {T : Ty} : MAddrT T → Option (MAddr H T)
@@ -163,16 +109,6 @@ theorem MAddrT.resolve_eq_resolveM (H : HTy) {T : Ty} (a : MAddrT T) :
   | .prim p => p.Denote
   | .ref _ => Nat
 
-/-- The untyped memory value. -/
-def MvT.erase : (T : Ty) → MvT T → Semantics.MVal
-  | .prim p, v => .prim (PrimTy.erase (p := p) v)
-  | .ref _, id => .ref id
-
-/-- An identity written names an `R`. -/
-def MvT.Ok (H : HTy) : (T : Ty) → MvT T → Prop
-  | .prim _, _ => True
-  | .ref R, id => IdOk H R id
-
 /-- The slot value over the heap typing `H`. -/
 def MvT.toMVal (H : HTy) : (T : Ty) → MvT T → Option (MVal H T)
   | .prim _, v => some v
@@ -187,7 +123,7 @@ storage's operations read it unchanged. -/
 def Contract.ofStruct (s : Name) : Contract := { vars := structDef s }
 
 /-- A typed sort's values, over the global part's heap typing `H`. -/
-@[reducible] def SrtT.Den (C : Contract) (H : HTy) : SrtT → Type
+@[reducible] def Srt.Den (C : Contract) (H : HTy) : Srt → Type
   | .val p => p.Denote
   | .path T => SRef C T
   | .st => Storage C
@@ -204,153 +140,91 @@ def State.glob {Γ : Ctx} (σ : State C Γ) : State C [] :=
   { storage := σ.storage, H := σ.H, heap := σ.heap, env := (), net := σ.net,
     selfBalance := σ.selfBalance, tx := σ.tx }
 
-theorem State.glob_globE {Γ : Ctx} (σ : State C Γ) : σ.glob.globE = σ.globE := rfl
-
 /-- The memory as it is: the heap grown by nothing. -/
 def State.memT (g : State C []) : Grown g.H (fun _ => Unit) := ⟨List.prefix_refl _, g.heap, ()⟩
 
 /-! ## Symbols -/
 
 /-- Constants. -/
-inductive OpT0 (C : Contract) : SrtT → Type where
-  | lit {p : PrimTy} (v : p.Denote) : OpT0 C (.val p)
-  | env (k : EnvKey) : OpT0 C (.val .uint)
-  | root (r : Name) {T : Ty} (h : C.rootType r = some T) : OpT0 C (.path T)
-  | storage : OpT0 C .st
-  | memory : OpT0 C .mem
+inductive Op0 (C : Contract) : Srt → Type where
+  | lit {p : PrimTy} (v : p.Denote) : Op0 C (.val p)
+  | env (k : EnvKey) : Op0 C (.val .uint)
+  | root (r : Name) {T : Ty} (h : C.rootType r = some T) : Op0 C (.path T)
+  | storage : Op0 C .st
+  | memory : Op0 C .mem
   /-- `mtSt`: every root of the contract at its default (`Storage.init`). -/
-  | mtSt : OpT0 C .st
+  | mtSt : Op0 C .st
   /-- A member `f` of the struct `s` as a root under `select` (`Op0.root f`). -/
-  | member (s f : Name) {T : Ty} (h : C.fieldType s f = some T) : OpT0 C (.spath s T)
+  | member (s f : Name) {T : Ty} (h : C.fieldType s f = some T) : Op0 C (.spath s T)
 
 /-- Unary symbols. -/
-inductive OpT1 (C : Contract) : SrtT → SrtT → Type where
-  | unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) : OpT1 C (.val p) (.val (op.ret p))
+inductive Op1 (C : Contract) : Srt → Srt → Type where
+  | unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) : Op1 C (.val p) (.val (op.ret p))
   /-- `net(a)`: an `int`, where the ledger's entry is one. -/
-  | net : OpT1 C (.val .uint) (.val .int)
-  | delValue {p : PrimTy} : OpT1 C (.val p) (.val p)
+  | net : Op1 C (.val .uint) (.val .int)
+  | delValue {p : PrimTy} : Op1 C (.val p) (.val p)
   | field {s f : Name} {T : Ty} (h : C.fieldType s f = some T) :
-      OpT1 C (.path (.ref (.struct s))) (.path T)
-  | next {E : Ty} : OpT1 C (.path (.ref (.array E))) (.path E)
-  | sval {p : PrimTy} : OpT1 C (.val p) (.sv (.prim p))
-  | newArr {R : RefTy} (h : R.newArrOk = true) : OpT1 C (.val .uint) (.sv (.ref R))
-  | alloc (R : RefTy) (h : (Ty.ref R).mapFree = true) : OpT1 C .mem (.ident R)
+      Op1 C (.path (.ref (.struct s))) (.path T)
+  | next {E : Ty} : Op1 C (.path (.ref (.array E))) (.path E)
+  | sval {p : PrimTy} : Op1 C (.val p) (.sv (.prim p))
+  | newArr {R : RefTy} (h : R.newArrOk = true) : Op1 C (.val .uint) (.sv (.ref R))
+  | alloc (R : RefTy) (h : (Ty.ref R).mapFree = true) : Op1 C .mem (.ident R)
   | mfield {s f : Name} {T : Ty} (h : C.fieldType s f = some T) :
-      OpT1 C (.ident (.struct s)) (.addr T)
-  | addM (R : RefTy) (h : (Ty.ref R).mapFree = true) : OpT1 C .mem .mem
-  | mval {p : PrimTy} : OpT1 C (.val p) (.mv (.prim p))
-  | ref {R : RefTy} : OpT1 C (.ident R) (.mv (.ref R))
-  | wt : OpT1 C .st (.val .bool)
+      Op1 C (.ident (.struct s)) (.addr T)
+  | addM (R : RefTy) (h : (Ty.ref R).mapFree = true) : Op1 C .mem .mem
+  | mval {p : PrimTy} : Op1 C (.val p) (.mv (.prim p))
+  | ref {R : RefTy} : Op1 C (.ident R) (.mv (.ref R))
+  | wt : Op1 C .st (.val .bool)
   /-- `select(s, r)`: the struct at the root `r`, read as a storage of its
   members (KeY's `selectSt<[Struct]>(s, r)`). -/
   | select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s))) :
-      OpT1 C .st (.sts s)
+      Op1 C .st (.sts s)
   /-- `select(s, f)` under a `select`: the struct at the member `f`. -/
   | selectIn {s s' f : Name} (h : C.fieldType s f = some (.ref (.struct s'))) :
-      OpT1 C (.sts s) (.sts s')
+      Op1 C (.sts s) (.sts s')
   /-- `p.f` under a `select`. -/
   | fieldIn {s s' f : Name} {T : Ty} (h : C.fieldType s' f = some T) :
-      OpT1 C (.spath s (.ref (.struct s'))) (.spath s T)
+      Op1 C (.spath s (.ref (.struct s'))) (.spath s T)
 
 /-- Binary symbols. -/
-inductive OpT2 (C : Contract) : SrtT → SrtT → SrtT → Type where
+inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
   | binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) :
-      OpT2 C (.val p) (.val p) (.val (op.ret p))
-  | find {p : PrimTy} : OpT2 C .st (.path (.prim p)) (.val p)
-  | len {E : Ty} : OpT2 C .st (.path (.ref (.array E))) (.val .uint)
-  | read {p : PrimTy} : OpT2 C .mem (.addr (.prim p)) (.val p)
-  | mlen {E : Ty} : OpT2 C .mem (.ident (.array E)) (.val .uint)
+      Op2 C (.val p) (.val p) (.val (op.ret p))
+  | find {p : PrimTy} : Op2 C .st (.path (.prim p)) (.val p)
+  | len {E : Ty} : Op2 C .st (.path (.ref (.array E))) (.val .uint)
+  | read {p : PrimTy} : Op2 C .mem (.addr (.prim p)) (.val p)
+  | mlen {E : Ty} : Op2 C .mem (.ident (.array E)) (.val .uint)
   | at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
-      OpT2 C (.path (.ref R)) (.val k.keyTy) (.path V)
-  | nextIn {E : Ty} : OpT2 C .st (.path (.ref (.array E))) (.path E)
-  | delAt {T : Ty} : OpT2 C .st (.path T) .st
-  | pushSlot {E : Ty} : OpT2 C .st (.path (.ref (.array E))) .st
-  | pop {E : Ty} : OpT2 C .st (.path (.ref (.array E))) .st
-  | shrink {E : Ty} : OpT2 C .st (.path (.ref (.array E))) .st
-  | extend {E : Ty} : OpT2 C .st (.path (.ref (.array E))) .st
-  | sfind {T : Ty} : OpT2 C .st (.path T) (.sv T)
-  | copyMem {R : RefTy} : OpT2 C .mem (.ident R) (.sv (.ref R))
-  | iread {R : RefTy} : OpT2 C .mem (.addr (.ref R)) (.ident R)
-  | copy {R : RefTy} (h : (Ty.ref R).mapFree = true) : OpT2 C .mem (.sv (.ref R)) (.ident R)
-  | mat {R : RefTy} {E : Ty} (a : ArrTy R E) : OpT2 C (.ident R) (.val .uint) (.addr E)
-  | copySt {T : Ty} (h : T.mapFree = true) : OpT2 C .mem (.sv T) .mem
+      Op2 C (.path (.ref R)) (.val k.keyTy) (.path V)
+  | nextIn {E : Ty} : Op2 C .st (.path (.ref (.array E))) (.path E)
+  | delAt {T : Ty} : Op2 C .st (.path T) .st
+  | pushSlot {E : Ty} : Op2 C .st (.path (.ref (.array E))) .st
+  | pop {E : Ty} : Op2 C .st (.path (.ref (.array E))) .st
+  | shrink {E : Ty} : Op2 C .st (.path (.ref (.array E))) .st
+  | extend {E : Ty} : Op2 C .st (.path (.ref (.array E))) .st
+  | sfind {T : Ty} : Op2 C .st (.path T) (.sv T)
+  | copyMem {R : RefTy} : Op2 C .mem (.ident R) (.sv (.ref R))
+  | iread {R : RefTy} : Op2 C .mem (.addr (.ref R)) (.ident R)
+  | copy {R : RefTy} (h : (Ty.ref R).mapFree = true) : Op2 C .mem (.sv (.ref R)) (.ident R)
+  | mat {R : RefTy} {E : Ty} (a : ArrTy R E) : Op2 C (.ident R) (.val .uint) (.addr E)
+  | copySt {T : Ty} (h : T.mapFree = true) : Op2 C .mem (.sv T) .mem
   /-- `find(s, p)` under a `select`. -/
-  | findIn {s : Name} {p : PrimTy} : OpT2 C (.sts s) (.spath s (.prim p)) (.val p)
+  | findIn {s : Name} {p : PrimTy} : Op2 C (.sts s) (.spath s (.prim p)) (.val p)
   /-- `delAt(s, p)` under a `select`. -/
-  | delAtIn {s : Name} {T : Ty} : OpT2 C (.sts s) (.spath s T) (.sts s)
+  | delAtIn {s : Name} {T : Ty} : Op2 C (.sts s) (.spath s T) (.sts s)
   /-- `sfind(s, p)` under a `select`. -/
-  | sfindIn {s : Name} {T : Ty} : OpT2 C (.sts s) (.spath s T) (.sv T)
+  | sfindIn {s : Name} {T : Ty} : Op2 C (.sts s) (.spath s T) (.sv T)
 
 /-- Ternary symbols. -/
-inductive OpT3 (C : Contract) : SrtT → SrtT → SrtT → SrtT → Type where
-  | ite {p : PrimTy} : OpT3 C (.val .bool) (.val p) (.val p) (.val p)
-  | save {T : Ty} : OpT3 C .st (.path T) (.sv T) .st
-  | push {E : Ty} : OpT3 C .st (.path (.ref (.array E))) (.sv E) .st
+inductive Op3 (C : Contract) : Srt → Srt → Srt → Srt → Type where
+  | ite {p : PrimTy} : Op3 C (.val .bool) (.val p) (.val p) (.val p)
+  | save {T : Ty} : Op3 C .st (.path T) (.sv T) .st
+  | push {E : Ty} : Op3 C .st (.path (.ref (.array E))) (.sv E) .st
   | atIn {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
-      OpT3 C .st (.path (.ref R)) (.val k.keyTy) (.path V)
-  | write {T : Ty} : OpT3 C .mem (.addr T) (.mv T) .mem
+      Op3 C .st (.path (.ref R)) (.val k.keyTy) (.path V)
+  | write {T : Ty} : Op3 C .mem (.addr T) (.mv T) .mem
   /-- `save(s, p, v)` under a `select`. -/
-  | saveIn {s : Name} {T : Ty} : OpT3 C (.sts s) (.spath s T) (.sv T) (.sts s)
-
-/-! ## Erasure to `Update.lean`'s symbols -/
-
-def OpT0.erase {s : SrtT} : OpT0 C s → Op0 s.erase
-  | .lit v => .lit (PrimTy.erase v)
-  | .env k => .env k
-  | .root r _ => .root r
-  | .storage => .storage
-  | .memory => .memory
-  | .mtSt => .mtSt C.vars
-  | .member _ f _ => .root f
-
-def OpT1.erase {a s : SrtT} : OpT1 C a s → Op1 a.erase s.erase
-  | .unop op (p := p) _ => .unop op p
-  | .net => .net
-  | .delValue => .delValue
-  | @OpT1.field _ _ f _ _ => .field f
-  | .next => .next
-  | .sval => .sval
-  | @OpT1.newArr _ R _ => .newArr R
-  | .alloc R _ => .alloc R
-  | @OpT1.mfield _ _ f _ _ => .mfield f
-  | .addM R _ => .addM R
-  | .mval => .mval
-  | .ref => .ref
-  | .wt => .wt C.vars
-  | .select r _ => .select r
-  | @OpT1.selectIn _ _ _ f _ => .select f
-  | @OpT1.fieldIn _ _ _ f _ _ => .field f
-
-def OpT2.erase {a b s : SrtT} : OpT2 C a b s → Op2 a.erase b.erase s.erase
-  | .binop op (p := p) _ => .binop op p
-  | .find => .find
-  | .len => .len
-  | .read => .read
-  | .mlen => .mlen
-  | .at _ => .at
-  | .nextIn => .nextIn
-  | .delAt => .delAt
-  | @OpT2.pushSlot _ E => .pushSlot E
-  | .pop => .pop
-  | .shrink => .shrink
-  | @OpT2.extend _ E => .extend E
-  | .sfind => .sfind
-  | .copyMem => .copyMem
-  | .iread => .iread
-  | .copy _ => .copy
-  | .mat _ => .mat
-  | .copySt _ => .copySt
-  | .findIn => .find
-  | .delAtIn => .delAt
-  | .sfindIn => .sfind
-
-def OpT3.erase {a b c s : SrtT} : OpT3 C a b c s → Op3 a.erase b.erase c.erase s.erase
-  | .ite => .ite
-  | .save => .save
-  | .push => .push
-  | .atIn _ => .atIn
-  | .write => .write
-  | .saveIn => .save
+  | saveIn {s : Name} {T : Ty} : Op3 C (.sts s) (.spath s T) (.sv T) (.sts s)
 
 
 /-! ## Evaluation on the typed global part
@@ -388,8 +262,8 @@ def Storage.selectT {C : Contract} {s r : Name} (st : Storage C)
     (h : C.rootType r = some (.ref (.struct s))) : Storage (Contract.ofStruct s) :=
   (SVal.view (st.get h) : SFields (structDef s))
 
-/-- `OpT0.eval` by `match`, its compiled form. -/
-def OpT0.evalM (g : State C []) {s : SrtT} : OpT0 C s → Option (s.Den C g.H)
+/-- `Op0.eval` by `match`, its compiled form. -/
+def Op0.evalM (g : State C []) {s : Srt} : Op0 C s → Option (s.Den C g.H)
   | .lit v => some v
   | .env k => some (g.envVal k)
   | .root r h => some (SRef.ofRoot r h)
@@ -399,19 +273,19 @@ def OpT0.evalM (g : State C []) {s : SrtT} : OpT0 C s → Option (s.Den C g.H)
   | .member _ f h => some (SRef.ofRoot (C := Contract.ofStruct _) f h)
 
 /-- A constant on the typed global part. -/
-@[implemented_by OpT0.evalM]
-def OpT0.eval (g : State C []) {s : SrtT} (o : OpT0 C s) : Option (s.Den C g.H) :=
-  @OpT0.casesOn C (fun s _ => Option (s.Den C g.H)) s o
+@[implemented_by Op0.evalM]
+def Op0.eval (g : State C []) {s : Srt} (o : Op0 C s) : Option (s.Den C g.H) :=
+  @Op0.casesOn C (fun s _ => Option (s.Den C g.H)) s o
     (fun {_} v => some v) (fun k => some (g.envVal k)) (fun r {_} h => some (SRef.ofRoot r h))
     (some g.storage) (some g.memT) (some (Storage.init C))
     (fun _ f {_} h => some (SRef.ofRoot (C := Contract.ofStruct _) f h))
 
-theorem OpT0.eval_eq_evalM (g : State C []) {s : SrtT} (o : OpT0 C s) : o.eval g = o.evalM g := by
+theorem Op0.eval_eq_evalM (g : State C []) {s : Srt} (o : Op0 C s) : o.eval g = o.evalM g := by
   cases o <;> rfl
 
-/-- `OpT1.eval` by `match`, its compiled form. -/
-def OpT1.evalM (g : State C []) {a s : SrtT} :
-    OpT1 C a s → Option (a.Den C g.H) → Option (s.Den C g.H)
+/-- `Op1.eval` by `match`, its compiled form. -/
+def Op1.evalM (g : State C []) {a s : Srt} :
+    Op1 C a s → Option (a.Den C g.H) → Option (s.Den C g.H)
   | .unop op _, x => x.bind op.evalT
   | .net, x => x.bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 g.net).getD 0)
   | .delValue, x => x.map fun _ => PrimTy.dflt _
@@ -430,10 +304,10 @@ def OpT1.evalM (g : State C []) {a s : SrtT} :
   | .fieldIn h, x => x.map (SRef.field · h)
 
 /-- A unary symbol on the typed global part. -/
-@[implemented_by OpT1.evalM]
-def OpT1.eval (g : State C []) {a s : SrtT} (o : OpT1 C a s) :
+@[implemented_by Op1.evalM]
+def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     Option (a.Den C g.H) → Option (s.Den C g.H) :=
-  @OpT1.casesOn C (fun a s _ => Option (a.Den C g.H) → Option (s.Den C g.H)) a s o
+  @Op1.casesOn C (fun a s _ => Option (a.Den C g.H) → Option (s.Den C g.H)) a s o
     (fun op {_} _ x => x.bind op.evalT)
     (fun x => x.bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 g.net).getD 0))
     (fun {_} x => x.map fun _ => PrimTy.dflt _)
@@ -451,7 +325,7 @@ def OpT1.eval (g : State C []) {a s : SrtT} (o : OpT1 C a s) :
     (fun {_} {_} {_} h x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h)
     (fun {_} {_} {_} {_} h x => x.map (SRef.field · h))
 
-theorem OpT1.eval_eq_evalM (g : State C []) {a s : SrtT} (o : OpT1 C a s) :
+theorem Op1.eval_eq_evalM (g : State C []) {a s : Srt} (o : Op1 C a s) :
     o.eval g = o.evalM g := by
   cases o <;> rfl
 
@@ -473,14 +347,14 @@ def Grown.writeT {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T)
   let hp ← m.heap.writeAddr (← a.resolve m.H') (← MvT.toMVal m.H' T v)
   some ⟨m.ext, hp, ()⟩
 
-/-- `OpT2.eval` by `match`, its compiled form. -/
-def OpT2.evalM (g : State C []) {a b s : SrtT} :
-    OpT2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H)
+/-- `Op2.eval` by `match`, its compiled form. -/
+def Op2.evalM (g : State C []) {a b s : Srt} :
+    Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H)
   | .binop op _, x, y => x.bind fun a => binopT op a y
   | .find, x, y => do let v ← (← x).find (← y); some v.view
   | .len, x, y => do (← x).len (← y)
   | .read, x, y => do (← x).readT (← y)
-  | @OpT2.mlen _ E, x, y => do
+  | @Op2.mlen _ E, x, y => do
     let m ← x
     some (m.heap.lenU (← HRef.ofId? m.H' (.array E) (← y)))
   | .at it, x, y => do g.storage.atT it (← x) (← y)
@@ -510,10 +384,10 @@ def OpT2.evalM (g : State C []) {a b s : SrtT} :
   | .sfindIn, x, y => do (← x).find (← y)
 
 /-- A binary symbol on the typed global part. -/
-@[implemented_by OpT2.evalM]
-def OpT2.eval (g : State C []) {a b s : SrtT} (o : OpT2 C a b s) :
+@[implemented_by Op2.evalM]
+def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H) :=
-  @OpT2.casesOn C
+  @Op2.casesOn C
     (fun a b s _ => Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H)) a b s o
     (fun op {_} _ x y => x.bind fun a => binopT op a y)
     (fun {_} x y => do let v ← (← x).find (← y); some v.view)
@@ -548,13 +422,13 @@ def OpT2.eval (g : State C []) {a b s : SrtT} (o : OpT2 C a b s) :
     (fun {_} {_} x y => do (← x).delete (← y))
     (fun {_} {_} x y => do (← x).find (← y))
 
-theorem OpT2.eval_eq_evalM (g : State C []) {a b s : SrtT} (o : OpT2 C a b s) :
+theorem Op2.eval_eq_evalM (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     o.eval g = o.evalM g := by
   cases o <;> rfl
 
-/-- `OpT3.eval` by `match`, its compiled form. -/
-def OpT3.evalM (g : State C []) {a b c s : SrtT} :
-    OpT3 C a b c s → Option (a.Den C g.H) → Option (b.Den C g.H) → Option (c.Den C g.H) →
+/-- `Op3.eval` by `match`, its compiled form. -/
+def Op3.evalM (g : State C []) {a b c s : Srt} :
+    Op3 C a b c s → Option (a.Den C g.H) → Option (b.Den C g.H) → Option (c.Den C g.H) →
       Option (s.Den C g.H)
   | .ite, x, y, z => x.bind fun c => cond c y z
   | .save, x, y, z => do (← x).write (← y) (← z)
@@ -564,10 +438,10 @@ def OpT3.evalM (g : State C []) {a b c s : SrtT} :
   | .saveIn, x, y, z => do (← x).write (← y) (← z)
 
 /-- A ternary symbol on the typed global part. -/
-@[implemented_by OpT3.evalM]
-def OpT3.eval (g : State C []) {a b c s : SrtT} (o : OpT3 C a b c s) :
+@[implemented_by Op3.evalM]
+def Op3.eval (g : State C []) {a b c s : Srt} (o : Op3 C a b c s) :
     Option (a.Den C g.H) → Option (b.Den C g.H) → Option (c.Den C g.H) → Option (s.Den C g.H) :=
-  @OpT3.casesOn C (fun a b c s _ => Option (a.Den C g.H) → Option (b.Den C g.H) →
+  @Op3.casesOn C (fun a b c s _ => Option (a.Den C g.H) → Option (b.Den C g.H) →
       Option (c.Den C g.H) → Option (s.Den C g.H)) a b c s o
     (fun {_} x y z => x.bind fun c => cond c y z)
     (fun {_} x y z => do (← x).write (← y) (← z))
@@ -576,211 +450,11 @@ def OpT3.eval (g : State C []) {a b c s : SrtT} (o : OpT3 C a b c s) :
     (fun {_} x y z => do (← x).writeT (← y) (← z))
     (fun {_} {_} x y z => do (← x).write (← y) (← z))
 
-theorem OpT3.eval_eq_evalM (g : State C []) {a b c s : SrtT} (o : OpT3 C a b c s) :
+theorem Op3.eval_eq_evalM (g : State C []) {a b c s : Srt} (o : Op3 C a b c s) :
     o.eval g = o.evalM g := by
   cases o <;> rfl
 
 
-/-! ## The bridge: the typed evaluation erased -/
-
-/-- A halt of the untyped evaluation, of any kind (`Calculus/RewritePast.lean`'s
-`Srt.Halts`, which sits above this module; one goes at W9.8.5). -/
-def Srt.IsHalt : (s : Srt) → s.Ev → Prop
-  | .val, r => ∃ h, r = .error h
-  | .path, r => ∃ h, r = .error h
-  | .st, r => ∃ h, r = .error h
-  | .sv, r => ∃ h, r = .error h
-  | .ident, r => ∃ h, r = .error h
-  | .addr, r => ∃ h, r = .error h
-  | .mem, r => ∃ h, r = .error h
-  | .mv, r => ∃ h, r = .error h
-
-/-- A typed value as the untyped evaluation returns it, over the erased
-global part: a storage or a memory is the global part with it. -/
-def SrtT.okE (g : State C []) : (s : SrtT) → s.Den C g.H → s.erase.Ev
-  | .val _, v => .ok (PrimTy.erase v)
-  | .path _, r => .ok (SRef.erase r)
-  | .st, w => .ok (Storage.into g.globE w)
-  | .sv _, v => .ok (SVal.erase v)
-  | .ident _, n => .ok n
-  | .addr _, a => .ok (MAddrT.erase a)
-  | .mem, m => .ok (Heap.into g.globE m.heap)
-  | .mv T, v => .ok (MvT.erase T v)
-  | .sts _, w => .ok (Storage.into g.globE w)
-  | .spath _ _, r => .ok (SRef.erase r)
-
-/-- The untyped evaluation `r` agrees with the typed `x`: `x`'s value erased,
-or some halt where `x` is `none`. -/
-def SrtT.Agree (g : State C []) (s : SrtT) : Option (s.Den C g.H) → s.erase.Ev → Prop
-  | some v, r => r = s.okE g v
-  | none, r => s.erase.IsHalt r
-
-/-- Where `OpT1.eval` is exact: `net(a)` an `int`. -/
-def OpT1.Exact (g : State C []) {a s : SrtT} : OpT1 C a s → a.Den C g.H → Prop
-  | .net, n => PrimTy.int.inRange ((lookupBy n.1 g.net).getD 0) = true
-  | _, _ => True
-
-/-- Where `OpT2.eval` is exact: an identity read has its type, a push room. -/
-def OpT2.Exact (g : State C []) {a b s : SrtT} : OpT2 C a b s → a.Den C g.H → b.Den C g.H → Prop
-  | .read, m, ad => MAddrT.Ok (Grown.H' m) ad
-  | @OpT2.mlen _ E, m, id => IdOk (Grown.H' m) (.array E) id
-  | @OpT2.copyMem _ R, m, id => IdOk (Grown.H' m) R id
-  | .iread, m, ad => MAddrT.Ok (Grown.H' m) ad
-  | .pushSlot, st, r => Storage.full st r = false
-  | .extend, st, r => Storage.full st r = false
-  | _, _, _ => True
-
-/-- Where `OpT3.eval` is exact: a push has room, a write's identities their types. -/
-def OpT3.Exact (g : State C []) {a b c s : SrtT} :
-    OpT3 C a b c s → a.Den C g.H → b.Den C g.H → c.Den C g.H → Prop
-  | .push, st, r, _ => Storage.full st r = false
-  | @OpT3.write _ T, m, ad, v => MAddrT.Ok (Grown.H' m) ad ∧ MvT.Ok (Grown.H' m) T v
-  | _, _, _, _ => True
-
-/-- **The bridge for constants**: exact. -/
-theorem OpT0.eval_agree (g : State C []) {s : SrtT} (o : OpT0 C s) :
-    SrtT.Agree g s (o.eval g) (Op0.eval g.globE o.erase) := by
-  rw [OpT0.eval_eq_evalM]
-  cases o with
-  | env k => cases k <;> rfl
-  | mtSt =>
-    simp only [OpT0.evalM, SrtT.Agree, SrtT.okE, Storage.into, Storage.init_erase,
-      Contract.initStorage, OpT0.erase, Op0.eval]
-    rfl
-  | _ => rfl
-
-
-/-- `select(s, r)` on the erasure: the struct at `r`, its members erased. -/
-theorem Storage.findStorage_selectT {C : Contract} {s r : Name} (σ : Semantics.State)
-    (st : Storage C) (hs : σ.storage = st.erase) (h : C.rootType r = some (.ref (.struct s))) :
-    σ.findStorage r [] = .ok (.struct (SFields.erase (Storage.selectT st h))) := by
-  simp only [Semantics.State.findStorage, hs, Storage.erase, SFields.lookupBy_erase st h,
-    Storage.selectT]
-  generalize st.get h = w
-  cases w
-  simp only [SVal.erase_struct, Semantics.SVal.find]
-  rfl
-
-section Bridge
-
-variable (g : State C [])
-
-theorem SrtT.agree_val {p : PrimTy} (x : Option p.Denote) :
-    SrtT.Agree g (.val p) x (toRes PrimTy.erase x) := by
-  cases x
-  · exact ⟨.revert, rfl⟩
-  · rfl
-
-theorem SrtT.agree_path {T : Ty} (x : Option (SRef C T)) :
-    SrtT.Agree g (.path T) x (toRes SRef.erase x) := by
-  cases x
-  · exact ⟨.revert, rfl⟩
-  · rfl
-
-theorem SrtT.agree_st (x : Option (Storage C)) :
-    SrtT.Agree g .st x (toRes (Storage.into g.globE) x) := by
-  cases x
-  · exact ⟨.revert, rfl⟩
-  · rfl
-
-theorem SrtT.agree_sts {s : Name} (x : Option (Storage (Contract.ofStruct s))) :
-    SrtT.Agree g (.sts s) x (toRes (Storage.into g.globE) x) := by
-  cases x
-  · exact ⟨.revert, rfl⟩
-  · rfl
-
-theorem SrtT.agree_sv {T : Ty} (x : Option (SVal T)) :
-    SrtT.Agree g (.sv T) x (toRes SVal.erase x) := by
-  cases x
-  · exact ⟨.revert, rfl⟩
-  · rfl
-
-/-- **The bridge for unary symbols**: exact where `OpT1.Exact` holds. -/
-theorem OpT1.eval_agree {a s : SrtT} (o : OpT1 C a s) {x : Option (a.Den C g.H)}
-    {rx : a.erase.Ev} (hx : SrtT.Agree g a x rx) (he : ∀ v, x = some v → o.Exact g v) :
-    SrtT.Agree g s (o.eval g x) (Op1.eval g.globE o.erase rx) := by
-  rw [OpT1.eval_eq_evalM]
-  cases x with
-  | none =>
-    cases o <;> (obtain ⟨h, rfl⟩ := hx; exact ⟨h, rfl⟩)
-  | some v =>
-    have he := he v rfl
-    cases o with
-    | unop op h =>
-      subst hx
-      show SrtT.Agree g (.val _) (op.evalT v)
-        (do unopCheck op _ (← Semantics.applyUnOp op (PrimTy.erase v)) : Res Value)
-      rw [UnOp.evalT_erase op h v]
-      exact SrtT.agree_val g _
-    | net =>
-      subst hx
-      simp only [OpT1.Exact] at he
-      simp only [OpT1.evalM, Option.bind_some, PrimTy.ofInt?, PrimTy.ofValue?, dif_pos he]
-      rfl
-    | delValue => subst hx; cases ‹PrimTy› <;> rfl
-    | field h =>
-      subst hx
-      show Except.ok _ = Except.ok (SRef.erase (v.field h))
-      simp only [SRef.erase, SRef.field, SRef.append, Path.erase_append]
-      rfl
-    | next =>
-      subst hx
-      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.bind_some, bind,
-        Except.bind, SRef.erase, Storage.findStorage_erase (σ := g.globE) (st := g.storage) rfl,
-        Storage.nextT]
-      cases g.storage.find v with
-      | none => exact ⟨.revert, rfl⟩
-      | some w =>
-        cases w with
-        | array e sh h =>
-          simp only [toRes, Option.map_some, SVal.erase_array, SVec.length_erase, SRef.index,
-            SRef.append, SVal.view_array, SrtT.Agree, SrtT.okE, SRef.erase, Path.erase_append,
-            Path.erase_index]
-          rfl
-    | sval =>
-      subst hx
-      show Except.ok _ = Except.ok (SVal.erase (SVal.prim v))
-      rw [SVal.erase_prim]
-      cases ‹PrimTy› <;> rfl
-    | newArr h =>
-      subst hx
-      show Except.ok _ = Except.ok (SVal.erase (newArrT _ v h))
-      rw [newArrT_erase]
-    | alloc R h =>
-      subst hx
-      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.map_some, bind, Except.bind,
-        Heap.allocDefault_erase (σ := Heap.into g.globE v.heap) (hp := v.heap) rfl rfl R h]
-      rfl
-    | mfield h => subst hx; rfl
-    | addM R h =>
-      subst hx
-      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.map_some, bind, Except.bind,
-        Heap.allocDefault_erase (σ := Heap.into g.globE v.heap) (hp := v.heap) rfl rfl R h]
-      rfl
-    | mval => subst hx; cases ‹PrimTy› <;> rfl
-    | ref => subst hx; rfl
-    | wt =>
-      subst hx
-      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.bind_some, Storage.wtT,
-        bind, Except.bind, Storage.into]
-      split
-      · rfl
-      · exact ⟨.undef, rfl⟩
-    | select r h =>
-      subst hx
-      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.map_some, bind, Except.bind,
-        Storage.findStorage_selectT (Storage.into g.globE v) v rfl h]
-      rfl
-    | selectIn h =>
-      subst hx
-      simp only [OpT1.evalM, OpT1.erase, Op1.eval, SrtT.okE, Option.map_some, bind, Except.bind,
-        Storage.findStorage_selectT (C := Contract.ofStruct _) (Storage.into g.globE v) v rfl h]
-      rfl
-    | fieldIn h =>
-      subst hx
-      show Except.ok _ = Except.ok (SRef.erase (v.field h))
-      simp only [SRef.erase, SRef.field, SRef.append, Path.erase_append]
-      rfl
 
 
 theorem binopT_some (op : BinOp) {p : PrimTy} (a b : p.Denote) :
@@ -788,299 +462,10 @@ theorem binopT_some (op : BinOp) {p : PrimTy} (a b : p.Denote) :
   unfold binopT
   cases op <;> cases p <;> (try cases a) <;> rfl
 
-/-- `&&`/`||` with a halting right operand: the untyped one returns where the
-typed one does. -/
-theorem binopT_none_agree (op : BinOp) {p : PrimTy} (a : p.Denote) (h : Halt) :
-    SrtT.Agree g (.val (op.ret p)) (binopT op a none)
-      (evalBinop op p (PrimTy.erase a) (.error h)) := by
-  unfold binopT
-  cases op <;> cases p <;> (try cases a) <;> first | rfl | exact ⟨h, rfl⟩
-
-/-- `p[i]` checked on the erasure. -/
-theorem Storage.atT_erase {σ : Semantics.State} {st : Storage C} (hs : σ.storage = st.erase)
-    {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (r : SRef C (.ref R))
-    (i : k.keyTy.Denote) :
-    (do σ.checkIndex r.root r.path.erase (PrimTy.key i)
-        pure (r.root, r.path.erase ++ [Seg.at (PrimTy.key i)]) : Res (Name × List Seg)) =
-      toRes SRef.erase (st.atT it r i) := by
-  rw [Storage.checkIndex_erase hs r it]
-  unfold Storage.atT
-  cases st.checkIndex r it (PrimTy.key i) with
-  | none => rfl
-  | some u =>
-    simp only [toRes, bind, Except.bind, Option.bind_some, SRef.erase,
-      SRef.index, SRef.append, Path.erase_append, Path.erase_index]
-    rfl
-
-/-- A memory read on the erasure, its identity typed. -/
-theorem Grown.readT_erase {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) {σ : Semantics.State}
-    (hh : σ.heap = m.heap.erase) (ad : MAddrT T) (hok : ad.Ok m.H') :
-    readAddr σ ad.erase = toRes (MVal.erase T) (m.readT ad) := by
-  cases ad with
-  | field id h =>
-    simp only [MAddrT.Ok] at hok
-    simp only [Grown.readT, MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_of_ok hok,
-      Option.map_some, Option.bind_eq_bind, Option.bind_some, Heap.readAddr, readAddr,
-      MAddrT.erase]
-    exact Heap.readField_erase hh ⟨id, hok⟩ h
-  | index id a i =>
-    simp only [MAddrT.Ok] at hok
-    simp only [Grown.readT, MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_of_ok hok,
-      Option.map_some, Option.bind_eq_bind, Option.bind_some, Heap.readAddr, readAddr,
-      MAddrT.erase]
-    exact Heap.readIndex_erase hh ⟨id, hok⟩ a i
-
-/-- The binary symbols on two values, exact. -/
-theorem OpT2.agree_some {a b s : SrtT} (o : OpT2 C a b s) (u : a.Den C g.H) (v : b.Den C g.H)
-    (he : o.Exact g u v) :
-    SrtT.Agree g s (o.evalM g (some u) (some v)) (Op2.eval g.globE o.erase (a.okE g u) (b.okE g v)) := by
-  cases o with
-  | binop op h =>
-    simp only [OpT2.evalM, Option.bind_some, binopT_some]
-    show SrtT.Agree g (.val _) _ (evalBinop op _ (PrimTy.erase u) (.ok (PrimTy.erase v)))
-    rw [BinOp.evalT_erase op h u v]
-    exact SrtT.agree_val g _
-  | find | findIn =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.findStorage_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    cases u.find v with
-    | none => exact ⟨.revert, rfl⟩
-    | some w =>
-      cases w
-      simp only [toRes, Option.bind_some, SVal.erase_prim, SrtT.Agree, SrtT.okE, SVal.view_prim]
-      cases ‹PrimTy› <;> rfl
-  | len =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.arrayLen_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    exact SrtT.agree_val g _
-  | read =>
-    simp only [OpT2.Exact] at he
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, Grown.readT_erase u (σ := Heap.into g.globE u.heap) rfl v he]
-    cases u.readT v with
-    | none => exact ⟨.revert, rfl⟩
-    | some w => cases ‹PrimTy› <;> rfl
-  | mlen =>
-    simp only [OpT2.Exact] at he
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, HRef.ofId?_of_ok he]
-    have hl := Heap.memArrayLen_erase (σ := Heap.into g.globE u.heap) (hp := u.heap) rfl
-      (⟨v, he⟩ : HRef u.H' _) .dyn
-    rw [hl]
-    rfl
-  | «at» it =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase, PrimTy.asInt_erase_keyTy]
-    have ha := Storage.atT_erase (σ := g.globE) (st := g.storage) rfl it u v
-    simp only [bind, Except.bind] at ha
-    rw [ha]
-    exact SrtT.agree_path g _
-  | nextIn =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.findStorage_erase (σ := Storage.into g.globE u) (st := u) rfl, Storage.nextT]
-    cases u.find v with
-    | none => exact ⟨.revert, rfl⟩
-    | some w =>
-      cases w with
-      | array e sh h =>
-        simp only [toRes, Option.map_some, SVal.erase_array, SVec.length_erase, SRef.index,
-          SRef.append, SVal.view_array, SrtT.Agree, SrtT.okE, SRef.erase, Path.erase_append,
-          Path.erase_index]
-        rfl
-  | delAt | delAtIn =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase]
-    have hd := Storage.delete_erase (σ := Storage.into g.globE u) (st := u) rfl v
-    simp only [bind, Except.bind] at hd
-    rw [hd]
-    first | exact SrtT.agree_st g _ | exact SrtT.agree_sts g _
-  | pushSlot =>
-    simp only [OpT2.Exact] at he
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase]
-    rw [Storage.pushAt_erase (σ := Storage.into g.globE u) (st := u) rfl v pure some
-      (fun _ => rfl) (.inl he)]
-    exact SrtT.agree_st g _
-  | pop =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.popAt_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    exact SrtT.agree_st g _
-  | shrink =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.popAt_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    exact SrtT.agree_st g _
-  | extend =>
-    simp only [OpT2.Exact] at he
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.pushPlaceAt_erase (σ := Storage.into g.globE u) (st := u) rfl v he]
-    cases u.pushPlace v with
-    | none => exact ⟨.revert, rfl⟩
-    | some w => rfl
-  | sfind | sfindIn =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, SRef.erase,
-      Storage.findStorage_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    exact SrtT.agree_sv g _
-  | copyMem =>
-    simp only [OpT2.Exact] at he
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, HRef.ofId?_of_ok he]
-    rw [show Semantics.MVal.ref v = MVal.erase (.ref _) (⟨v, he⟩ : HRef u.H' _) from rfl,
-      MVal.copyMem_erase (σ := Heap.into g.globE u.heap) (hp := u.heap) rfl]
-    rfl
-  | iread =>
-    simp only [OpT2.Exact] at he
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind, Grown.readT_erase u (σ := Heap.into g.globE u.heap) rfl v he]
-    cases u.readT v with
-    | none => exact ⟨.revert, rfl⟩
-    | some w => rfl
-  | copy h =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind,
-      SVal.copyStToM_erase v h u.heap (Heap.into g.globE u.heap) rfl rfl]
-    rfl
-  | mat a => rfl
-  | copySt h =>
-    simp only [OpT2.evalM, OpT2.erase, Op2.eval, SrtT.okE, Option.bind_some,
-      bind, Except.bind,
-      SVal.copyStToM_erase v h u.heap (Heap.into g.globE u.heap) rfl rfl]
-    rfl
-
-/-- **The bridge for binary symbols**: exact where `OpT2.Exact` holds. -/
-theorem OpT2.eval_agree {a b s : SrtT} (o : OpT2 C a b s) {x : Option (a.Den C g.H)}
-    {y : Option (b.Den C g.H)} {rx : a.erase.Ev} {ry : b.erase.Ev}
-    (hx : SrtT.Agree g a x rx) (hy : SrtT.Agree g b y ry)
-    (he : ∀ u v, x = some u → y = some v → o.Exact g u v) :
-    SrtT.Agree g s (o.eval g x y) (Op2.eval g.globE o.erase rx ry) := by
-  rw [OpT2.eval_eq_evalM]
-  cases o <;> cases x <;> cases y <;>
-    first
-    | (obtain ⟨h, rfl⟩ := hx; obtain ⟨h', rfl⟩ := hy; first | exact ⟨h, rfl⟩ | exact ⟨h', rfl⟩)
-    | (obtain ⟨h, rfl⟩ := hx; subst hy; exact ⟨h, rfl⟩)
-    | (subst hx; obtain ⟨h', rfl⟩ := hy; exact ⟨h', rfl⟩)
-    | (subst hx; subst hy; exact OpT2.agree_some g _ _ _ (he _ _ rfl rfl))
-    | (subst hx; obtain ⟨h', rfl⟩ := hy; exact binopT_none_agree g _ _ h')
-
-
-/-- A push whose element halts halts. -/
-theorem pushAt_error (σ : Semantics.State) (E : Ty) (r : Name) (segs : List Seg) (h : Halt) :
-    ∃ h', pushAt σ E r segs (fun _ => .error h) = .error h' := by
-  unfold pushAt
-  cases σ.findStorage r segs with
-  | error h' => exact ⟨h', rfl⟩
-  | ok d =>
-    cases d with
-    | array elems sh fx => exact ⟨h, rfl⟩
-    | _ => exact ⟨.undef, rfl⟩
-
-theorem MvT.toMVal_ok {H : HTy} : (T : Ty) → (v : MvT T) → MvT.Ok H T v →
-    ∃ v' : MVal H T, MvT.toMVal H T v = some v' ∧ MvT.erase T v = MVal.erase T v'
-  | .prim _, v, _ => ⟨v, rfl, rfl⟩
-  | .ref _, v, hv => ⟨⟨v, hv⟩, HRef.ofId?_of_ok hv, rfl⟩
-
-/-- A memory write on the erasure, its identities typed. -/
-theorem Grown.writeT_erase {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (σ : Semantics.State)
-    (ad : MAddrT T) (v : MvT T) (hok : ad.Ok m.H') (hv : MvT.Ok m.H' T v) :
-    writeAddr (Heap.into σ m.heap) (MvT.erase T v) ad.erase =
-      toRes (fun m' : Grown H (fun _ => Unit) => Heap.into σ m'.heap) (m.writeT ad v) := by
-  obtain ⟨v', htv, hev⟩ := MvT.toMVal_ok T v hv
-  rw [hev]
-  cases ad with
-  | field id h =>
-    simp only [MAddrT.Ok] at hok
-    simp only [Grown.writeT, MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_of_ok hok,
-      Option.map_some, Option.bind_eq_bind, Option.bind_some, htv, Heap.writeAddr, writeAddr,
-      MAddrT.erase]
-    rw [Heap.memWriteField_erase (σ := Heap.into σ m.heap) rfl ⟨id, hok⟩ h v']
-    rfl
-  | index id a i =>
-    simp only [MAddrT.Ok] at hok
-    simp only [Grown.writeT, MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_of_ok hok,
-      Option.map_some, Option.bind_eq_bind, Option.bind_some, htv, Heap.writeAddr, writeAddr,
-      MAddrT.erase]
-    rw [Heap.memWriteIndex_erase (σ := Heap.into σ m.heap) rfl ⟨id, hok⟩ a i v']
-    cases m.heap.setIndex ⟨id, hok⟩ a i v' <;> rfl
-
-/-- The ternary symbols on three values, exact. -/
-theorem OpT3.agree_some {a b c s : SrtT} (o : OpT3 C a b c s) (u : a.Den C g.H)
-    (v : b.Den C g.H) (w : c.Den C g.H) (he : o.Exact g u v w) :
-    SrtT.Agree g s (o.evalM g (some u) (some v) (some w))
-      (Op3.eval g.globE o.erase (a.okE g u) (b.okE g v) (c.okE g w)) := by
-  cases o with
-  | ite => cases u <;> rfl
-  | save | saveIn =>
-    simp only [OpT3.evalM, OpT3.erase, Op3.eval, SrtT.okE, Option.bind_some, bind, Except.bind,
-      SRef.erase, Storage.writeStorage_erase (σ := Storage.into g.globE u) (st := u) rfl]
-    first | exact SrtT.agree_st g _ | exact SrtT.agree_sts g _
-  | push =>
-    simp only [OpT3.Exact] at he
-    simp only [OpT3.evalM, OpT3.erase, Op3.eval, SrtT.okE, Option.bind_some, bind, Except.bind,
-      SRef.erase, Option.map_some]
-    rw [pushAt_const _ _ ‹Ty›,
-      Storage.pushAt_erase (σ := Storage.into g.globE u) (st := u) rfl v _ (fun _ => some w.strip)
-        (fun _ => by simp only [toRes, SVal.strip_erase]; rfl) (.inl he)]
-    exact SrtT.agree_st g _
-  | atIn it =>
-    simp only [OpT3.evalM, OpT3.erase, Op3.eval, SrtT.okE, Option.bind_some, bind, Except.bind,
-      SRef.erase, PrimTy.asInt_erase_keyTy]
-    have ha := Storage.atT_erase (σ := Storage.into g.globE u) (st := u) rfl it v w
-    simp only [bind, Except.bind] at ha
-    rw [ha]
-    exact SrtT.agree_path g _
-  | write =>
-    simp only [OpT3.Exact] at he
-    simp only [OpT3.evalM, OpT3.erase, Op3.eval, SrtT.okE, Option.bind_some, bind, Except.bind,
-      Grown.writeT_erase u g.globE v w he.1 he.2]
-    cases u.writeT v w with
-    | none => exact ⟨.revert, rfl⟩
-    | some m' => rfl
-
-theorem OpT3.ite_agree {p : PrimTy} (cv : Bool) {y z : Option p.Denote} {ry rz : Res Value}
-    (hy : SrtT.Agree g (.val p) y ry) (hz : SrtT.Agree g (.val p) z rz) :
-    SrtT.Agree g (.val p) (OpT3.evalM g .ite (some cv) y z)
-      (Op3.eval g.globE .ite (.ok (.bool cv)) ry rz) := by
-  cases cv
-  · exact hz
-  · exact hy
-
 theorem Storage.push_none {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     st.push r (fun _ => none) = none := by
   unfold Storage.push
   cases st.find r <;> rfl
-
-theorem OpT3.push_none_agree {E : Ty} (u : Storage C) (v : SRef C (.ref (.array E))) (h : Halt) :
-    SrtT.Agree g .st (OpT3.evalM g .push (some u) (some v) none)
-      (Op3.eval g.globE .push (SrtT.okE g .st u) (SrtT.okE g (.path _) v) (.error h)) := by
-  simp only [OpT3.evalM, Option.bind_eq_bind, Option.bind_some, Option.map_none,
-    Storage.push_none]
-  exact pushAt_error _ _ _ _ h
-
-/-- **The bridge for ternary symbols**: exact where `OpT3.Exact` holds. -/
-theorem OpT3.eval_agree {a b c s : SrtT} (o : OpT3 C a b c s) {x : Option (a.Den C g.H)}
-    {y : Option (b.Den C g.H)} {z : Option (c.Den C g.H)} {rx : a.erase.Ev} {ry : b.erase.Ev}
-    {rz : c.erase.Ev} (hx : SrtT.Agree g a x rx) (hy : SrtT.Agree g b y ry)
-    (hz : SrtT.Agree g c z rz)
-    (he : ∀ u v w, x = some u → y = some v → z = some w → o.Exact g u v w) :
-    SrtT.Agree g s (o.eval g x y z) (Op3.eval g.globE o.erase rx ry rz) := by
-  rw [OpT3.eval_eq_evalM]
-  cases o <;> cases x <;> cases y <;> cases z <;>
-    first
-    | (subst hx; subst hy; subst hz; exact OpT3.agree_some g _ _ _ _ (he _ _ _ rfl rfl rfl))
-    | (subst hx; exact OpT3.ite_agree g _ hy hz)
-    | (subst hx; subst hy; obtain ⟨h₃, rfl⟩ := hz; exact OpT3.push_none_agree g _ _ h₃)
-    | ((try obtain ⟨h₁, rfl⟩ := hx); (try obtain ⟨h₂, rfl⟩ := hy); (try obtain ⟨h₃, rfl⟩ := hz)
-       (try subst hx); (try subst hy); (try subst hz)
-       first | exact ⟨h₁, rfl⟩ | exact ⟨h₂, rfl⟩ | exact ⟨h₃, rfl⟩)
-
-end Bridge
-
 
 /-! ## The Theory's abstraction
 

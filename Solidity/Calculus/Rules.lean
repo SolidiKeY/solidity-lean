@@ -28,7 +28,7 @@ rule `Stmt.step` fires, so soundness comes from `Stmt.Sound`.
 
 namespace Solidity
 
-open Solidity (Srt Op0 Op1 Op2 Op3 IntOp Modality)
+open Solidity (IntOp Modality)
 
 section Prelude
 
@@ -37,69 +37,155 @@ variable {C : Contract} {Γ : Ctx}
 /-! ## The term symbols the rule lines write
 
 The term symbols by their KeY sort and name (`Term.find`, `STerm.save`, …),
-over `Update.lean`'s signature, at a context: the names the rule lines
-write, turned into these under `Tms` (`RuleSyntax.coreNames`). -/
+over the typed signature (`Signature.lean`), at a context: the names the
+rule lines write, turned into these under `Tms` (`RuleSyntax.coreNames`).
+A symbol takes the proofs its typed constructor carries: a root's, a
+member's (`hgsp`, `hfld`: the name's own, as the program's `Loc` takes
+them), an index's `IndexTy`/`ArrTy` (`it`, `ak`, `mk`), an operator's
+(`Val.binop`'s `hop`/`hq`, `⊕=`'s `hop`/`hp`); a proof the line does not
+name (that a type is free of mappings, a literal in range) is found by
+`tm_side`. -/
+
+/-- An element of an array free of mappings is free of them. -/
+theorem ArrTy.mapFree_elem {R : RefTy} {E : Ty} (a : ArrTy R E) (h : (Ty.ref R).mapFree = true) :
+    E.mapFree = true := by
+  cases a <;> exact h
+
+/-- The proofs a term symbol takes that a rule line does not name: a
+literal in range, a type free of mappings (a fresh array's, a member's or an
+element's of a memory object, a memory local's).  A hypothesis is taken
+whole last: taken first, it could fix a schema variable's type (an array's
+element type to the array's). -/
+syntax "tm_side" : tactic
+macro_rules
+  | `(tactic| tm_side) => `(tactic| first
+      | rfl
+      | exact RefTy.mapFree_of_newArrOk ‹_›
+      | (apply Ty.mapFree_field <;> assumption)
+      | (apply ArrTy.mapFree_elem <;> assumption)
+      | assumption
+      | fail "a term symbol's side proof: none in scope")
 
 namespace Tms
 
-@[reducible] def Term.lit (v : Semantics.Value) : Tm C Γ .val := .app0 (.lit v)
-@[reducible] def Term.pv {p : PrimTy} (i : Idx Γ (.val p)) : Tm C Γ .val := .pvV i
-@[reducible] def Term.binop (op : BinOp) (p : PrimTy) (a b : Tm C Γ .val) : Tm C Γ .val :=
-  .app2 (.binop op p) a b
-@[reducible] def Term.unop (op : UnOp) (p : PrimTy) (a : Tm C Γ .val) : Tm C Γ .val :=
-  .app1 (.unop op p) rfl a
-@[reducible] def Term.find (s : Tm C Γ .st) (p : Tm C Γ .path) : Tm C Γ .val := .app2 .find s p
-@[reducible] def Term.len (s : Tm C Γ .st) (p : Tm C Γ .path) : Tm C Γ .val := .app2 .len s p
-@[reducible] def Term.read (m : Tm C Γ .mem) (a : Tm C Γ .addr) : Tm C Γ .val := .app2 .read m a
-@[reducible] def Term.mlen (m : Tm C Γ .mem) (i : Tm C Γ .ident) : Tm C Γ .val := .app2 .mlen m i
-@[reducible] def Term.env (k : EnvKey) : Tm C Γ .val := .app0 (.env k)
-@[reducible] def Term.net (a : Tm C Γ .val) : Tm C Γ .val := .app1 .net rfl a
-@[reducible] def Term.delValue (t : Tm C Γ .val) : Tm C Γ .val := .app1 .delValue rfl t
-@[reducible] def Term.bumped (op : IncDec) (p : PrimTy) (t : Tm C Γ .val) : Tm C Γ .val :=
-  Tm.bumped op p t
+@[reducible] def Term.lit {p : PrimTy} (v : p.Denote) : Tm C Γ (.val p) := .app0 (.lit v)
+@[reducible] def Term.litB (b : Bool) : Tm C Γ (.val .bool) := .app0 (.lit (p := .bool) b)
+/-- A numeral, a `uint`. -/
+@[reducible] def Term.nat (n : Nat) (h : PrimTy.uint.inRange n = true := by tm_side) :
+    Tm C Γ (.val .uint) :=
+  .app0 (.lit (p := .uint) ⟨n, h⟩)
+/-- `defVal(T)`. -/
+@[reducible] def Term.dflt (p : PrimTy) : Tm C Γ (.val p) := .app0 (.lit (PrimTy.dflt p))
+/-- `1` at a numeric type, the step of `++`/`--`. -/
+@[reducible] def Term.one (p : PrimTy) (hp : p.isNumeric = true) : Tm C Γ (.val p) := Tm.one p hp
+@[reducible] def Term.pv {p : PrimTy} (i : Idx Γ (.val p)) : Tm C Γ (.val p) := .pvV i
+/-- `a ⊕ b` at a fixed operator and type. -/
+@[reducible] def Term.binop (op : BinOp) (p : PrimTy) (a b : Tm C Γ (.val p))
+    (h : op.accepts p = true := by tm_side) : Tm C Γ (.val (op.ret p)) :=
+  .app2 (.binop op h) a b
+/-- `a ⊕ b` of an operator schema variable, as `Val.binop op hop hq` lowers. -/
+@[reducible] def Term.binopS {p q : PrimTy} (op : BinOp) (hop : op.accepts p = true)
+    (hq : op.ret p = q) (a b : Tm C Γ (.val p)) : Tm C Γ (.val q) :=
+  Tm.castV hq (.app2 (.binop op hop) a b)
+/-- `l ⊕ se` in `l ⊕= se`, as `OpLoc.op` builds it. -/
+@[reducible] def Term.binopC {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (a b : Tm C Γ (.val p)) : Tm C Γ (.val p) :=
+  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)
+/-- `t ± 1`, an increment's or a decrement's arithmetic. -/
+@[reducible] def Term.binopI {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+    (a b : Tm C Γ (.val p)) : Tm C Γ (.val p) :=
+  Term.binopC op.binOp (IncDec.binOp_compound op) hp a b
+/-- `⊖a` of an operator schema variable, as `Val.unop op hop hq` lowers. -/
+@[reducible] def Term.unopS {p q : PrimTy} (op : UnOp) (hop : op.accepts p = true)
+    (hq : op.ret p = q) (a : Tm C Γ (.val p)) : Tm C Γ (.val q) :=
+  Tm.castV hq (.app1 (.unop op hop) a)
+@[reducible] def Term.find {p : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim p))) :
+    Tm C Γ (.val p) := .app2 .find s q
+@[reducible] def Term.len {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    Tm C Γ (.val .uint) := .app2 .len s q
+/-- `sp.length` read into a local of type `p`, as `Val.len … hlen` lowers. -/
+@[reducible] def Term.lenH {p : PrimTy} {E : Ty} (hp : p = .uint) (s : Tm C Γ .st)
+    (q : Tm C Γ (.path (.ref (.array E)))) : Tm C Γ (.val p) :=
+  Tm.castV hp.symm (.app2 .len s q)
+/-- `mv.length` read into a local of type `p`, as `Val.mlen … hlen` lowers. -/
+@[reducible] def Term.mlenH {p : PrimTy} {E : Ty} (hp : p = .uint) (m : Tm C Γ .mem)
+    (i : Tm C Γ (.ident (.array E))) : Tm C Γ (.val p) :=
+  Tm.castV hp.symm (.app2 .mlen m i)
+@[reducible] def Term.read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))) :
+    Tm C Γ (.val p) := .app2 .read m a
+@[reducible] def Term.mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
+    Tm C Γ (.val .uint) := .app2 .mlen m i
+@[reducible] def Term.env (k : EnvKey) : Tm C Γ (.val .uint) := .app0 (.env k)
+@[reducible] def Term.net (a : Tm C Γ (.val .uint)) : Tm C Γ (.val .int) := .app1 .net a
+@[reducible] def Term.delValue {p : PrimTy} (t : Tm C Γ (.val p)) : Tm C Γ (.val p) :=
+  .app1 .delValue t
+@[reducible] def Term.bumped (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true)
+    (t : Tm C Γ (.val p)) : Tm C Γ (.val p) :=
+  Tm.bumped op hp t
 
-@[reducible] def PTerm.root (r : Name) : Tm C Γ .path := .app0 (.root r)
-@[reducible] def PTerm.pv {R : RefTy} (i : Idx Γ (.alias R)) : Tm C Γ .path := .pvP i
-@[reducible] def PTerm.field (p : Tm C Γ .path) (f : Name) : Tm C Γ .path := .app1 (.field f) rfl p
-@[reducible] def PTerm.at (p : Tm C Γ .path) (i : Tm C Γ .val) : Tm C Γ .path := .app2 .at p i
-@[reducible] def PTerm.next (p : Tm C Γ .path) : Tm C Γ .path := .app1 .next rfl p
+@[reducible] def PTerm.root (r : Name) {T : Ty} (h : C.rootType r = some T) : Tm C Γ (.path T) :=
+  .app0 (.root r h)
+@[reducible] def PTerm.pv {R : RefTy} (i : Idx Γ (.alias R)) : Tm C Γ (.path (.ref R)) := .pvP i
+@[reducible] def PTerm.field {s : Name} {T : Ty} (q : Tm C Γ (.path (.ref (.struct s)))) (f : Name)
+    (h : C.fieldType s f = some T) : Tm C Γ (.path T) := .app1 (.field h) q
+@[reducible] def PTerm.at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k.keyTy)) : Tm C Γ (.path V) :=
+  .app2 (.at it) q i
+@[reducible] def PTerm.next {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) : Tm C Γ (.path E) :=
+  .app1 .next q
 
 @[reducible] def STerm.storage : Tm C Γ .st := .app0 .storage
-@[reducible] def STerm.save (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) : Tm C Γ .st :=
-  .app3 .save s p v
-@[reducible] def STerm.delAt (s : Tm C Γ .st) (p : Tm C Γ .path) : Tm C Γ .st := .app2 .delAt s p
-@[reducible] def STerm.push (s : Tm C Γ .st) (p : Tm C Γ .path) (v : Tm C Γ .sv) : Tm C Γ .st :=
-  .app3 .push s p v
-@[reducible] def STerm.pushSlot (s : Tm C Γ .st) (p : Tm C Γ .path) (E : Ty) : Tm C Γ .st :=
-  .app2 (.pushSlot E) s p
-@[reducible] def STerm.pop (s : Tm C Γ .st) (p : Tm C Γ .path) : Tm C Γ .st := .app2 .pop s p
-@[reducible] def STerm.shrink (s : Tm C Γ .st) (p : Tm C Γ .path) : Tm C Γ .st := .app2 .shrink s p
-@[reducible] def STerm.extend (s : Tm C Γ .st) (p : Tm C Γ .path) (E : Ty) : Tm C Γ .st :=
-  .app2 (.extend E) s p
-@[reducible] def STerm.select (s : Tm C Γ .st) (r : Name) : Tm C Γ .st := .app1 (.select r) rfl s
+@[reducible] def STerm.save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
+    Tm C Γ .st := .app3 .save s q v
+@[reducible] def STerm.delAt {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) : Tm C Γ .st :=
+  .app2 .delAt s q
+@[reducible] def STerm.push {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E))))
+    (v : Tm C Γ (.sv E)) : Tm C Γ .st := .app3 .push s q v
+@[reducible] def STerm.pushSlot (s : Tm C Γ .st) {E : Ty} (q : Tm C Γ (.path (.ref (.array E))))
+    (E' : Ty) (_h : E' = E := by rfl) : Tm C Γ .st := .app2 .pushSlot s q
+@[reducible] def STerm.pop {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    Tm C Γ .st := .app2 .pop s q
+@[reducible] def STerm.shrink {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    Tm C Γ .st := .app2 .shrink s q
+@[reducible] def STerm.extend (s : Tm C Γ .st) {E : Ty} (q : Tm C Γ (.path (.ref (.array E))))
+    (E' : Ty) (_h : E' = E := by rfl) : Tm C Γ .st := .app2 .extend s q
+@[reducible] def STerm.select {sn : Name} (s : Tm C Γ .st) (r : Name)
+    (h : C.rootType r = some (.ref (.struct sn))) : Tm C Γ (.sts sn) := .app1 (.select r h) s
 
-@[reducible] def SValT.val (t : Tm C Γ .val) : Tm C Γ .sv := .app1 .sval rfl t
-@[reducible] def SValT.find (s : Tm C Γ .st) (p : Tm C Γ .path) : Tm C Γ .sv := .app2 .sfind s p
-@[reducible] def SValT.copyMem (m : Tm C Γ .mem) (i : Tm C Γ .ident) : Tm C Γ .sv :=
-  .app2 .copyMem m i
-@[reducible] def SValT.newArr (R : RefTy) (n : Tm C Γ .val) : Tm C Γ .sv := .app1 (.newArr R) rfl n
+@[reducible] def SValT.val {p : PrimTy} (t : Tm C Γ (.val p)) : Tm C Γ (.sv (.prim p)) :=
+  .app1 .sval t
+@[reducible] def SValT.find {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) : Tm C Γ (.sv T) :=
+  .app2 .sfind s q
+@[reducible] def SValT.copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
+    Tm C Γ (.sv (.ref R)) := .app2 .copyMem m i
+@[reducible] def SValT.newArr (R : RefTy) (n : Tm C Γ (.val .uint))
+    (h : R.newArrOk = true := by tm_side) : Tm C Γ (.sv (.ref R)) := .app1 (.newArr h) n
 
-@[reducible] def ITerm.pv {R : RefTy} (i : Idx Γ (.mem R)) : Tm C Γ .ident := .pvI i
-@[reducible] def ITerm.read (m : Tm C Γ .mem) (a : Tm C Γ .addr) : Tm C Γ .ident := .app2 .iread m a
-@[reducible] def ITerm.alloc (m : Tm C Γ .mem) (R : RefTy) : Tm C Γ .ident := .app1 (.alloc R) rfl m
-@[reducible] def ITerm.copy (m : Tm C Γ .mem) (v : Tm C Γ .sv) : Tm C Γ .ident := .app2 .copy m v
+@[reducible] def ITerm.pv {R : RefTy} (i : Idx Γ (.mem R)) : Tm C Γ (.ident R) := .pvI i
+@[reducible] def ITerm.read {R : RefTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.ref R))) :
+    Tm C Γ (.ident R) := .app2 .iread m a
+@[reducible] def ITerm.alloc (m : Tm C Γ .mem) (R : RefTy)
+    (h : (Ty.ref R).mapFree = true := by tm_side) : Tm C Γ (.ident R) := .app1 (.alloc R h) m
+@[reducible] def ITerm.copy {R : RefTy} (m : Tm C Γ .mem) (v : Tm C Γ (.sv (.ref R)))
+    (h : (Ty.ref R).mapFree = true := by tm_side) : Tm C Γ (.ident R) := .app2 (.copy h) m v
 
-@[reducible] def MAddr.field (i : Tm C Γ .ident) (f : Name) : Tm C Γ .addr := .app1 (.mfield f) rfl i
-@[reducible] def MAddr.at (i : Tm C Γ .ident) (k : Tm C Γ .val) : Tm C Γ .addr := .app2 .mat i k
+@[reducible] def MAddr.field {s : Name} {T : Ty} (i : Tm C Γ (.ident (.struct s))) (f : Name)
+    (h : C.fieldType s f = some T) : Tm C Γ (.addr T) := .app1 (.mfield h) i
+@[reducible] def MAddr.at {R : RefTy} {E : Ty} (a : ArrTy R E) (i : Tm C Γ (.ident R))
+    (k : Tm C Γ (.val .uint)) : Tm C Γ (.addr E) := .app2 (.mat a) i k
 
 @[reducible] def MTerm.memory : Tm C Γ .mem := .app0 .memory
-@[reducible] def MTerm.write (m : Tm C Γ .mem) (a : Tm C Γ .addr) (v : Tm C Γ .mv) : Tm C Γ .mem :=
-  .app3 .write m a v
-@[reducible] def MTerm.addM (m : Tm C Γ .mem) (R : RefTy) : Tm C Γ .mem := .app1 (.addM R) rfl m
-@[reducible] def MTerm.copySt (m : Tm C Γ .mem) (v : Tm C Γ .sv) : Tm C Γ .mem := .app2 .copySt m v
+@[reducible] def MTerm.write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C Γ (.mv T)) :
+    Tm C Γ .mem := .app3 .write m a v
+@[reducible] def MTerm.addM (m : Tm C Γ .mem) (R : RefTy)
+    (h : (Ty.ref R).mapFree = true := by tm_side) : Tm C Γ .mem := .app1 (.addM R h) m
+@[reducible] def MTerm.copySt {T : Ty} (m : Tm C Γ .mem) (v : Tm C Γ (.sv T))
+    (h : T.mapFree = true := by tm_side) : Tm C Γ .mem := .app2 (.copySt h) m v
 
-@[reducible] def MValT.val (t : Tm C Γ .val) : Tm C Γ .mv := .app1 .mval rfl t
-@[reducible] def MValT.ref (i : Tm C Γ .ident) : Tm C Γ .mv := .app1 .ref rfl i
+@[reducible] def MValT.val {p : PrimTy} (t : Tm C Γ (.val p)) : Tm C Γ (.mv (.prim p)) :=
+  .app1 .mval t
+@[reducible] def MValT.ref {R : RefTy} (i : Tm C Γ (.ident R)) : Tm C Γ (.mv (.ref R)) :=
+  .app1 .ref i
 
 end Tms
 

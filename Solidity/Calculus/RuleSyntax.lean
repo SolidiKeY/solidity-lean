@@ -1166,7 +1166,7 @@ def tposError (x : Lean.Syntax) (what : String) (pos : TPos) : MacroM α :=
 def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   let n := x.getId.toString
   if (n == "true" || n == "false") && pos == .val then
-    return ← `(Term.lit (.bool $(mkIdent (Name.mkSimple n))))
+    return ← `(Term.litB $(mkIdent (Name.mkSimple n)))
   if n == "storage" && pos == .storage then return ← `(STerm.storage)
   if n == "memory" && pos == .memory then return ← `(MTerm.memory)
   if n == "selfBalance" && pos == .val then return ← `(Term.env EnvKey.selfBalance)
@@ -1178,8 +1178,8 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   | .alias v, .path => `(PTerm.pv $v)
   | .mem v _, .ident => `(ITerm.pv $v)
   | .mem v _, .mvalue => `(MValT.ref (ITerm.pv $v))
-  | .root r _, .val => `(Term.find STerm.storage (PTerm.root $r))
-  | .root r _, .path => `(PTerm.root $r)
+  | .root r h, .val => `(Term.find STerm.storage (PTerm.root $r $h))
+  | .root r h, .path => `(PTerm.root $r $h)
   | .simple s, .val => `($(Lean.mkCIdent `Solidity.Simple.lower) $s)
   | .simple s, .svalue => `(SValT.val ($(Lean.mkCIdent `Solidity.Simple.lower) $s))
   | .simple s, .mvalue => `(MValT.val ($(Lean.mkCIdent `Solidity.Simple.lower) $s))
@@ -1192,17 +1192,24 @@ def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   | _, _ => tposError x s!"`{n}`" pos
 
 /-- `mv.f₁.….fₙ` at a term sort: the inner members are identities read. -/
-def memMember (pos : TPos) (stx : Lean.Syntax) : Lean.Term → List Ident → MacroM Lean.Term
+def memMember (core : Bool) (pos : TPos) (stx : Lean.Syntax) :
+    Lean.Term → List Ident → MacroM Lean.Term
   | b, [] => pure b
   | b, [f] =>
+    -- in a rule, `mv.length` at the local's type (`Val.mlen`'s `hlen`)
+    if f.getId.toString == "length" && pos == .val && core then
+      `(Term.mlenH $(schemaIdent "hlen") MTerm.memory $b) else
     if f.getId.toString == "length" && pos == .val then `(Term.mlen MTerm.memory $b) else
+    let h := proofIdent f f.getId.toString
     match pos with
-    | .addr => `(MAddr.field $b $f)
-    | .val => `(Term.read MTerm.memory (MAddr.field $b $f))
-    | .ident => `(ITerm.read MTerm.memory (MAddr.field $b $f))
-    | .mvalue => `(MValT.ref (ITerm.read MTerm.memory (MAddr.field $b $f)))
+    | .addr => `(MAddr.field $b $f $h)
+    | .val => `(Term.read MTerm.memory (MAddr.field $b $f $h))
+    | .ident => `(ITerm.read MTerm.memory (MAddr.field $b $f $h))
+    | .mvalue => `(MValT.ref (ITerm.read MTerm.memory (MAddr.field $b $f $h)))
     | _ => tposError stx "a memory member" pos
-  | b, f :: fs => do memMember pos stx (← `(ITerm.read MTerm.memory (MAddr.field $b $f))) fs
+  | b, f :: fs => do
+    let h := proofIdent f f.getId.toString
+    memMember core pos stx (← `(ITerm.read MTerm.memory (MAddr.field $b $f $h))) fs
 
 /-- `p.length`, however it was parsed, or KeY's `consr(p, size)`: the path `p`. -/
 def lengthBase? : TSyntax `dl_term → MacroM (Option (TSyntax `dl_term))
@@ -1215,6 +1222,19 @@ def lengthBase? : TSyntax `dl_term → MacroM (Option (TSyntax `dl_term))
     | _ => pure none
   | `(dl_term| $t:dl_term . $f:ident) => pure (if f.getId.toString == "length" then some t else none)
   | _ => pure none
+
+/-- How a storage receiver term is indexed, as `indexTyOf` reads a program
+expression: `map[ie]` by key, `arr[ie]` (and its kin) by position, anything
+else by the schema variable `it`. -/
+def indexTyOfTerm : TSyntax `dl_term → MacroM Lean.Term
+  | `(dl_term| $x:ident) =>
+    match nameParts x.getId with
+    | [n] => match stemOf n with
+      | "map" => `(IndexTy.map)
+      | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr $(schemaIdent "ak"))
+      | _ => pure (schemaIdent "it")
+    | _ => pure (schemaIdent "it")
+  | _ => pure (schemaIdent "it")
 
 mutual
 
@@ -1260,9 +1280,9 @@ partial def schemaKey (Γ : Scope) (i : TSyntax `dl_term) : MacroM Lean.Term := 
 partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM Lean.Term
   | stx@`(dl_term| $n:num) =>
     match pos with
-    | .val => `(Term.lit (.int $n))
-    | .svalue => `(SValT.val (Term.lit (.int $n)))
-    | .mvalue => `(MValT.val (Term.lit (.int $n)))
+    | .val => `(Term.nat $n)
+    | .svalue => `(SValT.val (Term.nat $n))
+    | .mvalue => `(MValT.val (Term.nat $n))
     | _ => tposError stx "a number" pos
   | stx@`(dl_term| $x:ident) => do
     match nameParts x.getId with
@@ -1273,17 +1293,19 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       let hx := partIdent x h
       match headOf Γ hx with
       | .mem .. | .mpath _ =>
-        memMember pos stx (← headTerm Γ .ident hx) (fs.map (partIdent x))
+        memMember Γ.isCore pos stx (← headTerm Γ .ident hx) (fs.map (partIdent x))
       | _ =>
         if fs.getLast? == some "length" then
           let p' ← (fs.dropLast).foldlM (init := ← headTerm Γ .path hx) fun acc f =>
-            `(PTerm.field $acc $(partIdent x f))
+            `(PTerm.field $acc $(partIdent x f) $(proofIdent x f))
           match pos with
-          | .val => `(Term.len STerm.storage $p')
+          | .val =>
+            if Γ.isCore then `(Term.lenH $(schemaIdent "hlen") STerm.storage $p')
+            else `(Term.len STerm.storage $p')
           | _ => tposError stx "a length" pos
         else
         let p ← fs.foldlM (init := ← headTerm Γ .path hx) fun acc f =>
-          `(PTerm.field $acc $(partIdent x f))
+          `(PTerm.field $acc $(partIdent x f) $(proofIdent x f))
         match pos with
         | .path => pure p
         | .val => `(Term.find STerm.storage $p)
@@ -1291,7 +1313,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | _ => tposError stx "a storage path" pos
   | stx@`(dl_term| $t:dl_term . $f:ident) => do
     let p ← (nameParts f.getId).foldlM (init := ← schemaTerm Γ .path t) fun acc c =>
-      `(PTerm.field $acc $(partIdent f c))
+      `(PTerm.field $acc $(partIdent f c) $(proofIdent f c))
     match pos with
     | .path => pure p
     | _ => tposError stx "a member" pos
@@ -1304,7 +1326,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | [] => false
       | _ => false
     if mem then
-      let a ← `(MAddr.at $(← schemaTerm Γ .ident t) $(← schemaTerm Γ .val i))
+      let a ← `(MAddr.at $(schemaIdent "mk") $(← schemaTerm Γ .ident t) $(← schemaTerm Γ .val i))
       match pos with
       | .addr => pure a
       | .val => `(Term.read MTerm.memory $a)
@@ -1319,21 +1341,28 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | `(dl_term| $b:ident), `(dl_term| $x:ident) => pure (b.getId == x.getId)
         | _, _ => pure false
       let p ← if pastEnd then `(PTerm.next $(← schemaTerm Γ .path t))
-        else `(PTerm.at $(← schemaTerm Γ .path t) $(← schemaKey Γ i))
+        else `(PTerm.at $(← indexTyOfTerm t) $(← schemaTerm Γ .path t) $(← schemaKey Γ i))
       match pos with
       | .path => pure p
       | .val => `(Term.find STerm.storage $p)
       | .svalue => `(SValT.find STerm.storage $p)
       | _ => tposError stx "an entry" pos
   | `(dl_term| $a:dl_term ⊕ $b:dl_term) => do
-    `(Term.binop $(schemaIdent "op") $(schemaIdent "p") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
-  | `(dl_term| ⊖ $a:dl_term) => do
-    `(Term.unop $(schemaIdent "op") $(schemaIdent "p") $(← schemaTerm Γ .val a))
-  | `(dl_term| $a:dl_term ± $b:dl_term) => do
-    `(Term.binop (IncDec.binOp $(schemaIdent "op")) $(schemaIdent "p")
+    -- the operator schema variable's proofs are `Val.binop`'s (`hop`, `hq`);
+    -- in a compound assignment `schemaTacletCore` turns them into `⊕=`'s
+    `(Term.binopS $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
         $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| ⊖ $a:dl_term) => do
+    `(Term.unopS $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
+        $(← schemaTerm Γ .val a))
+  | `(dl_term| $a:dl_term ± $b:dl_term) => do
+    -- the step of `++`/`--`, `1` at the target's type
+    let b ← match b with
+      | `(dl_term| 1) => `(Term.one $(schemaIdent "p") $(schemaIdent "hp"))
+      | _ => schemaTerm Γ .val b
+    `(Term.binopI $(schemaIdent "op") $(schemaIdent "hp") $(← schemaTerm Γ .val a) $b)
   | `(dl_term| $a:dl_term ⊕⊕) => do
-    `(Term.bumped $(schemaIdent "op") $(schemaIdent "p") $(← schemaTerm Γ .val a))
+    `(Term.bumped $(schemaIdent "op") $(schemaIdent "hp") $(← schemaTerm Γ .val a))
   | `(dl_term| $a:dl_term + $b:dl_term) => do
     `(Term.binop BinOp.add PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term - $b:dl_term) => do
@@ -1353,14 +1382,16 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     -- the member `f`, the element `at(k)`
     let maddr (i a : TSyntax `dl_term) : MacroM Lean.Term := do
       match a with
-      | `(dl_term| at($k)) => `(MAddr.at $(← schemaTerm Γ .ident i) $(← schemaTerm Γ .val k))
-      | `(dl_term| $g:ident) => `(MAddr.field $(← schemaTerm Γ .ident i) $g)
+      | `(dl_term| at($k)) =>
+        `(MAddr.at $(schemaIdent "mk") $(← schemaTerm Γ .ident i) $(← schemaTerm Γ .val k))
+      | `(dl_term| $g:ident) =>
+        `(MAddr.field $(← schemaTerm Γ .ident i) $g $(proofIdent g g.getId.toString))
       | _ => tposError a "a member `f` or an element `at(k)`" .addr
     match f.getId.toString, args, pos with
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
     | "select", #[s, r], .storage | "selectSt", #[s, r], .storage =>
       let `(dl_term| $r:ident) := r | tposError r "a member name" .storage
-      `(STerm.select $(← st s) $r)
+      `(STerm.select $(← st s) $r $(proofIdent r r.getId.toString))
     | "net", #[a], .val => `(Term.net $(← schemaTerm Γ .val a))
     | "selectSt", #[n, a], .val =>
       let `(dl_term| net) := n | tposError n "`net`" .val
@@ -1368,7 +1399,9 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       `(Term.net $(← schemaTerm Γ .val a))
     | "find", #[s, p], .val =>
       match ← lengthBase? p with
-      | some b => `(Term.len $(← st s) $(← pa b))
+      | some b =>
+        if Γ.isCore then `(Term.lenH $(schemaIdent "hlen") $(← st s) $(← pa b))
+        else `(Term.len $(← st s) $(← pa b))
       | none => `(Term.find $(← st s) $(← pa p))
     | "find", #[s, p], .svalue =>
       match ← lengthBase? p with
@@ -1384,17 +1417,20 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
             | some b => pure (b.raw.structEq p.raw)
             | none => pure false
           | _ => pure false
-        if past then `(PTerm.next $(← pa p)) else `(PTerm.at $(← pa p) $(← schemaKey Γ i))
-      | `(dl_term| atMap($i)) => `(PTerm.at $(← pa p) $(← schemaKey Γ i))
+        if past then `(PTerm.next $(← pa p))
+        else `(PTerm.at $(← indexTyOfTerm p) $(← pa p) $(← schemaKey Γ i))
+      | `(dl_term| atMap($i)) => `(PTerm.at IndexTy.map $(← pa p) $(← schemaKey Γ i))
       | `(dl_term| $g:ident) =>
         if g.getId.toString == "size" then tposError f "`consr(p, size)` outside `find`" .path
-        else `(PTerm.field $(← pa p) $g)
+        else `(PTerm.field $(← pa p) $g $(proofIdent g g.getId.toString))
       | _ => tposError f "a member, `at(i)` or `atMap(i)`" .path
     | "read", #[m, a], .val => `(Term.read $(← me m) $(← schemaTerm Γ .addr a))
     | "read", #[m, a], .ident => `(ITerm.read $(← me m) $(← schemaTerm Γ .addr a))
     | "read", #[m, i, a], .val =>
       if let `(dl_term| $g:ident) := a then
         if g.getId.toString == "size" then
+          if Γ.isCore then
+            return ← `(Term.mlenH $(schemaIdent "hlen") $(← me m) $(← schemaTerm Γ .ident i))
           return ← `(Term.mlen $(← me m) $(← schemaTerm Γ .ident i))
       `(Term.read $(← me m) $(← maddr i a))
     | "read", #[m, i, a], .ident => `(ITerm.read $(← me m) $(← maddr i a))
@@ -1444,7 +1480,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | _ => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
       | none => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
     | "delAt", #[s, p], .storage => `(STerm.delAt $(← st s) $(← pa p))
-    | "defVal", #[_], .val => `(Term.lit (PrimTy.default $(schemaIdent "p")))
+    | "defVal", #[_], .val => `(Term.dflt $(schemaIdent "p"))
     | "write", #[m, a, v], .memory =>
       `(MTerm.write $(← me m) $(← schemaTerm Γ .addr a) $(← schemaTerm Γ .mvalue v))
     | "addM", #[m], .memory => `(MTerm.addM $(← me m) $(schemaIdent "R"))
@@ -1800,7 +1836,7 @@ partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
       let n := c.getId.toString
       if n == "TRUE" || n == "FALSE" then
         let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
-        return ← `($(fmlC "eqD") $(← schemaTerm Γ .val a) (Term.lit (.bool $v)))
+        return ← `($(fmlC "eqD") $(← schemaTerm Γ .val a) (Term.litB $v))
     `($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
     `($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
@@ -1821,10 +1857,10 @@ partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $x:ident) => pure x
   | `(dl_fml| $a:dl_term <= $b:dl_term) => do
     `($(fmlC "eqD") (Term.binop BinOp.le PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
-        (Term.lit (.bool true)))
+        (Term.litB true))
   | `(dl_fml| $a:dl_term < $b:dl_term) => do
     `($(fmlC "eqD") (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
-        (Term.lit (.bool true)))
+        (Term.litB true))
   | φ => Macro.throwErrorAt φ "no scoped reading of this formula yet"
 
 /-- The invariant rule's premise: the invariant now;
@@ -1910,6 +1946,24 @@ def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split
     schemaInvCore i b h U c t post c'
   | p => Macro.throwErrorAt p "no scoped reading of this premise yet"
 
+/-- A compound assignment's operator terms: `l ⊕ se` in `l ⊕= se`'s premise
+takes `⊕=`'s proofs (`hop` that it has a compound form, `hp` that the type is
+numeric), not `Val.binop`'s (`hop`, `hq`): `Term.binopS … hq` becomes
+`Term.binopC … hp`. -/
+partial def compoundOps : Syntax → Syntax
+  | stx@(.ident _ _ val _) =>
+    let v := val.eraseMacroScopes
+    if v == `Term.binopS then (mkIdentFrom stx `Term.binopC).raw
+    else if v == `hq then (mkIdentFrom stx `hp).raw
+    else stx
+  | .node i k args => .node i k (args.map compoundOps)
+  | stx => stx
+
+/-- Whether a statement is a compound assignment `l ⊕= r`. -/
+def isCompound : TSyntax `sol_stmt → Bool
+  | `(sol_stmt| $_:sol_expr ⊕= $_:sol_expr) => true
+  | _ => false
+
 /-- The taclet `s ⇝ p` under the modality `m`: the `\find` binds its names,
 read in its context `Γ` (named, so that the constructor binds it as `Γ`);
 the `\replacewith` sees them, and its own declarations are fresh, numbered
@@ -1927,6 +1981,7 @@ def schemaTacletCore (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_pr
       Lean.mkCIdent `Solidity.BlockKind.block
     | _ => Lean.mkCIdent `Solidity.BlockKind.capture
   let pt ← schemaPremiseCore Γ found split p
+  let pt : Lean.Term := if isCompound s then ⟨compoundOps pt⟩ else pt
   let st ← `(($st : $(Lean.mkCIdent `Solidity.Stmt) $(schemaIdent "C") $(schemaIdent "Γ") _))
   let jArgs : Array Lean.Term := #[schemaIdent "C", schemaIdent "k"]
   let ((f, args) : Ident × Array Lean.Term) ← match J with

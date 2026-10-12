@@ -68,7 +68,7 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
     (assignLocal := fun i v => localStep k i v)
     -- valueDeclSkip, localValueDeclInitDrop
     (declLocal := fun p x init => match init with
-      | none => .update (Upd.nil.decl x (.val (.app0 (.lit p.default))))
+      | none => .update (Upd.nil.decl x (.val (.app0 (.lit (PrimTy.dflt p)))))
       | some e => .bind x (.val p) (.cons (.assignLocal .here e.up) .nil))
     -- storageLocalDeclSkip, storageLocalDeclInitDrop
     (declStorage := fun R x init => match init with
@@ -76,13 +76,13 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
       | some r => .bind x (.alias R) (.cons (.rebind .here r.up) .nil))
     (opAssign := fun op hop hp l r => opStep k op hop hp l r)
     (incDec := fun op hp l => incStep k op hp l)
-    (assignIncDec := fun i op _ l _ => assignIncStep i op l)
+    (assignIncDec := fun i op hp l _ => assignIncStep i op hp l)
     (push := fun b v hd => pushStep k b v hd) (pop := fun b => popStep k b)
     (transfer := fun r a => transferStep k m r a) (send := fun pv r a => sendStep k m pv r a)
     -- memoryReferenceDeclFreshAlloc, memoryLocalDeclInitDrop
-    (declMem := fun R x init _ _ => match init with
-      | none => .update ((Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).snoc
-          (.memory (.app1 (.addM R) rfl .memory)))
+    (declMem := fun R x init _ hm => match init with
+      | none => .update ((Upd.nil.decl x (.mref (.app1 (.alloc R hm) (.app0 .memory)))).snoc
+          (.memory (.app1 (.addM R hm) (.app0 .memory))))
       | some r => .bind x (.mem R) (.cons (.rebindMem .here r.up) .nil))
     (rebindMem := fun i r => rebindMemStep k i r)
     (assignFromMem := fun l p => assignFromMemStep k l p)

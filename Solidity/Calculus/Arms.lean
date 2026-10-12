@@ -47,50 +47,50 @@ abbrev Tm.storage : Tm C Γ .st := .app0 .storage
 /-- `memory`, the term. -/
 abbrev Tm.memory : Tm C Γ .mem := .app0 .memory
 /-- A literal. -/
-abbrev Tm.lit (v : Semantics.Value) : Tm C Γ .val := .app0 (.lit v)
+abbrev Tm.lit {p : PrimTy} (v : p.Denote) : Tm C Γ (.val p) := .app0 (.lit v)
 
 /-- `se = true`, the condition of a branch's goal (`Fml.eq`, as the rules
 write it). -/
-def Fml.isBool (t : Tm C Γ .val) (b : Bool) : Fml C Γ :=
-  .eq t (.app0 (.lit (.bool b)))
+def Fml.isBool (t : Tm C Γ (.val .bool)) (b : Bool) : Fml C Γ :=
+  .eq t (.app0 (.lit (p := .bool) b))
 
 /-- `t ≐ b` with both sides defined (`Fml.eqD`). -/
-abbrev Fml.isBoolD (t : Tm C Γ .val) (b : Bool) : Fml C Γ := .eqD t (Tm.lit (.bool b))
+abbrev Fml.isBoolD (t : Tm C Γ (.val .bool)) (b : Bool) : Fml C Γ := .eqD t (Tm.lit (p := .bool) b)
 
 /-- `{v := v'}`: a local set to a value's term. -/
 def Premise.setLocal {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) : Premise C Γ Γ :=
-  .update (Upd.nil.snoc (.local i (.val v.lower)))
+  .update (Upd.nil.snoc (UpdElem.setLocal i v))
 
 /-- `{e}`: one assigning element. -/
 abbrev Premise.upd1 (e : UpdElem C Γ Γ) : Premise C Γ Γ := .update (Upd.nil.snoc e)
 
 /-- `{storage := save(storage, l, src)}`. -/
 def Premise.save {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) : Premise C Γ Γ :=
-  .upd1 (.storage (.app3 .save .storage l.lower r.lower))
+  .upd1 (UpdElem.save l r)
 
 /-- `{storage := save(storage, l, copyMem(memory, p))}`. -/
-def Premise.saveMem {T T' : Ty} (l : Loc C Γ T) (p : MPath C Γ T') : Premise C Γ Γ :=
-  .upd1 (.storage (.app3 .save .storage l.lower (.app2 .copyMem .memory p.lower)))
+def Premise.saveMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) : Premise C Γ Γ :=
+  .upd1 (UpdElem.saveMem l p)
 
 /-- `{storage := delAt(storage, l)}`. -/
 def Premise.delAt {T : Ty} (l : Loc C Γ T) : Premise C Γ Γ :=
-  .upd1 (.storage (.app2 .delAt .storage l.lower))
+  .upd1 (UpdElem.delAt l)
 
 /-- `{memory := write(memory, l, src)}`. -/
 def Premise.writeMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) : Premise C Γ Γ :=
-  .upd1 (.memory (.app3 .write .memory l.lower r.lower))
+  .upd1 (UpdElem.writeMem l r)
 
 /-- `delete` of a memory slot at the address `a`, by its type: a primitive
-reset to its default, a reference written a fresh default object. -/
-def Premise.clearMem (a : Tm C Γ .addr) : Ty → Premise C Γ Γ
-  | .prim p => .upd1 (.memory (.app3 .write .memory a (.app1 .mval rfl (Tm.lit p.default))))
-  | .ref R => .upd1 (.memory (.app3 .write (.app1 (.addM R) rfl .memory) a
-      (.app1 .ref rfl (.app1 (.alloc R) rfl .memory))))
+reset to its default, a reference written a fresh default object (its type
+free of mappings, `h`). -/
+def Premise.clearMem : (T : Ty) → Tm C Γ (.addr T) → T.mapFree = true → Premise C Γ Γ
+  | .prim p, a, h => .upd1 (UpdElem.clearMem (.prim p) a h)
+  | .ref R, a, h => .upd1 (UpdElem.clearMem (.ref R) a h)
 
 /-- `{mv := freshId(copySt(memory, v)) ‖ memory := copySt(memory, v)}`. -/
-def Premise.allocCopy {R : RefTy} (i : Idx Γ (.mem R)) (v : Tm C Γ .sv) : Premise C Γ Γ :=
-  .update ((Upd.nil.snoc (.local i (.mref (.app2 .copy .memory v)))).snoc
-    (.memory (.app2 .copySt .memory v)))
+def Premise.allocCopy {R : RefTy} (i : Idx Γ (.mem R)) (h : (Ty.ref R).mapFree = true)
+    (v : Tm C Γ (.sv (.ref R))) : Premise C Γ Γ :=
+  .update (Upd.allocCopy i h v)
 
 /-- The fresh names of a rule fired at index `k`. -/
 abbrev fse (k : Nat) : Var := .fresh "se" k
@@ -345,8 +345,7 @@ def rebindStep {R : RefTy} (i : Idx Γ (.alias R)) : ARhs C Γ R → Premise C �
   | .push b hd =>
     -- storageLocalRootPushBind, storageLocalRootPushBindMappingElement
     if b.isSimple then
-      .update ((Upd.nil.snoc (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
-        (.local i (.path (.app1 .next rfl b.lower))))
+      .update (Upd.pushBind i b)
     -- storageLocalRootPush_unfold_leftFstReceiver
     else .captureSP (fsp k) b (.rebind i.there (.push (.alias .here) hd))
 
@@ -478,32 +477,6 @@ def deleteStep {T : Ty} : Loc C Γ T → Premise C Γ Γ
 
 /-! ### Compound assignment and `++`/`--` -/
 
-/-- The value a compound target holds, as the rules read it: `v`,
-`find(storage, l)`, `read(memory, l)`. -/
-def OpLoc.cur {p : PrimTy} : OpLoc C Γ p → Tm C Γ .val
-  | .local i => .pvV i
-  | .root r h => (Val.read (Γ := Γ) (.root r h)).lower
-  | .field b f h => (Val.read (.field b f h)).lower
-  | .index it b ie => (Val.read (.index it b (.simple ie))).lower
-  | .mfield b f h => (Val.readMem (.field b f h)).lower
-  | .mindex a b ie => (Val.readMem (.index a b (.simple ie))).lower
-
-/-- The compound target set to `t`: `v := t`, `storage := save(storage, l, t)`,
-`memory := write(memory, l, t)`. -/
-def OpLoc.set {p : PrimTy} : OpLoc C Γ p → Tm C Γ .val → UpdElem C Γ Γ
-  | .local i, t => .local i (.val t)
-  | .root r h, t => .storage (.app3 .save .storage (Loc.root (Γ := Γ) r h).lower (.app1 .sval rfl t))
-  | .field b f h, t => .storage (.app3 .save .storage (Loc.field b f h).lower (.app1 .sval rfl t))
-  | .index it b ie, t =>
-    .storage (.app3 .save .storage (Loc.index it b (.simple ie)).lower (.app1 .sval rfl t))
-  | .mfield b f h, t => .memory (.app3 .write .memory (MLoc.field b f h).lower (.app1 .mval rfl t))
-  | .mindex a b ie, t =>
-    .memory (.app3 .write .memory (MLoc.index a b (.simple ie)).lower (.app1 .mval rfl t))
-
-/-- `l ⊕ t` at the target's type. -/
-abbrev OpLoc.op {p : PrimTy} (l : OpLoc C Γ p) (op : BinOp) (t : Tm C Γ .val) : Tm C Γ .val :=
-  .app2 (.binop op p) l.cur t
-
 /-- The target with a receiver that is not simple bound first
 (`…UnfoldLeftFst`): `T storage sp = nsp; s`, `T memory mv = nmp; s`, with
 `s` the statement on the bound receiver; `none` when the receiver is
@@ -531,12 +504,9 @@ def opStep {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true) (hp : p
   | .simple se =>
     match l.unfoldRecv k (fun l' => .opAssign op hop hp l' (.simple se.up)) with
     | some q => q
-    | none => .upd1 (l.set (l.op op se.lower))
+    | none => .upd1 (l.set (l.op op hop hp se.lower))
   -- compoundAssignValueRhsCapture
   | r => .capture p (fse k) r (.opAssign op hop hp l.up (.simple (.local .here)))
-
-/-- `1`, the step of `++`/`--`. -/
-abbrev Tm.one {Γ : Ctx} : Tm C Γ .val := Tm.lit (.int 1)
 
 /-- `l++;` (`incStep`): the receiver first. -/
 def incStep {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
@@ -547,21 +517,16 @@ def incStep {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ
   | some q => q
   -- localIncrement, storageRootIncrement, storageFieldIncrement,
   -- storageIndexIncrement, memoryFieldIncrement, memoryIndexArrayIncrement
-  | none => .upd1 (l.set (l.op op.binOp .one))
-
-/-- The value `t++` has: the bumped one for `++t`, the old one for `t++`
-(the rule table's `Term.bumped`, `Calculus/Rules.lean`). -/
-def Tm.bumped (op : IncDec) (p : PrimTy) (t : Tm C Γ .val) : Tm C Γ .val :=
-  if op.isPre then .app2 (.binop op.binOp p) t .one else t
+  | none => .upd1 (l.set (l.op op.binOp (IncDec.binOp_compound op) hp (Tm.one p hp)))
 
 /-- `v = l++;`, its receiver simple (`localAssignIncrement`,
 `storageRootIncrementAssignment`, `storageFieldIncrementAssignment`,
 `storageIndexIncrementAssignment`, `memoryFieldIncrementAssignment`,
 `memoryIndexArrayIncrementAssignment`). -/
-def assignIncStep {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : OpLoc C Γ p) :
-    Premise C Γ Γ :=
-  .update ((Upd.nil.snoc (l.set (l.op op.binOp .one))).snoc
-    (.local i (.val (Tm.bumped op p l.cur))))
+def assignIncStep {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (hp : p.isNumeric = true)
+    (l : OpLoc C Γ p) : Premise C Γ Γ :=
+  .update ((Upd.nil.snoc (l.set (l.op op.binOp (IncDec.binOp_compound op) hp (Tm.one p hp)))).snoc
+    (.local i (.val (Tm.bumped op hp l.cur))))
 
 /-! ### Arrays and payments -/
 
@@ -572,16 +537,16 @@ def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     match E, b, v with
     | E, b, none =>
       -- storagePushLengthSave
-      if b.elemPrim then .upd1 (.storage (.app2 (.pushSlot E) .storage b.lower))
+      if b.elemPrim then .upd1 (UpdElem.pushSlot b)
       -- storagePushLengthSaveReferenceElement
-      else .upd1 (.storage (.app2 (.extend E) .storage b.lower))
+      else .upd1 (UpdElem.extend b)
     -- storagePushValueSave
     | _, b, some (.val (.simple se)) =>
-      .upd1 (.storage (.app3 .push .storage b.lower (Src.val (Γ := Γ) (.simple se)).lower))
+      .upd1 (UpdElem.push b (.val (.simple se)))
     -- storagePushValue_unfold_rightSndArgument
     | _, b, some (.val e) => .capture _ (fse k) e (.push b.up (some (.val (.simple (.local .here)))) rfl)
     -- storagePushValueCopySource
-    | _, b, some (.copy p hm) => .upd1 (.storage (.app3 .push .storage b.lower (Src.copy p hm).lower))
+    | _, b, some (.copy p hm) => .upd1 (UpdElem.push b (.copy p hm))
   -- storagePush_unfold_leftFstReceiver, storagePushValue_unfold_leftFstReceiver
   else .captureSP (fsp k) b (.push (.alias .here) (v.map Src.up) (by
     cases v <;> exact hd))
@@ -590,20 +555,17 @@ def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
 def popStep {E : Ty} (b : SPath C Γ (.array E)) : Premise C Γ Γ :=
   if b.isSimple then
     -- storagePopSaveMappingElement
-    if b.elemMapping then .upd1 (.storage (.app2 .shrink .storage b.lower))
+    if b.elemMapping then .upd1 (UpdElem.shrink b)
     -- storagePopSave
-    else .upd1 (.storage (.app2 .pop .storage b.lower))
+    else .upd1 (UpdElem.pop b)
   -- storagePop_unfold_leftFstReceiver
   else .captureSP (fsp k) b (.pop (.alias .here))
-
-/-- `{net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se)}`. -/
-abbrev UpdElem.payTo (r a : Simple C Γ .uint) : UpdElem C Γ Γ := .pay r.lower a.lower
 
 /-- `r.transfer(a);` (`transferStep`): the receiver first, then the amount. -/
 def transferStep (m : Modality) : Val C Γ .uint → Val C Γ .uint → Premise C Γ Γ
   | .simple sadr, .simple se => match m with
     -- transferNoCallbackBox
-    | .box => .upd1 (.payTo sadr se)
+    | .box => .upd1 (UpdElem.payTo sadr se)
     -- transferDiamond (Lean)
     | .diamond => .done false
   -- transfer_unfold_rightSndArgument
@@ -617,14 +579,15 @@ def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) :
     Val C Γ .uint → Val C Γ .uint → Premise C Γ Γ
   | .simple sadr, .simple se =>
     let us : List (Upd C Γ Γ) :=
-      [(Upd.nil.snoc (.payTo sadr se)).snoc (.local pv (.val (Tm.lit (.bool true)))),
-        Upd.nil.snoc (.local pv (.val (Tm.lit (.bool false))))]
+      [(Upd.nil.snoc (UpdElem.payTo sadr se)).snoc (.local pv (.val (Tm.lit (p := .bool) true))),
+        Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))]
     match m with
     -- sendNoCallbackBox
     | .box => .cases [] us
     -- sendNoCallbackDiamond
     | .diamond =>
-      .cases [.isBoolD (.app2 (.binop .le .uint) (Tm.lit (.int 0)) se.lower) true] us
+      .cases [.isBoolD (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) se.lower)
+        true] us
   -- send_unfold_rightSndArgument
   | .simple sadr, a =>
     .capture .uint (fse k) a (.send pv.there (.simple sadr.up) (.simple (.local .here)))
@@ -645,9 +608,9 @@ def rebindMemStep {R : RefTy} (i : Idx Γ (.mem R)) : MRhs C Γ R → Premise C 
       (fun a mv hmv ie =>
         .upd1 (.local i (.mref (MPath.loc (.index a (.var mv hmv) (.simple ie))).lower))) l
   | .copy sp hm =>
-    if sp.isSimple then .allocCopy i (.app2 .sfind .storage sp.lower)
+    if sp.isSimple then .allocCopy i hm (.app2 .sfind Tm.storage sp.lower)
     else .captureSP (fsp k) sp (.rebindMem i.there (.copy (.alias .here) hm))
-  | .newArr n _ => .allocCopy i (.app1 (.newArr R) rfl n.lower)
+  | .newArr n h => .allocCopy i (RefTy.mapFree_of_newArrOk h) (.app1 (.newArr h) n.lower)
 
 /-- A memory reference written to the target `l` (`memRefStep`): a memory
 local or a bindable location is written (`memoryFieldWriteCopy`,
@@ -702,18 +665,17 @@ default object, a member or element of one reset by the rule its type
 picks, any other receiver bound first, a complex index captured. -/
 def deleteMemStep : {T : Ty} → MPath C Γ T → T.defaultOkS = true → Premise C Γ Γ
   -- memoryRootDeleteFreshRebind
-  | _, @MPath.var _ _ R i _, _ =>
-    .update ((Upd.nil.snoc (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
-      (.memory (.app1 (.addM R) rfl .memory)))
+  | _, @MPath.var _ _ _ i hm, _ => .update (Upd.allocFresh i hm)
   -- memoryFieldDeletePrimitive, memoryFieldDeleteReference
   | _, .loc (@MLoc.field _ _ _ T (.var mv hmv) f hf), _ =>
-    .clearMem (MLoc.field (.var mv hmv) f hf).lower T
+    .clearMem T (MLoc.field (.var mv hmv) f hf).lower (MLoc.field (.var mv hmv) f hf).mapFree
   -- memoryFieldDelete_unfold_leftFst
   | _, .loc (.field (.loc l) f hf), hd =>
     .captureMV (fmv k) (.loc l) (.deleteMem (.loc (.field (.var .here (MPath.loc l).mapFree) f hf)) hd)
   -- memoryIndexDeletePrimitive, memoryIndexDeleteReference
   | _, .loc (@MLoc.index _ _ _ T a (.var mv hmv) (.simple ie)), _ =>
-    .clearMem (MLoc.index a (.var mv hmv) (.simple ie)).lower T
+    .clearMem T (MLoc.index a (.var mv hmv) (.simple ie)).lower
+      (MLoc.index a (.var mv hmv) (.simple ie)).mapFree
   -- memoryIndexDeleteNonSimpleIndexCapture
   | _, .loc (.index a (.var mv hmv) i), hd =>
     .capture .uint (fie k) i (.deleteMem (.loc (.index a (.var mv.there hmv) (.simple (.local .here)))) hd)

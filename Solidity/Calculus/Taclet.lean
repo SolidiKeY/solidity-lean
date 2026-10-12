@@ -439,11 +439,11 @@ theorem LeanTaclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ�
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
     {cond inv : Val C Γ .bool} (hf : body.frame = some (xs, hv)) :
     Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec) cond body) =
-      Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
+      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) xs hv
         (Upd.nil.decl (Var.fresh "se" k) (Rhs.val cond.lower))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true)))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool false))) Ext.refl
-        Ext.refl.push body (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) := by
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl
+        Ext.refl.push body (Fml.eqD inv.lower (Tms.Term.litB true)) := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
@@ -451,21 +451,22 @@ theorem LeanTaclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ 
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
     (hf : body.frame = some (xs, hv)) :
     Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec)) cond body) =
-      Premise.inv (Fml.eqD inv.lower (Tms.Term.lit (.bool true))) xs hv
+      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) xs hv
         ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
           (Rhs.val (p := .bool) cond.lower))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true)))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool false))) Ext.refl.push
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
+        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl.push
         Ext.refl.push body.up
-        ((Fml.eqD inv.up.lower (Tms.Term.lit (.bool true))).and
+        ((Fml.eqD inv.up.lower (Tms.Term.litB true)).and
           (Fml.upd .diamond (Upd.nil.decl (Var.fresh "se" k) (Rhs.val (p := .bool) cond.up.lower))
-            ((Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.lit (.bool true))).imp
-              ((Fml.eqD (Tms.Term.binop .le .uint (Tms.Term.lit (.int 0)) dec.up.up.lower)
-                  (Tms.Term.lit (.bool true))).and
+            ((Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true)).imp
+              ((Fml.eqD (Tms.Term.binop .le .uint (Tms.Term.nat 0) dec.up.up.lower)
+                  (Tms.Term.litB true)).and
                 (Fml.eqD (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
-                  (Tms.Term.lit (.bool true))))))) := by
+                  (Tms.Term.litB true)))))) := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
+  rfl
 
 theorem LeanTaclet.whileClose.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁} {inv : Val C Γ .bool}
     {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} (hf : body.frame = none) :

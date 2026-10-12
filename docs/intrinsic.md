@@ -5564,6 +5564,152 @@ no slower.  `Rules.lean` is unchanged, so its check is too.
 files without warning; `sorry` count unchanged (19); `check-orphans` (312
 reachable), `check-doc-paths`.
 
+### W9.8.3a record (2026-10-12, branch `w98-switch`)
+
+The low layers switched in place: the typed term *is* the term.  No twin,
+no bridge.
+
+**Moved.**  `Signature.lean` (imports `Update` and the Semantics only) now
+sits under `Calculus/Fml.lean`, which imports it instead of `Update`.
+`Calculus/TypedTerm.lean` became `Calculus/TermEval.lean` (`Tm.eval`, its
+`evalM` twin, `Tm.findOnSave`/`findOnSaveFrameRoot`/`findOnSaveIn`, the two
+kernel-read literals), over `Fml` and under `Lower`;
+`Calculus/LowerT.lean`'s content replaced `Calculus/Lower.lean`'s, with the
+arms' update elements (`UpdElem.save`, …, `Upd.allocCopy`/`allocFresh`/
+`pushBind`, `OpLoc.cur`/`set`/`op`, `Tm.bumped`, `Tm.one`, `Tm.castV`).
+Two splits so that the rule table and its printers need nothing above the
+table: `Calculus/CallbackRules.lean` (the `CallbackTaclet` inductive,
+`toTaclet`, `toStep`; `Callback.lean` keeps `ProvesC` and the printers;
+`RuleShapes` imports `CallbackRules`), and `Calculus/DelabRules.lean` (the
+taclet, premise and formula delaborators and `delabTacletSide`; `Delab.lean`
+keeps the `Proves` sequent printer).
+
+**Renamed** (by text, the typed family having no other users below the
+layer): `SrtT` → `Srt`, `OpT0`–`OpT3` → `Op0`–`Op3`, `TmT` → `Tm`, `RhsT` →
+`Rhs`, `UpdElemT` → `UpdElem`, `UpdT` → `Upd`, `lowerT` → `lower`,
+`OpLoc.curT`/`setT`/`opT` → `cur`/`set`/`op`, `TmT.bumped`/`one`/`castV`/
+`keyAt`/`mread` → `Tm.…`.  **Deleted**: `Update.lean`'s `Srt`, `Op0`–`Op3`,
+`Srt.Ev`, `OpN.eval`, `Op1.vars`, `Srt.Den` (untyped) and `OpN.denote`
+(kept: `readAddr`, `StValue.toRes`, `Res.toSt`, the three `Denote` lemmas,
+`IntOp`, `havoc`/`anon`); `Signature.lean`'s `SrtT.erase`, `OpTn.erase`,
+`Srt.IsHalt`, `SrtT.okE`/`Agree`, `OpTn.Exact`, every `eval_agree`,
+`IdOk`, `MAddrT.erase`/`Ok`, `MvT.erase`/`Ok`, `PrimTy.asInt_erase_keyTy`,
+`State.glob_globE`, `Storage.findStorage_selectT`; `TypedTerm.lean`'s
+`TmT.erase`, `TmT.Exact`, `TmT.eval_agree`, `RhsT`/`UpdElemT`/`UpdT.erase`;
+`LowerT.lean`'s `MPath.eraseT` and every `…_erase` bridge; `Op1.named`.
+Kept, as decided at W9.8.0: `SVal.absT`, `Storage.absT`, `Storage.abs_into`,
+`State.abs_globE`; and `binopT_some`, `Storage.push_none` (no erasure in
+them).
+
+**Fixed sorts became typed** — the mechanical change above.  A site that
+wrote `Tm C Γ .val` now writes the type it has: `Tm C Γ (.val p)`.
+- `Fml.eq`/`Fml.defined`/`Fml.eqD` take an implicit `{p : PrimTy}`, both
+  sides at it.  A condition is `.val .bool` (`Fml.isBool`, `isBoolD`), a
+  literal is `Tm.lit (p := .bool) b` or `⟨n, rfl⟩ : PrimTy.uint.Denote`
+  (the untyped `.lit (.int n)`/`.lit (.bool b)` are gone).
+- An amount and an address are `.val .uint` (`UpdElem.selfBalance`, `net`,
+  `pay`, `netMt`, `setBalance`), `x[a]` is `.val .uint → .val .int`.
+- A lowered value carries its type through a cast where the syntax holds an
+  equation (`Tm.castV`, `h ▸ t`): `Val.binop`/`unop` (`hq : op.ret p' = p`),
+  `Val.len`/`mlen` (`hlen : p = .uint`), `Simple.env`, a compound operator
+  (`BinOp.compound_ret`).  The rule lines write the same casts
+  (`Tms.Term.binopS … hq`, `binopC … hp`, `binopI`, `unopS`, `lenH`/`mlenH
+  hlen`), so a rule is the arm's premise by `rfl` as before.
+- A path is `.path T`, an alias `.path (.ref R)`, a memory local
+  `.ident R`, an address `.addr T`, a storage value `.sv T`, a memory value
+  `.mv T`: a symbol takes the proofs its typed constructor carries.  A rule
+  line passes the ones it names (`hgsp`, `hfld`; `it`/`ak`/`mk` for an
+  index, read off the receiver's stem as `indexTyOf` does for the
+  program), and `tm_side` finds the rest (a fresh array's `newArrOk`, a
+  member's or an element's `mapFree`, a memory local's; `rfl` for a
+  literal in range).  `tm_side` takes a whole hypothesis last: taken
+  first it fixed `memoryIndexDeleteReference`'s array type to its
+  element's.
+- Arms that read a type now take its proof: `assignIncStep` takes `hp`
+  (`Stmt.step` passes `assignIncDec`'s), `Premise.saveMem` one `R`,
+  `Premise.clearMem T a h` (a `match` on `T`, so `rule_exists` still
+  splits there), `Premise.allocCopy i h v`.
+- Elaborated sites: `Fml`, `Lower`, `Arms`, `Blocks` (`loopExit`, the
+  invariant rules' `b`, `variant`, `0 <= dec`), `Step` (`defVal`,
+  `memoryReferenceDeclFreshAlloc` by `declMem`'s `hm`), `Rules`' `Tms`,
+  `Taclet` (the two hand-stated invariant `toStep`s), `RuleSyntax`'s
+  emitted names.
+
+**Formula atoms** (`ifElseSplit`, `requireSimple`, `assertSimple`,
+`loopExit`, `whileInvariant*`, `sendNoCallbackDiamond`) take typed terms:
+`se = TRUE` reads `Fml.eqD se.lower (Term.litB true)` at `.bool`, `0 <= se`
+`Term.binop BinOp.le PrimTy.uint (Term.nat 0) se.lower` at
+`BinOp.le.ret .uint`, which the kernel reduces to `.bool`.
+
+**Printers.**  `viewTmS` reads a symbol's arguments past its contract,
+sees through `Tm.castV`, and unfolds a term one definition at a time (so a
+cast is met before it unfolds); the symbol patterns take the typed
+constructors' implicit arguments; a literal is a `Subtype.mk`, a `Bool`,
+`PrimTy.dflt p` (`defVal(T)`) or `PrimTy.ofLit p 1 _` (`Tm.one`, `1`);
+`Fml.eq`/`defined` have one argument more.  The new `select` symbols
+(`selectIn`, `member`, `fieldIn`, `findIn`, `sfindIn`, `delAtIn`,
+`saveIn`) print as their untyped namesakes did.
+
+**Pins.**  The 168 `Taclet` constructors print the same lines as before
+(compared constructor by constructor against `ppExpr` of each type at the
+base commit, through `DelabRules`); the `LeanTaclet` and `CallbackTaclet`
+premises print the same text (their `dl[J]{ … }` wrappers and labels are
+printed above the layer, not checkable here).  No `#guard_msgs` pin was
+run: every one sits above the layer.
+
+**Timing** (`IO.processCommands` over the file's body in a scratch module
+importing its imports, two runs): `Calculus/Rules.lean` 2.65 s before,
+2.77–2.79 s after (+5%, the typed builders' proof arguments and
+`tm_side`); `Calculus/KeyTaclets.lean` 2.44–2.49 s before, 2.44–2.54 s
+after (it reads no term).
+
+**Sort check.**  `SortCheck/` names KeY's sorts by the rule table's
+annotations, not by `Srt`: nothing to map, no change.
+`.lake/build/bin/solkeycheck` (built by `lean_build`): OK against the
+checkout beside (326 taclets, 119 read-bearing, all covered).
+
+**Checked**: `lean_build` of the default targets: everything not importing
+the four modules below elaborates, among them `Signature`, `Fml`,
+`TermEval`, `Lower`, `Shift`, `Arms`, `Blocks`, `Step`, `WkOver`,
+`RuleSyntax`, `Rules`, `RuleKit`, `KeyTaclets`, `Taclet`, `RuleExists`,
+`Completeness`, `CallbackRules`, `RuleShapes`, `PrintedRules`,
+`SortCheck/Faithfulness`, `DelabErase`, `PrintTerm`, `PrintStmt`,
+`DelabRules`, `Hyp`, `FirstOrder`, `ReadWrite`, `MemNames`; `sorry` count
+unchanged (19); `check-orphans` (only the git-ignored scratch modules
+orphaned), `check-doc-paths`.
+
+**Broken, the next lanes' worklist.**  Four modules fail on their own
+(first error):
+- `Theory/Bridge/Denote.lean:35` — `Srt.Bridge : (s : Srt) → s.Den → s.Ev
+  → Prop`: the untyped `Srt.Den`/`Srt.Ev` are gone.  The bridge of
+  `OpN.denote` to `OpN.eval`; W9.8.3b reads `.eq` through `SVal.absT`
+  instead.  Imported by `Lands`, `StateFacts`, `CloseLemmas`, `Decide`,
+  `SoundLoops`.
+- `Calculus/NoPanic.lean:26` — `Srt.NoPanic` over `s.Ev`: a typed symbol
+  returns an `Option`, no panic to rule out; only `readAddr_noPanic`
+  survives.  Imported by `SoundKit` (`Tm.eval_noPanic`,
+  `Upd.applyV_noPanic`).
+- `Calculus/NamedTerm.lean:60` — `NTm.pvV` builds `.pvV i` at the sort
+  `.val`: a name's type is known only where it resolves, so `NTm C s`
+  needs its sort's type from the context (`resolve` to a sigma, or the
+  sort's type a parameter checked at resolution).  Imported by
+  `SurfaceNotation`, `NotationResolve` (the `dl!{ }` front end).
+- `Calculus/Quote.lean:52` — `qSrt` quotes the untyped `Srt`; the typed
+  symbols carry proofs (`rootType`, `fieldType`, `mapFree`) to quote.
+  Imported by `DecideLang`, `Notation`, `Print`, `Problem`, `RewriteLaws`,
+  `Spec`, `Symex`, `Tools/Inspect` and two examples.
+
+Blocked by an import of these (not elaborated, so no first error of their
+own): 189 of 314 modules, every one of `Logic`, `Lands`, `TypedLands`,
+`Graft`, `SeqRewrite`, `TermLib`, `TermLaws`, `Proves`, `Delab`,
+`Callback`, the `Sound*` family, `StateFacts`, `CloseLemmas`, `Close*`,
+`Decide*`, `DecideLang`, `KeyNotation` (through `DecideLang` → `Quote`,
+`Close`), `SurfaceNotation`, `Notation`, the `Rewrite*` and `Chain*`
+modules, `Tools/`, `Examples/`, `TestSuite/`.  `KeyNotation` and the
+`tm{ }` macro (`TermLib`) are the brief's notation this lane could not
+reach: both sit above the closer.  `TypedLands` imports `Lower` now (it
+imported `TypedTerm`); its content is W9.8.2's, on the old names.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

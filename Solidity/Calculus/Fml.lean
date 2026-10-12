@@ -1,12 +1,15 @@
-import Solidity.Update
+import Solidity.Signature
 
 /-!
 # Terms, updates and formulas, scoped
 
-Terms over `Update.lean`'s signature, updates and formulas, read in a
-context `Γ : Ctx` (`docs/intrinsic.md`, M6a), over the scoped programs of `Syntax/Scoped.lean`.
-A program variable is a position (`Tm.pvV i`, `i : Idx Γ (.val p)`), so a
-formula cannot read a local that is not in scope.
+Terms over KeY's typed signature (`Signature.lean`), updates and formulas,
+read in a context `Γ : Ctx` (`docs/intrinsic.md`, M6a and W9.8.3), over the
+scoped programs of `Syntax/Scoped.lean`.  A program variable is a position
+(`Tm.pvV i`, `i : Idx Γ (.val p)`), so a formula cannot read a local that
+is not in scope, and a term has its Solidity type in its sort
+(`Tm C Γ (.val p)`, `Tm C Γ (.path T)`, …), so a symbol cannot be applied
+to a term of another type: `save(s, p, v)` writes a `v` of `p`'s type.
 
 **Updates** (`Upd C Γ Δ`) are parallel, as KeY's: every right-hand side is
 read in `Γ`, the state the update is applied in, and every target is a local
@@ -37,48 +40,43 @@ has two goals, KeY's: a condition cannot be stuck, so there is no third.
 
 namespace Solidity
 
-open Solidity (Srt Op0 Op1 Op2 Op3 IntOp Modality)
+open Solidity (IntOp Modality)
 
 variable {C : Contract}
 
 /-! ## Terms -/
 
-/-- A unary symbol that names a local (`netOf x`, a ledger variable): the
-scoped terms read it through `Tm.netOf` instead. -/
-def _root_.Solidity.Op1.named {a s : Srt} : Op1 a s → Bool
-  | .netOf _ => true
-  | _ => false
-
-/-- A term of sort `s`, read in `Γ`: a local by its position, or a symbol
-applied to terms. -/
+/-- A term at the sort `s`, read in `Γ`: a local by its position, or a
+symbol applied to terms of its argument sorts. -/
 inductive Tm (C : Contract) (Γ : Ctx) : Srt → Type where
   /-- A stack local. -/
-  | pvV {p : PrimTy} (i : Idx Γ (.val p)) : Tm C Γ .val
+  | pvV {p : PrimTy} (i : Idx Γ (.val p)) : Tm C Γ (.val p)
   /-- A storage alias. -/
-  | pvP {R : RefTy} (i : Idx Γ (.alias R)) : Tm C Γ .path
+  | pvP {R : RefTy} (i : Idx Γ (.alias R)) : Tm C Γ (.path (.ref R))
   /-- A storage variable, KeY's `old`. -/
   | pvS (i : Idx Γ .old) : Tm C Γ .st
   /-- A memory local. -/
-  | pvI {R : RefTy} (i : Idx Γ (.mem R)) : Tm C Γ .ident
-  /-- `x[a]`: what the ledger bound at `x` holds for `a` (`Op1.netOf`). -/
-  | netOf (i : Idx Γ .oldNet) (a : Tm C Γ .val) : Tm C Γ .val
-  | app0 {s : Srt} (o : Op0 s) : Tm C Γ s
-  | app1 {a s : Srt} (o : Op1 a s) (ho : o.named = false) (x : Tm C Γ a) : Tm C Γ s
-  | app2 {a b s : Srt} (o : Op2 a b s) (x : Tm C Γ a) (y : Tm C Γ b) : Tm C Γ s
-  | app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C Γ b) (z : Tm C Γ c) : Tm C Γ s
+  | pvI {R : RefTy} (i : Idx Γ (.mem R)) : Tm C Γ (.ident R)
+  /-- `x[a]`: what the ledger bound at `x` holds for `a`, an `int`. -/
+  | netOf (i : Idx Γ .oldNet) (a : Tm C Γ (.val .uint)) : Tm C Γ (.val .int)
+  | app0 {s : Srt} (o : Op0 C s) : Tm C Γ s
+  | app1 {a s : Srt} (o : Op1 C a s) (x : Tm C Γ a) : Tm C Γ s
+  | app2 {a b s : Srt} (o : Op2 C a b s) (x : Tm C Γ a) (y : Tm C Γ b) : Tm C Γ s
+  | app3 {a b c s : Srt} (o : Op3 C a b c s) (x : Tm C Γ a) (y : Tm C Γ b)
+      (z : Tm C Γ c) : Tm C Γ s
 
 /-! ## Updates -/
 
 /-- What a local of type `t` is set to, read in `Γ`. -/
 inductive Rhs (C : Contract) (Γ : Ctx) : LTy → Type where
   /-- `v := t` -/
-  | val {p : PrimTy} (t : Tm C Γ .val) : Rhs C Γ (.val p)
+  | val {p : PrimTy} (t : Tm C Γ (.val p)) : Rhs C Γ (.val p)
   /-- `lsv := p` -/
-  | path {R : RefTy} (p : Tm C Γ .path) : Rhs C Γ (.alias R)
+  | path {R : RefTy} (p : Tm C Γ (.path (.ref R))) : Rhs C Γ (.alias R)
   /-- `lsv := unset` (Lean only, `storageLocalDeclSkip`). -/
   | unset {R : RefTy} : Rhs C Γ (.alias R)
   /-- `mv := i` -/
-  | mref {R : RefTy} (i : Tm C Γ .ident) : Rhs C Γ (.mem R)
+  | mref {R : RefTy} (i : Tm C Γ (.ident R)) : Rhs C Γ (.mem R)
   /-- `old := s` -/
   | store (s : Tm C Γ .st) : Rhs C Γ .old
   /-- `oldNet := net` -/
@@ -87,7 +85,8 @@ inductive Rhs (C : Contract) (Γ : Ctx) : LTy → Type where
   | saveNetMt : Rhs C Γ .oldNet
 
 /-- One assigning element: its right-hand sides read in `Γ`, its target a
-local of `Δ`, or a part of the state. -/
+local of `Δ`, or a part of the state.  An amount and an address are a
+`uint`. -/
 inductive UpdElem (C : Contract) (Γ Δ : Ctx) where
   /-- `x := r` -/
   | local {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t)
@@ -96,15 +95,15 @@ inductive UpdElem (C : Contract) (Γ Δ : Ctx) where
   /-- `memory := m` -/
   | memory (m : Tm C Γ .mem)
   /-- `selfBalance := selfBalance ± a` -/
-  | selfBalance (op : IntOp) (a : Tm C Γ .val)
+  | selfBalance (op : IntOp) (a : Tm C Γ (.val .uint))
   /-- `net := store(net, at(r), net(r) ± a)` -/
-  | net (r : Tm C Γ .val) (op : IntOp) (a : Tm C Γ .val)
+  | net (r : Tm C Γ (.val .uint)) (op : IntOp) (a : Tm C Γ (.val .uint))
   /-- `net := if(r = this) then net else store(net, at(r), net(r) - a)` -/
-  | pay (r a : Tm C Γ .val)
+  | pay (r a : Tm C Γ (.val .uint))
   /-- `net := store(mtSt, at(r), a)` -/
-  | netMt (r a : Tm C Γ .val)
+  | netMt (r a : Tm C Γ (.val .uint))
   /-- `selfBalance := a` -/
-  | setBalance (a : Tm C Γ .val)
+  | setBalance (a : Tm C Γ (.val .uint))
 
 /-- A parallel update applied in `Γ`, leaving `Δ`: its elements in the order
 they are written, the last one last. -/
@@ -193,10 +192,10 @@ theorem _root_.Solidity.Modality.forallB_intro {m : Modality} {α : Sort _} {p :
 /-- A formula about programs of `C`, read in `Γ`. -/
 inductive Fml (C : Contract) : Ctx → Type where
   | tt {Γ : Ctx} : Fml C Γ
-  /-- `a = b`, read in the Theory (`Tm.denote`). -/
-  | eq {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ
+  /-- `a = b`, two values of one type, read in the Theory (`Tm.denote`). -/
+  | eq {Γ : Ctx} {p : PrimTy} (a b : Tm C Γ (.val p)) : Fml C Γ
   /-- `t` returns. -/
-  | defined {Γ : Ctx} (t : Tm C Γ .val) : Fml C Γ
+  | defined {Γ : Ctx} {p : PrimTy} (t : Tm C Γ (.val p)) : Fml C Γ
   | not {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ
   | and {Γ : Ctx} (φ ψ : Fml C Γ) : Fml C Γ
   | imp {Γ : Ctx} (φ ψ : Fml C Γ) : Fml C Γ
@@ -219,7 +218,7 @@ inductive Fml (C : Contract) : Ctx → Type where
 abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt
 
 /-- `a = b` with both sides defined. -/
-abbrev Fml.eqD {Γ : Ctx} (a b : Tm C Γ .val) : Fml C Γ :=
+abbrev Fml.eqD {Γ : Ctx} {p : PrimTy} (a b : Tm C Γ (.val p)) : Fml C Γ :=
   .and (.defined a) (.and (.defined b) (.eq a b))
 
 /-! ## Premises -/

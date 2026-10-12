@@ -63,8 +63,8 @@ inductive TmV where
   | netOf (x a : Expr)
   /-- `t⊕⊕`: the value of an increment by a schema operator `op`. -/
   | bumped (op p t : Expr)
-  /-- A symbol: its constructor's name (`Op2.find`) and arguments, and the
-  terms it is applied to. -/
+  /-- A symbol: its constructor's name (`Op2.find`) and arguments past the
+  contract, and the terms it is applied to. -/
   | sym (o : Lean.Name) (oargs xs : Array Expr)
   /-- Anything else: it prints as `‹…›`. -/
   | other
@@ -80,16 +80,19 @@ partial def viewTmS (red : Bool) (ns : List Expr) (e : Expr) :
   let .const n _ := e.getAppFn | return (ns, .other, e)
   let args := e.getAppArgs
   if isUp n && args.size > 0 then return ← viewTmS red ns.tail args.back!
+  -- a cast between equal types (`Tm.castV`, an operator's result type): its term
+  if n == ``Tm.castV && args.size == 6 then return ← viewTmS red ns args[5]!
   if n == ``Tm.netOf && args.size == 4 then return (ns, .netOf (← idxName ns args[2]!) args[3]!, e)
-  if (n == ``Tm.bumped || n == ``Tms.Term.bumped) && args.size == 5 && args[2]!.isFVar then
-    return (ns, .bumped args[2]! args[3]! args[4]!, e)
+  if (n == ``Tm.bumped || n == ``Tms.Term.bumped) && args.size == 6 && args[2]!.isFVar then
+    return (ns, .bumped args[2]! args[3]! args[5]!, e)
+  -- a symbol's arguments past its contract
   let sym (o : Expr) (xs : Array Expr) : MetaM (List Expr × TmV × Expr) := do
     let o ← if red then whnf o else pure (← instantiateMVars o).consumeMData
     match o.getAppFn.constName? with
-    | some k => return (ns, .sym k o.getAppArgs xs, e)
+    | some k => return (ns, .sym k (o.getAppArgs.extract 1 o.getAppNumArgs) xs, e)
     | none => return (ns, .other, e)
   if n == ``Tm.app0 && args.size == 4 then return ← sym args[3]! #[]
-  if n == ``Tm.app1 && args.size == 7 then return ← sym args[4]! #[args[6]!]
+  if n == ``Tm.app1 && args.size == 6 then return ← sym args[4]! #[args[5]!]
   if n == ``Tm.app2 && args.size == 8 then return ← sym args[5]! #[args[6]!, args[7]!]
   if n == ``Tm.app3 && args.size == 10 then return ← sym args[6]! #[args[7]!, args[8]!, args[9]!]
   if (n == ``Tm.pvV || n == ``Tm.pvP || n == ``Tm.pvI) && args.size == 4 then
@@ -107,6 +110,10 @@ partial def viewTmS (red : Bool) (ns : List Expr) (e : Expr) :
       if c != n && (lowerFns.contains c || (← getEnv).isConstructor c) then
         return ← viewTmS red ns e'
   unless red do return (ns, .other, e)
+  -- one definition at a time, so that a cast is seen before it unfolds
+  if let some e1 ← unfoldDefinition? e then
+    let e1 ← whnfCore e1
+    if e1 != e then return ← viewTmS red ns e1
   let e' ← whnf e
   if e' == e then return (ns, .other, e)
   viewTmS red ns e'
@@ -162,43 +169,48 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   | .netOf x a =>
     let some x ← ppVar? x | escapeS e
     `(dl_term| net($x:ident, $(← ppTermS ns a)))
-  | .sym ``Op0.lit #[v] _ =>
-    match_expr (← whnfV v) with
-    | Semantics.PrimVal.int n =>
+  | .sym ``Op0.lit #[_, v] _ =>
+    if v.isAppOfArity ``PrimTy.dflt 1 then
+      return ← `(dl_term| defVal(T))
+    if let some n ← fvarName? v then return ← `(dl_term| lit($(nameIdent n):ident))
+    -- a literal at a numeric schema type (`Tm.one`)
+    let v0 := (← instantiateMVars v).consumeMData
+    if v0.isAppOfArity ``PrimTy.ofLit 3 then
+      if let some n ← intOf? (v0.getArg! 1) then
+        return ← `(dl_term| $(Syntax.mkNumLit (toString n)):num)
+    let v' ← whnfV v
+    if v'.isAppOfArity ``PrimTy.dflt 1 then
+      return ← `(dl_term| defVal(T))
+    match_expr v' with
+    | Subtype.mk _ _ n _ =>
       let some n ← intOf? n | escapeS e
       `(dl_term| $(Syntax.mkNumLit (toString n)):num)
-    | Semantics.PrimVal.bool b =>
-      match_expr (← whnfV b) with
-      | Bool.true => `(dl_term| true)
-      | Bool.false => `(dl_term| false)
-      | _ => escapeS e
-    | _ =>
-      if v.isAppOfArity ``PrimTy.default 1 then
-        return ← `(dl_term| defVal(T))
-      if let some n ← fvarName? v then return ← `(dl_term| lit($(nameIdent n):ident))
-      escapeS e
-  | .sym ``Op2.binop #[op, ty] #[a, b] =>
+    | Bool.true => `(dl_term| true)
+    | Bool.false => `(dl_term| false)
+    | _ => escapeS e
+  | .sym ``Op2.binop #[op, ty, _] #[a, b] =>
     let some sym ← termOpSym? op | escapeS e
     -- `+ - * /` read back as `uint` arithmetic only (`schemaTerm0`): an
     -- `int` (or unchecked `bool`) one escapes
     unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
-  | .sym ``Op1.unop #[op, _] #[a] =>
+  | .sym ``Op1.unop #[op, _, _] #[a] =>
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTermS ns a))
     if (← whnf op).isConstOf ``UnOp.not then return ← `(dl_term| !$(← ppTermS ns a))
     escapeS e
-  | .sym ``Op2.find #[] #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
-  | .sym ``Op2.len #[] #[s, p] =>
+  | .sym ``Op2.find _ #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
+  | .sym ``Op2.findIn _ #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
+  | .sym ``Op2.len _ #[s, p] =>
     let (lenPath, lenVal, _) ← lenTerms (← ppPTermS ns p)
     if !(← keyOn) && (← isStorageS ns s) then return lenVal
     `(dl_term| find($(← ppSTermS ns s), $lenPath))
-  | .sym ``Op1.delValue #[] #[t] => `(dl_term| delValue($(← ppTermS ns t)))
-  | .sym ``Op1.wt #[_] #[s] => `(dl_term| wt($(← ppSTermS ns s)))
-  | .sym ``Op2.read #[] #[m, a] =>
+  | .sym ``Op1.delValue _ #[t] => `(dl_term| delValue($(← ppTermS ns t)))
+  | .sym ``Op1.wt _ #[s] => `(dl_term| wt($(← ppSTermS ns s)))
+  | .sym ``Op2.read _ #[m, a] =>
     if ← keyOn then
       if let some (i, f) ← keyAddrS? ns a then return ← `(dl_term| read($(← ppMTermS ns m), $i, $f))
     `(dl_term| read($(← ppMTermS ns m), $(← ppMAddrS ns a)))
-  | .sym ``Op2.mlen #[] #[m, i] =>
+  | .sym ``Op2.mlen _ #[m, i] =>
     if ← keyOn then return ← `(dl_term| read($(← ppMTermS ns m), $(← ppITermS ns i), size))
     let (_, vm, _) ← viewTmS (← reduceOn) ns m
     unless vm matches .sym ``Op0.memory _ _ do return ← escapeS e
@@ -212,12 +224,9 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.selfBalance => `(dl_term| selfBalance)
     | EnvKey.selfAddress => if ← keyOn then `(dl_term| self) else `(dl_term| this)
     | _ => escapeS e
-  | .sym ``Op1.net #[] #[a] =>
+  | .sym ``Op1.net _ #[a] =>
     if ← keyOn then return ← `(dl_term| selectSt(net, at($(← ppTermS ns a))))
     `(dl_term| net($(← ppTermS ns a)))
-  | .sym ``Op1.netOf #[x] #[a] =>
-    let some x ← ppVar? x | escapeS e
-    `(dl_term| net($x:ident, $(← ppTermS ns a)))
   | _ => escapeS e
 
 /-- Whether a storage term is `storage`. -/
@@ -231,10 +240,10 @@ partial def keyAddrS? (ns : List Expr) (a : Expr) :
     MetaM (Option (TSyntax `dl_term × TSyntax `dl_term)) := do
   let (ns, v, _) ← viewTmS (← reduceOn) ns a
   match v with
-  | .sym ``Op1.mfield #[f] #[i] =>
+  | .sym ``Op1.mfield #[_, f, _, _] #[i] =>
     let some f ← nameOf? f | return none
     return some (← ppITermS ns i, ← `(dl_term| $(nameIdent f):ident))
-  | .sym ``Op2.mat #[] #[i, k] => return some (← ppITermS ns i, ← `(dl_term| at($(← ppTermS ns k))))
+  | .sym ``Op2.mat _ #[i, k] => return some (← ppITermS ns i, ← `(dl_term| at($(← ppTermS ns k))))
   | _ => return none
 
 /-- A storage path read at `ns`. -/
@@ -243,21 +252,28 @@ partial def ppPTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   if let .var x := v then
     if let some t ← tmVar? x then return t
   match v with
-  | .sym ``Op0.root #[r] _ =>
+  | .sym ``Op0.root #[r, _, _] _ =>
     let some r ← nameOf? r | escapeS e
     `(dl_term| $(nameIdent r):ident)
+  | .sym ``Op0.member #[_, f, _, _] _ =>
+    let some f ← nameOf? f | escapeS e
+    `(dl_term| $(nameIdent f):ident)
   | .pv x =>
     let some x ← ppVar? x | escapeS e
     `(dl_term| $x:ident)
-  | .sym ``Op1.field #[f] #[p] =>
+  | .sym ``Op1.field #[_, f, _, _] #[p] =>
     let some f ← nameOf? f | escapeS e
     if ← keyOn then return ← `(dl_term| consr($(← ppPTermS ns p), $(nameIdent f):ident))
     dotTerm (← ppPTermS ns p) f
-  | .sym ``Op2.at #[] #[p, i] => elemTerm (← ppPTermS ns p) (← ppTermS ns i)
-  | .sym ``Op1.next #[] #[p] => return (← lenTerms (← ppPTermS ns p)).2.2
-  | .sym ``Op3.atIn #[] #[s, p, i] =>
+  | .sym ``Op1.fieldIn #[_, _, f, _, _] #[p] =>
+    let some f ← nameOf? f | escapeS e
+    if ← keyOn then return ← `(dl_term| consr($(← ppPTermS ns p), $(nameIdent f):ident))
+    dotTerm (← ppPTermS ns p) f
+  | .sym ``Op2.at _ #[p, i] => elemTerm (← ppPTermS ns p) (← ppTermS ns i)
+  | .sym ``Op1.next _ #[p] => return (← lenTerms (← ppPTermS ns p)).2.2
+  | .sym ``Op3.atIn _ #[s, p, i] =>
     `(dl_term| $(← recvTerm (← ppPTermS ns p)):dl_term[$(← ppTermS ns i):dl_term]@$(← ppSTermS ns s):dl_term)
-  | .sym ``Op2.nextIn #[] #[s, p] =>
+  | .sym ``Op2.nextIn _ #[s, p] =>
     let p ← recvTerm (← ppPTermS ns p)
     let (_, len, _) ← withOptions (fun o => pp.sol.key.set o false) (lenTerms p)
     `(dl_term| $p:dl_term[$len:dl_term]@$(← ppSTermS ns s):dl_term)
@@ -274,26 +290,27 @@ partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .pv x =>
     let some x ← ppVar? x | escapeS e
     `(dl_term| $x:ident)
-  | .sym ``Op3.save #[] #[s, p, v] =>
+  | .sym ``Op3.save _ #[s, p, v] | .sym ``Op3.saveIn _ #[s, p, v] =>
     `(dl_term| save($(← ppSTermS ns s), $(← ppPTermS ns p), $(← ppSValS ns v)))
-  | .sym ``Op2.delAt #[] #[s, p] => `(dl_term| delAt($(← ppSTermS ns s), $(← ppPTermS ns p)))
-  | .sym ``Op3.push #[] #[s, p, v] =>
+  | .sym ``Op2.delAt _ #[s, p] | .sym ``Op2.delAtIn _ #[s, p] =>
+    `(dl_term| delAt($(← ppSTermS ns s), $(← ppPTermS ns p)))
+  | .sym ``Op3.push _ #[s, p, v] =>
     let (len, val, slot) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save(save($(← ppSTermS ns s), $slot, $(← ppSValS ns v)), $len, $val + 1))
-  | .sym ``Op2.pushSlot #[_] #[s, p] =>
+  | .sym ``Op2.pushSlot _ #[s, p] =>
     let (len, val, slot) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save(delAt($(← ppSTermS ns s), $slot), $len, $val + 1))
-  | .sym ``Op2.pop #[] #[s, p] =>
+  | .sym ``Op2.pop _ #[s, p] =>
     let p ← ppPTermS ns p
     let (len, val, _) ← lenTerms p
     `(dl_term| save(delAt($(← ppSTermS ns s), $(← elemTerm p (← `(dl_term| $val - 1)))), $len, $val - 1))
-  | .sym ``Op2.extend #[_] #[s, p] =>
+  | .sym ``Op2.extend _ #[s, p] =>
     let (len, val, _) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save($(← ppSTermS ns s), $len, $val + 1))
-  | .sym ``Op2.shrink #[] #[s, p] =>
+  | .sym ``Op2.shrink _ #[s, p] =>
     let (len, val, _) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save($(← ppSTermS ns s), $len, $val - 1))
-  | .sym ``Op1.select #[r] #[s] =>
+  | .sym ``Op1.select #[_, r, _] #[s] | .sym ``Op1.selectIn #[_, _, r, _] #[s] =>
     let some r ← nameOf? r | escapeS e
     if ← keyOn then return ← `(dl_term| selectSt($(← ppSTermS ns s), $(nameIdent r):ident))
     `(dl_term| select($(← ppSTermS ns s), $(nameIdent r):ident))
@@ -305,23 +322,24 @@ partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   if let .var x := v then
     if let some t ← tmVar? x then return t
   match v with
-  | .sym ``Op1.sval #[] #[t] =>
+  | .sym ``Op1.sval _ #[t] =>
     -- `find` here reads back as the copy below, so a value read prints as `select`
     let (nt, vt, _) ← viewTmS (← reduceOn) ns t
     let isVar ← match vt with
       | .var x => pure (← tmVar? x).isSome
       | _ => pure false
     if !isVar then
-      if let .sym ``Op2.find #[] #[s, p] := vt then
+      if let .sym ``Op2.find _ #[s, p] := vt then
         return ← `(dl_term| select($(← ppSTermS nt s), $(← ppPTermS nt p)))
     ppTermS ns t
   -- a lowered `Src` schema variable: the value it names
   | .pv x =>
     let some x ← ppVar? x | escapeS e
     `(dl_term| $x:ident)
-  | .sym ``Op2.sfind #[] #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
-  | .sym ``Op2.copyMem #[] #[m, i] => `(dl_term| copyMem(mtSt, $(← ppMTermS ns m), $(← ppITermS ns i)))
-  | .sym ``Op1.newArr #[R] #[n] =>
+  | .sym ``Op2.sfind _ #[s, p] | .sym ``Op2.sfindIn _ #[s, p] =>
+    `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
+  | .sym ``Op2.copyMem _ #[m, i] => `(dl_term| copyMem(mtSt, $(← ppMTermS ns m), $(← ppITermS ns i)))
+  | .sym ``Op1.newArr #[R, _] #[n] =>
     match ← allocTy? R with
     | some T => `(dl_term| newArr($T, $(← ppTermS ns n)))
     | none => `(dl_term| newArr($(← ppTermS ns n)))
@@ -336,16 +354,16 @@ partial def ppITermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .pv x =>
     let some x ← ppVar? x | escapeS e
     `(dl_term| $x:ident)
-  | .sym ``Op2.iread #[] #[m, a] =>
+  | .sym ``Op2.iread _ #[m, a] =>
     if ← keyOn then
       if let some (i, f) ← keyAddrS? ns a then return ← `(dl_term| read($(← ppMTermS ns m), $i, $f))
     `(dl_term| read($(← ppMTermS ns m), $(← ppMAddrS ns a)))
-  | .sym ``Op1.alloc #[R] #[m] =>
+  | .sym ``Op1.alloc #[R, _] #[m] =>
     let m ← ppMTermS ns m
     match ← allocTy? R with
     | some T => `(dl_term| freshId(addM($m, $T)))
     | none => `(dl_term| freshId(addM($m)))
-  | .sym ``Op2.copy #[] #[m, v] => `(dl_term| freshId(copySt($(← ppMTermS ns m), $(← ppSValS ns v))))
+  | .sym ``Op2.copy _ #[m, v] => `(dl_term| freshId(copySt($(← ppMTermS ns m), $(← ppSValS ns v))))
   | _ => escapeS e
 
 /-- A member or an element of a memory object, read at `ns`. -/
@@ -354,10 +372,10 @@ partial def ppMAddrS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   if let .var x := v then
     if let some t ← tmVar? x then return t
   match v with
-  | .sym ``Op1.mfield #[f] #[i] =>
+  | .sym ``Op1.mfield #[_, f, _, _] #[i] =>
     let some f ← nameOf? f | escapeS e
     dotTerm (← ppITermS ns i) f
-  | .sym ``Op2.mat #[] #[i, k] => `(dl_term| $(← ppITermS ns i):dl_term[$(← ppTermS ns k):dl_term])
+  | .sym ``Op2.mat _ #[i, k] => `(dl_term| $(← ppITermS ns i):dl_term[$(← ppTermS ns k):dl_term])
   | _ => escapeS e
 
 /-- A memory read at `ns`. -/
@@ -367,17 +385,17 @@ partial def ppMTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
     if let some n ← fvarName? x then return ← `(dl_term| $(nameIdent n):ident)
   match v with
   | .sym ``Op0.memory _ _ => `(dl_term| memory)
-  | .sym ``Op3.write #[] #[m, a, v] =>
+  | .sym ``Op3.write _ #[m, a, v] =>
     if ← keyOn then
       if let some (i, f) ← keyAddrS? ns a then
         return ← `(dl_term| write($(← ppMTermS ns m), $i, $f, $(← ppMValS ns v)))
     `(dl_term| write($(← ppMTermS ns m), $(← ppMAddrS ns a), $(← ppMValS ns v)))
-  | .sym ``Op1.addM #[R] #[m] =>
+  | .sym ``Op1.addM #[R, _] #[m] =>
     let m ← ppMTermS ns m
     match ← allocTy? R with
     | some T => `(dl_term| addM($m, $T))
     | none => `(dl_term| addM($m))
-  | .sym ``Op2.copySt #[] #[m, v] => `(dl_term| copySt($(← ppMTermS ns m), $(← ppSValS ns v)))
+  | .sym ``Op2.copySt _ #[m, v] => `(dl_term| copySt($(← ppMTermS ns m), $(← ppSValS ns v)))
   | _ => escapeS e
 
 /-- What a memory `write` writes, read at `ns`. -/
@@ -386,8 +404,8 @@ partial def ppMValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   if let .var x := v then
     if let some t ← tmVar? x then return t
   match v with
-  | .sym ``Op1.mval #[] #[t] => ppTermS ns t
-  | .sym ``Op1.ref #[] #[i] => ppITermS ns i
+  | .sym ``Op1.mval _ #[t] => ppTermS ns t
+  | .sym ``Op1.ref _ #[i] => ppITermS ns i
   -- a lowered `MSrc` schema variable: the value it names
   | .pv x =>
     let some x ← ppVar? x | escapeS e
@@ -401,12 +419,10 @@ end
 def cmpPartsS (na : List Expr) (a : Expr) (nb : List Expr) (b : Expr) :
     MetaM (Option (String × (List Expr × Expr) × (List Expr × Expr))) := do
   let (_, vb, _) ← viewTmS true nb b
-  let .sym ``Op0.lit #[v] _ := vb | return none
-  let v ← whnf v
-  unless v.isAppOfArity ``Semantics.PrimVal.bool 1 && (← whnf v.appArg!).isConstOf ``Bool.true do
-    return none
+  let .sym ``Op0.lit #[_, v] _ := vb | return none
+  unless (← whnf v).isConstOf ``Bool.true do return none
   let (na, va, _) ← viewTmS true na a
-  let .sym ``Op2.binop #[op, _] #[l, r] := va | return none
+  let .sym ``Op2.binop #[op, _, _] #[l, r] := va | return none
   let sym ← match_expr (← whnf op) with
     | BinOp.lt => pure "<"
     | BinOp.le => pure "<="
@@ -462,7 +478,7 @@ def rhsElemS (ns : List Expr) (x r : Expr) : MetaM (Option (TSyntax `dl_upd_elem
   match r.getAppFn.constName? with
   | some ``Rhs.val =>
     let (nt, vt, _) ← viewTmS true ns t
-    if let .sym ``Op2.binop #[op, ty] #[a, b] := vt then
+    if let .sym ``Op2.binop #[op, ty, _] #[a, b] := vt then
       let a ← ppTermS nt a
       let b ← ppTermS nt b
       match_expr (← whnf op) with

@@ -731,13 +731,13 @@ def eqDPartsS (ns : List Expr) (e : Expr) :
   let (ns, e) ← viewF ns e
   let_expr Fml.and _ _ l r := e | return none
   let (nl, l) ← viewF ns l
-  let_expr Fml.defined _ _ a := l | return none
+  let_expr Fml.defined _ _ _ a := l | return none
   let (nr, r) ← viewF ns r
   let_expr Fml.and _ _ l' r' := r | return none
   let (nl', l') ← viewF nr l'
-  let_expr Fml.defined _ _ b := l' | return none
+  let_expr Fml.defined _ _ _ b := l' | return none
   let (nr', r') ← viewF nr r'
-  let_expr Fml.eq _ _ a' b' := r' | return none
+  let_expr Fml.eq _ _ _ a' b' := r' | return none
   unless ← eqTmS nl a nr' a' do return none
   unless ← eqTmS nl' b nr' b' do return none
   return some ((nl, a), (nl', b))
@@ -806,8 +806,8 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
       if let (some x, some T) := (← ppVar? x, ← primName? p) then
         return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFmlS na a):dl_fml)
     `(dl_fml| ¬$(← arg ns φ):dl_fml)
-  | Fml.eq _ _ a b => `(dl_fml| $(← ppTermS ns a):dl_term ≐ $(← ppTermS ns b):dl_term)
-  | Fml.defined _ _ t => `(dl_fml| defined($(← ppTermS ns t):dl_term))
+  | Fml.eq _ _ _ a b => `(dl_fml| $(← ppTermS ns a):dl_term ≐ $(← ppTermS ns b):dl_term)
+  | Fml.defined _ _ _ t => `(dl_fml| defined($(← ppTermS ns t):dl_term))
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | escape

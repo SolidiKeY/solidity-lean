@@ -1,4 +1,4 @@
-import Solidity.Calculus.Callback
+import Solidity.Calculus.CallbackRules
 
 /-!
 # Where each taclet comes from
@@ -369,7 +369,7 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
 
 #check_constructor_table Taclet, tacletOrigins.map Prod.fst
 
-/-- The callback taclets (`Calculus/Callback.lean`'s `CallbackTaclet`, the other
+/-- The callback taclets (`Calculus/CallbackRules.lean`'s `CallbackTaclet`, the other
 `transferSemantics`), and the solkey taclets they transcribe. -/
 def callbackOrigins : List (Lean.Name × KeyOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),

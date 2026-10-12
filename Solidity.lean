@@ -52,9 +52,8 @@ import Solidity.Calculus.RuleExists
 import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
-import Solidity.Calculus.TypedTerm
+import Solidity.Calculus.TermEval
 import Solidity.Calculus.TypedLands
-import Solidity.Calculus.LowerT
 import Solidity.Calculus.Logic
 import Solidity.Calculus.SoundKit
 import Solidity.Calculus.SoundArms
@@ -71,6 +70,7 @@ import Solidity.Calculus.Sound
 import Solidity.Calculus.DelabErase
 import Solidity.Calculus.PrintTerm
 import Solidity.Calculus.PrintStmt
+import Solidity.Calculus.DelabRules
 import Solidity.Calculus.Delab
 import Solidity.Calculus.Proves
 import Solidity.Calculus.ProvesSound
@@ -105,6 +105,7 @@ import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Closers
 import Solidity.Calculus.ProofTree
+import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.CallbackSound

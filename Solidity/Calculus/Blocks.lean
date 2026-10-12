@@ -274,7 +274,7 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
     (body : Prog C Γ Γ₁) : Premise C Γ Γ :=
   match a with
   -- loopExit
-  | .unwind 0 => .check (.eqD c.lower (Tm.lit (.bool false)))
+  | .unwind 0 => .check (.eqD c.lower (Tm.lit (p := .bool) false))
   -- whileUnwind
   | .unwind (n + 1) =>
     .unfold (.cons (.ite c (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil)) .nil) .nil)
@@ -294,13 +294,13 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
       | .diamond, some d =>
         let U : Upd C Γ (.val .bool :: .val .uint :: Γ) :=
           (Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k) (.val (p := .bool) c.lower)
-        let d' : Tm C (.val .bool :: .val .uint :: Γ) .val := (d.up.up).lower
+        let d' : Tm C (.val .bool :: .val .uint :: Γ) (.val .uint) := (d.up.up).lower
         let post : Fml C (.val .uint :: Γ) :=
           .and (.isBoolD I.up.lower true)
             (.upd .diamond (Upd.nil.decl (fse k) (.val (p := .bool) c.up.lower))
               (.imp (.isBoolD (.pvV (p := .bool) .here) true)
-                (.and (.isBoolD (.app2 (.binop .le .uint) (Tm.lit (.int 0)) d') true)
-                  (.isBoolD (.app2 (.binop .lt .uint) d' (.pvV (p := .uint) (.there .here))) true))))
+                (.and (.isBoolD (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) d') true)
+                  (.isBoolD (.app2 (.binop .lt (p := .uint) rfl) d' (.pvV (p := .uint) (.there .here))) true))))
         .inv (.isBoolD I.lower true) xs hv U
           (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
           (.push .refl) (.push .refl) (body.wk up).2.2 post

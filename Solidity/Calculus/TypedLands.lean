@@ -1,11 +1,11 @@
-import Solidity.Calculus.TypedTerm
+import Solidity.Calculus.Lower
 import Solidity.Calculus.Logic
 
 /-!
 # Typed updates read in a state; where they land
 
 `Calculus/Lands.lean`'s reading of an update, for the typed terms of
-`Calculus/TypedTerm.lean` (`RhsT`, `UpdElemT`, `UpdT`), on the typed state
+`Calculus/Fml.lean` (`Rhs`, `UpdElem`, `Upd`; `RhsT`, `UpdElemT`, `UpdT` before W9.8.3), on the typed state
 with nothing erased (`docs/intrinsic.md`, "W9.8.2 lands record"):
 * `RhsT.eval`: what a local is set to, typed (`LTy.VDen`): a value of its
   type, a storage reference, a storage, a ledger; a memory local's an
