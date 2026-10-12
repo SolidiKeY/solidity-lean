@@ -21,7 +21,7 @@ import Solidity.Calculus.SoundCalls
   (`TLoop.run_variant`).  A condition is a `bool` of the typed state, so it
   is `true` or `false` wherever it is read; what the rule's terms read on
   the erasure is the typed value (`holds_isBoolD_lower`, from
-  `Val.evalT_erase`, `Val.evalT_ends` and the term bridge `Tm.denote_eval`, `Calculus/SeqRewrite.lean`).
+  `Val.lower_evalT` (`Calculus/LowerRun.lean`), `Val.evalT_ends` and the term bridge `Tm.denote_eval`, `Calculus/SeqRewrite.lean`).
 -/
 
 namespace Solidity
@@ -87,35 +87,28 @@ theorem holds_eqD_iffS {σ : State C Γ} {a b : Tm C Γ .val} :
     rw [Tm.denote_eval σ.erase a x hx, Tm.denote_eval σ.erase b x hy]
     exact Theory.StValue.Equiv.refl _
 
-/-- A value that returns over the typed state reads its erasure on the
-erased state. -/
-theorem Val.eval_erase_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
-    (h : v.evalT σ = .ok x) : v.eval σ.erase = .ok (PrimTy.erase x) := by
-  have ha := Val.evalT_erase σ v
-  rw [h] at ha
-  exact ha
+/-- A value that returns over the typed state: its lowered term reads its
+erasure on the erased state (`Val.lower_evalT`). -/
+theorem Val.lower_eval_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
+    (h : v.evalT σ = .ok x) : v.lower.eval σ.erase = .ok (PrimTy.erase x) :=
+  (Val.lower_evalT σ v).eq_ok h
 
-/-- What a value reads on the erased state, where the typed one halts: a
-halt too, for it never diverges. -/
-theorem Val.eval_erase_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e : THalt}
-    (h : v.evalT σ = .error e) : ∃ e', v.eval σ.erase = .error e' := by
-  have ha := Val.evalT_erase σ v
+/-- What a value's lowered term reads on the erased state, where the typed
+value halts: a halt too, for it never diverges. -/
+theorem Val.lower_eval_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e : THalt}
+    (h : v.evalT σ = .error e) : ∃ e', v.lower.eval σ.erase = .error e' := by
   have hnd := Val.evalT_ends σ v
-  rw [h] at ha hnd
-  cases e with
-  | revert => exact ⟨_, ha⟩
-  | panic => exact ⟨_, ha⟩
-  | diverge => exact absurd rfl hnd.1
-  | exhausted => exact absurd rfl hnd.2
+  rw [h] at hnd
+  exact (Val.lower_evalT σ v).eq_error h (fun hd => hnd.1 (hd ▸ rfl)) (fun hx => hnd.2 (hx ▸ rfl))
 
 /-- **A lowered condition** holds `b` over the typed state where it
 evaluates to `b`. -/
 theorem holds_isBoolD_lower (c : Val C Γ .bool) (σ : State C Γ) (b : Bool) :
     holds σ (Fml.isBoolD c.lower b) ↔ c.evalT σ = .ok b := by
-  rw [holds_isBoolD, Val.eval_lower]
+  rw [holds_isBoolD]
   cases h : c.evalT σ with
   | ok v =>
-    rw [Val.eval_erase_ok c σ h]
+    rw [Val.lower_eval_ok c σ h]
     constructor
     · intro h'
       have : v = b := Semantics.PrimVal.bool.inj (Except.ok.inj h')
@@ -124,7 +117,7 @@ theorem holds_isBoolD_lower (c : Val C Γ .bool) (σ : State C Γ) (b : Bool) :
       rw [show v = b from Except.ok.inj h']
       rfl
   | error e =>
-    obtain ⟨e', he'⟩ := Val.eval_erase_error c σ h
+    obtain ⟨e', he'⟩ := Val.lower_eval_error c σ h
     rw [he']
     exact ⟨nofun, nofun⟩
 
@@ -307,7 +300,7 @@ theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
         .ok (a.st.push (t := .val .bool) v).erase := by
       show (do let τ₀ ← pure a.st.erase
                pure (τ₀.push (t := .val .bool) (← c.lower.eval a.st.erase))) = _
-      rw [Val.eval_lower, Val.eval_erase_ok c a.st hc]
+      rw [Val.lower_eval_ok c a.st hc]
       rfl
     change Modality.afterC .box _ (Upd.apply _ _) at hY
     rw [hU] at hY
@@ -434,29 +427,28 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   change Modality.afterC .diamond _ (Upd.apply _ _) at hY
   have hUe : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
       (.val (p := .bool) c.lower)).apply a.st.erase =
-      (d.eval a.st.erase >>= fun dv => c.eval a.st.erase >>= fun cv =>
+      (d.lower.eval a.st.erase >>= fun dv => c.lower.eval a.st.erase >>= fun cv =>
         pure ((a.st.erase.push (t := .val .uint) dv).push (t := .val .bool) cv)) := by
     show (do
       let τ₁ ← (do
         let τ₀ ← pure a.st.erase
         pure (τ₀.push (t := .val .uint) (← d.lower.eval a.st.erase)))
       pure (τ₁.push (t := .val .bool) (← c.lower.eval a.st.erase))) = _
-    rw [Val.eval_lower, Val.eval_lower]
-    cases d.eval a.st.erase <;> cases c.eval a.st.erase <;> rfl
+    cases d.lower.eval a.st.erase <;> cases c.lower.eval a.st.erase <;> rfl
   rw [hUe] at hY
   cases hd : d.evalT a.st with
   | error e =>
-    obtain ⟨e', he'⟩ := Val.eval_erase_error d a.st hd
+    obtain ⟨e', he'⟩ := Val.lower_eval_error d a.st hd
     rw [he'] at hY
     exact hY.elim
   | ok dv =>
   cases hc : c.evalT a.st with
   | error e =>
-    obtain ⟨e', he'⟩ := Val.eval_erase_error c a.st hc
-    rw [Val.eval_erase_ok d a.st hd, he'] at hY
+    obtain ⟨e', he'⟩ := Val.lower_eval_error c a.st hc
+    rw [Val.lower_eval_ok d a.st hd, he'] at hY
     exact hY.elim
   | ok cv =>
-  rw [Val.eval_erase_ok d a.st hd, Val.eval_erase_ok c a.st hc] at hY
+  rw [Val.lower_eval_ok d a.st hd, Val.lower_eval_ok c a.st hc] at hY
   obtain ⟨hT, hF⟩ := hY ((a.st.push (t := .val .uint) dv).push (t := .val .bool) cv) rfl
     (List.prefix_refl _)
   refine ⟨dv.1, by show (d.evalT a.st).map _ = _; rw [hd]; rfl, ?_, fun hc' => ?_, fun hc' => ?_⟩
@@ -503,7 +495,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
             let υ ← pure (τ₀.push (t := .val .uint) dv).erase
             pure (υ.push (t := .val .bool)
               (← c.up.lower.eval (τ₀.push (t := .val .uint) dv).erase))) = _
-          rw [Val.eval_lower, Val.eval_erase_ok _ _ hcu]
+          rw [Val.lower_eval_ok _ _ hcu]
           rfl
         rw [hU₁] at hdec
         obtain ⟨hle, hlt⟩ := hdec _ rfl (List.prefix_refl _) ((holds_isBoolD _ _ _).2 rfl)
@@ -511,13 +503,12 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
         change evalBinop .le .uint (.int 0) (d.up.up.lower.eval _) = _ at hle
         change (d.up.up.lower.eval _ >>= fun a => evalBinop .lt .uint a (pure (.int dv.1))) = _
           at hlt
-        rw [Val.eval_lower] at hle hlt
         cases hdx : d.evalT τ₀ with
         | error e =>
           have hd₂ : (d.up.up (t := .val .bool)).evalT
               ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .error e := by
             rw [Val.evalT_up, Val.evalT_up]; exact hdx
-          obtain ⟨e', he'⟩ := Val.eval_erase_error _ _ hd₂
+          obtain ⟨e', he'⟩ := Val.lower_eval_error _ _ hd₂
           rw [he'] at hle
           obtain ⟨_, _, -, hy, -, -⟩ := evalBinop_cmp_true (.inr rfl) hle
           cases hy
@@ -525,7 +516,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
           have hd₂ : (d.up.up (t := .val .bool)).evalT
               ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .ok x := by
             rw [Val.evalT_up, Val.evalT_up]; exact hdx
-          rw [Val.eval_erase_ok _ _ hd₂] at hle hlt
+          rw [Val.lower_eval_ok _ _ hd₂] at hle hlt
           obtain ⟨_, y, hx0, hy, -, hle'⟩ := evalBinop_cmp_true (.inr rfl) hle
           cases hx0
           cases hy

@@ -21,35 +21,6 @@ open Semantics (Value SVal MVal Seg Halt Res)
 
 variable {C : Contract}
 
-/-! ## Blocks of captures -/
-
-section Blocks
-
-variable {Γ : Ctx} (σ : EState C Γ)
-
-theorem Res.map_bind' {α β γ : Type} (x : Res α) (f : α → Res β) (g : β → γ) :
-    (x >>= f).map g = x >>= fun a => (f a).map g := by
-  cases x <;> rfl
-
-/-- A halt alike to `h` from a run that does not panic and does not end. -/
-theorem Res.Sim.err_of_not_ok {α : Type} {h : Halt} (hh : h ≠ .panic) {r : Res α} (hr : NoPanic r)
-    (hn : ∀ a, r ≠ .ok a) : Res.Sim (.error h) r := by
-  cases r with
-  | ok a => exact absurd rfl (hn a)
-  | error e => exact ⟨fun e' => absurd e' hh, fun e' => absurd (congrArg Except.error e') hr⟩
-
-theorem MPath.mval_noPanic {T : Ty} (b : MPath C Γ T) : NoPanic (b.mval σ) := by
-  cases b with
-  | var i _ =>
-    show NoPanic (memRef σ i >>= fun id => pure (MVal.ref id))
-    exact NoPanic.bind (Tm.eval_noPanic σ (.pvI i)) fun _ _ => NoPanic.pure _
-  | loc l =>
-    show NoPanic (l.read σ)
-    rw [← MLoc.eval_lower σ l]
-    exact NoPanic.bind (Tm.eval_noPanic σ l.lower) fun _ _ => Solidity.readAddr_noPanic _ _
-
-end Blocks
-
 open Solidity (Modality)
 
 /-! ## Blocks of captures -/

@@ -27,6 +27,7 @@ import Solidity.Semantics.Erased
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
 import Solidity.Semantics.StepErase
+import Solidity.Semantics.TypedErase
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
@@ -37,6 +38,7 @@ import Solidity.Update
 import Solidity.Calculus.RuleSyntax
 import Solidity.Calculus.Fml
 import Solidity.Calculus.Lower
+import Solidity.Calculus.LowerRun
 import Solidity.Calculus.Print
 import Solidity.Calculus.Shift
 import Solidity.Calculus.Arms
