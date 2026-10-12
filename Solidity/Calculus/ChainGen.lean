@@ -54,10 +54,20 @@ def pastStepOf? (L : Expr) (n : String) (a : NFml.Chain.RwArrow) : TermElabM (Op
 first place it applies, in the generator's order: the merge first, then
 `~=>`'s. -/
 def pastSteps (L : Expr) (every : Bool := false) : TermElabM (Array PastStep) := do
+  let arrows := (← NFml.Chain.rwAnyArrows).toArray.filter fun (n, _) =>
+    every || NFml.Chain.chainRewrite n
+  let run ← runChain L
+  let st ← saveState
+  -- every arrow's rewrites computed at once (`scopedRwCandsMany`)
+  let rs ← try
+      pure (← scopedRwCandsMany L (arrows.map (·.2)) run.erased[0]! (past := true)
+        (keep := (!plainReadAny ·))).2
+    catch _ => st.restore; pure #[]
   let mut out := #[]
-  for (n, a) in ← NFml.Chain.rwAnyArrows do
-    unless every || NFml.Chain.chainRewrite n do continue
-    if let some st ← pastStepOf? L n a then out := out.push st
+  for ((n, _), (cands, _)) in arrows.zip rs do
+    -- a rewrite that leaves a line printed alike (a hidden binder absorbed) is no step
+    if let some c := cands.find? (·.erased != run.erased) then
+      out := out.push { name := n, fml := c.fml, erased := c.erased, rw := c.rw }
   return out.filter (·.name == "sequentialToParallel") ++ out.filter (·.name != "sequentialToParallel")
 
 /-- What the search past the program keeps: the lines tried, the smallest
