@@ -101,45 +101,37 @@ theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 a b c s) (x : Tm C Γ a) (y : Tm C �
 
 end WkEqns
 
-theorem EState.thin_glob {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) : (σ.thin h).glob = σ.glob :=
-  rfl
-
-theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) :
-    {s : Srt} → (t : Tm C Γ s) → (t.wk h).eval σ = t.eval (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.eval, EState.thin, EState.withEnv, Env.get_thin]
-  | _, .pvP i => by
-    simp only [Tm.wk_pvP, Tm.eval, aliasPath, EState.thin, EState.withEnv, Env.get_thin]
-  | _, .pvS i => by
-    simp only [Tm.wk_pvS, Tm.eval, EState.thin, EState.withEnv, Env.get_thin]
-    rfl
-  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.eval, memRef, EState.thin, EState.withEnv, Env.get_thin]
-  | _, .netOf i a => by
-    simp only [Tm.wk_netOf, Tm.eval, Tm.eval_wk h σ a]
-    simp only [EState.thin, EState.withEnv, Env.get_thin]
+theorem Tm.evalT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+    {s : Srt} → (t : Tm C Γ s) → (t.wk h).evalT σ = t.evalT (σ.thin h)
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.evalT, State.getE_thin]
+  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.evalT, State.aliasPathT_getE, State.getE_thin]
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.evalT, State.getE_thin]; rfl
+  | _, .pvI i => by simp only [Tm.wk_pvI, Tm.evalT, State.memRefT_getE, State.getE_thin]
+  | _, .netOf i a => by simp only [Tm.wk_netOf, Tm.evalT, Tm.evalT_wk h σ a, State.getE_thin]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.eval, Tm.eval_wk h σ a]; rfl
-  | _, .app2 o a b => by simp only [Tm.wk_app2, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b]; rfl
+  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.evalT, Tm.evalT_wk h σ a]; rfl
+  | _, .app2 o a b => by
+    simp only [Tm.wk_app2, Tm.evalT, Tm.evalT_wk h σ a, Tm.evalT_wk h σ b]; rfl
   | _, .app3 o a b c => by
-    simp only [Tm.wk_app3, Tm.eval, Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]; rfl
+    simp only [Tm.wk_app3, Tm.evalT, Tm.evalT_wk h σ a, Tm.evalT_wk h σ b, Tm.evalT_wk h σ c]; rfl
 
-theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : EState C Δ) :
-    {s : Srt} → (t : Tm C Γ s) → (t.wk h).denote σ = t.denote (σ.thin h)
-  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denote, EState.thin, EState.withEnv, Env.get_thin]
-  | _, .pvP i => by
-    simp only [Tm.wk_pvP, Tm.denote, aliasPath, EState.thin, EState.withEnv, Env.get_thin]
-  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denote, EState.thin, EState.withEnv, Env.get_thin]
+theorem Tm.denoteT_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
+    {s : Srt} → (t : Tm C Γ s) → (t.wk h).denoteT σ = t.denoteT (σ.thin h)
+  | _, .pvV i => by simp only [Tm.wk_pvV, Tm.denoteT, State.getE_thin]
+  | _, .pvP i => by simp only [Tm.wk_pvP, Tm.denoteT, State.aliasPathT_getE, State.getE_thin]
+  | _, .pvS i => by simp only [Tm.wk_pvS, Tm.denoteT, State.getE_thin]
   | _, .pvI i => rfl
   | _, .netOf i a => by
-    simp only [Tm.wk_netOf, Tm.denote, Tm.denote_wk h σ a]
-    simp only [EState.thin, EState.withEnv, Env.get_thin]
+    simp only [Tm.wk_netOf, Tm.denoteT, Tm.denoteT_wk h σ a, State.getE_thin]
   | _, .app0 o => rfl
-  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denote, Tm.denote_wk h σ a]; rfl
+  | _, .app1 o _ a => by simp only [Tm.wk_app1, Tm.denoteT, Tm.denoteT_wk h σ a]; rfl
   | _, .app2 o a b => by
-    simp only [Tm.wk_app2, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.eval_wk h σ a,
-      Tm.eval_wk h σ b]
+    simp only [Tm.wk_app2, Tm.denoteT, Tm.denoteT_wk h σ a, Tm.denoteT_wk h σ b, Tm.evalT_wk h σ a,
+      Tm.evalT_wk h σ b]
     rfl
   | _, .app3 o a b c => by
-    simp only [Tm.wk_app3, Tm.denote, Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.denote_wk h σ c]
+    simp only [Tm.wk_app3, Tm.denoteT, Tm.denoteT_wk h σ a, Tm.denoteT_wk h σ b,
+      Tm.denoteT_wk h σ c]
 
 /-- A first-order formula read with more locals around it; `none` on an
 update, a modality, a `havoc`, a hidden binder or an anonymising update. -/
@@ -182,12 +174,10 @@ theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : F
   | .tt, _, e, σ => by cases e; exact Iff.rfl
   | .eq a b, _, e, σ => by
     cases e
-    show Theory.StValue.Equiv _ _ ↔ Theory.StValue.Equiv _ _
-    rw [Tm.denote_wk, Tm.denote_wk, State.thin_erase]
+    rw [holds_eqT, holds_eqT, Tm.denoteT_wk, Tm.denoteT_wk]
   | .defined t, _, e, σ => by
     cases e
-    show (∃ x, _ = _) ↔ (∃ x, _ = _)
-    rw [Tm.eval_wk, State.thin_erase]
+    rw [holds_definedT, holds_definedT, Tm.evalT_wk]
   | .not φ, _, e, σ => by
     cases hφ : φ.wkFO h with
     | none => simp only [Fml.wkFO_not, hφ, Option.map_none, reduceCtorEq] at e
@@ -270,8 +260,13 @@ def State.snap {Δ : Ctx} (σ : State C Δ) : State C (Olds ++ Δ) :=
 /-- What a formula says past `snapOld`, it says of the snapshots. -/
 theorem holds_snapOld {Δ : Ctx} {X : Fml C (Olds ++ Δ)} {σ : State C Δ}
     (h : holds σ (.upd .box snapOld X)) : holds σ.snap X := by
-  have e : σ.snap.erase = (σ.erase.push σ.erase.glob.storage).push σ.erase.net := rfl
-  exact (holds_upd_erased _ _ _ _).1 h σ.snap e (List.prefix_refl _)
+  refine h.of_lands (g := σ.globE) ⟨rfl, rfl, fun i => ?_⟩ (List.prefix_refl _)
+  cases i with
+  | here => rfl
+  | there i =>
+    cases i with
+    | here => rfl
+    | there j => rfl
 
 /-- The callee's frame `τ` with the snapshots `n` (the ledger) and `s` (the
 storage) declared under its return variables. -/

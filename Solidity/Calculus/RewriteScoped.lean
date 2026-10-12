@@ -20,7 +20,7 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 
 | `FmlRw` | line before ⇝ line after | sound by | solkey |
 |---|---|---|---|
-| `lit r i` | a literal law in the right-hand sides of the update at spine position `i`, any modality | `Upd.rwC_apply_eq` (iff) | `add_literals`, `leq_literals`, … |
+| `lit r i` | a literal law in the right-hand sides of the update at spine position `i`, any modality | `holds_upd_rwC_iff` (iff) | `add_literals`, `leq_literals`, … |
 | `lawUpd r ht i` | a term taclet (`TermTaclet`) onto a literal, in the box update at `i` | `holds_upd_rwC` | `updRw` |
 | `applyOnRigid i s` | `{U}(A ∧ B)`, `{U}(a → B)`, `{U}¬a`, `{U}a` with `a` first-order: `U` applied to the first-order parts (`Fml.substU`), kept in front of the rest; `U` at `i`, cannot halt or under the box | `Fml.pushS_sound` | `applyOnRigidFormula` |
 | `applyStorageBox i s` | `applyOnRigid` where `U` is a box update of the storage and locals (`Fml.pushStAt`) | `Fml.pushS_sound` | `applyOnRigidFormula` (`applyStorageBox`) |

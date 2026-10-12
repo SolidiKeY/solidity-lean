@@ -79,33 +79,19 @@ theorem holds_exit (m : Modality) {Γ₀ : Ctx} : {Γ : Ctx} → (κ : Frames C 
     rw [Prog.runFrames_seq]
     exact h
   | _, .pop _ e κ, φ, σ, h =>
-    holds_exit m κ φ (σ.drop e) ((holds_upd_erased _ _ _ _).1 h (σ.drop e) (State.drop_erase e σ)
-      (List.prefix_refl _))
+    holds_exit m κ φ (σ.drop e) (Upd.afterT.of_lands h (Upd.lands_pop_nil e σ) (List.prefix_refl _))
   | _, .drop e κ, φ, σ, h =>
-    holds_exit m κ φ (σ.thin e) ((holds_upd_erased _ _ _ _).1 h (σ.thin e) (State.thin_erase e σ)
-      (List.prefix_refl _))
-
-/-! ## Outcomes -/
-
-theorem _root_.Solidity.Modality.afterC_and {α : Type} {m : Modality} {p q r : α → Prop} {x : Semantics.Res α}
-    (hp : m.afterC p x) (hq : m.afterC q x) (h : ∀ a, p a → q a → r a) : m.afterC r x := by
-  cases x with
-  | ok a => exact h a hp hq
-  | error _ => exact hp
+    holds_exit m κ φ (σ.thin e) (Upd.afterT.of_lands h (Upd.lands_drop_nil e σ) (List.prefix_refl _))
 
 /-- A pop or a drop never halts. -/
-theorem Upd.apply_popsOnly {Γ : Ctx} (σ : EState C Γ) {Δ : Ctx} (U : Upd C Γ Δ)
-    (h : U.popsOnly = true) : ∃ τ, U.apply σ = .ok τ := by
+theorem Upd.popsOnly_globT {Γ : Ctx} (σ : State C Γ) {Δ : Ctx} (U : Upd C Γ Δ)
+    (h : U.popsOnly = true) : U.globT σ = .ok σ.globE := by
   induction U with
-  | nil => exact ⟨σ, rfl⟩
+  | nil => rfl
   | snoc _ _ => exact absurd h Bool.false_ne_true
   | decl _ _ _ => exact absurd h Bool.false_ne_true
-  | pop U e ih =>
-    obtain ⟨τ, hτ⟩ := ih h
-    exact ⟨τ.drop e, by rw [Upd.apply, hτ]; rfl⟩
-  | drop U e ih =>
-    obtain ⟨τ, hτ⟩ := ih h
-    exact ⟨τ.thin e, by rw [Upd.apply, hτ]; rfl⟩
+  | pop U e ih => exact ih h
+  | drop U e ih => exact ih h
 
 /-! ## The context -/
 
@@ -169,20 +155,14 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     intro φ hb h
     cases m with
     | box =>
-      refine ih (φ := .upd .box U φ) hb fun τ => ?_
-      rw [holds_upd_erased]
-      show Modality.afterC .box _ _
-      cases U.apply τ.erase with
-      | ok _ => exact fun σ' _ _ => h σ'
-      | error _ => trivial
+      exact ih (φ := .upd .box U φ) hb fun τ =>
+        Upd.afterT_intro (fun _ _ => trivial) fun _ σ' _ _ => h σ'
     | diamond =>
       have hb' : U.popsOnly = true ∧ H.boxOnly = true := Bool.and_eq_true_iff.mp hb
       refine ih (φ := .upd .diamond U φ) hb'.2 fun τ => ?_
-      obtain ⟨a, ha⟩ := Upd.apply_popsOnly τ.erase U hb'.1
-      rw [holds_upd_erased]
-      show Modality.afterC .diamond _ _
-      rw [ha]
-      exact fun σ' _ _ => h σ'
+      refine Upd.afterT_intro (fun e he => ?_) fun _ σ' _ _ => h σ'
+      rw [Upd.popsOnly_globT τ U hb'.1] at he
+      cases he
   | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ => h _
   | all H x p ih => intro φ hb h; exact ih (φ := .all x p φ) hb fun τ _ => h _
   | bind H m x t ih =>

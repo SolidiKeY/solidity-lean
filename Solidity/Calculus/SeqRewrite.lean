@@ -10,8 +10,11 @@ closed value terms at the empty scope.  A term of the sequent is `t` where it
 has no local and reads `t` at the empty scope (`Tm.closedAs`: `Tm.toNil?`,
 compared by `Tm.beqR`); it becomes `t'` read at its scope (`Tm.ofNil`).  A
 closed term reads what it reads at the empty scope over the same global
-part (`Tm.eval_toNilS`, `Tm.denote_ofNil`, the state's global part
-`EState.nil`), so nothing below reads the closer's terms or the erasure.
+part (`Tm.evalT_toNilS`, `Tm.denoteT_ofNil`, the typed state's global part
+`State.toNil`), so nothing below reads the closer's terms or the erasure.
+`EState.nil` and `Tm.eval_toNilS`/`Tm.denote_toNilS` stay for
+`Calculus/TermLaws.lean`'s laws, read on the erasure, and so does the term
+bridge `Tm.denote_eval` (its typed twin `Tm.denoteT_eval`).
 
 *In an equation*: a side of an equation that is `t` becomes `t'`
 (`Tm.sideC`), in every equation of the formula, at any depth of its
@@ -27,8 +30,8 @@ context's preconditions and the goal at once (`Hyps.rwEqC`).
 *In an update's right-hand sides* (`Proves.updRw`): every closed
 occurrence of `t` becomes `t'` (`Tm.rwC`), where `t'` returns wherever `t`
 does, the same value (`Tm.EvalRefines`: a Theory equation onto a literal,
-`Tm.EvalRefines.of_theq`), and where the update returns, the rewritten one
-returns the same state (`Upd.rwC_apply`).
+`Tm.EvalRefines.of_theq`), and where the update lands, the rewritten one
+lands (`Upd.rwBy_lands`).
 
 The kernel unfolds `Fml.rwEqC` and `Hyps.rwEqC` where `Proves.rewrite'`
 checks the rewritten sequent (`rfl`), so both are written by the
@@ -71,14 +74,6 @@ def Tm.ofNil : {s : Srt} → Tm C [] s → Tm C Γ s
 
 /-- The state's global part, with no local. -/
 def EState.nil (σ : EState C Γ) : EState C [] := σ.withEnv (Δ := []) ()
-
-/-- Two states with one global part have one at the empty scope. -/
-theorem EState.nil_eq_of_glob {Δ : Ctx} {σ : EState C Γ} {τ : EState C Δ} (h : σ.glob = τ.glob) :
-    σ.nil = τ.nil := by
-  cases σ; cases τ
-  simp only [EState.glob, Semantics.State.mk.injEq] at h
-  obtain ⟨rfl, rfl, rfl, -, rfl, rfl, rfl⟩ := h
-  rfl
 
 /-- `t` has no local and reads `q` at the empty scope. -/
 def Tm.closedAs (t : Tm C Γ .val) (q : Tm C [] .val) : Bool :=
@@ -138,40 +133,6 @@ theorem Tm.denote_toNilS (σ : EState C Γ) : {s : Srt} → (t : Tm C Γ s) → 
       o.denote (x₀.denote σ.nil) (y₀.denote σ.nil) (z₀.denote σ.nil)
     rw [Tm.denote_toNilS σ x hx, Tm.denote_toNilS σ y hy, Tm.denote_toNilS σ z hz]
 
-/-- A term of the empty scope reads alike at any scope. -/
-theorem Tm.eval_ofNil (σ : EState C Γ) : {s : Srt} → (t : Tm C [] s) → (Tm.ofNil t).eval σ = t.eval σ.nil
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ => nomatch i
-  | _, .app0 _ => rfl
-  | _, .app1 o _ x => by
-    show o.eval σ.glob ((Tm.ofNil x).eval σ) = o.eval σ.glob (x.eval σ.nil)
-    rw [Tm.eval_ofNil σ x]
-  | _, .app2 o x y => by
-    show o.eval σ.glob ((Tm.ofNil x).eval σ) ((Tm.ofNil y).eval σ) =
-      o.eval σ.glob (x.eval σ.nil) (y.eval σ.nil)
-    rw [Tm.eval_ofNil σ x, Tm.eval_ofNil σ y]
-  | _, .app3 o x y z => by
-    show o.eval σ.glob ((Tm.ofNil x).eval σ) ((Tm.ofNil y).eval σ) ((Tm.ofNil z).eval σ) =
-      o.eval σ.glob (x.eval σ.nil) (y.eval σ.nil) (z.eval σ.nil)
-    rw [Tm.eval_ofNil σ x, Tm.eval_ofNil σ y, Tm.eval_ofNil σ z]
-
-/-- A term of the empty scope denotes alike at any scope. -/
-theorem Tm.denote_ofNil (σ : EState C Γ) : {s : Srt} → (t : Tm C [] s) →
-    (Tm.ofNil t).denote σ = t.denote σ.nil
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ => nomatch i
-  | _, .app0 _ => rfl
-  | _, .app1 o _ x => by
-    show o.denote σ.glob ((Tm.ofNil x).denote σ) = o.denote σ.glob (x.denote σ.nil)
-    rw [Tm.denote_ofNil σ x]
-  | _, .app2 o x y => by
-    show o.denote σ.glob ((Tm.ofNil x).eval σ) ((Tm.ofNil y).eval σ) ((Tm.ofNil x).denote σ)
-        ((Tm.ofNil y).denote σ) =
-      o.denote σ.glob (x.eval σ.nil) (y.eval σ.nil) (x.denote σ.nil) (y.denote σ.nil)
-    rw [Tm.denote_ofNil σ x, Tm.denote_ofNil σ y, Tm.eval_ofNil σ x, Tm.eval_ofNil σ y]
-  | _, .app3 o x y z => by
-    show o.denote ((Tm.ofNil x).denote σ) ((Tm.ofNil y).denote σ) ((Tm.ofNil z).denote σ) =
-      o.denote (x.denote σ.nil) (y.denote σ.nil) (z.denote σ.nil)
-    rw [Tm.denote_ofNil σ x, Tm.denote_ofNil σ y, Tm.denote_ofNil σ z]
-
 theorem Tm.closedAs_toNil {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs q = true) :
     t.toNil? = some q := by
   unfold Tm.closedAs at h
@@ -180,13 +141,6 @@ theorem Tm.closedAs_toNil {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs 
     rw [ht, Tm.eq_of_beqR h]
   · cases h
 
-theorem Tm.eval_closedAs {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs q = true)
-    (σ : EState C Γ) : t.eval σ = q.eval σ.nil :=
-  Tm.eval_toNilS σ t (Tm.closedAs_toNil h)
-
-theorem Tm.denote_closedAs {q : Tm C [] .val} {t : Tm C Γ .val} (h : t.closedAs q = true)
-    (σ : EState C Γ) : t.denote σ = q.denote σ.nil :=
-  Tm.denote_toNilS σ t (Tm.closedAs_toNil h)
 
 /-! ### Closed terms on the typed state -/
 

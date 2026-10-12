@@ -581,13 +581,33 @@ def Fml.eraseNames : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .anon xs φ => .anon xs (Fml.eraseNames φ)
   | _, φ => φ
 
-theorem Upd.apply_eraseNames {Γ : Ctx} (σ : EState C Γ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.apply σ = U.apply σ
+theorem Upd.globT_eraseNames {Γ : Ctx} (σ : State C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.globT σ = U.globT σ
   | _, .nil => rfl
-  | _, .snoc U _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
-  | _, .decl U _ _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
-  | _, .pop U _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
-  | _, .drop U _ => by simp only [Upd.eraseNames, Upd.apply, Upd.apply_eraseNames σ U]
+  | _, .snoc U _ => by simp only [Upd.eraseNames, Upd.globT, Upd.globT_eraseNames σ U]
+  | _, .decl U _ _ => by simp only [Upd.eraseNames, Upd.globT, Upd.globT_eraseNames σ U]
+  | _, .pop U _ => Upd.globT_eraseNames σ U
+  | _, .drop U _ => Upd.globT_eraseNames σ U
+
+theorem Upd.held_eraseNames {Γ : Ctx} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    ∀ {t : LTy} (i : Idx Δ t), U.eraseNames.held i = U.held i
+  | _, .nil, _, _ => rfl
+  | _, .snoc U e, _, i => by
+    cases e with
+    | «local» k r =>
+      show Subst.set (Upd.held U.eraseNames) k r i = Subst.set (Upd.held U) k r i
+      unfold Subst.set
+      split
+      · rfl
+      · exact Upd.held_eraseNames U i
+    | storage _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ =>
+      exact Upd.held_eraseNames U i
+  | _, .decl U _ _, _, i => by
+    cases i with
+    | here => rfl
+    | there j => exact Upd.held_eraseNames U j
+  | _, .pop U h, _, i => Upd.held_eraseNames U (i.ext h)
+  | _, .drop U h, _, i => Upd.held_eraseNames U (i.wk h)
 
 /-- **A binder's name is for printing**: a formula holds where it does with
 its binders' names blanked. -/
@@ -598,14 +618,9 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
   | _, σ, .and φ ψ => and_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
   | _, σ, .imp φ ψ => imp_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
   | _, σ, .upd m U φ => by
-    refine (holds_upd_erased _ _ _ _).trans (Iff.trans ?_ (holds_upd_erased _ _ _ _).symm)
-    show m.afterC _ (U.eraseNames.apply σ.erase) ↔ m.afterC _ (U.apply σ.erase)
-    rw [Upd.apply_eraseNames]
-    cases U.apply σ.erase with
-    | ok τ =>
-      exact forall_congr' fun σ' => forall_congr' fun _ => forall_congr' fun _ =>
-        holds_eraseNames σ' φ
-    | error _ => exact Iff.rfl
+    show U.eraseNames.afterT m σ (holds · φ.eraseNames) ↔ U.afterT m σ (holds · φ)
+    unfold Upd.afterT Upd.Lands
+    simp only [Upd.globT_eraseNames, Upd.held_eraseNames, holds_eraseNames]
   | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ

@@ -244,14 +244,11 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
       e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → ∃ e', U.apply σ.erase = .error e')) :
     Premise.Sound m s (.update U) σ := by
   intro _ _ ω κ φ h
-  have h' : m.afterC
-      (fun τ => ∀ σ' : State C Γ', σ'.erase = τ → σ.H <+: σ'.H → holds σ' (Fml.modalK m ω κ φ))
-      (U.apply σ.erase) := (holds_upd_erased _ _ _ _).1 h
   rw [holds_modal_iff, runSt_cons_frames]
   cases hτ : Stmt.runSt σ s with
   | ok τ =>
-    rw [hs τ hτ] at h'
-    exact (holds_modal_iff τ ω κ φ).1 (holds_modalK τ ω κ φ (h' τ rfl (Stmt.runSt_ext hτ)))
+    have hl : U.Lands σ τ.globE τ := Upd.lands_iff.2 ⟨hs τ hτ, rfl⟩
+    exact (holds_modal_iff τ ω κ φ).1 (holds_modalK τ ω κ φ (h.of_lands hl (Stmt.runSt_ext hτ)))
   | error e =>
     obtain ⟨hp, hd⟩ := hh e hτ
     refine ⟨?_, fun he => hp (Except.error.inj he)⟩
@@ -262,8 +259,8 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
       by_cases hx : e = .exhausted
       · exact hx
       · obtain ⟨e', he'⟩ := hd rfl hx
-        rw [he'] at h'
-        exact h'.elim
+        have hg : U.globT σ = .error e' := by rw [← Upd.apply_glob σ U, he']; rfl
+        exact (h.of_error hg).elim
 
 /-- **A block dropping a frame from under what it keeps**
 (`Premise.inline`). -/

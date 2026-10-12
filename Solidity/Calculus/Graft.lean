@@ -21,7 +21,15 @@ the storage `U` last wrote, where `U` writes no other global part
 the global part (`memory`, a bounds check) is read the same only where `U`
 writes no global part (`Upd.envOnly`); any other merge is refused (`none`),
 never wrong.  An `.st` term changes only the storage of the state it is read
-in (`Tm.eval_st_glob`), so `s` read before `U` is the state after it.
+in (`Tm.evalT_st_glob`), so `s` read before `U` is the global part after it.
+
+**Soundness reads `holds`' typed clause** (`Upd.afterT`, `Calculus/Lands.lean`):
+`V` substituted (`Tm.substH`) reads in the state before what `V` reads in
+every typed state `U` lands on (`Tm.evalT_substH`), so the grafted update
+computes `V`'s global part there and leaves `V`'s locals
+(`Upd.globT_graft`, `Upd.held_graft`), and gives `U` then `V`
+(`holds_upd_graft`, by `Upd.afterT_seq`).  An atom of `holds` is read by
+the typed readers (`holds_eqT`, `holds_definedT`).
 
 An update moves under a hidden binder when it declares nothing
 (`Upd.lift?`), the binder not at a memory type or the update allocating
@@ -871,8 +879,8 @@ theorem Env.thin_ofExt {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → (e : Env 
 `{storage := s}{x := find(storage, p)}` is `{storage := s ‖ x := find(s, p)}`:
 `storage` after an update that writes no global part but the storage is the
 storage it last wrote (`Upd.lastSt`), read before it.  A storage term
-changes only the storage of the state it is read in (`Tm.eval_st_glob`), so
-`s` read before the update is the global part after it (`Upd.lastSt_eval`). -/
+changes only the storage of the state it is read in (`Tm.evalT_st_glob`), so
+`s` read before the update is the global part it leaves (`Upd.lastSt_evalT`). -/
 
 /-- An element that writes no global part but the storage. -/
 def UpdElem.stOnly {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool

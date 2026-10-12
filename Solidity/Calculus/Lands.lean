@@ -892,6 +892,60 @@ theorem Upd.lands_drop_nil {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     (Upd.drop .nil h : Upd C Δ Γ).Lands σ σ.globE (σ.thin h) :=
   ⟨rfl, rfl, fun i => State.getE_thin h σ i⟩
 
+/-- A declaration after an update lands on the state it lands on, the
+declared local pushed. -/
+theorem Upd.lands_decl {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Semantics.State}
+    {σ' : State C Δ} (hL : U.Lands σ₀ g σ') (x : Var) {t : LTy} {r : Rhs C Γ t}
+    {v : t.TDenote C σ'.H} (hr : r.evalT σ₀ = .ok (LTy.TDenote.erase t v)) :
+    (U.decl x r).Lands σ₀ g (σ'.push v) := by
+  refine ⟨?_, hL.2.1, fun i => ?_⟩
+  · show (do let g' ← U.globT σ₀; let _ ← r.evalT σ₀; pure g') = _
+    rw [hL.1, hr]; rfl
+  · cases i with
+    | here => exact hr
+    | there j => exact hL.2.2 j
+
+/-- A declaration whose right-hand side halts halts. -/
+theorem Upd.globT_decl_error {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Semantics.State}
+    (hU : U.globT σ₀ = .ok g) (x : Var) {t : LTy} {r : Rhs C Γ t} {e : Halt}
+    (hr : r.evalT σ₀ = .error e) : (U.decl x r).globT σ₀ = .error e := by
+  show (do let g' ← U.globT σ₀; let _ ← r.evalT σ₀; pure g') = _
+  rw [hU, hr]; rfl
+
+theorem State.getE_setLocal_self {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
+    (σ.setLocal i v).getE i = LTy.TDenote.erase t v := by
+  rw [State.getE_eq, State.setLocal_erase]
+  exact Env.get_set i _ _
+
+theorem State.getE_setLocal_other {t u : LTy} (σ : State C Γ) (i : Idx Γ t) (j : Idx Γ u)
+    (h : i.toNat ≠ j.toNat) (v : t.TDenote C σ.H) : (σ.setLocal i v).getE j = σ.getE j := by
+  rw [State.getE_eq, State.getE_eq, State.setLocal_erase]
+  exact Env.get_set_other i j h _ _
+
+/-- A local set after an update lands on the state it lands on, the local
+set. -/
+theorem Upd.lands_snoc_local {Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {g : Semantics.State}
+    {σ' : State C Δ} (hL : U.Lands σ₀ g σ') {t : LTy} (i : Idx Δ t) {r : Rhs C Γ t}
+    {v : t.TDenote C σ'.H} (hr : r.evalT σ₀ = .ok (LTy.TDenote.erase t v)) :
+    (U.snoc (.local i r)).Lands σ₀ g (σ'.setLocal i v) := by
+  refine ⟨?_, hL.2.1, fun j => ?_⟩
+  · show (do let g' ← U.globT σ₀; (UpdElem.local i r).globT σ₀ g') = _
+    rw [hL.1]
+    show (do let _ ← r.evalT σ₀; pure g) = _
+    rw [hr]; rfl
+  · show Held.OKT σ₀ (σ'.setLocal i v) j (Subst.set (Upd.held U) i r j)
+    unfold Subst.set
+    split
+    · rename_i hij
+      obtain rfl := Idx.ty_eq_of_toNat hij
+      obtain rfl := Idx.toNat_inj i j hij
+      show r.evalT σ₀ = .ok ((σ'.setLocal i v).getE i)
+      rw [State.getE_setLocal_self]
+      exact hr
+    · rename_i hij
+      rw [Held.OKT_iff_OKV, State.getE_setLocal_other σ' i j hij]
+      exact (Held.OKT_iff_OKV _ _ _ _).1 (hL.2.2 j)
+
 end Kit
 
 end Solidity

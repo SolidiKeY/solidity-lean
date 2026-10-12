@@ -296,26 +296,20 @@ theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
     cases h
     exact Val.evalT_noPanic a.st c hc
   | ok v =>
-    have hU : (Upd.nil.decl (fse k) (.val (p := .bool) c.lower)).apply a.st.erase =
-        .ok (a.st.push (t := .val .bool) v).erase := by
-      show (do let τ₀ ← pure a.st.erase
-               pure (τ₀.push (t := .val .bool) (← c.lower.eval a.st.erase))) = _
-      rw [Val.lower_eval_ok c a.st hc]
-      rfl
-    rw [holds_upd_erased] at hY
-    change Modality.afterC .box _ (Upd.apply _ _) at hY
-    rw [hU] at hY
-    obtain ⟨hT, hF⟩ := hY _ rfl (List.prefix_refl _)
+    have hcl : (Rhs.val (p := .bool) c.lower).evalT a.st =
+        .ok (LTy.TDenote.erase (H := a.st.H) (.val .bool) v) := by
+      show c.lower.evalT a.st = _
+      rw [Tm.evalT_eq]; exact Val.lower_eval_ok c a.st hc
+    obtain ⟨hT, hF⟩ :=
+      hY.of_lands (Upd.lands_decl (Upd.lands_nil a.st) (fse k) hcl) (List.prefix_refl _)
     cases v with
     | false =>
-      have hF' :=
-        (holds_upd_erased _ _ _ _).1 (hF ((holds_isBoolD _ _ _).2 rfl))
-          a.st rfl (List.prefix_refl _)
+      have hF' : holds a.st _ := Upd.afterT.of_lands (hF ((holds_isBoolD _ _ _).2 rfl))
+          (Upd.lands_pop_nil _ _) (List.prefix_refl _)
       exact (holds_modal_iff a.st ω κ φ).1 (holds_modalK a.st ω κ φ hF')
     | true =>
-      have hT' :=
-        (holds_upd_erased _ _ _ _).1 (hT ((holds_isBoolD _ _ _).2 rfl))
-          a.st rfl (List.prefix_refl _)
+      have hT' : holds a.st _ := Upd.afterT.of_lands (hT ((holds_isBoolD _ _ _).2 rfl))
+          (Upd.lands_pop_nil _ _) (List.prefix_refl _)
       have h' := (holds_modal_iff a.st body _ _).1 (holds_modalK a.st body _ _ hT')
       unfold Prog.runSt at h'
       dsimp only
@@ -429,33 +423,34 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     ⟨TGFrame.refl σ, TLocAgree.refl _, hI0⟩
   rintro a ⟨hg, hag, hI⟩
   have hY := holds_anonHavoc hxs hg hag hA hI
-  rw [holds_upd_erased] at hY
-  change Modality.afterC .diamond _ (Upd.apply _ _) at hY
-  have hUe : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
-      (.val (p := .bool) c.lower)).apply a.st.erase =
-      (d.lower.eval a.st.erase >>= fun dv => c.lower.eval a.st.erase >>= fun cv =>
-        pure ((a.st.erase.push (t := .val .uint) dv).push (t := .val .bool) cv)) := by
-    show (do
-      let τ₁ ← (do
-        let τ₀ ← pure a.st.erase
-        pure (τ₀.push (t := .val .uint) (← d.lower.eval a.st.erase)))
-      pure (τ₁.push (t := .val .bool) (← c.lower.eval a.st.erase))) = _
-    cases d.lower.eval a.st.erase <;> cases c.lower.eval a.st.erase <;> rfl
-  rw [hUe] at hY
+  have hglob : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
+      (.val (p := .bool) c.lower)).globT a.st =
+      (do
+        let g ← (do let g ← pure a.st.globE; let _ ← d.lower.evalT a.st; pure g)
+        let _ ← c.lower.evalT a.st
+        pure g) := rfl
   cases hd : d.evalT a.st with
   | error e =>
     obtain ⟨e', he'⟩ := Val.lower_eval_error d a.st hd
-    rw [he'] at hY
-    exact hY.elim
+    rw [Tm.evalT_eq a.st d.lower, he'] at hglob
+    exact (hY.of_error hglob).elim
   | ok dv =>
   cases hc : c.evalT a.st with
   | error e =>
     obtain ⟨e', he'⟩ := Val.lower_eval_error c a.st hc
-    rw [Val.lower_eval_ok d a.st hd, he'] at hY
-    exact hY.elim
+    rw [Tm.evalT_eq a.st d.lower, Val.lower_eval_ok d a.st hd, Tm.evalT_eq a.st c.lower, he'] at hglob
+    exact (hY.of_error hglob).elim
   | ok cv =>
-  rw [Val.lower_eval_ok d a.st hd, Val.lower_eval_ok c a.st hc] at hY
-  obtain ⟨hT, hF⟩ := hY ((a.st.push (t := .val .uint) dv).push (t := .val .bool) cv) rfl
+  have hdl : (Rhs.val (p := .uint) d.lower).evalT a.st =
+      .ok (LTy.TDenote.erase (H := a.st.H) (.val .uint) dv) := by
+    show d.lower.evalT a.st = _
+    rw [Tm.evalT_eq]; exact Val.lower_eval_ok d a.st hd
+  have hcl : (Rhs.val (p := .bool) c.lower).evalT a.st =
+      .ok (LTy.TDenote.erase (H := a.st.H) (.val .bool) cv) := by
+    show c.lower.evalT a.st = _
+    rw [Tm.evalT_eq]; exact Val.lower_eval_ok c a.st hc
+  obtain ⟨hT, hF⟩ := hY.of_lands
+    (Upd.lands_decl (Upd.lands_decl (Upd.lands_nil a.st) (fie k) hdl) (fse k) hcl)
     (List.prefix_refl _)
   refine ⟨dv.1, by show (d.evalT a.st).map _ = _; rw [hd]; rfl, ?_, fun hc' => ?_, fun hc' => ?_⟩
   · cases cv
@@ -463,15 +458,13 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     · exact .inl rfl
   · have hcv : cv = false := Except.ok.inj hc'
     subst hcv
-    have hF' :=
-      (holds_upd_erased _ _ _ _).1 (hF ((holds_isBoolD _ _ _).2 rfl)) a.st rfl (List.prefix_refl _)
-    exact hF'
+    exact Upd.afterT.of_lands (hF ((holds_isBoolD _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+      (List.prefix_refl _)
   · have hcv : cv = true := Except.ok.inj hc'
     subst hcv
-    have hT' :=
-      (holds_upd_erased _ _ _ _).1 (hT ((holds_isBoolD _ _ _).2 rfl))
-        (a.st.push (t := .val .uint) dv) rfl
-      (List.prefix_refl _)
+    have hT' : holds (a.st.push (t := .val .uint) dv) _ :=
+      Upd.afterT.of_lands (hT ((holds_isBoolD _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+        (List.prefix_refl _)
     have h' := (holds_modal_iff _ _ _ _).1 (holds_modalK _ _ _ _ hT')
     unfold Prog.runSt at h'
     rw [frames_pop_nil_run, State.push_lift,
@@ -496,19 +489,13 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       · change c.evalT τ₀ = _ at hc₁
         have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
           rw [Val.evalT_up]; exact hc₁
-        rw [holds_upd_erased] at hdec
-        change Modality.afterC .diamond _ (Upd.apply _ _) at hdec
-        have hU₁ : (Upd.nil.decl (fse k) (.val (p := .bool) c.up.lower)).apply
-            (τ₀.push (t := .val .uint) dv).erase =
-            .ok ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true).erase := by
-          show (do
-            let υ ← pure (τ₀.push (t := .val .uint) dv).erase
-            pure (υ.push (t := .val .bool)
-              (← c.up.lower.eval (τ₀.push (t := .val .uint) dv).erase))) = _
-          rw [Val.lower_eval_ok _ _ hcu]
-          rfl
-        rw [hU₁] at hdec
-        obtain ⟨hle, hlt⟩ := hdec _ rfl (List.prefix_refl _) ((holds_isBoolD _ _ _).2 rfl)
+        have hcl₁ : (Rhs.val (p := .bool) c.up.lower).evalT (τ₀.push (t := .val .uint) dv) =
+            .ok (LTy.TDenote.erase (H := τ₀.H) (.val .bool) true) := by
+          show c.up.lower.evalT _ = _
+          rw [Tm.evalT_eq]; exact Val.lower_eval_ok _ _ hcu
+        obtain ⟨hle, hlt⟩ := hdec.of_lands
+          (Upd.lands_decl (Upd.lands_nil (τ₀.push (t := .val .uint) dv)) (fse k) hcl₁)
+          (List.prefix_refl _) ((holds_isBoolD _ _ _).2 rfl)
         rw [holds_isBoolD] at hle hlt
         change evalBinop .le .uint (.int 0) (d.up.up.lower.eval _) = _ at hle
         change (d.up.up.lower.eval _ >>= fun a => evalBinop .lt .uint a (pure (.int dv.1))) = _
