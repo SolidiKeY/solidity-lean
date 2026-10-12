@@ -472,6 +472,49 @@ theorem erase_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
 theorem erase_int (n : Int) (h : PrimTy.int.inRange n = true) :
     PrimTy.erase (p := .int) ⟨n, h⟩ = .int n := rfl
 theorem erase_bool (b : Bool) : PrimTy.erase (p := .bool) b = .bool b := rfl
+theorem ofLit_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
+    PrimTy.ofLit .uint n h = (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) := rfl
+theorem ofLit_int (n : Int) (h : PrimTy.int.inRange n = true) :
+    PrimTy.ofLit .int n h = (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true}) := rfl
+
+/-! The typed operators at their operand types, so a closer leaf's
+arithmetic is `Int` arithmetic and a range check (`PrimTy.ofInt?`). -/
+
+theorem shortT_uint (op : BinOp) (x : PrimTy.uint.Denote) : op.shortT x = none := by
+  cases op <;> rfl
+theorem shortT_int (op : BinOp) (x : PrimTy.int.Denote) : op.shortT x = none := by
+  cases op <;> rfl
+theorem shortT_and (x : PrimTy.bool.Denote) :
+    BinOp.and.shortT x = if x = true then none else some (false : Bool) := rfl
+theorem shortT_or (x : PrimTy.bool.Denote) :
+    BinOp.or.shortT x = if x = true then some (true : Bool) else none := rfl
+theorem shortT_bool (op : BinOp) (h₁ : op ≠ .and) (h₂ : op ≠ .or) (x : PrimTy.bool.Denote) :
+    op.shortT x = none := by
+  cases op <;> first | rfl | exact absurd rfl h₁ | exact absurd rfl h₂
+theorem evalT_uint (op : BinOp) (a b : PrimTy.uint.Denote) :
+    op.evalT a b = BinOp.evalNum .uint a.1 b.1 op := rfl
+theorem evalT_int (op : BinOp) (a b : PrimTy.int.Denote) :
+    op.evalT a b = BinOp.evalNum .int a.1 b.1 op := rfl
+theorem evalT_bool (op : BinOp) (a b : PrimTy.bool.Denote) :
+    op.evalT a b = BinOp.evalBool a b op := rfl
+theorem ofInt?_uint (n : Int) : PrimTy.uint.ofInt? n =
+    if h : PrimTy.uint.inRange n = true then
+      some (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) else none := rfl
+theorem ofInt?_int (n : Int) : PrimTy.int.ofInt? n =
+    if h : PrimTy.int.inRange n = true then
+      some (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true}) else none := rfl
+theorem optRes_dite_ok {α : Type} {c : Prop} [Decidable c] (f : c → α) (a : α) :
+    Close.optRes (if h : c then some (f h) else none) = .ok a ↔ ∃ h : c, f h = a := by
+  by_cases hc : c
+  · simp only [hc, dite_true, optRes_some, Except.ok.injEq, exists_true_left]
+  · rw [dif_neg hc, optRes_none]
+    exact ⟨fun e => (nomatch e), fun ⟨h, _⟩ => absurd h hc⟩
+theorem uint_eq_mk (a : PrimTy.uint.Denote) (n : Int) (h : PrimTy.uint.inRange n = true) :
+    a = (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) ↔ a.val = n :=
+  ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
+theorem int_eq_mk (a : PrimTy.int.Denote) (n : Int) (h : PrimTy.int.inRange n = true) :
+    a = (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true}) ↔ a.val = n :=
+  ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
 /-- A natural literal cast to an integer is the integer literal: the bounds
 `uintBound`, `intBound` and the bitwise results then compare by the
 literal simprocs (`Int.reduceLT`), not by unfolding the cast. -/
@@ -635,7 +678,10 @@ attribute [close_rw_s]
   CloseS.holds_defined CloseS.holds_upd CloseS.holds_havoc CloseS.holds_all
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
   CloseS.holds_bind_oldNet CloseS.holds_anon
-  CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool
+  CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool CloseS.ofLit_uint CloseS.ofLit_int
+  CloseS.shortT_uint CloseS.shortT_int CloseS.shortT_and CloseS.shortT_or CloseS.shortT_bool
+  CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int CloseS.optRes_dite_ok CloseS.uint_eq_mk CloseS.int_eq_mk exists_prop
+  BinOp.evalNum BinOp.evalBool BinOp.arithInt UnOp.evalT PrimTy.inRange
   CloseS.natCast_ofNat
   CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Close.equiv_prim_left_iff
   Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
