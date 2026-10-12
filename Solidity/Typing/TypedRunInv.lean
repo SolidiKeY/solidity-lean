@@ -1,43 +1,36 @@
 import Solidity.Typing.Soundness
-import Solidity.Semantics.StepErase
-import Solidity.Semantics.RunWk
+import Solidity.Semantics.RunFrame
 import Solidity.Typing.TypedWT
 
 /-!
-# Invariants of the typed run, on its erasure
+# Invariants of the typed run
 
-`Typing/Soundness.lean`'s `RunInv` (a part on the erased global state, a
-part on each erased local) carried along the typed run
-(`Semantics/Run.lean`): `RunInv.TKeeps t` says the step `t`, from a typed
-state whose erasure the invariant holds of, ends, if in a state, in one
-whose erasure it holds of, each under the store typing its own heap typing
-lists (`HTy.toHeapTy 0 σ.H`, decision 75).  The scopes (a branch, a block, a
-loop's iteration, a call's frame, a `try`'s clause) only push and pop
-locals, so they keep any such invariant once their sub-programs do
-(`tkeeps_ite` … `tkeeps_tryCall`, a loop by `TLoop.run_induct`); a statement
-without sub-programs keeps it when what it erases to does
-(`TKeeps.of_agrees`, through `Semantics/StepErase.lean`), from the erasure
-of a typed state, which is well-typed by construction (`State.erase_wt`,
-`Typing/TypedWT.lean`): each invariant's own lemma
-(`Typing/Reachability.lean`'s canonical storage,
-`Typing/Constructibility.lean`'s tight one) needs only what the types do
-not already say.
+`Typing/Soundness.lean`'s `RunInv` (a part on the untyped global state, a
+part on each erased local) read of a typed state (`RunInv.HoldsT`: the
+global part of its erasure, its locals erased) and carried along the typed
+run (`Semantics/Run.lean`): `RunInv.TKeeps t` says the step `t`, from a typed
+state the invariant holds of, ends, if in a state, in one it holds of, each
+under the store typing its own heap typing lists (`HTy.toHeapTy 0 σ.H`,
+decision 75).  The scopes (a branch, a block, a loop's iteration, a call's
+frame, a `try`'s clause) only push and pop locals, so they keep any such
+invariant once their sub-programs do (`tkeeps_ite` … `tkeeps_tryCall`, a
+loop by `TLoop.run_induct`); a call's arguments, return variables and
+decoded data are values or fresh memory objects, which every invariant
+here accepts (`RunInv.ValMemOk`).  A statement without sub-programs is each
+invariant's own lemma, read on `TRun.*` through the storage and heap
+erasure lemmas (`Semantics/StorageErase.lean`, `Semantics/HeapErase.lean`):
+`Typing/Reachability.lean`'s canonical storage,
+`Typing/Constructibility.lean`'s tight one, `Typing/Fits.lean`'s bounds.
+A typed state is well-typed by construction (`State.glob_wt`,
+`Typing/TypedWT.lean`), so an invariant needs only what the types do not
+already say.
 -/
 
 namespace Solidity
 
-open Semantics (Value Res HeapTy bind_ok_inv)
+open Semantics (Value Res HeapTy)
 
 variable {C : Contract}
-
-/-- A typed step that ends in a state: what it erases to ends in that state's
-erasure. -/
-theorem StepAgrees.ok {Γ Γ' : Ctx} {t : TStep C Γ Γ'} {u : EState C Γ → Res (EState C Γ')}
-    (ha : StepAgrees t u) {σ : State C Γ} {o : Out C σ.H Γ'} (h : t σ = .ok o) :
-    u σ.erase = .ok o.st.erase := by
-  have hu := ha σ
-  rw [h] at hu
-  exact hu
 
 /-- A heap typing that grew lists a store typing that only grew. -/
 theorem HTy.toHeapTy_extends {H H' : HTy} (h : H <+: H') :
@@ -56,45 +49,171 @@ theorem HTy.toHeapTy_extends {H H' : HTy} (h : H <+: H') :
     rw [List.getElem?_append_left (List.getElem?_eq_some_iff.mp hi).1, hi]
     exact hid
 
+theorem TRes.ofOpt_ok {α : Type} {x : Option α} {a : α} (h : TRes.ofOpt x = .ok a) :
+    x = some a := by
+  cases x with
+  | none => exact nomatch h
+  | some b => cases h; rfl
+
+/-- `b.f`, erased: the member's segment appended. -/
+theorem SRef.field_erase {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
+    (h : C.fieldType s f = some T) :
+    (r.field h).erase = (r.root, r.path.erase ++ [.field f]) := by
+  simp only [SRef.field, SRef.erase, SRef.append, Path.erase_append]
+  rfl
+
+/-- `b[i]`, erased: the index's segment appended. -/
+theorem SRef.index_erase {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R))
+    (it : IndexTy R k V) (i : Int) : (r.index it i).erase = (r.root, r.path.erase ++ [.at i]) := by
+  simp only [SRef.index, SRef.erase, SRef.append, Path.erase_append, Path.erase_index]
+
+/-! ## Typed locals that satisfy a predicate -/
+
+/-- Locals of value and memory types only. -/
+def Ctx.ValMem : Ctx → Prop
+  | [] => True
+  | .val _ :: Γ => Ctx.ValMem Γ
+  | .mem _ :: Γ => Ctx.ValMem Γ
+  | _ :: _ => False
+
+namespace Env.All
+
+variable {P : (t : LTy) → t.Denote C → Prop} {H : HTy}
+
+theorem tappend {Γ : Ctx} : (ρ : Ctx) → {r : TEnv C H ρ} → {e : TEnv C H Γ} →
+    Env.All P (TEnv.erase ρ r) → Env.All P (TEnv.erase Γ e) →
+    Env.All P (TEnv.erase (ρ ++ Γ) (TEnv.append ρ r e))
+  | [], _, _, _, he => he
+  | _ :: ρ, _, _, hr, he => ⟨hr.1, tappend ρ hr.2 he⟩
+
+theorem ttake {Γ : Ctx} : (ρ : Ctx) → {e : TEnv C H (ρ ++ Γ)} →
+    Env.All P (TEnv.erase (ρ ++ Γ) e) → Env.All P (TEnv.erase ρ (TEnv.take ρ e))
+  | [], _, _ => trivial
+  | _ :: ρ, _, he => ⟨he.1, ttake ρ he.2⟩
+
+theorem tdrop {Γ Δ : Ctx} (h : Ext Γ Δ) {e : TEnv C H Δ} (he : Env.All P (TEnv.erase Δ e)) :
+    Env.All P (TEnv.erase Γ (TEnv.drop h e)) := by
+  rw [← TEnv.drop_erase]
+  exact Env.All.drop h he
+
+theorem tset {Γ : Ctx} {t : LTy} (i : Idx Γ t) {e : TEnv C H Γ} {v : t.TDenote C H}
+    (he : Env.All P (TEnv.erase Γ e)) (hv : P t (LTy.TDenote.erase t v)) :
+    Env.All P (TEnv.erase Γ (TEnv.set i v e)) := by
+  rw [← TEnv.set_erase]
+  exact Env.All.set i he hv
+
+theorem twk {Γ : Ctx} {H' : HTy} (x : H <+: H') {e : TEnv C H Γ}
+    (he : Env.All P (TEnv.erase Γ e)) : Env.All P (TEnv.erase Γ (TEnv.wk x Γ e)) := by
+  rw [TEnv.erase_wk]
+  exact he
+
+/-- A predicate that every value and every memory local satisfies holds of
+locals of those types. -/
+theorem of_valMem (hv : ∀ p v, P (.val p) v) (hm : ∀ R v, P (.mem R) v) :
+    {Γ : Ctx} → Ctx.ValMem Γ → (e : Env C Γ) → Env.All P e
+  | [], _, _ => trivial
+  | .val _ :: Γ, h, e => ⟨hv _ e.1, of_valMem hv hm (Γ := Γ) h e.2⟩
+  | .mem _ :: Γ, h, e => ⟨hm _ e.1, of_valMem hv hm (Γ := Γ) h e.2⟩
+  | .alias _ :: _, h, _ => nomatch h
+  | .old :: _, h, _ => nomatch h
+  | .oldNet :: _, h, _ => nomatch h
+
+end Env.All
+
+theorem Args.valMem {Γ : Ctx} : {ps : Ctx} → Args C Γ ps → Ctx.ValMem ps
+  | _, .nil => trivial
+  | .val _ :: ps, .snoc as _ _ _ => (Args.valMem as : Ctx.ValMem ps)
+
+theorem Binders.valMem : {ρ : Ctx} → Binders ρ → Ctx.ValMem ρ
+  | _, .nil => trivial
+  | .val _ :: ρ, .snoc bs _ _ => (Binders.valMem bs : Ctx.ValMem ρ)
+
+theorem CodeBinder.valMem {κ : Ctx} (code : CodeBinder κ) : Ctx.ValMem κ := by
+  cases code <;> trivial
+
+/-- Leaving a call keeps every local satisfying `P` when the caller's and the
+frame's return variables do. -/
+theorem CallRet.leaveT_all {P : (t : LTy) → t.Denote C → Prop} {H : HTy} {Γ rs Γ' : Ctx}
+    (ret : CallRet Γ rs Γ') {e : TEnv C H Γ} {r : TEnv C H rs}
+    (he : Env.All P (TEnv.erase Γ e)) (hr : Env.All P (TEnv.erase rs r)) :
+    Env.All P (TEnv.erase Γ' (ret.leaveT e r)) := by
+  cases ret with
+  | none => exact he
+  | val p x res =>
+    cases res with
+    | none => exact he
+    | some i => exact Env.All.tset i he hr.1
+  | rets bs => exact Env.All.tappend _ hr he
+  | mem R x hd hm => exact ⟨hr.1, he⟩
+
+/-- Entering a call leaves the storage alone. -/
+theorem CallRet.enterT_storage {Γ rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (τ : State C ps) :
+    (ret.enterT τ).st.storage = τ.storage := by
+  cases ret <;> rfl
+
+/-- Entering a call: the frame's return variables, values or a fresh memory
+object, on top of the parameters. -/
+theorem CallRet.enterT_env {P : (t : LTy) → t.Denote C → Prop} {Γ rs Γ' ps : Ctx}
+    (ret : CallRet Γ rs Γ') (τ : State C ps) (hv : ∀ p v, P (.val p) v)
+    (hm : ∀ R v, P (.mem R) v) (he : Env.All P (TEnv.erase ps τ.env)) :
+    Env.All P (TEnv.erase (rs ++ ps) (ret.enterT τ).st.env) := by
+  cases ret with
+  | none => exact he
+  | val p x res => exact ⟨hv _ _, he⟩
+  | rets bs =>
+    exact Env.All.tappend _ (Env.All.of_valMem hv hm (Binders.valMem bs) _) he
+  | mem R x hd hm' => exact ⟨hm _ _, Env.All.twk _ he⟩
+
+/-! ## Invariants of the typed run -/
+
 namespace RunInv
 
 variable {I : RunInv C}
 
-/-- A typed step keeps the invariant on the erasure: from a typed state
-whose erasure it holds of, under the store typing its heap typing lists, the
-step ends, if in a state, in one whose erasure it holds of under its own. -/
+/-- The invariant holds of a typed state under the store typing `H`: of the
+global part of its erasure, and of each local erased. -/
+def HoldsT (I : RunInv C) {Γ : Ctx} (H : HeapTy) (σ : State C Γ) : Prop :=
+  I.glob H σ.erase.glob ∧ Env.All (I.loc H) (TEnv.erase Γ σ.env)
+
+/-- The locals replaced. -/
+theorem HoldsT.withEnv {Γ Δ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.HoldsT H σ)
+    {e : TEnv C σ.H Δ} (he : Env.All (I.loc H) (TEnv.erase Δ e)) : I.HoldsT H (σ.withEnv e) :=
+  ⟨h.1, he⟩
+
+theorem HoldsT.drop {Γ Δ : Ctx} {H : HeapTy} {σ : State C Δ} (h : I.HoldsT H σ) (x : Ext Γ Δ) :
+    I.HoldsT H (σ.drop x) :=
+  ⟨h.1, Env.All.tdrop x h.2⟩
+
+theorem HoldsT.setLocal {Γ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.HoldsT H σ) {t : LTy}
+    (i : Idx Γ t) {v : t.TDenote C σ.H} (hv : I.loc H t (LTy.TDenote.erase t v)) :
+    I.HoldsT H (σ.setLocal i v) :=
+  ⟨h.1, Env.All.tset i h.2 hv⟩
+
+theorem HoldsT.push {Γ : Ctx} {H : HeapTy} {σ : State C Γ} (h : I.HoldsT H σ) {t : LTy}
+    {v : t.TDenote C σ.H} (hv : I.loc H t (LTy.TDenote.erase t v)) :
+    I.HoldsT H (σ.push v) :=
+  ⟨h.1, hv, h.2⟩
+
+/-- A typed step keeps the invariant: from a typed state it holds of, under
+the store typing its heap typing lists, the step ends, if in a state, in one
+it holds of under its own. -/
 def TKeeps {Γ Γ' : Ctx} (I : RunInv C) (t : TStep C Γ Γ') : Prop :=
-  ∀ (σ : State C Γ) (o : Out C σ.H Γ'), I.Holds (HTy.toHeapTy 0 σ.H) σ.erase → t σ = .ok o →
-    I.Holds (HTy.toHeapTy 0 o.st.H) o.st.erase
+  ∀ (σ : State C Γ) (o : Out C σ.H Γ'), I.HoldsT (HTy.toHeapTy 0 σ.H) σ → t σ = .ok o →
+    I.HoldsT (HTy.toHeapTy 0 o.st.H) o.st
 
-/-- What a leaf proves on its erasure `u`: from a typed state whose erasure
-the invariant holds of (and which is well-typed by construction,
-`State.erase_wt`), what `u` ends in, if it is the erasure of a typed state
-over a grown heap typing, holds the invariant under that state's store
-typing. -/
-def EKeeps {Γ Γ' : Ctx} (I : RunInv C) (u : EState C Γ → Res (EState C Γ')) : Prop :=
-  ∀ (σ : State C Γ) (σ' : EState C Γ'), RunWT C (HTy.toHeapTy 0 σ.H) σ.erase →
-    I.Holds (HTy.toHeapTy 0 σ.H) σ.erase → u σ.erase = .ok σ' →
-    ∀ (τ : State C Γ'), σ.H <+: τ.H → τ.erase = σ' → I.Holds (HTy.toHeapTy 0 τ.H) σ'
-
-/-- **A leaf, through its erasure**: a typed step keeps the invariant when
-what it erases to does (`Semantics/StepErase.lean`). -/
-theorem TKeeps.of_agrees (hnd : Semantics.nodupKeysB C.vars = true) {Γ Γ' : Ctx} {t : TStep C Γ Γ'}
-    {u : EState C Γ → Res (EState C Γ')} (ha : StepAgrees t u) (hk : I.EKeeps u) : I.TKeeps t :=
-  fun σ o hσ h => hk σ o.st.erase (State.erase_wt hnd σ) hσ (ha.ok h) o.st o.ext rfl
+/-- The invariant accepts every value and every memory local, and reads the
+global state through its storage alone: what a call's arguments, return
+variables and decoded data, and a frame's allocation, need. -/
+structure ValMemOk (I : RunInv C) : Prop where
+  val : ∀ H p v, I.loc H (.val p) v
+  mem : ∀ H R v, I.loc H (.mem R) v
+  glob : ∀ H H' (τ τ' : Semantics.State), τ'.storage = τ.storage → I.glob H τ → I.glob H' τ'
 
 theorem TKeeps.drop {Γ Δ Δ' : Ctx} {t : TStep C Γ Δ} (hf : I.TKeeps t) (x : Ext Δ' Δ) :
     I.TKeeps (fun σ => (t σ).map fun o => ⟨o.st.drop x, o.ext⟩) := by
   intro σ o hσ h
-  dsimp only at h
-  cases hr : t σ with
-  | error e => rw [hr] at h; cases h
-  | ok o₁ =>
-    rw [hr] at h
-    cases h
-    show I.Holds (HTy.toHeapTy 0 o₁.st.H) (o₁.st.drop x).erase
-    rw [State.drop_erase]
-    exact (hf σ o₁ hσ hr).drop x
+  obtain ⟨o₁, hr, rfl⟩ := tmap_ok_inv h
+  exact (hf σ o₁ hσ hr).drop x
 
 theorem tkeeps_seq {Γ Γ₁ Γ₂ : Ctx} {s : TStep C Γ Γ₁} {P : TStep C Γ₁ Γ₂} (hs : I.TKeeps s)
     (hP : I.TKeeps P) : I.TKeeps (TRun.seq s P) := by
@@ -102,12 +221,8 @@ theorem tkeeps_seq {Γ Γ₁ Γ₂ : Ctx} {s : TStep C Γ Γ₁} {P : TStep C Γ
   unfold TRun.seq at h
   split at h
   · rename_i o₁ ho₁
-    cases hp : P o₁.st with
-    | error => rw [hp] at h; cases h
-    | ok o₂ =>
-      rw [hp] at h
-      cases h
-      exact hP o₁.st o₂ (hs σ o₁ hσ ho₁) hp
+    obtain ⟨o₂, hp, rfl⟩ := tmap_ok_inv h
+    exact hP o₁.st o₂ (hs σ o₁ hσ ho₁) hp
   · cases h
 
 theorem tkeeps_nil {Γ : Ctx} : I.TKeeps (TRun.nil : TStep C Γ Γ) := by
@@ -120,13 +235,10 @@ theorem tkeeps_ite {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ
     I.TKeeps (TRun.ite c h₁ thn h₂ els) := by
   intro σ o hσ h
   unfold TRun.ite at h
-  cases hv : c.evalT σ with
-  | error => rw [hv] at h; cases h
-  | ok v =>
-    rw [hv, ok_bind] at h
-    split at h
-    · exact hthn.drop h₁ σ o hσ h
-    · exact hels.drop h₂ σ o hσ h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  split at h
+  · exact hthn.drop h₁ σ o hσ h
+  · exact hels.drop h₂ σ o hσ h
 
 theorem tkeeps_block {Γ Γ₁ : Ctx} (x : Ext Γ Γ₁) {body : TStep C Γ Γ₁} (hb : I.TKeeps body) :
     I.TKeeps (TRun.block x body) :=
@@ -135,24 +247,18 @@ theorem tkeeps_block {Γ Γ₁ : Ctx} (x : Ext Γ Γ₁) {body : TStep C Γ Γ�
 theorem tkeeps_require {Γ : Ctx} (c : Val C Γ .bool) : I.TKeeps (TRun.require c) := by
   intro σ o hσ h
   unfold TRun.require at h
-  cases hv : c.evalT σ with
-  | error => rw [hv] at h; cases h
-  | ok v =>
-    rw [hv, ok_bind] at h
-    split at h
-    · cases h; exact hσ
-    · cases h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h; exact hσ
+  · cases h
 
 theorem tkeeps_assert {Γ : Ctx} (c : Val C Γ .bool) : I.TKeeps (TRun.assert c) := by
   intro σ o hσ h
   unfold TRun.assert at h
-  cases hv : c.evalT σ with
-  | error => rw [hv] at h; cases h
-  | ok v =>
-    rw [hv, ok_bind] at h
-    split at h
-    · cases h; exact hσ
-    · cases h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h; exact hσ
+  · cases h
 
 theorem tkeeps_revert {Γ : Ctx} :
     I.TKeeps (fun _ : State C Γ => (.error .revert : TRes (Out C _ Γ))) :=
@@ -162,8 +268,8 @@ theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {bo
     (hb : I.TKeeps body) : I.TKeeps (TRun.loop c x body) := by
   intro σ o hσ h
   unfold TRun.loop at h
-  refine TLoop.run_induct (P := fun o : Out C σ.H Γ => I.Holds (HTy.toHeapTy 0 o.st.H) o.st.erase)
-    (Q := fun r => ∀ o, r = .ok o → I.Holds (HTy.toHeapTy 0 o.st.H) o.st.erase)
+  refine TLoop.run_induct (P := fun o : Out C σ.H Γ => I.HoldsT (HTy.toHeapTy 0 o.st.H) o.st)
+    (Q := fun r => ∀ o, r = .ok o → I.HoldsT (HTy.toHeapTy 0 o.st.H) o.st)
     hσ (fun τ h₁ => ?_) (fun _ h => nomatch h) _ h
   simp only [TLoop.step]
   rcases c.evalT τ.st with _ | b
@@ -173,96 +279,53 @@ theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {bo
     · dsimp only
       cases hr : body τ.st with
       | error => exact fun _ h => nomatch h
-      | ok τ' =>
-        show I.Holds (HTy.toHeapTy 0 τ'.st.H) (τ'.st.drop x).erase
-        rw [State.drop_erase]
-        exact (hb τ.st τ' h₁ hr).drop x
+      | ok τ' => exact (hb τ.st τ' h₁ hr).drop x
 
-/-- A call keeps the invariant when its arguments, its entry (the frame's
-return variables, a memory one allocated) and its body do. -/
-theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
-    (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf}
-    (hargs : ∀ (H : HeapTy) (σ : EState C Γ) (a : Env C ps), I.Holds H σ → args.eval σ = .ok a →
-      Env.All (I.loc H) a)
-    (henter : ∀ (σ : State C Γ) (a : TEnv C σ.H ps),
-      I.Holds (HTy.toHeapTy 0 σ.H) (σ.withEnv a).erase →
-      I.Holds (HTy.toHeapTy 0 (ret.enterT (σ.withEnv a)).st.H) (ret.enterT (σ.withEnv a)).st.erase)
+/-- A call keeps an invariant `ValMemOk` accepts when its body does: the
+arguments are values, the frame's return variables values or a fresh
+memory object, the storage as it was. -/
+theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (hI : I.ValMemOk) (args : Args C Γ ps)
+    (ret : CallRet Γ rs Γ') (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf}
     (hb : I.TKeeps body) : I.TKeeps (TRun.call args ret x body) := by
   intro σ o hσ h
   unfold TRun.call at h
-  cases ha : args.evalT σ with
-  | error => rw [ha] at h; cases h
-  | ok a =>
-    rw [ha, ok_bind] at h
-    dsimp only at h
-    have hae := Args.evalT_erase σ args
-    rw [ha] at hae
-    have h₁ := henter σ a (by
-      rw [State.withEnv_erase]
-      exact hσ.withEnv (hargs _ σ.erase _ hσ hae))
-    cases hr : body (ret.enterT (σ.withEnv a)).st with
-    | error => rw [hr] at h; cases h
-    | ok o₂ =>
-      rw [hr, ok_bind] at h
-      cases h
-      have h₂ := hb _ o₂ h₁ hr
-      rw [State.withEnv_erase]
-      refine h₂.withEnv ?_
-      rw [CallRet.leaveT_erase, TEnv.erase_wk, ← TEnv.take_erase, ← TEnv.drop_erase]
-      exact CallRet.leave_all ret
-        (env_mono (HTy.toHeapTy_extends ((ret.enterT (σ.withEnv a)).ext.trans o₂.ext)) hσ.2)
-        (Env.All.take rs (Env.All.drop x h₂.2))
+  obtain ⟨a, _, h⟩ := tbind_ok_inv h
+  dsimp only at h
+  obtain ⟨o₂, hr, h⟩ := tbind_ok_inv h
+  cases h
+  have h₀ : I.HoldsT (HTy.toHeapTy 0 σ.H) (σ.withEnv a) :=
+    hσ.withEnv (Env.All.of_valMem (hI.val _) (hI.mem _) (Args.valMem args) _)
+  have h₁ : I.HoldsT (HTy.toHeapTy 0 (ret.enterT (σ.withEnv a)).st.H)
+      (ret.enterT (σ.withEnv a)).st :=
+    ⟨hI.glob _ _ (σ.withEnv a).erase.glob _
+      (congrArg Storage.erase (CallRet.enterT_storage ret (σ.withEnv a))) h₀.1,
+      CallRet.enterT_env ret _ (hI.val _) (hI.mem _)
+        (env_mono (HTy.toHeapTy_extends (ret.enterT (σ.withEnv a)).ext) h₀.2)⟩
+  have h₂ := hb _ o₂ h₁ hr
+  refine ⟨h₂.1, CallRet.leaveT_all ret (Env.All.twk _ ?_)
+    (Env.All.ttake rs (Env.All.tdrop x h₂.2))⟩
+  exact env_mono (HTy.toHeapTy_extends ((ret.enterT (σ.withEnv a)).ext.trans o₂.ext)) hσ.2
 
-/-- A call's entry, read on the erasure: `CallRet.enter` on the caller's
-global state, the frame's return variables before the arguments. -/
-theorem _root_.Solidity.CallRet.enterT_ok {Γ Γ' ps rs : Ctx} (ret : CallRet Γ rs Γ')
-    (σ : State C Γ) (a : TEnv C σ.H ps) :
-    ∃ τ' r, ret.enter σ.erase.glob = .ok (τ', r) ∧
-      (ret.enterT (σ.withEnv a)).st.erase =
-        EState.ofGlob τ' (Env.append rs r (TEnv.erase ps a)) := by
-  have he := CallRet.enterT_erase ret σ a (fun s => (pure s : Res _))
-  obtain ⟨⟨τ', r⟩, hen, he⟩ := bind_ok_inv he
-  exact ⟨τ', r, hen, (Except.ok.inj he).symm⟩
-
-theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
-    (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : TStep C (ρ ++ Γ) Γ₁}
+theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hI : I.ValMemOk) (call : ExtCall C Γ)
+    (rets : Binders ρ) (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : TStep C (ρ ++ Γ) Γ₁}
     (h₂ : Ext Γ Γ₂) {err : TStep C Γ Γ₂} (code : CodeBinder κ)
     (h₃ : Ext (κ ++ Γ) Γ₃) {pnc : TStep C (κ ++ Γ) Γ₃}
     (h₄ : Ext Γ Γ₄) {other : TStep C Γ Γ₄}
-    (hdec : ∀ (H : HeapTy) (vs : List Value) (r : Env C ρ) (rest : List Value),
-      rets.decode vs = .ok (r, rest) → Env.All (I.loc H) r)
-    (hcode : ∀ (H : HeapTy) (c : Value) (r : Env C κ), code.decode c = .ok r → Env.All (I.loc H) r)
     (hok : I.TKeeps ok) (herr : I.TKeeps err) (hpnc : I.TKeeps pnc) (hoth : I.TKeeps other) :
     I.TKeeps (TRun.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other) := by
   intro σ o hσ h
   unfold TRun.tryCall at h
   split at h
   · cases h
-  · rename_i vs _
-    cases hr : Binders.decodeT (H := σ.H) rets vs with
-    | error => rw [hr] at h; cases h
-    | ok x =>
-      obtain ⟨r, rest⟩ := x
-      rw [hr, ok_bind] at h
-      dsimp only at h
-      refine hok.drop ((Ext.append Γ ρ).trans h₁) (σ.withEnv (TEnv.append ρ r σ.env)) o ?_ h
-      show I.Holds (HTy.toHeapTy 0 σ.H) _
-      rw [State.withEnv_erase, TEnv.append_erase]
-      have hd := Binders.decodeT_erase (C := C) (H := σ.H) rets vs
-      rw [hr] at hd
-      exact hσ.withEnv (Env.All.append ρ (hdec _ vs _ rest hd) hσ.2)
+  · obtain ⟨⟨r, rest⟩, _, h⟩ := tbind_ok_inv h
+    refine hok.drop ((Ext.append Γ ρ).trans h₁) (σ.withEnv (TEnv.append ρ r σ.env)) o
+      (hσ.withEnv (Env.All.tappend ρ ?_ hσ.2)) h
+    exact Env.All.of_valMem (hI.val _) (hI.mem _) (Binders.valMem rets) _
   · exact herr.drop h₂ σ o hσ h
-  · rename_i c _
-    cases hr : code.decodeT (H := σ.H) c with
-    | error => rw [hr] at h; cases h
-    | ok r =>
-      rw [hr, ok_bind] at h
-      refine hpnc.drop ((Ext.append Γ κ).trans h₃) (σ.withEnv (TEnv.append κ r σ.env)) o ?_ h
-      show I.Holds (HTy.toHeapTy 0 σ.H) _
-      rw [State.withEnv_erase, TEnv.append_erase]
-      have hd := CodeBinder.decodeT_erase (C := C) (H := σ.H) code c
-      rw [hr] at hd
-      exact hσ.withEnv (Env.All.append κ (hcode _ c _ hd) hσ.2)
+  · obtain ⟨r, _, h⟩ := tbind_ok_inv h
+    refine hpnc.drop ((Ext.append Γ κ).trans h₃) (σ.withEnv (TEnv.append κ r σ.env)) o
+      (hσ.withEnv (Env.All.tappend κ ?_ hσ.2)) h
+    exact Env.All.of_valMem (hI.val _) (hI.mem _) (CodeBinder.valMem code) _
   · exact hoth.drop h₄ σ o hσ h
 
 end RunInv

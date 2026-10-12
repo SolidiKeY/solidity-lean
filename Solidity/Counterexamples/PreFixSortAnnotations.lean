@@ -33,7 +33,7 @@ open Semantics
 open TacletAnnotations
 open SortFaithfulness
 
-/-! ## Two small contracts and their stores -/
+/-! ## Two small contracts -/
 
 /-- Two `Person` roots. -/
 def People : Contract := contract!{ Person alice; Person bob; }
@@ -41,31 +41,17 @@ def People : Contract := contract!{ Person alice; Person bob; }
 /-- Two `bool` roots, the fix commit's `storageBoolRootCopy()` test. -/
 def Flags : Contract := contract!{ bool flag; bool flag2; }
 
-/-- A `Person` with its members at zero. -/
-def person0 : Semantics.SVal :=
-  .struct [("account", .struct [("balance", .int 0), ("token", .struct [("value", .int 0)])]),
-    ("age", .int 0)]
+/-- A `Person` is a `Struct` node, never an `int`. -/
+theorem person_not_int (v : SVal (.ref (.struct "Person"))) :
+    SortOkS (.fixed .int) (.ref (.struct "Person")) v.erase = false := by
+  cases v with
+  | struct fs => rw [SVal.erase_struct]; rfl
 
-/-- `alice` and `bob` at zero. -/
-def peopleStore : Semantics.State := { storage := [("alice", person0), ("bob", person0)] }
-
-/-- The flags. -/
-def flagStore : Semantics.State :=
-  { storage := [("flag", .bool false), ("flag2", .bool true)] }
-
-/-- `peopleStore`, as a scoped state with no locals. -/
-def peopleCore : EState People [] := EState.ofSem peopleStore
-
-/-- `flagStore`, as a scoped state with its local `bool x`. -/
-def flagCore : EState Flags [.val .bool] := EState.ofGlob flagStore (.bool false, ())
-
-/-- `People`'s store is well-typed. -/
-theorem peopleStore_wt : RunWT People [] peopleCore :=
-  ⟨StateWT.ofB (L := People.layout) (by decide), trivial⟩
-
-/-- `Flags`'s store is well-typed, `x` a `bool`. -/
-theorem flagStore_wt : RunWT Flags [] flagCore :=
-  ⟨StateWT.ofB (H := []) (L := Flags.layout) (by decide), rfl, trivial⟩
+/-- A `bool` is not an `int`. -/
+theorem bool_not_int (v : SVal (.prim .bool)) :
+    SortOkS (.fixed .int) (.prim .bool) v.erase = false := by
+  cases v with
+  | prim b => rw [SVal.erase_prim]; cases b <;> rfl
 
 /-! ## The copy rule -/
 
@@ -75,15 +61,16 @@ def aliceCopy : Stmt People [] [] :=
     (.loc (.root "bob" rfl)) rfl rfl)
 
 /-- The pre-fix `storageRootWriteCopySource` row is not faithful: at
-`alice = bob;` from a well-typed store the copy source is a `Person` node,
+`alice = bob;` from the initial state the copy source is a `Person` node,
 where the row declares `find<[int]>`. -/
 theorem preFix_rootCopy_not_faithful :
     ¬ RowFaithful preFixStorageRootWriteCopySource aliceCopy := by
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [] peopleCore peopleStore_wt "bob" [] person0 rfl rfl
-  exact absurd this (by decide)
+  have := hall (State.init People) (SRef.ofRoot "bob" rfl) _ rfl rfl
+  rw [person_not_int] at this
+  exact Bool.false_ne_true this
 
 /-- The fixed row (sort-free `find<[StValue]>`) is faithful there, as
 `faithful_storageRootWriteCopySource` says of every instance. -/
@@ -113,8 +100,10 @@ theorem preFix_readSelect_not_faithful :
   intro h
   obtain ⟨R, hR, _, hall⟩ := h ⟨.storage, .value, .fixed .int⟩ (by decide)
   cases hR
-  have := hall [] flagCore flagStore_wt "flag" [] (.bool false) rfl rfl
-  exact absurd this (by decide)
+  have := hall ((State.init Flags).push (t := .val .bool) (false : Bool))
+    (SRef.ofRoot "flag" rfl) _ rfl rfl
+  rw [bool_not_int] at this
+  exact Bool.false_ne_true this
 
 /-- The current row (`\hasSort`) is faithful there. -/
 theorem current_readSelect_faithful :
