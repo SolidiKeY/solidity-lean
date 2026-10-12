@@ -74,11 +74,11 @@ theorem rebindMemStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.mem R)) (r : MRh
     simp only [rebindMemStep] at hs
     split at hs
     · cases hs
-      exact sound_allocCopy σ i _ _ (allocCopy_copy σ sp hm)
+      exact sound_allocCopy_copy σ i sp hm
     · cases hs; exact sound_memCopyCapture σ i sp hm _
   | newArr n h =>
     cases hs
-    exact sound_allocCopy σ i _ _ (allocCopy_newArr σ n h)
+    exact sound_allocCopy_newArr σ i n h
 
 /-- **A memory reference written** (`memRefStep`). -/
 theorem memRefStep_sound (k : Nat) {R : RefTy} (l : MLoc C Γ (.ref R))

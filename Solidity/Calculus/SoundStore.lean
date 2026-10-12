@@ -506,15 +506,15 @@ theorem popStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (q : Premis
     (hs : popStep k b = q) : Premise.Runs m (.pop b) q σ := by
   simp only [popStep] at hs
   split at hs
-  · have hp : Premise.Runs m (.pop b) (.upd1 (.storage (.app2
-        (if E.isMapping then .shrink else .pop) .storage b.lower))) σ := sound_pop σ b
+  · have hp : Premise.Runs m (.pop b)
+        (.upd1 (if b.elemMapping then UpdElem.shrink b else UpdElem.pop b)) σ := sound_pop σ b
     split at hs
     · rename_i hE
       cases hs
-      rwa [show E.isMapping = true from hE, if_pos rfl] at hp
+      rwa [if_pos hE] at hp
     · rename_i hE
       cases hs
-      rwa [show E.isMapping = false from Bool.eq_false_iff.mpr hE, if_neg (by decide)] at hp
+      rwa [if_neg hE] at hp
   · cases hs; exact sound_popCapture σ b _
 
 end Store

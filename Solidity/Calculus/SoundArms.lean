@@ -1,257 +1,231 @@
 import Solidity.Calculus.SoundKit
-import Solidity.Theory.StateWrites
 
 /-!
 # Soundness of the update arms
 
 The rules of `Calculus/Arms.lean` and `Step.lean` whose premise is an
-update (`Premise.Sound`, `Calculus/ProvesSound.lean`).  An update is a
-term of `Update.lean`, computed on the typed state as a global part and the
-locals' values (`Upd.applyV`), so each arm states that the statement's
-typed step (`TRun.*`, `Semantics/Run.lean`) agrees with what the update
-computes in the state it starts in (`*_agrees`, `TRes.Agrees` against
-`State.globE` and `State.loc`), and closes with `Premise.sound_update_typed`
-(`Calculus/SoundKit.lean`).  An agreement composes the evaluators' (the
-typed evaluator against the lowered term, `Calculus/LowerRun.lean`) with
-the write's (`Semantics/StorageErase.lean`, `Semantics/HeapErase.lean`),
-after an equation that reads the update's terms in the order the statement
-reads them (`Theory/StateWrites.lean`'s frame lemmas, on `σ.globE`).
+update (`Premise.Sound`, `Calculus/PremiseSound.lean`).  An update is
+computed on the typed state as a typed global part and the locals' values
+(`Upd.applyP`), so each arm states that the statement's typed step
+(`TRun.*`, `Semantics/Run.lean`) agrees with what the update computes in the
+state it starts in (`*_agrees`, `TRes.AgreesO` of the state it ends in, read
+as `(State.glob, State.locV)`), and closes with `Premise.sound_update_typed`
+(`Calculus/SoundKit.lean`).  Nothing is erased (W9.8.3): an update's terms
+read the typed operations the run does (`Calculus/LowerRun.lean` for the
+lowered expressions), so an agreement follows the run's binds
+(`TRes.AgreesO.cases`) and computes the term on what they returned.
 
 The arms ask of the typed run that it does not diverge under the diamond:
 an expression, a location and every write but a push neither diverge nor
 are exhausted (`Val.evalT_ends` and its kin,
 `Semantics/Ends.lean`), and a push onto `2^256 - 1` elements is
-exhausted (`TRun.push_nd`, decision 15), which both modalities accept.  Every
-statement is on it: no struct repeats a member name (decision 16).
+exhausted (`TRun.push_nd`, decision 15), which both modalities accept.
 -/
 
 namespace Solidity
-open Solidity (Modality Srt Op0 Op1 Op2 Op3 NoPanic evalBinop)
-open Semantics (Value SVal MVal Seg Halt Res)
-open Solidity (readAddr)
+open Solidity (Modality Srt)
+open Semantics (lookupBy setBy)
 
 variable {C : Contract}
 
-/-! ## Updates computed: the terms in the statement's order
+/-! ## Following the run's binds -/
 
-The update reads its right-hand sides in the state it is applied in, the
-statement left to right; both reach the same writes through the same reads,
-and a write of the storage (the heap) changes nothing else
-(`Theory/StateWrites.lean`'s `*_with`).  Each equation leaves the
-statement's locations as terms (`P`, `A`), read once. -/
+/-- **The run's bind, against a reading**: where the run returns `a`, its
+part read `some (f a)`; where it reverts, read `none`, the reading `X` is
+`none`. -/
+theorem TRes.AgreesO.cases {α β γ δ : Type} {f : α → β} {t : TRes α} {u : Option β}
+    (h : TRes.AgreesO f t u) {g : γ → δ} {k : α → TRes γ} {X : Option δ}
+    (hok : ∀ a, u = some (f a) → TRes.AgreesO g (k a) X) (hnone : u = none → X = none) :
+    TRes.AgreesO g (t >>= k) X := by
+  match t, h with
+  | .ok a, h => exact hok a h
+  | .error .revert, h => exact hnone h
+  | .error .diverge, _ => trivial
+  | .error .exhausted, _ => trivial
+
+/-- A step that only returns, against its reading. -/
+theorem TRes.AgreesO.ret {γ δ : Type} {g : γ → δ} {c : γ} {X : Option δ} (h : X = some (g c)) :
+    TRes.AgreesO g (Except.ok c : TRes γ) X := h
+
+theorem Option.bind_swap {α β γ : Type} (x : Option α) (y : Option β) (f : α → β → Option γ) :
+    (x.bind fun a => y.bind fun b => f a b) = y.bind fun b => x.bind fun a => f a b := by
+  cases x <;> cases y <;> rfl
+
+/-! ## Updates computed -/
 
 section Updates
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-/-- A storage write through the term: the global part with the storage it
-leaves, the locals kept. -/
-theorem storage_glob (x : Res Semantics.State)
-    (hx : (x >>= fun τ => pure { σ.globE with storage := τ.storage }) = x) :
-    (x >>= fun st => pure ({ σ.globE with storage := st.storage }, σ.loc)) = (·, σ.loc) <$> x := by
-  conv => rhs; rw [← hx]
-  cases x <;> rfl
+theorem applyP_snoc {Δ : Ctx} (U : Upd C Γ Δ) (e : UpdElem C Γ Δ) :
+    (U.snoc e).applyP σ = (U.applyV σ).bind fun p => (e.applyV σ p.1 p.2).map fun q => (q.1.1, q.2) := by
+  show ((U.applyV σ).bind fun p => e.applyV σ p.1 p.2).map _ = _
+  cases U.applyV σ <;> rfl
 
-/-- A heap write through the term. -/
-theorem memory_glob (x : Res Semantics.State)
-    (hx : (x >>= fun μ => pure { σ.globE with heap := μ.heap, nextId := μ.nextId }) = x) :
-    (x >>= fun μ => pure ({ σ.globE with heap := μ.heap, nextId := μ.nextId }, σ.loc)) =
-      (·, σ.loc) <$> x := by
-  conv => rhs; rw [← hx]
-  cases x <;> rfl
+theorem applyV_nil : (Upd.nil : Upd C Γ Γ).applyV σ = some (σ.globG, σ.locV) := rfl
 
-theorem upd1_applyV (e : UpdElem C Γ Γ) :
-    (Upd.nil.snoc e).applyV σ = e.applyV σ σ.globE σ.loc := rfl
+/-- A `storage :=` element. -/
+theorem UpdElem.applyV_storage {Δ : Ctx} (t : Tm C Γ .st) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
+    (UpdElem.storage t : UpdElem C Γ Δ).applyV σ g ℓ =
+      (t.eval σ).map fun st => (g.withStorage st, ℓ) := by
+  rw [UpdElem.applyV_eq_applyVM]
+  show ((UpdElem.storage t : UpdElem C Γ Δ).globT σ g).bind _ = _
+  rw [UpdElem.globT_eq_globTM]
+  show ((t.eval σ).bind fun st => some (g.withStorage st)).bind _ = _
+  cases t.eval σ <;> rfl
 
-theorem upd2_applyV (e₁ e₂ : UpdElem C Γ Γ) :
-    ((Upd.nil.snoc e₁).snoc e₂).applyV σ =
-      (do let q ← e₁.applyV σ σ.globE σ.loc; e₂.applyV σ q.1 q.2) := rfl
+/-- A `memory :=` element. -/
+theorem UpdElem.applyV_memory {Δ : Ctx} (t : Tm C Γ .mem) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
+    (UpdElem.memory t : UpdElem C Γ Δ).applyV σ g ℓ =
+      (t.eval σ).map fun μ => (g.withMem μ, ℓ) := by
+  rw [UpdElem.applyV_eq_applyVM]
+  show ((UpdElem.memory t : UpdElem C Γ Δ).globT σ g).bind _ = _
+  rw [UpdElem.globT_eq_globTM]
+  show ((t.eval σ).bind fun μ => some (g.withMem μ)).bind _ = _
+  cases t.eval σ <;> rfl
 
-/-- A `storage :=` element, computed. -/
-theorem storage_applyV {Δ : Ctx} (s : Tm C Γ .st) (g : Semantics.State) (ℓ : Locs C Δ) :
-    (UpdElem.storage s : UpdElem C Γ Δ).applyV σ g ℓ =
-      (s.eval σ >>= fun st => pure ({ g with storage := st.storage }, ℓ)) := by
-  simp only [UpdElem.applyV, UpdElem.globT]
-  cases s.eval σ <;> rfl
+/-- A local's element. -/
+theorem UpdElem.applyV_local {Δ : Ctx} {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) (g : GlobT C σ.H)
+    (ℓ : LocsV C Δ) :
+    (UpdElem.local i r : UpdElem C Γ Δ).applyV σ g ℓ = (r.eval σ).map fun v => (g, ℓ.set i v) := by
+  rw [UpdElem.applyV_eq_applyVM]
+  show (r.eval σ).bind _ = _
+  cases r.eval σ <;> rfl
 
-/-- A `memory :=` element, computed. -/
-theorem memory_applyV {Δ : Ctx} (m : Tm C Γ .mem) (g : Semantics.State) (ℓ : Locs C Δ) :
-    (UpdElem.memory m : UpdElem C Γ Δ).applyV σ g ℓ =
-      (m.eval σ >>= fun μ => pure ({ g with heap := μ.heap, nextId := μ.nextId }, ℓ)) := by
-  simp only [UpdElem.applyV, UpdElem.globT]
-  cases m.eval σ <;> rfl
+/-- One storage element on its own. -/
+theorem applyP_storage1 (t : Tm C Γ .st) :
+    (Upd.nil.snoc (UpdElem.storage t)).applyP σ =
+      (t.eval σ).map fun st => ((σ.withStorage st).glob, σ.locV) := by
+  rw [applyP_snoc, applyV_nil, Option.bind_some, UpdElem.applyV_storage]
+  cases t.eval σ <;> rfl
 
-/-- A local's element, computed. -/
-theorem local_applyV {Δ : Ctx} {t : LTy} (i : Idx Δ t) (r : Rhs C Γ t) (g : Semantics.State)
-    (ℓ : Locs C Δ) :
-    (UpdElem.local i r : UpdElem C Γ Δ).applyV σ g ℓ = (r.eval σ >>= fun v => pure (g, ℓ.set i v)) :=
+/-- One memory element on its own. -/
+theorem applyP_memory1 (t : Tm C Γ .mem) :
+    (Upd.nil.snoc (UpdElem.memory t)).applyP σ =
+      (t.eval σ).map fun μ => ((σ.globG.withMem μ).1, σ.locV) := by
+  rw [applyP_snoc, applyV_nil, Option.bind_some, UpdElem.applyV_memory]
+  cases t.eval σ <;> rfl
+
+/-- One local element on its own. -/
+theorem applyP_local1 {t : LTy} (i : Idx Γ t) (r : Rhs C Γ t) :
+    (Upd.nil.snoc (UpdElem.local i r)).applyP σ =
+      (r.eval σ).map fun v => (σ.glob, σ.locV.set i v) := by
+  rw [applyP_snoc, applyV_nil, Option.bind_some, UpdElem.applyV_local]
+  cases r.eval σ <;> rfl
+
+/-! ### Terms computed -/
+
+theorem Tm.eval_storage : (Tm.app0 .storage : Tm C Γ .st).eval σ = some σ.storage := rfl
+theorem Tm.eval_memory : (Tm.app0 .memory : Tm C Γ .mem).eval σ = some σ.glob.memT := rfl
+theorem Tm.eval_lit {p : PrimTy} (v : p.Denote) : (Tm.app0 (.lit v) : Tm C Γ (.val p)).eval σ = some v :=
   rfl
+theorem Tm.eval_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
+    (Tm.pvV i : Tm C Γ (.val p)).eval σ = some (TEnv.get i σ.env) := rfl
 
-/-- A typed state with a local set, read as an update computes it. -/
-theorem pair_setLocal {t : LTy} (i : Idx Γ t) (v : t.TDenote C σ.H) :
-    ((σ.setLocal i v).globE, (σ.setLocal i v).loc) = (σ.globE, σ.loc.set i (LTy.TDenote.erase t v)) := by
-  rw [State.loc_setLocal]; rfl
+theorem Tm.eval_save {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
+    (Tm.app3 .save s q v).eval σ =
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (v.eval σ).bind fun w => st.write r w := by
+  rw [Tm.eval_app3, Op3.eval_eq_evalM]; rfl
 
-theorem Res.bind_ok {α β : Type} (a : α) (f : α → Res β) : ((Except.ok a : Res α) >>= f) = f a :=
-  rfl
+theorem Tm.eval_push {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E))))
+    (v : Tm C Γ (.sv E)) :
+    (Tm.app3 .push s q v).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
+      st.push r fun _ => (v.eval σ).map SVal.strip := by
+  rw [Tm.eval_app3, Op3.eval_eq_evalM]; rfl
 
-theorem writeStorage_toSVal (s : Semantics.State) (r : Name) (segs : List Seg) (v : Value) :
-    s.writeStorage r segs v.toSVal = s.saveStorage r segs v.toSVal := by
-  cases v <;> rfl
+theorem Tm.eval_write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C Γ (.mv T)) :
+    (Tm.app3 .write m a v).eval σ =
+      (m.eval σ).bind fun μ => (a.eval σ).bind fun ad => (v.eval σ).bind fun w => μ.writeT ad w := by
+  rw [Tm.eval_app3, Op3.eval_eq_evalM]; rfl
 
-/-- A storage save through the term, as the statement's write. -/
-theorem saveStorage_glob (r : Name) (segs : List Seg) (v : Semantics.SVal) :
-    (σ.globE.saveStorage r segs v >>= fun d =>
-      pure ({ σ.globE with storage := d.storage }, σ.loc)) =
-      (·, σ.loc) <$> σ.globE.saveStorage r segs v :=
-  storage_glob σ _ (Semantics.State.saveStorage_with _ _ _ _)
+theorem Tm.eval_find {p : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim p))) :
+    (Tm.app2 .find s q).eval σ =
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.find r).bind fun w => some w.view := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-/-- A heap write through the term, as the statement's write. -/
-theorem writeAddr_glob (mv : Semantics.MVal) (a : Semantics.Addr) :
-    (writeAddr σ.globE mv a >>= fun μ =>
-      pure ({ σ.globE with heap := μ.heap, nextId := μ.nextId }, σ.loc)) =
-      (·, σ.loc) <$> writeAddr σ.globE mv a :=
-  memory_glob σ _ (Solidity.writeAddr_with _ _ _)
+theorem Tm.eval_sfind {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
+    (Tm.app2 .sfind s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.find r := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-theorem bind_withGlob (x : Res Semantics.State) :
-    (x >>= fun τ => pure (τ, σ.loc)) = (·, σ.loc) <$> x := by
-  cases x <;> rfl
+theorem Tm.eval_delAt {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
+    (Tm.app2 .delAt s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.delete r := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-theorem writeAddr_ok_with {s x : Semantics.State} {mv : Semantics.MVal} {a : Semantics.Addr}
-    (h : writeAddr s mv a = .ok x) : { s with heap := x.heap, nextId := x.nextId } = x := by
-  have e := Solidity.writeAddr_with s mv a
-  rw [h] at e
-  exact Except.ok.inj e
+theorem Tm.eval_pushSlot {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app2 .pushSlot s q).eval σ =
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.push r some := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-/-- A global step's state and value, with the locals. -/
-def glob₂ (x : Semantics.State × Value) : (Semantics.State × Locs C Γ) × Value :=
-  ((x.1, σ.loc), x.2)
+theorem Tm.eval_extend {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app2 .extend s q).eval σ =
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.pushPlace r).map (·.1) := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]
+  show (s.eval σ).bind (fun st => (q.eval σ).bind fun r => (st.pushPlace r).bind fun p => some p.1) = _
+  congr 1; funext st; congr 1; funext r
+  cases st.pushPlace r <;> rfl
 
-/-- `storage := save(storage, P, P ⊕ t)`: the compound write at the path. -/
-theorem save_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p : PrimTy)
-    (P : Tm C Γ .path) (t : Tm C Γ .val) {w : Value} (ht : t.eval σ = .ok w) :
-    (UpdElem.storage (.app3 .save .storage P
-      (.app1 .sval rfl (.app2 (.binop op p) (.app2 .find .storage P) t)))).applyV σ σ.globE σ.loc =
-      (do
-        let (rt, segs) ← P.eval σ
-        (·, σ.loc) <$> opStore σ.globE op p rt segs w) := by
-  rw [storage_applyV]
-  simp only [Tm.eval, Op3.eval, Op2.eval, Op1.eval, Op0.eval,
-    evalBinop_compound hop, ht, opStore, bind_assoc, pure_bind, writeStorage_toSVal,
-    saveStorage_glob, map_bind]
-  cases P.eval σ <;> rfl
+theorem Tm.eval_pop {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app2 .pop s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop false r := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-/-- `memory := write(memory, A, A ⊕ t)`: the compound write at the address. -/
-theorem write_compound {op : BinOp} (hop : op.hasCompoundAssign = true) (p : PrimTy)
-    (A : Tm C Γ .addr) (t : Tm C Γ .val) {w : Value} (ht : t.eval σ = .ok w) :
-    (UpdElem.memory (.app3 .write .memory A
-      (.app1 .mval rfl (.app2 (.binop op p) (.app2 .read .memory A) t)))).applyV σ σ.globE σ.loc =
-      (do (·, σ.loc) <$> opMem σ.globE op p (← A.eval σ) w) := by
-  rw [memory_applyV]
-  simp only [Tm.eval, Op3.eval, Op2.eval, Op1.eval, Op0.eval,
-    evalBinop_compound hop, ht, opMem, Solidity.readLoc_eq, Semantics.writeLoc_eq, bind_assoc,
-    pure_bind, writeAddr_glob, map_bind]
-  cases A.eval σ <;> rfl
+theorem Tm.eval_shrink {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app2 .shrink s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop true r := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-/-- `storage := save(storage, P, P ± 1)`: the bump at the path. -/
-theorem save_bump (op : IncDec) (p : PrimTy) (P : Tm C Γ .path) :
-    (UpdElem.storage (.app3 .save .storage P
-      (.app1 .sval rfl (.app2 (.binop op.binOp p) (.app2 .find .storage P) Tm.one)))).applyV σ
-      σ.globE σ.loc =
-      ((do
-        let (rt, segs) ← P.eval σ
-        glob₂ σ <$> bumpStore σ.globE op p rt segs) >>= fun y => pure y.1) := by
-  rw [storage_applyV]
-  simp only [Tm.eval, Op3.eval, Op2.eval, Op1.eval, Op0.eval,
-    evalBinop_bump, Solidity.applyBinOp_bump, bumpStore, bind_assoc, pure_bind,
-    writeStorage_toSVal, saveStorage_glob, map_bind, map_pure, glob₂, bind_withGlob]
-  cases P.eval σ <;> rfl
+theorem Tm.eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
+    (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun μ => (i.eval σ).bind fun id =>
+      (HRef.ofId? μ.H' R id).bind fun r => some (MVal.copyMToSt μ.heap (T := .ref R) r) := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
-/-- `memory := write(memory, A, A ± 1)`: the bump at the address. -/
-theorem write_bump (op : IncDec) (p : PrimTy) (A : Tm C Γ .addr) :
-    (UpdElem.memory (.app3 .write .memory A
-      (.app1 .mval rfl (.app2 (.binop op.binOp p) (.app2 .read .memory A) Tm.one)))).applyV σ
-      σ.globE σ.loc =
-      ((do glob₂ σ <$> bumpMem σ.globE op p (← A.eval σ)) >>= fun y => pure y.1) := by
-  rw [memory_applyV]
-  simp only [Tm.eval, Op3.eval, Op2.eval, Op1.eval, Op0.eval,
-    evalBinop_bump, Solidity.applyBinOp_bump, bumpMem, Solidity.readLoc_eq,
-    Semantics.writeLoc_eq, bind_assoc, pure_bind, writeAddr_glob, map_bind, map_pure, glob₂,
-    bind_withGlob]
-  cases A.eval σ <;> rfl
+theorem Tm.eval_sval {p : PrimTy} (t : Tm C Γ (.val p)) :
+    (Tm.app1 .sval t).eval σ = (t.eval σ).map SVal.prim := by
+  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
 
-/-- The value `x++` gives at a path is what `bumped(find(storage, P))` reads in
-the state before. -/
-theorem bumped_find (op : IncDec) (p : PrimTy) (P : Tm C Γ .path) {q : Name × List Seg}
-    (hq : P.eval σ = .ok q) {τ : Semantics.State} {v : Value}
-    (hb : bumpStore σ.globE op p q.1 q.2 = .ok (τ, v)) :
-    (Tm.bumped op p (.app2 .find .storage P)).eval σ = .ok v := by
-  unfold Tm.bumped
-  simp only [bumpStore, SemanticsProperties.Res.bind_eq_ok] at hb
-  obtain ⟨sv, hsv, old, hold, n, hn, new, hnew, τ', hτ', he⟩ := hb
-  cases Except.ok.inj he
-  split <;> simp only [Tm.eval, Op2.eval, Op0.eval, evalBinop_bump, Solidity.applyBinOp_bump,
-    Res.bind_ok, pure_bind, bind_assoc, hq, hsv, hold, hn, hnew] <;> rfl
+theorem Tm.eval_mval {p : PrimTy} (t : Tm C Γ (.val p)) :
+    (Tm.app1 .mval t).eval σ = t.eval σ := by
+  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
 
-/-- The value `x++` gives at an address is what `bumped(read(memory, A))`
-reads in the state before. -/
-theorem bumped_read (op : IncDec) (p : PrimTy) (A : Tm C Γ .addr) {a : Semantics.Addr}
-    (ha : A.eval σ = .ok a) {τ : Semantics.State} {v : Value}
-    (hb : bumpMem σ.globE op p a = .ok (τ, v)) :
-    (Tm.bumped op p (.app2 .read .memory A)).eval σ = .ok v := by
-  unfold Tm.bumped
-  simp only [bumpMem, SemanticsProperties.Res.bind_eq_ok] at hb
-  obtain ⟨old, hold, n, hn, new, hnew, τ', hτ', he⟩ := hb
-  cases Except.ok.inj he
-  simp only [Solidity.readLoc_eq, SemanticsProperties.Res.bind_eq_ok] at hold
-  obtain ⟨r, hr, hro⟩ := hold
-  split <;> simp only [Tm.eval, Op2.eval, Op0.eval, evalBinop_bump, Solidity.applyBinOp_bump,
-    Res.bind_ok, pure_bind, bind_assoc, ha, hr, hro, hn, hnew] <;> rfl
+theorem Tm.eval_ref {R : RefTy} (t : Tm C Γ (.ident R)) :
+    (Tm.app1 .ref t).eval σ = t.eval σ := by
+  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
 
-/-- `{P := P ± 1 ‖ v := bumped(P)}` at a path. -/
-theorem save_bump_assign (op : IncDec) (p : PrimTy) (P : Tm C Γ .path) (i : Idx Γ (.val p)) :
-    ((Upd.nil.snoc (UpdElem.storage (.app3 .save .storage P
-      (.app1 .sval rfl (.app2 (.binop op.binOp p) (.app2 .find .storage P) Tm.one))))).snoc
-      (.local i (.val (Tm.bumped op p (.app2 .find .storage P))))).applyV σ =
-      ((do
-        let (rt, segs) ← P.eval σ
-        glob₂ σ <$> bumpStore σ.globE op p rt segs) >>= fun y =>
-          pure (y.1.1, y.1.2.set i y.2)) := by
-  rw [upd2_applyV, save_bump, bind_assoc]
-  cases hq : P.eval σ with
-  | error => rfl
-  | ok q =>
-    obtain ⟨rt, segs⟩ := q
-    show ((glob₂ σ <$> bumpStore σ.globE op p rt segs) >>= fun y => (pure y.1 : Res _) >>= _) =
-      ((glob₂ σ <$> bumpStore σ.globE op p rt segs) >>= fun y => pure (y.1.1, y.1.2.set i y.2))
-    cases hb : bumpStore σ.globE op p rt segs with
-    | error => rfl
-    | ok x =>
-      obtain ⟨τ, v⟩ := x
-      show (do pure (τ, σ.loc.set i
-        (← (Tm.bumped op p (.app2 .find .storage P)).eval σ))) = _
-      rw [bumped_find σ op p P hq hb]; rfl
+theorem Tm.eval_next {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) :
+    (Tm.app1 .next q).eval σ = (q.eval σ).bind σ.storage.nextT := by
+  rw [Tm.eval_app1, Op1.eval_eq_evalM]; rfl
 
-/-- `{A := A ± 1 ‖ v := bumped(A)}` at an address. -/
-theorem write_bump_assign (op : IncDec) (p : PrimTy) (A : Tm C Γ .addr) (i : Idx Γ (.val p)) :
-    ((Upd.nil.snoc (UpdElem.memory (.app3 .write .memory A
-      (.app1 .mval rfl (.app2 (.binop op.binOp p) (.app2 .read .memory A) Tm.one))))).snoc
-      (.local i (.val (Tm.bumped op p (.app2 .read .memory A))))).applyV σ =
-      ((do glob₂ σ <$> bumpMem σ.globE op p (← A.eval σ)) >>= fun y =>
-        pure (y.1.1, y.1.2.set i y.2)) := by
-  rw [upd2_applyV, write_bump, bind_assoc]
-  cases ha : A.eval σ with
-  | error => rfl
-  | ok a =>
-    show ((glob₂ σ <$> bumpMem σ.globE op p a) >>= fun y => (pure y.1 : Res _) >>= _) =
-      ((glob₂ σ <$> bumpMem σ.globE op p a) >>= fun y => pure (y.1.1, y.1.2.set i y.2))
-    cases hb : bumpMem σ.globE op p a with
-    | error => rfl
-    | ok x =>
-      obtain ⟨τ, v⟩ := x
-      show (do pure (τ, σ.loc.set i
-        (← (Tm.bumped op p (.app2 .read .memory A)).eval σ))) = _
-      rw [bumped_read σ op p A ha hb]; rfl
+theorem Tm.eval_castV {p q : PrimTy} (h : p = q) (t : Tm C Γ (.val p)) :
+    (Tm.castV h t).eval σ = h ▸ t.eval σ := by
+  subst h; rfl
+
+theorem Tm.eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
+    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op x (b.eval σ) := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+
+/-- A grown heap's memory, written at a typed address with a typed slot. -/
+theorem Grown.writeT_toT {H : HTy} (m : Grown H (fun _ => Unit)) {T : Ty} (a : MAddr m.H' T)
+    (v : MVal m.H' T) :
+    m.writeT a.toT (MVal.toT T v) = (m.heap.writeAddr a v).map fun hp => ⟨m.ext, hp, ()⟩ := by
+  have hv : MvT.toMVal m.H' T (MVal.toT T v) = some v := by
+    cases T with
+    | prim _ => rfl
+    | ref R => exact HRef.ofId?_id (v : HRef m.H' R)
+  simp only [Grown.writeT, MAddr.resolve_toT, hv, Option.bind_eq_bind, Option.bind_some]
+  cases m.heap.writeAddr a v <;> rfl
+
+theorem Grown.writeT_toT_prim {H : HTy} (m : Grown H (fun _ => Unit)) {p : PrimTy}
+    (a : MAddr m.H' (.prim p)) (v : p.Denote) :
+    m.writeT a.toT v = (m.heap.writeAddr a v).map fun hp => ⟨m.ext, hp, ()⟩ :=
+  Grown.writeT_toT m a (T := .prim p) v
+
+theorem TRes.ofOpt_some_bind {α β : Type} (a : α) (f : α → TRes β) :
+    (TRes.ofOpt (some a) >>= f) = f a := rfl
+
+theorem TRes.ofOpt_none_bind {α β : Type} (f : α → TRes β) :
+    (TRes.ofOpt (none : Option α) >>= f) = .error .revert := rfl
+
+/-- A storage write of a word is its save. -/
+theorem Storage.write_prim {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (x : p.Denote) :
+    st.write r (.prim x) = st.save r (.prim x) := rfl
 
 end Updates
 
@@ -265,290 +239,427 @@ section Agrees
 variable {Γ : Ctx} (σ : State C Γ)
 
 theorem setLocal_agrees {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.assignLocal i v σ)
-      ((Upd.nil.snoc (.local i (.val v.lower))).applyV σ) :=
-  TRes.Agrees.bind (Val.lower_evalT σ v) fun x =>
-    TRes.Agrees.of_eq (congrArg Except.ok (pair_setLocal σ i x).symm)
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.assignLocal i v σ)
+      ((Upd.nil.snoc (UpdElem.setLocal i v)).applyP σ) := by
+  rw [UpdElem.setLocal, applyP_local1]
+  show TRes.AgreesO _ _ ((v.lower.eval σ).map _)
+  refine (Val.lower_evalT σ v).cases (fun x hx => ?_) (fun hx => by rw [hx]; rfl)
+  refine TRes.AgreesO.ret ?_
+  rw [hx, State.locV_setLocal]
+  rfl
 
 theorem save_agrees {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.assign l r σ)
-      ((Upd.nil.snoc (.storage (.app3 .save .storage l.lower r.lower))).applyV σ) := by
-  have e : (Upd.nil.snoc (.storage (.app3 .save .storage l.lower r.lower))).applyV σ = (do
-      let sv ← r.lower.eval σ
-      let (root, segs) ← l.lower.eval σ
-      (·, σ.loc) <$> σ.globE.writeStorage root segs sv) := by
-    rw [upd1_applyV, storage_applyV]
-    show (do
-      let st ← Op3.eval σ.globE .save (pure σ.globE) (l.lower.eval σ)
-        (r.lower.eval σ)
-      pure (({ σ.globE with storage := st.storage }, σ.loc))) = _
-    simp only [Op3.eval, bind_assoc, pure_bind]
-    congr 1; funext sv; congr 1; funext q
-    exact storage_glob σ _ (Semantics.State.writeStorage_with _ _ _ _)
-  rw [e]
-  refine TRes.Agrees.bind (Src.lower_valueT σ r) fun sv => ?_
-  refine TRes.Agrees.bind (Loc.lower_resolveT σ l) fun ref => ?_
-  show TRes.Agrees _ (do
-      let st ← TRes.ofOpt (σ.storage.write ref sv)
-      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
-    ((·, σ.loc) <$> σ.globE.writeStorage ref.root ref.path.erase sv.erase)
-  rw [Storage.writeStorage_erase (σ := σ.globE) rfl ref sv]
-  cases σ.storage.write ref sv <;> rfl
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.assign l r σ)
+      ((Upd.nil.snoc (UpdElem.save l r)).applyP σ) := by
+  rw [UpdElem.save, applyP_storage1, Tm.eval_save, Tm.eval_storage, Option.bind_some]
+  refine (Src.lower_valueT σ r).cases (fun sv hsv => ?_) (fun hsv => ?_)
+  · refine (Loc.lower_resolveT σ l).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+    rw [href, hsv]
+    show TRes.AgreesO _ (TRes.ofOpt (σ.storage.write ref sv) >>= _) ((σ.storage.write ref sv).map _)
+    cases σ.storage.write ref sv <;> rfl
+  · rw [hsv]
+    cases l.lower.eval σ <;> rfl
 
 theorem saveMem_agrees {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.assignFromMem l p σ)
-      ((Upd.nil.snoc (.storage (.app3 .save .storage l.lower
-        (.app2 .copyMem .memory p.lower)))).applyV σ) := by
-  have e : (Upd.nil.snoc (.storage (.app3 .save .storage l.lower
-      (.app2 .copyMem .memory p.lower)))).applyV σ = (do
-      let id ← p.lower.eval σ
-      let sv ← Semantics.copyMem σ.globE (.ref id)
-      let (root, segs) ← l.lower.eval σ
-      (·, σ.loc) <$> σ.globE.writeStorage root segs sv) := by
-    rw [upd1_applyV, storage_applyV]
-    show (do
-      let st ← Op3.eval σ.globE .save (pure σ.globE) (l.lower.eval σ)
-        (Op2.eval σ.globE .copyMem (pure σ.globE) (p.lower.eval σ))
-      pure (({ σ.globE with storage := st.storage }, σ.loc))) = _
-    simp only [Op3.eval, Op2.eval, bind_assoc, pure_bind]
-    congr 1; funext id; congr 1; funext sv; congr 1; funext q
-    exact storage_glob σ _ (Semantics.State.writeStorage_with _ _ _ _)
-  rw [e]
-  refine TRes.Agrees.bind (MPath.lower_mvalT σ p) fun m => ?_
-  show TRes.Agrees _ _ (do
-    let sv ← Semantics.copyMem σ.globE (MVal.erase (.ref R) m)
-    let (root, segs) ← l.lower.eval σ
-    (·, σ.loc) <$> σ.globE.writeStorage root segs sv)
-  rw [State.copyMem_erase (T := .ref R) σ m, ok_bind]
-  refine TRes.Agrees.bind (Loc.lower_resolveT σ l) fun ref => ?_
-  show TRes.Agrees _ (do
-      let st ← TRes.ofOpt (σ.storage.write ref (σ.copyMToSt (T := .ref R) m))
-      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
-    ((·, σ.loc) <$> σ.globE.writeStorage ref.root ref.path.erase
-      (σ.copyMToSt (T := .ref R) m).erase)
-  rw [Storage.writeStorage_erase (σ := σ.globE) rfl ref]
-  cases σ.storage.write ref (σ.copyMToSt (T := .ref R) m) <;> rfl
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.assignFromMem l p σ)
+      ((Upd.nil.snoc (UpdElem.saveMem l p)).applyP σ) := by
+  rw [UpdElem.saveMem, applyP_storage1, Tm.eval_save, Tm.eval_storage, Option.bind_some,
+    Tm.eval_copyMem, Tm.eval_memory, Option.bind_some]
+  refine (MPath.lower_mvalT σ p).cases (fun m hm => ?_) (fun hm => ?_)
+  · refine (Loc.lower_resolveT σ l).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+    rw [href, hm]
+    simp only [Option.bind_some, State.memT, HRef.ofId?_id, id]
+    show TRes.AgreesO _ (TRes.ofOpt (σ.storage.write ref (MVal.copyMToSt σ.heap m)) >>= _)
+      ((σ.storage.write ref (MVal.copyMToSt σ.heap m)).map _)
+    cases σ.storage.write ref (MVal.copyMToSt σ.heap m) <;> rfl
+  · rw [hm]
+    cases l.lower.eval σ <;> rfl
 
 theorem delAt_agrees {T : Ty} (l : Loc C Γ T) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.delete l σ)
-      ((Upd.nil.snoc (.storage (.app2 .delAt .storage l.lower))).applyV σ) := by
-  have e : (Upd.nil.snoc (.storage (.app2 .delAt .storage l.lower))).applyV σ = (do
-      let (root, segs) ← l.lower.eval σ
-      let cur ← σ.globE.findStorage root segs
-      (·, σ.loc) <$> σ.globE.saveStorage root segs cur.defaultOf) := by
-    rw [upd1_applyV, storage_applyV]
-    show (do
-      let st ← Op2.eval σ.globE .delAt (pure σ.globE) (l.lower.eval σ)
-      pure (({ σ.globE with storage := st.storage }, σ.loc))) = _
-    simp only [Op2.eval, bind_assoc, pure_bind]
-    congr 1; funext q; congr 1; funext cur
-    exact storage_glob σ _ (Semantics.State.saveStorage_with _ _ _ _)
-  rw [e]
-  refine TRes.Agrees.bind (Loc.lower_resolveT σ l) fun ref => ?_
-  show TRes.Agrees _ (do
-      let st ← TRes.ofOpt (σ.storage.delete ref)
-      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
-    (do
-      let cur ← σ.globE.findStorage ref.root ref.path.erase
-      (·, σ.loc) <$> σ.globE.saveStorage ref.root ref.path.erase cur.defaultOf)
-  rw [← map_bind, Storage.delete_erase (σ := σ.globE) rfl ref]
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.delete l σ)
+      ((Upd.nil.snoc (UpdElem.delAt l)).applyP σ) := by
+  rw [UpdElem.delAt, applyP_storage1, Tm.eval_delAt, Tm.eval_storage, Option.bind_some]
+  refine (Loc.lower_resolveT σ l).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  show TRes.AgreesO _ (TRes.ofOpt (σ.storage.delete ref) >>= _) ((σ.storage.delete ref).map _)
   cases σ.storage.delete ref <;> rfl
 
 theorem writeMem_agrees {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.assignMem l r σ)
-      ((Upd.nil.snoc (.memory (.app3 .write .memory l.lower r.lower))).applyV σ) := by
-  have e : (Upd.nil.snoc (.memory (.app3 .write .memory l.lower r.lower))).applyV σ = (do
-      let mv ← r.lower.eval σ
-      let a ← l.lower.eval σ
-      (·, σ.loc) <$> writeAddr σ.globE mv a) := by
-    rw [upd1_applyV, memory_applyV]
-    show (do
-      let μ ← Op3.eval σ.globE .write (pure σ.globE) (l.lower.eval σ)
-        (r.lower.eval σ)
-      pure (({ σ.globE with heap := μ.heap, nextId := μ.nextId }, σ.loc))) = _
-    simp only [Op3.eval, bind_assoc, pure_bind]
-    congr 1; funext mv; congr 1; funext a
-    exact memory_glob σ _ (Solidity.writeAddr_with _ _ _)
-  rw [e]
-  refine TRes.Agrees.bind (MSrc.lower_mvalT σ r) fun mv => ?_
-  refine TRes.Agrees.bind (MLoc.lower_addrT σ l) fun a => ?_
-  show TRes.Agrees _ (do
-      let hp ← TRes.ofOpt (σ.heap.writeAddr a mv)
-      pure (⟨σ.withHeap hp, List.prefix_refl _⟩ : Out C σ.H Γ))
-    ((·, σ.loc) <$> writeAddr σ.globE (MVal.erase T mv) a.erase)
-  rw [writeAddr_erase σ a mv]
-  cases σ.heap.writeAddr a mv <;> rfl
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.assignMem l r σ)
+      ((Upd.nil.snoc (UpdElem.writeMem l r)).applyP σ) := by
+  rw [UpdElem.writeMem, applyP_memory1, Tm.eval_write, Tm.eval_memory, Option.bind_some]
+  refine (MSrc.lower_mvalT σ r).cases (fun mv hmv => ?_) (fun hmv => ?_)
+  · refine (MLoc.lower_addrT σ l).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
+    rw [ha, hmv]
+    simp only [Option.bind_some]
+    rw [Grown.writeT_toT (σ.glob.memT) a mv]
+    show TRes.AgreesO _ (TRes.ofOpt (σ.heap.writeAddr a mv) >>= _)
+      (((σ.heap.writeAddr a mv).map _).map _)
+    cases σ.heap.writeAddr a mv <;> rfl
+  · rw [hmv]
+    cases l.lower.eval σ <;> rfl
 
 theorem rebindPath_agrees {R : RefTy} (i : Idx Γ (.alias R)) (p : SPath C Γ (.ref R)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.rebind i (.path p) σ)
-      ((Upd.nil.snoc (.local i (.path p.lower))).applyV σ) := by
-  simp only [TRun.rebind, ARhs.evalT, upd1_applyV, local_applyV, Rhs.eval, bind_assoc, pure_bind]
-  exact TRes.Agrees.bind (SPath.lower_resolveT σ p) fun ref =>
-    TRes.Agrees.of_eq (congrArg Except.ok (pair_setLocal σ i (some ref)).symm)
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebind i (.path p) σ)
+      ((Upd.nil.snoc (UpdElem.rebind i p)).applyP σ) := by
+  rw [UpdElem.rebind, applyP_local1]
+  show TRes.AgreesO _ ((do pure (σ.storage, ← p.resolveT σ)) >>= _)
+    (((p.lower.eval σ).bind fun r => some (some r)).map _)
+  rw [bind_assoc]
+  refine (SPath.lower_resolveT σ p).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  refine TRes.AgreesO.ret ?_
+  rw [href, State.locV_setLocal]
+  rfl
 
 theorem rebindMemAlias_agrees {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (.ref R)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.rebindMem i (.alias p) σ)
-      ((Upd.nil.snoc (.local i (.mref p.lower))).applyV σ) := by
-  simp only [TRun.rebindMem, MRhs.evalT, upd1_applyV, local_applyV, Rhs.eval, bind_assoc,
-    pure_bind]
-  exact TRes.Agrees.bind (MPath.lower_mvalT σ p) fun r =>
-    TRes.Agrees.of_eq (congrArg Except.ok (pair_setLocal σ i (some r)).symm)
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebindMem i (.alias p) σ)
+      ((Upd.nil.snoc (UpdElem.rebindMem i p)).applyP σ) := by
+  rw [UpdElem.rebindMem, applyP_local1]
+  show TRes.AgreesO _ ((do let r ← p.mvalT σ; pure (⟨σ, List.prefix_refl _, r⟩ :
+      Grew C Γ σ.H (HRef · R))) >>= _)
+    (((p.lower.eval σ).bind fun id => some (some id)).map _)
+  rw [bind_assoc]
+  refine (MPath.lower_mvalT σ p).cases (fun r hr => ?_) (fun hr => by rw [hr]; rfl)
+  refine TRes.AgreesO.ret ?_
+  rw [hr, State.locV_setLocal]
+  rfl
+
+end Agrees
 
 /-! ### Compound targets -/
 
 section OpLoc
 
-variable {op : BinOp} {p : PrimTy}
+variable {Γ : Ctx} (σ : State C Γ) {op : BinOp} {p : PrimTy}
+
+theorem Tm.eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))) :
+    (Tm.app2 .read m a).eval σ = (m.eval σ).bind fun μ => (a.eval σ).bind fun ad => μ.readT ad := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
+
+/-- A compound operator on two terms is `compoundT` on the integers they read. -/
+theorem Tm.eval_compound (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
+    (a b : Tm C Γ (.val p)) :
+    (Tm.castV (BinOp.compound_ret hop p)
+      (Tm.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)).eval σ =
+      (a.eval σ).bind fun x => (b.eval σ).bind fun y => compoundT op p (PrimTy.key x) (PrimTy.key y) := by
+  rw [Tm.eval_castV, Tm.eval_binop]
+  cases op <;> simp only [BinOp.hasCompoundAssign, Bool.false_eq_true] at hop <;>
+    cases p <;> simp only [PrimTy.isNumeric, Bool.false_eq_true] at hp <;>
+    cases a.eval σ <;> cases b.eval σ <;> rfl
+
+/-- `++`/`--` on a term is `bumpT` on the integer it reads. -/
+theorem Tm.eval_bump (o : IncDec) (hp : p.isNumeric = true) (a : Tm C Γ (.val p)) :
+    (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
+      (Tm.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp)) a
+        (Tm.one p hp))).eval σ =
+      (a.eval σ).bind fun x => bumpT o p (PrimTy.key x) := by
+  rw [Tm.eval_castV, Tm.eval_binop]
+  cases o <;> cases p <;> simp only [PrimTy.isNumeric, Bool.false_eq_true] at hp <;>
+    cases a.eval σ <;> rfl
 
 theorem storeLoc_agrees (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
-    (L : Loc C Γ (.prim p)) (v : p.Denote) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (do opStoreT σ op (← L.resolveT σ) v)
-      (do
-        let (rt, segs) ← L.lower.eval σ
-        (·, σ.loc) <$> opStore σ.globE op p rt segs (PrimTy.erase v)) :=
-  TRes.Agrees.bind (Loc.lower_resolveT σ L) fun ref => opStoreT_erase σ hop hp ref v
+    (L : Loc C Γ (.prim p)) (v : p.Denote) (t : Tm C Γ (.val p)) (ht : t.eval σ = some v) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (do opStoreT σ op (← L.resolveT σ) v)
+      ((Upd.nil.snoc (.storage (.app3 .save (.app0 .storage) L.lower (.app1 .sval
+        (Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp))
+          (Val.read L).lower t)))))).applyP σ) := by
+  rw [applyP_storage1, Tm.eval_save, Tm.eval_storage, Option.bind_some, Tm.eval_sval,
+    Tm.eval_compound σ hop hp, ht]
+  show TRes.AgreesO _ _ (((L.lower.eval σ).bind fun r =>
+    ((((Tm.app2 .find (.app0 .storage) L.lower).eval σ).bind fun x =>
+      compoundT op p (PrimTy.key x) (PrimTy.key v)).map SVal.prim).bind fun w =>
+        σ.storage.write r w).map _)
+  rw [Tm.eval_find, Tm.eval_storage, Option.bind_some]
+  refine (Loc.lower_resolveT σ L).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  simp only [Option.bind_some, id, opStoreT]
+  cases hf : σ.storage.find ref with
+  | none => rfl
+  | some old =>
+    simp only [Option.bind_some, TRes.ofOpt_some_bind]
+    cases hc : compoundT op p (PrimTy.key (SVal.view old)) (PrimTy.key v) with
+    | none => rfl
+    | some new =>
+      simp only [Option.map_some, Option.bind_some, TRes.ofOpt_some_bind]
+      show TRes.AgreesO _ (TRes.ofOpt (σ.storage.save ref (.prim new)) >>= _)
+        ((σ.storage.write ref (.prim new)).map _)
+      rw [Storage.write_prim]
+      cases σ.storage.save ref (.prim new) <;> rfl
 
 theorem storeMem_agrees (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
-    (L : MLoc C Γ (.prim p)) (v : p.Denote) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (do opMemT σ op (← L.addrT σ) v)
-      (do (·, σ.loc) <$> opMem σ.globE op p (← L.lower.eval σ) (PrimTy.erase v)) :=
-  TRes.Agrees.bind (MLoc.lower_addrT σ L) fun a => opMemT_erase σ hop hp a v
-
-theorem bumpLoc_agrees (o : IncDec) (hp : p.isNumeric = true) (L : Loc C Γ (.prim p)) :
-    TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2))
-      (do bumpStoreT σ o (← L.resolveT σ))
-      (do
-        let (rt, segs) ← L.lower.eval σ
-        glob₂ σ <$> bumpStore σ.globE o p rt segs) :=
-  TRes.Agrees.bind (Loc.lower_resolveT σ L) fun ref => bumpStoreT_erase σ o hp ref fun _ _ => rfl
-
-theorem bumpMem_agrees (o : IncDec) (hp : p.isNumeric = true) (L : MLoc C Γ (.prim p)) :
-    TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2))
-      (do bumpMemT σ o (← L.addrT σ))
-      (do glob₂ σ <$> bumpMem σ.globE o p (← L.lower.eval σ)) :=
-  TRes.Agrees.bind (MLoc.lower_addrT σ L) fun a => bumpMemT_erase σ o hp a fun _ _ => rfl
+    (L : MLoc C Γ (.prim p)) (v : p.Denote) (t : Tm C Γ (.val p)) (ht : t.eval σ = some v) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (do opMemT σ op (← L.addrT σ) v)
+      ((Upd.nil.snoc (.memory (.app3 .write (.app0 .memory) L.lower (.app1 .mval
+        (Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp))
+          (Val.readMem L).lower t)))))).applyP σ) := by
+  rw [applyP_memory1, Tm.eval_write, Tm.eval_memory, Option.bind_some, Tm.eval_mval,
+    Tm.eval_compound σ hop hp, ht]
+  show TRes.AgreesO _ _ (((L.lower.eval σ).bind fun ad =>
+    ((((Tm.app2 .read (.app0 .memory) L.lower).eval σ).bind fun x =>
+      compoundT op p (PrimTy.key x) (PrimTy.key v))).bind fun w =>
+        σ.glob.memT.writeT ad w).map _)
+  rw [Tm.eval_read, Tm.eval_memory, Option.bind_some]
+  refine (MLoc.lower_addrT σ L).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
+  rw [ha]
+  simp only [Option.bind_some, opMemT, Grown.readT, State.memT, MAddr.resolve_toT,
+    Option.bind_eq_bind]
+  change TRes.AgreesO _ _ ((((σ.heap.readAddr a).bind fun x => _).bind fun w =>
+    Grown.writeT ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a.toT w).map _)
+  cases hf : σ.heap.readAddr a with
+  | none => rfl
+  | some old =>
+    simp only [Option.bind_some, TRes.ofOpt_some_bind]
+    cases hc : compoundT op p (PrimTy.key (p := p) old) (PrimTy.key v) with
+    | none => rfl
+    | some new =>
+      simp only [Option.bind_some, TRes.ofOpt_some_bind]
+      rw [Grown.writeT_toT_prim ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a new]
+      show TRes.AgreesO _ (TRes.ofOpt (σ.heap.writeAddr a new) >>= _)
+        (((σ.heap.writeAddr a new).map _).map _)
+      cases σ.heap.writeAddr a new <;> rfl
 
 theorem opAssign_agrees (hop : op.hasCompoundAssign = true) (hp : p.isNumeric = true)
     (l : OpLoc C Γ p) (se : Simple C Γ p) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.opAssign op l (.simple se) σ)
-      ((Upd.nil.snoc (l.set (l.op op se.lower))).applyV σ) := by
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.opAssign op l (.simple se) σ)
+      ((Upd.nil.snoc (l.set (l.op op hop hp se.lower))).applyP σ) := by
   have hse := Simple.lower_evalT σ se
-  rw [upd1_applyV]
-  show TRes.Agrees _ (l.storeT σ op (se.evalT σ)) _
+  show TRes.AgreesO _ (l.storeT σ op (se.evalT σ)) _
   cases l with
   | «local» i =>
-    show TRes.Agrees _ _
-      (do pure (σ.globE, σ.loc.set i
-        (← evalBinop op p (PrimTy.erase (p := p) (TEnv.get i σ.env)) (se.lower.eval σ))))
-    rw [hse, evalBinop_compound hop, ok_bind, compound_erase' hop hp]
-    show TRes.Agrees _ (do
-      let new ← TRes.ofOpt (compoundT op p (PrimTy.key (TEnv.get i σ.env)) (PrimTy.key (se.evalT σ)))
-      pure (⟨σ.setLocal i new, List.prefix_refl _⟩ : Out C σ.H Γ)) _
+    rw [OpLoc.set, applyP_local1]
+    show TRes.AgreesO _ _ (((Tm.castV _ (.app2 (.binop op _) (.pvV i) se.lower)).eval σ).map _)
+    rw [Tm.eval_compound σ hop hp, Tm.eval_pvV, hse]
+    simp only [Option.bind_some, OpLoc.storeT]
     cases compoundT op p (PrimTy.key (TEnv.get i σ.env)) (PrimTy.key (se.evalT σ)) with
     | none => rfl
-    | some new => exact TRes.Agrees.of_eq (congrArg Except.ok (pair_setLocal σ i new).symm)
-  | root r h =>
-    exact (storeLoc_agrees σ hop hp (.root r h) _).of_eq_right
-      (save_compound σ hop p _ _ hse).symm
-  | field b f h =>
-    exact (storeLoc_agrees σ hop hp (.field b f h) _).of_eq_right
-      (save_compound σ hop p _ _ hse).symm
-  | index it b ie =>
-    exact (storeLoc_agrees σ hop hp (.index it b (.simple ie)) _).of_eq_right
-      (save_compound σ hop p _ _ hse).symm
-  | mfield b f h =>
-    exact (storeMem_agrees σ hop hp (.field b f h) _).of_eq_right
-      (write_compound σ hop p _ _ hse).symm
-  | mindex a b ie =>
-    exact (storeMem_agrees σ hop hp (.index a b (.simple ie)) _).of_eq_right
-      (write_compound σ hop p _ _ hse).symm
+    | some new =>
+      refine TRes.AgreesO.ret ?_
+      rw [Option.map_some, State.locV_setLocal]
+      rfl
+  | root r h => exact storeLoc_agrees σ hop hp (.root r h) _ se.lower hse
+  | field b f h => exact storeLoc_agrees σ hop hp (.field b f h) _ se.lower hse
+  | index it b ie => exact storeLoc_agrees σ hop hp (.index it b (.simple ie)) _ se.lower hse
+  | mfield b f h => exact storeMem_agrees σ hop hp (.field b f h) _ se.lower hse
+  | mindex a b ie => exact storeMem_agrees σ hop hp (.index a b (.simple ie)) _ se.lower hse
 
-/-- `l++` on a local, against `{v := v ± 1}`, by its value too. -/
-theorem bumpLocal_agrees (o : IncDec) (hp : p.isNumeric = true) (i : Idx Γ (.val p)) :
-    TRes.Agrees (fun x : Out C σ.H Γ × p.Denote => ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2))
-      ((OpLoc.local i).bumpT σ o)
-      (do
-        let new ← evalBinop o.binOp p (σ.getE i) (pure (.int 1))
-        pure ((σ.globE, σ.loc.set i new), if o.isPre then new else σ.getE i)) := by
-  simp only [OpLoc.bumpT, State.getE, LTy.TDenote.erase_val, evalBinop_bump,
-    Solidity.applyBinOp_bump, asInt_erase_numeric hp, ok_bind, pure_bind, bump_erase hp]
-  cases Solidity.bumpT o p (PrimTy.key (TEnv.get i σ.env)) with
+
+/-- The update's first element, a storage write, before the second. -/
+theorem applyV_storage1 (t : Tm C Γ .st) :
+    (Upd.nil.snoc (UpdElem.storage t)).applyV σ =
+      (t.eval σ).map fun st => (σ.globG.withStorage st, σ.locV) := by
+  show (UpdElem.storage t : UpdElem C Γ Γ).applyV σ σ.globG σ.locV = _
+  rw [UpdElem.applyV_storage]
+
+theorem applyV_memory1 (t : Tm C Γ .mem) :
+    (Upd.nil.snoc (UpdElem.memory t)).applyV σ =
+      (t.eval σ).map fun μ => (σ.globG.withMem μ, σ.locV) := by
+  show (UpdElem.memory t : UpdElem C Γ Γ).applyV σ σ.globG σ.locV = _
+  rw [UpdElem.applyV_memory]
+
+theorem applyV_local1 {t : LTy} (i : Idx Γ t) (r : Rhs C Γ t) :
+    (Upd.nil.snoc (UpdElem.local i r)).applyV σ =
+      (r.eval σ).map fun v => (σ.globG, σ.locV.set i v) := by
+  show (UpdElem.local i r : UpdElem C Γ Γ).applyV σ σ.globG σ.locV = _
+  rw [UpdElem.applyV_local]
+
+/-- `x++`'s bumped value, read in the state before. -/
+theorem Tm.eval_bumped (o : IncDec) (hp : p.isNumeric = true) (a : Tm C Γ (.val p)) :
+    (Tm.bumped o hp a).eval σ =
+      (a.eval σ).bind fun x => if o.isPre then bumpT o p (PrimTy.key x) else some x := by
+  unfold Tm.bumped
+  cases o.isPre with
+  | true => exact Tm.eval_bump σ o hp a
+  | false => simp only [Bool.false_eq_true, ↓reduceIte]; cases a.eval σ <;> rfl
+
+theorem bumpLoc_agrees (o : IncDec) (hp : p.isNumeric = true) (L : Loc C Γ (.prim p)) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
+      ((do bumpStoreT σ o (← L.resolveT σ)) >>= fun x => pure x.1)
+      ((Upd.nil.snoc (.storage (.app3 .save (.app0 .storage) L.lower (.app1 .sval
+        (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
+          (.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp))
+            (Val.read L).lower (Tm.one p hp))))))).applyP σ) := by
+  rw [applyP_storage1, Tm.eval_save, Tm.eval_storage, Option.bind_some, Tm.eval_sval,
+    Tm.eval_bump σ o hp]
+  show TRes.AgreesO _ _ (((L.lower.eval σ).bind fun r =>
+    ((((Tm.app2 .find (.app0 .storage) L.lower).eval σ).bind fun x =>
+      bumpT o p (PrimTy.key x)).map SVal.prim).bind fun w => σ.storage.write r w).map _)
+  rw [Tm.eval_find, Tm.eval_storage, Option.bind_some, bind_assoc]
+  refine (Loc.lower_resolveT σ L).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  simp only [Option.bind_some, id, bumpStoreT, bind_assoc]
+  cases hf : σ.storage.find ref with
   | none => rfl
-  | some new =>
-    refine TRes.Agrees.of_eq ?_
-    rw [pair_setLocal]
-    cases o.isPre <;> rfl
+  | some old =>
+    simp only [Option.bind_some, TRes.ofOpt_some_bind]
+    cases hc : bumpT o p (PrimTy.key (SVal.view old)) with
+    | none => rfl
+    | some new =>
+      simp only [Option.map_some, Option.bind_some, TRes.ofOpt_some_bind]
+      rw [Storage.write_prim]
+      cases σ.storage.save ref (.prim new) <;> rfl
+
+theorem bumpMem_agrees (o : IncDec) (hp : p.isNumeric = true) (L : MLoc C Γ (.prim p)) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
+      ((do bumpMemT σ o (← L.addrT σ)) >>= fun x => pure x.1)
+      ((Upd.nil.snoc (.memory (.app3 .write (.app0 .memory) L.lower (.app1 .mval
+        (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
+          (.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp))
+            (Val.readMem L).lower (Tm.one p hp))))))).applyP σ) := by
+  rw [applyP_memory1, Tm.eval_write, Tm.eval_memory, Option.bind_some, Tm.eval_mval,
+    Tm.eval_bump σ o hp]
+  show TRes.AgreesO _ _ (((L.lower.eval σ).bind fun ad =>
+    ((((Tm.app2 .read (.app0 .memory) L.lower).eval σ).bind fun x =>
+      bumpT o p (PrimTy.key x))).bind fun w => σ.glob.memT.writeT ad w).map _)
+  rw [Tm.eval_read, Tm.eval_memory, Option.bind_some, bind_assoc]
+  refine (MLoc.lower_addrT σ L).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
+  rw [ha]
+  simp only [Option.bind_some, bumpMemT, Grown.readT, State.memT, MAddr.resolve_toT,
+    Option.bind_eq_bind, bind_assoc]
+  change TRes.AgreesO _ _ ((((σ.heap.readAddr a).bind fun x => _).bind fun w =>
+    Grown.writeT ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a.toT w).map _)
+  cases hf : σ.heap.readAddr a with
+  | none => rfl
+  | some old =>
+    simp only [Option.bind_some, TRes.ofOpt_some_bind]
+    cases hc : bumpT o p (PrimTy.key (p := p) old) with
+    | none => rfl
+    | some new =>
+      simp only [Option.bind_some, TRes.ofOpt_some_bind]
+      rw [Grown.writeT_toT_prim ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a new]
+      cases σ.heap.writeAddr a new <;> rfl
 
 theorem incDec_agrees (o : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    TRes.Agrees (fun x : Out C σ.H Γ => (x.st.globE, x.st.loc)) (TRun.incDec o l σ)
-      ((Upd.nil.snoc (l.set (l.op o.binOp .one))).applyV σ) := by
-  rw [upd1_applyV]
-  show TRes.Agrees _ (l.bumpT σ o >>= fun x => pure x.1) _
+    TRes.AgreesO (fun x : Out C σ.H Γ => (x.st.glob, x.st.locV)) (TRun.incDec o l σ)
+      ((Upd.nil.snoc (l.set (l.op o.binOp (IncDec.binOp_compound o) hp (Tm.one p hp)))).applyP σ) := by
+  show TRes.AgreesO _ (l.bumpT σ o >>= fun x => pure x.1) _
   cases l with
   | «local» i =>
-    refine TRes.Agrees.of_eq_right ((bumpLocal_agrees σ o hp i).bind_fst) ?_
-    simp only [UpdElem.applyV, Rhs.eval, OpLoc.set, OpLoc.op, OpLoc.cur, Tm.eval, Op2.eval,
-      Op0.eval, bind_assoc, pure_bind]
-  | root r h =>
-    exact (bumpLoc_agrees σ o hp (.root r h)).bind_fst.of_eq_right (save_bump σ o p _).symm
-  | field b f h =>
-    exact (bumpLoc_agrees σ o hp (.field b f h)).bind_fst.of_eq_right
-      (save_bump σ o p _).symm
-  | index it b ie =>
-    exact (bumpLoc_agrees σ o hp (.index it b (.simple ie))).bind_fst.of_eq_right
-      (save_bump σ o p _).symm
-  | mfield b f h =>
-    exact (bumpMem_agrees σ o hp (.field b f h)).bind_fst.of_eq_right
-      (write_bump σ o p _).symm
-  | mindex a b ie =>
-    exact (bumpMem_agrees σ o hp (.index a b (.simple ie))).bind_fst.of_eq_right
-      (write_bump σ o p _).symm
+    rw [OpLoc.set, applyP_local1]
+    show TRes.AgreesO _ _ (((Tm.castV _ (.app2 (.binop o.binOp _) (.pvV i) (Tm.one p hp))).eval
+      σ).map _)
+    rw [Tm.eval_bump σ o hp, Tm.eval_pvV]
+    simp only [Option.bind_some, OpLoc.bumpT, bind_assoc]
+    cases bumpT o p (PrimTy.key (TEnv.get i σ.env)) with
+    | none => rfl
+    | some new =>
+      refine TRes.AgreesO.ret ?_
+      rw [Option.map_some, State.locV_setLocal]
+      rfl
+  | root r h => exact bumpLoc_agrees σ o hp (.root r h)
+  | field b f h => exact bumpLoc_agrees σ o hp (.field b f h)
+  | index it b ie => exact bumpLoc_agrees σ o hp (.index it b (.simple ie))
+  | mfield b f h => exact bumpMem_agrees σ o hp (.field b f h)
+  | mindex a b ie => exact bumpMem_agrees σ o hp (.index a b (.simple ie))
+
+theorem bumpAssignLoc_agrees (i : Idx Γ (.val p)) (o : IncDec) (hp : p.isNumeric = true)
+    (L : Loc C Γ (.prim p)) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
+      ((do bumpStoreT σ o (← L.resolveT σ)) >>= fun x =>
+        pure (⟨x.1.st.setLocal i x.2, x.1.ext⟩ : Out C σ.H Γ))
+      (((Upd.nil.snoc (.storage (.app3 .save (.app0 .storage) L.lower (.app1 .sval
+        (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
+          (.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp))
+            (Val.read L).lower (Tm.one p hp))))))).snoc
+        (.local i (.val (Tm.bumped o hp (Val.read L).lower)))).applyP σ) := by
+  rw [applyP_snoc, applyV_storage1, Tm.eval_save, Tm.eval_storage, Option.bind_some, Tm.eval_sval,
+    Tm.eval_bump σ o hp]
+  simp only [UpdElem.applyV_local]
+  show TRes.AgreesO _ _ ((((L.lower.eval σ).bind fun r =>
+    ((((Tm.app2 .find (.app0 .storage) L.lower).eval σ).bind fun x =>
+      bumpT o p (PrimTy.key x)).map SVal.prim).bind fun w => σ.storage.write r w).map _).bind
+    fun q => (((Tm.bumped o hp (Tm.app2 .find (.app0 .storage) L.lower)).eval σ).map _).map _)
+  rw [Tm.eval_bumped, Tm.eval_find, Tm.eval_storage, Option.bind_some, bind_assoc]
+  refine (Loc.lower_resolveT σ L).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  simp only [Option.bind_some, id, bumpStoreT, bind_assoc]
+  cases hf : σ.storage.find ref with
+  | none => rfl
+  | some old =>
+    simp only [Option.bind_some, TRes.ofOpt_some_bind]
+    cases hc : bumpT o p (PrimTy.key (SVal.view old)) with
+    | none => rfl
+    | some new =>
+      simp only [Option.map_some, Option.bind_some, TRes.ofOpt_some_bind]
+      rw [Storage.write_prim]
+      cases σ.storage.save ref (.prim new) with
+      | none => rfl
+      | some st =>
+        refine TRes.AgreesO.ret ?_
+        cases o.isPre <;>
+          simp only [Option.map_some, Option.bind_some, Bool.false_eq_true, ↓reduceIte,
+            State.locV_setLocal] <;> rfl
+
+theorem bumpAssignMem_agrees (i : Idx Γ (.val p)) (o : IncDec) (hp : p.isNumeric = true)
+    (L : MLoc C Γ (.prim p)) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
+      ((do bumpMemT σ o (← L.addrT σ)) >>= fun x =>
+        pure (⟨x.1.st.setLocal i x.2, x.1.ext⟩ : Out C σ.H Γ))
+      (((Upd.nil.snoc (.memory (.app3 .write (.app0 .memory) L.lower (.app1 .mval
+        (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
+          (.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp))
+            (Val.readMem L).lower (Tm.one p hp))))))).snoc
+        (.local i (.val (Tm.bumped o hp (Val.readMem L).lower)))).applyP σ) := by
+  rw [applyP_snoc, applyV_memory1, Tm.eval_write, Tm.eval_memory, Option.bind_some, Tm.eval_mval,
+    Tm.eval_bump σ o hp]
+  simp only [UpdElem.applyV_local]
+  show TRes.AgreesO _ _ ((((L.lower.eval σ).bind fun ad =>
+    ((((Tm.app2 .read (.app0 .memory) L.lower).eval σ).bind fun x =>
+      bumpT o p (PrimTy.key x))).bind fun w => σ.glob.memT.writeT ad w).map _).bind
+    fun q => (((Tm.bumped o hp (Tm.app2 .read (.app0 .memory) L.lower)).eval σ).map _).map _)
+  rw [Tm.eval_bumped, Tm.eval_read, Tm.eval_memory, Option.bind_some, bind_assoc]
+  refine (MLoc.lower_addrT σ L).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
+  rw [ha]
+  simp only [Option.bind_some, bumpMemT, Grown.readT, State.memT, MAddr.resolve_toT,
+    Option.bind_eq_bind, bind_assoc]
+  change TRes.AgreesO _ _ (((((σ.heap.readAddr a).bind fun x => _).bind fun w =>
+    Grown.writeT ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a.toT w).map _).bind fun q =>
+      (((σ.heap.readAddr a).bind fun x => _).map _).map _)
+  cases hf : σ.heap.readAddr a with
+  | none => rfl
+  | some old =>
+    simp only [Option.bind_some, TRes.ofOpt_some_bind]
+    cases hc : bumpT o p (PrimTy.key (p := p) old) with
+    | none => rfl
+    | some new =>
+      simp only [Option.bind_some, TRes.ofOpt_some_bind]
+      rw [Grown.writeT_toT_prim ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a new]
+      cases σ.heap.writeAddr a new with
+      | none => rfl
+      | some h' =>
+        refine TRes.AgreesO.ret ?_
+        cases o.isPre <;>
+          simp only [Option.map_some, Option.bind_some, Bool.false_eq_true, ↓reduceIte,
+            State.locV_setLocal] <;> rfl
 
 theorem assignIncDec_agrees (i : Idx Γ (.val p)) (o : IncDec) (hp : p.isNumeric = true)
     (l : OpLoc C Γ p) :
-    TRes.Agrees (fun x : Out C σ.H Γ => (x.st.globE, x.st.loc)) (TRun.assignIncDec i o l σ)
-      (((Upd.nil.snoc (l.set (l.op o.binOp .one))).snoc
-        (.local i (.val (Tm.bumped o p l.cur)))).applyV σ) := by
-  have hk : ∀ x : Out C σ.H Γ × p.Denote, TRes.Agrees (fun x : Out C σ.H Γ => (x.st.globE, x.st.loc))
-      (pure (⟨x.1.st.setLocal i x.2, x.1.ext⟩ : Out C σ.H Γ))
-      (pure (((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2).1.1,
-        ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2).1.2.set i
-          ((x.1.st.globE, x.1.st.loc), PrimTy.erase x.2).2)) :=
-    fun x => TRes.Agrees.of_eq (congrArg Except.ok (pair_setLocal x.1.st i x.2).symm)
-  show TRes.Agrees _ (l.bumpT σ o >>= fun x =>
+    TRes.AgreesO (fun x : Out C σ.H Γ => (x.st.glob, x.st.locV)) (TRun.assignIncDec i o l σ)
+      (((Upd.nil.snoc (l.set (l.op o.binOp (IncDec.binOp_compound o) hp (Tm.one p hp)))).snoc
+        (.local i (.val (Tm.bumped o hp l.cur)))).applyP σ) := by
+  show TRes.AgreesO _ (l.bumpT σ o >>= fun x =>
     pure (⟨x.1.st.setLocal i x.2, x.1.ext⟩ : Out C σ.H Γ)) _
   cases l with
   | «local» j =>
-    refine TRes.Agrees.of_eq_right (TRes.Agrees.bind
-      (k' := fun y : (Semantics.State × Locs C Γ) × Value => pure (y.1.1, y.1.2.set i y.2))
-      (bumpLocal_agrees σ o hp j) hk) ?_
-    rw [upd2_applyV]
-    simp only [UpdElem.applyV, Rhs.eval, OpLoc.set, OpLoc.op, OpLoc.cur, Tm.bumped, Tm.eval,
-      Op2.eval, Op0.eval, bind_assoc, pure_bind]
-    cases hb : evalBinop o.binOp p (σ.getE j) (pure (.int 1)) with
-    | error => rfl
-    | ok new =>
-      cases o.isPre <;> simp only [Bool.false_eq_true, ↓reduceIte, Tm.eval, Op2.eval, Op0.eval,
-        pure_bind, hb] <;> rfl
-  | root r h =>
-    exact (TRes.Agrees.bind (bumpLoc_agrees σ o hp (.root r h)) hk).of_eq_right
-      (save_bump_assign σ o p _ i).symm
-  | field b f h =>
-    exact (TRes.Agrees.bind (bumpLoc_agrees σ o hp (.field b f h)) hk).of_eq_right
-      (save_bump_assign σ o p _ i).symm
-  | index it b ie =>
-    exact (TRes.Agrees.bind (bumpLoc_agrees σ o hp (.index it b (.simple ie))) hk).of_eq_right
-      (save_bump_assign σ o p _ i).symm
-  | mfield b f h =>
-    exact (TRes.Agrees.bind (bumpMem_agrees σ o hp (.field b f h)) hk).of_eq_right
-      (write_bump_assign σ o p _ i).symm
-  | mindex a b ie =>
-    exact (TRes.Agrees.bind (bumpMem_agrees σ o hp (.index a b (.simple ie))) hk).of_eq_right
-      (write_bump_assign σ o p _ i).symm
+    rw [applyP_snoc, OpLoc.set, applyV_local1]
+    simp only [UpdElem.applyV_local]
+    show TRes.AgreesO _ _ ((((Tm.castV _ (.app2 (.binop o.binOp _) (.pvV j) (Tm.one p hp))).eval
+      σ).map _).bind fun q => (((Tm.bumped o hp (.pvV j)).eval σ).map _).map _)
+    rw [Tm.eval_bump σ o hp, Tm.eval_bumped, Tm.eval_pvV]
+    simp only [Option.bind_some, OpLoc.bumpT, bind_assoc]
+    cases hc : bumpT o p (PrimTy.key (TEnv.get j σ.env)) with
+    | none => rfl
+    | some new =>
+      refine TRes.AgreesO.ret ?_
+      cases o.isPre <;>
+        simp only [Option.map_some, Option.bind_some, Bool.false_eq_true, ↓reduceIte,
+          State.locV_setLocal] <;> rfl
+  | root r h => exact bumpAssignLoc_agrees σ i o hp (.root r h)
+  | field b f h => exact bumpAssignLoc_agrees σ i o hp (.field b f h)
+  | index it b ie => exact bumpAssignLoc_agrees σ i o hp (.index it b (.simple ie))
+  | mfield b f h => exact bumpAssignMem_agrees σ i o hp (.field b f h)
+  | mindex a b ie => exact bumpAssignMem_agrees σ i o hp (.index a b (.simple ie))
 
 end OpLoc
-
-end Agrees
 
 /-! ## The update arms -/
 
@@ -594,27 +705,28 @@ theorem sound_writeMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
 
 /-- `storageLocalRootRebind`, `…BindLocalRoot`: `{lsv := p}`. -/
 theorem sound_rebindPath {R : RefTy} (i : Idx Γ (.alias R)) (p : SPath C Γ (.ref R)) :
-    Premise.Runs m (.rebind i (.path p)) (.upd1 (.local i (.path p.lower))) σ :=
+    Premise.Runs m (.rebind i (.path p)) (.upd1 (UpdElem.rebind i p)) σ :=
   Premise.sound_update_typed σ (rebindPath_agrees σ i p) fun _ =>
     (((SPath.resolveT_ends σ p).bind fun _ => TRes.Ends.ok _).bind fun _ => TRes.Ends.ok _).1
 
 /-- `memoryRootRebind`, `memoryFieldReadAliasRoot`, `memoryIndexReadArrayMemory`:
 `{mv := p}`. -/
 theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (.ref R)) :
-    Premise.Runs m (.rebindMem i (.alias p)) (.upd1 (.local i (.mref p.lower))) σ :=
+    Premise.Runs m (.rebindMem i (.alias p)) (.upd1 (UpdElem.rebindMem i p)) σ :=
   Premise.sound_update_typed σ (rebindMemAlias_agrees σ i p) fun _ =>
     ((MRhs.evalT_ends σ (.alias p)).bind fun _ => TRes.Ends.ok _).1
 
 /-- `localOpAssign`, `storage*OpAssign`, `memory*OpAssign`: `{l := l ⊕ se}`. -/
 theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (se : Simple C Γ p) :
-    Premise.Runs m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op se.lower))) σ :=
+    Premise.Runs m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op hop hp se.lower))) σ :=
   Premise.sound_update_typed σ (opAssign_agrees σ hop hp l se) fun _ =>
     (TRes.Ends.bind (TRes.Ends.ok _) fun _ => OpLoc.storeT_ends σ op l _).1
 
 /-- `localIncrement`, `storage*Increment`, `memory*Increment`: `{l := l ± 1}`. -/
 theorem sound_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
-    Premise.Runs m (.incDec op hp l) (.upd1 (l.set (l.op op.binOp .one))) σ :=
+    Premise.Runs m (.incDec op hp l)
+      (.upd1 (l.set (l.op op.binOp (IncDec.binOp_compound op) hp (Tm.one p hp)))) σ :=
   Premise.sound_update_typed σ (incDec_agrees σ op hp l) fun _ =>
     ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1
 
@@ -622,8 +734,7 @@ theorem sound_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : O
 `{l := l ± 1 ‖ v := bumped(l)}`. -/
 theorem sound_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) :
-    Premise.Runs m (.assignIncDec i op hp l hs) (.update ((Upd.nil.snoc
-      (l.set (l.op op.binOp .one))).snoc (.local i (.val (Tm.bumped op p l.cur))))) σ :=
+    Premise.Runs m (.assignIncDec i op hp l hs) (assignIncStep i op hp l) σ :=
   Premise.sound_update_typed σ (assignIncDec_agrees σ i op hp l) fun _ =>
     ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1
 
@@ -635,410 +746,343 @@ section Agrees2
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-/-- `b.push()` against the slot pushed on the erased global part. -/
-theorem pushNone_agrees {E : Ty} (b : SPath C Γ (.array E)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.push b none σ) (do
-      let (root, segs) ← b.lower.eval σ
-      (·, σ.loc) <$> pushAt σ.globE E root segs pure) := by
-  refine TRes.Agrees.bind (SPath.lower_resolveT σ b) fun ref => ?_
-  show TRes.Agrees _ (if σ.storage.full ref then .error .exhausted else do
-      let st ← TRes.ofOpt (σ.storage.push ref fun slot => some slot)
-      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
-    ((·, σ.loc) <$> pushAt σ.globE E ref.root ref.path.erase pure)
-  cases hfull : σ.storage.full ref
-  · rw [if_neg Bool.false_ne_true]
-    rw [Storage.pushAt_erase (σ := σ.globE) rfl ref pure (fun slot => some slot)
-      (fun _ => rfl) (.inl hfull)]
-    cases σ.storage.push ref (fun slot => some slot) <;> rfl
-  · trivial
+theorem Storage.pushPlace_fst {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    (st.pushPlace r).map (·.1) = st.push r some := by
+  unfold Storage.pushPlace Storage.push
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    simp only [Option.bind_eq_bind, Option.bind_some]
+    split
+    · cases st.save r _ <;> rfl
+    · rfl
+
+/-- A push as a place returns the slot past the live elements found. -/
+theorem Storage.pushPlace_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {n : Nat}
+    (h : st.pushPlace r = some (st', n)) :
+    ∃ v, st.find r = some v ∧ n = (SVal.view v : ArrView E).n := by
+  unfold Storage.pushPlace at h
+  cases hf : st.find r with
+  | none => rw [hf] at h; cases h
+  | some v =>
+    refine ⟨v, rfl, ?_⟩
+    rw [hf] at h
+    simp only [Option.bind_eq_bind, Option.bind_some] at h
+    split at h
+    · cases hs : st.save r _ with
+      | none => rw [hs] at h; cases h
+      | some s' =>
+        rw [hs] at h
+        cases h
+        rfl
+    · cases h
 
 theorem pushSlot_agrees {E : Ty} (b : SPath C Γ (.array E)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.push b none σ)
-      ((Upd.nil.snoc (.storage (.app2 (.pushSlot E) .storage b.lower))).applyV σ) := by
-  refine (pushNone_agrees σ b).of_eq_right ?_
-  rw [upd1_applyV, storage_applyV]
-  show _ = (do
-    let st ← Op2.eval σ.globE (.pushSlot E) (pure σ.globE) (b.lower.eval σ)
-    pure (({ σ.globE with storage := st.storage }, σ.loc)))
-  simp only [Op2.eval, bind_assoc, pure_bind]
-  congr 1; funext q
-  exact (storage_glob σ _ (Solidity.pushAt_with _ _ _ _ _)).symm
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.push b none σ)
+      ((Upd.nil.snoc (UpdElem.pushSlot b)).applyP σ) := by
+  rw [UpdElem.pushSlot, applyP_storage1, Tm.eval_pushSlot, Tm.eval_storage, Option.bind_some]
+  refine (SPath.lower_resolveT σ b).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  show TRes.AgreesO _ (if σ.storage.full ref then .error .exhausted else
+    TRes.ofOpt (σ.storage.push ref some) >>= fun st =>
+      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ)) ((σ.storage.push ref some).map _)
+  split
+  · trivial
+  · cases σ.storage.push ref some <;> rfl
 
 theorem extend_agrees {E : Ty} (b : SPath C Γ (.array E)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.push b none σ)
-      ((Upd.nil.snoc (.storage (.app2 (.extend E) .storage b.lower))).applyV σ) := by
-  refine (pushNone_agrees σ b).of_eq_right ?_
-  rw [upd1_applyV, storage_applyV]
-  show _ = (do
-    let st ← Op2.eval σ.globE (.extend E) (pure σ.globE) (b.lower.eval σ)
-    pure (({ σ.globE with storage := st.storage }, σ.loc)))
-  simp only [Op2.eval, pushPlaceAt, pushAt, SemanticsProperties.State.saveStorage_eq, bind_assoc,
-    pure_bind]
-  simp only [bind, Except.bind, pure, Except.pure, Functor.map, Except.map]
-  cases b.lower.eval σ with
-  | error => rfl
-  | ok q =>
-    simp only
-    cases σ.globE.findStorage q.1 q.2 with
-    | error => rfl
-    | ok v =>
-      cases v with
-      | array elems shadow fx =>
-        simp only
-        cases σ.globE.storeRes q.1 q.2 _ <;> rfl
-      | _ => rfl
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.push b none σ)
+      ((Upd.nil.snoc (UpdElem.extend b)).applyP σ) := by
+  have h := pushSlot_agrees σ b
+  rw [UpdElem.pushSlot, applyP_storage1, Tm.eval_pushSlot, Tm.eval_storage, Option.bind_some] at h
+  rw [UpdElem.extend, applyP_storage1, Tm.eval_extend, Tm.eval_storage, Option.bind_some]
+  simp only [Storage.pushPlace_fst]
+  exact h
 
-theorem pushSome_agrees {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.push b (some r) σ)
-      ((Upd.nil.snoc (.storage (.app3 .push .storage b.lower r.lower))).applyV σ) := by
-  have e : (Upd.nil.snoc (.storage (.app3 .push .storage b.lower r.lower))).applyV σ = (do
-      let (root, segs) ← b.lower.eval σ
-      (·, σ.loc) <$> pushAt σ.globE E root segs
-        fun _ => do pure (← r.lower.eval σ).strip) := by
-    rw [upd1_applyV, storage_applyV]
-    show (do
-      let st ← Op3.eval σ.globE .push (pure σ.globE) (b.lower.eval σ)
-        (r.lower.eval σ)
-      pure (({ σ.globE with storage := st.storage }, σ.loc))) = _
-    simp only [Op3.eval, bind_assoc, pure_bind]
-    congr 1; funext q
-    rw [Solidity.pushAt_const σ.globE .uint E]
-    exact storage_glob σ _ (Solidity.pushAt_with _ _ _ _ _)
-  rw [e]
-  refine TRes.Agrees.bind (SPath.lower_resolveT σ b) fun ref => ?_
-  show TRes.Agrees _ (do
-      let sv ← r.valueT σ
-      if σ.storage.full ref then .error .exhausted else do
-      let st ← TRes.ofOpt (σ.storage.push ref fun _ => some sv.strip)
-      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
-    ((·, σ.loc) <$> pushAt σ.globE E ref.root ref.path.erase
-      fun _ => do pure (← r.lower.eval σ).strip)
-  have ha := Src.lower_valueT σ r
-  have hn := Src.valueT_noPanic σ r
-  revert ha hn
-  cases r.valueT σ with
-  | ok sv =>
-    intro ha _
-    have hval : ∀ x : SVal E, (fun _ => do pure (← r.lower.eval σ).strip) x.erase =
-        toRes SVal.erase ((fun _ => some sv.strip) x) := fun _ => by
-      show (do pure (← r.lower.eval σ).strip) = _
-      rw [show r.lower.eval σ = .ok sv.erase from ha, ok_bind, ← SVal.strip_erase]
-      rfl
-    show TRes.Agrees _ (if σ.storage.full ref then .error .exhausted else do
-        let st ← TRes.ofOpt (σ.storage.push ref fun _ => some sv.strip)
-        pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ)) _
-    cases hfull : σ.storage.full ref
-    · rw [if_neg Bool.false_ne_true]
-      rw [Storage.pushAt_erase (σ := σ.globE) rfl ref _ _ hval (.inl hfull)]
-      cases σ.storage.push ref (fun _ => some sv.strip) <;> rfl
+theorem pushSome_agrees {E : Ty} (b : SPath C Γ (.array E)) (v : Src C Γ E) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.push b (some v) σ)
+      ((Upd.nil.snoc (UpdElem.push b v)).applyP σ) := by
+  rw [UpdElem.push, applyP_storage1, Tm.eval_push, Tm.eval_storage, Option.bind_some]
+  refine (SPath.lower_resolveT σ b).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  simp only [Option.bind_some, id]
+  refine (Src.lower_valueT σ v).cases (fun sv hsv => ?_) (fun hsv => ?_)
+  · rw [hsv]
+    show TRes.AgreesO _ (if σ.storage.full ref then .error .exhausted else
+      TRes.ofOpt (σ.storage.push ref fun _ => some sv.strip) >>= fun st =>
+        pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
+      ((σ.storage.push ref fun _ => some sv.strip).map _)
+    split
     · trivial
-  | error e =>
-    intro ha hn
-    cases e with
-    | diverge => trivial
-    | exhausted => trivial
-    | panic => exact absurd rfl hn
-    | revert =>
-      have hval : ∀ x : SVal E, (fun _ => do pure (← r.lower.eval σ).strip) x.erase =
-          toRes SVal.erase ((fun _ => (none : Option (SVal E))) x) := fun _ => by
-        show (do pure (← r.lower.eval σ).strip) = _
-        rw [show r.lower.eval σ = .error .revert from ha]
-        rfl
-      rw [Storage.pushAt_erase (σ := σ.globE) rfl ref _ _ hval (.inr fun _ => rfl)]
-      have hnone : σ.storage.push ref (fun _ => (none : Option (SVal E))) = none := by
-        simp only [Storage.push]
-        cases σ.storage.find ref <;> rfl
-      rw [hnone]
-      rfl
+    · cases σ.storage.push ref fun _ => some sv.strip <;> rfl
+  · rw [hsv]
+    show (σ.storage.push ref fun _ => none).map _ = none
+    rw [Storage.push_none]
+    rfl
 
 theorem pop_agrees {E : Ty} (b : SPath C Γ (.array E)) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.pop b σ)
-      ((Upd.nil.snoc (.storage (.app2 (if E.isMapping then .shrink else .pop)
-        .storage b.lower))).applyV σ) := by
-  have e : (Upd.nil.snoc (.storage (.app2 (if E.isMapping then .shrink else .pop)
-      .storage b.lower))).applyV σ = (do
-      let (root, segs) ← b.lower.eval σ
-      (·, σ.loc) <$> popAt σ.globE E.isMapping root segs) := by
-    rw [upd1_applyV, storage_applyV]
-    by_cases hE : E.isMapping = true
-    · rw [if_pos hE]
-      show (do
-        let st ← Op2.eval σ.globE .shrink (pure σ.globE) (b.lower.eval σ)
-        pure (({ σ.globE with storage := st.storage }, σ.loc))) = _
-      simp only [Op2.eval, hE, bind_assoc, pure_bind]
-      congr 1; funext q
-      exact storage_glob σ _ (Solidity.popAt_with _ _ _ _)
-    · have hE' : E.isMapping = false := by simpa only [Bool.not_eq_true] using hE
-      rw [if_neg hE]
-      show (do
-        let st ← Op2.eval σ.globE .pop (pure σ.globE) (b.lower.eval σ)
-        pure (({ σ.globE with storage := st.storage }, σ.loc))) = _
-      simp only [Op2.eval, hE', bind_assoc, pure_bind]
-      congr 1; funext q
-      exact storage_glob σ _ (Solidity.popAt_with _ _ _ _)
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.pop b σ)
+      ((Upd.nil.snoc (if b.elemMapping then UpdElem.shrink b else UpdElem.pop b)).applyP σ) := by
+  have e : (Upd.nil.snoc (if b.elemMapping then UpdElem.shrink b else UpdElem.pop b)).applyP σ =
+      ((b.lower.eval σ).bind fun r => σ.storage.pop E.isMapping r).map
+        fun st => ((σ.withStorage st).glob, σ.locV) := by
+    show (Upd.nil.snoc (if E.isMapping then UpdElem.shrink b else UpdElem.pop b)).applyP σ = _
+    cases E.isMapping with
+    | true =>
+      simp only [↓reduceIte, UpdElem.shrink, applyP_storage1, Tm.eval_shrink, Tm.eval_storage,
+        Option.bind_some]
+    | false =>
+      simp only [Bool.false_eq_true, ↓reduceIte, UpdElem.pop, applyP_storage1, Tm.eval_pop,
+        Tm.eval_storage, Option.bind_some]
   rw [e]
-  refine TRes.Agrees.bind (SPath.lower_resolveT σ b) fun ref => ?_
-  show TRes.Agrees _ (do
-      let st ← TRes.ofOpt (σ.storage.pop E.isMapping ref)
-      pure (⟨σ.withStorage st, List.prefix_refl _⟩ : Out C σ.H Γ))
-    ((·, σ.loc) <$> popAt σ.globE E.isMapping ref.root ref.path.erase)
-  rw [Storage.popAt_erase (σ := σ.globE) rfl E.isMapping ref]
+  refine (SPath.lower_resolveT σ b).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  show TRes.AgreesO _ (TRes.ofOpt (σ.storage.pop E.isMapping ref) >>= _)
+    ((σ.storage.pop E.isMapping ref).map _)
   cases σ.storage.pop E.isMapping ref <;> rfl
 
 theorem rebindPush_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.rebind i (.push b hd) σ)
-      (((Upd.nil.snoc (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
-        (.local i (.path (.app1 .next rfl b.lower)))).applyV σ) := by
-  have e : ((Upd.nil.snoc (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
-      (.local i (.path (.app1 .next rfl b.lower)))).applyV σ = (do
-      let (root, segs) ← b.lower.eval σ
-      let (τ, n) ← pushPlaceAt σ.globE (.ref R) root segs
-      pure (τ, σ.loc.set i (some (root, segs ++ [.at n])))) := by
-    rw [upd2_applyV, storage_applyV]
-    simp only [local_applyV, Rhs.eval, Tm.eval, Op2.eval, Op1.eval, Op0.eval, pushPlaceAt,
-      SemanticsProperties.State.saveStorage_eq, bind_assoc, pure_bind]
-    simp only [bind, Except.bind, pure, Except.pure]
-    cases b.lower.eval σ with
-    | error => rfl
-    | ok q =>
-      simp only
-      cases σ.globE.findStorage q.1 q.2 with
-      | error => rfl
-      | ok v =>
-        cases v with
-        | array elems shadow fx =>
-          simp only
-          cases σ.globE.storeRes q.1 q.2 _ <;> rfl
-        | _ => rfl
-  rw [e]
-  simp only [TRun.rebind, ARhs.evalT, bind_assoc]
-  refine TRes.Agrees.bind (SPath.lower_resolveT σ b) fun r => ?_
-  show TRes.Agrees _ ((if σ.storage.full r then .error .exhausted else do
-        let (st, n) ← TRes.ofOpt (σ.storage.pushPlace r)
-        pure (st, r.index (.arr .dyn) n)) >>= fun x =>
-      pure (⟨(σ.withStorage x.1).setLocal i (some x.2), List.prefix_refl _⟩ : Out C σ.H Γ))
-    (do
-      let (τ, n) ← pushPlaceAt σ.globE (.ref R) r.root r.path.erase
-      pure (τ, σ.loc.set i (some (r.root, r.path.erase ++ [.at n]))))
-  cases hfull : σ.storage.full r
-  · rw [if_neg Bool.false_ne_true]
-    rw [Storage.pushPlaceAt_erase (σ := σ.globE) rfl r hfull]
-    cases σ.storage.pushPlace r with
-    | none => rfl
-    | some x =>
-      refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
-      rw [pair_setLocal]
-      show (_, σ.loc.set i (some (r.root, r.path.erase ++ [.at (x.2 : Int)]))) =
-        (_, σ.loc.set i (some (r.index (.arr .dyn) x.2).erase))
-      rw [SRef.erase_index]
-      rfl
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebind i (.push b hd) σ)
+      ((Upd.pushBind i b).applyP σ) := by
+  rw [Upd.pushBind, applyP_snoc, applyV_storage1, Tm.eval_extend, Tm.eval_storage, Option.bind_some]
+  simp only [UpdElem.applyV_local]
+  show TRes.AgreesO _ _ ((((b.lower.eval σ).bind fun r => (σ.storage.pushPlace r).map (·.1)).map
+    _).bind fun q => ((((Tm.app1 .next b.lower).eval σ).bind fun r => some (some r)).map _).map _)
+  rw [Tm.eval_next]
+  show TRes.AgreesO _ ((do
+      let ref ← b.resolveT σ
+      if σ.storage.full ref then .error .exhausted else do
+      let (st, n) ← TRes.ofOpt (σ.storage.pushPlace ref)
+      pure (st, ref.index (.arr .dyn) n)) >>= fun x =>
+        pure (⟨(σ.withStorage x.1).setLocal i (some x.2), List.prefix_refl _⟩ : Out C σ.H Γ)) _
+  rw [bind_assoc]
+  refine (SPath.lower_resolveT σ b).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
+  rw [href]
+  simp only [Option.bind_some, id]
+  split
   · trivial
+  · cases hp : σ.storage.pushPlace ref with
+    | none => rfl
+    | some q =>
+      obtain ⟨st', n⟩ := q
+      obtain ⟨v, hv, rfl⟩ := Storage.pushPlace_some hp
+      refine TRes.AgreesO.ret ?_
+      simp only [Option.map_some, Option.bind_some, Storage.nextT, hv, State.locV_setLocal]
+      rfl
+
+theorem applyV_pay {Δ : Ctx} (r a : Tm C Γ (.val .uint)) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
+    (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ g ℓ =
+      (r.eval σ).bind fun addr => (a.eval σ).map fun amt =>
+        (g.withNet (if addr.1 = σ.tx.selfAddress.1 then g.1.net
+          else setBy addr.1 ((lookupBy addr.1 g.1.net).getD 0 - amt.1) g.1.net), ℓ) := by
+  rw [UpdElem.applyV_eq_applyVM]
+  show ((UpdElem.pay r a : UpdElem C Γ Δ).globT σ g).bind _ = _
+  rw [UpdElem.globT_eq_globTM]
+  show (((r.eval σ).bind fun addr => (a.eval σ).bind fun amt => some _).bind _) = _
+  cases r.eval σ with
+  | none => rfl
+  | some x => cases a.eval σ <;> rfl
 
 theorem transferBox_agrees (sadr se : Simple C Γ .uint) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.transfer (.simple sadr) (.simple se) σ)
-      ((Upd.nil.snoc (.payTo sadr se)).applyV σ) := by
-  show TRes.Agrees _
-    (.ok (⟨σ.pay (sadr.evalT σ).1 (se.evalT σ).1, List.prefix_refl _⟩ : Out C σ.H Γ)) _
-  refine TRes.Agrees.of_eq ?_
-  rw [upd1_applyV]
-  simp only [UpdElem.applyV, UpdElem.globT, Simple.lower_evalT, PrimTy.asInt_erase_uint, Res.bind_ok,
-    if_neg (Int.not_lt.mpr (PrimTy.uint_nonneg (se.evalT σ)))]
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
+      (TRun.transfer (.simple sadr) (.simple se) σ) ((Upd.nil.snoc (UpdElem.payTo sadr se)).applyP σ) := by
+  rw [UpdElem.payTo, applyP_snoc, applyV_nil, Option.bind_some, applyV_pay, Simple.lower_evalT,
+    Simple.lower_evalT]
   rfl
 
 /-- `pv = a.send(v);`'s outcome, by the updates of `sendNoCallback*`. -/
 theorem send_sim (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) :
-    ∃ U ∈ [(Upd.nil.snoc (.payTo sadr se)).snoc (.local pv (.val (Tm.lit (.bool true)))),
-        Upd.nil.snoc (.local pv (.val (Tm.lit (.bool false))))],
-      Res.Sim (U.applyV σ)
-        (.ok ((sendT σ pv (sadr.evalT σ).1 (se.evalT σ).1).st.globE,
-          (sendT σ pv (sadr.evalT σ).1 (se.evalT σ).1).st.loc)) := by
-  have hk := PrimTy.uint_nonneg (se.evalT σ)
-  have e₁ : ((Upd.nil.snoc (.payTo sadr se)).snoc
-      (.local pv (.val (Tm.lit (.bool true))))).applyV σ =
-        .ok (((σ.pay (sadr.evalT σ).1 (se.evalT σ).1).setLocal pv (true : Bool)).globE,
-          ((σ.pay (sadr.evalT σ).1 (se.evalT σ).1).setLocal pv (true : Bool)).loc) := by
-    rw [upd2_applyV, pair_setLocal]
-    simp only [UpdElem.applyV, UpdElem.globT, Rhs.eval, Tm.eval, Op0.eval, Simple.lower_evalT,
-      PrimTy.asInt_erase_uint, Res.bind_ok, if_neg (Int.not_lt.mpr hk)]
+    ∃ U ∈ [(Upd.nil.snoc (UpdElem.payTo sadr se)).snoc (.local pv (.val (Tm.lit (p := .bool) true))),
+        Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))],
+      U.applyP σ = some ((sendT σ pv (sadr.evalT σ).1 (se.evalT σ).1).st.glob,
+          (sendT σ pv (sadr.evalT σ).1 (se.evalT σ).1).st.locV) := by
+  have e₁ : ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
+      (.local pv (.val (Tm.lit (p := .bool) true)))).applyP σ =
+        some (((σ.pay (sadr.evalT σ).1 (se.evalT σ).1).setLocal pv (true : Bool)).glob,
+          ((σ.pay (sadr.evalT σ).1 (se.evalT σ).1).setLocal pv (true : Bool)).locV) := by
+    rw [applyP_snoc, UpdElem.payTo]
+    show ((((UpdElem.pay sadr.lower se.lower : UpdElem C Γ Γ).applyV σ σ.globG σ.locV)).bind _) = _
+    rw [applyV_pay, Simple.lower_evalT, Simple.lower_evalT, State.locV_setLocal]
     rfl
-  have e₂ : (Upd.nil.snoc (.local pv (.val (Tm.lit (C := C) (Γ := Γ) (.bool false))))).applyV
-      σ = .ok ((σ.setLocal pv (false : Bool)).globE, (σ.setLocal pv (false : Bool)).loc) := by
-    rw [pair_setLocal]; rfl
+  have e₂ : (Upd.nil.snoc (.local pv (.val (Tm.lit (C := C) (Γ := Γ) (p := .bool) false)))).applyP
+      σ = some ((σ.setLocal pv (false : Bool)).glob, (σ.setLocal pv (false : Bool)).locV) := by
+    rw [applyP_local1, State.locV_setLocal]; rfl
   unfold sendT
-  cases Semantics.lookupBy (sendKey (sadr.evalT σ).1 (se.evalT σ).1) σ.tx.ext with
-  | none => exact ⟨_, List.mem_cons_self .., by rw [e₁]; exact Res.Sim.refl _⟩
-  | some x =>
-    cases x with
-    | ok => exact ⟨_, List.mem_cons_self .., by rw [e₁]; exact Res.Sim.refl _⟩
-    | _ =>
-      exact ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self ..), by rw [e₂]; exact Res.Sim.refl _⟩
-
-theorem declMemFresh_agrees (R : RefTy) (x : Var) (hm : (Ty.ref R).mapFree = true) :
-    TRes.Agrees (fun o : Out C σ.H (.mem R :: Γ) => (o.st.globE, o.st.loc)) (TRun.declMem R none hm σ)
-      (((Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).snoc
-        (.memory (.app1 (.addM R) rfl .memory))).applyV σ) := by
-  have e : ((Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).snoc
-      (.memory (.app1 (.addM R) rfl .memory))).applyV σ = (do
-      let (τ', id) ← Semantics.allocDefault σ.globE R
-      pure (τ', σ.loc.push (t := .mem R) (some id))) := by
-    show (do
-      let q ← (Upd.nil.decl x (.mref (.app1 (.alloc R) rfl .memory))).applyV σ
-      UpdElem.applyV σ (.memory (.app1 (.addM R) rfl .memory)) q.1 q.2) = _
-    simp only [Upd.applyV, memory_applyV, Rhs.eval, Tm.eval, Op1.eval, Op0.eval,
-      Solidity.allocDefault_eq, bind_assoc, pure_bind]
-    simp only [bind, Except.bind, pure, Except.pure]
-    cases Solidity.allocHN σ.globE R <;> rfl
-  rw [e, State.allocDefault_erase σ R hm, ok_bind]
-  refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
-  rw [State.loc_push]
-  show (_, σ.loc.push _) = (_, (σ.allocDefault R hm).1.loc.push _)
-  rw [show (σ.allocDefault R hm).1.loc = σ.loc from State.adopt_loc σ _]
-  rfl
-
-theorem deleteMemVar_agrees {R : RefTy} (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.deleteMem (.var i hm) σ)
-      (((Upd.nil.snoc (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
-        (.memory (.app1 (.addM R) rfl .memory))).applyV σ) := by
-  have e : ((Upd.nil.snoc (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
-      (.memory (.app1 (.addM R) rfl .memory))).applyV σ = (do
-      let (τ', id) ← Semantics.allocDefault σ.globE R
-      pure (τ', σ.loc.set i (some id))) := by
-    rw [upd2_applyV]
-    simp only [memory_applyV, local_applyV, Rhs.eval, Tm.eval, Op1.eval, Op0.eval,
-      Solidity.allocDefault_eq, bind_assoc, pure_bind]
-    simp only [bind, Except.bind, pure, Except.pure]
-    cases Solidity.allocHN σ.globE R <;> rfl
-  rw [e, State.allocDefault_erase σ _ hm, ok_bind]
-  refine TRes.Agrees.of_eq (congrArg Except.ok ?_)
-  rw [pair_setLocal]
-  show (_, σ.loc.set i _) = (_, (σ.allocDefault _ hm).1.loc.set i _)
-  rw [show (σ.allocDefault _ hm).1.loc = σ.loc from State.adopt_loc σ _]
-  rfl
-
-theorem allocCopy_agrees {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) (v : Tm C Γ .sv)
-    (hr : TRes.Agrees (fun g : Grew C Γ σ.H (HRef · R) => ((g.st.globE, g.st.loc), (g.val : HRef _ R).id))
-      (r.evalT σ) (do
-        let (τ, mv) ← Semantics.copyStToM σ.globE (← v.eval σ)
-        pure ((τ, σ.loc), ← mv.asRef))) :
-    TRes.Agrees (fun o : Out C σ.H Γ => (o.st.globE, o.st.loc)) (TRun.rebindMem i r σ)
-      (((Upd.nil.snoc (.local i (.mref (.app2 .copy .memory v)))).snoc
-        (.memory (.app2 .copySt .memory v))).applyV σ) := by
-  have e : ((Upd.nil.snoc (.local i (.mref (.app2 .copy .memory v)))).snoc
-      (.memory (.app2 .copySt .memory v))).applyV σ = (do
-      let (τ', id) ← (do
-        let (τ, mv) ← Semantics.copyStToM σ.globE (← v.eval σ)
-        pure ((τ, σ.loc), ← mv.asRef))
-      pure (τ'.1, τ'.2.set i (some id))) := by
-    rw [upd2_applyV]
-    simp only [memory_applyV, local_applyV, Rhs.eval, Tm.eval, Op2.eval, Op0.eval,
-      Solidity.copyStToM_eq, bind_assoc, pure_bind]
-    simp only [bind, Except.bind, pure, Except.pure]
-    cases v.eval σ with
-    | error => rfl
-    | ok sv =>
-      simp only
-      cases Solidity.copyHN σ.globE sv with
-      | error => rfl
-      | ok q =>
-        simp only
-  rw [e]
-  exact TRes.Agrees.bind hr fun g =>
-    TRes.Agrees.of_eq (congrArg Except.ok (pair_setLocal g.st i (some g.val)).symm)
-
-/-- `memoryStorageCopy`'s right-hand side: a deep copy of `sfind(storage, p)`. -/
-theorem allocCopy_copy {R : RefTy} (p : SPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true) :
-    TRes.Agrees (fun g : Grew C Γ σ.H (HRef · R) => ((g.st.globE, g.st.loc), (g.val : HRef _ R).id))
-      ((MRhs.copy p hm).evalT σ) (do
-        let (τ, mv) ← Semantics.copyStToM σ.globE
-          (← (Tm.app2 .sfind .storage p.lower : Tm C Γ .sv).eval σ)
-        pure ((τ, σ.loc), ← mv.asRef)) := by
-  show TRes.Agrees _ _ (do
-    let sv ← (do
-      let τ ← pure σ.globE
-      let (r, segs) ← p.lower.eval σ
-      τ.findStorage r segs)
-    let (τ, mv) ← Semantics.copyStToM σ.globE sv
-    pure ((τ, σ.loc), ← mv.asRef))
-  simp only [pure_bind, bind_assoc]
-  refine TRes.Agrees.bind (SPath.lower_resolveT σ p) fun r => ?_
-  show TRes.Agrees _ (do
-      let sv ← TRes.ofOpt (σ.storage.find r)
-      let g := σ.copyStToMG sv hm
-      pure (⟨g.st, g.ext, g.val⟩ : Grew C Γ σ.H (HRef · R)))
-    (do
-      let sv ← σ.globE.findStorage r.root r.path.erase
-      let (τ, mv) ← Semantics.copyStToM σ.globE sv
-      pure ((τ, σ.loc), ← mv.asRef))
-  rw [Storage.findStorage_erase (σ := σ.globE) rfl r]
-  refine TRes.Agrees.bind (TRes.Agrees.ofOpt _) fun sv => ?_
-  rw [State.copyStToM_erase σ sv hm]
-  exact TRes.Agrees.of_eq (by
-    show Except.ok (((σ.copyStToM sv hm).1.globE, σ.loc), _) = _
-    rw [← State.adopt_loc σ (SVal.copyStToM σ.heap sv hm)]
-    rfl)
-
-/-- `memoryArrayFreshAlloc`'s right-hand side: `newArr(R, n)` copied. -/
-theorem allocCopy_newArr {R : RefTy} (n : Simple C Γ .uint) (h : R.newArrOk = true) :
-    TRes.Agrees (fun g : Grew C Γ σ.H (HRef · R) => ((g.st.globE, g.st.loc), (g.val : HRef _ R).id))
-      ((MRhs.newArr n h).evalT σ) (do
-        let (τ, mv) ← Semantics.copyStToM σ.globE
-          (← (Tm.app1 (.newArr R) rfl n.lower : Tm C Γ .sv).eval σ)
-        pure ((τ, σ.loc), ← mv.asRef)) := by
-  show TRes.Agrees _ _ (do
-    let sv ← (do pure (newArrVal R (← (← n.lower.eval σ).asInt)))
-    let (τ, mv) ← Semantics.copyStToM σ.globE sv
-    pure ((τ, σ.loc), ← mv.asRef))
-  rw [Simple.lower_evalT σ n, ok_bind, PrimTy.asInt_erase_uint, ok_bind, pure_bind,
-    ← newArrT_erase R _ h]
-  rw [State.copyStToM_erase σ _ (RefTy.mapFree_of_newArrOk h)]
-  exact TRes.Agrees.of_eq (by
-    show Except.ok (((σ.copyStToM _ _).1.globE, σ.loc), _) = _
-    rw [← State.adopt_loc σ (SVal.copyStToM σ.heap _ _)]
-    rfl)
-
-/-- `delete l` at a memory location: the slot reset to its default, or
-written a fresh default object, up to the halt (the update allocates before
-it reads the address). -/
-theorem clearMem_sim {T : Ty} (l : MLoc C Γ T) (hd : T.defaultOkS = true) :
-    ∃ U, Premise.clearMem l.lower T = .update U ∧
-      Res.Sim (U.applyV σ)
-        (do (·, σ.loc) <$> memClear σ.globE (← l.lower.eval σ) T) := by
-  cases T with
-  | prim p =>
-    refine ⟨_, rfl, Res.Sim.of_eq ?_⟩
-    rw [upd1_applyV, memory_applyV]
-    show _ = _
-    simp only [Tm.eval, Op3.eval, Op1.eval, Op0.eval, memClear, bind_assoc,
-      pure_bind, writeAddr_glob]
-  | ref R =>
-    refine ⟨_, rfl, ?_⟩
-    rw [upd1_applyV, memory_applyV]
-    simp only [Tm.eval, Op3.eval, Op1.eval, Op0.eval, memClear,
-      Solidity.allocDefault_eq, bind_assoc, pure_bind]
-    simp only [bind, Except.bind, pure, Except.pure, Functor.map, Except.map]
-    have ha : NoPanic (l.lower.eval σ) := Tm.eval_noPanic σ l.lower
-    have hal : NoPanic (Solidity.allocHN σ.globE R) := Solidity.allocHN_noPanic σ.globE R
-    revert ha hal
-    cases l.lower.eval σ with
-    | error e =>
-      cases Solidity.allocHN σ.globE R with
-      | error e' => exact fun ha hal => ⟨fun h => absurd (congrArg Except.error h) hal,
-          fun h => absurd (congrArg Except.error h) ha⟩
-      | ok q => intro _ _; exact Res.Sim.refl _
-    | ok a =>
-      cases Solidity.allocHN σ.globE R with
-      | error e' => intro _ _; exact Res.Sim.refl _
-      | ok q =>
-        intro _ _
-        simp only
-        cases hw : writeAddr _ _ a with
-        | error => exact Res.Sim.refl _
-        | ok μ =>
-          simp only [writeAddr_ok_with hw]
-          exact Res.Sim.refl _
+  split
+  · exact ⟨_, List.mem_cons_self .., e₁⟩
+  · exact ⟨_, List.mem_cons_self .., e₁⟩
+  · exact ⟨_, List.mem_cons_of_mem _ (List.mem_cons_self ..), e₂⟩
 
 end Agrees2
+
+/-! ### Allocations -/
+
+section Alloc
+
+variable {Γ : Ctx} (σ : State C Γ)
+
+theorem LTy.VDen.ofT_wk {H H' : HTy} (e : H <+: H') :
+    (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
+
+/-- An adopted heap leaves the locals' values as they were. -/
+theorem State.locV_adopt {α : HTy → Type} (g : Grown σ.H α) : (σ.adopt g).1.locV = σ.locV := by
+  funext t i
+  show LTy.VDen.ofT t (TEnv.get i (TEnv.wk g.ext Γ σ.env)) = _
+  rw [TEnv.get_wk, LTy.VDen.ofT_wk]
+  rfl
+
+theorem applyV_decl1 {t : LTy} (x : Var) (r : Rhs C Γ t) :
+    (Upd.nil.decl x r).applyV σ = (r.eval σ).map fun v => (σ.globG, σ.locV.push v) := by
+  show (r.eval σ).bind _ = _
+  cases r.eval σ <;> rfl
+
+theorem Tm.eval_alloc (R : RefTy) (h : (Ty.ref R).mapFree = true) :
+    (Tm.app1 (.alloc R h) (.app0 .memory) : Tm C Γ (.ident R)).eval σ =
+      some ((σ.heap.allocDefault R h).val : HRef _ R).id := rfl
+
+theorem Tm.eval_addM (R : RefTy) (h : (Ty.ref R).mapFree = true) :
+    (Tm.app1 (.addM R h) (.app0 .memory) : Tm C Γ .mem).eval σ =
+      some (σ.glob.memT.then (σ.heap.allocDefault R h)) := rfl
+
+theorem declMemFresh_agrees (R : RefTy) (x : Var) (hm : (Ty.ref R).mapFree = true) :
+    TRes.AgreesO (fun o : Out C σ.H (.mem R :: Γ) => (o.st.glob, o.st.locV))
+      (TRun.declMem R none hm σ)
+      (((Upd.nil.decl x (.mref (.app1 (.alloc R hm) (.app0 .memory)))).snoc
+        (.memory (.app1 (.addM R hm) (.app0 .memory)))).applyP σ) := by
+  rw [applyP_snoc, applyV_decl1]
+  simp only [UpdElem.applyV_memory]
+  refine congrArg some (Prod.ext rfl ?_)
+  show σ.locV.push _ = ((σ.adopt (σ.heap.allocDefault R hm)).1.push (t := .mem R) (some _)).locV
+  rw [State.locV_push, State.locV_adopt]
+  rfl
+
+theorem allocFresh_agrees {R : RefTy} (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.deleteMem (.var i hm) σ)
+      ((Upd.allocFresh i hm).applyP σ) := by
+  rw [Upd.allocFresh, applyP_snoc, applyV_local1]
+  simp only [UpdElem.applyV_memory]
+  refine congrArg some (Prod.ext rfl ?_)
+  show σ.locV.set i _ = ((σ.adopt (σ.heap.allocDefault R hm)).1.setLocal i (some _)).locV
+  rw [State.locV_setLocal, State.locV_adopt]
+  rfl
+
+theorem Tm.eval_copy {R : RefTy} (h : (Ty.ref R).mapFree = true) (v : Tm C Γ (.sv (.ref R))) :
+    (Tm.app2 (.copy h) (.app0 .memory) v).eval σ =
+      (v.eval σ).map fun sv => ((sv.copyStToM σ.heap h).val : HRef _ R).id := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]
+  show (v.eval σ).bind _ = _
+  cases v.eval σ <;> rfl
+
+theorem Tm.eval_copySt {R : RefTy} (h : (Ty.ref R).mapFree = true) (v : Tm C Γ (.sv (.ref R))) :
+    (Tm.app2 (.copySt h) (.app0 .memory) v).eval σ =
+      (v.eval σ).map fun sv => σ.glob.memT.then (sv.copyStToM σ.heap h) := by
+  rw [Tm.eval_app2, Op2.eval_eq_evalM]
+  show (v.eval σ).bind _ = _
+  cases v.eval σ <;> rfl
+
+/-- `{mv := freshId(copySt(memory, v)) ‖ memory := copySt(memory, v)}`, where
+`v` reads `sv`: the copy adopted, `mv` naming it. -/
+theorem allocCopy_applyP {R : RefTy} (i : Idx Γ (.mem R)) (h : (Ty.ref R).mapFree = true)
+    (v : Tm C Γ (.sv (.ref R))) {sv : SVal (.ref R)} (hv : v.eval σ = some sv) :
+    (Upd.allocCopy i h v).applyP σ =
+      some (((σ.copyStToMG sv h).st.setLocal i (some (σ.copyStToMG sv h).val)).glob,
+        ((σ.copyStToMG sv h).st.setLocal i (some (σ.copyStToMG sv h).val)).locV) := by
+  rw [Upd.allocCopy, applyP_snoc, applyV_local1]
+  simp only [UpdElem.applyV_memory]
+  show (((((Tm.app2 (.copy h) (.app0 .memory) v).eval σ).bind fun id => some (some id)).map
+    _).bind fun q => (((Tm.app2 (.copySt h) (.app0 .memory) v).eval σ).map _).map _) = _
+  rw [Tm.eval_copy, Tm.eval_copySt, hv]
+  refine congrArg some (Prod.ext rfl ?_)
+  show σ.locV.set i _ = ((σ.adopt (sv.copyStToM σ.heap h)).1.setLocal i (some _)).locV
+  rw [State.locV_setLocal, State.locV_adopt]
+  rfl
+
+theorem allocCopy_applyP_none {R : RefTy} (i : Idx Γ (.mem R)) (h : (Ty.ref R).mapFree = true)
+    (v : Tm C Γ (.sv (.ref R))) (hv : v.eval σ = none) : (Upd.allocCopy i h v).applyP σ = none := by
+  rw [Upd.allocCopy, applyP_snoc, applyV_local1]
+  show (((((Tm.app2 (.copy h) (.app0 .memory) v).eval σ).bind fun id => some (some id)).map
+    _).bind _) = _
+  rw [Tm.eval_copy, hv]
+  rfl
+
+/-- `memoryStorageCopy`: a deep copy of `sfind(storage, p)`. -/
+theorem allocCopy_copy_agrees {R : RefTy} (i : Idx Γ (.mem R)) (p : SPath C Γ (.ref R))
+    (hm : (Ty.ref R).mapFree = true) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebindMem i (.copy p hm) σ)
+      ((Upd.allocCopy i hm (.app2 .sfind (.app0 .storage) p.lower)).applyP σ) := by
+  show TRes.AgreesO _ ((do
+      let r ← p.resolveT σ
+      let sv ← TRes.ofOpt (σ.storage.find r)
+      let g := σ.copyStToMG sv hm
+      pure (⟨g.st, g.ext, g.val⟩ : Grew C Γ σ.H (HRef · R))) >>= fun g =>
+        pure (⟨g.st.setLocal i (some g.val), g.ext⟩ : Out C σ.H Γ)) _
+  rw [bind_assoc]
+  refine (SPath.lower_resolveT σ p).cases (fun ref href => ?_) (fun href => ?_)
+  · cases hf : σ.storage.find ref with
+    | none =>
+      exact allocCopy_applyP_none σ i hm _ (by rw [Tm.eval_sfind, Tm.eval_storage, href]; exact hf)
+    | some sv =>
+      exact allocCopy_applyP σ i hm _ (by rw [Tm.eval_sfind, Tm.eval_storage, href]; exact hf)
+  · exact allocCopy_applyP_none σ i hm _ (by rw [Tm.eval_sfind, Tm.eval_storage, href]; rfl)
+
+/-- `memoryArrayFreshAlloc`: `newArr(R, n)` copied. -/
+theorem allocCopy_newArr_agrees {R : RefTy} (i : Idx Γ (.mem R)) (n : Simple C Γ .uint)
+    (h : R.newArrOk = true) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebindMem i (.newArr n h) σ)
+      ((Upd.allocCopy i (RefTy.mapFree_of_newArrOk h) (.app1 (.newArr h) n.lower)).applyP σ) := by
+  rw [allocCopy_applyP σ i _ _ (sv := newArrT R (n.evalT σ) h)
+    (by rw [Tm.eval_app1, Op1.eval_eq_evalM]; show (n.lower.eval σ).map _ = _
+        rw [Simple.lower_evalT]; rfl)]
+  rfl
+
+theorem MAddr.toT_wk {H H' : HTy} (e : H <+: H') {T : Ty} (a : MAddr H T) :
+    (a.wk e).toT = a.toT := by
+  cases a <;> rfl
+
+theorem clearPrim_agrees {p : PrimTy} (l : MLoc C Γ (.prim p)) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.deleteMem (.loc l) σ)
+      ((Upd.nil.snoc (UpdElem.clearMem (.prim p) l.lower l.mapFree)).applyP σ) := by
+  rw [UpdElem.clearMem, applyP_memory1, Tm.eval_write, Tm.eval_memory, Option.bind_some,
+    Tm.eval_mval, Tm.eval_lit]
+  refine (MLoc.lower_addrT σ l).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
+  rw [ha]
+  simp only [Option.bind_some]
+  rw [Grown.writeT_toT_prim σ.glob.memT a (PrimTy.dflt p)]
+  show TRes.AgreesO _ (TRes.ofOpt (σ.heap.writeAddr a (PrimTy.dflt p)) >>= _)
+    (((σ.heap.writeAddr a (PrimTy.dflt p)).map _).map _)
+  cases σ.heap.writeAddr a (PrimTy.dflt p) <;> rfl
+
+theorem clearRef_agrees {R : RefTy} (l : MLoc C Γ (.ref R)) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.deleteMem (.loc l) σ)
+      ((Upd.nil.snoc (UpdElem.clearMem (.ref R) l.lower l.mapFree)).applyP σ) := by
+  rw [UpdElem.clearMem, applyP_memory1, Tm.eval_write, Tm.eval_addM, Option.bind_some, Tm.eval_ref,
+    Tm.eval_alloc]
+  refine (MLoc.lower_addrT σ l).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
+  rw [ha]
+  simp only [Option.bind_some]
+  have hw := Grown.writeT_toT (σ.glob.memT.then (σ.heap.allocDefault R l.mapFree))
+    (a.wk (σ.heap.allocDefault R l.mapFree).ext) (T := .ref R)
+    (σ.heap.allocDefault R l.mapFree).val
+  rw [MAddr.toT_wk] at hw
+  rw [show ((σ.heap.allocDefault R l.mapFree).val : HRef _ R).id =
+    MVal.toT (.ref R) (σ.heap.allocDefault R l.mapFree).val from rfl, hw]
+  show TRes.AgreesO _ (TRun.clearT σ a l.mapFree)
+    ((((σ.adopt (σ.heap.allocDefault R l.mapFree)).1.heap.writeAddr
+      (a.wk (σ.heap.allocDefault R l.mapFree).ext) (σ.heap.allocDefault R l.mapFree).val).map _).map _)
+  simp only [TRun.clearT, State.allocDefaultG, State.grow]
+  split
+  · rename_i hp heq
+    rw [heq]
+    refine congrArg some (Prod.ext rfl ?_)
+    show σ.locV = ((σ.adopt (σ.heap.allocDefault R l.mapFree)).1.withHeap hp).locV
+    exact (State.locV_adopt σ _).symm
+  · rename_i heq
+    rw [heq]
+    rfl
+
+end Alloc
 
 /-! ## The other update arms (`Step.lean`) -/
 
@@ -1049,27 +1093,25 @@ variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
 /-- `storagePushLengthSave`: `{storage := pushSlot(storage, b)}`. -/
 theorem sound_pushSlot {E : Ty} (b : SPath C Γ (.array E))
     (hd : (none.isSome || E.defaultOkS) = true) :
-    Premise.Runs m (.push b none hd) (.upd1 (.storage (.app2 (.pushSlot E) .storage b.lower))) σ :=
+    Premise.Runs m (.push b none hd) (.upd1 (UpdElem.pushSlot b)) σ :=
   Premise.sound_update_typed σ (pushSlot_agrees σ b) fun _ => TRun.push_nd σ b none
 
 /-- `storagePushLengthSaveReferenceElement`: `{storage := extend(storage, b)}`. -/
 theorem sound_extend {E : Ty} (b : SPath C Γ (.array E))
     (hd : (none.isSome || E.defaultOkS) = true) :
-    Premise.Runs m (.push b none hd) (.upd1 (.storage (.app2 (.extend E) .storage b.lower))) σ :=
+    Premise.Runs m (.push b none hd) (.upd1 (UpdElem.extend b)) σ :=
   Premise.sound_update_typed σ (extend_agrees σ b) fun _ => TRun.push_nd σ b none
 
 /-- `storagePushValueSave`, `storagePushValueCopySource`:
 `{storage := push(storage, b, src)}`. -/
 theorem sound_pushSome {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
     (hd : ((some r).isSome || E.defaultOkS) = true) :
-    Premise.Runs m (.push b (some r) hd)
-      (.upd1 (.storage (.app3 .push .storage b.lower r.lower))) σ :=
+    Premise.Runs m (.push b (some r) hd) (.upd1 (UpdElem.push b r)) σ :=
   Premise.sound_update_typed σ (pushSome_agrees σ b r) fun _ => TRun.push_nd σ b (some r)
 
 /-- `storagePopSave`, `storagePopSaveMappingElement`. -/
 theorem sound_pop {E : Ty} (b : SPath C Γ (.array E)) :
-    Premise.Runs m (.pop b) (.upd1 (.storage (.app2 (if E.isMapping then .shrink else .pop)
-      .storage b.lower))) σ :=
+    Premise.Runs m (.pop b) (.upd1 (if b.elemMapping then UpdElem.shrink b else UpdElem.pop b)) σ :=
   Premise.sound_update_typed σ (pop_agrees σ b) fun _ =>
     ((SPath.resolveT_ends σ b).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
 
@@ -1077,15 +1119,13 @@ theorem sound_pop {E : Ty} (b : SPath C Γ (.array E)) :
 `{storage := extend(storage, b) ‖ lsv := next(b)}`. -/
 theorem sound_rebindPush {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) :
-    Premise.Runs m (.rebind i (.push b hd)) (.update ((Upd.nil.snoc
-      (.storage (.app2 (.extend (.ref R)) .storage b.lower))).snoc
-      (.local i (.path (.app1 .next rfl b.lower))))) σ :=
+    Premise.Runs m (.rebind i (.push b hd)) (.update (Upd.pushBind i b)) σ :=
   Premise.sound_update_typed σ (rebindPush_agrees σ i b hd) fun _ =>
     TRes.NoDiv.bind (ARhs.evalT_nd σ (.push b hd)) fun _ => TRes.NoDiv.ok _
 
 /-- `transferNoCallbackBox`: `{net := …}`. -/
 theorem sound_transferBox (sadr se : Simple C Γ .uint) :
-    Premise.Runs m (.transfer (.simple sadr) (.simple se)) (.upd1 (.payTo sadr se)) σ :=
+    Premise.Runs m (.transfer (.simple sadr) (.simple se)) (.upd1 (UpdElem.payTo sadr se)) σ :=
   Premise.sound_update_typed σ (transferBox_agrees σ sadr se) fun _ => TRes.NoDiv.ok _
 
 /-- `transferDiamond` (Lean): the goal fails. -/
@@ -1096,38 +1136,41 @@ theorem sound_done_false {Γ' : Ctx} (s : Stmt C Γ Γ') : Premise.Sound m s (.d
 or `pv` false. -/
 theorem sound_send (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) (fs : List (Fml C Γ)) :
     Premise.Sound m (.send pv (.simple sadr) (.simple se)) (.cases fs
-      [(Upd.nil.snoc (.payTo sadr se)).snoc (.local pv (.val (Tm.lit (.bool true)))),
-        Upd.nil.snoc (.local pv (.val (Tm.lit (.bool false))))]) σ :=
+      [(Upd.nil.snoc (UpdElem.payTo sadr se)).snoc (.local pv (.val (Tm.lit (p := .bool) true))),
+        Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))]) σ :=
   Premise.sound_cases_typed (s := .send pv (.simple sadr) (.simple se))
-    (t := TRun.send pv (.simple sadr) (.simple se)) σ (TRes.Agrees.pure _)
+    (t := TRun.send pv (.simple sadr) (.simple se)) σ (TRes.AgreesO.pure _)
     (fun _ => send_sim σ pv sadr se) fun _ => TRes.NoDiv.ok _
 
 /-- `memoryReferenceDeclFreshAlloc`. -/
 theorem sound_declMemFresh (R : RefTy) (x : Var)
     (hd : (none.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
     Premise.Runs m (.declMem R x none hd hm) (.update ((Upd.nil.decl x
-      (.mref (.app1 (.alloc R) rfl .memory))).snoc (.memory (.app1 (.addM R) rfl .memory)))) σ :=
+      (.mref (.app1 (.alloc R hm) (.app0 .memory)))).snoc
+        (.memory (.app1 (.addM R hm) (.app0 .memory))))) σ :=
   Premise.sound_update_typed σ (declMemFresh_agrees σ R x hm) fun _ => TRes.NoDiv.ok _
 
 /-- `memoryRootDeleteFreshRebind`. -/
 theorem sound_deleteMemVar {R : RefTy} (i : Idx Γ (.mem R)) (hm : (Ty.ref R).mapFree = true)
     (hd : (Ty.ref R).defaultOkS = true) :
-    Premise.Runs m (.deleteMem (.var i hm) hd) (.update ((Upd.nil.snoc
-      (.local i (.mref (.app1 (.alloc R) rfl .memory)))).snoc
-      (.memory (.app1 (.addM R) rfl .memory)))) σ :=
-  Premise.sound_update_typed σ (deleteMemVar_agrees σ i hm) fun _ => TRes.NoDiv.ok _
+    Premise.Runs m (.deleteMem (.var i hm) hd) (.update (Upd.allocFresh i hm)) σ :=
+  Premise.sound_update_typed σ (allocFresh_agrees σ i hm) fun _ => TRes.NoDiv.ok _
 
-/-- `memoryStorageCopy`, `memoryArrayFreshAlloc`, given the right-hand
-side's typed evaluation against the copy on the erased global part (`allocCopy_copy`,
-`allocCopy_newArr`). -/
-theorem sound_allocCopy {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) (v : Tm C Γ .sv)
-    (hr : TRes.Agrees (fun g : Grew C Γ σ.H (HRef · R) => ((g.st.globE, g.st.loc), (g.val : HRef _ R).id))
-      (r.evalT σ) (do
-        let (τ, mv) ← Semantics.copyStToM σ.globE (← v.eval σ)
-        pure ((τ, σ.loc), ← mv.asRef))) :
-    Premise.Runs m (.rebindMem i r) (.allocCopy i v) σ :=
-  Premise.sound_update_typed σ (allocCopy_agrees σ i r v hr) fun _ =>
-    ((MRhs.evalT_ends σ r).bind fun _ => TRes.Ends.ok _).1
+/-- `memoryStorageCopy`. -/
+theorem sound_allocCopy_copy {R : RefTy} (i : Idx Γ (.mem R)) (p : SPath C Γ (.ref R))
+    (hm : (Ty.ref R).mapFree = true) :
+    Premise.Runs m (.rebindMem i (.copy p hm))
+      (.allocCopy i hm (.app2 .sfind (.app0 .storage) p.lower)) σ :=
+  Premise.sound_update_typed σ (allocCopy_copy_agrees σ i p hm) fun _ =>
+    ((MRhs.evalT_ends σ (.copy p hm)).bind fun _ => TRes.Ends.ok _).1
+
+/-- `memoryArrayFreshAlloc`. -/
+theorem sound_allocCopy_newArr {R : RefTy} (i : Idx Γ (.mem R)) (n : Simple C Γ .uint)
+    (h : R.newArrOk = true) :
+    Premise.Runs m (.rebindMem i (.newArr n h))
+      (.allocCopy i (RefTy.mapFree_of_newArrOk h) (.app1 (.newArr h) n.lower)) σ :=
+  Premise.sound_update_typed σ (allocCopy_newArr_agrees σ i n h) fun _ =>
+    ((MRhs.evalT_ends σ (.newArr n h)).bind fun _ => TRes.Ends.ok _).1
 
 theorem clearT_ends : {T : Ty} → (a : MAddr σ.H T) → (hm : T.mapFree = true) →
     (TRun.clearT σ a hm).Ends
@@ -1139,29 +1182,32 @@ theorem clearT_ends : {T : Ty} → (a : MAddr σ.H T) → (hm : T.mapFree = true
 /-- `memoryFieldDelete*`, `memoryIndexDelete*`: a slot reset to its default,
 or written a fresh default object. -/
 theorem sound_clearMem {T : Ty} (l : MLoc C Γ T) (hd : T.defaultOkS = true) :
-    Premise.Runs m (.deleteMem (.loc l) hd) (.clearMem l.lower T) σ := by
-  obtain ⟨U, hU, hs⟩ := clearMem_sim σ l hd
-  rw [hU]
-  exact Premise.sound_updateSim_typed (t := TRun.deleteMem (.loc l)) σ
-    (TRes.Agrees.bind (MLoc.lower_addrT σ l) fun a => TRun.clearT_erase σ a l.mapFree) hs
-    fun _ => ((MLoc.addrT_ends σ l).bind fun a => clearT_ends σ a _).1
+    Premise.Runs m (.deleteMem (.loc l) hd) (.clearMem T l.lower l.mapFree) σ := by
+  cases T with
+  | prim p =>
+    exact Premise.sound_update_typed σ (clearPrim_agrees σ l) fun _ =>
+      ((MLoc.addrT_ends σ l).bind fun a => clearT_ends σ a _).1
+  | ref R =>
+    exact Premise.sound_update_typed σ (clearRef_agrees σ l) fun _ =>
+      ((MLoc.addrT_ends σ l).bind fun a => clearT_ends σ a _).1
+
+theorem applyP_decl1 {t : LTy} (x : Var) (r : Rhs C Γ t) :
+    (Upd.nil.decl x r).applyP σ = (r.eval σ).map fun v => (σ.glob, σ.locV.push v) := by
+  show ((r.eval σ).bind _).map _ = _
+  cases r.eval σ <;> rfl
 
 /-- `valueDeclSkip`: `{v := defVal(T)}`. -/
 theorem sound_valueDeclSkip (p : PrimTy) (x : Var) :
     Premise.Runs m (.declLocal p x none)
-      (.update (Upd.nil.decl x (.val (p := p) (.app0 (.lit p.default))))) σ :=
+      (.update (Upd.nil.decl x (.val (.app0 (.lit (PrimTy.dflt p)))))) σ :=
   Premise.sound_update_typed (s := .declLocal p x none) (t := TRun.declLocal p none) σ
-    (TRes.Agrees.of_eq (congrArg Except.ok (by
-      show (σ.globE, σ.loc.push (PrimTy.default p)) =
-        ((σ.push (t := .val p) (PrimTy.dflt p)).globE, (σ.push (t := .val p) (PrimTy.dflt p)).loc)
-      rw [State.loc_push, ← PrimTy.erase_dflt]; rfl)))
-    fun _ => TRes.NoDiv.ok _
+    (TRes.AgreesO.ret (by rw [applyP_decl1, State.locV_push]; rfl)) fun _ => TRes.NoDiv.ok _
 
 /-- `storageLocalDeclSkip`: `{lsv := unset}`. -/
 theorem sound_storageLocalDeclSkip (R : RefTy) (x : Var) :
     Premise.Runs m (.declStorage R x none) (.update (Upd.nil.decl (t := .alias R) x .unset)) σ :=
   Premise.sound_update_typed (s := .declStorage R x none) (t := TRun.declStorage R none) σ
-    (TRes.Agrees.of_eq (congrArg Except.ok (by rw [State.loc_push]; rfl))) fun _ => TRes.NoDiv.ok _
+    (TRes.AgreesO.ret (by rw [applyP_decl1, State.locV_push]; rfl)) fun _ => TRes.NoDiv.ok _
 
 /-- `revertBox`, `revertDiamond`. -/
 theorem sound_revert :
