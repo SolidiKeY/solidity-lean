@@ -100,11 +100,11 @@ theorem Hyps.wrap_valid {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     cases m with
     | box =>
       exact ih (φ := .upd .box U φ) hb fun τ =>
-        Upd.afterT_intro (fun _ _ => trivial) fun _ σ' _ _ => h σ'
+        Upd.afterT_intro (fun _ => trivial) fun _ σ' _ => h σ'
     | diamond =>
       have hb' : U.popsOnly = true ∧ H.boxOnly = true := Bool.and_eq_true_iff.mp hb
       refine ih (φ := .upd .diamond U φ) hb'.2 fun τ => ?_
-      refine Upd.afterT_intro (fun e he => ?_) fun _ σ' _ _ => h σ'
+      refine Upd.afterT_intro (fun he => ?_) fun _ σ' _ => h σ'
       rw [Upd.popsOnly_globT τ U hb'.1] at he
       cases he
   | havoc H ih => intro φ hb h; exact ih (φ := .havoc φ) hb fun τ _ _ => h _
@@ -135,7 +135,7 @@ theorem Hyps.wrap_anonHavoc {Γ : Ctx} (H : Hyps C Γ₀ Γ) (xs : List ((t : LT
 end Wrap
 
 /-- Rewriting the context and the goal is rewriting the sequent. -/
-theorem Hyps.wrap_rwEqC (q : Tm C [] .val × Tm C [] .val) {Γ₀ : Ctx} :
+theorem Hyps.wrap_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ₀ : Ctx} :
     {Γ : Ctx} → (H : Hyps C Γ₀ Γ) → (φ : Fml C Γ) →
       (H.rwEqC q).wrap (φ.rwEqC q) = (H.wrap φ).rwEqC q
   | _, .nil, _ => rfl
@@ -243,10 +243,10 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
       (ψ := .upd m U (Fml.binds bs (.upd m V φ)))
       (fun τ hτ => holds_liftBinds bs hU τ
         (Fml.binds_mono bs (fun ρ hρ => holds_upd_seqPar hW ρ hρ) τ hτ)) σ h
-  | @updRw Γ Δ H U φ q hq _ ih =>
+  | @updRw Γ Δ H U φ p q hq _ ih =>
     exact fun σ => H.wrap_mono (φ := .upd .box (U.rwC q) φ) (ψ := .upd .box U φ)
       (fun τ hτ => holds_upd_rwC hq τ hτ) σ (ih σ)
-  | @rewrite Γ H φ q hq _ ih =>
+  | @rewrite Γ H φ p q hq _ ih =>
     intro σ
     have h := ih σ
     rw [Hyps.wrap_rwEqC] at h
