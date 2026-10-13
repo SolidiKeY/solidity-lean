@@ -1,9 +1,8 @@
-import Solidity.Typing.CanonTest
+import Solidity.Calculus.WtBridge
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
 import Solidity.Calculus.Logic
-import Solidity.Semantics.Erase
 
 /-!
 # Obligations, as solkey states them
@@ -23,13 +22,14 @@ more inputs.
 
 **The premise is the model's own.**  solkey's `storage` is a free `Struct`
 term whose integer fields are unbounded, and no solidity taclet mentions a
-well-formed heap; here the storage is a state of the interpreter, any
-list of roots.  `wt(storage)` (`Fml.wt`) assumes most of what Solidity
-guarantees of a deployed contract's storage: every root there, in order,
-canonical and tight, which is exactly reachable (`shape_iff_reachable`,
-for every word, key and slot in range), and every word in its type's range
-(`storageWtB`, `wt_iff_reachable`).  Reachable is by the typed interpreter
-(`Reachable`).
+well-formed heap; here the storage is a typed storage of the interpreter,
+its roots at their types, its words in range.  `wt(storage)` (`Fml.wt`)
+assumes most of what Solidity guarantees of a deployed contract's storage:
+every root canonical and tight, which is exactly reachable
+(`shape_iff_reachable`, for every key and slot in range), and every mapping
+key in its key type's range (`Storage.wtB`, `wt_iff_reachable`; the term
+runs the test on the erasure, `Calculus/WtBridge.lean`).  Reachable is by
+the typed interpreter (`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
 model's `push` (`Storage.push`) never panics (at `2^256 - 1` elements it is out
@@ -71,52 +71,9 @@ since a symbol does not know its contract (`Fml.wt` fills it in).
 
 namespace Solidity
 
-open Semantics
-open Semantics.SVal.canon (canonFields canonElems canonEntries)
-open Semantics.SVal.canonB (canonFieldsB canonElemsB canonEntriesB)
-open Semantics.SVal.tight (tightFields tightElems tightEntries)
-open Semantics.SVal.tightB (tightFieldsB tightElemsB tightEntriesB)
-open SemanticsProperties (lookupBy_eq_some_mem)
+open Semantics (structDef lookupBy setBy nodupKeysB)
 
 variable {C : Contract}
-
-/-! ## The shape test -/
-
-/-- A storage the shape test accepts holds the roots, canonical and tight. -/
-theorem storageShapeB_sound {st : List (Name × Semantics.SVal)} (h : storageShapeB C.vars st = true) :
-    CanonStorage C st ∧ TightStorage C st := by
-  simp only [storageShapeB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true] at h
-  obtain ⟨hn, hall⟩ := h
-  have hroot : ∀ r T, lookupBy r C.vars = some T →
-      ∃ v, lookupBy r st = some v ∧ v.canonB T = true ∧ v.tightB T = true := by
-    intro r T hT
-    have := hall (r, T) (lookupBy_eq_some_mem hT)
-    revert this
-    cases lookupBy r st with
-    | none => intro h; exact absurd h (by simp only [Bool.false_eq_true, not_false_eq_true])
-    | some v =>
-      intro h
-      simp only [Bool.and_eq_true] at h
-      exact ⟨v, rfl, h⟩
-  refine ⟨⟨hn, fun r T hT => ?_⟩, fun r T v hT hv => ?_⟩
-  · obtain ⟨v, hv, hc, -⟩ := hroot r T hT
-    exact ⟨v, hv, SVal.canonB_iff.1 hc⟩
-  · obtain ⟨w, hw, -, ht⟩ := hroot r T hT
-    rw [hv] at hw
-    cases hw
-    exact SVal.tightB_iff.1 ht
-
-/-- A storage that holds the roots, canonical and tight, passes the shape
-test, when no root is declared twice. -/
-theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name × Semantics.SVal)}
-    (hc : CanonStorage C st) (ht : TightStorage C st) : storageShapeB C.vars st = true := by
-  simp only [storageShapeB, Bool.and_eq_true, decide_eq_true_eq, List.all_eq_true]
-  refine ⟨hc.1, fun rT hm => ?_⟩
-  have hl : lookupBy rT.1 C.vars = some rT.2 := lookupBy_eq_of_nodup hnd hm
-  obtain ⟨v, hv, hcv⟩ := hc.2 _ _ hl
-  rw [hv]
-  simp only [Bool.and_eq_true]
-  exact ⟨SVal.canonB_iff.2 hcv, SVal.tightB_iff.2 (ht _ _ _ hl hv)⟩
 
 /-! ## The premise -/
 
@@ -124,80 +81,53 @@ theorem storageShapeB_complete (hnd : nodupKeysB C.vars = true) {st : List (Name
 def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
   .defined (.app1 .wt (.app0 .storage))
 
-/-- `wt(storage)` holds in a typed state exactly when its storage passes
-the test. -/
-theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
-    holds σ (Fml.wt C) ↔ storageWtB C.vars σ.storage.erase = true := by
+/-- `wt(storage)` holds in a typed state exactly when its storage passes the
+typed test (`Storage.wtB`), for a contract that declares no root twice. -/
+theorem holds_wt (hnd : nodupKeysB C.vars = true) {Γ : Ctx} {σ : State C Γ} :
+    holds σ (Fml.wt C) ↔ σ.storage.wtB = true := by
   rw [Fml.wt, holds_defined]
   show (Storage.wtT σ.storage) ≠ none ↔ _
   unfold Storage.wtT
-  cases storageWtB C.vars σ.storage.erase with
+  rw [storageWtB_erase hnd]
+  cases σ.storage.wtB with
   | true => exact ⟨fun _ => rfl, fun _ h => nomatch h⟩
   | false => exact ⟨fun h => absurd rfl h, fun h => nomatch h⟩
 
 /-- A reachable storage passes the shape test. -/
-theorem shape_of_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (h : Reachable C st) :
-    storageShapeB C.vars st = true :=
-  let ⟨hc, ht⟩ := reachable_shape hnd hdeep h; storageShapeB_complete hnd hc ht
+theorem shape_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
+    (h : Reachable C st) : st.shapeB = true :=
+  (Storage.shapeB_iff st).2 (reachable_shape hdeep h)
 
 /-- **The shape is reachability**: for a contract whose types have
-well-formed defaults all the way down, a storage whose words, keys and
-slots are in range (`FitsStorage`) passes the shape test exactly when a
-program reaches it from the contract's initial state. -/
+well-formed defaults all the way down, a storage whose keys and slots are in
+range (`SVal.Fits`) passes the shape test exactly when a program reaches it
+from the contract's initial state. -/
 theorem shape_iff_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (hf : FitsStorage C st) :
-    storageShapeB C.vars st = true ↔ Reachable C st :=
-  ⟨fun h => (reachable_iff hnd hdeep hf).2 (storageShapeB_sound h), shape_of_reachable hnd hdeep⟩
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C} (hf : st.Fits) :
+    st.shapeB = true ↔ Reachable C st := by
+  rw [Storage.shapeB_iff, reachable_iff hnd hdeep hf]
 
-/-- **`wt` is reachability with words in range**: a storage whose words,
-keys and slots are in range is well-formed exactly when a program reaches it
-and its words fit their types, which a program solc compiles keeps
-(`Semantics/WellFormed.lean`). -/
+/-- **`wt` is reachability**: a storage whose keys and slots are in range is
+well-formed exactly when a program reaches it.  Its words are in range by
+their types; its keys, by `Fits`. -/
 theorem wt_iff_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (hf : FitsStorage C st) :
-    storageWtB C.vars st = true ↔ Reachable C st ∧ storageWordsB C.vars st = true := by
-  rw [storageWtB, Bool.and_eq_true, shape_iff_reachable hnd hdeep hf]
+    (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C} (hf : st.Fits) :
+    st.wtB = true ↔ Reachable C st := by
+  rw [Storage.wtB, Storage.keysB_of_fits hf, Bool.and_true, shape_iff_reachable hnd hdeep hf]
 
-/-- A reachable storage whose words fit is well-formed. -/
-theorem wt_of_reachable (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) {st : List (Name × Semantics.SVal)} (h : Reachable C st)
-    (hw : storageWordsB C.vars st = true) : storageWtB C.vars st = true := by
-  rw [storageWtB, Bool.and_eq_true]
-  exact ⟨shape_of_reachable hnd hdeep h, hw⟩
-
-/-- A fresh contract's root holds its type's default. -/
-theorem lookupBy_initStorage_vars (r : Name) :
-    lookupBy r C.initStorage = (lookupBy r C.vars).map defaultForTy := by
-  simp only [Contract.initStorage]
-  induction C.vars with
-  | nil => rfl
-  | cons x l ih =>
-    obtain ⟨g, T⟩ := x
-    simp only [List.map, lookupBy]
-    split
-    · rfl
-    · exact ih
-
-/-- The words of a fresh contract fit: every root holds its default. -/
-theorem storageWordsB_init (hnd : nodupKeysB C.vars = true) :
-    storageWordsB C.vars C.initStorage = true := by
-  simp only [storageWordsB, List.all_eq_true]
-  intro rT hm
-  have hl : lookupBy rT.1 C.vars = some rT.2 := lookupBy_eq_of_nodup hnd hm
-  rw [lookupBy_initStorage_vars, hl]
-  exact SVal.wordsB_default rT.2
+/-- A reachable storage is well-formed: its keys are in range
+(`reachable_bnd`). -/
+theorem wt_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
+    (h : Reachable C st) : st.wtB = true := by
+  rw [Storage.wtB, shape_of_reachable hdeep h, Storage.keysB_of_bnd (reachable_bnd h)]
+  rfl
 
 /-- The contract's initial storage is well-formed (the empty program reaches
-it, and its words are defaults), so the premise is satisfiable. -/
+it), so the premise is satisfiable. -/
 theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) : holds (State.init C) (Fml.wt C) := by
-  rw [holds_wt]
-  show storageWtB C.vars (State.init C).globE.storage = true
-  rw [Reachable.init_globE]
-  exact wt_of_reachable hnd hdeep
-    ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, rfl, Storage.init_erase C⟩
-    (storageWordsB_init hnd)
+    (hdeep : C.vars.all (·.2.okDeep) = true) : holds (State.init C) (Fml.wt C) :=
+  (holds_wt hnd).2 (wt_of_reachable hdeep
+    ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, Prog.run_nil _, rfl⟩)
 
 /-! ## The obligations
 

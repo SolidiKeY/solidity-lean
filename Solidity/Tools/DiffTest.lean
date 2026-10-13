@@ -1,6 +1,6 @@
 import Solidity.Evm.Compile
 import Solidity.Semantics.Run
-import Solidity.Typing.Storage
+import Solidity.Semantics.Properties
 import Solidity.Tools.Run
 
 /-!
@@ -30,8 +30,8 @@ from a start where its hypotheses hold:
   represent its default; no locals; the funds, the sender, the value and the
   time are words and the same on both sides; nothing sent.  The storages
   drawn are canonical (`Typing/Reachability.lean`: no shadow, a mapping's
-  default `defaultForTy V`, distinct keys), in range, and checked with
-  `SVal.hasTy`, then read at the contract's types (`SFields.ofU`); an array
+  default `defaultForTy V`, distinct keys), in range, and read at the
+  contract's types (`SFields.ofU`); an array
   holds fewer than `4` elements, so `L = 4` and `L + Prog.pushes Q ≤ 2^64`;
 * the two **agree** when both revert, or when both succeed with the machine's
   stack as it was and the machine representing the final state: every slot

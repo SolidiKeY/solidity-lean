@@ -27,9 +27,8 @@ Proved: the rules are sound for (2) (`Stmt.sound` with `Rule.toStep`, `Proves.so
 on the programs it compiles (`inFrag`: no memory, loops or `try`) from a
 state it simulates.  (2) is never stuck, by construction: the typed run halts
 only by `revert`, `panic`, `diverge` or `exhausted` (`THalt`), and its states
-hold values of their types, so their erasure is well-typed
-(`State.glob_wt`, `Typing/TypedWT.lean`) and the closer's term model, which
-reads that erasure, meets its ill-sorted value (`Halt.undef`) on no state a
+hold values of their types (`Semantics/State.lean`), and the closer's term
+model reads the typed state, so it meets no ill-sorted value on a state a
 run reaches (`docs/intrinsic.md`, decisions 39, 40 and 50).  There is no
 untyped run of a statement left to be stuck.
 Not proved, and not provable without a model of solc: that (1) reads a program
@@ -152,7 +151,7 @@ lemma set for I.
 **A. The trusted base, in CI.** `#print axioms` on `Stmt.sound` (`Calculus/Sound.lean`), `Proves.sound`,
 `Proves.valid`, `ProvesC.sound_of`, `symex_sound`, `Evm.compile_correct`; fail on anything beyond `propext`,
 `Quot.sound`, `Classical.choice`, or on `sorry`, `native_decide`, `implemented_by` in
-the closure (`Calculus/RuleShapes.lean:44` and `Typing/State.lean` use them; the
+the closure (`Calculus/RuleShapes.lean:44` uses them; the
 closure decides). A day; every other check assumes it (L4).
 
 **B. solc facts, pinned.** One theorem per solc behaviour, closed by `decide` or

@@ -60,19 +60,18 @@ claim does need the invariant). A `\forall` clause over a mapping is provable
 in Lean only under the layout premises `layoutAt` states (`Calculus/SurfaceSpec.lean`);
 solkey's obligation states none.
 
-**Lean evidence.** Every typed state's erasure is well-typed
-(`State.glob_wt`, `Typing/TypedWT.lean`), so the invariant can be
-assumed once. It is not tight:
-`SVal.canon` adds what `hasTy` forgets (mapping default is the type's default,
-mapping keys are unique, a struct carries exactly its declared members), and
+**Lean evidence.** Every typed state is well-typed by construction (its
+storage holds the roots at their types, a struct exactly its declared
+members, `Semantics/Storage.lean`), so the invariant can be assumed once.
+It is not tight: `SVal.Canon` adds what the types do not say (mapping
+default is the type's default, mapping keys are unique), and
 `Prog.run_canon`, `reachable_canon`, `map_default_not_reachable` and
-`struct_missing_field_not_reachable` (`Typing/Reachability.lean`) prove that
-canonical storage is what execution keeps. `SVal.tight`, `reachable_iff` and
-`no_hidden_invariant` (`Typing/Constructibility.lean`) prove canonical and tight
-is exactly reachable (for words, keys and slots in range, `SVal.fits`), so no
-hidden invariant is missing. Reachable is by the typed run
-(`Reachable`; for words, keys and slots in range, `FitsStorage`, exactly the
-canonical and tight storages). Word range holds by construction of the typed
+`map_dup_key_not_reachable` (`Typing/Reachability.lean`) prove that
+canonical storage is what execution keeps. `SVal.Tight` (`Typing/Tight.lean`),
+`reachable_iff` and `no_hidden_invariant` (`Typing/Constructibility.lean`)
+prove canonical and tight is exactly reachable (for keys and slots in range,
+`SVal.Fits`), so no hidden invariant is missing. Reachable is by the typed
+run (`Reachable`). Word range holds by construction of the typed
 state (a word is a `PrimTy.Denote`), and `reachable_fits`/`reachable_iff_fits`
 (`Typing/Fits.lean`, decision 97 of `docs/intrinsic.md`) prove that reachable
 storage fits for any contract solc accepts (`FixedFits`). What item 1 still

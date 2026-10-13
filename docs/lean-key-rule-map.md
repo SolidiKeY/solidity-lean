@@ -575,7 +575,7 @@ operation here (`Storage.obs_save`, `obs_write`, `obs_delete`, `obs_push`,
 | `selectSt<[Struct]>(s, r)` | `Obs.select`, `Obs.select_save`, `Obs.select_copyTo`, `Obs.select_delAt` and their `_ne` | done: the struct at a root as a storage of its members |
 | `selectOnEmptyStorage`, `saveOnEmptyStorage`, `defaultValue*` | `Storage.obs` of the typed empty storage (`Storage.init`) | done: a location reads its type's default |
 | `selectOnEmptyStorage`, `saveOnEmptyStorage` in the closer | `sol_close_mt` (`Calculus/Close.lean`, `Calculus/CloseScoped.lean`) | Lean only: `mtSt` evaluates to the roots at their defaults (`CloseS.eval_mtSt`); `sol_decide` keeps `mtSt` as a term it does not read (`SFun.ofOrig`) |
-| `selectOnShape*`, `wf*`, `fixed*`, `wfFixedIsFixed`, `wfDynIsNotFixed`, `fieldShapeDef` | `wellTypedStorageB`, `SVal.hasTy` (`Typing/Storage.lean`) | **not modelled as taclets**: a typed storage is in its contract's shape, clause for clause |
+| `selectOnShape*`, `wf*`, `fixed*`, `wfFixedIsFixed`, `wfDynIsNotFixed`, `fieldShapeDef` | the typed storage (`Storage C`, `Semantics/Storage.lean`) | **not modelled as taclets**: a typed storage is in its contract's shape, clause for clause |
 | `sizeNotNegative` | — | **arch**: a length is a `uint`, at least `0` by its type (the closer's `Facts.range`) |
 
 ### `memoryRules.key`, `structMemoryRules.key` → `Theory/Typed/Mem.lean`

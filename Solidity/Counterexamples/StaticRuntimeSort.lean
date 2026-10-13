@@ -1,4 +1,4 @@
-import Solidity.Typing.Storage
+import Solidity.Typing.Sorts
 
 /-!
 # Static array and mapping sorts are not their runtime nodes
@@ -29,36 +29,31 @@ namespace Solidity
 namespace Counterexamples
 namespace StaticRuntimeSort
 
-open Semantics
-
-/-- A well-typed storage array is a `Struct` node whose static sort is
-`uint[]` — and `Struct ≰ uint[]`. -/
+/-- A storage array is a `Struct` node whose static sort is `uint[]` — and
+`Struct ≰ uint[]`. -/
 theorem array_runtime_not_le_static :
-    ∃ (v : SVal) (ty : Ty), v.hasTy ty = true ∧
-      (v.keySort).le (ty.keySort false) = false :=
-  ⟨SVal.array [] [] false, Ty.ref (RefTy.array Ty.uint), by decide, by decide⟩
+    ∃ (T : Ty) (v : SVal T), v.keySort.le (T.keySort false) = false :=
+  ⟨Ty.ref (RefTy.array Ty.uint), .array .nil .nil SVal.zero_lt_bound, by decide⟩
 
 /-- The same for a mapping: a `Struct` node whose static sort is
 `mapping(int => int)`. -/
 theorem mapping_runtime_not_le_static :
-    ∃ (v : SVal) (ty : Ty), v.hasTy ty = true ∧
-      (v.keySort).le (ty.keySort false) = false :=
-  ⟨SVal.map [] (SVal.int 0), Ty.ref (RefTy.mapping Ty.uint Ty.uint),
-    by decide, by decide⟩
+    ∃ (T : Ty) (v : SVal T), v.keySort.le (T.keySort false) = false :=
+  ⟨Ty.ref (RefTy.mapping Ty.uint Ty.uint), .map .nil (.prim (PrimTy.dflt .uint)), by decide⟩
 
 /-- Nor the other way round: the static sort is not below `Struct`
 either, so the two are simply incomparable. -/
 example : (KeySort.array KeySort.int).le KeySort.struct = false := by decide
 example : (KeySort.mapping KeySort.int KeySort.int).le KeySort.struct = false := by decide
 
-/-- Where the two sides do agree: primitives (`StorageTyping.hasTy_keySort_of_primitive`)
+/-- Where the two sides do agree: primitives (`SVal.keySort_of_primitive`)
 and structs. -/
-example : (SVal.struct []).keySort = (Ty.ref (RefTy.struct "Person")).keySort false := rfl
+example : (SVal.struct (SFields.dflt (Semantics.structDef "Person"))).keySort =
+    (Ty.ref (RefTy.struct "Person")).keySort false := rfl
 
-theorem prim_runtime_eq_static {ty : Ty} {v : SVal}
-    (hprim : ty.isPrimitive = true) (h : v.hasTy ty = true) :
-    (v.keySort).le (ty.keySort false) = true := by
-  rw [hasTy_keySort_of_primitive hprim h]
+theorem prim_runtime_eq_static {T : Ty} (hprim : T.isPrimitive = true) (v : SVal T) :
+    v.keySort.le (T.keySort false) = true := by
+  rw [SVal.keySort_of_primitive hprim v]
   exact KeySort.le_refl _
 
 /-- The safe reads are the ones the corpus actually has: a bound of

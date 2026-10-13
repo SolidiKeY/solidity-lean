@@ -1,4 +1,5 @@
-import Solidity.Typing.TypedWT
+import Solidity.Typing.Sorts
+import Solidity.Semantics.Run
 import Solidity.Calculus.RuleShapes
 import Solidity.SortCheck.Annotations
 
@@ -9,9 +10,9 @@ The table ↔ semantics edge of the conformance loop: every read-sort
 annotation in `TacletAnnotations.tacletReadAnns` is *faithful* — the sort a
 taclet's value read declares agrees with the value the typed run's
 evaluators (`Semantics/Run.lean`: `SPath.resolveT`, `MPath.mvalT`,
-`Val.evalT`) find there, erased, in every typed state: the value is of its
-type by construction (`SVal.erase_hasTy`, `MVal.erase_hasTyH`,
-`Typing/TypedWT.lean`).
+`Val.evalT`) find there, in every typed state: the value is of its type by
+construction, and its runtime sort is its type's (`SVal.keySort`,
+`Typing/Sorts.lean`).
 `solkeycheck` keeps the table equal to the `.key` text; this module keeps it
 true of the interpreter, so a table updated to match a buggy
 taclet stops building here (`Counterexamples/PreFixSortAnnotations.lean`
@@ -51,7 +52,6 @@ theorem.
 namespace Solidity
 namespace SortFaithfulness
 
-open Semantics
 open TacletAnnotations
 
 variable {C : Contract}
@@ -109,29 +109,29 @@ def Stmt.read? {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Read C Γ)
 
 /-! ## What a declared sort claims -/
 
-/-- What `find<[s]>`/`select<[s]>` claims of the storage value found, the
-read place being of type `T`. -/
-def SortOkS : ReadSort → Ty → Semantics.SVal → Bool
-  | .generic _, T, v => v.hasTy T
+/-- What `find<[s]>`/`select<[s]>` claims of the storage value found: a
+varcond-generic sort, that it inhabits the read place's type, which a typed
+value does; a fixed sort, that its runtime sort lies below. -/
+def SortOkS : ReadSort → {T : Ty} → SVal T → Bool
+  | .generic _, _, _ => true
   | .fixed s, _, v => v.keySort.le s
 
 /-- What `read<[s]>` claims of the memory slot found. -/
-def SortOkM (H : HeapTy) : ReadSort → Ty → Semantics.MVal → Bool
-  | .generic _, T, mv => MVal.hasTyH H mv T
-  | .fixed s, _, mv => mv.keySort.le s
+def SortOkM {H : HTy} : ReadSort → (T : Ty) → MVal H T → Bool
+  | .generic _, _, _ => true
+  | .fixed s, T, mv => (MVal.keySort T mv).le s
 
 /-- The declared sort `rs` holds of whatever the read finds in the typed
-state `σ`, erased: resolving the storage path and finding the value, or
-reading the memory slot, under the store typing `σ`'s heap typing lists. -/
+state `σ`: resolving the storage path and finding the value, or reading the
+memory slot. -/
 def Read.SortOk {Γ : Ctx} (σ : State C Γ) (rs : ReadSort) : Read C Γ → Prop
-  | .storage T p => ∀ r v, p.resolveT σ = .ok r → σ.storage.find r = some v →
-      SortOkS rs T v.erase = true
-  | .memory T p => ∀ mv, p.mvalT σ = .ok mv →
-      SortOkM (HTy.toHeapTy 0 σ.H) rs T (MVal.erase T mv) = true
+  | .storage T p => ∀ r (v : SVal T), p.resolveT σ = .ok r → σ.storage.find r = some v →
+      SortOkS rs v = true
+  | .memory T p => ∀ mv, p.mvalT σ = .ok mv → SortOkM rs T mv = true
   | .slen p => ∀ v, (Val.len (p := .uint) p rfl).evalT σ = .ok v →
-      SortOkS rs .uint (SVal.prim v).erase = true
+      SortOkS rs (SVal.prim v) = true
   | .mlen p => ∀ v, (Val.mlen (p := .uint) p rfl).evalT σ = .ok v →
-      SortOkM (HTy.toHeapTy 0 σ.H) rs .uint (MVal.erase (H := σ.H) (.prim .uint) v) = true
+      SortOkM (H := σ.H) rs (.prim .uint) v = true
 
 /-- What a constructor's schema fixes about its read's static type. -/
 inductive ReadClass where
@@ -162,26 +162,6 @@ def ReadClass.supports (cls : ReadClass) : ReadDomain → ReadSort → Bool
   | .memory, .fixed .identity => cls == .reference
   | _, _ => false
 
-/-- A memory slot typed `uint` holds a number: `m.age` in `m.age += 1;`. -/
-theorem MVal.int_of_hasTyH_numeric {H : HeapTy} {mv : Semantics.MVal} {T : Ty}
-    (hT : isNumericTy T = true) (h : MVal.hasTyH H mv T = true) : ∃ n, mv = .int n := by
-  cases T with
-  | prim p =>
-    cases mv with
-    | prim pv => cases p <;> cases pv <;> simp_all [MVal.hasTyH, isNumericTy, PrimTy.isNumeric]
-    | ref _ => cases p <;> simp [MVal.hasTyH] at h
-  | ref _ => simp [isNumericTy] at hT
-
-/-- A memory slot typed at a reference holds an identity: `m.account`. -/
-theorem MVal.ref_of_hasTyH_ref {H : HeapTy} {mv : Semantics.MVal} {T : Ty}
-    (hT : T.isReference = true) (h : MVal.hasTyH H mv T = true) : ∃ id, mv = .ref id := by
-  cases T with
-  | prim p => simp [Ty.isReference, Ty.isPrimitive] at hT
-  | ref _ =>
-    cases mv with
-    | prim pv => cases pv <;> simp [MVal.hasTyH] at h
-    | ref id => exact ⟨id, rfl⟩
-
 /-- **The semantic core.**  A read of a class the declared sort is supported
 by finds a value the sort claims, in every typed state: `x = total;` finds a
 number where `total : uint`, `alice.age += 1` finds an `int`, `m = alice;`
@@ -194,60 +174,50 @@ theorem Read.sortOk {Γ : Ctx} (σ : State C Γ)
   | storage T p =>
     unfold Read.SortOk
     intro r v _ _
-    have hty := SVal.erase_hasTy v
     cases rs with
-    | generic _ => exact hty
+    | generic _ => rfl
     | fixed s =>
-      show v.erase.keySort.le s = true
+      show v.keySort.le s = true
       cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
         (try exact Bool.noConfusion hsup) <;> subst_vars
-      · exact SVal.keySort_le_stValue _
-      · obtain ⟨n, hn⟩ := hasTy_numeric hfit hty
-        rw [hn]; rfl
-      · rw [(SVal.isRefVal_iff_keySort_struct _).mp (hasTy_isRefVal hfit hty)]
-        exact KeySort.le_refl _
+      · exact SVal.keySort_le_stValue v
+      · rw [SVal.keySort_numeric (T := T) hfit v]; rfl
+      · rw [SVal.keySort_ref (T := T) hfit v]; exact KeySort.le_refl _
   | memory T p =>
     unfold Read.SortOk
     intro mv _
-    have hty := MVal.erase_hasTyH T mv
     cases rs with
-    | generic _ => exact hty
+    | generic _ => rfl
     | fixed s =>
-      show (MVal.erase T mv).keySort.le s = true
+      show (MVal.keySort T mv).le s = true
       cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
         (try exact Bool.noConfusion hsup) <;> subst_vars
-      · exact MVal.keySort_le_memValue _
-      · obtain ⟨n, hn⟩ := MVal.int_of_hasTyH_numeric hfit hty
-        rw [hn]; rfl
-      · obtain ⟨id, hid⟩ := MVal.ref_of_hasTyH_ref hfit hty
-        rw [hid]; rfl
+      · exact MVal.keySort_le_memValue T mv
+      · rw [MVal.keySort_numeric (T := T) hfit mv]; rfl
+      · rw [MVal.keySort_ref (T := T) hfit mv]; rfl
   | slen p =>
     unfold Read.SortOk
     intro v _
-    have hty := SVal.erase_hasTy (SVal.prim v)
     cases rs with
-    | generic _ => exact hty
+    | generic _ => rfl
     | fixed s =>
-      show (SVal.prim v).erase.keySort.le s = true
+      show (SVal.prim v).keySort.le s = true
       cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
         (try exact Bool.noConfusion hsup) <;> subst_vars
       · exact SVal.keySort_le_stValue _
-      · obtain ⟨n, hn⟩ := hasTy_numeric (ty := .uint) rfl hty
-        rw [hn]; rfl
+      · rfl
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
   | mlen p =>
     unfold Read.SortOk
     intro v _
-    have hty := MVal.erase_hasTyH (H := σ.H) (.prim .uint) v
     cases rs with
-    | generic _ => exact hty
+    | generic _ => rfl
     | fixed s =>
-      show (MVal.erase (.prim .uint) v).keySort.le s = true
+      show (MVal.keySort (H := σ.H) (.prim .uint) v).le s = true
       cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
         (try exact Bool.noConfusion hsup) <;> subst_vars
-      · exact MVal.keySort_le_memValue _
-      · obtain ⟨n, hn⟩ := MVal.int_of_hasTyH_numeric (T := .uint) rfl hty
-        rw [hn]; rfl
+      · exact MVal.keySort_le_memValue (H := σ.H) (.prim .uint) v
+      · rfl
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
 
 /-! ## Rows, constructors, statements -/

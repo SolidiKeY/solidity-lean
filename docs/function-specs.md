@@ -146,7 +146,7 @@ obligations, not `spec!`.
 
 - **The diamond over reachable states.** Every obligation is a box, so a
   reverting run satisfies it. A diamond spec needs the layout as constraints
-  on reachable states (`Typing/Constructibility.lean`, `Typing/Storage.lean`).
+  on reachable states (`Typing/Constructibility.lean`, `Typing/Tight.lean`).
 - **A spec's invariant as an `Invariant C`.** `Invariant`
   (`Calculus/CallbackHolds.lean`) is closed by its type (`Fml C []`) and
   first-order by `fo`, which admits a quantifier, over the typed `ExecS` of

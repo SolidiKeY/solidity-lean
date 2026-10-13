@@ -29,7 +29,6 @@ namespace Solidity
 namespace Counterexamples
 namespace PreFixSortAnnotations
 
-open Semantics
 open TacletAnnotations
 open SortFaithfulness
 
@@ -43,15 +42,15 @@ def Flags : Contract := contract!{ bool flag; bool flag2; }
 
 /-- A `Person` is a `Struct` node, never an `int`. -/
 theorem person_not_int (v : SVal (.ref (.struct "Person"))) :
-    SortOkS (.fixed .int) (.ref (.struct "Person")) v.erase = false := by
+    SortOkS (.fixed .int) v = false := by
   cases v with
-  | struct fs => rw [SVal.erase_struct]; rfl
+  | struct fs => rfl
 
 /-- A `bool` is not an `int`. -/
 theorem bool_not_int (v : SVal (.prim .bool)) :
-    SortOkS (.fixed .int) (.prim .bool) v.erase = false := by
+    SortOkS (.fixed .int) v = false := by
   cases v with
-  | prim b => rw [SVal.erase_prim]; cases b <;> rfl
+  | prim b => rfl
 
 /-! ## The copy rule -/
 

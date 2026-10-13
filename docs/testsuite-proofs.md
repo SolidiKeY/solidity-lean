@@ -480,9 +480,11 @@ one.
   So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
   `Ty.okDeep`) a storage passes the shape test exactly when a scoped
   program reaches it (by the typed run, `Reachable`); `wt_iff_reachable`: it passes `wt` exactly when it is
-  reachable and its words fit.  The words are a test of their own: a
-  literal is in its type's range (`Simple.lit`, since 2026-10-07), but no
-  theorem yet shows that a run keeps every word in range.  Why an
+  reachable.  Since W10.5.2 both are over the typed storage (`Storage.wtB`,
+  `Typing/CanonTest.lean`, which the term's untyped test is on the erasure,
+  `Calculus/WtBridge.lean`): a word is in range by its type, a mapping key
+  by `SVal.Fits`, and every reachable storage's keys are in range
+  (`reachable_bnd`).  Why an
   `Op1` and not a formula: a new `Fml` constructor touches every formula
   traversal, and an expanded layout (`∀` per root and member) gives every
   leaf quantifiers the closer has to instantiate.  The `Op1` cost one case

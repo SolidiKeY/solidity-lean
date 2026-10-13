@@ -106,7 +106,8 @@ and the run, and moved the calculus onto both.
   (`tests/solkey/expected.tsv`).
 - **The `PreservationNecessity` counterexample** (a duplicated layout root
   checks one stored value against two types, so `nodupKeysB` is necessary),
-  removed with the untyped layer; `Typing/StoragePreservation.lean` cites it.
+  removed with the untyped layer; the typed storage has one value per root
+  by construction (W10.5.2).
 
 ## Sharp edges
 
