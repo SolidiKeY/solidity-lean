@@ -2452,6 +2452,17 @@ def LTm.seqMem {s : Srt} (t : LTm C s) : LTm C s :=
     (@fun _ _ _ _ _ _ iha ihb iht ihe => .kite iha ihb iht ihe)
     (@fun _ => .err) s t
 
+theorem LTm.seqMem_eq_seqMemM {s : Srt} (t : LTm C s) : t.seqMem = t.seqMemM := by
+  induction t with
+  | var | app0 | err => rfl
+  | app1 o x ih | obsW x ih | obsL x ih | obsH x ih => simp only [LTm.seqMemM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.seqMemM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.seqMemM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.seqMemM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.seqMemM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.seqMemM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.seqMemM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
 theorem LTm.seqMem_eval {s : Srt} (t : LTm C s) : t.seqMem.eval g ν = t.eval g ν := by
   induction t with
   | var | app0 | err => rfl
@@ -2562,6 +2573,17 @@ def LTm.hasStRd {s : Srt} (t : LTm C s) : Bool :=
     (@fun _ _ _ _ _ _ iha ihb iht ihe => iha || ihb || iht || ihe)
     (@fun _ => false) s t
 
+theorem LTm.hasStRd_eq_hasStRdM {s : Srt} (t : LTm C s) : t.hasStRd = t.hasStRdM := by
+  induction t with
+  | var | app0 | obsW | obsL | obsH | err => rfl
+  | app1 o x ih => simp only [LTm.hasStRdM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.hasStRdM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.hasStRdM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.hasStRdM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.hasStRdM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.hasStRdM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.hasStRdM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
 /-- `LFml.hasStRd`'s compiled twin. -/
 def LFml.hasStRdM : LFml C → Bool
   | .eq a b => a.hasStRd || b.hasStRd
@@ -2576,6 +2598,12 @@ def LFml.hasStRd (φ : LFml C) : Bool :=
   @LFml.rec C (fun _ => Bool) false (@fun _ a b => a.hasStRd || b.hasStRd)
     (fun _ ih => ih) (fun _ _ ihφ ihψ => ihφ || ihψ) (fun _ _ ihφ ihψ => ihφ || ihψ)
     (fun _ _ _ ih => ih) φ
+
+theorem LFml.hasStRd_eq_hasStRdM (φ : LFml C) : φ.hasStRd = φ.hasStRdM := by
+  induction φ with
+  | tt | eq => rfl
+  | not φ ih | all k p φ ih => simp only [LFml.hasStRdM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.hasStRdM, ← ihφ, ← ihψ]; rfl
 
 /-- **The closer with memory read**: every read of memory walked
 (`LFml.memRes`), the storage reads that walk exposed (a member of a copy
@@ -2614,6 +2642,12 @@ def LFml.nfE (φ : LFml C) : LFml C :=
     (@fun _ a b => .eq (({} : Facts C).nf a) (({} : Facts C).nf b))
     (fun _ ih => .not ih) (fun _ _ ihφ ihψ => .and ihφ ihψ) (fun _ _ ihφ ihψ => .imp ihφ ihψ)
     (fun k p _ ih => .all k p ih) φ
+
+theorem LFml.nfE_eq_nfEM (φ : LFml C) : φ.nfE = φ.nfEM := by
+  induction φ with
+  | tt | eq => rfl
+  | not φ ih | all k p φ ih => simp only [LFml.nfEM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.nfEM, ← ihφ, ← ihψ]; rfl
 
 theorem LFml.nfE_holds (φ : LFml C) : ∀ (ν : AEnv), φ.nfE.holds g ν ↔ φ.holds g ν := by
   induction φ with
@@ -2670,6 +2704,17 @@ def LTm.stDepth {s : Srt} (t : LTm C s) : Nat :=
     (@fun _ _ _ _ _ _ iha ihb iht ihe => max (max iha ihb) (max iht ihe))
     (@fun _ => 0) s t
 
+theorem LTm.stDepth_eq_stDepthM {s : Srt} (t : LTm C s) : t.stDepth = t.stDepthM := by
+  induction t with
+  | var | app0 | obsW | obsL | obsH | err => rfl
+  | app1 o x ih => simp only [LTm.stDepthM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.stDepthM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.stDepthM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.stDepthM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.stDepthM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.stDepthM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.stDepthM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
 /-- `LFml.stDepth`'s compiled twin. -/
 def LFml.stDepthM : LFml C → Nat
   | .eq a b => max a.stDepth b.stDepth
@@ -2684,6 +2729,12 @@ def LFml.stDepth (φ : LFml C) : Nat :=
   @LFml.rec C (fun _ => Nat) 0 (@fun _ a b => max a.stDepth b.stDepth)
     (fun _ ih => ih) (fun _ _ ihφ ihψ => max ihφ ihψ) (fun _ _ ihφ ihψ => max ihφ ihψ)
     (fun _ _ _ ih => ih) φ
+
+theorem LFml.stDepth_eq_stDepthM (φ : LFml C) : φ.stDepth = φ.stDepthM := by
+  induction φ with
+  | tt | eq => rfl
+  | not φ ih | all k p φ ih => simp only [LFml.stDepthM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.stDepthM, ← ihφ, ← ihψ]; rfl
 
 end Fold
 

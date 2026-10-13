@@ -17,7 +17,7 @@ case tree over key equalities.  It eliminates the writes
 (`LFml.elimF`, `Calculus/ElimFacts.lean`), reads memory as solkey does
 (`Calculus/MemRead.lean`), and closes what is left with the closer
 (`Calculus/Closer.lean`); the kernel evaluates all of it once
-(`Valid.of_close`).  Each step is sound over the typed state
+(`Seq.checkCore_valid`).  Each step is sound over the typed state
 (`Valid.of_toLS`, `Calculus/DecideTyped.lean`), not an equivalence, so a
 goal `sol_decide` does not close may still be valid.
 
@@ -259,15 +259,23 @@ theorem parameterInRange : ⊨ dl!{ a < 10 → ⟨ uint y = a + 1; ⟩ y == a + 
 
 /-! ## The closer on the reduction
 
-`sol_decide` is the closer on the reduction (`Valid.of_close`);
-`sol_decide_close` is the same step, failing where the closer does not
-close the leaf, and `sol_reduce` shows the reduction. -/
+`sol_decide` is the closer on the reduction within its bounds
+(`Seq.checkCore_valid`), failing where the closer does not close the
+leaf; `sol_decide_close` is the same step, and `sol_reduce?` shows the
+reduction, left as the goal. -/
 
 /-- `⟨ uint x = a; ⟩ x >= 0` — the order a `uint` parameter's range gives
 is the closer's. -/
 theorem closerOnReduction : ⊨ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
   sol_symex
   sol_decide_close
+
+/-- info: ∀ uint pos(0); ∀ uint pos(1); true = true ∧ (pos(0) >= 0) = true -/
+#guard_msgs in
+example : ⊨ dl!{ ⟨ uint x = a; ⟩ x >= 0 } := by
+  sol_symex
+  sol_reduce?
+  exact Solidity.Decide.LFml.decideMem_valid rfl
 
 /-! ## Two elements in one update, and the layout
 

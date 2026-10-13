@@ -50,7 +50,7 @@ def budget : Nat := 20000
 
 /-- The tactics `sol_prove?` tries on a leaf, in order, each a sequence of
 lines: `sol_leaf` (the sequent as `⊨ ψ`, `Calculus/ProvesDerive.lean`), then
-`sol_decide` on the scoped leaf (its layout read from `wt(storage)`), then
+`sol_decide` on the scoped leaf, then
 `sol_close` and `sol_spec_close` (`Calculus/CloseScoped.lean`).  A leaf past
 the closer's bounds (`small = false`) gets no step that reduces it, only
 `sol_close` and `sol_spec_close`, whose `simp`, `omega` and `grind` heed

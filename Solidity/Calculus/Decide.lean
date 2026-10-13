@@ -373,6 +373,15 @@ def append {S U W : Ty} (p : TSegs C S U) (q : TSegs C U W) : TSegs C S W :=
     (fun h _ ih q => .field h (ih q)) (fun i _ ih q => .at i (ih q))
     (fun i _ ih q => .atF i (ih q)) (fun i _ ih q => .key i (ih q)) S U p q
 
+theorem append_eq_appendM {S U W : Ty} (p : TSegs C S U) (q : TSegs C U W) :
+    p.append q = p.appendM q := by
+  induction p with
+  | nil => rfl
+  | field _ _ ih => exact congrArg _ (ih _)
+  | atF _ _ ih => exact congrArg _ (ih _)
+  | key _ _ ih => exact congrArg _ (ih _)
+  | «at» _ _ ih => exact congrArg _ (ih _)
+
 /-- `toLTm` by `match`, its compiled form. -/
 def toLTmM : {S T : Ty} → TSegs C S T → LTm C (.path S) → LTm C (.path T)
   | _, _, .nil, acc => acc
@@ -390,6 +399,12 @@ def toLTm {S T : Ty} (p : TSegs C S T) : LTm C (.path S) → LTm C (.path T) :=
     (fun i _ ih acc => ih (.index (.arr .dyn) acc i))
     (fun i _ ih acc => ih (.index (.arr .fixed) acc i))
     (fun i _ ih acc => ih (.index .map acc i)) S T p
+
+theorem toLTm_eq_toLTmM {S T : Ty} (p : TSegs C S T) : p.toLTm = p.toLTmM := by
+  funext acc
+  induction p with
+  | nil => rfl
+  | field h p ih | «at» i p ih | atF i p ih | key i p ih => simp only [TSegs.toLTmM, ← ih]; rfl
 
 /-- One index step, by how the type is indexed. -/
 def ofIndex {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
@@ -549,6 +564,13 @@ def relSegs {S T : Ty} (p : TSegs C S T) : {U : Ty} → TSegs C S U →
         rfl)
     S T p
 
+theorem relSegs_eq_relSegsM {S T : Ty} (p : TSegs C S T) {U : Ty} (q : TSegs C S U) :
+    relSegs p q = relSegsM p q := by
+  induction p generalizing U with
+  | nil => rfl
+  | field h p ih => cases q <;> (first | rfl | (simp only [relSegsM, ← ih]; rfl))
+  | «at» i p ih | atF i p ih | key i p ih => cases q <;> (first | rfl | (simp only [relSegsM, ← ih]; rfl))
+
 theorem root_inj {r r' : Name} {R R' : Ty} (h : r = r') (hr : C.rootType r = some R)
     (hr' : C.rootType r' = some R') : R' = R := by
   subst h; exact Option.some.inj (hr'.symm.trans hr)
@@ -671,6 +693,12 @@ def delRS {U V : Ty} (x : VRd C U) (r : TSegs C U V) (c : CK V) : LTm C (.val c.
     (fun i r _ x c => x c (.key i r))
     U V r x c
 
+theorem delRS_eq_delRSM {U V : Ty} (x : VRd C U) (r : TSegs C U V) (c : CK V) :
+    delRS x r c = delRSM x r c := by
+  induction r with
+  | nil | key => rfl
+  | field h r ih | «at» i r ih | atF i r ih => simp only [delRSM, ← ih]; rfl
+
 /-- `stripRS` by `match`, its compiled form. -/
 def stripRSM {U V : Ty} (x : VRd C U) (r : TSegs C U V) (c : CK V) : LTm C (.val c.out) :=
   match U, V, r with
@@ -691,6 +719,12 @@ def stripRS {U V : Ty} (x : VRd C U) (r : TSegs C U V) (c : CK V) : LTm C (.val 
     (fun i _ ih x c => ih (x.find (.atF i .nil)) c)
     (fun i r _ x c => x c (.key i r))
     U V r x c
+
+theorem stripRS_eq_stripRSM {U V : Ty} (x : VRd C U) (r : TSegs C U V) (c : CK V) :
+    stripRS x r c = stripRSM x r c := by
+  induction r with
+  | nil | key => rfl
+  | field h r ih | «at» i r ih | atF i r ih => simp only [stripRSM, ← ih]; rfl
 
 /-- `ovRS` by `match`, its compiled form. -/
 def ovRSM {U V : Ty} (o n : VRd C U) (r : TSegs C U V) (c : CK V) : LTm C (.val c.out) :=
@@ -726,6 +760,13 @@ def ovRS {U V : Ty} (o n : VRd C U) (r : TSegs C U V) (c : CK V) : LTm C (.val c
       .cond (n (.has _) .nil) (.cond (o (.has _) .nil) (o c (.key i r)) (n c (.key i r))) c.absent)
     U V r o n c
 
+theorem ovRS_eq_ovRSM {U V : Ty} (o n : VRd C U) (r : TSegs C U V) (c : CK V) :
+    ovRS o n r c = ovRSM o n r c := by
+  induction r with
+  | nil | key => rfl
+  | field h r ih | atF i r ih => simp only [ovRSM, ← ih]; rfl
+  | «at» i r ih => simp only [ovRSM, ← ih, ← delRS_eq_delRSM]; rfl
+
 /-- `arrRd` by `match`, its compiled form. -/
 def arrRdM {E : Ty} (len' : LTm C (.val .uint)) (has : LTm C (.val .bool))
     (below : LTm C (.val .uint) → VRd C E) : VRd C (.ref (.array E)) :=
@@ -745,6 +786,11 @@ def arrRd {E : Ty} (len' : LTm C (.val .uint)) (has : LTm C (.val .bool))
       (fun _ _ _ _ => .err)
       (fun {_} {_} i rest e c => below i c (array_inj e ▸ rest))
       (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) rfl c
+
+theorem arrRd_eq_arrRdM {E : Ty} (len' : LTm C (.val .uint)) (has : LTm C (.val .bool))
+    (below : LTm C (.val .uint) → VRd C E) {V : Ty} (c : CK V) (r : TSegs C (.ref (.array E)) V) :
+    arrRd len' has below c r = arrRdM len' has below c r := by
+  cases r <;> rfl
 
 /-- **A push of `x`, read** (`TVal.pushA`): the length one more, `x` at the
 old length `L`, the old elements elsewhere. -/
@@ -774,6 +820,11 @@ def dfltHas {U V : Ty} (r : TSegs C U V) : LTm C (.val .bool) :=
     (fun _ _ _ => .lit (p := .bool) false)
     (fun {_} {_} {n} i _ ih => .cond (.ltNat i n) ih (.lit (p := .bool) false))
     (fun _ _ ih => ih) U V r
+
+theorem dfltHas_eq_dfltHasM {U V : Ty} (r : TSegs C U V) : dfltHas r = dfltHasM r := by
+  induction r with
+  | nil | «at» => rfl
+  | field h r ih | key i r ih | atF i r ih => simp only [dfltHasM, ← ih]; rfl
 
 /-- **A default value, read** (`(SVal.dflt E).obs`): the default word,
 length `0`, there as `dfltHas` says. -/
@@ -810,6 +861,10 @@ def svalRd {p : PrimTy} (w : LTm C (.val p)) : VRd C (.prim p) :=
         (fun P e' => (show P = p by injection e'.trans e) ▸ w)
         (fun _ _ => .err) (fun _ _ => .tt) rfl)
       (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) rfl c
+
+theorem svalRd_eq_svalRdM {p : PrimTy} (w : LTm C (.val p)) {V : Ty} (c : CK V)
+    (r : TSegs C (.prim p) V) : svalRd w c r = svalRdM w c r := by
+  cases r <;> cases c <;> rfl
 
 /-! ## A memory object as a stored value (`copyMem`) -/
 
@@ -869,6 +924,13 @@ def memRd (M : LTm C .mem) {T V : Ty} (r : TSegs C T V) : MLoc C T → LTm C (.v
         (.kite h .tt (LTm.ltNat i n) (.lit false)) c)
     (fun {_} {V} {_} _ _ ih _ h c => ih (MLoc.ofAddr M V .err) h c) T V r
 
+theorem memRd_eq_memRdM (M : LTm C .mem) {T V : Ty} (r : TSegs C T V) :
+    memRd M r = memRdM M r := by
+  funext loc h c
+  induction r generalizing h with
+  | nil => rfl
+  | field hf r ih | «at» i r ih | atF i r ih | key i r ih => simp only [memRdM, ← ih]; rfl
+
 /-- The reader of `copyMem(M, t)`. -/
 def copyMemRd {R : RefTy} (M : LTm C .mem) (t : LTm C (.ident R)) : VRd C (.ref R) :=
   fun c r => memRd M r (t : MLoc C (.ref R)) .tt c
@@ -897,6 +959,11 @@ there. -/
 def TSegs.noIdx {S T : Ty} (p : TSegs C S T) : Bool :=
   @TSegs.rec C (fun _ _ _ => Bool) true (fun _ _ ih => ih) (fun _ _ _ => false)
     (fun _ _ _ => false) (fun _ _ ih => ih) S T p
+
+theorem TSegs.noIdx_eq_noIdxM {S T : Ty} (p : TSegs C S T) : p.noIdx = p.noIdxM := by
+  induction p with
+  | nil | «at» | atF => rfl
+  | field h p ih | key i p ih => simp only [TSegs.noIdxM, ← ih]; rfl
 
 /-- The starting storage's observation `c` at a path; a path of members and
 keys alone is there. -/
@@ -936,6 +1003,10 @@ def writeAt {T : Ty} (S : SRd C) (P : SPath C T) (newR : VRd C T) : SRd C := fun
       | some rest => newR c rest
       | none => S c Q
   else S c Q
+
+theorem writeAt_eq_writeAtM {T : Ty} (S : SRd C) (P : SPath C T) (newR : VRd C T)
+    {V : Ty} (c : CK V) (Q : SPath C V) : writeAt S P newR c Q = writeAtM S P newR c Q := by
+  simp only [writeAt, writeAtM, relSegs_eq_relSegsM]
 
 /-- The largest length a push leaves: `2^256 - 1`. -/
 def maxLen : LTm C (.val .uint) := .nat (2 ^ 256 - 1)
@@ -1224,6 +1295,17 @@ def LTm.elim {s : Srt} (t : LTm C s) : ElimM C s :=
     (fun {_} {s} a b t e ea eb et ee => ElimM.kite ea eb s et ee (.kite a b t e))
     (fun {s} => ElimM.ofOrig s .err)
     s t
+
+theorem LTm.elim_eq_elimM {s : Srt} (t : LTm C s) : t.elim = t.elimM := by
+  induction t with
+  | var | app0 | obsW | obsL | obsH | err => rfl
+  | app1 o x ih => simp only [LTm.elimM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.elimM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.elimM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.elimM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.elimM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.elimM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.elimM, ← iha, ← ihb, ← iht, ← ihe]; rfl
 
 /-- A formula, eliminated: each equation's two sides. -/
 def LFml.elim : LFml C → LFml C

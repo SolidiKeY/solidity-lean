@@ -430,7 +430,7 @@ storage has the shape its contract declares, so no clause reads a layout.
 | — (a guard is Lean's) | closer clause `kiteBool?` | Lean only | `c = true ? true : false` read as `c` |
 | — (a guard is Lean's) | closer clauses `kiteAssert`, `assertArg?`, `Facts.addAsserts` | Lean only | a guard `kite(c, true, a, err)` that returns, like `assert(c)`, gives the premise `c ≐ true` |
 | `inEqSimp_*` on differences, `polySimp_*` in general | — | open | no bound on `y - x` for two symbolic terms, no polynomial normal form |
-| — (Lean only: a cost bound) | `Seq.closeSize`, `Seq.stackSize` (`Calculus/LeafDerive.lean`), `LFml.fits`, `LFml.stDepth` | Lean only | a leaf whose reduction is past `closeSize` nodes, or stacks more than `stackSize` storage updates, is left to the walk |
+| — (Lean only: a cost bound) | `Seq.closeSize`, `Seq.stackSize` (`Calculus/DecideComplete.lean`), `LFml.fits`, `LFml.stDepth` | Lean only | a leaf whose reduction is past `closeSize` nodes, or stacks more than `stackSize` storage updates, is left to the walk |
 
 ### The storage readers (`Calculus/Decide.lean`)
 

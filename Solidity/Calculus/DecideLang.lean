@@ -76,10 +76,6 @@ theorem AEnv.get_set_ne (ν : AEnv) (p q : PrimTy) {k j : Nat} (v : p.Denote) (h
     (ν.set p k v).get q j = ν.get q j := by
   cases p <;> cases q <;> simp only [AEnv.set, AEnv.get, h, if_false]
 
-theorem AEnv.get_set_ty (ν : AEnv) {p q : PrimTy} (k j : Nat) (v : p.Denote) (h : q ≠ p) :
-    (ν.set p k v).get q j = ν.get q j := by
-  cases p <;> cases q <;> first | exact absurd rfl h | rfl
-
 /-- A length as a `uint`, the default past the bound (no storage has an
 array that long: `SVal.array`'s `hn`). -/
 def uintOfNat (n : Nat) : PrimTy.uint.Denote :=
@@ -173,7 +169,6 @@ theorem LTm.eval_kite {p : PrimTy} {s : Srt} (a b : LTm C (.val p)) (t e : LTm C
     (LTm.kite a b t e).eval g ν =
       (a.eval g ν : Option p.Denote).bind fun x => (b.eval g ν : Option p.Denote).bind fun y =>
         if x = y then t.eval g ν else e.eval g ν := rfl
-theorem LTm.eval_err {s : Srt} : (LTm.err : LTm C s).eval g ν = none := rfl
 
 end Eval
 
@@ -281,13 +276,6 @@ theorem LTm.isTT_eval {g : State C []} {ν : AEnv} {t : LTm C (.val .bool)} (h :
 /-- A literal `uint`. -/
 def LTm.nat (n : Nat) : LTm C (.val .uint) := .lit (uintOfNat n)
 
-/-- The literal a term is, if it is one. -/
-def LTm.lit? {s : Srt} : LTm C s → Option (Σ' (p : PrimTy) (_ : s = .val p), p.Denote)
-  | .app0 o => match o with
-    | @Op0.lit _ p v => some ⟨p, rfl, v⟩
-    | _ => none
-  | _ => none
-
 /-- A unary symbol that returns where its argument does: a member path. -/
 def _root_.Solidity.Op1.retsStep {a s : Srt} : Op1 C a s → Bool
   | .field _ => true
@@ -315,6 +303,12 @@ def LTm.retsS {s : Srt} (t : LTm C s) : Bool :=
     (@fun _ _ ih => ih) (@fun _ _ ih => ih) (@fun _ _ ih => ih)
     (@fun _ _ _ _ _ _ => false) (@fun _ _ _ _ _ => false)
     (@fun _ _ _ _ _ _ _ _ _ _ => false) (@fun _ => false) s t
+
+theorem LTm.retsS_eq_retsSM {s : Srt} (t : LTm C s) : t.retsS = t.retsSM := by
+  induction t with
+  | var | app0 | app2 | app3 | seq | orElse | kite | err => rfl
+  | app1 o x ih | obsW x ih | obsL x ih | obsH x ih => simp only [LTm.retsSM, ← ih]; rfl
+  | index it q i ihq ihi => simp only [LTm.retsSM, ← ihq, ← ihi]; rfl
 
 theorem Op0.eval_isSome (g : State C []) {s : Srt} (o : Op0 C s) : (o.eval g).isSome = true := by
   cases o <;> rfl
@@ -369,22 +363,6 @@ theorem LTm.eval_assert (g : State C []) (ν : AEnv) (c : LTm C (.val .bool)) :
     cases h : (c.eval g ν : Option Bool) with
     | none => rfl
     | some b => cases b <;> rfl
-
-/-- `a ⊕ b`, folded where both are literals and it returns. -/
-def LTm.mkBin (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : LTm C (.val p)) :
-    LTm C (.val (op.ret p)) :=
-  let t : LTm C (.val (op.ret p)) := .app2 (.binop op h) a b
-  match a.lit?, b.lit? with
-  | some ⟨_, ea, x⟩, some ⟨_, eb, y⟩ =>
-    match (Srt.val.inj ea), (Srt.val.inj eb) with
-    | rfl, rfl =>
-      match binopT op x (some y) with
-      | some r => .lit r
-      | none => t
-  | _, _ => t
-
-/-- An index under a bound: `i < n` as a guard. -/
-def ltG (i n : LTm C (.val .uint)) : LTm C (.val .bool) := LTm.assert (.app2 (.binop .lt rfl) i n)
 
 /-! ## Printing
 
