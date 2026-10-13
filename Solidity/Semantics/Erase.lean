@@ -9,8 +9,9 @@ erasure (`State.globE`, `Semantics.lean`'s state with no locals): an
 allocation, a copy either way, the deployment's state.  Split out of
 `Semantics/State.lean` at W10.5.1 (`docs/intrinsic.md`), so the typed core
 (`State`, `Run`, `Heap`, `Signature.lean`) imports no erasure module; the
-readers are the Typing chain, the EVM simulation and the memory laws, which
-`Semantics/TypedErase.lean` serves, and they go with them (W10.5.2–6).
+readers are the Typing chain and the tools, which `Semantics/TypedErase.lean`
+serves, and they go with them (W10.5.2–6); the EVM simulation (W10.5.3)
+and the memory laws (W10.5.4) read none.
 -/
 
 namespace Solidity
@@ -44,12 +45,6 @@ theorem copyStToM_erase {T : Ty} (σ : State C Γ) (v : SVal T) (h : T.mapFree =
       .ok ((σ.copyStToM v h).1.globE, MVal.erase T (σ.copyStToM v h).2) := by
   rw [SVal.copyStToM_erase v h σ.heap σ.globE (globE_heap σ) (globE_nextId σ), copyStToM,
     adopt_globE]
-  rfl
-
-theorem allocDefault_erase (σ : State C Γ) (R : RefTy) (h : (Ty.ref R).mapFree = true) :
-    Semantics.allocDefault σ.globE R =
-      .ok ((σ.allocDefault R h).1.globE, ((σ.allocDefault R h).2 : HRef _ (R)).id) := by
-  rw [Heap.allocDefault_erase (globE_heap σ) (globE_nextId σ) R h, allocDefault, adopt_globE]
   rfl
 
 theorem copyMem_erase {T : Ty} (σ : State C Γ) (v : MVal σ.H T) :

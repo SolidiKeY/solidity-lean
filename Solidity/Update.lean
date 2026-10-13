@@ -13,9 +13,10 @@ here (`Srt`, `Op0` … `Op3`, read on `Semantics.State`) went at W9.8.3
 and the untyped callback and loop states (`State.havoc`, `State.anon`) at
 W10.1 (their typed versions are `Modality.afterRunTR`, `Calculus/Logic.lean`,
 and `Semantics/RunFrame.lean`'s), and the Theory's untyped readings of a
-result at W10.3.  What stays: the two modalities and how a halt reads under
-each (`Modality.onHalt`), the interpreter's memory read (`readAddr`), and
-the ledger's arithmetic (`IntOp`).
+result at W10.3, the interpreter's memory read (`readAddr`) at W10.5.4,
+when the memory laws went over to the typed heap (`Heap.readAddr`,
+`Semantics/Run.lean`).  What stays: the two modalities and how a halt reads
+under each (`Modality.onHalt`), and the ledger's arithmetic (`IntOp`).
 
 Unlike KeY's, the terms can halt: they are read by the interpreter's own
 operations, so `a + b` reverts on overflow and `values[i]` on an index out
@@ -38,30 +39,6 @@ formula holds of it, no diamond formula does. -/
 def Modality.onHalt : Modality → Prop
   | .diamond => False
   | .box => True
-
-/-! ## Memory reads
-
-The slot a memory address names, as the untyped interpreter reads it; the
-memory proofs reach it through an erased address (`MAddr.erase`).  The
-typed read is `Heap.readAddr` (`Semantics/Run.lean`). -/
-
-variable {C : Contract}
-
-/-- The slot at a memory address. -/
-def readAddr (σ : State) : Addr → Res MVal
-  | .memoryField id f => do
-    match ← σ.getObj id with
-    | .struct fields =>
-      match lookupBy f fields with
-      | some v => pure v
-      | none => .error .undef
-    | .array _ _ => .error .undef
-  | .memoryIndex id i => do
-    match ← σ.getObj id with
-    | .array elems _ =>
-      if h : 0 ≤ i ∧ i.toNat < elems.length then pure (elems.get ⟨i.toNat, h.2⟩)
-      else .error .revert
-    | .struct _ => .error .undef
 
 /-! ## Updates -/
 

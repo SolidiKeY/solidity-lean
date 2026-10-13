@@ -256,17 +256,6 @@ theorem SVec.copyStToM_erase : {E : Ty} → {n : Nat} → (l : SVec E n) → (h 
       Heap.into_into, SVec.copyStToM, List.map_cons, MVal.erase_wk]
 end
 
-/-- `allocDefault` on the erasure: the default object, at the next position. -/
-theorem Heap.allocDefault_erase {H : HTy} {σ : Semantics.State} {hp : Heap H}
-    (hh : σ.heap = hp.erase) (hn : σ.nextId = H.length) (R : RefTy)
-    (h : (Ty.ref R).mapFree = true) :
-    Semantics.allocDefault σ R =
-      .ok (Heap.into σ (hp.allocDefault R h).heap, (hp.allocDefault R h).val.id) := by
-  have hc := SVal.copyStToM_erase (SVal.dflt (.ref R)) h hp σ hh hn
-  rw [SVal.dflt_erase] at hc
-  simp only [Semantics.allocDefault, Semantics.defaultForRef, hc]
-  rfl
-
 /-! ## Memory to storage
 
 The untyped copy consumes an identity as it follows it (`rem`); the typed
@@ -449,59 +438,5 @@ theorem MFields.setBy_erase {H : HTy} {f : Name} : (fs : List (Name × Ty)) → 
       simp only [MFields.erase, MFields.set, setBy, ↓reduceIte, ↓reduceDIte]
     · simp only [MFields.erase, MFields.set, setBy, if_neg e, dif_neg e]
       exact congrArg _ (MFields.setBy_erase fs x.2 _ v)
-
-/-- Whether an array kind is the fixed-size one. -/
-def _root_.Solidity.ArrTy.isFixed : {R : RefTy} → {E : Ty} → ArrTy R E → Bool
-  | _, _, .dyn => false
-  | _, _, .fixed => true
-
-theorem MObj.erase_arr {H : HTy} : {R : RefTy} → {E : Ty} → (a : ArrTy R E) → (o : MObj H R) →
-    MObj.erase R o = .array ((MObj.elems a o).map (MVal.erase E)) a.isFixed
-  | _, _, .dyn, _ => by rw [MObj.elems_dyn]; rfl
-  | _, _, .fixed, _ => by rw [MObj.elems_fixed]; rfl
-
-namespace Heap
-
-variable {H : HTy} {σ : Semantics.State} {hp : Heap H}
-
-/-- A member read on the erasure (`readAddr`'s member arm). -/
-theorem readField_erase (hh : σ.heap = hp.erase) {s f : Name} {T : Ty}
-    (r : HRef H (.struct s)) (h : lookupBy f (structDef s) = some T) :
-    (do
-      match ← σ.getObj r.id with
-      | .struct fields =>
-        match lookupBy f fields with
-        | some v => pure v
-        | none => .error .undef
-      | .array _ _ => .error .undef : Semantics.Res Semantics.MVal) =
-      .ok (MVal.erase T (hp.field r h)) := by
-  simp only [getObj_erase hh r, bind, Except.bind]
-  show (match lookupBy f (MFields.erase (structDef s) (hp.get r)) with
-    | some v => pure v | none => .error .undef : Semantics.Res Semantics.MVal) = _
-  rw [MFields.lookupBy_erase (structDef s) (hp.get r) h]
-  rfl
-
-/-- An element read on the erasure (`readAddr`'s index arm): a revert out
-of bounds. -/
-theorem readIndex_erase (hh : σ.heap = hp.erase) {R : RefTy} {E : Ty}
-    (r : HRef H R) (a : ArrTy R E) (i : Int) :
-    (do
-      match ← σ.getObj r.id with
-      | .array elems _ =>
-        if h : 0 ≤ i ∧ i.toNat < elems.length then pure (elems.get ⟨i.toNat, h.2⟩)
-        else .error .revert
-      | .struct _ => .error .undef : Semantics.Res Semantics.MVal) =
-      toRes (MVal.erase E) (hp.index r a i) := by
-  simp only [getObj_erase hh r, bind, Except.bind, MObj.erase_arr a (hp.get r), Heap.index]
-  by_cases h0 : 0 ≤ i
-  · by_cases hl : i.toNat < (MObj.elems a (hp.get r)).length
-    · simp only [List.length_map, h0, hl, and_self, ↓reduceDIte, ↓reduceIte, List.get_eq_getElem,
-        List.getElem_map, List.getElem?_eq_getElem hl, toRes]
-      rfl
-    · simp only [List.length_map, h0, hl, and_false, ↓reduceDIte, ↓reduceIte,
-        List.getElem?_eq_none (Nat.le_of_not_lt hl), toRes]
-  · simp only [h0, false_and, ↓reduceDIte, ↓reduceIte, toRes]
-
-end Heap
 
 end Solidity
