@@ -178,7 +178,7 @@ its default (`readOnAddM` `\then`, then `initMember`). -/
 theorem memoryDeclDefault {H : HTy} (hp : Heap H) :
     (hp.allocDefault (.struct "Person") rfl).heap.field
       (hp.allocDefault (.struct "Person") rfl).val hAge = word 0 :=
-  (Heap.initMember hp rfl hAge (by decide)).trans rfl
+  (Heap.initMember hp rfl hAge).trans rfl
 
 end Memory
 
@@ -198,7 +198,7 @@ theorem storageToMemoryRootCopyValue {H : HTy} (hp : Heap H)
     (alice : SVal (.ref (.struct "Person"))) :
     (alice.copyStToM hp rfl).heap.field (alice.copyStToM hp rfl).val hAge =
       (((SVal.view alice : SFields _).get hAge).view : PrimTy.uint.Denote) :=
-  SVal.readFromCopyToStorage hp alice rfl hAge (by decide)
+  SVal.readFromCopyToStorage hp alice rfl hAge
 
 /-- …and an object older than the copy does not see it
 (`readFromCopyToStorage` `\else`). -/
@@ -213,7 +213,7 @@ member holds the object's. -/
 theorem memoryToStorageRootCopyValue {H : HTy} (hp : Heap H) (carol : HRef H (.struct "Person")) :
     (MVal.copyMToSt hp (T := .ref (.struct "Person")) carol).find (.field hAge .nil) =
       some (.prim (hp.field carol hAge)) :=
-  MVal.findOnCopy hp carol hAge (by decide)
+  MVal.findOnCopy hp carol hAge
 
 end CrossDomain
 

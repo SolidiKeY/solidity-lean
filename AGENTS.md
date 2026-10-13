@@ -38,9 +38,11 @@ with atoms and guards (`Calculus/DecideLang.lean`), the Theory's values
 are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
 `Tm.denote`, `.eq` is `=`), and `Tools/Counterexample.lean`'s candidates
 are typed states. Still untyped: `Semantics.State`, the typed state erased
-(`State.globE`), which the typed run's invariants (`Typing/`), the EVM
-simulation (`Evm/`), the memory laws' `readAddr` and the `#run` tools read
-(W10.5 types them), through the erasure modules
+(`State.globE`), which the `#run` tools and the `wt(storage)` bridge
+(`Calculus/WtBridge.lean`) read (W10.5 types them; the run invariants,
+`Typing/`, read the typed state since W10.5.2, the EVM simulation, `Evm/`,
+since W10.5.3, the memory laws the typed heap since W10.5.4),
+through the erasure modules
 (`Semantics/{StorageErase,HeapErase,Erase,TypedErase}.lean`), which the
 typed core (`Semantics/{State,Heap,Run}.lean`, `Signature.lean`) does not
 import (W10.5.1).

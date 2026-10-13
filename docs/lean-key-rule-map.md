@@ -383,7 +383,7 @@ diamond (`Hyps.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | `findOnSaveFrame`, `lenOnSaveFrame` (a scoped leaf) | `CloseS.wp_box_write`: `Storage.find_save_frame`, `len_save_frame`, `checkIndex_save_frame` | done (W9.8.4) | a read, a length and an index check at a path diverging from the write's (`Theory.diverges`, `Theory/Segs.lean`) read the storage before it; below the written path by `Path.append` |
 | `findOnDelAt`, `findOnDelAtFrame` (a scoped leaf) | `CloseS.wp_box_delete` (`Calculus/CloseFrame.lean`) | done (W9.8.4) | the deleted path reads its default (`SVal.dflt`), a diverging path the storage before |
 | `readOnWrite` (a scoped leaf) | `CloseS.wp_box_writeT`, `Grown.writeT_facts`, `MAddrT.apart_resolve` (`Calculus/CloseFrame.lean`) | done (W9.8.4) | a memory write reads back at its address and leaves an address apart from it (`MAddrT.Apart`) unchanged |
-| `copyStToMem`/`copyMemToSt` member reads (a scoped leaf) | `SVal.copyStToM_field`, `MVal.copyMToSt_field`, `CloseS.readId_copySt_field`, `copyMToSt_find_field` | done (W9.8.4) | a member of a copy reads the member copied, by the erasure (`Close.copyStToM_member`, `Close.copyMem_member`) |
+| `copyStToMem`/`copyMemToSt` member reads (a scoped leaf) | `SVal.copyStToM_field`, `MVal.copyMToSt_field`, `CloseS.readId_copySt_field`, `copyMToSt_find_field` | done (W9.8.4) | a member of a copy reads the member copied, on the typed heap (`SFields.copyStToM_get_prim`, `MVal.copyMToSt_findM_field`; W10.5.4) |
 | — (a total path in a diamond) | `CloseS.wp_diamond_write_total`, `wp_diamond_delete_total`, `wp_find_total` (and `_root`), `Storage.write_ne_none_total` | Lean only (W9.8.4) | a write, delete or read at a path with no index (`Path.total`) does not halt, so a diamond leaf reads it as the box does; a deployment's storage (`Storage.find_init_total`) likewise |
 | `selectOnEmptyStorage` at a root and below it (a deployment's storage) | `CloseS.find_init_ofRoot`, `CloseS.find_init_append` (`Calculus/CloseFrame.lean`), `close_rw_s` | done (W9.8.4) | the typed empty storage (`Storage.init`) reads a root, and a path through no array slot below it (`Path.total`), at its type's default (`Storage.find_init_total`) |
 | — (an index checked at a mapping root; a checked index) | `CloseS.atT_map_root`, `CloseS.atT_bind` (`Calculus/CloseScoped.lean`), `close_rw_s` | Lean only (W9.8.4) | a key of a mapping at a root is always a slot (the check passes), so two reads of `balances[0]` name one reference; any other index is its check, then the slot's reference: the typed `Storage.atT` unfolded so the closer compares references |
@@ -486,7 +486,7 @@ names"), with the lemma it restates.  A name is an identity term: KeY's
 | `readOnWrite` | `memReadN`, `.write` arm: the address written (`LTm.beqR`) reads the word written | `memReadN_eval`, `LTm.read_write_same` | `Grown.readOnWrite` (`Grown.writeT_facts`) | used; an address neither the same term nor apart keeps the read, where KeY's is an if-then-else |
 | `readOnWrite` at an `Identity` | `memIReadN`, `.write` arm | `memIReadN_eval`, `LTm.iread_write_same` | `Grown.readOnWrite` | used |
 | `readOnWrite` `\else` | the `.write` arms: an address apart (`LTm.apart?`: two members, a member and an element, two literal indices of one identity) reads below | `LTm.read_write_apart`, `LTm.iread_write_apart'`, `LTm.apart?_resolve` | `Grown.readOnWriteFrame` (`Grown.writeT_facts`) | used |
-| `readOnAddM` `\else` | the `.addM` arms: an address whose object is older than the allocation (`LTm.boundedIn`: allocated on the spine below it, or read out of a memory there) reads below | `LTm.read_addM_old`, `LTm.iread_addM_old`, `LTm.boundedIn_eval` | `Grown.readOnAddMFrame` (`Grown.readAddM_old`) | used |
+| `readOnAddM` `\else` | the `.addM` arms: an address whose object is older than the allocation (`LTm.boundedIn`: allocated on the spine below it, or read out of a memory there) reads below | `LTm.read_addM_old`, `LTm.iread_addM_old`, `LTm.boundedIn_eval` | `Grown.readOnAddMFrame` (`Grown.read_then_old`, `SVal.keeps_copyStToM`) | used |
 | `readOnAddM` `\then`, `initMember`, `defaultValueInt`, `defaultValueBool` | `memReadN`, `.addM` arm: an address at a member path of the fresh root (`LTm.freshPath?`, `Ty.memberTy`) of a primitive type reads its default (`PrimTy.dflt`) | `LTm.read_addM_fresh`, `LTm.freshPath_eval` | `Heap.initMember` | used |
 | `initElement` | the same, at a literal index of a fixed-size array (`Op2.freshStepL`) | `LTm.read_addM_fresh` | — | used |
 | `initSize`, `sizeOfDyn` | `lenAtN`, `.addM` arm: a fresh dynamic array's length is `0` | `lenAtN_eval` (`Heap.allocDefault_array_len`) | `Heap.initSize` | used |
@@ -502,7 +502,7 @@ names"), with the lemma it restates.  A name is an identity term: KeY's
 | `newFromAdd` | `LTm.identApart?`: two identities differ where one is fresh over a memory (`LTm.freshOver?`) the other is older than (`LTm.boundedIn`) | `LTm.identApart?_ne`, `LTm.freshOver?_eval` | `Grown.alloc_fresh` (`Grown.alloc_id_ge`, Lean only) | deviation: no `new` term |
 | `newFromWrite` | none, likewise: a memory on the spine below another grows to it (`LTm.onSpine_grows`) | — | — | deviation |
 | `readFromCopyToStorage` `\then` | `copyFieldRd?`: a member of a copy's root reads the storage it copied there (`find(st, q.f)`), which the elimination then reads (`LFml.closeMem`) | `copyFieldRd?_eval` | `SVal.readFromCopyToStorage` (`SVal.copyStToM_field`) | used |
-| `readFromCopyToStorage` `\else`, `readFromCopyToStorageIdentity` `\else` | the `.copySt` arms: an address whose object is older reads below | `LTm.read_copySt_old`, `LTm.iread_copySt_old` | `Grown.readFromCopyToStorageFrame` (`Grown.readCopySt_old`) | used; the premise is the object older than the copy, where KeY's is `idp1 ≠ idp2` |
+| `readFromCopyToStorage` `\else`, `readFromCopyToStorageIdentity` `\else` | the `.copySt` arms: an address whose object is older reads below | `LTm.read_copySt_old`, `LTm.iread_copySt_old` | `Grown.readFromCopyToStorageFrame` (`Grown.read_then_old`, `SVal.keeps_copyStToM`) | used; the premise is the object older than the copy, where KeY's is `idp1 ≠ idp2` |
 | `readFromCopyToStorageIdentity` `\then` | none: an identity member of a copy is kept as its read | — | — | open (its `\else` is the row above) |
 | `findDefinitionSize` (`structRules.key`) on a copy | `lenAtN`, `.copySt` arm: a copy of `new T[](n)` has length `n` | `lenAtN_eval` (`newArrT_copy_len`) | — | partly: a copy of a storage array keeps its length read |
 | `findOnCopy`, `selectOnCopyMemPrim`, `selectOnCopyMemRef` | `copyMemRd`, `memRd` (`Calculus/Decide.lean`): a memory object read as the stored value it copies to, down the segments (a member's address, an element within its array's length, an object's identity read there) | `memRd_rep`, `copyMem_rep` (`Calculus/DecideEval.lean`) | `MVal.findOnCopy` (`MVal.copyMToSt_field`) | used |
@@ -591,12 +591,12 @@ lemma beside it.
 | --- | --- | --- |
 | `readOnWrite` `\then` | `Grown.readOnWrite` (`Grown.writeT_facts`) | done |
 | `readOnWrite` `\else` | `Grown.readOnWriteFrame` (`Grown.writeT_facts`) | done |
-| `readOnAddM` `\else` | `Grown.readOnAddMFrame` (`Grown.readAddM_old`) | done |
+| `readOnAddM` `\else` | `Grown.readOnAddMFrame` (`Grown.readId_then_old`) | done |
 | — (the freshness behind `newFromAdd`) | `Grown.alloc_fresh` (`Grown.alloc_id_ge`) | Lean only: an allocation's identity is past every older one |
 | `readOnAddM` `\then`, then `initMember` | `Heap.initMember` | done: a member of a fresh struct reads its type's default |
 | `initSize`, `sizeOfDyn` | `Heap.initSize` (`Heap.allocDefault_array_len`) | done |
 | `readFromCopyToStorage` `\then` | `SVal.readFromCopyToStorage` (`SVal.copyStToM_field`) | done |
-| `readFromCopyToStorage` `\else`, `readFromCopyToStorageIdentity` `\else` | `Grown.readFromCopyToStorageFrame` (`Grown.readCopySt_old`) | done: the premise is the object older than the copy, where KeY's is `idp1 ≠ idp2` |
+| `readFromCopyToStorage` `\else`, `readFromCopyToStorageIdentity` `\else` | `Grown.readFromCopyToStorageFrame` (`Grown.readId_then_old`) | done: the premise is the object older than the copy, where KeY's is `idp1 ≠ idp2` |
 | `findOnCopy` (a one-member path), `selectOnCopyMemPrim` | `MVal.findOnCopy` (`MVal.copyMToSt_field`) | done |
 | `readFromEmptyMemory`, `newFromEmptyMemory` | — | not restated: memory grows from the global part's heap, never from an empty one |
 | `readREmpty`, `readRCons` | — | not restated: a path is read one address at a time |
@@ -649,12 +649,12 @@ write the law reads back (`Upd.coversEval`, `LawCov.eval`, `FmlRw.lawUpdS`).
 | Law | Interpreter lemma | KeY taclet | Notes |
 | --- | --- | --- | --- |
 | `readOnWrite` | `Heap.readAddr_writeAddr_same` (`Theory/Typed/Mem.lean`) | `readOnWrite` `\then` | `read(write(m, a, v), a) ⇝ v` for a literal `v` |
-| `findOnCopy` | `copyMem_member` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the printed trace's one step from the `find` into memory |
-| `readFromCopyToStorage` | `copyStToM_member` | `readFromCopyToStorage` `\then` | `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)` |
-| `readOnAddM` | `copyStToM_default_readPath` (`Calculus/ReadWrite.lean`) | `readOnAddM` `\then`, then `initMember`, `initElement` | `read(addM(m, R), a) ⇝ default` for a primitive member or fixed element at a fresh path of the allocation (`Tm.freshPath?`, `RefTy.memberTy`) |
-| `readOnAddMFrame` | `readAddr_heapExt`, `allocDefault_heapExt` | `readOnAddM` `\else` | `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is allocated strictly earlier on `m`'s spine (`Tm.boundedIn`) |
+| `findOnCopy` | `MVal.copyMToSt_field`, `SVal.find_overlay_field` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the printed trace's one step from the `find` into memory |
+| `readFromCopyToStorage` | `SVal.copyStToM_field` | `readFromCopyToStorage` `\then` | `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)` |
+| `readOnAddM` | `Heap.dflt_allocDefault`, `Srt.FreshRead.read_prim` (`Theory/Typed/Mem.lean`, `Calculus/TermLaws.lean`) | `readOnAddM` `\then`, then `initMember`, `initElement` | `read(addM(m, R), a) ⇝ default` for a primitive member or fixed element at a fresh path of the allocation (`Tm.freshPath?`, `Ty.memberTy`) |
+| `readOnAddMFrame` | `Heap.Keeps.readAddr`, `SVal.keeps_copyStToM` (`Grown.read_then_old`) | `readOnAddM` `\else` | `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is allocated strictly earlier on `m`'s spine (`Tm.boundedIn`) |
 | `readOnAddMFrameIdentity` | the same | `readOnAddM` `\else` at `Identity` | the twin at the identity sort |
-| `readOnWriteFrame` | `writeAddr_setObj` | `readOnWrite` `\else` | `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet (`Tm.apart?`: different members, a member and an element, one object at different literal indices) |
+| `readOnWriteFrame` | `Heap.readAddr_writeAddr_apart` | `readOnWrite` `\else` | `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet (`Tm.apart?`: different members, a member and an element, one object at different literal indices) |
 | `readOnWriteFrameIdentity` | the same | `readOnWrite` `\else` at `Identity` | the twin at the identity sort |
 | `readOnWriteIdentity` | `Heap.readAddr_writeAddr_same` | `readOnWrite` `\then` at `Identity` | `read(write(m, a, ref(i)), a) ⇝ i` |
 | — | — | `idC(ρ, [account])` | no law: a reference member of a fresh root, `read(addM(m, R), freshId(addM(m, R)).account)`, is the normal form, since KeY's `idC` has no `ITerm` counterpart |

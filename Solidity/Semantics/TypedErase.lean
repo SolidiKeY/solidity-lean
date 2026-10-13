@@ -5,8 +5,8 @@ import Solidity.Semantics.Erase
 # The value-level erasure
 
 The typed run's values against the untyped interpreter's, below the
-statements: the value-level erasure lemmas the EVM backend and the memory
-laws read (`MAddr.erase`, `compound_erase`, `bump_erase`, …), with
+statements: the value-level erasure lemmas the Typing chain and the tools
+read (`compound_erase`, `bump_erase`, …), with
 `Semantics/StorageErase.lean`, `Semantics/HeapErase.lean` and
 `Semantics/Erase.lean` below it; importing this module imports the whole
 erasure.  The typed core does not (W10.5.1): an expression's not panicking
@@ -32,35 +32,9 @@ section Eval
 
 variable {Γ : Ctx}
 
-theorem SVal.asValue_erase_prim {p : PrimTy} (v : SVal (.prim p)) :
-    v.erase.asValue = .ok (PrimTy.erase (SVal.view v)) := by
-  cases v with
-  | prim x => rw [SVal.erase_prim]; cases p <;> rfl
-
-theorem MVal.asValue_erase_prim {H : HTy} {p : PrimTy} (x : MVal H (.prim p)) :
-    (MVal.erase (.prim p) x).asValue = .ok (PrimTy.erase (p := p) x) := by
-  cases p <;> rfl
-
 theorem SRef.erase_index {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R))
     (it : IndexTy R k V) (i : Int) : (r.index it i).erase = (r.root, r.path.erase ++ [.at i]) := by
   simp only [SRef.index, SRef.erase, SRef.append, Path.erase_append, Path.erase_index]
-
-/-! ### Sources and right-hand sides -/
-
-theorem Value.toSVal_erase {p : PrimTy} (x : p.Denote) :
-    (PrimTy.erase x).toSVal = (SVal.prim x).erase := by
-  rw [SVal.erase_prim]; cases p <;> rfl
-
-/-! ### Memory addresses -/
-
-/-- The untyped address. -/
-def MAddr.erase {H : HTy} {T : Ty} : MAddr H T → Semantics.Addr
-  | .field (f := f) r _ => .memoryField r.id f
-  | .index r _ i => .memoryIndex r.id i
-
-theorem MAddr.erase_wk {H H' : HTy} (e : H <+: H') {T : Ty} (a : MAddr H T) :
-    (a.wk e).erase = a.erase := by
-  cases a <;> rfl
 
 /-! ### Compound assignments and `++` -/
 

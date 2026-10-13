@@ -87,25 +87,6 @@ theorem write_eq_bind {T : Ty} (st : Storage C) (r : SRef C T) (v : SVal T) :
 
 end Storage
 
-/-! ## A copy laid over a struct, member by member -/
-
-/-- A word laid over a word is the new one. -/
-theorem SVal.overlay_prim' {p : PrimTy} (o n : SVal (.prim p)) : o.overlay n = n := by
-  cases n; exact SVal.overlay_prim o _
-
-/-- **A member of a struct copy** (the untyped `Close.find_overlay_fields`):
-the new struct's member laid over the old one's. -/
-theorem SVal.find_overlay_field {s f : Name} {T U : Ty} (o n : SVal (.ref (.struct s)))
-    (h : lookupBy f (structDef s) = some T) (p : Path T U) :
-    (o.overlay n).find (.field h p) =
-      (n.find (.field h .nil)).bind fun n' => (((SVal.view o : SFields _).get h).overlay n').find p := by
-  cases o with
-  | struct ofs =>
-    cases n with
-    | struct nfs =>
-      rw [SVal.overlay_struct, SVal.find_field, SFields.get_overlay, SVal.find_field,
-        SVal.find_nil, Option.bind_some, SVal.view_struct]
-
 /-! ## A delete, member by member -/
 
 /-- A word reset is the type's default, whatever it held. -/
@@ -137,21 +118,13 @@ def Path.total : {T U : Ty} → Path T U → Bool
 
 theorem SVal.dflt_prim' (p : PrimTy) : SVal.dflt (.prim p) = .prim (PrimTy.dflt p) := rfl
 
-theorem defaultForFields_map : (l : List (Name × Ty)) →
-    Semantics.defaultForFields l = l.map fun (n, T) => (n, Semantics.defaultForTy T)
-  | [] => by rw [Semantics.defaultForFields]; rfl
-  | (n, T) :: l => by rw [Semantics.defaultForFields, defaultForFields_map l]; rfl
-
 theorem SVal.dflt_struct' (s : Name) :
-    SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) := by
-  apply SVal.erase_injective
-  rw [SVal.dflt_erase, SVal.erase_struct, SFields.dflt_erase, Semantics.defaultForTy,
-    defaultForFields_map]
+    SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
+  SVal.dflt_struct_eq s
 
 theorem SVal.dflt_map' (K V : Ty) :
-    SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) := by
-  apply SVal.erase_injective
-  rw [SVal.dflt_erase, SVal.erase_map, SVal.dflt_erase, Semantics.defaultForTy, SMap.erase_nil]
+    SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
+  SVal.dflt_map_eq K V
 
 theorem SFields.get_dflt {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
     (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
@@ -382,7 +355,7 @@ theorem withMem_memT_readId {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Un
 copy leaves: what the struct held there. -/
 theorem readId_copySt_field {H : HTy} (m : Grown H (fun _ => Unit)) {s f : Name} {p : PrimTy}
     (w : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
-    (hf : lookupBy f (structDef s) = some (.prim p)) (hl : ¬ f = "length") :
+    (hf : lookupBy f (structDef s) = some (.prim p)) :
     (m.then (w.copyStToM m.heap hT)).readId (MAddrT.field (w.copyStToM m.heap hT).val.id hf) =
       (w.find (.field hf .nil)).map fun v => v.view := by
   show (((MAddrT.field (w.copyStToM m.heap hT).val.id hf).resolve
@@ -390,17 +363,16 @@ theorem readId_copySt_field {H : HTy} (m : Grown H (fun _ => Unit)) {s f : Name}
   simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some,
     Option.bind_some]
   show some ((w.copyStToM m.heap hT).heap.field (w.copyStToM m.heap hT).val hf) = _
-  rw [SVal.copyStToM_field m.heap w hT hf hl]
+  rw [SVal.copyStToM_field m.heap w hT hf]
   rfl
 
 /-- A member of a memory struct copied into storage, as the memory reads
 it. -/
 theorem copyMToSt_find_field {H : HTy} (g : Grown H (fun _ => Unit)) {s f : Name} {p : PrimTy}
-    (a : HRef g.H' (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p))
-    (hl : ¬ f = "length") :
+    (a : HRef g.H' (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p)) :
     (MVal.copyMToSt g.heap (T := .ref (.struct s)) a).find (.field hf .nil) =
       (g.readId (MAddrT.field a.id hf)).map SVal.prim := by
-  rw [MVal.copyMToSt_field g.heap a hf hl]
+  rw [MVal.copyMToSt_field g.heap a hf]
   show _ = Option.map SVal.prim
     ((((MAddrT.field a.id hf).resolve g.H').bind g.heap.readAddr).map (MVal.toMvT g.H' _))
   simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some,
