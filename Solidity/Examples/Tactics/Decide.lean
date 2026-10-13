@@ -134,14 +134,18 @@ A read at or below a deleted location, before any key, reads the default of
 what was there (`find_defaultOf`): `0` for a `uint` that held one. -/
 
 /-- `alice.account.balance = 100; delete alice.account;` — the member below
-the deleted struct reads `0`.  The gap `Calculus/Close.lean` lists: `sol_close` does
-not read below a deleted struct. -/
+the deleted struct reads `0`.  `sol_close` reads it too (W9.8.4: the typed
+delete's member below, `SVal.find_defaultOf_field`). -/
 theorem deleteBelow :
     ⊨ dl!{ [ alice.account.balance = 100; delete alice.account; ]
            alice.account.balance == 0 } := by
   sol_symex
-  fail_if_success sol_close
   sol_decide
+
+example : ⊨ dl!{ [ alice.account.balance = 100; delete alice.account; ]
+    alice.account.balance == 0 } := by
+  sol_symex
+  sol_close
 
 /-- The same through a local, and a member beside the deleted one kept. -/
 theorem deleteBelowAndBeside :
