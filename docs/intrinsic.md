@@ -6590,6 +6590,142 @@ gate on both checkouts this time (master 9.3–9.4 s CPU, here 10.4), so
 the load is part of it; the W9.8.4 measurement (9.2 against 8.2) stands as
 the comparison, and nothing in this change touches `sol_chain`.
 
+### W9.8 review record (2026-10-13, branch `w98-switch`)
+
+Three read-only reviews of W9.8; each item checked against the code first.
+
+**A1–A3, KeY's `int`: confirmed and fixed** (the lead's design).  On the
+branch `Op1.net` and `Op1.toInt` were `PrimTy.int.ofInt? …` (`none`
+outside `int256`) while the ledger is unbounded; a spec's `eqD` over them
+was stronger than solkey's; and the reader widened a free parameter
+(`net(to) = x` read `x` as a `uint`).  Now:
+- **The sort** `Srt.kint` (`Signature.lean`, denoting `Int`), apart from
+  `val .int`: `Op1.net` and `Op1.toInt` at it, total; `Tm.netOf` at it;
+  `Op0.zlit`, `Op2.zbin` (`+ - *`, `BinOp.evalZ`, unbounded), `Op2.zcmp`
+  (to `bool`, `BinOp.cmpZ`).  A logical variable `LTy.kint` (a formula's
+  parameter; no statement reads one: the elaborator refuses it), its term
+  `Tm.pvZ`, its right-hand side `Rhs.zint`.  `Fml.eq`/`eqD` stay over
+  `val p`: an equation on KeY `int`s is `a == b = true` (`NRead.eqK`),
+  printed `a = b`.  The Theory reads it as `prim (int n)` (`Srt.TDen`,
+  `Op2.denote`); every recursion on terms, right-hand sides and local
+  types got its arm (G0 twins and links included).
+- **The reader**: a parameter is a KeY `int` where only KeY `int`
+  arithmetic reads it (`RawFml.kintParams`: every occurrence an operand of
+  `+ - *` in an equation or comparison beside a ledger read), bound by a
+  hidden binder (`Fml.all` ranges over Solidity types); a widening
+  (`NTm.widen`, `resolvePairV`) only of a term that synthesizes `uint`
+  (a local, a read, `msg.value`, a parameter some program reads); a
+  numeral checked at it is `zlit`.  `valTy?`'s `net(…)` case:
+  `{ y := net(a) }` declares a KeY `int` (`RawTerm.isKintIn`).  The
+  `int`-beside-`uint` widening into `int256` is gone.  `toInt(t)` reads.
+- **Specs** (`SurfaceSpec.lean`): `SpecExpr.term` types by `NTm.VSort`;
+  `net(a)` and arithmetic over it are KeY's.  `cspec!{add}`'s pin is
+  unchanged: its ensures is now `net(msg.sender) == net(oldNet,
+  msg.sender) + toInt(msg.value)` unbounded, as solkey's.
+- **The closer** reads it (`CloseS.eval_pvZ`, `eval_zlit`, `eval_zbin`,
+  `eval_zcmp`, `BinOp.evalZ`/`cmpZ`, `holds_bind_kint`, `rhs_zint`):
+  `Tactics/Net`'s `netTransferAny` (`e` any integer) and
+  `netTransferBelowZero` (a negative entry) are new.
+- **Kept**: `sol_decide` leaves the sort outside its fragment
+  (`Op2.toL … => .err`, `inL` false), as it left `net` and `x[a]` on
+  master: its language reads no ledger at all (the review's premise that
+  it does was refuted), so the sort would bring the ledger with it.  The
+  ledger elements' amounts (`UpdElem.net`/`pay`/`netMt`) stay `uint`
+  terms: they are program values; the entries they book are `Int` in
+  `Upd.globT` already.
+- **Pins**: `Tactics/Decide`'s `inLS` pin is master's capture,
+  `{ y := net(a) } y = 0` (`==` compares program expressions, which a KeY
+  `int` is not); `DlNotation`'s ledger example is master's again (no
+  `where int x`).
+
+**B, keys and printing: confirmed and fixed.**  `Tm.keyStr` prints
+`toInt(…)` and the KeY symbols' own keys (`zlit n`, `zbin +`, `zcmp ==`);
+a key by name (`NTm`) knows the sort where the text shows it (`NTm.isK`,
+`keyK`: a numeral at the sort is `zlit n`, a widened term `toInt(…)`).  A
+`uint` 7 and an `int` 7 still share `lit 7` (the reader cannot tell them
+before resolving; neither is a KeY `int`).  `ppTermS` prints a widening
+bare only where an operand beside it shows the sort (`ppKPairS`,
+`kintEvidentS`), else `toInt(…)`; the `int` add with widened operands it
+printed bare no longer exists (the sum is `zbin`).  No pin moved: the only
+pinned widening (`cspec!{add}`'s `msg.value`) stands beside `net(…)`.
+
+**C1: confirmed and fixed.**  The four pins are back in
+`Calculus/TermLib.lean` (section `Printed`), typed: `findOnSave` at
+`P.Denote`, `findOnPushFrame` and `selectOnSaveMemberIn` with their
+sort indices (the latter prints its `K.fill` arguments as constructors),
+`bumped_pin` at `uint` with `hp`.
+
+**C2: confirmed and fixed.**  `lawAt` prints a side condition by
+`sideCondFmt` (`Calculus/RewriteChains.lean`): a closed term as
+`tm{ … }` (`delabTmClosed`, `pp.sol.closedTm`, `Calculus/TermLib.lean`),
+a literal law's `BinOp.evalT a b = some ?_` as `a + b in range`.
+`ChainRewrites`' two pins re-pinned (`tm{ alice.age }.diverges tm{
+alice.age } = true`).  `sol_rw`'s message is unchanged.
+
+**D1: confirmed and fixed.**  The run exhausts a push at a full array on
+master too (`Semantics/Run.lean`, `push`), so after one that returns the
+length is at least `1`: `storagePushReadBack` was valid on master.  The
+W9.8.5 record, "What is left", `docs/testsuite-proofs.md`,
+`docs/solc-alignment.md`, `TestSuite/Report.lean`, `Calculus/Problem.lean`,
+the rule map's `sizeNotNegative` row, `tests/solkey/expected.tsv`,
+`docs/corpus-parity.md` and `scripts/solkey-port.mjs` now say valid, not
+derived; the classification is unchanged.  Deriving it was tried: its two
+leaves need the closer to read a push's length and slot
+(`Calculus/CloseFrame.lean` has no push clause), not one clause.
+
+**D2–D4: confirmed and fixed** (431 → 435; AGENTS.md's push and
+untyped list; `Semantics/State.lean`'s docstring and "What is left /
+W9.7": the terms read the typed state, `State.globE` only bridges
+`sol_decide`).
+
+**D5: confirmed and fixed**: `Close.lean`'s `sol_close_mt` limits (both
+close since W9.8.4) and its push bullet (no `CloseFrame` push clause);
+`Dangling`'s room wording (the box asks none, the diamond keeps it as a
+premise); `DecideRel`'s docstrings (`RelB.env`, `TermOKS`/`MValOKS`,
+`staleSave`, `SymS.pushQ`).
+
+**D6: confirmed and fixed**: rule-map rows for `findOnSaveIn`,
+`findMemberConsIn`, the four `…At`, `find_init_ofRoot`/`find_init_append`,
+`atT_map_root`/`atT_bind` (Lean only), `lookupBy_setBy_int`,
+`roomM`/`Facts.narrowS` (Lean only), `Srt.kint`; `findOnPushFrame`/
+`findOnPopFrame` noted as not rewriting inside an update's right-hand
+sides past the program (both sides push-free, W9.8.5).
+
+**D7: confirmed and fixed** (`Examples/Tactics/Constructors.lean`; the
+`sorry` lines are 19, `rg -c '\bsorry\b'`).
+
+**E: confirmed and fixed**, each by `rg -w` (one occurrence, its
+definition): the thirty-three listed lemmas deleted.  Kept:
+`Tm.litVarsS_eq_litVarsSM`, the link theorem of `Tm.litVarsS`'s
+`implemented_by` (G0); `Tm.beqR_iff` deleted.
+
+**F: confirmed and fixed**: `Upd.replayS_eq_replaySM`, `Upd.view_eq_viewM`
+(`Calculus/DecideScoped.lean`).
+
+**Checked**: `lean_build` of the default targets and `SolkeyTestSuite`
+(added to `defaultTargets` for the build, not committed), clean (320
+jobs); `Report.lean`'s pin 435 derived; `Proves.valid`'s axioms
+`propext`, `Classical.choice`, `Quot.sound` (`Sound.lean`'s pin); `sorry`
+19; `check-orphans` (orphans only the git-ignored `Scratch` modules),
+`check-doc-paths`, `check-testsuite --solkey` at `1b4341a303` (438 = 435
+derived + 1 pending + 1 divergent + 1 excluded, 2 skip).
+
+**Gates** (the W9.6.4 method, the two checkouts interleaved; master
+`02b1025d`; wall s, CPU where it differs):
+
+| Row | Gate | master | `w98-switch` |
+|---|---|---|---|
+| `Tactics/Decide` | 45.0 | 38.1, 38.3 | 32.2, 32.0 |
+| `ProofTree` | 11.7 | 8.7 | 10.2 (one example more, W9.8.5) |
+| `Chains/Storage` | 9.0 | 8.3 | 9.2 (as at W9.8.4) |
+| `ChainRewrites` | 8.2 | 7.3, 7.2 | 8.3, 8.3 (W9.8.4: 8.1) |
+| `Tactics/Spec` | — | 4.6 (0.6 CPU) | 4.0 (0.7 CPU) |
+| `Tactics/Specs` | — | 18.1, 18.1, 18.3 | 11.2 (a first run 20.1 at 11.1 CPU) |
+| `Tactics/SolSpec` | — | 18.2 | 11.0 |
+
+`ChainRewrites` is 0.1 s over its gate, within the run-to-run spread;
+`Chains/Storage` stays where W9.8.4 left it.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
