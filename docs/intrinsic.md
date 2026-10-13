@@ -7021,6 +7021,63 @@ The 437 `sol_prove`s one at a time (`Elab.async false`): 214.3 s here,
 facts that change at each premise).  CPU of the Derived files is 16 % over
 master's 199.0.
 
+### W10 review record (2026-10-13, branches `w10r-decide`, `w10r-misc`)
+
+One read-only review of W10 (four areas, a finder and a skeptic each);
+nothing unsound found.  The merge of `w10-decide` (`7b7c3bb1`) failed to
+build at first: `Calculus/SurfaceSpec.lean`'s `Close.forall_admits_*` read
+the deleted `PrimTy.admits` (dead, gone) and one line of
+`Fml.eval3C_sound` (`eb267464`).  Confirmed and fixed:
+
+- **G0 condition 2 had regressed**: 28 `@[implemented_by]` twins had no
+  link theorem (`Fml.toLS_eq_toLSM` and its kin had gone with W10.4).  Each
+  has one now (`Decide.lean`, `DecideScoped.lean`, `ElimFacts.lean`,
+  `DecideLang.lean`, `MemRead.lean`, `Closer.lean`).
+- **`sol_decide` had no size bound** outside `sol_prove`: `closeScoped`
+  now proves `Seq.checkCore` (moved with `closeSize`, `stackSize` and
+  `checkCore_valid` into `Calculus/DecideComplete.lean`; `Seq.fitsCore`
+  the two bounds alone) and says so past them.  `sol_decide_finish`, a
+  stub that always failed after an unbounded reduction, is gone;
+  `Valid.of_close` too.  `sol_reduce?` is pinned
+  (`Examples/Tactics/Decide.lean`).
+- **Names that were not solkey's**: the memory laws carried names no
+  `.key` file has at `1b4341a303`.  Now, a taclet's `\then` by its name and
+  its `\else` with `Frame`: `Grown.readOnWriteFrame`, `readOnAddMFrame`,
+  `readFromCopyToStorageFrame` (also `readFromCopyToStorageIdentity`'s
+  `\else`, premise: the object older than the copy), `SVal.readFromCopyToStorage`,
+  `MVal.findOnCopy`; `Grown.alloc_fresh` (Lean only, the freshness behind
+  `newFromAdd`).  The chain links likewise (`EvalLaw.readOnWriteFrame[Identity]`,
+  `readOnAddM`, `readOnAddMFrame[Identity]`, `readFromCopyToStorage`,
+  `findOnCopy[In]`).  `findOnSaveDifferent`, `delValueStruct`,
+  `delValueDefault` are no longer cited as taclets; the rule map's KeY
+  columns name the taclet and branch.  `readOnAddMFrame` and
+  `readFromCopyToStorageFrame` are stated over `Grown.readId`
+  (`MVal.toMvT_of_erase`).
+- **Dead code**: `Semantics/Agree.lean` (the W10.1–2 record left it), the
+  untyped part of `Calculus/StateFacts.lean` (70 declarations), five `Obs`
+  lemmas, `Storage.findOnSaveFrame`, seven `sol_decide` declarations,
+  `sol_spec_prep`'s untyped hints (`Close.asValue_eq_ok`,
+  `Close.defaultOf_*`); `Signature.lean` no longer imports
+  `Theory/StateWrites.lean`.
+- **Pins**: `#counterexample` certifies a storage with a struct, `uint[2]`,
+  `uint[]` and a mapping (`Examples/Verify.lean`, `Shapes`): `quoteFold`'s
+  arms are kernel-checked; the push alias under the diamond is pinned open
+  (`Examples/ProofTree.lean`, `pushAlias`).
+- **Docs**: AGENTS.md's untyped list (who reads `State.globE`; `close_rw`
+  unreached), `.claude/rules/{typing,derivations}.md` (the `Theory/**`
+  glob; a write under the diamond closes), `module-map.md`,
+  `kernel-port.md`, `testsuite-proofs.md`, stale docstrings (`Facts.fold2`,
+  `leafFitsOn`, `Dangling`'s three updates a round); the W10.1–2 record
+  moved before W10.3.
+
+**Refuted**: `TxEnv`'s `State.havoc` (the typed one); `PrimTy.ofIntD`
+beside `uintOf` (they reduce differently on purpose); links being
+unreferenced (they are by design).  **Checks**: `lean_build` of the default
+targets clean after each merge; `check-orphans`, `check-doc-paths` clean;
+no new `sorry`; `Tactics/Decide` 21 s alone (gate 45).  `SolkeyTestSuite`
+not rebuilt: it names none of the renamed or removed declarations, and
+`TestSuite/Derived5` checks.
+
 ## W10.5 plan (the typed state, fully)
 
 The user's decision (2026-10-13): `Semantics.State` goes, with its
