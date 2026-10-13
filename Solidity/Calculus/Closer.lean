@@ -326,7 +326,7 @@ def _root_.Solidity.BinOp.totalB : BinOp → Bool
 the connectives, the integer symbols of the ledger. -/
 def _root_.Solidity.Op2.total {a b s : Srt} : Op2 C a b s → Bool
   | .binop op _ => op.totalB
-  | .zbin _ _ | .zcmp _ _ | .mat _ => true
+  | .zbin _ _ | .zcmp _ _ | .mat _ | .copy _ | .copySt _ => true
   | _ => false
 
 theorem _root_.Solidity.Op2.total_isSome {a b s : Srt} (o : Op2 C a b s) (h : o.total = true)
@@ -339,7 +339,7 @@ theorem _root_.Solidity.Op2.total_isSome {a b s : Srt} (o : Op2 C a b s) (h : o.
     cases op <;> simp only [BinOp.totalB, Bool.false_eq_true] at h <;>
       cases p <;> first | exact absurd hp (by decide) | skip <;>
       first | rfl | (cases (x : Bool) <;> rfl)
-  case zbin | zcmp | mat => rfl
+  case zbin | zcmp | mat | copy | copySt => rfl
   all_goals simp only [Op2.total, Bool.false_eq_true] at h
 
 /-- `a ⊖`, folded on a literal. -/

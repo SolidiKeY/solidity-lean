@@ -1,5 +1,5 @@
 import Solidity.Calculus.DecideTyped
-import Solidity.Calculus.Closer
+import Solidity.Calculus.MemRead
 import Solidity.Calculus.Symex
 
 /-!
@@ -23,11 +23,11 @@ variable {C : Contract}
 
 /-- **A leaf the closer closes is valid**: its reduction closed
 (`LFml.close`, `Calculus/Closer.lean`), the kernel evaluating both. -/
-theorem _root_.Solidity.Valid.of_close {φ : Fml C []} (h : φ.reduceS.map LFml.close = some true) :
+theorem _root_.Solidity.Valid.of_close {φ : Fml C []} (h : φ.reduceS.map LFml.closeMem = some true) :
     Valid φ := by
   rw [Option.map_eq_some_iff] at h
   obtain ⟨ψ, hψ, hc⟩ := h
-  exact Valid.of_reduceS hψ (LFml.close_valid hc)
+  exact Valid.of_reduceS hψ (LFml.closeMem_valid hc)
 
 /-- The reduction quoted at the contract `c`, and printed. -/
 def LFml.quoteOpt (c : Expr) : Option (LFml C) → Option (Expr × String)
@@ -82,7 +82,7 @@ code: `none` outside the fragment. -/
 def closeExpr (C φ : Expr) : MetaM (Option Bool) := do
   let φ ← Symex.evaluable φ
   let e := mkApp4 (mkConst ``Option.map [0, 0]) (mkApp (mkConst ``LFml) C) (mkConst ``Bool)
-    (mkApp (mkConst ``LFml.close) C) (mkApp2 (mkConst ``Fml.reduceS) C φ)
+    (mkApp (mkConst ``LFml.closeMem) C) (mkApp2 (mkConst ``Fml.reduceS) C φ)
   unsafe evalExpr (Option Bool) (mkApp (mkConst ``Option [0]) (mkConst ``Bool)) e
 
 /-- The leaf `Valid φ` closed by the closer (`Valid.of_close`), the kernel
@@ -95,7 +95,7 @@ def closeScoped (g : MVarId) (C φ : Expr) : MetaM Bool := do
   | some true =>
     let ob := mkApp (mkConst ``Option [0]) (mkConst ``Bool)
     let lhs := mkApp4 (mkConst ``Option.map [0, 0]) (mkApp (mkConst ``LFml) C) (mkConst ``Bool)
-      (mkApp (mkConst ``LFml.close) C) (mkApp2 (mkConst ``Fml.reduceS) C φ)
+      (mkApp (mkConst ``LFml.closeMem) C) (mkApp2 (mkConst ``Fml.reduceS) C φ)
     let rhs := mkApp2 (mkConst ``Option.some [0]) (mkConst ``Bool) (mkConst ``Bool.true)
     let h ← Derive.kernelLemma (mkApp3 (mkConst ``Eq [1]) ob lhs rhs)
       (mkApp2 (mkConst ``Eq.refl [1]) ob rhs)

@@ -253,14 +253,14 @@ nodes with its updates pushed in (the cheap bound, tested before the
 elimination), within `elimSize` after it, and closed by `LFml.close`. -/
 def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
-    (l.fits closeSize).isSome && (l.elim.fits elimSize).isSome && l.elim.close
+    (l.fits closeSize).isSome && (l.elim.fits elimSize).isSome && l.elim.closeMem
 
 /-- What `checkCore` closes is valid: `Valid.of_reduceS` and
 `LFml.close_valid`. -/
 theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Valid ψ := by
   simp only [checkCore, Option.map_eq_some_iff, Bool.and_eq_true] at h
   obtain ⟨l, hl, -, hc⟩ := h
-  exact Valid.of_reduceS (by rw [Fml.reduceS, hl]; rfl) (LFml.close_valid hc)
+  exact Valid.of_reduceS (by rw [Fml.reduceS, hl]; rfl) (LFml.closeMem_valid hc)
 
 /-- **The scoped closer on a wrapped leaf `ψ`**: none where a modality is
 left; else `checkCore` on the leaf. -/

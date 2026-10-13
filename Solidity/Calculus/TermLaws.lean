@@ -1,6 +1,7 @@
 import Solidity.Calculus.TermLib
 import Solidity.Calculus.SeqRewrite
 import Solidity.Calculus.StateFacts
+import Solidity.Theory.Typed.Mem
 
 /-!
 # The term laws at an update's right-hand sides, scoped
@@ -1510,152 +1511,6 @@ replacement returns the same (`EvalLaw.exact`), on the typed heap
 an update over either modality the update must hold the write the law reads
 past (`Upd.coversEval`), as `Upd.coversRef` for the storage. -/
 
-section Heap
-
-theorem Objs.get_set_same {H : HTy} {R : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) →
-    (i : Nat) → (h : Rs[i]? = some R) → (o : MObj H R) → Objs.get Rs (Objs.set Rs os i h o) i h = o
-  | [], _, _, h, _ => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
-  | R' :: _, _, 0, h, _ => by
-    obtain rfl : R' = R := Option.some.inj (by simpa only [List.getElem?_cons_zero] using h)
-    rfl
-  | _ :: Rs, os, i + 1, h, o => Objs.get_set_same Rs os.2 i _ o
-
-theorem Objs.get_set_ne {H : HTy} {R R₂ : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) →
-    (i j : Nat) → i ≠ j → (h : Rs[i]? = some R) → (h₂ : Rs[j]? = some R₂) → (o : MObj H R) →
-    Objs.get Rs (Objs.set Rs os i h o) j h₂ = Objs.get Rs os j h₂
-  | [], _, _, _, _, h, _, _ => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
-  | _ :: _, _, 0, 0, hij, _, _, _ => absurd rfl hij
-  | _ :: _, _, 0, _ + 1, _, _, _, _ => rfl
-  | _ :: _, _, _ + 1, 0, _, _, _, _ => rfl
-  | _ :: Rs, os, i + 1, j + 1, hij, h, h₂, o =>
-    Objs.get_set_ne Rs os.2 i j (fun e => hij (congrArg (· + 1) e)) _ _ o
-
-theorem Heap.get_set_same {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) (o : MObj H R) :
-    (hp.set r o).get r = o :=
-  Objs.get_set_same H hp r.id r.get? o
-
-theorem Heap.get_set_ne {H : HTy} {R R₂ : RefTy} (hp : Heap H) (r : HRef H R) (r₂ : HRef H R₂)
-    (hne : r.id ≠ r₂.id) (o : MObj H R) : (hp.set r o).get r₂ = hp.get r₂ :=
-  Objs.get_set_ne H hp r.id r₂.id hne r.get? r₂.get? o
-
-/-- Two references of one identity are one reference. -/
-theorem HRef.heq_of_id {H : HTy} {R R₂ : RefTy} (r : HRef H R) (r₂ : HRef H R₂) (e : r.id = r₂.id) :
-    R = R₂ ∧ HEq r r₂ := by
-  rcases r with ⟨i, h⟩
-  rcases r₂ with ⟨j, h₂⟩
-  simp only at e
-  subst e
-  obtain rfl : R = R₂ := Option.some.inj (h.symm.trans h₂)
-  exact ⟨rfl, HEq.rfl⟩
-
-theorem MFields.get_set_same {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} →
-    (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) → (v : MVal H T) →
-    MFields.get fs (MFields.set fs x h v) h = v
-  | [], _, _, h, _ => absurd h (by simp only [Semantics.lookupBy, reduceCtorEq, not_false_eq_true])
-  | (f', T') :: fs, T, x, h, v => by
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [MFields.get, MFields.set, e, dite_true]
-    · simp only [MFields.get, MFields.set, e, dite_false]
-      exact MFields.get_set_same fs x.2 _ v
-
-theorem MFields.get_set_ne {H : HTy} {f g : Name} : (fs : List (Name × Ty)) → {T U : Ty} →
-    (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) →
-    (hg : Semantics.lookupBy g fs = some U) → f ≠ g →
-    (v : MVal H T) → MFields.get fs (MFields.set fs x h v) hg = MFields.get fs x hg
-  | [], _, _, _, h, _, _, _ => absurd h (by simp only [Semantics.lookupBy, reduceCtorEq, not_false_eq_true])
-  | (f', T') :: fs, T, U, x, h, hg, hfg, v => by
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      have eg : ¬ g = f' := fun h' => hfg (e.trans h'.symm)
-      simp only [MFields.get, MFields.set, e, dite_true, eg, dite_false]
-    · by_cases eg : g = f'
-      · simp only [MFields.get, MFields.set, e, dite_false, eg, dite_true]
-      · simp only [MFields.get, MFields.set, e, dite_false, eg]
-        exact MFields.get_set_ne fs x.2 _ _ hfg v
-
-theorem MObj.elems_setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) (o : MObj H R) (i : Nat)
-    (v : MVal H E) : MObj.elems a (MObj.setElem a o i v) = (MObj.elems a o).set i v := by
-  cases a <;> simp only [MObj.setElem_dyn, MObj.elems_dyn, MObj.setElem_fixed, MObj.elems_fixed]
-
-/-- An array object is not a struct. -/
-theorem ArrTy.ne_struct {R : RefTy} {E : Ty} (a : ArrTy R E) (s : Name) : R ≠ .struct s := by
-  cases a <;> exact fun h => RefTy.noConfusion h
-
-/-- Two addresses that never meet: two members, or a member and an element
-(two kinds of object), or two elements of one array at two indices. -/
-def MAddr.Apart {H : HTy} {T U : Ty} : MAddr H T → MAddr H U → Prop
-  | @MAddr.field _ _ f _ _ _, @MAddr.field _ _ g _ _ _ => f ≠ g
-  | .field .., .index .. => True
-  | .index .., .field .. => True
-  | .index r _ i, .index r' _ j => r.id = r'.id → i ≠ j
-
-/-- **A write reads back where it lands** (`readOnWrite`). -/
-theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : MAddr H T}
-    {v : MVal H T} (h : hp.writeAddr ad v = some hp') : hp'.readAddr ad = some v := by
-  cases ad with
-  | field r hf =>
-    simp only [Heap.writeAddr, Option.some.injEq] at h
-    subst h
-    simp only [Heap.readAddr, Heap.field, Heap.setField, Heap.get_set_same, MFields.get_set_same]
-  | index r a i =>
-    simp only [Heap.writeAddr, Heap.setIndex] at h
-    split at h
-    · rename_i hb
-      simp only [Option.some.injEq] at h
-      subst h
-      simp only [Heap.readAddr, Heap.index, hb.1, if_true, Heap.get_set_same, MObj.elems_setElem,
-        List.getElem?_set_self hb.2]
-    · simp only [reduceCtorEq] at h
-
-/-- **A write leaves an address apart from it** (`readWriteDifferent`). -/
-theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
-    {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp') (hab : ad.Apart bd) :
-    hp'.readAddr bd = hp.readAddr bd := by
-  cases ad with
-  | field r hf =>
-    simp only [Heap.writeAddr, Option.some.injEq] at h
-    subst h
-    cases bd with
-    | field r' hg =>
-      simp only [Heap.readAddr, Heap.field, Heap.setField, Option.some.injEq]
-      by_cases e : r.id = r'.id
-      · obtain ⟨hR, hr⟩ := HRef.heq_of_id r r' e
-        cases hR
-        cases hr
-        rw [Heap.get_set_same, MFields.get_set_ne _ _ _ _ hab]
-      · rw [Heap.get_set_ne _ r r' e]
-    | index r' a j =>
-      have e : r.id ≠ r'.id := fun e => ArrTy.ne_struct a _ (HRef.heq_of_id r r' e).1.symm
-      simp only [Heap.readAddr, Heap.index, Heap.setField, Heap.get_set_ne _ r r' e]
-  | index r a i =>
-    simp only [Heap.writeAddr, Heap.setIndex] at h
-    split at h
-    · rename_i hb
-      simp only [Option.some.injEq] at h
-      subst h
-      cases bd with
-      | field r' hg =>
-        have e : r.id ≠ r'.id := fun e => ArrTy.ne_struct a _ (HRef.heq_of_id r r' e).1
-        simp only [Heap.readAddr, Heap.field, Heap.get_set_ne _ r r' e]
-      | index r' a' j =>
-        by_cases e : r.id = r'.id
-        · obtain ⟨hR, hr⟩ := HRef.heq_of_id r r' e
-          cases hR
-          cases hr
-          have hij : i ≠ j := hab e
-          cases a <;> cases a' <;>
-          · simp only [Heap.readAddr, Heap.index, Heap.get_set_same, MObj.elems_setElem]
-            by_cases hj : 0 ≤ j
-            · have hn : i.toNat ≠ j.toNat := by omega
-              simp only [hj, if_true, List.getElem?_set_ne hn]
-            · simp only [hj, if_false]
-        · simp only [Heap.readAddr, Heap.index, Heap.get_set_ne _ r r' e]
-    · simp only [reduceCtorEq] at h
-
-end Heap
 
 section MemEval
 
@@ -1888,11 +1743,6 @@ theorem Tm.onSpine_grows {σ : State C Γ} {t w : Tm C Γ .mem} (h : t.onSpine w
     exact List.prefix_refl _
   · exact Tm.onSpineAny_grows hw t h μ ht
 
-/-- The object an address is in. -/
-def MAddrT.id {T : Ty} : MAddrT T → Nat
-  | .field id _ => id
-  | .index id _ _ => id
-
 /-- An identity, or the object of an address, below `n`; other sorts carry
 nothing. -/
 def Srt.Bnd {H : HTy} (n : Nat) : (u : Srt) → Option (u.Den C H) → Prop
@@ -1912,9 +1762,6 @@ def Tm.boundedIn : {u : Srt} → Tm C Γ u → Tm C Γ .mem → Bool
   | _, .app1 (.mfield _) i, M => i.boundedIn M
   | _, .app2 (.mat _) i _, M => i.boundedIn M
   | _, _, _ => false
-
-theorem HRef.id_lt {H : HTy} {R : RefTy} (r : HRef H R) : r.id < H.length :=
-  (List.getElem?_eq_some_iff.1 r.get?).1
 
 theorem Tm.boundedIn_eval {σ : State C Γ} {M : Tm C Γ .mem} {μ : Grown σ.H (fun _ => Unit)}
     (hM : M.eval σ = some μ) {u : Srt} (t : Tm C Γ u) (h : t.boundedIn M = true) :
@@ -1971,56 +1818,6 @@ theorem Tm.boundedIn_eval {σ : State C Γ} {M : Tm C Γ .mem} {μ : Grown σ.H 
       exact ihx h id hid
     | _ => cases u <;> trivial
   | _ => cases u <;> trivial
-
-/-- The typed read of an address on the erasure. -/
-theorem Heap.readAddr_erase {H : HTy} {σ : Semantics.State} {hp : Heap H}
-    (hh : σ.heap = hp.erase) {T : Ty} (a : MAddr H T) :
-    Solidity.readAddr σ a.erase = toRes (MVal.erase T) (hp.readAddr a) := by
-  cases a with
-  | field r h => exact Heap.readField_erase hh r h
-  | index r a i => exact Heap.readIndex_erase hh r a i
-
-theorem toRes_inj {α α' β : Type} {f : α → β} {g : α' → β} {x : Option α} {y : Option α'}
-    (h : toRes f x = toRes g y) : x.map f = y.map g := by
-  cases x <;> cases y <;> simp_all only [toRes, Option.map_none, Option.map_some,
-    reduceCtorEq, Except.ok.injEq]
-
-/-- An allocation keeps every object below it: the slot at an address
-there reads the same, erased. -/
-theorem Heap.readAddr_allocDefault {H : HTy} (hp : Heap H) (R : RefTy)
-    (hR : (Ty.ref R).mapFree = true) {T : Ty} (ra : MAddr H T) :
-    ((hp.allocDefault R hR).heap.readAddr (ra.wk (hp.allocDefault R hR).ext)).map (MVal.erase T) =
-      (hp.readAddr ra).map (MVal.erase T) := by
-  let τ₀ : Semantics.State := Heap.into { storage := [] } hp
-  have ha := Heap.allocDefault_erase (σ := τ₀) (hp := hp) rfl rfl R hR
-  have hx := SemanticsProperties.allocDefault_heapExt ha
-  have hid : ra.erase.id < τ₀.nextId := by
-    cases ra with
-    | field r _ => exact HRef.id_lt r
-    | index r _ _ => exact HRef.id_lt r
-  have h₀ := Heap.readAddr_erase (σ := τ₀) (hp := hp) rfl ra
-  have h₁ := Heap.readAddr_erase (σ := Heap.into τ₀ (hp.allocDefault R hR).heap) rfl
-    (ra.wk (hp.allocDefault R hR).ext)
-  rw [MAddr.erase_wk, readAddr_heapExt hx hid, h₀] at h₁
-  exact (toRes_inj h₁).symm
-
-/-- The address in a grown typing: the same object, where it is below the
-smaller one. -/
-theorem MAddrT.resolve_wk {H H' : HTy} (e : H <+: H') {T : Ty} (a : MAddrT T)
-    (hid : a.id < H.length) : a.resolve H' = (a.resolve H).map (MAddr.wk e) := by
-  obtain ⟨t, rfl⟩ := e
-  have hg : ∀ (R : RefTy) (id : Nat), id < H.length →
-      HRef.ofId? (H ++ t) R id = (HRef.ofId? H R id).map (HRef.wk ⟨t, rfl⟩) := by
-    intro R id hl
-    simp only [HRef.ofId?, List.getElem?_append_left hl]
-    split <;> rfl
-  cases a with
-  | field id h =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, hg _ id hid, Option.map_map]
-    rfl
-  | index id a i =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, hg _ id hid, Option.map_map]
-    rfl
 
 /-- `addM(m, R)` returns: `m` does, and the allocation is its default. -/
 theorem Tm.addM_some {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true}
@@ -2090,29 +1887,6 @@ theorem Tm.readAddDifferentIdentity_exact {σ : State C Γ} {m : Tm C Γ .mem} {
       Option.some.injEq, Option.bind_some, Option.bind_none] at he ⊢
     exact Semantics.MVal.ref.inj he
 
-/-- The untyped address. -/
-def MAddrT.eraseT {T : Ty} : MAddrT T → Semantics.Addr
-  | .field (f := f) id _ => .memoryField id f
-  | .index id _ i => .memoryIndex id i
-
-theorem MAddrT.erase_resolve {H : HTy} {T : Ty} {a : MAddrT T} {ra : MAddr H T}
-    (h : a.resolve H = some ra) : ra.erase = a.eraseT := by
-  cases a with
-  | field id hf =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at h
-    obtain ⟨r, hr, rfl⟩ := h
-    simp only [HRef.ofId?] at hr
-    split at hr
-    · cases hr; rfl
-    · cases hr
-  | index id a i =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at h
-    obtain ⟨r, hr, rfl⟩ := h
-    simp only [HRef.ofId?] at hr
-    split at hr
-    · cases hr; rfl
-    · cases hr
-
 /-- `M` is `addM(m, R)`. -/
 def Tm.isAddM (M m : Tm C Γ .mem) (R : RefTy) : Bool :=
   match M with
@@ -2178,17 +1952,6 @@ def Srt.FreshRead {H : HTy} (H₁ : HTy) (τ : Semantics.State) (root : Nat) (R 
         readAddr τ ad.eraseT = τ.readPath root p) ∧
       (∀ T', (Ty.ref R).memberTy p = some T' → ∃ ad, x = some ad)
   | _, _ => True
-
-/-- The erasure the fresh reads are read on: the heap after the allocation. -/
-abbrev Grown.allocSt {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
-    (hR : (Ty.ref R).mapFree = true) : Semantics.State :=
-  Heap.into (Heap.into { storage := [] } μ₀.heap) (μ₀.heap.allocDefault R hR).heap
-
-theorem Grown.allocSt_copy {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
-    (hR : (Ty.ref R).mapFree = true) :
-    Semantics.copyStToM (Heap.into { storage := [] } μ₀.heap) (Semantics.defaultForTy (.ref R)) =
-      .ok (μ₀.allocSt R hR, .ref (μ₀.heap.allocDefault R hR).val.id) :=
-  Close.allocDefault_copy (Heap.allocDefault_erase rfl rfl R hR)
 
 theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {μ₀ : Grown σ.H (fun _ => Unit)} (hm : m.eval σ = some μ₀)
@@ -2347,18 +2110,6 @@ storage struct into memory (`SVal.copyStToM_erase`, `Close.copyStToM_member`),
 and of a memory struct into storage (`MVal.copyMem_erase`,
 `Close.copyMem_member`), its write laid over the old value
 (`SVal.overlay_erase`, `Close.find_overlay_fields`). -/
-
-/-- A read one member below a root's path, untyped. -/
-theorem Semantics.State.findStorage_snoc (σ : Semantics.State) (root : Name)
-    (segs : List Semantics.Seg) (sg : Semantics.Seg) :
-    σ.findStorage root (segs ++ [sg]) = σ.findStorage root segs >>= fun w => w.find [sg] := by
-  unfold Semantics.State.findStorage
-  cases lookupBy root σ.storage with
-  | none => rfl
-  | some v => exact SemanticsProperties.SVal.find_append v segs [sg]
-
-theorem HRef.ofId?_self {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.id = some r := by
-  simp only [HRef.ofId?, r.get?, dite_true]
 
 /-- A member read out of a copy of a storage struct, on the erasure: what
 the storage holds at the member. -/
