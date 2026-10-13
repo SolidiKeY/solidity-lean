@@ -228,7 +228,7 @@ condition false assumed, and that it is false. -/
 theorem loopFalse_derived : Proves C .all [] .nil (loopFalse (C := C)) := by
   refine .check (LeanTaclet.toStep .loopExit) (.closeTrue rfl)
     (.closeHolds (fun _ => ⟨fun h => Option.noConfusion h, fun h => Option.noConfusion h,
-      Theory.StValue.Equiv.refl _⟩))
+      rfl⟩))
 
 /-- **Off the fragment solkey's rules fall short**: the calculus derives
 `[ while (false) { } ] true`, solkey's rules do not (today's

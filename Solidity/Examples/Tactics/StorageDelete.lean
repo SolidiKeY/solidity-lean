@@ -263,9 +263,10 @@ end Solidity.Examples.Tactics.StorageDelete
 The same reads, closed as mini-solkey closes them: the calculus steps
 (`sol_derive`), the updates merged into one parallel update (`Proves.merge`
 for the locals, `Proves.mergeStorage` for a storage write), and the read the
-last element binds rewritten by the Theory's own lemmas — `find_delAt_same`,
-`find_copyTo_same`, `find_delAt_frame` of `Theory/Storage.lean` and
-`Theory/Copy.lean`, named directly (`sol_rw`, `Calculus/RewriteSyntax.lean`).
+last element binds rewritten by the typed Theory's own laws —
+`Obs.findOnDelAt`, `Obs.findOnSave`, `Obs.findOnDelAtFrame` of
+`Theory/Typed/Obs.lean`, named directly (`sol_rw`,
+`Calculus/RewriteSyntax.lean`).
 The read sits in an update's right-hand side, `{ x := find(…) }`, which the
 rewrite reaches because its result is a literal and the update is under the
 box (`Proves.updRw`).  Then the update is applied to the goal and dropped
@@ -288,11 +289,9 @@ local instance : InContract := ⟨StandardExample⟩
 
 open scoped Scoped
 
-open Theory Theory.StValue in
 /-- `alice.account.balance = 5; delete alice.account.balance;` read two
-members down: `find_delAt_same` reads the delete, `find_copyTo_same` and
-`copyVal` the write under it, and `delValueDefault`/`primDefault` reset the
-word, in one step, since `delValue (findSt …)` alone is no term. -/
+members down: a word deleted reads its default (`Obs.findOnDelAt`),
+whatever was written there. -/
 theorem deleteReadDeep_theory :
     ⊢ dl!{ [ alice.account.balance = 5; delete alice.account.balance;
       uint x = alice.account.balance; ] x == 0 } := by
@@ -308,7 +307,7 @@ theorem deleteReadDeep_theory :
   refine Proves.merge rfl ?_
   -- dl{ { se1 := 5 ‖ … ‖ x := find(delAt(save(storage, alice.account.balance, 5),
   --       alice.account.balance), alice.account.balance) } ⟹ x = 0 }
-  sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
+  sol_rw [Obs.findOnDelAt]
   -- dl{ { se1 := 5 ‖ … ‖ x := 0 } ⟹ x = 0 }
   sol_apply_upd
   -- dl{ ⟹ 0 = 0 }
@@ -366,10 +365,9 @@ example :
   sol_leaf
   sol_close
 
-open Theory Theory.StValue in
 /-- `bob.age = 7; delete alice;` read at `bob.age`: the delete is off the
-path (`find_delAt_frame`, its `diverges` decided on the two literal paths),
-and the write is read back (`find_copyTo_same`, `copyVal`). -/
+location (`Obs.findOnDelAtFrame`, its side condition decided on the two
+literal locations), and the write is read back (`Obs.findOnSave`). -/
 theorem deleteFrame_theory :
     ⊢ dl!{ [ bob.age = 7; delete alice; uint x = bob.age; ] x == 7 } := by
   sol_derive
@@ -377,12 +375,11 @@ theorem deleteFrame_theory :
   --     { x := find(storage, bob.age) } ⟹ x = 7 }
   refine Proves.mergeStorage ?_
   refine Proves.mergeStorage ?_
-  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
+  sol_rw [Obs.findOnDelAtFrame, Obs.findOnSave]
   -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹ x = 7 }
   sol_apply_upd
   exact Proves.eqDClose
 
-open Theory Theory.StValue in
 /-- The same read, rewritten while `x = x + 1;` is still to run: the merge
 and the rewrite are rules of the calculus, not steps after it. -/
 theorem deleteFrameMid_theory :
@@ -393,7 +390,7 @@ theorem deleteFrameMid_theory :
   apply update .storageFieldReadFind
   refine Proves.mergeStorage ?_
   refine Proves.mergeStorage ?_
-  sol_rw [find_delAt_frame, find_copyTo_same, copyVal]
+  sol_rw [Obs.findOnDelAtFrame, Obs.findOnSave]
   -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹
   --     [ x = x + 1; ] x = 8 }
   sol_derive

@@ -585,6 +585,11 @@ theorem uint_eq_iff (a b : PrimTy.uint.Denote) : a = b ↔ a.val = b.val :=
   ⟨fun e => e ▸ rfl, Subtype.ext⟩
 theorem int_eq_iff (a b : PrimTy.int.Denote) : a = b ↔ a.val = b.val :=
   ⟨fun e => e ▸ rfl, Subtype.ext⟩
+/-- A `bool` word's equation at `Bool`, where the `Bool` lemmas
+(`decide_eq_true_eq`, …) read it: an equation of denotations is at
+`PrimTy.bool.Denote`, which they do not see through. -/
+theorem bool_eq_iff (a b : PrimTy.bool.Denote) : @Eq PrimTy.bool.Denote a b ↔ @Eq Bool a b :=
+  Iff.rfl
 /-- A stored word against a value: their integers (`Shape (.prim p)` is the
 value's type, which `uint_eq_iff` does not see through). -/
 theorem view_eq_uint (x : SVal (.prim .uint)) (b : PrimTy.uint.Denote) :
@@ -895,7 +900,7 @@ attribute [close_rw_s]
   Semantics.uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
   Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.root_field CloseS.root_index CloseS.atT_bind
   CloseS.getD_ite Option.getD_some CloseS.erase_uint' CloseS.erase_int'
-  CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
+  CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.bool_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
 
 attribute [close_rw_s_last] Modality.wp_box

@@ -183,7 +183,7 @@ theorem headlineValueChain :
 /-- `alice.account.balance = 10;` reads back `10`: the chain is a proof, its last scoped line
 valid: it binds three hidden locals over `10 ≐ 10` (`Fml.Via.valid`). -/
 theorem headlineValue : ⊨ dl!{ [ alice.account.balance = 10; ] alice.account.balance ≐ 10 } :=
-  Fml.Via.valid headlineValueChain fun _ => Theory.StValue.Equiv.refl _
+  Fml.Via.valid headlineValueChain fun _ => rfl
 
 /-- `alice.account.balance = 10;` against `==`: the law rewrites the
 equation, not the `defined(…)` beside it. -/
@@ -222,7 +222,7 @@ theorem ageWriteReadValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] x �
           x ≐ 42 }
     ~[findOnSave]~> dl![.box]{ { storage := save(storage, alice.age, 42) ‖ x := 42 } x ≐ 42 }
     ~[applyOnRigidBox]~> dl!{ 42 ≐ 42 } by sol_chain)
-    fun _ => Theory.StValue.Equiv.refl _
+    fun _ => rfl
 
 /-- `alice.age = 42; uint x = alice.age;` reads back `42`, in
 `ageWriteReadKeY`'s order: merge, apply, then the law. -/
@@ -234,7 +234,7 @@ theorem ageWriteReadKeYValue : ⊨ dl!{ [ alice.age = 42; uint x = alice.age; ] 
           x ≐ 42 }
     ~[applyOnRigidBox]~> dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 }
     ~[findOnSave]~> dl!{ 42 ≐ 42 } by sol_chain)
-    fun _ => Theory.StValue.Equiv.refl _
+    fun _ => rfl
 
 /-- The read of the write, one member at a time instead of `findOnSave`: solkey's
 `findMemberCons` reads `alice.age` from its head, `find(select(…, alice), age)`
@@ -266,7 +266,7 @@ theorem readBackValue :
         dl![.box]{ { se1 := 10 ‖ sp1 := alice.account ‖ storage := save(storage, alice.account.balance, 10)
           ‖ sp2 := alice.account ‖ x := 10 } x ≐ 10 }
     ~[applyOnRigidBox]~> dl!{ 10 ≐ 10 } by sol_chain)
-    fun _ _ _ _ => Theory.StValue.Equiv.refl _
+    fun _ _ _ _ => rfl
 
 /-! ## 3′ · Under any modality
 

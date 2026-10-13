@@ -53,7 +53,7 @@ def decideProof? (prop : Expr) : MetaM (Option Expr) := do
   if prop.hasMVar then return none
   try
     let d ← mkDecide prop
-    if (← withAtLeastTransparency .default <| whnf d).isConstOf ``true then
+    if (← withTransparency .all <| whnf d).isConstOf ``true then
       return some (← mkDecideProof prop)
     return none
   catch _ => return none
@@ -232,6 +232,7 @@ partial def tmSubterms (t : Expr) (acc : Array Expr := #[]) : MetaM (Array Expr)
 def reifyWordS (C Γ p e : Expr) : MetaM (Option Expr) := do
   let lit (v : Expr) : MetaM Expr := mkAppOptM ``Tms.Term.lit #[C, Γ, p, v]
   let some x := (match_expr e with | Option.some _ x => some x | _ => none) | return none
+  if x.isAppOf ``Obs.word then return none
   let x ← whnf x
   let p' ← whnf p
   if p'.isConstOf ``PrimTy.bool then
@@ -265,7 +266,7 @@ partial def reifyS (C Γ : Expr) (table : Array (Expr × Expr)) (srt e : Expr) :
   match_expr e with
   | Option.some _ w =>
     match_expr w with
-    | Obs.word _ _ s _ q =>
+    | Obs.word _ s _ q =>
       let s ← reifyS C Γ table (mkConst ``Srt.st) s
       let T ← mkFreshExprMVar (mkConst ``Ty)
       let q ← reifyS C Γ table (mkApp (mkConst ``Srt.path) T) q
@@ -273,7 +274,7 @@ partial def reifyS (C Γ : Expr) (table : Array (Expr × Expr)) (srt e : Expr) :
     | _ => throwError "not a term: {e}"
   | lenW n =>
     match_expr n with
-    | Obs.len _ _ s _ q =>
+    | Obs.len _ s _ q =>
       let s ← reifyS C Γ table (mkConst ``Srt.st) s
       let T ← mkFreshExprMVar (mkConst ``Ty)
       let q ← reifyS C Γ table (mkApp (mkConst ``Srt.path) T) q
@@ -320,7 +321,7 @@ def theoryRewriteS (thms : SimpTheorems) (C u : Expr) : MetaM (Option (Expr × E
     for n in theoryUnfoldLemmasS do unfold ← unfold.addConst n
     let ctx ← Simp.mkContext (simpTheorems := #[unfold])
     let (r₁, _) ← simp lhs ctx
-    let (r₂, _) ← simp r₁.expr (← Simp.mkContext (simpTheorems := #[thms]))
+    let (r₂, _) ← simp r₁.expr (← Simp.mkContext (simpTheorems := #[thms, unfold]))
       (discharge? := dischargeTheory)
     if r₂.expr == r₁.expr then return none
     let mut table : Array (Expr × Expr) := #[]
