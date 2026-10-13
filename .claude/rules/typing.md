@@ -11,7 +11,7 @@ cannot be written, so no theorem of the calculus carries a typing hypothesis.
 The typed state is what a well-typed state was: its storage holds the
 contract's roots at their types, its heap objects at the types its typing
 lists.  What is left here is about what the types do not say, read on the
-typed state only (W10.5.2: no `Typing/` module imports an erasure module).
+typed state only.
 
 Each run invariant is a hereditary predicate on typed values
 (`Typing/Values.lean`: `SVal.All P` for node conditions `P : Hered`):
@@ -31,17 +31,13 @@ for `Ty.okDeep` roots, under `SVal.Fits`; implied under `FixedFits`,
 `reachable_fits`, so `reachable_iff_fits` has no premise on the storage;
 decisions 77 and 97 of `docs/intrinsic.md`), by a builder that reaches past
 an array's end through aliases `slot d` (`Build.fill`, `fill_ok`).
-`Typing/CanonTest.lean` has the tests `wt(storage)` makes, as folds
-(`Storage.wtB`).
 
-The run is `Semantics/Run.lean`'s, over typed states; `Semantics.lean` keeps
-the untyped state's operations, which the typed ones erase to
-(`Semantics/StorageErase.lean`, `HeapErase.lean`, `Semantics/Erase.lean`,
-`TypedErase.lean`) only for the `wt(storage)` bridge
-(`Calculus/WtBridge.lean`): the Typing chain reads the typed state (W10.5.2),
-the EVM too (W10.5.3), and the memory laws the typed heap (W10.5.4); the
-typed core (`State`, `Heap`, `Run`, `Signature.lean`) imports none of them
-(W10.5.1).
+The run is `Semantics/Run.lean`'s, over typed states; there is no untyped
+state (W10.5.6).  `Typing/CanonTest.lean` proves what the tests of
+`wt(storage)` decide; the tests themselves are folds low in the stack
+(`Semantics/StorageWt.lean`), since the term `wt(storage)` runs them
+(`Storage.wtT`, `Signature.lean`) and the kernel evaluates them in
+certificates.
 
 Changes to the run that follow solc over KeY are recorded in
 `docs/solc-alignment.md`.

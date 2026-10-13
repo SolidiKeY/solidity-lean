@@ -21,9 +21,7 @@ namespace Solidity
 
 variable {C : Contract}
 
-/-! ## Typed results
-
-Moved from `Semantics/TypedErase.lean` at W10.5.1: nothing here is erased. -/
+/-! ## Typed results -/
 
 /-- A typed result that does not panic (an expression's: it reverts or
 diverges only). -/

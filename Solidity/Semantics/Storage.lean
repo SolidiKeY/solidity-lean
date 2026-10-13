@@ -734,7 +734,7 @@ an indexed family, whose casts cost the kernel a factor of 40 here
 (`docs/intrinsic.md`, "M4 lane", and Gate G0, condition 2).  The compiler
 cannot compile a recursor, so each has a `match` twin (`SVal.findM`, …) as
 its `implemented_by`, and a theorem that they are equal
-(`Semantics/StorageErase.lean`). -/
+(`SVal.find_eq_findM`, …). -/
 
 /-- What `save` keeps live is within the bound. -/
 theorem SVal.take_lt_bound {α : Type} {n : Nat} (l : List α) (h : n < 2 ^ 256) :

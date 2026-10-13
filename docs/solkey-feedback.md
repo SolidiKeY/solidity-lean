@@ -192,7 +192,7 @@ None is wrong on the corpus; each matters for a future taclet.
   while `PathSVSort` accepts its flags in any order. Cosmetic.
 - **`commuteSimpleUpdates`** (commented out in `updateRules.key`) is false as
   state equality on an assoc-list storage; it holds only pointwise. Keep it dead
-  (`Semantics/Properties.lean`).
+  (the untyped state's laws, deleted at W10.5.6).
 - **`requireSimple` states a branch in another form than its siblings.**
   `ifElseSplit` (`\find( ==> …)`) adds the condition to the antecedent on
   both goals (`\add(se = TRUE ==>)`, `\add(se = FALSE ==>)`); `assertSimple`

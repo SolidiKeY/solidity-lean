@@ -277,7 +277,7 @@ receiver kind, Lean does not.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `assertConditionCapture` | same | same | |
-| `assertSimple` | same | same | KeY's two branches: "Holds" `se = true ⟹ ⟨[ ]⟩` and "Violated" `se = true` (`Premise.check`, `Proves.check`); a failed `assert` panics (`Halt.panic`), which neither modality accepts (`Modality.afterRunTR`) |
+| `assertSimple` | same | same | KeY's two branches: "Holds" `se = true ⟹ ⟨[ ]⟩` and "Violated" `se = true` (`Premise.check`, `Proves.check`); a failed `assert` panics (`THalt.panic`), which neither modality accepts (`Modality.afterRunTR`) |
 | `requireConditionCapture` | same | same | the assert capture over `Stmt.require` |
 | `requireSimple` | same | find same | reshaped: `require(se); ⇝ se = true ⟹ ⟨[ ]⟩ ; se = false ⟹ ⟨[ revert(); ]⟩`. KeY writes each goal as a disjunction, "Holds" `se = FALSE \| ⟨[ ]⟩ post` and "Reverts" `se = TRUE \| ⟨[ revert(); ]⟩ post`; for a `bool` each is the implication Lean's `.split` premise states with the condition in the context: KeY's two goals under either modality (`Proves.split`) |
 | `ifElseUnfold` | same | same | also claims `ifUnfold` |
@@ -686,7 +686,7 @@ sides (`FmlRw.lawUpdS`, `Calculus/RewriteLaws.lean`).
 
 | Law | KeY taclet | Notes |
 | --- | --- | --- |
-| `add_literals` | `add_literals` | `a + b ⇝ a + b` folded, where the sum is in `uint` range (`checkArith`; out of range the sum reverts and is its own normal form) |
+| `add_literals` | `add_literals` | `a + b ⇝ a + b` folded, where the sum is in `uint` range (`PrimTy.ofInt?`; out of range the sum reverts and is its own normal form) |
 | `sub_literals` | `sub_literals` | `a - b ⇝ a - b` folded, in `uint` range |
 | `leq_literals` | `leq_literals` | `a <= b ⇝ true`/`false` |
 | `less_literals` | `less_literals` | `a < b ⇝ true`/`false` |
@@ -720,7 +720,7 @@ Where the theory or a taclet differs from KeY, each stated once at its row:
 - **A push is one term.** `STerm.push s p v` *is* `save(save(s, p[p.length], v),
   p.length, p.length + 1)`, where KeY writes two parallel `save`s: a program
   can perform neither write alone. The slot it lands on is recycled or a
-  fresh default (`Semantics.pushAt`); a mapping nested in a popped element
+  fresh default (`Storage.push`, `pushSlot`); a mapping nested in a popped element
   survives into the next push either way (`storagePush*`/`storagePop*` rows).
 - **Deletes are computed from the type** (`TVal.delR`): a mapping's entries
   and an array's slots past its live end are kept, with no premise on the

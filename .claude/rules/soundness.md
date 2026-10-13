@@ -33,10 +33,9 @@ way: no `sorry`, no new hypothesis.
   `Update.lean`, computed on the typed state as a global part and the
   locals' values (`Upd.applyV`), so state an equation between what it
   computes and the statement's typed step (`*_agrees`, `TRes.Agrees` of
-  `TRun.x` against `U.applyV σ`, the step's state read as
-  `(o.st.globE, o.st.loc)`, the operands through
-  `Calculus/LowerRun.lean`), and close with `Premise.sound_update_typed`.  A new storage or heap operation needs its
-  erasure lemma first (`Semantics/TypedErase.lean`).
+  `TRun.x` against `U.applyV σ`, the step's state read as the typed global
+  part and the locals' values, the operands through
+  `Calculus/LowerRun.lean`), and close with `Premise.sound_update_typed`.
 - **Unfold premise** (`Calculus/SoundCapture.lean`, `SoundLocal`, …): the
   fresh local is pushed and popped by the premise's frame; the runs compare
   up to the halt (`TRes.Sim`, `sound_unfoldSim`), the schema variables read

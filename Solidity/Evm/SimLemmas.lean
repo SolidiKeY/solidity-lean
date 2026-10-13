@@ -199,10 +199,10 @@ private def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : R
   | .or, .bool true => pure (.bool true)
   | _, _ => do checkArith (op.retTy (.prim p)) (← applyBinOp op lv (← b))
 
-/-- An `Option` as a run's result: `none` is a revert, the one way a typed
-operation fails.  A typed operation's agreement with its untyped namesake
-reads `untyped (erase x) = toRes erase (typed x)`, so the untyped one is
-never `undef` there. -/
+/-- An `Option` as a word operation's result: `none` is a revert.  A typed
+operator's agreement with its word namesake reads
+`word (erase x) = toRes erase (typed x)`, so the word one is never `undef`
+there. -/
 private def toRes {α β : Type} (f : α → β) : Option α → Res β
   | some a => .ok (f a)
   | none => .error .revert

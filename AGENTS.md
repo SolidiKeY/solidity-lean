@@ -37,16 +37,14 @@ rest is typed too (W10): `sol_decide`'s language is the typed signature
 with atoms and guards (`Calculus/DecideLang.lean`), the Theory's values
 are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
 `Tm.denote`, `.eq` is `=`), and `Tools/Counterexample.lean`'s candidates
-are typed states. Still untyped: `Semantics.State`, the typed state erased
-(`State.globE`), and the erasure modules
-(`Semantics/{StorageErase,HeapErase,Erase,TypedErase}.lean`), which only
-the `wt(storage)` bridge (`Calculus/WtBridge.lean`) reads (W10.5.6 deletes
-them; the run invariants, `Typing/`, read the typed state since W10.5.2,
-the EVM simulation, `Evm/`, since W10.5.3, the memory laws the typed heap
-since W10.5.4, the tools, `Tools/`, since W10.5.5: `#run`, `#difftest`
-and the printers), and which the typed core
-(`Semantics/{State,Heap,Run}.lean`, `Signature.lean`) does not import
-(W10.5.1).
+are typed states.  So is every other state read: the run invariants
+(`Typing/`), the EVM simulation (`Evm/`), the memory laws, the tools and
+`wt(storage)` (`Semantics/StorageWt.lean`) read the typed state; there is
+no untyped one (W10.5.6). What stays untyped is not state: the ABI values
+(`Semantics.lean`: `Value`, `ExtKey`, `ExtResult`, a typed value as a word
+by `PrimTy.erase`), a path's segments (`Seg`, `Path.erase`,
+`Theory/Segs.lean`, the side conditions' path syntax), the ledger
+(`List (Int × Int)`, KeY's `int`) and the EVM's word store.
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s

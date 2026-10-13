@@ -471,20 +471,15 @@ one.
   inputs), never weaker; its `require(x == 5)` keeps it derivable.  No `TestSuite`
   function returns a value but the skipped `tryCalleeGet`.
 - **`wt` is one atomic term**, `Op1.wt vs` applied to `storage`, stated as
-  `defined(wt(storage))` (`Fml.wt`).  The interpreter reads it as a test,
-  `storageWtB` (`Semantics/WellFormed.lean`): every root there, in order,
-  each `SVal.canon` and `SVal.tight` at its type, clause for clause as
-  `canonB`/`tightB`, the default compared by `SVal.isDfltB` since the
-  kernel does not reduce the well-founded `defaultForTy`; and every word in
-  its type's range, every mapping key in its key type's (`SVal.wordsB`).
-  So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
+  `defined(wt(storage))` (`Fml.wt`).  The interpreter reads it as a test
+  on the typed storage, `Storage.wtB` (`Semantics/StorageWt.lean`, a fold
+  the kernel evaluates): every root canonical and tight, every mapping key
+  in its key type's range (a word is in range by its type).  So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
   `Ty.okDeep`) a storage passes the shape test exactly when a scoped
   program reaches it (by the typed run, `Reachable`); `wt_iff_reachable`: it passes `wt` exactly when it is
-  reachable.  Since W10.5.2 both are over the typed storage (`Storage.wtB`,
-  `Typing/CanonTest.lean`, which the term's untyped test is on the erasure,
-  `Calculus/WtBridge.lean`): a word is in range by its type, a mapping key
-  by `SVal.Fits`, and every reachable storage's keys are in range
-  (`reachable_bnd`).  Why an
+  reachable, a mapping key in range by `SVal.Fits`, and every reachable
+  storage's keys are in range (`reachable_bnd`).  (Until W10.5.6 the term
+  ran an untyped test on the storage's erasure, bridged to the typed one.)  Why an
   `Op1` and not a formula: a new `Fml` constructor touches every formula
   traversal, and an expanded layout (`∀` per root and member) gives every
   leaf quantifiers the closer has to instantiate.  The `Op1` cost one case
@@ -591,8 +586,8 @@ not.
   diamond such as `total = total + 0` from `total = -1` reverted, which made
   its obligation false where solkey's holds.
 - **One copy each.**  `nodupKeysB` and `Ty.numericKey` (now `Ty.isKey`) moved to `AST.lean`,
-  below both the typing modules and `Semantics/WellFormed.lean`, which
-  had copies; `Frontend/Import.lean`'s `paramTy?` is the one reading of a
+  below both the typing modules and the untyped storage test (gone at
+  W10.5.6), which had copies; `Frontend/Import.lean`'s `paramTy?` is the one reading of a
   parameter type, for `paramCtx` and for `solc_problems`, which now warns
   and skips a function whose parameter it cannot bind (listed "unstated")
   instead of failing the command.
