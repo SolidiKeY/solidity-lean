@@ -14,8 +14,8 @@ heap objects at the types its typing lists.
 What a run keeps beyond its types is a `RunInv`: a part on the storage and a
 part on each local at its type, kept as the heap grows (`RunInv.loc_wk`).
 `Typing/TypedRunInv.lean` carries one along the typed run;
-`Typing/Reachability.lean`, `Typing/Constructibility.lean` and
-`Typing/Fits.lean` instantiate it.
+`heredInv` (`Typing/HeredRun.lean`) instantiates it, at
+`Typing/Reachability.lean`, `Typing/Tight.lean` and `Typing/Fits.lean`.
 -/
 
 namespace Solidity

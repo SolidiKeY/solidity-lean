@@ -27,39 +27,14 @@ typed path (`Path.Keyed`).
 
 namespace Solidity
 
-open Semantics (structDef lookupBy setBy nodupKeysB tyRank fieldsRank)
+open Semantics (structDef lookupBy setBy nodupKeysB tyRank fieldsRank lookupBy_setBy_self
+  lookupBy_setBy_ne setBy_setBy_self lookupBy_eq_some_mem)
 
 /-! ## Association lists -/
 
 section Lists
 
 variable {κ α : Type} [DecidableEq κ]
-
-theorem lookupBy_setBy_same (k : κ) (v : α) (l : List (κ × α)) :
-    lookupBy k (setBy k v l) = some v := by
-  induction l with
-  | nil => simp only [setBy, lookupBy, ↓reduceIte]
-  | cons hd tl ih =>
-    obtain ⟨k', v'⟩ := hd
-    by_cases h : k = k' <;> simp only [h, setBy, ↓reduceIte, lookupBy, ih]
-
-theorem lookupBy_setBy_other {k k' : κ} (h : k ≠ k') (v : α) (l : List (κ × α)) :
-    lookupBy k (setBy k' v l) = lookupBy k l := by
-  induction l with
-  | nil => simp only [setBy, lookupBy, h, ↓reduceIte]
-  | cons hd tl ih =>
-    obtain ⟨k'', v''⟩ := hd
-    by_cases h₂ : k' = k''
-    · subst h₂; simp only [setBy, ↓reduceIte, lookupBy, h]
-    · simp only [setBy, h₂, ↓reduceIte, lookupBy, ih]
-
-theorem lookupBy_mem' {k : κ} {v : α} : {l : List (κ × α)} → lookupBy k l = some v → (k, v) ∈ l
-  | [], h => by simp only [lookupBy, reduceCtorEq] at h
-  | (k', v') :: rest, h => by
-    simp only [lookupBy] at h
-    split at h
-    · cases h; subst_vars; exact List.mem_cons_self
-    · exact List.mem_cons_of_mem _ (lookupBy_mem' h)
 
 theorem lookupBy_isSome_of_mem' {k : κ} {v : α} : {l : List (κ × α)} → (k, v) ∈ l →
     (lookupBy k l).isSome = true
@@ -108,7 +83,7 @@ theorem mem_setBy {k : κ} {v : α} {e : κ × α} : {l : List (κ × α)} → e
 
 theorem lookupBy_none_setBy {k k' : κ} {v : α} (hne : k ≠ k') {l : List (κ × α)}
     (h : lookupBy k l = none) : lookupBy k (setBy k' v l) = none := by
-  rw [lookupBy_setBy_other hne]; exact h
+  rw [lookupBy_setBy_ne hne]; exact h
 
 /-- `setBy` keeps the keys distinct. -/
 theorem nodupKeysB_setBy' {k : κ} {v : α} : {l : List (κ × α)} → nodupKeysB l = true →
@@ -131,14 +106,6 @@ theorem fst_mem_setBy {k : κ} {v : α} {l : List (κ × α)} {e : κ × α} (h 
   rcases mem_setBy h with h | h
   · exact Or.inl (by rw [h])
   · exact Or.inr ⟨e.2, h⟩
-
-theorem setBy_setBy_same (k : κ) (v v' : α) : (l : List (κ × α)) →
-    setBy k v' (setBy k v l) = setBy k v' l
-  | [] => by simp only [setBy, ↓reduceIte]
-  | (k', w) :: rest => by
-    by_cases h : k = k'
-    · simp only [setBy, h, ↓reduceIte]
-    · simp only [setBy, h, ↓reduceIte, setBy_setBy_same k v v' rest]
 
 theorem setBy_of_lookupBy {k : κ} {v : α} : {l : List (κ × α)} → lookupBy k l = some v →
     setBy k v l = l
@@ -467,7 +434,7 @@ theorem SVal.findM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {w :
     simp only [SVal.findM] at h
     split at h
     · rename_i y hy
-      exact SVal.findM_all p (SMap.all_iff.mp hx.2.1 (k, y) (lookupBy_mem' hy)) h
+      exact SVal.findM_all p (SMap.all_iff.mp hx.2.1 (k, y) (lookupBy_eq_some_mem hy)) h
     · exact SVal.findM_all p hx.2.2 h
 
 theorem SVal.find_all {T U : Ty} {x : SVal T} (p : Path T U) {w : SVal U} (hx : x.All P)
@@ -747,7 +714,7 @@ theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨z, hz, rfl⟩ := h
       have hzA := SVal.saveM_all p
-        (SMap.all_iff.mp hx.2.1 (k, y) (lookupBy_mem' hy)) hn hk.2 (by simpa only [hy] using hl) hz
+        (SMap.all_iff.mp hx.2.1 (k, y) (lookupBy_eq_some_mem hy)) hn hk.2 (by simpa only [hy] using hl) hz
       simp only [SVal.All]
       refine ⟨hmap m d k z hk.1 hzA hx.1, SMap.all_ofList.mpr fun e he => ?_, hx.2.2⟩
       rcases mem_setBy he with he | he
@@ -1008,7 +975,7 @@ theorem Path.okDeep : {T U : Ty} → Path T U → T.okDeep = true → U.okDeep =
   | _, _, .nil, h => h
   | _, _, .field hf p, h =>
     Path.okDeep p (struct_okDeep (by simpa only [Ty.okDeep, decide_eq_true_eq] using h) _
-      (lookupBy_mem' hf))
+      (lookupBy_eq_some_mem hf))
   | _, _, .at _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
   | _, _, .atF _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
   | _, _, .key _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
@@ -1153,16 +1120,6 @@ theorem SVal.array_ext {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh s
   subst hnm
   rw [SVec.eq_of_toList_eq e e' he, ← SList.ofList_toList sh, hs, SList.ofList_toList]
 
-/-- The live elements and the slots past the end of an array saved at a slot,
-read back. -/
-theorem SVal.array_resplit {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256)
-    (h' : ((e.toList ++ sh.toList).take n).length < 2 ^ 256) :
-    SVal.array (SVec.ofList ((e.toList ++ sh.toList).take n))
-      (SList.ofList ((e.toList ++ sh.toList).drop n)) h' = SVal.array e sh h := by
-  apply SVal.array_ext
-  · rw [SVec.toList_ofList, List.take_left' (SVec.length_toList e)]
-  · rw [SList.toList_ofList, List.drop_left' (SVec.length_toList e)]
-
 theorem SFields.set_get_self {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
     (h : lookupBy f fs = some T) → x.set h (x.get h) = x
   | [], _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
@@ -1238,13 +1195,13 @@ theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v 
     · rename_i y hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨z, hz, rfl⟩ := h
-      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, SVal.saveM_idem y p v hz,
-        Option.bind_eq_bind, Option.bind_some, setBy_setBy_same]
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_self, SVal.saveM_idem y p v hz,
+        Option.bind_eq_bind, Option.bind_some, setBy_setBy_self]
     · rename_i hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨z, hz, rfl⟩ := h
-      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, SVal.saveM_idem d p v hz,
-        Option.bind_eq_bind, Option.bind_some, setBy_setBy_same]
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_self, SVal.saveM_idem d p v hz,
+        Option.bind_eq_bind, Option.bind_some, setBy_setBy_self]
 
 theorem SVal.saveM_nil {T : Ty} (y z : SVal T) : y.saveM .nil z = some z := by cases y <;> rfl
 
@@ -1310,19 +1267,19 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
     · rename_i y hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
       obtain ⟨z, hz, rfl⟩ := h₁
-      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, Option.bind_eq_bind,
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_self, Option.bind_eq_bind,
         Option.bind_eq_some_iff, Option.some.injEq] at h₂
       obtain ⟨w, hw, rfl⟩ := h₂
       simp only [SVal.saveM, hy, SVal.saveM_saveM y p a b hz hw, Option.bind_eq_bind,
-        Option.bind_some, setBy_setBy_same]
+        Option.bind_some, setBy_setBy_self]
     · rename_i hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
       obtain ⟨z, hz, rfl⟩ := h₁
-      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, Option.bind_eq_bind,
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_self, Option.bind_eq_bind,
         Option.bind_eq_some_iff, Option.some.injEq] at h₂
       obtain ⟨w, hw, rfl⟩ := h₂
       simp only [SVal.saveM, hy, SVal.saveM_saveM d p a b hz hw, Option.bind_eq_bind,
-        Option.bind_some, setBy_setBy_same]
+        Option.bind_some, setBy_setBy_self]
 
 /-! ## Defaults, read and cleared -/
 

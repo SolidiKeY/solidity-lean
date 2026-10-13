@@ -27,7 +27,7 @@ from the default, at a path where saving the default changes nothing.
 
 namespace Solidity
 
-open Semantics (structDef lookupBy setBy nodupKeysB)
+open Semantics (structDef lookupBy setBy nodupKeysB lookupBy_eq_some_mem)
 
 variable {C : Contract}
 
@@ -416,10 +416,6 @@ theorem Wrote.arr_congr {st₀ st : Storage C} {E : Ty} {r : SRef C (.ref (.arra
     (hW : Wrote st₀ st r (arrOf L S h)) (e : L = L') : Wrote st₀ st r (arrOf L' S h') := by
   subst e; exact hW
 
-theorem arrOf_eq {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
-    (h : e.toList.length < 2 ^ 256) : arrOf e.toList sh.toList h = .array e sh hn :=
-  SVal.array_ext _ _ _ _ _ _ (SVec.toList_ofList _) (SList.toList_ofList _)
-
 theorem len_snoc {α : Type} {L : List α} {x : α} (hb : L.length + 1 < 2 ^ 256) :
     (L ++ [x]).length < 2 ^ 256 := by
   rw [List.length_append, List.length_singleton]; exact hb
@@ -698,7 +694,7 @@ theorem fields_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} {v : SVal T} {r
         · exact hgf (congrArg Prod.fst hV)
         · exact hm ⟨V, hV⟩)
     (fun g U h' hg => by
-      have hgf : g ≠ f := hne g ⟨U, lookupBy_mem' h'⟩
+      have hgf : g ≠ f := hne g ⟨U, lookupBy_eq_some_mem h'⟩
       have h0 : lookupBy g ((f, T) :: fs) = some U := by
         simp only [lookupBy, hgf, ↓reduceIte]; exact h'
       have := hag g U h0 hg
@@ -717,7 +713,7 @@ theorem fill_struct {s : Name} {fs : SFields (structDef s)} (hfs : FieldsOK C fs
     (fun _ _ hm => lookupBy_of_nodup (structDef_nodup _) hm)
     (σ.push (t := .alias (.struct s)) (some ref)) ref σ.storage (SFields.dflt (structDef s)) fs
     rfl h0 (fun g U hg _ => SFields.dflt_get hg)
-    (fun g U hg hm => absurd ⟨U, lookupBy_mem' hg⟩ hm) (fun _ _ _ _ => rfl) hc ht hf
+    (fun g U hg hm => absurd ⟨U, lookupBy_eq_some_mem hg⟩ hm) (fun _ _ _ _ => rfl) hc ht hf
     (structDef_nodup s)
   exact ⟨st', run_bound hq hrun, hW⟩
 
@@ -1190,7 +1186,7 @@ theorem storage_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc 
     TRuns (State.init C) (rootsProg st C.vars fun _ _ hm => lookupBy_of_nodup hnd hm)
       ((State.init C).withStorage st) :=
   rootsProg_run st hnd C.vars _ (State.init C) (fun _ _ hr _ => SFields.dflt_get hr)
-    (fun _ T hr hm => absurd ⟨T, lookupBy_mem' hr⟩ hm) hc ht hf hnd
+    (fun _ T hr hm => absurd ⟨T, lookupBy_eq_some_mem hr⟩ hm) hc ht hf hnd
 
 /-- **Canonical and tight ⇒ reachable**, for keys and slots in range. -/
 theorem canon_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc : st.Canon)
@@ -1214,7 +1210,7 @@ theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true) (P : Storage C → 
   exact this
 
 theorem deepOk_of_all (h : C.vars.all (·.2.okDeep) = true) : DeepOk C :=
-  fun _ _ hr => List.all_eq_true.mp h _ (lookupBy_mem' hr)
+  fun _ _ hr => List.all_eq_true.mp h _ (lookupBy_eq_some_mem hr)
 
 /-- **Reachable ⇒ canonical and tight**, for a contract whose types have
 well-formed defaults all the way down. -/

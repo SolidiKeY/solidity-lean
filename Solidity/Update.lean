@@ -33,7 +33,7 @@ inductive Modality where
   | box
   deriving DecidableEq, Repr, Inhabited, Lean.ToExpr
 
-/-- What a modality says of a run that reverts (or is `undef`): every box
+/-- What a modality says of a run that reverts: every box
 formula holds of it, no diamond formula does. -/
 def Modality.onHalt : Modality → Prop
   | .diamond => False

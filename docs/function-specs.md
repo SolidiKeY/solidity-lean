@@ -72,13 +72,13 @@ and arithmetic is Solidity's, checked at its operands' type, where solkey's
 is unbounded `int`: an overflowing side makes the equation false.
 
 **`old` is a storage variable**, KeY's `Struct old`: the update
-`{old := storage}` (`UpdElem.store`) binds it (`Binding.store`), only when an
+`{old := storage}` (`Rhs.store`) binds it (a local of type `old`, a `Storage C`), only when an
 `ensures` reads `\old` or an `assignable` clause is given. `find(old, p)`
 checks `p`'s indices against the current storage and reads `old`;
 `sol_decide` cannot state that exactly, so `old` is outside its fragment and
 `sol_close` reads it semantically. `net(a)` is `Term.net`, read as a `uint`
-like `msg.value`; under `\old` it is `Term.netOf oldNet a`, the snapshot
-`oldNet` (`UpdElem.saveNet`, `Binding.ledger`), taken only when an `\old(…)`
+like `msg.value`; under `\old` it is `Tm.netOf oldNet a`, the snapshot
+`oldNet` (`Rhs.saveNet`, a local of type `oldNet`), taken only when an `\old(…)`
 reads `net(a)`.
 
 **`\forall` is `Fml.all x T φ`**, a binder at its type (a `uint` in
@@ -122,8 +122,8 @@ has no obligation; a parameter named `old`, `oldNet`, `result` or `k<n>`, or
 of reference type, is rejected.
 
 **`sol_spec`** proves one obligation: `sol_symex`, then `sol_spec_close`
-(`sol_close` knowing a word read is a word, `Close.asValue_eq_ok`, and
-`grind`'s instantiation bounded). Splitting by clause costs more, since
+(`sol_close`'s reads, then `omega` or `grind` with its instantiation
+bounded). Splitting by clause costs more, since
 symbolic execution then runs once per clause. `sol_spec_try` leaves what it
 cannot close as goals.
 

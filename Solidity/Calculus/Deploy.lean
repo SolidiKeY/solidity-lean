@@ -3,6 +3,7 @@ import Solidity.Calculus.Logic
 import Solidity.Calculus.FirstOrder
 import Solidity.Calculus.Close
 import Solidity.Calculus.SoundKit
+import Solidity.Semantics.Deploy
 
 /-!
 # A scoped constructor obligation, read at the deployment
@@ -12,12 +13,12 @@ The constructor obligation (`Problem.ctorFml`, `problem!{constructor}`,
 `Problem.deploy_of_valid` read the unscoped one:
 
 * `Problem.deploy_of_valid`: a valid obligation is a theorem about the typed
-  run of its program from the typed deployment state (`State.deploy`) with
+  run of its program from the typed deployment state (`State.deploy`, `Semantics/Deploy.lean`) with
   any values of its parameters, which the deployment update leaves as it
   is; `Problem.deploy_of_valid_typed` is the case of no parameters;
 * `Problem.deploy_of_valid_nil`: the same, read at the typed deployment
-  (`Contract.deployT`, master's `Contract.deploy` guard over the typed
-  run): a constructor that is not `payable` is sent no value.
+  (`Contract.deployT`, `Semantics/Deploy.lean`: master's
+  `Contract.deploy` guard over the typed run): a constructor that is not `payable` is sent no value.
 -/
 
 namespace Solidity
@@ -25,13 +26,6 @@ namespace Solidity
 open Solidity (Modality)
 
 variable {C : Contract}
-
-/-- The state a deployment starts in: the
-empty storage, no memory, a ledger holding the deployer's payment, and the
-value sent as the contract's funds. -/
-def State.deploy (C : Contract) (tx : TTx) : State C [] :=
-  { storage := Storage.init C, H := [], heap := Heap.empty, env := (),
-    net := [(tx.msgSender.1, tx.msgValue.1)], selfBalance := tx.msgValue, tx := tx }
 
 /-- **The deployment update lands on the deployment's state**, with the
 constructor's parameters bound: it writes the deployment's storage, ledger
@@ -78,14 +72,9 @@ theorem Problem.deploy_of_valid_typed {m : Modality} {Γ' : Ctx} {P : Prog C [] 
     m.afterRunTR (fun _ => True) (Prog.runFrames (State.deploy C tx) P .nil) := by
   exact Upd.afterT.of_lands (h (State.deploy C tx)) (Problem.deployUpd_lands C tx (Δ := []) ())
 
-/-- **The typed deployment** (master's `Contract.deploy`, over the typed run): a
-constructor that is not `payable`, the implicit one too, refuses value, as
-solc's creation code does; otherwise its program runs from
-`State.deploy`. -/
-def Contract.deployT (C : Contract) {Γ' : Ctx} (P : Prog C [] Γ') (tx : TTx) :
-    TRes (State C Γ') :=
-  if !((C.ctor.map (·.payable)).getD false) && tx.msgValue.1 != 0 then .error .revert
-  else Prog.runFrames (State.deploy C tx) P .nil
+/-- A program run with no frames after it ends where its run does. -/
+theorem Prog.runFrames_nil {Γ Γ' : Ctx} (σ : State C Γ) (P : Prog C Γ Γ') :
+    Prog.runFrames σ P .nil = (do let o ← Prog.run σ P; pure o.st) := rfl
 
 /-- Value sent to a constructor that is not `payable` reverts the
 deployment. -/
@@ -102,6 +91,7 @@ theorem Problem.deploy_of_valid_nil {m : Modality} {Γ' : Ctx} {P : Prog C [] Γ
     (hpay : (C.ctor.map (·.payable)).getD false = true ∨ tx.msgValue.1 = 0) :
     m.afterRunTR (fun _ => True) (Contract.deployT C P tx) := by
   have e : Contract.deployT C P tx = Prog.runFrames (State.deploy C tx) P .nil := by
+    rw [Prog.runFrames_nil]
     rcases hpay with hp | hv
     · simp only [Contract.deployT, hp, Bool.not_true, Bool.false_and, Bool.false_eq_true,
         if_false]

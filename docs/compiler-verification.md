@@ -33,7 +33,7 @@ balances representing the run's final state; or both halt, the run by a
 revert or a panic (a failed `assert`), the machine by a revert, as solc's
 `Panic(0x01)` is one; or the program pays (`Prog.pays`), the world refuses a
 payment, and the machine alone reverts. The third is the price of a
-`transfer` that books `net` and nothing else (`Semantics.transferAt`): the
+`transfer` that books `net` and nothing else (`TRun.transfer`): the
 run does not know whether the contract's account covers the amount or
 whether the recipient accepts it, and the machine does. So the theorem is for
 the box: what the machine does when it succeeds, the run did

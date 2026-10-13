@@ -1,5 +1,6 @@
 import Solidity.Tools.Common
 import Solidity.Semantics.Run
+import Solidity.Semantics.Deploy
 
 /-!
 # `#run`: call a contract's function in the typed run
@@ -42,10 +43,10 @@ return.
 #deploy Mini(7) with msg.sender := 3
 ```
 
-`#deploy C(args)` deploys `C` in the typed run (`Contract.deployT`'s
-reading): it runs `constructor(args);` (`ctorProgS`, the initializers and the
-constructor's body) from the deployment's typed state (`deployStart`, as
-`State.deploy` of `Calculus/Deploy.lean`), whose ledger and funds hold what
+`#deploy C(args)` deploys `C` by `Contract.deployT` (`Semantics/Deploy.lean`,
+what the constructor obligation is read at): it runs `constructor(args);`
+(`ctorProgS`, the initializers and the constructor's body) from the
+deployment's typed state (`State.deploy`), whose ledger and funds hold what
 `msg.value := n` sends; `with` takes the transaction's fields only.  The
 output is `ok`, the funds, and the storage; or how it halted.
 -/
@@ -229,17 +230,9 @@ open Lean Elab Command Term Meta in
     logInfo (String.intercalate "\n" (← evalLines "#run" t))
   | _ => throwUnsupportedSyntax
 
-/-- The typed state a deployment starts in (`State.deploy` of
-`Calculus/Deploy.lean`): every root at its default, no memory, a ledger
-holding the deployer's payment, and the value sent as the contract's
-funds. -/
-def deployStart (C : Contract) (tx : TTx) : State C [] :=
-  { State.init C with net := [(tx.msgSender.1, tx.msgValue.1)], selfBalance := tx.msgValue, tx }
-
-/-- What `#deploy` prints: the deployment's outcome in the typed run
-(`Contract.deployT`'s: a constructor that is not `payable` refuses
-value, else `constructor(args);` runs from `deployStart`), the
-contract's funds and its storage. -/
+/-- What `#deploy` prints: the outcome of `Contract.deployT` (a
+constructor that is not `payable` refuses value, else `constructor(args);`
+runs from `State.deploy`), the contract's funds and its storage. -/
 def deployReport [FreshNames] (C : Contract) (args : List RawExpr) (sender value time : Int) :
     Except String (List String) := do
   let ⟨_, Q⟩ ← ctorProgS C args
@@ -247,10 +240,9 @@ def deployReport [FreshNames] (C : Contract) (args : List RawExpr) (sender value
       pure ({ msgSender := ← PrimTy.ofInt? .uint sender, msgValue := ← PrimTy.ofInt? .uint value,
               timestamp := ← PrimTy.ofInt? .uint time } : TTx))
     | throw "the deployment's start is not of the contract's types"
-  if !((C.ctor.map (·.payable)).getD false) && value != 0 then return [fmtHalt .revert]
-  pure <| match Prog.run (deployStart C tx) Q with
+  pure <| match Contract.deployT C Q tx with
     | .error h => [fmtHalt h]
-    | .ok o => ["ok", s!"balance {o.st.selfBalance.1}"] ++ fmtStorage C o.st.storage
+    | .ok σ => ["ok", s!"balance {σ.selfBalance.1}"] ++ fmtStorage C σ.storage
 
 /-- `#deploy C(a, b) [with msg.sender := n, msg.value := m, …]`: deploy the
 contract `C` in the typed run and print its outcome. -/

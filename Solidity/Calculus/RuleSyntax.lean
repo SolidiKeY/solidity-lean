@@ -1508,7 +1508,8 @@ def tmSort : TSyntax `dl_term → TPos
   | `(dl_term| $_:dl_term . $_:ident) | `(dl_term| $_:dl_term [ $_:dl_term ]) => .path
   | _ => .val
 
-/-- One elementary update: the sort of `x := t` is read off `x`. -/
+/-- One elementary update of a global: `selfBalance`, `net`, `storage` or
+`memory` (`schemaUpdCore` reads a local's itself, as `UpdElem.local`). -/
 def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
   | `(dl_upd_elem| $l:dl_term := $r:dl_term) => do
     let `(dl_term| $x:ident) := l | Macro.throwErrorAt l "an update assigns a variable"
@@ -1550,18 +1551,8 @@ def schemaUpdElem (Γ : Scope) : TSyntax `dl_upd_elem → MacroM Lean.Term
             `if(r = this) then net else store(net, at(r), net(r) - a)`"
     if n == "storage" then return ← `(UpdElem.storage $(← schemaTerm Γ .storage r))
     if n == "memory" then return ← `(UpdElem.memory $(← schemaTerm Γ .memory r))
-    match headOf Γ x with
-    | .local v => `(UpdElem.val $v $(← schemaTerm Γ .val r))
-    | .alias v =>
-      -- `lsv := unset`: the alias of a declaration without a path (Lean only)
-      match r with
-      | `(dl_term| $u:ident) =>
-        if u.getId == `unset then `(UpdElem.unset $v)
-        else `(UpdElem.path $v $(← schemaTerm Γ .path r))
-      | _ => `(UpdElem.path $v $(← schemaTerm Γ .path r))
-    | .mem v _ => `(UpdElem.mref $v $(← schemaTerm Γ .ident r))
-    | _ => Macro.throwErrorAt x "an update assigns a local, an alias, a memory local, \
-        `storage` or `memory`"
+    Macro.throwErrorAt x "an elementary update of a global assigns `selfBalance`, `net`, \
+      `storage` or `memory`"
   | _ => Macro.throwUnsupported
 
 /-- The modality of the formula under an update: an update is judged as the

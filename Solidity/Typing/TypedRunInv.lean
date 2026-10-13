@@ -14,10 +14,9 @@ clause) only push and pop locals, so they keep any such invariant once their
 sub-programs do (`tkeeps_ite` … `tkeeps_tryCall`, a loop by
 `TLoop.run_induct`); a call's arguments, return variables and decoded data
 are values or fresh memory objects, which every invariant here accepts
-(`RunInv.ValMemOk`).  A statement without sub-programs is each invariant's
-own lemma, read on `TRun.*`: `Typing/Reachability.lean`'s canonical
-storage, `Typing/Constructibility.lean`'s tight one, `Typing/Fits.lean`'s
-bounds.
+(`RunInv.ValMemOk`).  A statement without sub-programs is proved once for
+every hereditary invariant (`Stmt.keeps_all`, `Typing/HeredRun.lean`), read
+on `TRun.*`.
 -/
 
 namespace Solidity

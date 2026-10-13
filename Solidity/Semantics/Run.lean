@@ -652,7 +652,7 @@ def delete {T : Ty} (l : Loc C Γ T) : TStep C Γ Γ := fun σ => do
   let st ← TRes.ofOpt (σ.storage.delete ref)
   pure ⟨σ.withStorage st, List.prefix_refl _⟩
 
-/-- `delete` at a memory address (`memClear`): a word to its default, a
+/-- `delete` at a memory address: a word to its default, a
 reference to a fresh default object. -/
 def clearT (σ : State C Γ) : {T : Ty} → MAddr σ.H T → T.mapFree = true → TRes (Out C σ.H Γ)
   | .prim p, a, _ => do

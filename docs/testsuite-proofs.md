@@ -490,11 +490,11 @@ one.
   tactic does the same through `Proves.close_dropWt`, which `sol_prove?`
   picks for a leaf under `wt`.
 - **Satisfiable**: `Solkey.TestSuite.initState_wt`, the initial state passes
-  `wt`.  The plan asked for `decide +kernel` on the initial store; the
-  kernel cannot evaluate `C.initStorage` (it is built by `defaultForTy`), so
+  `wt`.  The plan asked for `decide +kernel` on the initial store, so
   the theorem is `initStorage_wt` — the empty program reaches the initial
-  storage, and its words are defaults — with its two side conditions (`nodupKeysB`, `okDeep` of the
-  roots) by `decide +kernel`.
+  storage — with its one side condition (`okDeep` of the roots) by
+  `decide +kernel` (until W10.5.6 also `nodupKeysB`, the untyped
+  `C.initStorage` being built by the well-founded `defaultForTy`).
 
 **The statements.**  `solc_scoped_problems Solkey.TestSuite decl`
 (`TestSuite/ScopedProblems.lean`) declares the statement proved,

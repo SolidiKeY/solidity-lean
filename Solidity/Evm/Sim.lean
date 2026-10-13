@@ -532,9 +532,6 @@ def see {H : HTy} : (t : LTy) → t.TDenote C H → Seen C t
 def Look.ofTEnv {H : HTy} {Γ : Ctx} (e : TEnv C H Γ) : Look C Γ :=
   fun {t} i => see t (TEnv.get i e)
 
-theorem Look.ofTEnv_val {H : HTy} {Γ : Ctx} {p : PrimTy} (e : TEnv C H Γ) (i : Idx Γ (.val p)) :
-    Look.ofTEnv e i = TEnv.get i e := rfl
-
 theorem Look.ofTEnv_alias {H : HTy} {Γ : Ctx} {R : RefTy} (e : TEnv C H Γ)
     (i : Idx Γ (.alias R)) : Look.ofTEnv e i = TEnv.get i e := rfl
 

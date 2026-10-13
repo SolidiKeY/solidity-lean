@@ -288,7 +288,7 @@ variable (m : Modality) (φ : Post StandardExample [])
 
 namespace IndexRead
 /-- `v = values[i];` with `i` 1, from a storage where `values[1]` is 10, at the box.  One normal branch: the
-bounds check is the path's own (`State.checkIndex`, the `@S` of `values[1]@S`), so the rule does not branch
+bounds check is the path's own (`Storage.checkIndex`, the `@S` of `values[1]@S`), so the rule does not branch
 and there is no `i < 0 ∨ i ≥ ℓ` sequent.  `findOnSave` reads the write back past the check under the box only,
 where a check that fails makes the line true.  Under any modality `m` the chain stops at the check: no law
 decides it, which needs the length in `S`, and a starting length has no spelling (the notation writes a length

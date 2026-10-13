@@ -166,7 +166,7 @@ private def sendNineCore := (sol{ uint to = 9; bool ok = to.send(5); } : Prog St
 private abbrev start : State StandardExample [] :=
   State.ofStorage Storage.standardExample
 
-/-- The ledger at `a` (`State.getNet`) after `P` runs from `σ`; `none` on a
+/-- The ledger at `a` (the typed state's `net`, read by `lookupBy`) after `P` runs from `σ`; `none` on a
 halt. -/
 def netAfter {Γ' : Ctx} (σ : State StandardExample []) (P : Prog StandardExample [] Γ')
     (a : Int) : Option Int :=

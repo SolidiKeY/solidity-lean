@@ -276,7 +276,8 @@ uint r = t.value;` — the push-after-pop example (`sec:push-pop-example`):
 the slot `pop()` cleared is not restored by the next `push()`, so the value
 written before the pop is not seen through the returned reference, and the
 program reaches the read without reverting.  Run on `testSuiteStore`, the store
-that has `tokens`; a `Token` default is not unfolded by `rfl`, so it is printed. -/
+that has `tokens`; the run builds a `Token` default, so it is printed (`#eval`)
+rather than decided. -/
 
 /--
 info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
@@ -288,7 +289,7 @@ info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 
 /-! `persons.push(); persons.push(); Person storage p; p = persons.push();
 p.age = 5; uint result = persons[2].age;` (`storage-push-local-bind.key`).  Pushing
-a `Person` builds its default, which `rfl` cannot unfold, so the run is printed. -/
+a `Person` builds its default, so the run is printed rather than decided. -/
 
 /--
 info: Except.ok (some (Solidity.Semantics.PrimVal.int 5))

@@ -26,7 +26,7 @@ abbrev Name := String
 /-- KeY `int, bool \extends Prim` (`intHeader.key`, `boolHeader.key`).
 KeY has a single mathematical `int` sort; the calculus keeps solc's
 `uint`/`int` distinction below `Prim` — both erase to KeY `int`
-(range checking is `checkArith`'s job, not the sort's). -/
+(range checking is `PrimTy.ofInt?`'s job, not the sort's). -/
 inductive PrimTy where
   | bool
   | uint
@@ -658,15 +658,6 @@ def Ty.mapFree : Ty → Bool
   | .ref (.array e) => e.mapFree
   | .ref (.fixed e _) => e.mapFree
 
-theorem Semantics.lookupBy_mem {κ α : Type} [DecidableEq κ] {k : κ} {a : α} :
-    ∀ {l : List (κ × α)}, Semantics.lookupBy k l = some a → (k, a) ∈ l
-  | [], h => by simp only [Semantics.lookupBy, reduceCtorEq] at h
-  | (k', v) :: rest, h => by
-    simp only [Semantics.lookupBy] at h
-    split at h
-    · cases h; subst_vars; exact List.mem_cons_self
-    · exact List.mem_cons_of_mem _ (Semantics.lookupBy_mem h)
-
 /-- A member of a struct that holds no mapping holds none: what a memory
 path's type inherits from its receiver's (`MPath.memOk`). -/
 theorem Ty.mapFree_field {s f : Name} {T : Ty} (hs : (Ty.ref (.struct s)).mapFree = true)
@@ -674,7 +665,7 @@ theorem Ty.mapFree_field {s f : Name} {T : Ty} (hs : (Ty.ref (.struct s)).mapFre
   have hall : ∀ s ∈ mapFreeStructs, ∀ p ∈ Semantics.structDef s, p.2.mapFree = true := by
     decide
   simp only [Ty.mapFree, decide_eq_true_eq] at hs
-  exact hall s hs (f, T) (Semantics.lookupBy_mem h)
+  exact hall s hs (f, T) (Semantics.lookupBy_eq_some_mem h)
 
 /-- The structs whose fresh default is well-formed: every struct of the
 table.  A struct with a repeated member name would not be (its second row

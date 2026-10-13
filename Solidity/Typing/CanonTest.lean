@@ -80,10 +80,13 @@ def keysH : Hered where
   fix _ _ := True
   map K := fun m _ => ∀ e ∈ m.toList, K.keyOk e.1
 
-theorem SVal.canonB_iff {T : Ty} (v : SVal T) : v.allB canonHB = true ↔ v.Canon :=
-  SVal.allB_iff (P := canonH) ⟨fun _ _ => by simp only [canonHB, canonH],
+theorem canonHB_decides : canonHB.Decides canonH :=
+  ⟨fun _ _ => by simp only [canonHB, canonH],
     fun _ _ => by simp only [canonHB, canonH],
-    fun _ _ m d => by simp only [canonHB, canonH, Bool.and_eq_true, SVal.beq_iff]⟩ v
+    fun _ _ m d => by simp only [canonHB, canonH, Bool.and_eq_true, SVal.beq_iff]⟩
+
+theorem SVal.canonB_iff {T : Ty} (v : SVal T) : v.allB canonHB = true ↔ v.Canon :=
+  SVal.allB_iff canonHB_decides v
 
 theorem SList.toList_isEmpty {E : Ty} (sh : SList E) : sh.toList.isEmpty = true ↔ sh = .nil := by
   cases sh with
@@ -123,41 +126,39 @@ theorem tightHB_arr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) :
       · exact Or.inl rfl
       · exact Or.inr (h2 hp)
 
-theorem SVal.tightB_iff {T : Ty} (v : SVal T) : v.allB tightHB = true ↔ v.Tight :=
-  SVal.allB_iff (P := tightH) ⟨tightHB_arr, fun _ _ => by simp only [tightHB, tightH],
+theorem tightHB_decides : tightHB.Decides tightH :=
+  ⟨tightHB_arr, fun _ _ => by simp only [tightHB, tightH],
     fun K _ m d => by
       show (K.isKey || m.toList.isEmpty) = true ↔ (K.isKey = false → m = .nil)
       rw [Bool.or_eq_true, SMap.toList_isEmpty]
       cases K.isKey
       · simp only [Bool.false_eq_true, false_or, forall_const]
-      · simp only [true_or, Bool.true_eq_false, false_implies]⟩ v
+      · simp only [true_or, Bool.true_eq_false, false_implies]⟩
+
+theorem SVal.tightB_iff {T : Ty} (v : SVal T) : v.allB tightHB = true ↔ v.Tight :=
+  SVal.allB_iff tightHB_decides v
 
 theorem Ty.keyOkB_iff (K : Ty) (k : Int) : K.keyOkB k = true ↔ K.keyOk k := by
   cases K <;> simp only [Ty.keyOkB, Ty.keyOk]
 
-theorem SVal.keysB_iff {T : Ty} (v : SVal T) : v.allB keysHB = true ↔ v.All keysH :=
-  SVal.allB_iff (P := keysH) ⟨fun _ _ => by simp only [keysHB, keysH],
+theorem keysHB_decides : keysHB.Decides keysH :=
+  ⟨fun _ _ => by simp only [keysHB, keysH],
     fun _ _ => by simp only [keysHB, keysH],
     fun K _ m d => by
       show (m.toList.all fun e => K.keyOkB e.1) = true ↔ ∀ e ∈ m.toList, K.keyOk e.1
-      simp only [List.all_eq_true, Ty.keyOkB_iff]⟩ v
+      simp only [List.all_eq_true, Ty.keyOkB_iff]⟩
 
-theorem SFields.allB_iff' {P : Hered} {B : HeredB}
-    (h : ∀ {T : Ty} (v : SVal T), v.allB B = true ↔ v.All P) :
-    {fs : List (Name × Ty)} → (x : SFields fs) → x.allB B = true ↔ x.All P
-  | _, .nil => by simp only [SFields.allB, SFields.All]
-  | _, .cons v rest => by
-    simp only [SFields.allB, SFields.All, Bool.and_eq_true]
-    rw [h v, SFields.allB_iff' h rest]
+theorem SVal.keysB_iff {T : Ty} (v : SVal T) : v.allB keysHB = true ↔ v.All keysH :=
+  SVal.allB_iff keysHB_decides v
 
 /-! ## The storage's tests -/
 
 theorem Storage.shapeB_iff (st : Storage C) : st.shapeB = true ↔ st.Canon ∧ st.Tight := by
   simp only [Storage.shapeB, Bool.and_eq_true]
-  rw [SFields.allB_iff' SVal.canonB_iff st, SFields.allB_iff' SVal.tightB_iff st]
+  rw [SFields.allB_iff canonHB_decides st, SFields.allB_iff tightHB_decides st]
 
 theorem Storage.keysB_iff (st : Storage C) : st.keysB = true ↔ st.All keysH :=
-  SFields.allB_iff' SVal.keysB_iff st
+  SFields.allB_iff keysHB_decides st
 
 /-- Keys and slots in range have their keys in range. -/
 theorem Storage.keysB_of_fits {st : Storage C} (h : st.Fits) : st.keysB = true :=

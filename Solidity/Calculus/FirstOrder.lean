@@ -31,6 +31,15 @@ def Idx.nameR {Γ : Ctx} {t : LTy} (ns : List Var) (i : Idx Γ t) : Var :=
   Idx.rec (motive := fun _ _ _ => List Var → Var) (fun ns => ns.headD (.user "_"))
     (fun _ ih ns => ih ns.tail) i ns
 
+theorem Idx.nameR_eq {Γ : Ctx} {t : LTy} (ns : List Var) (i : Idx Γ t) :
+    i.nameR ns = i.name ns := by
+  induction i generalizing ns with
+  | here => cases ns <;> rfl
+  | there i ih =>
+    cases ns with
+    | nil => exact (ih []).trans (by simp only [Idx.name, Idx.toNat, List.getD_nil])
+    | cons n ns => exact (ih ns).trans (by simp only [Idx.name, Idx.toNat, List.getD_cons_succ])
+
 /-- `Thin.names`, by the recursor. -/
 @[implemented_by Thin.names]
 def Thin.namesR {Γ Δ : Ctx} (h : Thin Γ Δ) : List Var → List Var :=

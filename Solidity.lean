@@ -19,6 +19,7 @@ import Solidity.Semantics.StorageWt
 import Solidity.Semantics.Heap
 import Solidity.Semantics.State
 import Solidity.Semantics.Run
+import Solidity.Semantics.Deploy
 import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame

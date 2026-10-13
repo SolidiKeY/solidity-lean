@@ -243,7 +243,7 @@ theorem diverges_nil_left (q : List Semantics.Seg) : diverges [] q = false := rf
 theorem diverges_nil_right (a : Semantics.Seg) (p : List Semantics.Seg) :
     diverges (a :: p) [] = false := rfl
 /-- `diverges` as `sol_close` reads it, with the disequation both ways
-round (as the untyped `Close.diverge_cons'`): a premise `k != j` then frames
+round: a premise `k != j` then frames
 `balances[k]` against `balances[j]` whichever of the two was written
 first. -/
 theorem diverges_cons (a b : Semantics.Seg) (p q : List Semantics.Seg) :

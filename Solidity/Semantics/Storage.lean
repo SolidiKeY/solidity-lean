@@ -558,6 +558,24 @@ theorem set_cons {f f' : Name} {T T' : Ty} {fs : List (Name × Ty)} (v : SVal T'
       if e : f = f' then .cons ((lookupBy_cons_pos e h).symm ▸ y) rest
       else .cons v (rest.set (lookupBy_cons_neg e h) y) := rfl
 
+theorem get_eq_getM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
+    (h : lookupBy f fs = some T) → st.get h = st.getM h
+  | _, _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
+  | _, _, @SFields.cons f' T' _ v rest, h => by
+    rw [get_cons]
+    by_cases e : f = f'
+    · simp only [e, ↓reduceDIte, getM]
+    · simp only [e, ↓reduceDIte, getM, get_eq_getM rest]
+
+theorem set_eq_setM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
+    (h : lookupBy f fs = some T) → (x : SVal T) → st.set h x = st.setM h x
+  | _, _, .nil, _, _ => rfl
+  | _, _, @SFields.cons f' T' _ v rest, h, x => by
+    rw [set_cons]
+    by_cases e : f = f'
+    · simp only [e, ↓reduceDIte, setM]
+    · simp only [e, ↓reduceDIte, setM, set_eq_setM rest]
+
 end SFields
 
 /-- An empty array is within the bound. -/
@@ -1547,15 +1565,15 @@ variable {C : Contract}
 default. -/
 def init (C : Contract) : Storage C := SFields.dflt C.vars
 
-/-- The value at a reference (`State.findStorage`). -/
+/-- The value at a reference (solkey's `find`). -/
 def find {U : Ty} (st : Storage C) (r : SRef C U) : Option (SVal U) :=
   (st.get r.hroot).find r.path
 
-/-- `SVal.findLive` at a reference (`State.findLive`). -/
+/-- `SVal.findLive` at a reference. -/
 def findLive {U : Ty} (st : Storage C) (r : SRef C U) : Option (SVal U) :=
   (st.get r.hroot).findLive r.path
 
-/-- The storage with the value at a reference replaced (`State.saveStorage`). -/
+/-- The storage with the value at a reference replaced (solkey's `save`). -/
 def save {U : Ty} (st : Storage C) (r : SRef C U) (new : SVal U) : Option (Storage C) := do
   let v ← (st.get r.hroot).save r.path new
   some (st.set r.hroot v)
@@ -1572,13 +1590,13 @@ def inBounds {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
         if 0 ≤ i ∧ i.toNat < w.n then some () else none)
       (fun {_} {n} _ => if 0 ≤ i ∧ i.toNat < n then some () else none))
 
-/-- `b[i]`'s index in bounds where the program takes it (`State.checkIndex`):
+/-- `b[i]`'s index in bounds where the program takes it:
 a mapping takes every key, an array an index below its live length. -/
 def checkIndex {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (r : SRef C (.ref R))
     (it : IndexTy R k V) (i : Int) : Option Unit := do
   inBounds it i (← st.find r)
 
-/-- The live length of a dynamic array (`arrayLen`), a `uint`: it is below
+/-- The live length of a dynamic array, a `uint`: it is below
 `2^256`. -/
 def len {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     Option PrimTy.uint.Denote := do
@@ -1593,7 +1611,7 @@ def full {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) : Bool :=
   | some v => !decide ((SVal.view v : ArrView E).n + 1 < 2 ^ 256)
   | none => false
 
-/-- `b.push(…)` (`pushAt`): the element `val` makes of the slot it lands on,
+/-- `b.push(…)`: the element `val` makes of the slot it lands on,
 appended; `none` past the bound (`full`). -/
 def push {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)))
     (val : SVal E → Option (SVal E)) : Option (Storage C) := do
@@ -1605,7 +1623,7 @@ def push {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)))
       (SVec.snoc_lt_bound w.elems x h))
   else none
 
-/-- `b.push()` as a place (`pushPlaceAt`): the slot appended, and its index. -/
+/-- `b.push()` as a place: the slot appended, and its index. -/
 def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     Option (Storage C × Nat) := do
   let w : ArrView E := SVal.view (← st.find r)
@@ -1616,7 +1634,7 @@ def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     some (st', w.n)
   else none
 
-/-- `b.pop()` (`popAt`): the last element cleared into the slots past the
+/-- `b.pop()`: the last element cleared into the slots past the
 end, or moved there as it is when `keep`; an empty array reverts. -/
 def pop {E : Ty} (st : Storage C) (keep : Bool) (r : SRef C (.ref (.array E))) :
     Option (Storage C) := do
@@ -1632,7 +1650,7 @@ def pop {E : Ty} (st : Storage C) (keep : Bool) (r : SRef C (.ref (.array E))) :
 def delete {T : Ty} (st : Storage C) (r : SRef C T) : Option (Storage C) := do
   st.save r (← st.find r).defaultOf
 
-/-- An assignment's write (`State.writeStorage`): a word stored, a struct or
+/-- An assignment's write: a word stored, a struct or
 an array copied over what is there. -/
 def write {T : Ty} (st : Storage C) (r : SRef C T) (new : SVal T) : Option (Storage C) :=
   if new.isPrim then st.save r new
@@ -1645,24 +1663,6 @@ end Storage
 `findOnSave` and `findOnSaveFrame` on the compiled forms: a save reads back
 at its path (`SVal.findM_saveM`), and leaves a path that parts from it
 (`Path.Diverges`, `SVal.findM_saveM_diverges`). -/
-
-private theorem lookupBy_setBy_self' {κ α : Type} [DecidableEq κ] (k : κ) (v : α)
-    (l : List (κ × α)) : lookupBy k (setBy k v l) = some v := by
-  induction l with
-  | nil => simp only [setBy, lookupBy, ↓reduceIte]
-  | cons hd tl ih =>
-    obtain ⟨k', v'⟩ := hd
-    by_cases h : k = k' <;> simp only [h, setBy, ↓reduceIte, lookupBy, ih]
-
-private theorem lookupBy_setBy_ne' {κ α : Type} [DecidableEq κ] {k k' : κ} (h : k ≠ k') (v : α)
-    (l : List (κ × α)) : lookupBy k (setBy k' v l) = lookupBy k l := by
-  induction l with
-  | nil => simp only [setBy, lookupBy, h, ↓reduceIte]
-  | cons hd tl ih =>
-    obtain ⟨k'', v''⟩ := hd
-    by_cases h₂ : k' = k''
-    · subst h₂; simp only [setBy, ↓reduceIte, lookupBy, h]
-    · simp only [setBy, h₂, ↓reduceIte, lookupBy, ih]
 
 theorem SFields.get_set_same {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
     (h : lookupBy f fs = some T) → (y : SVal T) → (x.set h y).get h = y
@@ -1734,7 +1734,7 @@ theorem SVal.findM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v
     split at h <;>
     · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨y, hy, rfl⟩ := h
-      simp only [SVal.findM, SMap.toList_ofList, lookupBy_setBy_self']
+      simp only [SVal.findM, SMap.toList_ofList, Semantics.lookupBy_setBy_self]
       exact SVal.findM_saveM _ p v hy
 
 /-- Two paths from one value that part: at two members, two slots or two
@@ -1859,7 +1859,7 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
       · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
         obtain ⟨y, _, rfl⟩ := hs
         simp only [SVal.findM, SMap.toList_ofList,
-          lookupBy_setBy_ne' (Ne.symm hne)]
+          Semantics.lookupBy_setBy_ne (Ne.symm hne)]
   | keyIn k _ ih =>
     intro x v x' hs
     cases x with
@@ -1869,12 +1869,12 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
       · rename_i x0 hx
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
         obtain ⟨y, hy, rfl⟩ := hs
-        simp only [SVal.findM, SMap.toList_ofList, lookupBy_setBy_self', hx]
+        simp only [SVal.findM, SMap.toList_ofList, Semantics.lookupBy_setBy_self, hx]
         exact ih _ v hy
       · rename_i hx
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
         obtain ⟨y, hy, rfl⟩ := hs
-        simp only [SVal.findM, SMap.toList_ofList, lookupBy_setBy_self', hx]
+        simp only [SVal.findM, SMap.toList_ofList, Semantics.lookupBy_setBy_self, hx]
         exact ih _ v hy
 
 /-! ### The recursor forms are their `match` twins

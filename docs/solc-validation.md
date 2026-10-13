@@ -44,7 +44,7 @@ about Solidity only through one of four links:
   program needs. `Stmt.rule_exists` is coverage, not logical completeness. The
   `assert` rule was the known case the other way round: it mirrored `require`,
   so a failed `assert` satisfied every box formula and a box obligation proved
-  nothing. A failed `assert` now panics (`Halt.panic`, solc's `Panic(0x01)`),
+  nothing. A failed `assert` now panics (`THalt.panic`, solc's `Panic(0x01)`),
   which no modality accepts, and `Taclet.assertSimple` owes its condition under
   both, as KeY's "Violated" branch does; none is known.
 - **L4. The trusted base leaks**: `sorry`, `native_decide`, `implemented_by`, or
@@ -113,8 +113,8 @@ only with packed types and a low-level read).
 (`docs/internals/layout_in_storage.rst:21-28`) except for `bool` beside a packable
 neighbour, so a slot-by-slot comparison is exact only for bool-free contracts;
 D compares *decoded values* using `solc --storage-layout` instead. Panic codes
-(`libsolutil/ErrorCodes.h:25-37`) collapse to `Halt.revert` in the model, except
-0x01 (a failed `assert`), which is `Halt.panic`; a harness records the code as an
+(`libsolutil/ErrorCodes.h:25-37`) collapse to `THalt.revert` in the model, except
+0x01 (a failed `assert`), which is `THalt.panic`; a harness records the code as an
 expected-cause tag, to catch a revert for the wrong reason.
 `unchecked` selects `wrapping_*` over `checked_*` helpers
 (`IRGeneratorForStatements.cpp:567-584`); `mod_…` checks a zero divisor in both.
@@ -130,7 +130,7 @@ lemma set for I.
 - *Struct and array sources are not right-hand-side first* in solc (target
   resolved, then member-by-member copy); the interpreter is value-first
   (`solc-alignment.md`, "Known divergence").
-- *`transfer` assumes the world pays.* `transferAt` books `net` and nothing
+- *`transfer` assumes the world pays.* `TRun.transfer` books `net` and nothing
   else: no funds check, no refusing recipient. The machine has both (`bal`,
   `accepts`), and `compile_correct` states the difference as a third outcome,
   the machine reverting alone in code that pays, so the box carries over
@@ -254,7 +254,8 @@ instance with solc and run it. Three independent computations, so a disagreement
 which is wrong. Runner: `solc --ir` with `test/tools/yulInterpreter/`, or evmone.
 
 **H. Mutation testing.** A suite that always agrees may be too weak to disagree.
-Mutate `Semantics.lean` one decision at a time (RHS after target, a `checkArith`
+Mutate the typed run (`Semantics/Run.lean`, `Semantics/Storage.lean`) one decision at
+a time (RHS after target, a range check of `PrimTy.ofInt?`
 dropped, `pop` not clearing, `delete` resetting mappings, a push not reusing its slot,
 an unbounded alias bind, `**` unchecked, `transfer` not debiting) and require the suite
 to kill each. Mutate `Calculus/Rules.lean` too (drop a guard, swap a capture order): if
@@ -311,7 +312,7 @@ copy, dangling references; memory or storage source; effects before a revert;
 is a program that tells it from the original. For each solc helper behind a statement
 the model has an opinion on, an agent reads helper and Lean side by side and writes the
 cases where they could differ (`copyStructToStorageFunction` against
-`State.writeStorage`/`SVal.overlay`; `array_pop_<T>` against `storagePopSave`;
+`Storage.write`/`SVal.overlay`; `array_pop_<T>` against `storagePopSave`;
 `cleanup_storage_array_end_<T>` against the past-end `shadow`). Dangling references and
 past-end slots are the richest target, including the delta no test reads (`arr.push(v)`
 of a struct over a recycled slot).

@@ -329,7 +329,7 @@ is structural; the one loop solc emits for the current fragment
 Backward jumps need absolute `JUMP`/`JUMPDEST` with a program counter and
 fuel; a "code at offset `o` is `compile s`" invariant in place of
 `exec_append` and the skip-count lemmas that every case of `stmt_sim` uses;
-a third arm in `ValOut`/`StmtOut` (`Evm/Stmt.lean`) for "out of fuel
+a third arm in `ValOutT` (`Evm/SimLemmas.lean`)/`StmtOut` (`Evm/Stmt.lean`) for "out of fuel
 at every fuel"; and a new bound on a loop's pushes, since
 `L + pushesP P ≤ 2^64` no longer holds (the interpreter's `push` would revert
 at `2^64` as solc does, or the bound becomes a run-time invariant of `Sim`).

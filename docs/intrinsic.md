@@ -7782,6 +7782,71 @@ gone, and nothing under `Evm/` reads `Semantics.Value`.
   module: the edit rebuilds the package), and `solc-validation.md`'s
   mutation plan names it as a decision to mutate.
 
+### W10.5 review record (2026-10-14, branch `w105-r`)
+
+The read-only review of W10.5.1–W10.5.6: two finders and two skeptics,
+none calling the Lean server; then the confirmed findings fixed here.
+
+- **Nothing weakened.**  Checked: the headline theorems' statements,
+  `ReprAt`, and the `length` premises dropped during W10.5; none weakens
+  a claim.
+- **Confirmed and fixed, by class.**
+  - *Gate G0 links*: `SFields.get_eq_getM`/`set_eq_setM`
+    (`Semantics/Storage.lean`), lost with `StorageErase.lean` at W10.5.6,
+    restored; `Idx.nameR_eq` (`Calculus/FirstOrder.lean`), missing since
+    before W10.5, added.
+  - *Duplicates*: the assoc-list lemmas restated in `Typing/Values.lean`
+    (`lookupBy_setBy_same`/`_other`, `setBy_setBy_same`, `lookupBy_mem'`),
+    `Semantics/Storage.lean` (the private `lookupBy_setBy_self'`/`_ne'`)
+    and `AST.lean` itself (`Semantics.lookupBy_mem`) deleted, their sites on
+    `AST.lean`'s `Semantics.lookupBy_setBy_self`, `lookupBy_setBy_ne`,
+    `setBy_setBy_self`, `lookupBy_eq_some_mem`.  `Typing/CanonTest.lean`'s
+    three node-test witnesses are named (`canonHB_decides`,
+    `tightHB_decides`, `keysHB_decides`) and the storage tests read them
+    through the mutual `SFields.allB_iff`; `SFields.allB_iff'` deleted.
+  - *Unused*: `arrOf_eq`, `SVal.array_resplit`, `PrimTy.erase_injective`,
+    `PrimTy.erase_of_ofValue?`, `PrimTy.ofValue?_erase`,
+    `Look.ofTEnv_val` deleted.  Kept, and said so: `Prog.run_bnd` (the twin
+    of `Prog.run_canon`), `Heap.readAddr_allocDefault`/`readAddr_copyStToM`
+    (the law library; the second now cited under
+    **readFromCopyToStorage** in `Theory/Typed/Mem.lean`).
+  - *One deployment*: `#deploy` repeated `Contract.deployT`'s payable check
+    and ran `Prog.run` from its own `deployStart`.  `State.deploy` and
+    `Contract.deployT` moved to the new `Semantics/Deploy.lean` (over the
+    typed run alone, so `Tools/Run.lean` imports no calculus), `deployT`
+    running `Prog.run` and keeping the final state;
+    `Calculus/Deploy.lean` reads it at `Prog.runFrames … .nil` by
+    `Prog.runFrames_nil` (`rfl`).  `deployReport` calls `Contract.deployT`;
+    `deployStart` deleted.  The `#deploy` pins are unchanged.
+  - *Dead macro arms*: `schemaUpdElem` (`Calculus/RuleSyntax.lean`) is
+    reached only for `selfBalance`, `net`, `storage` and `memory`
+    (`schemaUpdCore` reads a local's update itself, as `UpdElem.local`);
+    its arms for a local, an alias and a memory local emitted
+    `UpdElem.val`/`path`/`mref`/`unset`, constructors that no longer exist,
+    and were never expanded.  Deleted, an error in their place.
+  - *Docstrings and docs naming deleted untyped names*: `Semantics/Storage`,
+    `Semantics/Heap`, `Semantics/Run`, `AST.lean` (`PrimTy.ofInt?` for
+    `checkArith`), `Update.lean`, `Calculus/CloseFrame`,
+    `Calculus/Problem` (`wt` as an opaque atom), the `Typing/` headers
+    (`Stmt.keeps_all`, `heredInv`, `Typing/Tight.lean`), three examples;
+    `AGENTS.md`'s and `module-map.md`'s layering, `kernel-port.md`,
+    `solc-alignment.md`, `solc-validation.md` (the mutation plan on the
+    typed run and `PrimTy.ofInt?`), `lean-key-rule-map.md`,
+    `function-specs.md`, `compiler-verification.md`, `solkey-feedback.md`,
+    `loops.md`, `testsuite-proofs.md`.
+- **Refuted**: `SimL.«return»` unused (it is used, `Evm/Correct.lean`'s
+  `hm'.return`); the missing `Idx.nameR` link as a W10.5 regression (it
+  was missing before W10.5; added anyway, above).
+- **Checks**: after W10.5.6, `SolkeyTestSuite` and `SolidityCorpus` file
+  by file (the 14 `Derived` modules, `Suggestions`, `Problems`,
+  `ScopedProblems`, `Report` with its pin "452 functions: 437 derived, 0
+  pending, 15 other", the nine `Corpus` modules): all clean.  Here:
+  `lean_build` of the default targets clean (273 jobs, the `#deploy` pins
+  of `Examples/Tools.lean` and `Examples/Tactics/Constructors.lean`
+  unchanged), per-file diagnostics of the edited modules clean,
+  `check-orphans` (291 reachable), `check-doc-paths` clean, the `sorry`
+  count unchanged (22), no `axiom` or heartbeat override added.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

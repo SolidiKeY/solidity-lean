@@ -55,8 +55,9 @@ rather than relying on the user's `require`.
 `defaultValue`, a declared struct member is never stuck, and a `uint` cell is in
 range. This is a completeness and faithfulness gap, not an unsoundness: a read
 on a mismatching store degrades to an underspecified cast and proves nothing
-false (`WellTypedNecessity.readSelect_needs_storage` shows the interpreter-side
-claim does need the invariant). A `\forall` clause over a mapping is provable
+false (the untyped interpreter needed the invariant for it;
+the counterexample module `Counterexamples.WellTypedNecessity`, deleted at
+W10.5.1). A `\forall` clause over a mapping is provable
 in Lean only under the layout premises `layoutAt` states (`Calculus/SurfaceSpec.lean`);
 solkey's obligation states none.
 

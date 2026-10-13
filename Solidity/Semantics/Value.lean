@@ -59,31 +59,6 @@ def ofValue? : (p : PrimTy) → Semantics.Value → Option p.Denote
     else none
   | .bool, .int _ | .uint, .bool _ | .int, .bool _ => none
 
-theorem ofValue?_erase : {p : PrimTy} → (v : p.Denote) → ofValue? p (erase v) = some v
-  | .bool, _ => rfl
-  | .uint, ⟨_, h⟩ => dif_pos h
-  | .int, ⟨_, h⟩ => dif_pos h
-
-theorem erase_of_ofValue? : {p : PrimTy} → {w : Semantics.Value} → {v : p.Denote} →
-    ofValue? p w = some v → erase v = w
-  | .bool, .bool _, _, h => by cases h; rfl
-  | .uint, .int n, v, h => by
-    simp only [ofValue?] at h
-    split at h
-    · cases h; rfl
-    · cases h
-  | .int, .int n, v, h => by
-    simp only [ofValue?] at h
-    split at h
-    · cases h; rfl
-    · cases h
-  | .bool, .int _, _, h | .uint, .bool _, _, h | .int, .bool _, _, h => nomatch h
-
-theorem erase_injective {p : PrimTy} {v w : p.Denote} (h : erase v = erase w) : v = w := by
-  have := ofValue?_erase v
-  rw [h, ofValue?_erase w] at this
-  exact (Option.some.inj this).symm
-
 /-- A mapping key as the integer it is hashed as.  solc hashes a key padded
 to a word (`keccak256(h(k) . p)`), and a `bool` pads to `0` or `1`, so
 `mapping(bool => V)` keeps two slots, at the keys `0` and `1`

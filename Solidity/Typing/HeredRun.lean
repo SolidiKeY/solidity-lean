@@ -10,7 +10,7 @@ storage operation keeps `P`'s node conditions: a slot or entry replaced
 over (`overlay`), an element pushed or popped, a word or a copy out of
 memory written.  `HeredRun P G` is that list, over the node conditions
 alone; `G` is a property of every type the contract reaches (`Ty.okDeep`
-for `Typing/Constructibility.lean`'s tight storage, nothing otherwise),
+for `Typing/Tight.lean`'s tight storage, nothing otherwise),
 which only a push and a copy out of memory read.
 
 The invariant (`heredInv P`) is the storage's `All P`, and every alias
@@ -18,7 +18,7 @@ bound along keys a program can write (`LTy.Keyed`): a mapping indexed at a
 word key type, by a key in its range.  It is carried along the typed run
 statement by statement (`Stmt.keeps_all`), each leaf on `TRun.*`, once for
 all three predicates of `Typing/Reachability.lean`,
-`Typing/Constructibility.lean` and `Typing/Fits.lean`.
+`Typing/Tight.lean` and `Typing/Fits.lean`.
 -/
 
 namespace Solidity

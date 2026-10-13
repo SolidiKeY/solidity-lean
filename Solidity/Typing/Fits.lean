@@ -133,7 +133,10 @@ theorem Storage.init_bnd : (Storage.init C).Bnd :=
 writes. -/
 abbrev fitsInv (C : Contract) : RunInv C := heredInv C bndH
 
-/-- A block run from a bounded state ends, if in a state, in a bounded one. -/
+/-- A block run from a bounded state ends, if in a state, in a bounded one.
+The twin of `Prog.run_canon` (`Typing/Reachability.lean`) for this
+invariant: nothing cites it, it is kept as the run-level statement beside
+`reachable_bnd`. -/
 theorem Prog.run_bnd {Γ Γ' : Ctx} (P : Prog C Γ Γ') {σ : State C Γ} {o : Out C σ.H Γ'}
     (hσ : (fitsInv C).HoldsT σ) (h : P.run σ = .ok o) : o.st.storage.Bnd :=
   Prog.run_all bndH_run (fun _ => trivial) P hσ h

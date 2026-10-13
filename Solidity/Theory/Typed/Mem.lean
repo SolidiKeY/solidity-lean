@@ -25,7 +25,7 @@ locations (`Theory/Typed/Obs.lean`).
 * **readFromCopyToStorage**, its `\then` and its `\else`, and
   **findOnCopy**: a copy between storage and memory reads what it copied,
   and leaves the older objects (`SVal.copyStToM_field`,
-  `SVal.keeps_copyStToM`, `MVal.copyMToSt_field`).
+  `SVal.keeps_copyStToM`, `Heap.readAddr_copyStToM`, `MVal.copyMToSt_field`).
 
 The section at the end restates each law under its solkey taclet's name,
 a taclet's `\else` as its frame (`readOnWriteFrame`), as the storage laws

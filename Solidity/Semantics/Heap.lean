@@ -130,10 +130,10 @@ namespace Heap
 
 variable {H : HTy}
 
-/-- The object a reference names (`State.getObj`). -/
+/-- The object a reference names. -/
 def get {R : RefTy} (hp : Heap H) (r : HRef H R) : MObj H R := Objs.get H hp r.id r.get?
 
-/-- The object a reference names replaced (`State.setObj`). -/
+/-- The object a reference names replaced. -/
 def set {R : RefTy} (hp : Heap H) (r : HRef H R) (o : MObj H R) : Heap H :=
   Objs.set H hp r.id r.get? o
 
@@ -213,7 +213,7 @@ def field {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
     (h : lookupBy f (structDef s) = some T) : MVal H T :=
   MFields.get (structDef s) (hp.get r) h
 
-/-- `mv.f = v` (`memWriteField`). -/
+/-- `mv.f = v`. -/
 def setField {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
     (h : lookupBy f (structDef s) = some T) (v : MVal H T) : Heap H :=
   hp.set r (MFields.set (structDef s) (hp.get r) h v)
@@ -223,7 +223,7 @@ def index {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (i :
     Option (MVal H E) :=
   if 0 ≤ i then (MObj.elems a (hp.get r))[i.toNat]? else none
 
-/-- `mv[i] = v` (`memWriteIndex`): `none`, a revert, out of bounds. -/
+/-- `mv[i] = v`: `none`, a revert, out of bounds. -/
 def setIndex {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (i : Int)
     (v : MVal H E) : Option (Heap H) :=
   if 0 ≤ i ∧ i.toNat < (MObj.elems a (hp.get r)).length then
