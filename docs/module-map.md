@@ -212,6 +212,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 
 | Module | What it defines |
 |---|---|
+| `Theory/Typed/Obs.lean` | The typed Theory: a value is its observations (`Obs L`: word, live length, presence, at the locations `L`), `TVal T`, `TSto C` over `SLoc C` (a state variable's path or a dangling one); `find`/`save`/`delAt`/`copyTo`/`push`/`extend`/`pop`/`select` stated once over any location family (`ObsLoc`), a delete/strip/copy computed from the type (`TVal.del`, `strip`, `overlay`, one `Comp`onent at a time); the bridge from the typed storage (`SVal.obs`, `Storage.obs`, `obs_save`, `obs_write`, `obs_delete`, `obs_push`, `obs_pop`, …). |
 | `Theory/Terms.lean` | The mutual sorts `Struct`/`StValue`/`Memory`, the readers, `StValue.Equiv`. |
 | `Theory/Storage.lean` | `structRules.key`'s taclets: `save`, `storeAt`, the delete family, `diverges`. |
 | `Theory/Copy.lean` | The copying write `copyTo` and the array writes (`pushT`, `popT`, …). |

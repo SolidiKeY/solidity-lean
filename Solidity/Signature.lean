@@ -148,11 +148,6 @@ def MvT.toMVal (H : HTy) : (T : Ty) → MvT T → Option (MVal H T)
 
 /-! ## What the sorts denote -/
 
-/-- A struct's members as the state variables of a contract: what
-`select(s, r)` reads as a storage (`Storage (Contract.ofStruct s)`), and
-where a path under it is rooted (`SRef (Contract.ofStruct s) T`), so the
-storage's operations read it unchanged. -/
-def Contract.ofStruct (s : Name) : Contract := { vars := structDef s }
 
 /-- A typed sort's values, over the global part's heap typing `H`. -/
 @[reducible] def Srt.Den (C : Contract) (H : HTy) : Srt → Type
@@ -294,16 +289,6 @@ def Storage.atT {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (it : IndexTy
   st.checkIndex r it (PrimTy.key i)
   some (r.index it (PrimTy.key i))
 
-/-- A path under `select(s, r)` as a path from the root `r`: its member
-first. -/
-def SRef.under {C : Contract} {s r : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
-    (h : C.rootType r = some (.ref (.struct s))) : SRef C U :=
-  ⟨r, h, .field q.hroot q.path⟩
-
-/-- The struct at the root `r` of `st`, as a storage of its members. -/
-def Storage.selectT {C : Contract} {s r : Name} (st : Storage C)
-    (h : C.rootType r = some (.ref (.struct s))) : Storage (Contract.ofStruct s) :=
-  (SVal.view (st.get h) : SFields (structDef s))
 
 /-- `Op0.eval` by `match`, its compiled form. -/
 def Op0.evalM (g : State C []) {s : Srt} : Op0 C s → Option (s.Den C g.H)

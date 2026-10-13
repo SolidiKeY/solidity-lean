@@ -228,6 +228,7 @@ import Solidity.Typing.Reachability
 import Solidity.Typing.Constructibility
 import Solidity.Typing.Fits
 import Solidity.Typing.CanonTest
+import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Terms
 import Solidity.Theory.Storage
 import Solidity.Theory.Copy
