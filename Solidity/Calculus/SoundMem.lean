@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundStore
+import Solidity.Semantics.NoPanic
 
 /-!
 # Soundness of the memory arms

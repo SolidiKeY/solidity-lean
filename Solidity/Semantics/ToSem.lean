@@ -1,5 +1,4 @@
 import Solidity.Semantics.RunFrame
-import Solidity.Semantics.StateErase
 
 /-!
 # A typed state, named

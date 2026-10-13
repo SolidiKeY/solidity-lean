@@ -1953,5 +1953,158 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
         simp only [SVal.findM, SMap.toList_ofList, lookupBy_setBy_self', hx]
         exact ih _ v hy
 
+/-! ### The recursor forms are their `match` twins
+
+`SVal.find`, `findLive` and `save` are written with `Path.rec` for the
+kernel; these equations are their `match` twins' arms, by `rfl`, and the
+twins agree. -/
+
+namespace SVal
+
+theorem find_nil {T : Ty} (v : SVal T) : v.find .nil = some v := rfl
+
+theorem find_field {s f : Name} {T U : Ty} (fs : SFields (structDef s))
+    (h : lookupBy f (structDef s) = some T) (p : Path T U) :
+    (SVal.struct fs).find (.field h p) = (fs.get h).find p := rfl
+
+theorem find_at {E U : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) (i : Int)
+    (p : Path E U) :
+    (SVal.array e sh h).find (.at i p) =
+      if 0 ≤ i then
+        match (e.toList ++ sh.toList)[i.toNat]? with
+        | some x => x.find p
+        | none => none
+      else none := rfl
+
+theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (p : Path E U) :
+    (SVal.fixed e).find (.atF i p) =
+      if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => x.find p
+        | none => none
+      else none := rfl
+
+theorem find_key {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
+    (SVal.map (K := K) m d).find (.key k p) =
+      match lookupBy k m.toList with
+      | some x => x.find p
+      | none => d.find p := rfl
+
+theorem find_eq_findM : {T U : Ty} → (v : SVal T) → (p : Path T U) → v.find p = v.findM p
+  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, .struct fs, .field h p => by
+    rw [find_field, find_eq_findM _ p]
+    simp only [findM]
+  | _, _, .array e sh _, .at i p => by
+    rw [find_at]
+    simp only [find_eq_findM _ p, findM]
+  | _, _, .fixed e, .atF i p => by
+    rw [find_atF]
+    simp only [find_eq_findM _ p, findM]
+  | _, _, .map m d, .key k p => by
+    rw [find_key]
+    simp only [find_eq_findM _ p, findM]
+
+theorem findLive_eq_findLiveM : {T U : Ty} → (v : SVal T) → (p : Path T U) →
+    v.findLive p = v.findLiveM p
+  | _, _, v, .nil => by cases v <;> rfl
+  | _, _, .struct fs, .field h p => by
+    show (fs.get h).findLive p = _
+    rw [findLive_eq_findLiveM _ p]
+    simp only [findLiveM]
+  | _, _, .array e sh _, .at i p => by
+    show (if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => x.findLive p
+        | none => none
+      else none) = _
+    simp only [findLive_eq_findLiveM _ p, findLiveM]
+  | _, _, .fixed e, .atF i p => by
+    show (if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => x.findLive p
+        | none => none
+      else none) = _
+    simp only [findLive_eq_findLiveM _ p, findLiveM]
+  | _, _, .map m d, .key k p => by
+    show (match lookupBy k m.toList with
+      | some x => x.findLive p
+      | none => d.findLive p) = _
+    simp only [findLive_eq_findLiveM _ p, findLiveM]
+
+theorem save_eq_saveM : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
+    v.save p new = v.saveM p new
+  | _, _, v, .nil, _ => by cases v <;> rfl
+  | _, _, @SVal.struct s fs, .field h p, new => by
+    show (do
+        let x ← (fs.get h).save p new
+        some (SVal.struct (fs.set h x)) : Option (SVal (.ref (.struct s)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+  | _, _, @SVal.array E n e sh h, .at i p, new => by
+    show (if 0 ≤ i then
+        match (e.toList ++ sh.toList)[i.toNat]? with
+        | some x => do
+          let x' ← x.save p new
+          let slots := (e.toList ++ sh.toList).set i.toNat x'
+          some (SVal.array (SVec.ofList (slots.take n)) (.ofList (slots.drop n))
+            (SVal.take_lt_bound slots h))
+        | none => none
+      else none : Option (SVal (.ref (.array E)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+  | _, _, @SVal.fixed E n e, .atF i p, new => by
+    show (if 0 ≤ i then
+        match e.toList[i.toNat]? with
+        | some x => do
+          let x' ← x.save p new
+          some (SVal.fixed (e.set i.toNat x'))
+        | none => none
+      else none : Option (SVal (.ref (.fixed E n)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+  | _, _, @SVal.map K V m d, .key k p, new => by
+    show (match lookupBy k m.toList with
+      | some x => do
+        let x' ← x.save p new
+        some (SVal.map (.ofList (setBy k x' m.toList)) d)
+      | none => do
+        let x' ← d.save p new
+        some (SVal.map (.ofList (setBy k x' m.toList)) d) : Option (SVal (.ref (.mapping K V)))) = _
+    simp only [save_eq_saveM _ p, saveM]
+
+end SVal
+
+/-- A save that lands reads back (`findOnSave` below a root). -/
+theorem SVal.find_save_same {T U : Ty} (x : SVal T) (p : Path T U) (v : SVal U)
+    {x' : SVal T} (h : x.save p v = some x') : x'.find p = some v := by
+  rw [SVal.save_eq_saveM] at h
+  rw [SVal.find_eq_findM]
+  exact SVal.findM_saveM x p v h
+
+/-- The members of a struct without mappings are without mappings too. -/
+theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT.2.mapFree = true := by
+  decide
+
+/-! ## The stores
+
+The ported contracts' stores, typed: each a named constant, so a proof about
+one unfolds it only where it reads it (the kernel then reduces `SVal.dflt`,
+which `defaultForTy` does not let it). -/
+
+namespace Storage
+
+/-- `StandardExample`'s storage at deployment. -/
+def standardExample : Storage StandardExample := Storage.init StandardExample
+
+/-- `TestSuite`'s storage at deployment. -/
+def testSuite : Storage TestSuite := Storage.init TestSuite
+
+/-- Storage equality is decided by the kernel (`SFields.beq`): a store is
+itself, and not itself with `alice.age` saved as `7`. -/
+example : (testSuite = testSuite) ∧
+    (testSuite.save ⟨"alice", rfl, .field (f := "age") rfl .nil⟩
+      (.prim (⟨7, rfl⟩ : {n : Int // PrimTy.uint.inRange n = true}))).map
+      (fun st => decide (st = testSuite)) = some false := by
+  decide +kernel
+
+end Storage
 
 end Solidity

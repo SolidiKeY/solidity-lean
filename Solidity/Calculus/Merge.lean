@@ -2,7 +2,6 @@ import Solidity.Calculus.Graft
 import Solidity.Calculus.Sound
 import Solidity.Calculus.Logic
 import Solidity.Calculus.FirstOrder
-import Solidity.Semantics.StateErase
 import Solidity.Calculus.Close
 
 /-!

@@ -1,4 +1,5 @@
 import Solidity.Semantics.Heap
+import Solidity.Semantics.StorageErase
 
 /-!
 # The typed heap erases to the untyped heap
@@ -145,13 +146,6 @@ theorem getObj_erase (hh : σ.heap = hp.erase) {R : RefTy} (r : HRef H R) :
   have := Objs.lookupBy_erase H hp 0 r.id r.get?
   rw [Nat.zero_add] at this
   simp only [Semantics.State.getObj, hh, Heap.erase, this]
-  rfl
-
-theorem setObj_erase (hh : σ.heap = hp.erase) {R : RefTy} (r : HRef H R) (o : MObj H R) :
-    σ.setObj r.id (MObj.erase R o) = { σ with heap := (hp.set r o).erase } := by
-  have := Objs.setBy_erase H hp 0 r.id r.get? o
-  rw [Nat.zero_add] at this
-  simp only [Semantics.State.setObj, hh, Heap.erase, this]
   rfl
 
 theorem alloc_erase (hh : σ.heap = hp.erase) (hn : σ.nextId = H.length) {R : RefTy}
@@ -466,49 +460,9 @@ theorem MObj.erase_arr {H : HTy} : {R : RefTy} → {E : Ty} → (a : ArrTy R E) 
   | _, _, .dyn, _ => by rw [MObj.elems_dyn]; rfl
   | _, _, .fixed, _ => by rw [MObj.elems_fixed]; rfl
 
-theorem MObj.erase_setElem {H : HTy} : {R : RefTy} → {E : Ty} → (a : ArrTy R E) →
-    (o : MObj H R) → (i : Nat) → (v : MVal H E) →
-    MObj.erase R (MObj.setElem a o i v) =
-      .array (((MObj.elems a o).map (MVal.erase E)).set i (MVal.erase E v)) a.isFixed
-  | _, _, .dyn, _, _, _ => by
-    simp only [MObj.setElem, MObj.erase, MObj.elems, List.map_set, ArrTy.isFixed]
-  | _, _, .fixed, _, _, _ => by
-    simp only [MObj.setElem, MObj.erase, MObj.elems, List.map_set, ArrTy.isFixed]
-
 namespace Heap
 
 variable {H : HTy} {σ : Semantics.State} {hp : Heap H}
-
-/-- `memWriteField` on the erasure. -/
-theorem memWriteField_erase (hh : σ.heap = hp.erase) {s f : Name} {T : Ty}
-    (r : HRef H (.struct s)) (h : lookupBy f (structDef s) = some T) (v : MVal H T) :
-    Solidity.memWriteField σ r.id f (MVal.erase T v) =
-      .ok { σ with heap := (hp.setField r h v).erase } := by
-  simp only [Solidity.memWriteField, getObj_erase hh r, bind, Except.bind]
-  show Except.ok (σ.setObj r.id (Semantics.MObj.struct
-    (setBy f (MVal.erase T v) (MFields.erase (structDef s) (hp.get r))))) = _
-  rw [MFields.setBy_erase (structDef s) (hp.get r) h v]
-  exact congrArg Except.ok (setObj_erase hh r (R := .struct s) _)
-
-/-- `memWriteIndex` on the erasure: a revert out of bounds. -/
-theorem memWriteIndex_erase (hh : σ.heap = hp.erase) {R : RefTy} {E : Ty}
-    (r : HRef H R) (a : ArrTy R E) (i : Int) (v : MVal H E) :
-    Solidity.memWriteIndex σ r.id i (MVal.erase E v) =
-      toRes (fun hp' : Heap H => { σ with heap := hp'.erase }) (hp.setIndex r a i v) := by
-  simp only [Solidity.memWriteIndex, getObj_erase hh r, bind, Except.bind,
-    MObj.erase_arr a (hp.get r), Heap.setIndex, List.length_map]
-  split
-  · rw [← MObj.erase_setElem a (hp.get r) i.toNat v, setObj_erase hh r]
-    rfl
-  · rfl
-
-/-- `memArrayLen` on the erasure. -/
-theorem memArrayLen_erase (hh : σ.heap = hp.erase) {R : RefTy} {E : Ty}
-    (r : HRef H R) (a : ArrTy R E) :
-    Solidity.memArrayLen σ r.id = .ok (.int (hp.len r a)) := by
-  simp only [Solidity.memArrayLen, getObj_erase hh r, bind, Except.bind,
-    MObj.erase_arr a (hp.get r), List.length_map, Heap.len]
-  rfl
 
 /-- A member read on the erasure (`readAddr`'s member arm). -/
 theorem readField_erase (hh : σ.heap = hp.erase) {s f : Name} {T : Ty}

@@ -1,6 +1,7 @@
 import Solidity.Theory.Bridge.Denote
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.SoundCalls
+import Solidity.Semantics.NoPanic
 
 /-!
 # The rules of loops are sound

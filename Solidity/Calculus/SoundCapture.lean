@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundArms
+import Solidity.Semantics.NoPanic
 
 /-!
 # Soundness of captures, and the holes a read lands in

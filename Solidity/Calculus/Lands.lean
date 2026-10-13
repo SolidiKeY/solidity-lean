@@ -1,5 +1,4 @@
 import Solidity.Calculus.Step
-import Solidity.Typing.Soundness
 import Solidity.Semantics.RunFrame
 import Solidity.Theory.Bridge.Denote
 

@@ -3,6 +3,7 @@ import Solidity.Calculus.PremiseSound
 import Solidity.Semantics.Ends
 import Solidity.Calculus.LowerRun
 import Solidity.Semantics.Callback
+import Solidity.Semantics.NoPanic
 
 /-!
 # Soundness of a rule: the premise shapes, and the kit

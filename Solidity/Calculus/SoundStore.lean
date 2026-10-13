@@ -1,4 +1,5 @@
 import Solidity.Calculus.SoundCapture
+import Solidity.Semantics.NoPanic
 
 /-!
 # Soundness of the storage arms

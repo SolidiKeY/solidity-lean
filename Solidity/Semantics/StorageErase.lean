@@ -14,9 +14,10 @@ A struct is copied member by member in order (solc), and the untyped
 members have distinct names (`structDef_nodup`: solc refuses a struct that
 repeats one, and so does the elaborator, decision 16).
 
-`copyStToM` is never `undef` on a type without mappings (`SVal.copyStToM_ok`),
-and `SVal.ofU` reads an untyped value back at its type.  The typed copies
-between storage and memory are `Semantics/Heap.lean`'s.
+`SVal.ofU` reads an untyped value back at its type.  The typed copies
+between storage and memory are `Semantics/Heap.lean`'s; the typed stores,
+the recursor forms' `match` twins and `SVal.find_save_same` are
+`Semantics/Storage.lean`'s (W10.5.1).
 -/
 
 namespace Solidity
@@ -77,15 +78,6 @@ theorem lookupBy_erase {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (s
     · simp only [SFields.erase, get_cons, lookupBy, if_neg e, dif_neg e]
       exact lookupBy_erase rest _
 
-theorem get_eq_getM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
-    (h : lookupBy f fs = some T) → st.get h = st.getM h
-  | _, _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
-  | _, _, @SFields.cons f' T' _ v rest, h => by
-    rw [get_cons]
-    by_cases e : f = f'
-    · simp only [e, ↓reduceDIte, getM]
-    · simp only [e, ↓reduceDIte, getM, get_eq_getM rest]
-
 theorem set_eq_setM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (st : SFields fs) →
     (h : lookupBy f fs = some T) → (x : SVal T) → st.set h x = st.setM h x
   | _, _, .nil, _, _ => rfl
@@ -133,134 +125,6 @@ theorem slot_erase {E : Ty} {β γ : Type} (L : List (SVal E)) (M : List Semanti
       rfl
   · rw [dif_neg (fun h => hi h.1), if_neg hi]
     rfl
-
-/-! ### The recursor forms are their `match` twins
-
-`SVal.find`, `findLive` and `save` are written with `Path.rec` for the
-kernel; these equations are their `match` twins' arms, by `rfl`, and the
-twins agree. -/
-
-namespace SVal
-
-theorem find_nil {T : Ty} (v : SVal T) : v.find .nil = some v := rfl
-
-theorem find_field {s f : Name} {T U : Ty} (fs : SFields (structDef s))
-    (h : lookupBy f (structDef s) = some T) (p : Path T U) :
-    (SVal.struct fs).find (.field h p) = (fs.get h).find p := rfl
-
-theorem find_at {E U : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) (i : Int)
-    (p : Path E U) :
-    (SVal.array e sh h).find (.at i p) =
-      if 0 ≤ i then
-        match (e.toList ++ sh.toList)[i.toNat]? with
-        | some x => x.find p
-        | none => none
-      else none := rfl
-
-theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (p : Path E U) :
-    (SVal.fixed e).find (.atF i p) =
-      if 0 ≤ i then
-        match e.toList[i.toNat]? with
-        | some x => x.find p
-        | none => none
-      else none := rfl
-
-theorem find_key {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
-    (SVal.map (K := K) m d).find (.key k p) =
-      match lookupBy k m.toList with
-      | some x => x.find p
-      | none => d.find p := rfl
-
-theorem find_eq_findM : {T U : Ty} → (v : SVal T) → (p : Path T U) → v.find p = v.findM p
-  | _, _, v, .nil => by cases v <;> rfl
-  | _, _, .struct fs, .field h p => by
-    rw [find_field, find_eq_findM _ p]
-    simp only [findM]
-  | _, _, .array e sh _, .at i p => by
-    rw [find_at]
-    simp only [find_eq_findM _ p, findM]
-    rfl
-  | _, _, .fixed e, .atF i p => by
-    rw [find_atF]
-    simp only [find_eq_findM _ p, findM]
-    rfl
-  | _, _, .map m d, .key k p => by
-    rw [find_key]
-    simp only [find_eq_findM _ p, findM]
-    rfl
-
-theorem findLive_eq_findLiveM : {T U : Ty} → (v : SVal T) → (p : Path T U) →
-    v.findLive p = v.findLiveM p
-  | _, _, v, .nil => by cases v <;> rfl
-  | _, _, .struct fs, .field h p => by
-    show (fs.get h).findLive p = _
-    rw [findLive_eq_findLiveM _ p]
-    simp only [findLiveM]
-  | _, _, .array e sh _, .at i p => by
-    show (if 0 ≤ i then
-        match e.toList[i.toNat]? with
-        | some x => x.findLive p
-        | none => none
-      else none) = _
-    simp only [findLive_eq_findLiveM _ p, findLiveM]
-    rfl
-  | _, _, .fixed e, .atF i p => by
-    show (if 0 ≤ i then
-        match e.toList[i.toNat]? with
-        | some x => x.findLive p
-        | none => none
-      else none) = _
-    simp only [findLive_eq_findLiveM _ p, findLiveM]
-    rfl
-  | _, _, .map m d, .key k p => by
-    show (match lookupBy k m.toList with
-      | some x => x.findLive p
-      | none => d.findLive p) = _
-    simp only [findLive_eq_findLiveM _ p, findLiveM]
-    rfl
-
-theorem save_eq_saveM : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new : SVal U) →
-    v.save p new = v.saveM p new
-  | _, _, v, .nil, _ => by cases v <;> rfl
-  | _, _, @SVal.struct s fs, .field h p, new => by
-    show (do
-        let x ← (fs.get h).save p new
-        some (SVal.struct (fs.set h x)) : Option (SVal (.ref (.struct s)))) = _
-    simp only [save_eq_saveM _ p, saveM]
-  | _, _, @SVal.array E n e sh h, .at i p, new => by
-    show (if 0 ≤ i then
-        match (e.toList ++ sh.toList)[i.toNat]? with
-        | some x => do
-          let x' ← x.save p new
-          let slots := (e.toList ++ sh.toList).set i.toNat x'
-          some (SVal.array (SVec.ofList (slots.take n)) (.ofList (slots.drop n))
-            (SVal.take_lt_bound slots h))
-        | none => none
-      else none : Option (SVal (.ref (.array E)))) = _
-    simp only [save_eq_saveM _ p, saveM]
-    rfl
-  | _, _, @SVal.fixed E n e, .atF i p, new => by
-    show (if 0 ≤ i then
-        match e.toList[i.toNat]? with
-        | some x => do
-          let x' ← x.save p new
-          some (SVal.fixed (e.set i.toNat x'))
-        | none => none
-      else none : Option (SVal (.ref (.fixed E n)))) = _
-    simp only [save_eq_saveM _ p, saveM]
-    rfl
-  | _, _, @SVal.map K V m d, .key k p, new => by
-    show (match lookupBy k m.toList with
-      | some x => do
-        let x' ← x.save p new
-        some (SVal.map (.ofList (setBy k x' m.toList)) d)
-      | none => do
-        let x' ← d.save p new
-        some (SVal.map (.ofList (setBy k x' m.toList)) d) : Option (SVal (.ref (.mapping K V)))) = _
-    simp only [save_eq_saveM _ p, saveM]
-    rfl
-
-end SVal
 
 theorem SVal.findM_erase : {T U : Ty} → (v : SVal T) → (p : Path T U) →
     v.erase.find p.erase = toRes SVal.erase (v.findM p)
@@ -544,11 +408,6 @@ theorem lookupBy_append_of_none {κ α : Type} [DecidableEq κ] {k : κ} :
     · simp only [List.cons_append, lookupBy, if_neg ‹¬k = k'›]
       exact lookupBy_append_of_none rest l₂ h
 
-theorem overlayElems_eq_zip : (os vs : List Semantics.SVal) → os.length = vs.length →
-    Semantics.SVal.overlay.overlayElems os vs = List.zipWith Semantics.SVal.overlay os vs
-  | [], [], _ => rfl
-  | _ :: os, _ :: vs, h => congrArg (_ :: ·) (overlayElems_eq_zip os vs (Nat.succ.inj h))
-
 mutual
 theorem SVal.overlay_erase : {T : Ty} → (o v : SVal T) →
     (o.overlay v).erase = o.erase.overlay v.erase
@@ -826,59 +685,10 @@ theorem writeStorage_erase (hs : σ.storage = st.erase) {T : Ty}
 
 end Storage
 
-/-! ## Copies, and untyped values read back
+/-! ## Untyped values read back
 
-Storage to memory copies the erasure without an `undef` on a type without
-mappings; an untyped value reads back at its type (`SVal.ofU`) exactly when
-it has that type's shape. -/
-
-theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT.2.mapFree = true := by
-  decide
-
-mutual
-theorem SVal.copyStToM_ok : {T : Ty} → (v : SVal T) → T.mapFree = true →
-    ∀ s : Semantics.State, ∃ r, Semantics.copyStToM s v.erase = .ok r
-  | _, @SVal.prim .bool b, _, s => ⟨_, by with_unfolding_all rfl⟩
-  | _, @SVal.prim .uint n, _, s => ⟨_, by with_unfolding_all rfl⟩
-  | _, @SVal.prim .int n, _, s => ⟨_, by with_unfolding_all rfl⟩
-  | _, @SVal.struct sn fs, h, s => by
-    obtain ⟨⟨s', mf⟩, hr⟩ := SFields.copyStFields_ok fs
-      (mapFree_structDef sn (by simpa only [Ty.mapFree, decide_eq_true_eq] using h)) s
-    exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
-  | _, .array e _ _, h, s => by
-    obtain ⟨⟨s', me⟩, hr⟩ := SVec.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
-    exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
-  | _, .fixed e, h, s => by
-    obtain ⟨⟨s', me⟩, hr⟩ := SVec.copyStElems_ok e (by simpa only [Ty.mapFree] using h) s
-    exact ⟨_, by simp only [SVal.erase, Semantics.copyStToM, hr]; rfl⟩
-  | _, .map _ _, h, _ => by simp only [Ty.mapFree, Bool.false_eq_true] at h
-
-theorem SFields.copyStFields_ok : {fs : List (Name × Ty)} → (st : SFields fs) →
-    (∀ fT ∈ fs, fT.2.mapFree = true) →
-    ∀ s : Semantics.State, ∃ r, Semantics.copyStFields s st.erase = .ok r
-  | _, .nil, _, s => ⟨_, by with_unfolding_all rfl⟩
-  | _, .cons v rest, h, s => by
-    obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v (h _ List.mem_cons_self) s
-    obtain ⟨⟨s₂, mr⟩, h₂⟩ := SFields.copyStFields_ok rest
-      (fun fT hm => h fT (List.mem_cons_of_mem _ hm)) s₁
-    exact ⟨_, by simp only [SFields.erase, Semantics.copyStFields, h₁, bind, Except.bind, h₂]; rfl⟩
-
-theorem SList.copyStElems_ok : {E : Ty} → (l : SList E) → E.mapFree = true →
-    ∀ s : Semantics.State, ∃ r, Semantics.copyStElems s l.erase = .ok r
-  | _, .nil, _, s => ⟨_, by with_unfolding_all rfl⟩
-  | _, .cons v rest, h, s => by
-    obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v h s
-    obtain ⟨⟨s₂, mr⟩, h₂⟩ := SList.copyStElems_ok rest h s₁
-    exact ⟨_, by simp only [SList.erase, Semantics.copyStElems, h₁, bind, Except.bind, h₂]; rfl⟩
-
-theorem SVec.copyStElems_ok : {E : Ty} → {n : Nat} → (l : SVec E n) → E.mapFree = true →
-    ∀ s : Semantics.State, ∃ r, Semantics.copyStElems s l.erase = .ok r
-  | _, _, .nil, _, s => ⟨_, by with_unfolding_all rfl⟩
-  | _, _, .cons v rest, h, s => by
-    obtain ⟨⟨s₁, mv⟩, h₁⟩ := SVal.copyStToM_ok v h s
-    obtain ⟨⟨s₂, mr⟩, h₂⟩ := SVec.copyStElems_ok rest h s₁
-    exact ⟨_, by simp only [SVec.erase, Semantics.copyStElems, h₁, bind, Except.bind, h₂]; rfl⟩
-end
+An untyped value reads back at its type (`SVal.ofU`) exactly when it has
+that type's shape. -/
 
 mutual
 /-- An untyped storage value read at a type: `none` where it does not fit. -/
@@ -990,212 +800,5 @@ theorem SVal.erase_injective {T : Ty} {v w : SVal T} (h : v.erase = w.erase) : v
   have := SVal.ofU_erase v
   rw [h, SVal.ofU_erase w] at this
   exact (Option.some.inj this).symm
-
-mutual
-theorem SVal.erase_of_ofU : (w : Semantics.SVal) → {T : Ty} → {v : SVal T} →
-    SVal.ofU w T = some v → v.erase = w
-  | .prim pv, T, v, h => by
-    cases T with
-    | prim p =>
-      simp only [SVal.ofU, Option.map_eq_some_iff] at h
-      obtain ⟨x, hx, rfl⟩ := h
-      simp only [SVal.erase, PrimTy.erase_of_ofValue? hx]
-    | ref R => cases R <;> simp only [SVal.ofU, reduceCtorEq] at h
-  | .struct fields, T, v, h => by
-    cases T with
-    | prim p => simp only [SVal.ofU, reduceCtorEq] at h
-    | ref R =>
-      cases R with
-      | struct s =>
-        simp only [SVal.ofU, Option.map_eq_some_iff] at h
-        obtain ⟨x, hx, rfl⟩ := h
-        simp only [SVal.erase, SFields.erase_of_ofU fields hx]
-      | array _ | fixed _ _ | mapping _ _ => simp only [SVal.ofU, reduceCtorEq] at h
-  | .array elems shadow fx, T, v, h => by
-    cases T with
-    | prim p => simp only [SVal.ofU, reduceCtorEq] at h
-    | ref R =>
-      cases R with
-      | array E =>
-        cases fx with
-        | true => simp only [SVal.ofU, reduceCtorEq] at h
-        | false =>
-          simp only [SVal.ofU] at h
-          split at h
-          · split at h
-            · rename_i e sh he hsh
-              cases h
-              simp only [SVal.erase, SVec.erase_of_ofU elems he, SList.erase_of_ofU shadow hsh]
-            · cases h
-          · cases h
-      | fixed E n =>
-        cases fx with
-        | false => simp only [SVal.ofU, reduceCtorEq] at h
-        | true =>
-          cases shadow with
-          | cons _ _ => simp only [SVal.ofU, reduceCtorEq] at h
-          | nil =>
-            simp only [SVal.ofU, Option.map_eq_some_iff] at h
-            obtain ⟨x, hx, rfl⟩ := h
-            simp only [SVal.erase, SVec.erase_of_ofU elems hx]
-      | struct _ | mapping _ _ => simp only [SVal.ofU, reduceCtorEq] at h
-  | .map entries dflt, T, v, h => by
-    cases T with
-    | prim p => simp only [SVal.ofU, reduceCtorEq] at h
-    | ref R =>
-      cases R with
-      | mapping K V =>
-        simp only [SVal.ofU] at h
-        split at h
-        · rename_i m d hm hd
-          cases h
-          simp only [SVal.erase, SMap.erase_of_ofU entries hm, SVal.erase_of_ofU dflt hd]
-        · cases h
-      | struct _ | array _ | fixed _ _ => simp only [SVal.ofU, reduceCtorEq] at h
-
-theorem SFields.erase_of_ofU : (l : List (Name × Semantics.SVal)) → {fs : List (Name × Ty)} →
-    {st : SFields fs} → SFields.ofU l fs = some st → st.erase = l
-  | [], fs, st, h => by
-    cases fs with
-    | nil => simp only [SFields.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
-    | cons _ _ => simp only [SFields.ofU, reduceCtorEq] at h
-  | (f, w) :: rest, fs, st, h => by
-    cases fs with
-    | nil => simp only [SFields.ofU, reduceCtorEq] at h
-    | cons fT fs =>
-      obtain ⟨f', T⟩ := fT
-      simp only [SFields.ofU] at h
-      split at h
-      · rename_i e
-        subst e
-        split at h
-        · rename_i x xs hx hxs
-          cases h
-          simp only [SFields.erase, SVal.erase_of_ofU w hx, SFields.erase_of_ofU rest hxs]
-        · cases h
-      · cases h
-
-theorem SList.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {xs : SList E} →
-    SList.ofU l E = some xs → xs.erase = l
-  | [], E, xs, h => by simp only [SList.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
-  | w :: rest, E, xs, h => by
-    simp only [SList.ofU] at h
-    split at h
-    · rename_i x ys hx hys
-      cases h
-      simp only [SList.erase, SVal.erase_of_ofU w hx, SList.erase_of_ofU rest hys]
-    · cases h
-
-theorem SVec.erase_of_ofU : (l : List Semantics.SVal) → {E : Ty} → {n : Nat} → {xs : SVec E n} →
-    SVec.ofU l E n = some xs → xs.erase = l
-  | [], E, n, xs, h => by
-    cases n with
-    | zero => simp only [SVec.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
-    | succ n => simp only [SVec.ofU, reduceCtorEq] at h
-  | w :: rest, E, n, xs, h => by
-    cases n with
-    | zero => simp only [SVec.ofU, reduceCtorEq] at h
-    | succ n =>
-      simp only [SVec.ofU] at h
-      split at h
-      · rename_i x ys hx hys
-        cases h
-        simp only [SVec.erase, SVal.erase_of_ofU w hx, SVec.erase_of_ofU rest hys]
-      · cases h
-
-theorem SMap.erase_of_ofU : (l : List (Int × Semantics.SVal)) → {V : Ty} → {m : SMap V} →
-    SMap.ofU l V = some m → m.erase = l
-  | [], V, m, h => by simp only [SMap.ofU, Option.some.injEq] at h; subst h; with_unfolding_all rfl
-  | (k, w) :: rest, V, m, h => by
-    simp only [SMap.ofU] at h
-    split at h
-    · rename_i x ys hx hys
-      cases h
-      simp only [SMap.erase, SVal.erase_of_ofU w hx, SMap.erase_of_ofU rest hys]
-    · cases h
-end
-
-/-! ## The stores
-
-The ported contracts' stores, typed: each a named constant, so a proof about
-one unfolds it only where it reads it (the kernel then reduces `SVal.dflt`,
-which `defaultForTy` does not let it), each the erasure of its untyped store
-(`Semantics.lean`, "The stores"). -/
-
-namespace Storage
-
-/-- `StandardExample`'s storage at deployment. -/
-def standardExample : Storage StandardExample := Storage.init StandardExample
-
-theorem standardExample_erase :
-    standardExample.erase = Semantics.State.exampleStore.storage := by
-  rw [standardExample, init_erase, initStorage_standardExample]
-
-/-- `TestSuite`'s storage at deployment. -/
-def testSuite : Storage TestSuite := Storage.init TestSuite
-
-theorem testSuite_erase :
-    testSuite.erase = Semantics.State.testSuiteStore.storage := by
-  rw [testSuite, init_erase, initStorage_testSuite]
-
-/-- `SolcExpressions`'s storage at deployment. -/
-def solcExpressions : Storage SolcExpressions := Storage.init SolcExpressions
-
-theorem solcExpressions_erase :
-    solcExpressions.erase = Semantics.State.solcExpressionsStore.storage := by
-  rw [solcExpressions, init_erase, initStorage_solcExpressions]
-
-/-- `SolcStructs`'s storage at deployment. -/
-def solcStructs : Storage SolcStructs := Storage.init SolcStructs
-
-theorem solcStructs_erase :
-    solcStructs.erase = Semantics.State.solcStructsStore.storage := by
-  rw [solcStructs, init_erase, initStorage_solcStructs]
-
-/-- `SolcArrays`'s storage at deployment. -/
-def solcArrays : Storage SolcArrays := Storage.init SolcArrays
-
-theorem solcArrays_erase :
-    solcArrays.erase = Semantics.State.solcArraysStore.storage := by
-  rw [solcArrays, init_erase, initStorage_solcArrays]
-
-/-- `SolcMemory`'s storage at deployment. -/
-def solcMemory : Storage SolcMemory := Storage.init SolcMemory
-
-theorem solcMemory_erase :
-    solcMemory.erase = Semantics.State.solcMemoryStore.storage := by
-  rw [solcMemory, init_erase, initStorage_solcMemory]
-
-/-- `SolcMappings`'s storage at deployment. -/
-def solcMappings : Storage SolcMappings := Storage.init SolcMappings
-
-theorem solcMappings_erase :
-    solcMappings.erase = Semantics.State.solcMappingsStore.storage := by
-  rw [solcMappings, init_erase, initStorage_solcMappings]
-
-/-- `SolcControlFlow`'s storage at deployment. -/
-def solcControlFlow : Storage SolcControlFlow := Storage.init SolcControlFlow
-
-theorem solcControlFlow_erase :
-    solcControlFlow.erase = Semantics.State.solcControlFlowStore.storage := by
-  rw [solcControlFlow, init_erase, initStorage_solcControlFlow]
-
-/-- Storage equality is decided by the kernel (`SFields.beq`): a store is
-itself, and not itself with `alice.age` saved as `7`. -/
-example : (testSuite = testSuite) ∧
-    (testSuite.save ⟨"alice", rfl, .field (f := "age") rfl .nil⟩
-      (.prim (⟨7, rfl⟩ : {n : Int // PrimTy.uint.inRange n = true}))).map
-      (fun st => decide (st = testSuite)) = some false := by
-  decide +kernel
-
-end Storage
-
-/-- A save that lands reads back (`findOnSave` below a root). -/
-theorem SVal.find_save_same {T U : Ty} (x : SVal T) (p : Path T U) (v : SVal U)
-    {x' : SVal T} (h : x.save p v = some x') : x'.find p = some v := by
-  rw [SVal.save_eq_saveM] at h
-  rw [SVal.find_eq_findM]
-  exact SVal.findM_saveM x p v h
-
 
 end Solidity

@@ -1,6 +1,6 @@
 import Solidity.Semantics
 import Solidity.Syntax.Quote
-import Solidity.Semantics.HeapErase
+import Solidity.Semantics.Heap
 
 /-!
 # The typed state
@@ -16,9 +16,10 @@ identities stay, so the erasure does too.
 The terms read the typed state itself (`Signature.lean`, W9.8).  Its
 value-level erasure, the global part (`State.globE`, `Semantics.lean`'s
 state with no locals) and each local at its type (`State.getE`,
-`State.loc`), is what the untyped interpreter's lemmas are read on.  Each operation's erasure is one lemma here
-(`State.adopt_globE`, `State.copyStToM_erase`, …), from which each typed
-step's follows (`Semantics/TypedErase.lean`).
+`State.loc`), is what the untyped interpreter's lemmas are read on.  Each
+operation's erasure is one lemma of `Semantics/Erase.lean`
+(`State.adopt_globE`, `State.copyStToM_erase`, …): this module imports no
+erasure module (W10.5.1).
 -/
 
 namespace Solidity
@@ -166,10 +167,6 @@ memory, no locals. -/
 def init (C : Contract) : State C [] :=
   { storage := Storage.init C, H := [], heap := Heap.empty, env := () }
 
-theorem init_globE (C : Contract) : (State.init C).globE = { storage := C.initStorage } := by
-  simp only [globE, init, Storage.init_erase]
-  rfl
-
 /-- A local declared. -/
 def push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : State C (t :: Γ) :=
   { σ with env := (v, σ.env) }
@@ -182,12 +179,13 @@ def setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
 def drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : State C Γ :=
   { σ with env := TEnv.drop h σ.env }
 
+/-- The global part of a typed state: the state without its locals. -/
+def glob (σ : State C Γ) : State C [] :=
+  { storage := σ.storage, H := σ.H, heap := σ.heap, env := (), net := σ.net,
+    selfBalance := σ.selfBalance, tx := σ.tx }
+
 /-- The storage replaced. -/
 def withStorage (σ : State C Γ) (st : Storage C) : State C Γ := { σ with storage := st }
-
-theorem globE_heap (σ : State C Γ) : σ.globE.heap = σ.heap.erase := rfl
-
-theorem globE_nextId (σ : State C Γ) : σ.globE.nextId = σ.H.length := rfl
 
 /-! ### Allocation -/
 
@@ -197,60 +195,23 @@ def adopt {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
     (σ' : State C Γ) × α σ'.H :=
   ⟨{ σ with H := g.H', heap := g.heap, env := TEnv.wk g.ext Γ σ.env }, g.val⟩
 
-/-- The adopted state's global part is the old one with the grown heap. -/
-theorem adopt_globE {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
-    (σ.adopt g).1.globE = Heap.into σ.globE g.heap := rfl
-
-/-- The adopted state's locals read as they did. -/
-theorem adopt_getE {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) {t : LTy} (i : Idx Γ t) :
-    (σ.adopt g).1.getE i = σ.getE i := by
-  simp only [adopt, getE, TEnv.get_wk, LTy.TDenote.erase_wk]
-
-theorem adopt_loc {α : HTy → Type} (σ : State C Γ) (g : Grown σ.H α) :
-    (σ.adopt g).1.loc = σ.loc := by
-  funext t i
-  exact adopt_getE σ g i
-
 /-- A fresh object (`State.alloc`): the heap grows by its type. -/
 def alloc {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
     (σ' : State C Γ) × MVal σ'.H (.ref R) :=
   σ.adopt (Grown.alloc ⟨List.prefix_refl _, σ.heap, o⟩)
-
-theorem alloc_erase {R : RefTy} (σ : State C Γ) (o : MObj σ.H R) :
-    σ.globE.alloc (MObj.erase R o) =
-      ((σ.alloc o).1.globE, ((σ.alloc o).2 : HRef _ R).id) := by
-  rw [Heap.alloc_erase (globE_heap σ) (globE_nextId σ) o, alloc, adopt_globE]
-  rfl
 
 /-- A storage value copied into fresh objects (`copyStToM`). -/
 def copyStToM {T : Ty} (σ : State C Γ) (v : SVal T) (h : T.mapFree = true) :
     (σ' : State C Γ) × MVal σ'.H T :=
   σ.adopt (v.copyStToM σ.heap h)
 
-theorem copyStToM_erase {T : Ty} (σ : State C Γ) (v : SVal T) (h : T.mapFree = true) :
-    Semantics.copyStToM σ.globE v.erase =
-      .ok ((σ.copyStToM v h).1.globE, MVal.erase T (σ.copyStToM v h).2) := by
-  rw [SVal.copyStToM_erase v h σ.heap σ.globE (globE_heap σ) (globE_nextId σ), copyStToM,
-    adopt_globE]
-  rfl
-
 /-- A fresh default object (`allocDefault`). -/
 def allocDefault (σ : State C Γ) (R : RefTy) (h : (Ty.ref R).mapFree = true) :
     (σ' : State C Γ) × MVal σ'.H (.ref R) :=
   σ.adopt (σ.heap.allocDefault R h)
 
-theorem allocDefault_erase (σ : State C Γ) (R : RefTy) (h : (Ty.ref R).mapFree = true) :
-    Semantics.allocDefault σ.globE R =
-      .ok ((σ.allocDefault R h).1.globE, ((σ.allocDefault R h).2 : HRef _ (R)).id) := by
-  rw [Heap.allocDefault_erase (globE_heap σ) (globE_nextId σ) R h, allocDefault, adopt_globE]
-  rfl
-
 /-- A memory value copied to storage (`copyMem`). -/
 def copyMToSt {T : Ty} (σ : State C Γ) (v : MVal σ.H T) : SVal T := MVal.copyMToSt σ.heap v
-
-theorem copyMem_erase {T : Ty} (σ : State C Γ) (v : MVal σ.H T) :
-    Semantics.copyMem σ.globE (MVal.erase T v) = .ok (σ.copyMToSt v).erase :=
-  MVal.copyMem_erase (globE_heap σ) v
 
 /-- A fresh `Person` in memory: its members' objects first, then its own,
 so the heap typing grows by three; its `age` reads its default.  By the

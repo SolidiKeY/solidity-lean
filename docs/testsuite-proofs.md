@@ -369,10 +369,10 @@ of an empty array) stay reverts, as in KeY, where a box accepts them.
   (`Semantics/NoPanic.lean`: `Prog.run_noPanic`, a program whose
   `Prog.asserts` is `false` never ends in `panic`), as master proved it of
   the untyped run; an expression of the typed run does not panic
-  (`Val.evalT_noPanic`, `Semantics/TypedErase.lean`), nor does any step but
+  (`Val.evalT_noPanic`, `Semantics/NoPanic.lean` since W10.5.1), nor does any step but
   `assert` (`TRun.push_noPanic` … `TRun.seq_noPanic`).  The untyped
-  operations' lemmas stay (`Semantics/NoPanicOps.lean`, the `no_panic`
-  tactic), for the closer's terms.
+  operations' lemmas stayed (`Semantics/NoPanicOps`, the `no_panic`
+  tactic), for the closer's terms; unread, they went at W10.5.1.
 - **The taclet.** `Taclet.assertSimple` is KeY's: `⟨[ assert(se); ]⟩ ⇝
   se = true ⟹ ⟨[ ]⟩ ; se = true`, "Holds" and "Violated" (the new premise
   `Premise.check`, `Proves.check` with goals `thn` and `els`, `checkRule`,
@@ -422,8 +422,8 @@ never meets: the kernel decides runs (`corpus_decide`) and the `LFml`
 reduction, not `holds` of a modality.
 
 Second review fixes: the `*_noPanic` lemmas are in the simp set
-`no_panic_simp` (`Semantics/NoPanicSimp.lean`), not the default one, and
-`Semantics/NoPanicOps.lean` closes with `simp only`; `no_panic`,
+`no_panic_simp` (`Semantics/NoPanicSimp`), not the default one, and
+`Semantics/NoPanicOps` closes with `simp only` (both gone at W10.5.1); `no_panic`,
 `no_panic_iff` and `sound_unfold`'s panic cases use `simp only` /
 `simp_all only`.  `NoPanic.ne_of_eq` is the one proof that a halt of a
 computation that does not panic is not a panic.  `#verify` runs the

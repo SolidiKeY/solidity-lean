@@ -1,6 +1,5 @@
 import Solidity.Update
-import Solidity.Semantics.TypedErase
-import Solidity.Semantics.StorageErase
+import Solidity.Semantics.Run
 import Solidity.Theory.Typed.Obs
 
 /-!
@@ -162,11 +161,6 @@ def MvT.toMVal (H : HTy) : (T : Ty) → MvT T → Option (MVal H T)
   | .sts s => Storage (Contract.ofStruct s)
   | .spath s T => SRef (Contract.ofStruct s) T
   | .kint => Int
-
-/-- The global part of a typed state: the state without its locals. -/
-def State.glob {Γ : Ctx} (σ : State C Γ) : State C [] :=
-  { storage := σ.storage, H := σ.H, heap := σ.heap, env := (), net := σ.net,
-    selfBalance := σ.selfBalance, tx := σ.tx }
 
 /-- The memory as it is: the heap grown by nothing. -/
 def State.memT (g : State C []) : Grown g.H (fun _ => Unit) := ⟨List.prefix_refl _, g.heap, ()⟩

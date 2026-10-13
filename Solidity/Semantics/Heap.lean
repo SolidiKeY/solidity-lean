@@ -1,4 +1,4 @@
-import Solidity.Semantics.StorageErase
+import Solidity.Semantics.Storage
 
 /-!
 # Typed heap
@@ -233,7 +233,7 @@ def setIndex {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) (
     some (hp.set r (MObj.setElem a (hp.get r) i.toNat v))
   else none
 
-/-- `mv.length` (`memArrayLen`). -/
+/-- `mv.length`. -/
 def len {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E) : Nat :=
   (MObj.elems a (hp.get r)).length
 

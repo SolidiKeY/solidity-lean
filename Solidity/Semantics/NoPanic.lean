@@ -1,4 +1,4 @@
-import Solidity.Semantics.TypedErase
+import Solidity.Semantics.Run
 
 /-!
 # Only an `assert` panics
@@ -6,7 +6,7 @@ import Solidity.Semantics.TypedErase
 `THalt.panic` is the halt no modality accepts, and the typed run raises it
 in one place, a failed `assert` (`TRun.assert`).  Every other step halts
 with `revert`, `exhausted` or `diverge`: an expression does not panic
-(`Val.evalT_noPanic`, `Semantics/TypedErase.lean`), nor does a write, an
+(`Val.evalT_noPanic`, below), nor does a write, an
 allocation, a call's entry or a `try`'s decoding.  So a program with no
 `assert` in it (`Prog.asserts`, in a branch, a block, a loop or a called
 body) never panics (`Prog.run_noPanic`), on every typed state, inside the
@@ -20,6 +20,103 @@ does for `TRes.Ends`.
 namespace Solidity
 
 variable {C : Contract}
+
+/-! ## Typed results
+
+Moved from `Semantics/TypedErase.lean` at W10.5.1: nothing here is erased. -/
+
+/-- A typed result that does not panic (an expression's: it reverts or
+diverges only). -/
+def TRes.NoPanic {α : Type} (t : TRes α) : Prop := t ≠ .error .panic
+
+theorem TRes.NoPanic.bind {α γ : Type} {t : TRes α} (h : t.NoPanic) {k : α → TRes γ}
+    (hk : ∀ a, (k a).NoPanic) : (t >>= k).NoPanic := by
+  match t with
+  | .ok a => exact hk a
+  | .error e => exact fun h' => h (by cases h'; rfl)
+
+theorem TRes.NoPanic.ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).NoPanic := by
+  cases x <;> exact fun h => nomatch h
+
+/-! ## An expression does not panic -/
+
+section Eval
+
+variable {Γ : Ctx}
+
+mutual
+
+theorem SPath.resolveT_noPanic (σ : State C Γ) : {T : Ty} → (b : SPath C Γ T) →
+    (b.resolveT σ).NoPanic
+  | _, .alias i => by
+    show (match (TEnv.get i σ.env : Option (SRef C _)) with
+      | some r => .ok r
+      | none => .error .revert : TRes _).NoPanic
+    cases (TEnv.get i σ.env : Option (SRef C _)) <;> exact fun h => nomatch h
+  | _, .loc l => l.resolveT_noPanic σ
+
+theorem Loc.resolveT_noPanic (σ : State C Γ) : {T : Ty} → (l : Loc C Γ T) →
+    (l.resolveT σ).NoPanic
+  | _, .root .. => fun h => nomatch h
+  | _, .field b _ _ => (b.resolveT_noPanic σ).bind fun _ => fun h => nomatch h
+  | _, .index _ b i => (b.resolveT_noPanic σ).bind fun _ => (i.evalT_noPanic σ).bind fun _ =>
+      (TRes.NoPanic.ofOpt _).bind fun _ => fun h => nomatch h
+
+theorem MPath.mvalT_noPanic (σ : State C Γ) : {T : Ty} → (b : MPath C Γ T) →
+    (b.mvalT σ).NoPanic
+  | _, .var i _ => by
+    show (match (TEnv.get i σ.env : Option (HRef σ.H _)) with
+      | some r => .ok r
+      | none => .error .revert : TRes _).NoPanic
+    cases (TEnv.get i σ.env : Option (HRef σ.H _)) <;> exact fun h => nomatch h
+  | _, .loc l => (l.addrT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
+
+theorem MLoc.addrT_noPanic (σ : State C Γ) : {T : Ty} → (l : MLoc C Γ T) →
+    (l.addrT σ).NoPanic
+  | _, .field b _ _ => (b.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
+  | _, .index _ b i => (b.mvalT_noPanic σ).bind fun _ => (i.evalT_noPanic σ).bind fun _ =>
+      fun h => nomatch h
+
+theorem Val.evalT_noPanic (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) →
+    (v.evalT σ).NoPanic
+  | _, .simple _ => fun h => nomatch h
+  | _, .read l => (l.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
+      fun h => nomatch h
+  | _, .binop op _ hq a b => by
+    subst hq
+    refine (a.evalT_noPanic σ).bind fun x => ?_
+    show (match op.shortT x with
+      | some y => pure y
+      | none => do
+        let y ← b.evalT σ
+        TRes.ofOpt (op.evalT x y) : TRes _).NoPanic
+    cases op.shortT x with
+    | some _ => exact fun h => nomatch h
+    | none => exact (b.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
+  | _, .unop op _ hq a => by
+    subst hq
+    exact (a.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
+  | _, .ternary c a b => (c.evalT_noPanic σ).bind fun x => by
+    cases x
+    · exact b.evalT_noPanic σ
+    · exact a.evalT_noPanic σ
+  | _, .readMem l => (l.addrT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
+  | _, .len b hp => by
+    subst hp
+    exact (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
+      fun h => nomatch h
+  | _, .mlen b hp => by
+    subst hp
+    exact (b.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
+
+end
+
+theorem Src.valueT_noPanic (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valueT σ).NoPanic := by
+  cases r with
+  | val v => exact (v.evalT_noPanic σ).bind fun _ => fun h => nomatch h
+  | copy p _ => exact (p.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
+
+end Eval
 
 /-! ## Assertions -/
 

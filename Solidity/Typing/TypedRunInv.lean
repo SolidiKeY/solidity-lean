@@ -1,6 +1,7 @@
 import Solidity.Typing.Soundness
 import Solidity.Semantics.RunFrame
 import Solidity.Typing.TypedWT
+import Solidity.Semantics.TypedErase
 
 /-!
 # Invariants of the typed run

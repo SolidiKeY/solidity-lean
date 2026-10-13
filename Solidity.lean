@@ -15,7 +15,6 @@ import Solidity.Semantics
 import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
 import Solidity.Semantics.WellFormed
-import Solidity.Semantics.NoPanicOps
 import Solidity.Semantics.Value
 import Solidity.Semantics.Ops
 import Solidity.Semantics.Storage
@@ -23,6 +22,7 @@ import Solidity.Semantics.StorageErase
 import Solidity.Semantics.Heap
 import Solidity.Semantics.HeapErase
 import Solidity.Semantics.State
+import Solidity.Semantics.Erase
 import Solidity.Semantics.Run
 import Solidity.Semantics.TypedErase
 import Solidity.Semantics.NoPanic
@@ -30,7 +30,6 @@ import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.ToSem
-import Solidity.Semantics.StateErase
 import Solidity.Update
 import Solidity.Signature
 import Solidity.Calculus.RuleSyntax
@@ -228,13 +227,11 @@ import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Typed.Mem
 import Solidity.Theory.Segs
 import Solidity.Theory.Bridge.Denote
-import Solidity.Theory.StateWrites
 import Solidity.Calculus.KeyTaclets
 import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Parser
 import Solidity.SortCheck.Faithfulness
 import Solidity.Counterexamples.PreFixSortAnnotations
-import Solidity.Counterexamples.WellTypedNecessity
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort
 import Solidity.Evm.Layout

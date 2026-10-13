@@ -325,7 +325,6 @@ end
 def defaultForRef (ref : RefTy) : SVal :=
   defaultForTy (Ty.ref ref)
 
-
 /-- Shape-preserving default (`defaultOf` on the current value):
 `delete` resets primitives, recurses into struct fields and array elements —
 but leaves mappings untouched (entries and default), the Solidity `delete`
@@ -585,9 +584,6 @@ def getEnv (s : State) (name : Var) : Res Binding :=
   | some b => .ok b
   | none => .error .undef
 
-def setEnv (s : State) (name : Var) (b : Binding) : State :=
-  { s with env := setBy name b s.env }
-
 def getObj (s : State) (id : Nat) : Res MObj :=
   match lookupBy id s.heap with
   | some obj => .ok obj
@@ -602,9 +598,6 @@ def alloc (s : State) (obj : MObj) : State × Nat :=
 
 def getNet (s : State) (addr : Int) : Int :=
   (lookupBy addr s.net).getD 0
-
-def setNet (s : State) (addr amount : Int) : State :=
-  { s with net := setBy addr amount s.net }
 
 /-- A value of the environment: `msg.sender` is `tx.msgSender`,
 `address(this).balance` the funds `transfer` debits. -/
@@ -737,10 +730,6 @@ def Value.keyAt : PrimTy -> Value -> Res Int
   | .bool, v => do pure (cond (← v.asBool) 1 0)
   | .uint, v => v.asInt
   | .int, v => v.asInt
-
-theorem Value.keyAt_numeric {k : PrimTy} (hk : k.isNumeric = true) (v : Value) :
-    v.keyAt k = v.asInt := by
-  cases k <;> first | rfl | exact absurd hk (by decide)
 
 def SVal.asValue : SVal -> Res Value
   | SVal.int v => .ok (Value.int v)
@@ -898,7 +887,6 @@ theorem checkArith_ok_eq {ty : Ty} {v w : Value}
           | bool => exact (Except.ok.inj h).symm
       | ref r => exact (Except.ok.inj h).symm
 
-
 /-! ## Memory addresses
 
 `++`/`--` and `op=` on a memory location resolve it once, then read and
@@ -1034,66 +1022,6 @@ def State.testSuiteStore : State :=
         ("ledgerMap", SVal.map [] (defaultForRef (RefTy.struct "Ledger"))),
         ("mapArray", SVal.array [] [] false) ] }
 
-/-- `solc/SolcExpressions.sol`. `v` ports to `counter`: `v` is a local
-`uint` in twelve functions across the suites. -/
-def State.solcExpressionsStore : State :=
-  { storage := [("counter", SVal.int 0)] }
-
-/-- `solc/SolcStructs.sol`, less the `Flagged`/`Depth*` family (see
-`structDef`). -/
-def State.solcStructsStore : State :=
-  { storage :=
-      [ ("data1", defaultForRef (RefTy.struct "Simple")),
-        ("withArray", defaultForRef (RefTy.struct "WithArray")),
-        ("triple", defaultForRef (RefTy.struct "Triple")),
-        ("neighbourBefore", SVal.int 0),
-        ("neighbourAfter", SVal.int 0),
-        ("source", defaultForRef (RefTy.struct "Pair")),
-        ("target", defaultForRef (RefTy.struct "Pair")),
-        ("pairs1", SVal.array [] [] false),
-        ("pairs2", SVal.array [] [] false),
-        ("campaigns", SVal.map [] (defaultForRef (RefTy.struct "Simple"))) ] }
-
-/-- `solc/SolcArrays.sol`. -/
-def State.solcArraysStore : State :=
-  { storage :=
-      [ ("storageArray", SVal.array [] [] false),
-        ("matrix", SVal.array [] [] false),
-        ("structs", SVal.array [] [] false) ] }
-
-/-- `solc/SolcMemory.sol`. `x` ports to `outerX` (`x` is the stack `uint`
-root), `inner` to `innerS` (`inner` is a local storage alias in
-`SolcStructs`), `data` to `inners` (`data` is a `Depth0` state variable
-in `SolcStructs`). -/
-def State.solcMemoryStore : State :=
-  { storage :=
-      [ ("outerX", defaultForRef (RefTy.struct "Outer")),
-        ("innerS", defaultForRef (RefTy.struct "Inner")),
-        ("inners", SVal.array [] [] false),
-        ("prims", SVal.array [] [] false) ] }
-
-/-- `solc/SolcMappings.sol`. `s` ports to `sBox` (`s` is a local
-`Inner memory` in `SolcMemory`) and `m` to `sMap` (`m` is an existing
-local storage-alias name). -/
-def State.solcMappingsStore : State :=
-  { storage :=
-      [ ("sBox", defaultForRef (RefTy.struct "S")),
-        ("withSub", defaultForRef (RefTy.struct "WithSub")),
-        ("sMap", SVal.map [] (defaultForRef (RefTy.struct "S"))),
-        ("withSubMap", SVal.map [] (defaultForRef (RefTy.struct "WithSub"))),
-        ("balances", SVal.map [] (SVal.int 0)),
-        ("arrayMap", SVal.map [] (SVal.array [] [] false)),
-        ("rows", SVal.array [] [] false),
-        ("ledger", defaultForRef (RefTy.struct "Ledger")) ] }
-
-/-- `solc/SolcControlFlow.sol`. -/
-def State.solcControlFlowStore : State :=
-  { storage :=
-      [ ("sx", defaultForRef (RefTy.struct "Pair")),
-        ("sy", defaultForRef (RefTy.struct "Pair")),
-        ("target", defaultForRef (RefTy.struct "Pair")),
-        ("values", SVal.array [] [] false) ] }
-
 end Semantics
 
 /-! ## Running a program -/
@@ -1102,35 +1030,15 @@ open Semantics
 
 variable {C : Contract}
 
-/-- The path an alias is bound to. -/
-def Semantics.aliasPath (σ : State) (x : Var) : Res (Name × List Seg) := do
-  match ← σ.getEnv x with
-  | .spath root segs => pure (root, segs)
-  | .unset => .error .revert
-  | .val _ | .mref _ | .store _ | .ledger _ => .error .undef
-
 /-- A word is stored as it is. -/
 @[simp] theorem Semantics.State.writeStorage_prim (σ : State) (r : Name) (segs : List Seg) (p : PrimVal) :
     σ.writeStorage r segs (.prim p) = σ.saveStorage r segs (.prim p) := rfl
-
-/-- A word is stored as it is: `alice.age = 10;` is a `save`. -/
-@[simp] theorem Semantics.State.writeStorage_toSVal (σ : State) (r : Name) (segs : List Seg) (v : Value) :
-    σ.writeStorage r segs v.toSVal = σ.saveStorage r segs v.toSVal := by
-  cases v <;> rfl
 
 /-- `-x` is range-checked at `int` only. -/
 def unopCheck (op : UnOp) (p : PrimTy) (v : Value) : Res Value :=
   match op, p with
   | .neg, .int => checkArith .int v
   | _, _ => pure v
-
-/-- `c ? t : e` once `c` is evaluated: the branch it picks (the other is
-never evaluated). -/
-def pickBranch (cv : Value) (t e : Res Value) : Res Value :=
-  match cv with
-  | .bool true => t
-  | .bool false => e
-  | .int _ => .error .undef
 
 /-- `a ⊕ b` on values, the right operand evaluated only when the left does not decide. -/
 def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : Res Value :=
@@ -1144,17 +1052,6 @@ def arrayLen (σ : State) (r : Name) (segs : List Seg) : Res Value := do
   match ← σ.findStorage r segs with
   | .array elems _ _ => pure (.int elems.length)
   | .prim _ | .struct _ | .map _ _ => .error .undef
-
-/-- The length of the memory array `id`: `xs.length`. -/
-def memArrayLen (σ : State) (id : Nat) : Res Value := do
-  match ← σ.getObj id with
-  | .array elems _ => pure (.int elems.length)
-  | .struct _ => .error .undef
-
-/-- A memory slot read as the object it references: a primitive has none. -/
-def Semantics.MVal.asRef : MVal → Res Nat
-  | .ref id => pure id
-  | .prim _ => .error .undef
 
 /-- The default `uint x;` binds. -/
 def PrimTy.default : PrimTy → Value
@@ -1276,14 +1173,6 @@ theorem Semantics.State.pay_eq (σ : State) (addr amt : Int) : σ.pay addr amt =
     { σ with net := if addr = σ.tx.selfAddress then σ.net
       else setBy addr (σ.getNet addr - amt) σ.net } := rfl
 
-/-- `a.transfer(v)` with both evaluated: book the payment on the ledger.  A
-negative amount reverts (solc's amount is a `uint`, never negative on the
-EVM; here one can be, from an out-of-range environment value such as
-`msg.value` or a storage word). -/
-def transferAt (σ : State) (addr amt : Int) : Res State :=
-  if amt < 0 then .error .revert
-  else .ok (σ.pay addr amt)
-
 /-- The external call a `send` makes: `amt` to `addr` with empty calldata,
 which reaches the recipient's `receive` (or fallback) function. -/
 def sendKey (addr amt : Int) : ExtKey := ⟨addr, "", [.int amt]⟩
@@ -1295,16 +1184,6 @@ def Semantics.PrimVal.fits : Value → PrimTy → Bool
   | .int n, .uint => decide (0 ≤ n ∧ n < uintBound)
   | .int n, .int => decide (-intBound ≤ n ∧ n < intBound)
   | _, _ => false
-
-/-- The locals an external call's outcome binds, from its data in order, as
-the caller decodes it: data too short, or a word that is not a value of its
-local's type, reverts (in the caller: no `catch` clause catches it).  Data
-past the last local is not read. -/
-def bindData : List (PrimTy × Var) → List Value → State → Res State
-  | [], _, σ => pure σ
-  | (p, x) :: xs, v :: vs, σ =>
-    if v.fits p then bindData xs vs (σ.setEnv x (.val v)) else .error .revert
-  | _ :: _, [], _ => .error .revert
 
 /-! ## Each contract starts in its store -/
 
@@ -1333,43 +1212,6 @@ at the default `Person`. -/
 theorem initStorage_standardExample :
     StandardExample.initStorage = State.exampleStore.storage := by
   simp [StandardExample, initStorage, State.exampleStore, defaultForRef, defaultForTy]
-
-/-- `TestSuite` starts in `State.testSuiteStore`; `bool flag;` at `false`. -/
-theorem initStorage_testSuite :
-    TestSuite.initStorage = State.testSuiteStore.storage := by
-  simp [TestSuite, initStorage, State.testSuiteStore, defaultForRef, defaultForTy]
-
-/-- `SolcExpressions` starts in its store: `uint counter;` at `0`. -/
-theorem initStorage_solcExpressions :
-    SolcExpressions.initStorage = State.solcExpressionsStore.storage := by
-  simp [SolcExpressions, initStorage, State.solcExpressionsStore, defaultForTy]
-
-/-- `SolcStructs` starts in its store: `Pair source;` at the default `Pair`. -/
-theorem initStorage_solcStructs :
-    SolcStructs.initStorage = State.solcStructsStore.storage := by
-  simp [SolcStructs, initStorage, State.solcStructsStore, defaultForRef, defaultForTy]
-
-/-- `SolcArrays` starts in its store: `uint[] storageArray;` empty. -/
-theorem initStorage_solcArrays :
-    SolcArrays.initStorage = State.solcArraysStore.storage := by
-  simp [SolcArrays, initStorage, State.solcArraysStore, defaultForTy]
-
-/-- `SolcMemory` starts in its store: `Outer outerX;` at the default `Outer`. -/
-theorem initStorage_solcMemory :
-    SolcMemory.initStorage = State.solcMemoryStore.storage := by
-  simp [SolcMemory, initStorage, State.solcMemoryStore, defaultForRef, defaultForTy]
-
-/-- `SolcMappings` starts in its store: `mapping(uint => S) sMap;` maps every
-key to the default `S`. -/
-theorem initStorage_solcMappings :
-    SolcMappings.initStorage = State.solcMappingsStore.storage := by
-  simp [SolcMappings, initStorage, State.solcMappingsStore, defaultForRef, defaultForTy]
-
-/-- `SolcControlFlow` starts in its store: `uint[] values;` empty. -/
-theorem initStorage_solcControlFlow :
-    SolcControlFlow.initStorage = State.solcControlFlowStore.storage := by
-  simp [SolcControlFlow, initStorage, State.solcControlFlowStore, defaultForRef,
-    defaultForTy]
 
 end
 

@@ -1,4 +1,5 @@
 import Solidity.Evm.Sim
+import Solidity.Semantics.TypedErase
 
 /-!
 # Expressions over the typed run

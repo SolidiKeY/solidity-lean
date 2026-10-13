@@ -1,5 +1,6 @@
 import Solidity.Typing.Soundness
 import Solidity.Semantics.State
+import Solidity.Semantics.TypedErase
 
 /-!
 # A typed state erases to a well-typed one

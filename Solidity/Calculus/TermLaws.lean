@@ -2,6 +2,7 @@ import Solidity.Calculus.TermLib
 import Solidity.Calculus.SeqRewrite
 import Solidity.Calculus.StateFacts
 import Solidity.Theory.Typed.Mem
+import Solidity.Semantics.TypedErase
 
 /-!
 # The term laws at an update's right-hand sides, scoped

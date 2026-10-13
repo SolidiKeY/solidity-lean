@@ -1,5 +1,6 @@
 import Solidity.Typing.TypedRunInv
 import Solidity.Semantics.Ends
+import Solidity.Semantics.TypedErase
 
 /-!
 # What every reachable state satisfies beyond its types

@@ -3,6 +3,7 @@ import Solidity.Calculus.TermEq
 import Solidity.Calculus.Rules
 import Solidity.Calculus.StateFacts
 import Solidity.Calculus.PrintTerm
+import Solidity.Semantics.TypedErase
 
 /-!
 # Term taclets on scoped terms

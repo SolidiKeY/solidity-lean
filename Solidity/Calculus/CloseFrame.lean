@@ -316,7 +316,7 @@ theorem map_const_eq_some {α β : Type} (x : Option α) (y w : β) :
   cases x <;> simp only [Option.map_none, Option.map_some, reduceCtorEq, Option.some.injEq,
     exists_false, and_false, exists_eq', and_true]
 
-/-- **A subtree read under the box** (the untyped `Modality.wp_box_findStorage`):
+/-- **A subtree read under the box**:
 in `[ alice = bob; ] alice.age == bob.age`, the tree read at `bob` reads
 below what the storage reads below `bob`.  A word read is named bare: the
 fact would be an obligation where the read stands under a negation. -/
@@ -426,7 +426,7 @@ theorem withNet_memT_readId {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) {
 theorem withBalance_memT_readId {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) {T : Ty}
     (a : MAddrT T) : (g.withBalance b).1.memT.readId a = g.1.memT.readId a := rfl
 
-/-- **A memory write under the box** (the untyped `Modality.wp_box_writeAddr`):
+/-- **A memory write under the box**:
 after `m.age = 5;` the memory reads `5` at `m.age`, and as before at every
 address apart from it. -/
 theorem wp_box_writeT {H : HTy} {T : Ty} {m : Grown H (fun _ => Unit)} {a : MAddrT T} {v : MvT T}

@@ -1,9 +1,9 @@
 import Solidity.Typing.CanonTest
 import Solidity.Calculus.SurfaceSpec
-import Solidity.Semantics.StateErase
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
 import Solidity.Calculus.Logic
+import Solidity.Semantics.Erase
 
 /-!
 # Obligations, as solkey states them
@@ -32,7 +32,7 @@ for every word, key and slot in range), and every word in its type's range
 (`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
-model's `push` (`pushOn`) never panics (at `2^256 - 1` elements it is out
+model's `push` (`Storage.push`) never panics (at `2^256 - 1` elements it is out
 of gas, which both modalities accept).  A diamond that reads a length back
 after a push (`storagePushReadBack`) is valid all the same, the length then
 at least `1`, though not derived.  And a diamond over a `push` with no

@@ -7115,6 +7115,94 @@ in certificates, so it stays a fold).  `Evm/Correct` keeps its
 `maxHeartbeats 10000`.  Removing `sol_close`'s untyped branch can only make
 it faster; no earlier speed change is undone.
 
+### W10.5.1 record (2026-10-13, branch `w105-1`)
+
+Dead untyped layers deleted, and the erasure moved off the typed core's
+import path.  No definition the Typing, EVM or memory proofs read changed;
+net −2.5k lines (48 files, +372 −2849 before this record).
+
+- **Modules deleted.**  `Semantics/StateErase` (47 lines: `LTy.enc`,
+  `withLocals`, `Idx.name_*`, unread since W10.4; its five importers needed
+  nothing of it), `Semantics/NoPanicOps` (310) and `NoPanicSimp` (15: no
+  `*_noPanic` of an untyped operation was read), `Theory/StateWrites` (130:
+  `close_rw`'s only), `Counterexamples/WellTypedNecessity` (82): its
+  `badStore` is an untyped state, and its point, that no typed state is
+  one, holds by construction (`State.glob_wt`); with no untyped read left
+  in the closer there is nothing for it to pin.
+- **`sol_close`'s untyped branch.**  `Calculus/Close.lean` (309 → 151):
+  the five untyped elaborators are bare `syntax` now (the scoped ones attach
+  to `Solidity.tacticSol_close_*`), `close_rw`/`close_rw_last` and their
+  lists gone, with the binding lemmas.  `Calculus/CloseLemmas.lean` (453 →
+  246): the seven untyped `Modality.wp_box_*`, the 22 value and operator
+  lemmas only `close_rw` listed.  `Calculus/ReadWrite.lean` (1491 → 695):
+  the storage read-after-write and the path comparison (`Prefix`,
+  `Diverge`, `after`), push/pop, `Apart` and the untyped
+  `readAddr_writeAddr_same` (the rule map now cites `Heap`'s), the
+  transfer and environment frames.  Kept: `Modality.wp*`,
+  `Close.forall_unit`/`exists_unit`/`pure_eq_ok`/`bind_ok_right`, the
+  bitwise numerals and ledger lemmas, `Op*.eval_*` (all `close_rw_s`'s);
+  `ReadWrite`'s fresh default read along a path, `find_overlay_fields`,
+  `layAt_prim`, `fieldPath_*` (a bare `simp` in `find_strip_fields` reads
+  `fieldPath_nil`/`_at`), `readVal`, the copies (`TermLaws`, `MemRead`,
+  `Theory/Typed/Mem`).
+- **Dead declarations** (each by `rg`, then the build).  `Semantics.lean`
+  (1391 → 1233): `setEnv`, `setNet`, `aliasPath`, `pickBranch`,
+  `memArrayLen`, `MVal.asRef`, `bindData`, `transferAt`,
+  `writeStorage_toSVal`, `Value.keyAt_numeric`, the six `solc*Store`s and
+  seven `initStorage_*` (unread since the corpus went typed, `da3c04ab`);
+  `readLoc` stays (`opMem`/`bumpMem`, which `Typing/` reads).
+  `Semantics/Properties.lean` (986 → 770): the `setEnv`/`setNet` laws,
+  `findStorage_saveStorage_same`, the allocation-counter lemmas
+  (`State.alloc_*`, `copyStToM_nextId*`, `allocDefault_nextId*`,
+  `allocDefault_id_lt`), `Res.bind_eq_ok`.  `HeapErase`: `setObj_erase`,
+  `MObj.erase_setElem`, `memWriteField_erase`, `memWriteIndex_erase`,
+  `memArrayLen_erase`.  `StorageErase`: `SFields.get_eq_getM`,
+  `overlayElems_eq_zip`, the `copyStToM_ok` and `erase_of_ofU` mutual
+  blocks, the `solc*` typed stores and every store's `_erase`.
+  `TypedErase`: `evalBinop_short`/`_long`, `newArrT_erase`, `writeLoc_eq`,
+  `LTy.TDenote.erase_val`.  `State`: `adopt_getE`, `adopt_loc`.
+  `Typing/Constructibility`: `transferAt_se`.
+- **Moves.**  Into `Semantics/Storage.lean`: the recursor forms' `match`
+  twins (`SVal.find_eq_findM`, `findLive_eq_findLiveM`, `save_eq_saveM`,
+  the `find_*` arms), `SVal.find_save_same`, `mapFree_structDef`,
+  `Storage.standardExample`/`testSuite` (and the kernel example).  Into the
+  existing `Semantics/NoPanic.lean` (now over `Run`, not `TypedErase`):
+  `TRes.NoPanic` and the evaluators' no-panic lemmas; `Solidity.ok_bind`
+  into `Semantics/Run.lean`; `State.glob` from `Signature.lean` into
+  `Semantics/State.lean`; State's erasure lemmas (`init_globE`,
+  `globE_heap`, `globE_nextId`, `adopt_globE`, `alloc_erase`,
+  `copyStToM_erase`, `allocDefault_erase`, `copyMem_erase`) into a new
+  leaf, `Semantics/Erase.lean`.  Imports: `Heap` → `Storage`, `State` →
+  `Heap`, `Signature` → `Update`, `Run`, `Theory.Typed.Obs`; `HeapErase`
+  imports `StorageErase` and `TypedErase` imports `Erase`, so importing
+  `TypedErase` imports the erasure.  `Semantics/{Run,State,Heap,NoPanic}`
+  and `Signature.lean` import no erasure module.  The readers import it
+  themselves: `TypedErase` in `Typing/{Constructibility,Fits,Reachability,
+  TypedRunInv,TypedWT}`, `Evm/{Expr,Stmt}`, `Calculus/{TermLaws,TermLib}`,
+  `Theory/Typed/Mem`, `Tools/Run`; `Erase` in `Calculus/Problem`;
+  `Semantics.NoPanic` in `Calculus/Sound{Kit,Capture,Loops,Mem,Store}`
+  (found by a name sweep over the import closures, then the build).
+  `Calculus/Lands.lean`'s unused `import Solidity.Typing.Soundness` is
+  dropped; `Tools/Taclet`'s `scopedOnlyRoots` names `RemOk`, `TyLe`, `TyLt`
+  and `RunInv` unchecked (one backtick), so it needs neither chain.
+- **Not done here**: `Storage.wtB` (with W10.5.2).
+- **Docs**: `module-map.md` (four rows gone, `Semantics/Erase.lean` added,
+  ten rows restated), AGENTS.md's untyped list, `.claude/rules/typing.md`,
+  `lean-key-rule-map.md` (`readOnWrite*`, the ledger row,
+  `transferNoCallbackBox`), `solc-alignment.md` and `kernel-port.md`
+  (`transferAt`, `bindData`, `pushOn`, `aliasPathT` cited as the typed
+  names), `testsuite-proofs.md`'s `NoPanicOps` citations, stale docstrings.
+- **Checks**: `lean_build` of the default targets clean (278 jobs) after
+  the moves and again after the docs; `check-orphans` (296 reachable),
+  `check-doc-paths` clean; no new `sorry`, `axiom` or heartbeat override;
+  `TestSuite/Problems.lean` and `Corpus/Imported.lean` clean, and no
+  deleted name under `Solidity/TestSuite` or `Solidity/Corpus`
+  (`SolkeyTestSuite`, `SolidityCorpus` not rebuilt).
+- **Timings** (diagnostics wall, MCP round trip ≈3 s included, under a
+  concurrent KeY run on ≈11 cores): `Tactics/Decide` 18.0 and 26.6 s (gate
+  45), `ProofTree` 13.5 and 20.7 s (gate 11.7; 9.4 at W10.4 on a quiet
+  machine).  To re-time at low load before the merge.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

@@ -1,5 +1,6 @@
 import Solidity.Evm.Expr
 import Solidity.Semantics.NoPanic
+import Solidity.Semantics.TypedErase
 
 /-!
 # Statements over the typed run

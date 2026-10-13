@@ -34,8 +34,10 @@ implied by `Reachable` in general (`huge_reachable_not_fits`), implied under
 
 The run is `Semantics/Run.lean`'s, over typed states; `Semantics.lean` keeps
 the untyped state's operations, which the typed ones erase to
-(`Semantics/StorageErase.lean`, `HeapErase.lean`, `TypedErase.lean`) and the
-closer's terms read.
+(`Semantics/StorageErase.lean`, `HeapErase.lean`, `Semantics/Erase.lean`,
+`TypedErase.lean`) for the Typing chain, the EVM and the memory laws; the
+typed core (`State`, `Heap`, `Run`, `Signature.lean`) imports none of them
+(W10.5.1).
 
 Changes to the run that follow solc over KeY are recorded in
 `docs/solc-alignment.md`.

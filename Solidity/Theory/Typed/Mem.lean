@@ -1,5 +1,6 @@
 import Solidity.Calculus.StateFacts
 import Solidity.Semantics.HeapErase
+import Solidity.Semantics.TypedErase
 
 /-!
 # The Theory of memory, typed

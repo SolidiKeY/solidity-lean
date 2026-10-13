@@ -174,7 +174,7 @@ private def resultEx {Γ : Ctx} (P : Prog StandardExample [] (.val .uint :: Γ))
     Option Int :=
   (runEx P).toOption.map fun o => (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
 
-/-- A write through an alias bound to no path reverts (`aliasPath`); solc
+/-- A write through an alias bound to no path reverts (`SPath.resolveT`); solc
 rejects the program statically. -/
 theorem unsetAliasWrite : (runEx unsetAliasWriteCore).halt? = some .revert := by decide +kernel
 

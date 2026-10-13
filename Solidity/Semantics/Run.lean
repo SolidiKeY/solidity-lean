@@ -63,6 +63,10 @@ inductive THalt where
 
 abbrev TRes (α : Type) := Except THalt α
 
+/-- A bind of a result that returns: the continuation. -/
+theorem ok_bind {ε α β : Type} (a : α) (k : α → Except ε β) :
+    (Except.ok a : Except ε α) >>= k = k a := rfl
+
 def THalt.erase : THalt → Halt
   | .revert => .revert
   | .panic => .panic

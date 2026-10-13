@@ -171,14 +171,14 @@ def scopedOnlyRoots : List Lean.Name :=
    ``Solidity.Grown, ``Solidity.Heap, ``Solidity.Held, ``Solidity.HRef, ``Solidity.HTy,
    ``Solidity.Hyps, ``Solidity.LeanTaclet, ``Solidity.MFields, ``Solidity.MObj,
    ``Solidity.MVal, ``Solidity.NCtx, ``Solidity.Objs,
-   ``Solidity.Out, ``Solidity.Path, ``Solidity.Proves, ``Solidity.ProvesC, ``Solidity.RemOk,
-   ``Solidity.Rhs, ``Solidity.Rule, ``Solidity.RunInv,
+   ``Solidity.Out, ``Solidity.Path, ``Solidity.Proves, ``Solidity.ProvesC, `Solidity.RemOk,
+   ``Solidity.Rhs, ``Solidity.Rule, `Solidity.RunInv,
    ``Solidity.SFields, ``Solidity.Shape, ``Solidity.SList, ``Solidity.SMap, ``Solidity.SRef,
    ``Solidity.StateInv, ``Solidity.Storage, ``Solidity.Subst,
    ``Solidity.SVal, ``Solidity.SVec, ``Solidity.Taclet, ``Solidity.TEnv, ``Solidity.TGFrame,
    ``Solidity.THalt, ``Solidity.Thin, ``Solidity.TLocAgree, `Solidity.TLoop, ``Solidity.TRes,
-   `Solidity.TRun, ``Solidity.TStep, ``Solidity.TTx, ``Solidity.TWkRel, ``Solidity.TyLe,
-   ``Solidity.TyLt, `Solidity.Tms, ``Solidity.VShape]
+   `Solidity.TRun, ``Solidity.TStep, ``Solidity.TTx, ``Solidity.TWkRel, `Solidity.TyLe,
+   `Solidity.TyLt, `Solidity.Tms, ``Solidity.VShape]
 
 /-- Whether a full name printed in an escape is a scoped constant: it, or a
 namespace it is in, is a scoped family (`Delab.isScopedFamily`) or one of

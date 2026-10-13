@@ -1,5 +1,6 @@
 import Solidity.Typing.Constructibility
 import Solidity.Semantics.RunFrame
+import Solidity.Semantics.TypedErase
 
 /-!
 # Reachable storage fits (decision 77, its conditional form)

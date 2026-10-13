@@ -1,6 +1,7 @@
 import Solidity.Tools.Common
 import Solidity.Semantics.Run
 import Solidity.Semantics.ToSem
+import Solidity.Semantics.TypedErase
 
 /-!
 # `#run`: call a contract's function in the typed run

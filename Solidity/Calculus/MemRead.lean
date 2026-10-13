@@ -1171,8 +1171,7 @@ def LTm.newArrLen? {U : Ty} (S : LTm C (.sv U)) : Option (LTm C (.val .uint)) :=
   | .app1 o x => o.newArrArg x
   | _ => none
 
-/-- **An array's length, walked down a memory that returns**
-(`memArrayLen`): a write keeps every length, an allocation and a copy
+/-- **An array's length, walked down a memory that returns**: a write keeps every length, an allocation and a copy
 every older array's; a fresh dynamic array's is `0`, a copy of
 `new T[](n)`'s is `n`.  By the recursor on the depth. -/
 def lenAtN (n : Nat) : {E : Ty} → LTm C .mem → LTm C (.ident (.array E)) → LTm C (.val .uint) :=

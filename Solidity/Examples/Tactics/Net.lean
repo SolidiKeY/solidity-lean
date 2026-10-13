@@ -9,7 +9,7 @@ import Solidity.Tools.Inspect
 
 `a.transfer(v);` books a debit of `v` on the `net` ledger at `a`, with no
 callback (`transferNoCallbackBox`, solkey's `netHeader.key`), and does
-nothing else (`Semantics.transferAt`): `to`'s entry down by `v`, unless
+nothing else (`TRun.transfer`): `to`'s entry down by `v`, unless
 `to` is the contract itself (`this`, `address(this)`), which books nothing.
 The rule and its single-statement walk are `Payment.lean`'s.
 
@@ -245,7 +245,7 @@ theorem netSendOk :
   sol_close
 
 /-- A ledger read crosses a storage write: `total = 1;` leaves `net` as it
-was (`Modality.wp_box_saveStorage`). -/
+was (`CloseS.wp_box_write`). -/
 theorem netTransferThenStore :
     ⊨ dl!{ to != this → net(to) = 7 → [ to.transfer(5); total = 1; ] net(to) = 2 } := by
   sol_symex

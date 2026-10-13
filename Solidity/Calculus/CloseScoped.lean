@@ -33,8 +33,7 @@ only (`Tm.eval`, `Tm.denote`, `Rhs.eval`, `Upd.applyV`, `UpdElem.globT`)
 and the typed state's operations as `State.locV` and the global part's
 fields read them.  A storage write under the box is named on the spot with
 the typed laws in `Calculus/CloseFrame.lean` (above `TermLaws`, whose frame
-laws it reads).  The untyped interpreter's write-naming lemmas
-(`close_rw`'s) no longer meet a scoped leaf, whose storage is typed.
+laws it reads).
 -/
 
 namespace Solidity

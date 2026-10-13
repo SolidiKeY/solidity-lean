@@ -1,4 +1,5 @@
 import Solidity.Typing.Reachability
+import Solidity.Semantics.TypedErase
 
 /-!
 # Which storages are reachable, exactly
@@ -1487,7 +1488,6 @@ variable {C : Contract}
 
 open Build
 
-
 /-- Keys decide `nodupKeysB`. -/
 theorem nodupKeysB_of_map_fst_eq {α β : Type} :
     ∀ {l : List (Name × α)} {l' : List (Name × β)}, l.map (·.1) = l'.map (·.1) →
@@ -2611,12 +2611,6 @@ theorem memClear_se {a : Addr} : ∀ {T : Ty}, memClear σ a T = .ok σ' → SE 
   | .ref _, h => by
     obtain ⟨⟨σ₁, id⟩, h₁, h⟩ := bind_ok_inv h
     exact (allocDefault_se h₁).trans (writeAddr_se h)
-
-theorem transferAt_se {addr amt : Int} (h : transferAt σ addr amt = .ok σ') : SE σ σ' := by
-  unfold transferAt at h
-  split at h
-  · exact nomatch h
-  · cases h; rw [State.pay_eq]; exact ⟨rfl, rfl⟩
 
 theorem pay_se (addr amt : Int) : SE σ (σ.pay addr amt) := by
   rw [State.pay_eq]; exact ⟨rfl, rfl⟩

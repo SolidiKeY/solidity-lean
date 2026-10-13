@@ -157,24 +157,6 @@ theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
                     subst updated
                     simp only [SVal.find, lookupBy_setBy_self, ih hs]
 
-/-- State-level read-after-write, lifted through the storage-root map. -/
-theorem State.findStorage_saveStorage_same {s s' : State} {root : Name}
-    {path : List Seg} {new : SVal}
-    (h : s.saveStorage root path new = .ok s') :
-    s'.findStorage root path = .ok new := by
-  unfold State.saveStorage at h
-  cases hv : lookupBy root s.storage with
-  | none => simp only [hv, reduceCtorEq] at h
-  | some old =>
-      simp only [hv] at h
-      cases hs : old.save path new with
-      | error e => rw [hs] at h; contradiction
-      | ok updated =>
-          rw [hs] at h
-          injection h with h'
-          subst s'
-          simp only [State.findStorage, lookupBy_setBy_self, SVal.find_save_same hs]
-
 /-- A successful storage update changes only the storage component. -/
 theorem State.saveStorage_frame {s s' : State} {root : Name}
     {path : List Seg} {new : SVal}
@@ -201,33 +183,10 @@ lookup form, this also rules out duplicate stale entries at future IDs. -/
 def HeapWellFormed (s : State) : Prop :=
   ∀ id, s.nextId ≤ id → lookupBy id s.heap = none
 
-/-- Allocation returns the identifier it inserts. -/
-@[simp] theorem State.alloc_id (s : State) (obj : MObj) :
-    (s.alloc obj).2 = s.nextId := rfl
-
-/-- The next fresh identifier advances exactly once. -/
-@[simp] theorem State.alloc_nextId (s : State) (obj : MObj) :
-    (s.alloc obj).1.nextId = s.nextId + 1 := rfl
-
 /-- The freshly returned identifier reads back the allocated object. -/
 @[simp] theorem State.alloc_fresh (s : State) (obj : MObj) :
     (s.alloc obj).1.getObj (s.alloc obj).2 = .ok obj := by
   simp only [State.getObj, State.alloc, lookupBy_setBy_self]
-
-/-- Allocation leaves every other heap lookup unchanged. -/
-theorem State.alloc_preserves_getObj {s : State} {obj : MObj} {id : Nat}
-    (hne : id ≠ s.nextId) :
-    (s.alloc obj).1.getObj id = s.getObj id := by
-  simp only [State.getObj, State.alloc, lookupBy_setBy_ne hne]
-
-/-- Allocation does not change storage, local bindings, the network
-ledger, or the contract balance. -/
-theorem State.alloc_frame (s : State) (obj : MObj) :
-    (s.alloc obj).1.storage = s.storage ∧
-      (s.alloc obj).1.env = s.env ∧
-      (s.alloc obj).1.net = s.net ∧
-      (s.alloc obj).1.selfBalance = s.selfBalance :=
-  ⟨rfl, rfl, rfl, rfl⟩
 
 namespace HeapWellFormed
 
@@ -416,125 +375,6 @@ theorem alloc_ref (s : State) (obj : MObj) :
 
 end NextIdGrows
 
-mutual
-
-/-- A storage-to-memory copy only advances `nextId`. -/
-theorem copyStToM_nextId (s : State) (v : SVal) :
-    NextIdGrows s (copyStToM s v) := by
-  cases v with
-  | prim p =>
-      cases p with
-      | int v => exact NextIdGrows.pure s (MVal.int v)
-      | bool b => exact NextIdGrows.pure s (MVal.bool b)
-  | map entries dflt => intro t mv h; simp only [copyStToM, reduceCtorEq] at h
-  | struct fields =>
-      rw [copyStToM]
-      apply NextIdGrows.bind (copyStFields_nextId s fields)
-      intro t mfields
-      exact NextIdGrows.alloc_ref t (.struct mfields)
-  | array elems _ fx =>
-      rw [copyStToM]
-      apply NextIdGrows.bind (copyStElems_nextId s elems)
-      intro t melems
-      exact NextIdGrows.alloc_ref t (.array melems fx)
-
-theorem copyStFields_nextId (s : State) (fields : List (Name × SVal)) :
-    NextIdGrows s (copyStFields s fields) := by
-  cases fields with
-  | nil => exact NextIdGrows.pure s []
-  | cons field rest =>
-      obtain ⟨name, v⟩ := field
-      rw [copyStFields]
-      apply NextIdGrows.bind (copyStToM_nextId s v)
-      intro t mv
-      apply NextIdGrows.bind (copyStFields_nextId t rest)
-      intro u mrest
-      exact NextIdGrows.pure u ((name, mv) :: mrest)
-
-theorem copyStElems_nextId (s : State) (elems : List SVal) :
-    NextIdGrows s (copyStElems s elems) := by
-  cases elems with
-  | nil => exact NextIdGrows.pure s []
-  | cons v rest =>
-      rw [copyStElems]
-      apply NextIdGrows.bind (copyStToM_nextId s v)
-      intro t mv
-      apply NextIdGrows.bind (copyStElems_nextId t rest)
-      intro u mrest
-      exact NextIdGrows.pure u (mv :: mrest)
-
-end
-
-/-- A fresh default allocation only advances `nextId`, and by at least one:
-the object it mints is `nextId` itself. -/
-theorem allocDefault_nextId {s t : State} {ref : RefTy} {n : Nat}
-    (h : allocDefault s ref = .ok (t, n)) : s.nextId ≤ t.nextId := by
-  unfold allocDefault at h
-  cases hc : copyStToM s (defaultForRef ref) with
-  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
-  | ok tv =>
-      obtain ⟨t', mv⟩ := tv
-      rw [hc] at h
-      cases mv with
-      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
-      | ref m =>
-          simp only [Except.ok.injEq, Prod.mk.injEq] at h
-          exact h.1 ▸ copyStToM_nextId s _ t' _ hc
-
-/-- A copy that yields a *reference* allocated at least one object, so it
-advanced the counter strictly.  This is what makes the root `addM` mints
-genuinely below the counter afterwards, and hence not fresh
--- again the future denotation proof connecting the theory to the
-interpreter, not yet written (`denoteMem_new`). -/
-theorem copyStToM_nextId_lt {s t : State} {v : SVal} {n : Nat}
-    (h : copyStToM s v = .ok (t, .ref n)) : s.nextId < t.nextId := by
-  cases v with
-  | prim p => cases p <;> exact absurd h (by simp only [copyStToM_int, Except.ok.injEq,
-                                                 Prod.mk.injEq, reduceCtorEq, and_false,
-                                                 not_false_eq_true, copyStToM_bool])
-  | map entries dflt => exact absurd h (by simp only [copyStToM_map, reduceCtorEq,
-                                               not_false_eq_true])
-  | struct fields =>
-      rw [copyStToM] at h
-      cases hf : copyStFields s fields with
-      | error e => rw [hf] at h; exact absurd h (by simp only [bind, Except.bind, reduceCtorEq,
-                                                        not_false_eq_true])
-      | ok tf =>
-          obtain ⟨t', mfields⟩ := tf
-          rw [hf] at h
-          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq] at h
-          have hle : s.nextId ≤ t'.nextId := copyStFields_nextId s fields t' _ hf
-          have : t.nextId = t'.nextId + 1 := by rw [← h.1]; rfl
-          omega
-  | array elems =>
-      rw [copyStToM] at h
-      cases he : copyStElems s elems with
-      | error e => rw [he] at h; exact absurd h (by simp only [bind, Except.bind, reduceCtorEq,
-                                                        not_false_eq_true])
-      | ok te =>
-          obtain ⟨t', melems⟩ := te
-          rw [he] at h
-          simp only [bind, Except.bind, Except.ok.injEq, Prod.mk.injEq] at h
-          have hle : s.nextId ≤ t'.nextId := copyStElems_nextId s elems t' _ he
-          have : t.nextId = t'.nextId + 1 := by rw [← h.1]; rfl
-          omega
-
-/-- …hence a fresh default allocation advances the counter strictly. -/
-theorem allocDefault_nextId_lt {s t : State} {ref : RefTy} {n : Nat}
-    (h : allocDefault s ref = .ok (t, n)) : s.nextId < t.nextId := by
-  unfold allocDefault at h
-  cases hc : copyStToM s (defaultForRef ref) with
-  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
-  | ok tv =>
-      obtain ⟨t', mv⟩ := tv
-      rw [hc] at h
-      cases mv with
-      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
-      | ref m =>
-          simp only [Except.ok.injEq, Prod.mk.injEq] at h
-          exact h.1 ▸ copyStToM_nextId_lt hc
-
-
 /-! ## Heap extension
 
 A memory allocation changes the heap only above the counter: every object
@@ -678,22 +518,6 @@ theorem copyStToM_ref_lt {s t : State} {v : SVal} {n : Nat}
           obtain ⟨rfl, rfl⟩ := h
           exact Nat.lt_succ_self _
 
-/-- The identity a fresh default allocation returns is below the counter it leaves. -/
-theorem allocDefault_id_lt {s t : State} {R : RefTy} {n : Nat}
-    (h : allocDefault s R = .ok (t, n)) : n < t.nextId := by
-  unfold allocDefault at h
-  cases hc : copyStToM s (defaultForRef R) with
-  | error e => rw [hc] at h; exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
-  | ok tv =>
-      obtain ⟨t', mv⟩ := tv
-      rw [hc] at h
-      cases mv with
-      | prim p => exact absurd h (by simp only [reduceCtorEq, not_false_eq_true])
-      | ref m =>
-          simp only [Except.ok.injEq, Prod.mk.injEq] at h
-          obtain ⟨rfl, rfl⟩ := h
-          exact copyStToM_ref_lt hc
-
 /-! ## State-update algebra (`updateRules.key` analogues)
 
 KeY's update calculus applies parallel updates at the point of use
@@ -701,8 +525,7 @@ KeY's update calculus applies parallel updates at the point of use
 (`simplifyUpdate1-3`). The Lean model has no update syntax — state
 change is function application — so the semantic content of those rules
 is the read-after-write / frame / overwrite-absorption laws below.
-Storage instances already exist (`State.findStorage_saveStorage_same`,
-`State.saveStorage_frame`); these cover locals (`env`) and the payment
+Storage instances already exist (`State.saveStorage_frame`); these cover locals (`env`) and the payment
 ledger (`net`). The update-monoid normal-form machinery
 (`sequentialToParallel*`, `applyOnParallel`, skip elimination) is
 function composition and needs no port; `commuteSimpleUpdates` /
@@ -717,39 +540,6 @@ theorem setBy_setBy_self [DecidableEq κ] (k : κ) (v v' : α)
   | cons hd tl ih =>
       obtain ⟨k'', v''⟩ := hd
       by_cases h : k = k'' <;> simp only [h, setBy, ↓reduceIte, ih]
-
-/-- KeY `applyOnPV`/`applyOnPVLastInParallel` for locals: read after
-write at the point of application. -/
-@[simp] theorem State.getEnv_setEnv_self (s : State) (n : Var)
-    (b : Binding) : (s.setEnv n b).getEnv n = .ok b := by
-  simp only [State.getEnv, State.setEnv, lookupBy_setBy_self]
-
-/-- KeY `applyOnDifferentPV` for locals: a write to a different name
-frames. -/
-theorem State.getEnv_setEnv_ne {n n' : Var} (h : n' ≠ n) (s : State)
-    (b : Binding) : (s.setEnv n b).getEnv n' = s.getEnv n' := by
-  simp only [State.getEnv, State.setEnv, lookupBy_setBy_ne h]
-
-/-- KeY `simplifyUpdate1-3` (semantic core): the later write to the same
-local absorbs the earlier one. -/
-theorem State.setEnv_setEnv_absorb (s : State) (n : Var)
-    (b b' : Binding) : (s.setEnv n b).setEnv n b' = s.setEnv n b' := by
-  simp only [State.setEnv, setBy_setBy_self]
-
-/-- Ledger instance of `applyOnPV`: read after transfer booking. -/
-@[simp] theorem State.getNet_setNet_self (s : State) (a v : Int) :
-    (s.setNet a v).getNet a = v := by
-  simp only [State.getNet, State.setNet, lookupBy_setBy_self, Option.getD_some]
-
-/-- Ledger instance of `applyOnDifferentPV`. -/
-theorem State.getNet_setNet_ne {a a' : Int} (h : a' ≠ a) (s : State)
-    (v : Int) : (s.setNet a v).getNet a' = s.getNet a' := by
-  simp only [State.getNet, State.setNet, lookupBy_setBy_ne h]
-
-/-- Ledger overwrite absorption. -/
-theorem State.setNet_setNet_absorb (s : State) (a : Int) (v v' : Int) :
-    (s.setNet a v).setNet a v' = s.setNet a v' := by
-  simp only [State.setNet, setBy_setBy_self]
 
 /-! ## Paths, runs and results
 
@@ -975,12 +765,6 @@ theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) :
 /-- A run that halted halts what follows. -/
 theorem Res.error_bind {α β : Type} (e : Halt) (f : α → Res β) :
     (Except.error e >>= f : Res β) = .error e := rfl
-
-/-- A bind returned: its first step did, and the rest did from there. -/
-theorem Res.bind_eq_ok {α β : Type} {x : Res α} {f : α → Res β} {b : β} :
-    (x >>= f) = .ok b ↔ ∃ a, x = .ok a ∧ f a = .ok b := by
-  cases x <;> simp only [bind, Except.bind, reduceCtorEq, false_and, exists_false, Except.ok.injEq,
-                  exists_eq_left']
 
 end SemanticsProperties
 end Solidity
