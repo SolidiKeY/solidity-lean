@@ -7,9 +7,9 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
 (`State`, `Semantics/State.lean`) and the typed run (`Prog.run`,
 `Frames.run`): `holds`, `Valid`.
 
-* A term in an equation is read in the Theory (`Tm.denote`,
-  `Calculus/Lands.lean`, KeY's total model, the W9.8.0 decision), a typed
-  value through its abstraction (`SVal.absT`); a definedness test reads it on
+* A term in an equation is read in the typed Theory (`Tm.denote`,
+  `Calculus/Lands.lean`, KeY's total model), a typed value as its
+  observations (`SVal.obs`), equal by `=`; a definedness test reads it on
   the typed state (`Tm.eval`, `Calculus/TermEval.lean`): `none` where it
   reverts.
 * An update is parallel (every right-hand side read in the state it is
@@ -48,7 +48,7 @@ each lowered expression's term reading what the typed evaluator returns
 -/
 
 namespace Solidity
-open Theory Theory.StValue
+
 open Solidity (Srt Modality)
 
 variable {C : Contract}
@@ -74,7 +74,7 @@ def Prog.runFrames {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁
 /-- **Whether `φ` holds in the typed state `σ`.** -/
 def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
-  | _, σ, .eq a b => Theory.StValue.Equiv (a.denote σ) (b.denote σ)
+  | _, σ, .eq a b => a.denote σ = b.denote σ
   | _, σ, .defined t => t.eval σ ≠ none
   | _, σ, .not φ => ¬ holds σ φ
   | _, σ, .and φ ψ => holds σ φ ∧ holds σ ψ
@@ -88,7 +88,7 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
 
 /-- An equation of `holds`, read by the typed readers. -/
 theorem holds_eq {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
+    holds σ (.eq a b) ↔ a.denote σ = b.denote σ := Iff.rfl
 
 /-- A `defined` of `holds`, read by the typed readers. -/
 theorem holds_defined {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (t : Tm C Γ (.val p)) :
@@ -103,17 +103,16 @@ theorem holds_eqD {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val
     rw [holds_eq] at he
     obtain ⟨x, hx⟩ := Option.ne_none_iff_exists'.1 ha
     obtain ⟨y, hy⟩ := Option.ne_none_iff_exists'.1 hb
-    have ex : a.denote σ = .prim (PrimTy.erase x) := Tm.denote_eval σ a x hx
-    have ey : b.denote σ = .prim (PrimTy.erase y) := Tm.denote_eval σ b y hy
-    rw [ex, ey, StValue.Equiv.prim_iff] at he
-    obtain rfl := PrimTy.erase_injective (StValue.prim.inj he)
+    have ex : a.denote σ = some x := Tm.denote_eval σ a x hx
+    have ey : b.denote σ = some y := Tm.denote_eval σ b y hy
+    rw [ex, ey, Option.some.injEq] at he
+    subst he
     exact ⟨x, hx, hy⟩
   · rintro ⟨x, hx, hy⟩
     refine ⟨(holds_defined σ a).2 (by rw [hx]; exact nofun),
       (holds_defined σ b).2 (by rw [hy]; exact nofun), ?_⟩
-    show StValue.Equiv _ _
+    show a.denote σ = b.denote σ
     rw [Tm.denote_eval σ a x hx, Tm.denote_eval σ b x hy]
-    exact StValue.Equiv.refl _
 
 /-- Every local's type has a value in every typed state: an alias and a
 memory local unset among them (decision 17'). -/
