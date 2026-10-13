@@ -716,7 +716,7 @@ theorem fill_struct {s : Name} {fs : SFields (structDef s)} (hfs : FieldsOK C fs
   obtain ⟨st', hrun, hW⟩ := hfs s d _ .here
     (fun _ _ hm => lookupBy_of_nodup (structDef_nodup _) hm)
     (σ.push (t := .alias (.struct s)) (some ref)) ref σ.storage (SFields.dflt (structDef s)) fs
-    rfl h0 (fun g U hg _ => SFields.get_dflt hg)
+    rfl h0 (fun g U hg _ => SFields.dflt_get hg)
     (fun g U hg hm => absurd ⟨U, lookupBy_mem' hg⟩ hm) (fun _ _ _ _ => rfl) hc ht hf
     (structDef_nodup s)
   exact ⟨st', run_bound hq hrun, hW⟩
@@ -1189,7 +1189,7 @@ theorem storage_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc 
     (ht : st.Tight) (hf : st.Fits) :
     TRuns (State.init C) (rootsProg st C.vars fun _ _ hm => lookupBy_of_nodup hnd hm)
       ((State.init C).withStorage st) :=
-  rootsProg_run st hnd C.vars _ (State.init C) (fun _ _ hr _ => SFields.get_dflt hr)
+  rootsProg_run st hnd C.vars _ (State.init C) (fun _ _ hr _ => SFields.dflt_get hr)
     (fun r T hr hm => absurd ⟨T, lookupBy_mem' hr⟩ hm) hc ht hf hnd
 
 /-- **Canonical and tight ⇒ reachable**, for keys and slots in range. -/
@@ -1285,7 +1285,7 @@ theorem huge_reachable_not_fits :
   refine ⟨⟨[], .nil, ⟨State.init Huge, List.prefix_refl _⟩, Prog.run_nil _, rfl⟩, fun hf => ?_⟩
   have hr : lookupBy "big" Huge.vars = some (.ref (.fixed .uint (2 ^ 256 + 1))) := rfl
   have h := SFields.all_get hr hf
-  rw [Storage.init, SFields.get_dflt, SVal.dflt_fixed] at h
+  rw [Storage.init, SFields.dflt_get, SVal.dflt_fixed] at h
   simp only [SVal.All] at h
   exact Nat.not_succ_le_self _ h.1
 
