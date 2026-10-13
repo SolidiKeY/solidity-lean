@@ -57,13 +57,15 @@ inductive Tm (C : Contract) (Γ : Ctx) : Srt → Type where
   | pvS (i : Idx Γ .old) : Tm C Γ .st
   /-- A memory local. -/
   | pvI {R : RefTy} (i : Idx Γ (.mem R)) : Tm C Γ (.ident R)
-  /-- `x[a]`: what the ledger bound at `x` holds for `a`, an `int`. -/
-  | netOf (i : Idx Γ .oldNet) (a : Tm C Γ (.val .uint)) : Tm C Γ (.val .int)
+  /-- `x[a]`: what the ledger bound at `x` holds for `a`, a KeY `int`. -/
+  | netOf (i : Idx Γ .oldNet) (a : Tm C Γ (.val .uint)) : Tm C Γ .kint
   | app0 {s : Srt} (o : Op0 C s) : Tm C Γ s
   | app1 {a s : Srt} (o : Op1 C a s) (x : Tm C Γ a) : Tm C Γ s
   | app2 {a b s : Srt} (o : Op2 C a b s) (x : Tm C Γ a) (y : Tm C Γ b) : Tm C Γ s
   | app3 {a b c s : Srt} (o : Op3 C a b c s) (x : Tm C Γ a) (y : Tm C Γ b)
       (z : Tm C Γ c) : Tm C Γ s
+  /-- A logical variable of KeY's `int` (a formula's parameter). -/
+  | pvZ (i : Idx Γ .kint) : Tm C Γ .kint
 
 /-! ## Updates -/
 
@@ -83,6 +85,8 @@ inductive Rhs (C : Contract) (Γ : Ctx) : LTy → Type where
   | saveNet : Rhs C Γ .oldNet
   /-- `oldNet := mtSt` -/
   | saveNetMt : Rhs C Γ .oldNet
+  /-- `z := t`, a KeY `int`. -/
+  | zint (t : Tm C Γ .kint) : Rhs C Γ .kint
 
 /-- One assigning element: its right-hand sides read in `Γ`, its target a
 local of `Δ`, or a part of the state.  An amount and an address are a

@@ -91,6 +91,7 @@ variable [FreshNames]
 its term checked at `t`'s sort. -/
 def Rhs.resolveN (Γ : NCtx) : (t : LTy) → NUpdElem C → Except String (Rhs C Γ.ctx t)
   | .val p, .val _ r => do pure (.val (← r.check (.val p) Γ))
+  | .kint, .val _ r => do pure (.zint (← r.check .kint Γ))
   | .alias R, .path _ p => do pure (.path (← p.check (.path (.ref R)) Γ))
   | .alias _, .unset _ => pure .unset
   | .mem R, .mref _ i => do pure (.mref (← i.check (.ident R) Γ))
@@ -117,8 +118,9 @@ where
   own : Except String LTy :=
     match e with
     | .val _ t => do
-      let ⟨p, _⟩ ← t.resolveVal Γ
-      pure (.val p)
+      match ← t.resolveV Γ with
+      | ⟨.prim p, _⟩ => pure (.val p)
+      | ⟨.kint, _⟩ => pure .kint
     | .path _ p => do
       match ← p.resolve Γ with
       | ⟨.path (.ref R), _⟩ => pure (.alias R)
@@ -176,14 +178,23 @@ namespace NRead
 def tt : NRead C := fun _ => pure .tt
 /-- `false`. -/
 def ff : NRead C := fun _ => pure .ff
-/-- `a ≐ b`, KeY's `=`, at the sides' type. -/
+/-- `a == b = true` on KeY's `int`: its equation, written `a = b`
+(`Fml.eqK`). -/
+def eqK {Γ : NCtx} (eqv : {p : PrimTy} → Tm C Γ.ctx (.val p) → Tm C Γ.ctx (.val p) → Fml C Γ.ctx)
+    (a b : Tm C Γ.ctx .kint) : Fml C Γ.ctx :=
+  eqv (.app2 (.zcmp .eqB rfl) a b) (.app0 (.lit (p := .bool) true))
+/-- `a ≐ b`, KeY's `=`, at the sides' type (on KeY's `int`, its
+comparison `≐ true`). -/
 def eq (a b : NTerm C) : NRead C := fun Γ => do
-  let ⟨_, a', b'⟩ ← NTm.resolvePair a b Γ
-  pure (.eq a' b')
-/-- `a = b`, both sides defined (`Fml.eqD`). -/
+  match ← NTm.resolvePairV a b Γ with
+  | ⟨.prim _, a', b'⟩ => pure (.eq a' b')
+  | ⟨.kint, a', b'⟩ => pure (eqK (fun x y => .eq x y) a' b')
+/-- `a = b`, both sides defined (`Fml.eqD`; on KeY's `int`, its
+comparison `= true`). -/
 def eqD (a b : NTerm C) : NRead C := fun Γ => do
-  let ⟨_, a', b'⟩ ← NTm.resolvePair a b Γ
-  pure (.eqD a' b')
+  match ← NTm.resolvePairV a b Γ with
+  | ⟨.prim _, a', b'⟩ => pure (.eqD a' b')
+  | ⟨.kint, a', b'⟩ => pure (eqK (fun x y => .eqD x y) a' b')
 /-- `defined(t)`. -/
 def defined (t : NTerm C) : NRead C := fun Γ => do
   let ⟨_, t'⟩ ← t.resolveVal Γ

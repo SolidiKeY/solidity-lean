@@ -88,7 +88,7 @@ none of. -/
 @[reducible] def Seen (C : Contract) : LTy → Type
   | .val p => p.Denote
   | .alias R => Option (Solidity.SRef C (.ref R))
-  | .mem _ | .old | .oldNet => Unit
+  | .mem _ | .old | .oldNet | .kint => Unit
 
 /-- What each local of `Γ` holds, by position, as the simulation reads it:
 `TEnv.get` of the typed run's locals, seen (`Look.ofTEnv`). -/

@@ -267,6 +267,7 @@ def _root_.Solidity.Tm.toLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → s.LTy
   | _, .app1 o a => o.toL (a.toLSM ρ)
   | _, .app2 o a b => Op2.toLAtS ρ o a (a.toLSM ρ) (b.toLSM ρ)
   | _, .app3 o a b c => Op3.toLAtS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ)
+  | _, .pvZ _ => .err
 
 /-- **A term with the updates pushed in, its locals read by position**, by
 the recursor. -/
@@ -289,7 +290,7 @@ def _root_.Solidity.Tm.toLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : s.LTy :=
       | _ => none)
     (fun _ _ _ => .err) (fun o => o.toL ρ.sym) (fun o _ ih => o.toL ih)
     (fun o a _ iha ihb => Op2.toLAtS ρ o a iha ihb)
-    (fun o a _ c iha ihb ihc => Op3.toLAtS ρ o a c iha ihb ihc) t
+    (fun o a _ c iha ihb ihc => Op3.toLAtS ρ o a c iha ihb ihc) (fun _ => .err) t
 
 /-- A binary symbol in the fragment, its arguments in it (`ha`, `hb`): a
 storage operation on `storage` (a `find` also on a storage local), a memory
@@ -351,6 +352,7 @@ def _root_.Solidity.Tm.inLSM (ρ : SymS) : {s : Srt} → Tm C Γ s → Bool
   | _, .app2 o a b => Op2.inLS ρ o a (a.toLSM ρ) (b.toLSM ρ) (a.inLSM ρ) (b.inLSM ρ)
   | _, .app3 o a b c =>
     Op3.inLS ρ o a c (a.toLSM ρ) (b.toLSM ρ) (c.toLSM ρ) (a.inLSM ρ) (b.inLSM ρ) (c.inLSM ρ)
+  | _, .pvZ _ => false
 
 /-- **The fragment, by position**, by the recursor. -/
 @[implemented_by Tm.inLSM]
@@ -369,14 +371,14 @@ def _root_.Solidity.Tm.inLS (ρ : SymS) {s : Srt} (t : Tm C Γ s) : Bool :=
     (fun _ _ _ => false) (fun o => o.inL) (fun o a ih => o.inL (a.toLS ρ) ih)
     (fun o a b iha ihb => Op2.inLS ρ o a (a.toLS ρ) (b.toLS ρ) iha ihb)
     (fun o a b c iha ihb ihc =>
-      Op3.inLS ρ o a c (a.toLS ρ) (b.toLS ρ) (c.toLS ρ) iha ihb ihc) t
+      Op3.inLS ρ o a c (a.toLS ρ) (b.toLS ρ) (c.toLS ρ) iha ihb ihc) (fun _ => false) t
 
 /-- The recursor's reading is the twin's. -/
 theorem _root_.Solidity.Tm.toLS_eq_toLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
     t.toLS ρ = t.toLSM ρ := by
   induction t with
   | pvV i | pvP i | pvI i => simp only [Tm.toLSM, ← Idx.toNatR_eq]; rfl
-  | pvS _ | netOf _ _ | app0 _ => rfl
+  | pvS _ | netOf _ _ | app0 _ | pvZ _ => rfl
   | app1 o x ih => simp only [Tm.toLSM, ← ih]; rfl
   | app2 o x y ihx ihy => simp only [Tm.toLSM, ← ihx, ← ihy]; rfl
   | app3 o x y z ihx ihy ihz => simp only [Tm.toLSM, ← ihx, ← ihy, ← ihz]; rfl
@@ -385,7 +387,7 @@ theorem _root_.Solidity.Tm.inLS_eq_inLSM (ρ : SymS) {s : Srt} (t : Tm C Γ s) :
     t.inLS ρ = t.inLSM ρ := by
   induction t with
   | pvV i | pvP i | pvI i => simp only [Tm.inLSM, ← Idx.toNatR_eq]; rfl
-  | pvS _ | netOf _ _ | app0 _ => rfl
+  | pvS _ | netOf _ _ | app0 _ | pvZ _ => rfl
   | app1 o x ih => simp only [Tm.inLSM, ← ih, ← Tm.toLS_eq_toLSM]; rfl
   | app2 o x y ihx ihy => simp only [Tm.inLSM, ← ihx, ← ihy, ← Tm.toLS_eq_toLSM]; rfl
   | app3 o x y z ihx ihy ihz =>
@@ -404,7 +406,7 @@ def _root_.Solidity.Op2.shapeS {a b s : Srt} : Op2 C a b s → Tm C Γ a → Boo
 /-- The terms `sameAt` compares. -/
 def _root_.Solidity.Tm.sameShapeS : {s : Srt} → Tm C Γ s → Bool
   | _, .pvV _ | _, .pvP _ => true
-  | _, .pvS _ | _, .pvI _ | _, .netOf _ _ => false
+  | _, .pvS _ | _, .pvI _ | _, .netOf _ _ | _, .pvZ _ => false
   | _, .app0 o => match o with
     | .lit _ | .env _ | .root _ _ => true
     | _ => false
@@ -681,7 +683,7 @@ def _root_.Solidity.Rhs.actS (ρ : SymS) {t : LTy} : Rhs C Γ t → Option SymB
   | .unset => some .unset
   | .mref i => (i.toLS ρ).map fun p => .mref p.1
   | .store s => some (.stor (s.toLS ρ))
-  | .saveNet | .saveNetMt => none
+  | .saveNet | .saveNetMt | .zint _ => none
 
 /-- What a right-hand side's term must return. -/
 def _root_.Solidity.Rhs.guardS (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
@@ -693,7 +695,7 @@ def _root_.Solidity.Rhs.guardS (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
     | some (_, g) => g
     | none => .err
   | .store s => .sok (s.toLS ρ)
-  | .saveNet | .saveNetMt => .err
+  | .saveNet | .saveNetMt | .zint _ => .err
 
 /-- A right-hand side in the fragment. -/
 def _root_.Solidity.Rhs.inLS (ρ : SymS) {t : LTy} : Rhs C Γ t → Bool
@@ -702,7 +704,7 @@ def _root_.Solidity.Rhs.inLS (ρ : SymS) {t : LTy} : Rhs C Γ t → Bool
   | .unset => true
   | .mref i => i.inLS ρ
   | .store s => s.inLS ρ
-  | .saveNet | .saveNetMt => false
+  | .saveNet | .saveNetMt | .zint _ => false
 
 /-- An element's act, read in `ρ`. -/
 def _root_.Solidity.UpdElem.actS (ρ : SymS) {Δ : Ctx} : UpdElem C Γ Δ → Act

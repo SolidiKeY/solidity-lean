@@ -289,13 +289,14 @@ def TEnv.liftV? (H : HTy) : (Δ : Ctx) → LocsV C Δ → Option (TEnv C H Δ)
       pure (some (← HRef.ofId? H R id), ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
   | .old :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
   | .oldNet :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
+  | .kint :: Δ, ℓ => do pure (ℓ _ .here, ← TEnv.liftV? H Δ fun _ i => ℓ _ (.there i))
 
 theorem TEnv.liftV?_get (H : HTy) : (Δ : Ctx) → (ℓ : LocsV C Δ) → (e' : TEnv C H Δ) →
     TEnv.liftV? H Δ ℓ = some e' → ∀ {t : LTy} (i : Idx Δ t),
       LTy.VDen.ofT t (TEnv.get i e') = ℓ t i
   | [], _, (), _, _, i => nomatch i
   | .val _ :: Δ, ℓ, e', h, t, i | .alias _ :: Δ, ℓ, e', h, t, i | .old :: Δ, ℓ, e', h, t, i
-  | .oldNet :: Δ, ℓ, e', h, t, i => by
+  | .oldNet :: Δ, ℓ, e', h, t, i | .kint :: Δ, ℓ, e', h, t, i => by
     simp only [TEnv.liftV?, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.pure_def,
       Option.some.injEq] at h
     obtain ⟨e'', he, rfl⟩ := h
@@ -362,6 +363,7 @@ def TDom.bind {Γ : Ctx} (dom : TDom) (σ : State C Γ) : (t : LTy) → List (t.
   | .mem _ => [none]
   | .old => [σ.storage]
   | .oldNet => [σ.net]
+  | .kint => (dom .int).map (·.1)
 
 /-- What a modality says of a typed run: of the state it ends in, a halt as
 `Modality.onTHalt` says, `ff` on a panic, `unknown` on `diverge` (a loop
@@ -812,7 +814,8 @@ def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : State C Γ) (φ : Fml
           | some w => ih (σ.push (t := .val p) w)
           | none => ⟨_, σ, .bind m x (.val p) φ⟩)
         (fun r φ _ => ⟨_, σ, .bind m x (.alias r) φ⟩) (fun r φ _ => ⟨_, σ, .bind m x (.mem r) φ⟩)
-        (fun φ _ => ⟨_, σ, .bind m x .old φ⟩) (fun φ _ => ⟨_, σ, .bind m x .oldNet φ⟩) φ ih)
+        (fun φ _ => ⟨_, σ, .bind m x .old φ⟩) (fun φ _ => ⟨_, σ, .bind m x .oldNet φ⟩)
+        (fun φ _ => ⟨_, σ, .bind m x .kint φ⟩) φ ih)
     (fun xs φ _ σ => ⟨_, σ, .anon xs φ⟩)
     φ σ
 
@@ -821,9 +824,9 @@ theorem Fml.peel_eq (vals : List (Var × Value)) : {Γ : Ctx} → (φ : Fml C Γ
   | _, .all _ _ φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
   | _, .bind _ _ (.val _) φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
   | _, .bind _ _ (.alias _) _, _ | _, .bind _ _ (.mem _) _, _ | _, .bind _ _ .old _, _
-  | _, .bind _ _ .oldNet _, _ | _, .tt, _ | _, .eq .., _ | _, .defined _, _ | _, .not _, _
-  | _, .and .., _ | _, .imp .., _ | _, .upd .., _ | _, .modal .., _ | _, .havoc _, _
-  | _, .anon .., _ => rfl
+  | _, .bind _ _ .oldNet _, _ | _, .bind _ _ .kint _, _ | _, .tt, _ | _, .eq .., _
+  | _, .defined _, _ | _, .not _, _ | _, .and .., _ | _, .imp .., _ | _, .upd .., _
+  | _, .modal .., _ | _, .havoc _, _ | _, .anon .., _ => rfl
 
 /-- What fails under the peeled binders fails under the binders: each is a
 `∀` (or a hidden binder, read as one) of the values it is peeled at. -/
@@ -842,7 +845,8 @@ theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ
       rw [Fml.peelC, hw] at h
       exact fun hall => Fml.not_holds_of_peelC vals _ φ h (hall w)
   | _, _, .bind _ _ (.alias _) _, h | _, _, .bind _ _ (.mem _) _, h | _, _, .bind _ _ .old _, h
-  | _, _, .bind _ _ .oldNet _, h | _, _, .tt, h | _, _, .eq .., h | _, _, .defined _, h
+  | _, _, .bind _ _ .oldNet _, h | _, _, .bind _ _ .kint _, h | _, _, .tt, h | _, _, .eq .., h
+  | _, _, .defined _, h
   | _, _, .not _, h | _, _, .and .., h | _, _, .imp .., h | _, _, .upd .., h
   | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h => h
 

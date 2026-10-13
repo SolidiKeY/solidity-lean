@@ -37,11 +37,11 @@ namespace LTy
 theorem TDenote.wk_trans {H₁ H₂ H₃ : HTy} (e₁ : H₁ <+: H₂) (e₂ : H₂ <+: H₃) :
     (t : LTy) → (v : t.TDenote C H₁) →
       TDenote.wk e₂ t (TDenote.wk e₁ t v) = TDenote.wk (e₁.trans e₂) t v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ | .kint, _ => rfl
 
 theorem TDenote.wk_self {H : HTy} (e : H <+: H) :
     (t : LTy) → (v : t.TDenote C H) → TDenote.wk e t v = v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ | .kint, _ => rfl
 
 /-- Over an equal heap typing, a weakened value is the value. -/
 theorem TDenote.wk_heq {H H' : HTy} (e : H <+: H') (hH : H' = H) (t : LTy)

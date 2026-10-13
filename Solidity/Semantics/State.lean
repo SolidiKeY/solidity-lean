@@ -36,6 +36,7 @@ a hidden binder ranges over it, decision 17'), a whole storage, a ledger. -/
   | .mem R => Option (HRef H R)
   | .old => Storage C
   | .oldNet => List (Int × Int)
+  | .kint => Int
 
 namespace LTy
 
@@ -46,6 +47,7 @@ def TDenote.wk {H H' : HTy} (e : H <+: H') : (t : LTy) → t.TDenote C H → t.T
   | .mem _, r => r.map (HRef.wk e)
   | .old, st => st
   | .oldNet, l => l
+  | .kint, n => n
 
 /-- A local's value, erased. -/
 def TDenote.erase {H : HTy} : (t : LTy) → t.TDenote C H → t.Denote C
@@ -54,10 +56,11 @@ def TDenote.erase {H : HTy} : (t : LTy) → t.TDenote C H → t.Denote C
   | .mem _, r => (r : Option (HRef H _)).map (·.id)
   | .old, st => Storage.erase (st : Storage C)
   | .oldNet, l => l
+  | .kint, n => n
 
 theorem TDenote.erase_wk {H H' : HTy} (e : H <+: H') :
     (t : LTy) → (v : t.TDenote C H) → TDenote.erase t (TDenote.wk e t v) = TDenote.erase t v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ | .kint, _ => rfl
 
 end LTy
 

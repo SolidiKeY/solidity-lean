@@ -304,7 +304,7 @@ def _root_.Solidity.Tm.lsize : {s : Srt} → Tm C Γ s → Nat
   | _, .app2 _ a b => a.lsize + b.lsize + 1
   | _, .app3 _ a b c => a.lsize + b.lsize + c.lsize + 1
   | _, .netOf _ a => a.lsize + 1
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ => 0
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ | _, .pvZ _ => 0
 
 /-- `x.lsize < n` for a direct subterm `x` of a term of size below `n + 1`. -/
 macro "lsizeS_tac" : tactic => `(tactic| (simp only [Tm.lsize] at *; omega))
@@ -485,7 +485,7 @@ theorem TermOKS.step (h : RelT σ ρ τ) {n : Nat}
       rw [Tm.evalE_unop]
       simp only [Tm.toLSM, Op1.toL, LTerm.mkUn_eval, LTerm.eval]
       exact Sim.bind (hT a (by lsizeS_tac) hf) fun _ => Sim.refl _
-    | net | delValue | wt | toInt => simp only [Tm.inLSM, Op1.inL, Bool.false_eq_true] at hf
+    | delValue | wt => simp only [Tm.inLSM, Op1.inL, Bool.false_eq_true] at hf
   | app2 o x y =>
     cases o with
     | binop op hop =>
@@ -620,7 +620,7 @@ theorem TermOKS.step (h : RelT σ ρ τ) {n : Nat}
         simp only [LSel.read, memArrayLen_of_heap hh.1] at hs
         rw [hg, Res.ok_bind, hg', Res.ok_bind]
         exact hs.2 hw
-    | findIn => simp only [Tm.inLSM, Op2.inLS, Bool.false_eq_true] at hf
+    | findIn | zcmp _ _ => simp only [Tm.inLSM, Op2.inLS, Bool.false_eq_true] at hf
   | app3 o c a b =>
     cases o with
     | ite =>
@@ -629,7 +629,6 @@ theorem TermOKS.step (h : RelT σ ρ τ) {n : Nat}
       simp only [Tm.toLSM, Op3.toLAtS, Op3.toL, LTerm.eval]
       exact Sim.bind (hT c (by lsizeS_tac) hf.1.1) fun _ =>
         pickBranch_sim (hT a (by lsizeS_tac) hf.1.2) (hT b (by lsizeS_tac) hf.2)
-  | netOf _ _ => simp only [Tm.inLSM, Bool.false_eq_true] at hf
 
 theorem glob_storage (τ : State C Γ) : τ.globE.storage = τ.globE.storage := rfl
 
@@ -2327,7 +2326,7 @@ theorem RelU.rhs (h₀ : RelT σ ρ₀ τ₀) {t : LTy} (r : Rhs C Γ t) (hr : r
       obtain ⟨τ₁, h₁, hd⟩ := Res.bind_eq_ok.1 hd
       cases hd
       exact ⟨_, rfl, τ₁.storage, hw τ₁ h₁, rfl⟩
-  | saveNet | saveNetMt => simp only [Rhs.inLS, Bool.false_eq_true] at hr
+  | saveNet | saveNetMt | zint _ => simp only [Rhs.inLS, Bool.false_eq_true] at hr
 
 theorem elemV_net {Δ : Ctx} (τ : Semantics.State × Locs C Δ) (r : Tm C Γ (.val .uint)) (op : IntOp)
     (a : Tm C Γ (.val .uint)) : (UpdElem.net (Δ := Δ) r op a).applyVE τ₀ τ.1 τ.2 =

@@ -55,6 +55,7 @@ denotes it; the rest at their types. -/
   | .mem _ => Option Nat
   | .old => Storage C
   | .oldNet => List (Int × Int)
+  | .kint => Int
 
 namespace LTy
 
@@ -65,6 +66,7 @@ def VDen.ofT {H : HTy} : (t : LTy) → t.TDenote C H → t.VDen C
   | .mem _, r => (r : Option (HRef H _)).map (·.id)
   | .old, w => w
   | .oldNet, l => l
+  | .kint, n => n
 
 end LTy
 
@@ -94,6 +96,7 @@ def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.TDen
   | _, .app1 o a => o.denote σ.glob (a.denote σ)
   | _, .app2 o a b => o.denote σ.glob (a.eval σ) (b.eval σ) (a.denote σ) (b.denote σ)
   | _, .app3 o a b c => o.denote (a.denote σ) (b.denote σ) (c.denote σ)
+  | _, .pvZ i => .prim (.int (TEnv.get i σ.env))
 
 /-- **The term bridge**: a term's denotation agrees with its reading in a
 typed state wherever the reading returns (`Srt.Bridge`). -/
@@ -116,13 +119,15 @@ theorem Tm.denote_eval (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
     have ha := Tm.denote_eval σ a n hn
     simp only [Srt.Bridge] at ha
     simp only [Tm.denote, ha, PrimTy.erase, Srt.Bridge]
-    simp only [Tm.netOfT, PrimTy.ofInt?] at h
-    exact congrArg StValue.prim (PrimTy.erase_of_ofValue? (p := .int) h).symm
+    simp only [Tm.netOfT, Option.some.injEq] at h
+    subst h
+    rfl
   | _, .app0 o => Op0.denote_eval σ.glob o
   | _, .app1 o a => Op1.denote_eval σ.glob o (Tm.denote_eval σ a)
   | _, .app2 o a b => Op2.denote_eval σ.glob o (Tm.denote_eval σ a) (Tm.denote_eval σ b)
   | _, .app3 o a b c =>
     Op3.denote_eval σ.glob o (Tm.denote_eval σ a) (Tm.denote_eval σ b) (Tm.denote_eval σ c)
+  | _, .pvZ _ => by intro x h; cases h; rfl
 
 namespace Rhs
 
@@ -135,6 +140,7 @@ def evalM (σ₀ : State C Γ) : {t : LTy} → Rhs C Γ t → Option (t.VDen C)
   | _, .store s => (s.eval σ₀).bind fun st => some st
   | _, .saveNet => some σ₀.net
   | _, .saveNetMt => some []
+  | _, .zint t => t.eval σ₀
 
 /-- What a local is set to, read in the typed state `σ₀`; `none` where a
 term reverts. -/
@@ -148,6 +154,7 @@ def eval (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) : Option (t.VDen C) :=
     (fun s => (s.eval σ₀).bind fun st => some st)
     (some σ₀.net)
     (some [])
+    (fun x => x.eval σ₀)
 
 theorem eval_eq_evalM (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) : r.eval σ₀ = r.evalM σ₀ := by
   cases r <;> rfl
@@ -408,7 +415,7 @@ theorem Tm.eval_of_exhB (σ : State C Γ) {s : Srt} : (t : Tm C Γ s) → t.exhB
   | .netOf _ _, h | .app1 _ _, h => by
     simp only [Tm.exhB, Bool.and_eq_true] at h
     exact Option.isNone_iff_eq_none.1 h.1
-  | .pvV _, h | .pvP _, h | .pvS _, h | .pvI _, h | .app0 _, h => by
+  | .pvV _, h | .pvP _, h | .pvS _, h | .pvI _, h | .app0 _, h | .pvZ _, h => by
     simp only [Tm.exhB, Bool.false_eq_true] at h
 
 /-- A term that returns is not out of gas. -/
@@ -461,7 +468,8 @@ theorem Tm.exhB_of_pushFree (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) �
     simp only [Tm.exhB, Op3.exhB_of_pushFree h.1.1.1, Tm.exhB_of_pushFree σ x h.1.1.2,
       Tm.exhB_of_pushFree σ y h.1.2, Tm.exhB_of_pushFree σ z h.2, Bool.false_and,
       Bool.or_false, Bool.and_false]
-  | _, .pvV _, _ | _, .pvP _, _ | _, .pvS _, _ | _, .pvI _, _ | _, .app0 _, _ => rfl
+  | _, .pvV _, _ | _, .pvP _, _ | _, .pvS _, _ | _, .pvI _, _ | _, .app0 _, _
+  | _, .pvZ _, _ => rfl
 
 /-! ### The arms' terms push nothing -/
 
@@ -565,6 +573,7 @@ def Rhs.pushFree {t : LTy} : Rhs C Γ t → Bool
   | .path p => p.pushFree
   | .mref i => i.pushFree
   | .store x => x.pushFree
+  | .zint x => x.pushFree
   | _ => true
 
 /-- An element with no push symbol. -/
@@ -598,6 +607,7 @@ def Rhs.exhB (σ₀ : State C Γ) {t : LTy} : Rhs C Γ t → Bool
   | .path p => p.exhB σ₀
   | .mref i => i.exhB σ₀
   | .store x => x.exhB σ₀
+  | .zint x => x.exhB σ₀
   | _ => false
 
 /-- **An element out of gas**: one of its terms is, the others returning. -/

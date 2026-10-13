@@ -42,6 +42,7 @@ def qLTy : LTy → Expr
   | .mem R => mkApp (mkConst ``LTy.mem) (toExpr R)
   | .old => mkConst ``LTy.old
   | .oldNet => mkConst ``LTy.oldNet
+  | .kint => mkConst ``LTy.kint
 
 def ltyE : Expr := mkConst ``LTy
 
@@ -336,6 +337,7 @@ def qOp0 : {s : Srt} → Op0 C s → QM Expr
   | _, .mtSt => do return mkApp (mkConst ``Op0.mtSt) (← contract)
   | _, @Op0.member _ s f T _ => do
     return mkAppN (mkConst ``Op0.member) #[← contract, toExpr s, toExpr f, toExpr T, rflSome T]
+  | _, .zlit n => do return mkApp2 (mkConst ``Op0.zlit) (← contract) (toExpr n)
 
 def qOp1 : {a s : Srt} → Op1 C a s → QM Expr
   | _, _, @Op1.unop _ op p _ => do
@@ -395,6 +397,8 @@ def qOp2 : {a b s : Srt} → Op2 C a b s → QM Expr
     return mkApp3 (mkConst ``Op2.delAtIn) (← contract) (toExpr s) (toExpr T)
   | _, _, _, @Op2.sfindIn _ s T => do
     return mkApp3 (mkConst ``Op2.sfindIn) (← contract) (toExpr s) (toExpr T)
+  | _, _, _, .zbin op _ => do return mkApp3 (mkConst ``Op2.zbin) (← contract) (toExpr op) rflTrue
+  | _, _, _, .zcmp op _ => do return mkApp3 (mkConst ``Op2.zcmp) (← contract) (toExpr op) rflTrue
 
 def qOp3 : {a b c s : Srt} → Op3 C a b c s → QM Expr
   | _, _, _, _, @Op3.ite _ p => do return mkApp2 (mkConst ``Op3.ite) (← contract) (toExpr p)
@@ -420,6 +424,7 @@ partial def qTm (Γ : Ctx) : (s : Srt) → Tm C Γ s → QM Expr
   | s, @Tm.app3 _ _ a b c _ o x y z => do
     ctor ``Tm.app3 Γ #[qSrt a, qSrt b, qSrt c, qSrt s, ← qOp3 o, ← qTm Γ a x, ← qTm Γ b y,
       ← qTm Γ c z]
+  | _, .pvZ i => do ctor ``Tm.pvZ Γ #[← qIdx Γ .kint i]
 
 def qRhs (Γ : Ctx) : (t : LTy) → Rhs C Γ t → QM Expr
   | _, @Rhs.val _ _ p t => do ctor ``Rhs.val Γ #[toExpr p, ← qTm Γ (.val p) t]
@@ -429,6 +434,7 @@ def qRhs (Γ : Ctx) : (t : LTy) → Rhs C Γ t → QM Expr
   | _, .store s => do ctor ``Rhs.store Γ #[← qTm Γ .st s]
   | _, .saveNet => ctor ``Rhs.saveNet Γ #[]
   | _, .saveNetMt => ctor ``Rhs.saveNetMt Γ #[]
+  | _, .zint t => do ctor ``Rhs.zint Γ #[← qTm Γ .kint t]
 
 def qUpdElem (Γ Δ : Ctx) (e : UpdElem C Γ Δ) : QM Expr := do
   let pre := #[← contract, ← qCtx Γ, ← qCtx Δ]

@@ -521,6 +521,43 @@ def RawFml.unsets : RawFml → List String
     U.filterMap (fun | .assign x (.name "unset") => some x | _ => none) ++ φ.unsets
   | _ => []
 
+/-- A KeY `int` term by its syntax: a ledger read (`net(a)`, `net(x, a)`),
+a name of `ks`, or `+`, `-`, `*` over one. -/
+def RawTerm.isKintIn (ks : List String) : RawTerm → Bool
+  | .app "net" _ | .app "toInt" _ => true
+  | .name y => ks.contains y
+  | .add a b | .sub a b | .arith .mul a b => a.isKintIn ks || b.isKintIn ks
+  | _ => false
+
+/-- The names a term reads as arithmetic operands: itself, or under `+`,
+`-`, `*`. -/
+def RawTerm.arithLeaves : RawTerm → List String
+  | .name y => [y]
+  | .add a b | .sub a b | .arith .mul a b => a.arithLeaves ++ b.arithLeaves
+  | _ => []
+
+/-- The names read as arithmetic operands of an equation or a comparison
+over a KeY `int` (`isKintIn`). -/
+def RawFml.kintLeaves (ks : List String) : RawFml → List String
+  | .eq a b | .teq a b | .cmp _ a b =>
+    if a.isKintIn ks || b.isKintIn ks then a.arithLeaves ++ b.arithLeaves else []
+  | .all _ _ φ | .not φ | .upd _ _ φ | .modal _ _ φ | .decl _ φ => φ.kintLeaves ks
+  | .and φ ψ | .imp φ ψ => φ.kintLeaves ks ++ ψ.kintLeaves ks
+  | _ => []
+
+/-- **The parameters of KeY's `int`** among `free`: a name read only as an
+operand of KeY `int` arithmetic (beside a ledger read, `net(to) = x`), and
+nowhere else (no program, update or other term reads it).  Such a parameter
+ranges over KeY's unbounded `int`, as solkey's does; a parameter read
+elsewhere too is a `uint`, and widened (`toInt`) where it meets a KeY
+`int`, its type fixed by that other use. -/
+def RawFml.kintParams (φ : RawFml) (free : List String) : List String :=
+  let all := φ.names.1
+  let step (ks : List String) : List String :=
+    let ls := φ.kintLeaves ks
+    free.filter fun x => ls.contains x && ls.count x == all.count x
+  step (step (step []))
+
 /-- The statements of every program in a formula. -/
 def RawFml.stmts : RawFml → List RawStmt
   | .not φ | .upd _ _ φ | .all _ _ φ | .decl _ φ => φ.stmts
@@ -544,6 +581,7 @@ def nameKind (Γ : ECtx) (x : String) : NameKind :=
   | some (.alias _) => .alias
   | some (.mem _) => .mem
   | some .store => .store
+  | some .kint => .local
   | none =>
     if (C.rootType x).isSome then .root else
     match Var.ofName x with
@@ -664,7 +702,7 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NTerm C)
   | .name "false" => pure (.bool false)
   | .name x =>
     match nameKind C Γ x with
-    | .local => pure (.pv (Var.ofName x))
+    | .local => pure (NTm.pvV (Var.ofName x) (isK := lookupBy x Γ == some .kint))
     | .root => pure (.find .storage (.root x))
     | .alias => throw s!"`{x}` is a storage alias, not a value: read it with `find(storage, …)`"
     | .mem => throw s!"`{x}` is a memory reference, not a value"
@@ -689,6 +727,9 @@ def rVal (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NTerm C)
   | .app "read" [m, a] => do pure (.read (← R.mem m) (← R.addr a))
   | .app "net" [a] => do pure (.net (← R.val a))
   | .app "net" [.name x, a] => do pure (.netOf (Var.ofName x) (← R.val a))
+  | .app "toInt" [a] => do
+    let a ← R.val a
+    pure (NTm.app1 .toInt a s!"toInt({a.text})")
   | .app "!" [t] => do pure (.unop .not (← R.val t))
   | .app "defVal" [.name "uint"] => pure (.lit (PrimTy.dflt .uint))
   | .app "defVal" [.name "int"] => pure (.lit (PrimTy.dflt .int))
@@ -914,6 +955,7 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) �
         | some (.val ..) => some "a value local"
         | some (.mem _) => some "a memory local"
         | some .store => some "a storage variable"
+        | some .kint => some "a KeY `int` local"
         | none => if (C.rootType x).isSome then some "a state variable" else none
       if let some what := what? then
         throw s!"`{x} := unset` binds a storage alias; `{x}` is {what}"
@@ -934,10 +976,11 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) �
     | .local =>
       -- `se1 := x <= 255`, `se1 := find(storage, flags[a])`: a capture at the type of its
       -- right-hand side, which a program under it reads at that type (a `uint` otherwise)
-      let Γ' := match valTy? t with
-        | some p =>
-          if p != .uint && (lookupBy x Γ' matches none | some (.val .uint 256)) then
-            setBy x (.val p) Γ' else Γ'
+      let free := lookupBy x Γ' matches none | some (.val .uint 256)
+      let Γ' := if t.isKintIn (Γ.filterMap fun (y, u) => if u == .kint then some y else none) then
+          if free then setBy x .kint Γ' else Γ'
+        else match valTy? t with
+        | some p => if p != .uint && free then setBy x (.val p) Γ' else Γ'
         | none => Γ'
       return (.val (Var.ofName x) (← tVal C Γ t) :: U', Γ')
 where

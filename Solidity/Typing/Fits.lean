@@ -924,6 +924,7 @@ def LTy.KeysFit (C : Contract) : (t : LTy) → t.Denote C → Prop
   | .mem _, _ => True
   | .old, _ => True
   | .oldNet, _ => True
+  | .kint, _ => True
 
 theorem SRef.keysFit_local {R : RefTy} {r : SRef C (.ref R)} (h : r.KeysFit) :
     LTy.KeysFit C (.alias R) (some r.erase) := by

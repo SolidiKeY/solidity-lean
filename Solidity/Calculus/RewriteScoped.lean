@@ -831,7 +831,7 @@ theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
     · show o.denote ((x.litPV s).denote τ) ((y.litPV s).denote τ) ((z.litPV s).denote τ) =
         o.denote (x.denote τ) (y.denote τ) (z.denote τ)
       rw [hdx, hdy, hdz]
-  | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ => ⟨rfl, rfl⟩
+  | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ | _, .pvZ _ => ⟨rfl, rfl⟩
 
 /-- The atoms along the skeleton `s`, not past an update, with the locals
 `h` leaves holding a literal read as it. -/

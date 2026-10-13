@@ -245,9 +245,8 @@ example (m : Modality) : dl![m]{ a == 1 ⟹ ⟨[ x = 1; ]⟩ true } =
 
 /-- `0 <= se <= selfBalance`, and the read of the ledger. -/
 example : dl!{ 0 <= 5 <= selfBalance } = dl!{ 0 <= 5 ∧ 5 <= selfBalance } := rfl
-example : dl!{ { net := store(net, at(to), select(net, at(to)) - 5) } select(net, at(to)) = x
-    where int x } =
-    dl!{ { net := store(net, at(to), net(to) - 5) } net(to) = x where int x } := rfl
+example : dl!{ { net := store(net, at(to), select(net, at(to)) - 5) } select(net, at(to)) = x } =
+    dl!{ { net := store(net, at(to), net(to) - 5) } net(to) = x } := rfl
 
 end Examples
 

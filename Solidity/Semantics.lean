@@ -1386,5 +1386,6 @@ the instances of its type. -/
   | .mem _ => Option Nat
   | .old => List (Name × Semantics.SVal)
   | .oldNet => List (Int × Int)
+  | .kint => Int
 
 end Solidity

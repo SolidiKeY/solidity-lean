@@ -482,7 +482,7 @@ theorem key_int (n : Int) (h : PrimTy.int.inRange n = true) :
 theorem key_uint' (a : PrimTy.uint.Denote) : PrimTy.key a = a.val := rfl
 theorem key_int' (a : PrimTy.int.Denote) : PrimTy.key a = a.val := rfl
 theorem netOfT_def (l : List (Int × Int)) (n : PrimTy.uint.Denote) :
-    Tm.netOfT l n = PrimTy.int.ofInt? ((Semantics.lookupBy n.1 l).getD 0) := rfl
+    Tm.netOfT l n = some ((Semantics.lookupBy n.1 l).getD 0) := rfl
 /-- A mapping's slot at a root is always there. -/
 theorem checkIndex_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
     (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : Int) :

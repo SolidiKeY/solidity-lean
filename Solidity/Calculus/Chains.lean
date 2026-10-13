@@ -139,6 +139,7 @@ def Rhs.keyStr {Γ : Ctx} (ns : List Var) (x : Var) : {t : LTy} → Rhs C Γ t �
   | _, .store t => s!"{reprStr x} := {Tm.keyStr ns t}"
   | _, .saveNet => s!"{reprStr x} := net"
   | _, .saveNetMt => s!"{reprStr x} := mtNet"
+  | _, .zint t => s!"{reprStr x} := {Tm.keyStr ns t}"
 
 /-- An element as text, its right-hand sides named by `ns`, its target by `ms`. -/
 def UpdElem.keyStr {Γ Δ : Ctx} (ns ms : List Var) : UpdElem C Γ Δ → String

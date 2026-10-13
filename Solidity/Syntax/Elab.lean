@@ -58,6 +58,7 @@ def LTy.toStr : LTy → String
   | .mem R => s!"{Ty.ref R} memory"
   | .old => "storage"
   | .oldNet => "ledger"
+  | .kint => "int (KeY)"
 
 /-- The newest local named `x`, which must be of type `t`. -/
 def NCtx.find [FreshNames] (x : Var) (t : LTy) :
@@ -99,6 +100,9 @@ inductive LocalTy where
   /-- A storage variable, `old`: only a formula binds one (`old := storage`),
   and a program cannot read it. -/
   | store
+  /-- A logical variable of KeY's `int`: only a formula binds one (a
+  parameter read beside the ledger), and a program cannot read it. -/
+  | kint
   deriving DecidableEq, Repr
 
 /-- The locals in scope, most recent first. -/
@@ -565,7 +569,8 @@ def ECtx.toNCtx [FreshNames] (Γ : ECtx) : NCtx :=
     | .val p _ => .val p
     | .alias R => .alias R
     | .mem R => .mem R
-    | .store => .old)
+    | .store => .old
+    | .kint => .kint)
 
 /-! ### Named contexts and blocks -/
 
@@ -758,6 +763,7 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       | true => do pure (.mpath (.ref R) (.var (← Γ.idx v (.mem R)) hm))
       | false => throw s!"{x} is a memory local of a type that holds a mapping"
     | some .old | some .oldNet => throw s!"{x} is a storage variable, not a program value"
+    | some .kint => throw s!"{x} is a logical variable (KeY's `int`), not a program value"
     | none =>
       match hr : C.rootType x with
       | some T => pure (.path T (.loc (.root x hr)))

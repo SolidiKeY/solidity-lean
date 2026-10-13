@@ -95,7 +95,7 @@ inductive Op2Code where
   | pushSlot (E : Ty) | pop (E : Ty) | shrink (E : Ty) | extend (E : Ty) | sfind (T : Ty)
   | copyMem (R : RefTy) | iread (R : RefTy) | copy (R : RefTy) | mat (R : RefTy) (E : Ty)
   | copySt (T : Ty) | findIn (s : Name) (p : PrimTy) | delAtIn (s : Name) (T : Ty)
-  | sfindIn (s : Name) (T : Ty)
+  | sfindIn (s : Name) (T : Ty) | zbin (op : BinOp) | zcmp (op : BinOp)
   deriving DecidableEq
 
 /-- A ternary symbol's constructor and types, its proofs dropped. -/
@@ -147,6 +147,8 @@ def Op2.code {a b s : Srt} : Op2 C a b s → Op2Code
   | @Op2.findIn _ s p => .findIn s p
   | @Op2.delAtIn _ s T => .delAtIn s T
   | @Op2.sfindIn _ s T => .sfindIn s T
+  | .zbin op _ => .zbin op
+  | .zcmp op _ => .zcmp op
 
 /-- A ternary symbol's code. -/
 def Op3.code {a b c s : Srt} : Op3 C a b c s → Op3Code
@@ -253,11 +255,11 @@ def Tm.litVarsS {s : Srt} (t : Tm C Γ s) : Option (List (AnyIdx Γ)) :=
     (@fun a b s o _ _ iha ihb => match a, b, s, o with
       | _, _, _, .binop _ _ => joinVars iha ihb
       | _, _, _, _ => none)
-    (fun _ _ _ _ _ _ _ => none) t
+    (fun _ _ _ _ _ _ _ => none) (fun _ => none) t
 
 theorem Tm.litVarsS_eq_litVarsSM {s : Srt} (t : Tm C Γ s) : t.litVarsS = t.litVarsSM := by
   induction t with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app3 _ _ _ _ => rfl
+  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app3 _ _ _ _ | pvZ _ => rfl
   | app0 o => cases o <;> rfl
   | app1 o x ih => cases o <;> first | rfl | exact ih
   | app2 o x y ihx ihy =>
@@ -320,6 +322,9 @@ def Tm.beqM : {s s' : Srt} → Tm C Γ s → Tm C Γ s' → Bool
   | _, _, .app3 o x y z, t' => match t' with
     | .app3 o' x' y' z' => Op3.hbeq o o' && x.beqM x' && y.beqM y' && z.beqM z'
     | _ => false
+  | _, _, .pvZ i, t' => match t' with
+    | .pvZ j => Idx.hbeq i j
+    | _ => false
 
 /-- **Structural equality of two terms**, their sorts compared too, by the
 recursor. -/
@@ -352,11 +357,14 @@ def Tm.beqR {s s' : Srt} (t : Tm C Γ s) (t' : Tm C Γ s') : Bool :=
       | _ => false)
     (@fun _ _ _ _ o _ _ _ ihx ihy ihz _ t' => match t' with
       | .app3 o' x' y' z' => Op3.hbeq o o' && ihx x' && ihy y' && ihz z'
+      | _ => false)
+    (@fun i _ t' => match t' with
+      | .pvZ j => Idx.hbeq i j
       | _ => false) t t'
 
 theorem Tm.beqR_eq_beqM {s s' : Srt} (t : Tm C Γ s) (t' : Tm C Γ s') : t.beqR t' = t.beqM t' := by
   induction t generalizing s' with
-  | pvV _ | pvP _ | pvS _ | pvI _ | app0 _ => cases t' <;> rfl
+  | pvV _ | pvP _ | pvS _ | pvI _ | app0 _ | pvZ _ => cases t' <;> rfl
   | netOf i a ih => cases t' <;> first | rfl | (simp only [Tm.beqM, ← ih]; rfl)
   | app1 o x ih => cases t' <;> first | rfl | (simp only [Tm.beqM, ← ih]; rfl)
   | app2 o x y ihx ihy => cases t' <;> first | rfl | (simp only [Tm.beqM, ← ihx, ← ihy]; rfl)
@@ -367,7 +375,7 @@ theorem Tm.beqR_eq_beqM {s s' : Srt} (t : Tm C Γ s) (t' : Tm C Γ s') : t.beqR 
 theorem Tm.eq_of_beqM {s s' : Srt} (t : Tm C Γ s) (t' : Tm C Γ s') (h : t.beqM t' = true) :
     (⟨s, t⟩ : (s : Srt) × Tm C Γ s) = ⟨s', t'⟩ := by
   induction t generalizing s' with
-  | pvV i | pvP i | pvS i | pvI i | app0 i =>
+  | pvV i | pvP i | pvS i | pvI i | app0 i | pvZ i =>
     cases t' <;> simp only [Tm.beqM, Bool.false_eq_true] at h
     cases eq_of_hbeqAt h
     rfl
@@ -401,7 +409,8 @@ theorem Tm.eq_of_beqM {s s' : Srt} (t : Tm C Γ s) (t' : Tm C Γ s') (h : t.beqM
 
 theorem Tm.beqM_self {s : Srt} (t : Tm C Γ s) : t.beqM t = true := by
   induction t with
-  | pvV i | pvP i | pvS i | pvI i | app0 i => simp only [Tm.beqM, Idx.hbeq, Op0.hbeq, hbeqAt_self]
+  | pvV i | pvP i | pvS i | pvI i | app0 i | pvZ i =>
+    simp only [Tm.beqM, Idx.hbeq, Op0.hbeq, hbeqAt_self]
   | netOf i a ih => simp only [Tm.beqM, Idx.hbeq, hbeqAt_self, ih, Bool.and_self]
   | app1 o x ih => simp only [Tm.beqM, Op1.hbeq_self, ih, Bool.and_self]
   | app2 o x y ihx ihy => simp only [Tm.beqM, Op2.hbeq_self, ihx, ihy, Bool.and_self]

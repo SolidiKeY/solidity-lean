@@ -72,6 +72,7 @@ def Tm.thinS? (h : Thin Γ' Γ) : {s : Srt} → Tm C Γ s → Option (Tm C Γ' s
   | _, .pvP i => (Idx.unwk? h i).map .pvP
   | _, .pvS i => (Idx.unwk? h i).map .pvS
   | _, .pvI i => (Idx.unwk? h i).map .pvI
+  | _, .pvZ i => (Idx.unwk? h i).map .pvZ
   | _, .netOf i a => do pure (.netOf (← Idx.unwk? h i) (← Tm.thinS? h a))
   | _, .app0 o => some (.app0 o)
   | _, .app1 o x => (Tm.thinS? h x).map (.app1 o)
@@ -110,6 +111,11 @@ theorem Tm.eval_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
   | _, .pvI i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
     show (TEnv.get j (TEnv.thin h σ.env)).map (·.id) = _
+    rw [TEnv.get_unwk? σ.env hj]
+    rfl
+  | _, .pvZ i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    show some (TEnv.get j (TEnv.thin h σ.env)) = _
     rw [TEnv.get_unwk? σ.env hj]
     rfl
   | _, .netOf i a, _, ht => by
@@ -156,6 +162,9 @@ theorem Tm.denote_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
   | _, .pvI i, _, ht => by
     obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
     rfl
+  | _, .pvZ i, _, ht => by
+    obtain ⟨j, hj, rfl⟩ := Option.map_eq_some_iff.1 ht
+    simp only [Tm.denote, State.thin, State.withEnv, TEnv.get_unwk? σ.env hj]
   | _, .netOf i a, _, ht => by
     obtain ⟨j, hj, ht⟩ := Option.bind_eq_some_iff.1 ht
     obtain ⟨a', ha, ht⟩ := Option.bind_eq_some_iff.1 ht
@@ -194,6 +203,7 @@ def Rhs.thinS? (h : Thin Γ' Γ) : {t : LTy} → Rhs C Γ t → Option (Rhs C Γ
   | _, .store s => (Tm.thinS? h s).map .store
   | _, .saveNet => some .saveNet
   | _, .saveNetMt => some .saveNetMt
+  | _, .zint t => (Tm.thinS? h t).map .zint
 
 theorem Rhs.eval_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
     {t : LTy} → (r : Rhs C Γ t) → {r' : Rhs C Γ' t} → Rhs.thinS? h r = some r' →
@@ -216,6 +226,9 @@ theorem Rhs.eval_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
     rw [Tm.eval_thinS? h σ s hs]
   | _, .saveNet, _, hx => by cases hx; rfl
   | _, .saveNetMt, _, hx => by cases hx; rfl
+  | _, .zint t, _, hx => by
+    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hx
+    exact Tm.eval_thinS? h σ t ht
 
 end ThinS
 
@@ -229,7 +242,8 @@ variable {Γ : Ctx} {u : LTy}
 theorem Tm.exhB_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
     {s : Srt} → (t : Tm C Γ s) → {t' : Tm C Γ' s} → Tm.thinS? h t = some t' →
       t'.exhB (σ.thin h) = t.exhB σ
-  | _, .pvV _, _, ht | _, .pvP _, _, ht | _, .pvS _, _, ht | _, .pvI _, _, ht => by
+  | _, .pvV _, _, ht | _, .pvP _, _, ht | _, .pvS _, _, ht | _, .pvI _, _, ht
+  | _, .pvZ _, _, ht => by
     obtain ⟨_, -, rfl⟩ := Option.map_eq_some_iff.1 ht; rfl
   | _, .app0 _, _, ht => by cases ht; rfl
   | _, .netOf i a, _, ht => by
@@ -262,7 +276,7 @@ theorem Tm.exhB_thinS? (h : Thin Γ' Γ) (σ : State C Γ) :
 theorem Rhs.exhB_thinS? (h : Thin Γ' Γ) (σ : State C Γ) {t : LTy} (r : Rhs C Γ t)
     {r' : Rhs C Γ' t} (hr : Rhs.thinS? h r = some r') : r'.exhB (σ.thin h) = r.exhB σ := by
   cases r with
-  | val x | path x | mref x | store x =>
+  | val x | path x | mref x | store x | zint x =>
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 hr
     exact Tm.exhB_thinS? h σ x hx
   | unset | saveNet | saveNetMt => cases hr; rfl
@@ -827,7 +841,7 @@ def Tm.spineHasM {k : Srt} (S : Tm C Γ k) : {s : Srt} → Tm C Γ s → Bool
   | _, .app1 _ a => a.beqR S || Tm.spineHasM S a
   | _, .app2 _ a _ => a.beqR S || Tm.spineHasM S a
   | _, .app3 _ a _ _ => a.beqR S || Tm.spineHasM S a
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .app0 _ => false
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .app0 _ | _, .pvZ _ => false
 
 /-- `S` is read first, strictly inside `T`: the first argument of a symbol of
 `T`, or of one below it (every symbol reads its first argument first: where
@@ -839,12 +853,12 @@ def Tm.spineHas {k : Srt} (S : Tm C Γ k) {s : Srt} (T : Tm C Γ s) : Bool :=
     (fun _ => false)
     (fun _ a ih => a.beqR S || ih)
     (fun _ a _ iha _ => a.beqR S || iha)
-    (fun _ a _ _ iha _ _ => a.beqR S || iha) T
+    (fun _ a _ _ iha _ _ => a.beqR S || iha) (fun _ => false) T
 
 theorem Tm.spineHas_eq_spineHasM {k : Srt} (S : Tm C Γ k) {s : Srt} (T : Tm C Γ s) :
     Tm.spineHas S T = Tm.spineHasM S T := by
   induction T with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ => rfl
+  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ | pvZ _ => rfl
   | app1 o a ih => simp only [Tm.spineHasM, ← ih]; rfl
   | app2 o a _ ih _ => simp only [Tm.spineHasM, ← ih]; rfl
   | app3 o a _ _ ih _ _ => simp only [Tm.spineHasM, ← ih]; rfl
@@ -857,7 +871,8 @@ def Tm.onSpineS {k : Srt} (T S : Tm C Γ k) : Bool := T.beqR S || Tm.spineHas S 
 theorem Tm.spineHas_none {k : Srt} {S : Tm C Γ k} {σ : State C Γ} (hS : S.eval σ = none)
     {s : Srt} (T : Tm C Γ s) (h : Tm.spineHasM S T = true) : T.eval σ = none := by
   induction T with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ => exact absurd h Bool.false_ne_true
+  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ _ | app0 _ | pvZ _ =>
+    exact absurd h Bool.false_ne_true
   | app1 o a iha =>
     simp only [Tm.spineHasM, Bool.or_eq_true] at h
     refine Tm.eval_app1_none o a ?_
@@ -1564,10 +1579,11 @@ def Srt.DEquiv : (s : Srt) → s.TDen → s.TDen → Prop
   | .sv _ => StValue.Equiv
   | .sts _ => Struct.Equiv
   | .spath _ _ => Eq
+  | .kint => StValue.Equiv
   | .ident _ | .addr _ | .mem | .mv _ => fun _ _ => True
 
 theorem Srt.DEquiv.refl : (s : Srt) → (d : s.TDen) → Srt.DEquiv s d d
-  | .val _, _ | .st, _ | .sv _, _ | .sts _, _ => StValue.Equiv.refl _
+  | .val _, _ | .st, _ | .sv _, _ | .sts _, _ | .kint, _ => StValue.Equiv.refl _
   | .path _, _ | .spath _ _, _ => rfl
   | .ident _, _ | .addr _, _ | .mem, _ | .mv _, _ => trivial
 
@@ -1637,7 +1653,7 @@ theorem Op1.denote_congrP {a s : Srt} (o : Op1 C a s) (hr : g₀.SameRest g₁)
     exact StValue.Equiv.asStruct (StValue.Equiv.select h _)
   | alloc _ _ | mfield _ | addM _ _ | mval | ref => trivial
   | wt => exact StValue.Equiv.refl _
-  | toInt => exact h
+  | toInt => simp only [Srt.DEquiv, Op1.denote] at h ⊢; exact h
 
 /-- A binary symbol respects `Equiv` of its arguments' denotations, and a
 memory read its arguments' readings, in two global parts with one ledger,
@@ -1698,6 +1714,13 @@ theorem Op2.denote_congrP {a b s : Srt} (o : Op2 C a b s) (hr : g₀.SameRest g�
     rw [hb]
     exact Struct.Equiv.shrinkT ha _
   | iread | copy _ | mat _ | copySt _ => trivial
+  | zbin op ho | zcmp op ho =>
+    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
+    rcases ha.eq_or_st with rfl | ⟨s, t, rfl, rfl⟩ <;>
+      rcases hb.eq_or_st with rfl | ⟨s', t', rfl, rfl⟩ <;>
+      first
+      | exact StValue.Equiv.refl _
+      | (split <;> (try split) <;> first | exact StValue.Equiv.refl _ | simp_all)
 
 /-- A ternary symbol respects `Equiv` of its arguments' denotations. -/
 theorem Op3.denote_congr {a b c s : Srt} (o : Op3 C a b c s) {da da' : a.TDen}
@@ -1834,6 +1857,7 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     | root r hr' => exact Op0.denote_congrP (.root r hr') hr (.inr rfl)
     | mtSt => exact Op0.denote_congrP .mtSt hr (.inr rfl)
     | member s f hf => exact Op0.denote_congrP (.member s f hf) hr (.inr rfl)
+    | zlit n => exact Op0.denote_congrP (.zlit n) hr (.inr rfl)
   | _, .app1 o x, t', h => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
     have ihx := Tm.substP_denote hL hr hst hmem x hx
@@ -1879,6 +1903,24 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     cases h
     exact Op3.denote_congr o (Tm.substP_denote hL hr hst hmem x hx)
       (Tm.substP_denote hL hr hst hmem y hy) (Tm.substP_denote hL hr hst hmem z hz)
+  | _, .pvZ i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvZ j) | .rhs (.zint t) => some t) = some t' := h
+    generalize U.held i = x at h hx
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show StValue.Equiv (.prim (.int (TEnv.get j σ₀.env))) (.prim (.int (TEnv.get i σ₁.env)))
+      rw [hx]
+      exact StValue.Equiv.refl _
+    | .rhs (.zint t), hx, h =>
+      cases h
+      have hb := Tm.denote_eval σ₀ t' _ hx
+      show StValue.Equiv _ (.prim (.int (TEnv.get i σ₁.env)))
+      rw [hb]
+      exact StValue.Equiv.refl _
 
 /-- A first-order formula of `Δ` read in `Γ` before an update of locals and
 the storage (`Tm.substP`); `none` past anything else. -/

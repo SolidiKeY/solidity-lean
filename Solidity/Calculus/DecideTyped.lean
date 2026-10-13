@@ -293,7 +293,7 @@ theorem _root_.Solidity.Tm.toLSM_congr {Γ : Ctx} {ρ ρ' : SymS} (hl : ρ.loc =
   subst hl hs
   intro s t
   induction t with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app0 _ => exact ⟨rfl, rfl⟩
+  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app0 _ | pvZ _ => exact ⟨rfl, rfl⟩
   | app1 o x ih => refine ⟨?_, ?_⟩ <;> simp only [Tm.toLSM, Tm.inLSM, ih.1, ih.2] <;> rfl
   | app2 o x y ihx ihy =>
     refine ⟨?_, ?_⟩ <;> simp only [Tm.toLSM, Tm.inLSM, ihx.1, ihx.2, ihy.1, ihy.2] <;> rfl

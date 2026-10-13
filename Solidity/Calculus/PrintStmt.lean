@@ -806,7 +806,11 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
       if let (some x, some T) := (← ppVar? x, ← primName? p) then
         return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFmlS na a):dl_fml)
     `(dl_fml| ¬$(← arg ns φ):dl_fml)
-  | Fml.eq _ _ _ a b => `(dl_fml| $(← ppTermS ns a):dl_term ≐ $(← ppTermS ns b):dl_term)
+  | Fml.eq _ _ _ a b =>
+    -- on KeY's `int`, `a == b ≐ true` is `a ≐ b` (`NRead.eqK`)
+    if let some ("=", true, (nl, l), (_, r)) ← cmpPartsS ns a ns b then
+      if let some (l, r) ← ppKPairS nl l r then return ← `(dl_fml| $l:dl_term ≐ $r:dl_term)
+    `(dl_fml| $(← ppTermS ns a):dl_term ≐ $(← ppTermS ns b):dl_term)
   | Fml.defined _ _ _ t => `(dl_fml| defined($(← ppTermS ns t):dl_term))
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
@@ -816,13 +820,18 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   | Fml.and _ _ φ ψ =>
     if let some ((na, a), (nb, b)) ← eqDPartsS ns e then
       let cmp ← cmpPartsS na a nb b
-      if let some (sym, (nl, l), (nr, r)) := cmp then
-        let l ← ppTermS nl l
-        let r ← ppTermS nr r
+      -- a KeY `int` comparison's operands, to read back at KeY's `int`
+      let parts? : Option (String × TSyntax `dl_term × TSyntax `dl_term) ← match cmp with
+        | some (sym, false, (nl, l), (nr, r)) => pure (some (sym, ← ppTermS nl l, ← ppTermS nr r))
+        | some (sym, true, (nl, l), (_, r)) =>
+          pure ((← ppKPairS nl l r).map fun (l, r) => (sym, l, r))
+        | none => pure none
+      if let some (sym, l, r) := parts? then
         return ← match sym with
           | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
           | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
           | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
+          | "=" => `(dl_fml| $l:dl_term = $r:dl_term)
           | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
       return ← `(dl_fml| $(← ppTermS na a):dl_term = $(← ppTermS nb b):dl_term)
     if let some ((na, a), (nb, b)) ← iffPartsS ns e then

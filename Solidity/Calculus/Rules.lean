@@ -116,7 +116,7 @@ namespace Tms
 @[reducible] def Term.mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
     Tm C Γ (.val .uint) := .app2 .mlen m i
 @[reducible] def Term.env (k : EnvKey) : Tm C Γ (.val .uint) := .app0 (.env k)
-@[reducible] def Term.net (a : Tm C Γ (.val .uint)) : Tm C Γ (.val .int) := .app1 .net a
+@[reducible] def Term.net (a : Tm C Γ (.val .uint)) : Tm C Γ .kint := .app1 .net a
 @[reducible] def Term.delValue {p : PrimTy} (t : Tm C Γ (.val p)) : Tm C Γ (.val p) :=
   .app1 .delValue t
 @[reducible] def Term.bumped (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true)

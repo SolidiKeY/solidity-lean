@@ -67,6 +67,11 @@ inductive Srt where
   | sts (s : Name)
   /-- `PTerm` under `select`: from a member of the struct `s` to a `T`. -/
   | spath (s : Name) (T : Ty)
+  /-- KeY's `int`: an unbounded integer, apart from Solidity's `int256`
+  (`val .int`).  The ledger's entries (`net(a)`, `x[a]`), `msg.value` and a
+  `uint` widened (`toInt`), and a specification's arithmetic over them are
+  KeY `int`s (solkey's `netHeader.key`, `SpecCompiler`): total, unbounded. -/
+  | kint
   deriving DecidableEq, Repr
 
 /-- The type an index of key type `k` is hashed at: a `bool` key is the
@@ -75,6 +80,33 @@ def PrimTy.keyTy : PrimTy → PrimTy
   | .bool => .uint
   | .uint => .uint
   | .int => .int
+
+/-- An operator KeY's `int` has, unbounded: `+`, `-`, `*`. -/
+def BinOp.zArith : BinOp → Bool
+  | .add | .sub | .mul => true
+  | _ => false
+
+/-- A comparison of two KeY `int`s: `<`, `>`, `<=`, `>=`, `==`, `!=`. -/
+def BinOp.zCmp : BinOp → Bool
+  | .lt | .gt | .le | .ge | .eqB | .neB => true
+  | _ => false
+
+/-- `a ⊕ b` on KeY's `int`, unbounded (`0` off `zArith`). -/
+def BinOp.evalZ : BinOp → Int → Int → Int
+  | .add, a, b => a + b
+  | .sub, a, b => a - b
+  | .mul, a, b => a * b
+  | _, _, _ => 0
+
+/-- `a ⊲ b` on KeY's `int` (`false` off `zCmp`). -/
+def BinOp.cmpZ : BinOp → Int → Int → Bool
+  | .lt, a, b => decide (a < b)
+  | .gt, a, b => decide (b < a)
+  | .le, a, b => decide (a ≤ b)
+  | .ge, a, b => decide (b ≤ a)
+  | .eqB, a, b => decide (a = b)
+  | .neB, a, b => !decide (a = b)
+  | _, _, _ => false
 
 /-! ## Identities and addresses -/
 
@@ -134,6 +166,7 @@ def Contract.ofStruct (s : Name) : Contract := { vars := structDef s }
   | .mv T => MvT T
   | .sts s => Storage (Contract.ofStruct s)
   | .spath s T => SRef (Contract.ofStruct s) T
+  | .kint => Int
 
 /-- The global part of a typed state: the state without its locals. -/
 def State.glob {Γ : Ctx} (σ : State C Γ) : State C [] :=
@@ -156,12 +189,14 @@ inductive Op0 (C : Contract) : Srt → Type where
   | mtSt : Op0 C .st
   /-- A member `f` of the struct `s` as a root under `select` (`Op0.root f`). -/
   | member (s f : Name) {T : Ty} (h : C.fieldType s f = some T) : Op0 C (.spath s T)
+  /-- A KeY `int` literal. -/
+  | zlit (n : Int) : Op0 C .kint
 
 /-- Unary symbols. -/
 inductive Op1 (C : Contract) : Srt → Srt → Type where
   | unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) : Op1 C (.val p) (.val (op.ret p))
-  /-- `net(a)`: an `int`, where the ledger's entry is one. -/
-  | net : Op1 C (.val .uint) (.val .int)
+  /-- `net(a)`: the ledger's entry, a KeY `int`. -/
+  | net : Op1 C (.val .uint) .kint
   | delValue {p : PrimTy} : Op1 C (.val p) (.val p)
   | field {s f : Name} {T : Ty} (h : C.fieldType s f = some T) :
       Op1 C (.path (.ref (.struct s))) (.path T)
@@ -185,11 +220,10 @@ inductive Op1 (C : Contract) : Srt → Srt → Type where
   /-- `p.f` under a `select`. -/
   | fieldIn {s s' f : Name} {T : Ty} (h : C.fieldType s' f = some T) :
       Op1 C (.spath s (.ref (.struct s'))) (.spath s T)
-  /-- A `uint` read as an `int`: KeY has one `int` sort, so solkey writes
-  nothing (its `msgValue` and the ledger's entries are `int`s, `netHeader.key`)
-  and neither does the printer; a specification's `net(a) + msg.value` reads
-  `msg.value` so.  `none` past `2^255 - 1`. -/
-  | toInt : Op1 C (.val .uint) (.val .int)
+  /-- A `uint` read as a KeY `int`: KeY has one `int` sort, so solkey writes
+  nothing (its `msgValue` and the ledger's entries are `int`s, `netHeader.key`);
+  a specification's `net(a) + msg.value` reads `msg.value` so.  Total. -/
+  | toInt : Op1 C (.val .uint) .kint
 
 /-- Binary symbols. -/
 inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
@@ -219,6 +253,10 @@ inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
   | delAtIn {s : Name} {T : Ty} : Op2 C (.sts s) (.spath s T) (.sts s)
   /-- `sfind(s, p)` under a `select`. -/
   | sfindIn {s : Name} {T : Ty} : Op2 C (.sts s) (.spath s T) (.sv T)
+  /-- `a + b`, `a - b`, `a * b` on KeY's `int`, unbounded. -/
+  | zbin (op : BinOp) (h : op.zArith = true) : Op2 C .kint .kint .kint
+  /-- `a < b`, …, `a == b` on KeY's `int`. -/
+  | zcmp (op : BinOp) (h : op.zCmp = true) : Op2 C .kint .kint (.val .bool)
 
 /-- Ternary symbols. -/
 inductive Op3 (C : Contract) : Srt → Srt → Srt → Srt → Type where
@@ -276,6 +314,7 @@ def Op0.evalM (g : State C []) {s : Srt} : Op0 C s → Option (s.Den C g.H)
   | .memory => some g.memT
   | .mtSt => some (Storage.init C)
   | .member _ f h => some (SRef.ofRoot (C := Contract.ofStruct _) f h)
+  | .zlit n => some n
 
 /-- A constant on the typed global part. -/
 @[implemented_by Op0.evalM]
@@ -284,6 +323,7 @@ def Op0.eval (g : State C []) {s : Srt} (o : Op0 C s) : Option (s.Den C g.H) :=
     (fun {_} v => some v) (fun k => some (g.envVal k)) (fun r {_} h => some (SRef.ofRoot r h))
     (some g.storage) (some g.memT) (some (Storage.init C))
     (fun _ f {_} h => some (SRef.ofRoot (C := Contract.ofStruct _) f h))
+    (fun n => some n)
 
 theorem Op0.eval_eq_evalM (g : State C []) {s : Srt} (o : Op0 C s) : o.eval g = o.evalM g := by
   cases o <;> rfl
@@ -292,7 +332,7 @@ theorem Op0.eval_eq_evalM (g : State C []) {s : Srt} (o : Op0 C s) : o.eval g = 
 def Op1.evalM (g : State C []) {a s : Srt} :
     Op1 C a s → Option (a.Den C g.H) → Option (s.Den C g.H)
   | .unop op _, x => x.bind op.evalT
-  | .net, x => x.bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 g.net).getD 0)
+  | .net, x => x.map fun n => (lookupBy n.1 g.net).getD 0
   | .delValue, x => x.map fun _ => PrimTy.dflt _
   | .field h, x => x.map (·.field h)
   | .next, x => x.bind g.storage.nextT
@@ -307,7 +347,7 @@ def Op1.evalM (g : State C []) {a s : Srt} :
   | .select _ h, x => x.map fun st => Storage.selectT st h
   | .selectIn h, x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h
   | .fieldIn h, x => x.map (SRef.field · h)
-  | .toInt, x => x.bind fun n => PrimTy.int.ofInt? n.1
+  | .toInt, x => x.map fun n => n.1
 
 /-- A unary symbol on the typed global part. -/
 @[implemented_by Op1.evalM]
@@ -315,7 +355,7 @@ def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     Option (a.Den C g.H) → Option (s.Den C g.H) :=
   @Op1.casesOn C (fun a s _ => Option (a.Den C g.H) → Option (s.Den C g.H)) a s o
     (fun op {_} _ x => x.bind op.evalT)
-    (fun x => x.bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 g.net).getD 0))
+    (fun x => x.map fun n => (lookupBy n.1 g.net).getD 0)
     (fun {_} x => x.map fun _ => PrimTy.dflt _)
     (fun {_} {_} {_} h x => x.map (·.field h))
     (fun {_} x => x.bind g.storage.nextT)
@@ -330,7 +370,7 @@ def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     (fun {_} _ h x => x.map fun st => Storage.selectT st h)
     (fun {_} {_} {_} h x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h)
     (fun {_} {_} {_} {_} h x => x.map (SRef.field · h))
-    (fun x => x.bind fun n => PrimTy.int.ofInt? n.1)
+    (fun x => x.map fun n => n.1)
 
 theorem Op1.eval_eq_evalM (g : State C []) {a s : Srt} (o : Op1 C a s) :
     o.eval g = o.evalM g := by
@@ -389,6 +429,8 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
   | .findIn, x, y => do let v ← (← x).find (← y); some v.view
   | .delAtIn, x, y => do (← x).delete (← y)
   | .sfindIn, x, y => do (← x).find (← y)
+  | .zbin op _, x, y => do some (op.evalZ (← x) (← y))
+  | .zcmp op _, x, y => do some (op.cmpZ (← x) (← y))
 
 /-- A binary symbol on the typed global part. -/
 @[implemented_by Op2.evalM]
@@ -428,6 +470,8 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     (fun {_} {_} x y => do let v ← (← x).find (← y); some v.view)
     (fun {_} {_} x y => do (← x).delete (← y))
     (fun {_} {_} x y => do (← x).find (← y))
+    (fun op _ x y => do some (op.evalZ (← x) (← y)))
+    (fun op _ x y => do some (op.cmpZ (← x) (← y)))
 
 theorem Op2.eval_eq_evalM (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     o.eval g = o.evalM g := by
@@ -486,11 +530,6 @@ def SVal.absT {T : Ty} (v : SVal T) : Theory.StValue := Semantics.SVal.abs v.era
 
 /-- A typed storage as one Theory struct node (`State.abs`). -/
 def Storage.absT (st : Storage C) : Theory.Struct := Semantics.SVal.abs.fields st.erase
-
-theorem Storage.abs_into (σ : Semantics.State) (st : Storage C) :
-    (Storage.into σ st).abs = st.absT := rfl
-
-theorem State.abs_globE {Γ : Ctx} (σ : State C Γ) : σ.globE.abs = σ.storage.absT := rfl
 
 /-! ## The laws, typed
 

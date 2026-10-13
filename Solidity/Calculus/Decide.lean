@@ -420,6 +420,8 @@ memory value what the slot holds. -/
   -- under a `select`: out of the fragment
   | .sts _ => LStor
   | .spath _ _ => LPath
+  -- KeY's `int`: out of the fragment, as the ledger it reads
+  | .kint => LTerm
 
 /-- A constant with the updates `ρ` pushed in; a literal erased to KeY's
 untyped value (`PrimTy.erase`). -/
@@ -432,6 +434,7 @@ def _root_.Solidity.Op0.toL (ρ : Sym) : Op0 C s → s.LTy
   -- out of the fragment (`inL`): nothing reads it
   | .mtSt => ρ.stor
   | .member _ _ _ => .undef
+  | .zlit _ => .err
 
 /-- A unary symbol over its argument's `toL`. -/
 def _root_.Solidity.Op1.toL : Op1 C a s → a.LTy → s.LTy
@@ -452,7 +455,7 @@ def _root_.Solidity.Op1.toL : Op1 C a s → a.LTy → s.LTy
   | .mval, x => some (.word x, x)
   | .ref, i => i.map fun p => (.ref p.1, p.2)
   | .wt, _ => .err
-  -- out of the fragment (`inL`): a `uint` widened to an `int`
+  -- out of the fragment (`inL`): a `uint` widened to a KeY `int`
   | .toInt, _ => .err
 
 /-- `read(m, a)` pushed in: the memory's guard, the address's, then the word
@@ -543,6 +546,9 @@ def _root_.Solidity.Op2.toL : Op2 C a b s → a.LTy → b.LTy → s.LTy
   | .findIn, _, _ => .err
   | .delAtIn, x, _ => x
   | .sfindIn, _, _ => .word .err
+  -- KeY's `int`: out of the fragment
+  | .zbin _ _, _, _ => .err
+  | .zcmp _ _, _, _ => .err
 
 /-- A ternary symbol over its arguments' `toL`. -/
 def _root_.Solidity.Op3.toL : Op3 C a b c s → a.LTy → b.LTy → c.LTy → s.LTy
@@ -603,7 +609,7 @@ def Sym.vars (ρ : Sym) : List Var :=
 root, `storage`; not yet `mtSt`, a deployment's storage. -/
 def _root_.Solidity.Op0.inL : Op0 C s → Bool
   | .lit _ | .env _ | .root _ _ | .storage | .memory => true
-  | .mtSt | .member _ _ _ => false
+  | .mtSt | .member _ _ _ | .zlit _ => false
 
 /-- A unary symbol in the fragment, its argument in it (`hb`); an
 allocation where its default copies (`allocOk`).  The identity an allocation

@@ -29,6 +29,7 @@ def LTy.enc (C : Contract) : (t : LTy) → t.Denote C → Binding
   | .mem _, none => .unset
   | .old, st => .store st
   | .oldNet, l => .ledger l
+  | .kint, n => .val (.int n)
 
 /-- A global part with these bindings. -/
 abbrev withLocals (τ : Semantics.State) (e : List (Var × Binding)) : Semantics.State :=

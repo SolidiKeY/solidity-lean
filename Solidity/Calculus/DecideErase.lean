@@ -64,6 +64,7 @@ a storage or a memory as the global part with it. -/
   | .mv _ => Semantics.MVal
   | .sts _ => Semantics.State
   | .spath _ _ => Name × List Seg
+  | .kint => Value
 
 /-- The identity `id` names an `R` in `H`: where a typed memory read is
 exact. -/
@@ -124,6 +125,7 @@ def Srt.erase (g : State C []) : (s : Srt) → s.Den C g.H → s.Ev
   | .mv T, v => MvT.erase T v
   | .sts _, w => { g.globE with storage := Storage.erase w }
   | .spath _ _, r => r.erase
+  | .kint, n => .int n
 
 /-- **The typed reading, erased**: what a term reads in `τ`, as the
 decision procedure's untyped values; a revert where it reads `none`. -/
@@ -137,6 +139,7 @@ def LTy.VDen.erase : (t : LTy) → t.VDen C → t.Denote C
   | .mem _, i => i
   | .old, w => Storage.erase w
   | .oldNet, l => l
+  | .kint, n => n
 
 /-- What a local is set to, erased. -/
 def Rhs.evalE {Γ : Ctx} (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t) : Res (t.Denote C) :=

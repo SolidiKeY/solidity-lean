@@ -62,6 +62,7 @@ def _root_.Solidity.LocalTy.toLTy : LocalTy → LTy
   | .alias R => .alias R
   | .mem R => .mem R
   | .store => .old
+  | .kint => .kint
 
 /-- `Fml.slot i` at the context `Γ`: the `i`th Lean formula, read as a
 formula no reading writes (`{anon()}` over the mark `Fml.slotMark i`), and
@@ -288,11 +289,14 @@ def dlParams (φ : RawFml) (pastAll : Bool) : ECtx × List String × List Nat :=
   let free := (used.filter fun x => (C.rootType x).isNone &&
     (lookupBy x C.enums).isNone).eraseDups
   let unsets := φ.unsets
+  let kints := φ.kintParams free
   let params : ECtx := free.filterMap fun x =>
     match lookupBy x hints, Var.ofName x with
     | some R, _ => some (x, LocalTy.alias R)
     | none, .fresh "sp" _ | none, .fresh "mv" _ => none
-    | none, _ => if unsets.contains x then none else some (x, LocalTy.val .uint)
+    | none, _ =>
+      if unsets.contains x then none
+      else some (x, if kints.contains x then LocalTy.kint else LocalTy.val .uint)
   let taken := ((used ++ declared).map fun x => (Var.ofName x).idx).filter (· > 0)
   let taken := if pastAll then List.range' 1 (taken.foldl max 0) else taken
   (params, declared, taken)
@@ -345,6 +349,12 @@ the text `Tm.keyStr` writes of the scoped term it names. -/
 /-- `a = b` with both sides defined, as `Fml.eqD`'s key. -/
 def LineKey.eqD (a b : String) : LineKey := .and (.defined a) (.and (.defined b) (.eq a b))
 
+/-- The keys of `a = b` by name: the sides', or on KeY's `int` its
+comparison's and `true`'s (`NRead.eqK`). -/
+def eqKeys (a b : NTerm C) : String × String :=
+  if a.isK || b.isK then ((NTerm.binop .eqB a b).key, (NTerm.bool (C := C) true).key)
+  else (a.key, b.key)
+
 /-- A written line with no modality, its key read by name (`Fml.lineKey`'s
 shapes: `Fml.eqD` a conjunction, a comparison `a < b` the equation
 `a < b = true`, a Lean formula its slot). -/
@@ -352,10 +362,12 @@ def elabKeyFml : RawFml → ElabM LineKey
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
-    pure (.eqD (← tVal C Γ a).key (← tVal C Γ b).key)
+    let (ka, kb) := eqKeys C (← tVal C Γ a) (← tVal C Γ b)
+    pure (.eqD ka kb)
   | .teq a b => do
     let (Γ, _) ← get
-    pure (.eq (← tVal C Γ a).key (← tVal C Γ b).key)
+    let (ka, kb) := eqKeys C (← tVal C Γ a) (← tVal C Γ b)
+    pure (.eq ka kb)
   | .defined t => do
     let (Γ, _) ← get
     pure (.defined (← tVal C Γ t).key)

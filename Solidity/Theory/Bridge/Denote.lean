@@ -55,6 +55,7 @@ memory sorts denote nothing of their own. -/
   | .sv _ => StValue
   | .sts _ => Struct
   | .spath _ _ => List Seg
+  | .kint => StValue
   | .ident _ | .addr _ | .mem | .mv _ => Unit
 
 /-- A typed storage as an untyped state, for the Theory's bridge lemmas. -/
@@ -81,6 +82,7 @@ def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen
   | .memory => ()
   | .mtSt => (Storage.init C).absT
   | .member _ f _ => rootPath f []
+  | .zlit n => .prim (.int n)
 
 /-- A unary symbol in the Theory, its argument's denotation given. -/
 def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen → s.TDen
@@ -131,6 +133,12 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .findIn, _, _, ds, dp => findSt ds dp
   | .delAtIn, _, _, ds, dp => StValue.delAt ds dp
   | .sfindIn, _, _, ds, dp => findSt ds dp
+  | .zbin op _, _, _, da, db => match da, db with
+    | .prim (.int a), .prim (.int b) => .prim (.int (op.evalZ a b))
+    | _, _ => .st .mtSt
+  | .zcmp op _, _, _, da, db => match da, db with
+    | .prim (.int a), .prim (.int b) => .prim (.bool (op.cmpZ a b))
+    | _, _ => .st .mtSt
 
 /-- A ternary symbol in the Theory, its arguments' denotations given. -/
 def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen → b.TDen → c.TDen → s.TDen
@@ -155,6 +163,7 @@ def Srt.Bridge (C : Contract) (H : HTy) : (s : Srt) → s.TDen → s.Den C H →
   | .sv _, d, w => StValue.Equiv d w.absT
   | .sts _, d, w => Struct.Equiv d (Storage.absT w)
   | .spath _ _, d, r => d = r.absT
+  | .kint, d, n => d = .prim (.int n)
   | .ident _, _, _ | .addr _, _, _ | .mem, _, _ | .mv _, _, _ => True
 
 /-- A denotation agrees with a typed reading wherever it returns. -/
@@ -248,10 +257,11 @@ theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {
     simp only [Op1.denote, hu, StValue.toRes]
     exact congrArg Semantics.Res.toSt he
   | net =>
-    simp only [Op1.evalM, Option.bind_some] at hv
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
     simp only [Srt.Bridge] at hu ⊢
     simp only [Op1.denote, hu]
-    exact congrArg StValue.prim (PrimTy.erase_of_ofValue? hv).symm
+    rfl
   | delValue =>
     simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
     subst hv
@@ -301,9 +311,10 @@ theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {
     simp only [Srt.Bridge] at hu ⊢
     rw [Op1.denote, hu, SRef.absT_field]
   | toInt =>
-    simp only [Op1.evalM, Option.bind_some] at hv
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
     simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, PrimTy.erase_of_ofValue? hv]
+    rw [Op1.denote, hu]
     rfl
 
 /-- A push that returns had room. -/
@@ -344,10 +355,6 @@ theorem SVal.absT_prim_view {p : PrimTy} (w : SVal (.prim p)) :
   cases w
   rw [SVal.absT, SVal.erase_prim, Semantics.SVal.abs]
   rfl
-
-/-- A storage untyped with the typed one in place. -/
-theorem Storage.abs_into_sem {C : Contract} (st st' : Storage C) :
-    (Storage.into st.sem st').abs = st'.absT := rfl
 
 /-- `find` on a typed storage, up to `Equiv` of the storage. -/
 theorem Storage.findSt_equiv {C : Contract} {U : Ty} {d : Struct} {st : Storage C}
@@ -547,7 +554,16 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
     have e4 : st'.absT = _ := (Semantics.State.abs_pushPlaceAt (σ := u.sem) he).1
     rw [Op2.denote, hw, e4]
     exact Struct.Equiv.pushSlotT _ _ hu _
-
+  | zbin op h | zcmp op h =>
+    cases y with
+    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
+        reduceCtorEq] at hv
+    | some w =>
+    have hw := hy w rfl
+    simp only [Srt.Bridge] at hu hw ⊢
+    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind, Option.some.injEq] at hv
+    subst hv hu hw
+    rfl
 
 theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C g.H)}
     {y : Option (b.Den C g.H)} {z : Option (c.Den C g.H)} {da : a.TDen} {db : b.TDen}

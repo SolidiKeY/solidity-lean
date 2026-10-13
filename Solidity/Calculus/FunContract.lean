@@ -73,6 +73,7 @@ def Tm.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {s : Srt} → Tm C Γ s → Tm C Δ s
     (app1 := fun o a => .app1 o (Tm.wk h a))
     (app2 := fun o a b => .app2 o (Tm.wk h a) (Tm.wk h b))
     (app3 := fun o a b c => .app3 o (Tm.wk h a) (Tm.wk h b) (Tm.wk h c))
+    (pvZ := fun i => .pvZ (i.wk h))
   termination_by structural _ t => t
 
 /-! `Tm.wk`'s equations, one a constructor: its own equation unfolds to
@@ -98,6 +99,7 @@ theorem Tm.wk_app2 {a b s : Srt} (o : Op2 C a b s) (x : Tm C Γ a) (y : Tm C Γ 
     (Tm.app2 o x y).wk h = .app2 o (x.wk h) (y.wk h) := rfl
 theorem Tm.wk_app3 {a b c s : Srt} (o : Op3 C a b c s) (x : Tm C Γ a) (y : Tm C Γ b)
     (z : Tm C Γ c) : (Tm.app3 o x y z).wk h = .app3 o (x.wk h) (y.wk h) (z.wk h) := rfl
+theorem Tm.wk_pvZ (i : Idx Γ .kint) : (Tm.pvZ (C := C) i).wk h = .pvZ (i.wk h) := rfl
 
 end WkEqns
 
@@ -130,6 +132,9 @@ theorem Tm.eval_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     show o.eval σ.glob ((a.wk h).eval σ) ((b.wk h).eval σ) ((c.wk h).eval σ) =
       o.eval σ.glob (a.eval (σ.thin h)) (b.eval (σ.thin h)) (c.eval (σ.thin h))
     rw [Tm.eval_wk h σ a, Tm.eval_wk h σ b, Tm.eval_wk h σ c]
+  | _, .pvZ i => by
+    show some (TEnv.get (i.wk h) σ.env) = some (TEnv.get i (TEnv.thin h σ.env))
+    rw [TEnv.get_thin_wk]
 
 theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     {s : Srt} → (t : Tm C Γ s) → (t.wk h).denote σ = t.denote (σ.thin h)
@@ -153,6 +158,7 @@ theorem Tm.denote_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) :
     show o.denote ((a.wk h).denote σ) ((b.wk h).denote σ) ((c.wk h).denote σ) =
       o.denote (a.denote (σ.thin h)) (b.denote (σ.thin h)) (c.denote (σ.thin h))
     rw [Tm.denote_wk h σ a, Tm.denote_wk h σ b, Tm.denote_wk h σ c]
+  | _, .pvZ i => by simp only [Tm.wk_pvZ, Tm.denote, State.thin, State.withEnv, TEnv.get_thin_wk]
 
 /-- A first-order formula read with more locals around it; `none` on an
 update, a modality, a `havoc`, a hidden binder or an anonymising update. -/

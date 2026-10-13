@@ -2699,6 +2699,7 @@ def LTy.Keys (C : Contract) : (t : LTy) → t.Denote C → Prop
   | .mem _, _ => True
   | .old, _ => True
   | .oldNet, _ => True
+  | .kint, _ => True
 
 /-- What a run keeps beyond canonical storage, of a typed state: its storage
 erases tight, and its aliases are bound along numeric keys. -/

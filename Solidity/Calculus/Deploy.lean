@@ -58,6 +58,7 @@ theorem holds_closeN {σ : State C []} {useAll : Bool} :
   | (x, .mem R) :: Γ, φ, h, (v, e) => holds_closeN (φ := .bind .box x (.mem R) φ) Γ h e v
   | (x, .old) :: Γ, φ, h, (v, e) => holds_closeN (φ := .bind .box x .old φ) Γ h e v
   | (x, .oldNet) :: Γ, φ, h, (v, e) => holds_closeN (φ := .bind .box x .oldNet φ) Γ h e v
+  | (x, .kint) :: Γ, φ, h, (v, e) => holds_closeN (φ := .bind .box x .kint φ) Γ h e v
 
 /-- **A derived constructor obligation holds of the typed deployment**:
 for every value of its parameters, its program runs under `m` from

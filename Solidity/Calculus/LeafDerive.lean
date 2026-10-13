@@ -287,12 +287,12 @@ def _root_.Solidity.Tm.stablePathS {s : Srt} (t : Tm C Γ s) : Bool :=
     (fun _ => false) (fun _ => true) (fun _ => false) (fun _ => false) (fun _ _ _ => false)
     (fun o => o.isRoot) (fun o _ ih => o.isField && ih)
     (fun o _ y iha _ => o.isAt && iha && y.keyFreeS)
-    (fun _ _ _ _ _ _ _ => false) t
+    (fun _ _ _ _ _ _ _ => false) (fun _ => false) t
 
 theorem _root_.Solidity.Tm.stablePathS_eq_stablePathSM {s : Srt} (t : Tm C Γ s) :
     t.stablePathS = t.stablePathSM := by
   induction t with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app0 _ | app3 _ _ _ _ => rfl
+  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app0 _ | app3 _ _ _ _ | pvZ _ => rfl
   | app1 o x ih => simp only [Tm.stablePathSM, ← ih]; rfl
   | app2 o x y ihx ihy => simp only [Tm.stablePathSM, ← ihx]; rfl
 
@@ -741,7 +741,7 @@ theorem holds_bindAsAll {Γ : Ctx} {m : Modality} {x : Var} :
     (t : LTy) → {φ : Fml C (t :: Γ)} → (σ : State C Γ) →
       holds σ (Fml.bindAsAll m x t φ) → holds σ (.bind m x t φ)
   | .val _, _, _, h => fun v => h v
-  | .alias _, _, _, h | .mem _, _, _, h | .old, _, _, h | .oldNet, _, _, h => h
+  | .alias _, _, _, h | .mem _, _, _, h | .old, _, _, h | .oldNet, _, _, h | .kint, _, _, h => h
 
 /-- `Fml.prepS`' compiled twin. -/
 def _root_.Solidity.Fml.prepSM : {Γ : Ctx} → Fml C Γ → Fml C Γ

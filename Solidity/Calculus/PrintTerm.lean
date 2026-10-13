@@ -97,7 +97,8 @@ partial def viewTmS (red : Bool) (ns : List Expr) (e : Expr) :
   if n == ``Tm.app3 && args.size == 10 then return ← sym args[6]! #[args[7]!, args[8]!, args[9]!]
   if (n == ``Tm.pvV || n == ``Tm.pvP || n == ``Tm.pvI) && args.size == 4 then
     return (ns, .pv (← idxName ns args[3]!), e)
-  if n == ``Tm.pvS && args.size == 3 then return (ns, .pv (← idxName ns args[2]!), e)
+  if (n == ``Tm.pvS || n == ``Tm.pvZ) && args.size == 3 then
+    return (ns, .pv (← idxName ns args[2]!), e)
   -- a lowering: of a schema variable, the local of its name; of a
   -- constructor, what it computes to
   if lowerFns.contains n && args.size > 0 then
@@ -154,10 +155,18 @@ partial def eqTmS (n₁ : List Expr) (x : Expr) (n₂ : List Expr) (y : Expr) : 
 /-- `‹e›`. -/
 def escapeS (e : Expr) : MetaM (TSyntax `dl_term) := escapeDl e
 
-/-- Whether a value term is a `uint` widened to an `int` (`Op1.toInt`). -/
+/-- Whether a value term is a `uint` widened to a KeY `int` (`Op1.toInt`). -/
 def isToIntS (ns : List Expr) (e : Expr) : MetaM Bool := do
   let (_, v, _) ← viewTmS (← reduceOn) ns e
   return v matches .sym ``Op1.toInt _ _
+
+/-- Whether a KeY `int` term shows its sort where it prints, as the reader
+tells by name (`NTm.isK`): a ledger read, a KeY `int` local, arithmetic over
+KeY `int`s (which prints its widenings when no operand shows the sort). -/
+def kintEvidentS (ns : List Expr) (e : Expr) : MetaM Bool := do
+  let (_, v, e') ← viewTmS (← reduceOn) ns e
+  if e'.isAppOf ``Tm.pvZ then return true
+  return v matches .netOf .. | .sym ``Op1.net _ _ | .sym ``Op2.zbin _ _
 
 mutual
 
@@ -196,12 +205,16 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   | .sym ``Op2.binop #[op, ty, _] #[a, b] =>
     let some sym ← termOpSym? op | escapeS e
     -- `+ - * /` read back as `uint` arithmetic only (`schemaTerm0`): an
-    -- `int` (or unchecked `bool`) one escapes, but one with a widened
-    -- operand (`net(a) + msg.value`), which the reader widens again
-    -- (`NTm.resolvePair`)
-    unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint ||
-        (← isToIntS ns a) || (← isToIntS ns b) do return ← escapeS e
+    -- `int` (or unchecked `bool`) one escapes
+    unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
+  | .sym ``Op2.zbin #[op, _] #[a, b] =>
+    let some sym ← termOpSym? op | escapeS e
+    let some (a, b) ← ppKPairS ns a b | escapeS e
+    mkBinTerm sym a b
+  | .sym ``Op0.zlit #[n] _ =>
+    let some n ← intOf? n | escapeS e
+    if n < 0 then escapeS e else `(dl_term| $(Syntax.mkNumLit (toString n)):num)
   | .sym ``Op1.unop #[op, _, _] #[a] =>
     if (← fvarName? op).isSome then return ← `(dl_term| ⊖$(← ppTermS ns a))
     if (← whnf op).isConstOf ``UnOp.not then return ← `(dl_term| !$(← ppTermS ns a))
@@ -232,11 +245,30 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     | EnvKey.selfBalance => `(dl_term| selfBalance)
     | EnvKey.selfAddress => if ← keyOn then `(dl_term| self) else `(dl_term| this)
     | _ => escapeS e
-  | .sym ``Op1.toInt _ #[a] => ppTermS ns a
+  -- a widening where nothing shows the sort: written (`ppKS` drops it where
+  -- an operand beside it does)
+  | .sym ``Op1.toInt _ #[a] => `(dl_term| toInt($(← ppTermS ns a)))
   | .sym ``Op1.net _ #[a] =>
     if ← keyOn then return ← `(dl_term| selectSt(net, at($(← ppTermS ns a))))
     `(dl_term| net($(← ppTermS ns a)))
   | _ => escapeS e
+
+/-- An operand of KeY `int` arithmetic or of a comparison: a widened
+`uint` bare when `bare` (the reader widens it again, `NTm.resolvePairV`). -/
+partial def ppKS (ns : List Expr) (bare : Bool) (e : Expr) : MetaM (TSyntax `dl_term) := do
+  if bare then
+    let (ns', v, _) ← viewTmS (← reduceOn) ns e
+    if let .sym ``Op1.toInt _ #[a] := v then return ← ppTermS ns' a
+  ppTermS ns e
+
+/-- Two KeY `int` operands, printed to read back at KeY's `int`: a widening
+bare where an operand shows the sort (`kintEvidentS`), written where none
+does; none where neither shows it nor is widened (two literals). -/
+partial def ppKPairS (ns : List Expr) (a b : Expr) :
+    MetaM (Option (TSyntax `dl_term × TSyntax `dl_term)) := do
+  let bare := (← kintEvidentS ns a) || (← kintEvidentS ns b)
+  if !bare && !(← isToIntS ns a) && !(← isToIntS ns b) then return none
+  return some (← ppKS ns bare a, ← ppKS ns bare b)
 
 /-- Whether a storage term is `storage`. -/
 partial def isStorageS (ns : List Expr) (s : Expr) : MetaM Bool := do
@@ -424,21 +456,27 @@ partial def ppMValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
 end
 
 /-- `a < b = true`, a comparison as the specification writes one, read at
-`na` and `nb`: its operator and operands, with their names. -/
+`na` and `nb`: its operator and operands, with their names, and whether it
+compares KeY `int`s (`zcmp`; then `a == b = true` is the equation `a = b`,
+`NRead.eqK`). -/
 def cmpPartsS (na : List Expr) (a : Expr) (nb : List Expr) (b : Expr) :
-    MetaM (Option (String × (List Expr × Expr) × (List Expr × Expr))) := do
+    MetaM (Option (String × Bool × (List Expr × Expr) × (List Expr × Expr))) := do
   let (_, vb, _) ← viewTmS true nb b
   let .sym ``Op0.lit #[_, v] _ := vb | return none
   unless (← whnf v).isConstOf ``Bool.true do return none
   let (na, va, _) ← viewTmS true na a
-  let .sym ``Op2.binop #[op, _, _] #[l, r] := va | return none
+  let (op, k, l, r) ← match va with
+    | .sym ``Op2.binop #[op, _, _] #[l, r] => pure (op, false, l, r)
+    | .sym ``Op2.zcmp #[op, _] #[l, r] => pure (op, true, l, r)
+    | _ => return none
   let sym ← match_expr (← whnf op) with
     | BinOp.lt => pure "<"
     | BinOp.le => pure "<="
     | BinOp.gt => pure ">"
     | BinOp.ge => pure ">="
+    | BinOp.eqB => if k then pure "=" else return none
     | _ => return none
-  return some (sym, (na, l), (na, r))
+  return some (sym, k, (na, l), (na, r))
 
 /-! ## Updates -/
 
@@ -502,6 +540,16 @@ def rhsElemS (ns : List Expr) (x r : Expr) : MetaM (Option (TSyntax `dl_upd_elem
         if (← whnf ty).isConstOf ``PrimTy.uint then
           return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
       | _ => pure ()
+    if let .sym ``Op2.zcmp #[op, _] #[a, b] := vt then
+      if let some (a, b) ← ppKPairS nt a b then
+        match_expr (← whnf op) with
+        | BinOp.le => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term <= $b:dl_term))
+        | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
+        | BinOp.gt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term > $b:dl_term))
+        | BinOp.ge => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term >= $b:dl_term))
+        | BinOp.eqB => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term == $b:dl_term))
+        | BinOp.neB => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
+        | _ => pure ()
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppTermS ns t):dl_term))
   | some ``Rhs.path => return some (← `(dl_upd_elem| $x:dl_term := $(← ppPTermS ns t):dl_term))
   | some ``Rhs.unset => return some (← `(dl_upd_elem| $x:dl_term := unset))
@@ -509,6 +557,7 @@ def rhsElemS (ns : List Expr) (x r : Expr) : MetaM (Option (TSyntax `dl_upd_elem
   | some ``Rhs.store => return some (← `(dl_upd_elem| $x:dl_term := $(← ppSTermS ns t):dl_term))
   | some ``Rhs.saveNet => return some (← `(dl_upd_elem| $x:dl_term := net))
   | some ``Rhs.saveNetMt => return some (← `(dl_upd_elem| $x:dl_term := mtSt))
+  | some ``Rhs.zint => return some (← `(dl_upd_elem| $x:dl_term := $(← ppTermS ns t):dl_term))
   | _ => return none
 
 /-- An assigning element, its right-hand sides read at `ns` and its target at

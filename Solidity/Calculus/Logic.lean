@@ -123,6 +123,7 @@ theorem LTy.tdenote_nonempty {H : HTy} : (t : LTy) → Nonempty (t.TDenote C H)
   | .mem _ => ⟨none⟩
   | .old => ⟨Storage.init C⟩
   | .oldNet => ⟨[]⟩
+  | .kint => ⟨(0 : Int)⟩
 
 /-- Valid over the typed states: true in every typed state of the empty
 context. -/

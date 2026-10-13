@@ -58,12 +58,6 @@ variable {C : Contract}
 
 /-! ## Names in a named context -/
 
-/-- A conversion the notation writes nothing for (`toInt`): its key and
-its text are its argument's. -/
-def Op1.isCast {a s : Srt} : Op1 C a s → Bool
-  | .toInt => true
-  | _ => false
-
 /-- The newest local named `x`, of whatever type. -/
 def NCtx.findAny (x : Var) : (Γ : NCtx) → Except String ((t : LTy) × Idx Γ.ctx t)
   | [] => .error s!"unknown name {x}"
@@ -102,6 +96,7 @@ inductive SrtK where
   | .addr _ => .addr
   | .mem => .mem
   | .mv _ => .mv
+  | .kint => .val
 
 /-- A sort as an error message names it. -/
 def Srt.describe : Srt → String
@@ -115,6 +110,7 @@ def Srt.describe : Srt → String
   | .mv T => s!"a memory value of type `{T}`"
   | .sts s => s!"the members of a `{s}` (a `select`)"
   | .spath s T => s!"a path from a member of `{s}` to a `{T}`"
+  | .kint => "a KeY `int`"
 
 /-- A value of a primitive type as text. -/
 def PrimTy.showD : (p : PrimTy) → p.Denote → String
@@ -135,6 +131,7 @@ def Op0.key {s : Srt} : Op0 C s → String
   | .memory => "memory"
   | .mtSt => "mtSt"
   | .member _ f _ => s!"root {f}"
+  | .zlit n => s!"zlit {n}"
 
 def Op1.key {a s : Srt} : Op1 C a s → String
   | .unop op _ => s!"unop {op.sym}"
@@ -174,6 +171,8 @@ def Op2.key {a b s : Srt} : Op2 C a b s → String
   | .copy _ => "copy"
   | .mat _ => "mat"
   | .copySt _ => "copySt"
+  | .zbin op _ => s!"zbin {op.sym}"
+  | .zcmp op _ => s!"zcmp {op.sym}"
 
 def Op3.key {a b c s : Srt} : Op3 C a b c s → String
   | .ite => "ite"
@@ -188,9 +187,10 @@ def Tm.keyStr {Γ : Ctx} (ns : List Var) : {s : Srt} → Tm C Γ s → String
   | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i => reprStr (i.name ns)
   | _, .netOf i a => s!"({reprStr (i.name ns)})[{Tm.keyStr ns a}]"
   | _, .app0 o => o.key
-  | _, .app1 o x => if o.isCast then Tm.keyStr ns x else s!"{o.key}({Tm.keyStr ns x})"
+  | _, .app1 o x => s!"{o.key}({Tm.keyStr ns x})"
   | _, .app2 o x y => s!"{o.key}({Tm.keyStr ns x}, {Tm.keyStr ns y})"
   | _, .app3 o x y z => s!"{o.key}({Tm.keyStr ns x}, {Tm.keyStr ns y}, {Tm.keyStr ns z})"
+  | _, .pvZ i => reprStr (i.name ns)
 
 /-! ## Terms by name -/
 
@@ -206,6 +206,17 @@ structure NTm (C : Contract) (k : SrtK) where
   text : String
   resolve : (Γ : NCtx) → Except String (Resolved C Γ)
   checkAt? : Option ((s : Srt) → (Γ : NCtx) → Except String (Tm C Γ.ctx s)) := none
+  /-- Whether it synthesizes a KeY `int`, read by name (a ledger read, a
+  KeY `int` local, arithmetic over one), so a key is known before the term
+  resolves. -/
+  isK : Bool := false
+  /-- Its key where it is checked at a KeY `int`, if not `keyK`'s default. -/
+  keyKO : Option String := none
+
+/-- A term's key where it is checked at a KeY `int`: its own if it is one, a
+numeral's literal at the sort (`zlit n`), else widened (`toInt(…)`). -/
+def NTm.keyK {k : SrtK} (t : NTm C k) : String :=
+  t.keyKO.getD (if t.isK then t.key else s!"toInt({t.key})")
 
 /-- `t` is of sort `s'`, used at `s`. -/
 def sortError {α : Type} (t : String) (s' s : Srt) : Except String α :=
@@ -219,10 +230,12 @@ namespace NTm
 
 variable {k : SrtK}
 
-/-- A term of sort `s'` used at `s`: itself, a `uint` used as an `int`
-widened (`Op1.toInt`: KeY has one `int` sort), else the mismatch. -/
+/-- A term of sort `s'` used at `s`: itself, a `uint` of fixed type (a
+local, a read, `msg.value`: what synthesizes) used as a KeY `int` widened
+(`Op1.toInt`: solkey's `msgValue` and ledger are KeY `int`s), else the
+mismatch. -/
 def widen (text : String) {Γ : Ctx} : (s' s : Srt) → Tm C Γ s' → Except String (Tm C Γ s)
-  | .val .uint, .val .int, x => pure (.app1 .toInt x)
+  | .val .uint, .kint, x => pure (.app1 .toInt x)
   | s', s, x => if h : s' = s then pure (h ▸ x) else sortError text s' s
 
 /-- `t` at the sort `s`: synthesized and compared (a `uint` widened to an
@@ -234,40 +247,69 @@ def check (t : NTm C k) (s : Srt) (Γ : NCtx) : Except String (Tm C Γ.ctx s) :=
     let ⟨s', x⟩ ← t.resolve Γ
     widen t.text s' s x
 
-/-- A term at a value sort, and its type. -/
+/-- A term at a value sort of a Solidity type, and its type. -/
 def resolveVal (t : NTm C .val) (Γ : NCtx) :
     Except String ((p : PrimTy) × Tm C Γ.ctx (.val p)) := do
   match ← t.resolve Γ with
   | ⟨.val p, x⟩ => pure ⟨p, x⟩
+  | ⟨s, _⟩ => useError t.text s "a value of a Solidity type"
+
+/-- A value's sort: a Solidity type's (`val p`) or KeY's `int`. -/
+inductive VSort where
+  | prim (p : PrimTy)
+  | kint
+  deriving DecidableEq
+
+/-- The sort a value sort is. -/
+@[reducible] def VSort.srt : VSort → Srt
+  | .prim p => .val p
+  | .kint => .kint
+
+/-- A term at a value sort, a Solidity type's or KeY's `int`. -/
+def resolveV (t : NTm C .val) (Γ : NCtx) :
+    Except String ((v : VSort) × Tm C Γ.ctx v.srt) := do
+  match ← t.resolve Γ with
+  | ⟨.val p, x⟩ => pure ⟨.prim p, x⟩
+  | ⟨.kint, x⟩ => pure ⟨.kint, x⟩
   | ⟨s, _⟩ => useError t.text s "a value"
 
-/-- Two values at one type: the side that is no numeral synthesizes it
-(the first if neither or both are), the other is checked at it. -/
+/-- Two values at one sort: the side that is no numeral synthesizes it
+(the first if neither or both are), the other is checked at it; a side of
+fixed type `uint` beside a KeY `int` is widened (`widen`). -/
+def resolvePairV (a b : NTm C .val) (Γ : NCtx) :
+    Except String ((v : VSort) × Tm C Γ.ctx v.srt × Tm C Γ.ctx v.srt) := do
+  if a.checkAt?.isSome && b.checkAt?.isNone then
+    let ⟨v, b'⟩ ← b.resolveV Γ
+    pure ⟨v, ← a.check v.srt Γ, b'⟩
+  else
+    let ⟨v, a'⟩ ← a.resolveV Γ
+    if b.checkAt?.isSome then return ⟨v, a', ← b.check v.srt Γ⟩
+    let ⟨q, b'⟩ ← b.resolve Γ
+    match v, a', q, b' with
+    | .prim .uint, a', .kint, b' => pure ⟨.kint, .app1 .toInt a', b'⟩
+    | v, a', q, b' => pure ⟨v, a', ← widen b.text q v.srt b'⟩
+
+/-- Two values at one Solidity type (`resolvePairV`, a KeY `int` refused). -/
 def resolvePair (a b : NTm C .val) (Γ : NCtx) :
     Except String ((p : PrimTy) × Tm C Γ.ctx (.val p) × Tm C Γ.ctx (.val p)) := do
-  if a.checkAt?.isSome && b.checkAt?.isNone then
-    let ⟨p, b'⟩ ← b.resolveVal Γ
-    pure ⟨p, ← a.check (.val p) Γ, b'⟩
-  else
-    let ⟨p, a'⟩ ← a.resolveVal Γ
-    if b.checkAt?.isSome then return ⟨p, a', ← b.check (.val p) Γ⟩
-    -- a `uint` beside an `int` is widened, on either side (`widen`)
-    let ⟨q, b'⟩ ← b.resolve Γ
-    match p, a', q, b' with
-    | .uint, a', .val .int, b' => pure ⟨.int, .app1 .toInt a', b'⟩
-    | p, a', q, b' => pure ⟨p, a', ← widen b.text q (.val p) b'⟩
+  match ← resolvePairV a b Γ with
+  | ⟨.prim p, a', b'⟩ => pure ⟨p, a', b'⟩
+  | ⟨.kint, _, _⟩ => useError s!"{a.text}, {b.text}" .kint "a value of a Solidity type"
 
 /-- A term that synthesizes: no `checkAt?`. -/
 def syn (key text : String) (resolve : (Γ : NCtx) → Except String (Resolved C Γ)) : NTm C k :=
   { key, text, resolve }
 
-/-- A stack local. -/
-def pvV (x : Var) : NTm C .val :=
-  syn (reprStr x) x.text fun Γ => do
-    let ⟨t, i⟩ ← Γ.findAny x
-    match t, i with
-    | .val p, i => pure ⟨.val p, .pvV i⟩
-    | t, _ => kindError x t "a value"
+/-- A stack local, or a KeY `int` one (`isK`: what the reader's scope says
+of the name). -/
+def pvV (x : Var) (isK : Bool := false) : NTm C .val :=
+  { key := reprStr x, text := x.text, isK
+    resolve := fun Γ => do
+      let ⟨t, i⟩ ← Γ.findAny x
+      match t, i with
+      | .val p, i => pure ⟨.val p, .pvV i⟩
+      | .kint, i => pure ⟨.kint, .pvZ i⟩
+      | t, _ => kindError x t "a value" }
 
 /-- A storage alias. -/
 def pvP (x : Var) : NTm C .path :=
@@ -295,34 +337,44 @@ def pvI (x : Var) : NTm C .ident :=
 
 /-- `x[a]`: what the ledger bound at `x` holds for `a`. -/
 def netOf (x : Var) (a : NTm C .val) : NTm C .val :=
-  syn s!"({reprStr x})[{a.key}]" s!"net({x.text}, {a.text})" fun Γ => do
-    let a' ← a.check (.val .uint) Γ
-    let ⟨t, i⟩ ← Γ.findAny x
-    match t, i with
-    | .oldNet, i => pure ⟨.val .int, .netOf i a'⟩
-    | t, _ => kindError x t "a ledger"
+  { key := s!"({reprStr x})[{a.key}]", text := s!"net({x.text}, {a.text})", isK := true
+    resolve := fun Γ => do
+      let a' ← a.check (.val .uint) Γ
+      let ⟨t, i⟩ ← Γ.findAny x
+      match t, i with
+      | .oldNet, i => pure ⟨.kint, .netOf i a'⟩
+      | t, _ => kindError x t "a ledger" }
 
 /-- A symbol of a sort its constructor fixes, its arguments checked. -/
 def app0 {s : Srt} (o : Op0 C s) (text : String) : NTm C s.kind :=
-  syn o.key text fun _ => pure ⟨s, .app0 o⟩
+  { (syn o.key text fun _ => pure ⟨s, .app0 o⟩ : NTm C s.kind) with isK := s == .kint }
+
+/-- An argument's key at the sort it is checked at: a KeY `int`'s
+`keyK`. -/
+def keyAt {k : SrtK} (x : NTm C k) (a : Srt) : String := if a == .kint then x.keyK else x.key
 
 def app1 {a s : Srt} (o : Op1 C a s) (x : NTm C a.kind) (text : String) : NTm C s.kind :=
-  syn s!"{o.key}({x.key})" text fun Γ => do pure ⟨s, .app1 o (← x.check a Γ)⟩
+  { (syn s!"{o.key}({x.keyAt a})" text (fun Γ => do pure ⟨s, .app1 o (← x.check a Γ)⟩) :
+      NTm C s.kind) with
+    isK := s == .kint }
 
 def app2 {a b s : Srt} (o : Op2 C a b s) (x : NTm C a.kind) (y : NTm C b.kind) (text : String) :
     NTm C s.kind :=
-  syn s!"{o.key}({x.key}, {y.key})" text fun Γ => do
-    pure ⟨s, .app2 o (← x.check a Γ) (← y.check b Γ)⟩
+  { (syn s!"{o.key}({x.keyAt a}, {y.keyAt b})" text (fun Γ => do
+      pure ⟨s, .app2 o (← x.check a Γ) (← y.check b Γ)⟩) : NTm C s.kind) with
+    isK := s == .kint }
 
 def app3 {a b c s : Srt} (o : Op3 C a b c s) (x : NTm C a.kind) (y : NTm C b.kind)
     (z : NTm C c.kind) (text : String) : NTm C s.kind :=
-  syn s!"{o.key}({x.key}, {y.key}, {z.key})" text fun Γ => do
-    pure ⟨s, .app3 o (← x.check a Γ) (← y.check b Γ) (← z.check c Γ)⟩
+  { (syn s!"{o.key}({x.keyAt a}, {y.keyAt b}, {z.keyAt c})" text (fun Γ => do
+      pure ⟨s, .app3 o (← x.check a Γ) (← y.check b Γ) (← z.check c Γ)⟩) : NTm C s.kind) with
+    isK := s == .kint }
 
 /-- A scoped term read at the names `ns`, by name: what it is wherever its
 locals' names stand (its text its key). -/
 def ofTm {Δ : Ctx} (ns : List Var) : {s : Srt} → Tm C Δ s → NTm C s.kind
   | _, .pvV i => pvV (i.name ns)
+  | _, .pvZ i => pvV (i.name ns) (isK := true)
   | _, .pvP i => pvP (i.name ns)
   | _, .pvS i => pvS (i.name ns)
   | _, .pvI i => pvI (i.name ns)
@@ -421,17 +473,30 @@ def NTerm.num (n : Int) : NTerm C :=
       pure ⟨.val p, .app0 (.lit (← numLit (toString n) n p))⟩
     checkAt? := some fun s _ => match s with
       | .val p => do pure (.app0 (.lit (← numLit (toString n) n p)))
-      | s => .error s!"`{n}` is a number, used as {s.describe}" }
+      | .kint => pure (.app0 (.zlit n))
+      | s => .error s!"`{n}` is a number, used as {s.describe}"
+    keyKO := some s!"zlit {n}" }
 
 def NTerm.bool (b : Bool) : NTerm C := NTerm.lit (p := .bool) b
 def NTerm.pv (x : Var) : NTerm C := .pvV x
 
-/-- `a ⊕ b`, at the operands' type. -/
+/-- `a ⊕ b`, at the operands' type: on KeY's `int` (unbounded, `zbin`, or a
+comparison `zcmp`) where an operand is one. -/
 def NTerm.binop (op : BinOp) (a b : NTerm C) : NTerm C :=
-  syn s!"binop {op.sym}({a.key}, {b.key})" s!"{a.text} {op.sym} {b.text}" fun Γ => do
-    let ⟨p, a', b'⟩ ← NTm.resolvePair a b Γ
-    if h : op.accepts p = true then pure ⟨_, .app2 (.binop op h) a' b'⟩
-    else .error s!"`{op.sym}` does not apply to a `{p.toStr}` (`{a.text}`)"
+  let k := a.isK || b.isK
+  { key := if k then s!"{if op.zCmp then "zcmp" else "zbin"} {op.sym}({a.keyK}, {b.keyK})"
+      else s!"binop {op.sym}({a.key}, {b.key})"
+    text := s!"{a.text} {op.sym} {b.text}"
+    isK := k && !op.zCmp
+    resolve := fun Γ => do
+      match ← NTm.resolvePairV a b Γ with
+      | ⟨.prim p, a', b'⟩ =>
+        if h : op.accepts p = true then pure ⟨_, .app2 (.binop op h) a' b'⟩
+        else .error s!"`{op.sym}` does not apply to a `{p.toStr}` (`{a.text}`)"
+      | ⟨.kint, a', b'⟩ =>
+        if h : op.zArith = true then pure ⟨_, .app2 (.zbin op h) a' b'⟩
+        else if h : op.zCmp = true then pure ⟨_, .app2 (.zcmp op h) a' b'⟩
+        else .error s!"`{op.sym}` does not apply to a KeY `int` (`{a.text}`)" }
 
 /-- `⊖ a`, at the operand's type. -/
 def NTerm.unop (op : UnOp) (a : NTerm C) : NTerm C :=
@@ -791,7 +856,7 @@ def NUpdElem.setsLocal? : NUpdElem C → Option Var
 
 /-- Whether a local of type `t` is what the element sets. -/
 def NUpdElem.fits : NUpdElem C → LTy → Bool
-  | .val .., .val _ | .path .., .alias _ | .unset _, .alias _ | .mref .., .mem _
+  | .val .., .val _ | .val .., .kint | .path .., .alias _ | .unset _, .alias _ | .mref .., .mem _
   | .store .., .old | .saveNet _, .oldNet | .saveNetMt _, .oldNet => true
   | _, _ => false
 

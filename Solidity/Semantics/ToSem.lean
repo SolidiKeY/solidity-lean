@@ -27,6 +27,7 @@ def LTy.TDenote.bind {H : HTy} : (t : LTy) → t.TDenote C H → Binding
   | .mem _, none => .unset
   | .old, st => .store (Storage.erase (st : Storage C))
   | .oldNet, l => .ledger l
+  | .kint, n => .val (.int n)
 
 /-! ## Locals -/
 

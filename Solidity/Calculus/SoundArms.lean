@@ -1027,7 +1027,8 @@ variable {Γ : Ctx} (σ : State C Γ)
 
 theorem LTy.VDen.ofT_wk {H H' : HTy} (e : H <+: H') :
     (t : LTy) → (v : t.TDenote C H) → LTy.VDen.ofT t (LTy.TDenote.wk e t v) = LTy.VDen.ofT t v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _
+  | .kint, _ => rfl
 
 /-- An adopted heap leaves the locals' values as they were. -/
 theorem State.locV_adopt {α : HTy → Type} (g : Grown σ.H α) : (σ.adopt g).1.locV = σ.locV := by

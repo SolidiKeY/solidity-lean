@@ -347,11 +347,12 @@ theorem Op0.eval_root (r : Name) {T : Ty} (h : C.rootType r = some T) :
 theorem Op0.eval_storage : Op0.eval g .storage = some g.storage := rfl
 theorem Op0.eval_memory : Op0.eval g .memory = some g.memT := rfl
 theorem Op0.eval_mtSt : Op0.eval g .mtSt = some (Storage.init C) := rfl
+theorem Op0.eval_zlit (n : Int) : Op0.eval g (.zlit n) = some n := rfl
 
 theorem Op1.eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true)
     (x : Option p.Denote) : Op1.eval g (.unop op h) x = x.bind op.evalT := rfl
 theorem Op1.eval_net (x : Option PrimTy.uint.Denote) : Op1.eval g .net x =
-    x.bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 g.net).getD 0) := rfl
+    x.map fun n => (lookupBy n.1 g.net).getD 0 := rfl
 theorem Op1.eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
     (x : Option (SRef C (.ref (.struct s)))) : Op1.eval g (.field h) x = x.map (·.field h) := rfl
 theorem Op1.eval_next {E : Ty} (x : Option (SRef C (.ref (.array E)))) :
@@ -375,7 +376,7 @@ theorem Op1.eval_addM (R : RefTy) (h : (Ty.ref R).mapFree = true)
     Op1.eval g (.addM R h) x = x.map fun m => m.then (m.heap.allocDefault R h) := rfl
 theorem Op1.eval_wt (x : Option (Storage C)) : Op1.eval g .wt x = x.bind Storage.wtT := rfl
 theorem Op1.eval_toInt (x : Option PrimTy.uint.Denote) :
-    Op1.eval g .toInt x = x.bind fun n => PrimTy.int.ofInt? n.1 := rfl
+    Op1.eval g .toInt x = x.map fun n => n.1 := rfl
 theorem Op1.eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s)))
     (x : Option (Storage C)) :
     Op1.eval g (.select r h) x = x.map fun st => Storage.selectT st h := rfl
@@ -450,6 +451,11 @@ theorem Op3.eval_push {E : Ty} (x : Option (Storage C)) (y : Option (SRef C (.re
 theorem Op3.eval_write {T : Ty} (x : Option (Grown g.H (fun _ => Unit))) (y : Option (MAddrT T))
     (z : Option (MvT T)) :
     Op3.eval g .write x y z = x.bind fun m => y.bind fun a => z.bind fun v => m.writeT a v := rfl
+
+theorem Op2.eval_zbin (op : BinOp) (h : op.zArith = true) (x y : Option Int) :
+    Op2.eval g (.zbin op h) x y = x.bind fun a => y.bind fun b => some (op.evalZ a b) := rfl
+theorem Op2.eval_zcmp (op : BinOp) (h : op.zCmp = true) (x y : Option Int) :
+    Op2.eval g (.zcmp op h) x y = x.bind fun a => y.bind fun b => some (op.cmpZ a b) := rfl
 
 end Ops
 

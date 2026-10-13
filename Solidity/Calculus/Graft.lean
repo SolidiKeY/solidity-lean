@@ -73,6 +73,7 @@ typing). -/
   | .mv T => MvT T
   | .sts s => Storage (Contract.ofStruct s)
   | .spath s T => SRef (Contract.ofStruct s) T
+  | .kint => Int
 
 /-- The heap typing forgotten. -/
 def Srt.forget {H : HTy} : (k : Srt) → k.Den C H → k.DenF C
@@ -86,6 +87,7 @@ def Srt.forget {H : HTy} : (k : Srt) → k.Den C H → k.DenF C
   | .mv _, x => x
   | .sts _, x => x
   | .spath _ _, x => x
+  | .kint, x => x
 
 /-- Two readings of the sort `k`, over two heap typings, are one. -/
 def Srt.SameO {H₀ H₁ : HTy} (k : Srt) (x : Option (k.Den C H₀)) (y : Option (k.Den C H₁)) :
@@ -102,7 +104,8 @@ theorem Srt.forget_injective {H : HTy} : (k : Srt) → {x y : k.Den C H} →
     cases h
     rfl
   | .val _, _, _, h | .path _, _, _, h | .st, _, _, h | .sv _, _, _, h | .ident _, _, _, h
-  | .addr _, _, _, h | .mv _, _, _, h | .sts _, _, _, h | .spath _ _, _, _, h => h
+  | .addr _, _, _, h | .mv _, _, _, h | .sts _, _, _, h | .spath _ _, _, _, h
+  | .kint, _, _, h => h
 
 /-- Over one heap typing, the same reading is equal. -/
 theorem Srt.SameO.eq {H : HTy} {k : Srt} {x y : Option (k.Den C H)} (h : Srt.SameO k x y) :
@@ -152,11 +155,18 @@ theorem Srt.sameO_ident {H₀ H₁ : HTy} {R : RefTy} {x : Option ((Srt.ident R)
       first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
    fun h => by rw [h]; rfl⟩
 
+theorem Srt.sameO_kint {H₀ H₁ : HTy} {x : Option (Srt.kint.Den C H₀)}
+    {y : Option (Srt.kint.Den C H₁)} : Srt.SameO .kint x y ↔ x = y :=
+  ⟨fun h => by
+    cases x <;> cases y <;>
+      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
+   fun h => by rw [h]; rfl⟩
+
 /-! ## Symbols that read no global part -/
 
 /-- A constant that reads nothing of the state. -/
 def _root_.Solidity.Op0.globFree {s : Srt} : Op0 C s → Bool
-  | .lit _ | .root .. | .mtSt | .member .. => true
+  | .lit _ | .root .. | .mtSt | .member .. | .zlit _ => true
   | _ => false
 
 /-- A unary symbol that reads nothing of the state but its argument, and
@@ -295,6 +305,9 @@ def Tm.substH : {k : Srt} → Tm C Δ k → Option (Tm C Γ k)
     if g || o.globFree then
       do pure (.app3 o (← Tm.substH x) (← Tm.substH y) (← Tm.substH z))
     else none
+  | _, .pvZ i => match s i with
+    | .pos j => some (.pvZ j)
+    | .rhs (.zint t) => some t
 
 /-- A right-hand side of `Δ` read in `Γ`. -/
 def Rhs.substH : {t : LTy} → Rhs C Δ t → Option (Rhs C Γ t)
@@ -305,6 +318,7 @@ def Rhs.substH : {t : LTy} → Rhs C Δ t → Option (Rhs C Γ t)
   | _, .store x => (x.substH s g st).map .store
   | _, .saveNet => if g then some .saveNet else none
   | _, .saveNetMt => some .saveNetMt
+  | _, .zint t => (t.substH s g st).map .zint
 
 /-- An element whose right-hand sides are read in `Δ`, read in `Γ`. -/
 def UpdElem.substH {Ε : Ctx} : UpdElem C Δ Ε → Option (UpdElem C Γ Ε)
@@ -461,7 +475,7 @@ theorem Tm.eval_substH (hL : U.Lands σ₀ g σ₁)
         | .pos j => (a.substH U.held U.envOnly st).map (Tm.netOf j) | .rhs _ => none) =
           some t' := h
     generalize U.held i = x at h hx
-    rw [Srt.sameO_val]
+    rw [Srt.sameO_kint]
     match x, hx, h with
     | .rhs _, _, h => cases h
     | .pos j, hx, h =>
@@ -511,6 +525,21 @@ theorem Tm.eval_substH (hL : U.Lands σ₀ g σ₁)
       exact Op3.eval_same o (hL.glob_or hc) (Tm.eval_substH hL hst x hx)
         (Tm.eval_substH hL hst y hy) (Tm.eval_substH hL hst z hz)
     · cases h
+  | _, .pvZ i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvZ j) | .rhs (.zint t) => some t) = some t' := h
+    generalize U.held i = x at h hx
+    rw [Srt.sameO_kint]
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show some (TEnv.get j σ₀.env) = some (TEnv.get i σ₁.env)
+      rw [hx]
+    | .rhs (.zint t), hx, h =>
+      cases h
+      exact hx
 
 theorem Rhs.eval_substH (hL : U.Lands σ₀ g σ₁)
     (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) :
@@ -541,6 +570,9 @@ theorem Rhs.eval_substH (hL : U.Lands σ₀ g σ₁)
       rw [show σ₁.net = σ₀.net from congrArg State.net (hL.glob_of_envOnly hg)]
     · cases h
   | _, .saveNetMt, r', h => by cases h; rfl
+  | _, .zint t, r', h => by
+    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Srt.sameO_kint.1 (Tm.eval_substH hL hst t ht)
 
 /-- Two typed global parts over two heap typings, one state. -/
 theorem GlobT.map_val_bind {H₀ H₁ : HTy} {o₀ : Option (GlobT C H₀)} {o₁ : Option (GlobT C H₁)}
@@ -625,6 +657,11 @@ theorem Tm.exhB_substH (hL : U.Lands σ₀ g σ₁)
     have hn := Tm.eval_of_exhB σ₀ t' hx
     rw [hn] at hw
     exact absurd hw (by nofun)
+  | _, .pvZ i, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.pvZ i) h
+    have hn := Tm.eval_of_exhB σ₀ t' hx
+    rw [hn] at hw
+    exact absurd hw (by nofun)
   | _, .pvP i, t', h, hx => by
     have hx' := hL.2.2 i
     have h : (match U.held i with
@@ -666,7 +703,7 @@ theorem Rhs.exhB_substH (hL : U.Lands σ₀ g σ₁)
     {r' : Rhs C Γ t} (h : r.substH U.held U.envOnly st = some r') (hx : r'.exhB σ₀ = true) :
     r.exhB σ₁ = true := by
   cases r with
-  | val x | path x | mref x | store x =>
+  | val x | path x | mref x | store x | zint x =>
     obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
     exact Tm.exhB_substH hL hst x hx' hx
   | unset => cases h; exact hx
@@ -1382,7 +1419,7 @@ theorem LTy.vden_of_notMem {t : LTy} (ht : t.notMem = true) {H H' : HTy} (v' : t
     ∃ v : t.TDenote C H, LTy.VDen.ofT t v = LTy.VDen.ofT t v' := by
   cases t with
   | mem => cases ht
-  | val | alias | old | oldNet => exact ⟨v', rfl⟩
+  | val | alias | old | oldNet | kint => exact ⟨v', rfl⟩
 
 /-- An element that allocates nothing: a local or the storage set. -/
 def UpdElem.keepsNext {Γ Δ : Ctx} : UpdElem C Γ Δ → Bool

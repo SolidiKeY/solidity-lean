@@ -31,13 +31,16 @@ namespace Solidity
 
 /-- What a local holds: a value of a primitive type, a storage alias, a
 memory reference, or (in a specification) the storage or ledger before the
-call, solkey's `old`. -/
+call, solkey's `old`; or a logical variable of KeY's `int`, an unbounded
+integer (`kint`: a formula's parameter read beside the ledger), which no
+statement reads or binds. -/
 inductive LTy where
   | val (p : PrimTy)
   | alias (R : RefTy)
   | mem (R : RefTy)
   | old
   | oldNet
+  | kint
   deriving DecidableEq, Repr, Inhabited
 
 /-- The types of the locals in scope, innermost first. -/

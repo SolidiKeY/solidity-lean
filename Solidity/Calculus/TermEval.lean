@@ -24,9 +24,9 @@ namespace Tm
 
 variable {Γ : Ctx}
 
-/-- `x[a]` on a ledger: an `int`, where the entry is one. -/
-def netOfT (l : List (Int × Int)) (n : PrimTy.uint.Denote) : Option PrimTy.int.Denote :=
-  PrimTy.int.ofInt? ((lookupBy n.1 l).getD 0)
+/-- `x[a]` on a ledger: the entry, a KeY `int` (total). -/
+def netOfT (l : List (Int × Int)) (n : PrimTy.uint.Denote) : Option Int :=
+  some ((lookupBy n.1 l).getD 0)
 
 /-- `eval` by `match`, its compiled form. -/
 def evalM (σ : State C Γ) : {s : Srt} → Tm C Γ s → Option (s.Den C σ.H)
@@ -39,6 +39,7 @@ def evalM (σ : State C Γ) : {s : Srt} → Tm C Γ s → Option (s.Den C σ.H)
   | _, .app1 o x => o.eval σ.glob (x.evalM σ)
   | _, .app2 o x y => o.eval σ.glob (x.evalM σ) (y.evalM σ)
   | _, .app3 o x y z => o.eval σ.glob (x.evalM σ) (y.evalM σ) (z.evalM σ)
+  | _, .pvZ i => some (TEnv.get i σ.env)
 
 /-- A term read on the typed state: a local by its position, a symbol on the
 global part; `none` where it reverts. -/
@@ -53,10 +54,11 @@ def eval (σ : State C Γ) {s : Srt} (t : Tm C Γ s) : Option (s.Den C σ.H) :=
     (fun {_} o => o.eval σ.glob)
     (fun {_} {_} o _ ix => o.eval σ.glob ix)
     (fun {_} {_} {_} o _ _ ix iy => o.eval σ.glob ix iy)
-    (fun {_} {_} {_} {_} o _ _ _ ix iy iz => o.eval σ.glob ix iy iz) s t
+    (fun {_} {_} {_} {_} o _ _ _ ix iy iz => o.eval σ.glob ix iy iz)
+    (fun i => some (TEnv.get i σ.env)) s t
 
 theorem eval_eq_evalM (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → t.eval σ = t.evalM σ
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ => rfl
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .app0 _ | _, .pvZ _ => rfl
   | _, .netOf i a => by
     show (a.eval σ).bind _ = (a.evalM σ).bind _
     rw [eval_eq_evalM σ a]

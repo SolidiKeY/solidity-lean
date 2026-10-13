@@ -223,6 +223,7 @@ def Rhs.mapF : {t : LTy} → Rhs C Δ t → Option (Rhs C Γ t)
   | _, .store x => (F x).map .store
   | _, .saveNet => some .saveNet
   | _, .saveNetMt => some .saveNetMt
+  | _, .zint t => (F t).map .zint
 
 /-- An element whose right-hand sides are read in `Δ`, read in `Γ` through `F`. -/
 def UpdElem.mapF {Ε : Ctx} : UpdElem C Δ Ε → Option (UpdElem C Γ Ε)
@@ -302,6 +303,9 @@ theorem Rhs.eval_mapF (hF : GraftOK σ₀ σ₁ F) :
     show some σ₀.net = some σ₁.net
     rw [show σ₁.net = σ₀.net from hF.rest.net]
   | _, .saveNetMt, r', h => by cases h; rfl
+  | _, .zint t, r', h => by
+    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Srt.sameO_kint.1 (hF.tm t ht)
 
 /-- An element mapped computes the global part the element does, read where
 `U` lands, from one global part. -/
@@ -572,7 +576,7 @@ theorem Upd.exh_graftFM_none (hU : U.globT σ₀ = none) {Δ₂ : Ctx} (V : Upd 
 theorem Rhs.exhB_mapF (hF : GraftOK σ₀ σ₁ F) {t : LTy} (r : Rhs C Δ₁ t) {r' : Rhs C Γ t}
     (h : r.mapF F = some r') (hx : r'.exhB σ₀ = true) : r.exhB σ₁ = true := by
   cases r with
-  | val x | path x | mref x | store x =>
+  | val x | path x | mref x | store x | zint x =>
     obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
     exact hF.exh x hx' hx
   | unset | saveNet | saveNetMt => cases h; exact hx
@@ -759,6 +763,9 @@ def Tm.substP : {k : Srt} → Tm C Δ k → Option (Tm C Γ k)
   | _, .app1 o x => (Tm.substP x).map (o.substStep stS)
   | _, .app2 o x y => do pure (o.substStep stS (← Tm.substP x) (← Tm.substP y))
   | _, .app3 o x y z => do pure (.app3 o (← Tm.substP x) (← Tm.substP y) (← Tm.substP z))
+  | _, .pvZ i => match s i with
+    | .pos j => some (.pvZ j)
+    | .rhs (.zint t) => some t
 
 theorem Op1.substStep_of_stFree {a k : Srt} {o : Op1 C a k} (h : o.stFree = true) (x : Tm C Γ a) :
     o.substStep stS x = .app1 o x := by
@@ -874,7 +881,7 @@ theorem Tm.substP_eval (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ
         | .pos j => (Tm.substP U.held stS memS a).map (Tm.netOf j) | .rhs _ => none) =
           some t' := h
     generalize U.held i = x at h hx
-    rw [Srt.sameO_val]
+    rw [Srt.sameO_kint]
     match x, hx, h with
     | .rhs _, _, h => cases h
     | .pos j, hx, h =>
@@ -900,6 +907,7 @@ theorem Tm.substP_eval (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ
     | root r hr' => exact Op0.eval_sameP (.root r hr') hr (.inr rfl) (.inr rfl)
     | mtSt => exact Op0.eval_sameP .mtSt hr (.inr rfl) (.inr rfl)
     | member s f hf => exact Op0.eval_sameP (.member s f hf) hr (.inr rfl) (.inr rfl)
+    | zlit n => exact Op0.eval_sameP (.zlit n) hr (.inr rfl) (.inr rfl)
   | _, .app1 o x, t', h => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
     have ihx := Tm.substP_eval hL hr hst hmem x hx
@@ -945,6 +953,21 @@ theorem Tm.substP_eval (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ
     cases h
     exact Op3.eval_sameP o (Tm.substP_eval hL hr hst hmem x hx)
       (Tm.substP_eval hL hr hst hmem y hy) (Tm.substP_eval hL hr hst hmem z hz)
+  | _, .pvZ i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvZ j) | .rhs (.zint t) => some t) = some t' := h
+    generalize U.held i = x at h hx
+    rw [Srt.sameO_kint]
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show some (TEnv.get j σ₀.env) = some (TEnv.get i σ₁.env)
+      rw [hx]
+    | .rhs (.zint t), hx, h =>
+      cases h
+      exact hx
 
 /-- **A term out of gas before the update, substituted, is out of gas in a
 typed state it lands on.** -/
@@ -1061,6 +1084,10 @@ theorem Tm.substP_exhB (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ
     exact absurd hw (by nofun)
   | _, .pvS i, t', h, hx => by
     have hw := Tm.substP_eval hL hr hst hmem (Tm.pvS i) h
+    rw [Tm.eval_of_exhB σ₀ t' hx] at hw
+    exact absurd hw (by nofun)
+  | _, .pvZ i, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.pvZ i) h
     rw [Tm.eval_of_exhB σ₀ t' hx] at hw
     exact absurd hw (by nofun)
   | _, .pvP i, t', h, hx => by

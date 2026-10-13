@@ -54,7 +54,7 @@ variable {Γ : Ctx}
 
 /-- A term with no local, at the empty scope. -/
 def Tm.toNil? : {s : Srt} → Tm C Γ s → Option (Tm C [] s)
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. => none
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .netOf .. | _, .pvZ _ => none
   | _, .app0 o => some (.app0 o)
   | _, .app1 o x => (Tm.toNil? x).map (.app1 o)
   | _, .app2 o x y => do pure (.app2 o (← Tm.toNil? x) (← Tm.toNil? y))
@@ -62,7 +62,7 @@ def Tm.toNil? : {s : Srt} → Tm C Γ s → Option (Tm C [] s)
 
 /-- A term at the empty scope, read at the scope `Γ`. -/
 def Tm.ofNil : {s : Srt} → Tm C [] s → Tm C Γ s
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ => nomatch i
+  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ | _, .pvZ i => nomatch i
   | _, .app0 o => .app0 o
   | _, .app1 o x => .app1 o (Tm.ofNil x)
   | _, .app2 o x y => .app2 o (Tm.ofNil x) (Tm.ofNil y)
@@ -90,7 +90,7 @@ abbrev State.toNil (σ : State C Γ) : State C [] := σ.glob
 /-- A closed term reads what it reads at the empty scope. -/
 theorem Tm.eval_toNilS (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
     t.toNil? = some t₀ → t.eval σ = t₀.eval σ.toNil
-  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
+  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h | _, .pvZ _, _, h =>
     nomatch h
   | _, .app0 o, _, h => by cases h; rfl
   | _, .app1 o x, _, h => by
@@ -116,7 +116,7 @@ theorem Tm.eval_toNilS (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t�
 /-- A closed term denotes what it denotes at the empty scope. -/
 theorem Tm.denote_toNilS (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {t₀ : Tm C [] s} →
     t.toNil? = some t₀ → t.denote σ = t₀.denote σ.toNil
-  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h =>
+  | _, .pvV _, _, h | _, .pvP _, _, h | _, .pvS _, _, h | _, .pvI _, _, h | _, .netOf .., _, h | _, .pvZ _, _, h =>
     nomatch h
   | _, .app0 o, _, h => by cases h; rfl
   | _, .app1 o x, _, h => by
@@ -144,7 +144,7 @@ theorem Tm.denote_toNilS (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) → {
 /-- A term of the empty scope reads alike at any scope. -/
 theorem Tm.eval_ofNil (σ : State C Γ) : {s : Srt} → (t : Tm C [] s) →
     (Tm.ofNil t).eval σ = t.eval σ.toNil
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ => nomatch i
+  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ | _, .pvZ i => nomatch i
   | _, .app0 _ => rfl
   | _, .app1 o x => by
     show o.eval σ.glob ((Tm.ofNil x).eval σ) = o.eval σ.glob (x.eval σ.toNil)
@@ -161,7 +161,7 @@ theorem Tm.eval_ofNil (σ : State C Γ) : {s : Srt} → (t : Tm C [] s) →
 /-- A term of the empty scope denotes alike at any scope. -/
 theorem Tm.denote_ofNil (σ : State C Γ) : {s : Srt} → (t : Tm C [] s) →
     (Tm.ofNil t).denote σ = t.denote σ.toNil
-  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ => nomatch i
+  | _, .pvV i | _, .pvP i | _, .pvS i | _, .pvI i | _, .netOf i _ | _, .pvZ i => nomatch i
   | _, .app0 _ => rfl
   | _, .app1 o x => by
     show o.denote σ.glob ((Tm.ofNil x).denote σ) = o.denote σ.glob (x.denote σ.toNil)
@@ -248,6 +248,7 @@ def Tm.rwBy : {s : Srt} → Tm C Γ s → Tm C Γ s
   | _, .pvP i => .pvP i
   | _, .pvS i => .pvS i
   | _, .pvI i => .pvI i
+  | _, .pvZ i => .pvZ i
   | _, .netOf i a => .netOf i (Tm.rwBy a)
   | _, .app0 o => (f (.app0 o)).getD (.app0 o)
   | _, .app1 o x => (f (.app1 o x)).getD (.app1 o (Tm.rwBy x))
@@ -263,6 +264,7 @@ def Rhs.rwBy : {t : LTy} → Rhs C Γ t → Rhs C Γ t
   | _, .store s => .store (Tm.rwBy f s)
   | _, .saveNet => .saveNet
   | _, .saveNetMt => .saveNetMt
+  | _, .zint t => .zint (Tm.rwBy f t)
 
 /-- An element's right-hand sides rewritten. -/
 def UpdElem.rwBy {Δ : Ctx} : UpdElem C Γ Δ → UpdElem C Γ Δ
@@ -285,7 +287,7 @@ def Upd.rwBy : {Δ : Ctx} → Upd C Γ Δ → Upd C Γ Δ
 
 /-- Whether `Tm.rwBy f` rewrites something in a term. -/
 def Tm.hasBy : {s : Srt} → Tm C Γ s → Bool
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => false
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .pvZ _ => false
   | _, .netOf _ a => Tm.hasBy a
   | _, t@(.app0 _) => (f t).isSome
   | _, t@(.app1 _ x) => (f t).isSome || Tm.hasBy x
@@ -298,6 +300,7 @@ def Rhs.hasBy : {t : LTy} → Rhs C Γ t → Bool
   | _, .path p => Tm.hasBy f p
   | _, .mref i => Tm.hasBy f i
   | _, .store s => Tm.hasBy f s
+  | _, .zint t => Tm.hasBy f t
   | _, _ => false
 
 /-- Whether `UpdElem.rwBy f` rewrites something. -/
@@ -354,7 +357,7 @@ theorem Tm.getD_eq (hf : PickEq f σ) {s : Srt} {t d : Tm C Γ s}
 /-- **A rewrite keeps every value a term returns.** -/
 theorem Tm.rwBy_eval (hf : PickLe f σ) :
     {s : Srt} → (t : Tm C Γ s) → OLe (t.eval σ) ((Tm.rwBy f t).eval σ)
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => OLe.refl _
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .pvZ _ => OLe.refl _
   | _, .netOf _ a => OLe.bind (Tm.rwBy_eval hf a) fun _ => OLe.refl _
   | _, .app0 _ => Tm.getD_le σ hf (OLe.refl _)
   | _, .app1 o x => Tm.getD_le σ hf (o.eval_le (Tm.rwBy_eval hf x))
@@ -365,7 +368,7 @@ theorem Tm.rwBy_eval (hf : PickLe f σ) :
 /-- **A rewrite returns nothing the term does not.** -/
 theorem Tm.rwBy_eval_rev (hf : PickGe f σ) :
     {s : Srt} → (t : Tm C Γ s) → OLe ((Tm.rwBy f t).eval σ) (t.eval σ)
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => OLe.refl _
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .pvZ _ => OLe.refl _
   | _, .netOf _ a => OLe.bind (Tm.rwBy_eval_rev hf a) fun _ => OLe.refl _
   | _, .app0 _ => Tm.getD_ge σ hf (OLe.refl _)
   | _, .app1 o x => Tm.getD_ge σ hf (o.eval_le (Tm.rwBy_eval_rev hf x))
@@ -377,7 +380,7 @@ theorem Tm.rwBy_eval_rev (hf : PickGe f σ) :
 /-- **An exact rewrite keeps what every term returns.** -/
 theorem Tm.rwBy_eval_eq (hf : PickEq f σ) :
     {s : Srt} → (t : Tm C Γ s) → (Tm.rwBy f t).eval σ = t.eval σ
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => rfl
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .pvZ _ => rfl
   | _, .netOf i a => by
     show ((Tm.rwBy f a).eval σ).bind _ = (a.eval σ).bind _
     rw [Tm.rwBy_eval_eq hf a]
@@ -397,7 +400,7 @@ theorem Tm.rwBy_eval_eq (hf : PickEq f σ) :
 theorem Rhs.rwBy_eval (hf : PickLe f σ) {t : LTy} (r : Rhs C Γ t) :
     OLe (r.eval σ) ((Rhs.rwBy f r).eval σ) := by
   cases r with
-  | val t => exact Tm.rwBy_eval σ hf t
+  | val t | zint t => exact Tm.rwBy_eval σ hf t
   | path p => exact OLe.bind (Tm.rwBy_eval σ hf p) fun _ => OLe.refl _
   | unset => exact OLe.refl _
   | mref i => exact OLe.bind (Tm.rwBy_eval σ hf i) fun _ => OLe.refl _
@@ -408,7 +411,7 @@ theorem Rhs.rwBy_eval (hf : PickLe f σ) {t : LTy} (r : Rhs C Γ t) :
 theorem Rhs.rwBy_eval_rev (hf : PickGe f σ) {t : LTy} (r : Rhs C Γ t) :
     OLe ((Rhs.rwBy f r).eval σ) (r.eval σ) := by
   cases r with
-  | val t => exact Tm.rwBy_eval_rev σ hf t
+  | val t | zint t => exact Tm.rwBy_eval_rev σ hf t
   | path p => exact OLe.bind (Tm.rwBy_eval_rev σ hf p) fun _ => OLe.refl _
   | unset => exact OLe.refl _
   | mref i => exact OLe.bind (Tm.rwBy_eval_rev σ hf i) fun _ => OLe.refl _
@@ -419,7 +422,7 @@ theorem Rhs.rwBy_eval_rev (hf : PickGe f σ) {t : LTy} (r : Rhs C Γ t) :
 theorem Rhs.rwBy_eval_eq (hf : PickEq f σ) {t : LTy} (r : Rhs C Γ t) :
     (Rhs.rwBy f r).eval σ = r.eval σ := by
   cases r with
-  | val t => exact Tm.rwBy_eval_eq σ hf t
+  | val t | zint t => exact Tm.rwBy_eval_eq σ hf t
   | path p =>
     show ((Tm.rwBy f p).eval σ).bind _ = (p.eval σ).bind _
     rw [Tm.rwBy_eval_eq σ hf p]
@@ -564,7 +567,7 @@ def PickExh (f : {s : Srt} → Tm C Γ s → Option (Tm C Γ s)) (σ : State C �
 they replace are keeps exhaustion.** -/
 theorem Tm.rwBy_exhB (hf : PickEq f σ) (hn : PickExh f σ) :
     {s : Srt} → (t : Tm C Γ s) → (Tm.rwBy f t).exhB σ = t.exhB σ
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => rfl
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .pvZ _ => rfl
   | _, .netOf i a => by
     have he := Tm.rwBy_eval_eq σ hf (Tm.netOf i a)
     show (Tm.netOf i (Tm.rwBy f a)).exhB σ = _

@@ -46,7 +46,7 @@ theorem sem_pay {Γ : Ctx} (σ : State C Γ) (a x : Int) : (σ.pay a x).sem = σ
 def see {H : HTy} : (t : LTy) → t.TDenote C H → Seen C t
   | .val _, v => v
   | .alias _, a => a
-  | .mem _, _ | .old, _ | .oldNet, _ => ()
+  | .mem _, _ | .old, _ | .oldNet, _ | .kint, _ => ()
 
 /-- The locals of a typed state, as the simulation reads them. -/
 def Look.ofTEnv {H : HTy} {Γ : Ctx} (e : TEnv C H Γ) : Look C Γ :=
@@ -84,7 +84,7 @@ theorem Look.ofTEnv_drop {H : HTy} {Γ Δ : Ctx} (h : Ext Γ Δ) (e : TEnv C H �
 
 theorem see_wk {H H' : HTy} (x : H <+: H') :
     (t : LTy) → (v : t.TDenote C H) → see t (Solidity.LTy.TDenote.wk x t v) = see t v
-  | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ => rfl
+  | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ | .kint, _ => rfl
 
 theorem TEnv.get_wk {H H' : HTy} (x : H <+: H') :
     {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (e : TEnv C H Γ) →

@@ -156,6 +156,7 @@ def LTy.WT (C : Contract) (H : HeapTy) : (t : LTy) → t.Denote C → Prop
   | .mem R, o => ∀ id, o = some id → MVal.hasTyH H (.ref id) (.ref R) = true
   | .old, _ => True
   | .oldNet, _ => True
+  | .kint, _ => True
 
 theorem LTy.WT.mono {H H' : HeapTy} (hext : H.Extends H') :
     {t : LTy} → {v : t.Denote C} → LTy.WT C H t v → LTy.WT C H' t v
@@ -164,6 +165,7 @@ theorem LTy.WT.mono {H H' : HeapTy} (hext : H.Extends H') :
   | .mem _, _, h => fun id hid => MVal.hasTyH_mono hext (h id hid)
   | .old, _, h => h
   | .oldNet, _, h => h
+  | .kint, _, h => h
 
 theorem LTy.WT.default (p : PrimTy) : LTy.WT C H (.val p) (PrimTy.default p) := by
   cases p <;> rfl

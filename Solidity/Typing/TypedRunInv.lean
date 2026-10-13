@@ -145,6 +145,7 @@ theorem of_valMem (hv : ∀ p v, P (.val p) v) (hm : ∀ R v, P (.mem R) v) :
   | .alias _ :: _, h, _ => nomatch h
   | .old :: _, h, _ => nomatch h
   | .oldNet :: _, h, _ => nomatch h
+  | .kint :: _, h, _ => nomatch h
 
 end TEnv.All
 

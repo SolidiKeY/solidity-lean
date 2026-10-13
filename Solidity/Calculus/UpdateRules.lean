@@ -192,6 +192,20 @@ theorem Tm.denote_substH (hL : U.Lands σ₀ g σ₁) :
         o.denote (x.denote σ₁) (y.denote σ₁) (z.denote σ₁)
       rw [Tm.denote_substH hL x hx, Tm.denote_substH hL y hy, Tm.denote_substH hL z hz]
     · cases h
+  | _, .pvZ i, t', h => by
+    have hx := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvZ j) | .rhs (.zint t) => some t) = some t' := h
+    generalize U.held i = x at h hx
+    match x, hx, h with
+    | .pos j, hx, h =>
+      cases h
+      have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
+      show StValue.prim _ = StValue.prim _
+      rw [hx]
+    | .rhs (.zint t), hx, h =>
+      cases h
+      exact Tm.denote_eval σ₀ t' _ hx
 
 end Denote
 
@@ -212,7 +226,7 @@ def State.ReadsAs (σ σ' : State C Γ) : Prop :=
 
 theorem LTy.VDen.ofT_injective {H : HTy} : (t : LTy) → {v w : t.TDenote C H} →
     LTy.VDen.ofT t v = LTy.VDen.ofT t w → v = w
-  | .val _, _, _, h | .alias _, _, _, h | .old, _, _, h | .oldNet, _, _, h => h
+  | .val _, _, _, h | .alias _, _, _, h | .old, _, _, h | .oldNet, _, _, h | .kint, _, _, h => h
   | .mem _, v, w, h => by
     rcases v with _ | ⟨i, hi⟩ <;> rcases w with _ | ⟨j, hj⟩
     · rfl

@@ -119,6 +119,8 @@ theorem vden_mem {R : RefTy} {H : HTy} (v : (LTy.mem R).TDenote C H) :
 theorem vden_old {H : HTy} (v : LTy.old.TDenote C H) : LTy.VDen.ofT (C := C) .old v = v := rfl
 theorem vden_oldNet {H : HTy} (v : LTy.oldNet.TDenote C H) :
     LTy.VDen.ofT (C := C) .oldNet v = v := rfl
+theorem vden_kint {H : HTy} (v : LTy.kint.TDenote C H) :
+    LTy.VDen.ofT (C := C) .kint v = v := rfl
 
 end StateAPI
 
@@ -144,6 +146,8 @@ theorem eval_pvI {R : RefTy} (i : Idx Γ (.mem R)) :
     (Tm.pvI i : Tm C Γ (.ident R)).eval σ = σ.locV _ i := rfl
 theorem eval_netOf (i : Idx Γ .oldNet) (a : Tm C Γ (.val .uint)) :
     (Tm.netOf i a).eval σ = (a.eval σ).bind (Tm.netOfT (σ.locV _ i)) := rfl
+theorem eval_pvZ (i : Idx Γ .kint) : (Tm.pvZ i : Tm C Γ .kint).eval σ = some (σ.locV _ i) := rfl
+theorem eval_zlit (n : Int) : (Tm.app0 (.zlit n) : Tm C Γ .kint).eval σ = some n := rfl
 
 theorem eval_lit {p : PrimTy} (v : p.Denote) :
     (Tm.app0 (.lit v) : Tm C Γ (.val p)).eval σ = some v := rfl
@@ -157,7 +161,7 @@ theorem eval_mtSt : (Tm.app0 .mtSt : Tm C Γ .st).eval σ = some (Storage.init C
 theorem eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) (a : Tm C Γ (.val p)) :
     (Tm.app1 (.unop op h) a).eval σ = (a.eval σ).bind op.evalT := rfl
 theorem eval_net (a : Tm C Γ (.val .uint)) : (Tm.app1 .net a).eval σ =
-    (a.eval σ).bind fun n => PrimTy.int.ofInt? ((lookupBy n.1 σ.net).getD 0) := rfl
+    (a.eval σ).map fun n => (lookupBy n.1 σ.net).getD 0 := rfl
 theorem eval_delValue {p : PrimTy} (a : Tm C Γ (.val p)) :
     (Tm.app1 .delValue a).eval σ = (a.eval σ).map fun _ => PrimTy.dflt p := rfl
 theorem eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
@@ -181,7 +185,13 @@ theorem eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struc
     (t : Tm C Γ .st) :
     (Tm.app1 (.select r h) t).eval σ = (t.eval σ).map fun st => Storage.selectT st h := rfl
 theorem eval_toInt (a : Tm C Γ (.val .uint)) :
-    (Tm.app1 .toInt a).eval σ = (a.eval σ).bind fun n => PrimTy.int.ofInt? n.1 := rfl
+    (Tm.app1 .toInt a).eval σ = (a.eval σ).map fun n => n.1 := rfl
+theorem eval_zbin (op : BinOp) (h : op.zArith = true) (a b : Tm C Γ .kint) :
+    (Tm.app2 (.zbin op h) a b).eval σ =
+      (a.eval σ).bind fun x => (b.eval σ).bind fun y => some (op.evalZ x y) := rfl
+theorem eval_zcmp (op : BinOp) (h : op.zCmp = true) (a b : Tm C Γ .kint) :
+    (Tm.app2 (.zcmp op h) a b).eval σ =
+      (a.eval σ).bind fun x => (b.eval σ).bind fun y => some (op.cmpZ x y) := rfl
 
 theorem eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
     (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op x (b.eval σ) := rfl
@@ -295,6 +305,7 @@ theorem rhs_store (s : Tm C Γ .st) : (Rhs.store s).eval σ₀ = s.eval σ₀ :=
   cases s.eval σ₀ <;> rfl
 theorem rhs_saveNet : (Rhs.saveNet : Rhs C Γ _).eval σ₀ = some σ₀.net := rfl
 theorem rhs_saveNetMt : (Rhs.saveNetMt : Rhs C Γ _).eval σ₀ = some [] := rfl
+theorem rhs_zint (t : Tm C Γ .kint) : (Rhs.zint t).eval σ₀ = t.eval σ₀ := rfl
 
 theorem glob_storageE (s : Tm C Γ .st) (g : GlobT C σ₀.H) :
     (UpdElem.storage s : UpdElem C Γ Δ).globT σ₀ g = (s.eval σ₀).map g.withStorage := by
@@ -782,6 +793,8 @@ theorem holds_bind_old (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.
 theorem holds_bind_oldNet (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.oldNet :: Γ)) :
     holds σ (.bind m x .oldNet φ) ↔ ∀ v : List (Int × Int), holds (σ.push (t := .oldNet) v) φ :=
   Iff.rfl
+theorem holds_bind_kint (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.kint :: Γ)) :
+    holds σ (.bind m x .kint φ) ↔ ∀ v : Int, holds (σ.push (t := .kint) v) φ := Iff.rfl
 theorem holds_anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
     holds σ (.anon xs φ) ↔ ∀ b, holds (σ.anon xs b) φ := Iff.rfl
 
@@ -800,7 +813,7 @@ attribute [close_rw_s]
   CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
   Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
-  CloseS.holds_bind_oldNet CloseS.holds_anon
+  CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon
   CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
   CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
@@ -825,6 +838,7 @@ attribute [close_rw_s]
   CloseS.landedAll_const CloseS.landedRest_def
   State.anon_nil State.anon_cons
   CloseS.vden_val CloseS.vden_alias CloseS.vden_mem CloseS.vden_old CloseS.vden_oldNet
+  CloseS.vden_kint
   CloseS.optRes_some CloseS.optRes_none CloseS.optRes_bind CloseS.optRes_map
   -- updates
   CloseS.applyV_nil CloseS.applyV_snoc CloseS.applyV_decl CloseS.applyV_pop CloseS.applyV_drop
@@ -842,9 +856,10 @@ attribute [close_rw_s]
   CloseS.ext_refl CloseS.ext_push CloseS.wk_refl CloseS.wk_keep_here
   CloseS.wk_keep_there CloseS.wk_drop
   CloseS.rhs_val CloseS.rhs_path CloseS.rhs_unset CloseS.rhs_mref CloseS.rhs_store
-  CloseS.rhs_saveNet CloseS.rhs_saveNetMt IntOp.apply
+  CloseS.rhs_saveNet CloseS.rhs_saveNetMt CloseS.rhs_zint IntOp.apply
   -- terms
   CloseS.eval_pvV CloseS.eval_pvP CloseS.eval_pvS CloseS.eval_pvI CloseS.eval_netOf
+  CloseS.eval_pvZ CloseS.eval_zlit CloseS.eval_zbin CloseS.eval_zcmp BinOp.evalZ BinOp.cmpZ
   CloseS.eval_lit CloseS.eval_env CloseS.eval_root CloseS.eval_storage CloseS.eval_mtSt
   CloseS.eval_unop CloseS.eval_net CloseS.eval_delValue CloseS.eval_field CloseS.eval_next
   CloseS.eval_sval CloseS.eval_newArr CloseS.eval_mfield CloseS.eval_mval CloseS.eval_ref
