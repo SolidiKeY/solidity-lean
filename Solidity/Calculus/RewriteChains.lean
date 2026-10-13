@@ -143,11 +143,28 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
     update rule ({", ".intercalate (rwTable.map toString)}), not a term taclet (`TermTaclet`), \
     not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)"
 
-/-- The subterms of `e` with the head of `p`, outermost and leftmost first. -/
+/-- The symbol of a term `Tm.appN … o …`: its constructor's name, where it
+has one. -/
+def tmSymbolHead? (e : Lean.Expr) : Option Lean.Name :=
+  let k? : Option Nat :=
+    if e.isAppOfArity ``Tm.app0 4 then some 3
+    else if e.isAppOfArity ``Tm.app1 6 then some 4
+    else if e.isAppOfArity ``Tm.app2 8 then some 5
+    else if e.isAppOfArity ``Tm.app3 10 then some 6
+    else none
+  k?.bind fun k => (e.getArg! k).getAppFn.constName?
+
+/-- The subterms of `e` with the head of `p`, outermost and leftmost first;
+for a term, with its symbol too, where `p` names one (a typed term's
+symbols are compared before any unification). -/
 partial def subtermsLike (p e : Lean.Expr) : Array Lean.Expr :=
+  let ps := tmSymbolHead? p
   let rec go (e : Lean.Expr) (acc : Array Lean.Expr) : Array Lean.Expr :=
     let acc := if !e.hasLooseBVars && e.toHeadIndex == p.toHeadIndex &&
-        e.headNumArgs == p.headNumArgs then acc.push e else acc
+        e.headNumArgs == p.headNumArgs &&
+        (match ps, tmSymbolHead? e with
+          | some a, some b => a == b
+          | _, _ => true) then acc.push e else acc
     match e with
     | .app f x => go x (go f acc)
     | .mdata _ e => go e acc
