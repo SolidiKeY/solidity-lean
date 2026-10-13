@@ -6726,6 +6726,106 @@ derived + 1 pending + 1 divergent + 1 excluded, 2 skip).
 `ChainRewrites` is 0.1 s over its gate, within the run-to-run spread;
 `Chains/Storage` stays where W9.8.4 left it.
 
+### W10.3 record (2026-10-13, branch `w10-theory`)
+
+The Theory is typed: a term denotes a typed value, its laws are stated
+once over an observation model, and `.eq` is Lean's `=`.
+
+**The model** (`Theory/Typed/Obs.lean`).  `Obs L` observes a location
+family `L : Ty → Ty → Type` by three fields: `word` (the word at a
+primitive location), `len` (an array's length) and `has` (whether a
+location is present).  `has` is beyond the design: without it two values
+that differ only by a mapping key under a fresh array slot, or by a strip
+against an overlay, observe equal and the overlay is no congruence.
+`class ObsLoc L` gives `app`/`strip?` and their laws; its instances are
+`Path T` (`TVal T := Obs (Path T)`) and `SLoc C` (`TSto C := Obs (SLoc
+C)`; a struct's fields are `TSto (Contract.ofStruct s)`).  `SLoc` is a
+storage reference or a dangling path below one (`SLoc.dangling`): an unset
+alias (`pvP`) must denote a location, and `findOnSave` hold there too —
+a deviation from the design's `SRef`.  The operations are generic and
+total: `find`, `save`, `copyTo` (a save of `TVal.overlay`), `delAt` (a
+save of `TVal.del`, the default computed from the type), `push`,
+`extend`, `pop`, `select`.  `TVal.delR`/`stripR`/`ovR` are written once
+over `word`/`len`/`has` (`Comp`).  The laws carry solkey's names:
+`Obs.findOnSave`, `findOnSavePrefix`, `findOnSaveFrame`, `findOnDelAt`,
+`findOnDelAtFrame`, `lenOnSaveFrame`, `lenOnDelAtFrame`,
+`findOnPushFrame`, `findOnPopFrame`; a frame's side condition is
+`(ObsLoc.strip? p q).isNone`.
+
+**The bridge** (`Theory/Bridge/Denote.lean`).  `Srt.TDen C` gives each
+sort its typed denotation (a word `Option p.Denote`, `kint` `Option Int`,
+`path T` `SLoc C T`, `st` `TSto C`, `sv T` `TVal T`, the memory sorts
+`Unit`); `Tm.denote` is total, and `denote_eval` proves
+`eval = some x → denote = x.obs` (`SVal.obs`, `Storage.obs`, with
+`obs_saveM`, `Storage.obs_save/write/delete/push/pop`, `obs_selectT`).
+
+**Moved.**  `Contract.ofStruct`, `SRef.under`, `Storage.selectT` from
+`Signature.lean` to `Obs.lean`; `findM_append`, `saveM_*`,
+`Path.append_assoc`, `heq_of_erase`, `split_of_erase` from `TermLaws`;
+`SFields.get_overlay/get_defaultOf` from `CloseFrame`; `Path.Diverges`
+and `findM_saveM_diverges` down to `Semantics/Storage.lean`,
+`SVal.find_save_same` to `StorageErase.lean`.  `Theory/StateWrites.lean`
+keeps only what `sol_decide` reads (W10.4).
+
+**Vanished.**  `Theory/Bridge/{Save,Delete,Copy,CopyArray,Push}.lean`;
+`SVal.absT` and its section of `Signature.lean`; `StValue.toRes`,
+`Res.toSt`, `Denote.*` and `SVal.abs_of_asValue` in `Update.lean`; the
+`Equiv` entries of the closer (`CloseLemmas`, `Close`, `StateFacts`) and
+`DEquiv` of `RewritePast` (its congruences are equalities).  `Tm.Theq`
+keeps its name, now `∀ σ, a.denote σ = b.denote σ`.
+
+**Changed readings.**  The side conditions (`TermLib`, `TermLaws`,
+`CloseFrame`) read a location's segments (`SLoc.segs`, `SRef.segs`)
+with `Theory.StValue.diverges`, decidable as before.  `Tm.KindFreeAt` is
+semantic: a delete at `p` resets every word below it (`delR`), so
+`findOnDelAtBelow`'s premises `hw`/`hp` are unused.  The closer gained
+`CloseS.bool_eq_iff` (an `=` at `PrimTy.bool.Denote` is one at `Bool`).
+`sol_rw`'s theory pass (`theoryRewriteS`) reifies the `Obs` symbols and
+discharges at `.all` transparency (`Path.append` is irreducible).
+
+**Still untyped, and why.**  The memory island: `Theory/{Terms,Storage,
+Copy,Observe,Abs,Memory,CrossDomain,Rewrite}.lean` and
+`Theory/Bridge/Find.lean`, read by `Calculus/MemTheory.lean`
+(`SVal.abs`, `Theory.Memory`), `MemNames`, `MemRead`,
+`Semantics/Properties` (`Theory.Memory.new`) and sections 2 and 5–8 of
+`Examples/Tactics/Theory.lean`; `Theory.StValue.diverges`/`lengthSeg`,
+list functions the side conditions read; `Theory/StateWrites.lean` for
+`sol_decide` (W10.4).  `Update.lean` still imports `Theory.Abs` (its
+remnant is the `w10-remnant` lane's).
+
+**Checks.**  `lean_build` of the default targets: clean except
+`Tools/Counterexample.lean` 426–427 (the `w10-remnant` lane's file, not
+edited here), which reads the old `Option`-free `.eq`; it needs
+`a.denote σ = some x`, `b.denote σ = some y` and `Option.some.injEq`.
+`Derived1`–`14` check on the branch; `Report.lean` was not rebuilt.
+`sorry` lines 19 (as master); `#print axioms Proves.valid`: `propext`,
+`Classical.choice`, `Quot.sound`; `check-orphans` (313 reachable, 0
+orphaned), `check-doc-paths`; `check-testsuite` against solkey
+`1b4341a303`: 438 = 435 derived + 1 pending + 1 divergent + 1 excluded,
+2 skip.  `check-corpus.sh` not run (it needs `lake`).
+
+**Gates** (the W9.6.4 method, master `147718f0` and the branch
+interleaved; wall s, CPU in parentheses):
+
+| Row | Gate | master | `w10-theory` |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 231.4 (199.0) | 205.3 (199.0) |
+| `Derived7` | 61.7 | 49.1 | 49.0 |
+| `Tactics/Decide` | 45.0 | 31.6 (32.5) | 31.7 (32.7) |
+| `ProofTree` | 11.7 | 10.2 | 9.8 |
+| `Chains/Storage` | 9.0 (≤ 9.2) | 9.27, 9.24 (10.5) | 9.27, 9.10 (10.5) |
+| `ChainRewrites` | 8.2 | 8.21 | 8.26 |
+| `ChainRewritesOpen` | 4.1 | 3.73 | 3.72 |
+| `Solkey/TestSuite` | 13.2 | 16.0, 13.0 (6.9) | 12.0, 14.0 (6.9) |
+
+Per file (master / here): `Derived1` 13.4/8.0, `2` 10.0/7.9, `3`
+16.1/11.8, `4` 15.7/15.8, `5` 10.0/8.1, `6` 15.9/10.5, `8` 27.5/27.4,
+`9` 10.0/6.2, `10` 11.3/18.1 (10.3 s CPU), `11` 4.9/2.9, `12` 26.7/12.5,
+`13` 12.0/11.2, `14` 8.9/16.1 (9.0 s CPU).  CPU is equal on both sides;
+the wall differences are load.  `Solkey/TestSuite`'s wall is noise around
+an equal CPU.  The closer and the chains never unfold a denotation past a
+literal, a parameter or the environment, which the spike measured first.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -6752,6 +6852,9 @@ remains only as the bridge of `sol_decide`'s untyped language
 terms' symbols read the typed state; what stays untyped is listed in the
 W9.8.4 record.  A push at a full array is out of gas in the run and in the
 update reading alike (W9.8.5).
+
+**W10.3 (the typed Theory)**: done (record above); the memory island
+stays untyped.
 
 **Open items:**
 - `storagePushReadBack` is valid in the model (and was on master: the
