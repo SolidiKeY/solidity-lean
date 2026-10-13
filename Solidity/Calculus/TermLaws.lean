@@ -26,13 +26,9 @@ second, decided by `rfl`.
 
 **Typed sorts** (W9.8.3c).  A term reads the typed state directly
 (`Tm.eval`), so the laws are proved on the typed storage
-(`Storage.findOnSave`, `Storage.find_selectT`), with no erased state.  Not
-ported yet (`docs/intrinsic.md`, W9.8.3c laws record): the frame and
-delete-value laws past an update (`TermTaclet.RefLaw`, `Upd.coversRef`),
-which need the typed frame laws of a delete, a push and a pop and a shape's
-divergence read as `Path.Diverges`; the memory laws (`EvalLaw`,
-`Upd.coversEval`) on the `Grown` heap; and the member-wise reads of a write
-under a `select` (`Tm.baseAny`).
+(`Storage.findOnSave`, `Storage.find_selectT`), with no erased state.  The frame and
+delete-value laws past an update are `TermTaclet.RefLaw` (`Upd.coversRef`);
+the memory laws are `EvalLaw` (`Upd.coversEval`).
 -/
 
 namespace Solidity

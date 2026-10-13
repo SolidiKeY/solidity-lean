@@ -6826,6 +6826,31 @@ the wall differences are load.  `Solkey/TestSuite`'s wall is noise around
 an equal CPU.  The closer and the chains never unfold a denotation past a
 literal, a parameter or the environment, which the spike measured first.
 
+**Review** (one read-only finder; each item checked against the code).
+No soundness bug: the laws hold in the model, and the bridges
+(`SVal.obs_defaultOf`, `obs_strip`, `obs_overlay`, `obs_selectT`) are
+unconditional.  Fixed: dead lemmas in `Obs.lean` (`Path.heq_of_erase`,
+`Path.IsNil`, `SVal.obsOpt_some`, `findM_field_nil`, `findM_atF_nil`,
+`findM_key'`, `find_eq_findM'`); the `TermTaclet` docstrings and
+`Examples/Tactics/SelectOnSaveConsr.lean` cite the `Obs` laws;
+`docs/module-map.md`'s `RewritePast` and `Close` rows; `TermLaws`' header
+(`RefLaw`, `EvalLaw` exist).  Recorded, not changed:
+- every unset alias of a type denotes one location
+  (`SLoc.dangling T .nil`), and `Obs.select` keeps a dangling location,
+  so a save through one unset alias reads back through another; no frame
+  fires there (a dangling location's segments are `[]`), and no law may
+  take alias identity as a premise;
+- a halted argument denotes its default (`getD`), and two halting terms
+  are `=` (both as on master);
+- `findOnSave`'s `hp`, `findOnDelAt`'s and `findOnDelAtBelow`'s `hw`/`hp`,
+  `findOnDelAtValue`'s `hp` are no longer used by the soundness: the rules
+  keep solkey's shape;
+- `Option.bind_some_id` restates core's `Option.bind_fun_some`;
+  `Semantics/Storage.lean`'s private `lookupBy_setBy_*'` restate
+  `Semantics/Properties.lean`'s; two double blank lines in
+  `Signature.lean` (low modules, left to avoid a rebuild);
+- `AGENTS.md` still names `SVal.absT` (line 39): left to the lead.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

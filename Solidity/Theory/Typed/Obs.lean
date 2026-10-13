@@ -117,52 +117,6 @@ theorem eq_of_strip? : {T U W : Ty} → (p : Path T U) → (q : Path T W) → {r
   | _, _, _, .field _ _, .nil, _, h | _, _, _, .at _ _, .nil, _, h
   | _, _, _, .atF _ _, .nil, _, h | _, _, _, .key _ _, .nil, _, h => by cases h
 
-/-- Two paths from one type with one erasure are one path. -/
-theorem heq_of_erase {T U W : Ty} (p : Path T U) (q : Path T W) (h : p.erase = q.erase) :
-    U = W ∧ HEq p q := by
-  induction p generalizing W with
-  | nil =>
-    cases q with
-    | nil => exact ⟨rfl, HEq.rfl⟩
-    | _ => simp only [Path.erase, reduceCtorEq] at h
-  | @field s f T₁ U₁ hf p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | @field _ f' T₂ _ hf' q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.field.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-  | @«at» E U₁ i p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | «at» j q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-  | @atF E U₁ n i p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | atF j q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-  | @key K V U₁ k p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | key k' q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-
 /-- A path whose erasure extends another's, from one type, is the other
 followed by a path. -/
 theorem split_of_erase {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Semantics.Seg}
@@ -202,9 +156,6 @@ theorem split_of_erase {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Sema
       obtain ⟨rfl, h⟩ := h
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_key _ p r).symm, hr⟩
-
-/-- A path that goes nowhere. -/
-def IsNil {T U : Ty} (p : Path T U) : Prop := p.erase = []
 
 /-- Where `q` does not go through `p`, the two part, or `q` stops above `p`. -/
 theorem strip?_none : {T U W : Ty} → (p : Path T U) → (q : Path T W) → strip? p q = none →
@@ -831,8 +782,6 @@ theorem SVal.obs_find {T U : Ty} (v : SVal T) (p : Path T U) : v.obs.find p = SV
   apply Obs.ext <;> intro _ r <;>
     simp only [Obs.find, SVal.obs, SVal.obsOpt, Option.bind_some, ObsLoc.app_path, SVal.findM_append]
 
-theorem SVal.obsOpt_some {T : Ty} (v : SVal T) : SVal.obsOpt (some v) = v.obs := rfl
-
 /-- **`findOnSave`, the bridge**: a typed save, read, is the Theory's. -/
 theorem SVal.obs_saveM {T U : Ty} {x x' : SVal T} {p : Path T U} {v : SVal U}
     (h : x.saveM p v = some x') : x'.obs = x.obs.save p v.obs := by
@@ -1130,11 +1079,6 @@ theorem SVal.findM_atF' {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (r : Path 
 theorem Option.bind_some_id {β : Type} (x : Option β) : x.bind (fun y => some y) = x := by
   cases x <;> rfl
 
-theorem SVal.findM_field_nil {s f : Name} {T : Ty} (fs : SFields (structDef s))
-    (h : lookupBy f (structDef s) = some T) :
-    (SVal.struct fs).findM (.field h .nil) = some (fs.get h) := by
-  rw [SVal.findM_field', SVal.findM_nil']
-
 theorem SVal.findM_at_nil {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (i : Int) : (SVal.array e sh hn).findM (.at i .nil) =
       if 0 ≤ i then (e.toList ++ sh.toList)[i.toNat]? else none := by
@@ -1144,20 +1088,6 @@ theorem SVal.findM_at_nil {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn :
     | none => rfl
     | some w => exact SVal.findM_nil' w
   · rfl
-
-theorem SVal.findM_atF_nil {E : Ty} {n : Nat} (e : SVec E n) (i : Int) :
-    (SVal.fixed e).findM (.atF i .nil) = if 0 ≤ i then e.toList[i.toNat]? else none := by
-  rw [SVal.findM_atF']
-  split
-  · cases e.toList[i.toNat]? with
-    | none => rfl
-    | some w => exact SVal.findM_nil' w
-  · rfl
-
-theorem SVal.findM_key' {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (r : Path V U) :
-    (SVal.map (K := K) m d).findM (.key k r) = ((lookupBy k m.toList).getD d).findM r := by
-  simp only [SVal.findM]
-  cases lookupBy k m.toList <;> rfl
 
 /-! ### Members and elements of a delete, a strip, a copy -/
 
@@ -1716,9 +1646,6 @@ theorem TVal.overlay_prim {P : PrimTy} (o n : TVal (.prim P)) : o.overlay n = n 
   · intro P' r; cases r; rfl
   · intro E r; cases r
   · intro V r; cases r; rfl
-
-theorem SVal.find_eq_findM' {T U : Ty} (v : SVal T) (p : Path T U) : v.find p = v.findM p :=
-  SVal.find_eq_findM v p
 
 theorem List.getElem?_snoc_tail {β : Type} (l : List β) (x : β) (sh : List β) {k : Nat}
     (hk : k ≠ l.length) : (l ++ [x] ++ sh.tail)[k]? = (l ++ sh)[k]? := by

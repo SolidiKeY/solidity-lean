@@ -1111,32 +1111,32 @@ path (`p.length`).  -/
 each constructor named as its solkey taclet. -/
 inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ (.val P) → Prop
   /-- **`findOnSave`**: `find(save(s, p, v), q) ⇝ v` for a word `v`, `q` the
-  path `p` its checks aside (`find_copyTo_same`). -/
+  path `p` its checks aside (`Obs.findOnSave`). -/
   | findOnSave {s : Tm C Γ .st} {P : PrimTy} {p q : Tm C Γ (.path (.prim P))} {v : P.Denote}
       (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
       TermTaclet (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.val (Tms.Term.lit v))) q)
         (Tms.Term.lit v)
   /-- **`findOnSaveFrame`**: a read at a path that leaves the written one does
-  not see the write (`find_copyTo_frame`). -/
+  not see the write (`Obs.findOnSaveFrame`). -/
   | findOnSaveFrame {s : Tm C Γ .st} {T : Ty} {P : PrimTy} {p : Tm C Γ (.path T)}
       {q : Tm C Γ (.path (.prim P))} {v : Tm C Γ (.sv T)} (h : p.diverges q = true := by rfl) :
       TermTaclet (Tms.Term.find (Tms.STerm.save s p v) q) (Tms.Term.find s q)
   /-- **`findMemberCons`**: `find(s, r.p) ⇝ find(select(s, r), p)`, the path
-  read from its head (`find_cons`). -/
+  read from its head (`Obs.select_find`). -/
   | findMemberCons {s : Tm C Γ .st} {P : PrimTy} {p : Tm C Γ (.path (.prim P))} {r sn : Name}
       {hr : C.rootType r = some (.ref (.struct sn))} {p' : Tm C Γ (.spath sn (.prim P))}
       (h : p.shift? = some ⟨r, sn, hr, p'⟩ := by rfl) :
       TermTaclet (Tms.Term.find s p) (.app2 .findIn (Tms.STerm.select s r hr) p')
   /-- **`findMemberCons`** in a storage of members: `findIn(s, f.p) ⇝
-  findIn(select(s, f), p)` (`find_cons`). -/
+  findIn(select(s, f), p)` (`Obs.select_find`). -/
   | findMemberConsIn {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
       {p : Tm C Γ (.spath sn (.prim P))} {f sn' : Name}
       {hf : C.fieldType sn f = some (.ref (.struct sn'))} {p' : Tm C Γ (.spath sn' (.prim P))}
       (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩ := by rfl) :
       TermTaclet (.app2 .findIn s p) (.app2 .findIn (.app1 (.selectIn hf) s) p')
   /-- **`findOnSave`** in a storage of members: `findIn(saveIn(s, p, v), p) ⇝ v`
-  for a word `v` (`find_copyTo_same`). -/
+  for a word `v` (`Obs.findOnSave`). -/
   | findOnSaveIn {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
       {p q : Tm C Γ (.spath sn (.prim P))} {v : P.Denote}
       (hq : p.beqR q = true := by first | rfl | exact Tm.beqR_self _) :
@@ -1244,13 +1244,13 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       TermTaclet (.app2 .findIn (K.fill (.app1 (.selectIn hf) (.app2 .delAtIn s p))) q)
         (.app2 .findIn (K.fill (.app1 (.selectIn hf) s)) q)
   /-- **`findOnDelAt`**: where `s` reads the word `w` at `p`, the delete
-  leaves its default (`find_delAt_same`, `delValueDefault`). -/
+  leaves its default (`Obs.findOnDelAt`, `delValueDefault`). -/
   | findOnDelAt {s : Tm C Γ .st} {P : PrimTy} {p q : Tm C Γ (.path (.prim P))} {w : P.Denote}
       (hw : TermTaclet (Tms.Term.find s p) (Tms.Term.lit w)) (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
       TermTaclet (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.dflt P)
   /-- **`findOnDelAtValue`**: the delete leaves at its path the default of
-  what was there (`find_delAt_same`). -/
+  what was there (`Obs.findOnDelAt`). -/
   | findOnDelAtValue {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)} {P : PrimTy}
       {q : Tm C Γ (.path (.prim P))} (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
@@ -1259,7 +1259,7 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
   | delValueLit {P : PrimTy} {w : P.Denote} :
       TermTaclet (Tms.Term.delValue (Tms.Term.lit w)) (Tms.Term.dflt P)
   /-- **`findOnDelAtBelow`**: below a deleted node that is not a mapping,
-  every word reads its default (`find_delAt_below`, `delValueDefault`). -/
+  every word reads its default (`Obs.delAt_word_below`, `delValueDefault`). -/
   | findOnDelAtBelow {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)} {P : PrimTy}
       {q : Tm C Γ (.path (.prim P))} {w : P.Denote} (hk : s.KindFreeAt p)
       (hw : s.findLit? q = some w := by rfl) (hp : p.hasSeg = true := by rfl)
@@ -1268,35 +1268,35 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
   /-- **`findOnDelAtBelow`** in a storage of members:
   `findIn(delAtIn(s, p), q) ⇝ defVal` below a deleted member that is not a
   mapping, `q` going on below `p` by members (`Tm.extendsIn`) and `s`
-  writing the word there (`Tm.findLitIn?`) (`find_delAt_below`,
+  writing the word there (`Tm.findLitIn?`) (`Obs.delAt_word_below`,
   `delValueDefault`). -/
   | findOnDelAtBelowIn {sn : Name} {s : Tm C Γ (.sts sn)} {T : Ty} {p : Tm C Γ (.spath sn T)}
       {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote} (hk : s.KindFreeAt p)
       (hw : s.findLitIn? q = some w := by rfl) (hq : q.extendsIn p = true := by rfl) :
       TermTaclet (.app2 .findIn (.app2 .delAtIn s p) q) (Tms.Term.dflt P)
   /-- **`findOnDelAtFrame`**: a read off the deleted path does not see the
-  delete (`find_delAt_frame`). -/
+  delete (`Obs.findOnDelAtFrame`). -/
   | findOnDelAtFrame {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)} {P : PrimTy}
       {q : Tm C Γ (.path (.prim P))} (h : p.diverges q = true := by rfl) :
       TermTaclet (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.find s q)
   /-- **`findOnPushFrame`**: a read off the array's path does not see a push
-  (`find_pushT_frame`). -/
+  (`Obs.findOnPushFrame`). -/
   | findOnPushFrame {s : Tm C Γ .st} {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))}
       {v : Tm C Γ (.sv E)} {P : PrimTy} {q : Tm C Γ (.path (.prim P))}
       (h : p.diverges q = true := by rfl) :
       TermTaclet (Tms.Term.find (Tms.STerm.push s p v) q) (Tms.Term.find s q)
   /-- **`findOnPopFrame`**: a read off the array's path does not see a pop
-  (`find_popT_frame`). -/
+  (`Obs.findOnPopFrame`). -/
   | findOnPopFrame {s : Tm C Γ .st} {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))}
       {P : PrimTy} {q : Tm C Γ (.path (.prim P))} (h : p.diverges q = true := by rfl) :
       TermTaclet (Tms.Term.find (Tms.STerm.pop s p) q) (Tms.Term.find s q)
   /-- **`lenOnSaveFrame`**: a length read off the written path does not see
-  the write (`find_copyTo_frame`). -/
+  the write (`Obs.findOnSaveFrame`). -/
   | lenOnSaveFrame {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)} {v : Tm C Γ (.sv T)}
       {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))} (h : q.divergesLen p = true := by rfl) :
       TermTaclet (Tms.Term.len (Tms.STerm.save s q v) p) (Tms.Term.len s p)
   /-- **`lenOnDelAtFrame`**: a length read off the deleted path does not see
-  the delete (`find_delAt_frame`). -/
+  the delete (`Obs.findOnDelAtFrame`). -/
   | lenOnDelAtFrame {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)}
       {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))} (h : q.divergesLen p = true := by rfl) :
       TermTaclet (Tms.Term.len (Tms.STerm.delAt s q) p) (Tms.Term.len s p)
