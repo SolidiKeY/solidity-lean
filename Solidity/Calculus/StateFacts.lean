@@ -359,11 +359,11 @@ def Seg.isField : Seg → Bool
   | .at _ => false
 
 /-- The Theory's `diverges` gives the interpreter's `Diverge`. -/
-theorem Diverge_of_diverges : (a b : List Seg) → Theory.StValue.diverges a b = true → Close.Diverge a b
+theorem Diverge_of_diverges : (a b : List Seg) → Theory.diverges a b = true → Close.Diverge a b
   | [], _, h => nomatch h
   | _ :: _, [], h => nomatch h
   | x :: p, y :: q, h => by
-    simp only [Theory.StValue.diverges] at h
+    simp only [Theory.diverges] at h
     split at h
     · exact Or.inr (Diverge_of_diverges p q h)
     · exact Or.inl ‹_›
@@ -869,7 +869,7 @@ end
 /-! ## From `Solidity.Calculus.TermTaclets` -/
 
 section
-open Semantics Theory Theory.StValue
+open Semantics Theory
 variable {C : Contract}
 
 /-- The shape of a path's segment: a member, or an element at a literal
@@ -953,11 +953,11 @@ theorem SegT.apart_sound : {x y : SegT} → {d : Bool} → {s t : Seg} → x.apa
 
 /-- Shapes that diverge have paths that diverge. -/
 theorem SegT.diverges_sound : (a b : List SegT) → (p q : List Seg) → SegT.diverges a b = true →
-    SegT.matches a p = true → SegT.matches b q = true → Theory.StValue.diverges p q = true
+    SegT.matches a p = true → SegT.matches b q = true → Theory.diverges p q = true
   | x :: a, y :: b, s :: p, t :: q, hd, ha, hb => by
     simp only [SegT.matches, Bool.and_eq_true] at ha hb
     simp only [SegT.diverges] at hd
-    simp only [Theory.StValue.diverges]
+    simp only [Theory.diverges]
     cases hx : x.apart y with
     | none => rw [hx] at hd; cases hd
     | some d =>

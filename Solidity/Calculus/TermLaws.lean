@@ -331,62 +331,62 @@ section Frame
 Theory's `diverges` on the erased segments.  At one source type the two
 paths take the same constructor at each step. -/
 theorem Path.diverges_of_erase {T U W : Ty} (p : Path T U) (q : Path T W)
-    (h : Theory.StValue.diverges p.erase q.erase = true) : Path.Diverges p q := by
+    (h : Theory.diverges p.erase q.erase = true) : Path.Diverges p q := by
   induction p generalizing W with
-  | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+  | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
   | @field s f T₁ U₁ hf p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | @field _ f' T₂ _ hf' q =>
       by_cases e : f = f'
       · subst e
         obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .fieldIn hf (ih q h)
       · exact .field hf hf' p q e
   | @«at» E U₁ i p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | «at» j q =>
       by_cases e : i = j
       · subst e
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .atIn i (ih q h)
       · exact .at p q e
   | @atF E U₁ n i p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | atF j q =>
       by_cases e : i = j
       · subst e
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .atFIn i (ih q h)
       · exact .atF p q e
   | @key K V U₁ k p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | key k' q =>
       by_cases e : k = k'
       · subst e
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .keyIn k (ih q h)
       · exact .key p q e
 
 /-- The Theory's `diverges a (b ++ [x])`: `a` parts from `b`, or goes on
 below it. -/
 theorem diverges_append_single {a b : List Semantics.Seg} {x : Semantics.Seg}
-    (h : Theory.StValue.diverges a (b ++ [x]) = true) :
-    Theory.StValue.diverges a b = true ∨ ∃ rest, rest ≠ [] ∧ a = b ++ rest := by
+    (h : Theory.diverges a (b ++ [x]) = true) :
+    Theory.diverges a b = true ∨ ∃ rest, rest ≠ [] ∧ a = b ++ rest := by
   induction b generalizing a with
   | nil =>
     cases a with
-    | nil => simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Theory.diverges, Bool.false_eq_true] at h
     | cons y a' => exact .inr ⟨y :: a', List.cons_ne_nil _ _, rfl⟩
   | cons c b' ih =>
     cases a with
-    | nil => simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Theory.diverges, Bool.false_eq_true] at h
     | cons d a' =>
-      simp only [List.cons_append, Theory.StValue.diverges] at h ⊢
+      simp only [List.cons_append, Theory.diverges] at h ⊢
       by_cases e : d = c
       · subst e
         simp only [if_pos rfl] at h ⊢
@@ -433,7 +433,7 @@ theorem find_save_same {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
 /-- **A save leaves a reference that parts from it** (solkey's
 `findOnSaveFrame`): across roots, or below one root by `Path.Diverges`. -/
 theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
-    {q : SRef C W} (hd : Theory.StValue.diverges r.segs q.segs = true)
+    {q : SRef C W} (hd : Theory.diverges r.segs q.segs = true)
     (h : st.save r v = some st') : st'.find q = st.find q := by
   obtain ⟨x', hs, rfl⟩ := save_some h
   rcases r with ⟨n, hr, p⟩
@@ -442,7 +442,7 @@ theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal
   · subst e
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-    simp only [SRef.segs, Theory.StValue.diverges, if_pos rfl] at hd
+    simp only [SRef.segs, Theory.diverges, if_pos rfl] at hd
     show ((SFields.set st hr x').get hr).find p' = (st.get hr).find p'
     rw [SFields.get_set_same]
     rw [SVal.save_eq_saveM] at hs
@@ -461,7 +461,7 @@ path (solkey's `lenOnSaveFrame`): elsewhere, or below one of the array's
 elements. -/
 theorem len_save_frame {U E : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     {q : SRef C (.ref (.array E))}
-    (hd : Theory.StValue.diverges r.segs (q.segs ++ [Theory.StValue.lengthSeg]) = true)
+    (hd : Theory.diverges r.segs (q.segs ++ [Theory.lengthSeg]) = true)
     (h : st.save r v = some st') : st'.len q = st.len q := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.len, find_save_frame hd h]
@@ -513,7 +513,7 @@ theorem Tm.delValue_evalT {P : PrimTy} (t : Tm C Γ (.val P)) :
 /-- Two paths whose shapes part reach references that part. -/
 theorem Tm.diverges_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.diverges q = true) {r : SRef C T} {r' : SRef C U} (hp : p.eval σ = some r)
-    (hq : q.eval σ = some r') : Theory.StValue.diverges r.segs r'.segs = true := by
+    (hq : q.eval σ = some r') : Theory.diverges r.segs r'.segs = true := by
   have e := Tm.diverges_segs σ h
   rwa [show p.denote σ = .ref r from Tm.denote_eval σ p r hp,
     show q.denote σ = .ref r' from Tm.denote_eval σ q r' hq] at e
@@ -522,7 +522,7 @@ theorem Tm.diverges_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path 
 theorem Tm.divergesLen_eval {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) {r : SRef C T} {r' : SRef C U} (hq : q.eval σ = some r)
     (hp : p.eval σ = some r') :
-    Theory.StValue.diverges r.segs (r'.segs ++ [Theory.StValue.lengthSeg]) = true := by
+    Theory.diverges r.segs (r'.segs ++ [Theory.lengthSeg]) = true := by
   have e := Tm.divergesLen_segs σ h
   rwa [show q.denote σ = .ref r from Tm.denote_eval σ q r hq,
     show p.denote σ = .ref r' from Tm.denote_eval σ p r' hp] at e

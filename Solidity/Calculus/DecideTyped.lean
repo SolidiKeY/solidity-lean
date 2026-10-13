@@ -239,11 +239,11 @@ theorem Op0.toL_ne {s : Srt} (o : Op0 C s) (hs : o.isStorage = false) (hm : o.is
   cases o <;> simp only [Op0.isStorage, Op0.isMemory, reduceCtorEq] at hs hm <;> rfl
 
 theorem Op1.toL_ne {a s : Srt} (o : Op1 C a s) (x : LTm C a) (hnet : o.isNet = false)
-    (hnext : o.isNext = false) : o.toL ρ x = some (.app1 o x) := by
+    (hnext : o.isNext = false) : o.toL ρ x = some (fold1 o x) := by
   cases o <;> simp only [Op1.isNet, Op1.isNext, reduceCtorEq] at hnet hnext <;> rfl
 
 theorem Op2.toL_ne {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
-    (hat : o.isAt = false) : o.toL ρ x y = some (.app2 o x y) := by
+    (hat : o.isAt = false) : o.toL ρ x y = some (fold2 o x y) := by
   cases o <;> simp only [Op2.isAt, reduceCtorEq] at hat <;> rfl
 
 /-- **A term pushed in reads what the scoped term reads.** -/
@@ -293,6 +293,7 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
       | false =>
         rw [Op1.toL_ne o x' hn hm] at ht
         cases ht
+        rw [fold1_eval]
         exact Op1.eval_drel g₀ τ.glob o hn hm hx
   | _, .app2 o x y, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
@@ -310,6 +311,7 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     | false =>
       rw [Op2.toL_ne o x' y' ha] at ht
       cases ht
+      rw [fold2_eval]
       exact Op2.eval_drel g₀ τ.glob o ha hx hy
   | _, .app3 o x y z, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
@@ -412,6 +414,16 @@ theorem Fresh.seqL {s' s : Srt} {n : Nat} {d : LTm C s'} {a : LTm C s} (hd : Fre
 
 theorem Fresh.tt (n : Nat) : Fresh n (LTm.tt : LTm C (.val .bool)) := Fresh.app0 n _
 
+theorem Fresh.fold1 {a s : Srt} {n : Nat} (o : Op1 C a s) {x : LTm C a} (hx : Fresh n x) :
+    Fresh n (fold1 o x) := fun g ν p k v hk => by
+  simp only [fold1_eval]
+  exact Fresh.app1 o hx g ν p k v hk
+
+theorem Fresh.fold2 {a b s : Srt} {n : Nat} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b}
+    (hx : Fresh n x) (hy : Fresh n y) : Fresh n (fold2 o x y) := fun g ν p k v hk => by
+  simp only [fold2_eval]
+  exact Fresh.app2 o hx hy g ν p k v hk
+
 /-- **A term pushed in is fresh where the state is.** -/
 theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) →
     t.toL ρ = some t' → Fresh ρ.next t'
@@ -424,13 +436,13 @@ theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : L
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', ht⟩ := ht
     have hx := Tm.toL_fresh hF x x' hx'
-    cases o <;> cases ht <;> first | exact Fresh.app1 _ hx | exact Fresh.app2 _ hF.stor hx
+    cases o <;> cases ht <;> first | exact Fresh.fold1 _ hx | exact Fresh.app1 _ hx | exact Fresh.app2 _ hF.stor hx
   | _, .app2 o x y, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', y', hy', ht⟩ := ht
     have hx := Tm.toL_fresh hF x x' hx'
     have hy := Tm.toL_fresh hF y y' hy'
-    cases o <;> cases ht <;> first | exact Fresh.app2 _ hx hy | exact Fresh.app3 _ hF.stor hx hy
+    cases o <;> cases ht <;> first | exact Fresh.fold2 _ hx hy | exact Fresh.app2 _ hx hy | exact Fresh.app3 _ hF.stor hx hy
   | _, .app3 o x y z, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', y', hy', z', hz', ht⟩ := ht

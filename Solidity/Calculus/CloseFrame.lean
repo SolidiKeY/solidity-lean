@@ -20,7 +20,7 @@ written member by member.
 
 namespace Solidity
 
-open Theory.StValue (diverges lengthSeg)
+open Theory (diverges lengthSeg)
 open Semantics (lookupBy structDef)
 
 namespace Storage
@@ -274,7 +274,7 @@ round (as the untyped `Close.diverge_cons'`): a premise `k != j` then frames
 first. -/
 theorem diverges_cons (a b : Semantics.Seg) (p q : List Semantics.Seg) :
     diverges (a :: p) (b :: q) = true ↔ (¬ a = b ∨ ¬ b = a) ∨ diverges p q = true := by
-  simp only [Theory.StValue.diverges]
+  simp only [Theory.diverges]
   by_cases h : a = b
   · subst h; simp only [if_true, not_true_eq_false, or_self, false_or]
   · simp only [h, if_false, not_false_eq_true, true_or]

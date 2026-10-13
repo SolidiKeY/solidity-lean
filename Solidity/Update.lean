@@ -1,7 +1,7 @@
 import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
 import Solidity.TermSimp
-import Solidity.Theory.Abs
+import Solidity.Theory.Segs
 
 /-!
 # Modalities, and what the terms' signature leaves to the interpreter

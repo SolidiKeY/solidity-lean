@@ -35,7 +35,7 @@ symbols, which print so.
 namespace Solidity
 
 open Semantics
-open Theory.StValue (lengthSeg asInt)
+open Theory (lengthSeg)
 open Solidity (Srt Op0 Op1 Op2 Op3)
 
 variable {C : Contract}
@@ -254,9 +254,15 @@ def Tm.litW? {u : Srt} : Tm C Γ u → Option ((p : PrimTy) × p.Denote)
   | .app0 o => o.litW?
   | _ => none
 
+/-- A word as an integer: an `int` its value, a `bool` `0` (KeY's `(int)`
+cast). -/
+def asInt : Semantics.PrimVal → Int
+  | .int v => v
+  | _ => 0
+
 /-- An index literal, as the integer it is hashed as. -/
 def Tm.litInt? {u : Srt} (t : Tm C Γ u) : Option Int :=
-  t.litW?.map fun w => asInt (.prim (PrimTy.erase w.2))
+  t.litW?.map fun w => asInt (PrimTy.erase w.2)
 
 /-- A root's segment. -/
 def Op0.shapeLeaf? {s : Srt} : Op0 C s → Option (List SegT)
@@ -559,19 +565,19 @@ theorem SLoc.segs_app {C : Contract} {T U : Ty} (l : SLoc C T) (p : Path T U) :
     Path.erase_append, List.cons_append]
 
 /-- Two lists that part are not one the other's prefix, either way. -/
-theorem diverges_append_ne : (a b : List Seg) → Theory.StValue.diverges a b = true →
+theorem diverges_append_ne : (a b : List Seg) → Theory.diverges a b = true →
     ∀ x y : List Seg, a ++ x ≠ b ++ y
-  | [], _, h, _, _, _ => by simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
-  | _ :: _, [], h, _, _, _ => by simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+  | [], _, h, _, _, _ => by simp only [Theory.diverges, Bool.false_eq_true] at h
+  | _ :: _, [], h, _, _, _ => by simp only [Theory.diverges, Bool.false_eq_true] at h
   | a :: p, b :: q, h, x, y, e => by
     simp only [List.cons_append, List.cons.injEq] at e
     obtain ⟨rfl, e⟩ := e
-    simp only [Theory.StValue.diverges, if_true] at h
+    simp only [Theory.diverges, if_true] at h
     exact diverges_append_ne p q h x y e
 
 /-- **Locations whose segments part**: neither is below the other. -/
 theorem SLoc.strip?_none_of_diverges {C : Contract} {U W : Ty} {p : SLoc C U} {q : SLoc C W}
-    (h : Theory.StValue.diverges p.segs q.segs = true) :
+    (h : Theory.diverges p.segs q.segs = true) :
     ∀ {V : Ty} (r : Path W V), ObsLoc.strip? p (ObsLoc.app q r) = none := by
   intro V r
   cases hs : ObsLoc.strip? p (ObsLoc.app q r) with
@@ -586,7 +592,7 @@ theorem SLoc.strip?_none_of_diverges {C : Contract} {U W : Ty} {p : SLoc C U} {q
 the array. -/
 theorem SLoc.strip?_none_of_divergesLen {C : Contract} {U E : Ty} {q : SLoc C U}
     {p : SLoc C (.ref (.array E))}
-    (h : Theory.StValue.diverges q.segs (p.segs ++ [lengthSeg]) = true) :
+    (h : Theory.diverges q.segs (p.segs ++ [lengthSeg]) = true) :
     ObsLoc.strip? q p = none := by
   cases hs : ObsLoc.strip? q p with
   | none => rfl
@@ -632,7 +638,7 @@ variable {Γ : Ctx} (σ : State C Γ)
 
 /-- An index read as the Theory's `int`: the integer it is hashed as. -/
 theorem asInt_erase_keyTy {k : PrimTy} (i : k.keyTy.Denote) :
-    asInt (.prim (PrimTy.erase i)) = PrimTy.key i := by
+    asInt (PrimTy.erase i) = PrimTy.key i := by
   cases k <;> rfl
 
 /-- A literal reads its word in the Theory. -/
@@ -740,7 +746,7 @@ theorem Tm.shape?_matches {T : Ty} (p : Tm C Γ (.path T)) {a : List SegT}
 /-- `Tm.diverges` gives the Theory's `diverges` on the locations' segments. -/
 theorem Tm.diverges_segs {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.diverges q = true) :
-    Theory.StValue.diverges (p.denote σ).segs (q.denote σ).segs = true := by
+    Theory.diverges (p.denote σ).segs (q.denote σ).segs = true := by
   unfold Tm.diverges at h
   split at h
   · rename_i a b ha hb
@@ -751,7 +757,7 @@ theorem Tm.diverges_segs {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path 
 the segments. -/
 theorem Tm.divergesLen_segs {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) :
-    Theory.StValue.diverges (q.denote σ).segs ((p.denote σ).segs ++ [lengthSeg]) = true := by
+    Theory.diverges (q.denote σ).segs ((p.denote σ).segs ++ [lengthSeg]) = true := by
   unfold Tm.divergesLen at h
   split at h
   · rename_i a b ha hb

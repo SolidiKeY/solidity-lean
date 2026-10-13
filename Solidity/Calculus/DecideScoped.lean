@@ -137,12 +137,13 @@ def _root_.Solidity.Op0.toL (ρ : SymS C Γ) {s : Srt} (o : Op0 C s) : Option (L
     (some (.app0 .mtSt)) (fun s f {_} h => some (.app0 (.member s f h)))
     (fun n => some (.app0 (.zlit n)))
 
-/-- A unary symbol pushed in: `next` onto the storage the updates left; a
-read of the ledger outside the fragment. -/
+/-- A unary symbol pushed in: an operator folded on a literal, `next`
+onto the storage the updates left; a read of the ledger outside the
+fragment. -/
 def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
     Option (LTm C s) :=
   @Op1.casesOn C (fun a s _ => LTm C a → Option (LTm C s)) a s o
-    (fun op {_} h x => some (.app1 (.unop op h) x))
+    (fun op {_} h x => some (fold1 (.unop op h) x))
     (fun _ => none)
     (fun {_} x => some (.app1 .delValue x))
     (fun {_} {_} {_} h x => some (.app1 (.field h) x))
@@ -160,12 +161,12 @@ def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LT
     (fun {_} {_} {_} {_} h x => some (.app1 (.fieldIn h) x))
     (fun x => some (.app1 .toInt x)) x
 
-/-- A binary symbol pushed in: a checked index onto the storage the
-updates left (`atIn`). -/
+/-- A binary symbol pushed in: an operator folded on literals, a checked
+index onto the storage the updates left (`atIn`). -/
 def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a)
     (y : LTm C b) : Option (LTm C s) :=
   @Op2.casesOn C (fun a b s _ => LTm C a → LTm C b → Option (LTm C s)) a b s o
-    (fun op {_} h x y => some (.app2 (.binop op h) x y))
+    (fun op {_} h x y => some (fold2 (.binop op h) x y))
     (fun {_} x y => some (.app2 .find x y))
     (fun {_} x y => some (.app2 .len x y))
     (fun {_} x y => some (.app2 .read x y))

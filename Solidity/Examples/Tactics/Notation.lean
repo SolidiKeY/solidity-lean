@@ -99,7 +99,7 @@ def xDefined : Post StandardExample [.val .uint] := ⟨.defined (.pvV .here), by
 info: symbolic execution leaves:
     dl{ { x := 10 } x = 10 }
 update-free:
-    10 = 10 ∧ 10 = 10
+    ∀ uint x; true = true ∧ 10 = 10
 -/
 #guard_msgs in #wp cdl!{ ⟨ uint x = 10; ⟩ x == 10 }
 

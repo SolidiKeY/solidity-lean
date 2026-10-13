@@ -18,11 +18,13 @@ locations (`Theory/Typed/Obs.lean`).
 * **readAddDifferent**, **newAddDifferent**: an allocation leaves every
   older object (`Heap.readAddr_allocDefault`, `MAddrT.resolve_wk`); its
   objects are new (`Grown.alloc_id_ge`).
-* **readAddEqual**, **initMember**, **defaultValueInt**/**defaultValueBool**:
-  a fresh object reads its default (`Grown.readAddM_fresh_field`).
-* **readFromCopyToStorage**, **selectOnCopyMem**: a copy between storage
-  and memory reads what it copied (`SVal.copyStToM_field`,
-  `MVal.copyMToSt_field`).
+* **readAddEqual**, **initMember**, **initSize**: a fresh object reads its
+  default (`Heap.initMember`, `Heap.initSize`).
+* **readCopySt**, **readCopyStOther**, **findCopyMem**: a copy between
+  storage and memory reads what it copied, and leaves the older objects
+  (`SVal.copyStToM_field`, `Grown.readCopySt_old`, `MVal.copyMToSt_field`).
+
+The section at the end restates each law under its solkey name.
 
 The laws are proved on the typed heap, through its erasure where the
 interpreter's lemmas already answer (`Heap.readAddr_erase`).
@@ -814,5 +816,85 @@ theorem MVal.copyMToSt_prim {H : HTy} (hp : Heap H) {P : PrimTy} (v : MVal H (.p
   cases P <;> rfl
 
 end CopyMem
+
+/-! ## The laws by solkey's names
+
+`memoryRules.key`, `structMemoryRules.key` and the cross-domain taclets,
+each stated on the typed heap and proved by the lemma above it.  A rule
+whose term has no counterpart on the typed heap is not restated:
+`readFromEmptyMemory` and `newFromEmptyMemory` (a memory grows from the
+global part's heap, never from an empty one), `readR*` (a path is read one
+address at a time), and `initIdentity` (a reference member is allocated
+with its parent, so it is a member read like a word). -/
+
+section Solkey
+
+/-- **readOnWrite** (`readWriteEqual`): a write reads back where it lands. -/
+theorem Grown.readOnWrite {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
+    {v : MvT T} (h : m.writeT a v = some m') : m'.readId a = some v :=
+  (Grown.writeT_facts h).1
+
+/-- **readOnWrite** (`readWriteDifferent`): a write leaves every address
+apart from it. -/
+theorem Grown.readWriteDifferent {H : HTy} {T U : Ty} {m m' : Grown H (fun _ => Unit)}
+    {a : MAddrT T} {v : MvT T} (h : m.writeT a v = some m') (b : MAddrT U) (hab : a.Apart b) :
+    m'.readId b = m.readId b :=
+  (Grown.writeT_facts h).2 b hab
+
+/-- **readAddDifferent**: an allocation leaves every older object. -/
+theorem Grown.readAddDifferent {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
+    (hR : (Ty.ref R).mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
+    ((bd.resolve (μ₀.then (μ₀.heap.allocDefault R hR)).H').bind fun rb =>
+        (μ₀.then (μ₀.heap.allocDefault R hR)).heap.readAddr rb).map (MVal.erase T) =
+      ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase T) :=
+  Grown.readAddM_old μ₀ R hR bd hid
+
+/-- **newAddDifferent**: an allocation's identity is past every older one. -/
+theorem Grown.newAddDifferent {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
+    H.length ≤ ((Grown.alloc g).val : HRef _ R).id :=
+  Grown.alloc_id_ge g
+
+/-- **readAddEqual**, **initMember**: a member of a fresh struct reads the
+default of its type. -/
+theorem Heap.initMember {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+    (hR : (Ty.ref (.struct s)).mapFree = true) (hf : lookupBy f (structDef s) = some (.prim p))
+    (hl : ¬ f = "length") :
+    (hp.allocDefault (.struct s) hR).heap.field (hp.allocDefault (.struct s) hR).val hf =
+      (((SVal.view (SVal.dflt (.ref (.struct s))) : SFields _).get hf).view : p.Denote) :=
+  SVal.copyStToM_field hp _ hR hf hl
+
+/-- **initSize**: a fresh dynamic array has no elements. -/
+theorem Heap.initSize {H : HTy} (hp : Heap H) (E : Ty)
+    (hR : (Ty.ref (.array E)).mapFree = true) :
+    (hp.allocDefault (.array E) hR).heap.len (hp.allocDefault (.array E) hR).val .dyn = 0 :=
+  Heap.allocDefault_array_len hp E hR
+
+/-- **readCopySt**: a member of a storage struct copied into memory reads
+what the struct held there. -/
+theorem SVal.readCopySt {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+    (sv : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
+    (hf : lookupBy f (structDef s) = some (.prim p)) (hl : ¬ f = "length") :
+    (sv.copyStToM hp hT).heap.field (sv.copyStToM hp hT).val hf =
+      (((SVal.view sv : SFields _).get hf).view : p.Denote) :=
+  SVal.copyStToM_field hp sv hT hf hl
+
+/-- **readCopyStOther**: a copy into memory leaves every older object. -/
+theorem Grown.readCopyStOther {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : Ty} (v : SVal U)
+    (hU : U.mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
+    ((bd.resolve (μ₀.then (v.copyStToM μ₀.heap hU)).H').bind fun rb =>
+        (μ₀.then (v.copyStToM μ₀.heap hU)).heap.readAddr rb).map (MVal.erase T) =
+      ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase T) :=
+  Grown.readCopySt_old μ₀ v hU bd hid
+
+/-- **findCopyMem**, **selectOnCopyMemPrim**: a member of a memory struct
+copied into storage holds what the object held there. -/
+theorem MVal.findCopyMem {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+    (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p))
+    (hl : ¬ f = "length") :
+    (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) =
+      some (.prim (hp.field r hf)) :=
+  MVal.copyMToSt_field hp r hf hl
+
+end Solkey
 
 end Solidity

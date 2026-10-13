@@ -231,6 +231,113 @@ theorem LTm.eq_of_beqR {s : Srt} {t t' : LTm C s} (h : t.beqR t' = true) : t = t
 
 end Beq
 
+/-! ## Literals, and symbols folded on them -/
+
+/-- A literal, read at its own type. -/
+def LTm.litV? {p : PrimTy} (t : LTm C (.val p)) : Option p.Denote :=
+  match t with
+  | .app0 (.lit v) => some v
+  | _ => none
+
+theorem LTm.eq_of_litV? {p : PrimTy} {t : LTm C (.val p)} {v : p.Denote} (h : t.litV? = some v) :
+    t = .lit v := by
+  unfold LTm.litV? at h
+  split at h
+  · cases h; rfl
+  · cases h
+
+/-- `a ⊖`, folded on a literal. -/
+def fold1 {a s : Srt} (o : Op1 C a s) (x : LTm C a) : LTm C s :=
+  match o, x with
+  | .unop op h, x =>
+    match x.litV? with
+    | some v =>
+      match op.evalT v with
+      | some r => .lit r
+      | none => .err
+    | none => .app1 (.unop op h) x
+  | o, x => .app1 o x
+
+/-- An exponent past `256`: a power is not folded on it (`Int.pow`
+recurses once per unit of it, heeding no heartbeats). -/
+def expBig : {p : PrimTy} → p.Denote → Bool
+  | .uint, v => decide (256 < v.1)
+  | .int, v => decide (256 < v.1)
+  | .bool, _ => false
+
+/-- `a ⊕ b`, folded on literals: `&&`/`||` on a literal left operand,
+any operator on two. -/
+def fold2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s :=
+  match o, x, y with
+  | .binop op h, x, y =>
+    match x.litV? with
+    | some u =>
+      match op.shortT u with
+      | some r => .lit r
+      | none =>
+        match y.litV? with
+        | some v =>
+          if (op == .pow || op == .powW) && expBig v then .app2 (.binop op h) x y
+          else
+            match op.evalT u v with
+            | some r => .lit r
+            | none => .err
+        | none => .app2 (.binop op h) x y
+    | none => .app2 (.binop op h) x y
+  | o, x, y => .app2 o x y
+
+
+
+section FoldEval
+
+variable (g : State C []) (ν : AEnv)
+
+theorem fold1_eval {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
+    (fold1 o x).eval g ν = (LTm.app1 o x).eval g ν := by
+  cases o <;> try rfl
+  rename_i op p h
+  simp only [fold1]
+  split
+  · rename_i v hv
+    obtain rfl := LTm.eq_of_litV? hv
+    split <;> rename_i r hr
+    · show some r = (some v).bind op.evalT
+      rw [Option.bind_some, hr]
+    · show none = (some v).bind op.evalT
+      rw [Option.bind_some, hr]
+  · rfl
+
+theorem fold2_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    (fold2 o x y).eval g ν = (LTm.app2 o x y).eval g ν := by
+  cases o <;> try rfl
+  rename_i op p h
+  simp only [fold2]
+  split
+  · rename_i u hu
+    obtain rfl := LTm.eq_of_litV? hu
+    show _ = binopT op u _
+    unfold binopT
+    split
+    · rename_i r hr
+      rw [hr]; rfl
+    · rename_i hr
+      rw [hr]
+      split
+      · rename_i v hv
+        obtain rfl := LTm.eq_of_litV? hv
+        show _ = (some v).bind (op.evalT u)
+        split
+        · show binopT op u (some v) = _
+          unfold binopT
+          rw [hr]
+        · rw [Option.bind_some]
+          split <;> rename_i r' hr' <;> rw [hr'] <;> rfl
+      · show binopT op u _ = _
+        unfold binopT
+        rw [hr]
+  · rfl
+
+end FoldEval
 
 /-! ## Symbolic paths
 

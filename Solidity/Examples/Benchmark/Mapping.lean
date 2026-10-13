@@ -116,16 +116,12 @@ theorem set_spec : ⊢ dl!{ [ set(a, i); ] myMap[a] == i } := by
 theorem set_frame : ⊢ dl!{ b != a && v == myMap[b] → [ set(a, i); ] myMap[b] == v } := by
   sol_prove
 
-/-- `remove(a)`: `ensures myMap[_addr] == 0`, where `myMap[a]` held a
-`uint` (`myMap[a] + 0` evaluates).  A `delete` leaves the default of the old
-value, and the leaf the closer leaves is closed on its scoped form
-(`sol_leaf`) by `sol_decide`, whose reduction reads the storage untyped,
-where `myMap[a]` may hold a `bool` (no `wt(storage)` premise gives a
-layout): the premise stands in for the typing. -/
+/-- `remove(a)`: `ensures myMap[_addr] == 0`: a `delete` leaves the
+default of the value's type.  (The premise `myMap[a] + 0 == myMap[a]` once
+stood in for the typing, when `sol_decide` read the storage untyped; the
+typed reading needs it no more.) -/
 theorem remove_spec : ⊢ dl!{ myMap[a] + 0 == myMap[a] → [ remove(a); ] myMap[a] == 0 } := by
   sol_prove
-  sol_leaf
-  sol_decide
 
 /-- `remove(a)`: every other key keeps its value. -/
 theorem remove_frame : ⊢ dl!{ b != a && v == myMap[b] → [ remove(a); ] myMap[b] == v } := by
