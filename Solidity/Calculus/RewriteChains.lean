@@ -357,10 +357,10 @@ def rwLaws : List Lean.Name :=
 
 /-- The laws of memory reads `~=>` tries, after the term taclets. -/
 def rwEvalLaws : List Lean.Name :=
-  [``EvalLaw.readOnWrite, ``EvalLaw.findCopyMem, ``EvalLaw.findCopyMemIn, ``EvalLaw.readCopySt,
-    ``EvalLaw.readAddEqual, ``EvalLaw.readAddDifferent,
-    ``EvalLaw.readAddDifferentIdentity, ``EvalLaw.readWriteDifferent,
-    ``EvalLaw.readWriteDifferentIdentity, ``EvalLaw.readOnWriteIdentity]
+  [``EvalLaw.readOnWrite, ``EvalLaw.findOnCopy, ``EvalLaw.findOnCopyIn, ``EvalLaw.readFromCopyToStorage,
+    ``EvalLaw.readOnAddM, ``EvalLaw.readOnAddMFrame,
+    ``EvalLaw.readOnAddMFrameIdentity, ``EvalLaw.readOnWriteFrame,
+    ``EvalLaw.readOnWriteFrameIdentity, ``EvalLaw.readOnWriteIdentity]
 
 /-- The literal laws `~=>` tries, after the laws of memory reads. -/
 def rwLitLaws : List Lean.Name :=

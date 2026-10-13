@@ -773,7 +773,7 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
       -- a law of a memory read, in an update's right-hand sides under any
       -- modality, where the update holds the write it reads past
       -- (`FmlRw.lawUpdS`)
-      -- (and its twin in a storage of members, `findCopyMemIn`)
+      -- (and its twin in a storage of members, `findOnCopyIn`)
       for c' in Chain.lawTwins (← getEnv) c do
         let (es, f) ← lawUpdCands C c' true φb scopes keep
         rs := rs ++ es

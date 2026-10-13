@@ -649,13 +649,13 @@ write the law reads back (`Upd.coversEval`, `LawCov.eval`, `FmlRw.lawUpdS`).
 | Law | Interpreter lemma | KeY taclet | Notes |
 | --- | --- | --- | --- |
 | `readOnWrite` | `readAddr_writeAddr_same` (`Calculus/ReadWrite.lean`) | `readOnWrite` `\then` | `read(write(m, a, v), a) ⇝ v` for a literal `v` |
-| `findCopyMem` | `copyMem_member` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the printed trace's one step from the `find` into memory |
-| `readCopySt` | `copyStToM_member` | `readFromCopyToStorage` `\then` | `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)` |
-| `readAddEqual` | `copyStToM_default_readPath` (`Calculus/ReadWrite.lean`) | `readOnAddM` `\then`, then `initMember`, `initElement` | `read(addM(m, R), a) ⇝ default` for a primitive member or fixed element at a fresh path of the allocation (`Tm.freshPath?`, `RefTy.memberTy`) |
-| `readAddDifferent` | `readAddr_heapExt`, `allocDefault_heapExt` | `readOnAddM` `\else` | `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is allocated strictly earlier on `m`'s spine (`Tm.boundedIn`) |
-| `readAddDifferentIdentity` | the same | `readOnAddM` `\else` at `Identity` | the twin at the identity sort |
-| `readWriteDifferent` | `writeAddr_setObj` | `readOnWrite` `\else` | `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet (`Tm.apart?`: different members, a member and an element, one object at different literal indices) |
-| `readWriteDifferentIdentity` | the same | `readOnWrite` `\else` at `Identity` | the twin at the identity sort |
+| `findOnCopy` | `copyMem_member` | `findOnCopy` over `findOnSave` | `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)`: the printed trace's one step from the `find` into memory |
+| `readFromCopyToStorage` | `copyStToM_member` | `readFromCopyToStorage` `\then` | `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)` |
+| `readOnAddM` | `copyStToM_default_readPath` (`Calculus/ReadWrite.lean`) | `readOnAddM` `\then`, then `initMember`, `initElement` | `read(addM(m, R), a) ⇝ default` for a primitive member or fixed element at a fresh path of the allocation (`Tm.freshPath?`, `RefTy.memberTy`) |
+| `readOnAddMFrame` | `readAddr_heapExt`, `allocDefault_heapExt` | `readOnAddM` `\else` | `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s identity is allocated strictly earlier on `m`'s spine (`Tm.boundedIn`) |
+| `readOnAddMFrameIdentity` | the same | `readOnAddM` `\else` at `Identity` | the twin at the identity sort |
+| `readOnWriteFrame` | `writeAddr_setObj` | `readOnWrite` `\else` | `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet (`Tm.apart?`: different members, a member and an element, one object at different literal indices) |
+| `readOnWriteFrameIdentity` | the same | `readOnWrite` `\else` at `Identity` | the twin at the identity sort |
 | `readOnWriteIdentity` | `readAddr_writeAddr_same` | `readOnWrite` `\then` at `Identity` | `read(write(m, a, ref(i)), a) ⇝ i` |
 | — | — | `idC(ρ, [account])` | no law: a reference member of a fresh root, `read(addM(m, R), freshId(addM(m, R)).account)`, is the normal form, since KeY's `idC` has no `ITerm` counterpart |
 

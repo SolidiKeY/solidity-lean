@@ -1650,9 +1650,9 @@ leaves (`Heap.allocDefault_erase`), and that heap extends the old one
 (`allocDefault_heapExt`) and holds the default of `R` along every declared
 path (`copyStToM_default_readPath`).  An address whose object is older than
 the allocation (`Tm.boundedIn`) reads what it read before
-(`Tm.readAddDifferent_exact`); one at a path below the fresh root
+(`Tm.readOnAddMFrame_exact`); one at a path below the fresh root
 (`Tm.freshPath?`) whose declared type is a primitive reads its default
-(`Tm.readAddEqual_exact`). -/
+(`Tm.readOnAddM_exact`). -/
 
 /-- A memory write that returns: its parts, and the heap it leaves. -/
 theorem Tm.write_some {σ : State C Γ} {T : Ty} {m : Tm C Γ .mem} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
@@ -1846,7 +1846,7 @@ theorem Tm.readAddM_old {σ : State C Γ} {m : Tm C Γ .mem} {μ₀ : Grown σ.H
     simp only [Option.map_some, Option.bind_some]
     exact Heap.readAddr_allocDefault μ₀.heap R hR rb
 
-theorem Tm.readAddDifferent_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
+theorem Tm.readOnAddMFrame_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {P : PrimTy} {b : Tm C Γ (.addr (.prim P))}
     (h : b.boundedIn m = true) (hX : (Tms.MTerm.addM m R hR).eval σ ≠ none) :
     (Tms.Term.read (Tms.MTerm.addM m R hR) b).eval σ = (Tms.Term.read m b).eval σ := by
@@ -1867,7 +1867,7 @@ theorem Tm.readAddDifferent_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefT
       Option.some.injEq] at he ⊢
     exact PrimTy.erase_injective (Semantics.MVal.prim.inj he)
 
-theorem Tm.readAddDifferentIdentity_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
+theorem Tm.readOnAddMFrameIdentity_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {R' : RefTy} {b : Tm C Γ (.addr (.ref R'))}
     (h : b.boundedIn m = true) (hX : (Tms.MTerm.addM m R hR).eval σ ≠ none) :
     (Tms.ITerm.read (Tms.MTerm.addM m R hR) b).eval σ = (Tms.ITerm.read m b).eval σ := by
@@ -2070,7 +2070,7 @@ theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     | _ => simp only [Tm.freshPath?, Op2.freshStep, reduceCtorEq] at h
   | _ => intro p h; simp only [Tm.freshPath?, reduceCtorEq] at h
 
-theorem Tm.readAddEqual_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
+theorem Tm.readOnAddM_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {P : PrimTy} {b : Tm C Γ (.addr (.prim P))}
     (h : (Tm.freshPath? m R b).bind (Ty.ref R).memberTy = some (.prim P))
     (hX : (Tms.MTerm.addM m R hR).eval σ ≠ none) :
@@ -2114,7 +2114,7 @@ and of a memory struct into storage (`MVal.copyMem_erase`,
 
 /-- A member read out of a copy of a storage struct, on the erasure: what
 the storage holds at the member. -/
-theorem Tm.readCopySt_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
+theorem Tm.readFromCopyToStorage_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
     {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
     {hT : (Ty.ref (.struct sn)).mapFree = true} {hf : C.fieldType sn f = some (.prim P)}
     (hl : (f == "length") = false)
@@ -2184,7 +2184,7 @@ theorem Tm.readCopySt_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .s
 
 /-- A member read out of a memory struct copied into storage, on the
 erasure: what the memory holds at the member. -/
-theorem Tm.findCopyMem_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
+theorem Tm.findOnCopy_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
     {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))} {i : Tm C Γ (.ident (.struct sn))}
     {hf : C.fieldType sn f = some (.prim P)} (hl : (f == "length") = false)
     (hS : (Tms.STerm.save s p (Tms.SValT.copyMem m i)).eval σ ≠ none) :
@@ -2256,15 +2256,15 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   | readOnWrite {m : Tm C Γ .mem} {P : PrimTy} {a : Tm C Γ (.addr (.prim P))} {v : P.Denote} :
       EvalLaw (Tms.Term.read (Tms.MTerm.write m a (Tms.MValT.val (Tms.Term.lit v))) a)
         (Tms.Term.lit v)
-  /-- **`readWriteDifferent`** (solkey's `readOnWrite` `\else`): a write
+  /-- **`readOnWriteFrame`** (solkey's `readOnWrite` `\else`): a write
   leaves every other address,
   `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet
   (`Tm.apart?`, `Heap.readAddr_writeAddr_apart`). -/
-  | readWriteDifferent {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
+  | readOnWriteFrame {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
       {P : PrimTy} {b : Tm C Γ (.addr (.prim P))} (h : a.apart? b = true := by rfl) :
       EvalLaw (Tms.Term.read (Tms.MTerm.write m a v) b) (Tms.Term.read m b)
-  /-- **`readWriteDifferentIdentity`**: `readWriteDifferent` at the identity sort. -/
-  | readWriteDifferentIdentity {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)}
+  /-- **`readOnWriteFrameIdentity`**: `readOnWriteFrame` at the identity sort. -/
+  | readOnWriteFrameIdentity {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)}
       {v : Tm C Γ (.mv T)} {R : RefTy} {b : Tm C Γ (.addr (.ref R))}
       (h : a.apart? b = true := by rfl) :
       EvalLaw (Tms.ITerm.read (Tms.MTerm.write m a v) b) (Tms.ITerm.read m b)
@@ -2273,18 +2273,18 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   | readOnWriteIdentity {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ (.addr (.ref R))}
       {i : Tm C Γ (.ident R)} :
       EvalLaw (Tms.ITerm.read (Tms.MTerm.write m a (Tms.MValT.ref i)) a) i
-  /-- **`findCopyMem`** (solkey's `findOnCopy` over `findOnSave`): a member
+  /-- **`findOnCopy`** (solkey's `findOnCopy` over `findOnSave`): a member
   read out of a memory object copied into storage is read out of memory,
-  `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)` (`Tm.findCopyMem_exact`). -/
-  | findCopyMem {s : Tm C Γ .st} {sn f : Name} {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
+  `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)` (`Tm.findOnCopy_exact`). -/
+  | findOnCopy {s : Tm C Γ .st} {sn f : Name} {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
       {m : Tm C Γ .mem} {i : Tm C Γ (.ident (.struct sn))} {hf : C.fieldType sn f = some (.prim P)}
       (hl : (f == "length") = false := by rfl) :
       EvalLaw (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.copyMem m i)) (Tms.PTerm.field p f hf))
         (Tms.Term.read m (Tms.MAddr.field i f hf))
-  /-- **`findCopyMemIn`**: `findCopyMem` in a storage of members,
+  /-- **`findOnCopyIn`**: `findOnCopy` in a storage of members,
   `find(save(select(s, r), q, copyMem(mtSt, m, i)), q.f) ⇝ read(m, i.f)`, where the
   read is the plain one (`Tm.base?`). -/
-  | findCopyMemIn {s0 sn f : Name} {P : PrimTy} {S : Tm C Γ (.sts s0)}
+  | findOnCopyIn {s0 sn f : Name} {P : PrimTy} {S : Tm C Γ (.sts s0)}
       {q : Tm C Γ (.spath s0 (.ref (.struct sn)))} {m : Tm C Γ .mem}
       {i : Tm C Γ (.ident (.struct sn))} {hf : C.fieldType sn f = some (.prim P)}
       {s : Tm C Γ .st} {p : Tm C Γ (.path (.ref (.struct sn)))}
@@ -2296,34 +2296,34 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
       EvalLaw (Tm.app2 .findIn (Tm.app3 .saveIn S q (Tms.SValT.copyMem m i))
           (Tm.app1 (.fieldIn hf) q))
         (Tms.Term.read m (Tms.MAddr.field i f hf))
-  /-- **`readCopySt`** (solkey's `readFromCopyToStorage` `\then`): a member
+  /-- **`readFromCopyToStorage`** (solkey's `readFromCopyToStorage` `\then`): a member
   read out of a copy of a storage struct is read out of storage,
   `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)`
-  (`Tm.readCopySt_exact`). -/
-  | readCopySt {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name} {P : PrimTy}
+  (`Tm.readFromCopyToStorage_exact`). -/
+  | readFromCopyToStorage {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name} {P : PrimTy}
       {p : Tm C Γ (.path (.ref (.struct sn)))} {hT : (Ty.ref (.struct sn)).mapFree = true}
       {hf : C.fieldType sn f = some (.prim P)} (hl : (f == "length") = false := by rfl) :
       EvalLaw (Tms.Term.read (Tms.MTerm.copySt m (Tms.SValT.find s p) hT)
           (Tms.MAddr.field (Tms.ITerm.copy m (Tms.SValT.find s p) hT) f hf))
         (Tms.Term.find s (Tms.PTerm.field p f hf))
-  /-- **`readAddEqual`** (solkey's `readOnAddM` `\then`, then `initMember`,
+  /-- **`readOnAddM`** (solkey's `readOnAddM` `\then`, then `initMember`,
   `initElement`): a primitive member or fixed element of a fresh
   object holds its type's default, `read(addM(m, R), a) ⇝ default`, where `a`
   reads at a path below the fresh root whose declared type is the primitive
-  (`Tm.freshPath?`, `Tm.readAddEqual_exact`). -/
-  | readAddEqual {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true} {P : PrimTy}
+  (`Tm.freshPath?`, `Tm.readOnAddM_exact`). -/
+  | readOnAddM {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true} {P : PrimTy}
       {b : Tm C Γ (.addr (.prim P))}
       (h : (Tm.freshPath? m R b).bind (Ty.ref R).memberTy = some (.prim P) := by rfl) :
       EvalLaw (Tms.Term.read (Tms.MTerm.addM m R hR) b) (Tm.app0 (.lit (PrimTy.dflt P)))
-  /-- **`readAddDifferent`** (solkey's `readOnAddM` `\else`): an allocation
+  /-- **`readOnAddMFrame`** (solkey's `readOnAddM` `\else`): an allocation
   leaves every object allocated
   before it, `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s object is older
-  than `m` leaves (`Tm.boundedIn`, `Tm.readAddDifferent_exact`). -/
-  | readAddDifferent {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true} {P : PrimTy}
+  than `m` leaves (`Tm.boundedIn`, `Tm.readOnAddMFrame_exact`). -/
+  | readOnAddMFrame {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true} {P : PrimTy}
       {b : Tm C Γ (.addr (.prim P))} (h : b.boundedIn m = true := by rfl) :
       EvalLaw (Tms.Term.read (Tms.MTerm.addM m R hR) b) (Tms.Term.read m b)
-  /-- **`readAddDifferentIdentity`**: `readAddDifferent` at the identity sort. -/
-  | readAddDifferentIdentity {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true}
+  /-- **`readOnAddMFrameIdentity`**: `readOnAddMFrame` at the identity sort. -/
+  | readOnAddMFrameIdentity {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true}
       {R' : RefTy} {b : Tm C Γ (.addr (.ref R'))} (h : b.boundedIn m = true := by rfl) :
       EvalLaw (Tms.ITerm.read (Tms.MTerm.addM m R hR) b) (Tms.ITerm.read m b)
 
@@ -2397,7 +2397,7 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ A, t.l
       show (ad.resolve μ.H').bind (fun rb => hp.readAddr rb) = _
       rw [hra, Option.bind_some, Heap.readAddr_writeAddr_same hw]
       rfl⟩
-  | @EvalLaw.readWriteDifferent _ _ m T a v P b h => ⟨_, rfl, fun σ hX => by
+  | @EvalLaw.readOnWriteFrame _ _ m T a v P b h => ⟨_, rfl, fun σ hX => by
       obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
       obtain ⟨μ, ad, w, ra, mv, hp, hm, ha, -, hra, -, hw, rfl⟩ := Tm.write_some hX
       rw [Tm.read_evalT, Tm.read_evalT, hX, hm, Option.bind_some, Option.bind_some]
@@ -2411,7 +2411,7 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ A, t.l
         | some rb =>
           simp only [Option.bind_some]
           exact Heap.readAddr_writeAddr_apart hw (Tm.apart?_resolve σ h ha hb hra hrb)⟩
-  | @EvalLaw.readWriteDifferentIdentity _ _ m T a v R b h => ⟨_, rfl, fun σ hX => by
+  | @EvalLaw.readOnWriteFrameIdentity _ _ m T a v R b h => ⟨_, rfl, fun σ hX => by
       obtain ⟨μ', hX⟩ := Option.ne_none_iff_exists'.1 hX
       obtain ⟨μ, ad, w, ra, mv, hp, hm, ha, -, hra, -, hw, rfl⟩ := Tm.write_some hX
       rw [Tm.iread_evalT, Tm.iread_evalT, hX, hm, Option.bind_some, Option.bind_some]
@@ -2437,14 +2437,14 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ A, t.l
       split at hmv
       · cases hmv; rfl
       · cases hmv⟩
-  | .findCopyMem hl => ⟨_, rfl, fun _ hS => Tm.findCopyMem_exact hl hS⟩
-  | .findCopyMemIn hb hl => ⟨.st (Tms.STerm.save _ _ (Tms.SValT.copyMem _ _)),
+  | .findOnCopy hl => ⟨_, rfl, fun _ hS => Tm.findOnCopy_exact hl hS⟩
+  | .findOnCopyIn hb hl => ⟨.st (Tms.STerm.save _ _ (Tms.SValT.copyMem _ _)),
       by simp only [Tm.lawAnchor?, Option.orElse, hb]; rfl,
-      fun σ hS => (Tm.base?_eval σ hb).trans (Tm.findCopyMem_exact hl hS)⟩
-  | .readCopySt hl => ⟨_, rfl, fun _ hX => Tm.readCopySt_exact hl hX⟩
-  | .readAddEqual h => ⟨_, rfl, fun _ hX => Tm.readAddEqual_exact h hX⟩
-  | .readAddDifferent h => ⟨_, rfl, fun _ hX => Tm.readAddDifferent_exact h hX⟩
-  | .readAddDifferentIdentity h => ⟨_, rfl, fun _ hX => Tm.readAddDifferentIdentity_exact h hX⟩
+      fun σ hS => (Tm.base?_eval σ hb).trans (Tm.findOnCopy_exact hl hS)⟩
+  | .readFromCopyToStorage hl => ⟨_, rfl, fun _ hX => Tm.readFromCopyToStorage_exact hl hX⟩
+  | .readOnAddM h => ⟨_, rfl, fun _ hX => Tm.readOnAddM_exact h hX⟩
+  | .readOnAddMFrame h => ⟨_, rfl, fun _ hX => Tm.readOnAddMFrame_exact h hX⟩
+  | .readOnAddMFrameIdentity h => ⟨_, rfl, fun _ hX => Tm.readOnAddMFrameIdentity_exact h hX⟩
 
 /-- **A memory law keeps every value its left side returns.** -/
 theorem EvalLaw.evalRefines {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') :

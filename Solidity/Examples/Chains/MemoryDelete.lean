@@ -15,8 +15,8 @@ writes a fresh default object into the field or element; the alias keeps the old
 * The strategy's runs are grouped as the paper prints them.  The printed trace drops the second
   declaration first; the strategy allocates the first object before it (`memoryReferenceDeclFreshAlloc`),
   so the printed first `⇝` is that allocation here, and the drop is in the `⇝*` after it.
-* Past the merge each read is resolved by a law of memory reads (`readAddEqual`, `readAddDifferent`,
-  `readOnWrite`, `readWriteDifferent` and their identity forms), one link each, every capture kept, to the
+* Past the merge each read is resolved by a law of memory reads (`readOnAddM`, `readOnAddMFrame`,
+  `readOnWrite`, `readOnWriteFrame` and their identity forms), one link each, every capture kept, to the
   printed `33` and `0`, `100` and `0`, `9` and `0`.  The aliases keep their reads of a fresh object's
   member (`carolAcc`, `toks`, `tk`): no law reads that to its identity (the printed
   `idConstructor(ρ, [account])`).  The element `[1 + 1]` folds to `[2]` with `i`, in every memory
@@ -45,8 +45,8 @@ namespace RootDelete
 delete carol; oldAge = carolAlias.age; newAge = carol.age;` — `carol` allocated (the paper's first `⇝`,
 the module docstring says why), the run to the delete (`⇝*`),
 `delete` rebinding `carol` to a fresh default object (`⇝`), the two reads (`⇝*`) and the merge.  The
-alias keeps the old object: `newAge` reads the fresh one, the default `0` (`readAddEqual`); `oldAge` reads
-past that allocation (`readAddDifferent`) the write, `33` (`readOnWrite`). -/
+alias keeps the old object: `newAge` reads the fresh one, the default `0` (`readOnAddM`); `oldAge` reads
+past that allocation (`readOnAddMFrame`) the write, `33` (`readOnWrite`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
       ⟨[ Person memory carol; Person memory carolAlias = carol; carol.age = 33; delete carol; oldAge = carolAlias.age;
@@ -82,7 +82,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct
               read(addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person),
                 freshId(addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person)).age) }
           φ }
-    ~[readAddEqual]~> dl![m]{
+    ~[readOnAddM]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ carolAlias := freshId(addM(memory, Person)) ‖
             carol := freshId(addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person)) ‖
             memory := addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person) ‖
@@ -91,7 +91,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .mem (.struct
                 freshId(addM(memory, Person)).age) ‖
             newAge := 0 }
           φ }
-    ~[readAddDifferent]~> dl![m]{
+    ~[readOnAddMFrame]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖ carolAlias := freshId(addM(memory, Person)) ‖
             carol := freshId(addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person)) ‖
             memory := addM(write(addM(memory, Person), freshId(addM(memory, Person)).age, 33), Person) ‖
@@ -122,8 +122,8 @@ delete carol.account; oldBal = carolAcc.balance; newBal = carol.account.balance;
 paper's first `⇝`), to the delete (`⇝*`), `delete` writing a fresh default `Account` into `carol.account`
 (`⇝`), the two reads (`⇝*`), the merge, and `acc`, read at `carol.account`, the fresh object the delete wrote
 there (`readOnWriteIdentity`); then `oldBal` read past the delete's write and allocation
-(`readWriteDifferent`, `readAddDifferent`) to the write through `carolAcc`, `100`, and `newBal`, `acc`'s
-`balance`, past the delete's write to the fresh object's default, `0` (`readAddEqual`).  The member gets a
+(`readOnWriteFrame`, `readOnAddMFrame`) to the write through `carolAcc`, `100`, and `newBal`, `acc`'s
+`balance`, past the delete's write to the fresh object's default, `0` (`readOnAddM`).  The member gets a
 fresh default object, and `carolAcc` keeps the old one. -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .val .uint, .val .uint]) :
     dl![m]{
@@ -233,7 +233,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struc
                         read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
                       Account)).balance) }
           φ }
-    ~[readWriteDifferent]~> dl![m]{
+    ~[readOnWriteFrame]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=
@@ -265,7 +265,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struc
                         read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
                       Account)).balance) }
           φ }
-    ~[readAddDifferent]~> dl![m]{
+    ~[readOnAddMFrame]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=
@@ -324,7 +324,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struc
                         read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
                       Account)).balance) }
           φ }
-    ~[readWriteDifferent]~> dl![m]{
+    ~[readOnWriteFrame]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=
@@ -348,7 +348,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struc
                         read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 100),
                       Account)).balance) }
           φ }
-    ~[readAddEqual]~> dl![m]{
+    ~[readOnAddM]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=
@@ -578,7 +578,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                               Token))),
                         freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -685,7 +685,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                               Token))),
                         freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -774,7 +774,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           Token),
                         freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) }
           φ }
-    ~[readAddDifferentIdentity]~> dl![m]{
+    ~[readOnAddMFrameIdentity]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -860,7 +860,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                           9),
                         freshId(addM(memory, TokenBucket)).tokens)[1 + 1]).value) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -992,7 +992,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                         9),
                       Token)).value) }
           φ }
-    ~[readWriteDifferent]~> dl![m]{
+    ~[readOnWriteFrame]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -1045,7 +1045,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                         9),
                       Token)).value) }
           φ }
-    ~[readAddDifferent]~> dl![m]{
+    ~[readOnAddMFrame]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -1142,7 +1142,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                         9),
                       Token)).value) }
           φ }
-    ~[readWriteDifferent]~> dl![m]{
+    ~[readOnWriteFrame]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖
@@ -1181,7 +1181,7 @@ theorem chain (φ : Post TestSuite [.mem (.struct "Token"), .mem (.struct "Token
                         9),
                       Token)).value) }
           φ }
-    ~[readAddEqual]~> dl![m]{
+    ~[readOnAddM]~> dl![m]{
         { i := 1 ‖ b := freshId(addM(memory, TokenBucket)) ‖
             toks := read(addM(memory, TokenBucket), freshId(addM(memory, TokenBucket)).tokens) ‖ idx := 0 ‖ i := 1 + 1 ‖
             idx := 1 + 1 ‖

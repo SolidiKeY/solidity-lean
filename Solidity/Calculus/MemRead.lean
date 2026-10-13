@@ -18,12 +18,12 @@ as the program built it: `write(m, a, v)`, `addM(m, R)` with its root
 node down (`LTm.memRes`), comparing addresses without running anything:
 
 * **readOnWrite**: the address written reads what was written;
-  **readWriteDifferent**: an address apart from it reads below
+  **readOnWriteFrame**: an address apart from it reads below
   (`LTm.apart?`: two members, a member and an element, two literal
   indices of one identity).
-* **readAddDifferent**: an address whose object is older than an
+* **readOnAddMFrame**: an address whose object is older than an
   allocation (`LTm.boundedIn`: allocated on the spine below it, or read out
-  of a memory there) reads below it; **readAddEqual** with **initMember**
+  of a memory there) reads below it; **readOnAddM** with **initMember**
   and **defaultValueInt**/**defaultValueBool**: an address at a member path
   of the fresh root reads its default.
 * **readFromCopyToStorage**: a member of a copy of storage reads the
@@ -628,7 +628,7 @@ theorem LTm.freshOver?_eval {R : RefTy} {t : LTm C (.ident R)} {m : LTm C .mem}
     | _ => simp only [LTm.identView, reduceCtorEq] at ht'
   · cases h
 
-/-- **Two identities that differ** (`newAddDifferent`): one fresh over a
+/-- **Two identities that differ** (`Grown.alloc_fresh`, the freshness behind `newFromAdd`): one fresh over a
 memory the other is older than. -/
 def LTm.identApart? {R R' : RefTy} (t : LTm C (.ident R)) (t' : LTm C (.ident R')) : Bool :=
   (match t'.freshOver? with
@@ -678,7 +678,7 @@ def LTm.addrShape? {u : Srt} : LTm C u → Option (AddrShapeL C)
   | .app2 o x y => o.addrStepL x y
   | _ => none
 
-/-- **Two address terms that never meet** (`readWriteDifferent`'s side
+/-- **Two address terms that never meet** (`readOnWriteFrame`'s side
 condition, decided on the terms): two members, a member and an element, or
 two elements of one identity at two literal indices. -/
 def LTm.apart? {T U : Ty} (a : LTm C (.addr T)) (b : LTm C (.addr U)) : Bool :=
@@ -850,7 +850,7 @@ theorem LTm.iread_write_same {R : RefTy} (m : LTm C .mem) (a : LTm C (.addr (.re
     have hx : (t.eval g ν : Option Nat) = some w := hv
     rw [Option.bind_some, hx]
 
-/-- **readWriteDifferent**: an address apart from the one written reads
+/-- **readOnWriteFrame**: an address apart from the one written reads
 below the write, where it returns. -/
 theorem LTm.read_write_apart {T U : Ty} (m : LTm C .mem) (a : LTm C (.addr T)) (v : LTm C (.mv T))
     (b : LTm C (.addr U)) (h : a.apart? b = true) :
@@ -888,7 +888,7 @@ theorem LTm.iread_write_apart' {R : RefTy} {T : Ty} (m : LTm C .mem) (a : LTm C 
   funext _
   rw [LTm.iread_eval_readId]
 
-/-- **readAddDifferent**: below an allocation, an address whose object is
+/-- **readOnAddMFrame**: below an allocation, an address whose object is
 older reads below it. -/
 theorem LTm.read_addM_old {P : PrimTy} (m : LTm C .mem) (R : RefTy)
     (hR : (Ty.ref R).mapFree = true) (b : LTm C (.addr (.prim P))) (h : b.boundedIn m = true) :
@@ -920,7 +920,7 @@ theorem LTm.iread_addM_old {R' : RefTy} (m : LTm C .mem) (R : RefTy)
       simp only [Option.bind_some]
       exact MVal.erase_ref_inj (Grown.readAddM_old μ₀ R hR bd (LTm.boundedIn_eval hm b h bd hb))
 
-/-- **readAddDifferent** below a copy into memory. -/
+/-- **readOnAddMFrame** below a copy into memory. -/
 theorem LTm.read_copySt_old {P : PrimTy} {U : Ty} (m : LTm C .mem) (hU : U.mapFree = true)
     (S : LTm C (.sv U)) (b : LTm C (.addr (.prim P))) (h : b.boundedIn m = true) :
     ((LTm.app2 .read (.app2 (.copySt hU) m S) b).eval g ν : Option P.Denote) =
@@ -959,7 +959,7 @@ theorem LTm.iread_copySt_old {R' : RefTy} {U : Ty} (m : LTm C .mem) (hU : U.mapF
         exact MVal.erase_ref_inj
           (Grown.readCopySt_old μ₀ v hU bd (LTm.boundedIn_eval hm b h bd hb))
 
-/-- **readAddEqual**, **initMember**, **defaultValueInt**: below an
+/-- **readOnAddM**, **initMember**, **defaultValueInt**: below an
 allocation, an address at a member path of the fresh root, of a primitive
 type, reads its default, where the memory below returns. -/
 theorem LTm.read_addM_fresh {P : PrimTy} (m : LTm C .mem) (R : RefTy)
@@ -2126,8 +2126,8 @@ def LTm.mvArg? {s : Srt} (v : LTm C s) : Option ((u : Srt) × LTm C u) :=
   | _ => none
 
 /-- **A read of a word, walked down its memory** `n` writes and
-allocations deep: `readOnWrite`, `readWriteDifferent`, `readAddDifferent`,
-`readAddEqual`.  By the recursor on the depth. -/
+allocations deep: `readOnWrite`, `readOnWriteFrame`, `readOnAddMFrame`,
+`readOnAddM`.  By the recursor on the depth. -/
 def memReadN (n : Nat) : {P : PrimTy} → LTm C .mem → LTm C (.addr (.prim P)) → LTm C (.val P) :=
   Nat.rec (motive := fun _ => {P : PrimTy} → LTm C .mem → LTm C (.addr (.prim P)) → LTm C (.val P))
     (fun X b => .app2 .read X b)

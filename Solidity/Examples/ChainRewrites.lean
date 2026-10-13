@@ -351,11 +351,11 @@ end AnyModality
 /-! ## 3″ · Memory reads
 
 A memory read denotes its run, so its laws are refinements of the
-interpreter (`EvalLaw`): `readOnWrite`, `findCopyMem` (a member of a memory
-object copied into storage is read out of memory), `readCopySt` (a member of
-a copy of a storage struct is read out of storage), `readAddEqual` (a
-primitive member of a fresh object is its default), `readAddDifferent` and
-`readWriteDifferent` (an allocation, a write, leaves every other slot), and
+interpreter (`EvalLaw`): `readOnWrite`, `findOnCopy` (a member of a memory
+object copied into storage is read out of memory), `readFromCopyToStorage` (a member of
+a copy of a storage struct is read out of storage), `readOnAddM` (a
+primitive member of a fresh object is its default), `readOnAddMFrame` and
+`readOnWriteFrame` (an allocation, a write, leaves every other slot), and
 their twins at the identity sort (`…Identity`, with `readOnWriteIdentity`).
 Each applies in an update under `m` where the update holds the write or
 allocation it reads back (`Upd.coversEval`), at the sort of the law
@@ -377,12 +377,12 @@ example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![
         v := find(save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)), alice.age) } φ where Person memory carol } := by
   sol_chain
 
-/-- `findCopyMem` then `readOnWrite`, under `m`: the update holds the storage
+/-- `findOnCopy` then `readOnWrite`, under `m`: the update holds the storage
 write the first reads back and the memory write the second does. -/
 example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { memory := write(memory, carol.age, 42) ‖
         storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
         v := find(save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)), alice.age) } φ where Person memory carol }
-    ~[findCopyMem]~>
+    ~[findOnCopy]~>
       dl![m]{ { memory := write(memory, carol.age, 42) ‖
         storage := save(storage, alice, copyMem(mtSt, write(memory, carol.age, 42), carol)) ‖
         v := read(write(memory, carol.age, 42), carol.age) } φ where Person memory carol }
@@ -395,7 +395,7 @@ example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![
 set_option maxHeartbeats 2000000 in
 /-- A storage-to-memory copy read back: the three updates merged into one
 (the copy's identity and memory into the read, the storage write into the
-copy), then `readCopySt`, then `findOnSave`. -/
+copy), then `readFromCopyToStorage`, then `findOnSave`. -/
 example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { storage := save(storage, alice.age, 25) }
       { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
       { v := read(memory, carol.age) } φ }
@@ -405,7 +405,7 @@ example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![
         memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
         v := read(copySt(memory, find(save(storage, alice.age, 25), alice)),
                   freshId(copySt(memory, find(save(storage, alice.age, 25), alice))).age) } φ }
-    ~[readCopySt]~>
+    ~[readFromCopyToStorage]~>
       dl![m]{ { storage := save(storage, alice.age, 25) ‖
         carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
         memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
@@ -417,60 +417,60 @@ example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![
         v := 25 } φ } := by
   sol_chain
 
-/-- `readAddEqual`: a primitive member of a fresh object is its default,
+/-- `readOnAddM`: a primitive member of a fresh object is its default,
 under `m` where the update holds the allocation. -/
 example (φ : Post StandardExample [.val .uint, .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
         v := read(addM(memory, Person), freshId(addM(memory, Person)).age) } φ }
-    ~[readAddEqual]~>
+    ~[readOnAddM]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
         v := 0 } φ } := by
   sol_chain
 
-/-- `readAddDifferent` then `readAddEqual`: a second allocation leaves the
+/-- `readOnAddMFrame` then `readOnAddM`: a second allocation leaves the
 first object, whose member then reads its default. -/
 example (φ : Post StandardExample [.val .uint, .mem (.struct "Person"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         v := read(addM(addM(memory, Person), Person), freshId(addM(memory, Person)).age) } φ }
-    ~[readAddDifferent]~>
+    ~[readOnAddMFrame]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         v := read(addM(memory, Person), freshId(addM(memory, Person)).age) } φ }
-    ~[readAddEqual]~>
+    ~[readOnAddM]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         v := 0 } φ } := by
   sol_chain
 
-/-- `readAddDifferentIdentity`: the reference member of the first object,
+/-- `readOnAddMFrameIdentity`: the reference member of the first object,
 read past the second allocation; the read of the fresh root's member is the
 normal form. -/
 example (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person"), .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         carolAcc := read(addM(addM(memory, Person), Person), freshId(addM(memory, Person)).account) } φ }
-    ~[readAddDifferentIdentity]~>
+    ~[readOnAddMFrameIdentity]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖
         david := freshId(addM(addM(memory, Person), Person)) ‖
         memory := addM(addM(memory, Person), Person) ‖
         carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) } φ } := by
   sol_chain
 
-/-- `readWriteDifferent` and `readWriteDifferentIdentity`: a write to
+/-- `readOnWriteFrame` and `readOnWriteFrameIdentity`: a write to
 `carol.age` leaves `carol.account.balance` and `carol.account`, under `m`
 where the update holds the write. -/
 example (φ : Post StandardExample [.mem (.struct "Account"), .val .uint, .mem (.struct "Person")]) : dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
       { memory := write(memory, carol.age, 42) ‖
         v := read(write(memory, carol.age, 42), carol.account.balance) ‖
         carolAcc := read(write(memory, carol.age, 42), carol.account) } φ }
-    ~[readWriteDifferent]~>
+    ~[readOnWriteFrame]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
       { memory := write(memory, carol.age, 42) ‖
         v := read(memory, carol.account.balance) ‖
         carolAcc := read(write(memory, carol.age, 42), carol.account) } φ }
-    ~[readWriteDifferentIdentity]~>
+    ~[readOnWriteFrameIdentity]~>
       dl![m]{ { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
       { memory := write(memory, carol.age, 42) ‖
         v := read(memory, carol.account.balance) ‖

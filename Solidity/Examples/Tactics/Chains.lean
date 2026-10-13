@@ -444,7 +444,7 @@ example (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
               mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
               v := read(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).balance) }
             φ }
-    ~[readAddEqual]~> cdl![m]{
+    ~[readOnAddM]~> cdl![m]{
         ∀ uint v;
           { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) ‖
               mv1 := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖ v := 0 }

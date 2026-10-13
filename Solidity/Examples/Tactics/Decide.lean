@@ -471,7 +471,7 @@ theorem memoryDeleteRefFresh :
   sol_decide
 
 /-- `Person memory carol = alice;` copies the storage in
-(`memoryStorageCopy`); a later write to `alice` is not seen (`readCopySt`
+(`memoryStorageCopy`); a later write to `alice` is not seen (`readFromCopyToStorage`
 reads the storage of the copy). -/
 theorem memoryStorageCopyRead :
     ⊨ dl!{ [ alice.age = 27; Person memory carol = alice; alice.age = 30;
@@ -481,7 +481,7 @@ theorem memoryStorageCopyRead :
 
 /-- `alice = carol;` copies memory out (`memoryToStorageStoreRoot`, the
 copy of `carol` laid over `alice`); the storage reads what was copied
-(`findCopyMem`), so a later write to `carol` is not seen. -/
+(`findOnCopy`), so a later write to `carol` is not seen. -/
 theorem memoryToStorageRead :
     ⊨ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
              uint x = alice.age; ] x == 42 } := by

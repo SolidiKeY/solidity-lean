@@ -14,7 +14,7 @@ printed names (`FreshNames` tables).  The root `r` the copy allocates is `freshI
 Where the worked example prints the updates merged before the copy (the alias `sp`, `aliceTok`), the chain merges
 there too (`~[sequentialToParallel]~>` under the open modality, `Calculus/Merge.lean`; in `FieldCopy` all but
 `sp`, which a hidden binder separates from the stack), and again past the program.  The read of the
-copy is then resolved one law a link (`Calculus/RewriteLaws.lean`): `readCopySt` reads the copy out of the
+copy is then resolved one law a link (`Calculus/RewriteLaws.lean`): `readFromCopyToStorage` reads the copy out of the
 storage it copied, `findOnSave` the write.  Every capture stays to the last line, which `#last_line` checks.
 The copied struct itself (`find(S, alice)`) is a struct read and has no literal: no law reads a struct
 through a write below it.
@@ -34,7 +34,7 @@ variable (m : Modality) (φ : Post StandardExample [])
 namespace RootCopy
 /-- `alice.age = 25; Person memory carol = alice; v = carol.age;` — the copy is a fresh object holding a
 snapshot of `alice`, and the read is a read of it.  The line the declaration leaves says `carol` is a memory
-local.  The updates merged, the read of the copy is a read of the storage copied (`readCopySt`), which the
+local.  The updates merged, the read of the copy is a read of the storage copied (`readFromCopyToStorage`), which the
 write answers (`findOnSave`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ ⟨[ alice.age = 25; Person memory carol = alice; v = carol.age; ]⟩ φ }
@@ -56,7 +56,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) 
             memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
             v := read(copySt(memory, find(save(storage, alice.age, 25), alice)),
                 freshId(copySt(memory, find(save(storage, alice.age, 25), alice))).age) } φ }
-    ~[readCopySt]~> dl![m]{
+    ~[readFromCopyToStorage]~> dl![m]{
         { storage := save(storage, alice.age, 25) ‖
             carol := freshId(copySt(memory, find(save(storage, alice.age, 25), alice))) ‖
             memory := copySt(memory, find(save(storage, alice.age, 25), alice)) ‖
@@ -85,7 +85,7 @@ but for `sp`: the declaration's hidden binder (`memoryLocalDeclInitDrop`) stands
 update, and a merge does not move a stack that declares locals (`pv`, `aliceAcc`) under a binder
 (`Calculus/Merge.lean`), so `sp` joins the rest past the program.  Then `acc` a copy of the object `sp`
 names, and `v = acc.balance;` a read of the copy: the updates merged, the read of the copy a read of the
-storage copied (`readCopySt`), which the write answers (`findOnSave`). -/
+storage copied (`readFromCopyToStorage`), which the write answers (`findOnSave`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint]) :
     dl![m]{ ⟨[ alice.account.balance = 10; Account memory acc = alice.account; v = acc.balance; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
@@ -125,7 +125,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint])
             memory := copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)) ‖
             v := read(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account)),
                 freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))).balance) } φ }
-    ~[readCopySt]~> dl![m]{
+    ~[readFromCopyToStorage]~> dl![m]{
         { pv := 10 ‖ aliceAcc := alice.account ‖ storage := save(storage, alice.account.balance, 10) ‖
             sp := alice.account ‖
             acc := freshId(copySt(memory, find(save(storage, alice.account.balance, 10), alice.account))) ‖

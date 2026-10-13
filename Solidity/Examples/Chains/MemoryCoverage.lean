@@ -179,7 +179,7 @@ theorem newArrayCapture (φ : Post MemCoverage [.mem (.struct "Basket"), .val .u
 /-! ### Field reads -/
 
 /-- `v = carol.account.balance;` from a memory where it is 10: past the merge the read of `carol.account`
-passes the write to `balance` (`readWriteDifferentIdentity`), and the member read is that write's value
+passes the write to `balance` (`readOnWriteFrameIdentity`), and the member read is that write's value
 (`readOnWrite`). -/
 theorem memoryFieldRead_unfold_rightFst (φ : Post MemCoverage [.mem (.struct "Person"), .val .uint]) :
     dl![m]{ { memory := write(memory, read(memory, carol.account).balance, 10) } ⟨[ v = carol.account.balance; ]⟩ φ
@@ -200,7 +200,7 @@ theorem memoryFieldRead_unfold_rightFst (φ : Post MemCoverage [.mem (.struct "P
               read(write(memory, read(memory, carol.account).balance, 10),
                 read(write(memory, read(memory, carol.account).balance, 10), carol.account).balance) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { memory := write(memory, read(memory, carol.account).balance, 10) ‖ mv1 := read(memory, carol.account) ‖
             v := read(write(memory, read(memory, carol.account).balance, 10), read(memory, carol.account).balance) }
           φ }
@@ -249,7 +249,7 @@ theorem memoryFieldRead_unfold_rightSndResult (φ : Post MemCoverage [.mem (.str
         { mv1 := read(write(memory, acc.balance, 10), carol.account) ‖ se2 := 10 ‖
             memory := write(write(memory, acc.balance, 10), read(write(memory, acc.balance, 10), carol.account).balance, 10) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { mv1 := read(memory, carol.account) ‖ se2 := 10 ‖
             memory := write(write(memory, acc.balance, 10), read(memory, carol.account).balance, 10) }
           φ } := by
@@ -440,7 +440,7 @@ theorem memoryIndexRead_unfold_rightFst (φ : Post MemCoverage [.mem (.struct "B
               read(write(memory, read(memory, basket.items)[2], 7),
                 read(write(memory, read(memory, basket.items)[2], 7), basket.items)[2]) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { i := 2 ‖ memory := write(memory, read(memory, basket.items)[2], 7) ‖ mv1 := read(memory, basket.items) ‖
             v := read(write(memory, read(memory, basket.items)[2], 7), read(memory, basket.items)[2]) }
           φ }

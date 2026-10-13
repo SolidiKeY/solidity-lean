@@ -158,7 +158,7 @@ local instance : FreshNames := .ofTable names
 /-- `carol.account.token = davidTokens[i];` with `i` 2: the target's receiver is bound (`mv`), then the
 member is written with the element's identity (the paper's `⇝*`; the printed `tok` is not declared).  Past
 the merge the read of `carol.account` passes the later allocation of `davidTokens`
-(`readAddDifferentIdentity`); the element of the fresh `davidTokens` is an identity, which no law reads. -/
+(`readOnAddMFrameIdentity`); the element of the fresh `davidTokens` is an identity, which no law reads. -/
 theorem chain (φ : Post StandardExample [.mem (.fixed (.ref (.struct "Token")) 3), .mem (.struct "Person"), .val .uint]) :
     dl![m]{
       { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -180,7 +180,7 @@ theorem chain (φ : Post StandardExample [.mem (.fixed (.ref (.struct "Token")) 
                 read(addM(addM(memory, Person), Token[3]), freshId(addM(memory, Person)).account).token,
                 read(addM(addM(memory, Person), Token[3]), freshId(addM(addM(memory, Person), Token[3]))[2])) }
           φ }
-    ~[readAddDifferentIdentity]~> dl![m]{
+    ~[readOnAddMFrameIdentity]~> dl![m]{
         { i := 2 ‖ carol := freshId(addM(memory, Person)) ‖ davidTokens := freshId(addM(addM(memory, Person), Token[3])) ‖
             mv := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=

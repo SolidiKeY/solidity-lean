@@ -23,7 +23,7 @@ postcondition `φ` (`Examples/Chains/Storage.lean` says how to read one), in the
   (`carol.account.balance = 10;`), and `memoryFieldWriteCopy` is one rule where the printed trace
   unfolds a source path into a local.
 * Past the program the stack merges (`~[sequentialToParallel]~>`) and each read is resolved by a law
-  of memory reads (`readWriteDifferentIdentity`, `readOnWrite`, `readAddDifferentIdentity`,
+  of memory reads (`readOnWriteFrameIdentity`, `readOnWrite`, `readOnAddMFrameIdentity`,
   `EvalLaw`), one link each, every capture kept to the last line, which `#last_line` checks.  Not
   drawn: the printed lines that resolve a read through the identity (`memReadIn`,
   `idConstructor(ρ, [account])`), for which there is no law.
@@ -142,7 +142,7 @@ local instance : FreshNames := .ofTable names
 
 /-- `v = carol.account.balance;` from a memory where it is 10 — the receiver is
 bound first, then the member read out of the heap.  Past the merge the read of
-`carol.account` passes the write to `balance` (`readWriteDifferentIdentity`),
+`carol.account` passes the write to `balance` (`readOnWriteFrameIdentity`),
 and the member read is that write's value (`readOnWrite`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{
@@ -177,7 +177,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) 
                       10),
                     freshId(addM(memory, Person)).account).balance) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             memory :=
               write(addM(memory, Person), read(addM(memory, Person), freshId(addM(memory, Person)).account).balance, 10) ‖
@@ -338,7 +338,7 @@ namespace Rebind
 
 /-- `carolAcc = david.account;` — a memory field on the right rebinds the
 local to the identity the member holds; past the merge the read passes the
-later allocation of `carolAcc`'s object (`readAddDifferentIdentity`). -/
+later allocation of `carolAcc`'s object (`readOnAddMFrameIdentity`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struct "Person")]) :
     dl![m]{
       { david := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -352,7 +352,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .mem (.struc
             memory := addM(addM(memory, Person), Account) ‖
             carolAcc := read(addM(addM(memory, Person), Account), freshId(addM(memory, Person)).account) }
           φ }
-    ~[readAddDifferentIdentity]~> dl![m]{
+    ~[readOnAddMFrameIdentity]~> dl![m]{
         { david := freshId(addM(memory, Person)) ‖ carolAcc := freshId(addM(addM(memory, Person), Account)) ‖
             memory := addM(addM(memory, Person), Account) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) }

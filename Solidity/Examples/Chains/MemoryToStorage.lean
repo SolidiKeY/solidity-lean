@@ -25,9 +25,9 @@ substituted for `memory` in the storage write, as the printed `S₁` reads
 `copyMem(mtSt, M₁, carol)` — and the read is resolved one law a link
 (`Calculus/RewriteLaws.lean`), every capture kept to the last line:
 `findMemberCons` and `selectOnSaveMember` walk the path down to the copy,
-`findCopyMem` sends the `find` back into memory, `readOnWrite` reads the
+`findOnCopy` sends the `find` back into memory, `readOnWrite` reads the
 write.  In the member-source example the copied identity is read after the
-write, and `readWriteDifferentIdentity` (the write at `balance` leaves
+write, and `readOnWriteFrameIdentity` (the write at `balance` leaves
 `account` alone) reads it back to the identity written.
 -/
 
@@ -46,7 +46,7 @@ variable (m : Modality) (φ : Post StandardExample [])
 /-- `carol.age = 42; alice = carol; v = alice.age;` — a memory object copied
 into a storage root (`copyMem`), and read back from storage: the write, the
 copy with the read (the paper's one `⇝`), the merge, the read sent back into
-memory (`findCopyMem`), the write read (`readOnWrite`). -/
+memory (`findOnCopy`), the write read (`readOnWrite`). -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
     dl![m]{
       { carol := freshId(addM(memory, Person)) ‖ memory := addM(memory, Person) }
@@ -71,7 +71,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) 
                     freshId(addM(memory, Person)))),
                 alice.age) }
           φ }
-    ~[findCopyMem]~> dl![m]{
+    ~[findOnCopy]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             memory := write(addM(memory, Person), freshId(addM(memory, Person)).age, 42) ‖
             storage :=
@@ -171,7 +171,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Account"), .val .uint])
                     freshId(addM(memory, Account)))),
                 account.balance) }
           φ }
-    ~[findCopyMem]~> dl![m]{
+    ~[findOnCopy]~> dl![m]{
         { carolAcc := freshId(addM(memory, Account)) ‖
             memory := write(addM(memory, Account), freshId(addM(memory, Account)).balance, 50) ‖
             storage :=
@@ -214,8 +214,8 @@ variable (m : Modality) (φ : Post StandardExample [])
 v = alice.account.balance;` — the source a member of a memory object: its
 identity is read from memory (`carolAcc`, the printed `i_acc`), and what is
 copied is the identity read after the write (`i_rhs`).  After the merge the
-read walks down to the copy and `findCopyMem` sends it back into memory, at
-`i_rhs`; `readWriteDifferentIdentity` reads `i_rhs` back to `i_acc` (the
+read walks down to the copy and `findOnCopy` sends it back into memory, at
+`i_rhs`; `readOnWriteFrameIdentity` reads `i_rhs` back to `i_acc` (the
 write at `balance` does not touch `account`), and `readOnWrite` reads the
 write. -/
 theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) :
@@ -311,7 +311,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) 
                       freshId(addM(memory, Person)).account))),
                 account.balance) }
           φ }
-    ~[findCopyMem]~> dl![m]{
+    ~[findOnCopy]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=
@@ -330,7 +330,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Person"), .val .uint]) 
                       50),
                     freshId(addM(memory, Person)).account).balance) }
           φ }
-    ~[readWriteDifferentIdentity]~> dl![m]{
+    ~[readOnWriteFrameIdentity]~> dl![m]{
         { carol := freshId(addM(memory, Person)) ‖
             carolAcc := read(addM(memory, Person), freshId(addM(memory, Person)).account) ‖
             memory :=
@@ -475,7 +475,7 @@ theorem chain (φ : Post StandardExample [.mem (.struct "Token"), .val .uint]) :
                     freshId(addM(memory, Token)))),
                 token.value) }
           φ }
-    ~[findCopyMem]~> dl![m]{
+    ~[findOnCopy]~> dl![m]{
         { carolToken := freshId(addM(memory, Token)) ‖
             memory := write(addM(memory, Token), freshId(addM(memory, Token)).value, 99) ‖ aliceAcc := alice.account ‖
             storage :=
