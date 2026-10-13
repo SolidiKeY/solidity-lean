@@ -32,13 +32,16 @@ erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
 erased program evaluators (W9.6.4), and so are the untyped terms by name
 (`Surface.Tm`, W9.7.1), and so is the erased state (W9.7.3); the terms'
 symbols read the typed state (W9.8.3). KeY's unbounded `int` is its own
-sort (`Srt.kint`): the ledger, `toInt`, a spec's arithmetic over them. What
-stays untyped: `sol_decide`'s language (`Calculus/DecideLang.lean`, over
-`Semantics.Value`), reached by the typed reading erased
-(`Calculus/DecideErase.lean`); the Theory's values, which a term denotes
-through `SVal.absT`; `Update.lean`'s remnant over `Semantics.State`
-(`Modality.after`, `State.havoc`); `Tools/Counterexample.lean`'s candidate
-states, each lifted to a typed one.
+sort (`Srt.kint`): the ledger, `toInt`, a spec's arithmetic over them. The
+rest is typed too (W10): `sol_decide`'s language is the typed signature
+with atoms and guards (`Calculus/DecideLang.lean`), the Theory's values
+are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
+`Tm.denote`, `.eq` is `=`), and `Tools/Counterexample.lean`'s candidates
+are typed states. What stays untyped: `Semantics.State` and its encodings
+(`State.globE`, `Semantics/StateErase.lean`), read only by the untyped
+interpreter's own lemmas; `Theory/StateWrites.lean`, read by `sol_close`;
+`readAddr` (`Update.lean`), which the memory proofs reach through an erased
+address.
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s
@@ -323,8 +326,7 @@ follows solkey.
   `Theory/` lemma that transcribes it, and give it a row in
   `docs/lean-key-rule-map.md`. Mark Lean-only clauses and deviations as such.
 - **Notation, not constructor trees.** A taclet is `dl{ … }`, a sequent
-  `dl{ ..Γ, c ⟹[R] ⟨[ s; ..ω ]⟩ φ }`, a term `tm{ … }`, a closer term
-  `key{ write(mem, id1, a1, v) }` (`Calculus/KeyNotation.lean`), used in
+  `dl{ ..Γ, c ⟹[R] ⟨[ s; ..ω ]⟩ φ }`, a term `tm{ … }`, used in
   definitions' patterns and arms, with a printer that shows the same in
   `#wp`, errors and pins. A new term language gets its notation and printer
   with it. Notation is macros only: the kernel and compiled code see the
