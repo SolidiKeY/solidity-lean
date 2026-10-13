@@ -7,8 +7,7 @@ import Solidity.TestSuite.ScopedProblems
 pushed and popped, the slot a `push()` recycles, copies between storage
 locations), from `storageIndexWriteComplexReceiverCopySource` to `testStorageNestedPushReturnAlias` in the
 order of the source; the replays are what `#solkey_derive? … pending`
-(`Frontend/Problems.lean`) prints.  A leaf the closer leaves is closed
-on its scoped form (`sol_leaf`).
+(`Frontend/Problems.lean`) prints.
 -/
 
 open Solidity
@@ -133,5 +132,6 @@ theorem Solkey.TestSuite.testStorageMapStructCopy.proved : ⊢ Solkey.TestSuite.
 
 theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  sol_leaf
-  sol_close
+
+theorem Solkey.TestSuite.storagePushReadBack.proved : ⊢ Solkey.TestSuite.storagePushReadBack.problem := by
+  sol_prove

@@ -27,9 +27,7 @@ an internal helper has no obligation, so the table's
 
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
-| derived | 328 | 107 | 0 | 435 |
-| pending | 1 | 0 | 0 | 1 |
-| divergent | 1 | 0 | 0 | 1 |
+| derived | 330 | 107 | 0 | 437 |
 | excluded | 1 | 0 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
 | **all** | **331** | **107** | **2** | **440** |
@@ -39,8 +37,6 @@ Not derived, by reason:
 | Status | Because | # | functions |
 |---|---|---:|---|
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
-| divergent | valid in the model (a push at a full array is out of gas, so the length after one is at least `1`) but not derived: the closer does not read the slot at `(len + 1) - 1` as the one pushed | 1 | `storagePushReadBack` |
-| pending | the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a storage with writes at another root below it, which the slot facts do not read | 1 | `testArrayCopyClearsOldElements` |
 | excluded | struct `Tree` (line 36) is recursive through a mapping: its default value is infinite, and the model's are finite | 1 | `recursiveStructMapping` |
 
 ## The other suites

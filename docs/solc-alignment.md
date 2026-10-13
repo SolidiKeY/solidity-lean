@@ -404,8 +404,8 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   arithmetic after a push (`storagePushReadBack`: `values[values.length -
   1]` after a `push`) is valid in the model all the same, since the push at
   a full array is out of gas and the length after one is at least `1`; it
-  stays underived (`divergent` in `tests/solkey/expected.tsv`), because
-  the closer does not read the slot at `(len + 1) - 1` as the one pushed.
+  is derived since W10.4 (the closer reads `len < len + 1`,
+  `Facts.ltSucc`).
   One that pushes with no bound on the length before it holds in the model
   where solc panics, from a length of exactly `2^64`:
   `storagePushLengthPositive`, `storagePopUnknownLength` and

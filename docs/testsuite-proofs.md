@@ -140,6 +140,10 @@ What they say:
   so the length after one is at least `1` and the `- 1` does not
   underflow: W9.8 review), not derived (the closer does not read the slot
   at `(len + 1) - 1` as the one pushed), and still listed `divergent`.
+- **W10.4** (`docs/intrinsic.md`): `sol_decide`'s language typed.  The
+  closer reads `x < x + c` (`Facts.ltSucc`) and the alias a dangling write
+  went through: `storagePushReadBack` and `testArrayCopyClearsOldElements`
+  derived, 437 derived, none pending; every replay is `sol_prove` alone.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`

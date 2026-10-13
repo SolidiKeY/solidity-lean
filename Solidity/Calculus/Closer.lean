@@ -1293,6 +1293,46 @@ theorem eqBoolLit_eval {p : PrimTy} {x y : LTm C (.val p)} {t : LTm C (.val .boo
     · cases h
   | uint | int => simp only [eqBoolLit, reduceCtorEq] at h
 
+/-- `x < x + c`, `c` a positive literal, where the sum returns. -/
+def Facts.ltSucc (F : Facts C) {p : PrimTy} (x y : LTm C (.val p)) : Bool :=
+  match y.addArgs? with
+  | some e => e.l.beqR x && ((e.r.litV?).map fun v => decide (0 < PrimTy.ival v)).getD false &&
+      F.returns y
+  | none => false
+
+theorem Facts.ltSucc_sound {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} {x y : LTm C (.val p)}
+    (h : F.ltSucc x y = true) : ∃ u w, (x.eval g ν : Option p.Denote) = some u ∧
+      (y.eval g ν : Option p.Denote) = some w ∧ PrimTy.ival u < PrimTy.ival w := by
+  unfold Facts.ltSucc at h
+  split at h
+  · rename_i e he
+    simp only [Bool.and_eq_true] at h
+    obtain ⟨⟨hl, hc⟩, hr⟩ := h
+    obtain ⟨vy, hvy⟩ := Option.isSome_iff_exists.1 (F.returns_sound hF _ hr)
+    obtain ⟨hp, hy⟩ := LTm.addArgs?_eq he
+    obtain ⟨q, l, r⟩ := e
+    cases hy
+    cases LTm.sigma_eq_of_beqR hl
+    cases hlv : r.litV? with
+    | none => rw [hlv] at hc; cases hc
+    | some c =>
+      rw [hlv] at hc
+      simp only [Option.map_some, Option.getD_some, decide_eq_true_eq] at hc
+      obtain rfl := LTm.eq_of_litV? hlv
+      rw [LTm.eval_app2] at hvy
+      cases hxv : (l.eval g ν : Option q.Denote) with
+      | none => rw [hxv] at hvy; cases hvy
+      | some vx =>
+        rw [hxv] at hvy
+        have h1 : binopT .add vx (some c) = some vy := hvy
+        unfold binopT at h1
+        simp only [BinOp.shortT, Option.bind_some] at h1
+        have hs := evalT_add h1
+        refine ⟨vx, vy, rfl, ?_, by omega⟩
+        rw [LTm.eval_app2, hxv]
+        exact hvy
+  · cases h
+
 /-- A comparison folded by its operands' ranges, where both return. -/
 def Facts.cmpFold (F : Facts C) {p : PrimTy} (dec : Int × Int → Int × Int → Option Bool)
     (x y : LTm C (.val p)) : Option Bool :=
@@ -1349,6 +1389,7 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
     else if F.apart x y then .lit (p := .bool) true
     else Decide.fold2 (.binop .neB h) x y
   | .binop .lt h, x, y =>
+    if F.ltSucc x y then .lit (p := .bool) true else
     match F.cmpFold ltDec x y with
     | some c => .lit (p := .bool) c
     | none => Decide.fold2 (.binop .lt h) x y
@@ -1373,7 +1414,7 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
     | some t => t
     | none => Decide.fold2 (.binop .add h) x y
   | .binop .mul h, x, y =>
-    if isTwo x then .app2 (.binop .add h) y y else Decide.fold2 (.binop .mul h) x y
+    if isTwo x then Decide.fold2 (.binop .add h) y y else Decide.fold2 (.binop .mul h) x y
   | o, x, y => Decide.fold2 o x y
 
 theorem Facts.cmpFold_sound {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
@@ -1427,7 +1468,38 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
                exact eqBoolLit_eval ht h
              · exact Decide.fold2_eval g ν _ x y)
           | exact Decide.fold2_eval g ν _ x y
-    case lt | gt | le | ge =>
+    case lt =>
+      have hnum : p.isNumeric = true := by
+        cases p <;> first | rfl | cases h
+      simp only [Facts.fold2]
+      split
+      · rename_i hs
+        obtain ⟨u, w, hu, hw, hlt⟩ := F.ltSucc_sound hF hs
+        simp only [LTm.eval_app2, hu, hw]
+        rw [Op2.eval_eq_evalM]
+        simp only [Op2.evalM, Option.bind_some]
+        unfold binopT
+        cases p with
+        | bool => cases hnum
+        | uint | int =>
+          simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum]
+          exact congrArg some (decide_eq_true hlt).symm
+      · split
+        · rename_i c hc
+          obtain ⟨u, w, hu, hw, ru, rw', hd⟩ := F.cmpFold_sound hF hc
+          simp only [LTm.eval_app2, hu, hw]
+          rw [Op2.eval_eq_evalM]
+          simp only [Op2.evalM, Option.bind_some]
+          unfold binopT
+          cases p with
+          | bool => cases hnum
+          | uint | int =>
+            simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalNum]
+            first
+              | exact congrArg some (ltDec_sound ru rw' hd).symm
+              | exact congrArg some (leDec_sound ru rw' hd).symm
+        · exact Decide.fold2_eval g ν _ x y
+    case gt | le | ge =>
       have hnum : p.isNumeric = true := by
         cases p <;> first | rfl | cases h
       simp only [Facts.fold2]
@@ -1462,6 +1534,7 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
       simp only [Facts.fold2]
       split
       · rename_i hx
+        rw [Decide.fold2_eval]
         exact evalT_two_mul hx h y
       · exact Decide.fold2_eval g ν _ x y
     all_goals simp only [Facts.fold2]; exact Decide.fold2_eval g ν _ x y

@@ -6882,11 +6882,6 @@ update reading alike (W9.8.5).
 stays untyped.
 
 **Open items:**
-- `storagePushReadBack` is valid in the model (and was on master: the
-  length after a push that returns is at least `1`) but not derived (the
-  closer does not read `(len + 1) - 1` as the pushed slot, and
-  `Calculus/CloseFrame.lean` has no push clause); the tables list it
-  `divergent`.
 - `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).
 - `Derived13` about 5 s slower than master (the restored stale push
   obligation, W9.8.5 record).

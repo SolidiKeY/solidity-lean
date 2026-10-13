@@ -34,3 +34,6 @@ theorem Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.proved :
 theorem Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved :
     ⊢ Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.problem := by
   sol_prove
+
+theorem Solkey.TestSuite.testArrayCopyClearsOldElements.proved : ⊢ Solkey.TestSuite.testArrayCopyClearsOldElements.problem := by
+  sol_prove
