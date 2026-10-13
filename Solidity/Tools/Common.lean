@@ -11,8 +11,8 @@ Two things every command of `Tools/` needs, written once:
   (`Typing/Reachability.lean`: every struct member in order, a mapping's keys
   unique and its default `defaultForTy V`, no shadow).  A `GenSpec` says how
   words and keys are drawn and how long a mapping or an array gets:
-  `#difftest` draws words anywhere in range, `#counterexample` from pools of
-  interesting values;
+  `#difftest` draws words anywhere in range (`#counterexample` draws typed
+  storages, `TGen` of `Tools/Counterexample.lean`);
 * **the command front end**: what an identifier `C` or `C.f` names
   (`resolveTarget`), a term of type `Except String (List String)` elaborated and run
   (`evalLines`), and a report of a head line and indented lines

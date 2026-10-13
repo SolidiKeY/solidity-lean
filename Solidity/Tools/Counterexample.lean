@@ -30,22 +30,25 @@ evaluated but made true by the generator: arguments are drawn in their
 type's range, storages are canonical (`Typing/Reachability.lean`: every
 struct member present in order, a mapping's keys unique and its default the
 type's), their words in range, and `msg.value` is `0` for a function that
-is not `payable`.  The candidate is untyped data (`Cand`), read as a typed
-state by `State.ofSem?` (the storage decoded at the contract's types).
+is not `payable`.  The candidate is typed (`Cand C`: a storage at the
+contract's types, drawn by `TGen.sval`, the transaction's words `uint`s), and
+its state is a typed one with no locals (`Cand.tstate`); only its arguments
+are values (`Semantics.Value`), which the formula's binders read at their
+types.
 
 The search is testing: small pools of values per primitive type (the
 bounds, `0`, `1`, `2`, and the spec's own literals), all-default storages
 over every combination of arguments first, then random states
-(`GenSpec.sval` of `Tools/Common.lean` over the pools, seeded, so the result
-is the same on every run).  A witness found is shrunk before it is shown
+(`TGen.sval` over the pools, seeded, so the result is the same on every
+run).  A witness found is shrunk before it is shown
 (Shrinking, below).
 
 A witness is **certified** when the kernel checks `¬ ⊨ φ` of the scoped
 formula from it: `Fml.not_valid_of_eval3Peel` applied to
 `Fml.eval3Peel dom vals σ₀ φ = .ff`, `φ` with its leading parameters bound
 to the witness's arguments `vals` (`Fml.peel`), which the kernel decides by
-evaluating `peel`, `eval3`, the typed run and the decoding of the
-candidate's storage on closed terms (`certifyRefl`).  That needs every
+evaluating `peel`, `eval3` and the typed run on closed terms, the
+candidate's typed state quoted constructor by constructor (`certifyRefl`).  That needs every
 premise to evaluate to `tt` in `σ₀`, and so fails when one is quantified
 over a `uint`, as the layout premise of a mapping is; the witness is then
 only **tested**.  What the kernel runs is written by the recursor
@@ -98,174 +101,6 @@ open Solidity.Tools (Tri)
 open Semantics (Value)
 
 variable {C : Contract}
-
-/-! ## The typed state of a candidate
-
-An untyped storage read at the contract's types: kernel-reducible, by
-recursion on a depth `k` (a struct's members, an array's elements and a
-mapping's values one level down), each list by its own recursion. -/
-
-/-- Exactly `n` values, each decoded by `f`. -/
-def SVec.decode {E : Ty} (f : Semantics.SVal → Option (SVal E)) :
-    (n : Nat) → List Semantics.SVal → Option (SVec E n)
-  | 0, [] => some .nil
-  | n + 1, v :: vs => do pure (.cons (← f v) (← SVec.decode f n vs))
-  | _, _ => none
-
-/-- A list of values, each decoded by `f`. -/
-def SList.decode {E : Ty} (f : Semantics.SVal → Option (SVal E)) :
-    List Semantics.SVal → Option (SList E)
-  | [] => some .nil
-  | v :: vs => do pure (.cons (← f v) (← SList.decode f vs))
-
-/-- A mapping's entries, each value decoded by `f`. -/
-def SMap.decode {V : Ty} (f : Semantics.SVal → Option (SVal V)) :
-    List (Int × Semantics.SVal) → Option (SMap V)
-  | [] => some .nil
-  | (k, v) :: es => do pure (.cons k (← f v) (← SMap.decode f es))
-
-/-- A struct's members, by name and in order, each decoded at its type by `f`. -/
-def SFields.decode (f : (T : Ty) → Semantics.SVal → Option (SVal T)) :
-    (fs : List (Name × Ty)) → List (Name × Semantics.SVal) → Option (SFields fs)
-  | [], [] => some .nil
-  | (n, T) :: fs, (n', v) :: vs =>
-    if n = n' then do pure (.cons (← f T v) (← SFields.decode f fs vs)) else none
-  | _, _ => none
-
-/-- An untyped storage value read at the type `T`, at most `k` levels deep:
-`none` where it has another shape (a value out of its type's range among
-them). -/
-def SVal.decodeN : Nat → (T : Ty) → Semantics.SVal → Option (SVal T)
-  | 0, _, _ => none
-  | _ + 1, .prim p, .prim v => (PrimTy.ofValue? p v).map .prim
-  | k + 1, .ref (.struct s), .struct fs =>
-    (SFields.decode (SVal.decodeN k) (Semantics.structDef s) fs).map .struct
-  | k + 1, .ref (.array E), .array es sh false =>
-    if h : es.length < 2 ^ 256 then do
-      pure (.array (← SVec.decode (SVal.decodeN k E) es.length es)
-        (← SList.decode (SVal.decodeN k E) sh) h)
-    else none
-  | k + 1, .ref (.fixed E n), .array es [] true =>
-    (SVec.decode (SVal.decodeN k E) n es).map .fixed
-  | k + 1, .ref (.mapping _ V), .map es d => do
-    pure (.map (← SMap.decode (SVal.decodeN k V) es) (← SVal.decodeN k V d))
-  | _ + 1, _, _ => none
-
-/-- An untyped storage read at the contract's types. -/
-def Storage.decode (C : Contract) (st : List (Name × Semantics.SVal)) : Option (Storage C) :=
-  SFields.decode (SVal.decodeN 32) C.vars st
-
-/-- **The typed state of an untyped one**, with no locals: the storage
-decoded, the words of the transaction and the funds read as `uint`s. -/
-def State.ofSem? (C : Contract) (s : Semantics.State) : Option (State C []) := do
-  let u (n : Int) : Option PrimTy.uint.Denote := PrimTy.ofValue? .uint (.int n)
-  let st ← Storage.decode C s.storage
-  let bal ← u s.selfBalance
-  let sender ← u s.tx.msgSender
-  let self ← u s.tx.selfAddress
-  let value ← u s.tx.msgValue
-  let time ← u s.tx.timestamp
-  pure { storage := st, H := [], heap := Heap.empty, env := (), net := s.net,
-         selfBalance := bal,
-         tx := { msgSender := sender, selfAddress := self, msgValue := value, timestamp := time,
-                 ext := s.tx.ext } }
-
-/-- `State.ofSem?`, the initial state where it fails. -/
-def State.ofSemD (C : Contract) (s : Semantics.State) : State C [] :=
-  (State.ofSem? C s).getD (State.init C)
-
-/-! ## Comparing untyped storages in the kernel
-
-`Semantics.SVal`'s `DecidableEq` (a nested inductive's, written by hand) does
-not reduce in the kernel; `SVal.beqK` is a structural Boolean equality that
-does, and implies equality (`SVal.eq_of_beqK`). -/
-
-mutual
-/-- Boolean equality of untyped storage values, structural. -/
-def _root_.Solidity.Semantics.SVal.beqK : Semantics.SVal → Semantics.SVal → Bool
-  | .prim a, .prim b => decide (a = b)
-  | .struct fs, .struct gs => Semantics.SVal.fieldsBeqK fs gs
-  | .array es sh f, .array es' sh' f' =>
-    Semantics.SVal.listBeqK es es' && Semantics.SVal.listBeqK sh sh' && f == f'
-  | .map es d, .map es' d' => Semantics.SVal.entriesBeqK es es' && Semantics.SVal.beqK d d'
-  | _, _ => false
-  termination_by structural a => a
-
-/-- Members, by name and value. -/
-def _root_.Solidity.Semantics.SVal.fieldsBeqK :
-    List (Name × Semantics.SVal) → List (Name × Semantics.SVal) → Bool
-  | [], [] => true
-  | (n, v) :: fs, (n', v') :: gs =>
-    decide (n = n') && Semantics.SVal.beqK v v' && Semantics.SVal.fieldsBeqK fs gs
-  | _, _ => false
-  termination_by structural a => a
-
-/-- Elements. -/
-def _root_.Solidity.Semantics.SVal.listBeqK : List Semantics.SVal → List Semantics.SVal → Bool
-  | [], [] => true
-  | v :: vs, v' :: vs' => Semantics.SVal.beqK v v' && Semantics.SVal.listBeqK vs vs'
-  | _, _ => false
-  termination_by structural a => a
-
-/-- Entries, by key and value. -/
-def _root_.Solidity.Semantics.SVal.entriesBeqK :
-    List (Int × Semantics.SVal) → List (Int × Semantics.SVal) → Bool
-  | [], [] => true
-  | (k, v) :: es, (k', v') :: es' =>
-    decide (k = k') && Semantics.SVal.beqK v v' && Semantics.SVal.entriesBeqK es es'
-  | _, _ => false
-  termination_by structural a => a
-end
-
-mutual
-theorem _root_.Solidity.Semantics.SVal.eq_of_beqK : (a b : Semantics.SVal) →
-    Semantics.SVal.beqK a b = true → a = b
-  | .prim a, .prim b, h => by
-    simp only [Semantics.SVal.beqK, decide_eq_true_eq] at h
-    rw [h]
-  | .struct fs, .struct gs, h => by
-    simp only [Semantics.SVal.beqK] at h
-    rw [Semantics.SVal.eq_of_fieldsBeqK fs gs h]
-  | .array es sh f, .array es' sh' f', h => by
-    simp only [Semantics.SVal.beqK, Bool.and_eq_true, beq_iff_eq] at h
-    rw [Semantics.SVal.eq_of_listBeqK es es' h.1.1, Semantics.SVal.eq_of_listBeqK sh sh' h.1.2,
-      h.2]
-  | .map es d, .map es' d', h => by
-    simp only [Semantics.SVal.beqK, Bool.and_eq_true] at h
-    rw [Semantics.SVal.eq_of_entriesBeqK es es' h.1, Semantics.SVal.eq_of_beqK d d' h.2]
-  | .prim _, .struct _, h | .prim _, .array .., h | .prim _, .map .., h
-  | .struct _, .prim _, h | .struct _, .array .., h | .struct _, .map .., h
-  | .array .., .prim _, h | .array .., .struct _, h | .array .., .map .., h
-  | .map .., .prim _, h | .map .., .struct _, h | .map .., .array .., h => by
-    simp only [Semantics.SVal.beqK, Bool.false_eq_true] at h
-
-theorem _root_.Solidity.Semantics.SVal.eq_of_fieldsBeqK :
-    (a b : List (Name × Semantics.SVal)) → Semantics.SVal.fieldsBeqK a b = true → a = b
-  | [], [], _ => rfl
-  | (n, v) :: fs, (n', v') :: gs, h => by
-    simp only [Semantics.SVal.fieldsBeqK, Bool.and_eq_true, decide_eq_true_eq] at h
-    rw [h.1.1, Semantics.SVal.eq_of_beqK v v' h.1.2, Semantics.SVal.eq_of_fieldsBeqK fs gs h.2]
-  | [], _ :: _, h | _ :: _, [], h => by
-    simp only [Semantics.SVal.fieldsBeqK, Bool.false_eq_true] at h
-
-theorem _root_.Solidity.Semantics.SVal.eq_of_listBeqK :
-    (a b : List Semantics.SVal) → Semantics.SVal.listBeqK a b = true → a = b
-  | [], [], _ => rfl
-  | v :: vs, v' :: vs', h => by
-    simp only [Semantics.SVal.listBeqK, Bool.and_eq_true] at h
-    rw [Semantics.SVal.eq_of_beqK v v' h.1, Semantics.SVal.eq_of_listBeqK vs vs' h.2]
-  | [], _ :: _, h | _ :: _, [], h => by
-    simp only [Semantics.SVal.listBeqK, Bool.false_eq_true] at h
-
-theorem _root_.Solidity.Semantics.SVal.eq_of_entriesBeqK :
-    (a b : List (Int × Semantics.SVal)) → Semantics.SVal.entriesBeqK a b = true → a = b
-  | [], [], _ => rfl
-  | (k, v) :: es, (k', v') :: es', h => by
-    simp only [Semantics.SVal.entriesBeqK, Bool.and_eq_true, decide_eq_true_eq] at h
-    rw [h.1.1, Semantics.SVal.eq_of_beqK v v' h.1.2, Semantics.SVal.eq_of_entriesBeqK es es' h.2]
-  | [], _ :: _, h | _ :: _, [], h => by
-    simp only [Semantics.SVal.entriesBeqK, Bool.false_eq_true] at h
-end
 
 /-! ## The typed state an update ends in
 
@@ -632,15 +467,86 @@ def poolVals (lits : List Int) : PrimTy → List Value
   | .uint => (uintPool lits).map .int
   | .int => (intPool lits).map .int
 
-/-! ## Random states -/
+/-- **The domain a quantifier and a hidden binder are tried on**: the pools
+of `lits` (`uintPool`, `intPool`) read at their types. -/
+def poolDom (lits : List Int) : TDom
+  | .bool => [true, false]
+  | .uint => (uintPool lits).filterMap fun n => PrimTy.ofValue? .uint (.int n)
+  | .int => (intPool lits).filterMap fun n => PrimTy.ofValue? .int (.int n)
 
-/-- How a search draws a storage: every word from `vals`, a mapping's keys
-from `keys`, up to `3` entries, arrays of fewer than `3` elements. -/
-def pooledGen (vals : PrimTy → List Value) (keys : PrimTy → List Int) : GenSpec where
-  prim p := pickD (PrimTy.default p) (vals p)
-  key K := some (pickD 0 (keys K))
-  entries := 4
-  length := 3
+/-- `n` at the type `p`, its default out of range: the words of a
+candidate's transaction, which the pools draw in range. -/
+def _root_.Solidity.PrimTy.ofIntD (p : PrimTy) (n : Int) : p.Denote :=
+  (PrimTy.ofInt? p n).getD (PrimTy.dflt p)
+
+/-! ## Random states
+
+A candidate's storage is drawn typed (`Solidity.SVal`), as `GenSpec.sval`
+(`Tools/Common.lean`) draws an untyped one for `#difftest`: canonical
+(`Typing/Reachability.lean`: every struct member in order, a mapping's keys
+unique over the type's default, no shadow), its words from the pools. -/
+
+/-- How a search draws a typed storage: every word from `vals`, a mapping's
+keys from `keys`, up to `3` entries, arrays of fewer than `3` elements. -/
+structure TGen where
+  vals : TDom
+  keys : PrimTy → List Int
+  entries : Nat := 4
+  length : Nat := 3
+
+/-- Exactly `n` values, each drawn by `f`, the first first. -/
+def TGen.vec {E : Ty} (f : Gen (Solidity.SVal E)) : (n : Nat) → Gen (SVec E n)
+  | 0 => pure .nil
+  | n + 1 => do
+    let v ← f
+    pure (.cons v (← TGen.vec f n))
+
+/-- A struct's members, in order, each drawn at its type by `f`. -/
+def TGen.fields (f : (T : Ty) → Gen (Solidity.SVal T)) :
+    (fs : List (Name × Ty)) → Gen (SFields fs)
+  | [] => pure .nil
+  | (_, T) :: fs => do
+    let v ← f T
+    pure (.cons v (← TGen.fields f fs))
+
+/-- A mapping's entries, in the order written. -/
+def TGen.smap {V : Ty} : List (Int × Solidity.SVal V) → SMap V
+  | [] => .nil
+  | (k, v) :: es => .cons k v (TGen.smap es)
+
+/-- An array of the elements `es` over the shadow `sh`, its type's default
+past the bound on a length: what a certificate quotes (`quoteFold`), the
+bound checked by the kernel. -/
+def _root_.Solidity.SVal.arrayOf {E : Ty} {n : Nat} (es : SVec E n) (sh : SList E) :
+    Solidity.SVal (.ref (.array E)) :=
+  if h : n < 2 ^ 256 then .array es sh h else Solidity.SVal.dflt _
+
+/-- **A canonical storage value of type `T`**, at most `k` levels deep (the
+default below): a mapping's keys drawn from `g.keys` (a key drawn twice is
+drawn once, its value only the first time), an array of fewer than
+`g.length` elements. -/
+def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (Solidity.SVal T)
+  | 0, T => pure (Solidity.SVal.dflt T)
+  | _ + 1, .prim p => do pure (.prim (← pickD (PrimTy.dflt p) (g.vals p)))
+  | k + 1, .ref (.mapping (.prim K) V) => do
+    let ks := g.keys K
+    if ks.isEmpty then return .map .nil (Solidity.SVal.dflt V)
+    let n ← randBelow g.entries
+    let mut es : List (Int × Solidity.SVal V) := []
+    for _ in [0:n] do
+      let key ← pickD 0 ks
+      if (es.find? (·.1 == key)).isNone then es := es ++ [(key, ← g.sval k V)]
+    pure (.map (TGen.smap es) (Solidity.SVal.dflt V))
+  | _ + 1, .ref (.mapping _ V) => pure (.map .nil (Solidity.SVal.dflt V))
+  | k + 1, .ref (.struct s) => do pure (.struct (← TGen.fields (g.sval k) (structDef s)))
+  | k + 1, .ref (.array E) => do
+    let n ← randBelow g.length
+    pure (Solidity.SVal.arrayOf (← TGen.vec (g.sval k E) n) .nil)
+  | k + 1, .ref (.fixed E n) => do pure (.fixed (← TGen.vec (g.sval k E) n))
+
+/-- A storage: every root of the contract, drawn at its type, in order. -/
+def TGen.storage (g : TGen) (C : Contract) : Gen (Solidity.Storage C) :=
+  TGen.fields (g.sval 32) C.vars
 
 /-- Every combination, the first list's element first. -/
 def products {α : Type} : List (List α) → List (List α)
@@ -648,23 +554,25 @@ def products {α : Type} : List (List α) → List (List α)
   | xs :: rest => xs.flatMap fun x => (products rest).map (x :: ·)
 
 /-- A candidate: the storage, the arguments, the transaction, the ledger
-and the funds a call starts from. -/
-structure Cand where
-  st : List (Name × Semantics.SVal)
+and the funds a call starts from, typed but for the arguments, which the
+formula's binders read at their types (`Fml.peel`). -/
+structure Cand (C : Contract) where
+  st : Solidity.Storage C
   args : List (String × Value)
-  tx : TxEnv := { msgSender := 1 }
+  tx : TTx := { msgSender := PrimTy.ofIntD .uint 1 }
   net : List (Int × Int) := []
-  bal : Int := 0
+  bal : PrimTy.uint.Denote := PrimTy.dflt .uint
 
-/-- The state a candidate starts in: the arguments bound as locals. -/
-def Cand.state [FreshNames] (c : Cand) : Semantics.State :=
-  { storage := c.st, env := c.args.map fun (n, v) => (Var.ofName n, .val v), tx := c.tx,
-    net := c.net, selfBalance := c.bal }
+/-- **The typed state a candidate starts in**, with no locals: its
+arguments are the formula's binders. -/
+def Cand.tstate (C : Contract) (c : Cand C) : Solidity.State C [] :=
+  { storage := c.st, H := [], heap := Heap.empty, env := (), net := c.net,
+    selfBalance := c.bal, tx := c.tx }
 
 /-- A random candidate: arguments of the types `ps`, a sender, a storage of
 `C`'s layout whose mapping keys include the arguments and the sender. -/
 def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
-    (payable : Bool) : Gen Cand := do
+    (payable : Bool) : Gen (Cand C) := do
   let dom := poolVals lits
   let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (PrimTy.default p) (dom p))
   let sender ← pickD 1 ([1, 2] ++ uintPool lits)
@@ -675,13 +583,15 @@ def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
     | .bool => [0, 1]
     | .uint => (uintPool lits ++ (sender :: argInts).filter (0 ≤ ·)).eraseDups
     | .int => (intPool lits ++ sender :: argInts).eraseDups
-  let st ← (pooledGen dom keys).storage C
+  let st ← ({ vals := poolDom lits, keys } : TGen).storage C
   let value ← if payable then pickD 0 (uintPool lits) else pure 0
   let time ← pickD 0 (uintPool lits)
   let paid ← pickD 0 (uintPool lits)
   let net ← pickD [] [[], [(sender, paid)]]
   let bal ← pickD 0 [0, 1, uintBound - 1]
-  pure { st, args, tx := { msgSender := sender, msgValue := value, timestamp := time }, net, bal }
+  let u := PrimTy.ofIntD .uint
+  pure { st, args, tx := { msgSender := u sender, msgValue := u value, timestamp := u time }, net,
+         bal := u bal }
 
 /-! ## Shrinking
 
@@ -690,75 +600,118 @@ the funds and the timestamp zeroed, the sender `1`, a state variable reset to it
 a mapping entry dropped, and a large number renamed to a small one unused
 elsewhere, everywhere it occurs (arguments, sender, keys, words), so that
 the equalities the witness relies on survive.  A step is kept when the
-candidate is still a counterexample. -/
+candidate is still a counterexample.  The storage is shrunk typed: each step
+is a fold (`Fold`) or a walk of the roots. -/
 
 /-- The integers a storage value holds, keys included. -/
-partial def SVal.ints : Semantics.SVal → List Int
-  | .prim (.int n) => [n]
-  | .prim (.bool _) => []
-  | .struct fs => fs.flatMap fun (_, v) => SVal.ints v
-  | .array es sh _ => (es ++ sh).flatMap SVal.ints
-  | .map es d => es.flatMap (fun (k, v) => k :: SVal.ints v) ++ SVal.ints d
+def intsFold : Fold where
+  V _ := List Int
+  F _ := List Int
+  L _ := List Int
+  W _ _ := List Int
+  M _ := List Int
+  prim v := match PrimTy.erase v with
+    | .int n => [n]
+    | .bool _ => []
+  struct _ r := r
+  array _ _ _ w l := w ++ l
+  fixed _ w := w
+  map _ _ m d := m ++ d
+  fnil := []
+  fcons _ _ v r := v ++ r
+  lnil := []
+  lcons _ _ v r := v ++ r
+  wnil := []
+  wcons _ _ v r := v ++ r
+  mnil := []
+  mcons k _ _ v r := k :: v ++ r
 
-/-- `v` renamed `s`, keys and words alike. -/
-partial def SVal.rename (v s : Int) : Semantics.SVal → Semantics.SVal
-  | .prim (.int n) => .prim (.int (if n = v then s else n))
-  | .prim (.bool b) => .prim (.bool b)
-  | .struct fs => .struct (fs.map fun (f, x) => (f, SVal.rename v s x))
-  | .array es sh fx => .array (es.map (SVal.rename v s)) (sh.map (SVal.rename v s)) fx
-  | .map es d => .map (es.map fun (k, x) => (if k = v then s else k, SVal.rename v s x))
-    (SVal.rename v s d)
+/-- `v` renamed `s`, keys and words alike (a word only where `s` is in its
+type's range). -/
+def renameFold (v s : Int) : Fold where
+  V := Solidity.SVal
+  F := SFields
+  L := SList
+  W := SVec
+  M := SMap
+  prim {p} x := .prim (if PrimTy.erase x = .int v then (PrimTy.ofInt? p s).getD x else x)
+  struct _ r := .struct r
+  array _ _ h w l := .array w l h
+  fixed _ w := .fixed w
+  map _ _ m d := .map m d
+  fnil := .nil
+  fcons _ _ x r := .cons x r
+  lnil := .nil
+  lcons _ _ x r := .cons x r
+  wnil := .nil
+  wcons _ _ x r := .cons x r
+  mnil := .nil
+  mcons k _ _ x r := .cons (if k = v then s else k) x r
+
+/-- A mapping with each of its entries dropped in turn. -/
+def SMap.drops {V : Ty} : SMap V → List (SMap V)
+  | .nil => []
+  | .cons k x rest => rest :: (SMap.drops rest).map (.cons k x)
+
+/-- A value with one mapping entry dropped, each in turn: none but at a
+mapping. -/
+def SVal.dropEntries : {T : Ty} → Solidity.SVal T → List (Solidity.SVal T)
+  | _, .map es d => (SMap.drops es).map (.map · d)
+  | _, _ => []
+
+/-- The roots with one of them reset to its default, each in turn (none
+already there). -/
+def SFields.resets : {fs : List (Name × Ty)} → SFields fs → List (SFields fs)
+  | _, .nil => []
+  | _, .cons (T := T) x rest =>
+    (if x = Solidity.SVal.dflt T then [] else [.cons (Solidity.SVal.dflt T) rest]) ++
+      (SFields.resets rest).map (.cons x)
+
+/-- The roots with one mapping entry dropped, each in turn. -/
+def SFields.drops : {fs : List (Name × Ty)} → SFields fs → List (SFields fs)
+  | _, .nil => []
+  | _, .cons x rest =>
+    (SVal.dropEntries x).map (.cons · rest) ++ (SFields.drops rest).map (.cons x)
 
 /-- The integers a candidate mentions. -/
-def Cand.ints (c : Cand) : List Int :=
+def Cand.ints (c : Cand C) : List Int :=
   (c.args.filterMap (fun (_, v) => match v with | .int n => some n | .bool _ => none) ++
-    c.tx.msgSender :: c.st.flatMap (fun (_, v) => SVal.ints v)).eraseDups
+    c.tx.msgSender.1 :: c.st.fold intsFold).eraseDups
 
 /-- `v` renamed `s` everywhere in a candidate. -/
-def Cand.rename (c : Cand) (v s : Int) : Cand :=
+def Cand.rename (c : Cand C) (v s : Int) : Cand C :=
   let r (n : Int) : Int := if n = v then s else n
   { c with
-    st := c.st.map fun (x, sv) => (x, SVal.rename v s sv)
+    st := c.st.fold (renameFold v s)
     args := c.args.map fun (x, a) => (x, match a with | .int n => .int (r n) | .bool b => .bool b)
-    tx := { c.tx with msgSender := r c.tx.msgSender }
+    tx := { c.tx with msgSender := (PrimTy.ofInt? .uint (r c.tx.msgSender.1)).getD c.tx.msgSender }
     net := c.net.map fun (a, b) => (r a, b) }
 
 /-- The candidates one shrinking step away, simplest first. -/
-def Cand.shrinks (C : Contract) (c : Cand) : List Cand :=
+def Cand.shrinks (c : Cand C) : List (Cand C) :=
   let small : List Int := [0, 1, 2, 3]
   let ints := c.ints
   let renames := (ints.filter (fun v => !small.contains v)).flatMap fun v =>
     (small.filter (!ints.contains ·)).map (c.rename v)
-  let resets := C.vars.filterMap fun (r, T) =>
-    if lookupBy r c.st == some (defaultForTy T) then none
-    else some { c with st := setBy r (defaultForTy T) c.st }
-  let drops := c.st.flatMap fun (r, v) => match v with
-    | .map es d => (List.range es.length).map fun i =>
-      { c with st := setBy r (.map (es.eraseIdx i) d) c.st }
-    | _ => []
+  let resets := (SFields.resets c.st).map fun st => { c with st }
+  let drops := (SFields.drops c.st).map fun st => { c with st }
+  let u := PrimTy.ofIntD .uint
   (if c.net.isEmpty then [] else [{ c with net := [] }]) ++
-  (if c.bal = 0 then [] else [{ c with bal := 0 }]) ++
-  (if c.tx.timestamp = 0 then [] else [{ c with tx := { c.tx with timestamp := 0 } }]) ++
-  (if c.tx.msgValue = 0 then [] else [{ c with tx := { c.tx with msgValue := 0 } }]) ++
-  (if c.tx.msgSender = 1 then [] else [{ c with tx := { c.tx with msgSender := 1 } }]) ++
+  (if c.bal.1 = 0 then [] else [{ c with bal := u 0 }]) ++
+  (if c.tx.timestamp.1 = 0 then [] else [{ c with tx := { c.tx with timestamp := u 0 } }]) ++
+  (if c.tx.msgValue.1 = 0 then [] else [{ c with tx := { c.tx with msgValue := u 0 } }]) ++
+  (if c.tx.msgSender.1 = 1 then [] else [{ c with tx := { c.tx with msgSender := u 1 } }]) ++
   resets ++ drops ++ renames
 
 /-- **Shrink** `c` while `ok` holds of it, one step at a time, at most
 `fuel` steps. -/
-def Cand.shrink (C : Contract) (ok : Cand → Bool) : Nat → Cand → Cand
+def Cand.shrink (ok : Cand C → Bool) : Nat → Cand C → Cand C
   | 0, c => c
   | fuel + 1, c =>
-    match (c.shrinks C).find? ok with
-    | some c' => Cand.shrink C ok fuel c'
+    match c.shrinks.find? ok with
+    | some c' => Cand.shrink ok fuel c'
     | none => c
 
-
-/-- **The domain a quantifier and a hidden binder are tried on**: the pools
-of `lits` (`uintPool`, `intPool`) read at their types. -/
-def poolDom (lits : List Int) : TDom
-  | .bool => [true, false]
-  | .uint => (uintPool lits).filterMap fun n => PrimTy.ofValue? .uint (.int n)
-  | .int => (intPool lits).filterMap fun n => PrimTy.ofValue? .int (.int n)
 
 end Solidity.Tools
 
@@ -936,22 +889,21 @@ arguments bound as locals, the transaction, the ledger), the arguments, the
 storage the typed run ends with or how it halts (`none` for a formula with
 no run in front), and the indices of the conjuncts after the call that
 evaluate to `ff`. -/
-structure Witness where
-  state : Semantics.State
-  args : List (String × Value)
+structure Witness (C : Contract) where
+  cand : Cand C
   outcome : Option (Except Halt (List (Name × Semantics.SVal)))
   failing : List Nat
 
 /-- What a search found, among how many candidates, of which how many met
 the stated premises. -/
-structure Search where
-  witness : Option Witness
+structure Search (C : Contract) where
+  witness : Option (Witness C)
   tried : Nat
   admitted : Nat
 
 /-- The integers a candidate's arguments are, first in its domain: a
 binder tries them before the pools. -/
-def Cand.argInts (c : Cand) : List Int :=
+def Cand.argInts (c : Cand C) : List Int :=
   c.args.filterMap fun (_, v) => match v with
     | .int n => some n
     | .bool _ => none
@@ -961,11 +913,7 @@ section Search
 variable [FreshNames]
 
 /-- The arguments of a candidate by variable, as `Fml.peel` binds them. -/
-def Cand.vals (c : Cand) : List (Var × Value) := c.args.map fun (n, v) => (Var.ofName n, v)
-
-/-- The typed state a candidate starts in, with no locals: its parameters are
-the formula's binders. -/
-def Cand.tstate (C : Contract) (c : Cand) : State C [] := State.ofSemD C c.state
+def Cand.vals (c : Cand C) : List (Var × Value) := c.args.map fun (n, v) => (Var.ofName n, v)
 
 /-- The obligation of `f` in pieces, and what the search needs of `f`: its
 declaration, the scoped obligation, how many premises are met by
@@ -998,7 +946,7 @@ def SpecProblem.of (C : Contract) (f : String) : Except String (SpecProblem C) :
 
 /-- The literals a candidate's domain is drawn from: its arguments, then
 the specification's. -/
-def SpecProblem.domLits (P : SpecProblem C) (c : Cand) : List Int := c.argInts ++ P.lits
+def SpecProblem.domLits (P : SpecProblem C) (c : Cand C) : List Int := c.argInts ++ P.lits
 
 /-- A candidate tried: `none` unless the stated premises evaluate to `tt`;
 then the conjuncts that evaluate to `ff`, if any.  A run that panics (an
@@ -1006,7 +954,7 @@ then the conjuncts that evaluate to `ff`, if any.  A run that panics (an
 counterexample with no conjunct blamed: the witness's outcome names it.
 The update and the call run once (the typed run, with fuel), and each
 conjunct is read in the state they leave. -/
-def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
+def SpecProblem.try (P : SpecProblem C) (c : Cand C) : Option (Option (Witness C)) :=
   let dom := poolDom (P.domLits c)
   let ⟨_, σ, ψ⟩ := Fml.peel c.vals (c.tstate C) P.fml
   match ψ with
@@ -1016,17 +964,15 @@ def SpecProblem.try (P : SpecProblem C) (c : Cand) : Option (Option Witness) :=
     match Fml.postFails dom P.posts.length σ body with
     | none => some none
     | some (some .panic, _) =>
-      some (some { state := c.state, args := c.args, failing := [],
-                   outcome := some (.error .panic) })
+      some (some { cand := c, failing := [], outcome := some (.error .panic) })
     | some (some _, _) => some none
     | some (none, []) => some none
     | some (none, failing) =>
-      some (some { state := c.state, args := c.args, failing,
-                   outcome := Fml.outcome dom σ body })
+      some (some { cand := c, failing, outcome := Fml.outcome dom σ body })
   | _ => none
 
 /-- Whether a candidate is a counterexample. -/
-def SpecProblem.refutes (P : SpecProblem C) (c : Cand) : Bool :=
+def SpecProblem.refutes (P : SpecProblem C) (c : Cand C) : Bool :=
   match P.try c with
   | some (some _) => true
   | _ => false
@@ -1035,16 +981,16 @@ def SpecProblem.refutes (P : SpecProblem C) (c : Cand) : Bool :=
 all-default storage with every combination of pooled arguments first (when
 there are at most half the budget of them), then random candidates up to
 `budget`; what is found is shrunk. -/
-def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search := Id.run do
+def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search C := Id.run do
   let dom := poolVals P.lits
   let combos := products (P.params.map fun (_, p) => dom p)
   let combos := if combos.length * 2 ≤ budget then combos else []
   let cands := combos.map fun vs =>
-    ({ st := C.initStorage, args := P.params.map (·.1) |>.zip vs } : Cand)
+    ({ st := Storage.init C, args := P.params.map (·.1) |>.zip vs } : Cand C)
   let mut admitted := 0
   let mut tried := 0
   let mut g := mkStdGen 2026
-  let mut found : Option Cand := none
+  let mut found : Option (Cand C) := none
   for c in cands do
     tried := tried + 1
     match P.try c with
@@ -1061,28 +1007,28 @@ def SpecProblem.search (P : SpecProblem C) (budget : Nat) : Search := Id.run do
       | some none => admitted := admitted + 1
       | some (some _) => found := some c; break
   let some c := found | return { witness := none, tried, admitted }
-  let c := c.shrink C P.refutes 64
+  let c := c.shrink P.refutes 64
   return { witness := (P.try c).join, tried, admitted := admitted + 1 }
 
 /-- **A counterexample to a closed scoped formula**: its parameters bound to
 pooled `uint`s (every combination first), the storage all-default, then
 random storages of `C`'s layout; what is found is shrunk.  A candidate is
 one where the formula under its arguments evaluates to `ff`. -/
-def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search := Id.run do
+def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search C := Id.run do
   let ps := (Fml.params φ).filterMap fun (x, p) => match x with
     | .user n => some (n, p)
     | .fresh .. => none
   -- the candidate's arguments bound, so that the witness is what refutes
-  let refutes (c : Cand) : Bool :=
+  let refutes (c : Cand C) : Bool :=
     Fml.eval3Peel (poolDom c.argInts) c.vals (c.tstate C) φ = .ff
   let combos := products (ps.map fun (_, p) => poolVals [] p)
   let combos := if combos.length * 2 ≤ budget then combos else []
   let mut tried := 0
   let mut g := mkStdGen 2026
-  let mut found : Option Cand := none
+  let mut found : Option (Cand C) := none
   for vs in combos do
     tried := tried + 1
-    let c : Cand := { st := C.initStorage, args := ps.map (·.1) |>.zip vs }
+    let c : Cand C := { st := Storage.init C, args := ps.map (·.1) |>.zip vs }
     if refutes c then found := some c; break
   if found.isNone then
     for _ in [0:budget - tried] do
@@ -1091,24 +1037,26 @@ def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search := 
       tried := tried + 1
       if refutes c then found := some c; break
   let some c := found | return { witness := none, tried, admitted := tried }
-  let c := c.shrink C refutes 64
+  let c := c.shrink refutes 64
   let ⟨_, σ, ψ⟩ := Fml.peel c.vals (c.tstate C) φ
-  return { witness := some { state := c.state, args := c.args, failing := [],
+  return { witness := some { cand := c, failing := [],
                              outcome := Fml.outcome (poolDom c.argInts) σ ψ },
            tried, admitted := tried }
 
 /-! ## Printing a witness -/
 
 /-- A witness, one fact per line: the arguments and the transaction
-(`fmtTx`), the storage before, and after the run (or how it halted). -/
-def Witness.lines (C : Contract) (w : Witness) : List String :=
-  let σ := w.state
-  let args := w.args.map fun (n, v) => s!"{n} = {Value.fmt v}"
+(`fmtTx`), the storage before, and after the run (or how it halted), each
+printed erased. -/
+def Witness.lines (C : Contract) (w : Witness C) : List String :=
+  let σ := w.cand.tstate C
+  let args := w.cand.args.map fun (n, v) => s!"{n} = {Value.fmt v}"
   let after := match w.outcome with
     | none => []
     | some (.error h) => [s!"after: {fmtHalt h}"]
     | some (.ok st) => ["after: " ++ fmtStorageLine C st]
-  [", ".intercalate (args ++ fmtTx σ), "before: " ++ fmtStorageLine C σ.storage] ++ after
+  [", ".intercalate (args ++ fmtTx σ.globE), "before: " ++ fmtStorageLine C σ.storage.erase] ++
+    after
 
 /-! ## Certificates -/
 
@@ -1116,28 +1064,58 @@ section Meta
 
 open Lean Meta
 
-deriving instance ToExpr for Semantics.SVal
-deriving instance ToExpr for Semantics.MVal
-deriving instance ToExpr for Semantics.MObj
-deriving instance ToExpr for Semantics.Seg
-deriving instance ToExpr for Semantics.Binding
 deriving instance ToExpr for Semantics.ExtKey
 deriving instance ToExpr for Semantics.ExtResult
-deriving instance ToExpr for Semantics.TxEnv
-deriving instance ToExpr for Semantics.State
+
+/-- A typed primitive as a closed term: a `uint` or an `int` as
+`PrimTy.ofIntD`, which the kernel reads back. -/
+def quotePrim : (p : PrimTy) → p.Denote → Expr
+  | .bool, b => toExpr (show Bool from b)
+  | .uint, n => mkApp2 (mkConst ``PrimTy.ofIntD) (toExpr PrimTy.uint) (toExpr n.1)
+  | .int, n => mkApp2 (mkConst ``PrimTy.ofIntD) (toExpr PrimTy.int) (toExpr n.1)
+
+/-- A typed storage value as a closed term, constructor by constructor, an
+array's bound as `SVal.arrayOf`'s check. -/
+def quoteFold : Fold where
+  V _ := Expr
+  F _ := Expr
+  L _ := Expr
+  W _ _ := Expr
+  M _ := Expr
+  prim {p} v := mkApp2 (mkConst ``Solidity.SVal.prim) (toExpr p) (quotePrim p v)
+  struct {s} _ r := mkApp2 (mkConst ``Solidity.SVal.struct) (toExpr s) r
+  array {E n} _ _ _ w l := mkApp4 (mkConst ``Solidity.SVal.arrayOf) (toExpr E) (toExpr n) w l
+  fixed {E n} _ w := mkApp3 (mkConst ``Solidity.SVal.fixed) (toExpr E) (toExpr n) w
+  map {K U} _ _ m d := mkApp4 (mkConst ``Solidity.SVal.map) (toExpr K) (toExpr U) m d
+  fnil := mkConst ``SFields.nil
+  fcons {f T fs} _ _ v r :=
+    mkAppN (mkConst ``SFields.cons) #[toExpr f, toExpr T, toExpr fs, v, r]
+  lnil {E} := mkApp (mkConst ``SList.nil) (toExpr E)
+  lcons {E} _ _ v r := mkApp3 (mkConst ``SList.cons) (toExpr E) v r
+  wnil {E} := mkApp (mkConst ``SVec.nil) (toExpr E)
+  wcons {E n} _ _ v r := mkApp4 (mkConst ``SVec.cons) (toExpr E) (toExpr n) v r
+  mnil {U} := mkApp (mkConst ``SMap.nil) (toExpr U)
+  mcons {U} k _ _ v r := mkApp4 (mkConst ``SMap.cons) (toExpr U) (toExpr k) v r
+
+/-- A candidate as a closed term of `Cand C`, `cE` naming `C`. -/
+def Cand.quote (cE : Expr) (c : Cand C) : Expr :=
+  let u (n : PrimTy.uint.Denote) : Expr := quotePrim .uint n
+  let txE := mkAppN (mkConst ``TTx.mk)
+    #[u c.tx.msgSender, u c.tx.selfAddress, u c.tx.msgValue, u c.tx.timestamp, toExpr c.tx.ext]
+  mkAppN (mkConst ``Cand.mk) #[cE, c.st.fold quoteFold, toExpr c.args, txE, toExpr c.net, u c.bal]
 
 /-- **The certificate**: the kernel checks `¬ ⊨ φ` of the scoped `φ` as
-`Fml.not_valid_of_eval3Peel` at the typed state of `σ`
-(`State.ofSemD`), its leading parameters bound to the witness's arguments
-`vals` (`Fml.peel`, as the search read it), deciding
-`Fml.eval3Peel (poolDom lits) vals _ φ = .ff` by evaluation: the decoding
-of `σ`'s storage, the typed run and the formula under the parameters.  The
-kernel runs under `heartbeats` (thousands), half the default, and the
-declaration is checked, never added. -/
+`Fml.not_valid_of_eval3Peel` at the typed state of the candidate `c`
+(`Cand.tstate`, quoted by `Cand.quote`), its leading parameters bound to
+the witness's arguments `vals` (`Fml.peel`, as the search read it),
+deciding `Fml.eval3Peel (poolDom lits) vals _ φ = .ff` by evaluation: the
+typed run and the formula under the parameters.  The kernel runs under
+`heartbeats` (thousands), half the default, and the declaration is
+checked, never added. -/
 def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Value))
-    (σ : Semantics.State) (heartbeats : Nat := 100000) : MetaM Bool := do
+    (c : Cand C) (heartbeats : Nat := 100000) : MetaM Bool := do
   let domE := mkApp (mkConst ``poolDom) (toExpr lits)
-  let σE := mkApp2 (mkConst ``State.ofSemD) cE (toExpr σ)
+  let σE := mkApp2 (mkConst ``Cand.tstate) cE (c.quote cE)
   let valsE := toExpr vals
   let ev ← mkAppM ``Fml.eval3Peel #[domE, valsE, σE, φE]
   let eq ← mkEq ev (mkConst ``Tri.ff)
@@ -1151,10 +1129,10 @@ def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Value))
   | .ok _ => pure true
   | .error _ => pure false
 
-/-- A refutation: the witness, whether the kernel certified it, and the
-conjuncts it fails. -/
+/-- A refutation: the witness, printed (`Witness.lines`), whether the
+kernel certified it, and the conjuncts it fails. -/
 structure Refutation where
-  witness : Witness
+  witness : List String
   certified : Bool
   fails : List MessageData
 
@@ -1177,25 +1155,25 @@ def postLabel (C : Contract) (d : FunDecl) (cE : Expr) (i : Nat) (φ : NRead C) 
 /-- **Refute `f`'s specification**: search, then certify what was found
 against the scoped obligation.  `n` names the contract `C`. -/
 def refuteSpec (n : Lean.Name) (C : Contract) (f : String) (budget : Nat := 2000) :
-    MetaM (Except String (Search × Option Refutation)) := do
+    MetaM (Except String (Search C × Option Refutation)) := do
   match SpecProblem.of C f with
   | .error e => pure (.error e)
   | .ok P =>
     let s := P.search budget
     let some w := s.witness | pure (.ok (s, none))
     let cE := mkConst n
-    let c : Cand := { st := w.state.storage, args := w.args }
+    let c := w.cand
     let lits := P.domLits c
     -- the kernel is asked only what the evaluator already answered
-    let certified ← if Fml.eval3Peel (poolDom lits) c.vals (State.ofSemD C w.state)
-        P.fml = .ff then certifyRefl cE (Fml.quote cE P.fml) lits c.vals w.state
+    let certified ← if Fml.eval3Peel (poolDom lits) c.vals (c.tstate C)
+        P.fml = .ff then certifyRefl cE (Fml.quote cE P.fml) lits c.vals c
       else pure false
     let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i NRead.tt)
-    pure (.ok (s, some { witness := w, certified, fails }))
+    pure (.ok (s, some { witness := w.lines C, certified, fails }))
 
 /-- The report of a refutation: the witness and the conjuncts it fails. -/
-def Refutation.lines (C : Contract) (r : Refutation) : List MessageData :=
-  (r.witness.lines C).map toMessageData ++ r.fails.map fun l => m!"fails: {l}"
+def Refutation.lines (r : Refutation) : List MessageData :=
+  r.witness.map toMessageData ++ r.fails.map fun l => m!"fails: {l}"
 
 /-- The head line of a refutation of `f`, as `#verify` and
 `#counterexample` print it: `✗ f (certified):`. -/
@@ -1203,8 +1181,8 @@ def Refutation.head (f : String) (r : Refutation) : MessageData :=
   m!"✗ {f} ({if r.certified then "certified" else "tested"}):"
 
 /-- The report of the search for a counterexample to `f`'s specification. -/
-def searchReport (C : Contract) (f : String) : Search × Option Refutation → MessageData
-  | (_, some r) => reportMsg (r.head f) (r.lines C)
+def searchReport (f : String) : Search C × Option Refutation → MessageData
+  | (_, some r) => reportMsg (r.head f) r.lines
   | (s, none) =>
     m!"no counterexample to {f} found in {s.tried} candidates ({s.admitted} met the premises)"
 
@@ -1231,7 +1209,7 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
   let one (c : Lean.Name) (C : Contract) (f : String) : TermElabM Unit := do
     match ← refuteSpec c C f with
     | .error e => throwError "#counterexample: {e}"
-    | .ok r => logInfo (searchReport C f r)
+    | .ok r => logInfo (searchReport f r)
   match target with
   | some (.function c C f) => one c C f
   | some (.contract c C) =>
@@ -1255,9 +1233,9 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     let s := searchFml C φ
     let some w := s.witness
       | logInfo m!"no counterexample found in {s.tried} candidates"
-    let c : Cand := { st := w.state.storage, args := w.args }
+    let c := w.cand
     let certified ← if Fml.eval3Peel (poolDom c.argInts) c.vals
-        (State.ofSemD C w.state) φ = .ff then certifyRefl cE φE c.argInts c.vals w.state
+        (c.tstate C) φ = .ff then certifyRefl cE φE c.argInts c.vals c
       else pure false
     logReport m!"counterexample ({if certified then "certified" else "tested"}):"
       ((w.lines C).map toMessageData)

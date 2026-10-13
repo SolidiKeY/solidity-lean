@@ -93,7 +93,7 @@ left (`inScope` as in `provedTheorem`). -/
 def Verdict.report (C : Contract) (c : Lean.Name) (f : String) (inScope : Bool) :
     Verdict → MetaM MessageData
   | .proved => pure m!"✓ {f}\n{provedTheorem c f inScope}"
-  | .refuted r => pure (reportMsg (r.head f) (r.lines C))
+  | .refuted r => pure (reportMsg (r.head f) r.lines)
   | .gaveUp [] note => pure m!"? {f}: gave up: {note}"
   | .gaveUp (g :: gs) _ =>
     pure m!"? {f}: {gs.length + 1} goals left, the first:\n{MessageData.ofGoal g}"
