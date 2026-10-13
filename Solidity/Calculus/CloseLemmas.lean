@@ -322,12 +322,6 @@ theorem equiv_prim_left_iff {p : Value} {v : Theory.StValue} :
   ⟨fun h => (Theory.StValue.Equiv.prim_iff.1 h.symm).symm,
     fun h => h ▸ Theory.StValue.Equiv.refl _⟩
 
-/-- The state a `{havoc}` leaves, as the structure: its locals, heap,
-funds and transaction `σ`'s. -/
-theorem State.havoc_eq_mk (σ : Semantics.State) (st : List (Name × Semantics.SVal))
-    (nt : List (Int × Int)) :
-    σ.havoc st nt = Semantics.State.mk st σ.heap σ.nextId σ.env nt σ.selfBalance σ.tx := rfl
-
 /-! ## The symbols, one at a time -/
 
 section Ops
