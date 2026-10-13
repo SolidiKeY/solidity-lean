@@ -154,22 +154,28 @@ def tmSymbolHead? (e : Lean.Expr) : Option Lean.Name :=
     else none
   k?.bind fun k => (e.getArg! k).getAppFn.constName?
 
-/-- The subterms of `e` with the head of `p`, outermost and leftmost first;
+/-- The subterms of `e` with the head of `p`, outermost and leftmost first,
+each once;
 for a term, with its symbol too, where `p` names one (a typed term's
 symbols are compared before any unification). -/
 partial def subtermsLike (p e : Lean.Expr) : Array Lean.Expr :=
   let ps := tmSymbolHead? p
-  let rec go (e : Lean.Expr) (acc : Array Lean.Expr) : Array Lean.Expr :=
+  -- each shared subterm once: a line's terms share their storages
+  let rec go (e : Lean.Expr) (st : Array Lean.Expr × Std.HashSet Lean.Expr) :
+      Array Lean.Expr × Std.HashSet Lean.Expr :=
+    if st.2.contains e then st else
+    let (acc, seen) := st
+    let seen := seen.insert e
     let acc := if !e.hasLooseBVars && e.toHeadIndex == p.toHeadIndex &&
         e.headNumArgs == p.headNumArgs &&
         (match ps, tmSymbolHead? e with
           | some a, some b => a == b
           | _, _ => true) then acc.push e else acc
     match e with
-    | .app f x => go x (go f acc)
-    | .mdata _ e => go e acc
-    | _ => acc
-  go e #[]
+    | .app f x => go x (go f (acc, seen))
+    | .mdata _ e => go e (acc, seen)
+    | _ => (acc, seen)
+  (go e (#[], {})).1
 
 /-- The positions on the spine of the scoped storage of members `S`: each
 storage of members reached through the first argument of a `saveIn`, a
