@@ -30,13 +30,16 @@ the program is open (`Calculus/RewriteScoped.lean`) and past it
 (`Calculus/RewritePast.lean`, `Calculus/RewriteLaws.lean`). No leaf is
 erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
 erased program evaluators (W9.6.4), and so are the untyped terms by name
-(`Surface.Tm`, W9.7.1), and so is the erased state (W9.7.3). What stays
-untyped is what a term reads of the typed state: its global part
-(`State.globE`) and each local at its type (`State.getE`).
+(`Surface.Tm`, W9.7.1), and so is the erased state (W9.7.3); the terms'
+symbols read the typed state (W9.8.3). What stays untyped is `sol_decide`'s
+language (`LTerm`, `LStor`, `LMem`, `LFml`: `Calculus/DecideLang.lean`, over
+`Semantics.Value`), reached by the typed reading erased
+(`Calculus/DecideErase.lean`, `State.globE`), and the Theory's values, which
+a term denotes through `SVal.absT`.
 
-**Updates are terms** (`Update.lean`'s signature, `Calculus/Fml.lean`'s
-terms): `STerm` at `structRules.key`'s
-signature, `MTerm` at `memoryRules.key`'s — `save`/`delAt` nest, and so do
+**Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
+types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s
+sorts, a memory at `memoryRules.key`'s — `save`/`delAt` nest, and so do
 `write`/`addM`/`copySt`.  An allocation is the two parallel elements KeY
 writes, a push and a pop are nested writes over `size`, and
 `docs/lean-key-rule-map.md` is the symbol table.  A path alias binds bare

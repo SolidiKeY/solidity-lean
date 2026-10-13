@@ -45,11 +45,10 @@ set knows of the interpreter is `Calculus/CloseLemmas.lean`'s.
 
 What does not close, and why (on either side):
 
-* a write under the diamond: the closer reads the leaf's storage untyped
-  (`State.globE`), where `find`/`save` at `alice` is not known
-  to be defined, so `⟨ alice.age = 1; ⟩ true` stays open at
-  `{ storage := save(storage, alice.age, 1) } true`.  Write the box, or put
-  the well-formedness of the storage in the premise;
+* a write under the diamond at a path with an index: the index check may
+  revert, and the leaf does not say it does not.  At a path with no index
+  (`⟨ alice.age = 1; ⟩ true`) the write does not halt and closes as under
+  the box (`Calculus/CloseFrame.lean`);
 * two symbolic keys the formula does not tell apart: there is no case
   split on `k = j`, so `[ balances[k] = 5; balances[j] = 6; ] balances[k] == 5`
   stays open (it is false at `k = j`);

@@ -6,7 +6,7 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 435 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 431 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 Since the intrinsic refactor (`docs/intrinsic.md`, W3 and W4) the
@@ -127,6 +127,11 @@ What they say:
 - **Re-import at solkey `1b4341a303`** (W6, W7, below): 452 functions,
   12 of them internal; the twenty new obligations (`send`, internal calls,
   `return`, tuples) derived in `Derived14`: 435 derived.
+- **W9.8.4** (`docs/intrinsic.md`): four diamond obligations with a push
+  (`storagePopUnknownLength`, `storagePushLengthPositive`,
+  `arrayOfMappingsIndex`, `testDanglingInnerArrayReappearsAfterPush`)
+  pending again: the typed push halts at a full array, and `wt` bounds no
+  length: 431 derived.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`

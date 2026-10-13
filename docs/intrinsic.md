@@ -6375,6 +6375,125 @@ spread over the 23 chains' line elaboration.
 `CloseScoped`, `Decide`, `Deploy` (unchanged failures); `Tactics/Spec`,
 `Chains/StorageDelete`, `Chains/MemoryDelete` now build.  `sorry` count 19.
 
+### W9.8.4 record (2026-10-13, branch `w98-switch`)
+
+The merged lanes made green, and their losses won back where they could be.
+
+**Built**: `lean_build` of the default targets and `SolkeyTestSuite` (320
+jobs), clean.  What failed after the merge, and the fix:
+- `sol_close` on the typed leaves (`grind` left frames, deletes, memory
+  writes and copies unread): the facts a write leaves are named in the
+  `close_rw_s` set by a new module, `Calculus/CloseFrame.lean` (rows in
+  `lean-key-rule-map.md`): the value written (`Storage.writeVal`), reads,
+  lengths and index checks below (`Path.append`) and beside
+  (`StValue.diverges`) a write or a delete, a memory write's frame
+  (`MAddrT.Apart`), a copy's members, a deployment's storage.  The lemmas
+  are stated at a root and a path (`(SRef.ofRoot r h).append p`): a side
+  condition on a general `SRef` did not discharge inside `simp`.  A read is
+  named by `getD`, not `Option.get` (a dependent rewrite), and only at a
+  reference type: a word read named under a negation left obligations
+  (`Derive`, `Branch`).
+- Under the diamond, a write, delete or read at a path with no index
+  (`Path.total`) does not halt, so it closes as under the box
+  (`wp_diamond_write_total`, …): `⟨ alice.age = 1; ⟩ true` closes now
+  (its `ProofTree` pin moved; `Close.lean`'s list of what does not close
+  says so).
+- `theoryRewriteS` (`Calculus/RewriteSyntax.lean`) reified the old untyped
+  reading; it now reads a term by its typed denotation (`Tm.denote_*S`).
+- `Op1.toInt` had no arm in `Op1.toL`/`DecideRel`/the closer's equations
+  (`eval_toInt`); `TermLaws`' `findDelBelowStep` accepts the deleted path
+  itself; `SurfaceNotation` infers an update's local type (`valTy?`);
+  `Tools/Counterexample` lifts an update's result over the global part and
+  the locals' values (`State.lift?`, `TEnv.liftV?`); `State.thin_push`
+  clashed with `FunContract`'s (renamed `State.thin_keep_push`).
+
+**Pins moved, with reasons**: `Tactics/Decide`'s `twoKeysBothWays` and
+`deleteBelow`, and two `Solkey/Constructors` examples, were pinned open
+(`fail_if_success sol_close`) and close now; `ChainRewrites`' `add_literals`
+pin prints the typed `BinOp.add.evalT`, `findOnSaveFrame`'s the auxiliary
+proof names; `Notation`'s `PTerm.field` pin; `SelectOnSaveConsr`'s
+`ageWriteRead` is closed by its landed state (`landedAll_def`).
+
+**The push bound** (the `dec` lane's).  Under the box it is not needed:
+the update reading of a push at a full array halts, and a halting update
+makes a box line true.  `ElemS.guardAt` (`DecideScoped`) keeps the bound
+under the diamond only (`guardNB` under the box; `DecideTyped`'s
+`guardAt_box_rets`).  Under the diamond it is needed: the run accepts
+exhaustion (decision 15), the update reading does not, and `wt` is a
+layout, no length bound (a bounded `wt` would change `wt_iff_reachable`
+and every obligation's meaning).  Restored: `ProofTree`'s `pushes22`,
+`Dangling`'s `rounds6` (`rounds7` refused, pinned).  Still lost: the three
+`ProofTree` `wt` push examples stay box obligations, and four `TestSuite`
+diamond obligations with a push are pending (`storagePopUnknownLength`,
+`storagePushLengthPositive` in `Derived7`, `arrayOfMappingsIndex` in
+`Derived8`, `testDanglingInnerArrayReappearsAfterPush` in `Derived13`):
+431 derived, 6 pending (`Report.lean`, `corpus-parity.md`,
+`expected.tsv`, `Corpus/TestSuite.lean` regenerated).  Ways back: an update
+reading that accepts exhaustion as the run does (a third outcome), a
+diamond push rule with a `¬full` premise and its own case, or a `wt` with
+room and a length upper bound in the closer.
+
+**Not restored: a push through a stale alias** (`Dangling`'s `matrixPush`,
+one leaf open, pinned).  `Tm.staleWriteS` takes a `save` only, and the
+bound reads a live length a stale slot has not (`LPath.undef` makes
+`pushBound` an `err`).  It needs a stale push bridge (`pushOn` as
+`AOp.push` and a `save`), and either the bound as a slot-level `LTerm` with
+its `Sim` lemma or `RelU.storT_guard`'s `iff`s weakened to the implication
+the box needs.
+
+**Gates** (the W9.6.4 method: each file copied under `Solidity/Scratch/`,
+a fresh worker through the MCP, `/proc` every 20 ms, wall to the last CPU
+tick, one at a time, the two checkouts interleaved; master at
+`02b1025d`; wall s):
+
+| Row | Gate | master | `w98-switch` |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 181.5 | 177.3 |
+| `Derived7` | 61.7 | 47.7 | 48.8 |
+| `Tactics/Decide` | 45.0 | 38.3 | 31.4 |
+| `ProofTree` | 11.7 | 11.0 | 9.2 |
+| `Chains/Storage` | 9.0 | 8.2 | 9.2 |
+| `ChainRewrites` | 8.2 | 7.2 | 8.1 |
+| `ChainRewritesOpen` | 4.1 | 3.9 | 3.8 |
+| `Solkey/TestSuite` | 13.2 | 8.5 | 9.8 |
+
+Per file (master / here): `Derived1` 7.0/7.2, `2` 7.9/7.9, `3` 11.5/11.9,
+`4` 15.6/15.6, `5` 6.1/6.3, `6` 10.1/10.5, `7` 47.7/48.8, `8` 25.0/25.0,
+`9` 5.8/6.1, `10` 14.1/8.9 (master's wall at 9.8 s CPU: load), `11`
+2.7/2.8, `12` 12.2/12.5, `13` 7.1/3.9 (one obligation pending), `14`
+8.7/10.1 (9.0 s CPU both).  `ProofTree` master 8.5 s CPU.
+
+`Chains/Storage` is over its gate: 9.6 s at the merge, 9.2 s after two
+changes to `Chain.lawInstances` (`Calculus/RewriteChains.lean`): a law's
+candidates filtered by their symbol (`tmSymbolHead?`) before unification,
+and each shared subterm visited once (`subtermsLike`; a line's terms share
+their storages).  `#last_line` was the regression (`PushAfterPop` 849 ms,
+master 432; 660 ms after the first change).  What remains is spread
+(`profiler`, 50 ms: no declaration more than 170 ms over master); the
+lanes' `lawTwins` (each law and its `…In`/`…At` twin) and `mkAppM` for
+the candidates are the likely rest, not measured apart.  `ChainRewrites`
+likewise, 0.1 s under its gate.
+
+**What stays untyped**, and why:
+- `sol_decide`'s language (`LTerm`, `LStor`, `LMem`, `LFml` over
+  `Semantics.Value`), as the `dec` record says: one elimination and one
+  realizer for every sort would decide nothing more.  Its bridge is the
+  typed reading erased (`Tm.evalE`, `State.globE`).
+- The Theory (`Theory/`), reached by `SVal.absT`: its laws are KeY's,
+  stated once over `StValue`, and a term's denotation (`Tm.denote`) reads
+  through it.
+- `Update.lean`'s remnant over `Semantics.State`: `Modality.after`,
+  `readAddr`, `State.havoc`/`anon`, which the interpreter's own lemmas use.
+- `Tools/Counterexample`'s candidates (`State.ofSem?`, `Storage.decode`):
+  a search over untyped states, each lifted to a typed one before it counts.
+
+**Checked**: `sorry` count 19; `#print axioms Proves.valid` three
+(`propext`, `Classical.choice`, `Quot.sound`; `Sound.lean`'s pin);
+`check-orphans` (the only orphans are git-ignored `Scratch` modules);
+`check-doc-paths`; `solkeycheck` zero (323 taclets) and `check-testsuite`
+(431 derived, 5 pending, 1 divergent, 1 excluded) against a checkout of
+solkey `1b4341a303`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -6397,15 +6516,17 @@ not fix the heap typing, an allocation pair writes the local before the
 heap that types it, and `net`/`pay` read the intermediate global part
 (decision U1).  The side-projects reader is outdated (W9.7.1).
 
+**W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.4).  The
+terms' symbols read the typed state; what stays untyped is listed in the
+W9.8.4 record.
+
 **Open items:**
-- The reduction's symbols over the typed state (decision 83): a scoped
-  term's symbols still read the global part untyped (`State.globE`).
-- `Close`'s `simp` set over typed symbols (decision 82: done for the
-  scoped leaf at W9.3, `Calculus/CloseScoped.lean`).
-- A write under the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩
-  true`, pinned in `Examples/ProofTree.lean`): the closer reads the
-  storage untyped, with no layout without a `wt(storage)` premise
-  (proposal 100).
+- A push under the diamond: four `TestSuite` obligations pending and three
+  `ProofTree` examples boxed (W9.8.4 record, "The push bound"); a push
+  through a stale alias (`matrixPush`).
+- `Chains/Storage` 0.2 s over its gate (W9.8.4 record).
+- A write under the diamond at a path with an index leaves its leaf open:
+  the index check may revert.
 - `simplifyUpdate` while the program is open does not drop unread locals
   with their hidden binders (past the program it does, `FmlRw.simplifyPast`);
   what an update pops under the diamond (decision 87's rest).
