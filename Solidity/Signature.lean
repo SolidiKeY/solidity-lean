@@ -2,6 +2,7 @@ import Solidity.Update
 import Solidity.Semantics.TypedErase
 import Solidity.Semantics.StorageErase
 import Solidity.Theory.StateWrites
+import Solidity.Theory.Typed.Obs
 
 /-!
 # KeY's signature, typed
@@ -148,11 +149,6 @@ def MvT.toMVal (H : HTy) : (T : Ty) → MvT T → Option (MVal H T)
 
 /-! ## What the sorts denote -/
 
-/-- A struct's members as the state variables of a contract: what
-`select(s, r)` reads as a storage (`Storage (Contract.ofStruct s)`), and
-where a path under it is rooted (`SRef (Contract.ofStruct s) T`), so the
-storage's operations read it unchanged. -/
-def Contract.ofStruct (s : Name) : Contract := { vars := structDef s }
 
 /-- A typed sort's values, over the global part's heap typing `H`. -/
 @[reducible] def Srt.Den (C : Contract) (H : HTy) : Srt → Type
@@ -294,16 +290,6 @@ def Storage.atT {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (it : IndexTy
   st.checkIndex r it (PrimTy.key i)
   some (r.index it (PrimTy.key i))
 
-/-- A path under `select(s, r)` as a path from the root `r`: its member
-first. -/
-def SRef.under {C : Contract} {s r : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
-    (h : C.rootType r = some (.ref (.struct s))) : SRef C U :=
-  ⟨r, h, .field q.hroot q.path⟩
-
-/-- The struct at the root `r` of `st`, as a storage of its members. -/
-def Storage.selectT {C : Contract} {s r : Name} (st : Storage C)
-    (h : C.rootType r = some (.ref (.struct s))) : Storage (Contract.ofStruct s) :=
-  (SVal.view (st.get h) : SFields (structDef s))
 
 /-- `Op0.eval` by `match`, its compiled form. -/
 def Op0.evalM (g : State C []) {s : Srt} : Op0 C s → Option (s.Den C g.H)
@@ -518,247 +504,14 @@ theorem Storage.push_none {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)
   unfold Storage.push
   cases st.find r <;> rfl
 
-/-! ## The Theory's abstraction
-
-`Fml.eq` reads the Theory (`Theory.StValue`, KeY's total model), so a typed
-value is read there through its erasure (decision of the W9.8.0 spike): the
-Theory stays untyped. -/
-
-/-- A typed storage value as a Theory term (`Semantics.SVal.abs` of its
-erasure). -/
-def SVal.absT {T : Ty} (v : SVal T) : Theory.StValue := Semantics.SVal.abs v.erase
-
-/-- A typed storage as one Theory struct node (`State.abs`). -/
-def Storage.absT (st : Storage C) : Theory.Struct := Semantics.SVal.abs.fields st.erase
-
 /-! ## The laws, typed
 
 solkey's `findOnSave` and `findOnSaveDifferent` (`TermTaclet.findOnSave`,
 `TermTaclet.findOnSaveFrame`) on the typed storage, where the write lands
-(the Theory's `find_copyTo_same` and `find_copyTo_frame`, `Theory/Copy.lean`,
-need no premise: KeY's model is total).  A typed `save` is the program's
+(the typed Theory's `Obs.findOnSave` and `Obs.findOnSaveFrame`,
+`Theory/Typed/Obs.lean`, need no premise: KeY's model is total).  A typed `save` is the program's
 write (`Storage.write`: a word stored, a struct or an array laid over what is
 there), which is a `Storage.save` at the same reference. -/
-
-theorem SFields.get_set_same {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
-    (h : lookupBy f fs = some T) → (y : SVal T) → (x.set h y).get h = y
-  | [], _, .nil, h, _ => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons v rest, h, y => by
-    rw [SFields.set_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true, SFields.get_cons]
-    · simp only [e, dite_false, SFields.get_cons]
-      exact SFields.get_set_same rest _ y
-
-theorem SFields.get_set_ne {f g : Name} : {fs : List (Name × Ty)} → {T U : Ty} → (x : SFields fs) →
-    (h : lookupBy f fs = some T) → (hg : lookupBy g fs = some U) → f ≠ g → (y : SVal T) →
-    (x.set h y).get hg = x.get hg
-  | [], _, _, .nil, h, _, _, _ => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, U, .cons v rest, h, hg, hfg, y => by
-    rw [SFields.set_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      have eg : ¬ g = f' := fun h' => hfg (e.trans h'.symm)
-      simp only [e, dite_true, SFields.get_cons, eg, dite_false]
-    · simp only [e, dite_false, SFields.get_cons]
-      by_cases eg : g = f'
-      · simp only [eg, dite_true]
-      · simp only [eg, dite_false]
-        exact SFields.get_set_ne rest _ _ hfg y
-
-theorem SVal.findM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v : SVal U) →
-    {x' : SVal T} → x.saveM p v = some x' → x'.findM p = some v
-  | _, _, x, .nil, v, x', h => by
-    cases x <;> (simp only [SVal.saveM, Option.some.injEq] at h; subst h; cases v <;> rfl)
-  | _, _, .struct fs, .field hf p, v, x', h => by
-    simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-    obtain ⟨y, hy, rfl⟩ := h
-    simp only [SVal.findM, SFields.get_set_same]
-    exact SVal.findM_saveM _ p v hy
-  | _, _, .array e sh hn, .at i p, v, x', h => by
-    simp only [SVal.saveM] at h
-    split at h
-    · rename_i hi
-      split at h
-      · rename_i x hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-        obtain ⟨y, hy, rfl⟩ := h
-        have hl : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hx).1
-        simp only [SVal.findM, hi, if_true, SVec.toList_ofList, SList.toList_ofList,
-          List.take_append_drop, List.getElem?_set_self hl]
-        exact SVal.findM_saveM _ p v hy
-      · simp only [reduceCtorEq] at h
-    · simp only [reduceCtorEq] at h
-  | _, _, .fixed e, .atF i p, v, x', h => by
-    simp only [SVal.saveM] at h
-    split at h
-    · rename_i hi
-      split at h
-      · rename_i x hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-        obtain ⟨y, hy, rfl⟩ := h
-        have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hx).1
-        simp only [SVal.findM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl]
-        exact SVal.findM_saveM _ p v hy
-      · simp only [reduceCtorEq] at h
-    · simp only [reduceCtorEq] at h
-  | _, _, .map m d, .key k p, v, x', h => by
-    simp only [SVal.saveM] at h
-    split at h <;>
-    · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-      obtain ⟨y, hy, rfl⟩ := h
-      simp only [SVal.findM, SMap.toList_ofList, SemanticsProperties.lookupBy_setBy_self]
-      exact SVal.findM_saveM _ p v hy
-
-/-- A save that lands reads back (`findOnSave` below a root). -/
-theorem SVal.find_save_same {T U : Ty} (x : SVal T) (p : Path T U) (v : SVal U)
-    {x' : SVal T} (h : x.save p v = some x') : x'.find p = some v := by
-  rw [SVal.save_eq_saveM] at h
-  rw [SVal.find_eq_findM]
-  exact SVal.findM_saveM x p v h
-
-/-- Two paths from one value that part: at two members, two slots or two
-keys, somewhere along them (solkey's `p ≠ q` of `findOnSaveDifferent`,
-across the types the two paths reach). -/
-inductive Path.Diverges : {T U W : Ty} → Path T U → Path T W → Prop
-  | field {s f f' : Name} {T T' U W : Ty} (h : lookupBy f (structDef s) = some T)
-      (h' : lookupBy f' (structDef s) = some T') (p : Path T U) (q : Path T' W) (hne : f ≠ f') :
-      Diverges (.field h p) (.field h' q)
-  | fieldIn {s f : Name} {T U W : Ty} (h : lookupBy f (structDef s) = some T) {p : Path T U}
-      {q : Path T W} : Diverges p q → Diverges (.field h p) (.field h q)
-  | at {E U W : Ty} {i j : Int} (p : Path E U) (q : Path E W) (hne : i ≠ j) :
-      Diverges (.at i p) (.at j q)
-  | atIn {E U W : Ty} (i : Int) {p : Path E U} {q : Path E W} :
-      Diverges p q → Diverges (.at i p) (.at i q)
-  | atF {E U W : Ty} {n : Nat} {i j : Int} (p : Path E U) (q : Path E W) (hne : i ≠ j) :
-      Diverges (.atF (n := n) i p) (.atF j q)
-  | atFIn {E U W : Ty} {n : Nat} (i : Int) {p : Path E U} {q : Path E W} :
-      Diverges p q → Diverges (.atF (n := n) i p) (.atF i q)
-  | key {K V U W : Ty} {k k' : Int} (p : Path V U) (q : Path V W) (hne : k ≠ k') :
-      Diverges (.key (K := K) k p) (.key k' q)
-  | keyIn {K V U W : Ty} (k : Int) {p : Path V U} {q : Path V W} :
-      Diverges p q → Diverges (.key (K := K) k p) (.key k q)
-
-theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
-    (hd : Path.Diverges p q) : (x : SVal T) → (v : SVal U) → {x' : SVal T} →
-    x.saveM p v = some x' → x'.findM q = x.findM q := by
-  induction hd with
-  | field h h' p q hne =>
-    intro x v x' hs
-    cases x with
-    | struct fs =>
-      simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff,
-        Option.some.injEq] at hs
-      obtain ⟨y, _, rfl⟩ := hs
-      simp only [SVal.findM, SFields.get_set_ne fs h h' hne]
-  | fieldIn h _ ih =>
-    intro x v x' hs
-    cases x with
-    | struct fs =>
-      simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff,
-        Option.some.injEq] at hs
-      obtain ⟨y, hy, rfl⟩ := hs
-      simp only [SVal.findM, SFields.get_set_same]
-      exact ih _ v hy
-  | @«at» E U W i j p q hne =>
-    intro x v x' hs
-    cases x with
-    | array e sh hn =>
-      simp only [SVal.saveM] at hs
-      split at hs
-      · rename_i hi
-        split at hs
-        · rename_i x0 hx
-          simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-          obtain ⟨y, _, rfl⟩ := hs
-          simp only [SVal.findM, SVec.toList_ofList, SList.toList_ofList, List.take_append_drop]
-          by_cases hj : 0 ≤ j
-          · have hn' : i.toNat ≠ j.toNat := by omega
-            simp only [hj, if_true, List.getElem?_set_ne hn']
-          · simp only [hj, if_false]
-        · simp only [reduceCtorEq] at hs
-      · simp only [reduceCtorEq] at hs
-  | atIn i _ ih =>
-    intro x v x' hs
-    cases x with
-    | array e sh hn =>
-      simp only [SVal.saveM] at hs
-      split at hs
-      · rename_i hi
-        split at hs
-        · rename_i x0 hx
-          simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-          obtain ⟨y, hy, rfl⟩ := hs
-          have hl : i.toNat < (e.toList ++ sh.toList).length :=
-            (List.getElem?_eq_some_iff.mp hx).1
-          simp only [SVal.findM, hi, if_true, SVec.toList_ofList, SList.toList_ofList,
-            List.take_append_drop, List.getElem?_set_self hl, hx]
-          exact ih _ v hy
-        · simp only [reduceCtorEq] at hs
-      · simp only [reduceCtorEq] at hs
-  | @atF E U W n i j p q hne =>
-    intro x v x' hs
-    cases x with
-    | fixed e =>
-      simp only [SVal.saveM] at hs
-      split at hs
-      · rename_i hi
-        split at hs
-        · rename_i x0 hx
-          simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-          obtain ⟨y, _, rfl⟩ := hs
-          simp only [SVal.findM, SVec.toList_set]
-          by_cases hj : 0 ≤ j
-          · have hn' : i.toNat ≠ j.toNat := by omega
-            simp only [hj, if_true, List.getElem?_set_ne hn']
-          · simp only [hj, if_false]
-        · simp only [reduceCtorEq] at hs
-      · simp only [reduceCtorEq] at hs
-  | atFIn i _ ih =>
-    intro x v x' hs
-    cases x with
-    | fixed e =>
-      simp only [SVal.saveM] at hs
-      split at hs
-      · rename_i hi
-        split at hs
-        · rename_i x0 hx
-          simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-          obtain ⟨y, hy, rfl⟩ := hs
-          have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hx).1
-          simp only [SVal.findM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl, hx]
-          exact ih _ v hy
-        · simp only [reduceCtorEq] at hs
-      · simp only [reduceCtorEq] at hs
-  | @key K V U W k k' p q hne =>
-    intro x v x' hs
-    cases x with
-    | map m d =>
-      simp only [SVal.saveM] at hs
-      split at hs <;>
-      · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-        obtain ⟨y, _, rfl⟩ := hs
-        simp only [SVal.findM, SMap.toList_ofList,
-          SemanticsProperties.lookupBy_setBy_ne (Ne.symm hne)]
-  | keyIn k _ ih =>
-    intro x v x' hs
-    cases x with
-    | map m d =>
-      simp only [SVal.saveM] at hs
-      split at hs
-      · rename_i x0 hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-        obtain ⟨y, hy, rfl⟩ := hs
-        simp only [SVal.findM, SMap.toList_ofList, SemanticsProperties.lookupBy_setBy_self, hx]
-        exact ih _ v hy
-      · rename_i hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
-        obtain ⟨y, hy, rfl⟩ := hs
-        simp only [SVal.findM, SMap.toList_ofList, SemanticsProperties.lookupBy_setBy_self, hx]
-        exact ih _ v hy
 
 namespace Storage
 
@@ -784,7 +537,7 @@ theorem write_some {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     exact ⟨_, h⟩
 
 /-- **`findOnSave`**, typed: a word written where the write lands reads back
-(solkey's `findOnSave`; Theory `find_copyTo_same`). -/
+(solkey's `findOnSave`; Theory `Obs.findOnSave`). -/
 theorem findOnSave {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (v : p.Denote)
     {st' : Storage C} (h : st.write r (.prim v) = some st') : st'.find r = some (.prim v) := by
   obtain ⟨x', hs, rfl⟩ := save_some (show st.save r (.prim v) = some st' from h)
@@ -793,7 +546,7 @@ theorem findOnSave {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (v : p.D
 
 /-- **`findOnSaveFrame`** across roots, typed: a write leaves another state
 variable as it was (solkey's `findOnSaveDifferent`; Theory
-`find_copyTo_frame`). -/
+`Obs.findOnSaveFrame`). -/
 theorem findOnSaveFrameRoot {U W : Ty} (st : Storage C) (r : SRef C U) (q : SRef C W)
     (hne : r.root ≠ q.root) (v : SVal U) {st' : Storage C} (h : st.write r v = some st') :
     st'.find q = st.find q := by
@@ -803,7 +556,7 @@ theorem findOnSaveFrameRoot {U W : Ty} (st : Storage C) (r : SRef C U) (q : SRef
 
 /-- **`findOnSaveFrame`** below one root, typed: a write leaves a path that
 parts from it as it was (solkey's `findOnSaveDifferent`, `p ≠ q` as
-`Path.Diverges`; Theory `find_copyTo_frame`). -/
+`Path.Diverges`; Theory `Obs.findOnSaveFrame`). -/
 theorem findOnSaveFrame {T U W : Ty} (st : Storage C) (r : Name) (hr : C.rootType r = some T)
     {p : Path T U} {q : Path T W} (hd : Path.Diverges p q) (v : SVal U) {st' : Storage C}
     (h : st.write ⟨r, hr, p⟩ v = some st') :
@@ -822,7 +575,7 @@ The laws above are over any contract, so over `Contract.ofStruct s` they
 are the laws of `sts s` (`findOnSave (C := Contract.ofStruct s)`, …). -/
 
 /-- **`findMemberCons`**, typed: a read under `select(s, r)` is the read at
-`r` followed by its path (Theory `find_cons`). -/
+`r` followed by its path (Theory `Obs.select_find`). -/
 theorem find_selectT {s r : Name} {U : Ty} (st : Storage C)
     (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U) :
     (st.selectT h).find q = st.find (q.under h) := by

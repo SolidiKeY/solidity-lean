@@ -1,4 +1,3 @@
-import Solidity.Calculus.Decide
 import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.Delab
 import Solidity.Calculus.Quote
@@ -17,13 +16,12 @@ import Solidity.Tools.Taclet
 
 * `#wp φ` runs the scoped strategy to the end (`symex 200`, what
   `sol_symex` does) and prints what is left, the first-order formula whose
-  validity is `φ`'s.  When it is in `sol_decide`'s fragment
-  (`Fml.inLS`) it also prints its reduction (`Fml.reduceS`): the updates
-  pushed in and every read of a write
-  eliminated, a formula over the initial state alone, printed by `LFml.fmt`
-  in KeY's spelling (`find(storage, alice.age)`, `save(s, p, w)`,
-  `delAt(s, p)`, `if(i = j) then a else b`, `write(m, idC(idp0, nil), at(i),
-  v)`, `=`, `∧`, `→`, `¬`, `∀ uint x; φ`).
+  validity is `φ`'s.  When it is in `sol_decide`'s fragment it also prints
+  its reduction (`Fml.reduceS`): the updates pushed in and every read of a
+  write eliminated, a typed formula over the initial state alone, printed
+  by `LFml.ppWith` in KeY's spelling (`find(storage, alice.age)`,
+  `save(s, p, w)`, `delAt(s, p)`, `if(i = j) then a else b`, `=`, `∧`,
+  `→`, `¬`, `∀ uint x; φ`).
 * `#step φ` takes one step and names the rule the scoped strategy fires
   (`ruleAtC?`, `ruleOf?`), as a line of `#derivation`.
 
@@ -42,180 +40,11 @@ namespace Solidity.Tools
 
 open Semantics Decide
 
-/-! ## The reduced formula, printed -/
-
-/-- A key shape as its test is named. -/
-def KShape.fmt : KShape → String
-  | .map => "isMap"
-  | .fixed => "isFixed"
-
-/-- A path whose keys are integer literals. -/
-def LPath.total : LPath → Bool
-  | .root _ => true
-  | .field q _ => LPath.total q
-  | .at q (.lit (.int _)) => LPath.total q
-  | .at _ _ => false
-
-/-- A guard that always returns, and is not printed: a literal, or the keys
-of a path with literal keys (`ok(alice.age)`). -/
-def LTerm.total : LTerm → Bool
-  | .lit _ | .env _ => true
-  | .pok q => LPath.total q
-  | _ => false
-
-/-- The guards of a sequence and the value it returns: `seq d a` returns
-`a` where `d` returns, and a guard that is itself a sequence contributes its
-guards and its value. -/
-def LTerm.guards : LTerm → List LTerm × LTerm
-  | .seq d a =>
-    let (gd, vd) := LTerm.guards d
-    let (ga, va) := LTerm.guards a
-    (gd ++ [vd] ++ ga, va)
-  | t => ([], t)
-
-/-- The allocation ordinal `k` as KeY's Skolem identity: `idp0`. -/
-def idpFmt (k : Nat) : String := s!"idp{k}"
-
-/-- A memory name as KeY writes it, `idC(idp, flds)`: `idC(idp0, nil)`,
-`idC(idp0, [account, at(2)])`. -/
-def LId.fmt (i : LId) : String :=
-  let seg : Seg → String
-    | .field f => f
-    | .at k => s!"at({k})"
-  let flds := if i.path.isEmpty then "nil" else "[" ++ ", ".intercalate (i.path.map seg) ++ "]"
-  s!"idC({idpFmt i.root}, {flds})"
-
-/-- An array operation, as `ppKey` writes it: `push`, `slot(T)`, `pop(keep)`. -/
-def AOp.fmt : AOp → String
-  | .push => "push"
-  | .slot E => s!"slot({E.toStr})"
-  | .pop b => s!"pop({b})"
-
-mutual
-/-- A term of the target language, in KeY's spelling where KeY has the
-symbol (`find`, `delValue`, `if(…) then … else …`); the guards only Lean has
-keep Lean's names (`has`, `isMap`, `isFixed`, `ok`, `copyOk`, `orElse`,
-`err`), and `(d; a)` is `a` where `d` returns. -/
-partial def LTerm.fmt [FreshNames] : LTerm → String
-  | .lit v => Value.fmt v
-  | .var a => toString a.key
-  | .binop op _ a b => s!"{LTerm.fmtArg a} {BinOp.sym op} {LTerm.fmtArg b}"
-  | .unop op _ a => s!"{UnOp.sym op}{LTerm.fmtArg a}"
-  | .ite c a b => s!"if({LTerm.fmt c}) then {LTerm.fmtArg a} else {LTerm.fmt b}"
-  | .find s q => s!"find({LStor.fmt s}, {LPath.fmt q})"
-  | .has s q => s!"has({LStor.fmt s}, {LPath.fmt q})"
-  | .kmap sh s q => s!"{KShape.fmt sh}({LStor.fmt s}, {LPath.fmt q})"
-  | .len s q => s!"find({LStor.fmt s}, {LPath.fmt q}.length)"
-  | .sok s => s!"ok({LStor.fmt s})"
-  | .pok q => s!"ok({LPath.fmt q})"
-  | t@(.seq ..) =>
-    let (gs, v) := LTerm.guards t
-    let guard : LTerm → String
-      | g@(.ite ..) | g@(.kite ..) => s!"({LTerm.fmt g})"
-      | g => LTerm.fmt g
-    let gs := (gs.filter (!LTerm.total ·)).map guard |>.eraseDups
-    if gs.isEmpty then LTerm.fmt v else s!"({", ".intercalate gs}; {LTerm.fmt v})"
-  | .orElse a b => s!"orElse({LTerm.fmt a}, {LTerm.fmt b})"
-  | .kite a b t e =>
-    s!"if({LTerm.fmt a} = {LTerm.fmt b}) then {LTerm.fmtArg t} else {LTerm.fmt e}"
-  | .zero a => s!"delValue({LTerm.fmt a})"
-  | .err => "err"
-  | .env k => k.toStr
-  | .findP s q => s!"findP({LStor.fmt s}, {LPath.fmt q})"
-  | .cpok s q => s!"copyOk({LStor.fmt s}, {LPath.fmt q})"
-
-/-- A term as an operand: parenthesised unless it is atomic. -/
-partial def LTerm.fmtArg [FreshNames] : LTerm → String
-  | t@(.binop ..) | t@(.ite ..) | t@(.kite ..) => s!"({LTerm.fmt t})"
-  | t => LTerm.fmt t
-
-/-- A path, the root first: `alice.account.balance`, `balances[k]`. -/
-partial def LPath.fmt [FreshNames] : LPath → String
-  | .root r => r
-  | .field q f => s!"{LPath.fmt q}.{f}"
-  | .at q k => s!"{LPath.fmt q}[{LTerm.fmt k}]"
-
-/-- A storage: `storage`, and the writes on top of it, as `ppKey` writes
-them (`Calculus/KeyNotation.lean`).  A read written is `select(s, q)`, since
-`find` there is a copy, KeY's `save(s, q, find(src, sq))`; a copy of memory
-is `save(s, q, copyMem(mtSt, m, i))`; an array operation `arr(op, s, q, w)`
-(`push(s, q, w)` for a push); a write through a stale alias `staleSave` or
-`stale(op, s, q, w)`, nodes only Lean has (`Calculus/DecideLang.lean`). -/
-partial def LStor.fmt [FreshNames] : LStor → String
-  | .init => "storage"
-  | .save s q w =>
-    let w := match w with
-      | .find s' q' => s!"select({LStor.fmt s'}, {LPath.fmt q'})"
-      | .len s' q' => s!"select({LStor.fmt s'}, {LPath.fmt q'}.length)"
-      | w => LTerm.fmt w
-    s!"save({LStor.fmt s}, {LPath.fmt q}, {w})"
-  | .delAt s q => s!"delAt({LStor.fmt s}, {LPath.fmt q})"
-  | .arr .push s q w => s!"push({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .arr op s q w => s!"arr({AOp.fmt op}, {LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .stale none s q w => s!"staleSave({LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .stale (some op) s q w =>
-    s!"stale({AOp.fmt op}, {LStor.fmt s}, {LPath.fmt q}, {LTerm.fmt w})"
-  | .copy s q src@(.view ..) (.root r) =>
-    if r = viewRoot then s!"save({LStor.fmt s}, {LPath.fmt q}, {LStor.fmt src})"
-    else s!"save({LStor.fmt s}, {LPath.fmt q}, find({LStor.fmt src}, {r}))"
-  | .copy s q src sq =>
-    s!"save({LStor.fmt s}, {LPath.fmt q}, find({LStor.fmt src}, {LPath.fmt sq}))"
-  | .view m i => s!"copyMem(mtSt, {LMem.fmt m}, {LId.fmt i})"
-
-/-- A memory: `memory`, and the allocations and writes on top of it, as KeY
-writes them.  The `k`-th allocation is `shaped(idpk, T)`, its type in place
-of KeY's `#shapeOf`; a `new T[](n)` is the allocation and the write of its
-`size`. -/
-partial def LMem.fmt [FreshNames] : LMem → String
-  | .init => "memory"
-  | .addM m k R => s!"addM({LMem.fmt m}, shaped({idpFmt k}, {(Ty.ref R).toStr}))"
-  | .newArr m k R n =>
-    s!"write(addM({LMem.fmt m}, shaped({idpFmt k}, {(Ty.ref R).toStr})), \
-      {LId.fmt ⟨k, []⟩}, size, {LTerm.fmt n})"
-  | .copySt m k s q => s!"copySt({LMem.fmt m}, {idpFmt k}, find({LStor.fmt s}, {LPath.fmt q}))"
-  | .write m i a v =>
-    -- a write of `size` would read as an allocation: `ppKey` escapes it
-    let a := match a with | .size => "‹LSel.size›" | a => LSel.fmt a
-    s!"write({LMem.fmt m}, {LId.fmt i}, {a}, {LMV.fmt v})"
-
-/-- A selector, as KeY's: a member `f`, an element `at(t)`, the length `size`. -/
-partial def LSel.fmt [FreshNames] : LSel → String
-  | .fld f => f
-  | .idx t => s!"at({LTerm.fmt t})"
-  | .size => "size"
-
-/-- A memory value: a word, or a name. -/
-partial def LMV.fmt [FreshNames] : LMV → String
-  | .word t => LTerm.fmt t
-  | .ref i => LId.fmt i
-end
-
-/-- A reduced formula: `∧` binds tighter than `→`, which associates to the
-right; `=` is KeY's equality, and `∀ uint x; φ` its quantifier. -/
-partial def LFml.fmt [FreshNames] : LFml → String
-  | .tt => "true"
-  | .eq a b => s!"{LTerm.fmtArg a} = {LTerm.fmtArg b}"
-  | .not φ => s!"¬{atom φ}"
-  | .and φ ψ => s!"{conj φ} ∧ {conj ψ}"
-  | .imp φ ψ => s!"{atom' φ} → {LFml.fmt ψ}"
-  | .all x p φ => s!"∀ {p.toStr} {x}; {LFml.fmt φ}"
-where
-  atom : LFml → String
-    | φ@(.tt) | φ@(.not _) => LFml.fmt φ
-    | φ => s!"({LFml.fmt φ})"
-  conj : LFml → String
-    | φ@(.imp ..) | φ@(.all ..) => s!"({LFml.fmt φ})"
-    | φ => LFml.fmt φ
-  atom' : LFml → String
-    | φ@(.imp ..) | φ@(.all ..) => s!"({LFml.fmt φ})"
-    | φ => LFml.fmt φ
-
-
 /-! ## The binders' names
 
 The scoped reduction keys a local by the binder count where it is pushed
-(`SymS.key`, `slotVar k`), which prints as `#k`; `#wp` prints it by the name
-its binder gives, replaying the count as `Fml.toLS` makes it. -/
+(`SymS.next`, the atom `LTm.var k`), which prints as `#k`; `#wp` prints it
+by the name its binder gives, replaying the count as `Fml.toLS` makes it. -/
 
 /-- The names an update declares, in the order it pushes them
 (`Upd.replayS`). -/
@@ -268,11 +97,12 @@ quoted, and its reduction when it is in the fragment. -/
 def wpQuotedC [FreshNames] (c : Lean.Expr) {Γ : Ctx} (φ : Fml C Γ) :
     Lean.Expr × Option String :=
   let ψ := symex 200 φ
-  -- a modality left is outside the fragment (`Fml.inLS`)
+  -- a modality left is outside the fragment
   (ψ.quote c, match Γ, ψ with
     | [], ψ =>
-      if !ψ.active && ψ.inLS true SymS.empty then
-        some (@LFml.fmt (keyedNames (ψ.keyNames 0)) ψ.reduceS)
+      if !ψ.active then
+        let inst := keyedNames (ψ.keyNames 0)
+        ψ.reduceS.map fun r => r.ppWith (inst.name "#") PrimTy.toStr
       else none
     | _, _ => none)
 
@@ -319,7 +149,7 @@ def elabWpCore : CommandElab := fun stx => liftTermElabM do
   let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) (← inferType e) e
   let tail := match red with
     | some r => m!"\nupdate-free:\n    {r}"
-    | none => m!"\noutside `sol_decide`'s fragment (`Fml.inLS`): no reduction"
+    | none => m!"\noutside `sol_decide`'s fragment (`Fml.reduceS`): no reduction"
   logInfo (m!"symbolic execution leaves:\n    {ψ}" ++ tail)
 
 /-- `#step φ`. -/

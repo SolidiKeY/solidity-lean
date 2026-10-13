@@ -140,6 +140,10 @@ What they say:
   so the length after one is at least `1` and the `- 1` does not
   underflow: W9.8 review), not derived (the closer does not read the slot
   at `(len + 1) - 1` as the one pushed), and still listed `divergent`.
+- **W10.4** (`docs/intrinsic.md`): `sol_decide`'s language typed.  The
+  closer reads `x < x + c` (`Facts.ltSucc`) and the alias a dangling write
+  went through: `storagePushReadBack` and `testArrayCopyClearsOldElements`
+  derived, 437 derived, none pending; every replay is `sol_prove` alone.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -1166,7 +1170,7 @@ is the write itself, so it is exact with a guard that is only sound
 (`storagePushLengthSaveReferenceElement` then `selectOnSaveCons`): the
 word where the write is at the slot's location (opaque if the location has
 an index), nothing above or below it, the slot below the write apart
-(`stale_slotU_sim`).  The facts are `Calculus/SlotLemmas.lean`'s, with
+(`stale_slotU_sim`).  The facts are those of Calculus/SlotLemmas.lean (deleted at W10.4), with
 `find_save_diverge_tail`, `find_slot_head` and `save_ok_of_find_ok`
 added.  A push through an alias (`.stale (some _)`) stays whole.
 
@@ -1242,7 +1246,7 @@ outer array and reads the recycled inner array's length and element.
   with the facts' halting (`Facts.nfH`): the slot's length is
   `kite(0, (len; 0) + 1 - 1, …)`, whose test only `delete`'s reset
   `len` (`isFixed` halting) decides.
-- `Calculus/SlotLemmas.lean` gains `apply_push_findLive_array` (an array
+- Calculus/SlotLemmas.lean gains `apply_push_findLive_array` (an array
   below a pushed array is an old element's).
 
 `testDanglingInnerArrayReappearsAfterPush` is derived by `sol_prove`
@@ -1291,7 +1295,7 @@ whose reduction is 15931, refused by `Derive.leafFits` in 25 ms, as
 
 The rule map (`docs/lean-key-rule-map.md`, after the `slotU` row) has a row
 per taclet the lane transcribes, with the Lean clause, its soundness
-lemmas (`Calculus/SlotLemmas.lean`'s among them) and the Theory lemma; the
+lemmas (Calculus/SlotLemmas.lean's among them) and the Theory lemma; the
 guards KeY does not have (`staleOk`, `LStor.dangles`, `Facts.nfH`) are
 marked Lean only.
 
@@ -1467,7 +1471,7 @@ A second run was within 1% of the first.
 
 ### Step 1: the interpreter lemmas
 
-`Calculus/MemNames.lean` (about 1,560 lines) holds the facts the memory
+Calculus/MemNames.lean (about 1,560 lines; deleted at W10.4) holds the facts the memory
 clauses rest on. It builds in 2.2 s (`lake build`), well under the 20–60 s
 the plan estimated. Nothing in `Decide`, `Closer` or `Derive` changed, so
 `Derived9`–`11` are as in the baseline. `DecideMem` does not import the
@@ -1481,7 +1485,7 @@ The target language gains solkey's memory (`LMem`: `addM`, `newArr`,
 storage (`LStor.view`), the copy guard `LTerm.cpok` and `LVal.mem`.
 Nothing produces them yet; every exhaustive match keeps them whole
 (`.find (.view ..) Q`, `.sok (.view ..)`, `cpok` itself), and `fits` counts
-`LMem` nodes. `DecideMem` now imports `Calculus/MemNames.lean`.
+`LMem` nodes. `DecideMem` now imports Calculus/MemNames.lean.
 
 **Measured.** All 91 theorems still prove; `Derived9`–`11` check clean.
 
@@ -1758,8 +1762,8 @@ As at step 5b, to within noise: no closer code changed.
 
 ### Step 8: the readers against the Theory
 
-`Calculus/MemTheory.lean` reads a closer memory as a term of
-`Theory/Terms.lean` (`LMem.toTheory`: `init` is `pre(heap)`, the `k`-th
+Calculus/MemTheory.lean reads a closer memory as a term of
+Theory/Terms.lean (both deleted at W10.4; `LMem.toTheory`: `init` is `pre(heap)`, the `k`-th
 allocation the root `shaped(ofNat(k), sh)`, `new T[](n)` an `addM` with its
 length written, a copy from storage `copySt` of the subtree's `abs`) and
 proves that wherever `readT` and `readI` answer, they answer what
@@ -1784,7 +1788,7 @@ Every memory clause of the closer is a solkey taclet of `memoryRules.key`,
 names it, with a row in `docs/lean-key-rule-map.md` ("The closer's memory
 clauses"): the closer clause, the interpreter lemma that is its soundness,
 the Theory lemma that transcribes the taclet, and where
-`Calculus/MemTheory.lean` checks the two agree. The guards only Lean has
+Calculus/MemTheory.lean checks the two agree. The guards only Lean has
 (the run and copy guards, `refDesc`, `memSize`) have rows marked "—", and
 the three deviations (an allocation's pair kept whole, `new T[](n)` one
 node, no `new` term) are rows of their own.
@@ -1795,10 +1799,10 @@ node, no `new` term) are rows of their own.
   pending, 3 other". The 6 pending are `storagePushReadBack` (divergent)
   and the five dangling aliases, as the plan expected. `check-testsuite.sh`
   passes: 418 = 411 + 5 pending + 1 divergent + 1 excluded.
-- **Modules.** New: `Calculus/MemNames.lean` (the interpreter lemmas),
+- **Modules.** New: Calculus/MemNames.lean (the interpreter lemmas),
   `Calculus/DecideLang.lean` (the target language, split out of
   `Calculus/Decide.lean`), `Calculus/MemRead.lean` (the clauses),
-  `Calculus/MemTheory.lean` (agreement with the Theory). Deleted: the module
+  Calculus/MemTheory.lean (agreement with the Theory). Deleted: the module
   `DecideMem`, M6's symbolic heap.
 - **Review findings of the M6 closer.** Closed: the allocation built
   before its size guard (gone with `DecideMem`; `new T[](n)` is one node,
@@ -1832,8 +1836,8 @@ it now stands (step 8 added a module no proof imports):
 | `Derived11`, 11 theorems | 2.3 s | 2.2 s | −6% |
 | `memoryIndexWriteNse` | 2.48 s | 2.20 s | −11% |
 | `Derived12`, the 19 by `sol_prove` (new) | — | 15.1 s | — |
-| `Calculus/MemNames.lean` (new, `lake build`) | — | 2.2 s | — |
-| `Calculus/MemTheory.lean` (new, language server) | — | about 5 s | — |
+| Calculus/MemNames.lean (new, `lake build`) | — | 2.2 s | — |
+| Calculus/MemTheory.lean (new, language server) | — | about 5 s | — |
 
 Nothing is slower than the baseline, so no warning: the 20% line was
 approached only at steps 2 and 3 (`memoryIndexWriteNse` +17%, the kernel
@@ -1858,7 +1862,7 @@ each:
   `read_agree` and `newSel_agree` held trivially.  Replaced by `DeclAlong`,
   a hypothesis on the one read: the table is the declarations of the
   members along its path below the allocated type.  An `example` at the end
-  of `Calculus/MemTheory.lean` instantiates `readT_agree_shapes` on a fresh
+  of Calculus/MemTheory.lean instantiates `readT_agree_shapes` on a fresh
   `Basket` (the length of `items`), discharging it.
 - **Theory citations by definition.**  About ten rows of the rule map cite
   a Theory lemma the agreement proof never names (`shapeAt*`,

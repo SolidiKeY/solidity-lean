@@ -25,20 +25,14 @@ statement does, and the import's verdict for the fifteen with no statement
 inlines an `internal` one at its calls).  A pending obligation is no theorem
 and no `sorry`.  solkey `1b4341a303`'s twenty new functions (`send`,
 internal calls, `return`, tuples) are derived in `Derived14.lean`.
-`testArrayCopyClearsOldElements` writes through an alias bound through an
-index after a `pop` made it dangle (`SymB.stale`) and reads the slot again after a copy: its leaf's
-reduction is past `Decide.elimSize`, and the `push()` takes its slot from a
-storage with writes at another root below it, which the slot facts do not
-read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
-`storagePushReadBack` is valid in the model (a push at a full array is
-out of gas, so the length after one is at least `1`) but not derived: the
-closer does not read the slot at `(len + 1) - 1` as the one pushed.
-`tests/solkey/expected.tsv` lists it `divergent`, so the tables count one
-pending fewer.
+`testArrayCopyClearsOldElements` (a write through an alias a `pop` made
+dangle, read again after a copy) and `storagePushReadBack` (the slot at
+`(len + 1) - 1` after a push) are derived since W10.4, in `Derived13.lean`
+and `Derived7.lean`.
 -/
 
 /--
-info: 452 functions: 435 derived, 2 pending, 15 other
+info: 452 functions: 437 derived, 0 pending, 15 other
 excluded recursiveStructMapping
 skipped tryCalleeGet
 skipped tryCalleePing
@@ -55,7 +49,6 @@ internal returnRevertsOnZero
 internal returnInsideTry
 internal returnVoidEarly
 pending:
-storagePushReadBack testArrayCopyClearsOldElements
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

@@ -102,25 +102,24 @@ Solidity.Scoped`, `Tools/Inspect.lean`): a parameter is bound by
 open scoped Scoped
 
 /-! What symbolic execution leaves is a formula of updates; reduced, it
-reads the initial state alone: it holds wherever `alice.age` is a location
-(`has`), where the write returns and the read gives `42`.  `(d; a)` is `a`
-where `d` returns. -/
+reads the initial state alone: the write returns (`alice.age` is a location
+of the typed storage) and the read gives `42`.  `(d; a)` is `a` where `d`
+returns. -/
 
 /--
 info: symbolic execution leaves:
     dl{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x = 42 }
 update-free:
-    has(storage, alice.age) = has(storage, alice.age) → (has(storage, alice.age); 42) = (has(storage, alice.age); 42) → (has(storage, alice.age); 42) = 42
+    true = true → ∀ uint x; true = true → 42 = 42
 -/
 #guard_msgs in #wp dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
 
 
-/-! Memory is pushed in as one term (`LMem`), printed as KeY writes it: a
-copy from storage under its guard (`copyOk`, the subtree copies), the `k`-th
-allocation `addM(m, shaped(idpk, T))` and its objects `idC(idpk, flds)`, a
-`new T[](n)` as the allocation and the write of its `size`, and a copy of
-memory into storage `save(s, p, copyMem(mtSt, m, i))`, read through its
-view. -/
+/-! Memory is pushed in as terms of the typed heap: a copy from storage is
+the pair `copy` (the root it allocates) and `copySt` (the memory after
+it), a `new T[](n)` the copy of `newArr(n)`, a write `write(m, a, v)` and
+a copy of memory into storage `copyMem(m, r)`; the reduction reads each
+as solkey's memory rules do. -/
 
 /--
 info: symbolic execution leaves:
@@ -128,7 +127,7 @@ info: symbolic execution leaves:
   { carol := freshId(copySt(memory, find(storage, alice))) ‖ memory := copySt(memory, find(storage, alice)) }
     { x := read(memory, carol.age) } x = find(storage, alice.age) }
 update-free:
-    (copyOk(storage, alice); if(orElse((find(storage, alice); true), false)) then err else true) = (copyOk(storage, alice); if(orElse((find(storage, alice); true), false)) then err else true) → find(storage, alice.age) = find(storage, alice.age) → find(storage, alice.age) = find(storage, alice.age)
+    (copy(memory, select(storage, alice)), copySt(memory, select(storage, alice)); true) = (copy(memory, select(storage, alice)), copySt(memory, select(storage, alice)); true) → ∀ uint x; (read(copySt(memory, select(storage, alice)), copy(memory, select(storage, alice)).age); true) = (read(copySt(memory, select(storage, alice)), copy(memory, select(storage, alice)).age); true) → read(copySt(memory, select(storage, alice)), copy(memory, select(storage, alice)).age) = find(storage, alice.age)
 -/
 #guard_msgs in #wp dl!{ [ Person memory carol = alice; uint x = carol.age; ] x == alice.age }
 
@@ -141,7 +140,7 @@ info: symbolic execution leaves:
         { memory := write(memory, xs[i], 7) }
           { storage := save(storage, values, copyMem(mtSt, memory, xs)) } find(storage, values[i]) = 7 }
 update-free:
-    ∀ uint i; ∀ uint n; (if(n = n) then true else true) = (if(n = n) then true else true) → ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) = ((if(i = i) then true else true); if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) = ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err); has(storage, values)) → ((if(n = n) then true else true), (if((0 <= i) && (i < (if(n < 0) then 0 else n))) then true else err), has(storage, values), ok(values[i]); if(orElse((err; true), false)) then find(save(storage, values, copyMem(mtSt, write(write(addM(memory, shaped(idp0, uint[])), idC(idp0, nil), size, n), idC(idp0, nil), at(i), 7), idC(idp0, nil))), values[i]) else if(i = i) then 7 else ((if((0 <= i) && (i < n)) then true else err); 0)) = 7
+    ∀ uint i; ∀ uint n; (copy(memory, newArr(n)), copySt(memory, newArr(n)); true) = (copy(memory, newArr(n)), copySt(memory, newArr(n)); true) → (write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7); true) = (write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7); true) → (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))); true) = (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))); true) → (copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))), copyMem(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))), (if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then true else err); if(if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then (if(true = true) then (i < size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n)))) else false) else (i < find(storage, values.length); has(storage, values[i]))) then (if(i < (if(true = true) then size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))) else 0)) then (if(if(true = true) then (i < size(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n)))) else false = true) then read(write(copySt(memory, newArr(n)), copy(memory, newArr(n))[i], 7), copy(memory, newArr(n))[i]) else 0) else if(i < find(storage, values.length)) then 0 else find(storage, values[i])) else err) = 7
 -/
 #guard_msgs in
 #wp dl!{ [ uint[] memory xs = new uint[](n); xs[i] = 7; values = xs; ] values[i] == 7 }

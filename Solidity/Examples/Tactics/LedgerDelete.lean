@@ -1,6 +1,5 @@
 import Solidity.Tools.Run
 import Solidity.Calculus.Close
-import Solidity.Theory.Storage
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
@@ -29,13 +28,13 @@ read (`StorageDelete.lean`), so they are a run of the interpreter from
 cannot clear a mapping, since it does not know the keys, and the interpreter
 keeps every entry (`SVal.defaultOf`).
 
-**Part 2** is the storage theory, by hand: the same storages
-written as terms of `structRules.key`'s algebra over an arbitrary store `s`
-(`Theory/Storage.lean`), `S1`…`S5` one per `storage :=` update, and each read
-taken to its value one lemma at a time.  The two reads after `delete ledger`
-carry the sorts the program's types give: `ledger` is not a mapping, and
-`ledger.balances` is one, so its entry survives (`selectDelNodeMap`,
-`Theory/Storage.lean`, "Delete").
+**Part 2** is the storage theory, by hand: the same storages written in the
+typed Theory over an arbitrary storage `s` (`Theory/Typed/Obs.lean`, a
+storage its observations at typed locations), `S1`…`S5` one per `storage :=`
+update, and each read taken to its value one law at a time.  The two reads
+after `delete ledger` need no premise: the delete is read off the type
+(`TVal.delR`), `ledger` a struct whose `nonce` is reset, `ledger.balances` a
+mapping whose entries a delete keeps.
 -/
 
 namespace Solidity.Examples.Tactics.LedgerDelete
@@ -155,88 +154,56 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 
 namespace Store
 
-open Theory Theory.StValue
+/-- `ledger`, `ledger.nonce` and `ledger.balances[k]`: storage locations of
+`TestSuite` (`SLoc`), typed by what they hold. -/
+abbrev ledger : SLoc TestSuite (.ref (.struct "Ledger")) := .ref (SRef.ofRoot "ledger" rfl)
+abbrev nonce : SLoc TestSuite .uint := ObsLoc.app ledger (.field (f := "nonce") rfl .nil)
+abbrev balance (k : Int) : SLoc TestSuite .uint :=
+  ObsLoc.app ledger (.field (f := "balances") rfl (.key (K := .uint) k .nil))
 
-abbrev ledger   : Seg := .field "ledger"
-abbrev nonce    : Seg := .field "nonce"
-abbrev balances : Seg := .field "balances"
+/-- A word as written. -/
+abbrev w (n : Int) (h : PrimTy.uint.inRange n = true := by rfl) : PrimTy.uint.Denote := ⟨n, h⟩
 
-/-- The storages of the program, one per `storage :=` update. -/
-def S1 (s : Struct) : Struct := save s [ledger, nonce] (int 5)
-def S2 (s : Struct) : Struct := save (S1 s) [ledger, balances, .at 1] (int 10)
-def S3 (s : Struct) : Struct := save (S2 s) [ledger, balances, .at 2] (int 20)
-def S4 (s : Struct) : Struct := delAt (S3 s) [ledger, balances, .at 1]
-def S5 (s : Struct) : Struct := delAt (S4 s) [ledger]
+/-- The storages of the program, one per `storage :=` update, over any
+storage `s`. -/
+def S1 (s : TSto TestSuite) : TSto TestSuite := s.copyTo nonce (TVal.ofWord (w 5))
+def S2 (s : TSto TestSuite) : TSto TestSuite := (S1 s).copyTo (balance 1) (TVal.ofWord (w 10))
+def S3 (s : TSto TestSuite) : TSto TestSuite := (S2 s).copyTo (balance 2) (TVal.ofWord (w 20))
+def S4 (s : TSto TestSuite) : TSto TestSuite := (S3 s).delAt (balance 1)
+def S5 (s : TSto TestSuite) : TSto TestSuite := (S4 s).delAt ledger
 
-/-- `gone`: the deleted entry reads as the default. -/
-theorem deletedEntry (s : Struct) : findSt (S4 s) [ledger, balances, .at 1] = int 0 := by
-  rw [S4, find_delAt_same _ (by simp)]        -- `findDelAt`: the deleted value
-  rw [S3, find_save_frame _ _ _ _ (by decide)] -- `findOnSaveDifferent`: past key 2
-  rw [S2, find_save_same _ (by simp)]          -- `findOnSave`: the write of key 1
-  rfl                                          -- `delValueDefault`
+/-- `gone`: the deleted entry reads its default, whatever was written there
+(`findOnDelAt`). -/
+theorem deletedEntry (s : TSto TestSuite) : (S4 s).word (balance 1) = w 0 :=
+  Obs.findOnDelAt _ _
 
-/-- The same chain with every intermediate term written down. -/
-theorem deletedEntryWritten (s : Struct) :
-    findSt (S4 s) [ledger, balances, .at 1] = int 0 :=
-  calc findSt (S4 s) [ledger, balances, .at 1]
-      _ = delValue (findSt (S3 s) [ledger, balances, .at 1]) := find_delAt_same _ (by simp)
-      _ = delValue (findSt (S2 s) [ledger, balances, .at 1]) := by
-            rw [S3, find_save_frame _ _ _ _ (by decide)]
-      _ = delValue (int 10)                                  := by rw [S2, find_save_same _ (by simp)]
-      _ = prim (primDefault (.int 10))                       := delValueDefault _
-      _ = int 0                                              := rfl
-
-/-- `kept`: the entry beside it does not see the delete. -/
-theorem survivingEntry (s : Struct) : findSt (S4 s) [ledger, balances, .at 2] = int 20 := by
-  rw [S4, find_delAt_frame _ (by decide)]      -- `findDelAtOutside`: key 1 and key 2 part ways
-  rw [S3, find_save_same _ (by simp)]
+/-- `kept`: the entry beside it does not see the delete (`findOnDelAtFrame`,
+key 1 and key 2 part ways), and reads its write (`findOnSave`). -/
+theorem survivingEntry (s : TSto TestSuite) : (S4 s).word (balance 2) = w 20 := by
+  rw [S4, Obs.findOnDelAtFrame (p := balance 1) _ (by decide +kernel), S3, Obs.findOnSave]; rfl
 
 /-- `before`: neither does the field; two frames past the entries, then the
 write. -/
-theorem nonceBeforeDelete (s : Struct) : findSt (S4 s) [ledger, nonce] = int 5 := by
-  rw [S4, find_delAt_frame _ (by decide)]
-  rw [S3, find_save_frame _ _ _ _ (by decide), S2, find_save_frame _ _ _ _ (by decide)]
-  rw [S1, find_save_same _ (by simp)]
+theorem nonceBeforeDelete (s : TSto TestSuite) : (S4 s).word nonce = w 5 := by
+  rw [S4, Obs.findOnDelAtFrame (p := balance 1) (q := nonce) _ (by decide +kernel), S3,
+    Obs.findOnSaveFrame (p := balance 2) (q := nonce) _ _ (by decide +kernel), S2,
+    Obs.findOnSaveFrame (p := balance 1) (q := nonce) _ _ (by decide +kernel), S1, Obs.findOnSave]
+  rfl
 
-/-- A write below `ledger` leaves the kind of what `ledger` holds. -/
-private theorem kind_ledger_save (s : Struct) {r : List Seg} (hr : r ≠ []) (v : StValue) :
-    (asStruct (findSt (save s (ledger :: r) v) [ledger])).kind =
-      (asStruct (findSt s [ledger])).kind := by
-  rw [show ledger :: r = [ledger] ++ r from rfl, find_save_prefix _ _ hr, asStruct_st,
-    kind_save _ hr]
-
-/-- …and one below `ledger.balances` the kind of what that holds. -/
-private theorem kind_balances_save (s : Struct) {r : List Seg} (hr : r ≠ []) (v : StValue) :
-    (asStruct (findSt (save s (ledger :: balances :: r) v) [ledger, balances])).kind =
-      (asStruct (findSt s [ledger, balances])).kind := by
-  rw [show ledger :: balances :: r = [ledger, balances] ++ r from rfl, find_save_prefix _ _ hr,
-    asStruct_st, kind_save _ hr]
-
-/-- `after`: after `delete ledger` the field is below the deleted location, and
-reads the reset of what was there (`findDelAt` one member down), which at `int`
-is `0`.  The premise is `ledger`'s sort: a struct, not a mapping. -/
-theorem nonceAfterDelete (s : Struct) (hk : (asStruct (findSt s [ledger])).kind ≠ some .map) :
-    asInt (findSt (S5 s) [ledger, nonce]) = 0 := by
-  have hk4 : (asStruct (findSt (S4 s) [ledger])).kind ≠ some .map := by
-    rw [S4, delAt, kind_ledger_save _ (by simp), S3, kind_ledger_save _ (by simp), S2,
-      kind_ledger_save _ (by simp), S1, kind_ledger_save _ (by simp)]
-    exact hk
-  rw [S5, show [ledger, nonce] = [ledger] ++ [nonce] from rfl,
-    find_delAt_member _ (by simp) _ (keepsOnDelete_field hk4 (by decide))]
-  exact delValueCast_asInt _
+/-- `after`: after `delete ledger` the field is below the deleted location,
+and the delete resets it: `ledger` is a struct, `nonce` a word of it
+(`TVal.delR`, read off the type). -/
+theorem nonceAfterDelete (s : TSto TestSuite) : (S5 s).word nonce = w 0 := by
+  rw [S5, Obs.delAt_word_below]; rfl
 
 /-- `survives`: `ledger.balances` is a mapping, so `delete ledger` keeps its
-entries (`selectDelNodeMap`): the entry reads what it read before. -/
-theorem balancesSurvive (s : Struct)
-    (hm : (asStruct (findSt s [ledger, balances])).kind = some .map) :
-    findSt (S5 s) [ledger, balances, .at 2] = findSt (S4 s) [ledger, balances, .at 2] := by
-  have hm4 : (asStruct (findSt (S4 s) [ledger, balances])).kind = some .map := by
-    rw [S4, delAt, kind_balances_save _ (by simp), S3, kind_balances_save _ (by simp), S2,
-      kind_balances_save _ (by simp), S1, find_save_frame _ _ _ _ (by decide)]
-    exact hm
-  rw [S5, show [ledger, balances, .at 2] = [ledger] ++ [balances, .at 2] from rfl,
-    find_delAt_extends _ (by simp) (by simp), delValueCast]
-  exact selectDelNodeMap hm4
+entries (the delete reads past a key, `TVal.delR`): the entry reads what it
+read before. -/
+theorem balancesSurvive (s : TSto TestSuite) : (S5 s).word (balance 2) = (S4 s).word (balance 2) := by
+  rw [S5, Obs.delAt_word_below]
+  show ((S4 s).find ledger).word ((Path.field _ .nil).append (.key 2 .nil)) = _
+  rw [Path.append_field, Path.append_nil]
+  rfl
 
 end Store
 

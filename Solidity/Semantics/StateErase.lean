@@ -4,10 +4,9 @@ import Solidity.Semantics.Agree
 /-!
 # A local's binding, untyped
 
-What the decision procedure's untyped state binds a scoped local to
-(`Calculus/DecideRel.lean`): a local's value encoded as `Semantics.lean`'s
-binding (`LTy.enc`), under the name a position takes in a list of names
-(`Idx.name`).
+A scoped local's value encoded as `Semantics.lean`'s binding (`LTy.enc`),
+under the name a position takes in a list of names (`Idx.name`): what the
+untyped interpreter's state binds it to.
 -/
 
 namespace Solidity

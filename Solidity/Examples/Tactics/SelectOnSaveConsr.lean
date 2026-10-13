@@ -37,16 +37,14 @@ equation and dropped in one step (`Proves.applyOnRigidBox`, through
 reads no storage.  The one storage step, the read of the
 write, is the term taclet `findOnSave` on scoped terms
 (`TermTaclet.findOnSave`, `Calculus/TermLib.lean`), applied by
-`Proves.rewrite`; its soundness is the Theory's `find_copyTo_same`
+`Proves.rewrite`; its soundness is the Theory's `Obs.findOnSave`
 (`TermTaclet.sound`).  `42 ≐ 42` closes by `Proves.eqRefl`.
 
 The `consr` path has not gone away, it has moved into the Theory.
-`alice.age` still denotes `[.field "alice"] ++ [.field "age"]`
-(`Tm.denote` of `.field`), and the Theory's laws are stated at a list path:
-`find_copyTo_same` at any `p ≠ []`, and the rule-shaped `findDelAt` at
-`p ++ [a]` (`find_delAt_field`, which splits the read with `find_append`).
-The reassociation happens once, inside the proof of the law
-(`find_save_same` walks `p` from the left), never in a derivation.  What the
+`alice.age` denotes a typed storage location (`SLoc`, `Tm.denote` of
+`.field`), and the Theory's laws are stated once over any location
+(`Obs.findOnSave`, `Obs.findOnDelAt`); the bridge to the run
+(`SVal.obs_saveM`) walks the path, never a derivation.  What the
 derivation still sees of it is the side condition `p.hasSeg`, that a
 `consr`-built path is not empty; `sol_rw` closes it by `rfl` once the match
 has fixed `p`, so the law is named bare.

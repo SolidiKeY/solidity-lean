@@ -1,5 +1,4 @@
 import Solidity.Calculus.Step
-import Solidity.Theory.Observe
 import Solidity.Typing.Soundness
 import Solidity.Semantics.RunFrame
 import Solidity.Theory.Bridge.Denote
@@ -11,8 +10,8 @@ What `holds` (`Calculus/Logic.lean`) reads a term and an update by, on the
 typed state with nothing erased (`docs/intrinsic.md`, W9.8.2 and W9.8.3).
 
 * A term: `Tm.eval` (`Calculus/TermEval.lean`), and `Tm.denote`, its reading
-  in the Theory (`Theory/Bridge/Denote.lean`'s symbols; a local by its
-  position, its value abstracted), which an equation reads; the bridge
+  in the typed Theory (`Theory/Bridge/Denote.lean`'s symbols; a local by its
+  position, its value read as its observations), which an equation reads; the bridge
   `Tm.denote_eval` says the two agree where `eval` returns.
 * `Rhs.eval`: what a local is set to (`LTy.VDen`): a value of its type, a
   storage reference, a storage, a ledger; a memory local's an identity,
@@ -33,8 +32,6 @@ theorems (Gate G0).
 namespace Solidity
 
 open Semantics (Halt Res lookupBy setBy)
-open Theory Theory.StValue
-
 variable {C : Contract}
 
 theorem Idx.ty_eq_of_toNat {Γ : Ctx} {t u : LTy} {i : Idx Γ t} {j : Idx Γ u}
@@ -80,23 +77,22 @@ abbrev State.getV (σ : State C Γ) {t : LTy} (i : Idx Γ t) : t.VDen C :=
 /-! ## A term in the Theory -/
 
 /-- **A term in the Theory**, read in the typed state `σ`: a local's value
-abstracted, a symbol by `OpN.denote` over the global part
+read as its observations, a symbol by `OpN.denote` over the global part
 (`Theory/Bridge/Denote.lean`).  What an equation reads (`holds`). -/
-def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.TDen
-  | _, .pvV i => .prim (PrimTy.erase (TEnv.get i σ.env))
+def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.TDen C
+  | _, .pvV i => some (TEnv.get i σ.env)
   | _, .pvP i => match (TEnv.get i σ.env : Option (SRef C _)) with
-    | some r => r.absT
-    | none => []
-  | _, .pvS i => Storage.absT (TEnv.get i σ.env : Storage C)
+    | some r => .ref r
+    | none => .dangling _ .nil
+  | _, .pvS i => Storage.obs (TEnv.get i σ.env : Storage C)
   | _, .pvI _ => ()
-  | _, .netOf i a => match a.denote σ with
-    | .prim (.int n) => .prim (.int ((lookupBy n (TEnv.get i σ.env : List (Int × Int))).getD 0))
-    | _ => .st .mtSt
+  | _, .netOf i a => (a.denote σ).map fun n =>
+    (lookupBy n.1 (TEnv.get i σ.env : List (Int × Int))).getD 0
   | _, .app0 o => o.denote σ.glob
   | _, .app1 o a => o.denote σ.glob (a.denote σ)
   | _, .app2 o a b => o.denote σ.glob (a.eval σ) (b.eval σ) (a.denote σ) (b.denote σ)
   | _, .app3 o a b c => o.denote (a.denote σ) (b.denote σ) (c.denote σ)
-  | _, .pvZ i => .prim (.int (TEnv.get i σ.env))
+  | _, .pvZ i => some (TEnv.get i σ.env)
 
 /-- **The term bridge**: a term's denotation agrees with its reading in a
 typed state wherever the reading returns (`Srt.Bridge`). -/
@@ -108,7 +104,7 @@ theorem Tm.denote_eval (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
     have h' : (TEnv.get i σ.env : Option (SRef C _)) = some r := h
     simp only [Tm.denote, h']
     rfl
-  | _, .pvS _ => by intro τ h; cases h; exact StValue.Equiv.refl _
+  | _, .pvS _ => by intro τ h; cases h; rfl
   | _, .pvI _ => by intro _ _; trivial
   | _, .netOf i a => by
     intro x h
@@ -116,12 +112,10 @@ theorem Tm.denote_eval (σ : State C Γ) : {s : Srt} → (t : Tm C Γ s) →
     simp only [Tm.evalM, Option.bind_eq_some_iff] at h
     obtain ⟨n, hn, h⟩ := h
     rw [← Tm.eval_eq_evalM] at hn
-    have ha := Tm.denote_eval σ a n hn
-    simp only [Srt.Bridge] at ha
-    simp only [Tm.denote, ha, PrimTy.erase, Srt.Bridge]
+    have ha : a.denote σ = some n := Tm.denote_eval σ a n hn
     simp only [Tm.netOfT, Option.some.injEq] at h
     subst h
-    rfl
+    simp only [Srt.Bridge, Tm.denote, ha, Option.map_some]
   | _, .app0 o => Op0.denote_eval σ.glob o
   | _, .app1 o a => Op1.denote_eval σ.glob o (Tm.denote_eval σ a)
   | _, .app2 o a b => Op2.denote_eval σ.glob o (Tm.denote_eval σ a) (Tm.denote_eval σ b)

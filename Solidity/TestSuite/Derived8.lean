@@ -7,8 +7,7 @@ import Solidity.TestSuite.ScopedProblems
 pushed and popped, the slot a `push()` recycles, copies between storage
 locations), from `testStoragePushFieldLvalue` to `arrayOfMappingsIndex` in the
 order of the source; the replays are what `#solkey_derive? … pending`
-(`Frontend/Problems.lean`) prints.  A leaf the closer leaves is closed
-on its scoped form (`sol_leaf`).
+(`Frontend/Problems.lean`) prints.
 -/
 
 open Solidity

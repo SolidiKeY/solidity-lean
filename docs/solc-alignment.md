@@ -180,13 +180,14 @@ the storage-source read, which is `.undef` on such a type, the image of
 "rejected at compile time" and deliberately not `.revert`. `delete` keeps a
 mapping member in place, as solc does, and memory types contain no mappings.
 
-The Theory (solkey's storage term algebra) has both of solkey's writes: the
-collapsing `save` (`Theory/Storage.lean`), and the non-collapsing `copyTo`
-(`Theory/Copy.lean`), which keeps a mapping member of the old node
-(`selectOnCopyMap`) though no program here writes such a copy. Its `delete`
-keeps mapping members as the interpreter's does (`keepsOnDelete`,
-`selectStDelNodeMap`), and `State.abs_delete` (`Theory/Bridge/Delete.lean`)
-proves the two agree on every read.
+The typed Theory (`Theory/Typed/Obs.lean`, what an equation reads) has
+solkey's copying write `copyTo`, which keeps a mapping member of the old node
+(`TVal.overlay`) though no program here writes such a copy, and its `delete`
+keeps mapping entries and an array's slots past its end as the interpreter's
+does (`TVal.delR`, read off the type); `Storage.obs_delete` and
+`Storage.obs_write` prove the two agree on every read, literally.  The
+untyped algebra that kept both of solkey's writes, the collapsing `save` and
+the non-collapsing `copyTo`, was deleted at W10.4.
 
 ## Arrays past their end
 
@@ -402,8 +403,8 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   arithmetic after a push (`storagePushReadBack`: `values[values.length -
   1]` after a `push`) is valid in the model all the same, since the push at
   a full array is out of gas and the length after one is at least `1`; it
-  stays underived (`divergent` in `tests/solkey/expected.tsv`), because
-  the closer does not read the slot at `(len + 1) - 1` as the one pushed.
+  is derived since W10.4 (the closer reads `len < len + 1`,
+  `Facts.ltSucc`).
   One that pushes with no bound on the length before it holds in the model
   where solc panics, from a length of exactly `2^64`:
   `storagePushLengthPositive`, `storagePopUnknownLength` and

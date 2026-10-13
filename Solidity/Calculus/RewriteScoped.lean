@@ -56,7 +56,6 @@ namespace Solidity
 
 open Solidity (Srt Op0 Modality)
 open Semantics (Value)
-open Theory Theory.StValue
 
 /-! ## The skeleton of a line -/
 
@@ -792,7 +791,7 @@ theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
       refine ⟨?_, ?_⟩
       · show some v = some (TEnv.get i τ.env)
         rw [hg]
-      · show Theory.StValue.prim (PrimTy.erase v) = Theory.StValue.prim (PrimTy.erase (TEnv.get i τ.env))
+      · show some v = some (TEnv.get i τ.env)
         rw [hg]
     · exact ⟨rfl, rfl⟩
   | _, .netOf i a => by
@@ -800,8 +799,7 @@ theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
     refine ⟨?_, ?_⟩
     · show ((a.litPV s).eval τ).bind _ = (a.eval τ).bind _
       rw [he]
-    · show (match (a.litPV s).denote τ with
-        | .prim (.int n) => _ | _ => _) = (match a.denote τ with | .prim (.int n) => _ | _ => _)
+    · show ((a.litPV s).denote τ).map _ = (a.denote τ).map _
       rw [hd]
   | _, .app1 o x => by
     obtain ⟨he, hd⟩ := Tm.litPV_eq hok x
@@ -1068,10 +1066,10 @@ theorem Fml.litCS_holds (φ : Fml C Γ) (σ : State C Γ) : holds σ φ.litCS �
         split
         · rename_i hvw
           subst hvw
-          exact ⟨fun _ => Equiv.refl _, fun _ => trivial⟩
+          exact ⟨fun _ => rfl, fun _ => trivial⟩
         · rename_i hvw
           refine ⟨fun h => absurd trivial h, fun h => ?_⟩
-          exact absurd (PrimTy.erase_injective (StValue.prim.inj (Equiv.prim_iff.1 h))) hvw
+          exact absurd (Option.some.inj h) hvw
   | defined t =>
     show holds σ (if t.isLit then .tt else .defined t) ↔ _
     split

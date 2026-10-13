@@ -7,7 +7,7 @@ import Solidity.Calculus.ReadWrite
 # Facts about the interpreter's states and the typed symbols
 
 Two kinds of facts.  Of the untyped interpreter (`Semantics.State`), which
-the decision procedure and the Theory bridge still read: a result refining
+the decision procedure still reads: a result refining
 another (`Res.Le`), two results returning alike (`Res.OkEq`), the parts of a
 state a write reads (`State.HeapEq`, `StPartEq`, `MemPartEq`), a root read
 member-wise (`State.selectRoot`, `State.frameOf`), and the shapes of the
@@ -23,28 +23,6 @@ stated on it where the law is.
 -/
 
 namespace Solidity
-
-/-! ## From `Solidity.Calculus.TermRules` -/
-
-section
-open Semantics SemanticsProperties Theory
-variable {C : Contract}
-
-theorem Theory.StValue.Equiv.eq_or_st {v w : StValue} (h : StValue.Equiv v w) :
-    v = w ∨ ∃ s t, v = .st s ∧ w = .st t := by
-  cases v with
-  | prim p => exact Or.inl (StValue.Equiv.prim_iff.1 h.symm).symm
-  | st s => cases w with
-    | prim p => cases StValue.Equiv.prim_iff.1 h
-    | st t => exact Or.inr ⟨s, t, rfl, rfl⟩
-
-/-- Equivalent values are one interpreter result. -/
-theorem Theory.StValue.Equiv.toRes {v w : StValue} (h : StValue.Equiv v w) :
-    v.toRes = w.toRes := by
-  rcases h.eq_or_st with rfl | ⟨s, t, rfl, rfl⟩ <;> rfl
-
-end
-
 
 section
 open Semantics
@@ -381,11 +359,11 @@ def Seg.isField : Seg → Bool
   | .at _ => false
 
 /-- The Theory's `diverges` gives the interpreter's `Diverge`. -/
-theorem Diverge_of_diverges : (a b : List Seg) → Theory.StValue.diverges a b = true → Close.Diverge a b
+theorem Diverge_of_diverges : (a b : List Seg) → Theory.diverges a b = true → Close.Diverge a b
   | [], _, h => nomatch h
   | _ :: _, [], h => nomatch h
   | x :: p, y :: q, h => by
-    simp only [Theory.StValue.diverges] at h
+    simp only [Theory.diverges] at h
     split at h
     · exact Or.inr (Diverge_of_diverges p q h)
     · exact Or.inl ‹_›
@@ -891,7 +869,7 @@ end
 /-! ## From `Solidity.Calculus.TermTaclets` -/
 
 section
-open Semantics Theory Theory.StValue
+open Semantics Theory
 variable {C : Contract}
 
 /-- The shape of a path's segment: a member, or an element at a literal
@@ -975,11 +953,11 @@ theorem SegT.apart_sound : {x y : SegT} → {d : Bool} → {s t : Seg} → x.apa
 
 /-- Shapes that diverge have paths that diverge. -/
 theorem SegT.diverges_sound : (a b : List SegT) → (p q : List Seg) → SegT.diverges a b = true →
-    SegT.matches a p = true → SegT.matches b q = true → Theory.StValue.diverges p q = true
+    SegT.matches a p = true → SegT.matches b q = true → Theory.diverges p q = true
   | x :: a, y :: b, s :: p, t :: q, hd, ha, hb => by
     simp only [SegT.matches, Bool.and_eq_true] at ha hb
     simp only [SegT.diverges] at hd
-    simp only [Theory.StValue.diverges]
+    simp only [Theory.diverges]
     cases hx : x.apart y with
     | none => rw [hx] at hd; cases hd
     | some d =>

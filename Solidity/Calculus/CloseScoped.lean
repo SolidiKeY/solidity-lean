@@ -272,11 +272,11 @@ theorem eval_write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C
       (v.eval σ).bind fun w => g.writeT ad w := rfl
 
 theorem denote_lit {p : PrimTy} (v : p.Denote) :
-    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = .prim (PrimTy.erase v) := rfl
+    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = some v := rfl
 theorem denote_env (k : EnvKey) :
-    (Tm.app0 (.env k) : Tm C Γ (.val .uint)).denote σ = .prim (PrimTy.erase (σ.envVal k)) := rfl
+    (Tm.app0 (.env k) : Tm C Γ (.val .uint)).denote σ = some (σ.envVal k) := rfl
 theorem denote_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
-    (Tm.pvV i : Tm C Γ (.val p)).denote σ = .prim (PrimTy.erase (σ.locV _ i)) := rfl
+    (Tm.pvV i : Tm C Γ (.val p)).denote σ = some (σ.locV _ i) := rfl
 
 end Terms
 
@@ -585,6 +585,11 @@ theorem uint_eq_iff (a b : PrimTy.uint.Denote) : a = b ↔ a.val = b.val :=
   ⟨fun e => e ▸ rfl, Subtype.ext⟩
 theorem int_eq_iff (a b : PrimTy.int.Denote) : a = b ↔ a.val = b.val :=
   ⟨fun e => e ▸ rfl, Subtype.ext⟩
+/-- A `bool` word's equation at `Bool`, where the `Bool` lemmas
+(`decide_eq_true_eq`, …) read it: an equation of denotations is at
+`PrimTy.bool.Denote`, which they do not see through. -/
+theorem bool_eq_iff (a b : PrimTy.bool.Denote) : @Eq PrimTy.bool.Denote a b ↔ @Eq Bool a b :=
+  Iff.rfl
 /-- A stored word against a value: their integers (`Shape (.prim p)` is the
 value's type, which `uint_eq_iff` does not see through). -/
 theorem view_eq_uint (x : SVal (.prim .uint)) (b : PrimTy.uint.Denote) :
@@ -685,7 +690,7 @@ theorem holds_and (σ : State C Γ) (φ ψ : Fml C Γ) :
 theorem holds_imp (σ : State C Γ) (φ ψ : Fml C Γ) :
     holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
 theorem holds_eq {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
+    holds σ (.eq a b) ↔ a.denote σ = b.denote σ := Iff.rfl
 theorem holds_defined {p : PrimTy} (σ : State C Γ) (t : Tm C Γ (.val p)) :
     holds σ (.defined t) ↔ Modality.diamond.wp (Close.optRes (t.eval σ)) fun _ => True := by
   show t.eval σ ≠ none ↔ _
@@ -821,8 +826,7 @@ attribute [close_rw_s]
   CloseS.uint_eq_mk CloseS.int_eq_mk CloseS.mk_eq_uint CloseS.mk_eq_int and_assoc exists_prop
   BinOp.evalNum BinOp.evalBool BinOp.arithInt UnOp.evalT PrimTy.inRange
   CloseS.natCast_ofNat
-  CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Close.equiv_prim_left_iff
-  Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
+  CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Option.some.injEq
   -- the typed state
   State.locV_push State.locV_setLocal State.locV_drop State.locV_thin CloseS.locV_havoc
   CloseS.glob_storage CloseS.glob_net CloseS.glob_selfBalance CloseS.glob_tx CloseS.glob_envVal
@@ -896,7 +900,7 @@ attribute [close_rw_s]
   Semantics.uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
   Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.root_field CloseS.root_index CloseS.atT_bind
   CloseS.getD_ite Option.getD_some CloseS.erase_uint' CloseS.erase_int'
-  CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
+  CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.bool_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
 
 attribute [close_rw_s_last] Modality.wp_box

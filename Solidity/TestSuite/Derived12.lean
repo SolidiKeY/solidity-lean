@@ -46,8 +46,6 @@ theorem Solkey.TestSuite.memoryToStorageIndexArrayCopyRootExample.proved : ⊢ S
 
 theorem Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.memoryToStorageIndexArrayCopyRootOutOfBoundsReverts.problem := by
   sol_prove
-  sol_leaf
-  sol_decide
 
 theorem Solkey.TestSuite.testMemoryToStorageCopyComplexSource.proved : ⊢ Solkey.TestSuite.testMemoryToStorageCopyComplexSource.problem := by
   sol_prove

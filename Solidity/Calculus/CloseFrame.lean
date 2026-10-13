@@ -8,7 +8,7 @@ A storage write under the box, named on the spot with what the typed laws
 say of the storage it returns (`Calculus/TermLaws.lean`'s frame section):
 solkey's `findOnSave` at the path written and below it, and its
 `findOnSaveFrame`, `lenOnSaveFrame` where the paths part, the parting read
-as the Theory's `diverges` on the references' segments (`SRef.absT`), which
+as the Theory's `diverges` on the references' segments (`SRef.segs`), which
 the closer computes, a symbolic key by a hypothesis `k != j` of the formula
 or a branch.  An index check (`Storage.checkIndex`) is framed as an array's
 length is: it reads the length only (or nothing, for a mapping).
@@ -20,7 +20,7 @@ written member by member.
 
 namespace Solidity
 
-open Theory.StValue (diverges lengthSeg)
+open Theory (diverges lengthSeg)
 open Semantics (lookupBy structDef)
 
 namespace Storage
@@ -51,14 +51,14 @@ which the check reads). -/
 theorem checkIndex_save_frame {k : PrimTy} {V : Ty} {T : Ty} {R' : RefTy}
     {st st' : Storage C} {r : SRef C T} {v : SVal T} {q : SRef C (.ref R')}
     (it : IndexTy R' k V) (i : Int)
-    (hd : diverges r.absT (q.absT ++ [lengthSeg]) = true) (h : st.save r v = some st') :
+    (hd : diverges r.segs (q.segs ++ [lengthSeg]) = true) (h : st.save r v = some st') :
     st'.checkIndex q it i = st.checkIndex q it i := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.checkIndex, find_save_frame hd h]
   · obtain ⟨x', hs, rfl⟩ := save_some h
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
-    simp only [SRef.absT, Theory.rootPath, List.cons_append, List.cons.injEq,
+    simp only [SRef.segs, List.cons_append, List.cons.injEq,
       Semantics.Seg.field.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
@@ -88,19 +88,6 @@ end Storage
 
 /-! ## A copy laid over a struct, member by member -/
 
-theorem SFields.get_overlay {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (os ns : SFields fs) → (h : lookupBy f fs = some T) →
-    (os.overlay ns).get h = (os.get h).overlay (ns.get h)
-  | [], _, .nil, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons o os, .cons n ns, h => by
-    rw [SFields.overlay_cons, SFields.get_cons, SFields.get_cons, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact SFields.get_overlay os ns _
-
 /-- A word laid over a word is the new one. -/
 theorem SVal.overlay_prim' {p : PrimTy} (o n : SVal (.prim p)) : o.overlay n = n := by
   cases n; exact SVal.overlay_prim o _
@@ -119,19 +106,6 @@ theorem SVal.find_overlay_field {s f : Name} {T U : Ty} (o n : SVal (.ref (.stru
         SVal.find_nil, Option.bind_some, SVal.view_struct]
 
 /-! ## A delete, member by member -/
-
-theorem SFields.get_defaultOf {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (xs : SFields fs) → (h : lookupBy f fs = some T) →
-    xs.defaultOf.get h = (xs.get h).defaultOf
-  | [], _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons x xs, h => by
-    rw [SFields.defaultOf_cons, SFields.get_cons, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact SFields.get_defaultOf xs _
 
 /-- A word reset is the type's default, whatever it held. -/
 theorem SVal.defaultOf_prim' {p : PrimTy} (x : SVal (.prim p)) :
@@ -272,177 +246,6 @@ theorem Storage.delete_ne_none_total {C : Contract} {U : Ty} (st : Storage C) (r
   simp only [Storage.delete, hc, Option.bind_eq_bind, Option.bind_some]
   exact Storage.save_ne_none_total st r h _
 
-/-! ## Memory, read by identity
-
-A memory read returns a value over the heap typing it reads in, so two
-reads over two typings are not of one type; read as a word or an identity
-(`Grown.readId`, `MvT`), they are, and a write is named with what it leaves
-there. -/
-
-/-- A slot value as a word or an identity (`MvT`), whatever the heap
-typing. -/
-def MVal.toMvT (H : HTy) : (T : Ty) → MVal H T → MvT T
-  | .prim _, v => v
-  | .ref _, r => (r : HRef H _).id
-
-/-- `read(m, a)` as a word or an identity. -/
-def Grown.readId {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T) :
-    Option (MvT T) :=
-  (m.readT a).map (MVal.toMvT m.H' T)
-
-/-- Two memory addresses that never meet: two objects, two members of one
-object, or two elements of one array; or a member and an element. -/
-def MAddrT.Apart {T U : Ty} : MAddrT T → MAddrT U → Prop
-  | @MAddrT.field _ f _ id _, @MAddrT.field _ g _ id' _ => ¬ id = id' ∨ ¬ f = g
-  | .field .., .index .. => True
-  | .index .., .field .. => True
-  | .index id _ i, .index id' _ j => ¬ id = id' ∨ ¬ i = j
-
-/-- The object of an address. -/
-def MAddr.id {H : HTy} {T : Ty} : MAddr H T → Nat
-  | .field r _ => r.id
-  | .index r _ _ => r.id
-
-theorem HRef.id_of_ofId? {H : HTy} {R : RefTy} {id : Nat} {r : HRef H R}
-    (h : HRef.ofId? H R id = some r) : r.id = id := by
-  unfold HRef.ofId? at h
-  split at h
-  · cases h; rfl
-  · cases h
-
-theorem MVal.toMvT_toMVal {H : HTy} : {T : Ty} → {v : MvT T} → {w : MVal H T} →
-    MvT.toMVal H T v = some w → MVal.toMvT H T w = v
-  | .prim _, _, _, h => by cases h; rfl
-  | .ref _, _, _, h => HRef.id_of_ofId? h
-
-/-- **A write leaves an address on another object**, or apart on its own. -/
-theorem Heap.readAddr_writeAddr_frame {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
-    {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp')
-    (hab : ¬ ad.id = bd.id ∨ ad.Apart bd) : hp'.readAddr bd = hp.readAddr bd := by
-  rcases hab with hne | hab
-  · cases ad with
-    | field r hf =>
-      simp only [Heap.writeAddr, Option.some.injEq] at h
-      subst h
-      cases bd with
-      | field r' hg =>
-        simp only [Heap.readAddr, Heap.field, Heap.setField, Heap.get_set_ne _ r r' hne]
-      | index r' a j =>
-        simp only [Heap.readAddr, Heap.index, Heap.setField, Heap.get_set_ne _ r r' hne]
-    | index r a i =>
-      simp only [Heap.writeAddr, Heap.setIndex] at h
-      split at h
-      · simp only [Option.some.injEq] at h
-        subst h
-        cases bd with
-        | field r' hg => simp only [Heap.readAddr, Heap.field, Heap.get_set_ne _ r r' hne]
-        | index r' a' j => simp only [Heap.readAddr, Heap.index, Heap.get_set_ne _ r r' hne]
-      · simp only [reduceCtorEq] at h
-  · exact Heap.readAddr_writeAddr_apart h hab
-
-theorem MAddrT.apart_resolve {H : HTy} {T U : Ty} {a : MAddrT T} {b : MAddrT U}
-    {ad : MAddr H T} {bd : MAddr H U} (hab : a.Apart b) (ha : a.resolve H = some ad)
-    (hb : b.resolve H = some bd) : ¬ ad.id = bd.id ∨ ad.Apart bd := by
-  cases a with
-  | field id h =>
-    cases b with
-    | field id' h' =>
-      obtain ⟨r, hr, rfl⟩ := Option.map_eq_some_iff.1 ha
-      obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 hb
-      simp only [MAddr.id, HRef.id_of_ofId? hr, HRef.id_of_ofId? hr']
-      rcases hab with hne | hne
-      · exact .inl hne
-      · by_cases e : id = id'
-        · exact .inr hne
-        · exact .inl e
-    | index id' a' j =>
-      obtain ⟨r, hr, rfl⟩ := Option.map_eq_some_iff.1 ha
-      obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 hb
-      exact .inr trivial
-  | index id a i =>
-    cases b with
-    | field id' h' =>
-      obtain ⟨r, hr, rfl⟩ := Option.map_eq_some_iff.1 ha
-      obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 hb
-      exact .inr trivial
-    | index id' a' j =>
-      obtain ⟨r, hr, rfl⟩ := Option.map_eq_some_iff.1 ha
-      obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 hb
-      simp only [MAddr.id, HRef.id_of_ofId? hr, HRef.id_of_ofId? hr']
-      rcases hab with hne | hne
-      · exact .inl hne
-      · exact .inr fun _ => hne
-
-/-- What a write to memory leaves: the word or identity written at its
-address, and every address apart from it as it was. -/
-theorem Grown.writeT_facts {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
-    {v : MvT T} (h : m.writeT a v = some m') :
-    m'.readId a = some v ∧ ∀ {U : Ty} (b : MAddrT U), a.Apart b → m'.readId b = m.readId b := by
-  unfold Grown.writeT at h
-  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-  obtain ⟨ad, had, w, hw, hp, hhp, rfl⟩ := h
-  refine ⟨?_, fun b hab => ?_⟩
-  · show ((a.resolve m.H').bind hp.readAddr).map _ = _
-    rw [had, Option.bind_some, Heap.readAddr_writeAddr_same hhp, Option.map_some,
-      MVal.toMvT_toMVal hw]
-  · show ((b.resolve m.H').bind hp.readAddr).map _ = ((b.resolve m.H').bind m.heap.readAddr).map _
-    cases hb : b.resolve m.H' with
-    | none => rfl
-    | some bd =>
-      simp only [Option.bind_some]
-      rw [Heap.readAddr_writeAddr_frame hhp (MAddrT.apart_resolve hab had hb)]
-
-/-- **A member of a storage struct copied into memory** reads what the
-struct held there (the untyped `Close.copyStToM_member`, on the erasure). -/
-theorem SVal.copyStToM_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
-    (sv : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
-    (hf : lookupBy f (structDef s) = some (.prim p)) (hl : ¬ f = "length") :
-    (sv.copyStToM hp hT).heap.field (sv.copyStToM hp hT).val hf =
-      (((SVal.view sv : SFields _).get hf).view : p.Denote) := by
-  let g := sv.copyStToM hp hT
-  let τ₀ : Semantics.State := Heap.into { storage := [] } hp
-  have hc : Semantics.copyStToM τ₀ sv.erase = .ok (Heap.into τ₀ g.heap, .ref g.val.id) :=
-    SVal.copyStToM_erase sv hT hp τ₀ rfl rfl
-  have hmem := Close.copyStToM_member hc hl
-  have hrd : Close.readVal (Heap.into τ₀ g.heap) (.memoryField g.val.id f) =
-      .ok (PrimTy.erase (g.heap.field g.val hf)) := by
-    have h₁ := Heap.readAddr_erase (σ := Heap.into τ₀ g.heap) (hp := g.heap) rfl
-      (MAddr.field g.val hf)
-    simp only [Close.readVal]
-    rw [show (Semantics.Addr.memoryField g.val.id f) = (MAddr.field g.val hf).erase from rfl, h₁]
-    simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind']
-    exact MVal.asValue_erase_prim _
-  have hfind : sv.erase.find [.field f] = .ok ((SVal.view sv : SFields _).get hf).erase := by
-    have := SVal.find_erase sv (.field hf .nil)
-    exact this
-  rw [hmem, hfind, Semantics.Res.ok_bind', SVal.asValue_erase_prim] at hrd
-  exact (PrimTy.erase_injective (Except.ok.inj hrd)).symm
-
-/-- **A member of a memory struct copied into storage** holds what the
-object held there (the untyped `Close.copyMem_member`, on the erasure). -/
-theorem MVal.copyMToSt_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
-    (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p))
-    (hl : ¬ f = "length") :
-    (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) =
-      some (.prim (hp.field r hf)) := by
-  let τ : Semantics.State := Heap.into { storage := [] } hp
-  have hcm := MVal.copyMem_erase (σ := τ) (hp := hp) rfl (T := .ref (.struct s)) r
-  have hmem := Close.copyMem_member hcm hl
-  have h₁ := Heap.readAddr_erase (σ := τ) (hp := hp) rfl (MAddr.field r hf)
-  rw [show (MAddr.field r hf).erase = Semantics.Addr.memoryField r.id f from rfl] at h₁
-  rw [h₁] at hmem
-  simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind', MVal.erase, Close.copyLeaf_prim] at hmem
-  have hfe := SVal.find_erase (MVal.copyMToSt hp (T := .ref (.struct s)) r) (.field hf .nil)
-  rw [show (Path.field hf (Path.nil (T := .prim p))).erase = [Semantics.Seg.field f] from rfl,
-    hmem] at hfe
-  cases hx : (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) with
-  | none => rw [hx] at hfe; cases hfe
-  | some y =>
-    rw [hx] at hfe
-    simp only [toRes, Except.ok.injEq] at hfe
-    rw [← SVal.erase_prim] at hfe
-    rw [SVal.erase_injective hfe.symm]
-
 namespace CloseS
 
 variable {C : Contract}
@@ -457,11 +260,11 @@ theorem append_append {T U W : Ty} (r : SRef C T) (p : Path T U) (q : Path U W) 
     (r.append p).append q = r.append (p.append q) := by
   simp only [SRef.append, Path.append_assoc]
 theorem root_append {T U : Ty} (r : SRef C T) (p : Path T U) : (r.append p).root = r.root := rfl
-theorem absT_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
-    (SRef.ofRoot r h).absT = [.field r] := rfl
-theorem absT_append {T U : Ty} (r : SRef C T) (p : Path T U) :
-    (r.append p).absT = r.absT ++ p.erase := by
-  simp only [SRef.absT, SRef.append, Path.erase_append, Theory.rootPath, List.cons_append]
+theorem segs_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
+    (SRef.ofRoot r h).segs = [.field r] := rfl
+theorem segs_append {T U : Ty} (r : SRef C T) (p : Path T U) :
+    (r.append p).segs = r.segs ++ p.erase := by
+  simp only [SRef.segs, SRef.append, Path.erase_append, List.cons_append]
 theorem diverges_nil_left (q : List Semantics.Seg) : diverges [] q = false := rfl
 theorem diverges_nil_right (a : Semantics.Seg) (p : List Semantics.Seg) :
     diverges (a :: p) [] = false := rfl
@@ -471,7 +274,7 @@ round (as the untyped `Close.diverge_cons'`): a premise `k != j` then frames
 first. -/
 theorem diverges_cons (a b : Semantics.Seg) (p q : List Semantics.Seg) :
     diverges (a :: p) (b :: q) = true ↔ (¬ a = b ∨ ¬ b = a) ∨ diverges p q = true := by
-  simp only [Theory.StValue.diverges]
+  simp only [Theory.diverges]
   by_cases h : a = b
   · subst h; simp only [if_true, not_true_eq_false, or_self, false_or]
   · simp only [h, if_false, not_false_eq_true, true_or]
@@ -768,11 +571,11 @@ theorem wp_box_write {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
       ∀ st', st.write r v = some st' →
         st'.find r = st.writeVal r v →
         (∀ {W : Ty} (p : Path T W), st'.find (r.append p) = (st.writeVal r v).bind (·.find p)) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   cases h : st.write r v with
@@ -797,11 +600,11 @@ theorem wp_box_delete {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C �
         st'.find r = (st.find r).map (fun x => x.defaultOf) →
         (∀ {W : Ty} (p : Path T W), st'.find (r.append p) =
           (st.find r).bind fun x => x.defaultOf.find p) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   cases h : st.delete r with
@@ -823,11 +626,11 @@ theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {
     {P : Storage C → Prop} :
     Modality.box.wp (Close.optRes (st.write r (.prim x))) P ↔
       ∀ st', st.write r (.prim x) = some st' → st'.find r = some (.prim x) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   rw [wp_box_write]
@@ -844,7 +647,7 @@ attribute [close_rw_s high] CloseS.wp_box_write_prim CloseS.wp_diamond_write_tot
 
 attribute [close_rw_s]
   CloseS.wp_box_write CloseS.field_append CloseS.index_append CloseS.append_append
-  CloseS.root_append CloseS.absT_ofRoot CloseS.absT_append CloseS.diverges_nil_left
+  CloseS.root_append CloseS.segs_ofRoot CloseS.segs_append CloseS.diverges_nil_left
   CloseS.diverges_nil_right CloseS.diverges_cons CloseS.key_uint CloseS.key_int
   CloseS.key_uint' CloseS.key_int' CloseS.netOfT_def
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref

@@ -9,10 +9,10 @@ before them.  A statement is picked by name (`only`), so a function added
 to `TestSuite.sol` does not move a pin.
 
 A statement the closer proves in the residue is `sol_prove` alone; a leaf
-it leaves (a member written through the alias a nested `push` returns,
-outside the scoped closer's fragment) is closed on its scoped form
-(`sol_leaf`, then a closer: `Derive.searchLeaf`), and several leaves each
-go under their `case`.
+it leaves would be closed on its scoped form (`sol_leaf`, then a closer:
+`Derive.searchLeaf`), and several leaves each under their `case`.  Since
+W10.4 every statement closes in the residue, the member written through the
+alias a nested `push` returns included.
 -/
 
 /--
@@ -27,8 +27,6 @@ additionStorageWrite: derived
 /--
 info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
   sol_prove
-  sol_leaf
-  sol_close
 
 testStorageNestedPushReturnAlias: derived
 -/

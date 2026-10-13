@@ -16,8 +16,7 @@ identities stay, so the erasure does too.
 The terms read the typed state itself (`Signature.lean`, W9.8).  Its
 value-level erasure, the global part (`State.globE`, `Semantics.lean`'s
 state with no locals) and each local at its type (`State.getE`,
-`State.loc`), is what `sol_decide`'s untyped language is related to
-(`Calculus/DecideErase.lean`).  Each operation's erasure is one lemma here
+`State.loc`), is what the untyped interpreter's lemmas are read on.  Each operation's erasure is one lemma here
 (`State.adopt_globE`, `State.copyStToM_erase`, …), from which each typed
 step's follows (`Semantics/TypedErase.lean`).
 -/

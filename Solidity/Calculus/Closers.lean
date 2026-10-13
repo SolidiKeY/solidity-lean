@@ -11,8 +11,7 @@ on a leaf `sol_prove` left, a leaf is closed on its scoped form:
 `sol_close`, `sol_close_mt` and `sol_spec_close` read it through
 `sol_close_unwrap` (`CloseS.valid_of_holds`, `Calculus/CloseScoped.lean`),
 `holds` on the typed state.  `sol_close_eval` on the bare leaf `Valid ψ`, before its
-state is introduced, takes the same first step here.  `sol_decide`'s parts
-reduce the scoped leaf by position (below).  `sol_upd` and `sol_merge`
+state is introduced, takes the same first step here.  `sol_upd` and `sol_merge`
 rewrite the scoped formula itself (M6c, W7 `w7-rewrites`): `Calculus/UpdRuleScoped.lean`'s
 rules, the leaf staying scoped.  `sol_prove?` runs the scoped `sol_prove`
 and the scoped leaf search after it.
@@ -29,52 +28,6 @@ reads it (`sol_close_unwrap`), its state introduced, then the scoped step
 def evalSolCloseEvalCore : Tactic := fun _ => withMainContext do
   let some _ ← Symex.validGoal? (← getMainGoal) | throwUnsupportedSyntax
   evalTactic (← `(tactic| (sol_close_unwrap; intro σ; sol_close_eval)))
-
-/-! ## `sol_decide`'s parts on a scoped goal (decision 80)
-
-Each part on a scoped leaf `Valid ψ` reduces the leaf by position
-(`Decide.reduceScoped`, `Valid.of_reduceS`; with a premise `wt(storage)`,
-`Valid.of_reduceSL`, its layout then set aside), computes the reduction
-(`sol_reduce`) and takes the step it names on it: the constraints with the
-parameters typed (`sol_decide_cons`, `sol_decide_typed`'s step; `sol_reads`
-its first part), or the finish without them, the parameters free
-(`sol_decide_heuristic`, `sol_decide_unconstrained`).  On a goal that is
-not a scoped leaf each steps aside. -/
-
-open Meta in
-/-- A part of `sol_decide` on a scoped goal: the leaf reduced by position,
-the reduction computed, then `rest`. -/
-def Decide.onReduced (layout : Bool) (rest : Option (TacticM Unit)) : Tactic := fun _ =>
-  withMainContext do
-    let g ← getMainGoal
-    let some (C, ψ) ← Symex.validGoal? g | throwUnsupportedSyntax
-    Symex.reporting g do
-      let (g', hasLayout) ← Decide.reduceScoped g C ψ
-      replaceMainGoal [g']
-      evalTactic (← `(tactic| sol_reduce))
-      if hasLayout && !layout then
-        evalTactic (← `(tactic| refine Decide.LFml.forall_layout ?_))
-      if let some k := rest then withMainContext k
-
-@[tactic Solidity.Decide.tacticSol_decide_heuristic]
-def evalSolDecideHeuristicCore : Tactic := Decide.onReduced false <| some do
-  evalTactic (← `(tactic| (sol_decide_body; sol_decide_heuristic)))
-
-@[tactic Solidity.Decide.tacticSol_decide_cons]
-def evalSolDecideConsCore : Tactic := Decide.onReduced false <| some do
-  evalTactic (← `(tactic| sol_decide_typed))
-
-@[tactic Solidity.Decide.tacticSol_decide_unconstrained]
-def evalSolDecideUnconstrainedCore : Tactic := Decide.onReduced false <| some do
-  evalTactic (← `(tactic| (sol_decide_body; sol_decide_heuristic)))
-
-@[tactic Solidity.Decide.tacticSol_reduce]
-def evalSolReduceCore : Tactic := Decide.onReduced true none
-
-@[tactic Solidity.Decide.tacticSol_reads]
-def evalSolReadsCore : Tactic := Decide.onReduced false <| some do
-  replaceMainGoal [← Decide.typedCons (← getMainGoal)]
-  evalTactic (← `(tactic| sol_reads))
 
 /-- `sol_merge`: every stack of updates merged into one and what is dead
 dropped. -/

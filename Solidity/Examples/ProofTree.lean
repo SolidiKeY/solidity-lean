@@ -428,15 +428,12 @@ info: Try this:
 example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
   sol_prove?
 
-/-! Two writes at keys the premises do not separate: the leaf is left, and
-closed on the scoped leaf (`sol_leaf`, the sequent as `⊨ ψ`) by
-`sol_decide`, whose steps after the closer split on `k == j`. -/
+/-! Two writes at keys the premises do not separate: the closer splits on
+`k == j` inside the residue. -/
 
 /--
 info: Try this:
   sol_prove
-    sol_leaf
-    sol_decide
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
@@ -500,11 +497,11 @@ example : ⊢ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.a
                    uint x = alice.age; ] x == 42 } := by
   sol_prove?
 
-/-! Arrays and copies (`LStor.arr`, `LStor.copy`): a push, a `pop` after
+/-! Arrays and copies (`pushRd`, `popRd`, `ovRS`): a push, a `pop` after
 it and a copy close inside the residue; under `wt(storage)` the diamond of
-a push and a `pop` returns (a length is at least `0`, `Facts.lo`), and so
-does a write below the slot a `push()` of a struct takes, through an index
-or through the alias it returns (`Derive.pushAlias?`, `Facts.slotTy`). -/
+a push and a `pop` returns (a length is at least `0`, `Facts.range`), and so
+does a write below the slot a `push()` of a struct takes, through an
+index. -/
 
 /--
 info: Try this:
@@ -552,13 +549,11 @@ info: Try this:
 example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); persons[0].age = 1; ⟩ true } := by
   sol_prove?
 
-/--
-info: Try this:
-  sol_prove
--/
-#guard_msgs in
-example : ⊢ .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; ⟩ true } := by
-  sol_prove?
+/- Through the alias a `push()` returns (`Person storage p = persons.push();
+p.age = 1;`) the leaf is left open under the diamond: the alias is read at
+the old length before the push lands, a read that reverts at a full array,
+so the closer asks for room the formula does not give (`docs/intrinsic.md`,
+open items). -/
 
 /-! The length past a push, read back under the diamond: the push's room is
 the premise of what follows it (`roomM`), which bounds the length (W9.8.5). -/
@@ -625,14 +620,21 @@ heartbeats. -/
 section Scoped
 open scoped Scoped
 
-/-! The reduction's compiled code reads a pushed array's old length and
-value only where the read needs them (`CaseTree.toTermLazy`).  Run
-strictly, the work doubled with each push (twelve onto one array: 23 ms;
-twelve onto each of two, interleaved: 106 s), and `sol_prove?`'s size test
-(`Seq.leafFitsOn`) builds the reduction before it counts it.  Here the leaf
-is within `closeSize` and its reduction past `elimSize`: refused in
-milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), read as the
-scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`, `Fml.toLS`). -/
+/-! Each push stacks a storage update a later read is taken through, and
+the elimination reads each through the ones below it.  `sol_prove?`'s size
+test (`Seq.leafFitsOn`) counts the stack before the elimination
+(`Seq.stackSize`): here the leaf is within `closeSize` and its stack of
+twenty-two past the bound, refused in milliseconds.  The leaves are the `⊢`
+walk's (`Seq.residue`), read as the closer reads them (`Hyps.wrap`,
+`Fml.toLS`). -/
+
+/-- The walk's leaves of `φ`, each read as the closer reads it: within
+`closeSize`, its storage stack, and whether `leafFitsOn` takes it. -/
+def leafStats (φ : Fml StandardExample []) : Option (List (Bool × Nat × Bool)) :=
+  (Seq.residue .all .nil φ).map fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match (l.2.1.wrap l.2.2).toLS true Decide.SymS.init with
+    | some x => ((x.fits Seq.closeSize).isSome, x.stDepth, Seq.leafFitsOn (l.2.1.wrap l.2.2))
+    | none => (false, 0, false)
 
 /-- Twenty-two pushes onto one array. -/
 def pushes22 : Fml StandardExample [] :=
@@ -644,15 +646,11 @@ def pushes22 : Fml StandardExample [] :=
     values.push(20); values.push(21); ]
     values.length > 0 }
 
-#guard (Seq.residue .all .nil pushes22).map
-  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
-      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
+#guard leafStats pushes22 == some [(true, 22, false)]
 
-/-! The size bound (`Derive.closeSize`): a storage written from its own
-read doubles the leaf with each write.  Four `total += 1;` close inside the
-residue; six leave one leaf past the bound, which neither the closer nor
-`sol_prove?`'s reducing steps attempt (`Seq.leafFitsOn`). -/
+/-! A storage written from its own read: the literals fold where the
+terms are built, so four and six `total += 1;` both close inside the
+residue. -/
 
 /-- Four writes of `total` from its own read. -/
 def writes4 : Fml StandardExample [] :=
@@ -664,13 +662,10 @@ def writes6 : Fml StandardExample [] :=
     total += 1; ] total == 6 }
 
 #guard (Seq.residue .all .nil writes4).map List.isEmpty == some true
-#guard (Seq.residue .all .nil writes6).map
-  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [false]
+#guard (Seq.residue .all .nil writes6).map List.isEmpty == some true
 
-/-! The reduction is bounded apart (`Decide.elimSize`): a read below a
-`delete` carries the read before it twice, so ten deletes make a leaf of
-330 nodes, within `closeSize`, whose reduction has 79587. -/
+/-! Ten deletes stack ten storage updates, within `stackSize`: the leaf is
+taken (`Seq.leafFitsOn`). -/
 
 /-- Ten deletes of `wallet`, then a read of its mapping member. -/
 def deletes10 : Fml StandardExample [] :=
@@ -678,21 +673,20 @@ def deletes10 : Fml StandardExample [] :=
     delete wallet; delete wallet; delete wallet; delete wallet; delete wallet; ]
     wallet.stash[owner] == 0 }
 
-#guard (Seq.residue .all .nil deletes10).map
-  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
-      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
+#guard leafStats deletes10 == some [(true, 10, true)]
 
 end Scoped
 
-/-! A power is folded only up to the exponent `256` (`Decide.powBig`):
+/-! A power is folded only up to the exponent `256` (`Decide.expBig`):
 `Int.pow` recurses once per unit of it, heeding no heartbeats. -/
 
-#guard match Decide.foldBin .pow .uint (.lit (.int 2)) (.lit (.int 1000000000)) with
-  | .binop .. => true
+#guard match Decide.fold2 (C := StandardExample) (.binop .pow rfl)
+    (.lit (p := .uint) (PrimTy.uint.ofLit 2 rfl)) (.lit (PrimTy.uint.ofLit 1000000000 rfl)) with
+  | .app2 .. => true
   | _ => false
-#guard match Decide.foldBin .pow .uint (.lit (.int 2)) (.lit (.int 255)) with
-  | .lit (.int v) => v == 2 ^ 255
+#guard match Decide.fold2 (C := StandardExample) (.binop .pow rfl)
+    (.lit (p := .uint) (PrimTy.uint.ofLit 2 rfl)) (.lit (PrimTy.uint.ofLit 255 rfl)) with
+  | .app0 (.lit v) => decide ((v : PrimTy.uint.Denote).1 = 2 ^ 255)
   | _ => false
 
 section Scoped

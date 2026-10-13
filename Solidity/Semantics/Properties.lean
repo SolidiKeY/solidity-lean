@@ -89,8 +89,9 @@ theorem State.findStorage_of_findLive {σ : State} {r : Name} {p : List Seg} {w 
 includes insertion at a previously absent mapping key.
 
 The general form — the read at, below, above and *off* the written path — is
-`Theory/Storage.lean`'s `find_save_same`/`_extends`/`_prefix`/`_frame`, over
-solkey's own `save` term, and needs no hypothesis that the write succeeded.
+the typed Theory's `Obs.findOnSave`/`findOnSavePrefix`/`findOnSaveFrame`
+(`Theory/Typed/Obs.lean`), over solkey's own `save`, and needs no
+hypothesis that the write succeeded.
 This one is kept because the whole typing layer is stated against it. -/
 theorem SVal.find_save_same {old new updated : SVal} {path : List Seg}
     (h : old.save path new = .ok updated) :
@@ -381,10 +382,8 @@ end
 /-! ## The fresh-ID counter only grows
 
 A copy allocates; it never frees, so every identity at or above the *final*
-`nextId` was already absent before the copy.  That is what makes
-`Theory.Memory.new` a consequence of a denotation rather than an assumption
-about one -- connecting `Theory.Memory.new` to the interpreter is a future
-denotation proof, not yet written (`denoteMem_new`). -/
+`nextId` was already absent before the copy: solkey's `new(mem, r)`, read
+on the interpreter (on the typed heap, `Grown.newAddDifferent`). -/
 
 /-- A state computation only advances the fresh-ID counter. -/
 def NextIdGrows (s : State) (r : Res (State × α)) : Prop :=

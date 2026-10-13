@@ -258,15 +258,15 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
     | none => simp only [Option.elim, reduceCtorEq, false_implies, and_self]
     | some y =>
       simp only [Option.elim]
-      have hda : a.denote σ = .prim (PrimTy.erase x) := Tm.denote_eval σ a x ha
-      have hdb : b.denote σ = .prim (PrimTy.erase y) := Tm.denote_eval σ b y hb
-      rw [hda, hdb, Theory.StValue.Equiv.prim_iff]
+      have hda : a.denote σ = some x := Tm.denote_eval σ a x ha
+      have hdb : b.denote σ = some y := Tm.denote_eval σ b y hb
+      rw [hda, hdb, Option.some.injEq]
       by_cases hxy : x = y
       · subst hxy
         simp only [if_true, reduceCtorEq, false_implies, and_true]
         exact fun _ => trivial
       · simp only [hxy, if_false, reduceCtorEq, false_implies, true_and]
-        exact fun _ h => hxy (PrimTy.erase_injective (Theory.StValue.prim.inj h))
+        exact fun _ h => hxy h
   | _, .defined t, σ => by
     simp only [Fml.eval3C, holds]
     cases h : t.eval σ <;> simp only [Option.elim, ne_eq, reduceCtorEq, not_false_eq_true,

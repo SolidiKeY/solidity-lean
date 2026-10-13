@@ -1,6 +1,7 @@
 import Solidity.Calculus.TermLib
 import Solidity.Calculus.SeqRewrite
 import Solidity.Calculus.StateFacts
+import Solidity.Theory.Typed.Mem
 
 /-!
 # The term laws at an update's right-hand sides, scoped
@@ -26,18 +27,13 @@ second, decided by `rfl`.
 
 **Typed sorts** (W9.8.3c).  A term reads the typed state directly
 (`Tm.eval`), so the laws are proved on the typed storage
-(`Storage.findOnSave`, `Storage.find_selectT`), with no erased state.  Not
-ported yet (`docs/intrinsic.md`, W9.8.3c laws record): the frame and
-delete-value laws past an update (`TermTaclet.RefLaw`, `Upd.coversRef`),
-which need the typed frame laws of a delete, a push and a pop and a shape's
-divergence read as `Path.Diverges`; the memory laws (`EvalLaw`,
-`Upd.coversEval`) on the `Grown` heap; and the member-wise reads of a write
-under a `select` (`Tm.baseAny`).
+(`Storage.findOnSave`, `Storage.find_selectT`), with no erased state.  The frame and
+delete-value laws past an update are `TermTaclet.RefLaw` (`Upd.coversRef`);
+the memory laws are `EvalLaw` (`Upd.coversEval`).
 -/
 
 namespace Solidity
 
-open Theory Theory.StValue
 open Solidity (Srt Op0 Op1 Op2 Op3)
 
 variable {C : Contract} {Γ : Ctx}
@@ -59,9 +55,8 @@ theorem Tm.evalRefinesAt_of_theq {P : PrimTy} {t t' : Tm C Γ (.val P)} (h : Tm.
   | none => simp only [Tm.isLit, hl, Option.isSome_none, Bool.false_eq_true] at ht
   | some v =>
     obtain rfl := Tm.eq_of_litVal? hl
-    have e : StValue.prim (PrimTy.erase v) = .prim (PrimTy.erase x) :=
-      (Theory.StValue.Equiv.prim_iff.1 e.symm)
-    rw [PrimTy.erase_injective (StValue.prim.inj e)]
+    have e : some v = some x := e.symm
+    rw [Option.some.inj e]
     rfl
 
 /-! ## The literal laws -/
@@ -118,7 +113,7 @@ theorem LitLaw.theq {P : PrimTy} {t t' : Tm C Γ (.val P)} (r : LitLaw t t') : T
   obtain ⟨v, rfl, hv⟩ := r.exact
   intro σ
   rw [Tm.denote_eval σ t v (hv σ)]
-  exact Theory.StValue.Equiv.refl _
+  rfl
 
 /-! ## What an update's elements write -/
 
@@ -336,235 +331,62 @@ section Frame
 Theory's `diverges` on the erased segments.  At one source type the two
 paths take the same constructor at each step. -/
 theorem Path.diverges_of_erase {T U W : Ty} (p : Path T U) (q : Path T W)
-    (h : Theory.StValue.diverges p.erase q.erase = true) : Path.Diverges p q := by
+    (h : Theory.diverges p.erase q.erase = true) : Path.Diverges p q := by
   induction p generalizing W with
-  | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+  | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
   | @field s f T₁ U₁ hf p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | @field _ f' T₂ _ hf' q =>
       by_cases e : f = f'
       · subst e
         obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .fieldIn hf (ih q h)
       · exact .field hf hf' p q e
   | @«at» E U₁ i p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | «at» j q =>
       by_cases e : i = j
       · subst e
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .atIn i (ih q h)
       · exact .at p q e
   | @atF E U₁ n i p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | atF j q =>
       by_cases e : i = j
       · subst e
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .atFIn i (ih q h)
       · exact .atF p q e
   | @key K V U₁ k p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
     | key k' q =>
       by_cases e : k = k'
       · subst e
-        simp only [Path.erase, Theory.StValue.diverges, if_pos rfl] at h
+        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
         exact .keyIn k (ih q h)
       · exact .key p q e
-
-/-- Two typed paths from one type with one erasure are one path. -/
-theorem Path.heq_of_erase {T U W : Ty} (p : Path T U) (q : Path T W) (h : p.erase = q.erase) :
-    U = W ∧ HEq p q := by
-  induction p generalizing W with
-  | nil =>
-    cases q with
-    | nil => exact ⟨rfl, HEq.rfl⟩
-    | _ => simp only [Path.erase, reduceCtorEq] at h
-  | @field s f T₁ U₁ hf p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | @field _ f' T₂ _ hf' q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.field.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-  | @«at» E U₁ i p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | «at» j q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-  | @atF E U₁ n i p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | atF j q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-  | @key K V U₁ k p ih =>
-    cases q with
-    | nil => simp only [Path.erase, reduceCtorEq] at h
-    | key k' q =>
-      simp only [Path.erase, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨rfl, e⟩ := ih q h
-      cases e
-      exact ⟨rfl, HEq.rfl⟩
-
-/-- A typed path whose erasure extends another's, from one type, is the
-other followed by a path. -/
-theorem Path.split_of_erase {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Semantics.Seg}
-    (h : q.erase = p.erase ++ s) : ∃ r : Path U W, q = p.append r ∧ r.erase = s := by
-  induction p generalizing W with
-  | nil => exact ⟨q, (Path.append_nil q).symm, h⟩
-  | @field s₀ f T₁ U₁ hf p ih =>
-    cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
-    | @field _ f' T₂ _ hf' q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.field.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
-      obtain ⟨r, rfl, hr⟩ := ih q h
-      exact ⟨r, (Path.append_field hf p r).symm, hr⟩
-  | @«at» E U₁ i p ih =>
-    cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
-    | «at» j q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨r, rfl, hr⟩ := ih q h
-      exact ⟨r, (Path.append_at _ p r).symm, hr⟩
-  | @atF E U₁ n i p ih =>
-    cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
-    | atF j q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨r, rfl, hr⟩ := ih q h
-      exact ⟨r, (Path.append_atF _ p r).symm, hr⟩
-  | @key K V U₁ k p ih =>
-    cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
-    | key k' q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
-      obtain ⟨r, rfl, hr⟩ := ih q h
-      exact ⟨r, (Path.append_key _ p r).symm, hr⟩
-
-/-- A save below a path is a save at the path of the value found there,
-saved below. -/
-theorem SVal.saveM_append {T U W : Ty} (x : SVal T) (p : Path T U) (r : Path U W) (v : SVal W)
-    {x' : SVal T} (h : x.saveM (p.append r) v = some x') :
-    ∃ y y', x.findM p = some y ∧ y.saveM r v = some y' ∧ x.saveM p y' = some x' := by
-  induction p with
-  | nil => exact ⟨x, x', by cases x <;> rfl, by rw [Path.append_nil] at h; exact h, by cases x <;> rfl⟩
-  | @field s f T₁ U₁ hf p ih =>
-    cases x with
-    | struct fs =>
-      simp only [Path.append_field, SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff,
-        Option.some.injEq] at h
-      obtain ⟨z, hz, rfl⟩ := h
-      obtain ⟨y, y', hy, hy', hz'⟩ := ih (fs.get hf) r hz
-      refine ⟨y, y', ?_, hy', ?_⟩
-      · simp only [SVal.findM]; exact hy
-      · simp only [SVal.saveM, hz', Option.bind_eq_bind, Option.bind_some]
-  | @«at» E U₁ i p ih =>
-    cases x with
-    | array e sh hn =>
-      simp only [Path.append_at, SVal.saveM] at h
-      split at h
-      · rename_i hi
-        split at h
-        · rename_i x0 hx
-          simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-          obtain ⟨z, hz, rfl⟩ := h
-          obtain ⟨y, y', hy, hy', hz'⟩ := ih x0 r hz
-          refine ⟨y, y', ?_, hy', ?_⟩
-          · simp only [SVal.findM, hi, if_true, hx]; exact hy
-          · simp only [SVal.saveM, hi, if_true, hx, hz', Option.bind_eq_bind, Option.bind_some]
-        · simp only [reduceCtorEq] at h
-      · simp only [reduceCtorEq] at h
-  | @atF E U₁ n i p ih =>
-    cases x with
-    | fixed e =>
-      simp only [Path.append_atF, SVal.saveM] at h
-      split at h
-      · rename_i hi
-        split at h
-        · rename_i x0 hx
-          simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-          obtain ⟨z, hz, rfl⟩ := h
-          obtain ⟨y, y', hy, hy', hz'⟩ := ih x0 r hz
-          refine ⟨y, y', ?_, hy', ?_⟩
-          · simp only [SVal.findM, hi, if_true, hx]; exact hy
-          · simp only [SVal.saveM, hi, if_true, hx, hz', Option.bind_eq_bind, Option.bind_some]
-        · simp only [reduceCtorEq] at h
-      · simp only [reduceCtorEq] at h
-  | @key K V U₁ k p ih =>
-    cases x with
-    | map m d =>
-      simp only [Path.append_key, SVal.saveM] at h
-      split at h
-      · rename_i x0 hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-        obtain ⟨z, hz, rfl⟩ := h
-        obtain ⟨y, y', hy, hy', hz'⟩ := ih x0 r hz
-        refine ⟨y, y', ?_, hy', ?_⟩
-        · simp only [SVal.findM, hx]; exact hy
-        · simp only [SVal.saveM, hx, hz', Option.bind_eq_bind, Option.bind_some]
-      · rename_i hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-        obtain ⟨z, hz, rfl⟩ := h
-        obtain ⟨y, y', hy, hy', hz'⟩ := ih d r hz
-        refine ⟨y, y', ?_, hy', ?_⟩
-        · simp only [SVal.findM, hx]; exact hy
-        · simp only [SVal.saveM, hx, hz', Option.bind_eq_bind, Option.bind_some]
-
-/-- A save at an element below an array keeps the array's live length. -/
-theorem SVal.saveM_at_n {E W : Ty} {y y' : SVal (.ref (.array E))} {i : Int} {r : Path E W}
-    {v : SVal W} (h : y.saveM (.at i r) v = some y') :
-    (SVal.view y' : ArrView E).n = (SVal.view y : ArrView E).n := by
-  cases y with
-  | array e sh hn =>
-    rename_i n
-    simp only [SVal.saveM] at h
-    split at h
-    · split at h
-      · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
-        obtain ⟨z, -, rfl⟩ := h
-        show (List.take n _).length = n
-        rw [List.length_take, List.length_set, List.length_append, SVec.length_toList]
-        omega
-      · simp only [reduceCtorEq] at h
-    · simp only [reduceCtorEq] at h
 
 /-- The Theory's `diverges a (b ++ [x])`: `a` parts from `b`, or goes on
 below it. -/
 theorem diverges_append_single {a b : List Semantics.Seg} {x : Semantics.Seg}
-    (h : Theory.StValue.diverges a (b ++ [x]) = true) :
-    Theory.StValue.diverges a b = true ∨ ∃ rest, rest ≠ [] ∧ a = b ++ rest := by
+    (h : Theory.diverges a (b ++ [x]) = true) :
+    Theory.diverges a b = true ∨ ∃ rest, rest ≠ [] ∧ a = b ++ rest := by
   induction b generalizing a with
   | nil =>
     cases a with
-    | nil => simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Theory.diverges, Bool.false_eq_true] at h
     | cons y a' => exact .inr ⟨y :: a', List.cons_ne_nil _ _, rfl⟩
   | cons c b' ih =>
     cases a with
-    | nil => simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Theory.diverges, Bool.false_eq_true] at h
     | cons d a' =>
-      simp only [List.cons_append, Theory.StValue.diverges] at h ⊢
+      simp only [List.cons_append, Theory.diverges] at h ⊢
       by_cases e : d = c
       · subst e
         simp only [if_pos rfl] at h ⊢
@@ -611,7 +433,7 @@ theorem find_save_same {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
 /-- **A save leaves a reference that parts from it** (solkey's
 `findOnSaveFrame`): across roots, or below one root by `Path.Diverges`. -/
 theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
-    {q : SRef C W} (hd : Theory.StValue.diverges r.absT q.absT = true)
+    {q : SRef C W} (hd : Theory.diverges r.segs q.segs = true)
     (h : st.save r v = some st') : st'.find q = st.find q := by
   obtain ⟨x', hs, rfl⟩ := save_some h
   rcases r with ⟨n, hr, p⟩
@@ -620,7 +442,7 @@ theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal
   · subst e
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-    simp only [SRef.absT, rootPath, Theory.StValue.diverges, if_pos rfl] at hd
+    simp only [SRef.segs, Theory.diverges, if_pos rfl] at hd
     show ((SFields.set st hr x').get hr).find p' = (st.get hr).find p'
     rw [SFields.get_set_same]
     rw [SVal.save_eq_saveM] at hs
@@ -639,14 +461,14 @@ path (solkey's `lenOnSaveFrame`): elsewhere, or below one of the array's
 elements. -/
 theorem len_save_frame {U E : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     {q : SRef C (.ref (.array E))}
-    (hd : Theory.StValue.diverges r.absT (q.absT ++ [Theory.StValue.lengthSeg]) = true)
+    (hd : Theory.diverges r.segs (q.segs ++ [Theory.lengthSeg]) = true)
     (h : st.save r v = some st') : st'.len q = st.len q := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.len, find_save_frame hd h]
   · obtain ⟨x', hs, rfl⟩ := save_some h
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
-    simp only [SRef.absT, rootPath, List.cons_append, List.cons.injEq,
+    simp only [SRef.segs, List.cons_append, List.cons.injEq,
       Semantics.Seg.field.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
@@ -691,41 +513,30 @@ theorem Tm.delValue_evalT {P : PrimTy} (t : Tm C Γ (.val P)) :
 /-- Two paths whose shapes part reach references that part. -/
 theorem Tm.diverges_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.diverges q = true) {r : SRef C T} {r' : SRef C U} (hp : p.eval σ = some r)
-    (hq : q.eval σ = some r') : Theory.StValue.diverges r.absT r'.absT = true := by
-  have e := Tm.diverges_denote σ h
-  rwa [show p.denote σ = r.absT from Tm.denote_eval σ p r hp,
-    show q.denote σ = r'.absT from Tm.denote_eval σ q r' hq] at e
+    (hq : q.eval σ = some r') : Theory.diverges r.segs r'.segs = true := by
+  have e := Tm.diverges_segs σ h
+  rwa [show p.denote σ = .ref r from Tm.denote_eval σ p r hp,
+    show q.denote σ = .ref r' from Tm.denote_eval σ q r' hq] at e
 
 /-- A path that leaves another's length reaches a reference that does. -/
 theorem Tm.divergesLen_eval {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) {r : SRef C T} {r' : SRef C U} (hq : q.eval σ = some r)
     (hp : p.eval σ = some r') :
-    Theory.StValue.diverges r.absT (r'.absT ++ [Theory.StValue.lengthSeg]) = true := by
-  have e := Tm.divergesLen_denote σ h
-  rwa [show q.denote σ = r.absT from Tm.denote_eval σ q r hq,
-    show p.denote σ = r'.absT from Tm.denote_eval σ p r' hp] at e
-
-/-- Two typed references with one Theory path are one reference. -/
-theorem SRef.heq_of_absT {U W : Ty} (r : SRef C U) (q : SRef C W) (h : r.absT = q.absT) :
-    U = W ∧ HEq r q := by
-  rcases r with ⟨n, hr, p⟩
-  rcases q with ⟨n', hq, p'⟩
-  simp only [SRef.absT, rootPath, List.cons.injEq, Semantics.Seg.field.injEq] at h
-  obtain ⟨rfl, h⟩ := h
-  rename_i T₁ T₂
-  obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-  obtain ⟨rfl, e⟩ := Path.heq_of_erase p p' h
-  cases e
-  exact ⟨rfl, HEq.rfl⟩
+    Theory.diverges r.segs (r'.segs ++ [Theory.lengthSeg]) = true := by
+  have e := Tm.divergesLen_segs σ h
+  rwa [show q.denote σ = .ref r from Tm.denote_eval σ q r hq,
+    show p.denote σ = .ref r' from Tm.denote_eval σ p r' hp] at e
 
 /-- Two paths of the same segments reach one reference. -/
 theorem Tm.sameSegs_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.sameSegs q = true) {r : SRef C T} {r' : SRef C U} (hp : p.eval σ = some r)
     (hq : q.eval σ = some r') : T = U ∧ HEq r r' := by
-  have e := Tm.sameSegs_denote σ h
-  rw [show p.denote σ = r.absT from Tm.denote_eval σ p r hp,
-    show q.denote σ = r'.absT from Tm.denote_eval σ q r' hq] at e
-  exact SRef.heq_of_absT r r' e
+  obtain ⟨rfl, e⟩ := Tm.sameSegs_heq σ h
+  have e := eq_of_heq e
+  rw [show p.denote σ = .ref r from Tm.denote_eval σ p r hp,
+    show q.denote σ = .ref r' from Tm.denote_eval σ q r' hq] at e
+  cases e
+  exact ⟨rfl, HEq.rfl⟩
 
 /-- `s'` is a save at `p` over `s`, wherever it returns. -/
 def Tm.SavesAt (σ : State C Γ) (s' : Tm C Γ .st) {T : Ty} (p : Tm C Γ (.path T))
@@ -1069,172 +880,6 @@ and a read of it returns exactly what the read it is returns
 section MemberWise
 
 /-! ### Paths and references below a prefix -/
-
-theorem Path.append_assoc : {T U V W : Ty} → (p : Path T U) → (q : Path U V) → (r : Path V W) →
-    (p.append q).append r = p.append (q.append r)
-  | _, _, _, _, .nil, q, r => by rw [Path.append_nil, Path.append_nil]
-  | _, _, _, _, .field h p, q, r => by
-    rw [Path.append_field, Path.append_field, Path.append_field, Path.append_assoc p q r]
-  | _, _, _, _, .at i p, q, r => by
-    rw [Path.append_at, Path.append_at, Path.append_at, Path.append_assoc p q r]
-  | _, _, _, _, .atF i p, q, r => by
-    rw [Path.append_atF, Path.append_atF, Path.append_atF, Path.append_assoc p q r]
-  | _, _, _, _, .key k p, q, r => by
-    rw [Path.append_key, Path.append_key, Path.append_key, Path.append_assoc p q r]
-
-/-- A read below a path is the read of what is found at the path. -/
-theorem SVal.findM_append {T U W : Ty} : (x : SVal T) → (p : Path T U) → (r : Path U W) →
-    x.findM (p.append r) = (x.findM p).bind (·.findM r)
-  | x, .nil, r => by rw [Path.append_nil]; cases x <;> rfl
-  | .struct fs, .field hf p, r => by
-    rw [Path.append_field]
-    simp only [SVal.findM]
-    exact SVal.findM_append _ p r
-  | .array e sh hn, .at i p, r => by
-    rw [Path.append_at]
-    simp only [SVal.findM]
-    split
-    · split
-      · rename_i x0 _
-        exact SVal.findM_append x0 p r
-      · rfl
-    · rfl
-  | .fixed e, .atF i p, r => by
-    rw [Path.append_atF]
-    simp only [SVal.findM]
-    split
-    · split
-      · rename_i x0 _
-        exact SVal.findM_append x0 p r
-      · rfl
-    · rfl
-  | .map m d, .key k p, r => by
-    rw [Path.append_key]
-    simp only [SVal.findM]
-    split
-    · rename_i x0 _
-      exact SVal.findM_append x0 p r
-    · exact SVal.findM_append d p r
-
-/-- A save below a path is the save, at the path, of what is found there with
-the save below it; its compiled form. -/
-theorem SVal.saveM_append_eq {T U W : Ty} : (x : SVal T) → (p : Path T U) → (r : Path U W) →
-    (v : SVal W) → x.saveM (p.append r) v =
-      (x.findM p).bind fun y => (y.saveM r v).bind fun y' => x.saveM p y'
-  | x, .nil, r, v => by
-    rw [Path.append_nil]
-    cases x <;> (simp only [SVal.findM, Option.bind_some]; cases SVal.saveM _ r v <;> rfl)
-  | .struct fs, .field hf p, r, v => by
-    rw [Path.append_field]
-    simp only [SVal.saveM, SVal.findM, Option.bind_eq_bind]
-    rw [SVal.saveM_append_eq _ p r v]
-    cases (fs.get hf).findM p with
-    | none => rfl
-    | some y =>
-      simp only [Option.bind_some]
-      cases y.saveM r v with
-      | none => rfl
-      | some y' => rfl
-  | .array e sh hn, .at i p, r, v => by
-    rw [Path.append_at]
-    simp only [SVal.saveM, SVal.findM]
-    split
-    · rename_i hi
-      split
-      · rename_i x0 hx
-        simp only [Option.bind_eq_bind]
-        rw [SVal.saveM_append_eq x0 p r v]
-        cases x0.findM p with
-        | none => rfl
-        | some y =>
-          simp only [Option.bind_some]
-          cases y.saveM r v with
-          | none => rfl
-          | some y' => simp only [Option.bind_some, SVal.saveM, hi, if_true, hx]
-      · rfl
-    · rfl
-  | .fixed e, .atF i p, r, v => by
-    rw [Path.append_atF]
-    simp only [SVal.saveM, SVal.findM]
-    split
-    · rename_i hi
-      split
-      · rename_i x0 hx
-        simp only [Option.bind_eq_bind]
-        rw [SVal.saveM_append_eq x0 p r v]
-        cases x0.findM p with
-        | none => rfl
-        | some y =>
-          simp only [Option.bind_some]
-          cases y.saveM r v with
-          | none => rfl
-          | some y' => simp only [Option.bind_some, SVal.saveM, hi, if_true, hx]
-      · rfl
-    · rfl
-  | .map m d, .key k p, r, v => by
-    rw [Path.append_key]
-    simp only [SVal.saveM, SVal.findM]
-    split
-    · rename_i x0 hx
-      simp only [Option.bind_eq_bind]
-      rw [SVal.saveM_append_eq x0 p r v]
-      cases x0.findM p with
-      | none => rfl
-      | some y =>
-        simp only [Option.bind_some]
-        cases y.saveM r v with
-        | none => rfl
-        | some y' => simp only [Option.bind_some, SVal.saveM, hx]
-    · rename_i hx
-      simp only [Option.bind_eq_bind]
-      rw [SVal.saveM_append_eq d p r v]
-      cases d.findM p with
-      | none => rfl
-      | some y =>
-        simp only [Option.bind_some]
-        cases y.saveM r v with
-        | none => rfl
-        | some y' => simp only [Option.bind_some, SVal.saveM, hx]
-
-/-- Where a path finds a value, a save at it lands. -/
-theorem SVal.saveM_of_findM {T U : Ty} : (x : SVal T) → (p : Path T U) → {y : SVal U} →
-    x.findM p = some y → ∀ v : SVal U, ∃ x', x.saveM p v = some x'
-  | x, .nil, _, _, v => ⟨v, by cases x <;> rfl⟩
-  | .struct fs, .field hf p, y, h, v => by
-    simp only [SVal.findM] at h
-    obtain ⟨z, hz⟩ := SVal.saveM_of_findM _ p h v
-    exact ⟨_, by simp only [SVal.saveM, hz, Option.bind_eq_bind, Option.bind_some]; rfl⟩
-  | .array e sh hn, .at i p, y, h, v => by
-    simp only [SVal.findM] at h
-    split at h
-    · rename_i hi
-      split at h
-      · rename_i x0 hx
-        obtain ⟨z, hz⟩ := SVal.saveM_of_findM x0 p h v
-        exact ⟨_, by simp only [SVal.saveM, hi, if_true, hx, hz, Option.bind_eq_bind,
-          Option.bind_some]; rfl⟩
-      · cases h
-    · cases h
-  | .fixed e, .atF i p, y, h, v => by
-    simp only [SVal.findM] at h
-    split at h
-    · rename_i hi
-      split at h
-      · rename_i x0 hx
-        obtain ⟨z, hz⟩ := SVal.saveM_of_findM x0 p h v
-        exact ⟨_, by simp only [SVal.saveM, hi, if_true, hx, hz, Option.bind_eq_bind,
-          Option.bind_some]; rfl⟩
-      · cases h
-    · cases h
-  | .map m d, .key k p, y, h, v => by
-    simp only [SVal.findM] at h
-    split at h
-    · rename_i x0 hx
-      obtain ⟨z, hz⟩ := SVal.saveM_of_findM x0 p h v
-      exact ⟨_, by simp only [SVal.saveM, hx, hz, Option.bind_eq_bind, Option.bind_some]; rfl⟩
-    · rename_i hx
-      obtain ⟨z, hz⟩ := SVal.saveM_of_findM d p h v
-      exact ⟨_, by simp only [SVal.saveM, hx, hz, Option.bind_eq_bind, Option.bind_some]; rfl⟩
 
 /-- A member path under the struct at `ref`, as a path from the root. -/
 def SRef.underAt {C : Contract} {s : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
@@ -1866,152 +1511,6 @@ replacement returns the same (`EvalLaw.exact`), on the typed heap
 an update over either modality the update must hold the write the law reads
 past (`Upd.coversEval`), as `Upd.coversRef` for the storage. -/
 
-section Heap
-
-theorem Objs.get_set_same {H : HTy} {R : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) →
-    (i : Nat) → (h : Rs[i]? = some R) → (o : MObj H R) → Objs.get Rs (Objs.set Rs os i h o) i h = o
-  | [], _, _, h, _ => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
-  | R' :: _, _, 0, h, _ => by
-    obtain rfl : R' = R := Option.some.inj (by simpa only [List.getElem?_cons_zero] using h)
-    rfl
-  | _ :: Rs, os, i + 1, h, o => Objs.get_set_same Rs os.2 i _ o
-
-theorem Objs.get_set_ne {H : HTy} {R R₂ : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) →
-    (i j : Nat) → i ≠ j → (h : Rs[i]? = some R) → (h₂ : Rs[j]? = some R₂) → (o : MObj H R) →
-    Objs.get Rs (Objs.set Rs os i h o) j h₂ = Objs.get Rs os j h₂
-  | [], _, _, _, _, h, _, _ => absurd h (by simp only [List.getElem?_nil, reduceCtorEq, not_false_eq_true])
-  | _ :: _, _, 0, 0, hij, _, _, _ => absurd rfl hij
-  | _ :: _, _, 0, _ + 1, _, _, _, _ => rfl
-  | _ :: _, _, _ + 1, 0, _, _, _, _ => rfl
-  | _ :: Rs, os, i + 1, j + 1, hij, h, h₂, o =>
-    Objs.get_set_ne Rs os.2 i j (fun e => hij (congrArg (· + 1) e)) _ _ o
-
-theorem Heap.get_set_same {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) (o : MObj H R) :
-    (hp.set r o).get r = o :=
-  Objs.get_set_same H hp r.id r.get? o
-
-theorem Heap.get_set_ne {H : HTy} {R R₂ : RefTy} (hp : Heap H) (r : HRef H R) (r₂ : HRef H R₂)
-    (hne : r.id ≠ r₂.id) (o : MObj H R) : (hp.set r o).get r₂ = hp.get r₂ :=
-  Objs.get_set_ne H hp r.id r₂.id hne r.get? r₂.get? o
-
-/-- Two references of one identity are one reference. -/
-theorem HRef.heq_of_id {H : HTy} {R R₂ : RefTy} (r : HRef H R) (r₂ : HRef H R₂) (e : r.id = r₂.id) :
-    R = R₂ ∧ HEq r r₂ := by
-  rcases r with ⟨i, h⟩
-  rcases r₂ with ⟨j, h₂⟩
-  simp only at e
-  subst e
-  obtain rfl : R = R₂ := Option.some.inj (h.symm.trans h₂)
-  exact ⟨rfl, HEq.rfl⟩
-
-theorem MFields.get_set_same {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} →
-    (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) → (v : MVal H T) →
-    MFields.get fs (MFields.set fs x h v) h = v
-  | [], _, _, h, _ => absurd h (by simp only [Semantics.lookupBy, reduceCtorEq, not_false_eq_true])
-  | (f', T') :: fs, T, x, h, v => by
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [MFields.get, MFields.set, e, dite_true]
-    · simp only [MFields.get, MFields.set, e, dite_false]
-      exact MFields.get_set_same fs x.2 _ v
-
-theorem MFields.get_set_ne {H : HTy} {f g : Name} : (fs : List (Name × Ty)) → {T U : Ty} →
-    (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) →
-    (hg : Semantics.lookupBy g fs = some U) → f ≠ g →
-    (v : MVal H T) → MFields.get fs (MFields.set fs x h v) hg = MFields.get fs x hg
-  | [], _, _, _, h, _, _, _ => absurd h (by simp only [Semantics.lookupBy, reduceCtorEq, not_false_eq_true])
-  | (f', T') :: fs, T, U, x, h, hg, hfg, v => by
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      have eg : ¬ g = f' := fun h' => hfg (e.trans h'.symm)
-      simp only [MFields.get, MFields.set, e, dite_true, eg, dite_false]
-    · by_cases eg : g = f'
-      · simp only [MFields.get, MFields.set, e, dite_false, eg, dite_true]
-      · simp only [MFields.get, MFields.set, e, dite_false, eg]
-        exact MFields.get_set_ne fs x.2 _ _ hfg v
-
-theorem MObj.elems_setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) (o : MObj H R) (i : Nat)
-    (v : MVal H E) : MObj.elems a (MObj.setElem a o i v) = (MObj.elems a o).set i v := by
-  cases a <;> simp only [MObj.setElem_dyn, MObj.elems_dyn, MObj.setElem_fixed, MObj.elems_fixed]
-
-/-- An array object is not a struct. -/
-theorem ArrTy.ne_struct {R : RefTy} {E : Ty} (a : ArrTy R E) (s : Name) : R ≠ .struct s := by
-  cases a <;> exact fun h => RefTy.noConfusion h
-
-/-- Two addresses that never meet: two members, or a member and an element
-(two kinds of object), or two elements of one array at two indices. -/
-def MAddr.Apart {H : HTy} {T U : Ty} : MAddr H T → MAddr H U → Prop
-  | @MAddr.field _ _ f _ _ _, @MAddr.field _ _ g _ _ _ => f ≠ g
-  | .field .., .index .. => True
-  | .index .., .field .. => True
-  | .index r _ i, .index r' _ j => r.id = r'.id → i ≠ j
-
-/-- **A write reads back where it lands** (`readOnWrite`). -/
-theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : MAddr H T}
-    {v : MVal H T} (h : hp.writeAddr ad v = some hp') : hp'.readAddr ad = some v := by
-  cases ad with
-  | field r hf =>
-    simp only [Heap.writeAddr, Option.some.injEq] at h
-    subst h
-    simp only [Heap.readAddr, Heap.field, Heap.setField, Heap.get_set_same, MFields.get_set_same]
-  | index r a i =>
-    simp only [Heap.writeAddr, Heap.setIndex] at h
-    split at h
-    · rename_i hb
-      simp only [Option.some.injEq] at h
-      subst h
-      simp only [Heap.readAddr, Heap.index, hb.1, if_true, Heap.get_set_same, MObj.elems_setElem,
-        List.getElem?_set_self hb.2]
-    · simp only [reduceCtorEq] at h
-
-/-- **A write leaves an address apart from it** (`readWriteDifferent`). -/
-theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
-    {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp') (hab : ad.Apart bd) :
-    hp'.readAddr bd = hp.readAddr bd := by
-  cases ad with
-  | field r hf =>
-    simp only [Heap.writeAddr, Option.some.injEq] at h
-    subst h
-    cases bd with
-    | field r' hg =>
-      simp only [Heap.readAddr, Heap.field, Heap.setField, Option.some.injEq]
-      by_cases e : r.id = r'.id
-      · obtain ⟨hR, hr⟩ := HRef.heq_of_id r r' e
-        cases hR
-        cases hr
-        rw [Heap.get_set_same, MFields.get_set_ne _ _ _ _ hab]
-      · rw [Heap.get_set_ne _ r r' e]
-    | index r' a j =>
-      have e : r.id ≠ r'.id := fun e => ArrTy.ne_struct a _ (HRef.heq_of_id r r' e).1.symm
-      simp only [Heap.readAddr, Heap.index, Heap.setField, Heap.get_set_ne _ r r' e]
-  | index r a i =>
-    simp only [Heap.writeAddr, Heap.setIndex] at h
-    split at h
-    · rename_i hb
-      simp only [Option.some.injEq] at h
-      subst h
-      cases bd with
-      | field r' hg =>
-        have e : r.id ≠ r'.id := fun e => ArrTy.ne_struct a _ (HRef.heq_of_id r r' e).1
-        simp only [Heap.readAddr, Heap.field, Heap.get_set_ne _ r r' e]
-      | index r' a' j =>
-        by_cases e : r.id = r'.id
-        · obtain ⟨hR, hr⟩ := HRef.heq_of_id r r' e
-          cases hR
-          cases hr
-          have hij : i ≠ j := hab e
-          cases a <;> cases a' <;>
-          · simp only [Heap.readAddr, Heap.index, Heap.get_set_same, MObj.elems_setElem]
-            by_cases hj : 0 ≤ j
-            · have hn : i.toNat ≠ j.toNat := by omega
-              simp only [hj, if_true, List.getElem?_set_ne hn]
-            · simp only [hj, if_false]
-        · simp only [Heap.readAddr, Heap.index, Heap.get_set_ne _ r r' e]
-    · simp only [reduceCtorEq] at h
-
-end Heap
 
 section MemEval
 
@@ -2244,11 +1743,6 @@ theorem Tm.onSpine_grows {σ : State C Γ} {t w : Tm C Γ .mem} (h : t.onSpine w
     exact List.prefix_refl _
   · exact Tm.onSpineAny_grows hw t h μ ht
 
-/-- The object an address is in. -/
-def MAddrT.id {T : Ty} : MAddrT T → Nat
-  | .field id _ => id
-  | .index id _ _ => id
-
 /-- An identity, or the object of an address, below `n`; other sorts carry
 nothing. -/
 def Srt.Bnd {H : HTy} (n : Nat) : (u : Srt) → Option (u.Den C H) → Prop
@@ -2268,9 +1762,6 @@ def Tm.boundedIn : {u : Srt} → Tm C Γ u → Tm C Γ .mem → Bool
   | _, .app1 (.mfield _) i, M => i.boundedIn M
   | _, .app2 (.mat _) i _, M => i.boundedIn M
   | _, _, _ => false
-
-theorem HRef.id_lt {H : HTy} {R : RefTy} (r : HRef H R) : r.id < H.length :=
-  (List.getElem?_eq_some_iff.1 r.get?).1
 
 theorem Tm.boundedIn_eval {σ : State C Γ} {M : Tm C Γ .mem} {μ : Grown σ.H (fun _ => Unit)}
     (hM : M.eval σ = some μ) {u : Srt} (t : Tm C Γ u) (h : t.boundedIn M = true) :
@@ -2327,56 +1818,6 @@ theorem Tm.boundedIn_eval {σ : State C Γ} {M : Tm C Γ .mem} {μ : Grown σ.H 
       exact ihx h id hid
     | _ => cases u <;> trivial
   | _ => cases u <;> trivial
-
-/-- The typed read of an address on the erasure. -/
-theorem Heap.readAddr_erase {H : HTy} {σ : Semantics.State} {hp : Heap H}
-    (hh : σ.heap = hp.erase) {T : Ty} (a : MAddr H T) :
-    Solidity.readAddr σ a.erase = toRes (MVal.erase T) (hp.readAddr a) := by
-  cases a with
-  | field r h => exact Heap.readField_erase hh r h
-  | index r a i => exact Heap.readIndex_erase hh r a i
-
-theorem toRes_inj {α α' β : Type} {f : α → β} {g : α' → β} {x : Option α} {y : Option α'}
-    (h : toRes f x = toRes g y) : x.map f = y.map g := by
-  cases x <;> cases y <;> simp_all only [toRes, Option.map_none, Option.map_some,
-    reduceCtorEq, Except.ok.injEq]
-
-/-- An allocation keeps every object below it: the slot at an address
-there reads the same, erased. -/
-theorem Heap.readAddr_allocDefault {H : HTy} (hp : Heap H) (R : RefTy)
-    (hR : (Ty.ref R).mapFree = true) {T : Ty} (ra : MAddr H T) :
-    ((hp.allocDefault R hR).heap.readAddr (ra.wk (hp.allocDefault R hR).ext)).map (MVal.erase T) =
-      (hp.readAddr ra).map (MVal.erase T) := by
-  let τ₀ : Semantics.State := Heap.into { storage := [] } hp
-  have ha := Heap.allocDefault_erase (σ := τ₀) (hp := hp) rfl rfl R hR
-  have hx := SemanticsProperties.allocDefault_heapExt ha
-  have hid : ra.erase.id < τ₀.nextId := by
-    cases ra with
-    | field r _ => exact HRef.id_lt r
-    | index r _ _ => exact HRef.id_lt r
-  have h₀ := Heap.readAddr_erase (σ := τ₀) (hp := hp) rfl ra
-  have h₁ := Heap.readAddr_erase (σ := Heap.into τ₀ (hp.allocDefault R hR).heap) rfl
-    (ra.wk (hp.allocDefault R hR).ext)
-  rw [MAddr.erase_wk, readAddr_heapExt hx hid, h₀] at h₁
-  exact (toRes_inj h₁).symm
-
-/-- The address in a grown typing: the same object, where it is below the
-smaller one. -/
-theorem MAddrT.resolve_wk {H H' : HTy} (e : H <+: H') {T : Ty} (a : MAddrT T)
-    (hid : a.id < H.length) : a.resolve H' = (a.resolve H).map (MAddr.wk e) := by
-  obtain ⟨t, rfl⟩ := e
-  have hg : ∀ (R : RefTy) (id : Nat), id < H.length →
-      HRef.ofId? (H ++ t) R id = (HRef.ofId? H R id).map (HRef.wk ⟨t, rfl⟩) := by
-    intro R id hl
-    simp only [HRef.ofId?, List.getElem?_append_left hl]
-    split <;> rfl
-  cases a with
-  | field id h =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, hg _ id hid, Option.map_map]
-    rfl
-  | index id a i =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, hg _ id hid, Option.map_map]
-    rfl
 
 /-- `addM(m, R)` returns: `m` does, and the allocation is its default. -/
 theorem Tm.addM_some {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true}
@@ -2446,29 +1887,6 @@ theorem Tm.readAddDifferentIdentity_exact {σ : State C Γ} {m : Tm C Γ .mem} {
       Option.some.injEq, Option.bind_some, Option.bind_none] at he ⊢
     exact Semantics.MVal.ref.inj he
 
-/-- The untyped address. -/
-def MAddrT.eraseT {T : Ty} : MAddrT T → Semantics.Addr
-  | .field (f := f) id _ => .memoryField id f
-  | .index id _ i => .memoryIndex id i
-
-theorem MAddrT.erase_resolve {H : HTy} {T : Ty} {a : MAddrT T} {ra : MAddr H T}
-    (h : a.resolve H = some ra) : ra.erase = a.eraseT := by
-  cases a with
-  | field id hf =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at h
-    obtain ⟨r, hr, rfl⟩ := h
-    simp only [HRef.ofId?] at hr
-    split at hr
-    · cases hr; rfl
-    · cases hr
-  | index id a i =>
-    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, Option.map_eq_some_iff] at h
-    obtain ⟨r, hr, rfl⟩ := h
-    simp only [HRef.ofId?] at hr
-    split at hr
-    · cases hr; rfl
-    · cases hr
-
 /-- `M` is `addM(m, R)`. -/
 def Tm.isAddM (M m : Tm C Γ .mem) (R : RefTy) : Bool :=
   match M with
@@ -2534,17 +1952,6 @@ def Srt.FreshRead {H : HTy} (H₁ : HTy) (τ : Semantics.State) (root : Nat) (R 
         readAddr τ ad.eraseT = τ.readPath root p) ∧
       (∀ T', (Ty.ref R).memberTy p = some T' → ∃ ad, x = some ad)
   | _, _ => True
-
-/-- The erasure the fresh reads are read on: the heap after the allocation. -/
-abbrev Grown.allocSt {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
-    (hR : (Ty.ref R).mapFree = true) : Semantics.State :=
-  Heap.into (Heap.into { storage := [] } μ₀.heap) (μ₀.heap.allocDefault R hR).heap
-
-theorem Grown.allocSt_copy {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
-    (hR : (Ty.ref R).mapFree = true) :
-    Semantics.copyStToM (Heap.into { storage := [] } μ₀.heap) (Semantics.defaultForTy (.ref R)) =
-      .ok (μ₀.allocSt R hR, .ref (μ₀.heap.allocDefault R hR).val.id) :=
-  Close.allocDefault_copy (Heap.allocDefault_erase rfl rfl R hR)
 
 theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {μ₀ : Grown σ.H (fun _ => Unit)} (hm : m.eval σ = some μ₀)
@@ -2703,18 +2110,6 @@ storage struct into memory (`SVal.copyStToM_erase`, `Close.copyStToM_member`),
 and of a memory struct into storage (`MVal.copyMem_erase`,
 `Close.copyMem_member`), its write laid over the old value
 (`SVal.overlay_erase`, `Close.find_overlay_fields`). -/
-
-/-- A read one member below a root's path, untyped. -/
-theorem Semantics.State.findStorage_snoc (σ : Semantics.State) (root : Name)
-    (segs : List Semantics.Seg) (sg : Semantics.Seg) :
-    σ.findStorage root (segs ++ [sg]) = σ.findStorage root segs >>= fun w => w.find [sg] := by
-  unfold Semantics.State.findStorage
-  cases lookupBy root σ.storage with
-  | none => rfl
-  | some v => exact SemanticsProperties.SVal.find_append v segs [sg]
-
-theorem HRef.ofId?_self {H : HTy} {R : RefTy} (r : HRef H R) : HRef.ofId? H R r.id = some r := by
-  simp only [HRef.ofId?, r.get?, dite_true]
 
 /-- A member read out of a copy of a storage struct, on the erasure: what
 the storage holds at the member. -/
@@ -3236,9 +2631,17 @@ chain's hypothesis about terms at the empty scope (`st!{ … }`, `pt!{ … }`)
 gives a law's premise at an update's scope. -/
 theorem Tm.KindFreeAt.ofNil {u : Srt} {T : Ty} {s : Tm C Γ u} {p : Tm C Γ (u.pathAt T)}
     {s₀ : Tm C [] u} {p₀ : Tm C [] (u.pathAt T)} (h : Tm.KindFreeAt s₀ p₀) (hs : s.toNil? = some s₀)
-    (hp : p.toNil? = some p₀) : Tm.KindFreeAt s p := fun σ => by
-  rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
-  exact h σ.toNil
+    (hp : p.toNil? = some p₀) : Tm.KindFreeAt s p := by
+  cases u with
+  | st =>
+    intro σ P r
+    rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
+    exact h σ.toNil r
+  | sts sn =>
+    intro σ P r
+    rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
+    exact h σ.toNil r
+  | _ => trivial
 
 /-! ## Pins -/
 

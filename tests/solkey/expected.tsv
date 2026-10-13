@@ -162,7 +162,7 @@ taclets	TestSuite	storagePushEmpty	derived	box	`Solkey.TestSuite.storagePushEmpt
 taclets	TestSuite	storagePushLengthPositive	derived	diamond	`Solkey.TestSuite.storagePushLengthPositive.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushLocalBind	derived	box	`Solkey.TestSuite.storagePushLocalBind.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushNonsimpleArg	derived	box; for all x, y	`Solkey.TestSuite.storagePushNonsimpleArg.proved` (`Solidity/TestSuite/Derived7.lean`)
-taclets	TestSuite	storagePushReadBack	divergent	diamond	valid in the model (a push at a full array is out of gas, so the length after one is at least `1`) but not derived: the closer does not read the slot at `(len + 1) - 1` as the one pushed
+taclets	TestSuite	storagePushReadBack	derived	diamond	`Solkey.TestSuite.storagePushReadBack.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushReturnAssign	derived	box	`Solkey.TestSuite.storagePushReturnAssign.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storageRootAddAssign	derived	diamond	`Solkey.TestSuite.storageRootAddAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
 taclets	TestSuite	storageRootCopySource	derived	diamond	`Solkey.TestSuite.storageRootCopySource.proved` (`Solidity/TestSuite/Derived3.lean`)
@@ -236,7 +236,7 @@ taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	derived	box	`Solkey.T
 taclets	TestSuite	testStoragePushLvaluePrimitive	derived	box	`Solkey.TestSuite.testStoragePushLvaluePrimitive.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStoragePushReturnAlias	derived	box	`Solkey.TestSuite.testStoragePushReturnAlias.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testDanglingReferenceSurvivesPush	derived	diamond	`Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved` (`Solidity/TestSuite/Derived13.lean`)
-taclets	TestSuite	testArrayCopyClearsOldElements	pending	diamond	the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a storage with writes at another root below it, which the slot facts do not read
+taclets	TestSuite	testArrayCopyClearsOldElements	derived	diamond	`Solkey.TestSuite.testArrayCopyClearsOldElements.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testArrayCopyKeepsDestinationTail	derived	diamond	`Solkey.TestSuite.testArrayCopyKeepsDestinationTail.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	derived	box	`Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
@@ -579,4 +579,4 @@ rules	Rules	storageExample4_2	unported	solkey storageExample4-2.key	hand-written
 rules	Rules	storageExample5	unported	solkey storageExample5.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	storageFieldRead	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
 rules	Rules	storageFieldWrite	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
-storage	Rules	copyKeepsMapping	unsupported		storage-theory problem over a `MapField`: a copy of a mapping-carrying type, which no program writes (solc ≥ 0.7 and solkey's parser reject it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), and the corpus's obligations are programs' (`⟨ f() ⟩ true`)
+storage	Rules	copyKeepsMapping	unsupported		storage-theory problem over a `MapField`: a copy of a mapping-carrying type, which no program writes (solc ≥ 0.7 and solkey's parser reject it); the typed Theory states the rule it exercises (`Theory/Typed/Obs.lean`, `Obs.copyTo`), and the corpus's obligations are programs' (`⟨ f() ⟩ true`)

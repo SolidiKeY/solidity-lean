@@ -9,8 +9,8 @@ import Solidity.Calculus.Closers
 `rw [findOnSave]` on a sequent applies the term taclet
 `TermTaclet.findOnSave` (`Calculus/TermLib.lean`) by `Proves.rewrite`:
 its paths are found in the sequent and its side conditions closed on them.
-`sol_rw [find_delAt_same, …]` builds a rule from the Theory's own lemmas
-instead (`Calculus/RewriteSyntax.lean`).
+`sol_rw [Obs.findOnDelAt, …]` builds a rule from the typed Theory's own
+laws instead (`Theory/Typed/Obs.lean`, `Calculus/RewriteSyntax.lean`).
 
 The sequents are scoped (`open scoped Solidity.Scoped`, `⊢ φ`), over
 `StandardExample`: they hold terms only, with no local, no update and no
@@ -21,7 +21,7 @@ or not (`Examples/Tactics/SelectOnSaveConsr.lean`).
 
 namespace Solidity.Examples.Tactics.TermTaclets
 
-open Solidity Semantics Theory Theory.StValue
+open Solidity Semantics
 
 local instance : InContract := ⟨StandardExample⟩
 
@@ -41,18 +41,17 @@ example : ⊢ dl!{ find(delAt(save(storage, alice.age, 42), alice.age), alice.ag
   sol_rw [findOnDelAtSave]
   exact Proves.eqRefl
 
-/-- The same, with the Theory's own lemmas named instead of `findOnDelAtSave`:
-the read of the delete (`find_delAt_same`), of the write under it
-(`find_copyTo_same`, `copyVal`) and the reset of the word (`delValueDefault`,
-`primDefault`), one step, since `delValue (findSt …)` alone is no term. -/
+/-- The same, with the typed Theory's own law named instead of
+`findOnDelAtSave`: a word deleted reads its default (`Obs.findOnDelAt`),
+whatever was written there. -/
 example : ⊢ dl!{ find(delAt(save(storage, alice.age, 42), alice.age), alice.age) ≐ 0 } := by
-  sol_rw [find_delAt_same, find_copyTo_same, copyVal, delValueDefault, primDefault]
+  sol_rw [Obs.findOnDelAt]
   exact Proves.eqRefl
 
-/-- A Theory frame lemma: a read off the deleted path, `alice` against
-`bob.age`, whose `diverges` closes on the two literal paths. -/
+/-- A Theory frame law: a read off the deleted location, `alice` against
+`bob.age`, its side condition decided on the two literal locations. -/
 example : ⊢ dl!{ find(delAt(storage, alice), bob.age) ≐ find(storage, bob.age) } := by
-  rw [find_delAt_frame]
+  rw [Obs.findOnDelAtFrame]
   exact Proves.eqRefl
 
 /- A frame law whose side condition fails: `alice.account` and

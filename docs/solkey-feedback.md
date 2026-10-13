@@ -155,9 +155,11 @@ it (`Src.copy`'s `mapFree`). On every program the two theories agree, and the
 lazy leaf costs a term that grows with every write and six taclets where the
 signature has one rule, `saveEmptyPath` (`save(st, ∅, v) = (Struct) v`).
 
-**Lean evidence.** `Theory/Storage.lean` keeps the collapsing leaf
-(`saveOnEmpty`, mirrored in `Theory/Rewrite.lean`) as the source of truth for
-solkey; `docs/lean-key-rule-map.md` records the difference.
+**Lean evidence.** The typed Theory has no leaf: a copy is one `save` of
+the new value laid over the old one, computed from the type (`Obs.copyTo`,
+`TVal.overlay`, `Theory/Typed/Obs.lean`); the untyped algebra that kept the
+collapsing leaf (`saveOnEmpty`) was deleted at W10.4.
+`docs/lean-key-rule-map.md` records the difference.
 
 **Fix.** Revert to the collapsing leaf, or state the program on which the fold
 is observable.

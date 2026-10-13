@@ -195,24 +195,11 @@ const IMPORTED = {
 };
 
 /** Pending obligations listed apart from the pending ones, with the reason
-(`storagePushReadBack`: valid in the model since W9.8.5, not derived). */
-const DIVERGENT = {
-  storagePushReadBack:
-    "valid in the model (a push at a full array is out of gas, so the length after " +
-    "one is at least `1`) but not derived: the closer does not read the slot at " +
-    "`(len + 1) - 1` as the one pushed",
-};
+(none since W10.4: `storagePushReadBack` is derived). */
+const DIVERGENT = {};
 
-/** The copy test of the dangling aliases (docs/testsuite-proofs.md, "Dangling aliases"). */
-const DANGLING =
-  "the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but " +
-  "the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a " +
-  "storage with writes at another root below it, which the slot facts do not read";
-
-/** Why a pending obligation is pending. */
-const PENDING = {
-  testArrayCopyClearsOldElements: DANGLING,
-};
+/** Why a pending obligation is pending (none since W10.4). */
+const PENDING = {};
 
 /** The statuses of an imported row, in report order. */
 const IMPORTED_STATUSES = ["derived", "pending", "divergent", "excluded", "unsupported", "skip"];
@@ -295,7 +282,7 @@ const KEY_SUITES = [
     reason: () =>
       "storage-theory problem over a `MapField`: a copy of a mapping-carrying " +
       "type, which no program writes (solc ≥ 0.7 and solkey's parser reject " +
-      "it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), " +
+      "it); the typed Theory states the rule it exercises (`Theory/Typed/Obs.lean`, `Obs.copyTo`), " +
       "and the corpus's obligations are programs' (`⟨ f() ⟩ true`)",
   },
 ];

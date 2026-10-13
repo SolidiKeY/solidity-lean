@@ -1190,4 +1190,12 @@ example : (testSuite = testSuite) ∧
 
 end Storage
 
+/-- A save that lands reads back (`findOnSave` below a root). -/
+theorem SVal.find_save_same {T U : Ty} (x : SVal T) (p : Path T U) (v : SVal U)
+    {x' : SVal T} (h : x.save p v = some x') : x'.find p = some v := by
+  rw [SVal.save_eq_saveM] at h
+  rw [SVal.find_eq_findM]
+  exact SVal.findM_saveM x p v h
+
+
 end Solidity

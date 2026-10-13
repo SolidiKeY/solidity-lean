@@ -1,31 +1,27 @@
 import Solidity.Signature
-import Solidity.Theory.Bridge.Copy
-import Solidity.Theory.Bridge.Push
-import Solidity.Theory.Bridge.Delete
-import Solidity.Theory.Bridge.Find
 
 /-!
 # What a typed symbol denotes in the Theory, and the bridge
 
-A formula's equation reads its terms in the Theory algebra (`Theory.StValue`,
-KeY's total model: a read off the end of what is there is a node, not a
-halt), so solkey's laws need no "the write lands" premise (the W9.8.0
-decision, `docs/intrinsic.md`).  `Op0.denote` … `Op3.denote` read the typed
-symbols of `Signature.lean` there, over the typed global part's storage
-abstracted (`Storage.absT`); `Tm.denote` (`Calculus/Lands.lean`) is one
-recursion over them.
+A formula's equation reads its terms in the typed Theory
+(`Theory/Typed/Obs.lean`: a value is its observations), KeY's total model:
+a read off the end of what is there reads the default, a write always
+lands, so solkey's laws need no "the write lands" premise.  `Op0.denote` …
+`Op3.denote` read the typed symbols of `Signature.lean` there, over the
+typed global part's storage read as its observations (`Storage.obs`);
+`Tm.denote` (`Calculus/Lands.lean`) is one recursion over them.  A sort
+denotes `Srt.TDen C`: a word or a KeY `int` an `Option` (`none` a halt), a
+path a storage location (`SLoc`), a storage a `TSto`, a stored value a
+`TVal`.
 
 **The bridge** (`Op0.denote_eval` … `Op3.denote_eval`): where the typed
-evaluation returns (`OpN.eval`, `some`), the denotation is its value
-abstracted, literally for a value and a path, up to `Equiv` for a storage
-and a stored value (`Srt.Bridge`).  Each case is the storage operation's
-erasure (`Semantics/StorageErase.lean`) composed with its Theory bridge
-(`Theory/Bridge/Find`, `Save`, `Copy`, `Delete`, `Push`), on the storage
-read as an untyped state (`Storage.sem`).
+evaluation returns (`OpN.eval`, `some`), the denotation is its value read
+as its observations (`Srt.Bridge`): literally, by the bridge lemmas of
+`Theory/Typed/Obs.lean` (`Storage.obs_write`, `obs_delete`, `obs_push`, …).
 
 **Where it does not follow the Theory.**
-- Arithmetic is the interpreter's checked arithmetic (`evalBinop`,
-  `unopCheck`), and a halt reads `st mtSt` (`Res.toSt`).
+- Arithmetic is the interpreter's checked arithmetic (`BinOp.evalT`,
+  `UnOp.evalT`), a halt `none`.
 - The memory island is not abstracted: `read`, `mlen` and `copyMem` denote
   the typed evaluation's value, and the memory sorts denote nothing.
 - A path is not bounds-checked (`at`): that is KeY's guard, a premise of the
@@ -37,285 +33,143 @@ This is the only Theory module that imports the signature (design R10).
 
 namespace Solidity
 
-open Semantics (Value Seg Res lookupBy defaultForTy)
-open Solidity (evalBinop unopCheck newArrVal)
-open Theory Theory.StValue
+open Semantics (lookupBy)
 
 variable {C : Contract}
 
 /-! ## The Theory's sorts -/
 
-/-- What a term of each sort denotes in the Theory: a value or a stored
-value a Theory value, a path its segments, a storage a struct node; the
-memory sorts denote nothing of their own. -/
-@[reducible] def Srt.TDen : Srt → Type
-  | .val _ => StValue
-  | .path _ => List Seg
-  | .st => Struct
-  | .sv _ => StValue
-  | .sts _ => Struct
-  | .spath _ _ => List Seg
-  | .kint => StValue
+/-- What a term of each sort denotes in the Theory: a word or a KeY `int`
+its value (`none`, a halt), a path a storage location, a storage and a
+stored value their observations; the memory sorts denote nothing of their
+own. -/
+@[reducible] def Srt.TDen (C : Contract) : Srt → Type
+  | .val p => Option p.Denote
+  | .path T => SLoc C T
+  | .st => TSto C
+  | .sv T => TVal T
+  | .sts s => TSto (Contract.ofStruct s)
+  | .spath s T => SLoc (Contract.ofStruct s) T
+  | .kint => Option Int
   | .ident _ | .addr _ | .mem | .mv _ => Unit
 
-/-- A typed storage as an untyped state, for the Theory's bridge lemmas. -/
-def Storage.sem (st : Storage C) : Semantics.State := { storage := st.erase }
-
-theorem Storage.abs_sem (st : Storage C) : st.sem.abs = st.absT := rfl
-
-/-- A typed storage reference as a Theory path. -/
-def SRef.absT {U : Ty} (r : SRef C U) : List Seg := rootPath r.root r.path.erase
-
-/-- A typed word's result as a Theory value: a halt reads as nothing. -/
-def PrimTy.toSt {p : PrimTy} : Option p.Denote → StValue
-  | some v => .prim (PrimTy.erase v)
-  | none => .st .mtSt
+/-- A live length as a `uint`: past the bound, nothing. -/
+def lenW (n : Nat) : Option PrimTy.uint.Denote :=
+  if h : n < 2 ^ 256 then some (lenU n h) else none
 
 /-! ## The symbols in the Theory -/
 
 /-- A constant in the Theory. -/
-def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen
-  | .lit v => .prim (PrimTy.erase v)
-  | .env k => .prim (PrimTy.erase (g.envVal k))
-  | .root r _ => rootPath r []
-  | .storage => g.storage.absT
+def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen C
+  | .lit v => some v
+  | .env k => some (g.envVal k)
+  | .root r h => .ref (SRef.ofRoot r h)
+  | .storage => g.storage.obs
   | .memory => ()
-  | .mtSt => (Storage.init C).absT
-  | .member _ f _ => rootPath f []
-  | .zlit n => .prim (.int n)
+  | .mtSt => (Storage.init C).obs
+  | .member _ f h => .ref (SRef.ofRoot (C := Contract.ofStruct _) f h)
+  | .zlit n => some n
 
 /-- A unary symbol in the Theory, its argument's denotation given. -/
-def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen → s.TDen
-  | @Op1.unop _ op p _, da => Res.toSt (do unopCheck op p (← Semantics.applyUnOp op (← da.toRes)))
-  | .net, da => match da with
-    | .prim (.int n) => .prim (.int ((lookupBy n g.net).getD 0))
-    | _ => .st .mtSt
-  | .delValue, da => StValue.delValue da
-  | @Op1.field _ _ f _ _, dp => dp ++ [.field f]
-  | .next, dp => dp ++ [.at (lenAt g.storage.absT dp)]
-  | .sval, dt => dt
-  | @Op1.newArr _ R _, dn => (newArrVal R (asInt dn)).abs
+def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen C
+  | .unop op _, da => da.bind op.evalT
+  | .net, da => da.map fun n => (lookupBy n.1 g.net).getD 0
+  | .delValue, da => da.map fun _ => PrimTy.dflt _
+  | .field h, dp => ObsLoc.app dp (.field h .nil)
+  | .next, dp => ObsLoc.app dp (.at (g.storage.obs.len dp : Int) .nil)
+  | .sval, da => TVal.ofWord (da.getD (PrimTy.dflt _))
+  | .newArr h, dn => (newArrT _ (dn.getD (PrimTy.dflt _)) h).obs
   | .alloc _ _, _ => ()
   | .mfield _, _ => ()
   | .addM _ _, _ => ()
   | .mval, _ => ()
   | .ref, _ => ()
-  | .wt, _ => .prim (.bool true)
-  | .select r _, ds => asStruct (selectSt ds (.field r))
-  | @Op1.selectIn _ _ _ f _, ds => asStruct (selectSt ds (.field f))
-  | @Op1.fieldIn _ _ _ f _ _, dp => dp ++ [.field f]
-  | .toInt, da => da
+  | .wt, _ => some true
+  | .select _ h, ds => ds.select h
+  | .selectIn h, ds => Obs.select (C := Contract.ofStruct _) ds h
+  | .fieldIn h, dp => ObsLoc.app dp (.field h .nil)
+  | .toInt, da => da.map (·.1)
 
 /-- A binary symbol in the Theory, its arguments' typed readings and
 denotations given. -/
 def Op2.denote (g : State C []) {a b s : Srt} :
-    Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → a.TDen → b.TDen → s.TDen
-  | @Op2.binop _ op p _, _, _, da, db => Res.toSt (do evalBinop op p (← da.toRes) db.toRes)
-  | .find, _, _, ds, dp => findSt ds dp
-  | .len, _, _, ds, dp => findSt ds (dp ++ [lengthSeg])
-  | .read, x, y, _, _ => PrimTy.toSt (Op2.eval g .read x y)
-  | .mlen, x, y, _, _ => PrimTy.toSt (Op2.eval g .mlen x y)
-  | .at _, _, _, dp, di => dp ++ [.at (asInt di)]
-  | .nextIn, _, _, ds, dp => dp ++ [.at (lenAt ds dp)]
-  | .delAt, _, _, ds, dp => StValue.delAt ds dp
-  | @Op2.pushSlot _ E, _, _, ds, dp => pushSlotT E.isPrimitive (defaultForTy E).abs ds dp
-  | .pop, _, _, ds, dp => popT ds dp
-  | .shrink, _, _, ds, dp => shrinkT ds dp
-  | @Op2.extend _ E, _, _, ds, dp => pushSlotT E.isPrimitive (defaultForTy E).abs ds dp
-  | .sfind, _, _, ds, dp => findSt ds dp
+    Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → a.TDen C → b.TDen C → s.TDen C
+  | .binop op _, _, _, da, db => da.bind fun x => binopT op x db
+  | .find, _, _, ds, dp => some (ds.word dp)
+  | .len, _, _, ds, dp => lenW (ds.len dp)
+  | .read, x, y, _, _ => Op2.eval g .read x y
+  | .mlen, x, y, _, _ => Op2.eval g .mlen x y
+  | .at it, _, _, dp, di => ObsLoc.app dp (Path.index it (PrimTy.key (di.getD (PrimTy.dflt _))))
+  | .nextIn, _, _, ds, dp => ObsLoc.app dp (.at (ds.len dp : Int) .nil)
+  | .delAt, _, _, ds, dp => ds.delAt dp
+  | .pushSlot, _, _, ds, dp => ds.extend dp
+  | .pop, _, _, ds, dp => ds.pop false dp
+  | .shrink, _, _, ds, dp => ds.pop true dp
+  | .extend, _, _, ds, dp => ds.extend dp
+  | .sfind, _, _, ds, dp => ds.find dp
   | .copyMem, x, y, _, _ => match Op2.eval g .copyMem x y with
-    | some w => w.absT
-    | none => .st .mtSt
+    | some w => w.obs
+    | none => (SVal.dflt _).obs
   | .iread, _, _, _, _ => ()
   | .copy _, _, _, _, _ => ()
   | .mat _, _, _, _, _ => ()
   | .copySt _, _, _, _, _ => ()
-  | .findIn, _, _, ds, dp => findSt ds dp
-  | .delAtIn, _, _, ds, dp => StValue.delAt ds dp
-  | .sfindIn, _, _, ds, dp => findSt ds dp
-  | .zbin op _, _, _, da, db => match da, db with
-    | .prim (.int a), .prim (.int b) => .prim (.int (op.evalZ a b))
-    | _, _ => .st .mtSt
-  | .zcmp op _, _, _, da, db => match da, db with
-    | .prim (.int a), .prim (.int b) => .prim (.bool (op.cmpZ a b))
-    | _, _ => .st .mtSt
+  | .findIn, _, _, ds, dp => some (ds.word dp)
+  | .delAtIn, _, _, ds, dp => ds.delAt dp
+  | .sfindIn, _, _, ds, dp => ds.find dp
+  | .zbin op _, _, _, da, db => do some (op.evalZ (← da) (← db))
+  | .zcmp op _, _, _, da, db => do some (op.cmpZ (← da) (← db))
 
 /-- A ternary symbol in the Theory, its arguments' denotations given. -/
-def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen → b.TDen → c.TDen → s.TDen
-  | .ite, dc, da, db => match dc with
-    | .prim (.bool true) => da
-    | .prim (.bool false) => db
-    | _ => .st .mtSt
-  | .save, ds, dp, dv => copyTo ds dp dv
-  | .push, ds, dp, dv => pushT ds dp (stripVal dv)
-  | .atIn _, _, dp, di => dp ++ [.at (asInt di)]
+def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.TDen C → s.TDen C
+  | .ite, dc, da, db => dc.bind fun x => cond x da db
+  | .save, ds, dp, dv => ds.copyTo dp dv
+  | .push, ds, dp, dv => ds.push dp (TVal.strip dv)
+  | .atIn it, _, dp, di => ObsLoc.app dp (Path.index it (PrimTy.key (di.getD (PrimTy.dflt _))))
   | .write, _, _, _ => ()
-  | .saveIn, ds, dp, dv => copyTo ds dp dv
+  | .saveIn, ds, dp, dv => ds.copyTo dp dv
 
 /-! ## The bridge -/
 
-/-- A denotation agrees with a typed value: the value itself, the Theory
-path, the storage or stored value up to `Equiv`. -/
-def Srt.Bridge (C : Contract) (H : HTy) : (s : Srt) → s.TDen → s.Den C H → Prop
-  | .val _, d, x => d = .prim (PrimTy.erase x)
-  | .path _, d, r => d = r.absT
-  | .st, d, w => Struct.Equiv d (Storage.absT w)
-  | .sv _, d, w => StValue.Equiv d w.absT
-  | .sts _, d, w => Struct.Equiv d (Storage.absT w)
-  | .spath _ _, d, r => d = r.absT
-  | .kint, d, n => d = .prim (.int n)
+/-- A denotation agrees with a typed value: the value itself, the
+reference, the storage or stored value read as its observations. -/
+def Srt.Bridge (C : Contract) (H : HTy) : (s : Srt) → s.TDen C → s.Den C H → Prop
+  | .val _, d, x => d = some x
+  | .path _, d, r => d = .ref r
+  | .st, d, w => d = w.obs
+  | .sv _, d, w => d = w.obs
+  | .sts _, d, w => d = w.obs
+  | .spath _ _, d, r => d = .ref r
+  | .kint, d, n => d = some n
   | .ident _, _, _ | .addr _, _, _ | .mem, _, _ | .mv _, _, _ => True
 
 /-- A denotation agrees with a typed reading wherever it returns. -/
-def Srt.BridgeO (C : Contract) (H : HTy) (s : Srt) (d : s.TDen) (x : Option (s.Den C H)) : Prop :=
+def Srt.BridgeO (C : Contract) (H : HTy) (s : Srt) (d : s.TDen C) (x : Option (s.Den C H)) : Prop :=
   ∀ v, x = some v → Srt.Bridge C H s d v
 
 section Bridge
 
 variable (g : State C [])
 
-/-- An index read as the Theory's `int`: the integer it is hashed as. -/
-theorem asInt_erase_keyTy {k : PrimTy} (i : k.keyTy.Denote) :
-    asInt (.prim (PrimTy.erase i)) = PrimTy.key i := by
-  cases k <;> rfl
+theorem Storage.obs_len_ref_some {E : Ty} {st : Storage C} {r : SRef C (.ref (.array E))}
+    {w : SVal (.ref (.array E))} (h : st.find r = some w) :
+    st.obs.len (.ref r) = (SVal.view w : ArrView E).n := by
+  have e := congrArg (fun o : TVal _ => o.len .nil) (Storage.obs_find_some h)
+  simp only [Obs.find_len] at e
+  rw [show (ObsLoc.app (SLoc.ref r) .nil : SLoc C _) = .ref r from congrArg SLoc.ref
+    (SRef.append_nil r)] at e
+  rw [e]
+  cases w; rfl
 
-/-- A typed storage path's segments, a member further. -/
-theorem SRef.absT_field {C : Contract} {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
-    (h : C.fieldType s f = some T) : (r.field h).absT = r.absT ++ [Seg.field f] := by
-  simp only [SRef.absT, SRef.field, SRef.append, Path.erase_append, rootPath, List.cons_append]
-  rfl
-
-/-- …an index further. -/
-theorem SRef.absT_index {C : Contract} {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R))
-    (it : IndexTy R k V) (i : Int) : (r.index it i).absT = r.absT ++ [Seg.at i] := by
-  simp only [SRef.absT, SRef.index, SRef.append, Path.erase_append, Path.erase_index, rootPath,
-    List.cons_append]
-
-/-- The value at a typed reference, as the Theory finds it. -/
-theorem Storage.findSt_absT {C : Contract} {U : Ty} {st : Storage C} {r : SRef C U} {w : SVal U}
-    (h : st.find r = some w) : findSt st.absT r.absT = w.absT := by
-  have hf := Storage.findStorage_erase (σ := st.sem) (st := st) rfl r
-  rw [h] at hf
-  exact Semantics.State.abs_findStorage (σ := st.sem) hf
-
-/-- The live length of a typed array, as the Theory reads it. -/
-theorem Storage.lenAt_absT {C : Contract} {E : Ty} {st : Storage C}
-    {r : SRef C (.ref (.array E))} {w : SVal (.ref (.array E))} (h : st.find r = some w) :
-    lenAt st.absT r.absT = ((SVal.view w : ArrView E).n : Int) := by
-  have hf := Storage.findStorage_erase (σ := st.sem) (st := st) rfl r
-  rw [h] at hf
-  cases w with
-  | array e sh hn =>
-    simp only [toRes, SVal.erase_array] at hf
-    have := Semantics.State.abs_lenAt_of_array hf
-    rw [SVec.length_erase] at this
-    exact this
-
-/-- `select(s, r)` on the erasure: the struct at `r`, its members erased. -/
-theorem Storage.findStorage_selectT {C : Contract} {s r : Name} (σ : Semantics.State)
-    (st : Storage C) (hs : σ.storage = st.erase) (h : C.rootType r = some (.ref (.struct s))) :
-    σ.findStorage r [] = .ok (.struct (SFields.erase (Storage.selectT st h))) := by
-  simp only [Semantics.State.findStorage, hs, Storage.erase, SFields.lookupBy_erase st h,
-    Storage.selectT]
-  generalize st.get h = w
-  cases w
-  simp only [SVal.erase_struct, Semantics.SVal.find]
-  rfl
-
-/-- `select(s, r)` in the Theory is the struct at `r`. -/
-theorem Storage.select_absT {C : Contract} {s r : Name} {d : Struct} {st : Storage C}
-    (hd : Struct.Equiv d st.absT) (h : C.rootType r = some (.ref (.struct s))) :
-    Struct.Equiv (asStruct (selectSt d (.field r))) (Storage.selectT st h).absT := by
-  have e3 : findSt st.sem.abs (rootPath r []) = (Semantics.SVal.struct
-      (SFields.erase (Storage.selectT st h))).abs :=
-    Semantics.State.abs_findStorage (Storage.findStorage_selectT st.sem st rfl h)
-  have e5 := StValue.Equiv.asStruct (StValue.Equiv.findSt hd (rootPath r []))
-  rw [Storage.abs_sem] at e3
-  rw [e3] at e5
-  exact e5
-
-theorem Op0.denote_eval {s : Srt} (o : Op0 C s) : Srt.BridgeO C g.H s (o.denote g) (o.eval g) := by
-  intro v hv
-  rw [Op0.eval_eq_evalM] at hv
-  cases o <;> simp only [Op0.evalM, Option.some.injEq] at hv <;> subst hv
-  all_goals first | rfl | exact StValue.Equiv.refl _ | trivial
-
-theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {d : a.TDen}
-    (hx : Srt.BridgeO C g.H a d x) : Srt.BridgeO C g.H s (o.denote g d) (o.eval g x) := by
-  intro v hv
-  rw [Op1.eval_eq_evalM] at hv
-  cases x with
-  | none => cases o <;> simp only [Op1.evalM, Option.bind_none, Option.map_none, reduceCtorEq] at hv
-  | some u =>
-  have hu := hx u rfl
-  cases o with
-  | unop op h =>
-    simp only [Op1.evalM, Option.bind_some] at hv
-    simp only [Srt.Bridge] at hu ⊢
-    have he := UnOp.evalT_erase op h u
-    rw [hv] at he
-    simp only [Op1.denote, hu, StValue.toRes]
-    exact congrArg Semantics.Res.toSt he
-  | net =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    simp only [Op1.denote, hu]
-    rfl
-  | delValue =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu]
-    rename_i p
-    cases p <;> rfl
-  | field h =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, SRef.absT_field]
-  | next =>
-    simp only [Op1.evalM, Option.bind_some, Storage.nextT, Option.map_eq_some_iff] at hv
-    obtain ⟨w, hw, rfl⟩ := hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, SRef.absT_index, Storage.lenAt_absT hw]
-  | sval =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, SVal.absT, SVal.erase_prim, Semantics.SVal.abs]
-    exact StValue.Equiv.refl _
-  | newArr h =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, SVal.absT, newArrT_erase]
-    exact StValue.Equiv.refl _
-  | alloc | mfield | addM | mval | ref => trivial
-  | wt =>
-    simp only [Op1.evalM, Option.bind_some, Storage.wtT] at hv
-    split at hv
-    · cases hv; rfl
-    · cases hv
-  | select r h =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    exact Storage.select_absT hu h
-  | selectIn h =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    exact Storage.select_absT hu h
-  | fieldIn h =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, SRef.absT_field]
-  | toInt =>
-    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
-    subst hv
-    simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu]
-    rfl
+theorem Storage.obs_word_ref_some {P : PrimTy} {st : Storage C} {r : SRef C (.prim P)}
+    {w : SVal (.prim P)} (h : st.find r = some w) :
+    st.obs.word (.ref r) = (SVal.view w : P.Denote) := by
+  have e := congrArg (fun o : TVal _ => o.word .nil) (Storage.obs_find_some h)
+  simp only [Obs.find_word] at e
+  rw [show (ObsLoc.app (SLoc.ref r) .nil : SLoc C _) = .ref r from congrArg SLoc.ref
+    (SRef.append_nil r)] at e
+  rw [e]
+  cases w; rfl
 
 /-- A push that returns had room. -/
 theorem Storage.full_of_push {C : Contract} {E : Ty} {st st' : Storage C}
@@ -349,40 +203,69 @@ theorem Storage.full_of_pushPlace {C : Contract} {E : Ty} {st : Storage C}
     · simp only [hb, decide_true, Bool.not_true]
     · simp only [hb, dite_false, reduceCtorEq] at h
 
-/-- A stored word is its value. -/
-theorem SVal.absT_prim_view {p : PrimTy} (w : SVal (.prim p)) :
-    w.absT = .prim (PrimTy.erase (SVal.view w : p.Denote)) := by
-  cases w
-  rw [SVal.absT, SVal.erase_prim, Semantics.SVal.abs]
-  rfl
+theorem Op0.denote_eval {s : Srt} (o : Op0 C s) : Srt.BridgeO C g.H s (o.denote g) (o.eval g) := by
+  intro v hv
+  rw [Op0.eval_eq_evalM] at hv
+  cases o <;> simp only [Op0.evalM, Option.some.injEq] at hv <;> subst hv
+  all_goals first | rfl | trivial
 
-/-- `find` on a typed storage, up to `Equiv` of the storage. -/
-theorem Storage.findSt_equiv {C : Contract} {U : Ty} {d : Struct} {st : Storage C}
-    (hd : Struct.Equiv d st.absT) {r : SRef C U} {w : SVal U} (h : st.find r = some w) :
-    StValue.Equiv (findSt d r.absT) w.absT := by
-  have e := StValue.Equiv.findSt hd r.absT
-  rw [Storage.findSt_absT h] at e
-  exact e
-
-theorem Storage.delAt_equiv {C : Contract} {U : Ty} {d : Struct} {st st' : Storage C}
-    (hd : Struct.Equiv d st.absT) {r : SRef C U} (h : st.delete r = some st') :
-    Struct.Equiv (StValue.delAt d r.absT) st'.absT := by
-  have he := Storage.delete_erase (σ := st.sem) (st := st) rfl r
-  rw [h] at he
-  obtain ⟨cur, h1, h2⟩ := Semantics.bind_ok_inv he
-  exact StValue.Equiv.trans (Struct.Equiv.delAt hd _) (Semantics.State.abs_delete h1 h2)
-
-theorem Storage.write_equiv {C : Contract} {U : Ty} {d : Struct} {st st' : Storage C}
-    (hd : Struct.Equiv d st.absT) {r : SRef C U} {w : SVal U} {dv : StValue}
-    (hv : StValue.Equiv dv w.absT) (h : st.write r w = some st') :
-    Struct.Equiv (copyTo d r.absT dv) st'.absT := by
-  have he := Storage.writeStorage_erase (σ := st.sem) (st := st) rfl r w
-  rw [h] at he
-  exact StValue.Equiv.trans (Struct.Equiv.copyTo hd hv _)
-    (Semantics.State.abs_writeStorage (σ := st.sem) he)
+theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {d : a.TDen C}
+    (hx : Srt.BridgeO C g.H a d x) : Srt.BridgeO C g.H s (o.denote g d) (o.eval g x) := by
+  intro v hv
+  rw [Op1.eval_eq_evalM] at hv
+  cases x with
+  | none => cases o <;> simp only [Op1.evalM, Option.bind_none, Option.map_none, reduceCtorEq] at hv
+  | some u =>
+  have hu := hx u rfl
+  cases o with
+  | unop op h =>
+    simp only [Srt.Bridge] at hu ⊢
+    simp only [Op1.evalM] at hv
+    rw [Op1.denote, hu]; exact hv
+  | net | delValue | toInt =>
+    simp only [Srt.Bridge] at hu ⊢
+    simp only [Op1.evalM] at hv
+    rw [Op1.denote, hu]; exact hv
+  | field h | fieldIn h =>
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu]; rfl
+  | next =>
+    simp only [Op1.evalM, Option.bind_some, Storage.nextT, Option.map_eq_some_iff] at hv
+    obtain ⟨w, hw, rfl⟩ := hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu, Storage.obs_len_ref_some hw, SRef.index, Path.index_dyn]
+    rfl
+  | sval =>
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu]; rfl
+  | newArr h =>
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu]; rfl
+  | alloc | mfield | addM | mval | ref => trivial
+  | wt =>
+    simp only [Op1.evalM, Option.bind_some, Storage.wtT] at hv
+    split at hv
+    · cases hv; rfl
+    · cases hv
+  | select r h =>
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu, Storage.obs_selectT]
+  | selectIn h =>
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu, Storage.obs_selectT]
 
 theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H)}
-    {y : Option (b.Den C g.H)} {da : a.TDen} {db : b.TDen}
+    {y : Option (b.Den C g.H)} {da : a.TDen C} {db : b.TDen C}
     (hx : Srt.BridgeO C g.H a da x) (hy : Srt.BridgeO C g.H b db y) :
     Srt.BridgeO C g.H s (o.denote g x y da db) (o.eval g x y) := by
   intro v hv
@@ -395,179 +278,65 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
   have hu := hx u rfl
   cases o with
   | binop op h =>
-    rename_i p
-    simp only [Op2.evalM, Option.bind_some, binopT] at hv
+    simp only [Op2.evalM, Option.bind_some] at hv
     simp only [Srt.Bridge] at hu ⊢
-    simp only [Op2.denote, hu, StValue.toRes]
+    rw [Op2.denote, hu, Option.bind_some]
+    unfold binopT at hv ⊢
     cases hs : op.shortT u with
-    | some r =>
-      rw [hs] at hv
-      cases hv
-      show Semantics.Res.toSt (evalBinop op p (PrimTy.erase u) _) = _
-      rw [evalBinop_short hs]
-      rfl
+    | some r => rw [hs] at hv; exact hv
     | none =>
       rw [hs] at hv
       cases y with
       | none => cases hv
       | some w =>
-        have hw : db = .prim (PrimTy.erase w) := hy w rfl
-        simp only [Option.bind_some] at hv
-        show Semantics.Res.toSt (evalBinop op p (PrimTy.erase u) _) = _
-        rw [hw, evalBinop_long hs]
-        have he := BinOp.evalT_erase op h u w
-        rw [hv] at he
-        show Semantics.Res.toSt (evalBinop op p (PrimTy.erase u) (.ok (PrimTy.erase w))) = _
-        rw [he]
-        rfl
-  | read | mlen =>
-    show PrimTy.toSt _ = _
-    rw [hv']
-    rfl
+        have hw : db = some w := hy w rfl
+        rw [hw]; exact hv
+  | read | mlen => exact hv'
   | copyMem =>
-    simp only [Op2.denote, hv']
-    exact StValue.Equiv.refl _
+    simp only [Srt.Bridge]
+    rw [Op2.denote, hv']
   | iread | copy | mat | copySt => trivial
-  | find | findIn =>
+  | _ =>
     cases y with
     | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
         reduceCtorEq] at hv
     | some w =>
     have hw := hy w rfl
     simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    rw [Option.bind_eq_some_iff] at hv
-    obtain ⟨sv, hsv, hv⟩ := hv
-    cases hv
-    rw [Op2.denote, hw, ← StValue.Equiv.prim_iff, ← SVal.absT_prim_view]
-    exact Storage.findSt_equiv hu hsv
-  | sfind | sfindIn =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    rw [Op2.denote, hw]
-    exact Storage.findSt_equiv hu hv
-  | delAt | delAtIn =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    rw [Op2.denote, hw]
-    exact Storage.delAt_equiv hu hv
-  | len =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    have he := Storage.arrayLen_erase (σ := u.sem) (st := u) rfl w
-    rw [hv] at he
-    have e3 : findSt u.absT (w.absT ++ [lengthSeg]) = .prim (PrimTy.erase v) :=
-      Semantics.State.abs_arrayLen (σ := u.sem) he
-    rw [Op2.denote, hw, ← StValue.Equiv.prim_iff, ← e3]
-    exact StValue.Equiv.findSt hu _
-  | «at» it =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    simp only [Storage.atT, Option.bind_eq_bind, Option.bind_eq_some_iff,
-      Option.some.injEq] at hv
-    obtain ⟨_, _, rfl⟩ := hv
-    rw [Op2.denote, hu, hw, asInt_erase_keyTy, SRef.absT_index]
-  | nextIn =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    simp only [Storage.nextT, Option.map_eq_some_iff] at hv
-    obtain ⟨sv, hsv, rfl⟩ := hv
-    rw [Op2.denote, Struct.Equiv.lenAt hu, hw, SRef.absT_index, Storage.lenAt_absT hsv]
-  | pushSlot =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    have he := Storage.pushAt_erase (σ := u.sem) (st := u) rfl w pure some (fun _ => rfl)
-      (.inl (Storage.full_of_push hv))
-    rw [hv] at he
-    have e4 : v.absT = _ := Semantics.State.abs_pushAt_slot (σ := u.sem) he
-    rw [Op2.denote, hw, e4]
-    exact Struct.Equiv.pushSlotT _ _ hu _
-  | pop =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    have he := Storage.popAt_erase (σ := u.sem) (st := u) rfl false w
-    rw [hv] at he
-    rw [Op2.denote, hw]
-    exact StValue.Equiv.trans (Struct.Equiv.popT hu _) (Semantics.State.abs_pop (σ := u.sem) he)
-  | shrink =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    have he := Storage.popAt_erase (σ := u.sem) (st := u) rfl true w
-    rw [hv] at he
-    have e4 : v.absT = _ := Semantics.State.abs_shrink (σ := u.sem) he
-    rw [Op2.denote, hw, e4]
-    exact Struct.Equiv.shrinkT hu _
-  | extend =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
-    rw [Option.bind_eq_some_iff] at hv
-    obtain ⟨⟨st', n⟩, hq, hv⟩ := hv
-    cases hv
-    have he := Storage.pushPlaceAt_erase (σ := u.sem) (st := u) rfl w
-      (Storage.full_of_pushPlace hq)
-    rw [hq] at he
-    have e4 : st'.absT = _ := (Semantics.State.abs_pushPlaceAt (σ := u.sem) he).1
-    rw [Op2.denote, hw, e4]
-    exact Struct.Equiv.pushSlotT _ _ hu _
-  | zbin op h | zcmp op h =>
-    cases y with
-    | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        reduceCtorEq] at hv
-    | some w =>
-    have hw := hy w rfl
-    simp only [Srt.Bridge] at hu hw ⊢
-    simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind, Option.some.injEq] at hv
-    subst hv hu hw
-    rfl
+    try simp only [Op2.evalM, Option.bind_some, Option.bind_eq_bind] at hv
+    subst hu hw
+    all_goals first
+    | (rw [Op2.denote]
+       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hv
+       obtain ⟨w', hw', rfl⟩ := hv
+       rw [Storage.obs_word_ref_some hw'])
+    | (rw [Op2.denote]
+       simp only [Storage.len, Option.bind_eq_bind, Option.bind_eq_some_iff,
+         Option.some.injEq] at hv
+       obtain ⟨w', hw', rfl⟩ := hv
+       rw [Storage.obs_len_ref_some hw', lenW, dif_pos])
+    | (simp only [Storage.atT, Option.bind_eq_bind, Option.bind_eq_some_iff,
+         Option.some.injEq] at hv
+       obtain ⟨_, _, rfl⟩ := hv
+       rfl)
+    | (simp only [Storage.nextT, Option.map_eq_some_iff] at hv
+       obtain ⟨w', hw', rfl⟩ := hv
+       rw [Op2.denote, Storage.obs_len_ref_some hw', SRef.index, Path.index_dyn]
+       rfl)
+    | (rw [Op2.denote, Storage.obs_delete hv])
+    | (rw [Op2.denote, Storage.obs_push_slot hv])
+    | (rw [Op2.denote, Storage.obs_pop hv])
+    | (simp only [Option.bind_eq_some_iff, Option.some.injEq] at hv
+       obtain ⟨⟨st', k⟩, hp, rfl⟩ := hv
+       rw [Op2.denote, Storage.obs_pushPlace hp])
+    | (rw [Op2.denote, Storage.obs_find_some hv])
+    | (simp only [Option.some.injEq] at hv
+       subst hv
+       rfl)
 
 theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C g.H)}
-    {y : Option (b.Den C g.H)} {z : Option (c.Den C g.H)} {da : a.TDen} {db : b.TDen}
-    {dc : c.TDen} (hx : Srt.BridgeO C g.H a da x) (hy : Srt.BridgeO C g.H b db y)
+    {y : Option (b.Den C g.H)} {z : Option (c.Den C g.H)} {da : a.TDen C} {db : b.TDen C}
+    {dc : c.TDen C} (hx : Srt.BridgeO C g.H a da x) (hy : Srt.BridgeO C g.H b db y)
     (hz : Srt.BridgeO C g.H c dc z) :
     Srt.BridgeO C g.H s (o.denote da db dc) (o.eval g x y z) := by
   intro v hv
@@ -581,9 +350,10 @@ theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C
   | ite =>
     simp only [Op3.evalM, Option.bind_some] at hv
     simp only [Srt.Bridge] at hu
+    rw [Op3.denote, hu, Option.bind_some]
     cases u with
-    | true => simp only [Op3.denote, hu, PrimTy.erase]; exact hy v hv
-    | false => simp only [Op3.denote, hu, PrimTy.erase]; exact hz v hv
+    | true => exact hy v hv
+    | false => exact hz v hv
   | write => trivial
   | _ =>
     cases y with
@@ -598,21 +368,14 @@ theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C
     have ht := hz t rfl
     simp only [Srt.Bridge] at hu hw ht ⊢
     simp only [Op3.evalM, Option.bind_some, Option.bind_eq_bind, Option.map_some] at hv
+    subst hu hw ht
     first
-    | (rw [Op3.denote, hw]; exact Storage.write_equiv hu ht hv)
+    | (rw [Op3.denote, Storage.obs_write hv])
     | (simp only [Storage.atT, Option.bind_eq_bind, Option.bind_eq_some_iff,
           Option.some.injEq] at hv
        obtain ⟨_, _, rfl⟩ := hv
-       rw [Op3.denote, hw, ht, asInt_erase_keyTy, SRef.absT_index])
-    | (have he := Storage.pushAt_erase (σ := u.sem) (st := u) rfl w
-          (fun _ => .ok t.strip.erase) (fun _ => some t.strip) (fun _ => rfl)
-          (.inl (Storage.full_of_push hv))
-       rw [hv] at he
-       have e4 : v.absT = _ := Semantics.State.abs_pushAt_const (σ := u.sem) _ he
-       rw [Op3.denote, hw, e4]
-       refine Struct.Equiv.pushT hu ?_ _
-       rw [SVal.strip_erase]
-       exact StValue.Equiv.trans (StValue.Equiv.stripVal ht) (Semantics.SVal.abs_strip _))
+       rfl)
+    | (rw [Op3.denote, ← SVal.obs_strip, Storage.obs_push hv])
 
 end Bridge
 

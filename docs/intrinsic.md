@@ -6726,6 +6726,224 @@ derived + 1 pending + 1 divergent + 1 excluded, 2 skip).
 `ChainRewrites` is 0.1 s over its gate, within the run-to-run spread;
 `Chains/Storage` stays where W9.8.4 left it.
 
+### W10.3 record (2026-10-13, branch `w10-theory`)
+
+The Theory is typed: a term denotes a typed value, its laws are stated
+once over an observation model, and `.eq` is Lean's `=`.
+
+**The model** (`Theory/Typed/Obs.lean`).  `Obs L` observes a location
+family `L : Ty → Ty → Type` by three fields: `word` (the word at a
+primitive location), `len` (an array's length) and `has` (whether a
+location is present).  `has` is beyond the design: without it two values
+that differ only by a mapping key under a fresh array slot, or by a strip
+against an overlay, observe equal and the overlay is no congruence.
+`class ObsLoc L` gives `app`/`strip?` and their laws; its instances are
+`Path T` (`TVal T := Obs (Path T)`) and `SLoc C` (`TSto C := Obs (SLoc
+C)`; a struct's fields are `TSto (Contract.ofStruct s)`).  `SLoc` is a
+storage reference or a dangling path below one (`SLoc.dangling`): an unset
+alias (`pvP`) must denote a location, and `findOnSave` hold there too —
+a deviation from the design's `SRef`.  The operations are generic and
+total: `find`, `save`, `copyTo` (a save of `TVal.overlay`), `delAt` (a
+save of `TVal.del`, the default computed from the type), `push`,
+`extend`, `pop`, `select`.  `TVal.delR`/`stripR`/`ovR` are written once
+over `word`/`len`/`has` (`Comp`).  The laws carry solkey's names:
+`Obs.findOnSave`, `findOnSavePrefix`, `findOnSaveFrame`, `findOnDelAt`,
+`findOnDelAtFrame`, `lenOnSaveFrame`, `lenOnDelAtFrame`,
+`findOnPushFrame`, `findOnPopFrame`; a frame's side condition is
+`(ObsLoc.strip? p q).isNone`.
+
+**The bridge** (`Theory/Bridge/Denote.lean`).  `Srt.TDen C` gives each
+sort its typed denotation (a word `Option p.Denote`, `kint` `Option Int`,
+`path T` `SLoc C T`, `st` `TSto C`, `sv T` `TVal T`, the memory sorts
+`Unit`); `Tm.denote` is total, and `denote_eval` proves
+`eval = some x → denote = x.obs` (`SVal.obs`, `Storage.obs`, with
+`obs_saveM`, `Storage.obs_save/write/delete/push/pop`, `obs_selectT`).
+
+**Moved.**  `Contract.ofStruct`, `SRef.under`, `Storage.selectT` from
+`Signature.lean` to `Obs.lean`; `findM_append`, `saveM_*`,
+`Path.append_assoc`, `heq_of_erase`, `split_of_erase` from `TermLaws`;
+`SFields.get_overlay/get_defaultOf` from `CloseFrame`; `Path.Diverges`
+and `findM_saveM_diverges` down to `Semantics/Storage.lean`,
+`SVal.find_save_same` to `StorageErase.lean`.  `Theory/StateWrites.lean`
+keeps only what `sol_decide` reads (W10.4).
+
+**Vanished.**  `Theory/Bridge/{Save,Delete,Copy,CopyArray,Push}.lean`;
+`SVal.absT` and its section of `Signature.lean`; `StValue.toRes`,
+`Res.toSt`, `Denote.*` and `SVal.abs_of_asValue` in `Update.lean`; the
+`Equiv` entries of the closer (`CloseLemmas`, `Close`, `StateFacts`) and
+`DEquiv` of `RewritePast` (its congruences are equalities).  `Tm.Theq`
+keeps its name, now `∀ σ, a.denote σ = b.denote σ`.
+
+**Changed readings.**  The side conditions (`TermLib`, `TermLaws`,
+`CloseFrame`) read a location's segments (`SLoc.segs`, `SRef.segs`)
+with `Theory.StValue.diverges`, decidable as before.  `Tm.KindFreeAt` is
+semantic: a delete at `p` resets every word below it (`delR`), so
+`findOnDelAtBelow`'s premises `hw`/`hp` are unused.  The closer gained
+`CloseS.bool_eq_iff` (an `=` at `PrimTy.bool.Denote` is one at `Bool`).
+`sol_rw`'s theory pass (`theoryRewriteS`) reifies the `Obs` symbols and
+discharges at `.all` transparency (`Path.append` is irreducible).
+
+**Still untyped, and why.**  The memory island: `Theory/{Terms,Storage,
+Copy,Observe,Abs,Memory,CrossDomain,Rewrite}.lean` and
+`Theory/Bridge/Find.lean`, read by `Calculus/MemTheory.lean`
+(`SVal.abs`, `Theory.Memory`), `MemNames`, `MemRead`,
+`Semantics/Properties` (`Theory.Memory.new`) and sections 2 and 5–8 of
+`Examples/Tactics/Theory.lean`; `Theory.StValue.diverges`/`lengthSeg`,
+list functions the side conditions read; `Theory/StateWrites.lean` for
+`sol_decide` (W10.4).  `Update.lean` still imports `Theory.Abs` (its
+remnant is the `w10-remnant` lane's).
+
+**Checks.**  `lean_build` of the default targets: clean except
+`Tools/Counterexample.lean` 426–427 (the `w10-remnant` lane's file, not
+edited here), which reads the old `Option`-free `.eq`; it needs
+`a.denote σ = some x`, `b.denote σ = some y` and `Option.some.injEq`.
+`Derived1`–`14` check on the branch; `Report.lean` was not rebuilt.
+`sorry` lines 19 (as master); `#print axioms Proves.valid`: `propext`,
+`Classical.choice`, `Quot.sound`; `check-orphans` (313 reachable, 0
+orphaned), `check-doc-paths`; `check-testsuite` against solkey
+`1b4341a303`: 438 = 435 derived + 1 pending + 1 divergent + 1 excluded,
+2 skip.  `check-corpus.sh` not run (it needs `lake`).
+
+**Gates** (the W9.6.4 method, master `147718f0` and the branch
+interleaved; wall s, CPU in parentheses):
+
+| Row | Gate | master | `w10-theory` |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 231.4 (199.0) | 205.3 (199.0) |
+| `Derived7` | 61.7 | 49.1 | 49.0 |
+| `Tactics/Decide` | 45.0 | 31.6 (32.5) | 31.7 (32.7) |
+| `ProofTree` | 11.7 | 10.2 | 9.8 |
+| `Chains/Storage` | 9.0 (≤ 9.2) | 9.27, 9.24 (10.5) | 9.27, 9.10 (10.5) |
+| `ChainRewrites` | 8.2 | 8.21 | 8.26 |
+| `ChainRewritesOpen` | 4.1 | 3.73 | 3.72 |
+| `Solkey/TestSuite` | 13.2 | 16.0, 13.0 (6.9) | 12.0, 14.0 (6.9) |
+
+Per file (master / here): `Derived1` 13.4/8.0, `2` 10.0/7.9, `3`
+16.1/11.8, `4` 15.7/15.8, `5` 10.0/8.1, `6` 15.9/10.5, `8` 27.5/27.4,
+`9` 10.0/6.2, `10` 11.3/18.1 (10.3 s CPU), `11` 4.9/2.9, `12` 26.7/12.5,
+`13` 12.0/11.2, `14` 8.9/16.1 (9.0 s CPU).  CPU is equal on both sides;
+the wall differences are load.  `Solkey/TestSuite`'s wall is noise around
+an equal CPU.  The closer and the chains never unfold a denotation past a
+literal, a parameter or the environment, which the spike measured first.
+
+**Review** (one read-only finder; each item checked against the code).
+No soundness bug: the laws hold in the model, and the bridges
+(`SVal.obs_defaultOf`, `obs_strip`, `obs_overlay`, `obs_selectT`) are
+unconditional.  Fixed: dead lemmas in `Obs.lean` (`Path.heq_of_erase`,
+`Path.IsNil`, `SVal.obsOpt_some`, `findM_field_nil`, `findM_atF_nil`,
+`findM_key'`, `find_eq_findM'`); the `TermTaclet` docstrings and
+`Examples/Tactics/SelectOnSaveConsr.lean` cite the `Obs` laws;
+`docs/module-map.md`'s `RewritePast` and `Close` rows; `TermLaws`' header
+(`RefLaw`, `EvalLaw` exist).  Recorded, not changed:
+- every unset alias of a type denotes one location
+  (`SLoc.dangling T .nil`), and `Obs.select` keeps a dangling location,
+  so a save through one unset alias reads back through another; no frame
+  fires there (a dangling location's segments are `[]`), and no law may
+  take alias identity as a premise;
+- a halted argument denotes its default (`getD`), and two halting terms
+  are `=` (both as on master);
+- `findOnSave`'s `hp`, `findOnDelAt`'s and `findOnDelAtBelow`'s `hw`/`hp`,
+  `findOnDelAtValue`'s `hp` are no longer used by the soundness: the rules
+  keep solkey's shape;
+- `Option.bind_some_id` restates core's `Option.bind_fun_some`;
+  `Semantics/Storage.lean`'s private `lookupBy_setBy_*'` restate
+  `Semantics/Properties.lean`'s; two double blank lines in
+  `Signature.lean` (low modules, left to avoid a rebuild);
+- `AGENTS.md` still names `SVal.absT` (line 39): left to the lead.
+
+### W10.4 record (2026-10-13, branch `w10-decide`)
+
+**What changed.**  `sol_decide`'s language is typed, end to end, and the
+memory island is gone.
+
+- **W10.4.1–3.**  The target language is the typed signature
+  (`Calculus/DecideLang.lean`: `LTm`, `LFml`, atoms by position, guards
+  `seq`/`orElse`/`kite`/`err`, the starting storage observed by
+  `obsW`/`obsL`/`obsH`).  The elimination reads the typed Theory
+  symbolically (`Calculus/Decide.lean`, its soundness
+  `Calculus/DecideEval.lean`, `LTm.elim_eval`).  A scoped leaf is pushed in
+  by position (`Fml.toLS`, `Calculus/DecideScoped.lean`) and is sound over
+  the typed state (`Valid.of_toLS`, `Calculus/DecideTyped.lean`).
+  `DecideRel` and `DecideErase` are deleted.
+- **W10.4.4.**  The closer is typed (`Calculus/Closer.lean`): a value is in
+  range by its type and the storage in its declared shape, so no layout
+  premise is left (`Fml.dropWtS`, `Fml.layoutS` gone).  `DecideSyn`,
+  `KeyNotation` and `SlotLemmas` are deleted.
+- **W10.4.5a–b.**  Memory read as solkey reads it, on the typed heap
+  (`Calculus/MemRead.lean`, `Theory/Typed/Mem.lean`): writes, allocations
+  and copies walked from the newest down, identities apart by birth,
+  guards as bounds on lengths (`lenAtN`), copies between storage and
+  memory read through (`copyFieldRd?`, `copyMemRd`).  Pushes out of gas
+  under the diamond (`Upd.exhL`, `guardM`).  The elimination runs under
+  its premises (`Calculus/ElimFacts.lean`, `LFml.elimF`).  The leaf bound
+  is `closeSize` (24000) on the pushed-in leaf and `stackSize` (12) on the
+  storage updates a read goes through; `elimSize` is gone.
+- **W10.4.5c.**  The untyped Theory is deleted:
+  `Theory/{Terms,Storage,Copy,Observe,Abs,Memory,CrossDomain,Rewrite}.lean`,
+  `Theory/Bridge/Find.lean`, `Calculus/MemTheory.lean`,
+  `Calculus/MemNames.lean`.  The memory laws carry solkey's names on the
+  typed heap (`Grown.readOnWrite`, `readWriteDifferent`,
+  `readAddDifferent`, `newAddDifferent`, `Heap.initMember`, `initSize`,
+  `SVal.readCopySt`, `Grown.readCopyStOther`, `MVal.findCopyMem`);
+  `diverges` and `lengthSeg` moved to `Theory/Segs.lean`.
+  `Examples/Tactics/Theory.lean` sections 2 and 5–8 are typed.  The
+  closer gained: constants rewritten by the facts, comparisons of terms
+  apart folded, `(a - b) + b` cancelled (`Facts.cancelAdd`), `2 * a` as
+  `a + a`, `a < a + c` (`Facts.ltSucc`, Lean only), `kite(c, true, true,
+  false)` as `c`, a guard `kite(c, true, a, err)` read as an `assert`, and
+  `Facts.rebuild` keeping the pairs apart.  Literals fold where a term is
+  pushed in (`fold1`, `fold2`, no power past the exponent `256`).
+
+**TestSuite.**  `storagePushReadBack` and `testArrayCopyClearsOldElements`
+are derived: 437 derived, none pending, 1 excluded, 2 skip
+(`check-testsuite.sh` against solkey `1b4341a303`).  Every replay in
+`Derived1`–`14` is `sol_prove` alone (four `sol_leaf` replays dropped).
+
+**Pins moved.**  `#wp`'s update-free line (`Examples/Tools.lean`,
+`Tactics/Surface.lean`, `Tactics/Notation.lean`): the typed translation,
+its hidden local a quantifier, guards that return folded.
+`Examples/ProofTree.lean`: two keys and the `Coin`/`Purchase`/`Mapping`
+leaves close in the residue; the size guards read `closeSize` and
+`stackSize` (`leafStats`); `writes6` now closes; the alias a `push()`
+returns under the diamond is no longer pinned (open item).
+`Tactics/Dangling.lean`'s rounds guards read the stack.
+`Tactics/Decide.lean` rewritten for the typed pipeline (the memory clause
+pins on `LMem` terms gone; `copyFrame`, `mappingEveryKey` now close).
+`TestSuite/Suggestions.lean`: `testStorageNestedPushReturnAlias` is
+`sol_prove` alone.
+
+**Checks.**  `lean_build` of the default targets: clean except
+`Tools/Counterexample.lean` 426–428 (the `w10-remnant` lane's file, not
+edited: it reads `Theory.StValue.Equiv`, now deleted).  `sorry` lines 20
+(as master); `#print axioms Proves.valid` and `Seq.checkCore_valid`:
+`propext`, `Classical.choice`, `Quot.sound`; `check-orphans` clean but for
+scratch; `check-doc-paths` clean but for `AGENTS.md`'s two citations of
+deleted modules.
+
+**Gates** (the W9.6.4 method, this branch only, low load; wall s, CPU in
+parentheses):
+
+| Row | Gate | `w10-decide` |
+|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 207.6 (230.7) |
+| `Derived7` | 61.7 | 45.8 (64.3) |
+| `Tactics/Decide` | 45.0 | 13.3 (13.5) |
+| `ProofTree` | 11.7 | 9.4 (9.3) |
+| `Chains/Storage` | 9.2 | 9.3 (10.6) |
+| `ChainRewrites` | 8.2 | 8.3 (9.1) |
+| `ChainRewritesOpen` | 4.1 | 3.8 (3.9) |
+| `Solkey/TestSuite` | 13.2 | 12.0 (7.0) |
+
+Per file: `Derived1` 8.0, `2` 7.7, `3` 18.1, `4` 11.4, `5` 6.0, `6` 7.8,
+`8` 31.1, `9` 12.1, `10` 13.0, `11` 4.6, `12` 20.1, `13` 12.0, `14` 10.0.
+The 437 `sol_prove`s one at a time (`Elab.async false`): 214.3 s here,
+202.7 s on master; the slowest are the impure receivers
+(`testNestedIndexWriteImpureReceiverAndIndex` 19.5 s,
+`indexWriteBothImpureStorageRef` 12.5 s, `indexWriteBothImpureMemToStorage`
+11.3 s), where the elimination dominates (the kernel builds it under
+facts that change at each premise).  CPU of the Derived files is 16 % over
+master's 199.0.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -6744,8 +6962,7 @@ What W9.7 left untyped, the value-level reading of a typed state
 `State.globE`, and an update computed a `Semantics.State × Locs C Δ`),
 W9.8 typed: the symbols read the typed state, and `Upd.applyV` computes the
 typed global part and the locals' values (`GlobT`, `LocsV`).  `State.globE`
-remains only as the bridge of `sol_decide`'s untyped language
-(`Calculus/DecideErase.lean`).  The side-projects reader is outdated
+remains for the untyped interpreter's lemmas only (W10.4).  The side-projects reader is outdated
 (W9.7.1).
 
 **W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
@@ -6753,12 +6970,13 @@ terms' symbols read the typed state; what stays untyped is listed in the
 W9.8.4 record.  A push at a full array is out of gas in the run and in the
 update reading alike (W9.8.5).
 
+**W10.3 (the typed Theory)**: done (record above).
+
+**W10.4 (`sol_decide` typed)**: done (record above): the decision
+procedure, the closer and the memory laws read the typed state; the
+untyped Theory is gone.
+
 **Open items:**
-- `storagePushReadBack` is valid in the model (and was on master: the
-  length after a push that returns is at least `1`) but not derived (the
-  closer does not read `(len + 1) - 1` as the pushed slot, and
-  `Calculus/CloseFrame.lean` has no push clause); the tables list it
-  `divergent`.
 - `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).
 - `Derived13` about 5 s slower than master (the restored stale push
   obligation, W9.8.5 record).
@@ -6771,7 +6989,11 @@ update reading alike (W9.8.5).
   (`Fml.LeadsK`); a line whose context order differs from the computed one
   (`Tactics/Chains`' memory example) is written as an explicit chain.
 - Printing a reduction's atoms by their binders' names (proposal 99) would
-  take the leaf's context to `KeyNotation`'s printer.
+  take the leaf's context to `LTm.ppWith`.
+- Under the diamond, the alias a `push()` returns (`Person storage p =
+  persons.push(); p.age = 1;`) is read at the old length before the push
+  lands, which reverts at a full array: the leaf asks for room the formula
+  does not give, and stays open.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`), the
   reader's `keycheck` executable and the VS Code extension's tests.
 - `check-testsuite.sh` passes at the W8.5 gate with `--solkey` at a

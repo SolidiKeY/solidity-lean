@@ -16,8 +16,8 @@ at `Hyps.fresh`, the index the rules ask: under `⊢ₖ` solkey's rules alone) a
 leaves, `empty` goes through the frames, `closeTrue` ends a `true` behind a
 box context.  Every other leaf is closed on its scoped form
 (`Seq.leafCheckS`, `Calculus/LeafDerive.lean`): the sequent wrapped, its
-`wt(storage)` premise read as a layout, its updates pushed in by position
-and the reduction closed by `LFml.closeS`, sound by `Proves.closeHolds`.
+updates pushed in by position and the reduction closed by `LFml.close`,
+sound by `Proves.closeHolds`.
 A leaf that closer does not read (outside its fragment: the classes
 `docs/intrinsic.md`'s "W9.3 `walk` record" lists), or reads and does not
 close, stays the walk's own sequent `H ⊢ φ` (`Seq.SLeaf`, `Seq.leafS`; M6c
@@ -575,21 +575,15 @@ theorem Proves.closeValid {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml 
     (h : Valid (H.wrap φ)) (hm : (H.wrap φ).modalFree = true) : Proves C R [] H φ :=
   .closeHolds h hm
 
-/-- A leaf is valid where it is with its premise `wt(storage)` set aside
-(`Fml.dropWtS`): the scoped `Proves.close_dropWt`. -/
-theorem Valid.of_dropWtS {φ : Fml C []} (h : Valid φ.dropWtS) : Valid φ := fun τ =>
-  Decide.holds_of_dropWtSM φ τ τ.redState rfl fun _ => Fml.dropWtS_eq_dropWtSM φ ▸ h τ
-
 namespace Seq
 
 open Lean Elab Tactic Meta
 
 /-- `sol_leaf` on the main goal, a leaf `H ⊢ φ` of the outer scope:
 `Proves.closeValid`, the goal left `⊨ ψ` with `ψ` the wrapped sequent
-computed and quoted (`Symex.normValid`), its premise `wt(storage)` set
-aside with `wt` (`Valid.of_dropWtS`); no modality left
+computed and quoted (`Symex.normValid`); no modality left
 (`Fml.modalFree`, checked by the kernel). -/
-def leafValid (wt : Bool) : TacticM Unit := withMainContext do
+def leafValid : TacticM Unit := withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
   let_expr Proves C R Γ₀ Γ H φ := ty | throwError "sol_leaf: not a scoped sequent"
@@ -599,10 +593,8 @@ def leafValid (wt : Bool) : TacticM Unit := withMainContext do
   let ψ := mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, H, φ]
   let hm ← try Decide.trueLemma (mkApp3 (mkConst ``Fml.modalFree) C nilCtx ψ)
     catch _ => throwError "sol_leaf: a modality is left in the leaf"
-  let ψ' := if wt then mkApp3 (mkConst ``Fml.dropWtS) C nilCtx ψ else ψ
-  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Valid) C ψ') (← g.getTag)
-  let hv := if wt then mkApp3 (mkConst ``Valid.of_dropWtS) C ψ g' else g'
-  g.assign (mkAppN (mkConst ``Proves.closeValid) #[C, R, Γ, H, φ, hv, hm])
+  let g' ← mkFreshExprSyntheticOpaqueMVar (mkApp2 (mkConst ``Valid) C ψ) (← g.getTag)
+  g.assign (mkAppN (mkConst ``Proves.closeValid) #[C, R, Γ, H, φ, g', hm])
   replaceMainGoal [← Symex.normValid g'.mvarId!]
 
 end Seq
@@ -610,8 +602,8 @@ end Seq
 /-- `sol_leaf` (declared in `Calculus/ProofTree.lean`, whose tree closes a
 leaf by it): `Seq.leafValid`. -/
 elab_rules : tactic
-  | `(tactic| sol_leaf) => Seq.leafValid false
-  | `(tactic| sol_leaf_wt) => Seq.leafValid true
+  | `(tactic| sol_leaf) => Seq.leafValid
+  | `(tactic| sol_leaf_wt) => Seq.leafValid
 
 open Lean Elab Tactic Meta in
 /-- `sol_prove` on a scoped sequent `H ⊢ φ` (`Proves C R [] H φ`,

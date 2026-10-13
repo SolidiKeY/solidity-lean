@@ -61,12 +61,12 @@ theorem emptyModality {Γ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {κ 
 end Proves
 
 /-- `sol_leaf`: a leaf `H ⊢ φ` that `sol_prove` left, as `⊨ ψ` with `ψ`
-the sequent wrapped (`Proves.closeHolds`); `sol_leaf_wt` sets its premise
-`wt(storage)` aside (`Valid.of_dropWtS`).  Elaborated in
+the sequent wrapped (`Proves.closeHolds`); `sol_leaf_wt` is the same
+since W10.4 (a typed storage needs no layout).  Elaborated in
 `Calculus/ProvesDerive.lean` (`Seq.leafValid`); declared here, where a
 tree closes its leaves by it. -/
 syntax "sol_leaf" : tactic
-/-- `sol_leaf` with the premise `wt(storage)` set aside. -/
+/-- `sol_leaf`, kept for the replays that name it. -/
 syntax "sol_leaf_wt" : tactic
 
 namespace ProofTree

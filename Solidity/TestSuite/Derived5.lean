@@ -5,9 +5,7 @@ import Solidity.TestSuite.ScopedProblems
 
 `⊢` of each obligation `sol_prove` and its leaf tactics close, from
 `boolKeyMapping` to `parenthesizedRightOperand` in the order of the source; the replays are what
-`#solkey_derive?` (`Frontend/Problems.lean`) prints.  The closer reads
-`wt(storage)` as the layout a well-formed storage holds; a leaf it leaves
-is closed on its scoped form (`sol_leaf`).
+`#solkey_derive?` (`Frontend/Problems.lean`) prints.
 -/
 
 open Solidity

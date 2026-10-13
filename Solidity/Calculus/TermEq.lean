@@ -28,7 +28,6 @@ Gate G0 asks (`Calculus/DecideScoped.lean`).
 
 namespace Solidity
 
-open Theory Theory.StValue
 open Solidity (Srt Op0 Op1 Op2 Op3)
 
 variable {C : Contract}
@@ -39,12 +38,12 @@ section Theq
 
 variable {Γ : Ctx} {p : PrimTy}
 
-/-- The two terms have the same Theory value in every state: what a law of
-the Theory says about the terms that denote its sides. -/
+/-- The two terms have one Theory value in every state: what a law of the
+Theory says about the terms that denote its sides. -/
 def Tm.Theq (t t' : Tm C Γ (.val p)) : Prop :=
-  ∀ σ : State C Γ, Theory.StValue.Equiv (t.denote σ) (t'.denote σ)
+  ∀ σ : State C Γ, t.denote σ = t'.denote σ
 
-theorem Tm.Theq.refl (t : Tm C Γ (.val p)) : Tm.Theq t t := fun _ => StValue.Equiv.refl _
+theorem Tm.Theq.refl (t : Tm C Γ (.val p)) : Tm.Theq t t := fun _ => rfl
 
 theorem Tm.Theq.symm {t t' : Tm C Γ (.val p)} (h : Tm.Theq t t') : Tm.Theq t' t :=
   fun σ => (h σ).symm
@@ -55,8 +54,7 @@ theorem Tm.Theq.trans {t₁ t₂ t₃ : Tm C Γ (.val p)} (h₁ : Tm.Theq t₁ t
 
 /-- Terms whose Theory values are equal are equal in the Theory. -/
 theorem Tm.Theq.of_eq {t t' : Tm C Γ (.val p)} (h : ∀ σ : State C Γ, t.denote σ = t'.denote σ) :
-    Tm.Theq t t' :=
-  fun σ => h σ ▸ StValue.Equiv.refl _
+    Tm.Theq t t' := h
 
 instance : Trans (@Tm.Theq C Γ p) (@Tm.Theq C Γ p) (@Tm.Theq C Γ p) := ⟨Tm.Theq.trans⟩
 

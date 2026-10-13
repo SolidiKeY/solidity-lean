@@ -1,929 +1,1184 @@
-import Solidity.Calculus.DecideRel
-import Solidity.Calculus.Graft
-import Solidity.Calculus.SoundLoops
-import Solidity.Calculus.ProvesSound
+import Solidity.Calculus.DecideScoped
+import Solidity.Calculus.DecideEval
 
 /-!
 # The scoped reduction, sound over the typed state
 
 `Fml.toLS` (`Calculus/DecideScoped.lean`) pushes a scoped leaf's updates in
 by position.  Its soundness is proved here on the leaf itself, over the
-typed state and its run (`holds`, `Calculus/Logic.lean`), not through the
-leaf's erasure (decision 83's rest): `Fml.toLSM_sound` follows the leaf's
-binders, updates and connectives as `holds` reads them, and
-`Valid.of_reduceS` puts it together with the elimination (`LFml.elim_holds`).
+typed state and its run (`holds`, `Calculus/Logic.lean`): the reduction is
+read in the state the leaf starts in (`g₀`, its atoms in `ν`), the leaf in
+the state its updates reach (`τ`), and what relates them is `Agrees`: the
+storage term the updates left reads `τ`'s storage, the memory term `τ`'s
+heap, each bound position `τ`'s local (`LTy.vopt`), and the values of the
+transaction are `g₀`'s.
 
-What relates the reduction's state to the scoped state is `RelU σ ρ g ℓ`,
-on a global part and the locals' values (`RelT σ ρ τ` on a typed state, its
-`τ.globE` and `τ.loc`; `Calculus/DecideRel.lean`), and what a term or an update pushed in reads
-is proved there, on the scoped terms (`RelU.val`, `RelU.one`, `RelU.two`,
-`RelU.par`).
+* A term pushed in reads what the scoped term reads (`Tm.toL_drel`):
+  equal, a memory up to the heap typing it grew from (`Srt.DRel`), since a
+  symbol reads its arguments alike in either state, `at` and `next` aside,
+  which read the storage they were pushed onto.
+* An update pushed in returns exactly where the update does, and the state
+  it leaves agrees with every typed state the update lands on
+  (`Upd.toLS_sound`, through `Upd.applyV`).
+* A formula pushed in implies the formula at the positive polarity and
+  follows from it at the negative one (`Fml.toLS_sound`).
 
-The binders: a quantifier is the reduction's `LFml.all` over its key, and
-its local the atom `pos k`, which the state read binds at the key
-(`RelU.pushQ`); a hidden binder pushes a position bound to nothing
-(`RelU.pushFree`).  An equation `eqD a b` is read through the
-constructors it is peeled of (`Fml.peelS`): its two readings, the same
-term in one context with the same keys (`sameAt`), lower alike.
-
-Polarity: the fragment takes updates, hidden binders and modalities only
-in positive positions (`Fml.inLS true`), where the reduction need only
-imply the formula; under a negation or on the left of an implication the
-formula is first-order and the two agree both ways.
-
-A leaf's premise `wt(storage)` under its parameters' quantifiers is set
-aside (`Fml.dropWtS`) and read as the layout its roots hold
-(`Fml.layoutS`, `holds_of_dropWtS`; proposal 100).
+`Valid.of_reduceS` puts it together with the elimination
+(`LFml.elim_holds`, `Calculus/DecideEval.lean`).
 -/
 
 namespace Solidity
 
-/-! ## A primitive value and the values its type admits -/
-
-section
-open Semantics (Value Seg Halt Res Binding lookupBy setBy)
-open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
-variable {C : Contract}
-
-theorem _root_.Solidity.PrimTy.admits_erase : {p : PrimTy} → (v : p.Denote) → p.admits (PrimTy.erase v)
-  | .bool, _ => trivial
-  | .uint, ⟨_, h⟩ => by
-    simp only [PrimTy.inRange, decide_eq_true_eq] at h
-    exact h
-  | .int, ⟨_, h⟩ => by
-    simp only [PrimTy.inRange, decide_eq_true_eq] at h
-    exact h
-
-theorem _root_.Solidity.PrimTy.exists_of_admits :
-    {p : PrimTy} → {v : Semantics.Value} → p.admits v → ∃ w : p.Denote, PrimTy.erase w = v
-  | .bool, .bool b, _ => ⟨b, rfl⟩
-  | .uint, .int n, h =>
-    ⟨(⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ :
-      {n : Int // PrimTy.uint.inRange n = true}), rfl⟩
-  | .int, .int n, h =>
-    ⟨(⟨n, by
-        simp only [PrimTy.inRange, decide_eq_true_eq]
-        exact h⟩ :
-      {n : Int // PrimTy.int.inRange n = true}), rfl⟩
-  | .bool, .int _, h | .uint, .bool _, h | .int, .bool _, h => h.elim
-
-end
-
-
-
 namespace Decide
 
-open Semantics SemanticsProperties
+open Semantics
 
 variable {C : Contract}
 
-/-! ## Through the constructors the erasure drops -/
+/-! ## Two readings of a sort -/
 
-section Peel
+/-- A memory, up to the heap typing it grew from: its heap. -/
+def _root_.Solidity.Grown.forget {H : HTy} (m : Grown H (fun _ => Unit)) : (H' : HTy) × Heap H' :=
+  ⟨m.H', m.heap⟩
 
-variable {σ : Semantics.State}
-
-/-- An update of pops and drops, on a typed state: it ends in the typed
-state its pops and drops leave. -/
-theorem zero_typed {Γ : Ctx} (τ : State C Γ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → U.view = .zero →
-      ∃ (τ' : State C Δ) (hp : τ.H <+: τ'.glob.H), U.applyV τ = some (⟨τ'.glob, hp⟩, τ'.locV)
-  | _, .nil, _ => ⟨τ, List.prefix_refl _, rfl⟩
-  | _, .snoc U e, hv => absurd hv (UView.add_ne_zero U.view e.toElemS)
-  | _, .decl U _ r, hv => absurd hv (UView.add_ne_zero U.view (.rhs r))
-  | _, .pop U hx, hv => by
-    obtain ⟨τ', hp, hτ⟩ := zero_typed τ U hv
-    refine ⟨τ'.drop hx, hp, ?_⟩
-    show (U.applyV τ).bind (fun p => some (p.1, p.2.drop hx)) = _
-    rw [hτ, Option.bind_some, State.locV_drop]
-    rfl
-  | _, .drop U hx, hv => by
-    obtain ⟨τ', hp, hτ⟩ := zero_typed τ U hv
-    refine ⟨τ'.thin hx, hp, ?_⟩
-    show (U.applyV τ).bind (fun p => some (p.1, p.2.thin hx)) = _
-    rw [hτ, Option.bind_some, State.locV_thin]
-    rfl
-
-/-- A typed state with the global part and the locals an update leaves
-stands where the update's erased result does. -/
-theorem RelT.of_lands {Δ : Ctx} {ρ : SymS} {H : HTy} {q : GlobT C H × LocsV C Δ}
-    (h : RelU σ ρ (eraseQ q).1 (eraseQ q).2) {σ' : State C Δ} (hg : σ'.glob = q.1.1)
-    (hl : ∀ {t : LTy} (i : Idx Δ t), σ'.getV i = q.2 t i) : RelT σ ρ σ' := by
-  have hl' : σ'.loc = q.2.erase := by
-    rw [← State.locV_erase]
-    funext t i
-    show LTy.VDen.erase t (σ'.getV i) = LTy.VDen.erase t (q.2 t i)
-    rw [hl i]
-  have hg' : σ'.globE = q.1.1.globE := by rw [← State.glob_globE, hg]
-  show RelU σ ρ σ'.globE σ'.loc
-  rw [hg', hl']
-  exact h
-
-/-- A pushed typed state stands where the pushed locals do. -/
-theorem RelT.push {Γ : Ctx} {ρ : SymS} {τ : State C Γ} {t : LTy} {v : t.TDenote C τ.H}
-    (h : RelU σ ρ τ.globE (τ.loc.push (LTy.TDenote.erase t v))) : RelT σ ρ (τ.push v) := by
-  have hl : (τ.push v).loc = τ.loc.push (LTy.TDenote.erase t v) := by
-    funext u j
-    cases j <;> rfl
-  show RelU σ ρ (τ.push v).globE (τ.push v).loc
-  rw [hl]
-  exact h
-
-/-- The erased application of an update that returns: the typed one
-erased. -/
-theorem applyVE_ok {Γ Δ : Ctx} {τ : State C Γ} {U : Upd C Γ Δ} {τe : Semantics.State × Locs C Δ}
-    (h : U.applyVE τ = .ok τe) : ∃ q, U.applyV τ = some q ∧ τe = eraseQ q := by
-  rw [Upd.applyVE_eq] at h
-  cases hq : U.applyV τ with
-  | none => rw [hq] at h; cases h
-  | some q =>
-    rw [hq] at h
-    cases h
-    exact ⟨q, rfl, rfl⟩
-
-theorem applyVE_none {Γ Δ : Ctx} {τ : State C Γ} {U : Upd C Γ Δ} (h : U.applyV τ = none) :
-    ∀ τe, U.applyVE τ ≠ .ok τe := by
-  intro τe he
-  rw [Upd.applyVE_eq, h] at he
-  cases he
-
-/-- **Peeling keeps the relation, the reduction's symbols and its shape.** -/
-theorem peel_sym : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS} {φ' : Fml C Γ'},
-    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ρ'.sym = ρ.sym := by
-  intro Γ φ
-  induction φ with
-  | upd m U φ ih =>
-    intro ρ Γ' ρ' φ' hp
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    split at hp
-    · rw [← Fml.peelS_eq_peelSM] at hp
-      have := ih (ρ := U.replayS noActE noActR ρ) hp
-      rw [this]
-      rename_i hv
-      exact replayS_sym_zero noActE noActR ρ U hv
-    · cases hp; rfl
-  | bind m x t φ ih =>
-    intro ρ Γ' ρ' φ' hp
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    rw [← Fml.peelS_eq_peelSM] at hp
-    exact ih (ρ := ρ.push .keep) hp
-  | _ => intro ρ Γ' ρ' φ' hp; cases hp; rfl
-
-/-- **Peeling, read one way**: a formula holds where what it peels to holds
-in every typed state the peeled constructors reach. -/
-theorem peel_pos : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS} {φ' : Fml C Γ'},
-    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelT σ ρ τ →
-      (∀ τ' : State C Γ', RelT σ ρ' τ' → holds τ' φ') → holds τ φ := by
-  intro Γ φ
-  induction φ with
-  | upd m U φ ih =>
-    intro ρ Γ' ρ' φ' hp τ h hk
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    split at hp
-    · rename_i hv
-      rw [← Fml.peelS_eq_peelSM] at hp
-      obtain ⟨τe, hτ, h', hs⟩ := RelU.zero noActE noActR h U hv
-      obtain ⟨q, hq, rfl⟩ := applyVE_ok hτ
-      show U.afterT m τ (holds · φ)
-      rw [Upd.afterT_applyV, hq]
-      intro σ' hg hl
-      exact ih (ρ := U.replayS noActE noActR ρ) hp σ' (RelT.of_lands h' hg hl) hk
-    · cases hp; exact hk τ h
-  | bind m x t φ ih =>
-    intro ρ Γ' ρ' φ' hp τ h hk
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    rw [← Fml.peelS_eq_peelSM] at hp
-    intro v
-    exact ih (ρ := ρ.push .keep) hp (τ.push v) (RelT.push (h.pushFree _)) hk
-  | _ => intro ρ Γ' ρ' φ' hp τ h hk; cases hp; exact hk τ h
-
-/-- **Peeling, read the other way**: where a formula holds, what it peels
-to holds in a typed state the peeled constructors reach. -/
-theorem peel_neg : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS} {φ' : Fml C Γ'},
-    φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelT σ ρ τ → holds τ φ →
-      ∃ τ' : State C Γ', RelT σ ρ' τ' ∧ holds τ' φ' := by
-  intro Γ φ
-  induction φ with
-  | upd m U φ ih =>
-    intro ρ Γ' ρ' φ' hp τ h hφ
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    split at hp
-    · rename_i hv
-      rw [← Fml.peelS_eq_peelSM] at hp
-      obtain ⟨τe, hτ, h', hs⟩ := RelU.zero noActE noActR h U hv
-      obtain ⟨τ'', hp', hτ''⟩ := zero_typed τ U hv
-      obtain ⟨q, hq, rfl⟩ := applyVE_ok hτ
-      have hφ' : U.afterT m τ (holds · φ) := hφ
-      rw [Upd.afterT_applyV, hτ''] at hφ'
-      rw [hτ''] at hq
-      cases hq
-      exact ih (ρ := U.replayS noActE noActR ρ) hp τ'' (RelT.of_lands h' rfl fun _ => rfl)
-        (hφ' τ'' rfl (fun _ => rfl))
-    · cases hp; exact ⟨τ, h, hφ⟩
-  | bind m x t φ ih =>
-    intro ρ Γ' ρ' φ' hp τ h hφ
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    rw [← Fml.peelS_eq_peelSM] at hp
-    obtain ⟨v⟩ := LTy.tdenote_nonempty (C := C) (H := τ.H) t
-    exact ih (ρ := ρ.push .keep) hp (τ.push v) (RelT.push (h.pushFree _)) (hφ v)
-  | _ => intro ρ Γ' ρ' φ' hp τ h hφ; cases hp; exact ⟨τ, h, hφ⟩
-
-/-- Peeling reaches a typed state. -/
-theorem peel_exists : ∀ {Γ : Ctx} (φ : Fml C Γ) {ρ : SymS} {Γ' : Ctx} {ρ' : SymS}
-    {φ' : Fml C Γ'}, φ.peelS ρ = ⟨Γ', ρ', φ'⟩ → ∀ τ : State C Γ, RelT σ ρ τ →
-      ∃ τ' : State C Γ', RelT σ ρ' τ' := by
-  intro Γ φ
-  induction φ with
-  | upd m U φ ih =>
-    intro ρ Γ' ρ' φ' hp τ h
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    split at hp
-    · rename_i hv
-      rw [← Fml.peelS_eq_peelSM] at hp
-      obtain ⟨τe, hτ, h', hs⟩ := RelU.zero noActE noActR h U hv
-      obtain ⟨τ'', hp', hτ''⟩ := zero_typed τ U hv
-      obtain ⟨q, hq, rfl⟩ := applyVE_ok hτ
-      rw [hτ''] at hq
-      cases hq
-      exact ih (ρ := U.replayS noActE noActR ρ) hp τ'' (RelT.of_lands h' rfl fun _ => rfl)
-    · cases hp; exact ⟨τ, h⟩
-  | bind m x t φ ih =>
-    intro ρ Γ' ρ' φ' hp τ h
-    rw [Fml.peelS_eq_peelSM] at hp
-    simp only [Fml.peelSM] at hp
-    rw [← Fml.peelS_eq_peelSM] at hp
-    obtain ⟨v⟩ := LTy.tdenote_nonempty (C := C) (H := τ.H) t
-    exact ih (ρ := ρ.push .keep) hp (τ.push v) (RelT.push (h.pushFree _))
-  | _ => intro ρ Γ' ρ' φ' hp τ h; cases hp; exact ⟨τ, h⟩
-
-theorem Fml.asDefinedS_some {Γ : Ctx} {φ : Fml C Γ} {p : PrimTy} {a : Tm C Γ (.val p)}
-    (h : φ.asDefinedS = some ⟨p, a⟩) : φ = .defined a := by
-  cases φ <;> simp only [Fml.asDefinedS, reduceCtorEq, Option.some.injEq, Sigma.mk.injEq] at h
+theorem _root_.Solidity.Grown.forget_inj {H₁ H₂ : HTy} {m₁ : Grown H₁ (fun _ => Unit)}
+    {m₂ : Grown H₂ (fun _ => Unit)} (h : m₁.forget = m₂.forget) :
+    ∃ (H' : HTy) (hp : Heap H') (e₁ : H₁ <+: H') (e₂ : H₂ <+: H'),
+      m₁ = ⟨e₁, hp, ()⟩ ∧ m₂ = ⟨e₂, hp, ()⟩ := by
+  cases m₁ with | mk e₁ hp₁ u₁ =>
+  cases m₂ with | mk e₂ hp₂ u₂ =>
+  simp only [Grown.forget, Sigma.mk.injEq] at h
   obtain ⟨rfl, h⟩ := h
   cases h
-  rfl
+  exact ⟨_, _, e₁, e₂, rfl, rfl⟩
 
-theorem Fml.asAndS_some {Γ : Ctx} {φ ψ₁ ψ₂ : Fml C Γ} (h : φ.asAndS = some (ψ₁, ψ₂)) :
-    φ = .and ψ₁ ψ₂ := by
-  cases φ <;> simp only [Fml.asAndS, reduceCtorEq, Option.some.injEq, Prod.mk.injEq] at h
-  rw [h.1, h.2]
+/-- **Two readings of a sort agree**, over two heap typings: equal, a
+memory by its heap. -/
+def _root_.Solidity.Srt.DRel : (s : Srt) → {H₁ H₂ : HTy} → Option (s.Den C H₁) →
+    Option (s.Den C H₂) → Prop
+  | .mem, _, _, x, y =>
+    (x : Option (Grown _ _)).map Grown.forget = (y : Option (Grown _ _)).map Grown.forget
+  | .val p, _, _, x, y => (x : Option p.Denote) = y
+  | .path T, _, _, x, y => (x : Option (SRef C T)) = y
+  | .st, _, _, x, y => (x : Option (Storage C)) = y
+  | .sv T, _, _, x, y => (x : Option (SVal T)) = y
+  | .ident _, _, _, x, y => (x : Option Nat) = y
+  | .addr T, _, _, x, y => (x : Option (MAddrT T)) = y
+  | .mv T, _, _, x, y => (x : Option (MvT T)) = y
+  | .sts s, _, _, x, y => (x : Option (Storage (Contract.ofStruct s))) = y
+  | .spath s T, _, _, x, y => (x : Option (SRef (Contract.ofStruct s) T)) = y
+  | .kint, _, _, x, y => (x : Option Int) = y
 
-theorem Fml.asEqS_some {Γ : Ctx} {φ : Fml C Γ} {p : PrimTy} {a b : Tm C Γ (.val p)}
-    (h : φ.asEqS = some ⟨p, a, b⟩) : φ = .eq a b := by
-  cases φ <;> simp only [Fml.asEqS, reduceCtorEq, Option.some.injEq, Sigma.mk.injEq] at h
-  obtain ⟨rfl, h⟩ := h
-  simp only [heq_eq_eq, Prod.mk.injEq] at h
-  obtain ⟨rfl, rfl⟩ := h
-  rfl
+/-! ## The symbols, read in two states -/
 
-/-- A term lowers alike in two states with the same positions and symbols. -/
-theorem _root_.Solidity.Tm.toLSM_congr {Γ : Ctx} {ρ ρ' : SymS} (hl : ρ.loc = ρ'.loc)
-    (hs : ρ.sym = ρ'.sym) : {s : Srt} → (t : Tm C Γ s) → t.toLSM ρ = t.toLSM ρ' ∧
-      t.inLSM ρ = t.inLSM ρ' := by
-  obtain ⟨l, sy, n⟩ := ρ
-  obtain ⟨l', sy', n'⟩ := ρ'
-  simp only at hl hs
-  subst hl hs
-  intro s t
-  induction t with
-  | pvV _ | pvP _ | pvS _ | pvI _ | netOf _ _ | app0 _ | pvZ _ => exact ⟨rfl, rfl⟩
-  | app1 o x ih => refine ⟨?_, ?_⟩ <;> simp only [Tm.toLSM, Tm.inLSM, ih.1, ih.2] <;> rfl
-  | app2 o x y ihx ihy =>
-    refine ⟨?_, ?_⟩ <;> simp only [Tm.toLSM, Tm.inLSM, ihx.1, ihx.2, ihy.1, ihy.2] <;> rfl
-  | app3 o x y z ihx ihy ihz =>
-    refine ⟨?_, ?_⟩ <;>
-      simp only [Tm.toLSM, Tm.inLSM, ihx.1, ihx.2, ihy.1, ihy.2, ihz.1, ihz.2] <;> rfl
+/-- `net`. -/
+def _root_.Solidity.Op1.isNet {a s : Srt} : Op1 C a s → Bool
+  | .net => true
+  | _ => false
 
-/-- **An equation's two readings, the same** (`sameAt`): one term in one
-context with the same keys, read with the same symbols, lowers alike. -/
-theorem sameAt_toLS {Γ Δ : Ctx} {ρa ρb : SymS} {p q : PrimTy} {a : Tm C Γ (.val p)}
-    {b : Tm C Δ (.val q)}
-    (h : sameAt ρa a ρb b = true) (hs : ρa.sym = ρb.sym) (hoka : ρa.Ok ρa.names)
-    (hokb : ρb.Ok ρb.names) : b.toLS ρb = a.toLS ρa ∧ b.inLS ρb = a.inLS ρa := by
-  unfold sameAt at h
+/-- `next`. -/
+def _root_.Solidity.Op1.isNext {a s : Srt} : Op1 C a s → Bool
+  | .next => true
+  | _ => false
+
+/-- `storage`. -/
+def _root_.Solidity.Op0.isStorage {s : Srt} : Op0 C s → Bool
+  | .storage => true
+  | _ => false
+
+/-- `memory`. -/
+def _root_.Solidity.Op0.isMemory {s : Srt} : Op0 C s → Bool
+  | .memory => true
+  | _ => false
+
+/-- `at`. -/
+def _root_.Solidity.Op2.isAt {a b s : Srt} : Op2 C a b s → Bool
+  | .at _ => true
+  | _ => false
+
+section Ops
+
+variable (g₁ g₂ : State C [])
+
+theorem Op1.eval_drel {a s : Srt} (o : Op1 C a s) (hnet : o.isNet = false)
+    (hnext : o.isNext = false)
+    {x₁ : Option (a.Den C g₁.H)} {x₂ : Option (a.Den C g₂.H)} (hx : Srt.DRel a x₁ x₂) :
+    Srt.DRel s (o.eval g₁ x₁) (o.eval g₂ x₂) := by
+  cases o with
+  | net => cases hnet
+  | next => cases hnext
+  | alloc R h =>
+    cases x₁ <;> cases x₂ <;> simp only [Srt.DRel, Option.map_none, Option.map_some,
+      reduceCtorEq, Option.some.injEq] at hx
+    · rfl
+    · obtain ⟨H', hp, e₁, e₂, rfl, rfl⟩ := Grown.forget_inj hx
+      rfl
+  | addM R h =>
+    cases x₁ <;> cases x₂ <;> simp only [Srt.DRel, Option.map_none, Option.map_some,
+      reduceCtorEq, Option.some.injEq] at hx
+    · rfl
+    · obtain ⟨H', hp, e₁, e₂, rfl, rfl⟩ := Grown.forget_inj hx
+      rfl
+  | _ => cases hx; rfl
+
+theorem Op2.eval_drel {a b s : Srt} (o : Op2 C a b s) (hat : o.isAt = false)
+    {x₁ : Option (a.Den C g₁.H)} {x₂ : Option (a.Den C g₂.H)} (hx : Srt.DRel a x₁ x₂)
+    {y₁ : Option (b.Den C g₁.H)} {y₂ : Option (b.Den C g₂.H)} (hy : Srt.DRel b y₁ y₂) :
+    Srt.DRel s (o.eval g₁ x₁ y₁) (o.eval g₂ x₂ y₂) := by
+  cases o with
+  | «at» it => cases hat
+  | read | mlen | copyMem | iread | copy =>
+    cases x₁ <;> cases x₂ <;> simp only [Srt.DRel, Option.map_none, Option.map_some,
+      reduceCtorEq, Option.some.injEq] at hx
+    · cases hy; rfl
+    · obtain ⟨H', hp, e₁, e₂, rfl, rfl⟩ := Grown.forget_inj hx
+      cases hy; rfl
+  | copySt h =>
+    cases x₁ <;> cases x₂ <;> simp only [Srt.DRel, Option.map_none, Option.map_some,
+      reduceCtorEq, Option.some.injEq] at hx
+    · cases hy; rfl
+    · obtain ⟨H', hp, e₁, e₂, rfl, rfl⟩ := Grown.forget_inj hx
+      cases hy
+      cases y₁ <;> rfl
+  | _ => cases hx; cases hy; rfl
+
+theorem writeT_forget {H₁ H₂ H' : HTy} {T : Ty} (e₁ : H₁ <+: H') (e₂ : H₂ <+: H') (hp : Heap H')
+    (a : MAddrT T) (v : MvT T) :
+    (Grown.writeT (⟨e₁, hp, ()⟩ : Grown H₁ (fun _ => Unit)) a v).map Grown.forget =
+      (Grown.writeT (⟨e₂, hp, ()⟩ : Grown H₂ (fun _ => Unit)) a v).map Grown.forget := by
+  simp only [Grown.writeT, Option.bind_eq_bind]
+  cases MAddrT.resolve H' a <;> simp only [Option.bind_none, Option.bind_some, Option.map_none]
+  rename_i ad
+  cases MvT.toMVal H' T v <;> simp only [Option.bind_none, Option.bind_some, Option.map_none]
+  rename_i mv
+  cases hp.writeAddr ad mv <;> rfl
+
+theorem Op3.eval_drel {a b c s : Srt} (o : Op3 C a b c s)
+    {x₁ : Option (a.Den C g₁.H)} {x₂ : Option (a.Den C g₂.H)} (hx : Srt.DRel a x₁ x₂)
+    {y₁ : Option (b.Den C g₁.H)} {y₂ : Option (b.Den C g₂.H)} (hy : Srt.DRel b y₁ y₂)
+    {z₁ : Option (c.Den C g₁.H)} {z₂ : Option (c.Den C g₂.H)} (hz : Srt.DRel c z₁ z₂) :
+    Srt.DRel s (o.eval g₁ x₁ y₁ z₁) (o.eval g₂ x₂ y₂ z₂) := by
+  cases o with
+  | write =>
+    cases x₁ <;> cases x₂ <;> simp only [Srt.DRel, Option.map_none, Option.map_some,
+      reduceCtorEq, Option.some.injEq] at hx
+    · cases hy; cases hz; rfl
+    · obtain ⟨H', hp, e₁, e₂, rfl, rfl⟩ := Grown.forget_inj hx
+      cases hy; cases hz
+      cases y₁ <;> cases z₁ <;> try rfl
+      rename_i a v
+      exact writeT_forget e₁ e₂ hp a v
+  | _ => cases hx; cases hy; cases hz; rfl
+
+theorem Op0.eval_drel {s : Srt} (o : Op0 C s) (hs : o.isStorage = false) (hm : o.isMemory = false)
+    (htx : g₁.tx = g₂.tx) (hbal : g₁.selfBalance = g₂.selfBalance) :
+    Srt.DRel s (o.eval g₁) (o.eval g₂) := by
+  cases o with
+  | storage => cases hs
+  | memory => cases hm
+  | env k =>
+    show some (g₁.envVal k) = some (g₂.envVal k)
+    cases k <;> simp only [State.envVal, htx, hbal]
+  | _ => rfl
+
+end Ops
+
+/-! ## The relation -/
+
+/-- What a position bound to a term reads: its local's value, at the sort
+it is bound at. -/
+def _root_.Solidity.LTy.vopt {H : HTy} : (t : LTy) → t.VDen C → Option (t.bs.Den C H)
+  | .val _, v => some v
+  | .alias _, v => v
+  | .mem _, v => v
+  | .old, v => some v
+  | .oldNet, _ => none
+  | .kint, v => some v
+
+/-- A term is fresh from the position `n` on: binding an atom there leaves
+what it reads. -/
+def Fresh {s : Srt} (n : Nat) (t : LTm C s) : Prop :=
+  ∀ (g : State C []) (ν : AEnv) (p : PrimTy) (k : Nat) (v : p.Denote), n ≤ k →
+    t.eval g (ν.set p k v) = t.eval g ν
+
+/-- Every binding fresh from `n` on. -/
+def BEnv.Fresh (n : Nat) : {Γ : Ctx} → BEnv C Γ → Prop
+  | [], _ => True
+  | _ :: _, e => (∀ b, e.1 = some b → Decide.Fresh n b) ∧ BEnv.Fresh n e.2
+
+/-- The symbolic state is fresh past its next position. -/
+structure SymS.Fresh {Γ : Ctx} (ρ : SymS C Γ) : Prop where
+  stor : Decide.Fresh ρ.next ρ.stor
+  mem : Decide.Fresh ρ.next ρ.mem
+  loc : ρ.loc.Fresh ρ.next
+
+/-- **The reduction's state `ρ`, read in `g₀` and `ν`, stands for the
+global part `G` and the locals `ℓ`.** -/
+structure AgreesV (g₀ : State C []) (ν : AEnv) {Γ : Ctx} (ρ : SymS C Γ) (G : State C [])
+    (ℓ : LocsV C Γ) : Prop where
+  stor : (ρ.stor.eval g₀ ν : Option (Storage C)) = some G.storage
+  mem : (ρ.mem.eval g₀ ν : Option (Grown g₀.H (fun _ => Unit))).map Grown.forget =
+    some ⟨G.H, G.heap⟩
+  tx : g₀.tx = G.tx
+  bal : g₀.selfBalance = G.selfBalance
+  loc : ∀ {t : LTy} (i : Idx Γ t) (b : LTm C t.bs), ρ.loc.get i = some b →
+    (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt (ℓ t i)
+
+/-- At a typed state: its global part and its locals. -/
+abbrev Agrees (g₀ : State C []) (ν : AEnv) {Γ : Ctx} (ρ : SymS C Γ) (τ : State C Γ) : Prop :=
+  AgreesV g₀ ν ρ τ.glob τ.locV
+
+/-! ## Terms, by position -/
+
+section Terms
+
+variable {g₀ : State C []} {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ}
+
+theorem Op0.toL_ne {s : Srt} (o : Op0 C s) (hs : o.isStorage = false) (hm : o.isMemory = false) :
+    o.toL ρ = some (.app0 o) := by
+  cases o <;> simp only [Op0.isStorage, Op0.isMemory, reduceCtorEq] at hs hm <;> rfl
+
+theorem Op1.toL_ne {a s : Srt} (o : Op1 C a s) (x : LTm C a) (hnet : o.isNet = false)
+    (hnext : o.isNext = false) : o.toL ρ x = some (fold1 o x) := by
+  cases o <;> simp only [Op1.isNet, Op1.isNext, reduceCtorEq] at hnet hnext <;> rfl
+
+theorem Op2.toL_ne {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
+    (hat : o.isAt = false) : o.toL ρ x y = some (fold2 o x y) := by
+  cases o <;> simp only [Op2.isAt, reduceCtorEq] at hat <;> rfl
+
+/-- **A term pushed in reads what the scoped term reads.** -/
+theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
+    {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) → t.toL ρ = some t' →
+      Srt.DRel s (t'.eval g₀ ν) (t.eval τ)
+  | _, .pvV i, t', ht => by
+    have := h.loc i t' ht; rw [this]; rfl
+  | _, .pvP i, t', ht => by
+    have := h.loc i t' ht; rw [this]; rfl
+  | _, .pvS i, t', ht => by
+    have := h.loc i t' ht; rw [this]; rfl
+  | _, .pvI i, t', ht => by
+    have := h.loc i t' ht; rw [this]; rfl
+  | _, .pvZ i, t', ht => by
+    have := h.loc i t' ht; rw [this]; rfl
+  | _, .netOf _ _, t', ht => by cases ht
+  | _, .app0 o, t', ht => by
+    cases o with
+    | storage =>
+      cases ht
+      show (ρ.stor.eval g₀ ν : Option (Storage C)) = some τ.storage
+      exact h.stor
+    | memory =>
+      cases ht
+      exact h.mem
+    | lit v => cases ht; exact Op0.eval_drel g₀ τ.glob (.lit v) rfl rfl h.tx h.bal
+    | env k => cases ht; exact Op0.eval_drel g₀ τ.glob (.env k) rfl rfl h.tx h.bal
+    | root r hr => cases ht; exact Op0.eval_drel g₀ τ.glob (.root r hr) rfl rfl h.tx h.bal
+    | mtSt => cases ht; exact Op0.eval_drel g₀ τ.glob .mtSt rfl rfl h.tx h.bal
+    | member s f hf => cases ht; exact Op0.eval_drel g₀ τ.glob (.member s f hf) rfl rfl h.tx h.bal
+    | zlit n => cases ht; exact Op0.eval_drel g₀ τ.glob (.zlit n) rfl rfl h.tx h.bal
+  | _, .app1 o x, t', ht => by
+    simp only [Tm.toL, Option.bind_eq_some_iff] at ht
+    obtain ⟨x', hx', ht⟩ := ht
+    have hx := Tm.toL_drel h x x' hx'
+    cases hn : o.isNet with
+    | true => cases o <;> simp only [Op1.isNet, reduceCtorEq] at hn; cases ht
+    | false =>
+      cases hm : o.isNext with
+      | true =>
+        cases o <;> simp only [Op1.isNext, reduceCtorEq] at hm
+        cases ht
+        rw [LTm.eval_app2, Tm.eval_app1, h.stor]
+        show (Option.bind _ _ : Option _) = Option.bind _ _
+        rw [show (x'.eval g₀ ν : Option (SRef C _)) = x.eval τ from hx]
+      | false =>
+        rw [Op1.toL_ne o x' hn hm] at ht
+        cases ht
+        rw [fold1_eval]
+        exact Op1.eval_drel g₀ τ.glob o hn hm hx
+  | _, .app2 o x y, t', ht => by
+    simp only [Tm.toL, Option.bind_eq_some_iff] at ht
+    obtain ⟨x', hx', y', hy', ht⟩ := ht
+    have hx := Tm.toL_drel h x x' hx'
+    have hy := Tm.toL_drel h y y' hy'
+    cases ha : o.isAt with
+    | true =>
+      cases o <;> simp only [Op2.isAt, reduceCtorEq] at ha
+      cases ht
+      rw [LTm.eval_app3, Tm.eval_app2, h.stor]
+      rw [show (x'.eval g₀ ν : Option (SRef C _)) = x.eval τ from hx,
+        show (y'.eval g₀ ν : Option _) = y.eval τ from hy]
+      rfl
+    | false =>
+      rw [Op2.toL_ne o x' y' ha] at ht
+      cases ht
+      rw [fold2_eval]
+      exact Op2.eval_drel g₀ τ.glob o ha hx hy
+  | _, .app3 o x y z, t', ht => by
+    simp only [Tm.toL, Option.bind_eq_some_iff] at ht
+    obtain ⟨x', hx', y', hy', z', hz', ht⟩ := ht
+    cases ht
+    exact Op3.eval_drel g₀ τ.glob o (Tm.toL_drel h x x' hx') (Tm.toL_drel h y y' hy')
+      (Tm.toL_drel h z z' hz')
+
+end Terms
+
+/-! ## The bindings, by position -/
+
+namespace BEnv
+
+theorem get_set_same : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (w : Option (LTm C t.bs)) →
+    (e : BEnv C Γ) → BEnv.get i (BEnv.set i w e) = w
+  | _, _, .here, _, _ => rfl
+  | _, _, .there i, w, e => get_set_same i w e.2
+
+theorem get_set_ne : {Γ : Ctx} → {t u : LTy} → (i : Idx Γ t) → (j : Idx Γ u) →
+    i.toNat ≠ j.toNat → (w : Option (LTm C t.bs)) → (e : BEnv C Γ) →
+    BEnv.get j (BEnv.set i w e) = BEnv.get j e
+  | _, _, _, .here, .here, h, _, _ => absurd rfl h
+  | _, _, _, .here, .there _, _, _, _ => rfl
+  | _, _, _, .there _, .here, _, _, _ => rfl
+  | _, _, _, .there i, .there j, h, w, e =>
+    get_set_ne i j (fun h' => h (congrArg (· + 1) h')) w e.2
+
+theorem get_drop {Γ : Ctx} {t : LTy} (i : Idx Γ t) : {Δ : Ctx} → (h : Ext Γ Δ) → (e : BEnv C Δ) →
+    BEnv.get i (BEnv.drop h e) = BEnv.get (i.ext h) e
+  | _, .refl, _ => rfl
+  | _, .push h, e => get_drop i h e.2
+
+theorem get_thin : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {t : LTy} → (i : Idx Γ t) → (e : BEnv C Δ) →
+    BEnv.get i (BEnv.thin h e) = BEnv.get (i.wk h) e
+  | _, _, .refl, _, _, _ => rfl
+  | _, _, .keep _, _, .here, _ => rfl
+  | _, _, .keep h, _, .there i, e => get_thin h i e.2
+  | _, _, .drop h, _, i, e => get_thin h i e.2
+
+theorem Fresh.get {n : Nat} : {Γ : Ctx} → {e : BEnv C Γ} → BEnv.Fresh n e → {t : LTy} →
+    (i : Idx Γ t) → (b : LTm C t.bs) → BEnv.get i e = some b → Decide.Fresh n b
+  | _ :: _, _, h, _, .here, b, hb => h.1 b hb
+  | _ :: _, _, h, _, .there i, b, hb => Fresh.get h.2 i b hb
+
+theorem Fresh.mono {n m : Nat} (hnm : n ≤ m) : {Γ : Ctx} → {e : BEnv C Γ} → BEnv.Fresh n e →
+    BEnv.Fresh m e
+  | [], _, _ => trivial
+  | _ :: _, _, h => ⟨fun b hb g ν p k v hk => h.1 b hb g ν p k v (Nat.le_trans hnm hk),
+      Fresh.mono hnm h.2⟩
+
+theorem Fresh.set {n : Nat} : {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → {w : Option (LTm C t.bs)} →
+    (∀ b, w = some b → Decide.Fresh n b) → {e : BEnv C Γ} → BEnv.Fresh n e →
+    BEnv.Fresh n (BEnv.set i w e)
+  | _, _, .here, _, hw, _, h => ⟨hw, h.2⟩
+  | _, _, .there i, _, hw, _, h => ⟨h.1, Fresh.set i hw h.2⟩
+
+theorem Fresh.drop {n : Nat} {Γ : Ctx} : {Δ : Ctx} → (h : Ext Γ Δ) → {e : BEnv C Δ} →
+    BEnv.Fresh n e → BEnv.Fresh n (BEnv.drop h e)
+  | _, .refl, _, hf => hf
+  | _, .push h, _, hf => Fresh.drop h hf.2
+
+theorem Fresh.thin {n : Nat} : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {e : BEnv C Δ} →
+    BEnv.Fresh n e → BEnv.Fresh n (BEnv.thin h e)
+  | _, _, .refl, _, hf => hf
+  | _, _, .keep h, _, hf => ⟨hf.1, Fresh.thin h hf.2⟩
+  | _, _, .drop h, _, hf => Fresh.thin h hf.2
+
+end BEnv
+
+theorem Fresh.mono {s : Srt} {n m : Nat} (hnm : n ≤ m) {t : LTm C s} (h : Fresh n t) : Fresh m t :=
+  fun g ν p k v hk => h g ν p k v (Nat.le_trans hnm hk)
+
+/-! ## Freshness of the terms pushed in -/
+
+section FreshTerms
+
+variable {Γ : Ctx} {ρ : SymS C Γ}
+
+theorem Fresh.app0 {s : Srt} (n : Nat) (o : Op0 C s) : Fresh n (LTm.app0 o) := fun _ _ _ _ _ _ => rfl
+
+theorem Fresh.app1 {a s : Srt} {n : Nat} (o : Op1 C a s) {x : LTm C a} (hx : Fresh n x) :
+    Fresh n (LTm.app1 o x) := fun g ν p k v hk => by
+  rw [LTm.eval_app1, LTm.eval_app1, hx g ν p k v hk]
+
+theorem Fresh.app2 {a b s : Srt} {n : Nat} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b}
+    (hx : Fresh n x) (hy : Fresh n y) : Fresh n (LTm.app2 o x y) := fun g ν p k v hk => by
+  rw [LTm.eval_app2, LTm.eval_app2, hx g ν p k v hk, hy g ν p k v hk]
+
+theorem Fresh.app3 {a b c s : Srt} {n : Nat} (o : Op3 C a b c s) {x : LTm C a} {y : LTm C b}
+    {z : LTm C c} (hx : Fresh n x) (hy : Fresh n y) (hz : Fresh n z) :
+    Fresh n (LTm.app3 o x y z) := fun g ν p k v hk => by
+  rw [LTm.eval_app3, LTm.eval_app3, hx g ν p k v hk, hy g ν p k v hk, hz g ν p k v hk]
+
+theorem Fresh.err {s : Srt} (n : Nat) : Fresh n (LTm.err : LTm C s) := fun _ _ _ _ _ _ => rfl
+
+theorem Fresh.seqL {s' s : Srt} {n : Nat} {d : LTm C s'} {a : LTm C s} (hd : Fresh n d)
+    (ha : Fresh n a) : Fresh n (seqL d a) := fun g ν p k v hk => by
+  rw [seqL_eval, seqL_eval, hd g ν p k v hk, ha g ν p k v hk]
+
+theorem Fresh.tt (n : Nat) : Fresh n (LTm.tt : LTm C (.val .bool)) := Fresh.app0 n _
+
+theorem Fresh.fold1 {a s : Srt} {n : Nat} (o : Op1 C a s) {x : LTm C a} (hx : Fresh n x) :
+    Fresh n (fold1 o x) := fun g ν p k v hk => by
+  simp only [fold1_eval]
+  exact Fresh.app1 o hx g ν p k v hk
+
+theorem Fresh.fold2 {a b s : Srt} {n : Nat} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b}
+    (hx : Fresh n x) (hy : Fresh n y) : Fresh n (fold2 o x y) := fun g ν p k v hk => by
+  simp only [fold2_eval]
+  exact Fresh.app2 o hx hy g ν p k v hk
+
+/-- **A term pushed in is fresh where the state is.** -/
+theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) →
+    t.toL ρ = some t' → Fresh ρ.next t'
+  | _, .pvV i, t', ht | _, .pvP i, t', ht | _, .pvS i, t', ht | _, .pvI i, t', ht
+  | _, .pvZ i, t', ht => hF.loc.get i t' ht
+  | _, .netOf _ _, _, ht => by cases ht
+  | _, .app0 o, t', ht => by
+    cases o <;> cases ht <;> first | exact hF.stor | exact hF.mem | exact Fresh.app0 _ _
+  | _, .app1 o x, t', ht => by
+    simp only [Tm.toL, Option.bind_eq_some_iff] at ht
+    obtain ⟨x', hx', ht⟩ := ht
+    have hx := Tm.toL_fresh hF x x' hx'
+    cases o <;> cases ht <;> first | exact Fresh.fold1 _ hx | exact Fresh.app1 _ hx | exact Fresh.app2 _ hF.stor hx
+  | _, .app2 o x y, t', ht => by
+    simp only [Tm.toL, Option.bind_eq_some_iff] at ht
+    obtain ⟨x', hx', y', hy', ht⟩ := ht
+    have hx := Tm.toL_fresh hF x x' hx'
+    have hy := Tm.toL_fresh hF y y' hy'
+    cases o <;> cases ht <;> first | exact Fresh.fold2 _ hx hy | exact Fresh.app2 _ hx hy | exact Fresh.app3 _ hF.stor hx hy
+  | _, .app3 o x y z, t', ht => by
+    simp only [Tm.toL, Option.bind_eq_some_iff] at ht
+    obtain ⟨x', hx', y', hy', z', hz', ht⟩ := ht
+    cases ht
+    exact Fresh.app3 _ (Tm.toL_fresh hF x x' hx') (Tm.toL_fresh hF y y' hy')
+      (Tm.toL_fresh hF z z' hz')
+
+end FreshTerms
+
+/-! ## Updates, by position -/
+
+section Upd
+
+variable {g₀ : State C []} {ν : AEnv} {Γ : Ctx} {ρ₀ : SymS C Γ} {τ : State C Γ}
+
+theorem seqL_tt_drel {s : Srt} {x : LTm C s} {y : Option (s.Den C τ.H)} (h : Srt.DRel s (x.eval g₀ ν) y) :
+    ((seqL x .tt).eval g₀ ν : Option Bool) = y.map fun _ => true := by
+  rw [seqL_tt_eval]
+  cases s <;> first
+    | (cases h; rfl)
+    | (cases hx : x.eval g₀ ν <;> cases hy : y <;> rw [hx, hy] at h <;>
+        simp only [Srt.DRel, Option.map_none, Option.map_some, reduceCtorEq] at h <;> rfl)
+
+/-- **A right-hand side pushed in**: its guard returns where it does, and
+its binding reads what it sets the local to. -/
+theorem Rhs.toL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh) {t : LTy} (r : Rhs C Γ t)
+    {b : LTm C t.bs} {gd : LTm C (.val .bool)} (h : r.toL ρ₀ = some (b, gd)) :
+    (gd.eval g₀ ν : Option Bool) = (r.eval τ).map (fun _ => true) ∧
+      (∀ v, r.eval τ = some v → (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt v) ∧
+      Fresh ρ₀.next b := by
+  cases r with
+  | val x =>
+    simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    obtain ⟨x', hx', rfl, rfl⟩ := h
+    have hd := Tm.toL_drel hA x x' hx'
+    refine ⟨seqL_tt_drel hd, fun v hv => ?_, Tm.toL_fresh hF x x' hx'⟩
+    show (x'.eval g₀ ν : Option _) = some v
+    rw [show (x'.eval g₀ ν : Option _) = x.eval τ from hd]; exact hv
+  | path q =>
+    simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    obtain ⟨q', hq', rfl, rfl⟩ := h
+    have hd := Tm.toL_drel hA q q' hq'
+    refine ⟨?_, fun v hv => ?_, Tm.toL_fresh hF q q' hq'⟩
+    · rw [seqL_tt_drel hd]
+      show _ = Option.map _ (Option.bind _ _)
+      cases (q.eval τ : Option (SRef C _)) <;> rfl
+    · show (q'.eval g₀ ν : Option _) = v
+      rw [show (q'.eval g₀ ν : Option (SRef C _)) = q.eval τ from hd]
+      show _ = v
+      revert hv
+      show Option.bind _ _ = _ → _
+      cases (q.eval τ : Option (SRef C _)) <;> intro hv <;> cases hv <;> rfl
+  | unset =>
+    simp only [Rhs.toL, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    exact ⟨rfl, fun v hv => by cases hv; rfl, Fresh.err _⟩
+  | mref i =>
+    simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    obtain ⟨i', hi', rfl, rfl⟩ := h
+    have hd := Tm.toL_drel hA i i' hi'
+    refine ⟨?_, fun v hv => ?_, Tm.toL_fresh hF i i' hi'⟩
+    · rw [seqL_tt_drel hd]
+      show _ = Option.map _ (Option.bind _ _)
+      cases (i.eval τ : Option Nat) <;> rfl
+    · show (i'.eval g₀ ν : Option Nat) = v
+      rw [show (i'.eval g₀ ν : Option Nat) = i.eval τ from hd]
+      revert hv
+      show Option.bind _ _ = _ → _
+      cases (i.eval τ : Option Nat) <;> intro hv <;> cases hv <;> rfl
+  | store st =>
+    simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    obtain ⟨s', hs', rfl, rfl⟩ := h
+    have hd := Tm.toL_drel hA st s' hs'
+    refine ⟨?_, fun v hv => ?_, Tm.toL_fresh hF st s' hs'⟩
+    · rw [seqL_tt_drel hd]
+      show _ = Option.map _ (Option.bind _ _)
+      cases (st.eval τ : Option (Storage C)) <;> rfl
+    · show (s'.eval g₀ ν : Option (Storage C)) = some v
+      rw [show (s'.eval g₀ ν : Option (Storage C)) = st.eval τ from hd]
+      revert hv
+      show Option.bind _ _ = _ → _
+      cases (st.eval τ : Option (Storage C)) <;> intro hv <;> cases hv <;> rfl
+  | saveNet => cases h
+  | saveNetMt => cases h
+  | zint x =>
+    simp only [Rhs.toL, Option.map_eq_some_iff, Prod.mk.injEq] at h
+    obtain ⟨x', hx', rfl, rfl⟩ := h
+    have hd := Tm.toL_drel hA x x' hx'
+    refine ⟨seqL_tt_drel hd, fun v hv => ?_, Tm.toL_fresh hF x x' hx'⟩
+    show (x'.eval g₀ ν : Option Int) = some v
+    rw [show (x'.eval g₀ ν : Option Int) = x.eval τ from hd]; exact hv
+
+theorem AgreesV.setLoc {Δ : Ctx} {ρ : SymS C Δ} {G : State C []} {ℓ : LocsV C Δ}
+    (h : AgreesV g₀ ν ρ G ℓ) {t : LTy} (i : Idx Δ t) {b : LTm C t.bs} {v : t.VDen C}
+    (hb : (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt v) :
+    AgreesV g₀ ν ⟨ρ.loc.set i (some b), ρ.stor, ρ.mem, ρ.next⟩ G (ℓ.set i v) := by
+  refine ⟨h.stor, h.mem, h.tx, h.bal, fun {u} j b' hj => ?_⟩
+  by_cases e : i.toNat = j.toNat
+  · obtain rfl := Idx.ty_eq_of_toNat e
+    obtain rfl := Idx.toNat_inj i j e
+    simp only [BEnv.get_set_same, Option.some.injEq] at hj
+    subst hj
+    rw [hb, LocsV.set_same]
+  · rw [BEnv.get_set_ne i j e] at hj
+    rw [h.loc j b' hj, LocsV.set_ne _ i j e]
+
+/-- **An element pushed in**, read in `ρ₀` and applied to `ρ`: its guard
+returns where the element does, and the state it leaves agrees with what
+the element leaves. -/
+theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : Ctx} (e : UpdElem C Γ Δ)
+    {ρ ρ'' : SymS C Δ} {gde : LTm C (.val .bool)} (h : e.toLS ρ₀ ρ = some (ρ'', gde))
+    {G : GlobT C τ.H} {ℓ : LocsV C Δ} (hρ : AgreesV g₀ ν ρ G.1 ℓ) (hFρ : ρ.Fresh)
+    (hn : ρ₀.next ≤ ρ.next) :
+    (gde.eval g₀ ν : Option Bool) = (e.applyV τ G ℓ).map (fun _ => true) ∧
+      (∀ q, e.applyV τ G ℓ = some q → AgreesV g₀ ν ρ'' q.1.1 q.2) ∧ ρ''.Fresh ∧
+      ρ''.next = ρ.next := by
+  cases e with
+  | «local» i r =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨⟨b, gd⟩, hr, h⟩ := h
+    cases h
+    obtain ⟨hg, hv, hfb⟩ := Rhs.toL_sound hA hF0 r hr
+    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, BEnv.Fresh.set i (fun b' hb' => by
+      cases hb'; exact hfb.mono hn) hFρ.loc⟩, rfl⟩
+    · rw [hg]
+      show _ = Option.map _ (Option.bind _ _)
+      cases r.eval τ <;> rfl
+    · intro q hq
+      show AgreesV _ _ _ _ _
+      have hq' : (r.eval τ).bind (fun v => some (G, ℓ.set i v)) = some q := hq
+      rw [Option.bind_eq_some_iff] at hq'
+      obtain ⟨v, hrv, hq''⟩ := hq'
+      cases hq''
+      exact hρ.setLoc i (hv v hrv)
+  | storage st =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨s', hs', h⟩ := h
+    cases h
+    have hd := Tm.toL_drel hA st s' hs'
+    refine ⟨?_, ?_, ⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc⟩, rfl⟩
+    · rw [seqL_tt_drel hd]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (st.eval τ : Option (Storage C)) <;> rfl
+    · intro q hq
+      have hq' : ((st.eval τ).bind fun x => some (G.withStorage x)).bind
+          (fun g' => some (g', ℓ)) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨x, hx, rfl⟩, rfl⟩ := hq'
+      exact ⟨by rw [show (s'.eval g₀ ν : Option (Storage C)) = st.eval τ from hd, hx]; rfl,
+        hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
+  | memory m =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨m', hm', h⟩ := h
+    cases h
+    have hd := Tm.toL_drel hA m m' hm'
+    refine ⟨?_, ?_, ⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc⟩, rfl⟩
+    · rw [seqL_tt_drel hd]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (m.eval τ : Option (Grown _ _)) <;> rfl
+    · intro q hq
+      have hq' : ((m.eval τ).bind fun x => some (G.withMem x)).bind
+          (fun g' => some (g', ℓ)) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨x, hx, rfl⟩, rfl⟩ := hq'
+      refine ⟨hρ.stor, ?_, hρ.tx, hρ.bal, hρ.loc⟩
+      have hd' : (m'.eval g₀ ν : Option (Grown g₀.H _)).map Grown.forget =
+          (some x : Option (Grown τ.H _)).map Grown.forget := by
+        rw [← hx]; exact hd
+      exact hd'
+  | selfBalance op a => cases h
+  | net r op a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', hr', a', ha', h⟩ := h
+    cases h
+    have hdr := Tm.toL_drel hA r r' hr'
+    have hda := Tm.toL_drel hA a a' ha'
+    refine ⟨?_, ?_, hFρ, rfl⟩
+    · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (r.eval τ : Option PrimTy.uint.Denote)
+      · rfl
+      · simp only [Option.bind_some]
+        rw [seqL_tt_drel hda]
+        cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
+    · intro q hq
+      have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt => some (G.withNet _)).bind
+          (fun g' => some (g', ℓ))) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
+      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
+  | pay r a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', hr', a', ha', h⟩ := h
+    cases h
+    have hdr := Tm.toL_drel hA r r' hr'
+    have hda := Tm.toL_drel hA a a' ha'
+    refine ⟨?_, ?_, hFρ, rfl⟩
+    · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (r.eval τ : Option PrimTy.uint.Denote)
+      · rfl
+      · simp only [Option.bind_some]
+        rw [seqL_tt_drel hda]
+        cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
+    · intro q hq
+      have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt => some (G.withNet _)).bind
+          (fun g' => some (g', ℓ))) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
+      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
+  | netMt r a => cases h
+  | setBalance a => cases h
+
+theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : Ctx} (e : UpdElem C Γ Δ)
+    {ρ ρ'' : SymS C Δ} {gde : LTm C (.val .bool)} (h : e.toLS ρ₀ ρ = some (ρ'', gde))
+    (hFρ : ρ.Fresh) (hn : ρ₀.next ≤ ρ.next) : ρ''.Fresh ∧ ρ''.next = ρ.next := by
+  cases e with
+  | «local» i r =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨⟨b, gd⟩, hr, h⟩ := h
+    cases h
+    obtain ⟨-, -, hfb⟩ := Rhs.toL_sound hA hF0 r hr
+    exact ⟨⟨hFρ.stor, hFρ.mem, BEnv.Fresh.set i (fun b' hb' => by
+      cases hb'; exact hfb.mono hn) hFρ.loc⟩, rfl⟩
+  | storage st =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨s', hs', h⟩ := h
+    cases h
+    exact ⟨⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc⟩, rfl⟩
+  | memory m =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨m', hm', h⟩ := h
+    cases h
+    exact ⟨⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc⟩, rfl⟩
+  | selfBalance op a => cases h
+  | net r op a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', -, a', -, h⟩ := h
+    cases h
+    exact ⟨hFρ, rfl⟩
+  | pay r a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', -, a', -, h⟩ := h
+    cases h
+    exact ⟨hFρ, rfl⟩
+  | netMt r a => cases h
+  | setBalance a => cases h
+
+/-- **An update pushed in**: its guard returns exactly where the update
+returns, and the state it leaves agrees with what the update leaves. -/
+theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : Ctx} (U : Upd C Γ Δ) :
+    ∀ {ρ' : SymS C Δ} {gd : LTm C (.val .bool)}, U.toLS ρ₀ = some (ρ', gd) →
+    (gd.eval g₀ ν : Option Bool) = (U.applyV τ).map (fun _ => true) ∧
+      (∀ q, U.applyV τ = some q → AgreesV g₀ ν ρ' q.1.1 q.2) ∧ ρ'.Fresh ∧ ρ₀.next ≤ ρ'.next := by
+  induction U with
+  | nil =>
+    intro ρ' gd h
+    cases h
+    refine ⟨rfl, fun q hq => ?_, hF0, Nat.le_refl _⟩
+    cases hq
+    exact hA
+  | snoc U e ih =>
+    intro ρ' gd h
+    have h' : (U.toLS ρ₀).bind (fun p => (e.toLS ρ₀ p.1).map fun q => (q.1, seqL p.2 q.2)) =
+      some (ρ', gd) := h
+    simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+    obtain ⟨⟨ρ₁, gd₁⟩, hU, ⟨ρ₂, gd₂⟩, he, hp⟩ := h'
+    cases hp
+    obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
+    show (seqL gd₁ gd₂).eval g₀ ν = Option.map _ ((U.applyV τ).bind _) ∧ _
+    rw [seqL_eval, hg₁]
+    cases hq : U.applyV τ with
+    | none =>
+      refine ⟨rfl, fun q hq' => ?_, ?_, ?_⟩
+      · have : (U.applyV τ).bind (fun p => e.applyV τ p.1 p.2) = some q := hq'
+        rw [hq] at this; cases this
+      · exact (UpdElem.toLS_fresh hA hF0 e he hf₁ hn₁).1
+      · exact (UpdElem.toLS_fresh hA hF0 e he hf₁ hn₁).2 ▸ hn₁
+    | some p =>
+      obtain ⟨he₁, he₂, hf₂, hn₂⟩ := UpdElem.toLS_sound hA hF0 e he (ha₁ p hq) hf₁ hn₁
+      refine ⟨?_, fun q hq' => he₂ q (by
+        have : (U.applyV τ).bind (fun p => e.applyV τ p.1 p.2) = some q := hq'
+        rwa [hq] at this), hf₂, hn₂ ▸ hn₁⟩
+      simp only [Option.map_some, Option.bind_some]
+      exact he₁
+  | decl U x r ih =>
+    intro ρ' gd h
+    have h' : (U.toLS ρ₀).bind (fun p => (r.toL ρ₀).map fun b =>
+      (p.1.push (some b.1), seqL p.2 b.2)) = some (ρ', gd) := h
+    simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+    obtain ⟨⟨ρ₁, gd₁⟩, hU, ⟨b, gdb⟩, hr, hp⟩ := h'
+    cases hp
+    obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
+    obtain ⟨hgb, hvb, hfb⟩ := Rhs.toL_sound hA hF0 r hr
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor.mono (Nat.le_succ _), hf₁.mem.mono (Nat.le_succ _),
+      ⟨fun b' hb' => by cases hb'; exact hfb.mono (Nat.le_trans hn₁ (Nat.le_succ _)),
+        hf₁.loc.mono (Nat.le_succ _)⟩⟩, Nat.le_trans hn₁ (Nat.le_succ _)⟩
+    · show (seqL gd₁ gdb).eval g₀ ν = Option.map _ ((U.applyV τ).bind _)
+      rw [seqL_eval, hg₁, hgb]
+      cases U.applyV τ <;> try rfl
+      simp only [Option.map_some, Option.bind_some]
+      cases r.eval τ <;> rfl
+    · have hq' : (U.applyV τ).bind (fun p => (r.eval τ).bind fun v => some (p.1, p.2.push v)) =
+          some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨p, hp, v, hv, rfl⟩ := hq'
+      have hag := ha₁ p hp
+      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_⟩
+      cases j with
+      | here =>
+        simp only [SymS.push, BEnv.get, Option.some.injEq] at hj
+        subst hj
+        exact hvb v hv
+      | there j => exact hag.loc j b' hj
+  | pop U h ih =>
+    intro ρ' gd hh
+    have h' : (U.toLS ρ₀).map
+        (fun p => ((⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.next⟩ : SymS C _), p.2)) =
+        some (ρ', gd) := hh
+    rw [Option.map_eq_some_iff] at h'
+    obtain ⟨⟨ρ₁, gd₁⟩, hU, hp⟩ := h'
+    cases hp
+    obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.drop h hf₁.loc⟩, hn₁⟩
+    · show _ = Option.map _ ((U.applyV τ).bind _)
+      rw [hg₁]; cases U.applyV τ <;> rfl
+    · have hq' : (U.applyV τ).bind (fun p => some (p.1, p.2.drop h)) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨p, hp, rfl⟩ := hq'
+      have hag := ha₁ p hp
+      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_⟩
+      rw [BEnv.get_drop] at hj
+      exact hag.loc _ b' hj
+  | drop U h ih =>
+    intro ρ' gd hh
+    have h' : (U.toLS ρ₀).map
+        (fun p => ((⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.next⟩ : SymS C _), p.2)) =
+        some (ρ', gd) := hh
+    rw [Option.map_eq_some_iff] at h'
+    obtain ⟨⟨ρ₁, gd₁⟩, hU, hp⟩ := h'
+    cases hp
+    obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.thin h hf₁.loc⟩, hn₁⟩
+    · show _ = Option.map _ ((U.applyV τ).bind _)
+      rw [hg₁]; cases U.applyV τ <;> rfl
+    · have hq' : (U.applyV τ).bind (fun p => some (p.1, p.2.thin h)) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨p, hp, rfl⟩ := hq'
+      have hag := ha₁ p hp
+      refine ⟨hag.stor, hag.mem, hag.tx, hag.bal, fun {u} j b' hj => ?_⟩
+      rw [BEnv.get_thin] at hj
+      exact hag.loc _ b' hj
+
+/-- A full array, read: where `fullL` is `true`, the storage and path
+return and the array there is full. -/
+theorem fullL_true {st : LTm C .st} {E : Ty} {q : LTm C (.path (.ref (.array E)))}
+    (h : ((fullL st q).eval g₀ ν : Option Bool) = some true) :
+    ∃ w r, (st.eval g₀ ν : Option (Storage C)) = some w ∧ (q.eval g₀ ν : Option (SRef C _)) = some r ∧
+      w.full r = true := by
+  unfold fullL at h
+  rw [LTm.eval_app2, Op2.eval_eq_evalM] at h
+  cases hl : ((LTm.app2 .len st q).eval g₀ ν : Option PrimTy.uint.Denote) with
+  | none => rw [hl] at h; cases h
+  | some l =>
+    rw [hl] at h
+    have hl1 : l.1 = ((2 ^ 256 - 1 : Nat) : Int) := by
+      have h' : BinOp.evalT .eqB l (uintOfNat (2 ^ 256 - 1)) = some true := h
+      have h'' : (some (decide (l.1 = (uintOfNat (2 ^ 256 - 1)).1)) : Option Bool) = some true := h'
+      simp only [Option.some.injEq, decide_eq_true_eq] at h''
+      rw [h'', uintOfNat_val (Nat.sub_one_lt (Nat.ne_of_gt (Nat.two_pow_pos 256)))]
+    rw [LTm.eval_app2, Op2.eval_eq_evalM] at hl
+    cases hs : (st.eval g₀ ν : Option (Storage C)) with
+    | none => rw [hs] at hl; cases hl
+    | some w =>
+      cases hr : (q.eval g₀ ν : Option (SRef C _)) with
+      | none => rw [hs, hr] at hl; cases hl
+      | some r =>
+        rw [hs, hr] at hl
+        refine ⟨w, r, rfl, rfl, ?_⟩
+        have hl' : w.len r = some l := hl
+        unfold Storage.len at hl'
+        unfold Storage.full
+        cases hf : w.find r with
+        | none => rw [hf] at hl'; cases hl'
+        | some v =>
+          rw [hf] at hl'
+          have hl'' : lenU (SVal.view v : ArrView E).n (SVal.view v : ArrView E).hn = l :=
+            Option.some.inj hl'
+          subst hl''
+          have hn : (SVal.view v : ArrView E).n = 2 ^ 256 - 1 := Int.ofNat.inj hl1
+          show (!decide ((SVal.view v : ArrView E).n + 1 < 2 ^ 256)) = true
+          simp only [Bool.not_eq_true', decide_eq_false_iff_not, Nat.not_lt]
+          omega
+
+/-- **What `Tm.exhL` reads**: where it is `true`, the term is a push out of
+gas (`Tm.exhB`). -/
+theorem Tm.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {s : Srt} (t : Tm C Γ s) {X : LTm C (.val .bool)}
+    (h : t.exhL ρ₀ = some X) (hX : (X.eval g₀ ν : Option Bool) = some true) : t.exhB τ = true := by
+  cases t with
+  | app2 o x y =>
+    cases o <;> simp only [Tm.exhL, Op2.exhL, reduceCtorEq] at h <;>
+    · obtain ⟨st', hst, h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨q', hq, rfl⟩ := Option.map_eq_some_iff.1 h
+      obtain ⟨w, r, hw, hr, hfull⟩ := fullL_true hX
+      have dx : (st'.eval g₀ ν : Option (Storage C)) = x.eval τ := Tm.toL_drel hA x st' hst
+      have dy : (q'.eval g₀ ν : Option (SRef C _)) = y.eval τ := Tm.toL_drel hA y q' hq
+      rw [hw] at dx
+      rw [hr] at dy
+      simp only [Tm.exhB, ← dx, ← dy, Op2.exhB, hfull, Bool.true_or]
+  | app3 o x y z =>
+    cases o <;> simp only [Tm.exhL, Op3.exhL, reduceCtorEq] at h
+    obtain ⟨st', hst, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨q', hq, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨v', hv, rfl⟩ := Option.map_eq_some_iff.1 h
+    rw [LTm.eval_kite] at hX
+    cases hfl : ((fullL st' q').eval g₀ ν : Option Bool) with
+    | none => rw [hfl] at hX; cases hX
+    | some b =>
+      rw [hfl] at hX
+      cases b with
+      | false => cases hX
+      | true =>
+        obtain ⟨w, r, hw, hr, hfull⟩ := fullL_true hfl
+        have hv' : (v'.eval g₀ ν).isSome = true := by
+          change ((seqL v' LTm.tt).eval g₀ ν : Option Bool) = some true at hX
+          rw [seqL_eval] at hX
+          cases hve : v'.eval g₀ ν with
+          | none => rw [hve] at hX; cases hX
+          | some _ => rfl
+        have dx : (st'.eval g₀ ν : Option (Storage C)) = x.eval τ := Tm.toL_drel hA x st' hst
+        have dy : (q'.eval g₀ ν : Option (SRef C _)) = y.eval τ := Tm.toL_drel hA y q' hq
+        have dz := Tm.toL_drel hA z v' hv
+        obtain ⟨vv, hvv⟩ := Option.isSome_iff_exists.1 hv'
+        have hz : z.eval τ = some vv := by rw [← dz, hvv]
+        rw [hw] at dx
+        rw [hr] at dy
+        simp only [Tm.exhB, ← dx, ← dy, hz, Op3.exhB, hfull, Bool.true_or]
+  | _ => simp only [Tm.exhL, reduceCtorEq] at h
+
+/-- **What `Upd.exhL` reads**: where it is `true`, the update is out of gas. -/
+theorem Upd.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {Δ : Ctx} (U : Upd C Γ Δ) {X : LTm C (.val .bool)}
+    (h : U.exhL ρ₀ = some X) (hX : (X.eval g₀ ν : Option Bool) = some true) : U.exh τ = true := by
+  unfold Upd.exhL at h
   split at h
-  · rename_i e _
-    subst e
-    simp only [Bool.and_eq_true, decide_eq_true_eq] at h
-    obtain ⟨⟨-, hn⟩, hb⟩ := h
-    have hab := Tm.sigma_eq_of_beqR hb
-    simp only [Sigma.mk.injEq, Srt.val.injEq] at hab
-    obtain ⟨rfl, hab⟩ := hab
-    cases hab
-    have hl : ρb.loc = ρa.loc := by
-      unfold SymS.Ok at hoka hokb
-      rw [hokb, hoka, hn, hs]
-    rw [Tm.toLS_eq_toLSM, Tm.toLS_eq_toLSM, Tm.inLS_eq_inLSM, Tm.inLS_eq_inLSM]
-    exact Tm.toLSM_congr hl hs.symm a
+  · rename_i s
+    have hs := Tm.exhL_sound hA s h hX
+    simp only [Upd.exh, Upd.exhAny, Upd.exhOk, UpdElem.exhB, hs, Bool.or_true, Bool.false_or,
+      Bool.true_and, Bool.and_self]
   · cases h
 
-/-- What `eqDViewS` recognises: `defined a ∧ (defined b ∧ a' = b')`
-through peeled constructors, `a'` and `b'` the same terms as `a` and `b`. -/
-theorem eqDViewS_spec {Γ : Ctx} {ρ : SymS} {φ ψ : Fml C Γ}
-    {A B : (Γ' : Ctx) × SymS × (p : PrimTy) × Tm C Γ' (.val p)}
-    (h : eqDViewS ρ φ ψ = some (A, B)) :
-    φ.peelS ρ = ⟨A.1, A.2.1, .defined A.2.2.2⟩ ∧
-      ∃ (Γ' : Ctx) (ρ' : SymS) (ψ₁ ψ₂ : Fml C Γ'), ψ.peelS ρ = ⟨Γ', ρ', .and ψ₁ ψ₂⟩ ∧
-        ψ₁.peelS ρ' = ⟨B.1, B.2.1, .defined B.2.2.2⟩ ∧
-        ∃ (Γc : Ctx) (ρc : SymS) (pc : PrimTy) (a' b' : Tm C Γc (.val pc)),
-          ψ₂.peelS ρ' = ⟨Γc, ρc, .eq a' b'⟩ ∧
-          sameAt A.2.1 A.2.2.2 ρc a' = true ∧ sameAt B.2.1 B.2.2.2 ρc b' = true := by
-  unfold eqDViewS at h
-  dsimp only at h
+end Upd
+
+/-! ## Formulas, by position -/
+
+section Fml
+
+variable {g₀ : State C []}
+
+theorem Tm.retsS_eval {Γ : Ctx} (τ : State C Γ) {p : PrimTy} {t : Tm C Γ (.val p)}
+    (h : t.retsS = true) : ∃ x, t.eval τ = some x := by
+  cases t with
+  | pvV i => exact ⟨_, rfl⟩
+  | app0 o =>
+    cases o <;> simp only [Tm.retsS, reduceCtorEq, Bool.false_eq_true] at h <;> exact ⟨_, rfl⟩
+  | _ => simp only [Tm.retsS, Bool.false_eq_true] at h
+
+theorem Fml.eqDView?_some {Γ : Ctx} {φ ψ : Fml C Γ} {p : PrimTy} {a b : Tm C Γ (.val p)}
+    (h : Fml.eqDView? φ ψ = some ⟨p, a, b⟩) : Fml.and φ ψ = Fml.eqD a b := by
+  unfold Fml.eqDView? at h
   split at h
-  · rename_i pa a₀ ψ₁ ψ₂ ha hb
+  · rename_i p₁ a₁ q b₁ r a' b'
     split at h
-    · rename_i pb b₀ pc a' b' h₁ h₂
+    · rename_i hpq
+      obtain ⟨rfl, rfl⟩ := hpq
       split at h
-      · rename_i hs
-        simp only [Bool.and_eq_true] at hs
-        simp only [Option.some.injEq, Prod.mk.injEq] at h
-        obtain ⟨rfl, rfl⟩ := h
-        refine ⟨?_, (ψ.peelS ρ).1, (ψ.peelS ρ).2.1, ψ₁, ψ₂, ?_, ?_,
-          (ψ₂.peelS (ψ.peelS ρ).2.1).1, (ψ₂.peelS (ψ.peelS ρ).2.1).2.1, _, a', b', ?_, hs.1, hs.2⟩
-        · rw [← Fml.asDefinedS_some ha]
-        · rw [← Fml.asAndS_some hb]
-        · rw [← Fml.asDefinedS_some h₁]
-        · rw [← Fml.asEqS_some h₂]
+      · rename_i hb
+        simp only [Bool.and_eq_true] at hb
+        obtain rfl := Tm.eq_of_beqR hb.1
+        obtain rfl := Tm.eq_of_beqR hb.2
+        simp only [Option.some.injEq, Sigma.mk.injEq] at h
+        obtain ⟨rfl, h⟩ := h
+        cases h
+        rfl
       · cases h
     · cases h
   · cases h
 
-end Peel
+theorem Agrees.pushQ {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
+    (hF : ρ.Fresh) (p : PrimTy) (v : p.Denote) :
+    Agrees g₀ (ν.set p ρ.next v) (ρ.pushQ p) (τ.push (t := .val p) v) := by
+  refine ⟨?_, ?_, hA.tx, hA.bal, fun {u} j b hj => ?_⟩
+  · show (ρ.stor.eval g₀ (ν.set p ρ.next v) : Option (Storage C)) = some τ.storage
+    rw [hF.stor g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.stor
+  · show (ρ.mem.eval g₀ (ν.set p ρ.next v) : Option (Grown _ _)).map Grown.forget = _
+    rw [hF.mem g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.mem
+  · rw [State.locV_push]
+    cases j with
+    | here =>
+      simp only [SymS.pushQ, SymS.push, BEnv.get, Option.some.injEq] at hj
+      subst hj
+      rw [LTm.eval_var, AEnv.get_set_self]
+      rfl
+    | there j =>
+      rw [(hF.loc.get j b hj) g₀ ν p ρ.next v (Nat.le_refl _)]
+      exact hA.loc j b hj
 
-/-! ## The reduction is sound -/
+theorem SymS.Fresh.pushQ {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (p : PrimTy) :
+    (ρ.pushQ p).Fresh :=
+  ⟨hF.stor.mono (Nat.le_succ _), hF.mem.mono (Nat.le_succ _),
+    ⟨(fun b hb => by
+      simp only [SymS.pushQ, SymS.push, Option.some.injEq] at hb
+      subst hb
+      intro g ν q k v hk
+      simp only [SymS.pushQ, SymS.push] at hk
+      rw [LTm.eval_var, LTm.eval_var, AEnv.get_set_ne _ _ _ _ (by omega)]),
+    hF.loc.mono (Nat.le_succ _)⟩⟩
 
-section Sound
+theorem Agrees.push {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
+    {t : LTy} (v : t.TDenote C τ.H) : Agrees g₀ ν (ρ.push (t := t) none) (τ.push v) := by
+  refine ⟨hA.stor, hA.mem, hA.tx, hA.bal, fun {u} j b hj => ?_⟩
+  rw [State.locV_push]
+  cases j with
+  | here => simp only [SymS.push, BEnv.get, reduceCtorEq] at hj
+  | there j => exact hA.loc j b hj
 
-variable {Γ : Ctx}
+theorem SymS.Fresh.push {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (t : LTy) :
+    (ρ.push (t := t) none).Fresh :=
+  ⟨hF.stor.mono (Nat.le_succ _), hF.mem.mono (Nat.le_succ _),
+    ⟨(fun b hb => by cases hb), hF.loc.mono (Nat.le_succ _)⟩⟩
 
-/-- `defined t` holds where the erased reading returns. -/
-theorem Tm.evalE_defined_iff {p : PrimTy} (τ : State C Γ) (t : Tm C Γ (.val p)) :
-    holds τ (.defined t) ↔ ∃ x, t.evalE τ = .ok x := by
-  show t.eval τ ≠ none ↔ _
-  rw [Tm.evalE_def]
-  cases t.eval τ with
-  | none => simp only [ne_eq, not_true_eq_false, toRes, reduceCtorEq, exists_false]
-  | some v => simp only [ne_eq, reduceCtorEq, not_false_eq_true, toRes, Except.ok.injEq,
-      exists_eq']
+theorem guardM_holds {ν : AEnv} {Γ : Ctx} {τ : State C Γ} {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ)
+    {x : Option (LTm C (.val .bool))} {gd : LTm C (.val .bool)} {ψ : LFml C} {φ : Fml C Δ}
+    (hx : ∀ X, x = some X → (X.eval g₀ ν : Option Bool) = some true → U.exh τ = true)
+    (hg : (gd.eval g₀ ν : Option Bool) = (U.applyV τ).map (fun _ => true))
+    (hrest : ∀ q, U.applyV τ = some q → ψ.holds g₀ ν → ∀ σ' : State C Δ, σ'.glob = q.1.1 →
+      (∀ {t : LTy} (i : Idx Δ t), σ'.getV i = q.2 t i) → holds σ' φ)
+    (h : (guardM m x gd ψ).holds g₀ ν) : holds τ (.upd m U φ) := by
+  show U.afterT m τ (holds · φ)
+  rw [Upd.afterT_applyV]
+  have hgd : (LFml.eq gd gd).holds g₀ ν ↔ (U.applyV τ).isSome = true := by
+    rw [LFml.holds_rets, hg]
+    cases U.applyV τ with
+    | none => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
+    | some _ => exact ⟨fun _ => rfl, fun _ => ⟨true, rfl⟩⟩
+  cases hq : U.applyV τ with
+  | none =>
+    cases m with
+    | box => exact .inl trivial
+    | diamond =>
+      cases x with
+      | none =>
+        have h' := (hgd.1 h.1)
+        rw [hq] at h'
+        cases h'
+      | some X =>
+        refine .inr (hx X rfl ?_)
+        have h1 : ¬ (LFml.not (LFml.eq X .tt)).holds g₀ ν := fun hn => by
+          have h' := hgd.1 (h.1 hn)
+          rw [hq] at h'
+          cases h'
+        have h2 : (LFml.eq X .tt).holds g₀ ν := Classical.byContradiction h1
+        obtain ⟨b, hb, hb'⟩ := (LFml.holds_eq_iff _ _ _ _).1 h2
+        cases hb'
+        exact hb
+  | some q =>
+    have hgq : (LFml.eq gd gd).holds g₀ ν := hgd.2 (by rw [hq]; rfl)
+    cases m with
+    | box => exact hrest q hq (h hgq)
+    | diamond =>
+      cases x with
+      | none => exact hrest q hq h.2
+      | some X => exact hrest q hq (h.2 hgq)
 
-/-- A literal, `msg.sender` or a local reads a value. -/
-theorem Tm.eval_of_atomLike {p : PrimTy} {t : Tm C Γ (.val p)} (τ : State C Γ)
-    (h : t.isLitLikeS = true ∨ t.isAtomS = true) : ∃ x, t.evalE τ = .ok x := by
+/-- A hidden binder read as a quantifier (`LFml.allB`): what holds for
+every atom at its position holds for every value it binds. -/
+theorem Fml.allB_push {Γ : Ctx} {t : LTy} {ρ : SymS C Γ} {τ : State C Γ} {ν : AEnv}
+    (hA : Agrees g₀ ν ρ τ) (hF : ρ.Fresh) {ψ₁ : LFml C} {P : State C (t :: Γ) → Prop}
+    (ih : ∀ (τ' : State C (t :: Γ)) (ν' : AEnv), Agrees g₀ ν' (ρ.pushB t) τ' →
+      (ρ.pushB t).Fresh → ψ₁.holds g₀ ν' → P τ')
+    (hψ : (LFml.allB t ρ.next ψ₁).holds g₀ ν) (v : t.TDenote C τ.H) : P (τ.push v) := by
   cases t with
-  | app0 o => cases o <;> exact ⟨_, rfl⟩
-  | pvV i => exact ⟨_, rfl⟩
-  | _ => rcases h with h | h <;> simp only [Tm.isLitLikeS, Tm.isAtomS, Bool.false_eq_true] at h
+  | val p => exact ih _ _ (hA.pushQ hF p v) (hF.pushQ p) (hψ v)
+  | _ => exact ih _ _ (hA.push v) (hF.push _) hψ
 
-/-- Between two terms that return, the equation is equality of the
-values. -/
-theorem holds_eq_of_eval {τ : State C Γ} {p : PrimTy} {a b : Tm C Γ (.val p)} {x y : Value}
-    (ha : a.evalE τ = .ok x) (hb : b.evalE τ = .ok y) :
-    holds τ (.eq a b) ↔ x = y := by
-  rw [Tm.evalE_def] at ha hb
-  cases ha' : a.eval τ with
-  | none => rw [ha'] at ha; cases ha
-  | some x' =>
-    cases hb' : b.eval τ with
-    | none => rw [hb'] at hb; cases hb
-    | some y' =>
-      rw [ha'] at ha
-      rw [hb'] at hb
-      cases ha
-      cases hb
-      show Theory.StValue.Equiv (a.denote τ) (b.denote τ) ↔ _
-      rw [Tm.denote_eval τ a x' ha', Tm.denote_eval τ b y' hb', Theory.StValue.Equiv.prim_iff]
-      exact ⟨fun h => by injection h, fun h => congrArg Theory.StValue.prim h⟩
-
-/-- **An equation through peeled constructors** (`eqDViewS`): both
-readings return one value, read in every typed state the peels reach. -/
-theorem eqD_sound {φ ψ : Fml C Γ} {σ : Semantics.State} {ρ : SymS}
-    {τ : State C Γ} (h : RelT σ ρ τ) {Γa Γb : Ctx} {ρa ρb : SymS} {pa pb : PrimTy}
-    {a : Tm C Γa (.val pa)} {b : Tm C Γb (.val pb)}
-    (hv : eqDViewS ρ φ ψ = some (⟨Γa, ρa, pa, a⟩, ⟨Γb, ρb, pb, b⟩))
-    (ha : a.inLS ρa = true) (hb : b.inLS ρb = true) :
-    holds τ (.and φ ψ) ↔ (LFml.eq (a.toLS ρa) (b.toLS ρb)).holds σ := by
-  obtain ⟨hpa, Γ', ρ', ψ₁, ψ₂, hpb, hp₁, Γc, ρc, pc, a', b', hp₂, hsa, hsb⟩ := eqDViewS_spec hv
-  have sa := peel_sym φ hpa
-  have s' := peel_sym ψ hpb
-  have sb := peel_sym ψ₁ hp₁
-  have sc := peel_sym ψ₂ hp₂
-  obtain ⟨τa, hra⟩ := peel_exists φ hpa τ h
-  obtain ⟨τ₁, hr₁⟩ := peel_exists ψ hpb τ h
-  obtain ⟨τb, hrb⟩ := peel_exists ψ₁ hp₁ τ₁ hr₁
-  obtain ⟨τc, hrc⟩ := peel_exists ψ₂ hp₂ τ₁ hr₁
-  -- the equation's readings lower as the definedness conjuncts' do
-  have ea := sameAt_toLS hsa (by rw [sa, sc, s']) hra.ok hrc.ok
-  have eb := sameAt_toLS hsb (by rw [sb, sc]) hrb.ok hrc.ok
-  have A2 : ∀ τa' : State C Γa, RelT σ ρa τa' →
-      Sim ((a.toLS ρa).eval σ) (a.evalE τa') := fun _ hr => hr.val ha
-  have B2 : ∀ τb' : State C Γb, RelT σ ρb τb' →
-      Sim ((b.toLS ρb).eval σ) (b.evalE τb') := fun _ hr => hr.val hb
-  have A3 : ∀ τc' : State C Γc, RelT σ ρc τc' →
-      Sim ((a.toLS ρa).eval σ) (a'.evalE τc') := by
-    intro τc' hr
-    rw [← ea.1]
-    exact hr.val (by rw [ea.2]; exact ha)
-  have B3 : ∀ τc' : State C Γc, RelT σ ρc τc' →
-      Sim ((b.toLS ρb).eval σ) (b'.evalE τc') := by
-    intro τc' hr
-    rw [← eb.1]
-    exact hr.val (by rw [eb.2]; exact hb)
-  rw [LFml.holds_eq_iff]
-  constructor
-  · rintro ⟨hφ, hψ⟩
-    obtain ⟨τa', hra', hda⟩ := peel_neg φ hpa τ h hφ
-    obtain ⟨τ₂, hr₂, hψ₁, hψ₂⟩ := peel_neg ψ hpb τ h hψ
-    obtain ⟨τb', hrb', hdb⟩ := peel_neg ψ₁ hp₁ τ₂ hr₂ hψ₁
-    obtain ⟨τc', hrc', hc⟩ := peel_neg ψ₂ hp₂ τ₂ hr₂ hψ₂
-    obtain ⟨x, hx⟩ := (Tm.evalE_defined_iff τa' a).1 hda
-    obtain ⟨y, hy⟩ := (Tm.evalE_defined_iff τb' b).1 hdb
-    have hx' := (A2 τa' hra' x).2 hx
-    have hy' := (B2 τb' hrb' y).2 hy
-    have hxy := (holds_eq_of_eval ((A3 τc' hrc' x).1 hx') ((B3 τc' hrc' y).1 hy')).1 hc
-    subst hxy
-    exact ⟨x, hx', hy'⟩
-  · rintro ⟨x, hx, hy⟩
-    refine ⟨peel_pos φ hpa τ h fun τa' hra' => (Tm.evalE_defined_iff τa' a).2 ⟨x, (A2 τa' hra' x).1 hx⟩,
-      peel_pos ψ hpb τ h fun τ₂ hr₂ => ⟨peel_pos ψ₁ hp₁ τ₂ hr₂ fun τb' hrb' =>
-        (Tm.evalE_defined_iff τb' b).2 ⟨x, (B2 τb' hrb' x).1 hy⟩, peel_pos ψ₂ hp₂ τ₂ hr₂ fun τc' hrc' =>
-        (holds_eq_of_eval ((A3 τc' hrc' x).1 hx) ((B3 τc' hrc' x).1 hy)).2 rfl⟩⟩
-
-/-- An element's terms return, read in the typed state. -/
-def ElemS.okT (τ : State C Γ) : ElemS C Γ → Bool
-  | .rhs r => (r.eval τ).isSome
-  | .glob e => e.okB τ
-
-/-- An element out of gas, read in the typed state (`UpdElem.exhB`). -/
-def ElemS.exhT (τ : State C Γ) : ElemS C Γ → Bool
-  | .rhs r => r.exhB τ
-  | .glob e => e.exhB τ
-
-theorem toElemS_okT {Δ : Ctx} (τ : State C Γ) (e : UpdElem C Γ Δ) :
-    e.toElemS.okT τ = e.okB τ := by
-  cases e <;> rfl
-
-theorem toElemS_exhT {Δ : Ctx} (τ : State C Γ) (e : UpdElem C Γ Δ) :
-    e.toElemS.exhT τ = e.exhB τ := by
-  cases e <;> rfl
-
-theorem toElemS_guard {Δ : Ctx} (ρ : SymS) (e : UpdElem C Γ Δ) :
-    e.toElemS.guard ρ = (ElemS.glob e).guard ρ := by
-  cases e <;> rfl
-
-theorem toElemS_inLS {Δ : Ctx} (ρ : SymS) (e : UpdElem C Γ Δ) :
-    e.toElemS.inLS ρ = (ElemS.glob e).inLS ρ := by
-  cases e <;> rfl
-
-/-- An update with no element is never out of gas. -/
-theorem Upd.exh_view_zero (τ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.view = .zero →
-    U.exhAny τ = false ∧ U.exhOk τ = true
-  | _, .nil, _ => ⟨rfl, rfl⟩
-  | _, .snoc U e, hv => by
-    change U.view.add e.toElemS = .zero at hv
-    generalize U.view = w at hv
-    cases w <;> simp only [UView.add, reduceCtorEq] at hv
-  | _, .decl U _ r, hv => by
-    change U.view.add (.rhs r) = .zero at hv
-    generalize U.view = w at hv
-    cases w <;> simp only [UView.add, reduceCtorEq] at hv
-  | _, .pop U _, hv => Upd.exh_view_zero τ U hv
-  | _, .drop U _, hv => Upd.exh_view_zero τ U hv
-
-/-- An update of one element is out of gas where the element is. -/
-theorem Upd.exh_view_one (τ : State C Γ) {a : ElemS C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
-    U.view = .one a → U.exhAny τ = a.exhT τ ∧ U.exhOk τ = (a.okT τ || a.exhT τ)
-  | _, .nil, hv => UView.noConfusion hv
-  | _, .snoc U e, hv => by
-    obtain ⟨hz, rfl⟩ := UView.add_eq_one hv
-    obtain ⟨h₁, h₂⟩ := Upd.exh_view_zero τ U hz
-    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, toElemS_okT, toElemS_exhT, Bool.false_or,
-      Bool.true_and, and_self]
-  | _, .decl U _ r, hv => by
-    obtain ⟨hz, rfl⟩ := UView.add_eq_one hv
-    obtain ⟨h₁, h₂⟩ := Upd.exh_view_zero τ U hz
-    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, ElemS.okT, ElemS.exhT, Bool.false_or,
-      Bool.true_and, and_self]
-  | _, .pop U _, hv => Upd.exh_view_one τ U hv
-  | _, .drop U _, hv => Upd.exh_view_one τ U hv
-
-/-- An update of two elements is out of gas where one is and the other
-returns or is out of gas. -/
-theorem Upd.exh_view_two (τ : State C Γ) {a b : ElemS C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
-    U.view = .two a b → U.exhAny τ = (a.exhT τ || b.exhT τ) ∧
-      U.exhOk τ = ((a.okT τ || a.exhT τ) && (b.okT τ || b.exhT τ))
-  | _, .nil, hv => UView.noConfusion hv
-  | _, .snoc U e, hv => by
-    obtain ⟨hz, rfl⟩ := UView.add_eq_two hv
-    obtain ⟨h₁, h₂⟩ := Upd.exh_view_one τ U hz
-    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, toElemS_okT, toElemS_exhT, and_self]
-  | _, .decl U _ r, hv => by
-    obtain ⟨hz, rfl⟩ := UView.add_eq_two hv
-    obtain ⟨h₁, h₂⟩ := Upd.exh_view_one τ U hz
-    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, ElemS.okT, ElemS.exhT, and_self]
-  | _, .pop U _, hv => Upd.exh_view_two τ U hv
-  | _, .drop U _, hv => Upd.exh_view_two τ U hv
-
-/-- An element at the update's own scope whose guard returns returns. -/
-theorem guard_okT_at {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
-    (e : UpdElem C Γ Γ) (ha : e.toElemS.inLS ρ = true) (hg : Rets ((e.toElemS.guard ρ).eval σ))
-    (hR : e.toElemS.RoomE τ) : e.okB τ = true := by
-  obtain ⟨τ', h'⟩ := ((RelU.one h ((Upd.nil (C := C) (Γ := Γ)).snoc e) rfl ha).1.1 ⟨hg, hR⟩)
-  obtain ⟨q, hq, -⟩ := applyVE_ok h'
-  have hg' := (Upd.applyV_ok _ hq).1
-  change (some τ.globG).bind (e.globT τ) = _ at hg'
-  rw [Option.bind_some] at hg'
-  rw [← UpdElem.globT_isSome τ e τ.globG, hg']
-  rfl
-
-/-- **An element whose guard returns returns** in every typed state the
-symbolic one stands for. -/
-theorem guard_okT {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
-    (a : ElemS C Γ) (ha : a.inLS ρ = true) (hg : Rets ((a.guard ρ).eval σ)) (hR : a.RoomE τ) :
-    a.okT τ = true := by
-  have hrhs : ∀ {t : LTy} (r : Rhs C Γ t), r.inLS ρ = true → Rets ((r.guardS ρ).eval σ) →
-      r.RoomR τ → (r.eval τ).isSome = true := fun r ha hg hR => by
-    obtain ⟨τ', h'⟩ :=
-      ((RelU.one h ((Upd.nil (C := C) (Γ := Γ)).decl (.user "_") r) rfl ha).1.1 ⟨hg, hR⟩)
-    obtain ⟨q, hq, -⟩ := applyVE_ok h'
-    have hg' := (Upd.applyV_ok _ hq).1
-    change (some τ.globG).bind (fun g => (r.eval τ).bind fun _ => some g) = _ at hg'
-    simp only [Option.bind_some] at hg'
-    cases hr : r.eval τ with
-    | none => rw [hr] at hg'; cases hg'
-    | some _ => rfl
-  cases a with
-  | rhs r => exact hrhs r ha hg hR
-  | glob e =>
-    cases e with
-    | «local» _ r => exact hrhs r ha hg hR
-    | storage x => exact guard_okT_at h (.storage x) ha hg hR
-    | memory x => exact guard_okT_at h (.memory x) ha hg hR
-    | selfBalance op x => exact guard_okT_at h (.selfBalance op x) ha hg hR
-    | net r op x => exact guard_okT_at h (.net r op x) ha hg hR
-    | pay r x => exact guard_okT_at h (.pay r x) ha hg hR
-    | netMt r x => exact guard_okT_at h (.netMt r x) ha hg hR
-    | setBalance x => exact guard_okT_at h (.setBalance x) ha hg hR
-
-theorem sok_rets {σ : Semantics.State} {X : LStor} (h : Rets ((LTerm.sok X).eval σ)) :
-    ∃ a, X.eval σ = .ok a := by
-  obtain ⟨v, hv⟩ := h
-  simp only [LTerm.eval] at hv
-  obtain ⟨a, ha, -⟩ := Res.bind_eq_ok.1 hv
-  exact ⟨a, ha⟩
-
-/-- **An element whose terms return returns, or is out of gas**: where its
-push has no room (`ElemS.RoomE`), the push is at a full array. -/
-theorem guard_cases {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
-    (a : ElemS C Γ) (ha : a.inLS ρ = true) (hg : Rets ((a.guard ρ).eval σ)) :
-    (Rets ((a.guard ρ).eval σ) ∧ a.RoomE τ) ∨ a.exhT τ = true := by
-  by_cases hR : a.RoomE τ
-  · exact .inl ⟨hg, hR⟩
-  · refine .inr ?_
-    have hrhs : ∀ {t : LTy} (r : Rhs C Γ t), r.inLS ρ = true → Rets ((r.guardS ρ).eval σ) →
-        ¬ r.RoomR τ → r.exhB τ = true := fun r hr hg hR => by
-      cases r with
-      | store s =>
-        obtain ⟨x, hx⟩ := sok_rets hg
-        rw [Tm.toLS_eq_toLSM] at hx
-        exact h.stor_exh s (by rw [← Tm.inLS_eq_inLSM]; exact hr) ⟨x, hx⟩ hR
-      | _ => exact absurd trivial hR
-    cases a with
-    | rhs r => exact hrhs r ha hg hR
-    | glob e =>
-      cases e with
-      | «local» _ r => exact hrhs r ha hg hR
-      | storage s => exact h.storT_exh s ha hg hR
-      | _ => exact absurd trivial hR
-
-/-- **An element that returns has the room its pushes read** (`ElemS.bound`). -/
-theorem bound_true {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
-    (a : ElemS C Γ) (ha : a.inLS ρ = true) (hok : a.okT τ = true) :
-    (a.bound ρ).eval σ = .ok (.bool true) := by
-  have hrhs : ∀ {t : LTy} (r : Rhs C Γ t), r.inLS ρ = true → (r.eval τ).isSome = true →
-      (r.boundR ρ).eval σ = .ok (.bool true) := fun r hr hok => by
-    cases r with
-    | store s =>
-      rw [CloseS.rhs_store] at hok
-      exact h.bound_of_ok s (by rw [← Tm.inLS_eq_inLSM]; exact hr) hok
-    | _ => rfl
-  cases a with
-  | rhs r => exact hrhs r ha hok
-  | glob e =>
-    cases e with
-    | «local» _ r => exact hrhs r ha hok
-    | storage s => exact h.boundSt_of_ok s ha hok
-    | _ => rfl
-
-/-- What follows an update, read past the room its pushes have. -/
-theorem roomM_holds {σ : Semantics.State} (m : Modality) {b : LTerm} {φ : LFml}
-    (h : (roomM m b φ).holds σ) (hb : b.eval σ = .ok (.bool true)) : φ.holds σ := by
-  cases m with
-  | box => exact h
-  | diamond =>
-    cases b with
-    | lit _ => exact h
-    | _ => exact h ((LFml.holds_eq_iff _ _ _).2 ⟨_, hb, rfl⟩)
-
-/-- An update of one element that returns: the element returns. -/
-theorem okT_of_view_one {τ : State C Γ} {a : ElemS C Γ} {Δ : Ctx} {U : Upd C Γ Δ}
-    (hv : U.view = .one a) {q : GlobT C τ.H × LocsV C Δ} (hap : U.applyV τ = some q) :
-    a.okT τ = true := by
-  have hg := (Upd.applyV_ok U hap).1
-  have h₁ := Upd.exhAny_of_globT hg
-  have h₂ := Upd.exhOk_of_globT U hg
-  obtain ⟨e₁, e₂⟩ := Upd.exh_view_one τ U hv
-  rw [e₁] at h₁
-  rw [e₂, h₁, Bool.or_false] at h₂
-  exact h₂
-
-/-- An update of two elements that returns: each returns. -/
-theorem okT_of_view_two {τ : State C Γ} {a b : ElemS C Γ} {Δ : Ctx} {U : Upd C Γ Δ}
-    (hv : U.view = .two a b) {q : GlobT C τ.H × LocsV C Δ} (hap : U.applyV τ = some q) :
-    a.okT τ = true ∧ b.okT τ = true := by
-  have hg := (Upd.applyV_ok U hap).1
-  have h₁ := Upd.exhAny_of_globT hg
-  have h₂ := Upd.exhOk_of_globT U hg
-  obtain ⟨e₁, e₂⟩ := Upd.exh_view_two τ U hv
-  rw [e₁, Bool.or_eq_false_iff] at h₁
-  rw [e₂, h₁.1, h₁.2, Bool.or_false, Bool.or_false, Bool.and_eq_true] at h₂
-  exact h₂
-
-/-- **The scoped reduction is sound**, over the typed state, at the
-polarity `pos`: where the fragment takes a formula, its reduction read in
-`σ` gives the formula in every typed state `ρ` stands for (positive), and
-the formula gives its reduction (negative, where it is first-order). -/
-theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool)
-    {σ : Semantics.State} {ρ : SymS} (τ : State C Γ),
-    RelT σ ρ τ → φ.inLSM pos ρ = true →
-    (pos = true → (φ.toLSM ρ).holds σ → holds τ φ) ∧
-      (pos = false → holds τ φ → (φ.toLSM ρ).holds σ) := by
-  intro Γ φ
-  induction φ with
-  | tt => intro pos σ ρ τ h hf; exact ⟨fun _ _ => trivial, fun _ _ => trivial⟩
-  | eq a b =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.and_eq_true] at hf
-    obtain ⟨⟨hl, ha⟩, hb⟩ := hf
-    have key : holds τ (.eq a b) ↔ (Fml.toLSM ρ (.eq a b)).holds σ := by
-      have hab : (a.isLitLikeS = true ∨ a.isAtomS = true) ∧
-          (b.isLitLikeS = true ∨ b.isAtomS = true) := by
-        simp only [Tm.eqLitS, Bool.or_eq_true, Bool.and_eq_true] at hl
-        rcases hl with ⟨h1, h2⟩ | ⟨h1, h2⟩
-        · exact ⟨.inl h1, .inr h2⟩
-        · exact ⟨.inr h2, .inl h1⟩
-      obtain ⟨x, hx⟩ := Tm.eval_of_atomLike τ hab.1
-      obtain ⟨y, hy⟩ := Tm.eval_of_atomLike τ hab.2
-      rw [holds_eq_of_eval hx hy]
-      simp only [Fml.toLSM]
-      rw [LFml.holds_eq_iff]
-      have sa := h.val ha
-      have sb := h.val hb
+/-- **A formula pushed in** implies the formula at the positive polarity,
+and follows from it at the negative one. -/
+theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS C Γ} {ψ : LFml C},
+    φ.toLS pos ρ = some ψ → ∀ (τ : State C Γ) (ν : AEnv), Agrees g₀ ν ρ τ → ρ.Fresh →
+    (pos = true → ψ.holds g₀ ν → holds τ φ) ∧ (pos = false → holds τ φ → ψ.holds g₀ ν)
+  | _, .tt, _, _, _, h, _, _, _, _ => by
+    cases h; exact ⟨fun _ _ => trivial, fun _ _ => trivial⟩
+  | _, .eq (p := p) a b, pos, ρ, ψ, h, τ, ν, hA, _ => by
+    have h' : (if pos || (a.retsS && b.retsS) then
+        (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => LFml.eq a' b' else none) = some ψ := h
+    split at h'
+    · rename_i hc
+      simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+      obtain ⟨a', ha', b', hb', rfl⟩ := h'
+      have hda : (a'.eval g₀ ν : Option p.Denote) = a.eval τ := Tm.toL_drel hA a a' ha'
+      have hdb : (b'.eval g₀ ν : Option p.Denote) = b.eval τ := Tm.toL_drel hA b b' hb'
+      refine ⟨fun _ hψ => ?_, fun hpos hφ => ?_⟩
+      · rw [LFml.holds_eq_iff] at hψ
+        obtain ⟨x, hx, hy⟩ := hψ
+        rw [hda] at hx; rw [hdb] at hy
+        show a.denote τ = b.denote τ
+        rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b x hy]
+      · subst hpos
+        simp only [Bool.false_or, Bool.and_eq_true] at hc
+        obtain ⟨x, hx⟩ := Tm.retsS_eval τ hc.1
+        obtain ⟨y, hy⟩ := Tm.retsS_eval τ hc.2
+        have hφ' : a.denote τ = b.denote τ := hφ
+        rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b y hy] at hφ'
+        obtain rfl : x = y := Option.some.inj hφ'
+        rw [LFml.holds_eq_iff]
+        exact ⟨x, by rw [hda, hx], by rw [hdb, hy]⟩
+    · cases h'
+  | _, .defined (p := p) t, pos, ρ, ψ, h, τ, ν, hA, _ => by
+    have h' : (t.toL ρ).map (fun t' => LFml.eq t' t') = some ψ := h
+    rw [Option.map_eq_some_iff] at h'
+    obtain ⟨t', ht', rfl⟩ := h'
+    have hd : (t'.eval g₀ ν : Option p.Denote) = t.eval τ := Tm.toL_drel hA t t' ht'
+    have key : (LFml.eq t' t').holds g₀ ν ↔ holds τ (.defined t) := by
+      rw [LFml.holds_rets, holds_defined, hd]
       constructor
-      · rintro rfl; exact ⟨x, (sa x).2 hx, (sb x).2 hy⟩
-      · rintro ⟨z, hz₁, hz₂⟩
-        have e1 := (sa z).1 hz₁
-        have e2 := (sb z).1 hz₂
-        rw [hx] at e1; rw [hy] at e2
-        cases e1; cases e2; rfl
-    exact ⟨fun _ hL => key.2 hL, fun _ hφ => key.1 hφ⟩
-  | defined t =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM] at hf
-    have st := h.val hf
-    have key : holds τ (.defined t) ↔ (Fml.toLSM ρ (.defined t)).holds σ := by
-      simp only [Fml.toLSM]
-      rw [holds_eq_self, Tm.evalE_defined_iff]
-      exact ⟨fun ⟨x, hx⟩ => ⟨x, (st x).2 hx⟩, fun ⟨x, hx⟩ => ⟨x, (st x).1 hx⟩⟩
-    exact ⟨fun _ hL => key.2 hL, fun _ hφ => key.1 hφ⟩
-  | not φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM] at hf
-    have hi := ih (!pos) τ h hf
-    simp only [Fml.toLSM, LFml.holds]
-    refine ⟨fun hp hL hφ => ?_, fun hp hφ hL => ?_⟩
-    · subst hp; exact hL (hi.2 rfl hφ)
-    · subst hp; exact hφ (hi.1 rfl hL)
-  | and φ ψ ihφ ihψ =>
-    intro pos σ ρ τ h hf
-    cases hv : eqDViewS ρ φ ψ with
-    | none =>
-      simp only [Fml.inLSM, hv, Bool.and_eq_true] at hf
-      have h1 := ihφ pos τ h hf.1
-      have h2 := ihψ pos τ h hf.2
-      simp only [Fml.toLSM, hv, LFml.holds]
-      exact ⟨fun hp hL => ⟨h1.1 hp hL.1, h2.1 hp hL.2⟩,
-        fun hp hφ => ⟨h1.2 hp hφ.1, h2.2 hp hφ.2⟩⟩
-    | some AB =>
-      obtain ⟨⟨Γa, ρa, pa, a⟩, ⟨Γb, ρb, pb, b⟩⟩ := AB
-      simp only [Fml.inLSM, hv, Bool.and_eq_true] at hf
-      have key := eqD_sound h hv hf.1 hf.2
-      simp only [Fml.toLSM, hv]
-      exact ⟨fun _ hL => key.2 hL, fun _ hφ => key.1 hφ⟩
-  | imp φ ψ ihφ ihψ =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.and_eq_true] at hf
-    have h1 := ihφ (!pos) τ h hf.1
-    have h2 := ihψ pos τ h hf.2
-    simp only [Fml.toLSM, LFml.holds]
-    refine ⟨fun hp hL hφ => h2.1 hp (hL (h1.2 (by rw [hp]; rfl) hφ)),
-      fun hp hφψ hL => h2.2 hp (hφψ (h1.1 (by rw [hp]; rfl) hL))⟩
-  | upd m U φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.and_eq_true] at hf
-    obtain ⟨rfl, hf⟩ := hf
-    refine ⟨fun _ hL => ?_, fun hp => Bool.noConfusion hp⟩
-    show U.afterT m τ (holds · φ)
-    rw [Upd.afterT_applyV]
-    cases hv : U.view with
-    | zero =>
-      simp only [Fml.toLSM, hv] at hL
-      simp only [hv] at hf
-      obtain ⟨τe, hτ, h', -⟩ := RelU.zero noActE noActR h U hv
-      obtain ⟨q, hq, rfl⟩ := applyVE_ok hτ
-      rw [hq]
-      intro σ' hg hl
-      exact (ih true σ' (RelT.of_lands h' hg hl) hf).1 rfl hL
-    | one a =>
-      simp only [Fml.toLSM, hv] at hL
-      simp only [hv, Bool.and_eq_true] at hf
-      obtain ⟨hg, hr⟩ := RelU.one h U hv hf.1
-      cases hap : U.applyV τ with
-      | none =>
-        cases m with
-        | box => exact .inl trivial
-        | diamond =>
-          rw [guardM_diamond] at hL
-          rcases guard_cases h a hf.1 hL.1 with hgr | hx
-          · obtain ⟨τ', h'⟩ := hg.1 hgr
-            exact absurd h' (applyVE_none hap τ')
-          · refine .inr ?_
-            obtain ⟨h₁, h₂⟩ := Upd.exh_view_one τ U hv
-            simp only [Upd.exh, h₁, h₂, hx, Bool.or_true, Bool.and_self]
-      | some q =>
-        intro σ' hg' hl
-        have hap' : U.applyVE τ = .ok (eraseQ q) := by rw [Upd.applyVE_eq, hap]; rfl
-        have hgret := hg.2 ⟨_, hap'⟩
-        have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds σ := by
-          have hb := bound_true h a hf.1 (okT_of_view_one hv hap)
-          cases m with
-          | box => exact (guardM_box σ _ _).1 hL hgret.1
-          | diamond => exact roomM_holds .diamond ((guardM_diamond σ _ _).1 hL).2 hb
-        exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
-    | two a b =>
-      simp only [Fml.toLSM, hv] at hL
-      simp only [hv] at hf
-      cases hp : pairViewS a b with
-      | none =>
-        simp only [hp, Bool.and_eq_true] at hf hL
-        obtain ⟨hg, hr⟩ := RelU.par h U hv hf.1
-        cases hap : U.applyV τ with
-        | none =>
-          cases m with
-          | box => exact .inl trivial
-          | diamond =>
-            rw [guardM_diamond] at hL
-            obtain ⟨hga, hgb⟩ := (seqL_rets σ _ _).1 hL.1
-            have hpo := hf.1
-            simp only [ElemS.parOk, Bool.and_eq_true] at hpo
-            have hia : a.inLS ρ = true := hpo.1.1.1
-            have hib : b.inLS ρ = true := hpo.1.1.2
-            have hca := guard_cases h a hia hga
-            have hcb := guard_cases h b hib hgb
-            by_cases hboth : (Rets ((a.guard ρ).eval σ) ∧ a.RoomE τ) ∧
-                (Rets ((b.guard ρ).eval σ) ∧ b.RoomE τ)
-            · obtain ⟨τ', h'⟩ := hg.1 ⟨(seqL_rets σ _ _).2 ⟨hboth.1.1, hboth.2.1⟩, hboth.1.2,
-                hboth.2.2⟩
-              exact absurd h' (applyVE_none hap τ')
-            · refine .inr ?_
-              have hoka : (a.okT τ || a.exhT τ) = true := by
-                rcases hca with hx | hx
-                · rw [guard_okT h a hia hx.1 hx.2, Bool.true_or]
-                · rw [hx, Bool.or_true]
-              have hokb : (b.okT τ || b.exhT τ) = true := by
-                rcases hcb with hx | hx
-                · rw [guard_okT h b hib hx.1 hx.2, Bool.true_or]
-                · rw [hx, Bool.or_true]
-              have hany : (a.exhT τ || b.exhT τ) = true := by
-                rcases hca with hca | hca
-                · rcases hcb with hcb | hcb
-                  · exact absurd ⟨hca, hcb⟩ hboth
-                  · rw [hcb, Bool.or_true]
-                · rw [hca, Bool.true_or]
-              obtain ⟨h₁, h₂⟩ := Upd.exh_view_two τ U hv
-              simp only [Upd.exh, h₁, h₂, hany, hoka, hokb, Bool.and_self]
-        | some q =>
-          intro σ' hg' hl
-          have hap' : U.applyVE τ = .ok (eraseQ q) := by rw [Upd.applyVE_eq, hap]; rfl
-          have hgret := hg.2 ⟨_, hap'⟩
-          have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds
-              σ := by
-            have hpo := hf.1
-            simp only [ElemS.parOk, Bool.and_eq_true] at hpo
-            obtain ⟨hoa, hob⟩ := okT_of_view_two hv hap
-            cases m with
-            | box => exact (guardM_box σ _ _).1 hL hgret.1
-            | diamond =>
-              exact roomM_holds .diamond (roomM_holds .diamond ((guardM_diamond σ _ _).1 hL).2
-                (bound_true h a hpo.1.1.1 hoa)) (bound_true h b hpo.1.1.2 hob)
-          exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
-      | some p =>
-        obtain ⟨R, i, mm⟩ := p
-        cases hq : pairLS ρ i mm with
-        | none => simp only [hp, hq, Bool.false_eq_true] at hf
-        | some q =>
-          obtain ⟨g, M⟩ := q
-          simp only [hp, hq, Bool.and_eq_true] at hf hL
-          obtain ⟨hg, hr⟩ := RelU.two h hq hf.1.1 U hv hp
-          cases hap : U.applyV τ with
-          | none =>
-            cases m with
-            | box => exact .inl trivial
-            | diamond =>
-              rw [guardM_diamond] at hL
-              obtain ⟨τ', h'⟩ := hg.1 hL.1
-              exact absurd h' (applyVE_none hap τ')
-          | some q =>
-            intro σ' hg' hl
-            have hap' : U.applyVE τ = .ok (eraseQ q) := by rw [Upd.applyVE_eq, hap]; rfl
-            have hgret : ∃ v, g.eval σ = .ok v := hg.2 ⟨_, hap'⟩
-            have hL' : (φ.toLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ)).holds σ := by
-              cases m with
-              | box => exact (guardM_box σ _ _).1 hL hgret
-              | diamond => exact ((guardM_diamond σ _ _).1 hL).2
-            exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
-    | many => simp only [hv, Bool.false_eq_true] at hf
-  | modal m P κ φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM] at hf
-    subst hf
-    refine ⟨fun _ hL => ?_, fun hp => Bool.noConfusion hp⟩
-    simp only [Fml.toLSM, LFml.holds] at hL
-    exact absurd trivial hL
-  | havoc φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.false_eq_true] at hf
-  | anon xs φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.false_eq_true] at hf
-  | all x p φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.and_eq_true, Bool.not_eq_true'] at hf
-    obtain ⟨hx, hf⟩ := hf
-    simp only [Fml.toLSM, LFml.holds]
-    refine ⟨fun hp hL v => ?_, fun hp hφ w hw => ?_⟩
-    · exact (ih pos (τ.push v) (RelT.push (h.pushQ hx (PrimTy.erase v)))
-        hf).1 hp (hL _ (PrimTy.admits_erase v))
-    · obtain ⟨v, rfl⟩ := PrimTy.exists_of_admits hw
-      exact (ih pos (τ.push v) (RelT.push (h.pushQ hx (PrimTy.erase v)))
-        hf).2 hp (hφ v)
-  | bind m x t φ ih =>
-    intro pos σ ρ τ h hf
-    simp only [Fml.inLSM, Bool.and_eq_true] at hf
-    obtain ⟨rfl, hf⟩ := hf
-    refine ⟨fun _ hL => ?_, fun hp => Bool.noConfusion hp⟩
-    simp only [Fml.toLSM] at hL
-    intro v
-    exact (ih true (τ.push v) (RelT.push (h.pushFree _)) hf).1 rfl hL
+      · rintro ⟨x, hx⟩; rw [hx]; exact nofun
+      · intro h; exact Option.ne_none_iff_exists'.1 h
+    exact ⟨fun _ => key.1, fun _ => key.2⟩
+  | _, .not φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (φ.toLS (!pos) ρ).map LFml.not = some ψ := h
+    rw [Option.map_eq_some_iff] at h'
+    obtain ⟨ψ₁, h₁, rfl⟩ := h'
+    obtain ⟨ih₁, ih₂⟩ := Fml.toLS_sound φ (!pos) h₁ τ ν hA hF
+    refine ⟨fun hp hψ hφ => hψ (ih₂ (by simp only [hp, Bool.not_true]) hφ),
+      fun hp hφ hψ => hφ (ih₁ (by simp only [hp, Bool.not_false]) hψ)⟩
+  | _, .and φ₁ φ₂, pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (match Fml.eqDView? φ₁ φ₂ with
+      | some ⟨_, a, b⟩ => (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => LFml.eq a' b'
+      | none => (φ₁.toLS pos ρ).bind fun ψ₁ => (φ₂.toLS pos ρ).map fun ψ₂ => .and ψ₁ ψ₂) =
+        some ψ := h
+    split at h'
+    · rename_i p a b he
+      rw [Fml.eqDView?_some he]
+      simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+      obtain ⟨a', ha', b', hb', rfl⟩ := h'
+      have hda : (a'.eval g₀ ν : Option p.Denote) = a.eval τ := Tm.toL_drel hA a a' ha'
+      have hdb : (b'.eval g₀ ν : Option p.Denote) = b.eval τ := Tm.toL_drel hA b b' hb'
+      have key : (LFml.eq a' b').holds g₀ ν ↔ holds τ (Fml.eqD a b) := by
+        rw [LFml.holds_eq_iff, holds_eqD, hda, hdb]
+      exact ⟨fun _ => key.1, fun _ => key.2⟩
+    · simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+      obtain ⟨ψ₁, h₁, ψ₂, h₂, rfl⟩ := h'
+      obtain ⟨i₁, j₁⟩ := Fml.toLS_sound φ₁ pos h₁ τ ν hA hF
+      obtain ⟨i₂, j₂⟩ := Fml.toLS_sound φ₂ pos h₂ τ ν hA hF
+      exact ⟨fun hp hψ => ⟨i₁ hp hψ.1, i₂ hp hψ.2⟩, fun hp hφ => ⟨j₁ hp hφ.1, j₂ hp hφ.2⟩⟩
+  | _, .imp φ₁ φ₂, pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (φ₁.toLS (!pos) ρ).bind (fun ψ₁ => (φ₂.toLS pos ρ).map fun ψ₂ => LFml.imp ψ₁ ψ₂) =
+      some ψ := h
+    simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+    obtain ⟨ψ₁, h₁, ψ₂, h₂, rfl⟩ := h'
+    obtain ⟨i₁, j₁⟩ := Fml.toLS_sound φ₁ (!pos) h₁ τ ν hA hF
+    obtain ⟨i₂, j₂⟩ := Fml.toLS_sound φ₂ pos h₂ τ ν hA hF
+    refine ⟨fun hp hψ hφ₁ => i₂ hp (hψ (j₁ (by simp only [hp, Bool.not_true]) hφ₁)),
+      fun hp hφ hψ₁ => j₂ hp (hφ (i₁ (by simp only [hp, Bool.not_false]) hψ₁))⟩
+  | _, .upd m U φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (if pos then (U.toLS ρ).bind fun p => (φ.toLS pos p.1).map fun φ' =>
+      guardM m (U.exhL ρ) p.2 φ' else none) = some ψ := h
+    split at h'
+    · rename_i hp
+      subst hp
+      simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+      obtain ⟨⟨ρ', gd⟩, hU, ψ', hφ, rfl⟩ := h'
+      obtain ⟨hg, hag, hf', -⟩ := Upd.toLS_sound hA hF U hU
+      refine ⟨fun _ hψ => guardM_holds m U (fun X hX hXt => Upd.exhL_sound hA U hX hXt) hg
+        (fun q hq hψ' σ' hσ hl => ?_) hψ, fun h => by cases h⟩
+      have hA' : Agrees g₀ ν ρ' σ' := by
+        have hl' : σ'.locV = q.2 := funext fun _ => funext fun i => hl i
+        show AgreesV g₀ ν ρ' σ'.glob σ'.locV
+        rw [hσ, hl']
+        exact hag q hq
+      exact (Fml.toLS_sound φ true hφ σ' ν hA' hf').1 rfl hψ'
+    · cases h'
+  | _, .modal .., pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (if pos then some LFml.ff else none) = some ψ := h
+    split at h'
+    · cases h'; exact ⟨fun _ hψ => (hψ trivial).elim, fun hp => by subst hp; contradiction⟩
+    · cases h'
+  | _, .havoc _, _, _, _, h, _, _, _, _ => by cases h
+  | _, .anon .., _, _, _, h, _, _, _, _ => by cases h
+  | _, .all x p φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (φ.toLS pos (ρ.pushQ p)).map (fun φ' => LFml.all ρ.next p φ') = some ψ := h
+    rw [Option.map_eq_some_iff] at h'
+    obtain ⟨ψ₁, h₁, rfl⟩ := h'
+    refine ⟨fun hp hψ v => ?_, fun hp hφ v => ?_⟩
+    · exact (Fml.toLS_sound φ pos h₁ (τ.push (t := .val p) v) (ν.set p ρ.next v)
+        (hA.pushQ hF p v) (hF.pushQ p)).1 hp (hψ v)
+    · exact (Fml.toLS_sound φ pos h₁ (τ.push (t := .val p) v) (ν.set p ρ.next v)
+        (hA.pushQ hF p v) (hF.pushQ p)).2 hp (hφ v)
+  | _, .bind m x t φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
+    have h' : (if pos then (φ.toLS pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none) =
+      some ψ := h
+    split at h'
+    · rename_i hp
+      subst hp
+      rw [Option.map_eq_some_iff] at h'
+      obtain ⟨ψ₁, h₁, rfl⟩ := h'
+      refine ⟨fun _ hψ => fun v => ?_, fun h => by cases h⟩
+      exact Fml.allB_push hA hF (fun τ' ν' hA' hF' => (Fml.toLS_sound φ true h₁ τ' ν' hA' hF').1 rfl)
+        hψ v
+    · cases h'
 
-/-- The state a typed state's reduction is read in: its global part, no
-local. -/
-def _root_.Solidity.State.redState {Γ : Ctx} (τ : State C Γ) : Semantics.State :=
-  withLocals τ.globE []
+/-- The empty state agrees with every typed state of the empty context. -/
+theorem Agrees.init (τ : State C []) (ν : AEnv) : Agrees τ ν SymS.init τ :=
+  ⟨rfl, rfl, rfl, rfl, fun i => nomatch i⟩
 
-/-- The reduction's start: no update, no local. -/
-theorem RelU.empty (τ : State C []) : RelT τ.redState SymS.empty τ :=
-  { ok := rfl, len := rfl, nodup := List.nodup_nil,
-    fresh := fun _ _ => ⟨List.not_mem_nil, rfl⟩, stor := rfl,
-    env := fun _ hm => (nomatch hm), tx := fun k => by cases k <;> rfl,
-    mem := ⟨memBase _, [], rfl, rfl, rfl⟩ }
+theorem SymS.Fresh.init : (SymS.init : SymS C []).Fresh :=
+  ⟨Fresh.app0 _ _, Fresh.app0 _ _, trivial⟩
 
-/-- A leaf holds in a typed state where its reduction holds in the state
-the reduction reads (`Fml.toLSM_sound` at the start). -/
-theorem holds_of_reduceS {φ : Fml C []} (hf : φ.inLS true SymS.empty = true) (τ : State C [])
-    (h : φ.reduceS.holds τ.redState) : holds τ φ := by
-  have hL : (φ.toLSM SymS.empty).holds τ.redState := by
-    rw [← Fml.toLS_eq_toLSM]
-    exact (LFml.elim_holds _ _).1 h
-  exact (Fml.toLSM_sound φ true τ (RelU.empty τ)
-    (by rw [← Fml.inLS_eq_inLSM]; exact hf)).1 rfl hL
+end Fml
 
-/-- **The boundary, scoped**: a leaf is valid where its reduction, computed
-on the leaf itself, holds in every state; the fragment is checked on the
-leaf (`Fml.inLS`).  Proved over the typed state (`Fml.toLSM_sound`), not
-through the leaf's erasure. -/
-theorem _root_.Solidity.Valid.of_reduceS {φ : Fml C []} (hf : φ.inLS true SymS.empty = true)
-    (h : ∀ σ, φ.reduceS.holds σ) : Valid φ :=
-  fun τ => holds_of_reduceS hf τ (h _)
+/-- **A leaf whose reduction, before the elimination, is valid, is
+valid** (`Fml.toLS_sound`). -/
+theorem _root_.Solidity.Valid.of_toLS {φ : Fml C []} {ψ : LFml C}
+    (h : φ.toLS true SymS.init = some ψ) (hψ : ψ.Valid) : Valid φ := fun τ =>
+  (Fml.toLS_sound φ true h τ AEnv.dflt (Agrees.init τ AEnv.dflt) SymS.Fresh.init).1 rfl
+    (hψ τ AEnv.dflt)
 
-end Sound
+/-- **`sol_decide`'s reduction is sound**: a scoped leaf whose reduction is
+valid is valid. -/
+theorem _root_.Solidity.Valid.of_reduceS {φ : Fml C []} {ψ : LFml C} (h : φ.reduceS = some ψ)
+    (hψ : ψ.Valid) : Valid φ := by
+  intro τ
+  unfold Fml.reduceS at h
+  rw [Option.map_eq_some_iff] at h
+  obtain ⟨ψ₀, h₀, rfl⟩ := h
+  have hh : ψ₀.holds τ AEnv.dflt := (LFml.elim_holds τ ψ₀ AEnv.dflt).1 (hψ τ AEnv.dflt)
+  exact (Fml.toLS_sound φ true h₀ τ AEnv.dflt (Agrees.init τ AEnv.dflt) SymS.Fresh.init).1 rfl hh
 
 end Decide
 

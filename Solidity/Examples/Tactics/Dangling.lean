@@ -8,12 +8,12 @@ import Solidity.Calculus.Closers
 An alias bound through an index (`Person storage r = persons[0];`) names a
 slot, not a live element: KeY's `consr(sp, at(ie))`, checked only when
 `storageIndexReadArrayBindLocalRoot` bound it.  After a `pop` the slot is
-past the array's end, and a write through the alias lands there
-(`LStor.stale`, `Calculus/Decide.lean`); a later `push()` makes the slot
-live again, directly, after a `delete` of the emptied array, or after a
-copy over it (`LStor.slotU`).  A push through an alias of an inner array
-lands in the recycled array, whose length the slot readers count
-(`LStor.slotLenU`).  The clauses are solkey's storage taclets;
+past the array's end, and a write through the alias lands there (a save
+at the dangling location, `SLoc.dangling`, `Theory/Typed/Obs.lean`); a
+later `push()` makes the slot live again, as it is (`TVal.extendA`),
+directly, after a `delete` of the emptied array, or after a copy over it.
+A push through an alias of an inner array lands in the recycled array,
+whose length is read off the slot.  The clauses are solkey's storage taclets;
 `docs/lean-key-rule-map.md` names each with the lemmas that transcribe it.
 
 These are solkey `TestSuite`'s dangling-alias functions over
@@ -98,21 +98,15 @@ example : ⊢ dl!{ defined(wt(storage)) → [
 
 /-! ## Rounds of `pop`, write, `push()`
 
-Each round adds a stale write and a pop below the slot reader, whose
-guards repeat at every read: the leaf grows quadratically with the rounds
-and the reduction by about 1.6 times a round.  Two rounds close; four
-(twelve statements) make a leaf within `closeSize` whose reduction is past
-`elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
-`Examples/ProofTree.lean`.  Six are the most whose leaf is within
-`closeSize`, so the largest reduction `leafFitsOn` builds before refusing;
-seven are refused by the leaf's size.  (Under the box, as here, a push
-asks no room: at a full array the typed one is out of gas, `Upd.exh`,
-which the box accepts.  Under the diamond the reduction keeps the room as a
-premise of what follows, `roomM` (W9.8.5).  With a bound guard, W9.8.3d,
-five fitted.)
-The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
-read as the scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`,
-`Fml.toLS`). -/
+Each round adds a stale write and a pop below the slot reader, and two
+storage updates to the stack a read is taken through.  Two rounds close;
+four (twelve statements) stack fourteen updates, past `stackSize`, and are
+refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
+`Examples/ProofTree.lean`; six and seven too, each leaf within
+`closeSize`.  (Under the box, as here, a push asks no room: at a full array
+the typed one is out of gas, which the box accepts.)  The leaves are the
+walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs), read as the closer
+reads them (`Hyps.wrap`, `Fml.toLS`). -/
 
 /-- Two rounds through one alias. -/
 def rounds2 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
@@ -128,7 +122,7 @@ def rounds4 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 3; persons.push();
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
-/-- Six rounds: the most whose leaf is within `closeSize`. -/
+/-- Six rounds. -/
 def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
@@ -138,7 +132,7 @@ def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 5; persons.push();
     persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
 
-/-- Seven rounds: refused by the leaf's size. -/
+/-- Seven rounds. -/
 def rounds7 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
@@ -149,20 +143,17 @@ def rounds7 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 6; persons.push();
     persons.pop(); r.age = 7; persons.push(); ] persons[0].age == 7 }
 
+/-- The walk's leaves of `φ`, each read as the closer reads it: within
+`closeSize`, its storage stack, and whether `leafFitsOn` takes it. -/
+def leafStats (φ : Fml StandardExample []) : Option (List (Bool × Nat × Bool)) :=
+  (Seq.residue .all .nil φ).map fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    match (l.2.1.wrap l.2.2).toLS true Decide.SymS.init with
+    | some x => ((x.fits Seq.closeSize).isSome, x.stDepth, Seq.leafFitsOn (l.2.1.wrap l.2.2))
+    | none => (false, 0, false)
+
 #guard (Seq.residue .all .nil rounds2).map List.isEmpty == some true
-#guard (Seq.residue .all .nil rounds4).map
-  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
-      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
-
-#guard (Seq.residue .all .nil rounds6).map
-  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
-      !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
-
-#guard (Seq.residue .all .nil rounds7).map
-  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
-    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome) ==
-  some [false]
+#guard leafStats rounds4 == some [(true, 14, false)]
+#guard leafStats rounds6 == some [(true, 20, false)]
+#guard leafStats rounds7 == some [(true, 23, false)]
 
 end Solidity.Examples.Tactics.Dangling

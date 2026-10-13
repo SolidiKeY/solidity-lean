@@ -44,7 +44,7 @@ open scoped Scoped
 info: symbolic execution leaves:
     dl{ ∀ uint a; a = 1 → { x := a } x = 1 }
 update-free:
-    ∀ uint a; a = 1 → a = a ∧ a = 1
+    ∀ uint a; a = 1 → ∀ uint x; true = true ∧ a = 1
 -/
 #guard_msgs in #wp dl!{ a == 1 → ⟨ uint x = a; ⟩ x == 1 }
 
