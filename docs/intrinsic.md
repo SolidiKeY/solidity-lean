@@ -7475,9 +7475,17 @@ W10.5.6).  Retyped, not deleted: every theorem keeps its content, over
   `Typing/` 9124 → 4837 lines, `Calculus/Problem.lean` 329 → 259.
   `Tools/DiffTest.lean` imports `Semantics.Properties` instead of the
   deleted `Typing/Storage.lean` (it read nothing of it).
-- **Checks**: `lean_build` of the default targets clean (279 jobs);
-  `TestSuite/Problems.lean` and `Corpus/Imported.lean` clean;
-  `check-orphans` (297 reachable); no `sorry`, `axiom` or heartbeat
+- **Merged with master** after W10.5.3 and W10.5.4 (no Typing file read
+  what they deleted).  `Theory/Typed/Mem.lean` (W10.5.4) proves the same
+  fuel independence of `SVal.dflt` as `Typing/Values.lean` under the names
+  `SFields.dfltBelow_congr`, `SVal.dfltAt_congr`, `SVal.dfltBelow_fuel` …;
+  this lane's are renamed (`SVal.dfltAt_irrel`, `SVal.dfltBelow_irrel`,
+  `SVal.dfltBelow_dflt`, …) to build beside them.  One copy should go: Mem
+  could import `Typing/Values.lean` (which imports only
+  `Theory/Typed/Obs.lean`).
+- **Checks**: `lean_build` of the default targets clean after the merge
+  (280 jobs); `TestSuite/Problems.lean` and `Corpus/Imported.lean` clean;
+  `check-orphans` (298 reachable); no `sorry`, `axiom` or heartbeat
   override; `wt_iff_reachable`, `initStorage_wt`, `reachable_iff_fits`,
   `no_hidden_invariant` on `propext`, `Classical.choice`, `Quot.sound`.
   `check-doc-paths` names two docstrings citing the deleted

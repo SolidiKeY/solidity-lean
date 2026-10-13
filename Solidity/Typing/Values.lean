@@ -193,53 +193,53 @@ end Lists
 /-! ## Defaults by their equations
 
 `SVal.dflt` is by fuel, a bound on the rank; the fuel does not matter
-(`SVal.dfltBelow_congr`), so a default unfolds one type constructor at a
+(`SVal.dfltBelow_irrel`), so a default unfolds one type constructor at a
 time. -/
 
-theorem SFields.dfltBelow_congr {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
+theorem SFields.dfltBelow_irrel {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     {ih' : (T : Ty) → tyRank T < k' → SVal T} (hih : ∀ T h h', ih T h = ih' T h') :
     (fs : List (Name × Ty)) → (h : fieldsRank fs < k) → (h' : fieldsRank fs < k') →
     SFields.dfltBelow k ih fs h = SFields.dfltBelow k' ih' fs h'
   | [], _, _ => rfl
   | (_, T) :: fs, h, h' => by
     simp only [SFields.dfltBelow]
-    rw [hih T, SFields.dfltBelow_congr hih fs]
+    rw [hih T, SFields.dfltBelow_irrel hih fs]
 
 mutual
-theorem SVal.dfltAt_congr {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
+theorem SVal.dfltAt_irrel {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     {ih' : (T : Ty) → tyRank T < k' → SVal T} (hih : ∀ T h h', ih T h = ih' T h') :
     (T : Ty) → (h : tyRank T < k + 1) → (h' : tyRank T < k' + 1) →
     SVal.dfltAt k ih T h = SVal.dfltAt k' ih' T h'
   | .prim _, _, _ => rfl
-  | .ref R, h, h' => SVal.dfltRefAt_congr hih R h h'
+  | .ref R, h, h' => SVal.dfltRefAt_irrel hih R h h'
 
-theorem SVal.dfltRefAt_congr {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
+theorem SVal.dfltRefAt_irrel {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     {ih' : (T : Ty) → tyRank T < k' → SVal T} (hih : ∀ T h h', ih T h = ih' T h') :
     (R : RefTy) → (h : tyRank (.ref R) < k + 1) → (h' : tyRank (.ref R) < k' + 1) →
     SVal.dfltRefAt k ih R h = SVal.dfltRefAt k' ih' R h'
   | .struct s, h, h' => by
     simp only [SVal.dfltRefAt]
-    rw [SFields.dfltBelow_congr hih]
+    rw [SFields.dfltBelow_irrel hih]
   | .array _, _, _ => rfl
   | .fixed E n, h, h' => by
     simp only [SVal.dfltRefAt]
-    rw [SVal.dfltAt_congr hih E]
+    rw [SVal.dfltAt_irrel hih E]
   | .mapping _ V, h, h' => by
     simp only [SVal.dfltRefAt]
-    rw [SVal.dfltAt_congr hih V]
+    rw [SVal.dfltAt_irrel hih V]
 end
 
-theorem SVal.dfltBelow_congr : (k k' : Nat) → (T : Ty) → (h : tyRank T < k) →
+theorem SVal.dfltBelow_irrel : (k k' : Nat) → (T : Ty) → (h : tyRank T < k) →
     (h' : tyRank T < k') → SVal.dfltBelow k T h = SVal.dfltBelow k' T h'
   | 0, _, _, h, _ => absurd h (Nat.not_lt_zero _)
   | _ + 1, 0, _, _, h' => absurd h' (Nat.not_lt_zero _)
   | k + 1, k' + 1, T, h, h' => by
     simp only [SVal.dfltBelow]
-    exact SVal.dfltAt_congr (fun T h h' => SVal.dfltBelow_congr k k' T h h') T h h'
+    exact SVal.dfltAt_irrel (fun T h h' => SVal.dfltBelow_irrel k k' T h h') T h h'
 
-theorem SVal.dfltBelow_eq (k : Nat) (T : Ty) (h : tyRank T < k) :
+theorem SVal.dfltBelow_dflt (k : Nat) (T : Ty) (h : tyRank T < k) :
     SVal.dfltBelow k T h = SVal.dflt T :=
-  SVal.dfltBelow_congr _ _ T h _
+  SVal.dfltBelow_irrel _ _ T h _
 
 theorem SFields.dfltBelow_eq (k : Nat) :
     (fs : List (Name × Ty)) → (h : fieldsRank fs < k) →
@@ -247,7 +247,7 @@ theorem SFields.dfltBelow_eq (k : Nat) :
   | [], _ => rfl
   | (_, T) :: fs, h => by
     simp only [SFields.dfltBelow, SFields.dflt]
-    rw [SVal.dfltBelow_eq, SFields.dfltBelow_eq k fs]
+    rw [SVal.dfltBelow_dflt, SFields.dfltBelow_eq k fs]
 
 /-- A default unfolded once. -/
 theorem SVal.dflt_eq_at (T : Ty) :
@@ -270,22 +270,22 @@ theorem SVal.dflt_fixed (E : Ty) (n : Nat) :
   rw [SVal.dflt_eq_at]
   simp only [SVal.dfltAt, SVal.dfltRefAt]
   exact congrArg (fun x => SVal.fixed (SVec.replicate x n))
-    (SVal.dfltAt_congr (fun T h h' => SVal.dfltBelow_congr _ _ T h h') E _ _)
+    (SVal.dfltAt_irrel (fun T h h' => SVal.dfltBelow_irrel _ _ T h h') E _ _)
 
 theorem SVal.dflt_map (K V : Ty) :
     SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) := by
   rw [SVal.dflt_eq_at]
   simp only [SVal.dfltAt, SVal.dfltRefAt]
   exact congrArg (SVal.map .nil)
-    (SVal.dfltAt_congr (fun T h h' => SVal.dfltBelow_congr _ _ T h h') V _ _)
+    (SVal.dfltAt_irrel (fun T h h' => SVal.dfltBelow_irrel _ _ T h h') V _ _)
 
 /-- A default's subterm at a fuel that defaults agree on is the default. -/
 theorem SVal.dfltAt_eq {k : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
     (heq : ∀ T h, ih T h = SVal.dflt T) (T : Ty) (h : tyRank T < k + 1) :
     SVal.dfltAt k ih T h = SVal.dflt T := by
-  rw [SVal.dfltAt_congr (ih' := SVal.dfltBelow k)
-    (fun T h h' => by rw [heq, SVal.dfltBelow_eq]) T h h]
-  exact SVal.dfltBelow_eq (k + 1) T h
+  rw [SVal.dfltAt_irrel (ih' := SVal.dfltBelow k)
+    (fun T h h' => by rw [heq, SVal.dfltBelow_dflt]) T h h]
+  exact SVal.dfltBelow_dflt (k + 1) T h
 
 /-! ## Hereditary predicates -/
 
@@ -508,7 +508,7 @@ theorem SVal.dfltRefAt_all (harr : ∀ E : Ty, P.arr (E := E) SVec.nil SList.nil
   | .mapping K V, h => by
     simp only [SVal.dfltRefAt, SVal.All]
     refine ⟨?_, by simp only [SMap.All], SVal.dfltAt_all harr hfix hmap hih V _⟩
-    rw [SVal.dfltAt_eq (fun T h => SVal.dfltBelow_eq k T h)]
+    rw [SVal.dfltAt_eq (fun T h => SVal.dfltBelow_dflt k T h)]
     exact hmap K V
 end
 
