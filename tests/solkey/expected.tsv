@@ -157,9 +157,9 @@ taclets	TestSuite	storageMatrixNseIndex	derived	box; for all i, j, x, y	`Solkey.
 taclets	TestSuite	storageMatrixWriteRead	derived	box	`Solkey.TestSuite.storageMatrixWriteRead.proved` (`Solidity/TestSuite/Derived3.lean`)
 taclets	TestSuite	storagePopAfterPush	derived	box	`Solkey.TestSuite.storagePopAfterPush.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePopNonempty	derived	box	`Solkey.TestSuite.storagePopNonempty.proved` (`Solidity/TestSuite/Derived7.lean`)
-taclets	TestSuite	storagePopUnknownLength	derived	diamond	`Solkey.TestSuite.storagePopUnknownLength.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePopUnknownLength	pending	diamond	not derived yet
 taclets	TestSuite	storagePushEmpty	derived	box	`Solkey.TestSuite.storagePushEmpty.proved` (`Solidity/TestSuite/Derived7.lean`)
-taclets	TestSuite	storagePushLengthPositive	derived	diamond	`Solkey.TestSuite.storagePushLengthPositive.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushLengthPositive	pending	diamond	not derived yet
 taclets	TestSuite	storagePushLocalBind	derived	box	`Solkey.TestSuite.storagePushLocalBind.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushNonsimpleArg	derived	box; for all x, y	`Solkey.TestSuite.storagePushNonsimpleArg.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushReadBack	divergent	diamond	`wt(storage)` does not bound array lengths, so the checked `- 1` after a push can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, "Remaining deltas")
@@ -259,7 +259,7 @@ taclets	TestSuite	testDeleteArrayLeavesDataPastLength	derived	diamond	`Solkey.Te
 taclets	TestSuite	testPopKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testPopKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testDeleteKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testDeleteKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testPushBindMappingElement	derived	diamond	`Solkey.TestSuite.testPushBindMappingElement.proved` (`Solidity/TestSuite/Derived8.lean`)
-taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	derived	diamond	`Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved` (`Solidity/TestSuite/Derived13.lean`)
+taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	pending	diamond	not derived yet
 taclets	TestSuite	testStorageRootDeepCopy	derived	diamond	`Solkey.TestSuite.testStorageRootDeepCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	derived	diamond	`Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testStorageToMemoryCopyComplexPath	derived	diamond	`Solkey.TestSuite.testStorageToMemoryCopyComplexPath.proved` (`Solidity/TestSuite/Derived12.lean`)
@@ -307,7 +307,7 @@ taclets	TestSuite	indexWriteBothImpureMemoryValue	derived	diamond	`Solkey.TestSu
 taclets	TestSuite	indexWriteBothImpureMemRef	derived	diamond	`Solkey.TestSuite.indexWriteBothImpureMemRef.proved` (`Solidity/TestSuite/Derived10.lean`)
 taclets	TestSuite	nestedMappingWriteRead	derived	diamond	`Solkey.TestSuite.nestedMappingWriteRead.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	nestedMappingRowAlias	derived	diamond	`Solkey.TestSuite.nestedMappingRowAlias.proved` (`Solidity/TestSuite/Derived4.lean`)
-taclets	TestSuite	arrayOfMappingsIndex	derived	diamond	`Solkey.TestSuite.arrayOfMappingsIndex.proved` (`Solidity/TestSuite/Derived8.lean`)
+taclets	TestSuite	arrayOfMappingsIndex	pending	diamond	not derived yet
 taclets	TestSuite	mappingOfLedgerMember	derived	diamond	`Solkey.TestSuite.mappingOfLedgerMember.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	mappingPointerTernary	derived	diamond	`Solkey.TestSuite.mappingPointerTernary.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	mappingReadAsKey	derived	diamond	`Solkey.TestSuite.mappingReadAsKey.proved` (`Solidity/TestSuite/Derived4.lean`)
