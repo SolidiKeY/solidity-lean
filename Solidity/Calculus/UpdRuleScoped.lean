@@ -655,13 +655,6 @@ theorem Upd.shadow_held {Γ : Ctx} (box : Bool) :
     | storage _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ =>
       exact ih k
 
-theorem ResRel.eq_of_false {α : Type} {a b : Option α} (h : ResRel false (· = ·) a b) : a = b := by
-  cases a <;> cases b
-  · rfl
-  · exact absurd h Bool.false_ne_true
-  · exact h.elim
-  · exact congrArg some h
-
 theorem Rhs.exhB_of_totalB {Γ : Ctx} (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t)
     (h : r.totalB = true) : r.exhB σ₀ = false := by
   obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r h

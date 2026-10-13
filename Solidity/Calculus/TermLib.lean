@@ -166,11 +166,36 @@ def delabTmS : Delab := do
     | ``Srt.addr => pure (Delab.ppMAddrS [])
     | ``Srt.mem => pure (Delab.ppMTermS [])
     | ``Srt.mv => pure (Delab.ppMValS [])
+    | ``Srt.kint => pure (Delab.ppTermS [])
     | _ => failure
   let t ← withOptions (fun o => pp.sol.tmField.set (pp.sol.reduce.set o false) true)
     (printer (← unfoldTmsSyms e'))
   guard !(isEscape t)
   `(tm{ $t })
+
+/-- A closed scoped term as `tm{ t }`, where `pp.sol.closedTm` asks (a law's
+side condition, `lawAt`): read as the closer's terms are (`pp.sol.reduce`),
+an escape refused. -/
+def delabTmClosed : Delab := do
+  unless pp.sol.closedTm.get (← getOptions) do failure
+  let e ← instantiateMVars (← getExpr)
+  let some c := e.getAppFn.constName? | failure
+  guard (e.getAppNumArgs == (← getConstInfo c).type.getNumHeadForalls)
+  guard (sizeAtMost tmCutoff e)
+  let_expr Solidity.Tm _ _ s := (← whnfR (← inferType e)) | failure
+  let some srt := (← whnf s).getAppFn.constName? | failure
+  let printer : Lean.Expr → MetaM (TSyntax `dl_term) ← match srt with
+    | ``Srt.val | ``Srt.kint => pure (Delab.ppTermS [])
+    | ``Srt.path | ``Srt.spath => pure (Delab.ppPTermS [])
+    | ``Srt.st | ``Srt.sts => pure (Delab.ppSTermS [])
+    | ``Srt.sv => pure (Delab.ppSValS [])
+    | _ => failure
+  let t ← withOptions (fun o => pp.sol.reduce.set o true) (printer e)
+  guard !(isEscape t)
+  `(tm{ $t })
+
+attribute [delab app.Solidity.Tm.app0, delab app.Solidity.Tm.app1, delab app.Solidity.Tm.app2,
+  delab app.Solidity.Tm.app3] delabTmClosed
 
 attribute [delab app.Solidity.Tms.Term.lit, delab app.Solidity.Tms.Term.binop,
   delab app.Solidity.Tms.Term.unop, delab app.Solidity.Tms.Term.find,
@@ -1497,6 +1522,57 @@ end Sound
 /-! ## Pins -/
 
 section Pins
+
+section Printed
+
+variable {Γ : Ctx}
+
+/- `tm{ … }` writes a scoped rule and prints it back as it was written; an
+escape's term prints as the closer's does. -/
+/--
+info: @TermTaclet.findOnSave : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {P : PrimTy}
+  {p q : Tm C Γ (Srt.path (Ty.prim P))} {v : P.Denote},
+  autoParam (p.hasSeg = true) _auto✝ →
+    autoParam (p.sameSegs q = true) _auto✝¹ → TermTaclet tm{ find(save(s, p, lit(v)), q) } tm{ lit(v) }
+-/
+#guard_msgs in
+#check @TermTaclet.findOnSave
+
+/--
+info: @TermTaclet.findOnPushFrame : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {E : Ty}
+  {p : Tm C Γ (Srt.path (Ty.ref (RefTy.array E)))} {v : Tm C Γ (Srt.sv E)} {P : PrimTy}
+  {q : Tm C Γ (Srt.path (Ty.prim P))},
+  autoParam (p.diverges q = true) _auto✝ →
+    TermTaclet tm{ find(save(save(s, p[p.length], v), p.length, p.length + 1), q) } tm{ find(s, q) }
+-/
+#guard_msgs in
+#check @TermTaclet.findOnPushFrame
+
+/--
+info: @TermTaclet.selectOnSaveMemberIn : ∀ {C : Contract} {Γ : Ctx} {s : Tm C Γ Srt.st} {T : Ty} {p : Tm C Γ (Srt.path T)}
+  {v : Tm C Γ (Srt.sv T)} {r sn : Name} {hr : C.rootType r = some (Ty.ref (RefTy.struct sn))}
+  {p' : Tm C Γ (Srt.spath sn T)} {sn₁ : Name} (K : SCtxS C Γ sn sn₁) {P : PrimTy}
+  {q : Tm C Γ (Srt.spath sn₁ (Ty.prim P))},
+  autoParam (p.shift? = some { r := r, sn := sn, h := hr, p := p' }) _auto✝ →
+    TermTaclet (Tm.app2 Op2.findIn (K.fill tm{ select(save(s, p, v), r) }) q)
+      (Tm.app2 Op2.findIn (K.fill (Tm.app3 Op3.saveIn tm{ select(s, r) } p' v)) q)
+-/
+#guard_msgs in
+#check @TermTaclet.selectOnSaveMemberIn
+
+/-- `t⊕⊕` prints with its operand's symbols unfolded (W9.6 review). -/
+theorem bumped_pin (op : IncDec) (hp : PrimTy.uint.isNumeric = true) (s : Tm C Γ .st)
+    (q : Tm C Γ (.path (.prim .uint))) :
+    (tm{ find(s, q)⊕⊕ + 1 } : Tm C Γ (.val .uint)) = tm{ find(s, q)⊕⊕ + 1 } := rfl
+
+/--
+info: Solidity.bumped_pin {C : Contract} {Γ : Ctx} (op : IncDec) (hp : PrimTy.uint.isNumeric = true) (s : Tm C Γ Srt.st)
+  (q : Tm C Γ (Srt.path (Ty.prim PrimTy.uint))) : tm{ find(s, q)⊕⊕ + 1 } = tm{ find(s, q)⊕⊕ + 1 }
+-/
+#guard_msgs in
+#check bumped_pin
+
+end Printed
 
 /-- `bob.age`. -/
 private def bobAge : Tm StandardExample [] (.path (.prim .uint)) :=

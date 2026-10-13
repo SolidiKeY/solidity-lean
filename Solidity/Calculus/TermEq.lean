@@ -429,9 +429,6 @@ theorem Tm.sigma_eq_of_beqR {s s' : Srt} {t : Tm C Γ s} {t' : Tm C Γ s'} (h : 
 theorem Tm.beqR_self {s : Srt} (t : Tm C Γ s) : t.beqR t = true :=
   (Tm.beqR_eq_beqM t t).trans (Tm.beqM_self t)
 
-theorem Tm.beqR_iff {s : Srt} {t t' : Tm C Γ s} : t.beqR t' = true ↔ t = t' :=
-  ⟨Tm.eq_of_beqR, fun h => h ▸ Tm.beqR_self t⟩
-
 end Generic
 
 /-! ## Pins -/

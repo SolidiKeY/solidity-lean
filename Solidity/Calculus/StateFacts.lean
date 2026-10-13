@@ -78,14 +78,6 @@ theorem pickBranch_le {c : Value} {a a' b b' : Res Value} (ha : Res.Le a a') (hb
   · exact hb
   · exact Res.Le.refl _
 
-theorem pushAt_le {σ : Semantics.State} {E : Ty} {r : Name} {segs : List Seg} {val val' : Semantics.SVal → Res Semantics.SVal}
-    (hv : ∀ x, Res.Le (val x) (val' x)) : Res.Le (pushAt σ E r segs val) (pushAt σ E r segs val') := by
-  unfold pushAt
-  refine Res.Le.bind (Res.Le.refl _) fun cur => ?_
-  cases cur with
-  | array elems shadow fx => exact Res.Le.bind (hv _) fun _ => Res.Le.refl _
-  | prim _ | struct _ | map _ _ => exact Res.Le.refl _
-
 end RwEval
 end
 
@@ -155,12 +147,6 @@ theorem Semantics.Res.memPart_cases {a b : Res Semantics.State} (h : Res.memPart
       simp only [Res.memPart, Except.map, Except.ok.injEq, Prod.mk.injEq] at h
       exact Or.inr ⟨τ₁, τ₂, rfl, rfl, h⟩
 
-theorem Semantics.Res.stPart_ok {τ₁ τ₂ : Semantics.State} (h : τ₁.storage = τ₂.storage) :
-    StPartEq (Except.ok τ₁) (Except.ok τ₂) := ⟨by simp only [Res.stPart, Except.map, h]⟩
-
-theorem Semantics.Res.memPart_ok {τ₁ τ₂ : Semantics.State} (h : τ₁.HeapEq τ₂) :
-    MemPartEq (Except.ok τ₁) (Except.ok τ₂) := ⟨by simp only [Res.memPart, Except.map, h.1, h.2]⟩
-
 end
 
 section
@@ -190,33 +176,6 @@ theorem Semantics.State.saveStorage_of_storage (r : Name) (q : List Seg) (v : Se
   | some w =>
     simp only [bind, Except.bind]
     cases w.save q v <;> rfl
-
-theorem Semantics.State.writeStorage_of_storage (r : Name) (q : List Seg) (v : Semantics.SVal) :
-    Res.stPart (σ.writeStorage r q v) = Res.stPart (τ.writeStorage r q v) := by
-  unfold Semantics.State.writeStorage
-  cases v with
-  | prim p => exact Semantics.State.saveStorage_of_storage hst r q _
-  | struct _ | array _ _ _ | map _ _ =>
-    rw [Semantics.State.findStorage_of_storage hst]
-    simp only [bind, Except.bind]
-    cases τ.findStorage r q with
-    | error _ => rfl
-    | ok cur => exact Semantics.State.saveStorage_of_storage hst r q _
-
-theorem pushAt_of_storage (E : Ty) (r : Name) (q : List Seg) (val : Semantics.SVal → Res Semantics.SVal) :
-    Res.stPart (pushAt σ E r q val) = Res.stPart (pushAt τ E r q val) := by
-  unfold pushAt
-  rw [Semantics.State.findStorage_of_storage hst]
-  cases τ.findStorage r q with
-  | error _ => rfl
-  | ok cur =>
-    cases cur with
-    | array elems shadow fx =>
-      simp only [bind, Except.bind]
-      cases val (Semantics.pushSlot E shadow).1 with
-      | error _ => rfl
-      | ok w => exact Semantics.State.saveStorage_of_storage hst r q _
-    | prim _ | struct _ | map _ _ => rfl
 
 theorem pushPlaceAt_of_storage (E : Ty) (r : Name) (q : List Seg) :
     Res.stPart (pushPlaceAt σ E r q >>= fun x => pure x.1) =
@@ -498,16 +457,6 @@ def Semantics.State.frameOf : List Name → Semantics.State → Res Semantics.St
   | [], τ => .ok τ
   | r :: F, τ => Semantics.State.selectRoot r τ >>= Semantics.State.frameOf F
 
-theorem Semantics.State.frameOf_append (F G : List Name) (τ : Semantics.State) :
-    Semantics.State.frameOf (F ++ G) τ = (Semantics.State.frameOf F τ >>= Semantics.State.frameOf G) := by
-  induction F generalizing τ with
-  | nil => rfl
-  | cons r F ih =>
-    simp only [List.cons_append, Semantics.State.frameOf]
-    cases Semantics.State.selectRoot r τ with
-    | error e => rfl
-    | ok τ' => exact ih τ'
-
 /-- In the frame at `r`, a read at `g.segs` is the read at `r.g.segs` outside it. -/
 theorem Semantics.State.findStorage_selectRoot {r : Name} {τ τ' : Semantics.State} (h : Semantics.State.selectRoot r τ = .ok τ')
     (g : Name) (segs : List Seg) : τ'.findStorage g segs = τ.findStorage r (.field g :: segs) := by
@@ -623,15 +572,6 @@ theorem Semantics.State.writeStorage_selectRoot (r : Name) (τ : Semantics.State
 def _root_.Solidity.Semantics.State.delAtAt (τ : Semantics.State) (g : Name) (segs : List Seg) : Res Semantics.State :=
   τ.findStorage g segs >>= fun cur => τ.saveStorage g segs cur.defaultOf
 
-/-- A storage word and its default either both fail to be words, or read as
-the value and its primitive default. -/
-theorem Semantics.SVal.defaultOf_asValue_primDefault (v : Semantics.SVal) :
-    v.defaultOf.asValue = (do pure (Theory.StValue.primDefault (← v.asValue))) := by
-  cases v with
-  | prim p => cases p <;> rfl
-  | struct _ | map _ _ => rfl
-  | array _ _ fx => cases fx <;> rfl
-
 /-- A write below an array keeps its length. -/
 theorem Close.arrLen_save_cons {a : Seg} {rest : List Seg} {old new upd : Semantics.SVal}
     (h : old.save (a :: rest) new = .ok upd) : Close.arrLen upd = Close.arrLen old := by
@@ -683,23 +623,6 @@ theorem Close.find_save_arrLen : ∀ {p q : List Seg} {old new upd : Semantics.S
         rw [(hf q).1, (hf q).2]
         exact Close.find_save_arrLen hu hq'
       · rw [Close.find_save_diverge (show Close.Diverge (a :: p) (b :: q) from Or.inl hab) hs]
-
-/-- `find_save_arrLen` at a root of the storage. -/
-theorem Close.arrayLen_saveStorage_frame {σ τ : Semantics.State} {r r' : Name} {p q : List Seg}
-    {v : Semantics.SVal} (h : σ.saveStorage r p v = .ok τ)
-    (hq : r' ≠ r ∨ ¬ Close.Prefix p q) : arrayLen τ r' q = arrayLen σ r' q := by
-  rw [Close.arrayLen_eq, Close.arrayLen_eq]
-  unfold Semantics.State.saveStorage at h
-  split at h
-  · rename_i old hl
-    obtain ⟨u, hu, h⟩ := bind_ok_inv h
-    cases h
-    by_cases hr : r' = r
-    · subst hr
-      simp only [Semantics.State.findStorage, lookupBy_setBy_self, hl]
-      exact Close.find_save_arrLen hu (hq.resolve_left (· rfl))
-    · simp only [Semantics.State.findStorage, lookupBy_setBy_ne hr]
-  · simp at h
 
 /-- A divergent path is not a prefix of the path it diverges from. -/
 theorem Close.Diverge.not_prefix : ∀ {p q : List Seg}, Close.Diverge p q → ¬ Close.Prefix p q
@@ -927,19 +850,6 @@ theorem Semantics.State.frameOf_of_saveStorage (r₁ g : Name) (segs : List Seg)
     · show (Semantics.State.selectRoot r₁ τ₁ >>= Semantics.State.frameOf (r₂ :: F'')) = _
       rw [hs₁, Res.ok_bind']; exact hb
 
-/-- A write of the frame `F` at `F.p` that returned leaves the frame in place. -/
-theorem Semantics.State.frameOf_of_writeStorage {r₁ g : Name} {segs : List Seg} {sv : Semantics.SVal} {F' : List Name}
-    {τ τ₁ : Semantics.State} (h : τ.writeStorage r₁ (F'.map Seg.field ++ (.field g :: segs)) sv = .ok τ₁) :
-    ∃ τ₁', Semantics.State.frameOf (r₁ :: F') τ₁ = .ok τ₁' := by
-  obtain ⟨x, hx⟩ := Semantics.State.writeStorage_ok h
-  exact (Semantics.State.frameOf_of_saveStorage r₁ g segs x F' τ τ₁ hx).2
-
-theorem Semantics.State.frameOf_of_delAtAt {r₁ g : Name} {segs : List Seg} {F' : List Name} {τ τ₁ : Semantics.State}
-    (h : τ.delAtAt r₁ (F'.map Seg.field ++ (.field g :: segs)) = .ok τ₁) :
-    ∃ τ₁', Semantics.State.frameOf (r₁ :: F') τ₁ = .ok τ₁' := by
-  obtain ⟨cur, -, hx⟩ := bind_ok_inv h
-  exact (Semantics.State.frameOf_of_saveStorage r₁ g segs cur.defaultOf F' τ τ₁ hx).2
-
 theorem Semantics.Value.toMVal_asValue (v : Value) : v.toMVal.asValue = .ok v := by cases v <;> rfl
 
 theorem PrimVal.asValue_eq (p : PrimVal) : (Semantics.SVal.prim p).asValue = (MVal.prim p).asValue := by
@@ -965,53 +875,6 @@ theorem Close.layAt_asValue (old : Semantics.SVal) (q : List Seg) (v : Semantics
         | none => exact Semantics.SVal.strip_asValue v
         | some o => exact ih o
       | prim _ | array _ _ _ | map _ _ => simp only [Close.layAt]; exact Semantics.SVal.strip_asValue v
-
-/-- A member read at a word below a storage write reads the word written
-there, whatever the write copied over. -/
-theorem Semantics.State.writeStorage_find_field {σ τ : Semantics.State} {r : Name} {segs : List Seg} {sv : Semantics.SVal}
-    (h : σ.writeStorage r segs sv = .ok τ) (f : Name) :
-    (τ.findStorage r (segs ++ [.field f]) >>= Semantics.SVal.asValue) = (sv.find [.field f] >>= Semantics.SVal.asValue) := by
-  rw [SemanticsProperties.State.findStorage_append]
-  unfold Semantics.State.writeStorage at h
-  cases sv with
-  | prim p =>
-    rw [SemanticsProperties.State.findStorage_saveStorage_same h]
-    rfl
-  | struct _ | array _ _ _ | map _ _ =>
-    simp only [bind, Except.bind] at h
-    cases hc : σ.findStorage r segs with
-    | error e => rw [hc] at h; cases h
-    | ok cur =>
-      rw [hc] at h
-      rw [SemanticsProperties.State.findStorage_saveStorage_same h, Res.ok_bind', Close.find_overlay_fields _ _ _ rfl]
-      cases Semantics.SVal.find _ [Seg.field f] with
-      | error _ => rfl
-      | ok v => simp only [bind, Except.bind, Close.layAt_asValue]
-
-/-- A member copied out of memory reads as the member in memory: a word as
-the word, a reference as no word. -/
-theorem Close.copyLeaf_asValue (σ : Semantics.State) (id : Nat) (mv : Semantics.MVal) (x : Value) :
-    (Close.copyLeaf σ id mv >>= Semantics.SVal.asValue) = .ok x ↔ mv.asValue = .ok x := by
-  cases mv with
-  | prim p => rw [Close.copyLeaf_prim, Res.ok_bind', PrimVal.asValue_eq]
-  | ref id' =>
-    unfold Close.copyLeaf
-    rw [copyMToSt.eq_def]
-    simp only
-    constructor
-    · intro h
-      exfalso
-      split at h
-      · split at h
-        · rename_i hmem _ fields hg
-          rcases hcf : copyMFields σ (((List.map Prod.fst σ.heap).erase id).erase id') fields with _ | sf <;>
-            simp [hcf, bind, Except.bind, Semantics.SVal.asValue] at h
-        · rename_i hmem _ elems fx hg
-          rcases hcf : copyMElems σ (((List.map Prod.fst σ.heap).erase id).erase id') elems with _ | se <;>
-            simp [hcf, bind, Except.bind, Semantics.SVal.asValue] at h
-        · simp [bind, Except.bind] at h
-      · simp [bind, Except.bind] at h
-    · intro h; cases h
 
 theorem Ty.memberTy_snoc_some {T T' : Ty} {p : List Seg} {s : Seg}
     (h : T.memberTy (p ++ [s]) = some T') : ∃ R', T.memberTy p = some (.ref R') := by

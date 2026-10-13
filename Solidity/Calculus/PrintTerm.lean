@@ -31,6 +31,12 @@ register_option pp.sol.tmField : Bool := {
             (`s.save p v`); set by `tm{ … }`'s printer (`delabTmS`)"
 }
 
+register_option pp.sol.closedTm : Bool := {
+  defValue := false
+  descr := "a closed scoped term (`Tm.app1 …` over no schema variable) prints as `tm{ … }`; \
+            set where a law's side condition is shown (`lawAt`)"
+}
+
 namespace Delab
 
 section PrintTerm

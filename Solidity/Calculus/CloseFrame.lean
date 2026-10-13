@@ -495,9 +495,6 @@ theorem writeVal_prim {p : PrimTy} (st : Storage C) (r : SRef C (.prim p))
 
 theorem writeVal_ref {R : RefTy} (st : Storage C) (r : SRef C (.ref R)) (v : SVal (.ref R)) :
     st.writeVal r v = (st.find r).map fun cur => cur.overlay v := rfl
-theorem find_ofRoot {T : Ty} (st : Storage C) (r : Name) (h : C.rootType r = some T) :
-    st.find (SRef.ofRoot r h) = some (st.get h) := rfl
-
 /-- A result named bare (`Modality.wp_box`) is the option's: two reads of
 one reference then name one value. -/
 theorem optRes_eq_ok {α : Type} (x : Option α) (a : α) : Close.optRes x = .ok a ↔ x = some a := by

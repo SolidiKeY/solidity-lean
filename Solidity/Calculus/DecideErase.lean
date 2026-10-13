@@ -244,12 +244,6 @@ theorem LocsV.erase_push {Δ : Ctx} {t : LTy} (ℓ : LocsV C Δ) (v : t.VDen C) 
   funext u j
   cases j <;> rfl
 
-theorem LocsV.erase_drop {Δ Δ' : Ctx} (h : Ext Δ' Δ) (ℓ : LocsV C Δ) :
-    (ℓ.drop h).erase = ℓ.erase.drop h := rfl
-
-theorem LocsV.erase_thin {Δ Δ' : Ctx} (h : Thin Δ' Δ) (ℓ : LocsV C Δ) :
-    (ℓ.thin h).erase = ℓ.erase.thin h := rfl
-
 theorem State.locV_erase {Γ : Ctx} (τ : State C Γ) : τ.locV.erase = τ.loc := by
   funext t i
   show LTy.VDen.erase t (LTy.VDen.ofT t (TEnv.get i τ.env)) = LTy.TDenote.erase t (TEnv.get i τ.env)
@@ -815,8 +809,6 @@ end Terms
 
 end Tm
 
-theorem Rhs.evalE_val {Γ : Ctx} (σ₀ : State C Γ) {p : PrimTy} (t : Tm C Γ (.val p)) :
-    (Rhs.val t).evalE σ₀ = t.evalE σ₀ := rfl
 theorem Rhs.evalE_path {Γ : Ctx} (σ₀ : State C Γ) {R : RefTy} (p : Tm C Γ (.path (.ref R))) :
     (Rhs.path p).evalE σ₀ = p.evalE σ₀ >>= fun rs => .ok (some rs) := by
   simp only [Rhs.evalE, Tm.evalE]
@@ -896,10 +888,6 @@ def Upd.applyVE (σ₀ : State C Γ) : {Δ : Ctx} → Upd C Γ Δ → Res (Seman
 /-- An update's result, erased. -/
 def eraseQ {H : HTy} {Δ : Ctx} (q : GlobT C H × LocsV C Δ) : Semantics.State × Locs C Δ :=
   (q.1.1.globE, q.2.erase)
-
-theorem toRes_bind {α β γ : Type} (f : β → γ) (x : Option α) (k : α → Option β) :
-    toRes f (x.bind k) = toRes id x >>= fun a => toRes f (k a) := by
-  cases x <;> rfl
 
 theorem UpdElem.applyVE_eq {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ) (g : GlobT C σ₀.H)
     (ℓ : LocsV C Δ) : e.applyVE σ₀ g.1.globE ℓ.erase = toRes eraseQ (e.applyV σ₀ g ℓ) := by

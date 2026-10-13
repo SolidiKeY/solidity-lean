@@ -234,6 +234,22 @@ def matchLaw (lhs e : Lean.Expr) : MetaM Bool := do
       return false
   return true
 
+/-- A law's side condition as the notation writes its terms: a term
+`tm{ … }` (`delabTmClosed`), a literal law's `a ⊕ b = some ?_` as the
+operation that must stay in range; an argument the condition fixes, not yet
+known, as `?_`. -/
+def sideCondFmt (ty : Lean.Expr) : MetaM Format := do
+  if let some (_, l, _) := ty.eq? then
+    if l.isAppOfArity ``BinOp.evalT 4 then
+      let ls := l.getAppArgs
+      let val (v : Lean.Expr) : MetaM (Option Int) := do
+        match_expr (← whnf v) with
+        | Subtype.mk _ _ n _ => intOf? n
+        | _ => pure none
+      if let (some sym, some a, some b) := (← termOpSym? ls[0]!, ← val ls[2]!, ← val ls[3]!) then
+        return f!"{a} {sym} {b} in range"
+  withOptions (fun o => (o.setBool `pp.mvars false).setBool `pp.sol.closedTm true) (ppExpr ty)
+
 /-- The law `c` at the subterm `e`: `(t, t', h)` when `e` is its left side,
 its arguments found there by unification and its side conditions
 (`hp : p.hasSeg = true`, …) closed by `rfl` or `decide`, as `sol_rw` closes
@@ -286,10 +302,8 @@ def lawAt (c : Lean.Name) (e : Lean.Expr) :
     let g := a.mvarId!
     if (← g.isAssigned) || !(← isProp (← g.getType)) then continue
     let ty := (← instantiateMVars (← g.getType)).cleanupAnnotations
-    -- an argument the condition fixes, not yet known, prints as `?_`
-    let fmt ← withOptions (fun o => o.setBool `pp.mvars false) (ppExpr ty)
-    return .error (some m!"the side condition{indentD fmt}\nof {lastName c} closes by neither \
-      `rfl`, `decide` nor a hypothesis")
+    return .error (some m!"the side condition{indentD (← sideCondFmt ty)}\nof {lastName c} \
+      closes by neither `rfl`, `decide` nor a hypothesis")
   let pf ← instantiateMVars (mkAppN pf args)
   let t' ← instantiateMVars rhs
   if pf.hasExprMVar || t'.hasExprMVar then return .error none

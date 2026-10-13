@@ -919,12 +919,6 @@ theorem Tm.onSpineAny_eval {σ : State C Γ} {k : Srt} {w : Tm C Γ k} {u : Srt}
     · exact ihx h hx
   | _ => simp only [Tm.onSpineAny, Bool.false_eq_true] at h
 
-theorem Tm.onSpine_eval {σ : State C Γ} {k : Srt} {t w : Tm C Γ k} (h : t.onSpine w = true)
-    (ht : t.eval σ ≠ none) : w.eval σ ≠ none := by
-  rcases Bool.or_eq_true_iff.mp h with h | h
-  · obtain rfl := Tm.eq_of_beqR h; exact ht
-  · exact Tm.onSpineAny_eval (w := w) t h ht
-
 theorem Op2.exhB_none_fst {H : HTy} {a b k : Srt} (o : Op2 C a b k) (y : Option (b.Den C H)) :
     o.exhB none y = false := by
   cases o <;> rfl
@@ -1247,21 +1241,12 @@ def SRef.underAt {C : Contract} {s : Name} {U : Ty} (q : SRef (Contract.ofStruct
     (ref : SRef C (.ref (.struct s))) : SRef C U :=
   ref.append (.field q.hroot q.path)
 
-theorem SRef.underAt_ofRoot {C : Contract} {s r : Name} {U : Ty} (q : SRef (Contract.ofStruct s) U)
-    (h : C.rootType r = some (.ref (.struct s))) : q.underAt (SRef.ofRoot r h) = q.under h := by
-  simp only [SRef.underAt, SRef.ofRoot, SRef.append, SRef.under, Path.append_nil]
-
 /-- A member after a member path, under `ref`. -/
 theorem SRef.underAt_field {C : Contract} {s s' f : Name} {T : Ty}
     (q : SRef (Contract.ofStruct s) (.ref (.struct s'))) (hg : C.fieldType s' f = some T)
     (ref : SRef C (.ref (.struct s))) :
     (q.field (C := Contract.ofStruct s) hg).underAt ref = (q.underAt ref).field hg := by
   simp only [SRef.underAt, SRef.field, SRef.append, Path.append_assoc, Path.append_field]
-
-/-- A member under `ref`. -/
-theorem SRef.ofRoot_underAt {C : Contract} {s f : Name} {T : Ty}
-    (hf : C.fieldType s f = some T) (ref : SRef C (.ref (.struct s))) :
-    (SRef.ofRoot (C := Contract.ofStruct s) f hf).underAt ref = ref.field hf := rfl
 
 namespace Storage
 

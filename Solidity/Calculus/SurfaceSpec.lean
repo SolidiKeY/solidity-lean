@@ -69,14 +69,16 @@ variable, the ledger or the funds is refused, since solkey reads it before
 the update, of a storage the deployment never sees.
 
 Not ported: the benchmarks' clauses over `net(a)` are not tried.  A spec's
-arithmetic is Solidity's, checked at its operands' type, where solkey's is
-KeY's unbounded `int`: an overflowing side makes its equation false rather
-than true of a larger number.  Every equation compiled here is the
-interpreter's, `Fml.eqD` (both sides return, with one value), not the total
-`Fml.eq`.  `net(a)` is a ledger entry, an `int`; `msg.value` is a `uint`
-(solkey's `msgValue` and its ledger are both KeY `int`s, `netHeader.key`), so
-beside an `int` a `uint` is widened (`Op1.toInt`, printed bare as solkey
-prints it), and `\old(net(a)) + msg.value` is checked `int` arithmetic.
+arithmetic over Solidity values is Solidity's, checked at its operands'
+type, where solkey's is KeY's unbounded `int`: an overflowing side makes its
+equation false rather than true of a larger number.  Every equation compiled
+here is the interpreter's, `Fml.eqD` (both sides return, with one value),
+not the total `Fml.eq`.  `net(a)` is a ledger entry, a KeY `int`
+(`Srt.kint`, solkey's `netHeader.key`), unbounded; beside one a `uint`
+(`msg.value`, solkey's `msgValue`, also a KeY `int`) is widened
+(`Op1.toInt`, total, printed bare where the other side shows the sort), and
+`\old(net(a)) + msg.value` is KeY's unbounded arithmetic (`Op2.zbin`), its
+equation the comparison `==` on KeY `int`s (`NRead.eqK`).
 -/
 
 namespace Solidity
@@ -205,7 +207,8 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
     match T with
     | .ref (.mapping (.prim kp) V) => do
       let (q, t) ← k.term ctx
-      unless q = kp || k.isNum do throw s!"a key of type {q.toStr} where a {kp.toStr} is expected"
+      unless q = .prim kp || k.isNum do
+        throw s!"a key of type {q.toStr} where a {kp.toStr} is expected"
       pure (V, .at p t)
     | .ref (.array E) | .ref (.fixed E _) => do
       let (_, t) ← k.term ctx
@@ -213,55 +216,67 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
     | _ => throw "indexing something that is not a mapping or an array"
   | _ => throw "not a storage path: a state variable, `e.f` or `e[k]`"
 
-/-- A value, and its type: a state variable is read from the context's
-storage, `find(storage, count)`, or `find(old, count)` under `\old`. -/
-partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
-  | .num n => pure (.uint, .num n)
-  | .bool b => pure (.bool, .bool b)
+/-- A value, and its sort: a state variable is read from the context's
+storage, `find(storage, count)`, or `find(old, count)` under `\old`; a
+ledger entry is a KeY `int` (`VSort.kint`), and so is arithmetic over one. -/
+partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (NTm.VSort × NTerm C)
+  | .num n => pure (.prim .uint, .num n)
+  | .bool b => pure (.prim .bool, .bool b)
   | .result => do
     unless ctx.ensures do throw "\\result is only allowed in ensures"
     let some p := ctx.result | throw "\\result needs a function that returns one value"
-    pure (p, .pv resultVar)
+    pure (.prim p, .pv resultVar)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
     e.term ctx.old
   | .net e => do
     let (p, t) ← e.term ctx
-    unless p = .uint || e.isNum do throw s!"net(…) of a {p.toStr}, where an address is expected"
+    unless p = .prim .uint || e.isNum do
+      throw s!"net(…) of a {p.toStr}, where an address is expected"
     match ctx.ledger with
-    | none => pure (.int, .net t)
-    | some x => pure (.int, .netOf x t)
+    | none => pure (.kint, .net t)
+    | some x => pure (.kint, .netOf x t)
   | .name x =>
     match lookupBy x ctx.locals with
-    | some p => pure (p, .pv (.ofName x))
+    | some p => pure (.prim p, .pv (.ofName x))
     | none =>
       match ctx.ensures, ctx.rets.find? (·.1 == x) with
-      | true, some (_, v, p) => pure (p, .pv (.ofName v))
-      | _, _ => SpecExpr.read ctx (.name x)
+      | true, some (_, v, p) => pure (.prim p, .pv (.ofName v))
+      | _, _ => do let (p, t) ← SpecExpr.read ctx (.name x); pure (.prim p, t)
   | .field (.name b) m => do
     if (lookupBy b ctx.locals).isNone && (C.rootType b).isNone then
-      if let some k := EnvKey.ofParts b m then return (.uint, .env k)
-      if b == "this" && m == "balance" then return (.uint, .env .selfBalance)
+      if let some k := EnvKey.ofParts b m then return (.prim .uint, .env k)
+      if b == "this" && m == "balance" then return (.prim .uint, .env .selfBalance)
       let some ms := lookupBy b C.enums | throw s!"unknown name {b}"
       let some i := ms.findIdx? (· == m) | throw s!"enum {b} has no member {m}"
-      return (.uint, .num i)
-    SpecExpr.read ctx (.field (.name b) m)
-  | e@(.field ..) | e@(.index ..) => SpecExpr.read ctx e
-  | .unop .neg (.num n) => pure (.int, .num (-(n : Int)))
+      return (.prim .uint, .num i)
+    let (p, t) ← SpecExpr.read ctx (.field (.name b) m)
+    pure (.prim p, t)
+  | e@(.field ..) | e@(.index ..) => do let (p, t) ← SpecExpr.read ctx e; pure (.prim p, t)
+  | .unop .neg (.num n) => pure (.prim .int, .num (-(n : Int)))
   | .unop op a => do
     let (p, t) ← a.term ctx
+    let .prim p := p | throw s!"operator {UnOp.sym op} does not take a KeY `int`"
     unless op.accepts p do throw s!"operator {UnOp.sym op} does not take {p.toStr}"
-    pure (op.ret p, .unop op t)
+    pure (.prim (op.ret p), .unop op t)
   | .binop op a b => do
     let (pa, ta) ← a.term ctx
     let (pb, tb) ← b.term ctx
-    -- a `uint` beside an `int` is widened (`NTm.resolvePair`)
-    let p := if a.isNum then pb else if b.isNum then pa
-      else if pa = .int && pb = .uint || pa = .uint && pb = .int then .int else pa
-    unless a.isNum || b.isNum || pa = pb || p = .int && pa.isNumeric && pb.isNumeric do
-      throw s!"operands of {BinOp.sym op} of types {pa.toStr} and {pb.toStr}"
+    -- beside a KeY `int` (a ledger entry), a `uint` is widened and the
+    -- arithmetic is KeY's, unbounded (`NTm.resolvePairV`)
+    if pa = .kint || pb = .kint then
+      unless (pa = .kint || pa = .prim .uint || a.isNum) &&
+          (pb = .kint || pb = .prim .uint || b.isNum) do
+        throw s!"operands of {BinOp.sym op} of types {pa.toStr} and {pb.toStr}"
+      if op.zArith then return (.kint, .binop op ta tb)
+      if op.zCmp then return (.prim .bool, .binop op ta tb)
+      throw s!"operator {BinOp.sym op} does not take a KeY `int`"
+    let (.prim pa', .prim pb') := (pa, pb) | throw "internal: a KeY `int` operand"
+    let p := if a.isNum then pb' else pa'
+    unless a.isNum || b.isNum || pa' = pb' do
+      throw s!"operands of {BinOp.sym op} of types {pa'.toStr} and {pb'.toStr}"
     unless op.accepts p do throw s!"operator {BinOp.sym op} does not take {p.toStr}"
-    pure (op.ret p, .binop op ta tb)
+    pure (.prim (op.ret p), .binop op ta tb)
   | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
 
 /-- A read: `.length` of an array, or the word at a path. -/
@@ -300,7 +315,7 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
     if op = .eqB || op = .neB then
       let (pa, ta) ← a.term C ctx
       let (pb, tb) ← b.term C ctx
-      let eq ← if pa = .bool && pb = .bool then iff a b else pure (NRead.eqD ta tb)
+      let eq ← if pa = .prim .bool && pb = .prim .bool then iff a b else pure (NRead.eqD ta tb)
       return if op = .eqB then eq else .not eq
     cond (.binop op a b)
   | e => cond e
@@ -313,7 +328,7 @@ where
   /-- A `bool` value as a condition, `t = true`. -/
   cond (e : SpecExpr) : Except String (NRead C) := do
     let (p, t) ← e.term C ctx
-    unless p = .bool do throw s!"a {p.toStr} where a condition is expected"
+    unless p = .prim .bool do throw s!"a {p.toStr} where a condition is expected"
     pure (NRead.bool t)
 
 /-! ### `assignable`: the words a function may change -/
@@ -343,7 +358,7 @@ def SpecLoc.compile (ctx : SpecCtx C) : SpecLoc → Except String (String × Ty 
     let (q, t) ← e.term C ctx
     match T with
     | .ref (.mapping (.prim kp) V) =>
-      unless q = kp || e.isNum do
+      unless q = .prim kp || e.isNum do
         throw s!"assignable: a key of type {q.toStr} where a {kp.toStr} is expected"
       pure (r, V, ss ++ [.key t])
     | .ref (.array E) | .ref (.fixed E _) => pure (r, E, ss ++ [.key t])

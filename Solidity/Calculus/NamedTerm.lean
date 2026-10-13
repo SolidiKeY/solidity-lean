@@ -260,6 +260,11 @@ inductive VSort where
   | kint
   deriving DecidableEq
 
+/-- A value sort as an error message names it. -/
+def VSort.toStr : VSort → String
+  | .prim p => p.toStr
+  | .kint => "KeY `int`"
+
 /-- The sort a value sort is. -/
 @[reducible] def VSort.srt : VSort → Srt
   | .prim p => .val p

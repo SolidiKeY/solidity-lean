@@ -191,9 +191,6 @@ end WkFOEqns
 /-- `Fml.wkFO`, `true` where it is `none`. -/
 def Fml.wkD {Γ Δ : Ctx} (h : Thin Γ Δ) (φ : Fml C Γ) : Fml C Δ := (φ.wkFO h).getD .tt
 
-theorem State.thin_keep_push {Γ Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) {t : LTy}
-    (v : t.TDenote C σ.H) : (σ.push v).thin h.keep = (σ.thin h).push v := rfl
-
 /-- **A weakened first-order formula reads as the formula on the thinned
 state.** -/
 theorem holds_wkFO {Γ Δ : Ctx} (h : Thin Γ Δ) : (φ : Fml C Γ) → {φ' : Fml C Δ} →

@@ -575,9 +575,7 @@ example (ψ : Post StandardExample [.val .uint]) : dl![m]{ { x := 260 ‖ se1 :=
 error: ~[add_literals]~>: add_literals does not apply to
   dl{ { x := 115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 } φ }
 (the side condition
-  BinOp.add.evalT ⟨Int.ofNat 115792089237316195423570985008687907853269984665640564039457584007913129639935, ⋯⟩
-      ⟨Int.ofNat 1, ⋯⟩ =
-    some ?_
+  115792089237316195423570985008687907853269984665640564039457584007913129639935 + 1 in range
 of add_literals closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in
@@ -638,9 +636,7 @@ example : dl!{ find(save(storage, alice.age, 42), alice.age) ≐ 42 } ~=> dl!{ 4
 error: ~[findOnSaveFrame]~>: findOnSaveFrame does not apply to
   dl{ find(save(storage, alice.age, 1), alice.age) ≐ 0 }
 (the side condition
-  (Tm.app1 (Op1.field ageWriteReadValue._proof_1) (Tm.app0 (Op0.root "alice" balanceWrite._proof_3))).diverges
-      (Tm.app1 (Op1.field ageWriteReadValue._proof_1) (Tm.app0 (Op0.root "alice" balanceWrite._proof_3))) =
-    true
+  tm{ alice.age }.diverges tm{ alice.age } = true
 of findOnSaveFrame closes by neither `rfl`, `decide` nor a hypothesis)
 -/
 #guard_msgs in

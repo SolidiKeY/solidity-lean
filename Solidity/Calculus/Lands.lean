@@ -1214,18 +1214,6 @@ theorem Upd.afterT_of_lands {Δ : Ctx} {m : Modality} {σ₀ : State C Γ} {U U'
 
 /-! ### The state an update leaves, by constructor -/
 
-theorem State.glob_drop {Δ : Ctx} (h : Ext Γ Δ) (σ : State C Δ) : (σ.drop h).glob = σ.glob :=
-  rfl
-
-theorem State.glob_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) : (σ.thin h).glob = σ.glob :=
-  rfl
-
-theorem State.glob_push {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
-    (σ.push v).glob = σ.glob := rfl
-
-theorem State.glob_setLocal {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
-    (σ.setLocal i v).glob = σ.glob := rfl
-
 theorem TEnv.get_drop_ext {H : HTy} : {Γ Δ : Ctx} → (h : Ext Γ Δ) → {t : LTy} → (i : Idx Γ t) →
     (e : TEnv C H Δ) → TEnv.get i (TEnv.drop h e) = TEnv.get (i.ext h) e
   | _, _, .refl, _, _, _ => rfl
@@ -1247,12 +1235,6 @@ theorem State.getV_thin {Δ : Ctx} (h : Thin Γ Δ) (σ : State C Δ) {t : LTy} 
     (σ.thin h).getV i = σ.getV (i.wk h) := by
   show LTy.VDen.ofT t (TEnv.get i (TEnv.thin h σ.env)) = _
   rw [TEnv.get_thin_wk]
-
-theorem State.getV_push_here {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
-    (σ.push v).getV .here = LTy.VDen.ofT t v := rfl
-
-theorem State.getV_push_there {t u : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) (j : Idx Γ u) :
-    (σ.push v).getV (.there j) = σ.getV j := rfl
 
 theorem State.getV_setLocal_same {t : LTy} (σ : State C Γ) (i : Idx Γ t) (v : t.TDenote C σ.H) :
     (σ.setLocal i v).getV i = LTy.VDen.ofT t v := by

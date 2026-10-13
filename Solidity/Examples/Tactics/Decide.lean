@@ -734,6 +734,6 @@ open scoped Scoped
 
 /-- info: false -/
 #guard_msgs in -- a read of the ledger is outside the fragment
-#eval (dl!{ net(a) = 0 }).inLS true Decide.SymS.empty
+#eval (dl!{ { y := net(a) } y = 0 }).inLS true Decide.SymS.empty
 
 end Solidity.Examples.Tactics.Decide

@@ -638,6 +638,15 @@ def _root_.Solidity.Upd.replayS (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
     (fun _ _ r ih => ih.push (aR r)) (fun _ h ih => ⟨ih.loc.drop h.depth, ih.sym, ih.next⟩)
     (fun _ h ih => ⟨Thin.sel h ih.loc, ih.sym, ih.next⟩) U
 
+/-- The recursor's replay is the twin's (Gate G0). -/
+theorem _root_.Solidity.Upd.replayS_eq_replaySM (aE : ∀ {Δ : Ctx}, UpdElem C Γ Δ → Act)
+    (aR : ∀ {t : LTy}, Rhs C Γ t → Act) (ρ₀ : SymS) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.replayS aE aR ρ₀ = U.replaySM aE aR ρ₀ := by
+  induction U with
+  | nil => rfl
+  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
+    simp only [Upd.replaySM, ← ih]; rfl
+
 /-- An element of an update: a right-hand side (an assignment's or a
 declaration's), or an element that assigns no local. -/
 inductive ElemS (C : Contract) (Γ : Ctx) where
@@ -675,6 +684,13 @@ def _root_.Solidity.Upd.viewM : {Δ : Ctx} → Upd C Γ Δ → UView C Γ
 def _root_.Solidity.Upd.view {Δ : Ctx} (U : Upd C Γ Δ) : UView C Γ :=
   Upd.rec (motive := fun _ _ => UView C Γ) .zero (fun _ e ih => ih.add e.toElemS)
     (fun _ _ r ih => ih.add (.rhs r)) (fun _ _ ih => ih) (fun _ _ ih => ih) U
+
+/-- The recursor's view is the twin's (Gate G0). -/
+theorem _root_.Solidity.Upd.view_eq_viewM {Δ : Ctx} (U : Upd C Γ Δ) : U.view = U.viewM := by
+  induction U with
+  | nil => rfl
+  | snoc U e ih | decl U x r ih | pop U h ih | drop U h ih =>
+    simp only [Upd.viewM, ← ih]; rfl
 
 /-- What a right-hand side binds its local to. -/
 def _root_.Solidity.Rhs.actS (ρ : SymS) {t : LTy} : Rhs C Γ t → Option SymB

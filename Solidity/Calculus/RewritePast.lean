@@ -302,10 +302,6 @@ def UpdElem.down? {Δ : Ctx} : UpdElem C (u :: Γ) Δ → Option (UpdElem C Γ �
   | .netMt r a => do pure (.netMt (← r.down?) (← a.down?))
   | .setBalance a => a.down?.map .setBalance
 
-/-- A state below a pushed local is the state with it left out. -/
-theorem State.thin_push (σ : State C Γ) (v : u.TDenote C σ.H) :
-    (σ.push v).thin (.drop .refl) = σ := rfl
-
 /-- **A term that does not read the top local reads alike below it.** -/
 theorem Tm.eval_down? (σ : State C Γ) (v : u.TDenote C σ.H) {s : Srt} (t : Tm C (u :: Γ) s)
     {t' : Tm C Γ s} (h : t.down? = some t') : t'.eval σ = t.eval (σ.push v) :=
