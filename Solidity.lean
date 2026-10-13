@@ -129,15 +129,13 @@ import Solidity.Calculus.CloseFrame
 import Solidity.Calculus.CloseTests
 import Solidity.Calculus.MemNames
 import Solidity.Calculus.DecideLang
-import Solidity.Calculus.KeyNotation
 import Solidity.Calculus.MemRead
 import Solidity.Calculus.MemTheory
-import Solidity.Calculus.SlotLemmas
 import Solidity.Calculus.Decide
-import Solidity.Calculus.DecideSyn
+import Solidity.Calculus.DecideEval
 import Solidity.Calculus.DecideScoped
-import Solidity.Calculus.DecideRel
 import Solidity.Calculus.DecideTyped
+import Solidity.Calculus.Closer
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Problem
 import Solidity.Calculus.SurfaceSpec

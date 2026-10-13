@@ -196,6 +196,13 @@ instance : Inhabited (LFml C) := ⟨.tt⟩
 /-- `false`. -/
 abbrev LFml.ff : LFml C := .not .tt
 
+/-- A hidden binder's local read as a quantifier: a value's, at the
+position `k`; any other binds nothing. -/
+def LFml.allB (t : LTy) (k : Nat) (φ : LFml C) : LFml C :=
+  match t with
+  | .val p => .all k p φ
+  | _ => φ
+
 /-- **A formula holds** in the global part `g`, its atoms in `ν`. -/
 def LFml.holds (g : State C []) : AEnv → LFml C → Prop
   | _, .tt => True
@@ -306,8 +313,10 @@ def ltG (i n : LTm C (.val .uint)) : LTm C (.val .bool) := LTm.assert (.app2 (.b
 /-! ## Printing
 
 A term in solkey's notation (`docs/lean-key-rule-map.md`): `find(s, q)`,
-`len(s, q)`, `save(s, q, v)`, `W(q)`/`L(q)`/`H(q)` the starting storage
-observed, `if(a = b) then t else e` a key test, `(d; a)` a guard. -/
+`save(s, q, v)`, `delAt(s, q)`, the starting storage read as
+`find(storage, q)`, `find(storage, q.length)`, `has(storage, q)`,
+`if(a = b) then t else e` a key test, `(g; a)` a term `a` behind the guards
+`g` (only Lean has guards, `orElse` and `err`). -/
 
 /-- A value of a primitive type, printed. -/
 def ppVal : (p : PrimTy) → p.Denote → String
@@ -315,10 +324,16 @@ def ppVal : (p : PrimTy) → p.Denote → String
   | .uint, v => toString (v : {n : Int // PrimTy.uint.inRange n = true}).1
   | .int, v => toString (v : {n : Int // PrimTy.int.inRange n = true}).1
 
-/-- A term, printed. -/
-partial def LTm.pp : {s : Srt} → LTm C s → String
-  | _, .var k => s!"pos({k})"
-  | _, .app0 o => match o with
+/-- The term a sequence returns, its guards dropped. -/
+def LTm.seqValue {s : Srt} : LTm C s → LTm C s
+  | .seq _ a => a.seqValue
+  | t => t
+
+mutual
+/-- A term, printed, a position by `nm`. -/
+partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
+  | .var k => nm k
+  | .app0 o => match o with
     | @Op0.lit _ p v => ppVal p v
     | .env k => k.toStr
     | .root r _ => r
@@ -327,53 +342,105 @@ partial def LTm.pp : {s : Srt} → LTm C s → String
     | .mtSt => "mtSt"
     | .member _ f _ => f
     | .zlit n => toString n
-  | _, .app1 o x => match o with
-    | .unop op _ => s!"{op.sym}{x.pp}"
-    | @Op1.field _ _ f _ _ => s!"{x.pp}.{f}"
-    | .sval => x.pp
-    | .next => s!"next({x.pp})"
-    | .toInt => s!"int({x.pp})"
-    | .delValue => s!"delValue({x.pp})"
-    | _ => s!"op1({x.pp})"
-  | _, .app2 o x y => match o with
-    | .binop op _ => s!"({x.pp} {op.sym} {y.pp})"
-    | .find => s!"find({x.pp}, {y.pp})"
-    | .len => s!"len({x.pp}, {y.pp})"
-    | .sfind => s!"select({x.pp}, {y.pp})"
-    | .delAt => s!"delAt({x.pp}, {y.pp})"
-    | .pushSlot => s!"pushSlot({x.pp}, {y.pp})"
-    | .pop => s!"pop({x.pp}, {y.pp})"
-    | .shrink => s!"shrink({x.pp}, {y.pp})"
-    | .extend => s!"extend({x.pp}, {y.pp})"
-    | .at _ => s!"{x.pp}[{y.pp}]"
-    | .nextIn => s!"next({x.pp}, {y.pp})"
-    | .read => s!"read({x.pp}, {y.pp})"
-    | .mlen => s!"size({x.pp}, {y.pp})"
-    | _ => s!"op2({x.pp}, {y.pp})"
-  | _, .app3 o x y z => match o with
-    | .ite => s!"(if({x.pp}) then {y.pp} else {z.pp})"
-    | .save => s!"save({x.pp}, {y.pp}, {z.pp})"
-    | .push => s!"push({x.pp}, {y.pp}, {z.pp})"
-    | .atIn _ => s!"at({x.pp}, {y.pp}, {z.pp})"
-    | .write => s!"write({x.pp}, {y.pp}, {z.pp})"
-    | .saveIn => s!"saveIn({x.pp}, {y.pp}, {z.pp})"
-  | _, .index _ q i => s!"{q.pp}[{i.pp}]"
-  | _, .obsW q => s!"W({q.pp})"
-  | _, .obsL q => s!"L({q.pp})"
-  | _, .obsH q => s!"H({q.pp})"
-  | _, .seq d a => s!"({d.pp}; {a.pp})"
-  | _, .orElse a b => s!"orElse({a.pp}, {b.pp})"
-  | _, .kite a b t e => s!"(if({a.pp} = {b.pp}) then {t.pp} else {e.pp})"
-  | _, .err => "err"
+  | .app1 o x => match o with
+    | .unop op _ => s!"{op.sym}{x.ppArg nm}"
+    | @Op1.field _ _ f _ _ => s!"{x.ppWith nm}.{f}"
+    | @Op1.mfield _ _ f _ _ => s!"{x.ppWith nm}.{f}"
+    | @Op1.fieldIn _ _ _ f _ _ => s!"{x.ppWith nm}.{f}"
+    | .sval | .mval | .ref => x.ppWith nm
+    | .next => s!"next({x.ppWith nm})"
+    | .toInt => s!"toInt({x.ppWith nm})"
+    | .net => s!"net({x.ppWith nm})"
+    | .delValue => s!"delValue({x.ppWith nm})"
+    | .wt => s!"wt({x.ppWith nm})"
+    | .newArr _ => s!"newArr({x.ppWith nm})"
+    | .alloc R _ => s!"alloc({x.ppWith nm}, {(Ty.ref R).toStr})"
+    | .addM R _ => s!"addM({x.ppWith nm}, {(Ty.ref R).toStr})"
+    | .select r _ => s!"select({x.ppWith nm}, {r})"
+    | .selectIn _ => s!"selectIn({x.ppWith nm})"
+  | .app2 o x y => match o with
+    | .binop op _ => s!"{x.ppArg nm} {op.sym} {y.ppArg nm}"
+    | .find => s!"find({x.ppWith nm}, {y.ppWith nm})"
+    | .len => s!"find({x.ppWith nm}, {y.ppWith nm}.length)"
+    | .sfind => s!"select({x.ppWith nm}, {y.ppWith nm})"
+    | .delAt => s!"delAt({x.ppWith nm}, {y.ppWith nm})"
+    | .pushSlot => s!"pushSlot({x.ppWith nm}, {y.ppWith nm})"
+    | .pop => s!"pop({x.ppWith nm}, {y.ppWith nm})"
+    | .shrink => s!"shrink({x.ppWith nm}, {y.ppWith nm})"
+    | .extend => s!"extend({x.ppWith nm}, {y.ppWith nm})"
+    | .at _ => s!"{x.ppWith nm}[{y.ppWith nm}]"
+    | .nextIn => s!"next({x.ppWith nm}, {y.ppWith nm})"
+    | .read => s!"read({x.ppWith nm}, {y.ppWith nm})"
+    | .mlen => s!"size({x.ppWith nm}, {y.ppWith nm})"
+    | .copyMem => s!"copyMem({x.ppWith nm}, {y.ppWith nm})"
+    | .iread => s!"read({x.ppWith nm}, {y.ppWith nm})"
+    | .copy _ => s!"copy({x.ppWith nm}, {y.ppWith nm})"
+    | .mat _ => s!"{x.ppWith nm}[{y.ppWith nm}]"
+    | .copySt _ => s!"copySt({x.ppWith nm}, {y.ppWith nm})"
+    | .findIn => s!"find({x.ppWith nm}, {y.ppWith nm})"
+    | .delAtIn => s!"delAt({x.ppWith nm}, {y.ppWith nm})"
+    | .sfindIn => s!"select({x.ppWith nm}, {y.ppWith nm})"
+    | .zbin op _ => s!"{x.ppArg nm} {op.sym} {y.ppArg nm}"
+    | .zcmp op _ => s!"{x.ppArg nm} {op.sym} {y.ppArg nm}"
+  | .app3 o x y z => match o with
+    | .ite => s!"if({x.ppWith nm}) then {y.ppArg nm} else {z.ppWith nm}"
+    | .save => s!"save({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
+    | .push => s!"push({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
+    | .atIn _ => s!"{y.ppWith nm}[{z.ppWith nm}]"
+    | .write => s!"write({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
+    | .saveIn => s!"save({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
+  | .index _ q i => s!"{q.ppWith nm}[{i.ppWith nm}]"
+  | .obsW q => s!"find(storage, {q.ppWith nm})"
+  | .obsL q => s!"find(storage, {q.ppWith nm}.length)"
+  | .obsH q => s!"has(storage, {q.ppWith nm})"
+  | t@(.seq ..) =>
+    let gs := LTm.ppGuards nm t
+    let v := t.seqValue
+    if gs.isEmpty then v.ppWith nm else s!"({", ".intercalate gs}; {v.ppWith nm})"
+  | .orElse a b => s!"orElse({a.ppWith nm}, {b.ppWith nm})"
+  | .kite a b t e => s!"if({a.ppWith nm} = {b.ppWith nm}) then {t.ppArg nm} else {e.ppWith nm}"
+  | .err => "err"
 
-/-- A formula, printed. -/
-partial def LFml.pp : LFml C → String
+/-- A term as an operand: parenthesised unless it is atomic. -/
+partial def LTm.ppArg (nm : Nat → String) {s : Srt} : LTm C s → String
+  | t@(.app2 (.binop ..) ..) | t@(.app3 .ite ..) | t@(.kite ..) => s!"({t.ppWith nm})"
+  | t => t.ppWith nm
+
+/-- The guards of a sequence, printed, the ones that are literals dropped. -/
+partial def LTm.ppGuards (nm : Nat → String) {s : Srt} : LTm C s → List String
+  | .seq d a => LTm.ppGuard nm d ++ LTm.ppGuards nm a
+  | _ => []
+
+/-- A guard, printed: its own guards and the term, a literal dropped. -/
+partial def LTm.ppGuard (nm : Nat → String) {s : Srt} : LTm C s → List String
+  | .seq d a => LTm.ppGuard nm d ++ LTm.ppGuard nm a
+  | .app0 (.lit _) => []
+  | g@(.app3 .ite ..) | g@(.kite ..) => [s!"({g.ppWith nm})"]
+  | g => [g.ppWith nm]
+end
+
+/-- A term, printed, the position `k` as `pos(k)`. -/
+def LTm.pp {s : Srt} (t : LTm C s) : String := t.ppWith fun k => s!"pos({k})"
+
+/-- A formula, printed, a position by `nm`, a quantifier's local named by
+`nm` too. -/
+partial def LFml.ppWith (nm : Nat → String) (tyStr : PrimTy → String) : LFml C → String
   | .tt => "true"
-  | .eq a b => s!"{a.pp} = {b.pp}"
-  | .not φ => s!"!({φ.pp})"
-  | .and φ ψ => s!"({φ.pp} & {ψ.pp})"
-  | .imp φ ψ => s!"({φ.pp} -> {ψ.pp})"
-  | .all k p φ => s!"(\\forall {p.toStr} pos({k}); {φ.pp})"
+  | .eq a b => s!"{a.ppArg nm} = {b.ppArg nm}"
+  | .not φ => s!"¬{atom φ}"
+  | .and φ ψ => s!"{conj φ} ∧ {conj ψ}"
+  | .imp φ ψ => s!"{conj φ} → {LFml.ppWith nm tyStr ψ}"
+  | .all k p φ => s!"∀ {tyStr p} {nm k}; {LFml.ppWith nm tyStr φ}"
+where
+  atom : LFml C → String
+    | φ@(.tt) | φ@(.not _) | φ@(.eq ..) => LFml.ppWith nm tyStr φ
+    | φ => s!"({LFml.ppWith nm tyStr φ})"
+  conj : LFml C → String
+    | φ@(.imp ..) | φ@(.all ..) => s!"({LFml.ppWith nm tyStr φ})"
+    | φ => LFml.ppWith nm tyStr φ
+
+/-- A formula, printed, the position `k` as `pos(k)`. -/
+def LFml.pp (φ : LFml C) : String := φ.ppWith (fun k => s!"pos({k})") PrimTy.toStr
 
 /-! ## Quoting
 

@@ -887,6 +887,17 @@ theorem guardM_holds {ν : AEnv} {Γ : Ctx} {τ : State C Γ} {Δ : Ctx} (m : Mo
       exact hrest q hq (h ((LFml.holds_rets _ _ _).2 ⟨true, by rw [hg, hq]; rfl⟩))
     | diamond => exact hrest q hq h.2
 
+/-- A hidden binder read as a quantifier (`LFml.allB`): what holds for
+every atom at its position holds for every value it binds. -/
+theorem Fml.allB_push {Γ : Ctx} {t : LTy} {ρ : SymS C Γ} {τ : State C Γ} {ν : AEnv}
+    (hA : Agrees g₀ ν ρ τ) (hF : ρ.Fresh) {ψ₁ : LFml C} {P : State C (t :: Γ) → Prop}
+    (ih : ∀ (τ' : State C (t :: Γ)) (ν' : AEnv), Agrees g₀ ν' (ρ.pushB t) τ' →
+      (ρ.pushB t).Fresh → ψ₁.holds g₀ ν' → P τ')
+    (hψ : (LFml.allB t ρ.next ψ₁).holds g₀ ν) (v : t.TDenote C τ.H) : P (τ.push v) := by
+  cases t with
+  | val p => exact ih _ _ (hA.pushQ hF p v) (hF.pushQ p) (hψ v)
+  | _ => exact ih _ _ (hA.push v) (hF.push _) hψ
+
 /-- **A formula pushed in** implies the formula at the positive polarity,
 and follows from it at the negative one. -/
 theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS C Γ} {ψ : LFml C},
@@ -1000,12 +1011,16 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
     · exact (Fml.toLS_sound φ pos h₁ (τ.push (t := .val p) v) (ν.set p ρ.next v)
         (hA.pushQ hF p v) (hF.pushQ p)).2 hp (hφ v)
   | _, .bind m x t φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
-    have h' : (if pos then φ.toLS pos (ρ.push none) else none) = some ψ := h
+    have h' : (if pos then (φ.toLS pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none) =
+      some ψ := h
     split at h'
     · rename_i hp
       subst hp
+      rw [Option.map_eq_some_iff] at h'
+      obtain ⟨ψ₁, h₁, rfl⟩ := h'
       refine ⟨fun _ hψ => fun v => ?_, fun h => by cases h⟩
-      exact (Fml.toLS_sound φ true h' (τ.push v) ν (hA.push v) (hF.push t)).1 rfl hψ
+      exact Fml.allB_push hA hF (fun τ' ν' hA' hF' => (Fml.toLS_sound φ true h₁ τ' ν' hA' hF').1 rfl)
+        hψ v
     · cases h'
 
 /-- The empty state agrees with every typed state of the empty context. -/

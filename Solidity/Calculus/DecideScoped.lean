@@ -115,6 +115,14 @@ def SymS.push {Γ : Ctx} {t : LTy} (ρ : SymS C Γ) (b : Option (LTm C t.bs)) : 
 def SymS.pushQ {Γ : Ctx} (p : PrimTy) (ρ : SymS C Γ) : SymS C (.val p :: Γ) :=
   ρ.push (t := .val p) (some (.var ρ.next))
 
+/-- A hidden binder's local pushed: a value binds the atom of its position,
+as a quantifier does (it reads as one, `Fml.toLS`); any other local is
+unknown until an update binds it. -/
+def SymS.pushB {Γ : Ctx} (t : LTy) (ρ : SymS C Γ) : SymS C (t :: Γ) :=
+  match t with
+  | .val p => ρ.pushQ p
+  | _ => ρ.push none
+
 /-! ## Terms, by position -/
 
 section Terms
@@ -324,7 +332,8 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → Bool → SymS C Γ → Fml C Γ �
   | _, pos, _, .modal .. => if pos then some .ff else none
   | _, _, _, .havoc _ => none
   | _, pos, ρ, .all _ p φ => (φ.toLSM pos (ρ.pushQ p)).map fun φ' => .all ρ.next p φ'
-  | _, pos, ρ, .bind _ _ _ φ => if pos then φ.toLSM pos (ρ.push none) else none
+  | _, pos, ρ, .bind _ _ t φ =>
+    if pos then (φ.toLSM pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none
   | _, _, _, .anon .. => none
 
 /-- **A scoped formula with its updates pushed in**, at the polarity `pos`
@@ -353,7 +362,7 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml 
     (fun _ _ _ _ _ pos _ => if pos then some .ff else none)
     (fun _ _ _ _ => none)
     (fun _ p _ ih pos ρ => (ih pos (ρ.pushQ p)).map fun φ' => .all ρ.next p φ')
-    (fun _ _ _ _ ih pos ρ => if pos then ih pos (ρ.push none) else none)
+    (fun _ _ t _ ih pos ρ => if pos then (ih pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none)
     (fun _ _ _ _ _ => none) _ φ pos ρ
 
 /-- **What `sol_decide` proves of a scoped leaf**: its updates pushed in by
