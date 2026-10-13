@@ -475,12 +475,6 @@ theorem SVal.find_all {T U : Ty} {x : SVal T} (p : Path T U) {w : SVal U} (hx : 
 
 /-! ### Defaults -/
 
-variable (harr : ∀ E : Ty, P.arr (E := E) SVec.nil SList.nil)
-  (hfix : ∀ E n, P.fix E n)
-  (hmap : ∀ K V : Ty, P.map K SMap.nil (SVal.dflt V))
-
-include harr hfix hmap
-
 theorem SFields.dfltBelow_all {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).All P) :
     (fs : List (Name × Ty)) → (h : fieldsRank fs < k) →
     (SFields.dfltBelow k (SVal.dfltBelow k) fs h).All P
@@ -490,29 +484,41 @@ theorem SFields.dfltBelow_all {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).A
     exact ⟨hih T _, SFields.dfltBelow_all hih fs _⟩
 
 mutual
-theorem SVal.dfltAt_all {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).All P) :
+theorem SVal.dfltAt_all (harr : ∀ E : Ty, P.arr (E := E) SVec.nil SList.nil)
+    (hfix : ∀ E n, P.fix E n) (hmap : ∀ K V : Ty, P.map K SMap.nil (SVal.dflt V)) {k : Nat}
+    (hih : ∀ T h, (SVal.dfltBelow k T h).All P) :
     (T : Ty) → (h : tyRank T < k + 1) → (SVal.dfltAt k (SVal.dfltBelow k) T h).All P
   | .prim _, _ => by simp only [SVal.dfltAt, SVal.All]
-  | .ref R, h => SVal.dfltRefAt_all hih R h
+  | .ref R, h => SVal.dfltRefAt_all harr hfix hmap hih R h
 
-theorem SVal.dfltRefAt_all {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).All P) :
+theorem SVal.dfltRefAt_all (harr : ∀ E : Ty, P.arr (E := E) SVec.nil SList.nil)
+    (hfix : ∀ E n, P.fix E n) (hmap : ∀ K V : Ty, P.map K SMap.nil (SVal.dflt V)) {k : Nat}
+    (hih : ∀ T h, (SVal.dfltBelow k T h).All P) :
     (R : RefTy) → (h : tyRank (.ref R) < k + 1) →
     (SVal.dfltRefAt k (SVal.dfltBelow k) R h).All P
   | .struct s, h => by
     simp only [SVal.dfltRefAt, SVal.All]
-    exact SFields.dfltBelow_all harr hfix hmap hih _ _
+    exact SFields.dfltBelow_all hih _ _
   | .array E, _ => by
     simp only [SVal.dfltRefAt, SVal.All]
     exact ⟨harr E, by simp only [SVec.All], by simp only [SList.All]⟩
   | .fixed E n, h => by
     simp only [SVal.dfltRefAt, SVal.All]
-    exact ⟨hfix E n, SVec.all_replicate (SVal.dfltAt_all hih E _) n⟩
+    exact ⟨hfix E n, SVec.all_replicate (SVal.dfltAt_all harr hfix hmap hih E _) n⟩
   | .mapping K V, h => by
     simp only [SVal.dfltRefAt, SVal.All]
-    refine ⟨?_, by simp only [SMap.All], SVal.dfltAt_all hih V _⟩
+    refine ⟨?_, by simp only [SMap.All], SVal.dfltAt_all harr hfix hmap hih V _⟩
     rw [SVal.dfltAt_eq (fun T h => SVal.dfltBelow_eq k T h)]
     exact hmap K V
 end
+
+section Dflt
+
+variable (harr : ∀ E : Ty, P.arr (E := E) SVec.nil SList.nil)
+  (hfix : ∀ E n, P.fix E n)
+  (hmap : ∀ K V : Ty, P.map K SMap.nil (SVal.dflt V))
+
+include harr hfix hmap
 
 theorem SVal.dfltBelow_all : (k : Nat) → (T : Ty) → (h : tyRank T < k) →
     (SVal.dfltBelow k T h).All P
@@ -529,6 +535,8 @@ theorem SFields.dflt_all : (fs : List (Name × Ty)) → (SFields.dflt fs).All P
   | (_, T) :: fs => by
     simp only [SFields.dflt, SFields.All]
     exact ⟨SVal.dflt_all harr hfix hmap T, SFields.dflt_all fs⟩
+
+end Dflt
 
 end AllLemmas
 
@@ -769,102 +777,94 @@ section Ops
 
 variable {P : Hered}
 
-section Strip
+/-- An array condition that survives the slots past the end dropped. -/
+def Hered.StripOK (P : Hered) : Prop :=
+  ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
+    P.arr e.strip SList.nil
 
-variable (hstrip : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
-    P.arr e.strip SList.nil)
+/-- An array condition that survives the elements cleared into the slots
+past the end. -/
+def Hered.DelOK (P : Hered) : Prop :=
+  ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
+    P.arr SVec.nil (SList.ofList (e.defaultOf.toList ++ sh.toList))
 
-include hstrip
+/-- An array condition that survives an array copied over another. -/
+def Hered.OvOK (P : Hered) : Prop :=
+  ∀ {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E) (nel : SVec E n) (nsh : SList E),
+    P.arr oel osh → P.arr nel nsh → oel.All P → osh.All P → nel.All P →
+    P.arr (SVec.overlayOn (oel.toList ++ osh.toList) nel)
+      (SList.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m)))
 
 mutual
 /-- A value as nothing wrote it keeps a predicate whose array condition
 survives the slots past the end dropped. -/
-theorem SVal.strip_all : {T : Ty} → {v : SVal T} → v.All P → v.strip.All P
+theorem SVal.strip_all (hs : P.StripOK) : {T : Ty} → {v : SVal T} → v.All P → v.strip.All P
   | _, .prim _, _ => by simp only [SVal.strip, SVal.All]
   | _, .struct _, h => by
-    simp only [SVal.strip, SVal.All] at h ⊢; exact SFields.strip_all h
+    simp only [SVal.strip, SVal.All] at h ⊢; exact SFields.strip_all hs h
   | _, .array e sh _, h => by
     simp only [SVal.strip, SVal.All] at h ⊢
-    exact ⟨hstrip e sh h.1 h.2.1, SVec.strip_all h.2.1, by simp only [SList.All]⟩
+    exact ⟨hs e sh h.1 h.2.1, SVec.strip_all hs h.2.1, by simp only [SList.All]⟩
   | _, .fixed _, h => by
-    simp only [SVal.strip, SVal.All] at h ⊢; exact ⟨h.1, SVec.strip_all h.2⟩
+    simp only [SVal.strip, SVal.All] at h ⊢; exact ⟨h.1, SVec.strip_all hs h.2⟩
   | _, .map _ _, h => by simp only [SVal.strip]; exact h
 
-theorem SFields.strip_all : {fs : List (Name × Ty)} → {x : SFields fs} → x.All P → x.strip.All P
+theorem SFields.strip_all (hs : P.StripOK) : {fs : List (Name × Ty)} → {x : SFields fs} →
+    x.All P → x.strip.All P
   | _, .nil, _ => by simp only [SFields.strip, SFields.All]
   | _, .cons _ _, h => by
-    simp only [SFields.strip, SFields.All] at h ⊢; exact ⟨SVal.strip_all h.1, SFields.strip_all h.2⟩
+    simp only [SFields.strip, SFields.All] at h ⊢
+    exact ⟨SVal.strip_all hs h.1, SFields.strip_all hs h.2⟩
 
-theorem SVec.strip_all : {E : Ty} → {n : Nat} → {e : SVec E n} → e.All P → e.strip.All P
+theorem SVec.strip_all (hs : P.StripOK) : {E : Ty} → {n : Nat} → {e : SVec E n} → e.All P →
+    e.strip.All P
   | _, _, .nil, _ => by simp only [SVec.strip, SVec.All]
   | _, _, .cons _ _, h => by
-    simp only [SVec.strip, SVec.All] at h ⊢; exact ⟨SVal.strip_all h.1, SVec.strip_all h.2⟩
+    simp only [SVec.strip, SVec.All] at h ⊢; exact ⟨SVal.strip_all hs h.1, SVec.strip_all hs h.2⟩
 end
-
-end Strip
-
-section Delete
-
-variable (hdel : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
-    P.arr SVec.nil (SList.ofList (e.defaultOf.toList ++ sh.toList)))
-
-include hdel
 
 mutual
 /-- `delete`'s value keeps a predicate whose array condition survives the
 elements cleared into the slots past the end. -/
-theorem SVal.defaultOf_all : {T : Ty} → {v : SVal T} → v.All P → v.defaultOf.All P
+theorem SVal.defaultOf_all (hd : P.DelOK) : {T : Ty} → {v : SVal T} → v.All P →
+    v.defaultOf.All P
   | _, .prim _, _ => by simp only [SVal.defaultOf, SVal.All]
   | _, .struct _, h => by
-    simp only [SVal.defaultOf, SVal.All] at h ⊢; exact SFields.defaultOf_all h
+    simp only [SVal.defaultOf, SVal.All] at h ⊢; exact SFields.defaultOf_all hd h
   | _, .array e sh _, h => by
     simp only [SVal.defaultOf, SVal.All] at h ⊢
-    refine ⟨hdel e sh h.1 h.2.1, by simp only [SVec.All], SList.all_ofList.mpr fun w hw => ?_⟩
+    refine ⟨hd e sh h.1 h.2.1, by simp only [SVec.All], SList.all_ofList.mpr fun w hw => ?_⟩
     rcases List.mem_append.mp hw with hw | hw
-    · exact SVec.all_iff.mp (SVec.defaultOf_all h.2.1) w hw
+    · exact SVec.all_iff.mp (SVec.defaultOf_all hd h.2.1) w hw
     · exact SList.all_iff.mp h.2.2 w hw
   | _, .fixed _, h => by
-    simp only [SVal.defaultOf, SVal.All] at h ⊢; exact ⟨h.1, SVec.defaultOf_all h.2⟩
+    simp only [SVal.defaultOf, SVal.All] at h ⊢; exact ⟨h.1, SVec.defaultOf_all hd h.2⟩
   | _, .map _ _, h => by simp only [SVal.defaultOf]; exact h
 
-theorem SFields.defaultOf_all : {fs : List (Name × Ty)} → {x : SFields fs} → x.All P →
-    x.defaultOf.All P
+theorem SFields.defaultOf_all (hd : P.DelOK) : {fs : List (Name × Ty)} → {x : SFields fs} →
+    x.All P → x.defaultOf.All P
   | _, .nil, _ => by simp only [SFields.defaultOf, SFields.All]
   | _, .cons _ _, h => by
     simp only [SFields.defaultOf, SFields.All] at h ⊢
-    exact ⟨SVal.defaultOf_all h.1, SFields.defaultOf_all h.2⟩
+    exact ⟨SVal.defaultOf_all hd h.1, SFields.defaultOf_all hd h.2⟩
 
-theorem SVec.defaultOf_all : {E : Ty} → {n : Nat} → {e : SVec E n} → e.All P →
+theorem SVec.defaultOf_all (hd : P.DelOK) : {E : Ty} → {n : Nat} → {e : SVec E n} → e.All P →
     e.defaultOf.All P
   | _, _, .nil, _ => by simp only [SVec.defaultOf, SVec.All]
   | _, _, .cons _ _, h => by
     simp only [SVec.defaultOf, SVec.All] at h ⊢
-    exact ⟨SVal.defaultOf_all h.1, SVec.defaultOf_all h.2⟩
+    exact ⟨SVal.defaultOf_all hd h.1, SVec.defaultOf_all hd h.2⟩
 end
-
-end Delete
-
-section Overlay
-
-variable (hstrip : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
-    P.arr e.strip SList.nil)
-  (hdel : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
-    P.arr SVec.nil (SList.ofList (e.defaultOf.toList ++ sh.toList)))
-  (hov : ∀ {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E) (nel : SVec E n) (nsh : SList E),
-    P.arr oel osh → P.arr nel nsh → oel.All P → osh.All P → nel.All P →
-    P.arr (SVec.overlayOn (oel.toList ++ osh.toList) nel)
-      (SList.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m))))
-
-include hstrip hdel hov
 
 mutual
 /-- **A copy over a value keeps a predicate** whose array condition
 survives an array copied over another. -/
-theorem SVal.overlay_all : {T : Ty} → (o v : SVal T) → o.All P → v.All P → (o.overlay v).All P
+theorem SVal.overlay_all (hs : P.StripOK) (hd : P.DelOK) (hov : P.OvOK) :
+    {T : Ty} → (o v : SVal T) → o.All P → v.All P → (o.overlay v).All P
   | _, _, .prim _, _, _ => by simp only [SVal.overlay, SVal.All]
   | _, .struct ofs, .struct nfs, ho, hv => by
     simp only [SVal.overlay, SVal.All] at ho hv ⊢
-    exact SFields.overlay_all ofs nfs ho hv
+    exact SFields.overlay_all hs hd hov ofs nfs ho hv
   | _, .array oel osh _, .array nel nsh _, ho, hv => by
     simp only [SVal.overlay, SVal.All] at ho hv ⊢
     have hold : ∀ w ∈ oel.toList ++ osh.toList, w.All P := by
@@ -873,36 +873,37 @@ theorem SVal.overlay_all : {T : Ty} → (o v : SVal T) → o.All P → v.All P �
       · exact SVec.all_iff.mp ho.2.1 w hw
       · exact SList.all_iff.mp ho.2.2 w hw
     refine ⟨hov oel osh nel nsh ho.1 hv.1 ho.2.1 ho.2.2 hv.2.1,
-      SVec.overlayOn_all _ hold nel hv.2.1, SList.all_ofList.mpr fun w hw => ?_⟩
+      SVec.overlayOn_all hs hd hov _ hold nel hv.2.1, SList.all_ofList.mpr fun w hw => ?_⟩
     rcases List.mem_append.mp hw with hw | hw
     · obtain ⟨u, hu, rfl⟩ := List.mem_map.mp hw
-      exact SVal.defaultOf_all hdel (SVec.all_iff.mp ho.2.1 u (List.mem_of_mem_drop hu))
+      exact SVal.defaultOf_all hd (SVec.all_iff.mp ho.2.1 u (List.mem_of_mem_drop hu))
     · exact SList.all_iff.mp ho.2.2 w (List.mem_of_mem_drop hw)
   | _, .fixed oel, .fixed nel, ho, hv => by
     simp only [SVal.overlay, SVal.All] at ho hv ⊢
-    exact ⟨hv.1, SVec.overlayOn_all _ (SVec.all_iff.mp ho.2) nel hv.2⟩
+    exact ⟨hv.1, SVec.overlayOn_all hs hd hov _ (SVec.all_iff.mp ho.2) nel hv.2⟩
   | _, .map _ _, .map _ _, ho, _ => by simp only [SVal.overlay]; exact ho
 
-theorem SFields.overlay_all : {fs : List (Name × Ty)} → (os ns : SFields fs) → os.All P →
-    ns.All P → (os.overlay ns).All P
+theorem SFields.overlay_all (hs : P.StripOK) (hd : P.DelOK) (hov : P.OvOK) :
+    {fs : List (Name × Ty)} → (os ns : SFields fs) → os.All P → ns.All P →
+    (os.overlay ns).All P
   | _, .nil, .nil, _, _ => by simp only [SFields.overlay, SFields.All]
   | _, .cons o os, .cons v rest, ho, hv => by
     simp only [SFields.overlay, SFields.All] at ho hv ⊢
-    exact ⟨SVal.overlay_all o v ho.1 hv.1, SFields.overlay_all os rest ho.2 hv.2⟩
+    exact ⟨SVal.overlay_all hs hd hov o v ho.1 hv.1,
+      SFields.overlay_all hs hd hov os rest ho.2 hv.2⟩
 
-theorem SVec.overlayOn_all : {E : Ty} → {n : Nat} → (L : List (SVal E)) → (∀ w ∈ L, w.All P) →
+theorem SVec.overlayOn_all (hs : P.StripOK) (hd : P.DelOK) (hov : P.OvOK) :
+    {E : Ty} → {n : Nat} → (L : List (SVal E)) → (∀ w ∈ L, w.All P) →
     (e : SVec E n) → e.All P → (SVec.overlayOn L e).All P
   | _, _, _, _, .nil, _ => by simp only [SVec.overlayOn, SVec.All]
   | _, _, [], _, .cons v rest, he => by
     simp only [SVec.overlayOn, SVec.All] at he ⊢
-    exact ⟨SVal.strip_all hstrip he.1, SVec.strip_all hstrip he.2⟩
+    exact ⟨SVal.strip_all hs he.1, SVec.strip_all hs he.2⟩
   | _, _, o :: L, hL, .cons v rest, he => by
     simp only [SVec.overlayOn, SVec.All] at he ⊢
-    exact ⟨SVal.overlay_all o v (hL o List.mem_cons_self) he.1,
-      SVec.overlayOn_all L (fun w hw => hL w (List.mem_cons_of_mem _ hw)) rest he.2⟩
+    exact ⟨SVal.overlay_all hs hd hov o v (hL o List.mem_cons_self) he.1,
+      SVec.overlayOn_all hs hd hov L (fun w hw => hL w (List.mem_cons_of_mem _ hw)) rest he.2⟩
 end
-
-end Overlay
 
 end Ops
 
@@ -1018,63 +1019,69 @@ theorem Path.okDeep : {T U : Ty} → Path T U → T.okDeep = true → U.okDeep =
   | _, _, .atF _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
   | _, _, .key _ p, h => Path.okDeep p (by simpa only [Ty.okDeep] using h)
 
+/-- What it takes for `Q`'s node conditions to imply `P`'s, at the types
+`G` holds of, `G` closed under members, elements and values. -/
+structure Hered.Mono (P Q : Hered) (G : Ty → Prop) : Prop where
+  gs : ∀ s, G (.ref (.struct s)) → ∀ nt ∈ structDef s, G nt.2
+  ga : ∀ E, G (.ref (.array E)) → G E
+  gf : ∀ E n, G (.ref (.fixed E n)) → G E
+  gm : ∀ K V, G (.ref (.mapping K V)) → G V
+  arr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → G (.ref (.array E)) →
+    Q.arr e sh → P.arr e sh
+  fix : ∀ E n, G (.ref (.fixed E n)) → Q.fix E n → P.fix E n
+  map : ∀ {K V : Ty} (m : SMap V) (d : SVal V), G (.ref (.mapping K V)) → Q.map K m d →
+    P.map K m d
+
 section Mono
 
-variable {P Q : Hered} (G : Ty → Prop)
-  (hGs : ∀ s, G (.ref (.struct s)) → ∀ nt ∈ structDef s, G nt.2)
-  (hGa : ∀ E, G (.ref (.array E)) → G E) (hGf : ∀ E n, G (.ref (.fixed E n)) → G E)
-  (hGm : ∀ K V, G (.ref (.mapping K V)) → G V)
-  (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → G (.ref (.array E)) →
-    Q.arr e sh → P.arr e sh)
-  (hfix : ∀ E n, G (.ref (.fixed E n)) → Q.fix E n → P.fix E n)
-  (hmap : ∀ {K V : Ty} (m : SMap V) (d : SVal V), G (.ref (.mapping K V)) → Q.map K m d →
-    P.map K m d)
-
-include hGs hGa hGf hGm harr hfix hmap
+variable {P Q : Hered} {G : Ty → Prop}
 
 mutual
 /-- A predicate whose node conditions imply another's, at the types `G`
-holds of (closed under members, elements and values). -/
-theorem SVal.all_mono : {T : Ty} → (v : SVal T) → G T → v.All Q → v.All P
+holds of. -/
+theorem SVal.all_mono (hm : P.Mono Q G) : {T : Ty} → (v : SVal T) → G T → v.All Q → v.All P
   | _, .prim _, _, _ => by simp only [SVal.All]
   | _, .struct fs, hT, h => by
     simp only [SVal.All] at h ⊢
-    exact SFields.all_mono fs (hGs _ hT) h
+    exact SFields.all_mono hm fs (hm.gs _ hT) h
   | _, .array e sh hn, hT, h => by
     simp only [SVal.All] at h ⊢
-    exact ⟨harr e sh hn hT h.1, SVec.all_mono e (hGa _ hT) h.2.1, SList.all_mono sh (hGa _ hT) h.2.2⟩
+    exact ⟨hm.arr e sh hn hT h.1, SVec.all_mono hm e (hm.ga _ hT) h.2.1,
+      SList.all_mono hm sh (hm.ga _ hT) h.2.2⟩
   | _, .fixed e, hT, h => by
     simp only [SVal.All] at h ⊢
-    exact ⟨hfix _ _ hT h.1, SVec.all_mono e (hGf _ _ hT) h.2⟩
+    exact ⟨hm.fix _ _ hT h.1, SVec.all_mono hm e (hm.gf _ _ hT) h.2⟩
   | _, .map m d, hT, h => by
     simp only [SVal.All] at h ⊢
-    exact ⟨hmap m d hT h.1, SMap.all_mono m (hGm _ _ hT) h.2.1, SVal.all_mono d (hGm _ _ hT) h.2.2⟩
+    exact ⟨hm.map m d hT h.1, SMap.all_mono hm m (hm.gm _ _ hT) h.2.1,
+      SVal.all_mono hm d (hm.gm _ _ hT) h.2.2⟩
 
-theorem SFields.all_mono : {fs : List (Name × Ty)} → (x : SFields fs) →
+theorem SFields.all_mono (hm : P.Mono Q G) : {fs : List (Name × Ty)} → (x : SFields fs) →
     (∀ nt ∈ fs, G nt.2) → x.All Q → x.All P
   | _, .nil, _, _ => by simp only [SFields.All]
   | _, .cons v rest, hfs, h => by
     simp only [SFields.All] at h ⊢
-    exact ⟨SVal.all_mono v (hfs _ List.mem_cons_self) h.1,
-      SFields.all_mono rest (fun nt hm => hfs nt (List.mem_cons_of_mem _ hm)) h.2⟩
+    exact ⟨SVal.all_mono hm v (hfs _ List.mem_cons_self) h.1,
+      SFields.all_mono hm rest (fun nt hm' => hfs nt (List.mem_cons_of_mem _ hm')) h.2⟩
 
-theorem SList.all_mono : {E : Ty} → (l : SList E) → G E → l.All Q → l.All P
+theorem SList.all_mono (hm : P.Mono Q G) : {E : Ty} → (l : SList E) → G E → l.All Q → l.All P
   | _, .nil, _, _ => by simp only [SList.All]
   | _, .cons v rest, hE, h => by
     simp only [SList.All] at h ⊢
-    exact ⟨SVal.all_mono v hE h.1, SList.all_mono rest hE h.2⟩
+    exact ⟨SVal.all_mono hm v hE h.1, SList.all_mono hm rest hE h.2⟩
 
-theorem SVec.all_mono : {E : Ty} → {n : Nat} → (l : SVec E n) → G E → l.All Q → l.All P
+theorem SVec.all_mono (hm : P.Mono Q G) : {E : Ty} → {n : Nat} → (l : SVec E n) → G E →
+    l.All Q → l.All P
   | _, _, .nil, _, _ => by simp only [SVec.All]
   | _, _, .cons v rest, hE, h => by
     simp only [SVec.All] at h ⊢
-    exact ⟨SVal.all_mono v hE h.1, SVec.all_mono rest hE h.2⟩
+    exact ⟨SVal.all_mono hm v hE h.1, SVec.all_mono hm rest hE h.2⟩
 
-theorem SMap.all_mono : {V : Ty} → (m : SMap V) → G V → m.All Q → m.All P
+theorem SMap.all_mono (hm : P.Mono Q G) : {V : Ty} → (m : SMap V) → G V → m.All Q → m.All P
   | _, .nil, _, _ => by simp only [SMap.All]
   | _, .cons _ v rest, hV, h => by
     simp only [SMap.All] at h ⊢
-    exact ⟨SVal.all_mono v hV h.1, SMap.all_mono rest hV h.2⟩
+    exact ⟨SVal.all_mono hm v hV h.1, SMap.all_mono hm rest hV h.2⟩
 end
 
 end Mono
@@ -1086,9 +1093,9 @@ theorem SVal.all_mono' {P Q : Hered}
     (hfix : ∀ E n, Q.fix E n → P.fix E n)
     (hmap : ∀ {K V : Ty} (m : SMap V) (d : SVal V), Q.map K m d → P.map K m d)
     {T : Ty} (v : SVal T) (h : v.All Q) : v.All P :=
-  SVal.all_mono (fun _ => True) (fun _ _ _ _ => trivial) (fun _ _ => trivial)
-    (fun _ _ _ => trivial) (fun _ _ _ => trivial) (fun e sh hn _ => harr e sh hn)
-    (fun E n _ => hfix E n) (fun m d _ => hmap m d) v trivial h
+  SVal.all_mono (G := fun _ => True) ⟨fun _ _ _ _ => trivial, fun _ _ => trivial,
+    fun _ _ _ => trivial, fun _ _ _ => trivial, fun e sh hn _ => harr e sh hn,
+    fun E n _ => hfix E n, fun m d _ => hmap m d⟩ v trivial h
 
 /-- The same at `okDeep` types. -/
 theorem SVal.all_mono_deep {P Q : Hered}
@@ -1098,13 +1105,13 @@ theorem SVal.all_mono_deep {P Q : Hered}
     (hmap : ∀ {K V : Ty} (m : SMap V) (d : SVal V), V.okDeep = true → Q.map K m d →
       P.map K m d)
     {T : Ty} (v : SVal T) (hT : T.okDeep = true) (h : v.All Q) : v.All P :=
-  SVal.all_mono (fun T => T.okDeep = true)
-    (fun _ h => struct_okDeep (by simpa only [Ty.okDeep, decide_eq_true_eq] using h))
-    (fun _ h => by simpa only [Ty.okDeep] using h) (fun _ _ h => by simpa only [Ty.okDeep] using h)
-    (fun _ _ h => by simpa only [Ty.okDeep] using h)
-    (fun e sh hn h => harr e sh hn (by simpa only [Ty.okDeep] using h))
-    (fun E n h => hfix E n (by simpa only [Ty.okDeep] using h))
-    (fun m d h => hmap m d (by simpa only [Ty.okDeep] using h)) v hT h
+  SVal.all_mono (G := fun T => T.okDeep = true)
+    ⟨fun _ h => struct_okDeep (by simpa only [Ty.okDeep, decide_eq_true_eq] using h),
+      fun _ h => by simpa only [Ty.okDeep] using h, fun _ _ h => by simpa only [Ty.okDeep] using h,
+      fun _ _ h => by simpa only [Ty.okDeep] using h,
+      fun e sh hn h => harr e sh hn (by simpa only [Ty.okDeep] using h),
+      fun E n h => hfix E n (by simpa only [Ty.okDeep] using h),
+      fun m d h => hmap m d (by simpa only [Ty.okDeep] using h)⟩ v hT h
 
 /-! ## Storage -/
 
@@ -1313,7 +1320,7 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
         Option.bind_eq_some_iff, Option.some.injEq] at h₂
       obtain ⟨w, hw, rfl⟩ := h₂
       simp only [SVal.saveM, hy, SVal.saveM_saveM y p a b hz hw, Option.bind_eq_bind,
-        Option.bind_some, SMap.toList_ofList, setBy_setBy_same]
+        Option.bind_some, setBy_setBy_same]
     · rename_i hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
       obtain ⟨z, hz, rfl⟩ := h₁
@@ -1321,7 +1328,7 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
         Option.bind_eq_some_iff, Option.some.injEq] at h₂
       obtain ⟨w, hw, rfl⟩ := h₂
       simp only [SVal.saveM, hy, SVal.saveM_saveM d p a b hz hw, Option.bind_eq_bind,
-        Option.bind_some, SMap.toList_ofList, setBy_setBy_same]
+        Option.bind_some, setBy_setBy_same]
 
 /-! ## Defaults, read and cleared -/
 

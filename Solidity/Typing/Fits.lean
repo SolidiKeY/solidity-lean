@@ -105,7 +105,7 @@ theorem bndH_run : HeredRun bndH (fun _ => True) where
     | nil => simp only [pushSlot, List.length_nil]; omega
     | cons c rest =>
       rw [hs, List.length_cons] at this
-      simp only [pushSlot, List.length_cons] at this ⊢
+      simp only [pushSlot] at this ⊢
       omega
   pop e sh last keep hlast _ harr _ _ := by
     show (e.toList.dropLast).length + (SList.ofList _).length < _
@@ -155,21 +155,20 @@ storage layout has at most `2^256` elements, which solc's "type too large
 for storage" check implies (`Huge` is refused). -/
 def FixedFits (C : Contract) : Prop := ∀ nt ∈ C.vars, FixedFitsAt nt.2
 
+/-- Bounded at types whose fixed sizes fit is fitting. -/
+theorem fixedFits_mono : fitsH.Mono bndH FixedFitsAt :=
+  ⟨fun _ hT _ hm E n p => hT E n (.field (lookupBy_of_nodup (structDef_nodup _) hm) p),
+    fun _ hT E n p => hT E n (.at 0 p), fun _ _ hT E n p => hT E n (.atF 0 p),
+    fun _ _ hT E n p => hT E n (.key 0 p),
+    fun _ _ _ _ h => h, fun E n hT _ => hT E n .nil, fun _ _ _ h => h⟩
+
 /-- A bounded value fits, its fixed sizes within `2^256`. -/
 theorem SVal.fits_of_bnd {T : Ty} (v : SVal T) (hT : FixedFitsAt T) (h : v.Bnd) : v.Fits :=
-  SVal.all_mono (P := fitsH) (Q := bndH) FixedFitsAt
-    (fun _ hT _ hm E n p => hT E n (.field (lookupBy_of_nodup (structDef_nodup _) hm) p))
-    (fun _ hT E n p => hT E n (.at 0 p)) (fun _ _ hT E n p => hT E n (.atF 0 p))
-    (fun _ _ hT E n p => hT E n (.key 0 p))
-    (fun _ _ _ _ h => h) (fun E n hT _ => hT E n .nil) (fun _ _ _ h => h) v hT h
+  SVal.all_mono (P := fitsH) (Q := bndH) (G := FixedFitsAt) fixedFits_mono v hT h
 
 /-- A bounded storage fits, its fixed sizes within `2^256`. -/
 theorem Storage.fits_of_bnd (hf : FixedFits C) (st : Storage C) (h : st.Bnd) : st.Fits :=
-  SFields.all_mono (P := fitsH) (Q := bndH) FixedFitsAt
-    (fun _ hT _ hm E n p => hT E n (.field (lookupBy_of_nodup (structDef_nodup _) hm) p))
-    (fun _ hT E n p => hT E n (.at 0 p)) (fun _ _ hT E n p => hT E n (.atF 0 p))
-    (fun _ _ hT E n p => hT E n (.key 0 p))
-    (fun _ _ _ _ h => h) (fun E n hT _ => hT E n .nil) (fun _ _ _ h => h) st hf h
+  SFields.all_mono (P := fitsH) (Q := bndH) (G := FixedFitsAt) fixedFits_mono st hf h
 
 /-- **Reachable ⇒ fits** (decision 77, its conditional form): for a contract
 whose fixed sizes are at most `2^256` (solc's "type too large for storage"),

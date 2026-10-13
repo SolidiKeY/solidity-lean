@@ -576,7 +576,7 @@ theorem fixed_saveM {E : Ty} {n : Nat} (e : SVec E n) {i : Nat} (hi : i < n) (x 
 theorem map_saveM {K V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V) :
     (SVal.map (K := K) m d).saveM (.key k .nil) x = some (.map (.ofList (setBy k x m.toList)) d) := by
   simp only [SVal.saveM]
-  split <;> simp only [SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
+  split <;> simp only [Option.bind_eq_bind, Option.bind_some]
 
 /-! ### A child filled -/
 
@@ -1190,7 +1190,7 @@ theorem storage_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc 
     TRuns (State.init C) (rootsProg st C.vars fun _ _ hm => lookupBy_of_nodup hnd hm)
       ((State.init C).withStorage st) :=
   rootsProg_run st hnd C.vars _ (State.init C) (fun _ _ hr _ => SFields.dflt_get hr)
-    (fun r T hr hm => absurd ⟨T, lookupBy_mem' hr⟩ hm) hc ht hf hnd
+    (fun _ T hr hm => absurd ⟨T, lookupBy_mem' hr⟩ hm) hc ht hf hnd
 
 /-- **Canonical and tight ⇒ reachable**, for keys and slots in range. -/
 theorem canon_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc : st.Canon)
@@ -1261,10 +1261,10 @@ reachable, since `pop`, `delete` and a shorter copy clear the words they
 leave behind and nothing writes past the end of an array of words. -/
 theorem dirty_word_not_reachable : Words.dirty.Canon ∧ ¬ Reachable Words Words.dirty := by
   refine ⟨?_, fun h => ?_⟩
-  · simp only [Words.dirty, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, canonH,
+  · simp only [Words.dirty, SFields.All, SVal.All, SVec.All, SList.All, canonH,
       and_self]
   · have ht := reachable_tight (deepOk_of_all (by decide)) h
-    simp only [Words.dirty, Storage.All, SFields.All, SVal.All, tightH] at ht
+    simp only [Words.dirty, SFields.All, SVal.All, tightH] at ht
     have h5 := ht.1.1.2 rfl _ (by rw [SList.toList_cons]; exact List.mem_cons_self)
     rw [SVal.dflt_prim] at h5
     cases h5
@@ -1304,15 +1304,14 @@ def BoolKeyed.flag : Storage BoolKeyed :=
 to (decisions 10 and 14): reachable, by the builder (`flags[true] = 3;`). -/
 theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
   refine canon_reachable (by decide) ?_ ?_ ?_
-  · simp only [BoolKeyed.flag, Storage.All, SFields.All, SVal.All, SMap.All, canonH, and_true,
-      true_and]
+  · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, canonH, and_true]
     refine ⟨?_, rfl⟩
     simp only [SMap.toList]
     decide
-  · simp only [BoolKeyed.flag, Storage.All, SFields.All, SVal.All, SMap.All, tightH, and_true]
+  · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, tightH, and_true]
     intro h
     exact nomatch h
-  · simp only [BoolKeyed.flag, Storage.All, SFields.All, SVal.All, SMap.All, fitsH, and_true]
+  · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, fitsH, and_true]
     intro e he
     simp only [SMap.toList, List.mem_cons, List.not_mem_nil, or_false] at he
     subst he
@@ -1328,12 +1327,12 @@ def Tokens.dangling : Storage Tokens :=
 before its `pop`: reachable, by the builder. -/
 theorem dangling_slot_reachable : Reachable Tokens Tokens.dangling := by
   refine canon_reachable (by decide) ?_ ?_ ?_
-  · simp only [Tokens.dangling, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, canonH,
+  · simp only [Tokens.dangling, SFields.All, SVal.All, SVec.All, SList.All, canonH,
       and_self]
-  · simp only [Tokens.dangling, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, tightH,
+  · simp only [Tokens.dangling, SFields.All, SVal.All, SVec.All, SList.All, tightH,
       and_true]
     refine ⟨fun h => absurd h (by decide), fun h => absurd h (by decide)⟩
-  · simp only [Tokens.dangling, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, fitsH,
+  · simp only [Tokens.dangling, SFields.All, SVal.All, SVec.All, SList.All, fitsH,
       and_true]
     show 0 + SList.length _ < 2 ^ 256
     simp only [SList.length, SList.toList_cons, SList.toList_nil, List.length_cons,

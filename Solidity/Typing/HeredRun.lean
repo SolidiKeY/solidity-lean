@@ -172,8 +172,7 @@ theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E)
     simp only [SVal.view_array] at h
     split at h
     · rename_i hb
-      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq,
-        Prod.mk.injEq] at h
+      simp only [Option.bind_eq_some_iff, Option.some.injEq, Prod.mk.injEq] at h
       obtain ⟨st₁, h, rfl, -⟩ := h
       simp only [SVal.All] at hvA
       have hsl := hP.pushSlot_all (SList.all_iff.mp hvA.2.2)
@@ -404,6 +403,7 @@ theorem ARhs.evalT_all {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R : R
       rw [Path.keys_append, Path.index_dyn]
       exact ⟨hk, trivial⟩
 
+omit hP hG in
 theorem MRhs.evalT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R : RefTy} :
     (r : MRhs C Γ R) → {g : Grew C Γ σ.H (HRef · R)} → r.evalT σ = .ok g →
       (heredInv C P).HoldsT g.st
@@ -420,6 +420,7 @@ theorem MRhs.evalT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R :
     cases h
     exact hσ.adopt _
 
+omit hG in
 theorem opStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : BinOp)
     {p : PrimTy} {r : SRef C (.prim p)} (hk : r.path.Keys Ty.Keyable)
     (hl : (σ.storage.get r.hroot).Live r.path) (v : p.Denote) {o : Out C σ.H Γ}
@@ -431,6 +432,7 @@ theorem opStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : 
   cases h
   exact hσ.withStorage (Storage.save_all hP hσ.1 (by simp only [SVal.All]) hk hl (TRes.ofOpt_ok hst))
 
+omit hP hG in
 theorem opMemT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : BinOp) {p : PrimTy}
     (a : MAddr σ.H (.prim p)) (v : p.Denote) {o : Out C σ.H Γ} (h : opMemT σ op a v = .ok o) :
     (heredInv C P).HoldsT o.st := by
@@ -441,6 +443,7 @@ theorem opMemT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : Bi
   cases h
   exact hσ
 
+omit hG in
 theorem OpLoc.storeT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : BinOp) :
     {p : PrimTy} → (l : OpLoc C Γ p) → (v : p.Denote) → {o : Out C σ.H Γ} →
       l.storeT σ op v = .ok o → (heredInv C P).HoldsT o.st
@@ -449,22 +452,23 @@ theorem OpLoc.storeT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (o
     cases h
     exact hσ.setLocal i trivial
   | _, .root r hr, v, o, h =>
-    opStoreT_holds hP hG hσ op (r := SRef.ofRoot r hr) trivial (SVal.live_nil _) v h
+    opStoreT_holds hP hσ op (r := SRef.ofRoot r hr) trivial (SVal.live_nil _) v h
   | _, .field b f hf, v, o, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact opStoreT_holds hP hG hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact opStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
       (Loc.resolveT_live σ _ href) v h
   | _, .index it b i, v, o, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact opStoreT_holds hP hG hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact opStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
       (Loc.resolveT_live σ _ href) v h
   | _, .mfield .., v, o, h => by
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
-    exact opMemT_holds hP hG hσ op a v h
+    exact opMemT_holds hσ op a v h
   | _, .mindex .., v, o, h => by
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
-    exact opMemT_holds hP hG hσ op a v h
+    exact opMemT_holds hσ op a v h
 
+omit hG in
 theorem bumpStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : IncDec)
     {p : PrimTy} {r : SRef C (.prim p)} (hk : r.path.Keys Ty.Keyable)
     (hl : (σ.storage.get r.hroot).Live r.path) {o : Out C σ.H Γ} {w : p.Denote}
@@ -476,6 +480,7 @@ theorem bumpStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op 
   cases h
   exact hσ.withStorage (Storage.save_all hP hσ.1 (by simp only [SVal.All]) hk hl (TRes.ofOpt_ok hst))
 
+omit hP hG in
 theorem bumpMemT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : IncDec) {p : PrimTy}
     (a : MAddr σ.H (.prim p)) {o : Out C σ.H Γ} {w : p.Denote} (h : bumpMemT σ op a = .ok (o, w)) :
     (heredInv C P).HoldsT o.st := by
@@ -486,6 +491,7 @@ theorem bumpMemT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : 
   cases h
   exact hσ
 
+omit hG in
 theorem OpLoc.bumpT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : IncDec) :
     {p : PrimTy} → (l : OpLoc C Γ p) → {o : Out C σ.H Γ} → {w : p.Denote} →
       l.bumpT σ op = .ok (o, w) → (heredInv C P).HoldsT o.st
@@ -494,22 +500,23 @@ theorem OpLoc.bumpT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op
     cases h
     exact hσ.setLocal i trivial
   | _, .root r hr, o, w, h =>
-    bumpStoreT_holds hP hG hσ op (r := SRef.ofRoot r hr) trivial (SVal.live_nil _) h
+    bumpStoreT_holds hP hσ op (r := SRef.ofRoot r hr) trivial (SVal.live_nil _) h
   | _, .field b f hf, o, w, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact bumpStoreT_holds hP hG hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact bumpStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
       (Loc.resolveT_live σ _ href) h
   | _, .index it b i, o, w, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact bumpStoreT_holds hP hG hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact bumpStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
       (Loc.resolveT_live σ _ href) h
   | _, .mfield .., o, w, h => by
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
-    exact bumpMemT_holds hP hG hσ op a h
+    exact bumpMemT_holds hσ op a h
   | _, .mindex .., o, w, h => by
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
-    exact bumpMemT_holds hP hG hσ op a h
+    exact bumpMemT_holds hσ op a h
 
+omit hP hG in
 theorem clearT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) :
     {T : Ty} → (a : MAddr σ.H T) → (hm : T.mapFree = true) → {o : Out C σ.H Γ} →
       TRun.clearT σ a hm = .ok o → (heredInv C P).HoldsT o.st
@@ -524,6 +531,7 @@ theorem clearT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) :
       exact hσ.adopt _
     · exact nomatch h
 
+omit hG in
 theorem keeps_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
     (heredInv C P).TKeeps (TRun.assign l r) := by
   intro σ o hσ h
@@ -544,6 +552,7 @@ theorem keeps_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
   obtain ⟨hst, hk⟩ := ARhs.evalT_all hP hG hσ r he
   exact (hσ.withStorage hst).setLocal i fun r' hr' => by cases hr'; exact hk
 
+omit hP hG in
 theorem keeps_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
     (heredInv C P).TKeeps (TRun.assignLocal i r) := by
   intro σ o hσ h
@@ -552,6 +561,7 @@ theorem keeps_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
   cases h
   exact hσ.setLocal i trivial
 
+omit hP hG in
 theorem keeps_declLocal (p : PrimTy) (init : Option (Val C Γ p)) :
     (heredInv C P).TKeeps (TRun.declLocal p init) := by
   intro σ o hσ h
@@ -576,28 +586,31 @@ theorem keeps_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
     obtain ⟨hst, hk⟩ := ARhs.evalT_all hP hG hσ r he
     exact (hσ.withStorage hst).push fun r' hr' => by cases hr'; exact hk
 
+omit hG in
 theorem keeps_opAssign {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (r : Val C Γ p) :
     (heredInv C P).TKeeps (TRun.opAssign op l r) := by
   intro σ o hσ h
   unfold TRun.opAssign at h
   obtain ⟨v, _, h⟩ := tbind_ok_inv h
-  exact OpLoc.storeT_holds hP hG hσ op l v h
+  exact OpLoc.storeT_holds hP hσ op l v h
 
+omit hG in
 theorem keeps_incDec {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) :
     (heredInv C P).TKeeps (TRun.incDec op l) := by
   intro σ o hσ h
   unfold TRun.incDec at h
   obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
   cases h
-  exact OpLoc.bumpT_holds hP hG hσ op l hb
+  exact OpLoc.bumpT_holds hP hσ op l hb
 
+omit hG in
 theorem keeps_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : OpLoc C Γ p) :
     (heredInv C P).TKeeps (TRun.assignIncDec i op l) := by
   intro σ o hσ h
   unfold TRun.assignIncDec at h
   obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
   cases h
-  exact (OpLoc.bumpT_holds hP hG hσ op l hb).setLocal i trivial
+  exact (OpLoc.bumpT_holds hP hσ op l hb).setLocal i trivial
 
 theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) :
     (heredInv C P).TKeeps (TRun.push b v) := by
@@ -628,6 +641,7 @@ theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
     | none => exact hs
     | some x0 => exact hx x0 rfl
 
+omit hG in
 theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (heredInv C P).TKeeps (TRun.pop b) := by
   intro σ o hσ h
   unfold TRun.pop at h
@@ -640,6 +654,7 @@ theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (heredInv C P).TKeeps (
   | prim _ => exact nomatch hm
   | ref _ => rfl
 
+omit hP hG in
 theorem keeps_transfer (r a : Val C Γ .uint) : (heredInv C P).TKeeps (TRun.transfer r a) := by
   intro σ o hσ h
   unfold TRun.transfer at h
@@ -648,6 +663,7 @@ theorem keeps_transfer (r a : Val C Γ .uint) : (heredInv C P).TKeeps (TRun.tran
   cases h
   exact hσ
 
+omit hP hG in
 theorem keeps_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
     (heredInv C P).TKeeps (TRun.send pv r a) := by
   intro σ o hσ h
@@ -661,6 +677,7 @@ theorem keeps_send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
   · exact hσ.setLocal pv trivial
   · exact hσ.setLocal pv trivial
 
+omit hP hG in
 theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).mapFree = true) :
     (heredInv C P).TKeeps (TRun.declMem R init hm) := by
   intro σ o hσ h
@@ -670,15 +687,16 @@ theorem keeps_declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R)
   | some r =>
     obtain ⟨g, hg, h⟩ := tbind_ok_inv h
     cases h
-    exact (MRhs.evalT_holds hP hG hσ r hg).push trivial
+    exact (MRhs.evalT_holds hσ r hg).push trivial
 
+omit hP hG in
 theorem keeps_rebindMem {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
     (heredInv C P).TKeeps (TRun.rebindMem i r) := by
   intro σ o hσ h
   unfold TRun.rebindMem at h
   obtain ⟨g, hg, h⟩ := tbind_ok_inv h
   cases h
-  exact (MRhs.evalT_holds hP hG hσ r hg).setLocal i trivial
+  exact (MRhs.evalT_holds hσ r hg).setLocal i trivial
 
 theorem keeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R)) :
     (heredInv C P).TKeeps (TRun.assignFromMem l p) := by
@@ -692,6 +710,7 @@ theorem keeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ 
     (hP.plain _ (hG ref) (MVal.copyMToSt_plain σ.heap m))
     (Loc.resolveT_keyed σ hσ.2 l href) (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
 
+omit hP hG in
 theorem keeps_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
     (heredInv C P).TKeeps (TRun.assignMem l r) := by
   intro σ o hσ h
@@ -702,6 +721,7 @@ theorem keeps_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
   cases h
   exact hσ
 
+omit hG in
 theorem keeps_delete {T : Ty} (l : Loc C Γ T) : (heredInv C P).TKeeps (TRun.delete l) := by
   intro σ o hσ h
   unfold TRun.delete at h
@@ -711,6 +731,7 @@ theorem keeps_delete {T : Ty} (l : Loc C Γ T) : (heredInv C P).TKeeps (TRun.del
   exact hσ.withStorage (Storage.delete_all hP hσ.1 (Loc.resolveT_keyed σ hσ.2 l href)
     (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
 
+omit hP hG in
 theorem keeps_deleteMem {T : Ty} (p : MPath C Γ T) : (heredInv C P).TKeeps (TRun.deleteMem p) := by
   intro σ o hσ h
   unfold TRun.deleteMem at h
@@ -718,7 +739,7 @@ theorem keeps_deleteMem {T : Ty} (p : MPath C Γ T) : (heredInv C P).TKeeps (TRu
   | var i _ => cases h; exact (hσ.adopt _).setLocal i trivial
   | loc l =>
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
-    exact clearT_holds hP hG hσ a l.mapFree h
+    exact clearT_holds hσ a l.mapFree h
 
 theorem keeps_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     (hn : R.newArrOk = true) : (heredInv C P).TKeeps (TRun.assignNew l n hn) := by
@@ -745,59 +766,59 @@ end Leaves
 
 section Run
 
-variable {P : Hered} {G : Ty → Prop} (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
-
-include hP hG
+variable {P : Hered} {G : Ty → Prop}
 
 mutual
 
 /-- **A hereditary predicate, statement level.**  A statement run from a
 state whose storage satisfies it, its aliases bound along keys a program
 writes, ends in one. -/
-theorem Stmt.keeps_all : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (heredInv C P).TKeeps (Stmt.runR s)
-  | _, _, .assign l r => keeps_assign hP hG l r
+theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) :
+    {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (heredInv C P).TKeeps (Stmt.runR s)
+  | _, _, .assign l r => keeps_assign hP l r
   | _, _, .rebind i r => keeps_rebind hP hG i r
-  | _, _, .assignLocal i r => keeps_assignLocal hP hG i r
-  | _, _, .declLocal p _ init => keeps_declLocal hP hG p init
+  | _, _, .assignLocal i r => keeps_assignLocal i r
+  | _, _, .declLocal p _ init => keeps_declLocal p init
   | _, _, .declStorage R _ init => keeps_declStorage hP hG R init
-  | _, _, .opAssign op _ _ l r => keeps_opAssign hP hG op l r
-  | _, _, .incDec op _ l => keeps_incDec hP hG op l
-  | _, _, .assignIncDec i op _ l _ => keeps_assignIncDec hP hG i op l
+  | _, _, .opAssign op _ _ l r => keeps_opAssign hP op l r
+  | _, _, .incDec op _ l => keeps_incDec hP op l
+  | _, _, .assignIncDec i op _ l _ => keeps_assignIncDec hP i op l
   | _, _, .push b v _ => keeps_push hP hG b v
-  | _, _, .pop b => keeps_pop hP hG b
-  | _, _, .transfer r a => keeps_transfer hP hG r a
-  | _, _, .send pv r a => keeps_send hP hG pv r a
-  | _, _, .declMem R _ init _ hm => keeps_declMem hP hG R init hm
-  | _, _, .rebindMem i r => keeps_rebindMem hP hG i r
+  | _, _, .pop b => keeps_pop hP b
+  | _, _, .transfer r a => keeps_transfer r a
+  | _, _, .send pv r a => keeps_send pv r a
+  | _, _, .declMem R _ init _ hm => keeps_declMem R init hm
+  | _, _, .rebindMem i r => keeps_rebindMem i r
   | _, _, .assignFromMem l p => keeps_assignFromMem hP hG l p
-  | _, _, .assignMem l r => keeps_assignMem hP hG l r
-  | _, _, .delete l => keeps_delete hP hG l
-  | _, _, .deleteMem p _ => keeps_deleteMem hP hG p
+  | _, _, .assignMem l r => keeps_assignMem l r
+  | _, _, .delete l => keeps_delete hP l
+  | _, _, .deleteMem p _ => keeps_deleteMem p
   | _, _, .assignNew l n hn => keeps_assignNew hP hG l n hn
   | _, _, .ite c thn els =>
-    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_all thn) (Prog.keeps_all els)
+    RunInv.tkeeps_ite c thn.ext els.ext (Prog.keeps_all hP hG thn) (Prog.keeps_all hP hG els)
   | _, _, .require c => RunInv.tkeeps_require c
   | _, _, .assert c => RunInv.tkeeps_assert c
   | _, _, .revert => RunInv.tkeeps_revert
   | _, _, .call _ args ret body =>
-    RunInv.tkeeps_call heredInv.valMemOk args ret body.ext (Prog.keeps_all body)
+    RunInv.tkeeps_call heredInv.valMemOk args ret body.ext (Prog.keeps_all hP hG body)
   | _, _, .tryCall call rets ok err code pnc other =>
     RunInv.tkeeps_tryCall heredInv.valMemOk call rets ok.ext err.ext code pnc.ext other.ext
-      (Prog.keeps_all ok) (Prog.keeps_all err) (Prog.keeps_all pnc) (Prog.keeps_all other)
-  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_all body)
-  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_all body)
+      (Prog.keeps_all hP hG ok) (Prog.keeps_all hP hG err) (Prog.keeps_all hP hG pnc) (Prog.keeps_all hP hG other)
+  | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_all hP hG body)
+  | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_all hP hG body)
 
 /-- **A hereditary predicate, block level.** -/
-theorem Prog.keeps_all : {Γ Γ' : Ctx} → (P' : Prog C Γ Γ') → (heredInv C P).TKeeps (Prog.runR P')
+theorem Prog.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) :
+    {Γ Γ' : Ctx} → (P' : Prog C Γ Γ') → (heredInv C P).TKeeps (Prog.runR P')
   | _, _, .nil => RunInv.tkeeps_nil
-  | _, _, .cons s P' => RunInv.tkeeps_seq (Stmt.keeps_all s) (Prog.keeps_all P')
+  | _, _, .cons s P' => RunInv.tkeeps_seq (Stmt.keeps_all hP hG s) (Prog.keeps_all hP hG P')
 
 end
 
 /-- **What a run keeps**: a block run from a state whose storage satisfies
 the predicate, with no alias bound off the keys a program writes, ends, if in
 a state, in one whose storage satisfies it. -/
-theorem Prog.run_all {Γ Γ' : Ctx} (P' : Prog C Γ Γ') {σ : State C Γ} {o : Out C σ.H Γ'}
+theorem Prog.run_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U) {Γ Γ' : Ctx} (P' : Prog C Γ Γ') {σ : State C Γ} {o : Out C σ.H Γ'}
     (hσ : (heredInv C P).HoldsT σ) (h : P'.run σ = .ok o) : o.st.storage.All P :=
   (Prog.keeps_all hP hG P' σ o hσ h).1
 

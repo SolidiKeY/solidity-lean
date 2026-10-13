@@ -88,54 +88,57 @@ attribute [eqns SList.allB_nil SList.allB_cons] SList.allB
 attribute [eqns SVec.allB_nil SVec.allB_cons] SVec.allB
 attribute [eqns SMap.allB_nil SMap.allB_cons] SMap.allB
 
+/-- Node tests that decide a predicate's node conditions. -/
+structure HeredB.Decides (B : HeredB) (P : Hered) : Prop where
+  arr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), B.arr e sh = true ↔ P.arr e sh
+  fix : ∀ E n, B.fix E n = true ↔ P.fix E n
+  map : ∀ K {V : Ty} (m : SMap V) (d : SVal V), B.map K m d = true ↔ P.map K m d
+
 section Iff
 
 variable {P : Hered} {B : HeredB}
-  (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), B.arr e sh = true ↔ P.arr e sh)
-  (hfix : ∀ E n, B.fix E n = true ↔ P.fix E n)
-  (hmap : ∀ K {V : Ty} (m : SMap V) (d : SVal V), B.map K m d = true ↔ P.map K m d)
-
-include harr hfix hmap
 
 mutual
 /-- **The test decides the predicate**, its node tests deciding the node
 conditions. -/
-theorem SVal.allB_iff : {T : Ty} → (v : SVal T) → v.allB B = true ↔ v.All P
+theorem SVal.allB_iff (hB : B.Decides P) : {T : Ty} → (v : SVal T) → v.allB B = true ↔ v.All P
   | _, .prim _ => by simp only [SVal.allB, SVal.All]
-  | _, .struct fs => by simp only [SVal.allB, SVal.All]; exact SFields.allB_iff fs
+  | _, .struct fs => by simp only [SVal.allB, SVal.All]; exact SFields.allB_iff hB fs
   | _, .array e sh _ => by
     simp only [SVal.allB, SVal.All, Bool.and_eq_true]
-    rw [harr, SVec.allB_iff e, SList.allB_iff sh, and_assoc]
+    rw [hB.arr, SVec.allB_iff hB e, SList.allB_iff hB sh, and_assoc]
   | _, .fixed e => by
     simp only [SVal.allB, SVal.All, Bool.and_eq_true]
-    rw [hfix, SVec.allB_iff e]
+    rw [hB.fix, SVec.allB_iff hB e]
   | _, .map m d => by
     simp only [SVal.allB, SVal.All, Bool.and_eq_true]
-    rw [hmap, SMap.allB_iff m, SVal.allB_iff d, and_assoc]
+    rw [hB.map, SMap.allB_iff hB m, SVal.allB_iff hB d, and_assoc]
 
-theorem SFields.allB_iff : {fs : List (Name × Ty)} → (x : SFields fs) → x.allB B = true ↔ x.All P
+theorem SFields.allB_iff (hB : B.Decides P) : {fs : List (Name × Ty)} → (x : SFields fs) →
+    x.allB B = true ↔ x.All P
   | _, .nil => by simp only [SFields.allB, SFields.All]
   | _, .cons v rest => by
     simp only [SFields.allB, SFields.All, Bool.and_eq_true]
-    rw [SVal.allB_iff v, SFields.allB_iff rest]
+    rw [SVal.allB_iff hB v, SFields.allB_iff hB rest]
 
-theorem SList.allB_iff : {E : Ty} → (l : SList E) → l.allB B = true ↔ l.All P
+theorem SList.allB_iff (hB : B.Decides P) : {E : Ty} → (l : SList E) → l.allB B = true ↔ l.All P
   | _, .nil => by simp only [SList.allB, SList.All]
   | _, .cons v rest => by
     simp only [SList.allB, SList.All, Bool.and_eq_true]
-    rw [SVal.allB_iff v, SList.allB_iff rest]
+    rw [SVal.allB_iff hB v, SList.allB_iff hB rest]
 
-theorem SVec.allB_iff : {E : Ty} → {n : Nat} → (l : SVec E n) → l.allB B = true ↔ l.All P
+theorem SVec.allB_iff (hB : B.Decides P) : {E : Ty} → {n : Nat} → (l : SVec E n) →
+    l.allB B = true ↔ l.All P
   | _, _, .nil => by simp only [SVec.allB, SVec.All]
   | _, _, .cons v rest => by
     simp only [SVec.allB, SVec.All, Bool.and_eq_true]
-    rw [SVal.allB_iff v, SVec.allB_iff rest]
+    rw [SVal.allB_iff hB v, SVec.allB_iff hB rest]
 
-theorem SMap.allB_iff : {V : Ty} → (m : SMap V) → m.allB B = true ↔ m.All P
+theorem SMap.allB_iff (hB : B.Decides P) : {V : Ty} → (m : SMap V) → m.allB B = true ↔ m.All P
   | _, .nil => by simp only [SMap.allB, SMap.All]
   | _, .cons _ v rest => by
     simp only [SMap.allB, SMap.All, Bool.and_eq_true]
-    rw [SVal.allB_iff v, SMap.allB_iff rest]
+    rw [SVal.allB_iff hB v, SMap.allB_iff hB rest]
 end
 
 end Iff
@@ -173,9 +176,9 @@ def keysHB : HeredB where
   map K := fun m _ => m.toList.all fun e => K.keyOkB e.1
 
 theorem SVal.canonB_iff {T : Ty} (v : SVal T) : v.allB canonHB = true ↔ v.Canon :=
-  SVal.allB_iff (P := canonH) (fun _ _ => by simp only [canonHB, canonH])
-    (fun _ _ => by simp only [canonHB, canonH])
-    (fun _ _ m d => by simp only [canonHB, canonH, Bool.and_eq_true, SVal.beq_iff]) v
+  SVal.allB_iff (P := canonH) ⟨fun _ _ => by simp only [canonHB, canonH],
+    fun _ _ => by simp only [canonHB, canonH],
+    fun _ _ m d => by simp only [canonHB, canonH, Bool.and_eq_true, SVal.beq_iff]⟩ v
 
 theorem SList.toList_isEmpty {E : Ty} (sh : SList E) : sh.toList.isEmpty = true ↔ sh = .nil := by
   cases sh with
@@ -216,23 +219,23 @@ theorem tightHB_arr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) :
       · exact Or.inr (h2 hp)
 
 theorem SVal.tightB_iff {T : Ty} (v : SVal T) : v.allB tightHB = true ↔ v.Tight :=
-  SVal.allB_iff (P := tightH) tightHB_arr (fun _ _ => by simp only [tightHB, tightH])
-    (fun K _ m d => by
+  SVal.allB_iff (P := tightH) ⟨tightHB_arr, fun _ _ => by simp only [tightHB, tightH],
+    fun K _ m d => by
       show (K.isKey || m.toList.isEmpty) = true ↔ (K.isKey = false → m = .nil)
       rw [Bool.or_eq_true, SMap.toList_isEmpty]
       cases K.isKey
       · simp only [Bool.false_eq_true, false_or, forall_const]
-      · simp only [true_or, Bool.true_eq_false, false_implies]) v
+      · simp only [true_or, Bool.true_eq_false, false_implies]⟩ v
 
 theorem Ty.keyOkB_iff (K : Ty) (k : Int) : K.keyOkB k = true ↔ K.keyOk k := by
   cases K <;> simp only [Ty.keyOkB, Ty.keyOk]
 
 theorem SVal.keysB_iff {T : Ty} (v : SVal T) : v.allB keysHB = true ↔ v.All keysH :=
-  SVal.allB_iff (P := keysH) (fun _ _ => by simp only [keysHB, keysH])
-    (fun _ _ => by simp only [keysHB, keysH])
-    (fun K _ m d => by
+  SVal.allB_iff (P := keysH) ⟨fun _ _ => by simp only [keysHB, keysH],
+    fun _ _ => by simp only [keysHB, keysH],
+    fun K _ m d => by
       show (m.toList.all fun e => K.keyOkB e.1) = true ↔ ∀ e ∈ m.toList, K.keyOk e.1
-      simp only [List.all_eq_true, Ty.keyOkB_iff]) v
+      simp only [List.all_eq_true, Ty.keyOkB_iff]⟩ v
 
 theorem SFields.allB_iff' {P : Hered} {B : HeredB}
     (h : ∀ {T : Ty} (v : SVal T), v.allB B = true ↔ v.All P) :
@@ -262,16 +265,16 @@ theorem Storage.keysB_iff (st : Storage C) : st.keysB = true ↔ st.All keysH :=
 
 /-- Keys and slots in range have their keys in range. -/
 theorem Storage.keysB_of_fits {st : Storage C} (h : st.Fits) : st.keysB = true :=
-  (Storage.keysB_iff st).2 (SFields.all_mono (P := keysH) (Q := fitsH) (fun _ => True)
-    (fun _ _ _ _ => trivial) (fun _ _ => trivial) (fun _ _ _ => trivial) (fun _ _ _ => trivial)
-    (fun _ _ _ _ _ => trivial) (fun _ _ _ _ => trivial) (fun _ _ _ h => h) st
+  (Storage.keysB_iff st).2 (SFields.all_mono (P := keysH) (Q := fitsH) (G := fun _ => True)
+    ⟨fun _ _ _ _ => trivial, fun _ _ => trivial, fun _ _ _ => trivial, fun _ _ _ => trivial,
+      fun _ _ _ _ _ => trivial, fun _ _ _ _ => trivial, fun _ _ _ h => h⟩ st
     (fun _ _ => trivial) h)
 
 /-- Bounded storage has its keys in range. -/
 theorem Storage.keysB_of_bnd {st : Storage C} (h : st.Bnd) : st.keysB = true :=
-  (Storage.keysB_iff st).2 (SFields.all_mono (P := keysH) (Q := bndH) (fun _ => True)
-    (fun _ _ _ _ => trivial) (fun _ _ => trivial) (fun _ _ _ => trivial) (fun _ _ _ => trivial)
-    (fun _ _ _ _ _ => trivial) (fun _ _ _ _ => trivial) (fun _ _ _ h => h) st
+  (Storage.keysB_iff st).2 (SFields.all_mono (P := keysH) (Q := bndH) (G := fun _ => True)
+    ⟨fun _ _ _ _ => trivial, fun _ _ => trivial, fun _ _ _ => trivial, fun _ _ _ => trivial,
+      fun _ _ _ _ _ => trivial, fun _ _ _ _ => trivial, fun _ _ _ h => h⟩ st
     (fun _ _ => trivial) h)
 
 end Solidity

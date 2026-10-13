@@ -142,7 +142,7 @@ mapping's default is its type's default. -/
 theorem map_default_not_reachable : ¬ Reachable Balances Balances.five := by
   intro h
   have hc := reachable_canon h
-  simp only [Balances.five, Storage.All, SFields.All, SVal.All] at hc
+  simp only [Balances.five, SFields.All, SVal.All] at hc
   have hd := hc.1.1.2
   rw [SVal.dflt_prim] at hd
   cases hd
@@ -152,7 +152,7 @@ by `setBy`. -/
 theorem map_dup_key_not_reachable : ¬ Reachable Balances Balances.dup := by
   intro h
   have hc := reachable_canon h
-  simp only [Balances.dup, Storage.All, SFields.All, SVal.All] at hc
+  simp only [Balances.dup, SFields.All, SVal.All] at hc
   exact absurd hc.1.1.1 (by simp only [SMap.toList]; decide)
 
 end Witnesses
