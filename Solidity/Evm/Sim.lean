@@ -933,4 +933,54 @@ theorem storesFrom_callFrame (b : Nat) {Γ Γ' ps rs Γf : Ctx}
   have := storesFrom_compileProg (b + Γ.length) body
   stores_from
 
+
+namespace Sim
+
+variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State C Γ} {m : Machine}
+
+/-! The fields of `SimL` read on the typed state itself. -/
+
+theorem store (h : Sim C L b F σ m) : ReprStore C L m.store σ.storage := SimL.store h
+
+theorem fragile (h : Sim C L b F σ m) {R : RefTy} (i : Idx Γ (.alias R))
+    (hi : F.get i = .fragile) :
+    ∃ r s, Look.ofTEnv σ.env i = some r ∧ m.memAt (lvl b i) = .slot s ∧
+      PathSlot C false r s ∧ ∃ sv, σ.storage.findLive r = some sv :=
+  SimL.fragile h i hi
+
+theorem net (h : Sim C L b F σ m) :
+    ∀ a : Nat, a < W → a ≠ m.self → netAt σ.net a = (m.bal₀ a : Int) - m.bal a :=
+  SimL.net h
+
+theorem netSelf (h : Sim C L b F σ m) : netAt σ.net m.self = 0 := SimL.netSelf h
+
+theorem env (h : Sim C L b F σ m) : EnvSim σ.tx m := SimL.env h
+
+/-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
+theorem book (h : Sim C L b F σ m) (x y : Int) (bl bl₀ : Nat → Nat)
+    (hn : ∀ a : Nat, a < W → a ≠ m.self → netAt (σ.pay x y).net a = (bl₀ a : Int) - bl a)
+    (hself : netAt (σ.pay x y).net m.self = 0) :
+    Sim C L b F (σ.pay x y) { m with bal := bl, bal₀ := bl₀ } :=
+  SimL.book h x y bl bl₀ hn hself
+
+/-- Under a looser bound on the arrays. -/
+theorem mono {L' : Nat} (h : Sim C L b F σ m) (hL : L ≤ L') (hL' : L' ≤ Lmax) :
+    Sim C L' b F σ m :=
+  SimL.mono h hL hL'
+
+/-- A storage write that lowers no array's length. -/
+theorem store' (h : Sim C L b F σ m) {st' : Slot → Nat} {stor : Solidity.Storage C}
+    (hs : ReprStore C L st' stor) (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
+    Sim C L b F (σ.withStorage stor) { m with store := st' } :=
+  SimL.store' h hs hlen
+
+/-- A storage write that may shrink an array (`pop`, `delete`): the fragile
+aliases forgotten. -/
+theorem storeDrop (h : Sim C L b F σ m) {st' : Slot → Nat} {stor : Solidity.Storage C}
+    (hs : ReprStore C L st' stor) :
+    Sim C L b F.dropFragile (σ.withStorage stor) { m with store := st' } :=
+  SimL.storeDrop h hs
+
+end Sim
+
 end Solidity.Evm
