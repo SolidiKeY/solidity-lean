@@ -151,6 +151,43 @@ theorem setBy_of_lookupBy {k : κ} {v : α} : {l : List (κ × α)} → lookupBy
     · simp only [hk, ↓reduceIte] at h
       simp only [setBy, hk, ↓reduceIte, setBy_of_lookupBy h]
 
+theorem lookupBy_append_none {k : κ} : {l₁ : List (κ × α)} → (l₂ : List (κ × α)) →
+    lookupBy k l₁ = none → lookupBy k (l₁ ++ l₂) = lookupBy k l₂
+  | [], _, _ => rfl
+  | (k', v') :: l₁, l₂, h => by
+    simp only [lookupBy] at h ⊢
+    split at h
+    · exact nomatch h
+    · rename_i hk
+      simp only [List.cons_append, lookupBy, hk, ↓reduceIte]
+      exact lookupBy_append_none l₂ h
+
+theorem setBy_append_none {k : κ} {v : α} : {l₁ : List (κ × α)} → (l₂ : List (κ × α)) →
+    lookupBy k l₁ = none → setBy k v (l₁ ++ l₂) = l₁ ++ setBy k v l₂
+  | [], _, _ => rfl
+  | (k', v') :: l₁, l₂, h => by
+    simp only [lookupBy] at h
+    split at h
+    · exact nomatch h
+    · rename_i hk
+      simp only [List.cons_append, setBy, hk, ↓reduceIte]
+      rw [setBy_append_none l₂ h]
+
+theorem nodupKeysB_mid {k : κ} {v : α} : {l₁ : List (κ × α)} → {l₂ : List (κ × α)} →
+    nodupKeysB (l₁ ++ (k, v) :: l₂) = true → lookupBy k l₁ = none
+  | [], _, _ => rfl
+  | (k', v') :: l₁, l₂, h => by
+    simp only [List.cons_append, nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at h
+    simp only [lookupBy]
+    split
+    · rename_i hk
+      subst hk
+      have := lookupBy_isSome_of_mem' (k := k) (v := v)
+        (List.mem_append_right l₁ List.mem_cons_self : (k, v) ∈ l₁ ++ (k, v) :: l₂)
+      rw [h.1] at this
+      exact nomatch this
+    · exact nodupKeysB_mid h.2
+
 end Lists
 
 /-! ## Defaults by their equations
