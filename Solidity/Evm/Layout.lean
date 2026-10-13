@@ -139,7 +139,7 @@ theorem size_struct (n : Name) : size (.ref (.struct n)) = sumSizes (structDef n
 `keccak(4)`. -/
 @[simp] theorem size_array (E : Ty) : size (.ref (.array E)) = 1 := rfl
 /-- A mapping takes one slot, never written: `mapping(uint => uint) balances;` is slot `5`. -/
-@[simp] theorem size_mapping (K V : Ty) : size (.ref (.mapping K V)) = 1 := rfl
+@[simp] theorem size_mapping (K : PrimTy) (V : Ty) : size (.ref (.mapping K V)) = 1 := rfl
 /-- A fixed-size array takes its elements' slots, one after the other, and no
 length slot: `uint[3] fixedValues;` takes three, `Token[2] fixedTokens;` two. -/
 @[simp] theorem size_fixed (E : Ty) (n : Nat) : size (.ref (.fixed E n)) = n * size E := by
@@ -259,7 +259,7 @@ inductive Occ : Ty → Slot → Slot → Prop
   | len {E : Ty} {s : Slot} : Occ (.ref (.array E)) s s
   | elem {E : Ty} {s x : Slot} (i : Nat) :
       Occ E (.data s (i * size E)) x → Occ (.ref (.array E)) s x
-  | entry {K V : Ty} {s x : Slot} (k : Nat) : Occ V (.hash k s 0) x → Occ (.ref (.mapping K V)) s x
+  | entry {K : PrimTy} {V : Ty} {s x : Slot} (k : Nat) : Occ V (.hash k s 0) x → Occ (.ref (.mapping K V)) s x
   | felem {E : Ty} {n : Nat} {s x : Slot} (i : Nat) :
       i < n → Occ E (s.add (i * size E)) x → Occ (.ref (.fixed E n)) s x
 

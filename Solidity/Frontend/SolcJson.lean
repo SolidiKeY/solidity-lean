@@ -284,7 +284,9 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
       | some n => pure (.ref (.fixed b n))
       | none => throw s!"array length `{v}`"
   | "Mapping" =>
-    pure (.ref (.mapping (← tyOf S (← j.getObjVal? "keyType")) (← tyOf S (← j.getObjVal? "valueType"))))
+    match ← tyOf S (← j.getObjVal? "keyType") with
+    | .prim k => pure (.ref (.mapping k (← tyOf S (← j.getObjVal? "valueType"))))
+    | t => throw s!"mapping key `{t.toStr}`"
   | k => throw s!"type node `{k}`"
 
 /-- Does the type node name the struct `s`? -/

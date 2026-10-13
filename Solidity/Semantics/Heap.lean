@@ -339,7 +339,7 @@ theorem SVal.copyStToM_fixed {H : HTy} (hp : Heap H) {E : Ty} {n : Nat} (e : SVe
     SVal.copyStToM hp (.fixed e) h =
       Grown.alloc (R := .fixed E n) (SVec.copyStToM hp e (by simpa only [Ty.mapFree] using h)) :=
   rfl
-theorem SVal.copyStToM_map {H : HTy} (hp : Heap H) {K U : Ty} (m : SMap U) (d : SVal U)
+theorem SVal.copyStToM_map {H : HTy} (hp : Heap H) {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U)
     (h : (Ty.ref (.mapping K U)).mapFree = true) :
     SVal.copyStToM hp (.map m d) h =
       absurd h (by simp only [Ty.mapFree, Bool.false_eq_true, not_false_eq_true]) := rfl

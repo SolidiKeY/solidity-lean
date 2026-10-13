@@ -421,7 +421,7 @@ abbrev NMValT (C : Contract) := NTm C .mv
 /-- How a reference type is indexed (`Loc.index`'s `IndexTy`): a mapping
 by its primitive key, an array by a `uint`. -/
 def RefTy.indexTy? : (R : RefTy) → Option ((k : PrimTy) × (V : Ty) × IndexTy R k V)
-  | .mapping (.prim k) V => some ⟨k, V, .map⟩
+  | .mapping k V => some ⟨k, V, .map⟩
   | .array E => some ⟨.uint, E, .arr .dyn⟩
   | .fixed E _ => some ⟨.uint, E, .arr .fixed⟩
   | _ => none

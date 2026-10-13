@@ -168,7 +168,7 @@ partial def layoutAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (k : 
   match T with
   | .prim q =>
     [keys.foldl (fun φ (x, q) => .all x q φ) (rangeFml (.find .storage p) q)]
-  | .ref (.mapping (.prim K) V) =>
+  | .ref (.mapping K V) =>
     let x : Var := .ofName s!"k{k}"
     layoutAt V (.at p (.pv x)) ((x, K) :: keys) (k + 1)
   | .ref (.struct s) => (structDef s).flatMap fun (f, T') => layoutAt T' (.field p f) keys k
@@ -205,7 +205,7 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
   | .index e k => do
     let (T, p) ← e.path ctx
     match T with
-    | .ref (.mapping (.prim kp) V) => do
+    | .ref (.mapping kp V) => do
       let (q, t) ← k.term ctx
       unless q = .prim kp || k.isNum do
         throw s!"a key of type {q.toStr} where a {kp.toStr} is expected"
@@ -357,7 +357,7 @@ def SpecLoc.compile (ctx : SpecCtx C) : SpecLoc → Except String (String × Ty 
     let (r, T, ss) ← l.compile ctx
     let (q, t) ← e.term C ctx
     match T with
-    | .ref (.mapping (.prim kp) V) =>
+    | .ref (.mapping kp V) =>
       unless q = .prim kp || e.isNum do
         throw s!"assignable: a key of type {q.toStr} where a {kp.toStr} is expected"
       pure (r, V, ss ++ [.key t])
@@ -412,7 +412,7 @@ partial def frameAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (hyps 
   let owe (a b : NTerm C) : NRead C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
   match T with
   | .prim _ => [owe (.find .storage p) (.find (.pv oldVar) p)]
-  | .ref (.mapping (.prim K) V) =>
+  | .ref (.mapping K V) =>
     let x : Var := .ofName s!"k{k}"
     frameAt V (.at p (.pv x)) ((x, K) :: keys) hyps (enterKey C x ls) (k + 1)
   | .ref (.struct s) => (structDef s).flatMap fun (f, T') =>
@@ -429,7 +429,6 @@ partial def frameAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (hyps 
     let i : Var := .ofName s!"k{k}"
     frameAt E (.at p (.pv i)) ((i, .uint) :: keys)
       (hyps ++ [NRead.cmp .lt (.pv i) (.num n)]) (enterKey C i ls) (k + 1)
-  | _ => []
 
 /-- The frame of an `assignable` clause over every state variable of the
 contract. -/

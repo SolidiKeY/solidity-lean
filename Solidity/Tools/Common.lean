@@ -89,7 +89,7 @@ shadow. -/
 def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (SVal T)
   | 0, T => pure (SVal.dflt T)
   | _ + 1, .prim p => do pure (.prim (← g.prim p))
-  | k + 1, .ref (.mapping (.prim K) V) => do
+  | k + 1, .ref (.mapping K V) => do
     let some key := g.key K | return .map .nil (SVal.dflt V)
     let n ← randBelow g.entries
     let mut es : List (Int × SVal V) := []
@@ -97,7 +97,6 @@ def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (SVal T)
       let x ← key
       if (es.find? (·.1 == x)).isNone then es := es ++ [(x, ← g.sval k V)]
     pure (.map (TGen.smap es) (SVal.dflt V))
-  | _ + 1, .ref (.mapping _ V) => pure (.map .nil (SVal.dflt V))
   | k + 1, .ref (.struct s) => do pure (.struct (← TGen.fields (g.sval k) (structDef s)))
   | k + 1, .ref (.array E) => do
     let n ← randBelow g.length

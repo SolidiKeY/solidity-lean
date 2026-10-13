@@ -144,7 +144,7 @@ theorem findLive_field {st : Solidity.Storage C} {s f : Name} {T : Ty}
 
 /-- A mapping's entry, read live: the entry written, or the default. -/
 theorem findLive_key {st : Solidity.Storage C} {k : PrimTy} {V : Ty}
-    {r : SRef C (.ref (.mapping (.prim k) V))} {m : SMap V} {d : SVal V}
+    {r : SRef C (.ref (.mapping k V))} {m : SMap V} {d : SVal V}
     (hr : st.findLive r = some (.map m d)) (i : Int) :
     st.findLive (r.index .map i) = some ((lookupBy i m.toList).getD d) := by
   rw [SRef.index, Path.index_map, findLive_append, hr]
@@ -172,7 +172,7 @@ theorem findLive_felem {st : Solidity.Storage C} {E : Ty} {n : Nat}
 
 /-- A mapping takes every key. -/
 theorem checkIndex_map {st : Solidity.Storage C} {k : PrimTy} {V : Ty}
-    {r : SRef C (.ref (.mapping (.prim k) V))} {m : SMap V} {d : SVal V}
+    {r : SRef C (.ref (.mapping k V))} {m : SMap V} {d : SVal V}
     (hr : st.find r = some (.map m d)) (i : Int) : st.checkIndex r .map i = some () := by
   simp only [Solidity.Storage.checkIndex, hr, bind, Option.bind]
   rfl

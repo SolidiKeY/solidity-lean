@@ -121,7 +121,10 @@ def elabTy (C : Contract) : RawTy → Except String Ty
       else if (narrowTy? s).isSome then throw (narrowNestedMsg s)
       else if (structDef s).isEmpty then throw (unknownStructMsg s)
       else pure (.struct s)
-  | .mapping k v => do pure (.mapping (← elabTy C k) (← elabTy C v))
+  | .mapping k v => do
+    match ← elabTy C k with
+    | .prim p => pure (.mapping p (← elabTy C v))
+    | t => throw s!"a mapping's key is a value type, not {t.toStr}"
   | .array t => do pure (.array (← elabTy C t))
   | .fixed t n => do pure (.fixed (← elabTy C t) n)
 
@@ -796,7 +799,7 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     | _ => throw s!"member access .{f} on a non-struct"
   | .index e k => do
     match ← synth Γ e with
-    | .path (.ref (.mapping (.prim kp) V)) b => pure (.path V (.loc (.index .map b (← check Γ kp k))))
+    | .path (.ref (.mapping kp V)) b => pure (.path V (.loc (.index .map b (← check Γ kp k))))
     | .path (.ref (.array E)) b => pure (.path E (.loc (.index (.arr .dyn) b (← check Γ .uint k))))
     | .mpath (.ref (.array E)) b => pure (.mpath E (.loc (.index .dyn b (← check Γ .uint k))))
     -- a literal index past a fixed-size array's end is solc's compile error

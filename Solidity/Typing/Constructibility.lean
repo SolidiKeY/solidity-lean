@@ -103,10 +103,7 @@ def fill {Γ : Ctx} (d : Nat) : {T : Ty} → SPath C Γ T → SVal T → Prog C 
           ((fillShadow d .here n sh).append (fillElems d (ArrTy.dyn (E := E)) .here 0 e))
       else .nil)
   | .ref (.fixed E n), q, .fixed e => bound d _ q (fillElems d (ArrTy.fixed (E := E) (n := n)) .here 0 e)
-  | .ref (.mapping K _), q, .map m _ =>
-    match K, q with
-    | .prim k, q => bound d _ q (fillEntries d k .here m)
-    | .ref _, _ => .nil
+  | .ref (.mapping K _), q, .map m _ => bound d _ q (fillEntries d K .here m)
 
 /-- The members of a struct bound to `a`, one after another. -/
 def fillFields {Γ : Ctx} (d : Nat) {s : Name} (a : Idx Γ (.alias (.struct s))) :
@@ -142,7 +139,7 @@ def fillElems {Γ : Ctx} (d : Nat) {R : RefTy} {E : Ty} (ak : ArrTy R E) (a : Id
 /-- The entries of the mapping bound to `a`: each created by `delete`, then
 filled. -/
 def fillEntries {Γ : Ctx} (d : Nat) (k : PrimTy) {V : Ty}
-    (a : Idx Γ (.alias (.mapping (.prim k) V))) : SMap V → Prog C Γ Γ
+    (a : Idx Γ (.alias (.mapping k V))) : SMap V → Prog C Γ Γ
   | .nil => .nil
   | .cons key w rest =>
       .cons (.delete (.index .map (.alias a) (.simple (keyLit k key)) : Loc C Γ V))
@@ -351,8 +348,8 @@ theorem resolveT_index_lit {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R 
   rfl
 
 theorem resolveT_index_map {σ : State C Γ} {k : PrimTy} {V : Ty} {key : Int}
-    (hk : k.keyFits key = true) {a : Idx Γ (.alias (.mapping (.prim k) V))}
-    {ref : SRef C (.ref (.mapping (.prim k) V))} (h : TEnv.get a σ.env = some ref)
+    (hk : k.keyFits key = true) {a : Idx Γ (.alias (.mapping k V))}
+    {ref : SRef C (.ref (.mapping k V))} (h : TEnv.get a σ.env = some ref)
     (hfind : ∃ v, σ.storage.find ref = some v) :
     (Loc.index (C := C) (V := V) .map (.alias a) (.simple (keyLit k key))).resolveT σ =
       .ok (ref.index .map key) := by
@@ -569,7 +566,7 @@ theorem fixed_saveM {E : Ty} {n : Nat} (e : SVec E n) {i : Nat} (hi : i < n) (x 
   simp only [SVal.saveM, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast,
     List.getElem?_eq_getElem hl, SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
 
-theorem map_saveM {K V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V) :
+theorem map_saveM {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V) :
     (SVal.map (K := K) m d).saveM (.key k .nil) x = some (.map (.ofList (setBy k x m.toList)) d) := by
   simp only [SVal.saveM]
   split <;> simp only [Option.bind_eq_bind, Option.bind_some]
@@ -935,8 +932,8 @@ theorem Storage.save_exists_of_find {st : Storage C} {U : Ty} {r : SRef C U} {y 
 
 /-- What `fillEntries` does for the entries `x`, after the entries `done`. -/
 def EntriesOK (C : Contract) {V : Ty} (x : SMap V) : Prop :=
-  ∀ (d : Nat) (Γ : Ctx) (k : PrimTy) (a : Idx Γ (.alias (.mapping (.prim k) V)))
-    (σ : State C Γ) (ref : SRef C (.ref (.mapping (.prim k) V))) (st₀ : Storage C)
+  ∀ (d : Nat) (Γ : Ctx) (k : PrimTy) (a : Idx Γ (.alias (.mapping k V)))
+    (σ : State C Γ) (ref : SRef C (.ref (.mapping k V))) (st₀ : Storage C)
     (done : List (Int × SVal V)),
     TEnv.get a σ.env = some ref →
     Wrote st₀ σ.storage ref (.map (SMap.ofList done) (SVal.dflt V)) →
@@ -978,11 +975,11 @@ theorem entries_cons {V : Ty} {key : Int} {w : SVal V} {rest : SMap V}
     intro x
     rw [setBy_append_none _ hkey]
     simp only [setBy, ↓reduceIte]
-  have hnoop : (SVal.map (K := .prim k) (SMap.ofList (done ++ [(key, SVal.dflt V)])) (SVal.dflt V)).saveM
+  have hnoop : (SVal.map (K := k) (SMap.ofList (done ++ [(key, SVal.dflt V)])) (SVal.dflt V)).saveM
       (.key key .nil) (SVal.dflt V) =
       some (.map (SMap.ofList (done ++ [(key, SVal.dflt V)])) (SVal.dflt V)) := by
     rw [map_saveM, SMap.toList_ofList, hset]
-  have hs : (SVal.map (K := .prim k) (SMap.ofList (done ++ [(key, SVal.dflt V)])) (SVal.dflt V)).saveM
+  have hs : (SVal.map (K := k) (SMap.ofList (done ++ [(key, SVal.dflt V)])) (SVal.dflt V)).saveM
       (.key key .nil) w = some (.map (SMap.ofList (done ++ [(key, w)])) (SVal.dflt V)) := by
     rw [map_saveM, SMap.toList_ofList, hset]
   obtain ⟨st₂, hrun₂, hW₂⟩ := child_stepL (d := d) hv hc.1 ht.1 hf.1 hq₁ hW₁ hnoop hs
@@ -1052,25 +1049,19 @@ theorem fill_fixed {E : Ty} {n : Nat} {e : SVec E n} (he : FixedOK C e) :
   subst hce
   exact ⟨st', run_bound hq hrun, hW⟩
 
-theorem fill_map {K V : Ty} {m : SMap V} {dv : SVal V} (hm : EntriesOK C m) :
+theorem fill_map {K : PrimTy} {V : Ty} {m : SMap V} {dv : SVal V} (hm : EntriesOK C m) :
     FillOK C (SVal.map (K := K) m dv) := by
   intro d Γ q σ ref hc ht hf hq h0
   simp only [SVal.All] at hc ht hf
   obtain ⟨⟨hnd, hdv⟩, hcm, -⟩ := hc
   subst hdv
   rw [SVal.dflt_map] at h0
-  cases K with
-  | prim k =>
-    obtain ⟨st', hrun, hW⟩ := hm d _ k .here (σ.push (t := .alias (.mapping (.prim k) V)) (some ref))
-      ref σ.storage [] rfl h0 hcm ht.2.1 hf.2.1 (fun e he => hf.1 e he)
-      (by simpa only [List.nil_append] using hnd)
-    refine ⟨st', run_bound hq hrun, ?_⟩
-    rw [List.nil_append, SMap.ofList_toList] at hW
-    exact hW
-  | ref R =>
-    have hm0 : m = .nil := ht.1 rfl
-    subst hm0
-    exact ⟨σ.storage, TRuns.nil σ, h0⟩
+  obtain ⟨st', hrun, hW⟩ := hm d _ K .here (σ.push (t := .alias (.mapping K V)) (some ref))
+    ref σ.storage [] rfl h0 hcm ht.2.1 hf.2.1 (fun e he => hf.1 e he)
+    (by simpa only [List.nil_append] using hnd)
+  refine ⟨st', run_bound hq hrun, ?_⟩
+  rw [List.nil_append, SMap.ofList_toList] at hW
+  exact hW
 
 mutual
 
@@ -1305,8 +1296,6 @@ theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
     simp only [SMap.toList]
     decide
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, tightH, and_true]
-    intro h
-    exact nomatch h
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, fitsH, and_true]
     intro e he
     simp only [SMap.toList, List.mem_cons, List.not_mem_nil, or_false] at he

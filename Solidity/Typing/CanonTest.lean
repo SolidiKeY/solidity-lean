@@ -128,25 +128,17 @@ theorem tightHB_arr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) :
 
 theorem tightHB_decides : tightHB.Decides tightH :=
   ⟨tightHB_arr, fun _ _ => by simp only [tightHB, tightH],
-    fun K _ m d => by
-      show (K.isKey || m.toList.isEmpty) = true ↔ (K.isKey = false → m = .nil)
-      rw [Bool.or_eq_true, SMap.toList_isEmpty]
-      cases K.isKey
-      · simp only [Bool.false_eq_true, false_or, forall_const]
-      · simp only [true_or, Bool.true_eq_false, false_implies]⟩
+    fun _ _ _ _ => by simp only [tightHB, tightH]⟩
 
 theorem SVal.tightB_iff {T : Ty} (v : SVal T) : v.allB tightHB = true ↔ v.Tight :=
   SVal.allB_iff tightHB_decides v
-
-theorem Ty.keyOkB_iff (K : Ty) (k : Int) : K.keyOkB k = true ↔ K.keyOk k := by
-  cases K <;> simp only [Ty.keyOkB, Ty.keyOk]
 
 theorem keysHB_decides : keysHB.Decides keysH :=
   ⟨fun _ _ => by simp only [keysHB, keysH],
     fun _ _ => by simp only [keysHB, keysH],
     fun K _ m d => by
-      show (m.toList.all fun e => K.keyOkB e.1) = true ↔ ∀ e ∈ m.toList, K.keyOk e.1
-      simp only [List.all_eq_true, Ty.keyOkB_iff]⟩
+      show (m.toList.all fun e => K.keyFits e.1) = true ↔ ∀ e ∈ m.toList, K.keyOk e.1
+      simp only [List.all_eq_true, PrimTy.keyOk]⟩
 
 theorem SVal.keysB_iff {T : Ty} (v : SVal T) : v.allB keysHB = true ↔ v.All keysH :=
   SVal.allB_iff keysHB_decides v

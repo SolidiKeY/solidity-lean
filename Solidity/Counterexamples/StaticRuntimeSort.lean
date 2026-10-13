@@ -39,7 +39,7 @@ theorem array_runtime_not_le_static :
 `mapping(int => int)`. -/
 theorem mapping_runtime_not_le_static :
     ∃ (T : Ty) (v : SVal T), v.keySort.le (T.keySort false) = false :=
-  ⟨Ty.ref (RefTy.mapping Ty.uint Ty.uint), .map .nil (.prim (PrimTy.dflt .uint)), by decide⟩
+  ⟨Ty.ref (RefTy.mapping .uint Ty.uint), .map .nil (.prim (PrimTy.dflt .uint)), by decide⟩
 
 /-- Nor the other way round: the static sort is not below `Struct`
 either, so the two are simply incomparable. -/
@@ -60,7 +60,7 @@ theorem prim_runtime_eq_static {T : Ty} (hprim : T.isPrimitive = true) (v : SVal
 `Prim` (`alphaPrim`) never binds on an array or mapping, so the gap
 cannot be reached through `\hasSort(x, \sort(alphaPrim))`. -/
 example : ((Ty.ref (RefTy.array Ty.uint)).keySort false).le KeySort.prim = false := by decide
-example : ((Ty.ref (RefTy.mapping Ty.uint Ty.uint)).keySort false).le KeySort.prim = false := by
+example : ((Ty.ref (RefTy.mapping .uint Ty.uint)).keySort false).le KeySort.prim = false := by
   decide
 
 /-- …while a bound of `StValue` (`alphaSt`) would. -/

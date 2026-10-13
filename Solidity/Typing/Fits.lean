@@ -75,7 +75,7 @@ theorem bndH_run : HeredRun bndH (fun _ => True) where
   map m d k x hk _ hm e he := by
     rw [SMap.toList_ofList] at he
     rcases fst_mem_setBy he with h | ⟨w, hw⟩
-    · rw [h]; exact hk.2
+    · rw [h]; exact hk
     · exact hm (e.1, w) hw
   strip _ _ harr _ := by
     show _ + SList.length .nil < _

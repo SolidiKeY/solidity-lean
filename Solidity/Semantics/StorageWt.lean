@@ -29,7 +29,7 @@ def PrimTy.keyFits : PrimTy → Int → Bool
 structure HeredB where
   arr : {E : Ty} → {n : Nat} → SVec E n → SList E → Bool
   fix : Ty → Nat → Bool
-  map : Ty → {V : Ty} → SMap V → SVal V → Bool
+  map : PrimTy → {V : Ty} → SMap V → SVal V → Bool
 
 /-- Every node passing `B`'s test, as a fold. -/
 def allBFold (B : HeredB) : Fold where
@@ -70,7 +70,7 @@ theorem SVal.allB_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n 
     (SVal.array e sh h).allB B = (B.arr e sh && e.allB B && sh.allB B) := rfl
 theorem SVal.allB_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).allB B = (B.fix E n && e.allB B) := rfl
-theorem SVal.allB_map {K V : Ty} (m : SMap V) (d : SVal V) :
+theorem SVal.allB_map {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) :
     (SVal.map (K := K) m d).allB B = (B.map K m d && m.allB B && d.allB B) := rfl
 theorem SFields.allB_nil : (SFields.nil).allB B = true := rfl
 theorem SFields.allB_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -108,18 +108,13 @@ def tightHB : HeredB where
   arr := fun {E} {n} _ sh => (E.defaultOkS || (n == 0 && sh.toList.isEmpty)) &&
     (!E.isPrimitive || sh.toList.all fun w => w.beq (SVal.dflt E))
   fix _ _ := true
-  map K := fun m _ => K.isKey || m.toList.isEmpty
-
-/-- A key in its key type's range, as a test. -/
-def Ty.keyOkB : Ty → Int → Bool
-  | .prim p, k => p.keyFits k
-  | .ref _, _ => true
+  map _ := fun _ _ => true
 
 /-- `keysH`'s test. -/
 def keysHB : HeredB where
   arr _ _ := true
   fix _ _ := true
-  map K := fun m _ => m.toList.all fun e => K.keyOkB e.1
+  map K := fun m _ => m.toList.all fun e => K.keyFits e.1
 
 /-! ## The storage's tests -/
 

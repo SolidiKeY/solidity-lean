@@ -567,7 +567,7 @@ theorem root_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
 /-- A key of a mapping at a root: always a slot (`inBounds` at `map`), so
 two reads of `balances[0]` name the same reference, before a write and after. -/
 theorem atT_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
-    (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : k.keyTy.Denote) :
+    (h : C.rootType r = some (Ty.ref (RefTy.mapping k V))) (i : k.keyTy.Denote) :
     st.atT IndexTy.map (SRef.ofRoot r h) i =
       some ((SRef.ofRoot r h).index IndexTy.map (PrimTy.key i)) := rfl
 theorem getD_ite {α : Type} {c : Prop} [Decidable c] (x y : Option α) (d : α) :

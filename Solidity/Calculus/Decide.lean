@@ -354,7 +354,7 @@ inductive TSegs (C : Contract) : Ty → Ty → Type where
   | atF {E U : Ty} {n : Nat} (i : LTm C (.val .uint)) (rest : TSegs C E U) :
       TSegs C (.ref (.fixed E n)) U
   | key {k : PrimTy} {V U : Ty} (i : LTm C (.val k.keyTy)) (rest : TSegs C V U) :
-      TSegs C (.ref (.mapping (.prim k) V)) U
+      TSegs C (.ref (.mapping k V)) U
 
 namespace TSegs
 
@@ -512,8 +512,8 @@ theorem fixed_inj {E E' : Ty} {n n' : Nat} (h : Ty.ref (.fixed E' n') = .ref (.f
   injection h with h; injection h
 
 theorem mapping_inj {k k' : PrimTy} {V V' : Ty}
-    (h : Ty.ref (.mapping (.prim k') V') = .ref (.mapping (.prim k) V)) : k' = k ∧ V' = V := by
-  injection h with h; injection h with h₁ h₂; injection h₁ with h₁; exact ⟨h₁, h₂⟩
+    (h : Ty.ref (.mapping k' V') = .ref (.mapping k V)) : k' = k ∧ V' = V := by
+  injection h with h; injection h with h₁ h₂; exact ⟨h₁, h₂⟩
 
 /-- `relSegs` by `match`, its compiled form. -/
 def relSegsM : {S T : Ty} → TSegs C S T → {U : Ty} → TSegs C S U →
@@ -555,7 +555,7 @@ def relSegs {S T : Ty} (p : TSegs C S T) : {U : Ty} → TSegs C S U →
         (fun _ _ _ => .leaf none) rfl)
     (fun {k} {V} {T} i _ ih {U} q =>
       @TSegs.casesOn C
-        (fun S' U' _ => S' = .ref (.mapping (.prim k) V) → CTree C (Option (TSegs C T U')))
+        (fun S' U' _ => S' = .ref (.mapping k V) → CTree C (Option (TSegs C T U')))
         _ U q
         (fun _ => .leaf none) (fun _ _ _ => .leaf none) (fun _ _ _ => .leaf none)
         (fun _ _ _ => .leaf none)

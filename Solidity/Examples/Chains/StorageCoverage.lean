@@ -406,7 +406,7 @@ theorem storageIndexReadArrayBindLocalRoot (φ : Post Coverage [.alias (.struct 
 #last_line storageIndexReadArrayBindLocalRoot
 
 /-- `led = ledgers[i];` with `i` 2. -/
-theorem storageIndexReadArrayBindLocalRootMappingElement (φ : Post Coverage [.alias (.mapping (.prim .uint) (.prim .uint)), .val .uint]) :
+theorem storageIndexReadArrayBindLocalRootMappingElement (φ : Post Coverage [.alias (.mapping .uint (.prim .uint)), .val .uint]) :
     dl![m]{ { i := 2 } ⟨[ led = ledgers[i]; ]⟩ φ where mapping(uint => uint) storage led }
     ~*> dl![m]{ { i := 2 } { led := ledgers[i] } φ }
     ~[sequentialToParallel]~> dl![m]{ { i := 2 ‖ led := ledgers[2] } φ } := by
@@ -552,7 +552,7 @@ def storageLocalRootPushBind (φ : Post Coverage [.alias (.struct "Token")]) :
 #last_line storageLocalRootPushBind
 
 /-- `led = ledgers.push();` -/
-def storageLocalRootPushBindMappingElement (φ : Post Coverage [.alias (.mapping (.prim .uint) (.prim .uint))]) :
+def storageLocalRootPushBindMappingElement (φ : Post Coverage [.alias (.mapping .uint (.prim .uint))]) :
     dl![m]{ ⟨[ led = ledgers.push(); ]⟩ φ where mapping(uint => uint) storage led }
     ~*> dl![m]{
         { storage := save(storage, ledgers.length, ledgers.length + 1) ‖ led := ledgers[ledgers.length] } φ } := by

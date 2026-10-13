@@ -639,7 +639,7 @@ theorem findM_field {s f : Name} {T : Ty} (h : Semantics.lookupBy f (Semantics.s
   cases v
   simp only [SVal.findM, SVal.findM_nil', Option.isSome_some]
 
-theorem findM_key {K V : Ty} (k : Int) (v : SVal (.ref (.mapping K V))) :
+theorem findM_key {K : PrimTy} {V : Ty} (k : Int) (v : SVal (.ref (.mapping K V))) :
     (v.findM (.key k .nil)).isSome = true := by
   cases v
   simp only [SVal.findM]

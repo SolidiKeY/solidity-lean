@@ -37,7 +37,7 @@ structure HeredRun (P : Hered) (G : Ty → Prop) : Prop where
     P.arr (SVec.ofList (((e.toList ++ sh.toList).set i x).take n))
       (SList.ofList (((e.toList ++ sh.toList).set i x).drop n))
   /-- An entry written, at a key a program writes. -/
-  map : ∀ {K V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V), Ty.Keyable K k →
+  map : ∀ {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V), Ty.Keyable K k →
     x.All P → P.map K m d → P.map K (SMap.ofList (setBy k x m.toList)) d
   /-- The slots past the end dropped (a copy's source). -/
   strip : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
@@ -280,7 +280,7 @@ theorem Loc.resolveT_keyed (he : TEnv.All LTy.Keyed σ.env) :
     rw [Path.keys_append]
     refine ⟨SPath.resolveT_keyed he b h0, ?_⟩
     cases it with
-    | map => rw [Path.index_map]; exact ⟨⟨rfl, PrimTy.keyFits_key k⟩, trivial⟩
+    | map => rw [Path.index_map]; exact ⟨PrimTy.keyFits_key k, trivial⟩
     | arr a =>
       cases a
       · rw [Path.index_dyn]; trivial

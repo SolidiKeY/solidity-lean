@@ -166,7 +166,7 @@ entry, else the mapping's default, `SVal.find`), since the erasure of a
 typed storage does not reduce in the kernel. -/
 def balanceAfter {Γ' : Ctx} (P : Prog Coin [] Γ') (a : Int) : Option Int :=
   (Contract.deployT Coin P tx).toOption.bind fun σ =>
-    ((σ.storage.get (f := "balances") (T := .ref (.mapping (.prim .uint) (.prim .uint))) rfl).find
+    ((σ.storage.get (f := "balances") (T := .ref (.mapping .uint (.prim .uint))) rfl).find
       (.key a .nil)).map fun v => v.view.1
 
 /-- What a deployment by `7` stores: `minter` is `7`, `balances` has no

@@ -380,6 +380,19 @@ syntax:max &"address" &"payable" : sol_ty
 /-- `ty!(mapping(uint => Person))`: a type written as Solidity does. -/
 syntax "ty!(" sol_ty ")" : term
 
+/-- `pty!(uint)`: a value type, as a mapping's key is. -/
+syntax "pty!(" sol_ty ")" : term
+
+macro_rules
+  | `(pty!($x:ident)) =>
+      match PrimTy.ofName? x.getId.toString with
+      | some .uint => `(PrimTy.uint)
+      | some .int => `(PrimTy.int)
+      | some .bool => `(PrimTy.bool)
+      | none => Lean.Macro.throwErrorAt x "a mapping's key is a value type"
+  | `(pty!(address payable)) => `(PrimTy.uint)
+  | `(pty!($t)) => Lean.Macro.throwErrorAt t "a mapping's key is a value type"
+
 macro_rules
   | `(ty!($x:ident)) =>
       let s := x.getId.toString
@@ -394,7 +407,7 @@ macro_rules
         else if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownStructMsg s)
         else `(Ty.struct $(Lean.quote s))
   | `(ty!(address payable)) => `(Ty.uint)
-  | `(ty!(mapping($K => $V))) => `(Ty.mapping ty!($K) ty!($V))
+  | `(ty!(mapping($K => $V))) => `(Ty.mapping pty!($K) ty!($V))
   | `(ty!($T[])) => `(Ty.array ty!($T))
   | `(ty!($T[$n])) => `(Ty.fixed ty!($T) $n)
 
@@ -418,7 +431,7 @@ inductive ArrTy : RefTy → Ty → Type where
 kind) by a `uint`.  One `Loc.index` serves both, so a rule that does not care
 which is one constructor, and the ones that do fix it. -/
 inductive IndexTy : RefTy → PrimTy → Ty → Type where
-  | map {k : PrimTy} {V : Ty} : IndexTy (.mapping (.prim k) V) k V
+  | map {k : PrimTy} {V : Ty} : IndexTy (.mapping k V) k V
   | arr {R : RefTy} {E : Ty} (a : ArrTy R E) : IndexTy R .uint E
 
 /-- `new R(n)` can be written: `R` is an array type whose elements a

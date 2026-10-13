@@ -40,13 +40,12 @@ variable {C : Contract}
 /-! ## The tight values -/
 
 /-- A tight node: an array whose elements have no well-formed default has no
-slots, the slots past the end of an array of words are defaults, a mapping
-no program indexes (a reference key) has no entries. -/
+slots, the slots past the end of an array of words are defaults. -/
 def tightH : Hered where
   arr := fun {E} {n} _ sh => (E.defaultOkS = false → n = 0 ∧ sh = .nil) ∧
     (E.isPrimitive = true → ∀ w ∈ sh.toList, w = SVal.dflt E)
   fix _ _ := True
-  map K := fun m _ => K.isKey = false → m = .nil
+  map _ := fun _ _ => True
 
 /-- `v` is tight. -/
 abbrev SVal.Tight {T : Ty} (v : SVal T) : Prop := v.All tightH
@@ -73,7 +72,7 @@ theorem SVec.toList_eq_nil {E : Ty} {n : Nat} (e : SVec E n) (h : n = 0) : e.toL
 theorem SVal.dflt_tight (T : Ty) : (SVal.dflt T).Tight :=
   SVal.dflt_all (P := tightH)
     (fun _ => ⟨fun _ => ⟨rfl, rfl⟩, fun _ w hw => by rw [SList.toList_nil] at hw; exact nomatch hw⟩)
-    (fun _ _ => trivial) (fun _ _ _ => rfl) T
+    (fun _ _ => trivial) (fun _ _ => trivial) T
 
 /-- `T`'s default and those of every type in it are well-formed: every root
 of the contract `Ty.okDeep`. -/
@@ -107,7 +106,7 @@ theorem tightH_run : HeredRun tightH (fun T => T.okDeep = true) where
     · rw [SList.toList_ofList, List.drop_set, if_pos (hlive hp),
         List.drop_left' (SVec.length_toList e)] at hw
       exact harr.2 hp w hw
-  map _ _ _ _ hk _ _ hK := by rw [hk.1] at hK; exact nomatch hK
+  map _ _ _ _ _ _ _ := trivial
   strip _ sh harr _ :=
     ⟨fun hd => ⟨(harr.1 hd).1, rfl⟩, fun _ w hw => by rw [SList.toList_nil] at hw; exact nomatch hw⟩
   del e sh harr _ := by
@@ -156,7 +155,7 @@ theorem tightH_run : HeredRun tightH (fun T => T.okDeep = true) where
 theorem Storage.init_tight : (Storage.init C).Tight :=
   SFields.dflt_all (P := tightH)
     (fun _ => ⟨fun _ => ⟨rfl, rfl⟩, fun _ w hw => by rw [SList.toList_nil] at hw; exact nomatch hw⟩)
-    (fun _ _ => trivial) (fun _ _ _ => rfl) C.vars
+    (fun _ _ => trivial) (fun _ _ => trivial) C.vars
 
 /-- What a run keeps beyond canonical: tight storage, its aliases along keys
 a program writes. -/

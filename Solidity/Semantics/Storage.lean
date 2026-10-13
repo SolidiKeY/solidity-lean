@@ -52,7 +52,7 @@ inductive SVal : Ty → Type where
       SVal (.ref (.array E))
   | fixed {E : Ty} {n : Nat} (elems : SVec E n) : SVal (.ref (.fixed E n))
   /-- The entries written and the value of every other key. -/
-  | map {K V : Ty} (entries : SMap V) (dflt : SVal V) : SVal (.ref (.mapping K V))
+  | map {K : PrimTy} {V : Ty} (entries : SMap V) (dflt : SVal V) : SVal (.ref (.mapping K V))
 
 /-- One value per member, of the member's type, in the members' order. -/
 inductive SFields : List (Name × Ty) → Type where
@@ -105,7 +105,7 @@ structure Fold where
   array : {E : Ty} → {n : Nat} → SVec E n → SList E → n < 2 ^ 256 → W E n → L E →
     V (.ref (.array E))
   fixed : {E : Ty} → {n : Nat} → SVec E n → W E n → V (.ref (.fixed E n))
-  map : {K U : Ty} → SMap U → SVal U → M U → V U → V (.ref (.mapping K U))
+  map : {K : PrimTy} → {U : Ty} → SMap U → SVal U → M U → V U → V (.ref (.mapping K U))
   fnil : F []
   fcons : {f : Name} → {T : Ty} → {fs : List (Name × Ty)} → SVal T → SFields fs → V T → F fs →
     F ((f, T) :: fs)
@@ -244,7 +244,7 @@ theorem SVal.view_struct {s : Name} (fs : SFields (structDef s)) : (SVal.struct 
 theorem SVal.view_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
     (SVal.array e sh h).view = ⟨e, sh, h⟩ := rfl
 theorem SVal.view_fixed {E : Ty} {n : Nat} (e : SVec E n) : (SVal.fixed e).view = e := rfl
-theorem SVal.view_map {K U : Ty} (m : SMap U) (d : SVal U) :
+theorem SVal.view_map {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U) :
     (SVal.map (K := K) m d).view = (m, d) := rfl
 
 /-- What the members of `fs` hold: the first one and the others. -/
@@ -661,7 +661,7 @@ inductive Path : Ty → Ty → Type where
       Path (.ref (.struct s)) U
   | at {E U : Ty} (i : Int) (p : Path E U) : Path (.ref (.array E)) U
   | atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) : Path (.ref (.fixed E n)) U
-  | key {K V U : Ty} (k : Int) (p : Path V U) : Path (.ref (.mapping K V)) U
+  | key {K : PrimTy} {V U : Ty} (k : Int) (p : Path V U) : Path (.ref (.mapping K V)) U
 
 /-- One segment knows the type it leaves and the type it reaches.
 A field carries its lookup proof; array and mapping steps cannot be exchanged. -/
@@ -670,7 +670,7 @@ inductive Semantics.Seg : Ty → Ty → Type where
       Seg (.ref (.struct s)) T
   | at {E : Ty} (i : Int) : Seg (.ref (.array E)) E
   | atF {E : Ty} {n : Nat} (i : Int) : Seg (.ref (.fixed E n)) E
-  | key {K V : Ty} (k : Int) : Seg (.ref (.mapping K V)) V
+  | key {K : PrimTy} {V : Ty} (k : Int) : Seg (.ref (.mapping K V)) V
 
 /-- A sequence composes only when adjacent segment types agree. -/
 inductive Semantics.Segs : Ty → Ty → Type where
@@ -737,7 +737,7 @@ theorem labels_at {E U : Ty} (i : Int) (p : Path E U) :
     (Path.at i p).labels = .at i :: p.labels := rfl
 theorem labels_atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) :
     (Path.atF (n := n) i p).labels = .at i :: p.labels := rfl
-theorem labels_key {K V U : Ty} (k : Int) (p : Path V U) :
+theorem labels_key {K : PrimTy} {V U : Ty} (k : Int) (p : Path V U) :
     (Path.key (K := K) k p).labels = .at k :: p.labels := rfl
 
 attribute [irreducible] labels
@@ -766,7 +766,7 @@ theorem append_at {E U W : Ty} (i : Int) (p : Path E U) (q : Path U W) :
     (Path.at i p).append q = .at i (p.append q) := rfl
 theorem append_atF {E U W : Ty} {n : Nat} (i : Int) (p : Path E U) (q : Path U W) :
     (Path.atF (n := n) i p).append q = .atF i (p.append q) := rfl
-theorem append_key {K V U W : Ty} (k : Int) (p : Path V U) (q : Path U W) :
+theorem append_key {K : PrimTy} {V U W : Ty} (k : Int) (p : Path V U) (q : Path U W) :
     (Path.key (K := K) k p).append q = .key k (p.append q) := rfl
 
 attribute [irreducible] append
@@ -1074,7 +1074,7 @@ theorem SVal.defaultOf_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h
       .array .nil (.ofList (e.defaultOf.toList ++ sh.toList)) SVal.zero_lt_bound := rfl
 theorem SVal.defaultOf_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).defaultOf = .fixed e.defaultOf := rfl
-theorem SVal.defaultOf_map {K U : Ty} (m : SMap U) (d : SVal U) :
+theorem SVal.defaultOf_map {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U) :
     (SVal.map (K := K) m d).defaultOf = .map m d := rfl
 theorem SFields.defaultOf_nil : (SFields.nil).defaultOf = .nil := rfl
 theorem SFields.defaultOf_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -1186,7 +1186,7 @@ theorem SVal.strip_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n
     (SVal.array e sh h).strip = .array e.strip .nil h := rfl
 theorem SVal.strip_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).strip = .fixed e.strip := rfl
-theorem SVal.strip_map {K U : Ty} (m : SMap U) (d : SVal U) :
+theorem SVal.strip_map {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U) :
     (SVal.map (K := K) m d).strip = .map m d := rfl
 theorem SFields.strip_nil : (SFields.nil).strip = .nil := rfl
 theorem SFields.strip_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -1305,7 +1305,7 @@ theorem SVal.overlay_array {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E)
         (.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m))) h₂ := rfl
 theorem SVal.overlay_fixed {E : Ty} {n : Nat} (oel nel : SVec E n) :
     (SVal.fixed oel).overlay (.fixed nel) = .fixed (SVec.overlayOn oel.toList nel) := rfl
-theorem SVal.overlay_map {K U : Ty} (oe ne : SMap U) (od nd : SVal U) :
+theorem SVal.overlay_map {K : PrimTy} {U : Ty} (oe ne : SMap U) (od nd : SVal U) :
     (SVal.map (K := K) oe od).overlay (.map ne nd) = .map oe od := rfl
 theorem SFields.overlay_nil : SFields.overlay .nil .nil = .nil := rfl
 theorem SFields.overlay_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (o v : SVal T)
@@ -1423,7 +1423,7 @@ theorem SVal.beq_array {E : Ty} {n m : Nat} (e : SVec E n) (sh : SList E) (h : n
     (SVal.array e sh h).beq (.array e' sh' h') = (e.beqL e'.toList && sh.beq sh') := rfl
 theorem SVal.beq_fixed {E : Ty} {n : Nat} (e e' : SVec E n) :
     (SVal.fixed e).beq (.fixed e') = e.beqL e'.toList := rfl
-theorem SVal.beq_map {K U : Ty} (m m' : SMap U) (d d' : SVal U) :
+theorem SVal.beq_map {K : PrimTy} {U : Ty} (m m' : SMap U) (d d' : SVal U) :
     (SVal.map (K := K) m d).beq (.map m' d') = (m.beq m' && d.beq d') := rfl
 theorem SFields.beq_nil : SFields.beq .nil .nil = true := rfl
 theorem SFields.beq_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v w : SVal T)
@@ -1840,9 +1840,9 @@ inductive Path.Diverges : {T U W : Ty} → Path T U → Path T W → Prop
       Diverges (.atF (n := n) i p) (.atF j q)
   | atFIn {E U W : Ty} {n : Nat} (i : Int) {p : Path E U} {q : Path E W} :
       Diverges p q → Diverges (.atF (n := n) i p) (.atF i q)
-  | key {K V U W : Ty} {k k' : Int} (p : Path V U) (q : Path V W) (hne : k ≠ k') :
+  | key {K : PrimTy} {V U W : Ty} {k k' : Int} (p : Path V U) (q : Path V W) (hne : k ≠ k') :
       Diverges (.key (K := K) k p) (.key k' q)
-  | keyIn {K V U W : Ty} (k : Int) {p : Path V U} {q : Path V W} :
+  | keyIn {K : PrimTy} {V U W : Ty} (k : Int) {p : Path V U} {q : Path V W} :
       Diverges p q → Diverges (.key (K := K) k p) (.key k q)
 
 theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
@@ -1994,7 +1994,7 @@ theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (p : Path E U) :
         | none => none
       else none := rfl
 
-theorem find_key {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
+theorem find_key {K : PrimTy} {V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
     (SVal.map (K := K) m d).find (.key k p) =
       match lookupBy k m.toList with
       | some x => x.find p

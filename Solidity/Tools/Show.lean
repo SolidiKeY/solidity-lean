@@ -33,7 +33,7 @@ def CallValue.fmt : Semantics.CallValue → String
 
 /-- A mapping's key as its type writes it: a `bool` key `true`, any other
 the number. -/
-def keyFmt (K : Ty) (k : Int) : String :=
+def keyFmt (K : PrimTy) (k : Int) : String :=
   if K == .bool then toString (k != 0) else toString k
 
 /-- **The printing fold**: a value as Solidity writes it, a struct's members

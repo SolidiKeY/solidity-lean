@@ -82,8 +82,8 @@ inductive ReprAt (st : WordStore) (L : Nat) : (T : Ty) → Slot → SVal T → P
   | fixed {E : Ty} {k : Nat} {s : Slot} {e : SVec E k} :
       (∀ i x, e.toList[i]? = some x → ReprAt st L E (s.add (i * size E)) x) →
       ReprAt st L (.ref (.fixed E k)) s (.fixed e)
-  | map {K V : Ty} {s : Slot} {m : SMap V} {d : SVal V} :
-      (K = .prim .uint → ∀ k : Nat, k < W →
+  | map {K : PrimTy} {V : Ty} {s : Slot} {m : SMap V} {d : SVal V} :
+      (K = .uint → ∀ k : Nat, k < W →
         ReprAt st L V (.hash k s 0) ((lookupBy (k : Int) m.toList).getD d)) →
       ReprAt st L (.ref (.mapping K V)) s (.map m d)
 
@@ -139,7 +139,7 @@ inductive PathAt : Bool → {T U : Ty} → Path T U → Slot → Slot → Prop
       PathAt a p (s.add (offset n f)) s' → PathAt a (Path.field h p) s s'
   | key {a : Bool} {V U : Ty} {k : Int} {p : Path V U} {s s' : Slot} :
       0 ≤ k → k < W → PathAt a p (.hash k.toNat s 0) s' →
-      PathAt a (Path.key (K := .prim .uint) k p) s s'
+      PathAt a (Path.key (K := .uint) k p) s s'
   | elem {E U : Ty} {i : Int} {p : Path E U} {s s' : Slot} :
       0 ≤ i → i < W → PathAt false p (.data s (i.toNat * size E)) s' →
       PathAt false (Path.at i p) s s'
@@ -198,7 +198,7 @@ theorem field {a : Bool} {n f : Name} {T : Ty} {r : SRef C (.ref (.struct n))} {
   PathAt.trans hp (.field .nil)
 
 /-- `b[k]` of a `uint`-keyed mapping is at `keccak(k, b)`. -/
-theorem key {a : Bool} {V : Ty} {r : SRef C (.ref (.mapping (.prim .uint) V))} {s : Slot}
+theorem key {a : Bool} {V : Ty} {r : SRef C (.ref (.mapping .uint V))} {s : Slot}
     (hp : PathSlot C a r s) {k : Int} (h0 : 0 ≤ k) (h1 : k < W) :
     PathSlot C a (r.index .map k) (.hash k.toNat s 0) := by
   unfold PathSlot SRef.index SRef.append
@@ -236,7 +236,7 @@ theorem PathAt.occ {a : Bool} {T U : Ty} {p : Path T U} {s s' : Slot} (hp : Path
 /-! ## Reading -/
 
 /-- A mapping's entry, live: the entry written, or the mapping's default. -/
-theorem findLiveM_key {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
+theorem findLiveM_key {K : PrimTy} {V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
     (SVal.map (K := K) m d).findLiveM (.key k p) =
       ((lookupBy k m.toList).getD d).findLiveM p := by
   simp only [SVal.findLiveM]
@@ -761,7 +761,7 @@ inductive OccAt : Bool → Ty → Slot → Slot → Prop
         OccAt k (.ref (.struct n)) s x
   | elem {k : Bool} {E : Ty} {s x : Slot} (i : Nat) :
       OccAt k E (.data s (i * size E)) x → OccAt k (.ref (.array E)) s x
-  | entry {k : Bool} {K V : Ty} {s x : Slot} (key : Nat) :
+  | entry {k : Bool} {K : PrimTy} {V : Ty} {s x : Slot} (key : Nat) :
       OccAt k V (.hash key s 0) x → OccAt k (.ref (.mapping K V)) s x
   | felem {k : Bool} {E : Ty} {n : Nat} {s x : Slot} (i : Nat) :
       i < n → OccAt k E (s.add (i * size E)) x → OccAt k (.ref (.fixed E n)) s x

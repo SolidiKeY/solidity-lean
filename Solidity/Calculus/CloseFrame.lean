@@ -122,7 +122,7 @@ theorem SVal.dflt_struct' (s : Name) :
     SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
   SVal.dflt_struct s
 
-theorem SVal.dflt_map' (K V : Ty) :
+theorem SVal.dflt_map' (K : PrimTy) (V : Ty) :
     SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
   SVal.dflt_map K V
 
@@ -263,7 +263,7 @@ theorem netOfT_def (l : Ledger) (n : PrimTy.uint.Denote) :
     Tm.netOfT l n = some ((Semantics.lookupBy n l).getD 0) := rfl
 /-- A mapping's slot at a root is always there. -/
 theorem checkIndex_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
-    (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : Int) :
+    (h : C.rootType r = some (Ty.ref (RefTy.mapping k V))) (i : Int) :
     st.checkIndex (SRef.ofRoot r h) IndexTy.map i = some () := rfl
 theorem dflt_bool : PrimTy.dflt .bool = (false : Bool) := rfl
 theorem dflt_uint_val : (PrimTy.dflt .uint).val = 0 := rfl
@@ -511,7 +511,7 @@ theorem find_total_map_const {α : Type} {T U : Ty} (st : Storage C) (r : Name)
   rw [ha, Option.map_some]
 /-- A mapping's key along a total path is always a slot. -/
 theorem checkIndex_map_total {k : PrimTy} {V T : Ty} (st : Storage C) (r : Name)
-    (h : C.rootType r = some T) (p : Path T (.ref (.mapping (.prim k) V))) (hp : p.total = true)
+    (h : C.rootType r = some T) (p : Path T (.ref (.mapping k V))) (hp : p.total = true)
     (i : Int) : st.checkIndex ((SRef.ofRoot r h).append p) IndexTy.map i = some () := by
   obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1
     (Storage.find_ne_none_total st _ (total_ofRoot_append r h p hp))

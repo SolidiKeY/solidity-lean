@@ -68,7 +68,8 @@ mutual
     | array (elem : Ty)
     /-- `T[n]`: a fixed-size array, its length part of the type. -/
     | fixed (elem : Ty) (n : Nat)
-    | mapping (key value : Ty)
+    /-- `mapping(K => V)`: a key is a value type (solc rejects any other). -/
+    | mapping (key : PrimTy) (value : Ty)
     deriving DecidableEq, Repr
 
   /-- KeY `Prim, Struct \extends StValue` (`solidityDLHeader.key`,
@@ -141,13 +142,6 @@ theorem PrimTy.isNumeric_of_inRange {p : PrimTy} {n : Int} (h : p.inRange n = tr
     p.isNumeric = true := by
   cases p <;> simp only [PrimTy.inRange, Bool.false_eq_true] at h <;> rfl
 
-/-- A key type a program can index a mapping with: a word, read as the
-integer it is hashed as (`PrimTy.key`, a `bool` as `0`/`1`); a reference
-type is no key (`IndexTy.map`). -/
-def Ty.isKey : Ty → Bool
-  | .prim _ => true
-  | .ref _ => false
-
 mutual
   def Ty.allowsMemory : Ty -> Bool
     | Ty.ref ref => ref.allowsMemory
@@ -215,13 +209,13 @@ def structDef : Name -> List (Name × Ty)
   -- semantics (mapping members survive `delete` on the struct).
   | "Wallet" =>
       [("owner", Ty.uint),
-       ("stash", Ty.ref (RefTy.mapping Ty.uint Ty.uint))]
+       ("stash", Ty.ref (RefTy.mapping .uint Ty.uint))]
   -- TestSuite.sol (`keyext.solidity.examples/TestSuite.sol`); `Basket`
   -- is shared verbatim with `solc/SolcMemory.sol`.
   | "Basket" => [("items", Ty.ref (RefTy.array Ty.uint))]
   | "Ledger" =>
       [("nonce", Ty.uint),
-       ("balances", Ty.ref (RefTy.mapping Ty.uint Ty.uint))]
+       ("balances", Ty.ref (RefTy.mapping .uint Ty.uint))]
   | "LedgerUse" => [("ledger", Ty.ref (RefTy.struct "Ledger"))]
   | "TokenBucket" =>
       [("tokens", Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))]
@@ -465,7 +459,8 @@ mutual
     | RefTy.fixed elem _ =>
         if memoryPayload then KeySort.identity else KeySort.array (elem.keySort false)
     | RefTy.mapping key value =>
-        KeySort.mapping (key.keySort false) (value.keySort false)
+        KeySort.mapping (if key == .bool then KeySort.bool else KeySort.int)
+          (value.keySort false)
 end
 
 /-- `Ty.keySort` under the name the `SolKey` reader's decoder uses. -/
@@ -622,7 +617,7 @@ namespace Ty
 @[match_pattern, reducible] def struct (n : Name) : Ty := .ref (.struct n)
 @[match_pattern, reducible] def array (T : Ty) : Ty := .ref (.array T)
 @[match_pattern, reducible] def fixed (T : Ty) (n : Nat) : Ty := .ref (.fixed T n)
-@[match_pattern, reducible] def mapping (K V : Ty) : Ty := .ref (.mapping K V)
+@[match_pattern, reducible] def mapping (K : PrimTy) (V : Ty) : Ty := .ref (.mapping K V)
 
 /-- The Solidity spelling: `uint`, `Person[]`, `mapping(uint => bool)`. -/
 def toStr : Ty → String
