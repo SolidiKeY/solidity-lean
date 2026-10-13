@@ -30,7 +30,7 @@ interpreter's lemmas already answer (`Heap.readAddr_erase`).
 
 namespace Solidity
 
-open Semantics (lookupBy structDef)
+open Semantics (lookupBy structDef tyRank fieldsRank)
 
 section Heap
 
@@ -701,6 +701,118 @@ theorem Grown.writeT_lenU {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a
   | none => rfl
   | some r => exact congrArg some (Heap.lenU_eq (Heap.len_writeAddr hhp r .dyn))
 
+/-- **An allocation's identity is new** (`newAddDifferent`): past every
+identity of the heap it grows. -/
+theorem Grown.alloc_id_ge {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
+    H.length ≤ ((Grown.alloc g).val : HRef _ R).id :=
+  g.ext.length_le
+
+/-- A copy into memory of a reference is a fresh object: its identity is
+past the heap's. -/
+theorem SVal.copyStToM_id_ge {H : HTy} (hp : Heap H) {R : RefTy} (v : SVal (.ref R))
+    (h : (Ty.ref R).mapFree = true) :
+    H.length ≤ ((v.copyStToM hp h).val : HRef _ R).id := by
+  cases v with
+  | struct fs => rw [SVal.copyStToM_struct]; exact Grown.alloc_id_ge _
+  | array e sh hn =>
+    rw [SVal.copyStToM_array]; exact Grown.alloc_id_ge _
+  | fixed e =>
+    rw [SVal.copyStToM_fixed]; exact Grown.alloc_id_ge _
+  | map m d => exact absurd h (by simp only [Ty.mapFree, Bool.false_eq_true, not_false_eq_true])
+
 end Len
+
+/-! ## Copies into storage: what a copy reads (`copyMem`) -/
+
+section CopyMem
+
+theorem SVec.toList_ofLen {α : Type} {E : Ty} (f : α → SVal E) : (n : Nat) → (l : List α) →
+    (h : l.length = n) → (SVec.ofLen f n l h).toList = l.map f
+  | 0, [], _ => by simp only [SVec.ofLen, SVec.toList_nil, List.map_nil]
+  | n + 1, x :: xs, h => by
+    simp only [SVec.ofLen, SVec.toList_cons, List.map_cons, SVec.toList_ofLen f n xs]
+  | 0, _ :: _, h => by simp only [List.length_cons, Nat.add_one_ne_zero] at h
+  | _ + 1, [], h => by simp only [List.length_nil, Nat.zero_ne_add_one] at h
+
+/-- The copy at any fuel past the type's rank is the copy. -/
+theorem MVal.copyBelow_eq {H : HTy} (hp : Heap H) (k : Nat) (T : Ty) (h : tyRank T < k)
+    (v : MVal H T) : MVal.copyBelow hp k T h v = v.copyMToSt hp := by
+  have e₁ := MVal.copyBelow_erase (σ := Heap.into { storage := [] } hp) (hp := hp) rfl k T h v _
+    (RemOk.all hp T)
+  have e₂ := MVal.copyBelow_erase (σ := Heap.into { storage := [] } hp) (hp := hp) rfl _ T
+    (Nat.lt_succ_of_le (tyRank_le_rankBound T)) v _ (RemOk.all hp T)
+  exact SVal.erase_injective (Except.ok.inj (e₁.symm.trans e₂))
+
+theorem MFields.copyBelow_get {H : HTy} (k : Nat) (ih : (T : Ty) → tyRank T < k → MVal H T → SVal T)
+    {f : Name} : (fs : List (Name × Ty)) → (hfs : fieldsRank fs < k) → (x : MFields H fs) →
+    {T : Ty} → (h : lookupBy f fs = some T) →
+    ∃ hT, (MFields.copyBelow k ih fs hfs x).get h = ih T hT (MFields.get fs x h)
+  | [], _, _, _, h => absurd h (by simp only [lookupBy, reduceCtorEq, not_false_eq_true])
+  | (f', T') :: fs, hfs, x, T, h => by
+    by_cases e : f = f'
+    · have hT' := SFields.lookupBy_cons_pos e h
+      subst hT'
+      exact ⟨Nat.lt_of_le_of_lt (Nat.le_max_left _ _) hfs, by
+        simp only [MFields.copyBelow, SFields.get_cons, MFields.get, e, dite_true]⟩
+    · obtain ⟨hT, he⟩ := MFields.copyBelow_get k ih fs (Nat.lt_of_le_of_lt (Nat.le_max_right _ _) hfs)
+        x.2 (SFields.lookupBy_cons_neg e h)
+      exact ⟨hT, by simp only [MFields.copyBelow, SFields.get_cons, MFields.get, e, dite_false, he]⟩
+
+/-- **A struct copied to storage, at a member** (`selectOnCopyMem`): the
+copy of the member's value. -/
+theorem MVal.copyMToSt_findM_field {H : HTy} (hp : Heap H) {s f : Name} {T U : Ty}
+    (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some T) (p : Path T U) :
+    (MVal.copyMToSt hp (T := .ref (.struct s)) r).findM (.field hf p) =
+      (MVal.copyMToSt hp (hp.field r hf)).findM p := by
+  obtain ⟨hT, he⟩ := MFields.copyBelow_get 4 (MVal.copyBelow hp 4) (structDef s)
+    (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (tyRank_le_rankBound (.ref (.struct s))))
+    (hp.get r) hf
+  show ((MFields.copyBelow 4 (MVal.copyBelow hp 4) (structDef s) _ (hp.get r)).get hf).findM p = _
+  rw [he, MVal.copyBelow_eq]
+  rfl
+
+/-- **A dynamic array copied to storage, at an element**: the copy of the
+element, within the array's length. -/
+theorem MVal.copyMToSt_findM_at {H : HTy} (hp : Heap H) {E U : Ty} (r : HRef H (.array E))
+    (i : Int) (p : Path E U) :
+    (MVal.copyMToSt hp (T := .ref (.array E)) r).findM (.at i p) =
+      if 0 ≤ i then ((MObj.elems .dyn (hp.get r))[i.toNat]?).bind
+        (fun v => (MVal.copyMToSt hp v).findM p) else none := by
+  simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.findM,
+    SVec.toList_ofList, SList.toList_nil, List.append_nil, List.getElem?_map, MObj.elems_dyn]
+  split
+  · cases (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).1[i.toNat]? <;> rfl
+  · rfl
+
+/-- A fixed array copied to storage, at an element. -/
+theorem MVal.copyMToSt_findM_atF {H : HTy} (hp : Heap H) {E U : Ty} {n : Nat}
+    (r : HRef H (.fixed E n)) (i : Int) (p : Path E U) :
+    (MVal.copyMToSt hp (T := .ref (.fixed E n)) r).findM (.atF i p) =
+      if 0 ≤ i then ((MObj.elems .fixed (hp.get r))[i.toNat]?).bind
+        (fun v => (MVal.copyMToSt hp v).findM p) else none := by
+  simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.findM,
+    SVec.toList_ofLen, List.getElem?_map, MObj.elems_fixed]
+  split
+  · cases (hp.get r : {l : List (MVal H E) // l.length = n}).1[i.toNat]? with
+    | none => rfl
+    | some v =>
+      simp only [Option.map_some, Option.bind_some]
+      exact congrArg (·.findM p) ((MVal.copyBelow_eq hp (rankBound E + 2) E _ v).trans
+        (MVal.copyBelow_eq hp (rankBound E + 1) E _ v).symm)
+  · rfl
+
+/-- A dynamic array copied to storage has the array's length. -/
+theorem MVal.copyMToSt_len {H : HTy} (hp : Heap H) {E : Ty} (r : HRef H (.array E)) :
+    ((MVal.copyMToSt hp (T := .ref (.array E)) r).view : ArrView E).n = hp.len r .dyn := by
+  simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.view_array,
+    Heap.len, MObj.elems_dyn]
+  exact (List.length_map _).trans rfl
+
+/-- A word copied to storage is the word. -/
+theorem MVal.copyMToSt_prim {H : HTy} (hp : Heap H) {P : PrimTy} (v : MVal H (.prim P)) :
+    MVal.copyMToSt hp v = .prim v := by
+  cases P <;> rfl
+
+end CopyMem
 
 end Solidity

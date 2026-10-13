@@ -371,18 +371,6 @@ theorem LTm.freshPath?_eq_freshPathM (m : LTm C .mem) (R : RefTy) {u : Srt} (t :
   | app2 o x y ihx ihy => simp only [LTm.freshPathM, ← ihx, ← ihy]; rfl
   | _ => rfl
 
-theorem LTm.read_evalT {P : PrimTy} (X : LTm C .mem) (b : LTm C (.addr (.prim P))) :
-    ((LTm.app2 .read X b).eval g ν : Option P.Denote) =
-      ((X.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
-        (b.eval g ν : Option (MAddrT (.prim P))).bind fun bd =>
-          (bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb) := rfl
-
-theorem LTm.iread_evalT {R : RefTy} (X : LTm C .mem) (b : LTm C (.addr (.ref R))) :
-    ((LTm.app2 .iread X b).eval g ν : Option Nat) =
-      ((X.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
-        (b.eval g ν : Option (MAddrT (.ref R))).bind fun bd =>
-          ((bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb).bind fun r => some r.id) := rfl
-
 theorem LTm.freshPath_eval {m : LTm C .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true}
     {μ₀ : Grown g.H (fun _ => Unit)} (hm : m.eval g ν = some μ₀) {u : Srt} (t : LTm C u) :
     ∀ {p : List Semantics.Seg}, LTm.freshPath? m R t = some p →
@@ -503,6 +491,32 @@ theorem LTm.freshPath_eval {m : LTm C .mem} {R : RefTy} {hR : (Ty.ref R).mapFree
 
 end Fresh
 
+/-- An identity term's head: an allocation, a copy, a read out of memory. -/
+inductive IdentV (C : Contract) where
+  | alloc (m : LTm C .mem) (R : RefTy) (h : (Ty.ref R).mapFree = true)
+  | copy (m : LTm C .mem) {U : Ty} (h : U.mapFree = true) (S : LTm C (.sv U))
+  | iread (X : LTm C .mem) {T : Ty} (b : LTm C (.addr T))
+  | other
+
+def _root_.Solidity.Op1.identV {a s : Srt} (o : Op1 C a s) (x : LTm C a) : IdentV C :=
+  match o, x with
+  | .alloc R h, x => .alloc x R h
+  | _, _ => .other
+
+def _root_.Solidity.Op2.identV {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    IdentV C :=
+  match o, x, y with
+  | .copy h, x, y => .copy x h y
+  | .iread, x, y => .iread x y
+  | _, _, _ => .other
+
+/-- An identity term's head. -/
+def LTm.identView {s : Srt} (t : LTm C s) : IdentV C :=
+  match t with
+  | .app1 o x => o.identV x
+  | .app2 o x y => o.identV x y
+  | _ => .other
+
 /-! ## Memory terms and addresses, viewed -/
 
 section Views
@@ -573,15 +587,83 @@ theorem LTm.memView_copySt {X m : LTm C .mem} {T : Ty} {hT : T.mapFree = true}
   | app3 o x y z => cases o; simp only [LTm.memView, Op3.memV, reduceCtorEq] at h
   | _ => simp only [LTm.memView, reduceCtorEq] at h
 
+/-- The memory an identity term is fresh over: an allocation's, a copy's
+root's. -/
+def LTm.freshOver? {s : Srt} (t : LTm C s) : Option (LTm C .mem) :=
+  match t.identView with
+  | .alloc m _ _ => some m
+  | .copy m _ _ => some m
+  | _ => none
+
+theorem LTm.freshOver?_eval {R : RefTy} {t : LTm C (.ident R)} {m : LTm C .mem}
+    (h : t.freshOver? = some m) {id : Nat} (ht : (t.eval g ν : Option Nat) = some id) :
+    ∃ μ : Grown g.H (fun _ => Unit), m.eval g ν = some μ ∧ μ.H'.length ≤ id := by
+  unfold LTm.freshOver? at h
+  split at h
+  · rename_i m' R' hR ht'
+    cases h
+    cases t with
+    | app1 o x =>
+      cases o <;> simp only [LTm.identView, Op1.identV, reduceCtorEq, IdentV.alloc.injEq] at ht'
+      obtain ⟨rfl, -⟩ := ht'
+      rw [LTm.eval_app1, Op1.eval_eq_evalM] at ht
+      simp only [Op1.evalM, Option.map_eq_some_iff] at ht
+      obtain ⟨μ, hμ, rfl⟩ := ht
+      exact ⟨μ, hμ, SVal.copyStToM_id_ge _ _ _⟩
+    | app2 o x y => cases o <;> simp only [LTm.identView, Op2.identV, reduceCtorEq] at ht'
+    | _ => simp only [LTm.identView, reduceCtorEq] at ht'
+  · rename_i m' U hU S ht'
+    cases h
+    cases t with
+    | app1 o x => cases o <;> simp only [LTm.identView, Op1.identV, reduceCtorEq] at ht'
+    | app2 o x y =>
+      cases o <;> simp only [LTm.identView, Op2.identV, reduceCtorEq, IdentV.copy.injEq] at ht'
+      obtain ⟨rfl, rfl, hy⟩ := ht'
+      cases eq_of_heq hy
+      rw [LTm.eval_app2, Op2.eval_eq_evalM] at ht
+      simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at ht
+      obtain ⟨μ, hμ, v, -, rfl⟩ := ht
+      exact ⟨μ, hμ, SVal.copyStToM_id_ge _ _ _⟩
+    | _ => simp only [LTm.identView, reduceCtorEq] at ht'
+  · cases h
+
+/-- **Two identities that differ** (`newAddDifferent`): one fresh over a
+memory the other is older than. -/
+def LTm.identApart? {R R' : RefTy} (t : LTm C (.ident R)) (t' : LTm C (.ident R')) : Bool :=
+  (match t'.freshOver? with
+    | some m => t.boundedIn m
+    | none => false) ||
+  (match t.freshOver? with
+    | some m => t'.boundedIn m
+    | none => false)
+
+theorem LTm.identApart?_ne {R R' : RefTy} {t : LTm C (.ident R)} {t' : LTm C (.ident R')}
+    (h : t.identApart? t' = true) {id id' : Nat} (ht : (t.eval g ν : Option Nat) = some id)
+    (ht' : (t'.eval g ν : Option Nat) = some id') : id ≠ id' := by
+  unfold LTm.identApart? at h
+  rcases Bool.or_eq_true_iff.1 h with h | h
+  · split at h
+    · rename_i m hm
+      obtain ⟨μ, hμ, hle⟩ := LTm.freshOver?_eval hm ht'
+      have : id < μ.H'.length := LTm.boundedIn_eval hμ t h id ht
+      omega
+    · cases h
+  · split at h
+    · rename_i m hm
+      obtain ⟨μ, hμ, hle⟩ := LTm.freshOver?_eval hm ht
+      have : id' < μ.H'.length := LTm.boundedIn_eval hμ t' h id' ht'
+      omega
+    · cases h
+
 /-- An address term's shape. -/
 inductive AddrShapeL (C : Contract) where
-  | field (f : Name)
+  | field (f : Name) (o : (R : RefTy) × LTm C (.ident R))
   | index (i : (R : RefTy) × LTm C (.ident R)) (k : Option Int)
 
 /-- At a unary symbol. -/
-def _root_.Solidity.Op1.addrStepL {a u : Srt} : Op1 C a u → Option (AddrShapeL C)
-  | .mfield (f := f) _ => some (.field f)
-  | _ => none
+def _root_.Solidity.Op1.addrStepL {a u : Srt} : Op1 C a u → LTm C a → Option (AddrShapeL C)
+  | .mfield (f := f) _, x => some (.field f ⟨_, x⟩)
+  | _, _ => none
 
 /-- At a binary symbol. -/
 def _root_.Solidity.Op2.addrStepL {a b u : Srt} : Op2 C a b u → LTm C a → LTm C b →
@@ -591,7 +673,7 @@ def _root_.Solidity.Op2.addrStepL {a b u : Srt} : Op2 C a b u → LTm C a → LT
 
 /-- An address term's shape.  Generic in the sort. -/
 def LTm.addrShape? {u : Srt} : LTm C u → Option (AddrShapeL C)
-  | .app1 o _ => o.addrStepL
+  | .app1 o x => o.addrStepL x
   | .app2 o x y => o.addrStepL x y
   | _ => none
 
@@ -600,16 +682,19 @@ condition, decided on the terms): two members, a member and an element, or
 two elements of one identity at two literal indices. -/
 def LTm.apart? {T U : Ty} (a : LTm C (.addr T)) (b : LTm C (.addr U)) : Bool :=
   match a.addrShape?, b.addrShape? with
-  | some (.field f), some (.field g) => f != g
-  | some (.field _), some (.index _ _) => true
-  | some (.index _ _), some (.field _) => true
-  | some (.index i (some k)), some (.index j (some k')) => i.2.beqR j.2 && k != k'
+  | some (.field f o), some (.field g o') => f != g || LTm.identApart? o.2 o'.2
+  | some (.field _ _), some (.index _ _) => true
+  | some (.index _ _), some (.field _ _) => true
+  | some (.index i k), some (.index j k') =>
+    (i.2.beqR j.2 && match k, k' with
+      | some k, some k' => k != k'
+      | _, _ => false) || LTm.identApart? i.2 j.2
   | _, _ => false
 
 /-- What an address term's shape says of the address it reads. -/
 def AddrShapeL.Reads (g : State C []) (ν : AEnv) {T : Ty} : AddrShapeL C → MAddrT T → Prop
-  | .field f, ad => ∃ (s : Name) (id : Nat) (h : lookupBy f (structDef s) = some T),
-      ad = MAddrT.field id h
+  | .field f o, ad => ∃ (s : Name) (id : Nat) (h : lookupBy f (structDef s) = some T),
+      ad = MAddrT.field id h ∧ (o.2.eval g ν : Option Nat) = some id
   | .index ⟨R, i⟩ k, ad => ∃ (id : Nat) (a : ArrTy R T) (j : Int),
       (i.eval g ν : Option Nat) = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j = k'
 
@@ -622,8 +707,8 @@ theorem LTm.addrShape?_eval {T : Ty} {a : LTm C (.addr T)} {sh : AddrShapeL C}
     subst h
     rename_i s f hf
     have ha : ((x.eval g ν : Option Nat).map (fun id => MAddrT.field id hf)) = some ad := ha
-    obtain ⟨id, -, rfl⟩ := Option.map_eq_some_iff.1 ha
-    exact ⟨s, id, hf, rfl⟩
+    obtain ⟨id, hid, rfl⟩ := Option.map_eq_some_iff.1 ha
+    exact ⟨s, id, hf, rfl, hid⟩
   | app2 o x y =>
     cases o <;> simp only [LTm.addrShape?, Op2.addrStepL, reduceCtorEq, Option.some.injEq] at h
     subst h
@@ -648,31 +733,38 @@ theorem LTm.apart?_resolve {T U : Ty} {a : LTm C (.addr T)} {b : LTm C (.addr U)
     (hb : (b.eval g ν : Option (MAddrT U)) = some bd) : ad.Apart bd := by
   unfold LTm.apart? at h
   split at h
-  · rename_i f f' hfa hfb
-    obtain ⟨s, id, hf, rfl⟩ := LTm.addrShape?_eval hfa ha
-    obtain ⟨s', id', hg, rfl⟩ := LTm.addrShape?_eval hfb hb
-    exact .inr (by simpa only [bne_iff_ne, ne_eq] using h)
-  · rename_i f i k hfa hfb
-    obtain ⟨s, id, hf, rfl⟩ := LTm.addrShape?_eval hfa ha
+  · rename_i f o f' o' hfa hfb
+    obtain ⟨s, id, hf, rfl, hid⟩ := LTm.addrShape?_eval hfa ha
+    obtain ⟨s', id', hg, rfl, hid'⟩ := LTm.addrShape?_eval hfb hb
+    rcases Bool.or_eq_true_iff.1 h with h | h
+    · exact .inr (by simpa only [bne_iff_ne, ne_eq] using h)
+    · exact .inl (LTm.identApart?_ne h hid hid')
+  · rename_i f o i k hfa hfb
+    obtain ⟨s, id, hf, rfl, -⟩ := LTm.addrShape?_eval hfa ha
     obtain ⟨id', arr, j, -, rfl, -⟩ := LTm.addrShape?_eval hfb hb
     trivial
-  · rename_i i k f hfa hfb
+  · rename_i i k f o hfa hfb
     obtain ⟨id', arr, j, -, rfl, -⟩ := LTm.addrShape?_eval hfa ha
-    obtain ⟨s, id, hf, rfl⟩ := LTm.addrShape?_eval hfb hb
+    obtain ⟨s, id, hf, rfl, -⟩ := LTm.addrShape?_eval hfb hb
     trivial
   · rename_i i k j k' hfa hfb
-    simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at h
-    obtain ⟨hij, hk⟩ := h
     obtain ⟨R, i⟩ := i
     obtain ⟨R', j⟩ := j
-    cases LTm.sigma_eq_of_beqR hij
     obtain ⟨id, arr, n, hi, rfl, hn⟩ := LTm.addrShape?_eval hfa ha
     obtain ⟨id', arr', n', hi', rfl, hn'⟩ := LTm.addrShape?_eval hfb hb
-    rw [hi] at hi'
-    cases hi'
-    refine .inr ?_
-    rw [hn k rfl, hn' k' rfl]
-    exact hk
+    rcases Bool.or_eq_true_iff.1 h with h | h
+    · simp only [Bool.and_eq_true] at h
+      obtain ⟨hij, hk⟩ := h
+      cases LTm.sigma_eq_of_beqR hij
+      rw [hi] at hi'
+      cases hi'
+      refine .inr ?_
+      split at hk
+      · rename_i k₁ k₂
+        rw [hn k₁ rfl, hn' k₂ rfl]
+        simpa only [bne_iff_ne, ne_eq] using hk
+      · cases hk
+    · exact .inl (LTm.identApart?_ne h hi hi')
   · nomatch h
 
 end Views
@@ -909,55 +1001,162 @@ theorem LTm.read_addM_fresh {P : PrimTy} (m : LTm C .mem) (R : RefTy)
         cases P <;> exact Semantics.MVal.prim.inj hd
       rw [PrimTy.erase_injective hv]
 
-end Laws
+/-- A member address term, viewed: its object and member. -/
+structure FieldV (C : Contract) where
+  {s f : Name}
+  {T : Ty}
+  hf : C.fieldType s f = some T
+  t : LTm C (.ident (.struct s))
 
-/-- An identity term's head: an allocation, a copy, a read out of memory. -/
-inductive IdentV (C : Contract) where
-  | alloc (m : LTm C .mem) (R : RefTy) (h : (Ty.ref R).mapFree = true)
-  | copy (m : LTm C .mem) {U : Ty} (h : U.mapFree = true) (S : LTm C (.sv U))
-  | iread (X : LTm C .mem) {T : Ty} (b : LTm C (.addr T))
-  | other
-
-def _root_.Solidity.Op1.identV {a s : Srt} (o : Op1 C a s) (x : LTm C a) : IdentV C :=
+def _root_.Solidity.Op1.fieldV {a u : Srt} (o : Op1 C a u) (x : LTm C a) : Option (FieldV C) :=
   match o, x with
-  | .alloc R h, x => .alloc x R h
-  | _, _ => .other
+  | .mfield hf, x => some ⟨hf, x⟩
+  | _, _ => none
 
-def _root_.Solidity.Op2.identV {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
-    IdentV C :=
+/-- A member address term's object and member. -/
+def LTm.fieldV? {u : Srt} (b : LTm C u) : Option (FieldV C) :=
+  match b with
+  | .app1 o x => o.fieldV x
+  | _ => none
+
+/-- A storage value term read out of storage, viewed: `sfind(st, q)`. -/
+structure SFindV (C : Contract) where
+  {T : Ty}
+  st : LTm C .st
+  q : LTm C (.path T)
+
+def _root_.Solidity.Op2.sfindV {a b u : Srt} (o : Op2 C a b u) (x : LTm C a) (y : LTm C b) :
+    Option (SFindV C) :=
   match o, x, y with
-  | .copy h, x, y => .copy x h y
-  | .iread, x, y => .iread x y
-  | _, _, _ => .other
+  | .sfind, x, y => some ⟨x, y⟩
+  | _, _, _ => none
 
-/-- An identity term's head. -/
-def LTm.identView {s : Srt} (t : LTm C s) : IdentV C :=
-  match t with
-  | .app1 o x => o.identV x
-  | .app2 o x y => o.identV x y
-  | _ => .other
+/-- A storage value term's storage and path, where it is read out of one. -/
+def LTm.sfindV? {u : Srt} (S : LTm C u) : Option (SFindV C) :=
+  match S with
+  | .app2 o x y => o.sfindV x y
+  | _ => none
+
+/-- **A member of a copy of storage, read** (`readFromCopyToStorage`): the
+word at the member of the copy's root, as the storage it copied holds it
+there. -/
+def copyFieldRd? (m : LTm C .mem) {U : Ty} (S : LTm C (.sv U)) {P : PrimTy}
+    (b : LTm C (.addr (.prim P))) : Option (LTm C (.val P)) :=
+  match b.fieldV? with
+  | some fv =>
+    match fv.t.identView with
+    | .copy m' _ S' =>
+      if m'.beqR m && S'.beqR S && fv.f != "length" then
+        match S.sfindV? with
+        | some ⟨st, q⟩ =>
+          (q.castTo? (s' := .path (.ref (.struct fv.s)))).bind fun q' =>
+            ((LTm.app1 (.field fv.hf) q').castTo? (s' := .path (.prim P))).map fun q'' =>
+              .app2 .find st q''
+        | none => none
+      else none
+    | _ => none
+  | none => none
+
+theorem copyFieldRd?_eval {m : LTm C .mem} {U : Ty} {hU : U.mapFree = true} {S : LTm C (.sv U)}
+    {P : PrimTy} {b : LTm C (.addr (.prim P))} {y : LTm C (.val P)} (h : copyFieldRd? m S b = some y) :
+    ((LTm.app2 .read (.app2 (.copySt hU) m S) b).eval g ν : Option P.Denote) =
+      (LTm.seq (.app2 (.copySt hU) m S) y).eval g ν := by
+  unfold copyFieldRd? at h
+  split at h
+  · rename_i fv hfv
+    split at h
+    · rename_i m' U' hU' S' ht
+      split at h
+      · rename_i hc
+        simp only [Bool.and_eq_true, bne_iff_ne, ne_eq] at hc
+        obtain ⟨⟨hm, hS⟩, hl⟩ := hc
+        split at h
+        · rename_i T' st q hsf
+          obtain ⟨q', hq', h⟩ := Option.bind_eq_some_iff.1 h
+          obtain ⟨q'', hq'', rfl⟩ := Option.map_eq_some_iff.1 h
+          cases b with
+          | app1 o x =>
+            cases o <;> simp only [LTm.fieldV?, Op1.fieldV, reduceCtorEq, Option.some.injEq] at hfv
+            subst hfv
+            rename_i s f hf
+            obtain ⟨-, hq2⟩ := Sigma.mk.inj (LTm.castTo?_eq hq'')
+            cases eq_of_heq hq2
+            obtain ⟨hT, hq1⟩ := Sigma.mk.inj (LTm.castTo?_eq hq')
+            cases hT
+            cases eq_of_heq hq1
+            cases LTm.sigma_eq_of_beqR hm
+            obtain ⟨hUU, hSS⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hS)
+            cases hUU
+            cases eq_of_heq hSS
+            cases x with
+            | app2 o xm xS =>
+              cases o <;> simp only [LTm.identView, Op2.identV, reduceCtorEq, IdentV.copy.injEq] at ht
+              obtain ⟨rfl, hR, hxS⟩ := ht
+              cases hR
+              cases eq_of_heq hxS
+              cases xS with
+              | app2 o st' q0 =>
+                cases o <;> simp only [LTm.sfindV?, Op2.sfindV, reduceCtorEq, Option.some.injEq,
+                  SFindV.mk.injEq] at hsf
+                obtain ⟨-, hst', hq0⟩ := hsf
+                subst st
+                cases eq_of_heq hq0
+                have ev : ((LTm.app2 .sfind st' q0).eval g ν : Option (SVal _)) =
+                    (st'.eval g ν : Option (Storage C)).bind fun st₀ =>
+                      (q0.eval g ν : Option (SRef C _)).bind fun r₀ => st₀.find r₀ := by
+                  rw [LTm.eval_app2]
+                  cases (st'.eval g ν : Option (Storage C)) <;>
+                    cases (q0.eval g ν : Option (SRef C _)) <;> rfl
+                rw [LTm.read_evalT, LTm.eval_seq, LTm.eval_app2 g ν (Op2.copySt hU), Op2.eval_eq_evalM]
+                cases hxm : (xm.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+                | none => rfl
+                | some μ₀ =>
+                  cases hv : ((LTm.app2 .sfind st' q0).eval g ν : Option (SVal _)) with
+                  | none => rfl
+                  | some v =>
+                    rw [ev] at hv
+                    simp only [Option.bind_eq_some_iff] at hv
+                    obtain ⟨st₀, hst, r₀, hr₀, hfv⟩ := hv
+                    rename_i hcp
+                    have hv2 : ((LTm.app2 .sfind st' q0).eval g ν : Option (SVal _)) = some v := by
+                      rw [ev, hst, Option.bind_some, hr₀, Option.bind_some, hfv]
+                    have hb : ((LTm.app1 (Op1.mfield f) (LTm.app2 (Op2.copy hcp) xm
+                        (LTm.app2 Op2.sfind st' q0))).eval g ν : Option (MAddrT _)) =
+                        some (MAddrT.field (v.copyStToM μ₀.heap hcp).val.id f) := by
+                      rw [LTm.eval_app1, LTm.eval_app2, hxm, hv2]; rfl
+                    rw [show Op2.evalM g (Op2.copySt hU) (some μ₀) (some v) =
+                      some (μ₀.then (v.copyStToM μ₀.heap hU)) from rfl, Option.bind_some,
+                      Option.bind_some, hb, Option.bind_some]
+                    show ((MAddrT.field (SVal.copyStToM μ₀.heap v hU).val.id f).resolve
+                      (SVal.copyStToM μ₀.heap v hU).H').bind
+                      (fun rb => (SVal.copyStToM μ₀.heap v hU).heap.readAddr rb) = _
+                    rw [MAddrT.resolve_eq_resolveM]
+                    simp only [MAddrT.resolveM]
+                    rw [HRef.ofId?_self (r := ((SVal.copyStToM μ₀.heap v hU).val : HRef _ _))]
+                    simp only [Option.map_some, Option.bind_some]
+                    show some ((SVal.copyStToM μ₀.heap v hU).heap.field
+                      (SVal.copyStToM μ₀.heap v hU).val f) = _
+                    rw [SVal.copyStToM_field μ₀.heap v hU f hl, LTm.eval_app2, hst, LTm.eval_app1, hr₀]
+                    show _ = (st₀.find (r₀.field f)).bind fun w => some w.view
+                    rw [SRef.field, Storage.find_append, hfv]
+                    cases v with
+                    | struct fs => rfl
+              | _ => simp only [LTm.sfindV?, reduceCtorEq] at hsf
+            | app1 o xm => cases o <;> simp only [LTm.identView, Op1.identV, reduceCtorEq] at ht
+            | _ => simp only [LTm.identView, reduceCtorEq] at ht
+          | _ => simp only [LTm.fieldV?, reduceCtorEq] at hfv
+        · cases h
+      · cases h
+    · cases h
+  · cases h
+
+end Laws
 
 /-! ## The length of an array, walked down its memory -/
 
 section Len
 
 variable {g : State C []} {ν : AEnv}
-
-theorem LTm.mlen_evalT {E : Ty} (X : LTm C .mem) (t : LTm C (.ident (.array E))) :
-    ((LTm.app2 .mlen X t).eval g ν : Option PrimTy.uint.Denote) =
-      ((X.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
-        (t.eval g ν : Option Nat).bind fun id =>
-          (HRef.ofId? μ.H' (.array E) id).map fun r => μ.heap.lenU r) := by
-  rw [LTm.eval_app2, Op2.eval_eq_evalM]
-  cases (X.eval g ν : Option (Grown g.H (fun _ => Unit))) with
-  | none => rfl
-  | some μ =>
-    cases (t.eval g ν : Option Nat) with
-    | none => rfl
-    | some id =>
-      show (HRef.ofId? μ.H' (.array E) id).bind (fun r => some (μ.heap.lenU r)) =
-        (HRef.ofId? μ.H' (.array E) id).map fun r => μ.heap.lenU r
-      cases HRef.ofId? μ.H' (.array E) id <;> rfl
 
 /-- `new T[](n)`'s `n`, where a storage value term is one. -/
 def _root_.Solidity.Op1.newArrArg {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
@@ -1711,6 +1910,43 @@ theorem LTm.identMem?_rets {R : RefTy} {t : LTm C (.ident R)} {M : LTm C .mem}
     | _ => simp only [LTm.identView, reduceCtorEq] at ht'
   · cases h
 
+/-- A copy into storage, viewed: its memory and object. -/
+def _root_.Solidity.Op2.copyMemV {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    Option ((R : RefTy) × LTm C .mem × LTm C (.ident R)) :=
+  match o, x, y with
+  | .copyMem, x, y => some ⟨_, x, y⟩
+  | _, _, _ => none
+
+/-- A copy into storage's memory and object. -/
+def LTm.copyMemV? {s : Srt} (t : LTm C s) : Option ((R : RefTy) × LTm C .mem × LTm C (.ident R)) :=
+  match t with
+  | .app2 o x y => o.copyMemV x y
+  | _ => none
+
+theorem LTm.copyMem_isSome {R : RefTy} (M : LTm C .mem) (t : LTm C (.ident R)) :
+    ((LTm.app2 .copyMem M t).eval g ν : Option (SVal (.ref R))).isSome = true ↔
+      ∃ μ : Grown g.H (fun _ => Unit), M.eval g ν = some μ ∧
+        ∃ id, (t.eval g ν : Option Nat) = some id ∧ μ.H'[id]? = some R := by
+  rw [LTm.eval_app2, Op2.eval_eq_evalM]
+  cases hm : (M.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+  | none => exact ⟨fun h => (nomatch h), fun ⟨_, h, _⟩ => (nomatch h)⟩
+  | some μ =>
+    cases ht : (t.eval g ν : Option Nat) with
+    | none => exact ⟨fun h => (nomatch h), fun ⟨_, _, _, h, _⟩ => (nomatch h)⟩
+    | some id =>
+      show ((HRef.ofId? μ.H' R id).bind fun r =>
+        some (MVal.copyMToSt μ.heap (T := .ref R) r)).isSome = true ↔ _
+      unfold HRef.ofId?
+      by_cases hid : μ.H'[id]? = some R
+      · simp only [hid, dite_true, Option.bind_some, Option.isSome_some, true_iff]
+        exact ⟨μ, rfl, id, rfl, hid⟩
+      · simp only [hid, dite_false, Option.bind_none, Option.isSome_none, Bool.false_eq_true,
+          false_iff, not_exists, not_and]
+        intro μ' hμ' id' hid' hR
+        cases hμ'
+        cases hid'
+        exact hid hR
+
 /-- The words a guard's returning comes to: a memory's, an identity's in
 its memory. -/
 def guardQ {s : Srt} (d : LTm C s) : Option (List (LTm C (.val .bool))) :=
@@ -1720,7 +1956,11 @@ def guardQ {s : Srt} (d : LTm C s) : Option (List (LTm C (.val .bool))) :=
     match s, d with
     | .ident _, d => d.identMem?.bind fun M => (memCondN memFuel (.mem M)).bind fun c₁ =>
         (memCondN memFuel (.ident d M)).map fun c₂ => c₁ ++ c₂
-    | .sv _, d => some (svConds d)
+    | .sv _, d =>
+      match d.copyMemV? with
+      | some ⟨_, M, t⟩ => (memCondN memFuel (.mem M)).bind fun c₁ =>
+          (memCondN memFuel (.ident t M)).map fun c₂ => c₁ ++ c₂
+      | none => some (svConds d)
     | _, _ => none
 
 theorem guardQ_sound {s : Srt} {d : LTm C s} {cs : List (LTm C (.val .bool))}
@@ -1749,13 +1989,48 @@ theorem guardQ_sound {s : Srt} {d : LTm C s} {cs : List (LTm C (.val .bool))}
         show (d'.eval g ν : Option Nat).isSome = true
         rw [hid]; rfl
     · rename_i U d' _
-      cases h
-      exact svConds_iff d'
+      split at h
+      · rename_i R M t hcm
+        obtain ⟨c₁, h₁, h⟩ := Option.bind_eq_some_iff.1 h
+        obtain ⟨c₂, h₂, rfl⟩ := Option.map_eq_some_iff.1 h
+        have HM := memCondN_sound (g := g) (ν := ν) memFuel (.mem M) c₁ h₁
+        have HI := memCondN_sound (g := g) (ν := ν) memFuel (.ident t M) c₂ h₂
+        cases d' with
+        | app2 o x y =>
+          cases o <;> simp only [LTm.copyMemV?, Op2.copyMemV, reduceCtorEq, Option.some.injEq] at hcm
+          obtain ⟨rfl, hcm⟩ := Sigma.mk.inj hcm
+          simp only [heq_eq_eq, Prod.mk.injEq] at hcm
+          obtain ⟨rfl, rfl⟩ := hcm
+          rw [LTm.copyMem_isSome, AllT.append]
+          constructor
+          · rintro ⟨μ, hμ, id, hid, hR⟩
+            exact ⟨HM.1 (by rw [hμ]; rfl), (HI μ hμ).2 (by rw [hid]; rfl)⟩
+          · rintro ⟨a₁, a₂⟩
+            obtain ⟨μ, hμ⟩ := Option.isSome_iff_exists.1 (HM.2 a₁)
+            exact ⟨μ, hμ, (HI μ hμ).1 a₂⟩
+        | _ => simp only [LTm.copyMemV?, reduceCtorEq] at hcm
+      · cases h
+        exact svConds_iff d'
     · cases h
 
-/-- `a`, guarded by the words `cs`: `if (c) then … else err`. -/
+/-- A word the closer folds to `true` (`Facts.nf` with no facts). -/
+def LTm.isTrueC (c : LTm C (.val .bool)) : Bool :=
+  match (({} : Facts C).nf c).litV? with
+  | some v => v
+  | none => false
+
+theorem LTm.isTrueC_eval {c : LTm C (.val .bool)} (h : c.isTrueC = true) :
+    (c.eval g ν : Option Bool) = some true := by
+  unfold LTm.isTrueC at h
+  split at h
+  · rename_i v hv
+    rw [← Facts.nf_eval (Facts.ok_empty ν), LTm.eval_litV? g ν hv, h]
+  · cases h
+
+/-- `a`, guarded by the words `cs`: `if (c) then … else err`, a word the
+closer folds to `true` dropped. -/
 def guardL (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) : LTm C s :=
-  cs.foldr (fun c a => .kite c .tt a .err) a
+  cs.foldr (fun c a => if c.isTrueC then a else .kite c .tt a .err) a
 
 open Classical in
 theorem guardL_eval (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) :
@@ -1763,10 +2038,17 @@ theorem guardL_eval (cs : List (LTm C (.val .bool))) {s : Srt} (a : LTm C s) :
   induction cs with
   | nil => rw [if_pos AllT.nil]; rfl
   | cons c cs ih =>
-    show (LTm.kite c .tt (guardL cs a) .err).eval g ν = _
-    rw [LTm.eval_kite, ih]
     have hc : AllT g ν (c :: cs) ↔ (c.eval g ν : Option Bool) = some true ∧ AllT g ν cs := by
       rw [show c :: cs = [c] ++ cs from rfl, AllT.append, AllT.single]
+    show (if c.isTrueC then guardL cs a else .kite c .tt (guardL cs a) .err).eval g ν = _
+    split
+    · rename_i htc
+      have h1 := LTm.isTrueC_eval (g := g) (ν := ν) htc
+      rw [ih]
+      by_cases h2 : AllT g ν cs
+      · rw [if_pos h2, if_pos (hc.2 ⟨h1, h2⟩)]
+      · rw [if_neg h2, if_neg (fun h => h2 (hc.1 h).2)]
+    rw [LTm.eval_kite, ih]
     by_cases h1 : (c.eval g ν : Option Bool) = some true
     · rw [h1]
       by_cases h2 : AllT g ν cs
@@ -1866,7 +2148,11 @@ def memReadN (n : Nat) : {P : PrimTy} → LTm C .mem → LTm C (.addr (.prim P))
           seqMemL m (.lit (PrimTy.dflt P))
         else .app2 .read X b
       | .copySt m _ S =>
-        if b.boundedIn m then seqMemL S (ih m b) else .app2 .read X b
+        if b.boundedIn m then seqMemL S (ih m b)
+        else
+          match copyFieldRd? m S b with
+          | some y => seqMemL X y
+          | none => .app2 .read X b
       | .other => .app2 .read X b) n
 
 /-- **A read of an identity, walked down its memory.** -/
@@ -1914,7 +2200,11 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
           seqMemL m (.lit (PrimTy.dflt P))
         else .app2 .read X b
       | .copySt m _ S =>
-        if b.boundedIn m then seqMemL S (memReadN n m b) else .app2 .read X b
+        if b.boundedIn m then seqMemL S (memReadN n m b)
+        else
+          match copyFieldRd? m S b with
+          | some y => seqMemL X y
+          | none => .app2 .read X b
       | .other => .app2 .read X b : LTm C (.val P)).eval g ν = _
     split
     · rename_i m T a v hX
@@ -1954,7 +2244,11 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
       split
       · rename_i hb
         rw [seqMemL_eval, LTm.read_copySt_old m hU S b hb, LTm.eval_seq, LTm.eval_seq, ih]
-      · rfl
+      · split
+        · rename_i y hy
+          rw [seqMemL_eval]
+          exact (copyFieldRd?_eval hy).symm
+        · rfl
     · rfl
 
 theorem memIReadN_eval (n : Nat) : ∀ {R : RefTy} (X : LTm C .mem) (b : LTm C (.addr (.ref R))),
@@ -2194,7 +2488,7 @@ theorem LTm.seqMem_eval {s : Srt} (t : LTm C s) : t.seqMem.eval g ν = t.eval g 
 /-- `LFml.memRes`'s compiled twin. -/
 def LFml.memResM : LFml C → LFml C
   | .tt => .tt
-  | .eq a b => .eq a.memRes.seqMem b.memRes.seqMem
+  | .eq a b => .eq (({} : Facts C).nf a).memRes.seqMem (({} : Facts C).nf b).memRes.seqMem
   | .not φ => .not φ.memResM
   | .and φ ψ => .and φ.memResM ψ.memResM
   | .imp φ ψ => .imp φ.memResM ψ.memResM
@@ -2203,7 +2497,8 @@ def LFml.memResM : LFml C → LFml C
 /-- **Every read of memory in a formula walked.**  By the recursor. -/
 @[implemented_by LFml.memResM]
 def LFml.memRes (φ : LFml C) : LFml C :=
-  @LFml.rec C (fun _ => LFml C) .tt (@fun _ a b => .eq a.memRes.seqMem b.memRes.seqMem)
+  @LFml.rec C (fun _ => LFml C) .tt
+    (@fun _ a b => .eq (({} : Facts C).nf a).memRes.seqMem (({} : Facts C).nf b).memRes.seqMem)
     (fun _ ih => .not ih) (fun _ _ ihφ ihψ => .and ihφ ihψ) (fun _ _ ihφ ihψ => .imp ihφ ihψ)
     (fun k p _ ih => .all k p ih) φ
 
@@ -2218,9 +2513,10 @@ theorem LFml.memRes_holds (φ : LFml C) : ∀ (ν : AEnv), φ.memRes.holds g ν 
   | tt => intro ν; exact Iff.rfl
   | eq a b =>
     intro ν
-    show (LFml.eq a.memRes.seqMem b.memRes.seqMem).holds g ν ↔ _
+    show (LFml.eq (({} : Facts C).nf a).memRes.seqMem
+      (({} : Facts C).nf b).memRes.seqMem).holds g ν ↔ _
     rw [LFml.holds_eq_iff, LFml.holds_eq_iff, LTm.seqMem_eval, LTm.seqMem_eval, LTm.memRes_eval,
-      LTm.memRes_eval]
+      LTm.memRes_eval, Facts.nf_eval (Facts.ok_empty ν), Facts.nf_eval (Facts.ok_empty ν)]
   | not φ ih => intro ν; exact not_congr (ih ν)
   | and φ ψ ihφ ihψ => intro ν; exact and_congr (ihφ ν) (ihψ ν)
   | imp φ ψ ihφ ihψ => intro ν; exact imp_congr (ihφ ν) (ihψ ν)
@@ -2232,11 +2528,14 @@ theorem LFml.memRes_valid {φ : LFml C} (h : φ.memRes.Valid) : φ.Valid :=
 end Pass
 
 /-- **The closer with memory read**: every read of memory walked
-(`LFml.memRes`), then `LFml.close`. -/
-def LFml.closeMem (φ : LFml C) : Bool := φ.memRes.close
+(`LFml.memRes`), the storage reads that walk exposed (a member of a copy
+of storage) eliminated once more (`LFml.elim`), walked again, then
+`LFml.close`. -/
+def LFml.closeMem (φ : LFml C) : Bool := φ.memRes.elim.memRes.close
 
 theorem LFml.closeMem_valid {φ : LFml C} (h : φ.closeMem = true) : φ.Valid :=
-  LFml.memRes_valid (LFml.close_valid h)
+  LFml.memRes_valid fun g ν =>
+    (LFml.elim_holds g φ.memRes ν).1 (LFml.memRes_valid (LFml.close_valid h) g ν)
 
 end Decide
 

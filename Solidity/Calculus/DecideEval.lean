@@ -1,4 +1,5 @@
 import Solidity.Calculus.Decide
+import Solidity.Theory.Typed.Mem
 
 /-!
 # The elimination keeps what a term reads
@@ -1808,6 +1809,309 @@ theorem sfind_rep {T : Ty} {S : SFun C} {s : LTm C .st} (hS : S.Rep g ν s)
       exact (hS.rd st hs).at g ν (hPe r hq)
 
 
+/-! ## Reads of memory -/
+
+section
+
+variable {g : State C []} {ν : AEnv}
+
+theorem LTm.read_evalT {P : PrimTy} (X : LTm C .mem) (b : LTm C (.addr (.prim P))) :
+    ((LTm.app2 .read X b).eval g ν : Option P.Denote) =
+      ((X.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
+        (b.eval g ν : Option (MAddrT (.prim P))).bind fun bd =>
+          (bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb) := rfl
+
+theorem LTm.iread_evalT {R : RefTy} (X : LTm C .mem) (b : LTm C (.addr (.ref R))) :
+    ((LTm.app2 .iread X b).eval g ν : Option Nat) =
+      ((X.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
+        (b.eval g ν : Option (MAddrT (.ref R))).bind fun bd =>
+          ((bd.resolve μ.H').bind fun rb => μ.heap.readAddr rb).bind fun r => some r.id) := rfl
+
+theorem LTm.mlen_evalT {E : Ty} (X : LTm C .mem) (t : LTm C (.ident (.array E))) :
+    ((LTm.app2 .mlen X t).eval g ν : Option PrimTy.uint.Denote) =
+      ((X.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
+        (t.eval g ν : Option Nat).bind fun id =>
+          (HRef.ofId? μ.H' (.array E) id).map fun r => μ.heap.lenU r) := by
+  rw [LTm.eval_app2, Op2.eval_eq_evalM]
+  cases (X.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+  | none => rfl
+  | some μ =>
+    cases (t.eval g ν : Option Nat) with
+    | none => rfl
+    | some id =>
+      show (HRef.ofId? μ.H' (.array E) id).bind (fun r => some (μ.heap.lenU r)) =
+        (HRef.ofId? μ.H' (.array E) id).map fun r => μ.heap.lenU r
+      cases HRef.ofId? μ.H' (.array E) id <;> rfl
+
+end
+
+/-! ## A memory object, read as the stored value it copies to -/
+
+section CopyMem
+
+variable {M : LTm C .mem} {μ : Grown g.H (fun _ => Unit)}
+
+/-- What a memory reader's location stands at: the word a word's copy
+holds, read there; the object a reference's copy copies. -/
+def MLoc.Rep (M : LTm C .mem) (μ : Grown g.H (fun _ => Unit)) : (T : Ty) → MLoc C T → SVal T → Prop
+  | .prim P, loc, v => ∃ w : P.Denote,
+      ((LTm.app2 .read M (loc : LTm C (.addr (.prim P)))).eval g ν : Option P.Denote) = some w ∧
+        v = .prim w
+  | .ref R, loc, v => ∃ r : HRef μ.H' R, ((loc : LTm C (.ident R)).eval g ν : Option Nat) = some r.id ∧
+      v = MVal.copyMToSt μ.heap (T := .ref R) r
+
+/-- The location at an address that reads `mv` stands at its copy. -/
+theorem MLoc.ofAddr_rep (hM : M.eval g ν = some μ) {T : Ty} {a : LTm C (.addr T)} {ad : MAddrT T}
+    {ra : MAddr μ.H' T} {mv : MVal μ.H' T} (ha : (a.eval g ν : Option (MAddrT T)) = some ad)
+    (hra : ad.resolve μ.H' = some ra) (hmv : μ.heap.readAddr ra = some mv) :
+    MLoc.Rep g ν M μ T (MLoc.ofAddr M T a) (MVal.copyMToSt μ.heap mv) := by
+  cases T with
+  | prim P =>
+    refine ⟨mv, ?_, MVal.copyMToSt_prim μ.heap mv⟩
+    show ((LTm.app2 .read M a).eval g ν : Option P.Denote) = _
+    rw [LTm.read_evalT, hM, Option.bind_some, ha, Option.bind_some, hra, Option.bind_some, hmv]
+  | ref R =>
+    refine ⟨mv, ?_, rfl⟩
+    show ((LTm.app2 .iread M a).eval g ν : Option Nat) = _
+    rw [LTm.iread_evalT, hM, Option.bind_some, ha, Option.bind_some, hra, Option.bind_some, hmv]
+    rfl
+
+theorem bind_findM_nil_isSome {H : HTy} {T : Ty} (l : List (MVal H T)) (f : MVal H T → SVal T)
+    (n : Nat) : (l[n]?.bind fun v => (f v).findM .nil).isSome = decide (n < l.length) := by
+  by_cases hn : n < l.length
+  · rw [List.getElem?_eq_getElem hn, Option.bind_some, SVal.findM_nil', decide_eq_true hn]; rfl
+  · rw [List.getElem?_eq_none (by omega), decide_eq_false hn]; rfl
+
+/-- **The memory reader reads the copy** (`selectOnCopyMem`): at segments
+that evaluate, what the copy observes there, where its location stands at
+the copy and `h` says whether the copy is there. -/
+theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
+    ∀ (loc : MLoc C T) (h : LTm C (.val .bool)) (x : Option (SVal T)),
+      (h.eval g ν : Option Bool) = some x.isSome → (∀ v, x = some v → MLoc.Rep g ν M μ T loc v) →
+      ∀ (c : CK V) (p : Path T V), r.eval g ν = some p →
+        ((memRd M r loc h c).eval g ν : Option c.out.Denote) =
+          some (c.obsC fun cc => cc.ofOpt (x.bind (·.findM p))) := by
+  induction r with
+  | nil =>
+    intro loc h x hh hx c p hp
+    cases hp
+    have hb : x.bind (·.findM .nil) = x := by
+      cases x with
+      | none => rfl
+      | some v => exact SVal.findM_nil' v
+    rw [hb]
+    cases c with
+    | word P =>
+      show ((LTm.kite h .tt (.app2 .read M loc) (.lit (PrimTy.dflt P))).eval g ν :
+        Option P.Denote) = _
+      rw [LTm.eval_kite, hh]
+      cases x with
+      | none => rfl
+      | some v =>
+        obtain ⟨w, hw, rfl⟩ := hx _ rfl
+        change (if (true : Bool) = true then ((LTm.app2 .read M loc).eval g ν : Option P.Denote)
+          else ((LTm.lit (PrimTy.dflt P) : LTm C (.val P)).eval g ν)) = _
+        rw [if_pos rfl, hw]; rfl
+    | len E =>
+      show ((LTm.kite h .tt (.app2 .mlen M loc) (.nat 0)).eval g ν : Option PrimTy.uint.Denote) = _
+      rw [LTm.eval_kite, hh]
+      cases x with
+      | none => rfl
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        change (if (true : Bool) = true then
+          ((LTm.app2 .mlen M loc).eval g ν : Option PrimTy.uint.Denote)
+          else ((LTm.nat 0 : LTm C (.val .uint)).eval g ν)) = _
+        rw [if_pos rfl, LTm.mlen_evalT, hM, Option.bind_some, hr, Option.bind_some,
+          HRef.ofId?_self, Option.map_some]
+        refine congrArg some ?_
+        show μ.heap.lenU r = uintOfNat (SVal.lenOf (some (MVal.copyMToSt μ.heap (T := .ref _) r)))
+        simp only [SVal.lenOf, MVal.copyMToSt_len, uintOfNat, dif_pos (μ.heap.len_dyn_lt r)]
+        rfl
+    | has V => exact hh
+  | field hf rest ih =>
+    intro loc h x hh hx c p hp
+    rw [TSegs.eval_field] at hp
+    obtain ⟨p', hp', rfl⟩ := Option.map_eq_some_iff.1 hp
+    have e : x.bind (·.findM (.field hf p')) =
+        (x.bind (·.findM (.field hf .nil))).bind (·.findM p') := by
+      cases x with
+      | none => rfl
+      | some v =>
+        simp only [Option.bind_some]
+        rw [← SVal.findM_append, Path.append_field, Path.append_nil]
+    rw [e]
+    refine ih _ h _ ?_ ?_ c p' hp'
+    · cases x with
+      | none => exact hh
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        rw [hh, Option.bind_some, MVal.copyMToSt_findM_field, SVal.findM_nil']
+        rfl
+    · intro v' hv'
+      cases x with
+      | none => cases hv'
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        rw [Option.bind_some, MVal.copyMToSt_findM_field, SVal.findM_nil',
+          Option.some.injEq] at hv'
+        subst hv'
+        refine MLoc.ofAddr_rep g ν hM (ad := .field r.id hf) (ra := .field r hf) ?_ ?_ rfl
+        · rw [LTm.eval_app1, hr]; rfl
+        · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
+            Option.map_some]
+  | «at» i rest ih =>
+    intro loc h x hh hx c p hp
+    rw [TSegs.eval_at] at hp
+    obtain ⟨k, hk, hp⟩ := Option.bind_eq_some_iff.1 hp
+    obtain ⟨p', hp', rfl⟩ := Option.map_eq_some_iff.1 hp
+    have e : x.bind (·.findM (.at k.1 p')) =
+        (x.bind (·.findM (.at k.1 .nil))).bind (·.findM p') := by
+      cases x with
+      | none => rfl
+      | some v =>
+        simp only [Option.bind_some]
+        rw [← SVal.findM_append, Path.append_at, Path.append_nil]
+    rw [e]
+    have k0 : 0 ≤ k.1 := by
+      have := k.2
+      simp only [PrimTy.inRange, decide_eq_true_eq] at this
+      omega
+    refine ih _ _ _ ?_ ?_ c p' hp'
+    · rw [LTm.eval_kite, hh]
+      cases x with
+      | none => rfl
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        change (if (true : Bool) = true then ((LTm.lt i (.app2 .mlen M loc)).eval g ν : Option Bool)
+          else ((LTm.lit (p := .bool) false : LTm C (.val .bool)).eval g ν)) = _
+        rw [if_pos rfl, LTm.eval_lt, hk, Option.bind_some, LTm.mlen_evalT, hM, Option.bind_some, hr,
+          Option.bind_some, HRef.ofId?_self, Option.map_some, Option.map_some, Option.bind_some,
+          MVal.copyMToSt_findM_at, if_pos k0, bind_findM_nil_isSome]
+        have e' : (μ.heap.lenU r).1 = (μ.heap.len r .dyn : Int) := rfl
+        refine congrArg some ?_
+        rw [e']
+        simp only [Heap.len, decide_eq_decide]
+        omega
+    · intro v' hv'
+      cases x with
+      | none => cases hv'
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        rw [Option.bind_some, MVal.copyMToSt_findM_at, if_pos k0] at hv'
+        obtain ⟨mv, hmv, hv'⟩ := Option.bind_eq_some_iff.1 hv'
+        rw [SVal.findM_nil', Option.some.injEq] at hv'
+        subst hv'
+        refine MLoc.ofAddr_rep g ν hM (ad := .index r.id .dyn k.1) (ra := .index r .dyn k.1) ?_ ?_ ?_
+        · rw [LTm.eval_app2, hr, hk]; rfl
+        · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
+            Option.map_some]
+        · show μ.heap.index r .dyn k.1 = some mv
+          simp only [Heap.index, if_pos k0, hmv]
+  | atF i rest ih =>
+    rename_i E U n
+    intro loc h x hh hx c p hp
+    rw [TSegs.eval_atF] at hp
+    obtain ⟨k, hk, hp⟩ := Option.bind_eq_some_iff.1 hp
+    obtain ⟨p', hp', rfl⟩ := Option.map_eq_some_iff.1 hp
+    have e : x.bind (·.findM (.atF k.1 p')) =
+        (x.bind (·.findM (.atF k.1 .nil))).bind (·.findM p') := by
+      cases x with
+      | none => rfl
+      | some v =>
+        simp only [Option.bind_some]
+        rw [← SVal.findM_append, Path.append_atF, Path.append_nil]
+    rw [e]
+    have k0 : 0 ≤ k.1 := by
+      have := k.2
+      simp only [PrimTy.inRange, decide_eq_true_eq] at this
+      omega
+    refine ih _ _ _ ?_ ?_ c p' hp'
+    · rw [LTm.eval_kite, hh]
+      cases x with
+      | none => rfl
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        change (if (true : Bool) = true then ((LTm.ltNat i n).eval g ν : Option Bool)
+          else ((LTm.lit (p := .bool) false : LTm C (.val .bool)).eval g ν)) = _
+        rw [if_pos rfl, LTm.eval_ltNat g ν n hk, Option.bind_some, MVal.copyMToSt_findM_atF,
+          if_pos k0, bind_findM_nil_isSome]
+        have hl : (MObj.elems .fixed (μ.heap.get r)).length = n := by
+          rw [MObj.elems_fixed]
+          exact (μ.heap.get r : {l : List (MVal μ.H' E) // l.length = n}).2
+        rw [hl]
+        refine congrArg some ?_
+        simp only [decide_eq_decide]
+        omega
+    · intro v' hv'
+      cases x with
+      | none => cases hv'
+      | some v =>
+        obtain ⟨r, hr, rfl⟩ := hx _ rfl
+        rw [Option.bind_some, MVal.copyMToSt_findM_atF, if_pos k0] at hv'
+        obtain ⟨mv, hmv, hv'⟩ := Option.bind_eq_some_iff.1 hv'
+        rw [SVal.findM_nil', Option.some.injEq] at hv'
+        subst hv'
+        refine MLoc.ofAddr_rep g ν hM (ad := .index r.id (ArrTy.fixed (n := n)) k.1)
+          (ra := .index r .fixed k.1)
+          ?_ ?_ ?_
+        · rw [LTm.eval_app2, hr, hk]; rfl
+        · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
+            Option.map_some]
+        · show μ.heap.index r .fixed k.1 = some mv
+          simp only [Heap.index, if_pos k0, hmv]
+  | key i rest ih =>
+    intro loc h x hh hx c p hp
+    rw [TSegs.eval_key] at hp
+    obtain ⟨j, hj, hp⟩ := Option.bind_eq_some_iff.1 hp
+    obtain ⟨p', hp', rfl⟩ := Option.map_eq_some_iff.1 hp
+    cases x with
+    | some v =>
+      obtain ⟨r, -, -⟩ := hx _ rfl
+      exact (μ.heap.get r : Empty).elim
+    | none => exact ih _ h none hh (fun _ hv => nomatch hv) c p' hp'
+
+/-- **`copyMem(M, t)`, eliminated**: the guard that it returns, and the
+reader of the object it copies. -/
+theorem copyMem_rep {R : RefTy} {M' : LTm C .mem} {t t' : LTm C (.ident R)}
+    (hM : (M'.eval g ν : Option (Grown g.H (fun _ => Unit))) = M.eval g ν)
+    (ht : (t'.eval g ν : Option Nat) = t.eval g ν) :
+    VRep g ν (some (seqL (.app2 .copyMem M' t') .tt, copyMemRd M' t')) (.app2 .copyMem M t) := by
+  have ev : ∀ (M : LTm C .mem) (t : LTm C (.ident R)),
+      ((LTm.app2 .copyMem M t).eval g ν : Option (SVal (.ref R))) =
+        (M.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
+          (t.eval g ν : Option Nat).bind fun id =>
+            (HRef.ofId? μ.H' R id).map fun r => MVal.copyMToSt μ.heap (T := .ref R) r := by
+    intro M t
+    rw [LTm.eval_app2, Op2.eval_eq_evalM]
+    cases (M.eval g ν : Option (Grown g.H (fun _ => Unit))) with
+    | none => rfl
+    | some μ =>
+      cases (t.eval g ν : Option Nat) with
+      | none => rfl
+      | some id =>
+        show (HRef.ofId? μ.H' R id).bind (fun r => some (MVal.copyMToSt μ.heap (T := .ref R) r)) =
+          (HRef.ofId? μ.H' R id).map fun r => MVal.copyMToSt μ.heap (T := .ref R) r
+        cases HRef.ofId? μ.H' R id <;> rfl
+  intro gd V he
+  simp only [Option.some.injEq, Prod.mk.injEq] at he
+  obtain ⟨rfl, rfl⟩ := he
+  refine ⟨?_, fun w hw => ?_⟩
+  · rw [seqL_eval, ev, ev, hM, ht]
+    cases ((M.eval g ν : Option (Grown g.H (fun _ => Unit))).bind fun μ =>
+      (t.eval g ν : Option Nat).bind fun id =>
+        (HRef.ofId? μ.H' R id).map fun r => MVal.copyMToSt μ.heap (T := .ref R) r) <;> rfl
+  · rw [ev] at hw
+    simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at hw
+    obtain ⟨μ, hμ, id, hid, r, hr, rfl⟩ := hw
+    intro V c q p hq
+    have hrid : r.id = id := HRef.id_of_ofId? hr
+    refine (memRd_rep g ν (hM.trans hμ) q t' .tt (some _) rfl
+      (fun v hv => ⟨r, by rw [ht, hid, hrid], (Option.some.inj hv).symm⟩) c p hq).trans ?_
+    exact congrArg some (CK.obsC_congr c fun cc => (cc.read_obsOpt (some _) p).symm)
+
+end CopyMem
+
 /-! ## The elimination keeps what a term reads -/
 
 /-- **What an eliminated term stands for**, by its sort. -/
@@ -2172,7 +2476,7 @@ theorem Op2.elim_rep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
       cases (x.eval g ν : Option (Storage C)) <;> cases (y.eval g ν : Option (SRef C _)) <;>
         first | rfl | exact bind_fst_eq_map _
   | sfind => exact sfind_rep g ν hx hy
-  | copyMem => exact fun _ _ he => nomatch he
+  | copyMem => exact copyMem_rep g ν hx hy
   | iread => rfl
   | copy h => rfl
   | mat a => rfl

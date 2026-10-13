@@ -486,6 +486,68 @@ def svalRd {p : PrimTy} (w : LTm C (.val p)) : VRd C (.prim p) :=
         (fun _ _ => .err) (fun _ _ => .tt) rfl)
       (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) (fun _ _ _ _ => .err) rfl c
 
+/-! ## A memory object as a stored value (`copyMem`) -/
+
+/-- Where a reader of a memory object stands: an address at a word, the
+identity of an object at a reference. -/
+def MLoc (C : Contract) : Ty → Type
+  | .prim P => LTm C (.addr (.prim P))
+  | .ref R => LTm C (.ident R)
+
+/-- The location at an address: the address at a word, the identity read
+there at a reference. -/
+def MLoc.ofAddr (M : LTm C .mem) : (T : Ty) → LTm C (.addr T) → MLoc C T
+  | .prim _, a => a
+  | .ref _, a => (.app2 .iread M a : LTm C (.ident _))
+
+/-- At the end of the segments: the word read, the array's length, whether
+every index on the way was within its array (`h`). -/
+def memRdNil (M : LTm C .mem) {V : Ty} (loc : MLoc C V) (h : LTm C (.val .bool)) (c : CK V) :
+    LTm C (.val c.out) :=
+  @CK.casesOn (fun V c => MLoc C V → LTm C (.val c.out)) V c
+    (fun P loc => .kite h .tt (.app2 .read M (loc : LTm C (.addr (.prim P))))
+      (.lit (PrimTy.dflt P)))
+    (fun E loc => .kite h .tt (.app2 .mlen M (loc : LTm C (.ident (.array E)))) (.nat 0))
+    (fun _ _ => h) loc
+
+/-- `memRd` by `match`, its compiled form. -/
+def memRdM (M : LTm C .mem) : {T V : Ty} → TSegs C T V → MLoc C T → LTm C (.val .bool) →
+    (c : CK V) → LTm C (.val c.out)
+  | _, _, .nil, loc, h, c => memRdNil M loc h c
+  | _, _, .field (T := T) hf rest, loc, h, c =>
+    memRdM M rest (MLoc.ofAddr M T (.app1 (.mfield hf) (loc : LTm C (.ident (.struct _))))) h c
+  | _, _, .at (E := E) i rest, loc, h, c =>
+    memRdM M rest (MLoc.ofAddr M E (.app2 (.mat .dyn) (loc : LTm C (.ident (.array E))) i))
+      (.kite h .tt (.lt i (.app2 .mlen M (loc : LTm C (.ident (.array E))))) (.lit false)) c
+  | _, _, .atF (E := E) (n := n) i rest, loc, h, c =>
+    memRdM M rest (MLoc.ofAddr M E (.app2 (.mat .fixed) (loc : LTm C (.ident (.fixed E n))) i))
+      (.kite h .tt (LTm.ltNat i n) (.lit false)) c
+  | _, _, .key (V := V) _ rest, _, h, c => memRdM M rest (MLoc.ofAddr M V .err) h c
+
+/-- **A memory object read as the stored value it copies to**
+(`selectOnCopyMem`): down the segments from `loc` in the memory `M`, a
+member's address, an element's within its array's length, an object's
+identity read there; at the end the word, the length, whether every index
+was within. -/
+@[implemented_by memRdM]
+def memRd (M : LTm C .mem) {T V : Ty} (r : TSegs C T V) : MLoc C T → LTm C (.val .bool) →
+    (c : CK V) → LTm C (.val c.out) :=
+  @TSegs.rec C (fun T V _ => MLoc C T → LTm C (.val .bool) → (c : CK V) → LTm C (.val c.out))
+    (fun loc h c => memRdNil M loc h c)
+    (fun {_} {_} {T} {_} hf _ ih loc h c =>
+      ih (MLoc.ofAddr M T (.app1 (.mfield hf) (loc : LTm C (.ident (.struct _))))) h c)
+    (fun {E} {_} i _ ih loc h c =>
+      ih (MLoc.ofAddr M E (.app2 (.mat .dyn) (loc : LTm C (.ident (.array E))) i))
+        (.kite h .tt (.lt i (.app2 .mlen M (loc : LTm C (.ident (.array E))))) (.lit false)) c)
+    (fun {E} {_} {n} i _ ih loc h c =>
+      ih (MLoc.ofAddr M E (.app2 (.mat .fixed) (loc : LTm C (.ident (.fixed E n))) i))
+        (.kite h .tt (LTm.ltNat i n) (.lit false)) c)
+    (fun {_} {V} {_} _ _ ih _ h c => ih (MLoc.ofAddr M V .err) h c) T V r
+
+/-- The reader of `copyMem(M, t)`. -/
+def copyMemRd {R : RefTy} (M : LTm C .mem) (t : LTm C (.ident R)) : VRd C (.ref R) :=
+  fun c r => memRd M r (t : MLoc C (.ref R)) .tt c
+
 /-! ## Storages, eliminated
 
 A storage term is eliminated to what makes it return (`ok`) and its
@@ -752,7 +814,8 @@ def _root_.Solidity.Op2.elim {a b s : Srt} (o : Op2 C a b s) : LTm C a → LTm C
       | none => SFun.ofOrig (.app2 .extend x y))
     (fun {_} _ _ ex ey => (ey : Option (LTm C (.val .bool) × SPath C _)).map fun x =>
       (seqL (SFun.ok ex) (seqL x.1 (LTm.assert (SFun.rd ex (.has _) x.2))), SRd.at (SFun.rd ex) x.2))
-    (fun {_} _ _ _ _ => none)
+    (fun {_} _ _ ex ey => some (seqL (.app2 .copyMem (ex : LTm C .mem) (ey : LTm C (.ident _))) .tt,
+      copyMemRd ex ey))
     (fun {_} x y _ _ => (.app2 .iread x y : LTm C (.ident _)))
     (fun {_} h x y _ _ => (.app2 (.copy h) x y : LTm C (.ident _)))
     (fun {_} {_} a x y _ _ => (.app2 (.mat a) x y : LTm C (.addr _)))
