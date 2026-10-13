@@ -429,7 +429,7 @@ end Solidity
 
 namespace Solidity.Tools
 
-open Semantics
+open Semantics (Value uintBound intBound lookupBy)
 
 variable {C : Contract}
 
@@ -474,79 +474,12 @@ def poolDom (lits : List Int) : TDom
   | .uint => (uintPool lits).filterMap fun n => PrimTy.ofValue? .uint (.int n)
   | .int => (intPool lits).filterMap fun n => PrimTy.ofValue? .int (.int n)
 
-/-- `n` at the type `p`, its default out of range: the words of a
-candidate's transaction, which the pools draw in range. -/
-def _root_.Solidity.PrimTy.ofIntD (p : PrimTy) (n : Int) : p.Denote :=
-  (PrimTy.ofInt? p n).getD (PrimTy.dflt p)
-
 /-! ## Random states
 
-A candidate's storage is drawn typed (`Solidity.SVal`), as `GenSpec.sval`
-(`Tools/Common.lean`) draws an untyped one for `#difftest`: canonical
-(`Typing/Reachability.lean`: every struct member in order, a mapping's keys
-unique over the type's default, no shadow), its words from the pools. -/
-
-/-- How a search draws a typed storage: every word from `vals`, a mapping's
-keys from `keys`, up to `3` entries, arrays of fewer than `3` elements. -/
-structure TGen where
-  vals : TDom
-  keys : PrimTy → List Int
-  entries : Nat := 4
-  length : Nat := 3
-
-/-- Exactly `n` values, each drawn by `f`, the first first. -/
-def TGen.vec {E : Ty} (f : Gen (Solidity.SVal E)) : (n : Nat) → Gen (SVec E n)
-  | 0 => pure .nil
-  | n + 1 => do
-    let v ← f
-    pure (.cons v (← TGen.vec f n))
-
-/-- A struct's members, in order, each drawn at its type by `f`. -/
-def TGen.fields (f : (T : Ty) → Gen (Solidity.SVal T)) :
-    (fs : List (Name × Ty)) → Gen (SFields fs)
-  | [] => pure .nil
-  | (_, T) :: fs => do
-    let v ← f T
-    pure (.cons v (← TGen.fields f fs))
-
-/-- A mapping's entries, in the order written. -/
-def TGen.smap {V : Ty} : List (Int × Solidity.SVal V) → SMap V
-  | [] => .nil
-  | (k, v) :: es => .cons k v (TGen.smap es)
-
-/-- An array of the elements `es` over the shadow `sh`, its type's default
-past the bound on a length: what a certificate quotes (`quoteFold`), the
-bound checked by the kernel. -/
-def _root_.Solidity.SVal.arrayOf {E : Ty} {n : Nat} (es : SVec E n) (sh : SList E) :
-    Solidity.SVal (.ref (.array E)) :=
-  if h : n < 2 ^ 256 then .array es sh h else Solidity.SVal.dflt _
-
-/-- **A canonical storage value of type `T`**, at most `k` levels deep (the
-default below): a mapping's keys drawn from `g.keys` (a key drawn twice is
-drawn once, its value only the first time), an array of fewer than
-`g.length` elements. -/
-def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (Solidity.SVal T)
-  | 0, T => pure (Solidity.SVal.dflt T)
-  | _ + 1, .prim p => do pure (.prim (← pickD (PrimTy.dflt p) (g.vals p)))
-  | k + 1, .ref (.mapping (.prim K) V) => do
-    let ks := g.keys K
-    if ks.isEmpty then return .map .nil (Solidity.SVal.dflt V)
-    let n ← randBelow g.entries
-    let mut es : List (Int × Solidity.SVal V) := []
-    for _ in [0:n] do
-      let key ← pickD 0 ks
-      if (es.find? (·.1 == key)).isNone then es := es ++ [(key, ← g.sval k V)]
-    pure (.map (TGen.smap es) (Solidity.SVal.dflt V))
-  | _ + 1, .ref (.mapping _ V) => pure (.map .nil (Solidity.SVal.dflt V))
-  | k + 1, .ref (.struct s) => do pure (.struct (← TGen.fields (g.sval k) (structDef s)))
-  | k + 1, .ref (.array E) => do
-    let n ← randBelow g.length
-    pure (Solidity.SVal.arrayOf (← TGen.vec (g.sval k E) n) .nil)
-  | k + 1, .ref (.fixed E n) => do pure (.fixed (← TGen.vec (g.sval k E) n))
-
-/-- A storage: every root of the contract, drawn at its type, in order. -/
-def TGen.storage (g : TGen) (C : Contract) : Gen (Solidity.Storage C) :=
-  TGen.fields (g.sval 32) C.vars
+A candidate's storage is drawn typed by `TGen.sval` (`Tools/Common.lean`):
+canonical (`Typing/Reachability.lean`: every struct member in order, a
+mapping's keys unique over the type's default, no shadow), its words from
+the pools. -/
 
 /-- Every combination, the first list's element first. -/
 def products {α : Type} : List (List α) → List (List α)
@@ -583,7 +516,10 @@ def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
     | .bool => [0, 1]
     | .uint => (uintPool lits ++ (sender :: argInts).filter (0 ≤ ·)).eraseDups
     | .int => (intPool lits ++ sender :: argInts).eraseDups
-  let st ← ({ vals := poolDom lits, keys } : TGen).storage C
+  let g : TGen :=
+    { prim := fun p => pickD (PrimTy.dflt p) (poolDom lits p)
+      key := fun K => if (keys K).isEmpty then none else some (pickD 0 (keys K)) }
+  let st ← g.storage C
   let value ← if payable then pickD 0 (uintPool lits) else pure 0
   let time ← pickD 0 (uintPool lits)
   let paid ← pickD 0 (uintPool lits)
@@ -834,7 +770,7 @@ it ends with, or how it halts; under implications, a binder at its first
 value, an update in the typed state it lifts to.  `none` where the run is
 past its fuel or the update lifts to no typed state. -/
 def Fml.outcome (dom : TDom) : {Γ : Ctx} → State C Γ →
-    Fml C Γ → Option (Except Semantics.Halt (List (Name × Semantics.SVal)))
+    Fml C Γ → Option (Except THalt (Storage C))
   | _, σ, .imp _ ψ => Fml.outcome dom σ ψ
   | _, σ, .all _ p ψ => match dom p with
     | v :: _ => Fml.outcome dom (σ.push (t := .val p) v) ψ
@@ -847,12 +783,12 @@ def Fml.outcome (dom : TDom) : {Γ : Ctx} → State C Γ →
     | some τ => match σ.lift? τ with
       | some σ' => match Fml.outcome dom σ' ψ with
         | some r => some r
-        | none => some (.ok σ'.storage.erase)
+        | none => some (.ok σ'.storage)
       | none => none
   | _, σ, .modal _ P κ _ => match Prog.runFramesF loopFuel σ P κ with
-    | .ok τ => some (.ok τ.storage.erase)
+    | .ok τ => some (.ok τ.storage)
     | .error .diverge => none
-    | .error e => some (.error e.erase)
+    | .error e => some (.error e)
   | _, _, _ => none
 
 /-- A specification's body `{U} [ P ] (φ₁ ∧ … ∧ φₙ)` read in `σ`: the halt
@@ -860,7 +796,7 @@ the run ends in, or the indices of the conjuncts that evaluate to `ff`
 where it ends; `none` where the run is past its fuel or the update lifts to
 no typed state. -/
 def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → State C Γ →
-    Fml C Γ → Option (Option Semantics.Halt × List Nat)
+    Fml C Γ → Option (Option THalt × List Nat)
   | _, σ, .upd _ U ψ => match U.applyV σ with
     | none => some (some .revert, [])
     | some τ => match σ.lift? τ with
@@ -871,14 +807,14 @@ def Fml.postFails (dom : TDom) (n : Nat) : {Γ : Ctx} → State C Γ →
       some (none, ((List.range n).zip (Fml.conjN n φ)).filterMap fun (i, ψ) =>
         if ψ.eval3 dom τ = .ff then some i else none)
     | .error .diverge => none
-    | .error e => some (some e.erase, [])
+    | .error e => some (some e, [])
   | _, _, _ => none
 
 end Solidity
 
 namespace Solidity.Tools
 
-open Semantics
+open Semantics (Value lookupBy)
 
 variable {C : Contract}
 
@@ -891,7 +827,7 @@ binders, not locals), the storage the typed run ends with or how it halts
 conjuncts after the call that evaluate to `ff`. -/
 structure Witness (C : Contract) where
   cand : Cand C
-  outcome : Option (Except Halt (List (Name × Semantics.SVal)))
+  outcome : Option (Except THalt (Storage C))
   failing : List Nat
 
 /-- What a search found, among how many candidates, of which how many met
@@ -1046,8 +982,8 @@ def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search C :
 /-! ## Printing a witness -/
 
 /-- A witness, one fact per line: the arguments and the transaction
-(`fmtTx`), the storage before, and after the run (or how it halted), each
-printed erased. -/
+(`fmtTx`), the storage before, and after the run (or how it halted), over
+the typed state. -/
 def Witness.lines (C : Contract) (w : Witness C) : List String :=
   let σ := w.cand.tstate C
   let args := w.cand.args.map fun (n, v) => s!"{n} = {Value.fmt v}"
@@ -1055,7 +991,7 @@ def Witness.lines (C : Contract) (w : Witness C) : List String :=
     | none => []
     | some (.error h) => [s!"after: {fmtHalt h}"]
     | some (.ok st) => ["after: " ++ fmtStorageLine C st]
-  [", ".intercalate (args ++ fmtTx σ.globE), "before: " ++ fmtStorageLine C σ.storage.erase] ++
+  [", ".intercalate (args ++ fmtTx σ), "before: " ++ fmtStorageLine C σ.storage] ++
     after
 
 /-! ## Certificates -/

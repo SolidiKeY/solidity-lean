@@ -29,7 +29,6 @@ import Solidity.Semantics.NoPanic
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.RunFrame
 import Solidity.Semantics.RunFuel
-import Solidity.Semantics.ToSem
 import Solidity.Update
 import Solidity.Signature
 import Solidity.Calculus.RuleSyntax

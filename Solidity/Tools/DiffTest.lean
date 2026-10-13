@@ -1,6 +1,5 @@
 import Solidity.Evm.Compile
 import Solidity.Semantics.Run
-import Solidity.Semantics.Properties
 import Solidity.Tools.Run
 
 /-!
@@ -25,14 +24,14 @@ from a start where its hypotheses hold:
   fragment, `inFragP (Frag.init []) Q = some F'`; otherwise the function is
   reported skipped;
 * the start machine represents the start state (`Sim C L b F σ m`): its
-  storage is the storage encoded (`SVal.encode`, which is `ReprAt` read as a
-  function), every other slot `0`, which is how a mapping's absent keys
-  represent its default; no locals; the funds, the sender, the value and the
-  time are words and the same on both sides; nothing sent.  The storages
-  drawn are canonical (`Typing/Reachability.lean`: no shadow, a mapping's
-  default `defaultForTy V`, distinct keys), in range, and read at the
-  contract's types (`SFields.ofU`); an array
-  holds fewer than `4` elements, so `L = 4` and `L + Prog.pushes Q ≤ 2^64`;
+  storage is the typed storage encoded (`encodeFold`, which is `ReprAt`
+  read as a function), every other slot `0`, which is how a mapping's absent
+  keys represent its default; no locals; the funds, the sender, the value
+  and the time are words and the same on both sides; nothing sent.  The
+  storages drawn are typed (`TGen.sval`, `Tools/Common.lean`) and canonical
+  (`Typing/Reachability.lean`: no shadow, a mapping's default the type's,
+  distinct keys); an array holds fewer than `4` elements, so `L = 4` and
+  `L + Prog.pushes Q ≤ 2^64`;
 * the two **agree** when both revert, or when both succeed with the machine's
   stack as it was and the machine representing the final state: every slot
   the final storage occupies holds its word (`ReprStore`, for the mapping keys
@@ -53,7 +52,7 @@ happen, the contract's account holding less than `100` and the recipient
 `3` refusing every payment.  A diverging typed run or a faulting machine is
 a disagreement: on the fragment, `compile_correct` excludes both.
 
-The generator is `GenSpec.sval` (`Tools/Common.lean`) over Lean core's
+The generator is `TGen.sval` (`Tools/Common.lean`) over Lean core's
 `StdGen`.  Run `i` of the `j`-th function draws from a seed of its own,
 `runSeed seed j i`, whatever other function is tested, so a mismatch prints
 the command that replays it: `#difftest C.f (runs := i + 1) (seed := s)`,
@@ -62,59 +61,78 @@ whose last run is the one that failed.
 
 namespace Solidity.Tools
 
-open Semantics Evm
+open Evm
+open Semantics (Value lookupBy)
 
 /-! ## The layout, as a function -/
 
-/-- The mapping keys a value holds anywhere, as words. -/
-partial def SVal.mapKeys : Semantics.SVal → List Nat
-  | .prim _ => []
-  | .struct fs => fs.flatMap (SVal.mapKeys ·.2)
-  | .array es sh _ => (es ++ sh).flatMap SVal.mapKeys
-  | .map es d =>
-    (es.filterMap fun (k, _) => if 0 ≤ k ∧ k < (W : Int) then some k.toNat else none) ++
-      (es.flatMap (SVal.mapKeys ·.2)) ++ SVal.mapKeys d
+/-- The mapping keys a value holds anywhere, as words: a mapping's own keys
+in range, then its values', then its default's; an array's shadow
+included. -/
+def mapKeysFold : Fold where
+  V _ := List Nat
+  F _ := List Nat
+  L _ := List Nat
+  W _ _ := List Nat
+  M _ := List Nat × List Nat
+  prim _ := []
+  struct _ r := r
+  array _ _ _ w l := w ++ l
+  fixed _ w := w
+  map _ _ m d := m.1 ++ m.2 ++ d
+  fnil := []
+  fcons _ _ v r := v ++ r
+  lnil := []
+  lcons _ _ v r := v ++ r
+  wnil := []
+  wcons _ _ v r := v ++ r
+  mnil := ([], [])
+  mcons k _ _ v r :=
+    ((if 0 ≤ k ∧ k < (W : Int) then [k.toNat] else []) ++ r.1, v ++ r.2)
 
-/-- The slots the value `v` of type `T` occupies from slot `s`, with their
-words: `ReprAt` constructor by constructor.  A `uint` its number, a `bool`
-`bword b`, an `int` its two's complement word; a struct its members from
-`s.add (offset n f)`; a dynamic array its length at `s` and element `i` from
-`.data s (i · size E)`; a fixed-size one element `i` from `s.add (i · size E)`;
-a `uint`-keyed mapping entry `k` from `.hash k s 0`, for the keys `keys` and
-its own (an entry of another key type takes no slot the fragment reads, as
-`ReprAt.mapOther` says).  An error is a value no machine storage represents:
-out of range, of another type, or a struct short of a member. -/
-partial def SVal.encode (keys : List Nat) : Ty → Slot → Semantics.SVal → Except String (List (Slot × Nat))
-  | .prim .uint, s, .prim (.int n) =>
-    if 0 ≤ n ∧ n < (W : Int) then pure [(s, n.toNat)] else throw s!"uint {n} out of range"
-  | .prim .bool, s, .prim (.bool b) => pure [(s, bword b)]
-  | .prim .int, s, .prim (.int n) =>
-    if -(H : Int) ≤ n ∧ n < (H : Int) then pure [(s, toWord n)] else throw s!"int {n} out of range"
-  | .ref (.struct n), s, .struct fs =>
-    (structDef n).flatMapM fun (f, T) => do
-      let some v := lookupBy f fs | throw s!"{n} without its member {f}"
-      SVal.encode keys T (s.add (offset n f)) v
-  | .ref (.array E), s, .array es _ false => do
-    let elems ← (List.range es.length).zip es |>.flatMapM fun (i, v) =>
-      SVal.encode keys E (.data s (i * size E)) v
-    pure ((s, es.length) :: elems)
-  | .ref (.fixed E n), s, .array es _ true => do
-    unless es.length = n do throw s!"a {n}-element array with {es.length}"
-    (List.range es.length).zip es |>.flatMapM fun (i, v) =>
-      SVal.encode keys E (s.add (i * size E)) v
-  | .ref (.mapping (.prim .uint) V), s, .map es d =>
-    let own := es.filterMap fun (k, _) => if 0 ≤ k ∧ k < (W : Int) then some k.toNat else none
-    (own ++ keys).eraseDups.flatMapM fun k =>
-      SVal.encode keys V (.hash k s 0) ((lookupBy (k : Int) es).getD d)
-  | .ref (.mapping _ _), _, _ => pure []
-  | T, _, v => throw s!"{SVal.fmt T v} is no {Ty.toStr T}"
+/-- The mapping keys a storage holds anywhere, as words. -/
+def storageKeys {C : Contract} (st : Storage C) : List Nat := SFields.fold mapKeysFold st
+
+/-- **The slots a value occupies from a slot, with their words**: `ReprAt`
+(`Evm/Repr.lean`) constructor by constructor, read as a function.  A `uint`
+its number, a `bool` `bword b`, an `int` its two's complement word; a
+struct its members from `s.add (offset n f)` (a struct's fields are given
+the slot of each member); a dynamic array its length at `s` and element `i`
+from `.data s (i · size E)`; a fixed-size one element `i` from
+`s.add (i · size E)`; a `uint`-keyed mapping entry `k` from `.hash k s 0`,
+for the keys `keys` and its own (a mapping of another key type takes no slot
+the fragment reads: `ReprAt.map`'s `K = uint` premise).  Total: a typed
+value is in range and of its shape. -/
+def encodeFold (keys : List Nat) : Fold where
+  V _ := Slot → List (Slot × Nat)
+  F _ := (Name → Slot) → List (Slot × Nat)
+  L _ := Unit
+  W _ _ := (Nat → Slot) → Nat → List (Slot × Nat)
+  M _ := List (Int × (Slot → List (Slot × Nat)))
+  prim {p} v s := match p, v with
+    | .uint, n => [(s, n.1.toNat)]
+    | .bool, b => [(s, bword b)]
+    | .int, n => [(s, toWord n.1)]
+  struct {n} _ r s := r fun f => s.add (offset n f)
+  array {E n} _ _ _ w _ s := (s, n) :: w (fun i => .data s (i * size E)) 0
+  fixed {E _} _ w s := w (fun i => s.add (i * size E)) 0
+  map {K _} _ _ m d s :=
+    if K == .uint then
+      let own := m.filterMap fun (k, _) => if 0 ≤ k ∧ k < (W : Int) then some k.toNat else none
+      (own ++ keys).eraseDups.flatMap fun (k : Nat) => ((lookupBy (k : Int) m).getD d) (.hash k s 0)
+    else []
+  fnil _ := []
+  fcons {f _ _} _ _ v r slot := v (slot f) ++ r slot
+  lnil := ()
+  lcons _ _ _ _ := ()
+  wnil _ _ := []
+  wcons _ _ v r slot i := v (slot i) ++ r slot (i + 1)
+  mnil := []
+  mcons k _ _ v r := (k, v) :: r
 
 /-- The whole storage laid out: every root of the contract at `rootSlot`. -/
-def encodeStorage (C : Contract) (keys : List Nat) (st : List (Name × Semantics.SVal)) :
-    Except String (List (Slot × Nat)) :=
-  C.vars.flatMapM fun (r, T) => do
-    let some v := lookupBy r st | throw s!"no root {r}"
-    SVal.encode keys T (rootSlot C r) v
+def encodeStorage (C : Contract) (keys : List Nat) (st : Storage C) : List (Slot × Nat) :=
+  SFields.fold (encodeFold keys) st (rootSlot C)
 
 /-- A machine storage holding the words listed, `0` elsewhere. -/
 def storeOf (ws : List (Slot × Nat)) : Slot → Nat := fun s => (lookupBy s ws).getD 0
@@ -146,16 +164,19 @@ def genInt : Gen Int := do
 /-- A `bool`. -/
 def genBool : Gen Bool := do pure ((← randBelow 2) == 1)
 
-/-- How `#difftest` draws a storage: words by `genUint`, `genInt`,
-`genBool`; up to `3` entries of a `uint`-keyed mapping (none for another key
-type, which takes no slot the compiled code reads), a few small keys, so
-that two entries or two reads can meet, and the largest word; arrays of
-fewer than `4` elements. -/
-def diffGen : GenSpec where
-  prim
-    | .uint => do pure (.int (← genUint))
-    | .int => do pure (.int (← genInt))
-    | .bool => do pure (.bool (← genBool))
+/-- A word of the type `p`, untyped: `genUint`, `genInt`, `genBool`. -/
+def genWord : PrimTy → Gen Value
+  | .uint => do pure (.int (← genUint))
+  | .int => do pure (.int (← genInt))
+  | .bool => do pure (.bool (← genBool))
+
+/-- How `#difftest` draws a storage: words by `genWord`, read at their type;
+up to `3` entries of a `uint`-keyed mapping (none for another key type,
+which takes no slot the compiled code reads), a few small keys, so that two
+entries or two reads can meet, and the largest word; arrays of fewer than
+`4` elements. -/
+def diffGen : TGen where
+  prim p := do pure ((PrimTy.ofValue? p (← genWord p)).getD (PrimTy.dflt p))
   key
     | .uint => some do
       if (← randBelow 8) < 7 then pure ((← randBelow 4 : Nat) : Int) else pure (W - 1 : Nat)
@@ -177,8 +198,8 @@ def genArg : Ty → Gen (Option (RawExpr × Value))
 /-! ## One run -/
 
 /-- What a run starts from. -/
-structure Start where
-  storage : List (Name × Semantics.SVal)
+structure Start (C : Contract) where
+  storage : Storage C
   args : List Value
   sender : Nat
   value : Nat
@@ -188,15 +209,18 @@ structure Start where
   /-- The contract's address. -/
   self : Nat
 
-/-- The start state, untyped: what a mismatch prints. -/
-def Start.state (s : Start) : Semantics.State where
-  storage := s.storage
-  selfBalance := s.balance
-  tx := { msgSender := s.sender, msgValue := s.value, timestamp := s.time, selfAddress := s.self }
+/-- The typed state a run starts in: the storage, no memory, no locals,
+the funds and the transaction's words (all drawn in range). -/
+def Start.state {C : Contract} (s : Start C) : State C [] :=
+  { State.init C with
+    storage := s.storage
+    selfBalance := PrimTy.ofIntD .uint s.balance
+    tx := { msgSender := PrimTy.ofIntD .uint s.sender, msgValue := PrimTy.ofIntD .uint s.value,
+            timestamp := PrimTy.ofIntD .uint s.time, selfAddress := PrimTy.ofIntD .uint s.self } }
 
 /-- The start of a run, drawn: the storage, the arguments and the
 transaction; `none` if a parameter has no value type. -/
-def genStart (C : Contract) (d : FunDecl) : Gen (Option (Start × List RawExpr)) := do
+def genStart (C : Contract) (d : FunDecl) : Gen (Option (Start C × List RawExpr)) := do
   let st ← diffGen.storage C
   let args ← d.params.mapM fun (_, T) => genArg T
   let sender ← randBelow 4
@@ -206,11 +230,6 @@ def genStart (C : Contract) (d : FunDecl) : Gen (Option (Start × List RawExpr))
   let self ← randBelow 4
   pure <| (args.mapM id).map fun args =>
     ({ storage := st, args := args.map (·.2), sender, value, time, balance, self }, args.map (·.1))
-
-/-- A typed run's outcome, for the report. -/
-def fmtTRes {α : Type} : TRes α → String
-  | .ok _ => "ok"
-  | .error h => fmtHalt h.erase
 
 /-- A machine run's outcome, for the report. -/
 def fmtOut : Evm.Out → String
@@ -223,10 +242,8 @@ def fmtOut : Evm.Out → String
 line each; empty when it does.  `names` are the final context's names. -/
 def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
     (σ' : State C Γ) (m' : Machine) : List String :=
-  let store := match encodeStorage C keys σ'.storage.erase with
-    | .error e => [s!"storage: the typed run's final storage is not representable: {e}"]
-    | .ok ws => ws.filterMap fun (s, w) =>
-      if m'.store s == w then none else some s!"slot {s}: typed run {w}, machine {m'.store s}"
+  let store := (encodeStorage C keys σ'.storage).filterMap fun (s, w) =>
+    if m'.store s == w then none else some s!"slot {s}: typed run {w}, machine {m'.store s}"
   let vals := (names.zip (localCells Γ σ'.env)).filterMap fun (x, l, c) => match c with
     | some (p, v) =>
       if wordOf p v == some (m'.memAt l) then none
@@ -244,33 +261,30 @@ def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
 /-- One run of `Q` from `s`: whether both reverted when the two agree, else
 the lines of the mismatch.  The machine has no panic: a failed `assert`
 reverts there (`compile_correct`'s panic case). -/
-def runOnce (C : Contract) {Γ' : Ctx} (Q : Prog C [] Γ') (s : Start) :
+def runOnce (C : Contract) {Γ' : Ctx} (Q : Prog C [] Γ') (s : Start C) :
     Except (List String) Bool :=
-  let keys0 := s.storage.flatMap (SVal.mapKeys ·.2)
-  match encodeStorage C keys0 s.storage, typedState? C s.state with
-  | .error e, _ => throw [s!"the start storage is not representable: {e}"]
-  | _, none => throw ["the start storage is not of the contract's types"]
-  | .ok ws, some σ =>
-    let m : Machine :=
-      { Machine.init (fun a => if a = s.self then s.balance else 0) s.self with
-        accepts := fun a _ => a != 3
-        store := storeOf ws
-        caller := s.sender
-        callvalue := s.value
-        timestamp := s.time }
-    let res := Prog.run σ Q
-    let out := Evm.run (Evm.compileProg 0 Q) m
-    match res, out with
-    | .error .revert, .revert => pure true
-    | .error .panic, .revert => pure true
-    | .ok _, .revert => if Evm.Prog.pays Q then pure true
-      else throw ["typed run ok, machine revert, and no payment to refuse"]
-    | .ok o, .ok m' 0 =>
-      let keys := (keys0 ++ o.st.storage.erase.flatMap (SVal.mapKeys ·.2)).eraseDups
-      match differences C (Q.outNames []) keys o.st m' with
-      | [] => pure false
-      | ds => throw (s!"both ok, and they differ:" :: ds)
-    | _, _ => throw [s!"typed run {fmtTRes res}, machine {fmtOut out}"]
+  let keys0 := storageKeys s.storage
+  let σ := s.state
+  let m : Machine :=
+    { Machine.init (fun a => if a = s.self then s.balance else 0) s.self with
+      accepts := fun a _ => a != 3
+      store := storeOf (encodeStorage C keys0 s.storage)
+      caller := s.sender
+      callvalue := s.value
+      timestamp := s.time }
+  let res := Prog.run σ Q
+  let out := Evm.run (Evm.compileProg 0 Q) m
+  match res, out with
+  | .error .revert, .revert => pure true
+  | .error .panic, .revert => pure true
+  | .ok _, .revert => if Evm.Prog.pays Q then pure true
+    else throw ["typed run ok, machine revert, and no payment to refuse"]
+  | .ok o, .ok m' 0 =>
+    let keys := (keys0 ++ storageKeys o.st.storage).eraseDups
+    match differences C (Q.outNames []) keys o.st m' with
+    | [] => pure false
+    | ds => throw (s!"both ok, and they differ:" :: ds)
+  | _, _ => throw [s!"typed run {fmtTRes res}, machine {fmtOut out}"]
 
 /-! ## The test -/
 
