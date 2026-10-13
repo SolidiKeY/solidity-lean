@@ -86,8 +86,8 @@ count = 42
 balances = {_: 0}
 -/
 #guard_msgs in
-#run CallsExample.bump() from
-  { storage := [("total", .int 0), ("count", .int 41), ("balances", .map [] (.int 0))] }
+#run CallsExample.bump() from ((State.init CallsExample).withStorage
+  (.cons (.prim ⟨0, rfl⟩) (.cons (.prim ⟨41, rfl⟩) (.cons (.map .nil (.prim ⟨0, rfl⟩)) .nil))))
 
 /-! ## `#wp` and `#step` -/
 
@@ -380,11 +380,11 @@ solkey's `TestSuite.sol` pins it: a binary operator's right operand first
 /-- info: (true, true, true) -/
 #guard_msgs in
 #eval
-  ((Prog.runT Semantics.State.testSuiteStore (sol[TestSuite]{ uint i = 1; uint x = i++ + i;
+  ((Prog.runT State.testSuiteStore (sol[TestSuite]{ uint i = 1; uint x = i++ + i;
       assert(x == 2); assert(i == 2); })).isOk,
-  (Prog.runT Semantics.State.testSuiteStore (sol[TestSuite]{ uint i = 0; values.push(100);
+  (Prog.runT State.testSuiteStore (sol[TestSuite]{ uint i = 0; values.push(100);
       values.push(100); values.push(100); values[++i] = ++i; assert(values[2] == 1); })).isOk,
-  (Prog.runT Semantics.State.testSuiteStore (sol[TestSuite]{ matrix.push(); matrix.push();
+  (Prog.runT State.testSuiteStore (sol[TestSuite]{ matrix.push(); matrix.push();
       matrix[0].push(0); matrix[1].push(0); uint k = 0; matrix[k][k++] = 77; assert(k == 1);
       assert(matrix[0][0] == 77); assert(matrix[1][0] == 0); })).isOk)
 
@@ -392,10 +392,10 @@ solkey's `TestSuite.sol` pins it: a binary operator's right operand first
 write lands in `alice` (the pin of M3's erased run until its deletion,
 `docs/intrinsic.md`, decision 40). -/
 
-/-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 10)) -/
+/-- info: Except.ok (some "{account: {balance: 0, token: {value: 0}}, age: 10}") -/
 #guard_msgs in
-#eval (Prog.runT Semantics.State.exampleStore (sol[StandardExample]{
-    Person storage p = alice; p.age = 10; uint x = alice.age; assert(x == 10); })).bind fun τ =>
-  τ.findStorage "alice" [.field "age"]
+#eval (Prog.runT State.exampleStore (sol[StandardExample]{
+    Person storage p = alice; p.age = 10; uint x = alice.age; assert(x == 10); })).map fun τ =>
+  Tools.fmtRoot τ.storage "alice"
 
 end Solidity.Examples.Tools

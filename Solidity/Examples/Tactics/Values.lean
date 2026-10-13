@@ -300,9 +300,9 @@ theorem powerUnfold :
 /-! `2 ** 256` overflows a `uint256`: checked, the run reverts; `2 ** 255` is
 in range. -/
 
-/-- info: (Except.error (Solidity.Semantics.Halt.revert), true) -/
+/-- info: (Except.error (Solidity.THalt.revert), true) -/
 #guard_msgs in
-#eval ((Prog.runT Semantics.State.exampleStore (sol{ uint r = 2 ** 256; } : Prog StandardExample [] _)).map
-    (fun _ => ()), (Prog.runT Semantics.State.exampleStore (sol{ uint r = 2 ** 255; } : Prog StandardExample [] _)).isOk)
+#eval ((Prog.runT State.exampleStore (sol{ uint r = 2 ** 256; } : Prog StandardExample [] _)).map
+    (fun _ => ()), (Prog.runT State.exampleStore (sol{ uint r = 2 ** 255; } : Prog StandardExample [] _)).isOk)
 
 end Solidity.Examples.Tactics.Values

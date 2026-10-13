@@ -122,7 +122,7 @@ def ledgerProgram := (sol{
 /-! `after`: the value member is reset by `delete ledger`. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore ledgerProgram "after"
@@ -130,7 +130,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 /-! `survives`: the mapping entry is not. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 20))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 20))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore ledgerProgram "survives"
@@ -141,7 +141,7 @@ uint gone = ledger.balances[1];` — deleting the entry is what clears it:
 `kept * 100 + nonce0 * 10 + gone` is `1000`. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 1000))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 1000))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore

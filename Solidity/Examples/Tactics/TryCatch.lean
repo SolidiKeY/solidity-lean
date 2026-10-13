@@ -95,33 +95,31 @@ example : Prog.toStr [] (sol{ try I(last).ping() { pings += 1; } catch { fails +
 /-! ## Running -/
 
 /-- The call's outcome is the transaction's: here `ping` on `7` returns. -/
-def pingOk : Semantics.State where
-  storage := Pinger.initStorage
-  tx := { ext := [(⟨7, "ping", []⟩, .ok [])] }
+def pingOk : State Pinger [] :=
+  { State.init Pinger with tx := { ext := [(⟨7, "ping", []⟩, .ok [])] } }
 
 private def pingP : Prog Pinger [] [.val .uint] :=
   sol{ uint a = 7; try I(a).ping() { pings += 1; } catch { fails += 1; } }
 
-/-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 1)) -/
+/-- info: Except.ok (some "1") -/
 #guard_msgs in
 #eval do
   let σ ← Prog.runT pingOk pingP
-  σ.findStorage "pings" []
+  pure (Tools.fmtRoot σ.storage "pings")
 
 /-- The same call reverting with `Panic(0x11)`: the `Panic` clause runs, with
 the code bound. -/
-def pingPanic : Semantics.State where
-  storage := Pinger.initStorage
-  tx := { ext := [(⟨7, "ping", []⟩, .panic (.int 17))] }
+def pingPanic : State Pinger [] :=
+  { State.init Pinger with tx := { ext := [(⟨7, "ping", []⟩, .panic (.int 17))] } }
 
 private def pingPanicP : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
   try I(a).ping() { pings += 1; } catch Panic(uint c) { last = c; } catch { fails += 1; } }
 
-/-- info: Except.ok (Solidity.Semantics.SVal.prim (Solidity.Semantics.PrimVal.int 17)) -/
+/-- info: Except.ok (some "17") -/
 #guard_msgs in
 #eval do
   let σ ← Prog.runT pingPanic pingPanicP
-  σ.findStorage "last" []
+  pure (Tools.fmtRoot σ.storage "last")
 
 def pingNoCodeCore : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
   try I(a).ping() { pings += 1; } catch { fails += 1; } }

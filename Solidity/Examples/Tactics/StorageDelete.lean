@@ -169,7 +169,7 @@ theorem deleteRootUnknown :
 then both members read back as `0`. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore (sol{
@@ -180,7 +180,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 /-! `alice.age = 30; delete alice; uint result = alice.age;` (`storage-root-delete-struct.key`). -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore (sol{
@@ -191,7 +191,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
 entry of a mapping (`storage-index-delete-mapping-struct.key`). -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore (sol{
@@ -204,7 +204,7 @@ its value members do not (`selectStDelNodePrim`): after
 the owner `0`. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 42))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 42))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore (sol{
@@ -212,7 +212,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
   } : Prog StandardExample [] _) "kept"
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore (sol{

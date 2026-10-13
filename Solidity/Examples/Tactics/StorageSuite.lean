@@ -189,12 +189,10 @@ so the run is printed. -/
 /-- info: ("ok", "revert") -/
 #guard_msgs in
 #eval
-  let halt (r : Res Semantics.State) := match r with
-    | .error .revert => "revert" | .ok _ => "ok" | .error _ => "another halt"
-  (halt (Prog.runT State.exampleStore
+  (Tools.fmtTRes (Prog.runT State.exampleStore
       (sol{ uint i = 0; while (i < 1) { Person storage p; if (i == 0) { p = alice; }
             p.age = 1; i++; } } : Prog StandardExample [] _)),
-   halt (Prog.runT State.exampleStore
+   Tools.fmtTRes (Prog.runT State.exampleStore
       (sol{ uint i = 0; while (i < 2) { Person storage p; if (i == 0) { p = alice; }
             p.age = 1; i++; } } : Prog StandardExample [] _)))
 
@@ -238,7 +236,7 @@ theorem decomposeAfterPush :
 bare push leaves the default (`storage-push-empty.key`). -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -256,7 +254,7 @@ theorem pushNonsimpleArg : resultEx pushNonsimpleArgCore = some 42 := by decide 
 (`storage-pop-nonempty.key`). -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -281,7 +279,7 @@ program reaches the read without reverting.  Run on `testSuiteStore`, the store
 that has `tokens`; a `Token` default is not unfolded by `rfl`, so it is printed. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore
@@ -293,7 +291,7 @@ p.age = 5; uint result = persons[2].age;` (`storage-push-local-bind.key`).  Push
 a `Person` builds its default, which `rfl` cannot unfold, so the run is printed. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 5))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 5))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -305,7 +303,7 @@ m[0] = values; uint result = matrix[0][1];` — an array copied into a pushed ro
 (`storage-index-copysource-after-push.key`). -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 6))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 6))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -318,7 +316,7 @@ the next `push()` recycles still holds the entry — while its value members are
 reset. -/
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 10))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 10))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore
@@ -327,7 +325,7 @@ info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 
                   uint result = l2.balances[1]; } "result"
 
 /--
-info: Except.ok (Solidity.Semantics.Binding.val (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore
@@ -466,7 +464,7 @@ theorem fixedElementLength : ⊨ dl!{ [ uint k = rows[0].length; ] k == 3 } := b
 /-! From the initial store: an index past the declared length reverts, and
 `rows[0].length` reverts while `rows` is empty. -/
 
-/-- info: (Except.error (Solidity.Semantics.Halt.revert), Except.error (Solidity.Semantics.Halt.revert)) -/
+/-- info: (Except.error (Solidity.THalt.revert), Except.error (Solidity.THalt.revert)) -/
 #guard_msgs in
 #eval (Prog.runT State.testSuiteStore (sol{ uint k = 3; fixedValues[k] = 1; }),
   Prog.runT State.testSuiteStore (sol{ uint k = rows[0].length; }))

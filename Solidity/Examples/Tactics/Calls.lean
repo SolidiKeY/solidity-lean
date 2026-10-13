@@ -406,7 +406,7 @@ printed as written. -/
 (solkey's `tupleAssignment` drops it): `1 / total` divides by zero in a
 fresh contract, so the declaration halts (run, not proved: the interpreter
 does not reduce in the kernel here). -/
-#guard (Prog.runT ({ storage := Tuples.initStorage } : Semantics.State)
+#guard (Prog.runT (State.init Tuples)
     (sol[Tuples]{ (uint x, ) = (1, 1 / total); } : Prog Tuples [] _)).toBool == false
 
 theorem returnLeavesNestedBlocks :

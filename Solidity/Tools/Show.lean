@@ -17,7 +17,7 @@ its live elements, not the `shadow` a `pop` leaves behind.
 
 namespace Solidity.Tools
 
-open Semantics (Value)
+open Semantics (Value lookupBy)
 
 /-- A word: `5`, `-1`, `true`. -/
 def Value.fmt : Value → String
@@ -58,9 +58,17 @@ def _root_.Solidity.SVal.fmt {T : Ty} (v : SVal T) : String := v.fold fmtFold
 def fmtStorage (C : Contract) (st : Storage C) : List String :=
   (SFields.fold fmtFold st).map fun (r, v) => s!"{r} = {v}"
 
+/-- The state variable `r` as Solidity writes it, if the storage has one. -/
+def fmtRoot {C : Contract} (st : Storage C) (r : Name) : Option String :=
+  lookupBy r (SFields.fold fmtFold st)
+
 /-- The storage on one line: `count = 1; total = 0`. -/
 def fmtStorageLine (C : Contract) (st : Storage C) : String :=
   "; ".intercalate (fmtStorage C st)
+
+/-- A typed state printed by `#eval`: its storage on one line. -/
+instance {C : Contract} {Γ : Ctx} : Repr (State C Γ) :=
+  ⟨fun σ _ => Std.Format.text ("⟨" ++ fmtStorageLine C σ.storage ++ "⟩")⟩
 
 /-- What a run starts from besides the storage and the arguments, as `#run
 … with` sets it: the sender and the value always, the time, the funds and
