@@ -7,7 +7,7 @@
 #
 #   1. relative to the citing file's own directory  (`ReadWrite.lean` cited
 #                                                     from `Calculus/Close.lean`)
-#   2. relative to `Solidity/`                      (`Theory/Storage.lean`)
+#   2. relative to `Solidity/`                      (`Theory/Typed/Obs.lean`)
 #   3. relative to the repository root              (`Solidity/AST.lean`)
 #   4. by unique basename anywhere in the package   (`KeyTaclets.lean` cited
 #                                                     from `Examples/Tactics/Values.lean`,

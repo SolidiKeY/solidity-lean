@@ -6851,6 +6851,99 @@ unconditional.  Fixed: dead lemmas in `Obs.lean` (`Path.heq_of_erase`,
   `Signature.lean` (low modules, left to avoid a rebuild);
 - `AGENTS.md` still names `SVal.absT` (line 39): left to the lead.
 
+### W10.4 record (2026-10-13, branch `w10-decide`)
+
+**What changed.**  `sol_decide`'s language is typed, end to end, and the
+memory island is gone.
+
+- **W10.4.1–3.**  The target language is the typed signature
+  (`Calculus/DecideLang.lean`: `LTm`, `LFml`, atoms by position, guards
+  `seq`/`orElse`/`kite`/`err`, the starting storage observed by
+  `obsW`/`obsL`/`obsH`).  The elimination reads the typed Theory
+  symbolically (`Calculus/Decide.lean`, its soundness
+  `Calculus/DecideEval.lean`, `LTm.elim_eval`).  A scoped leaf is pushed in
+  by position (`Fml.toLS`, `Calculus/DecideScoped.lean`) and is sound over
+  the typed state (`Valid.of_toLS`, `Calculus/DecideTyped.lean`).
+  `DecideRel` and `DecideErase` are deleted.
+- **W10.4.4.**  The closer is typed (`Calculus/Closer.lean`): a value is in
+  range by its type and the storage in its declared shape, so no layout
+  premise is left (`Fml.dropWtS`, `Fml.layoutS` gone).  `DecideSyn`,
+  `KeyNotation` and `SlotLemmas` are deleted.
+- **W10.4.5a–b.**  Memory read as solkey reads it, on the typed heap
+  (`Calculus/MemRead.lean`, `Theory/Typed/Mem.lean`): writes, allocations
+  and copies walked from the newest down, identities apart by birth,
+  guards as bounds on lengths (`lenAtN`), copies between storage and
+  memory read through (`copyFieldRd?`, `copyMemRd`).  Pushes out of gas
+  under the diamond (`Upd.exhL`, `guardM`).  The elimination runs under
+  its premises (`Calculus/ElimFacts.lean`, `LFml.elimF`).  The leaf bound
+  is `closeSize` (24000) on the pushed-in leaf and `stackSize` (12) on the
+  storage updates a read goes through; `elimSize` is gone.
+- **W10.4.5c.**  The untyped Theory is deleted:
+  `Theory/{Terms,Storage,Copy,Observe,Abs,Memory,CrossDomain,Rewrite}.lean`,
+  `Theory/Bridge/Find.lean`, `Calculus/MemTheory.lean`,
+  `Calculus/MemNames.lean`.  The memory laws carry solkey's names on the
+  typed heap (`Grown.readOnWrite`, `readWriteDifferent`,
+  `readAddDifferent`, `newAddDifferent`, `Heap.initMember`, `initSize`,
+  `SVal.readCopySt`, `Grown.readCopyStOther`, `MVal.findCopyMem`);
+  `diverges` and `lengthSeg` moved to `Theory/Segs.lean`.
+  `Examples/Tactics/Theory.lean` sections 2 and 5–8 are typed.  The
+  closer gained: constants rewritten by the facts, comparisons of terms
+  apart folded, `(a - b) + b` cancelled (`Facts.cancelAdd`), `2 * a` as
+  `a + a`, `a < a + c` (`Facts.ltSucc`, Lean only), `kite(c, true, true,
+  false)` as `c`, a guard `kite(c, true, a, err)` read as an `assert`, and
+  `Facts.rebuild` keeping the pairs apart.  Literals fold where a term is
+  pushed in (`fold1`, `fold2`, no power past the exponent `256`).
+
+**TestSuite.**  `storagePushReadBack` and `testArrayCopyClearsOldElements`
+are derived: 437 derived, none pending, 1 excluded, 2 skip
+(`check-testsuite.sh` against solkey `1b4341a303`).  Every replay in
+`Derived1`–`14` is `sol_prove` alone (four `sol_leaf` replays dropped).
+
+**Pins moved.**  `#wp`'s update-free line (`Examples/Tools.lean`,
+`Tactics/Surface.lean`, `Tactics/Notation.lean`): the typed translation,
+its hidden local a quantifier, guards that return folded.
+`Examples/ProofTree.lean`: two keys and the `Coin`/`Purchase`/`Mapping`
+leaves close in the residue; the size guards read `closeSize` and
+`stackSize` (`leafStats`); `writes6` now closes; the alias a `push()`
+returns under the diamond is no longer pinned (open item).
+`Tactics/Dangling.lean`'s rounds guards read the stack.
+`Tactics/Decide.lean` rewritten for the typed pipeline (the memory clause
+pins on `LMem` terms gone; `copyFrame`, `mappingEveryKey` now close).
+`TestSuite/Suggestions.lean`: `testStorageNestedPushReturnAlias` is
+`sol_prove` alone.
+
+**Checks.**  `lean_build` of the default targets: clean except
+`Tools/Counterexample.lean` 426–428 (the `w10-remnant` lane's file, not
+edited: it reads `Theory.StValue.Equiv`, now deleted).  `sorry` lines 20
+(as master); `#print axioms Proves.valid` and `Seq.checkCore_valid`:
+`propext`, `Classical.choice`, `Quot.sound`; `check-orphans` clean but for
+scratch; `check-doc-paths` clean but for `AGENTS.md`'s two citations of
+deleted modules.
+
+**Gates** (the W9.6.4 method, this branch only, low load; wall s, CPU in
+parentheses):
+
+| Row | Gate | `w10-decide` |
+|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 207.6 (230.7) |
+| `Derived7` | 61.7 | 45.8 (64.3) |
+| `Tactics/Decide` | 45.0 | 13.3 (13.5) |
+| `ProofTree` | 11.7 | 9.4 (9.3) |
+| `Chains/Storage` | 9.2 | 9.3 (10.6) |
+| `ChainRewrites` | 8.2 | 8.3 (9.1) |
+| `ChainRewritesOpen` | 4.1 | 3.8 (3.9) |
+| `Solkey/TestSuite` | 13.2 | 12.0 (7.0) |
+
+Per file: `Derived1` 8.0, `2` 7.7, `3` 18.1, `4` 11.4, `5` 6.0, `6` 7.8,
+`8` 31.1, `9` 12.1, `10` 13.0, `11` 4.6, `12` 20.1, `13` 12.0, `14` 10.0.
+The 437 `sol_prove`s one at a time (`Elab.async false`): 214.3 s here,
+202.7 s on master; the slowest are the impure receivers
+(`testNestedIndexWriteImpureReceiverAndIndex` 19.5 s,
+`indexWriteBothImpureStorageRef` 12.5 s, `indexWriteBothImpureMemToStorage`
+11.3 s), where the elimination dominates (the kernel builds it under
+facts that change at each premise).  CPU of the Derived files is 16 % over
+master's 199.0.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -6869,8 +6962,7 @@ What W9.7 left untyped, the value-level reading of a typed state
 `State.globE`, and an update computed a `Semantics.State × Locs C Δ`),
 W9.8 typed: the symbols read the typed state, and `Upd.applyV` computes the
 typed global part and the locals' values (`GlobT`, `LocsV`).  `State.globE`
-remains only as the bridge of `sol_decide`'s untyped language
-(`Calculus/DecideErase.lean`).  The side-projects reader is outdated
+remains for the untyped interpreter's lemmas only (W10.4).  The side-projects reader is outdated
 (W9.7.1).
 
 **W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
@@ -6878,8 +6970,11 @@ terms' symbols read the typed state; what stays untyped is listed in the
 W9.8.4 record.  A push at a full array is out of gas in the run and in the
 update reading alike (W9.8.5).
 
-**W10.3 (the typed Theory)**: done (record above); the memory island
-stays untyped.
+**W10.3 (the typed Theory)**: done (record above).
+
+**W10.4 (`sol_decide` typed)**: done (record above): the decision
+procedure, the closer and the memory laws read the typed state; the
+untyped Theory is gone.
 
 **Open items:**
 - `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).
@@ -6894,7 +6989,11 @@ stays untyped.
   (`Fml.LeadsK`); a line whose context order differs from the computed one
   (`Tactics/Chains`' memory example) is written as an explicit chain.
 - Printing a reduction's atoms by their binders' names (proposal 99) would
-  take the leaf's context to `KeyNotation`'s printer.
+  take the leaf's context to `LTm.ppWith`.
+- Under the diamond, the alias a `push()` returns (`Person storage p =
+  persons.push(); p.age = 1;`) is read at the old length before the push
+  lands, which reverts at a full array: the leaf asks for room the formula
+  does not give, and stays open.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`), the
   reader's `keycheck` executable and the VS Code extension's tests.
 - `check-testsuite.sh` passes at the W8.5 gate with `--solkey` at a

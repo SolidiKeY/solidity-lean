@@ -186,9 +186,8 @@ solkey's copying write `copyTo`, which keeps a mapping member of the old node
 keeps mapping entries and an array's slots past its end as the interpreter's
 does (`TVal.delR`, read off the type); `Storage.obs_delete` and
 `Storage.obs_write` prove the two agree on every read, literally.  The
-untyped algebra (`Theory/Storage.lean`, `Theory/Copy.lean`), the memory
-island's, keeps both of solkey's writes, the collapsing `save` and the
-non-collapsing `copyTo` (`selectOnCopyMap`, `keepsOnDelete`).
+untyped algebra that kept both of solkey's writes, the collapsing `save` and
+the non-collapsing `copyTo`, was deleted at W10.4.
 
 ## Arrays past their end
 

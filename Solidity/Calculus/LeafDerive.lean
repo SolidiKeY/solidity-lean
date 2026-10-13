@@ -7,10 +7,13 @@ import Solidity.Calculus.Derive
 where no program rule fits.  Here it is closed on its scoped form
 (`Seq.leafCheckS`): the sequent put back together (`Hyps.wrap`), no
 modality left (`Fml.modalFree`), its updates pushed in by position
-(`Fml.toLS`, `Calculus/DecideScoped.lean`) within `closeSize` nodes, the
-reads of writes eliminated (`LFml.elim`) within `stackSize`, and the
-reduction closed by `LFml.close` (`Calculus/Closer.lean`).  Soundness is
-`Valid.of_reduceS` and `LFml.close_valid`, then `Proves.closeHolds`.  A
+(`Fml.toLS`, `Calculus/DecideScoped.lean`) within `closeSize` nodes and
+`stackSize` storage updates a read is taken through, the reads of writes
+eliminated under the premises (`LFml.elimF`, `Calculus/ElimFacts.lean`),
+memory read as solkey reads it and the reduction closed by the closer
+(`LFml.decideMem`, `Calculus/MemRead.lean`, `Calculus/Closer.lean`).
+Soundness is `Valid.of_toLS` and `LFml.decideMem_valid`, then
+`Proves.closeHolds`.  A
 leaf outside the fragment is not read (`none`); the walk leaves it, a goal
 of the scoped calculus.
 

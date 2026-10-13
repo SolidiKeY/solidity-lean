@@ -8,12 +8,12 @@ import Solidity.Calculus.Closers
 An alias bound through an index (`Person storage r = persons[0];`) names a
 slot, not a live element: KeY's `consr(sp, at(ie))`, checked only when
 `storageIndexReadArrayBindLocalRoot` bound it.  After a `pop` the slot is
-past the array's end, and a write through the alias lands there
-(`LStor.stale`, `Calculus/Decide.lean`); a later `push()` makes the slot
-live again, directly, after a `delete` of the emptied array, or after a
-copy over it (`LStor.slotU`).  A push through an alias of an inner array
-lands in the recycled array, whose length the slot readers count
-(`LStor.slotLenU`).  The clauses are solkey's storage taclets;
+past the array's end, and a write through the alias lands there (a save
+at the dangling location, `SLoc.dangling`, `Theory/Typed/Obs.lean`); a
+later `push()` makes the slot live again, as it is (`TVal.extendA`),
+directly, after a `delete` of the emptied array, or after a copy over it.
+A push through an alias of an inner array lands in the recycled array,
+whose length is read off the slot.  The clauses are solkey's storage taclets;
 `docs/lean-key-rule-map.md` names each with the lemmas that transcribe it.
 
 These are solkey `TestSuite`'s dangling-alias functions over

@@ -497,9 +497,9 @@ example : ⊢ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.a
                    uint x = alice.age; ] x == 42 } := by
   sol_prove?
 
-/-! Arrays and copies (`LStor.arr`, `LStor.copy`): a push, a `pop` after
+/-! Arrays and copies (`pushRd`, `popRd`, `ovRS`): a push, a `pop` after
 it and a copy close inside the residue; under `wt(storage)` the diamond of
-a push and a `pop` returns (a length is at least `0`, `Facts.lo`), and so
+a push and a `pop` returns (a length is at least `0`, `Facts.range`), and so
 does a write below the slot a `push()` of a struct takes, through an
 index. -/
 

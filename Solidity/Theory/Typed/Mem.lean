@@ -548,7 +548,9 @@ theorem Heap.readAddr_index_isSome {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H) 
   simp only [Heap.readAddr, Heap.index, Heap.len]
   by_cases h0 : 0 ≤ i
   · simp only [h0, if_true, true_and]
-    by_cases hl : i.toNat < (MObj.elems a (hp.get r)).length <;> simp [hl]
+    by_cases hl : i.toNat < (MObj.elems a (hp.get r)).length
+    · simp only [hl, getElem?_pos, Option.isSome_some, decide_true]
+    · simp only [hl, not_false_eq_true, getElem?_neg, Option.isSome_none, decide_false]
   · simp only [h0, if_false, false_and, Option.isSome_none, decide_false]
 
 /-- A slot writes exactly where it reads. -/
@@ -559,7 +561,11 @@ theorem Heap.writeAddr_isSome {H : HTy} {T : Ty} (hp : Heap H) (ad : MAddr H T) 
   | index r a i =>
     rw [Heap.readAddr_index_isSome]
     simp only [Heap.writeAddr, Heap.setIndex, Heap.len]
-    split <;> simp_all
+    split
+    · simp_all only [Option.isSome_some, and_self, decide_true]
+    · simp_all only [not_and, Int.toNat_lt, Int.not_lt, Option.isSome_none, Bool.decide_and,
+        Bool.false_eq, Bool.and_eq_false_imp, decide_eq_true_eq, decide_eq_false_iff_not,
+        implies_true]
 
 /-- **A write keeps every length**: a member is no array, and an element
 written keeps its array's length. -/

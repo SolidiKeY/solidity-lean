@@ -13,14 +13,17 @@ they are clauses of one function, `LFml.close`, proved sound once
 
 What it knows at a point of a leaf is a `Facts`: terms that return, pairs
 of terms equal (a rewrite, left to right: KeY's `applyEq`) or apart.  A
-premise adds to it (`Facts.assume`); a term is read in its normal form
-under the facts (`Facts.nf`): every symbol on literals evaluated (KeY's
-literal and `intSimplification` taclets), a guard that returns dropped, a
-key compared with itself or with one it is apart from read as its branch
-(`select(store(h, k, v), j)` under `k = j` or `k ≠ j`), and a subterm the
-premises know rewritten.  A conclusion `a ≐ b` holds where the two normal
+premise adds to it (`LFml.yesM`: an equation, its `assert`s and guards
+read `true`, its `bool` sides taken apart); a term is read in its normal
+form under the facts (`Facts.nf`): every symbol on literals evaluated
+(KeY's literal and `intSimplification` taclets), a guard that returns
+dropped, a key compared with itself or with one it is apart from read as
+its branch (`select(store(h, k, v), j)` under `k = j` or `k ≠ j`), a
+comparison of two terms apart folded, `(a - b) + b` and `(a + b) - b`
+cancelled, `2 * a` read as `a + a`, `a < a + c` read `true` (Lean only),
+and a subterm (a constant included) the premises know rewritten.  A conclusion `a ≐ b` holds where the two normal
 forms are one term that returns; where a key comparison is left open, the
-closer splits on it (`Facts.split`, KeY's `cut` on `k = j`).
+closer splits on it (`LTm.pick`, KeY's `cut` on `k = j`).
 
 Since W10.4 the terms are typed: a value is in range by its type, the
 storage has the shape its contract declares, so no layout premise and no
@@ -2101,7 +2104,7 @@ theorem Facts.cmpBnds_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
   · rename_i hvt
     subst hvt
     refine Facts.lessBnd_ok hF hx hy strict ?_
-    cases strict <;> simp_all
+    cases strict <;> simp_all only [Bool.false_eq_true, ↓reduceIte, true_eq_decide_iff]
   · rename_i hvt
     refine Facts.lessBnd_ok hF hy hx (!strict) ?_
     cases v

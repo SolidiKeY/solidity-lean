@@ -6,11 +6,13 @@ import Solidity.Calculus.Symex
 # `sol_decide` on a scoped leaf
 
 `sol_decide` proves `⊨ φ` for a leaf whose modalities are gone (after
-`sol_symex`): the leaf reduced by position (`Fml.reduceS`,
-`Calculus/DecideScoped.lean`), computed by compiled code and quoted back,
-the kernel checking the equation (`Valid.of_reduceS`); then the reduction,
-a typed first-order formula over the starting state (`LFml`,
-`Calculus/DecideLang.lean`), closed.
+`sol_symex`): its updates pushed in by position (`Fml.toLS`,
+`Calculus/DecideScoped.lean`), the reads of writes eliminated under the
+premises (`LFml.elimF`), memory read and the result closed by the closer
+(`LFml.decideMem`), all of it evaluated once by the kernel
+(`Valid.of_close`).  Where the closer does not close it, the reduction is
+quoted (`sol_reduce`, `Fml.reduceS`, `Valid.of_reduceS`) and left to
+`sol_decide_finish`.
 -/
 
 namespace Solidity

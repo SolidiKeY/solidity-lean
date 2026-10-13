@@ -282,7 +282,7 @@ const KEY_SUITES = [
     reason: () =>
       "storage-theory problem over a `MapField`: a copy of a mapping-carrying " +
       "type, which no program writes (solc ≥ 0.7 and solkey's parser reject " +
-      "it); `Theory/Copy.lean` states the rule it exercises (`selectOnCopyMap`), " +
+      "it); the typed Theory states the rule it exercises (`Theory/Typed/Obs.lean`, `Obs.copyTo`), " +
       "and the corpus's obligations are programs' (`⟨ f() ⟩ true`)",
   },
 ];
