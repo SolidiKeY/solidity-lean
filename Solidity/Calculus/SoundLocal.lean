@@ -11,7 +11,7 @@ stuck: a short circuit runs exactly as its unfolded `if`.
 
 namespace Solidity
 open Solidity (Modality Srt Op0 Op1 Op2 Op3)
-open Semantics (Value Selector)
+open Semantics (Selector)
 
 variable {C : Contract}
 

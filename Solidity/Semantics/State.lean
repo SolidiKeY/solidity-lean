@@ -181,8 +181,8 @@ def copyMToSt {T : Ty} (σ : State C Γ) (v : MVal σ.H T) : SVal T := MVal.copy
 so the heap typing grows by three; its `age` reads its default.  By the
 kernel: the copy is a fold. -/
 example : (let g := (State.init StandardExample).allocDefault (.struct "Person") rfl
-    (g.1.H.length, PrimTy.erase (p := .uint) (g.1.heap.field g.2 (f := "age") rfl))) =
-    (3, .int 0) := by
+    (g.1.H.length, (g.1.heap.field g.2 (f := "age") rfl : PrimTy.uint.Denote).1)) =
+    (3, 0) := by
   decide +kernel
 
 end State

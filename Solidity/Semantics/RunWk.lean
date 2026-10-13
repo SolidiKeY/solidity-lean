@@ -26,7 +26,7 @@ induction on its heads (`TLoop.run_induct`), and a loop with a variant ends
 
 namespace Solidity
 
-open Semantics (Value lookupBy)
+open Semantics (lookupBy)
 
 variable {C : Contract}
 
@@ -1235,7 +1235,7 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
         rwa [TEnv.off_keepAll] at this
       | error => exact TWkRel.drop (Prog.wk_over err h) (Prog.run_wk err h τ d)
       | panic c =>
-        refine TWkRel.bind_same _ fun r => ?_
+        let r : TEnv C τ.H _ := code.decodeT c
         show TWkRel h _ (Except.map (Out.drop _) _) (Except.map (Out.drop _) _)
         rw [show (τ.lift h d).env = TEnv.put h τ.env d from rfl, ← TEnv.put_keepAll h _ r r τ.env d]
         have := TWkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over pnc _))

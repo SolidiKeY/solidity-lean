@@ -45,7 +45,7 @@ theorem RefTy.mapFree_of_newArrOk {R : RefTy} (h : R.newArrOk = true) :
   exact h.1
 
 
-open Semantics (Value Selector lookupBy setBy ExtKey ExtResult structDef)
+open Semantics (Selector lookupBy setBy ExtKey ExtResult structDef)
 
 variable {C : Contract}
 
@@ -427,27 +427,26 @@ def Binders.defaultsT {H : HTy} : {ρ : Ctx} → Binders ρ → TEnv C H ρ
 
 /-- The locals an external call's data binds, read back at their types, and
 the data left: too short, or a word not of its local's type, reverts. -/
-def Binders.decodeT {H : HTy} : {ρ : Ctx} → Binders ρ → List Value → TRes (TEnv C H ρ × List Value)
+def Binders.decodeT {H : HTy} :
+    {ρ : Ctx} → Binders ρ → List Semantics.Word → TRes (TEnv C H ρ × List Semantics.Word)
   | _, bs => Binders.casesOn
-      (motive := fun ρ _ => List Value → TRes (TEnv C H ρ × List Value)) bs
+      (motive := fun ρ _ => List Semantics.Word → TRes (TEnv C H ρ × List Semantics.Word)) bs
       (fun vs => pure ((), vs))
       (fun bs p _ vs => do
         let (e, rest) ← Binders.decodeT bs vs
         match rest with
         | v :: rest =>
-          match PrimTy.ofValue? p v with
+          match PrimTy.ofWord? p v with
           | some x => pure ((x, e), rest)
           | none => .error .revert
         | [] => .error .revert)
   termination_by structural _ bs => bs
 
-/-- The `Panic` code bound, if the clause names it. -/
-def CodeBinder.decodeT {H : HTy} {κ : Ctx} (code : CodeBinder κ) (c : Value) :
-    TRes (TEnv C H κ) :=
-  CodeBinder.casesOn (motive := fun κ _ => TRes (TEnv C H κ)) code (pure ())
-    (fun _ => match PrimTy.ofValue? .uint c with
-      | Option.some x => pure (x, ())
-      | Option.none => .error .revert)
+/-- The `Panic` code bound, if the clause names it: a `uint256`, so every
+word decodes. -/
+def CodeBinder.decodeT {H : HTy} {κ : Ctx} (code : CodeBinder κ) (c : Semantics.Word) :
+    TEnv C H κ :=
+  CodeBinder.casesOn (motive := fun κ _ => TEnv C H κ) code () (fun _ => (c, ()))
 
 /-- Entering a call: its return variables at their defaults on the frame's
 parameters (a memory return a fresh default object). -/
@@ -724,9 +723,8 @@ def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : 
     (ok (σ.withEnv (TEnv.append ρ r σ.env))).map fun o =>
       ⟨o.st.drop ((Ext.append Γ ρ).trans h₁), o.ext⟩
   | some .error => (err σ).map fun o => ⟨o.st.drop h₂, o.ext⟩
-  | some (.panic c) => do
-    let r ← code.decodeT (H := σ.H) c
-    (pnc (σ.withEnv (TEnv.append κ r σ.env))).map fun o =>
+  | some (.panic c) =>
+    (pnc (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) c) σ.env))).map fun o =>
       ⟨o.st.drop ((Ext.append Γ κ).trans h₃), o.ext⟩
   | some .other => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
 

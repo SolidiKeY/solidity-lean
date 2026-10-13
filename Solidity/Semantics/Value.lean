@@ -8,10 +8,11 @@ Decision 3, M4a): a `bool` a `Bool`, a `uint` or an `int` an integer in its
 type's range.  Arithmetic stays on `Int`, so the kernel never unfolds
 `Nat.land` on a `uint` (56642ee); the range is a proof beside the number.
 
-`PrimTy.erase` is its ABI word (`Semantics.Value`): what a call's
-returned wire data is made of and what the tools print, and
-`PrimTy.ofValue?` reads one back, where the word has the type: what a `try`
-decodes and what the tools take as arguments.
+`CallValue.ofTyped` packs a typed value with its type, what the tools take
+and print, and `CallValue.as?` reads one back where it has the type.
+`PrimTy.toWord` is its ABI word and `PrimTy.ofWord?` reads a word at a type:
+what a `try` decodes a call's returned data with.  `PrimTy.ofInt?` reads an
+integer at a type, range-checked.
 -/
 
 namespace Solidity
@@ -57,30 +58,51 @@ end Ledger
 
 namespace PrimTy
 
-/-- The untyped value of a typed one. -/
-def erase : {p : PrimTy} → p.Denote → Semantics.Value
-  | .bool, b => .bool b
-  | .uint, n => .int n.1
-  | .int, n => .int n.1
-
 /-- The default of a type: what `uint x;` binds and `delete` writes. -/
 def dflt : (p : PrimTy) → p.Denote
   | .bool => (false : Bool)
   | .uint => (⟨0, rfl⟩ : {n : Int // PrimTy.uint.inRange n = true})
   | .int => (⟨0, rfl⟩ : {n : Int // PrimTy.int.inRange n = true})
 
-/-- An untyped value read at a type: `none` where it is not one. -/
-def ofValue? : (p : PrimTy) → Semantics.Value → Option p.Denote
-  | .bool, .bool b => some b
-  | .uint, .int n =>
+/-- An integer at a type, range-checked: `none` outside the range, and at
+`bool`. -/
+def ofInt? : (p : PrimTy) → Int → Option p.Denote
+  | .uint, n =>
     if h : PrimTy.uint.inRange n = true then
       some (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true})
     else none
-  | .int, .int n =>
+  | .int, n =>
     if h : PrimTy.int.inRange n = true then
       some (⟨n, h⟩ : {n : Int // PrimTy.int.inRange n = true})
     else none
-  | .bool, .int _ | .uint, .bool _ | .int, .bool _ => none
+  | .bool, _ => none
+
+/-- A number's integer; `none` for a `bool`. -/
+def num? : {p : PrimTy} → p.Denote → Option Int
+  | .bool, _ => none
+  | .uint, n => some n.1
+  | .int, n => some n.1
+
+/-- A word read at a type, as solc's ABI decoder reads it: a `uint256` is
+the word, an `int256` its two's complement, a `bool` `0` or `1` (any other
+word reverts the decoding: `none`). -/
+def ofWord? : (p : PrimTy) → Semantics.Word → Option p.Denote
+  | .bool, w => if w.1 = 0 then some false else if w.1 = 1 then some true else none
+  | .uint, w => some w
+  | .int, w => ofInt? .int (if w.1 < 2 ^ 255 then w.1 else w.1 - 2 ^ 256)
+
+/-- The ABI word of a typed value: its two's complement for an `int256`. -/
+def toWord : {p : PrimTy} → p.Denote → Semantics.Word
+  | .bool, b => cond (b : Bool) ⟨1, rfl⟩ ⟨0, rfl⟩
+  | .uint, n => n
+  | .int, n => if h : 0 ≤ n.1 then ⟨n.1, by
+        have hr := n.2
+        simp only [PrimTy.inRange, decide_eq_true_eq] at hr ⊢
+        omega⟩
+      else ⟨n.1 + 2 ^ 256, by
+        have hr := n.2
+        simp only [PrimTy.inRange, decide_eq_true_eq] at hr ⊢
+        omega⟩
 
 /-- A mapping key as the integer it is hashed as.  solc hashes a key padded
 to a word (`keccak256(h(k) . p)`), and a `bool` pads to `0` or `1`, so
@@ -92,6 +114,32 @@ def key : {p : PrimTy} → p.Denote → Int
   | .int, n => n.1
 
 end PrimTy
+
+namespace Semantics.CallValue
+
+/-- The value's type. -/
+def ty : CallValue → PrimTy
+  | .bool _ => .bool
+  | .uint _ => .uint
+  | .int _ => .int
+
+/-- The value at the type `p`: `none` where it has another type. -/
+def as? : (p : PrimTy) → CallValue → Option p.Denote
+  | .bool, .bool b => some b
+  | .uint, .uint n => some n
+  | .int, .int n => some n
+  | _, _ => none
+
+theorem as?_ofTyped {p : PrimTy} (v : p.Denote) : as? p (ofTyped v) = some v := by
+  cases p <;> rfl
+
+/-- A number's integer; `none` for a `bool`. -/
+def num? (v : CallValue) : Option Int := match v with
+  | .bool _ => none
+  | .uint n => some n.1
+  | .int n => some n.1
+
+end Semantics.CallValue
 
 
 end Solidity

@@ -55,7 +55,6 @@ run on a whole leaf (`Upd.simpS`, `Fml.mergeB`) is
 namespace Solidity
 
 open Solidity (Srt Op0 Modality)
-open Semantics (Value)
 
 /-! ## The skeleton of a line -/
 

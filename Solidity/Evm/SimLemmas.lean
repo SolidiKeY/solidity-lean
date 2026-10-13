@@ -84,27 +84,27 @@ private theorem ofInt_uint {n : Int} (h : 0 ≤ n ∧ n < W) :
     PrimTy.uint.ofInt? n = some ⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ := by
   have hr : PrimTy.uint.inRange n = true := by
     simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, PrimTy.ofValue?, dif_pos hr]
+  simp only [PrimTy.ofInt?, dif_pos hr]
 
 /-- An integer out of `uint`'s range reverts. -/
 private theorem ofInt_uint_none {n : Int} (h : ¬(0 ≤ n ∧ n < W)) : PrimTy.uint.ofInt? n = none := by
   have hr : ¬PrimTy.uint.inRange n = true := by
     simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, PrimTy.ofValue?, dif_neg hr]
+  simp only [PrimTy.ofInt?, dif_neg hr]
 
 /-- An integer in `int`'s range is an `int`. -/
 private theorem ofInt_int {n : Int} (h : -(H : Int) ≤ n ∧ n < H) :
     PrimTy.int.ofInt? n = some ⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ := by
   have hr : PrimTy.int.inRange n = true := by
     simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, PrimTy.ofValue?, dif_pos hr]
+  simp only [PrimTy.ofInt?, dif_pos hr]
 
 /-- An integer out of `int`'s range reverts. -/
 private theorem ofInt_int_none {n : Int} (h : ¬(-(H : Int) ≤ n ∧ n < H)) :
     PrimTy.int.ofInt? n = none := by
   have hr : ¬PrimTy.int.inRange n = true := by
     simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, PrimTy.ofValue?, dif_neg hr]
+  simp only [PrimTy.ofInt?, dif_neg hr]
 
 /-- `Option.bind` on a result: the range check of a computed integer.  Not
 a `rfl` lemma on purpose: `simp` then rewrites with a proof, and the kernel

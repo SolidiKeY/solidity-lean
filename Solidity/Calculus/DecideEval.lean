@@ -757,7 +757,7 @@ theorem uintOfNat_one : (uintOfNat 1).1 = 1 := uintOfNat_val (by decide)
 
 theorem ofInt?_uint {m : Int} (h : PrimTy.uint.inRange m = true) :
     PrimTy.uint.ofInt? m = some (⟨m, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) := by
-  simp only [PrimTy.ofInt?, PrimTy.ofValue?, dif_pos h]
+  simp only [PrimTy.ofInt?, dif_pos h]
 
 theorem LTm.eval_succ {L : LTm C (.val .uint)} {n : Nat}
     (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat n)) (h : n + 1 < 2 ^ 256) :

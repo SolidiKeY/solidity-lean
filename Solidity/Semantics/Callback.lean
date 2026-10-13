@@ -40,7 +40,7 @@ runs are `holdsC` (`Calculus/CallbackHolds.lean`).
 
 namespace Solidity
 
-open Semantics (Value lookupBy)
+open Semantics (Word lookupBy)
 open Solidity (Modality)
 
 variable {C : Contract}
@@ -295,7 +295,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- Data that the return variables do not decode. -/
   | tryDecode {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {vs : List Value} {e : THalt} :
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {vs : List Word} {e : THalt} :
       rets.decodeT (C := C) (H := σ.H) vs = .error e →
         ExecS J σ (.tryCall call rets ok err code pnc other) (.halt e)
   /-- KeY's "invariant on exit": control leaves with `J` broken. -/
@@ -308,7 +308,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   | tryOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {st : Storage C} {nt : Ledger}
-      {vs rest : List Value} {r : TEnv C σ.H ρ} {o : COut C σ.H Γ₁} :
+      {vs rest : List Word} {r : TEnv C σ.H ρ} {o : COut C σ.H Γ₁} :
       J.at σ → J.at (σ.havoc st nt) → rets.decodeT vs = .ok (r, rest) →
         ExecP J ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) ok o →
           ExecS J σ (.tryCall call rets ok err code pnc other)
@@ -322,17 +322,10 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- "Panic caught", with the code bound. -/
   | tryPanic {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {v : Value} {r : TEnv C σ.H κ}
-      {o : COut C σ.H Γ₃} :
-      code.decodeT v = .ok r → ExecP J (σ.withEnv (TEnv.append κ r σ.env)) pnc o →
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {v : Word} {o : COut C σ.H Γ₃} :
+      ExecP J (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) pnc o →
         ExecS J σ (.tryCall call rets ok err code pnc other)
           (o.map (Out.drop ((Ext.append Γ κ).trans pnc.ext)))
-  /-- A panic code that does not decode. -/
-  | tryCode {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
-      {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {v : Value} {e : THalt} :
-      code.decodeT (C := C) (H := σ.H) v = .error e →
-        ExecS J σ (.tryCall call rets ok err code pnc other) (.halt e)
   /-- "Other failure caught". -/
   | tryOther {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
@@ -405,7 +398,7 @@ end Solidity
 
 namespace Solidity
 
-open Semantics (Value lookupBy)
+open Semantics (Word lookupBy)
 
 variable {C : Contract}
 
@@ -552,14 +545,10 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       · exact .inl (.tryError h)
       · exact .inr (.tryError (o := .violated) h)
     · dsimp only
-      cases hd : code.decodeT (C := C) (H := σ.H) v with
-      | error e => exact .inl (.tryCode hd)
-      | ok r =>
-        simp only [bind, Except.bind]
-        rw [← COut.map_ofRes]
-        rcases Prog.exec_run J pnc (σ.withEnv (TEnv.append _ r σ.env)) with h | h
-        · exact .inl (.tryPanic hd h)
-        · exact .inr (.tryPanic (o := .violated) hd h)
+      rw [← COut.map_ofRes]
+      rcases Prog.exec_run J pnc (σ.withEnv (TEnv.append _ (code.decodeT v) σ.env)) with h | h
+      · exact .inl (.tryPanic h)
+      · exact .inr (.tryPanic (o := .violated) h)
     · rw [← COut.map_ofRes]
       rcases Prog.exec_run J other σ with h | h
       · exact .inl (.tryOther h)

@@ -110,7 +110,7 @@ private def pingP : Prog Pinger [] [.val .uint] :=
 /-- The same call reverting with `Panic(0x11)`: the `Panic` clause runs, with
 the code bound. -/
 def pingPanic : State Pinger [] :=
-  { State.init Pinger with tx := { ext := [(⟨⟨7, rfl⟩, "ping", []⟩, .panic (.int 17))] } }
+  { State.init Pinger with tx := { ext := [(⟨⟨7, rfl⟩, "ping", []⟩, .panic ⟨17, rfl⟩)] } }
 
 private def pingPanicP : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
   try I(a).ping() { pings += 1; } catch Panic(uint c) { last = c; } catch { fails += 1; } }
@@ -120,6 +120,39 @@ private def pingPanicP : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
 #eval do
   let σ ← Prog.runT pingPanic pingPanicP
   pure (Tools.fmtRoot σ.storage "last")
+
+/-! The returned data are ABI words, read at the locals' types when a `try`
+decodes them (`PrimTy.ofWord?`): an `int256` is the word's two's
+complement, a `bool` `0` or `1`. -/
+
+section Decoding
+
+def Decoder : Contract := contract!{ bool flag; int neg; }
+
+local instance : InContract := ⟨Decoder⟩
+
+private def decodeP : Prog Decoder [] [.val .uint] := sol{ uint a = 7;
+  try I(a).get() returns (bool b, int n) { flag = b; neg = n; } catch { } }
+
+def decodeOk : State Decoder [] :=
+  { State.init Decoder with
+    tx := { ext := [(⟨⟨7, rfl⟩, "get", []⟩, .ok [⟨1, rfl⟩, PrimTy.ofIntD .uint (2 ^ 256 - 1)])] } }
+
+/-- info: Except.ok (some "true", some "-1") -/
+#guard_msgs in
+#eval do
+  let σ ← Prog.runT decodeOk decodeP
+  pure (Tools.fmtRoot σ.storage "flag", Tools.fmtRoot σ.storage "neg")
+
+/-- A `bool` word that is neither `0` nor `1` does not decode: the caller
+reverts, as solc's decoder does. -/
+theorem decodeBadBool :
+    (Prog.run { State.init Decoder with
+      tx := { ext := [(⟨⟨7, rfl⟩, "get", []⟩, .ok [⟨2, rfl⟩, ⟨0, rfl⟩])] } } decodeP).halt? =
+      some .revert := by
+  decide +kernel
+
+end Decoding
 
 def pingNoCodeCore : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
   try I(a).ping() { pings += 1; } catch { fails += 1; } }

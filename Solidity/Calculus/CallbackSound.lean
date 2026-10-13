@@ -421,11 +421,10 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false) {ρ κc Γo
   | tryError hP =>
     rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
     exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
-  | tryPanic hd hP =>
-    rename_i _ r o
-    have h₂ := holdsC_binders_all code.binders σ _ r hpnc
+  | tryPanic hP =>
+    rename_i v o
+    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v) hpnc
     exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
-  | tryCode hd => exact ⟨trivial, fun he => code.decodeT_ne_panic _ (he ▸ hd)⟩
   | tryOther hP =>
     rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
     exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)

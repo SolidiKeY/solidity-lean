@@ -399,7 +399,7 @@ allocations being different objects — holds of the contract's initial store,
 type's default (`memory-decl-fresh.key`, `memory-decl-default.key`). -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -412,7 +412,7 @@ carol.account = mv; carol.account.balance = 60; uint result = david.account.bala
 same claim over copies of storage objects, for every state. -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 60))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 60))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -560,7 +560,7 @@ theorem memoryIndexDeleteCapture :
 two reads: the alias still sees `33`, `carol` the default `0`. -/
 
 /--
-info: (Except.ok (some (Solidity.Semantics.PrimVal.int 33)), Except.ok (some (Solidity.Semantics.PrimVal.int 0)))
+info: (Except.ok (some (Solidity.Semantics.CallValue.uint 33)), Except.ok (some (Solidity.Semantics.CallValue.uint 0)))
 -/
 #guard_msgs in
 #eval
@@ -572,7 +572,7 @@ info: (Except.ok (some (Solidity.Semantics.PrimVal.int 33)), Except.ok (some (So
 `100`, the member reads the fresh default `0`. -/
 
 /--
-info: (Except.ok (some (Solidity.Semantics.PrimVal.int 100)), Except.ok (some (Solidity.Semantics.PrimVal.int 0)))
+info: (Except.ok (some (Solidity.Semantics.CallValue.uint 100)), Except.ok (some (Solidity.Semantics.CallValue.uint 0)))
 -/
 #guard_msgs in
 #eval
@@ -654,7 +654,7 @@ theorem memoryNestedLength :
 each its own object; the lengths read back. -/
 
 /--
-info: (Except.ok (some (Solidity.Semantics.PrimVal.int 3)), Except.ok (some (Solidity.Semantics.PrimVal.int 0)))
+info: (Except.ok (some (Solidity.Semantics.CallValue.uint 3)), Except.ok (some (Solidity.Semantics.CallValue.uint 0)))
 -/
 #guard_msgs in
 #eval
@@ -663,7 +663,7 @@ info: (Except.ok (some (Solidity.Semantics.PrimVal.int 3)), Except.ok (some (Sol
   (Prog.localAfterT State.exampleStore P "len", Prog.localAfterT State.exampleStore P "x")
 
 /--
-info: (Except.ok (some (Solidity.Semantics.PrimVal.int 5)), Except.ok (some (Solidity.Semantics.PrimVal.int 0)))
+info: (Except.ok (some (Solidity.Semantics.CallValue.uint 5)), Except.ok (some (Solidity.Semantics.CallValue.uint 0)))
 -/
 #guard_msgs in
 #eval
@@ -671,7 +671,7 @@ info: (Except.ok (some (Solidity.Semantics.PrimVal.int 5)), Except.ok (some (Sol
     ts[0].value = 5; uint a = ts[0].value; uint b = ts[1].value; }
   (Prog.localAfterT State.testSuiteStore P "a", Prog.localAfterT State.testSuiteStore P "b")
 
-/-- info: Except.ok (some (Solidity.Semantics.PrimVal.int 2)) -/
+/-- info: Except.ok (some (Solidity.Semantics.CallValue.uint 2)) -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore
   (sol[TestSuite]{ basketA.items = new uint[](2); uint len = basketA.items.length; }) "len"

@@ -39,10 +39,6 @@ theorem uintBitwise_natCast (f : Nat → Nat → Nat) (a b : Nat) :
 
 end Semantics
 
-/-- An integer at a type, range-checked: `none` outside the range, and at
-`bool`. -/
-def PrimTy.ofInt? (p : PrimTy) (n : Int) : Option p.Denote := PrimTy.ofValue? p (.int n)
-
 namespace BinOp
 
 /-- An arithmetic operator on integers, before the range check: `none`

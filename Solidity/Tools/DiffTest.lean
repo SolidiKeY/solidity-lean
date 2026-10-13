@@ -62,7 +62,7 @@ whose last run is the one that failed.
 namespace Solidity.Tools
 
 open Evm
-open Semantics (Value lookupBy)
+open Semantics (lookupBy)
 
 /-! ## The layout, as a function -/
 
@@ -139,11 +139,10 @@ def storeOf (ws : List (Slot × Nat)) : WordStore :=
   WordStore.ofFn fun s => (lookupBy s ws).getD 0
 
 /-- The word a value local's cell holds: `ReprV` read as a function. -/
-def wordOf : PrimTy → Value → Option Word
-  | .uint, .int n => if 0 ≤ n ∧ n < (W : Int) then some (.val n.toNat) else none
-  | .bool, .bool b => some (.val (bword b))
-  | .int, .int n => if -(H : Int) ≤ n ∧ n < (H : Int) then some (.val (toWord n)) else none
-  | _, _ => none
+def wordOf : (p : PrimTy) → p.Denote → Word
+  | .uint, n => .val n.1.toNat
+  | .bool, b => .val (bword b)
+  | .int, n => .val (toWord n.1)
 
 /-! ## Random well-typed values -/
 
@@ -165,19 +164,19 @@ def genInt : Gen Int := do
 /-- A `bool`. -/
 def genBool : Gen Bool := do pure ((← randBelow 2) == 1)
 
-/-- A word of the type `p`, untyped: `genUint`, `genInt`, `genBool`. -/
-def genWord : PrimTy → Gen Value
-  | .uint => do pure (.int (← genUint))
-  | .int => do pure (.int (← genInt))
-  | .bool => do pure (.bool (← genBool))
+/-- A value of the type `p`: `genUint`, `genInt`, `genBool`. -/
+def genVal : (p : PrimTy) → Gen p.Denote
+  | .uint => do pure ((PrimTy.ofInt? .uint (← genUint)).getD (PrimTy.dflt .uint))
+  | .int => do pure ((PrimTy.ofInt? .int (← genInt)).getD (PrimTy.dflt .int))
+  | .bool => do pure (show Bool from ← genBool)
 
-/-- How `#difftest` draws a storage: words by `genWord`, read at their type;
+/-- How `#difftest` draws a storage: words by `genVal`;
 up to `3` entries of a `uint`-keyed mapping (none for another key type,
 which takes no slot the compiled code reads), a few small keys, so that two
 entries or two reads can meet, and the largest word; arrays of fewer than
 `4` elements. -/
 def diffGen : TGen where
-  prim p := do pure ((PrimTy.ofValue? p (← genWord p)).getD (PrimTy.dflt p))
+  prim p := genVal p
   key
     | .uint => some do
       if (← randBelow 8) < 7 then pure ((← randBelow 4 : Nat) : Int) else pure (W - 1 : Nat)
@@ -187,13 +186,15 @@ def diffGen : TGen where
 
 /-- An argument as a literal: `5`, `-5`, `true`.  An `int` argument is kept
 off `-2^255`, which no literal spells (`-x` of `2^255` is out of range). -/
-def genArg : Ty → Gen (Option (RawExpr × Value))
-  | .prim .uint => do let n ← genUint; pure (some (.num n, .int n))
+def genArg : Ty → Gen (Option (RawExpr × Semantics.CallValue))
+  | .prim .uint => do
+    let n ← genVal .uint
+    pure (some (.num n.1.toNat, .uint n))
   | .prim .bool => do let b ← genBool; pure (some (.bool b, .bool b))
   | .prim .int => do
-    let n ← genInt
-    let n := if n = -(H : Int) then n + 1 else n
-    pure (some (if n < 0 then .unop .neg (.num n.natAbs) else .num n.toNat, .int n))
+    let n ← genVal .int
+    let n := if n.1 = -(H : Int) then (PrimTy.ofInt? .int (n.1 + 1)).getD n else n
+    pure (some (if n.1 < 0 then .unop .neg (.num n.1.natAbs) else .num n.1.toNat, .int n))
   | _ => pure none
 
 /-! ## One run -/
@@ -201,7 +202,7 @@ def genArg : Ty → Gen (Option (RawExpr × Value))
 /-- What a run starts from. -/
 structure Start (C : Contract) where
   storage : Storage C
-  args : List Value
+  args : List Semantics.CallValue
   sender : Nat
   value : Nat
   time : Nat
@@ -246,9 +247,9 @@ def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
   let store := (encodeStorage C keys σ'.storage).filterMap fun (s, w) =>
     if m'.store s == w then none else some s!"slot {s}: typed run {w}, machine {m'.store s}"
   let vals := (names.zip (localCells Γ σ'.env)).filterMap fun (x, l, c) => match c with
-    | some (p, v) =>
-      if wordOf p v == some (m'.memAt l) then none
-      else some s!"local {x}: typed run {Value.fmt v}, machine {m'.memAt l}"
+    | some ⟨p, v⟩ =>
+      if wordOf p v == m'.memAt l then none
+      else some s!"local {x}: typed run {PrimTy.fmt v}, machine {m'.memAt l}"
     | none => none
   let net := σ'.net.filterMap fun (address, n) =>
     let a := address.1
@@ -314,7 +315,7 @@ def testFun [FreshNames] (C : Contract) (name : String) (runs seed j : Nat) (f :
       agreed := agreed + 1
       if rev then reverted := reverted + 1
     | .error ds =>
-      let args := (d.params.zip s.args).map fun ((x, _), v) => s!"{x} = {Value.fmt v}"
+      let args := (d.params.zip s.args).map fun ((x, _), v) => s!"{x} = {CallValue.fmt v}"
       return [s!"{f}: MISMATCH at run {i}, replayed by",
         s!"  #difftest {name}.{f} (runs := {i + 1}) (seed := {seed})",
         "  " ++ ", ".intercalate (args ++ fmtTx s.state),

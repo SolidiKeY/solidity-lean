@@ -23,7 +23,6 @@ import Solidity.Calculus.SoundKit
 -/
 
 namespace Solidity
-open Semantics (Value)
 open Solidity (Modality)
 
 variable {C : Contract}
@@ -601,14 +600,14 @@ variable {Γ : Ctx}
 
 /-- Decoding reverts, never panics. -/
 theorem Binders.decodeT_ne_panic {H : HTy} {ρ : Ctx} (bs : Binders ρ) :
-    ∀ (vs : List Semantics.Value), bs.decodeT (C := C) (H := H) vs ≠ .error .panic := by
+    ∀ (vs : List Semantics.Word), bs.decodeT (C := C) (H := H) vs ≠ .error .panic := by
   induction bs with
   | nil => intro _ h; cases h
   | snoc bs p x ih =>
     intro vs h
     have hb : Binders.decodeT (C := C) (H := H) (Binders.snoc bs p x) vs =
         (bs.decodeT (C := C) (H := H) vs >>= fun er => match er.2 with
-          | v :: rest => match PrimTy.ofValue? p v with
+          | v :: rest => match PrimTy.ofWord? p v with
             | some x => pure ((x, er.1), rest)
             | none => .error .revert
           | [] => .error .revert) := rfl
@@ -621,21 +620,10 @@ theorem Binders.decodeT_ne_panic {H : HTy} {ρ : Ctx} (bs : Binders ρ) :
       cases rest with
       | nil => cases h
       | cons v rest =>
-        change (match PrimTy.ofValue? p v with
+        change (match PrimTy.ofWord? p v with
           | some x => pure ((x, e), rest)
           | none => Except.error THalt.revert : TRes _) = _ at h
         split at h <;> cases h
-
-theorem CodeBinder.decodeT_ne_panic {H : HTy} {κ : Ctx} (code : CodeBinder κ)
-    (c : Semantics.Value) : code.decodeT (C := C) (H := H) c ≠ .error .panic := by
-  cases code with
-  | none => intro h; cases h
-  | some x =>
-    intro h
-    change (match PrimTy.ofValue? .uint c with
-      | Option.some x => pure (x, ())
-      | Option.none => Except.error THalt.revert : TRes _) = _ at h
-    split at h <;> cases h
 
 /-- `∀ xs. ψ` holds at every typed value of the binders. -/
 theorem holds_binders_all {ρ : Ctx} (bs : Binders ρ) :
@@ -717,12 +705,9 @@ theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx} (call : Ex
       exact h2'
     | panic c =>
       dsimp only
-      cases hd : code.decodeT (C := C) (H := σ.H) c with
-      | error e => exact afterRunTR_box_error (fun he => code.decodeT_ne_panic c (he ▸ hd))
-      | ok r =>
-        rw [TRes.ok_bind', TRes.map_st _ _ (State.drop ((Ext.append Γ κc).trans pnc.ext))
-          fun _ => rfl]
-        exact holds_modalK_pop _ pnc _ ω κ φ (holds_binders_all code.binders σ _ r h3)
+      rw [TRes.map_st _ _ (State.drop ((Ext.append Γ κc).trans pnc.ext)) fun _ => rfl]
+      exact holds_modalK_pop _ pnc _ ω κ φ
+        (holds_binders_all code.binders σ _ (code.decodeT (H := σ.H) c) h3)
     | other =>
       dsimp only
       have h4' := holds_modalK_pop σ other ((Ext.append Γ []).trans other.ext) ω κ φ h4

@@ -26,7 +26,6 @@ families; it is `partial`, since it is never unfolded.
 
 namespace Solidity
 
-deriving instance Lean.ToExpr for Semantics.PrimVal
 deriving instance Lean.ToExpr for Srt
 
 open Lean (Expr mkAppN mkConst mkApp mkApp2 mkApp3 mkApp4 toExpr levelZero)

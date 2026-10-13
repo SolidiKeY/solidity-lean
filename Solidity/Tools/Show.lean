@@ -17,12 +17,19 @@ its live elements, not the `shadow` a `pop` leaves behind.
 
 namespace Solidity.Tools
 
-open Semantics (Value lookupBy)
+open Semantics (lookupBy)
 
-/-- A word: `5`, `-1`, `true`. -/
-def Value.fmt : Value → String
-  | .int n => toString n
-  | .bool b => toString b
+/-- A typed value: `5`, `-1`, `true`. -/
+def PrimTy.fmt : {p : PrimTy} → p.Denote → String
+  | .bool, b => toString (show Bool from b)
+  | .uint, n => toString n.1
+  | .int, n => toString n.1
+
+/-- A value with its type: `5`, `-1`, `true`. -/
+def CallValue.fmt : Semantics.CallValue → String
+  | .bool b => PrimTy.fmt (p := .bool) b
+  | .uint n => PrimTy.fmt n
+  | .int n => PrimTy.fmt n
 
 /-- A mapping's key as its type writes it: a `bool` key `true`, any other
 the number. -/
@@ -37,7 +44,7 @@ def fmtFold : Fold where
   L _ := Unit
   W _ _ := List String
   M _ := (Int → String) → List String
-  prim v := Value.fmt (PrimTy.erase v)
+  prim v := PrimTy.fmt v
   struct _ r := "{" ++ ", ".intercalate (r.map fun (f, v) => s!"{f}: {v}") ++ "}"
   array _ _ _ w _ := "[" ++ ", ".intercalate w ++ "]"
   fixed _ w := "[" ++ ", ".intercalate w ++ "]"

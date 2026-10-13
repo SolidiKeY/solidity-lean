@@ -254,15 +254,13 @@ def Tm.litW? {u : Srt} : Tm C Γ u → Option ((p : PrimTy) × p.Denote)
   | .app0 o => o.litW?
   | _ => none
 
-/-- A word as an integer: an `int` its value, a `bool` `0` (KeY's `(int)`
+/-- A word as an integer: a number its value, a `bool` `0` (KeY's `(int)`
 cast). -/
-def asInt : Semantics.PrimVal → Int
-  | .int v => v
-  | _ => 0
+def asInt {p : PrimTy} (v : p.Denote) : Int := (PrimTy.num? v).getD 0
 
 /-- An index literal, as the integer it is hashed as. -/
 def Tm.litInt? {u : Srt} (t : Tm C Γ u) : Option Int :=
-  t.litW?.map fun w => asInt (PrimTy.erase w.2)
+  t.litW?.map fun w => asInt w.2
 
 /-- A root's segment. -/
 def Op0.shapeLeaf? {s : Srt} : Op0 C s → Option (List SegT)
@@ -649,7 +647,7 @@ variable {Γ : Ctx} (σ : State C Γ)
 
 /-- An index read as the Theory's `int`: the integer it is hashed as. -/
 theorem asInt_erase_keyTy {k : PrimTy} (i : k.keyTy.Denote) :
-    asInt (PrimTy.erase i) = PrimTy.key i := by
+    asInt i = PrimTy.key i := by
   cases k <;> rfl
 
 /-- A literal reads its word in the Theory. -/

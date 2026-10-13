@@ -236,7 +236,7 @@ theorem decomposeAfterPush :
 bare push leaves the default (`storage-push-empty.key`). -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -254,7 +254,7 @@ theorem pushNonsimpleArg : resultEx pushNonsimpleArgCore = some 42 := by decide 
 (`storage-pop-nonempty.key`). -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -280,7 +280,7 @@ that has `tokens`; the run builds a `Token` default, so it is printed (`#eval`)
 rather than decided. -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore
@@ -292,7 +292,7 @@ p.age = 5; uint result = persons[2].age;` (`storage-push-local-bind.key`).  Push
 a `Person` builds its default, so the run is printed rather than decided. -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 5))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 5))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -304,7 +304,7 @@ m[0] = values; uint result = matrix[0][1];` — an array copied into a pushed ro
 (`storage-index-copysource-after-push.key`). -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 6))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 6))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore
@@ -317,7 +317,7 @@ the next `push()` recycles still holds the entry — while its value members are
 reset. -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 10))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 10))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore
@@ -326,7 +326,7 @@ info: Except.ok (some (Solidity.Semantics.PrimVal.int 10))
                   uint result = l2.balances[1]; } "result"
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 0))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.testSuiteStore

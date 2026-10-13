@@ -305,8 +305,8 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hI : I.ValMemOk
       (hσ.withEnv (TEnv.All.append ρ ?_ hσ.2)) h
     exact TEnv.All.of_valMem (hI.val _) (hI.mem _) (Binders.valMem rets) _
   · exact herr.drop h₂ σ o hσ h
-  · obtain ⟨r, _, h⟩ := tbind_ok_inv h
-    refine hpnc.drop ((Ext.append Γ κ).trans h₃) (σ.withEnv (TEnv.append κ r σ.env)) o
+  · refine hpnc.drop ((Ext.append Γ κ).trans h₃)
+      (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) _) σ.env)) o
       (hσ.withEnv (TEnv.All.append κ ?_ hσ.2)) h
     exact TEnv.All.of_valMem (hI.val _) (hI.mem _) (CodeBinder.valMem code) _
   · exact hoth.drop h₄ σ o hσ h

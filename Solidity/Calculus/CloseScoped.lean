@@ -508,11 +508,6 @@ theorem forall_int (P : PrimTy.int.Denote → Prop) :
   ⟨fun h n _ _ => h _, fun h ⟨n, hn⟩ => by
     simp only [PrimTy.inRange, decide_eq_true_eq] at hn
     exact h n hn.1 hn.2⟩
-theorem erase_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
-    PrimTy.erase (p := .uint) ⟨n, h⟩ = .int n := rfl
-theorem erase_int (n : Int) (h : PrimTy.int.inRange n = true) :
-    PrimTy.erase (p := .int) ⟨n, h⟩ = .int n := rfl
-theorem erase_bool (b : Bool) : PrimTy.erase (p := .bool) b = .bool b := rfl
 theorem ofLit_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
     PrimTy.ofLit .uint n h = (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) := rfl
 theorem ofLit_int (n : Int) (h : PrimTy.int.inRange n = true) :
@@ -578,8 +573,6 @@ theorem atT_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
 theorem getD_ite {α : Type} {c : Prop} [Decidable c] (x y : Option α) (d : α) :
     (if c then x else y).getD d = if c then x.getD d else y.getD d := by
   split <;> rfl
-theorem erase_uint' (a : PrimTy.uint.Denote) : PrimTy.erase a = .int a.val := rfl
-theorem erase_int' (a : PrimTy.int.Denote) : PrimTy.erase a = .int a.val := rfl
 theorem uint_eq_iff (a b : PrimTy.uint.Denote) : a = b ↔ a.val = b.val :=
   ⟨fun e => e ▸ rfl, Subtype.ext⟩
 theorem int_eq_iff (a b : PrimTy.int.Denote) : a = b ↔ a.val = b.val :=
@@ -612,19 +605,19 @@ theorem ofInt?_uint (n : Int) : PrimTy.uint.ofInt? n =
   by_cases h : 0 ≤ n ∧ n < uintBound
   · have h' : PrimTy.uint.inRange n = true := by
       simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', dite_true, if_pos h, uintOf]
+    simp only [PrimTy.ofInt?, h', dite_true, if_pos h, uintOf]
   · have h' : ¬PrimTy.uint.inRange n = true := by
       simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', Bool.false_eq_true, dite_false, if_neg h]
+    simp only [PrimTy.ofInt?, h', Bool.false_eq_true, dite_false, if_neg h]
 theorem ofInt?_int (n : Int) : PrimTy.int.ofInt? n =
     if -intBound ≤ n ∧ n < intBound then some (intOf n) else none := by
   by_cases h : -intBound ≤ n ∧ n < intBound
   · have h' : PrimTy.int.inRange n = true := by
       simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', dite_true, if_pos h, intOf]
+    simp only [PrimTy.ofInt?, h', dite_true, if_pos h, intOf]
   · have h' : ¬PrimTy.int.inRange n = true := by
       simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?, h', Bool.false_eq_true, dite_false, if_neg h]
+    simp only [PrimTy.ofInt?, h', Bool.false_eq_true, dite_false, if_neg h]
 theorem optRes_ite_ok {α : Type} {c : Prop} [Decidable c] (x a : α) :
     Close.optRes (if c then some x else none) = .ok a ↔ x = a ∧ c := by
   by_cases hc : c
@@ -818,7 +811,7 @@ attribute [close_rw_s]
   Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
   CloseS.holds_bind_oldNet CloseS.holds_bind_kint CloseS.holds_anon
-  CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool CloseS.ofLit_uint CloseS.ofLit_int
+  CloseS.forall_uint CloseS.forall_int CloseS.ofLit_uint CloseS.ofLit_int
   CloseS.binopT_uint CloseS.binopT_int CloseS.binopT_and CloseS.binopT_or CloseS.binopT_bool
   CloseS.evalT_uint CloseS.evalT_int CloseS.evalT_bool CloseS.ofInt?_uint CloseS.ofInt?_int
   CloseS.optRes_ite_ok CloseS.optRes_ite CloseS.uintOf_val' CloseS.intOf_val' CloseS.eq_uintOf' CloseS.eq_intOf'
@@ -882,7 +875,6 @@ attribute [close_rw_s]
   Except.ok.injEq Option.some.injEq Option.map_some Option.map_none Option.bind_some
   Option.bind_none Option.map_map Option.bind_map Option.map_bind Function.comp_apply
   Subtype.mk.injEq Prod.mk.injEq cond_true cond_false
-  PrimVal.int.injEq PrimVal.bool.injEq
   forall_eq' forall_eq exists_eq_left' exists_eq_left exists_eq' exists_eq forall_exists_index
   and_imp
   true_and and_true and_self implies_true forall_const ne_eq not_false_eq_true not_true_eq_false
@@ -898,7 +890,7 @@ attribute [close_rw_s]
   Close.uintBitwise_ofNat Close.uintBitwise_ofNat_cast Close.uintBitwise_cast_ofNat
   Semantics.uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
   Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.root_field CloseS.root_index CloseS.atT_bind
-  CloseS.getD_ite Option.getD_some CloseS.erase_uint' CloseS.erase_int'
+  CloseS.getD_ite Option.getD_some
   CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.bool_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
   Int.reduceAdd Int.reduceSub Int.reduceMul Int.reduceNeg Int.reduceLT Int.reduceLE
 

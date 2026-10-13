@@ -53,7 +53,7 @@ output is `ok`, the funds, and the storage; or how it halted.
 
 namespace Solidity.Tools
 
-open Semantics (lookupBy Value)
+open Semantics (lookupBy)
 
 /-- The raw type of a value type, as a declaration spells it. -/
 def PrimTy.raw : PrimTy → RawTy
@@ -125,17 +125,23 @@ def State.withTx {C : Contract} (σ : State C []) (sender value time balance : O
 
 /-- `σ` with the state variable `r`, of a value type, set to `v`; an error
 where `r` is no such variable or `v` not of its type. -/
-def State.withRoot {C : Contract} (σ : State C []) (r : Name) (v : Value) :
+def State.withRoot {C : Contract} (σ : State C []) (r : Name) (v : Semantics.CallValue) :
     Except String (State C []) :=
   match h : lookupBy r C.vars with
-  | some (.prim p) => match PrimTy.ofValue? p v with
+  | some (.prim p) => match v.as? p with
     | some y => pure { σ with storage := SFields.set (σ.storage : SFields C.vars) h (.prim y) }
     | none => throw "the start state is not of the contract's types"
   | some T => throw s!"{r} is a {Ty.toStr T}, not a value type"
   | none => throw s!"{r} is not a state variable"
 
+/-- A state variable's integer given to `#run`, read at its type `p`. -/
+def rootInt (r : Name) (p : PrimTy) (n : Int) : Except String (Name × Semantics.CallValue) :=
+  match PrimTy.ofInt? p n with
+  | some v => pure (r, .ofTyped v)
+  | none => throw "the start state is not of the contract's types"
+
 /-- `σ` with the state variables given replaced, in order. -/
-def State.withRoots {C : Contract} (σ : State C []) (roots : List (Name × Value)) :
+def State.withRoots {C : Contract} (σ : State C []) (roots : List (Name × Semantics.CallValue)) :
     Except String (State C []) :=
   roots.foldlM (fun σ (r, v) => State.withRoot σ r v) σ
 
@@ -148,22 +154,22 @@ def _root_.Solidity.Prog.runT {C : Contract} {Γ' : Ctx} (σ : State C []) (P : 
 /-- The locals of a typed environment, innermost first: each one's level at
 base `0` (`Evm.lvl`), and its type and value if it is a value local. -/
 def localCells {C : Contract} {H : HTy} : (Γ : Ctx) → TEnv C H Γ →
-    List (Nat × Option (PrimTy × Value))
+    List (Nat × Option ((p : PrimTy) × p.Denote))
   | [], _ => []
   | t :: Γ, e =>
     (match t, e.1 with
-      | .val p, v => (Γ.length, some (p, PrimTy.erase (p := p) v))
+      | .val p, v => (Γ.length, some ⟨p, v⟩)
       | _, _ => (Γ.length, none)) :: localCells Γ e.2
 
 /-- The value locals of a typed environment, by the names of its context. -/
 def localVals {C : Contract} {H : HTy} {Γ : Ctx} (names : List Var)
-    (e : TEnv C H Γ) : List (Var × Value) :=
-  (names.zip (localCells Γ e)).filterMap fun (x, _, c) => c.map fun (_, v) => (x, v)
+    (e : TEnv C H Γ) : List (Var × Semantics.CallValue) :=
+  (names.zip (localCells Γ e)).filterMap fun (x, _, c) => c.map fun v => (x, .ofTyped v.2)
 
 /-- What the value local `x` holds after `P` runs from `σ` (`Prog.runT`):
 `none` where the end state has no value local of that name. -/
 def _root_.Solidity.Prog.localAfterT [FreshNames] {C : Contract} {Γ' : Ctx} (σ : State C [])
-    (P : Prog C [] Γ') (x : String) : TRes (Option Value) := do
+    (P : Prog C [] Γ') (x : String) : TRes (Option Semantics.CallValue) := do
   let τ ← Prog.runT σ P
   pure (lookupBy (Var.ofName x) (localVals (P.outNames []) τ.env))
 
@@ -178,9 +184,9 @@ def runReport [FreshNames] (C : Contract) (σ : State C []) (f : String) (args :
       let vals := localVals (Q.outNames []) o.st.env
       let ret := if n ≥ 2 then
           let vs := (List.range n).filterMap fun i => lookupBy (Var.ofName s!"{retLocal}{i}") vals
-          [s!"returns ({", ".intercalate (vs.map Value.fmt)})"]
+          [s!"returns ({", ".intercalate (vs.map CallValue.fmt)})"]
         else match lookupBy (Var.ofName retLocal) vals with
-          | some v => [s!"returns {Value.fmt v}"]
+          | some v => [s!"returns {CallValue.fmt v}"]
           | none => []
       ["ok"] ++ ret ++ fmtStorage C o.st.storage
 
@@ -214,8 +220,10 @@ open Lean Elab Command Term Meta in
       | "balance" => bal ← `(some ($v : Int))
       | _ =>
         match Semantics.lookupBy n C.vars with
-        | some (.prim .bool) => roots := roots.push (← `(($(quote n), .bool ($v : Bool))))
-        | some (.prim _) => roots := roots.push (← `(($(quote n), .int ($v : Int))))
+        | some (.prim .bool) =>
+          roots := roots.push (← `(pure ($(quote n), Solidity.Semantics.CallValue.bool ($v : Bool))))
+        | some (.prim .uint) => roots := roots.push (← `(Solidity.Tools.rootInt $(quote n) .uint ($v : Int)))
+        | some (.prim .int) => roots := roots.push (← `(Solidity.Tools.rootInt $(quote n) .int ($v : Int)))
         | some T => throwErrorAt k "#run: {n} is a {Ty.toStr T}: give it with `from`"
         | none => throwErrorAt k "#run: {n} is not one of msg.sender, msg.value, \
             block.timestamp, balance, nor a state variable of {c}"
@@ -225,7 +233,8 @@ open Lean Elab Command Term Meta in
       | none => `(freshState $Ct)
     let t ← `(do
       let σ ← State.withTx $σ $sender $value $time $bal
-      let σ ← State.withRoots σ ([$roots,*] : List (Solidity.Name × Solidity.Semantics.Value))
+      let roots ← ([$roots,*] : List (Except String (Solidity.Name × Solidity.Semantics.CallValue))).mapM id
+      let σ ← State.withRoots σ roots
       runReport $Ct σ $(quote f) [$args,*])
     logInfo (String.intercalate "\n" (← evalLines "#run" t))
   | _ => throwUnsupportedSyntax

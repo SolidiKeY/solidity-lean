@@ -262,7 +262,7 @@ copy member by member, one level down, so this one is a run from
 `State.exampleStore`. -/
 
 /--
-info: Except.ok (some (Solidity.Semantics.PrimVal.int 8))
+info: Except.ok (some (Solidity.Semantics.CallValue.uint 8))
 -/
 #guard_msgs in
 #eval Prog.localAfterT State.exampleStore

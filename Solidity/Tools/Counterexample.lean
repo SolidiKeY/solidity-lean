@@ -32,9 +32,9 @@ struct member present in order, a mapping's keys unique and its default the
 type's), their words in range, and `msg.value` is `0` for a function that
 is not `payable`.  The candidate is typed (`Cand C`: a storage at the
 contract's types, drawn by `TGen.sval`, the transaction's words `uint`s), and
-its state is a typed one with no locals (`Cand.tstate`); only its arguments
-are values (`Semantics.Value`), which the formula's binders read at their
-types.
+its state is a typed one with no locals (`Cand.tstate`); its arguments are
+typed values with their types (`Semantics.CallValue`), which the formula's
+binders read at their types (`CallValue.as?`).
 
 The search is testing: small pools of values per primitive type (the
 bounds, `0`, `1`, `2`, and the spec's own literals), all-default storages
@@ -98,7 +98,6 @@ end Solidity.Tools
 namespace Solidity
 
 open Solidity.Tools (Tri)
-open Semantics (Value)
 
 variable {C : Contract}
 
@@ -429,7 +428,7 @@ end Solidity
 
 namespace Solidity.Tools
 
-open Semantics (Value uintBound intBound lookupBy)
+open Semantics (uintBound intBound lookupBy)
 
 variable {C : Contract}
 
@@ -461,18 +460,16 @@ def intPool (lits : List Int) : List Int :=
   (([0, 1, -1] ++ lits.flatMap (fun n => [n, -n, n + 1, n - 1]) ++ [-intBound, intBound - 1]).filter
     fun n => decide (-intBound ≤ n ∧ n < intBound)).eraseDups
 
-/-- The pool arguments and stored words are drawn from. -/
-def poolVals (lits : List Int) : PrimTy → List Value
-  | .bool => [.bool true, .bool false]
-  | .uint => (uintPool lits).map .int
-  | .int => (intPool lits).map .int
-
 /-- **The domain a quantifier and a hidden binder are tried on**: the pools
 of `lits` (`uintPool`, `intPool`) read at their types. -/
 def poolDom (lits : List Int) : TDom
   | .bool => [true, false]
-  | .uint => (uintPool lits).filterMap fun n => PrimTy.ofValue? .uint (.int n)
-  | .int => (intPool lits).filterMap fun n => PrimTy.ofValue? .int (.int n)
+  | .uint => (uintPool lits).filterMap (PrimTy.ofInt? .uint)
+  | .int => (intPool lits).filterMap (PrimTy.ofInt? .int)
+
+/-- The pool arguments are drawn from, each with its type. -/
+def poolVals (lits : List Int) (p : PrimTy) : List Semantics.CallValue :=
+  (poolDom lits p).map .ofTyped
 
 /-! ## Random states
 
@@ -487,11 +484,11 @@ def products {α : Type} : List (List α) → List (List α)
   | xs :: rest => xs.flatMap fun x => (products rest).map (x :: ·)
 
 /-- A candidate: the storage, the arguments, the transaction, the ledger
-and the funds a call starts from, typed but for the arguments, which the
-formula's binders read at their types (`Fml.peel`). -/
+and the funds a call starts from, the arguments each with its type, which
+the formula's binders read at theirs (`Fml.peel`). -/
 structure Cand (C : Contract) where
   st : Solidity.Storage C
-  args : List (String × Value)
+  args : List (String × Semantics.CallValue)
   tx : TTx := { msgSender := PrimTy.ofIntD .uint 1 }
   net : Ledger := []
   bal : PrimTy.uint.Denote := PrimTy.dflt .uint
@@ -507,11 +504,9 @@ def Cand.tstate (C : Contract) (c : Cand C) : Solidity.State C [] :=
 def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
     (payable : Bool) : Gen (Cand C) := do
   let dom := poolVals lits
-  let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (PrimTy.erase (PrimTy.dflt p)) (dom p))
+  let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (.ofTyped (PrimTy.dflt p)) (dom p))
   let sender ← pickD 1 ([1, 2] ++ uintPool lits)
-  let argInts := args.filterMap fun (_, v) => match v with
-    | .int n => some n
-    | .bool _ => none
+  let argInts := args.filterMap fun (_, v) => v.num?
   let keys : PrimTy → List Int := fun
     | .bool => [0, 1]
     | .uint => (uintPool lits ++ (sender :: argInts).filter (0 ≤ ·)).eraseDups
@@ -546,9 +541,7 @@ def intsFold : Fold where
   L _ := List Int
   W _ _ := List Int
   M _ := List Int
-  prim v := match PrimTy.erase v with
-    | .int n => [n]
-    | .bool _ => []
+  prim v := (PrimTy.num? v).toList
   struct _ r := r
   array _ _ _ w l := w ++ l
   fixed _ w := w
@@ -570,7 +563,7 @@ def renameFold (v s : Int) : Fold where
   L := SList
   W := SVec
   M := SMap
-  prim {p} x := .prim (if PrimTy.erase x = .int v then (PrimTy.ofInt? p s).getD x else x)
+  prim {p} x := .prim (if PrimTy.num? x = some v then (PrimTy.ofInt? p s).getD x else x)
   struct _ r := .struct r
   array _ _ h w l := .array w l h
   fixed _ w := .fixed w
@@ -611,15 +604,22 @@ def SFields.drops : {fs : List (Name × Ty)} → SFields fs → List (SFields fs
 
 /-- The integers a candidate mentions. -/
 def Cand.ints (c : Cand C) : List Int :=
-  (c.args.filterMap (fun (_, v) => match v with | .int n => some n | .bool _ => none) ++
+  (c.args.filterMap (fun (_, v) => v.num?) ++
     c.tx.msgSender.1 :: c.st.fold intsFold).eraseDups
+
+/-- An argument's number renamed by `f`, where the result is in its type's
+range. -/
+def renameArg (f : Int → Int) : Semantics.CallValue → Semantics.CallValue
+  | .bool b => .bool b
+  | .uint n => .uint ((PrimTy.ofInt? .uint (f n.1)).getD n)
+  | .int n => .int ((PrimTy.ofInt? .int (f n.1)).getD n)
 
 /-- `v` renamed `s` everywhere in a candidate. -/
 def Cand.rename (c : Cand C) (v s : Int) : Cand C :=
   let r (n : Int) : Int := if n = v then s else n
   { c with
     st := c.st.fold (renameFold v s)
-    args := c.args.map fun (x, a) => (x, match a with | .int n => .int (r n) | .bool b => .bool b)
+    args := c.args.map fun (x, a) => (x, renameArg r a)
     tx := { c.tx with msgSender := (PrimTy.ofInt? .uint (r c.tx.msgSender.1)).getD c.tx.msgSender }
     net := c.net.map fun (a, b) => ((PrimTy.ofInt? .uint (r a.1)).getD a, b) }
 
@@ -656,7 +656,6 @@ end Solidity.Tools
 namespace Solidity
 
 open Solidity.Tools (Tri)
-open Semantics (Value)
 
 variable {C : Contract}
 
@@ -674,11 +673,11 @@ abbrev Peeled (C : Contract) := (Δ : Ctx) × State C Δ × Fml C Δ
 /-- The leading parameters bound to `vals`, by name, as far as each is
 given: the state and the formula under them.  Compiled; the twin of
 `Fml.peel` (`Fml.peel_eq`). -/
-def Fml.peelC (vals : List (Var × Value)) : {Γ : Ctx} → State C Γ → Fml C Γ → Peeled C
-  | _, σ, .all x p φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+def Fml.peelC (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → State C Γ → Fml C Γ → Peeled C
+  | _, σ, .all x p φ => match (vals.lookup x).bind (Semantics.CallValue.as? p) with
     | some w => Fml.peelC vals (σ.push (t := .val p) w) φ
     | none => ⟨_, σ, .all x p φ⟩
-  | _, σ, .bind m x (.val p) φ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+  | _, σ, .bind m x (.val p) φ => match (vals.lookup x).bind (Semantics.CallValue.as? p) with
     | some w => Fml.peelC vals (σ.push (t := .val p) w) φ
     | none => ⟨_, σ, .bind m x (.val p) φ⟩
   | _, σ, φ => ⟨_, σ, φ⟩
@@ -687,19 +686,19 @@ def Fml.peelC (vals : List (Var × Value)) : {Γ : Ctx} → State C Γ → Fml C
 conditions 1 and 2): what a certificate peels in the kernel.  Compiled as
 `Fml.peelC`. -/
 @[implemented_by Fml.peelC]
-def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
+def Fml.peel (vals : List (Var × Semantics.CallValue)) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
     Peeled C :=
   Fml.rec (motive := fun Γ _ => State C Γ → Peeled C)
     (fun σ => ⟨_, σ, .tt⟩) (fun a b σ => ⟨_, σ, .eq a b⟩) (fun t σ => ⟨_, σ, .defined t⟩)
     (fun φ _ σ => ⟨_, σ, .not φ⟩) (fun φ ψ _ _ σ => ⟨_, σ, .and φ ψ⟩)
     (fun φ ψ _ _ σ => ⟨_, σ, .imp φ ψ⟩) (fun m U φ _ σ => ⟨_, σ, .upd m U φ⟩)
     (fun m P κ φ _ σ => ⟨_, σ, .modal m P κ φ⟩) (fun φ _ σ => ⟨_, σ, .havoc φ⟩)
-    (fun x p φ ih σ => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+    (fun x p φ ih σ => match (vals.lookup x).bind (Semantics.CallValue.as? p) with
       | some w => ih (σ.push (t := .val p) w)
       | none => ⟨_, σ, .all x p φ⟩)
     (fun {Γ} m x t φ ih σ =>
       LTy.casesOn (motive := fun t => Fml C (t :: Γ) → (State C (t :: Γ) → Peeled C) → Peeled C) t
-        (fun p φ ih => match (vals.lookup x).bind (PrimTy.ofValue? p) with
+        (fun p φ ih => match (vals.lookup x).bind (Semantics.CallValue.as? p) with
           | some w => ih (σ.push (t := .val p) w)
           | none => ⟨_, σ, .bind m x (.val p) φ⟩)
         (fun r φ _ => ⟨_, σ, .bind m x (.alias r) φ⟩) (fun r φ _ => ⟨_, σ, .bind m x (.mem r) φ⟩)
@@ -708,7 +707,7 @@ def Fml.peel (vals : List (Var × Value)) {Γ : Ctx} (σ : State C Γ) (φ : Fml
     (fun xs φ _ σ => ⟨_, σ, .anon xs φ⟩)
     φ σ
 
-theorem Fml.peel_eq (vals : List (Var × Value)) : {Γ : Ctx} → (φ : Fml C Γ) →
+theorem Fml.peel_eq (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → (φ : Fml C Γ) →
     ∀ σ : State C Γ, Fml.peel vals σ φ = Fml.peelC vals σ φ
   | _, .all _ _ φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
   | _, .bind _ _ (.val _) φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
@@ -719,16 +718,16 @@ theorem Fml.peel_eq (vals : List (Var × Value)) : {Γ : Ctx} → (φ : Fml C Γ
 
 /-- What fails under the peeled binders fails under the binders: each is a
 `∀` (or a hidden binder, read as one) of the values it is peeled at. -/
-theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ : State C Γ) →
+theorem Fml.not_holds_of_peelC (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → (σ : State C Γ) →
     (φ : Fml C Γ) → ¬ holds (Fml.peelC vals σ φ).2.1 (Fml.peelC vals σ φ).2.2 → ¬ holds σ φ
   | _, σ, .all x p φ, h => by
-    cases hw : (vals.lookup x).bind (PrimTy.ofValue? p) with
+    cases hw : (vals.lookup x).bind (Semantics.CallValue.as? p) with
     | none => rw [Fml.peelC, hw] at h; exact h
     | some w =>
       rw [Fml.peelC, hw] at h
       exact fun hall => Fml.not_holds_of_peelC vals _ φ h (hall w)
   | _, σ, .bind m x (.val p) φ, h => by
-    cases hw : (vals.lookup x).bind (PrimTy.ofValue? p) with
+    cases hw : (vals.lookup x).bind (Semantics.CallValue.as? p) with
     | none => rw [Fml.peelC, hw] at h; exact h
     | some w =>
       rw [Fml.peelC, hw] at h
@@ -740,14 +739,14 @@ theorem Fml.not_holds_of_peelC (vals : List (Var × Value)) : {Γ : Ctx} → (σ
   | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h => h
 
 /-- `φ` read under its leading parameters bound to `vals` (`Fml.peel`). -/
-def Fml.eval3Peel (dom : TDom) (vals : List (Var × Value)) {Γ : Ctx} (σ : State C Γ)
+def Fml.eval3Peel (dom : TDom) (vals : List (Var × Semantics.CallValue)) {Γ : Ctx} (σ : State C Γ)
     (φ : Fml C Γ) : Tri :=
   match Fml.peel vals σ φ with
   | ⟨_, σ', ψ⟩ => ψ.eval3 dom σ'
 
 /-- **A certificate**: a typed state where `φ`, its leading parameters bound
 to `vals`, evaluates to `ff` refutes `⊨ φ`. -/
-theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Value)) (σ : State C [])
+theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Semantics.CallValue)) (σ : State C [])
     {φ : Fml C []} (h : Fml.eval3Peel dom vals σ φ = .ff) : ¬ Valid φ := by
   intro hv
   have key := Fml.not_holds_of_peelC vals σ φ
@@ -814,7 +813,7 @@ end Solidity
 
 namespace Solidity.Tools
 
-open Semantics (Value lookupBy)
+open Semantics (lookupBy)
 
 variable {C : Contract}
 
@@ -840,16 +839,14 @@ structure Search (C : Contract) where
 /-- The integers a candidate's arguments are, first in its domain: a
 binder tries them before the pools. -/
 def Cand.argInts (c : Cand C) : List Int :=
-  c.args.filterMap fun (_, v) => match v with
-    | .int n => some n
-    | .bool _ => none
+  c.args.filterMap fun (_, v) => v.num?
 
 section Search
 
 variable [FreshNames]
 
 /-- The arguments of a candidate by variable, as `Fml.peel` binds them. -/
-def Cand.vals (c : Cand C) : List (Var × Value) := c.args.map fun (n, v) => (Var.ofName n, v)
+def Cand.vals (c : Cand C) : List (Var × Semantics.CallValue) := c.args.map fun (n, v) => (Var.ofName n, v)
 
 /-- The obligation of `f` in pieces, and what the search needs of `f`: its
 declaration, the scoped obligation, how many premises are met by
@@ -986,7 +983,7 @@ def searchFml (C : Contract) (φ : Fml C []) (budget : Nat := 2000) : Search C :
 the typed state. -/
 def Witness.lines (C : Contract) (w : Witness C) : List String :=
   let σ := w.cand.tstate C
-  let args := w.cand.args.map fun (n, v) => s!"{n} = {Value.fmt v}"
+  let args := w.cand.args.map fun (n, v) => s!"{n} = {CallValue.fmt v}"
   let after := match w.outcome with
     | none => []
     | some (.error h) => [s!"after: {fmtHalt h}"]
@@ -999,8 +996,6 @@ def Witness.lines (C : Contract) (w : Witness C) : List String :=
 section Meta
 
 open Lean Meta
-
-deriving instance ToExpr for Semantics.ExtResult
 
 /-- A typed primitive as a closed term: a `uint` or an `int` as
 `PrimTy.ofIntD`, which the kernel reads back. -/
@@ -1021,6 +1016,8 @@ instance : ToExpr Semantics.CallValue where
   toTypeExpr := mkConst ``Semantics.CallValue
 
 deriving instance ToExpr for Semantics.ExtKey
+
+deriving instance ToExpr for Semantics.ExtResult
 
 /-- A typed storage value as a closed term, constructor by constructor, an
 array's bound as `SVal.arrayOf`'s check. -/
@@ -1060,7 +1057,7 @@ deciding `Fml.eval3Peel (poolDom lits) vals _ φ = .ff` by evaluation: the
 typed run and the formula under the parameters.  The kernel runs under
 `heartbeats` (thousands), half the default, and the declaration is
 checked, never added. -/
-def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Value))
+def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Semantics.CallValue))
     (c : Cand C) (heartbeats : Nat := 100000) : MetaM Bool := do
   let domE := mkApp (mkConst ``poolDom) (toExpr lits)
   let σE := mkApp2 (mkConst ``Cand.tstate) cE (c.quote cE)

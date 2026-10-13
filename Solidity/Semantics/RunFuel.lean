@@ -150,7 +150,7 @@ theorem tryCall_approx {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (ec : ExtCall C Γ)
   · exact .refl _
   · exact (TRes.Approx.refl _).bind fun _ => (hok _).map _
   · exact (herr _).map _
-  · exact (TRes.Approx.refl _).bind fun _ => (hpnc _).map _
+  · exact (hpnc _).map _
   · exact (hoth _).map _
 
 theorem block_approx {Γ₁ : Ctx} (h : Ext Γ Γ₁) {f g : TStep C Γ Γ₁} (hfg : TStep.Approx f g) :

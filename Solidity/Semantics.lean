@@ -8,10 +8,11 @@ External-call inputs are typed: `ExtKey` has a bounded receiver and
 `PrimTy.Denote` is defined here so the call boundary can use it without
 an import cycle.
 
-`PrimVal`/`Value` is the wire and tool representation, decoded at the
-expected type (`PrimTy.ofValue?`, `Semantics/Value.lean`). External responses
-(`ExtResult`) remain wire data: a callee can return malformed data, which
-`try` must reject. `Selector` labels describe comparisons and schema
+There is no untyped value: a tool's input or output is a `CallValue`, read
+at a type by `CallValue.as?` (`Semantics/Value.lean`). External responses
+(`ExtResult`) are ABI words (`Word`, a `uint256`): every word is one, and a word is read
+at its local's type when a `try` decodes it (`PrimTy.ofWord?`), where a
+`bool` that is neither `0` nor `1` reverts, as solc's decoder does. `Selector` labels describe comparisons and schema
 analysis; actual path segments are indexed (`Seg`/`Segs` in
 `Semantics/Storage.lean`). The state is typed (`Semantics/State.lean`).
 -/
@@ -40,22 +41,6 @@ end PrimTy
 
 namespace Semantics
 
-/-- Primitive run-time values — KeY `Prim \extends StValue, MemValue`
-(`solidityDLHeader.key`): the values shared by storage and memory. -/
-inductive PrimVal where
-  | int (v : Int)
-  | bool (b : Bool)
-  deriving Repr, DecidableEq
-
-/-- Stack values *are* primitive values: KeY gives primitive-typed
-program variables the `Prim` subsorts directly, with no separate stack
-sort. `Value` stays as the interpreter-facing name. -/
-abbrev Value := PrimVal
-
-namespace Value
-export PrimVal (int bool)
-end Value
-
 /-- A selector label for comparison and schema analysis. A label carries no
 storage access operation; `Seg` is the typed segment that projects it. -/
 inductive Selector where
@@ -63,17 +48,21 @@ inductive Selector where
   | at (i : Int)
   deriving Repr, DecidableEq
 
-/-- How an external call ends, as its caller sees it: it returns this data,
-or it reverts with `Error(string)`, with `Panic(uint)` and this code, or in
-another way. -/
+/-- An ABI word: 256 bits, read as a `uint256`. -/
+abbrev Word := PrimTy.uint.Denote
+
+/-- How an external call ends, as its caller sees it: it returns these
+words, or it reverts with `Error(string)`, with `Panic(uint256)` and this
+code, or in another way. -/
 inductive ExtResult where
-  | ok (data : List Value)
+  | ok (data : List Word)
   | error
-  | panic (code : Value)
+  | panic (code : Word)
   | other
   deriving Repr, DecidableEq
 
-/-- An argument retains its Solidity type and that type's range proof. -/
+/-- A typed value of some primitive type: an argument retains its Solidity
+type and that type's range proof, and so does what the tools read and print. -/
 inductive CallValue where
   | bool (value : Bool)
   | uint (value : PrimTy.uint.Denote)

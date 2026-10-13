@@ -266,7 +266,7 @@ theorem Args.evalT_noPanic : {ps : Ctx} → (as : Args C Γ ps) → (as.evalT σ
 end Ops
 
 theorem Binders.decodeT_noPanic {H : HTy} : {ρ : Ctx} → (bs : Binders ρ) →
-    (vs : List Semantics.Value) → (Binders.decodeT (C := C) (H := H) bs vs).NoPanic
+    (vs : List Semantics.Word) → (Binders.decodeT (C := C) (H := H) bs vs).NoPanic
   | _, .nil, _ => TRes.NoPanic.ok _
   | _, .snoc bs p _, vs => (Binders.decodeT_noPanic bs vs).bind fun (_, rest) => by
     dsimp only
@@ -274,17 +274,6 @@ theorem Binders.decodeT_noPanic {H : HTy} : {ρ : Ctx} → (bs : Binders ρ) →
     · split
       · exact TRes.NoPanic.ok _
       · exact TRes.NoPanic.revert
-    · exact TRes.NoPanic.revert
-
-theorem CodeBinder.decodeT_noPanic {H : HTy} {κ : Ctx} (code : CodeBinder κ)
-    (c : Semantics.Value) : (CodeBinder.decodeT (C := C) (H := H) code c).NoPanic := by
-  cases code with
-  | none => exact TRes.NoPanic.ok _
-  | some =>
-    unfold CodeBinder.decodeT
-    dsimp only
-    split
-    · exact TRes.NoPanic.ok _
     · exact TRes.NoPanic.revert
 
 /-! ## Steps do not panic
@@ -372,7 +361,7 @@ theorem tryCall_noPanic {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (c : ExtCall C Γ)
   · exact TRes.NoPanic.revert
   · exact (Binders.decodeT_noPanic rets _).bind fun _ => (hok _).map _
   · exact (herr σ).map _
-  · exact (CodeBinder.decodeT_noPanic code _).bind fun _ => (hpnc _).map _
+  · exact (hpnc _).map _
   · exact (hother σ).map _
 
 theorem loop_noPanic {Γ₁ : Ctx} (c : Val C Γ .bool) (h : Ext Γ Γ₁) (body : TStep C Γ Γ₁)

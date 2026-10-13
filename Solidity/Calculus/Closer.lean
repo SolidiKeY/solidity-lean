@@ -330,14 +330,14 @@ def Facts.rangeOp (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y
 theorem ofInt?_ival {p : PrimTy} {n : Int} {v : p.Denote} (h : p.ofInt? n = some v) :
     PrimTy.ival v = n := by
   cases p with
-  | bool => simp only [PrimTy.ofInt?, PrimTy.ofValue?, reduceCtorEq] at h
+  | bool => simp only [PrimTy.ofInt?, reduceCtorEq] at h
   | uint =>
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?] at h
+    simp only [PrimTy.ofInt?] at h
     split at h
     · cases h; rfl
     · cases h
   | int =>
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?] at h
+    simp only [PrimTy.ofInt?] at h
     split at h
     · cases h; rfl
     · cases h
@@ -348,11 +348,11 @@ theorem ofInt?_isSome {p : PrimTy} (hp : p.isNumeric = true) {n : Int} (h1 : p.l
   | bool => cases hp
   | uint =>
     simp only [PrimTy.lo, PrimTy.hi] at h1 h2
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?]
+    simp only [PrimTy.ofInt?]
     rw [dif_pos (by simp only [PrimTy.inRange, decide_eq_true_eq]; omega)]; rfl
   | int =>
     simp only [PrimTy.lo, PrimTy.hi] at h1 h2
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?]
+    simp only [PrimTy.ofInt?]
     rw [dif_pos (by simp only [PrimTy.inRange, decide_eq_true_eq]; omega)]; rfl
 
 theorem evalT_add {p : PrimTy} {u w v : p.Denote} (h : BinOp.evalT .add u w = some v) :
@@ -1158,7 +1158,7 @@ theorem ofInt?_ival_self {p : PrimTy} (hp : p.isNumeric = true) (v : p.Denote) :
   cases p with
   | bool => cases hp
   | uint | int =>
-    simp only [PrimTy.ofInt?, PrimTy.ofValue?, PrimTy.ival]
+    simp only [PrimTy.ofInt?, PrimTy.ival]
     rw [dif_pos v.2]
     rfl
 
