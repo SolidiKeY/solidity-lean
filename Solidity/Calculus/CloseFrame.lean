@@ -120,11 +120,11 @@ theorem SVal.dflt_prim' (p : PrimTy) : SVal.dflt (.prim p) = .prim (PrimTy.dflt 
 
 theorem SVal.dflt_struct' (s : Name) :
     SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
-  SVal.dflt_struct_eq s
+  SVal.dflt_struct s
 
 theorem SVal.dflt_map' (K V : Ty) :
     SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
-  SVal.dflt_map_eq K V
+  SVal.dflt_map K V
 
 theorem SFields.get_dflt {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
     (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T

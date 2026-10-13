@@ -38,12 +38,12 @@ laws it reads).
 
 namespace Solidity
 
-open Semantics SemanticsProperties
+open Semantics
 
 variable {C : Contract}
 
-/-- A `Res` of an optional value: `none` reverts. -/
-def Close.optRes {α : Type} : Option α → Res α
+/-- A result of an optional value: `none` reverts. -/
+def Close.optRes {α : Type} : Option α → TRes α
   | some a => .ok a
   | none => .error .revert
 
@@ -877,7 +877,7 @@ attribute [close_rw_s]
   -- runs
   Modality.wp_ok Modality.wp_pure Modality.wp_error Modality.wp_bind Modality.wp_ite
   Modality.wp_diamond Modality.onHalt_box Modality.onHalt_diamond
-  Close.pure_eq_ok Res.ok_bind Res.error_bind Close.bind_ok_right bind_assoc
+  Close.pure_eq_ok Solidity.ok_bind Solidity.error_bind Close.bind_ok_right bind_assoc
   -- logic
   Except.ok.injEq Option.some.injEq Option.map_some Option.map_none Option.bind_some
   Option.bind_none Option.map_map Option.bind_map Option.map_bind Function.comp_apply

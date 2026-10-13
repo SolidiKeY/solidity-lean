@@ -46,7 +46,7 @@ namespace Solidity
 namespace Evm
 
 open Semantics (structDef lookupBy setBy tyRank)
-open SemanticsProperties (lookupBy_setBy_self lookupBy_setBy_ne lookupBy_eq_some_mem)
+open Semantics (lookupBy_setBy_self lookupBy_setBy_ne lookupBy_eq_some_mem)
 
 variable {L : Nat}
 

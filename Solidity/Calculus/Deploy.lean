@@ -26,7 +26,7 @@ open Solidity (Modality)
 
 variable {C : Contract}
 
-/-- The typed state a deployment starts in (`Contract.deployState`): the
+/-- The state a deployment starts in: the
 empty storage, no memory, a ledger holding the deployer's payment, and the
 value sent as the contract's funds. -/
 def State.deploy (C : Contract) (tx : TTx) : State C [] :=

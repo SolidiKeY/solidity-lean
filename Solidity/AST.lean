@@ -142,7 +142,7 @@ theorem PrimTy.isNumeric_of_inRange {p : PrimTy} {n : Int} (h : p.inRange n = tr
   cases p <;> simp only [PrimTy.inRange, Bool.false_eq_true] at h <;> rfl
 
 /-- A key type a program can index a mapping with: a word, read as the
-integer it is hashed as (`Value.keyAt`, a `bool` as `0`/`1`); a reference
+integer it is hashed as (`PrimTy.key`, a `bool` as `0`/`1`); a reference
 type is no key (`IndexTy.map`). -/
 def Ty.isKey : Ty → Bool
   | .prim _ => true
@@ -201,10 +201,10 @@ port and noted at their arm. -/
 
 The trailing catch-all is forced — the key is a `Name`, so the match
 cannot be closed — and it is the one silent default left in this file: an
-unknown struct name has zero fields, so `defaultForTy` builds an empty
+unknown struct name has zero fields, so `SVal.dflt` builds an empty
 node for it instead of being `undef`.  Harmless while the contract corpus
 is closed; making it loud would mean an `Option` result threaded through
-`defaultForTy`, `tyHasMapping`, `Reachability` and `WellFormedConsumers`. -/
+`SVal.dflt`, `tyHasMapping` and the reachability proofs. -/
 def structDef : Name -> List (Name × Ty)
   | "Token" => [("value", Ty.uint)]
   | "Account" =>
@@ -273,7 +273,8 @@ def unknownStructMsg (s : String) : String :=
 
 /-! ### The `structDef` termination certificate
 
-`defaultForTy` and `tyHasMapping` expand a struct through the `structDef`
+`tyRank`-fuelled functions (`SVal.dflt`) and `tyHasMapping` expand a
+struct through the `structDef`
 table, not into a structurally smaller `Ty`, so neither is structural.
 They used to be fuelled at a hardcoded `8`, and fuel exhaustion was a
 *silent wrong answer* — `SVal.int 0` for a struct, `false` for "contains
@@ -383,11 +384,54 @@ def setBy [DecidableEq κ] (k : κ) (v : α) : List (κ × α) -> List (κ × α
   | (k', v') :: rest =>
       if k = k' then (k, v) :: rest else (k', v') :: setBy k v rest
 
-/-- No duplicate keys: a layout or storage read through `lookupBy` has one
-entry per key (`wellTypedStorageB` and `storageWtB` check each root once). -/
+/-- No duplicate keys: a layout read through `lookupBy` has one entry per
+key (a contract's roots, a struct's members). -/
 def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
   | [] => true
   | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest
+
+/-! ### Association-list laws -/
+
+@[simp] theorem lookupBy_setBy_self [DecidableEq κ] (k : κ) (v : α)
+    (l : List (κ × α)) : lookupBy k (setBy k v l) = some v := by
+  induction l with
+  | nil => simp only [setBy, lookupBy, ↓reduceIte]
+  | cons hd tl ih =>
+      obtain ⟨k', v'⟩ := hd
+      by_cases h : k = k' <;> simp only [h, setBy, ↓reduceIte, lookupBy, ih]
+
+theorem lookupBy_setBy_ne [DecidableEq κ] {k k' : κ} (h : k ≠ k')
+    (v : α) (l : List (κ × α)) :
+    lookupBy k (setBy k' v l) = lookupBy k l := by
+  induction l with
+  | nil => simp only [setBy, lookupBy, h, ↓reduceIte]
+  | cons hd tl ih =>
+      obtain ⟨k'', v''⟩ := hd
+      by_cases h₂ : k' = k''
+      · subst h₂
+        simp only [setBy, ↓reduceIte, lookupBy, h]
+      · by_cases h₃ : k = k'' <;>
+          simp only [h₃, setBy, h₂, ↓reduceIte, lookupBy, ih]
+
+/-- Overwriting the same key twice keeps only the second write
+(assoc-list core of KeY `simplifyUpdate1-3`). -/
+theorem setBy_setBy_self [DecidableEq κ] (k : κ) (v v' : α)
+    (l : List (κ × α)) : setBy k v' (setBy k v l) = setBy k v' l := by
+  induction l with
+  | nil => simp only [setBy, ↓reduceIte]
+  | cons hd tl ih =>
+      obtain ⟨k'', v''⟩ := hd
+      by_cases h : k = k'' <;> simp only [h, setBy, ↓reduceIte, ih]
+
+/-- A member that `lookupBy` finds is in the list: `age` is a member of `Person`. -/
+theorem lookupBy_eq_some_mem [DecidableEq κ] {k : κ} {v : α} :
+    ∀ {l : List (κ × α)}, lookupBy k l = some v → (k, v) ∈ l
+  | [], h => by simp only [lookupBy, reduceCtorEq] at h
+  | (k', v') :: l, h => by
+    simp only [lookupBy] at h
+    split at h
+    · cases h; rename_i hk; subst hk; exact List.mem_cons_self
+    · exact List.mem_cons_of_mem _ (lookupBy_eq_some_mem h)
 
 end Semantics
 
@@ -599,7 +643,7 @@ fresh default must be well-formed.  `tyHasMapping` and `defaultOk` answer
 these by well-founded recursion through `structDef`, which the kernel
 cannot evaluate; `mapFree` and `defaultOkS` answer them structurally, so
 their proofs are `Eq.refl`, from a list of the structs checked once
-(`mapFree_sound` in `Typing/StoragePreservation.lean`). -/
+(`mapFree_structDef` in `Semantics/Storage.lean`). -/
 
 /-- The structs of `structDef` that hold no mapping. -/
 def mapFreeStructs : List Name :=

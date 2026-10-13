@@ -12,17 +12,16 @@ exactly its length, and a mapping's values are all of its value type.
 `Storage C` is the contract's state variables as one such struct
 (`SFields C.vars`), and a typed path `Path T U` leads from a `T` to a `U`, so
 the storage operations are total except where the program's index is out of
-bounds: they return an `Option`, `none` for that revert (`toRes`).
+bounds: they return an `Option`, `none` for that revert (`TRes.ofOpt`).
 
-The shapes mirror `Semantics.SVal`'s, which `SVal.erase` reads off: an array
-keeps the slots past its end (`shadow`), a mapping its default.  A
-fixed-size array keeps none (no operation puts one there).  Each operation
-follows its untyped namesake in `Semantics.lean` line for line, and
-`Semantics/StorageErase.lean` proves that it erases to it.
+The shapes are solkey's storage trees (`structRules.key`): an array keeps
+the slots past its end (`shadow`), a mapping its default.  A fixed-size
+array keeps none (no operation puts one there).  (The untyped storage this
+mirrored went at W10.5.6.)
 
 Defaults (`SVal.dflt`) are structural on the rank `structDef_rank_lt`
-certifies, so the kernel can reduce them, where `defaultForTy` is
-well-founded; their fuel is `rankBound`, which reads no struct name.
+certifies, so the kernel can reduce them; their fuel is `rankBound`, which
+reads no struct name.
 
 Nothing the kernel evaluates `match`es on the indexed families (Gate G0,
 conditions 1 and 2): `find`, `findLive`, `save`, `SFields.get`/`set` and
@@ -48,8 +47,7 @@ inductive SVal : Ty → Type where
   | prim {p : PrimTy} (v : p.Denote) : SVal (.prim p)
   | struct {s : Name} (fs : SFields (structDef s)) : SVal (.ref (.struct s))
   /-- The live elements, fewer than `2^256` (a length is a `uint`; a push at
-  the bound is out of gas, `Storage.full`), and the slots past the end
-  (`Semantics.SVal.array`). -/
+  the bound is out of gas, `Storage.full`), and the slots past the end. -/
   | array {E : Ty} {n : Nat} (elems : SVec E n) (shadow : SList E) (hn : n < 2 ^ 256) :
       SVal (.ref (.array E))
   | fixed {E : Ty} {n : Nat} (elems : SVec E n) : SVal (.ref (.fixed E n))
@@ -80,7 +78,7 @@ end
 
 /-! ## Folds
 
-Every function the kernel evaluates on a whole value (`SVal.erase`,
+Every function the kernel evaluates on a whole value (`SVal.dflt`,
 `defaultOf`, `strip`, `overlay`, `beq`, the `toList`s, `SVal.copyStToM`) is
 one fold: what it computes at each type (`Fold.V`, …) and its step at each
 constructor, given the results on the constructor's arguments.  A fold is the
@@ -276,67 +274,6 @@ def SMap.uncons {U : Ty} (m : SMap U) : Option (Int × SVal U × SMap U) :=
   @SMap.casesOn (fun U _ => Option (Int × SVal U × SMap U)) U m none
     (fun {_} k v rest => some (k, v, rest))
 
-/-! ## Erasure -/
-
-/-- The untyped value. -/
-def eraseFold : Fold where
-  V _ := Semantics.SVal
-  F _ := List (Name × Semantics.SVal)
-  L _ := List Semantics.SVal
-  W _ _ := List Semantics.SVal
-  M _ := List (Int × Semantics.SVal)
-  prim := fun {p} v => .prim (PrimTy.erase (p := p) v)
-  struct := fun _ ih => .struct ih
-  array := fun _ _ _ ie ish => .array ie ish false
-  fixed := fun _ ie => .array ie [] true
-  map := fun _ _ im id => .map im id
-  fnil := []
-  fcons := fun {f} {_} {_} _ _ iv ir => (f, iv) :: ir
-  lnil := []
-  lcons := fun _ _ iv ir => iv :: ir
-  wnil := []
-  wcons := fun _ _ iv ir => iv :: ir
-  mnil := []
-  mcons := fun k _ _ iv ir => (k, iv) :: ir
-
-/-- The untyped value. -/
-def SVal.erase {T : Ty} (v : SVal T) : Semantics.SVal := v.fold eraseFold
-def SFields.erase {fs : List (Name × Ty)} (x : SFields fs) : List (Name × Semantics.SVal) :=
-  x.fold eraseFold
-def SList.erase {E : Ty} (l : SList E) : List Semantics.SVal := l.fold eraseFold
-def SVec.erase {E : Ty} {n : Nat} (l : SVec E n) : List Semantics.SVal := l.fold eraseFold
-def SMap.erase {U : Ty} (m : SMap U) : List (Int × Semantics.SVal) := m.fold eraseFold
-
-theorem SVal.erase_prim {p : PrimTy} (v : p.Denote) : (SVal.prim v).erase = .prim (PrimTy.erase v) :=
-  rfl
-theorem SVal.erase_struct {s : Name} (fs : SFields (structDef s)) :
-    (SVal.struct fs).erase = .struct fs.erase := rfl
-theorem SVal.erase_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
-    (SVal.array e sh h).erase = .array e.erase sh.erase false := rfl
-theorem SVal.erase_fixed {E : Ty} {n : Nat} (e : SVec E n) :
-    (SVal.fixed e).erase = .array e.erase [] true := rfl
-theorem SVal.erase_map {K U : Ty} (m : SMap U) (d : SVal U) :
-    (SVal.map (K := K) m d).erase = .map m.erase d.erase := rfl
-theorem SFields.erase_nil : (SFields.nil).erase = [] := rfl
-theorem SFields.erase_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
-    (rest : SFields fs) : (SFields.cons (f := f) v rest).erase = (f, v.erase) :: rest.erase := rfl
-theorem SList.erase_nil {E : Ty} : (SList.nil (E := E)).erase = [] := rfl
-theorem SList.erase_cons {E : Ty} (v : SVal E) (rest : SList E) :
-    (SList.cons v rest).erase = v.erase :: rest.erase := rfl
-theorem SVec.erase_nil {E : Ty} : (SVec.nil (E := E)).erase = [] := rfl
-theorem SVec.erase_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
-    (SVec.cons v rest).erase = v.erase :: rest.erase := rfl
-theorem SMap.erase_nil {U : Ty} : (SMap.nil (V := U)).erase = [] := rfl
-theorem SMap.erase_cons {U : Ty} (k : Int) (v : SVal U) (rest : SMap U) :
-    (SMap.cons k v rest).erase = (k, v.erase) :: rest.erase := rfl
-
-attribute [irreducible] SVal.erase SFields.erase SList.erase SVec.erase SMap.erase
-attribute [eqns SVal.erase_prim SVal.erase_struct SVal.erase_array SVal.erase_fixed
-  SVal.erase_map] SVal.erase
-attribute [eqns SFields.erase_nil SFields.erase_cons] SFields.erase
-attribute [eqns SList.erase_nil SList.erase_cons] SList.erase
-attribute [eqns SVec.erase_nil SVec.erase_cons] SVec.erase
-attribute [eqns SMap.erase_nil SMap.erase_cons] SMap.erase
 
 /-! ## Lists, vectors and maps as Lean lists -/
 
@@ -394,9 +331,6 @@ def ofList {E : Ty} : List (SVal E) → SList E
   | .nil => by rw [toList_nil, ofList]
   | .cons v rest => by rw [toList_cons, ofList, ofList_toList rest]
 
-theorem erase_eq {E : Ty} : (l : SList E) → l.erase = l.toList.map SVal.erase
-  | .nil => by simp only [SList.erase, toList, List.map_nil]
-  | .cons v rest => by simp only [SList.erase, toList, List.map_cons, erase_eq rest]
 
 /-- The number of values. -/
 def length {E : Ty} (l : SList E) : Nat := l.toList.length
@@ -428,9 +362,6 @@ theorem length_toList {E : Ty} : {n : Nat} → (v : SVec E n) → v.toList.lengt
   | _, .nil => by rw [toList_nil, List.length_nil]
   | _, .cons _ rest => by rw [toList_cons, List.length_cons, length_toList rest]
 
-theorem erase_eq {E : Ty} : {n : Nat} → (l : SVec E n) → l.erase = l.toList.map SVal.erase
-  | _, .nil => by simp only [SVec.erase, toList, List.map_nil]
-  | _, .cons v rest => by simp only [SVec.erase, toList, List.map_cons, erase_eq rest]
 
 /-- `n` copies of a value. -/
 def replicate {E : Ty} (v : SVal E) : (n : Nat) → SVec E n
@@ -545,9 +476,6 @@ def ofList {V : Ty} : List (Int × SVal V) → SMap V
   | [] => by rw [ofList, toList_nil]
   | (k, v) :: rest => by rw [ofList, toList_cons, toList_ofList rest]
 
-theorem erase_eq {V : Ty} : (m : SMap V) → m.erase = m.toList.map (fun e => (e.1, e.2.erase))
-  | .nil => by simp only [SMap.erase, toList, List.map_nil]
-  | .cons k v rest => by simp only [SMap.erase, toList, List.map_cons, erase_eq rest]
 
 end SMap
 
@@ -637,7 +565,7 @@ theorem SVal.zero_lt_bound : 0 < 2 ^ 256 := by decide
 
 /-! ## Defaults
 
-`SVal.dflt T` is `defaultForTy T`: by recursion on a bound `k` of the rank,
+`SVal.dflt T` is `T`'s default: by recursion on a bound `k` of the rank,
 and inside one rank structurally on the type; a struct's members are of a
 smaller rank (`structDef_rank_lt`). -/
 
@@ -694,7 +622,7 @@ theorem tyRank_le_rankBound : (T : Ty) → tyRank T ≤ rankBound T
   | .ref (.fixed E _) => Nat.succ_le_succ (tyRank_le_rankBound E)
   | .ref (.mapping _ V) => tyRank_le_rankBound V
 
-/-- The default of `T` (`defaultForTy`). -/
+/-- The default of `T`. -/
 def SVal.dflt (T : Ty) : SVal T :=
   SVal.dfltBelow (rankBound T + 1) T (Nat.lt_succ_of_le (tyRank_le_rankBound T))
 
@@ -719,7 +647,7 @@ inductive Path : Ty → Ty → Type where
 
 namespace Path
 
-/-- The untyped segments. -/
+/-- The segments, as the side conditions read them (`Theory/Segs.lean`). -/
 def erase : {T U : Ty} → Path T U → List Semantics.Seg
   | _, _, .nil => []
   | _, _, @Path.field _ f _ _ _ p => .field f :: p.erase
@@ -888,7 +816,7 @@ def SVal.saveM : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal 
       let x' ← d.saveM p new
       some (.map (.ofList (setBy k x' m.toList)) d)
 
-/-- The value at a path (`Semantics.SVal.find`): `none` where an index is past
+/-- The value at a path (solkey's `find`): `none` where an index is past
 the slots. -/
 @[implemented_by SVal.findM]
 def SVal.find {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
@@ -916,7 +844,7 @@ def SVal.find {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
     T U p v
 
 /-- A read that checks every index against the live length
-(`Semantics.SVal.findLive`): `find` past an array's end is `none`. -/
+(`findLive`): `find` past an array's end is `none`. -/
 @[implemented_by SVal.findLiveM]
 def SVal.findLive {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
   @Path.rec (fun T U _ => SVal T → Option (SVal U))
@@ -942,7 +870,7 @@ def SVal.findLive {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
       | none => ih w.2)
     T U p v
 
-/-- The value with the one at a path replaced (`Semantics.SVal.save`). -/
+/-- The value with the one at a path replaced (solkey's `save`). -/
 @[implemented_by SVal.saveM]
 def SVal.save {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) : Option (SVal T) :=
   @Path.rec (fun T U _ => SVal T → SVal U → Option (SVal T))
@@ -1033,7 +961,7 @@ def defaultOfFold : Fold where
   mnil := .nil
   mcons := fun k v rest _ _ => .cons k v rest
 
-/-- `delete`'s value (`Semantics.SVal.defaultOf`): primitives reset, members
+/-- `delete`'s value (solkey's `delAt`): primitives reset, members
 and elements recursively, a dynamic array emptied into the slots past its
 end, a mapping left as it is. -/
 @[implemented_by SVal.defaultOfM]
@@ -1148,7 +1076,7 @@ def stripFold : Fold where
   mnil := .nil
   mcons := fun k v rest _ _ => .cons k v rest
 
-/-- A value as written to slots nothing has written (`Semantics.SVal.strip`):
+/-- A value as written to slots nothing has written (`strip`):
 no slots past an array's end. -/
 @[implemented_by SVal.stripM]
 def SVal.strip {T : Ty} (v : SVal T) : SVal T := v.fold stripFold
@@ -1261,7 +1189,7 @@ def overlayFold : Fold where
   mnil := ()
   mcons := fun _ _ _ _ _ => ()
 
-/-- A copy of `new` written over `old` (`Semantics.SVal.overlay`): member by
+/-- A copy of `new` written over `old` (`overlay`): member by
 member in their order, as solc copies, element by element over the slots
 it lands on, the old elements past the new length cleared, a mapping kept. -/
 @[implemented_by SVal.overlayM]
@@ -1545,7 +1473,7 @@ instance SVal.decEq {T : Ty} : DecidableEq (SVal T) := fun _ _ => decidable_of_i
 instance SFields.decEq {fs : List (Name × Ty)} : DecidableEq (SFields fs) :=
   fun _ _ => decidable_of_iff _ SFields.beq_iff
 
-/-- The slot `push` lands on (`Semantics.pushSlot`), and the slots left. -/
+/-- The slot `push` lands on, and the slots left. -/
 def pushSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
   | [] => (SVal.dflt E, [])
   | c :: rest => (if E.isPrimitive then SVal.dflt E else c, rest)
@@ -1607,8 +1535,6 @@ def atKey {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R)) (it : IndexTy 
     (i : k.Denote) : SRef C V :=
   r.index it (PrimTy.key i)
 
-/-- The untyped reference: `(root, segs)`. -/
-def erase {U : Ty} (r : SRef C U) : Name × List Semantics.Seg := (r.root, r.path.erase)
 
 end SRef
 
@@ -1616,11 +1542,9 @@ namespace Storage
 
 variable {C : Contract}
 
-/-- The untyped storage. -/
-def erase (st : Storage C) : List (Name × Semantics.SVal) := SFields.erase st
 
-/-- The storage a contract starts with: every state variable at its default
-(`Contract.initStorage`). -/
+/-- The storage a contract starts with: every state variable at its
+default. -/
 def init (C : Contract) : Storage C := SFields.dflt C.vars
 
 /-- The value at a reference (`State.findStorage`). -/
@@ -2086,8 +2010,7 @@ theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT
 /-! ## The stores
 
 The ported contracts' stores, typed: each a named constant, so a proof about
-one unfolds it only where it reads it (the kernel then reduces `SVal.dflt`,
-which `defaultForTy` does not let it). -/
+one unfolds it only where it reads it. -/
 
 namespace Storage
 

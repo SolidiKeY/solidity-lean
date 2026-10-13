@@ -17,14 +17,13 @@ pushed, or both revert), the slot sequences (`boundsCheck_run`,
 sequences of `delete`, `pop`, a copy and a `push` (`zeroCode_run`,
 `popCode_run`, `storeLeaves_run`, `pushSlotCode_run`).
 
-**Word arithmetic.**  The operators' tails are proved against the integer
-arithmetic of the untyped operators (`applyBinOp`, `checkArith`,
-`Semantics.lean`), on the integers a word represents (`ReprW`, `ValOutW`,
-private here): `tail_sim` and its signed half.  The typed operators are that
-arithmetic range-checked (`BinOp.evalT_erase`, `UnOp.evalT_erase`,
-`Semantics/Ops.lean`), so the typed tails (`tail_simT`, `neg_simT`,
-`bnot_simT`, `compound_simT`, `bump_simT`) read them off it; nothing outside
-this file reads an untyped value.
+**Word arithmetic.**  The operators' tails are proved against integer
+arithmetic on ABI words (`applyBinOp`, `checkArith`, private here), on the
+integers a word represents (`ReprW`, `ValOutW`): `tail_sim` and its signed
+half.  The typed operators are that arithmetic range-checked
+(`binOp_evalT_erase`, `unOp_evalT_erase`), so the typed tails (`tail_simT`,
+`neg_simT`, `bnot_simT`, `compound_simT`, `bump_simT`) read them off it;
+nothing outside this file computes on words.
 -/
 
 namespace Solidity
@@ -77,7 +76,204 @@ theorem ValOutT.opt_cases {p : PrimTy} {o : Option p.Denote} {out : Out} {m : Ma
 
 section Words
 
-open Semantics SemanticsProperties
+open Semantics
+
+/-! ## Word arithmetic
+
+The operators on ABI words (`Semantics.Value`): the integer arithmetic the
+guard tails below are proved on, which the typed operators range-check
+(`BinOp.evalT`, `UnOp.evalT`, `Semantics/Ops.lean`).  `binOp_evalT_erase`
+and `unOp_evalT_erase` are the agreement: on an operand type the operator
+accepts, the word operator is the typed one erased, so it is never `undef`.
+They are private here: nothing else computes on words. -/
+
+/-- How word arithmetic halts: a revert, or an operand of the other kind. -/
+private inductive Halt where
+  | revert
+  | undef
+
+private abbrev Res (α : Type) := Except Halt α
+
+private theorem Res.ok_bind {α β : Type} (a : α) (f : α → Res β) :
+    (Except.ok a >>= f : Res β) = f a := rfl
+
+private theorem Res.error_bind {α β : Type} (e : Halt) (f : α → Res β) :
+    (Except.error e >>= f : Res β) = .error e := rfl
+
+private def Value.asInt : Value -> Res Int
+  | Value.int v => .ok v
+  | Value.bool _ => .error .undef
+
+private def Value.asBool : Value -> Res Bool
+  | Value.bool b => .ok b
+  | Value.int _ => .error .undef
+
+/-- Arithmetic and relational operators on values. `/` and `%` revert on
+a zero divisor (KeY `divisionAssignment`/`moduloAssignment`), and `**` on
+a negative exponent (solc's exponent is a `uint`, never negative on the EVM;
+here one can be, from an out-of-range environment value or storage word).  The bitwise operators, the shifts and the
+wrapping arithmetic are solc's at `uint256`: `~x` is `2^256 - 1 - x`,
+`x << n` is `x * 2^n` modulo `2^256`, `x >> n` is `x / 2^n`, a shift by
+`256` or more gives `0`, and `+%` (what `unchecked { a + b; }` is) is `a + b`
+modulo `2^256`. -/
+private def applyBinOp (op : BinOp) (l r : Value) : Res Value :=
+  match op with
+  | .add => do .ok (Value.int ((← Value.asInt l) + (← Value.asInt r)))
+  | .sub => do .ok (Value.int ((← Value.asInt l) - (← Value.asInt r)))
+  | .mul => do .ok (Value.int ((← Value.asInt l) * (← Value.asInt r)))
+  | .pow => do
+      let b ← Value.asInt l
+      let e ← Value.asInt r
+      if e < 0 then .error .revert else .ok (Value.int (b ^ e.toNat))
+  | .div => do
+      let d ← Value.asInt r
+      if d = 0 then .error .revert
+      else .ok (Value.int (Int.tdiv (← Value.asInt l) d))
+  | .mod => do
+      let d ← Value.asInt r
+      if d = 0 then .error .revert
+      else .ok (Value.int (Int.tmod (← Value.asInt l) d))
+  | .lt => do .ok (Value.bool (decide ((← Value.asInt l) < (← Value.asInt r))))
+  | .gt => do .ok (Value.bool (decide ((← Value.asInt r) < (← Value.asInt l))))
+  | .le => do .ok (Value.bool (decide ((← Value.asInt l) ≤ (← Value.asInt r))))
+  | .ge => do .ok (Value.bool (decide ((← Value.asInt r) ≤ (← Value.asInt l))))
+  | .eqB => .ok (Value.bool (decide (l = r)))
+  | .neB => .ok (Value.bool (!decide (l = r)))
+  | .and => do .ok (Value.bool ((← Value.asBool l) && (← Value.asBool r)))
+  | .or => do .ok (Value.bool ((← Value.asBool l) || (← Value.asBool r)))
+  -- the `uint` operators with no overflow to check (`BinOp.accepts`): their
+  -- result is below `2^256` already, so `checkArith` passes it
+  | .band => do .ok (Value.int (uintBitwise (· &&& ·) (← Value.asInt l) (← Value.asInt r)))
+  | .bor => do .ok (Value.int (uintBitwise (· ||| ·) (← Value.asInt l) (← Value.asInt r)))
+  | .bxor => do .ok (Value.int (uintBitwise (· ^^^ ·) (← Value.asInt l) (← Value.asInt r)))
+  | .shl => do
+      let a ← Value.asInt l
+      let n ← Value.asInt r
+      .ok (Value.int (if n < 256 then a * 2 ^ n.toNat % uintBound else 0))
+  | .shr => do
+      let a ← Value.asInt l
+      let n ← Value.asInt r
+      .ok (Value.int (if n < 256 then a / 2 ^ n.toNat else 0))
+  | .addW => do .ok (Value.int (((← Value.asInt l) + (← Value.asInt r)) % uintBound))
+  | .subW => do .ok (Value.int (((← Value.asInt l) - (← Value.asInt r)) % uintBound))
+  | .mulW => do .ok (Value.int ((← Value.asInt l) * (← Value.asInt r) % uintBound))
+  | .powW => do
+      let b ← Value.asInt l
+      let e ← Value.asInt r
+      if e < 0 then .error .revert else .ok (Value.int (b ^ e.toNat % uintBound))
+
+private def applyUnOp (op : UnOp) (v : Value) : Res Value :=
+  match op with
+  | .neg => do .ok (Value.int (-(← Value.asInt v)))
+  | .not => do .ok (Value.bool (!(← Value.asBool v)))
+  | .bnot => do .ok (Value.int (uintBound - 1 - (← Value.asInt v)))
+
+/-- Checked-arithmetic gate: revert when an arithmetic result leaves
+its Solidity type's range (solc's `Panic(0x11)`); non-integer results
+and non-arithmetic types pass through. -/
+private def checkArith (ty : Ty) : Value -> Res Value
+  | Value.int n =>
+      match ty with
+      | Ty.uint =>
+          if 0 ≤ n ∧ n < uintBound then .ok (Value.int n)
+          else .error .revert
+      | Ty.int =>
+          if -intBound ≤ n ∧ n < intBound then .ok (Value.int n)
+          else .error .revert
+      -- An integer at a non-arithmetic type skips the range gate.  Only
+      -- reachable through kind confusion, which `wtExpr` does not pin.
+      | Ty.bool => .ok (Value.int n)
+      | Ty.ref _ => .ok (Value.int n)
+  | Value.bool b => .ok (Value.bool b)
+
+/-- `-x` is range-checked at `int` only. -/
+private def unopCheck (op : UnOp) (p : PrimTy) (v : Value) : Res Value :=
+  match op, p with
+  | .neg, .int => checkArith .int v
+  | _, _ => pure v
+
+/-- `a ⊕ b` on values, the right operand evaluated only when the left does not decide. -/
+private def evalBinop (op : BinOp) (p : PrimTy) (lv : Value) (b : Res Value) : Res Value :=
+  match op, lv with
+  | .and, .bool false => pure (.bool false)
+  | .or, .bool true => pure (.bool true)
+  | _, _ => do checkArith (op.retTy (.prim p)) (← applyBinOp op lv (← b))
+
+/-- An `Option` as a run's result: `none` is a revert, the one way a typed
+operation fails.  A typed operation's agreement with its untyped namesake
+reads `untyped (erase x) = toRes erase (typed x)`, so the untyped one is
+never `undef` there. -/
+private def toRes {α β : Type} (f : α → β) : Option α → Res β
+  | some a => .ok (f a)
+  | none => .error .revert
+
+
+/-- `checkArith` is `ofInt?` erased, at a numeric type. -/
+private theorem checkArith_ofInt {p : PrimTy} (hp : p.isNumeric = true) (n : Int) :
+    checkArith (.prim p) (.int n) = toRes PrimTy.erase (p.ofInt? n) := by
+  cases p with
+  | bool => cases hp
+  | uint =>
+    simp only [checkArith, PrimTy.ofInt?, PrimTy.ofValue?, PrimTy.inRange,
+      Semantics.uintBound, decide_eq_true_eq]
+    by_cases hb : 0 ≤ n ∧ n < ((2 ^ 256 : Nat) : Int)
+    · rw [if_pos hb, dif_pos hb]; rfl
+    · rw [if_neg hb, dif_neg hb]; rfl
+  | int =>
+    simp only [checkArith, PrimTy.ofInt?, PrimTy.ofValue?, PrimTy.inRange,
+      Semantics.intBound, decide_eq_true_eq]
+    by_cases hb : -((2 ^ 255 : Nat) : Int) ≤ n ∧ n < ((2 ^ 255 : Nat) : Int)
+    · rw [if_pos hb, dif_pos hb]; rfl
+    · rw [if_neg hb, dif_neg hb]; rfl
+
+/-- `applyBinOp` on two integers is `BinOp.arithInt`, at an arithmetic operator. -/
+private theorem applyBinOp_int {op : BinOp} (hA : op.isArith = true) (x y : Int) :
+    applyBinOp op (.int x) (.int y) = toRes Value.int (BinOp.arithInt op x y) := by
+  cases op <;> simp only [BinOp.isArith, Bool.false_eq_true] at hA <;>
+    simp only [applyBinOp, BinOp.arithInt, Value.asInt, bind, Except.bind] <;>
+    first | rfl | (split <;> rfl)
+
+/-- An arithmetic operator: `applyBinOp`, then the range check. -/
+private theorem evalBinop_arith {op : BinOp} (hA : op.isArith = true) {p : PrimTy}
+    (hp : p.isNumeric = true) (x y : Int) :
+    evalBinop op p (.int x) (.ok (.int y)) =
+      toRes PrimTy.erase ((BinOp.arithInt op x y).bind p.ofInt?) := by
+  have hb : evalBinop op p (.int x) (.ok (.int y)) =
+      Except.bind (applyBinOp op (.int x) (.int y)) (checkArith (.prim p)) := by
+    cases op <;> simp only [BinOp.isArith, Bool.false_eq_true] at hA <;> rfl
+  rw [hb, applyBinOp_int hA]
+  cases BinOp.arithInt op x y with
+  | none => rfl
+  | some n => exact checkArith_ofInt hp n
+
+/-- **`evalBinop` is `evalT` erased**, at an operand type the operator
+accepts: the untyped operator is never `undef` there. -/
+private theorem binOp_evalT_erase (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : p.Denote) :
+    evalBinop op p (PrimTy.erase a) (.ok (PrimTy.erase b)) = toRes PrimTy.erase (op.evalT a b) := by
+  cases p <;> cases op <;> (first | exact absurd h (by decide) | skip)
+  all_goals first
+    | exact evalBinop_arith rfl rfl a.1 b.1
+    | rfl
+    | (cases a <;> rfl)
+    | (simp only [evalBinop, applyBinOp, checkArith, BinOp.evalT, BinOp.evalNum,
+        BinOp.evalBool, toRes, bind, Except.bind, PrimTy.erase, Semantics.PrimVal.int.injEq,
+        Semantics.PrimVal.bool.injEq] <;> rfl)
+
+/-- **`applyUnOp` then `unopCheck` is `evalT` erased**, at an operand type the
+operator accepts. -/
+private theorem unOp_evalT_erase (op : UnOp) {p : PrimTy} (h : op.accepts p = true) (a : p.Denote) :
+    (do unopCheck op p (← applyUnOp op (PrimTy.erase a))) =
+      toRes PrimTy.erase (op.evalT a) := by
+  cases op <;> cases p <;> first | exact absurd h (by decide) | skip
+  · exact checkArith_ofInt (p := .int) rfl _
+  · rfl
+  · have hx := a.2
+    simp only [PrimTy.inRange, decide_eq_true_eq] at hx
+    have h' : PrimTy.uint.inRange (Semantics.uintBound - 1 - a.1) = true := by
+      simp only [PrimTy.inRange, decide_eq_true_eq, Semantics.uintBound]
+      omega
+    simp only [UnOp.evalT, PrimTy.ofInt?, PrimTy.ofValue?, dif_pos h']
+    rfl
 
 /-! ## The guard sequences -/
 
@@ -602,21 +798,21 @@ private theorem erase_numeric {p : PrimTy} (hp : p.isNumeric = true) (x : p.Deno
 private theorem compound_erase {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy}
     (hp : p.isNumeric = true) (x y : p.Denote) :
     (applyBinOp op (PrimTy.erase x) (PrimTy.erase y) >>= checkArith (.prim p)) =
-      Solidity.toRes PrimTy.erase
+      toRes PrimTy.erase
         (Solidity.compoundT op p (PrimTy.key x) (PrimTy.key y)) := by
   have hA : op.isArith = true := by
     cases op <;> simp only [BinOp.hasCompoundAssign, Bool.false_eq_true] at hop <;> rfl
-  rw [erase_numeric hp x, erase_numeric hp y, BinOp.applyBinOp_int hA]
+  rw [erase_numeric hp x, erase_numeric hp y, applyBinOp_int hA]
   unfold Solidity.compoundT
   cases BinOp.arithInt op (PrimTy.key x) (PrimTy.key y) with
   | none => rfl
-  | some n => exact PrimTy.checkArith_ofInt hp n
+  | some n => exact checkArith_ofInt hp n
 
 /-- `x++`'s new value, checked: `bumpT` erased. -/
 private theorem bump_erase {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) (x : Int) :
     checkArith (.prim p) (.int (if op.isIncrement then x + 1 else x - 1)) =
-      Solidity.toRes PrimTy.erase (Solidity.bumpT op p x) :=
-  PrimTy.checkArith_ofInt hp _
+      toRes PrimTy.erase (Solidity.bumpT op p x) :=
+  checkArith_ofInt hp _
 
 /-! ## Typed values -/
 
@@ -650,7 +846,7 @@ private theorem reprV_iff {p : PrimTy} {v : p.Denote} {w : Word} :
 
 /-- A typed operator's outcome read off its untyped one. -/
 private theorem ValOutT.ofW {p : PrimTy} {o : Option p.Denote} {out : Out} {m : Machine}
-    (h : ValOutW p (Solidity.toRes PrimTy.erase o) out m) : ValOutT p (TRes.ofOpt o) out m := by
+    (h : ValOutW p (toRes PrimTy.erase o) out m) : ValOutT p (TRes.ofOpt o) out m := by
   cases o with
   | none =>
     rcases h with ⟨_, _, h, _⟩ | ⟨_, h⟩
@@ -676,7 +872,7 @@ theorem tail_simT {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand 
     ValOutT (op.ret p) (TRes.ofOpt (op.evalT a b))
       (run (binTail p op) { m with stack := wb :: wa :: m.stack }) m := by
   apply ValOutT.ofW
-  rw [← BinOp.evalT_erase op hacc, evalBinop_eq hand hor]
+  rw [← binOp_evalT_erase op hacc, evalBinop_eq hand hor]
   exact tail_sim hop hand hor (reprV_iff.1 ha) (reprV_iff.1 hb) m
 
 /-- `-x` at `int`: the negation, or a revert at `-2^255`. -/
@@ -684,7 +880,7 @@ theorem neg_simT {a : PrimTy.int.Denote} {wa : Word} (ha : ReprV .int a wa) (m :
     ValOutT .int (TRes.ofOpt (UnOp.neg.evalT a)) (run negCode (m.push wa)) m := by
   obtain ⟨x, rfl, hx, hax⟩ := ha
   apply ValOutT.ofW
-  rw [← UnOp.evalT_erase .neg rfl a]
+  rw [← unOp_evalT_erase .neg rfl a]
   simp only [Machine.push]
   rw [neg_run m m.stack hx]
   change ValOutW _ (checkArith (.prim .int) (.int (-a.1))) _ _
@@ -697,7 +893,7 @@ theorem neg_simT {a : PrimTy.int.Denote} {wa : Word} (ha : ReprV .int a wa) (m :
 theorem bnot_simT {a : PrimTy.uint.Denote} {wa : Word} (ha : ReprV .uint a wa) (m : Machine) :
     ValOutT .uint (TRes.ofOpt (UnOp.bnot.evalT a)) (run [.not] (m.push wa)) m := by
   apply ValOutT.ofW
-  rw [← UnOp.evalT_erase .bnot rfl a]
+  rw [← unOp_evalT_erase .bnot rfl a]
   obtain ⟨x, hx, hza, rfl⟩ := (reprV_iff.1 ha).uint_inv
   rw [hza]
   have := W_pos
@@ -808,8 +1004,8 @@ theorem netAt_pay {C : Contract} {Γ : Ctx} (τ : State C Γ) (x y a : Int) :
   · simp only [State.pay, netAt, h1, ↓reduceIte]
   · simp only [State.pay, netAt, h1, ↓reduceIte]
     by_cases h2 : a = x
-    · subst h2; simp only [SemanticsProperties.lookupBy_setBy_self, ↓reduceIte, Option.getD_some]
-    · simp only [SemanticsProperties.lookupBy_setBy_ne h2, h2, ↓reduceIte]
+    · subst h2; simp only [Semantics.lookupBy_setBy_self, ↓reduceIte, Option.getD_some]
+    · simp only [Semantics.lookupBy_setBy_ne h2, h2, ↓reduceIte]
 
 variable {C : Contract} {L : Nat}
 

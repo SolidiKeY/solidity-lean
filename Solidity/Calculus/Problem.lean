@@ -1,4 +1,4 @@
-import Solidity.Calculus.WtBridge
+import Solidity.Typing.CanonTest
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.NotationResolve
 import Solidity.Calculus.Quote
@@ -28,7 +28,7 @@ assumes most of what Solidity guarantees of a deployed contract's storage:
 every root canonical and tight, which is exactly reachable
 (`shape_iff_reachable`, for every key and slot in range), and every mapping
 key in its key type's range (`Storage.wtB`, `wt_iff_reachable`; the term
-runs the test on the erasure, `Calculus/WtBridge.lean`).  Reachable is by
+runs that test, `Semantics/StorageWt.lean`).  Reachable is by
 the typed interpreter (`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
@@ -82,13 +82,12 @@ def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
   .defined (.app1 .wt (.app0 .storage))
 
 /-- `wt(storage)` holds in a typed state exactly when its storage passes the
-typed test (`Storage.wtB`), for a contract that declares no root twice. -/
-theorem holds_wt (hnd : nodupKeysB C.vars = true) {Γ : Ctx} {σ : State C Γ} :
+test (`Storage.wtB`). -/
+theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
     holds σ (Fml.wt C) ↔ σ.storage.wtB = true := by
   rw [Fml.wt, holds_defined]
   show (Storage.wtT σ.storage) ≠ none ↔ _
   unfold Storage.wtT
-  rw [storageWtB_erase hnd]
   cases σ.storage.wtB with
   | true => exact ⟨fun _ => rfl, fun _ h => nomatch h⟩
   | false => exact ⟨fun h => absurd rfl h, fun h => nomatch h⟩
@@ -124,9 +123,9 @@ theorem wt_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage 
 
 /-- The contract's initial storage is well-formed (the empty program reaches
 it), so the premise is satisfiable. -/
-theorem initStorage_wt (hnd : nodupKeysB C.vars = true)
-    (hdeep : C.vars.all (·.2.okDeep) = true) : holds (State.init C) (Fml.wt C) :=
-  (holds_wt hnd).2 (wt_of_reachable hdeep
+theorem initStorage_wt (hdeep : C.vars.all (·.2.okDeep) = true) :
+    holds (State.init C) (Fml.wt C) :=
+  holds_wt.2 (wt_of_reachable hdeep
     ⟨[], .nil, ⟨State.init C, List.prefix_refl _⟩, Prog.run_nil _, rfl⟩)
 
 /-! ## The obligations
@@ -150,7 +149,7 @@ def Problem.fml (m : Modality) (xs : List (PrimTy × Var)) {Γ' : Ctx}
 /-- solkey's deployment update,
 `{storage := mtSt ‖ net := storeSt(mtSt, at(msgSender), msgValue) ‖ selfBalance := msgValue}`:
 the empty storage, a ledger holding the deployer's payment, and the value
-sent as the contract's funds (`Contract.deployState`). -/
+sent as the contract's funds (`State.deploy`). -/
 def Problem.deployUpd (C : Contract) {Γ : Ctx} : Upd C Γ Γ :=
   ((Upd.nil.snoc (.storage (.app0 .mtSt))).snoc
     (.netMt (.app0 (.env .msgSender)) (.app0 (.env .msgValue)))).snoc
@@ -239,7 +238,7 @@ premise `wt(storage)`, which solkey's has not.  A deployment is printed
 with its update, solkey's specified one: solkey's unspecified constructor
 problem writes `{storage := mtSt || net := mtSt}`, an empty ledger and free
 funds, where the interpreter's deployment books the payment
-(`Contract.deployState`). -/
+(`State.deploy`). -/
 def Problem.text (contract fn : String) (φ : Fml C []) : String :=
   match Problem.parts φ with
   | none => "(not an obligation)"

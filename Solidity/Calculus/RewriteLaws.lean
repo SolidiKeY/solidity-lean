@@ -40,7 +40,6 @@ under the exemption of `Calculus/RewriteScoped.lean`'s walks (proposal 104).
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
-open Semantics (Res)
 
 variable {C : Contract}
 

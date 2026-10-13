@@ -46,8 +46,8 @@ What does not close, and why:
   (`Examples/Tactics/CallOperands.lean` pins it open, and writes its push rows as
   chains for this);
 * a default read out of a fresh memory object (`Person memory m;
-  uint x = m.age;`): the default of a struct type is a well-founded
-  definition (`defaultForTy`) that `simp` does not unfold.
+  uint x = m.age;`): the default of a struct type (`SVal.dflt`) is
+  fuelled by the type's rank, which `simp` does not unfold.
 -/
 
 namespace Solidity
@@ -59,14 +59,13 @@ namespace Close
 open Lean Elab Tactic Meta in
 /-- Whether the main goal is a scoped leaf's: it or its context reads a
 typed state (`Solidity.State`, `Valid`, `holds`), or what the scoped closer
-leaves of one past an update (`CloseS.Landed`, `CloseS.LandedAll`, a
-`Locs`: a premise `Nonempty (Landed …)` once the rest reads no landed
-state).  `Calculus/CloseScoped.lean`'s steps run on such a goal only,
+leaves of one past an update (`CloseS.Landed`, `CloseS.LandedAll`: a
+premise `Nonempty (Landed …)` once the rest reads no landed state).  `Calculus/CloseScoped.lean`'s steps run on such a goal only,
 reading it with `close_rw_s`. -/
 def scopedGoal : TacticM Bool := withMainContext do
   let names : List Lean.Name :=
     [`Solidity.State, `Solidity.Valid, `Solidity.holds, `Solidity.CloseS.Landed,
-     `Solidity.CloseS.LandedAll, `Solidity.Locs]
+     `Solidity.CloseS.LandedAll]
   let hit (e : Expr) : Bool := (e.find? fun x => x.isConst && names.contains x.constName!).isSome
   if hit (← instantiateMVars (← getMainTarget)) then return true
   for d in ← getLCtx do

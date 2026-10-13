@@ -6,7 +6,7 @@ import Solidity.Theory.Bridge.Denote
 
 The lemmas `sol_close`'s set `close_rw_s` (`Calculus/CloseScoped.lean`)
 reads a scoped leaf with, below its term equations: weakest preconditions
-(`Modality.wp`) over the evaluators' `Res`, a few facts of integers and
+(`Modality.wp`) over a result (`TRes`), a few facts of integers and
 ledgers, and the typed symbols `Op0`–`Op3` (`Signature.lean`) read one
 constructor at a time on the typed global part (`Close.Op2.eval_find`, …,
 each its `casesOn` arm by `rfl`), from which the scoped set's term
@@ -16,14 +16,14 @@ equations follow.  The untyped interpreter's write-naming lemmas
 
 namespace Solidity
 
-open Semantics SemanticsProperties
+open Semantics
 
 /-! ## Weakest preconditions -/
 
 /-- `P` of what `x` returns, or `m.onHalt` when it halts: under the box
 `[ alice.age = 1; ] φ` holds of a state without `alice`, under the diamond
 it does not. -/
-def Modality.wp {α : Type} (m : Modality) (x : Res α) (P : α → Prop) : Prop :=
+def Modality.wp {α : Type} (m : Modality) (x : TRes α) (P : α → Prop) : Prop :=
   match x with
   | .ok a => P a
   | .error _ => m.onHalt
@@ -39,7 +39,7 @@ variable {α β : Type} {m : Modality}
 @[simp] theorem Modality.wp_pure {a : α} {P : α → Prop} : m.wp (pure a) P ↔ P a := Iff.rfl
 
 /-- A run that halts: `revert();` proves every box formula, no diamond one. -/
-@[simp] theorem Modality.wp_error {e : Halt} {P : α → Prop} : m.wp (.error e) P ↔ m.onHalt :=
+@[simp] theorem Modality.wp_error {e : THalt} {P : α → Prop} : m.wp (.error e) P ↔ m.onHalt :=
   Iff.rfl
 
 /-- Under the box a halt is fine: `[ revert(); ] false`. -/
@@ -50,23 +50,23 @@ variable {α β : Type} {m : Modality}
 
 /-- Sequencing: `y = x + 1` evaluates `x`, then adds, then range-checks, and
 the postcondition is asked of the last. -/
-theorem Modality.wp_bind {x : Res α} {f : α → Res β} {P : β → Prop} :
+theorem Modality.wp_bind {x : TRes α} {f : α → TRes β} {P : β → Prop} :
     m.wp (x >>= f) P ↔ m.wp x (fun a => m.wp (f a) P) := by
   cases x <;> exact Iff.rfl
 
 /-- A range check: `y = x + 1` at `uint` returns `x + 1` when it is below
 `2²⁵⁶`, and reverts otherwise. -/
-theorem Modality.wp_ite {c : Prop} [Decidable c] {x y : Res α} {P : α → Prop} :
+theorem Modality.wp_ite {c : Prop} [Decidable c] {x y : TRes α} {P : α → Prop} :
     m.wp (if c then x else y) P ↔ (c → m.wp x P) ∧ (¬ c → m.wp y P) := by
   by_cases h : c <;> simp [h]
 
 /-- The box, of a step nothing is known about: whatever it returns. -/
-theorem Modality.wp_box {x : Res α} {P : α → Prop} :
+theorem Modality.wp_box {x : TRes α} {P : α → Prop} :
     Modality.box.wp x P ↔ ∀ a, x = .ok a → P a := by
   cases x <;> simp [Modality.wp, Modality.onHalt]
 
 /-- The diamond: it returns, and what it returns satisfies `P`. -/
-theorem Modality.wp_diamond {x : Res α} {P : α → Prop} :
+theorem Modality.wp_diamond {x : TRes α} {P : α → Prop} :
     Modality.diamond.wp x P ↔ ∃ a, x = .ok a ∧ P a := by
   cases x <;> simp [Modality.wp, Modality.onHalt]
 
@@ -83,9 +83,9 @@ theorem forall_unit {P : PUnit.{1} → Prop} : (∀ u, P u) ↔ P PUnit.unit :=
 theorem exists_unit {P : PUnit.{1} → Prop} : (∃ u, P u) ↔ P PUnit.unit :=
   ⟨fun ⟨u, h⟩ => by cases u; exact h, fun h => ⟨_, h⟩⟩
 /-- `pure` in a run is `ok`. -/
-theorem pure_eq_ok {α : Type} (a : α) : (pure a : Res α) = .ok a := rfl
+theorem pure_eq_ok {α : Type} (a : α) : (pure a : TRes α) = .ok a := rfl
 /-- A run followed by nothing is the run. -/
-theorem bind_ok_right {α : Type} (x : Res α) : (x >>= fun a => Except.ok a) = x := by
+theorem bind_ok_right {α : Type} (x : TRes α) : (x >>= fun a => Except.ok a) = x := by
   cases x <;> rfl
 
 /-- `12 & 10` on numerals: `Nat`'s `&&&`, which `Nat.reduceAnd` computes.  An
@@ -107,8 +107,8 @@ one elsewhere. -/
 theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
     lookupBy k (setBy k' v l) = if k = k' then some v else lookupBy k l := by
   split
-  · subst_vars; exact SemanticsProperties.lookupBy_setBy_self _ _ _
-  · exact SemanticsProperties.lookupBy_setBy_ne ‹_› _ _
+  · subst_vars; exact Semantics.lookupBy_setBy_self _ _ _
+  · exact Semantics.lookupBy_setBy_ne ‹_› _ _
 
 /-! ## The symbols, one at a time -/
 

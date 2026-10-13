@@ -30,7 +30,7 @@ theorems (Gate G0).
 
 namespace Solidity
 
-open Semantics (Halt Res lookupBy setBy)
+open Semantics (lookupBy setBy)
 variable {C : Contract}
 
 theorem Idx.ty_eq_of_toNat {Γ : Ctx} {t u : LTy} {i : Idx Γ t} {j : Idx Γ u}

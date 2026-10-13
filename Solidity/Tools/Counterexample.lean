@@ -507,7 +507,7 @@ def Cand.tstate (C : Contract) (c : Cand C) : Solidity.State C [] :=
 def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
     (payable : Bool) : Gen (Cand C) := do
   let dom := poolVals lits
-  let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (PrimTy.default p) (dom p))
+  let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (PrimTy.erase (PrimTy.dflt p)) (dom p))
   let sender ← pickD 1 ([1, 2] ++ uintPool lits)
   let argInts := args.filterMap fun (_, v) => match v with
     | .int n => some n

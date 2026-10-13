@@ -67,7 +67,7 @@ member at a time.
 
 namespace Solidity.Examples.Tactics.SelectOnSaveConsr
 
-open Semantics SemanticsProperties Close
+open Semantics Close
 
 local instance : InContract := ⟨StandardExample⟩
 

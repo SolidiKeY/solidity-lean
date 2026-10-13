@@ -10,28 +10,11 @@ stuck: a short circuit runs exactly as its unfolded `if`.
 -/
 
 namespace Solidity
-open Solidity (Modality Srt Op0 Op1 Op2 Op3 evalBinop)
-open Semantics (Value SVal MVal Seg Halt Res)
+open Solidity (Modality Srt Op0 Op1 Op2 Op3)
+open Semantics (Value Seg)
 
 variable {C : Contract}
 
-section Local
-
-variable {Γ : Ctx} {m : Modality}
-
-theorem evalBinop_and_true (bv : Value) :
-    evalBinop .and .bool bv (.ok (.bool true)) = evalBinop .and .bool (.bool true) (.ok bv) := by
-  cases bv with
-  | int n => rfl
-  | bool x => cases x <;> rfl
-
-theorem evalBinop_or_false (bv : Value) :
-    evalBinop .or .bool bv (.ok (.bool false)) = evalBinop .or .bool (.bool false) (.ok bv) := by
-  cases bv with
-  | int n => rfl
-  | bool x => cases x <;> rfl
-
-end Local
 
 open Solidity (Modality)
 

@@ -1,5 +1,6 @@
 import Solidity.Update
 import Solidity.Semantics.Run
+import Solidity.Semantics.StorageWt
 import Solidity.Theory.Typed.Obs
 
 /-!
@@ -269,9 +270,10 @@ def Grown.then {H : HTy} {α : HTy → Type} (m : Grown H (fun _ => Unit)) (n : 
     Grown H (fun _ => Unit) :=
   ⟨m.ext.trans n.ext, n.heap, ()⟩
 
-/-- The `storageWtB` test on a typed storage. -/
+/-- `wt(storage)`: `true` on a storage passing the test (`Storage.wtB`,
+`Semantics/StorageWt.lean`), undefined on any other. -/
 def Storage.wtT (st : Storage C) : Option PrimTy.bool.Denote :=
-  if storageWtB C.vars st.erase then some (true : Bool) else none
+  if st.wtB then some (true : Bool) else none
 
 /-- `p[p.length]` in `st`: the slot past the live elements. -/
 def Storage.nextT {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) : Option (SRef C E) :=

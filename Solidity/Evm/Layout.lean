@@ -1,5 +1,4 @@
 import Solidity.Evm.Machine
-import Solidity.Semantics.Properties
 
 /-!
 # Storage layout and the code sequences

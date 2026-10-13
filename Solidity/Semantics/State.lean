@@ -1,4 +1,3 @@
-import Solidity.Semantics
 import Solidity.Syntax.Quote
 import Solidity.Semantics.Heap
 
@@ -11,15 +10,11 @@ holds a typed storage and a heap whose typing `H` is a field, not an index,
 so a statement's run keeps its type.  An allocation grows the heap
 (`State.adopt`, from a `Grown` heap) and weakens the locals along the
 extension (`TEnv.wk`), which only rewrites a memory local's proof: the
-identities stay, so the erasure does too.
+identities stay.
 
-The terms read the typed state itself (`Signature.lean`, W9.8).  Its
-value-level erasure, the global part (`State.globE`, `Semantics.lean`'s
-state with no locals) and each local at its type (`State.getE`,
-`State.loc`), is what the untyped interpreter's lemmas are read on.  Each
-operation's erasure is one lemma of `Semantics/Erase.lean`
-(`State.adopt_globE`, `State.copyStToM_erase`, …): this module imports no
-erasure module (W10.5.1).
+The terms read the typed state itself (`Signature.lean`, W9.8), and so do
+the run's invariants (`Typing/`), the EVM simulation (`Evm/Sim.lean`) and
+the tools: there is no untyped state (W10.5.6).
 -/
 
 namespace Solidity
@@ -50,19 +45,6 @@ def TDenote.wk {H H' : HTy} (e : H <+: H') : (t : LTy) → t.TDenote C H → t.T
   | .old, st => st
   | .oldNet, l => l
   | .kint, n => n
-
-/-- A local's value, erased. -/
-def TDenote.erase {H : HTy} : (t : LTy) → t.TDenote C H → t.Denote C
-  | .val p, v => PrimTy.erase (p := p) v
-  | .alias _, a => a.map SRef.erase
-  | .mem _, r => (r : Option (HRef H _)).map (·.id)
-  | .old, st => Storage.erase (st : Storage C)
-  | .oldNet, l => l
-  | .kint, n => n
-
-theorem TDenote.erase_wk {H H' : HTy} (e : H <+: H') :
-    (t : LTy) → (v : t.TDenote C H) → TDenote.erase t (TDenote.wk e t v) = TDenote.erase t v
-  | .val _, _ | .alias _, _ | .mem _, none | .mem _, some _ | .old, _ | .oldNet, _ | .kint, _ => rfl
 
 end LTy
 
@@ -106,32 +88,27 @@ theorem get_wk {H' : HTy} (e : H <+: H') {t : LTy} : {Γ : Ctx} → (i : Idx Γ 
 
 end TEnv
 
-/-- The locals of `Γ`, erased, by position. -/
-abbrev Locs (C : Contract) (Γ : Ctx) : Type := (t : LTy) → Idx Γ t → t.Denote C
-
-/-- A local pushed. -/
-def Locs.push {Γ : Ctx} {t : LTy} (ℓ : Locs C Γ) (v : t.Denote C) : Locs C (t :: Γ) :=
-  fun _ j => match j with
-    | .here => v
-    | .there i => ℓ _ i
-
 /-! ## States -/
 
-/-- The transaction, typed (`Semantics.TxEnv`): its words are `uint`s, so
-`msg.sender` and the other values of the environment are in range by
-construction.  The outcomes of external calls stay untyped data, read back
-at their types when a `try` decodes them. -/
+/-- The transaction: KeY's program variables `msgSender` and `msgValue`
+(`netHeader.key`), the contract's own address and the block's timestamp,
+`uint`s, so in range by construction; and how each external call it makes
+ends (`ext`), a call it has no entry for reaching an address with no code
+(which a `try` reverts on, and a `send` pays: `sendT`).  Two identical
+calls, or two `send`s of one amount to one address, read the same entry.
+No statement changes them, and a callback leaves them as they were: a
+re-entrant call runs in its own transaction, which the caller never sees.
+The outcomes are ABI data (`Semantics.ExtResult`), read back at their types
+when a `try` decodes them.  The calculus reads none of `ext`: a `try` has a
+goal for every way its call may end (`tryCallNoCallbackBox`), a `send` one
+for each outcome (`sendNoCallbackBox`), so a proof holds whatever the table
+says. -/
 structure TTx where
   msgSender : PrimTy.uint.Denote := PrimTy.dflt .uint
   selfAddress : PrimTy.uint.Denote := PrimTy.dflt .uint
   msgValue : PrimTy.uint.Denote := PrimTy.dflt .uint
   timestamp : PrimTy.uint.Denote := PrimTy.dflt .uint
   ext : List (Semantics.ExtKey × Semantics.ExtResult) := []
-
-/-- The untyped transaction. -/
-def TTx.erase (t : TTx) : Semantics.TxEnv :=
-  { msgSender := t.msgSender.1, selfAddress := t.selfAddress.1, msgValue := t.msgValue.1,
-    timestamp := t.timestamp.1, ext := t.ext }
 
 /-- A state in the context `Γ`, typed: the storage at the contract's
 types, a heap and its typing, the locals typed over it, the contract's own
@@ -148,19 +125,6 @@ structure State (C : Contract) (Γ : Ctx) where
 namespace State
 
 variable {Γ : Ctx}
-
-/-- The global part of a typed state, erased: the storage and the heap
-erased, the next identity the heap's length, no locals. -/
-def globE (σ : State C Γ) : Semantics.State :=
-  { storage := σ.storage.erase, heap := σ.heap.erase, nextId := σ.H.length, net := σ.net,
-    selfBalance := σ.selfBalance.1, tx := σ.tx.erase }
-
-/-- A local, erased at its type. -/
-abbrev getE (σ : State C Γ) {t : LTy} (i : Idx Γ t) : t.Denote C :=
-  LTy.TDenote.erase t (TEnv.get i σ.env)
-
-/-- A typed state's locals, erased, by position. -/
-def loc (σ : State C Γ) : Locs C Γ := fun _ i => σ.getE i
 
 /-- The state a contract starts in: every state variable at its default, no
 memory, no locals. -/
@@ -217,7 +181,7 @@ def copyMToSt {T : Ty} (σ : State C Γ) (v : MVal σ.H T) : SVal T := MVal.copy
 so the heap typing grows by three; its `age` reads its default.  By the
 kernel: the copy is a fold. -/
 example : (let g := (State.init StandardExample).allocDefault (.struct "Person") rfl
-    (g.1.H.length, MVal.erase (.prim .uint) (g.1.heap.field g.2 (f := "age") rfl))) =
+    (g.1.H.length, PrimTy.erase (p := .uint) (g.1.heap.field g.2 (f := "age") rfl))) =
     (3, .int 0) := by
   decide +kernel
 

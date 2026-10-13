@@ -17,8 +17,8 @@ A dynamic array holds fewer than `2^256` elements (`SVal.array`, `MObj`), so
 a length is a `uint` (`Storage.len`, `Heap.lenU`).  A push onto `2^256 - 1`
 elements exhausts the resources: the run halts with `exhausted`
 (`Storage.full`, decision 15), which both modalities accept, as KeY, which
-models no gas, reads every run that runs out of it; the untyped push, which
-has no bound, goes on (`docs/solc-alignment.md`, "Array lengths").
+models no gas, reads every run that runs out of it (`docs/solc-alignment.md`,
+"Array lengths").
 
 The heap only grows, and a call sets its caller's locals aside while the body
 runs, so each step returns its state with the extension of the heap typing
@@ -45,7 +45,7 @@ theorem RefTy.mapFree_of_newArrOk {R : RefTy} (h : R.newArrOk = true) :
   exact h.1
 
 
-open Semantics (Value Seg Halt Res lookupBy setBy ExtKey ExtResult structDef)
+open Semantics (Value Seg lookupBy setBy ExtKey ExtResult structDef)
 
 variable {C : Contract}
 
@@ -67,16 +67,9 @@ abbrev TRes (α : Type) := Except THalt α
 theorem ok_bind {ε α β : Type} (a : α) (k : α → Except ε β) :
     (Except.ok a : Except ε α) >>= k = k a := rfl
 
-def THalt.erase : THalt → Halt
-  | .revert => .revert
-  | .panic => .panic
-  | .diverge => .diverge
-  | .exhausted => .diverge
-
-/-- A typed result as an untyped one. -/
-def TRes.erase {α β : Type} (f : α → β) : TRes α → Res β
-  | .ok a => .ok (f a)
-  | .error h => .error h.erase
+/-- A bind of a result that halts: the halt. -/
+theorem error_bind {ε α β : Type} (e : ε) (k : α → Except ε β) :
+    (Except.error e : Except ε α) >>= k = .error e := rfl
 
 /-- A typed operation's `none` reverts. -/
 def TRes.ofOpt {α : Type} : Option α → TRes α
@@ -195,18 +188,18 @@ end Heap
 /-! ## Operators -/
 
 /-- `a && b` and `a || b` decided by `a` alone: the right operand is not
-evaluated (`evalBinop`'s first arms). -/
+evaluated. -/
 def _root_.Solidity.BinOp.shortT : (op : BinOp) → {p : PrimTy} → p.Denote → Option (op.ret p).Denote
   | .and, .bool, x => if boolT x then none else some (false : Bool)
   | .or, .bool, x => if boolT x then some (true : Bool) else none
   | _, _, _ => none
 
 /-- `a ⊕= b` at a numeric type: the operator on the integers, then the range
-check (`opStore`). -/
+check. -/
 def compoundT (op : BinOp) (p : PrimTy) (x y : Int) : Option p.Denote :=
   (BinOp.arithInt op x y).bind p.ofInt?
 
-/-- `x++`/`x--` at a numeric type (`bumpStore`). -/
+/-- `x++`/`x--` at a numeric type. -/
 def bumpT (op : IncDec) (p : PrimTy) (x : Int) : Option p.Denote :=
   p.ofInt? (if op.isIncrement then x + 1 else x - 1)
 
@@ -218,8 +211,8 @@ theorem newArr_lt {E : Ty} (n : PrimTy.uint.Denote) (v : SVal E) :
   rw [List.length_replicate]
   omega
 
-/-- What `new R(n)` allocates, as the storage value it is a copy of
-(`newArrVal`): `n` default elements. -/
+/-- What `new R(n)` allocates, as the storage value it is a copy of: `n`
+default elements. -/
 def newArrT : (R : RefTy) → PrimTy.uint.Denote → R.newArrOk = true → SVal (.ref R)
   | .array E, n, _ => .array (SVec.ofList (List.replicate n.1.toNat (SVal.dflt E))) .nil
       (newArr_lt n _)
@@ -411,7 +404,7 @@ def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : Int) : Out C 
   | none | some (.ok _) => ⟨(σ.pay addr amt).setLocal pv (true : Bool), List.prefix_refl _⟩
   | some _ => ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩
 
-/-- The call as it is made: its receiver and arguments, untyped. -/
+/-- The call as it is made: its receiver and arguments, as ABI words. -/
 def ExtCall.keyT (σ : State C Γ) (c : ExtCall C Γ) : ExtKey :=
   ⟨(c.addr.evalT σ).1, c.fn, c.args.map fun a => PrimTy.erase (a.2.evalT σ)⟩
 

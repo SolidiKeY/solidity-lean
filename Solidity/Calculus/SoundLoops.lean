@@ -27,7 +27,7 @@ import Solidity.Semantics.NoPanic
 -/
 
 namespace Solidity
-open Semantics (Value Res Halt)
+open Semantics (Value)
 open Solidity (Modality Mutability)
 
 variable {C : Contract}

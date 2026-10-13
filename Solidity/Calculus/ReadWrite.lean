@@ -1,5 +1,4 @@
 import Solidity.Update
-import Solidity.Semantics.Properties
 
 /-!
 # The closers' simp sets, and the type declared at a path

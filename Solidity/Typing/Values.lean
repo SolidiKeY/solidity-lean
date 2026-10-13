@@ -1,4 +1,5 @@
 import Solidity.Theory.Typed.Obs
+import Solidity.Semantics.StorageWt
 
 /-!
 # Typed storage values, hereditarily
@@ -541,13 +542,6 @@ end Dflt
 end AllLemmas
 
 /-! ## Keys and live slots along a path -/
-
-/-- A mapping key a literal writes: a number in its type's range, a `bool`
-key `0` or `1` (`false`/`true`, as `PrimTy.key` hashes them). -/
-def PrimTy.keyFits : PrimTy → Int → Bool
-  | .bool, k => k == 0 || k == 1
-  | .uint, k => PrimTy.uint.inRange k
-  | .int, k => PrimTy.int.inRange k
 
 /-- A mapping key that fits its key type: a word key in its range; a
 reference key is never indexed. -/

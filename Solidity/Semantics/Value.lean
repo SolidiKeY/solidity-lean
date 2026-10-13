@@ -8,10 +8,10 @@ Decision 3, M4a): a `bool` a `Bool`, a `uint` or an `int` an integer in its
 type's range.  Arithmetic stays on `Int`, so the kernel never unfolds
 `Nat.land` on a `uint` (56642ee); the range is a proof beside the number.
 
-`PrimTy.erase` is the value the untyped interpreter holds for it
-(`Semantics.Value`), and `PrimTy.ofValue?` reads one back, where the untyped
-value has the type: what a typed step's erasure reads
-(`Semantics/TypedErase.lean`).
+`PrimTy.erase` is its ABI word (`Semantics.Value`): what a call's
+arguments and returned data are made of and what the tools print, and
+`PrimTy.ofValue?` reads one back, where the word has the type: what a `try`
+decodes and what the tools take as arguments.
 -/
 
 namespace Solidity
@@ -59,9 +59,6 @@ def ofValue? : (p : PrimTy) → Semantics.Value → Option p.Denote
     else none
   | .bool, .int _ | .uint, .bool _ | .int, .bool _ => none
 
-theorem erase_dflt : (p : PrimTy) → erase (dflt p) = PrimTy.default p
-  | .bool | .uint | .int => rfl
-
 theorem ofValue?_erase : {p : PrimTy} → (v : p.Denote) → ofValue? p (erase v) = some v
   | .bool, _ => rfl
   | .uint, ⟨_, h⟩ => dif_pos h
@@ -87,14 +84,6 @@ theorem erase_injective {p : PrimTy} {v w : p.Denote} (h : erase v = erase w) : 
   rw [h, ofValue?_erase w] at this
   exact (Option.some.inj this).symm
 
-/-- A numeric value is the integer it holds: `Value.asInt` never fails on one. -/
-theorem asInt_erase_uint (v : PrimTy.uint.Denote) : Semantics.Value.asInt (erase v) = .ok v.1 := rfl
-
-theorem asInt_erase_int (v : PrimTy.int.Denote) : Semantics.Value.asInt (erase v) = .ok v.1 := rfl
-
-/-- A `bool` is the Boolean it holds: `Value.asBool` never fails on one. -/
-theorem asBool_erase (v : PrimTy.bool.Denote) : Semantics.Value.asBool (erase v) = .ok v := rfl
-
 /-- A mapping key as the integer it is hashed as.  solc hashes a key padded
 to a word (`keccak256(h(k) . p)`), and a `bool` pads to `0` or `1`, so
 `mapping(bool => V)` keeps two slots, at the keys `0` and `1`
@@ -104,23 +93,7 @@ def key : {p : PrimTy} → p.Denote → Int
   | .uint, n => n.1
   | .int, n => n.1
 
-/-- A key is the integer the untyped interpreter reads at its key type
-(`Value.keyAt`), a `bool` one too. -/
-theorem keyAt_erase_key : {p : PrimTy} → (v : p.Denote) →
-    Semantics.Value.keyAt p (erase v) = .ok (key v)
-  | .uint, _ | .int, _ => rfl
-  | .bool, b => by cases b <;> rfl
-
 end PrimTy
-
-
-/-- An `Option` as a run's result: `none` is a revert, the one way a typed
-operation fails.  A typed operation's agreement with its untyped namesake
-reads `untyped (erase x) = toRes erase (typed x)`, so the untyped one is
-never `undef` there. -/
-def toRes {α β : Type} (f : α → β) : Option α → Semantics.Res β
-  | some a => .ok (f a)
-  | none => .error .revert
 
 
 end Solidity

@@ -1,4 +1,3 @@
-import Solidity.Semantics.WellFormed
 import Solidity.TermSimp
 import Solidity.Theory.Segs
 
@@ -8,7 +7,7 @@ import Solidity.Theory.Segs
 The terms of the calculus are typed (`Signature.lean`: KeY's sorts indexed
 by Solidity types, the symbols over the contract; `Calculus/Fml.lean`: the
 terms, updates and formulas in a context).  The untyped signature that was
-here (`Srt`, `Op0` … `Op3`, read on `Semantics.State`) went at W9.8.3
+here (`Srt`, `Op0` … `Op3`, read on the untyped state) went at W9.8.3
 (`docs/intrinsic.md`), the untyped reading of a halt (`Modality.after`)
 and the untyped callback and loop states (`State.havoc`, `State.anon`) at
 W10.1 (their typed versions are `Modality.afterRunTR`, `Calculus/Logic.lean`,

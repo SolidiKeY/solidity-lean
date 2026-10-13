@@ -16,18 +16,15 @@ family, no cast but the one at an object's own type.
 Allocation appends, so it returns a heap over `H ++ [R]` and the reference,
 and everything typed over `H` is weakened along the prefix (`H <+: H'`, the
 returned extension that replaces `HeapTy.Extends`).  A weakening keeps every
-identity, so it erases to the same untyped value.
+identity.
 
-The two copies follow `Semantics.lean`'s line for line, allocating in the
-same order, so identities agree: `SVal.copyStToM` (storage to memory, a fold
+The two copies allocate as solc does, members and elements first, then the
+object itself: `SVal.copyStToM` (storage to memory, a fold
 of `Semantics/Storage.lean`, so the kernel reduces it) needs a type
 without mappings and cannot fail, and `MVal.copyMToSt` (memory to
 storage) recurses on the type, by rank (fuel `rankBound`, which reads no
 struct name) and inside one rank structurally, as `SVal.dflt` does: a reference's target has a smaller type, so there is no
 cycle to guard against and no `undef` arm.
-
-The untyped heap is the erasure: object `i` at key `i`, `nextId` the length
-of the typing (`Semantics/HeapErase.lean` proves the agreement).
 -/
 
 namespace Solidity
@@ -303,7 +300,7 @@ def copyStToMFold : Fold where
   mcons := fun _ _ _ _ _ => ()
 
 /-- A storage value deep-copied into fresh objects (`copyStToM`), members and
-elements first, as the untyped copy allocates. -/
+elements first. -/
 def SVal.copyStToM {H : HTy} (hp : Heap H) {T : Ty} (v : SVal T) (h : T.mapFree = true) :
     Grown H (MVal · T) :=
   (v.fold copyStToMFold : (H : HTy) → Heap H → T.mapFree = true → Grown H (MVal · T)) H hp h
@@ -442,39 +439,6 @@ def MVal.copyMToSt {T : Ty} (v : MVal H T) : SVal T :=
   MVal.copyBelow hp (rankBound T + 1) T (Nat.lt_succ_of_le (tyRank_le_rankBound T)) v
 
 end CopyMem
-
-/-! ## Erasure -/
-
-/-- The untyped slot. -/
-def MVal.erase {H : HTy} : (T : Ty) → MVal H T → Semantics.MVal
-  | .prim p, v => .prim (PrimTy.erase (p := p) v)
-  | .ref _, r => .ref (r : HRef H _).id
-
-def MFields.erase {H : HTy} : (fs : List (Name × Ty)) → MFields H fs → List (Name × Semantics.MVal)
-  | [], _ => []
-  | (f, T) :: fs, x => (f, MVal.erase T x.1) :: MFields.erase fs x.2
-
-/-- The untyped object: a struct's members named, an array marked fixed or not. -/
-def MObj.erase {H : HTy} : (R : RefTy) → MObj H R → Semantics.MObj
-  | .struct s, o => .struct (MFields.erase (structDef s) o)
-  | .array E, o =>
-    .array ((o : {l : List (MVal H E) // l.length < 2 ^ 256}).1.map (MVal.erase E)) false
-  | .fixed E n, o =>
-    .array ((o : {l : List (MVal H E) // l.length = n}).1.map (MVal.erase E)) true
-  | .mapping _ _, o => (o : Empty).elim
-
-/-- The untyped objects, keyed from `start`. -/
-def Objs.erase {H : HTy} (start : Nat) : (Rs : List RefTy) → Objs H Rs →
-    List (Nat × Semantics.MObj)
-  | [], _ => []
-  | R :: Rs, os => (start, MObj.erase R os.1) :: Objs.erase (start + 1) Rs os.2
-
-/-- The untyped heap: object `i` at key `i`. -/
-def Heap.erase {H : HTy} (hp : Heap H) : List (Nat × Semantics.MObj) := Objs.erase 0 H hp
-
-/-- An untyped state holding a typed heap: `nextId` the next position. -/
-def Heap.into {H : HTy} (σ : Semantics.State) (hp : Heap H) : Semantics.State :=
-  { σ with heap := hp.erase, nextId := H.length }
 
 /-- The empty heap. -/
 def Heap.empty : Heap [] := ()

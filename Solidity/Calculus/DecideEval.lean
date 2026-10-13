@@ -948,14 +948,14 @@ theorem svalRd_rep {p : PrimTy} {w : LTm C (.val p)} {v : p.Denote}
 
 theorem dflt_struct (s : Name) :
     SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
-  SVal.dflt_struct_eq s
+  SVal.dflt_struct s
 
 theorem dflt_map (K V : Ty) : SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
-  SVal.dflt_map_eq K V
+  SVal.dflt_map K V
 
 theorem dflt_fixed (E : Ty) (n : Nat) :
     SVal.dflt (.ref (.fixed E n)) = .fixed (SVec.replicate (SVal.dflt E) n) :=
-  SVal.dflt_fixed_eq E n
+  SVal.dflt_fixed E n
 
 theorem dflt_array (E : Ty) : SVal.dflt (.ref (.array E)) = .array .nil .nil SVal.zero_lt_bound :=
   rfl

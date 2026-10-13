@@ -23,7 +23,7 @@ import Solidity.Calculus.SoundKit
 -/
 
 namespace Solidity
-open Semantics (Value Res Halt)
+open Semantics (Value)
 open Solidity (Modality)
 
 variable {C : Contract}
@@ -43,9 +43,6 @@ theorem Args.capture_snoc {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var) 
 end Args
 
 /-! ## A body run in its frame -/
-
-theorem Res.ok_bind' {α β : Type} (a : α) (f : α → Res β) :
-    Except.bind (Except.ok a : Res α) f = f a := rfl
 
 open Semantics (lookupBy)
 open Solidity (Modality)
