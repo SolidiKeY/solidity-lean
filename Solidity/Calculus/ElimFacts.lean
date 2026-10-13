@@ -168,7 +168,7 @@ theorem Op2.eqBFact_sound {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm
     ∃ x, (e.l.eval g ν : Option e.p.Denote) = some x ∧ e.r.eval g ν = some x := by
   cases o <;> simp only [Op2.eqBFact, reduceCtorEq] at he
   rename_i op p hop
-  cases op <;> simp only [Op2.eqBFact, reduceCtorEq, Option.some.injEq] at he
+  cases op <;> simp only [reduceCtorEq, Option.some.injEq] at he
   subst he
   cases hs
   have ht' : ((LTm.app2 (.binop .eqB hop) x y).eval g ν : Option Bool) = some true := ht

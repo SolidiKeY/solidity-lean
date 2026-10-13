@@ -520,10 +520,24 @@ theorem LTm.eval_cond {p : PrimTy} (c : LTm C (.val .bool)) (a b : LTm C (.val p
         cases (c.eval g ν : Option Bool) with
         | none => rfl
         | some x => cases x <;> rfl
-      · rw [LTm.eval_app3]
-        cases (c.eval g ν : Option Bool) with
-        | none => rfl
-        | some x => cases x <;> rfl
+      · split
+        · rename_i h
+          simp only [Bool.and_eq_true] at h
+          obtain ⟨hac, hb⟩ := h
+          cases p with
+          | bool =>
+            obtain ⟨-, hac⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hac)
+            cases eq_of_heq hac
+            have hb' := LTm.isTT_eval (g := g) (ν := ν) hb
+            rw [seqL_eval, hb']
+            cases hc : (c.eval g ν : Option Bool) with
+            | none => rfl
+            | some x => cases x <;> rfl
+          | uint | int => simp only [LTm.isTrue, Bool.false_eq_true] at hb
+        · rw [LTm.eval_app3]
+          cases (c.eval g ν : Option Bool) with
+          | none => rfl
+          | some x => cases x <;> rfl
 
 theorem LTm.eval_lt_some {a b : LTm C (.val .uint)} {x y : PrimTy.uint.Denote}
     (ha : (a.eval g ν : Option _) = some x) (hb : (b.eval g ν : Option _) = some y) :

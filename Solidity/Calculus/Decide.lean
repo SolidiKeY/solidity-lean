@@ -491,6 +491,12 @@ def LTm.succ (a : LTm C (.val .uint)) : LTm C (.val .uint) := .app2 (.binop .add
 /-- `a - 1` on `uint`s. -/
 def LTm.pred (a : LTm C (.val .uint)) : LTm C (.val .uint) := .app2 (.binop .sub rfl) a (.nat 1)
 
+/-- The term is the literal `true`, at any primitive type. -/
+def LTm.isTrue {p : PrimTy} (t : LTm C (.val p)) : Bool :=
+  match p, t with
+  | .bool, t => t.isTT
+  | _, _ => false
+
 /-- `a + 1` on `uint`s, a literal added where it is one. -/
 def LTm.succK (a : LTm C (.val .uint)) : LTm C (.val .uint) :=
   match a.keyView with
@@ -515,6 +521,7 @@ def LTm.cond {p : PrimTy} (c : LTm C (.val .bool)) (a b : LTm C (.val p)) : LTm 
   if c.isTT then a
   else if c.isFF then b
   else if a.beqR b then seqL c a
+  else if a.beqR c && b.isTrue then seqL c b
   else .app3 .ite c a b
 
 /-- What nothing shows: the default word, length `0`, not there. -/
