@@ -397,7 +397,7 @@ def Fml.eval3C (dom : TDom) : {Γ : Ctx} → State C Γ → Fml C Γ → Tri
   | _, σ, .and φ ψ => (φ.eval3C dom σ).and (ψ.eval3C dom σ)
   | _, σ, .imp φ ψ => (φ.eval3C dom σ).imp (ψ.eval3C dom σ)
   | _, σ, .upd m U φ =>
-    (U.applyV σ).elim (if m = .box then .tt else .ff) fun τ =>
+    (U.applyV σ).elim (if m = .box || U.exh σ then .tt else .ff) fun τ =>
       (σ.lift? τ).elim .unknown fun σ' => if φ.eval3C dom σ' = .ff then .ff else .unknown
   | _, σ, .modal m P κ φ => Tri.afterT m (fun τ => φ.eval3C dom τ) (Prog.runFramesF loopFuel σ P κ)
   | _, σ, .havoc φ =>
@@ -459,9 +459,12 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
     show (_ → U.afterT m σ (holds · φ)) ∧ (_ → ¬ U.afterT m σ (holds · φ))
     rw [Upd.afterT_applyV]
     cases hU : U.applyV σ with
-    | none => cases m <;> simp only [Option.elim, Modality.onHalt, reduceCtorEq, imp_self,
+    | none =>
+      cases m <;> cases U.exh σ <;> simp only [Option.elim, Modality.onHalt, reduceCtorEq, imp_self,
         not_true_eq_false, not_false_eq_true, and_self, true_implies, false_implies, if_true,
-        if_false]
+        if_false, Bool.or_true, Bool.or_false, Bool.true_or, Bool.false_or, decide_true,
+        decide_false, true_or, or_true, false_or, or_false, Bool.false_eq_true, ↓reduceIte,
+        not_false_eq_true, Tri.noConfusion, implies_true]
     | some τ =>
       simp only [Option.elim]
       cases hl : σ.lift? τ with
@@ -546,7 +549,7 @@ def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
     (fun _ ih σ => (ih σ).not)
     (fun _ _ ih₁ ih₂ σ => (ih₁ σ).and (ih₂ σ))
     (fun _ _ ih₁ ih₂ σ => (ih₁ σ).imp (ih₂ σ))
-    (fun m U _ ih σ => (U.applyV σ).elim (if m = .box then .tt else .ff) fun τ =>
+    (fun m U _ ih σ => (U.applyV σ).elim (if m = .box || U.exh σ then .tt else .ff) fun τ =>
       (σ.lift? τ).elim .unknown fun σ' => if ih σ' = .ff then .ff else .unknown)
     (fun m P κ _ ih σ => Tri.afterT m (fun τ => ih τ) (Prog.runFramesF loopFuel σ P κ))
     (fun _ ih σ => if ih σ = .ff || ih (σ.havoc σ.storage []) = .ff then .ff else .unknown)

@@ -395,12 +395,12 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
   cases hd : d.evalT a.st with
   | error e =>
     rw [Val.lower_eval_error d a.st hd] at hglob
-    exact (hY.of_none hglob).elim
+    exact (hY.of_noExh hglob (Upd.exh_of_pushFree (by simp only [Upd.pushFree, Rhs.pushFree, Val.lower_pushFree, Bool.and_self]))).elim
   | ok dv =>
   cases hc : c.evalT a.st with
   | error e =>
     rw [Val.lower_eval_ok d a.st hd, Val.lower_eval_error c a.st hc] at hglob
-    exact (hY.of_none hglob).elim
+    exact (hY.of_noExh hglob (Upd.exh_of_pushFree (by simp only [Upd.pushFree, Rhs.pushFree, Val.lower_pushFree, Bool.and_self]))).elim
   | ok cv =>
   have hdl : (Rhs.val (p := .uint) d.lower).eval a.st =
       some (LTy.VDen.ofT (H := a.st.H) (.val .uint) dv) := by

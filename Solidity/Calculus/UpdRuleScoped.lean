@@ -655,6 +655,135 @@ theorem Upd.shadow_held {Γ : Ctx} (box : Bool) :
     | storage _ | memory _ | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ =>
       exact ih k
 
+theorem ResRel.eq_of_false {α : Type} {a b : Option α} (h : ResRel false (· = ·) a b) : a = b := by
+  cases a <;> cases b
+  · rfl
+  · exact absurd h Bool.false_ne_true
+  · exact h.elim
+  · exact congrArg some h
+
+theorem Rhs.exhB_of_totalB {Γ : Ctx} (σ₀ : State C Γ) {t : LTy} (r : Rhs C Γ t)
+    (h : r.totalB = true) : r.exhB σ₀ = false := by
+  obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r h
+  exact Rhs.exhB_of_eval σ₀ r hv
+
+/-- Under the diamond, dropping the writes to a local keeps the elements out
+of gas. -/
+theorem Upd.unsetAt_exhAny {Γ : Ctx} (i : Nat) (σ₀ : State C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → (U.unsetAtM false i).exhAny σ₀ = U.exhAny σ₀
+  | _, .nil | _, .decl .. | _, .pop .. | _, .drop .. => rfl
+  | _, .snoc U e => by
+    have ih := Upd.unsetAt_exhAny i σ₀ U
+    cases e with
+    | «local» j r =>
+      show (UpdElem.unsetSnoc false i (U.unsetAtM false i) (.local j r)).exhAny σ₀ = _
+      simp only [UpdElem.unsetSnoc]
+      split
+      · rename_i hd
+        simp only [Upd.exhAny, UpdElem.exhB,
+          Rhs.exhB_of_totalB σ₀ r (by simpa only [Bool.false_or] using hd.2), Bool.or_false, ih]
+      · simp only [Upd.exhAny, ih]
+    | _ => simp only [Upd.unsetAtM, UpdElem.unsetSnoc, Upd.exhAny, ih]
+
+/-- Under the diamond, dropping the writes to a local reverts nowhere only
+where the update does not. -/
+theorem Upd.unsetAt_exhOk {Γ : Ctx} (i : Nat) (σ₀ : State C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → (U.unsetAtM false i).exhOk σ₀ = true → U.exhOk σ₀ = true
+  | _, .nil, h | _, .decl .., h | _, .pop .., h | _, .drop .., h => h
+  | _, .snoc U e, h => by
+    have ih := Upd.unsetAt_exhOk i σ₀ U
+    cases e with
+    | «local» j r =>
+      change (UpdElem.unsetSnoc false i (U.unsetAtM false i) (.local j r)).exhOk σ₀ = true at h
+      simp only [UpdElem.unsetSnoc] at h
+      simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true]
+      split at h
+      · rename_i hd
+        obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r (by simpa only [Bool.false_or] using hd.2)
+        refine ⟨ih h, .inl ?_⟩
+        simp only [UpdElem.okB, hv, Option.isSome_some]
+      · simp only [Upd.exhOk, Bool.and_eq_true] at h
+        exact ⟨ih h.1, Bool.or_eq_true_iff.1 h.2⟩
+    | _ =>
+      simp only [Upd.unsetAtM, UpdElem.unsetSnoc, Upd.exhOk, Bool.and_eq_true] at h ⊢
+      exact ⟨ih h.1, h.2⟩
+
+/-- Under the diamond, a declaration given a later write's right-hand side
+keeps the elements out of gas, and reverts nowhere only where the two did
+not. -/
+theorem Upd.redecl_exh {Γ : Ctx} (box : Bool) (hb : box = false) (σ₀ : State C Γ) :
+    {Δ : Ctx} → (W : Upd C Γ Δ) → {t : LTy} → (i : Idx Δ t) → (r : Rhs C Γ t) →
+      {W' : Upd C Γ Δ} → W.redeclM box i r = some W' →
+      W'.exhAny σ₀ = (Upd.snoc W (.local i r)).exhAny σ₀ ∧
+        (W'.exhOk σ₀ = true → (Upd.snoc W (.local i r)).exhOk σ₀ = true)
+  | _, .snoc U e, _, i, r, W', h => by
+    simp only [Upd.redeclM] at h
+    split at h
+    · cases h
+    · obtain ⟨U', hU', rfl⟩ := Option.map_eq_some_iff.1 h
+      obtain ⟨ih₁, ih₂⟩ := Upd.redecl_exh box hb σ₀ U i r hU'
+      simp only [Upd.exhAny] at ih₁
+      refine ⟨by simp only [Upd.exhAny, ih₁, Bool.or_assoc, Bool.or_comm (UpdElem.exhB σ₀ e)],
+        fun hx => ?_⟩
+      simp only [Upd.exhOk, Bool.and_eq_true] at hx ih₂ ⊢
+      obtain ⟨h₁, h₂⟩ := ih₂ hx.1
+      exact ⟨⟨h₁, hx.2⟩, h₂⟩
+  | _, .decl U x r0, _, .here, r, W', h => by
+    simp only [Upd.redeclM] at h
+    split at h
+    · rename_i hr0
+      cases h
+      subst hb
+      have h0 := Rhs.exhB_of_totalB σ₀ r0 (by simpa only [Bool.false_or] using hr0)
+      obtain ⟨v, hv⟩ := Rhs.totalB_eval σ₀ r0 (by simpa only [Bool.false_or] using hr0)
+      refine ⟨by simp only [Upd.exhAny, UpdElem.exhB, h0, Bool.or_false], fun hx => ?_⟩
+      simp only [Upd.exhOk, Bool.and_eq_true, UpdElem.okB, hv, Option.isSome_some,
+        Bool.true_or, and_true, Bool.or_eq_true] at hx ⊢
+      exact ⟨hx.1, hx.2.imp id id⟩
+    · cases h
+  | _, .nil, _, _, _, _, h | _, .pop .., _, _, _, _, h | _, .drop .., _, _, _, _, h => by
+    simp only [Upd.redeclM] at h; cases h
+  | _, .decl .., _, .there _, _, _, h => by simp only [Upd.redeclM] at h; cases h
+
+/-- Under the diamond, an update with its shadowed writes dropped is out of
+gas only where the update is. -/
+theorem Upd.shadow_exh {Γ : Ctx} (σ₀ : State C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) →
+      (U.shadowM false).exhAny σ₀ = U.exhAny σ₀ ∧
+        ((U.shadowM false).exhOk σ₀ = true → U.exhOk σ₀ = true)
+  | _, .nil => ⟨rfl, id⟩
+  | _, .decl U _ r => by
+    obtain ⟨ih₁, ih₂⟩ := Upd.shadow_exh σ₀ U
+    refine ⟨by simp only [Upd.shadowM, Upd.exhAny, ih₁], fun h => ?_⟩
+    simp only [Upd.shadowM, Upd.exhOk, Bool.and_eq_true] at h ⊢
+    exact ⟨ih₂ h.1, h.2⟩
+  | _, .pop U _ => Upd.shadow_exh σ₀ U
+  | _, .drop U _ => Upd.shadow_exh σ₀ U
+  | _, .snoc U e => by
+    obtain ⟨ih₁, ih₂⟩ := Upd.shadow_exh σ₀ U
+    cases e with
+    | «local» j r =>
+      show Upd.exhAny σ₀ ((((U.shadowM false).unsetAtM false j.toNat).redeclM false j r).getD
+          (.snoc ((U.shadowM false).unsetAtM false j.toNat) (.local j r))) = _ ∧
+        (Upd.exhOk σ₀ ((((U.shadowM false).unsetAtM false j.toNat).redeclM false j r).getD
+          (.snoc ((U.shadowM false).unsetAtM false j.toNat) (.local j r))) = true → _)
+      have hk : Upd.exhOk σ₀ (.snoc ((U.shadowM false).unsetAtM false j.toNat) (.local j r)) =
+          true → (Upd.snoc U (.local j r)).exhOk σ₀ = true := fun h => by
+        simp only [Upd.exhOk, Bool.and_eq_true] at h ⊢
+        exact ⟨ih₂ (Upd.unsetAt_exhOk j.toNat σ₀ _ h.1), h.2⟩
+      have ha : Upd.exhAny σ₀ (.snoc ((U.shadowM false).unsetAtM false j.toNat) (.local j r)) =
+          (Upd.snoc U (.local j r)).exhAny σ₀ := by
+        simp only [Upd.exhAny, Upd.unsetAt_exhAny, ih₁]
+      cases hd : ((U.shadowM false).unsetAtM false j.toNat).redeclM false j r with
+      | none => exact ⟨ha, hk⟩
+      | some W' =>
+        obtain ⟨h₁, h₂⟩ := Upd.redecl_exh false rfl σ₀ _ j r hd
+        exact ⟨h₁.trans ha, fun h => hk (h₂ h)⟩
+    | _ =>
+      refine ⟨by simp only [Upd.shadowM, Upd.exhAny, ih₁], fun h => ?_⟩
+      simp only [Upd.shadowM, Upd.exhOk, Bool.and_eq_true] at h ⊢
+      exact ⟨ih₂ h.1, h.2⟩
+
 /-- **`{U} φ` from `U` with its shadowed writes dropped**: under the box
 any write, under the diamond a write that cannot halt. -/
 theorem holds_upd_shadow {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
@@ -664,10 +793,14 @@ theorem holds_upd_shadow {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fm
   refine Upd.afterT_of_lands (fun he h' => ?_) (fun g σ' hL => ?_) h
   · rw [he] at hr
     cases m with
-    | box => trivial
+    | box => exact .inl trivial
     | diamond =>
       cases hb : (U.shadowM Modality.diamond.isBoxS).globT σ with
-      | none => exact h'.of_none hb
+      | none =>
+        refine (h'.of_none hb).imp_right fun hx => ?_
+        obtain ⟨h₁, h₂⟩ := Upd.shadow_exh σ U
+        obtain ⟨hx₁, hx₂⟩ := Bool.and_eq_true_iff.1 hx
+        exact Bool.and_eq_true_iff.2 ⟨h₁ ▸ hx₁, h₂ hx₂⟩
       | some => rw [hb] at hr; exact absurd hr Bool.false_ne_true
   · refine ⟨?_, hL.2.1, fun k => ?_⟩
     · rw [hL.1] at hr

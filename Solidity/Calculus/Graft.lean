@@ -223,6 +223,30 @@ theorem _root_.Solidity.Op3.eval_same {a b c s : Srt} (o : Op3 C a b c s)
 
 end EvalSame
 
+/-! ### Exhaustion read the same -/
+
+theorem _root_.Solidity.Op2.exhB_same {H₀ H₁ : HTy} {a b s : Srt} (o : Op2 C a b s)
+    {x : Option (a.Den C H₀)} {x' : Option (a.Den C H₁)}
+    {y : Option (b.Den C H₀)} {y' : Option (b.Den C H₁)}
+    (hx : Srt.SameO a x x') (hy : Srt.SameO b y y') : o.exhB x y = o.exhB x' y' := by
+  cases o <;> first | rfl | (same_subst hx x x'; same_subst hy y y'; cases x <;> cases y <;> rfl)
+
+theorem _root_.Solidity.Op3.exhB_same {H₀ H₁ : HTy} {a b c s : Srt} (o : Op3 C a b c s)
+    {x : Option (a.Den C H₀)} {x' : Option (a.Den C H₁)}
+    {y : Option (b.Den C H₀)} {y' : Option (b.Den C H₁)}
+    {z : Option (c.Den C H₀)} {z' : Option (c.Den C H₁)}
+    (hx : Srt.SameO a x x') (hy : Srt.SameO b y y') (hz : Srt.SameO c z z') :
+    o.exhB x y z = o.exhB x' y' z' := by
+  cases o <;> first | rfl | (same_subst hx x x'; same_subst hy y y'; same_subst hz z z'; cases x <;> cases y <;> cases z <;> rfl)
+
+theorem Srt.SameO.isSome {H₀ H₁ : HTy} {k : Srt} {x : Option (k.Den C H₀)}
+    {y : Option (k.Den C H₁)} (h : Srt.SameO k x y) : x.isSome = y.isSome := by
+  cases x <;> cases y <;> first | rfl | exact Option.noConfusion h
+
+theorem Srt.SameO.isNone {H₀ H₁ : HTy} {k : Srt} {x : Option (k.Den C H₀)}
+    {y : Option (k.Den C H₁)} (h : Srt.SameO k x y) : x.isNone = y.isNone := by
+  cases x <;> cases y <;> first | rfl | exact Option.noConfusion h
+
 /-- An update that writes locals only: the global part of the state it is
 applied in is the one it leaves. -/
 def Upd.envOnly {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
@@ -530,6 +554,171 @@ theorem GlobT.map_val_bind {H₀ H₁ : HTy} {o₀ : Option (GlobT C H₀)} {o�
   · exact Option.noConfusion h
   · exact hf _ _ (Option.some.inj h)
 
+/-- **A term out of gas in the state before is out of gas in every typed
+state the update lands on.** -/
+theorem Tm.exhB_substH (hL : U.Lands σ₀ g σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) :
+    {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → t.substH U.held U.envOnly st = some t' →
+      t'.exhB σ₀ = true → t.exhB σ₁ = true
+  | _, .app1 o x, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.app1 o x) h
+    simp only [Tm.substH] at h
+    split at h
+    · obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
+      simp only [Tm.exhB, Bool.and_eq_true] at hx ⊢
+      exact ⟨hw.isNone ▸ hx.1, Tm.exhB_substH hL hst x hx' hx.2⟩
+    · cases h
+  | _, .netOf i a, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.netOf i a) h
+    have hx₀ := hx
+    have h₀ := h
+    simp only [Tm.substH] at h
+    split at h
+    · obtain ⟨a', ha', rfl⟩ := Option.map_eq_some_iff.1 h
+      simp only [Tm.exhB, Bool.and_eq_true] at hx ⊢
+      exact ⟨hw.isNone ▸ hx.1, Tm.exhB_substH hL hst a ha' hx.2⟩
+    · cases h
+  | _, .app2 o x y, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.app2 o x y) h
+    simp only [Tm.substH] at h
+    split at h
+    · obtain ⟨x', hx', h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨y', hy', h⟩ := Option.bind_eq_some_iff.1 h
+      cases h
+      have ex := Tm.eval_substH hL hst x hx'
+      have ey := Tm.eval_substH hL hst y hy'
+      simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+      rcases hx with hx | ⟨hn, hx⟩
+      · exact .inl (o.exhB_same ex ey ▸ hx)
+      · refine .inr ⟨hw.isNone ▸ hn, ?_⟩
+        rcases hx with ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩
+        · exact .inl ⟨Tm.exhB_substH hL hst x hx' h₁, ey.isSome ▸ h₂⟩
+        · exact .inr ⟨Tm.exhB_substH hL hst y hy' h₁, ex.isSome ▸ h₂⟩
+    · cases h
+  | _, .app3 o x y z, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.app3 o x y z) h
+    simp only [Tm.substH] at h
+    split at h
+    · obtain ⟨x', hx', h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨y', hy', h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨z', hz', h⟩ := Option.bind_eq_some_iff.1 h
+      cases h
+      have ex := Tm.eval_substH hL hst x hx'
+      have ey := Tm.eval_substH hL hst y hy'
+      have ez := Tm.eval_substH hL hst z hz'
+      simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+      rcases hx with hx | ⟨hn, hx⟩
+      · exact .inl (o.exhB_same ex ey ez ▸ hx)
+      · refine .inr ⟨hw.isNone ▸ hn, ?_⟩
+        rcases hx with (⟨⟨h₁, h₂⟩, h₃⟩ | ⟨⟨h₁, h₂⟩, h₃⟩) | ⟨⟨h₁, h₂⟩, h₃⟩
+        · exact .inl (.inl ⟨⟨Tm.exhB_substH hL hst x hx' h₁, ey.isSome ▸ h₂⟩, ez.isSome ▸ h₃⟩)
+        · exact .inl (.inr ⟨⟨Tm.exhB_substH hL hst y hy' h₁, ex.isSome ▸ h₂⟩, ez.isSome ▸ h₃⟩)
+        · exact .inr ⟨⟨Tm.exhB_substH hL hst z hz' h₁, ex.isSome ▸ h₂⟩, ey.isSome ▸ h₃⟩
+    · cases h
+  | _, .pvV i, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.pvV i) h
+    have hn := Tm.eval_of_exhB σ₀ t' hx
+    rw [hn] at hw
+    exact absurd hw (by nofun)
+  | _, .pvS i, t', h, hx => by
+    have hw := Tm.eval_substH hL hst (Tm.pvS i) h
+    have hn := Tm.eval_of_exhB σ₀ t' hx
+    rw [hn] at hw
+    exact absurd hw (by nofun)
+  | _, .pvP i, t', h, hx => by
+    have hx' := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvP j) | .rhs (.path p) => some p | .rhs .unset => none) =
+          some t' := h
+    generalize U.held i = x at h hx'
+    match x, hx', h with
+    | .pos j, _, h => cases h; simp only [Tm.exhB, Bool.false_eq_true] at hx
+    | .rhs (.path p), hx', h =>
+      cases h
+      have hx'' : (t'.eval σ₀).bind (fun r => some (some r)) = some (TEnv.get i σ₁.env) := hx'
+      rw [Tm.eval_of_exhB σ₀ t' hx, Option.bind_none] at hx''
+      cases hx''
+  | _, .pvI i, t', h, hx => by
+    have hx' := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvI j) | .rhs (.mref t) => some t) = some t' := h
+    generalize U.held i = x at h hx'
+    match x, hx', h with
+    | .pos j, _, h => cases h; simp only [Tm.exhB, Bool.false_eq_true] at hx
+    | .rhs (.mref p), hx', h =>
+      cases h
+      have hx'' : (t'.eval σ₀).bind (fun id => some (some id)) = some (σ₁.getV i) := hx'
+      rw [Tm.eval_of_exhB σ₀ t' hx, Option.bind_none] at hx''
+      cases hx''
+  | _, .app0 o, t', h, hx => by
+    simp only [Tm.substH] at h
+    split at h
+    · cases h; simp only [Tm.exhB, Bool.false_eq_true] at hx
+    · cases o with
+      | storage =>
+        have hs : st = some t' := h
+        rw [Tm.exhB_of_eval σ₀ t' (hst t' hs)] at hx
+        exact hx
+      | _ => cases h
+
+theorem Rhs.exhB_substH (hL : U.Lands σ₀ g σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) {t : LTy} (r : Rhs C Δ t)
+    {r' : Rhs C Γ t} (h : r.substH U.held U.envOnly st = some r') (hx : r'.exhB σ₀ = true) :
+    r.exhB σ₁ = true := by
+  cases r with
+  | val x | path x | mref x | store x =>
+    obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Tm.exhB_substH hL hst x hx' hx
+  | unset => cases h; exact hx
+  | saveNet =>
+    simp only [Rhs.substH] at h
+    split at h
+    · cases h; exact hx
+    · cases h
+  | saveNetMt => cases h; exact hx
+
+/-- An element out of gas in the state before is out of gas in every
+typed state the update lands on. -/
+theorem UpdElem.exhB_substH (hL : U.Lands σ₀ g σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) {Ε : Ctx} (e : UpdElem C Δ Ε)
+    {e' : UpdElem C Γ Ε} (h : e.substH U.held U.envOnly st = some e') (hx : e'.exhB σ₀ = true) :
+    e.exhB σ₁ = true := by
+  cases e with
+  | «local» _ r =>
+    obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Rhs.exhB_substH hL hst r hr' hx
+  | storage x | memory x | setBalance x =>
+    obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Tm.exhB_substH hL hst x hx' hx
+  | selfBalance _ a =>
+    simp only [UpdElem.substH] at h
+    split at h
+    · obtain ⟨a', ha', rfl⟩ := Option.map_eq_some_iff.1 h
+      exact Tm.exhB_substH hL hst a ha' hx
+    · cases h
+  | pay r a =>
+    simp only [UpdElem.substH] at h
+    split at h
+    · obtain ⟨r', hr', h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨a', ha', h⟩ := Option.bind_eq_some_iff.1 h
+      cases h
+      have er := Tm.eval_substH hL hst r hr'
+      have ea := Tm.eval_substH hL hst a ha'
+      simp only [UpdElem.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+      exact hx.imp (fun h => ⟨Tm.exhB_substH hL hst r hr' h.1, ea.isSome ▸ h.2⟩)
+        (fun h => ⟨Tm.exhB_substH hL hst a ha' h.1, er.isSome ▸ h.2⟩)
+    · cases h
+  | net r _ a | netMt r a =>
+    simp only [UpdElem.substH] at h
+    obtain ⟨r', hr', h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨a', ha', h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    have er := Tm.eval_substH hL hst r hr'
+    have ea := Tm.eval_substH hL hst a ha'
+    simp only [UpdElem.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+    exact hx.imp (fun h => ⟨Tm.exhB_substH hL hst r hr' h.1, ea.isSome ▸ h.2⟩)
+      (fun h => ⟨Tm.exhB_substH hL hst a ha' h.1, er.isSome ▸ h.2⟩)
+
 section GlobCongr
 
 variable {H₀ H₁ : HTy} {G₀ : GlobT C H₀} {G₁ : GlobT C H₁}
@@ -819,6 +1008,121 @@ theorem Upd.held_graft (hL : U.Lands σ₀ g₁ σ₁)
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
     exact Upd.held_graft hL hst V hW (i.wk e) v hv
 
+/-- The grafted update reverts nowhere only where `U` does not. -/
+theorem Upd.exhOk_graft_prefix :
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graft U.held U.envOnly st V = some W →
+      W.exhOk σ₀ = true → U.exhOk σ₀ = true
+  | _, .nil, W, h, hx => by cases h; exact hx
+  | _, .snoc V e', W, h, hx => by
+    simp only [Upd.graft] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e'', -, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Upd.exhOk_graft_prefix V hW (Bool.and_eq_true_iff.1 hx).1
+  | _, .decl V x r, W, h, hx => by
+    simp only [Upd.graft] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', -, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Upd.exhOk_graft_prefix V hW (Bool.and_eq_true_iff.1 hx).1
+  | _, .pop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graft_prefix V hW hx
+  | _, .drop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graft_prefix V hW hx
+
+/-- The grafted update is out of gas, where `U` halts, only where `U` is. -/
+theorem Upd.exh_graft_none (hU : U.globT σ₀ = none) {Δ₂ : Ctx} (V : Upd C Δ₁ Δ₂)
+    {W : Upd C Γ Δ₂} (h : U.graft U.held U.envOnly st V = some W) (hx : W.exh σ₀ = true) :
+    U.exh σ₀ = true := by
+  have hk := Upd.exhOk_graft_prefix V h (Bool.and_eq_true_iff.1 hx).2
+  exact Bool.and_eq_true_iff.2 ⟨Upd.exhAny_of_none σ₀ U hk hU, hk⟩
+
+/-- An element substituted returns where the element does, in a state `U`
+lands on. -/
+theorem UpdElem.okB_substH (hL : U.Lands σ₀ g₁ σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) {Ε : Ctx} (e : UpdElem C Δ₁ Ε)
+    {e' : UpdElem C Γ Ε} (h : e.substH U.held U.envOnly st = some e') :
+    e'.okB σ₀ = e.okB σ₁ := by
+  have hm := UpdElem.globT_substH hL hst e h g₁ σ₁.globG hL.2.1.symm
+  rw [← UpdElem.globT_isSome σ₀ e' g₁, ← UpdElem.globT_isSome σ₁ e σ₁.globG]
+  revert hm
+  cases e'.globT σ₀ g₁ <;> cases e.globT σ₁ σ₁.globG <;>
+    simp only [Option.map_none, Option.map_some, reduceCtorEq, Option.isSome_none,
+      Option.isSome_some, imp_self, false_implies, implies_true]
+
+/-- Where `U` lands, the grafted update reverts nowhere only where `V` does
+not. -/
+theorem Upd.exhOk_graft (hL : U.Lands σ₀ g₁ σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) :
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graft U.held U.envOnly st V = some W →
+      W.exhOk σ₀ = true → V.exhOk σ₁ = true
+  | _, .nil, W, h, hx => rfl
+  | _, .snoc V e, W, h, hx => by
+    simp only [Upd.graft] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true] at hx ⊢
+    refine ⟨Upd.exhOk_graft hL hst V hW hx.1, ?_⟩
+    rw [← UpdElem.okB_substH hL hst e he]
+    exact hx.2.imp_right (UpdElem.exhB_substH hL hst e he)
+  | _, .decl V x r, W, h, hx => by
+    simp only [Upd.graft] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true] at hx ⊢
+    rw [← Rhs.eval_substH hL hst r hr]
+    exact ⟨Upd.exhOk_graft hL hst V hW hx.1, hx.2.imp_right (Rhs.exhB_substH hL hst r hr)⟩
+  | _, .pop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graft hL hst V hW hx
+  | _, .drop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graft hL hst V hW hx
+
+/-- Where `U` lands, an element of the grafted update out of gas is one of
+`V`'s. -/
+theorem Upd.exhAny_graft (hL : U.Lands σ₀ g₁ σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) :
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graft U.held U.envOnly st V = some W →
+      W.exhAny σ₀ = true → V.exhAny σ₁ = true
+  | _, .nil, W, h, hx => by
+    cases h
+    rw [Upd.exhAny_of_globT hL.1] at hx
+    cases hx
+  | _, .snoc V e, W, h, hx => by
+    simp only [Upd.graft] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhAny, Bool.or_eq_true] at hx ⊢
+    exact hx.imp (Upd.exhAny_graft hL hst V hW) (UpdElem.exhB_substH hL hst e he)
+  | _, .decl V x r, W, h, hx => by
+    simp only [Upd.graft] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhAny, Bool.or_eq_true] at hx ⊢
+    exact hx.imp (Upd.exhAny_graft hL hst V hW) (Rhs.exhB_substH hL hst r hr)
+  | _, .pop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhAny_graft hL hst V hW hx
+  | _, .drop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhAny_graft hL hst V hW hx
+
+/-- **The grafted update is out of gas where `V` is**, in a state `U`
+lands on. -/
+theorem Upd.exh_graft (hL : U.Lands σ₀ g₁ σ₁)
+    (hst : ∀ x, st = some x → x.eval σ₀ = some σ₁.storage) {Δ₂ : Ctx} (V : Upd C Δ₁ Δ₂)
+    {W : Upd C Γ Δ₂} (h : U.graft U.held U.envOnly st V = some W) (hx : W.exh σ₀ = true) :
+    V.exh σ₁ = true :=
+  Bool.and_eq_true_iff.2 ⟨Upd.exhAny_graft hL hst V h (Bool.and_eq_true_iff.1 hx).1,
+    Upd.exhOk_graft hL hst V h (Bool.and_eq_true_iff.1 hx).2⟩
+
 end GraftT
 
 /-! ## An update moved under a hidden binder
@@ -918,6 +1222,43 @@ theorem Upd.globT_liftG? (σ : State C Γ) (v : t.TDenote C σ.H) : {Δ : Ctx} �
   | _, .drop U _, _, hh => by
     obtain ⟨U', hU, rfl⟩ := Option.map_eq_some_iff.1 hh
     exact Upd.globT_liftG? σ v U hU
+  | _, .decl .., _, h => by cases h
+
+/-- The moved update is out of gas only where the update is. -/
+theorem Upd.exh_liftG? (σ : State C Γ) (v : t.TDenote C σ.H) : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    {U' : Upd C (t :: Γ) (t :: Δ)} → U.liftG? = some U' →
+      (U'.exhAny (σ.push v) = true → U.exhAny σ = true) ∧
+        (U'.exhOk (σ.push v) = true → U.exhOk σ = true)
+  | _, .nil, _, h => by cases h; exact ⟨id, id⟩
+  | _, .snoc U e, _, h => by
+    simp only [Upd.liftG?] at h
+    obtain ⟨U', hU, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    obtain ⟨ih₁, ih₂⟩ := Upd.exh_liftG? σ v U hU
+    have hok : e'.okB (σ.push v) = e.okB σ := by
+      rw [← UpdElem.globT_isSome (σ.push v) e' σ.globG, ← UpdElem.globT_isSome σ e σ.globG]
+      exact congrArg Option.isSome (UpdElem.globT_lift? σ v e he σ.globG)
+    have hex : e'.exhB (σ.push v) = true → e.exhB σ = true := by
+      cases e with
+      | storage x =>
+        obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 he
+        exact Tm.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) x hx'
+      | memory x =>
+        obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 he
+        exact Tm.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) x hx'
+      | «local» _ r =>
+        obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 he
+        exact Rhs.exhB_substH (Upd.lands_dropTop σ v) (fun _ h => Option.noConfusion h) r hr'
+      | selfBalance _ _ | net _ _ _ | pay _ _ | netMt _ _ | setBalance _ => cases he
+    simp only [Upd.exhAny, Upd.exhOk, Bool.or_eq_true, Bool.and_eq_true, hok]
+    exact ⟨fun hx => hx.imp ih₁ hex, fun hx => ⟨ih₂ hx.1, hx.2.imp_right hex⟩⟩
+  | _, .pop U _, _, hh => by
+    obtain ⟨U', hU, rfl⟩ := Option.map_eq_some_iff.1 hh
+    exact Upd.exh_liftG? σ v U hU
+  | _, .drop U _, _, hh => by
+    obtain ⟨U', hU, rfl⟩ := Option.map_eq_some_iff.1 hh
+    exact Upd.exh_liftG? σ v U hU
   | _, .decl .., _, h => by cases h
 
 /-- The moved update keeps the top local. -/
@@ -1100,9 +1441,12 @@ theorem Fml.upd_bind_of_liftG {m m' : Modality} {Γ Δ : Ctx} {U : Upd C Γ Δ} 
     (hψ : m'.forallB fun v : t.TDenote C σ.H => holds (σ.push v) (.upd m U' ψ)) :
     holds σ (.upd m U (.bind m' x t ψ)) := by
   obtain ⟨v₀⟩ := LTy.tdenote_nonempty (C := C) (H := σ.H) t
-  refine Upd.afterT_intro (fun he => ?_) fun g σ' hL => ?_
+  refine Upd.afterT_introX (fun he => ?_) fun g σ' hL => ?_
   · have h₀ : U'.afterT m (σ.push v₀) (holds · ψ) := Modality.forallB_all hψ v₀
-    exact h₀.of_none ((Upd.globT_liftG? σ v₀ U hU').trans he)
+    refine (h₀.of_none ((Upd.globT_liftG? σ v₀ U hU').trans he)).imp_right fun hx => ?_
+    obtain ⟨h₁, h₂⟩ := Upd.exh_liftG? σ v₀ U hU'
+    obtain ⟨hx₁, hx₂⟩ := Bool.and_eq_true_iff.1 hx
+    exact Bool.and_eq_true_iff.2 ⟨h₁ hx₁, h₂ hx₂⟩
   · refine Modality.forallB_intro fun v' => ?_
     have hv : ∃ v : t.TDenote C σ.H, LTy.VDen.ofT t v = LTy.VDen.ofT t v' := by
       rcases Bool.or_eq_true_iff.mp ht with ht | hk
@@ -1197,12 +1541,14 @@ theorem holds_upd_graft {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ�
     (hW : U.graft U.held U.envOnly st V = some W) {φ : Fml C Δ₂} (σ : State C Γ)
     (h : holds σ (.upd m W φ)) : holds σ (.upd m U (.upd m V φ)) := by
   have h : W.afterT m σ (holds · φ) := h
-  refine Upd.afterT_intro (fun hU => h.of_none (Upd.globT_graft_none hU V hW)) fun g₁ σ₁ hL => ?_
+  refine Upd.afterT_introX (fun hU => (h.of_none (Upd.globT_graft_none hU V hW)).imp_right
+    (Upd.exh_graft_none hU V hW)) fun g₁ σ₁ hL => ?_
   have hst' : ∀ x, st = some x → x.eval σ = some σ₁.storage := fun x hx => by
     rw [hst σ g₁ hL.1 x hx, ← hL.2.1]
     rfl
   have hG := Upd.globT_graft hL hst' V hW
-  refine Upd.afterT_intro (fun hV => h.of_none ?_) fun g₂ σ₂ hL₂ => ?_
+  refine Upd.afterT_introX (fun hV => (h.of_none ?_).imp_right (Upd.exh_graft hL hst' V hW))
+    fun g₂ σ₂ hL₂ => ?_
   · rw [hV] at hG
     cases hw : W.globT σ with
     | none => rfl

@@ -600,6 +600,41 @@ theorem nextOf?_some {T : Ty} {n : Tm C Γ (.path T)} {P : Tm C Γ (.path (.ref 
     rfl
   | _ => simp only [Tm.nextOf?, reduceCtorEq] at h
 
+/-- The alias a push binds reads the slot past the end wherever the push is
+out of gas: the parallel update is out of gas where the push alone is. -/
+theorem push_alias_exh {R : RefTy} {P : Tm C Γ (.path (.ref (.array (.ref R))))}
+    {i : Idx Γ (.alias R)} (σ : State C Γ)
+    (hx : (Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) P))).exh σ = true) :
+    ((Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) P))).snoc
+      (.local i (.path (.app1 .next P)))).exh σ = true := by
+  simp only [Upd.exh, Upd.exhAny, Upd.exhOk, Bool.false_or, Bool.true_and, Bool.and_eq_true,
+    Bool.or_eq_true] at hx ⊢
+  refine ⟨.inl hx.1, hx.2, ?_⟩
+  have he : (Tm.app2 Op2.extend (Tm.app0 Op0.storage) P).exhB σ = true := hx.1
+  simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true] at he
+  rcases he with he | ⟨-, ⟨h₁, -⟩ | ⟨h₁, -⟩⟩
+  · left
+    show ((Rhs.path (Tm.app1 .next P)).eval σ).isSome = true
+    rw [Rhs.eval_eq_evalM]
+    show (((Tm.app1 .next P).eval σ).bind fun r => some (some r)).isSome = true
+    rw [CloseS.eval_next]
+    change Op2.exhB .extend (some σ.storage) (P.eval σ) = true at he
+    cases hP : P.eval σ with
+    | none => rw [hP] at he; cases he
+    | some r =>
+      rw [hP] at he
+      have hf : σ.storage.full r = true := he
+      unfold Storage.full at hf
+      cases hw : σ.storage.find r with
+      | none => rw [hw] at hf; cases hf
+      | some w => simp only [Option.bind_some, Storage.nextT, hw, Option.map_some,
+          Option.isSome_some]
+  · cases h₁
+  · right
+    show (Tm.app1 .next P).exhB σ = true
+    simp only [Tm.exhB, Bool.and_eq_true]
+    exact ⟨by rw [CloseS.eval_next, Tm.eval_of_exhB σ P h₁]; rfl, h₁⟩
+
 /-- `pushSplit`'s soundness on the update it splits: a state the parallel
 update lands on, its alias set back to what it held before, is a state the
 push alone lands on, and the alias's own update then lands on the first. -/
@@ -616,7 +651,9 @@ theorem holds_push_alias {m : Modality} {R : RefTy} {P : Tm C Γ (.path (.ref (.
   simp only [CloseS.applyV_snoc, CloseS.applyV_nil, Option.bind_some, CloseS.elem_storage,
     CloseS.glob_storageE, CloseS.elem_local, CloseS.rhs_path] at hψ' ⊢
   cases hS : (Tm.app2 .extend (.app0 .storage) P : Tm C Γ .st).eval σ with
-  | none => simp only [hS, Option.map_none, Option.bind_none] at hψ' ⊢; exact hψ'
+  | none =>
+    simp only [hS, Option.map_none, Option.bind_none] at hψ' ⊢
+    exact hψ'.imp_right (push_alias_exh σ)
   | some st' =>
     obtain ⟨r, w, nv, hr, hw, -, -, -⟩ := extend_typed hS
     have hv : (Tm.app1 .next P).eval σ =

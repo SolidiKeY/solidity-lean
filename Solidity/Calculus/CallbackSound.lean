@@ -221,7 +221,7 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
       show e = .exhausted
       by_cases hx : e = .exhausted
       · exact hx
-      · exact (Upd.afterT.of_none h (Upd.globT_none_of_applyV (hd rfl hx))).elim
+      · exact (Upd.afterT.of_noExh h (Upd.globT_none_of_applyV (hd rfl hx).1) (hd rfl hx).2).elim
 
 /-- **A block that pays nothing, with callbacks.** -/
 theorem holdsC_unfold {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}

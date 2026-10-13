@@ -269,6 +269,9 @@ structure GraftOK {Γ Δ : Ctx} (σ₀ : State C Γ) (σ₁ : State C Δ)
   tm : ∀ {k : Srt} (t : Tm C Δ k) {t' : Tm C Γ k}, F t = some t' →
     Srt.SameO k (t'.eval σ₀) (t.eval σ₁)
   rest : σ₀.glob.SameRest σ₁.glob
+  /-- A term out of gas before is out of gas where the update lands. -/
+  exh : ∀ {k : Srt} (t : Tm C Δ k) {t' : Tm C Γ k}, F t = some t' → t'.exhB σ₀ = true →
+    t.exhB σ₁ = true
 
 section GraftFSound
 
@@ -536,6 +539,141 @@ theorem Upd.held_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ�
     obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
     exact Upd.held_graftFM hL hF V hW (i.wk e) v hv
 
+/-- The grafted update reverts nowhere only where `U` does not. -/
+theorem Upd.exhOk_graftFM_prefix :
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graftFM F V = some W →
+      W.exhOk σ₀ = true → U.exhOk σ₀ = true
+  | _, .nil, W, h, hx => by cases h; exact hx
+  | _, .snoc V e', W, h, hx => by
+    simp only [Upd.graftFM] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e'', -, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Upd.exhOk_graftFM_prefix V hW (Bool.and_eq_true_iff.1 hx).1
+  | _, .decl V x r, W, h, hx => by
+    simp only [Upd.graftFM] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', -, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    exact Upd.exhOk_graftFM_prefix V hW (Bool.and_eq_true_iff.1 hx).1
+  | _, .pop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graftFM_prefix V hW hx
+  | _, .drop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graftFM_prefix V hW hx
+
+/-- The grafted update is out of gas, where `U` halts, only where `U` is. -/
+theorem Upd.exh_graftFM_none (hU : U.globT σ₀ = none) {Δ₂ : Ctx} (V : Upd C Δ₁ Δ₂)
+    {W : Upd C Γ Δ₂} (h : U.graftFM F V = some W) (hx : W.exh σ₀ = true) : U.exh σ₀ = true := by
+  have hk := Upd.exhOk_graftFM_prefix V h (Bool.and_eq_true_iff.1 hx).2
+  exact Bool.and_eq_true_iff.2 ⟨Upd.exhAny_of_none σ₀ U hk hU, hk⟩
+
+theorem Rhs.exhB_mapF (hF : GraftOK σ₀ σ₁ F) {t : LTy} (r : Rhs C Δ₁ t) {r' : Rhs C Γ t}
+    (h : r.mapF F = some r') (hx : r'.exhB σ₀ = true) : r.exhB σ₁ = true := by
+  cases r with
+  | val x | path x | mref x | store x =>
+    obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact hF.exh x hx' hx
+  | unset | saveNet | saveNetMt => cases h; exact hx
+
+/-- An element mapped is out of gas where the element is. -/
+theorem UpdElem.exhB_mapF (hF : GraftOK σ₀ σ₁ F) {Ε : Ctx} (e : UpdElem C Δ₁ Ε)
+    {e' : UpdElem C Γ Ε} (h : e.mapF F = some e') (hx : e'.exhB σ₀ = true) :
+    e.exhB σ₁ = true := by
+  cases e with
+  | «local» _ r =>
+    obtain ⟨r', hr', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Rhs.exhB_mapF hF r hr' hx
+  | storage x | memory x | selfBalance _ x | setBalance x =>
+    obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
+    exact hF.exh x hx' hx
+  | net r _ a | pay r a | netMt r a =>
+    simp only [UpdElem.mapF] at h
+    obtain ⟨r', hr', h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨a', ha', h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    have er := hF.tm r hr'
+    have ea := hF.tm a ha'
+    simp only [UpdElem.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+    exact hx.imp (fun h => ⟨hF.exh r hr' h.1, ea.isSome ▸ h.2⟩)
+      (fun h => ⟨hF.exh a ha' h.1, er.isSome ▸ h.2⟩)
+
+/-- An element mapped returns where the element does. -/
+theorem UpdElem.okB_mapF (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ₁ F) {Ε : Ctx}
+    (e : UpdElem C Δ₁ Ε) {e' : UpdElem C Γ Ε} (h : e.mapF F = some e') :
+    e'.okB σ₀ = e.okB σ₁ := by
+  have hm := UpdElem.globT_mapF hF e h g₁ σ₁.globG hL.2.1.symm
+  rw [← UpdElem.globT_isSome σ₀ e' g₁, ← UpdElem.globT_isSome σ₁ e σ₁.globG]
+  revert hm
+  cases e'.globT σ₀ g₁ <;> cases e.globT σ₁ σ₁.globG <;>
+    simp only [Option.map_none, Option.map_some, reduceCtorEq, Option.isSome_none,
+      Option.isSome_some, imp_self, false_implies, implies_true]
+
+theorem Upd.exhOk_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ₁ F) :
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graftFM F V = some W →
+      W.exhOk σ₀ = true → V.exhOk σ₁ = true
+  | _, .nil, W, h, hx => rfl
+  | _, .snoc V e, W, h, hx => by
+    simp only [Upd.graftFM] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true] at hx ⊢
+    refine ⟨Upd.exhOk_graftFM hL hF V hW hx.1, ?_⟩
+    rw [← UpdElem.okB_mapF hL hF e he]
+    exact hx.2.imp_right (UpdElem.exhB_mapF hF e he)
+  | _, .decl V x r, W, h, hx => by
+    simp only [Upd.graftFM] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true] at hx ⊢
+    rw [← Rhs.eval_mapF hF r hr]
+    exact ⟨Upd.exhOk_graftFM hL hF V hW hx.1, hx.2.imp_right (Rhs.exhB_mapF hF r hr)⟩
+  | _, .pop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graftFM hL hF V hW hx
+  | _, .drop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhOk_graftFM hL hF V hW hx
+
+theorem Upd.exhAny_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ₁ F) :
+    {Δ₂ : Ctx} → (V : Upd C Δ₁ Δ₂) → {W : Upd C Γ Δ₂} → U.graftFM F V = some W →
+      W.exhAny σ₀ = true → V.exhAny σ₁ = true
+  | _, .nil, W, h, hx => by
+    cases h
+    rw [Upd.exhAny_of_globT hL.1] at hx
+    cases hx
+  | _, .snoc V e, W, h, hx => by
+    simp only [Upd.graftFM] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨e', he, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhAny, Bool.or_eq_true] at hx ⊢
+    exact hx.imp (Upd.exhAny_graftFM hL hF V hW) (UpdElem.exhB_mapF hF e he)
+  | _, .decl V x r, W, h, hx => by
+    simp only [Upd.graftFM] at h
+    obtain ⟨W', hW, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨r', hr, h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    simp only [Upd.exhAny, Bool.or_eq_true] at hx ⊢
+    exact hx.imp (Upd.exhAny_graftFM hL hF V hW) (Rhs.exhB_mapF hF r hr)
+  | _, .pop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhAny_graftFM hL hF V hW hx
+  | _, .drop V _, W, h, hx => by
+    obtain ⟨W', hW, rfl⟩ := Option.map_eq_some_iff.1 h
+    exact Upd.exhAny_graftFM hL hF V hW hx
+
+/-- **The grafted update is out of gas where `V` is**, in a typed state `U`
+lands on. -/
+theorem Upd.exh_graftFM (hL : U.Lands σ₀ g₁ σ₁) (hF : GraftOK σ₀ σ₁ F) {Δ₂ : Ctx}
+    (V : Upd C Δ₁ Δ₂) {W : Upd C Γ Δ₂} (h : U.graftFM F V = some W) (hx : W.exh σ₀ = true) :
+    V.exh σ₁ = true :=
+  Bool.and_eq_true_iff.2 ⟨Upd.exhAny_graftFM hL hF V h (Bool.and_eq_true_iff.1 hx).1,
+    Upd.exhOk_graftFM hL hF V h (Bool.and_eq_true_iff.1 hx).2⟩
+
 end GraftFT
 
 /-- **The grafted update gives the two in turn**, where `F` reads each
@@ -548,11 +686,12 @@ theorem holds_upd_graftF {m : Modality} {Γ Δ₁ Δ₂ : Ctx}
     holds σ (.upd m U (.upd m V φ)) := by
   have hW : U.graftFM F V = some W := Upd.graftF_eq_graftFM F U V ▸ hW
   have h : W.afterT m σ (holds · φ) := h
-  refine Upd.afterT_intro (fun hU => h.of_none (Upd.globT_graftFM_none hU V hW))
-    fun g₁ σ₁ hL => ?_
+  refine Upd.afterT_introX (fun hU => (h.of_none (Upd.globT_graftFM_none hU V hW)).imp_right
+    (Upd.exh_graftFM_none hU V hW)) fun g₁ σ₁ hL => ?_
   have hF := hF g₁ σ₁ hL
   have hG := Upd.globT_graftFM hL hF V hW
-  refine Upd.afterT_intro (fun hV => h.of_none ?_) fun g₂ σ₂ hL₂ => ?_
+  refine Upd.afterT_introX (fun hV => (h.of_none ?_).imp_right (Upd.exh_graftFM hL hF V hW))
+    fun g₂ σ₂ hL₂ => ?_
   · rw [hV] at hG
     cases hw : W.globT σ with
     | none => rfl
@@ -807,6 +946,170 @@ theorem Tm.substP_eval (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ
     exact Op3.eval_sameP o (Tm.substP_eval hL hr hst hmem x hx)
       (Tm.substP_eval hL hr hst hmem y hy) (Tm.substP_eval hL hr hst hmem z hz)
 
+/-- **A term out of gas before the update, substituted, is out of gas in a
+typed state it lands on.** -/
+theorem Tm.substP_exhB (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ₁.glob)
+    (hst : StOK σ₀ σ₁ stS) (hmem : MemOK σ₀ σ₁ memS) :
+    {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → Tm.substP U.held stS memS t = some t' →
+      t'.exhB σ₀ = true → t.exhB σ₁ = true
+  | _, .app2 o x y, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.app2 o x y) h
+    obtain ⟨x', hx', h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨y', hy', h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    have ex := Tm.substP_eval hL hr hst hmem x hx'
+    have ey := Tm.substP_eval hL hr hst hmem y hy'
+    have ihx := Tm.substP_exhB hL hr hst hmem x hx'
+    have ihy := Tm.substP_exhB hL hr hst hmem y hy'
+    by_cases hn : o.stFree = true
+    · rw [Op2.substStep_of_stFree stS hn] at hx hw
+      simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+      rcases hx with hx | ⟨hn', hx⟩
+      · exact .inl (o.exhB_same ex ey ▸ hx)
+      · refine .inr ⟨hw.isNone ▸ hn', ?_⟩
+        rcases hx with ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩
+        · exact .inl ⟨ihx h₁, ey.isSome ▸ h₂⟩
+        · exact .inr ⟨ihy h₁, ex.isSome ▸ h₂⟩
+    cases o with
+    | «at» it =>
+      cases stS with
+      | some S =>
+        have hS : S.eval σ₀ = some σ₁.storage := hst
+        change (Tm.app3 (.atIn it) S x' y').exhB σ₀ = true at hx
+        change Srt.SameO _ ((Tm.app3 (.atIn it) S x' y').eval σ₀) _ at hw
+        simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true, Tm.exhB_of_eval σ₀ S hS, hS,
+          Option.isSome_some, and_true, Bool.false_eq_true, false_and, false_or] at hx ⊢
+        rcases hx with hx | ⟨hn', hx⟩
+        · cases hx
+        · refine .inr ⟨hw.isNone ▸ hn', ?_⟩
+          rcases hx with ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩
+          · exact .inl ⟨ihx h₁, ey.isSome ▸ h₂⟩
+          · exact .inr ⟨ihy h₁, ex.isSome ▸ h₂⟩
+      | none =>
+        change (Tm.app2 (.at it) x' y').exhB σ₀ = true at hx
+        change Srt.SameO _ ((Tm.app2 (.at it) x' y').eval σ₀) _ at hw
+        simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+        rcases hx with hx | ⟨hn', hx⟩
+        · exact .inl (Op2.exhB_same _ ex ey ▸ hx)
+        · refine .inr ⟨hw.isNone ▸ hn', ?_⟩
+          rcases hx with ⟨h₁, h₂⟩ | ⟨h₁, h₂⟩
+          · exact .inl ⟨ihx h₁, ey.isSome ▸ h₂⟩
+          · exact .inr ⟨ihy h₁, ex.isSome ▸ h₂⟩
+    | _ => exact absurd rfl hn
+  | _, .app3 o x y z, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.app3 o x y z) h
+    obtain ⟨x', hx', h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨y', hy', h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨z', hz', h⟩ := Option.bind_eq_some_iff.1 h
+    cases h
+    have ex := Tm.substP_eval hL hr hst hmem x hx'
+    have ey := Tm.substP_eval hL hr hst hmem y hy'
+    have ez := Tm.substP_eval hL hr hst hmem z hz'
+    simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true] at hx ⊢
+    rcases hx with hx | ⟨hn, hx⟩
+    · exact .inl (o.exhB_same ex ey ez ▸ hx)
+    · refine .inr ⟨hw.isNone ▸ hn, ?_⟩
+      rcases hx with (⟨⟨h₁, h₂⟩, h₃⟩ | ⟨⟨h₁, h₂⟩, h₃⟩) | ⟨⟨h₁, h₂⟩, h₃⟩
+      · exact .inl (.inl ⟨⟨Tm.substP_exhB hL hr hst hmem x hx' h₁, ey.isSome ▸ h₂⟩,
+          ez.isSome ▸ h₃⟩)
+      · exact .inl (.inr ⟨⟨Tm.substP_exhB hL hr hst hmem y hy' h₁, ex.isSome ▸ h₂⟩,
+          ez.isSome ▸ h₃⟩)
+      · exact .inr ⟨⟨Tm.substP_exhB hL hr hst hmem z hz' h₁, ex.isSome ▸ h₂⟩, ey.isSome ▸ h₃⟩
+  | _, .app1 o x, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.app1 o x) h
+    obtain ⟨x', hx', rfl⟩ := Option.map_eq_some_iff.1 h
+    have ex := Tm.substP_eval hL hr hst hmem x hx'
+    have ihx := Tm.substP_exhB hL hr hst hmem x hx'
+    by_cases hn : o.stFree = true
+    · rw [Op1.substStep_of_stFree stS hn] at hx hw
+      simp only [Tm.exhB, Bool.and_eq_true] at hx ⊢
+      exact ⟨hw.isNone ▸ hx.1, ihx hx.2⟩
+    cases o with
+    | next =>
+      cases stS with
+      | some S =>
+        have hS : S.eval σ₀ = some σ₁.storage := hst
+        change (Tm.app2 .nextIn S x').exhB σ₀ = true at hx
+        change Srt.SameO _ ((Tm.app2 .nextIn S x').eval σ₀) _ at hw
+        simp only [Tm.exhB, Bool.or_eq_true, Bool.and_eq_true, Tm.exhB_of_eval σ₀ S hS, hS,
+          Option.isSome_some, Bool.false_eq_true, false_and, false_or, and_true] at hx ⊢
+        rcases hx with hx | ⟨hn', hx⟩
+        · cases hx
+        · exact ⟨hw.isNone ▸ hn', ihx hx⟩
+      | none =>
+        change (Tm.app1 .next x').exhB σ₀ = true at hx
+        change Srt.SameO _ ((Tm.app1 .next x').eval σ₀) _ at hw
+        simp only [Tm.exhB, Bool.and_eq_true] at hx ⊢
+        exact ⟨hw.isNone ▸ hx.1, ihx hx.2⟩
+    | _ => exact absurd rfl hn
+  | _, .netOf i a, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.netOf i a) h
+    have h₀ := h
+    have h : (match U.held i with
+        | .pos j => (Tm.substP U.held stS memS a).map (Tm.netOf j) | .rhs _ => none) =
+          some t' := h
+    generalize U.held i = x at h
+    match x, h with
+    | .rhs _, h => cases h
+    | .pos j, h =>
+      obtain ⟨a', ha', rfl⟩ := Option.map_eq_some_iff.1 h
+      simp only [Tm.exhB, Bool.and_eq_true] at hx ⊢
+      exact ⟨hw.isNone ▸ hx.1, Tm.substP_exhB hL hr hst hmem a ha' hx.2⟩
+  | _, .pvV i, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.pvV i) h
+    rw [Tm.eval_of_exhB σ₀ t' hx] at hw
+    exact absurd hw (by nofun)
+  | _, .pvS i, t', h, hx => by
+    have hw := Tm.substP_eval hL hr hst hmem (Tm.pvS i) h
+    rw [Tm.eval_of_exhB σ₀ t' hx] at hw
+    exact absurd hw (by nofun)
+  | _, .pvP i, t', h, hx => by
+    have hx' := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvP j) | .rhs (.path p) => some p | .rhs .unset => none) =
+          some t' := h
+    generalize U.held i = x at h hx'
+    match x, hx', h with
+    | .pos j, _, h => cases h; simp only [Tm.exhB, Bool.false_eq_true] at hx
+    | .rhs (.path p), hx', h =>
+      cases h
+      have hx'' : (t'.eval σ₀).bind (fun r => some (some r)) = some (TEnv.get i σ₁.env) := hx'
+      rw [Tm.eval_of_exhB σ₀ t' hx, Option.bind_none] at hx''
+      cases hx''
+  | _, .pvI i, t', h, hx => by
+    have hx' := hL.2.2 i
+    have h : (match U.held i with
+        | .pos j => some (Tm.pvI j) | .rhs (.mref t) => some t) = some t' := h
+    generalize U.held i = x at h hx'
+    match x, hx', h with
+    | .pos j, _, h => cases h; simp only [Tm.exhB, Bool.false_eq_true] at hx
+    | .rhs (.mref p), hx', h =>
+      cases h
+      have hx'' : (t'.eval σ₀).bind (fun id => some (some id)) = some (σ₁.getV i) := hx'
+      rw [Tm.eval_of_exhB σ₀ t' hx, Option.bind_none] at hx''
+      cases hx''
+  | _, .app0 o, t', h, hx => by
+    cases h
+    cases o with
+    | storage =>
+      cases stS with
+      | some S =>
+        have hS : S.eval σ₀ = some σ₁.storage := hst
+        change S.exhB σ₀ = true at hx
+        rw [Tm.exhB_of_eval σ₀ S hS] at hx
+        cases hx
+      | none => cases hx
+    | memory =>
+      cases memS with
+      | some M =>
+        have hM : Srt.SameO .mem (M.eval σ₀) (some σ₁.glob.memT) := hmem
+        change M.exhB σ₀ = true at hx
+        have hn := Tm.eval_of_exhB σ₀ M hx
+        rw [hn] at hM
+        exact absurd hM (by nofun)
+      | none => cases hx
+    | _ => cases hx
+
 end SubstPSound
 
 /-! ## What a storage or memory write leaves -/
@@ -916,7 +1219,8 @@ theorem holds_upd_mergeSt {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ Δ
         show Srt.forget .mem σ₁.glob.memT = _
         rw [hg]
         exact hm
-      exact ⟨fun t _ ht => Tm.substP_eval hL hr' hS' hm' t ht, hr'⟩
+      exact ⟨fun t _ ht => Tm.substP_eval hL hr' hS' hm' t ht, hr',
+        fun t _ ht hx => Tm.substP_exhB hL hr' hS' hm' t ht hx⟩
     · cases hW
   · cases hW
 
@@ -960,7 +1264,8 @@ theorem holds_upd_mergeMem {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ �
       | memory M =>
         refine holds_upd_graftF σ (fun g₁ σ₁ hL => ?_) hW h
         obtain ⟨hr, hs, hm⟩ := MemOK.of_memLast (U := Upd.snoc .nil (.memory M)) rfl hL
-        exact ⟨fun t _ ht => Tm.substP_eval hL hr hs hm t ht, hr⟩
+        exact ⟨fun t _ ht => Tm.substP_eval hL hr hs hm t ht, hr,
+          fun t _ ht hx => Tm.substP_exhB hL hr hs hm t ht hx⟩
       | _ => cases hW
     | _ => cases hW
   | _ => cases hW
@@ -982,7 +1287,8 @@ theorem holds_upd_mergeMemL {m : Modality} {Γ Δ₁ Δ₂ : Ctx} {U : Upd C Γ 
   · rename_i M hm
     refine holds_upd_graftF σ (fun g₁ σ₁ hL => ?_) hW h
     obtain ⟨hr, hs, hm'⟩ := MemOK.of_memLast hm hL
-    exact ⟨fun t _ ht => Tm.substP_eval hL hr hs hm' t ht, hr⟩
+    exact ⟨fun t _ ht => Tm.substP_eval hL hr hs hm' t ht, hr,
+      fun t _ ht hx => Tm.substP_exhB hL hr hs hm' t ht hx⟩
   · cases hW
 
 /-! ## The merges at a position -/

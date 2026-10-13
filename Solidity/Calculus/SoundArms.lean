@@ -720,23 +720,23 @@ theorem sound_rebindMemAlias {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ (
 theorem sound_opAssign {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (se : Simple C Γ p) :
     Premise.Runs m (.opAssign op hop hp l (.simple se)) (.upd1 (l.set (l.op op hop hp se.lower))) σ :=
-  Premise.sound_update_typed σ (opAssign_agrees σ hop hp l se) fun _ =>
-    (TRes.Ends.bind (TRes.Ends.ok _) fun _ => OpLoc.storeT_ends σ op l _).1
+  Premise.sound_update_typed σ (opAssign_agrees σ hop hp l se) (fun _ =>
+    (TRes.Ends.bind (TRes.Ends.ok _) fun _ => OpLoc.storeT_ends σ op l _).1)
 
 /-- `localIncrement`, `storage*Increment`, `memory*Increment`: `{l := l ± 1}`. -/
 theorem sound_incDec {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
     Premise.Runs m (.incDec op hp l)
       (.upd1 (l.set (l.op op.binOp (IncDec.binOp_compound op) hp (Tm.one p hp)))) σ :=
-  Premise.sound_update_typed σ (incDec_agrees σ op hp l) fun _ =>
-    ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1
+  Premise.sound_update_typed σ (incDec_agrees σ op hp l) (fun _ =>
+    ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1)
 
 /-- `localAssignIncrement`, `…IncrementAssignment`:
 `{l := l ± 1 ‖ v := bumped(l)}`. -/
 theorem sound_assignIncDec {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) :
     Premise.Runs m (.assignIncDec i op hp l hs) (assignIncStep i op hp l) σ :=
-  Premise.sound_update_typed σ (assignIncDec_agrees σ i op hp l) fun _ =>
-    ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1
+  Premise.sound_update_typed σ (assignIncDec_agrees σ i op hp l) (fun _ =>
+    ((OpLoc.bumpT_ends σ op l).bind fun _ => TRes.Ends.ok _).1)
 
 end Arms
 
@@ -870,6 +870,109 @@ theorem rebindPush_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.
       refine TRes.AgreesO.ret ?_
       simp only [Option.map_some, Option.bind_some, Storage.nextT, hv, State.locV_setLocal]
       rfl
+
+/-! ### A push's update is out of gas where the run is -/
+
+theorem TRes.AgreesO.eq_ok {α : Type} {t : TRes α} {u : Option α} {a : α}
+    (h : TRes.AgreesO id t u) (he : t.Ends) (hu : u = some a) : t = .ok a := by
+  subst hu
+  match t, h with
+  | .ok _, h => cases h; rfl
+  | .error .revert, h => cases h
+  | .error .panic, h => exact h.elim
+  | .error .diverge, _ => exact absurd rfl he.1
+  | .error .exhausted, _ => exact absurd rfl he.2
+
+/-- The array a push reads, where its update says it is full: the run is
+out of gas there. -/
+theorem push_exhausted {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
+    {ref : SRef C (.ref (.array E))} (hq : b.lower.eval σ = some ref)
+    (hv : ∀ r, v = some r → (r.lower.eval σ).isSome) (hf : σ.storage.full ref = true) :
+    TRun.push b v σ = .error .exhausted := by
+  have hr := (SPath.lower_resolveT σ b).eq_ok (SPath.resolveT_ends σ b) hq
+  unfold TRun.push
+  rw [hr]
+  cases v with
+  | none => exact if_pos hf
+  | some r =>
+    obtain ⟨sv, hsv⟩ := Option.isSome_iff_exists.1 (hv r rfl)
+    have hval := (Src.lower_valueT σ r).eq_ok (Src.valueT_ends σ r) hsv
+    dsimp only
+    rw [hval]
+    exact if_pos hf
+
+theorem pushSlot_exh {E : Ty} (b : SPath C Γ (.array E))
+    (h : TRun.push b none σ = .error .revert) :
+    (Upd.nil.snoc (UpdElem.pushSlot b)).exh σ = false := by
+  refine Upd.exh_of_exhAny ?_
+  show (false || (Tm.app2 .pushSlot (.app0 .storage) b.lower).exhB σ) = false
+  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b)]
+  show (false || Op2.exhB .pushSlot (some σ.storage) (b.lower.eval σ)) = false
+  cases hq : b.lower.eval σ with
+  | none => rfl
+  | some ref =>
+    cases hf : σ.storage.full ref with
+    | false => show (false || σ.storage.full ref) = false; rw [hf]; rfl
+    | true => rw [push_exhausted σ b none hq nofun hf] at h; cases h
+
+theorem extend_exh {E : Ty} (b : SPath C Γ (.array E))
+    (h : TRun.push b none σ = .error .revert) :
+    (Upd.nil.snoc (UpdElem.extend b)).exh σ = false := by
+  refine Upd.exh_of_exhAny ?_
+  show (false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) = false
+  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b)]
+  show (false || Op2.exhB .extend (some σ.storage) (b.lower.eval σ)) = false
+  cases hq : b.lower.eval σ with
+  | none => rfl
+  | some ref =>
+    cases hf : σ.storage.full ref with
+    | false => show (false || σ.storage.full ref) = false; rw [hf]; rfl
+    | true => rw [push_exhausted σ b none hq nofun hf] at h; cases h
+
+theorem pushSome_exh {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
+    (h : TRun.push b (some r) σ = .error .revert) :
+    (Upd.nil.snoc (UpdElem.push b r)).exh σ = false := by
+  refine Upd.exh_of_exhAny ?_
+  show (false || (Tm.app3 .push (.app0 .storage) b.lower r.lower).exhB σ) = false
+  rw [Tm.exhB_app3_pushFree σ _ _ _ _ rfl (SPath.lower_pushFree b) (Src.lower_pushFree r)]
+  show (false || Op3.exhB .push (some σ.storage) (b.lower.eval σ) (r.lower.eval σ)) = false
+  cases hq : b.lower.eval σ with
+  | none => rfl
+  | some ref =>
+    cases hv : r.lower.eval σ with
+    | none => rfl
+    | some sv =>
+      cases hf : σ.storage.full ref with
+      | false => show (false || σ.storage.full ref) = false; rw [hf]; rfl
+      | true =>
+        rw [push_exhausted σ b (some r) hq (fun r' hr => by cases hr; rw [hv]; rfl) hf] at h
+        cases h
+
+theorem pushBind_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
+    (hd : (Ty.ref R).defaultOkS = true) (h : TRun.rebind i (.push b hd) σ = .error .revert) :
+    (Upd.pushBind i b).exh σ = false := by
+  refine Upd.exh_of_exhAny ?_
+  show ((false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) ||
+    (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false
+  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b),
+    Rhs.exhB_of_pushFree σ _ (by simp only [Rhs.pushFree, Tm.pushFree, SPath.lower_pushFree])]
+  show ((false || Op2.exhB .extend (some σ.storage) (b.lower.eval σ)) || false) = false
+  cases hq : b.lower.eval σ with
+  | none => rfl
+  | some ref =>
+    cases hf : σ.storage.full ref with
+    | false => show ((false || σ.storage.full ref) || false) = false; rw [hf]; rfl
+    | true =>
+      have hr := (SPath.lower_resolveT σ b).eq_ok (SPath.resolveT_ends σ b) hq
+      have ha : ARhs.evalT σ (.push b hd) = .error .exhausted := by
+        simp only [ARhs.evalT, hr]
+        exact if_pos hf
+      have hx : TRun.rebind i (.push b hd) σ = .error .exhausted := by
+        show (ARhs.evalT σ (.push b hd) >>= _) = _
+        rw [ha]
+        rfl
+      rw [hx] at h
+      cases h
 
 theorem applyV_pay {Δ : Ctx} (r a : Tm C Γ (.val .uint)) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
     (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ g ℓ =
@@ -1094,34 +1197,41 @@ variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
 theorem sound_pushSlot {E : Ty} (b : SPath C Γ (.array E))
     (hd : (none.isSome || E.defaultOkS) = true) :
     Premise.Runs m (.push b none hd) (.upd1 (UpdElem.pushSlot b)) σ :=
-  Premise.sound_update_typed σ (pushSlot_agrees σ b) fun _ => TRun.push_nd σ b none
+  Premise.sound_update_typed σ (pushSlot_agrees σ b) (fun _ => TRun.push_nd σ b none)
+    (hx := pushSlot_exh σ b)
 
 /-- `storagePushLengthSaveReferenceElement`: `{storage := extend(storage, b)}`. -/
 theorem sound_extend {E : Ty} (b : SPath C Γ (.array E))
     (hd : (none.isSome || E.defaultOkS) = true) :
     Premise.Runs m (.push b none hd) (.upd1 (UpdElem.extend b)) σ :=
-  Premise.sound_update_typed σ (extend_agrees σ b) fun _ => TRun.push_nd σ b none
+  Premise.sound_update_typed σ (extend_agrees σ b) (fun _ => TRun.push_nd σ b none)
+    (hx := extend_exh σ b)
 
 /-- `storagePushValueSave`, `storagePushValueCopySource`:
 `{storage := push(storage, b, src)}`. -/
 theorem sound_pushSome {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
     (hd : ((some r).isSome || E.defaultOkS) = true) :
     Premise.Runs m (.push b (some r) hd) (.upd1 (UpdElem.push b r)) σ :=
-  Premise.sound_update_typed σ (pushSome_agrees σ b r) fun _ => TRun.push_nd σ b (some r)
+  Premise.sound_update_typed σ (pushSome_agrees σ b r) (fun _ => TRun.push_nd σ b (some r))
+    (hx := pushSome_exh σ b r)
 
 /-- `storagePopSave`, `storagePopSaveMappingElement`. -/
 theorem sound_pop {E : Ty} (b : SPath C Γ (.array E)) :
     Premise.Runs m (.pop b) (.upd1 (if b.elemMapping then UpdElem.shrink b else UpdElem.pop b)) σ :=
-  Premise.sound_update_typed σ (pop_agrees σ b) fun _ =>
-    ((SPath.resolveT_ends σ b).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1
+  Premise.sound_update_typed σ (pop_agrees σ b) (fun _ =>
+    ((SPath.resolveT_ends σ b).bind fun _ => (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _).1)
+    (hx := fun _ => Upd.exh_of_pushFree (by
+      split <;> simp only [Upd.pushFree, UpdElem.pushFree, UpdElem.pop, UpdElem.shrink,
+        Tm.pushFree, Op2.pushFree, SPath.lower_pushFree, Bool.and_self]))
 
 /-- `storageLocalRootPushBind`, `storageLocalRootPushBindMappingElement`:
 `{storage := extend(storage, b) ‖ lsv := next(b)}`. -/
 theorem sound_rebindPush {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) :
     Premise.Runs m (.rebind i (.push b hd)) (.update (Upd.pushBind i b)) σ :=
-  Premise.sound_update_typed σ (rebindPush_agrees σ i b hd) fun _ =>
-    TRes.NoDiv.bind (ARhs.evalT_nd σ (.push b hd)) fun _ => TRes.NoDiv.ok _
+  Premise.sound_update_typed σ (rebindPush_agrees σ i b hd) (fun _ =>
+    TRes.NoDiv.bind (ARhs.evalT_nd σ (.push b hd)) fun _ => TRes.NoDiv.ok _)
+    (hx := pushBind_exh σ i b hd)
 
 /-- `transferNoCallbackBox`: `{net := …}`. -/
 theorem sound_transferBox (sadr se : Simple C Γ .uint) :
@@ -1140,7 +1250,11 @@ theorem sound_send (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) (fs 
         Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))]) σ :=
   Premise.sound_cases_typed (s := .send pv (.simple sadr) (.simple se))
     (t := TRun.send pv (.simple sadr) (.simple se)) σ (TRes.AgreesO.pure _)
-    (fun _ => send_sim σ pv sadr se) fun _ => TRes.NoDiv.ok _
+    (fun _ => send_sim σ pv sadr se) (fun _ => TRes.NoDiv.ok _) (hx := fun U hU _ => by
+      simp only [List.mem_cons, List.not_mem_nil, or_false] at hU
+      rcases hU with rfl | rfl <;> exact Upd.exh_of_pushFree (by
+        simp only [Upd.pushFree, UpdElem.pushFree, UpdElem.payTo, Rhs.pushFree, Tm.pushFree,
+          Simple.lower_pushFree, Bool.and_self]))
 
 /-- `memoryReferenceDeclFreshAlloc`. -/
 theorem sound_declMemFresh (R : RefTy) (x : Var)

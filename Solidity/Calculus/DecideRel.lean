@@ -1385,10 +1385,32 @@ theorem boundS_pushSlot {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) :
 theorem boundS_extend {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .extend (.app0 .storage) q).boundS ρ = pushBound ρ.sym.stor (q.toLS ρ) := rfl
 
-/-- **A storage term, pushed in, is the write it made**, a push guarded by
-its bound (`Tm.boundS`). -/
+/-- The push a storage term makes onto `storage`, if it is one, has room
+(`Tm.PushRoom`). -/
+def _root_.Solidity.Tm.RoomS (τ : State C Γ) (s : Tm C Γ .st) : Prop :=
+  ∀ {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))),
+    ((∃ v, s = .app3 .push (.app0 .storage) q v) ∨ s = .app2 .pushSlot (.app0 .storage) q ∨
+      s = .app2 .extend (.app0 .storage) q) → Tm.PushRoom τ (.app0 .storage) q
+
+/-- A push whose bound returns has room. -/
+theorem RelU.room_of_bound (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSM ρ = true)
+    (hbd : Rets ((s.boundS ρ).eval σ)) : Tm.RoomS τ s := by
+  intro E q hs
+  rcases hs with ⟨v, rfl⟩ | rfl | rfl
+  · simp only [Tm.inLSM, Op3.inLS, Bool.and_eq_true] at hf
+    rw [boundS_push, Tm.toLS_eq_toLSM] at hbd
+    exact h.pushBound_room hf.1.2 hbd
+  · simp only [Tm.inLSM, Op2.inLS, Bool.and_eq_true] at hf
+    rw [boundS_pushSlot, Tm.toLS_eq_toLSM] at hbd
+    exact h.pushBound_room hf.2 hbd
+  · simp only [Tm.inLSM, Op2.inLS, Bool.and_eq_true] at hf
+    rw [boundS_extend, Tm.toLS_eq_toLSM] at hbd
+    exact h.pushBound_room hf.2 hbd
+
+/-- **A storage term, pushed in, is the write it made**, a push with room
+(`Tm.RoomS`). -/
 theorem RelU.stor_eval (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSM ρ = true)
-    (hbd : Rets ((s.boundS ρ).eval σ)) :
+    (hroomS : Tm.RoomS τ s) :
     Sim ((s.toLSM ρ).eval σ) (s.evalE τ >>= fun τ' => .ok (.struct τ'.storage)) := by
   cases s with
   | app0 o =>
@@ -1479,8 +1501,7 @@ theorem RelU.stor_eval (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSM ρ = 
       have hroom : Tm.PushRoom τ s p := by
         simp only [Tm.inLSM, Op3.inLS, Bool.and_eq_true] at hf
         obtain rfl := isStorageS_st hf.1.1.1
-        rw [boundS_push, Tm.toLS_eq_toLSM] at hbd
-        exact h.pushBound_room hf.1.2 hbd
+        exact hroomS p (.inl ⟨v, rfl⟩)
       simp only [Tm.inLSM, Op3.inLS, Bool.and_eq_true] at hf
       obtain ⟨⟨⟨hs, hpv⟩, hp⟩, hv⟩ := hf
       obtain rfl := isStorageS_st hs
@@ -1560,9 +1581,8 @@ theorem RelU.stor_eval (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSM ρ = 
       obtain rfl := isStorageS_st hs
       have hroom : Tm.PushRoom τ (.app0 .storage) p := by
         first
-          | rw [boundS_pushSlot, Tm.toLS_eq_toLSM] at hbd
-          | rw [boundS_extend, Tm.toLS_eq_toLSM] at hbd
-        exact h.pushBound_room hp hbd
+          | exact hroomS p (.inr (.inl rfl))
+          | exact hroomS p (.inr (.inr rfl))
       have hb := live_bridge (τ := τ.globE) (h.pathM p hp)
       first
         | rw [Tm.evalE_pushSlot τ _ _ hroom]
@@ -1665,7 +1685,7 @@ theorem RelU.stale_write (h : RelT σ ρ τ) {p : PrimTy} {x : Tm C Γ (.path (.
 through a stale alias at the slot level, otherwise as `RelU.stor_eval`
 says. -/
 theorem RelU.storT (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ = true)
-    (hbd : Rets ((s.boundS ρ).eval σ)) :
+    (hroomS : Tm.RoomS τ s) :
     Sim ((s.toLSt ρ).eval σ) (s.evalE τ >>= fun τ' => .ok (.struct τ'.storage)) := by
   unfold Tm.toLSt
   unfold Tm.inLSt at hf
@@ -1673,7 +1693,7 @@ theorem RelU.storT (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ = true
   | none =>
     simp only [hw] at hf ⊢
     rw [Tm.toLS_eq_toLSM]
-    exact RelU.stor_eval h s (by rw [← Tm.inLS_eq_inLSM]; exact hf) hbd
+    exact RelU.stor_eval h s (by rw [← Tm.inLS_eq_inLSM]; exact hf) hroomS
   | some w =>
     obtain ⟨op, q, ⟨p, t⟩⟩ := w
     simp only [hw] at hf ⊢
@@ -1802,6 +1822,33 @@ theorem RelU.bound_of_ok (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSM ρ 
             obtain ⟨w, hw, hn⟩ := Storage.pushPlace_room hp
             exact h.pushBound_ok hf.2 hr hw hn
 
+/-- Whether a term's top symbol pushes. -/
+def headPushS {s : Srt} : Tm C Γ s → Bool
+  | .app2 o _ _ => !o.pushFree
+  | .app3 o _ _ _ => !o.pushFree
+  | _ => false
+
+/-- A write, not a push: it has the room `Tm.RoomS` asks. -/
+theorem roomS_save {T : Ty} (st : Tm C Γ .st) (x : Tm C Γ (.path T)) (v : Tm C Γ (.sv T)) :
+    Tm.RoomS τ (.app3 .save st x v) := by
+  intro E q hs
+  rcases hs with ⟨v', hv'⟩ | hv' | hv' <;>
+    exact absurd (congrArg headPushS hv') (by simp only [headPushS, Op3.pushFree, Op2.pushFree,
+      Bool.not_true, Bool.not_false, Bool.false_eq_true, not_false_eq_true])
+
+/-- A storage update whose bound returns has room. -/
+theorem RelU.roomT_of_bound (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ = true)
+    (hbd : Rets ((s.boundS ρ).eval σ)) : Tm.RoomS τ s := by
+  unfold Tm.inLSt at hf
+  cases hw : s.staleWriteS ρ with
+  | none =>
+    rw [hw] at hf
+    exact h.room_of_bound s (by rw [← Tm.inLS_eq_inLSM]; exact hf) hbd
+  | some w =>
+    obtain ⟨op, q, ⟨p, t⟩⟩ := w
+    obtain ⟨x, -, -, rfl⟩ := staleWriteS_some hw
+    exact roomS_save _ _ _
+
 /-- **A storage update's guard**: its bound and its writes return exactly
 where the update does, and then the writes are the update's. -/
 theorem RelU.storT_guard (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ = true) :
@@ -1822,14 +1869,14 @@ theorem RelU.storT_guard (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ 
   · obtain ⟨hb, v, hv⟩ := (seqL_rets σ _ _).1 hg
     simp only [LTerm.eval] at hv
     obtain ⟨a, ha, -⟩ := Res.bind_eq_ok.1 hv
-    obtain ⟨τ'', h'', -⟩ := Res.bind_eq_ok.1 ((h.storT s hf hb a).1 ha)
+    obtain ⟨τ'', h'', -⟩ := Res.bind_eq_ok.1 ((h.storT s hf (h.roomT_of_bound s hf hb) a).1 ha)
     exact ⟨τ'', h''⟩
   · obtain ⟨τ', he⟩ := he
     have hb := hbo ⟨τ', he⟩
-    have hS := (h.storT s hf hb _).2 (by rw [he]; rfl)
+    have hS := (h.storT s hf (h.roomT_of_bound s hf hb) _).2 (by rw [he]; rfl)
     exact (seqL_rets σ _ _).2 ⟨hb, ⟨.bool true, by simp only [LTerm.eval, hS, Res.ok_bind]⟩⟩
   · have hb := hbo ⟨τ', he⟩
-    exact (h.storT s hf hb _).2 (by rw [he]; rfl)
+    exact (h.storT s hf (h.roomT_of_bound s hf hb) _).2 (by rw [he]; rfl)
 
 /-- `RelU.storT_guard` for a storage the update reads in full (`old := s`). -/
 theorem RelU.stor_guard (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLS ρ = true) :
@@ -1838,7 +1885,7 @@ theorem RelU.stor_guard (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLS ρ = 
   rw [Tm.inLS_eq_inLSM] at hf
   have hS : Rets ((s.boundS ρ).eval σ) → Sim ((s.toLS ρ).eval σ)
       (s.evalE τ >>= fun τ' => .ok (.struct τ'.storage)) := fun hb => by
-    rw [Tm.toLS_eq_toLSM]; exact h.stor_eval s hf hb
+    rw [Tm.toLS_eq_toLSM]; exact h.stor_eval s hf (h.room_of_bound s hf hb)
   refine ⟨⟨fun hg => ?_, fun he => ?_⟩, fun τ' he => ?_⟩
   · obtain ⟨hb, v, hv⟩ := (seqL_rets σ _ _).1 hg
     simp only [LTerm.eval] at hv
@@ -1850,6 +1897,112 @@ theorem RelU.stor_guard (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLS ρ = 
     have hS' := (hS hb _).2 (by rw [he]; rfl)
     exact (seqL_rets σ _ _).2 ⟨hb, ⟨.bool true, by simp only [LTerm.eval, hS', Res.ok_bind]⟩⟩
   · exact (hS (h.bound_of_ok s hf ⟨τ', he⟩) _).2 (by rw [he]; rfl)
+
+/-- A term whose erased reading returns returns. -/
+theorem eval_some_of_evalE {s : Srt} {t : Tm C Γ s} {x : _} (h : t.evalE τ = .ok x) :
+    (t.eval τ).isSome = true := by
+  rw [Tm.evalE_def] at h
+  cases ht : t.eval τ with
+  | none => rw [ht] at h; cases h
+  | some _ => rfl
+
+/-- **A storage update whose writes return returns, or is out of gas**: a
+push onto a full array (`Storage.full`) where the update reading has no
+room, its arguments returning. -/
+theorem RelU.stor_ok_or_exh (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSM ρ = true)
+    (hg : ∃ a, (s.toLSM ρ).eval σ = .ok a) : (∃ τ', s.evalE τ = .ok τ') ∨ s.exhB τ = true := by
+  by_cases hR : Tm.RoomS τ s
+  · left
+    obtain ⟨a, ha⟩ := hg
+    obtain ⟨τ', h', -⟩ := Res.bind_eq_ok.1 ((h.stor_eval s hf hR a).1 ha)
+    exact ⟨τ', h'⟩
+  · right
+    have hR' : ∃ (E : Ty) (q : Tm C Γ (.path (.ref (.array E)))),
+        ((∃ v, s = .app3 .push (.app0 .storage) q v) ∨ s = .app2 .pushSlot (.app0 .storage) q ∨
+          s = .app2 .extend (.app0 .storage) q) ∧
+        ∃ st r, (Tm.app0 (Γ := Γ) .storage).eval τ = some st ∧ q.eval τ = some r ∧
+          st.full r = true := by
+      refine Classical.byContradiction fun hn => hR fun {E} q hshape st r hs hr => ?_
+      cases hfl : st.full r with
+      | false => rfl
+      | true => exact absurd ⟨E, q, hshape, st, r, hs, hr, hfl⟩ hn
+    obtain ⟨E, q, hshape, st, r, hs, hr, hfull⟩ := hR'
+    rcases hshape with ⟨v, rfl⟩ | rfl | rfl
+    · simp only [Tm.exhB, Bool.or_eq_true]
+      left
+      rw [hs, hr]
+      simp only [Tm.inLSM, Op3.inLS, Bool.and_eq_true] at hf
+      obtain ⟨⟨⟨-, hpv⟩, hp⟩, hv⟩ := hf
+      obtain ⟨a, ha⟩ := hg
+      have hvs : (v.eval τ).isSome = true := by
+        cases v with
+        | app1 o t =>
+          cases o with
+          | sval =>
+            simp only [Tm.toLSM, Op0.toL, Op1.toL, Op3.toLAtS, Op3.toL, LStor.eval, h.stor,
+              Res.ok_bind, bind_assoc] at ha
+            obtain ⟨y, hy, -⟩ := Res.bind_eq_ok.1 ha
+            have hty := (h.valM t hv y).1 hy
+            show ((Tm.app1 .sval t).eval τ).isSome = true
+            rw [CloseS.eval_sval]
+            have := eval_some_of_evalE hty
+            cases ht : t.eval τ with
+            | none => rw [ht] at this; cases this
+            | some _ => rfl
+          | newArr _ => simp only [Tm.pushValS, Bool.false_eq_true] at hpv
+        | app2 o s' p' =>
+          cases o with
+          | sfind =>
+            simp only [Tm.inLSM, Op2.inLS, Bool.and_eq_true] at hv
+            obtain ⟨hs', hp'⟩ := hv
+            obtain rfl := isStorageS_st hs'
+            simp only [Tm.toLSM, Op0.toL, Op2.toLAtS, Op2.toL, Op3.toLAtS, Op3.toL, pure,
+              Except.pure, Res.ok_bind, bind_assoc] at ha
+            simp only [LStor.eval, LTerm.eval, LPath.eval, h.stor, Res.ok_bind,
+              Res.bind_eq_ok] at ha
+            obtain ⟨sqs, hsq, n, hn, -⟩ := ha
+            obtain ⟨rs, hrs, -, hfs⟩ := (live_bridge (τ := τ.globE) (h.pathM p' hp') sqs n).1
+              ⟨hsq, hn⟩
+            have he : (Tm.app2 .sfind (.app0 .storage) p').evalE τ = .ok n := by
+              rw [Tm.evalE_sfind, Tm.evalE_storage, Res.ok_bind, hrs, Res.ok_bind]
+              exact hfs
+            exact eval_some_of_evalE he
+          | copyMem | sfindIn => simp only [Tm.pushValS, Bool.false_eq_true] at hpv
+        | app0 o => cases o
+        | app3 o _ _ _ => cases o
+      obtain ⟨w, hw⟩ := Option.isSome_iff_exists.1 hvs
+      rw [hw]
+      exact hfull
+    · simp only [Tm.exhB, Bool.or_eq_true]
+      left
+      rw [hs, hr]
+      exact hfull
+    · simp only [Tm.exhB, Bool.or_eq_true]
+      left
+      rw [hs, hr]
+      exact hfull
+
+/-- `RelU.stor_ok_or_exh` through a stale alias at the slot level: a write,
+which returns. -/
+theorem RelU.storT_ok_or_exh (h : RelT σ ρ τ) (s : Tm C Γ .st) (hf : s.inLSt ρ = true)
+    (hg : ∃ a, (s.toLSt ρ).eval σ = .ok a) : (∃ τ', s.evalE τ = .ok τ') ∨ s.exhB τ = true := by
+  have hf₀ := hf
+  unfold Tm.inLSt at hf
+  cases hw : s.staleWriteS ρ with
+  | none =>
+    rw [hw] at hf
+    have hg' : ∃ a, (s.toLSM ρ).eval σ = .ok a := by
+      unfold Tm.toLSt at hg
+      rw [hw, Tm.toLS_eq_toLSM] at hg
+      exact hg
+    exact h.stor_ok_or_exh s (by rw [← Tm.inLS_eq_inLSM]; exact hf) hg'
+  | some w =>
+    obtain ⟨op, q, ⟨p, t⟩⟩ := w
+    obtain ⟨x, -, -, rfl⟩ := staleWriteS_some hw
+    left
+    obtain ⟨a, ha⟩ := hg
+    obtain ⟨τ', h', -⟩ := Res.bind_eq_ok.1 ((h.storT _ hf₀ (roomS_save _ _ _) a).1 ha)
+    exact ⟨τ', h'⟩
 
 end Terms
 

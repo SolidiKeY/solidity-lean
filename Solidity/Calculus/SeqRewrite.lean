@@ -555,13 +555,106 @@ theorem Upd.rwBy_lands_iff (hf : PickEq f σ) {Δ : Ctx} (U : Upd C Γ Δ) (g : 
     show (Rhs.rwBy f r).eval σ = _ ↔ r.eval σ = _
     rw [Rhs.rwBy_eval_eq σ hf]
 
-/-- **An exact rewrite reads after the update as the update.** -/
-theorem Upd.rwBy_afterT (hf : PickEq f σ) {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ)
-    (p : State C Δ → Prop) : (Upd.rwBy f U).afterT m σ p ↔ U.afterT m σ p := by
+/-- A rewrite whose replacement is out of gas exactly where the term it
+replaces is. -/
+def PickExh (f : {s : Srt} → Tm C Γ s → Option (Tm C Γ s)) (σ : State C Γ) : Prop :=
+  ∀ {s : Srt} {t t' : Tm C Γ s}, f t = some t' → t'.exhB σ = t.exhB σ
+
+/-- **An exact rewrite whose replacements are out of gas where the terms
+they replace are keeps exhaustion.** -/
+theorem Tm.rwBy_exhB (hf : PickEq f σ) (hn : PickExh f σ) :
+    {s : Srt} → (t : Tm C Γ s) → (Tm.rwBy f t).exhB σ = t.exhB σ
+  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ => rfl
+  | _, .netOf i a => by
+    have he := Tm.rwBy_eval_eq σ hf (Tm.netOf i a)
+    show (Tm.netOf i (Tm.rwBy f a)).exhB σ = _
+    have he' : (Tm.netOf i (Tm.rwBy f a)).eval σ = (Tm.netOf i a).eval σ := he
+    simp only [Tm.exhB, he', Tm.rwBy_exhB hf hn a]
+  | _, .app0 o => by
+    show ((f (.app0 o)).getD _).exhB σ = _
+    cases h : f (Tm.app0 o) with
+    | some _ => exact hn h
+    | none => rfl
+  | _, .app1 o x => by
+    have he := Tm.rwBy_eval_eq σ hf (Tm.app1 o x)
+    show ((f (.app1 o x)).getD _).exhB σ = _
+    cases h : f (Tm.app1 o x) with
+    | some _ => exact hn h
+    | none =>
+      have he' : (Tm.app1 o (Tm.rwBy f x)).eval σ = (Tm.app1 o x).eval σ := by
+        rw [← he]; show _ = ((f (.app1 o x)).getD _).eval σ; rw [h]; rfl
+      simp only [Option.getD_none, Tm.exhB, he', Tm.rwBy_exhB hf hn x]
+  | _, .app2 o x y => by
+    have he := Tm.rwBy_eval_eq σ hf (Tm.app2 o x y)
+    show ((f (.app2 o x y)).getD _).exhB σ = _
+    cases h : f (Tm.app2 o x y) with
+    | some _ => exact hn h
+    | none =>
+      have he' : (Tm.app2 o (Tm.rwBy f x) (Tm.rwBy f y)).eval σ = (Tm.app2 o x y).eval σ := by
+        rw [← he]; show _ = ((f (.app2 o x y)).getD _).eval σ; rw [h]; rfl
+      simp only [Option.getD_none, Tm.exhB, he', Tm.rwBy_exhB hf hn x, Tm.rwBy_exhB hf hn y,
+        Tm.rwBy_eval_eq σ hf x, Tm.rwBy_eval_eq σ hf y]
+  | _, .app3 o x y z => by
+    have he := Tm.rwBy_eval_eq σ hf (Tm.app3 o x y z)
+    show ((f (.app3 o x y z)).getD _).exhB σ = _
+    cases h : f (Tm.app3 o x y z) with
+    | some _ => exact hn h
+    | none =>
+      have he' : (Tm.app3 o (Tm.rwBy f x) (Tm.rwBy f y) (Tm.rwBy f z)).eval σ =
+          (Tm.app3 o x y z).eval σ := by
+        rw [← he]; show _ = ((f (.app3 o x y z)).getD _).eval σ; rw [h]; rfl
+      simp only [Option.getD_none, Tm.exhB, he', Tm.rwBy_exhB hf hn x, Tm.rwBy_exhB hf hn y,
+        Tm.rwBy_exhB hf hn z, Tm.rwBy_eval_eq σ hf x, Tm.rwBy_eval_eq σ hf y,
+        Tm.rwBy_eval_eq σ hf z]
+
+theorem Rhs.rwBy_exhB (hf : PickEq f σ) (hn : PickExh f σ) {t : LTy} (r : Rhs C Γ t) :
+    (Rhs.rwBy f r).exhB σ = r.exhB σ := by
+  cases r <;> first | rfl | exact Tm.rwBy_exhB σ hf hn _
+
+theorem UpdElem.rwBy_exhB (hf : PickEq f σ) (hn : PickExh f σ) {Δ : Ctx} (e : UpdElem C Γ Δ) :
+    (UpdElem.rwBy f e).exhB σ = e.exhB σ := by
+  cases e <;>
+    simp only [UpdElem.rwBy, UpdElem.exhB, Tm.rwBy_exhB σ hf hn, Rhs.rwBy_exhB σ hf hn,
+      Tm.rwBy_eval_eq σ hf]
+
+theorem Upd.rwBy_exhAny (hf : PickEq f σ) (hn : PickExh f σ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → (Upd.rwBy f U).exhAny σ = U.exhAny σ
+  | _, .nil => rfl
+  | _, .snoc U e => by
+    have he : (UpdElem.rwBy f e).exhB σ = e.exhB σ := UpdElem.rwBy_exhB σ hf hn e
+    simp only [Upd.rwBy, Upd.exhAny, Upd.rwBy_exhAny hf hn U, he]
+  | _, .decl U _ r => by
+    simp only [Upd.rwBy, Upd.exhAny, Upd.rwBy_exhAny hf hn U, Rhs.rwBy_exhB σ hf hn r]
+  | _, .pop U _ => Upd.rwBy_exhAny hf hn U
+  | _, .drop U _ => Upd.rwBy_exhAny hf hn U
+
+theorem Upd.rwBy_exhOk (hf : PickEq f σ) (hn : PickExh f σ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → (Upd.rwBy f U).exhOk σ = U.exhOk σ
+  | _, .nil => rfl
+  | _, .snoc U e => by
+    have he : (UpdElem.rwBy f e).exhB σ = e.exhB σ := UpdElem.rwBy_exhB σ hf hn e
+    have ho : (UpdElem.rwBy f e).okB σ = e.okB σ := by
+      rw [← UpdElem.globT_isSome σ _ σ.globG, ← UpdElem.globT_isSome σ e σ.globG,
+        UpdElem.rwBy_globT_eq σ hf e]
+    simp only [Upd.rwBy, Upd.exhOk, Upd.rwBy_exhOk hf hn U, he, ho]
+  | _, .decl U _ r => by
+    simp only [Upd.rwBy, Upd.exhOk, Upd.rwBy_exhOk hf hn U, Rhs.rwBy_eval_eq σ hf,
+      Rhs.rwBy_exhB σ hf hn r]
+  | _, .pop U _ => Upd.rwBy_exhOk hf hn U
+  | _, .drop U _ => Upd.rwBy_exhOk hf hn U
+
+theorem Upd.rwBy_exh (hf : PickEq f σ) (hn : PickExh f σ) {Δ : Ctx} (U : Upd C Γ Δ) :
+    (Upd.rwBy f U).exh σ = U.exh σ := by
+  simp only [Upd.exh, Upd.rwBy_exhAny σ hf hn U, Upd.rwBy_exhOk σ hf hn U]
+
+/-- **An exact rewrite reads after the update as the update**, firing on
+no storage term. -/
+theorem Upd.rwBy_afterT (hf : PickEq f σ) (hn : PickExh f σ) {Δ : Ctx} (m : Modality)
+    (U : Upd C Γ Δ) (p : State C Δ → Prop) : (Upd.rwBy f U).afterT m σ p ↔ U.afterT m σ p := by
   unfold Upd.afterT
   rw [Upd.rwBy_globT_eq σ hf U]
   split
-  · exact Iff.rfl
+  · rw [Upd.rwBy_exh σ hf hn U]
   · rename_i g _
     simp only [Upd.rwBy_lands_iff σ hf U g]
 
@@ -623,7 +716,7 @@ theorem Tm.pickClosed_le (hq : Tm.EvalRefines q.1 q.2) (σ : State C Γ) :
 /-- **Under the box, a rewritten update gives the update.** -/
 theorem holds_upd_rwC (hq : Tm.EvalRefines q.1 q.2) {Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ}
     (σ : State C Γ) (h : holds σ (.upd .box (U.rwC q) φ)) : holds σ (.upd .box U φ) :=
-  Upd.afterT_of_lands (fun _ _ => trivial)
+  Upd.afterT_of_lands (fun _ _ => .inl trivial)
     (fun _ _ hL => Upd.rwBy_lands σ (Tm.pickClosed_le hq σ) U hL) h
 
 end RwC

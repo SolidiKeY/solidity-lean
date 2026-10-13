@@ -735,17 +735,32 @@ theorem landedRest_def {H : HTy} {Δ : Ctx} (φ : Fml C Δ) (g : GlobT C H) (ℓ
 (`Upd.afterT_applyV`): one with the global part and the locals the update
 leaves. -/
 theorem holds_upd {Δ : Ctx} (σ : State C Γ) (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) :
-    holds σ (.upd m U φ) ↔ m.wp (Close.optRes (U.applyV σ)) (LandedRest φ) := by
+    holds σ (.upd m U φ) ↔
+      m.wp (Close.optRes (U.applyV σ)) (LandedRest φ) ∨ (m = .diamond ∧ U.exh σ = true) := by
   show U.afterT m σ (holds · φ) ↔ _
   rw [Upd.afterT_applyV]
-  cases U.applyV σ with
-  | none => rfl
+  cases ha : U.applyV σ with
+  | none =>
+    cases m with
+    | box => exact ⟨fun _ => .inl trivial, fun _ => .inl trivial⟩
+    | diamond =>
+      show False ∨ _ ↔ False ∨ _
+      simp only [false_or, true_and]
   | some q =>
+    have hx : U.exh σ = false :=
+      Upd.exh_of_globT (Upd.applyV_ok U ha).1
+    simp only [hx, Bool.false_eq_true, and_false, or_false]
     show (∀ σ' : State C Δ, _) ↔ LandedAll q.1.1 q.2 _
     rw [landedAll_def]
     refine ⟨fun h x => h x.val x.glob_eq (fun i => ?_), fun h σ' hg hl =>
       h ⟨σ', hg, funext fun _ => funext fun i => hl i⟩⟩
     exact congrFun (congrFun x.locV_eq _) i
+
+/-- An update with no push symbol is never out of gas (the closer's side
+condition, read off the update by `Upd.pushFree`). -/
+theorem exh_pushFree {Δ : Ctx} {σ : State C Γ} {U : Upd C Γ Δ} (h : U.pushFree = true) :
+    U.exh σ = false :=
+  Upd.exh_of_pushFree h
 
 theorem holds_havoc (σ : State C Γ) (φ : Fml C Γ) :
     holds σ (.havoc φ) ↔ ∀ (st : Storage C) nt, holds (σ.havoc st nt) φ := Iff.rfl
@@ -782,6 +797,8 @@ attribute [close_rw_s]
   -- formulas
   CloseS.holds_tt CloseS.holds_not CloseS.holds_and CloseS.holds_imp CloseS.holds_eq
   CloseS.holds_defined CloseS.holds_upd CloseS.holds_havoc CloseS.holds_all
+  CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
+  Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
   CloseS.holds_bind_oldNet CloseS.holds_anon
   CloseS.forall_uint CloseS.forall_int CloseS.erase_uint CloseS.erase_int CloseS.erase_bool CloseS.ofLit_uint CloseS.ofLit_int

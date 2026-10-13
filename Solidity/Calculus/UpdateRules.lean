@@ -378,7 +378,7 @@ theorem Upd.simp_held {Γ : Ctx} : {Δ : Ctx} → (n : Nat) → (U : Upd C Γ Δ
 /-- Under the box, an update with what it pops dropped gives the update. -/
 theorem holds_upd_simp {Γ Δ : Ctx} {U : Upd C Γ Δ} {φ : Fml C Δ} (σ : State C Γ)
     (h : holds σ (.upd .box (U.simp 0) φ)) : holds σ (.upd .box U φ) :=
-  Upd.afterT_of_lands (fun _ _ => trivial)
+  Upd.afterT_of_lands (fun _ _ => .inl trivial)
     (fun _ _ hL => Upd.lands_of (fun _ hg => Upd.simp_globT σ 0 U hg)
       (fun i v hv => by rw [Upd.simp_held 0 U i (Nat.zero_le _)]; exact hv) hL) h
 

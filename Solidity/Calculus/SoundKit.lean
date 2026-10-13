@@ -162,7 +162,7 @@ both modalities accept), never in a panic. -/
 theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State C Γ)
     (hs : ∀ τ, Stmt.runSt σ s = .ok τ → U.applyP σ = some (τ.glob, τ.locV))
     (hh : ∀ e, Stmt.runSt σ s = .error e →
-      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none)) :
+      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none ∧ U.exh σ = false)) :
     Premise.Sound m s (.update U) σ := by
   intro _ _ ω κ φ h
   rw [holds_modal_iff, runSt_cons_frames]
@@ -179,7 +179,7 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
       show e = .exhausted
       by_cases hx : e = .exhausted
       · exact hx
-      · exact (h.of_none (Upd.globT_none_of_applyV (hd rfl hx))).elim
+      · exact (h.of_noExh (Upd.globT_none_of_applyV (hd rfl hx).1) (hd rfl hx).2).elim
 
 /-- **A block dropping a frame from under what it keeps**
 (`Premise.inline`). -/
@@ -440,7 +440,7 @@ kind. -/
 def Premise.Runs (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → State C Γ → Prop
   | _, _, s, .update U, σ => (∀ τ, Stmt.runSt σ s = .ok τ → U.applyP σ = some (τ.glob, τ.locV)) ∧
       (∀ e, Stmt.runSt σ s = .error e →
-        e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none))
+        e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none ∧ U.exh σ = false))
   | _, _, s, .unfold P h, σ => TRes.Sim ((Prog.runSt σ P).map (State.drop h)) (Stmt.runSt σ s)
   | _, _, s, .bind _ t P, σ => ∃ v : t.TDenote C σ.H, Prog.runSt (σ.push v) P = Stmt.runSt σ s
   | _, _, s, .split _ c c' P Q, σ =>
@@ -473,7 +473,7 @@ theorem Premise.Runs.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {p 
 theorem Premise.sound_update {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State C Γ)
     (hs : ∀ τ, Stmt.runSt σ s = .ok τ → U.applyP σ = some (τ.glob, τ.locV))
     (hh : ∀ e, Stmt.runSt σ s = .error e →
-      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none)) :
+      e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none ∧ U.exh σ = false)) :
     Premise.Runs m s (.update U) σ := ⟨hs, hh⟩
 
 /-- **A block**, up to the halt. -/
@@ -677,6 +677,22 @@ the diamond the arm shows that it does not happen (no update arm's
 statement loops; a push at the bound is exhausted, `TRun.push_nd`, which
 agrees with anything too and which both modalities accept). -/
 
+/-- An update the arms leave pushes nothing: it is never out of gas
+(`Upd.exh_of_pushFree`, the lowered parts' `…_pushFree`). -/
+macro "exh_free" : tactic => `(tactic| (
+  intro _
+  apply Upd.exh_of_pushFree
+  try simp only [Upd.pushFree, OpLoc.set_pushFree, UpdElem.clearMem_pushFree]
+  simp only [Upd.pushFree, UpdElem.pushFree, Rhs.pushFree, Tm.pushFree, Op2.pushFree,
+    Op3.pushFree, Simple.lower_pushFree, Val.lower_pushFree, SPath.lower_pushFree,
+    Loc.lower_pushFree, MPath.lower_pushFree, MLoc.lower_pushFree, Src.lower_pushFree,
+    MSrc.lower_pushFree, Tm.keyAt_pushFree, Tm.mread_pushFree, Tm.castV_pushFree,
+    OpLoc.cur_pushFree, OpLoc.set_pushFree, OpLoc.op_pushFree, Tm.bumped_pushFree,
+    Tm.one_pushFree, UpdElem.setLocal, UpdElem.save, UpdElem.saveMem, UpdElem.delAt,
+    UpdElem.writeMem, UpdElem.pop, UpdElem.shrink, UpdElem.payTo, UpdElem.rebind,
+    UpdElem.rebindMem, Upd.allocCopy, Upd.allocFresh, MLoc.lower_pushFree, Bool.and_self,
+    Bool.and_true, Bool.true_and]))
+
 section Bridge
 
 variable {Γ Γ' : Ctx} {m : Modality}
@@ -687,7 +703,8 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
     {X : Option (State C [] × LocsV C Γ')}
     (ha : TRes.AgreesO (fun o : Out C σ.H Γ' => (o.st.glob, o.st.locV)) (s.run σ) X)
     (hs : U.applyP σ = X)
-    (hd : m = .diamond → (s.run σ).NoDiv) : Premise.Runs m s (.update U) σ := by
+    (hd : m = .diamond → (s.run σ).NoDiv)
+    (hx : s.run σ = .error .revert → U.exh σ = false) : Premise.Runs m s (.update U) σ := by
   subst hs
   apply Premise.sound_update σ
   · intro τ hτ
@@ -708,7 +725,7 @@ theorem Premise.sound_updateSim_agrees {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (�
       cases e' with
       | revert =>
         have ha' : U.applyP σ = none := ha
-        refine ⟨nofun, fun _ _ => ?_⟩
+        refine ⟨nofun, fun _ _ => ⟨?_, hx ht⟩⟩
         unfold Upd.applyP at ha'
         exact Option.map_eq_none_iff.1 ha'
       | panic => exact ha.elim
@@ -721,18 +738,20 @@ theorem Premise.sound_updateSim_typed {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t 
     (σ : State C Γ) {X : Option (State C [] × LocsV C Γ')}
     (ha : TRes.AgreesO (fun o : Out C σ.H Γ' => (o.st.glob, o.st.locV)) (t σ) X)
     (hs : U.applyP σ = X)
-    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
+    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl)
+    (hx : t σ = .error .revert → U.exh σ = false := by exh_free) :
     Premise.Runs m s (.update U) σ :=
-  Premise.sound_updateSim_agrees σ (by rw [ht]; exact ha) hs hd
+  Premise.sound_updateSim_agrees σ (by rw [ht]; exact ha) hs hd (by rw [ht]; exact hx)
 
 /-- **An update, against the typed run**: the statement's typed step agrees
 with what the update computes. -/
 theorem Premise.sound_update_typed {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} {t : TStep C Γ Γ'}
     (σ : State C Γ)
     (ha : TRes.AgreesO (fun o : Out C σ.H Γ' => (o.st.glob, o.st.locV)) (t σ) (U.applyP σ))
-    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
+    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl)
+    (hx : t σ = .error .revert → U.exh σ = false := by exh_free) :
     Premise.Runs m s (.update U) σ :=
-  Premise.sound_updateSim_typed σ ha rfl hd ht
+  Premise.sound_updateSim_typed σ ha rfl hd ht hx
 
 theorem holds_conj {σ : State C Γ} :
     (l : List (Fml C Γ)) → (holds σ (Fml.conj l) ↔ ∀ ψ ∈ l, holds σ ψ)
@@ -751,12 +770,13 @@ theorem Premise.sound_cases_typed {fs : List (Fml C Γ)} {us : List (Upd C Γ Γ
     {t : TStep C Γ Γ} (σ : State C Γ) {X : Option (State C [] × LocsV C Γ)}
     (ha : TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (t σ) X)
     (h : (∀ f ∈ fs, holds σ f) → ∃ U ∈ us, U.applyP σ = X)
-    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl) :
+    (hd : m = .diamond → (s.run σ).NoDiv) (ht : s.run σ = t σ := by rfl)
+    (hx : ∀ U ∈ us, t σ = .error .revert → U.exh σ = false) :
     Premise.Sound m s (.cases fs us) σ := by
   intro Γ₁ Γ₀ ω κ φ hp
   have hp' := (holds_conj _).1 hp
   obtain ⟨U, hU, hs⟩ := h fun f hf => hp' f (List.mem_append_left _ hf)
-  exact (Premise.sound_updateSim_typed σ ha hs hd ht).sound ω κ φ
+  exact (Premise.sound_updateSim_typed σ ha hs hd ht (hx U hU)).sound ω κ φ
     (hp' _ (List.mem_append_right _ (List.mem_map_of_mem hU)))
 
 end Bridge

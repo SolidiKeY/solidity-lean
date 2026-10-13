@@ -483,23 +483,154 @@ theorem guardNB_rets {σ : Semantics.State} {ρ : SymS} (e : ElemS C Γ)
       | ok w => rw [hb] at hv; exact ⟨v, hv⟩
     | _ => exact h
 
-/-- What the box asks of an element returns where its guard does. -/
-theorem guardAt_box_rets {σ : Semantics.State} {ρ : SymS} (e : ElemS C Γ)
-    (h : Rets ((e.guard ρ).eval σ)) : Rets ((e.guardAt .box ρ).eval σ) :=
-  guardNB_rets e h
+/-- An element's terms return, read in the typed state. -/
+def ElemS.okT (τ : State C Γ) : ElemS C Γ → Bool
+  | .rhs r => (r.eval τ).isSome
+  | .glob e => e.okB τ
 
-theorem guardAt_box_rets₂ {σ : Semantics.State} {ρ : SymS} (a b : ElemS C Γ)
-    (h : Rets ((seqL (a.guard ρ) (b.guard ρ)).eval σ)) :
-    Rets ((seqL (a.guardAt .box ρ) (b.guardAt .box ρ)).eval σ) := by
+/-- An element out of gas, read in the typed state (`UpdElem.exhB`). -/
+def ElemS.exhT (τ : State C Γ) : ElemS C Γ → Bool
+  | .rhs r => r.exhB τ
+  | .glob e => e.exhB τ
+
+theorem toElemS_okT {Δ : Ctx} (τ : State C Γ) (e : UpdElem C Γ Δ) :
+    e.toElemS.okT τ = e.okB τ := by
+  cases e <;> rfl
+
+theorem toElemS_exhT {Δ : Ctx} (τ : State C Γ) (e : UpdElem C Γ Δ) :
+    e.toElemS.exhT τ = e.exhB τ := by
+  cases e <;> rfl
+
+theorem toElemS_guard {Δ : Ctx} (ρ : SymS) (e : UpdElem C Γ Δ) :
+    e.toElemS.guard ρ = (ElemS.glob e).guard ρ := by
+  cases e <;> rfl
+
+theorem toElemS_inLS {Δ : Ctx} (ρ : SymS) (e : UpdElem C Γ Δ) :
+    e.toElemS.inLS ρ = (ElemS.glob e).inLS ρ := by
+  cases e <;> rfl
+
+/-- An update with no element is never out of gas. -/
+theorem Upd.exh_view_zero (τ : State C Γ) : {Δ : Ctx} → (U : Upd C Γ Δ) → U.view = .zero →
+    U.exhAny τ = false ∧ U.exhOk τ = true
+  | _, .nil, _ => ⟨rfl, rfl⟩
+  | _, .snoc U e, hv => by
+    change U.view.add e.toElemS = .zero at hv
+    generalize U.view = w at hv
+    cases w <;> simp only [UView.add, reduceCtorEq] at hv
+  | _, .decl U _ r, hv => by
+    change U.view.add (.rhs r) = .zero at hv
+    generalize U.view = w at hv
+    cases w <;> simp only [UView.add, reduceCtorEq] at hv
+  | _, .pop U _, hv => Upd.exh_view_zero τ U hv
+  | _, .drop U _, hv => Upd.exh_view_zero τ U hv
+
+/-- An update of one element is out of gas where the element is. -/
+theorem Upd.exh_view_one (τ : State C Γ) {a : ElemS C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    U.view = .one a → U.exhAny τ = a.exhT τ ∧ U.exhOk τ = (a.okT τ || a.exhT τ)
+  | _, .nil, hv => UView.noConfusion hv
+  | _, .snoc U e, hv => by
+    obtain ⟨hz, rfl⟩ := UView.add_eq_one hv
+    obtain ⟨h₁, h₂⟩ := Upd.exh_view_zero τ U hz
+    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, toElemS_okT, toElemS_exhT, Bool.false_or,
+      Bool.true_and, and_self]
+  | _, .decl U _ r, hv => by
+    obtain ⟨hz, rfl⟩ := UView.add_eq_one hv
+    obtain ⟨h₁, h₂⟩ := Upd.exh_view_zero τ U hz
+    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, ElemS.okT, ElemS.exhT, Bool.false_or,
+      Bool.true_and, and_self]
+  | _, .pop U _, hv => Upd.exh_view_one τ U hv
+  | _, .drop U _, hv => Upd.exh_view_one τ U hv
+
+/-- An update of two elements is out of gas where one is and the other
+returns or is out of gas. -/
+theorem Upd.exh_view_two (τ : State C Γ) {a b : ElemS C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
+    U.view = .two a b → U.exhAny τ = (a.exhT τ || b.exhT τ) ∧
+      U.exhOk τ = ((a.okT τ || a.exhT τ) && (b.okT τ || b.exhT τ))
+  | _, .nil, hv => UView.noConfusion hv
+  | _, .snoc U e, hv => by
+    obtain ⟨hz, rfl⟩ := UView.add_eq_two hv
+    obtain ⟨h₁, h₂⟩ := Upd.exh_view_one τ U hz
+    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, toElemS_okT, toElemS_exhT, and_self]
+  | _, .decl U _ r, hv => by
+    obtain ⟨hz, rfl⟩ := UView.add_eq_two hv
+    obtain ⟨h₁, h₂⟩ := Upd.exh_view_one τ U hz
+    simp only [Upd.exhAny, Upd.exhOk, h₁, h₂, ElemS.okT, ElemS.exhT, and_self]
+  | _, .pop U _, hv => Upd.exh_view_two τ U hv
+  | _, .drop U _, hv => Upd.exh_view_two τ U hv
+
+/-- An element at the update's own scope whose guard returns returns. -/
+theorem guard_okT_at {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
+    (e : UpdElem C Γ Γ) (ha : e.toElemS.inLS ρ = true) (hg : Rets ((e.toElemS.guard ρ).eval σ)) :
+    e.okB τ = true := by
+  obtain ⟨τ', h'⟩ := ((RelU.one h ((Upd.nil (C := C) (Γ := Γ)).snoc e) rfl ha).1.1 hg)
+  obtain ⟨q, hq, -⟩ := applyVE_ok h'
+  have hg' := (Upd.applyV_ok _ hq).1
+  change (some τ.globG).bind (e.globT τ) = _ at hg'
+  rw [Option.bind_some] at hg'
+  rw [← UpdElem.globT_isSome τ e τ.globG, hg']
+  rfl
+
+/-- **An element whose guard returns returns** in every typed state the
+symbolic one stands for. -/
+theorem guard_okT {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
+    (a : ElemS C Γ) (ha : a.inLS ρ = true) (hg : Rets ((a.guard ρ).eval σ)) : a.okT τ = true := by
+  have hrhs : ∀ {t : LTy} (r : Rhs C Γ t), r.inLS ρ = true → Rets ((r.guardS ρ).eval σ) →
+      (r.eval τ).isSome = true := fun r ha hg => by
+    obtain ⟨τ', h'⟩ := ((RelU.one h ((Upd.nil (C := C) (Γ := Γ)).decl (.user "_") r) rfl ha).1.1 hg)
+    obtain ⟨q, hq, -⟩ := applyVE_ok h'
+    have hg' := (Upd.applyV_ok _ hq).1
+    change (some τ.globG).bind (fun g => (r.eval τ).bind fun _ => some g) = _ at hg'
+    simp only [Option.bind_some] at hg'
+    cases hr : r.eval τ with
+    | none => rw [hr] at hg'; cases hg'
+    | some _ => rfl
+  cases a with
+  | rhs r => exact hrhs r ha hg
+  | glob e =>
+    cases e with
+    | «local» _ r => exact hrhs r ha hg
+    | storage x => exact guard_okT_at h (.storage x) ha hg
+    | memory x => exact guard_okT_at h (.memory x) ha hg
+    | selfBalance op x => exact guard_okT_at h (.selfBalance op x) ha hg
+    | net r op x => exact guard_okT_at h (.net r op x) ha hg
+    | pay r x => exact guard_okT_at h (.pay r x) ha hg
+    | netMt r x => exact guard_okT_at h (.netMt r x) ha hg
+    | setBalance x => exact guard_okT_at h (.setBalance x) ha hg
+
+theorem sok_rets {σ : Semantics.State} {X : LStor} (h : Rets ((LTerm.sok X).eval σ)) :
+    ∃ a, X.eval σ = .ok a := by
   obtain ⟨v, hv⟩ := h
-  simp only [seqL_eval] at hv ⊢
-  cases ha : (a.guard ρ).eval σ with
-  | error e => rw [ha] at hv; cases hv
-  | ok w =>
-    rw [ha] at hv
-    obtain ⟨w', hw'⟩ := guardAt_box_rets a ⟨w, ha⟩
-    obtain ⟨v', hv'⟩ := guardAt_box_rets b ⟨v, hv⟩
-    exact ⟨v', by rw [hw', hv']; rfl⟩
+  simp only [LTerm.eval] at hv
+  obtain ⟨a, ha, -⟩ := Res.bind_eq_ok.1 hv
+  exact ⟨a, ha⟩
+
+/-- **An element whose terms return returns, or is out of gas**: its guard
+with the push bound returns, or a push it makes is at a full array. -/
+theorem guardNB_cases {σ : Semantics.State} {ρ : SymS} {τ : State C Γ} (h : RelT σ ρ τ)
+    (a : ElemS C Γ) (ha : a.inLS ρ = true) (hg : Rets ((a.guardNB ρ).eval σ)) :
+    Rets ((a.guard ρ).eval σ) ∨ a.exhT τ = true := by
+  have hrhs : ∀ {t : LTy} (r : Rhs C Γ t), r.inLS ρ = true → Rets ((r.guardNB ρ).eval σ) →
+      Rets ((r.guardS ρ).eval σ) ∨ r.exhB τ = true := fun r hr hg => by
+    cases r with
+    | store s =>
+      have hs : s.inLSM ρ = true := by rw [← Tm.inLS_eq_inLSM]; exact hr
+      obtain ⟨x, hx⟩ := sok_rets hg
+      rw [Tm.toLS_eq_toLSM] at hx
+      rcases h.stor_ok_or_exh s hs ⟨x, hx⟩ with hok | hx
+      · exact .inl ((h.stor_guard s hr).1.2 hok)
+      · exact .inr hx
+    | _ => exact .inl hg
+  cases a with
+  | rhs r => exact hrhs r ha hg
+  | glob e =>
+    cases e with
+    | «local» _ r => exact hrhs r ha hg
+    | storage s =>
+      obtain ⟨x, hx⟩ := sok_rets hg
+      rcases h.storT_ok_or_exh s ha ⟨x, hx⟩ with hok | hx
+      · exact .inl ((h.storT_guard s ha).1.2 hok)
+      · exact .inr hx
+    | _ => exact .inl hg
 
 /-- **The scoped reduction is sound**, over the typed state, at the
 polarity `pos`: where the fragment takes a formula, its reduction read in
@@ -603,18 +734,22 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
       cases hap : U.applyV τ with
       | none =>
         cases m with
-        | box => trivial
+        | box => exact .inl trivial
         | diamond =>
           rw [guardM_diamond] at hL
-          obtain ⟨τ', h'⟩ := hg.1 hL.1
-          exact absurd h' (applyVE_none hap τ')
+          rcases guardNB_cases h a hf.1 hL.1 with hgr | hx
+          · obtain ⟨τ', h'⟩ := hg.1 hgr
+            exact absurd h' (applyVE_none hap τ')
+          · refine .inr ?_
+            obtain ⟨h₁, h₂⟩ := Upd.exh_view_one τ U hv
+            simp only [Upd.exh, h₁, h₂, hx, Bool.or_true, Bool.and_self]
       | some q =>
         intro σ' hg' hl
         have hap' : U.applyVE τ = .ok (eraseQ q) := by rw [Upd.applyVE_eq, hap]; rfl
         have hgret : ∃ v, (a.guard ρ).eval σ = .ok v := hg.2 ⟨_, hap'⟩
         have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds σ := by
           cases m with
-          | box => exact (guardM_box σ _ _).1 hL (guardAt_box_rets a hgret)
+          | box => exact (guardM_box σ _ _).1 hL (guardNB_rets a hgret)
           | diamond => exact ((guardM_diamond σ _ _).1 hL).2
         exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
     | two a b =>
@@ -627,11 +762,36 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
         cases hap : U.applyV τ with
         | none =>
           cases m with
-          | box => trivial
+          | box => exact .inl trivial
           | diamond =>
             rw [guardM_diamond] at hL
-            obtain ⟨τ', h'⟩ := hg.1 hL.1
-            exact absurd h' (applyVE_none hap τ')
+            obtain ⟨hga, hgb⟩ := (seqL_rets σ _ _).1 hL.1
+            have hpo := hf.1
+            simp only [ElemS.parOk, Bool.and_eq_true] at hpo
+            have hia : a.inLS ρ = true := hpo.1.1.1
+            have hib : b.inLS ρ = true := hpo.1.1.2
+            have hca := guardNB_cases h a hia hga
+            have hcb := guardNB_cases h b hib hgb
+            by_cases hboth : Rets ((a.guard ρ).eval σ) ∧ Rets ((b.guard ρ).eval σ)
+            · obtain ⟨τ', h'⟩ := hg.1 ((seqL_rets σ _ _).2 hboth)
+              exact absurd h' (applyVE_none hap τ')
+            · refine .inr ?_
+              have hoka : (a.okT τ || a.exhT τ) = true := by
+                rcases hca with hx | hx
+                · rw [guard_okT h a hia hx, Bool.true_or]
+                · rw [hx, Bool.or_true]
+              have hokb : (b.okT τ || b.exhT τ) = true := by
+                rcases hcb with hx | hx
+                · rw [guard_okT h b hib hx, Bool.true_or]
+                · rw [hx, Bool.or_true]
+              have hany : (a.exhT τ || b.exhT τ) = true := by
+                rcases hca with hca | hca
+                · rcases hcb with hcb | hcb
+                  · exact absurd ⟨hca, hcb⟩ hboth
+                  · rw [hcb, Bool.or_true]
+                · rw [hca, Bool.true_or]
+              obtain ⟨h₁, h₂⟩ := Upd.exh_view_two τ U hv
+              simp only [Upd.exh, h₁, h₂, hany, hoka, hokb, Bool.and_self]
         | some q =>
           intro σ' hg' hl
           have hap' : U.applyVE τ = .ok (eraseQ q) := by rw [Upd.applyVE_eq, hap]; rfl
@@ -639,7 +799,10 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
           have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds
               σ := by
             cases m with
-            | box => exact (guardM_box σ _ _).1 hL (guardAt_box_rets₂ a b hgret)
+            | box =>
+              obtain ⟨hga, hgb⟩ := (seqL_rets σ _ _).1 hgret
+              exact (guardM_box σ _ _).1 hL ((seqL_rets σ _ _).2
+                ⟨guardNB_rets a hga, guardNB_rets b hgb⟩)
             | diamond => exact ((guardM_diamond σ _ _).1 hL).2
           exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
       | some p =>
@@ -653,7 +816,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
           cases hap : U.applyV τ with
           | none =>
             cases m with
-            | box => trivial
+            | box => exact .inl trivial
             | diamond =>
               rw [guardM_diamond] at hL
               obtain ⟨τ', h'⟩ := hg.1 hL.1

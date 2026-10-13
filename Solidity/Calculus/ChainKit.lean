@@ -581,6 +581,26 @@ def Fml.eraseNames : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .anon xs φ => .anon xs (Fml.eraseNames φ)
   | _, φ => φ
 
+theorem Upd.exhAny_eraseNames {Γ : Ctx} (σ : State C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.exhAny σ = U.exhAny σ
+  | _, .nil => rfl
+  | _, .snoc U e => by simp only [Upd.eraseNames, Upd.exhAny, Upd.exhAny_eraseNames σ U]
+  | _, .decl U _ r => by simp only [Upd.eraseNames, Upd.exhAny, Upd.exhAny_eraseNames σ U]
+  | _, .pop U _ => Upd.exhAny_eraseNames σ U
+  | _, .drop U _ => Upd.exhAny_eraseNames σ U
+
+theorem Upd.exhOk_eraseNames {Γ : Ctx} (σ : State C Γ) :
+    {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.exhOk σ = U.exhOk σ
+  | _, .nil => rfl
+  | _, .snoc U e => by simp only [Upd.eraseNames, Upd.exhOk, Upd.exhOk_eraseNames σ U]
+  | _, .decl U _ r => by simp only [Upd.eraseNames, Upd.exhOk, Upd.exhOk_eraseNames σ U]
+  | _, .pop U _ => Upd.exhOk_eraseNames σ U
+  | _, .drop U _ => Upd.exhOk_eraseNames σ U
+
+theorem Upd.exh_eraseNames {Γ Δ : Ctx} (σ : State C Γ) (U : Upd C Γ Δ) :
+    U.eraseNames.exh σ = U.exh σ := by
+  simp only [Upd.exh, Upd.exhAny_eraseNames, Upd.exhOk_eraseNames]
+
 theorem Upd.globT_eraseNames {Γ : Ctx} (σ : State C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → U.eraseNames.globT σ = U.globT σ
   | _, .nil => rfl
@@ -625,7 +645,7 @@ theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) 
   | _, σ, .upd m U φ => by
     show U.eraseNames.afterT m σ (holds · φ.eraseNames) ↔ U.afterT m σ (holds · φ)
     unfold Upd.afterT Upd.Lands
-    simp only [Upd.globT_eraseNames, Upd.held_eraseNames, holds_eraseNames]
+    simp only [Upd.globT_eraseNames, Upd.held_eraseNames, holds_eraseNames, Upd.exh_eraseNames]
   | _, σ, .havoc φ => forall_congr' fun _ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .all _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ
   | _, σ, .bind _ _ _ φ => forall_congr' fun _ => holds_eraseNames _ φ

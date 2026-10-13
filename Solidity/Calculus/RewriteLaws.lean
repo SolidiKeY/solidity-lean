@@ -134,24 +134,53 @@ section Laws
 
 variable {Γ₀ : Ctx}
 
+/-- A law that refines both ways at a state is exact there. -/
+theorem LawPair.pick_eq {q : LawPair C Γ₀} (hr : q.Refines) (σ : State C Γ₀)
+    (hb : OLe (q.rhs.eval σ) (q.lhs.eval σ)) : PickEq q.pick σ := fun h => by
+  obtain ⟨e, rfl, rfl⟩ := LawPair.pick_some h
+  subst e
+  have hf := hr σ
+  cases hl : q.lhs.eval σ with
+  | none =>
+    cases hr' : q.rhs.eval σ with
+    | none => rfl
+    | some x => rw [hr', hl] at hb; exact absurd (hb x rfl) (by nofun)
+  | some x => rw [hl] at hf; exact hf x rfl
+
+/-- A law with no push on either side is out of gas nowhere. -/
+theorem LawPair.pick_exh {q : LawPair C Γ₀} (hp : q.lhs.pushFree = true ∧ q.rhs.pushFree = true)
+    (σ : State C Γ₀) : PickExh q.pick σ := fun h => by
+  obtain ⟨e, rfl, rfl⟩ := LawPair.pick_some h
+  subst e
+  rw [Tm.exhB_of_pushFree σ _ hp.1, Tm.exhB_of_pushFree σ _ hp.2]
+
 /-- **A law in an update's right-hand sides, under any modality**, where it
-refines, and refines back wherever the rewritten update returns. -/
+refines, and refines back wherever the rewritten update reverts nowhere; its
+two sides push nothing, so where the rewritten update is out of gas, so is
+the update. -/
 theorem holds_upd_rwG {q : LawPair C Γ₀} (hr : q.Refines) {m : Modality} {Δ : Ctx}
     {U : Upd C Γ₀ Δ} {φ : Fml C Δ} (σ : State C Γ₀)
-    (hb : ∀ g, (Upd.rwG q U).globT σ = some g → OLe (q.rhs.eval σ) (q.lhs.eval σ))
+    (hb : (Upd.rwG q U).exhOk σ = true → OLe (q.rhs.eval σ) (q.lhs.eval σ))
+    (hp : q.lhs.pushFree = true ∧ q.rhs.pushFree = true)
     (h : holds σ (.upd m (Upd.rwG q U) φ)) : holds σ (.upd m U φ) := by
-  refine Upd.afterT_intro (fun he => ?_) fun g σ' hL =>
+  refine Upd.afterT_introX (fun he => ?_) fun g σ' hL =>
     h.of_lands (Upd.rwBy_lands σ (LawPair.pick_le hr σ) U hL)
   cases hB : (Upd.rwG q U).globT σ with
-  | none => exact h.of_none hB
+  | none =>
+    refine (h.of_none hB).imp_right fun hx => ?_
+    have hk : (Upd.rwG q U).exhOk σ = true := (Bool.and_eq_true_iff.1 hx).2
+    rw [Upd.rwBy_exh σ (LawPair.pick_eq hr σ (hb hk)) (LawPair.pick_exh hp σ) U] at hx
+    exact hx
   | some g =>
-    rw [Upd.rwBy_globT_rev σ (LawPair.pick_ge σ (hb g hB)) U g hB] at he
+    rw [Upd.rwBy_globT_rev σ (LawPair.pick_ge σ (hb (Upd.exhOk_of_globT _ hB))) U g hB] at he
     cases he
 
 /-- The law `E` in the right-hand sides of `{U}_m φ`, `U` at the law's scope. -/
 def Fml.updRwS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs)
     {Δ : Ctx} (m : Modality) (U : Upd C Γ₀ Δ) (φ : Fml C Δ) : Option (Fml C Γ₀) :=
-  if (Upd.hasG q U && E.chk (Upd.rwG q U)) = true then some (.upd m (Upd.rwG q U) φ) else none
+  if (Upd.hasG q U && E.chk (Upd.rwG q U) && q.lhs.pushFree && q.rhs.pushFree) = true then
+    some (.upd m (Upd.rwG q U) φ)
+  else none
 
 /-- `Fml.updRwS` on an update read at the law's scope `Γ₀`. -/
 def Fml.updRwSAt (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs)
@@ -177,7 +206,7 @@ def FmlRw.lawUpdS (q : LawPair C Γ₀) (E : LawCov C Γ₀ q.k q.lhs q.rhs) (i 
         cases h
         simp only [Bool.and_eq_true] at hc
         exact holds_upd_rwG (LawPair.Refines.of_at E.fwd) σ
-          (fun g hB => E.back (Upd.rwG q U) σ g hc.2 hB) hψ
+          (fun hk => E.back (Upd.rwG q U) σ hc.1.1.2 hk) ⟨hc.1.2, hc.2⟩ hψ
       · cases h
     · cases h) i
 

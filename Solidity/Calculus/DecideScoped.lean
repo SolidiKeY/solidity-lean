@@ -727,13 +727,6 @@ def ElemS.guardNB (ρ : SymS) : ElemS C Γ → LTerm
   | .glob (.storage s) => .sok (s.toLSt ρ)
   | e => e.guard ρ
 
-/-- What an element's terms must return under `m`: the push bound is the
-diamond's (`Rhs.guardNB`). -/
-def ElemS.guardAt (m : Modality) (ρ : SymS) (e : ElemS C Γ) : LTerm :=
-  match m with
-  | .box => e.guardNB ρ
-  | .diamond => e.guard ρ
-
 /-- An element in the fragment. -/
 def ElemS.inLS (ρ : SymS) : ElemS C Γ → Bool
   | .rhs r => r.inLS ρ
@@ -986,7 +979,7 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
     match U.view with
     | .zero => φ.toLSM (U.replayS noActE noActR ρ)
     | .one a =>
-      guardM m (a.guardAt m ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+      guardM m (a.guardNB ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
     | .two a b =>
       match pairViewS a b with
       | some ⟨_, i, mm⟩ =>
@@ -994,7 +987,7 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
         | some (g, M) => guardM m g (φ.toLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
         | none => .tt
       | none =>
-        guardM m (seqL (a.guardAt m ρ) (b.guardAt m ρ))
+        guardM m (seqL (a.guardNB ρ) (b.guardNB ρ))
           (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
     | .many => .tt
   | _, _, .modal .. => .not .tt
@@ -1053,7 +1046,7 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
       match U.view with
       | .zero => ih (U.replayS noActE noActR ρ)
       | .one a =>
-        guardM m (a.guardAt m ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+        guardM m (a.guardNB ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
       | .two a b =>
         match pairViewS a b with
         | some ⟨_, i, mm⟩ =>
@@ -1061,7 +1054,7 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
           | some (g, M) => guardM m g (ih (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
           | none => .tt
         | none =>
-          guardM m (seqL (a.guardAt m ρ) (b.guardAt m ρ))
+          guardM m (seqL (a.guardNB ρ) (b.guardNB ρ))
             (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
       | .many => .tt)
     (modal := fun _ _ _ _ _ _ => .not .tt) (havoc := fun _ _ _ => .tt)

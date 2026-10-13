@@ -163,6 +163,27 @@ theorem Upd.storage_eval_of_globT {σ : State C Γ} : {Δ : Ctx} → (U : Upd C 
     exact Upd.storage_eval_of_globT U hU
   | _, .pop U _, _, h | _, .drop U _, _, h => Upd.storage_eval_of_globT U h
 
+/-- **A storage write that is an element of an update that reverts nowhere
+returns or is out of gas.** -/
+theorem Upd.storage_okx {σ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → U.exhOk σ = true →
+    ∀ s ∈ U.storTerms, (s.eval σ).isSome = true ∨ s.exhB σ = true
+  | _, .nil, _ => fun _ h => nomatch h
+  | _, .snoc U e, h => by
+    simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true] at h
+    intro s hs
+    rcases List.mem_append.1 hs with hs | hs
+    · exact Upd.storage_okx U h.1 s hs
+    · cases e with
+      | storage s' =>
+        simp only [UpdElem.storTerms, List.mem_singleton] at hs
+        subst hs
+        exact h.2
+      | _ => nomatch hs
+  | _, .decl U _ _, h => by
+    simp only [Upd.exhOk, Bool.and_eq_true] at h
+    exact Upd.storage_okx U h.1
+  | _, .pop U _, h | _, .drop U _, h => Upd.storage_okx U h
+
 /-! ## A storage law onto a literal
 
 `{ storage := save(storage, p, 10) ‖ x := find(save(storage, p, 10), p) }`
@@ -904,17 +925,85 @@ theorem Tm.onSpine_eval {σ : State C Γ} {k : Srt} {t w : Tm C Γ k} (h : t.onS
   · obtain rfl := Tm.eq_of_beqR h; exact ht
   · exact Tm.onSpineAny_eval (w := w) t h ht
 
-/-- `U` writes the storage with a term on whose spine the write `w` lies:
-`w` returns wherever `U` does. -/
+theorem Op2.exhB_none_fst {H : HTy} {a b k : Srt} (o : Op2 C a b k) (y : Option (b.Den C H)) :
+    o.exhB none y = false := by
+  cases o <;> rfl
+
+theorem Op3.exhB_none_fst {H : HTy} {a b c k : Srt} (o : Op3 C a b c k) (y : Option (b.Den C H))
+    (z : Option (c.Den C H)) : o.exhB none y z = false := by
+  cases o <;> rfl
+
+/-- What a term out of gas reads first returns or is out of gas. -/
+theorem Tm.onSpineAny_okx {σ : State C Γ} {k : Srt} {w : Tm C Γ k} {u : Srt} (t : Tm C Γ u)
+    (h : Tm.onSpineAny w t = true) (ht : t.exhB σ = true) :
+    (w.eval σ).isSome = true ∨ w.exhB σ = true := by
+  cases hw : w.eval σ with
+  | some _ => exact .inl rfl
+  | none =>
+    refine .inr ?_
+    induction t with
+    | app1 o x ihx =>
+      simp only [Tm.onSpineAny, Bool.or_eq_true] at h
+      simp only [Tm.exhB, Bool.and_eq_true] at ht
+      rcases h with h | h
+      · cases Tm.sigma_eq_of_beqR h; exact ht.2
+      · exact ihx h ht.2
+    | app2 o x y ihx _ =>
+      simp only [Tm.onSpineAny, Bool.or_eq_true] at h
+      have hx : x.eval σ = none := by
+        rcases h with h | h
+        · cases Tm.sigma_eq_of_beqR h; exact hw
+        · exact Classical.byContradiction fun hx => Tm.onSpineAny_eval x h hx hw
+      simp only [Tm.exhB, hx, Op2.exhB_none_fst, Option.isSome_none, Bool.and_false,
+        Bool.false_and, Bool.or_false, Bool.false_or, Bool.and_eq_true] at ht
+      rcases h with h | h
+      · cases Tm.sigma_eq_of_beqR h; exact ht.2.1
+      · exact ihx h ht.2.1
+    | app3 o x y z ihx _ _ =>
+      simp only [Tm.onSpineAny, Bool.or_eq_true] at h
+      have hx : x.eval σ = none := by
+        rcases h with h | h
+        · cases Tm.sigma_eq_of_beqR h; exact hw
+        · exact Classical.byContradiction fun hx => Tm.onSpineAny_eval x h hx hw
+      simp only [Tm.exhB, hx, Op3.exhB_none_fst, Option.isSome_none, Bool.and_false,
+        Bool.false_and, Bool.or_false, Bool.false_or, Bool.and_eq_true] at ht
+      rcases h with h | h
+      · cases Tm.sigma_eq_of_beqR h; exact ht.2.1.1
+      · exact ihx h ht.2.1.1
+    | _ => simp only [Tm.onSpineAny, Bool.false_eq_true] at h
+
+/-- What a term that returns or is out of gas has on its spine returns or
+is out of gas. -/
+theorem Tm.onSpine_okx {σ : State C Γ} {k : Srt} {t w : Tm C Γ k} (h : t.onSpine w = true)
+    (ht : (t.eval σ).isSome = true ∨ t.exhB σ = true) :
+    (w.eval σ).isSome = true ∨ w.exhB σ = true := by
+  rcases Bool.or_eq_true_iff.mp h with h | h
+  · obtain rfl := Tm.eq_of_beqR h; exact ht
+  · rcases ht with ht | ht
+    · left
+      have := Tm.onSpineAny_eval (σ := σ) (w := w) t h (by
+        intro hn; rw [hn] at ht; cases ht)
+      cases hw : w.eval σ with
+      | none => exact absurd hw this
+      | some _ => rfl
+    · exact Tm.onSpineAny_okx t h ht
+
+/-- `U` writes the storage with a term on whose spine the write `w` lies, a
+term with no push (`Tm.pushFree`): `w` returns wherever `U` reverts nowhere
+(it is never out of gas). -/
 def Upd.holdsWrite {Δ : Ctx} (U : Upd C Γ Δ) (w : Tm C Γ .st) : Bool :=
-  U.storTerms.any (·.onSpine w)
+  w.pushFree && U.storTerms.any (·.onSpine w)
 
 theorem Upd.holdsWrite_eval {Δ : Ctx} {U : Upd C Γ Δ} {w : Tm C Γ .st}
-    (h : U.holdsWrite w = true) {σ : State C Γ} {g : GlobT C σ.H} (hU : U.globT σ = some g) :
+    (h : U.holdsWrite w = true) {σ : State C Γ} (hU : U.exhOk σ = true) :
     w.eval σ ≠ none := by
+  obtain ⟨hp, h⟩ := Bool.and_eq_true_iff.1 h
   obtain ⟨S, hS, hs⟩ := List.any_eq_true.1 h
-  obtain ⟨st, hst⟩ := Upd.storage_eval_of_globT U hU S hS
-  exact Tm.onSpine_eval hs (by rw [hst]; exact Option.some_ne_none _)
+  have hw := Tm.onSpine_okx hs (Upd.storage_okx U hU S hS)
+  rw [Tm.exhB_of_pushFree σ w hp] at hw
+  intro hn
+  rw [hn] at hw
+  simp only [Option.isSome_none, Bool.false_eq_true, or_self] at hw
 
 /-- **A reference law is exact past its storage operation**: the read's
 storage returns wherever the read does, and where it returns the two sides
@@ -960,7 +1049,7 @@ def Upd.coversRef {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (q : Tm C Γ u × Tm C 
 /-- **Wherever a covered update returns, a reference law refines back.** -/
 theorem TermTaclet.RefLaw.back {P : PrimTy} {t t' : Tm C Γ (.val P)} {r : TermTaclet t t'}
     (hr : RefLaw r) {Δ : Ctx} {U : Upd C Γ Δ} (hc : U.coversRef (t, t') = true) {σ : State C Γ}
-    {g : GlobT C σ.H} (hU : U.globT σ = some g) : OLe (t'.eval σ) (t.eval σ) := by
+    (hU : U.exhOk σ = true) : OLe (t'.eval σ) (t.eval σ) := by
   obtain ⟨X, hX, he⟩ := hr.exact
   simp only [Upd.coversRef, hX] at hc
   rw [he σ (Upd.holdsWrite_eval hc hU)]
@@ -1663,8 +1752,8 @@ def Tm.findDelBelowAt {Δ : Ctx} (U : Upd C Γ Δ) {u : Srt} : Tm C Γ u → Boo
 /-- **A read by members below a delete the update holds returns**: the
 delete leaves its path found (`Storage.delete_save`), and a struct has every
 member. -/
-theorem Tm.findDelBelowAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g : GlobT C σ.H}
-    (hU : U.globT σ = some g) {u : Srt} (b : Tm C Γ u) (h : Tm.findDelBelowAt U b = true) :
+theorem Tm.findDelBelowAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ}
+    (hU : U.exhOk σ = true) {u : Srt} (b : Tm C Γ u) (h : Tm.findDelBelowAt U b = true) :
     b.eval σ ≠ none := by
   cases b with
   | app2 o x y =>
@@ -1734,8 +1823,8 @@ def Upd.coversLit {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (t : Tm C Γ u) : Bool 
   | some b => Tm.findSaveLitAt U b || Tm.findDelBelowAt U b
   | none => false
 
-theorem Tm.findSaveLitAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g : GlobT C σ.H}
-    (hU : U.globT σ = some g) {u : Srt} (b : Tm C Γ u) (h : Tm.findSaveLitAt U b = true) :
+theorem Tm.findSaveLitAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ}
+    (hU : U.exhOk σ = true) {u : Srt} (b : Tm C Γ u) (h : Tm.findSaveLitAt U b = true) :
     b.eval σ ≠ none := by
   cases b with
   | app2 o x y =>
@@ -1771,7 +1860,7 @@ theorem Tm.findSaveLitAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g 
 
 /-- Where a covering update returns, the read it covers returns. -/
 theorem Upd.coversLit_eval {Δ : Ctx} {U : Upd C Γ Δ} {u : Srt} {t : Tm C Γ u}
-    (hc : U.coversLit t = true) {σ : State C Γ} {g : GlobT C σ.H} (hU : U.globT σ = some g) :
+    (hc : U.coversLit t = true) {σ : State C Γ} (hU : U.exhOk σ = true) :
     t.eval σ ≠ none := by
   unfold Upd.coversLit at hc
   split at hc
@@ -3022,14 +3111,41 @@ theorem Upd.memory_eval_of_globT {σ : State C Γ} : {Δ : Ctx} → (U : Upd C �
     exact Upd.memory_eval_of_globT U hU
   | _, .pop U _, _, h | _, .drop U _, _, h => Upd.memory_eval_of_globT U h
 
-/-- `U` writes the memory with a term on whose spine the memory `w` lies. -/
+/-- **A memory write that is an element of an update that reverts nowhere
+returns or is out of gas.** -/
+theorem Upd.memory_okx {σ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → U.exhOk σ = true →
+    ∀ s ∈ U.memTerms, (s.eval σ).isSome = true ∨ s.exhB σ = true
+  | _, .nil, _ => fun _ h => nomatch h
+  | _, .snoc U e, h => by
+    simp only [Upd.exhOk, Bool.and_eq_true, Bool.or_eq_true] at h
+    intro s hs
+    rcases List.mem_append.1 hs with hs | hs
+    · exact Upd.memory_okx U h.1 s hs
+    · cases e with
+      | memory s' =>
+        simp only [UpdElem.memTerms, List.mem_singleton] at hs
+        subst hs
+        exact h.2
+      | _ => nomatch hs
+  | _, .decl U _ _, h => by
+    simp only [Upd.exhOk, Bool.and_eq_true] at h
+    exact Upd.memory_okx U h.1
+  | _, .pop U _, h | _, .drop U _, h => Upd.memory_okx U h
+
+/-- `U` writes the memory with a term on whose spine the memory `w` lies, a
+term with no push. -/
 def Upd.holdsMem {Δ : Ctx} (U : Upd C Γ Δ) (w : Tm C Γ .mem) : Bool :=
-  U.memTerms.any (·.onSpine w)
+  w.pushFree && U.memTerms.any (·.onSpine w)
 
 theorem Upd.holdsMem_eval {Δ : Ctx} {U : Upd C Γ Δ} {w : Tm C Γ .mem} (h : U.holdsMem w = true)
-    {g : GlobT C σ.H} (hU : U.globT σ = some g) : w.eval σ ≠ none := by
+    (hU : U.exhOk σ = true) : w.eval σ ≠ none := by
+  obtain ⟨hp, h⟩ := Bool.and_eq_true_iff.1 h
   obtain ⟨S, hS, hs⟩ := List.any_eq_true.1 h
-  exact Tm.onSpine_eval hs (Upd.memory_eval_of_globT U hU S hS)
+  have hw := Tm.onSpine_okx hs (Upd.memory_okx U hU S hS)
+  rw [Tm.exhB_of_pushFree σ w hp] at hw
+  intro hn
+  rw [hn] at hw
+  simp only [Option.isSome_none, Bool.false_eq_true, or_self] at hw
 
 /-- A covered memory law's write is held by the update. -/
 def Upd.coversEval {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (q : Tm C Γ u × Tm C Γ u) : Bool :=
@@ -3040,7 +3156,7 @@ def Upd.coversEval {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (q : Tm C Γ u × Tm C
 
 /-- **Wherever a covered update returns, a memory law refines back.** -/
 theorem EvalLaw.back {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') {Δ : Ctx} {U : Upd C Γ Δ}
-    (hc : U.coversEval (t, t') = true) {g : GlobT C σ.H} (hU : U.globT σ = some g) :
+    (hc : U.coversEval (t, t') = true) (hU : U.exhOk σ = true) :
     OLe (t'.eval σ) (t.eval σ) := by
   obtain ⟨A, hA, he⟩ := r.exact
   cases A with
@@ -3063,14 +3179,14 @@ left side returns what the right side does (`back`). -/
 structure LawCov (C : Contract) (Γ : Ctx) (u : Srt) (t t' : Tm C Γ u) where
   chk : {Δ : Ctx} → Upd C Γ Δ → Bool
   fwd : Tm.EvalRefinesAt t t'
-  back : ∀ {Δ : Ctx} (U : Upd C Γ Δ) (σ : State C Γ) (g : GlobT C σ.H), chk U = true →
-    U.globT σ = some g → OLe (t'.eval σ) (t.eval σ)
+  back : ∀ {Δ : Ctx} (U : Upd C Γ Δ) (σ : State C Γ), chk U = true →
+    U.exhOk σ = true → OLe (t'.eval σ) (t.eval σ)
 
 /-- A literal law, under any update. -/
 def LawCov.lit {P : PrimTy} {t t' : Tm C Γ (.val P)} (r : LitLaw t t') : LawCov C Γ (.val P) t t' where
   chk _ := true
   fwd σ := (r.evalEq σ ▸ OLe.refl _)
-  back _ σ _ _ _ := (r.evalEq σ ▸ OLe.refl _)
+  back _ σ _ _ := (r.evalEq σ ▸ OLe.refl _)
 
 /-- **`findOnSave` at an update**: the read of a word written, where the
 update holds the write. -/
@@ -3078,7 +3194,7 @@ def LawCov.findOnSave {P : PrimTy} (s : Tm C Γ .st) (p : Tm C Γ (.path (.prim 
     (w : P.Denote) : LawCov C Γ (.val P) (Tm.findSaveLit s p w) (Tms.Term.lit w) where
   chk U := U.holdsWrite (Tm.saveLit s p w)
   fwd := Tm.findSaveLit_fwd s p w
-  back U σ g hc hU := by
+  back U σ hc hU := by
     obtain ⟨st', hst'⟩ := Option.ne_none_iff_exists'.1 (Upd.holdsWrite_eval hc hU)
     intro x hx
     rw [Tm.findSaveLit_eval_of_save s p w hst']
@@ -3092,7 +3208,7 @@ def LawCov.findMemberCons {s : Tm C Γ .st} {P : PrimTy} {p : Tm C Γ (.path (.p
     LawCov C Γ (.val P) (Tms.Term.find s p) (.app2 .findIn (Tms.STerm.select s r hr) p') where
   chk _ := true
   fwd σ := Tm.findMemberCons_eval h σ ▸ OLe.refl _
-  back _ σ _ _ _ := Tm.findMemberCons_eval h σ ▸ OLe.refl _
+  back _ σ _ _ := Tm.findMemberCons_eval h σ ▸ OLe.refl _
 
 /-- **A term taclet onto a literal, where the update holds the write it
 reads back** (`Upd.coversLit`): the read returns wherever the update does,
@@ -3101,7 +3217,7 @@ def LawCov.covered {P : PrimTy} {t t' : Tm C Γ (.val P)} (r : TermTaclet t t')
     (ht : t'.isLit = true) : LawCov C Γ (.val P) t t' where
   chk U := U.coversLit t
   fwd := Tm.evalRefinesAt_of_theq r.sound ht
-  back U σ g hc hU := fun x hx => by
+  back U σ hc hU := fun x hx => by
     obtain ⟨y, hy⟩ := Option.ne_none_iff_exists'.1 (Upd.coversLit_eval hc hU)
     rw [Tm.evalRefinesAt_of_theq r.sound ht σ y hy] at hx
     cases hx
@@ -3113,20 +3229,20 @@ def LawCov.ref {P : PrimTy} {t t' : Tm C Γ (.val P)} {r : TermTaclet t t'}
     (hr : TermTaclet.RefLaw r) : LawCov C Γ (.val P) t t' where
   chk U := U.coversRef (t, t')
   fwd := hr.evalRefines
-  back _ _ _ hc hU := hr.back hc hU
+  back _ _ hc hU := hr.back hc hU
 
 /-- **Two member-wise forms of one read, under any update** (`Tm.sameBase`). -/
 def LawCov.eqv {u : Srt} {t t' : Tm C Γ u} (h : Tm.sameBase t t' = true) : LawCov C Γ u t t' where
   chk _ := true
   fwd σ := Tm.sameBase_eval h σ ▸ OLe.refl _
-  back _ σ _ _ _ := Tm.sameBase_eval h σ ▸ OLe.refl _
+  back _ σ _ _ := Tm.sameBase_eval h σ ▸ OLe.refl _
 
 /-- **A memory law, where the update holds the write it reads past**
 (`Upd.coversEval`). -/
 def LawCov.eval {u : Srt} {t t' : Tm C Γ u} (r : EvalLaw t t') : LawCov C Γ u t t' where
   chk U := U.coversEval (t, t')
   fwd := r.evalRefines
-  back _ _ _ hc hU := r.back hc hU
+  back _ _ hc hU := r.back hc hU
 
 /-! ## A premise about closed terms, at any scope -/
 

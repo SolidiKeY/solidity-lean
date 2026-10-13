@@ -219,9 +219,31 @@ theorem Tm.rwC_eval_eq (hq : Tm.EvalEq q.1 q.2) (σ : State C Γ) {s : Srt} (t :
     (t.rwC q).eval σ = t.eval σ :=
   Tm.rwBy_eval_eq σ (Tm.pickClosed_eq hq σ) t
 
-theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
+/-- A law whose left side always returns: its two sides are never out of
+gas. -/
+theorem Tm.pickClosed_exh (hq : Tm.EvalEq q.1 q.2) (hd : ∀ τ : State C [], (q.1.eval τ).isSome)
+    (σ : State C Γ) : PickExh (Tm.pickClosed q) σ := by
+  intro s t t' h
+  have he := Tm.pickClosed_eq hq σ h
+  cases s with
+  | val p' =>
+    simp only [Tm.pickClosed] at h
+    split at h
+    · rename_i e
+      subst e
+      split at h
+      · rename_i hc
+        obtain ⟨v, hv⟩ := Option.isSome_iff_exists.1 (hd σ.toNil)
+        have ht : t.eval σ = some v := by rw [Tm.eval_closedAs hc σ]; exact hv
+        rw [Tm.exhB_of_eval σ t ht, Tm.exhB_of_eval σ t' (he.trans ht)]
+      · cases h
+    · cases h
+  | _ => simp only [Tm.pickClosed, reduceCtorEq] at h
+
+theorem holds_upd_rwC_iff (hq : Tm.EvalEq q.1 q.2) (hd : ∀ τ : State C [], (q.1.eval τ).isSome)
+    {m : Modality} {Δ : Ctx} {U : Upd C Γ Δ}
     {φ : Fml C Δ} (σ : State C Γ) : holds σ (.upd m (U.rwC q) φ) ↔ holds σ (.upd m U φ) :=
-  Upd.rwBy_afterT σ (Tm.pickClosed_eq hq σ) m U _
+  Upd.rwBy_afterT σ (Tm.pickClosed_eq hq σ) (Tm.pickClosed_exh hq hd σ) m U _
 
 end Laws
 
@@ -245,7 +267,10 @@ def lit {p : PrimTy} {t t' : Tm C [] (.val p)} (r : LitLaw t t') (i : Nat) : Fml
     (fun {_ _ m U φ ψ} h σ hψ => by
       dsimp only [Fml.updRwEq] at h
       split at h
-      · cases h; exact (holds_upd_rwC_iff (q := (t, t')) r.evalEqT σ).1 hψ
+      · cases h
+        obtain ⟨v, -, hv⟩ := r.exact
+        exact (holds_upd_rwC_iff (q := (t, t')) r.evalEqT
+          (fun τ => by rw [hv τ]; rfl) σ).1 hψ
       · cases h) i
 
 /-- **A term taclet** onto a literal, in the right-hand sides of the box
@@ -865,7 +890,7 @@ theorem Fml.applyOnPVTop_sound {s : Skel} {m : Modality} {U : Upd C Γ Δ} {φ :
   unfold Fml.applyOnPVTop at h
   split at h
   · cases h
-    exact Upd.afterT_intro (fun he => hψ.of_none he) fun _ σ' hL =>
+    exact Upd.afterT_introX (fun he => hψ.of_none he) fun _ σ' hL =>
       (Fml.litPVAlong_holds σ' hL.2.2 s φ).1 (hψ.of_lands hL)
   · cases h
 
