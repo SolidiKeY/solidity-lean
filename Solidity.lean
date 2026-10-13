@@ -136,6 +136,7 @@ import Solidity.Calculus.DecideEval
 import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.Closer
+import Solidity.Calculus.ElimFacts
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Problem
 import Solidity.Calculus.SurfaceSpec

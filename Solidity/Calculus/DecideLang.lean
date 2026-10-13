@@ -242,6 +242,42 @@ abbrev LTm.lit {p : PrimTy} (v : p.Denote) : LTm C (.val p) := .app0 (.lit v)
 /-- `true`. -/
 abbrev LTm.tt : LTm C (.val .bool) := .lit (p := .bool) true
 
+/-- The term is the literal `true`. -/
+def LTm.isTT (t : LTm C (.val .bool)) : Bool :=
+  match t with
+  | .app0 (.lit v) => v
+  | _ => false
+
+/-- The term is the literal `false`. -/
+def LTm.isFF (t : LTm C (.val .bool)) : Bool :=
+  match t with
+  | .app0 (.lit v) => !v
+  | _ => false
+
+theorem LTm.isFF_eval {g : State C []} {ν : AEnv} {t : LTm C (.val .bool)} (h : t.isFF = true) :
+    (t.eval g ν : Option Bool) = some false := by
+  cases t with
+  | app0 o =>
+    cases o with
+    | lit v =>
+      have hv : (v : Bool) = false := by simpa only [LTm.isFF, Bool.not_eq_true'] using h
+      show some v = some false
+      rw [hv]
+    | _ => simp only [LTm.isFF, reduceCtorEq] at h
+  | _ => simp only [LTm.isFF, reduceCtorEq] at h
+
+theorem LTm.isTT_eval {g : State C []} {ν : AEnv} {t : LTm C (.val .bool)} (h : t.isTT = true) :
+    (t.eval g ν : Option Bool) = some true := by
+  cases t with
+  | app0 o =>
+    cases o with
+    | lit v =>
+      have hv : (v : Bool) = true := h
+      show some v = some true
+      rw [hv]
+    | _ => simp only [LTm.isTT, reduceCtorEq] at h
+  | _ => simp only [LTm.isTT, reduceCtorEq] at h
+
 /-- A literal `uint`. -/
 def LTm.nat (n : Nat) : LTm C (.val .uint) := .lit (uintOfNat n)
 
@@ -252,21 +288,56 @@ def LTm.lit? {s : Srt} : LTm C s → Option (Σ' (p : PrimTy) (_ : s = .val p), 
     | _ => none
   | _ => none
 
-/-- The term always returns: an atom or a constant. -/
+/-- A unary symbol that returns where its argument does: a member path. -/
+def _root_.Solidity.Op1.retsStep {a s : Srt} : Op1 C a s → Bool
+  | .field _ => true
+  | _ => false
+
+/-- `LTm.retsS`'s compiled twin. -/
+def LTm.retsSM : {s : Srt} → LTm C s → Bool
+  | _, .var _ | _, .app0 _ => true
+  | _, .app1 o x => o.retsStep && x.retsSM
+  | _, .index _ q i => q.retsSM && i.retsSM
+  | _, .obsW q | _, .obsL q | _, .obsH q => q.retsSM
+  | _, _ => false
+
+/-- **The term always returns**: an atom, a constant, a path of members
+and unchecked indices below a root, the starting storage read at one.  By
+the recursor. -/
+@[implemented_by LTm.retsSM]
 def LTm.retsS {s : Srt} (t : LTm C s) : Bool :=
-  @LTm.casesOn C (fun _ _ => Bool) s t (fun _ => true) (fun _ => true) (fun _ _ => false)
-    (fun _ _ _ => false) (fun _ _ _ _ => false) (fun _ _ _ => false) (fun _ => false)
-    (fun _ => false) (fun _ => false) (fun _ _ => false) (fun _ _ => false)
-    (fun _ _ _ _ => false) false
+  @LTm.rec C (fun _ _ => Bool)
+    (@fun _ _ => true) (@fun _ _ => true)
+    (@fun _ _ o _ ihx => o.retsStep && ihx)
+    (@fun _ _ _ _ _ _ _ _ => false)
+    (@fun _ _ _ _ _ _ _ _ _ _ _ => false)
+    (@fun _ _ _ _ _ _ ihq ihi => ihq && ihi)
+    (@fun _ _ ih => ih) (@fun _ _ ih => ih) (@fun _ _ ih => ih)
+    (@fun _ _ _ _ _ _ => false) (@fun _ _ _ _ _ => false)
+    (@fun _ _ _ _ _ _ _ _ _ _ => false) (@fun _ => false) s t
 
 theorem Op0.eval_isSome (g : State C []) {s : Srt} (o : Op0 C s) : (o.eval g).isSome = true := by
   cases o <;> rfl
 
 theorem LTm.retsS_eval {g : State C []} {ν : AEnv} {s : Srt} {t : LTm C s} (h : t.retsS = true) :
     ∃ v, t.eval g ν = some v := by
-  cases t with
+  induction t with
   | var k => exact ⟨_, rfl⟩
   | app0 o => exact Option.isSome_iff_exists.1 (Op0.eval_isSome g o)
+  | app1 o x ih =>
+    have h' : o.retsStep = true ∧ x.retsS = true := Bool.and_eq_true_iff.1 h
+    obtain ⟨v, hv⟩ := ih h'.2
+    have h1 := h'.1
+    cases o <;> simp only [Op1.retsStep, Bool.false_eq_true] at h1
+    exact ⟨_, by rw [LTm.eval_app1, hv]; rfl⟩
+  | index it q i ihq ihi =>
+    have h' : q.retsS = true ∧ i.retsS = true := Bool.and_eq_true_iff.1 h
+    obtain ⟨v, hv⟩ := ihq h'.1
+    obtain ⟨w, hw⟩ := ihi h'.2
+    exact ⟨_, by rw [LTm.eval_index, hv, hw]; rfl⟩
+  | obsW q ih | obsL q ih | obsH q ih =>
+    obtain ⟨v, hv⟩ := ih h
+    exact ⟨_, by show (q.eval g ν).bind _ = _; rw [hv]; rfl⟩
   | _ => simp only [LTm.retsS, Bool.false_eq_true] at h
 
 /-- `a`, guarded by `g` returning; `a` alone after a term that always
@@ -284,15 +355,20 @@ theorem seqL_eval (g₀ : State C []) (ν : AEnv) {s' s : Srt} (g : LTm C s') (a
   · rfl
 
 /-- `true` where `c` is `true`, halting where it is `false`: a guard. -/
-def LTm.assert (c : LTm C (.val .bool)) : LTm C (.val .bool) := .app3 .ite c .tt .err
+def LTm.assert (c : LTm C (.val .bool)) : LTm C (.val .bool) :=
+  if c.isTT then .tt else .app3 .ite c .tt .err
 
 theorem LTm.eval_assert (g : State C []) (ν : AEnv) (c : LTm C (.val .bool)) :
     ((LTm.assert c).eval g ν : Option Bool) =
       (c.eval g ν : Option Bool).bind fun b => if (b : Bool) = true then some true else none := by
-  rw [LTm.assert, LTm.eval_app3]
-  cases h : (c.eval g ν : Option Bool) with
-  | none => rfl
-  | some b => cases b <;> rfl
+  unfold LTm.assert
+  split
+  · rename_i h
+    rw [LTm.isTT_eval h]; rfl
+  · rw [LTm.eval_app3]
+    cases h : (c.eval g ν : Option Bool) with
+    | none => rfl
+    | some b => cases b <;> rfl
 
 /-- `a ⊕ b`, folded where both are literals and it returns. -/
 def LTm.mkBin (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : LTm C (.val p)) :

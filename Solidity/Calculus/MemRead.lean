@@ -1,4 +1,5 @@
 import Solidity.Calculus.Closer
+import Solidity.Calculus.ElimFacts
 import Solidity.Calculus.DecideEval
 import Solidity.Calculus.TermLaws
 
@@ -2527,15 +2528,164 @@ theorem LFml.memRes_valid {φ : LFml C} (h : φ.memRes.Valid) : φ.Valid :=
 
 end Pass
 
+/-- A read of a storage term the elimination did not take: `find`, `len`,
+`sfind`. -/
+def _root_.Solidity.Op2.isStRd {a b s : Srt} : Op2 C a b s → Bool
+  | .find | .len | .sfind => true
+  | _ => false
+
+/-- `LTm.hasStRd`'s compiled twin. -/
+def LTm.hasStRdM : {s : Srt} → LTm C s → Bool
+  | _, .app1 _ x => x.hasStRdM
+  | _, .app2 o x y => o.isStRd || x.hasStRdM || y.hasStRdM
+  | _, .app3 _ x y z => x.hasStRdM || y.hasStRdM || z.hasStRdM
+  | _, .index _ q i => q.hasStRdM || i.hasStRdM
+  | _, .seq d a => d.hasStRdM || a.hasStRdM
+  | _, .orElse a b => a.hasStRdM || b.hasStRdM
+  | _, .kite a b t e => a.hasStRdM || b.hasStRdM || t.hasStRdM || e.hasStRdM
+  | _, _ => false
+
+/-- **A term with a storage read left**: one the walk of memory exposed
+(a member of a copy of storage) for the elimination to take.  By the
+recursor. -/
+@[implemented_by LTm.hasStRdM]
+def LTm.hasStRd {s : Srt} (t : LTm C s) : Bool :=
+  @LTm.rec C (fun _ _ => Bool)
+    (@fun _ _ => false) (@fun _ _ => false)
+    (@fun _ _ _ _ ihx => ihx)
+    (@fun _ _ _ o _ _ ihx ihy => o.isStRd || ihx || ihy)
+    (@fun _ _ _ _ _ _ _ _ ihx ihy ihz => ihx || ihy || ihz)
+    (@fun _ _ _ _ _ _ ihq ihi => ihq || ihi)
+    (@fun _ _ _ => false) (@fun _ _ _ => false) (@fun _ _ _ => false)
+    (@fun _ _ _ _ ihd iha => ihd || iha)
+    (@fun _ _ _ iha ihb => iha || ihb)
+    (@fun _ _ _ _ _ _ iha ihb iht ihe => iha || ihb || iht || ihe)
+    (@fun _ => false) s t
+
+/-- `LFml.hasStRd`'s compiled twin. -/
+def LFml.hasStRdM : LFml C → Bool
+  | .eq a b => a.hasStRd || b.hasStRd
+  | .not φ => φ.hasStRdM
+  | .and φ ψ | .imp φ ψ => φ.hasStRdM || ψ.hasStRdM
+  | .all _ _ φ => φ.hasStRdM
+  | .tt => false
+
+/-- A formula with a storage read left.  By the recursor. -/
+@[implemented_by LFml.hasStRdM]
+def LFml.hasStRd (φ : LFml C) : Bool :=
+  @LFml.rec C (fun _ => Bool) false (@fun _ a b => a.hasStRd || b.hasStRd)
+    (fun _ ih => ih) (fun _ _ ihφ ihψ => ihφ || ihψ) (fun _ _ ihφ ihψ => ihφ || ihψ)
+    (fun _ _ _ ih => ih) φ
+
 /-- **The closer with memory read**: every read of memory walked
 (`LFml.memRes`), the storage reads that walk exposed (a member of a copy
 of storage) eliminated once more (`LFml.elim`), walked again, then
 `LFml.close`. -/
-def LFml.closeMem (φ : LFml C) : Bool := φ.memRes.elim.memRes.close
+def LFml.closeMem (φ : LFml C) : Bool :=
+  if φ.memRes.hasStRd then φ.memRes.elim.memRes.close else φ.memRes.close
 
-theorem LFml.closeMem_valid {φ : LFml C} (h : φ.closeMem = true) : φ.Valid :=
-  LFml.memRes_valid fun g ν =>
-    (LFml.elim_holds g φ.memRes ν).1 (LFml.memRes_valid (LFml.close_valid h) g ν)
+theorem LFml.closeMem_valid {φ : LFml C} (h : φ.closeMem = true) : φ.Valid := by
+  unfold LFml.closeMem at h
+  split at h
+  · exact LFml.memRes_valid fun g ν =>
+      (LFml.elim_holds g φ.memRes ν).1 (LFml.memRes_valid (LFml.close_valid h) g ν)
+  · exact LFml.memRes_valid (LFml.close_valid h)
+
+/-! ## Before the elimination -/
+
+section Fold
+
+variable {g : State C []}
+
+/-- `LFml.nfE`'s compiled twin. -/
+def LFml.nfEM : LFml C → LFml C
+  | .tt => .tt
+  | .eq a b => .eq (({} : Facts C).nf a) (({} : Facts C).nf b)
+  | .not φ => .not φ.nfEM
+  | .and φ ψ => .and φ.nfEM ψ.nfEM
+  | .imp φ ψ => .imp φ.nfEM ψ.nfEM
+  | .all k p φ => .all k p φ.nfEM
+
+/-- **Every term in its normal form with no premise**: literals folded, so
+that the elimination compares keys it can (`keyCmp`).  By the recursor. -/
+@[implemented_by LFml.nfEM]
+def LFml.nfE (φ : LFml C) : LFml C :=
+  @LFml.rec C (fun _ => LFml C) .tt
+    (@fun _ a b => .eq (({} : Facts C).nf a) (({} : Facts C).nf b))
+    (fun _ ih => .not ih) (fun _ _ ihφ ihψ => .and ihφ ihψ) (fun _ _ ihφ ihψ => .imp ihφ ihψ)
+    (fun k p _ ih => .all k p ih) φ
+
+theorem LFml.nfE_holds (φ : LFml C) : ∀ (ν : AEnv), φ.nfE.holds g ν ↔ φ.holds g ν := by
+  induction φ with
+  | tt => intro ν; exact Iff.rfl
+  | eq a b =>
+    intro ν
+    show (LFml.eq (({} : Facts C).nf a) (({} : Facts C).nf b)).holds g ν ↔ _
+    rw [LFml.holds_eq_iff, LFml.holds_eq_iff, Facts.nf_eval (Facts.ok_empty ν),
+      Facts.nf_eval (Facts.ok_empty ν)]
+  | not φ ih => intro ν; exact not_congr (ih ν)
+  | and φ ψ ihφ ihψ => intro ν; exact and_congr (ihφ ν) (ihψ ν)
+  | imp φ ψ ihφ ihψ => intro ν; exact imp_congr (ihφ ν) (ihψ ν)
+  | all k p φ ih => intro ν; exact forall_congr' fun v => ih _
+
+/-- **`sol_decide` on a reduction**: its terms folded (`LFml.nfE`), the
+reads of writes eliminated under its premises (`LFml.elimF`), memory read and closed
+(`LFml.closeMem`). -/
+def LFml.decideMem (φ : LFml C) : Bool := (φ.nfE.elimF {}).closeMem
+
+theorem LFml.decideMem_valid {φ : LFml C} (h : φ.decideMem = true) : φ.Valid := fun g ν =>
+  (LFml.nfE_holds φ ν).1 ((LFml.elimF_holds g φ.nfE {} ν (Facts.ok_empty ν)).1
+    (LFml.closeMem_valid h g ν))
+
+/-- A storage sort. -/
+def _root_.Solidity.Srt.isSt : Srt → Bool
+  | .st => true
+  | _ => false
+
+/-- `LTm.stDepth`'s compiled twin. -/
+def LTm.stDepthM : {s : Srt} → LTm C s → Nat
+  | s, .app1 _ x => (if s.isSt then 1 else 0) + x.stDepthM
+  | s, .app2 _ x y => (if s.isSt then 1 else 0) + max x.stDepthM y.stDepthM
+  | s, .app3 _ x y z => (if s.isSt then 1 else 0) + max x.stDepthM (max y.stDepthM z.stDepthM)
+  | _, .index _ q i => max q.stDepthM i.stDepthM
+  | _, .seq d a => max d.stDepthM a.stDepthM
+  | _, .orElse a b => max a.stDepthM b.stDepthM
+  | _, .kite a b t e => max (max a.stDepthM b.stDepthM) (max t.stDepthM e.stDepthM)
+  | _, _ => 0
+
+/-- **How many storage updates a term stacks**, at its deepest: what the
+elimination's readers nest, each reading the one below it.  By the
+recursor. -/
+@[implemented_by LTm.stDepthM]
+def LTm.stDepth {s : Srt} (t : LTm C s) : Nat :=
+  @LTm.rec C (fun _ _ => Nat)
+    (@fun _ _ => 0) (@fun _ _ => 0)
+    (@fun _ s _ _ ihx => (if s.isSt then 1 else 0) + ihx)
+    (@fun _ _ s _ _ _ ihx ihy => (if s.isSt then 1 else 0) + max ihx ihy)
+    (@fun _ _ _ s _ _ _ _ ihx ihy ihz => (if s.isSt then 1 else 0) + max ihx (max ihy ihz))
+    (@fun _ _ _ _ _ _ ihq ihi => max ihq ihi)
+    (@fun _ _ _ => 0) (@fun _ _ _ => 0) (@fun _ _ _ => 0)
+    (@fun _ _ _ _ ihd iha => max ihd iha)
+    (@fun _ _ _ iha ihb => max iha ihb)
+    (@fun _ _ _ _ _ _ iha ihb iht ihe => max (max iha ihb) (max iht ihe))
+    (@fun _ => 0) s t
+
+/-- `LFml.stDepth`'s compiled twin. -/
+def LFml.stDepthM : LFml C → Nat
+  | .eq a b => max a.stDepth b.stDepth
+  | .not φ => φ.stDepthM
+  | .and φ ψ | .imp φ ψ => max φ.stDepthM ψ.stDepthM
+  | .all _ _ φ => φ.stDepthM
+  | .tt => 0
+
+/-- The most storage updates a formula's term stacks.  By the recursor. -/
+@[implemented_by LFml.stDepthM]
+def LFml.stDepth (φ : LFml C) : Nat :=
+  @LFml.rec C (fun _ => Nat) 0 (@fun _ a b => max a.stDepth b.stDepth)
+    (fun _ ih => ih) (fun _ _ ihφ ihψ => max ihφ ihψ) (fun _ _ ihφ ihψ => max ihφ ihψ)
+    (fun _ _ _ ih => ih) φ
+
+end Fold
 
 end Decide
 

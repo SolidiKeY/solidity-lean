@@ -8,7 +8,7 @@ where no program rule fits.  Here it is closed on its scoped form
 (`Seq.leafCheckS`): the sequent put back together (`Hyps.wrap`), no
 modality left (`Fml.modalFree`), its updates pushed in by position
 (`Fml.toLS`, `Calculus/DecideScoped.lean`) within `closeSize` nodes, the
-reads of writes eliminated (`LFml.elim`) within `elimSize`, and the
+reads of writes eliminated (`LFml.elim`) within `stackSize`, and the
 reduction closed by `LFml.close` (`Calculus/Closer.lean`).  Soundness is
 `Valid.of_reduceS` and `LFml.close_valid`, then `Proves.closeHolds`.  A
 leaf outside the fragment is not read (`none`); the walk leaves it, a goal
@@ -241,26 +241,28 @@ pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
 of the one before it appears twice in the next, so this tree doubles with
 each such write.  It is the cheap first test: computing the reduction of a
 leaf far past it would itself be slow. -/
-def closeSize : Nat := 16000
+def closeSize : Nat := 24000
 
-/-- The most nodes the closer takes in the reduction (`LFml.elim`), which
-is what it walks, counted as a tree. -/
-def elimSize : Nat := 100000
+/-- The most storage updates one term of the reduction stacks
+(`LFml.stDepth`): the elimination reads each through the ones below it, so
+its size grows with each.  A bound on the stack, not on the elimination's
+nodes: the kernel would build the elimination twice to count it. -/
+def stackSize : Nat := 12
 
 /-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the
 reduction does not read it; else whether it closes it: within `closeSize`
 nodes with its updates pushed in (the cheap bound, tested before the
-elimination), within `elimSize` after it, and closed by `LFml.close`. -/
+elimination), within `stackSize` after it, and closed by `LFml.close`. -/
 def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
-    (l.fits closeSize).isSome && (l.elim.fits elimSize).isSome && l.elim.closeMem
+    (l.fits closeSize).isSome && decide (l.stDepth ≤ stackSize) && l.decideMem
 
 /-- What `checkCore` closes is valid: `Valid.of_reduceS` and
 `LFml.close_valid`. -/
 theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Valid ψ := by
   simp only [checkCore, Option.map_eq_some_iff, Bool.and_eq_true] at h
   obtain ⟨l, hl, -, hc⟩ := h
-  exact Valid.of_reduceS (by rw [Fml.reduceS, hl]; rfl) (LFml.closeMem_valid hc)
+  exact Valid.of_toLS hl (LFml.decideMem_valid hc)
 
 /-- **The scoped closer on a wrapped leaf `ψ`**: none where a modality is
 left; else `checkCore` on the leaf. -/
@@ -271,12 +273,12 @@ def leafCheckOn (ψ : Fml C []) : Option Bool :=
 `sol_prove?` asks before it tries a step that reduces the leaf (the
 reduction, its quoting and its kernel check heed no heartbeats): the
 reduction reads it within `closeSize` with its updates pushed in, and
-within `elimSize` after the elimination, which is built only within the
+within `stackSize` after the elimination, which is built only within the
 first bound. -/
 def leafFitsOn (ψ : Fml C []) : Bool :=
   ψ.modalFree &&
     match ψ.toLS true SymS.init with
-    | some l => (l.fits closeSize).isSome && (l.elim.fits elimSize).isSome
+    | some l => (l.fits closeSize).isSome && decide (l.stDepth ≤ stackSize)
     | none => false
 
 /-- `leafCheckOn` on the leaf `H ⊢ φ`. -/

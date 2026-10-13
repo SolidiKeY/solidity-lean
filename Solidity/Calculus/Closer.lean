@@ -1,5 +1,6 @@
 import Solidity.Calculus.DecideLang
 import Solidity.Calculus.TermEq
+import Solidity.Calculus.Decide
 
 /-!
 # The closer: a reduction closed by its terms
@@ -35,189 +36,6 @@ namespace Decide
 
 variable {C : Contract}
 
-/-! ## Terms compared -/
-
-section Beq
-
-/-- `LTm.beqR`'s compiled twin. -/
-def LTm.beqM : {s s' : Srt} → LTm C s → LTm C s' → Bool
-  | _, _, @LTm.var _ p k, t' => match t' with
-    | @LTm.var _ p' k' => p == p' && k == k'
-    | _ => false
-  | _, _, .app0 o, t' => match t' with
-    | .app0 o' => Op0.hbeq o o'
-    | _ => false
-  | _, _, .app1 o x, t' => match t' with
-    | .app1 o' x' => Op1.hbeq o o' && x.beqM x'
-    | _ => false
-  | _, _, .app2 o x y, t' => match t' with
-    | .app2 o' x' y' => Op2.hbeq o o' && x.beqM x' && y.beqM y'
-    | _ => false
-  | _, _, .app3 o x y z, t' => match t' with
-    | .app3 o' x' y' z' => Op3.hbeq o o' && x.beqM x' && y.beqM y' && z.beqM z'
-    | _ => false
-  | _, _, @LTm.index _ R k V _ q i, t' => match t' with
-    | @LTm.index _ R' k' V' _ q' i' => decide (R = R' ∧ k = k' ∧ V = V') && q.beqM q' && i.beqM i'
-    | _ => false
-  | _, _, .obsW q, t' => match t' with
-    | .obsW q' => q.beqM q'
-    | _ => false
-  | _, _, .obsL q, t' => match t' with
-    | .obsL q' => q.beqM q'
-    | _ => false
-  | _, _, .obsH q, t' => match t' with
-    | .obsH q' => q.beqM q'
-    | _ => false
-  | _, _, .seq d a, t' => match t' with
-    | .seq d' a' => d.beqM d' && a.beqM a'
-    | _ => false
-  | _, _, .orElse a b, t' => match t' with
-    | .orElse a' b' => a.beqM a' && b.beqM b'
-    | _ => false
-  | _, _, .kite a b t e, t' => match t' with
-    | .kite a' b' t'' e' => a.beqM a' && b.beqM b' && t.beqM t'' && e.beqM e'
-    | _ => false
-  | s, _, .err, t' => match t' with
-    | @LTm.err _ s' => s == s'
-    | _ => false
-
-/-- **Structural equality of two terms**, their sorts compared too, by the
-recursor. -/
-@[implemented_by LTm.beqM]
-def LTm.beqR {s s' : Srt} (t : LTm C s) (t' : LTm C s') : Bool :=
-  @LTm.rec C (fun _ _ => {s' : Srt} → LTm C s' → Bool)
-    (@fun p k _ t' => match t' with
-      | @LTm.var _ p' k' => p == p' && k == k'
-      | _ => false)
-    (@fun _ o _ t' => match t' with
-      | .app0 o' => Op0.hbeq o o'
-      | _ => false)
-    (@fun _ _ o _ ih _ t' => match t' with
-      | .app1 o' x' => Op1.hbeq o o' && ih x'
-      | _ => false)
-    (@fun _ _ _ o _ _ ihx ihy _ t' => match t' with
-      | .app2 o' x' y' => Op2.hbeq o o' && ihx x' && ihy y'
-      | _ => false)
-    (@fun _ _ _ _ o _ _ _ ihx ihy ihz _ t' => match t' with
-      | .app3 o' x' y' z' => Op3.hbeq o o' && ihx x' && ihy y' && ihz z'
-      | _ => false)
-    (@fun R k V _ _ _ ihq ihi _ t' => match t' with
-      | @LTm.index _ R' k' V' _ q' i' => decide (R = R' ∧ k = k' ∧ V = V') && ihq q' && ihi i'
-      | _ => false)
-    (@fun _ _ ih _ t' => match t' with
-      | .obsW q' => ih q'
-      | _ => false)
-    (@fun _ _ ih _ t' => match t' with
-      | .obsL q' => ih q'
-      | _ => false)
-    (@fun _ _ ih _ t' => match t' with
-      | .obsH q' => ih q'
-      | _ => false)
-    (@fun _ _ _ _ ihd iha _ t' => match t' with
-      | .seq d' a' => ihd d' && iha a'
-      | _ => false)
-    (@fun _ _ _ iha ihb _ t' => match t' with
-      | .orElse a' b' => iha a' && ihb b'
-      | _ => false)
-    (@fun _ _ _ _ _ _ iha ihb iht ihe _ t' => match t' with
-      | .kite a' b' t'' e' => iha a' && ihb b' && iht t'' && ihe e'
-      | _ => false)
-    (@fun s _ t' => match t' with
-      | @LTm.err _ s' => s == s'
-      | _ => false) s t s' t'
-
-theorem LTm.beqR_eq_beqM {s s' : Srt} (t : LTm C s) (t' : LTm C s') : t.beqR t' = t.beqM t' := by
-  induction t generalizing s' with
-  | var | app0 | err => cases t' <;> rfl
-  | app1 o x ih => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ih]; rfl)
-  | app2 o x y ihx ihy => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihx, ← ihy]; rfl)
-  | app3 o x y z ihx ihy ihz =>
-    cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihx, ← ihy, ← ihz]; rfl)
-  | index it q i ihq ihi => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihq, ← ihi]; rfl)
-  | obsW q ih | obsL q ih | obsH q ih => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ih]; rfl)
-  | seq d a ihd iha => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihd, ← iha]; rfl)
-  | orElse a b iha ihb => cases t' <;> first | rfl | (simp only [LTm.beqM, ← iha, ← ihb]; rfl)
-  | kite a b t e iha ihb iht ihe =>
-    cases t' <;> first | rfl | (simp only [LTm.beqM, ← iha, ← ihb, ← iht, ← ihe]; rfl)
-
-/-- What `beqM` accepts is one term, its sort and all. -/
-theorem LTm.eq_of_beqM {s s' : Srt} (t : LTm C s) (t' : LTm C s') (h : t.beqM t' = true) :
-    (⟨s, t⟩ : (s : Srt) × LTm C s) = ⟨s', t'⟩ := by
-  induction t generalizing s' with
-  | var k =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true, beq_iff_eq] at h
-    obtain ⟨rfl, rfl⟩ := h
-    rfl
-  | app0 o =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true] at h
-    cases eq_of_hbeqAt h
-    rfl
-  | err =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, beq_iff_eq] at h
-    cases h
-    rfl
-  | app1 o x ih =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
-    obtain ⟨h1, h2⟩ := h
-    cases ih _ h2
-    cases Op1.eq_of_hbeq h1
-    rfl
-  | app2 o x y ihx ihy =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
-    obtain ⟨⟨h1, h2⟩, h3⟩ := h
-    cases ihx _ h2
-    cases ihy _ h3
-    cases Op2.eq_of_hbeq h1
-    rfl
-  | app3 o x y z ihx ihy ihz =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
-    obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := h
-    cases ihx _ h2
-    cases ihy _ h3
-    cases ihz _ h4
-    cases Op3.eq_of_hbeq h1
-    rfl
-  | index it q i ihq ihi =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true, decide_eq_true_eq] at h
-    obtain ⟨⟨⟨rfl, rfl, rfl⟩, h2⟩, h3⟩ := h
-    cases ihq _ h2
-    cases ihi _ h3
-    rename_i it'
-    cases IndexTy.eq it it'
-    rfl
-  | obsW q ih | obsL q ih | obsH q ih =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true] at h
-    cases ih _ h
-    rfl
-  | seq d a ihd iha =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
-    cases ihd _ h.1
-    cases iha _ h.2
-    rfl
-  | orElse a b iha ihb =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
-    cases iha _ h.1
-    cases ihb _ h.2
-    rfl
-  | kite a b t e iha ihb iht ihe =>
-    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
-    obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := h
-    cases iha _ h1
-    cases ihb _ h2
-    cases iht _ h3
-    cases ihe _ h4
-    rfl
-
-/-- What `beqR` accepts across two sorts is one sort and one term. -/
-theorem LTm.sigma_eq_of_beqR {s s' : Srt} {t : LTm C s} {t' : LTm C s'} (h : t.beqR t' = true) :
-    (⟨s, t⟩ : (s : Srt) × LTm C s) = ⟨s', t'⟩ :=
-  LTm.eq_of_beqM t t' ((LTm.beqR_eq_beqM t t').symm.trans h)
-
-/-- **`beqR` is equality**: what it accepts is one term. -/
-theorem LTm.eq_of_beqR {s : Srt} {t t' : LTm C s} (h : t.beqR t' = true) : t = t' :=
-  eq_of_heq (Sigma.mk.inj (LTm.sigma_eq_of_beqR h)).2
-
-end Beq
 
 /-! ## What the symbols read -/
 
@@ -1622,7 +1440,7 @@ def Facts.nfM (F : Facts C) : {s : Srt} → LTm C s → LTm C s
   | _, .obsH q => F.rw (F.hasRange (hasN (.obsH (F.nfM q))))
   | _, .seq d a => F.seqN (F.nfM d) (F.nfM a)
   | _, .orElse a b => F.orElseN (F.nfM a) (F.nfM b)
-  | _, .kite a b t e => F.kiteN (F.nfM a) (F.nfM b) (F.nfM t) (F.nfM e)
+  | _, .kite a b t e => F.rw (F.kiteN (F.nfM a) (F.nfM b) (F.nfM t) (F.nfM e))
   | _, .err => .err
 
 /-- **A term's normal form under the facts**, bottom-up: symbols folded,
@@ -1642,7 +1460,7 @@ def Facts.nf (F : Facts C) {s : Srt} (t : LTm C s) : LTm C s :=
     (@fun _ _ ih => F.rw (F.hasRange (hasN (.obsH ih))))
     (@fun _ _ _ _ ihd iha => F.seqN ihd iha)
     (@fun _ _ _ iha ihb => F.orElseN iha ihb)
-    (@fun _ _ _ _ _ _ iha ihb iht ihe => F.kiteN iha ihb iht ihe)
+    (@fun _ _ _ _ _ _ iha ihb iht ihe => F.rw (F.kiteN iha ihb iht ihe))
     (@fun _ => .err) s t
 
 theorem Facts.nf_eq_nfM (F : Facts C) {s : Srt} (t : LTm C s) : F.nf t = F.nfM t := by
@@ -1692,8 +1510,8 @@ theorem Facts.nf_eval {F : Facts C} (hF : F.Ok g ν) {s : Srt} (t : LTm C s) :
     show (F.orElseN (F.nf a) (F.nf b)).eval g ν = _
     rw [F.orElseN_eval hF, LTm.eval_orElse, LTm.eval_orElse, iha, ihb]
   | kite a b t e iha ihb iht ihe =>
-    show (F.kiteN (F.nf a) (F.nf b) (F.nf t) (F.nf e)).eval g ν = _
-    rw [F.kiteN_eval hF, LTm.eval_kite, LTm.eval_kite, iha, ihb, iht, ihe]
+    show (F.rw (F.kiteN (F.nf a) (F.nf b) (F.nf t) (F.nf e))).eval g ν = _
+    rw [F.rw_eval hF, F.kiteN_eval hF, LTm.eval_kite, LTm.eval_kite, iha, ihb, iht, ihe]
 
 end Normal
 

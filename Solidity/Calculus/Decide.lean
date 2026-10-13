@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideLang
+import Solidity.Calculus.TermEq
 
 /-!
 # Deciding the storage goals: `sol_decide`
@@ -45,6 +46,191 @@ namespace Decide
 open Semantics
 
 variable {C : Contract}
+
+/-! ## Terms compared -/
+
+section Beq
+
+/-- `LTm.beqR`'s compiled twin. -/
+def LTm.beqM : {s s' : Srt} → LTm C s → LTm C s' → Bool
+  | _, _, @LTm.var _ p k, t' => match t' with
+    | @LTm.var _ p' k' => p == p' && k == k'
+    | _ => false
+  | _, _, .app0 o, t' => match t' with
+    | .app0 o' => Op0.hbeq o o'
+    | _ => false
+  | _, _, .app1 o x, t' => match t' with
+    | .app1 o' x' => Op1.hbeq o o' && x.beqM x'
+    | _ => false
+  | _, _, .app2 o x y, t' => match t' with
+    | .app2 o' x' y' => Op2.hbeq o o' && x.beqM x' && y.beqM y'
+    | _ => false
+  | _, _, .app3 o x y z, t' => match t' with
+    | .app3 o' x' y' z' => Op3.hbeq o o' && x.beqM x' && y.beqM y' && z.beqM z'
+    | _ => false
+  | _, _, @LTm.index _ R k V _ q i, t' => match t' with
+    | @LTm.index _ R' k' V' _ q' i' => decide (R = R' ∧ k = k' ∧ V = V') && q.beqM q' && i.beqM i'
+    | _ => false
+  | _, _, .obsW q, t' => match t' with
+    | .obsW q' => q.beqM q'
+    | _ => false
+  | _, _, .obsL q, t' => match t' with
+    | .obsL q' => q.beqM q'
+    | _ => false
+  | _, _, .obsH q, t' => match t' with
+    | .obsH q' => q.beqM q'
+    | _ => false
+  | _, _, .seq d a, t' => match t' with
+    | .seq d' a' => d.beqM d' && a.beqM a'
+    | _ => false
+  | _, _, .orElse a b, t' => match t' with
+    | .orElse a' b' => a.beqM a' && b.beqM b'
+    | _ => false
+  | _, _, .kite a b t e, t' => match t' with
+    | .kite a' b' t'' e' => a.beqM a' && b.beqM b' && t.beqM t'' && e.beqM e'
+    | _ => false
+  | s, _, .err, t' => match t' with
+    | @LTm.err _ s' => s == s'
+    | _ => false
+
+/-- **Structural equality of two terms**, their sorts compared too, by the
+recursor. -/
+@[implemented_by LTm.beqM]
+def LTm.beqR {s s' : Srt} (t : LTm C s) (t' : LTm C s') : Bool :=
+  @LTm.rec C (fun _ _ => {s' : Srt} → LTm C s' → Bool)
+    (@fun p k _ t' => match t' with
+      | @LTm.var _ p' k' => p == p' && k == k'
+      | _ => false)
+    (@fun _ o _ t' => match t' with
+      | .app0 o' => Op0.hbeq o o'
+      | _ => false)
+    (@fun _ _ o _ ih _ t' => match t' with
+      | .app1 o' x' => Op1.hbeq o o' && ih x'
+      | _ => false)
+    (@fun _ _ _ o _ _ ihx ihy _ t' => match t' with
+      | .app2 o' x' y' => Op2.hbeq o o' && ihx x' && ihy y'
+      | _ => false)
+    (@fun _ _ _ _ o _ _ _ ihx ihy ihz _ t' => match t' with
+      | .app3 o' x' y' z' => Op3.hbeq o o' && ihx x' && ihy y' && ihz z'
+      | _ => false)
+    (@fun R k V _ _ _ ihq ihi _ t' => match t' with
+      | @LTm.index _ R' k' V' _ q' i' => decide (R = R' ∧ k = k' ∧ V = V') && ihq q' && ihi i'
+      | _ => false)
+    (@fun _ _ ih _ t' => match t' with
+      | .obsW q' => ih q'
+      | _ => false)
+    (@fun _ _ ih _ t' => match t' with
+      | .obsL q' => ih q'
+      | _ => false)
+    (@fun _ _ ih _ t' => match t' with
+      | .obsH q' => ih q'
+      | _ => false)
+    (@fun _ _ _ _ ihd iha _ t' => match t' with
+      | .seq d' a' => ihd d' && iha a'
+      | _ => false)
+    (@fun _ _ _ iha ihb _ t' => match t' with
+      | .orElse a' b' => iha a' && ihb b'
+      | _ => false)
+    (@fun _ _ _ _ _ _ iha ihb iht ihe _ t' => match t' with
+      | .kite a' b' t'' e' => iha a' && ihb b' && iht t'' && ihe e'
+      | _ => false)
+    (@fun s _ t' => match t' with
+      | @LTm.err _ s' => s == s'
+      | _ => false) s t s' t'
+
+theorem LTm.beqR_eq_beqM {s s' : Srt} (t : LTm C s) (t' : LTm C s') : t.beqR t' = t.beqM t' := by
+  induction t generalizing s' with
+  | var | app0 | err => cases t' <;> rfl
+  | app1 o x ih => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ih]; rfl)
+  | app2 o x y ihx ihy => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihx, ← ihy]; rfl)
+  | app3 o x y z ihx ihy ihz =>
+    cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihx, ← ihy, ← ihz]; rfl)
+  | index it q i ihq ihi => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihq, ← ihi]; rfl)
+  | obsW q ih | obsL q ih | obsH q ih => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ih]; rfl)
+  | seq d a ihd iha => cases t' <;> first | rfl | (simp only [LTm.beqM, ← ihd, ← iha]; rfl)
+  | orElse a b iha ihb => cases t' <;> first | rfl | (simp only [LTm.beqM, ← iha, ← ihb]; rfl)
+  | kite a b t e iha ihb iht ihe =>
+    cases t' <;> first | rfl | (simp only [LTm.beqM, ← iha, ← ihb, ← iht, ← ihe]; rfl)
+
+/-- What `beqM` accepts is one term, its sort and all. -/
+theorem LTm.eq_of_beqM {s s' : Srt} (t : LTm C s) (t' : LTm C s') (h : t.beqM t' = true) :
+    (⟨s, t⟩ : (s : Srt) × LTm C s) = ⟨s', t'⟩ := by
+  induction t generalizing s' with
+  | var k =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true, beq_iff_eq] at h
+    obtain ⟨rfl, rfl⟩ := h
+    rfl
+  | app0 o =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true] at h
+    cases eq_of_hbeqAt h
+    rfl
+  | err =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, beq_iff_eq] at h
+    cases h
+    rfl
+  | app1 o x ih =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
+    obtain ⟨h1, h2⟩ := h
+    cases ih _ h2
+    cases Op1.eq_of_hbeq h1
+    rfl
+  | app2 o x y ihx ihy =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
+    obtain ⟨⟨h1, h2⟩, h3⟩ := h
+    cases ihx _ h2
+    cases ihy _ h3
+    cases Op2.eq_of_hbeq h1
+    rfl
+  | app3 o x y z ihx ihy ihz =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
+    obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := h
+    cases ihx _ h2
+    cases ihy _ h3
+    cases ihz _ h4
+    cases Op3.eq_of_hbeq h1
+    rfl
+  | index it q i ihq ihi =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true, decide_eq_true_eq] at h
+    obtain ⟨⟨⟨rfl, rfl, rfl⟩, h2⟩, h3⟩ := h
+    cases ihq _ h2
+    cases ihi _ h3
+    rename_i it'
+    cases IndexTy.eq it it'
+    rfl
+  | obsW q ih | obsL q ih | obsH q ih =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true] at h
+    cases ih _ h
+    rfl
+  | seq d a ihd iha =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
+    cases ihd _ h.1
+    cases iha _ h.2
+    rfl
+  | orElse a b iha ihb =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
+    cases iha _ h.1
+    cases ihb _ h.2
+    rfl
+  | kite a b t e iha ihb iht ihe =>
+    cases t' <;> simp only [LTm.beqM, Bool.false_eq_true, Bool.and_eq_true] at h
+    obtain ⟨⟨⟨h1, h2⟩, h3⟩, h4⟩ := h
+    cases iha _ h1
+    cases ihb _ h2
+    cases iht _ h3
+    cases ihe _ h4
+    rfl
+
+/-- What `beqR` accepts across two sorts is one sort and one term. -/
+theorem LTm.sigma_eq_of_beqR {s s' : Srt} {t : LTm C s} {t' : LTm C s'} (h : t.beqR t' = true) :
+    (⟨s, t⟩ : (s : Srt) × LTm C s) = ⟨s', t'⟩ :=
+  LTm.eq_of_beqM t t' ((LTm.beqR_eq_beqM t t').symm.trans h)
+
+/-- **`beqR` is equality**: what it accepts is one term. -/
+theorem LTm.eq_of_beqR {s : Srt} {t t' : LTm C s} (h : t.beqR t' = true) : t = t' :=
+  eq_of_heq (Sigma.mk.inj (LTm.sigma_eq_of_beqR h)).2
+
+end Beq
+
 
 /-! ## Symbolic paths
 
@@ -289,8 +475,11 @@ def VRd.find {T U : Ty} (x : VRd C T) (s : TSegs C T U) : VRd C U := fun c r => 
 /-- The storage reader at `P`. -/
 def SRd.at {T : Ty} (S : SRd C) (P : SPath C T) : VRd C T := fun c r => S c (P.snoc r)
 
-/-- `a < b` on `uint`s. -/
-def LTm.lt (a b : LTm C (.val .uint)) : LTm C (.val .bool) := .app2 (.binop .lt rfl) a b
+/-- `a < b` on `uint`s, two literals compared. -/
+def LTm.lt (a b : LTm C (.val .uint)) : LTm C (.val .bool) :=
+  match a.keyView, b.keyView with
+  | .lit x, .lit y => .lit (p := .bool) (decide (x < y))
+  | _, _ => .app2 (.binop .lt rfl) a b
 
 /-- `a < n` for a size `n` (every `uint` is below a size past the bound). -/
 def LTm.ltNat (a : LTm C (.val .uint)) (n : Nat) : LTm C (.val .bool) :=
@@ -302,9 +491,31 @@ def LTm.succ (a : LTm C (.val .uint)) : LTm C (.val .uint) := .app2 (.binop .add
 /-- `a - 1` on `uint`s. -/
 def LTm.pred (a : LTm C (.val .uint)) : LTm C (.val .uint) := .app2 (.binop .sub rfl) a (.nat 1)
 
+/-- `a + 1` on `uint`s, a literal added where it is one. -/
+def LTm.succK (a : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  match a.keyView with
+  | .lit n => if 0 ≤ n ∧ n + 1 < 2 ^ 256 then .nat (n + 1).toNat else .succ a
+  | _ => .succ a
+
+/-- `a - 1` on `uint`s, a literal subtracted where it is one. -/
+def LTm.predK (a : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  match a.keyView with
+  | .lit n => if 1 ≤ n ∧ n < 2 ^ 256 then .nat (n - 1).toNat else .pred a
+  | _ => .pred a
+
+/-- `kite a b t e`, settled where the terms compare (`keyCmp`). -/
+def LTm.kiteK {p : PrimTy} {s : Srt} (a b : LTm C (.val p)) (t e : LTm C s) : LTm C s :=
+  match keyCmp a b with
+  | some true => t
+  | some false => e
+  | none => .kite a b t e
+
 /-- `c ? a : b`. -/
 def LTm.cond {p : PrimTy} (c : LTm C (.val .bool)) (a b : LTm C (.val p)) : LTm C (.val p) :=
-  .app3 .ite c a b
+  if c.isTT then a
+  else if c.isFF then b
+  else if a.beqR b then seqL c a
+  else .app3 .ite c a b
 
 /-- What nothing shows: the default word, length `0`, not there. -/
 def CK.absent {V : Ty} (c : CK V) : LTm C (.val c.out) :=
@@ -425,7 +636,7 @@ def arrRd {E : Ty} (len' : LTm C (.val .uint)) (has : LTm C (.val .bool))
 old length `L`, the old elements elsewhere. -/
 def pushRd {E : Ty} (a : VRd C (.ref (.array E))) (x : VRd C E) (L : LTm C (.val .uint)) :
     VRd C (.ref (.array E)) :=
-  arrRd (.succ L) (a (.has _) .nil) fun i {_} c r => .kite i L (x c r) (a c (.at i r))
+  arrRd (.succK L) (a (.has _) .nil) fun i {_} c r => .kiteK i L (x c r) (a c (.at i r))
 
 /-- An array with its length set to `L'`, its slots as they are
 (`TVal.setLen`). -/
@@ -460,15 +671,15 @@ def extendRd {E : Ty} (a : VRd C (.ref (.array E))) (L : LTm C (.val .uint)) :
     VRd C (.ref (.array E)) :=
   if E.isPrimitive then pushRd a (dfltRd E) L
   else fun c r =>
-    .cond (a (.has _) (.at L .nil)) (setLenRd a (.succ L) c r) (pushRd a (dfltRd E) L c r)
+    .cond (a (.has _) (.at L .nil)) (setLenRd a (.succK L) c r) (pushRd a (dfltRd E) L c r)
 
 /-- **A pop, read** (`TVal.popA`, the array not empty): the length one
 less, the last element deleted unless `keep`. -/
 def popRd (keep : Bool) {E : Ty} (a : VRd C (.ref (.array E))) (L : LTm C (.val .uint)) :
     VRd C (.ref (.array E)) :=
-  if keep then setLenRd a (.pred L)
-  else arrRd (.pred L) (a (.has _) .nil) fun i {_} c r =>
-    .kite i (.pred L) (delRS (a.find (.at (.pred L) .nil)) r c) (a c (.at i r))
+  if keep then setLenRd a (.predK L)
+  else arrRd (.predK L) (a (.has _) .nil) fun i {_} c r =>
+    .kiteK i (.predK L) (delRS (a.find (.at (.predK L) .nil)) r c) (a c (.at i r))
 
 /-- `svalRd` by `match`, its compiled form. -/
 def svalRdM {p : PrimTy} (w : LTm C (.val p)) : VRd C (.prim p) :=
@@ -559,10 +770,26 @@ structure SFun (C : Contract) where
   rd : SRd C
   orig : LTm C .st
 
-/-- The starting storage's observation `c` at a path. -/
+/-- `TSegs.noIdx`'s compiled twin. -/
+def TSegs.noIdxM : {S T : Ty} → TSegs C S T → Bool
+  | _, _, .nil => true
+  | _, _, .field _ p => p.noIdxM
+  | _, _, .key _ p => p.noIdxM
+  | _, _, _ => false
+
+/-- Segments of members and keys alone: a location below them is always
+there. -/
+@[implemented_by TSegs.noIdxM]
+def TSegs.noIdx {S T : Ty} (p : TSegs C S T) : Bool :=
+  @TSegs.rec C (fun _ _ _ => Bool) true (fun _ _ ih => ih) (fun _ _ _ => false)
+    (fun _ _ _ => false) (fun _ _ ih => ih) S T p
+
+/-- The starting storage's observation `c` at a path; a path of members and
+keys alone is there. -/
 def initRd : SRd C := fun {V} c P =>
   @CK.casesOn (fun V c => LTm C (.path V) → LTm C (.val c.out)) V c
-    (fun _ q => .obsW q) (fun _ q => .obsL q) (fun _ q => .obsH q) P.toLTm
+    (fun _ q => .obsW q) (fun _ q => .obsL q)
+    (fun _ q => if P.segs.noIdx then .tt else .obsH q) P.toLTm
 
 /-- The starting storage. -/
 def SFun.init : SFun C := ⟨.tt, initRd, .app0 .storage⟩

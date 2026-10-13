@@ -1150,6 +1150,13 @@ theorem SymS.Fresh.init : (SymS.init : SymS C []).Fresh :=
 
 end Fml
 
+/-- **A leaf whose reduction, before the elimination, is valid, is
+valid** (`Fml.toLS_sound`). -/
+theorem _root_.Solidity.Valid.of_toLS {φ : Fml C []} {ψ : LFml C}
+    (h : φ.toLS true SymS.init = some ψ) (hψ : ψ.Valid) : Valid φ := fun τ =>
+  (Fml.toLS_sound φ true h τ AEnv.dflt (Agrees.init τ AEnv.dflt) SymS.Fresh.init).1 rfl
+    (hψ τ AEnv.dflt)
+
 /-- **`sol_decide`'s reduction is sound**: a scoped leaf whose reduction is
 valid is valid. -/
 theorem _root_.Solidity.Valid.of_reduceS {φ : Fml C []} {ψ : LFml C} (h : φ.reduceS = some ψ)

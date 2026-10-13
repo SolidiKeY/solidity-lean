@@ -23,11 +23,11 @@ variable {C : Contract}
 
 /-- **A leaf the closer closes is valid**: its reduction closed
 (`LFml.close`, `Calculus/Closer.lean`), the kernel evaluating both. -/
-theorem _root_.Solidity.Valid.of_close {φ : Fml C []} (h : φ.reduceS.map LFml.closeMem = some true) :
-    Valid φ := by
+theorem _root_.Solidity.Valid.of_close {φ : Fml C []}
+    (h : (φ.toLS true SymS.init).map LFml.decideMem = some true) : Valid φ := by
   rw [Option.map_eq_some_iff] at h
   obtain ⟨ψ, hψ, hc⟩ := h
-  exact Valid.of_reduceS hψ (LFml.closeMem_valid hc)
+  exact Valid.of_toLS hψ (LFml.decideMem_valid hc)
 
 /-- The reduction quoted at the contract `c`, and printed. -/
 def LFml.quoteOpt (c : Expr) : Option (LFml C) → Option (Expr × String)
@@ -77,12 +77,17 @@ elab "sol_reduce?" : tactic => withMainContext do
   logInfo s
   replaceMainGoal [g']
 
+/-- `φ.toLS true SymS.init`, as an expression. -/
+def toLSInit (C φ : Expr) : Expr :=
+  mkAppN (mkConst ``Fml.toLS) #[C, mkConst ``List.nil [0] |>.app (mkConst ``LTy), mkConst ``Bool.true,
+    mkApp (mkConst ``SymS.init) C, φ]
+
 /-- The closer on the leaf `φ` of the contract `C`, computed by compiled
 code: `none` outside the fragment. -/
 def closeExpr (C φ : Expr) : MetaM (Option Bool) := do
   let φ ← Symex.evaluable φ
   let e := mkApp4 (mkConst ``Option.map [0, 0]) (mkApp (mkConst ``LFml) C) (mkConst ``Bool)
-    (mkApp (mkConst ``LFml.closeMem) C) (mkApp2 (mkConst ``Fml.reduceS) C φ)
+    (mkApp (mkConst ``LFml.decideMem) C) (toLSInit C φ)
   unsafe evalExpr (Option Bool) (mkApp (mkConst ``Option [0]) (mkConst ``Bool)) e
 
 /-- The leaf `Valid φ` closed by the closer (`Valid.of_close`), the kernel
@@ -95,7 +100,7 @@ def closeScoped (g : MVarId) (C φ : Expr) : MetaM Bool := do
   | some true =>
     let ob := mkApp (mkConst ``Option [0]) (mkConst ``Bool)
     let lhs := mkApp4 (mkConst ``Option.map [0, 0]) (mkApp (mkConst ``LFml) C) (mkConst ``Bool)
-      (mkApp (mkConst ``LFml.closeMem) C) (mkApp2 (mkConst ``Fml.reduceS) C φ)
+      (mkApp (mkConst ``LFml.decideMem) C) (toLSInit C φ)
     let rhs := mkApp2 (mkConst ``Option.some [0]) (mkConst ``Bool) (mkConst ``Bool.true)
     let h ← Derive.kernelLemma (mkApp3 (mkConst ``Eq [1]) ob lhs rhs)
       (mkApp2 (mkConst ``Eq.refl [1]) ob rhs)

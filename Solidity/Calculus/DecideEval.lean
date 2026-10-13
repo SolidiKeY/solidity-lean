@@ -234,6 +234,47 @@ theorem keyCmp_sound {p : PrimTy} {a b : LTm C (.val p)} {c : Bool} (h : keyCmp 
       exact fun h' => e (PrimTy.key_inj h')
   · cases h
 
+/-- A key the terms compare returns. -/
+theorem LTm.keyView_eval {p : PrimTy} {t : LTm C (.val p)} (h : t.keyView ≠ .other) :
+    ∃ x, (t.eval g ν : Option p.Denote) = some x := by
+  cases hv : t.keyView with
+  | var k => rw [LTm.keyView_var hv]; exact ⟨_, rfl⟩
+  | env k =>
+    obtain ⟨e, he⟩ := LTm.keyView_env hv
+    subst e; cases he; exact ⟨_, rfl⟩
+  | lit v => obtain ⟨w, rfl, -⟩ := LTm.keyView_lit hv; exact ⟨w, rfl⟩
+  | other => exact absurd hv h
+
+theorem keyCmp_isSome {p : PrimTy} {a b : LTm C (.val p)} {c : Bool} (h : keyCmp a b = some c) :
+    a.keyView ≠ .other ∧ b.keyView ≠ .other := by
+  unfold keyCmp at h
+  split at h
+  · rename_i x y ha hb; rw [ha, hb]; exact ⟨nofun, nofun⟩
+  · rename_i x y ha hb; rw [ha, hb]; exact ⟨nofun, nofun⟩
+  · rename_i x y ha hb; rw [ha, hb]; exact ⟨nofun, nofun⟩
+  · cases h
+
+/-- `kiteK` reads as `kite`. -/
+theorem LTm.eval_kiteK {p : PrimTy} {s : Srt} (a b : LTm C (.val p)) (t e : LTm C s) :
+    (LTm.kiteK a b t e).eval g ν = (LTm.kite a b t e).eval g ν := by
+  unfold LTm.kiteK
+  split
+  · rename_i hc
+    obtain ⟨ha, hb⟩ := keyCmp_isSome hc
+    obtain ⟨x, hx⟩ := LTm.keyView_eval g ν ha
+    obtain ⟨y, hy⟩ := LTm.keyView_eval g ν hb
+    have hxy := keyCmp_sound g ν hc hx hy
+    rw [LTm.eval_kite, hx, hy]
+    simp only [Option.bind_some, of_decide_eq_true hxy, if_true]
+  · rename_i hc
+    obtain ⟨ha, hb⟩ := keyCmp_isSome hc
+    obtain ⟨x, hx⟩ := LTm.keyView_eval g ν ha
+    obtain ⟨y, hy⟩ := LTm.keyView_eval g ν hb
+    have hxy := keyCmp_sound g ν hc hx hy
+    rw [LTm.eval_kite, hx, hy]
+    simp only [Option.bind_some, of_decide_eq_false hxy, if_false]
+  · rfl
+
 theorem keyTree_sel {α : Type} {p : PrimTy} (a b : LTm C (.val p)) (t e : CTree C α)
     {x y : p.Denote} (hx : (a.eval g ν : Option p.Denote) = some x)
     (hy : (b.eval g ν : Option p.Denote) = some y) :
@@ -451,17 +492,38 @@ theorem LTm.eval_lt (a b : LTm C (.val .uint)) :
     ((LTm.lt a b).eval g ν : Option Bool) =
       (a.eval g ν : Option PrimTy.uint.Denote).bind fun x =>
         (b.eval g ν : Option PrimTy.uint.Denote).map fun y => decide (x.1 < y.1) := by
-  rw [LTm.lt, LTm.eval_app2]
-  cases (a.eval g ν : Option PrimTy.uint.Denote) <;> cases (b.eval g ν : Option PrimTy.uint.Denote) <;>
+  unfold LTm.lt
+  split
+  · rename_i x y ha hb
+    obtain ⟨w, rfl, hw⟩ := LTm.keyView_lit ha
+    obtain ⟨w', rfl, hw'⟩ := LTm.keyView_lit hb
+    subst hw hw'
     rfl
+  · rw [LTm.eval_app2]
+    cases (a.eval g ν : Option PrimTy.uint.Denote) <;>
+      cases (b.eval g ν : Option PrimTy.uint.Denote) <;> rfl
 
 theorem LTm.eval_cond {p : PrimTy} (c : LTm C (.val .bool)) (a b : LTm C (.val p)) :
     ((LTm.cond c a b).eval g ν : Option p.Denote) =
       (c.eval g ν : Option Bool).bind fun x => if (x : Bool) = true then a.eval g ν else b.eval g ν := by
-  rw [LTm.cond, LTm.eval_app3]
-  cases (c.eval g ν : Option Bool) with
-  | none => rfl
-  | some x => cases x <;> rfl
+  unfold LTm.cond
+  split
+  · rename_i h
+    rw [LTm.isTT_eval h]; rfl
+  · split
+    · rename_i h
+      rw [LTm.isFF_eval h]; rfl
+    · split
+      · rename_i h
+        cases LTm.eq_of_beqR h
+        rw [seqL_eval]
+        cases (c.eval g ν : Option Bool) with
+        | none => rfl
+        | some x => cases x <;> rfl
+      · rw [LTm.eval_app3]
+        cases (c.eval g ν : Option Bool) with
+        | none => rfl
+        | some x => cases x <;> rfl
 
 theorem LTm.eval_lt_some {a b : LTm C (.val .uint)} {x y : PrimTy.uint.Denote}
     (ha : (a.eval g ν : Option _) = some x) (hb : (b.eval g ν : Option _) = some y) :
@@ -709,6 +771,42 @@ theorem LTm.eval_pred {L : LTm C (.val .uint)} {n : Nat}
     show (n : Int) - 1 = ((n - 1 : Nat) : Int) by omega, ofInt?_uint (lenU_inRange h')]
   exact congrArg some (Subtype.ext (uintOfNat_val h').symm)
 
+theorem LTm.eval_succK {L : LTm C (.val .uint)} {n : Nat}
+    (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat n)) (h : n + 1 < 2 ^ 256) :
+    ((LTm.succK L).eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (n + 1)) := by
+  unfold LTm.succK
+  split
+  · rename_i m hm
+    split
+    · obtain ⟨w, rfl, hw⟩ := LTm.keyView_lit hm
+      have hw' : (w : PrimTy.uint.Denote) = uintOfNat n := Option.some.inj hL
+      have hn : (uintOfNat n).1 = n := uintOfNat_val (by omega)
+      have hm' : m = n := by rw [← hw, hw']; exact hn
+      subst hm'
+      rw [LTm.eval_nat]
+      congr 2
+    · exact LTm.eval_succ g ν hL h
+  · exact LTm.eval_succ g ν hL h
+
+theorem LTm.eval_predK {L : LTm C (.val .uint)} {n : Nat}
+    (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat n)) (h0 : 0 < n)
+    (h : n < 2 ^ 256) :
+    ((LTm.predK L).eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (n - 1)) := by
+  unfold LTm.predK
+  split
+  · rename_i m hm
+    split
+    · obtain ⟨w, rfl, hw⟩ := LTm.keyView_lit hm
+      have hw' : (w : PrimTy.uint.Denote) = uintOfNat n := Option.some.inj hL
+      have hn : (uintOfNat n).1 = n := uintOfNat_val h
+      have hm' : m = n := by rw [← hw, hw']; exact hn
+      subst hm'
+      rw [LTm.eval_nat]
+      congr 2
+      omega
+    · exact LTm.eval_pred g ν hL h0 h
+  · exact LTm.eval_pred g ν hL h0 h
+
 theorem obsV_setLen_at {E V : Ty} (c : CK V) (a : TVal (.ref (.array E))) (n : Nat) (k : Int)
     (p : Path E V) : c.obsV (TVal.setLen a n) (.at k p) = c.obsV a (.at k p) := by
   cases c <;> rfl
@@ -757,11 +855,11 @@ theorem pushRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {x : VRd C E}
     (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (t.len .nil)))
     (hn : t.len .nil + 1 < 2 ^ 256) : VRd.Rep g ν (pushRd a x L) (TVal.pushA t tx) := by
   apply arrRd_rep
-  · exact LTm.eval_succ g ν hL hn
+  · exact LTm.eval_succK g ν hL hn
   · rw [hasNil_eval g ν ha]
     simp only [TVal.pushA, TVal.setLen, obsV_save_nil_has]
   · intro i k hk V c r p hr
-    rw [LTm.eval_kite, hk, hL]
+    rw [LTm.eval_kiteK, LTm.eval_kite, hk, hL]
     simp only [Option.bind_some]
     rw [show c.obsV (TVal.pushA t tx) (.at k.1 p) = _ from obsV_setLen_at c _ _ k.1 p,
       obsV_save_at]
@@ -789,7 +887,7 @@ theorem popRd_rep (keep : Bool) {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm 
     {t : TVal (.ref (.array E))} (ha : VRd.Rep g ν a t) (hb : Bnd t)
     (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (t.len .nil)))
     (h0 : 0 < t.len .nil) : VRd.Rep g ν (popRd keep a L) (TVal.popA keep t) := by
-  have hp := LTm.eval_pred g ν hL h0 (hb .nil)
+  have hp := LTm.eval_predK g ν hL h0 (hb .nil)
   have hne : t.len .nil ≠ 0 := by omega
   cases keep with
   | true =>
@@ -802,14 +900,14 @@ theorem popRd_rep (keep : Bool) {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm 
     · rw [hasNil_eval g ν ha]
       simp only [TVal.setLen, obsV_save_nil_has]
     · intro i k hk V c r p hr
-      rw [LTm.eval_kite, hk, hp]
+      rw [LTm.eval_kiteK, LTm.eval_kite, hk, hp]
       simp only [Option.bind_some]
       rw [obsV_setLen_at, obsV_save_at]
       have hb' : t.len .nil - 1 < 2 ^ 256 := by have := hb .nil; omega
       by_cases e : k.1 = ((t.len .nil - 1 : Nat) : Int)
       · have e' : k = uintOfNat (t.len .nil - 1) := (uintOfNat_eq_iff hb').2 e
         rw [if_pos e', if_pos e]
-        have hs : (TSegs.at (LTm.pred L) TSegs.nil : TSegs C (.ref (.array E)) E).eval g ν =
+        have hs : (TSegs.at (LTm.predK L) TSegs.nil : TSegs C (.ref (.array E)) E).eval g ν =
             some (.at ((t.len .nil - 1 : Nat) : Int) .nil) := by
           rw [TSegs.eval_at, hp, Option.bind_some]
           simp only [uintOfNat_val (show t.len .nil - 1 < 2 ^ 256 by have := hb .nil; omega)]
@@ -985,7 +1083,7 @@ theorem extendRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm C (.val .ui
     rw [LTm.eval_cond_some g ν _ _ hh]
     by_cases h : t.has (.at (t.len .nil : Int) .nil) = true
     · simp only [h, if_true, Bool.not_true, Bool.false_eq_true, if_false]
-      exact setLenRd_rep g ν ha (LTm.eval_succ g ν hL hn) V c r p hr
+      exact setLenRd_rep g ν ha (LTm.eval_succK g ν hL hn) V c r p hr
     · simp only [h, if_false, Bool.false_eq_true, Bool.not_false, if_true]
       exact pushRd_rep g ν ha (dfltRd_rep g ν E) hL hn V c r p hr
 
@@ -1021,6 +1119,36 @@ theorem SRd.Rep.at {S : SRd C} {st : Storage C} (h : SRd.Rep g ν S st) {T : Ty}
     rw [SPath.eval_snoc, hP, Option.bind_some, hr]; rfl
   exact (h V c _ _ e).trans (by cases c <;> rfl)
 
+/-- Below members and keys alone, a value always has a location. -/
+theorem TSegs.findM_noIdx {S T : Ty} (p : TSegs C S T) :
+    ∀ (pp : Path S T), p.eval g ν = some pp → p.noIdx = true → ∀ v : SVal S, (v.findM pp).isSome = true := by
+  induction p with
+  | nil =>
+    intro pp hp _ v
+    cases hp
+    cases v <;> rfl
+  | field h rest ih =>
+    intro pp hp hn v
+    rw [TSegs.eval_field] at hp
+    obtain ⟨pp', hpp', rfl⟩ := Option.map_eq_some_iff.1 hp
+    cases v with
+    | struct fs => exact ih pp' hpp' hn _
+  | «at» i rest _ => intro _ _ hn; cases hn
+  | atF i rest _ => intro _ _ hn; cases hn
+  | key i rest ih =>
+    intro pp hp hn v
+    rw [TSegs.eval_key] at hp
+    obtain ⟨j, -, hp⟩ := Option.bind_eq_some_iff.1 hp
+    obtain ⟨pp', hpp', rfl⟩ := Option.map_eq_some_iff.1 hp
+    cases v with
+    | map m d =>
+      show (match lookupBy _ m.toList with
+        | some x => x.findM pp'
+        | none => d.findM pp').isSome = true
+      split
+      · exact ih pp' hpp' hn _
+      · exact ih pp' hpp' hn _
+
 theorem initRd_rep : SRd.Rep g ν initRd g.storage := by
   intro V c Q r hQ
   cases c with
@@ -1031,8 +1159,15 @@ theorem initRd_rep : SRd.Rep g ν initRd g.storage := by
     show ((LTm.obsL Q.toLTm).eval g ν : Option _) = _
     rw [LTm.eval_obsL, SPath.eval_toLTm, hQ]; rfl
   | has V =>
-    show ((LTm.obsH Q.toLTm).eval g ν : Option _) = _
-    rw [LTm.eval_obsH, SPath.eval_toLTm, hQ]; rfl
+    show ((if Q.segs.noIdx then LTm.tt else LTm.obsH Q.toLTm).eval g ν : Option _) = _
+    split
+    · rename_i hn
+      show some true = some (g.storage.obs.has (.ref r))
+      rw [Storage.obs_has_ref, SVal.obs_has]
+      unfold SPath.eval at hQ
+      obtain ⟨pp, hpp, rfl⟩ := Option.map_eq_some_iff.1 hQ
+      rw [TSegs.findM_noIdx g ν Q.segs pp hpp hn]
+    · rw [LTm.eval_obsH, SPath.eval_toLTm, hQ]; rfl
 
 theorem sto_find_findM {U : Ty} (st : Storage C) (r : SRef C U) :
     st.find r = (st.get r.hroot).findM r.path := by
