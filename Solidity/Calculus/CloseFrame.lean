@@ -88,19 +88,6 @@ end Storage
 
 /-! ## A copy laid over a struct, member by member -/
 
-theorem SFields.get_overlay {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (os ns : SFields fs) → (h : lookupBy f fs = some T) →
-    (os.overlay ns).get h = (os.get h).overlay (ns.get h)
-  | [], _, .nil, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons o os, .cons n ns, h => by
-    rw [SFields.overlay_cons, SFields.get_cons, SFields.get_cons, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact SFields.get_overlay os ns _
-
 /-- A word laid over a word is the new one. -/
 theorem SVal.overlay_prim' {p : PrimTy} (o n : SVal (.prim p)) : o.overlay n = n := by
   cases n; exact SVal.overlay_prim o _
@@ -119,19 +106,6 @@ theorem SVal.find_overlay_field {s f : Name} {T U : Ty} (o n : SVal (.ref (.stru
         SVal.find_nil, Option.bind_some, SVal.view_struct]
 
 /-! ## A delete, member by member -/
-
-theorem SFields.get_defaultOf {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (xs : SFields fs) → (h : lookupBy f fs = some T) →
-    xs.defaultOf.get h = (xs.get h).defaultOf
-  | [], _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, .cons x xs, h => by
-    rw [SFields.defaultOf_cons, SFields.get_cons, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact SFields.get_defaultOf xs _
 
 /-- A word reset is the type's default, whatever it held. -/
 theorem SVal.defaultOf_prim' {p : PrimTy} (x : SVal (.prim p)) :

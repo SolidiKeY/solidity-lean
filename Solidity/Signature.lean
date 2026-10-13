@@ -2,6 +2,7 @@ import Solidity.Update
 import Solidity.Semantics.TypedErase
 import Solidity.Semantics.StorageErase
 import Solidity.Theory.StateWrites
+import Solidity.Theory.Typed.Obs
 
 /-!
 # KeY's signature, typed
