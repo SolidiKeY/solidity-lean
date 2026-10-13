@@ -7579,6 +7579,144 @@ Net −68 lines (18 files, +439 −507 before this record).
   `Semantics/ToSem.lean` gone, `TypedErase`, `Constructors`), AGENTS.md's
   untyped sentence, example docstrings (`TTx.ext`, the typed stores).
 
+### W10.5.6 record (2026-10-13, branch `w105-6`)
+
+The untyped core is deleted: there is no untyped state.  Nothing under
+`Solidity/` names `Semantics.State`, the untyped `SVal`/`MVal`/`MObj`/
+`Binding`/`TxEnv`, `Halt`/`Res`, `LTy.Denote`, `State.globE`/`getE`/`loc`/
+`Locs`, an `*.erase` of a state part or `Heap.into` (the sweep of the plan's
+`rg` is empty).  Net −3890 Lean lines (49 files, +573 −4463).
+
+- **`wt(storage)` typed.**  `Storage.wtT` (`Signature.lean`) runs the typed
+  test, `if st.wtB then some true else none`.  The test's definitions
+  (`HeredB`, `allBFold`, `SVal.allB` and its `eqns`, `canonHB`, `tightHB`,
+  `keysHB`, `Ty.keyOkB`, `PrimTy.keyFits`, `Storage.shapeB`/`keysB`/`wtB`)
+  moved out of `Typing/CanonTest.lean` and `Typing/Values.lean` into a new
+  low module, `Semantics/StorageWt.lean` (135 lines, imports
+  `Semantics/Storage.lean` only), which `Signature.lean` imports; still a
+  fold (`SVal.fold`, the recursor form with its `match` twin), so Gate G0
+  holds and the kernel evaluates it in certificates (`Examples/Verify`'s
+  certified pins stand, and its time, below).  `CanonTest` keeps the
+  proofs of what the tests decide.  `holds_wt` loses its `nodupKeysB`
+  premise (the untyped test looked each root up by name) and is a case on
+  `σ.storage.wtB`; `initStorage_wt hdeep` likewise (`TestSuite/Problems.lean`'s
+  `initState_wt` passes one `decide +kernel`).  Deleted:
+  `Calculus/WtBridge.lean` (360) and `Semantics/WellFormed.lean` (269,
+  `storageWtB`, the untyped `canonB`/`tightB`/`wordsB`).
+- **Modules deleted.**  `Semantics/{StorageErase (804), HeapErase (442),
+  Erase (56), TypedErase (64), DecEq (22), Properties (627)}`: nothing
+  but `Solidity.lean` and the bridge imported the erasure since W10.5.5.
+  `Properties`' association-list laws (`lookupBy_setBy_self`,
+  `lookupBy_setBy_ne`, `setBy_setBy_self`, `lookupBy_eq_some_mem`) moved to
+  `AST.lean` (namespace `Semantics`, beside `lookupBy`/`setBy`); its
+  untyped-state laws went with it.
+- **`Semantics.lean` (1233 → 69): the ABI values.**  `PrimVal`/`Value`,
+  `Seg`, `ExtResult`, `ExtKey`, `sendKey`.  Deleted: the untyped `SVal`
+  (and its hand-written `DecidableEq`), `MVal`, `MObj`, `Binding`, `TxEnv`,
+  `State`, `Halt`/`Res`/`bind_ok_inv`, `defaultForTy`/`defaultForRef`/
+  `defaultOf`/`strip`/`overlay`/`pushSlot` and `find`/`save`/`findLive`
+  on it, every state operation (`findStorage`, `saveStorage`,
+  `writeStorage`, `checkIndex`, `getEnv`, `getObj`, `setObj`, `alloc`,
+  `getNet`, `envVal`, `copyStToM`, `allocDefault`, `copyMToSt`, `copyMem`,
+  `readLoc`, `writeLoc`, `arrayLen`, `memWriteField`/`Index`, `newArrVal`,
+  `writeAddr`, `memClear`, `opStore`, `opMem`, `bumpStore`, `bumpMem`,
+  `pushAt`, `pushPlaceAt`, `popAt`, `State.pay`), `Value.asInt`/`asBool`/
+  `keyAt`/`toSVal`/`toMVal`, `applyBinOp`, `applyUnOp`, `checkArith`,
+  `unopCheck`, `evalBinop`, `PrimTy.default`, `PrimVal.fits`, the untyped
+  stores `State.exampleStore`/`testSuiteStore` (the typed ones of
+  `Tools/Run.lean` stand), `Contract.initStorage`/`deployState` (the typed
+  `Storage.init`/`State.deploy`), `initStorage_standardExample`,
+  `LTy.Denote`.  `uintBound`, `intBound`, `uintBitwise` (and
+  `uintBitwise_natCast`) moved to `Semantics/Ops.lean`, still in namespace
+  `Semantics` (their readers unchanged).
+- **The erasure parts of the typed modules.**  `State.lean`:
+  `LTy.TDenote.erase`/`erase_wk`, `Locs`/`Locs.push`, `TTx.erase`,
+  `State.globE`/`getE`/`loc` (the `TTx` docstring now carries what
+  `TxEnv`'s said).  `Storage.lean`: `eraseFold`, `SVal`/`SFields`/`SList`/
+  `SVec`/`SMap.erase` with their `eqns`, the three `erase_eq`,
+  `SRef.erase`, `Storage.erase`; `Path.erase` stays (the segments the side
+  conditions read, `Theory/Segs.lean`).  `Heap.lean`: `MVal`/`MFields`/
+  `MObj`/`Objs`/`Heap.erase`, `Heap.into`.  `Run.lean`: `THalt.erase`,
+  `TRes.erase`.  `Value.lean`: `toRes`, `erase_dflt`, `asInt_erase_*`,
+  `asBool_erase`, `keyAt_erase_key` (`PrimTy.erase`/`ofValue?` stay, the
+  ABI word of a typed value; not renamed).  `Ops.lean`:
+  `PrimTy.checkArith_ofInt`, `BinOp.applyBinOp_int`, `evalBinop_arith`,
+  `BinOp.evalT_erase`, `UnOp.evalT_erase`.
+- **`Res` → `TRes`.**  `Close.optRes : Option α → TRes α`,
+  `Modality.wp` and its lemmas over `TRes` (`wp_error {e : THalt}`),
+  `Close.pure_eq_ok`/`bind_ok_right`; `close_rw_s` lists
+  `Solidity.ok_bind`/`error_bind` (the latter new, `Semantics/Run.lean`,
+  generic in the error type) for the deleted `Res.ok_bind`/`error_bind`.
+  The `open Semantics (… SVal MVal Halt Res)` of the `Sound*` files
+  narrowed; `SoundLocal`'s two untyped `evalBinop_*` lemmas (unread) and
+  `SoundCalls`' `Res.ok_bind'` (unread) deleted.
+- **The EVM's word arithmetic: the fallback.**  The guard tails stay proved
+  on integer arithmetic on ABI words; `applyBinOp`, `applyUnOp`,
+  `checkArith`, `unopCheck`, `evalBinop`, `Value.asInt`/`asBool`, a
+  `Halt`/`Res` of their own (`revert`, `undef`), `toRes` and the agreement
+  lemmas (`checkArith_ofInt`, `applyBinOp_int`, `evalBinop_arith`,
+  `binOp_evalT_erase`, `unOp_evalT_erase`) are now private to
+  `Evm/SimLemmas.lean` (+196 lines there), copied verbatim, so no proof
+  changed.  Restating `tail_sim` and its signed half on `BinOp.evalT`
+  (`PrimTy.ofInt?`) directly is left: the copy is arithmetic on words,
+  not state, and nothing outside the file reads it.
+- **Dedupe.**  `Theory/Typed/Mem.lean`'s section "A type's default, at any
+  fuel" (W10.5.4: `SFields.dfltBelow_congr`, `SVal.dfltAt_congr`,
+  `dfltRefAt_congr`, `dfltBelow_fuel`, `SVal.dfltBelow_eq`,
+  `SFields.dfltBelow_eq_dflt`, `SVal.dflt_struct_eq`/`map_eq`/`fixed_eq`,
+  81 lines) is gone; Mem imports `Typing/Values.lean` (below it: it
+  imports `Theory/Typed/Obs.lean` and `StorageWt` only) and cites its
+  copies (`dfltBelow_irrel`, `dfltAt_irrel`, `dfltBelow_dflt`,
+  `SFields.dfltBelow_eq`, `SVal.dflt_struct`/`dflt_map`/`dflt_fixed`), as
+  do `CloseFrame` and `DecideEval`.
+- **Doc paths.**  `AST.lean`'s `mapFree` docstring cites
+  `mapFree_structDef` (`Semantics/Storage.lean`) for the deleted
+  `Typing/StoragePreservation.lean`; `Semantics.lean`'s citation went with
+  `pushSlot_prim`.  Docstrings naming deleted declarations
+  (`defaultForTy`, `Value.keyAt`, `Contract.deployState`, `evalBinop`,
+  `opStore`, the `Semantics.SVal.*` operations, the erasure modules)
+  restated.
+- **Timings** (diagnostics wall on copies under `Solidity/Scratch/`,
+  `Elab.async false`, `IO.monoMsNow` around the body; master `3bd29372` in
+  a detached worktree and this branch, same load, back to back or
+  concurrently where marked):
+
+  | File | master | here | gate |
+  |---|---|---|---|
+  | `Examples/Tactics/Decide` (concurrent) | 15.3 s | 15.2 s | 45 |
+  | `Examples/ProofTree` | 9.5 s | 9.7 s | 11.7 |
+  | `Examples/Chains/Storage` | 10.4 s | 10.8 s | 9.2 (over on master too) |
+  | `Examples/ChainRewrites` | 9.1 s | 8.9 s | 8.2 (over on master too) |
+  | `Examples/Verify` | 11.3 s | 11.1 s | |
+  | `TestSuite/Derived5` (concurrent) | 4.7 s | 4.6 s | |
+
+  `Derived5` per theorem (an `#eval` between each) agrees to the
+  millisecond scale (8.79 s and 8.73 s for the 40 theorems, instrumented).
+  The two gates over are over on master in the same run: machine load,
+  not this change.
+- **Checks**: `lean_build` of the default targets clean (272 jobs) after
+  the code and again after the docstring edits, no new warning (the
+  replayed warnings are all in files or lines this wave did not touch);
+  `TestSuite/Problems.lean`, `Corpus/Imported.lean` and
+  `TestSuite/Derived5.lean` clean; `TestSuite/Report.lean` not checked
+  (building its fourteen `Derived` imports at once passed 27 GB and was
+  stopped); `#print axioms` of `Proves.valid`, `Seq.checkCore_valid`,
+  `compiler_correct`, `wt_iff_reachable`, `initStorage_wt`, `holds_wt`:
+  `propext`, `Classical.choice`, `Quot.sound` (appended to `Theorems.lean`
+  with its imports, then removed); no `sorry` (0, as on master), no
+  `axiom` or heartbeat override added; `check-orphans` (290 reachable),
+  `check-doc-paths` clean.
+- **Docs**: AGENTS.md's untyped paragraph (what stays: the ABI values, a
+  path's segments, the ledger, the EVM word store), `module-map.md` (eight
+  rows out, `Semantics/StorageWt.lean` in, `Semantics.lean`, `Value`,
+  `Ops`, `Storage`, `Heap`, `State`, `NoPanic`, `AST`, `CanonTest`,
+  `Values`, `Mem`, `Problem`, `CloseLemmas`, `SimLemmas` restated),
+  `.claude/rules/typing.md` and `soundness.md`, `lean-key-rule-map.md`
+  (`add_literals`, `assertSimple`'s halt, the push row), `solc-alignment.md`
+  (the anchors `checkArith`/`evalBinop`/`applyBinOp`/`Value.keyAt` now the
+  typed operators and `PrimTy.key`; the untyped push's paragraph; the
+  deployment state), `testsuite-proofs.md` (`wt`), `solkey-feedback.md`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -7596,11 +7734,8 @@ What W9.7 left untyped, the value-level reading of a typed state
 (decisions 40, 83: a term's symbols read its global part erased,
 `State.globE`, and an update computed a `Semantics.State × Locs C Δ`),
 W9.8 typed: the symbols read the typed state, and `Upd.applyV` computes the
-typed global part and the locals' values (`GlobT`, `LocsV`).  `State.globE`
-remains as the typed state's erasure: the typed run's invariants
-(`Typing/`), `Problem`'s initial-state check and the tools read it (W10.5
-types them; the EVM simulation no longer, W10.5.3).  The side-projects
-reader is outdated (W9.7.1).
+typed global part and the locals' values (`GlobT`, `LocsV`).  The erasure
+itself went at W10.5.6.  The side-projects reader is outdated (W9.7.1).
 
 **W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
 terms' symbols read the typed state; what stays untyped is listed in the
@@ -7616,7 +7751,26 @@ done (record above).
 procedure, the closer and the memory laws read the typed state; the
 untyped Theory is gone.
 
+**W10.5 (the typed state, fully)**: done (records above, W10.5.1 to
+W10.5.6).  There is no untyped state: the run's invariants, the EVM
+simulation, the memory laws, the tools and `wt(storage)` read the typed
+state, and `Semantics.State`, its operations and the erasure modules are
+deleted.  What stays untyped is not state, and stays so by design: the ABI
+values (`Semantics.lean`'s `Value`, `ExtKey`, `ExtResult`, and a typed
+value as a word, `PrimTy.erase`/`ofValue?`), which are external data (a
+call's arguments and returned data, the tools' arguments and output); a
+path's segments (`Seg`, `Path.erase`, `Theory.diverges`, `SegT`), the
+side conditions' path syntax; the ledger (`List (Int × Int)`), KeY's
+unbounded `int`; the EVM's word store (`Slot → Nat`), the machine's own,
+and the integer arithmetic on words its operator tails are proved on
+(private to `Evm/SimLemmas.lean`).
+
 **Open items:**
+- The EVM's operator tails are proved on word arithmetic copied privately
+  into `Evm/SimLemmas.lean` (W10.5.6); restating them on `BinOp.evalT`
+  would drop the copy.
+- `TestSuite/Report.lean` was not checked after W10.5.6 (memory); its
+  `Derived5` import was.
 - `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).
 - `Derived13` about 5 s slower than master (the restored stale push
   obligation, W9.8.5 record).
