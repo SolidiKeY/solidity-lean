@@ -7201,7 +7201,9 @@ net −2.5k lines (48 files, +372 −2849 before this record).
 - **Timings** (diagnostics wall, MCP round trip ≈3 s included, under a
   concurrent KeY run on ≈11 cores): `Tactics/Decide` 18.0 and 26.6 s (gate
   45), `ProofTree` 13.5 and 20.7 s (gate 11.7; 9.4 at W10.4 on a quiet
-  machine).  To re-time at low load before the merge.
+  machine).  Re-timed before the merge, master and this branch back to
+  back under the same load (`Elab.async false`, `IO.monoMsNow` around a
+  copy of the file): `ProofTree` 9.2 s on master, 9.3 s here.
 
 ## What is left
 
