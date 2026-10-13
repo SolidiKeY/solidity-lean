@@ -552,7 +552,9 @@ def State.anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
   σ.withEnv (xs.foldl (fun e x => TEnv.set x.2 (b x) e) σ.env)
 
 /-- The state after a callback: storage and ledger replaced by what the
-callee left, the locals, memory and funds kept (`Semantics.State.havoc`). -/
+callee left (KeY's `{storage := storageSk ‖ net := netSk}`, fresh skolem
+constants), the locals, memory and funds kept: the funds are not a
+transfer's to change. -/
 def State.havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) : State C Γ :=
   { σ with storage := st, net := nt }
 

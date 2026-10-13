@@ -14,7 +14,7 @@ about what `saveStorage`, `findStorage`, `readAddr` and `getEnv` return on a
 `simp` over the `close_rw` set, then `omega` or `grind` for the arithmetic.
 
 **Weakest preconditions.**  `Modality.wp m x P` is `P` of what `x` returns,
-or `m.onHalt` when it halts; `Modality.after` is its instance at `State`.
+or `m.onHalt` when it halts.
 Pushed through the binds of the evaluators (`Modality.wp_bind`, and one
 equation per constructor below), it turns the goal into a nest of `∀ τ,
 x = .ok τ → …` (the box) or `∃ τ, x = .ok τ ∧ …` (the diamond).  A
