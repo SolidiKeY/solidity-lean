@@ -224,7 +224,7 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `Theory/Bridge/Copy.lean`, `CopyArray.lean` | `overlay`, `strip` and assignment against `copyVal`, `stripVal`, `copyTo`. |
 | `Theory/Bridge/Push.lean` | `push`/`pop` against `pushT`/`shrinkT`/`popT`. |
 | `Theory/Bridge/Denote.lean` | What a typed symbol denotes in the Theory (`Srt.TDen`, `Op0.denote` … `Op3.denote`, over the storage abstracted, `Storage.absT`, `SRef.absT`) and the bridge to its typed evaluation (`Srt.Bridge`, `Op0.denote_eval` … `Op3.denote_eval`), by the storage erasure lemmas and the Theory's. The one Theory module that imports the signature. |
-| `Theory/StateWrites.lean` | The interpreter's writes reshaped for the soundness proofs and the closer: a write as a new storage or heap (`State.writeStorage_eq`, `writeAddr_eq`, `copyStToM_eq`, `allocDefault_eq`), a write keeping its component (`*_with`), `evalBinop_bump`, what a binding holds (`Close.bindingVal`, …). |
+| `Theory/StateWrites.lean` | What `sol_decide`'s untyped language and the closer still read of the untyped interpreter's writes: a storage write as a new storage (`State.writeStorage_eq`), `pushAt_const`, a local's write leaving the rest (simp lemmas), what a binding holds (`Close.bindingVal`, …); goes with W10.4. |
 | `Theory/Rewrite.lean` | `TheoryRule`: a constructor per printed rewrite rule, and the lemma behind each. |
 
 ## Typing and sort faithfulness
