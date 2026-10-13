@@ -235,11 +235,6 @@ import Solidity.Theory.Copy
 import Solidity.Theory.Observe
 import Solidity.Theory.Abs
 import Solidity.Theory.Bridge.Find
-import Solidity.Theory.Bridge.Save
-import Solidity.Theory.Bridge.CopyArray
-import Solidity.Theory.Bridge.Delete
-import Solidity.Theory.Bridge.Copy
-import Solidity.Theory.Bridge.Push
 import Solidity.Theory.Bridge.Denote
 import Solidity.Theory.StateWrites
 import Solidity.Theory.Memory

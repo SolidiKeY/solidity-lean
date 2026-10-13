@@ -2076,6 +2076,12 @@ premise the decidable `(ObsLoc.strip? p q).isNone`. -/
 theorem findOnSave (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
     (o.copyTo p v).word p = v.word .nil := copyTo_word_same o p v
 
+/-- **`findOnSavePrefix`**: a read above a save sees the save made below
+it. -/
+theorem findOnSavePrefix (o : Obs L) {U V : Ty} (q : L U) (r : Path U V) (v : TVal V) :
+    (o.copyTo (ObsLoc.app q r) v).find q = (o.find q).copyTo r v := by
+  rw [copyTo, copyTo, find_save_below, find_find]
+
 /-- **`findOnSaveFrame`** (solkey's `findOnSaveDifferent`). -/
 theorem findOnSaveFrame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
     (v : TVal U) (h : (ObsLoc.strip? p q).isNone = true) : (o.copyTo p v).word q = o.word q :=

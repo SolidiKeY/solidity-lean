@@ -1,4 +1,6 @@
 import Solidity.Theory.Rewrite
+import Solidity.Theory.Typed.Obs
+import Solidity.Syntax
 
 /-!
 # The lines after the program: rewriting by the theories
@@ -23,10 +25,19 @@ The calculus side of each example — the program run into those terms and read
 back — is `StorageSteps.lean`, `Memory.lean` and `CrossDomain.lean`; the name
 of each chain here says which one it continues.
 
+The storage fields and `delete` (sections 1 and 3) are read in the typed
+Theory, where an equation of the calculus is read (`Theory/Typed/Obs.lean`):
+a storage is its observations at typed locations, a law is stated once by its
+solkey name (`Obs.findOnSave`, …), and a delete is read off the type, with
+no premise about what the deleted node is.  The push/pop argument (section
+2) and the memory and cross-domain lines (5–8) stay in the untyped algebra of
+`Theory/Terms.lean`, the memory island's (`Calculus/MemTheory.lean`): there
+`size` is a member written like any other, and the paths are `List Seg`, so
+`alice·account·balance` is `[alice, account, balance]` and its `⟨f⟩` is `[f]`.
+
 A root that the calculus invents is a variable `r`, not a numeral: the
 `new(mem, r) →` premise says only that it is fresh, and a chain that picked
-`7` would prove less.  Paths are `List Seg`, so
-`alice·account·balance` is `[alice, account, balance]` and its `⟨f⟩` is `[f]`.
+`7` would prove less.
 -/
 
 namespace Solidity.Examples.Tactics.Theory
@@ -59,35 +70,56 @@ private abbrev memWrite (r : IdentityPrim) (a : Seg) (v : Int) : Memory :=
 private abbrev stSave (p : List Seg) (v : Int) : Struct :=
   save Struct.mtSt p (StValue.int v)
 
-/-! ## 1 · Storage fields
+/-! ## 1 · Storage fields, in the typed Theory
 
-The read that follows `StorageSteps.deepFieldWrite`
-("the subsequent field read sees …"). -/
+A storage is its observations at typed locations (`TSto`,
+`Theory/Typed/Obs.lean`): `alice.account.balance` is a location of
+`StandardExample` holding a `uint`, and a write is a copy laid there
+(`Obs.copyTo`).  The laws are solkey's, by name. -/
+
+section Typed
+
+/-- `alice`, `bob`, and the paths the examples read below a `Person`. -/
+private abbrev aliceL : SLoc StandardExample (.ref (.struct "Person")) :=
+  .ref (SRef.ofRoot "alice" rfl)
+private abbrev bobL : SLoc StandardExample (.ref (.struct "Person")) :=
+  .ref (SRef.ofRoot "bob" rfl)
+private abbrev accountBalance : Path (.ref (.struct "Person")) .uint :=
+  .field (f := "account") rfl (.field (s := "Account") (f := "balance") rfl .nil)
+private abbrev accountTokenValue : Path (.ref (.struct "Person")) .uint :=
+  .field (f := "account") rfl (.field (s := "Account") (f := "token") rfl
+    (.field (s := "Token") (f := "value") rfl .nil))
+private abbrev ageP : Path (.ref (.struct "Person")) .uint := .field (f := "age") rfl .nil
+private abbrev accountP : Path (.ref (.struct "Person")) (.ref (.struct "Account")) :=
+  .field (f := "account") rfl .nil
+
+/-- A `uint` word as written. -/
+private abbrev word (n : Int) (h : PrimTy.uint.inRange n = true := by rfl) : PrimTy.uint.Denote :=
+  ⟨n, h⟩
 
 /-- `alice.account.balance = 10; v = alice.account.balance;` — reading exactly
-the written path. -/
-theorem deepFieldWriteValue (s : Struct) :
-    findSt (save s [alice, account, balance] (StValue.int 10)) [alice, account, balance] =
-      StValue.int 10 :=
-  calc findSt (save s [alice, account, balance] (StValue.int 10)) [alice, account, balance]
-    _ = StValue.int 10 := find_save_same s (by simp) _  -- findOnSave
+the written location (`findOnSave`). -/
+theorem deepFieldWriteValue (s : TSto StandardExample) :
+    (s.copyTo (ObsLoc.app aliceL accountBalance) (TVal.ofWord (word 10))).word
+      (ObsLoc.app aliceL accountBalance) = word 10 :=
+  Obs.findOnSave _ _ _
 
-/-- **The frame.**  `bob.age` does not see the write: the paths diverge at the
-first segment. -/
-theorem deepFieldWriteFrame (s : Struct) :
-    findSt (save s [alice, account, balance] (StValue.int 10)) [bob, age] = findSt s [bob, age] :=
-  calc findSt (save s [alice, account, balance] (StValue.int 10)) [bob, age]
-    _ = findSt s [bob, age] := find_save_frame s _ _ _ (by decide)  -- findOnSaveDifferent
+/-- **The frame.**  `bob.age` does not see the write: the locations part at
+the root (`findOnSaveDifferent`, decided on the two literal locations). -/
+theorem deepFieldWriteFrame (s : TSto StandardExample) :
+    (s.copyTo (ObsLoc.app aliceL accountBalance) (TVal.ofWord (word 10))).word
+      (ObsLoc.app bobL ageP) = s.word (ObsLoc.app bobL ageP) :=
+  Obs.findOnSaveFrame _ _ (by decide +kernel)
 
-/-- **Reading above the write.**  A prefix of the written path reads the write
-pushed down to what is left of it — the step the calculus takes when an alias
-was captured above the target. -/
-theorem deepFieldWritePrefix (s : Struct) :
-    findSt (save s ([alice] ++ [account, balance]) (StValue.int 10)) [alice] =
-      StValue.st (save (asStruct (findSt s [alice])) [account, balance] (StValue.int 10)) :=
-  calc findSt (save s ([alice] ++ [account, balance]) (StValue.int 10)) [alice]
-    _ = StValue.st (save (asStruct (findSt s [alice])) [account, balance] (StValue.int 10)) :=
-        find_save_prefix s [alice] (by simp) _  -- findOnSavePrefix
+/-- **Reading above the write.**  `alice` reads the write made below it
+(`findOnSavePrefix`) — the step the calculus takes when an alias was captured
+above the target. -/
+theorem deepFieldWritePrefix (s : TSto StandardExample) (v : TVal .uint) :
+    (s.copyTo (ObsLoc.app aliceL accountBalance) v).find aliceL =
+      (s.find aliceL).copyTo accountBalance v :=
+  Obs.findOnSavePrefix _ _ _ _
+
+end Typed
 
 /-! ## 2 · Storage arrays: the push/pop argument
 
@@ -110,85 +142,49 @@ theorem pushPopSlotValue : findSt S3 [tokens, .at 0, value] = StValue.int 7 :=
                                                                    -- findOnSaveDifferent
     _ = StValue.int 7 := find_save_same _ (by simp) _              -- findOnSave
 
-/-! ## 3 · `delete`
+/-! ## 3 · `delete`, in the typed Theory
 
-A deleted node carries the marker (`delAtEmpty`), a leaf reads as its type's
-default (`delFieldDefault`), and a read below a deleted path descends through
-the marker: the first storage `delete` trace, where `A`
-is the deleted account. -/
+A delete resets what is below its location, read off the type
+(`TVal.delR`): a word to its default, a struct member by member, a mapping's
+entries and an array's slots past its end kept.  So the storage `delete`
+trace needs no premise about what the deleted account is: its type says. -/
 
-/-- `delete alice;` of a struct holding `age = 34`: the marker. -/
-theorem deleteLeafValue :
-    delAt (stSave [alice, age] 34) [] = delNode (stSave [alice, age] 34) :=
-  calc delAt (stSave [alice, age] 34) []
-    _ = delNode (stSave [alice, age] 34) := delAtEmpty _  -- delAtEmpty
+section TypedDelete
 
-/-- …and a leaf's default: `delete s.a;` for a primitive `a`, read at `int`. -/
-theorem deleteLeafDefault (s : Struct) (a : Seg) : asInt (delField s a) = 0 :=
-  calc asInt (delField s a)
-    _ = 0 := delFieldDefault s a  -- delFieldDefault
+/-- `delete alice.age;` of a word: its default (`findOnDelAt`). -/
+theorem deleteLeafDefault (s : TSto StandardExample) :
+    (s.delAt (ObsLoc.app aliceL ageP)).word (ObsLoc.app aliceL ageP) = word 0 :=
+  Obs.findOnDelAt _ _
 
 /-- `S₁` of the storage `delete` example:
 `alice.account.balance = 100; alice.account.token.value = 7;`. -/
-private abbrev S1Del (s : Struct) : Struct :=
-  save (save s [alice, account, balance] (StValue.int 100)) [alice, account, token, value]
-    (StValue.int 7)
+private abbrev S1Del (s : TSto StandardExample) : TSto StandardExample :=
+  (s.copyTo (ObsLoc.app aliceL accountBalance) (TVal.ofWord (word 100))).copyTo
+    (ObsLoc.app aliceL accountTokenValue) (TVal.ofWord (word 7))
 
-/-- `A = delNode(find(S₁, alice·account))`, the deleted account. -/
-private abbrev A (s : Struct) : Struct := delNode (asStruct (findSt (S1Del s) [alice, account]))
+/-- `delete alice.account; b = alice.account.balance;` — the balance is below
+the deleted account, a struct, and reads its default. -/
+theorem deleteSubtreeBalance (s : TSto StandardExample) :
+    ((S1Del s).delAt (ObsLoc.app aliceL accountP)).word (ObsLoc.app aliceL accountBalance) =
+      word 0 := by
+  rw [show ObsLoc.app aliceL accountBalance = ObsLoc.app (ObsLoc.app aliceL accountP)
+      (.field (s := "Account") (f := "balance") rfl .nil) by
+    rw [ObsLoc.app_app, Path.append_field, Path.append_nil],
+    Obs.delAt_word_below]
+  rfl
 
-/-- The writes of `S₁` are below `alice.account`, so the account keeps its kind. -/
-private theorem S1Del_account_kind (s : Struct) :
-    (asStruct (findSt (S1Del s) [alice, account])).kind =
-      (asStruct (findSt s [alice, account])).kind := by
-  rw [S1Del, show [alice, account, token, value] = [alice, account] ++ [token, value] from rfl,
-    find_save_prefix _ _ (by simp), asStruct_st, kind_save _ (by simp),
-    show [alice, account, balance] = [alice, account] ++ [balance] from rfl,
-    find_save_prefix _ _ (by simp), asStruct_st, kind_save _ (by simp)]
+/-- `v = alice.account.token.value;` — two members below the deleted account:
+the token is a struct too, and its value reads its default. -/
+theorem deleteSubtreeTokenValue (s : TSto StandardExample) :
+    ((S1Del s).delAt (ObsLoc.app aliceL accountP)).word (ObsLoc.app aliceL accountTokenValue) =
+      word 0 := by
+  rw [show ObsLoc.app aliceL accountTokenValue = ObsLoc.app (ObsLoc.app aliceL accountP)
+      (.field (s := "Account") (f := "token") rfl (.field (s := "Token") (f := "value") rfl .nil)) by
+    rw [ObsLoc.app_app, Path.append_field, Path.append_nil],
+    Obs.delAt_word_below]
+  rfl
 
-/-- …and so does its token, which the write of `balance` leaves alone. -/
-private theorem S1Del_token_kind (s : Struct) :
-    (asStruct (findSt (S1Del s) [alice, account, token])).kind =
-      (asStruct (findSt s [alice, account, token])).kind := by
-  rw [S1Del, show [alice, account, token, value] = [alice, account, token] ++ [value] from rfl,
-    find_save_prefix _ _ (by simp), asStruct_st, kind_save _ (by simp),
-    find_save_frame _ _ _ _ (by decide)]
-
-/-- `delete alice.account; b = alice.account.balance;` — "the marker becomes
-`A` when a read descends through it", and `A`'s value member is the default.
-The premise is the account's sort: a mapping would keep its members. -/
-theorem deleteSubtreeBalance (s : Struct)
-    (hk : (asStruct (findSt s [alice, account])).kind ≠ some .map) :
-    asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, balance]) = 0 :=
-  calc asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, balance])
-    _ = asInt (findSt (asStruct (delValue (findSt (S1Del s) [alice, account]))) [balance]) :=
-        by rw [show [alice, account, balance] = [alice, account] ++ [balance] from rfl,
-               find_delAt_extends _ (by simp) (by simp)]         -- findPath, findDelAt
-    _ = asInt (selectSt (A s) balance) := by rw [delValueCast]; rfl  -- delFieldRef
-    _ = 0 := selectStDelNodeDefault _ _
-          (keepsOnDelete_field (by rw [S1Del_account_kind]; exact hk) (by decide))
-                                                                  -- selectStDelNodeDefault
-
-/-- `v = alice.account.token.value;` — two members below the marker: the
-reference member is deleted recursively, and its value member is the
-default.  The premises are the account's and the token's sorts. -/
-theorem deleteSubtreeTokenValue (s : Struct)
-    (hk : (asStruct (findSt s [alice, account])).kind ≠ some .map)
-    (hk' : (asStruct (findSt s [alice, account, token])).kind ≠ some .map) :
-    asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, token, value]) = 0 :=
-  calc asInt (findSt (delAt (S1Del s) [alice, account]) [alice, account, token, value])
-    _ = asInt (findSt (A s) [token, value]) :=
-        by rw [show [alice, account, token, value] = [alice, account] ++ [token, value] from rfl,
-               find_delAt_extends _ (by simp) (by simp), delValueCast]  -- findDelAt, delFieldRef
-    _ = asInt (selectSt (asStruct (selectSt (A s) token)) value) := rfl    -- findPath
-    _ = asInt (selectSt (delNode (asStruct (selectSt (asStruct (findSt (S1Del s) [alice, account]))
-          token))) value) := by
-        rw [selectStDelNodeRef _ _
-          (keepsOnDelete_field (by rw [S1Del_account_kind]; exact hk) (by decide))]
-                                                                           -- selectDelNodeRef
-    _ = 0 := selectStDelNodeDefault _ _
-          (keepsOnDelete_field (fun he => hk' ((S1Del_token_kind s).symm.trans he)) (by decide))
-                                                                           -- selectStDelNodeDefault
+end TypedDelete
 
 /-! ## 5–7 · Memory
 
