@@ -29,9 +29,9 @@ extent, a struct its mapping members).  Reading it back:
 | `p`, with nothing known of it | `wt(storage)`, `sol_prove` | `deleteRootUnknown` |
 
 A read *below* a deleted struct reads the default of a member of a value
-`sol_close` does not know (`Calculus/Close.lean`), so those claims are checked on a run
-of the interpreter from `State.exampleStore`, printed by `#eval`: a `Person`'s
-default is built by the well-founded `defaultForTy`, which `rfl` cannot unfold.
+`sol_close` does not know (`Calculus/Close.lean`), so those claims are checked on a
+typed run from `State.exampleStore` (`Tools/Run.lean`), printed by `#eval`
+(`Prog.localAfterT`).
 
 The walks start with `apply Proves.valid`, which turns `⊨ φ` into the judgement
 `⊢ φ`; each `apply` names one taclet (`StorageSteps.lean`).
@@ -223,7 +223,7 @@ info: Except.ok (some (Solidity.Semantics.PrimVal.int 0))
 
 `delete` of a `uint[3]` resets its three elements in place and keeps the
 length (solc; solkey's `delNodeFixed`), where a `uint[]` is emptied.  The
-interpreter knows which by the value (`SVal.array`'s `fixed`), so the rule is
+interpreter knows which by the type (`SVal.fixed`, not `SVal.array`), so the rule is
 the same `storageRootDelete`; `sol_decide` reads it back by a case on the
 location's shape (`Examples/Tactics/Decide.lean`, `fixedDelete`). -/
 

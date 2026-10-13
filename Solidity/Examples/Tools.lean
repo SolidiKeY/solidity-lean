@@ -69,7 +69,8 @@ balances = {1: 5, _: 0}
 #guard_msgs in #run Benchmark.Coin.Coin.mint(1, 5) with msg.sender := 0
 
 /-! A state variable of a value type is set in the `with` list; any other
-start state is given whole, with `from`. -/
+start state is given whole, with `from`: a typed state (`State C []`), here
+`State.init` with its storage written out. -/
 
 /--
 info: ok
@@ -374,8 +375,7 @@ solkey's `TestSuite.sol` pins it: a binary operator's right operand first
 (`i++ + i` is `1 + 1`), an assignment's right-hand side before its target
 (`a[++i] = ++i` writes `1` at `2`), an index's base before the index
 (`matrix[k][k++]` indexes `matrix[0]`).  Run typed from `TestSuite`'s store
-(`Prog.runT`; `Semantics.lean`'s pin of today's run until W4
-`modal`). -/
+(`Prog.runT`, from the typed `State.testSuiteStore`). -/
 
 /-- info: (true, true, true) -/
 #guard_msgs in
@@ -389,8 +389,7 @@ solkey's `TestSuite.sol` pins it: a binary operator's right operand first
       assert(matrix[0][0] == 77); assert(matrix[1][0] == 0); })).isOk)
 
 /-! `x = 10` through an alias, typed from `StandardExample`'s store: the
-write lands in `alice` (the pin of M3's erased run until its deletion,
-`docs/intrinsic.md`, decision 40). -/
+write lands in `alice`, printed from the typed storage (`fmtRoot`). -/
 
 /-- info: Except.ok (some "{account: {balance: 0, token: {value: 0}}, age: 10}") -/
 #guard_msgs in

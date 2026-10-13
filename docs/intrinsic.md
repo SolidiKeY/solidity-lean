@@ -7493,6 +7493,92 @@ W10.5.6).  Retyped, not deleted: every theorem keeps its content, over
   `Semantics.lean` (`pushSlot_prim`), low modules this lane left alone
   (a rebuild of everything): to fix at the merge, or with W10.5.6.
 
+### W10.5.5 record (2026-10-13, branch `w105-x`)
+
+The tools read and print the typed state: nothing under `Solidity/Tools/`
+or `Solidity/Examples/` reads `Semantics.State`, the untyped
+`SVal`/`MVal`/`Binding`/`Halt`/`Res`, `globE`/`getE`, or an erasure
+lemma, and `Tools/{Run,Show,Common,DiffTest}` import no erasure module.
+Net −68 lines (18 files, +439 −507 before this record).
+
+- **The printers, typed** (`Tools/Show.lean`).  `SVal.fmt : SVal T →
+  String` is a fold (`fmtFold`: a struct's members by name, an array's live
+  elements, a mapping's entries over `_: default`, a `bool` key `true`),
+  `fmtStorage`/`fmtStorageLine (st : Storage C)` the roots in order,
+  `fmtRoot` one root, `fmtTx (σ : State C Γ)`, `fmtHalt : THalt → String`
+  (`exhausted` prints as `diverge` did), `fmtTRes` (was
+  `DiffTest`'s), and a `Repr` of `State C Γ` (its storage on one line) so
+  `#eval` prints a `TRes (State C Γ)`.  The printed text is the untyped
+  printers' on every well-typed value; the untyped fall-backs (a root the
+  contract does not declare, a word of another type, `undef`) are gone with
+  the states that had them.
+- **`#run`, `#deploy`, the runs** (`Tools/Run.lean`).  `#run … from σ`
+  takes a typed `State C []` (any heap: the old no-memory restriction was
+  the untyped reading's); `freshState C`, `State.withTx` and
+  `State.withRoots` (a value root by `SFields.set` at its `lookupBy`
+  proof, the word by `PrimTy.ofValue?`) are typed and report a word out of
+  range as before ("not of the contract's types").  `Prog.runT (σ : State C
+  []) P : TRes (State C Γ')`, `Prog.localAfterT σ P x : TRes (Option
+  Value)` (a value local by name, `none` for any other), and the typed
+  `State.exampleStore`/`State.testSuiteStore` (`Storage.init` with funds
+  `10^9`) replace the untyped stores in the examples.  `#deploy` runs from
+  `deployStart` (`State.deploy`'s state, without importing
+  `Calculus/Deploy`).  Deleted: `typedState?`, `noLocals`,
+  `Contract.deployRun` (the example states `Contract.deployT`),
+  `Semantics/ToSem.lean` (`State.toSem`, `TEnv.toSem`,
+  `LTy.TDenote.bind`).
+- **`TGen` in `Tools/Common.lean`.**  Counterexample's typed generator,
+  generalised from a pool to a draw per word (`prim : (p : PrimTy) → Gen
+  p.Denote`, `key : PrimTy → Option (Gen Int)`) so `#difftest` draws
+  with it; `PrimTy.ofIntD`, `SVal.arrayOf` moved with it.  `GenSpec`,
+  `GenSpec.sval`/`storage` and the untyped `Inhabited SVal` are deleted.
+  The draws are the old ones step for step (`TGen.sval` and `GenSpec.sval`
+  draw in the same order, a word by one call of its generator, read at its
+  type by `PrimTy.ofValue?`), so `#difftest` with a seed draws the same
+  candidates and `#counterexample` the same witnesses: every count and
+  witness pinned in `Examples/Tools.lean` and `Examples/Verify.lean`
+  stands.
+- **`#difftest`'s start, typed** (`Tools/DiffTest.lean`).  `Start C` holds
+  a `Storage C`, `Start.state` is a `State C []`; the layout is a fold over
+  the typed value (`encodeFold`, `ReprAt` of `Evm/Repr.lean` read as a
+  function, total: a typed value is in range and of its shape, so the
+  "not representable" branches are gone) and `mapKeysFold`/`storageKeys`.
+- **Counterexample's printing** (`Tools/Counterexample.lean`).
+  `Witness.outcome : Option (Except THalt (Storage C))`,
+  `Fml.outcome`/`postFails` keep the typed storage and halt;
+  `Witness.lines` prints `fmtTx σ` and `fmtStorageLine C σ.storage` (no
+  `globE`, no `storage.erase`); `open Semantics` narrowed to the names
+  read.
+- **Pins moved, by class** (all else unchanged, `#run`, `#deploy`,
+  `#difftest` and `#counterexample` included).  A local read
+  (`localAfterT`): `Except.ok (Binding.val (PrimVal.int n))` is
+  `Except.ok (some (PrimVal.int n))`, and a pair of them now fits on one
+  line (`Tactics/Memory`).  A halt: `Semantics.Halt.revert` is
+  `THalt.revert`.  A storage read (`findStorage`): the root printed,
+  `Except.ok (some "17")` (`Tactics/TryCatch`), `alice` whole
+  (`Examples/Tools`).  `#run … from` writes the typed storage.
+  `StorageSuite`'s outcome pair reads `fmtTRes`.
+- **What remains.**  `Value`/`PrimVal` (`PrimTy.erase`: the arguments,
+  the value locals `#run` reports, the words a fold compares) and
+  `ExtKey`/`ExtResult` (`TTx.ext`): ABI data, untyped by design.  The
+  erasure modules are still in the import closure of `Tools/
+  {Counterexample,Inspect,ProofTree,Verify}` and most examples, through
+  `Calculus/Problem.lean` → `Calculus/WtBridge.lean` (W10.5.2's
+  `wt(storage)` bridge, W10.5.6's to delete); nothing there is read by a
+  tool.  `Semantics/TypedErase.lean` is now imported by `Solidity.lean`
+  alone.
+- **Checks**: per-file diagnostics of the five tools and of `Examples/
+  {Tools,Verify}`, `Tactics/{TryCatch,Values,Calls,StorageSuite,
+  Constructors,StorageDelete,LedgerDelete}`; `lean_build` of the default
+  targets clean (279 jobs: `Tactics/Memory`, `CrossDomain`,
+  `Benchmark/Coin` included); `check-orphans` (297 reachable);
+  `check-doc-paths` clean but for master's two citations of the deleted
+  `Typing/StoragePreservation.lean` (W10.5.6's); no `sorry`, `axiom` or
+  heartbeat override added; no proof touched.
+- **Docs**: `module-map.md` (`Tools/{Show,Common,Run,DiffTest}`,
+  `Semantics/ToSem.lean` gone, `TypedErase`, `Constructors`), AGENTS.md's
+  untyped sentence, example docstrings (`TTx.ext`, the typed stores).
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the

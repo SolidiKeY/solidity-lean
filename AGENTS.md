@@ -38,14 +38,15 @@ with atoms and guards (`Calculus/DecideLang.lean`), the Theory's values
 are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
 `Tm.denote`, `.eq` is `=`), and `Tools/Counterexample.lean`'s candidates
 are typed states. Still untyped: `Semantics.State`, the typed state erased
-(`State.globE`), which the `#run` tools and the `wt(storage)` bridge
-(`Calculus/WtBridge.lean`) read (W10.5 types them; the run invariants,
-`Typing/`, read the typed state since W10.5.2, the EVM simulation, `Evm/`,
-since W10.5.3, the memory laws the typed heap since W10.5.4),
-through the erasure modules
-(`Semantics/{StorageErase,HeapErase,Erase,TypedErase}.lean`), which the
-typed core (`Semantics/{State,Heap,Run}.lean`, `Signature.lean`) does not
-import (W10.5.1).
+(`State.globE`), and the erasure modules
+(`Semantics/{StorageErase,HeapErase,Erase,TypedErase}.lean`), which only
+the `wt(storage)` bridge (`Calculus/WtBridge.lean`) reads (W10.5.6 deletes
+them; the run invariants, `Typing/`, read the typed state since W10.5.2,
+the EVM simulation, `Evm/`, since W10.5.3, the memory laws the typed heap
+since W10.5.4, the tools, `Tools/`, since W10.5.5: `#run`, `#difftest`
+and the printers), and which the typed core
+(`Semantics/{State,Heap,Run}.lean`, `Signature.lean`) does not import
+(W10.5.1).
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s

@@ -392,9 +392,8 @@ theorem memoryDeclFromNestedArrayElem :
 
 What `sol_close` cannot read back — the default a fresh object holds, and two
 allocations being different objects — holds of the contract's initial store,
-`State.exampleStore`.  A struct's default is built by a well-founded
-definition (`defaultForTy`) that `rfl` does not unfold, so these runs are
-printed, as `StorageSuite.lean` prints its. -/
+`State.exampleStore` (`Tools/Run.lean`): these typed runs are printed
+(`Prog.localAfterT`), as `StorageSuite.lean` prints its. -/
 
 /-! `Person memory carol; uint result = carol.age;` — a fresh object holds its
 type's default (`memory-decl-fresh.key`, `memory-decl-default.key`). -/

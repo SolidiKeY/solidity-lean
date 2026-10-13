@@ -12,7 +12,7 @@ import Solidity.Tools.Inspect
 catch Panic(uint c) { … } catch { … }` calls a function of another contract
 (`Stmt.tryCall`).  Its callee is never run: without callbacks it changes
 nothing of this contract, and how it ends is the transaction's
-(`TxEnv.ext`), a call with no entry reaching an address with no code and
+(`TTx.ext`), a call with no entry reaching an address with no code and
 reverting in the caller.  So a proof of a `try` has a goal per clause
 (`tryCallNoCallbackBox`): the success block for every value of the returned
 data, and each `catch` block from the state the call was made in.  A
