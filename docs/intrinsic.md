@@ -6494,6 +6494,102 @@ likewise, 0.1 s under its gate.
 (431 derived, 5 pending, 1 divergent, 1 excluded) against a checkout of
 solkey `1b4341a303`.
 
+### W9.8.5 record (2026-10-13, branch `w98-switch`)
+
+The lead's option: the update reading agrees with the run on a push at a
+full array, which is out of gas in both (decision 15), and the diamond
+guard is gone.
+
+**The update reading has a third outcome** (`Calculus/Lands.lean`).
+`Upd.exh σ U := U.exhAny σ && U.exhOk σ`: some element is out of gas, and
+every element (a declaration's right-hand side too) returns or is out of
+gas.  A term is out of gas by `Tm.exhB`: a push symbol at a full array
+(`Storage.full`) with its arguments defined, or a symbol whose value is
+none with one argument out of gas and the others defined; it always
+implies the value is none (`Tm.eval_of_exhB`).  `Upd.afterT`'s halting
+branch is `m.onHalt ∨ U.exh σ = true`, so a box reads as before and a
+diamond accepts an exhausted update.  Two first drafts failed:
+- an order-sensitive `exh` (the first element that does not return is out
+  of gas) is not kept by the rewrites that drop or reorder elements
+  (`Upd.dropSh`, `thinIO`): dropping a shadowed element that reverts ahead
+  of a full push turned a reverting update into an exhausted one;
+- `exhB` at the head symbol only missed a push below another symbol
+  (`save(push(storage, a, v), …)`), and a law that moves or drops a push
+  (`findOnPushFrame` reads `find(push(s, q, v), p)` as `find(s, p)`) then
+  changed it.  The recursive `exhB` is kept by substitution and grafts
+  (`Tm.exhB_substH`, `substP_exhB`, `GraftOK.exh`); a law rewrite (`rwG`,
+  `Fml.updRwS`) asks both sides push-free (`Tm.pushFree`), and a held write
+  (`Upd.holdsWrite`, `holdsMem`) too; `LawCov.back` reads `U.exhOk`.
+
+**Soundness.**  `TRes.AgreesO` takes an exhausted run as agreeing with
+anything; `Premise.Runs` asks a diamond's update not exhausted where the
+run is not, which `Premise.sound_update_typed` discharges by `exh_free`
+(the lowered terms are push-free, `Upd.exh_of_pushFree`) except at the
+push arms (`pushSlot_exh`, `extend_exh`, `pushSome_exh`, `pushBind_exh`).
+`CloseS.holds_upd` gains the exhausted disjunct; the counterexample
+evaluator reads `m = .box || U.exh σ`.  `#print axioms Proves.valid`:
+`propext`, `Classical.choice`, `Quot.sound`.
+
+**The decision procedure** (`DecideScoped`, `DecideRel`, `DecideTyped`).
+The guards carry no bound (`ElemS.guardAt`, `guardNB` deleted): the
+`RelU` iffs are `(Rets guard ∧ ElemS.RoomE) ↔ ok`, and where a push has no
+room, `RelU.storT_exh` gives `exhB` (`guard_cases`).  A diamond's
+reduction keeps the room as a *premise* of what follows the update
+(`Tm.boundS`, `ElemS.bound`, `roomM`: `len(s, q) < 2^256 - 1 = true →
+…`), sound because an update that returns had room (`bound_true`,
+`RelU.bound_of_ok`), and an update with none is exhausted.  Without it,
+`p = persons.push()` read as the push, then `p := persons[persons.length
+- 1]` (`Upd.pushSplit`) left the checked `- 1` of a length the closer did
+not bound.  The closer narrows a term with only a bound below
+(`Facts.lo`: a length is `≥ 0`) by a premise's bound above, and narrows a
+guarded term below its guards (`Facts.narrowS`, `LTerm.unseq`).
+
+**Stale alias push.**  `Tm.staleWriteS` takes a push of a word through a
+stale alias (`some .push`), `RelU.stale_push` its `Sim` lemma under room;
+a stale push asks no room premise (`Tm.boundSt`).  `Dangling`'s `matrix`
+example is back to master's pin.
+
+**Restored**: the four `TestSuite` obligations (`storagePopUnknownLength`,
+`storagePushLengthPositive`, `arrayOfMappingsIndex`,
+`testDanglingInnerArrayReappearsAfterPush`): 435 derived, `Report.lean`,
+`corpus-parity.md`, `expected.tsv` and `Corpus/TestSuite.lean` as on
+master; the three `ProofTree` `wt` push examples under the diamond, and a
+pin of `⟨ persons.push(); uint n = persons.length - 1; ⟩ true`.
+`storagePushReadBack` is now valid in the model (where the `- 1` would
+overflow, the push is exhausted) but not derived: the closer does not read
+`values[(len + 1) - 1]` as the pushed slot.  It stays `divergent` in the
+tables, as on master; its reason there (the length delta) is now the
+solc one only.
+
+**Built**: `lean_build` of the default targets and `SolkeyTestSuite`,
+clean; `sorry` lines 20 (as `HEAD`); `check-orphans` (orphans only the
+git-ignored `Scratch` modules), `check-doc-paths`; `check-testsuite`
+against solkey `1b4341a303`: 438 functions = 435 derived + 1 pending + 1
+divergent + 1 excluded, 2 skip (the `Report.lean` pin's "2 pending" is the
+pending and the divergent one).
+
+**Gates** (the W9.6.4 method, the two checkouts interleaved, each run
+waited for before the next; master `02b1025d`; wall s):
+
+| Row | Gate | master | `w98-switch` |
+|---|---|---|---|
+| `Derived1`–`14` (sum) | 237.8 | 187.3 | 197.5 |
+| `Derived7` | 61.7 | 48.2 | 49.4 |
+| `Derived8` | — | 24.9 | 31.7 (27.4 rerun) |
+| `Derived13` | — | 6.8 | 11.3 (16.1 rerun, 11.3 s CPU) |
+| `Tactics/Decide` | 45.0 | 38.0 | 31.5 |
+| `ProofTree` | 11.7 | 8.7 | 10.3 (one example more) |
+| `Chains/Storage` | 9.0 | 8.2 (10.7) | 10.1 (11.4) |
+
+Per file (master / here): `Derived1` 10.1/8.0, `2` 7.8/8.0, `3`
+16.1/12.0, `4` 15.5/15.8, `5` 8.5/6.3, `6` 10.2/10.5, `9` 5.9/6.2, `10`
+8.7/14.1 (10.6 s CPU), `11` 2.7/2.8, `12` 12.1/12.4, `14` 10.1/9.0.
+`Derived13` pays for `testDanglingInnerArrayReappearsAfterPush` (about
+5 s CPU over master's).  `Chains/Storage` was tried once more: over its
+gate on both checkouts this time (master 9.3–9.4 s CPU, here 10.4), so
+the load is part of it; the W9.8.4 measurement (9.2 against 8.2) stands as
+the comparison, and nothing in this change touches `sol_chain`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -6516,15 +6612,18 @@ not fix the heap typing, an allocation pair writes the local before the
 heap that types it, and `net`/`pay` read the intermediate global part
 (decision U1).  The side-projects reader is outdated (W9.7.1).
 
-**W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.4).  The
+**W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
 terms' symbols read the typed state; what stays untyped is listed in the
-W9.8.4 record.
+W9.8.4 record.  A push at a full array is out of gas in the run and in the
+update reading alike (W9.8.5).
 
 **Open items:**
-- A push under the diamond: four `TestSuite` obligations pending and three
-  `ProofTree` examples boxed (W9.8.4 record, "The push bound"); a push
-  through a stale alias (`matrixPush`).
-- `Chains/Storage` 0.2 s over its gate (W9.8.4 record).
+- `storagePushReadBack` is valid in the model since W9.8.5 but not derived
+  (the closer does not read `(len + 1) - 1` as the pushed slot); the tables
+  still list it `divergent`.
+- `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).
+- `Derived13` about 5 s slower than master (the restored stale push
+  obligation, W9.8.5 record).
 - A write under the diamond at a path with an index leaves its leaf open:
   the index check may revert.
 - `simplifyUpdate` while the program is open does not drop unread locals

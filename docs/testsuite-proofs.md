@@ -132,6 +132,13 @@ What they say:
   `arrayOfMappingsIndex`, `testDanglingInnerArrayReappearsAfterPush`)
   pending again: the typed push halts at a full array, and `wt` bounds no
   length: 431 derived.
+- **W9.8.5** (`docs/intrinsic.md`): the update reading takes a push at a
+  full array as out of gas, as the run does, which the diamond accepts;
+  the diamond's reduction reads the push's room as a premise (`roomM`).
+  The four derived again: 435 derived.  `storagePushReadBack` is valid in
+  the model now (the overflowing `- 1` follows an exhausted push), not
+  derived (the closer does not read the pushed slot back), and still
+  listed `divergent`.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -841,7 +848,8 @@ parallel build (they were built before `Calculus/Problem.lean` anyway).
 theorem derives yet.
 
 **Three diamonds hold only up to the length delta.**  The model's `push`
-never panics and `wt(storage)` does not bound a length, while solc's
+never panics (at `2^256 - 1` elements it is out of gas, which every
+modality accepts) and `wt(storage)` does not bound a length, while solc's
 `push` panics (0x41) on an array of length `2^64`, a length a deployed
 contract can hold.  `storagePushLengthPositive`, `storagePopUnknownLength`
 (`TestSuite/Derived7.lean`) and `arrayOfMappingsIndex`
