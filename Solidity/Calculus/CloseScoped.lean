@@ -228,7 +228,7 @@ theorem eval_nextIn {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.nextT r := rfl
 theorem eval_mat {R : RefTy} {E : Ty} (a : ArrTy R E) (i : Tm C Γ (.ident R))
     (k : Tm C Γ (.val .uint)) : (Tm.app2 (.mat a) i k).eval σ =
-      (i.eval σ).bind fun id => (k.eval σ).bind fun j => some (.index id a j.1) := rfl
+      (i.eval σ).bind fun id => (k.eval σ).bind fun j => some (.index id a j) := rfl
 
 /-! The memory symbols, on the memory a term reads (`Grown σ.H`). -/
 

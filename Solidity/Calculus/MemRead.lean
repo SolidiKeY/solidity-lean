@@ -426,14 +426,14 @@ theorem LTm.freshPath_eval {m : LTm C .mem} {R : RefTy} {hR : (Ty.ref R).mapFree
       obtain ⟨k, hk, p', hp', rfl⟩ := h
       obtain ⟨w, hw, hwk⟩ := LTm.uintLit?_eval (g := g) (ν := ν) hk
       have he : (LTm.app2 (.mat a) x y).eval g ν =
-          (x.eval g ν : Option Nat).map fun id => MAddrT.index id a k := by
+          (x.eval g ν : Option Nat).map fun id => MAddrT.index id a w := by
         cases hx : (x.eval g ν : Option Nat) with
         | none => exact LTm.eval_app2_none _ x y hx
         | some id =>
           rw [LTm.eval_app2, Op2.eval_eq_evalM]
-          simp only [Op2.evalM, hx, hw, hwk, Option.bind_eq_bind, Option.bind_some, Option.map_some]
-      rw [he]
-      exact Srt.FreshRead.index a k (ihx hp')
+          simp only [Op2.evalM, hx, hw, Option.bind_eq_bind, Option.bind_some, Option.map_some]
+      rw [he, ← hwk]
+      exact Srt.FreshRead.index a w (ihx hp')
     | _ => simp only [LTm.freshPath?, Op2.freshStepL, reduceCtorEq] at h
   | _ => intro p h; simp only [LTm.freshPath?, reduceCtorEq] at h
 
@@ -643,8 +643,8 @@ def LTm.apart? {T U : Ty} (a : LTm C (.addr T)) (b : LTm C (.addr U)) : Bool :=
 def AddrShapeL.Reads (g : State C []) (ν : AEnv) {T : Ty} : AddrShapeL C → MAddrT T → Prop
   | .field f o, ad => ∃ (s : Name) (id : Nat) (h : lookupBy f (structDef s) = some T),
       ad = MAddrT.field id h ∧ (o.2.eval g ν : Option Nat) = some id
-  | .index ⟨R, i⟩ k, ad => ∃ (id : Nat) (a : ArrTy R T) (j : Int),
-      (i.eval g ν : Option Nat) = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j = k'
+  | .index ⟨R, i⟩ k, ad => ∃ (id : Nat) (a : ArrTy R T) (j : PrimTy.uint.Denote),
+      (i.eval g ν : Option Nat) = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j.1 = k'
 
 theorem LTm.addrShape?_eval {T : Ty} {a : LTm C (.addr T)} {sh : AddrShapeL C}
     (h : a.addrShape? = some sh) {ad : MAddrT T} (ha : (a.eval g ν : Option (MAddrT T)) = some ad) :
@@ -662,11 +662,11 @@ theorem LTm.addrShape?_eval {T : Ty} {a : LTm C (.addr T)} {sh : AddrShapeL C}
     subst h
     rename_i R arr
     have ha : (((x.eval g ν : Option Nat)).bind fun id =>
-        (y.eval g ν : Option PrimTy.uint.Denote).bind fun k => some (MAddrT.index id arr k.1)) =
+        (y.eval g ν : Option PrimTy.uint.Denote).bind fun k => some (MAddrT.index id arr k)) =
       some ad := ha
     simp only [Option.bind_eq_some_iff, Option.some.injEq] at ha
     obtain ⟨id, hi, w, hw, rfl⟩ := ha
-    refine ⟨id, arr, w.1, hi, rfl, fun k' hk => ?_⟩
+    refine ⟨id, arr, w, hi, rfl, fun k' hk => ?_⟩
     obtain ⟨w', hw', hk'⟩ := LTm.uintLit?_eval (g := g) (ν := ν) hk
     rw [hw] at hw'
     cases hw'
@@ -709,8 +709,8 @@ theorem LTm.apart?_resolve {T U : Ty} {a : LTm C (.addr T)} {b : LTm C (.addr U)
       refine .inr ?_
       split at hk
       · rename_i k₁ k₂
-        rw [hn k₁ rfl, hn' k₂ rfl]
-        simpa only [bne_iff_ne, ne_eq] using hk
+        have hk' : k₁ ≠ k₂ := by simpa only [bne_iff_ne, ne_eq] using hk
+        exact fun e => hk' ((hn k₁ rfl).symm.trans ((congrArg Subtype.val e).trans (hn' k₂ rfl)))
       · cases hk
     · exact .inl (LTm.identApart?_ne h hi hi')
   · nomatch h
@@ -1752,7 +1752,7 @@ theorem memCondN_sound (n : Nat) :
             have hev : ∀ id (kv : PrimTy.uint.Denote), (i.eval g ν : Option Nat) = some id →
                 (k.eval g ν : Option PrimTy.uint.Denote) = some kv →
                 ((LTm.app2 (.mat arr) i k).eval g ν : Option (MAddrT _)) =
-                  some (.index id arr kv.1) := by
+                  some (.index id arr kv) := by
               intro id kv h1 h2; rw [LTm.eval_app2, h1, h2, Op2.eval_eq_evalM]; rfl
             rw [AllT.append]
             refine ⟨fun ⟨a₁, a₂⟩ => ?_, fun ad ra had hra hrd => ⟨?_, ?_⟩⟩
@@ -1760,7 +1760,7 @@ theorem memCondN_sound (n : Nat) :
               have hr : HRef.ofId? μ.H' E id = some ⟨id, hty⟩ := by
                 simp only [HRef.ofId?, hty, dite_true]
               obtain ⟨kv, hk, hlt⟩ := (lenCond_iff arr M i k hμ hid hr).1 (AllT.single.1 a₂)
-              refine ⟨.index id arr kv.1, .index ⟨id, hty⟩ arr kv.1, hev id kv hid hk, ?_, ?_⟩
+              refine ⟨.index id arr kv, .index ⟨id, hty⟩ arr kv, hev id kv hid hk, ?_, ?_⟩
               · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, hr, Option.map_some]
               · have := kv.2
                 simp only [PrimTy.inRange, decide_eq_true_eq] at this

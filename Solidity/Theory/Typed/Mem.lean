@@ -177,8 +177,9 @@ theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad
           have hij : i ≠ j := hab e
           cases a <;> cases a' <;>
           · simp only [Heap.readAddr, Heap.index, Heap.get_set_same, MObj.elems_setElem]
-            by_cases hj : 0 ≤ j
-            · have hn : i.toNat ≠ j.toNat := by omega
+            by_cases hj : 0 ≤ j.1
+            · have hij' : i.1 ≠ j.1 := fun e => hij (Subtype.ext e)
+              have hn : i.1.toNat ≠ j.1.toNat := by omega
               simp only [hj, if_true, List.getElem?_set_ne hn]
             · simp only [hj, if_false]
         · simp only [Heap.readAddr, Heap.index, Heap.get_set_ne _ r r' e]
@@ -659,12 +660,12 @@ section Len
 
 /-- An element reads exactly below the array's length. -/
 theorem Heap.readAddr_index_isSome {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R)
-    (a : ArrTy R E) (i : Int) :
-    (hp.readAddr (.index r a i)).isSome = decide (0 ≤ i ∧ i.toNat < hp.len r a) := by
+    (a : ArrTy R E) (i : PrimTy.uint.Denote) :
+    (hp.readAddr (.index r a i)).isSome = decide (0 ≤ i.1 ∧ i.1.toNat < hp.len r a) := by
   simp only [Heap.readAddr, Heap.index, Heap.len]
-  by_cases h0 : 0 ≤ i
+  by_cases h0 : 0 ≤ i.1
   · simp only [h0, if_true, true_and]
-    by_cases hl : i.toNat < (MObj.elems a (hp.get r)).length
+    by_cases hl : i.1.toNat < (MObj.elems a (hp.get r)).length
     · simp only [hl, getElem?_pos, Option.isSome_some, decide_true]
     · simp only [hl, not_false_eq_true, getElem?_neg, Option.isSome_none, decide_false]
   · simp only [h0, if_false, false_and, Option.isSome_none, decide_false]

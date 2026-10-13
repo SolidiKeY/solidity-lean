@@ -109,7 +109,7 @@ def HRef.ofId? (H : HTy) (R : RefTy) (id : Nat) : Option (HRef H R) :=
 /-- A memory address (`MAddr`), its identity unchecked. -/
 inductive MAddrT : Ty → Type where
   | field {s f : Name} {T : Ty} (id : Nat) (h : lookupBy f (structDef s) = some T) : MAddrT T
-  | index {R : RefTy} {E : Ty} (id : Nat) (a : ArrTy R E) (i : Int) : MAddrT E
+  | index {R : RefTy} {E : Ty} (id : Nat) (a : ArrTy R E) (i : PrimTy.uint.Denote) : MAddrT E
 
 /-- `resolve` by `match`, its compiled form. -/
 def MAddrT.resolveM (H : HTy) {T : Ty} : MAddrT T → Option (MAddr H T)
@@ -397,7 +397,7 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
     let m ← x
     let r : HRef _ _ := ((← y).copyStToM m.heap h).val
     some r.id
-  | .mat a, x, y => do some (.index (← x) a (← y).1)
+  | .mat a, x, y => do some (.index (← x) a (← y))
   | .copySt h, x, y => do
     let m ← x
     some (m.then ((← y).copyStToM m.heap h))
@@ -438,7 +438,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
       let m ← x
       let r : HRef _ _ := ((← y).copyStToM m.heap h).val
       some r.id)
-    (fun {_} {_} a x y => do some (.index (← x) a (← y).1))
+    (fun {_} {_} a x y => do some (.index (← x) a (← y)))
     (fun {_} h x y => do
       let m ← x
       some (m.then ((← y).copyStToM m.heap h)))

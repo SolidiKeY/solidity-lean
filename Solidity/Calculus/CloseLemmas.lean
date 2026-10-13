@@ -196,7 +196,7 @@ theorem Op2.eval_shrink {E : Ty} (x : Option (Storage C))
     Op2.eval g .shrink x y = x.bind fun st => y.bind fun r => st.pop true r := rfl
 theorem Op2.eval_mat {R : RefTy} {E : Ty} (a : ArrTy R E) (x : Option Nat)
     (y : Option PrimTy.uint.Denote) :
-    Op2.eval g (.mat a) x y = x.bind fun id => y.bind fun i => some (.index id a i.1) := rfl
+    Op2.eval g (.mat a) x y = x.bind fun id => y.bind fun i => some (.index id a i) := rfl
 
 theorem Op2.eval_extend {E : Ty} (x : Option (Storage C))
     (y : Option (SRef C (.ref (.array E)))) :

@@ -167,8 +167,8 @@ theorem MLoc.lower_addrT : {T : Ty} → (l : MLoc C Γ T) →
       ((b.lower.eval σ).map fun id => MAddrT.field id h)
     exact TRes.AgreesO.map (MPath.lower_mvalT b) fun _ => rfl
   | _, .index a b i => by
-    show TRes.AgreesO _ (do let r ← b.mvalT σ; let k ← i.evalT σ; pure (MAddr.index r a k.1))
-      ((b.lower.eval σ).bind fun x => (i.lower.eval σ).bind fun y => some (MAddrT.index x a y.1))
+    show TRes.AgreesO _ (do let r ← b.mvalT σ; let k ← i.evalT σ; pure (MAddr.index r a k))
+      ((b.lower.eval σ).bind fun x => (i.lower.eval σ).bind fun y => some (MAddrT.index x a y))
     refine TRes.AgreesO.bind (MPath.lower_mvalT b) fun _ => ?_
     exact TRes.AgreesO.bind (Val.lower_evalT i) fun _ => rfl
 

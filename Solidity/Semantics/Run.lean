@@ -162,7 +162,7 @@ end State
 inductive MAddr (H : HTy) : Ty → Type where
   | field {s f : Name} {T : Ty} (r : HRef H (.struct s)) (h : lookupBy f (structDef s) = some T) :
       MAddr H T
-  | index {R : RefTy} {E : Ty} (r : HRef H R) (a : ArrTy R E) (i : Int) : MAddr H E
+  | index {R : RefTy} {E : Ty} (r : HRef H R) (a : ArrTy R E) (i : PrimTy.uint.Denote) : MAddr H E
 
 /-- An address over a grown heap. -/
 def MAddr.wk {H H' : HTy} (e : H <+: H') {T : Ty} : MAddr H T → MAddr H' T
@@ -270,7 +270,7 @@ def MLoc.addrT (σ : State C Γ) : {T : Ty} → MLoc C Γ T → TRes (MAddr σ.H
   | _, .index a b i => do
     let r ← b.mvalT σ
     let k ← i.evalT σ
-    pure (.index r a k.1)
+    pure (.index r a k)
 
 /-- The value a value expression denotes. -/
 def Val.evalT (σ : State C Γ) : {p : PrimTy} → Val C Γ p → TRes p.Denote

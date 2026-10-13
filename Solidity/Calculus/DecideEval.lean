@@ -2115,11 +2115,11 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         obtain ⟨mv, hmv, hv'⟩ := Option.bind_eq_some_iff.1 hv'
         rw [SVal.findM_nil', Option.some.injEq] at hv'
         subst hv'
-        refine MLoc.ofAddr_rep g ν hM (ad := .index r.id .dyn k.1) (ra := .index r .dyn k.1) ?_ ?_ ?_
+        refine MLoc.ofAddr_rep g ν hM (ad := .index r.id .dyn k) (ra := .index r .dyn k) ?_ ?_ ?_
         · rw [LTm.eval_app2, hr, hk]; rfl
         · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
             Option.map_some]
-        · show μ.heap.index r .dyn k.1 = some mv
+        · show μ.heap.index r .dyn k = some mv
           simp only [Heap.index, if_pos k0, hmv]
   | atF i rest ih =>
     rename_i E U n
@@ -2165,13 +2165,13 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         obtain ⟨mv, hmv, hv'⟩ := Option.bind_eq_some_iff.1 hv'
         rw [SVal.findM_nil', Option.some.injEq] at hv'
         subst hv'
-        refine MLoc.ofAddr_rep g ν hM (ad := .index r.id (ArrTy.fixed (n := n)) k.1)
-          (ra := .index r .fixed k.1)
+        refine MLoc.ofAddr_rep g ν hM (ad := .index r.id (ArrTy.fixed (n := n)) k)
+          (ra := .index r .fixed k)
           ?_ ?_ ?_
         · rw [LTm.eval_app2, hr, hk]; rfl
         · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
             Option.map_some]
-        · show μ.heap.index r .fixed k.1 = some mv
+        · show μ.heap.index r .fixed k = some mv
           simp only [Heap.index, if_pos k0, hmv]
   | key i rest ih =>
     intro loc h x hh hx c p hp
