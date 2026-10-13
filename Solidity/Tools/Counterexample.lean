@@ -266,7 +266,7 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
         simp only [if_true, reduceCtorEq, false_implies, and_true]
         exact fun _ => trivial
       · simp only [hxy, if_false, reduceCtorEq, false_implies, true_and]
-        exact fun _ h => hxy h
+        exact fun _ h => h
   | _, .defined t, σ => by
     simp only [Fml.eval3C, holds]
     cases h : t.eval σ <;> simp only [Option.elim, ne_eq, reduceCtorEq, not_false_eq_true,

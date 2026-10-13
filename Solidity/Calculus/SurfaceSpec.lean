@@ -543,41 +543,6 @@ syntax "spec!{ " ident " }" : term
 macro_rules
   | `(spec!{ $f:ident }) => `(spec[InContract.contract]{ $f })
 
-/-! ## Closing: the quantifier's range -/
-
-namespace Close
-
-/-- A `uint` quantifier ranges over `[0, 2^256)`. -/
-theorem forall_admits_uint (P : Value → Prop) :
-    (∀ v, PrimTy.uint.admits v → P v) ↔ ∀ n : Int, 0 ≤ n → n < uintBound → P (.int n) := by
-  constructor
-  · intro h n h₀ h₁; exact h (.int n) ⟨h₀, h₁⟩
-  · intro h v hv; cases v with
-    | int n => exact h n hv.1 hv.2
-    | bool _ => exact hv.elim
-
-/-- An `int` quantifier ranges over `[-2^255, 2^255)`. -/
-theorem forall_admits_int (P : Value → Prop) :
-    (∀ v, PrimTy.int.admits v → P v) ↔ ∀ n : Int, -intBound ≤ n → n < intBound → P (.int n) := by
-  constructor
-  · intro h n h₀ h₁; exact h (.int n) ⟨h₀, h₁⟩
-  · intro h v hv; cases v with
-    | int n => exact h n hv.1 hv.2
-    | bool _ => exact hv.elim
-
-/-- A `bool` quantifier ranges over `true` and `false`. -/
-theorem forall_admits_bool (P : Value → Prop) :
-    (∀ v, PrimTy.bool.admits v → P v) ↔ ∀ b : Bool, P (.bool b) := by
-  constructor
-  · intro h b; exact h (.bool b) trivial
-  · intro h v hv; cases v with
-    | bool b => exact h b
-    | int _ => exact hv.elim
-
-end Close
-
-attribute [close_rw] Close.forall_admits_uint Close.forall_admits_int Close.forall_admits_bool
-
 /-- What `sol_spec_close` does before its last step: `sol_close`'s
 evaluation and reads, knowing also that a word read is a word
 (`Close.asValue_eq_ok`), which the layout premises of a specification say of

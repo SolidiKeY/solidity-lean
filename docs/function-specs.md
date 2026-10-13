@@ -81,9 +81,9 @@ like `msg.value`; under `\old` it is `Term.netOf oldNet a`, the snapshot
 `oldNet` (`UpdElem.saveNet`, `Binding.ledger`), taken only when an `\old(…)`
 reads `net(a)`.
 
-**`\forall` is `Fml.all x T φ`**, over `PrimTy.admits` (a `uint` in
+**`\forall` is `Fml.all x T φ`**, a binder at its type (a `uint` in
 `[0, 2^256)`). `sol_close` reads it as a Lean `∀` over the range
-(`Close.forall_admits_uint`, `_int`, `_bool`), and `grind` instantiates it.
+(`CloseS.forall_uint`, `forall_int`), and `grind` instantiates it.
 
 **The obligation is solkey's box** (`spec[C]{f}`; `spec!{f}` for the file's
 `InContract`; `specObligation`):
