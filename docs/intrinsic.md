@@ -7205,6 +7205,97 @@ net −2.5k lines (48 files, +372 −2849 before this record).
   back under the same load (`Elab.async false`, `IO.monoMsNow` around a
   copy of the file): `ProofTree` 9.2 s on master, 9.3 s here.
 
+### W10.5.2 record (2026-10-13, branch `w105-t`)
+
+The Typing chain reads the typed state only: no `Typing/` module imports
+an erasure module, and the obligations' side reaches the erasure through one
+bridge (`Calculus/WtBridge.lean`, until `Storage.wtT` is the typed test,
+W10.5.6).  Retyped, not deleted: every theorem keeps its content, over
+`Storage C` instead of `List (Name × Semantics.SVal)`.
+
+- **One proof for three invariants.**  Canonical, tight and bounded are
+  each a hereditary predicate on typed values (`SVal.All P`, a fold, for
+  node conditions `P : Hered`, `Typing/Values.lean`): `canonH` (a mapping's
+  keys distinct, its default the type's), `tightH` (no slot of an array of
+  elements without a well-formed default, defaults past an array of words'
+  end, no entry of a reference-keyed mapping), `bndH` (keys in range, a
+  dynamic array's slots below `2^256`).  What a read, a default, a save,
+  `strip`, `delete` and a copy over keep is proved once for any `P`
+  (`SVal.findM_all`, `SVal.dflt_all`, `SVal.saveM_all`, …); the typed run
+  keeps any `P` whose node conditions survive each storage operation
+  (`HeredRun P G`) statement by statement, the 19 leaves written once
+  (`Stmt.keeps_all`, `Typing/HeredRun.lean`).  Each predicate is then its
+  `HeredRun` (`canonH_run`, `tightH_run`, `bndH_run`: 15–60 lines each).
+  A word is written into a live slot only (`SVal.Live`, from
+  `Storage.checkIndex`: `Loc.resolveT_live`), a key only at a word key
+  type, in range (`Path.Keys Ty.Keyable`, the locals' part of every
+  invariant, `LTy.Keyed`).
+- **Statements, old → new.**  `RunInv`: `glob : HeapTy → Semantics.State →
+  Prop`, `loc : HeapTy → (t : LTy) → t.Denote C → Prop` → `glob : Storage C
+  → Prop`, `loc : {H} → (t : LTy) → t.TDenote C H → Prop`, `loc_wk`;
+  `RunInv.HoldsT I H σ := I.glob H σ.globE ∧ …` → `I.glob σ.storage ∧
+  TEnv.All I.loc σ.env` (no store typing, `ValMemOk` without its `glob`
+  clause).  `Reachable C st` over `Storage C` (`o.st.storage = st`).
+  `CanonStorage`/`TightStorage`/`FitsStorage C st` → `st.Canon`/`Tight`/
+  `Fits`; `SVal.canon`/`tight`/`fits`/`bnd` on `Semantics.SVal` and a type
+  → `SVal.Canon`/`Tight`/`Fits`/`Bnd` on `SVal T`, keeping only what the
+  types do not say (members, kinds, fixed lengths and words are the types';
+  the fixed-shadow clause of `tight` and the word clause of `fits` are
+  gone; `Fits` also asks the fixed sizes under a mapping's default).
+  `Prog.run_canon hnd P (hc : CanonStorage C σ.storage.erase) h` →
+  `Prog.run_canon P (hσ : (canonInv C).HoldsT σ) h : o.st.storage.Canon`
+  (no `hnd`; `run_tight` asks `DeepOk` only).  `reachable_canon hnd h :
+  wellTypedStorageB … ∧ CanonStorage C st` → `reachable_canon h :
+  st.Canon`.  `reachable_iff hnd hdeep (hf : st.Fits) : Reachable C st ↔
+  st.Canon ∧ st.Tight`, its converse `canon_reachable hnd` asking neither
+  `defaultOkS` nor `okDeep` (the typed builder needs no well-formed
+  default but to push one, which tightness already confines).
+  `FixedFits C := ∀ nt ∈ C.vars, FixedFitsAt nt.2`, `FixedFitsAt T` a
+  bound on every `Path T (.ref (.fixed E n))`; `reachable_fits`,
+  `reachable_iff_fits` as before.  `no_hidden_invariant` over `Storage C →
+  Prop`.  `Problem`: `holds_wt (hnd) : holds σ (Fml.wt C) ↔
+  σ.storage.wtB = true` (was `storageWtB C.vars σ.storage.erase = true`;
+  `hnd` since the untyped test looks each root up by name),
+  `shape_iff_reachable`, `wt_iff_reachable (hf : st.Fits) : st.wtB = true
+  ↔ Reachable C st` (the words conjunct gone: words by types, keys by
+  `Fits`), `wt_of_reachable hdeep h` (no words premise: keys by
+  `reachable_bnd`), `initStorage_wt hnd hdeep` unchanged (TestSuite's
+  `initState_wt` checks as it was); `storageShapeB_sound`/`_complete` →
+  `Storage.shapeB_iff`; `lookupBy_initStorage_vars`, `storageWordsB_init`
+  gone.  `CanonTest`: the tests as typed folds (`SVal.allB` of `canonHB`,
+  `tightHB`, `keysHB`; `Storage.shapeB`, `keysB`, `wtB`), decided by
+  `SVal.allB_iff` once.  `SortCheck/Faithfulness`: `SortOkS rs T
+  (v : Semantics.SVal)` → `SortOkS rs (v : SVal T)` at the runtime sort
+  `SVal.keySort` (`Typing/Sorts.lean`), a varcond-generic sort true by the
+  value's type; `Counterexamples/StaticRuntimeSort`,
+  `PreFixSortAnnotations` on typed values.
+- **Gone with the types.**  `struct_missing_field_not_reachable` and
+  `fixed_past_end_not_reachable` (the typed storage cannot hold either);
+  `Contract.layout`, `SVal.hasTy`, `StateWT`, `LTy.WT`, `State.glob_wt`,
+  the `CopyOut`/`CanonHeap` heap invariants (the heap is typed), the
+  untyped storage algebra of the builder (`putSt`, the `Wrote` on erased
+  lists: now `Wrote st₀ st r X := st₀.save r X = some st` on the typed
+  storage, with `SVal.saveM_idem`/`saveM_saveM`).
+- **Modules.**  New: `Typing/Values.lean` (1412 lines),
+  `Typing/HeredRun.lean` (827), `Typing/Tight.lean` (195),
+  `Typing/Sorts.lean` (92), `Calculus/WtBridge.lean` (360).  Deleted:
+  `Typing/Storage.lean` (480), `StoragePreservation.lean` (257),
+  `State.lean` (413), `TypedWT.lean` (236).  Rewritten: `Reachability`
+  1907 → 160, `Constructibility` 3626 → 1344, `Fits` 1527 → 179,
+  `CanonTest` 142 → 280, `Soundness` 173 → 31, `TypedRunInv` 363 → 317;
+  `Typing/` 9124 → 4837 lines, `Calculus/Problem.lean` 329 → 259.
+  `Tools/DiffTest.lean` imports `Semantics.Properties` instead of the
+  deleted `Typing/Storage.lean` (it read nothing of it).
+- **Checks**: `lean_build` of the default targets clean (279 jobs);
+  `TestSuite/Problems.lean` and `Corpus/Imported.lean` clean;
+  `check-orphans` (297 reachable); no `sorry`, `axiom` or heartbeat
+  override; `wt_iff_reachable`, `initStorage_wt`, `reachable_iff_fits`,
+  `no_hidden_invariant` on `propext`, `Classical.choice`, `Quot.sound`.
+  `check-doc-paths` names two docstrings citing the deleted
+  `Typing/StoragePreservation.lean`, in `AST.lean` (`mapFree_sound`) and
+  `Semantics.lean` (`pushSlot_prim`), low modules this lane left alone
+  (a rebuild of everything): to fix at the merge, or with W10.5.6.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
