@@ -1286,4 +1286,83 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
       simp only [SVal.saveM, hy, SVal.saveM_saveM d p a b hz hw, Option.bind_eq_bind,
         Option.bind_some, SMap.toList_ofList, setBy_setBy_same]
 
+/-! ## Defaults, read and cleared -/
+
+theorem SFields.get_dflt {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
+    (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
+  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
+  | (f', T') :: fs, T, h => by
+    rw [SFields.dflt, SFields.get_cons]
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      simp only [e, dite_true]
+    · simp only [e, dite_false]
+      exact SFields.get_dflt _
+
+/-- Members with distinct names are equal when every member is. -/
+theorem SFields.ext_get : {fs : List (Name × Ty)} → nodupKeysB fs = true → (x y : SFields fs) →
+    (∀ f T (h : lookupBy f fs = some T), x.get h = y.get h) → x = y
+  | [], _, .nil, .nil, _ => rfl
+  | (f, T) :: fs, hnd, .cons v rest, .cons w rest', h => by
+    simp only [nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hnd
+    have h0 : lookupBy f ((f, T) :: fs) = some T := by simp only [lookupBy, ↓reduceIte]
+    have hv : v = w := by
+      have := h f T h0
+      simp only [SFields.get_cons, dite_true] at this
+      exact this
+    subst hv
+    have hr : rest = rest' := SFields.ext_get hnd.2 rest rest' fun g U hg => by
+      have hne : g ≠ f := fun he => by rw [he, hnd.1] at hg; exact nomatch hg
+      have h1 : lookupBy g ((f, T) :: fs) = some U := by
+        simp only [lookupBy, hne, ↓reduceIte]; exact hg
+      have := h g U h1
+      simp only [SFields.get_cons, hne, dite_false] at this
+      exact this
+    rw [hr]
+
+theorem SVec.defaultOf_replicate {E : Ty} {x : SVal E} (hx : x.defaultOf = x) (n : Nat) :
+    (SVec.replicate x n).defaultOf = SVec.replicate x n := by
+  apply SVec.eq_of_toList_eq
+  rw [SVec.toList_defaultOf, SVec.toList_replicate, List.map_replicate, hx]
+
+theorem SFields.dfltBelow_defaultOf {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).defaultOf =
+    SVal.dfltBelow k T h) : (fs : List (Name × Ty)) → (h : fieldsRank fs < k) →
+    (SFields.dfltBelow k (SVal.dfltBelow k) fs h).defaultOf =
+      SFields.dfltBelow k (SVal.dfltBelow k) fs h
+  | [], _ => by simp only [SFields.dfltBelow, SFields.defaultOf]
+  | (_, T) :: fs, h => by
+    simp only [SFields.dfltBelow, SFields.defaultOf, hih, SFields.dfltBelow_defaultOf hih fs]
+
+mutual
+theorem SVal.dfltAt_defaultOf {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).defaultOf =
+    SVal.dfltBelow k T h) : (T : Ty) → (h : tyRank T < k + 1) →
+    (SVal.dfltAt k (SVal.dfltBelow k) T h).defaultOf = SVal.dfltAt k (SVal.dfltBelow k) T h
+  | .prim _, _ => by simp only [SVal.dfltAt, SVal.defaultOf]
+  | .ref R, h => SVal.dfltRefAt_defaultOf hih R h
+
+theorem SVal.dfltRefAt_defaultOf {k : Nat} (hih : ∀ T h, (SVal.dfltBelow k T h).defaultOf =
+    SVal.dfltBelow k T h) : (R : RefTy) → (h : tyRank (.ref R) < k + 1) →
+    (SVal.dfltRefAt k (SVal.dfltBelow k) R h).defaultOf = SVal.dfltRefAt k (SVal.dfltBelow k) R h
+  | .struct s, h => by
+    simp only [SVal.dfltRefAt, SVal.defaultOf, SFields.dfltBelow_defaultOf hih]
+  | .array E, _ => by
+    simp only [SVal.dfltRefAt, SVal.defaultOf, SVec.toList_defaultOf, SVec.toList_nil,
+      SList.toList_nil, List.map_nil, List.append_nil]
+    rfl
+  | .fixed E n, h => by
+    simp only [SVal.dfltRefAt, SVal.defaultOf]
+    rw [SVec.defaultOf_replicate (SVal.dfltAt_defaultOf hih E _)]
+  | .mapping K V, h => by simp only [SVal.dfltRefAt, SVal.defaultOf]
+end
+
+theorem SVal.dfltBelow_defaultOf : (k : Nat) → (T : Ty) → (h : tyRank T < k) →
+    (SVal.dfltBelow k T h).defaultOf = SVal.dfltBelow k T h
+  | 0, _, h => absurd h (Nat.not_lt_zero _)
+  | k + 1, T, h => SVal.dfltAt_defaultOf (SVal.dfltBelow_defaultOf k) T h
+
+/-- `delete` on a default changes nothing. -/
+theorem SVal.defaultOf_dflt (T : Ty) : (SVal.dflt T).defaultOf = SVal.dflt T :=
+  SVal.dfltBelow_defaultOf _ T _
+
 end Solidity

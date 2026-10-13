@@ -407,6 +407,10 @@ theorem run_assign {σ : State C Γ} {p : PrimTy} {l : Loc C Γ (.prim p)} {ref 
 def arrOf {E : Ty} (L S : List (SVal E)) (h : L.length < 2 ^ 256) : SVal (.ref (.array E)) :=
   .array (SVec.ofList L) (SList.ofList S) h
 
+theorem arrOf_congr {E : Ty} {L L' S : List (SVal E)} {h : L.length < 2 ^ 256}
+    {h' : L'.length < 2 ^ 256} (hL : L = L') : arrOf L S h = arrOf L' S h' := by
+  subst hL; rfl
+
 theorem arrOf_eq {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (h : e.toList.length < 2 ^ 256) : arrOf e.toList sh.toList h = .array e sh hn :=
   SVal.array_ext _ _ _ _ _ _ (SVec.toList_ofList _) (SList.toList_ofList _)
@@ -513,6 +517,315 @@ theorem run_bound {d : Nat} {R : RefTy} {σ : State C Γ} {q : SPath C Γ (.ref 
   exact h
 
 end Steps
+
+/-! ## The builder writes what it is given -/
+
+section Fills
+
+/-! ### Saves at one slot -/
+
+theorem arrOf_saveM_live {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 256) {i : Nat}
+    (hi : i < L.length) (x : SVal E) :
+    (arrOf L S h).saveM (.at (i : Int) .nil) x =
+      some (arrOf (L.set i x) S (by rw [List.length_set]; exact h)) := by
+  have hl : i < (L ++ S).length := by rw [List.length_append]; omega
+  simp only [arrOf, SVal.saveM, Int.natCast_nonneg, ↓reduceIte, SVec.toList_ofList,
+    SList.toList_ofList, Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil,
+    Option.bind_eq_bind, Option.bind_some]
+  congr 1
+  apply SVal.array_ext
+  · simp only [SVec.toList_ofList]
+    rw [List.set_append_left _ _ hi, List.take_left' (List.length_set ..)]
+  · simp only [SList.toList_ofList]
+    rw [List.set_append_left _ _ hi, List.drop_left' (List.length_set ..)]
+
+theorem arrOf_saveM_shadow {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 256) {i : Nat}
+    (hi : L.length ≤ i) (hi' : i < L.length + S.length) (x : SVal E) :
+    (arrOf L S h).saveM (.at (i : Int) .nil) x = some (arrOf L (S.set (i - L.length) x) h) := by
+  have hl : i < (L ++ S).length := by rw [List.length_append]; omega
+  simp only [arrOf, SVal.saveM, Int.natCast_nonneg, ↓reduceIte, SVec.toList_ofList,
+    SList.toList_ofList, Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil,
+    Option.bind_eq_bind, Option.bind_some]
+  congr 1
+  apply SVal.array_ext
+  · simp only [SVec.toList_ofList]
+    rw [List.set_append_right _ _ hi, List.take_left' rfl]
+  · simp only [SList.toList_ofList]
+    rw [List.set_append_right _ _ hi, List.drop_left' rfl]
+
+theorem fixed_saveM {E : Ty} {n : Nat} (e : SVec E n) {i : Nat} (hi : i < n) (x : SVal E) :
+    (SVal.fixed e).saveM (.atF (i : Int) .nil) x = some (.fixed (e.set i x)) := by
+  have hl : i < e.toList.length := by rw [SVec.length_toList]; exact hi
+  simp only [SVal.saveM, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast,
+    List.getElem?_eq_getElem hl, SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
+
+theorem map_saveM {K V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V) :
+    (SVal.map (K := K) m d).saveM (.key k .nil) x = some (.map (.ofList (setBy k x m.toList)) d) := by
+  simp only [SVal.saveM]
+  split <;> simp only [SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
+
+/-! ### A child filled -/
+
+/-- What `fill` does for one value `v`: from a path where saving the default
+changes nothing, in any context, it leaves `v` there, changing nothing but
+the storage. -/
+def FillOK (C : Contract) {T : Ty} (v : SVal T) : Prop :=
+  ∀ (d : Nat) (Γ : Ctx) (q : SPath C Γ T) (σ : State C Γ) (ref : SRef C T),
+    v.Canon → v.Tight → v.Fits → q.resolveT σ = .ok ref →
+    σ.storage.save ref (SVal.dflt T) = some σ.storage →
+    ∃ st', TRuns σ (fill d q v) (σ.withStorage st') ∧ σ.storage.save ref v = some st'
+
+variable {Γ : Ctx}
+
+/-- A child filled below the node written at `ref`: the node, `N`, becomes
+`N'`. -/
+theorem child_step {d : Nat} {T W : Ty} {q : SPath C Γ W} {σ : State C Γ} {st₀ : Storage C}
+    {ref : SRef C T} {N N' : SVal T} {p : Path T W} {w : SVal W}
+    (hw : FillOK C w) (hc : w.Canon) (ht : w.Tight) (hf : w.Fits)
+    (hq : q.resolveT σ = .ok (ref.append p)) (hW : Wrote st₀ σ.storage ref N)
+    (hnoop : N.saveM p (SVal.dflt W) = some N) (hs : N.saveM p w = some N') :
+    ∃ st', TRuns σ (fill (d + 1) q w) (σ.withStorage st') ∧ Wrote st₀ st' ref N' := by
+  obtain ⟨st', hrun, hsave⟩ := hw (d + 1) Γ q σ (ref.append p) hc ht hf hq (hW.childNoop hnoop)
+  obtain ⟨N'', hN'', hW'⟩ := hW.child hsave
+  rw [hs] at hN''
+  cases hN''
+  exact ⟨st', hrun, hW'⟩
+
+/-- `child_step` at a location. -/
+theorem child_stepL {d : Nat} {T W : Ty} {l : Loc C Γ W} {σ : State C Γ} {st₀ : Storage C}
+    {ref : SRef C T} {N N' : SVal T} {p : Path T W} {w : SVal W}
+    (hw : FillOK C w) (hc : w.Canon) (ht : w.Tight) (hf : w.Fits)
+    (hq : l.resolveT σ = .ok (ref.append p)) (hW : Wrote st₀ σ.storage ref N)
+    (hnoop : N.saveM p (SVal.dflt W) = some N) (hs : N.saveM p w = some N') :
+    ∃ st', TRuns σ (fill (d + 1) (.loc l) w) (σ.withStorage st') ∧ Wrote st₀ st' ref N' :=
+  child_step hw hc ht hf hq hW hnoop hs
+
+/-- `a.push();` `k` times on an array with nothing past its end, below the
+bound. -/
+theorem pushes_run {E : Ty} {a : Idx Γ (.alias (.array E))} {ref : SRef C (.ref (.array E))}
+    (hd : (none.isSome || E.defaultOkS) = true) {st₀ : Storage C} :
+    ∀ (k : Nat) (L : List (SVal E)) (σ : State C Γ) (hL : L.length < 2 ^ 256),
+      TEnv.get a σ.env = some ref → Wrote st₀ σ.storage ref (arrOf L [] hL) →
+      (hk : L.length + k < 2 ^ 256) →
+      ∃ st', TRuns σ (Prog.rep k (Stmt.push (C := C) (.alias a : SPath C Γ (.array E)) none hd))
+        (σ.withStorage st') ∧
+        Wrote st₀ st' ref (arrOf (L ++ List.replicate k (SVal.dflt E)) []
+          (by rw [List.length_append, List.length_replicate]; exact hk))
+  | 0, L, σ, hL, _, hW, _ => ⟨σ.storage, TRuns.nil σ, by simpa only [List.replicate_zero,
+      List.append_nil] using hW⟩
+  | k + 1, L, σ, hL, ha, hW, hk => by
+    obtain ⟨st₁, hs₁, hW₁⟩ := run_push hd ha hW (by omega)
+    obtain ⟨st', hrun, hW'⟩ := pushes_run hd k (L ++ [SVal.dflt E]) (σ.withStorage st₁) _ ha hW₁
+      (by rw [List.length_append, List.length_singleton]; omega)
+    refine ⟨st', TRuns.cons hs₁ hrun, ?_⟩
+    simpa only [List.append_assoc, List.replicate_succ, List.singleton_append] using hW'
+
+/-! ### Structs, member by member -/
+
+/-- What `fillFields` does for the members `x` (a suffix of the struct's):
+from a node `N` holding the default at each member still to fill and the
+target `tgt` at every other, it leaves the target there. -/
+def FieldsOK (C : Contract) {fs : List (Name × Ty)} (x : SFields fs) : Prop :=
+  ∀ (s : Name) (d : Nat) (Γ : Ctx) (a : Idx Γ (.alias (.struct s)))
+    (hsub : ∀ f T, (f, T) ∈ fs → lookupBy f (structDef s) = some T) (σ : State C Γ)
+    (ref : SRef C (.ref (.struct s))) (st₀ : Storage C) (N tgt : SFields (structDef s)),
+    TEnv.get a σ.env = some ref → Wrote st₀ σ.storage ref (.struct N) →
+    (∀ g U (hg : lookupBy g (structDef s) = some U), (∃ V, (g, V) ∈ fs) → N.get hg = SVal.dflt U) →
+    (∀ g U (hg : lookupBy g (structDef s) = some U), (¬∃ V, (g, V) ∈ fs) → N.get hg = tgt.get hg) →
+    (∀ g U (h' : lookupBy g fs = some U) (hg : lookupBy g (structDef s) = some U),
+      x.get h' = tgt.get hg) →
+    x.All canonH → x.All tightH → x.All fitsH → nodupKeysB fs = true →
+    ∃ st', TRuns σ (fillFields d a hsub x) (σ.withStorage st') ∧ Wrote st₀ st' ref (.struct tgt)
+
+theorem fields_nil : FieldsOK C SFields.nil := by
+  intro s d Γ a hsub σ ref st₀ N tgt _ hW _ h2 _ _ _ _ _
+  have hN : N = tgt := SFields.ext_get (structDef_nodup s) N tgt fun g U hg =>
+    h2 g U hg fun ⟨_, hm⟩ => nomatch hm
+  subst hN
+  exact ⟨σ.storage, TRuns.nil σ, hW⟩
+
+theorem fields_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} {v : SVal T} {rest : SFields fs}
+    (hv : FillOK C v) (hrest : FieldsOK C rest) :
+    FieldsOK C (SFields.cons (f := f) v rest) := by
+  intro s d Γ a hsub σ ref st₀ N tgt ha hW h1 h2 hag hc ht hf hnd
+  simp only [SFields.All] at hc ht hf
+  simp only [nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hnd
+  have hfT : lookupBy f (structDef s) = some T := hsub f T List.mem_cons_self
+  have hN : N.get hfT = SVal.dflt T := h1 f T hfT ⟨T, List.mem_cons_self⟩
+  have hhead : v = tgt.get hfT := by
+    have h0 : lookupBy f ((f, T) :: fs) = some T := by simp only [lookupBy, ↓reduceIte]
+    have := hag f T h0 hfT
+    simp only [SFields.get_cons, dite_true] at this
+    exact this
+  have hnoop : (SVal.struct N).saveM (.field hfT .nil) (SVal.dflt T) = some (.struct N) := by
+    simp only [SVal.saveM, SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
+    rw [← hN, SFields.set_get_self]
+  have hs : (SVal.struct N).saveM (.field hfT .nil) v = some (.struct (N.set hfT v)) := by
+    simp only [SVal.saveM, SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
+  obtain ⟨st₁, hrun₁, hW₁⟩ := child_stepL (d := d) (p := .field hfT .nil) hv hc.1 ht.1 hf.1 (resolveT_field hfT ha) hW hnoop hs
+  have hne : ∀ g, (∃ V, (g, V) ∈ fs) → g ≠ f := fun g ⟨V, hm⟩ he => by
+    have := lookupBy_isSome_of_mem' hm
+    rw [he, hnd.1] at this
+    exact nomatch this
+  obtain ⟨st', hrun₂, hW'⟩ := hrest s d Γ a (fun g U hm => hsub g U (List.mem_cons_of_mem _ hm))
+    (σ.withStorage st₁) ref st₀ (N.set hfT v) tgt ha hW₁
+    (fun g U hg hm => by
+      rw [SFields.get_set_ne N hfT hg (hne g hm).symm]
+      exact h1 g U hg (let ⟨V, hV⟩ := hm; ⟨V, List.mem_cons_of_mem _ hV⟩))
+    (fun g U hg hm => by
+      by_cases hgf : g = f
+      · subst hgf
+        have hU : U = T := Option.some.inj (hg.symm.trans hfT)
+        subst hU
+        rw [SFields.get_set_same, hhead]
+      · rw [SFields.get_set_ne N hfT hg (Ne.symm hgf)]
+        refine h2 g U hg fun ⟨V, hV⟩ => ?_
+        rcases List.mem_cons.mp hV with hV | hV
+        · exact hgf (congrArg Prod.fst hV)
+        · exact hm ⟨V, hV⟩)
+    (fun g U h' hg => by
+      have hgf : g ≠ f := hne g ⟨U, lookupBy_mem' h'⟩
+      have h0 : lookupBy g ((f, T) :: fs) = some U := by
+        simp only [lookupBy, hgf, ↓reduceIte]; exact h'
+      have := hag g U h0 hg
+      simp only [SFields.get_cons, hgf, dite_false] at this
+      exact this)
+    hc.2 ht.2 hf.2 hnd.2
+  exact ⟨st', TRuns.append hrun₁ hrun₂, hW'⟩
+
+/-- A struct filled member by member through an alias bound to it. -/
+theorem fill_struct {s : Name} {fs : SFields (structDef s)} (hfs : FieldsOK C fs) :
+    FillOK C (SVal.struct fs) := by
+  intro d Γ q σ ref hc ht hf hq h0
+  simp only [SVal.All] at hc ht hf
+  rw [SVal.dflt_struct] at h0
+  obtain ⟨st', hrun, hW⟩ := hfs s d _ .here
+    (fun _ _ hm => lookupBy_of_nodup (structDef_nodup _) hm)
+    (σ.push (t := .alias (.struct s)) (some ref)) ref σ.storage (SFields.dflt (structDef s)) fs
+    rfl h0 (fun g U hg _ => SFields.get_dflt hg)
+    (fun g U hg hm => absurd ⟨U, lookupBy_mem' hg⟩ hm) (fun _ _ _ _ => rfl) hc ht hf
+    (structDef_nodup s)
+  exact ⟨st', run_bound hq hrun, hW⟩
+
+/-! ### Arrays, element by element -/
+
+theorem checkIndex_dyn {st : Storage C} {E : Ty} {ref : SRef C (.ref (.array E))}
+    {L S : List (SVal E)} {hL : L.length < 2 ^ 256} (hf : st.find ref = some (arrOf L S hL))
+    {j : Nat} (hj : j < L.length) : st.checkIndex ref (.arr .dyn) (j : Int) = some () := by
+  simp only [Storage.checkIndex, hf, Option.bind_eq_bind, Option.bind_some]
+  show (if 0 ≤ (j : Int) ∧ (j : Int).toNat < L.length then some () else none) = some ()
+  rw [if_pos ⟨Int.natCast_nonneg j, by rw [Int.toNat_natCast]; exact hj⟩]
+
+theorem checkIndex_fixed {st : Storage C} {E : Ty} {n : Nat} {ref : SRef C (.ref (.fixed E n))}
+    {e : SVec E n} (hf : st.find ref = some (.fixed e)) {j : Nat} (hj : j < n) :
+    st.checkIndex ref (.arr .fixed) (j : Int) = some () := by
+  simp only [Storage.checkIndex, hf, Option.bind_eq_bind, Option.bind_some]
+  show (if 0 ≤ (j : Int) ∧ (j : Int).toNat < n then some () else none) = some ()
+  rw [if_pos ⟨Int.natCast_nonneg j, by rw [Int.toNat_natCast]; exact hj⟩]
+
+/-- What `fillElems` does for the live elements `x` of a dynamic array, from
+index `pre.length`. -/
+def ElemsOK (C : Contract) {E : Ty} {n : Nat} (x : SVec E n) : Prop :=
+  ∀ (d : Nat) (Γ : Ctx) (a : Idx Γ (.alias (.array E))) (σ : State C Γ)
+    (ref : SRef C (.ref (.array E))) (st₀ : Storage C) (pre S : List (SVal E))
+    (hL : (pre ++ List.replicate n (SVal.dflt E)).length < 2 ^ 256),
+    TEnv.get a σ.env = some ref →
+    Wrote st₀ σ.storage ref (arrOf (pre ++ List.replicate n (SVal.dflt E)) S hL) →
+    x.All canonH → x.All tightH → x.All fitsH →
+    ∃ st' hL', TRuns σ (fillElems d (ArrTy.dyn (E := E)) a pre.length x) (σ.withStorage st') ∧
+      Wrote st₀ st' ref (arrOf (pre ++ x.toList) S hL')
+
+theorem elems_nil {E : Ty} : ElemsOK C (SVec.nil (E := E)) := by
+  intro d Γ a σ ref st₀ pre S hL _ hW _ _ _
+  refine ⟨σ.storage, by simpa only [SVec.toList_nil, List.append_nil, List.replicate_zero]
+    using hL, TRuns.nil σ, ?_⟩
+  simpa only [SVec.toList_nil, List.replicate_zero] using hW
+
+theorem elems_cons {E : Ty} {n : Nat} {v : SVal E} {rest : SVec E n}
+    (hv : FillOK C v) (hrest : ElemsOK C rest) : ElemsOK C (SVec.cons v rest) := by
+  intro d Γ a σ ref st₀ pre S hL ha hW hc ht hf
+  simp only [SVec.All] at hc ht hf
+  have hlen : (pre ++ List.replicate (n + 1) (SVal.dflt E)).length = pre.length + n + 1 := by
+    simp only [List.length_append, List.length_replicate]; omega
+  have hj : pre.length < (pre ++ List.replicate (n + 1) (SVal.dflt E)).length := by omega
+  have hq := resolveT_index_lit (C := C) (ArrTy.dyn (E := E)) (by omega) ha
+    (checkIndex_dyn hW.find hj)
+  rw [show (ref.index (.arr .dyn) (pre.length : Int)) = ref.append (.at (pre.length : Int) .nil)
+    by simp only [SRef.index, Path.index_dyn]] at hq
+  have hset : ∀ x : SVal E, (pre ++ List.replicate (n + 1) (SVal.dflt E)).set pre.length x =
+      (pre ++ [x]) ++ List.replicate n (SVal.dflt E) := by
+    intro x
+    rw [List.set_append_right _ _ (Nat.le_refl _), Nat.sub_self, List.replicate_succ,
+      List.set_cons_zero, List.append_assoc, List.singleton_append]
+  have hnoop : (arrOf (pre ++ List.replicate (n + 1) (SVal.dflt E)) S hL).saveM
+      (.at (pre.length : Int) .nil) (SVal.dflt E) =
+      some (arrOf (pre ++ List.replicate (n + 1) (SVal.dflt E)) S hL) := by
+    rw [arrOf_saveM_live hL hj]
+    exact congrArg some (arrOf_congr (by rw [hset, List.append_assoc, List.singleton_append,
+      ← List.replicate_succ]))
+  have hs : (arrOf (pre ++ List.replicate (n + 1) (SVal.dflt E)) S hL).saveM
+      (.at (pre.length : Int) .nil) v =
+      some (arrOf ((pre ++ [v]) ++ List.replicate n (SVal.dflt E)) S (by
+        simp only [List.length_append, List.length_singleton, List.length_replicate]; omega)) := by
+    rw [arrOf_saveM_live hL hj]
+    exact congrArg some (arrOf_congr (hset v))
+  obtain ⟨st₁, hrun₁, hW₁⟩ := child_stepL (d := d) hv hc.1 ht.1 hf.1 hq hW hnoop hs
+  obtain ⟨st', hL', hrun₂, hW'⟩ := hrest d Γ a (σ.withStorage st₁) ref st₀ (pre ++ [v]) S _ ha hW₁
+    hc.2 ht.2 hf.2
+  refine ⟨st', by simpa only [SVec.toList_cons, List.append_assoc, List.singleton_append]
+      using hL', TRuns.append hrun₁ ?_, ?_⟩
+  · simpa only [List.length_append, List.length_singleton] using hrun₂
+  · simpa only [SVec.toList_cons, List.append_assoc, List.singleton_append] using hW'
+
+/-- What `fillElems` does for the elements `x` of a fixed-size array, from
+index `pre.length`. -/
+def FixedOK (C : Contract) {E : Ty} {m : Nat} (x : SVec E m) : Prop :=
+  ∀ (d : Nat) (Γ : Ctx) {N : Nat} (a : Idx Γ (.alias (.fixed E N))) (σ : State C Γ)
+    (ref : SRef C (.ref (.fixed E N))) (st₀ : Storage C) (pre : List (SVal E)) (cur : SVec E N),
+    N ≤ 2 ^ 256 → cur.toList = pre ++ List.replicate m (SVal.dflt E) →
+    TEnv.get a σ.env = some ref → Wrote st₀ σ.storage ref (.fixed cur) →
+    x.All canonH → x.All tightH → x.All fitsH →
+    ∃ (st' : Storage C) (cur' : SVec E N), cur'.toList = pre ++ x.toList ∧
+      TRuns σ (fillElems d (ArrTy.fixed (E := E) (n := N)) a pre.length x) (σ.withStorage st') ∧
+      Wrote st₀ st' ref (.fixed cur')
+
+theorem fixedElems_nil {E : Ty} : FixedOK C (SVec.nil (E := E)) := by
+  intro d Γ N a σ ref st₀ pre cur _ hcur _ hW _ _ _
+  exact ⟨σ.storage, cur, by simpa only [SVec.toList_nil, List.append_nil,
+    List.replicate_zero] using hcur, TRuns.nil σ, hW⟩
+
+theorem fixedElems_cons {E : Ty} {m : Nat} {v : SVal E} {rest : SVec E m}
+    (hv : FillOK C v) (hrest : FixedOK C rest) : FixedOK C (SVec.cons v rest) := by
+  intro d Γ N a σ ref st₀ pre cur hN hcur ha hW hc ht hf
+  simp only [SVec.All] at hc ht hf
+  have hj : pre.length < N := by
+    have := congrArg List.length hcur
+    simp only [SVec.length_toList, List.length_append, List.length_replicate] at this
+    omega
+  have hq := resolveT_index_lit (C := C) (ArrTy.fixed (E := E) (n := N)) (by omega) ha
+    (checkIndex_fixed hW.find hj)
+  rw [show (ref.index (.arr .fixed) (pre.length : Int)) =
+    ref.append (.atF (pre.length : Int) .nil) by simp only [SRef.index, Path.index_fixed]] at hq
+  have hset : ∀ x : SVal E, (cur.set pre.length x).toList =
+      (pre ++ [x]) ++ List.replicate m (SVal.dflt E) := by
+    intro x
+    rw [SVec.toList_set, hcur, List.set_append_right _ _ (Nat.le_refl _), Nat.sub_self,
+      List.replicate_succ, List.set_cons_zero, List.append_assoc, List.singleton_append]
+  have hnoop : (SVal.fixed cur).saveM (.atF (pre.length : Int) .nil) (SVal.dflt E) =
+      some (.fixed cur) := by
+    rw [fixed_saveM cur hj]
+    congr 2
+    apply SVec.eq_of_toList_eq
+    rw [hset, hcur, List.append_assoc, List.singleton_append, ← List.replicate_succ]
+  obtain ⟨st₁, hrun₁, hW₁⟩ := child_stepL (d := d) hv hc.1 ht.1 hf.1 hq hW hnoop
+    (fixed_saveM cur hj v)
+  obtain ⟨st', cur', hcur', hrun₂, hW'⟩ := hrest d Γ a (σ.withStorage st₁) ref st₀ (pre ++ [v])
+    (cur.set pre.length v) hN (hset v) ha hW₁ hc.2 ht.2 hf.2
+  refine ⟨st', cur', by simpa only [SVec.toList_cons, List.append_assoc, List.singleton_append]
+      using hcur', TRuns.append hrun₁ ?_, hW'⟩
+  simpa only [List.length_append, List.length_singleton] using hrun₂
+
+end Fills
 
 end Build
 
