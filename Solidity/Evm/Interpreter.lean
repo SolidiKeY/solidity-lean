@@ -38,9 +38,7 @@ theorem setAge_interpreter :
   rcases compile_storage (Option.some_get setAge_frag).symm (by decide +kernel) 0 W_pos (fresh).bal
       0 W_pos with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
   · refine ⟨o, h1, fun v hv => ?_⟩
-    have hp : PathSlot StandardExample false aliceAge.root aliceAge.path.erase (.prim .uint)
-        (.root 13) :=
-      PathSlot.field (segs := []) (PathSlot.root (T := .ref (.struct "Person")) rfl) rfl
+    have hp : PathSlot StandardExample false aliceAge (.root 13) := PathAt.field PathAt.nil
     have hs := h3 _ _ v hp hv
     have hm := Solidity.Evm.Examples.setAge_run
     unfold slotAfter codeOf at hm
@@ -80,7 +78,7 @@ account into `5`'s: `compile_net` reads the run's ledger off the balances
 at `5`, and the contract's own entry stays `0`. -/
 theorem payOwner_interpreter :
     ∃ o, Solidity.Prog.run (freshState StandardExample) payOwner = .ok o ∧
-      o.st.sem.getNet 5 = -30 ∧ o.st.sem.getNet 0 = 0 := by
+      netAt o.st.net 5 = -30 ∧ netAt o.st.net 0 = 0 := by
   have hr := Solidity.Evm.Examples.payOwner_run
   unfold codeOf at hr
   cases h : run (compileProg 0 payOwner) (fresh 100) with
@@ -114,8 +112,7 @@ theorem callTwice_interpreter :
       (fresh).bal 0 W_pos with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
   · refine ⟨o, h1, fun v hv => ?_⟩
     have hp : PathSlot CallsExample false (Solidity.SRef.ofRoot (C := CallsExample) "total"
-        (T := .prim .uint) rfl).root (Solidity.SRef.ofRoot (C := CallsExample) "total"
-        (T := .prim .uint) rfl).path.erase (.prim .uint) (.root 0) := PathSlot.root rfl
+        (T := .prim .uint) rfl) (.root 0) := PathSlot.root rfl
     have hs := h3 _ _ v hp hv
     have hm := Solidity.Evm.Examples.callTwice_run
     unfold slotAfter codeOf at hm

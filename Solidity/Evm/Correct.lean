@@ -25,8 +25,7 @@ checks within `maxHeartbeats 10000` (the W1 gate, pinned below).
 
 namespace Solidity.Evm
 
-open Semantics
-open SemanticsProperties
+open Semantics (structDef lookupBy)
 open Solidity (Ctx Idx Ext TEnv State SRef TRes HTy)
 
 variable {C : Contract}
@@ -51,8 +50,8 @@ theorem Keeps.weaken {sh' : Bool} {m m' : Machine} (h : Keeps C b sh m m')
 
 /-- A scope's end in the state: its locals popped. -/
 theorem Sim.dropState {Γ Δ : Ctx} {G : Frag Δ} {τ : State C Δ} (h : Ext Γ Δ)
-    (hm : Sim C L b G τ.sem (Look.ofTEnv τ.env) m) :
-    Sim C L b (G.restrict Γ) (τ.drop h).sem (Look.ofTEnv (τ.drop h).env) m :=
+    (hm : Sim C L b G τ m) :
+    Sim C L b (G.restrict Γ) (τ.drop h) m :=
   (hm.drop h).congrLook fun i => Look.ofTEnv_drop h τ.env i
 
 /-- The outcome of a scope, its locals popped. -/
@@ -86,8 +85,7 @@ reads of them. -/
 theorem StmtOut.map {H : HTy} {Γ'' : Ctx} {F'' : Frag Γ''} {res : TRes (Solidity.Out C H Γ')}
     {G : Frag Γ'} (f : Solidity.Out C H Γ' → Solidity.Out C H Γ'')
     (hf : ∀ (o : Solidity.Out C H Γ') {m' : Machine},
-      Sim C L b G o.st.sem (Look.ofTEnv o.st.env) m' →
-        Sim C L b F'' (f o).st.sem (Look.ofTEnv (f o).st.env) m')
+      Sim C L b G o.st m' → Sim C L b F'' (f o).st m')
     (h : StmtOut C L b G sh pays asserts res out m) :
     StmtOut C L b F'' sh pays asserts (res.map f) out m := by
   rcases h with ⟨o, m', h1, h2, h3, h4, h5⟩ | ⟨h1, h2⟩ | ⟨ha, h1, h2⟩ |
@@ -112,7 +110,7 @@ Example: `if (total > 3) { uint x = 1; total = x; } else { revert(); }` runs
 `MSTORE %0` in the `then` branch, and `x` is gone after it. -/
 theorem ite_sim {Γ₁ Γ₂ : Ctx} (c : Solidity.Val C Γ .bool)
     (t : Solidity.Prog C Γ Γ₁) (e : Solidity.Prog C Γ Γ₂) {F₁ : Frag Γ₁}
-    {F₂ : Frag Γ₂} {L' : Nat} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F₂ : Frag Γ₂} {L' : Nat} (hm : Sim C L b F σ m)
     (hwc : valIn F c = true)
     (iht : StmtOut C L' b F₁ (Prog.shrinks t) (Prog.pays t) (Prog.asserts t)
       (Solidity.Prog.run σ t) (run (compileProg b t) m) m)
@@ -124,8 +122,7 @@ theorem ite_sim {Γ₁ Γ₂ : Ctx} (c : Solidity.Val C Γ .bool)
   show StmtOut C L' b _ _ _ _ (Solidity.TRun.ite c t.ext t.runR e.ext e.runR σ) _ m
   simp only [compileStmt, List.append_assoc]
   rcases val_sim c hm hwc with ⟨vc, wc, hvc, hrc, hrunc⟩ | ⟨hvc, hrunc⟩
-  · obtain ⟨x, hx, rfl⟩ := hrc.bool_inv
-    obtain rfl : vc = x := Semantics.PrimVal.bool.inj hx
+  · obtain rfl := hrc.bool_inv
     rw [run_append_ok hrunc]
     simp only [Solidity.TRun.ite, hvc, bind, Except.bind, Solidity.boolT]
     cases vc
@@ -190,12 +187,12 @@ stored at its level in the callee's frame, which starts at `b + Γ.length`;
 the caller's cells left.
 
 Example: `addTwo(3)` from no locals is `PUSH 3; MSTORE %0`. -/
-theorem args_sim (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) :
+theorem args_sim (hm : Sim C L b F σ m) :
     ∀ {ps : Ctx} (args : Solidity.Args C Γ ps), argsIn F args = true →
       (∃ a mem', Solidity.Args.evalT σ args = .ok a ∧
         run (argsCode b args) m = .ok { m with mem := mem' } 0 ∧
         (∀ l, l < b + Γ.length → mem' (cell l) = m.mem (cell l)) ∧
-        ∀ {p : PrimTy} (i : Idx ps (.val p)), ReprV p (PrimTy.erase (Look.ofTEnv a i))
+        ∀ {p : PrimTy} (i : Idx ps (.val p)), ReprV p (Look.ofTEnv a i)
           (({ m with mem := mem' } : Machine).memAt (lvl (b + Γ.length) i))) ∨
       (Solidity.Args.evalT σ args = .error .revert ∧ run (argsCode b args) m = .revert)
   | _, .nil, _ => .inl ⟨(), m.mem, rfl, rfl, fun _ _ => rfl, fun i => nomatch i⟩
@@ -213,10 +210,10 @@ theorem args_sim (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) :
         · rw [upd_other _ _ (fun h => by have := cell_inj h; omega)]; exact hmem₁ l hl
         · cases i with
           | here =>
-            show ReprV _ (PrimTy.erase v) (upd mem₁ _ w (cell (lvl _ (Idx.here (Γ := ps)))))
+            show ReprV _ v (upd mem₁ _ w (cell (lvl _ (Idx.here (Γ := ps)))))
             rw [lvl_here, upd_same]; exact hrv
           | there j =>
-            show ReprV _ (PrimTy.erase (Look.ofTEnv a j))
+            show ReprV _ (Look.ofTEnv a j)
               (upd mem₁ _ w (cell (lvl _ (Idx.there (u := .val p) j))))
             have := lvl_lt (b + Γ.length) j
             rw [lvl_there, upd_other _ _ (fun h => by have := cell_inj h; omega)]; exact hv₁ j
@@ -227,11 +224,11 @@ theorem args_sim (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) :
 kept every cell below its frame), its storage, ledger and transaction the
 callee's, its fragile aliases forgotten if the callee may have shrunk an
 array; and what the call keeps, from what its body keeps. -/
-theorem Sim.back {Δ : Ctx} {G : Frag Δ} {τ : Semantics.State} {ρ' : Look C Δ} {m₁ m₃ : Machine}
-    {sh : Bool} {L' : Nat} (hL : L ≤ L') (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+theorem Sim.back {Δ : Ctx} {G : Frag Δ} {τ : State C []} {ρ' : Look C Δ} {m₁ m₃ : Machine}
+    {sh : Bool} {L' : Nat} (hL : L ≤ L') (hm : Sim C L b F σ m)
     (h₁ : ∀ l, l < b + Γ.length → m₁.memAt l = m.memAt l) (hs₁ : m₁.store = m.store)
-    (hk : Keeps C (b + Γ.length) sh m₁ m₃) (h₃ : Sim C L' (b + Γ.length) G τ ρ' m₃) :
-    Sim C L' b (F.after sh) τ (Look.ofTEnv σ.env) m₃ ∧ Keeps C b sh m m₃ := by
+    (hk : Keeps C (b + Γ.length) sh m₁ m₃) (h₃ : SimL C L' (b + Γ.length) G τ ρ' m₃) :
+    SimL C L' b (F.after sh) τ (Look.ofTEnv σ.env) m₃ ∧ Keeps C b sh m m₃ := by
   have hm' := hm.mono hL h₃.bound
   have hmem : ∀ l, l < b + Γ.length → m₃.memAt l = m.memAt l :=
     fun l hl => (hk.mem l hl).trans (h₁ l hl)
@@ -301,9 +298,9 @@ theorem callVal_run_eq {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) 
 the body, back. -/
 theorem callNone_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps)
     (body : Solidity.Prog C ([] ++ ps) Γf) {L' : Nat} {sh pays asserts : Bool}
-    (hL : L ≤ L') (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hwa : argsIn F args = true)
+    (hL : L ≤ L') (hm : Sim C L b F σ m) (hwa : argsIn F args = true)
     (ih : ∀ {τ : State C ([] ++ ps)} {m₂ : Machine},
-      Sim C L (b + Γ.length) (Frag.init ([] ++ ps)) τ.sem (Look.ofTEnv τ.env) m₂ →
+      Sim C L (b + Γ.length) (Frag.init ([] ++ ps)) τ m₂ →
       ∃ G : Frag Γf, StmtOut C L' (b + Γ.length) G sh pays asserts
         (Solidity.Prog.run τ body) (run (compileProg (b + Γ.length) body) m₂) m₂) :
     StmtOut C L' b (F.after sh) sh pays asserts
@@ -340,9 +337,9 @@ Example: `uint y = addTwo(3);` stores `3` at `%1`, `0` at `%2`, runs
 theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p : PrimTy)
     (r : Var) (res : Option (Idx Γ (.val p))) (body : Solidity.Prog C ([.val p] ++ ps) Γf)
     {L' : Nat} {sh pays asserts : Bool}
-    (hL : L ≤ L') (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hwa : argsIn F args = true)
+    (hL : L ≤ L') (hm : Sim C L b F σ m) (hwa : argsIn F args = true)
     (ih : ∀ {τ : State C ([.val p] ++ ps)} {m₂ : Machine},
-      Sim C L (b + Γ.length) (Frag.init ([.val p] ++ ps)) τ.sem (Look.ofTEnv τ.env) m₂ →
+      Sim C L (b + Γ.length) (Frag.init ([.val p] ++ ps)) τ m₂ →
       ∃ G : Frag Γf, StmtOut C L' (b + Γ.length) G sh pays asserts
         (Solidity.Prog.run τ body) (run (compileProg (b + Γ.length) body) m₂) m₂) :
     StmtOut C L' b (F.after sh) sh pays asserts
@@ -356,7 +353,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
       rfl]
     have hb := ((hm.congrMem (mem := mem₁) fun l _ hl => hmem₁ l hl).enter (b + Γ.length)
       (Look.ofTEnv a) hv₁ (Args.noAlias args)).consVal (v := PrimTy.dflt p)
-      (by rw [PrimTy.erase_dflt]; exact ReprV.default p)
+      (ReprV.dflt_zero p)
     obtain ⟨G, hout⟩ :=
       ih (τ := (σ.withEnv a).push (t := .val p) (PrimTy.dflt p))
         (hb.congrLook fun j => Look.ofTEnv_cons (u := .val p) (PrimTy.dflt p) a j)
@@ -370,22 +367,17 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
         {m₃ : Machine},
         Keeps C (b + Γ.length) sh
           { m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) (.val 0) } m₃ →
-        Sim C L' (b + Γ.length) G υ.st.sem (Look.ofTEnv υ.st.env) m₃ →
+        Sim C L' (b + Γ.length) G υ.st m₃ →
         ∃ m₄, run (retLeaveCode b ps (.val p r res)) m₃ = .ok m₄ 0 ∧ m₄.stack = m₃.stack ∧
           Keeps C b sh m m₄ ∧
           Sim C L' b (F.after sh)
             (υ.st.withEnv (match res with
               | some i => TEnv.set i (TEnv.get (Idx.ext Idx.here body.ext) υ.st.env)
                   (TEnv.wk υ.ext Γ σ.env)
-              | none => TEnv.wk υ.ext Γ σ.env)).sem
-            (Look.ofTEnv (υ.st.withEnv (match res with
-              | some i => TEnv.set i (TEnv.get (Idx.ext Idx.here body.ext) υ.st.env)
-                  (TEnv.wk υ.ext Γ σ.env)
-              | none => TEnv.wk υ.ext Γ σ.env)).env) m₄ := by
+              | none => TEnv.wk υ.ext Γ σ.env)) m₄ := by
       intro υ m₃ hk₃ hm₃
       obtain ⟨hs, hk⟩ := Sim.back hL hm h₁ rfl hk₃ hm₃
-      have hs' : Sim C L' b (F.after sh) (υ.st.withEnv (TEnv.wk υ.ext Γ σ.env)).sem
-          (Look.ofTEnv (υ.st.withEnv (TEnv.wk υ.ext Γ σ.env)).env) m₃ :=
+      have hs' : Sim C L' b (F.after sh) (υ.st.withEnv (TEnv.wk υ.ext Γ σ.env)) m₃ :=
         hs.congrLook fun i => Look.ofTEnv_wk υ.ext σ.env i
       cases res with
       | none => exact ⟨m₃, rfl, rfl, hk, hs'⟩
@@ -425,7 +417,7 @@ section Families
 variable {L b : Nat} {Γ : Ctx} {F : Frag Γ} {σ : State C Γ} {m : Machine}
 
 theorem assign_family {T : Ty} (l : Solidity.Loc C Γ T) (r : Solidity.Src C Γ T)
-    {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag Γ} (hm : Sim C L b F σ m)
     (hw : inFrag F (.assign l r) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.assign l r))
       (run (compileStmt b (.assign l r)) m) m := by
@@ -440,7 +432,7 @@ theorem assign_family {T : Ty} (l : Solidity.Loc C Γ T) (r : Solidity.Src C Γ 
     exact copy_sim l q hq hok.1.1 hm hok.1.2 hok.2
 
 theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.ARhs C Γ R)
-    {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag Γ} (hm : Sim C L b F σ m)
     (hw : inFrag F (.rebind i r) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.rebind i r))
       (run (compileStmt b (.rebind i r)) m) m := by
@@ -449,7 +441,7 @@ theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.ARhs C �
   | push _ _ => simp only [inFrag, reduceCtorEq] at hw
 
 theorem assignLocal_family {p : PrimTy} (i : Idx Γ (.val p)) (r : Solidity.Val C Γ p)
-    {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag Γ} (hm : Sim C L b F σ m)
     (hw : inFrag F (.assignLocal i r) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.assignLocal i r))
       (run (compileStmt b (.assignLocal i r)) m) m := by
@@ -458,7 +450,7 @@ theorem assignLocal_family {p : PrimTy} (i : Idx Γ (.val p)) (r : Solidity.Val 
   exact assignLocal_sim i r hm hok
 
 theorem declLocal_family (p : PrimTy) (x : Var) (init : Option (Solidity.Val C Γ p))
-    {F' : Frag (.val p :: Γ)} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag (.val p :: Γ)} (hm : Sim C L b F σ m)
     (hw : inFrag F (.declLocal p x init) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.declLocal p x init))
       (run (compileStmt b (.declLocal p x init)) m) m := by
@@ -469,7 +461,7 @@ theorem declLocal_family (p : PrimTy) (x : Var) (init : Option (Solidity.Val C �
   | some e => exact declLocal_sim p (some e) hm hok
 
 theorem declStorage_family (R : RefTy) (x : Var) (init : Option (Solidity.ARhs C Γ R))
-    {F' : Frag (.alias R :: Γ)} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag (.alias R :: Γ)} (hm : Sim C L b F σ m)
     (hw : inFrag F (.declStorage R x init) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.declStorage R x init))
       (run (compileStmt b (.declStorage R x init)) m) m := by
@@ -484,7 +476,7 @@ theorem declStorage_family (R : RefTy) (x : Var) (init : Option (Solidity.ARhs C
 
 theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hpn : p.isNumeric = true) (l : Solidity.OpLoc C Γ p) (r : Solidity.Val C Γ p)
-    {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag Γ} (hm : Sim C L b F σ m)
     (hw : inFrag F (.opAssign op hop hpn l r) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.opAssign op hop hpn l r))
       (run (compileStmt b (.opAssign op hop hpn l r)) m) m := by
@@ -501,7 +493,7 @@ theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
   | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
 
 theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
-    (l : Solidity.OpLoc C Γ p) {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    (l : Solidity.OpLoc C Γ p) {F' : Frag Γ} (hm : Sim C L b F σ m)
     (hw : inFrag F (.incDec op hpn l) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.incDec op hpn l))
       (run (compileStmt b (.incDec op hpn l)) m) m := by
@@ -518,7 +510,7 @@ theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
 
 theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hpn : p.isNumeric = true) (l : Solidity.OpLoc C Γ p) (hs : l.recvSimple = true)
-    {F' : Frag Γ} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag Γ} (hm : Sim C L b F σ m)
     (hw : inFrag F (.assignIncDec i op hpn l hs) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.assignIncDec i op hpn l hs))
       (run (compileStmt b (.assignIncDec i op hpn l hs)) m) m := by
@@ -535,7 +527,7 @@ theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
 
 theorem push_family {E : Ty} (q : Solidity.SPath C Γ (.array E))
     (v : Option (Solidity.Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true) {F' : Frag Γ}
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hw : inFrag F (.push q v hd) = some F')
+    (hm : Sim C L b F σ m) (hw : inFrag F (.push q v hd) = some F')
     (hL : L + 1 ≤ Lmax) :
     StmtOut C (L + 1) b F' false false false (Solidity.Stmt.run σ (.push q v hd))
       (run (compileStmt b (.push q v hd)) m) m := by
@@ -544,7 +536,7 @@ theorem push_family {E : Ty} (q : Solidity.SPath C Γ (.array E))
   exact push_sim q v hm hok hL
 
 theorem pop_family {E : Ty} (q : Solidity.SPath C Γ (.array E)) {F' : Frag Γ}
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hw : inFrag F (.pop q) = some F') :
+    (hm : Sim C L b F σ m) (hw : inFrag F (.pop q) = some F') :
     StmtOut C L b F' true false false (Solidity.Stmt.run σ (.pop q))
       (run (compileStmt b (.pop q)) m) m := by
   simp only [inFrag] at hw
@@ -552,7 +544,7 @@ theorem pop_family {E : Ty} (q : Solidity.SPath C Γ (.array E)) {F' : Frag Γ}
   exact pop_sim q hm hok
 
 theorem delete_family {T : Ty} (l : Solidity.Loc C Γ T) {F' : Frag Γ}
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hw : inFrag F (.delete l) = some F') :
+    (hm : Sim C L b F σ m) (hw : inFrag F (.delete l) = some F') :
     StmtOut C L b F' true false false (Solidity.Stmt.run σ (.delete l))
       (run (compileStmt b (.delete l)) m) m := by
   simp only [inFrag] at hw
@@ -560,7 +552,7 @@ theorem delete_family {T : Ty} (l : Solidity.Loc C Γ T) {F' : Frag Γ}
   exact delete_sim l hm hok
 
 theorem transfer_family (r a : Solidity.Val C Γ .uint) {F' : Frag Γ}
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hw : inFrag F (.transfer r a) = some F') :
+    (hm : Sim C L b F σ m) (hw : inFrag F (.transfer r a) = some F') :
     StmtOut C L b F' false true false (Solidity.Stmt.run σ (.transfer r a))
       (run (compileStmt b (.transfer r a)) m) m := by
   simp only [inFrag] at hw
@@ -569,7 +561,7 @@ theorem transfer_family (r a : Solidity.Val C Γ .uint) {F' : Frag Γ}
   exact transfer_sim r a hm hok.1 hok.2
 
 theorem require_family (c : Solidity.Val C Γ .bool) {F' : Frag Γ}
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hw : inFrag F (.require c) = some F') :
+    (hm : Sim C L b F σ m) (hw : inFrag F (.require c) = some F') :
     StmtOut C L b F' false false false (Solidity.Stmt.run σ (.require c))
       (run (compileStmt b (.require c)) m) m := by
   simp only [inFrag] at hw
@@ -577,7 +569,7 @@ theorem require_family (c : Solidity.Val C Γ .bool) {F' : Frag Γ}
   exact require_sim c hm hok
 
 theorem assert_family (c : Solidity.Val C Γ .bool) {F' : Frag Γ}
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hw : inFrag F (.assert c) = some F') :
+    (hm : Sim C L b F σ m) (hw : inFrag F (.assert c) = some F') :
     StmtOut C L b F' false false true (Solidity.Stmt.run σ (.assert c))
       (run (compileStmt b (.assert c)) m) m := by
   simp only [inFrag] at hw
@@ -626,11 +618,11 @@ theorem call_frag {Γ' ps rs Γf : Ctx} {f : Name} {args : Solidity.Args C Γ ps
 outcome given (`ih`, `prog_sim` on the body in its frame). -/
 theorem call_family {Γ' ps rs Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps)
     (ret : Solidity.CallRet Γ rs Γ') (body : Solidity.Prog C (rs ++ ps) Γf)
-    {F' : Frag Γ'} (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m)
+    {F' : Frag Γ'} (hm : Sim C L b F σ m)
     (hw : inFrag F (.call f args ret body) = some F')
     (ih : ∀ {G : Frag Γf} {τ : State C (rs ++ ps)} {m₂ : Machine},
       inFragP (Frag.init (rs ++ ps)) body = some G →
-      Sim C L (b + Γ.length) (Frag.init (rs ++ ps)) τ.sem (Look.ofTEnv τ.env) m₂ →
+      Sim C L (b + Γ.length) (Frag.init (rs ++ ps)) τ m₂ →
       StmtOut C (L + Prog.pushes body) (b + Γ.length) G (Prog.shrinks body) (Prog.pays body)
         (Prog.asserts body) (Solidity.Prog.run τ body)
         (run (compileProg (b + Γ.length) body) m₂) m₂) :
@@ -675,7 +667,7 @@ theorem seq_sim {Γ₁ Γ₂ : Ctx} (s : Solidity.Stmt C Γ Γ₁) (P : Solidity
     {L₁ L₂ : Nat} {F₁ : Frag Γ₁} {F₂ : Frag Γ₂} {sh₁ p₁ a₁ sh₂ p₂ a₂ : Bool}
     (hs : StmtOut C L₁ b F₁ sh₁ p₁ a₁ (Solidity.Stmt.run σ s) (run (compileStmt b s) m) m)
     (hP : ∀ {τ : State C Γ₁} {m₁ : Machine},
-      Sim C L₁ b F₁ τ.sem (Look.ofTEnv τ.env) m₁ →
+      Sim C L₁ b F₁ τ m₁ →
       StmtOut C L₂ b F₂ sh₂ p₂ a₂ (Solidity.Prog.run τ P) (run (compileProg b P) m₁) m₁) :
     StmtOut C L₂ b F₂ (sh₁ || sh₂) (p₁ || p₂) (a₁ || a₂)
       (Solidity.Prog.run σ (.cons s P)) (run (compileProg b (.cons s P)) m) m := by
@@ -718,7 +710,7 @@ Example: `alice.age = 10;` is `PUSH 10; PUSH @11; PUSH 2; ADD; SSTORE`, which
 writes slot `13`; `require(total > 3);` with `total = 2` reverts in both. -/
 theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {F : Frag Γ}
     {F' : Frag Γ'} {σ : State C Γ} {m : Machine},
-    Sim C L b F σ.sem (Look.ofTEnv σ.env) m → inFrag F s = some F' → L + Stmt.pushes s ≤ Lmax →
+    Sim C L b F σ m → inFrag F s = some F' → L + Stmt.pushes s ≤ Lmax →
       StmtOut C (L + Stmt.pushes s) b F' (Stmt.shrinks s) (Stmt.pays s) (Stmt.asserts s)
         (Solidity.Stmt.run σ s) (run (compileStmt b s) m) m
   | _, _, .assign l r => fun hm hw _ => assign_family l r hm hw
@@ -764,7 +756,7 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
 /-- A block's code does what the block does. -/
 theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Prog C Γ Γ') {L b : Nat} {F : Frag Γ}
     {F' : Frag Γ'} {σ : State C Γ} {m : Machine},
-    Sim C L b F σ.sem (Look.ofTEnv σ.env) m → inFragP F P = some F' → L + Prog.pushes P ≤ Lmax →
+    Sim C L b F σ m → inFragP F P = some F' → L + Prog.pushes P ≤ Lmax →
       StmtOut C (L + Prog.pushes P) b F' (Prog.shrinks P) (Prog.pays P) (Prog.asserts P)
         (Solidity.Prog.run σ P) (run (compileProg b P) m) m
   | _, _, .nil => fun hm hw _ => by
@@ -809,15 +801,15 @@ total += 1; if (total > 3) { delete alice; } else { revert(); }
 runs to `total = 4` and a default `alice`, and on the machine to slot `0`
 holding `4` and slots `11`–`13` holding `0`. -/
 theorem compile_correct {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax) :
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax) :
     (∃ o m', Solidity.Prog.run σ P = .ok o ∧ run (compileProg b P) m = .ok m' 0 ∧
-      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m') ∨
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m') ∨
     ((Solidity.Prog.run σ P = .error .revert ∨
         (Prog.asserts P = true ∧ Solidity.Prog.run σ P = .error .panic)) ∧
       run (compileProg b P) m = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg b P) m = .revert ∧ ∃ o m',
       Solidity.Prog.run σ P = .ok o ∧
-      Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m') := by
+      Sim C (L + Prog.pushes P) b F' o.st m') := by
   rcases prog_sim P hm hP hL with ⟨o, m', h1, h2, h3, -, h5⟩ | ⟨h1, h2⟩ | ⟨ha, h1, h2⟩ |
       ⟨hp, h1, o, m', h2, -, h5⟩
   · exact .inl ⟨o, m', h1, h2, h3, h5⟩
@@ -831,10 +823,10 @@ be refused, and the machine reverts where the typed run does; with no
 
 Example: `total += 1;` at `2^256 - 1` reverts in both. -/
 theorem compile_exact {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hpay : Prog.pays P = false) :
     (∃ o m', Solidity.Prog.run σ P = .ok o ∧ run (compileProg b P) m = .ok m' 0 ∧
-      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m') ∨
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m') ∨
     ((Solidity.Prog.run σ P = .error .revert ∨
         (Prog.asserts P = true ∧ Solidity.Prog.run σ P = .error .panic)) ∧
       run (compileProg b P) m = .revert) := by
@@ -850,10 +842,10 @@ in a state the final machine represents.
 Example: `to.transfer(5);` that the machine completes is one the typed run
 completes, its ledger `5` less at `to` (`compile_net`). -/
 theorem compile_box {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F P = some F')
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
-      Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m' := by
+      Sim C (L + Prog.pushes P) b F' o.st m' := by
   rcases compile_correct hP hm hL with ⟨o, m'', h1, h2, _, h4⟩ | ⟨_, h2⟩ | ⟨_, h2, _⟩
   · rw [hrun] at h2; cases h2; exact ⟨o, h1, h4⟩
   · rw [hrun] at h2; cases h2
@@ -867,11 +859,11 @@ stays at `0`.
 Example: `to.transfer(5);` from an empty ledger, completed by the machine,
 leaves `net(to) = -5` and `to`'s account `5` richer. -/
 theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F P = some F')
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → o.st.sem.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
-      o.st.sem.getNet m'.self = 0 := by
+      (∀ a : Nat, a < W → a ≠ m'.self → netAt o.st.net a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      netAt o.st.net m'.self = 0 := by
   obtain ⟨o, h1, h2⟩ := compile_box hP hm hL hrun
   exact ⟨o, h1, h2.net, h2.netSelf⟩
 
@@ -881,30 +873,21 @@ def uintT (n : Nat) (h : n < W) : PrimTy.uint.Denote :=
     {n : Int // PrimTy.uint.inRange n = true})
 
 /-- A fresh contract, typed: its storage at deployment, no memory, no
-locals, its funds `balance` and its address `self` (`Evm.State.fresh`). -/
+locals, its funds `balance` and its address `self`. -/
 def freshT (C : Contract) (balance : Nat) (hb : balance < W) (self : Nat) (hs : self < W) :
     State C [] :=
   { storage := Solidity.Storage.init C, H := [], heap := Solidity.Heap.empty, env := (),
     selfBalance := uintT balance hb, tx := { selfAddress := uintT self hs } }
-
-theorem freshT_sem (C : Contract) (balance : Nat) (hb : balance < W) (self : Nat)
-    (hs : self < W) : (freshT C balance hb self hs).sem = State.fresh C balance self := by
-  simp only [Solidity.State.sem, freshT, Solidity.Storage.init_erase, State.fresh]
-  rfl
 
 /-- A fresh machine represents a fresh contract with no locals: every slot
 `0`, nothing moved, whatever the world's balances and the contract's
 address. -/
 theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Nat → Nat) (self : Nat)
     (hs : self < W) :
-    Sim C 1 0 (Frag.init []) (freshT C balance hb self hs).sem
-      (Look.ofTEnv (freshT C balance hb self hs).env) (Machine.init bal self) := by
-  rw [freshT_sem C balance hb self hs]
-  exact ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
-    fun _ _ _ => by
-      simp only [State.getNet, State.fresh, lookupBy, Option.getD_none, Machine.init, Int.sub_self],
-    by simp only [State.getNet, Machine.init, State.fresh, lookupBy, Option.getD_none],
-    by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
+    Sim C 1 0 (Frag.init []) (freshT C balance hb self hs) (Machine.init bal self) :=
+  ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
+    fun _ _ _ => by simp only [netAt, Machine.init, Int.sub_self]; rfl,
+    rfl, by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
 
 /-- **The EVM agrees with the typed run's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then
@@ -921,7 +904,7 @@ theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []
     (∃ o m', Solidity.Prog.run (freshT C balance hb self hs) P = .ok o ∧
         run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
-        PathSlot C false r.root r.path.erase (.prim .uint) s →
+        PathSlot C false r s →
         o.st.storage.findLive r = some (.prim v) → m'.store s = v.1.toNat) ∨
     ((Solidity.Prog.run (freshT C balance hb self hs) P = .error .revert ∨
         (Prog.asserts P = true ∧
@@ -932,15 +915,11 @@ theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []
   rcases compile_correct hP (Sim.init C balance hb bal self hs) (by omega) with
     ⟨o, m', h1, h2, _, hm⟩ | h | ⟨hp, h1, o, _, h2, _⟩
   · refine .inl ⟨o, m', h1, h2, fun r s v hp hf => ?_⟩
-    have hl := Solidity.Storage.findLive_erase (σ := o.st.sem) rfl r
-    rw [hf] at hl
     rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩
-    · rw [hl] at hsv; cases hsv
-      rw [Solidity.SVal.erase_prim] at hr
-      change ReprAt _ _ _ _ (.prim (.int v.1)) at hr
+    · rw [hf] at hsv; cases hsv
       cases hr with
-      | uint _ _ h => exact h
-    · rw [hl] at hsv; cases hsv
+      | prim h => exact (Word.val.inj h).symm ▸ rfl
+    · rw [hf] at hsv; cases hsv
   · exact .inr (.inl h)
   · exact .inr (.inr ⟨hp, h1, o, h2⟩)
 

@@ -41,7 +41,7 @@ typed run has no stuck outcome, so `compiler_correct` covers every case.  Its pr
 | `⟦P⟧b` | `P` compiled, its frame at `b` | `Evm.compileProg b P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
 | `F ⊩ P ⊣ F'` | `P` is in the compiled fragment, its locals laid out by `F` then `F'` | `Evm.inFragP F P = some F'` |
-| `σ ≈[C, L, b, F] m` | the machine `m` represents the typed state `σ` | `Evm.Sim C L b F σ.sem (Look.ofTEnv σ.env) m` |
+| `σ ≈[C, L, b, F] m` | the machine `m` represents the typed state `σ` | `Evm.Sim C L b F σ m` |
 -/
 
 namespace Solidity
@@ -107,7 +107,7 @@ abbrev Compiles {C : Contract} {Γ Γ' : Ctx} (F : Evm.Frag Γ) (P : Prog C Γ �
 /-- `σ ≈[C, L, b, F] m`: the machine `m` represents the typed state `σ`. -/
 abbrev Represents (C : Contract) (L b : Nat) {Γ : Ctx} (F : Evm.Frag Γ)
     (σ : State C Γ) (m : Evm.Machine) : Prop :=
-  Evm.Sim C L b F σ.sem (Evm.Look.ofTEnv σ.env) m
+  Evm.Sim C L b F σ m
 
 scoped notation:25 H:26 " ⊨ " φ:26 => ValidUnder H φ
 scoped notation:25 H:26 " ⊢ " φ:26 => Derives H φ
@@ -255,8 +255,8 @@ theorem compiler_net {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Sta
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : (⟦P⟧b, mc) ⇓ₘ mc') :
     ∃ o, (P, σ) ⇓ o ∧
-      (∀ a : Nat, a < W → a ≠ mc'.self → o.st.sem.getNet a = (mc'.bal₀ a : Int) - mc'.bal a) ∧
-      o.st.sem.getNet mc'.self = 0 :=
+      (∀ a : Nat, a < W → a ≠ mc'.self → netAt o.st.net a = (mc'.bal₀ a : Int) - mc'.bal a) ∧
+      netAt o.st.net mc'.self = 0 :=
   compile_net hP hm hL hrun
 
 /-! ## Their axioms: Lean's three at most -/

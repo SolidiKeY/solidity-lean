@@ -235,6 +235,7 @@ import Solidity.Counterexamples.PreFixSortAnnotations
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort
 import Solidity.Evm.Layout
+import Solidity.Evm.StorageLemmas
 import Solidity.Evm.SimLemmas
 import Solidity.Evm.Compile
 import Solidity.Evm.Examples

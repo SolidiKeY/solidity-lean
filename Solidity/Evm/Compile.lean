@@ -1,6 +1,5 @@
 import Solidity.Evm.Layout
 import Solidity.Syntax.Scoped
-import Solidity.Semantics.StorageErase
 
 /-!
 # The compiler over the scoped syntax
@@ -191,9 +190,8 @@ def Frag.after {Γ : Ctx} (F : Frag Γ) (shrinks : Bool) : Frag Γ :=
 def Frag.guard {Γ : Ctx} (F : Frag Γ) (ok : Bool) : Option (Frag Γ) := if ok then some F else none
 
 /-- `l = r;` of the fragment: a value, or a copy of a static value (the
-typed run's positional copy is the name-wise one the representation reads:
-no struct repeats a member name, `structDef_nodup`, which
-`Storage.writeStorage_erase` reads). -/
+typed run lays it over the target member by member, `SVal.overlay`, which
+`Evm/Repr.lean`'s `overlay_repr` reads). -/
 def assignIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → Solidity.Src C Γ T →
     Solidity.Loc C Γ T → Bool
   | _, .val v, l => locIn F false l && valIn F v
