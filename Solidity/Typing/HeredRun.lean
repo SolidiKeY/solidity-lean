@@ -54,10 +54,13 @@ structure HeredRun (P : Hered) (G : Ty → Prop) : Prop where
   push : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (x : SVal E),
     G (.ref (.array E)) → n + 1 < 2 ^ 256 → P.arr e sh → e.All P → sh.All P → x.All P →
     P.arr (SVec.ofList (e.toList ++ [x])) (SList.ofList (pushSlot E sh.toList).2)
-  /-- The last element popped, into the slots past the end as `y`. -/
-  pop : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (y : SVal E), e.toList ≠ [] →
-    P.arr e sh → e.All P → sh.All P → y.All P →
-    P.arr (SVec.ofList e.toList.dropLast) (SList.ofList (y :: sh.toList))
+  /-- The last element popped into the slots past the end: kept as it is
+(an element of a mapping type) or cleared. -/
+  pop : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (last : SVal E) (keep : Bool),
+    last ∈ e.toList → (keep = true → E.isPrimitive = false) → P.arr e sh → e.All P →
+    sh.All P →
+    P.arr (SVec.ofList e.toList.dropLast)
+      (SList.ofList ((if keep then last else last.defaultOf) :: sh.toList))
   /-- A default. -/
   dflt : ∀ T, (SVal.dflt T).All P
   /-- A copy out of memory. -/
@@ -184,7 +187,8 @@ theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E)
     · exact nomatch h
 
 theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {keep : Bool}
-    (hs : st.All P) (hk : r.path.Keys Ty.Keyable) (h : st.pop keep r = some st') : st'.All P := by
+    (hs : st.All P) (hk : r.path.Keys Ty.Keyable) (hkeep : keep = true → E.isPrimitive = false)
+    (h : st.pop keep r = some st') : st'.All P := by
   unfold Storage.pop at h
   simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
   obtain ⟨v, hv, h⟩ := h
@@ -199,14 +203,13 @@ theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {ke
       have hlast : last ∈ e.toList := by
         rw [← List.mem_reverse, hrev]; exact List.mem_cons_self
       have hlA := SVec.all_iff.mp hvA.2.1 last hlast
-      have hne : e.toList ≠ [] := fun he => by rw [he] at hlast; exact nomatch hlast
       have hy : (if keep then last else last.defaultOf).All P := by
         split
         · exact hlA
         · exact hP.defaultOf_all hlA
       refine save_all hP hs ?_ hk (SVal.live_of_ref _ _ rfl) h
       simp only [SVal.All]
-      refine ⟨hP.pop e sh _ hne hvA.1 hvA.2.1 hvA.2.2 hy,
+      refine ⟨hP.pop e sh last keep hlast hkeep hvA.1 hvA.2.1 hvA.2.2,
         SVec.all_ofList.mpr fun w hw => SVec.all_iff.mp hvA.2.1 w (List.dropLast_subset _ hw),
         SList.all_ofList.mpr fun w hw => ?_⟩
       rcases List.mem_cons.mp hw with hw | hw
@@ -631,8 +634,11 @@ theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (heredInv C P).TKeeps (
   obtain ⟨ref, href, h⟩ := tbind_ok_inv h
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
-  exact hσ.withStorage (Storage.pop_all hP hσ.1 (SPath.resolveT_keyed σ hσ.2 b href)
-    (TRes.ofOpt_ok hst))
+  refine hσ.withStorage (Storage.pop_all hP hσ.1 (SPath.resolveT_keyed σ hσ.2 b href)
+    (fun hm => ?_) (TRes.ofOpt_ok hst))
+  cases E with
+  | prim _ => exact nomatch hm
+  | ref _ => rfl
 
 theorem keeps_transfer (r a : Val C Γ .uint) : (heredInv C P).TKeeps (TRun.transfer r a) := by
   intro σ o hσ h

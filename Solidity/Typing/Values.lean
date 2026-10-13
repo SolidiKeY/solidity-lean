@@ -967,7 +967,7 @@ variable {P Q : Hered} (G : Ty → Prop)
   (hGs : ∀ s, G (.ref (.struct s)) → ∀ nt ∈ structDef s, G nt.2)
   (hGa : ∀ E, G (.ref (.array E)) → G E) (hGf : ∀ E n, G (.ref (.fixed E n)) → G E)
   (hGm : ∀ K V, G (.ref (.mapping K V)) → G V)
-  (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), G (.ref (.array E)) →
+  (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → G (.ref (.array E)) →
     Q.arr e sh → P.arr e sh)
   (hfix : ∀ E n, G (.ref (.fixed E n)) → Q.fix E n → P.fix E n)
   (hmap : ∀ {K V : Ty} (m : SMap V) (d : SVal V), G (.ref (.mapping K V)) → Q.map K m d →
@@ -983,9 +983,9 @@ theorem SVal.all_mono : {T : Ty} → (v : SVal T) → G T → v.All Q → v.All 
   | _, .struct fs, hT, h => by
     simp only [SVal.All] at h ⊢
     exact SFields.all_mono fs (hGs _ hT) h
-  | _, .array e sh _, hT, h => by
+  | _, .array e sh hn, hT, h => by
     simp only [SVal.All] at h ⊢
-    exact ⟨harr e sh hT h.1, SVec.all_mono e (hGa _ hT) h.2.1, SList.all_mono sh (hGa _ hT) h.2.2⟩
+    exact ⟨harr e sh hn hT h.1, SVec.all_mono e (hGa _ hT) h.2.1, SList.all_mono sh (hGa _ hT) h.2.2⟩
   | _, .fixed e, hT, h => by
     simp only [SVal.All] at h ⊢
     exact ⟨hfix _ _ hT h.1, SVec.all_mono e (hGf _ _ hT) h.2⟩
@@ -1024,17 +1024,18 @@ end Mono
 
 /-- A predicate whose node conditions imply another's, everywhere. -/
 theorem SVal.all_mono' {P Q : Hered}
-    (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), Q.arr e sh → P.arr e sh)
+    (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → Q.arr e sh →
+      P.arr e sh)
     (hfix : ∀ E n, Q.fix E n → P.fix E n)
     (hmap : ∀ {K V : Ty} (m : SMap V) (d : SVal V), Q.map K m d → P.map K m d)
     {T : Ty} (v : SVal T) (h : v.All Q) : v.All P :=
   SVal.all_mono (fun _ => True) (fun _ _ _ _ => trivial) (fun _ _ => trivial)
-    (fun _ _ _ => trivial) (fun _ _ _ => trivial) (fun e sh _ => harr e sh)
+    (fun _ _ _ => trivial) (fun _ _ _ => trivial) (fun e sh hn _ => harr e sh hn)
     (fun E n _ => hfix E n) (fun m d _ => hmap m d) v trivial h
 
 /-- The same at `okDeep` types. -/
 theorem SVal.all_mono_deep {P Q : Hered}
-    (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), E.okDeep = true →
+    (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → E.okDeep = true →
       Q.arr e sh → P.arr e sh)
     (hfix : ∀ E n, E.okDeep = true → Q.fix E n → P.fix E n)
     (hmap : ∀ {K V : Ty} (m : SMap V) (d : SVal V), V.okDeep = true → Q.map K m d →
@@ -1044,7 +1045,7 @@ theorem SVal.all_mono_deep {P Q : Hered}
     (fun _ h => struct_okDeep (by simpa only [Ty.okDeep, decide_eq_true_eq] using h))
     (fun _ h => by simpa only [Ty.okDeep] using h) (fun _ _ h => by simpa only [Ty.okDeep] using h)
     (fun _ _ h => by simpa only [Ty.okDeep] using h)
-    (fun e sh h => harr e sh (by simpa only [Ty.okDeep] using h))
+    (fun e sh hn h => harr e sh hn (by simpa only [Ty.okDeep] using h))
     (fun E n h => hfix E n (by simpa only [Ty.okDeep] using h))
     (fun m d h => hmap m d (by simpa only [Ty.okDeep] using h)) v hT h
 
