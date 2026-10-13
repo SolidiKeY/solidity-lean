@@ -7717,6 +7717,71 @@ The untyped core is deleted: there is no untyped state.  Nothing under
   typed operators and `PrimTy.key`; the untyped push's paragraph; the
   deployment state), `testsuite-proofs.md` (`wt`), `solkey-feedback.md`.
 
+### W10.5.7 record (2026-10-13, branch `w105-w`)
+
+The EVM's operator tails are proved on the typed operators: the private
+copy of the untyped word arithmetic in `Evm/SimLemmas.lean` (W10.5.6) is
+gone, and nothing under `Evm/` reads `Semantics.Value`.
+`Evm/SimLemmas.lean` 1232 → 837 lines (−395).
+
+- **Deleted** (all private): `Halt`/`Res` and their bind lemmas,
+  `Value.asInt`/`asBool`, `applyBinOp`, `applyUnOp`, `checkArith`,
+  `unopCheck`, `evalBinop`, `toRes`, the agreement lemmas
+  (`checkArith_ofInt`, `applyBinOp_int`, `evalBinop_arith`,
+  `binOp_evalT_erase`, `unOp_evalT_erase`, `evalBinop_eq`,
+  `compound_erase`, `bump_erase`, `erase_numeric`), the word reading
+  `ReprW` (its inversions, `ReprW.one`/`uint`/`int`/`num_inv`, `reprV_iff`),
+  `ValOutW`/`ValOutT.ofW`, `src_arith`, `checkArith_uint`/`_int`,
+  `word_tail`, `tail_sim`, `stail_sim`, `bump_src`, `bump_sim`.
+- **The typed proof.**  "Results on words": `PrimTy.ofInt?` at `uint` and
+  `int` computed (`ofInt_uint`, `ofInt_int` and their `none`s) and read as a
+  machine outcome (`out_uint_ok`/`out_uint_if`, `out_int_ok`/`out_int_if`/
+  `out_int_none`, `out_bool`, `out_revert`: the guard lemmas' `if … then
+  .ok … else .revert` shapes).  `utail_simT` (each `uint` operator on two
+  words below `2^256`, over `BinOp.evalNum .uint`) and `stail_simT` (its
+  signed half, over `evalNum .int (sgn a) (sgn b)`) replace `tail_sim`;
+  `tail_simT` reads a typed operand's word (`ReprV.uint_inv`, the `int`
+  clause of `ReprV`) and dispatches to them, the `bool` case directly.
+  `neg_simT`, `bnot_simT` and `ReprV.int_word` are direct.
+  `compound_simT` and `bump_simT` are `tail_simT` at the operator
+  (`compoundT op p` and `bumpT op p` are `evalT` at an operator with an
+  `op=` form, definitionally per constructor; `bumpT`'s `1` is the typed `⟨1, _⟩`).
+- **A kernel pitfall.**  The `rfl` lemma `Option.bind_some` (or any
+  `rfl`-proved `(some a).bind f = f a`) makes `simp` rewrite
+  `(some n).bind PrimTy.uint.ofInt?` definitionally, and the kernel then
+  checks it by unfolding `ofInt?`'s range test on `2^256`: "(kernel) deep
+  recursion detected".  `some_bind'` is the same equation proved by `rw`, so
+  `simp` rewrites with a proof.
+- **Statements**: every public lemma unchanged (`tail_simT`'s accepted-type
+  premise is now unused, named `_hacc`); no caller in `Evm/Expr.lean` or
+  `Evm/Stmt.lean` changed.
+- **Timings** (diagnostics wall on copies under `Solidity/Scratch/`,
+  `Elab.async false`, `IO.monoMsNow` after the imports and at the end; master
+  `6ddeac87` and this branch, the pairs elaborated concurrently, the solo
+  runs back to back):
+
+  | File | master | here |
+  |---|---|---|
+  | `Evm/SimLemmas` (concurrent) | 4.8 s | 3.5 s |
+  | `Evm/SimLemmas` (solo) | 4.3 s | 2.8 s |
+  | `Evm/Stmt` (concurrent) | 2.6 s | 2.6 s |
+  | `Evm/Correct` (concurrent) | 3.0 s | 3.3 s |
+
+  `stmt_sim` keeps its `maxHeartbeats 10000`.
+- **Checks**: per-file diagnostics of `Evm/SimLemmas`, `Evm/Expr`,
+  `Evm/Stmt`, `Evm/Correct`, `Evm/Interpreter` and `Theorems.lean` clean
+  (no warning in `SimLemmas`); `#print axioms compiler_correct`
+  (`propext`, `Classical.choice`, `Quot.sound`; appended to `Theorems.lean`,
+  then removed); `lean_build` of the default targets clean (272 jobs);
+  `check-orphans` (290 reachable), `check-doc-paths` clean; no `sorry`,
+  `axiom` or heartbeat override added; the new proofs use `simp only`.
+- **Docs**: `module-map.md`'s `Evm/SimLemmas` row; docstrings citing the
+  deleted names restated (`Examples/Tactics/Operators.lean`,
+  `Examples/Tactics/Values.lean`, `solkey-feedback.md`).  Still stale and
+  left alone: `AST.lean`'s `PrimTy` docstring names `checkArith` (a low
+  module: the edit rebuilds the package), and `solc-validation.md`'s
+  mutation plan names it as a decision to mutate.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -7752,7 +7817,7 @@ procedure, the closer and the memory laws read the typed state; the
 untyped Theory is gone.
 
 **W10.5 (the typed state, fully)**: done (records above, W10.5.1 to
-W10.5.6).  There is no untyped state: the run's invariants, the EVM
+W10.5.7).  There is no untyped state: the run's invariants, the EVM
 simulation, the memory laws, the tools and `wt(storage)` read the typed
 state, and `Semantics.State`, its operations and the erasure modules are
 deleted.  What stays untyped is not state, and stays so by design: the ABI
@@ -7761,14 +7826,10 @@ value as a word, `PrimTy.erase`/`ofValue?`), which are external data (a
 call's arguments and returned data, the tools' arguments and output); a
 path's segments (`Seg`, `Path.erase`, `Theory.diverges`, `SegT`), the
 side conditions' path syntax; the ledger (`List (Int × Int)`), KeY's
-unbounded `int`; the EVM's word store (`Slot → Nat`), the machine's own,
-and the integer arithmetic on words its operator tails are proved on
-(private to `Evm/SimLemmas.lean`).
+unbounded `int`; the EVM's word store (`Slot → Nat`), the machine's own
+(its operator tails are proved on the typed operators, W10.5.7).
 
 **Open items:**
-- The EVM's operator tails are proved on word arithmetic copied privately
-  into `Evm/SimLemmas.lean` (W10.5.6); restating them on `BinOp.evalT`
-  would drop the copy.
 - `TestSuite/Report.lean` was not checked after W10.5.6 (memory); its
   `Derived5` import was.
 - `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).

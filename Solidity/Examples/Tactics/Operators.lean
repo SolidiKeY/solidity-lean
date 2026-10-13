@@ -10,8 +10,8 @@ import Solidity.Tools.Inspect
 The `uint` operators solkey has no taclet for, and the wrapping arithmetic of
 an `unchecked { … }` block.  None needs a rule of its own: each is a `BinOp`
 (or `UnOp`) constructor, so `binopAssignment`, `binopUnfoldLeft`/`Right` and
-`unopAssignment` cover it at `op := .band` and so on, and the interpreter's
-`applyBinOp` gives its meaning, solc's at `uint256`.
+`unopAssignment` cover it at `op := .band` and so on, and the typed
+operator `BinOp.evalT` gives its meaning, solc's at `uint256`.
 
 * `&`, `|`, `^`, `~`, `<<`, `>>` at `uint` only (`BinOp.accepts`): at `int`
   solc reads them in two's complement, which is left out.  Their precedence is
@@ -136,7 +136,7 @@ example : Prog.toStr [] (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
 /-! ## On the machine
 
 The operators compile to their opcodes with no guard (`uTail`), and the
-compiler's correctness covers them (`tail_sim`). -/
+compiler's correctness covers them (`tail_simT`). -/
 
 open Evm.Examples in
 /-- `total = 12 & 10 | 1 << 4;` stores `24`; `unchecked { total = total + 1; }`

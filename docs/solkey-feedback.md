@@ -36,9 +36,9 @@ with no range; Lean's obligation assumes `0 <= x <= 2^256 - 1` for a `uint`
 (`rangeFml` in `Calculus/SurfaceSpec.lean`), so a clause like `requires amount >= 0` is
 redundant there and load-bearing in solkey.
 
-**Lean evidence.** `Semantics.checkArith` (`Semantics.lean`); the EVM compiler
-proves the guard: `checkArith_uint`, `checkArith_int`, `tail_sim`
-(`Evm/SimLemmas.lean`), `overflow_run`/`overflow_interpreter`
+**Lean evidence.** `BinOp.evalT`, range-checked by `PrimTy.ofInt?`
+(`Semantics/Ops.lean`); the EVM compiler proves the guard: `tail_simT`, on
+`PrimTy.ofInt?` at `uint` and `int` (`Evm/SimLemmas.lean`), `overflow_run`/`overflow_interpreter`
 (`Evm/Examples.lean`, `Evm/Interpreter.lean`).
 
 **Fix.** Either split each arithmetic taclet on the range (revert branch under

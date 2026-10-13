@@ -18,9 +18,10 @@ local is `localOpAssign`.  One constructor stands for the whole family: `⊕`
 is its schema variable, and `KeyTaclets.lean` maps each instance back to the
 taclet solkey writes per operator.
 
-The terms of an update are *checked*: `a + b` is read by the interpreter's
-own `applyBinOp` and `checkArith`, so it halts on overflow, a zero divisor or
-a negative `uint`, exactly as the statement would (`Update.lean`).  A
+The terms of an update are *checked*: `a + b` is read by the run's own
+typed operator (`BinOp.evalT`, range-checked by `PrimTy.ofInt?`), so it
+halts on overflow, a zero divisor or a negative `uint`, exactly as the
+statement would (`Update.lean`).  A
 halting update satisfies the box and falsifies the diamond; the old
 `division_unfold_result` revert branch is that, with no rule of its own.
 
