@@ -401,6 +401,27 @@ theorem save_save (o : Obs L) {U : Ty} (p : L U) (v w : TVal U) :
     (o.save p v).save p w = o.save p w := by
   apply Obs.ext <;> intro _ q <;> simp only [save] <;> split <;> rfl
 
+theorem save_word_below (o : Obs L) {U : Ty} (p : L U) {P : PrimTy} (r : Path U (.prim P))
+    (v : TVal U) : (o.save p v).word (ObsLoc.app p r) = v.word r := by
+  simp only [save, ObsLoc.strip?_app]
+
+theorem save_len_below (o : Obs L) {U : Ty} (p : L U) {E : Ty} (r : Path U (.ref (.array E)))
+    (v : TVal U) : (o.save p v).len (ObsLoc.app p r) = v.len r := by
+  simp only [save, ObsLoc.strip?_app]
+
+theorem save_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
+    (o.save p v).word p = v.word .nil := by
+  have e := save_word_below o p .nil v
+  rwa [ObsLoc.app_nil] at e
+
+theorem save_word_frame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
+    (v : TVal U) (h : ObsLoc.strip? p q = none) : (o.save p v).word q = o.word q := by
+  simp only [save, h]
+
+theorem save_len_frame (o : Obs L) {U : Ty} {p : L U} {E : Ty} {q : L (.ref (.array E))}
+    (v : TVal U) (h : ObsLoc.strip? p q = none) : (o.save p v).len q = o.len q := by
+  simp only [save, h]
+
 /-- A save below `q`, read at `q`: the value there with the save made in it. -/
 theorem find_save_below (o : Obs L) {U V : Ty} (q : L U) (r : Path U V) (v : TVal V) :
     (o.save (ObsLoc.app q r) v).find q = (o.find q).save r v := by
@@ -2017,5 +2038,171 @@ theorem obs_pop {E : Ty} {st st' : Storage C} {keep : Bool} {r : SRef C (.ref (.
           exact hx.trans (congrArg _ hdl)
 
 end Storage
+
+
+/-! ### Laws of the operations -/
+
+theorem TVal.overlay_word_nil {P : PrimTy} (o n : TVal (.prim P)) :
+    (TVal.overlay o n).word .nil = n.word .nil := rfl
+
+theorem TVal.ofWord_word_nil {P : PrimTy} (x : P.Denote) : (TVal.ofWord x).word .nil = x := rfl
+
+theorem TVal.del_word_nil {P : PrimTy} (o : TVal (.prim P)) :
+    (TVal.del o).word .nil = PrimTy.dflt P := rfl
+
+namespace Obs
+
+variable {L : Ty → Type} [ObsLoc L]
+
+/-- **`findOnSave`** of a copy at a word: the word written. -/
+theorem copyTo_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
+    (o.copyTo p v).word p = v.word .nil := by
+  rw [copyTo, save_word_same]; rfl
+
+/-- **`findOnDelAt`**: a word deleted reads its default. -/
+theorem delAt_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) :
+    (o.delAt p).word p = PrimTy.dflt P := by
+  rw [delAt, save_word_same]; rfl
+
+/-- Below a delete, the delete's reading. -/
+theorem delAt_word_below (o : Obs L) {U : Ty} (p : L U) {P : PrimTy} (r : Path U (.prim P)) :
+    (o.delAt p).word (ObsLoc.app p r) = TVal.delR (Comp.word P) (o.find p) r := by
+  rw [delAt, save_word_below]; rfl
+
+/-! The laws by solkey's taclet names, as `sol_rw` reads them: a frame's
+premise the decidable `(ObsLoc.strip? p q).isNone`. -/
+
+/-- **`findOnSave`**. -/
+theorem findOnSave (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
+    (o.copyTo p v).word p = v.word .nil := copyTo_word_same o p v
+
+/-- **`findOnSaveFrame`** (solkey's `findOnSaveDifferent`). -/
+theorem findOnSaveFrame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
+    (v : TVal U) (h : (ObsLoc.strip? p q).isNone = true) : (o.copyTo p v).word q = o.word q :=
+  save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
+
+/-- **`findOnDelAt`**. -/
+theorem findOnDelAt (o : Obs L) {P : PrimTy} (p : L (.prim P)) :
+    (o.delAt p).word p = PrimTy.dflt P := delAt_word_same o p
+
+/-- **`findOnDelAtFrame`**. -/
+theorem findOnDelAtFrame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
+    (h : (ObsLoc.strip? p q).isNone = true) : (o.delAt p).word q = o.word q :=
+  save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
+
+/-- **`lenOnSaveFrame`**. -/
+theorem lenOnSaveFrame (o : Obs L) {U : Ty} {p : L U} {E : Ty} {q : L (.ref (.array E))}
+    (v : TVal U) (h : (ObsLoc.strip? p q).isNone = true) : (o.copyTo p v).len q = o.len q :=
+  save_len_frame _ _ (Option.isNone_iff_eq_none.1 h)
+
+/-- **`lenOnDelAtFrame`**. -/
+theorem lenOnDelAtFrame (o : Obs L) {U : Ty} {p : L U} {E : Ty} {q : L (.ref (.array E))}
+    (h : (ObsLoc.strip? p q).isNone = true) : (o.delAt p).len q = o.len q :=
+  save_len_frame _ _ (Option.isNone_iff_eq_none.1 h)
+
+/-- **`findOnPushFrame`**. -/
+theorem findOnPushFrame (o : Obs L) {E : Ty} {p : L (.ref (.array E))} {P : PrimTy}
+    {q : L (.prim P)} (x : TVal E) (h : (ObsLoc.strip? p q).isNone = true) :
+    (o.push p x).word q = o.word q :=
+  save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
+
+/-- **`findOnPopFrame`**. -/
+theorem findOnPopFrame (o : Obs L) (keep : Bool) {E : Ty} {p : L (.ref (.array E))} {P : PrimTy}
+    {q : L (.prim P)} (h : (ObsLoc.strip? p q).isNone = true) :
+    (o.pop keep p).word q = o.word q :=
+  save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)
+
+end Obs
+
+/-! ### Under a `select` -/
+
+theorem SRef.under_append {C : Contract} {s r : Name} {U W : Ty} (h : C.rootType r = some (.ref (.struct s)))
+    (q : SRef (Contract.ofStruct s) U) (p : Path U W) :
+    (q.append p).under h = (q.under h).append p := by
+  simp only [SRef.under, SRef.append, Path.append_field]
+
+theorem SLoc.under_app {C : Contract} {s r : Name} {U W : Ty} (h : C.rootType r = some (.ref (.struct s)))
+    (l : SLoc (Contract.ofStruct s) U) (p : Path U W) :
+    (ObsLoc.app l p).under h = ObsLoc.app (l.under h) p := by
+  cases l with
+  | ref q => exact congrArg SLoc.ref (SRef.under_append h q p)
+  | dangling => rfl
+
+theorem SRef.strip?_under {C : Contract} {s r : Name} {U W : Ty}
+    (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U)
+    (q' : SRef (Contract.ofStruct s) W) : (q.under h).strip? (q'.under h) = q.strip? q' := by
+  rcases q with ⟨n, hn, qp⟩
+  rcases q' with ⟨n', hn', qp'⟩
+  unfold SRef.strip? SRef.under
+  rw [dif_pos rfl]
+  by_cases e : n = n'
+  · subst e
+    obtain rfl : _ = _ := Option.some.inj (hn.symm.trans hn')
+    simp only [dite_true, Path.strip?]
+  · simp only [Path.strip?, e, dite_false]
+
+theorem SRef.strip?_under_ne {C : Contract} {s r s' r' : Name} {U W : Ty}
+    (h : C.rootType r = some (.ref (.struct s))) (h' : C.rootType r' = some (.ref (.struct s')))
+    (hne : r' ≠ r) (q : SRef (Contract.ofStruct s') U) (q' : SRef (Contract.ofStruct s) W) :
+    (q.under h').strip? (q'.under h) = none := by
+  unfold SRef.strip? SRef.under
+  rw [dif_neg hne]
+
+/-- A `select`'s read below a member: the read below the member's path. -/
+theorem Obs.select_find {C : Contract} {s r : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) {U : Ty} (l : SLoc (Contract.ofStruct s) U) :
+    (o.select h).find l = o.find (l.under h) := by
+  apply Obs.ext <;> intro _ q <;> simp only [Obs.find, Obs.select, SLoc.under_app]
+
+/-- **`selectOnSaveCons`** at the member saved: the save seen from the root
+is a save at the member path. -/
+theorem Obs.select_save {C : Contract} {s r : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) {U : Ty} (l : SLoc (Contract.ofStruct s) U)
+    (v : TVal U) : (o.save (l.under h) v).select h = (o.select h).save l v := by
+  have e : ∀ {W : Ty} (q : SLoc (Contract.ofStruct s) W),
+      ObsLoc.strip? (l.under h) (q.under h) = ObsLoc.strip? l q := by
+    intro W q
+    cases l <;> cases q
+    · exact SRef.strip?_under h _ _
+    · rfl
+    · rfl
+    · rfl
+  apply Obs.ext <;> intro _ q <;> simp only [Obs.select, Obs.save, e]
+
+/-- **`selectOnSaveCons`** away from the member: a save under another root
+is not seen from `r`. -/
+theorem Obs.select_save_ne {C : Contract} {s r s' r' : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) (h' : C.rootType r' = some (.ref (.struct s')))
+    (hne : r' ≠ r) {U : Ty} (q' : SRef (Contract.ofStruct s') U) (v : TVal U) :
+    (o.save ((SLoc.ref q').under h') v).select h = o.select h := by
+  have e : ∀ {W : Ty} (q : SLoc (Contract.ofStruct s) W),
+      ObsLoc.strip? ((SLoc.ref q').under h') (q.under h) = none := by
+    intro W q
+    cases q
+    · exact SRef.strip?_under_ne h h' hne _ _
+    · rfl
+  apply Obs.ext <;> intro _ q <;> simp only [Obs.select, Obs.save, e]
+
+theorem Obs.select_copyTo {C : Contract} {s r : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) {U : Ty} (l : SLoc (Contract.ofStruct s) U)
+    (v : TVal U) : (o.copyTo (l.under h) v).select h = (o.select h).copyTo l v := by
+  rw [Obs.copyTo, Obs.copyTo, Obs.select_save, Obs.select_find]
+
+theorem Obs.select_delAt {C : Contract} {s r : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) {U : Ty} (l : SLoc (Contract.ofStruct s) U) :
+    (o.delAt (l.under h)).select h = (o.select h).delAt l := by
+  rw [Obs.delAt, Obs.delAt, Obs.select_save, Obs.select_find]
+
+theorem Obs.select_copyTo_ne {C : Contract} {s r s' r' : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) (h' : C.rootType r' = some (.ref (.struct s')))
+    (hne : r' ≠ r) {U : Ty} (q' : SRef (Contract.ofStruct s') U) (v : TVal U) :
+    (o.copyTo ((SLoc.ref q').under h') v).select h = o.select h := by
+  rw [Obs.copyTo, Obs.select_save_ne o h h' hne]
+
+theorem Obs.select_delAt_ne {C : Contract} {s r s' r' : Name} (o : TSto C)
+    (h : C.rootType r = some (.ref (.struct s))) (h' : C.rootType r' = some (.ref (.struct s')))
+    (hne : r' ≠ r) {U : Ty} (q' : SRef (Contract.ofStruct s') U) :
+    (o.delAt ((SLoc.ref q').under h')).select h = o.select h := by
+  rw [Obs.delAt, Obs.select_save_ne o h h' hne]
 
 end Solidity

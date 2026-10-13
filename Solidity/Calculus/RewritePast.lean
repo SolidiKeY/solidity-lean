@@ -1557,31 +1557,12 @@ The substitution is the storage merge's (`Tm.substP`,
 `Calculus/StatePartsScoped.lean`: `storage` by `S`, a push slot and an index
 check read in `S`), so a substituted term reads before the write as the term
 reads where it lands (`Tm.substP_eval`).  An equation reads its terms
-through `denote`, which the substitution keeps up to `Equiv`
-(`Tm.substP_denote`): each typed symbol's denotation respects `Equiv` of its
-arguments' (`Srt.DEquiv`, `Op0.denote_congrP` … `Op3.denote_congr`), and
-`S` denotes, up to `Equiv`, the storage it leaves (`Tm.denote_eval`). -/
+through `denote`, which the substitution keeps (`Tm.substP_denote`): a
+symbol that reads no storage denotes alike in the two global parts
+(`Op0.denote_congrP` … `Op2.denote_congrP`), and `S` denotes the storage it
+leaves (`Tm.denote_eval`). -/
 
 section WithSt
-
-open Theory Theory.StValue
-
-/-- Two denotations of a sort agree in the Theory: `Equiv` for a value or a
-storage, equal paths. -/
-def Srt.DEquiv : (s : Srt) → s.TDen → s.TDen → Prop
-  | .val _ => StValue.Equiv
-  | .path _ => Eq
-  | .st => Struct.Equiv
-  | .sv _ => StValue.Equiv
-  | .sts _ => Struct.Equiv
-  | .spath _ _ => Eq
-  | .kint => StValue.Equiv
-  | .ident _ | .addr _ | .mem | .mv _ => fun _ _ => True
-
-theorem Srt.DEquiv.refl : (s : Srt) → (d : s.TDen) → Srt.DEquiv s d d
-  | .val _, _ | .st, _ | .sv _, _ | .sts _, _ | .kint, _ => StValue.Equiv.refl _
-  | .path _, _ | .spath _ _, _ => rfl
-  | .ident _, _ | .addr _, _ | .mem, _ | .mv _, _ => trivial
 
 theorem Srt.sameO_sv {H₀ H₁ : HTy} {T : Ty} {x : Option ((Srt.sv T).Den C H₀)}
     {y : Option ((Srt.sv T).Den C H₁)} : Srt.SameO (.sv T) x y ↔ x = y :=
@@ -1595,8 +1576,7 @@ variable {g₀ g₁ : State C []}
 /-- A constant that reads no storage denotes alike in two global parts with
 one ledger, funds and transaction. -/
 theorem Op0.denote_congrP {s : Srt} (o : Op0 C s) (hr : g₀.SameRest g₁)
-    (hs : g₁.storage = g₀.storage ∨ o.stFree = true) :
-    Srt.DEquiv s (o.denote g₀) (o.denote g₁) := by
+    (hs : g₁.storage = g₀.storage ∨ o.stFree = true) : o.denote g₀ = o.denote g₁ := by
   rcases g₀ with ⟨st₀, H₀, hp₀, ⟨⟩, n₀, b₀, t₀⟩
   rcases g₁ with ⟨st₁, H₁, hp₁, ⟨⟩, n₁, b₁, t₁⟩
   obtain ⟨hn, hb, ht⟩ := hr
@@ -1605,156 +1585,58 @@ theorem Op0.denote_congrP {s : Srt} (o : Op0 C s) (hr : g₀.SameRest g₁)
   cases o with
   | storage =>
     rcases hs with hs | hs
-    · dsimp only at hs; subst hs; exact Srt.DEquiv.refl _ _
+    · dsimp only at hs; subst hs; rfl
     · exact absurd hs Bool.false_ne_true
-  | _ => exact Srt.DEquiv.refl _ _
+  | _ => rfl
 
-/-- A unary symbol respects `Equiv` of its argument's denotation, in two
-global parts with one ledger, funds and transaction. -/
+/-- A unary symbol denotes alike in two global parts with one ledger, funds
+and transaction, where it reads no storage. -/
 theorem Op1.denote_congrP {a s : Srt} (o : Op1 C a s) (hr : g₀.SameRest g₁)
-    (hs : g₁.storage = g₀.storage ∨ o.stFree = true) {d d' : a.TDen}
-    (h : Srt.DEquiv a d d') : Srt.DEquiv s (o.denote g₀ d) (o.denote g₁ d') := by
+    (hs : g₁.storage = g₀.storage ∨ o.stFree = true) (d : a.TDen C) :
+    o.denote g₀ d = o.denote g₁ d := by
   rcases g₀ with ⟨st₀, H₀, hp₀, ⟨⟩, n₀, b₀, t₀⟩
   rcases g₁ with ⟨st₁, H₁, hp₁, ⟨⟩, n₁, b₁, t₁⟩
   obtain ⟨hn, hb, ht⟩ := hr
   dsimp only at hn hb ht
   subst hn hb ht
   cases o with
-  | unop op ho =>
-    simp only [Srt.DEquiv, Op1.denote] at h ⊢
-    rw [h.toRes]
-    exact StValue.Equiv.refl _
-  | net =>
-    simp only [Srt.DEquiv] at h ⊢
-    rcases h.eq_or_st with h | ⟨s, t, hs, ht⟩
-    · rw [h]; exact StValue.Equiv.refl _
-    · simp only [Op1.denote, hs, ht]; exact StValue.Equiv.refl _
-  | delValue =>
-    simp only [Srt.DEquiv, Op1.denote] at h ⊢
-    exact StValue.Equiv.delValue h
-  | field hf | fieldIn hf =>
-    simp only [Srt.DEquiv, Op1.denote] at h ⊢; rw [h]
   | next =>
     rcases hs with hs | hs
-    · dsimp only at hs; subst hs
-      simp only [Srt.DEquiv, Op1.denote] at h ⊢; rw [h]
+    · dsimp only at hs; subst hs; rfl
     · exact absurd hs Bool.false_ne_true
-  | sval => exact h
-  | newArr hR =>
-    simp only [Srt.DEquiv, Op1.denote] at h ⊢
-    rw [h.asInt]
-    exact StValue.Equiv.refl _
-  | select r hr' | selectIn hr' =>
-    simp only [Srt.DEquiv, Op1.denote] at h ⊢
-    exact StValue.Equiv.asStruct (StValue.Equiv.select h _)
-  | alloc _ _ | mfield _ | addM _ _ | mval | ref => trivial
-  | wt => exact StValue.Equiv.refl _
-  | toInt => simp only [Srt.DEquiv, Op1.denote] at h ⊢; exact h
+  | _ => rfl
 
-/-- A binary symbol respects `Equiv` of its arguments' denotations, and a
-memory read its arguments' readings, in two global parts with one ledger,
-funds and transaction. -/
+/-- A binary symbol denotes alike in two global parts with one ledger, funds
+and transaction, a memory read its arguments' readings alike. -/
 theorem Op2.denote_congrP {a b s : Srt} (o : Op2 C a b s) (hr : g₀.SameRest g₁)
     {x : Option (a.Den C g₀.H)} {x' : Option (a.Den C g₁.H)} {y : Option (b.Den C g₀.H)}
     {y' : Option (b.Den C g₁.H)} (hx : Srt.SameO a x x') (hy : Srt.SameO b y y')
-    {da da' : a.TDen} {db db' : b.TDen} (ha : Srt.DEquiv a da da') (hb : Srt.DEquiv b db db') :
-    Srt.DEquiv s (o.denote g₀ x y da db) (o.denote g₁ x' y' da' db') := by
+    (da : a.TDen C) (db : b.TDen C) : o.denote g₀ x y da db = o.denote g₁ x' y' da db := by
   cases o with
-  | binop op ho =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [ha.toRes, hb.toRes]
-    exact StValue.Equiv.refl _
-  | find | sfind | len | findIn | sfindIn =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [hb]
-    exact StValue.Equiv.findSt ha _
   | read =>
-    have he := Srt.sameO_val.1 (Op2.eval_sameP .read hr (.inr rfl) hx hy)
-    simp only [Srt.DEquiv, Op2.denote]
-    rw [he]
-    exact StValue.Equiv.refl _
+    exact Srt.sameO_val.1 (Op2.eval_sameP .read hr (.inr rfl) hx hy)
   | mlen =>
-    have he := Srt.sameO_val.1 (Op2.eval_sameP .mlen hr (.inr rfl) hx hy)
-    simp only [Srt.DEquiv, Op2.denote]
-    rw [he]
-    exact StValue.Equiv.refl _
+    exact Srt.sameO_val.1 (Op2.eval_sameP .mlen hr (.inr rfl) hx hy)
   | copyMem =>
     have he := Srt.sameO_sv.1 (Op2.eval_sameP .copyMem hr (.inr rfl) hx hy)
-    simp only [Srt.DEquiv, Op2.denote]
+    simp only [Op2.denote]
     revert he
     generalize Op2.eval g₀ .copyMem x y = u
     generalize Op2.eval g₁ .copyMem x' y' = v
     intro he
     subst he
-    cases u <;> exact StValue.Equiv.refl _
-  | «at» it =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [ha, hb.asInt]
-  | nextIn =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [hb, Struct.Equiv.lenAt ha]
-  | delAt | delAtIn =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [hb]
-    exact Struct.Equiv.delAt ha _
-  | pushSlot | extend =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [hb]
-    exact Struct.Equiv.pushSlotT _ _ ha _
-  | pop =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [hb]
-    exact Struct.Equiv.popT ha _
-  | shrink =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rw [hb]
-    exact Struct.Equiv.shrinkT ha _
-  | iread | copy _ | mat _ | copySt _ => trivial
-  | zbin op ho | zcmp op ho =>
-    simp only [Srt.DEquiv, Op2.denote] at ha hb ⊢
-    rcases ha.eq_or_st with rfl | ⟨s, t, rfl, rfl⟩ <;>
-      rcases hb.eq_or_st with rfl | ⟨s', t', rfl, rfl⟩ <;>
-      first
-      | exact StValue.Equiv.refl _
-      | (split <;> (try split) <;> first | exact StValue.Equiv.refl _ | simp_all)
-
-/-- A ternary symbol respects `Equiv` of its arguments' denotations. -/
-theorem Op3.denote_congr {a b c s : Srt} (o : Op3 C a b c s) {da da' : a.TDen}
-    {db db' : b.TDen} {dc dc' : c.TDen} (ha : Srt.DEquiv a da da') (hb : Srt.DEquiv b db db')
-    (hc : Srt.DEquiv c dc dc') : Srt.DEquiv s (o.denote da db dc) (o.denote da' db' dc') := by
-  cases o with
-  | ite =>
-    simp only [Srt.DEquiv, Op3.denote] at ha hb hc ⊢
-    rcases ha.eq_or_st with h | ⟨s, t, hs, ht⟩
-    · rw [h]
-      split
-      · exact hb
-      · exact hc
-      · exact StValue.Equiv.refl _
-    · simp only [hs, ht]
-      exact StValue.Equiv.refl _
-  | atIn it =>
-    simp only [Srt.DEquiv, Op3.denote] at hb hc ⊢
-    rw [hb, hc.asInt]
-  | save | saveIn =>
-    simp only [Srt.DEquiv, Op3.denote] at ha hb hc ⊢
-    rw [hb]
-    exact Struct.Equiv.copyTo ha hc _
-  | push =>
-    simp only [Srt.DEquiv, Op3.denote] at ha hb hc ⊢
-    rw [hb]
-    exact Struct.Equiv.pushT ha (StValue.Equiv.stripVal hc) _
-  | write => trivial
+    cases u <;> rfl
+  | _ => rfl
 
 variable {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ₀ : State C Γ} {σ₁ : State C Δ} {g : GlobT C σ₀.H}
   {stS : Option (Tm C Γ .st)} {memS : Option (Tm C Γ .mem)}
 
-/-- **Read before the update, the substituted term denotes, up to `Equiv`,
-what the term denotes in a typed state it lands on.** -/
+/-- **Read before the update, the substituted term denotes what the term
+denotes in a typed state it lands on.** -/
 theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest σ₁.glob)
     (hst : StOK σ₀ σ₁ stS) (hmem : MemOK σ₀ σ₁ memS) :
     {k : Srt} → (t : Tm C Δ k) → {t' : Tm C Γ k} → Tm.substP U.held stS memS t = some t' →
-      Srt.DEquiv k (t'.denote σ₀) (t.denote σ₁)
+      t'.denote σ₀ = t.denote σ₁
   | _, .pvV i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
@@ -1764,16 +1646,11 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     | .pos j, hx, h =>
       cases h
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
-      show StValue.Equiv (.prim (PrimTy.erase (TEnv.get j σ₀.env)))
-        (.prim (PrimTy.erase (TEnv.get i σ₁.env)))
+      show some _ = some _
       rw [hx]
-      exact StValue.Equiv.refl _
     | .rhs (.val t), hx, h =>
       cases h
-      have hb := Tm.denote_eval σ₀ t' _ hx
-      show StValue.Equiv _ (.prim (PrimTy.erase (TEnv.get i σ₁.env)))
-      rw [hb]
-      exact StValue.Equiv.refl _
+      exact Tm.denote_eval σ₀ t' _ hx
   | _, .pvP i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
@@ -1807,10 +1684,8 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     | .pos j, hx, h =>
       cases h
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
-      show Struct.Equiv (Storage.absT (TEnv.get j σ₀.env : Storage C))
-        (Storage.absT (TEnv.get i σ₁.env : Storage C))
+      show Storage.obs (TEnv.get j σ₀.env : Storage C) = Storage.obs (TEnv.get i σ₁.env : Storage C)
       rw [hx]
-      exact StValue.Equiv.refl _
     | .rhs (.store x), hx, h =>
       cases h
       have hx : (t'.eval σ₀).bind (fun st => some st) = some (TEnv.get i σ₁.env) := hx
@@ -1819,10 +1694,10 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
       | some q =>
         rw [hp] at hx
         have hq : q = TEnv.get i σ₁.env := Option.some.inj hx
-        show Struct.Equiv (t'.denote σ₀) (Storage.absT (TEnv.get i σ₁.env : Storage C))
+        show t'.denote σ₀ = Storage.obs (TEnv.get i σ₁.env : Storage C)
         rw [← hq]
         exact Tm.denote_eval σ₀ t' q hp
-  | _, .pvI _, _, _ => trivial
+  | _, .pvI _, _, _ => rfl
   | _, .netOf i a, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
@@ -1834,12 +1709,9 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     | .pos j, hx, h =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
-      have ih : StValue.Equiv (a'.denote σ₀) (a.denote σ₁) :=
-        Tm.substP_denote hL hr hst hmem a ha
-      show StValue.Equiv (Tm.denote σ₀ (.netOf j a')) (Tm.denote σ₁ (.netOf i a))
-      rcases ih.eq_or_st with e | ⟨s, t, hs, ht⟩
-      · simp only [Tm.denote, e, hx]; exact StValue.Equiv.refl _
-      · simp only [Tm.denote, hs, ht]; exact StValue.Equiv.refl _
+      have ih : a'.denote σ₀ = a.denote σ₁ := Tm.substP_denote hL hr hst hmem a ha
+      show Tm.denote σ₀ (.netOf j a') = Tm.denote σ₁ (.netOf i a)
+      simp only [Tm.denote, ih, hx]
   | _, .app0 o, t', h => by
     cases h
     cases o with
@@ -1847,7 +1719,7 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
       cases stS with
       | some S => exact Tm.denote_eval σ₀ S σ₁.storage hst
       | none => exact Op0.denote_congrP .storage hr (.inl hst)
-    | memory => trivial
+    | memory => rfl
     | lit v => exact Op0.denote_congrP (.lit v) hr (.inr rfl)
     | env k => exact Op0.denote_congrP (.env k) hr (.inr rfl)
     | root r hr' => exact Op0.denote_congrP (.root r hr') hr (.inr rfl)
@@ -1856,49 +1728,60 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     | zlit n => exact Op0.denote_congrP (.zlit n) hr (.inr rfl)
   | _, .app1 o x, t', h => by
     obtain ⟨x', hx, rfl⟩ := Option.map_eq_some_iff.1 h
-    have ihx := Tm.substP_denote hL hr hst hmem x hx
+    have ihx : x'.denote σ₀ = x.denote σ₁ := Tm.substP_denote hL hr hst hmem x hx
     by_cases hn : o.stFree = true
     · rw [Op1.substStep_of_stFree stS hn]
-      exact Op1.denote_congrP o hr (.inr hn) ihx
+      show o.denote σ₀.glob (x'.denote σ₀) = o.denote σ₁.glob (x.denote σ₁)
+      rw [ihx]
+      exact Op1.denote_congrP o hr (.inr hn) _
     cases o with
     | next =>
       cases stS with
       | some S =>
-        have hS : Struct.Equiv (S.denote σ₀) σ₁.storage.absT := Tm.denote_eval σ₀ S σ₁.storage hst
-        have ihx : x'.denote σ₀ = x.denote σ₁ := ihx
+        have hS : S.denote σ₀ = σ₁.storage.obs := Tm.denote_eval σ₀ S σ₁.storage hst
         show Tm.denote σ₀ (Tm.app2 .nextIn S x') = Tm.denote σ₁ (Tm.app1 .next x)
-        simp only [Tm.denote, Op2.denote, Op1.denote, ihx, Struct.Equiv.lenAt hS]
+        simp only [Tm.denote, Op2.denote, Op1.denote, ihx, hS]
         rfl
-      | none => exact Op1.denote_congrP .next hr (.inl hst) ihx
+      | none =>
+        show Op1.denote σ₀.glob .next (x'.denote σ₀) = Op1.denote σ₁.glob .next (x.denote σ₁)
+        rw [ihx]
+        exact Op1.denote_congrP .next hr (.inl hst) _
     | _ => exact absurd rfl hn
   | _, .app2 o x y, t', h => by
     obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have ihx := Tm.substP_denote hL hr hst hmem x hx
-    have ihy := Tm.substP_denote hL hr hst hmem y hy
+    have ihx : x'.denote σ₀ = x.denote σ₁ := Tm.substP_denote hL hr hst hmem x hx
+    have ihy : y'.denote σ₀ = y.denote σ₁ := Tm.substP_denote hL hr hst hmem y hy
     have evx := Tm.substP_eval hL hr hst hmem x hx
     have evy := Tm.substP_eval hL hr hst hmem y hy
     by_cases hn : o.stFree = true
     · rw [Op2.substStep_of_stFree stS hn]
-      exact Op2.denote_congrP o hr evx evy ihx ihy
+      show o.denote σ₀.glob (x'.eval σ₀) (y'.eval σ₀) (x'.denote σ₀) (y'.denote σ₀) =
+        o.denote σ₁.glob (x.eval σ₁) (y.eval σ₁) (x.denote σ₁) (y.denote σ₁)
+      rw [ihx, ihy]
+      exact Op2.denote_congrP o hr evx evy _ _
     cases o with
     | «at» it =>
       cases stS with
       | some S =>
-        have ihx : x'.denote σ₀ = x.denote σ₁ := ihx
-        have ihy : StValue.Equiv (y'.denote σ₀) (y.denote σ₁) := ihy
         show Tm.denote σ₀ (Tm.app3 (.atIn it) S x' y') = Tm.denote σ₁ (Tm.app2 (.at it) x y)
-        simp only [Tm.denote, Op3.denote, Op2.denote, ihx, ihy.asInt]
-      | none => exact Op2.denote_congrP (.at it) hr evx evy ihx ihy
+        simp only [Tm.denote, Op3.denote, Op2.denote, ihx, ihy]
+      | none =>
+        show Op2.denote σ₀.glob (.at it) (x'.eval σ₀) (y'.eval σ₀) (x'.denote σ₀) (y'.denote σ₀) =
+          Op2.denote σ₁.glob (.at it) (x.eval σ₁) (y.eval σ₁) (x.denote σ₁) (y.denote σ₁)
+        rw [ihx, ihy]
+        exact Op2.denote_congrP (.at it) hr evx evy _ _
     | _ => exact absurd rfl hn
   | _, .app3 o x y z, t', h => by
     obtain ⟨x', hx, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨y', hy, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨z', hz, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    exact Op3.denote_congr o (Tm.substP_denote hL hr hst hmem x hx)
-      (Tm.substP_denote hL hr hst hmem y hy) (Tm.substP_denote hL hr hst hmem z hz)
+    show o.denote (x'.denote σ₀) (y'.denote σ₀) (z'.denote σ₀) =
+      o.denote (x.denote σ₁) (y.denote σ₁) (z.denote σ₁)
+    rw [Tm.substP_denote hL hr hst hmem x hx, Tm.substP_denote hL hr hst hmem y hy,
+      Tm.substP_denote hL hr hst hmem z hz]
   | _, .pvZ i, t', h => by
     have hx := hL.2.2 i
     have h : (match U.held i with
@@ -1908,15 +1791,11 @@ theorem Tm.substP_denote (hL : U.Lands σ₀ g σ₁) (hr : σ₀.glob.SameRest 
     | .pos j, hx, h =>
       cases h
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
-      show StValue.Equiv (.prim (.int (TEnv.get j σ₀.env))) (.prim (.int (TEnv.get i σ₁.env)))
+      show some _ = some _
       rw [hx]
-      exact StValue.Equiv.refl _
     | .rhs (.zint t), hx, h =>
       cases h
-      have hb := Tm.denote_eval σ₀ t' _ hx
-      show StValue.Equiv _ (.prim (.int (TEnv.get i σ₁.env)))
-      rw [hb]
-      exact StValue.Equiv.refl _
+      exact Tm.denote_eval σ₀ t' _ hx
 
 /-- A first-order formula of `Δ` read in `Γ` before an update of locals and
 the storage (`Tm.substP`); `none` past anything else. -/
@@ -1941,10 +1820,8 @@ theorem Fml.substSt_holds {S : Tm C Γ .st} (hL : U.Lands σ₀ g σ₁)
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
-    have ea : StValue.Equiv (a'.denote σ₀) (a.denote σ₁) := Tm.substP_denote hL hr hst hmem a ha
-    have eb : StValue.Equiv (b'.denote σ₀) (b.denote σ₁) := Tm.substP_denote hL hr hst hmem b hb
-    rw [holds_eq, holds_eq]
-    exact ⟨fun e => (ea.symm.trans e).trans eb, fun e => (ea.trans e).trans eb.symm⟩
+    rw [holds_eq, holds_eq, Tm.substP_denote hL hr hst hmem a ha,
+      Tm.substP_denote hL hr hst hmem b hb]
   | .defined t, _, h => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
     rw [holds_defined, holds_defined, Srt.sameO_val.1 (Tm.substP_eval hL hr hst hmem t ht)]

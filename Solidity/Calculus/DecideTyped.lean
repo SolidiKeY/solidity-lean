@@ -398,9 +398,9 @@ theorem holds_eq_of_eval {τ : State C Γ} {p : PrimTy} {a b : Tm C Γ (.val p)}
       rw [hb'] at hb
       cases ha
       cases hb
-      show Theory.StValue.Equiv (a.denote τ) (b.denote τ) ↔ _
-      rw [Tm.denote_eval τ a x' ha', Tm.denote_eval τ b y' hb', Theory.StValue.Equiv.prim_iff]
-      exact ⟨fun h => by injection h, fun h => congrArg Theory.StValue.prim h⟩
+      show a.denote τ = b.denote τ ↔ _
+      rw [Tm.denote_eval τ a x' ha', Tm.denote_eval τ b y' hb', Option.some.injEq]
+      exact ⟨fun h => h ▸ rfl, fun h => PrimTy.erase_injective h⟩
 
 /-- **An equation through peeled constructors** (`eqDViewS`): both
 readings return one value, read in every typed state the peels reach. -/

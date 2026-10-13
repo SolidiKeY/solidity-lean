@@ -37,7 +37,6 @@ under a `select` (`Tm.baseAny`).
 
 namespace Solidity
 
-open Theory Theory.StValue
 open Solidity (Srt Op0 Op1 Op2 Op3)
 
 variable {C : Contract} {Γ : Ctx}
@@ -59,9 +58,8 @@ theorem Tm.evalRefinesAt_of_theq {P : PrimTy} {t t' : Tm C Γ (.val P)} (h : Tm.
   | none => simp only [Tm.isLit, hl, Option.isSome_none, Bool.false_eq_true] at ht
   | some v =>
     obtain rfl := Tm.eq_of_litVal? hl
-    have e : StValue.prim (PrimTy.erase v) = .prim (PrimTy.erase x) :=
-      (Theory.StValue.Equiv.prim_iff.1 e.symm)
-    rw [PrimTy.erase_injective (StValue.prim.inj e)]
+    have e : some v = some x := e.symm
+    rw [Option.some.inj e]
     rfl
 
 /-! ## The literal laws -/
@@ -118,7 +116,7 @@ theorem LitLaw.theq {P : PrimTy} {t t' : Tm C Γ (.val P)} (r : LitLaw t t') : T
   obtain ⟨v, rfl, hv⟩ := r.exact
   intro σ
   rw [Tm.denote_eval σ t v (hv σ)]
-  exact Theory.StValue.Equiv.refl _
+  rfl
 
 /-! ## What an update's elements write -/
 
@@ -438,7 +436,7 @@ theorem find_save_same {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
 /-- **A save leaves a reference that parts from it** (solkey's
 `findOnSaveFrame`): across roots, or below one root by `Path.Diverges`. -/
 theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
-    {q : SRef C W} (hd : Theory.StValue.diverges r.absT q.absT = true)
+    {q : SRef C W} (hd : Theory.StValue.diverges r.segs q.segs = true)
     (h : st.save r v = some st') : st'.find q = st.find q := by
   obtain ⟨x', hs, rfl⟩ := save_some h
   rcases r with ⟨n, hr, p⟩
@@ -447,7 +445,7 @@ theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal
   · subst e
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-    simp only [SRef.absT, rootPath, Theory.StValue.diverges, if_pos rfl] at hd
+    simp only [SRef.segs, Theory.StValue.diverges, if_pos rfl] at hd
     show ((SFields.set st hr x').get hr).find p' = (st.get hr).find p'
     rw [SFields.get_set_same]
     rw [SVal.save_eq_saveM] at hs
@@ -466,14 +464,14 @@ path (solkey's `lenOnSaveFrame`): elsewhere, or below one of the array's
 elements. -/
 theorem len_save_frame {U E : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     {q : SRef C (.ref (.array E))}
-    (hd : Theory.StValue.diverges r.absT (q.absT ++ [Theory.StValue.lengthSeg]) = true)
+    (hd : Theory.StValue.diverges r.segs (q.segs ++ [Theory.StValue.lengthSeg]) = true)
     (h : st.save r v = some st') : st'.len q = st.len q := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.len, find_save_frame hd h]
   · obtain ⟨x', hs, rfl⟩ := save_some h
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
-    simp only [SRef.absT, rootPath, List.cons_append, List.cons.injEq,
+    simp only [SRef.segs, List.cons_append, List.cons.injEq,
       Semantics.Seg.field.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
@@ -518,41 +516,30 @@ theorem Tm.delValue_evalT {P : PrimTy} (t : Tm C Γ (.val P)) :
 /-- Two paths whose shapes part reach references that part. -/
 theorem Tm.diverges_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.diverges q = true) {r : SRef C T} {r' : SRef C U} (hp : p.eval σ = some r)
-    (hq : q.eval σ = some r') : Theory.StValue.diverges r.absT r'.absT = true := by
-  have e := Tm.diverges_denote σ h
-  rwa [show p.denote σ = r.absT from Tm.denote_eval σ p r hp,
-    show q.denote σ = r'.absT from Tm.denote_eval σ q r' hq] at e
+    (hq : q.eval σ = some r') : Theory.StValue.diverges r.segs r'.segs = true := by
+  have e := Tm.diverges_segs σ h
+  rwa [show p.denote σ = .ref r from Tm.denote_eval σ p r hp,
+    show q.denote σ = .ref r' from Tm.denote_eval σ q r' hq] at e
 
 /-- A path that leaves another's length reaches a reference that does. -/
 theorem Tm.divergesLen_eval {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) {r : SRef C T} {r' : SRef C U} (hq : q.eval σ = some r)
     (hp : p.eval σ = some r') :
-    Theory.StValue.diverges r.absT (r'.absT ++ [Theory.StValue.lengthSeg]) = true := by
-  have e := Tm.divergesLen_denote σ h
-  rwa [show q.denote σ = r.absT from Tm.denote_eval σ q r hq,
-    show p.denote σ = r'.absT from Tm.denote_eval σ p r' hp] at e
-
-/-- Two typed references with one Theory path are one reference. -/
-theorem SRef.heq_of_absT {U W : Ty} (r : SRef C U) (q : SRef C W) (h : r.absT = q.absT) :
-    U = W ∧ HEq r q := by
-  rcases r with ⟨n, hr, p⟩
-  rcases q with ⟨n', hq, p'⟩
-  simp only [SRef.absT, rootPath, List.cons.injEq, Semantics.Seg.field.injEq] at h
-  obtain ⟨rfl, h⟩ := h
-  rename_i T₁ T₂
-  obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-  obtain ⟨rfl, e⟩ := Path.heq_of_erase p p' h
-  cases e
-  exact ⟨rfl, HEq.rfl⟩
+    Theory.StValue.diverges r.segs (r'.segs ++ [Theory.StValue.lengthSeg]) = true := by
+  have e := Tm.divergesLen_segs σ h
+  rwa [show q.denote σ = .ref r from Tm.denote_eval σ q r hq,
+    show p.denote σ = .ref r' from Tm.denote_eval σ p r' hp] at e
 
 /-- Two paths of the same segments reach one reference. -/
 theorem Tm.sameSegs_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.sameSegs q = true) {r : SRef C T} {r' : SRef C U} (hp : p.eval σ = some r)
     (hq : q.eval σ = some r') : T = U ∧ HEq r r' := by
-  have e := Tm.sameSegs_denote σ h
-  rw [show p.denote σ = r.absT from Tm.denote_eval σ p r hp,
-    show q.denote σ = r'.absT from Tm.denote_eval σ q r' hq] at e
-  exact SRef.heq_of_absT r r' e
+  obtain ⟨rfl, e⟩ := Tm.sameSegs_heq σ h
+  have e := eq_of_heq e
+  rw [show p.denote σ = .ref r from Tm.denote_eval σ p r hp,
+    show q.denote σ = .ref r' from Tm.denote_eval σ q r' hq] at e
+  cases e
+  exact ⟨rfl, HEq.rfl⟩
 
 /-- `s'` is a save at `p` over `s`, wherever it returns. -/
 def Tm.SavesAt (σ : State C Γ) (s' : Tm C Γ .st) {T : Ty} (p : Tm C Γ (.path T))
@@ -2897,9 +2884,17 @@ chain's hypothesis about terms at the empty scope (`st!{ … }`, `pt!{ … }`)
 gives a law's premise at an update's scope. -/
 theorem Tm.KindFreeAt.ofNil {u : Srt} {T : Ty} {s : Tm C Γ u} {p : Tm C Γ (u.pathAt T)}
     {s₀ : Tm C [] u} {p₀ : Tm C [] (u.pathAt T)} (h : Tm.KindFreeAt s₀ p₀) (hs : s.toNil? = some s₀)
-    (hp : p.toNil? = some p₀) : Tm.KindFreeAt s p := fun σ => by
-  rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
-  exact h σ.toNil
+    (hp : p.toNil? = some p₀) : Tm.KindFreeAt s p := by
+  cases u with
+  | st =>
+    intro σ P r
+    rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
+    exact h σ.toNil r
+  | sts sn =>
+    intro σ P r
+    rw [Tm.denote_toNilS σ s hs, Tm.denote_toNilS σ p hp]
+    exact h σ.toNil r
+  | _ => trivial
 
 /-! ## Pins -/
 

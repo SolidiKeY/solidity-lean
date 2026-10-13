@@ -33,7 +33,6 @@ families, against Gate G0's first condition: an exemption, timed
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality RuleSet)
-open Theory Theory.StValue
 
 variable {C : Contract}
 
@@ -50,7 +49,7 @@ theorem _root_.Solidity.Op0.denote_same {s : Srt} (o : Op0 C s)
   · cases o <;> first | rfl | exact absurd hf Bool.false_ne_true
 
 theorem _root_.Solidity.Op1.denote_same {a s : Srt} (o : Op1 C a s)
-    (hc : g₀ = g₁ ∨ o.globFree = true) (d : a.TDen) : o.denote g₀ d = o.denote g₁ d := by
+    (hc : g₀ = g₁ ∨ o.globFree = true) (d : a.TDen C) : o.denote g₀ d = o.denote g₁ d := by
   rcases hc with rfl | hf
   · rfl
   · cases o <;> first | rfl | exact absurd hf Bool.false_ne_true
@@ -61,7 +60,7 @@ not. -/
 theorem _root_.Solidity.Op2.denote_same {a b s : Srt} (o : Op2 C a b s)
     (hc : g₀ = g₁ ∨ o.globFree = true) {x : Option (a.Den C g₀.H)} {x' : Option (a.Den C g₁.H)}
     {y : Option (b.Den C g₀.H)} {y' : Option (b.Den C g₁.H)}
-    (hx : Srt.SameO a x x') (hy : Srt.SameO b y y') (da : a.TDen) (db : b.TDen) :
+    (hx : Srt.SameO a x x') (hy : Srt.SameO b y y') (da : a.TDen C) (db : b.TDen C) :
     o.denote g₀ x y da db = o.denote g₁ x' y' da db := by
   rcases hc with rfl | hf
   · rw [Srt.SameO.eq hx, Srt.SameO.eq hy]
@@ -71,12 +70,12 @@ end DenoteSame
 
 /-! ## A term read in the state before an update, in the Theory -/
 
-/-- An alias denotes the path it holds, `[]` unset. -/
+/-- An alias denotes the location it holds, a dangling one unset. -/
 theorem Tm.denote_pvP {Γ : Ctx} (σ : State C Γ) {R : RefTy} (i : Idx Γ (.alias R)) :
-    (Tm.pvP i).denote σ = ((σ.getV i).map SRef.absT).getD [] := by
+    (Tm.pvP i).denote σ = ((σ.getV i).map SLoc.ref).getD (.dangling _ .nil) := by
   show (match (TEnv.get i σ.env : Option (SRef C (.ref R))) with
-    | some r => r.absT | none => []) =
-      ((TEnv.get i σ.env : Option (SRef C (.ref R))).map SRef.absT).getD []
+    | some r => SLoc.ref r | none => .dangling _ .nil) =
+      ((TEnv.get i σ.env : Option (SRef C (.ref R))).map SLoc.ref).getD (.dangling _ .nil)
   cases (TEnv.get i σ.env : Option (SRef C (.ref R))) <;> rfl
 
 section Denote
@@ -98,7 +97,7 @@ theorem Tm.denote_substH (hL : U.Lands σ₀ g σ₁) :
     | .pos j, hx, h =>
       cases h
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
-      show StValue.prim _ = StValue.prim _
+      show some _ = some _
       rw [hx]
     | .rhs (.val t), hx, h =>
       cases h
@@ -201,7 +200,7 @@ theorem Tm.denote_substH (hL : U.Lands σ₀ g σ₁) :
     | .pos j, hx, h =>
       cases h
       have hx : TEnv.get i σ₁.env = TEnv.get j σ₀.env := hx
-      show StValue.prim _ = StValue.prim _
+      show some _ = some _
       rw [hx]
     | .rhs (.zint t), hx, h =>
       cases h
@@ -442,7 +441,7 @@ theorem Proves.definedLit {p : PrimTy} {v : p.Denote} (hb : H.boxOnly = true := 
 theorem Proves.eqRefl {p : PrimTy} {t : Tm C Γ (.val p)} (hb : H.boxOnly = true := by first | rfl | decide)
     (hm : (H.wrap (.eq t t)).modalFree = true := by first | rfl | decide) :
     Proves C R Γ₀ H (.eq t t) :=
-  .closeHolds (fun σ => H.wrap_valid (φ := .eq t t) hb (fun _ => Equiv.refl _) σ) hm
+  .closeHolds (fun σ => H.wrap_valid (φ := .eq t t) hb (fun _ => rfl) σ) hm
 
 /-- **`eqClose`**: `v ≐ v`, behind a context with no diamond. -/
 theorem Proves.eqClose {p : PrimTy} {v : p.Denote} (hb : H.boxOnly = true := by first | rfl | decide)
@@ -458,7 +457,7 @@ theorem Proves.eqDClose {p : PrimTy} {v : p.Denote} (hb : H.boxOnly = true := by
       first | rfl | decide) :
     Proves C R Γ₀ H (Fml.eqD (.app0 (.lit v)) (.app0 (.lit v))) :=
   .closeHolds (fun σ => H.wrap_valid (φ := Fml.eqD (.app0 (.lit v)) (.app0 (.lit v))) hb
-    (fun _ => ⟨fun h => Option.noConfusion h, fun h => Option.noConfusion h, Equiv.refl _⟩) σ) hm
+    (fun _ => ⟨fun h => Option.noConfusion h, fun h => Option.noConfusion h, rfl⟩) σ) hm
 
 /-- **`applyOnRigidFormula` under the box**: the last update applied to a
 first-order goal and dropped (`Fml.substU`).  The goal reads no global part

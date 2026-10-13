@@ -106,7 +106,7 @@ theorem Simple.lower_evalT {p : PrimTy} (s : Simple C Γ p) :
 
 /-- A simple value denotes its typed value. -/
 theorem Simple.denote_lowerT {p : PrimTy} (s : Simple C Γ p) :
-    s.lower.denote σ = .prim (PrimTy.erase (s.evalT σ)) :=
+    s.lower.denote σ = some (s.evalT σ) :=
   Tm.denote_eval σ s.lower _ (Simple.lower_evalT σ s)
 
 /-- The word a key is hashed as, at its key type (`Tm.keyAt`). -/

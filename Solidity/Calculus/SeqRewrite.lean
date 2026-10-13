@@ -42,7 +42,6 @@ exemption of `Calculus/Graft.lean`'s functions): they run once a rule.
 namespace Solidity
 
 open Solidity (Srt Op0 Op1 Op2 Op3 Modality)
-open Theory Theory.StValue
 
 variable {C : Contract}
 
@@ -222,9 +221,8 @@ theorem Tm.EvalRefines.of_theq {t t' : Tm C [] (.val p)} (h : Tm.Theq t t')
   | none => simp only [Tm.isLit, hl, Option.isSome_none, Bool.false_eq_true] at ht
   | some v =>
     obtain rfl := Tm.eq_of_litVal? hl
-    have e : StValue.prim (PrimTy.erase v) = .prim (PrimTy.erase x) :=
-      (Theory.StValue.Equiv.prim_iff.1 e.symm)
-    rw [PrimTy.erase_injective (StValue.prim.inj e)]
+    have e : some v = some x := e.symm
+    rw [Option.some.inj e]
     rfl
 
 end RwC
@@ -795,7 +793,7 @@ end Clauses
 
 theorem Tm.sideC_denote {q : Tm C [] (.val p) × Tm C [] (.val p)} (hq : Tm.Theq q.1 q.2)
     (σ : State C Γ) {p' : PrimTy} (t : Tm C Γ (.val p')) :
-    Equiv ((t.sideC q).denote σ) (t.denote σ) := by
+    (t.sideC q).denote σ = t.denote σ := by
   unfold Tm.sideC
   split
   · rename_i e
@@ -804,8 +802,8 @@ theorem Tm.sideC_denote {q : Tm C [] (.val p) × Tm C [] (.val p)} (hq : Tm.Theq
     · rename_i hc
       rw [Tm.denote_ofNil σ, Tm.denote_closedAs hc σ]
       exact (hq σ.toNil).symm
-    · exact Equiv.refl _
-  · exact Equiv.refl _
+    · rfl
+  · rfl
 
 /-- **A formula rewritten by a Theory equation holds where it does.** -/
 theorem Fml.rwEqC_holds {q : Tm C [] (.val p) × Tm C [] (.val p)} (hq : Tm.Theq q.1 q.2) :
@@ -814,9 +812,7 @@ theorem Fml.rwEqC_holds {q : Tm C [] (.val p) × Tm C [] (.val p)} (hq : Tm.Theq
   | _, .eq a b, σ => by
     show holds σ (.eq (a.sideC q) (b.sideC q)) ↔ holds σ (.eq a b)
     rw [holds_eq, holds_eq]
-    have ha := Tm.sideC_denote hq σ a
-    have hb := Tm.sideC_denote hq σ b
-    exact ⟨fun h => (ha.symm.trans h).trans hb, fun h => (ha.trans h).trans hb.symm⟩
+    rw [Tm.sideC_denote hq σ a, Tm.sideC_denote hq σ b]
   | _, .defined _, _ => Iff.rfl
   | _, .not φ, σ => not_congr (Fml.rwEqC_holds hq φ σ)
   | _, .and φ ψ, σ => and_congr (Fml.rwEqC_holds hq φ σ) (Fml.rwEqC_holds hq ψ σ)

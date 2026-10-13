@@ -272,11 +272,11 @@ theorem eval_write {T : Ty} (m : Tm C Γ .mem) (a : Tm C Γ (.addr T)) (v : Tm C
       (v.eval σ).bind fun w => g.writeT ad w := rfl
 
 theorem denote_lit {p : PrimTy} (v : p.Denote) :
-    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = .prim (PrimTy.erase v) := rfl
+    (Tm.app0 (.lit v) : Tm C Γ (.val p)).denote σ = some v := rfl
 theorem denote_env (k : EnvKey) :
-    (Tm.app0 (.env k) : Tm C Γ (.val .uint)).denote σ = .prim (PrimTy.erase (σ.envVal k)) := rfl
+    (Tm.app0 (.env k) : Tm C Γ (.val .uint)).denote σ = some (σ.envVal k) := rfl
 theorem denote_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
-    (Tm.pvV i : Tm C Γ (.val p)).denote σ = .prim (PrimTy.erase (σ.locV _ i)) := rfl
+    (Tm.pvV i : Tm C Γ (.val p)).denote σ = some (σ.locV _ i) := rfl
 
 end Terms
 
@@ -685,7 +685,7 @@ theorem holds_and (σ : State C Γ) (φ ψ : Fml C Γ) :
 theorem holds_imp (σ : State C Γ) (φ ψ : Fml C Γ) :
     holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
 theorem holds_eq {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
-    holds σ (.eq a b) ↔ Theory.StValue.Equiv (a.denote σ) (b.denote σ) := Iff.rfl
+    holds σ (.eq a b) ↔ a.denote σ = b.denote σ := Iff.rfl
 theorem holds_defined {p : PrimTy} (σ : State C Γ) (t : Tm C Γ (.val p)) :
     holds σ (.defined t) ↔ Modality.diamond.wp (Close.optRes (t.eval σ)) fun _ => True := by
   show t.eval σ ≠ none ↔ _
@@ -821,8 +821,7 @@ attribute [close_rw_s]
   CloseS.uint_eq_mk CloseS.int_eq_mk CloseS.mk_eq_uint CloseS.mk_eq_int and_assoc exists_prop
   BinOp.evalNum BinOp.evalBool BinOp.arithInt UnOp.evalT PrimTy.inRange
   CloseS.natCast_ofNat
-  CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Close.equiv_prim_left_iff
-  Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
+  CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Option.some.injEq
   -- the typed state
   State.locV_push State.locV_setLocal State.locV_drop State.locV_thin CloseS.locV_havoc
   CloseS.glob_storage CloseS.glob_net CloseS.glob_selfBalance CloseS.glob_tx CloseS.glob_envVal

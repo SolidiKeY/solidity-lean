@@ -34,7 +34,8 @@ symbols, which print so.
 
 namespace Solidity
 
-open Semantics Theory Theory.StValue
+open Semantics
+open Theory.StValue (lengthSeg asInt)
 open Solidity (Srt Op0 Op1 Op2 Op3)
 
 variable {C : Contract}
@@ -535,20 +536,72 @@ def Tm.extendsIn {sn : Name} {T U : Ty} (q : Tm C Γ (.spath sn T)) (p : Tm C Γ
 
 end Side
 
-/-! ## The side conditions in the Theory -/
+/-! ## The side conditions in the Theory
+
+A path term denotes a storage location (`SLoc`); the side conditions are
+read off its segments (`SLoc.segs`: the root, then the path), which the
+shapes match, and give the Theory's location facts: two paths that part
+are not below one another (`ObsLoc.strip? … = none`), a path that extends
+another is it followed by a path. -/
+
+/-- A storage reference's segments: the state variable, then its path. -/
+def SRef.segs {C : Contract} {T : Ty} (r : SRef C T) : List Seg := .field r.root :: r.path.erase
+
+/-- A storage location's segments: a reference's, a dangling location's
+path alone. -/
+def SLoc.segs {C : Contract} {T : Ty} : SLoc C T → List Seg
+  | .ref r => r.segs
+  | .dangling _ p => p.erase
+
+theorem SLoc.segs_app {C : Contract} {T U : Ty} (l : SLoc C T) (p : Path T U) :
+    (ObsLoc.app l p).segs = l.segs ++ p.erase := by
+  cases l <;> simp only [ObsLoc.app, SLoc.app, SLoc.segs, SRef.segs, SRef.append,
+    Path.erase_append, List.cons_append]
+
+/-- Two lists that part are not one the other's prefix, either way. -/
+theorem diverges_append_ne : (a b : List Seg) → Theory.StValue.diverges a b = true →
+    ∀ x y : List Seg, a ++ x ≠ b ++ y
+  | [], _, h, _, _, _ => by simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+  | _ :: _, [], h, _, _, _ => by simp only [Theory.StValue.diverges, Bool.false_eq_true] at h
+  | a :: p, b :: q, h, x, y, e => by
+    simp only [List.cons_append, List.cons.injEq] at e
+    obtain ⟨rfl, e⟩ := e
+    simp only [Theory.StValue.diverges, if_true] at h
+    exact diverges_append_ne p q h x y e
+
+/-- **Locations whose segments part**: neither is below the other. -/
+theorem SLoc.strip?_none_of_diverges {C : Contract} {U W : Ty} {p : SLoc C U} {q : SLoc C W}
+    (h : Theory.StValue.diverges p.segs q.segs = true) :
+    ∀ {V : Ty} (r : Path W V), ObsLoc.strip? p (ObsLoc.app q r) = none := by
+  intro V r
+  cases hs : ObsLoc.strip? p (ObsLoc.app q r) with
+  | none => rfl
+  | some r' =>
+    exfalso
+    have e := congrArg SLoc.segs (ObsLoc.eq_of_strip? p _ hs)
+    rw [SLoc.segs_app, SLoc.segs_app] at e
+    exact diverges_append_ne _ _ h _ _ e.symm
+
+/-- **A location that parts from an array's length** is not at or above
+the array. -/
+theorem SLoc.strip?_none_of_divergesLen {C : Contract} {U E : Ty} {q : SLoc C U}
+    {p : SLoc C (.ref (.array E))}
+    (h : Theory.StValue.diverges q.segs (p.segs ++ [lengthSeg]) = true) :
+    ObsLoc.strip? q p = none := by
+  cases hs : ObsLoc.strip? q p with
+  | none => rfl
+  | some r =>
+    exfalso
+    have e := congrArg SLoc.segs (ObsLoc.eq_of_strip? q p hs)
+    rw [SLoc.segs_app] at e
+    refine diverges_append_ne _ _ h (r.erase ++ [lengthSeg]) [] ?_
+    rw [e, List.append_nil, List.append_assoc]
 
 /-- A sort's Theory denotation as segments: a path's, `[]` for the rest. -/
-def Srt.segs : (u : Srt) → u.TDen → List Seg
-  | .path _, d => d
-  | .spath _ _, d => d
+def Srt.segs : (u : Srt) → u.TDen C → List Seg
+  | .path _, d => d.segs
+  | .spath _ _, d => d.segs
   | _, _ => []
-
-/-- A sort's Theory denotation as a storage: a storage's, `mtSt` for the
-rest. -/
-def Srt.stDen : (u : Srt) → u.TDen → Struct
-  | .st, d => d
-  | .sts _, d => d
-  | _, _ => .mtSt
 
 /-- The sort of a path below a storage sort's roots: from the contract's
 roots for a storage, from the members under a `select`. -/
@@ -556,40 +609,55 @@ roots for a storage, from the members under a `select`. -/
   | .sts sn, T => .spath sn T
   | _, T => .path T
 
-/-- The node at `p` in `s` is not a mapping, in every state: `s` a storage,
-or a storage of members (`select`) and `p` a member path. -/
+/-- The storage contract of a storage sort. -/
+@[reducible] def Srt.stC (C : Contract) : Srt → Contract
+  | .sts sn => Contract.ofStruct sn
+  | _ => C
+
+/-- **A delete at `p` resets every word below it**, in every state: no
+mapping's entry and no slot past an array's live end below `p` in `s`
+(both of which a delete keeps; `TVal.delR`).  `s` a storage, or a storage of
+members (`select`) and `p` a member path. -/
 def Tm.KindFreeAt {Γ : Ctx} {u : Srt} {T : Ty} (s : Tm C Γ u) (p : Tm C Γ (u.pathAt T)) : Prop :=
-  ∀ σ : State C Γ, (findSt (u.stDen (s.denote σ)) ((u.pathAt T).segs (p.denote σ))).kindFree = true
+  match u, s, p with
+  | .st, s, p => ∀ (σ : State C Γ) {P : PrimTy} (r : Path T (.prim P)),
+      TVal.delR (Comp.word P) ((s.denote σ).find (p.denote σ)) r = PrimTy.dflt P
+  | .sts _, s, p => ∀ (σ : State C Γ) {P : PrimTy} (r : Path T (.prim P)),
+      TVal.delR (Comp.word P) ((s.denote σ).find (p.denote σ)) r = PrimTy.dflt P
+  | _, _, _ => True
 
 section SideDenote
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-/-- `hasSeg` gives the Theory's `p ≠ []` in every state. -/
-theorem Tm.denote_ne_nil {T : Ty} {p : Tm C Γ (.path T)} (hp : p.hasSeg = true) :
-    p.denote σ ≠ [] := by
-  cases p with
-  | pvP _ => exact absurd hp Bool.false_ne_true
-  | app0 o => cases o; exact List.cons_ne_nil _ _
-  | app1 o _ => cases o <;> exact List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)
-  | app2 o _ _ => cases o <;> exact List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)
-  | app3 o _ _ _ => cases o; exact List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)
+/-- An index read as the Theory's `int`: the integer it is hashed as. -/
+theorem asInt_erase_keyTy {k : PrimTy} (i : k.keyTy.Denote) :
+    asInt (.prim (PrimTy.erase i)) = PrimTy.key i := by
+  cases k <;> rfl
 
 /-- A literal reads its word in the Theory. -/
 theorem Tm.litW?_denote {p : PrimTy} {t : Tm C Γ (.val p)} {w : (p : PrimTy) × p.Denote}
-    (h : t.litW? = some w) : t.denote σ = .prim (PrimTy.erase w.2) := by
+    (h : t.litW? = some w) : ∃ e : w.1 = p, t.denote σ = some (e ▸ w.2) := by
   cases t with
   | app0 o =>
     cases o with
-    | lit v => cases h; rfl
+    | lit v => cases h; exact ⟨rfl, rfl⟩
     | _ => cases h
   | _ => cases h
 
 /-- An index literal reads its integer in the Theory. -/
-theorem Tm.litInt?_denote {p : PrimTy} {t : Tm C Γ (.val p)} {i : Int} (h : t.litInt? = some i) :
-    asInt (t.denote σ) = i := by
+theorem Tm.litInt?_denote {k : PrimTy} {t : Tm C Γ (.val k.keyTy)} {i : Int}
+    (h : t.litInt? = some i) : PrimTy.key ((t.denote σ).getD (PrimTy.dflt _)) = i := by
   obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.1 h
-  rw [Tm.litW?_denote σ hw]
+  obtain ⟨e, hd⟩ := Tm.litW?_denote σ hw
+  obtain ⟨P, w⟩ := w
+  dsimp only at e
+  subst e
+  rw [hd, Option.getD_some]
+  exact (asInt_erase_keyTy w).symm
+
+theorem Path.erase_index' {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
+    (Path.index it i).erase = [.at i] := Path.erase_index it i
 
 /-- A path has its shape in every state; generic in the sort, a path's
 segments read by `Srt.segs`. -/
@@ -601,26 +669,32 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
     cases o with
     | root r hr =>
       cases h
-      simp only [Srt.segs, Tm.denote, Op0.denote, rootPath, SegT.matches, SegT.fits,
-        beq_self_eq_true, Bool.and_self]
+      simp only [Srt.segs, Tm.denote, Op0.denote, SLoc.segs, SRef.segs, SRef.ofRoot, Path.erase,
+        SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | member sn f hf =>
       cases h
-      simp only [Srt.segs, Tm.denote, Op0.denote, rootPath, SegT.matches, SegT.fits,
-        beq_self_eq_true, Bool.and_self]
+      simp only [Srt.segs, Tm.denote, Op0.denote, SLoc.segs, SRef.segs, SRef.ofRoot, Path.erase,
+        SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | _ => cases h
   | app1 o x ih =>
     intro a h
     cases o with
     | field hf =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.segs_app]
       exact SegT.matches_append _ _ _ _ (ih ha)
-        (by simp only [SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
+        (by simp only [Path.erase, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
     | fieldIn hf =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.segs_app]
       exact SegT.matches_append _ _ _ _ (ih ha)
-        (by simp only [SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
+        (by simp only [Path.erase, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
     | next =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.segs_app]
       exact SegT.matches_append _ _ _ _ (ih ha) rfl
     | _ => cases h
   | app2 o x y ihx ihy =>
@@ -628,15 +702,18 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
     cases o with
     | «at» it =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.segs_app, Path.erase_index']
       refine SegT.matches_append _ _ _ _ (ihx ha) ?_
       cases hi : Tm.litInt? y with
       | none => rfl
       | some k =>
         have hk := Tm.litInt?_denote σ hi
-        show SegT.matches [.at (some k)] [.at (asInt (y.denote σ))] = true
         simp only [hk, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | nextIn =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      show SegT.matches _ (SLoc.segs (ObsLoc.app (y.denote σ) _)) = true
+      rw [SLoc.segs_app]
       exact SegT.matches_append _ _ _ _ (ihy ha) rfl
     | _ => cases h
   | app3 o x y z _ ihy _ =>
@@ -644,34 +721,37 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
     cases o with
     | atIn it =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
+      show SegT.matches _ (SLoc.segs (ObsLoc.app (y.denote σ) _)) = true
+      rw [SLoc.segs_app, Path.erase_index']
       refine SegT.matches_append _ _ _ _ (ihy ha) ?_
       cases hi : Tm.litInt? z with
       | none => rfl
       | some k =>
         have hk := Tm.litInt?_denote σ hi
-        show SegT.matches [.at (some k)] [.at (asInt (z.denote σ))] = true
         simp only [hk, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | _ => cases h
   | _ => intro a h; cases h
 
 /-- A path has its shape in every state. -/
 theorem Tm.shape?_matches {T : Ty} (p : Tm C Γ (.path T)) {a : List SegT}
-    (h : p.shape? = some a) : SegT.matches a (p.denote σ) = true :=
+    (h : p.shape? = some a) : SegT.matches a (p.denote σ).segs = true :=
   Tm.shape?_matches' σ p h
 
-/-- `Tm.diverges` gives the Theory's `diverges` in every state. -/
-theorem Tm.diverges_denote {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
-    (h : p.diverges q = true) : Theory.StValue.diverges (p.denote σ) (q.denote σ) = true := by
+/-- `Tm.diverges` gives the Theory's `diverges` on the locations' segments. -/
+theorem Tm.diverges_segs {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
+    (h : p.diverges q = true) :
+    Theory.StValue.diverges (p.denote σ).segs (q.denote σ).segs = true := by
   unfold Tm.diverges at h
   split at h
   · rename_i a b ha hb
     exact SegT.diverges_sound a b _ _ h (p.shape?_matches σ ha) (q.shape?_matches σ hb)
   · exact absurd h Bool.false_ne_true
 
-/-- `Tm.divergesLen` gives the Theory's `diverges q (p ++ [lengthSeg])`. -/
-theorem Tm.divergesLen_denote {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
+/-- `Tm.divergesLen` gives the Theory's `diverges q (p ++ [lengthSeg])` on
+the segments. -/
+theorem Tm.divergesLen_segs {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) :
-    Theory.StValue.diverges (q.denote σ) (p.denote σ ++ [lengthSeg]) = true := by
+    Theory.StValue.diverges (q.denote σ).segs ((p.denote σ).segs ++ [lengthSeg]) = true := by
   unfold Tm.divergesLen at h
   split at h
   · rename_i a b ha hb
@@ -679,55 +759,106 @@ theorem Tm.divergesLen_denote {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.
       (SegT.matches_append _ _ _ _ (p.shape?_matches σ hb) (by decide))
   · exact absurd h Bool.false_ne_true
 
-/-- A check erased leaves the Theory's path, in every state; generic in the
-sort. -/
+/-- `Tm.diverges` gives two locations neither below the other, in every
+state. -/
+theorem Tm.diverges_denote {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
+    (h : p.diverges q = true) :
+    ∀ {V : Ty} (r : Path U V), ObsLoc.strip? (p.denote σ) (ObsLoc.app (q.denote σ) r) = none := by
+  unfold Tm.diverges at h
+  split at h
+  · rename_i a b ha hb
+    exact SLoc.strip?_none_of_diverges
+      (SegT.diverges_sound a b _ _ h (p.shape?_matches σ ha) (q.shape?_matches σ hb))
+  · exact absurd h Bool.false_ne_true
+
+/-- `Tm.diverges` read at the location itself. -/
+theorem Tm.diverges_denote_nil {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
+    (h : p.diverges q = true) : ObsLoc.strip? (p.denote σ) (q.denote σ) = none := by
+  have e := Tm.diverges_denote σ h .nil
+  rwa [ObsLoc.app_nil] at e
+
+/-- `Tm.divergesLen` gives a location not at or above the array. -/
+theorem Tm.divergesLen_denote {T E : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path (.ref (.array E)))}
+    (h : q.divergesLen p = true) : ObsLoc.strip? (q.denote σ) (p.denote σ) = none := by
+  unfold Tm.divergesLen at h
+  split at h
+  · rename_i a b ha hb
+    exact SLoc.strip?_none_of_divergesLen (SegT.diverges_sound _ _ _ _ h (q.shape?_matches σ ha)
+      (SegT.matches_append _ _ _ _ (p.shape?_matches σ hb) (by decide)))
+  · exact absurd h Bool.false_ne_true
+
+/-- A check erased leaves the Theory's location, in every state; generic in
+the sort. -/
 theorem Tm.eraseChecks_denote' {u : Srt} (p : Tm C Γ u) :
     p.eraseChecks.denote σ = p.denote σ := by
   induction p with
   | app1 o x ih =>
-    cases o <;> first | rfl | (show x.eraseChecks.denote σ ++ _ = x.denote σ ++ _; rw [ih])
+    cases o <;> first
+      | rfl
+      | (show ObsLoc.app (x.eraseChecks.denote σ) _ = ObsLoc.app (x.denote σ) _; rw [ih])
+      | (show ObsLoc.app (x.eraseChecks.denote σ) (.at (σ.glob.storage.obs.len
+            (x.eraseChecks.denote σ) : Int) .nil) = ObsLoc.app (x.denote σ) (.at (σ.glob.storage.obs.len
+            (x.denote σ) : Int) .nil); rw [ih])
   | app2 o x y ihx ihy =>
     cases o <;>
       first
       | rfl
-      | (show x.eraseChecks.denote σ ++ _ = x.denote σ ++ _; rw [ihx])
-      | (show y.eraseChecks.denote σ ++ _ = y.denote σ ++ _; rw [ihy])
+      | (show ObsLoc.app (x.eraseChecks.denote σ) _ = ObsLoc.app (x.denote σ) _; rw [ihx])
+      | (show ObsLoc.app (y.eraseChecks.denote σ) (.at (Obs.len (x.denote σ)
+            (y.eraseChecks.denote σ) : Int) .nil) = ObsLoc.app (y.denote σ) (.at (Obs.len
+            (x.denote σ) (y.denote σ) : Int) .nil); rw [ihy])
   | app3 o x y z _ ihy _ =>
-    cases o <;> first | rfl | (show y.eraseChecks.denote σ ++ _ = y.denote σ ++ _; rw [ihy])
+    cases o <;> first | rfl | (show ObsLoc.app (y.eraseChecks.denote σ) _ = ObsLoc.app (y.denote σ) _; rw [ihy])
   | _ => rfl
 
 theorem Tm.eraseChecks_denote {T : Ty} (p : Tm C Γ (.path T)) :
     p.eraseChecks.denote σ = p.denote σ :=
   Tm.eraseChecks_denote' σ p
 
-/-- `sameSegs` gives one Theory path in every state. -/
-theorem Tm.sameSegs_denote {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
-    (h : p.sameSegs q = true) : p.denote σ = q.denote σ := by
+/-- `sameSegs` gives one location in every state, at one type. -/
+theorem Tm.sameSegs_heq {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
+    (h : p.sameSegs q = true) : T = U ∧ HEq (p.denote σ) (q.denote σ) := by
   rw [← Tm.eraseChecks_denote σ p, ← Tm.eraseChecks_denote σ q]
   have e := Tm.sigma_eq_of_beqR h
   generalize p.eraseChecks = p' at e
   generalize q.eraseChecks = q' at e
   cases e
-  rfl
+  exact ⟨rfl, HEq.rfl⟩
 
-/-- `q.extends p` gives the Theory's `q = p ++ r`, `r ≠ []`, in every
+theorem Tm.sameSegs_denote {T : Ty} {p q : Tm C Γ (.path T)} (h : p.sameSegs q = true) :
+    p.denote σ = q.denote σ :=
+  eq_of_heq (Tm.sameSegs_heq σ h).2
+
+/-- A location below another: it followed by a path that goes somewhere. -/
+def Srt.Below {U : Ty} (l : SLoc C U) : (u : Srt) → u.TDen C → Prop
+  | .path T, d => ∃ r : Path U T, r.erase ≠ [] ∧ d = ObsLoc.app l r
+  | _, _ => False
+
+/-- A member location below another under a `select` of `s`. -/
+def Srt.BelowIn {s : Name} {U : Ty} (l : SLoc (Contract.ofStruct s) U) :
+    (u : Srt) → u.TDen C → Prop
+  | .spath s' T, d => ∀ e : s' = s, ∃ r : Path U T, r.erase ≠ [] ∧
+      (e ▸ d : SLoc (Contract.ofStruct s) T) = ObsLoc.app l r
+  | _, _ => False
+
+/-- `q.extends p` gives `q`'s location `p`'s followed by a path, in every
 state; generic in the sort. -/
 theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C Γ u) :
-    q.extendsAny (·.beqR p) = true →
-      ∃ r, r ≠ [] ∧ u.segs (q.denote σ) = p.denote σ ++ r := by
+    q.extendsAny (·.beqR p) = true → Srt.Below (p.denote σ) u (q.denote σ) := by
   induction q with
   | app1 o x ih =>
     intro h
     cases o with
     | field hf =>
-      rename_i f _
       rcases Bool.or_eq_true_iff.mp h with h | h
       · cases Tm.sigma_eq_of_beqR h
-        exact ⟨[.field f], List.cons_ne_nil _ _, rfl⟩
-      · obtain ⟨r, -, hq⟩ := ih h
-        refine ⟨r ++ [.field f], List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _), ?_⟩
-        show x.denote σ ++ _ = _
-        rw [show x.denote σ = _ from hq, List.append_assoc]
+        exact ⟨.field hf .nil, by simp only [Path.erase, ne_eq, reduceCtorEq,
+          not_false_eq_true], rfl⟩
+      · obtain ⟨r, hr, hq⟩ := ih h
+        refine ⟨r.append (.field hf .nil), ?_, ?_⟩
+        · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+        · show ObsLoc.app (x.denote σ) _ = _
+          rw [hq, ObsLoc.app_app]
     | _ => cases h
   | app2 o x y ihx _ =>
     intro h
@@ -735,12 +866,13 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
     | «at» it =>
       rcases Bool.or_eq_true_iff.mp h with h | h
       · cases Tm.sigma_eq_of_beqR h
-        exact ⟨[.at (asInt (y.denote σ))], List.cons_ne_nil _ _, rfl⟩
-      · obtain ⟨r, -, hq⟩ := ihx h
-        refine ⟨r ++ [.at (asInt (y.denote σ))],
-          List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _), ?_⟩
-        show x.denote σ ++ _ = _
-        rw [show x.denote σ = _ from hq, List.append_assoc]
+        exact ⟨_, by rw [Path.erase_index']; simp only [ne_eq, reduceCtorEq,
+          not_false_eq_true], rfl⟩
+      · obtain ⟨r, hr, hq⟩ := ihx h
+        refine ⟨r.append (Path.index it (PrimTy.key ((y.denote σ).getD (PrimTy.dflt _)))), ?_, ?_⟩
+        · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+        · show ObsLoc.app (x.denote σ) _ = _
+          rw [hq, ObsLoc.app_app]
     | _ => cases h
   | app3 o x y z _ ihy _ =>
     intro h
@@ -748,26 +880,29 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
     | atIn it =>
       rcases Bool.or_eq_true_iff.mp h with h | h
       · cases Tm.sigma_eq_of_beqR h
-        exact ⟨[.at (asInt (z.denote σ))], List.cons_ne_nil _ _, rfl⟩
-      · obtain ⟨r, -, hq⟩ := ihy h
-        refine ⟨r ++ [.at (asInt (z.denote σ))],
-          List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _), ?_⟩
-        show y.denote σ ++ _ = _
-        rw [show y.denote σ = _ from hq, List.append_assoc]
+        exact ⟨_, by rw [Path.erase_index']; simp only [ne_eq, reduceCtorEq,
+          not_false_eq_true], rfl⟩
+      · obtain ⟨r, hr, hq⟩ := ihy h
+        refine ⟨r.append (Path.index it (PrimTy.key ((z.denote σ).getD (PrimTy.dflt _)))), ?_, ?_⟩
+        · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+        · show ObsLoc.app (y.denote σ) _ = _
+          rw [hq, ObsLoc.app_app]
     | _ => cases h
   | _ => intro h; cases h
 
 theorem Tm.extends_denote {T U : Ty} {p : Tm C Γ (.path U)} (q : Tm C Γ (.path T))
-    (h : q.extends p = true) : ∃ r, r ≠ [] ∧ q.denote σ = p.denote σ ++ r :=
-  Tm.extends_denote' σ q h
+    (h : q.extends p = true) :
+    ∃ r : Path U T, r.erase ≠ [] ∧ q.denote σ = ObsLoc.app (p.denote σ) r := by
+  exact Tm.extends_denote' σ q h
 
-/-- What `shift?` gives splits the Theory's path at its head. -/
-def Srt.ShiftOK' (σ : State C Γ) : (u : Srt) → u.ShiftD C Γ → u.TDen → Prop
-  | .path _, sh, d => d = .field sh.r :: sh.p.denote σ ∧ sh.p.denote σ ≠ []
+/-- What `shift?` gives splits the location at its head: the member path
+under the root. -/
+def Srt.ShiftOK' (σ : State C Γ) : (u : Srt) → u.ShiftD C Γ → u.TDen C → Prop
+  | .path _, sh, d => d = (sh.p.denote σ).under sh.h
   | _, _, _ => True
 
 /-- What `shift?` gives, if anything, splits the path; generic in the sort. -/
-def Srt.ShiftOK (σ : State C Γ) (u : Srt) (o : Option (u.ShiftD C Γ)) (d : u.TDen) : Prop :=
+def Srt.ShiftOK (σ : State C Γ) (u : Srt) (o : Option (u.ShiftD C Γ)) (d : u.TDen C) : Prop :=
   ∀ sh, o = some sh → Srt.ShiftOK' σ u sh d
 
 theorem Tm.shift?_ok {u : Srt} (p : Tm C Γ u) : Srt.ShiftOK σ u p.shift? (p.denote σ) := by
@@ -786,32 +921,34 @@ theorem Tm.shift?_ok {u : Srt} (p : Tm C Γ u) : Srt.ShiftOK σ u p.shift? (p.de
         rw [hx] at h
         obtain ⟨r, hr⟩ := rr
         cases h
-        have hd : x.denote σ = [.field r] := by
+        have hd : x.denote σ = .ref (SRef.ofRoot r hr) := by
           cases x with
           | app0 o =>
             cases o with
             | root r' hr' => cases hx; rfl
             | _ => cases hx
           | _ => cases hx
-        exact ⟨by show x.denote σ ++ _ = _; rw [hd]; rfl, List.cons_ne_nil _ _⟩
+        show ObsLoc.app (x.denote σ) _ = _
+        rw [hd]
+        simp only [ObsLoc.app, SLoc.app, SRef.ofRoot, SRef.append, Path.append_nil, Tm.denote,
+          Op0.denote, SLoc.under, SRef.under]
       | none =>
         rw [hx] at h
         obtain ⟨sh', hs, rfl⟩ := Option.map_eq_some_iff.1 h
-        obtain ⟨ih, -⟩ := ih sh' hs
-        exact ⟨by show x.denote σ ++ _ = _; rw [ih]; rfl,
-          List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)⟩
+        have ih' : x.denote σ = (sh'.p.denote σ).under sh'.h := ih sh' hs
+        show ObsLoc.app (x.denote σ) _ = (ObsLoc.app (sh'.p.denote σ) _).under sh'.h
+        rw [ih', SLoc.under_app]
     | _ => intro sh h; cases h
   | _ => intro sh h; cases h
 
-/-- `shift?` splits the Theory's path at its head, in every state; the rest
-has a segment. -/
+/-- `shift?` splits the location at its head, in every state. -/
 theorem Tm.shift?_denote {T : Ty} (p : Tm C Γ (.path T)) {sh : Shifted C Γ T}
-    (h : p.shift? = some sh) : p.denote σ = .field sh.r :: sh.p.denote σ ∧ sh.p.denote σ ≠ [] := by
-  exact Tm.shift?_ok σ p sh h
+    (h : p.shift? = some sh) : p.denote σ = (sh.p.denote σ).under sh.h :=
+  Tm.shift?_ok σ p sh h
 
-/-- What `shiftIn?` gives splits the Theory's member path at its head. -/
-def Srt.ShiftInOK (σ : State C Γ) : (u : Srt) → u.ShiftInD C Γ → u.TDen → Prop
-  | .spath _ _, sh, d => d = .field sh.f :: sh.p.denote σ ∧ sh.p.denote σ ≠ []
+/-- What `shiftIn?` gives splits the member location at its head. -/
+def Srt.ShiftInOK (σ : State C Γ) : (u : Srt) → u.ShiftInD C Γ → u.TDen C → Prop
+  | .spath _ _, sh, d => d = SLoc.under (C := Contract.ofStruct _) sh.h (sh.p.denote σ)
   | _, _, _ => True
 
 theorem Tm.shiftIn?_ok {u : Srt} (p : Tm C Γ u) :
@@ -831,30 +968,50 @@ theorem Tm.shiftIn?_ok {u : Srt} (p : Tm C Γ u) :
         rw [hx] at h
         obtain ⟨f, hf⟩ := mm
         cases h
-        have hd : x.denote σ = [.field f] := by
+        have hd : x.denote σ = .ref (SRef.ofRoot (C := Contract.ofStruct s) f hf) := by
           cases x with
           | app0 o =>
             cases o with
             | member _ f' hf' => cases hx; rfl
             | _ => cases hx
           | _ => cases hx
-        exact ⟨by show x.denote σ ++ _ = _; rw [hd]; rfl, List.cons_ne_nil _ _⟩
+        show ObsLoc.app (x.denote σ) _ = _
+        rw [hd]
+        simp only [ObsLoc.app, SLoc.app, SRef.ofRoot, SRef.append, Path.append_nil, Tm.denote,
+          Op0.denote, SLoc.under, SRef.under]
       | none =>
         rw [hx] at h
         obtain ⟨sh', hs, rfl⟩ := Option.map_eq_some_iff.1 h
-        obtain ⟨ih, -⟩ := ih sh' hs
-        exact ⟨by show x.denote σ ++ _ = _; rw [ih]; rfl,
-          List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)⟩
+        have ih' : x.denote σ = SLoc.under (C := Contract.ofStruct _) sh'.h (sh'.p.denote σ) :=
+          ih sh' hs
+        show ObsLoc.app (x.denote σ) _ =
+          SLoc.under (C := Contract.ofStruct _) sh'.h (ObsLoc.app (sh'.p.denote σ) _)
+        rw [ih', SLoc.under_app]
     | _ => intro sh h; cases h
   | _ => intro sh h; cases h
 
-/-- A member path is never empty. -/
-theorem Tm.denote_ne_nil_spath {s : Name} {T : Ty} (p : Tm C Γ (.spath s T)) : p.denote σ ≠ [] := by
-  cases p with
-  | app0 o => cases o; exact List.cons_ne_nil _ _
-  | app1 o _ => cases o; exact List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _)
-  | app2 o _ _ => cases o
-  | app3 o _ _ _ => cases o
+/-- A member path denotes a state variable's path, never a dangling one;
+generic in the sort. -/
+def Srt.IsRef : (u : Srt) → u.TDen C → Prop
+  | .spath _ _, d => ∃ q, d = .ref q
+  | _, _ => True
+
+theorem Tm.spath_isRef' {u : Srt} (p : Tm C Γ u) : Srt.IsRef u (p.denote σ) := by
+  induction p with
+  | app0 o => cases o <;> first | trivial | exact ⟨_, rfl⟩
+  | app1 o x ih =>
+    cases o with
+    | fieldIn h =>
+      obtain ⟨q, hq⟩ := ih
+      exact ⟨_, show ObsLoc.app (x.denote σ) _ = _ by rw [hq]; rfl⟩
+    | _ => trivial
+  | app2 o => cases o <;> trivial
+  | app3 o => cases o <;> trivial
+  | _ => trivial
+
+theorem Tm.spath_isRef {s : Name} {T : Ty} (p : Tm C Γ (.spath s T)) :
+    ∃ q, p.denote σ = .ref q :=
+  Tm.spath_isRef' σ p
 
 end SideDenote
 
@@ -880,13 +1037,18 @@ theorem Tm.sameSegs_hasSeg {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.pat
   rfl
 
 /-- A literal written value reads its word in the Theory. -/
-theorem Tm.svLit?_denote (σ : State C Γ) {T : Ty} {v : Tm C Γ (.sv T)}
+theorem Tm.svLit?_word (σ : State C Γ) {P : PrimTy} {v : Tm C Γ (.sv (.prim P))}
     {w : (p : PrimTy) × p.Denote} (h : v.svLit? = some w) :
-    v.denote σ = .prim (PrimTy.erase w.2) := by
+    ∃ e : w.1 = P, (v.denote σ).word .nil = e ▸ w.2 := by
   cases v with
   | app1 o x =>
     cases o with
-    | sval => exact Tm.litW?_denote σ (t := x) h
+    | sval =>
+      obtain ⟨e, hx⟩ := Tm.litW?_denote σ (t := x) h
+      refine ⟨e, ?_⟩
+      show (TVal.ofWord ((x.denote σ).getD _)).word .nil = _
+      rw [hx]
+      rfl
     | _ => cases h
   | _ => cases h
 
@@ -1166,21 +1328,15 @@ section Sound
 
 variable {Γ : Ctx}
 
-/-- A word's default, erased, is the Theory's default of the word. -/
-theorem primDefault_erase {P : PrimTy} (w : P.Denote) :
-    primDefault (PrimTy.erase w) = PrimTy.erase (PrimTy.dflt P) := by
-  cases P <;> rfl
-
 theorem Tm.selectOnSaveMember_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
     {v : Tm C Γ (.sv T)} {r sn : Name} {hr : C.rootType r = some (.ref (.struct sn))}
     {p' : Tm C Γ (.spath sn T)} (h : p.shift? = some ⟨r, sn, hr, p'⟩) (σ : State C Γ) :
     (Tms.STerm.select (Tms.STerm.save s p v) r hr).denote σ =
       (.app3 .saveIn (Tms.STerm.select s r hr) p' v : Tm C Γ (.sts sn)).denote σ := by
-  obtain ⟨hd, hne⟩ := Tm.shift?_denote σ p h
-  show asStruct (selectSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (.field r)) =
-    copyTo (asStruct (selectSt (s.denote σ) (.field r))) (p'.denote σ) (v.denote σ)
-  simp only [hd, copyTo, StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne, if_false,
-    asStruct_st, find_cons _ _ hne]
+  have hd := Tm.shift?_denote σ p h
+  show ((s.denote σ).copyTo (p.denote σ) (v.denote σ)).select hr =
+    ((s.denote σ).select hr).copyTo (p'.denote σ) (v.denote σ)
+  rw [hd, Obs.select_copyTo]
 
 theorem Tm.selectOnSaveFrame_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
     {v : Tm C Γ (.sv T)} {r sn r' sn' : Name} {hr : C.rootType r = some (.ref (.struct sn))}
@@ -1188,22 +1344,20 @@ theorem Tm.selectOnSaveFrame_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.pa
     (h : p.shift? = some ⟨r', sn', hr', p'⟩) (hne : r' ≠ r) (σ : State C Γ) :
     (Tms.STerm.select (Tms.STerm.save s p v) r hr).denote σ =
       (Tms.STerm.select s r hr).denote σ := by
-  obtain ⟨hd, -⟩ := Tm.shift?_denote σ p h
-  show asStruct (selectSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (.field r)) =
-    asStruct (selectSt (s.denote σ) (.field r))
-  simp only [hd, copyTo, StValue.selectOnSaveCons]
-  rw [if_neg (fun e => hne (Seg.field.inj e))]
+  have hd := Tm.shift?_denote σ p h
+  obtain ⟨q', hq'⟩ := Tm.spath_isRef σ p'
+  show ((s.denote σ).copyTo (p.denote σ) (v.denote σ)).select hr = (s.denote σ).select hr
+  rw [hd, hq']
+  exact Obs.select_copyTo_ne _ hr hr' hne q' _
 
 theorem Tm.selectOnDelAtMember_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
     {r sn : Name} {hr : C.rootType r = some (.ref (.struct sn))}
     {p' : Tm C Γ (.spath sn T)} (h : p.shift? = some ⟨r, sn, hr, p'⟩) (σ : State C Γ) :
     (Tms.STerm.select (Tms.STerm.delAt s p) r hr).denote σ =
       (.app2 .delAtIn (Tms.STerm.select s r hr) p' : Tm C Γ (.sts sn)).denote σ := by
-  obtain ⟨hd, hne⟩ := Tm.shift?_denote σ p h
-  show asStruct (selectSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (.field r)) =
-    Theory.StValue.delAt (asStruct (selectSt (s.denote σ) (.field r))) (p'.denote σ)
-  simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne,
-    if_false, asStruct_st, find_cons _ _ hne]
+  have hd := Tm.shift?_denote σ p h
+  show ((s.denote σ).delAt (p.denote σ)).select hr = ((s.denote σ).select hr).delAt (p'.denote σ)
+  rw [hd, Obs.select_delAt]
 
 theorem Tm.selectOnDelAtFrame_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)}
     {r sn r' sn' : Name} {hr : C.rootType r = some (.ref (.struct sn))}
@@ -1211,11 +1365,11 @@ theorem Tm.selectOnDelAtFrame_denote {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.p
     (h : p.shift? = some ⟨r', sn', hr', p'⟩) (hne : r' ≠ r) (σ : State C Γ) :
     (Tms.STerm.select (Tms.STerm.delAt s p) r hr).denote σ =
       (Tms.STerm.select s r hr).denote σ := by
-  obtain ⟨hd, -⟩ := Tm.shift?_denote σ p h
-  show asStruct (selectSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (.field r)) =
-    asStruct (selectSt (s.denote σ) (.field r))
-  simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons]
-  rw [if_neg (fun e => hne (Seg.field.inj e))]
+  have hd := Tm.shift?_denote σ p h
+  obtain ⟨q', hq'⟩ := Tm.spath_isRef σ p'
+  show ((s.denote σ).delAt (p.denote σ)).select hr = (s.denote σ).select hr
+  rw [hd, hq']
+  exact Obs.select_delAt_ne _ hr hr' hne q'
 
 theorem Tm.selectOnSaveMemberAt_denote {sn sn' f : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
     {p : Tm C Γ (.spath sn T)} {v : Tm C Γ (.sv T)}
@@ -1223,11 +1377,11 @@ theorem Tm.selectOnSaveMemberAt_denote {sn sn' f : Name} {s : Tm C Γ (.sts sn)}
     (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩) (σ : State C Γ) :
     (.app1 (.selectIn hf) (.app3 .saveIn s p v) : Tm C Γ (.sts sn')).denote σ =
       (.app3 .saveIn (.app1 (.selectIn hf) s) p' v : Tm C Γ (.sts sn')).denote σ := by
-  obtain ⟨hd, hne⟩ := Tm.shiftIn?_ok σ p _ h
-  show asStruct (selectSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (.field f)) =
-    copyTo (asStruct (selectSt (s.denote σ) (.field f))) (p'.denote σ) (v.denote σ)
-  simp only [hd, copyTo, StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne, if_false,
-    asStruct_st, find_cons _ _ hne]
+  have hd : p.denote σ = SLoc.under (C := Contract.ofStruct sn) hf (p'.denote σ) :=
+    Tm.shiftIn?_ok σ p _ h
+  show Obs.select (C := Contract.ofStruct sn) ((s.denote σ).copyTo (p.denote σ) (v.denote σ)) hf =
+    (Obs.select (C := Contract.ofStruct sn) (s.denote σ) hf).copyTo (p'.denote σ) (v.denote σ)
+  rw [hd, Obs.select_copyTo]
 
 theorem Tm.selectOnSaveFrameAt_denote {sn sn' sn'' f f' : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
     {p : Tm C Γ (.spath sn T)} {v : Tm C Γ (.sv T)}
@@ -1236,22 +1390,24 @@ theorem Tm.selectOnSaveFrameAt_denote {sn sn' sn'' f f' : Name} {s : Tm C Γ (.s
     (h : p.shiftIn? = some ⟨f', sn'', hf', p'⟩) (hne : f' ≠ f) (σ : State C Γ) :
     (.app1 (.selectIn hf) (.app3 .saveIn s p v) : Tm C Γ (.sts sn')).denote σ =
       (.app1 (.selectIn hf) s : Tm C Γ (.sts sn')).denote σ := by
-  obtain ⟨hd, -⟩ := Tm.shiftIn?_ok σ p _ h
-  show asStruct (selectSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (.field f)) =
-    asStruct (selectSt (s.denote σ) (.field f))
-  simp only [hd, copyTo, StValue.selectOnSaveCons]
-  rw [if_neg (fun e => hne (Seg.field.inj e))]
+  have hd : p.denote σ = SLoc.under (C := Contract.ofStruct sn) hf' (p'.denote σ) :=
+    Tm.shiftIn?_ok σ p _ h
+  obtain ⟨q', hq'⟩ := Tm.spath_isRef σ p'
+  show Obs.select (C := Contract.ofStruct sn) ((s.denote σ).copyTo (p.denote σ) (v.denote σ)) hf =
+    Obs.select (C := Contract.ofStruct sn) (s.denote σ) hf
+  rw [hd, hq']
+  exact Obs.select_copyTo_ne (C := Contract.ofStruct sn) _ hf hf' hne q' _
 
 theorem Tm.selectOnDelAtMemberAt_denote {sn sn' f : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
     {p : Tm C Γ (.spath sn T)} {hf : C.fieldType sn f = some (.ref (.struct sn'))}
     {p' : Tm C Γ (.spath sn' T)} (h : p.shiftIn? = some ⟨f, sn', hf, p'⟩) (σ : State C Γ) :
     (.app1 (.selectIn hf) (.app2 .delAtIn s p) : Tm C Γ (.sts sn')).denote σ =
       (.app2 .delAtIn (.app1 (.selectIn hf) s) p' : Tm C Γ (.sts sn')).denote σ := by
-  obtain ⟨hd, hne⟩ := Tm.shiftIn?_ok σ p _ h
-  show asStruct (selectSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (.field f)) =
-    Theory.StValue.delAt (asStruct (selectSt (s.denote σ) (.field f))) (p'.denote σ)
-  simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons, if_true, List.isEmpty_iff, hne,
-    if_false, asStruct_st, find_cons _ _ hne]
+  have hd : p.denote σ = SLoc.under (C := Contract.ofStruct sn) hf (p'.denote σ) :=
+    Tm.shiftIn?_ok σ p _ h
+  show Obs.select (C := Contract.ofStruct sn) ((s.denote σ).delAt (p.denote σ)) hf =
+    (Obs.select (C := Contract.ofStruct sn) (s.denote σ) hf).delAt (p'.denote σ)
+  rw [hd, Obs.select_delAt]
 
 theorem Tm.selectOnDelAtFrameAt_denote {sn sn' sn'' f f' : Name} {s : Tm C Γ (.sts sn)} {T : Ty}
     {p : Tm C Γ (.spath sn T)} {hf : C.fieldType sn f = some (.ref (.struct sn'))}
@@ -1259,11 +1415,13 @@ theorem Tm.selectOnDelAtFrameAt_denote {sn sn' sn'' f f' : Name} {s : Tm C Γ (.
     (h : p.shiftIn? = some ⟨f', sn'', hf', p'⟩) (hne : f' ≠ f) (σ : State C Γ) :
     (.app1 (.selectIn hf) (.app2 .delAtIn s p) : Tm C Γ (.sts sn')).denote σ =
       (.app1 (.selectIn hf) s : Tm C Γ (.sts sn')).denote σ := by
-  obtain ⟨hd, -⟩ := Tm.shiftIn?_ok σ p _ h
-  show asStruct (selectSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (.field f)) =
-    asStruct (selectSt (s.denote σ) (.field f))
-  simp only [hd, Theory.StValue.delAt, StValue.selectOnSaveCons]
-  rw [if_neg (fun e => hne (Seg.field.inj e))]
+  have hd : p.denote σ = SLoc.under (C := Contract.ofStruct sn) hf' (p'.denote σ) :=
+    Tm.shiftIn?_ok σ p _ h
+  obtain ⟨q', hq'⟩ := Tm.spath_isRef σ p'
+  show Obs.select (C := Contract.ofStruct sn) ((s.denote σ).delAt (p.denote σ)) hf =
+    Obs.select (C := Contract.ofStruct sn) (s.denote σ) hf
+  rw [hd, hq']
+  exact Obs.select_delAt_ne (C := Contract.ofStruct sn) _ hf hf' hne q'
 
 /-- Two storages of members that denote alike are read alike, in any
 context. -/
@@ -1271,37 +1429,41 @@ theorem Tm.findIn_fill_theq {sn sn₁ : Name} {s s' : Tm C Γ (.sts sn)}
     (h : ∀ σ : State C Γ, s.denote σ = s'.denote σ) (K : SCtxS C Γ sn sn₁) {P : PrimTy}
     (q : Tm C Γ (.spath sn₁ (.prim P))) :
     Tm.Theq (.app2 .findIn (K.fill s) q) (.app2 .findIn (K.fill s') q) := fun σ => by
-  show Equiv (findSt ((K.fill s).denote σ) (q.denote σ)) (findSt ((K.fill s').denote σ) (q.denote σ))
+  show some (((K.fill s).denote σ).word (q.denote σ)) = some (((K.fill s').denote σ).word (q.denote σ))
   rw [SCtxS.fill_denote h K σ]
-  exact Equiv.refl _
 
-/-- The word read off the writes is the word read; generic in the sort, a
-storage read by `Srt.stDen`. -/
-theorem Tm.findLitBy_theq {P : PrimTy} {q : Tm C Γ (.path (.prim P))} (hq : q.hasSeg = true)
-    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote},
+/-- What a storage term reads at a word location, if it is a storage;
+generic in the sort. -/
+def Srt.WordAt {P : PrimTy} (q : SLoc C (.prim P)) (x : P.Denote) : (u : Srt) → u.TDen C → Prop
+  | .st, d => d.word q = x
+  | _, _ => True
+
+/-- The word read off the writes is the word read; generic in the sort. -/
+theorem Tm.findLitBy_theq {P : PrimTy} {q : Tm C Γ (.path (.prim P))}
+    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote} (e : w.1 = P),
       s.findLitBy (·.sameSegs q) (·.diverges q) = some w →
-      Equiv (findSt (u.stDen (s.denote σ)) (q.denote σ)) (.prim (PrimTy.erase w.2)) := by
+      Srt.WordAt (q.denote σ) (e ▸ w.2) u (s.denote σ) := by
   induction s with
   | app3 o x y z ihx _ _ =>
-    intro w h
+    intro w e h
     cases o with
     | save =>
       have h : (if y.sameSegs q then z.svLit? else if y.diverges q then
           x.findLitBy (·.sameSegs q) (·.diverges q) else none) = some w := h
-      show Equiv (findSt (copyTo (x.denote σ) (y.denote σ) (z.denote σ)) (q.denote σ)) _
+      show ((x.denote σ).copyTo (y.denote σ) (z.denote σ)).word (q.denote σ) = _
       split at h
       · rename_i hpq
-        have hp : y.hasSeg = true := (Tm.sameSegs_hasSeg hpq).trans hq
-        rw [← Tm.sameSegs_denote σ hpq, find_copyTo_same _ (Tm.denote_ne_nil σ hp),
-          Tm.svLit?_denote σ h]
-        exact Equiv.refl _
+        obtain ⟨rfl, hh⟩ := Tm.sameSegs_heq σ hpq
+        rw [← eq_of_heq hh, Obs.copyTo_word_same]
+        obtain ⟨e', hz⟩ := Tm.svLit?_word σ h
+        rw [hz]
       · split at h
         · rename_i hd
-          rw [find_copyTo_frame _ _ _ _ (Tm.diverges_denote σ hd)]
-          exact ihx h
+          rw [Obs.copyTo, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ hd)]
+          exact ihx e h
         · cases h
     | _ => cases h
-  | _ => intro w h; cases h
+  | _ => intro w e h; cases h
 
 /-- `findLit?` reads the word the storage holds there. -/
 theorem Tm.findLit?_theq {s : Tm C Γ .st} {P : PrimTy} {q : Tm C Γ (.path (.prim P))}
@@ -1309,125 +1471,137 @@ theorem Tm.findLit?_theq {s : Tm C Γ .st} {P : PrimTy} {q : Tm C Γ (.path (.pr
     Tm.Theq (Tms.Term.find s q) (Tms.Term.lit w) := fun σ => by
   unfold Tm.findLit? at h
   split at h
-  · rename_i hq
-    obtain ⟨w', hw', h⟩ := Option.bind_eq_some_iff.1 h
+  · obtain ⟨w', hw', h⟩ := Option.bind_eq_some_iff.1 h
     split at h
     · rename_i e
-      obtain ⟨P', w'⟩ := w'
-      dsimp only at e
-      subst e
       cases h
-      exact Tm.findLitBy_theq hq σ s hw'
+      show some ((s.denote σ).word (q.denote σ)) = some _
+      rw [Tm.findLitBy_theq σ s e hw']
     · cases h
   · cases h
 
-/-- `Tm.divergesU` gives the Theory's `diverges` in every state. -/
-theorem Tm.divergesU_denote (σ : State C Γ) {u v : Srt} {p : Tm C Γ u} {q : Tm C Γ v}
-    (h : p.divergesU q = true) :
-    Theory.StValue.diverges (u.segs (p.denote σ)) (v.segs (q.denote σ)) = true := by
+/-- `Tm.divergesU` gives two locations neither below the other, in every
+state. -/
+theorem Tm.divergesU_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C Γ (.spath sn T)}
+    {q : Tm C Γ (.spath sn U)} (h : p.divergesU q = true) :
+    ObsLoc.strip? (p.denote σ) (q.denote σ) = none := by
   unfold Tm.divergesU at h
   split at h
   · rename_i a b ha hb
-    exact SegT.diverges_sound a b _ _ h (p.shape?_matches' σ ha) (q.shape?_matches' σ hb)
+    have e := SLoc.strip?_none_of_diverges
+      (SegT.diverges_sound a b _ _ h (p.shape?_matches' σ ha) (q.shape?_matches' σ hb)) .nil
+    rwa [ObsLoc.app_nil] at e
   · exact absurd h Bool.false_ne_true
 
+/-- What a storage of members reads at a word location, if it is that
+storage; generic in the sort. -/
+def Srt.WordAtIn {sn : Name} {P : PrimTy} (q : SLoc (Contract.ofStruct sn) (.prim P)) (x : P.Denote) :
+    (u : Srt) → u.TDen C → Prop
+  | .sts sn', d => ∀ e : sn' = sn, (e ▸ d : TSto (Contract.ofStruct sn)).word q = x
+  | _, _ => True
+
 /-- The word read off the member-wise writes is the word read; generic in
-the sort, a storage read by `Srt.stDen`. -/
+the sort. -/
 theorem Tm.findLitInBy_theq {sn : Name} {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))}
-    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote},
+    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote} (e : w.1 = P),
       s.findLitInBy (·.beqR q) (·.divergesU q) = some w →
-      Equiv (findSt (u.stDen (s.denote σ)) (q.denote σ)) (.prim (PrimTy.erase w.2)) := by
+      Srt.WordAtIn (q.denote σ) (e ▸ w.2) u (s.denote σ) := by
   induction s with
   | app3 o x y z ihx _ _ =>
-    intro w h
+    intro w e h
     cases o with
     | saveIn =>
+      rename_i sn' T
       have h2 : (if y.beqR q then z.svLit? else if y.divergesU q then
           x.findLitInBy (·.beqR q) (·.divergesU q) else none) = some w := h
       clear h
-      show Equiv (findSt (copyTo (x.denote σ) (y.denote σ) (z.denote σ)) (q.denote σ)) _
+      intro esn
+      subst esn
+      show (Obs.copyTo (x.denote σ) (y.denote σ) (z.denote σ)).word (q.denote σ) = _
       split at h2
       · rename_i hpq
         cases Tm.sigma_eq_of_beqR hpq
-        rw [find_copyTo_same _ (Tm.denote_ne_nil_spath σ q), Tm.svLit?_denote σ h2]
-        exact Equiv.refl _
+        rw [Obs.copyTo_word_same]
+        obtain ⟨e', hz⟩ := Tm.svLit?_word σ h2
+        rw [hz]
       · split at h2
         · rename_i hd
-          have hd : Theory.StValue.diverges (y.denote σ) (q.denote σ) = true :=
-            Tm.divergesU_denote σ hd
-          rw [find_copyTo_frame _ _ _ _ hd]
-          exact ihx h2
+          rw [Obs.copyTo, Obs.save_word_frame _ _ (Tm.divergesU_denote σ hd)]
+          exact ihx e h2 rfl
         · cases h2
     | _ => cases h
-  | _ => intro w h; cases h
+  | _ => intro w e h; cases h
 
 /-- `findLitIn?` reads the word the storage of members holds there. -/
 theorem Tm.findLitIn?_denote {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
     {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote} (h : s.findLitIn? q = some w)
-    (σ : State C Γ) : findSt (s.denote σ) (q.denote σ) = .prim (PrimTy.erase w) := by
+    (σ : State C Γ) : (s.denote σ).word (q.denote σ) = w := by
   unfold Tm.findLitIn? at h
   obtain ⟨w', hw', h⟩ := Option.bind_eq_some_iff.1 h
   split at h
   · rename_i he
     cases h
-    obtain ⟨P', v⟩ := w'
-    dsimp only at he
-    subst he
-    exact Equiv.prim_iff.1 (Tm.findLitInBy_theq σ s hw')
+    exact Tm.findLitInBy_theq σ s he hw' rfl
   · cases h
 
-/-- `q.extendsIn p` gives the Theory's `q = p ++ r`, `r ≠ []`, in every
-state; generic in the sort. -/
-theorem Tm.extendsIn_denote' (σ : State C Γ) {sn : Name} {U : Ty} {p : Tm C Γ (.spath sn U)}
-    {u : Srt} (q : Tm C Γ u) :
-    q.extendsAnyIn (·.beqR p) = true → ∃ r, r ≠ [] ∧ u.segs (q.denote σ) = p.denote σ ++ r := by
-  induction q with
-  | app1 o x ih =>
-    intro h
-    cases o with
-    | fieldIn hf =>
-      rename_i f _
-      rcases Bool.or_eq_true_iff.mp h with h | h
-      · cases Tm.sigma_eq_of_beqR h
-        exact ⟨[.field f], List.cons_ne_nil _ _, rfl⟩
-      · obtain ⟨r, -, hq⟩ := ih h
-        refine ⟨r ++ [.field f], List.append_ne_nil_of_right_ne_nil _ (List.cons_ne_nil _ _), ?_⟩
-        show x.denote σ ++ _ = _
-        rw [show x.denote σ = _ from hq, List.append_assoc]
-    | _ => cases h
-  | _ => intro h; cases h
+/-- `q.extendsIn p` gives `q`'s location `p`'s followed by a path. -/
+theorem Tm.extendsIn_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C Γ (.spath sn U)}
+    (q : Tm C Γ (.spath sn T)) (h : q.extendsIn p = true) :
+    ∃ r : Path U T, r.erase ≠ [] ∧ q.denote σ = ObsLoc.app (p.denote σ) r := by
+  have key : ∀ {u : Srt} (q : Tm C Γ u), q.extendsAnyIn (·.beqR p) = true →
+      Srt.BelowIn (p.denote σ) u (q.denote σ) := by
+    intro u q
+    induction q with
+    | app1 o x ih =>
+      intro h
+      cases o with
+      | fieldIn hf =>
+        intro e
+        subst e
+        rcases Bool.or_eq_true_iff.mp h with h | h
+        · have e2 := Tm.sigma_eq_of_beqR h
+          simp only [Sigma.mk.injEq, Srt.spath.injEq] at e2
+          obtain ⟨⟨-, rfl⟩, hh⟩ := e2
+          refine ⟨.field hf .nil, by simp only [Path.erase, ne_eq, reduceCtorEq,
+            not_false_eq_true], ?_⟩
+          show ObsLoc.app (x.denote σ) _ = _
+          rw [eq_of_heq hh]
+        · obtain ⟨r, hr, hq⟩ := ih h rfl
+          refine ⟨r.append (.field hf .nil), ?_, ?_⟩
+          · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+          · show ObsLoc.app (x.denote σ) _ = _
+            rw [show x.denote σ = _ from hq, ObsLoc.app_app]
+      | _ => cases h
+    | _ => intro h; cases h
+  exact key q h rfl
 
 /-- **Each scoped term taclet is sound**: its two terms have one Theory value
 in every state (`TermTaclet.sound`). -/
 theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t' → Tm.Theq t t'
   | @findOnSave _ _ s _ p q v hp hq => fun σ => by
-    show Equiv (findSt (copyTo (s.denote σ) (p.denote σ) (.prim (PrimTy.erase v))) (q.denote σ))
-      (.prim (PrimTy.erase v))
-    rw [← Tm.sameSegs_denote σ hq, find_copyTo_same _ (Tm.denote_ne_nil σ hp)]
-    exact Equiv.refl _
+    show some (((s.denote σ).copyTo (p.denote σ) (TVal.ofWord v)).word (q.denote σ)) = some v
+    rw [← Tm.sameSegs_denote σ hq, Obs.copyTo_word_same]
+    rfl
   | @findOnSaveFrame _ _ s _ _ p q v h => fun σ => by
-    show Equiv (findSt (copyTo (s.denote σ) (p.denote σ) (v.denote σ)) (q.denote σ))
-      (findSt (s.denote σ) (q.denote σ))
-    rw [find_copyTo_frame _ _ _ _ (Tm.diverges_denote σ h)]
-    exact Equiv.refl _
+    show some (((s.denote σ).copyTo (p.denote σ) (v.denote σ)).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.copyTo, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
   | @findMemberCons _ _ s _ p r sn hr p' h => fun σ => by
-    obtain ⟨hd, hne⟩ := Tm.shift?_denote σ p h
-    show Equiv (findSt (s.denote σ) (p.denote σ))
-      (findSt (asStruct (selectSt (s.denote σ) (.field r))) (p'.denote σ))
-    rw [hd, find_cons _ _ hne]
-    exact Equiv.refl _
+    show some ((s.denote σ).word (p.denote σ)) = some (((s.denote σ).select hr).word (p'.denote σ))
+    rw [Tm.shift?_denote σ p h]
+    rfl
   | @findMemberConsIn _ _ sn s _ p f sn' hf p' h => fun σ => by
-    obtain ⟨hd, hne⟩ := Tm.shiftIn?_ok σ p _ h
-    show Equiv (findSt (s.denote σ) (p.denote σ))
-      (findSt (asStruct (selectSt (s.denote σ) (.field f))) (p'.denote σ))
-    rw [hd, find_cons _ _ hne]
-    exact Equiv.refl _
+    have hd : p.denote σ = SLoc.under (C := Contract.ofStruct sn) hf (p'.denote σ) :=
+      Tm.shiftIn?_ok σ p _ h
+    show some ((s.denote σ).word (p.denote σ)) =
+      some ((Obs.select (C := Contract.ofStruct sn) (s.denote σ) hf).word (p'.denote σ))
+    rw [hd]
+    rfl
   | @findOnSaveIn _ _ sn s _ p q v hq => fun σ => by
     obtain rfl := Tm.eq_of_beqR hq
-    show Equiv (findSt (copyTo (s.denote σ) (p.denote σ) (.prim (PrimTy.erase v))) (p.denote σ))
-      (.prim (PrimTy.erase v))
-    rw [find_copyTo_same _ (Tm.denote_ne_nil_spath σ p)]
-    exact Equiv.refl _
+    show some (((s.denote σ).copyTo (p.denote σ) (TVal.ofWord v)).word (p.denote σ)) = some v
+    rw [Obs.copyTo_word_same]
+    rfl
   | @selectOnSaveMember _ _ s _ p v r sn hr p' _ q h =>
     Tm.findIn_fill_theq (Tm.selectOnSaveMember_denote h) .hole q
   | @selectOnSaveFrame _ _ s _ p v r sn r' sn' hr hr' p' _ q h hne =>
@@ -1453,67 +1627,45 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
   | @selectOnDelAtFrameAt _ _ sn sn' sn'' f f' s _ p hf hf' p' _ K _ q h hne =>
     Tm.findIn_fill_theq (Tm.selectOnDelAtFrameAt_denote h hne) K q
   | @findOnDelAt _ _ s P p q w hw hp hq => fun σ => by
-    have hr : findSt (s.denote σ) (p.denote σ) = .prim (PrimTy.erase w) :=
-      Equiv.prim_iff.1 (hw.sound σ)
-    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
-      (.prim (PrimTy.erase (PrimTy.dflt P)))
-    rw [← Tm.sameSegs_denote σ hq, find_delAt_same _ (Tm.denote_ne_nil σ hp), hr,
-      delValueDefault, primDefault_erase]
-    exact Equiv.refl _
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
+    rw [← Tm.sameSegs_denote σ hq, Obs.delAt_word_same]
   | @findOnDelAtValue _ _ s _ p _ q hp hq => fun σ => by
-    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
-      (StValue.delValue (findSt (s.denote σ) (q.denote σ)))
-    rw [← Tm.sameSegs_denote σ hq, find_delAt_same _ (Tm.denote_ne_nil σ hp)]
-    exact Equiv.refl _
-  | @delValueLit _ _ P w => fun σ => by
-    show Equiv (StValue.delValue (.prim (PrimTy.erase w))) (.prim (PrimTy.erase (PrimTy.dflt P)))
-    rw [delValueDefault, primDefault_erase]
-    exact Equiv.refl _
+    obtain ⟨rfl, hh⟩ := Tm.sameSegs_heq σ hq
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) =
+      (some ((s.denote σ).word (q.denote σ))).map fun _ => PrimTy.dflt _
+    rw [← eq_of_heq hh, Obs.delAt_word_same]
+    rfl
+  | @delValueLit _ _ P w => fun σ => rfl
   | @findOnDelAtBelow _ _ s _ p P q w hk hw hp hq => fun σ => by
-    obtain ⟨r, hr, hqr⟩ := Tm.extends_denote σ q hq
-    have hw' := Tm.findLit?_theq hw σ
-    have hw'' : findSt (s.denote σ) (q.denote σ) = .prim (PrimTy.erase w) := Equiv.prim_iff.1 hw'
-    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
-      (.prim (PrimTy.erase (PrimTy.dflt P)))
-    have hk' : (findSt (s.denote σ) (p.denote σ)).kindFree = true := hk σ
-    rw [hqr, find_delAt_below _ (Tm.denote_ne_nil σ hp) hr hk', ← hqr, hw'', delValueDefault,
-      primDefault_erase]
-    exact Equiv.refl _
+    obtain ⟨r, -, hqr⟩ := Tm.extends_denote σ q hq
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
+    rw [hqr, Obs.delAt_word_below]
+    exact congrArg some (hk σ r)
   | @findOnDelAtBelowIn _ _ sn s _ p P q w hk hw hq => fun σ => by
-    obtain ⟨r, hr, hqr⟩ := Tm.extendsIn_denote' σ q hq
-    have hqr : q.denote σ = p.denote σ ++ r := hqr
-    have hw' := Tm.findLitIn?_denote hw σ
-    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
-      (.prim (PrimTy.erase (PrimTy.dflt P)))
-    have hk' : (findSt (s.denote σ) (p.denote σ)).kindFree = true := hk σ
-    rw [hqr, find_delAt_below _ (Tm.denote_ne_nil_spath σ p) hr hk', ← hqr, hw',
-      delValueDefault, primDefault_erase]
-    exact Equiv.refl _
+    obtain ⟨r, -, hqr⟩ := Tm.extendsIn_denote σ q hq
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) = some (PrimTy.dflt P)
+    rw [hqr, Obs.delAt_word_below]
+    exact congrArg some (hk σ r)
   | @findOnDelAtFrame _ _ s _ p _ q h => fun σ => by
-    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (p.denote σ)) (q.denote σ))
-      (findSt (s.denote σ) (q.denote σ))
-    rw [find_delAt_frame _ (Tm.diverges_denote σ h)]
-    exact Equiv.refl _
+    show some (((s.denote σ).delAt (p.denote σ)).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.delAt, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
   | @findOnPushFrame _ _ s _ p v _ q h => fun σ => by
-    show Equiv (findSt (pushT (s.denote σ) (p.denote σ) (stripVal (v.denote σ))) (q.denote σ))
-      (findSt (s.denote σ) (q.denote σ))
-    rw [find_pushT_frame _ _ (Tm.diverges_denote σ h)]
-    exact Equiv.refl _
+    show some (((s.denote σ).push (p.denote σ) (TVal.strip (v.denote σ))).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.push, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
   | @findOnPopFrame _ _ s _ p _ q h => fun σ => by
-    show Equiv (findSt (popT (s.denote σ) (p.denote σ)) (q.denote σ))
-      (findSt (s.denote σ) (q.denote σ))
-    rw [find_popT_frame _ (Tm.diverges_denote σ h)]
-    exact Equiv.refl _
+    show some (((s.denote σ).pop false (p.denote σ)).word (q.denote σ)) =
+      some ((s.denote σ).word (q.denote σ))
+    rw [Obs.pop, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ h)]
   | @lenOnSaveFrame _ _ s _ q v _ p h => fun σ => by
-    show Equiv (findSt (copyTo (s.denote σ) (q.denote σ) (v.denote σ)) (p.denote σ ++ [lengthSeg]))
-      (findSt (s.denote σ) (p.denote σ ++ [lengthSeg]))
-    rw [find_copyTo_frame _ _ _ _ (Tm.divergesLen_denote σ h)]
-    exact Equiv.refl _
+    show lenW (((s.denote σ).copyTo (q.denote σ) (v.denote σ)).len (p.denote σ)) =
+      lenW ((s.denote σ).len (p.denote σ))
+    rw [Obs.copyTo, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
   | @lenOnDelAtFrame _ _ s _ q _ p h => fun σ => by
-    show Equiv (findSt (Theory.StValue.delAt (s.denote σ) (q.denote σ)) (p.denote σ ++ [lengthSeg]))
-      (findSt (s.denote σ) (p.denote σ ++ [lengthSeg]))
-    rw [find_delAt_frame _ (Tm.divergesLen_denote σ h)]
-    exact Equiv.refl _
+    show lenW (((s.denote σ).delAt (q.denote σ)).len (p.denote σ)) =
+      lenW ((s.denote σ).len (p.denote σ))
+    rw [Obs.delAt, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
   | .theory h => h
   | .symm r => r.sound.symm
 

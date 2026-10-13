@@ -113,9 +113,8 @@ theorem holds_isBool (se : Simple C Γ .bool) (b : Bool) :
     holds σ (Fml.isBool se.lower b) ↔ se.evalT σ = b := by
   show holds σ (.eq _ _) ↔ _
   rw [holds_eq, Simple.denote_lowerT σ se]
-  show Theory.StValue.Equiv (.prim _) (.prim (.bool b)) ↔ _
-  rw [Theory.StValue.Equiv.prim_iff]
-  exact ⟨fun h => by injection h with h; injection h, fun h => by rw [← h]; rfl⟩
+  show some _ = some b ↔ _
+  rw [Option.some.injEq]
 
 /-- A block weakened under one local runs as before, lifted, its locals
 popped (`Prog.run_wk` at `up`). -/

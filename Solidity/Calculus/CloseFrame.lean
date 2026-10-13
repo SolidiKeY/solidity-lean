@@ -8,7 +8,7 @@ A storage write under the box, named on the spot with what the typed laws
 say of the storage it returns (`Calculus/TermLaws.lean`'s frame section):
 solkey's `findOnSave` at the path written and below it, and its
 `findOnSaveFrame`, `lenOnSaveFrame` where the paths part, the parting read
-as the Theory's `diverges` on the references' segments (`SRef.absT`), which
+as the Theory's `diverges` on the references' segments (`SRef.segs`), which
 the closer computes, a symbolic key by a hypothesis `k != j` of the formula
 or a branch.  An index check (`Storage.checkIndex`) is framed as an array's
 length is: it reads the length only (or nothing, for a mapping).
@@ -51,14 +51,14 @@ which the check reads). -/
 theorem checkIndex_save_frame {k : PrimTy} {V : Ty} {T : Ty} {R' : RefTy}
     {st st' : Storage C} {r : SRef C T} {v : SVal T} {q : SRef C (.ref R')}
     (it : IndexTy R' k V) (i : Int)
-    (hd : diverges r.absT (q.absT ++ [lengthSeg]) = true) (h : st.save r v = some st') :
+    (hd : diverges r.segs (q.segs ++ [lengthSeg]) = true) (h : st.save r v = some st') :
     st'.checkIndex q it i = st.checkIndex q it i := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.checkIndex, find_save_frame hd h]
   · obtain ⟨x', hs, rfl⟩ := save_some h
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
-    simp only [SRef.absT, Theory.rootPath, List.cons_append, List.cons.injEq,
+    simp only [SRef.segs, List.cons_append, List.cons.injEq,
       Semantics.Seg.field.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
@@ -431,11 +431,11 @@ theorem append_append {T U W : Ty} (r : SRef C T) (p : Path T U) (q : Path U W) 
     (r.append p).append q = r.append (p.append q) := by
   simp only [SRef.append, Path.append_assoc]
 theorem root_append {T U : Ty} (r : SRef C T) (p : Path T U) : (r.append p).root = r.root := rfl
-theorem absT_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
-    (SRef.ofRoot r h).absT = [.field r] := rfl
-theorem absT_append {T U : Ty} (r : SRef C T) (p : Path T U) :
-    (r.append p).absT = r.absT ++ p.erase := by
-  simp only [SRef.absT, SRef.append, Path.erase_append, Theory.rootPath, List.cons_append]
+theorem segs_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
+    (SRef.ofRoot r h).segs = [.field r] := rfl
+theorem segs_append {T U : Ty} (r : SRef C T) (p : Path T U) :
+    (r.append p).segs = r.segs ++ p.erase := by
+  simp only [SRef.segs, SRef.append, Path.erase_append, List.cons_append]
 theorem diverges_nil_left (q : List Semantics.Seg) : diverges [] q = false := rfl
 theorem diverges_nil_right (a : Semantics.Seg) (p : List Semantics.Seg) :
     diverges (a :: p) [] = false := rfl
@@ -742,11 +742,11 @@ theorem wp_box_write {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
       ∀ st', st.write r v = some st' →
         st'.find r = st.writeVal r v →
         (∀ {W : Ty} (p : Path T W), st'.find (r.append p) = (st.writeVal r v).bind (·.find p)) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   cases h : st.write r v with
@@ -771,11 +771,11 @@ theorem wp_box_delete {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C �
         st'.find r = (st.find r).map (fun x => x.defaultOf) →
         (∀ {W : Ty} (p : Path T W), st'.find (r.append p) =
           (st.find r).bind fun x => x.defaultOf.find p) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   cases h : st.delete r with
@@ -797,11 +797,11 @@ theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {
     {P : Storage C → Prop} :
     Modality.box.wp (Close.optRes (st.write r (.prim x))) P ↔
       ∀ st', st.write r (.prim x) = some st' → st'.find r = some (.prim x) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.absT q.absT = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.absT (q.absT ++ [lengthSeg]) = true →
+          diverges r.segs (q.segs ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   rw [wp_box_write]
@@ -818,7 +818,7 @@ attribute [close_rw_s high] CloseS.wp_box_write_prim CloseS.wp_diamond_write_tot
 
 attribute [close_rw_s]
   CloseS.wp_box_write CloseS.field_append CloseS.index_append CloseS.append_append
-  CloseS.root_append CloseS.absT_ofRoot CloseS.absT_append CloseS.diverges_nil_left
+  CloseS.root_append CloseS.segs_ofRoot CloseS.segs_append CloseS.diverges_nil_left
   CloseS.diverges_nil_right CloseS.diverges_cons CloseS.key_uint CloseS.key_int
   CloseS.key_uint' CloseS.key_int' CloseS.netOfT_def
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
