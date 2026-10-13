@@ -35,19 +35,15 @@ theorem findLiveM_append {T U W : Ty} : (x : SVal T) → (p : Path T U) → (r :
     rw [Path.append_at]
     simp only [SVal.findLiveM]
     split
-    · split
-      · rename_i x0 _
-        exact findLiveM_append x0 p r
-      · rfl
+    · rename_i x0 _
+      exact findLiveM_append x0 p r
     · rfl
   | .fixed e, .atF i p, r => by
     rw [Path.append_atF]
     simp only [SVal.findLiveM]
     split
-    · split
-      · rename_i x0 _
-        exact findLiveM_append x0 p r
-      · rfl
+    · rename_i x0 _
+      exact findLiveM_append x0 p r
     · rfl
   | .map m d, .key k p, r => by
     rw [Path.append_key]
@@ -67,22 +63,15 @@ theorem findM_of_findLiveM {T U : Ty} : (x : SVal T) → (p : Path T U) → {w :
   | .array e sh hn, .at i p, w, h => by
     simp only [SVal.findLiveM, SVal.findM] at h ⊢
     split at h
-    · rename_i hi
-      split at h
-      · rename_i x0 hx
-        rw [if_pos hi, List.getElem?_append_left (List.getElem?_eq_some_iff.1 hx).1, hx]
-        exact findM_of_findLiveM x0 p h
-      · cases h
+    · rename_i x0 hx
+      rw [List.getElem?_append_left (List.getElem?_eq_some_iff.1 hx).1, hx]
+      exact findM_of_findLiveM x0 p h
     · cases h
   | .fixed e, .atF i p, w, h => by
     simp only [SVal.findLiveM, SVal.findM] at h ⊢
     split at h
-    · rename_i hi
-      split at h
-      · rename_i x0 hx
-        rw [if_pos hi]
-        exact findM_of_findLiveM x0 p h
-      · cases h
+    · rename_i x0 hx
+      exact findM_of_findLiveM x0 p h
     · cases h
   | .map m d, .key k p, w, h => by
     simp only [SVal.findLiveM, SVal.findM] at h ⊢
@@ -183,7 +172,7 @@ theorem checkIndex_dyn {st : Solidity.Storage C} {E : Ty} {r : SRef C (.ref (.ar
     (i : PrimTy.uint.Denote) :
     st.checkIndex r (.arr .dyn) i = if i.1.toNat < k then some () else none := by
   simp only [Solidity.Storage.checkIndex, hr, bind, Option.bind]
-  show (if 0 ≤ i.1 ∧ i.1.toNat < k then some () else none) = _
+  show (if i.1.toNat < k then some () else none) = _
   simp only [PrimTy.uint_nonneg i, true_and]
 
 /-- A fixed-size array takes an index below its length. -/
@@ -192,7 +181,7 @@ theorem checkIndex_fixed {st : Solidity.Storage C} {E : Ty} {n : Nat}
     (i : PrimTy.uint.Denote) :
     st.checkIndex r (.arr .fixed) i = if i.1.toNat < n then some () else none := by
   simp only [Solidity.Storage.checkIndex, hr, bind, Option.bind]
-  show (if 0 ≤ i.1 ∧ i.1.toNat < n then some () else none) = _
+  show (if i.1.toNat < n then some () else none) = _
   simp only [PrimTy.uint_nonneg i, true_and]
 
 /-- A dynamic array's length. -/

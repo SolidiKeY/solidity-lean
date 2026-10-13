@@ -706,15 +706,15 @@ theorem checkIndex_dyn {st : Storage C} {E : Ty} {ref : SRef C (.ref (.array E))
     {j : Nat} (hj : j < L.length) (hb : j < 2 ^ 256) :
     st.checkIndex ref (.arr .dyn) (idxU j hb) = some () := by
   simp only [Storage.checkIndex, hf, Option.bind_eq_bind, Option.bind_some]
-  show (if 0 ≤ (j : Int) ∧ (j : Int).toNat < L.length then some () else none) = some ()
-  rw [if_pos ⟨Int.natCast_nonneg j, by rw [Int.toNat_natCast]; exact hj⟩]
+  show (if (j : Int).toNat < L.length then some () else none) = some ()
+  rw [if_pos (by rw [Int.toNat_natCast]; exact hj)]
 
 theorem checkIndex_fixed {st : Storage C} {E : Ty} {n : Nat} {ref : SRef C (.ref (.fixed E n))}
     {e : SVec E n} (hf : st.find ref = some (.fixed e)) {j : Nat} (hj : j < n) (hb : j < 2 ^ 256) :
     st.checkIndex ref (.arr .fixed) (idxU j hb) = some () := by
   simp only [Storage.checkIndex, hf, Option.bind_eq_bind, Option.bind_some]
-  show (if 0 ≤ (j : Int) ∧ (j : Int).toNat < n then some () else none) = some ()
-  rw [if_pos ⟨Int.natCast_nonneg j, by rw [Int.toNat_natCast]; exact hj⟩]
+  show (if (j : Int).toNat < n then some () else none) = some ()
+  rw [if_pos (by rw [Int.toNat_natCast]; exact hj)]
 
 /-- What `fillElems` does for the live elements `x` of a dynamic array, from
 index `pre.length`. -/

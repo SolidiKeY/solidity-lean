@@ -135,8 +135,8 @@ theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : 
     · rename_i hb
       simp only [Option.some.injEq] at h
       subst h
-      simp only [Heap.readAddr, Heap.index, hb.1, if_true, Heap.get_set_same, MObj.elems_setElem,
-        List.getElem?_set_self hb.2]
+      simp only [Heap.readAddr, Heap.index, Heap.get_set_same, MObj.elems_setElem,
+        List.getElem?_set_self hb]
     · simp only [reduceCtorEq] at h
 
 /-- **A write leaves an address apart from it** (`readOnWrite` `\else`). -/
@@ -177,11 +177,10 @@ theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad
           have hij : i ≠ j := hab e
           cases a <;> cases a' <;>
           · simp only [Heap.readAddr, Heap.index, Heap.get_set_same, MObj.elems_setElem]
-            by_cases hj : 0 ≤ j.1
-            · have hij' : i.1 ≠ j.1 := fun e => hij (Subtype.ext e)
-              have hn : i.1.toNat ≠ j.1.toNat := by omega
-              simp only [hj, if_true, List.getElem?_set_ne hn]
-            · simp only [hj, if_false]
+            have hij' : i.1 ≠ j.1 := fun e => hij (Subtype.ext e)
+            have hn : i.1.toNat ≠ j.1.toNat := by
+              have := PrimTy.uint_nonneg i; have := PrimTy.uint_nonneg j; omega
+            simp only [List.getElem?_set_ne hn]
         · simp only [Heap.readAddr, Heap.index, Heap.get_set_ne _ r r' e]
     · simp only [reduceCtorEq] at h
 
@@ -395,10 +394,7 @@ theorem Heap.Keeps.readAddr {H H' : HTy} {e : H <+: H'} {hp : Heap H} {hp' : Hea
   cases ra with
   | field r h => simp only [MAddr.wk, Heap.readAddr, hk.field r h, Option.map_some]
   | index r a i =>
-    simp only [MAddr.wk, Heap.readAddr, Heap.index, hk r, MObj.elems_wk]
-    split
-    · simp only [List.getElem?_map]
-    · rfl
+    simp only [MAddr.wk, Heap.readAddr, Heap.index, hk r, MObj.elems_wk, List.getElem?_map]
 
 /-- An allocation keeps every object below it: the slot at an address
 there reads the same, weakened. -/
@@ -661,14 +657,11 @@ section Len
 /-- An element reads exactly below the array's length. -/
 theorem Heap.readAddr_index_isSome {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R)
     (a : ArrTy R E) (i : PrimTy.uint.Denote) :
-    (hp.readAddr (.index r a i)).isSome = decide (0 ≤ i.1 ∧ i.1.toNat < hp.len r a) := by
+    (hp.readAddr (.index r a i)).isSome = decide (i.1.toNat < hp.len r a) := by
   simp only [Heap.readAddr, Heap.index, Heap.len]
-  by_cases h0 : 0 ≤ i.1
-  · simp only [h0, if_true, true_and]
-    by_cases hl : i.1.toNat < (MObj.elems a (hp.get r)).length
-    · simp only [hl, getElem?_pos, Option.isSome_some, decide_true]
-    · simp only [hl, not_false_eq_true, getElem?_neg, Option.isSome_none, decide_false]
-  · simp only [h0, if_false, false_and, Option.isSome_none, decide_false]
+  by_cases hl : i.1.toNat < (MObj.elems a (hp.get r)).length
+  · simp only [hl, getElem?_pos, Option.isSome_some, decide_true]
+  · simp only [hl, not_false_eq_true, getElem?_neg, Option.isSome_none, decide_false]
 
 /-- A slot writes exactly where it reads. -/
 theorem Heap.writeAddr_isSome {H : HTy} {T : Ty} (hp : Heap H) (ad : MAddr H T) (v : MVal H T) :
@@ -680,9 +673,7 @@ theorem Heap.writeAddr_isSome {H : HTy} {T : Ty} (hp : Heap H) (ad : MAddr H T) 
     simp only [Heap.writeAddr, Heap.setIndex, Heap.len]
     split
     · simp_all only [Option.isSome_some, and_self, decide_true]
-    · simp_all only [not_and, Int.toNat_lt, Int.not_lt, Option.isSome_none, Bool.decide_and,
-        Bool.false_eq, Bool.and_eq_false_imp, decide_eq_true_eq, decide_eq_false_iff_not,
-        implies_true]
+    · simp_all only [Option.isSome_none, decide_false]
 
 /-- **A write keeps every length**: a member is no array, and an element
 written keeps its array's length. -/
@@ -1083,30 +1074,24 @@ element, within the array's length. -/
 theorem MVal.copyMToSt_findM_at {H : HTy} (hp : Heap H) {E U : Ty} (r : HRef H (.array E))
     (i : PrimTy.uint.Denote) (p : Path E U) :
     (MVal.copyMToSt hp (T := .ref (.array E)) r).findM (.at i p) =
-      if 0 ≤ i.1 then ((MObj.elems .dyn (hp.get r))[i.1.toNat]?).bind
-        (fun v => (MVal.copyMToSt hp v).findM p) else none := by
+      ((MObj.elems .dyn (hp.get r))[i.1.toNat]?).bind (fun v => (MVal.copyMToSt hp v).findM p) := by
   simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.findM,
     SVec.toList_ofList, SList.toList_nil, List.append_nil, List.getElem?_map, MObj.elems_dyn]
-  split
-  · cases (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).1[i.1.toNat]? <;> rfl
-  · rfl
+  cases (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).1[i.1.toNat]? <;> rfl
 
 /-- A fixed array copied to storage, at an element. -/
 theorem MVal.copyMToSt_findM_atF {H : HTy} (hp : Heap H) {E U : Ty} {n : Nat}
     (r : HRef H (.fixed E n)) (i : PrimTy.uint.Denote) (p : Path E U) :
     (MVal.copyMToSt hp (T := .ref (.fixed E n)) r).findM (.atF i p) =
-      if 0 ≤ i.1 then ((MObj.elems .fixed (hp.get r))[i.1.toNat]?).bind
-        (fun v => (MVal.copyMToSt hp v).findM p) else none := by
+      ((MObj.elems .fixed (hp.get r))[i.1.toNat]?).bind (fun v => (MVal.copyMToSt hp v).findM p) := by
   simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.findM,
     SVec.toList_ofLen, List.getElem?_map, MObj.elems_fixed]
-  split
-  · cases (hp.get r : {l : List (MVal H E) // l.length = n}).1[i.1.toNat]? with
-    | none => rfl
-    | some v =>
-      simp only [Option.map_some, Option.bind_some]
-      exact congrArg (·.findM p) ((MVal.copyBelow_eq hp (rankBound E + 2) E _ v).trans
-        (MVal.copyBelow_eq hp (rankBound E + 1) E _ v).symm)
-  · rfl
+  cases (hp.get r : {l : List (MVal H E) // l.length = n}).1[i.1.toNat]? with
+  | none => rfl
+  | some v =>
+    simp only [Option.map_some, Option.bind_some]
+    exact congrArg (·.findM p) ((MVal.copyBelow_eq hp (rankBound E + 2) E _ v).trans
+      (MVal.copyBelow_eq hp (rankBound E + 1) E _ v).symm)
 
 /-- A dynamic array copied to storage has the array's length. -/
 theorem MVal.copyMToSt_len {H : HTy} (hp : Heap H) {E : Ty} (r : HRef H (.array E)) :

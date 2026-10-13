@@ -1762,11 +1762,9 @@ theorem memCondN_sound (n : Nat) :
               obtain ⟨kv, hk, hlt⟩ := (lenCond_iff arr M i k hμ hid hr).1 (AllT.single.1 a₂)
               refine ⟨.index id arr kv, .index ⟨id, hty⟩ arr kv, hev id kv hid hk, ?_, ?_⟩
               · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, hr, Option.map_some]
-              · have := kv.2
-                simp only [PrimTy.inRange, decide_eq_true_eq] at this
-                rw [Heap.readAddr_index_isSome]
+              · rw [Heap.readAddr_index_isSome]
                 simp only [decide_eq_true_eq]
-                exact ⟨by omega, hlt⟩
+                exact hlt
             · apply HI.2
               cases hx : (i.eval g ν : Option Nat) with
               | none => rw [LTm.eval_app2_none _ _ _ hx] at had; cases had
@@ -1784,7 +1782,7 @@ theorem memCondN_sound (n : Nat) :
                   obtain ⟨r, hr, rfl⟩ := hra
                   rw [Heap.readAddr_index_isSome] at hrd
                   simp only [decide_eq_true_eq] at hrd
-                  exact AllT.single.2 ((lenCond_iff arr M i k hμ hx hr).2 ⟨kv, hk, hrd.2⟩)
+                  exact AllT.single.2 ((lenCond_iff arr M i k hμ hx hr).2 ⟨kv, hk, hrd⟩)
           | _ => simp only [LTm.matObj?, reduceCtorEq] at hm
         · cases h
 

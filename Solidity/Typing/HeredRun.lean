@@ -335,16 +335,16 @@ theorem Loc.resolveT_live : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T}
         rw [Path.index_dyn]
         cases y with
         | array e sh hn =>
-          change (if 0 ≤ PrimTy.key k ∧ (PrimTy.key k).toNat < _ then some () else none) = _ at hin
+          change (if (k : PrimTy.uint.Denote).1.toNat < _ then some () else none) = _ at hin
           split at hin
           · rename_i hb
             simp only [SVal.Live]
-            exact fun z _ _ => ⟨fun _ => hb.2, trivial⟩
+            exact fun z _ => ⟨fun _ => hb, trivial⟩
           · exact nomatch hin
       | fixed =>
         rw [Path.index_fixed]
         cases y with
-        | fixed e => simp only [SVal.Live]; exact fun _ _ _ => trivial
+        | fixed e => simp only [SVal.Live]; exact fun _ _ => trivial
 
 /-- A path resolves to live slots: an alias names a reference, which reaches
 no array of words. -/

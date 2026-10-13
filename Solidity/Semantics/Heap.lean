@@ -221,12 +221,12 @@ def setField {s f : Name} {T : Ty} (hp : Heap H) (r : HRef H (.struct s))
 /-- `mv[i]` (`readAddr`'s index arm): `none`, a revert, out of bounds. -/
 def index {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E)
     (i : PrimTy.uint.Denote) : Option (MVal H E) :=
-  if 0 ≤ i.1 then (MObj.elems a (hp.get r))[i.1.toNat]? else none
+  (MObj.elems a (hp.get r))[i.1.toNat]?
 
 /-- `mv[i] = v`: `none`, a revert, out of bounds. -/
 def setIndex {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R) (a : ArrTy R E)
     (i : PrimTy.uint.Denote) (v : MVal H E) : Option (Heap H) :=
-  if 0 ≤ i.1 ∧ i.1.toNat < (MObj.elems a (hp.get r)).length then
+  if i.1.toNat < (MObj.elems a (hp.get r)).length then
     some (hp.set r (MObj.setElem a (hp.get r) i.1.toNat v))
   else none
 

@@ -542,7 +542,7 @@ theorem LTm.eval_cond_some {p : PrimTy} {c : LTm C (.val .bool)} {x : Bool} (a b
 
 /-- An index below a length, as `Path`'s `at` reads it. -/
 theorem idx_lt_iff {k : PrimTy.uint.Denote} {n : Nat} (hn : n < 2 ^ 256) :
-    decide (k.1 < (uintOfNat n).1) = decide (0 ≤ k.1 ∧ k.1.toNat < n) := by
+    decide (k.1 < (uintOfNat n).1) = decide (k.1.toNat < n) := by
   rw [uintOfNat_val hn]
   have hk := k.2
   simp only [PrimTy.inRange, decide_eq_true_eq] at hk
@@ -585,11 +585,11 @@ theorem delRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {x : VRd C U} {t
       show (CK.obsV (CK.len _) t .nil : PrimTy.uint.Denote) = uintOfNat (t.len .nil) from rfl,
       idx_lt_iff (hb .nil)]
     have e : CK.obsC c (fun cc => TVal.delR cc t (.at k p')) =
-        if 0 ≤ k.1 ∧ k.1.toNat < t.len .nil then c.obsC (fun cc => TVal.delR cc (t.find (.at k .nil)) p')
+        if k.1.toNat < t.len .nil then c.obsC (fun cc => TVal.delR cc (t.find (.at k .nil)) p')
         else c.obsC (fun cc => cc.read t (.at k p')) := by
       rw [← CK.obsC_ite]; exact CK.obsC_congr c fun cc => by simp only [TVal.delR]
     rw [e]
-    by_cases hc : 0 ≤ k.1 ∧ k.1.toNat < t.len .nil
+    by_cases hc : k.1.toNat < t.len .nil
     · simp only [hc, decide_true, if_true]
       exact delRS_rep r c (hx.find g ν (s := .at i .nil) (by rw [TSegs.eval_at, hk]; rfl))
         (hb.find _) hp'
@@ -634,12 +634,12 @@ theorem stripRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {x : VRd C U} 
       LTm.eval_cond_some g ν _ _ (LTm.eval_lt_some g ν hk (lenNil_eval g ν hx)),
       idx_lt_iff (hb .nil)]
     have e : CK.obsC c (fun cc => TVal.stripR cc t (.at k p')) =
-        if 0 ≤ k.1 ∧ k.1.toNat < t.len .nil then
+        if k.1.toNat < t.len .nil then
           c.obsC (fun cc => TVal.stripR cc (t.find (.at k .nil)) p')
         else c.obsC (fun cc => cc.absent) := by
       rw [← CK.obsC_ite]; exact CK.obsC_congr c fun cc => by simp only [TVal.stripR]
     rw [e]
-    by_cases hc : 0 ≤ k.1 ∧ k.1.toNat < t.len .nil
+    by_cases hc : k.1.toNat < t.len .nil
     · simp only [hc, decide_true, if_true]
       exact stripRS_rep r c (hx.find g ν (s := .at i .nil) (by rw [TSegs.eval_at, hk]; rfl))
         (hb.find _) hp'
@@ -682,9 +682,9 @@ theorem ovRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {o n : VRd C U} {
       LTm.eval_cond_some g ν _ _ (hasNil_eval g ν hn)]
     have e : CK.obsC c (fun cc => TVal.ovR cc to tn (.at k p')) =
         if tn.has .nil = true then
-          (if 0 ≤ k.1 ∧ k.1.toNat < tn.len .nil then
+          (if k.1.toNat < tn.len .nil then
             c.obsC (fun cc => TVal.ovR cc (to.find (.at k .nil)) (tn.find (.at k .nil)) p')
-          else if 0 ≤ k.1 ∧ k.1.toNat < to.len .nil then
+          else if k.1.toNat < to.len .nil then
             c.obsC (fun cc => TVal.delR cc (to.find (.at k .nil)) p')
           else c.obsC (fun cc => cc.read to (.at k p')))
         else c.obsC (fun cc => cc.absent) := by
@@ -695,13 +695,13 @@ theorem ovRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {o n : VRd C U} {
     · simp only [h1, if_true]
       rw [LTm.eval_cond_some g ν _ _ (LTm.eval_lt_some g ν hk (lenNil_eval g ν hn)),
         idx_lt_iff (hbn .nil)]
-      by_cases h2 : 0 ≤ k.1 ∧ k.1.toNat < tn.len .nil
+      by_cases h2 : k.1.toNat < tn.len .nil
       · simp only [h2, decide_true, if_true]
         exact ovRS_rep r c (ho.find g ν (s := .at i .nil) (by rw [TSegs.eval_at, hk]; rfl)) (hn.find g ν (s := .at i .nil) (by rw [TSegs.eval_at, hk]; rfl)) (hbo.find _) (hbn.find _) hp'
       · simp only [h2, decide_false, if_false, Bool.false_eq_true]
         rw [LTm.eval_cond_some g ν _ _ (LTm.eval_lt_some g ν hk (lenNil_eval g ν ho)),
           idx_lt_iff (hbo .nil)]
-        by_cases h3 : 0 ≤ k.1 ∧ k.1.toNat < to.len .nil
+        by_cases h3 : k.1.toNat < to.len .nil
         · simp only [h3, decide_true, if_true]
           exact delRS_rep g ν r c (ho.find g ν (s := .at i .nil) (by rw [TSegs.eval_at, hk]; rfl)) (hbo.find _) hp'
         · simp only [h3, decide_false, if_false, Bool.false_eq_true]
@@ -965,7 +965,7 @@ def _root_.Solidity.Path.dfltOk : {T U : Ty} → Path T U → Bool
   | _, _, .field _ p => p.dfltOk
   | _, _, .key _ p => p.dfltOk
   | _, _, .at _ _ => false
-  | _, _, .atF (n := n) i p => decide (0 ≤ i.1 ∧ i.1.toNat < n) && p.dfltOk
+  | _, _, .atF (n := n) i p => decide (i.1.toNat < n) && p.dfltOk
 
 theorem findM_dflt : {T U : Ty} → (p : Path T U) →
     (SVal.dflt T).findM p = if p.dfltOk then some (SVal.dflt U) else none
@@ -981,24 +981,15 @@ theorem findM_dflt : {T U : Ty} → (p : Path T U) →
   | _, _, .atF (n := n) i p => by
     rw [dflt_fixed, SVal.findM_atF', SVec.toList_replicate]
     simp only [Path.dfltOk, Bool.and_eq_true, decide_eq_true_eq]
-    by_cases h : 0 ≤ i.1 ∧ i.1.toNat < n
-    · rw [if_pos h.1, List.getElem?_replicate_of_lt h.2, Option.bind_some, findM_dflt p]
+    by_cases h : i.1.toNat < n
+    · rw [List.getElem?_replicate_of_lt h, Option.bind_some, findM_dflt p]
       simp only [h, true_and]
-    · have hr : (if 0 ≤ i.1 then (List.replicate n (SVal.dflt _))[i.1.toNat]?.bind
-          (fun x => x.findM p) else none) = none := by
-        split
-        · rename_i h0
-          have h1 : n ≤ i.1.toNat := by
-            have : ¬ i.1.toNat < n := fun h' => h ⟨h0, h'⟩
-            omega
-          rw [List.getElem?_eq_none (by rw [List.length_replicate]; exact h1), Option.bind_none]
-        · rfl
-      rw [hr]
+    · rw [List.getElem?_eq_none (by rw [List.length_replicate]; omega), Option.bind_none]
       simp only [h, false_and, if_false]
 
 theorem LTm.eval_ltNat {a : LTm C (.val .uint)} {k : PrimTy.uint.Denote} (n : Nat)
     (ha : (a.eval g ν : Option _) = some k) :
-    ((LTm.ltNat a n).eval g ν : Option Bool) = some (decide (0 ≤ k.1 ∧ k.1.toNat < n)) := by
+    ((LTm.ltNat a n).eval g ν : Option Bool) = some (decide (k.1.toNat < n)) := by
   have hk := k.2
   simp only [PrimTy.inRange, decide_eq_true_eq] at hk
   unfold LTm.ltNat
@@ -1025,7 +1016,7 @@ theorem dfltHas_eval : ∀ {U V : Ty} (r : TSegs C U V) {p : Path U V}, r.eval g
     obtain ⟨k, p', hk, hp', rfl⟩ := eval_atF_some g ν hr
     rw [show dfltHas (.atF i r) = .cond (.ltNat i n) (dfltHas r) (.lit (p := .bool) false) from rfl,
       LTm.eval_cond_some g ν _ _ (LTm.eval_ltNat g ν n hk)]
-    by_cases h : 0 ≤ k.1 ∧ k.1.toNat < n
+    by_cases h : k.1.toNat < n
     · simp only [h, decide_true, if_true, Path.dfltOk, Bool.true_and]
       exact dfltHas_eval r hp'
     · simp only [h, decide_false, if_false, Path.dfltOk, Bool.false_and, Bool.false_eq_true]
@@ -1256,27 +1247,19 @@ theorem findM_of_saveM {T U : Ty} : (x : SVal T) → (p : Path T U) → {v : SVa
     simp only [SVal.saveM] at h
     simp only [SVal.findM]
     split at h
-    · rename_i hi
-      rw [if_pos hi]
-      split at h
-      · rename_i x0 hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
-        obtain ⟨z, hz, -⟩ := h
-        exact findM_of_saveM x0 p hz
-      · cases h
+    · rename_i x0 hx
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+      obtain ⟨z, hz, -⟩ := h
+      exact findM_of_saveM x0 p hz
     · cases h
   | .fixed e, .atF i p, v, x', h => by
     simp only [SVal.saveM] at h
     simp only [SVal.findM]
     split at h
-    · rename_i hi
-      rw [if_pos hi]
-      split at h
-      · rename_i x0 hx
-        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
-        obtain ⟨z, hz, -⟩ := h
-        exact findM_of_saveM x0 p hz
-      · cases h
+    · rename_i x0 hx
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
+      obtain ⟨z, hz, -⟩ := h
+      exact findM_of_saveM x0 p hz
     · cases h
   | .map m d, .key k p, v, x', h => by
     simp only [SVal.saveM] at h
@@ -1746,18 +1729,18 @@ theorem boundG_eval {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (rd :
       | array e sh hn =>
         rename_i n
         have hl : st.obs.len (.ref r) = n := len_obs st r hw
-        show _ = (if 0 ≤ j.1 ∧ j.1.toNat < n then some () else none).map _
+        show _ = (if j.1.toNat < n then some () else none).map _
         rw [show (CK.len _).obsS st.obs r = uintOfNat (st.obs.len (.ref r)) from rfl, hl,
           idx_lt_iff hn]
-        by_cases h : 0 ≤ j.1 ∧ j.1.toNat < n
+        by_cases h : j.1.toNat < n
         · rw [if_pos h, decide_eq_true h]; rfl
         · rw [if_neg h, decide_eq_false h]; rfl
     | fixed =>
       rename_i n
       show ((LTm.assert (.ltNat ei n)).eval g ν : Option Bool) = _
       rw [LTm.eval_assert_some g ν (LTm.eval_ltNat g ν n hj)]
-      show _ = (if 0 ≤ j.1 ∧ j.1.toNat < n then some () else none).map _
-      by_cases h : 0 ≤ j.1 ∧ j.1.toNat < n
+      show _ = (if j.1.toNat < n then some () else none).map _
+      by_cases h : j.1.toNat < n
       · rw [if_pos h, decide_eq_true h]; rfl
       · rw [if_neg h, decide_eq_false h]; rfl
 
@@ -2086,10 +2069,6 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         simp only [Option.bind_some]
         rw [← SVal.findM_append, Path.append_at, Path.append_nil]
     rw [e]
-    have k0 : 0 ≤ k.1 := by
-      have := k.2
-      simp only [PrimTy.inRange, decide_eq_true_eq] at this
-      omega
     refine ih _ _ _ ?_ ?_ c p' hp'
     · rw [LTm.eval_kite, hh]
       cases x with
@@ -2100,18 +2079,19 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
           else ((LTm.lit (p := .bool) false : LTm C (.val .bool)).eval g ν)) = _
         rw [if_pos rfl, LTm.eval_lt, hk, Option.bind_some, LTm.mlen_evalT, hM, Option.bind_some, hr,
           Option.bind_some, HRef.ofId?_self, Option.map_some, Option.map_some, Option.bind_some,
-          MVal.copyMToSt_findM_at, if_pos k0, bind_findM_nil_isSome]
+          MVal.copyMToSt_findM_at, bind_findM_nil_isSome]
         have e' : (μ.heap.lenU r).1 = (μ.heap.len r .dyn : Int) := rfl
         refine congrArg some ?_
         rw [e']
         simp only [Heap.len, decide_eq_decide]
+        have := PrimTy.uint_nonneg k
         omega
     · intro v' hv'
       cases x with
       | none => cases hv'
       | some v =>
         obtain ⟨r, hr, rfl⟩ := hx _ rfl
-        rw [Option.bind_some, MVal.copyMToSt_findM_at, if_pos k0] at hv'
+        rw [Option.bind_some, MVal.copyMToSt_findM_at] at hv'
         obtain ⟨mv, hmv, hv'⟩ := Option.bind_eq_some_iff.1 hv'
         rw [SVal.findM_nil', Option.some.injEq] at hv'
         subst hv'
@@ -2120,7 +2100,7 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
             Option.map_some]
         · show μ.heap.index r .dyn k = some mv
-          simp only [Heap.index, if_pos k0, hmv]
+          simp only [Heap.index, hmv]
   | atF i rest ih =>
     rename_i E U n
     intro loc h x hh hx c p hp
@@ -2135,10 +2115,6 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         simp only [Option.bind_some]
         rw [← SVal.findM_append, Path.append_atF, Path.append_nil]
     rw [e]
-    have k0 : 0 ≤ k.1 := by
-      have := k.2
-      simp only [PrimTy.inRange, decide_eq_true_eq] at this
-      omega
     refine ih _ _ _ ?_ ?_ c p' hp'
     · rw [LTm.eval_kite, hh]
       cases x with
@@ -2148,20 +2124,17 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         change (if (true : Bool) = true then ((LTm.ltNat i n).eval g ν : Option Bool)
           else ((LTm.lit (p := .bool) false : LTm C (.val .bool)).eval g ν)) = _
         rw [if_pos rfl, LTm.eval_ltNat g ν n hk, Option.bind_some, MVal.copyMToSt_findM_atF,
-          if_pos k0, bind_findM_nil_isSome]
+          bind_findM_nil_isSome]
         have hl : (MObj.elems .fixed (μ.heap.get r)).length = n := by
           rw [MObj.elems_fixed]
           exact (μ.heap.get r : {l : List (MVal μ.H' E) // l.length = n}).2
         rw [hl]
-        refine congrArg some ?_
-        simp only [decide_eq_decide]
-        omega
     · intro v' hv'
       cases x with
       | none => cases hv'
       | some v =>
         obtain ⟨r, hr, rfl⟩ := hx _ rfl
-        rw [Option.bind_some, MVal.copyMToSt_findM_atF, if_pos k0] at hv'
+        rw [Option.bind_some, MVal.copyMToSt_findM_atF] at hv'
         obtain ⟨mv, hmv, hv'⟩ := Option.bind_eq_some_iff.1 hv'
         rw [SVal.findM_nil', Option.some.injEq] at hv'
         subst hv'
@@ -2172,7 +2145,7 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
         · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self,
             Option.map_some]
         · show μ.heap.index r .fixed k = some mv
-          simp only [Heap.index, if_pos k0, hmv]
+          simp only [Heap.index, hmv]
   | key i rest ih =>
     intro loc h x hh hx c p hp
     rw [TSegs.eval_key] at hp

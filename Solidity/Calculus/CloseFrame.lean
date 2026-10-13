@@ -42,8 +42,8 @@ theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) 
       cases rr with
       | nil => exact absurd Path.labels_nil hne
       | «at» j rr' =>
-        show (if 0 ≤ i.1 ∧ i.1.toNat < (SVal.view y' : ArrView _).n then some () else none) =
-          (if 0 ≤ i.1 ∧ i.1.toNat < (SVal.view y : ArrView _).n then some () else none)
+        show (if i.1.toNat < (SVal.view y' : ArrView _).n then some () else none) =
+          (if i.1.toNat < (SVal.view y : ArrView _).n then some () else none)
         rw [SVal.saveM_at_n h]
 
 /-- **A save leaves an index check** where it parts from the array's

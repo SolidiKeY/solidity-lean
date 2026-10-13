@@ -1989,17 +1989,15 @@ theorem index {p : List Semantics.Selector} {R' : RefTy} {E : Ty} (a : ArrTy R' 
     obtain ⟨r, rfl, hd⟩ := ih1 id hid
     refine ⟨.index r a k, hres r, fun v hv => ?_⟩
     simp only [Heap.readAddr, Heap.index] at hv
-    split at hv
-    · cases a with
-      | dyn =>
-        cases hd with
-        | array _ h =>
-          have hl : (MObj.elems .dyn (hp₁.get r)).length = 0 := h
-          simp only [List.length_eq_zero_iff.1 hl, List.getElem?_nil, reduceCtorEq] at hv
-      | fixed =>
-        cases hd with
-        | fixed _ h => exact h v (List.mem_of_getElem? hv)
-    · cases hv
+    cases a with
+    | dyn =>
+      cases hd with
+      | array _ h =>
+        have hl : (MObj.elems .dyn (hp₁.get r)).length = 0 := h
+        simp only [List.length_eq_zero_iff.1 hl, List.getElem?_nil, reduceCtorEq] at hv
+    | fixed =>
+      cases hd with
+      | fixed _ h => exact h v (List.mem_of_getElem? hv)
   · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
     obtain ⟨hR, id, hid⟩ := ih2 _ hR''
     cases hR
