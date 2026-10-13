@@ -35,8 +35,8 @@ implied by `Reachable` in general (`huge_reachable_not_fits`), implied under
 The run is `Semantics/Run.lean`'s, over typed states; `Semantics.lean` keeps
 the untyped state's operations, which the typed ones erase to
 (`Semantics/StorageErase.lean`, `HeapErase.lean`, `Semantics/Erase.lean`,
-`TypedErase.lean`) for the Typing chain and the memory laws (the EVM reads
-the typed state, W10.5.3); the
+`TypedErase.lean`) for the Typing chain (the EVM reads the typed state,
+W10.5.3, and the memory laws the typed heap, W10.5.4); the
 typed core (`State`, `Heap`, `Run`, `Signature.lean`) imports none of them
 (W10.5.1).
 

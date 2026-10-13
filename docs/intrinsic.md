@@ -7303,6 +7303,97 @@ Evm/ is 8154 lines (+89, the new `Evm/StorageLemmas.lean` included).
   added, `Theorems.lean`), `compiler-verification.md` (the statements),
   AGENTS.md's untyped list, `.claude/rules/typing.md`.
 
+### W10.5.4 record (2026-10-13, branch `w105-m`)
+
+The memory laws are proved on the typed heap alone: `Theory/Typed/Mem.lean`,
+`Calculus/TermLaws.lean`, `Calculus/MemRead.lean`, `Calculus/TermLib.lean`
+(and `DecideEval`, `CloseFrame`, `Decide`) import no erasure module
+(`Semantics/{Erase,TypedErase,HeapErase,StorageErase}`; checked on their
+import closures).  No definition the elimination reads changed
+(`LTm.memRes`, `LTm.freshPath?`, `Tm.freshPath?`, `EvalLaw`, `Ty.memberTy`):
+only proofs, so `sol_decide`'s output and the pins stand.  Net −661 lines
+(13 Lean files, +889 −1550).
+
+- **A grown heap keeps the older objects** (`Theory/Typed/Mem.lean`).
+  `Heap.Keeps e hp hp'`: every object of `hp`, weakened, is in `hp'`
+  (`refl`, `trans`); an allocation keeps (`Heap.keeps_alloc`,
+  `Grown.keeps_alloc`), and so does a copy into memory
+  (`SVal.keeps_copyStToM`, mutual with `SFields`/`SList`/`SVec`, on the
+  copy's eqns), so `Heap.allocDefault`.  `Heap.Keeps.readAddr` (an older
+  address reads as before, weakened: `MVal.wk`), `.field`, `.len`.  It
+  replaces the untyped `State.HeapExt` and `readAddr_heapExt`.
+  `Heap.readAddr_allocDefault`/`_copyStToM` are now typed equations (were
+  equal erased).  `Grown.read_then_old` takes `Heap.Keeps` and gives the
+  old read weakened; `Grown.readId_then_old` (as a word or an identity,
+  `MVal.toMvT_comp_wk`) proves `readOnAddMFrame` and
+  `readFromCopyToStorageFrame`; `MVal.map_wk_prim`/`bind_id_map_wk` serve
+  `MemRead`'s and `TermLaws`' frames.  `Grown.lenU_then_old` takes
+  `Heap.Keeps` (`Heap.len_eq_of_index` gone).
+- **A fresh default** (`Theory/Typed/Mem.lean`).  `Heap.Dflt hp T v`, an
+  inductive: a word its default, a struct each member's, a dynamic array
+  empty, a fixed array each element's; kept by a growth (`Heap.Dflt.wk`);
+  `Heap.dflt_copy_dfltBelow` (on the rank fuel, `termination_by (k, sizeOf
+  T)`, with `MFields.AllDflt` and `SVec.allDflt_copy_replicate`) and
+  `Heap.dflt_allocDefault`.  `Srt.FreshRead hp₁ R p` (`TermLaws`) is the
+  typed reading of a fresh path: an identity of a default object, an
+  address resolving to a default slot, each where `Ty.memberTy` declares
+  its type; its steps `root`, `field`, `index`, `iread`, `read_prim` are
+  shared by `Tm.freshPath_eval` and `LTm.freshPath_eval`, which were two
+  copies of one 100-line induction on the erasure and are now 60 lines
+  each of dispatch.  Adapted from the plan: no typed `readSegs`; the path
+  stays `List Seg` (the definitions read it), the invariant needs no root.
+- **Copies.**  `SVal.copyStToM_field` (by `Grown.alloc_field`,
+  `SFields.copyStToM_get_prim`), `MVal.copyMToSt_field` (by
+  `MVal.copyMToSt_findM_field`), `MVal.copyBelow_eq` (fuel independence,
+  `MVal.copyAt_congr`/`copyRefAt_congr`, `MVal.copyBelow_fuel`), and the
+  defaults at any fuel (`SVal.dfltBelow_eq`, `dflt_struct_eq`,
+  `dflt_map_eq`, `dflt_fixed_eq`), which `DecideEval`'s and `CloseFrame`'s
+  `dflt_*` now cite (they were by `SVal.erase_injective`).
+  `Tm.readFromCopyToStorage_exact`, `Tm.findOnCopy_exact` read the typed
+  storage (`Storage.find_append`, `SVal.find_overlay_field` and
+  `SVal.overlay_prim'`, moved down from `CloseFrame`).  The `¬ f =
+  "length"` premise of `SVal.copyStToM_field`, `MVal.copyMToSt_field`,
+  `Heap.initMember`, `SVal.readFromCopyToStorage`, `MVal.findOnCopy`,
+  `CloseS.readId_copySt_field`, `copyMToSt_find_field` and the two
+  `Tm.*_exact` is gone: only the name lookup of the untyped struct needed
+  it (`EvalLaw`'s constructors keep theirs: definitions).
+- **Deleted**: `Calculus/ReadWrite.lean`'s untyped part (695 → 57: the
+  fresh default read along a path, `DefaultMVal`, `readPath`, `layAt`,
+  `find_overlay_fields`, `readVal`, the copies `copyStToM_member`,
+  `copyMem_member`, `allocDefault_copy`, `RefTy.memberTy`,
+  `Semantics.Res.ok_bind'`; kept: the simp sets and `Ty.memberTy`).
+  `Semantics/Properties.lean` (770 → 627): `State.HeapExt`, `HeapExtR`,
+  `copyStToM_heapExt` and its mutual twins, `allocDefault_heapExt`,
+  `copyStToM_ref_lt`.  `Update.lean` (83 → 60): `readAddr`.
+  `Semantics/TypedErase.lean` (90 → 64): `MAddr.erase`, `erase_wk`, the
+  `asValue` erasures, `Value.toSVal_erase`.  `Semantics/HeapErase.lean`
+  (507 → 442): `Heap.allocDefault_erase`, `readField_erase`,
+  `readIndex_erase`, `MObj.erase_arr`, `ArrTy.isFixed`.
+  `Semantics/Erase.lean`: `State.allocDefault_erase`.  `Theory/Typed/Mem.lean`:
+  `Heap.readAddr_erase`, `toRes_inj`, `MAddrT.eraseT`/`erase_resolve`,
+  `Grown.allocSt`/`allocSt_copy`, `Semantics.State.findStorage_snoc`,
+  `Grown.readAddM_old`, `readCopySt_old`, `MVal.erase_prim_inj`,
+  `erase_ref_inj`, `toMvT_of_erase`.  `TermLib` drops its `TypedErase`
+  import.  What remains of the erasure is read by the Typing chain, the
+  tools (`Tools/Run`) and `Calculus/Problem` only (W10.5.2, W10.5.5).
+- **Timings** (diagnostics on copies, `Elab.async false`, `IO.monoMsNow`
+  around the body; master `51302477` in a detached worktree and this branch
+  back to back, same load): `Tactics/Decide` 14.6 s on master, 14.2 s here
+  (gate 45); `ProofTree` 9.9 s and 9.4 s (gate 11.7); `TestSuite/Derived5`
+  4.7 s and 4.7 s.
+- **Checks**: `lean_build` of the default targets clean (279 jobs, the
+  examples and their pins included); `TestSuite/Derived5` (so the
+  `SolkeyTestSuite` chain below it) clean; `check-orphans` (297
+  reachable), `check-doc-paths` clean; no `sorry`, `axiom` or heartbeat
+  override added (`Heap.initMember`, `Grown.readOnAddMFrame`,
+  `MVal.findOnCopy`, `Heap.dflt_allocDefault`: `propext`, `Quot.sound`).
+- **Docs**: `module-map.md` (`Theory/Typed/Mem`, `TermLaws`, `CloseFrame`,
+  `ReadWrite`, `Update`, `Properties`, the erasure rows),
+  `lean-key-rule-map.md` (the `EvalLaw` table's interpreter lemmas, the
+  frame rows, the copy row; `readOnWriteFrame`'s stale `writeAddr_setObj`
+  now `Heap.readAddr_writeAddr_apart`), AGENTS.md's untyped list,
+  `.claude/rules/typing.md`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
