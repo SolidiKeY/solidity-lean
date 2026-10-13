@@ -819,6 +819,87 @@ theorem SVal.copyStToM_id_ge {H : HTy} (hp : Heap H) {R : RefTy} (v : SVal (.ref
 
 end Len
 
+/-! ## A type's default, at any fuel
+
+`SVal.dflt` is computed below a rank bound (`SVal.dfltBelow`); any bound
+past the type's rank gives the same value, so a default's members and
+elements are their types' defaults (`SVal.dflt_struct_eq`, `dflt_map_eq`,
+`dflt_fixed_eq`). -/
+
+section DfltFuel
+
+theorem SFields.dfltBelow_congr {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
+    {ih' : (T : Ty) → tyRank T < k' → SVal T}
+    (hih : ∀ (T : Ty) (h : tyRank T < k) (h' : tyRank T < k'), ih T h = ih' T h') :
+    (fs : List (Name × Ty)) → (h : fieldsRank fs < k) → (h' : fieldsRank fs < k') →
+    SFields.dfltBelow k ih fs h = SFields.dfltBelow k' ih' fs h'
+  | [], _, _ => rfl
+  | (_, T) :: fs, _, _ => by
+    simp only [SFields.dfltBelow]
+    exact congr (congrArg SFields.cons (hih T _ _)) (SFields.dfltBelow_congr hih fs _ _)
+
+mutual
+theorem SVal.dfltAt_congr {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
+    {ih' : (T : Ty) → tyRank T < k' → SVal T}
+    (hih : ∀ (T : Ty) (h : tyRank T < k) (h' : tyRank T < k'), ih T h = ih' T h') :
+    (T : Ty) → (h : tyRank T < k + 1) → (h' : tyRank T < k' + 1) →
+    SVal.dfltAt k ih T h = SVal.dfltAt k' ih' T h'
+  | .prim _, _, _ => rfl
+  | .ref R, h, h' => SVal.dfltRefAt_congr hih R h h'
+
+theorem SVal.dfltRefAt_congr {k k' : Nat} {ih : (T : Ty) → tyRank T < k → SVal T}
+    {ih' : (T : Ty) → tyRank T < k' → SVal T}
+    (hih : ∀ (T : Ty) (h : tyRank T < k) (h' : tyRank T < k'), ih T h = ih' T h') :
+    (R : RefTy) → (h : tyRank (.ref R) < k + 1) → (h' : tyRank (.ref R) < k' + 1) →
+    SVal.dfltRefAt k ih R h = SVal.dfltRefAt k' ih' R h'
+  | .struct s, _, _ => by
+    simp only [SVal.dfltRefAt]
+    exact congrArg SVal.struct (SFields.dfltBelow_congr hih _ _ _)
+  | .array _, _, _ => rfl
+  | .fixed E n, h, h' => by
+    simp only [SVal.dfltRefAt]
+    rw [SVal.dfltAt_congr hih E _ (Nat.lt_of_succ_lt (by simpa only [tyRank] using h'))]
+  | .mapping _ V, h, h' => by
+    simp only [SVal.dfltRefAt]
+    rw [SVal.dfltAt_congr hih V _ (by simpa only [tyRank] using h')]
+end
+
+theorem SVal.dfltBelow_fuel : (k k' : Nat) → (T : Ty) → (h : tyRank T < k) →
+    (h' : tyRank T < k') → SVal.dfltBelow k T h = SVal.dfltBelow k' T h'
+  | 0, _, _, h, _ => absurd h (Nat.not_lt_zero _)
+  | _ + 1, 0, _, _, h' => absurd h' (Nat.not_lt_zero _)
+  | k + 1, k' + 1, T, h, h' =>
+    SVal.dfltAt_congr (fun T h h' => SVal.dfltBelow_fuel k k' T h h') T h h'
+
+/-- The default below any rank bound past the type's is the default. -/
+theorem SVal.dfltBelow_eq (k : Nat) (T : Ty) (h : tyRank T < k) :
+    SVal.dfltBelow k T h = SVal.dflt T :=
+  SVal.dfltBelow_fuel _ _ T h _
+
+theorem SFields.dfltBelow_eq_dflt (k : Nat) : (fs : List (Name × Ty)) →
+    (h : fieldsRank fs < k) → SFields.dfltBelow k (SVal.dfltBelow k) fs h = SFields.dflt fs
+  | [], _ => rfl
+  | (_, T) :: fs, _ => by
+    rw [SFields.dfltBelow, SFields.dflt, SVal.dfltBelow_eq, SFields.dfltBelow_eq_dflt k fs]
+
+/-- A default struct holds each member's default. -/
+theorem SVal.dflt_struct_eq (s : Name) :
+    SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
+  congrArg SVal.struct (SFields.dfltBelow_eq_dflt _ _ _)
+
+/-- A default mapping maps every key to the value's default. -/
+theorem SVal.dflt_map_eq (K V : Ty) :
+    SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
+  congrArg (SVal.map .nil) (SVal.dfltBelow_eq (rankBound (.ref (.mapping K V)) + 1) V _)
+
+/-- A default fixed array holds `n` of the element's default. -/
+theorem SVal.dflt_fixed_eq (E : Ty) (n : Nat) :
+    SVal.dflt (.ref (.fixed E n)) = .fixed (SVec.replicate (SVal.dflt E) n) :=
+  congrArg (fun v => SVal.fixed (SVec.replicate v n))
+    (SVal.dfltBelow_eq (rankBound (.ref (.fixed E n)) + 1) E _)
+
+end DfltFuel
+
 /-! ## A fresh default object
 
 `addM(m, R)` copies the default of `R` into memory (`Heap.allocDefault`):
