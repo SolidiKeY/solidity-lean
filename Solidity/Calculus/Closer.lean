@@ -730,13 +730,13 @@ section Below
 
 variable {g : State C []} {ν : AEnv}
 
-theorem findM_at_isSome {E : Ty} (v : SVal (.ref (.array E))) {i : Int} (h0 : 0 ≤ i)
-    (hi : i < ((SVal.view v : ArrView E).n : Int)) : (v.findM (.at i .nil)).isSome = true := by
+theorem findM_at_isSome {E : Ty} (v : SVal (.ref (.array E))) {i : PrimTy.uint.Denote} (h0 : 0 ≤ i.1)
+    (hi : i.1 < ((SVal.view v : ArrView E).n : Int)) : (v.findM (.at i .nil)).isSome = true := by
   cases v with
   | array e sh hn =>
     simp only [SVal.view] at hi
     simp only [SVal.findM, if_pos h0]
-    have hl : i.toNat < e.toList.length := by rw [SVec.length_toList]; omega
+    have hl : i.1.toNat < e.toList.length := by rw [SVec.length_toList]; omega
     rw [List.getElem?_append_left hl, List.getElem?_eq_getElem hl]
     simp only [SVal.findM_nil', Option.isSome_some]
 
@@ -747,8 +747,8 @@ theorem obs_len_lt' (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
   | none => exact Nat.two_pow_pos 256
   | some w => cases w with | array e sh hn => exact hn
 
-theorem has_below (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) {i : Int}
-    (h0 : 0 ≤ i) (hi : i < (st.obs.len (.ref r) : Int)) :
+theorem has_below (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) {i : PrimTy.uint.Denote}
+    (h0 : 0 ≤ i.1) (hi : i.1 < (st.obs.len (.ref r) : Int)) :
     st.obs.has (.ref (r.append (.at i .nil))) = true := by
   rw [Storage.obs_len_ref, SVal.obs_len] at hi
   rw [Storage.obs_has_ref, SVal.obs_has]
@@ -763,12 +763,12 @@ theorem has_below (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) {i : 
 theorem ival_uintOfNat {n : Nat} (h : n < 2 ^ 256) : PrimTy.ival (uintOfNat n) = n := by
   simp only [uintOfNat, dif_pos h, lenU, PrimTy.ival]
 
-theorem findM_atF_isSome {E : Ty} {n : Nat} (v : SVal (.ref (.fixed E n))) {i : Int} (h0 : 0 ≤ i)
-    (hi : i < (n : Int)) : (v.findM (.atF i .nil)).isSome = true := by
+theorem findM_atF_isSome {E : Ty} {n : Nat} (v : SVal (.ref (.fixed E n))) {i : PrimTy.uint.Denote} (h0 : 0 ≤ i.1)
+    (hi : i.1 < (n : Int)) : (v.findM (.atF i .nil)).isSome = true := by
   cases v with
   | fixed e =>
     simp only [SVal.findM, if_pos h0]
-    have hl : i.toNat < e.toList.length := by rw [SVec.length_toList]; omega
+    have hl : i.1.toNat < e.toList.length := by rw [SVec.length_toList]; omega
     rw [List.getElem?_eq_getElem hl]
     simp only [SVal.findM_nil', Option.isSome_some]
 

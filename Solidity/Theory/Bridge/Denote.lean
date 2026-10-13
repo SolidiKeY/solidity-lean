@@ -78,7 +78,7 @@ def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen 
   | .net, da => da.map fun n => (lookupBy n g.net).getD 0
   | .delValue, da => da.map fun _ => PrimTy.dflt _
   | .field h, dp => ObsLoc.app dp (.field h .nil)
-  | .next, dp => ObsLoc.app dp (.at (g.storage.obs.len dp : Int) .nil)
+  | .next, dp => ObsLoc.app dp (.at (uintOfNat (g.storage.obs.len dp)) .nil)
   | .sval, da => TVal.ofWord (da.getD (PrimTy.dflt _))
   | .newArr h, dn => (newArrT _ (dn.getD (PrimTy.dflt _)) h).obs
   | .alloc _ _, _ => ()
@@ -102,7 +102,7 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .read, x, y, _, _ => Op2.eval g .read x y
   | .mlen, x, y, _, _ => Op2.eval g .mlen x y
   | .at it, _, _, dp, di => ObsLoc.app dp (Path.index it (di.getD (PrimTy.dflt _)))
-  | .nextIn, _, _, ds, dp => ObsLoc.app dp (.at (ds.len dp : Int) .nil)
+  | .nextIn, _, _, ds, dp => ObsLoc.app dp (.at (uintOfNat (ds.len dp)) .nil)
   | .delAt, _, _, ds, dp => ds.delAt dp
   | .pushSlot, _, _, ds, dp => ds.extend dp
   | .pop, _, _, ds, dp => ds.pop false dp
@@ -237,7 +237,8 @@ theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {
     simp only [Op1.evalM, Option.bind_some, Storage.nextT, Option.map_eq_some_iff] at hv
     obtain ⟨w, hw, rfl⟩ := hv
     simp only [Srt.Bridge] at hu ⊢
-    rw [Op1.denote, hu, Storage.obs_len_ref_some hw, SRef.index, Path.index_dyn]
+    rw [Op1.denote, hu, Storage.obs_len_ref_some hw, SRef.index, Path.index_dyn,
+      uintOfNat_eq_lenU (SVal.view w : ArrView _).hn]
     rfl
   | sval =>
     simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
@@ -323,7 +324,8 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
        rfl)
     | (simp only [Storage.nextT, Option.map_eq_some_iff] at hv
        obtain ⟨w', hw', rfl⟩ := hv
-       rw [Op2.denote, Storage.obs_len_ref_some hw', SRef.index, Path.index_dyn]
+       rw [Op2.denote, Storage.obs_len_ref_some hw', SRef.index, Path.index_dyn,
+         uintOfNat_eq_lenU (SVal.view w' : ArrView _).hn]
        rfl)
     | (rw [Op2.denote, Storage.obs_delete hv])
     | (rw [Op2.denote, Storage.obs_push_slot hv])

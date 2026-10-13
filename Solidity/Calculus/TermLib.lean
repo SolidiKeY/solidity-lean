@@ -803,17 +803,17 @@ theorem Tm.eraseChecks_denote' {u : Srt} (p : Tm C Γ u) :
     cases o <;> first
       | rfl
       | (show ObsLoc.app (x.eraseChecks.denote σ) _ = ObsLoc.app (x.denote σ) _; rw [ih])
-      | (show ObsLoc.app (x.eraseChecks.denote σ) (.at (σ.glob.storage.obs.len
-            (x.eraseChecks.denote σ) : Int) .nil) = ObsLoc.app (x.denote σ) (.at (σ.glob.storage.obs.len
-            (x.denote σ) : Int) .nil); rw [ih])
+      | (show ObsLoc.app (x.eraseChecks.denote σ) (.at (uintOfNat (σ.glob.storage.obs.len
+            (x.eraseChecks.denote σ))) .nil) = ObsLoc.app (x.denote σ)
+            (.at (uintOfNat (σ.glob.storage.obs.len (x.denote σ))) .nil); rw [ih])
   | app2 o x y ihx ihy =>
     cases o <;>
       first
       | rfl
       | (show ObsLoc.app (x.eraseChecks.denote σ) _ = ObsLoc.app (x.denote σ) _; rw [ihx])
-      | (show ObsLoc.app (y.eraseChecks.denote σ) (.at (Obs.len (x.denote σ)
-            (y.eraseChecks.denote σ) : Int) .nil) = ObsLoc.app (y.denote σ) (.at (Obs.len
-            (x.denote σ) (y.denote σ) : Int) .nil); rw [ihy])
+      | (show ObsLoc.app (y.eraseChecks.denote σ) (.at (uintOfNat (Obs.len (x.denote σ)
+            (y.eraseChecks.denote σ))) .nil) = ObsLoc.app (y.denote σ) (.at (uintOfNat (Obs.len
+            (x.denote σ) (y.denote σ))) .nil); rw [ihy])
   | app3 o x y z _ ihy _ =>
     cases o <;> first | rfl | (show ObsLoc.app (y.eraseChecks.denote σ) _ = ObsLoc.app (y.denote σ) _; rw [ihy])
   | _ => rfl

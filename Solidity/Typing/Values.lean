@@ -558,9 +558,9 @@ word is written past an array's end by no program (`Storage.checkIndex`). -/
 def SVal.Live : {T U : Ty} → SVal T → Path T U → Prop
   | _, _, _, .nil => True
   | _, _, .struct fs, .field h p => (fs.get h).Live p
-  | _, _, @SVal.array E n e sh _, .at i p => ∀ y, 0 ≤ i →
-      (e.toList ++ sh.toList)[i.toNat]? = some y → (E.isPrimitive = true → i.toNat < n) ∧ y.Live p
-  | _, _, .fixed e, .atF i p => ∀ y, 0 ≤ i → e.toList[i.toNat]? = some y → y.Live p
+  | _, _, @SVal.array E n e sh _, .at i p => ∀ y, 0 ≤ i.1 →
+      (e.toList ++ sh.toList)[i.1.toNat]? = some y → (E.isPrimitive = true → i.1.toNat < n) ∧ y.Live p
+  | _, _, .fixed e, .atF i p => ∀ y, 0 ≤ i.1 → e.toList[i.1.toNat]? = some y → y.Live p
   | _, _, .map m d, .key k p =>
     match lookupBy k m.toList with
     | some y => y.Live p
@@ -669,13 +669,13 @@ theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new
           · exact SVec.all_iff.mp hx.2.1 w hw
           · exact SList.all_iff.mp hx.2.2 w hw
         have hzA := SVal.saveM_all p (hall y (List.mem_of_getElem? hy)) hn hk hl hz
-        have hlen : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
-        have hset : ∀ w ∈ (e.toList ++ sh.toList).set i.toNat z, w.All P := by
+        have hlen : i.1.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
+        have hset : ∀ w ∈ (e.toList ++ sh.toList).set i.1.toNat z, w.All P := by
           intro w hw
           rcases List.mem_or_eq_of_mem_set hw with hw | hw
           · exact hall w hw
           · exact hw ▸ hzA
-        refine ⟨harr e sh i.toNat z (by rwa [List.length_append] at hlen) hlive hx.1 hzA,
+        refine ⟨harr e sh i.1.toNat z (by rwa [List.length_append] at hlen) hlive hx.1 hzA,
           SVec.all_ofList.mpr fun w hw => hset w (List.mem_of_mem_take hw),
           SList.all_ofList.mpr fun w hw => hset w (List.mem_of_mem_drop hw)⟩
       · exact nomatch h
@@ -1152,10 +1152,10 @@ theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v 
       · rename_i y hy
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
         obtain ⟨z, hz, rfl⟩ := h
-        have hl : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
-        have hslots : (SVec.ofList (((e.toList ++ sh.toList).set i.toNat z).take n)).toList ++
-            (SList.ofList (((e.toList ++ sh.toList).set i.toNat z).drop n)).toList =
-            (e.toList ++ sh.toList).set i.toNat z := by
+        have hl : i.1.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
+        have hslots : (SVec.ofList (((e.toList ++ sh.toList).set i.1.toNat z).take n)).toList ++
+            (SList.ofList (((e.toList ++ sh.toList).set i.1.toNat z).drop n)).toList =
+            (e.toList ++ sh.toList).set i.1.toNat z := by
           rw [SVec.toList_ofList, SList.toList_ofList, List.take_append_drop]
         simp only [SVal.saveM, hi, if_true, hslots, List.getElem?_set_self hl,
           SVal.saveM_idem y p v hz, Option.bind_eq_bind, Option.bind_some, List.set_set]
@@ -1173,7 +1173,7 @@ theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v 
       · rename_i y hy
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
         obtain ⟨z, hz, rfl⟩ := h
-        have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hy).1
+        have hl : i.1.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hy).1
         simp only [SVal.saveM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl,
           SVal.saveM_idem y p v hz, Option.bind_eq_bind, Option.bind_some]
         congr 2
@@ -1221,7 +1221,7 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
       · rename_i y hy
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
         obtain ⟨z, hz, rfl⟩ := h₁
-        have hl : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
+        have hl : i.1.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
         simp only [SVal.saveM, hi, if_true, SVec.toList_ofList, SList.toList_ofList,
           List.take_append_drop, List.getElem?_set_self hl, Option.bind_eq_bind,
           Option.bind_eq_some_iff, Option.some.injEq] at h₂
@@ -1242,7 +1242,7 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
       · rename_i y hy
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
         obtain ⟨z, hz, rfl⟩ := h₁
-        have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hy).1
+        have hl : i.1.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hy).1
         simp only [SVal.saveM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl,
           Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₂
         obtain ⟨w, hw, rfl⟩ := h₂

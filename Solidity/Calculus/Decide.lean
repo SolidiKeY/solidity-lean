@@ -419,8 +419,8 @@ noncomputable def eval (g : State C []) (ν : AEnv) {T U : Ty} (p : TSegs C T U)
     Option (Path T U) :=
   @TSegs.rec C (fun T U _ => Option (Path T U)) (some .nil)
     (fun h _ ih => ih.map (.field h))
-    (fun i _ ih => (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => ih.map (.at k.1))
-    (fun i _ ih => (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => ih.map (.atF k.1))
+    (fun i _ ih => (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => ih.map (.at k))
+    (fun i _ ih => (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => ih.map (.atF k))
     (fun {k} {_} {_} i _ ih => (i.eval g ν : Option k.Denote).bind fun j =>
       ih.map (.key j))
     T U p

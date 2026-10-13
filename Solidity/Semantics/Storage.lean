@@ -698,8 +698,8 @@ inductive Path : Ty → Ty → Type where
   | nil {T : Ty} : Path T T
   | field {s f : Name} {T U : Ty} (h : lookupBy f (structDef s) = some T) (p : Path T U) :
       Path (.ref (.struct s)) U
-  | at {E U : Ty} (i : Int) (p : Path E U) : Path (.ref (.array E)) U
-  | atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) : Path (.ref (.fixed E n)) U
+  | at {E U : Ty} (i : PrimTy.uint.Denote) (p : Path E U) : Path (.ref (.array E)) U
+  | atF {E U : Ty} {n : Nat} (i : PrimTy.uint.Denote) (p : Path E U) : Path (.ref (.fixed E n)) U
   | key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) : Path (.ref (.mapping K V)) U
 
 /-- One segment knows the type it leaves and the type it reaches.
@@ -707,8 +707,8 @@ A field carries its lookup proof; array and mapping steps cannot be exchanged. -
 inductive Semantics.Seg : Ty → Ty → Type where
   | field {s f : Name} {T : Ty} (h : lookupBy f (structDef s) = some T) :
       Seg (.ref (.struct s)) T
-  | at {E : Ty} (i : Int) : Seg (.ref (.array E)) E
-  | atF {E : Ty} {n : Nat} (i : Int) : Seg (.ref (.fixed E n)) E
+  | at {E : Ty} (i : PrimTy.uint.Denote) : Seg (.ref (.array E)) E
+  | atF {E : Ty} {n : Nat} (i : PrimTy.uint.Denote) : Seg (.ref (.fixed E n)) E
   | key {K : PrimTy} {V : Ty} (k : K.Denote) : Seg (.ref (.mapping K V)) V
 
 /-- A sequence composes only when adjacent segment types agree. -/
@@ -720,8 +720,8 @@ inductive Semantics.Segs : Ty → Ty → Type where
 be followed to read or write storage. -/
 def Semantics.Seg.label : {T U : Ty} → Seg T U → Selector
   | _, _, @Seg.field _ f _ _ => .field f
-  | _, _, .at i => .at i
-  | _, _, .atF i => .at i
+  | _, _, .at i => .at i.1
+  | _, _, .atF i => .at i.1
   | _, _, .key k => .at (PrimTy.key k)
 
 /-- The comparison observations of a typed segment sequence. -/
@@ -772,10 +772,10 @@ def labels {T U : Ty} (p : Path T U) : List Semantics.Selector := p.segments.lab
 theorem labels_nil {T : Ty} : (Path.nil (T := T)).labels = [] := rfl
 theorem labels_field {s f : Name} {T U : Ty} (h : lookupBy f (structDef s) = some T)
     (p : Path T U) : (Path.field h p).labels = .field f :: p.labels := rfl
-theorem labels_at {E U : Ty} (i : Int) (p : Path E U) :
-    (Path.at i p).labels = .at i :: p.labels := rfl
-theorem labels_atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) :
-    (Path.atF (n := n) i p).labels = .at i :: p.labels := rfl
+theorem labels_at {E U : Ty} (i : PrimTy.uint.Denote) (p : Path E U) :
+    (Path.at i p).labels = .at i.1 :: p.labels := rfl
+theorem labels_atF {E U : Ty} {n : Nat} (i : PrimTy.uint.Denote) (p : Path E U) :
+    (Path.atF (n := n) i p).labels = .at i.1 :: p.labels := rfl
 theorem labels_key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) :
     (Path.key (K := K) k p).labels = .at (PrimTy.key k) :: p.labels := rfl
 
@@ -801,9 +801,9 @@ def append {T U W : Ty} (p : Path T U) (q : Path U W) : Path T W :=
 theorem append_nil {T W : Ty} (q : Path T W) : (Path.nil (T := T)).append q = q := rfl
 theorem append_field {s f : Name} {T U W : Ty} (h : lookupBy f (structDef s) = some T)
     (p : Path T U) (q : Path U W) : (Path.field h p).append q = .field h (p.append q) := rfl
-theorem append_at {E U W : Ty} (i : Int) (p : Path E U) (q : Path U W) :
+theorem append_at {E U W : Ty} (i : PrimTy.uint.Denote) (p : Path E U) (q : Path U W) :
     (Path.at i p).append q = .at i (p.append q) := rfl
-theorem append_atF {E U W : Ty} {n : Nat} (i : Int) (p : Path E U) (q : Path U W) :
+theorem append_atF {E U W : Ty} {n : Nat} (i : PrimTy.uint.Denote) (p : Path E U) (q : Path U W) :
     (Path.atF (n := n) i p).append q = .atF i (p.append q) := rfl
 theorem append_key {K : PrimTy} {V U W : Ty} (k : K.Denote) (p : Path V U) (q : Path U W) :
     (Path.key (K := K) k p).append q = .key k (p.append q) := rfl
@@ -838,15 +838,15 @@ def index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : k.Denote) 
   @IndexTy.casesOn (fun R k V _ => k.Denote → Path (.ref R) V) R k V it
     (fun {_} {_} i => .key i .nil)
     (fun {_} {_} a i => @ArrTy.casesOn (fun R E _ => Path (.ref R) E) _ _ a
-      (fun {_} => .at (i : PrimTy.uint.Denote).1 .nil)
-      (fun {_} {_} => .atF (i : PrimTy.uint.Denote).1 .nil)) i
+      (fun {_} => .at i .nil)
+      (fun {_} {_} => .atF i .nil)) i
 
 theorem index_map {k : PrimTy} {V : Ty} (i : k.Denote) :
     index (IndexTy.map (k := k) (V := V)) i = .key i .nil := rfl
 theorem index_dyn {E : Ty} (i : PrimTy.uint.Denote) :
-    index (IndexTy.arr (ArrTy.dyn (E := E))) i = .at i.1 .nil := rfl
+    index (IndexTy.arr (ArrTy.dyn (E := E))) i = .at i .nil := rfl
 theorem index_fixed {E : Ty} {n : Nat} (i : PrimTy.uint.Denote) :
-    index (IndexTy.arr (ArrTy.fixed (E := E) (n := n))) i = .atF i.1 .nil := rfl
+    index (IndexTy.arr (ArrTy.fixed (E := E) (n := n))) i = .atF i .nil := rfl
 
 attribute [irreducible] index
 attribute [eqns index_map index_dyn index_fixed] index
@@ -880,14 +880,14 @@ def SVal.findM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
   | _, _, v, .nil => some v
   | _, _, .struct fs, .field h p => (fs.get h).findM p
   | _, _, .array e sh _, .at i p =>
-    if 0 ≤ i then
-      match (e.toList ++ sh.toList)[i.toNat]? with
+    if 0 ≤ i.1 then
+      match (e.toList ++ sh.toList)[i.1.toNat]? with
       | some x => x.findM p
       | none => none
     else none
   | _, _, .fixed e, .atF i p =>
-    if 0 ≤ i then
-      match e.toList[i.toNat]? with
+    if 0 ≤ i.1 then
+      match e.toList[i.1.toNat]? with
       | some x => x.findM p
       | none => none
     else none
@@ -901,14 +901,14 @@ def SVal.findLiveM : {T U : Ty} → SVal T → Path T U → Option (SVal U)
   | _, _, v, .nil => some v
   | _, _, .struct fs, .field h p => (fs.get h).findLiveM p
   | _, _, .array e _ _, .at i p =>
-    if 0 ≤ i then
-      match e.toList[i.toNat]? with
+    if 0 ≤ i.1 then
+      match e.toList[i.1.toNat]? with
       | some x => x.findLiveM p
       | none => none
     else none
   | _, _, .fixed e, .atF i p =>
-    if 0 ≤ i then
-      match e.toList[i.toNat]? with
+    if 0 ≤ i.1 then
+      match e.toList[i.1.toNat]? with
       | some x => x.findLiveM p
       | none => none
     else none
@@ -924,21 +924,21 @@ def SVal.saveM : {T U : Ty} → SVal T → Path T U → SVal U → Option (SVal 
     let x ← (fs.get h).saveM p new
     some (.struct (fs.set h x))
   | _, _, @SVal.array _ n e sh h, .at i p, new =>
-    if 0 ≤ i then
-      match (e.toList ++ sh.toList)[i.toNat]? with
+    if 0 ≤ i.1 then
+      match (e.toList ++ sh.toList)[i.1.toNat]? with
       | some x => do
         let x' ← x.saveM p new
-        let slots := (e.toList ++ sh.toList).set i.toNat x'
+        let slots := (e.toList ++ sh.toList).set i.1.toNat x'
         some (.array (SVec.ofList (slots.take n)) (.ofList (slots.drop n))
           (SVal.take_lt_bound slots h))
       | none => none
     else none
   | _, _, .fixed e, .atF i p, new =>
-    if 0 ≤ i then
-      match e.toList[i.toNat]? with
+    if 0 ≤ i.1 then
+      match e.toList[i.1.toNat]? with
       | some x => do
         let x' ← x.saveM p new
-        some (.fixed (e.set i.toNat x'))
+        some (.fixed (e.set i.1.toNat x'))
       | none => none
     else none
   | _, _, .map m d, .key k p, new =>
@@ -959,14 +959,14 @@ def SVal.find {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
     (fun {_} {_} {_} {_} h _ ih v => ih (SFields.get (SVal.view v) h))
     (fun {_} {_} i _ ih v =>
       let w : ArrView _ := SVal.view v
-      if 0 ≤ i then
-        match (w.elems.toList ++ w.shadow.toList)[i.toNat]? with
+      if 0 ≤ i.1 then
+        match (w.elems.toList ++ w.shadow.toList)[i.1.toNat]? with
         | some x => ih x
         | none => none
       else none)
     (fun {_} {_} {_} i _ ih v =>
-      if 0 ≤ i then
-        match (SVal.view v : SVec _ _).toList[i.toNat]? with
+      if 0 ≤ i.1 then
+        match (SVal.view v : SVec _ _).toList[i.1.toNat]? with
         | some x => ih x
         | none => none
       else none)
@@ -986,14 +986,14 @@ def SVal.findLive {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
     (fun {_} {_} {_} {_} h _ ih v => ih (SFields.get (SVal.view v) h))
     (fun {_} {_} i _ ih v =>
       let w : ArrView _ := SVal.view v
-      if 0 ≤ i then
-        match w.elems.toList[i.toNat]? with
+      if 0 ≤ i.1 then
+        match w.elems.toList[i.1.toNat]? with
         | some x => ih x
         | none => none
       else none)
     (fun {_} {_} {_} i _ ih v =>
-      if 0 ≤ i then
-        match (SVal.view v : SVec _ _).toList[i.toNat]? with
+      if 0 ≤ i.1 then
+        match (SVal.view v : SVec _ _).toList[i.1.toNat]? with
         | some x => ih x
         | none => none
       else none)
@@ -1016,22 +1016,22 @@ def SVal.save {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) : Option (SV
         some (.struct (fs.set h x)))
     (fun {_} {_} i _ ih v new =>
       let w : ArrView _ := SVal.view v
-      if 0 ≤ i then
-        match (w.elems.toList ++ w.shadow.toList)[i.toNat]? with
+      if 0 ≤ i.1 then
+        match (w.elems.toList ++ w.shadow.toList)[i.1.toNat]? with
         | some x => do
           let x' ← ih x new
-          let slots := (w.elems.toList ++ w.shadow.toList).set i.toNat x'
+          let slots := (w.elems.toList ++ w.shadow.toList).set i.1.toNat x'
           some (.array (SVec.ofList (slots.take w.n)) (.ofList (slots.drop w.n))
             (SVal.take_lt_bound slots w.hn))
         | none => none
       else none)
     (fun {_} {_} {_} i _ ih v new =>
       let e : SVec _ _ := SVal.view v
-      if 0 ≤ i then
-        match e.toList[i.toNat]? with
+      if 0 ≤ i.1 then
+        match e.toList[i.1.toNat]? with
         | some x => do
           let x' ← ih x new
-          some (.fixed (e.set i.toNat x'))
+          some (.fixed (e.set i.1.toNat x'))
         | none => none
       else none)
     (fun {_} {_} {_} k _ ih v new =>
@@ -1623,6 +1623,16 @@ theorem lenU_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int)
 def lenU (n : Nat) (h : n < 2 ^ 256) : PrimTy.uint.Denote :=
   (⟨n, lenU_inRange h⟩ : {n : Int // PrimTy.uint.inRange n = true})
 
+/-- A length as a `uint`, the default past the bound (no storage has an
+array that long: `SVal.array`'s `hn`). -/
+def uintOfNat (n : Nat) : PrimTy.uint.Denote :=
+  if h : n < 2 ^ 256 then lenU n h else PrimTy.dflt .uint
+
+theorem uintOfNat_val {n : Nat} (h : n < 2 ^ 256) : (uintOfNat n).1 = n := by
+  simp only [uintOfNat, dif_pos h, lenU]
+
+theorem uintOfNat_eq_lenU {n : Nat} (h : n < 2 ^ 256) : uintOfNat n = lenU n h := dif_pos h
+
 /-- One more element, below the bound. -/
 theorem SVec.snoc_lt_bound {E : Ty} {n : Nat} (e : SVec E n) (x : SVal E) (h : n + 1 < 2 ^ 256) :
     (e.toList ++ [x]).length < 2 ^ 256 := by
@@ -1837,7 +1847,7 @@ theorem SVal.findM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v
       · rename_i x hx
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
         obtain ⟨y, hy, rfl⟩ := h
-        have hl : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hx).1
+        have hl : i.1.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hx).1
         simp only [SVal.findM, hi, if_true, SVec.toList_ofList, SList.toList_ofList,
           List.take_append_drop, List.getElem?_set_self hl]
         exact SVal.findM_saveM _ p v hy
@@ -1851,7 +1861,7 @@ theorem SVal.findM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v
       · rename_i x hx
         simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
         obtain ⟨y, hy, rfl⟩ := h
-        have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hx).1
+        have hl : i.1.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hx).1
         simp only [SVal.findM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl]
         exact SVal.findM_saveM _ p v hy
       · simp only [reduceCtorEq] at h
@@ -1873,13 +1883,13 @@ inductive Path.Diverges : {T U W : Ty} → Path T U → Path T W → Prop
       Diverges (.field h p) (.field h' q)
   | fieldIn {s f : Name} {T U W : Ty} (h : lookupBy f (structDef s) = some T) {p : Path T U}
       {q : Path T W} : Diverges p q → Diverges (.field h p) (.field h q)
-  | at {E U W : Ty} {i j : Int} (p : Path E U) (q : Path E W) (hne : i ≠ j) :
+  | at {E U W : Ty} {i j : PrimTy.uint.Denote} (p : Path E U) (q : Path E W) (hne : i ≠ j) :
       Diverges (.at i p) (.at j q)
-  | atIn {E U W : Ty} (i : Int) {p : Path E U} {q : Path E W} :
+  | atIn {E U W : Ty} (i : PrimTy.uint.Denote) {p : Path E U} {q : Path E W} :
       Diverges p q → Diverges (.at i p) (.at i q)
-  | atF {E U W : Ty} {n : Nat} {i j : Int} (p : Path E U) (q : Path E W) (hne : i ≠ j) :
+  | atF {E U W : Ty} {n : Nat} {i j : PrimTy.uint.Denote} (p : Path E U) (q : Path E W) (hne : i ≠ j) :
       Diverges (.atF (n := n) i p) (.atF j q)
-  | atFIn {E U W : Ty} {n : Nat} (i : Int) {p : Path E U} {q : Path E W} :
+  | atFIn {E U W : Ty} {n : Nat} (i : PrimTy.uint.Denote) {p : Path E U} {q : Path E W} :
       Diverges p q → Diverges (.atF (n := n) i p) (.atF i q)
   | key {K : PrimTy} {V U W : Ty} {k k' : K.Denote} (p : Path V U) (q : Path V W) (hne : k ≠ k') :
       Diverges (.key (K := K) k p) (.key k' q)
@@ -1919,8 +1929,9 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
           simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
           obtain ⟨y, _, rfl⟩ := hs
           simp only [SVal.findM, SVec.toList_ofList, SList.toList_ofList, List.take_append_drop]
-          by_cases hj : 0 ≤ j
-          · have hn' : i.toNat ≠ j.toNat := by omega
+          by_cases hj : 0 ≤ j.1
+          · have hne' : i.1 ≠ j.1 := fun e => hne (Subtype.ext e)
+            have hn' : i.1.toNat ≠ j.1.toNat := by omega
             simp only [hj, if_true, List.getElem?_set_ne hn']
           · simp only [hj, if_false]
         · simp only [reduceCtorEq] at hs
@@ -1936,7 +1947,7 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
         · rename_i x0 hx
           simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
           obtain ⟨y, hy, rfl⟩ := hs
-          have hl : i.toNat < (e.toList ++ sh.toList).length :=
+          have hl : i.1.toNat < (e.toList ++ sh.toList).length :=
             (List.getElem?_eq_some_iff.mp hx).1
           simp only [SVal.findM, hi, if_true, SVec.toList_ofList, SList.toList_ofList,
             List.take_append_drop, List.getElem?_set_self hl, hx]
@@ -1955,8 +1966,9 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
           simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
           obtain ⟨y, _, rfl⟩ := hs
           simp only [SVal.findM, SVec.toList_set]
-          by_cases hj : 0 ≤ j
-          · have hn' : i.toNat ≠ j.toNat := by omega
+          by_cases hj : 0 ≤ j.1
+          · have hne' : i.1 ≠ j.1 := fun e => hne (Subtype.ext e)
+            have hn' : i.1.toNat ≠ j.1.toNat := by omega
             simp only [hj, if_true, List.getElem?_set_ne hn']
           · simp only [hj, if_false]
         · simp only [reduceCtorEq] at hs
@@ -1972,7 +1984,7 @@ theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
         · rename_i x0 hx
           simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at hs
           obtain ⟨y, hy, rfl⟩ := hs
-          have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hx).1
+          have hl : i.1.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hx).1
           simp only [SVal.findM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl, hx]
           exact ih _ v hy
         · simp only [reduceCtorEq] at hs
@@ -2018,19 +2030,19 @@ theorem find_field {s f : Name} {T U : Ty} (fs : SFields (structDef s))
     (h : lookupBy f (structDef s) = some T) (p : Path T U) :
     (SVal.struct fs).find (.field h p) = (fs.get h).find p := rfl
 
-theorem find_at {E U : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) (i : Int)
+theorem find_at {E U : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) (i : PrimTy.uint.Denote)
     (p : Path E U) :
     (SVal.array e sh h).find (.at i p) =
-      if 0 ≤ i then
-        match (e.toList ++ sh.toList)[i.toNat]? with
+      if 0 ≤ i.1 then
+        match (e.toList ++ sh.toList)[i.1.toNat]? with
         | some x => x.find p
         | none => none
       else none := rfl
 
-theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (p : Path E U) :
+theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : PrimTy.uint.Denote) (p : Path E U) :
     (SVal.fixed e).find (.atF i p) =
-      if 0 ≤ i then
-        match e.toList[i.toNat]? with
+      if 0 ≤ i.1 then
+        match e.toList[i.1.toNat]? with
         | some x => x.find p
         | none => none
       else none := rfl
@@ -2064,15 +2076,15 @@ theorem findLive_eq_findLiveM : {T U : Ty} → (v : SVal T) → (p : Path T U) �
     rw [findLive_eq_findLiveM _ p]
     simp only [findLiveM]
   | _, _, .array e sh _, .at i p => by
-    show (if 0 ≤ i then
-        match e.toList[i.toNat]? with
+    show (if 0 ≤ i.1 then
+        match e.toList[i.1.toNat]? with
         | some x => x.findLive p
         | none => none
       else none) = _
     simp only [findLive_eq_findLiveM _ p, findLiveM]
   | _, _, .fixed e, .atF i p => by
-    show (if 0 ≤ i then
-        match e.toList[i.toNat]? with
+    show (if 0 ≤ i.1 then
+        match e.toList[i.1.toNat]? with
         | some x => x.findLive p
         | none => none
       else none) = _
@@ -2092,22 +2104,22 @@ theorem save_eq_saveM : {T U : Ty} → (v : SVal T) → (p : Path T U) → (new 
         some (SVal.struct (fs.set h x)) : Option (SVal (.ref (.struct s)))) = _
     simp only [save_eq_saveM _ p, saveM]
   | _, _, @SVal.array E n e sh h, .at i p, new => by
-    show (if 0 ≤ i then
-        match (e.toList ++ sh.toList)[i.toNat]? with
+    show (if 0 ≤ i.1 then
+        match (e.toList ++ sh.toList)[i.1.toNat]? with
         | some x => do
           let x' ← x.save p new
-          let slots := (e.toList ++ sh.toList).set i.toNat x'
+          let slots := (e.toList ++ sh.toList).set i.1.toNat x'
           some (SVal.array (SVec.ofList (slots.take n)) (.ofList (slots.drop n))
             (SVal.take_lt_bound slots h))
         | none => none
       else none : Option (SVal (.ref (.array E)))) = _
     simp only [save_eq_saveM _ p, saveM]
   | _, _, @SVal.fixed E n e, .atF i p, new => by
-    show (if 0 ≤ i then
-        match e.toList[i.toNat]? with
+    show (if 0 ≤ i.1 then
+        match e.toList[i.1.toNat]? with
         | some x => do
           let x' ← x.save p new
-          some (SVal.fixed (e.set i.toNat x'))
+          some (SVal.fixed (e.set i.1.toNat x'))
         | none => none
       else none : Option (SVal (.ref (.fixed E n)))) = _
     simp only [save_eq_saveM _ p, saveM]

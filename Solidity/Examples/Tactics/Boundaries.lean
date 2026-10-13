@@ -37,13 +37,18 @@ example : lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote)
 
 /-- An array segment can reach a uint; it cannot be composed with a bool tail. -/
 example : True := by
-  have : Segs (.ref (.array (.prim .uint))) (.prim .uint) := .cons (.at 0) .nil
+  have : Segs (.ref (.array (.prim .uint))) (.prim .uint) := .cons (.at ⟨0, rfl⟩) .nil
   fail_if_success
-    have : Segs (.ref (.array (.prim .uint))) (.prim .bool) := .cons (.at 0) .nil
+    have : Segs (.ref (.array (.prim .uint))) (.prim .bool) := .cons (.at ⟨0, rfl⟩) .nil
   trivial
 
 /-- A path's comparison observation comes from its typed segments. -/
-example : (Path.at (E := .prim .uint) 3 .nil).segments.labels = [.at 3] := rfl
+example : (Path.at (E := .prim .uint) ⟨3, rfl⟩ .nil).segments.labels = [.at 3] := rfl
+
+/-- An index is a `uint`: a negative one cannot be written. -/
+example : True := by
+  fail_if_success have : Path (.ref (.array (.prim .uint))) (.prim .uint) := .at ⟨-1, rfl⟩ .nil
+  trivial
 
 /-- SSTORE normalizes an oversized operand to a word and leaves another slot alone. -/
 example : (WordStore.write WordStore.zero (.root 0) (W + 7)) (.root 0) = 7 := by

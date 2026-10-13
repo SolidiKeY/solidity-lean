@@ -161,7 +161,8 @@ def FixedFits (C : Contract) : Prop := ∀ nt ∈ C.vars, FixedFitsAt nt.2
 /-- Bounded at types whose fixed sizes fit is fitting. -/
 theorem fixedFits_mono : fitsH.Mono bndH FixedFitsAt :=
   ⟨fun _ hT _ hm E n p => hT E n (.field (lookupBy_of_nodup (structDef_nodup _) hm) p),
-    fun _ hT E n p => hT E n (.at 0 p), fun _ _ hT E n p => hT E n (.atF 0 p),
+    fun _ hT E n p => hT E n (.at (PrimTy.dflt _) p),
+    fun _ _ hT E n p => hT E n (.atF (PrimTy.dflt _) p),
     fun _ _ hT E n p => hT E n (.key (PrimTy.dflt _) p),
     fun _ _ _ _ h => h, fun E n hT _ => hT E n .nil, fun _ _ _ h => h⟩
 

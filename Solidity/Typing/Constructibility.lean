@@ -518,10 +518,10 @@ section Fills
 
 theorem arrOf_saveM_live {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 256) {i : Nat}
     (hi : i < L.length) (x : SVal E) :
-    (arrOf L S h).saveM (.at (i : Int) .nil) x =
+    (arrOf L S h).saveM (.at (idxU i (Nat.lt_trans hi h)) .nil) x =
       some (arrOf (L.set i x) S (by rw [List.length_set]; exact h)) := by
   have hl : i < (L ++ S).length := by rw [List.length_append]; omega
-  simp only [arrOf, SVal.saveM, Int.natCast_nonneg, ↓reduceIte, SVec.toList_ofList,
+  simp only [arrOf, SVal.saveM, idxU, Int.natCast_nonneg, ↓reduceIte, SVec.toList_ofList,
     SList.toList_ofList, Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil,
     Option.bind_eq_bind, Option.bind_some]
   congr 1
@@ -532,10 +532,10 @@ theorem arrOf_saveM_live {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 256)
     rw [List.set_append_left _ _ hi, List.drop_left' (List.length_set ..)]
 
 theorem arrOf_saveM_shadow {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 256) {i : Nat}
-    (hi : L.length ≤ i) (hi' : i < L.length + S.length) (x : SVal E) :
-    (arrOf L S h).saveM (.at (i : Int) .nil) x = some (arrOf L (S.set (i - L.length) x) h) := by
+    (hi : L.length ≤ i) (hi' : i < L.length + S.length) (hb : i < 2 ^ 256) (x : SVal E) :
+    (arrOf L S h).saveM (.at (idxU i hb) .nil) x = some (arrOf L (S.set (i - L.length) x) h) := by
   have hl : i < (L ++ S).length := by rw [List.length_append]; omega
-  simp only [arrOf, SVal.saveM, Int.natCast_nonneg, ↓reduceIte, SVec.toList_ofList,
+  simp only [arrOf, SVal.saveM, idxU, Int.natCast_nonneg, ↓reduceIte, SVec.toList_ofList,
     SList.toList_ofList, Int.toNat_natCast, List.getElem?_eq_getElem hl, SVal.saveM_nil,
     Option.bind_eq_bind, Option.bind_some]
   congr 1
@@ -545,10 +545,10 @@ theorem arrOf_saveM_shadow {E : Ty} {L S : List (SVal E)} (h : L.length < 2 ^ 25
   · simp only [SList.toList_ofList]
     rw [List.set_append_right _ _ hi, List.drop_left' rfl]
 
-theorem fixed_saveM {E : Ty} {n : Nat} (e : SVec E n) {i : Nat} (hi : i < n) (x : SVal E) :
-    (SVal.fixed e).saveM (.atF (i : Int) .nil) x = some (.fixed (e.set i x)) := by
+theorem fixed_saveM {E : Ty} {n : Nat} (e : SVec E n) {i : Nat} (hi : i < n) (hb : i < 2 ^ 256)
+    (x : SVal E) : (SVal.fixed e).saveM (.atF (idxU i hb) .nil) x = some (.fixed (e.set i x)) := by
   have hl : i < e.toList.length := by rw [SVec.length_toList]; exact hi
-  simp only [SVal.saveM, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast,
+  simp only [SVal.saveM, idxU, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast,
     List.getElem?_eq_getElem hl, SVal.saveM_nil, Option.bind_eq_bind, Option.bind_some]
 
 theorem map_saveM {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V) :
@@ -743,21 +743,21 @@ theorem elems_cons {E : Ty} {n : Nat} {v : SVal E} {rest : SVec E n}
   have hj : pre.length < (pre ++ List.replicate (n + 1) (SVal.dflt E)).length := by omega
   have hq := resolveT_index_lit (C := C) (ArrTy.dyn (E := E)) (by omega) ha
     (checkIndex_dyn hW.find hj (by omega))
-  rw [show ∀ hb, ref.index (.arr .dyn) (idxU pre.length hb) = ref.append (.at (pre.length : Int) .nil)
-    from fun _ => by simp only [SRef.index, Path.index_dyn]; rfl] at hq
+  rw [show ∀ hb, ref.index (.arr .dyn) (idxU pre.length hb) = ref.append (.at (idxU pre.length hb) .nil)
+    from fun _ => by simp only [SRef.index, Path.index_dyn]] at hq
   have hset : ∀ x : SVal E, (pre ++ List.replicate (n + 1) (SVal.dflt E)).set pre.length x =
       (pre ++ [x]) ++ List.replicate n (SVal.dflt E) := by
     intro x
     rw [List.set_append_right _ _ (Nat.le_refl _), Nat.sub_self, List.replicate_succ,
       List.set_cons_zero, List.append_assoc, List.singleton_append]
   have hnoop : (arrOf (pre ++ List.replicate (n + 1) (SVal.dflt E)) S hL).saveM
-      (.at (pre.length : Int) .nil) (SVal.dflt E) =
+      (.at (idxU pre.length (by omega)) .nil) (SVal.dflt E) =
       some (arrOf (pre ++ List.replicate (n + 1) (SVal.dflt E)) S hL) := by
     rw [arrOf_saveM_live hL hj]
     exact congrArg some (arrOf_congr (by rw [hset, List.append_assoc, List.singleton_append,
       ← List.replicate_succ]))
   have hs : (arrOf (pre ++ List.replicate (n + 1) (SVal.dflt E)) S hL).saveM
-      (.at (pre.length : Int) .nil) v =
+      (.at (idxU pre.length (by omega)) .nil) v =
       some (arrOf ((pre ++ [v]) ++ List.replicate n (SVal.dflt E)) S (by
         simp only [List.length_append, List.length_singleton, List.length_replicate]; omega)) := by
     rw [arrOf_saveM_live hL hj]
@@ -798,21 +798,21 @@ theorem fixedElems_cons {E : Ty} {m : Nat} {v : SVal E} {rest : SVec E m}
   have hq := resolveT_index_lit (C := C) (ArrTy.fixed (E := E) (n := N)) (by omega) ha
     (checkIndex_fixed hW.find hj (by omega))
   rw [show ∀ hb, ref.index (.arr .fixed) (idxU pre.length hb) =
-    ref.append (.atF (pre.length : Int) .nil) from fun _ => by
-      simp only [SRef.index, Path.index_fixed]; rfl] at hq
+    ref.append (.atF (idxU pre.length hb) .nil) from fun hb => by
+      simp only [SRef.index, Path.index_fixed]] at hq
   have hset : ∀ x : SVal E, (cur.set pre.length x).toList =
       (pre ++ [x]) ++ List.replicate m (SVal.dflt E) := by
     intro x
     rw [SVec.toList_set, hcur, List.set_append_right _ _ (Nat.le_refl _), Nat.sub_self,
       List.replicate_succ, List.set_cons_zero, List.append_assoc, List.singleton_append]
-  have hnoop : (SVal.fixed cur).saveM (.atF (pre.length : Int) .nil) (SVal.dflt E) =
+  have hnoop : (SVal.fixed cur).saveM (.atF (idxU pre.length (by omega)) .nil) (SVal.dflt E) =
       some (.fixed cur) := by
-    rw [fixed_saveM cur hj]
+    rw [fixed_saveM cur hj (by omega)]
     congr 2
     apply SVec.eq_of_toList_eq
     rw [hset, hcur, List.append_assoc, List.singleton_append, ← List.replicate_succ]
   obtain ⟨st₁, hrun₁, hW₁⟩ := child_stepL (d := d) hv hc.1 ht.1 hf.1 hq hW hnoop
-    (fixed_saveM cur hj v)
+    (fixed_saveM cur hj (by omega) v)
   obtain ⟨st', cur', hcur', hrun₂, hW'⟩ := hrest d Γ a (σ.withStorage st₁) ref st₀ (pre ++ [v])
     (cur.set pre.length v) hN (hset v) ha hW₁ hc.2 ht.2 hf.2
   refine ⟨st', cur', by simpa only [SVec.toList_cons, List.append_assoc, List.singleton_append]
@@ -885,20 +885,19 @@ theorem shadow_cons {E : Ty} {v : SVal E} {rest : SList E}
     rw [hy] at hW₂
     have hsh : ∀ x : SVal (.ref R), (arrOf (List.replicate i (SVal.dflt (.ref R)))
         (SVal.dflt (.ref R) :: (rest.toList ++ SH)) (by simpa only [List.length_replicate]
-          using hi)).saveM (.at (i : Int) .nil) x =
+          using hi)).saveM (.at (idxU i hi) .nil) x =
         some (arrOf (List.replicate i (SVal.dflt (.ref R))) (x :: (rest.toList ++ SH))
           (by simpa only [List.length_replicate] using hi)) := by
       intro x
       rw [arrOf_saveM_shadow _ (by simp only [List.length_replicate, Nat.le_refl]) (by
-        rw [List.length_replicate, List.length_cons]; omega)]
+        rw [List.length_replicate, List.length_cons]; omega) hi]
       simp only [List.length_replicate, Nat.sub_self, List.set_cons_zero]
     have hal : (SPath.alias (C := C) (Idx.here (Γ := Γ) (t := .alias R))).resolveT
         (((σ.withStorage st₁).push (t := .alias R)
           (some (ref.index (.arr .dyn) (idxU i hi)))).withStorage st₂) =
-        .ok (ref.append (.at (i : Int) .nil)) := by
+        .ok (ref.append (.at (idxU i hi) .nil)) := by
       rw [resolveT_alias rfl]
       simp only [SRef.index, Path.index_dyn]
-      rfl
     obtain ⟨st₃, hrun₃, hW₃⟩ := child_step (d := d) hv hc.1 ht.1 hf.1 hal hW₂ (hsh _) (hsh v)
     refine ⟨st₃, by simpa only [List.length_replicate] using hi,
       TRuns.append hrun₁ (run_boundL hq (TRuns.cons hs₂ hrun₃)), ?_⟩

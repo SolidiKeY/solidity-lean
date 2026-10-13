@@ -76,11 +76,6 @@ theorem AEnv.get_set_ne (ν : AEnv) (p q : PrimTy) {k j : Nat} (v : p.Denote) (h
     (ν.set p k v).get q j = ν.get q j := by
   cases p <;> cases q <;> simp only [AEnv.set, AEnv.get, h, if_false]
 
-/-- A length as a `uint`, the default past the bound (no storage has an
-array that long: `SVal.array`'s `hn`). -/
-def uintOfNat (n : Nat) : PrimTy.uint.Denote :=
-  if h : n < 2 ^ 256 then lenU n h else PrimTy.dflt .uint
-
 /-! ## Terms -/
 
 /-- **A term of the reduction** at a sort: the typed signature, the atoms,

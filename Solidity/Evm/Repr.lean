@@ -140,11 +140,11 @@ inductive PathAt : Bool → {T U : Ty} → Path T U → Slot → Slot → Prop
   | key {a : Bool} {V U : Ty} {k : PrimTy.uint.Denote} {p : Path V U} {s s' : Slot} :
       0 ≤ k.1 → k.1 < W → PathAt a p (.hash k.1.toNat s 0) s' →
       PathAt a (Path.key (K := .uint) k p) s s'
-  | elem {E U : Ty} {i : Int} {p : Path E U} {s s' : Slot} :
-      0 ≤ i → i < W → PathAt false p (.data s (i.toNat * size E)) s' →
+  | elem {E U : Ty} {i : PrimTy.uint.Denote} {p : Path E U} {s s' : Slot} :
+      0 ≤ i.1 → i.1 < W → PathAt false p (.data s (i.1.toNat * size E)) s' →
       PathAt false (Path.at i p) s s'
-  | felem {E U : Ty} {n : Nat} {i : Int} {p : Path E U} {s s' : Slot} :
-      0 ≤ i → i < n → PathAt false p (s.add (i.toNat * size E)) s' →
+  | felem {E U : Ty} {n : Nat} {i : PrimTy.uint.Denote} {p : Path E U} {s s' : Slot} :
+      0 ≤ i.1 → i.1 < n → PathAt false p (s.add (i.1.toNat * size E)) s' →
       PathAt false (Path.atF (n := n) i p) s s'
 
 /-- `PathSlot C a r s`: the storage reference `r` has slot `s`. -/
@@ -370,19 +370,19 @@ theorem ReprAt.save {st st' : WordStore} {a : Bool} {T U : Ty} {p : Path T U} {s
       split at hold
       · rename_i x hx
         obtain ⟨x', hx', hrep⟩ := ih (hall _ x hx) ⟨old, hold⟩ hnew hout
-        have hi : i.toNat < e.toList.length := lt_of_getElem? hx
-        have hx2 : (e.toList ++ sh.toList)[i.toNat]? = some x := by
+        have hi : i.1.toNat < e.toList.length := lt_of_getElem? hx
+        have hx2 : (e.toList ++ sh.toList)[i.1.toNat]? = some x := by
           rw [List.getElem?_append_left hi]; exact hx
         have hlen : e.toList.length = k := SVec.length_toList e
         refine ⟨_, by simp only [SVal.saveM, if_pos h0, hx2, hx']; rfl, ?_⟩
-        have htake : ((e.toList ++ sh.toList).set i.toNat x').take k = e.toList.set i.toNat x' := by
+        have htake : ((e.toList ++ sh.toList).set i.1.toNat x').take k = e.toList.set i.1.toNat x' := by
           have := take_set_append e.toList sh.toList hi x'
           rwa [hlen] at this
         refine .array ?_ ?_ fun j y hy => ?_
         · rw [hout s fun ho => occ_len_elem (hp.occ ho), hl, htake, List.length_set, hlen]
         · rw [htake, List.length_set, hlen]; exact hW
         · rw [SVec.toList_ofList, htake, List.getElem?_set] at hy
-          by_cases hji : i.toNat = j
+          by_cases hji : i.1.toNat = j
           · subst hji
             rw [if_pos rfl, if_pos hi] at hy
             cases hy
@@ -400,10 +400,10 @@ theorem ReprAt.save {st st' : WordStore} {a : Bool} {T U : Ty} {p : Path T U} {s
       split at hold
       · rename_i x hx
         obtain ⟨x', hx', hrep⟩ := ih (hall _ x hx) ⟨old, hold⟩ hnew hout
-        refine ⟨.fixed (e.set i.toNat x'), by simp only [SVal.saveM, if_pos h0, hx, hx']; rfl,
+        refine ⟨.fixed (e.set i.1.toNat x'), by simp only [SVal.saveM, if_pos h0, hx, hx']; rfl,
           .fixed fun j y hy => ?_⟩
         rw [SVec.toList_set, List.getElem?_set] at hy
-        by_cases hji : i.toNat = j
+        by_cases hji : i.1.toNat = j
         · subst hji
           rw [if_pos rfl, if_pos (lt_of_getElem? hx)] at hy
           cases hy
@@ -928,9 +928,9 @@ theorem ReprAt.live_mono {st st' : WordStore} {L' : Nat} {a : Bool} {T U : Ty} {
         split at hw
         · rename_i x hx
           have hle := hlen s .len
-          have hi : i.toNat < e'.toList.length := by
+          have hi : i.1.toNat < e'.toList.length := by
             have := lt_of_getElem? hx; rw [SVec.length_toList] at this ⊢; omega
-          obtain ⟨x', hx'⟩ : ∃ x', e'.toList[i.toNat]? = some x' :=
+          obtain ⟨x', hx'⟩ : ∃ x', e'.toList[i.1.toNat]? = some x' :=
             ⟨_, List.getElem?_eq_getElem hi⟩
           rw [hx']
           exact ih (hall _ x hx) (hall' _ x' hx') (fun y hy => hlen y (.elem _ hy)) ⟨w, hw⟩
@@ -945,8 +945,8 @@ theorem ReprAt.live_mono {st st' : WordStore} {L' : Nat} {a : Bool} {T U : Ty} {
         obtain ⟨w, hw⟩ := hw
         split at hw
         · rename_i x hx
-          have hi : i.toNat < e'.toList.length := by rw [SVec.length_toList]; omega
-          obtain ⟨x', hx'⟩ : ∃ x', e'.toList[i.toNat]? = some x' :=
+          have hi : i.1.toNat < e'.toList.length := by rw [SVec.length_toList]; omega
+          obtain ⟨x', hx'⟩ : ∃ x', e'.toList[i.1.toNat]? = some x' :=
             ⟨_, List.getElem?_eq_getElem hi⟩
           rw [hx']
           exact ih (hall _ x hx) (hall' _ x' hx')

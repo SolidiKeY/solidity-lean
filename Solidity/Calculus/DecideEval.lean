@@ -32,10 +32,10 @@ theorem eval_field {s f : Name} {T U : Ty} (h : lookupBy f (structDef s) = some 
     (r : TSegs C T U) : (TSegs.field h r).eval g ν = (r.eval g ν).map (.field h) := rfl
 theorem eval_at {E U : Ty} (i : LTm C (.val .uint)) (r : TSegs C E U) :
     (TSegs.at i r).eval g ν =
-      (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => (r.eval g ν).map (.at k.1) := rfl
+      (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => (r.eval g ν).map (.at k) := rfl
 theorem eval_atF {E U : Ty} {n : Nat} (i : LTm C (.val .uint)) (r : TSegs C E U) :
     (TSegs.atF (n := n) i r).eval g ν =
-      (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => (r.eval g ν).map (.atF k.1) := rfl
+      (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => (r.eval g ν).map (.atF k) := rfl
 theorem eval_key {k : PrimTy} {V U : Ty} (i : LTm C (.val k)) (r : TSegs C V U) :
     (TSegs.key i r).eval g ν =
       (i.eval g ν : Option k.Denote).bind fun j => (r.eval g ν).map (.key j) :=
@@ -329,7 +329,7 @@ theorem eval_field_some {s f : Name} {T U : Ty} {h : lookupBy f (structDef s) = 
 theorem eval_at_some {E U : Ty} {i : LTm C (.val .uint)} {r : TSegs C E U} {pp : Path _ U}
     (hp : (TSegs.at i r).eval g ν = some pp) :
     ∃ k pp', (i.eval g ν : Option PrimTy.uint.Denote) = some k ∧ r.eval g ν = some pp' ∧
-      pp = .at k.1 pp' := by
+      pp = .at k pp' := by
   rw [TSegs.eval_at, Option.bind_eq_some_iff] at hp
   obtain ⟨k, hk, hp⟩ := hp
   rw [Option.map_eq_some_iff] at hp
@@ -339,7 +339,7 @@ theorem eval_at_some {E U : Ty} {i : LTm C (.val .uint)} {r : TSegs C E U} {pp :
 theorem eval_atF_some {E U : Ty} {n : Nat} {i : LTm C (.val .uint)} {r : TSegs C E U}
     {pp : Path (.ref (.fixed E n)) U} (hp : (TSegs.atF i r).eval g ν = some pp) :
     ∃ k pp', (i.eval g ν : Option PrimTy.uint.Denote) = some k ∧ r.eval g ν = some pp' ∧
-      pp = .atF k.1 pp' := by
+      pp = .atF k pp' := by
   rw [TSegs.eval_atF, Option.bind_eq_some_iff] at hp
   obtain ⟨k, hk, hp⟩ := hp
   rw [Option.map_eq_some_iff] at hp
@@ -476,9 +476,6 @@ theorem VRd.Rep.find {T U : Ty} {x : VRd C T} {t : TVal T} (h : VRd.Rep g ν x t
     rw [TSegs.eval_append, hs, Option.bind_some, hr, Option.map_some]
   exact (h _ c _ _ e).trans (by cases c <;> rfl)
 
-theorem uintOfNat_val {n : Nat} (h : n < 2 ^ 256) : (uintOfNat n).1 = n := by
-  simp only [uintOfNat, dif_pos h, lenU]
-
 theorem LTm.eval_nat (n : Nat) : ((LTm.nat n : LTm C (.val .uint)).eval g ν : Option _) =
     some (uintOfNat n) := rfl
 
@@ -587,9 +584,9 @@ theorem delRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {x : VRd C U} {t
       LTm.eval_cond_some g ν _ _ (LTm.eval_lt_some g ν hk (hx _ (.len _) .nil .nil rfl)),
       show (CK.obsV (CK.len _) t .nil : PrimTy.uint.Denote) = uintOfNat (t.len .nil) from rfl,
       idx_lt_iff (hb .nil)]
-    have e : CK.obsC c (fun cc => TVal.delR cc t (.at k.1 p')) =
-        if 0 ≤ k.1 ∧ k.1.toNat < t.len .nil then c.obsC (fun cc => TVal.delR cc (t.find (.at k.1 .nil)) p')
-        else c.obsC (fun cc => cc.read t (.at k.1 p')) := by
+    have e : CK.obsC c (fun cc => TVal.delR cc t (.at k p')) =
+        if 0 ≤ k.1 ∧ k.1.toNat < t.len .nil then c.obsC (fun cc => TVal.delR cc (t.find (.at k .nil)) p')
+        else c.obsC (fun cc => cc.read t (.at k p')) := by
       rw [← CK.obsC_ite]; exact CK.obsC_congr c fun cc => by simp only [TVal.delR]
     rw [e]
     by_cases hc : 0 ≤ k.1 ∧ k.1.toNat < t.len .nil
@@ -636,9 +633,9 @@ theorem stripRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {x : VRd C U} 
         (stripRS (x.find (.at i .nil)) r c) c.absent from rfl,
       LTm.eval_cond_some g ν _ _ (LTm.eval_lt_some g ν hk (lenNil_eval g ν hx)),
       idx_lt_iff (hb .nil)]
-    have e : CK.obsC c (fun cc => TVal.stripR cc t (.at k.1 p')) =
+    have e : CK.obsC c (fun cc => TVal.stripR cc t (.at k p')) =
         if 0 ≤ k.1 ∧ k.1.toNat < t.len .nil then
-          c.obsC (fun cc => TVal.stripR cc (t.find (.at k.1 .nil)) p')
+          c.obsC (fun cc => TVal.stripR cc (t.find (.at k .nil)) p')
         else c.obsC (fun cc => cc.absent) := by
       rw [← CK.obsC_ite]; exact CK.obsC_congr c fun cc => by simp only [TVal.stripR]
     rw [e]
@@ -683,13 +680,13 @@ theorem ovRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {o n : VRd C U} {
             (.cond (.lt i (o (.len _) .nil)) (delRS (o.find (.at i .nil)) r c) (o c (.at i r))))
           c.absent from rfl,
       LTm.eval_cond_some g ν _ _ (hasNil_eval g ν hn)]
-    have e : CK.obsC c (fun cc => TVal.ovR cc to tn (.at k.1 p')) =
+    have e : CK.obsC c (fun cc => TVal.ovR cc to tn (.at k p')) =
         if tn.has .nil = true then
           (if 0 ≤ k.1 ∧ k.1.toNat < tn.len .nil then
-            c.obsC (fun cc => TVal.ovR cc (to.find (.at k.1 .nil)) (tn.find (.at k.1 .nil)) p')
+            c.obsC (fun cc => TVal.ovR cc (to.find (.at k .nil)) (tn.find (.at k .nil)) p')
           else if 0 ≤ k.1 ∧ k.1.toNat < to.len .nil then
-            c.obsC (fun cc => TVal.delR cc (to.find (.at k.1 .nil)) p')
-          else c.obsC (fun cc => cc.read to (.at k.1 p')))
+            c.obsC (fun cc => TVal.delR cc (to.find (.at k .nil)) p')
+          else c.obsC (fun cc => cc.read to (.at k p')))
         else c.obsC (fun cc => cc.absent) := by
       rw [← CK.obsC_ite, ← CK.obsC_ite, ← CK.obsC_ite]
       exact CK.obsC_congr c fun cc => by simp only [TVal.ovR]
@@ -815,11 +812,11 @@ theorem LTm.eval_predK {L : LTm C (.val .uint)} {n : Nat}
     · exact LTm.eval_pred g ν hL h0 h
   · exact LTm.eval_pred g ν hL h0 h
 
-theorem obsV_setLen_at {E V : Ty} (c : CK V) (a : TVal (.ref (.array E))) (n : Nat) (k : Int)
+theorem obsV_setLen_at {E V : Ty} (c : CK V) (a : TVal (.ref (.array E))) (n : Nat) (k : PrimTy.uint.Denote)
     (p : Path E V) : c.obsV (TVal.setLen a n) (.at k p) = c.obsV a (.at k p) := by
   cases c <;> rfl
 
-theorem obsV_save_at {E V : Ty} (c : CK V) (a : TVal (.ref (.array E))) (x : TVal E) (m k : Int)
+theorem obsV_save_at {E V : Ty} (c : CK V) (a : TVal (.ref (.array E))) (x : TVal E) (m k : PrimTy.uint.Denote)
     (p : Path E V) :
     c.obsV (a.save (.at m .nil) x) (.at k p) = if k = m then c.obsV x p else c.obsV a (.at k p) := by
   by_cases e : k = m
@@ -830,7 +827,7 @@ theorem obsV_save_at {E V : Ty} (c : CK V) (a : TVal (.ref (.array E))) (x : TVa
     cases c <;> simp only [CK.obsV, CK.obsC, Comp.word, Comp.len, Comp.has, Obs.save,
       ObsLoc.strip?_path, Path.strip?, e, e', if_false]
 
-theorem obsV_save_nil_has {E : Ty} (a : TVal (.ref (.array E))) (x : TVal E) (m : Int) :
+theorem obsV_save_nil_has {E : Ty} (a : TVal (.ref (.array E))) (x : TVal E) (m : PrimTy.uint.Denote) :
     (a.save (.at m .nil) x).has .nil = a.has .nil := by
   simp only [Obs.save, ObsLoc.strip?_path, Path.strip?]
 
@@ -843,7 +840,7 @@ theorem arrRd_rep {E : Ty} {len' : LTm C (.val .uint)} {has : LTm C (.val .bool)
     (hb : ∀ (i : LTm C (.val .uint)) (k : PrimTy.uint.Denote),
       (i.eval g ν : Option PrimTy.uint.Denote) = some k → ∀ {V : Ty} (c : CK V) (r : TSegs C E V)
       (p : Path E V), r.eval g ν = some p →
-      ((below i c r).eval g ν : Option c.out.Denote) = some (c.obsV t (.at k.1 p))) :
+      ((below i c r).eval g ν : Option c.out.Denote) = some (c.obsV t (.at k p))) :
     VRd.Rep g ν (arrRd len' has below) t := by
   intro V c r p hr
   cases r with
@@ -869,13 +866,11 @@ theorem pushRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {x : VRd C E}
   · intro i k hk V c r p hr
     rw [LTm.eval_kiteK, LTm.eval_kite, hk, hL]
     simp only [Option.bind_some]
-    rw [show c.obsV (TVal.pushA t tx) (.at k.1 p) = _ from obsV_setLen_at c _ _ k.1 p,
+    rw [show c.obsV (TVal.pushA t tx) (.at k p) = _ from obsV_setLen_at c _ _ k p,
       obsV_save_at]
-    by_cases e : k.1 = (t.len .nil : Int)
-    · have e' : k = uintOfNat (t.len .nil) := (uintOfNat_eq_iff (by omega)).2 e
-      rw [if_pos e', if_pos e]; exact hx _ c r p hr
-    · have e' : ¬ k = uintOfNat (t.len .nil) := fun h => e ((uintOfNat_eq_iff (by omega)).1 h)
-      rw [if_neg e', if_neg e]
+    by_cases e' : k = uintOfNat (t.len .nil)
+    · rw [if_pos e', if_pos e']; exact hx _ c r p hr
+    · rw [if_neg e', if_neg e']
       exact ha _ c _ _ (by rw [TSegs.eval_at, hk, Option.bind_some, hr]; rfl)
 
 /-- **A length set, read, is `TVal.setLen`.** -/
@@ -912,18 +907,15 @@ theorem popRd_rep (keep : Bool) {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm 
       simp only [Option.bind_some]
       rw [obsV_setLen_at, obsV_save_at]
       have hb' : t.len .nil - 1 < 2 ^ 256 := by have := hb .nil; omega
-      by_cases e : k.1 = ((t.len .nil - 1 : Nat) : Int)
-      · have e' : k = uintOfNat (t.len .nil - 1) := (uintOfNat_eq_iff hb').2 e
-        rw [if_pos e', if_pos e]
+      by_cases e' : k = uintOfNat (t.len .nil - 1)
+      · rw [if_pos e', if_pos e']
         have hs : (TSegs.at (LTm.predK L) TSegs.nil : TSegs C (.ref (.array E)) E).eval g ν =
-            some (.at ((t.len .nil - 1 : Nat) : Int) .nil) := by
+            some (.at (uintOfNat (t.len .nil - 1)) .nil) := by
           rw [TSegs.eval_at, hp, Option.bind_some]
-          simp only [uintOfNat_val (show t.len .nil - 1 < 2 ^ 256 by have := hb .nil; omega)]
           rfl
         rw [delRS_rep g ν r c (ha.find g ν hs) (hb.find _) hr]
         cases c <;> rfl
-      · have e' : ¬ k = uintOfNat (t.len .nil - 1) := fun h => e ((uintOfNat_eq_iff hb').1 h)
-        rw [if_neg e', if_neg e]
+      · rw [if_neg e', if_neg e']
         exact ha _ c _ _ (by rw [TSegs.eval_at, hk, Option.bind_some, hr]; rfl)
 
 /-- **A word as a stored value, read.** -/
@@ -973,7 +965,7 @@ def _root_.Solidity.Path.dfltOk : {T U : Ty} → Path T U → Bool
   | _, _, .field _ p => p.dfltOk
   | _, _, .key _ p => p.dfltOk
   | _, _, .at _ _ => false
-  | _, _, .atF (n := n) i p => decide (0 ≤ i ∧ i.toNat < n) && p.dfltOk
+  | _, _, .atF (n := n) i p => decide (0 ≤ i.1 ∧ i.1.toNat < n) && p.dfltOk
 
 theorem findM_dflt : {T U : Ty} → (p : Path T U) →
     (SVal.dflt T).findM p = if p.dfltOk then some (SVal.dflt U) else none
@@ -989,15 +981,15 @@ theorem findM_dflt : {T U : Ty} → (p : Path T U) →
   | _, _, .atF (n := n) i p => by
     rw [dflt_fixed, SVal.findM_atF', SVec.toList_replicate]
     simp only [Path.dfltOk, Bool.and_eq_true, decide_eq_true_eq]
-    by_cases h : 0 ≤ i ∧ i.toNat < n
+    by_cases h : 0 ≤ i.1 ∧ i.1.toNat < n
     · rw [if_pos h.1, List.getElem?_replicate_of_lt h.2, Option.bind_some, findM_dflt p]
       simp only [h, true_and]
-    · have hr : (if 0 ≤ i then (List.replicate n (SVal.dflt _))[i.toNat]?.bind
+    · have hr : (if 0 ≤ i.1 then (List.replicate n (SVal.dflt _))[i.1.toNat]?.bind
           (fun x => x.findM p) else none) = none := by
         split
         · rename_i h0
-          have h1 : n ≤ i.toNat := by
-            have : ¬ i.toNat < n := fun h' => h ⟨h0, h'⟩
+          have h1 : n ≤ i.1.toNat := by
+            have : ¬ i.1.toNat < n := fun h' => h ⟨h0, h'⟩
             omega
           rw [List.getElem?_eq_none (by rw [List.length_replicate]; exact h1), Option.bind_none]
         · rfl
@@ -1073,13 +1065,13 @@ theorem extendRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm C (.val .ui
     exact pushRd_rep g ν ha (dfltRd_rep g ν E) hL hn
   · simp only [hp, if_false, Bool.false_or, Bool.false_eq_true]
     have hh : ((a (.has _) (.at L .nil)).eval g ν : Option Bool) =
-        some (t.has (.at (t.len .nil : Int) .nil)) := by
-      have := ha _ (.has _) (.at L .nil) (.at (uintOfNat (t.len .nil)).1 .nil)
+        some (t.has (.at (uintOfNat (t.len .nil)) .nil)) := by
+      have := ha _ (.has _) (.at L .nil) (.at (uintOfNat (t.len .nil)) .nil)
         (by rw [TSegs.eval_at, hL]; rfl)
-      rw [this, uintOfNat_val (by omega)]; rfl
+      rw [this]; rfl
     intro V c r p hr
     rw [LTm.eval_cond_some g ν _ _ hh]
-    by_cases h : t.has (.at (t.len .nil : Int) .nil) = true
+    by_cases h : t.has (.at (uintOfNat (t.len .nil)) .nil) = true
     · simp only [h, if_true, Bool.not_true, Bool.false_eq_true, if_false]
       exact setLenRd_rep g ν ha (LTm.eval_succK g ν hL hn) V c r p hr
     · simp only [h, if_false, Bool.false_eq_true, Bool.not_false, if_true]
@@ -1866,10 +1858,9 @@ theorem pathNext_core {E : Ty} (S : SFun C) (st? : Option (Storage C))
         rename_i n
         have hlen := hrd st hs _ (.len _) Q r (hPe r hq)
         rw [SPath.eval_snoc, hPe r hq, Option.bind_some, TSegs.eval_at, hlen]
-        show some (r.append (.at (uintOfNat (st.obs.len (.ref r))).1 .nil)) = _
-        rw [len_obs st r hw, uintOfNat_val (n := (SVal.array el sh hn).view.n) hn, SRef.index,
+        show some (r.append (.at (uintOfNat (st.obs.len (.ref r))) .nil)) = _
+        rw [len_obs st r hw, uintOfNat_eq_lenU (n := (SVal.array el sh hn).view.n) hn, SRef.index,
           Path.index_dyn]
-        rfl
 
 /-- A word stored, eliminated. -/
 theorem sval_rep {p : PrimTy} {x ex : LTm C (.val p)}
@@ -2087,8 +2078,8 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
     rw [TSegs.eval_at] at hp
     obtain ⟨k, hk, hp⟩ := Option.bind_eq_some_iff.1 hp
     obtain ⟨p', hp', rfl⟩ := Option.map_eq_some_iff.1 hp
-    have e : x.bind (·.findM (.at k.1 p')) =
-        (x.bind (·.findM (.at k.1 .nil))).bind (·.findM p') := by
+    have e : x.bind (·.findM (.at k p')) =
+        (x.bind (·.findM (.at k .nil))).bind (·.findM p') := by
       cases x with
       | none => rfl
       | some v =>
@@ -2136,8 +2127,8 @@ theorem memRd_rep (hM : M.eval g ν = some μ) {T V : Ty} (r : TSegs C T V) :
     rw [TSegs.eval_atF] at hp
     obtain ⟨k, hk, hp⟩ := Option.bind_eq_some_iff.1 hp
     obtain ⟨p', hp', rfl⟩ := Option.map_eq_some_iff.1 hp
-    have e : x.bind (·.findM (.atF k.1 p')) =
-        (x.bind (·.findM (.atF k.1 .nil))).bind (·.findM p') := by
+    have e : x.bind (·.findM (.atF k p')) =
+        (x.bind (·.findM (.atF k .nil))).bind (·.findM p') := by
       cases x with
       | none => rfl
       | some v =>

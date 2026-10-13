@@ -158,7 +158,7 @@ theorem findLive_elem {st : Solidity.Storage C} {E : Ty} {r : SRef C (.ref (.arr
     {i : PrimTy.uint.Denote} {x : SVal E} (hx : e.toList[i.1.toNat]? = some x) :
     st.findLive (r.index (.arr .dyn) i) = some x := by
   rw [SRef.index, Path.index_dyn, findLive_append, hr]
-  show (SVal.array e sh hk).findLiveM (.at i.1 .nil) = _
+  show (SVal.array e sh hk).findLiveM (.at i .nil) = _
   simp only [SVal.findLiveM, PrimTy.uint_nonneg i, ↓reduceIte, hx]
 
 /-- A fixed-size array's element, read live. -/
@@ -167,7 +167,7 @@ theorem findLive_felem {st : Solidity.Storage C} {E : Ty} {n : Nat}
     {i : PrimTy.uint.Denote} {x : SVal E} (hx : e.toList[i.1.toNat]? = some x) :
     st.findLive (r.index (.arr .fixed) i) = some x := by
   rw [SRef.index, Path.index_fixed, findLive_append, hr]
-  show (SVal.fixed e).findLiveM (.atF i.1 .nil) = _
+  show (SVal.fixed e).findLiveM (.atF i .nil) = _
   simp only [SVal.findLiveM, PrimTy.uint_nonneg i, ↓reduceIte, hx]
 
 /-- A mapping takes every key. -/

@@ -1080,26 +1080,26 @@ theorem MVal.copyMToSt_findM_field {H : HTy} (hp : Heap H) {s f : Name} {T U : T
 /-- **A dynamic array copied to storage, at an element**: the copy of the
 element, within the array's length. -/
 theorem MVal.copyMToSt_findM_at {H : HTy} (hp : Heap H) {E U : Ty} (r : HRef H (.array E))
-    (i : Int) (p : Path E U) :
+    (i : PrimTy.uint.Denote) (p : Path E U) :
     (MVal.copyMToSt hp (T := .ref (.array E)) r).findM (.at i p) =
-      if 0 ≤ i then ((MObj.elems .dyn (hp.get r))[i.toNat]?).bind
+      if 0 ≤ i.1 then ((MObj.elems .dyn (hp.get r))[i.1.toNat]?).bind
         (fun v => (MVal.copyMToSt hp v).findM p) else none := by
   simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.findM,
     SVec.toList_ofList, SList.toList_nil, List.append_nil, List.getElem?_map, MObj.elems_dyn]
   split
-  · cases (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).1[i.toNat]? <;> rfl
+  · cases (hp.get r : {l : List (MVal H E) // l.length < 2 ^ 256}).1[i.1.toNat]? <;> rfl
   · rfl
 
 /-- A fixed array copied to storage, at an element. -/
 theorem MVal.copyMToSt_findM_atF {H : HTy} (hp : Heap H) {E U : Ty} {n : Nat}
-    (r : HRef H (.fixed E n)) (i : Int) (p : Path E U) :
+    (r : HRef H (.fixed E n)) (i : PrimTy.uint.Denote) (p : Path E U) :
     (MVal.copyMToSt hp (T := .ref (.fixed E n)) r).findM (.atF i p) =
-      if 0 ≤ i then ((MObj.elems .fixed (hp.get r))[i.toNat]?).bind
+      if 0 ≤ i.1 then ((MObj.elems .fixed (hp.get r))[i.1.toNat]?).bind
         (fun v => (MVal.copyMToSt hp v).findM p) else none := by
   simp only [MVal.copyMToSt, MVal.copyBelow, MVal.copyAt, MVal.copyRefAt, SVal.findM,
     SVec.toList_ofLen, List.getElem?_map, MObj.elems_fixed]
   split
-  · cases (hp.get r : {l : List (MVal H E) // l.length = n}).1[i.toNat]? with
+  · cases (hp.get r : {l : List (MVal H E) // l.length = n}).1[i.1.toNat]? with
     | none => rfl
     | some v =>
       simp only [Option.map_some, Option.bind_some]
