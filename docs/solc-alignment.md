@@ -180,13 +180,15 @@ the storage-source read, which is `.undef` on such a type, the image of
 "rejected at compile time" and deliberately not `.revert`. `delete` keeps a
 mapping member in place, as solc does, and memory types contain no mappings.
 
-The Theory (solkey's storage term algebra) has both of solkey's writes: the
-collapsing `save` (`Theory/Storage.lean`), and the non-collapsing `copyTo`
-(`Theory/Copy.lean`), which keeps a mapping member of the old node
-(`selectOnCopyMap`) though no program here writes such a copy. Its `delete`
-keeps mapping members as the interpreter's does (`keepsOnDelete`,
-`selectStDelNodeMap`), and `State.abs_delete` (`Theory/Bridge/Delete.lean`)
-proves the two agree on every read.
+The typed Theory (`Theory/Typed/Obs.lean`, what an equation reads) has
+solkey's copying write `copyTo`, which keeps a mapping member of the old node
+(`TVal.overlay`) though no program here writes such a copy, and its `delete`
+keeps mapping entries and an array's slots past its end as the interpreter's
+does (`TVal.delR`, read off the type); `Storage.obs_delete` and
+`Storage.obs_write` prove the two agree on every read, literally.  The
+untyped algebra (`Theory/Storage.lean`, `Theory/Copy.lean`), the memory
+island's, keeps both of solkey's writes, the collapsing `save` and the
+non-collapsing `copyTo` (`selectOnCopyMap`, `keepsOnDelete`).
 
 ## Arrays past their end
 
