@@ -535,4 +535,172 @@ theorem MVal.erase_ref_inj {H H' : HTy} {R : RefTy} {x : Option (MVal H (.ref R)
   exact Semantics.MVal.ref.inj h
 
 
+/-! ## Lengths: what a read of an element needs -/
+
+section Len
+
+/-- An element reads exactly below the array's length. -/
+theorem Heap.readAddr_index_isSome {H : HTy} {R : RefTy} {E : Ty} (hp : Heap H) (r : HRef H R)
+    (a : ArrTy R E) (i : Int) :
+    (hp.readAddr (.index r a i)).isSome = decide (0 ≤ i ∧ i.toNat < hp.len r a) := by
+  simp only [Heap.readAddr, Heap.index, Heap.len]
+  by_cases h0 : 0 ≤ i
+  · simp only [h0, if_true, true_and]
+    by_cases hl : i.toNat < (MObj.elems a (hp.get r)).length <;> simp [hl]
+  · simp only [h0, if_false, false_and, Option.isSome_none, decide_false]
+
+/-- A slot writes exactly where it reads. -/
+theorem Heap.writeAddr_isSome {H : HTy} {T : Ty} (hp : Heap H) (ad : MAddr H T) (v : MVal H T) :
+    (hp.writeAddr ad v).isSome = (hp.readAddr ad).isSome := by
+  cases ad with
+  | field r h => rfl
+  | index r a i =>
+    rw [Heap.readAddr_index_isSome]
+    simp only [Heap.writeAddr, Heap.setIndex, Heap.len]
+    split <;> simp_all
+
+/-- **A write keeps every length**: a member is no array, and an element
+written keeps its array's length. -/
+theorem Heap.len_writeAddr {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : MAddr H T} {v : MVal H T}
+    (h : hp.writeAddr ad v = some hp') {R : RefTy} {E : Ty} (r : HRef H R) (a : ArrTy R E) :
+    hp'.len r a = hp.len r a := by
+  cases ad with
+  | field r' hf =>
+    simp only [Heap.writeAddr, Option.some.injEq] at h
+    subst h
+    unfold Heap.len Heap.setField
+    by_cases e : r'.id = r.id
+    · obtain ⟨hR, -⟩ := HRef.heq_of_id r' r e
+      exact absurd hR.symm (a.ne_struct _)
+    · rw [Heap.get_set_ne _ _ _ e]
+  | index r' a' i =>
+    simp only [Heap.writeAddr, Heap.setIndex] at h
+    split at h
+    · cases h
+      unfold Heap.len
+      by_cases e : r'.id = r.id
+      · obtain ⟨rfl, hr⟩ := HRef.heq_of_id r' r e
+        cases hr
+        cases a <;> cases a' <;>
+          simp only [Heap.get_set_same, MObj.elems_setElem, List.length_set]
+      · rw [Heap.get_set_ne _ _ _ e]
+    · cases h
+
+/-- Two arrays whose elements read at the same indices have one length. -/
+theorem Heap.len_eq_of_index {H H' : HTy} {R R' : RefTy} {E : Ty} (hp : Heap H) (hp' : Heap H')
+    (r : HRef H R) (r' : HRef H' R') (a : ArrTy R E) (a' : ArrTy R' E)
+    (h : ∀ i : Int, (hp.readAddr (.index r a i)).isSome = (hp'.readAddr (.index r' a' i)).isSome) :
+    hp.len r a = hp'.len r' a' := by
+  have := h (min (hp.len r a) (hp'.len r' a'))
+  simp only [Heap.readAddr_index_isSome, decide_eq_decide] at this
+  omega
+
+theorem Objs.get_snoc_last {H : HTy} {R : RefTy} (o : MObj H R) : (Rs : List RefTy) →
+    (os : Objs H Rs) → (h : (Rs ++ [R])[Rs.length]? = some R) →
+    Objs.get (Rs ++ [R]) (Objs.snoc o Rs os) Rs.length h = o
+  | [], _, _ => rfl
+  | _ :: Rs, os, _ => Objs.get_snoc_last o Rs os.2 _
+
+/-- The object allocated is the one given. -/
+theorem Heap.get_alloc {H : HTy} {R : RefTy} (hp : Heap H) (o : MObj H R) :
+    (hp.alloc o).1.get (hp.alloc o).2 = MObj.wk (List.prefix_append H [R]) R o :=
+  Objs.get_snoc_last _ H _ _
+
+theorem MObj.elems_wk_length {H H' : HTy} (e : H <+: H') {R : RefTy} {E : Ty} (a : ArrTy R E)
+    (o : MObj H R) : (MObj.elems a (MObj.wk e R o)).length = (MObj.elems a o).length := by
+  cases a <;> simp only [MObj.wk, MObj.elems_dyn, MObj.elems_fixed, List.length_map]
+
+/-- **A fresh array's length** is the length of the elements it was given. -/
+theorem Grown.alloc_len {H : HTy} {R : RefTy} {E : Ty} (g : Grown H (MObj · R)) (a : ArrTy R E) :
+    (Grown.alloc g).heap.len (Grown.alloc g).val a = (MObj.elems a g.val).length := by
+  show (MObj.elems a ((g.heap.alloc g.val).1.get (g.heap.alloc g.val).2)).length = _
+  rw [Heap.get_alloc, MObj.elems_wk_length]
+
+/-- A fresh array's length as a `uint`, of the length it was given. -/
+theorem lenU_eq {n : Nat} (h : n < 2 ^ 256) (x : PrimTy.uint.Denote) (e : (n : Int) = x.1) :
+    Solidity.lenU n h = x := Subtype.ext e
+
+theorem HRef.ofId?_wk {H H' : HTy} (e : H <+: H') (R : RefTy) {id : Nat} (hid : id < H.length) :
+    HRef.ofId? H' R id = (HRef.ofId? H R id).map (HRef.wk e) := by
+  obtain ⟨t, rfl⟩ := e
+  simp only [HRef.ofId?, List.getElem?_append_left hid]
+  split <;> rfl
+
+theorem Heap.lenU_eq {H H' : HTy} {E : Ty} {hp : Heap H} {hp' : Heap H'} {r : HRef H (.array E)}
+    {r' : HRef H' (.array E)} (h : hp.len r .dyn = hp'.len r' .dyn) : hp.lenU r = hp'.lenU r' :=
+  Subtype.ext (congrArg Nat.cast h)
+
+/-- **A grown heap keeps every older array's length**, where it reads the
+older objects as they were. -/
+theorem Grown.lenU_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : HTy → Type}
+    (g : Grown μ₀.H' α)
+    (hg : ∀ {T : Ty} (ra : MAddr μ₀.H' T),
+      (g.heap.readAddr (ra.wk g.ext)).map (MVal.erase T) = (μ₀.heap.readAddr ra).map (MVal.erase T))
+    {E : Ty} (id : Nat) (hid : id < μ₀.H'.length) :
+    (HRef.ofId? (μ₀.then g).H' (.array E) id).map (fun r => (μ₀.then g).heap.lenU r) =
+      (HRef.ofId? μ₀.H' (.array E) id).map (fun r => μ₀.heap.lenU r) := by
+  show (HRef.ofId? g.H' (.array E) id).map (fun r => g.heap.lenU r) = _
+  rw [HRef.ofId?_wk g.ext _ hid]
+  cases HRef.ofId? μ₀.H' (.array E) id with
+  | none => rfl
+  | some r =>
+    simp only [Option.map_some, Option.some.injEq]
+    refine Heap.lenU_eq (Heap.len_eq_of_index _ _ _ _ .dyn .dyn fun i => ?_)
+    have := hg (MAddr.index r .dyn i)
+    rw [← Option.isSome_map (f := MVal.erase _), ← Option.isSome_map (f := MVal.erase _)
+      (x := μ₀.heap.readAddr _), ← this]
+    rfl
+
+theorem Grown.lenU_addM_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
+    (hR : (Ty.ref R).mapFree = true) {E : Ty} (id : Nat) (hid : id < μ₀.H'.length) :
+    (HRef.ofId? (μ₀.then (μ₀.heap.allocDefault R hR)).H' (.array E) id).map
+        (fun r => (μ₀.then (μ₀.heap.allocDefault R hR)).heap.lenU r) =
+      (HRef.ofId? μ₀.H' (.array E) id).map (fun r => μ₀.heap.lenU r) :=
+  Grown.lenU_then_old μ₀ _ (fun ra => Heap.readAddr_allocDefault μ₀.heap R hR ra) id hid
+
+theorem Grown.lenU_copySt_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : Ty} (v : SVal U)
+    (hU : U.mapFree = true) {E : Ty} (id : Nat) (hid : id < μ₀.H'.length) :
+    (HRef.ofId? (μ₀.then (v.copyStToM μ₀.heap hU)).H' (.array E) id).map
+        (fun r => (μ₀.then (v.copyStToM μ₀.heap hU)).heap.lenU r) =
+      (HRef.ofId? μ₀.H' (.array E) id).map (fun r => μ₀.heap.lenU r) :=
+  Grown.lenU_then_old μ₀ _ (fun ra => Heap.readAddr_copyStToM μ₀.heap v hU ra) id hid
+
+/-- **A fresh dynamic array is empty.** -/
+theorem Heap.allocDefault_array_len {H : HTy} (hp : Heap H) (E : Ty)
+    (hR : (Ty.ref (.array E)).mapFree = true) :
+    (hp.allocDefault (.array E) hR).heap.len (hp.allocDefault (.array E) hR).val .dyn = 0 := by
+  unfold Heap.allocDefault
+  show (fun x : Grown H (MVal · (.ref (.array E))) => x.heap.len x.val .dyn)
+    ((SVal.array .nil .nil SVal.zero_lt_bound : SVal (.ref (.array E))).copyStToM hp hR) = 0
+  rw [SVal.copyStToM_array]
+  exact (Grown.alloc_len _ .dyn).trans (by rw [MObj.elems_dyn]; exact (SVec.copyStToM hp .nil _).val.2)
+
+/-- **A fresh array of `n` elements** (`new T[](n)`) has length `n`. -/
+theorem newArrT_copy_len {H : HTy} (hp : Heap H) (E : Ty) (n : PrimTy.uint.Denote)
+    (h : (RefTy.array E).newArrOk = true) (hU : (Ty.ref (.array E)).mapFree = true) :
+    ((newArrT (.array E) n h).copyStToM hp hU).heap.len ((newArrT (.array E) n h).copyStToM hp hU).val
+      .dyn = n.1.toNat := by
+  show (fun x : Grown H (MVal · (.ref (.array E))) => x.heap.len x.val .dyn)
+    ((SVal.array (SVec.ofList (List.replicate n.1.toNat (SVal.dflt E))) .nil (newArr_lt n _) :
+      SVal (.ref (.array E))).copyStToM hp hU) = _
+  rw [SVal.copyStToM_array]
+  refine (Grown.alloc_len _ .dyn).trans ?_
+  rw [MObj.elems_dyn]
+  exact (SVec.copyStToM hp _ _).val.2.trans (List.length_replicate ..)
+
+/-- **A write keeps every length**, on the grown heap. -/
+theorem Grown.writeT_lenU {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
+    {v : MvT T} (h : m.writeT a v = some m') {E : Ty} (id : Nat) :
+    (HRef.ofId? m'.H' (.array E) id).map (fun r => m'.heap.lenU r) =
+      (HRef.ofId? m.H' (.array E) id).map (fun r => m.heap.lenU r) := by
+  unfold Grown.writeT at h
+  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+  obtain ⟨ad, -, w, -, hp, hhp, rfl⟩ := h
+  show (HRef.ofId? m.H' (.array E) id).map (fun r => hp.lenU r) = _
+  cases HRef.ofId? m.H' (.array E) id with
+  | none => rfl
+  | some r => exact congrArg some (Heap.lenU_eq (Heap.len_writeAddr hhp r .dyn))
+
+end Len
+
 end Solidity
