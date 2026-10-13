@@ -236,14 +236,14 @@ error: Solidity elaboration failed: the contract declares no constructor: an imp
 -/
 #guard_msgs in #check problem[NoCtor]{ constructor }
 
-/-! ## What `sol_close_mt` leaves open
+/-! ## What `sol_close_mt` reads of the empty storage
 
-Its simp set reads the empty storage as a list of the roots at their
-defaults (`defaultForTy`), so a read at a free key of a mapping (the
-default map's `checkIndex`) and a member of a struct root
-(`defaultForFields` of the struct table) stay open: `grind` gets the
-unfolded storage and no value.  `Coin`'s "no one holds a coin" is the
-first. -/
+The empty storage is typed (`Storage.init`): every member of a struct and
+every key of a mapping is there at its default, so a read along a path
+through no array slot reads the default (`CloseS.find_init_append`), and a
+write along one returns, under the diamond too (`CloseS.wp_diamond_write_total`).
+A read at a free key of a mapping and a member of a struct root, which the
+untyped storage left open, close. -/
 
 /-- A mapping and a struct root, neither written. -/
 def Held : Contract := contract!{
@@ -253,23 +253,17 @@ def Held : Contract := contract!{
   constructor() { n = 1; }
 }
 
--- a read at a free key of the empty storage: open
-example : True := by
-  fail_if_success
-    have : ⊨ dl[Held]{ ∀ uint k; { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
-        selfBalance := msg.value } ⟨ constructor(); ⟩ held[k] == 0 } := by
-      sol_symex
-      sol_close_mt
-  trivial
+-- a read at a free key of the empty storage: its default
+example : ⊨ dl[Held]{ ∀ uint k; { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+    selfBalance := msg.value } ⟨ constructor(); ⟩ held[k] == 0 } := by
+  sol_symex
+  sol_close_mt
 
--- a member of a struct root of the empty storage: open
-example : True := by
-  fail_if_success
-    have : ⊨ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
-        selfBalance := msg.value } ⟨ constructor(); ⟩ alice.age == 0 } := by
-      sol_symex
-      sol_close_mt
-  trivial
+-- a member of a struct root of the empty storage: its default
+example : ⊨ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
+    selfBalance := msg.value } ⟨ constructor(); ⟩ alice.age == 0 } := by
+  sol_symex
+  sol_close_mt
 
 -- the root the constructor writes is read
 example : ⊨ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
@@ -415,4 +409,3 @@ theorem booked_constructor : ⊨ spec[Booked]{ constructor } := by
   sol_close_mt
 
 end Solidity.Examples.Tactics.Constructors.SolkeyCounter
-

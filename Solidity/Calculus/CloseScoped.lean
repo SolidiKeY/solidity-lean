@@ -909,7 +909,6 @@ def evalSolCloseReadsAllS : Tactic := onScoped `(tactic|
 
 @[tactic Solidity.tacticSol_close_mt_eval]
 def evalSolCloseMtEvalS : Tactic := onScoped `(tactic|
-  simp (config := { decide := true }) only [close_rw_s, Storage.init, Storage.find,
-    Storage.write, Storage.save, lookupBy, setBy, Option.some.injEq, exists_eq_left'])
+  simp only [close_rw_s])
 
 end Solidity

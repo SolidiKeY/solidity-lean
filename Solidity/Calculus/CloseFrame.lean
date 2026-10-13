@@ -145,6 +145,133 @@ theorem SVal.find_defaultOf_field {s f : Name} {T U : Ty} (x : SVal (.ref (.stru
   cases x with
   | struct fs => rw [SVal.defaultOf_struct, SVal.find_field, SFields.get_defaultOf]; rfl
 
+/-! ## A deployment's storage, and writes that cannot fail
+
+A typed storage has every member of a struct and every key of a mapping:
+a path through no array slot (`Path.total`) is always there, so a write or
+a read along one returns, under the diamond as under the box, and the
+deployment's storage (`Storage.init`, `mtSt`) reads the default there. -/
+
+/-- A path through no array slot. -/
+def Path.total : {T U : Ty} → Path T U → Bool
+  | _, _, .nil => true
+  | _, _, .field _ p => p.total
+  | _, _, .key _ p => p.total
+  | _, _, .at _ _ => false
+  | _, _, .atF _ _ => false
+
+theorem SVal.dflt_prim' (p : PrimTy) : SVal.dflt (.prim p) = .prim (PrimTy.dflt p) := rfl
+
+theorem defaultForFields_map : (l : List (Name × Ty)) →
+    Semantics.defaultForFields l = l.map fun (n, T) => (n, Semantics.defaultForTy T)
+  | [] => by rw [Semantics.defaultForFields]; rfl
+  | (n, T) :: l => by rw [Semantics.defaultForFields, defaultForFields_map l]; rfl
+
+theorem SVal.dflt_struct' (s : Name) :
+    SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) := by
+  apply SVal.erase_injective
+  rw [SVal.dflt_erase, SVal.erase_struct, SFields.dflt_erase, Semantics.defaultForTy,
+    defaultForFields_map]
+
+theorem SVal.dflt_map' (K V : Ty) :
+    SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) := by
+  apply SVal.erase_injective
+  rw [SVal.dflt_erase, SVal.erase_map, SVal.dflt_erase, Semantics.defaultForTy, SMap.erase_nil]
+
+theorem SFields.get_dflt {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
+    (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
+  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
+  | (f', T') :: fs, T, h => by
+    rw [SFields.dflt, SFields.get_cons]
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      simp only [e, dite_true]
+    · simp only [e, dite_false]
+      exact SFields.get_dflt _
+
+theorem SVal.findM_dflt_total : {T U : Ty} → (p : Path T U) → p.total = true →
+    (SVal.dflt T).findM p = some (SVal.dflt U)
+  | _, _, .nil, _ => by cases h : SVal.dflt _ <;> rfl
+  | _, _, @Path.field s _ _ _ hf p, hp => by
+    rw [SVal.dflt_struct']
+    simp only [SVal.findM, SFields.get_dflt]
+    exact SVal.findM_dflt_total p hp
+  | _, _, @Path.key K V _ k p, hp => by
+    rw [SVal.dflt_map']
+    simp only [SVal.findM, SMap.toList, SVal.findM]
+    exact SVal.findM_dflt_total p hp
+  | _, _, .at _ _, hp => by simp only [Path.total, Bool.false_eq_true] at hp
+  | _, _, .atF _ _, hp => by simp only [Path.total, Bool.false_eq_true] at hp
+
+theorem Storage.find_init_total {C : Contract} {U : Ty} (r : SRef C U) (h : r.path.total = true) :
+    (Storage.init C).find r = some (SVal.dflt U) := by
+  simp only [Storage.find, Storage.init, SFields.get_dflt, SVal.find_eq_findM]
+  exact SVal.findM_dflt_total _ h
+
+theorem SVal.saveM_total : {T U : Ty} → (x : SVal T) → (p : Path T U) → p.total = true →
+    (v : SVal U) → x.saveM p v ≠ none
+  | _, _, _, .nil, _, _ => by simp only [SVal.saveM, ne_eq, reduceCtorEq, not_false_eq_true]
+  | _, _, .struct fs, .field hf p, hp, v => by
+    obtain ⟨x', hx'⟩ := Option.ne_none_iff_exists'.1 (SVal.saveM_total (fs.get hf) p hp v)
+    simp only [SVal.saveM, hx', Option.bind_eq_bind, Option.bind_some, ne_eq, reduceCtorEq,
+      not_false_eq_true]
+  | _, _, .map m d, .key k p, hp, v => by
+    simp only [SVal.saveM]
+    split
+    · rename_i x _
+      obtain ⟨x', hx'⟩ := Option.ne_none_iff_exists'.1 (SVal.saveM_total x p hp v)
+      simp only [hx', Option.bind_eq_bind, Option.bind_some, ne_eq, reduceCtorEq,
+        not_false_eq_true]
+    · obtain ⟨x', hx'⟩ := Option.ne_none_iff_exists'.1 (SVal.saveM_total d p hp v)
+      simp only [hx', Option.bind_eq_bind, Option.bind_some, ne_eq, reduceCtorEq,
+        not_false_eq_true]
+  | _, _, _, .at _ _, hp, _ => by simp only [Path.total, Bool.false_eq_true] at hp
+  | _, _, _, .atF _ _, hp, _ => by simp only [Path.total, Bool.false_eq_true] at hp
+
+theorem SVal.findM_total : {T U : Ty} → (x : SVal T) → (p : Path T U) → p.total = true →
+    x.findM p ≠ none
+  | _, _, _, .nil, _ => by simp only [SVal.findM, ne_eq, reduceCtorEq, not_false_eq_true]
+  | _, _, .struct fs, .field hf p, hp => by
+    simp only [SVal.findM]
+    exact SVal.findM_total (fs.get hf) p hp
+  | _, _, .map m d, .key k p, hp => by
+    simp only [SVal.findM]
+    split
+    · exact SVal.findM_total _ p hp
+    · exact SVal.findM_total d p hp
+  | _, _, _, .at _ _, hp => by simp only [Path.total, Bool.false_eq_true] at hp
+  | _, _, _, .atF _ _, hp => by simp only [Path.total, Bool.false_eq_true] at hp
+
+theorem Storage.find_ne_none_total {C : Contract} {U : Ty} (st : Storage C) (r : SRef C U)
+    (h : r.path.total = true) : st.find r ≠ none := by
+  simp only [Storage.find, SVal.find_eq_findM]
+  exact SVal.findM_total _ _ h
+
+theorem Storage.save_ne_none_total {C : Contract} {U : Ty} (st : Storage C) (r : SRef C U)
+    (h : r.path.total = true) (v : SVal U) : st.save r v ≠ none := by
+  obtain ⟨x', hx'⟩ := Option.ne_none_iff_exists'.1
+    (SVal.saveM_total (st.get r.hroot) r.path h v)
+  simp only [Storage.save, SVal.save_eq_saveM, hx', Option.bind_eq_bind, Option.bind_some, ne_eq,
+    reduceCtorEq, not_false_eq_true]
+
+theorem Storage.write_ne_none_total {C : Contract} {U : Ty} (st : Storage C) (r : SRef C U)
+    (h : r.path.total = true) (v : SVal U) : st.write r v ≠ none := by
+  rw [Storage.write_eq_bind]
+  unfold Storage.writeVal
+  split
+  · simp only [Option.bind_some]
+    exact Storage.save_ne_none_total st r h v
+  · obtain ⟨c, hc⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st r h)
+    simp only [hc, Option.map_some, Option.bind_some]
+    exact Storage.save_ne_none_total st r h _
+
+theorem Storage.delete_ne_none_total {C : Contract} {U : Ty} (st : Storage C) (r : SRef C U)
+    (h : r.path.total = true) : st.delete r ≠ none := by
+  obtain ⟨c, hc⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st r h)
+  simp only [Storage.delete, hc, Option.bind_eq_bind, Option.bind_some]
+  exact Storage.save_ne_none_total st r h _
+
 /-! ## Memory, read by identity
 
 A memory read returns a value over the heap typing it reads in, so two
@@ -352,6 +479,10 @@ theorem key_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
     PrimTy.key (p := .uint) ⟨n, h⟩ = n := rfl
 theorem key_int (n : Int) (h : PrimTy.int.inRange n = true) :
     PrimTy.key (p := .int) ⟨n, h⟩ = n := rfl
+theorem key_uint' (a : PrimTy.uint.Denote) : PrimTy.key a = a.val := rfl
+theorem key_int' (a : PrimTy.int.Denote) : PrimTy.key a = a.val := rfl
+theorem netOfT_def (l : List (Int × Int)) (n : PrimTy.uint.Denote) :
+    Tm.netOfT l n = PrimTy.int.ofInt? ((Semantics.lookupBy n.1 l).getD 0) := rfl
 /-- A mapping's slot at a root is always there. -/
 theorem checkIndex_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
     (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : Int) :
@@ -508,6 +639,42 @@ theorem wp_box_writeT {H : HTy} {T : Ty} {m : Grown H (fun _ => Unit)} {a : MAdd
     obtain ⟨h₁, h₂⟩ := Grown.writeT_facts h
     exact ⟨fun hP _ _ => hP, fun hP => hP h₁ h₂⟩
 
+/-! ## A deployment's storage, and the diamond over a total path -/
+
+theorem path_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
+    (SRef.ofRoot r h).path = .nil := rfl
+theorem path_append {T U : Ty} (r : SRef C T) (p : Path T U) :
+    (r.append p).path = r.path.append p := rfl
+theorem find_init_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
+    (Storage.init C).find (SRef.ofRoot r h) = some (SVal.dflt T) :=
+  Storage.find_init_total _ rfl
+theorem find_init_append {T U : Ty} (r : Name) (h : C.rootType r = some T) (p : Path T U)
+    (hp : p.total = true) : (Storage.init C).find ((SRef.ofRoot r h).append p) = some (SVal.dflt U) :=
+  Storage.find_init_total _ (by simpa only [path_append, path_ofRoot, Path.append_nil] using hp)
+
+theorem wp_diamond_of_ne_none {α : Type} {x : Option α} {P : α → Prop} (h : x ≠ none) :
+    Modality.diamond.wp (Close.optRes x) P ↔ Modality.box.wp (Close.optRes x) P := by
+  obtain ⟨a, rfl⟩ := Option.ne_none_iff_exists'.1 h
+  exact Iff.rfl
+
+/-- A write along a path through no array slot returns: the diamond is the
+box there. -/
+theorem wp_diamond_write_total {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
+    {P : Storage C → Prop} (h : r.path.total = true) :
+    Modality.diamond.wp (Close.optRes (st.write r v)) P ↔
+      Modality.box.wp (Close.optRes (st.write r v)) P :=
+  wp_diamond_of_ne_none (Storage.write_ne_none_total st r h v)
+theorem wp_diamond_delete_total {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C → Prop}
+    (h : r.path.total = true) :
+    Modality.diamond.wp (Close.optRes (st.delete r)) P ↔
+      Modality.box.wp (Close.optRes (st.delete r)) P :=
+  wp_diamond_of_ne_none (Storage.delete_ne_none_total st r h)
+theorem wp_diamond_find_total {T : Ty} {st : Storage C} {r : SRef C T} {P : SVal T → Prop}
+    (h : r.path.total = true) :
+    Modality.diamond.wp (Close.optRes (st.find r)) P ↔
+      Modality.box.wp (Close.optRes (st.find r)) P :=
+  wp_diamond_of_ne_none (Storage.find_ne_none_total st r h)
+
 /-! ## A write under the box -/
 
 /-- **A storage write under the box**, named with what is known of the
@@ -590,17 +757,21 @@ theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {
 
 end CloseS
 
-attribute [close_rw_s high] CloseS.wp_box_write_prim
+attribute [close_rw_s high] CloseS.wp_box_write_prim CloseS.wp_diamond_write_total
+  CloseS.wp_diamond_delete_total CloseS.wp_diamond_find_total
 
 attribute [close_rw_s]
   CloseS.wp_box_write CloseS.field_append CloseS.index_append CloseS.append_append
   CloseS.root_append CloseS.absT_ofRoot CloseS.absT_append CloseS.diverges_nil_left
   CloseS.diverges_nil_right CloseS.diverges_cons CloseS.key_uint CloseS.key_int
+  CloseS.key_uint' CloseS.key_int' CloseS.netOfT_def
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
   CloseS.readT_prim CloseS.readT_ident CloseS.Landed.memT_readId CloseS.push_memT_readId
   CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field
   CloseS.copyMToSt_find_field CloseS.wp_box_ofId CloseS.withStorage_memT_readId
   CloseS.withNet_memT_readId CloseS.withBalance_memT_readId
+  CloseS.path_ofRoot CloseS.path_append CloseS.find_init_ofRoot CloseS.find_init_append
+  Path.total SVal.dflt_prim' Semantics.lookupBy Option.getD_some Option.getD_none
   CloseS.wp_box_delete CloseS.map_const_eq_some SVal.defaultOf_prim' SVal.find_defaultOf_field
   Option.map_map CloseS.dflt_bool CloseS.dflt_uint_val CloseS.dflt_int_val
   CloseS.bind_const_eq_some CloseS.optRes_eq_ok CloseS.forall_val_eq_uint CloseS.forall_val_eq_int
