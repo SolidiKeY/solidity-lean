@@ -1111,6 +1111,235 @@ end
 
 end Fills
 
+/-! ### Every root -/
+
+/-- The whole program: every root filled with its value in `st`. -/
+def rootsProg (st : Storage C) :
+    (vs : List (Name × Ty)) → (∀ r T, (r, T) ∈ vs → C.rootType r = some T) → Prog C [] []
+  | [], _ => .nil
+  | (r, T) :: vs, h =>
+    (fill 0 (.loc (.root r (h r T List.mem_cons_self))) (st.get (h r T List.mem_cons_self))).append
+      (rootsProg st vs fun r' T' hm => h r' T' (List.mem_cons_of_mem _ hm))
+
+theorem rootsProg_run (st : Storage C) (hnd : nodupKeysB C.vars = true) :
+    ∀ (vs : List (Name × Ty)) (h : ∀ r T, (r, T) ∈ vs → C.rootType r = some T)
+      (σ : State C []),
+      (∀ r T (hr : C.rootType r = some T), (∃ U, (r, U) ∈ vs) → σ.storage.get hr = SVal.dflt T) →
+      (∀ r T (hr : C.rootType r = some T), (¬∃ U, (r, U) ∈ vs) → σ.storage.get hr = st.get hr) →
+      st.Canon → st.Tight → st.Fits → nodupKeysB vs = true →
+      TRuns σ (rootsProg st vs h) (σ.withStorage st)
+  | [], _, σ, _, h2, _, _, _, _ => by
+    have hst : σ.storage = st := SFields.ext_get hnd _ _ fun r T hr =>
+      h2 r T hr fun ⟨_, hm⟩ => nomatch hm
+    have hσ : σ.withStorage st = σ := by rw [← hst]; rfl
+    rw [hσ]
+    exact TRuns.nil σ
+  | (r, T) :: vs, h, σ, h1, h2, hc, ht, hf, hnv => by
+    simp only [nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none] at hnv
+    have hr : C.rootType r = some T := h r T List.mem_cons_self
+    have hd : σ.storage.get hr = SVal.dflt T := h1 r T hr ⟨T, List.mem_cons_self⟩
+    have hsave : ∀ X : SVal T, σ.storage.save (SRef.ofRoot r hr) X =
+        some (σ.storage.set hr X) := by
+      intro X
+      rw [Storage.save_eq]
+      show ((σ.storage.get hr).saveM .nil X).map (σ.storage.set hr) = _
+      rw [SVal.saveM_nil]
+      rfl
+    have h0 : σ.storage.save (SRef.ofRoot r hr) (SVal.dflt T) = some σ.storage := by
+      rw [hsave, ← hd, SFields.set_get_self]
+    obtain ⟨st₁, hrun₁, hs₁⟩ := fill_ok (st.get hr) 0 [] (.loc (.root r hr)) σ (SRef.ofRoot r hr)
+      (SFields.all_get hr hc) (SFields.all_get hr ht) (SFields.all_get hr hf) rfl h0
+    rw [hsave] at hs₁
+    cases hs₁
+    have hne : ∀ g, (∃ U, (g, U) ∈ vs) → g ≠ r := fun g ⟨U, hm⟩ he => by
+      have := lookupBy_isSome_of_mem' hm
+      rw [he, hnv.1] at this
+      exact nomatch this
+    have hrest := rootsProg_run st hnd vs (fun r' T' hm => h r' T' (List.mem_cons_of_mem _ hm))
+      (σ.withStorage (σ.storage.set hr (st.get hr)))
+      (fun g U hg hm => by
+        show (σ.storage.set hr (st.get hr)).get hg = _
+        rw [SFields.get_set_ne _ hr hg (hne g hm).symm]
+        exact h1 g U hg (let ⟨V, hV⟩ := hm; ⟨V, List.mem_cons_of_mem _ hV⟩))
+      (fun g U hg hm => by
+        show (σ.storage.set hr (st.get hr)).get hg = _
+        by_cases hgr : g = r
+        · subst hgr
+          have hU : U = T := Option.some.inj (hg.symm.trans hr)
+          subst hU
+          rw [SFields.get_set_same]
+        · rw [SFields.get_set_ne _ hr hg (Ne.symm hgr)]
+          refine h2 g U hg fun ⟨V, hV⟩ => ?_
+          rcases List.mem_cons.mp hV with hV | hV
+          · exact hgr (congrArg Prod.fst hV)
+          · exact hm ⟨V, hV⟩)
+      hc ht hf hnv.2
+    exact TRuns.append hrun₁ hrest
+
 end Build
+
+/-! ## The characterisation -/
+
+open Build
+
+/-- **Canonical and tight ⇒ reachable, by one program**: `Build.rootsProg`,
+run by the typed run from `C`'s initial state, leaves exactly `st`, for keys
+and slots in range. -/
+theorem storage_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc : st.Canon)
+    (ht : st.Tight) (hf : st.Fits) :
+    TRuns (State.init C) (rootsProg st C.vars fun _ _ hm => lookupBy_of_nodup hnd hm)
+      ((State.init C).withStorage st) :=
+  rootsProg_run st hnd C.vars _ (State.init C) (fun _ _ hr _ => SFields.get_dflt hr)
+    (fun r T hr hm => absurd ⟨T, lookupBy_mem' hr⟩ hm) hc ht hf hnd
+
+/-- **Canonical and tight ⇒ reachable**, for keys and slots in range. -/
+theorem canon_reachable (hnd : nodupKeysB C.vars = true) {st : Storage C} (hc : st.Canon)
+    (ht : st.Tight) (hf : st.Fits) : Reachable C st := by
+  obtain ⟨o, ho, he⟩ := storage_reachable hnd hc ht hf
+  exact ⟨[], _, o, ho, by rw [he]; rfl⟩
+
+/-- **Nothing inferable is missing**: a property of storage that holds
+initially and that every program keeps, by the typed run from any typed
+state whose storage is canonical, holds of every canonical, tight storage
+whose keys and slots fit.  The typed state is well-typed by construction,
+so the step asks only the storage's canonicity. -/
+theorem no_hidden_invariant (hnd : nodupKeysB C.vars = true) (P : Storage C → Prop)
+    (hinit : P (Storage.init C))
+    (hstep : ∀ (Γ' : Ctx) (σ : State C []) (o : Out C σ.H Γ') (prog : Prog C [] Γ'),
+      σ.storage.Canon → prog.run σ = .ok o → P σ.storage → P o.st.storage)
+    (st : Storage C) (hc : st.Canon) (ht : st.Tight) (hf : st.Fits) : P st := by
+  obtain ⟨o, ho, he⟩ := storage_reachable hnd hc ht hf
+  have := hstep _ _ o _ Storage.init_canon ho hinit
+  rw [he] at this
+  exact this
+
+theorem deepOk_of_all (h : C.vars.all (·.2.okDeep) = true) : DeepOk C :=
+  fun _ _ hr => List.all_eq_true.mp h _ (lookupBy_mem' hr)
+
+/-- **Reachable ⇒ canonical and tight**, for a contract whose types have
+well-formed defaults all the way down. -/
+theorem reachable_shape (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
+    (h : Reachable C st) : st.Canon ∧ st.Tight :=
+  ⟨reachable_canon h, reachable_tight (deepOk_of_all hdeep) h⟩
+
+/-- **The reachable storages, exactly**: for a contract whose types have
+well-formed defaults all the way down, a storage whose keys and slots are in
+range (`SVal.Fits`, what a literal can write) is reachable by a program iff
+it is canonical and tight. -/
+theorem reachable_iff (hnd : nodupKeysB C.vars = true) (hdeep : C.vars.all (·.2.okDeep) = true)
+    {st : Storage C} (hf : st.Fits) : Reachable C st ↔ st.Canon ∧ st.Tight :=
+  ⟨reachable_shape hdeep, fun ⟨hc, ht⟩ => canon_reachable hnd hc ht hf⟩
+
+/-- **The reachable storages, exactly, with no premise on the storage**: for
+a contract whose types have well-formed defaults all the way down and whose
+fixed sizes fit, a storage is reachable iff it is canonical, tight and fits. -/
+theorem reachable_iff_fits (hnd : nodupKeysB C.vars = true)
+    (hdeep : C.vars.all (·.2.okDeep) = true) (hf : FixedFits C) {st : Storage C} :
+    Reachable C st ↔ st.Canon ∧ st.Tight ∧ st.Fits :=
+  ⟨fun h => ⟨(reachable_shape hdeep h).1, (reachable_shape hdeep h).2, reachable_fits hf h⟩,
+    fun ⟨hc, ht, hfs⟩ => canon_reachable hnd hc ht hfs⟩
+
+/-! ## What is reachable and what is not -/
+
+section Witnesses
+
+/-- One `uint[]` root. -/
+def Words : Contract := contract!{ uint[] xs; }
+
+/-- One `bool`-keyed mapping root. -/
+def BoolKeyed : Contract := contract!{ mapping(bool => uint) flags; }
+
+/-- One `Token[]` root. -/
+def Tokens : Contract := contract!{ Token[] tokens; }
+
+/-- `xs` empty, with a `5` past its end. -/
+def Words.dirty : Storage Words :=
+  .cons (.array .nil (.cons (.prim (PrimTy.ofLit .uint 5 rfl)) .nil) SVal.zero_lt_bound) .nil
+
+/-- A word past the end of a `uint[]` that is not cleared: canonical, not
+reachable, since `pop`, `delete` and a shorter copy clear the words they
+leave behind and nothing writes past the end of an array of words. -/
+theorem dirty_word_not_reachable : Words.dirty.Canon ∧ ¬ Reachable Words Words.dirty := by
+  refine ⟨?_, fun h => ?_⟩
+  · simp only [Words.dirty, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, canonH,
+      and_self]
+  · have ht := reachable_tight (deepOk_of_all (by decide)) h
+    simp only [Words.dirty, Storage.All, SFields.All, SVal.All, tightH] at ht
+    have h5 := ht.1.1.2 rfl _ (by rw [SList.toList_cons]; exact List.mem_cons_self)
+    rw [SVal.dflt_prim] at h5
+    cases h5
+
+/-- One `uint[2^256 + 1]` root: more slots than a `uint` index reaches
+(solc refuses a storage type that large). -/
+def Huge : Contract := { vars := [("big", .ref (.fixed .uint (2 ^ 256 + 1)))] }
+
+/-- **Reachable does not imply `Fits`** (decision 77): `Huge`'s initial
+storage is reached by the empty program, and its root has `2^256 + 1`
+elements, past what `Fits` allows a fixed-size array (the builder writes
+each element at a literal index).  So `reachable_iff` keeps its `Fits`
+premise.  Under solc's bound on fixed sizes (`FixedFits`, which `Huge`
+fails) every reachable storage fits, and `reachable_iff_fits` drops the
+premise (`Typing/Fits.lean`). -/
+theorem huge_reachable_not_fits :
+    Reachable Huge (Storage.init Huge) ∧ ¬ (Storage.init Huge).Fits := by
+  refine ⟨⟨[], .nil, ⟨State.init Huge, List.prefix_refl _⟩, Prog.run_nil _, rfl⟩, fun hf => ?_⟩
+  have hr : lookupBy "big" Huge.vars = some (.ref (.fixed .uint (2 ^ 256 + 1))) := rfl
+  have h := SFields.all_get hr hf
+  rw [Storage.init, SFields.get_dflt, SVal.dflt_fixed] at h
+  simp only [SVal.All] at h
+  exact Nat.not_succ_le_self _ h.1
+
+/-- `Huge`'s one root is past solc's bound, so it is no counterexample to
+`reachable_fits`. -/
+theorem huge_not_fixedFits : ¬ FixedFits Huge := by
+  intro hf
+  have h := hf ("big", _) List.mem_cons_self .uint (2 ^ 256 + 1) .nil
+  omega
+
+/-- `flags[true] = 3`. -/
+def BoolKeyed.flag : Storage BoolKeyed :=
+  .cons (.map (.cons 1 (.prim (PrimTy.ofLit .uint 3 rfl)) .nil) (.prim (PrimTy.dflt .uint))) .nil
+
+/-- An entry in a `bool`-keyed mapping, at the key `1` that `true` hashes
+to (decisions 10 and 14): reachable, by the builder (`flags[true] = 3;`). -/
+theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
+  refine canon_reachable (by decide) ?_ ?_ ?_
+  · simp only [BoolKeyed.flag, Storage.All, SFields.All, SVal.All, SMap.All, canonH, and_true,
+      true_and]
+    refine ⟨?_, rfl⟩
+    simp only [SMap.toList]
+    decide
+  · simp only [BoolKeyed.flag, Storage.All, SFields.All, SVal.All, SMap.All, tightH, and_true]
+    intro h
+    exact nomatch h
+  · simp only [BoolKeyed.flag, Storage.All, SFields.All, SVal.All, SMap.All, fitsH, and_true]
+    intro e he
+    simp only [SMap.toList, List.mem_cons, List.not_mem_nil, or_false] at he
+    subst he
+    show PrimTy.bool.keyFits 1 = true
+    rfl
+
+/-- A `Token` past the end of `tokens`. -/
+def Tokens.dangling : Storage Tokens :=
+  .cons (.array .nil (.cons (.struct (.cons (.prim (PrimTy.ofLit .uint 7 rfl)) .nil)) .nil)
+    SVal.zero_lt_bound) .nil
+
+/-- A `Token` past the end of `tokens`, written through a reference taken
+before its `pop`: reachable, by the builder. -/
+theorem dangling_slot_reachable : Reachable Tokens Tokens.dangling := by
+  refine canon_reachable (by decide) ?_ ?_ ?_
+  · simp only [Tokens.dangling, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, canonH,
+      and_self]
+  · simp only [Tokens.dangling, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, tightH,
+      and_true]
+    refine ⟨fun h => absurd h (by decide), fun h => absurd h (by decide)⟩
+  · simp only [Tokens.dangling, Storage.All, SFields.All, SVal.All, SVec.All, SList.All, fitsH,
+      and_true]
+    show 0 + SList.length _ < 2 ^ 256
+    simp only [SList.length, SList.toList_cons, SList.toList_nil, List.length_cons,
+      List.length_nil]
+    decide
+
+end Witnesses
 
 end Solidity
