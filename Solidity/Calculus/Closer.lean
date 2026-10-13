@@ -3176,11 +3176,16 @@ theorem cmpBoundR_sound {op : BinOp} {k j : Int} {c : Bool} (hc : cmpOp op k j =
       and_true] <;> omega)) <;>
     simp only [cmpBoundR, reduceCtorEq, false_imp_iff, implies_true, and_self]
 
-/-- Narrow the interval of `t` to the bounds given, where it has one. -/
+/-- Narrow the interval of `t` to the bounds given, where it has one; where
+it has only a bound below (`Facts.lo`, a length's `0`), a bound above
+given makes one (a push's room under the diamond, `roomM`). -/
 def Facts.narrow (F : Facts) (t : LTerm) (lo hi : Option Int) : Facts :=
   match F.range t with
   | some (l, h) => { F with bnds := (t, max l (lo.getD l), min h (hi.getD h)) :: F.bnds }
-  | none => F
+  | none =>
+    match F.lo t, hi with
+    | some l, some h => { F with bnds := (t, max l (lo.getD l), h) :: F.bnds }
+    | _, _ => F
 
 theorem Facts.narrow_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {i : Int}
     (ht : t.eval σ = .ok (.int i)) {lo hi : Option Int} (hlo : ∀ l, lo = some l → l ≤ i)
@@ -3205,16 +3210,63 @@ theorem Facts.narrow_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : L
         | some h' => exact hhi h' rfl
       exact ⟨Int.max_le.2 ⟨hlh.1, h1⟩, Int.le_min.2 ⟨hlh.2, h2⟩⟩
     · exact hb b hm i' hi'
-  · exact hF
+  · split
+    · rename_i _ _ l h hl
+      have hl' := F.lo_sound hF t hl ht
+      obtain ⟨hk, hn, he, hla, hv, hb⟩ := hF
+      refine ⟨hk, hn, he, hla, hv, ?_⟩
+      intro b hm i' hi'
+      rcases List.mem_cons.1 hm with rfl | hm
+      · rw [ht] at hi'
+        cases hi'
+        have h1 : lo.getD l ≤ i := by
+          cases lo with
+          | none => exact hl'
+          | some l' => exact hlo l' rfl
+        exact ⟨Int.max_le.2 ⟨hl', h1⟩, hhi h rfl⟩
+      · exact hb b hm i' hi'
+    · exact hF
+
+/-- A term below its guards (`seq`). -/
+def _root_.Solidity.Decide.LTerm.unseq : LTerm → LTerm
+  | .seq _ a => a.unseq
+  | t => t
+
+theorem _root_.Solidity.Decide.LTerm.unseq_eval {σ : Semantics.State} :
+    (t : LTerm) → ∀ {v : Value}, t.eval σ = .ok v → t.unseq.eval σ = .ok v
+  | .seq d a, v, h => by
+    simp only [LTerm.eval] at h
+    obtain ⟨_, -, h⟩ := Res.bind_eq_ok.1 h
+    exact LTerm.unseq_eval a h
+  | .lit _, _, h | .var _, _, h | .binop .., _, h | .unop .., _, h | .err, _, h | .env _, _, h
+  | .ite .., _, h | .kite .., _, h | .orElse .., _, h | .find .., _, h | .findP .., _, h
+  | .has .., _, h | .kmap .., _, h | .len .., _, h | .cpok .., _, h | .zero _, _, h
+  | .sok _, _, h | .pok _, _, h => h
+
+/-- `Facts.narrow` of a term and, where it is guarded, of the term below
+its guards: a guarded length (`len` behind its path's guards) bounds the
+length a push's room speaks of. -/
+def Facts.narrowS (F : Facts) (t : LTerm) (lo hi : Option Int) : Facts :=
+  match t with
+  | .seq .. => (F.narrow t lo hi).narrow t.unseq lo hi
+  | _ => F.narrow t lo hi
+
+theorem Facts.narrowS_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {t : LTerm} {i : Int}
+    (ht : t.eval σ = .ok (.int i)) {lo hi : Option Int} (hlo : ∀ l, lo = some l → l ≤ i)
+    (hhi : ∀ h, hi = some h → i ≤ h) : (F.narrowS t lo hi).Ok σ := by
+  unfold Facts.narrowS
+  split
+  · exact Facts.narrow_ok (F.narrow_ok hF ht hlo hhi) (LTerm.unseq_eval _ ht) hlo hhi
+  · exact F.narrow_ok hF ht hlo hhi
 
 /-- What `a op b = c` tells, one side a literal: an interval for the
 other. -/
 def Facts.addCmp (F : Facts) (op : BinOp) (a b : LTerm) (c : Bool) : Facts :=
   match b with
-  | .lit (.int k) => F.narrow a (cmpBoundL op c k).1 (cmpBoundL op c k).2
+  | .lit (.int k) => F.narrowS a (cmpBoundL op c k).1 (cmpBoundL op c k).2
   | _ =>
     match a with
-    | .lit (.int k) => F.narrow b (cmpBoundR op c k).1 (cmpBoundR op c k).2
+    | .lit (.int k) => F.narrowS b (cmpBoundR op c k).1 (cmpBoundR op c k).2
     | _ => F
 
 theorem Facts.addCmp_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {op : BinOp} {a b : LTerm}
@@ -3224,11 +3276,11 @@ theorem Facts.addCmp_ok {σ : Semantics.State} {F : Facts} (hF : F.Ok σ) {op : 
   split
   · rename_i k
     cases hb
-    exact F.narrow_ok hF ha (cmpBoundL_sound hc).1 (cmpBoundL_sound hc).2
+    exact F.narrowS_ok hF ha (cmpBoundL_sound hc).1 (cmpBoundL_sound hc).2
   · split
     · rename_i k _
       cases ha
-      exact F.narrow_ok hF hb (cmpBoundR_sound hc).1 (cmpBoundR_sound hc).2
+      exact F.narrowS_ok hF hb (cmpBoundR_sound hc).1 (cmpBoundR_sound hc).2
     · exact hF
 
 /-- What `t` returning `v` tells: its value (`addEq`), and through `&&`,

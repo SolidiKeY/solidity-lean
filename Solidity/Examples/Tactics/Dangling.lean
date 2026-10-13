@@ -84,19 +84,17 @@ example : ⊢ dl!{ defined(wt(storage)) → [
 
 `storagePushValueSave` at the slot: the inner array the outer `push()`
 recycles has the pushed word, and its length is one
-(`findDefinitionSize`, then `selectOnSaveCons` on `size`).  Not closed
-since W9.8.3d: a push through a stale alias is outside the fragment
-(`Tm.staleWriteS` takes a `save` only).  The typed push halts at the bound
-(`Storage.full`), and the guard that says so (`Decide.pushBound`) reads the
-live length, which a stale slot does not have; the walk leaves the one leaf
-below open. -/
+(`findDefinitionSize`, then `selectOnSaveCons` on `size`). -/
 
-/-- The push through a dangling alias, one leaf left. -/
-def matrixPush : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ dl!{ defined(wt(storage)) → [
     delete matrix; matrix.push(); uint[] storage ptr = matrix[0]; matrix.pop();
-    ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 }
-
-#guard (Seq.residue .all .nil matrixPush).map List.length == some 1
+    ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 } := by
+  sol_prove?
 
 /-! ## Rounds of `pop`, write, `push()`
 
@@ -107,8 +105,9 @@ and the reduction by about 1.6 times a round.  Two rounds close; four
 `elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
 `Examples/ProofTree.lean`.  Six are the most whose leaf is within
 `closeSize`, so the largest reduction `leafFitsOn` builds before refusing;
-seven are refused by the leaf's size.  (Under the box a push carries no
-bound guard, `ElemS.guardAt`; with one, W9.8.3d, five fitted.)
+seven are refused by the leaf's size.  (A push asks no room of the
+untyped storage the procedure reads: at a full array the typed one is out
+of gas, `Upd.exh`; with a bound guard, W9.8.3d, five fitted.)
 The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
 read as the scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`,
 `Fml.toLS`). -/

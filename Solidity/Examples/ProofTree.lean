@@ -531,13 +531,9 @@ info: Try this:
 example : ⊢ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
   sol_prove?
 
-/-- `wt(storage)`, the premise of a storage obligation (`Fml.wt`).  The
-three below are box obligations: a typed push is exhausted at a full array
-(`Storage.full`).  The run's exhaustion is accepted by both modalities, but
-the update the walk leaves, `{storage := save(…, len + 1)}`, halts there, and
-the diamond rejects a halting update; so a diamond push leaf needs a bound
-on the length below `2^256 - 1`, which `wt` (a layout) does not give.  The
-box needs none (`ElemS.guardAt`). -/
+/-- `wt(storage)`, the premise of a diamond obligation (`Fml.wt`).  A push
+at a full array (`Storage.full`) is out of gas, in the run and in the
+update the walk leaves (`Upd.exh`), which both modalities accept. -/
 def wtStd : Fml StandardExample [] := Fml.wt StandardExample
 
 /--
@@ -545,7 +541,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [ values.push(3); values.pop(); ] true } := by
+example : ⊢ .imp wtStd dl!{ ⟨ values.push(3); values.pop(); ⟩ true } := by
   sol_prove?
 
 /--
@@ -553,7 +549,7 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [ persons.push(); persons[0].age = 1; ] true } := by
+example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); persons[0].age = 1; ⟩ true } := by
   sol_prove?
 
 /--
@@ -561,7 +557,17 @@ info: Try this:
   sol_prove
 -/
 #guard_msgs in
-example : ⊢ .imp wtStd dl!{ [ Person storage p = persons.push(); p.age = 1; ] true } := by
+example : ⊢ .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; ⟩ true } := by
+  sol_prove?
+
+/-! The length past a push, read back under the diamond: the push's room is
+the premise of what follows it (`roomM`), which bounds the length (W9.8.5). -/
+/--
+info: Try this:
+  sol_prove
+-/
+#guard_msgs in
+example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); uint n = persons.length - 1; ⟩ true } := by
   sol_prove?
 
 /-! Intervals: a premise `x <= 100` bounds the `uint` local `x`, so the
@@ -628,8 +634,7 @@ is within `closeSize` and its reduction past `elimSize`: refused in
 milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), read as the
 scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`, `Fml.toLS`). -/
 
-/-- Twenty-two pushes onto one array (under the box a push carries no
-bound guard: `ElemS.guardAt`). -/
+/-- Twenty-two pushes onto one array. -/
 def pushes22 : Fml StandardExample [] :=
   dl!{ [
     values.push(0); values.push(1); values.push(2); values.push(3); values.push(4);

@@ -31,8 +31,9 @@ in (`State.findStorage`, `readAddr`, …), through the erasure lemmas of
 on the values returned (`Sim`): the untyped interpreter halts with other
 kinds than a revert.  Three are exact only under a premise, which the
 reduction supplies: a push below the bound of `2^256 - 1` elements (the
-typed one is out of gas there, `Storage.full`; the reduction guards a push
-with the bound, `Tm.pushBoundS`), and a memory read, length or copy
+typed one is out of gas there, `Storage.full`, which both modalities
+accept, `Upd.exh`; the diamond's reduction takes the bound as a premise of
+what follows, `Tm.boundS`, `roomM`), and a memory read, length or copy
 through an identity of the type the term says (`IdOk`: the untyped heap
 does not keep an object's type, so a read through an identity of another
 type can return where the typed one does not; the reduction's identities

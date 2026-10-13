@@ -184,6 +184,11 @@ def _root_.Solidity.Op3.isSave {a b c s : Srt} : Op3 C a b c s → Bool
   | .save => true
   | _ => false
 
+/-- `push`. -/
+def _root_.Solidity.Op3.isPush {a b c s : Srt} : Op3 C a b c s → Bool
+  | .push => true
+  | _ => false
+
 /-- `storage` itself. -/
 def _root_.Solidity.Tm.isStorageS {s : Srt} : Tm C Γ s → Bool
   | .app0 o => o.isStorage
@@ -444,19 +449,33 @@ def _root_.Solidity.Tm.slotPathS (ρ : SymS) : {u : Srt} → Tm C Γ u → Optio
   | _, .app1 o p => o.fieldName?.bind fun f => (Tm.slotPathS ρ p).map fun q => key{ q.f }
   | _, _ => none
 
-/-- A write through a stale alias. -/
+/-- A write or a push of a word through a stale alias, at the slot level. -/
 def _root_.Solidity.Tm.staleWriteS (ρ : SymS) {s : Srt} :
     Tm C Γ s → Option (Option AOp × LPath × (p : PrimTy) × Tm C Γ (.val p))
   | .app3 o st q v =>
-    if o.isSave && st.isStorageS then
-      (q.slotPathS ρ).bind fun l => v.svalArgS.map fun t => (none, l, t)
+    if st.isStorageS then
+      if o.isSave then (q.slotPathS ρ).bind fun l => v.svalArgS.map fun t => (none, l, t)
+      else if o.isPush then (q.slotPathS ρ).bind fun l => v.svalArgS.map fun t => (some .push, l, t)
+      else none
     else none
   | _ => none
 
+/-- A storage update pushed in. -/
+def _root_.Solidity.Tm.toLSt (ρ : SymS) (s : Tm C Γ .st) : LStor :=
+  match s.staleWriteS ρ with
+  | some (op, q, ⟨_, t⟩) => .stale op ρ.sym.stor q (t.toLS ρ)
+  | none => s.toLS ρ
+
+/-- The storage updates `toLSt` is exact on. -/
+def _root_.Solidity.Tm.inLSt (ρ : SymS) (s : Tm C Γ .st) : Bool :=
+  match s.staleWriteS ρ with
+  | some (_, _, ⟨_, t⟩) => t.inLS ρ
+  | none => s.inLS ρ
+
 /-- The array at `q` of `s` has room for one more element: fewer than
-`2^256 - 1` live ones (`Storage.full`), else it halts. -/
+`2^256 - 1` live ones (`Storage.full`). -/
 def pushBound (s : LStor) (q : LPath) : LTerm :=
-  .ite (.binop .lt .uint (.len s q) (.lit (.int (2 ^ 256 - 1)))) (.lit (.bool true)) .err
+  .binop .lt .uint (.len s q) (.lit (.int (2 ^ 256 - 1)))
 
 /-- `Tm.boundS` of a binary symbol. -/
 def _root_.Solidity.Op2.boundAt {a b s : Srt} (ρ : SymS) : Op2 C a b s → Tm C Γ a → Tm C Γ b →
@@ -471,25 +490,21 @@ def _root_.Solidity.Op3.boundAt {a b c s : Srt} (ρ : SymS) : Op3 C a b c s → 
   | .push, st, q => if st.isStorageS then pushBound ρ.sym.stor (q.toLS ρ) else .lit (.bool true)
   | _, _, _ => .lit (.bool true)
 
-/-- What a push onto `storage` must have, beside its write returning: room
-for the element (`pushBound`).  The typed push is out of gas at the bound
-(`Storage.full`), where the decision procedure's untyped one appends. -/
+/-- **The room a push onto `storage` has** (`pushBound`), else `true`.  Not
+a guard: the typed push at a full array is out of gas, which both
+modalities accept (`Upd.exh`); the diamond's reduction takes it as a
+premise of what follows the update (`roomM`), which then reads the
+length past the push in range.  A push through a stale alias asks none. -/
 def _root_.Solidity.Tm.boundS (ρ : SymS) {s : Srt} : Tm C Γ s → LTerm
   | .app3 o st q _ => o.boundAt ρ st q
   | .app2 o st q => o.boundAt ρ st q
   | _ => .lit (.bool true)
 
-/-- A storage update pushed in. -/
-def _root_.Solidity.Tm.toLSt (ρ : SymS) (s : Tm C Γ .st) : LStor :=
+/-- `Tm.boundS` of a storage update pushed in by `toLSt`. -/
+def _root_.Solidity.Tm.boundSt (ρ : SymS) (s : Tm C Γ .st) : LTerm :=
   match s.staleWriteS ρ with
-  | some (op, q, ⟨_, t⟩) => .stale op ρ.sym.stor q (t.toLS ρ)
-  | none => s.toLS ρ
-
-/-- The storage updates `toLSt` is exact on. -/
-def _root_.Solidity.Tm.inLSt (ρ : SymS) (s : Tm C Γ .st) : Bool :=
-  match s.staleWriteS ρ with
-  | some (_, _, ⟨_, t⟩) => t.inLS ρ
-  | none => s.inLS ρ
+  | some _ => .lit (.bool true)
+  | none => s.boundS ρ
 
 end Terms
 
@@ -677,16 +692,8 @@ def _root_.Solidity.Rhs.guardS (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
     match i.toLS ρ with
     | some (_, g) => g
     | none => .err
-  | .store s => seqL (s.boundS ρ) (.sok (s.toLS ρ))
-  | .saveNet | .saveNetMt => .err
-
-/-- `Rhs.guardS` with no push bound: what the box asks of a right-hand
-side.  A push past the bound halts the typed update (`Storage.full`), and a
-halting update makes the box hold, so the bound is the diamond's only
-(`ElemS.guardAt`). -/
-def _root_.Solidity.Rhs.guardNB (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
   | .store s => .sok (s.toLS ρ)
-  | r => r.guardS ρ
+  | .saveNet | .saveNetMt => .err
 
 /-- A right-hand side in the fragment. -/
 def _root_.Solidity.Rhs.inLS (ρ : SymS) {t : LTy} : Rhs C Γ t → Bool
@@ -707,11 +714,14 @@ def _root_.Solidity.UpdElem.actS (ρ : SymS) {Δ : Ctx} : UpdElem C Γ Δ → Ac
     | none => .keep
   | _ => .keep
 
-/-- What an element's terms must return. -/
+/-- What an element's terms must return.  A push's room is not asked: the
+typed push at a full array (`Storage.full`) is out of gas there, which both
+modalities accept (`Upd.exh`, `Calculus/Lands.lean`), where the untyped one
+the procedure reads appends. -/
 def ElemS.guard (ρ : SymS) : ElemS C Γ → LTerm
   | .rhs r => r.guardS ρ
   | .glob (.local _ r) => r.guardS ρ
-  | .glob (.storage s) => seqL (s.boundS ρ) (.sok (s.toLSt ρ))
+  | .glob (.storage s) => .sok (s.toLSt ρ)
   | .glob (.net r _ a) => .kite (r.toLS ρ) (a.toLS ρ) (.lit (.bool true)) (.lit (.bool true))
   | .glob (.pay r a) => .kite (r.toLS ρ) (a.toLS ρ) (payGuard (a.toLS ρ)) (payGuard (a.toLS ρ))
   | .glob (.memory m) =>
@@ -720,12 +730,26 @@ def ElemS.guard (ρ : SymS) : ElemS C Γ → LTerm
     | none => .err
   | .glob _ => .err
 
-/-- `ElemS.guard` with no push bound (`Rhs.guardNB`). -/
-def ElemS.guardNB (ρ : SymS) : ElemS C Γ → LTerm
-  | .rhs r => r.guardNB ρ
-  | .glob (.local _ r) => r.guardNB ρ
-  | .glob (.storage s) => .sok (s.toLSt ρ)
-  | e => e.guard ρ
+/-- The room a right-hand side's push has (`Tm.boundS`): an `old := s`'s. -/
+def _root_.Solidity.Rhs.boundR (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
+  | .store s => s.boundS ρ
+  | _ => .lit (.bool true)
+
+/-- The room an element's push has (`Tm.boundS`). -/
+def ElemS.bound (ρ : SymS) : ElemS C Γ → LTerm
+  | .rhs r => r.boundR ρ
+  | .glob (.local _ r) => r.boundR ρ
+  | .glob (.storage s) => s.boundSt ρ
+  | .glob _ => .lit (.bool true)
+
+/-- What follows an update under the diamond, with the room its pushes have
+as a premise (`ElemS.bound`, `true`): where a push has none, the update is
+out of gas, which the diamond accepts.  The closer reads the premise as
+the length's interval (`Facts.narrow`). -/
+def roomM : Modality → LTerm → LFml → LFml
+  | .diamond, .lit _, φ => φ
+  | .diamond, b, φ => .imp (.eq b (.lit (.bool true))) φ
+  | .box, _, φ => φ
 
 /-- An element in the fragment. -/
 def ElemS.inLS (ρ : SymS) : ElemS C Γ → Bool
@@ -979,7 +1003,8 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
     match U.view with
     | .zero => φ.toLSM (U.replayS noActE noActR ρ)
     | .one a =>
-      guardM m (a.guardNB ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+      guardM m (a.guard ρ)
+        (roomM m (a.bound ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)))
     | .two a b =>
       match pairViewS a b with
       | some ⟨_, i, mm⟩ =>
@@ -987,8 +1012,8 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
         | some (g, M) => guardM m g (φ.toLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
         | none => .tt
       | none =>
-        guardM m (seqL (a.guardNB ρ) (b.guardNB ρ))
-          (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+        guardM m (seqL (a.guard ρ) (b.guard ρ)) (roomM m (a.bound ρ) (roomM m (b.bound ρ)
+          (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))))
     | .many => .tt
   | _, _, .modal .. => .not .tt
   | _, _, .havoc _ => .tt
@@ -1046,7 +1071,8 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
       match U.view with
       | .zero => ih (U.replayS noActE noActR ρ)
       | .one a =>
-        guardM m (a.guardNB ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+        guardM m (a.guard ρ)
+          (roomM m (a.bound ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)))
       | .two a b =>
         match pairViewS a b with
         | some ⟨_, i, mm⟩ =>
@@ -1054,8 +1080,8 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
           | some (g, M) => guardM m g (ih (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
           | none => .tt
         | none =>
-          guardM m (seqL (a.guardNB ρ) (b.guardNB ρ))
-            (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+          guardM m (seqL (a.guard ρ) (b.guard ρ)) (roomM m (a.bound ρ) (roomM m (b.bound ρ)
+            (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))))
       | .many => .tt)
     (modal := fun _ _ _ _ _ _ => .not .tt) (havoc := fun _ _ _ => .tt)
     (all := fun _ p _ ih ρ => .all ρ.key p (ih ρ.pushQ))
