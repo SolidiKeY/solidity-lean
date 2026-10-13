@@ -226,7 +226,7 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   simp only [COut.after, holdsC, holds] at H2
   obtain ⟨-, -, hE⟩ := H2
   -- `0 + 10 == 5` fails
-  exact absurd (hE []) (by with_unfolding_all decide)
+  exact absurd hE (by with_unfolding_all decide)
 
 /-! ## The rules -/
 
