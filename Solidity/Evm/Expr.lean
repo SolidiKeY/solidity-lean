@@ -47,9 +47,9 @@ theorem simple_sim {m : Machine} (hm : Sim C L b F σ m) :
       ∃ w, ReprV p (s.evalT σ) w ∧ run (compileSimple b s) m = .ok (m.push w) 0
   | p, .lit n hr, _ => by
     cases p <;> simp only [PrimTy.inRange, decide_eq_true_eq, Bool.false_eq_true] at hr
-    · exact ⟨.val (toWord n), reprV_iff.2 ⟨hr.1, hr.2, by simp only [toWord, hr.1, ↓reduceIte]; rfl⟩,
-        rfl⟩
-    · exact ⟨.val (toWord n), reprV_iff.2 (ReprW.int hr.1 hr.2), rfl⟩
+    · exact ⟨.val (toWord n), show Word.val (toWord n) = .val n.toNat by
+        simp only [toWord, hr.1, ↓reduceIte], rfl⟩
+    · exact ⟨.val (toWord n), ReprV.int_word _, rfl⟩
   | _, .bool b, _ => ⟨.val (bword b), rfl, rfl⟩
   | p, .local i, _ => ⟨m.memAt (lvl b i), hm.vals i, rfl⟩
   | _, .env k hp, hw => by

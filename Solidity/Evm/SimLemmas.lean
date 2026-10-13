@@ -19,12 +19,12 @@ sequences of `delete`, `pop`, a copy and a `push` (`zeroCode_run`,
 
 **Word arithmetic.**  The operators' tails are proved against the integer
 arithmetic of the untyped operators (`applyBinOp`, `checkArith`,
-`Semantics.lean`), on the integers a word represents (`ReprW`, `ValOutW`):
-`tail_sim` and its signed half.  The typed operators are that arithmetic
-range-checked (`BinOp.evalT_erase`, `UnOp.evalT_erase`,
+`Semantics.lean`), on the integers a word represents (`ReprW`, `ValOutW`,
+private here): `tail_sim` and its signed half.  The typed operators are that
+arithmetic range-checked (`BinOp.evalT_erase`, `UnOp.evalT_erase`,
 `Semantics/Ops.lean`), so the typed tails (`tail_simT`, `neg_simT`,
-`bnot_simT`, `compound_simT`, `bump_simT`) read them off it; nothing else
-here or above reads an untyped value.
+`bnot_simT`, `compound_simT`, `bump_simT`) read them off it; nothing outside
+this file reads an untyped value.
 -/
 
 namespace Solidity
@@ -199,7 +199,7 @@ theorem cmp_tail (m : Machine) (st : List Word) (a b : Nat) :
 below `2^256` as itself, a `bool` as `1` or `0`, an `int` as its two's
 complement word.  The untyped reading of `ReprV` (`reprV_iff`), on which the
 operators' tails are proved. -/
-def ReprW : PrimTy → Value → Word → Prop
+private def ReprW : PrimTy → Value → Word → Prop
   | .uint, .int n, .val w => 0 ≤ n ∧ n < W ∧ w = n.toNat
   | .bool, .bool b, .val w => w = bword b
   | .int, .int n, .val w => w < W ∧ n = sgn w
@@ -207,31 +207,31 @@ def ReprW : PrimTy → Value → Word → Prop
 
 
 /-- A `uint` is represented by itself, a word below `2^256`: `total` read as `7` pushes `7`. -/
-theorem ReprW.uint_inv {v : Value} {w : Word} (h : ReprW .uint v w) :
+private theorem ReprW.uint_inv {v : Value} {w : Word} (h : ReprW .uint v w) :
     ∃ a : Nat, a < W ∧ v = .int a ∧ w = .val a := by
   match v, w, h with
   | .int n, .val w, ⟨h0, h1, h2⟩ =>
     exact ⟨n.toNat, by omega, by rw [Int.toNat_of_nonneg h0], h2 ▸ rfl⟩
 
 /-- A `bool` is represented by `1` or `0`: `flags[3]` read as `true` pushes `1`. -/
-theorem ReprW.bool_inv {v : Value} {w : Word} (h : ReprW .bool v w) :
+private theorem ReprW.bool_inv {v : Value} {w : Word} (h : ReprW .bool v w) :
     ∃ b : Bool, v = .bool b ∧ w = .val (bword b) := by
   match v, w, h with
   | .bool b, .val w, h => exact ⟨b, rfl, h ▸ rfl⟩
 
 /-- An `int` is represented by a word, its two's complement: `-1` is `2^256 - 1`. -/
-theorem ReprW.int_inv {v : Value} {w : Word} (h : ReprW .int v w) :
+private theorem ReprW.int_inv {v : Value} {w : Word} (h : ReprW .int v w) :
     ∃ a : Nat, a < W ∧ v = .int (sgn a) ∧ w = .val a := by
   match v, w, h with
   | .int n, .val w, ⟨h1, h2⟩ => exact ⟨w, h1, by rw [h2], rfl⟩
 
 /-- An `int256` is represented by its word: `x = -1;` pushes `2^256 - 1`. -/
-theorem ReprW.int {n : Int} (h1 : -(H : Int) ≤ n) (h2 : n < H) :
+private theorem ReprW.int {n : Int} (h1 : -(H : Int) ≤ n) (h2 : n < H) :
     ReprW .int (.int n) (.val (toWord n)) :=
   ⟨toWord_lt (by have := W_eq; omega) (by have := W_eq; omega), (sgn_toWord h1 h2).symm⟩
 
 /-- `1`, the step of `++`, at a numeric type. -/
-theorem ReprW.one {p : PrimTy} (hp : p ≠ .bool) : ReprW p (.int 1) (.val 1) := by
+private theorem ReprW.one {p : PrimTy} (hp : p ≠ .bool) : ReprW p (.int 1) (.val 1) := by
   have := W_pos; have := W_eq; have := H_pos
   cases p with
   | uint => exact ⟨by decide, by unfold W at *; omega, rfl⟩
@@ -239,39 +239,39 @@ theorem ReprW.one {p : PrimTy} (hp : p ≠ .bool) : ReprW p (.int 1) (.val 1) :=
   | bool => exact absurd rfl hp
 
 /-- A word below `2^256` represents itself as a `uint`: `total = 7;` pushes `7`. -/
-theorem ReprW.uint {a : Nat} (h : a < W) : ReprW .uint (.int a) (.val a) :=
+private theorem ReprW.uint {a : Nat} (h : a < W) : ReprW .uint (.int a) (.val a) :=
   ⟨Int.natCast_nonneg a, by omega, rfl⟩
 
 /-- `true` is `1`, `false` is `0`: `require(true);` pushes `1`. -/
-theorem ReprW.bool (b : Bool) : ReprW .bool (.bool b) (.val (bword b)) := rfl
+private theorem ReprW.bool (b : Bool) : ReprW .bool (.bool b) (.val (bword b)) := rfl
 
 /-- An expression's outcome, interpreter and machine together: a value and the
 word representing it pushed, or both revert. -/
-def ValOutW (p : PrimTy) (res : Res Value) (out : Out) (m : Machine) : Prop :=
+private def ValOutW (p : PrimTy) (res : Res Value) (out : Out) (m : Machine) : Prop :=
   (∃ v w, res = .ok v ∧ ReprW p v w ∧ out = .ok (m.push w) 0) ∨
     (res = .error .revert ∧ out = .revert)
 
 /-- The interpreter's `uint256` bound is the machine's word bound: `2^256`. -/
-theorem uintBound_eq : uintBound = (W : Int) := rfl
+private theorem uintBound_eq : uintBound = (W : Int) := rfl
 
 /-- On `uint`s the interpreter's truncating division is the machine's: `7 / 2` is `3`. -/
-theorem tdiv_natCast (a b : Nat) : Int.tdiv (a : Int) (b : Int) = ((a / b : Nat) : Int) := rfl
+private theorem tdiv_natCast (a b : Nat) : Int.tdiv (a : Int) (b : Int) = ((a / b : Nat) : Int) := rfl
 /-- On `uint`s the interpreter's `%` is the machine's: `7 % 2` is `1`. -/
-theorem tmod_natCast (a b : Nat) : Int.tmod (a : Int) (b : Int) = ((a % b : Nat) : Int) := rfl
+private theorem tmod_natCast (a b : Nat) : Int.tmod (a : Int) (b : Int) = ((a % b : Nat) : Int) := rfl
 
 /-- The range check at `uint`. -/
-theorem checkArith_uint (n : Int) :
+private theorem checkArith_uint (n : Int) :
     checkArith (.prim .uint) (.int n) = if 0 ≤ n ∧ n < W then .ok (.int n) else .error .revert :=
   rfl
 
 /-- The range check at `int`. -/
-theorem checkArith_int (n : Int) :
+private theorem checkArith_int (n : Int) :
     checkArith (.prim .int) (.int n) =
       if -(H : Int) ≤ n ∧ n < H then .ok (.int n) else .error .revert :=
   rfl
 
 /-- The interpreter's checked `+`, `-`, `*`, `/`, `%` on `uint`s. -/
-theorem src_arith {a b : Nat} (ha : a < W) :
+private theorem src_arith {a b : Nat} (ha : a < W) :
     (applyBinOp .add (.int a) (.int b) >>= checkArith (BinOp.add.retTy (.prim .uint))) =
       (if a + b < W then .ok (.int ↑(a + b)) else .error .revert) ∧
     (applyBinOp .sub (.int a) (.int b) >>= checkArith (BinOp.sub.retTy (.prim .uint))) =
@@ -319,7 +319,7 @@ theorem src_arith {a b : Nat} (ha : a < W) :
       rw [if_pos (by omega)]
 
 /-- The operators agree at `int`: `tail_sim`'s signed half. -/
-theorem stail_sim {op : BinOp} (hop : binInFrag op .int = true) (hand : op ≠ .and)
+private theorem stail_sim {op : BinOp} (hop : binInFrag op .int = true) (hand : op ≠ .and)
     (hor : op ≠ .or) {va vb : Value} {wa wb : Word} (ha : ReprW .int va wa) (hb : ReprW .int vb wb)
     (m : Machine) :
     ValOutW (op.ret .int) (applyBinOp op va vb >>= checkArith (op.retTy (.prim .int)))
@@ -389,7 +389,7 @@ theorem stail_sim {op : BinOp} (hop : binInFrag op .int = true) (hand : op ≠ .
 
 /-- An operator whose tail is its opcode, with no guard: the interpreter's
 result is a word, which the opcode pushes.  Example: `a & b`, `a +% b`. -/
-theorem word_tail {op : BinOp} (hop : op.isArith = true) {a b r : Nat} (hr : r < W)
+private theorem word_tail {op : BinOp} (hop : op.isArith = true) {a b r : Nat} (hr : r < W)
     (hsrc : applyBinOp op (.int a) (.int b) = .ok (.int (r : Int))) {m : Machine}
     (hrun : run (uTail op) { m with stack := .val b :: .val a :: m.stack } = .ok (m.push (.val r)) 0) :
     ValOutW (op.ret .uint) (applyBinOp op (.int a) (.int b) >>= checkArith (op.retTy (.prim .uint)))
@@ -400,7 +400,7 @@ theorem word_tail {op : BinOp} (hop : op.isArith = true) {a b r : Nat} (hr : r <
   exact .inl ⟨_, _, rfl, ReprW.uint hr, rfl⟩
 
 /-- `x - y` modulo `2^256` is `x + (2^256 - y)` modulo `2^256`: `SUB`. -/
-theorem subW_eq {a b : Nat} (hb : b < W) :
+private theorem subW_eq {a b : Nat} (hb : b < W) :
     ((a + (W - b)) % W : Nat) = ((a : Int) - b) % (W : Int) := by
   rw [Int.natCast_emod, show ((a + (W - b) : Nat) : Int) = ((a : Int) - b) + W by omega,
     Int.add_emod_right]
@@ -411,7 +411,7 @@ reverts exactly when the interpreter does.
 
 Example: `a + b` with `a = 2^256 - 1`, `b = 1`: `checkArith` reverts (the sum
 is not a `uint256`), and so does `add_tail`'s guard. -/
-theorem tail_sim {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand : op ≠ .and)
+private theorem tail_sim {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand : op ≠ .and)
     (hor : op ≠ .or) {va vb : Value} {wa wb : Word} (ha : ReprW p va wa) (hb : ReprW p vb wb)
     (m : Machine) :
     ValOutW (op.ret p) (applyBinOp op va vb >>= checkArith (op.retTy (.prim p)))
@@ -546,7 +546,7 @@ theorem tail_sim {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand :
 
 /-- An operator other than `&&`/`||` evaluates both operands: `a + b` evaluates `b` even when `a =
 0`. -/
-theorem evalBinop_eq {op : BinOp} (hand : op ≠ .and) (hor : op ≠ .or) (p : PrimTy) (lv : Value)
+private theorem evalBinop_eq {op : BinOp} (hand : op ≠ .and) (hor : op ≠ .or) (p : PrimTy) (lv : Value)
     (b : Res Value) :
     evalBinop op p lv b =
       (b >>= fun rv => applyBinOp op lv rv >>= checkArith (op.retTy (.prim p))) := by
@@ -564,7 +564,7 @@ theorem compound_frag {op : BinOp} {p : PrimTy} (h : op.hasCompoundAssign = true
 attribute [local simp] Res.ok_bind Res.error_bind
 
 /-- A numeric value is an integer: `total` and an `int` local both read as `.int`. -/
-theorem ReprW.num_inv {p : PrimTy} {v : Value} {w : Word} (hp : p ≠ .bool) (h : ReprW p v w) :
+private theorem ReprW.num_inv {p : PrimTy} {v : Value} {w : Word} (hp : p ≠ .bool) (h : ReprW p v w) :
     ∃ n, v = .int n := by
   cases p with
   | uint => obtain ⟨a, _, rfl, _⟩ := h.uint_inv; exact ⟨_, rfl⟩
@@ -572,7 +572,7 @@ theorem ReprW.num_inv {p : PrimTy} {v : Value} {w : Word} (hp : p ≠ .bool) (h 
   | bool => exact absurd rfl hp
 
 /-- `x++` and `x--` are `x += 1` and `x -= 1`, checked the same way. -/
-theorem bump_src (op : IncDec) (p : PrimTy) (a : Int) :
+private theorem bump_src (op : IncDec) (p : PrimTy) (a : Int) :
     checkArith (.prim p) (.int (if op.isIncrement then a + 1 else a - 1)) =
       (applyBinOp op.binOp (.int a) (.int 1) >>= checkArith (op.binOp.retTy (.prim p))) := by
   cases op <;> rfl
@@ -583,7 +583,7 @@ theorem bump_frag (op : IncDec) : op.binOp.hasCompoundAssign = true := by
 
 /-- The step of `++`: its old value an integer, its checked result computed by
 `PUSH 1` and the operator's tail, or both revert. -/
-theorem bump_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) {old : Value} {w : Word}
+private theorem bump_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) {old : Value} {w : Word}
     (h : ReprW p old w) (m : Machine) :
     ∃ n, old = .int n ∧ ValOutW p (checkArith (.prim p) (.int (if op.isIncrement then n + 1 else n - 1)))
       (run ([.push (.val 1)] ++ binTail p op.binOp) { m with stack := w :: m.stack }) m := by
@@ -594,12 +594,12 @@ theorem bump_sim {p : PrimTy} (hp : p ≠ .bool) (op : IncDec) {old : Value} {w 
   have ht := tail_sim hfrag hand hor h (ReprW.one hp) m
   rwa [hret] at ht
 
-theorem erase_numeric {p : PrimTy} (hp : p.isNumeric = true) (x : p.Denote) :
+private theorem erase_numeric {p : PrimTy} (hp : p.isNumeric = true) (x : p.Denote) :
     PrimTy.erase x = .int (PrimTy.key x) := by
   cases p <;> first | rfl | cases hp
 
 /-- `a ⊕= b`'s operator, checked: `compoundT` erased. -/
-theorem compound_erase {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy}
+private theorem compound_erase {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy}
     (hp : p.isNumeric = true) (x y : p.Denote) :
     (applyBinOp op (PrimTy.erase x) (PrimTy.erase y) >>= checkArith (.prim p)) =
       Solidity.toRes PrimTy.erase
@@ -613,7 +613,7 @@ theorem compound_erase {op : BinOp} (hop : op.hasCompoundAssign = true) {p : Pri
   | some n => exact PrimTy.checkArith_ofInt hp n
 
 /-- `x++`'s new value, checked: `bumpT` erased. -/
-theorem bump_erase {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) (x : Int) :
+private theorem bump_erase {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) (x : Int) :
     checkArith (.prim p) (.int (if op.isIncrement then x + 1 else x - 1)) =
       Solidity.toRes PrimTy.erase (Solidity.bumpT op p x) :=
   PrimTy.checkArith_ofInt hp _
@@ -621,7 +621,7 @@ theorem bump_erase {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) (x : Int
 /-! ## Typed values -/
 
 /-- A word represents a typed value as it represents the value erased. -/
-theorem reprV_iff {p : PrimTy} {v : p.Denote} {w : Word} :
+private theorem reprV_iff {p : PrimTy} {v : p.Denote} {w : Word} :
     ReprV p v w ↔ ReprW p (PrimTy.erase v) w := by
   cases p with
   | uint =>
@@ -649,7 +649,7 @@ theorem reprV_iff {p : PrimTy} {v : p.Denote} {w : Word} :
     | slot s => exact ⟨fun ⟨b, hb, _⟩ => (by cases hb), fun h => h.elim⟩
 
 /-- A typed operator's outcome read off its untyped one. -/
-theorem ValOutT.ofW {p : PrimTy} {o : Option p.Denote} {out : Out} {m : Machine}
+private theorem ValOutT.ofW {p : PrimTy} {o : Option p.Denote} {out : Out} {m : Machine}
     (h : ValOutW p (Solidity.toRes PrimTy.erase o) out m) : ValOutT p (TRes.ofOpt o) out m := by
   cases o with
   | none =>
@@ -660,6 +660,12 @@ theorem ValOutT.ofW {p : PrimTy} {o : Option p.Denote} {out : Out} {m : Machine}
     rcases h with ⟨v', w, h, hr, hout⟩ | ⟨h, _⟩
     · cases h; exact .inl ⟨v, w, rfl, reprV_iff.2 hr, hout⟩
     · cases h
+
+/-- An `int` is represented by its two's complement word: `-1` is `2^256 - 1`. -/
+theorem ReprV.int_word (v : PrimTy.int.Denote) : ReprV .int v (.val (toWord v.1)) := by
+  obtain ⟨n, hn⟩ := v
+  simp only [PrimTy.inRange, decide_eq_true_eq] at hn
+  exact reprV_iff.2 (ReprW.int hn.1 hn.2)
 
 /-- **The operators agree**, typed: on words representing its operands, an
 operator's tail computes the word of the typed result, or reverts exactly
