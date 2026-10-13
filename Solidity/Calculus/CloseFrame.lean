@@ -659,34 +659,72 @@ theorem wp_diamond_of_ne_none {α : Type} {x : Option α} {P : α → Prop} (h :
   obtain ⟨a, rfl⟩ := Option.ne_none_iff_exists'.1 h
   exact Iff.rfl
 
+theorem total_ofRoot_append {T U : Ty} (r : Name) (h : C.rootType r = some T) (p : Path T U)
+    (hp : p.total = true) : ((SRef.ofRoot r h).append p).path.total = true := by
+  simpa only [path_append, path_ofRoot, Path.append_nil] using hp
+
+/-! A reference in the closer's normal form is a root, or a root followed by
+a path: the lemmas below take the two, so that the side condition is the
+path's own `Path.total`, which `simp` decides. -/
+
 /-- A write along a path through no array slot returns: the diamond is the
 box there. -/
-theorem wp_diamond_write_total {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
-    {P : Storage C → Prop} (h : r.path.total = true) :
-    Modality.diamond.wp (Close.optRes (st.write r v)) P ↔
-      Modality.box.wp (Close.optRes (st.write r v)) P :=
-  wp_diamond_of_ne_none (Storage.write_ne_none_total st r h v)
-theorem wp_diamond_delete_total {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C → Prop}
-    (h : r.path.total = true) :
-    Modality.diamond.wp (Close.optRes (st.delete r)) P ↔
-      Modality.box.wp (Close.optRes (st.delete r)) P :=
-  wp_diamond_of_ne_none (Storage.delete_ne_none_total st r h)
-/-- A read along a path through no array slot returns, under either
-modality: it is named by the value it returns (`Option.get`), so two reads
-of one reference are one term. -/
-theorem wp_find_total {m : Modality} {T : Ty} {st : Storage C} {r : SRef C T}
-    {P : SVal T → Prop} (h : r.path.total = true) :
-    m.wp (Close.optRes (st.find r)) P ↔
-      P ((st.find r).get (Option.isSome_iff_ne_none.mpr (Storage.find_ne_none_total st r h))) := by
-  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st r h)
-  simp only [ha, Option.get_some]
-  exact Iff.rfl
+theorem wp_diamond_write_root {T : Ty} {st : Storage C} {r : Name} {h : C.rootType r = some T}
+    {v : SVal T} {P : Storage C → Prop} :
+    Modality.diamond.wp (Close.optRes (st.write (SRef.ofRoot r h) v)) P ↔
+      Modality.box.wp (Close.optRes (st.write (SRef.ofRoot r h) v)) P :=
+  wp_diamond_of_ne_none (Storage.write_ne_none_total st _ rfl v)
+theorem wp_diamond_write_total {T U : Ty} {st : Storage C} {r : Name} {h : C.rootType r = some T}
+    {p : Path T U} {v : SVal U} {P : Storage C → Prop} (hp : p.total = true) :
+    Modality.diamond.wp (Close.optRes (st.write ((SRef.ofRoot r h).append p) v)) P ↔
+      Modality.box.wp (Close.optRes (st.write ((SRef.ofRoot r h).append p) v)) P :=
+  wp_diamond_of_ne_none (Storage.write_ne_none_total st _ (total_ofRoot_append r h p hp) v)
+theorem wp_diamond_delete_root {T : Ty} {st : Storage C} {r : Name} {h : C.rootType r = some T}
+    {P : Storage C → Prop} :
+    Modality.diamond.wp (Close.optRes (st.delete (SRef.ofRoot r h))) P ↔
+      Modality.box.wp (Close.optRes (st.delete (SRef.ofRoot r h))) P :=
+  wp_diamond_of_ne_none (Storage.delete_ne_none_total st _ rfl)
+theorem wp_diamond_delete_total {T U : Ty} {st : Storage C} {r : Name} {h : C.rootType r = some T}
+    {p : Path T U} {P : Storage C → Prop} (hp : p.total = true) :
+    Modality.diamond.wp (Close.optRes (st.delete ((SRef.ofRoot r h).append p))) P ↔
+      Modality.box.wp (Close.optRes (st.delete ((SRef.ofRoot r h).append p))) P :=
+  wp_diamond_of_ne_none (Storage.delete_ne_none_total st _ (total_ofRoot_append r h p hp))
 
-/-- What a read returns, read below. -/
-theorem get_find_find {T U : Ty} (st : Storage C) (r : SRef C T) (h : (st.find r).isSome)
-    (p : Path T U) : ((st.find r).get h).find p = st.find (r.append p) := by
-  obtain ⟨a, ha⟩ := Option.isSome_iff_exists.1 h
-  simp only [ha, Option.get_some, Storage.find_append, Option.bind_some]
+/-- A read along a path through no array slot returns, under either
+modality: it is named by the value it returns (`Option.getD`, at the type's
+default, which it never takes), so two reads of one reference are one term,
+and a fact about the reference rewrites it. -/
+theorem wp_find_of_total {m : Modality} {T : Ty} {st : Storage C} {r : SRef C T}
+    {P : SVal T → Prop} (h : r.path.total = true) :
+    m.wp (Close.optRes (st.find r)) P ↔ P ((st.find r).getD (SVal.dflt T)) := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st r h)
+  simp only [ha, Option.getD_some]
+  exact Iff.rfl
+theorem wp_find_root {m : Modality} {T : Ty} {st : Storage C} {r : Name}
+    {h : C.rootType r = some T} {P : SVal T → Prop} :
+    m.wp (Close.optRes (st.find (SRef.ofRoot r h))) P ↔
+      P ((st.find (SRef.ofRoot r h)).getD (SVal.dflt T)) :=
+  wp_find_of_total rfl
+theorem wp_find_total {m : Modality} {T U : Ty} {st : Storage C} {r : Name}
+    {h : C.rootType r = some T} {p : Path T U} {P : SVal U → Prop} (hp : p.total = true) :
+    m.wp (Close.optRes (st.find ((SRef.ofRoot r h).append p))) P ↔
+      P ((st.find ((SRef.ofRoot r h).append p)).getD (SVal.dflt U)) :=
+  wp_find_of_total (total_ofRoot_append r h p hp)
+
+/-- What a read along a total path returns, read below. -/
+theorem getD_find_find {T U : Ty} (st : Storage C) (r : SRef C T) (h : r.path.total = true)
+    (p : Path T U) : ((st.find r).getD (SVal.dflt T)).find p = st.find (r.append p) := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st r h)
+  simp only [ha, Option.getD_some, Storage.find_append, Option.bind_some]
+theorem getD_find_root {T U : Ty} (st : Storage C) (r : Name) (h : C.rootType r = some T)
+    (p : Path T U) : ((st.find (SRef.ofRoot r h)).getD (SVal.dflt T)).find p =
+      st.find ((SRef.ofRoot r h).append p) :=
+  getD_find_find st _ rfl p
+theorem getD_find_append {T U W : Ty} (st : Storage C) (r : Name) (h : C.rootType r = some T)
+    (q : Path T U) (hq : q.total = true) (p : Path U W) :
+    ((st.find ((SRef.ofRoot r h).append q)).getD (SVal.dflt U)).find p =
+      st.find (((SRef.ofRoot r h).append q).append p) :=
+  getD_find_find st _ (total_ofRoot_append r h q hq) p
 
 /-! ## A write under the box -/
 
@@ -771,7 +809,8 @@ theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {
 end CloseS
 
 attribute [close_rw_s high] CloseS.wp_box_write_prim CloseS.wp_diamond_write_total
-  CloseS.wp_diamond_delete_total CloseS.wp_find_total
+  CloseS.wp_diamond_write_root CloseS.wp_diamond_delete_total CloseS.wp_diamond_delete_root
+  CloseS.wp_find_total CloseS.wp_find_root
 
 attribute [close_rw_s]
   CloseS.wp_box_write CloseS.field_append CloseS.index_append CloseS.append_append
@@ -783,7 +822,7 @@ attribute [close_rw_s]
   CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field
   CloseS.copyMToSt_find_field CloseS.wp_box_ofId CloseS.withStorage_memT_readId
   CloseS.withNet_memT_readId CloseS.withBalance_memT_readId
-  CloseS.get_find_find Option.get_some CloseS.path_ofRoot CloseS.path_append CloseS.find_init_ofRoot CloseS.find_init_append
+  CloseS.getD_find_root CloseS.getD_find_append CloseS.path_ofRoot CloseS.path_append CloseS.find_init_ofRoot CloseS.find_init_append
   Path.total SVal.dflt_prim' Semantics.lookupBy Option.getD_some Option.getD_none
   CloseS.wp_box_delete CloseS.map_const_eq_some SVal.defaultOf_prim' SVal.find_defaultOf_field
   Option.map_map CloseS.dflt_bool CloseS.dflt_uint_val CloseS.dflt_int_val

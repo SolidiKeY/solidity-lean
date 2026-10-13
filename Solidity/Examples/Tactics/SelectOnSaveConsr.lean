@@ -89,15 +89,14 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   -- the leaf read on the typed state (`holds`), a term at a time: the write
   -- named with what the typed laws say of the storage it leaves
   -- (`CloseS.wp_box_write_prim`: solkey's `findOnSave` at `alice.age`, the
-  -- frame elsewhere), the read after it named `w`
+  -- frame elsewhere)
   sol_close_eval
   intro st' _ hread _ _ _
   rw [CloseS.landedAll_def]
-  intro x n _ _ w hw _ _
-  -- the read is of the write: `w` is `42`
-  rw [hread, Option.some.injEq] at hw
-  subst hw
-  rfl
+  intro x n _ _
+  -- the read after it is of the write: `42`
+  rw [hread]
+  exact fun _ => rfl
 
 /-- The same program as solkey takes it: the calculus steps, the updates
 merged, the comparison split, the merged update applied, the read of the
