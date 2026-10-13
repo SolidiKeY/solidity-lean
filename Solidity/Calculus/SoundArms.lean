@@ -978,7 +978,7 @@ theorem applyV_pay {Δ : Ctx} (r a : Tm C Γ (.val .uint)) (g : GlobT C σ.H) (�
     (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ g ℓ =
       (r.eval σ).bind fun addr => (a.eval σ).map fun amt =>
         (g.withNet (if addr.1 = σ.tx.selfAddress.1 then g.1.net
-          else setBy addr.1 ((lookupBy addr.1 g.1.net).getD 0 - amt.1) g.1.net), ℓ) := by
+          else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net), ℓ) := by
   rw [UpdElem.applyV_eq_applyVM]
   show ((UpdElem.pay r a : UpdElem C Γ Δ).globT σ g).bind _ = _
   rw [UpdElem.globT_eq_globTM]
@@ -998,12 +998,12 @@ theorem transferBox_agrees (sadr se : Simple C Γ .uint) :
 theorem send_sim (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) :
     ∃ U ∈ [(Upd.nil.snoc (UpdElem.payTo sadr se)).snoc (.local pv (.val (Tm.lit (p := .bool) true))),
         Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))],
-      U.applyP σ = some ((sendT σ pv (sadr.evalT σ).1 (se.evalT σ).1).st.glob,
-          (sendT σ pv (sadr.evalT σ).1 (se.evalT σ).1).st.locV) := by
+      U.applyP σ = some ((sendT σ pv (sadr.evalT σ) (se.evalT σ)).st.glob,
+          (sendT σ pv (sadr.evalT σ) (se.evalT σ)).st.locV) := by
   have e₁ : ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
       (.local pv (.val (Tm.lit (p := .bool) true)))).applyP σ =
-        some (((σ.pay (sadr.evalT σ).1 (se.evalT σ).1).setLocal pv (true : Bool)).glob,
-          ((σ.pay (sadr.evalT σ).1 (se.evalT σ).1).setLocal pv (true : Bool)).locV) := by
+        some (((σ.pay (sadr.evalT σ) (se.evalT σ).1).setLocal pv (true : Bool)).glob,
+          ((σ.pay (sadr.evalT σ) (se.evalT σ).1).setLocal pv (true : Bool)).locV) := by
     rw [applyP_snoc, UpdElem.payTo]
     show ((((UpdElem.pay sadr.lower se.lower : UpdElem C Γ Γ).applyV σ σ.globG σ.locV)).bind _) = _
     rw [applyV_pay, Simple.lower_evalT, Simple.lower_evalT, State.locV_setLocal]

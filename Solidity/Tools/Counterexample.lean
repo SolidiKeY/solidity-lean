@@ -493,7 +493,7 @@ structure Cand (C : Contract) where
   st : Solidity.Storage C
   args : List (String × Value)
   tx : TTx := { msgSender := PrimTy.ofIntD .uint 1 }
-  net : List (Int × Int) := []
+  net : Ledger := []
   bal : PrimTy.uint.Denote := PrimTy.dflt .uint
 
 /-- **The typed state a candidate starts in**, with no locals: its
@@ -523,7 +523,7 @@ def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
   let value ← if payable then pickD 0 (uintPool lits) else pure 0
   let time ← pickD 0 (uintPool lits)
   let paid ← pickD 0 (uintPool lits)
-  let net ← pickD [] [[], [(sender, paid)]]
+  let net : Ledger ← pickD [] [[], [(PrimTy.ofIntD .uint sender, paid)]]
   let bal ← pickD 0 [0, 1, uintBound - 1]
   let u := PrimTy.ofIntD .uint
   pure { st, args, tx := { msgSender := u sender, msgValue := u value, timestamp := u time }, net,
@@ -621,7 +621,7 @@ def Cand.rename (c : Cand C) (v s : Int) : Cand C :=
     st := c.st.fold (renameFold v s)
     args := c.args.map fun (x, a) => (x, match a with | .int n => .int (r n) | .bool b => .bool b)
     tx := { c.tx with msgSender := (PrimTy.ofInt? .uint (r c.tx.msgSender.1)).getD c.tx.msgSender }
-    net := c.net.map fun (a, b) => (r a, b) }
+    net := c.net.map fun (a, b) => ((PrimTy.ofInt? .uint (r a.1)).getD a, b) }
 
 /-- The candidates one shrinking step away, simplest first. -/
 def Cand.shrinks (c : Cand C) : List (Cand C) :=
@@ -1000,7 +1000,6 @@ section Meta
 
 open Lean Meta
 
-deriving instance ToExpr for Semantics.ExtKey
 deriving instance ToExpr for Semantics.ExtResult
 
 /-- A typed primitive as a closed term: a `uint` or an `int` as
@@ -1009,6 +1008,19 @@ def quotePrim : (p : PrimTy) → p.Denote → Expr
   | .bool, b => toExpr (show Bool from b)
   | .uint, n => mkApp2 (mkConst ``PrimTy.ofIntD) (toExpr PrimTy.uint) (toExpr n.1)
   | .int, n => mkApp2 (mkConst ``PrimTy.ofIntD) (toExpr PrimTy.int) (toExpr n.1)
+
+instance : ToExpr PrimTy.uint.Denote where
+  toExpr := quotePrim .uint
+  toTypeExpr := mkApp (mkConst ``PrimTy.Denote) (toExpr PrimTy.uint)
+
+instance : ToExpr Semantics.CallValue where
+  toExpr
+    | .bool b => mkApp (mkConst ``Semantics.CallValue.bool) (toExpr b)
+    | .uint n => mkApp (mkConst ``Semantics.CallValue.uint) (quotePrim .uint n)
+    | .int n => mkApp (mkConst ``Semantics.CallValue.int) (quotePrim .int n)
+  toTypeExpr := mkConst ``Semantics.CallValue
+
+deriving instance ToExpr for Semantics.ExtKey
 
 /-- A typed storage value as a closed term, constructor by constructor, an
 array's bound as `SVal.arrayOf`'s check. -/

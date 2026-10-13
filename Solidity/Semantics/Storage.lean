@@ -663,15 +663,85 @@ inductive Path : Ty → Ty → Type where
   | atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) : Path (.ref (.fixed E n)) U
   | key {K V U : Ty} (k : Int) (p : Path V U) : Path (.ref (.mapping K V)) U
 
+/-- One segment knows the type it leaves and the type it reaches.
+A field carries its lookup proof; array and mapping steps cannot be exchanged. -/
+inductive Semantics.Seg : Ty → Ty → Type where
+  | field {s f : Name} {T : Ty} (h : lookupBy f (structDef s) = some T) :
+      Seg (.ref (.struct s)) T
+  | at {E : Ty} (i : Int) : Seg (.ref (.array E)) E
+  | atF {E : Ty} {n : Nat} (i : Int) : Seg (.ref (.fixed E n)) E
+  | key {K V : Ty} (k : Int) : Seg (.ref (.mapping K V)) V
+
+/-- A sequence composes only when adjacent segment types agree. -/
+inductive Semantics.Segs : Ty → Ty → Type where
+  | nil {T : Ty} : Segs T T
+  | cons {T U V : Ty} (head : Seg T U) (tail : Segs U V) : Segs T V
+
+/-- The comparable label of a typed segment. Labels support location comparison and schema analysis; they cannot
+be followed to read or write storage. -/
+def Semantics.Seg.label : {T U : Ty} → Seg T U → Selector
+  | _, _, @Seg.field _ f _ _ => .field f
+  | _, _, .at i => .at i
+  | _, _, .atF i => .at i
+  | _, _, .key k => .at k
+
+/-- The comparison observations of a typed segment sequence. -/
+def Semantics.Segs.labelsM : {T U : Ty} → Semantics.Segs T U → List Semantics.Selector
+  | _, _, .nil => []
+  | _, _, .cons h t => h.label :: t.labelsM
+
+@[implemented_by Semantics.Segs.labelsM]
+def Semantics.Segs.labels {T U : Ty} (p : Semantics.Segs T U) : List Semantics.Selector :=
+  @Semantics.Segs.rec (fun _ _ _ => List Semantics.Selector) (fun {_} => [])
+    (fun {_ _ _} h _ ih => h.label :: ih) T U p
+
+theorem Semantics.Segs.labels_eq_labelsM : {T U : Ty} → (p : Semantics.Segs T U) →
+    p.labels = p.labelsM
+  | _, _, .nil => rfl
+  | _, _, .cons h t => by exact congrArg (h.label :: ·) (t.labels_eq_labelsM)
+
 namespace Path
 
-/-- The segments, as the side conditions read them (`Theory/Segs.lean`). -/
-def erase : {T U : Ty} → Path T U → List Semantics.Seg
-  | _, _, .nil => []
-  | _, _, @Path.field _ f _ _ _ p => .field f :: p.erase
-  | _, _, .at i p => .at i :: p.erase
-  | _, _, .atF i p => .at i :: p.erase
-  | _, _, .key k p => .at k :: p.erase
+/-- The compiled segment view. -/
+def segmentsM : {T U : Ty} → Path T U → Semantics.Segs T U
+  | _, _, .nil => .nil
+  | _, _, .field h p => .cons (.field h) p.segmentsM
+  | _, _, .at i p => .cons (.at i) p.segmentsM
+  | _, _, .atF i p => .cons (.atF i) p.segmentsM
+  | _, _, .key k p => .cons (.key k) p.segmentsM
+
+/-- A path's segment sequence retains both endpoints and every intermediate type.
+The recursor avoids dependent pattern-match casts in kernel reductions. -/
+@[implemented_by segmentsM]
+def segments {T U : Ty} (p : Path T U) : Semantics.Segs T U :=
+  @Path.rec (fun T U _ => Semantics.Segs T U) (fun {_} => .nil)
+    (fun {_ _ _ _} h _ ih => .cons (.field h) ih)
+    (fun {_ _} i _ ih => .cons (.at i) ih)
+    (fun {_ _ _} i _ ih => .cons (.atF i) ih)
+    (fun {_ _ _} k _ ih => .cons (.key k) ih) T U p
+
+theorem segments_eq_segmentsM : {T U : Ty} → (p : Path T U) → p.segments = p.segmentsM
+  | _, _, .nil => rfl
+  | _, _, .field h p => by exact congrArg (Semantics.Segs.cons (.field h)) (segments_eq_segmentsM p)
+  | _, _, .at i p => by exact congrArg (Semantics.Segs.cons (.at i)) (segments_eq_segmentsM p)
+  | _, _, .atF i p => by exact congrArg (Semantics.Segs.cons (.atF i)) (segments_eq_segmentsM p)
+  | _, _, .key k p => by exact congrArg (Semantics.Segs.cons (.key k)) (segments_eq_segmentsM p)
+
+/-- The labels the side conditions observe from the typed segment sequence. -/
+def labels {T U : Ty} (p : Path T U) : List Semantics.Selector := p.segments.labels
+
+theorem labels_nil {T : Ty} : (Path.nil (T := T)).labels = [] := rfl
+theorem labels_field {s f : Name} {T U : Ty} (h : lookupBy f (structDef s) = some T)
+    (p : Path T U) : (Path.field h p).labels = .field f :: p.labels := rfl
+theorem labels_at {E U : Ty} (i : Int) (p : Path E U) :
+    (Path.at i p).labels = .at i :: p.labels := rfl
+theorem labels_atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) :
+    (Path.atF (n := n) i p).labels = .at i :: p.labels := rfl
+theorem labels_key {K V U : Ty} (k : Int) (p : Path V U) :
+    (Path.key (K := K) k p).labels = .at k :: p.labels := rfl
+
+attribute [irreducible] labels
+attribute [eqns labels_nil labels_field labels_at labels_atF labels_key] labels
 
 /-- `append` by `match`, its compiled form. -/
 def appendM : {T U W : Ty} → Path T U → Path U W → Path T W
@@ -710,13 +780,17 @@ theorem append_eq_appendM : {T U W : Ty} → (p : Path T U) → (q : Path U W) �
   | _, _, _, .atF i p, q => by rw [append_atF, appendM, append_eq_appendM p q]
   | _, _, _, .key k p, q => by rw [append_key, appendM, append_eq_appendM p q]
 
-theorem erase_append : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
-    (p.append q).erase = p.erase ++ q.erase
-  | _, _, _, .nil, _ => by rw [append_nil]; rfl
-  | _, _, _, .field _ p, q => by rw [append_field]; exact congrArg (_ :: ·) (erase_append p q)
-  | _, _, _, .at _ p, q => by rw [append_at]; exact congrArg (_ :: ·) (erase_append p q)
-  | _, _, _, .atF _ p, q => by rw [append_atF]; exact congrArg (_ :: ·) (erase_append p q)
-  | _, _, _, .key _ p, q => by rw [append_key]; exact congrArg (_ :: ·) (erase_append p q)
+theorem labels_append : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
+    (p.append q).labels = p.labels ++ q.labels
+  | _, _, _, .nil, _ => by rw [append_nil, labels_nil, List.nil_append]
+  | _, _, _, .field _ p, q => by
+    rw [append_field, labels_field, labels_field, List.cons_append, labels_append p q]
+  | _, _, _, .at _ p, q => by
+    rw [append_at, labels_at, labels_at, List.cons_append, labels_append p q]
+  | _, _, _, .atF _ p, q => by
+    rw [append_atF, labels_atF, labels_atF, List.cons_append, labels_append p q]
+  | _, _, _, .key _ p, q => by
+    rw [append_key, labels_key, labels_key, List.cons_append, labels_append p q]
 
 /-- The one step `b[i]` takes, by how `R` is indexed.  By `casesOn`, so the
 kernel casts nothing. -/
@@ -735,11 +809,11 @@ theorem index_fixed {E : Ty} {n : Nat} (i : Int) :
 attribute [irreducible] index
 attribute [eqns index_map index_dyn index_fixed] index
 
-theorem erase_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexTy R k V) → (i : Int) →
-    (index it i).erase = [.at i]
-  | _, _, _, .map, _ => by rw [index_map]; rfl
-  | _, _, _, .arr .dyn, _ => by rw [index_dyn]; rfl
-  | _, _, _, .arr .fixed, _ => by rw [index_fixed]; rfl
+theorem labels_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexTy R k V) → (i : Int) →
+    (index it i).labels = [.at i]
+  | _, _, _, .map, _ => by rw [index_map, labels_key, labels_nil]
+  | _, _, _, .arr .dyn, _ => by rw [index_dyn, labels_at, labels_nil]
+  | _, _, _, .arr .fixed, _ => by rw [index_fixed, labels_atF, labels_nil]
 
 end Path
 
@@ -1526,6 +1600,18 @@ structure SRef (C : Contract) (U : Ty) where
   {ty : Ty}
   hroot : C.rootType root = some ty
   path : Path ty U
+
+/-- A root followed by typed segments: the contract types the root and
+adjacent segment endpoints agree all the way to the selected value. -/
+structure RefSegments (C : Contract) (U : Ty) where
+  root : Name
+  {ty : Ty}
+  hroot : C.rootType root = some ty
+  tail : Semantics.Segs ty U
+
+/-- The typed segment view of a storage reference. -/
+def SRef.segments {C : Contract} {U : Ty} (r : SRef C U) : RefSegments C U :=
+  ⟨r.root, r.hroot, r.path.segments⟩
 
 namespace SRef
 

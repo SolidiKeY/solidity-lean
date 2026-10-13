@@ -313,7 +313,7 @@ theorem Op0.eval_eq_evalM (g : State C []) {s : Srt} (o : Op0 C s) : o.eval g = 
 def Op1.evalM (g : State C []) {a s : Srt} :
     Op1 C a s → Option (a.Den C g.H) → Option (s.Den C g.H)
   | .unop op _, x => x.bind op.evalT
-  | .net, x => x.map fun n => (lookupBy n.1 g.net).getD 0
+  | .net, x => x.map fun n => (lookupBy n g.net).getD 0
   | .delValue, x => x.map fun _ => PrimTy.dflt _
   | .field h, x => x.map (·.field h)
   | .next, x => x.bind g.storage.nextT
@@ -336,7 +336,7 @@ def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     Option (a.Den C g.H) → Option (s.Den C g.H) :=
   @Op1.casesOn C (fun a s _ => Option (a.Den C g.H) → Option (s.Den C g.H)) a s o
     (fun op {_} _ x => x.bind op.evalT)
-    (fun x => x.map fun n => (lookupBy n.1 g.net).getD 0)
+    (fun x => x.map fun n => (lookupBy n g.net).getD 0)
     (fun {_} x => x.map fun _ => PrimTy.dflt _)
     (fun {_} {_} {_} h x => x.map (·.field h))
     (fun {_} x => x.bind g.storage.nextT)

@@ -33,24 +33,24 @@ open Semantics
 
 /-- The declared type of a member or a fixed element: a struct's member, a
 fixed array's element in range. -/
-def Ty.at : Ty → Seg → Option Ty
+def Ty.at : Ty → Selector → Option Ty
   | .ref (.struct sn), .field f => lookupBy f (structDef sn)
   | .ref (.fixed E n), .at k => if 0 ≤ k ∧ k < n then some E else none
   | _, _ => none
 
 /-- The declared type at the end of a path, member by member. -/
-def Ty.memberTy : Ty → List Seg → Option Ty
+def Ty.memberTy : Ty → List Selector → Option Ty
   | T, [] => some T
   | T, s :: rest => (T.at s).bind (·.memberTy rest)
 
-theorem Ty.memberTy_append (T : Ty) : (p q : List Seg) →
+theorem Ty.memberTy_append (T : Ty) : (p q : List Selector) →
     T.memberTy (p ++ q) = (T.memberTy p).bind (·.memberTy q)
   | [], q => rfl
   | s :: p, q => by
     simp only [List.cons_append, Ty.memberTy]
     cases T.at s <;> simp only [Option.bind, Ty.memberTy_append]
 
-theorem Ty.at_prim (q : PrimTy) (s : Seg) : (Ty.prim q).at s = none := by
+theorem Ty.at_prim (q : PrimTy) (s : Selector) : (Ty.prim q).at s = none := by
   cases s <;> rfl
 
 end Solidity

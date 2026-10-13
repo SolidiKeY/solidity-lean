@@ -78,7 +78,7 @@ def fmtTx {C : Contract} {Γ : Ctx} (σ : State C Γ) : List String :=
   (if σ.tx.timestamp.1 = 0 then [] else [s!"block.timestamp = {σ.tx.timestamp.1}"]) ++
   (if σ.selfBalance.1 = 0 then [] else [s!"balance = {σ.selfBalance.1}"]) ++
   (if σ.net.isEmpty then [] else
-    ["net = " ++ "{" ++ ", ".intercalate (σ.net.map fun (a, b) => s!"{a}: {b}") ++ "}"])
+    ["net = " ++ "{" ++ ", ".intercalate (σ.net.map fun (a, b) => s!"{a.1}: {b}") ++ "}"])
 
 /-- A typed run's halt: running out of gas prints as a loop that never ends
 (`THalt.exhausted`, which the untyped run did not tell apart). -/

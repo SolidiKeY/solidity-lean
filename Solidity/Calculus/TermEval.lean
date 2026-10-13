@@ -25,8 +25,8 @@ namespace Tm
 variable {Γ : Ctx}
 
 /-- `x[a]` on a ledger: the entry, a KeY `int` (total). -/
-def netOfT (l : List (Int × Int)) (n : PrimTy.uint.Denote) : Option Int :=
-  some ((lookupBy n.1 l).getD 0)
+def netOfT (l : Ledger) (n : PrimTy.uint.Denote) : Option Int :=
+  some ((lookupBy n l).getD 0)
 
 /-- `eval` by `match`, its compiled form. -/
 def evalM (σ : State C Γ) : {s : Srt} → Tm C Γ s → Option (s.Den C σ.H)

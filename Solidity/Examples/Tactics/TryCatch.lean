@@ -96,7 +96,7 @@ example : Prog.toStr [] (sol{ try I(last).ping() { pings += 1; } catch { fails +
 
 /-- The call's outcome is the transaction's: here `ping` on `7` returns. -/
 def pingOk : State Pinger [] :=
-  { State.init Pinger with tx := { ext := [(⟨7, "ping", []⟩, .ok [])] } }
+  { State.init Pinger with tx := { ext := [(⟨⟨7, rfl⟩, "ping", []⟩, .ok [])] } }
 
 private def pingP : Prog Pinger [] [.val .uint] :=
   sol{ uint a = 7; try I(a).ping() { pings += 1; } catch { fails += 1; } }
@@ -110,7 +110,7 @@ private def pingP : Prog Pinger [] [.val .uint] :=
 /-- The same call reverting with `Panic(0x11)`: the `Panic` clause runs, with
 the code bound. -/
 def pingPanic : State Pinger [] :=
-  { State.init Pinger with tx := { ext := [(⟨7, "ping", []⟩, .panic (.int 17))] } }
+  { State.init Pinger with tx := { ext := [(⟨⟨7, rfl⟩, "ping", []⟩, .panic (.int 17))] } }
 
 private def pingPanicP : Prog Pinger [] [.val .uint] := sol{ uint a = 7;
   try I(a).ping() { pings += 1; } catch Panic(uint c) { last = c; } catch { fails += 1; } }

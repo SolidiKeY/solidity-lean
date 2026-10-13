@@ -273,7 +273,7 @@ def snapOld {Δ : Ctx} : Upd C Δ (Olds ++ Δ) :=
   (Upd.nil.decl (.user "old") (.store (.app0 .storage))).decl (.user "oldNet") .saveNet
 
 /-- The snapshots `n` (the ledger) and `s` (the storage) on the locals `B`. -/
-abbrev TEnv.olds {H : HTy} {Δ : Ctx} (n : List (Int × Int)) (s : Storage C) (B : TEnv C H Δ) :
+abbrev TEnv.olds {H : HTy} {Δ : Ctx} (n : Ledger) (s : Storage C) (B : TEnv C H Δ) :
     TEnv C H (Olds ++ Δ) :=
   (n, (s, B))
 
@@ -294,7 +294,7 @@ theorem holds_snapOld {Δ : Ctx} {X : Fml C (Olds ++ Δ)} {σ : State C Δ}
 
 /-- The callee's frame `τ` with the snapshots `n` (the ledger) and `s` (the
 storage) declared under its return variables. -/
-def State.withOlds (rs : Ctx) {ps : Ctx} (n : List (Int × Int)) (s : Storage C)
+def State.withOlds (rs : Ctx) {ps : Ctx} (n : Ledger) (s : Storage C)
     (τ : State C (rs ++ ps)) : State C (rs ++ (Olds ++ ps)) :=
   τ.withEnv (TEnv.append rs (TEnv.take rs τ.env)
     (TEnv.olds n s (TEnv.drop (Ext.append ps rs) τ.env)))
@@ -355,7 +355,7 @@ theorem TEnv.take_append {H : HTy} {Δ : Ctx} : (ρ : Ctx) → (r : TEnv C H ρ)
   | _ :: ρ, r, e => congrArg (Prod.mk r.1) (TEnv.take_append ρ r.2 e)
 
 /-- A frame lifted under the snapshots is the frame with them declared. -/
-theorem State.lift_thinOlds (τ : State C (rs ++ ps)) (A : TEnv C τ.H rs) (n : List (Int × Int))
+theorem State.lift_thinOlds (τ : State C (rs ++ ps)) (A : TEnv C τ.H rs) (n : Ledger)
     (s : Storage C) (B : TEnv C τ.H ps) :
     τ.lift (thinOlds rs ps) (TEnv.append rs A (TEnv.olds n s B)) =
       τ.withOlds rs n s := by
@@ -575,7 +575,7 @@ ones it was entered with). -/
 theorem holds_callPost {μ : Mutability} {args : Args C Γ ps} {ret : CallRet Γ rs Γ'}
     {ens : Fml C (rs ++ (Olds ++ ps))} {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
     {σ : State C Γ} (h : holds σ (Fml.callPost μ args ret ens ω κ φ)) (a : TEnv C σ.H ps)
-    (ha : args.evalT σ = .ok a) (st : Storage C) (nt : List (Int × Int))
+    (ha : args.evalT σ = .ok a) (st : Storage C) (nt : Ledger)
     (hk : μ ≠ .nonpayable → st = σ.storage ∧ nt = σ.net) :
     holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st nt)
       (Fml.callResult ret ens ω κ φ) := by

@@ -135,7 +135,8 @@ def encodeStorage (C : Contract) (keys : List Nat) (st : Storage C) : List (Slot
   SFields.fold (encodeFold keys) st (rootSlot C)
 
 /-- A machine storage holding the words listed, `0` elsewhere. -/
-def storeOf (ws : List (Slot × Nat)) : Slot → Nat := fun s => (lookupBy s ws).getD 0
+def storeOf (ws : List (Slot × Nat)) : WordStore :=
+  WordStore.ofFn fun s => (lookupBy s ws).getD 0
 
 /-- The word a value local's cell holds: `ReprV` read as a function. -/
 def wordOf : PrimTy → Value → Option Word
@@ -249,7 +250,8 @@ def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
       if wordOf p v == some (m'.memAt l) then none
       else some s!"local {x}: typed run {Value.fmt v}, machine {m'.memAt l}"
     | none => none
-  let net := σ'.net.filterMap fun (a, n) =>
+  let net := σ'.net.filterMap fun (address, n) =>
+    let a := address.1
     if a = m'.self then
       (if n != 0 then some s!"net {a}: typed run {n} at the contract itself, expected 0" else none)
     else if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then

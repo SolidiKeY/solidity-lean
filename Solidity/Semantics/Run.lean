@@ -45,7 +45,7 @@ theorem RefTy.mapFree_of_newArrOk {R : RefTy} (h : R.newArrOk = true) :
   exact h.1
 
 
-open Semantics (Value Seg lookupBy setBy ExtKey ExtResult structDef)
+open Semantics (Value Selector lookupBy setBy ExtKey ExtResult structDef)
 
 variable {C : Contract}
 
@@ -146,8 +146,8 @@ def envVal (σ : State C Γ) : EnvKey → PrimTy.uint.Denote
 
 /-- `amt` paid to `addr` on the ledger (`State.pay`): nothing booked for the
 contract itself. -/
-def pay (σ : State C Γ) (addr amt : Int) : State C Γ :=
-  { σ with net := if addr = σ.tx.selfAddress.1 then σ.net
+def pay (σ : State C Γ) (addr : PrimTy.uint.Denote) (amt : Int) : State C Γ :=
+  { σ with net := if addr.1 = σ.tx.selfAddress.1 then σ.net
       else setBy addr ((lookupBy addr σ.net).getD 0 - amt) σ.net }
 
 /-- A state with no locals and no memory, over a storage. -/
@@ -399,14 +399,14 @@ def OpLoc.bumpT (σ : State C Γ) (op : IncDec) : {p : PrimTy} → OpLoc C Γ p 
 
 /-- `pv = a.send(v);` with both evaluated (`sendT`): a payment refused books
 nothing and sets `pv` to `false`. -/
-def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : Int) : Out C σ.H Γ :=
+def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.Denote) : Out C σ.H Γ :=
   match lookupBy (sendKey addr amt) σ.tx.ext with
-  | none | some (.ok _) => ⟨(σ.pay addr amt).setLocal pv (true : Bool), List.prefix_refl _⟩
+  | none | some (.ok _) => ⟨(σ.pay addr amt.1).setLocal pv (true : Bool), List.prefix_refl _⟩
   | some _ => ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩
 
-/-- The call as it is made: its receiver and arguments, as ABI words. -/
+/-- The call as it is made: its bounded receiver and arguments at their Solidity types. -/
 def ExtCall.keyT (σ : State C Γ) (c : ExtCall C Γ) : ExtKey :=
-  ⟨(c.addr.evalT σ).1, c.fn, c.args.map fun a => PrimTy.erase (a.2.evalT σ)⟩
+  ⟨c.addr.evalT σ, c.fn, c.args.map fun a => Semantics.CallValue.ofTyped (a.2.evalT σ)⟩
 
 /-- A call's arguments, each read in the caller's state, in order. -/
 def Args.evalT (σ : State C Γ) : {ps : Ctx} → Args C Γ ps → TRes (TEnv C σ.H ps)
@@ -613,12 +613,12 @@ def pop {E : Ty} (b : SPath C Γ (.array E)) : TStep C Γ Γ := fun σ => do
 def transfer (r a : Val C Γ .uint) : TStep C Γ Γ := fun σ => do
   let addr ← r.evalT σ
   let amt ← a.evalT σ
-  pure ⟨σ.pay addr.1 amt.1, List.prefix_refl _⟩
+  pure ⟨σ.pay addr amt.1, List.prefix_refl _⟩
 
 def send (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) : TStep C Γ Γ := fun σ => do
   let addr ← r.evalT σ
   let amt ← a.evalT σ
-  pure (sendT σ pv addr.1 amt.1)
+  pure (sendT σ pv addr amt)
 
 def declMem (R : RefTy) (init : Option (MRhs C Γ R)) (hm : (Ty.ref R).mapFree = true) :
     TStep C Γ (.mem R :: Γ) := fun σ =>

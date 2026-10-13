@@ -68,7 +68,7 @@ theorem lt_of_getElem? {α : Type} {l : List α} {i : Nat} {x : α} (h : l[i]? =
 /-- `ReprAt st L T s v`: the storage value `v` of type `T` is laid out in `st`
 from slot `s`, and every dynamic array in it holds fewer than `L` elements
 (`L` at most solc's `2^64`: what a `push` needs to agree with solc's). -/
-inductive ReprAt (st : Slot → Nat) (L : Nat) : (T : Ty) → Slot → SVal T → Prop
+inductive ReprAt (st : WordStore) (L : Nat) : (T : Ty) → Slot → SVal T → Prop
   | prim {p : PrimTy} {s : Slot} {v : p.Denote} :
       ReprV p v (.val (st s)) → ReprAt st L (.prim p) s (.prim v)
   | struct {n : Name} {s : Slot} {fs : SFields (structDef n)} :
@@ -91,7 +91,7 @@ inductive ReprAt (st : Slot → Nat) (L : Nat) : (T : Ty) → Slot → SVal T �
 
 Example: `bob` is represented in slots `[14, 17)`; a write to `alice.age`
 (slot `13`) keeps it represented. -/
-theorem ReprAt.frame {st st' : Slot → Nat} {T : Ty} {s : Slot} {v : SVal T}
+theorem ReprAt.frame {st st' : WordStore} {T : Ty} {s : Slot} {v : SVal T}
     (h : ReprAt st L T s v) (hf : ∀ x, Occ T s x → st' x = st x) : ReprAt st' L T s v := by
   induction h with
   | prim h => exact .prim (by rw [hf _ .prim]; exact h)
@@ -105,7 +105,7 @@ theorem ReprAt.frame {st st' : Slot → Nat} {T : Ty} {s : Slot} {v : SVal T}
 
 /-- A looser bound on the arrays keeps a representation: after a `push`, the
 bound is one more. -/
-theorem ReprAt.mono {st : Slot → Nat} {L' : Nat} {T : Ty} {s : Slot} {v : SVal T}
+theorem ReprAt.mono {st : WordStore} {L' : Nat} {T : Ty} {s : Slot} {v : SVal T}
     (h : ReprAt st L T s v) (hL : L ≤ L') : ReprAt st L' T s v := by
   induction h with
   | prim h => exact .prim h
@@ -115,11 +115,11 @@ theorem ReprAt.mono {st : Slot → Nat} {L' : Nat} {T : Ty} {s : Slot} {v : SVal
   | map _ ih => exact .map ih
 
 /-- Every state variable is represented at its slot. -/
-def ReprStore (C : Contract) (L : Nat) (st : Slot → Nat) (stor : Solidity.Storage C) : Prop :=
+def ReprStore (C : Contract) (L : Nat) (st : WordStore) (stor : Solidity.Storage C) : Prop :=
   ∀ r T (h : C.rootType r = some T), ReprAt st L T (rootSlot C r) (stor.get h)
 
 /-- `ReprAt.mono` for every state variable. -/
-theorem ReprStore.mono {C : Contract} {st : Slot → Nat} {stor : Solidity.Storage C} {L' : Nat}
+theorem ReprStore.mono {C : Contract} {st : WordStore} {stor : Solidity.Storage C} {L' : Nat}
     (h : ReprStore C L st stor) (hL : L ≤ L') : ReprStore C L' st stor :=
   fun r T hr => (h r T hr).mono hL
 
@@ -244,7 +244,7 @@ theorem findLiveM_key {K V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path
 
 /-- A typed path reads, live, a value its slot represents, or (if it indexes
 an array) `none` out of bounds. -/
-theorem ReprAt.findLive {st : Slot → Nat} {a : Bool} {T U : Ty} {p : Path T U} {s s' : Slot}
+theorem ReprAt.findLive {st : WordStore} {a : Bool} {T U : Ty} {p : Path T U} {s s' : Slot}
     (hp : PathAt a p s s') :
     ∀ {v : SVal T}, ReprAt st L T s v →
       (∃ w, v.findLiveM p = some w ∧ ReprAt st L U s' w) ∨ (a = false ∧ v.findLiveM p = none) := by
@@ -290,7 +290,7 @@ indexes an array) `none` out of bounds.
 
 Example: `folks[7].age` reads what slot `keccak(7, 7) + 2` holds; with three
 `persons`, `persons[5].age` is `none`. -/
-theorem find_repr {C : Contract} {st : Slot → Nat} {stor : Solidity.Storage C}
+theorem find_repr {C : Contract} {st : WordStore} {stor : Solidity.Storage C}
     (hs : ReprStore C L st stor) {a : Bool} {U : Ty} {r : SRef C U} {s : Slot}
     (hp : PathSlot C a r s) :
     (∃ w, stor.findLive r = some w ∧ ReprAt st L U s w) ∨ (a = false ∧ stor.findLive r = none) := by
@@ -308,7 +308,7 @@ theorem take_set_append {α : Type} (l₁ l₂ : List α) {i : Nat} (hi : i < l�
 
 /-- A typed save at a path is the machine's write of the slots the path's
 value occupies (the value-level `save_repr`). -/
-theorem ReprAt.save {st st' : Slot → Nat} {a : Bool} {T U : Ty} {p : Path T U} {s s' : Slot}
+theorem ReprAt.save {st st' : WordStore} {a : Bool} {T U : Ty} {p : Path T U} {s s' : Slot}
     (hp : PathAt a p s s') :
     ∀ {v : SVal T} {new : SVal U}, ReprAt st L T s v → (∃ old, v.findLiveM p = some old) →
       ReprAt st' L U s' new → (∀ x, ¬ Occ U s' x → st' x = st x) →
@@ -418,9 +418,9 @@ Example: `alice.age = 5;` stores `5` in slot `13` and nothing else: slot `11`
 the typed `alice.account` and `bob` do not change either.  `delete alice;`
 is the same lemma with `new` the default `Person` and `st'` zero at three
 slots. -/
-theorem save_repr {C : Contract} {st : Slot → Nat} {stor : Solidity.Storage C}
+theorem save_repr {C : Contract} {st : WordStore} {stor : Solidity.Storage C}
     (hs : ReprStore C L st stor) {a : Bool} {U : Ty} {r : SRef C U} {s : Slot}
-    (hp : PathSlot C a r s) {st' : Slot → Nat} {new : SVal U}
+    (hp : PathSlot C a r s) {st' : WordStore} {new : SVal U}
     (hfind : ∃ old, stor.findLive r = some old) (hnew : ReprAt st' L U s new)
     (hout : ∀ x, ¬ Occ U s x → st' x = st x) :
     ∃ stor', stor.save r new = some stor' ∧ ReprStore C L st' stor' := by
@@ -441,22 +441,22 @@ theorem save_repr {C : Contract} {st : Slot → Nat} {stor : Solidity.Storage C}
 /-! ## `delete` and `pop` -/
 
 /-- `st` with `0` written at `s + o` for each `o`, in order. -/
-def zeroAt (st : Slot → Nat) (s : Slot) : List Nat → Slot → Nat
+def zeroAt (st : WordStore) (s : Slot) : List Nat → WordStore
   | [] => st
-  | o :: os => zeroAt (upd st (s.add o) 0) s os
+  | o :: os => zeroAt (WordStore.write st (s.add o) 0) s os
 
 /-- Zeroing some slots leaves the others: `delete alice;` leaves `bob.age`. -/
-theorem zeroAt_other {st : Slot → Nat} {s x : Slot} :
+theorem zeroAt_other {st : WordStore} {s x : Slot} :
     ∀ {os : List Nat}, (∀ o ∈ os, x ≠ s.add o) → zeroAt st s os x = st x
   | [], _ => rfl
   | o :: os, h => by
     simp only [zeroAt]
     rw [zeroAt_other fun o' ho' => h o' (List.mem_cons_of_mem _ ho')]
-    exact upd_other _ _ (h o List.mem_cons_self)
+    exact WordStore.write_other _ _ (h o List.mem_cons_self)
 
 /-- Every zeroed slot holds `0`: `delete alice;` zeroes `alice.age`. -/
 theorem zeroAt_zero {s x : Slot} :
-    ∀ {st : Slot → Nat} {os : List Nat}, (∃ o ∈ os, x = s.add o) → zeroAt st s os x = 0
+    ∀ {st : WordStore} {os : List Nat}, (∃ o ∈ os, x = s.add o) → zeroAt st s os x = 0
   | _, [], ⟨_, ho, _⟩ => by cases ho
   | st, o :: os, h => by
     simp only [zeroAt]
@@ -464,7 +464,7 @@ theorem zeroAt_zero {s x : Slot} :
     · exact zeroAt_zero h'
     · obtain ⟨o', ho', hx⟩ := h
       rcases List.mem_cons.1 ho' with rfl | ho'
-      · rw [zeroAt_other fun o'' ho'' hx' => h' ⟨o'', ho'', hx'⟩, hx, upd_same]
+      · rw [zeroAt_other fun o'' ho'' hx' => h' ⟨o'', ho'', hx'⟩, hx, WordStore.write_same, Nat.zero_mod]
       · exact absurd ⟨o', ho', hx⟩ h'
 
 /-- The default of a primitive type is the word `0`. -/
@@ -485,7 +485,7 @@ the value occupies, it represents the value's default (`SVal.defaultOf`).
 Example: `delete wallet;` zeroes `wallet.owner`'s slot and leaves
 `wallet.stash`'s entries where they are, and `SVal.defaultOf` keeps the
 mapping's entries too. -/
-theorem zero_repr {st st' : Slot → Nat} {T : Ty} {s : Slot} {v : SVal T} (h : ReprAt st L T s v) :
+theorem zero_repr {st st' : WordStore} {T : Ty} {s : Slot} {v : SVal T} (h : ReprAt st L T s v) :
     ∀ fuel, tyRank T < fuel → (∀ o ∈ leavesF fuel T, st' (s.add o) = 0) →
       (∀ x, Occ T s x → (∀ o ∈ leavesF fuel T, x ≠ s.add o) → st' x = st x) →
       ReprAt st' L T s v.defaultOf := by
@@ -571,20 +571,20 @@ elements, so whatever the slots past the end hold is represented.
 
 Example: with `values = [1, 2]`, `values.pop();` writes `1` to slot `4`;
 `keccak(4) + 1` still holds `2`, and nothing reads it. -/
-theorem pop_repr {st : Slot → Nat} {E : Ty} {s : Slot} {k : Nat} {e : SVec E k}
+theorem pop_repr {st : WordStore} {E : Ty} {s : Slot} {k : Nat} {e : SVec E k}
     {sh sh' : SList E} {hk : k < 2 ^ 256} (hb : e.toList.dropLast.length < 2 ^ 256)
     (h : ReprAt st L (.ref (.array E)) s (.array e sh hk)) :
-    ReprAt (upd st s (k - 1)) L (.ref (.array E)) s
+    ReprAt (WordStore.write st s (k - 1)) L (.ref (.array E)) s
       (.array (SVec.ofList e.toList.dropLast) sh' hb) := by
   cases h with
   | array hl hW hall =>
     have hlen : e.toList.length = k := SVec.length_toList e
-    refine .array (by rw [upd_same, List.length_dropLast, hlen])
+    refine .array (by rw [WordStore.write_same_of_lt _ _ _ (by unfold W; omega), List.length_dropLast, hlen])
       (by rw [List.length_dropLast]; omega) fun j y hy => ?_
     rw [SVec.toList_ofList, List.getElem?_dropLast] at hy
     split at hy
     · exact (hall j y hy).frame fun x hx =>
-        upd_other _ _ fun hxs => by subst hxs; exact occ_len_elem hx
+        WordStore.write_other _ _ fun hxs => by subst hxs; exact occ_len_elem hx
     · cases hy
 
 /-! ## Copies and `push`
@@ -598,7 +598,7 @@ value again as far as the slots go (`overlay_repr`). -/
 /-- **A static value moves with its leaves.**  If `st'` holds at `d + o` what
 `st` holds at `s + o` for every leaf `o`, the value laid out at `s` in `st` is
 laid out at `d` in `st'`.  `bob = alice;` copies slots `11`–`13` to `14`–`16`. -/
-theorem move_repr {st st' : Slot → Nat} {T : Ty} {s : Slot} {v : SVal T} (h : ReprAt st L T s v) :
+theorem move_repr {st st' : WordStore} {T : Ty} {s : Slot} {v : SVal T} (h : ReprAt st L T s v) :
     ∀ fuel (d : Slot), tyRank T < fuel → staticF fuel T = true →
       (∀ o ∈ leavesF fuel T, st' (d.add o) = st (s.add o)) → ReprAt st' L T d v := by
   induction h with
@@ -645,7 +645,7 @@ theorem move_repr {st st' : Slot → Nat} {T : Ty} {s : Slot} {v : SVal T} (h : 
 /-- **A copy lands as the value copied.**  A static value laid out at `d`,
 stripped or laid over any old value of its type, is still laid out at `d`:
 the slots hold the words, and nothing static has an array's leftovers. -/
-theorem overlay_repr {st : Slot → Nat} {T : Ty} {d : Slot} {v : SVal T} (h : ReprAt st L T d v) :
+theorem overlay_repr {st : WordStore} {T : Ty} {d : Slot} {v : SVal T} (h : ReprAt st L T d v) :
     ∀ fuel, tyRank T < fuel → staticF fuel T = true →
       ReprAt st L T d v.strip ∧ ∀ old : SVal T, ReprAt st L T d (old.overlay v) := by
   induction h with
@@ -714,7 +714,7 @@ theorem overlay_repr {st : Slot → Nat} {T : Ty} {d : Slot} {v : SVal T} (h : R
 length at `s`, represents the new element at its slot, and agrees with `st`
 off the length slot and the new element's slots, it represents the array
 grown by the element, under a bound one looser. -/
-theorem push_repr {st st' : Slot → Nat} {E : Ty} {s : Slot} {k : Nat} {e : SVec E k}
+theorem push_repr {st st' : WordStore} {E : Ty} {s : Slot} {k : Nat} {e : SVec E k}
     {sh sh' : SList E} {hk : k < 2 ^ 256} {new : SVal E}
     (hb : (e.toList ++ [new]).length < 2 ^ 256)
     (h : ReprAt st L (.ref (.array E)) s (.array e sh hk))
@@ -884,7 +884,7 @@ theorem leavesF_occAt : ∀ (fuel : Nat) (T : Ty) (s : Slot) (o : Nat), staticF 
 
 /-- **A path in bounds stays in bounds while no length shrinks** (the
 value-level `live_mono`). -/
-theorem ReprAt.live_mono {st st' : Slot → Nat} {L' : Nat} {a : Bool} {T U : Ty} {p : Path T U}
+theorem ReprAt.live_mono {st st' : WordStore} {L' : Nat} {a : Bool} {T U : Ty} {p : Path T U}
     {s s' : Slot} (hp : PathAt a p s s') :
     ∀ {v v' : SVal T}, ReprAt st L T s v → ReprAt st' L' T s v' →
       (∀ x, OccAt false T s x → st x ≤ st' x) →
@@ -950,7 +950,7 @@ theorem ReprAt.live_mono {st st' : Slot → Nat} {L' : Nat} {a : Bool} {T U : Ty
 storages are represented, and no slot that is an array's length holds less
 in `st'` than in `st`, a reference the first storage reads live, the second
 reads live too. -/
-theorem live_mono {C : Contract} {st st' : Slot → Nat} {stor stor' : Solidity.Storage C}
+theorem live_mono {C : Contract} {st st' : WordStore} {stor stor' : Solidity.Storage C}
     {L' : Nat} (hs : ReprStore C L st stor) (hs' : ReprStore C L' st' stor')
     (hlen : ∀ x, LenSlot C x → st x ≤ st' x) {a : Bool} {U : Ty} {r : SRef C U} {s : Slot}
     (hp : PathSlot C a r s) :
@@ -964,7 +964,7 @@ theorem live_mono {C : Contract} {st st' : Slot → Nat} {stor stor' : Solidity.
 /-- An all-zero storage represents every type's default: a fresh `Person` is
 three zero slots, a fresh `mapping(uint => Person)` maps every key to one. -/
 theorem dfltBelow_repr (hL : 0 < L) : ∀ (k : Nat) (T : Ty) (h : tyRank T < k) (s : Slot),
-    ReprAt (fun _ => 0) L T s (SVal.dfltBelow k T h)
+    ReprAt WordStore.zero L T s (SVal.dfltBelow k T h)
   | 0, _, h, _ => absurd h (Nat.not_lt_zero _)
   | k + 1, .prim p, _, _ => .prim (ReprV.dflt_zero p)
   | k + 1, .ref (.struct n), _, _ => .struct fun f T hT => by
@@ -987,7 +987,7 @@ termination_by k T => (k, sizeOf T)
 
 /-- A fresh contract's storage is represented by the all-zero machine storage. -/
 theorem initStorage_repr (C : Contract) (hL : 0 < L) :
-    ReprStore C L (fun _ => 0) (Solidity.Storage.init C) := fun r T h => by
+    ReprStore C L WordStore.zero (Solidity.Storage.init C) := fun r T h => by
   show ReprAt _ _ _ _ ((SFields.dflt C.vars).get h)
   rw [get_dflt]
   exact dfltBelow_repr hL _ T _ _

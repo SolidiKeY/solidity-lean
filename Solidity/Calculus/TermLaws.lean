@@ -322,7 +322,7 @@ read on the typed storage: a write, a delete, a push and a pop are each a
 `Storage.save` at their reference (`Storage.write_some`, `delete_save`,
 `push_save`, `pop_save`), and a save leaves what a reference that parts from
 it reads (`Storage.find_save_frame`; the Theory's `diverges` read as
-`Path.Diverges`, `Path.diverges_of_erase`), and an array's length where it
+`Path.Diverges`, `Path.diverges_of_labels`), and an array's length where it
 writes below one of its elements (`Storage.len_save_frame`). -/
 
 section Frame
@@ -330,51 +330,51 @@ section Frame
 /-- **Two typed paths whose segments part, part** (`Path.Diverges`): the
 Theory's `diverges` on the erased segments.  At one source type the two
 paths take the same constructor at each step. -/
-theorem Path.diverges_of_erase {T U W : Ty} (p : Path T U) (q : Path T W)
-    (h : Theory.diverges p.erase q.erase = true) : Path.Diverges p q := by
+theorem Path.diverges_of_labels {T U W : Ty} (p : Path T U) (q : Path T W)
+    (h : Theory.diverges p.labels q.labels = true) : Path.Diverges p q := by
   induction p generalizing W with
-  | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
+  | nil => simp only [Path.labels, Theory.diverges, Bool.false_eq_true] at h
   | @field s f T₁ U₁ hf p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.labels, Theory.diverges, Bool.false_eq_true] at h
     | @field _ f' T₂ _ hf' q =>
       by_cases e : f = f'
       · subst e
         obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
-        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
+        simp only [Path.labels, Theory.diverges, if_pos rfl] at h
         exact .fieldIn hf (ih q h)
       · exact .field hf hf' p q e
   | @«at» E U₁ i p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.labels, Theory.diverges, Bool.false_eq_true] at h
     | «at» j q =>
       by_cases e : i = j
       · subst e
-        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
+        simp only [Path.labels, Theory.diverges, if_pos rfl] at h
         exact .atIn i (ih q h)
       · exact .at p q e
   | @atF E U₁ n i p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.labels, Theory.diverges, Bool.false_eq_true] at h
     | atF j q =>
       by_cases e : i = j
       · subst e
-        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
+        simp only [Path.labels, Theory.diverges, if_pos rfl] at h
         exact .atFIn i (ih q h)
       · exact .atF p q e
   | @key K V U₁ k p ih =>
     cases q with
-    | nil => simp only [Path.erase, Theory.diverges, Bool.false_eq_true] at h
+    | nil => simp only [Path.labels, Theory.diverges, Bool.false_eq_true] at h
     | key k' q =>
       by_cases e : k = k'
       · subst e
-        simp only [Path.erase, Theory.diverges, if_pos rfl] at h
+        simp only [Path.labels, Theory.diverges, if_pos rfl] at h
         exact .keyIn k (ih q h)
       · exact .key p q e
 
 /-- The Theory's `diverges a (b ++ [x])`: `a` parts from `b`, or goes on
 below it. -/
-theorem diverges_append_single {a b : List Semantics.Seg} {x : Semantics.Seg}
+theorem diverges_append_single {a b : List Semantics.Selector} {x : Semantics.Selector}
     (h : Theory.diverges a (b ++ [x]) = true) :
     Theory.diverges a b = true ∨ ∃ rest, rest ≠ [] ∧ a = b ++ rest := by
   induction b generalizing a with
@@ -434,7 +434,7 @@ theorem find_save_same {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
 solkey's `selectOnSaveCons` `\else`): across roots, or below one root,
 by `Theory.diverges`. -/
 theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
-    {q : SRef C W} (hd : Theory.diverges r.segs q.segs = true)
+    {q : SRef C W} (hd : Theory.diverges r.labels q.labels = true)
     (h : st.save r v = some st') : st'.find q = st.find q := by
   obtain ⟨x', hs, rfl⟩ := save_some h
   rcases r with ⟨n, hr, p⟩
@@ -443,12 +443,12 @@ theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal
   · subst e
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-    simp only [SRef.segs, Theory.diverges, if_pos rfl] at hd
+    simp only [SRef.labels, Theory.diverges, if_pos rfl] at hd
     show ((SFields.set st hr x').get hr).find p' = (st.get hr).find p'
     rw [SFields.get_set_same]
     rw [SVal.save_eq_saveM] at hs
     rw [SVal.find_eq_findM, SVal.find_eq_findM]
-    exact SVal.findM_saveM_diverges (Path.diverges_of_erase p p' hd) _ v hs
+    exact SVal.findM_saveM_diverges (Path.diverges_of_labels p p' hd) _ v hs
   · show ((SFields.set st hr x').get hq).find p' = (st.get hq).find p'
     rw [SFields.get_set_ne _ hr hq e]
 
@@ -462,21 +462,23 @@ path (`lenOnSaveFrame`): elsewhere, or below one of the array's
 elements. -/
 theorem len_save_frame {U E : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     {q : SRef C (.ref (.array E))}
-    (hd : Theory.diverges r.segs (q.segs ++ [Theory.lengthSeg]) = true)
+    (hd : Theory.diverges r.labels (q.labels ++ [Theory.lengthSeg]) = true)
     (h : st.save r v = some st') : st'.len q = st.len q := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.len, find_save_frame hd h]
   · obtain ⟨x', hs, rfl⟩ := save_some h
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
-    simp only [SRef.segs, List.cons_append, List.cons.injEq,
-      Semantics.Seg.field.injEq] at he
+    simp only [SRef.labels, List.cons_append, List.cons.injEq,
+      Semantics.Selector.field.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-    obtain ⟨rr, rfl, hrr⟩ := Path.split_of_erase p' p he
+    obtain ⟨rr, rfl, hrr⟩ := Path.split_of_labels p' p he
     cases rr with
-    | nil => exact absurd hrr.symm hne
+    | nil =>
+      rw [Path.labels_nil] at hrr
+      exact absurd hrr.symm hne
     | «at» i rr' =>
       rw [SVal.save_eq_saveM] at hs
       obtain ⟨y, y', hy, hy', hx'⟩ := SVal.saveM_append _ p' (.at i rr') v hs
@@ -514,7 +516,7 @@ theorem Tm.delValue_evalT {P : PrimTy} (t : Tm C Γ (.val P)) :
 /-- Two paths whose shapes part reach references that part. -/
 theorem Tm.diverges_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.diverges q = true) {r : SRef C T} {r' : SRef C U} (hp : p.eval σ = some r)
-    (hq : q.eval σ = some r') : Theory.diverges r.segs r'.segs = true := by
+    (hq : q.eval σ = some r') : Theory.diverges r.labels r'.labels = true := by
   have e := Tm.diverges_segs σ h
   rwa [show p.denote σ = .ref r from Tm.denote_eval σ p r hp,
     show q.denote σ = .ref r' from Tm.denote_eval σ q r' hq] at e
@@ -523,7 +525,7 @@ theorem Tm.diverges_eval {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path 
 theorem Tm.divergesLen_eval {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) {r : SRef C T} {r' : SRef C U} (hq : q.eval σ = some r)
     (hp : p.eval σ = some r') :
-    Theory.diverges r.segs (r'.segs ++ [Theory.lengthSeg]) = true := by
+    Theory.diverges r.labels (r'.labels ++ [Theory.lengthSeg]) = true := by
   have e := Tm.divergesLen_segs σ h
   rwa [show q.denote σ = .ref r from Tm.denote_eval σ q r hq,
     show p.denote σ = .ref r' from Tm.denote_eval σ p r' hp] at e
@@ -1887,24 +1889,24 @@ theorem Tm.eq_of_isAddM {M m : Tm C Γ .mem} {R : RefTy} (h : M.isAddM m R = tru
 /-- One step of `Tm.freshPath?` at a unary symbol: `freshId(addM(m, R))`
 is the root, `i.f` the member `f` below `i`'s path `r`. -/
 def Op1.freshStep (m : Tm C Γ .mem) (R : RefTy) {a s : Srt} :
-    Op1 C a s → Tm C Γ a → Option (List Semantics.Seg) → Option (List Semantics.Seg)
+    Op1 C a s → Tm C Γ a → Option (List Semantics.Selector) → Option (List Semantics.Selector)
   | .alloc R' _, x, _ => if x.beqR m && R' == R then some [] else none
-  | .mfield (f := f) _, _, r => r.map (· ++ [Semantics.Seg.field f])
+  | .mfield (f := f) _, _, r => r.map (· ++ [Semantics.Selector.field f])
   | _, _, _ => none
 
 /-- One step of `Tm.freshPath?` at a binary symbol: `read(addM(m, R), a)`
 is what `a` reads (`ry`), `i[k]` (a literal `k`) the element `k` below
 `i`'s path `rx`. -/
 def Op2.freshStep (m : Tm C Γ .mem) (R : RefTy) {a b s : Srt} :
-    Op2 C a b s → Tm C Γ a → Tm C Γ b → Option (List Semantics.Seg) →
-      Option (List Semantics.Seg) → Option (List Semantics.Seg)
+    Op2 C a b s → Tm C Γ a → Tm C Γ b → Option (List Semantics.Selector) →
+      Option (List Semantics.Selector) → Option (List Semantics.Selector)
   | .iread, x, _, _, ry => if x.isAddM m R then ry else none
-  | .mat _, _, y, rx, _ => y.litInt?.bind fun k => rx.map (· ++ [Semantics.Seg.at k])
+  | .mat _, _, y, rx, _ => y.litInt?.bind fun k => rx.map (· ++ [Semantics.Selector.at k])
   | _, _, _, _, _ => none
 
 /-- The path at which a term reads below the root `addM(m, R)` allocates.
 Generic in the sort. -/
-def Tm.freshPath? (m : Tm C Γ .mem) (R : RefTy) : {u : Srt} → Tm C Γ u → Option (List Semantics.Seg)
+def Tm.freshPath? (m : Tm C Γ .mem) (R : RefTy) : {u : Srt} → Tm C Γ u → Option (List Semantics.Selector)
   | _, .app1 o x => o.freshStep m R x (Tm.freshPath? m R x)
   | _, .app2 o x y => o.freshStep m R x y (Tm.freshPath? m R x) (Tm.freshPath? m R y)
   | _, _ => none
@@ -1924,7 +1926,7 @@ sort, in the heap `hp₁` the allocation leaves: an identity is of an object
 holding its default, of the type the path declares; an address resolves in
 `hp₁` to a slot holding its default, and it reads where the path declares a
 type, that type. -/
-def Srt.FreshRead {H H₁ : HTy} (hp₁ : Heap H₁) (R : RefTy) (p : List Semantics.Seg) :
+def Srt.FreshRead {H H₁ : HTy} (hp₁ : Heap H₁) (R : RefTy) (p : List Semantics.Selector) :
     (u : Srt) → Option (u.Den C H) → Prop
   | .ident R', x => (∀ id, x = some id → ∃ r : HRef H₁ R', r.id = id ∧ hp₁.Dflt (.ref R') r) ∧
       (∀ T', (Ty.ref R).memberTy p = some T' → T' = .ref R' ∧ ∃ id, x = some id)
@@ -1948,7 +1950,7 @@ theorem root (r : HRef H₁ R) (hd : hp₁.Dflt (.ref R) r) :
     exact ⟨hT'.symm, _, rfl⟩
 
 /-- A member `i.f` of an identity `i` at the path `p`. -/
-theorem field {p : List Semantics.Seg} {s f : Name} {T : Ty}
+theorem field {p : List Semantics.Selector} {s f : Name} {T : Ty}
     (hf : Semantics.lookupBy f (Semantics.structDef s) = some T) {x : Option Nat}
     (hx : Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident (.struct s)) x) :
     Srt.FreshRead (C := C) (H := H) hp₁ R (p ++ [.field f]) (.addr T)
@@ -1974,7 +1976,7 @@ theorem field {p : List Semantics.Seg} {s f : Name} {T : Ty}
     exact ⟨hT'.symm, _, _, _, by rw [hid]; rfl, hres r, rfl⟩
 
 /-- An element `i[k]` of an identity `i` at the path `p`, at a literal `k`. -/
-theorem index {p : List Semantics.Seg} {R' : RefTy} {E : Ty} (a : ArrTy R' E) (k : Int)
+theorem index {p : List Semantics.Selector} {R' : RefTy} {E : Ty} (a : ArrTy R' E) (k : Int)
     {x : Option Nat} (hx : Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident R') x) :
     Srt.FreshRead (C := C) (H := H) hp₁ R (p ++ [.at k]) (.addr E)
       (x.map fun id => MAddrT.index id a k) := by
@@ -2019,7 +2021,7 @@ theorem index {p : List Semantics.Seg} {R' : RefTy} {E : Ty} (a : ArrTy R' E) (k
       · simp only [Option.bind_none, reduceCtorEq] at hT'
 
 /-- An identity read out of the fresh memory at an address of the path. -/
-theorem iread {p : List Semantics.Seg} {R' : RefTy} {b : Option (MAddrT (.ref R'))}
+theorem iread {p : List Semantics.Selector} {R' : RefTy} {b : Option (MAddrT (.ref R'))}
     (hb : Srt.FreshRead (C := C) (H := H) hp₁ R p (.addr (.ref R')) b) :
     Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident R')
       (b.bind fun bd => ((bd.resolve H₁).bind fun rb => hp₁.readAddr rb).bind
@@ -2037,7 +2039,7 @@ theorem iread {p : List Semantics.Seg} {R' : RefTy} {b : Option (MAddrT (.ref R'
     rw [hbd, Option.bind_some, hra, Option.bind_some, hv, Option.bind_some]
 
 /-- A word read at the path, where the path declares a word: the default. -/
-theorem read_prim {p : List Semantics.Seg} {P : PrimTy} {b : Option (MAddrT (.prim P))}
+theorem read_prim {p : List Semantics.Selector} {P : PrimTy} {b : Option (MAddrT (.prim P))}
     (hb : Srt.FreshRead (C := C) (H := H) hp₁ R p (.addr (.prim P)) b)
     (hT : (Ty.ref R).memberTy p = some (.prim P)) :
     (b.bind fun bd => (bd.resolve H₁).bind fun rb => hp₁.readAddr rb) = some (PrimTy.dflt P) := by
@@ -2052,7 +2054,7 @@ end Srt.FreshRead
 
 theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {μ₀ : Grown σ.H (fun _ => Unit)} (hm : m.eval σ = some μ₀)
-    {u : Srt} (t : Tm C Γ u) : ∀ {p : List Semantics.Seg}, Tm.freshPath? m R t = some p →
+    {u : Srt} (t : Tm C Γ u) : ∀ {p : List Semantics.Selector}, Tm.freshPath? m R t = some p →
       Srt.FreshRead (C := C) (μ₀.heap.allocDefault R hR).heap R p u (t.eval σ) := by
   induction t with
   | app1 o x ihx =>

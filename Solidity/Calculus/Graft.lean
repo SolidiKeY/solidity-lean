@@ -763,7 +763,7 @@ theorem GlobT.withStorage_congr (h : G₀.1 = G₁.1) (st : Storage C) :
     (G₀.withStorage st).1 = (G₁.withStorage st).1 := by
   rcases G₀ with ⟨G₀, _⟩; rcases G₁ with ⟨G₁, _⟩; dsimp only at h; subst h; rfl
 
-theorem GlobT.withNet_congr (h : G₀.1 = G₁.1) (nt : List (Int × Int)) :
+theorem GlobT.withNet_congr (h : G₀.1 = G₁.1) (nt : Ledger) :
     (G₀.withNet nt).1 = (G₁.withNet nt).1 := by
   rcases G₀ with ⟨G₀, _⟩; rcases G₁ with ⟨G₁, _⟩; dsimp only at h; subst h; rfl
 
@@ -846,11 +846,11 @@ theorem UpdElem.globT_substH (hL : U.Lands σ₀ g σ₁)
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     show ((r'.eval σ₀).bind fun addr => (a'.eval σ₀).bind fun amt =>
-        some (G₀.withNet (Semantics.setBy addr.1
-          (op.apply ((Semantics.lookupBy addr.1 G₀.1.net).getD 0) amt.1) G₀.1.net))).map (·.1) =
+        some (G₀.withNet (Semantics.setBy addr
+          (op.apply ((Semantics.lookupBy addr G₀.1.net).getD 0) amt.1) G₀.1.net))).map (·.1) =
       ((r.eval σ₁).bind fun addr => (a.eval σ₁).bind fun amt =>
-        some (G₁.withNet (Semantics.setBy addr.1
-          (op.apply ((Semantics.lookupBy addr.1 G₁.1.net).getD 0) amt.1) G₁.1.net))).map (·.1)
+        some (G₁.withNet (Semantics.setBy addr
+          (op.apply ((Semantics.lookupBy addr G₁.1.net).getD 0) amt.1) G₁.1.net))).map (·.1)
     rw [Srt.sameO_val.1 (Tm.eval_substH hL hst r hr), Srt.sameO_val.1 (Tm.eval_substH hL hst a ha),
       hG]
     cases r.eval σ₁ <;> cases a.eval σ₁ <;>
@@ -865,11 +865,11 @@ theorem UpdElem.globT_substH (hL : U.Lands σ₀ g σ₁)
       have ht : σ₁.tx = σ₀.tx := congrArg State.tx (hL.glob_of_envOnly hg)
       show ((r'.eval σ₀).bind fun addr => (a'.eval σ₀).bind fun amt =>
           some (G₀.withNet (if addr.1 = σ₀.tx.selfAddress.1 then G₀.1.net
-            else Semantics.setBy addr.1 ((Semantics.lookupBy addr.1 G₀.1.net).getD 0 - amt.1)
+            else Semantics.setBy addr ((Semantics.lookupBy addr G₀.1.net).getD 0 - amt.1)
               G₀.1.net))).map (·.1) =
         ((r.eval σ₁).bind fun addr => (a.eval σ₁).bind fun amt =>
           some (G₁.withNet (if addr.1 = σ₁.tx.selfAddress.1 then G₁.1.net
-            else Semantics.setBy addr.1 ((Semantics.lookupBy addr.1 G₁.1.net).getD 0 - amt.1)
+            else Semantics.setBy addr ((Semantics.lookupBy addr G₁.1.net).getD 0 - amt.1)
               G₁.1.net))).map (·.1)
       rw [Srt.sameO_val.1 (Tm.eval_substH hL hst r hr),
         Srt.sameO_val.1 (Tm.eval_substH hL hst a ha), ht, hG]
@@ -882,9 +882,9 @@ theorem UpdElem.globT_substH (hL : U.Lands σ₀ g σ₁)
     obtain ⟨a', ha, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     show ((r'.eval σ₀).bind fun addr => (a'.eval σ₀).bind fun amt =>
-        some (G₀.withNet [(addr.1, amt.1)])).map (·.1) =
+        some (G₀.withNet [(addr, amt.1)])).map (·.1) =
       ((r.eval σ₁).bind fun addr => (a.eval σ₁).bind fun amt =>
-        some (G₁.withNet [(addr.1, amt.1)])).map (·.1)
+        some (G₁.withNet [(addr, amt.1)])).map (·.1)
     rw [Srt.sameO_val.1 (Tm.eval_substH hL hst r hr), Srt.sameO_val.1 (Tm.eval_substH hL hst a ha)]
     cases r.eval σ₁ <;> cases a.eval σ₁ <;>
       first | rfl | exact congrArg some (GlobT.withNet_congr hG _)

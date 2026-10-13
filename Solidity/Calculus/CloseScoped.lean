@@ -61,7 +61,7 @@ section StateAPI
 
 variable {Γ : Ctx}
 
-theorem locV_havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+theorem locV_havoc (σ : State C Γ) (st : Storage C) (nt : Ledger) :
     (σ.havoc st nt).locV = σ.locV := rfl
 
 /-! The global part a field at a time: the leaf reads fields, never the
@@ -72,13 +72,13 @@ theorem glob_net (σ : State C Γ) : σ.glob.net = σ.net := rfl
 theorem glob_selfBalance (σ : State C Γ) : σ.glob.selfBalance = σ.selfBalance := rfl
 theorem glob_tx (σ : State C Γ) : σ.glob.tx = σ.tx := rfl
 theorem glob_envVal (σ : State C Γ) (k : EnvKey) : σ.glob.envVal k = σ.envVal k := rfl
-theorem havoc_storage (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+theorem havoc_storage (σ : State C Γ) (st : Storage C) (nt : Ledger) :
     (σ.havoc st nt).storage = st := rfl
-theorem havoc_net (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+theorem havoc_net (σ : State C Γ) (st : Storage C) (nt : Ledger) :
     (σ.havoc st nt).net = nt := rfl
-theorem havoc_selfBalance (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+theorem havoc_selfBalance (σ : State C Γ) (st : Storage C) (nt : Ledger) :
     (σ.havoc st nt).selfBalance = σ.selfBalance := rfl
-theorem havoc_tx (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) :
+theorem havoc_tx (σ : State C Γ) (st : Storage C) (nt : Ledger) :
     (σ.havoc st nt).tx = σ.tx := rfl
 theorem push_storage {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).storage = σ.storage := rfl
@@ -160,7 +160,7 @@ theorem eval_mtSt : (Tm.app0 .mtSt : Tm C Γ .st).eval σ = some (Storage.init C
 theorem eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) (a : Tm C Γ (.val p)) :
     (Tm.app1 (.unop op h) a).eval σ = (a.eval σ).bind op.evalT := rfl
 theorem eval_net (a : Tm C Γ (.val .uint)) : (Tm.app1 .net a).eval σ =
-    (a.eval σ).map fun n => (lookupBy n.1 σ.net).getD 0 := rfl
+    (a.eval σ).map fun n => (lookupBy n σ.net).getD 0 := rfl
 theorem eval_delValue {p : PrimTy} (a : Tm C Γ (.val p)) :
     (Tm.app1 .delValue a).eval σ = (a.eval σ).map fun _ => PrimTy.dflt p := rfl
 theorem eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
@@ -326,7 +326,7 @@ theorem glob_selfBalanceE (op : IntOp) (a : Tm C Γ (.val .uint)) (g : GlobT C �
 theorem glob_netE (r : Tm C Γ (.val .uint)) (op : IntOp) (a : Tm C Γ (.val .uint))
     (g : GlobT C σ₀.H) : (UpdElem.net r op a : UpdElem C Γ Δ).globT σ₀ g =
       (r.eval σ₀).bind fun addr => (a.eval σ₀).map fun amt =>
-        g.withNet (setBy addr.1 (op.apply ((lookupBy addr.1 g.1.net).getD 0) amt.1) g.1.net) := by
+        g.withNet (setBy addr (op.apply ((lookupBy addr g.1.net).getD 0) amt.1) g.1.net) := by
   show (r.eval σ₀).bind _ = _
   cases r.eval σ₀ with
   | none => rfl
@@ -335,14 +335,14 @@ theorem glob_payE (r a : Tm C Γ (.val .uint)) (g : GlobT C σ₀.H) :
     (UpdElem.pay r a : UpdElem C Γ Δ).globT σ₀ g =
       (r.eval σ₀).bind fun addr => (a.eval σ₀).map fun amt =>
         g.withNet (if addr.1 = σ₀.tx.selfAddress.1 then g.1.net
-          else setBy addr.1 ((lookupBy addr.1 g.1.net).getD 0 - amt.1) g.1.net) := by
+          else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net) := by
   show (r.eval σ₀).bind _ = _
   cases r.eval σ₀ with
   | none => rfl
   | some _ => show Option.bind _ _ = _; cases a.eval σ₀ <;> rfl
 theorem glob_netMtE (r a : Tm C Γ (.val .uint)) (g : GlobT C σ₀.H) :
     (UpdElem.netMt r a : UpdElem C Γ Δ).globT σ₀ g =
-      (r.eval σ₀).bind fun addr => (a.eval σ₀).map fun amt => g.withNet [(addr.1, amt.1)] := by
+      (r.eval σ₀).bind fun addr => (a.eval σ₀).map fun amt => g.withNet [(addr, amt.1)] := by
   show (r.eval σ₀).bind _ = _
   cases r.eval σ₀ with
   | none => rfl
@@ -370,13 +370,13 @@ theorem withMem_selfBalance {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Un
     (g.withMem μ).1.selfBalance = g.1.selfBalance := rfl
 theorem withMem_tx {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) :
     (g.withMem μ).1.tx = g.1.tx := rfl
-theorem withNet_storage {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) :
+theorem withNet_storage {H : HTy} (g : GlobT C H) (nt : Ledger) :
     (g.withNet nt).1.storage = g.1.storage := rfl
-theorem withNet_net {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) :
+theorem withNet_net {H : HTy} (g : GlobT C H) (nt : Ledger) :
     (g.withNet nt).1.net = nt := rfl
-theorem withNet_selfBalance {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) :
+theorem withNet_selfBalance {H : HTy} (g : GlobT C H) (nt : Ledger) :
     (g.withNet nt).1.selfBalance = g.1.selfBalance := rfl
-theorem withNet_tx {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) :
+theorem withNet_tx {H : HTy} (g : GlobT C H) (nt : Ledger) :
     (g.withNet nt).1.tx = g.1.tx := rfl
 theorem withBalance_storage {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) :
     (g.withBalance b).1.storage = g.1.storage := rfl
@@ -795,7 +795,7 @@ theorem holds_bind_mem (σ : State C Γ) (m : Modality) (x : Var) (R : RefTy)
 theorem holds_bind_old (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.old :: Γ)) :
     holds σ (.bind m x .old φ) ↔ ∀ v : Storage C, holds (σ.push (t := .old) v) φ := Iff.rfl
 theorem holds_bind_oldNet (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.oldNet :: Γ)) :
-    holds σ (.bind m x .oldNet φ) ↔ ∀ v : List (Int × Int), holds (σ.push (t := .oldNet) v) φ :=
+    holds σ (.bind m x .oldNet φ) ↔ ∀ v : Ledger, holds (σ.push (t := .oldNet) v) φ :=
   Iff.rfl
 theorem holds_bind_kint (σ : State C Γ) (m : Modality) (x : Var) (φ : Fml C (.kint :: Γ)) :
     holds σ (.bind m x .kint φ) ↔ ∀ v : Int, holds (σ.push (t := .kint) v) φ := Iff.rfl

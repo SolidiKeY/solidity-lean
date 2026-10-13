@@ -19,7 +19,7 @@ empty storage, no memory, a ledger holding the deployer's payment, and the
 value sent as the contract's funds. -/
 def State.deploy (C : Contract) (tx : TTx) : State C [] :=
   { storage := Storage.init C, H := [], heap := Heap.empty, env := (),
-    net := [(tx.msgSender.1, tx.msgValue.1)], selfBalance := tx.msgValue, tx := tx }
+    net := [(tx.msgSender, tx.msgValue.1)], selfBalance := tx.msgValue, tx := tx }
 
 /-- **The typed deployment** (master's `Contract.deploy`, over the typed run): a
 constructor that is not `payable`, the implicit one too, refuses value, as

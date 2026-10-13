@@ -99,16 +99,21 @@ theorem uintBitwise_cast_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
     uintBitwise f (a : Int) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) := rfl
 
 /-- A ledger entry after a payment: the entry of the ledger the payment chose. -/
-theorem lookupBy_ite (c : Prop) [Decidable c] (k : Int) (l l' : List (Int × Int)) :
+theorem lookupBy_ite (c : Prop) [Decidable c] (k : PrimTy.uint.Denote) (l l' : Ledger) :
     lookupBy k (if c then l else l') = if c then lookupBy k l else lookupBy k l' := by
   split <;> rfl
 /-- A ledger entry after a write: the written amount at that address, the old
 one elsewhere. -/
-theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
+theorem lookupBy_setBy_int (k k' : PrimTy.uint.Denote) (v : Int) (l : Ledger) :
     lookupBy k (setBy k' v l) = if k = k' then some v else lookupBy k l := by
   split
   · subst_vars; exact Semantics.lookupBy_setBy_self _ _ _
   · exact Semantics.lookupBy_setBy_ne ‹_› _ _
+
+/-- Equal address observations select the same ledger entry. This is ordinary
+function congruence through the address's range proof. -/
+theorem lookupBy_uint_congr (a b : PrimTy.uint.Denote) (l : Ledger) (h : a.1 = b.1) :
+    lookupBy a l = lookupBy b l := congrArg (fun k => lookupBy k l) (Subtype.ext h)
 
 /-! ## The symbols, one at a time -/
 
@@ -134,7 +139,7 @@ theorem Op0.eval_zlit (n : Int) : Op0.eval g (.zlit n) = some n := rfl
 theorem Op1.eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true)
     (x : Option p.Denote) : Op1.eval g (.unop op h) x = x.bind op.evalT := rfl
 theorem Op1.eval_net (x : Option PrimTy.uint.Denote) : Op1.eval g .net x =
-    x.map fun n => (lookupBy n.1 g.net).getD 0 := rfl
+    x.map fun n => (lookupBy n g.net).getD 0 := rfl
 theorem Op1.eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
     (x : Option (SRef C (.ref (.struct s)))) : Op1.eval g (.field h) x = x.map (·.field h) := rfl
 theorem Op1.eval_next {E : Ty} (x : Option (SRef C (.ref (.array E)))) :

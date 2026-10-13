@@ -239,7 +239,7 @@ theorem push {m : Machine} (h : SimL C L b F σ ρ m) (w : Word) : SimL C L b F 
   h.stack _
 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
-theorem book {m : Machine} (h : SimL C L b F σ ρ m) (x y : Int) (bl bl₀ : Nat → Nat)
+theorem book {m : Machine} (h : SimL C L b F σ ρ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Nat → Nat)
     (hn : ∀ a : Nat, a < W → a ≠ m.self → netAt (σ.pay x y).net a = (bl₀ a : Int) - bl a)
     (hself : netAt (σ.pay x y).net m.self = 0) :
     SimL C L b F (σ.pay x y) ρ { m with bal := bl, bal₀ := bl₀ } :=
@@ -251,7 +251,7 @@ theorem mono {m : Machine} {L' : Nat} (h : SimL C L b F σ ρ m) (hL : L ≤ L')
   ⟨h.store.mono hL, h.vals, h.aliases, h.net, h.netSelf, hL', h.fragile, h.env⟩
 
 /-- A storage write that lowers no array's length. -/
-theorem store' {m : Machine} (h : SimL C L b F σ ρ m) {st' : Slot → Nat}
+theorem store' {m : Machine} (h : SimL C L b F σ ρ m) {st' : WordStore}
     {stor : Solidity.Storage C} (hs : ReprStore C L st' stor)
     (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
     SimL C L b F { σ with storage := stor } ρ { m with store := st' } :=
@@ -279,7 +279,7 @@ theorem meet_right {m : Machine} (G : Frag Γ) (h : SimL C L b F σ ρ m) :
 
 /-- A storage write that may shrink an array (`pop`, `delete`): the fragile
 aliases forgotten. -/
-theorem storeDrop {m : Machine} (h : SimL C L b F σ ρ m) {st' : Slot → Nat}
+theorem storeDrop {m : Machine} (h : SimL C L b F σ ρ m) {st' : WordStore}
     {stor : Solidity.Storage C} (hs : ReprStore C L st' stor) :
     SimL C L b F.dropFragile { σ with storage := stor } ρ { m with store := st' } := by
   refine ⟨hs, h.vals, fun i hi => h.aliases i (Frag.get_dropFragile F i hi (by decide)).1,
@@ -951,7 +951,7 @@ theorem netSelf (h : Sim C L b F σ m) : netAt σ.net m.self = 0 := SimL.netSelf
 theorem env (h : Sim C L b F σ m) : EnvSim σ.tx m := SimL.env h
 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
-theorem book (h : Sim C L b F σ m) (x y : Int) (bl bl₀ : Nat → Nat)
+theorem book (h : Sim C L b F σ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Nat → Nat)
     (hn : ∀ a : Nat, a < W → a ≠ m.self → netAt (σ.pay x y).net a = (bl₀ a : Int) - bl a)
     (hself : netAt (σ.pay x y).net m.self = 0) :
     Sim C L b F (σ.pay x y) { m with bal := bl, bal₀ := bl₀ } :=
@@ -963,14 +963,14 @@ theorem mono {L' : Nat} (h : Sim C L b F σ m) (hL : L ≤ L') (hL' : L' ≤ Lma
   SimL.mono h hL hL'
 
 /-- A storage write that lowers no array's length. -/
-theorem store' (h : Sim C L b F σ m) {st' : Slot → Nat} {stor : Solidity.Storage C}
+theorem store' (h : Sim C L b F σ m) {st' : WordStore} {stor : Solidity.Storage C}
     (hs : ReprStore C L st' stor) (hlen : ∀ x, LenSlot C x → m.store x ≤ st' x) :
     Sim C L b F (σ.withStorage stor) { m with store := st' } :=
   SimL.store' h hs hlen
 
 /-- A storage write that may shrink an array (`pop`, `delete`): the fragile
 aliases forgotten. -/
-theorem storeDrop (h : Sim C L b F σ m) {st' : Slot → Nat} {stor : Solidity.Storage C}
+theorem storeDrop (h : Sim C L b F σ m) {st' : WordStore} {stor : Solidity.Storage C}
     (hs : ReprStore C L st' stor) :
     Sim C L b F.dropFragile (σ.withStorage stor) { m with store := st' } :=
   SimL.storeDrop h hs

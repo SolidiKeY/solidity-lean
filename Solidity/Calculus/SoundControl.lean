@@ -20,7 +20,7 @@ local's type and an unset local (decision 17'), from which the premise's
 
 namespace Solidity
 open Solidity (Modality Srt Op0 Op1 Op2 Op3)
-open Semantics (Value Seg)
+open Semantics (Value Selector)
 
 variable {C : Contract}
 

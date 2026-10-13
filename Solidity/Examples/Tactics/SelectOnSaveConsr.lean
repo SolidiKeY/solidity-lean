@@ -11,7 +11,7 @@ KeY builds a path by appending on the right: `storageFieldWriteSave` writes
 `{storage := save(storage, consr(sp, fld), se)}`, and the interpreter's
 `Tm.eval` returns `segs ++ [.field f]` the same way.  Reading a write back
 walks the path from the left: `SVal.save` and `SVal.find` unfold only on
-`Seg.field name :: rest`, as the theory's `findDefinitionCons` and
+`Selector.field name :: rest`, as the theory's `findDefinitionCons` and
 `selectOnSaveCons` match `cons(a, flds)`.
 
 `ageWriteRead` reads the leaf on the typed state, where the problem no

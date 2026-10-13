@@ -102,7 +102,7 @@ noncomputable def deployed : Option (State EtherWallet []) :=
 less, and the funds as the transaction found them. -/
 theorem withdrawRunNet :
     (deployed.bind fun σ => (Prog.run σ withdrawCore).toOption.map
-      fun o => ((Semantics.lookupBy 7 o.st.net).getD 0, o.st.selfBalance.1)) = some (-30, 100) := by
+      fun o => ((Semantics.lookupBy (⟨7, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, o.st.selfBalance.1)) = some (-30, 100) := by
   decide +kernel
 
 /-- More than the funds: the ledger books it all the same.  That the contract
@@ -110,7 +110,7 @@ can pay is not the ledger's to check; on the EVM the payment is refused and
 the call reverts (`Evm.compile_correct`). -/
 theorem withdrawRunOverdrawn :
     (deployed.bind fun σ => (Prog.run σ overdrawCore).toOption.map
-      fun o => (Semantics.lookupBy 7 o.st.net).getD 0) = some (-130) := by
+      fun o => (Semantics.lookupBy (⟨7, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0) = some (-130) := by
   decide +kernel
 
 /-- Anyone but the owner: `withdraw` reverts. -/

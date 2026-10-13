@@ -189,7 +189,7 @@ theorem withStorage (σ : State C Γ) (st : Storage C) :
     TGFrame .nonpayable σ (σ.withStorage st) :=
   ⟨rfl, HEq.rfl, rfl, rfl, fun h => absurd rfl h⟩
 
-theorem pay (σ : State C Γ) (a m : Int) : TGFrame .nonpayable σ (σ.pay a m) :=
+theorem pay (σ : State C Γ) (a : PrimTy.uint.Denote) (m : Int) : TGFrame .nonpayable σ (σ.pay a m) :=
   ⟨rfl, HEq.rfl, rfl, rfl, fun h => absurd rfl h⟩
 
 end TGFrame
@@ -555,7 +555,7 @@ def State.anon (σ : State C Γ) (xs : List ((t : LTy) × Idx Γ t))
 callee left (KeY's `{storage := storageSk ‖ net := netSk}`, fresh skolem
 constants), the locals, memory and funds kept: the funds are not a
 transfer's to change. -/
-def State.havoc (σ : State C Γ) (st : Storage C) (nt : List (Int × Int)) : State C Γ :=
+def State.havoc (σ : State C Γ) (st : Storage C) (nt : Ledger) : State C Γ :=
   { σ with storage := st, net := nt }
 
 theorem State.havoc_self (σ : State C Γ) : σ.havoc σ.storage σ.net = σ := rfl

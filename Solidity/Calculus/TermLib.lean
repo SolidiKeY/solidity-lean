@@ -545,28 +545,39 @@ end Side
 /-! ## The side conditions in the Theory
 
 A path term denotes a storage location (`SLoc`); the side conditions are
-read off its segments (`SLoc.segs`: the root, then the path), which the
+read off its segments (`SLoc.labels`: the root, then the path), which the
 shapes match, and give the Theory's location facts: two paths that part
 are not below one another (`ObsLoc.strip? … = none`), a path that extends
 another is it followed by a path. -/
 
 /-- A storage reference's segments: the state variable, then its path. -/
-def SRef.segs {C : Contract} {T : Ty} (r : SRef C T) : List Seg := .field r.root :: r.path.erase
+def RefSegments.labels {C : Contract} {T : Ty} (r : RefSegments C T) : List Selector :=
+  .field r.root :: r.tail.labels
+
+def SRef.labels {C : Contract} {T : Ty} (r : SRef C T) : List Selector := r.segments.labels
+
+theorem SRef.labels_eq {C : Contract} {T : Ty} (r : SRef C T) :
+    r.labels = .field r.root :: r.path.labels := by
+  unfold SRef.labels SRef.segments RefSegments.labels Path.labels
+  rfl
+
+attribute [irreducible] SRef.labels
+attribute [eqns SRef.labels_eq] SRef.labels
 
 /-- A storage location's segments: a reference's, a dangling location's
 path alone. -/
-def SLoc.segs {C : Contract} {T : Ty} : SLoc C T → List Seg
-  | .ref r => r.segs
-  | .dangling _ p => p.erase
+def SLoc.labels {C : Contract} {T : Ty} : SLoc C T → List Selector
+  | .ref r => r.labels
+  | .dangling _ p => p.labels
 
-theorem SLoc.segs_app {C : Contract} {T U : Ty} (l : SLoc C T) (p : Path T U) :
-    (ObsLoc.app l p).segs = l.segs ++ p.erase := by
-  cases l <;> simp only [ObsLoc.app, SLoc.app, SLoc.segs, SRef.segs, SRef.append,
-    Path.erase_append, List.cons_append]
+theorem SLoc.labels_app {C : Contract} {T U : Ty} (l : SLoc C T) (p : Path T U) :
+    (ObsLoc.app l p).labels = l.labels ++ p.labels := by
+  cases l <;> simp only [ObsLoc.app, SLoc.app, SLoc.labels, SRef.labels, SRef.append,
+    Path.labels_append, List.cons_append]
 
 /-- Two lists that part are not one the other's prefix, either way. -/
-theorem diverges_append_ne : (a b : List Seg) → Theory.diverges a b = true →
-    ∀ x y : List Seg, a ++ x ≠ b ++ y
+theorem diverges_append_ne : (a b : List Selector) → Theory.diverges a b = true →
+    ∀ x y : List Selector, a ++ x ≠ b ++ y
   | [], _, h, _, _, _ => by simp only [Theory.diverges, Bool.false_eq_true] at h
   | _ :: _, [], h, _, _, _ => by simp only [Theory.diverges, Bool.false_eq_true] at h
   | a :: p, b :: q, h, x, y, e => by
@@ -577,36 +588,36 @@ theorem diverges_append_ne : (a b : List Seg) → Theory.diverges a b = true →
 
 /-- **Locations whose segments part**: neither is below the other. -/
 theorem SLoc.strip?_none_of_diverges {C : Contract} {U W : Ty} {p : SLoc C U} {q : SLoc C W}
-    (h : Theory.diverges p.segs q.segs = true) :
+    (h : Theory.diverges p.labels q.labels = true) :
     ∀ {V : Ty} (r : Path W V), ObsLoc.strip? p (ObsLoc.app q r) = none := by
   intro V r
   cases hs : ObsLoc.strip? p (ObsLoc.app q r) with
   | none => rfl
   | some r' =>
     exfalso
-    have e := congrArg SLoc.segs (ObsLoc.eq_of_strip? p _ hs)
-    rw [SLoc.segs_app, SLoc.segs_app] at e
+    have e := congrArg SLoc.labels (ObsLoc.eq_of_strip? p _ hs)
+    rw [SLoc.labels_app, SLoc.labels_app] at e
     exact diverges_append_ne _ _ h _ _ e.symm
 
 /-- **A location that parts from an array's length** is not at or above
 the array. -/
 theorem SLoc.strip?_none_of_divergesLen {C : Contract} {U E : Ty} {q : SLoc C U}
     {p : SLoc C (.ref (.array E))}
-    (h : Theory.diverges q.segs (p.segs ++ [lengthSeg]) = true) :
+    (h : Theory.diverges q.labels (p.labels ++ [lengthSeg]) = true) :
     ObsLoc.strip? q p = none := by
   cases hs : ObsLoc.strip? q p with
   | none => rfl
   | some r =>
     exfalso
-    have e := congrArg SLoc.segs (ObsLoc.eq_of_strip? q p hs)
-    rw [SLoc.segs_app] at e
-    refine diverges_append_ne _ _ h (r.erase ++ [lengthSeg]) [] ?_
+    have e := congrArg SLoc.labels (ObsLoc.eq_of_strip? q p hs)
+    rw [SLoc.labels_app] at e
+    refine diverges_append_ne _ _ h (r.labels ++ [lengthSeg]) [] ?_
     rw [e, List.append_nil, List.append_assoc]
 
 /-- A sort's Theory denotation as segments: a path's, `[]` for the rest. -/
-def Srt.segs : (u : Srt) → u.TDen C → List Seg
-  | .path _, d => d.segs
-  | .spath _ _, d => d.segs
+def Srt.labels : (u : Srt) → u.TDen C → List Selector
+  | .path _, d => d.labels
+  | .spath _ _, d => d.labels
   | _, _ => []
 
 /-- The sort of a path below a storage sort's roots: from the contract's
@@ -662,24 +673,24 @@ theorem Tm.litInt?_denote {k : PrimTy} {t : Tm C Γ (.val k.keyTy)} {i : Int}
   rw [hd, Option.getD_some]
   exact (asInt_erase_keyTy w).symm
 
-theorem Path.erase_index' {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
-    (Path.index it i).erase = [.at i] := Path.erase_index it i
+theorem Path.labels_index' {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
+    (Path.index it i).labels = [.at i] := Path.labels_index it i
 
 /-- A path has its shape in every state; generic in the sort, a path's
-segments read by `Srt.segs`. -/
+segments read by `Srt.labels`. -/
 theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
-    ∀ {a : List SegT}, p.shape? = some a → SegT.matches a (u.segs (p.denote σ)) = true := by
+    ∀ {a : List SegT}, p.shape? = some a → SegT.matches a (u.labels (p.denote σ)) = true := by
   induction p with
   | app0 o =>
     intro a h
     cases o with
     | root r hr =>
       cases h
-      simp only [Srt.segs, Tm.denote, Op0.denote, SLoc.segs, SRef.segs, SRef.ofRoot, Path.erase,
+      simp only [Srt.labels, Tm.denote, Op0.denote, SLoc.labels, SRef.labels, SRef.ofRoot, Path.labels,
         SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | member sn f hf =>
       cases h
-      simp only [Srt.segs, Tm.denote, Op0.denote, SLoc.segs, SRef.segs, SRef.ofRoot, Path.erase,
+      simp only [Srt.labels, Tm.denote, Op0.denote, SLoc.labels, SRef.labels, SRef.ofRoot, Path.labels,
         SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | _ => cases h
   | app1 o x ih =>
@@ -687,29 +698,30 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
     cases o with
     | field hf =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
-      rw [SLoc.segs_app]
+      show SegT.matches _ (SLoc.labels (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.labels_app]
       exact SegT.matches_append _ _ _ _ (ih ha)
-        (by simp only [Path.erase, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
+        (by simp only [Path.labels, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
     | fieldIn hf =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
-      rw [SLoc.segs_app]
+      show SegT.matches _ (SLoc.labels (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.labels_app]
       exact SegT.matches_append _ _ _ _ (ih ha)
-        (by simp only [Path.erase, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
+        (by simp only [Path.labels, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self])
     | next =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
-      rw [SLoc.segs_app]
-      exact SegT.matches_append _ _ _ _ (ih ha) rfl
+      show SegT.matches _ (SLoc.labels (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.labels_app]
+      exact SegT.matches_append _ _ _ _ (ih ha)
+        (by simp only [Path.labels, SegT.matches, SegT.fits, Bool.and_self])
     | _ => cases h
   | app2 o x y ihx ihy =>
     intro a h
     cases o with
     | «at» it =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-      show SegT.matches _ (SLoc.segs (ObsLoc.app (x.denote σ) _)) = true
-      rw [SLoc.segs_app, Path.erase_index']
+      show SegT.matches _ (SLoc.labels (ObsLoc.app (x.denote σ) _)) = true
+      rw [SLoc.labels_app, Path.labels_index']
       refine SegT.matches_append _ _ _ _ (ihx ha) ?_
       cases hi : Tm.litInt? y with
       | none => rfl
@@ -718,17 +730,18 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
         simp only [hk, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
     | nextIn =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-      show SegT.matches _ (SLoc.segs (ObsLoc.app (y.denote σ) _)) = true
-      rw [SLoc.segs_app]
-      exact SegT.matches_append _ _ _ _ (ihy ha) rfl
+      show SegT.matches _ (SLoc.labels (ObsLoc.app (y.denote σ) _)) = true
+      rw [SLoc.labels_app]
+      exact SegT.matches_append _ _ _ _ (ihy ha)
+        (by simp only [Path.labels, SegT.matches, SegT.fits, Bool.and_self])
     | _ => cases h
   | app3 o x y z _ ihy _ =>
     intro a h
     cases o with
     | atIn it =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
-      show SegT.matches _ (SLoc.segs (ObsLoc.app (y.denote σ) _)) = true
-      rw [SLoc.segs_app, Path.erase_index']
+      show SegT.matches _ (SLoc.labels (ObsLoc.app (y.denote σ) _)) = true
+      rw [SLoc.labels_app, Path.labels_index']
       refine SegT.matches_append _ _ _ _ (ihy ha) ?_
       cases hi : Tm.litInt? z with
       | none => rfl
@@ -740,13 +753,13 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
 
 /-- A path has its shape in every state. -/
 theorem Tm.shape?_matches {T : Ty} (p : Tm C Γ (.path T)) {a : List SegT}
-    (h : p.shape? = some a) : SegT.matches a (p.denote σ).segs = true :=
+    (h : p.shape? = some a) : SegT.matches a (p.denote σ).labels = true :=
   Tm.shape?_matches' σ p h
 
 /-- `Tm.diverges` gives the Theory's `diverges` on the locations' segments. -/
 theorem Tm.diverges_segs {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path U)}
     (h : p.diverges q = true) :
-    Theory.diverges (p.denote σ).segs (q.denote σ).segs = true := by
+    Theory.diverges (p.denote σ).labels (q.denote σ).labels = true := by
   unfold Tm.diverges at h
   split at h
   · rename_i a b ha hb
@@ -757,7 +770,7 @@ theorem Tm.diverges_segs {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.path 
 the segments. -/
 theorem Tm.divergesLen_segs {T U : Ty} {q : Tm C Γ (.path T)} {p : Tm C Γ (.path U)}
     (h : q.divergesLen p = true) :
-    Theory.diverges (q.denote σ).segs ((p.denote σ).segs ++ [lengthSeg]) = true := by
+    Theory.diverges (q.denote σ).labels ((p.denote σ).labels ++ [lengthSeg]) = true := by
   unfold Tm.divergesLen at h
   split at h
   · rename_i a b ha hb
@@ -837,13 +850,13 @@ theorem Tm.sameSegs_denote {T : Ty} {p q : Tm C Γ (.path T)} (h : p.sameSegs q 
 
 /-- A location below another: it followed by a path that goes somewhere. -/
 def Srt.Below {U : Ty} (l : SLoc C U) : (u : Srt) → u.TDen C → Prop
-  | .path T, d => ∃ r : Path U T, r.erase ≠ [] ∧ d = ObsLoc.app l r
+  | .path T, d => ∃ r : Path U T, r.labels ≠ [] ∧ d = ObsLoc.app l r
   | _, _ => False
 
 /-- A member location below another under a `select` of `s`. -/
 def Srt.BelowIn {s : Name} {U : Ty} (l : SLoc (Contract.ofStruct s) U) :
     (u : Srt) → u.TDen C → Prop
-  | .spath s' T, d => ∀ e : s' = s, ∃ r : Path U T, r.erase ≠ [] ∧
+  | .spath s' T, d => ∀ e : s' = s, ∃ r : Path U T, r.labels ≠ [] ∧
       (e ▸ d : SLoc (Contract.ofStruct s) T) = ObsLoc.app l r
   | _, _ => False
 
@@ -858,11 +871,11 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
     | field hf =>
       rcases Bool.or_eq_true_iff.mp h with h | h
       · cases Tm.sigma_eq_of_beqR h
-        exact ⟨.field hf .nil, by simp only [Path.erase, ne_eq, reduceCtorEq,
+        exact ⟨.field hf .nil, by simp only [Path.labels, ne_eq, reduceCtorEq,
           not_false_eq_true], rfl⟩
       · obtain ⟨r, hr, hq⟩ := ih h
         refine ⟨r.append (.field hf .nil), ?_, ?_⟩
-        · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+        · rw [Path.labels_append]; exact List.append_ne_nil_of_left_ne_nil hr _
         · show ObsLoc.app (x.denote σ) _ = _
           rw [hq, ObsLoc.app_app]
     | _ => cases h
@@ -872,11 +885,11 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
     | «at» it =>
       rcases Bool.or_eq_true_iff.mp h with h | h
       · cases Tm.sigma_eq_of_beqR h
-        exact ⟨_, by rw [Path.erase_index']; simp only [ne_eq, reduceCtorEq,
+        exact ⟨_, by rw [Path.labels_index']; simp only [ne_eq, reduceCtorEq,
           not_false_eq_true], rfl⟩
       · obtain ⟨r, hr, hq⟩ := ihx h
         refine ⟨r.append (Path.index it (PrimTy.key ((y.denote σ).getD (PrimTy.dflt _)))), ?_, ?_⟩
-        · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+        · rw [Path.labels_append]; exact List.append_ne_nil_of_left_ne_nil hr _
         · show ObsLoc.app (x.denote σ) _ = _
           rw [hq, ObsLoc.app_app]
     | _ => cases h
@@ -886,11 +899,11 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
     | atIn it =>
       rcases Bool.or_eq_true_iff.mp h with h | h
       · cases Tm.sigma_eq_of_beqR h
-        exact ⟨_, by rw [Path.erase_index']; simp only [ne_eq, reduceCtorEq,
+        exact ⟨_, by rw [Path.labels_index']; simp only [ne_eq, reduceCtorEq,
           not_false_eq_true], rfl⟩
       · obtain ⟨r, hr, hq⟩ := ihy h
         refine ⟨r.append (Path.index it (PrimTy.key ((z.denote σ).getD (PrimTy.dflt _)))), ?_, ?_⟩
-        · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+        · rw [Path.labels_append]; exact List.append_ne_nil_of_left_ne_nil hr _
         · show ObsLoc.app (y.denote σ) _ = _
           rw [hq, ObsLoc.app_app]
     | _ => cases h
@@ -898,7 +911,7 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
 
 theorem Tm.extends_denote {T U : Ty} {p : Tm C Γ (.path U)} (q : Tm C Γ (.path T))
     (h : q.extends p = true) :
-    ∃ r : Path U T, r.erase ≠ [] ∧ q.denote σ = ObsLoc.app (p.denote σ) r := by
+    ∃ r : Path U T, r.labels ≠ [] ∧ q.denote σ = ObsLoc.app (p.denote σ) r := by
   exact Tm.extends_denote' σ q h
 
 /-- What `shift?` gives splits the location at its head: the member path
@@ -1552,7 +1565,7 @@ theorem Tm.findLitIn?_denote {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
 /-- `q.extendsIn p` gives `q`'s location `p`'s followed by a path. -/
 theorem Tm.extendsIn_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C Γ (.spath sn U)}
     (q : Tm C Γ (.spath sn T)) (h : q.extendsIn p = true) :
-    ∃ r : Path U T, r.erase ≠ [] ∧ q.denote σ = ObsLoc.app (p.denote σ) r := by
+    ∃ r : Path U T, r.labels ≠ [] ∧ q.denote σ = ObsLoc.app (p.denote σ) r := by
   have key : ∀ {u : Srt} (q : Tm C Γ u), q.extendsAnyIn (·.beqR p) = true →
       Srt.BelowIn (p.denote σ) u (q.denote σ) := by
     intro u q
@@ -1567,13 +1580,13 @@ theorem Tm.extendsIn_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C �
         · have e2 := Tm.sigma_eq_of_beqR h
           simp only [Sigma.mk.injEq, Srt.spath.injEq] at e2
           obtain ⟨⟨-, rfl⟩, hh⟩ := e2
-          refine ⟨.field hf .nil, by simp only [Path.erase, ne_eq, reduceCtorEq,
+          refine ⟨.field hf .nil, by simp only [Path.labels, ne_eq, reduceCtorEq,
             not_false_eq_true], ?_⟩
           show ObsLoc.app (x.denote σ) _ = _
           rw [eq_of_heq hh]
         · obtain ⟨r, hr, hq⟩ := ih h rfl
           refine ⟨r.append (.field hf .nil), ?_, ?_⟩
-          · rw [Path.erase_append]; exact List.append_ne_nil_of_left_ne_nil hr _
+          · rw [Path.labels_append]; exact List.append_ne_nil_of_left_ne_nil hr _
           · show ObsLoc.app (x.denote σ) _ = _
             rw [show x.denote σ = _ from hq, ObsLoc.app_app]
       | _ => cases h

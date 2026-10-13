@@ -597,26 +597,28 @@ def EnvSim (t : TTx) (m : Machine) : Prop :=
     m.caller < W ∧ m.callvalue < W ∧ m.timestamp < W ∧ m.self < W
 
 /-- `net(a)`: the ledger's entry at `a`, `0` where nothing was booked. -/
-def netAt (net : List (Int × Int)) (a : Int) : Int := (Semantics.lookupBy a net).getD 0
+def netAt (net : Ledger) (a : Int) : Int := (Semantics.lookupBy a (Ledger.entries net)).getD 0
 
 /-- The ledger after a payment of `y` to `x`: as it was when `x` is the
 contract itself, else `x`'s entry down by `y`. -/
-theorem netAt_pay {C : Contract} {Γ : Ctx} (τ : State C Γ) (x y a : Int) :
+theorem netAt_pay {C : Contract} {Γ : Ctx} (τ : State C Γ)
+    (x : PrimTy.uint.Denote) (y a : Int) :
     netAt (τ.pay x y).net a =
-      if x = τ.tx.selfAddress.1 then netAt τ.net a
-      else if a = x then netAt τ.net x - y else netAt τ.net a := by
-  by_cases h1 : x = τ.tx.selfAddress.1
-  · simp only [State.pay, netAt, h1, ↓reduceIte]
-  · simp only [State.pay, netAt, h1, ↓reduceIte]
-    by_cases h2 : a = x
-    · subst h2; simp only [Semantics.lookupBy_setBy_self, ↓reduceIte, Option.getD_some]
-    · simp only [Semantics.lookupBy_setBy_ne h2, h2, ↓reduceIte]
+      if x.1 = τ.tx.selfAddress.1 then netAt τ.net a
+      else if a = x.1 then netAt τ.net x.1 - y else netAt τ.net a := by
+  by_cases h1 : x.1 = τ.tx.selfAddress.1
+  · simp only [State.pay, netAt, h1, if_true]
+  · simp only [State.pay, netAt, h1, if_false, Ledger.entries_setBy]
+    by_cases h2 : a = x.1
+    · subst a
+      simp only [Semantics.lookupBy_setBy_self, if_true, Option.getD_some, Ledger.lookup_entries]
+    · simp only [Semantics.lookupBy_setBy_ne h2, h2, if_false]
 
 variable {C : Contract} {L : Nat}
 
 /-- A primitive storage value is read as the word at its slot: `alice.age`
 pushes slot `13`'s word, an `int` its two's complement. -/
-theorem prim_read {st : Slot → Nat} {p : PrimTy} {s : Slot} {sv : SVal (.prim p)}
+theorem prim_read {st : WordStore} {p : PrimTy} {s : Slot} {sv : SVal (.prim p)}
     (h : ReprAt st L (.prim p) s sv) : ∃ v, sv = .prim v ∧ ReprV p v (.val (st s)) := by
   cases h with
   | prim h => exact ⟨_, rfl, h⟩
@@ -624,10 +626,10 @@ theorem prim_read {st : Slot → Nat} {p : PrimTy} {s : Slot} {sv : SVal (.prim 
 /-! ## Statements -/
 
 /-- A write to a primitive leaves every array's length. -/
-theorem upd_len {st : Slot → Nat} {a : Bool} {p : PrimTy} {r : SRef C (.prim p)} {s : Slot}
+theorem upd_len {st : WordStore} {a : Bool} {p : PrimTy} {r : SRef C (.prim p)} {s : Slot}
     (hp : PathSlot C a r s) (v : Nat) :
-    ∀ x, LenSlot C x → st x ≤ upd st s v x := fun x hx => by
-  rw [upd_other _ _ fun he => len_prim_disjoint hx (by rw [he]; exact hp.primSlot)]
+    ∀ x, LenSlot C x → st x ≤ WordStore.write st s v x := fun x hx => by
+  rw [WordStore.write_other _ _ fun he => len_prim_disjoint hx (by rw [he]; exact hp.primSlot)]
   exact Nat.le_refl _
 
 /-- `delete`'s writes: `0` at each leaf, the slot kept on the stack; `delete alice;` writes `11`,
@@ -638,16 +640,16 @@ theorem zeroCode_run (m : Machine) (st : List Word) (s : Slot) : ∀ (os : List 
   | [] => rfl
   | o :: os => by
     rw [zeroCode, List.flatMap_cons, ← zeroCode,
-      run_append_ok (m' := { m with stack := .slot s :: st, store := upd m.store (s.add o) 0 })
+      run_append_ok (m' := { m with stack := .slot s :: st, store := WordStore.write m.store (s.add o) 0 })
         (by simp [run, Instr.step, Machine.next])]
-    exact zeroCode_run { m with store := upd m.store (s.add o) 0 } st s os
+    exact zeroCode_run { m with store := WordStore.write m.store (s.add o) 0 } st s os
 
 /-- `pop` on the array at `s`: revert on an empty array, else the length
 decremented. -/
 theorem popCode_run (m : Machine) (st : List Word) (s : Slot) (hW : m.store s < W) :
     run popCode { m with stack := .slot s :: st } =
       if m.store s = 0 then .revert
-      else .ok { m with stack := st, store := upd m.store s (m.store s - 1) } 0 := by
+      else .ok { m with stack := st, store := WordStore.write m.store s (m.store s - 1) } 0 := by
   by_cases h : m.store s = 0
   · simp [run, popCode, assertTop, Instr.step, Machine.next, h]
   · have e : (m.store s + (W - 1)) % W = m.store s - 1 := by
@@ -659,19 +661,19 @@ theorem popCode_run (m : Machine) (st : List Word) (s : Slot) (hW : m.store s < 
 /-- A value written to a slot is represented there: a `uint` or a `bool` as
 itself, an `int` as its word. -/
 theorem repr_write {p : PrimTy} {v : p.Denote} {w : Word}
-    (hv : ReprV p v w) (st : Slot → Nat) (s : Slot) :
-    ∃ a, w = .val a ∧ ReprAt (upd st s a) L (.prim p) s (.prim v) := by
+    (hv : ReprV p v w) (st : WordStore) (s : Slot) :
+    ∃ a, w = .val a ∧ ReprAt (WordStore.write st s a) L (.prim p) s (.prim v) := by
   cases p with
   | uint =>
-    obtain ⟨a, _, ha, rfl⟩ := hv.uint_inv
-    exact ⟨a, rfl, .prim (by rw [upd_same]; exact ReprV.uint_of ha)⟩
+    obtain ⟨a, hW, ha, rfl⟩ := hv.uint_inv
+    exact ⟨a, rfl, .prim (by rw [WordStore.write_same_of_lt _ _ _ hW]; exact ReprV.uint_of ha)⟩
   | bool =>
     have := hv.bool_inv
     subst this
-    exact ⟨_, rfl, .prim (by rw [upd_same]; rfl)⟩
+    exact ⟨_, rfl, .prim (by rw [WordStore.write_same_of_lt _ _ _ (by cases v <;> decide)]; rfl)⟩
   | int =>
     obtain ⟨a, ha, hax, rfl⟩ := hv.int_inv
-    exact ⟨a, rfl, .prim ⟨a, by rw [upd_same], ha, hax⟩⟩
+    exact ⟨a, rfl, .prim ⟨a, by rw [WordStore.write_same_of_lt _ _ _ ha], ha, hax⟩⟩
 
 /-- `x++`'s code as an expression: `… old → … new v`, with `v` the new word
 for `++x` and the old one for `x++`. -/
@@ -701,35 +703,35 @@ theorem bumpCode_simT {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) {a : 
     · exact .inr ⟨h1, run_append_revert h3⟩
 
 /-- `st` with `vs` written at `d + o` for the offsets `os`, in order. -/
-def storeAt (st : Slot → Nat) (d : Slot) : List Nat → List Nat → Slot → Nat
-  | o :: os, v :: vs => storeAt (upd st (d.add o) v) d os vs
+def storeAt (st : WordStore) (d : Slot) : List Nat → List Nat → WordStore
+  | o :: os, v :: vs => storeAt (WordStore.write st (d.add o) v) d os vs
   | _, _ => st
 
 /-- Writing at some offsets leaves the other slots. -/
-theorem storeAt_other {d x : Slot} : ∀ {os vs : List Nat} {st : Slot → Nat},
+theorem storeAt_other {d x : Slot} : ∀ {os vs : List Nat} {st : WordStore},
     (∀ o ∈ os, x ≠ d.add o) → storeAt st d os vs x = st x
   | [], _, _, _ => rfl
   | _ :: _, [], _, _ => rfl
   | o :: os, v :: vs, st, h => by
     simp only [storeAt]
     rw [storeAt_other fun o' ho' => h o' (List.mem_cons_of_mem _ ho')]
-    exact upd_other _ _ (h o List.mem_cons_self)
+    exact WordStore.write_other _ _ (h o List.mem_cons_self)
 
 /-- Writing `f o` at each `d + o` leaves `f o` there. -/
-theorem storeAt_map (f : Nat → Nat) {d : Slot} {o : Nat} : ∀ {os : List Nat} {st : Slot → Nat},
+theorem storeAt_map (f : Nat → Nat) (hf : ∀ o, f o < W) {d : Slot} {o : Nat} : ∀ {os : List Nat} {st : WordStore},
     o ∈ os → storeAt st d os (os.map f) (d.add o) = f o
   | o' :: os, st, h => by
     simp only [List.map_cons, storeAt]
     by_cases ho : o ∈ os
-    · exact storeAt_map f ho
+    · exact storeAt_map f hf ho
     · obtain rfl : o = o' := by
         rcases List.mem_cons.1 h with h | h
         · exact h
         · exact absurd h ho
-      rw [storeAt_other fun o'' ho'' he => ho (by rw [Slot.add_inj he]; exact ho''), upd_same]
+      rw [storeAt_other fun o'' ho'' he => ho (by rw [Slot.add_inj he]; exact ho''), WordStore.write_same_of_lt _ _ _ (hf _)]
 
 /-- A write to a static value's leaves leaves every array's length. -/
-theorem storeAt_len {st : Slot → Nat} {a : Bool} {R : RefTy} {r : SRef C (.ref R)}
+theorem storeAt_len {st : WordStore} {a : Bool} {R : RefTy} {r : SRef C (.ref R)}
     {d : Slot} (hp : PathSlot C a r d) (hst : static (.ref R) = true)
     (vs : List Nat) : ∀ x, LenSlot C x → st x ≤ storeAt st d (leaves (.ref R)).reverse vs x :=
   fun x hx => by
@@ -739,7 +741,7 @@ theorem storeAt_len {st : Slot → Nat} {a : Bool} {R : RefTy} {r : SRef C (.ref
     exact Nat.le_refl _
 
 /-- A `push`'s writes: the length one more, and the new element's primitives. -/
-theorem push_len {st st' : Slot → Nat} {a : Bool} {E : Ty} {r : SRef C (.ref (.array E))}
+theorem push_len {st st' : WordStore} {a : Bool} {E : Ty} {r : SRef C (.ref (.array E))}
     {s : Slot} (hp : PathSlot C a r s) (n : Nat)
     (hs : st' s = st s + 1)
     (hw : ∀ x, x ≠ s → st' x ≠ st x → OccAt true E (.data s (n * size E)) x) :
@@ -767,14 +769,14 @@ theorem loadLeaves_run (m : Machine) (s : Slot) : ∀ (os : List Nat) (st : List
 
 /-- `storeLeaves`: each word stored at `d + o`. -/
 theorem storeLeaves_run (m : Machine) (d : Slot) : ∀ (os vs : List Nat) (st : List Word)
-    (mst : Slot → Nat), os.length = vs.length →
+    (mst : WordStore), os.length = vs.length →
     run (storeLeaves os) { m with stack := .slot d :: (vs.map Word.val ++ st), store := mst } =
       .ok { m with stack := .slot d :: st, store := storeAt mst d os vs } 0
   | [], [], st, mst, _ => rfl
   | o :: os, v :: vs, st, mst, h => by
     rw [storeLeaves, List.flatMap_cons, ← storeLeaves,
       run_append_ok
-        (m' := { m with stack := .slot d :: (vs.map Word.val ++ st), store := upd mst (d.add o) v })
+        (m' := { m with stack := .slot d :: (vs.map Word.val ++ st), store := WordStore.write mst (d.add o) v })
         (by simp [run, Instr.step, Machine.next]),
       storeLeaves_run m d os vs st _ (by simpa using h)]
     rfl
@@ -799,20 +801,20 @@ theorem pushSlotCode_run (m : Machine) (st : List Word) (z : Nat) (s : Slot)
     run (pushSlotCode z) { m with stack := .slot s :: st } =
       .ok { m with
         stack := .slot (.data s (m.store s * z)) :: st
-        store := upd m.store s (m.store s + 1) } 0 := by
+        store := WordStore.write m.store s (m.store s + 1) } 0 := by
   have hW := Lmax_lt_W
   have e : (m.store s + 1) % W = m.store s + 1 := Nat.mod_eq_of_lt (by omega)
   have h1 : run ([.dup 1, .sload, .push (.val Lmax), .dup 2, .lt] ++ assertTop ++
       [.push (.val 1), .dup 2, .add, .dup 3, .sstore]) { m with stack := .slot s :: st } =
       .ok { m with
         stack := .val (m.store s) :: .slot s :: st
-        store := upd m.store s (m.store s + 1) } 0 := by
+        store := WordStore.write m.store s (m.store s + 1) } 0 := by
     simp [run, assertTop, Instr.step, Machine.next, hl, e, bword]
   rw [pushSlotCode, run_append_ok h1]
-  exact elemSlot_run { m with store := upd m.store s (m.store s + 1) } st (m.store s) z s
+  exact elemSlot_run { m with store := WordStore.write m.store s (m.store s + 1) } st (m.store s) z s
 
 /-- A slot holding `0` represents a primitive type's default. -/
-theorem zero_prim_repr {st : Slot → Nat} {p : PrimTy} {x : Slot}
+theorem zero_prim_repr {st : WordStore} {p : PrimTy} {x : Slot}
     (h : st x = 0) : ReprAt st L (.prim p) x (SVal.dflt (.prim p)) :=
   .prim (by rw [h]; exact ReprV.dflt_zero p)
 

@@ -265,7 +265,7 @@ theorem lift_setLocal (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) {t
     (τ.lift h d).setLocal (i.wk h) v = (τ.setLocal i v).lift h d := by
   simp only [lift, setLocal, withEnv, TEnv.set_put]
 
-theorem lift_pay (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) (a m : Int) :
+theorem lift_pay (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) (a : PrimTy.uint.Denote) (m : Int) :
     (τ.lift h d).pay a m = (τ.pay a m).lift h d := rfl
 
 theorem lift_withStorage (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) (st : Storage C) :
@@ -595,7 +595,7 @@ theorem OpLoc.bumpT_wk (op : IncDec) {p : PrimTy} (l : OpLoc C Γ p) :
       liftedT₂_bind, bumpMemT_lift]
     rfl
 
-theorem sendT_lift (pv : Idx Γ (.val .bool)) (addr amt : Int) :
+theorem sendT_lift (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.Denote) :
     sendT (τ.lift h d) (pv.wk h) addr amt = Out.lift h d (sendT τ pv addr amt) := by
   unfold sendT
   rw [show (τ.lift h d).tx = τ.tx from rfl]

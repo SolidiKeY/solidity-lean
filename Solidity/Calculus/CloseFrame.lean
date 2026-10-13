@@ -9,7 +9,7 @@ say of the storage it returns (`Calculus/TermLaws.lean`'s frame section):
 `findOnSave` at the path written and below it, and `findOnSaveFrame`,
 `lenOnSaveFrame` where the paths part (solkey's `selectOnSaveCons`, its
 `\then` and its `\else`), the parting read
-as the Theory's `diverges` on the references' segments (`SRef.segs`), which
+as the Theory's `diverges` on the references' segments (`SRef.labels`), which
 the closer computes, a symbolic key by a hypothesis `k != j` of the formula
 or a branch.  An index check (`Storage.checkIndex`) is framed as an array's
 length is: it reads the length only (or nothing, for a mapping).
@@ -32,7 +32,7 @@ variable {C : Contract}
 below one of the array's slots leaves it. -/
 theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) (i : Int)
     {y y' : SVal (.ref R)} {rr : Path (.ref R) W} {v : SVal W} (h : y.saveM rr v = some y')
-    (hne : rr.erase ≠ []) : inBounds it i y' = inBounds it i y := by
+    (hne : rr.labels ≠ []) : inBounds it i y' = inBounds it i y := by
   cases it with
   | map => rfl
   | arr a =>
@@ -40,7 +40,7 @@ theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) 
     | fixed => rfl
     | dyn =>
       cases rr with
-      | nil => exact absurd rfl hne
+      | nil => exact absurd Path.labels_nil hne
       | «at» j rr' =>
         show (if 0 ≤ i ∧ i.toNat < (SVal.view y' : ArrView _).n then some () else none) =
           (if 0 ≤ i ∧ i.toNat < (SVal.view y : ArrView _).n then some () else none)
@@ -52,19 +52,19 @@ check reads). -/
 theorem checkIndex_save_frame {k : PrimTy} {V : Ty} {T : Ty} {R' : RefTy}
     {st st' : Storage C} {r : SRef C T} {v : SVal T} {q : SRef C (.ref R')}
     (it : IndexTy R' k V) (i : Int)
-    (hd : diverges r.segs (q.segs ++ [lengthSeg]) = true) (h : st.save r v = some st') :
+    (hd : diverges r.labels (q.labels ++ [lengthSeg]) = true) (h : st.save r v = some st') :
     st'.checkIndex q it i = st.checkIndex q it i := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
   · simp only [Storage.checkIndex, find_save_frame hd h]
   · obtain ⟨x', hs, rfl⟩ := save_some h
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
-    simp only [SRef.segs, List.cons_append, List.cons.injEq,
-      Semantics.Seg.field.injEq] at he
+    simp only [SRef.labels, List.cons_append, List.cons.injEq,
+      Semantics.Selector.field.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
-    obtain ⟨rr, rfl, hrr⟩ := Path.split_of_erase p' p he
+    obtain ⟨rr, rfl, hrr⟩ := Path.split_of_labels p' p he
     rw [SVal.save_eq_saveM] at hs
     obtain ⟨y, y', hy, hy', hx'⟩ := SVal.saveM_append _ p' rr v hs
     have hfy' : x'.findM p' = some y' := SVal.findM_saveM _ p' y' hx'
@@ -234,19 +234,20 @@ theorem append_append {T U W : Ty} (r : SRef C T) (p : Path T U) (q : Path U W) 
     (r.append p).append q = r.append (p.append q) := by
   simp only [SRef.append, Path.append_assoc]
 theorem root_append {T U : Ty} (r : SRef C T) (p : Path T U) : (r.append p).root = r.root := rfl
-theorem segs_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
-    (SRef.ofRoot r h).segs = [.field r] := rfl
-theorem segs_append {T U : Ty} (r : SRef C T) (p : Path T U) :
-    (r.append p).segs = r.segs ++ p.erase := by
-  simp only [SRef.segs, SRef.append, Path.erase_append, List.cons_append]
-theorem diverges_nil_left (q : List Semantics.Seg) : diverges [] q = false := rfl
-theorem diverges_nil_right (a : Semantics.Seg) (p : List Semantics.Seg) :
+theorem labels_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
+    (SRef.ofRoot r h).labels = [.field r] := by
+  simp only [SRef.labels, SRef.ofRoot, Path.labels]
+theorem labels_append {T U : Ty} (r : SRef C T) (p : Path T U) :
+    (r.append p).labels = r.labels ++ p.labels := by
+  simp only [SRef.labels, SRef.append, Path.labels_append, List.cons_append]
+theorem diverges_nil_left (q : List Semantics.Selector) : diverges [] q = false := rfl
+theorem diverges_nil_right (a : Semantics.Selector) (p : List Semantics.Selector) :
     diverges (a :: p) [] = false := rfl
 /-- `diverges` as `sol_close` reads it, with the disequation both ways
 round: a premise `k != j` then frames
 `balances[k]` against `balances[j]` whichever of the two was written
 first. -/
-theorem diverges_cons (a b : Semantics.Seg) (p q : List Semantics.Seg) :
+theorem diverges_cons (a b : Semantics.Selector) (p q : List Semantics.Selector) :
     diverges (a :: p) (b :: q) = true ↔ (¬ a = b ∨ ¬ b = a) ∨ diverges p q = true := by
   simp only [Theory.diverges]
   by_cases h : a = b
@@ -258,8 +259,8 @@ theorem key_int (n : Int) (h : PrimTy.int.inRange n = true) :
     PrimTy.key (p := .int) ⟨n, h⟩ = n := rfl
 theorem key_uint' (a : PrimTy.uint.Denote) : PrimTy.key a = a.val := rfl
 theorem key_int' (a : PrimTy.int.Denote) : PrimTy.key a = a.val := rfl
-theorem netOfT_def (l : List (Int × Int)) (n : PrimTy.uint.Denote) :
-    Tm.netOfT l n = some ((Semantics.lookupBy n.1 l).getD 0) := rfl
+theorem netOfT_def (l : Ledger) (n : PrimTy.uint.Denote) :
+    Tm.netOfT l n = some ((Semantics.lookupBy n l).getD 0) := rfl
 /-- A mapping's slot at a root is always there. -/
 theorem checkIndex_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
     (h : C.rootType r = some (Ty.ref (RefTy.mapping (.prim k) V))) (i : Int) :
@@ -393,7 +394,7 @@ theorem wp_box_ofId {H : HTy} {R : RefTy} {id : Nat} {P : HRef H R → Prop} :
 
 theorem withStorage_memT_readId {H : HTy} (g : GlobT C H) (st : Storage C) {T : Ty}
     (a : MAddrT T) : (g.withStorage st).1.memT.readId a = g.1.memT.readId a := rfl
-theorem withNet_memT_readId {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) {T : Ty}
+theorem withNet_memT_readId {H : HTy} (g : GlobT C H) (nt : Ledger) {T : Ty}
     (a : MAddrT T) : (g.withNet nt).1.memT.readId a = g.1.memT.readId a := rfl
 theorem withBalance_memT_readId {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) {T : Ty}
     (a : MAddrT T) : (g.withBalance b).1.memT.readId a = g.1.memT.readId a := rfl
@@ -544,11 +545,11 @@ theorem wp_box_write {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
       ∀ st', st.write r v = some st' →
         st'.find r = st.writeVal r v →
         (∀ {W : Ty} (p : Path T W), st'.find (r.append p) = (st.writeVal r v).bind (·.find p)) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.labels q.labels = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.labels (q.labels ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.segs (q.segs ++ [lengthSeg]) = true →
+          diverges r.labels (q.labels ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   cases h : st.write r v with
@@ -573,11 +574,11 @@ theorem wp_box_delete {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C �
         st'.find r = (st.find r).map (fun x => x.defaultOf) →
         (∀ {W : Ty} (p : Path T W), st'.find (r.append p) =
           (st.find r).bind fun x => x.defaultOf.find p) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.labels q.labels = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.labels (q.labels ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.segs (q.segs ++ [lengthSeg]) = true →
+          diverges r.labels (q.labels ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   cases h : st.delete r with
@@ -599,11 +600,11 @@ theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {
     {P : Storage C → Prop} :
     Modality.box.wp (Close.optRes (st.write r (.prim x))) P ↔
       ∀ st', st.write r (.prim x) = some st' → st'.find r = some (.prim x) →
-        (∀ {W : Ty} (q : SRef C W), diverges r.segs q.segs = true → st'.find q = st.find q) →
+        (∀ {W : Ty} (q : SRef C W), diverges r.labels q.labels = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
-          diverges r.segs (q.segs ++ [lengthSeg]) = true → st'.len q = st.len q) →
+          diverges r.labels (q.labels ++ [lengthSeg]) = true → st'.len q = st.len q) →
         (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
-          diverges r.segs (q.segs ++ [lengthSeg]) = true →
+          diverges r.labels (q.labels ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
   rw [wp_box_write]
@@ -620,7 +621,7 @@ attribute [close_rw_s high] CloseS.wp_box_write_prim CloseS.wp_diamond_write_tot
 
 attribute [close_rw_s]
   CloseS.wp_box_write CloseS.field_append CloseS.index_append CloseS.append_append
-  CloseS.root_append CloseS.segs_ofRoot CloseS.segs_append CloseS.diverges_nil_left
+  CloseS.root_append CloseS.labels_ofRoot CloseS.labels_append CloseS.diverges_nil_left
   CloseS.diverges_nil_right CloseS.diverges_cons CloseS.key_uint CloseS.key_int
   CloseS.key_uint' CloseS.key_int' CloseS.netOfT_def
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
@@ -639,7 +640,7 @@ attribute [close_rw_s]
   CloseS.exists_val_eq_int
   CloseS.wp_box_find SVal.find_overlay_field SVal.overlay_prim' SVal.find_nil Function.comp_def
   Path.index_map Path.index_dyn Path.index_fixed Path.append_nil Path.append_field Path.append_at
-  Path.append_atF Path.append_key Path.erase Semantics.Seg.field.injEq Semantics.Seg.at.injEq
+  Path.append_atF Path.append_key Path.labels Semantics.Selector.field.injEq Semantics.Selector.at.injEq
   List.cons_append List.nil_append
 
 end Solidity

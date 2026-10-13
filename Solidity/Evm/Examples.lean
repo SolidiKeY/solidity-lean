@@ -252,7 +252,7 @@ theorem arrays_revert :
 
 theorem arrays_run :
     let o := run (codeOf sol{ values[1] = 7; values.pop(); })
-      { fresh with store := upd (fun _ => 0) (.root 4) 2 }
+      { fresh with store := WordStore.write WordStore.zero (.root 4) 2 }
     Examples.storeAt o (.data (.root 4) 1) = some 7 ∧ Examples.storeAt o (.root 4) = some 1 := by
   decide +kernel
 
@@ -291,7 +291,7 @@ theorem selfBalance_out :
 
 theorem length_run :
     slotAfter sol{ total = values.length; } (.root 0)
-      { fresh with store := upd (fun _ => 0) (.root 4) 3 } = some 3 := by
+      { fresh with store := WordStore.write WordStore.zero (.root 4) 3 } = some 3 := by
   decide +kernel
 
 theorem bumps_wt : compiles bumps := by decide +kernel
@@ -322,7 +322,7 @@ theorem pushPerson_run :
   decide +kernel
 
 theorem pushLimit_run :
-    reverts sol{ values.push(1); } { fresh with store := upd (fun _ => 0) (.root 4) Lmax }
+    reverts sol{ values.push(1); } { fresh with store := WordStore.write WordStore.zero (.root 4) Lmax }
       = true := by
   decide +kernel
 
@@ -342,7 +342,7 @@ theorem pow_wt : compiles (sol{ total = 3 ** 5; } : Solidity.Prog StandardExampl
 theorem elemAlias_wt : compiles elemAlias := by decide +kernel
 
 theorem elemAlias_run :
-    let o := run (codeOf elemAlias) { fresh with store := upd (fun _ => 0) (.root 9) 1 }
+    let o := run (codeOf elemAlias) { fresh with store := WordStore.write WordStore.zero (.root 9) 1 }
     Examples.storeAt o (.data (.root 9) 2) = some 7 ∧ Examples.storeAt o (.root 0) = some 7 := by
   decide +kernel
 

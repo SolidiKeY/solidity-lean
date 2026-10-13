@@ -7091,7 +7091,8 @@ simulation (`Evm/Sim.lean`'s `Sim` over `State.sem`, `Evm/Repr.lean`'s
 `Heap.into`, `Update.lean`'s `readAddr`, `Calculus/ReadWrite.lean`), and
 the tools (`Prog.runT`, `#run`, `#difftest`, `Semantics/ToSem.lean`).
 
-**What stays untyped, and why.**  `PrimVal`/`Value`, `ExtKey`,
+**Original W10.5 exceptions (superseded by Typed boundary follow-up below).**
+`PrimVal`/`Value`, `ExtKey`,
 `ExtResult`: the ABI data of external calls and the tools' arguments,
 external data, not state.  `Seg` and a path's segments (`Path.erase`,
 renamed `Path.segs`), `Theory.diverges`, `SegT`: the side conditions' path
@@ -7885,14 +7886,11 @@ untyped Theory is gone.
 W10.5.7).  There is no untyped state: the run's invariants, the EVM
 simulation, the memory laws, the tools and `wt(storage)` read the typed
 state, and `Semantics.State`, its operations and the erasure modules are
-deleted.  What stays untyped is not state, and stays so by design: the ABI
-values (`Semantics.lean`'s `Value`, `ExtKey`, `ExtResult`, and a typed
-value as a word, `PrimTy.erase`/`ofValue?`), which are external data (a
-call's arguments and returned data, the tools' arguments and output); a
-path's segments (`Seg`, `Path.erase`, `Theory.diverges`, `SegT`), the
-side conditions' path syntax; the ledger (`List (Int × Int)`), KeY's
-unbounded `int`; the EVM's word store (`Slot → Nat`), the machine's own
-(its operator tails are proved on the typed operators, W10.5.7).
+deleted. The remaining boundaries were typed in the follow-up below:
+external-call inputs, path segments, ledger keys and EVM storage words.
+Wire responses and tool input/output remain decoded observations;
+selector labels serve comparison and schema analysis.
+
 
 **Open items:**
 - `TestSuite/Report.lean` was not checked after W10.5.6 (memory); its
@@ -7920,3 +7918,80 @@ unbounded `int`; the EVM's word store (`Slot → Nat`), the machine's own
   checkout of solkey `1b4341a303` (`TestSuite.sol` `2fe50a03`);
   `../solkey` itself is stale (`c166991551`, `TestSuite.sol` `a4bca545`).
 - Lean docstrings may still call the erased side "today's" in places.
+
+## Typed boundary follow-up
+
+The four W10.5 exceptions are no longer the representations of call
+inputs, paths, ledger keys or machine storage:
+
+- `Semantics.lean`: `PrimTy.Denote` moved below syntax so `ExtKey` can
+  hold a bounded receiver and `CallValue` arguments directly. Each argument
+  keeps its Solidity primitive type and numeric range proof. `sendKey`
+  and `sendT` take typed addresses and amounts. `ExtCall.keyT` packages
+  evaluated typed values, rather than erasing them to `Value`.
+- `Semantics/Storage.lean`: `Seg T U` is one typed transition,
+  `Segs T U` a sequence whose intermediate types agree. `Path.segments`
+  uses the recursor, with its checked compiled twin, and
+  `RefSegments C U` retains the contract's root lookup proof.
+  `Path.labels` and `SRef.labels` compute observations of these typed
+  sequences. The old `Seg` comparison labels are named `Selector`, and
+  `Path.erase` is removed. The frame laws and closer retain their
+  comparison and schema-analysis behavior on these observations.
+- `Semantics/Value.lean`: `Ledger` stores bounded Solidity addresses as
+  keys and unbounded signed KeY `int` amounts. State, snapshot locals,
+  havoc, deployment, updates and counterexample candidates use it.
+  `Ledger.entries` is a numeric observation for the EVM bridge;
+  `lookup_entries` and `entries_setBy` prove the bridge agrees.
+- `Evm/Machine.lean`: `WordStore` holds `Fin (2^256)` at every slot.
+  Numeric reads have a range proof; `write` and `ofFn` explicitly
+  normalize input to the low 256 bits. `SSTORE`, the representation,
+  helper writes, simulation, compiler proofs and differential-test
+  generator use the bounded store. Writes of already bounded values
+  have the same observations as before.
+
+Two boundaries still need validation: external **responses** are wire
+`Value` data, since a callee can return malformed or insufficient data;
+`Binders.decodeT` and `CodeBinder.decodeT` validate them. Path indices and
+hashed mapping keys remain unchecked `Int` positions, as `Path` already
+requires for revert, dangling and ghost locations. Segment endpoint
+types are enforced; index liveness is checked on storage access.
+
+No dependency, axiom, `sorry` or heartbeat override was added. Interpreter
+arithmetic remains on `Int` with range proofs; the history's earlier
+performance choice to avoid bitvector arithmetic there is preserved.
+
+**Read-only finder/skeptic review:** no confirmed runtime or soundness
+regression. Both found stale descriptions of the former exceptions;
+those descriptions are updated. The finder also noted that selector
+observations calculate member types in fresh-memory closing, beyond
+comparing paths; the API documentation states both uses. Neither review
+called Lean or the MCP server. Regression examples are in
+`Examples/Tactics/Boundaries.lean`: the interpreter preserves argument
+types, malformed boundary terms fail elaboration, ledger amounts exceed
+256 bits, segment mismatches fail, and oversized word writes normalize.
+
+**Validation:**
+
+- `./run-lean.sh`: both Lean builds succeeded (274 default jobs and
+  143 `SolkeyTestSuite` jobs), including the theorem axiom pins and the
+  report's 437 derived proofs. The script exits 1 at its final sort check:
+  the sibling checkout is `c166991551` (347 taclets), and this checkout's local
+  `.lake/build/bin/solkeycheck` uses an old 115-row table. The current
+  source and artifact used by the library have 119 rows (also checked
+  directly by a kernel proof of the table length). Neither checker source,
+  annotation table, corpus fixture nor upstream pin was changed here.
+- Fresh-source checker against pinned solkey `1b4341a303`:
+  `lake env lean --tstack=131072 --setup .lake/build/ir/Solidity.setup.json --run SolkeyCheck.lean --key <pinned-rules>`:
+  exit 0, 323 taclets, 119 read-bearing, 119 table rows, zero mismatches.
+  The root's current setup is used because the old executable's setup
+  still points at the stale local annotation artifact.
+- `./scripts/check-testsuite.sh --complete --solkey <pinned-examples>`:
+  exit 0, trust audit of 21 modules clean; 438 test functions = 437
+  derived + 1 excluded, zero pending or divergent; two skips.
+  The pinned checkout used for both comparisons is a local shared clone
+  in `/tmp/typed-boundaries-solkey-pinned`, detached at `1b4341a303`.
+- `node scripts/check-orphans.mjs`: exit 0, 292 reachable, zero orphaned.
+- `./scripts/check-doc-paths.sh`: exit 0, all references resolve (eight
+  existing ambiguous short filenames).
+- `git diff --check`: clean. Final finder/skeptic pass confirmed no
+  material correctness, integration or documentation issue.

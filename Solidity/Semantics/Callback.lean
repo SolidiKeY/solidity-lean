@@ -238,7 +238,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- KeY's "resume after callback": control leaves with `J` kept and comes
   back to any state the callee may leave in which `J` holds. -/
   | transferResume {Γ : Ctx} {σ : State C Γ} {r a : Val C Γ .uint} {o₁ : Out C σ.H Γ}
-      {st : Storage C} {nt : List (Int × Int)} :
+      {st : Storage C} {nt : Ledger} :
       TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
         ExecS J σ (.transfer r a) (.ok ⟨o₁.st.havoc st nt, o₁.ext⟩)
   /-- A send that halts, where its transfer would. -/
@@ -258,7 +258,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- KeY's "send succeeded": the payment booked, `J` kept, any state the
   callee may leave in which `J` holds, `pv` then `true`. -/
   | sendResume {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
-      {o₁ : Out C σ.H Γ} {st : Storage C} {nt : List (Int × Int)} :
+      {o₁ : Out C σ.H Γ} {st : Storage C} {nt : Ledger} :
       TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
         ExecS J σ (.send pv r a)
           (.ok ⟨(o₁.st.havoc st nt).setLocal pv (true : Bool), o₁.ext⟩)
@@ -307,7 +307,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   which `J` holds, the return data bound, the clause run, its locals popped. -/
   | tryOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {st : Storage C} {nt : List (Int × Int)}
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {st : Storage C} {nt : Ledger}
       {vs rest : List Value} {r : TEnv C σ.H ρ} {o : COut C σ.H Γ₁} :
       J.at σ → J.at (σ.havoc st nt) → rets.decodeT vs = .ok (r, rest) →
         ExecP J ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) ok o →
@@ -432,7 +432,7 @@ theorem TRun.send_cases (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (σ : 
     | ok amt =>
       refine .inr ⟨_, rfl, ?_⟩
       simp only [pure, Except.pure, sendT]
-      rcases lookupBy (sendKey addr.1 amt.1) σ.tx.ext with _ | (_ | _ | _ | _)
+      rcases lookupBy (sendKey addr amt) σ.tx.ext with _ | (_ | _ | _ | _)
       · exact .inl rfl
       · exact .inl rfl
       · exact .inr rfl

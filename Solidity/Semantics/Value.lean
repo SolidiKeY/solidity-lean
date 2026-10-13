@@ -3,36 +3,59 @@ import Solidity.Semantics
 /-!
 # Typed primitive values
 
-What a value of a primitive type is, by its type (`docs/intrinsic.md`,
+The operations on a primitive value, by its type (`docs/intrinsic.md`,
 Decision 3, M4a): a `bool` a `Bool`, a `uint` or an `int` an integer in its
 type's range.  Arithmetic stays on `Int`, so the kernel never unfolds
 `Nat.land` on a `uint` (56642ee); the range is a proof beside the number.
 
 `PrimTy.erase` is its ABI word (`Semantics.Value`): what a call's
-arguments and returned data are made of and what the tools print, and
+returned wire data is made of and what the tools print, and
 `PrimTy.ofValue?` reads one back, where the word has the type: what a `try`
 decodes and what the tools take as arguments.
 -/
 
 namespace Solidity
 
-/-- The values of the primitive type `p`. -/
-def PrimTy.Denote : PrimTy → Type
-  | .bool => Bool
-  | .uint => {n : Int // PrimTy.uint.inRange n = true}
-  | .int => {n : Int // PrimTy.int.inRange n = true}
+/-- KeY's ledger: bounded Solidity addresses, unbounded signed net amounts.
+A ledger cannot contain a boolean, a negative address or an overflowing address. -/
+abbrev Ledger := List (PrimTy.uint.Denote × Int)
+
+namespace Ledger
+
+/-- Numeric observations for the EVM bridge; the stored keys remain typed. -/
+def entries (l : Ledger) : List (Int × Int) := l.map fun (a, n) => (a.1, n)
+
+/-- A numeric read at a typed address is its typed read. -/
+theorem lookup_entries (a : PrimTy.uint.Denote) (l : Ledger) :
+    Semantics.lookupBy a.1 (entries l) = Semantics.lookupBy a l := by
+  induction l with
+  | nil => rfl
+  | cons entry rest ih =>
+    obtain ⟨b, w⟩ := entry
+    by_cases h : a = b
+    · subst b
+      simp only [entries, List.map_cons, Semantics.lookupBy, if_true]
+    · have hn : a.1 ≠ b.1 := fun e => h (Subtype.ext e)
+      simp only [entries, List.map_cons, Semantics.lookupBy, h, hn, if_false]
+      exact ih
+
+/-- Writing a typed address agrees with the numeric EVM observation. -/
+theorem entries_setBy (a : PrimTy.uint.Denote) (v : Int) (l : Ledger) :
+    entries (Semantics.setBy a v l) = Semantics.setBy a.1 v (entries l) := by
+  induction l with
+  | nil => rfl
+  | cons entry rest ih =>
+    obtain ⟨b, w⟩ := entry
+    simp only [entries] at ih
+    by_cases h : a = b
+    · subst b
+      simp only [Semantics.setBy, entries, List.map_cons, if_true]
+    · have hn : a.1 ≠ b.1 := fun e => h (Subtype.ext e)
+      simp only [Semantics.setBy, h, hn, if_false, entries, List.map_cons, ih]
+
+end Ledger
 
 namespace PrimTy
-
-instance decEqDenote : (p : PrimTy) → DecidableEq p.Denote
-  | .bool => inferInstanceAs (DecidableEq Bool)
-  | .uint => inferInstanceAs (DecidableEq {n : Int // PrimTy.uint.inRange n = true})
-  | .int => inferInstanceAs (DecidableEq {n : Int // PrimTy.int.inRange n = true})
-
-instance reprDenote : (p : PrimTy) → Repr p.Denote
-  | .bool => inferInstanceAs (Repr Bool)
-  | .uint => ⟨fun n _ => repr n.1⟩
-  | .int => ⟨fun n _ => repr n.1⟩
 
 /-- The untyped value of a typed one. -/
 def erase : {p : PrimTy} → p.Denote → Semantics.Value

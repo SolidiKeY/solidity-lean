@@ -23,7 +23,7 @@ namespace Solidity
 section
 open Semantics
 
-theorem Ty.memberTy_snoc_some {T T' : Ty} {p : List Seg} {s : Seg}
+theorem Ty.memberTy_snoc_some {T T' : Ty} {p : List Selector} {s : Selector}
     (h : T.memberTy (p ++ [s]) = some T') : ∃ R', T.memberTy p = some (.ref R') := by
   rw [Ty.memberTy_append] at h
   cases hp : T.memberTy p with
@@ -50,14 +50,14 @@ inductive SegT where
   deriving DecidableEq, Repr
 
 /-- The segment has the shape. -/
-def SegT.fits : SegT → Seg → Bool
+def SegT.fits : SegT → Selector → Bool
   | .field f, .field g => f == g
   | .at (some k), .at i => k == i
   | .at none, .at _ => true
   | _, _ => false
 
 /-- The path has the shape, segment by segment. -/
-def SegT.matches : List SegT → List Seg → Bool
+def SegT.matches : List SegT → List Selector → Bool
   | [], [] => true
   | x :: a, s :: p => x.fits s && SegT.matches a p
   | _, _ => false
@@ -85,7 +85,7 @@ def SegT.diverges : List SegT → List SegT → Bool
   | _, _ => false
 
 /-- Two paths that have the shapes `a ++ b` have the shape of their halves. -/
-theorem SegT.matches_append : (a b : List SegT) → (p q : List Seg) → SegT.matches a p = true →
+theorem SegT.matches_append : (a b : List SegT) → (p q : List Selector) → SegT.matches a p = true →
     SegT.matches b q = true → SegT.matches (a ++ b) (p ++ q) = true
   | [], _, [], _, _, hb => hb
   | x :: a, b, s :: p, q, ha, hb => by
@@ -95,24 +95,24 @@ theorem SegT.matches_append : (a b : List SegT) → (p q : List Seg) → SegT.ma
   | [], _, _ :: _, _, ha, _ | _ :: _, _, [], _, ha, _ => nomatch ha
 
 /-- `apart` decides the segments as it says. -/
-theorem SegT.apart_sound : {x y : SegT} → {d : Bool} → {s t : Seg} → x.apart y = some d →
+theorem SegT.apart_sound : {x y : SegT} → {d : Bool} → {s t : Selector} → x.apart y = some d →
     x.fits s = true → y.fits t = true → (d = true → s ≠ t) ∧ (d = false → s = t)
   | .field _, .field _, _, .field _, .field _, h, hs, ht => by
     simp only [SegT.fits, beq_iff_eq] at hs ht
     simp only [SegT.apart, Option.some.injEq] at h
     subst hs ht h
-    exact ⟨fun hne e => (bne_iff_ne.1 hne) (Seg.field.inj e),
+    exact ⟨fun hne e => (bne_iff_ne.1 hne) (Selector.field.inj e),
       fun he => by rw [bne_eq_false_iff_eq.1 he]⟩
   | .at (some _), .at (some _), _, .at _, .at _, h, hs, ht => by
     simp only [SegT.fits, beq_iff_eq] at hs ht
     simp only [SegT.apart, Option.some.injEq] at h
     subst hs ht h
-    exact ⟨fun hne e => (bne_iff_ne.1 hne) (Seg.at.inj e),
+    exact ⟨fun hne e => (bne_iff_ne.1 hne) (Selector.at.inj e),
       fun he => by rw [bne_eq_false_iff_eq.1 he]⟩
   | .field _, .at _, _, .field _, .at _, h, _, _ | .at _, .field _, _, .at _, .field _, h, _, _ => by
     simp only [SegT.apart, Option.some.injEq] at h
     subst h
-    exact ⟨fun _ e => Seg.noConfusion e, fun h => nomatch h⟩
+    exact ⟨fun _ e => Selector.noConfusion e, fun h => nomatch h⟩
   | .at none, .at _, _, _, _, h, _, _ | .at (some _), .at none, _, _, _, h, _, _ => by
     simp only [SegT.apart, reduceCtorEq] at h
   | .field _, _, _, .at _, _, _, hs, _ | .at _, _, _, .field _, _, _, hs, _ => by
@@ -121,7 +121,7 @@ theorem SegT.apart_sound : {x y : SegT} → {d : Bool} → {s t : Seg} → x.apa
     simp only [SegT.fits, Bool.false_eq_true] at ht
 
 /-- Shapes that diverge have paths that diverge. -/
-theorem SegT.diverges_sound : (a b : List SegT) → (p q : List Seg) → SegT.diverges a b = true →
+theorem SegT.diverges_sound : (a b : List SegT) → (p q : List Selector) → SegT.diverges a b = true →
     SegT.matches a p = true → SegT.matches b q = true → Theory.diverges p q = true
   | x :: a, y :: b, s :: p, t :: q, hd, ha, hb => by
     simp only [SegT.matches, Bool.and_eq_true] at ha hb

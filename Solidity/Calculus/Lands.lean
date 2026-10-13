@@ -50,7 +50,7 @@ denotes it; the rest at their types. -/
   | .alias R => Option (SRef C (.ref R))
   | .mem _ => Option Nat
   | .old => Storage C
-  | .oldNet => List (Int × Int)
+  | .oldNet => Ledger
   | .kint => Int
 
 namespace LTy
@@ -86,7 +86,7 @@ def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.TDen C
   | _, .pvS i => Storage.obs (TEnv.get i σ.env : Storage C)
   | _, .pvI _ => ()
   | _, .netOf i a => (a.denote σ).map fun n =>
-    (lookupBy n.1 (TEnv.get i σ.env : List (Int × Int))).getD 0
+    (lookupBy n (TEnv.get i σ.env : Ledger)).getD 0
   | _, .app0 o => o.denote σ.glob
   | _, .app1 o a => o.denote σ.glob (a.denote σ)
   | _, .app2 o a b => o.denote σ.glob (a.eval σ) (b.eval σ) (a.denote σ) (b.denote σ)
@@ -235,7 +235,7 @@ def GlobT.withMem {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) : Glo
   ⟨State.mk g.1.storage μ.H' μ.heap () g.1.net g.1.selfBalance g.1.tx, μ.ext⟩
 
 /-- The ledger replaced. -/
-def GlobT.withNet {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) : GlobT C H :=
+def GlobT.withNet {H : HTy} (g : GlobT C H) (nt : Ledger) : GlobT C H :=
   ⟨{ g.1 with net := nt }, g.2⟩
 
 /-- The contract's balance replaced. -/
@@ -253,12 +253,12 @@ def UpdElem.globTM {Δ : Ctx} (σ₀ : State C Γ) :
     (PrimTy.uint.ofInt? (op.apply σ₀.selfBalance.1 amt.1)).bind fun b =>
       some (g.withBalance b)
   | .net r op a, g => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
-    some (g.withNet (setBy addr.1 (op.apply ((lookupBy addr.1 g.1.net).getD 0) amt.1) g.1.net))
+    some (g.withNet (setBy addr (op.apply ((lookupBy addr g.1.net).getD 0) amt.1) g.1.net))
   | .pay r a, g => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
     some (g.withNet (if addr.1 = σ₀.tx.selfAddress.1 then g.1.net
-      else setBy addr.1 ((lookupBy addr.1 g.1.net).getD 0 - amt.1) g.1.net))
+      else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net))
   | .netMt r a, g => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
-    some (g.withNet [(addr.1, amt.1)])
+    some (g.withNet [(addr, amt.1)])
   | .setBalance a, g => (a.eval σ₀).bind fun amt => some (g.withBalance amt)
 
 /-- The typed global part one element leaves, its right-hand sides read in
@@ -275,12 +275,12 @@ def UpdElem.globT {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ) (g : Glo
       (PrimTy.uint.ofInt? (op.apply σ₀.selfBalance.1 amt.1)).bind fun b =>
         some (g.withBalance b))
     (fun r op a => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
-      some (g.withNet (setBy addr.1 (op.apply ((lookupBy addr.1 g.1.net).getD 0) amt.1) g.1.net)))
+      some (g.withNet (setBy addr (op.apply ((lookupBy addr g.1.net).getD 0) amt.1) g.1.net)))
     (fun r a => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
       some (g.withNet (if addr.1 = σ₀.tx.selfAddress.1 then g.1.net
-        else setBy addr.1 ((lookupBy addr.1 g.1.net).getD 0 - amt.1) g.1.net)))
+        else setBy addr ((lookupBy addr g.1.net).getD 0 - amt.1) g.1.net)))
     (fun r a => (r.eval σ₀).bind fun addr => (a.eval σ₀).bind fun amt =>
-      some (g.withNet [(addr.1, amt.1)]))
+      some (g.withNet [(addr, amt.1)]))
     (fun a => (a.eval σ₀).bind fun amt => some (g.withBalance amt))
 
 theorem UpdElem.globT_eq_globTM {Δ : Ctx} (σ₀ : State C Γ) (e : UpdElem C Γ Δ)

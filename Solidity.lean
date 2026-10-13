@@ -148,6 +148,7 @@ import Solidity.Examples.Chains.MemoryToStorage
 import Solidity.Examples.Chains.Payment
 import Solidity.Examples.Chains.CheckedArithmetic
 import Solidity.Examples.Chains.EvaluationOrder
+import Solidity.Examples.Tactics.Boundaries
 import Solidity.Examples.Tactics.Tour
 import Solidity.Examples.Tactics.StorageSteps
 import Solidity.Examples.Tactics.StorageSuite

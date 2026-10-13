@@ -194,9 +194,63 @@ def upd {α : Type} {β : Type} [DecidableEq α] (f : α → β) (x : α) (v : �
 theorem upd_other {α β : Type} [DecidableEq α] (f : α → β) {x y : α} (v : β) (h : y ≠ x) :
     upd f x v y = f y := by simp [upd, h]
 
+/-- Each occupied or empty storage slot holds a 256-bit word. -/
+structure WordStore where
+  cells : Slot → Fin W
+
+namespace WordStore
+
+/-- Observe a word as a natural number for arithmetic and layout proofs. -/
+def read (st : WordStore) (s : Slot) : Nat := (st.cells s).val
+
+instance : CoeFun WordStore (fun _ => Slot → Nat) := ⟨read⟩
+
+/-- A store read is in range by construction. -/
+theorem read_lt (st : WordStore) (s : Slot) : st s < W := (st.cells s).isLt
+
+/-- Normalize input at the word boundary. -/
+def ofFn (f : Slot → Nat) : WordStore :=
+  ⟨fun s => ⟨f s % W, Nat.mod_lt _ W_pos⟩⟩
+
+/-- The empty EVM storage. -/
+def zero : WordStore := ofFn (fun _ => 0)
+
+/-- SSTORE writes the low 256 bits of its operand. -/
+def write (st : WordStore) (s : Slot) (v : Nat) : WordStore :=
+  ⟨upd st.cells s ⟨v % W, Nat.mod_lt _ W_pos⟩⟩
+
+@[simp] theorem zero_read (s : Slot) : zero s = 0 := rfl
+
+@[simp] theorem ofFn_read (f : Slot → Nat) (s : Slot) : ofFn f s = f s % W := rfl
+
+@[simp] theorem write_same (st : WordStore) (s : Slot) (v : Nat) :
+    write st s v s = v % W := by
+  simp only [write, read, upd_same]
+
+/-- A write of an existing word does not change its numeric value. -/
+theorem write_same_of_lt (st : WordStore) (s : Slot) (v : Nat) (h : v < W) :
+    write st s v s = v := by rw [write_same, Nat.mod_eq_of_lt h]
+
+/-- SSTORE leaves every other slot unchanged. -/
+theorem write_other (st : WordStore) (v : Nat) {s x : Slot} (h : x ≠ s) :
+    write st s v x = st x := by
+  simp only [write, read, upd_other _ _ h]
+
+/-- Stores are equal when all their word observations agree. -/
+@[ext] theorem ext {st st' : WordStore} (h : ∀ s, st s = st' s) : st = st' := by
+  cases st with
+  | mk f =>
+    cases st' with
+    | mk g =>
+      congr
+      funext s
+      exact Fin.ext (h s)
+
+end WordStore
+
 structure Machine where
   stack : List Word
-  store : Slot → Nat
+  store : WordStore
   mem : Nat → Word
   /-- Every account's balance. -/
   bal : Nat → Nat
@@ -218,7 +272,7 @@ structure Machine where
 stack, storage and memory all zeroes, nothing moved yet, called by `0` with
 nothing at time `0`, every payment accepted. -/
 def Machine.init (bal : Nat → Nat := fun _ => 0) (self : Nat := 0) : Machine :=
-  { stack := [], store := fun _ => 0, mem := fun _ => .val 0, bal, bal₀ := bal, self }
+  { stack := [], store := WordStore.zero, mem := fun _ => .val 0, bal, bal₀ := bal, self }
 
 /-- `v` moved from `s`'s account to `a`'s, another. -/
 def pay (bal : Nat → Nat) (s a v : Nat) : Nat → Nat :=
@@ -330,7 +384,7 @@ def Instr.step : Instr → Machine → Out
     | .slot s :: st => m.next (.val (m.store s) :: st)
     | _ => .fault
   | .sstore, m => match m.stack with
-    | .slot s :: .val v :: st => .ok { m with stack := st, store := upd m.store s v } 0
+    | .slot s :: .val v :: st => .ok { m with stack := st, store := WordStore.write m.store s v } 0
     | _ => .fault
   | .mload x, m => m.next (m.mem x :: m.stack)
   | .mstore x, m => match m.stack with

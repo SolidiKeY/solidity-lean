@@ -326,23 +326,23 @@ theorem LTm.eq_of_isAddM {M m : LTm C .mem} {R : RefTy} (h : M.isAddM m R = true
 /-- One step of `LTm.freshPath?` at a unary symbol: `alloc(m, R)` is the
 root, `i.f` the member `f` below `i`'s path. -/
 def _root_.Solidity.Op1.freshStepL (m : LTm C .mem) (R : RefTy) {a s : Srt} :
-    Op1 C a s → LTm C a → Option (List Semantics.Seg) → Option (List Semantics.Seg)
+    Op1 C a s → LTm C a → Option (List Semantics.Selector) → Option (List Semantics.Selector)
   | .alloc R' _, x, _ => if x.beqR m && R' == R then some [] else none
-  | .mfield (f := f) _, _, r => r.map (· ++ [Semantics.Seg.field f])
+  | .mfield (f := f) _, _, r => r.map (· ++ [Semantics.Selector.field f])
   | _, _, _ => none
 
 /-- One step of `LTm.freshPath?` at a binary symbol: `iread(addM(m, R), a)`
 is what `a` reads, `i[k]` (a literal `k`) the element `k` below `i`'s
 path. -/
 def _root_.Solidity.Op2.freshStepL (m : LTm C .mem) (R : RefTy) {a b s : Srt} :
-    Op2 C a b s → LTm C a → LTm C b → Option (List Semantics.Seg) →
-      Option (List Semantics.Seg) → Option (List Semantics.Seg)
+    Op2 C a b s → LTm C a → LTm C b → Option (List Semantics.Selector) →
+      Option (List Semantics.Selector) → Option (List Semantics.Selector)
   | .iread, x, _, _, ry => if x.isAddM m R then ry else none
-  | .mat _, _, y, rx, _ => y.uintLit?.bind fun k => rx.map (· ++ [Semantics.Seg.at k])
+  | .mat _, _, y, rx, _ => y.uintLit?.bind fun k => rx.map (· ++ [Semantics.Selector.at k])
   | _, _, _, _, _ => none
 
 /-- `LTm.freshPath?`'s compiled twin. -/
-def LTm.freshPathM (m : LTm C .mem) (R : RefTy) : {u : Srt} → LTm C u → Option (List Semantics.Seg)
+def LTm.freshPathM (m : LTm C .mem) (R : RefTy) : {u : Srt} → LTm C u → Option (List Semantics.Selector)
   | _, .app1 o x => o.freshStepL m R x (LTm.freshPathM m R x)
   | _, .app2 o x y => o.freshStepL m R x y (LTm.freshPathM m R x) (LTm.freshPathM m R y)
   | _, _ => none
@@ -352,8 +352,8 @@ allocates**: KeY's `idC(idp, flds)`.  Generic in the sort; by the
 recursor. -/
 @[implemented_by LTm.freshPathM]
 def LTm.freshPath? (m : LTm C .mem) (R : RefTy) {u : Srt} (t : LTm C u) :
-    Option (List Semantics.Seg) :=
-  @LTm.rec C (fun _ _ => Option (List Semantics.Seg))
+    Option (List Semantics.Selector) :=
+  @LTm.rec C (fun _ _ => Option (List Semantics.Selector))
     (@fun _ _ => none) (@fun _ _ => none)
     (@fun _ _ o x ihx => o.freshStepL m R x ihx)
     (@fun _ _ _ o x y ihx ihy => o.freshStepL m R x y ihx ihy)
@@ -374,7 +374,7 @@ theorem LTm.freshPath?_eq_freshPathM (m : LTm C .mem) (R : RefTy) {u : Srt} (t :
 
 theorem LTm.freshPath_eval {m : LTm C .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true}
     {μ₀ : Grown g.H (fun _ => Unit)} (hm : m.eval g ν = some μ₀) {u : Srt} (t : LTm C u) :
-    ∀ {p : List Semantics.Seg}, LTm.freshPath? m R t = some p →
+    ∀ {p : List Semantics.Selector}, LTm.freshPath? m R t = some p →
       Srt.FreshRead (C := C) (μ₀.heap.allocDefault R hR).heap R p u (t.eval g ν) := by
   induction t with
   | app1 o x ihx =>

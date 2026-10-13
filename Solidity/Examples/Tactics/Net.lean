@@ -170,7 +170,7 @@ private abbrev start : State StandardExample [] :=
 halt. -/
 def netAfter {Γ' : Ctx} (σ : State StandardExample []) (P : Prog StandardExample [] Γ')
     (a : Int) : Option Int :=
-  (Prog.run σ P).toOption.map fun o => (lookupBy a o.st.net).getD 0
+  (Prog.run σ P).toOption.map fun o => (lookupBy a (Ledger.entries o.st.net)).getD 0
 
 /-- `uint to = 9; to.transfer(5);` debits `9` by `5` (`net-transfer-simple.key`). -/
 theorem netTransferSimple : netAfter start payNineCore 9 = some (-5) := by decide +kernel
@@ -193,7 +193,7 @@ theorem netSelfRun : netAfter start paySelfCore 0 = some 0 := by decide +kernel
 after a payment of `5` from `3`. -/
 theorem transferLeavesFunds :
     ((Prog.run { start with selfBalance := ⟨3, rfl⟩ } payNineCore).toOption.map
-      fun o => ((lookupBy 9 o.st.net).getD 0, o.st.selfBalance.1)) = some (-5, 3) := by
+      fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, o.st.selfBalance.1)) = some (-5, 3) := by
   decide +kernel
 
 /-! ## 4 · `msg.value`, `msg.sender`
@@ -256,8 +256,8 @@ theorem netSendRun : netAfter start sendNineCore 9 = some (-5) := by decide +ker
 
 /-- With the recipient refusing, nothing is booked and `ok` is `false`. -/
 theorem netSendRefusedRun :
-    ((Prog.run { start with tx := { ext := [(sendKey 9 5, .error)] } } sendNineCore).toOption.map
-      fun o => ((lookupBy 9 o.st.net).getD 0, (TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
+    ((Prog.run { start with tx := { ext := [(sendKey ⟨9, rfl⟩ ⟨5, rfl⟩, .error)] } } sendNineCore).toOption.map
+      fun o => ((lookupBy (⟨9, rfl⟩ : PrimTy.uint.Denote) o.st.net).getD 0, (TEnv.get .here o.st.env : PrimTy.bool.Denote))) =
       some (0, false) := by
   decide +kernel
 

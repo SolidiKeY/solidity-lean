@@ -32,7 +32,7 @@ a hidden binder ranges over it, decision 17'), a whole storage, a ledger. -/
   | .alias R => Option (SRef C (.ref R))
   | .mem R => Option (HRef H R)
   | .old => Storage C
-  | .oldNet => List (Int × Int)
+  | .oldNet => Ledger
   | .kint => Int
 
 namespace LTy
@@ -118,7 +118,7 @@ structure State (C : Contract) (Γ : Ctx) where
   H : HTy
   heap : Heap H
   env : TEnv C H Γ
-  net : List (Int × Int) := []
+  net : Ledger := []
   selfBalance : PrimTy.uint.Denote := PrimTy.dflt .uint
   tx : TTx := {}
 

@@ -40,11 +40,13 @@ are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
 are typed states.  So is every other state read: the run invariants
 (`Typing/`), the EVM simulation (`Evm/`), the memory laws, the tools and
 `wt(storage)` (`Semantics/StorageWt.lean`) read the typed state; there is
-no untyped one (W10.5.6). What stays untyped is not state: the ABI values
-(`Semantics.lean`: `Value`, `ExtKey`, `ExtResult`, a typed value as a word
-by `PrimTy.erase`), a path's segments (`Seg`, `Path.erase`,
-`Theory/Segs.lean`, the side conditions' path syntax), the ledger
-(`List (Int × Int)`, KeY's `int`) and the EVM's word store.
+no untyped one (W10.5.6). External-call inputs retain their Solidity types (`CallValue`, `ExtKey`),
+path segments retain their endpoints (`Seg`, `Segs`, `RefSegments`), the
+ledger has bounded address keys and unbounded KeY `int` amounts (`Ledger`),
+and the EVM store holds `Fin (2^256)` words (`Evm.WordStore`). Wire responses
+and tool input/output use `Value`/`ExtResult`, decoded at the expected type;
+selector labels are observations for comparison and schema analysis.
+
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s

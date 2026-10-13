@@ -119,55 +119,57 @@ theorem eq_of_strip? : {T U W : Ty} → (p : Path T U) → (q : Path T W) → {r
 
 /-- A path whose erasure extends another's, from one type, is the other
 followed by a path. -/
-theorem split_of_erase {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Semantics.Seg}
-    (h : q.erase = p.erase ++ s) : ∃ r : Path U W, q = p.append r ∧ r.erase = s := by
+theorem split_of_labels {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Semantics.Selector}
+    (h : q.labels = p.labels ++ s) : ∃ r : Path U W, q = p.append r ∧ r.labels = s := by
   induction p generalizing W with
-  | nil => exact ⟨q, (Path.append_nil q).symm, h⟩
+  | nil =>
+    simp only [Path.labels, List.nil_append] at h
+    exact ⟨q, (Path.append_nil q).symm, h⟩
   | @field s₀ f T₁ U₁ hf p ih =>
     cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
+    | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | @field _ f' T₂ _ hf' q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.field.injEq] at h
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.field.injEq] at h
       obtain ⟨rfl, h⟩ := h
       obtain rfl : T₁ = T₂ := Option.some.inj (hf.symm.trans hf')
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_field hf p r).symm, hr⟩
   | @«at» E U₁ i p ih =>
     cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
+    | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | «at» j q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.at.injEq] at h
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
       obtain ⟨rfl, h⟩ := h
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_at _ p r).symm, hr⟩
   | @atF E U₁ n i p ih =>
     cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
+    | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | atF j q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.at.injEq] at h
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
       obtain ⟨rfl, h⟩ := h
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_atF _ p r).symm, hr⟩
   | @key K V U₁ k p ih =>
     cases q with
-    | nil => simp only [Path.erase, List.cons_append, reduceCtorEq] at h
+    | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | key k' q =>
-      simp only [Path.erase, List.cons_append, List.cons.injEq, Semantics.Seg.at.injEq] at h
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
       obtain ⟨rfl, h⟩ := h
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_key _ p r).symm, hr⟩
 
 /-- Where `q` does not go through `p`, the two part, or `q` stops above `p`. -/
 theorem strip?_none : {T U W : Ty} → (p : Path T U) → (q : Path T W) → strip? p q = none →
-    Diverges p q ∨ ∃ r : Path W U, r.erase ≠ [] ∧ p = q.append r
+    Diverges p q ∨ ∃ r : Path W U, r.labels ≠ [] ∧ p = q.append r
   | _, _, _, .nil, q, h => by simp only [strip?, reduceCtorEq] at h
-  | _, _, _, .field hf p, .nil, _ => .inr ⟨.field hf p, by simp only [erase, ne_eq,
+  | _, _, _, .field hf p, .nil, _ => .inr ⟨.field hf p, by simp only [labels, ne_eq,
       reduceCtorEq, not_false_eq_true], (append_nil _).symm⟩
-  | _, _, _, .at i p, .nil, _ => .inr ⟨.at i p, by simp only [erase, ne_eq, reduceCtorEq,
+  | _, _, _, .at i p, .nil, _ => .inr ⟨.at i p, by simp only [labels, ne_eq, reduceCtorEq,
       not_false_eq_true], (append_nil _).symm⟩
-  | _, _, _, .atF i p, .nil, _ => .inr ⟨.atF i p, by simp only [erase, ne_eq, reduceCtorEq,
+  | _, _, _, .atF i p, .nil, _ => .inr ⟨.atF i p, by simp only [labels, ne_eq, reduceCtorEq,
       not_false_eq_true], (append_nil _).symm⟩
-  | _, _, _, .key i p, .nil, _ => .inr ⟨.key i p, by simp only [erase, ne_eq, reduceCtorEq,
+  | _, _, _, .key i p, .nil, _ => .inr ⟨.key i p, by simp only [labels, ne_eq, reduceCtorEq,
       not_false_eq_true], (append_nil _).symm⟩
   | _, _, _, @Path.field _ f _ _ hf p, @Path.field _ f' _ _ hf' q, h => by
     by_cases e : f = f'
@@ -763,11 +765,11 @@ theorem SVal.obs_saveM {T U : Ty} {x x' : SVal T} {p : Path T U} {v : SVal U}
       refine ⟨by rw [hf, hy]; rfl, fun hW => ?_, fun hW => ?_⟩
       · subst hW
         cases r with
-        | nil => exact absurd rfl hr
+        | nil => exact absurd Path.labels_nil hr
         | «at» i r => rw [hf, hy]; exact SVal.saveM_at_n hy'
       · subst hW
         cases r with
-        | nil => exact absurd rfl hr
+        | nil => exact absurd Path.labels_nil hr
   apply Obs.ext
   · intro P q
     simp only [Obs.save, ObsLoc.strip?_path]

@@ -20,7 +20,7 @@ once.
 
 namespace Solidity
 open Solidity (Modality Srt Op0 Op1 Op2 Op3)
-open Semantics (Value Seg)
+open Semantics (Value Selector)
 
 variable {C : Contract}
 
@@ -471,7 +471,7 @@ theorem clearT_push {T : Ty} (a : MAddr σ.H T) (hm : T.mapFree = true) :
     TRun.clearT (σ.push w) a hm = pushedT σ w (TRun.clearT σ a hm) :=
   clearT_lift up σ (w, σ.env) a hm
 
-theorem sendT_push (pv : Idx Γ (.val .bool)) (addr amt : Int) :
+theorem sendT_push (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.Denote) :
     sendT (σ.push w) pv.there addr amt = Out.lift up (w, σ.env) (sendT σ pv addr amt) := by
   rw [← Idx.up_eq pv]
   exact sendT_lift up σ (w, σ.env) pv addr amt
