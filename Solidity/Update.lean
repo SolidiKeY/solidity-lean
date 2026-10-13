@@ -12,8 +12,7 @@ terms, updates and formulas in a context).  The untyped signature that was
 here (`Srt`, `Op0` … `Op3`, read on `Semantics.State`) went at W9.8.3
 (`docs/intrinsic.md`).  What stays: the two modalities and how a halt
 reads under each (`Modality.after`), the interpreter's memory read
-(`readAddr`), the Theory's reading of a result (`StValue.toRes`,
-`Res.toSt`), the ledger's arithmetic (`IntOp`), and the states a callee or
+(`readAddr`), the ledger's arithmetic (`IntOp`), and the states a callee or
 a loop iteration may leave (`State.havoc`, `State.anon`).
 
 Unlike KeY's, the terms can halt: they are read by the interpreter's own
@@ -66,48 +65,6 @@ def readAddr (σ : State) : Addr → Res MVal
       if h : 0 ≤ i ∧ i.toNat < elems.length then pure (elems.get ⟨i.toNat, h.2⟩)
       else .error .revert
     | .struct _ => .error .undef
-
-/-! ## The Theory's readings of results -/
-
-section Denote
-
-open Theory Theory.StValue
-
-/-- A Theory value as an interpreter result: a primitive, or a halt. -/
-def Theory.StValue.toRes : StValue → Res Value
-  | .prim p => .ok p
-  | .st _ => .error .undef
-
-/-- An interpreter result as a Theory value: a halt reads as nothing. -/
-def Semantics.Res.toSt : Res Value → StValue
-  | .ok v => .prim v
-  | .error _ => .st .mtSt
-
-
-/-- A binop that returns on a halting right operand short-circuited, so it
-returns the same on any.  `denote` hands `evalBinop` the right operand's
-`toRes`, which is not `eval`'s halt where `eval` halts. -/
-theorem Denote.evalBinop_of_error {op : BinOp} {p : PrimTy} {lv x : Value} {e : Halt}
-    (rb : Res Value) (h : evalBinop op p lv (.error e) = .ok x) :
-    evalBinop op p lv rb = .ok x := by
-  unfold evalBinop at h ⊢
-  split <;> simp_all only [bind, Except.bind, reduceCtorEq]
-
-/-- A stored word read as a value abstracts to that value. -/
-theorem _root_.Solidity.Semantics.SVal.abs_of_asValue {w : SVal} {x : Value}
-    (h : w.asValue = .ok x) : w.abs = .prim x := by
-  match w, h with
-  | .prim (.int _), h => cases h; rfl
-  | .prim (.bool _), h => cases h; rfl
-  | .struct _, h | .array .., h | .map .., h => cases h
-
-/-- The Theory's `int` cast agrees with the interpreter's where it returns:
-an index and `newArr`'s size are read with the Theory's total cast. -/
-theorem Denote.asInt_prim_of_asInt {v : Value} {i : Int} (h : v.asInt = .ok i) :
-    asInt (.prim v) = i := by
-  cases v <;> cases h; rfl
-
-end Denote
 
 /-! ## Updates -/
 

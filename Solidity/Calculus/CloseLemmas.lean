@@ -316,12 +316,6 @@ theorem lookupBy_setBy_int (k k' v : Int) (l : List (Int × Int)) :
   split
   · subst_vars; exact SemanticsProperties.lookupBy_setBy_self _ _ _
   · exact SemanticsProperties.lookupBy_setBy_ne ‹_› _ _
-/-- `Equiv.prim_iff` with the primitive on the left. -/
-theorem equiv_prim_left_iff {p : Value} {v : Theory.StValue} :
-    Theory.StValue.Equiv (.prim p) v ↔ Theory.StValue.prim p = v :=
-  ⟨fun h => (Theory.StValue.Equiv.prim_iff.1 h.symm).symm,
-    fun h => h ▸ Theory.StValue.Equiv.refl _⟩
-
 /-- The state a `{havoc}` leaves, as the structure: its locals, heap,
 funds and transaction `σ`'s. -/
 theorem State.havoc_eq_mk (σ : Semantics.State) (st : List (Name × Semantics.SVal))

@@ -7,7 +7,7 @@ import Solidity.Calculus.ReadWrite
 # Facts about the interpreter's states and the typed symbols
 
 Two kinds of facts.  Of the untyped interpreter (`Semantics.State`), which
-the decision procedure and the Theory bridge still read: a result refining
+the decision procedure still reads: a result refining
 another (`Res.Le`), two results returning alike (`Res.OkEq`), the parts of a
 state a write reads (`State.HeapEq`, `StPartEq`, `MemPartEq`), a root read
 member-wise (`State.selectRoot`, `State.frameOf`), and the shapes of the
@@ -23,28 +23,6 @@ stated on it where the law is.
 -/
 
 namespace Solidity
-
-/-! ## From `Solidity.Calculus.TermRules` -/
-
-section
-open Semantics SemanticsProperties Theory
-variable {C : Contract}
-
-theorem Theory.StValue.Equiv.eq_or_st {v w : StValue} (h : StValue.Equiv v w) :
-    v = w ∨ ∃ s t, v = .st s ∧ w = .st t := by
-  cases v with
-  | prim p => exact Or.inl (StValue.Equiv.prim_iff.1 h.symm).symm
-  | st s => cases w with
-    | prim p => cases StValue.Equiv.prim_iff.1 h
-    | st t => exact Or.inr ⟨s, t, rfl, rfl⟩
-
-/-- Equivalent values are one interpreter result. -/
-theorem Theory.StValue.Equiv.toRes {v w : StValue} (h : StValue.Equiv v w) :
-    v.toRes = w.toRes := by
-  rcases h.eq_or_st with rfl | ⟨s, t, rfl, rfl⟩ <;> rfl
-
-end
-
 
 section
 open Semantics

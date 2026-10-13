@@ -121,12 +121,11 @@ end Close
 /-! ## The tactic -/
 
 attribute [close_rw]
-  Theory.StValue.Equiv.prim_iff Theory.StValue.prim.injEq
   Close.forall_unit Close.exists_unit
   Close.find_overlay_fields Close.layAt_prim Close.fieldPath_nil Close.fieldPath_field
   Close.fieldPath_at
   -- values and the state's parts
-  Close.equiv_prim_left_iff IntOp.apply Semantics.State.envVal State.getNet
+  IntOp.apply Semantics.State.envVal State.getNet
   Close.idxOk_array Close.idxOk_map Close.pastEnd_array
   Close.lookupBy_setBy_int Semantics.State.pay State.setNet
   -- operators

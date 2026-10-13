@@ -504,25 +504,12 @@ theorem Storage.push_none {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)
   unfold Storage.push
   cases st.find r <;> rfl
 
-/-! ## The Theory's abstraction
-
-`Fml.eq` reads the Theory (`Theory.StValue`, KeY's total model), so a typed
-value is read there through its erasure (decision of the W9.8.0 spike): the
-Theory stays untyped. -/
-
-/-- A typed storage value as a Theory term (`Semantics.SVal.abs` of its
-erasure). -/
-def SVal.absT {T : Ty} (v : SVal T) : Theory.StValue := Semantics.SVal.abs v.erase
-
-/-- A typed storage as one Theory struct node (`State.abs`). -/
-def Storage.absT (st : Storage C) : Theory.Struct := Semantics.SVal.abs.fields st.erase
-
 /-! ## The laws, typed
 
 solkey's `findOnSave` and `findOnSaveDifferent` (`TermTaclet.findOnSave`,
 `TermTaclet.findOnSaveFrame`) on the typed storage, where the write lands
-(the Theory's `find_copyTo_same` and `find_copyTo_frame`, `Theory/Copy.lean`,
-need no premise: KeY's model is total).  A typed `save` is the program's
+(the typed Theory's `Obs.findOnSave` and `Obs.findOnSaveFrame`,
+`Theory/Typed/Obs.lean`, need no premise: KeY's model is total).  A typed `save` is the program's
 write (`Storage.write`: a word stored, a struct or an array laid over what is
 there), which is a `Storage.save` at the same reference. -/
 
@@ -550,7 +537,7 @@ theorem write_some {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     exact ⟨_, h⟩
 
 /-- **`findOnSave`**, typed: a word written where the write lands reads back
-(solkey's `findOnSave`; Theory `find_copyTo_same`). -/
+(solkey's `findOnSave`; Theory `Obs.findOnSave`). -/
 theorem findOnSave {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (v : p.Denote)
     {st' : Storage C} (h : st.write r (.prim v) = some st') : st'.find r = some (.prim v) := by
   obtain ⟨x', hs, rfl⟩ := save_some (show st.save r (.prim v) = some st' from h)
@@ -559,7 +546,7 @@ theorem findOnSave {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (v : p.D
 
 /-- **`findOnSaveFrame`** across roots, typed: a write leaves another state
 variable as it was (solkey's `findOnSaveDifferent`; Theory
-`find_copyTo_frame`). -/
+`Obs.findOnSaveFrame`). -/
 theorem findOnSaveFrameRoot {U W : Ty} (st : Storage C) (r : SRef C U) (q : SRef C W)
     (hne : r.root ≠ q.root) (v : SVal U) {st' : Storage C} (h : st.write r v = some st') :
     st'.find q = st.find q := by
@@ -569,7 +556,7 @@ theorem findOnSaveFrameRoot {U W : Ty} (st : Storage C) (r : SRef C U) (q : SRef
 
 /-- **`findOnSaveFrame`** below one root, typed: a write leaves a path that
 parts from it as it was (solkey's `findOnSaveDifferent`, `p ≠ q` as
-`Path.Diverges`; Theory `find_copyTo_frame`). -/
+`Path.Diverges`; Theory `Obs.findOnSaveFrame`). -/
 theorem findOnSaveFrame {T U W : Ty} (st : Storage C) (r : Name) (hr : C.rootType r = some T)
     {p : Path T U} {q : Path T W} (hd : Path.Diverges p q) (v : SVal U) {st' : Storage C}
     (h : st.write ⟨r, hr, p⟩ v = some st') :
@@ -588,7 +575,7 @@ The laws above are over any contract, so over `Contract.ofStruct s` they
 are the laws of `sts s` (`findOnSave (C := Contract.ofStruct s)`, …). -/
 
 /-- **`findMemberCons`**, typed: a read under `select(s, r)` is the read at
-`r` followed by its path (Theory `find_cons`). -/
+`r` followed by its path (Theory `Obs.select_find`). -/
 theorem find_selectT {s r : Name} {U : Ty} (st : Storage C)
     (h : C.rootType r = some (.ref (.struct s))) (q : SRef (Contract.ofStruct s) U) :
     (st.selectT h).find q = st.find (q.under h) := by
