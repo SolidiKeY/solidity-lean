@@ -2,7 +2,6 @@ import Solidity.Calculus.TermLib
 import Solidity.Calculus.SeqRewrite
 import Solidity.Calculus.StateFacts
 import Solidity.Theory.Typed.Mem
-import Solidity.Semantics.TypedErase
 
 /-!
 # The term laws at an update's right-hand sides, scoped
@@ -1645,15 +1644,14 @@ end MemEval
 
 /-! ## Fresh allocations
 
-A read below an allocation `addM(m, R)` is answered on the erasure: the
-typed heap the allocation leaves erases to the one `Semantics.allocDefault`
-leaves (`Heap.allocDefault_erase`), and that heap extends the old one
-(`allocDefault_heapExt`) and holds the default of `R` along every declared
-path (`copyStToM_default_readPath`).  An address whose object is older than
+A read below an allocation `addM(m, R)` is answered on the typed heap: the
+allocation keeps every older object (`Heap.Keeps`, `SVal.keeps_copyStToM`),
+and its fresh object holds the default of `R` at every member and fixed
+element (`Heap.dflt_allocDefault`).  An address whose object is older than
 the allocation (`Tm.boundedIn`) reads what it read before
 (`Tm.readOnAddMFrame_exact`); one at a path below the fresh root
-(`Tm.freshPath?`) whose declared type is a primitive reads its default
-(`Tm.readOnAddM_exact`). -/
+(`Tm.freshPath?`, `Srt.FreshRead`) whose declared type is a primitive reads
+its default (`Tm.readOnAddM_exact`). -/
 
 /-- A memory write that returns: its parts, and the heap it leaves. -/
 theorem Tm.write_some {σ : State C Γ} {T : Ty} {m : Tm C Γ .mem} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
@@ -1830,22 +1828,16 @@ theorem Tm.addM_some {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.
   obtain ⟨μ₀, h, rfl⟩ := h
   exact ⟨μ₀, h, rfl⟩
 
-/-- A read below an allocation, at an address whose object is older. -/
+/-- A read below an allocation, at an address whose object is older: the
+old read, weakened. -/
 theorem Tm.readAddM_old {σ : State C Γ} {m : Tm C Γ .mem} {μ₀ : Grown σ.H (fun _ => Unit)}
     (hm : m.eval σ = some μ₀) {T : Ty} {b : Tm C Γ (.addr T)} (h : b.boundedIn m = true)
     (R : RefTy) (hR : (Ty.ref R).mapFree = true) {bd : MAddrT T} (hb : b.eval σ = some bd) :
     ((bd.resolve (μ₀.then (μ₀.heap.allocDefault R hR)).H').bind fun rb =>
-        (μ₀.then (μ₀.heap.allocDefault R hR)).heap.readAddr rb).map (MVal.erase T) =
-      ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase T) := by
-  have hid : bd.id < μ₀.H'.length := Tm.boundedIn_eval hm b h bd hb
-  show ((bd.resolve (μ₀.heap.allocDefault R hR).H').bind fun rb =>
-      (μ₀.heap.allocDefault R hR).heap.readAddr rb).map _ = _
-  rw [MAddrT.resolve_wk (μ₀.heap.allocDefault R hR).ext bd hid]
-  cases bd.resolve μ₀.H' with
-  | none => rfl
-  | some rb =>
-    simp only [Option.map_some, Option.bind_some]
-    exact Heap.readAddr_allocDefault μ₀.heap R hR rb
+        (μ₀.then (μ₀.heap.allocDefault R hR)).heap.readAddr rb) =
+      ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map
+        (MVal.wk (μ₀.heap.allocDefault R hR).ext T) :=
+  Grown.read_then_old μ₀ _ (SVal.keeps_copyStToM _ hR μ₀.heap) bd (Tm.boundedIn_eval hm b h bd hb)
 
 theorem Tm.readOnAddMFrame_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {P : PrimTy} {b : Tm C Γ (.addr (.prim P))}
@@ -1858,15 +1850,8 @@ theorem Tm.readOnAddMFrame_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy
   | none => rfl
   | some bd =>
     simp only [Option.bind_some]
-    have he := Tm.readAddM_old hm h R hR hb
-    revert he
-    generalize ((bd.resolve (μ₀.then (μ₀.heap.allocDefault R hR)).H').bind fun rb =>
-      (μ₀.then (μ₀.heap.allocDefault R hR)).heap.readAddr rb) = x
-    generalize ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb) = y
-    intro he
-    cases x <;> cases y <;> simp only [Option.map_none, Option.map_some, reduceCtorEq,
-      Option.some.injEq] at he ⊢
-    exact PrimTy.erase_injective (Semantics.MVal.prim.inj he)
+    rw [Tm.readAddM_old hm h R hR hb]
+    exact MVal.map_wk_prim _ _
 
 theorem Tm.readOnAddMFrameIdentity_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {R' : RefTy} {b : Tm C Γ (.addr (.ref R'))}
@@ -1879,15 +1864,8 @@ theorem Tm.readOnAddMFrameIdentity_exact {σ : State C Γ} {m : Tm C Γ .mem} {R
   | none => rfl
   | some bd =>
     simp only [Option.bind_some]
-    have he := Tm.readAddM_old hm h R hR hb
-    revert he
-    generalize ((bd.resolve (μ₀.then (μ₀.heap.allocDefault R hR)).H').bind fun rb =>
-      (μ₀.then (μ₀.heap.allocDefault R hR)).heap.readAddr rb) = x
-    generalize ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb) = y
-    intro he
-    cases x <;> cases y <;> simp only [Option.map_none, Option.map_some, reduceCtorEq,
-      Option.some.injEq, Option.bind_some, Option.bind_none] at he ⊢
-    exact Semantics.MVal.ref.inj he
+    rw [Tm.readAddM_old hm h R hR hb]
+    exact MVal.bind_id_map_wk _ _
 
 /-- `M` is `addM(m, R)`. -/
 def Tm.isAddM (M m : Tm C Γ .mem) (R : RefTy) : Bool :=
@@ -1941,25 +1919,141 @@ theorem Tm.litInt?_some {σ : State C Γ} {y : Tm C Γ (.val .uint)} {k : Int} (
     | _ => simp only [Tm.litW?, Op0.litW?, reduceCtorEq] at hv
   | _ => simp only [Tm.litW?, reduceCtorEq] at hv
 
-/-- What a term at a fresh path reads, by sort, on the erasure `τ` of the
-allocation's heap `H₁` whose root is `root`: an identity is the one the path
-reads, of its type in `H₁`, and it reads where the path is declared; an
-address is resolved in `H₁` and reads what the path reads, and it reads
-where the path is declared. -/
-def Srt.FreshRead {H : HTy} (H₁ : HTy) (τ : Semantics.State) (root : Nat) (R : RefTy)
-    (p : List Semantics.Seg) : (u : Srt) → Option (u.Den C H) → Prop
-  | .ident R', x => (∀ id, x = some id → τ.readPath root p = .ok (.ref id) ∧ H₁[id]? = some R') ∧
-      (∀ T', (Ty.ref R).memberTy p = some T' → ∃ id, x = some id)
-  | .addr T, x => (∀ ad, x = some ad → (∃ ra : MAddr H₁ T, ad.resolve H₁ = some ra) ∧
-        readAddr τ ad.eraseT = τ.readPath root p) ∧
-      (∀ T', (Ty.ref R).memberTy p = some T' → ∃ ad, x = some ad)
+/-- What a term at a fresh path `p` below the root of `addM(m, R)` reads, by
+sort, in the heap `hp₁` the allocation leaves: an identity is of an object
+holding its default, of the type the path declares; an address resolves in
+`hp₁` to a slot holding its default, and it reads where the path declares a
+type, that type. -/
+def Srt.FreshRead {H H₁ : HTy} (hp₁ : Heap H₁) (R : RefTy) (p : List Semantics.Seg) :
+    (u : Srt) → Option (u.Den C H) → Prop
+  | .ident R', x => (∀ id, x = some id → ∃ r : HRef H₁ R', r.id = id ∧ hp₁.Dflt (.ref R') r) ∧
+      (∀ T', (Ty.ref R).memberTy p = some T' → T' = .ref R' ∧ ∃ id, x = some id)
+  | .addr T, x => (∀ ad, x = some ad → ∃ ra : MAddr H₁ T, ad.resolve H₁ = some ra ∧
+        ∀ v, hp₁.readAddr ra = some v → hp₁.Dflt T v) ∧
+      (∀ T', (Ty.ref R).memberTy p = some T' → T' = T ∧
+        ∃ ad ra v, x = some ad ∧ ad.resolve H₁ = some ra ∧ hp₁.readAddr ra = some v)
   | _, _ => True
+
+namespace Srt.FreshRead
+
+variable {H H₁ : HTy} {hp₁ : Heap H₁} {R : RefTy}
+
+/-- The root: `freshId(addM(m, R))`. -/
+theorem root (r : HRef H₁ R) (hd : hp₁.Dflt (.ref R) r) :
+    Srt.FreshRead (C := C) (H := H) hp₁ R [] (.ident R) (some r.id) := by
+  refine ⟨fun id hid => ?_, fun T' hT' => ?_⟩
+  · cases hid
+    exact ⟨r, rfl, hd⟩
+  · simp only [Ty.memberTy, Option.some.injEq] at hT'
+    exact ⟨hT'.symm, _, rfl⟩
+
+/-- A member `i.f` of an identity `i` at the path `p`. -/
+theorem field {p : List Semantics.Seg} {s f : Name} {T : Ty}
+    (hf : Semantics.lookupBy f (Semantics.structDef s) = some T) {x : Option Nat}
+    (hx : Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident (.struct s)) x) :
+    Srt.FreshRead (C := C) (H := H) hp₁ R (p ++ [.field f]) (.addr T)
+      (x.map fun id => MAddrT.field id hf) := by
+  obtain ⟨ih1, ih2⟩ := hx
+  have hres : ∀ r : HRef H₁ (.struct s),
+      (MAddrT.field r.id hf).resolve H₁ = some (MAddr.field r hf) := fun r => by
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some]
+  refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
+  · obtain ⟨id, hid, rfl⟩ := Option.map_eq_some_iff.1 had
+    obtain ⟨r, rfl, hd⟩ := ih1 id hid
+    refine ⟨.field r hf, hres r, fun v hv => ?_⟩
+    simp only [Heap.readAddr, Option.some.injEq] at hv
+    subst hv
+    cases hd with
+    | struct _ h => exact h hf
+  · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
+    obtain ⟨hR, id, hid⟩ := ih2 _ hR''
+    cases hR
+    obtain ⟨r, rfl, -⟩ := ih1 _ hid
+    rw [Ty.memberTy_append, hR''] at hT'
+    simp only [Option.bind_some, Ty.memberTy, Ty.at, hf, Option.some.injEq] at hT'
+    exact ⟨hT'.symm, _, _, _, by rw [hid]; rfl, hres r, rfl⟩
+
+/-- An element `i[k]` of an identity `i` at the path `p`, at a literal `k`. -/
+theorem index {p : List Semantics.Seg} {R' : RefTy} {E : Ty} (a : ArrTy R' E) (k : Int)
+    {x : Option Nat} (hx : Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident R') x) :
+    Srt.FreshRead (C := C) (H := H) hp₁ R (p ++ [.at k]) (.addr E)
+      (x.map fun id => MAddrT.index id a k) := by
+  obtain ⟨ih1, ih2⟩ := hx
+  have hres : ∀ r : HRef H₁ R',
+      (MAddrT.index r.id a k).resolve H₁ = some (MAddr.index r a k) := fun r => by
+    simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some]
+  refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
+  · obtain ⟨id, hid, rfl⟩ := Option.map_eq_some_iff.1 had
+    obtain ⟨r, rfl, hd⟩ := ih1 id hid
+    refine ⟨.index r a k, hres r, fun v hv => ?_⟩
+    simp only [Heap.readAddr, Heap.index] at hv
+    split at hv
+    · cases a with
+      | dyn =>
+        cases hd with
+        | array _ h =>
+          have hl : (MObj.elems .dyn (hp₁.get r)).length = 0 := h
+          simp only [List.length_eq_zero_iff.1 hl, List.getElem?_nil, reduceCtorEq] at hv
+      | fixed =>
+        cases hd with
+        | fixed _ h => exact h v (List.mem_of_getElem? hv)
+    · cases hv
+  · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
+    obtain ⟨hR, id, hid⟩ := ih2 _ hR''
+    cases hR
+    obtain ⟨r, rfl, -⟩ := ih1 _ hid
+    rw [Ty.memberTy_append, hR''] at hT'
+    cases a with
+    | dyn => simp only [Option.bind_some, Ty.memberTy, Ty.at, Option.bind_none, reduceCtorEq] at hT'
+    | @fixed E n =>
+      simp only [Option.bind_some, Ty.memberTy, Ty.at] at hT'
+      split at hT'
+      · rename_i hk
+        simp only [Option.bind_some, Option.some.injEq] at hT'
+        have hn : (MObj.elems .fixed (hp₁.get r)).length = n := by
+          rw [MObj.elems_fixed]
+          exact (hp₁.get r : {l : List (MVal H₁ E) // l.length = n}).2
+        have hlt : k.toNat < (MObj.elems .fixed (hp₁.get r)).length := by omega
+        refine ⟨hT'.symm, _, _, (MObj.elems .fixed (hp₁.get r))[k.toNat], by rw [hid]; rfl, hres r, ?_⟩
+        simp only [Heap.readAddr, Heap.index, hk.1, if_true, List.getElem?_eq_getElem hlt]
+      · simp only [Option.bind_none, reduceCtorEq] at hT'
+
+/-- An identity read out of the fresh memory at an address of the path. -/
+theorem iread {p : List Semantics.Seg} {R' : RefTy} {b : Option (MAddrT (.ref R'))}
+    (hb : Srt.FreshRead (C := C) (H := H) hp₁ R p (.addr (.ref R')) b) :
+    Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident R')
+      (b.bind fun bd => ((bd.resolve H₁).bind fun rb => hp₁.readAddr rb).bind
+        fun r => some (r : HRef H₁ R').id) := by
+  obtain ⟨ih1, ih2⟩ := hb
+  refine ⟨fun id hid => ?_, fun T' hT' => ?_⟩
+  · simp only [Option.bind_eq_some_iff, Option.some.injEq] at hid
+    obtain ⟨bd, hbd, r, ⟨ra, hra, hrd⟩, rfl⟩ := hid
+    obtain ⟨ra', hra', hd⟩ := ih1 bd hbd
+    rw [hra] at hra'
+    cases hra'
+    exact ⟨r, rfl, hd r hrd⟩
+  · obtain ⟨hT, bd, ra, v, hbd, hra, hv⟩ := ih2 T' hT'
+    refine ⟨hT, (v : HRef H₁ R').id, ?_⟩
+    rw [hbd, Option.bind_some, hra, Option.bind_some, hv, Option.bind_some]
+
+/-- A word read at the path, where the path declares a word: the default. -/
+theorem read_prim {p : List Semantics.Seg} {P : PrimTy} {b : Option (MAddrT (.prim P))}
+    (hb : Srt.FreshRead (C := C) (H := H) hp₁ R p (.addr (.prim P)) b)
+    (hT : (Ty.ref R).memberTy p = some (.prim P)) :
+    (b.bind fun bd => (bd.resolve H₁).bind fun rb => hp₁.readAddr rb) = some (PrimTy.dflt P) := by
+  obtain ⟨-, bd, ra, v, hbd, hra, hv⟩ := hb.2 _ hT
+  obtain ⟨ra', hra', hd⟩ := hb.1 bd hbd
+  rw [hra] at hra'
+  cases hra'
+  rw [hbd, Option.bind_some, hra, Option.bind_some, hv]
+  exact congrArg some (hd v hv).prim_eq
+
+end Srt.FreshRead
 
 theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
     {hR : (Ty.ref R).mapFree = true} {μ₀ : Grown σ.H (fun _ => Unit)} (hm : m.eval σ = some μ₀)
     {u : Srt} (t : Tm C Γ u) : ∀ {p : List Semantics.Seg}, Tm.freshPath? m R t = some p →
-      Srt.FreshRead (C := C) (μ₀.heap.allocDefault R hR).H' (μ₀.allocSt R hR)
-        (μ₀.heap.allocDefault R hR).val.id R p u (t.eval σ) := by
+      Srt.FreshRead (C := C) (μ₀.heap.allocDefault R hR).heap R p u (t.eval σ) := by
   induction t with
   | app1 o x ihx =>
     intro p h
@@ -1975,27 +2069,15 @@ theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
         have he : (Tm.app1 (.alloc R' hR') x).eval σ = some (μ₀.heap.allocDefault R' hR).val.id := by
           simp only [Tm.eval_app1, Op1.eval_eq_evalM, Op1.evalM, hm, Option.map_some]
         rw [he]
-        refine ⟨fun id hid => ?_, fun _ _ => ⟨_, rfl⟩⟩
-        cases hid
-        exact ⟨rfl, (μ₀.heap.allocDefault R' hR).val.get?⟩
+        exact Srt.FreshRead.root _ (Heap.dflt_allocDefault μ₀.heap R' hR)
       · cases h
     | mfield hf =>
       simp only [Tm.freshPath?, Op1.freshStep, Option.map_eq_some_iff] at h
       obtain ⟨p', hp', rfl⟩ := h
-      obtain ⟨ih1, ih2⟩ := ihx hp'
-      refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
-      · simp only [Tm.eval_app1, Op1.eval_eq_evalM, Op1.evalM, Option.map_eq_some_iff] at had
-        obtain ⟨id, hid, rfl⟩ := had
-        obtain ⟨h1, h2⟩ := ih1 id hid
-        refine ⟨⟨.field ⟨id, h2⟩ hf, ?_⟩, ?_⟩
-        · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?, h2, dite_true,
-            Option.map_some]
-        · simp only [Semantics.State.readPath, Semantics.MVal.readPath_snoc] at h1 ⊢
-          rw [h1, Semantics.Res.ok_bind']
-          rfl
-      · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
-        obtain ⟨id, hid⟩ := ih2 _ hR''
-        exact ⟨_, by rw [Tm.eval_app1, hid]; rfl⟩
+      have he : (Tm.app1 (.mfield hf) x).eval σ = (x.eval σ).map fun id => MAddrT.field id hf := by
+        simp only [Tm.eval_app1, Op1.eval_eq_evalM, Op1.evalM]
+      rw [he]
+      exact Srt.FreshRead.field hf (ihx hp')
     | _ => simp only [Tm.freshPath?, Op1.freshStep, reduceCtorEq] at h
   | app2 o x y ihx ihy =>
     intro p h
@@ -2005,69 +2087,27 @@ theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
       split at h
       · rename_i hM
         obtain ⟨hR', rfl⟩ := Tm.eq_of_isAddM hM
-        obtain ⟨ih1, ih2⟩ := ihy h
         have hX : (Tms.MTerm.addM m R hR').eval σ = some (μ₀.then (μ₀.heap.allocDefault R hR)) := by
           simp only [Tms.MTerm.addM, Tm.eval_app1, Op1.eval_eq_evalM, Op1.evalM, hm,
             Option.map_some]
         rw [show Tm.app2 .iread (Tms.MTerm.addM m R hR') y = Tms.ITerm.read _ y from rfl,
           Tm.iread_evalT, hX, Option.bind_some]
-        refine ⟨fun id hid => ?_, fun T' hT' => ?_⟩
-        · simp only [Option.bind_eq_some_iff, Option.some.injEq] at hid
-          obtain ⟨bd, hbd, r, ⟨ra, hra, hrd⟩, rfl⟩ := hid
-          obtain ⟨-, hpath⟩ := ih1 bd hbd
-          refine ⟨?_, r.get?⟩
-          rw [← hpath, ← MAddrT.erase_resolve hra,
-            Heap.readAddr_erase (hp := (μ₀.heap.allocDefault R hR).heap) rfl ra]
-          have hrd' : (μ₀.heap.allocDefault R hR).heap.readAddr ra = some r := hrd
-          rw [hrd']
-          rfl
-        · obtain ⟨bd, hbd⟩ := ih2 T' hT'
-          obtain ⟨⟨ra, hra⟩, hpath⟩ := ih1 bd hbd
-          obtain ⟨mv', hmv', -⟩ := (copyStToM_default_readPath p (Grown.allocSt_copy μ₀ R hR)
-            (Semantics.State.HeapExt.refl _)).2 T' hT'
-          have hrd : readAddr (μ₀.allocSt R hR) ra.erase = .ok mv' := by
-            rw [MAddrT.erase_resolve hra, hpath]
-            exact hmv'
-          rw [Heap.readAddr_erase (hp := (μ₀.heap.allocDefault R hR).heap) rfl ra] at hrd
-          cases hx : (μ₀.heap.allocDefault R hR).heap.readAddr ra with
-          | none => rw [hx] at hrd; cases hrd
-          | some r =>
-            refine ⟨r.id, ?_⟩
-            rw [hbd, Option.bind_some]
-            show ((bd.resolve (μ₀.heap.allocDefault R hR).H').bind fun rb =>
-              (μ₀.heap.allocDefault R hR).heap.readAddr rb).bind _ = _
-            rw [hra, Option.bind_some, hx, Option.bind_some]
+        exact Srt.FreshRead.iread (ihy h)
       · cases h
     | mat a =>
       simp only [Tm.freshPath?, Op2.freshStep, Option.bind_eq_some_iff,
         Option.map_eq_some_iff] at h
       obtain ⟨k, hk, p', hp', rfl⟩ := h
-      obtain ⟨ih1, ih2⟩ := ihx hp'
       obtain ⟨w, hw⟩ := Tm.litInt?_some (σ := σ) hk
       have hwk : w.1 = k := Tm.litInt?_uint hk hw
-      have he : ∀ id, x.eval σ = some id →
-          (Tm.app2 (.mat a) x y).eval σ = some (MAddrT.index id a k) := by
-        intro id hid
-        simp only [Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM, hid, hw, hwk, Option.bind_eq_bind,
-          Option.bind_some]
-      refine ⟨fun ad had => ?_, fun T' hT' => ?_⟩
-      · cases hx : x.eval σ with
-        | none =>
-          rw [Tm.eval_app2_none _ x y hx] at had
-          cases had
+      have he : (Tm.app2 (.mat a) x y).eval σ = (x.eval σ).map fun id => MAddrT.index id a k := by
+        cases hx : x.eval σ with
+        | none => exact Tm.eval_app2_none _ x y hx
         | some id =>
-          rw [he id hx] at had
-          cases had
-          obtain ⟨h1, h2⟩ := ih1 id hx
-          refine ⟨⟨.index ⟨id, h2⟩ a k, ?_⟩, ?_⟩
-          · simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?, h2, dite_true,
-              Option.map_some]
-          · simp only [Semantics.State.readPath, Semantics.MVal.readPath_snoc] at h1 ⊢
-            rw [h1, Semantics.Res.ok_bind']
-            rfl
-      · obtain ⟨R'', hR''⟩ := Ty.memberTy_snoc_some hT'
-        obtain ⟨id, hid⟩ := ih2 _ hR''
-        exact ⟨_, he id hid⟩
+          simp only [Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM, hx, hw, hwk, Option.bind_eq_bind,
+            Option.bind_some, Option.map_some]
+      rw [he]
+      exact Srt.FreshRead.index a k (ihx hp')
     | _ => simp only [Tm.freshPath?, Op2.freshStep, reduceCtorEq] at h
   | _ => intro p h; simp only [Tm.freshPath?, reduceCtorEq] at h
 
@@ -2080,45 +2120,39 @@ theorem Tm.readOnAddM_exact {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
   obtain ⟨μ₁, hX⟩ := Option.ne_none_iff_exists'.1 hX
   obtain ⟨μ₀, hm, rfl⟩ := Tm.addM_some hX
   obtain ⟨p, hp, hT⟩ := Option.bind_eq_some_iff.1 h
-  obtain ⟨ih1, ih2⟩ := Tm.freshPath_eval (hR := hR) hm b hp
-  obtain ⟨bd, hbd⟩ := ih2 _ hT
-  obtain ⟨⟨ra, hra⟩, hpath⟩ := ih1 bd hbd
-  obtain ⟨mv', hmv', hd⟩ := (copyStToM_default_readPath p (Grown.allocSt_copy μ₀ R hR)
-    (Semantics.State.HeapExt.refl _)).2 _ hT
-  have hrd : readAddr (μ₀.allocSt R hR) ra.erase = .ok mv' := by
-    rw [MAddrT.erase_resolve hra, hpath]
-    exact hmv'
-  rw [Heap.readAddr_erase (hp := (μ₀.heap.allocDefault R hR).heap) rfl ra] at hrd
-  rw [Tm.read_evalT, hX, Option.bind_some, hbd, Option.bind_some]
-  show ((bd.resolve (μ₀.heap.allocDefault R hR).H').bind fun rb =>
-    (μ₀.heap.allocDefault R hR).heap.readAddr rb) = some (PrimTy.dflt P)
-  rw [hra, Option.bind_some]
-  cases hx : (μ₀.heap.allocDefault R hR).heap.readAddr ra with
-  | none => rw [hx] at hrd; cases hrd
-  | some v =>
-    rw [hx] at hrd
-    simp only [toRes, Except.ok.injEq] at hrd
-    subst hrd
-    have hd : Semantics.MVal.prim (PrimTy.erase (p := P) v) = (PrimTy.default P).toMVal := hd
-    rw [← PrimTy.erase_dflt] at hd
-    have hv : PrimTy.erase (p := P) v = PrimTy.erase (PrimTy.dflt P) := by
-      cases P <;> exact Semantics.MVal.prim.inj hd
-    rw [PrimTy.erase_injective hv]
+  rw [Tm.read_evalT, hX, Option.bind_some]
+  exact Srt.FreshRead.read_prim (Tm.freshPath_eval (hR := hR) hm b hp) hT
 
 /-! ## Copies between storage and memory
 
-A member read out of a copy is answered on the erasure too: a copy of a
-storage struct into memory (`SVal.copyStToM_erase`, `Close.copyStToM_member`),
-and of a memory struct into storage (`MVal.copyMem_erase`,
-`Close.copyMem_member`), its write laid over the old value
-(`SVal.overlay_erase`, `Close.find_overlay_fields`). -/
+A member read out of a copy is answered on the typed values: a copy of a
+storage struct into memory holds its words (`SVal.copyStToM_field`), a copy
+of a memory struct into storage the object's (`MVal.copyMToSt_field`), and
+a copy laid over a struct is read member by member
+(`SVal.find_overlay_field`). -/
 
-/-- A member read out of a copy of a storage struct, on the erasure: what
-the storage holds at the member. -/
+/-- A word laid over a word is the new one. -/
+theorem SVal.overlay_prim' {p : PrimTy} (o n : SVal (.prim p)) : o.overlay n = n := by
+  cases n; exact SVal.overlay_prim o _
+
+/-- **A member of a struct copy**: the new struct's member laid over the old
+one's. -/
+theorem SVal.find_overlay_field {s f : Name} {T U : Ty} (o n : SVal (.ref (.struct s)))
+    (h : Semantics.lookupBy f (Semantics.structDef s) = some T) (p : Path T U) :
+    (o.overlay n).find (.field h p) =
+      (n.find (.field h .nil)).bind fun n' => (((SVal.view o : SFields _).get h).overlay n').find p := by
+  cases o with
+  | struct ofs =>
+    cases n with
+    | struct nfs =>
+      rw [SVal.overlay_struct, SVal.find_field, SFields.get_overlay, SVal.find_field,
+        SVal.find_nil, Option.bind_some, SVal.view_struct]
+
+/-- A member read out of a copy of a storage struct: what the storage holds
+at the member. -/
 theorem Tm.readFromCopyToStorage_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
     {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
     {hT : (Ty.ref (.struct sn)).mapFree = true} {hf : C.fieldType sn f = some (.prim P)}
-    (hl : (f == "length") = false)
     (hX : (Tms.MTerm.copySt m (Tms.SValT.find s p) hT).eval σ ≠ none) :
     (Tms.Term.read (Tms.MTerm.copySt m (Tms.SValT.find s p) hT)
         (Tms.MAddr.field (Tms.ITerm.copy m (Tms.SValT.find s p) hT) f hf)).eval σ =
@@ -2149,45 +2183,20 @@ theorem Tm.readFromCopyToStorage_exact {σ : State C Γ} {m : Tm C Γ .mem} {s :
     simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some,
       Option.bind_some]
     rfl
-  rw [hL]
-  let g := sv.copyStToM μ₀.heap hT
-  let τ₀ : Semantics.State := Heap.into { storage := st.erase } μ₀.heap
-  have hc : Semantics.copyStToM τ₀ sv.erase = .ok (Heap.into τ₀ g.heap, .ref g.val.id) :=
-    SVal.copyStToM_erase sv hT μ₀.heap τ₀ rfl rfl
-  have hmem := Close.copyStToM_member hc (by simpa only [beq_eq_false_iff_ne, ne_eq] using hl)
-  have hrd : Close.readVal (Heap.into τ₀ g.heap) (.memoryField g.val.id f) =
-      .ok (PrimTy.erase (g.heap.field g.val hf)) := by
-    have h₁ := Heap.readAddr_erase (σ := Heap.into τ₀ g.heap) (hp := g.heap) rfl
-      (MAddr.field g.val hf)
-    simp only [Close.readVal]
-    rw [show (Semantics.Addr.memoryField g.val.id f) = (MAddr.field g.val hf).erase from rfl, h₁]
-    simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind']
-    exact MVal.asValue_erase_prim _
-  have hfs := Storage.findStorage_erase (σ := Heap.into τ₀ g.heap) (st := st) rfl (r.field hf)
-  have hfs₀ := Storage.findStorage_erase (σ := Heap.into τ₀ g.heap) (st := st) rfl r
-  rw [hsv] at hfs₀
-  have hpe : (r.field hf).path.erase = r.path.erase ++ [Semantics.Seg.field f] := by
-    simp only [SRef.field, SRef.append, Path.erase_append]
-    rfl
-  rw [hpe, Semantics.State.findStorage_snoc, show (r.field hf).root = r.root from rfl, hfs₀] at hfs
-  simp only [toRes, Semantics.Res.ok_bind'] at hfs
-  rw [hmem, hfs] at hrd
+  rw [hL, SVal.copyStToM_field μ₀.heap sv hT hf]
   simp only [Tms.Term.find, Tms.PTerm.field, Tm.eval_app2, Tm.eval_app1, Op2.eval_eq_evalM,
     Op2.evalM, Op1.eval_eq_evalM, Op1.evalM, hs, hp, Option.map_some, Option.bind_eq_bind,
     Option.bind_some]
-  cases hw : Storage.find st (r.field hf) with
-  | none => rw [hw] at hrd; cases hrd
-  | some w =>
-    rw [hw] at hrd
-    simp only [Semantics.Res.ok_bind', SVal.asValue_erase_prim, Except.ok.injEq] at hrd
-    simp only [Option.bind_some, PrimTy.erase_injective hrd]
-    rfl
+  rw [show SRef.field r hf = r.append (.field hf .nil) from rfl, Storage.find_append, hsv,
+    Option.bind_some]
+  cases sv with
+  | struct fs => rw [SVal.find_field, SVal.find_nil, Option.bind_some, SVal.view_struct]
 
-/-- A member read out of a memory struct copied into storage, on the
-erasure: what the memory holds at the member. -/
+/-- A member read out of a memory struct copied into storage: what the memory
+holds at the member. -/
 theorem Tm.findOnCopy_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name}
     {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))} {i : Tm C Γ (.ident (.struct sn))}
-    {hf : C.fieldType sn f = some (.prim P)} (hl : (f == "length") = false)
+    {hf : C.fieldType sn f = some (.prim P)}
     (hS : (Tms.STerm.save s p (Tms.SValT.copyMem m i)).eval σ ≠ none) :
     (Tms.Term.find (Tms.STerm.save s p (Tms.SValT.copyMem m i)) (Tms.PTerm.field p f hf)).eval σ =
       (Tms.Term.read m (Tms.MAddr.field i f hf)).eval σ := by
@@ -2215,40 +2224,13 @@ theorem Tm.findOnCopy_exact {σ : State C Γ} {m : Tm C Γ .mem} {s : Tm C Γ .s
       Option.bind_some]
     rfl
   rw [hR]
-  have hfs := Storage.findStorage_erase (σ := { storage := st'.erase }) (st := st') rfl
-    (r.field hf)
-  have hfs₀ := Storage.findStorage_erase (σ := { storage := st'.erase }) (st := st') rfl r
-  rw [hfind] at hfs₀
-  have hpe : (r.field hf).path.erase = r.path.erase ++ [Semantics.Seg.field f] := by
-    simp only [SRef.field, SRef.append, Path.erase_append]
-    rfl
-  rw [hpe, Semantics.State.findStorage_snoc, show (r.field hf).root = r.root from rfl, hfs₀] at hfs
-  simp only [toRes, Semantics.Res.ok_bind', SVal.overlay_erase] at hfs
-  rw [Close.find_overlay_fields _ _ _ rfl] at hfs
-  let τ : Semantics.State := Heap.into { storage := [] } μ.heap
-  have hcm := MVal.copyMem_erase (σ := τ) (hp := μ.heap) rfl (T := .ref (.struct sn)) ref
-  have hmem := Close.copyMem_member hcm (by simpa only [beq_eq_false_iff_ne, ne_eq] using hl)
-  have h₁ := Heap.readAddr_erase (σ := τ) (hp := μ.heap) rfl (MAddr.field ref hf)
-  rw [show (MAddr.field ref hf).erase = Semantics.Addr.memoryField ref.id f from rfl] at h₁
-  rw [h₁] at hmem
-  simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind', MVal.erase, Close.copyLeaf_prim] at hmem
-  rw [hmem] at hfs
-  simp only [Semantics.Res.ok_bind', Close.layAt_prim] at hfs
   simp only [Tms.Term.find, Tms.PTerm.field, Tm.eval_app2, Tm.eval_app1, Op2.eval_eq_evalM,
     Op2.evalM, Op1.eval_eq_evalM, Op1.evalM, hS', hp, Option.map_some, Option.bind_eq_bind,
     Option.bind_some]
-  cases hw' : Storage.find st' (r.field hf) with
-  | none => rw [hw'] at hfs; cases hfs
-  | some w =>
-    rw [hw'] at hfs
-    simp only [Except.ok.injEq] at hfs
-    have ha := SVal.asValue_erase_prim w
-    rw [← hfs] at ha
-    have hv : PrimTy.erase w.view = PrimTy.erase (μ.heap.field ref hf) := by
-      revert ha
-      cases PrimTy.erase (μ.heap.field ref hf) <;>
-        simp only [Semantics.SVal.asValue, Except.ok.injEq] <;> exact fun ha => ha.symm
-    rw [Option.bind_some, PrimTy.erase_injective hv]
+  rw [show SRef.field r hf = r.append (.field hf .nil) from rfl, Storage.find_append, hfind,
+    Option.bind_some, SVal.find_overlay_field, MVal.copyMToSt_field, Option.bind_some,
+    SVal.overlay_prim', SVal.find_nil, Option.bind_some]
+  rfl
 
 /-- A law of a memory read, at the value or the identity sort: where the
 read returns, the replacement returns the same (`EvalLaw.exact`). -/
@@ -2438,11 +2420,11 @@ theorem EvalLaw.exact {u : Srt} {t t' : Tm C Γ u} : EvalLaw t t' → ∃ A, t.l
       split at hmv
       · cases hmv; rfl
       · cases hmv⟩
-  | .findOnCopy hl => ⟨_, rfl, fun _ hS => Tm.findOnCopy_exact hl hS⟩
-  | .findOnCopyIn hb hl => ⟨.st (Tms.STerm.save _ _ (Tms.SValT.copyMem _ _)),
+  | .findOnCopy _ => ⟨_, rfl, fun _ hS => Tm.findOnCopy_exact hS⟩
+  | .findOnCopyIn hb _ => ⟨.st (Tms.STerm.save _ _ (Tms.SValT.copyMem _ _)),
       by simp only [Tm.lawAnchor?, Option.orElse, hb]; rfl,
-      fun σ hS => (Tm.base?_eval σ hb).trans (Tm.findOnCopy_exact hl hS)⟩
-  | .readFromCopyToStorage hl => ⟨_, rfl, fun _ hX => Tm.readFromCopyToStorage_exact hl hX⟩
+      fun σ hS => (Tm.base?_eval σ hb).trans (Tm.findOnCopy_exact hS)⟩
+  | .readFromCopyToStorage _ => ⟨_, rfl, fun _ hX => Tm.readFromCopyToStorage_exact hX⟩
   | .readOnAddM h => ⟨_, rfl, fun _ hX => Tm.readOnAddM_exact h hX⟩
   | .readOnAddMFrame h => ⟨_, rfl, fun _ hX => Tm.readOnAddMFrame_exact h hX⟩
   | .readOnAddMFrameIdentity h => ⟨_, rfl, fun _ hX => Tm.readOnAddMFrameIdentity_exact h hX⟩

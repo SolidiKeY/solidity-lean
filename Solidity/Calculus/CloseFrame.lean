@@ -87,25 +87,6 @@ theorem write_eq_bind {T : Ty} (st : Storage C) (r : SRef C T) (v : SVal T) :
 
 end Storage
 
-/-! ## A copy laid over a struct, member by member -/
-
-/-- A word laid over a word is the new one. -/
-theorem SVal.overlay_prim' {p : PrimTy} (o n : SVal (.prim p)) : o.overlay n = n := by
-  cases n; exact SVal.overlay_prim o _
-
-/-- **A member of a struct copy** (the untyped `Close.find_overlay_fields`):
-the new struct's member laid over the old one's. -/
-theorem SVal.find_overlay_field {s f : Name} {T U : Ty} (o n : SVal (.ref (.struct s)))
-    (h : lookupBy f (structDef s) = some T) (p : Path T U) :
-    (o.overlay n).find (.field h p) =
-      (n.find (.field h .nil)).bind fun n' => (((SVal.view o : SFields _).get h).overlay n').find p := by
-  cases o with
-  | struct ofs =>
-    cases n with
-    | struct nfs =>
-      rw [SVal.overlay_struct, SVal.find_field, SFields.get_overlay, SVal.find_field,
-        SVal.find_nil, Option.bind_some, SVal.view_struct]
-
 /-! ## A delete, member by member -/
 
 /-- A word reset is the type's default, whatever it held. -/
