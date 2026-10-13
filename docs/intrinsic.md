@@ -6778,3 +6778,77 @@ update reading alike (W9.8.5).
   checkout of solkey `1b4341a303` (`TestSuite.sol` `2fe50a03`);
   `../solkey` itself is stale (`4150e0a8`).
 - Lean docstrings may still call the erased side "today's" in places.
+
+### W10.1–2 record (2026-10-13, branch `w10-remnant`)
+
+Type the remnants W9 left untyped on purpose (the W9.8.4 record's list):
+`Update.lean`'s remnant over `Semantics.State` and
+`Tools/Counterexample`'s candidates.
+
+**W10.1, `Update.lean`.**  What it held over the untyped state had no user
+left once the run, the formulas and the callbacks were typed; each has a
+typed version that the calculus already reads:
+- `Modality.after` (a halt under a modality, at `Res State`): gone; the
+  typed reading is `Modality.afterRunTR` (`Calculus/Logic.lean`), the
+  callbacks' `COut.after` (`Semantics/Callback.lean`).
+- `Semantics.State.havoc`/`havoc_self`, `EnvAgreeExcept.havoc`; `anonEnv`,
+  `Semantics.State.anon`, `EnvAgreeExcept.anon` and their list lemmas
+  (`lookupBy_filter_self`/`_ne`, `lookupBy_anonEnv`): gone; the typed
+  `State.havoc`/`State.anon` of `Semantics/RunFrame.lean` are what
+  `holds`, the callbacks and the loop frame read.  `Close.State.havoc_eq_mk`
+  (`Calculus/CloseLemmas.lean`, the untyped `havoc` as a structure) went
+  with them (its `lean-key-rule-map.md` row now cites `CloseS.holds_havoc`
+  only).
+- `Denote.evalBinop_of_error`, `Denote.asInt_prim_of_asInt`,
+  `SVal.abs_of_asValue`: dead, gone.
+- `Update.lean` no longer imports `Semantics/Agree.lean` (still reached
+  through `TermSimp.lean`).
+
+**W10.2, `Tools/Counterexample`.**  A candidate is typed (`Cand C`: a
+`Storage C`, a `TTx`, the funds a `uint`, the ledger), its state
+`Cand.tstate` a `State C []` built directly, so nothing is decoded: the
+untyped storage reader (`SVal.decodeN`, `SFields`/`SVec`/`SList`/`SMap.decode`,
+`Storage.decode`), `State.ofSem?`/`ofSemD` and the kernel-reducible untyped
+equality (`Semantics.SVal.beqK` and its lemmas) are gone.
+- The storage is drawn typed (`TGen.sval`, fuel 32 as the reader had,
+  `SVal.arrayOf` for a dynamic array's bound) in the order `GenSpec.sval`
+  drew it, each word from `poolDom`, the typed pool of the same length, so
+  the same seed gives the same candidates: no pinned output moved.
+- Shrinking is typed: the integers and the renaming are folds
+  (`intsFold`, `renameFold`), a reset and a dropped entry walk the roots
+  (`SFields.resets`, `SFields.drops`, `SMap.drops`).
+- A certificate quotes the typed state (`quoteFold`, `Cand.quote`; a word
+  as `PrimTy.ofIntD`, which the kernel reads back) and the kernel checks
+  `Fml.eval3Peel` at `Cand.tstate`, no decoding in it.
+- `Witness`/`Search` are indexed by the contract; a `Refutation` keeps its
+  witness printed (`Witness.lines`), so `Tools/Verify` reads it without
+  the contract.  A witness prints its typed state erased (`fmtTx` of
+  `globE`, `fmtStorageLine` of `storage.erase`), as an outcome already did.
+- `State.lift?` stays: it reads an update's typed result (`GlobT` and the
+  locals' values) back as a typed state, typed to typed.
+
+**What stays untyped**, and why:
+- `readAddr` (`Update.lean`): the memory read of `sol_decide`'s language
+  (`Calculus/Decide.lean`, `DecideErase`, `MemNames`, `CloseLemmas`) and of
+  the Theory (`Theory/StateWrites.lean`'s `readLoc_eq`); the typed read is
+  `Heap.readAddr`.  With the language it stays (W9.8.4).
+- `PrimTy.admits`: a quantifier's range in `sol_decide`'s language
+  (`DecideLang`, `Closer`, `DecideTyped.admits_erase`).
+- `StValue.toRes`, `Res.toSt`: the Theory bridge (`Theory/Bridge/Denote.lean`),
+  for W10.3.
+- A candidate's arguments are `Semantics.Value`s, which `Fml.peel` reads at
+  each binder's type (`PrimTy.ofValue?`); `GenSpec.sval` stays untyped for
+  `#difftest`, which runs the untyped interpreter beside the EVM.
+- `Semantics/Agree.lean` (the untyped frame kit, `EnvAgreeExcept`) has no
+  user outside itself now.  Deleting it also takes a line of
+  `.claude/rules/typing.md`, which names it; left for W10.3.
+
+**Checked**: `lean_build` of the default targets (299 jobs) clean;
+`Examples/Verify.lean`'s pins unchanged (`#verify` and `#counterexample`,
+the certified ones still certified); `check-orphans` (0 orphaned);
+`check-doc-paths`; `sorry` count unchanged (23 matches, as master).
+`SolkeyTestSuite` not rebuilt: no declaration removed here is named
+anywhere under `Solidity/`.  Timing (`profiler` on a scratch copy of
+`Examples/Verify.lean`, each checkout's worker; ms): the loop search
+`while (i < a)` 2890 here / 3010 master, `count = a` 74 / 80, the
+certified ones within 10 ms of master: no slowdown.
