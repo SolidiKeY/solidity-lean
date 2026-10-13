@@ -205,9 +205,9 @@ theorem Tm.denote_fieldS (σ : State C Γ) {s f : Name} {T : Ty} (h : C.fieldTyp
     (q : Tm C Γ (.path (.ref (.struct s)))) :
     (Tm.app1 (.field h) q).denote σ = ObsLoc.app (q.denote σ) (.field h .nil) := rfl
 theorem Tm.denote_atS (σ : State C Γ) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k.keyTy)) :
+    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k)) :
     (Tm.app2 (.at it) q i).denote σ =
-      ObsLoc.app (q.denote σ) (Path.index it (PrimTy.key ((i.denote σ).getD (PrimTy.dflt _)))) :=
+      ObsLoc.app (q.denote σ) (Path.index it ((i.denote σ).getD (PrimTy.dflt _))) :=
   rfl
 
 end TheoryS

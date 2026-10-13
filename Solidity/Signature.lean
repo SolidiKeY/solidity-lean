@@ -29,8 +29,7 @@ read as a storage (`Storage (Contract.ofStruct s)`), and `spath s T`, a
 path from one of them; `select` from the storage at a root, `selectIn`
 from an `sts` at a member, and `member`/`fieldIn`/`findIn`/`sfindIn`/
 `delAtIn`/`saveIn` the symbols under it.  An index (`at`, `atIn`) takes
-the word its key is hashed as, at `PrimTy.keyTy` (a `bool` key at `uint`),
-as `Tm.keyAt` writes it.
+a value of its key type: a mapping's key, an array's `uint` index.
 
 The evaluators are kernel-evaluated: each is a `casesOn` with a `match`
 twin as its `implemented_by` and a link theorem (Gate G0).
@@ -73,13 +72,6 @@ inductive Srt where
   KeY `int`s (solkey's `netHeader.key`, `SpecCompiler`): total, unbounded. -/
   | kint
   deriving DecidableEq, Repr
-
-/-- The type an index of key type `k` is hashed at: a `bool` key is the
-word `0` or `1` (`Tm.keyAt`). -/
-def PrimTy.keyTy : PrimTy → PrimTy
-  | .bool => .uint
-  | .uint => .uint
-  | .int => .int
 
 /-- An operator KeY's `int` has, unbounded: `+`, `-`, `*`. -/
 def BinOp.zArith : BinOp → Bool
@@ -224,7 +216,7 @@ inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
   | read {p : PrimTy} : Op2 C .mem (.addr (.prim p)) (.val p)
   | mlen {E : Ty} : Op2 C .mem (.ident (.array E)) (.val .uint)
   | at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
-      Op2 C (.path (.ref R)) (.val k.keyTy) (.path V)
+      Op2 C (.path (.ref R)) (.val k) (.path V)
   | nextIn {E : Ty} : Op2 C .st (.path (.ref (.array E))) (.path E)
   | delAt {T : Ty} : Op2 C .st (.path T) .st
   | pushSlot {E : Ty} : Op2 C .st (.path (.ref (.array E))) .st
@@ -254,7 +246,7 @@ inductive Op3 (C : Contract) : Srt → Srt → Srt → Srt → Type where
   | save {T : Ty} : Op3 C .st (.path T) (.sv T) .st
   | push {E : Ty} : Op3 C .st (.path (.ref (.array E))) (.sv E) .st
   | atIn {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
-      Op3 C .st (.path (.ref R)) (.val k.keyTy) (.path V)
+      Op3 C .st (.path (.ref R)) (.val k) (.path V)
   | write {T : Ty} : Op3 C .mem (.addr T) (.mv T) .mem
   /-- `save(s, p, v)` under a `select`. -/
   | saveIn {s : Name} {T : Ty} : Op3 C (.sts s) (.spath s T) (.sv T) (.sts s)
@@ -277,13 +269,15 @@ def Storage.wtT (st : Storage C) : Option PrimTy.bool.Denote :=
 
 /-- `p[p.length]` in `st`: the slot past the live elements. -/
 def Storage.nextT {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) : Option (SRef C E) :=
-  (st.find r).map fun v => r.index (.arr .dyn) ((SVal.view v : ArrView E).n : Int)
+  (st.find r).map fun (v : SVal (.ref (.array E))) =>
+    let w : ArrView E := SVal.view v
+    r.index (.arr .dyn) (lenU w.n w.hn)
 
 /-- `p[i]` with its index checked in `st`. -/
 def Storage.atT {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (it : IndexTy R k V)
-    (r : SRef C (.ref R)) (i : k.keyTy.Denote) : Option (SRef C V) := do
-  st.checkIndex r it (PrimTy.key i)
-  some (r.index it (PrimTy.key i))
+    (r : SRef C (.ref R)) (i : k.Denote) : Option (SRef C V) := do
+  st.checkIndex r it i
+  some (r.index it i)
 
 
 /-- `Op0.eval` by `match`, its compiled form. -/

@@ -264,7 +264,7 @@ ask nothing of their own. -/
 structure Hered where
   arr : {E : Ty} → {n : Nat} → SVec E n → SList E → Prop
   fix : Ty → Nat → Prop
-  map : PrimTy → {V : Ty} → SMap V → SVal V → Prop
+  map : (K : PrimTy) → {V : Ty} → SMap K V → SVal V → Prop
 
 /-- Every node satisfying `P`'s condition, as a fold. -/
 def allFold (P : Hered) : Fold where
@@ -272,7 +272,7 @@ def allFold (P : Hered) : Fold where
   F _ := Prop
   L _ := Prop
   W _ _ := Prop
-  M _ := Prop
+  M _ _ := Prop
   prim := fun _ => True
   struct := fun _ ih => ih
   array := fun e sh _ ie ish => P.arr e sh ∧ ie ∧ ish
@@ -292,7 +292,7 @@ def SVal.All (P : Hered) {T : Ty} (v : SVal T) : Prop := v.fold (allFold P)
 def SFields.All (P : Hered) {fs : List (Name × Ty)} (x : SFields fs) : Prop := x.fold (allFold P)
 def SList.All (P : Hered) {E : Ty} (l : SList E) : Prop := l.fold (allFold P)
 def SVec.All (P : Hered) {E : Ty} {n : Nat} (l : SVec E n) : Prop := l.fold (allFold P)
-def SMap.All (P : Hered) {V : Ty} (m : SMap V) : Prop := m.fold (allFold P)
+def SMap.All (P : Hered) {K : PrimTy} {V : Ty} (m : SMap K V) : Prop := m.fold (allFold P)
 
 section All
 
@@ -305,7 +305,7 @@ theorem SVal.All_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n <
     (SVal.array e sh h).All P = (P.arr e sh ∧ e.All P ∧ sh.All P) := rfl
 theorem SVal.All_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).All P = (P.fix E n ∧ e.All P) := rfl
-theorem SVal.All_map {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) :
+theorem SVal.All_map {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) :
     (SVal.map (K := K) m d).All P = (P.map K m d ∧ m.All P ∧ d.All P) := rfl
 theorem SFields.All_nil : (SFields.nil).All P = True := rfl
 theorem SFields.All_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -316,8 +316,8 @@ theorem SList.All_cons {E : Ty} (v : SVal E) (rest : SList E) :
 theorem SVec.All_nil {E : Ty} : (SVec.nil (E := E)).All P = True := rfl
 theorem SVec.All_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
     (SVec.cons v rest).All P = (v.All P ∧ rest.All P) := rfl
-theorem SMap.All_nil {V : Ty} : (SMap.nil (V := V)).All P = True := rfl
-theorem SMap.All_cons {V : Ty} (k : Int) (v : SVal V) (rest : SMap V) :
+theorem SMap.All_nil {V : Ty} : (SMap.nil (K := K) (V := V)).All P = True := rfl
+theorem SMap.All_cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest : SMap K V) :
     (SMap.cons k v rest).All P = (v.All P ∧ rest.All P) := rfl
 
 end All
@@ -345,7 +345,7 @@ theorem SList.all_iff {E : Ty} : {l : SList E} → l.All P ↔ ∀ x ∈ l.toLis
     simp only [SList.All, SList.toList, List.mem_cons, forall_eq_or_imp]
     rw [SList.all_iff]
 
-theorem SMap.all_iff {V : Ty} : {m : SMap V} → m.All P ↔ ∀ e ∈ m.toList, e.2.All P
+theorem SMap.all_iff {K : PrimTy} {V : Ty} : {m : SMap K V} → m.All P ↔ ∀ e ∈ m.toList, e.2.All P
   | .nil => by simp only [SMap.All, SMap.toList, List.not_mem_nil, false_implies, implies_true]
   | .cons k v rest => by
     simp only [SMap.All, SMap.toList, List.mem_cons, forall_eq_or_imp]
@@ -359,7 +359,7 @@ theorem SList.all_ofList {E : Ty} {l : List (SVal E)} :
     (SList.ofList l).All P ↔ ∀ x ∈ l, x.All P := by
   rw [SList.all_iff, SList.toList_ofList]
 
-theorem SMap.all_ofList {V : Ty} {l : List (Int × SVal V)} :
+theorem SMap.all_ofList {K : PrimTy} {V : Ty} {l : List (K.Denote × SVal V)} :
     (SMap.ofList l).All P ↔ ∀ e ∈ l, e.2.All P := by
   rw [SMap.all_iff, SMap.toList_ofList]
 
@@ -528,7 +528,7 @@ def Path.Keys (Q : PrimTy → Int → Prop) : {T U : Ty} → Path T U → Prop
   | _, _, .field _ p => p.Keys Q
   | _, _, .at _ p => p.Keys Q
   | _, _, .atF _ p => p.Keys Q
-  | _, _, @Path.key K _ _ k p => Q K k ∧ p.Keys Q
+  | _, _, @Path.key K _ _ k p => Q K (PrimTy.key k) ∧ p.Keys Q
 
 theorem Path.keys_mono {Q Q' : PrimTy → Int → Prop} (hQ : ∀ K k, Q K k → Q' K k) :
     {T U : Ty} → (p : Path T U) → p.Keys Q → p.Keys Q'
@@ -631,7 +631,7 @@ variable {P : Hered} {Q : PrimTy → Int → Prop}
     x.All P →
     P.arr (SVec.ofList (((e.toList ++ sh.toList).set i x).take n))
       (SList.ofList (((e.toList ++ sh.toList).set i x).drop n)))
-  (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V), Q K k → x.All P →
+  (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V), Q K (PrimTy.key k) → x.All P →
     P.map K m d → P.map K (SMap.ofList (setBy k x m.toList)) d)
 
 include harr hmap
@@ -986,7 +986,7 @@ structure Hered.Mono (P Q : Hered) (G : Ty → Prop) : Prop where
   arr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → G (.ref (.array E)) →
     Q.arr e sh → P.arr e sh
   fix : ∀ E n, G (.ref (.fixed E n)) → Q.fix E n → P.fix E n
-  map : ∀ {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V), G (.ref (.mapping K V)) → Q.map K m d →
+  map : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V), G (.ref (.mapping K V)) → Q.map K m d →
     P.map K m d
 
 section Mono
@@ -1034,9 +1034,9 @@ theorem SVec.all_mono (hm : P.Mono Q G) : {E : Ty} → {n : Nat} → (l : SVec E
     simp only [SVec.All] at h ⊢
     exact ⟨SVal.all_mono hm v hE h.1, SVec.all_mono hm rest hE h.2⟩
 
-theorem SMap.all_mono (hm : P.Mono Q G) : {V : Ty} → (m : SMap V) → G V → m.All Q → m.All P
-  | _, .nil, _, _ => by simp only [SMap.All]
-  | _, .cons _ v rest, hV, h => by
+theorem SMap.all_mono (hm : P.Mono Q G) : {K : PrimTy} → {V : Ty} → (m : SMap K V) → G V → m.All Q → m.All P
+  | _, _, .nil, _, _ => by simp only [SMap.All]
+  | _, _, .cons _ v rest, hV, h => by
     simp only [SMap.All] at h ⊢
     exact ⟨SVal.all_mono hm v hV h.1, SMap.all_mono hm rest hV h.2⟩
 end
@@ -1048,7 +1048,7 @@ theorem SVal.all_mono' {P Q : Hered}
     (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → Q.arr e sh →
       P.arr e sh)
     (hfix : ∀ E n, Q.fix E n → P.fix E n)
-    (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V), Q.map K m d → P.map K m d)
+    (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V), Q.map K m d → P.map K m d)
     {T : Ty} (v : SVal T) (h : v.All Q) : v.All P :=
   SVal.all_mono (G := fun _ => True) ⟨fun _ _ _ _ => trivial, fun _ _ => trivial,
     fun _ _ _ => trivial, fun _ _ _ => trivial, fun e sh hn _ => harr e sh hn,
@@ -1059,7 +1059,7 @@ theorem SVal.all_mono_deep {P Q : Hered}
     (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), n < 2 ^ 256 → E.okDeep = true →
       Q.arr e sh → P.arr e sh)
     (hfix : ∀ E n, E.okDeep = true → Q.fix E n → P.fix E n)
-    (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V), V.okDeep = true → Q.map K m d →
+    (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V), V.okDeep = true → Q.map K m d →
       P.map K m d)
     {T : Ty} (v : SVal T) (hT : T.okDeep = true) (h : v.All Q) : v.All P :=
   SVal.all_mono (G := fun T => T.okDeep = true)
@@ -1103,10 +1103,6 @@ A save is idempotent (`SVal.saveM_idem`) and the last of two saves at one
 path wins (`SVal.saveM_saveM`); with `SVal.findM_saveM` and the decomposition
 of a save below a path (`SVal.saveM_append`, `Theory/Typed/Obs.lean`) they
 are the algebra `Typing/Constructibility.lean`'s builder is tracked in. -/
-
-theorem SMap.ofList_toList {V : Ty} : (m : SMap V) → SMap.ofList m.toList = m
-  | .nil => by rw [SMap.toList_nil]; rfl
-  | .cons k v rest => by rw [SMap.toList_cons, SMap.ofList, SMap.ofList_toList rest]
 
 /-- Two dynamic arrays with the same live elements and slots are the same. -/
 theorem SVal.array_ext {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh sh' : SList E)

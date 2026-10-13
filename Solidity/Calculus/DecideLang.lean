@@ -94,7 +94,7 @@ inductive LTm (C : Contract) : Srt → Type where
   | app3 {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm C b) (z : LTm C c) : LTm C s
   /-- `q[i]`, not checked: a reference one step further. -/
   | index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (q : LTm C (.path (.ref R)))
-      (i : LTm C (.val k.keyTy)) : LTm C (.path V)
+      (i : LTm C (.val k)) : LTm C (.path V)
   /-- The word of the starting storage at `q` (its default where nothing is). -/
   | obsW {p : PrimTy} (q : LTm C (.path (.prim p))) : LTm C (.val p)
   /-- The live length of the starting storage's array at `q` (`0` where none). -/
@@ -122,7 +122,7 @@ noncomputable def LTm.eval (g : State C []) (ν : AEnv) {s : Srt} (t : LTm C s) 
     (fun o _ x => o.eval g x)
     (fun o _ _ x y => o.eval g x y)
     (fun o _ _ _ x y z => o.eval g x y z)
-    (fun it _ _ q i => q.bind fun r => i.bind fun k => some (r.index it (PrimTy.key k)))
+    (fun it _ _ q i => q.bind fun r => i.bind fun k => some (r.index it k))
     (fun _ q => q.bind fun r => some (g.storage.obs.word (.ref r)))
     (fun _ q => q.bind fun r => some (uintOfNat (g.storage.obs.len (.ref r))))
     (fun _ q => q.bind fun r => some (g.storage.obs.has (.ref r)))
@@ -146,10 +146,10 @@ theorem LTm.eval_app3 {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm
     (z : LTm C c) : (LTm.app3 o x y z).eval g ν = o.eval g (x.eval g ν) (y.eval g ν) (z.eval g ν) :=
   rfl
 theorem LTm.eval_index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (q : LTm C (.path (.ref R))) (i : LTm C (.val k.keyTy)) :
+    (q : LTm C (.path (.ref R))) (i : LTm C (.val k)) :
     ((LTm.index it q i).eval g ν : Option (SRef C V)) =
       (q.eval g ν : Option (SRef C (.ref R))).bind fun r =>
-        (i.eval g ν : Option k.keyTy.Denote).bind fun j => some (r.index it (PrimTy.key j)) := rfl
+        (i.eval g ν : Option k.Denote).bind fun j => some (r.index it j) := rfl
 theorem LTm.eval_obsW {p : PrimTy} (q : LTm C (.path (.prim p))) :
     ((LTm.obsW q).eval g ν : Option p.Denote) =
       (q.eval g ν : Option (SRef C (.prim p))).bind fun r => some (g.storage.obs.word (.ref r)) :=

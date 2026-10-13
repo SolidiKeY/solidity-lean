@@ -21,7 +21,7 @@ variable {C : Contract}
 structure HeredB.Decides (B : HeredB) (P : Hered) : Prop where
   arr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), B.arr e sh = true ↔ P.arr e sh
   fix : ∀ E n, B.fix E n = true ↔ P.fix E n
-  map : ∀ K {V : Ty} (m : SMap V) (d : SVal V), B.map K m d = true ↔ P.map K m d
+  map : ∀ (K : PrimTy) {V : Ty} (m : SMap K V) (d : SVal V), B.map K m d = true ↔ P.map K m d
 
 section Iff
 
@@ -63,9 +63,9 @@ theorem SVec.allB_iff (hB : B.Decides P) : {E : Ty} → {n : Nat} → (l : SVec 
     simp only [SVec.allB, SVec.All, Bool.and_eq_true]
     rw [SVal.allB_iff hB v, SVec.allB_iff hB rest]
 
-theorem SMap.allB_iff (hB : B.Decides P) : {V : Ty} → (m : SMap V) → m.allB B = true ↔ m.All P
-  | _, .nil => by simp only [SMap.allB, SMap.All]
-  | _, .cons _ v rest => by
+theorem SMap.allB_iff (hB : B.Decides P) : {K : PrimTy} → {V : Ty} → (m : SMap K V) → m.allB B = true ↔ m.All P
+  | _, _, .nil => by simp only [SMap.allB, SMap.All]
+  | _, _, .cons _ v rest => by
     simp only [SMap.allB, SMap.All, Bool.and_eq_true]
     rw [SVal.allB_iff hB v, SMap.allB_iff hB rest]
 end
@@ -78,7 +78,7 @@ end Iff
 def keysH : Hered where
   arr _ _ := True
   fix _ _ := True
-  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk e.1
+  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
 
 theorem canonHB_decides : canonHB.Decides canonH :=
   ⟨fun _ _ => by simp only [canonHB, canonH],
@@ -94,7 +94,7 @@ theorem SList.toList_isEmpty {E : Ty} (sh : SList E) : sh.toList.isEmpty = true 
   | cons v rest => simp only [SList.toList_cons, List.isEmpty_cons, Bool.false_eq_true,
       reduceCtorEq]
 
-theorem SMap.toList_isEmpty {V : Ty} (m : SMap V) : m.toList.isEmpty = true ↔ m = .nil := by
+theorem SMap.toList_isEmpty {K : PrimTy} {V : Ty} (m : SMap K V) : m.toList.isEmpty = true ↔ m = .nil := by
   cases m with
   | nil => simp only [SMap.toList_nil, List.isEmpty_nil]
   | cons k v rest => simp only [SMap.toList_cons, List.isEmpty_cons, Bool.false_eq_true,
@@ -137,7 +137,7 @@ theorem keysHB_decides : keysHB.Decides keysH :=
   ⟨fun _ _ => by simp only [keysHB, keysH],
     fun _ _ => by simp only [keysHB, keysH],
     fun K _ m d => by
-      show (m.toList.all fun e => K.keyFits e.1) = true ↔ ∀ e ∈ m.toList, K.keyOk e.1
+      show (m.toList.all fun e => K.keyFits (PrimTy.key e.1)) = true ↔ ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
       simp only [List.all_eq_true, PrimTy.keyOk]⟩
 
 theorem SVal.keysB_iff {T : Ty} (v : SVal T) : v.allB keysHB = true ↔ v.All keysH :=

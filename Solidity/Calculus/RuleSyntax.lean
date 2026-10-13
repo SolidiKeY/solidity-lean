@@ -1266,14 +1266,14 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
     else `(MValT.val $(← schemaTerm0 Γ .val t))
   | _ => schemaTerm0 Γ pos t
 
-/-- A storage index: a program expression's term is the word its key is
-hashed as (`Simple.keyLower`, `Loc.lower`'s), any other term itself. -/
+/-- A storage index: a program expression's term is its lowering
+(`Simple.lower`, `Loc.lower`'s), any other term itself. -/
 partial def schemaKey (Γ : Scope) (i : TSyntax `dl_term) : MacroM Lean.Term := do
   if let `(dl_term| $x:ident) := i then
     if (nameParts x.getId).length == 1 then
       match headOf Γ x with
-      | .simple s => return ← `($(Lean.mkCIdent `Solidity.Simple.keyLower) $s)
-      | .val e => return ← `($(Lean.mkCIdent `Solidity.Val.keyLower) $e)
+      | .simple s => return ← `($(Lean.mkCIdent `Solidity.Simple.lower) $s)
+      | .val e => return ← `($(Lean.mkCIdent `Solidity.Val.lower) $e)
       | _ => pure ()
   schemaTerm Γ .val i
 

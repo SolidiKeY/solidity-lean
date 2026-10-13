@@ -158,8 +158,8 @@ namespace Store
 `TestSuite` (`SLoc`), typed by what they hold. -/
 abbrev ledger : SLoc TestSuite (.ref (.struct "Ledger")) := .ref (SRef.ofRoot "ledger" rfl)
 abbrev nonce : SLoc TestSuite .uint := ObsLoc.app ledger (.field (f := "nonce") rfl .nil)
-abbrev balance (k : Int) : SLoc TestSuite .uint :=
-  ObsLoc.app ledger (.field (f := "balances") rfl (.key (K := .uint) k .nil))
+abbrev balance (k : Int) (h : PrimTy.uint.inRange k = true := by rfl) : SLoc TestSuite .uint :=
+  ObsLoc.app ledger (.field (f := "balances") rfl (.key (K := .uint) ⟨k, h⟩ .nil))
 
 /-- A word as written. -/
 abbrev w (n : Int) (h : PrimTy.uint.inRange n = true := by rfl) : PrimTy.uint.Denote := ⟨n, h⟩
@@ -201,7 +201,8 @@ entries (the delete reads past a key, `TVal.delR`): the entry reads what it
 read before. -/
 theorem balancesSurvive (s : TSto TestSuite) : (S5 s).word (balance 2) = (S4 s).word (balance 2) := by
   rw [S5, Obs.delAt_word_below]
-  show ((S4 s).find ledger).word ((Path.field _ .nil).append (.key 2 .nil)) = _
+  show ((S4 s).find ledger).word
+    ((Path.field _ .nil).append (.key (K := .uint) ⟨2, rfl⟩ .nil)) = _
   rw [Path.append_field, Path.append_nil]
   rfl
 

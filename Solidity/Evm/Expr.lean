@@ -135,14 +135,16 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
         rcases ihi (hm.push _) hwi with ⟨v, w, hv, hrep, hrun'⟩ | ⟨hv, hrun'⟩
         · obtain ⟨n, hn, hv1, rfl⟩ := hrep.uint_inv
           have hk : PrimTy.key v = (n : Int) := hv1
-          have hp' := PathSlot.key hp (Int.natCast_nonneg n) (by omega)
-          rw [Int.toNat_natCast] at hp'
-          have hat : r.atKey .map v = r.index .map (n : Int) := by unfold SRef.atKey; rw [hk]
-          refine .inl ⟨r.atKey .map v, .hash n s₀ 0, _, ?_, ?_, ?_, hall rfl n hn, ?_⟩
+          have hvn : v.1 = (n : Int) := hk
+          have hp' := PathSlot.key hp (k := v) (by omega) (by omega)
+          rw [hvn, Int.toNat_natCast] at hp'
+          have hent := hall rfl n hn
+          rw [← hk, SMap.lookupBy_hashed] at hent
+          refine .inl ⟨r.index .map v, .hash n s₀ 0, _, ?_, ?_, ?_, hent, ?_⟩
           · simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind]
-            rw [hk, Sto.checkIndex_map (Sto.find_of_findLive hsv)]; rfl
-          · rw [hat]; exact Sto.findLive_key hsv _
-          · rw [hat]; exact hp'
+            rw [Sto.checkIndex_map (Sto.find_of_findLive hsv)]; rfl
+          · exact Sto.findLive_key hsv _
+          · exact hp'
           · rw [run_append_ok hrun']; simp only [run, Machine.push, exec_cons_zero, Instr.step,
               Machine.next, exec_nil, Out.ok_bind]
         · exact .inr ⟨by simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind],
@@ -166,11 +168,12 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
         rcases ihi (hm.push _) hwi with ⟨v, w, hv, hrep, hrun'⟩ | ⟨hv, hrun'⟩
         · obtain ⟨n, hn, hv1, rfl⟩ := hrep.uint_inv
           have hk : PrimTy.key v = (n : Int) := hv1
+          have hvn : v.1.toNat = n := by have : v.1 = (n : Int) := hk; omega
           rw [run_append_ok hrun']
           have hres' : (Solidity.Loc.index (.arr .dyn) q i).resolveT σ =
-              (if n < kk then .ok (r.atKey (.arr .dyn) v) else .error .revert) := by
+              (if n < kk then .ok (r.index (.arr .dyn) v) else .error .revert) := by
             simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind]
-            rw [hk, Sto.checkIndex_dyn (Sto.find_of_findLive hsv)]
+            rw [Sto.checkIndex_dyn (Sto.find_of_findLive hsv), hvn]
             by_cases hin : n < kk <;> simp only [hin, ↓reduceIte] <;> rfl
           rw [hres']
           have hb := boundsCheck_run m m.stack (elemSlot (size E)) n s₀
@@ -178,16 +181,15 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
           rw [hb, hl]
           by_cases hin : n < kk
           · rw [if_pos hin, if_pos hin]
-            have hp' := PathSlot.elem hp (Int.natCast_nonneg n) (by omega)
-            rw [Int.toNat_natCast] at hp'
-            have hat : r.atKey (.arr .dyn) v = r.index (.arr .dyn) (n : Int) := by
-              unfold SRef.atKey; rw [hk]
+            have hp' := PathSlot.elem hp (i := v) (PrimTy.uint_nonneg v)
+              (by have : v.1 = (n : Int) := hk; omega)
+            rw [hvn] at hp'
             have hx : e.toList[n]? = some (e.toList[n]'(by rw [SVec.length_toList]; exact hin)) :=
               List.getElem?_eq_getElem _
-            refine .inl ⟨r.atKey (.arr .dyn) v, .data s₀ (n * size E), _, rfl, ?_, ?_,
+            refine .inl ⟨r.index (.arr .dyn) v, .data s₀ (n * size E), _, rfl, ?_, ?_,
               hall n _ hx, elemSlot_run m m.stack n (size E) s₀⟩
-            · rw [hat]; exact Sto.findLive_elem hsv hx
-            · rw [hat]; exact hp'
+            · exact Sto.findLive_elem hsv (by rw [hvn]; exact hx)
+            · exact hp'
           · rw [if_neg hin, if_neg hin]
             exact .inr ⟨rfl, rfl⟩
         · exact .inr ⟨by simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind],
@@ -212,11 +214,12 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
         rcases ihi (hm.push _) hwi with ⟨v, w, hv, hrep, hrun'⟩ | ⟨hv, hrun'⟩
         · obtain ⟨k, hkW, hv1, rfl⟩ := hrep.uint_inv
           have hk : PrimTy.key v = (k : Int) := hv1
+          have hvk : v.1.toNat = k := by have : v.1 = (k : Int) := hk; omega
           rw [run_append_ok hrun']
           have hres' : (Solidity.Loc.index (.arr .fixed) q i).resolveT σ =
-              (if k < n then .ok (r.atKey (.arr .fixed) v) else .error .revert) := by
+              (if k < n then .ok (r.index (.arr .fixed) v) else .error .revert) := by
             simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind]
-            rw [hk, Sto.checkIndex_fixed (Sto.find_of_findLive hsv)]
+            rw [Sto.checkIndex_fixed (Sto.find_of_findLive hsv), hvk]
             by_cases hin : k < n <;> simp only [hin, ↓reduceIte] <;> rfl
           rw [hres']
           have hb := fixedCheck_run m m.stack (fixedSlot (size E)) n k s₀
@@ -224,16 +227,15 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
           rw [hb]
           by_cases hin : k < n
           · rw [if_pos hin, if_pos hin]
-            have hp' := PathSlot.felem hp (Int.natCast_nonneg k) (by omega)
-            rw [Int.toNat_natCast] at hp'
-            have hat : r.atKey (.arr .fixed) v = r.index (.arr .fixed) (k : Int) := by
-              unfold SRef.atKey; rw [hk]
+            have hp' := PathSlot.felem hp (i := v) (PrimTy.uint_nonneg v)
+              (by have : v.1 = (k : Int) := hk; omega)
+            rw [hvk] at hp'
             have hx : e.toList[k]? = some (e.toList[k]'(by rw [SVec.length_toList]; exact hin)) :=
               List.getElem?_eq_getElem _
-            refine .inl ⟨r.atKey (.arr .fixed) v, s₀.add (k * size E), _, rfl, ?_, ?_,
+            refine .inl ⟨r.index (.arr .fixed) v, s₀.add (k * size E), _, rfl, ?_, ?_,
               hall k _ hx, fixedSlot_run m m.stack k (size E) s₀⟩
-            · rw [hat]; exact Sto.findLive_felem hsv hx
-            · rw [hat]; exact hp'
+            · exact Sto.findLive_felem hsv (by rw [hvk]; exact hx)
+            · exact hp'
           · rw [if_neg hin, if_neg hin]
             exact .inr ⟨rfl, rfl⟩
         · exact .inr ⟨by simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind],

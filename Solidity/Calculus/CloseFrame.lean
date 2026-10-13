@@ -30,7 +30,7 @@ variable {C : Contract}
 
 /-- An index check reads the length of an array, and only that: a save
 below one of the array's slots leaves it. -/
-theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) (i : Int)
+theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) (i : k.Denote)
     {y y' : SVal (.ref R)} {rr : Path (.ref R) W} {v : SVal W} (h : y.saveM rr v = some y')
     (hne : rr.labels ≠ []) : inBounds it i y' = inBounds it i y := by
   cases it with
@@ -42,8 +42,8 @@ theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) 
       cases rr with
       | nil => exact absurd Path.labels_nil hne
       | «at» j rr' =>
-        show (if 0 ≤ i ∧ i.toNat < (SVal.view y' : ArrView _).n then some () else none) =
-          (if 0 ≤ i ∧ i.toNat < (SVal.view y : ArrView _).n then some () else none)
+        show (if 0 ≤ i.1 ∧ i.1.toNat < (SVal.view y' : ArrView _).n then some () else none) =
+          (if 0 ≤ i.1 ∧ i.1.toNat < (SVal.view y : ArrView _).n then some () else none)
         rw [SVal.saveM_at_n h]
 
 /-- **A save leaves an index check** where it parts from the array's
@@ -51,7 +51,7 @@ length: elsewhere, or below one of its slots (`lenOnSaveFrame`, which the
 check reads). -/
 theorem checkIndex_save_frame {k : PrimTy} {V : Ty} {T : Ty} {R' : RefTy}
     {st st' : Storage C} {r : SRef C T} {v : SVal T} {q : SRef C (.ref R')}
-    (it : IndexTy R' k V) (i : Int)
+    (it : IndexTy R' k V) (i : k.Denote)
     (hd : diverges r.labels (q.labels ++ [lengthSeg]) = true) (h : st.save r v = some st') :
     st'.checkIndex q it i = st.checkIndex q it i := by
   rcases diverges_append_single hd with hd | ⟨rest, hne, he⟩
@@ -229,7 +229,7 @@ variable {C : Contract}
 theorem field_append {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
     (h : C.fieldType s f = some T) : r.field h = r.append (.field h .nil) := rfl
 theorem index_append {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R))
-    (it : IndexTy R k V) (i : Int) : r.index it i = r.append (Path.index it i) := rfl
+    (it : IndexTy R k V) (i : k.Denote) : r.index it i = r.append (Path.index it i) := rfl
 theorem append_append {T U W : Ty} (r : SRef C T) (p : Path T U) (q : Path U W) :
     (r.append p).append q = r.append (p.append q) := by
   simp only [SRef.append, Path.append_assoc]
@@ -263,7 +263,7 @@ theorem netOfT_def (l : Ledger) (n : PrimTy.uint.Denote) :
     Tm.netOfT l n = some ((Semantics.lookupBy n l).getD 0) := rfl
 /-- A mapping's slot at a root is always there. -/
 theorem checkIndex_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
-    (h : C.rootType r = some (Ty.ref (RefTy.mapping k V))) (i : Int) :
+    (h : C.rootType r = some (Ty.ref (RefTy.mapping k V))) (i : k.Denote) :
     st.checkIndex (SRef.ofRoot r h) IndexTy.map i = some () := rfl
 theorem dflt_bool : PrimTy.dflt .bool = (false : Bool) := rfl
 theorem dflt_uint_val : (PrimTy.dflt .uint).val = 0 := rfl
@@ -512,7 +512,7 @@ theorem find_total_map_const {α : Type} {T U : Ty} (st : Storage C) (r : Name)
 /-- A mapping's key along a total path is always a slot. -/
 theorem checkIndex_map_total {k : PrimTy} {V T : Ty} (st : Storage C) (r : Name)
     (h : C.rootType r = some T) (p : Path T (.ref (.mapping k V))) (hp : p.total = true)
-    (i : Int) : st.checkIndex ((SRef.ofRoot r h).append p) IndexTy.map i = some () := by
+    (i : k.Denote) : st.checkIndex ((SRef.ofRoot r h).append p) IndexTy.map i = some () := by
   obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1
     (Storage.find_ne_none_total st _ (total_ofRoot_append r h p hp))
   simp only [Storage.checkIndex, ha, Option.bind_eq_bind, Option.bind_some]
@@ -548,7 +548,7 @@ theorem wp_box_write {T : Ty} {st : Storage C} {r : SRef C T} {v : SVal T}
         (∀ {W : Ty} (q : SRef C W), diverges r.labels q.labels = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
           diverges r.labels (q.labels ++ [lengthSeg]) = true → st'.len q = st.len q) →
-        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
+        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote),
           diverges r.labels (q.labels ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
@@ -577,7 +577,7 @@ theorem wp_box_delete {T : Ty} {st : Storage C} {r : SRef C T} {P : Storage C �
         (∀ {W : Ty} (q : SRef C W), diverges r.labels q.labels = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
           diverges r.labels (q.labels ++ [lengthSeg]) = true → st'.len q = st.len q) →
-        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
+        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote),
           diverges r.labels (q.labels ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by
@@ -603,7 +603,7 @@ theorem wp_box_write_prim {p : PrimTy} {st : Storage C} {r : SRef C (.prim p)} {
         (∀ {W : Ty} (q : SRef C W), diverges r.labels q.labels = true → st'.find q = st.find q) →
         (∀ {E : Ty} (q : SRef C (.ref (.array E))),
           diverges r.labels (q.labels ++ [lengthSeg]) = true → st'.len q = st.len q) →
-        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : Int),
+        (∀ {R : RefTy} {k : PrimTy} {V : Ty} (q : SRef C (.ref R)) (it : IndexTy R k V) (i : k.Denote),
           diverges r.labels (q.labels ++ [lengthSeg]) = true →
             st'.checkIndex q it i = st.checkIndex q it i) →
         P st' := by

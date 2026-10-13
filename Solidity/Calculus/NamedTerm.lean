@@ -442,12 +442,9 @@ def numLit (text : String) (n : Int) : (p : PrimTy) → Except String p.Denote
 
 namespace NTm
 
-/-- An index at the word its key is hashed as (`Tm.keyAt`): a `bool` key
-as `1`/`0`. -/
-def idxAt (i : NTm C .val) (Γ : NCtx) : (k : PrimTy) → Except String (Tm C Γ.ctx (.val k.keyTy))
-  | .bool => do pure (Tm.keyAt .bool (← i.check (.val .bool) Γ))
-  | .uint => i.check (.val .uint) Γ
-  | .int => i.check (.val .int) Γ
+/-- An index at its key type. -/
+def idxAt (i : NTm C .val) (Γ : NCtx) (k : PrimTy) : Except String (Tm C Γ.ctx (.val k)) :=
+  i.check (.val k) Γ
 
 /-- The struct `s`'s member `f`, at its type. -/
 def fieldOf (s f : Name) (text : String) :

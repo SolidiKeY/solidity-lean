@@ -29,7 +29,7 @@ def PrimTy.keyFits : PrimTy → Int → Bool
 structure HeredB where
   arr : {E : Ty} → {n : Nat} → SVec E n → SList E → Bool
   fix : Ty → Nat → Bool
-  map : PrimTy → {V : Ty} → SMap V → SVal V → Bool
+  map : (K : PrimTy) → {V : Ty} → SMap K V → SVal V → Bool
 
 /-- Every node passing `B`'s test, as a fold. -/
 def allBFold (B : HeredB) : Fold where
@@ -37,7 +37,7 @@ def allBFold (B : HeredB) : Fold where
   F _ := Bool
   L _ := Bool
   W _ _ := Bool
-  M _ := Bool
+  M _ _ := Bool
   prim := fun _ => true
   struct := fun _ ih => ih
   array := fun e sh _ ie ish => B.arr e sh && ie && ish
@@ -57,7 +57,7 @@ def SVal.allB (B : HeredB) {T : Ty} (v : SVal T) : Bool := v.fold (allBFold B)
 def SFields.allB (B : HeredB) {fs : List (Name × Ty)} (x : SFields fs) : Bool := x.fold (allBFold B)
 def SList.allB (B : HeredB) {E : Ty} (l : SList E) : Bool := l.fold (allBFold B)
 def SVec.allB (B : HeredB) {E : Ty} {n : Nat} (l : SVec E n) : Bool := l.fold (allBFold B)
-def SMap.allB (B : HeredB) {V : Ty} (m : SMap V) : Bool := m.fold (allBFold B)
+def SMap.allB (B : HeredB) {K : PrimTy} {V : Ty} (m : SMap K V) : Bool := m.fold (allBFold B)
 
 section AllB
 
@@ -70,7 +70,7 @@ theorem SVal.allB_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n 
     (SVal.array e sh h).allB B = (B.arr e sh && e.allB B && sh.allB B) := rfl
 theorem SVal.allB_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).allB B = (B.fix E n && e.allB B) := rfl
-theorem SVal.allB_map {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) :
+theorem SVal.allB_map {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) :
     (SVal.map (K := K) m d).allB B = (B.map K m d && m.allB B && d.allB B) := rfl
 theorem SFields.allB_nil : (SFields.nil).allB B = true := rfl
 theorem SFields.allB_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -81,8 +81,8 @@ theorem SList.allB_cons {E : Ty} (v : SVal E) (rest : SList E) :
 theorem SVec.allB_nil {E : Ty} : (SVec.nil (E := E)).allB B = true := rfl
 theorem SVec.allB_cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
     (SVec.cons v rest).allB B = (v.allB B && rest.allB B) := rfl
-theorem SMap.allB_nil {V : Ty} : (SMap.nil (V := V)).allB B = true := rfl
-theorem SMap.allB_cons {V : Ty} (k : Int) (v : SVal V) (rest : SMap V) :
+theorem SMap.allB_nil {K : PrimTy} {V : Ty} : (SMap.nil (K := K) (V := V)).allB B = true := rfl
+theorem SMap.allB_cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest : SMap K V) :
     (SMap.cons k v rest).allB B = (v.allB B && rest.allB B) := rfl
 
 end AllB
@@ -114,7 +114,7 @@ def tightHB : HeredB where
 def keysHB : HeredB where
   arr _ _ := true
   fix _ _ := true
-  map K := fun m _ => m.toList.all fun e => K.keyFits e.1
+  map K := fun m _ => m.toList.all fun e => K.keyFits (PrimTy.key e.1)
 
 /-! ## The storage's tests -/
 

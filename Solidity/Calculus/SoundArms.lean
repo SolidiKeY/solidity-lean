@@ -758,9 +758,10 @@ theorem Storage.pushPlace_fst {E : Ty} (st : Storage C) (r : SRef C (.ref (.arra
     · rfl
 
 /-- A push as a place returns the slot past the live elements found. -/
-theorem Storage.pushPlace_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {n : Nat}
-    (h : st.pushPlace r = some (st', n)) :
-    ∃ v, st.find r = some v ∧ n = (SVal.view v : ArrView E).n := by
+theorem Storage.pushPlace_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
+    {n : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', n)) :
+    ∃ v, st.find r = some v ∧
+      n = lenU (SVal.view v : ArrView E).n (SVal.view v : ArrView E).hn := by
   unfold Storage.pushPlace at h
   cases hf : st.find r with
   | none => rw [hf] at h; cases h

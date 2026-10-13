@@ -52,7 +52,7 @@ inductive SVal : Ty → Type where
       SVal (.ref (.array E))
   | fixed {E : Ty} {n : Nat} (elems : SVec E n) : SVal (.ref (.fixed E n))
   /-- The entries written and the value of every other key. -/
-  | map {K : PrimTy} {V : Ty} (entries : SMap V) (dflt : SVal V) : SVal (.ref (.mapping K V))
+  | map {K : PrimTy} {V : Ty} (entries : SMap K V) (dflt : SVal V) : SVal (.ref (.mapping K V))
 
 /-- One value per member, of the member's type, in the members' order. -/
 inductive SFields : List (Name × Ty) → Type where
@@ -70,10 +70,10 @@ inductive SVec : Ty → Nat → Type where
   | nil {E : Ty} : SVec E 0
   | cons {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) : SVec E (n + 1)
 
-/-- A mapping's entries, by key. -/
-inductive SMap : Ty → Type where
-  | nil {V : Ty} : SMap V
-  | cons {V : Ty} (k : Int) (v : SVal V) (rest : SMap V) : SMap V
+/-- A mapping's entries, by key: each key a value of the key type. -/
+inductive SMap : PrimTy → Ty → Type where
+  | nil {K : PrimTy} {V : Ty} : SMap K V
+  | cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest : SMap K V) : SMap K V
 end
 
 /-! ## Folds
@@ -99,13 +99,13 @@ structure Fold where
   F : List (Name × Ty) → Type
   L : Ty → Type
   W : Ty → Nat → Type
-  M : Ty → Type
+  M : PrimTy → Ty → Type
   prim : {p : PrimTy} → p.Denote → V (.prim p)
   struct : {s : Name} → SFields (structDef s) → F (structDef s) → V (.ref (.struct s))
   array : {E : Ty} → {n : Nat} → SVec E n → SList E → n < 2 ^ 256 → W E n → L E →
     V (.ref (.array E))
   fixed : {E : Ty} → {n : Nat} → SVec E n → W E n → V (.ref (.fixed E n))
-  map : {K : PrimTy} → {U : Ty} → SMap U → SVal U → M U → V U → V (.ref (.mapping K U))
+  map : {K : PrimTy} → {U : Ty} → SMap K U → SVal U → M K U → V U → V (.ref (.mapping K U))
   fnil : F []
   fcons : {f : Name} → {T : Ty} → {fs : List (Name × Ty)} → SVal T → SFields fs → V T → F fs →
     F ((f, T) :: fs)
@@ -113,8 +113,8 @@ structure Fold where
   lcons : {E : Ty} → SVal E → SList E → V E → L E → L E
   wnil : {E : Ty} → W E 0
   wcons : {E : Ty} → {n : Nat} → SVal E → SVec E n → V E → W E n → W E (n + 1)
-  mnil : {U : Ty} → M U
-  mcons : {U : Ty} → Int → SVal U → SMap U → V U → M U → M U
+  mnil : {K : PrimTy} → {U : Ty} → M K U
+  mcons : {K : PrimTy} → {U : Ty} → K.Denote → SVal U → SMap K U → V U → M K U → M K U
 
 mutual
 /-- `SVal.fold` by `match`, its compiled form. -/
@@ -137,41 +137,41 @@ def SVec.foldM (a : Fold) : {E : Ty} → {n : Nat} → SVec E n → a.W E n
   | _, _, .nil => a.wnil
   | _, _, .cons v rest => a.wcons v rest (SVal.foldM a v) (SVec.foldM a rest)
 
-def SMap.foldM (a : Fold) : {U : Ty} → SMap U → a.M U
-  | _, .nil => a.mnil
-  | _, .cons k v rest => a.mcons k v rest (SVal.foldM a v) (SMap.foldM a rest)
+def SMap.foldM (a : Fold) : {K : PrimTy} → {U : Ty} → SMap K U → a.M K U
+  | _, _, .nil => a.mnil
+  | _, _, .cons k v rest => a.mcons k v rest (SVal.foldM a v) (SMap.foldM a rest)
 end
 
 /-- A fold of a value, by the recursor. -/
 @[implemented_by SVal.foldM]
 def SVal.fold (a : Fold) {T : Ty} (v : SVal T) : a.V T :=
   @SVal.rec (fun T _ => a.V T) (fun fs _ => a.F fs) (fun E _ => a.L E) (fun E n _ => a.W E n)
-    (fun U _ => a.M U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
+    (fun K U _ => a.M K U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
     a.wnil a.wcons a.mnil a.mcons T v
 
 @[implemented_by SFields.foldM]
 def SFields.fold (a : Fold) {fs : List (Name × Ty)} (x : SFields fs) : a.F fs :=
   @SFields.rec (fun T _ => a.V T) (fun fs _ => a.F fs) (fun E _ => a.L E) (fun E n _ => a.W E n)
-    (fun U _ => a.M U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
+    (fun K U _ => a.M K U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
     a.wnil a.wcons a.mnil a.mcons fs x
 
 @[implemented_by SList.foldM]
 def SList.fold (a : Fold) {E : Ty} (l : SList E) : a.L E :=
   @SList.rec (fun T _ => a.V T) (fun fs _ => a.F fs) (fun E _ => a.L E) (fun E n _ => a.W E n)
-    (fun U _ => a.M U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
+    (fun K U _ => a.M K U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
     a.wnil a.wcons a.mnil a.mcons E l
 
 @[implemented_by SVec.foldM]
 def SVec.fold (a : Fold) {E : Ty} {n : Nat} (l : SVec E n) : a.W E n :=
   @SVec.rec (fun T _ => a.V T) (fun fs _ => a.F fs) (fun E _ => a.L E) (fun E n _ => a.W E n)
-    (fun U _ => a.M U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
+    (fun K U _ => a.M K U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
     a.wnil a.wcons a.mnil a.mcons E n l
 
 @[implemented_by SMap.foldM]
-def SMap.fold (a : Fold) {U : Ty} (m : SMap U) : a.M U :=
+def SMap.fold (a : Fold) {K : PrimTy} {U : Ty} (m : SMap K U) : a.M K U :=
   @SMap.rec (fun T _ => a.V T) (fun fs _ => a.F fs) (fun E _ => a.L E) (fun E n _ => a.W E n)
-    (fun U _ => a.M U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
-    a.wnil a.wcons a.mnil a.mcons U m
+    (fun K U _ => a.M K U) a.prim a.struct a.array a.fixed a.map a.fnil a.fcons a.lnil a.lcons
+    a.wnil a.wcons a.mnil a.mcons K U m
 
 mutual
 theorem SVal.fold_eq_foldM (a : Fold) : {T : Ty} → (v : SVal T) → v.fold a = v.foldM a
@@ -209,9 +209,10 @@ theorem SVec.fold_eq_foldM (a : Fold) : {E : Ty} → {n : Nat} → (l : SVec E n
     show a.wcons v rest (v.fold a) (rest.fold a) = _
     rw [SVal.fold_eq_foldM a v, SVec.fold_eq_foldM a rest, SVec.foldM]
 
-theorem SMap.fold_eq_foldM (a : Fold) : {U : Ty} → (m : SMap U) → m.fold a = m.foldM a
-  | _, .nil => rfl
-  | _, .cons k v rest => by
+theorem SMap.fold_eq_foldM (a : Fold) : {K : PrimTy} → {U : Ty} → (m : SMap K U) →
+    m.fold a = m.foldM a
+  | _, _, .nil => rfl
+  | _, _, .cons k v rest => by
     show a.mcons k v rest (v.fold a) (rest.fold a) = _
     rw [SVal.fold_eq_foldM a v, SMap.fold_eq_foldM a rest, SMap.foldM]
 end
@@ -232,7 +233,7 @@ def Shape : Ty → Type
   | .ref (.struct s) => SFields (structDef s)
   | .ref (.array E) => ArrView E
   | .ref (.fixed E n) => SVec E n
-  | .ref (.mapping _ V) => SMap V × SVal V
+  | .ref (.mapping K V) => SMap K V × SVal V
 
 /-- A value's contents, at the type its type computes. -/
 def SVal.view {T : Ty} (v : SVal T) : Shape T :=
@@ -244,7 +245,7 @@ theorem SVal.view_struct {s : Name} (fs : SFields (structDef s)) : (SVal.struct 
 theorem SVal.view_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
     (SVal.array e sh h).view = ⟨e, sh, h⟩ := rfl
 theorem SVal.view_fixed {E : Ty} {n : Nat} (e : SVec E n) : (SVal.fixed e).view = e := rfl
-theorem SVal.view_map {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U) :
+theorem SVal.view_map {K : PrimTy} {U : Ty} (m : SMap K U) (d : SVal U) :
     (SVal.map (K := K) m d).view = (m, d) := rfl
 
 /-- What the members of `fs` hold: the first one and the others. -/
@@ -270,9 +271,9 @@ def SList.uncons {E : Ty} (l : SList E) : Option (SVal E × SList E) :=
   @SList.casesOn (fun E _ => Option (SVal E × SList E)) E l none (fun {_} v rest => some (v, rest))
 
 /-- A mapping's first entry and the others, if it has one. -/
-def SMap.uncons {U : Ty} (m : SMap U) : Option (Int × SVal U × SMap U) :=
-  @SMap.casesOn (fun U _ => Option (Int × SVal U × SMap U)) U m none
-    (fun {_} k v rest => some (k, v, rest))
+def SMap.uncons {K : PrimTy} {U : Ty} (m : SMap K U) : Option (K.Denote × SVal U × SMap K U) :=
+  @SMap.casesOn (fun K U _ => Option (K.Denote × SVal U × SMap K U)) K U m none
+    (fun {_} {_} k v rest => some (k, v, rest))
 
 
 /-! ## Lists, vectors and maps as Lean lists -/
@@ -283,7 +284,7 @@ def toListFold : Fold where
   F _ := Unit
   L E := List (SVal E)
   W E _ := List (SVal E)
-  M U := List (Int × SVal U)
+  M K U := List (K.Denote × SVal U)
   prim := fun _ => ()
   struct := fun _ _ => ()
   array := fun _ _ _ _ _ => ()
@@ -379,7 +380,7 @@ def setFold : Fold where
   F _ := Unit
   L _ := Unit
   W E n := Nat → SVal E → SVec E n
-  M _ := Unit
+  M _ _ := Unit
   prim := fun _ => ()
   struct := fun _ _ => ()
   array := fun _ _ _ _ _ => ()
@@ -450,31 +451,69 @@ end SVec
 namespace SMap
 
 /-- `toList` by `match`, its compiled form. -/
-def toListM {V : Ty} : SMap V → List (Int × SVal V)
+def toListM {K : PrimTy} {V : Ty} : SMap K V → List (K.Denote × SVal V)
   | .nil => []
   | .cons k v rest => (k, v) :: rest.toListM
 
 @[implemented_by toListM]
-def toList {V : Ty} (m : SMap V) : List (Int × SVal V) := m.fold toListFold
+def toList {K : PrimTy} {V : Ty} (m : SMap K V) : List (K.Denote × SVal V) := m.fold toListFold
 
-theorem toList_nil {V : Ty} : (SMap.nil (V := V)).toList = [] := rfl
-theorem toList_cons {V : Ty} (k : Int) (v : SVal V) (rest : SMap V) :
+theorem toList_nil {K : PrimTy} {V : Ty} : (SMap.nil (K := K) (V := V)).toList = [] := rfl
+theorem toList_cons {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal V) (rest : SMap K V) :
     (SMap.cons k v rest).toList = (k, v) :: rest.toList := rfl
 
 attribute [irreducible] toList
 attribute [eqns toList_nil toList_cons] toList
 
-theorem toList_eq_toListM {V : Ty} : (m : SMap V) → m.toList = m.toListM
+theorem toList_eq_toListM {K : PrimTy} {V : Ty} : (m : SMap K V) → m.toList = m.toListM
   | .nil => by rw [toList_nil, toListM]
   | .cons k v rest => by rw [toList_cons, toListM, toList_eq_toListM rest]
 
-def ofList {V : Ty} : List (Int × SVal V) → SMap V
+def ofList {K : PrimTy} {V : Ty} : List (K.Denote × SVal V) → SMap K V
   | [] => .nil
   | (k, v) :: rest => .cons k v (ofList rest)
 
-@[simp] theorem toList_ofList {V : Ty} : (l : List (Int × SVal V)) → (ofList l).toList = l
+@[simp] theorem toList_ofList {K : PrimTy} {V : Ty} :
+    (l : List (K.Denote × SVal V)) → (ofList l).toList = l
   | [] => by rw [ofList, toList_nil]
   | (k, v) :: rest => by rw [ofList, toList_cons, toList_ofList rest]
+
+theorem ofList_toList {K : PrimTy} {V : Ty} : (m : SMap K V) → ofList m.toList = m
+  | .nil => by rw [toList_nil]; rfl
+  | .cons k v rest => by rw [toList_cons, ofList, ofList_toList rest]
+
+/-- The entries at the words their keys hash to (`PrimTy.key`): what the
+EVM's slots observe. -/
+def hashed {K : PrimTy} {V : Ty} (m : SMap K V) : List (Int × SVal V) :=
+  m.toList.map fun e => (PrimTy.key e.1, e.2)
+
+theorem lookupBy_hashed_aux {K : PrimTy} {V : Ty} (k : K.Denote) :
+    (l : List (K.Denote × SVal V)) →
+      lookupBy (PrimTy.key k) (l.map fun e => (PrimTy.key e.1, e.2)) = lookupBy k l
+  | [] => rfl
+  | (k', v) :: rest => by
+    simp only [List.map_cons, lookupBy]
+    by_cases h : k = k'
+    · subst h; simp only [↓reduceIte]
+    · have h' : PrimTy.key k ≠ PrimTy.key k' := fun e => h (PrimTy.key_inj e)
+      simp only [h, h', ↓reduceIte, lookupBy_hashed_aux k rest]
+
+/-- A key's entry is the one at its hash. -/
+theorem lookupBy_hashed {K : PrimTy} {V : Ty} (m : SMap K V) (k : K.Denote) :
+    lookupBy (PrimTy.key k) m.hashed = lookupBy k m.toList :=
+  lookupBy_hashed_aux k m.toList
+
+theorem hashed_ofList_setBy {K : PrimTy} {V : Ty} (k : K.Denote) (x : SVal V) :
+    (l : List (K.Denote × SVal V)) →
+      (ofList (setBy k x l)).hashed = setBy (PrimTy.key k) x ((ofList l).hashed)
+  | [] => by simp only [setBy, hashed, toList_ofList, List.map_cons, List.map_nil]
+  | (k', v) :: rest => by
+    have ih := hashed_ofList_setBy k x rest
+    simp only [hashed, toList_ofList] at ih ⊢
+    by_cases h : k = k'
+    · subst h; simp only [setBy, ↓reduceIte, List.map_cons]
+    · have h' : PrimTy.key k ≠ PrimTy.key k' := fun e => h (PrimTy.key_inj e)
+      simp only [setBy, h, h', ↓reduceIte, List.map_cons, ih]
 
 
 end SMap
@@ -519,14 +558,14 @@ def setM {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → SFields fs →
 def get {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
     (h : lookupBy f fs = some T) : SVal T :=
   @SFields.rec (fun _ _ => Unit) (fun fs _ => ∀ T, lookupBy f fs = some T → SVal T)
-    (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ => Unit)
+    (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ _ => Unit)
     (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} {_} _ _ _ _ _ => ()) (fun {_} {_} _ _ => ())
     (fun {_} {_} _ _ _ _ => ())
     (fun _ h => absurd h (by simp only [lookupBy, reduceCtorEq, not_false_eq_true]))
     (fun {f'} {_} {_} v _ _ ih _ h =>
       if e : f = f' then lookupBy_cons_pos e h ▸ v else ih _ (lookupBy_cons_neg e h))
     (fun {_} => ()) (fun {_} _ _ _ _ => ()) (fun {_} => ()) (fun {_} {_} _ _ _ _ => ())
-    (fun {_} => ()) (fun {_} _ _ _ _ _ => ()) fs x T h
+    (fun {_} {_} => ()) (fun {_} {_} _ _ _ _ _ => ()) fs x T h
 
 /-- The first member named `f` replaced.  By the recursor; `setM` is its
 compiled form. -/
@@ -534,7 +573,7 @@ compiled form. -/
 def set {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
     (h : lookupBy f fs = some T) (y : SVal T) : SFields fs :=
   @SFields.rec (fun _ _ => Unit) (fun fs _ => ∀ T, lookupBy f fs = some T → SVal T → SFields fs)
-    (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ => Unit)
+    (fun _ _ => Unit) (fun _ _ _ => Unit) (fun _ _ _ => Unit)
     (fun {_} _ => ()) (fun {_} _ _ => ()) (fun {_} {_} _ _ _ _ _ => ()) (fun {_} {_} _ _ => ())
     (fun {_} {_} _ _ _ _ => ())
     (fun _ _ _ => .nil)
@@ -542,7 +581,7 @@ def set {f : Name} {fs : List (Name × Ty)} {T : Ty} (x : SFields fs)
       if e : f = f' then .cons ((lookupBy_cons_pos e h).symm ▸ y) rest
       else .cons v (ih _ (lookupBy_cons_neg e h) y))
     (fun {_} => ()) (fun {_} _ _ _ _ => ()) (fun {_} => ()) (fun {_} {_} _ _ _ _ => ())
-    (fun {_} => ()) (fun {_} _ _ _ _ _ => ()) fs x T h y
+    (fun {_} {_} => ()) (fun {_} {_} _ _ _ _ _ => ()) fs x T h y
 
 theorem get_cons {f f' : Name} {T T' : Ty} {fs : List (Name × Ty)} (v : SVal T')
     (rest : SFields fs) (h : lookupBy f ((f', T') :: fs) = some T) :
@@ -661,7 +700,7 @@ inductive Path : Ty → Ty → Type where
       Path (.ref (.struct s)) U
   | at {E U : Ty} (i : Int) (p : Path E U) : Path (.ref (.array E)) U
   | atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) : Path (.ref (.fixed E n)) U
-  | key {K : PrimTy} {V U : Ty} (k : Int) (p : Path V U) : Path (.ref (.mapping K V)) U
+  | key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) : Path (.ref (.mapping K V)) U
 
 /-- One segment knows the type it leaves and the type it reaches.
 A field carries its lookup proof; array and mapping steps cannot be exchanged. -/
@@ -670,7 +709,7 @@ inductive Semantics.Seg : Ty → Ty → Type where
       Seg (.ref (.struct s)) T
   | at {E : Ty} (i : Int) : Seg (.ref (.array E)) E
   | atF {E : Ty} {n : Nat} (i : Int) : Seg (.ref (.fixed E n)) E
-  | key {K : PrimTy} {V : Ty} (k : Int) : Seg (.ref (.mapping K V)) V
+  | key {K : PrimTy} {V : Ty} (k : K.Denote) : Seg (.ref (.mapping K V)) V
 
 /-- A sequence composes only when adjacent segment types agree. -/
 inductive Semantics.Segs : Ty → Ty → Type where
@@ -683,7 +722,7 @@ def Semantics.Seg.label : {T U : Ty} → Seg T U → Selector
   | _, _, @Seg.field _ f _ _ => .field f
   | _, _, .at i => .at i
   | _, _, .atF i => .at i
-  | _, _, .key k => .at k
+  | _, _, .key k => .at (PrimTy.key k)
 
 /-- The comparison observations of a typed segment sequence. -/
 def Semantics.Segs.labelsM : {T U : Ty} → Semantics.Segs T U → List Semantics.Selector
@@ -737,8 +776,8 @@ theorem labels_at {E U : Ty} (i : Int) (p : Path E U) :
     (Path.at i p).labels = .at i :: p.labels := rfl
 theorem labels_atF {E U : Ty} {n : Nat} (i : Int) (p : Path E U) :
     (Path.atF (n := n) i p).labels = .at i :: p.labels := rfl
-theorem labels_key {K : PrimTy} {V U : Ty} (k : Int) (p : Path V U) :
-    (Path.key (K := K) k p).labels = .at k :: p.labels := rfl
+theorem labels_key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) :
+    (Path.key (K := K) k p).labels = .at (PrimTy.key k) :: p.labels := rfl
 
 attribute [irreducible] labels
 attribute [eqns labels_nil labels_field labels_at labels_atF labels_key] labels
@@ -766,7 +805,7 @@ theorem append_at {E U W : Ty} (i : Int) (p : Path E U) (q : Path U W) :
     (Path.at i p).append q = .at i (p.append q) := rfl
 theorem append_atF {E U W : Ty} {n : Nat} (i : Int) (p : Path E U) (q : Path U W) :
     (Path.atF (n := n) i p).append q = .atF i (p.append q) := rfl
-theorem append_key {K : PrimTy} {V U W : Ty} (k : Int) (p : Path V U) (q : Path U W) :
+theorem append_key {K : PrimTy} {V U W : Ty} (k : K.Denote) (p : Path V U) (q : Path U W) :
     (Path.key (K := K) k p).append q = .key k (p.append q) := rfl
 
 attribute [irreducible] append
@@ -794,26 +833,29 @@ theorem labels_append : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
 
 /-- The one step `b[i]` takes, by how `R` is indexed.  By `casesOn`, so the
 kernel casts nothing. -/
-def index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) : Path (.ref R) V :=
-  @IndexTy.casesOn (fun R _ V _ => Path (.ref R) V) R k V it (fun {_} {_} => .key i .nil)
-    (fun {_} {_} a => @ArrTy.casesOn (fun R E _ => Path (.ref R) E) _ _ a
-      (fun {_} => .at i .nil) (fun {_} {_} => .atF i .nil))
+def index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : k.Denote) :
+    Path (.ref R) V :=
+  @IndexTy.casesOn (fun R k V _ => k.Denote → Path (.ref R) V) R k V it
+    (fun {_} {_} i => .key i .nil)
+    (fun {_} {_} a i => @ArrTy.casesOn (fun R E _ => Path (.ref R) E) _ _ a
+      (fun {_} => .at (i : PrimTy.uint.Denote).1 .nil)
+      (fun {_} {_} => .atF (i : PrimTy.uint.Denote).1 .nil)) i
 
-theorem index_map {k : PrimTy} {V : Ty} (i : Int) :
+theorem index_map {k : PrimTy} {V : Ty} (i : k.Denote) :
     index (IndexTy.map (k := k) (V := V)) i = .key i .nil := rfl
-theorem index_dyn {E : Ty} (i : Int) : index (IndexTy.arr (ArrTy.dyn (E := E))) i = .at i .nil :=
-  rfl
-theorem index_fixed {E : Ty} {n : Nat} (i : Int) :
-    index (IndexTy.arr (ArrTy.fixed (E := E) (n := n))) i = .atF i .nil := rfl
+theorem index_dyn {E : Ty} (i : PrimTy.uint.Denote) :
+    index (IndexTy.arr (ArrTy.dyn (E := E))) i = .at i.1 .nil := rfl
+theorem index_fixed {E : Ty} {n : Nat} (i : PrimTy.uint.Denote) :
+    index (IndexTy.arr (ArrTy.fixed (E := E) (n := n))) i = .atF i.1 .nil := rfl
 
 attribute [irreducible] index
 attribute [eqns index_map index_dyn index_fixed] index
 
-theorem labels_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexTy R k V) → (i : Int) →
-    (index it i).labels = [.at i]
+theorem labels_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexTy R k V) →
+    (i : k.Denote) → (index it i).labels = [.at (PrimTy.key i)]
   | _, _, _, .map, _ => by rw [index_map, labels_key, labels_nil]
-  | _, _, _, .arr .dyn, _ => by rw [index_dyn, labels_at, labels_nil]
-  | _, _, _, .arr .fixed, _ => by rw [index_fixed, labels_atF, labels_nil]
+  | _, _, _, .arr .dyn, _ => by rw [index_dyn, labels_at, labels_nil]; rfl
+  | _, _, _, .arr .fixed, _ => by rw [index_fixed, labels_atF, labels_nil]; rfl
 
 end Path
 
@@ -929,7 +971,7 @@ def SVal.find {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
         | none => none
       else none)
     (fun {_} {_} {_} k _ ih v =>
-      let w : SMap _ × SVal _ := SVal.view v
+      let w : SMap _ _ × SVal _ := SVal.view v
       match lookupBy k w.1.toList with
       | some x => ih x
       | none => ih w.2)
@@ -956,7 +998,7 @@ def SVal.findLive {T U : Ty} (v : SVal T) (p : Path T U) : Option (SVal U) :=
         | none => none
       else none)
     (fun {_} {_} {_} k _ ih v =>
-      let w : SMap _ × SVal _ := SVal.view v
+      let w : SMap _ _ × SVal _ := SVal.view v
       match lookupBy k w.1.toList with
       | some x => ih x
       | none => ih w.2)
@@ -993,7 +1035,7 @@ def SVal.save {T U : Ty} (v : SVal T) (p : Path T U) (new : SVal U) : Option (SV
         | none => none
       else none)
     (fun {_} {_} {_} k _ ih v new =>
-      let w : SMap _ × SVal _ := SVal.view v
+      let w : SMap _ _ × SVal _ := SVal.view v
       match lookupBy k w.1.toList with
       | some x => do
         let x' ← ih x new
@@ -1038,7 +1080,7 @@ def defaultOfFold : Fold where
   F fs := SFields fs
   L E := SList E
   W E n := SVec E n
-  M U := SMap U
+  M K U := SMap K U
   prim := fun {p} _ => .prim (PrimTy.dflt p)
   struct := fun _ ih => .struct ih
   array := fun _ sh _ ie _ => .array .nil (.ofList (SVec.toList ie ++ sh.toList)) SVal.zero_lt_bound
@@ -1074,7 +1116,7 @@ theorem SVal.defaultOf_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h
       .array .nil (.ofList (e.defaultOf.toList ++ sh.toList)) SVal.zero_lt_bound := rfl
 theorem SVal.defaultOf_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).defaultOf = .fixed e.defaultOf := rfl
-theorem SVal.defaultOf_map {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U) :
+theorem SVal.defaultOf_map {K : PrimTy} {U : Ty} (m : SMap K U) (d : SVal U) :
     (SVal.map (K := K) m d).defaultOf = .map m d := rfl
 theorem SFields.defaultOf_nil : (SFields.nil).defaultOf = .nil := rfl
 theorem SFields.defaultOf_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -1153,7 +1195,7 @@ def stripFold : Fold where
   F fs := SFields fs
   L E := SList E
   W E n := SVec E n
-  M U := SMap U
+  M K U := SMap K U
   prim := fun v => .prim v
   struct := fun _ ih => .struct ih
   array := fun _ _ h ie _ => .array ie .nil h
@@ -1186,7 +1228,7 @@ theorem SVal.strip_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n
     (SVal.array e sh h).strip = .array e.strip .nil h := rfl
 theorem SVal.strip_fixed {E : Ty} {n : Nat} (e : SVec E n) :
     (SVal.fixed e).strip = .fixed e.strip := rfl
-theorem SVal.strip_map {K : PrimTy} {U : Ty} (m : SMap U) (d : SVal U) :
+theorem SVal.strip_map {K : PrimTy} {U : Ty} (m : SMap K U) (d : SVal U) :
     (SVal.map (K := K) m d).strip = .map m d := rfl
 theorem SFields.strip_nil : (SFields.nil).strip = .nil := rfl
 theorem SFields.strip_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v : SVal T)
@@ -1258,7 +1300,7 @@ def overlayFold : Fold where
   F fs := SFields fs → SFields fs
   L _ := Unit
   W E n := List (SVal E) → SVec E n
-  M _ := Unit
+  M _ _ := Unit
   prim := fun v _ => .prim v
   struct := fun _ ih o => .struct (ih (SVal.view o))
   array := fun {_} {n} _ _ h ie _ o =>
@@ -1305,7 +1347,7 @@ theorem SVal.overlay_array {E : Ty} {m n : Nat} (oel : SVec E m) (osh : SList E)
         (.ofList ((oel.toList.drop n).map SVal.defaultOf ++ osh.toList.drop (n - m))) h₂ := rfl
 theorem SVal.overlay_fixed {E : Ty} {n : Nat} (oel nel : SVec E n) :
     (SVal.fixed oel).overlay (.fixed nel) = .fixed (SVec.overlayOn oel.toList nel) := rfl
-theorem SVal.overlay_map {K : PrimTy} {U : Ty} (oe ne : SMap U) (od nd : SVal U) :
+theorem SVal.overlay_map {K : PrimTy} {U : Ty} (oe ne : SMap K U) (od nd : SVal U) :
     (SVal.map (K := K) oe od).overlay (.map ne nd) = .map oe od := rfl
 theorem SFields.overlay_nil : SFields.overlay .nil .nil = .nil := rfl
 theorem SFields.overlay_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (o v : SVal T)
@@ -1377,7 +1419,7 @@ def beqFold : Fold where
   F fs := SFields fs → Bool
   L E := SList E → Bool
   W E _ := List (SVal E) → Bool
-  M U := SMap U → Bool
+  M K U := SMap K U → Bool
   prim := fun {p} x w => decide (x = (SVal.view w : p.Denote))
   struct := fun _ ih w => ih (SVal.view w)
   array := fun _ _ _ ie ish w =>
@@ -1385,7 +1427,7 @@ def beqFold : Fold where
     ie x.elems.toList && ish x.shadow
   fixed := fun _ ie w => ie (SVal.view w : SVec _ _).toList
   map := fun _ _ im id w =>
-    let x : SMap _ × SVal _ := SVal.view w
+    let x : SMap _ _ × SVal _ := SVal.view w
     im x.1 && id x.2
   fnil := fun _ => true
   fcons := fun _ _ iv ir w =>
@@ -1412,7 +1454,7 @@ def SFields.beq {fs : List (Name × Ty)} (x y : SFields fs) : Bool := x.fold beq
 def SList.beq {E : Ty} (l l' : SList E) : Bool := l.fold beqFold l'
 /-- A vector against a list: the same elements, as many. -/
 def SVec.beqL {E : Ty} {n : Nat} (l : SVec E n) (l' : List (SVal E)) : Bool := l.fold beqFold l'
-def SMap.beq {U : Ty} (m m' : SMap U) : Bool := m.fold beqFold m'
+def SMap.beq {K : PrimTy} {U : Ty} (m m' : SMap K U) : Bool := m.fold beqFold m'
 
 theorem SVal.beq_prim {p : PrimTy} (x y : p.Denote) :
     (SVal.prim x).beq (.prim y) = decide (x = y) := rfl
@@ -1423,7 +1465,7 @@ theorem SVal.beq_array {E : Ty} {n m : Nat} (e : SVec E n) (sh : SList E) (h : n
     (SVal.array e sh h).beq (.array e' sh' h') = (e.beqL e'.toList && sh.beq sh') := rfl
 theorem SVal.beq_fixed {E : Ty} {n : Nat} (e e' : SVec E n) :
     (SVal.fixed e).beq (.fixed e') = e.beqL e'.toList := rfl
-theorem SVal.beq_map {K : PrimTy} {U : Ty} (m m' : SMap U) (d d' : SVal U) :
+theorem SVal.beq_map {K : PrimTy} {U : Ty} (m m' : SMap K U) (d d' : SVal U) :
     (SVal.map (K := K) m d).beq (.map m' d') = (m.beq m' && d.beq d') := rfl
 theorem SFields.beq_nil : SFields.beq .nil .nil = true := rfl
 theorem SFields.beq_cons {f : Name} {T : Ty} {fs : List (Name × Ty)} (v w : SVal T)
@@ -1444,12 +1486,13 @@ theorem SVec.beqL_cons_nil {E : Ty} {n : Nat} (v : SVal E) (rest : SVec E n) :
 theorem SVec.beqL_cons_cons {E : Ty} {n : Nat} (v w : SVal E) (rest : SVec E n)
     (rest' : List (SVal E)) :
     SVec.beqL (.cons v rest) (w :: rest') = (v.beq w && rest.beqL rest') := rfl
-theorem SMap.beq_nil_nil {U : Ty} : SMap.beq (U := U) .nil .nil = true := rfl
-theorem SMap.beq_nil_cons {U : Ty} (k : Int) (w : SVal U) (rest' : SMap U) :
+theorem SMap.beq_nil_nil {K : PrimTy} {U : Ty} : SMap.beq (K := K) (U := U) .nil .nil = true := rfl
+theorem SMap.beq_nil_cons {K : PrimTy} {U : Ty} (k : K.Denote) (w : SVal U) (rest' : SMap K U) :
     SMap.beq .nil (.cons k w rest') = false := rfl
-theorem SMap.beq_cons_nil {U : Ty} (k : Int) (v : SVal U) (rest : SMap U) :
+theorem SMap.beq_cons_nil {K : PrimTy} {U : Ty} (k : K.Denote) (v : SVal U) (rest : SMap K U) :
     SMap.beq (.cons k v rest) .nil = false := rfl
-theorem SMap.beq_cons_cons {U : Ty} (k k' : Int) (v w : SVal U) (rest rest' : SMap U) :
+theorem SMap.beq_cons_cons {K : PrimTy} {U : Ty} (k k' : K.Denote) (v w : SVal U)
+    (rest rest' : SMap K U) :
     SMap.beq (.cons k v rest) (.cons k' w rest') = (decide (k = k') && v.beq w && rest.beq rest') :=
   rfl
 
@@ -1511,14 +1554,15 @@ theorem SVec.toList_eq_of_beqL : {E : Ty} → {n : Nat} → (l : SVec E n) → (
     rw [SVec.toList_cons, SVal.eq_of_beq v w h.1, SVec.toList_eq_of_beqL rest rest' h.2]
 termination_by structural _ _ l => l
 
-theorem SMap.eq_of_beq : {U : Ty} → (m m' : SMap U) → m.beq m' = true → m = m'
-  | _, .nil, .nil, _ => rfl
-  | _, .nil, .cons _ _ _, h => by simp only [SMap.beq, Bool.false_eq_true] at h
-  | _, .cons _ _ _, .nil, h => by simp only [SMap.beq, Bool.false_eq_true] at h
-  | _, .cons k v rest, .cons k' w rest', h => by
+theorem SMap.eq_of_beq : {K : PrimTy} → {U : Ty} → (m m' : SMap K U) → m.beq m' = true →
+    m = m'
+  | _, _, .nil, .nil, _ => rfl
+  | _, _, .nil, .cons _ _ _, h => by simp only [SMap.beq, Bool.false_eq_true] at h
+  | _, _, .cons _ _ _, .nil, h => by simp only [SMap.beq, Bool.false_eq_true] at h
+  | _, _, .cons k v rest, .cons k' w rest', h => by
     simp only [SMap.beq, Bool.and_eq_true, decide_eq_true_eq] at h
     rw [h.1.1, SVal.eq_of_beq v w h.1.2, SMap.eq_of_beq rest rest' h.2]
-termination_by structural _ m => m
+termination_by structural _ _ m => m
 end
 
 mutual
@@ -1546,9 +1590,9 @@ theorem SVec.beqL_self : {E : Ty} → {n : Nat} → (l : SVec E n) → l.beqL l.
     rw [SVec.toList_cons]
     simp only [SVec.beqL, SVal.beq_self v, SVec.beqL_self rest, Bool.and_self]
 
-theorem SMap.beq_self : {U : Ty} → (m : SMap U) → m.beq m = true
-  | _, .nil => by simp only [SMap.beq]
-  | _, .cons k v rest => by simp only [SMap.beq, decide_true, SVal.beq_self v,
+theorem SMap.beq_self : {K : PrimTy} → {U : Ty} → (m : SMap K U) → m.beq m = true
+  | _, _, .nil => by simp only [SMap.beq]
+  | _, _, .cons k v rest => by simp only [SMap.beq, decide_true, SVal.beq_self v,
       SMap.beq_self rest, Bool.and_self]
 end
 
@@ -1629,15 +1673,9 @@ def field {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s))) (h : C.fieldType
   r.append (.field h .nil)
 
 /-- `b[i]`. -/
-def index {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R)) (it : IndexTy R k V) (i : Int) :
-    SRef C V :=
-  r.append (Path.index it i)
-
-/-- `b[k]` for the program's index value: a mapping's key as it is hashed
-(`PrimTy.key`, a `bool` as `0`/`1`), an array's index as the number. -/
-def atKey {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R)) (it : IndexTy R k V)
+def index {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R)) (it : IndexTy R k V)
     (i : k.Denote) : SRef C V :=
-  r.index it (PrimTy.key i)
+  r.append (Path.index it i)
 
 
 end SRef
@@ -1666,20 +1704,23 @@ def save {U : Ty} (st : Storage C) (r : SRef C U) (new : SVal U) : Option (Stora
 
 /-- `checkIndex`'s test on the value at `b`: every key of a mapping, an index
 below an array's live length.  By `casesOn`, so the kernel casts nothing. -/
-def inBounds {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
+def inBounds {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : k.Denote) :
     SVal (.ref R) → Option Unit :=
-  @IndexTy.casesOn (fun R _ _ _ => SVal (.ref R) → Option Unit) R k V it
-    (fun {_} {_} _ => some ())
-    (fun {_} {_} a => @ArrTy.casesOn (fun R _ _ => SVal (.ref R) → Option Unit) _ _ a
+  @IndexTy.casesOn (fun R k _ _ => k.Denote → SVal (.ref R) → Option Unit) R k V it
+    (fun {_} {_} _ _ => some ())
+    (fun {_} {_} a i => @ArrTy.casesOn (fun R _ _ => SVal (.ref R) → Option Unit) _ _ a
       (fun {_} v =>
         let w : ArrView _ := SVal.view v
+        let i : Int := (i : PrimTy.uint.Denote).1
         if 0 ≤ i ∧ i.toNat < w.n then some () else none)
-      (fun {_} {n} _ => if 0 ≤ i ∧ i.toNat < n then some () else none))
+      (fun {_} {n} _ =>
+        let i : Int := (i : PrimTy.uint.Denote).1
+        if 0 ≤ i ∧ i.toNat < n then some () else none)) i
 
 /-- `b[i]`'s index in bounds where the program takes it:
 a mapping takes every key, an array an index below its live length. -/
 def checkIndex {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (r : SRef C (.ref R))
-    (it : IndexTy R k V) (i : Int) : Option Unit := do
+    (it : IndexTy R k V) (i : k.Denote) : Option Unit := do
   inBounds it i (← st.find r)
 
 /-- The live length of a dynamic array, a `uint`: it is below
@@ -1711,13 +1752,13 @@ def push {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)))
 
 /-- `b.push()` as a place: the slot appended, and its index. -/
 def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    Option (Storage C × Nat) := do
+    Option (Storage C × PrimTy.uint.Denote) := do
   let w : ArrView E := SVal.view (← st.find r)
   let (slot, sh') := pushSlot E w.shadow.toList
   if h : w.n + 1 < 2 ^ 256 then
     let st' ← st.save r (.array (SVec.ofList (w.elems.toList ++ [slot])) (.ofList sh')
       (SVec.snoc_lt_bound w.elems slot h))
-    some (st', w.n)
+    some (st', lenU w.n (Nat.lt_of_succ_lt h))
   else none
 
 /-- `b.pop()`: the last element cleared into the slots past the
@@ -1840,9 +1881,9 @@ inductive Path.Diverges : {T U W : Ty} → Path T U → Path T W → Prop
       Diverges (.atF (n := n) i p) (.atF j q)
   | atFIn {E U W : Ty} {n : Nat} (i : Int) {p : Path E U} {q : Path E W} :
       Diverges p q → Diverges (.atF (n := n) i p) (.atF i q)
-  | key {K : PrimTy} {V U W : Ty} {k k' : Int} (p : Path V U) (q : Path V W) (hne : k ≠ k') :
+  | key {K : PrimTy} {V U W : Ty} {k k' : K.Denote} (p : Path V U) (q : Path V W) (hne : k ≠ k') :
       Diverges (.key (K := K) k p) (.key k' q)
-  | keyIn {K : PrimTy} {V U W : Ty} (k : Int) {p : Path V U} {q : Path V W} :
+  | keyIn {K : PrimTy} {V U W : Ty} (k : K.Denote) {p : Path V U} {q : Path V W} :
       Diverges p q → Diverges (.key (K := K) k p) (.key k q)
 
 theorem SVal.findM_saveM_diverges {T U W : Ty} {p : Path T U} {q : Path T W}
@@ -1994,7 +2035,7 @@ theorem find_atF {E U : Ty} {n : Nat} (e : SVec E n) (i : Int) (p : Path E U) :
         | none => none
       else none := rfl
 
-theorem find_key {K : PrimTy} {V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
+theorem find_key {K : PrimTy} {V U : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (p : Path V U) :
     (SVal.map (K := K) m d).find (.key k p) =
       match lookupBy k m.toList with
       | some x => x.find p

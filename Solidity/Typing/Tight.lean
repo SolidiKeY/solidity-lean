@@ -183,7 +183,7 @@ all), a fixed-size array at most `2^256` long (its indices are `uint`s). -/
 def fitsH : Hered where
   arr := fun {_} {n} _ sh => n + sh.length < 2 ^ 256
   fix _ n := n ≤ 2 ^ 256
-  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk e.1
+  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
 
 /-- `v`'s keys and slots in range. -/
 abbrev SVal.Fits {T : Ty} (v : SVal T) : Prop := v.All fitsH

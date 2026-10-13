@@ -178,7 +178,7 @@ theorem Op2.eval_sfind {T : Ty} (x : Option (Storage C)) (y : Option (SRef C T))
 theorem Op2.eval_delAt {T : Ty} (x : Option (Storage C)) (y : Option (SRef C T)) :
     Op2.eval g .delAt x y = x.bind fun st => y.bind fun r => st.delete r := rfl
 theorem Op2.eval_at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (x : Option (SRef C (.ref R))) (y : Option k.keyTy.Denote) :
+    (x : Option (SRef C (.ref R))) (y : Option k.Denote) :
     Op2.eval g (.at it) x y = x.bind fun r => y.bind fun i => g.storage.atT it r i := rfl
 
 theorem Op2.eval_len {E : Ty} (x : Option (Storage C)) (y : Option (SRef C (.ref (.array E)))) :

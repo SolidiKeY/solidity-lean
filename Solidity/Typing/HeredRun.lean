@@ -37,7 +37,7 @@ structure HeredRun (P : Hered) (G : Ty → Prop) : Prop where
     P.arr (SVec.ofList (((e.toList ++ sh.toList).set i x).take n))
       (SList.ofList (((e.toList ++ sh.toList).set i x).drop n))
   /-- An entry written, at a key a program writes. -/
-  map : ∀ {K : PrimTy} {V : Ty} (m : SMap V) (d : SVal V) (k : Int) (x : SVal V), Ty.Keyable K k →
+  map : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V), Ty.Keyable K (PrimTy.key k) →
     x.All P → P.map K m d → P.map K (SMap.ofList (setBy k x m.toList)) d
   /-- The slots past the end dropped (a copy's source). -/
   strip : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
@@ -160,7 +160,8 @@ theorem push_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
       · rw [List.mem_singleton.mp hw]; exact hxA
     · exact nomatch h
 
-theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {k : Nat}
+theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote}
     (hs : st.All P) (hG : G (.ref (.array E))) (hk : r.path.Keys Ty.Keyable)
     (h : st.pushPlace r = some (st', k)) : st'.All P := by
   unfold Storage.pushPlace at h
@@ -276,7 +277,7 @@ theorem Loc.resolveT_keyed (he : TEnv.All LTy.Keyed σ.env) :
     obtain ⟨k, _, h⟩ := tbind_ok_inv h
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
-    show (r0.path.append (Path.index it (PrimTy.key k))).Keys Ty.Keyable
+    show (r0.path.append (Path.index it k)).Keys Ty.Keyable
     rw [Path.keys_append]
     refine ⟨SPath.resolveT_keyed he b h0, ?_⟩
     cases it with
@@ -289,7 +290,7 @@ end
 
 /-- An index the program takes is in bounds where it takes it. -/
 theorem Storage.checkIndex_some {st : Storage C} {R : RefTy} {k : PrimTy} {V : Ty}
-    {r : SRef C (.ref R)} {it : IndexTy R k V} {i : Int} (h : st.checkIndex r it i = some ()) :
+    {r : SRef C (.ref R)} {it : IndexTy R k V} {i : k.Denote} (h : st.checkIndex r it i = some ()) :
     ∃ y, st.find r = some y ∧ Storage.inBounds it i y = some () := by
   simp only [Storage.checkIndex, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
   exact h
@@ -314,7 +315,7 @@ theorem Loc.resolveT_live : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T}
     obtain ⟨k, _, h⟩ := tbind_ok_inv h
     obtain ⟨u, hck, h⟩ := tbind_ok_inv h
     cases h
-    show (σ.storage.get r0.hroot).Live (r0.path.append (Path.index it (PrimTy.key k)))
+    show (σ.storage.get r0.hroot).Live (r0.path.append (Path.index it k))
     obtain ⟨y0, hy0, hin⟩ := Storage.checkIndex_some (TRes.ofOpt_ok hck)
     refine SVal.live_append _ _ _ rfl fun y hy => ?_
     have hyy : y = y0 := by
@@ -399,7 +400,7 @@ theorem ARhs.evalT_all {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R : R
       cases h
       have hk := SPath.resolveT_keyed σ hσ.2 b h0
       refine ⟨Storage.pushPlace_all hP hσ.1 (hG r0) hk (TRes.ofOpt_ok hst), ?_⟩
-      show (r0.path.append (Path.index (.arr .dyn) (k : Int))).Keys Ty.Keyable
+      show (r0.path.append (Path.index (.arr .dyn) k)).Keys Ty.Keyable
       rw [Path.keys_append, Path.index_dyn]
       exact ⟨hk, trivial⟩
 

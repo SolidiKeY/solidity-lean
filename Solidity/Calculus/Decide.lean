@@ -353,7 +353,7 @@ inductive TSegs (C : Contract) : Ty → Ty → Type where
   | at {E U : Ty} (i : LTm C (.val .uint)) (rest : TSegs C E U) : TSegs C (.ref (.array E)) U
   | atF {E U : Ty} {n : Nat} (i : LTm C (.val .uint)) (rest : TSegs C E U) :
       TSegs C (.ref (.fixed E n)) U
-  | key {k : PrimTy} {V U : Ty} (i : LTm C (.val k.keyTy)) (rest : TSegs C V U) :
+  | key {k : PrimTy} {V U : Ty} (i : LTm C (.val k)) (rest : TSegs C V U) :
       TSegs C (.ref (.mapping k V)) U
 
 namespace TSegs
@@ -408,8 +408,8 @@ theorem toLTm_eq_toLTmM {S T : Ty} (p : TSegs C S T) : p.toLTm = p.toLTmM := by
 
 /-- One index step, by how the type is indexed. -/
 def ofIndex {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) :
-    LTm C (.val k.keyTy) → TSegs C (.ref R) V :=
-  @IndexTy.casesOn (fun R k V _ => LTm C (.val k.keyTy) → TSegs C (.ref R) V) R k V it
+    LTm C (.val k) → TSegs C (.ref R) V :=
+  @IndexTy.casesOn (fun R k V _ => LTm C (.val k) → TSegs C (.ref R) V) R k V it
     (fun {_} {_} i => .key i .nil)
     (fun {_} {_} a => @ArrTy.casesOn (fun R E _ => LTm C (.val .uint) → TSegs C (.ref R) E) _ _ a
       (fun {_} i => .at i .nil) (fun {_} {_} i => .atF i .nil))
@@ -421,8 +421,8 @@ noncomputable def eval (g : State C []) (ν : AEnv) {T U : Ty} (p : TSegs C T U)
     (fun h _ ih => ih.map (.field h))
     (fun i _ ih => (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => ih.map (.at k.1))
     (fun i _ ih => (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => ih.map (.atF k.1))
-    (fun {k} {_} {_} i _ ih => (i.eval g ν : Option k.keyTy.Denote).bind fun j =>
-      ih.map (.key (PrimTy.key j)))
+    (fun {k} {_} {_} i _ ih => (i.eval g ν : Option k.Denote).bind fun j =>
+      ih.map (.key j))
     T U p
 
 end TSegs
@@ -1130,15 +1130,15 @@ end ElimM
 
 /-- A path one index further, the index read as a key. -/
 def pathIdx {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (q : Option (LTm C (.val .bool) × SPath C (.ref R))) (i : LTm C (.val k.keyTy)) :
+    (q : Option (LTm C (.val .bool) × SPath C (.ref R))) (i : LTm C (.val k)) :
     Option (LTm C (.val .bool) × SPath C V) :=
   q.map fun x => (seqL x.1 (seqL i .tt), x.2.snoc (TSegs.ofIndex it i))
 
 /-- `checkIndex`'s bound on an index `i` at `Q` in the storage read by `rd`:
 every key of a mapping, an index below an array's length. -/
 def boundG {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (rd : SRd C)
-    (Q : SPath C (.ref R)) (i : LTm C (.val k.keyTy)) : LTm C (.val .bool) :=
-  @IndexTy.casesOn (fun R k V _ => SPath C (.ref R) → LTm C (.val k.keyTy) → LTm C (.val .bool))
+    (Q : SPath C (.ref R)) (i : LTm C (.val k)) : LTm C (.val .bool) :=
+  @IndexTy.casesOn (fun R k V _ => SPath C (.ref R) → LTm C (.val k) → LTm C (.val .bool))
     R k V it (fun _ _ => .tt)
     (fun {_} {_} a => @ArrTy.casesOn
       (fun R E _ => SPath C (.ref R) → LTm C (.val .uint) → LTm C (.val .bool)) _ _ a
@@ -1146,7 +1146,7 @@ def boundG {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (rd : SRd C)
 
 /-- `q[i]` checked against the storage `S` (`atIn`, `at`). -/
 def pathAtIn {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (S : SFun C)
-    (q : Option (LTm C (.val .bool) × SPath C (.ref R))) (i : LTm C (.val k.keyTy)) :
+    (q : Option (LTm C (.val .bool) × SPath C (.ref R))) (i : LTm C (.val k)) :
     Option (LTm C (.val .bool) × SPath C V) :=
   q.map fun x => (seqL S.ok (seqL x.1 (seqL i (seqL (LTm.assert (S.rd (.has _) x.2))
     (boundG it S.rd x.2 i)))), x.2.snoc (TSegs.ofIndex it i))

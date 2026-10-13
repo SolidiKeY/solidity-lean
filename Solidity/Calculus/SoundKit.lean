@@ -687,7 +687,7 @@ macro "exh_free" : tactic => `(tactic| (
   simp only [Upd.pushFree, UpdElem.pushFree, Rhs.pushFree, Tm.pushFree, Op2.pushFree,
     Op3.pushFree, Simple.lower_pushFree, Val.lower_pushFree, SPath.lower_pushFree,
     Loc.lower_pushFree, MPath.lower_pushFree, MLoc.lower_pushFree, Src.lower_pushFree,
-    MSrc.lower_pushFree, Tm.keyAt_pushFree, Tm.mread_pushFree, Tm.castV_pushFree,
+    MSrc.lower_pushFree, Tm.mread_pushFree, Tm.castV_pushFree,
     OpLoc.cur_pushFree, OpLoc.set_pushFree, OpLoc.op_pushFree, Tm.bumped_pushFree,
     Tm.one_pushFree, UpdElem.setLocal, UpdElem.save, UpdElem.saveMem, UpdElem.delAt,
     UpdElem.writeMem, UpdElem.pop, UpdElem.shrink, UpdElem.payTo, UpdElem.rebind,

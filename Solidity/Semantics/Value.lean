@@ -113,6 +113,20 @@ def key : {p : PrimTy} → p.Denote → Int
   | .uint, n => n.1
   | .int, n => n.1
 
+/-- A `uint` is not negative. -/
+theorem uint_nonneg (i : PrimTy.uint.Denote) : 0 ≤ i.1 := by
+  have h := i.2
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  exact h.1
+
+/-- Two keys hash alike only when they are equal. -/
+theorem key_inj : {p : PrimTy} → {a b : p.Denote} → key a = key b → a = b
+  | .bool, a, b, h => by
+    cases ha : (a : Bool) <;> cases hb : (b : Bool) <;>
+      simp only [key, ha, hb, cond_true, cond_false] at h <;> first | rfl | (exact absurd h (by decide))
+  | .uint, _, _, h => Subtype.ext h
+  | .int, _, _, h => Subtype.ext h
+
 end PrimTy
 
 namespace Semantics.CallValue

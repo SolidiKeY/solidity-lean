@@ -31,11 +31,6 @@ def CallValue.fmt : Semantics.CallValue → String
   | .uint n => PrimTy.fmt n
   | .int n => PrimTy.fmt n
 
-/-- A mapping's key as its type writes it: a `bool` key `true`, any other
-the number. -/
-def keyFmt (K : PrimTy) (k : Int) : String :=
-  if K == .bool then toString (k != 0) else toString k
-
 /-- **The printing fold**: a value as Solidity writes it, a struct's members
 by name, an array's live elements, a mapping's entries over its default. -/
 def fmtFold : Fold where
@@ -43,20 +38,20 @@ def fmtFold : Fold where
   F _ := List (Name × String)
   L _ := Unit
   W _ _ := List String
-  M _ := (Int → String) → List String
+  M _ _ := List String
   prim v := PrimTy.fmt v
   struct _ r := "{" ++ ", ".intercalate (r.map fun (f, v) => s!"{f}: {v}") ++ "}"
   array _ _ _ w _ := "[" ++ ", ".intercalate w ++ "]"
   fixed _ w := "[" ++ ", ".intercalate w ++ "]"
-  map {K _} _ _ m d := "{" ++ ", ".intercalate (m (keyFmt K) ++ [s!"_: {d}"]) ++ "}"
+  map _ _ m d := "{" ++ ", ".intercalate (m ++ [s!"_: {d}"]) ++ "}"
   fnil := []
   fcons {f _ _} _ _ v r := (f, v) :: r
   lnil := ()
   lcons _ _ _ _ := ()
   wnil := []
   wcons _ _ v r := v :: r
-  mnil := fun _ => []
-  mcons k _ _ v r := fun key => s!"{key k}: {v}" :: r key
+  mnil := []
+  mcons k _ _ v r := s!"{PrimTy.fmt k}: {v}" :: r
 
 /-- A storage value as Solidity writes it. -/
 def _root_.Solidity.SVal.fmt {T : Ty} (v : SVal T) : String := v.fold fmtFold

@@ -205,7 +205,7 @@ theorem eval_delAt {T : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T)) :
     (Tm.app2 .delAt s q).eval σ =
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.delete r := rfl
 theorem eval_at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k.keyTy)) :
+    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k)) :
     (Tm.app2 (.at it) q i).eval σ =
       (q.eval σ).bind fun r => (i.eval σ).bind fun x => σ.storage.atT it r x := rfl
 theorem eval_len {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
@@ -567,9 +567,9 @@ theorem root_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
 /-- A key of a mapping at a root: always a slot (`inBounds` at `map`), so
 two reads of `balances[0]` name the same reference, before a write and after. -/
 theorem atT_map_root {k : PrimTy} {V : Ty} (st : Storage C) (r : Name)
-    (h : C.rootType r = some (Ty.ref (RefTy.mapping k V))) (i : k.keyTy.Denote) :
+    (h : C.rootType r = some (Ty.ref (RefTy.mapping k V))) (i : k.Denote) :
     st.atT IndexTy.map (SRef.ofRoot r h) i =
-      some ((SRef.ofRoot r h).index IndexTy.map (PrimTy.key i)) := rfl
+      some ((SRef.ofRoot r h).index IndexTy.map i) := rfl
 theorem getD_ite {α : Type} {c : Prop} [Decidable c] (x y : Option α) (d : α) :
     (if c then x else y).getD d = if c then x.getD d else y.getD d := by
   split <;> rfl
@@ -593,12 +593,12 @@ theorem view_eq_int (x : SVal (.prim .int)) (b : PrimTy.int.Denote) :
 theorem root_field {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
     (h : C.fieldType s f = some T) : (r.field h).root = r.root := rfl
 theorem root_index {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R)) (it : IndexTy R k V)
-    (i : Int) : (r.index it i).root = r.root := rfl
+    (i : k.Denote) : (r.index it i).root = r.root := rfl
 /-- A checked index: the check, then the slot's reference, so two reads of
 `values[1]` name the same reference whatever the storage they check in. -/
 theorem atT_bind {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (it : IndexTy R k V)
-    (r : SRef C (.ref R)) (i : k.keyTy.Denote) :
-    st.atT it r i = (st.checkIndex r it (PrimTy.key i)).bind fun _ => some (r.index it (PrimTy.key i)) :=
+    (r : SRef C (.ref R)) (i : k.Denote) :
+    st.atT it r i = (st.checkIndex r it i).bind fun _ => some (r.index it i) :=
   rfl
 theorem ofInt?_uint (n : Int) : PrimTy.uint.ofInt? n =
     if 0 ≤ n ∧ n < uintBound then some (uintOf n) else none := by

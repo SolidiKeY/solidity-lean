@@ -254,13 +254,9 @@ def Tm.litW? {u : Srt} : Tm C Γ u → Option ((p : PrimTy) × p.Denote)
   | .app0 o => o.litW?
   | _ => none
 
-/-- A word as an integer: a number its value, a `bool` `0` (KeY's `(int)`
-cast). -/
-def asInt {p : PrimTy} (v : p.Denote) : Int := (PrimTy.num? v).getD 0
-
 /-- An index literal, as the integer it is hashed as. -/
 def Tm.litInt? {u : Srt} (t : Tm C Γ u) : Option Int :=
-  t.litW?.map fun w => asInt w.2
+  t.litW?.map fun w => PrimTy.key w.2
 
 /-- A root's segment. -/
 def Op0.shapeLeaf? {s : Srt} : Op0 C s → Option (List SegT)
@@ -645,11 +641,6 @@ section SideDenote
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-/-- An index read as the Theory's `int`: the integer it is hashed as. -/
-theorem asInt_erase_keyTy {k : PrimTy} (i : k.keyTy.Denote) :
-    asInt i = PrimTy.key i := by
-  cases k <;> rfl
-
 /-- A literal reads its word in the Theory. -/
 theorem Tm.litW?_denote {p : PrimTy} {t : Tm C Γ (.val p)} {w : (p : PrimTy) × p.Denote}
     (h : t.litW? = some w) : ∃ e : w.1 = p, t.denote σ = some (e ▸ w.2) := by
@@ -661,7 +652,7 @@ theorem Tm.litW?_denote {p : PrimTy} {t : Tm C Γ (.val p)} {w : (p : PrimTy) ×
   | _ => cases h
 
 /-- An index literal reads its integer in the Theory. -/
-theorem Tm.litInt?_denote {k : PrimTy} {t : Tm C Γ (.val k.keyTy)} {i : Int}
+theorem Tm.litInt?_denote {k : PrimTy} {t : Tm C Γ (.val k)} {i : Int}
     (h : t.litInt? = some i) : PrimTy.key ((t.denote σ).getD (PrimTy.dflt _)) = i := by
   obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.1 h
   obtain ⟨e, hd⟩ := Tm.litW?_denote σ hw
@@ -669,10 +660,9 @@ theorem Tm.litInt?_denote {k : PrimTy} {t : Tm C Γ (.val k.keyTy)} {i : Int}
   dsimp only at e
   subst e
   rw [hd, Option.getD_some]
-  exact (asInt_erase_keyTy w).symm
 
-theorem Path.labels_index' {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : Int) :
-    (Path.index it i).labels = [.at i] := Path.labels_index it i
+theorem Path.labels_index' {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : k.Denote) :
+    (Path.index it i).labels = [.at (PrimTy.key i)] := Path.labels_index it i
 
 /-- A path has its shape in every state; generic in the sort, a path's
 segments read by `Srt.labels`. -/
@@ -886,7 +876,7 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
         exact ⟨_, by rw [Path.labels_index']; simp only [ne_eq, reduceCtorEq,
           not_false_eq_true], rfl⟩
       · obtain ⟨r, hr, hq⟩ := ihx h
-        refine ⟨r.append (Path.index it (PrimTy.key ((y.denote σ).getD (PrimTy.dflt _)))), ?_, ?_⟩
+        refine ⟨r.append (Path.index it ((y.denote σ).getD (PrimTy.dflt _))), ?_, ?_⟩
         · rw [Path.labels_append]; exact List.append_ne_nil_of_left_ne_nil hr _
         · show ObsLoc.app (x.denote σ) _ = _
           rw [hq, ObsLoc.app_app]
@@ -900,7 +890,7 @@ theorem Tm.extends_denote' {U : Ty} {p : Tm C Γ (.path U)} {u : Srt} (q : Tm C 
         exact ⟨_, by rw [Path.labels_index']; simp only [ne_eq, reduceCtorEq,
           not_false_eq_true], rfl⟩
       · obtain ⟨r, hr, hq⟩ := ihy h
-        refine ⟨r.append (Path.index it (PrimTy.key ((z.denote σ).getD (PrimTy.dflt _)))), ?_, ?_⟩
+        refine ⟨r.append (Path.index it ((z.denote σ).getD (PrimTy.dflt _))), ?_, ?_⟩
         · rw [Path.labels_append]; exact List.append_ne_nil_of_left_ne_nil hr _
         · show ObsLoc.app (y.denote σ) _ = _
           rw [hq, ObsLoc.app_app]

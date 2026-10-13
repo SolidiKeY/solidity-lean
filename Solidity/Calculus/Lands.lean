@@ -475,10 +475,6 @@ theorem Simple.lower_pushFree {p : PrimTy} (s : Simple C Γ p) : s.lower.pushFre
   | env k hp => simp only [Simple.lower, Tm.castV_pushFree]; rfl
   | _ => rfl
 
-theorem Tm.keyAt_pushFree (k : PrimTy) (t : Tm C Γ (.val k)) :
-    (Tm.keyAt k t).pushFree = t.pushFree := by
-  cases k <;> simp only [Tm.keyAt, Tm.pushFree, Op3.pushFree, Bool.and_true, Bool.true_and]
-
 theorem Tm.mread_pushFree (T : Ty) (a : Tm C Γ (.addr T)) :
     (Tm.mread T a).pushFree = a.pushFree := by
   cases T <;> simp only [Tm.mread, Tm.pushFree, Op2.pushFree, Bool.true_and]
@@ -493,7 +489,7 @@ theorem Loc.lower_pushFree : {T : Ty} → (l : Loc C Γ T) → l.lower.pushFree 
   | _, .root _ _ => rfl
   | _, .field b _ _ => by simp only [Loc.lower, Tm.pushFree, SPath.lower_pushFree b]
   | _, .index (k := k) _ b i => by
-    simp only [Loc.lower, Tm.pushFree, Op2.pushFree, SPath.lower_pushFree b, Tm.keyAt_pushFree,
+    simp only [Loc.lower, Tm.pushFree, Op2.pushFree, SPath.lower_pushFree b,
       Val.lower_pushFree i, Bool.and_self]
 
 theorem MPath.lower_pushFree : {T : Ty} → (b : MPath C Γ T) → b.lower.pushFree = true

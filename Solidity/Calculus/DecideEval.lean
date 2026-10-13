@@ -36,9 +36,9 @@ theorem eval_at {E U : Ty} (i : LTm C (.val .uint)) (r : TSegs C E U) :
 theorem eval_atF {E U : Ty} {n : Nat} (i : LTm C (.val .uint)) (r : TSegs C E U) :
     (TSegs.atF (n := n) i r).eval g ν =
       (i.eval g ν : Option PrimTy.uint.Denote).bind fun k => (r.eval g ν).map (.atF k.1) := rfl
-theorem eval_key {k : PrimTy} {V U : Ty} (i : LTm C (.val k.keyTy)) (r : TSegs C V U) :
+theorem eval_key {k : PrimTy} {V U : Ty} (i : LTm C (.val k)) (r : TSegs C V U) :
     (TSegs.key i r).eval g ν =
-      (i.eval g ν : Option k.keyTy.Denote).bind fun j => (r.eval g ν).map (.key (PrimTy.key j)) :=
+      (i.eval g ν : Option k.Denote).bind fun j => (r.eval g ν).map (.key j) :=
   rfl
 
 theorem append_nil' {U W : Ty} (q : TSegs C U W) : (TSegs.nil : TSegs C U U).append q = q := rfl
@@ -73,9 +73,9 @@ theorem eval_append {S U W : Ty} (p : TSegs C S U) (q : TSegs C U W) :
         Path.append_key]
 
 theorem eval_ofIndex {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (i : LTm C (.val k.keyTy)) :
+    (i : LTm C (.val k)) :
     (TSegs.ofIndex it i).eval g ν =
-      (i.eval g ν : Option k.keyTy.Denote).map fun j => Path.index it (PrimTy.key j) := by
+      (i.eval g ν : Option k.Denote).map fun j => Path.index it j := by
   cases it with
   | map => cases h : (i.eval g ν : Option _) <;> simp only [ofIndex, eval_key, h, eval_nil,
       Option.bind_none, Option.map_none, Option.bind_some, Option.map_some, Path.index_map]
@@ -151,12 +151,6 @@ end SPath
 
 /-! ## Case trees and the comparison -/
 
-theorem _root_.Solidity.PrimTy.key_inj : {p : PrimTy} → {a b : p.Denote} →
-    PrimTy.key a = PrimTy.key b → a = b
-  | .bool, a, b, h => by
-    cases a <;> cases b <;> first | rfl | (simp only [PrimTy.key, cond] at h; exact absurd h (by decide))
-  | .uint, a, b, h => Subtype.ext h
-  | .int, a, b, h => Subtype.ext h
 
 namespace CTree
 
@@ -321,7 +315,7 @@ theorem relSegs_atF_atF {E U U' : Ty} {n : Nat} (i j : LTm C (.val .uint)) (p : 
     (q : TSegs C E U') :
     relSegs (.atF (n := n) i p) (.atF j q) = keyTree i j (relSegs p q) (.leaf none) := rfl
 
-theorem relSegs_key_key {k : PrimTy} {V U U' : Ty} (i j : LTm C (.val k.keyTy)) (p : TSegs C V U)
+theorem relSegs_key_key {k : PrimTy} {V U U' : Ty} (i j : LTm C (.val k)) (p : TSegs C V U)
     (q : TSegs C V U') :
     relSegs (.key i p) (.key j q) = keyTree i j (relSegs p q) (.leaf none) := rfl
 
@@ -352,10 +346,10 @@ theorem eval_atF_some {E U : Ty} {n : Nat} {i : LTm C (.val .uint)} {r : TSegs C
   obtain ⟨pp', h1, rfl⟩ := hp
   exact ⟨k, pp', hk, h1, rfl⟩
 
-theorem eval_key_some {k : PrimTy} {V U : Ty} {i : LTm C (.val k.keyTy)} {r : TSegs C V U}
+theorem eval_key_some {k : PrimTy} {V U : Ty} {i : LTm C (.val k)} {r : TSegs C V U}
     {pp : Path _ U} (hp : (TSegs.key i r).eval g ν = some pp) :
-    ∃ j pp', (i.eval g ν : Option k.keyTy.Denote) = some j ∧ r.eval g ν = some pp' ∧
-      pp = .key (PrimTy.key j) pp' := by
+    ∃ j pp', (i.eval g ν : Option k.Denote) = some j ∧ r.eval g ν = some pp' ∧
+      pp = .key j pp' := by
   rw [TSegs.eval_key, Option.bind_eq_some_iff] at hp
   obtain ⟨j, hj, hp⟩ := hp
   rw [Option.map_eq_some_iff] at hp
@@ -729,10 +723,10 @@ theorem ovRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {o n : VRd C U} {
         .cond (n (.has _) .nil) (.cond (o (.has _) .nil) (o c (.key i r)) (n c (.key i r))) c.absent
         from rfl,
       LTm.eval_cond_some g ν _ _ (hasNil_eval g ν hn), LTm.eval_cond_some g ν _ _ (hasNil_eval g ν ho)]
-    have e : CK.obsC c (fun cc => TVal.ovR cc to tn (.key (PrimTy.key j) p')) =
+    have e : CK.obsC c (fun cc => TVal.ovR cc to tn (.key j p')) =
         if tn.has .nil = true then
-          (if to.has .nil = true then c.obsC (fun cc => cc.read to (.key (PrimTy.key j) p'))
-          else c.obsC (fun cc => cc.read tn (.key (PrimTy.key j) p')))
+          (if to.has .nil = true then c.obsC (fun cc => cc.read to (.key j p'))
+          else c.obsC (fun cc => cc.read tn (.key j p')))
         else c.obsC (fun cc => cc.absent) := by
       rw [← CK.obsC_ite, ← CK.obsC_ite]
       exact CK.obsC_congr c fun cc => by simp only [TVal.ovR]
@@ -1732,23 +1726,23 @@ theorem SFun.pop_rep (keep : Bool) {E : Ty} {S : SFun C} {s : LTm C .st}
 
 theorem SPath.eval_snoc_index {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
     {Q : SPath C (.ref R)} {r : SRef C (.ref R)} (hQ : Q.eval g ν = some r)
-    {ei : LTm C (.val k.keyTy)} {j : k.keyTy.Denote} (hj : (ei.eval g ν : Option _) = some j) :
-    (Q.snoc (TSegs.ofIndex it ei)).eval g ν = some (r.index it (PrimTy.key j)) := by
+    {ei : LTm C (.val k)} {j : k.Denote} (hj : (ei.eval g ν : Option _) = some j) :
+    (Q.snoc (TSegs.ofIndex it ei)).eval g ν = some (r.index it j) := by
   rw [SPath.eval_snoc, hQ, Option.bind_some, TSegs.eval_ofIndex, hj]; rfl
 
 theorem atT_eq {R : RefTy} {k : PrimTy} {V : Ty} (st : Storage C) (it : IndexTy R k V)
-    (r : SRef C (.ref R)) (j : k.keyTy.Denote) :
-    st.atT it r j = (st.checkIndex r it (PrimTy.key j)).map fun _ => r.index it (PrimTy.key j) := by
+    (r : SRef C (.ref R)) (j : k.Denote) :
+    st.atT it r j = (st.checkIndex r it j).map fun _ => r.index it j := by
   unfold Storage.atT
-  cases st.checkIndex r it (PrimTy.key j) <;> rfl
+  cases st.checkIndex r it j <;> rfl
 
 /-- The guard of a checked index returns exactly where the check passes. -/
 theorem boundG_eval {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (rd : SRd C)
     (st : Storage C) (hrd : SRd.Rep g ν rd st) {Q : SPath C (.ref R)} {r : SRef C (.ref R)}
-    (hQ : Q.eval g ν = some r) {ei : LTm C (.val k.keyTy)} {j : k.keyTy.Denote}
+    (hQ : Q.eval g ν = some r) {ei : LTm C (.val k)} {j : k.Denote}
     (hj : (ei.eval g ν : Option _) = some j) {w : SVal (.ref R)} (hw : st.find r = some w) :
     ((boundG it rd Q ei).eval g ν : Option Bool) =
-      (Storage.inBounds it (PrimTy.key j) w).map fun _ => true := by
+      (Storage.inBounds it j w).map fun _ => true := by
   cases it with
   | map => rfl
   | arr a =>
@@ -1780,10 +1774,10 @@ theorem pathAtIn_core {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (S 
     (st? : Option (Storage C)) (hok : (S.ok.eval g ν : Option Bool) = st?.map (fun _ => true))
     (hrd : ∀ st, st? = some st → SRd.Rep g ν S.rd st)
     {e : Option (LTm C (.val .bool) × SPath C (.ref R))} {q : LTm C (.path (.ref R))}
-    (hP : PRep g ν e q) {ei i : LTm C (.val k.keyTy)}
-    (hi : (ei.eval g ν : Option k.keyTy.Denote) = i.eval g ν) {t : LTm C (.path V)}
+    (hP : PRep g ν e q) {ei i : LTm C (.val k)}
+    (hi : (ei.eval g ν : Option k.Denote) = i.eval g ν) {t : LTm C (.path V)}
     (ev : (t.eval g ν : Option (SRef C V)) = st?.bind fun st =>
-      (q.eval g ν : Option (SRef C _)).bind fun r => (i.eval g ν : Option k.keyTy.Denote).bind
+      (q.eval g ν : Option (SRef C _)).bind fun r => (i.eval g ν : Option k.Denote).bind
         fun j => st.atT it r j) :
     PRep g ν (pathAtIn it S e ei) t := by
   intro gd P' he
@@ -1805,7 +1799,7 @@ theorem pathAtIn_core {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (S 
         | none => rfl
         | some r =>
           rw [hi]
-          cases hj : (i.eval g ν : Option k.keyTy.Denote) with
+          cases hj : (i.eval g ν : Option k.Denote) with
           | none => rfl
           | some j =>
             simp only [Option.map_some, Option.bind_some]
@@ -1820,7 +1814,7 @@ theorem pathAtIn_core {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (S 
               rw [boundG_eval g ν it S.rd st (hrd st rfl) (hPe r hq) (hi.trans hj) hf]
               show _ = Option.map _ (Option.map _ ((some w).bind _))
               rw [Option.bind_some]
-              cases Storage.inBounds it (PrimTy.key j) w <;> rfl
+              cases Storage.inBounds it j w <;> rfl
     · intro r' ht
       rw [ev] at ht
       simp only [Option.bind_eq_some_iff, atT_eq, Option.map_eq_some_iff] at ht
@@ -1875,6 +1869,7 @@ theorem pathNext_core {E : Ty} (S : SFun C) (st? : Option (Storage C))
         show some (r.append (.at (uintOfNat (st.obs.len (.ref r))).1 .nil)) = _
         rw [len_obs st r hw, uintOfNat_val (n := (SVal.array el sh hn).view.n) hn, SRef.index,
           Path.index_dyn]
+        rfl
 
 /-- A word stored, eliminated. -/
 theorem sval_rep {p : PrimTy} {x ex : LTm C (.val p)}
@@ -2372,8 +2367,8 @@ theorem ElimM.kite_rep {p : PrimTy} {ea eb a b : LTm C (.val p)}
 
 theorem pathIdx_rep {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
     {e : Option (LTm C (.val .bool) × SPath C (.ref R))} {q : LTm C (.path (.ref R))}
-    (hP : PRep g ν e q) {ei i : LTm C (.val k.keyTy)}
-    (hi : (ei.eval g ν : Option k.keyTy.Denote) = i.eval g ν) :
+    (hP : PRep g ν e q) {ei i : LTm C (.val k)}
+    (hi : (ei.eval g ν : Option k.Denote) = i.eval g ν) :
     PRep g ν (pathIdx it e ei) (.index it q i) := by
   intro gd P' he
   cases e with

@@ -50,7 +50,7 @@ partial def extDepth (e : Expr) : MetaM Nat := do
 /-- The lowering functions (`Calculus/Lower.lean`). -/
 def lowerFns : List Lean.Name :=
   [``Simple.lower, ``SPath.lower, ``Loc.lower, ``MPath.lower, ``MLoc.lower, ``Val.lower,
-    ``Src.lower, ``MSrc.lower, ``Simple.keyLower, ``Val.keyLower]
+    ``Src.lower, ``MSrc.lower]
 
 /-- A part of the program or a term, read with one local more on top:
 `Val.up` and its kin (the one other `Solidity` name ending in `up` is a

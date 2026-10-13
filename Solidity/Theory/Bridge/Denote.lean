@@ -101,7 +101,7 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .len, _, _, ds, dp => lenW (ds.len dp)
   | .read, x, y, _, _ => Op2.eval g .read x y
   | .mlen, x, y, _, _ => Op2.eval g .mlen x y
-  | .at it, _, _, dp, di => ObsLoc.app dp (Path.index it (PrimTy.key (di.getD (PrimTy.dflt _))))
+  | .at it, _, _, dp, di => ObsLoc.app dp (Path.index it (di.getD (PrimTy.dflt _)))
   | .nextIn, _, _, ds, dp => ObsLoc.app dp (.at (ds.len dp : Int) .nil)
   | .delAt, _, _, ds, dp => ds.delAt dp
   | .pushSlot, _, _, ds, dp => ds.extend dp
@@ -127,7 +127,7 @@ def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.T
   | .ite, dc, da, db => dc.bind fun x => cond x da db
   | .save, ds, dp, dv => ds.copyTo dp dv
   | .push, ds, dp, dv => ds.push dp (TVal.strip dv)
-  | .atIn it, _, dp, di => ObsLoc.app dp (Path.index it (PrimTy.key (di.getD (PrimTy.dflt _))))
+  | .atIn it, _, dp, di => ObsLoc.app dp (Path.index it (di.getD (PrimTy.dflt _)))
   | .write, _, _, _ => ()
   | .saveIn, ds, dp, dv => ds.copyTo dp dv
 
@@ -193,7 +193,7 @@ theorem Storage.full_of_push {C : Contract} {E : Ty} {st st' : Storage C}
 
 /-- A push as a place that returns had room. -/
 theorem Storage.full_of_pushPlace {C : Contract} {E : Ty} {st : Storage C}
-    {r : SRef C (.ref (.array E))} {q : Storage C × Nat}
+    {r : SRef C (.ref (.array E))} {q : Storage C × PrimTy.uint.Denote}
     (h : st.pushPlace r = some q) : st.full r = false := by
   unfold Storage.pushPlace at h
   unfold Storage.full

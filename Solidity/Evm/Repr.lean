@@ -82,9 +82,9 @@ inductive ReprAt (st : WordStore) (L : Nat) : (T : Ty) → Slot → SVal T → P
   | fixed {E : Ty} {k : Nat} {s : Slot} {e : SVec E k} :
       (∀ i x, e.toList[i]? = some x → ReprAt st L E (s.add (i * size E)) x) →
       ReprAt st L (.ref (.fixed E k)) s (.fixed e)
-  | map {K : PrimTy} {V : Ty} {s : Slot} {m : SMap V} {d : SVal V} :
+  | map {K : PrimTy} {V : Ty} {s : Slot} {m : SMap K V} {d : SVal V} :
       (K = .uint → ∀ k : Nat, k < W →
-        ReprAt st L V (.hash k s 0) ((lookupBy (k : Int) m.toList).getD d)) →
+        ReprAt st L V (.hash k s 0) ((lookupBy (k : Int) m.hashed).getD d)) →
       ReprAt st L (.ref (.mapping K V)) s (.map m d)
 
 /-- A representation looks only at the slots the value occupies.
@@ -137,8 +137,8 @@ inductive PathAt : Bool → {T U : Ty} → Path T U → Slot → Slot → Prop
   | field {a : Bool} {n f : Name} {T U : Ty} {h : lookupBy f (structDef n) = some T}
       {p : Path T U} {s s' : Slot} :
       PathAt a p (s.add (offset n f)) s' → PathAt a (Path.field h p) s s'
-  | key {a : Bool} {V U : Ty} {k : Int} {p : Path V U} {s s' : Slot} :
-      0 ≤ k → k < W → PathAt a p (.hash k.toNat s 0) s' →
+  | key {a : Bool} {V U : Ty} {k : PrimTy.uint.Denote} {p : Path V U} {s s' : Slot} :
+      0 ≤ k.1 → k.1 < W → PathAt a p (.hash k.1.toNat s 0) s' →
       PathAt a (Path.key (K := .uint) k p) s s'
   | elem {E U : Ty} {i : Int} {p : Path E U} {s s' : Slot} :
       0 ≤ i → i < W → PathAt false p (.data s (i.toNat * size E)) s' →
@@ -199,24 +199,24 @@ theorem field {a : Bool} {n f : Name} {T : Ty} {r : SRef C (.ref (.struct n))} {
 
 /-- `b[k]` of a `uint`-keyed mapping is at `keccak(k, b)`. -/
 theorem key {a : Bool} {V : Ty} {r : SRef C (.ref (.mapping .uint V))} {s : Slot}
-    (hp : PathSlot C a r s) {k : Int} (h0 : 0 ≤ k) (h1 : k < W) :
-    PathSlot C a (r.index .map k) (.hash k.toNat s 0) := by
+    (hp : PathSlot C a r s) {k : PrimTy.uint.Denote} (h0 : 0 ≤ k.1) (h1 : k.1 < W) :
+    PathSlot C a (r.index .map k) (.hash k.1.toNat s 0) := by
   unfold PathSlot SRef.index SRef.append
   rw [Path.index_map]
   exact PathAt.trans hp (.key h0 h1 .nil)
 
 /-- `b[i]` of a dynamic array is at `keccak(b) + i·size`. -/
 theorem elem {E : Ty} {r : SRef C (.ref (.array E))} {s : Slot}
-    (hp : PathSlot C false r s) {i : Int} (h0 : 0 ≤ i) (h1 : i < W) :
-    PathSlot C false (r.index (.arr .dyn) i) (.data s (i.toNat * size E)) := by
+    (hp : PathSlot C false r s) {i : PrimTy.uint.Denote} (h0 : 0 ≤ i.1) (h1 : i.1 < W) :
+    PathSlot C false (r.index (.arr .dyn) i) (.data s (i.1.toNat * size E)) := by
   unfold PathSlot SRef.index SRef.append
   rw [Path.index_dyn]
   exact PathAt.trans hp (.elem h0 h1 .nil)
 
 /-- `b[i]` of a fixed-size array is at `b + i·size`. -/
 theorem felem {E : Ty} {n : Nat} {r : SRef C (.ref (.fixed E n))} {s : Slot}
-    (hp : PathSlot C false r s) {i : Int} (h0 : 0 ≤ i) (h1 : i < n) :
-    PathSlot C false (r.index (.arr .fixed) i) (s.add (i.toNat * size E)) := by
+    (hp : PathSlot C false r s) {i : PrimTy.uint.Denote} (h0 : 0 ≤ i.1) (h1 : i.1 < n) :
+    PathSlot C false (r.index (.arr .fixed) i) (s.add (i.1.toNat * size E)) := by
   unfold PathSlot SRef.index SRef.append
   rw [Path.index_fixed]
   exact PathAt.trans hp (.felem h0 h1 .nil)
@@ -236,7 +236,8 @@ theorem PathAt.occ {a : Bool} {T U : Ty} {p : Path T U} {s s' : Slot} (hp : Path
 /-! ## Reading -/
 
 /-- A mapping's entry, live: the entry written, or the mapping's default. -/
-theorem findLiveM_key {K : PrimTy} {V U : Ty} (m : SMap V) (d : SVal V) (k : Int) (p : Path V U) :
+theorem findLiveM_key {K : PrimTy} {V U : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote)
+    (p : Path V U) :
     (SVal.map (K := K) m d).findLiveM (.key k p) =
       ((lookupBy k m.toList).getD d).findLiveM p := by
   simp only [SVal.findLiveM]
@@ -261,8 +262,9 @@ theorem ReprAt.findLive {st : WordStore} {a : Bool} {T U : Ty} {p : Path T U} {s
     cases hv with
     | @map _ _ _ m d hall =>
       rw [findLiveM_key]
-      have := hall rfl k.toNat (by omega)
-      rw [Int.toNat_of_nonneg h0] at this
+      have := hall rfl k.1.toNat (by omega)
+      rw [Int.toNat_of_nonneg h0, show (k.1 : Int) = PrimTy.key k from rfl,
+        SMap.lookupBy_hashed] at this
       exact ih this
   | @elem E U i p s s' h0 h1 _ ih =>
     intro v hv
@@ -339,20 +341,24 @@ theorem ReprAt.save {st st' : WordStore} {a : Bool} {T U : Ty} {p : Path T U} {s
     | @map _ _ _ m d hall =>
       obtain ⟨old, hold⟩ := hfind
       rw [findLiveM_key] at hold
-      have hcur := hall rfl k.toNat (by omega)
-      rw [Int.toNat_of_nonneg h0] at hcur
+      have hcur := hall rfl k.1.toNat (by omega)
+      rw [Int.toNat_of_nonneg h0, show (k.1 : Int) = PrimTy.key k from rfl,
+        SMap.lookupBy_hashed] at hcur
       obtain ⟨x', hx', hrep⟩ := ih hcur ⟨old, hold⟩ hnew hout
       refine ⟨.map (.ofList (setBy k x' m.toList)) d, ?_, .map fun _ k' hk' => ?_⟩
       · simp only [SVal.saveM]
         cases hl : lookupBy k m.toList <;> rw [hl] at hx' <;> simp only [Option.getD] at hx' <;>
           simp only [hx'] <;> rfl
-      · rw [SMap.toList_ofList]
-        by_cases hkk : (k' : Int) = k
-        · have : k' = k.toNat := by omega
+      · rw [SMap.hashed_ofList_setBy, SMap.ofList_toList]
+        by_cases hkk : (k' : Int) = PrimTy.key k
+        · have : k' = k.1.toNat := by
+            have : (k' : Int) = k.1 := hkk
+            omega
           subst this
           rw [hkk, lookupBy_setBy_self]
           exact hrep
-        · rw [lookupBy_setBy_ne hkk]
+        · have hkk' : (k' : Int) ≠ k.1 := hkk
+          rw [lookupBy_setBy_ne hkk]
           exact (hall rfl k' hk').frame fun y hy => hout y fun hy' =>
             occ_entries_disjoint (by omega) hy (hp.occ hy')
   | @elem E U i p s s' h0 h1 hp ih =>
@@ -906,9 +912,10 @@ theorem ReprAt.live_mono {st st' : WordStore} {L' : Nat} {a : Bool} {T U : Ty} {
       cases hv' with
       | map hall' =>
         rw [findLiveM_key] at hw ⊢
-        have e1 := hall rfl k.toNat (by omega)
-        have e2 := hall' rfl k.toNat (by omega)
-        rw [Int.toNat_of_nonneg h0] at e1 e2
+        have e1 := hall rfl k.1.toNat (by omega)
+        have e2 := hall' rfl k.1.toNat (by omega)
+        rw [Int.toNat_of_nonneg h0, show (k.1 : Int) = PrimTy.key k from rfl,
+          SMap.lookupBy_hashed] at e1 e2
         exact ih e1 e2 (fun x hx => hlen x (.entry _ hx)) hw
   | @elem E U i p s s' h0 h1 _ ih =>
     intro v v' hv hv' hlen hw
@@ -981,7 +988,8 @@ theorem dfltBelow_repr (hL : 0 < L) : ∀ (k : Nat) (T : Ty) (h : tyRank T < k) 
       exact dfltBelow_repr hL (k + 1) E (by simp only [tyRank] at h; omega) _
     · cases hx
   | k + 1, .ref (.mapping K V), h, _ => .map fun _ k' _ => by
-    rw [SMap.toList_nil]
+    rw [show (SMap.nil : SMap K V).hashed = [] by
+      simp only [SMap.hashed, SMap.toList_nil, List.map_nil]]
     exact dfltBelow_repr hL (k + 1) V (by simpa only [tyRank] using h) _
 termination_by k T => (k, sizeOf T)
 

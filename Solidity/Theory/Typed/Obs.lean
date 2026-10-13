@@ -155,7 +155,8 @@ theorem split_of_labels {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Sem
     | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | key k' q =>
       simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
-      obtain ⟨rfl, h⟩ := h
+      obtain ⟨hk, h⟩ := h
+      obtain rfl := PrimTy.key_inj hk
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_key _ p r).symm, hr⟩
 
@@ -1856,8 +1857,8 @@ theorem obs_push_slot {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E)
   rw [obs_save hs, Obs.extend, obs_find_some hf, obs_extendArr e sh hn h']
 
 /-- **The bridge of `extend`** (`pushPlace`). -/
-theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {k : Nat}
-    (h : st.pushPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) := by
+theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) := by
   unfold Storage.pushPlace at h
   cases hf : st.find r with
   | none => simp only [hf, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h

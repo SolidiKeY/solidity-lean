@@ -52,12 +52,6 @@ def Simple.lower : {p : PrimTy} → Simple C Γ p → Tm C Γ (.val p)
   | _, .local i => .pvV i
   | _, .env k hp => Tm.castV hp.symm (.app0 (.env k))
 
-/-- An index as the word it is hashed as (`Tm.keyAt`). -/
-def Tm.keyAt : (k : PrimTy) → Tm C Γ (.val k) → Tm C Γ (.val k.keyTy)
-  | .bool, t => .app3 .ite t (.app0 (.lit (p := .uint) ⟨1, rfl⟩))
-      (.app0 (.lit (p := .uint) ⟨0, rfl⟩))
-  | .uint, t => t
-  | .int, t => t
 
 /-- The sort a memory path lowers to: an identity at a reference, an address
 at a word (which holds no identity: the module docstring). -/
@@ -80,7 +74,7 @@ def SPath.lower : {T : Ty} → SPath C Γ T → Tm C Γ (.path T)
 def Loc.lower : {T : Ty} → Loc C Γ T → Tm C Γ (.path T)
   | _, .root r h => .app0 (.root r h)
   | _, .field b _ h => .app1 (.field h) b.lower
-  | _, .index (k := k) it b i => .app2 (.at it) b.lower (Tm.keyAt k i.lower)
+  | _, .index it b i => .app2 (.at it) b.lower i.lower
 
 def MPath.lower : {T : Ty} → MPath C Γ T → Tm C Γ T.mpathSrt
   | _, .var i _ => .pvI i
@@ -101,13 +95,6 @@ def Val.lower : {p : PrimTy} → Val C Γ p → Tm C Γ (.val p)
   | _, .mlen b hp => Tm.castV hp.symm (.app2 .mlen (.app0 .memory) b.lower)
 
 end
-
-/-- An index's term: the word its key is hashed as (`Tm.keyAt`), what
-`Loc.lower` writes; a rule names it so, and it prints as the index. -/
-@[reducible] def Simple.keyLower {k : PrimTy} (s : Simple C Γ k) : Tm C Γ (.val k.keyTy) :=
-  Tm.keyAt k s.lower
-@[reducible] def Val.keyLower {k : PrimTy} (v : Val C Γ k) : Tm C Γ (.val k.keyTy) :=
-  Tm.keyAt k v.lower
 
 /-- A write's source as a storage value. -/
 def Src.lower {T : Ty} : Src C Γ T → Tm C Γ (.sv T)

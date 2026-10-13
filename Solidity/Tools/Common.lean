@@ -49,7 +49,7 @@ bounds on a mapping's entries and a dynamic array's length (drawn below
 them). -/
 structure TGen where
   prim : (p : PrimTy) → Gen p.Denote
-  key : PrimTy → Option (Gen Int)
+  key : (p : PrimTy) → Option (Gen p.Denote)
   entries : Nat := 4
   length : Nat := 3
 
@@ -69,7 +69,7 @@ def TGen.fields (f : (T : Ty) → Gen (SVal T)) :
     pure (.cons v (← TGen.fields f fs))
 
 /-- A mapping's entries, in the order written. -/
-def TGen.smap {V : Ty} : List (Int × SVal V) → SMap V
+def TGen.smap {K : PrimTy} {V : Ty} : List (K.Denote × SVal V) → SMap K V
   | [] => .nil
   | (k, v) :: es => .cons k v (TGen.smap es)
 
@@ -92,10 +92,10 @@ def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (SVal T)
   | k + 1, .ref (.mapping K V) => do
     let some key := g.key K | return .map .nil (SVal.dflt V)
     let n ← randBelow g.entries
-    let mut es : List (Int × SVal V) := []
+    let mut es : List (K.Denote × SVal V) := []
     for _ in [0:n] do
       let x ← key
-      if (es.find? (·.1 == x)).isNone then es := es ++ [(x, ← g.sval k V)]
+      if (es.find? (fun e => decide (e.1 = x))).isNone then es := es ++ [(x, ← g.sval k V)]
     pure (.map (TGen.smap es) (SVal.dflt V))
   | k + 1, .ref (.struct s) => do pure (.struct (← TGen.fields (g.sval k) (structDef s)))
   | k + 1, .ref (.array E) => do

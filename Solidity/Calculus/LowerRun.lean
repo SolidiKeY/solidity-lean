@@ -109,30 +109,6 @@ theorem Simple.denote_lowerT {p : PrimTy} (s : Simple C Γ p) :
     s.lower.denote σ = some (s.evalT σ) :=
   Tm.denote_eval σ s.lower _ (Simple.lower_evalT σ s)
 
-/-- The word a key is hashed as, at its key type (`Tm.keyAt`). -/
-def PrimTy.keyWord : {k : PrimTy} → k.Denote → k.keyTy.Denote
-  | .bool, b => (cond (b : Bool) ⟨1, rfl⟩ ⟨0, rfl⟩ : PrimTy.uint.Denote)
-  | .uint, n => n
-  | .int, n => n
-
-theorem PrimTy.key_keyWord : {k : PrimTy} → (v : k.Denote) → PrimTy.key (PrimTy.keyWord v) = PrimTy.key v
-  | .bool, b => by cases b <;> rfl
-  | .uint, _ | .int, _ => rfl
-
-/-- An index's term reads the word its key is hashed as. -/
-theorem Tm.keyAt_eval {k : PrimTy} (t : Tm C Γ (.val k)) :
-    (Tm.keyAt k t).eval σ = (t.eval σ).map PrimTy.keyWord := by
-  cases k with
-  | uint | int =>
-    show t.eval σ = _
-    cases t.eval σ <;> rfl
-  | bool =>
-    show (Tm.app3 .ite t _ _).eval σ = _
-    rw [Tm.eval_app3, Op3.eval_eq_evalM]
-    cases t.eval σ with
-    | none => rfl
-    | some b => cases b <;> rfl
-
 mutual
 
 theorem SPath.lower_resolveT : {T : Ty} → (b : SPath C Γ T) →
@@ -153,17 +129,16 @@ theorem Loc.lower_resolveT : {T : Ty} → (l : Loc C Γ T) →
     show TRes.AgreesO id ((fun r => r.field h) <$> b.resolveT σ) ((b.lower.eval σ).map (·.field h))
     exact TRes.AgreesO.map (SPath.lower_resolveT b) fun _ => rfl
   | _, .index (k := k) it b i => by
-    show TRes.AgreesO id _ ((Tm.app2 (.at it) b.lower (Tm.keyAt k i.lower)).eval σ)
-    rw [Tm.eval_app2, Op2.eval_eq_evalM, Tm.keyAt_eval]
+    show TRes.AgreesO id _ ((Tm.app2 (.at it) b.lower i.lower).eval σ)
+    rw [Tm.eval_app2, Op2.eval_eq_evalM]
     show TRes.AgreesO id _ ((b.lower.eval σ).bind fun r =>
-      ((i.lower.eval σ).map PrimTy.keyWord).bind fun y => σ.storage.atT it r y)
+      (i.lower.eval σ).bind fun y => σ.storage.atT it r y)
     refine TRes.AgreesO.bind (SPath.lower_resolveT b) fun r => ?_
-    rw [Option.bind_map]
     refine TRes.AgreesO.bind (Val.lower_evalT i) fun x => ?_
-    show TRes.AgreesO id (TRes.ofOpt (σ.storage.checkIndex r it (PrimTy.key x)) >>= fun _ =>
-      pure (r.atKey it x)) (σ.storage.atT it r (PrimTy.keyWord x))
-    simp only [Storage.atT, PrimTy.key_keyWord, SRef.atKey]
-    cases σ.storage.checkIndex r it (PrimTy.key x) <;> rfl
+    show TRes.AgreesO id (TRes.ofOpt (σ.storage.checkIndex r it x) >>= fun _ =>
+      pure (r.index it x)) (σ.storage.atT it r x)
+    simp only [Storage.atT]
+    cases σ.storage.checkIndex r it x <;> rfl
 
 theorem MPath.lower_mvalT : {R : RefTy} → (b : MPath C Γ (.ref R)) →
     TRes.AgreesO (fun r : HRef σ.H R => r.id) (b.mvalT σ) (b.lower.eval σ)

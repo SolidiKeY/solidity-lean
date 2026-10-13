@@ -38,7 +38,7 @@ mapping's keys in their key type's range. -/
 def bndH : Hered where
   arr := fun {_} {n} _ sh => n + sh.length < 2 ^ 256
   fix _ _ := True
-  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk e.1
+  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
 
 /-- `v` bounded. -/
 abbrev SVal.Bnd {T : Ty} (v : SVal T) : Prop := v.All bndH
@@ -162,7 +162,7 @@ def FixedFits (C : Contract) : Prop := ∀ nt ∈ C.vars, FixedFitsAt nt.2
 theorem fixedFits_mono : fitsH.Mono bndH FixedFitsAt :=
   ⟨fun _ hT _ hm E n p => hT E n (.field (lookupBy_of_nodup (structDef_nodup _) hm) p),
     fun _ hT E n p => hT E n (.at 0 p), fun _ _ hT E n p => hT E n (.atF 0 p),
-    fun _ _ hT E n p => hT E n (.key 0 p),
+    fun _ _ hT E n p => hT E n (.key (PrimTy.dflt _) p),
     fun _ _ _ _ h => h, fun E n hT _ => hT E n .nil, fun _ _ _ h => h⟩
 
 /-- A bounded value fits, its fixed sizes within `2^256`. -/

@@ -74,7 +74,7 @@ def mapKeysFold : Fold where
   F _ := List Nat
   L _ := List Nat
   W _ _ := List Nat
-  M _ := List Nat × List Nat
+  M _ _ := List Nat × List Nat
   prim _ := []
   struct _ r := r
   array _ _ _ w l := w ++ l
@@ -88,6 +88,7 @@ def mapKeysFold : Fold where
   wcons _ _ v r := v ++ r
   mnil := ([], [])
   mcons k _ _ v r :=
+    let k := PrimTy.key k
     ((if 0 ≤ k ∧ k < (W : Int) then [k.toNat] else []) ++ r.1, v ++ r.2)
 
 /-- The mapping keys a storage holds anywhere, as words. -/
@@ -108,7 +109,7 @@ def encodeFold (keys : List Nat) : Fold where
   F _ := (Name → Slot) → List (Slot × Nat)
   L _ := Unit
   W _ _ := (Nat → Slot) → Nat → List (Slot × Nat)
-  M _ := List (Int × (Slot → List (Slot × Nat)))
+  M _ _ := List (Int × (Slot → List (Slot × Nat)))
   prim {p} v s := match p, v with
     | .uint, n => [(s, n.1.toNat)]
     | .bool, b => [(s, bword b)]
@@ -128,7 +129,7 @@ def encodeFold (keys : List Nat) : Fold where
   wnil _ _ := []
   wcons _ _ v r slot i := v (slot i) ++ r slot (i + 1)
   mnil := []
-  mcons k _ _ v r := (k, v) :: r
+  mcons k _ _ v r := (PrimTy.key k, v) :: r
 
 /-- The whole storage laid out: every root of the contract at `rootSlot`. -/
 def encodeStorage (C : Contract) (keys : List Nat) (st : Storage C) : List (Slot × Nat) :=
@@ -179,7 +180,8 @@ def diffGen : TGen where
   prim p := genVal p
   key
     | .uint => some do
-      if (← randBelow 8) < 7 then pure ((← randBelow 4 : Nat) : Int) else pure (W - 1 : Nat)
+      if (← randBelow 8) < 7 then pure (PrimTy.ofIntD .uint (← randBelow 4 : Nat))
+      else pure (PrimTy.ofIntD .uint (W - 1 : Nat))
     | _ => none
   entries := 4
   length := 4

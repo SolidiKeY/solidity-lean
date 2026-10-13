@@ -129,7 +129,7 @@ namespace Tms
 @[reducible] def PTerm.field {s : Name} {T : Ty} (q : Tm C Γ (.path (.ref (.struct s)))) (f : Name)
     (h : C.fieldType s f = some T) : Tm C Γ (.path T) := .app1 (.field h) q
 @[reducible] def PTerm.at {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k.keyTy)) : Tm C Γ (.path V) :=
+    (q : Tm C Γ (.path (.ref R))) (i : Tm C Γ (.val k)) : Tm C Γ (.path V) :=
   .app2 (.at it) q i
 @[reducible] def PTerm.next {E : Ty} (q : Tm C Γ (.path (.ref (.array E)))) : Tm C Γ (.path E) :=
   .app1 .next q

@@ -639,7 +639,7 @@ theorem findM_field {s f : Name} {T : Ty} (h : Semantics.lookupBy f (Semantics.s
   cases v
   simp only [SVal.findM, SVal.findM_nil', Option.isSome_some]
 
-theorem findM_key {K : PrimTy} {V : Ty} (k : Int) (v : SVal (.ref (.mapping K V))) :
+theorem findM_key {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal (.ref (.mapping K V))) :
     (v.findM (.key k .nil)).isSome = true := by
   cases v
   simp only [SVal.findM]
@@ -648,8 +648,8 @@ theorem findM_key {K : PrimTy} {V : Ty} (k : Int) (v : SVal (.ref (.mapping K V)
 /-- `has` at an entry: a mapping's where its base has one, its key
 returning. -/
 def hasIdx {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (q : LTm C (.path (.ref R)))
-    (i : LTm C (.val k.keyTy)) : LTm C (.val .bool) :=
-  @IndexTy.casesOn (fun R k V _ => LTm C (.path (.ref R)) → LTm C (.val k.keyTy) → LTm C (.val .bool))
+    (i : LTm C (.val k)) : LTm C (.val .bool) :=
+  @IndexTy.casesOn (fun R k V _ => LTm C (.path (.ref R)) → LTm C (.val k) → LTm C (.val .bool))
     R k V it (fun {_} {_} q i => seqL i (.obsH q)) (fun a q i => .obsH (.index (.arr a) q i)) q i
 
 /-- `has` at a path on a typed storage, one step up: a root has a
@@ -774,12 +774,12 @@ theorem findM_atF_isSome {E : Ty} {n : Nat} (v : SVal (.ref (.fixed E n))) {i : 
 
 /-- `has` at a dynamic array's index the ranges put below its length. -/
 def Facts.hasIdxDyn (F : Facts C) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
-    (q : LTm C (.path (.ref R))) (i : LTm C (.val k.keyTy)) : LTm C (.val .bool) :=
+    (q : LTm C (.path (.ref R))) (i : LTm C (.val k)) : LTm C (.val .bool) :=
   @IndexTy.casesOn
-    (fun R k V _ => LTm C (.path (.ref R)) → LTm C (.val k.keyTy) → LTm C (.val .bool))
+    (fun R k V _ => LTm C (.path (.ref R)) → LTm C (.val k) → LTm C (.val .bool))
     R k V it (fun {_} {_} q i => .obsH (.index .map q i))
     (fun a => @ArrTy.casesOn
-      (fun R E a => LTm C (.path (.ref R)) → LTm C (.val PrimTy.uint.keyTy) → LTm C (.val .bool))
+      (fun R E a => LTm C (.path (.ref R)) → LTm C (.val PrimTy.uint) → LTm C (.val .bool))
       _ _ a
       (fun {_} q i =>
         if (F.range i).2 < (F.range (.obsL q)).1 then
@@ -791,14 +791,14 @@ def Facts.hasIdxDyn (F : Facts C) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexT
         else .obsH (.index (.arr .fixed) q i))) q i
 
 theorem Facts.hasDyn_core {F : Facts C} (hF : F.Ok g ν) {E : Ty}
-    {q : LTm C (.path (.ref (.array E)))} {i : LTm C (.val PrimTy.uint.keyTy)}
+    {q : LTm C (.path (.ref (.array E)))} {i : LTm C (.val PrimTy.uint)}
     (hlt : (F.range i).2 < (F.range (.obsL q)).1) :
     ((i.eval g ν : Option PrimTy.uint.Denote).bind fun _ =>
       ((LTm.obsL q).eval g ν : Option PrimTy.uint.Denote).bind fun _ =>
         (LTm.tt.eval g ν : Option Bool)) =
     (((q.eval g ν : Option (SRef C (.ref (.array E)))).bind fun r =>
       (i.eval g ν : Option PrimTy.uint.Denote).bind fun j =>
-        some (r.index (IndexTy.arr ArrTy.dyn) (PrimTy.key j))).bind fun r =>
+        some (r.index (IndexTy.arr ArrTy.dyn) j)).bind fun r =>
           some (g.storage.obs.has (.ref r))) := by
   cases hi : (i.eval g ν : Option PrimTy.uint.Denote) with
   | none => cases (q.eval g ν : Option (SRef C _)) <;> rfl
@@ -814,7 +814,7 @@ theorem Facts.hasDyn_core {F : Facts C} (hF : F.Ok g ν) {E : Ty}
       unfold InR at ri rl
       rw [ival_uintOfNat (obs_len_lt' _ _)] at rl
       have hk : 0 ≤ PrimTy.ival k := (PrimTy.ival_mem k).1
-      have hkey : PrimTy.key k = PrimTy.ival k := rfl
+      have hkey : k.val = PrimTy.ival k := rfl
       simp only [Option.bind_some, hl, SRef.index, Path.index_dyn]
       rw [has_below g.storage r (by rw [hkey]; exact hk) (by rw [hkey]; omega)]
       rfl
@@ -852,7 +852,7 @@ theorem Facts.hasRange_eval {F : Facts C} (hF : F.Ok g ν) (t : LTm C (.val .boo
                   have ri := F.range_sound hF i hi
                   unfold InR at ri
                   have hk : 0 ≤ PrimTy.ival k := (PrimTy.ival_mem k).1
-                  have hkey : PrimTy.key k = PrimTy.ival k := rfl
+                  have hkey : k.val = PrimTy.ival k := rfl
                   simp only [Option.bind_some, SRef.index, Path.index_fixed]
                   rw [has_append g.storage r _ fun v => findM_atF_isSome v (by rw [hkey]; exact hk)
                     (by rw [hkey]; omega)]

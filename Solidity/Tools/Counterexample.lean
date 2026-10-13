@@ -507,13 +507,16 @@ def genCandidate (C : Contract) (lits : List Int) (ps : List (String × PrimTy))
   let args ← ps.mapM fun (n, p) => do pure (n, ← pickD (.ofTyped (PrimTy.dflt p)) (dom p))
   let sender ← pickD 1 ([1, 2] ++ uintPool lits)
   let argInts := args.filterMap fun (_, v) => v.num?
-  let keys : PrimTy → List Int := fun
-    | .bool => [0, 1]
-    | .uint => (uintPool lits ++ (sender :: argInts).filter (0 ≤ ·)).eraseDups
-    | .int => (intPool lits ++ sender :: argInts).eraseDups
+  let keys : (p : PrimTy) → List p.Denote := fun
+    | .bool => ([false, true] : List Bool)
+    | .uint => (uintPool lits ++ (sender :: argInts).filter (0 ≤ ·)).eraseDups.filterMap
+        (PrimTy.ofInt? .uint)
+    | .int => (intPool lits ++ sender :: argInts).eraseDups.filterMap (PrimTy.ofInt? .int)
   let g : TGen :=
     { prim := fun p => pickD (PrimTy.dflt p) (poolDom lits p)
-      key := fun K => if (keys K).isEmpty then none else some (pickD 0 (keys K)) }
+      key := fun K => match keys K with
+        | [] => none
+        | k :: _ => some (pickD k (keys K)) }
   let st ← g.storage C
   let value ← if payable then pickD 0 (uintPool lits) else pure 0
   let time ← pickD 0 (uintPool lits)
@@ -540,7 +543,7 @@ def intsFold : Fold where
   F _ := List Int
   L _ := List Int
   W _ _ := List Int
-  M _ := List Int
+  M _ _ := List Int
   prim v := (PrimTy.num? v).toList
   struct _ r := r
   array _ _ _ w l := w ++ l
@@ -553,7 +556,7 @@ def intsFold : Fold where
   wnil := []
   wcons _ _ v r := v ++ r
   mnil := []
-  mcons k _ _ v r := k :: v ++ r
+  mcons k _ _ v r := PrimTy.key k :: v ++ r
 
 /-- `v` renamed `s`, keys and words alike (a word only where `s` is in its
 type's range). -/
@@ -575,10 +578,10 @@ def renameFold (v s : Int) : Fold where
   wnil := .nil
   wcons _ _ x r := .cons x r
   mnil := .nil
-  mcons k _ _ x r := .cons (if k = v then s else k) x r
+  mcons {K _} k _ _ x r := .cons (if PrimTy.num? k = some v then (PrimTy.ofInt? K s).getD k else k) x r
 
 /-- A mapping with each of its entries dropped in turn. -/
-def SMap.drops {V : Ty} : SMap V → List (SMap V)
+def SMap.drops {K : PrimTy} {V : Ty} : SMap K V → List (SMap K V)
   | .nil => []
   | .cons k x rest => rest :: (SMap.drops rest).map (.cons k x)
 
@@ -1026,7 +1029,7 @@ def quoteFold : Fold where
   F _ := Expr
   L _ := Expr
   W _ _ := Expr
-  M _ := Expr
+  M _ _ := Expr
   prim {p} v := mkApp2 (mkConst ``Solidity.SVal.prim) (toExpr p) (quotePrim p v)
   struct {s} _ r := mkApp2 (mkConst ``Solidity.SVal.struct) (toExpr s) r
   array {E n} _ _ _ w l := mkApp4 (mkConst ``Solidity.SVal.arrayOf) (toExpr E) (toExpr n) w l
@@ -1039,8 +1042,8 @@ def quoteFold : Fold where
   lcons {E} _ _ v r := mkApp3 (mkConst ``SList.cons) (toExpr E) v r
   wnil {E} := mkApp (mkConst ``SVec.nil) (toExpr E)
   wcons {E n} _ _ v r := mkApp4 (mkConst ``SVec.cons) (toExpr E) (toExpr n) v r
-  mnil {U} := mkApp (mkConst ``SMap.nil) (toExpr U)
-  mcons {U} k _ _ v r := mkApp4 (mkConst ``SMap.cons) (toExpr U) (toExpr k) v r
+  mnil {K U} := mkApp2 (mkConst ``SMap.nil) (toExpr K) (toExpr U)
+  mcons {K U} k _ _ v r := mkApp5 (mkConst ``SMap.cons) (toExpr K) (toExpr U) (quotePrim K k) v r
 
 /-- A candidate as a closed term of `Cand C`, `cE` naming `C`. -/
 def Cand.quote (cE : Expr) (c : Cand C) : Expr :=

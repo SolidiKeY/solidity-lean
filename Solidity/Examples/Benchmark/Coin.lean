@@ -167,7 +167,7 @@ typed storage does not reduce in the kernel. -/
 def balanceAfter {Γ' : Ctx} (P : Prog Coin [] Γ') (a : Int) : Option Int :=
   (Contract.deployT Coin P tx).toOption.bind fun σ =>
     ((σ.storage.get (f := "balances") (T := .ref (.mapping .uint (.prim .uint))) rfl).find
-      (.key a .nil)).map fun v => v.view.1
+      (.key (PrimTy.ofIntD .uint a) .nil)).map fun v => v.view.1
 
 /-- What a deployment by `7` stores: `minter` is `7`, `balances` has no
 entry and `0` at every key. -/

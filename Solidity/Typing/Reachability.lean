@@ -134,8 +134,9 @@ def Balances.five : Storage Balances :=
 
 /-- `balances` with key `1` twice. -/
 def Balances.dup : Storage Balances :=
-  .cons (.map (.cons 1 (.prim (PrimTy.ofLit .uint 0 rfl))
-    (.cons 1 (.prim (PrimTy.ofLit .uint 1 rfl)) .nil)) (.prim (PrimTy.dflt .uint))) .nil
+  .cons (.map (.cons (PrimTy.ofLit .uint 1 rfl) (.prim (PrimTy.ofLit .uint 0 rfl))
+    (.cons (PrimTy.ofLit .uint 1 rfl) (.prim (PrimTy.ofLit .uint 1 rfl)) .nil))
+    (.prim (PrimTy.dflt .uint))) .nil
 
 /-- A mapping whose absent keys read `5`: typed, not reachable, since every
 mapping's default is its type's default. -/

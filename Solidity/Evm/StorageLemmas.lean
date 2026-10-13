@@ -144,8 +144,8 @@ theorem findLive_field {st : Solidity.Storage C} {s f : Name} {T : Ty}
 
 /-- A mapping's entry, read live: the entry written, or the default. -/
 theorem findLive_key {st : Solidity.Storage C} {k : PrimTy} {V : Ty}
-    {r : SRef C (.ref (.mapping k V))} {m : SMap V} {d : SVal V}
-    (hr : st.findLive r = some (.map m d)) (i : Int) :
+    {r : SRef C (.ref (.mapping k V))} {m : SMap k V} {d : SVal V}
+    (hr : st.findLive r = some (.map m d)) (i : k.Denote) :
     st.findLive (r.index .map i) = some ((lookupBy i m.toList).getD d) := by
   rw [SRef.index, Path.index_map, findLive_append, hr]
   show (SVal.map m d).findLiveM (.key i .nil) = _
@@ -155,43 +155,45 @@ theorem findLive_key {st : Solidity.Storage C} {k : PrimTy} {V : Ty}
 /-- A dynamic array's live element, read live. -/
 theorem findLive_elem {st : Solidity.Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {k : Nat}
     {e : SVec E k} {sh : SList E} {hk : k < 2 ^ 256} (hr : st.findLive r = some (.array e sh hk))
-    {i : Nat} {x : SVal E} (hx : e.toList[i]? = some x) :
-    st.findLive (r.index (.arr .dyn) (i : Int)) = some x := by
+    {i : PrimTy.uint.Denote} {x : SVal E} (hx : e.toList[i.1.toNat]? = some x) :
+    st.findLive (r.index (.arr .dyn) i) = some x := by
   rw [SRef.index, Path.index_dyn, findLive_append, hr]
-  show (SVal.array e sh hk).findLiveM (.at (i : Int) .nil) = _
-  simp only [SVal.findLiveM, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast, hx]
+  show (SVal.array e sh hk).findLiveM (.at i.1 .nil) = _
+  simp only [SVal.findLiveM, PrimTy.uint_nonneg i, ↓reduceIte, hx]
 
 /-- A fixed-size array's element, read live. -/
 theorem findLive_felem {st : Solidity.Storage C} {E : Ty} {n : Nat}
     {r : SRef C (.ref (.fixed E n))} {e : SVec E n} (hr : st.findLive r = some (.fixed e))
-    {i : Nat} {x : SVal E} (hx : e.toList[i]? = some x) :
-    st.findLive (r.index (.arr .fixed) (i : Int)) = some x := by
+    {i : PrimTy.uint.Denote} {x : SVal E} (hx : e.toList[i.1.toNat]? = some x) :
+    st.findLive (r.index (.arr .fixed) i) = some x := by
   rw [SRef.index, Path.index_fixed, findLive_append, hr]
-  show (SVal.fixed e).findLiveM (.atF (i : Int) .nil) = _
-  simp only [SVal.findLiveM, Int.natCast_nonneg, ↓reduceIte, Int.toNat_natCast, hx]
+  show (SVal.fixed e).findLiveM (.atF i.1 .nil) = _
+  simp only [SVal.findLiveM, PrimTy.uint_nonneg i, ↓reduceIte, hx]
 
 /-- A mapping takes every key. -/
 theorem checkIndex_map {st : Solidity.Storage C} {k : PrimTy} {V : Ty}
-    {r : SRef C (.ref (.mapping k V))} {m : SMap V} {d : SVal V}
-    (hr : st.find r = some (.map m d)) (i : Int) : st.checkIndex r .map i = some () := by
+    {r : SRef C (.ref (.mapping k V))} {m : SMap k V} {d : SVal V}
+    (hr : st.find r = some (.map m d)) (i : k.Denote) : st.checkIndex r .map i = some () := by
   simp only [Solidity.Storage.checkIndex, hr, bind, Option.bind]
   rfl
 
 /-- A dynamic array takes an index below its live length. -/
 theorem checkIndex_dyn {st : Solidity.Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {k : Nat}
     {e : SVec E k} {sh : SList E} {hk : k < 2 ^ 256} (hr : st.find r = some (.array e sh hk))
-    (i : Nat) : st.checkIndex r (.arr .dyn) (i : Int) = if i < k then some () else none := by
+    (i : PrimTy.uint.Denote) :
+    st.checkIndex r (.arr .dyn) i = if i.1.toNat < k then some () else none := by
   simp only [Solidity.Storage.checkIndex, hr, bind, Option.bind]
-  show (if 0 ≤ (i : Int) ∧ (i : Int).toNat < k then some () else none) = _
-  simp only [Int.natCast_nonneg, Int.toNat_natCast, true_and]
+  show (if 0 ≤ i.1 ∧ i.1.toNat < k then some () else none) = _
+  simp only [PrimTy.uint_nonneg i, true_and]
 
 /-- A fixed-size array takes an index below its length. -/
 theorem checkIndex_fixed {st : Solidity.Storage C} {E : Ty} {n : Nat}
     {r : SRef C (.ref (.fixed E n))} {e : SVec E n} (hr : st.find r = some (.fixed e))
-    (i : Nat) : st.checkIndex r (.arr .fixed) (i : Int) = if i < n then some () else none := by
+    (i : PrimTy.uint.Denote) :
+    st.checkIndex r (.arr .fixed) i = if i.1.toNat < n then some () else none := by
   simp only [Solidity.Storage.checkIndex, hr, bind, Option.bind]
-  show (if 0 ≤ (i : Int) ∧ (i : Int).toNat < n then some () else none) = _
-  simp only [Int.natCast_nonneg, Int.toNat_natCast, true_and]
+  show (if 0 ≤ i.1 ∧ i.1.toNat < n then some () else none) = _
+  simp only [PrimTy.uint_nonneg i, true_and]
 
 /-- A dynamic array's length. -/
 theorem len_eq {st : Solidity.Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {k : Nat}

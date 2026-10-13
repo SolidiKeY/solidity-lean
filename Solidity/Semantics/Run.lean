@@ -7,7 +7,7 @@ import Solidity.Semantics.Ops
 The run on typed values (`docs/intrinsic.md`, "M4 lane", wiring items 3
 and 4): a state is a `State` (typed storage, a
 heap and its typing, the locals typed over it), a storage path resolves to
-an `SRef` (an index by `SRef.atKey`, a mapping's key as it is hashed), a
+an `SRef` (an index by `SRef.index`, at its key type), a
 memory path to a heap reference read through `Heap.field`/`Heap.index`, and
 an operator is `BinOp.evalT`/`UnOp.evalT`.  A run ends in a state or halts
 with `THalt`: `revert`, `panic`, `diverge` or `exhausted`; there is no
@@ -250,8 +250,8 @@ def Loc.resolveT (σ : State C Γ) : {T : Ty} → Loc C Γ T → TRes (SRef C T)
   | _, .index it b i => do
     let r ← b.resolveT σ
     let k ← i.evalT σ
-    TRes.ofOpt (σ.storage.checkIndex r it (PrimTy.key k))
-    pure (r.atKey it k)
+    TRes.ofOpt (σ.storage.checkIndex r it k)
+    pure (r.index it k)
 
 /-- The slot a memory path holds: an unset memory local reverts, as an
 unset alias does (decision 17'). -/
