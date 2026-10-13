@@ -265,6 +265,57 @@ theorem Grown.writeT_facts {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {
       simp only [Option.bind_some]
       rw [Heap.readAddr_writeAddr_frame hhp (MAddrT.apart_resolve hab had hb)]
 
+/-- **A member of a storage struct copied into memory** reads what the
+struct held there (the untyped `Close.copyStToM_member`, on the erasure). -/
+theorem SVal.copyStToM_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+    (sv : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
+    (hf : lookupBy f (structDef s) = some (.prim p)) (hl : ¬ f = "length") :
+    (sv.copyStToM hp hT).heap.field (sv.copyStToM hp hT).val hf =
+      (((SVal.view sv : SFields _).get hf).view : p.Denote) := by
+  let g := sv.copyStToM hp hT
+  let τ₀ : Semantics.State := Heap.into { storage := [] } hp
+  have hc : Semantics.copyStToM τ₀ sv.erase = .ok (Heap.into τ₀ g.heap, .ref g.val.id) :=
+    SVal.copyStToM_erase sv hT hp τ₀ rfl rfl
+  have hmem := Close.copyStToM_member hc hl
+  have hrd : Close.readVal (Heap.into τ₀ g.heap) (.memoryField g.val.id f) =
+      .ok (PrimTy.erase (g.heap.field g.val hf)) := by
+    have h₁ := Heap.readAddr_erase (σ := Heap.into τ₀ g.heap) (hp := g.heap) rfl
+      (MAddr.field g.val hf)
+    simp only [Close.readVal]
+    rw [show (Semantics.Addr.memoryField g.val.id f) = (MAddr.field g.val hf).erase from rfl, h₁]
+    simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind']
+    exact MVal.asValue_erase_prim _
+  have hfind : sv.erase.find [.field f] = .ok ((SVal.view sv : SFields _).get hf).erase := by
+    have := SVal.find_erase sv (.field hf .nil)
+    exact this
+  rw [hmem, hfind, Semantics.Res.ok_bind', SVal.asValue_erase_prim] at hrd
+  exact (PrimTy.erase_injective (Except.ok.inj hrd)).symm
+
+/-- **A member of a memory struct copied into storage** holds what the
+object held there (the untyped `Close.copyMem_member`, on the erasure). -/
+theorem MVal.copyMToSt_field {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+    (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p))
+    (hl : ¬ f = "length") :
+    (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) =
+      some (.prim (hp.field r hf)) := by
+  let τ : Semantics.State := Heap.into { storage := [] } hp
+  have hcm := MVal.copyMem_erase (σ := τ) (hp := hp) rfl (T := .ref (.struct s)) r
+  have hmem := Close.copyMem_member hcm hl
+  have h₁ := Heap.readAddr_erase (σ := τ) (hp := hp) rfl (MAddr.field r hf)
+  rw [show (MAddr.field r hf).erase = Semantics.Addr.memoryField r.id f from rfl] at h₁
+  rw [h₁] at hmem
+  simp only [Heap.readAddr, toRes, Semantics.Res.ok_bind', MVal.erase, Close.copyLeaf_prim] at hmem
+  have hfe := SVal.find_erase (MVal.copyMToSt hp (T := .ref (.struct s)) r) (.field hf .nil)
+  rw [show (Path.field hf (Path.nil (T := .prim p))).erase = [Semantics.Seg.field f] from rfl,
+    hmem] at hfe
+  cases hx : (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) with
+  | none => rw [hx] at hfe; cases hfe
+  | some y =>
+    rw [hx] at hfe
+    simp only [toRes, Except.ok.injEq] at hfe
+    rw [← SVal.erase_prim] at hfe
+    rw [SVal.erase_injective hfe.symm]
+
 namespace CloseS
 
 variable {C : Contract}
@@ -393,6 +444,54 @@ theorem push_memT_readId {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C
 theorem withMem_memT_readId {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) {T : Ty}
     (a : MAddrT T) : (g.withMem μ).1.memT.readId a = μ.readId a := rfl
 
+/-- A member of a struct copied out of storage, read in the memory the
+copy leaves: what the struct held there. -/
+theorem readId_copySt_field {H : HTy} (m : Grown H (fun _ => Unit)) {s f : Name} {p : PrimTy}
+    (w : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
+    (hf : lookupBy f (structDef s) = some (.prim p)) (hl : ¬ f = "length") :
+    (m.then (w.copyStToM m.heap hT)).readId (MAddrT.field (w.copyStToM m.heap hT).val.id hf) =
+      (w.find (.field hf .nil)).map fun v => v.view := by
+  show (((MAddrT.field (w.copyStToM m.heap hT).val.id hf).resolve
+      (w.copyStToM m.heap hT).H').bind (w.copyStToM m.heap hT).heap.readAddr).map _ = _
+  simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some,
+    Option.bind_some]
+  show some ((w.copyStToM m.heap hT).heap.field (w.copyStToM m.heap hT).val hf) = _
+  rw [SVal.copyStToM_field m.heap w hT hf hl]
+  rfl
+
+/-- A member of a memory struct copied into storage, as the memory reads
+it. -/
+theorem copyMToSt_find_field {H : HTy} (g : Grown H (fun _ => Unit)) {s f : Name} {p : PrimTy}
+    (a : HRef g.H' (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p))
+    (hl : ¬ f = "length") :
+    (MVal.copyMToSt g.heap (T := .ref (.struct s)) a).find (.field hf .nil) =
+      (g.readId (MAddrT.field a.id hf)).map SVal.prim := by
+  rw [MVal.copyMToSt_field g.heap a hf hl]
+  show _ = Option.map SVal.prim
+    ((((MAddrT.field a.id hf).resolve g.H').bind g.heap.readAddr).map (MVal.toMvT g.H' _))
+  simp only [MAddrT.resolve_eq_resolveM, MAddrT.resolveM, HRef.ofId?_self, Option.map_some,
+    Option.bind_some]
+  rfl
+
+/-- An identity read as an object of its type, under the box: the object
+has that identity. -/
+theorem wp_box_ofId {H : HTy} {R : RefTy} {id : Nat} {P : HRef H R → Prop} :
+    Modality.box.wp (Close.optRes (HRef.ofId? H R id)) P ↔
+      ∀ a : HRef H R, HRef.ofId? H R id = some a → a.id = id → P a := by
+  cases h : HRef.ofId? H R id with
+  | none => simp only [Close.optRes, Modality.wp, Modality.onHalt, reduceCtorEq, false_implies,
+      implies_true]
+  | some a =>
+    simp only [Close.optRes, Modality.wp, Option.some.injEq, forall_eq']
+    exact ⟨fun hP _ => hP, fun hP => hP (HRef.id_of_ofId? h)⟩
+
+theorem withStorage_memT_readId {H : HTy} (g : GlobT C H) (st : Storage C) {T : Ty}
+    (a : MAddrT T) : (g.withStorage st).1.memT.readId a = g.1.memT.readId a := rfl
+theorem withNet_memT_readId {H : HTy} (g : GlobT C H) (nt : List (Int × Int)) {T : Ty}
+    (a : MAddrT T) : (g.withNet nt).1.memT.readId a = g.1.memT.readId a := rfl
+theorem withBalance_memT_readId {H : HTy} (g : GlobT C H) (b : PrimTy.uint.Denote) {T : Ty}
+    (a : MAddrT T) : (g.withBalance b).1.memT.readId a = g.1.memT.readId a := rfl
+
 /-- **A memory write under the box** (the untyped `Modality.wp_box_writeAddr`):
 after `m.age = 5;` the memory reads `5` at `m.age`, and as before at every
 address apart from it. -/
@@ -499,7 +598,9 @@ attribute [close_rw_s]
   CloseS.diverges_nil_right CloseS.diverges_cons CloseS.key_uint CloseS.key_int
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
   CloseS.readT_prim CloseS.readT_ident CloseS.Landed.memT_readId CloseS.push_memT_readId
-  CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart
+  CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field
+  CloseS.copyMToSt_find_field CloseS.wp_box_ofId CloseS.withStorage_memT_readId
+  CloseS.withNet_memT_readId CloseS.withBalance_memT_readId
   CloseS.wp_box_delete CloseS.map_const_eq_some SVal.defaultOf_prim' SVal.find_defaultOf_field
   Option.map_map CloseS.dflt_bool CloseS.dflt_uint_val CloseS.dflt_int_val
   CloseS.bind_const_eq_some CloseS.optRes_eq_ok CloseS.forall_val_eq_uint CloseS.forall_val_eq_int
