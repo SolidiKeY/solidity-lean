@@ -33,10 +33,17 @@ read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
 `storagePushReadBack` is not valid in the model (the length delta,
 `docs/solc-alignment.md`): `tests/solkey/expected.tsv` lists it
 `divergent`, so the tables count one pending fewer.
+Four diamond obligations that push are pending since W9.8.4
+(`storagePopUnknownLength`, `storagePushLengthPositive`,
+`arrayOfMappingsIndex`, `testDanglingInnerArrayReappearsAfterPush`): a typed
+push is exhausted at a full array (`Storage.full`), which the run's
+modalities accept, but the update the push rule leaves halts there, which
+the diamond does not; the leaf is false at a full array, so no closer
+derives it (`docs/intrinsic.md`, "W9.8.4 record").
 -/
 
 /--
-info: 452 functions: 435 derived, 2 pending, 15 other
+info: 452 functions: 431 derived, 6 pending, 15 other
 excluded recursiveStructMapping
 skipped tryCalleeGet
 skipped tryCalleePing
@@ -53,7 +60,7 @@ internal returnRevertsOnZero
 internal returnInsideTry
 internal returnVoidEarly
 pending:
-storagePushReadBack testArrayCopyClearsOldElements
+storagePopUnknownLength storagePushLengthPositive storagePushReadBack testArrayCopyClearsOldElements testDanglingInnerArrayReappearsAfterPush arrayOfMappingsIndex
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

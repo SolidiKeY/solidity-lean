@@ -56,13 +56,7 @@ theorem Solkey.TestSuite.storagePopAfterPush.proved : ⊢ Solkey.TestSuite.stora
 theorem Solkey.TestSuite.storagePopNonempty.proved : ⊢ Solkey.TestSuite.storagePopNonempty.problem := by
   sol_prove
 
-theorem Solkey.TestSuite.storagePopUnknownLength.proved : ⊢ Solkey.TestSuite.storagePopUnknownLength.problem := by
-  sol_prove
-
 theorem Solkey.TestSuite.storagePushEmpty.proved : ⊢ Solkey.TestSuite.storagePushEmpty.problem := by
-  sol_prove
-
-theorem Solkey.TestSuite.storagePushLengthPositive.proved : ⊢ Solkey.TestSuite.storagePushLengthPositive.problem := by
   sol_prove
 
 theorem Solkey.TestSuite.storagePushLocalBind.proved : ⊢ Solkey.TestSuite.storagePushLocalBind.problem := by
