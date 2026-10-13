@@ -1,79 +1,88 @@
 import Solidity.Semantics
+import Solidity.Semantics.Run
 
 /-!
 # Printing states as Solidity
 
-The printers the `Tools/` commands share: a value as Solidity writes it,
-read against its type (types as `Ty.toStr` spells them), a storage one
-state variable per line (`fmtStorage`) or on one line (`fmtStorageLine`), a
-transaction as `#run … with` sets it (`fmtTx`).  They are
-for people, not for the kernel: `partial`, and nothing is proved about them.
+The printers the `Tools/` commands share, over the typed state: a value as
+Solidity writes it (`SVal.fmt`, a fold over the typed value, its types as
+`Ty.toStr` spells them), a storage one state variable per line
+(`fmtStorage`) or on one line (`fmtStorageLine`), a transaction as `#run …
+with` sets it (`fmtTx`), a typed run's halt (`fmtHalt`).  They are for
+people, not for the kernel: nothing is proved about them.
 
 A mapping prints its entries and then its default, `{7: 5, _: 0}`; an array
-its live elements, not the `shadow` a `pop` leaves behind; a `bool` stored
-where a `uint` is expected prints as it is, since a printer should show a
-badly typed state rather than hide it.
+its live elements, not the `shadow` a `pop` leaves behind.
 -/
 
 namespace Solidity.Tools
 
-open Semantics
+open Semantics (Value)
 
 /-- A word: `5`, `-1`, `true`. -/
 def Value.fmt : Value → String
   | .int n => toString n
   | .bool b => toString b
 
-/-- A storage value read against its type. -/
-partial def SVal.fmt : Ty → SVal → String
-  | _, .prim v => Value.fmt v
-  | .ref (.struct n), .struct fs =>
-    let parts := fs.map fun (f, v) => s!"{f}: {SVal.fmt ((lookupBy f (structDef n)).getD .uint) v}"
-    "{" ++ ", ".intercalate parts ++ "}"
-  | T, .struct fs =>
-    "{" ++ ", ".intercalate (fs.map fun (f, v) => s!"{f}: {SVal.fmt T v}") ++ "}"
-  | T, .array es _ _ =>
-    let E := match T with
-      | .ref (.array E) | .ref (.fixed E _) => E
-      | _ => T
-    "[" ++ ", ".intercalate (es.map (SVal.fmt E)) ++ "]"
-  | T, .map es d =>
-    let (K, V) := match T with
-      | .ref (.mapping K V) => (K, V)
-      | _ => (T, T)
-    let key : Int → String := fun k => if K == .bool then toString (k != 0) else toString k
-    let parts := es.map (fun (k, v) => s!"{key k}: {SVal.fmt V v}") ++ [s!"_: {SVal.fmt V d}"]
-    "{" ++ ", ".intercalate parts ++ "}"
+/-- A mapping's key as its type writes it: a `bool` key `true`, any other
+the number. -/
+def keyFmt (K : Ty) (k : Int) : String :=
+  if K == .bool then toString (k != 0) else toString k
 
-/-- The storage, one state variable per line, in the contract's order;
-a root the contract does not declare is printed after, untyped. -/
-def fmtStorage (C : Contract) (st : List (Name × SVal)) : List String :=
-  let declared := C.vars.filterMap fun (r, T) =>
-    (lookupBy r st).map fun v => s!"{r} = {SVal.fmt T v}"
-  let extra := st.filterMap fun (r, v) =>
-    if (C.vars.find? (·.1 == r)).isSome then none else some s!"{r} = {SVal.fmt .uint v}"
-  declared ++ extra
+/-- **The printing fold**: a value as Solidity writes it, a struct's members
+by name, an array's live elements, a mapping's entries over its default. -/
+def fmtFold : Fold where
+  V _ := String
+  F _ := List (Name × String)
+  L _ := Unit
+  W _ _ := List String
+  M _ := (Int → String) → List String
+  prim v := Value.fmt (PrimTy.erase v)
+  struct _ r := "{" ++ ", ".intercalate (r.map fun (f, v) => s!"{f}: {v}") ++ "}"
+  array _ _ _ w _ := "[" ++ ", ".intercalate w ++ "]"
+  fixed _ w := "[" ++ ", ".intercalate w ++ "]"
+  map {K _} _ _ m d := "{" ++ ", ".intercalate (m (keyFmt K) ++ [s!"_: {d}"]) ++ "}"
+  fnil := []
+  fcons {f _ _} _ _ v r := (f, v) :: r
+  lnil := ()
+  lcons _ _ _ _ := ()
+  wnil := []
+  wcons _ _ v r := v :: r
+  mnil := fun _ => []
+  mcons k _ _ v r := fun key => s!"{key k}: {v}" :: r key
+
+/-- A storage value as Solidity writes it. -/
+def _root_.Solidity.SVal.fmt {T : Ty} (v : SVal T) : String := v.fold fmtFold
+
+/-- The storage, one state variable per line, in the contract's order. -/
+def fmtStorage (C : Contract) (st : Storage C) : List String :=
+  (SFields.fold fmtFold st).map fun (r, v) => s!"{r} = {v}"
 
 /-- The storage on one line: `count = 1; total = 0`. -/
-def fmtStorageLine (C : Contract) (st : List (Name × SVal)) : String :=
+def fmtStorageLine (C : Contract) (st : Storage C) : String :=
   "; ".intercalate (fmtStorage C st)
 
 /-- What a run starts from besides the storage and the arguments, as `#run
 … with` sets it: the sender and the value always, the time, the funds and
 the ledger where they are not zero. -/
-def fmtTx (σ : State) : List String :=
-  [s!"msg.sender = {σ.tx.msgSender}", s!"msg.value = {σ.tx.msgValue}"] ++
-  (if σ.tx.timestamp = 0 then [] else [s!"block.timestamp = {σ.tx.timestamp}"]) ++
-  (if σ.selfBalance = 0 then [] else [s!"balance = {σ.selfBalance}"]) ++
+def fmtTx {C : Contract} {Γ : Ctx} (σ : State C Γ) : List String :=
+  [s!"msg.sender = {σ.tx.msgSender.1}", s!"msg.value = {σ.tx.msgValue.1}"] ++
+  (if σ.tx.timestamp.1 = 0 then [] else [s!"block.timestamp = {σ.tx.timestamp.1}"]) ++
+  (if σ.selfBalance.1 = 0 then [] else [s!"balance = {σ.selfBalance.1}"]) ++
   (if σ.net.isEmpty then [] else
     ["net = " ++ "{" ++ ", ".intercalate (σ.net.map fun (a, b) => s!"{a}: {b}") ++ "}"])
 
-/-- A run's outcome. -/
-def fmtHalt : Halt → String
+/-- A typed run's halt: running out of gas prints as a loop that never ends
+(`THalt.exhausted`, which the untyped run did not tell apart). -/
+def fmtHalt : THalt → String
   | .revert => "revert"
-  | .undef => "undef (an ill-sorted state, outside the typing)"
   | .panic => "panic (an `assert` failed)"
-  | .diverge => "diverge (a loop that never ends)"
+  | .diverge | .exhausted => "diverge (a loop that never ends)"
+
+/-- A typed run's outcome: `ok`, or how it halted. -/
+def fmtTRes {α : Type} : TRes α → String
+  | .ok _ => "ok"
+  | .error h => fmtHalt h
 
 /-- How tightly a clause binds, as `SpecSyntax.lean` parses it: `*` 70,
 `+` 65, a comparison 50, `==` 45, `&&` 35, `||` 30, `->` 25, `<->` 20. -/

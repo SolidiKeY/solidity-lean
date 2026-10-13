@@ -7,12 +7,11 @@ import Solidity.Tools.Show
 Two things every command of `Tools/` needs, written once:
 
 * **random states**: `Gen`, Lean core's `StdGen` threaded through
-  `StateM`, and `GenSpec.sval`, a canonical storage value of a type
+  `StateM`, and `TGen.sval`, a canonical typed storage value of a type
   (`Typing/Reachability.lean`: every struct member in order, a mapping's keys
-  unique and its default `defaultForTy V`, no shadow).  A `GenSpec` says how
-  words and keys are drawn and how long a mapping or an array gets:
-  `#difftest` draws words anywhere in range (`#counterexample` draws typed
-  storages, `TGen` of `Tools/Counterexample.lean`);
+  unique over the type's default, no shadow).  A `TGen` says how words and
+  keys are drawn and how long a mapping or an array gets: `#difftest` draws
+  words anywhere in range, `#counterexample` from small pools;
 * **the command front end**: what an identifier `C` or `C.f` names
   (`resolveTarget`), a term of type `Except String (List String)` elaborated and run
   (`evalLines`), and a report of a head line and indented lines
@@ -21,7 +20,7 @@ Two things every command of `Tools/` needs, written once:
 
 namespace Solidity.Tools
 
-open Semantics
+open Semantics (structDef lookupBy)
 
 /-! ## Random values -/
 
@@ -39,43 +38,75 @@ def randBelow (n : Nat) : Gen Nat := do
 def pickD {α : Type} (d : α) (xs : List α) : Gen α := do
   pure (xs.getD (← randBelow xs.length) d)
 
-instance : Inhabited SVal := ⟨.prim (.int 0)⟩
+/-- `n` at the type `p`, its default out of range: a word a generator
+draws in range. -/
+def _root_.Solidity.PrimTy.ofIntD (p : PrimTy) (n : Int) : p.Denote :=
+  (PrimTy.ofInt? p n).getD (PrimTy.dflt p)
 
-/-- How a random storage value is drawn: its words (`prim`), a mapping's
-keys (`none`: a mapping of that key type stays empty), and the bounds on a
-mapping's entries and a dynamic array's length (drawn below them). -/
-structure GenSpec where
-  prim : PrimTy → Gen Value
+/-- How a random typed storage value is drawn: its words (`prim`), a
+mapping's keys (`none`: a mapping of that key type stays empty), and the
+bounds on a mapping's entries and a dynamic array's length (drawn below
+them). -/
+structure TGen where
+  prim : (p : PrimTy) → Gen p.Denote
   key : PrimTy → Option (Gen Int)
-  entries : Nat
-  length : Nat
+  entries : Nat := 4
+  length : Nat := 3
 
-/-- **A canonical storage value of type `T`**: every struct member in
-order, a mapping's keys unique (a key drawn twice is drawn once; its value
-is drawn only the first time) over the default `defaultForTy V`, an array
-without recycled slots. -/
-partial def GenSpec.sval (g : GenSpec) : Ty → Gen SVal
-  | .prim p => do pure (.prim (← g.prim p))
-  | .ref (.mapping (.prim K) V) => do
-    let some key := g.key K | pure (.map [] (defaultForTy V))
+/-- Exactly `n` values, each drawn by `f`, the first first. -/
+def TGen.vec {E : Ty} (f : Gen (SVal E)) : (n : Nat) → Gen (SVec E n)
+  | 0 => pure .nil
+  | n + 1 => do
+    let v ← f
+    pure (.cons v (← TGen.vec f n))
+
+/-- A struct's members, in order, each drawn at its type by `f`. -/
+def TGen.fields (f : (T : Ty) → Gen (SVal T)) :
+    (fs : List (Name × Ty)) → Gen (SFields fs)
+  | [] => pure .nil
+  | (_, T) :: fs => do
+    let v ← f T
+    pure (.cons v (← TGen.fields f fs))
+
+/-- A mapping's entries, in the order written. -/
+def TGen.smap {V : Ty} : List (Int × SVal V) → SMap V
+  | [] => .nil
+  | (k, v) :: es => .cons k v (TGen.smap es)
+
+/-- An array of the elements `es` over the shadow `sh`, its type's default
+past the bound on a length: what a certificate quotes
+(`Tools/Counterexample.lean`'s `quoteFold`), the bound checked by the
+kernel. -/
+def _root_.Solidity.SVal.arrayOf {E : Ty} {n : Nat} (es : SVec E n) (sh : SList E) :
+    SVal (.ref (.array E)) :=
+  if h : n < 2 ^ 256 then .array es sh h else SVal.dflt _
+
+/-- **A canonical storage value of type `T`**, at most `k` levels deep (the
+default below): every struct member in order, a mapping's keys drawn by
+`g.key` (a key drawn twice is drawn once, its value only the first time)
+over the type's default, an array of fewer than `g.length` elements and no
+shadow. -/
+def TGen.sval (g : TGen) : Nat → (T : Ty) → Gen (SVal T)
+  | 0, T => pure (SVal.dflt T)
+  | _ + 1, .prim p => do pure (.prim (← g.prim p))
+  | k + 1, .ref (.mapping (.prim K) V) => do
+    let some key := g.key K | return .map .nil (SVal.dflt V)
     let n ← randBelow g.entries
-    let mut es : List (Int × SVal) := []
+    let mut es : List (Int × SVal V) := []
     for _ in [0:n] do
-      let k ← key
-      if (es.find? (·.1 == k)).isNone then es := es ++ [(k, ← g.sval V)]
-    pure (.map es (defaultForTy V))
-  | .ref (.mapping _ V) => pure (.map [] (defaultForTy V))
-  | .ref (.struct s) => do
-    pure (.struct (← (structDef s).mapM fun (f, T) => do pure (f, ← g.sval T)))
-  | .ref (.array E) => do
+      let x ← key
+      if (es.find? (·.1 == x)).isNone then es := es ++ [(x, ← g.sval k V)]
+    pure (.map (TGen.smap es) (SVal.dflt V))
+  | _ + 1, .ref (.mapping _ V) => pure (.map .nil (SVal.dflt V))
+  | k + 1, .ref (.struct s) => do pure (.struct (← TGen.fields (g.sval k) (structDef s)))
+  | k + 1, .ref (.array E) => do
     let n ← randBelow g.length
-    pure (.array (← (List.range n).mapM fun _ => g.sval E) [] false)
-  | .ref (.fixed E n) => do
-    pure (.array (← (List.range n).mapM fun _ => g.sval E) [] true)
+    pure (SVal.arrayOf (← TGen.vec (g.sval k E) n) .nil)
+  | k + 1, .ref (.fixed E n) => do pure (.fixed (← TGen.vec (g.sval k E) n))
 
 /-- A storage: every root of the contract, drawn at its type, in order. -/
-def GenSpec.storage (g : GenSpec) (C : Contract) : Gen (List (Name × SVal)) :=
-  C.vars.mapM fun (r, T) => do pure (r, ← g.sval T)
+def TGen.storage (g : TGen) (C : Contract) : Gen (Storage C) :=
+  TGen.fields (g.sval 32) C.vars
 
 /-- Whether `f` has an obligation: a clause of its own or an invariant of
 the contract, and no `skip`. -/
