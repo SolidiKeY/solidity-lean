@@ -7,8 +7,8 @@ import Solidity.Semantics.NoPanic
 One lemma per statement of the fragment (`docs/intrinsic.md`, M5, W1): the
 statement's step (`Semantics/Run.lean`'s `TRun.*`) and its code
 (`Evm/Compile.lean`) agree, as `StmtOut` says.  A storage write is the
-untyped one's (`Evm/Repr.lean`'s `save_repr`) read back typed through its
-agreement (`Storage.saveStorage_erase`, `into_ok`).  `stmt_sim`
+typed save, which `Evm/Repr.lean`'s `save_repr` relates to the machine's
+writes.  `stmt_sim`
 (`Evm/Correct.lean`) dispatches to them, so each elaborates on its own.
 
 `StmtOut` is the statements' dichotomy (the machine's outcome and the
@@ -362,9 +362,6 @@ theorem opLocT_bump {p : PrimTy} {l : Solidity.OpLoc C Γ p}
     l.bumpT σ op = (loc.resolveT σ >>= fun r => Solidity.bumpStoreT σ op r) := by
   cases l <;> simp only [opLocToLoc, reduceCtorEq, Option.some.injEq] at h <;> subst h <;> rfl
 
-theorem ne_bool_of_numeric {p : PrimTy} (hpn : p.isNumeric = true) : p ≠ .bool := by
-  rintro rfl; exact Bool.noConfusion hpn
-
 /-- `total += e;` on a storage target: the target resolved and read once,
 the right-hand side, the checked operator, the write back. -/
 theorem opStore_sim {p : PrimTy} (hpn : p.isNumeric = true) {op : BinOp} (hop : op.hasCompoundAssign = true)
@@ -456,7 +453,6 @@ theorem bumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) {l :
     StmtOut C L b F false false false (Solidity.TRun.incDec op l σ)
       (run (compileLoc b loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail p op.binOp ++
         [.swap 1, .sstore]) m) m := by
-  have hp := ne_bool_of_numeric hpn
   simp only [List.append_assoc]
   rcases loc_sim loc hm hwl with ⟨rt, s, sv, hres, hsv, hps, hr, hrunl⟩ | ⟨hres, hrunl⟩
   · obtain ⟨told, rfl, hrold⟩ := prim_read hr
@@ -491,7 +487,6 @@ theorem bumpLocal_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) (i :
     StmtOut C L b F false false false (Solidity.TRun.incDec op (.local i) σ)
       (run ([.mload (cellOf b i), .push (.val 1)] ++ binTail p op.binOp ++ [.mstore (cellOf b i)]) m)
       m := by
-  have hp := ne_bool_of_numeric hpn
   have hrold := hm.vals i
   have hv := bump_simT hpn op hrold m
   rw [show [Instr.mload (cellOf b i), .push (.val 1)] ++ binTail p op.binOp ++

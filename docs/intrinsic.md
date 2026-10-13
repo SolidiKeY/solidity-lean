@@ -7205,6 +7205,104 @@ net −2.5k lines (48 files, +372 −2849 before this record).
   back under the same load (`Elab.async false`, `IO.monoMsNow` around a
   copy of the file): `ProofTree` 9.2 s on master, 9.3 s here.
 
+### W10.5.3 record (2026-10-13, branch `w105-e`)
+
+The EVM simulation reads the typed state: no `Semantics.State`, untyped
+`SVal` or erasure lemma is left in `Evm/`, and no module of `Evm/` imports
+an erasure module (`Semantics/{Erase,TypedErase,HeapErase,StorageErase}`;
+checked on the import closure of `Evm/Correct` and `Evm/Interpreter`).
+Evm/ is 8154 lines (+89, the new `Evm/StorageLemmas.lean` included).
+
+- **The representation, typed** (`Evm/Repr.lean`).  `ReprV : (p : PrimTy)
+  → p.Denote → Word → Prop` (a `uint` its word, a `bool` `bword`, an `int`
+  a word whose `sgn` it is).  `ReprAt st L : (T : Ty) → Slot → SVal T →
+  Prop`, one inductive over the typed values: `prim` (the three primitive
+  constructors one), `struct` (every member, `SFields.get`, at its offset),
+  `array` (`st s = n`, `n < L`, each live element), `fixed` (each element),
+  `map` (when the key type is `uint`, each key below `2^256` at its hash).
+  Gone, since the types say them: the struct's member-exists clause, the
+  fixed-size array's length clause, and the `mapOther` fall-through (now the
+  `map` premise's `K = uint →`).  `ReprStore C L st (stor : Storage C)`.
+  Paths are typed: `PathAt a p s s'` by recursion on `Path T U` from the
+  root down (`Path.append` for the compiler's snoc steps:
+  `PathSlot.field`/`key`/`elem`/`felem`), `PathSlot C a (r : SRef C U) s`.
+  `find_repr`, `save_repr` (the value-level `ReprAt.save` by induction on
+  `PathAt`), `zero_repr`, `pop_repr`, `move_repr`, `overlay_repr` (the old
+  value of a static type has its shape, so no fall-through case),
+  `push_repr`, `live_mono` and `initStorage_repr` (`dfltBelow_repr`, on the
+  rank fuel of `SVal.dfltBelow`, so no erasure of the default) are over
+  `Storage.findLive`/`save`/`push`/`pop`/`delete` and `SVal.defaultOf`/
+  `overlay`/`strip`.  `LenSlot` is now `PrimSlot`'s twin (a slot some state
+  variable holds as an array's length, `OccAt false`).
+- **`Evm/StorageLemmas.lean`** (new, 236 lines): what the simulation reads
+  of the typed storage that neither `Semantics/Storage.lean` nor
+  `Theory/Typed/Obs.lean` states: `findLiveM_append`, `findM_of_findLiveM`,
+  the reads and index checks of a member, a key and an element
+  (`Sto.findLive_field` …, `Sto.checkIndex_dyn` …, `Sto.len_eq`), the
+  defaults' members (`get_dfltBelow`, `get_dflt`).  It imports
+  `Theory/Typed/Obs.lean` for `SFields.get_overlay`/`get_strip`/
+  `get_defaultOf` and the `SVec` lists; nothing in `Semantics/` changed.
+- **The simulation** (`Evm/Sim.lean`).  The relation is `SimL C L b F (g :
+  State C []) (ρ : Look C Γ) m` (was `Sim … (σ : Semantics.State) ρ m`):
+  `store` over `g.storage`, `vals : ReprV p (ρ i) …` (no `PrimTy.erase`),
+  `aliases`/`fragile` with `PathSlot C a r s` and `g.storage.findLive r`,
+  `net` over `netAt g.net`, `env : EnvSim g.tx m` (`EnvSim` over `TTx`).
+  `Sim C L b F (σ : State C Γ) m := SimL C L b F σ.glob (Look.ofTEnv σ.env)
+  m` (an abbreviation: the lemmas on the frame keep `Look`, which a call's
+  heap growth does not touch), with its fields and the storage steps
+  restated on `σ` (`Sim.store`, `Sim.store'`, `Sim.storeDrop`, `Sim.book`,
+  `Sim.mono`).  `Look.ofTEnv` moved here from `Evm/Expr.lean`.  Adapted:
+  the planner's `Sim` over `State C Γ` with fields read off `TEnv.get` is
+  this abbreviation (a field read is `Look.ofTEnv σ.env i`, definitionally
+  `TEnv.get i σ.env`).
+- **Gone**: `State.sem`, `sem_storage`, `sem_pay`, `Sim.congrGlob`,
+  `ValOut` (now private, `ValOutW`), `ValOutT.ofRes`, `find_of_findLive`
+  (now `Sto.find_of_findLive`), `sref_erase_field`/`_index`, `checkT`,
+  `asValue_erase_prim`, `into_ok`, `toRes_none`, `toSVal_erase`,
+  `ValOut.toRes_cases`, `prim_find`, `push_ok`, `Sim.withStore`,
+  `bump_key`, `writeStorage_static` (now `write_ref`),
+  `Value.toSVal_strip`, `State.fresh`, `freshT_sem`, the untyped
+  `findLive_append`, `Evm.TEnv.get_wk` (a copy of `Solidity.TEnv.get_wk`),
+  and every `Storage.*_erase` rewrite of `Evm/{Stmt,Expr}`.  `Evm/Expr`
+  and `Evm/Stmt` no longer import `TypedErase`, `Evm/Compile` no longer
+  imports `StorageErase`.
+- **The operators: the fallback.**  The guard lemmas stay proved on the
+  untyped word arithmetic (`applyBinOp`, `checkArith`, `evalBinop`,
+  `applyUnOp`, `unopCheck`, `Semantics.lean`), private to
+  `Evm/SimLemmas.lean` (`ReprW`, `ValOutW`, `tail_sim`, `stail_sim`,
+  `src_arith`, …), and are read typed through `Semantics/Ops.lean`'s
+  `BinOp.evalT_erase`/`UnOp.evalT_erase`/`PrimTy.checkArith_ofInt`: the
+  public tails are typed (`tail_simT`, `neg_simT`, `bnot_simT`,
+  `compound_simT`, `bump_simT`, over `BinOp.evalT`, `UnOp.evalT`,
+  `compoundT`, `bumpT`) and `ValOutT` (now in `SimLemmas`) is the one
+  value dichotomy outside the file.  Restating the operator cases at
+  `uint`, `int` and `bool` on `PrimTy.ofInt?` is left for W10.5.6, when
+  `Semantics.lean`'s operators go.
+- **Statements old → new** (`Theorems.lean`).  `σ ≈[C, L, b, F] m` was
+  `Evm.Sim C L b F σ.sem (Evm.Look.ofTEnv σ.env) m`, is `Evm.Sim C L b F σ
+  m`: the same claim (each state variable laid out at its slot, each local
+  in its cell, the ledger the money moved, the transaction the machine's
+  environment), now of the typed storage itself rather than its erasure.
+  `compiler_correct` unchanged in form; `compiler_net` reads `netAt
+  o.st.net a` (was `o.st.sem.getNet a`, the same `(lookupBy a net).getD
+  0`); `compile_storage` takes `PathSlot C false r s` (was `PathSlot C false
+  r.root r.path.erase (.prim .uint) s`).  Axioms unchanged (`propext`,
+  `Classical.choice`, `Quot.sound`; the pinned `#guard_msgs` and a
+  temporary `#print axioms compiler_correct`).
+- **Timings** (diagnostics wall on a copy with `Elab.async false`,
+  `IO.monoMsNow` around it): `Evm/Stmt` 2.4 s on master, 2.1 s here;
+  `Evm/Correct` 2.6 s and 2.6 s.  `stmt_sim` keeps its `maxHeartbeats
+  10000`.  `lake build` of the changed modules: `Evm/Sim` 5.4 s, `Evm/Expr`
+  3.5 s, `Evm/Stmt` 1.4 s, `Evm/Correct` 1.7 s.
+- **Checks**: `lean_build` of the default targets clean (279 jobs);
+  `check-orphans` (297 reachable), `check-doc-paths` clean; no `sorry`,
+  `axiom` or heartbeat override added.
+- **Not done here**: the operators typed (above); `Tools/DiffTest.lean`'s
+  start encodes an untyped storage (`SVal.encode`, W10.5.5).
+- **Docs**: `module-map.md` (the `Evm/` rows, `Evm/StorageLemmas.lean`
+  added, `Theorems.lean`), `compiler-verification.md` (the statements),
+  AGENTS.md's untyped list, `.claude/rules/typing.md`.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -7224,9 +7322,9 @@ What W9.7 left untyped, the value-level reading of a typed state
 W9.8 typed: the symbols read the typed state, and `Upd.applyV` computes the
 typed global part and the locals' values (`GlobT`, `LocsV`).  `State.globE`
 remains as the typed state's erasure: the typed run's invariants
-(`Typing/`), the EVM simulation (`Evm/`), `Problem`'s initial-state check and
-the tools read it (W10.5 types them).  The side-projects reader is outdated
-(W9.7.1).
+(`Typing/`), `Problem`'s initial-state check and the tools read it (W10.5
+types them; the EVM simulation no longer, W10.5.3).  The side-projects
+reader is outdated (W9.7.1).
 
 **W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
 terms' symbols read the typed state; what stays untyped is listed in the

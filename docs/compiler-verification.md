@@ -13,20 +13,19 @@ copies, aliases into elements), internal calls and `transfer`.
 
 For a program `P : Prog C Γ Γ'` of the fragment (`inFragP F P = some F'`), a
 machine `m` representing the typed state `σ` with its frame at base `b` and
-every dynamic array below `L` elements (`Sim C L b F σ.sem (Look.ofTEnv σ.env) m`,
-`L ≤ 2^64`), and room for its pushes:
+every dynamic array below `L` elements (`Sim C L b F σ m`, `L ≤ 2^64`), and room for its pushes:
 
 ```lean
 theorem compile_correct {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax) :
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax) :
     (∃ o m', Solidity.Prog.run σ P = .ok o ∧ run (compileProg b P) m = .ok m' 0 ∧
-      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m') ∨
+      m'.stack = m.stack ∧ Sim C (L + Prog.pushes P) b F' o.st m') ∨
     ((Solidity.Prog.run σ P = .error .revert ∨
         (Prog.asserts P = true ∧ Solidity.Prog.run σ P = .error .panic)) ∧
       run (compileProg b P) m = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg b P) m = .revert ∧ ∃ o m',
       Solidity.Prog.run σ P = .ok o ∧
-      Sim C (L + Prog.pushes P) b F' o.st.sem (Look.ofTEnv o.st.env) m')
+      Sim C (L + Prog.pushes P) b F' o.st m')
 ```
 
 Both succeed, the machine's stack as it was and its storage, locals and
@@ -59,11 +58,11 @@ entry, which `Sim.netSelf` pins. Read off a run that succeeds:
 
 ```lean
 theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F P = some F')
-    (hm : Sim C L b F σ.sem (Look.ofTEnv σ.env) m) (hL : L + Prog.pushes P ≤ Lmax)
+    (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → o.st.sem.getNet a = (m'.bal₀ a : Int) - m'.bal a) ∧
-      o.st.sem.getNet m'.self = 0
+      (∀ a : Nat, a < W → a ≠ m'.self → netAt o.st.net a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      netAt o.st.net m'.self = 0
 ```
 
 `Evm/Examples.lean` runs `owner = 5; owner.transfer(30);` on a contract
@@ -82,7 +81,7 @@ theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []
     (∃ o m', Solidity.Prog.run (freshT C balance hb self hs) P = .ok o ∧
         run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
-        PathSlot C false r.root r.path.erase (.prim .uint) s →
+        PathSlot C false r s →
         o.st.storage.findLive r = some (.prim v) → m'.store s = v.1.toNat) ∨
     ((Solidity.Prog.run (freshT C balance hb self hs) P = .error .revert ∨
         (Prog.asserts P = true ∧
@@ -199,7 +198,7 @@ Out, and why:
 | `push()` of a struct or an array element | solc does not clear the slot it grows into (a `pop` cleared it), and the interpreter revives the popped value there (`pushSlot`); the representation does not relate slots past the end (relating them would need `delete` and `pop` to clear them, which for a dynamic array is a loop). `push()` of a primitive (solc writes `0`) and `push(e)`/`push(sp)` (every slot written) are in. |
 | a fragile alias used after a `pop` or `delete` | See above: it may name a slot past the end, which the representation does not relate. |
 | `address(this).balance` | The interpreter's is the funds the transaction found, which a `transfer` leaves (it books `net` only); `SELFBALANCE` reads the account a `CALL` debits. The two part at the first payment. |
-| mappings keyed by `bool`/`int` | `ReprAt` relates a mapping keyed by `uint` only (`ReprAt.map`; any other key type is `ReprAt.mapOther`, which claims nothing): a `bool` key, which the typed run hashes as `0`/`1`, and an `int` key's two's complement are not related yet. |
+| mappings keyed by `bool`/`int` | `ReprAt` relates a mapping keyed by `uint` only (`ReprAt.map` claims its entries only when the key type is `uint`): a `bool` key, which the typed run hashes as `0`/`1`, and an `int` key's two's complement are not related yet. |
 
 The run evaluates an `op=`'s right-hand side before its target; the
 compiled code resolves the target first. The simulation lemmas are

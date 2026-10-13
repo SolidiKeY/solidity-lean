@@ -6,19 +6,23 @@ import Solidity.Semantics.Run
 # The simulation over the scoped syntax
 
 The simulation relation for `Evm/Compile.lean`'s compiler
-(`docs/intrinsic.md`, M5): a local is read by its position and lives at its
-level (`lvl b i`).
+(`docs/intrinsic.md`, M5, W10.5.3): `Sim C L b F σ m`, the machine `m`
+represents the typed state `σ`, is `SimL` of the state's global part
+(`State.glob`: its typed storage, by `Evm/Repr.lean`'s `ReprStore`; its
+ledger; its transaction, `EnvSim`) and of its locals, each read at its level
+(`lvl b i`).
 
 **The locals by position.**  `Look C Γ` is what each local of `Γ` holds, as
 the simulation reads it (`Seen`: a value of its type, the storage reference
-an alias holds): the typed run's `TEnv` instantiates it (`Look.ofTEnv`,
-`Evm/Expr.lean`), forgetting the heap typing, so a call that grows the
-heap leaves the caller's locals read as they were.  Declaring a local is
-`Look.cons` (`TEnv`'s pair), a scope end `Look.drop` along an `Ext`, an
-assignment `Look.set` (by recursion on the position, as `TEnv.set`).  A
-value local's cell represents its value outright (`ReprV p v`).  A declaration is `SimL.consVal`/`consAlias`/`consFragile`/`consDead`,
-a scope's end `SimL.drop` (its locals popped), and the end of a branch
-`SimL.flags` (the branches met, the fragile aliases forgotten).
+an alias holds): the typed run's `TEnv` instantiates it (`Look.ofTEnv`),
+forgetting the heap typing, so a call that grows the heap leaves the
+caller's locals read as they were.  Declaring a local is `Look.cons`
+(`TEnv`'s pair), a scope end `Look.drop` along an `Ext`, an assignment
+`Look.set` (by recursion on the position, as `TEnv.set`).  A value local's
+cell represents its value outright (`ReprV p v`).  A declaration is
+`SimL.consVal`/`consAlias`/`consFragile`/`consDead`, a scope's end
+`SimL.drop` (its locals popped), and the end of a branch `SimL.flags` (the
+branches met, the fragile aliases forgotten).
 
 **A frame's cells.**  Code compiled at base `b` over `Γ` writes only cells
 at levels `b` and above (`Stmt.storesFrom`), and a call's body, compiled at
@@ -562,17 +566,10 @@ theorem see_wk {H H' : HTy} (x : H <+: H') :
     (t : LTy) → (v : t.TDenote C H) → see t (Solidity.LTy.TDenote.wk x t v) = see t v
   | .val _, _ | .alias _, _ | .mem _, _ | .old, _ | .oldNet, _ | .kint, _ => rfl
 
-theorem TEnv.get_wk {H H' : HTy} (x : H <+: H') :
-    {Γ : Ctx} → {t : LTy} → (i : Idx Γ t) → (e : TEnv C H Γ) →
-      TEnv.get i (TEnv.wk x Γ e) = Solidity.LTy.TDenote.wk x t (TEnv.get i e)
-  | _ :: _, _, .here, _ => rfl
-  | _ :: _, _, .there i, e => TEnv.get_wk x i e.2
-
 /-- The locals over a grown heap read as they did. -/
 theorem Look.ofTEnv_wk {H H' : HTy} {Γ : Ctx} (x : H <+: H') (e : TEnv C H Γ) {t : LTy}
     (i : Idx Γ t) : Look.ofTEnv (TEnv.wk x Γ e) i = Look.ofTEnv e i := by
   simp only [Look.ofTEnv, TEnv.get_wk, see_wk]
-
 
 /-! ## The simulation of a typed state -/
 

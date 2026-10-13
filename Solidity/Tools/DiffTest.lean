@@ -24,7 +24,7 @@ from a start where its hypotheses hold:
   and kept only if it is in the compiled
   fragment, `inFragP (Frag.init []) Q = some F'`; otherwise the function is
   reported skipped;
-* the start machine represents the start state (`Sim C L b F σ.sem ρ m`): its
+* the start machine represents the start state (`Sim C L b F σ m`): its
   storage is the storage encoded (`SVal.encode`, which is `ReprAt` read as a
   function), every other slot `0`, which is how a mapping's absent keys
   represent its default; no locals; the funds, the sender, the value and the
