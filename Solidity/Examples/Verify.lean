@@ -9,7 +9,8 @@ counterexample (the kernel checked `¬ ⊨ spec[C]{f}`), one refuted by its
 `assignable` frame, one refuted by a tested counterexample only (the layout
 premise of a mapping is a `\forall` over a `uint`, which the certificate
 cannot evaluate), one refuted by a failed `assert`, and one given up on: true,
-but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula.
+but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula,
+and on a contract with a struct, both arrays and a mapping.
 
 Both read the scoped calculus (`open scoped Solidity.Scoped`,
 `docs/intrinsic.md`): `#verify` states `⊨ spec[C]{f}` of the scoped
@@ -152,6 +153,30 @@ info: counterexample (certified):
   after: count = 0; total = 0
 -/
 #guard_msgs in #counterexample dl!{ [ uint i = 0; while (i < 3) { i++; }; ] i == 2 }
+end
+
+/-- A struct, a fixed array, a dynamic array and a mapping: the certificate
+quotes each (`quoteFold`, `Cand.quote`). -/
+def Shapes : Contract := contract!{
+  Person alice;
+  uint[2] pair;
+  uint[] xs;
+  mapping(uint => uint) bal;
+}
+
+section
+local instance : InContract := ⟨Shapes⟩
+
+-- Refuted only where every shape holds something: the random search draws
+-- such a storage, and the kernel checks it quoted.
+/--
+info: counterexample (certified):
+  msg.sender = 1, msg.value = 0
+  before: alice = {account: {balance: 1, token: {value: 2}}, age: 2}; pair = [1, 3]; xs = [3, 3]; bal = {1: 3, _: 0}
+  after: alice = {account: {balance: 1, token: {value: 2}}, age: 1}; pair = [1, 3]; xs = [3, 3]; bal = {1: 3, _: 0}
+-/
+#guard_msgs in #counterexample dl!{ [ alice.age = 1; ]
+  (xs.length == 0 ∨ bal[1] == 0 ∨ pair[0] == 0 ∨ alice.account.balance == 0) }
 end
 
 end Solidity.Examples.Verify

@@ -12,19 +12,22 @@ the allocations (`Heap.allocDefault`, `SVal.copyStToM`), generic in the
 types it is read at, as the storage laws are generic over their
 locations (`Theory/Typed/Obs.lean`).
 
-* **readOnWrite**, **readWriteDifferent**: a write reads back where it
+* **readOnWrite**, its `\then` and its `\else`: a write reads back where it
   lands, and leaves every address apart from it (`Grown.writeT_facts`,
   `Heap.readAddr_writeAddr_same`, `Heap.readAddr_writeAddr_apart`).
-* **readAddDifferent**, **newAddDifferent**: an allocation leaves every
-  older object (`Heap.readAddr_allocDefault`, `MAddrT.resolve_wk`); its
-  objects are new (`Grown.alloc_id_ge`).
-* **readAddEqual**, **initMember**, **initSize**: a fresh object reads its
-  default (`Heap.initMember`, `Heap.initSize`).
-* **readCopySt**, **readCopyStOther**, **findCopyMem**: a copy between
-  storage and memory reads what it copied, and leaves the older objects
-  (`SVal.copyStToM_field`, `Grown.readCopySt_old`, `MVal.copyMToSt_field`).
+* **readOnAddM** `\else`: an allocation leaves every older object
+  (`Heap.readAddr_allocDefault`, `MAddrT.resolve_wk`); and, Lean only, its
+  objects are new (`Grown.alloc_id_ge`), the freshness behind `newFromAdd`.
+* **readOnAddM** `\then`, then **initMember**, **initSize**: a fresh object
+  reads its default (`Heap.initMember`, `Heap.initSize`).
+* **readFromCopyToStorage**, its `\then` and its `\else`, and
+  **findOnCopy**: a copy between storage and memory reads what it copied,
+  and leaves the older objects (`SVal.copyStToM_field`,
+  `Grown.readCopySt_old`, `MVal.copyMToSt_field`).
 
-The section at the end restates each law under its solkey name.
+The section at the end restates each law under its solkey taclet's name,
+a taclet's `\else` as its frame (`readOnWriteFrame`), as the storage laws
+name theirs (`Obs.findOnSaveFrame`).
 
 The laws are proved on the typed heap, through its erasure where the
 interpreter's lemmas already answer (`Heap.readAddr_erase`).
@@ -134,7 +137,7 @@ theorem Heap.readAddr_writeAddr_same {H : HTy} {T : Ty} {hp hp' : Heap H} {ad : 
         List.getElem?_set_self hb.2]
     · simp only [reduceCtorEq] at h
 
-/-- **A write leaves an address apart from it** (`readWriteDifferent`). -/
+/-- **A write leaves an address apart from it** (`readOnWrite` `\else`). -/
 theorem Heap.readAddr_writeAddr_apart {H : HTy} {T U : Ty} {hp hp' : Heap H} {ad : MAddr H T}
     {bd : MAddr H U} {v : MVal H T} (h : hp.writeAddr ad v = some hp') (hab : ad.Apart bd) :
     hp'.readAddr bd = hp.readAddr bd := by
@@ -501,7 +504,7 @@ theorem Grown.read_then_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {α : HT
     simp only [Option.map_some, Option.bind_some]
     exact hg rb
 
-/-- **readAddDifferent**: below an allocation, an address whose object is
+/-- **readOnAddM** `\else`: below an allocation, an address whose object is
 older reads what it read (erased; a word and an identity read so are
 equal). -/
 theorem Grown.readAddM_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
@@ -511,8 +514,8 @@ theorem Grown.readAddM_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefT
       ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase T) :=
   Grown.read_then_old μ₀ _ (fun ra => Heap.readAddr_allocDefault μ₀.heap R hR ra) bd hid
 
-/-- **readAddDifferent** for a copy into memory (`copySt`): an older
-object reads what it read. -/
+/-- **readFromCopyToStorage** `\else`: below a copy into memory
+(`copySt`), an older object reads what it read. -/
 theorem Grown.readCopySt_old {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : Ty} (v : SVal U)
     (hU : U.mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
     ((bd.resolve (μ₀.then (v.copyStToM μ₀.heap hU)).H').bind fun rb =>
@@ -535,6 +538,22 @@ theorem MVal.erase_ref_inj {H H' : HTy} {R : RefTy} {x : Option (MVal H (.ref R)
   cases x <;> cases y <;> simp only [Option.map_none, Option.map_some, reduceCtorEq,
     Option.some.injEq, Option.bind_some, Option.bind_none] at h ⊢
   exact Semantics.MVal.ref.inj h
+
+/-- Two reads equal erased are equal as a word or an identity. -/
+theorem MVal.toMvT_of_erase {H H' : HTy} {T : Ty} {x : Option (MVal H T)}
+    {y : Option (MVal H' T)} (h : x.map (MVal.erase T) = y.map (MVal.erase T)) :
+    x.map (MVal.toMvT H T) = y.map (MVal.toMvT H' T) := by
+  cases T with
+  | prim p =>
+    have e := MVal.erase_prim_inj h
+    cases x <;> cases y <;>
+      simp_all only [Option.map_none, Option.map_some, Option.some.injEq, reduceCtorEq,
+        MVal.toMvT]
+  | ref R =>
+    have e := MVal.erase_ref_inj h
+    cases x <;> cases y <;>
+      simp_all only [Option.map_none, Option.map_some, Option.some.injEq, Option.bind_none,
+        Option.bind_some, reduceCtorEq, MVal.toMvT]
 
 
 /-! ## Lengths: what a read of an element needs -/
@@ -709,8 +728,8 @@ theorem Grown.writeT_lenU {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a
   | none => rfl
   | some r => exact congrArg some (Heap.lenU_eq (Heap.len_writeAddr hhp r .dyn))
 
-/-- **An allocation's identity is new** (`newAddDifferent`): past every
-identity of the heap it grows. -/
+/-- **An allocation's identity is new** (Lean only, the freshness behind
+solkey's `newFromAdd`): past every identity of the heap it grows. -/
 theorem Grown.alloc_id_ge {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
     H.length ≤ ((Grown.alloc g).val : HRef _ R).id :=
   g.ext.length_le
@@ -823,10 +842,11 @@ theorem MVal.copyMToSt_prim {H : HTy} (hp : Heap H) {P : PrimTy} (v : MVal H (.p
 
 end CopyMem
 
-/-! ## The laws by solkey's names
+/-! ## The laws by solkey's taclets
 
 `memoryRules.key`, `structMemoryRules.key` and the cross-domain taclets,
-each stated on the typed heap and proved by the lemma above it.  A rule
+each stated on the typed heap and proved by the lemma above it; a taclet's
+`\then` is its name, its `\else` (the frame) its name with `Frame`.  A rule
 whose term has no counterpart on the typed heap is not restated:
 `readFromEmptyMemory` and `newFromEmptyMemory` (a memory grows from the
 global part's heap, never from an empty one), `readR*` (a path is read one
@@ -835,33 +855,31 @@ with its parent, so it is a member read like a word). -/
 
 section Solkey
 
-/-- **readOnWrite** (`readWriteEqual`): a write reads back where it lands. -/
+/-- **readOnWrite** `\then`: a write reads back where it lands. -/
 theorem Grown.readOnWrite {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}
     {v : MvT T} (h : m.writeT a v = some m') : m'.readId a = some v :=
   (Grown.writeT_facts h).1
 
-/-- **readOnWrite** (`readWriteDifferent`): a write leaves every address
-apart from it. -/
-theorem Grown.readWriteDifferent {H : HTy} {T U : Ty} {m m' : Grown H (fun _ => Unit)}
+/-- **readOnWrite** `\else`: a write leaves every address apart from it. -/
+theorem Grown.readOnWriteFrame {H : HTy} {T U : Ty} {m m' : Grown H (fun _ => Unit)}
     {a : MAddrT T} {v : MvT T} (h : m.writeT a v = some m') (b : MAddrT U) (hab : a.Apart b) :
     m'.readId b = m.readId b :=
   (Grown.writeT_facts h).2 b hab
 
-/-- **readAddDifferent**: an allocation leaves every older object. -/
-theorem Grown.readAddDifferent {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
+/-- **readOnAddM** `\else`: an allocation leaves every older object. -/
+theorem Grown.readOnAddMFrame {H : HTy} (μ₀ : Grown H (fun _ => Unit)) (R : RefTy)
     (hR : (Ty.ref R).mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
-    ((bd.resolve (μ₀.then (μ₀.heap.allocDefault R hR)).H').bind fun rb =>
-        (μ₀.then (μ₀.heap.allocDefault R hR)).heap.readAddr rb).map (MVal.erase T) =
-      ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase T) :=
-  Grown.readAddM_old μ₀ R hR bd hid
+    (μ₀.then (μ₀.heap.allocDefault R hR)).readId bd = μ₀.readId bd :=
+  MVal.toMvT_of_erase (Grown.readAddM_old μ₀ R hR bd hid)
 
-/-- **newAddDifferent**: an allocation's identity is past every older one. -/
-theorem Grown.newAddDifferent {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
+/-- An allocation's identity is past every older one (Lean only: the
+freshness behind `newFromAdd`, KeY's `idp1 ≠ idp2`). -/
+theorem Grown.alloc_fresh {H : HTy} {R : RefTy} (g : Grown H (MObj · R)) :
     H.length ≤ ((Grown.alloc g).val : HRef _ R).id :=
   Grown.alloc_id_ge g
 
-/-- **readAddEqual**, **initMember**: a member of a fresh struct reads the
-default of its type. -/
+/-- **readOnAddM** `\then`, then **initMember**: a member of a fresh struct
+reads the default of its type. -/
 theorem Heap.initMember {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (hR : (Ty.ref (.struct s)).mapFree = true) (hf : lookupBy f (structDef s) = some (.prim p))
     (hl : ¬ f = "length") :
@@ -875,26 +893,26 @@ theorem Heap.initSize {H : HTy} (hp : Heap H) (E : Ty)
     (hp.allocDefault (.array E) hR).heap.len (hp.allocDefault (.array E) hR).val .dyn = 0 :=
   Heap.allocDefault_array_len hp E hR
 
-/-- **readCopySt**: a member of a storage struct copied into memory reads
-what the struct held there. -/
-theorem SVal.readCopySt {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+/-- **readFromCopyToStorage** `\then`: a member of a storage struct copied
+into memory reads what the struct held there. -/
+theorem SVal.readFromCopyToStorage {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (sv : SVal (.ref (.struct s))) (hT : (Ty.ref (.struct s)).mapFree = true)
     (hf : lookupBy f (structDef s) = some (.prim p)) (hl : ¬ f = "length") :
     (sv.copyStToM hp hT).heap.field (sv.copyStToM hp hT).val hf =
       (((SVal.view sv : SFields _).get hf).view : p.Denote) :=
   SVal.copyStToM_field hp sv hT hf hl
 
-/-- **readCopyStOther**: a copy into memory leaves every older object. -/
-theorem Grown.readCopyStOther {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : Ty} (v : SVal U)
-    (hU : U.mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
-    ((bd.resolve (μ₀.then (v.copyStToM μ₀.heap hU)).H').bind fun rb =>
-        (μ₀.then (v.copyStToM μ₀.heap hU)).heap.readAddr rb).map (MVal.erase T) =
-      ((bd.resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase T) :=
-  Grown.readCopySt_old μ₀ v hU bd hid
+/-- **readFromCopyToStorage** `\else`, and **readFromCopyToStorageIdentity**
+`\else`: a copy into memory leaves every older object (the premise the
+object older than the copy, where KeY's is `idp1 ≠ idp2`). -/
+theorem Grown.readFromCopyToStorageFrame {H : HTy} (μ₀ : Grown H (fun _ => Unit)) {U : Ty}
+    (v : SVal U) (hU : U.mapFree = true) {T : Ty} (bd : MAddrT T) (hid : bd.id < μ₀.H'.length) :
+    (μ₀.then (v.copyStToM μ₀.heap hU)).readId bd = μ₀.readId bd :=
+  MVal.toMvT_of_erase (Grown.readCopySt_old μ₀ v hU bd hid)
 
-/-- **findCopyMem**, **selectOnCopyMemPrim**: a member of a memory struct
-copied into storage holds what the object held there. -/
-theorem MVal.findCopyMem {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
+/-- **findOnCopy** at a one-member path, **selectOnCopyMemPrim**: a member of
+a memory struct copied into storage holds what the object held there. -/
+theorem MVal.findOnCopy {H : HTy} (hp : Heap H) {s f : Name} {p : PrimTy}
     (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some (.prim p))
     (hl : ¬ f = "length") :
     (MVal.copyMToSt hp (T := .ref (.struct s)) r).find (.field hf .nil) =

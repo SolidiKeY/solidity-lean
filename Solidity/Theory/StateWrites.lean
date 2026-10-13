@@ -5,13 +5,13 @@ import Solidity.Semantics.NoPanicOps
 /-!
 # The interpreter's writes, reshaped
 
-What `sol_decide`'s untyped language and the closer still read of the
-untyped interpreter's writes: a storage write as a new storage
-(`State.writeStorage_eq`), a push whose element ignores the slot
-(`pushAt_const`), a local's write leaving the state's other parts and a
-memory location read and written (simp lemmas), and what a binding holds
-(`Close.bindingVal`, …).  The rest went with the typed Theory (W10.3.0,
-`docs/intrinsic.md`); these go with `sol_decide`'s untyped language (W10.4).
+What `sol_close`'s untyped `close_rw` set (`Calculus/Close.lean`) reads of
+the untyped interpreter's writes, which no scoped leaf reaches: a storage
+write as a new storage (`State.writeStorage_eq`), a push whose element
+ignores the slot (`pushAt_const`), a local's write leaving the state's
+other parts and a memory location read and written (simp lemmas), and what
+a binding holds (`Close.bindingVal`, …).  The rest went with the typed
+Theory (W10.3.0, `docs/intrinsic.md`); these go at W10.5.
 -/
 
 namespace Solidity

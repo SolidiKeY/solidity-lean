@@ -1,5 +1,5 @@
 import Solidity.Semantics.State
-import Solidity.Semantics.Agree
+import Solidity.Semantics.Properties
 
 /-!
 # A local's binding, untyped

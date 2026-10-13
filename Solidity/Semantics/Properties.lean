@@ -383,7 +383,7 @@ end
 
 A copy allocates; it never frees, so every identity at or above the *final*
 `nextId` was already absent before the copy: solkey's `new(mem, r)`, read
-on the interpreter (on the typed heap, `Grown.newAddDifferent`). -/
+on the interpreter (on the typed heap, `Grown.alloc_fresh`). -/
 
 /-- A state computation only advances the fresh-ID counter. -/
 def NextIdGrows (s : State) (r : Res (State × α)) : Prop :=

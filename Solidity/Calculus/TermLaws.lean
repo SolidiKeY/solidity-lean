@@ -430,8 +430,9 @@ theorem find_save_same {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
   simp only [Storage.find, SFields.get_set_same]
   exact SVal.find_save_same _ _ _ hs
 
-/-- **A save leaves a reference that parts from it** (solkey's
-`findOnSaveFrame`): across roots, or below one root by `Path.Diverges`. -/
+/-- **A save leaves a reference that parts from it** (`findOnSaveFrame`,
+solkey's `selectOnSaveCons` `\else`): across roots, or below one root,
+by `Theory.diverges`. -/
 theorem find_save_frame {U W : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     {q : SRef C W} (hd : Theory.diverges r.segs q.segs = true)
     (h : st.save r v = some st') : st'.find q = st.find q := by
@@ -457,7 +458,7 @@ theorem lenU_congr {n m : Nat} (e : n = m) (h : n < 2 ^ 256) (h' : m < 2 ^ 256) 
   subst e; rfl
 
 /-- **A save leaves an array's length** where it parts from the length's
-path (solkey's `lenOnSaveFrame`): elsewhere, or below one of the array's
+path (`lenOnSaveFrame`): elsewhere, or below one of the array's
 elements. -/
 theorem len_save_frame {U E : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     {q : SRef C (.ref (.array E))}
@@ -2255,7 +2256,8 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   | readOnWrite {m : Tm C Γ .mem} {P : PrimTy} {a : Tm C Γ (.addr (.prim P))} {v : P.Denote} :
       EvalLaw (Tms.Term.read (Tms.MTerm.write m a (Tms.MValT.val (Tms.Term.lit v))) a)
         (Tms.Term.lit v)
-  /-- **`readWriteDifferent`**: a write leaves every other address,
+  /-- **`readWriteDifferent`** (solkey's `readOnWrite` `\else`): a write
+  leaves every other address,
   `read(write(m, a, v), b) ⇝ read(m, b)` where `a` and `b` never meet
   (`Tm.apart?`, `Heap.readAddr_writeAddr_apart`). -/
   | readWriteDifferent {m : Tm C Γ .mem} {T : Ty} {a : Tm C Γ (.addr T)} {v : Tm C Γ (.mv T)}
@@ -2271,8 +2273,8 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
   | readOnWriteIdentity {m : Tm C Γ .mem} {R : RefTy} {a : Tm C Γ (.addr (.ref R))}
       {i : Tm C Γ (.ident R)} :
       EvalLaw (Tms.ITerm.read (Tms.MTerm.write m a (Tms.MValT.ref i)) a) i
-  /-- **`findCopyMem`**: a member read out of a memory object copied into
-  storage is read out of memory,
+  /-- **`findCopyMem`** (solkey's `findOnCopy` over `findOnSave`): a member
+  read out of a memory object copied into storage is read out of memory,
   `find(save(s, p, copyMem(mtSt, m, i)), p.f) ⇝ read(m, i.f)` (`Tm.findCopyMem_exact`). -/
   | findCopyMem {s : Tm C Γ .st} {sn f : Name} {P : PrimTy} {p : Tm C Γ (.path (.ref (.struct sn)))}
       {m : Tm C Γ .mem} {i : Tm C Γ (.ident (.struct sn))} {hf : C.fieldType sn f = some (.prim P)}
@@ -2294,8 +2296,8 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
       EvalLaw (Tm.app2 .findIn (Tm.app3 .saveIn S q (Tms.SValT.copyMem m i))
           (Tm.app1 (.fieldIn hf) q))
         (Tms.Term.read m (Tms.MAddr.field i f hf))
-  /-- **`readCopySt`**: a member read out of a copy of a storage struct is
-  read out of storage,
+  /-- **`readCopySt`** (solkey's `readFromCopyToStorage` `\then`): a member
+  read out of a copy of a storage struct is read out of storage,
   `read(copySt(m, find(s, p)), freshId(copySt(m, find(s, p))).f) ⇝ find(s, p.f)`
   (`Tm.readCopySt_exact`). -/
   | readCopySt {m : Tm C Γ .mem} {s : Tm C Γ .st} {sn f : Name} {P : PrimTy}
@@ -2304,7 +2306,8 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
       EvalLaw (Tms.Term.read (Tms.MTerm.copySt m (Tms.SValT.find s p) hT)
           (Tms.MAddr.field (Tms.ITerm.copy m (Tms.SValT.find s p) hT) f hf))
         (Tms.Term.find s (Tms.PTerm.field p f hf))
-  /-- **`readAddEqual`**: a primitive member or fixed element of a fresh
+  /-- **`readAddEqual`** (solkey's `readOnAddM` `\then`, then `initMember`,
+  `initElement`): a primitive member or fixed element of a fresh
   object holds its type's default, `read(addM(m, R), a) ⇝ default`, where `a`
   reads at a path below the fresh root whose declared type is the primitive
   (`Tm.freshPath?`, `Tm.readAddEqual_exact`). -/
@@ -2312,7 +2315,8 @@ inductive EvalLaw {Γ : Ctx} : {u : Srt} → Tm C Γ u → Tm C Γ u → Prop
       {b : Tm C Γ (.addr (.prim P))}
       (h : (Tm.freshPath? m R b).bind (Ty.ref R).memberTy = some (.prim P) := by rfl) :
       EvalLaw (Tms.Term.read (Tms.MTerm.addM m R hR) b) (Tm.app0 (.lit (PrimTy.dflt P)))
-  /-- **`readAddDifferent`**: an allocation leaves every object allocated
+  /-- **`readAddDifferent`** (solkey's `readOnAddM` `\else`): an allocation
+  leaves every object allocated
   before it, `read(addM(m, R), a) ⇝ read(m, a)` where `a`'s object is older
   than `m` leaves (`Tm.boundedIn`, `Tm.readAddDifferent_exact`). -/
   | readAddDifferent {m : Tm C Γ .mem} {R : RefTy} {hR : (Ty.ref R).mapFree = true} {P : PrimTy}

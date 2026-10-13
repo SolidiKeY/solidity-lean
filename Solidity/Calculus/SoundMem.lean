@@ -10,7 +10,7 @@ so a captured receiver is the reference itself (no `asRef`).
 -/
 
 namespace Solidity
-open Solidity (Modality Srt Op0 Op1 Op2 Op3 NoPanic)
+open Solidity (Modality Srt Op0 Op1 Op2 Op3)
 open Semantics (Value SVal MVal Seg Halt Res)
 
 variable {C : Contract}

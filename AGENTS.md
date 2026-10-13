@@ -37,11 +37,11 @@ rest is typed too (W10): `sol_decide`'s language is the typed signature
 with atoms and guards (`Calculus/DecideLang.lean`), the Theory's values
 are their observations (`Theory/Typed/Obs.lean`, `Theory/Typed/Mem.lean`;
 `Tm.denote`, `.eq` is `=`), and `Tools/Counterexample.lean`'s candidates
-are typed states. What stays untyped: `Semantics.State` and its encodings
-(`State.globE`, `Semantics/StateErase.lean`), read only by the untyped
-interpreter's own lemmas; `Theory/StateWrites.lean`, read by `sol_close`;
-`readAddr` (`Update.lean`), which the memory proofs reach through an erased
-address.
+are typed states. Still untyped: `Semantics.State`, the typed state erased
+(`State.globE`), which the typed run's invariants (`Typing/`), the EVM
+simulation (`Evm/`), the memory laws' `readAddr` and the `#run` tools read
+(W10.5 types them); and `Theory/StateWrites.lean`, in `sol_close`'s untyped
+`close_rw` set, which no scoped leaf reaches.
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s

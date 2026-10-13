@@ -14,7 +14,6 @@ import Solidity.FreshNames
 import Solidity.Semantics
 import Solidity.Semantics.DecEq
 import Solidity.Semantics.Properties
-import Solidity.Semantics.Agree
 import Solidity.Semantics.WellFormed
 import Solidity.Semantics.NoPanicOps
 import Solidity.Semantics.Value

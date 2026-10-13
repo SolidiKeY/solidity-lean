@@ -6,8 +6,9 @@ import Solidity.Calculus.TermLaws
 
 A storage write under the box, named on the spot with what the typed laws
 say of the storage it returns (`Calculus/TermLaws.lean`'s frame section):
-solkey's `findOnSave` at the path written and below it, and its
-`findOnSaveFrame`, `lenOnSaveFrame` where the paths part, the parting read
+`findOnSave` at the path written and below it, and `findOnSaveFrame`,
+`lenOnSaveFrame` where the paths part (solkey's `selectOnSaveCons`, its
+`\then` and its `\else`), the parting read
 as the Theory's `diverges` on the references' segments (`SRef.segs`), which
 the closer computes, a symbolic key by a hypothesis `k != j` of the formula
 or a branch.  An index check (`Storage.checkIndex`) is framed as an array's
@@ -46,8 +47,8 @@ theorem inBounds_saveM {R : RefTy} {k : PrimTy} {V W : Ty} (it : IndexTy R k V) 
         rw [SVal.saveM_at_n h]
 
 /-- **A save leaves an index check** where it parts from the array's
-length: elsewhere, or below one of its slots (solkey's `lenOnSaveFrame`,
-which the check reads). -/
+length: elsewhere, or below one of its slots (`lenOnSaveFrame`, which the
+check reads). -/
 theorem checkIndex_save_frame {k : PrimTy} {V : Ty} {T : Ty} {R' : RefTy}
     {st st' : Storage C} {r : SRef C T} {v : SVal T} {q : SRef C (.ref R')}
     (it : IndexTy R' k V) (i : Int)

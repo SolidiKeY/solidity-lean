@@ -35,9 +35,7 @@ implied by `Reachable` in general (`huge_reachable_not_fits`), implied under
 The run is `Semantics/Run.lean`'s, over typed states; `Semantics.lean` keeps
 the untyped state's operations, which the typed ones erase to
 (`Semantics/StorageErase.lean`, `HeapErase.lean`, `TypedErase.lean`) and the
-closer's terms read. `Semantics/Agree.lean` is the frame kit for reads on the
-erasure: `EnvAgreeExcept ns`, and a `*_frame` lemma per evaluator. A new
-evaluator in `Semantics.lean` needs its frame lemma there.
+closer's terms read.
 
 Changes to the run that follow solc over KeY are recorded in
 `docs/solc-alignment.md`.

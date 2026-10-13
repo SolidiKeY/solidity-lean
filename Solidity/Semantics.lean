@@ -8,9 +8,9 @@ The state KeY's terms read (mini-solkey's `Ch04_Semantics`): a storage tree
 the locals, the `net` payment ledger and the contract's funds
 (`netHeader.key`), and the transaction's environment (`msg.sender`, …);
 the evaluators of program expressions, the storage and memory reads and
-writes, a call's binding and decoding.  The closer's terms read it
-(`Tm.eval`, `Calculus/Lands.lean`), on the typed state's global part
-erased (`State.globE`, `Semantics/State.lean`).
+writes, a call's binding and decoding.  The typed state's global part
+erases to it (`State.globE`, `Semantics/State.lean`); the closer's terms
+read the typed state itself (`Signature.lean`, W9.8.3).
 
 Statements run in the typed interpreter (`Semantics/Run.lean`,
 `docs/intrinsic.md`); there is no untyped run of a statement (decisions 39

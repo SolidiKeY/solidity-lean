@@ -28,7 +28,9 @@ as its observations (`Srt.Bridge`): literally, by the bridge lemmas of
   laws.  `next` reads the length in the global storage, `nextIn` in its
   storage term.
 
-This is the only Theory module that imports the signature (design R10).
+This is the only Theory module that imports the signature directly (design
+R10); `Theory/Typed/Mem.lean` reads it (`MAddrT`, `Grown.writeT`) through
+`Calculus/StateFacts.lean`.
 -/
 
 namespace Solidity
