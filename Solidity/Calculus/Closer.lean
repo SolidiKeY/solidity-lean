@@ -1027,6 +1027,15 @@ theorem has_below (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) {i : 
 theorem ival_uintOfNat {n : Nat} (h : n < 2 ^ 256) : PrimTy.ival (uintOfNat n) = n := by
   simp only [uintOfNat, dif_pos h, lenU, PrimTy.ival]
 
+theorem findM_atF_isSome {E : Ty} {n : Nat} (v : SVal (.ref (.fixed E n))) {i : Int} (h0 : 0 ≤ i)
+    (hi : i < (n : Int)) : (v.findM (.atF i .nil)).isSome = true := by
+  cases v with
+  | fixed e =>
+    simp only [SVal.findM, if_pos h0]
+    have hl : i.toNat < e.toList.length := by rw [SVec.length_toList]; omega
+    rw [List.getElem?_eq_getElem hl]
+    simp only [SVal.findM_nil', Option.isSome_some]
+
 /-- `has` at a dynamic array's index the ranges put below its length. -/
 def Facts.hasIdxDyn (F : Facts C) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
     (q : LTm C (.path (.ref R))) (i : LTm C (.val k.keyTy)) : LTm C (.val .bool) :=
@@ -1040,7 +1049,10 @@ def Facts.hasIdxDyn (F : Facts C) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexT
         if (F.range i).2 < (F.range (.obsL q)).1 then
           (if F.returns i && F.returns q then .tt else .seq i (.seq (.obsL q) .tt))
         else .obsH (.index (.arr .dyn) q i))
-      (fun {_} {_} q i => .obsH (.index (.arr .fixed) q i))) q i
+      (fun {_} {n} q i =>
+        if (F.range i).2 < (n : Int) then
+          (if F.returns i then hasN (.obsH q) else .seq i (hasN (.obsH q)))
+        else .obsH (.index (.arr .fixed) q i))) q i
 
 theorem Facts.hasDyn_core {F : Facts C} (hF : F.Ok g ν) {E : Ty}
     {q : LTm C (.path (.ref (.array E)))} {i : LTm C (.val PrimTy.uint.keyTy)}
@@ -1088,7 +1100,33 @@ theorem Facts.hasRange_eval {F : Facts C} (hF : F.Ok g ν) (t : LTm C (.val .boo
       | map => rfl
       | arr a =>
         cases a with
-        | fixed => rfl
+        | @fixed E n =>
+          simp only [Facts.hasIdxDyn]
+          split
+          · rename_i hlt
+            have key : ((LTm.seq i (hasN (LTm.obsH q))).eval g ν : Option Bool) =
+                (LTm.obsH (LTm.index (IndexTy.arr ArrTy.fixed) q i)).eval g ν := by
+              rw [LTm.eval_seq, hasN_eval, LTm.eval_obsH, LTm.eval_obsH, LTm.eval_index]
+              cases hi : (i.eval g ν : Option PrimTy.uint.Denote) with
+              | none => cases (q.eval g ν : Option (SRef C _)) <;> rfl
+              | some k =>
+                cases hq : (q.eval g ν : Option (SRef C _)) with
+                | none => rfl
+                | some r =>
+                  have ri := F.range_sound hF i hi
+                  unfold InR at ri
+                  have hk : 0 ≤ PrimTy.ival k := (PrimTy.ival_mem k).1
+                  have hkey : PrimTy.key k = PrimTy.ival k := rfl
+                  simp only [Option.bind_some, SRef.index, Path.index_fixed]
+                  rw [has_append g.storage r _ fun v => findM_atF_isSome v (by rw [hkey]; exact hk)
+                    (by rw [hkey]; omega)]
+            split
+            · rename_i hr
+              obtain ⟨k, hk⟩ := Option.isSome_iff_exists.1 (F.returns_sound hF i hr)
+              rw [← key, LTm.eval_seq, hk]
+              rfl
+            · exact key
+          · rfl
         | dyn =>
           simp only [Facts.hasIdxDyn]
           split
@@ -1379,6 +1417,40 @@ theorem Facts.cancel_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} (hs : BinO
     · cases h
   · cases h
 
+/-- `x == true` as `x`, `x == false` as `!x`, at `bool`. -/
+def eqBoolLit {p : PrimTy} (x y : LTm C (.val p)) : Option (LTm C (.val .bool)) :=
+  match p, x, y with
+  | .bool, x, y =>
+    match y.litV? with
+    | some v => some (if (show Bool from v) then x else .app1 (.unop .not rfl) x)
+    | none => none
+  | _, _, _ => none
+
+theorem eqBoolLit_eval {p : PrimTy} {x y : LTm C (.val p)} {t : LTm C (.val .bool)}
+    (h : eqBoolLit x y = some t) (hacc : BinOp.eqB.accepts p = true) :
+    (t.eval g ν : Option Bool) = (LTm.app2 (.binop .eqB hacc) x y).eval g ν := by
+  cases p with
+  | bool =>
+    simp only [eqBoolLit] at h
+    split at h
+    · rename_i v hv
+      cases h
+      obtain rfl := LTm.eq_of_litV? hv
+      rw [LTm.eval_app2]
+      cases hx : (x.eval g ν : Option Bool) with
+      | none => cases hb : (show Bool from v) <;> simp only [hb, if_true, if_false,
+          Bool.false_eq_true, LTm.eval_app1, hx] <;> rfl
+      | some u =>
+        have hl : ((LTm.lit (p := .bool) v).eval g ν : Option Bool) = some v := rfl
+        rw [hl, Op2.eval_eq_evalM]
+        simp only [Op2.evalM, Option.bind_some]
+        unfold binopT
+        simp only [BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalBool]
+        cases hb : (show Bool from v) <;> cases u <;>
+          simp only [hb, if_true, if_false, Bool.false_eq_true, LTm.eval_app1, hx] <;> rfl
+    · cases h
+  | uint | int => simp only [eqBoolLit, reduceCtorEq] at h
+
 /-- A comparison folded by its operands' ranges, where both return. -/
 def Facts.cmpFold (F : Facts C) {p : PrimTy} (dec : Int × Int → Int × Int → Option Bool)
     (x y : LTm C (.val p)) : Option Bool :=
@@ -1390,7 +1462,11 @@ def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y :
     LTm C s :=
   match o, x, y with
   | .binop .eqB h, x, y =>
-    if x.beqR y && F.returns x then .lit (p := .bool) true else Decide.fold2 (.binop .eqB h) x y
+    if x.beqR y && F.returns x then .lit (p := .bool) true
+    else
+      match eqBoolLit x y with
+      | some t => t
+      | none => Decide.fold2 (.binop .eqB h) x y
   | .binop .neB h, x, y =>
     if x.beqR y && F.returns x then .lit (p := .bool) false else Decide.fold2 (.binop .neB h) x y
   | .binop .lt h, x, y =>
@@ -1446,7 +1522,12 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
         show _ = binopT _ v (some v)
         cases p <;> simp only [binopT, BinOp.shortT, Option.bind_some, BinOp.evalT,
           BinOp.evalNum, BinOp.evalBool, decide_true, Bool.not_true]
-      · exact Decide.fold2_eval g ν _ x y
+      · first
+          | (split
+             · rename_i t ht
+               exact eqBoolLit_eval ht h
+             · exact Decide.fold2_eval g ν _ x y)
+          | exact Decide.fold2_eval g ν _ x y
     case lt | gt | le | ge =>
       have hnum : p.isNumeric = true := by
         cases p <;> first | rfl | cases h
@@ -1483,7 +1564,13 @@ def Facts.fold3 (F : Facts C) {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) 
   | .ite, x, y, z =>
     match x.litV? with
     | some v => cond (v : Bool) y z
-    | none => if y.beqR z && F.returns x then y else .app3 .ite x y z
+    | none =>
+      if y.beqR z && F.returns x then y
+      else if y.beqR x && z.beqR (LTm.tt : LTm C (.val .bool)) && F.returns x then
+        match (LTm.tt : LTm C (.val .bool)).castTo? with
+        | some t => t
+        | none => .app3 .ite x y z
+      else .app3 .ite x y z
   | o, x, y, z => .app3 o x y z
 
 theorem Facts.fold3_eval {F : Facts C} (hF : F.Ok g ν) {a b c s : Srt} (o : Op3 C a b c s)
@@ -1505,7 +1592,21 @@ theorem Facts.fold3_eval {F : Facts C} (hF : F.Ok g ν) {a b c s : Srt} (o : Op3
         rw [LTm.eval_app3, hv]
         show _ = cond (v : Bool) _ _
         cases (v : Bool) <;> rfl
-      · rfl
+      · split
+        · rename_i hb
+          simp only [Bool.and_eq_true] at hb
+          obtain ⟨⟨h1, h2⟩, h3⟩ := hb
+          cases LTm.sigma_eq_of_beqR h1
+          cases LTm.sigma_eq_of_beqR h2
+          split
+          · rename_i t ht
+            cases LTm.castTo?_eq ht
+            obtain ⟨v, hv⟩ := Option.isSome_iff_exists.1 (F.returns_sound hF x h3)
+            rw [LTm.eval_app3, hv]
+            show some true = cond (v : Bool) _ _
+            cases (v : Bool) <;> rfl
+          · rfl
+        · rfl
   all_goals rfl
 
 /-- `Facts.nf`'s compiled twin. -/
@@ -2416,10 +2517,71 @@ theorem Facts.addEqn_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
     exact Facts.addBool_ok _ h1 (boolLit?_eval hc hn)
   · exact h1
 
+theorem _root_.Solidity.PrimTy.ival_inj : {p : PrimTy} → {u w : p.Denote} →
+    PrimTy.ival u = PrimTy.ival w → u = w
+  | .bool, u, w, h => by
+    cases hu : (show Bool from u) <;> cases hw : (show Bool from w) <;>
+      simp only [PrimTy.ival, hu, hw] at h <;> first | rfl | cases h |
+      (exact (show (u : Bool) = w from hu.trans hw.symm))
+  | .uint, _, _, h => Subtype.ext h
+  | .int, _, _, h => Subtype.ext h
+
+/-- The premise `¬ a ≐ v`, `v` a literal at an edge of `a`'s range: the
+range one narrower. -/
+def Facts.neEdge (F : Facts C) {p : PrimTy} (a : LTm C (.val p)) (v : p.Denote) : Facts C :=
+  let r := F.range a
+  if r.1 = PrimTy.ival v then { F with bnds := ⟨p, a, r.1 + 1, r.2⟩ :: F.bnds }
+  else if r.2 = PrimTy.ival v then { F with bnds := ⟨p, a, r.1, r.2 - 1⟩ :: F.bnds }
+  else F
+
+theorem Facts.neEdge_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
+    {a : LTm C (.val p)} {v : p.Denote}
+    (h : ∀ x, (a.eval g ν : Option p.Denote) = some x → x ≠ v) : (F.neEdge a v).Ok g ν := by
+  dsimp only [Facts.neEdge]
+  have key : ∀ x, (a.eval g ν : Option p.Denote) = some x →
+      InR (F.range a) (PrimTy.ival x) ∧ PrimTy.ival x ≠ PrimTy.ival v :=
+    fun x hx => ⟨F.range_sound hF a hx, fun e => h x hx (PrimTy.ival_inj e)⟩
+  split
+  · rename_i he
+    refine ⟨hF.eqs, hF.nes, hF.rets, fun b hb x hx => ?_⟩
+    rcases List.mem_cons.1 hb with rfl | hb
+    · obtain ⟨⟨h1, h2⟩, h3⟩ := key x hx
+      dsimp only
+      constructor <;> omega
+    · exact hF.bnds b hb x hx
+  · split
+    · rename_i _ he
+      refine ⟨hF.eqs, hF.nes, hF.rets, fun b hb x hx => ?_⟩
+      rcases List.mem_cons.1 hb with rfl | hb
+      · obtain ⟨⟨h1, h2⟩, h3⟩ := key x hx
+        dsimp only
+        constructor <;> omega
+      · exact hF.bnds b hb x hx
+    · exact hF
+
+/-- The premise `¬ a ≐ b` with a side a literal: the other's range narrowed. -/
+def Facts.neBnd (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
+  match b.litV?, a.litV? with
+  | some v, _ => F.neEdge a v
+  | none, some v => F.neEdge b v
+  | none, none => F
+
+theorem Facts.neBnd_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
+    {a b : LTm C (.val p)} (h : ¬ (LFml.eq a b).holds g ν) : (F.neBnd a b).Ok g ν := by
+  unfold Facts.neBnd
+  split
+  · rename_i v hv
+    refine Facts.neEdge_ok hF fun x hx e => h ((LFml.holds_eq_iff g ν a b).2 ⟨x, hx, ?_⟩)
+    rw [LTm.eval_litV? g ν hv, e]
+  · rename_i v hv
+    refine Facts.neEdge_ok hF fun x hx e => h ((LFml.holds_eq_iff g ν a b).2 ⟨x, ?_, hx⟩)
+    rw [LTm.eval_litV? g ν hv, e]
+  · exact hF
+
 /-- **The premise `¬ a ≐ b`**: `addNe1`, a boolean side read apart, and the
 facts read again. -/
 def Facts.addNeq (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
-  let F1 := F.addNe1 a b
+  let F1 := (F.addNe1 a b).neBnd (F.nf a) (F.nf b)
   let F2 := match boolLit? (F.nf a) (F.nf b) with
     | some (c, v) => if F.returns c then F1.addBool boolFuel c (!v) else F1
     | none => F1
@@ -2446,9 +2608,9 @@ theorem boolLit?_neg {ν : AEnv} {p : PrimTy} {a b : LTm C (.val p)} {c : LTm C 
 
 theorem Facts.addNeq_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
     {a b : LTm C (.val p)} (h : ¬ (LFml.eq a b).holds g ν) : (F.addNeq a b).Ok g ν := by
-  have h1 := Facts.addNe1_ok hF h
   have hn : ¬ (LFml.eq (F.nf a) (F.nf b)).holds g ν := by
     rw [LFml.holds_eq_iff, F.nf_eval hF, F.nf_eval hF, ← LFml.holds_eq_iff]; exact h
+  have h1 := Facts.neBnd_ok (Facts.addNe1_ok hF h) hn
   refine Facts.rebuild_ok ?_
   split
   · rename_i c v hc
@@ -2467,9 +2629,16 @@ section Close
 
 variable {g : State C []}
 
+/-- A `bool` atom to split on: `x ≐ true` or not. -/
+def boolSplit (p : PrimTy) (k : Nat) : Option (EqF C) :=
+  match p with
+  | .bool => some ⟨.bool, .var k, .tt⟩
+  | _ => none
+
 /-- `LTm.pick`'s compiled twin. -/
 def LTm.pickM (F : Facts C) : {s : Srt} → LTm C s → Option (EqF C)
-  | _, .var _ | _, .app0 _ | _, .err => none
+  | _, @LTm.var _ p k => boolSplit p k
+  | _, .app0 _ | _, .err => none
   | _, .app1 _ x => x.pickM F
   | _, .app2 _ x y => x.pickM F <|> y.pickM F
   | _, .app3 _ x y z => x.pickM F <|> y.pickM F <|> z.pickM F
@@ -2486,7 +2655,7 @@ return, the innermost first.  By the recursor. -/
 @[implemented_by LTm.pickM]
 def LTm.pick (F : Facts C) {s : Srt} (t : LTm C s) : Option (EqF C) :=
   @LTm.rec C (fun _ _ => Option (EqF C))
-    (@fun _ _ => none) (@fun _ _ => none)
+    (@fun p k => boolSplit p k) (@fun _ _ => none)
     (@fun _ _ _ _ ihx => ihx)
     (@fun _ _ _ _ _ _ ihx ihy => ihx <|> ihy)
     (@fun _ _ _ _ _ _ _ _ ihx ihy ihz => ihx <|> ihy <|> ihz)

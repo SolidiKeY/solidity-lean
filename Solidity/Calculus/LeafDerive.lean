@@ -245,7 +245,7 @@ def closeSize : Nat := 2000
 
 /-- The most nodes the closer takes in the reduction (`LFml.elim`), which
 is what it walks, counted as a tree. -/
-def elimSize : Nat := 8000
+def elimSize : Nat := 40000
 
 /-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the
 reduction does not read it; else whether it closes it: within `closeSize`
