@@ -44,7 +44,15 @@ is a `uint`, used as a `bool`".
   names: a written line past the program is compared by it, read where no
   context declares the locals it names.  A symbol's key is its untyped
   namesake's (`OpN.key`: `findIn` is `find`, `member f` is `root f`), with
-  no type in it, since a key is computed before anything resolves.
+  no Solidity type in it, since a key is computed before anything resolves.
+  KeY's `int` is told apart by name (`NTm.isK`: a ledger read, a KeY `int`
+  local, arithmetic over one), so its symbols keep their own keys
+  (`zlit n`, `zbin +`, `zcmp ==`) and a widening its `toInt(…)` (`keyK`).
+* **KeY's `int`** (`Srt.kint`, kind `.val`): a term of fixed type `uint`
+  (a local, a read, `msg.value`) beside one is widened (`widen`,
+  `resolvePairV`), a numeral checked at it is a KeY literal, and a free
+  parameter is never widened: the reader makes it a KeY `int` where only
+  such arithmetic reads it (`RawFml.kintParams`).
 
 `NUpdElem` is an update's element over such terms, which
 `Upd.resolveN` declares or assigns where it stands.

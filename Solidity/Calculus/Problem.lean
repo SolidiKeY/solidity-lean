@@ -32,10 +32,10 @@ for every word, key and slot in range), and every word in its type's range
 (`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
-model's `push` (`pushOn`) never panics.  The delta cuts both ways.  A
-diamond that reads a length through checked arithmetic can fail from a
-storage solc cannot reach, so it is stronger than Solidity's and may not be
-derivable (`storagePushReadBack`).  And a diamond over a `push` with no
+model's `push` (`pushOn`) never panics (at `2^256 - 1` elements it is out
+of gas, which both modalities accept).  A diamond that reads a length back
+after a push (`storagePushReadBack`) is valid all the same, the length then
+at least `1`, though not derived.  And a diamond over a `push` with no
 bound on the length before it asserts normal termination where solc
 panics, from a storage of length `2^64` that `wt` accepts: three derived
 ones hold only up to this delta (`storagePushLengthPositive`,

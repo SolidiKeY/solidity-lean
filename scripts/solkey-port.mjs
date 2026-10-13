@@ -194,12 +194,13 @@ const IMPORTED = {
   file: "TestSuite.sol", suite: "taclets", contract: "TestSuite", ns: "Solkey.TestSuite",
 };
 
-/** Pending obligations that are false in the model, with the reason. */
+/** Pending obligations listed apart from the pending ones, with the reason
+(`storagePushReadBack`: valid in the model since W9.8.5, not derived). */
 const DIVERGENT = {
   storagePushReadBack:
-    "`wt(storage)` does not bound array lengths, so the checked `- 1` after a push " +
-    "can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, " +
-    "\"Remaining deltas\")",
+    "valid in the model (a push at a full array is out of gas, so the length after " +
+    "one is at least `1`) but not derived: the closer does not read the slot at " +
+    "`(len + 1) - 1` as the one pushed",
 };
 
 /** The copy test of the dangling aliases (docs/testsuite-proofs.md, "Dangling aliases"). */

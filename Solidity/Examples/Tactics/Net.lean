@@ -130,6 +130,20 @@ theorem netTransferCapturedAmount :
   sol_symex
   sol_close
 
+/-- `e` a parameter of KeY's `int` (read only beside the ledger,
+`RawFml.kintParams`): the entry `e - 5` for every integer `e`, negative or
+past `2^256`, as solkey reads it. -/
+theorem netTransferAny :
+    ⊨ dl!{ to != this → net(to) = e → [ to.transfer(5); ] net(to) = e - 5 } := by
+  sol_symex
+  sol_close
+
+/-- The ledger is unbounded below: a debit of an empty entry is negative. -/
+theorem netTransferBelowZero :
+    ⊨ dl!{ to != this → net(to) = 0 → [ to.transfer(5); ] net(to) < 0 } := by
+  sol_symex
+  sol_close
+
 /-- Two transfers to one address accumulate. -/
 theorem netTransfersAccumulate :
     ⊨ dl!{ to != this → net(to) = 9 → [ to.transfer(5); to.transfer(2); ] net(to) = 2 } := by

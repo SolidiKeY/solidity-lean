@@ -6408,7 +6408,7 @@ jobs), clean.  What failed after the merge, and the fix:
   clashed with `FunContract`'s (renamed `State.thin_keep_push`).
 
 **Pins moved, with reasons**: `Tactics/Decide`'s `twoKeysBothWays` and
-`deleteBelow`, and two `Solkey/Constructors` examples, were pinned open
+`deleteBelow`, and two `Examples/Tactics/Constructors.lean` examples, were pinned open
 (`fail_if_success sol_close`) and close now; `ChainRewrites`' `add_literals`
 pin prints the typed `BinOp.add.evalT`, `findOnSaveFrame`'s the auxiliary
 proof names; `Notation`'s `PTerm.field` pin; `SelectOnSaveConsr`'s
@@ -6555,14 +6555,14 @@ example is back to master's pin.
 `corpus-parity.md`, `expected.tsv` and `Corpus/TestSuite.lean` as on
 master; the three `ProofTree` `wt` push examples under the diamond, and a
 pin of `⟨ persons.push(); uint n = persons.length - 1; ⟩ true`.
-`storagePushReadBack` is now valid in the model (where the `- 1` would
-overflow, the push is exhausted) but not derived: the closer does not read
-`values[(len + 1) - 1]` as the pushed slot.  It stays `divergent` in the
-tables, as on master; its reason there (the length delta) is now the
-solc one only.
+`storagePushReadBack` is valid in the model, as it was on master (the run
+exhausts a push at a full array, `Semantics/Run.lean`, so the length after
+one that returns is at least `1` and the `- 1` does not underflow: W9.8
+review), but not derived: the closer does not read `values[(len + 1) - 1]`
+as the pushed slot.  It stays `divergent` in the tables, as on master.
 
 **Built**: `lean_build` of the default targets and `SolkeyTestSuite`,
-clean; `sorry` lines 20 (as `HEAD`); `check-orphans` (orphans only the
+clean; `sorry` lines 19 (as `HEAD`); `check-orphans` (orphans only the
 git-ignored `Scratch` modules), `check-doc-paths`; `check-testsuite`
 against solkey `1b4341a303`: 438 functions = 435 derived + 1 pending + 1
 divergent + 1 excluded, 2 skip (the `Report.lean` pin's "2 pending" is the
@@ -6603,14 +6603,14 @@ the typed run only.
 The erased state is gone: `holds`, the update laws, the closer, the decision
 procedure and the rules' soundness read the typed state, an update by where
 it lands (`Upd.Lands`, `Upd.afterT`) or by what it computes (`Upd.applyV`).
-What stays untyped is the value-level reading of a typed state (decisions
-40, 83): a term's symbols read its global part erased (`State.globE`, a
-`Semantics.State`) and a local erased at its type (`State.getE`), and an
-update computes a global part and the locals' values
-(`Semantics.State × Locs C Δ`), not a typed state: an untyped `MObj` does
-not fix the heap typing, an allocation pair writes the local before the
-heap that types it, and `net`/`pay` read the intermediate global part
-(decision U1).  The side-projects reader is outdated (W9.7.1).
+What W9.7 left untyped, the value-level reading of a typed state
+(decisions 40, 83: a term's symbols read its global part erased,
+`State.globE`, and an update computed a `Semantics.State × Locs C Δ`),
+W9.8 typed: the symbols read the typed state, and `Upd.applyV` computes the
+typed global part and the locals' values (`GlobT`, `LocsV`).  `State.globE`
+remains only as the bridge of `sol_decide`'s untyped language
+(`Calculus/DecideErase.lean`).  The side-projects reader is outdated
+(W9.7.1).
 
 **W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
 terms' symbols read the typed state; what stays untyped is listed in the
@@ -6618,9 +6618,11 @@ W9.8.4 record.  A push at a full array is out of gas in the run and in the
 update reading alike (W9.8.5).
 
 **Open items:**
-- `storagePushReadBack` is valid in the model since W9.8.5 but not derived
-  (the closer does not read `(len + 1) - 1` as the pushed slot); the tables
-  still list it `divergent`.
+- `storagePushReadBack` is valid in the model (and was on master: the
+  length after a push that returns is at least `1`) but not derived (the
+  closer does not read `(len + 1) - 1` as the pushed slot, and
+  `Calculus/CloseFrame.lean` has no push clause); the tables list it
+  `divergent`.
 - `Chains/Storage` over its gate (W9.8.4 and W9.8.5 records).
 - `Derived13` about 5 s slower than master (the restored stale push
   obligation, W9.8.5 record).

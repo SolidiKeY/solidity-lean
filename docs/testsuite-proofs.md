@@ -6,7 +6,7 @@ derived with `⊢`, checked by the kernel, at close to KeY's speed. No
 dependencies, no `native_decide`, no new `maxHeartbeats` override, and a `?`
 twin that prints a cheap replay for every searching tactic.
 
-Today 431 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
+Today 435 of the 438 are derived by `⊢` (`TestSuite/Report.lean`), and the
 corpus rows (`Corpus/TestSuite.lean`) are corollaries of those theorems.
 
 Since the intrinsic refactor (`docs/intrinsic.md`, W3 and W4) the
@@ -136,9 +136,10 @@ What they say:
   full array as out of gas, as the run does, which the diamond accepts;
   the diamond's reduction reads the push's room as a premise (`roomM`).
   The four derived again: 435 derived.  `storagePushReadBack` is valid in
-  the model now (the overflowing `- 1` follows an exhausted push), not
-  derived (the closer does not read the pushed slot back), and still
-  listed `divergent`.
+  the model, and was on master too (a push at a full array is out of gas,
+  so the length after one is at least `1` and the `- 1` does not
+  underflow: W9.8 review), not derived (the closer does not read the slot
+  at `(len + 1) - 1` as the one pushed), and still listed `divergent`.
 - **M7.** The remaining functions; a `derived` status in the corpus table;
   retire `corpus_decide`, the `#eval` rows and the 8M override.  Done
   (below), but for the remaining functions: the table reads the `Report.lean`
@@ -825,7 +826,7 @@ Of the 117 pending, 111 use memory (M6).  The other 6, and why:
 
 | Function | Why it stays pending |
 |---|---|
-| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of a length with no bound, which reverts where the length is past `2²⁵⁶`; KeY's `int` has no range.  Not valid in the model (overflow, as the plan expects): solc keeps a length at most `2⁶⁴` (`push` panics, 0x41, on an array already that long), but `wt(storage)` does not bound lengths (`docs/solc-alignment.md`, "Remaining deltas"). |
+| `storagePushReadBack` (diamond) | `values[values.length - 1]` after `values.push(42)`: the `- 1` is a checked `uint` subtraction of the length.  Valid in the model: a push at a full array is out of gas (`Semantics/Run.lean`, `push`), which the diamond accepts, so after one that returns the length is at least `1` and the `- 1` does not underflow.  Not derived: the closer does not read the slot at `(len + 1) - 1` as the one pushed (W9.8 review, `docs/intrinsic.md`). |
 | `testDanglingReferenceSurvivesPush`, `testArrayCopyClearsOldElements`, `testArrayCopyKeepsDestinationTail`, `testDeleteArrayLeavesDataPastLength`, `testDanglingInnerArrayReappearsAfterPush` (diamonds) | an alias bound through an index (`Token storage r = tokens[0];`) used after a `pop` made it dangle: the fragment drops such an alias at the next write (`SymB.onWrite`), and the write through it lands past the live end, which the reduction's live storage does not reach. |
 
 **Cost.**  `Derived7.lean` (40 theorems) takes 58 s, `Derived8.lean` (23)

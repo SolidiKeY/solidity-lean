@@ -13,9 +13,9 @@ somewhere in the formula, at the type the reading gave it:
 * **parameters** (a name read before anything declares it, `x` in
   `x == 1 → ⟨ y = x; ⟩ …` or in `x == 1 → ⟨ uint x = 2; ⟩ …`) are bound
   outermost: a `uint` by `∀ uint x;` (`Fml.all`), an alias (what a
-  program binds to a storage path, `p = alice;`) by a hidden binder
-  (`Fml.bind`).  A parameter no term or program reads before something
-  binds it (`{ x := 10 } x == 10`, where the update declares `x`) is not
+  program binds to a storage path, `p = alice;`) or a KeY `int` (`LTy.kint`,
+  `RawFml.kintParams`) by a hidden binder (`Fml.bind`).  A parameter no
+  term or program reads before something binds it (`{ x := 10 } x == 10`, where the update declares `x`) is not
   bound: the reading is tried without each parameter in turn, and a
   parameter the formula reads without fails it;
 * **an update** declares the locals it binds that are not in scope at that

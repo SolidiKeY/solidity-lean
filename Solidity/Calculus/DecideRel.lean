@@ -209,7 +209,7 @@ variable {C : Contract}
 section Rel
 
 /-- What a position's binding `bd` holds, against what its symbol says
-(`EnvRel`, by position), the storage `st` and the births `B` the updates
+(`RelB.env`, by position), the storage `st` and the births `B` the updates
 left. -/
 def BindRel (σ : Semantics.State) (st : List (Name × Semantics.SVal)) (B : MemNames.Births)
     (bd : Binding) : SymB → Prop
@@ -350,7 +350,7 @@ theorem evalE_ident_ok {τ : State C Γ} {R : RefTy} {i : Tm C Γ (.ident R)} {i
   | some x => simp only [toRes, Except.ok.injEq, Option.some.injEq, Srt.erase]
 
 /-! The statements below, one per sort, for the terms of fewer than `n`
-symbols (`TermOK` to `MValOK`, by position).  An identity, an address and
+symbols (`TermOKS` to `MValOKS`, by position).  An identity, an address and
 a memory value also say that the identities they read are of their types
 in `τ`'s heap (`IdOk`): where the typed reading of a memory read is the
 untyped one (`Tm.evalE_read`). -/
@@ -1615,7 +1615,7 @@ theorem staleWriteS_some {s : Tm C Γ .st} {op : Option AOp} {q : LPath} {p : Pr
   | _ => simp only [Tm.staleWriteS, reduceCtorEq] at hw
 
 /-- **A write through a stale alias**: the slot-level write at the path it
-holds, live or not (`stale_write_bridge`). -/
+holds, live or not (`staleSave`). -/
 theorem RelU.stale_write (h : RelT σ ρ τ) {p : PrimTy} {x : Tm C Γ (.path (.prim p))} {q : LPath}
     (hq : x.slotPathS ρ = some q) (t : Tm C Γ (.val p)) (ht : t.inLS ρ = true) :
     Sim ((LStor.stale none ρ.sym.stor q (t.toLS ρ)).eval σ)
@@ -2175,7 +2175,7 @@ theorem RelB.setMem {g₀ : Semantics.State} {ℓ : Locs C Γ} (h : RelB σ ρ B
   exact ⟨h'.ok, h'.len, h'.nodup, h'.fresh, h'.stor, h'.env, h'.tx⟩
 
 /-- A quantifier's local: the atom of its position, the state read binding
-it (`Rel.freePos`, by position). -/
+it (`SymS.pushQ`, by position). -/
 theorem RelU.pushQ {g : Semantics.State} {ℓ : Locs C Γ} (h : RelU σ ρ g ℓ)
     (hx : ρ.sym.vars.contains ρ.key = false) (w : Value) {p : PrimTy} :
     RelU (σ.setEnv ρ.key (.val w)) ρ.pushQ g (ℓ.push (t := .val p) w) := by

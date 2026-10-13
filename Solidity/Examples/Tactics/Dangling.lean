@@ -105,9 +105,11 @@ and the reduction by about 1.6 times a round.  Two rounds close; four
 `elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
 `Examples/ProofTree.lean`.  Six are the most whose leaf is within
 `closeSize`, so the largest reduction `leafFitsOn` builds before refusing;
-seven are refused by the leaf's size.  (A push asks no room of the
-untyped storage the procedure reads: at a full array the typed one is out
-of gas, `Upd.exh`; with a bound guard, W9.8.3d, five fitted.)
+seven are refused by the leaf's size.  (Under the box, as here, a push
+asks no room: at a full array the typed one is out of gas, `Upd.exh`,
+which the box accepts.  Under the diamond the reduction keeps the room as a
+premise of what follows, `roomM` (W9.8.5).  With a bound guard, W9.8.3d,
+five fitted.)
 The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
 read as the scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`,
 `Fml.toLS`). -/

@@ -57,8 +57,9 @@ What does not close, and why (on either side):
   `nextId`;
 * a read of an array a push wrote, the array known only by its shape:
   `[ uint n = values.length; values.push(42); ] values.length == n + 1`
-  stays open, since the push's write is left as `saveStorage … = .ok τ`
-  with none of the facts `wp_box_saveStorage` names
+  stays open, since `Calculus/CloseFrame.lean` has no clause for a push
+  (the length it leaves, the slot it writes, the frame beside it), so the
+  typed `Storage.push` is not read further
   (`Examples/Tactics/CallOperands.lean` pins it open, and writes its push rows as
   chains for this);
 * a default read out of a fresh memory object (`Person memory m;
@@ -290,10 +291,9 @@ defaults, and the storage evaluators are unfolded over it — solkey's
 `selectOnEmptyStorage` and `saveOnEmptyStorage` (`structRules.key`), read off
 that list, which is what lets a write under the diamond return.  Not in
 `close_rw`: an arbitrary storage is left to the read-after-write facts.
-Known limits (pinned open in `Examples/Tactics/Constructors.lean`): a read
-at a free key of a mapping the deployment does not write (the default
-map's `checkIndex`), and a member of a struct root (`defaultForTy` of a
-struct, `defaultForFields` of the struct table, is not unfolded). -/
+A read at a free key of a mapping the deployment does not write, and a
+member of a struct root, close since the typed empty storage
+(`CloseS.find_init_append`; `Examples/Tactics/Constructors.lean`). -/
 macro "sol_close_mt" : tactic => `(tactic|
   all_goals
    (sol_close_unwrap

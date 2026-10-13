@@ -65,9 +65,11 @@ What a name is:
   program variable (`pv`); a bare state variable or path in a value position
   is `find(storage, p)`;
 * a name no program in the formula declares is a **parameter**, in scope
-  everywhere: a `uint` local (mini-solkey's reading of a free name), or an
-  alias when a program binds it to a storage path (`p = alice;`, which is
-  what symbolic execution leaves of `Person storage p = alice;`).  A name
+  everywhere: a `uint` local (mini-solkey's reading of a free name), a KeY
+  `int` one where only KeY `int` arithmetic reads it (`net(to) = x`,
+  `RawFml.kintParams`), or an alias when a program binds it to a storage
+  path (`p = alice;`, which is what symbolic execution leaves of `Person
+  storage p = alice;`).  A name
   some program declares is no parameter anywhere in the formula: outside
   that declaration's scope it is unknown (`checkFresh` would refuse the
   declaration of a parameter), so a free name and a declared one differ;

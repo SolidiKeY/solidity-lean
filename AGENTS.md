@@ -31,17 +31,21 @@ the program is open (`Calculus/RewriteScoped.lean`) and past it
 erased: the untyped formulas (`NFml`) are gone (W9.5a), and so are the
 erased program evaluators (W9.6.4), and so are the untyped terms by name
 (`Surface.Tm`, W9.7.1), and so is the erased state (W9.7.3); the terms'
-symbols read the typed state (W9.8.3). What stays untyped is `sol_decide`'s
-language (`LTerm`, `LStor`, `LMem`, `LFml`: `Calculus/DecideLang.lean`, over
+symbols read the typed state (W9.8.3). KeY's unbounded `int` is its own
+sort (`Srt.kint`): the ledger, `toInt`, a spec's arithmetic over them. What
+stays untyped: `sol_decide`'s language (`Calculus/DecideLang.lean`, over
 `Semantics.Value`), reached by the typed reading erased
-(`Calculus/DecideErase.lean`, `State.globE`), and the Theory's values, which
-a term denotes through `SVal.absT`.
+(`Calculus/DecideErase.lean`); the Theory's values, which a term denotes
+through `SVal.absT`; `Update.lean`'s remnant over `Semantics.State`
+(`Modality.after`, `State.havoc`); `Tools/Counterexample.lean`'s candidate
+states, each lifted to a typed one.
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity
 types; `Calculus/Fml.lean`'s terms): a storage at `structRules.key`'s
 sorts, a memory at `memoryRules.key`'s — `save`/`delAt` nest, and so do
 `write`/`addM`/`copySt`.  An allocation is the two parallel elements KeY
-writes, a push and a pop are nested writes over `size`, and
+writes, a push and a pop are one symbol each (printed as KeY's
+nested writes over `size`), and
 `docs/lean-key-rule-map.md` is the symbol table.  A path alias binds bare
 (`{ sp := alice.account }`); a read marks the *value* side instead
 (`find`/`select`/`read`).

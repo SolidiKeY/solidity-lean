@@ -30,9 +30,11 @@ index after a `pop` made it dangle (`SymB.stale`) and reads the slot again after
 reduction is past `Decide.elimSize`, and the `push()` takes its slot from a
 storage with writes at another root below it, which the slot facts do not
 read.  It is listed with its reasons in `docs/testsuite-proofs.md`.
-`storagePushReadBack` is not valid in the model (the length delta,
-`docs/solc-alignment.md`): `tests/solkey/expected.tsv` lists it
-`divergent`, so the tables count one pending fewer.
+`storagePushReadBack` is valid in the model (a push at a full array is
+out of gas, so the length after one is at least `1`) but not derived: the
+closer does not read the slot at `(len + 1) - 1` as the one pushed.
+`tests/solkey/expected.tsv` lists it `divergent`, so the tables count one
+pending fewer.
 -/
 
 /--

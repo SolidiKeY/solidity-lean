@@ -39,7 +39,7 @@ Not derived, by reason:
 | Status | Because | # | functions |
 |---|---|---:|---|
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
-| divergent | `wt(storage)` does not bound array lengths, so the checked `- 1` after a push can overflow; solc bounds lengths at `2^64` (`docs/solc-alignment.md`, "Remaining deltas") | 1 | `storagePushReadBack` |
+| divergent | valid in the model (a push at a full array is out of gas, so the length after one is at least `1`) but not derived: the closer does not read the slot at `(len + 1) - 1` as the one pushed | 1 | `storagePushReadBack` |
 | pending | the write through the dangling alias is translated (`SymB.stale`, `LStor.stale`), but the leaf's reduction is past `Derive.elimSize`, and the `push()` takes its slot from a storage with writes at another root below it, which the slot facts do not read | 1 | `testArrayCopyClearsOldElements` |
 | excluded | struct `Tree` (line 36) is recursive through a mapping: its default value is infinite, and the model's are finite | 1 | `recursiveStructMapping` |
 

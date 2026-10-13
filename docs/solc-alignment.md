@@ -398,11 +398,12 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   deployed contract holds lengths up to `2^64` and no longer; here a length
   is bounded only by `2^256` (the push at it `exhausted`, "Array lengths"
   above) and `wt(storage)` (`storageWtB`) bounds words and keys, not
-  lengths. The delta goes both ways for a diamond
-  obligation. One that reads a length through checked arithmetic
-  (`storagePushReadBack`: `values[values.length - 1]` after a `push`) is
-  false in the model from a storage solc cannot reach, and stays underived
-  (`divergent` in `tests/solkey/expected.tsv`).
+  lengths. A diamond obligation that reads a length through checked
+  arithmetic after a push (`storagePushReadBack`: `values[values.length -
+  1]` after a `push`) is valid in the model all the same, since the push at
+  a full array is out of gas and the length after one is at least `1`; it
+  stays underived (`divergent` in `tests/solkey/expected.tsv`), because
+  the closer does not read the slot at `(len + 1) - 1` as the one pushed.
   One that pushes with no bound on the length before it holds in the model
   where solc panics, from a length of exactly `2^64`:
   `storagePushLengthPositive`, `storagePopUnknownLength` and
@@ -410,4 +411,4 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   `TestSuite/Derived8.lean`) and true of solkey, whose `int` is unbounded,
   but not of solc from that storage (`docs/testsuite-proofs.md`). Closing
   it means a bound `≤ 2^64` on every length in `wt` and the 0x41 panic in
-  `pushOn`, which would also make `storagePushReadBack` derivable.
+  `pushOn`.
