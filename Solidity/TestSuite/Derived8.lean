@@ -79,3 +79,6 @@ theorem Solkey.TestSuite.testPushCopyThenDeleteTarget.proved : ⊢ Solkey.TestSu
 
 theorem Solkey.TestSuite.indexWriteBothImpureStorageRef.proved : ⊢ Solkey.TestSuite.indexWriteBothImpureStorageRef.problem := by
   sol_prove
+
+theorem Solkey.TestSuite.arrayOfMappingsIndex.proved : ⊢ Solkey.TestSuite.arrayOfMappingsIndex.problem := by
+  sol_prove
