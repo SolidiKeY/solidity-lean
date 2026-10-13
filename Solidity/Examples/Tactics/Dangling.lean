@@ -21,7 +21,7 @@ These are solkey `TestSuite`'s dangling-alias functions over
 `sol_prove`.  If a clause stops applying, or the strategy picks another
 rule, they fail.  They read scoped (`open scoped Solidity.Scoped`):
 the `⊢` walk, its leaves closed by the scoped closer within its bounds
-(`Seq.residue`, `Decide.closeSize`).
+(`Seq.residue`, `Seq.closeSize`).
 -/
 
 namespace Solidity.Examples.Tactics.Dangling
@@ -98,8 +98,9 @@ example : ⊢ dl!{ defined(wt(storage)) → [
 
 /-! ## Rounds of `pop`, write, `push()`
 
-Each round adds a stale write and a pop below the slot reader, and two
-storage updates to the stack a read is taken through.  Two rounds close;
+Each round adds a stale write and a pop below the slot reader, and three
+storage updates (a pop, a write, a push) to the stack a read is taken
+through.  Two rounds close;
 four (twelve statements) stack fourteen updates, past `stackSize`, and are
 refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
 `Examples/ProofTree.lean`; six and seven too, each leaf within

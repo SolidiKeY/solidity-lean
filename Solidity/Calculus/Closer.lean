@@ -1376,7 +1376,11 @@ theorem evalT_two_mul {p : PrimTy} {x : LTm C (.val p)} (hx : isTwo x = true)
   · cases hx
 
 /-- A binary symbol folded: on literals, `a == a`, `a != a` on a term that
-returns, a comparison of terms whose ranges decide it, and `(a + b) - b`. -/
+returns, `a == b`/`a != b` on terms apart (`Facts.apart`), `x == true`/
+`x == false` as `x`/`!x` (`eqBoolLit`), `x < x + c` (`Facts.ltSucc`), a
+comparison of terms whose ranges decide it, `(a + b) - b` and
+`(a - b) + b` (`Facts.cancel`, `Facts.cancelAdd`), and `2 * y` as `y + y`
+(`isTwo`). -/
 def Facts.fold2 (F : Facts C) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     LTm C s :=
   match o, x, y with
@@ -2291,7 +2295,7 @@ theorem Facts.boolStep_ok {ih : Facts C → LTm C (.val .bool) → Bool → Fact
         obtain ⟨w, hy, hv⟩ := binopT_neB h'
         simp only [Facts.boolStep]
         have := Facts.eqB_ok hF hx hy (!v) (by rw [hv, Bool.not_not])
-        cases v <;> simpa using this
+        cases v <;> simpa only [Bool.false_eq_true, ↓reduceIte, Bool.not_false, Bool.not_true] using this
       case and =>
         cases hs
         simp only [Facts.boolStep]
@@ -2699,6 +2703,17 @@ def LTm.pick (F : Facts C) {s : Srt} (t : LTm C s) : Option (EqF C) :=
     (@fun p _ a b _ _ iha ihb iht ihe =>
       iha <|> ihb <|> (if F.returns a && F.returns b then some ⟨p, a, b⟩ else none) <|> iht <|> ihe)
     (@fun _ => none) s t
+
+theorem LTm.pick_eq_pickM (F : Facts C) {s : Srt} (t : LTm C s) : t.pick F = t.pickM F := by
+  induction t with
+  | var | app0 | err => rfl
+  | app1 o x ih | obsW x ih | obsL x ih | obsH x ih => simp only [LTm.pickM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.pickM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.pickM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.pickM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.pickM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.pickM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.pickM, ← iha, ← ihb, ← iht, ← ihe]; rfl
 
 /-- `a ≐ b` by the normal forms: one term, which returns. -/
 def Facts.direct (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Bool :=

@@ -75,6 +75,17 @@ def LTm.elimF (F : Facts C) {s : Srt} (t : LTm C s) : ElimM C s :=
     (fun {s} => ElimM.ofOrig s .err)
     s t
 
+theorem LTm.elimF_eq_elimFM (F : Facts C) {s : Srt} (t : LTm C s) : t.elimF F = t.elimFM F := by
+  induction t with
+  | var | app0 | obsW | obsL | obsH | err => rfl
+  | app1 o x ih => simp only [LTm.elimFM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.elimFM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.elimFM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.elimFM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.elimFM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.elimFM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.elimFM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
 variable (g : State C []) (ν : AEnv)
 
 theorem ElimM.rwF_rep {F : Facts C} (hF : F.Ok g ν) :
@@ -159,6 +170,11 @@ conjuncts.  By the recursor. -/
 def LFml.factsOf (φ : LFml C) : List (EqF C) :=
   @LFml.rec C (fun _ => List (EqF C)) [] (@fun _ a b => eqFacts a b) (fun _ _ => [])
     (fun _ _ ih₁ ih₂ => ih₁ ++ ih₂) (fun _ _ _ _ => []) (fun _ _ _ _ => []) φ
+
+theorem LFml.factsOf_eq_factsOfM (φ : LFml C) : φ.factsOf = φ.factsOfM := by
+  induction φ with
+  | tt | eq | not | imp | all => rfl
+  | and φ ψ ihφ ihψ => simp only [LFml.factsOfM, ← ihφ, ← ihψ]; rfl
 
 variable {g : State C []} {ν : AEnv}
 
@@ -265,6 +281,12 @@ def LFml.elimF (φ : LFml C) (F : Facts C) : LFml C :=
       let φ' := ih₁ F
       .imp φ' (ih₂ (F.addEqs φ'.factsOf)))
     (fun k p _ ih F => .all k p (ih (F.drop k))) φ F
+
+theorem LFml.elimF_eq_elimFM (φ : LFml C) (F : Facts C) : φ.elimF F = φ.elimFM F := by
+  induction φ generalizing F with
+  | tt | eq => rfl
+  | not φ ih | all k p φ ih => simp only [LFml.elimFM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.elimFM, ← ihφ, ← ihψ]; rfl
 
 /-- **The elimination under premises keeps what a formula says.** -/
 theorem LFml.elimF_holds (g : State C []) : (φ : LFml C) → ∀ (F : Facts C) (ν : AEnv),

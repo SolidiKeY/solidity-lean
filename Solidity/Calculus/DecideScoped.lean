@@ -94,6 +94,12 @@ def thin : {Γ Δ : Ctx} → Thin Γ Δ → BEnv C Δ → BEnv C Γ
   | _, _, h => Thin.rec (motive := fun Γ Δ _ => BEnv C Δ → BEnv C Γ) (fun e => e)
       (fun _ ih e => (e.1, ih e.2)) (fun _ ih e => ih e.2) h
 
+theorem thin_eq_thinM {Γ Δ : Ctx} (h : Thin Γ Δ) (e : BEnv C Δ) :
+    BEnv.thin h e = BEnv.thinM h e := by
+  induction h with
+  | refl => rfl
+  | keep h ih | drop h ih => simp only [BEnv.thinM, ← ih]; rfl
+
 end BEnv
 
 /-- The updates so far, by position: what each local is bound to, the
@@ -221,6 +227,14 @@ def _root_.Solidity.Tm.toL (ρ : SymS C Γ) {s : Srt} (t : Tm C Γ s) : Option (
     (fun o _ _ _ ix iy iz => ix.bind fun x' => iy.bind fun y' => iz.bind (o.toL x' y'))
     (fun i => ρ.loc.get i) s t
 
+theorem _root_.Solidity.Tm.toL_eq_toLM (ρ : SymS C Γ) {s : Srt} (t : Tm C Γ s) :
+    t.toL ρ = t.toLM ρ := by
+  induction t with
+  | pvV | pvP | pvS | pvI | netOf | app0 | pvZ => rfl
+  | app1 o x ih => simp only [Tm.toLM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [Tm.toLM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [Tm.toLM, ← ihx, ← ihy, ← ihz]; rfl
+
 end Terms
 
 /-! ## Updates, by position
@@ -282,6 +296,12 @@ def _root_.Solidity.Upd.toLS (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
     (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.next⟩, p.2))
     (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.next⟩, p.2))
     Δ U
+
+theorem _root_.Solidity.Upd.toLS_eq_toLSM (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
+    U.toLS ρ₀ = U.toLSM ρ₀ := by
+  induction U with
+  | nil => rfl
+  | snoc U e ih | decl U _ r ih | pop U h ih | drop U h ih => simp only [Upd.toLSM, ← ih]; rfl
 
 /-- The array at `q` of `st` is full (`Storage.full`): `2^256 - 1` live
 elements. -/
@@ -406,6 +426,14 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml 
     (fun _ p _ ih pos ρ => (ih pos (ρ.pushQ p)).map fun φ' => .all ρ.next p φ')
     (fun _ _ t _ ih pos ρ => if pos then (ih pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none)
     (fun _ _ _ _ _ => none) _ φ pos ρ
+
+theorem _root_.Solidity.Fml.toLS_eq_toLSM {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml C Γ) :
+    φ.toLS pos ρ = φ.toLSM pos ρ := by
+  induction φ generalizing pos with
+  | tt | eq | defined | modal | havoc | anon => rfl
+  | not φ ih | all x p φ ih | bind m x t φ ih | upd m U φ ih =>
+    simp only [Fml.toLSM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.toLSM, ← ihφ, ← ihψ]; rfl
 
 /-- **What `sol_decide` proves of a scoped leaf**: its updates pushed in by
 position, the reads of writes eliminated (`LFml.elim`); `none` outside the

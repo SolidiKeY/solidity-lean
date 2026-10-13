@@ -1369,14 +1369,6 @@ def VRep {T : Ty} (e : Option (LTm C (.val .bool) × VRd C T)) (t : LTm C (.sv T
     (gd.eval g ν : Option Bool) = (t.eval g ν : Option (SVal T)).map (fun _ => true) ∧
       ∀ w, (t.eval g ν : Option (SVal T)) = some w → VRd.Rep g ν V w.obs
 
-theorem seqL_some {s' s : Srt} {d : LTm C s'} {a : LTm C s} {x : _}
-    (hd : (d.eval g ν).isSome) (ha : a.eval g ν = x) : (seqL d a).eval g ν = x := by
-  rw [seqL_eval]
-  obtain ⟨y, hy⟩ := Option.isSome_iff_exists.1 hd
-  rw [hy, Option.bind_some, ha]
-
-theorem LTm.eval_tt : ((LTm.tt : LTm C (.val .bool)).eval g ν : Option Bool) = some true := rfl
-
 theorem LTm.eval_assert_some {c : LTm C (.val .bool)} {b : Bool}
     (hc : (c.eval g ν : Option Bool) = some b) :
     ((LTm.assert c).eval g ν : Option Bool) = if b then some true else none := by
@@ -1486,10 +1478,6 @@ theorem obs_len_lt (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
 theorem find_len_nil (o : TSto C) {E : Ty} (r : SRef C (.ref (.array E))) :
     (o.find (.ref r)).len .nil = o.len (.ref r) := by
   rw [Obs.find_len, SLoc.app_ref, SRef.append_nil]
-
-theorem find_has_nil (o : TSto C) {U : Ty} (r : SRef C U) :
-    (o.find (.ref r)).has .nil = o.has (.ref r) := by
-  rw [Obs.find_has, SLoc.app_ref, SRef.append_nil]
 
 theorem eval_save3 {T : Ty} (s : LTm C .st) (pt : LTm C (.path T)) (vt : LTm C (.sv T)) :
     ((LTm.app3 .save s pt vt).eval g ν : Option (Storage C)) =
