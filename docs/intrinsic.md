@@ -6726,6 +6726,82 @@ derived + 1 pending + 1 divergent + 1 excluded, 2 skip).
 `ChainRewrites` is 0.1 s over its gate, within the run-to-run spread;
 `Chains/Storage` stays where W9.8.4 left it.
 
+### W10.1–2 record (2026-10-13, branch `w10-remnant`)
+
+Type the remnants W9 left untyped on purpose (the W9.8.4 record's list):
+`Update.lean`'s remnant over `Semantics.State` and
+`Tools/Counterexample`'s candidates.
+
+**W10.1, `Update.lean`.**  What it held over the untyped state had no user
+left once the run, the formulas and the callbacks were typed; each has a
+typed version that the calculus already reads:
+- `Modality.after` (a halt under a modality, at `Res State`): gone; the
+  typed reading is `Modality.afterRunTR` (`Calculus/Logic.lean`), the
+  callbacks' `COut.after` (`Semantics/Callback.lean`).
+- `Semantics.State.havoc`/`havoc_self`, `EnvAgreeExcept.havoc`; `anonEnv`,
+  `Semantics.State.anon`, `EnvAgreeExcept.anon` and their list lemmas
+  (`lookupBy_filter_self`/`_ne`, `lookupBy_anonEnv`): gone; the typed
+  `State.havoc`/`State.anon` of `Semantics/RunFrame.lean` are what
+  `holds`, the callbacks and the loop frame read.  `Close.State.havoc_eq_mk`
+  (`Calculus/CloseLemmas.lean`, the untyped `havoc` as a structure) went
+  with them (its `lean-key-rule-map.md` row now cites `CloseS.holds_havoc`
+  only).
+- `Denote.evalBinop_of_error`, `Denote.asInt_prim_of_asInt`,
+  `SVal.abs_of_asValue`: dead, gone.
+- `Update.lean` no longer imports `Semantics/Agree.lean` (still reached
+  through `TermSimp.lean`).
+
+**W10.2, `Tools/Counterexample`.**  A candidate is typed (`Cand C`: a
+`Storage C`, a `TTx`, the funds a `uint`, the ledger), its state
+`Cand.tstate` a `State C []` built directly, so nothing is decoded: the
+untyped storage reader (`SVal.decodeN`, `SFields`/`SVec`/`SList`/`SMap.decode`,
+`Storage.decode`), `State.ofSem?`/`ofSemD` and the kernel-reducible untyped
+equality (`Semantics.SVal.beqK` and its lemmas) are gone.
+- The storage is drawn typed (`TGen.sval`, fuel 32 as the reader had,
+  `SVal.arrayOf` for a dynamic array's bound) in the order `GenSpec.sval`
+  drew it, each word from `poolDom`, the typed pool of the same length, so
+  the same seed gives the same candidates: no pinned output moved.
+- Shrinking is typed: the integers and the renaming are folds
+  (`intsFold`, `renameFold`), a reset and a dropped entry walk the roots
+  (`SFields.resets`, `SFields.drops`, `SMap.drops`).
+- A certificate quotes the typed state (`quoteFold`, `Cand.quote`; a word
+  as `PrimTy.ofIntD`, which the kernel reads back) and the kernel checks
+  `Fml.eval3Peel` at `Cand.tstate`, no decoding in it.
+- `Witness`/`Search` are indexed by the contract; a `Refutation` keeps its
+  witness printed (`Witness.lines`), so `Tools/Verify` reads it without
+  the contract.  A witness prints its typed state erased (`fmtTx` of
+  `globE`, `fmtStorageLine` of `storage.erase`), as an outcome already did.
+- `State.lift?` stays: it reads an update's typed result (`GlobT` and the
+  locals' values) back as a typed state, typed to typed.
+
+**What stays untyped**, and why (as of W10.2; W10.3 and W10.4 then typed
+the Theory bridge and `sol_decide`, deleting `PrimTy.admits`,
+`StValue.toRes`, `Res.toSt`, `DecideErase` and `MemNames`):
+- `readAddr` (`Update.lean`): the memory read of `sol_decide`'s language
+  (`Calculus/Decide.lean`, `DecideErase`, `MemNames`, `CloseLemmas`) and of
+  the Theory (`Theory/StateWrites.lean`'s `readLoc_eq`); the typed read is
+  `Heap.readAddr`.  With the language it stays (W9.8.4).
+- `PrimTy.admits`: a quantifier's range in `sol_decide`'s language
+  (`DecideLang`, `Closer`, `DecideTyped.admits_erase`).
+- `StValue.toRes`, `Res.toSt`: the Theory bridge (`Theory/Bridge/Denote.lean`),
+  for W10.3.
+- A candidate's arguments are `Semantics.Value`s, which `Fml.peel` reads at
+  each binder's type (`PrimTy.ofValue?`); `GenSpec.sval` stays untyped for
+  `#difftest`, which runs the untyped interpreter beside the EVM.
+- `Semantics/Agree.lean` (the untyped frame kit, `EnvAgreeExcept`) has no
+  user outside itself now.  Deleting it also takes a line of
+  `.claude/rules/typing.md`, which names it; left for W10.3.
+
+**Checked**: `lean_build` of the default targets (299 jobs) clean;
+`Examples/Verify.lean`'s pins unchanged (`#verify` and `#counterexample`,
+the certified ones still certified); `check-orphans` (0 orphaned);
+`check-doc-paths`; `sorry` count unchanged (23 matches, as master).
+`SolkeyTestSuite` not rebuilt: no declaration removed here is named
+anywhere under `Solidity/`.  Timing (`profiler` on a scratch copy of
+`Examples/Verify.lean`, each checkout's worker; ms): the loop search
+`while (i < a)` 2890 here / 3010 master, `count = a` 74 / 80, the
+certified ones within 10 ms of master: no slowdown.
+
 ### W10.3 record (2026-10-13, branch `w10-theory`)
 
 The Theory is typed: a term denotes a typed value, its laws are stated
@@ -6914,7 +6990,8 @@ pins on `LMem` terms gone; `copyFrame`, `mappingEveryKey` now close).
 
 **Checks.**  `lean_build` of the default targets: clean except
 `Tools/Counterexample.lean` 426–428 (the `w10-remnant` lane's file, not
-edited: it reads `Theory.StValue.Equiv`, now deleted).  `sorry` lines 20
+edited: it reads `Theory.StValue.Equiv`, now deleted; fixed at the
+merge, `7b7c3bb1`, and `eb267464`).  `sorry` lines 20
 (as master); `#print axioms Proves.valid` and `Seq.checkCore_valid`:
 `propext`, `Classical.choice`, `Quot.sound`; `check-orphans` clean but for
 scratch; `check-doc-paths` clean but for `AGENTS.md`'s two citations of
@@ -6944,6 +7021,43 @@ The 437 `sol_prove`s one at a time (`Elab.async false`): 214.3 s here,
 facts that change at each premise).  CPU of the Derived files is 16 % over
 master's 199.0.
 
+## W10.5 plan (the typed state, fully)
+
+The user's decision (2026-10-13): `Semantics.State` goes, with its
+encoding of the typed state (`State.globE`, `State.getE`, `State.sem`), the
+erasure modules and `Theory/StateWrites.lean`; the Typing chain is
+retyped, not deleted.  Its readers today: the typed run's invariants
+(`Typing/`: `RunInv.HoldsT` reads `σ.globE`, the reachability and
+constructibility proofs behind `Problem`'s `wt_iff_reachable`), the EVM
+simulation (`Evm/Sim.lean`'s `Sim` over `State.sem`, `Evm/Repr.lean`'s
+`ReprAt` over the untyped `SVal`), the memory laws (`Heap.readAddr_erase`,
+`Heap.into`, `Update.lean`'s `readAddr`, `Calculus/ReadWrite.lean`), and
+the tools (`Prog.runT`, `#run`, `#difftest`, `Semantics/ToSem.lean`).
+
+**What stays untyped, and why.**  `PrimVal`/`Value`, `ExtKey`,
+`ExtResult`: the ABI data of external calls and the tools' arguments,
+external data, not state.  `Seg` and a path's segments (`Path.erase`,
+renamed `Path.segs`), `Theory.diverges`, `SegT`: the side conditions' path
+syntax.  The list and schema utilities of `AST.lean`.  The ledger
+(`List (Int × Int)`): KeY's unbounded `int`.  The EVM's word store
+(`Slot → Nat`): the machine's.
+
+| Wave | Lane | What |
+|---|---|---|
+| W10.5.1 | alone (rebuilds everything) | delete the dead untyped layers (`Semantics/{StateErase,NoPanicOps,NoPanicSimp}`, `Theory/StateWrites`, `Close.lean`'s untyped elaborators and `close_rw`, `CloseLemmas`' untyped `wp`, `ReadWrite`'s storage/push/transfer part, `Counterexamples/WellTypedNecessity`); move the typed stores out of `StorageErase`, `TRes.NoPanic` out of `TypedErase`, `State.glob` into `Semantics/State.lean`; `wt(storage)` as typed folds (`Storage.wtB`, Gate G0) with a bridge to `storageWtB` for the waves below |
+| W10.5.2 | T (with E, then M) | the Typing chain over the typed state: `RunInv` reads `Storage C` and the locals at their types (`RunInv.HoldsT σ := I.glob σ.storage ∧ TEnv.All I.loc σ.env`); `Reachable C st` by the typed run from `State.init`; `SVal.Canon`/`Tight`/`Fits` keep only what the types do not say; `Problem`'s `wt_iff_reachable` restated; `Typing/{Storage,State,StoragePreservation,TypedWT}` deleted |
+| W10.5.3 | E (with T) | the EVM over the typed state: `ReprAt st L s : SVal T → Prop` (no member-exists or fixed-length clause, no fall-through), `Sim` over `State C Γ` (`σ.storage`, `TEnv.get`, `σ.net`, `σ.tx`); `State.sem` and the `*_erase` rewrites of `Evm/{Stmt,Expr}` gone; the guard lemmas over `BinOp.evalT` |
+| W10.5.4 | M (with T) | the memory laws on the typed heap: `Heap.readAddr_allocDefault`, a typed `Grown.FreshRead` shared by `TermLaws` and `MemRead`; `ReadWrite`'s rest, `HeapExt`, `Update.lean`'s `readAddr`, `MAddr.erase` gone |
+| W10.5.5 | X (with T's tail) | the tools typed: `Prog.runT` from a `State C []`, typed printers (`SVal.fmt`, `fmtStorage`, `fmtTx`), `#difftest`'s start typed; `Semantics/ToSem.lean` gone; about 12 pinned outputs move |
+| W10.5.6 | alone (rebuilds everything) | delete the untyped core: `Semantics.lean` down to the ABI values, `Semantics/{StorageErase,HeapErase,WellFormed,DecEq}`, the rest of `TypedErase`, every `*.erase`/`globE`/`getE`/`Locs`, `LTy.Denote`, `Halt`/`Res`; the W10.5.1 bridge; docs |
+
+**Gates.**  W10.5.1 and W10.5.6 rebuild the package: re-time the W10.4
+gates (`Derived1`–`14`, `Tactics/Decide`, `ProofTree`, `Chains/Storage`,
+`ChainRewrites`) and `Examples/Verify` (the kernel evaluates `wt(storage)`
+in certificates, so it stays a fold).  `Evm/Correct` keeps its
+`maxHeartbeats 10000`.  Removing `sol_close`'s untyped branch can only make
+it faster; no earlier speed change is undone.
+
 ## What is left
 
 **W9.5b: the reader's shim**: deleted at W9.7.1 (record above); the
@@ -6962,13 +7076,18 @@ What W9.7 left untyped, the value-level reading of a typed state
 `State.globE`, and an update computed a `Semantics.State × Locs C Δ`),
 W9.8 typed: the symbols read the typed state, and `Upd.applyV` computes the
 typed global part and the locals' values (`GlobT`, `LocsV`).  `State.globE`
-remains for the untyped interpreter's lemmas only (W10.4).  The side-projects reader is outdated
+remains as the typed state's erasure: the typed run's invariants
+(`Typing/`), the EVM simulation (`Evm/`), `Problem`'s initial-state check and
+the tools read it (W10.5 types them).  The side-projects reader is outdated
 (W9.7.1).
 
 **W9.8 (typed sorts)**: done (records above, W9.8.0 to W9.8.5).  The
 terms' symbols read the typed state; what stays untyped is listed in the
 W9.8.4 record.  A push at a full array is out of gas in the run and in the
 update reading alike (W9.8.5).
+
+**W10.1–2 (`Update.lean`'s remnant, typed counterexample candidates)**:
+done (record above).
 
 **W10.3 (the typed Theory)**: done (record above).
 
@@ -6998,79 +7117,5 @@ untyped Theory is gone.
   reader's `keycheck` executable and the VS Code extension's tests.
 - `check-testsuite.sh` passes at the W8.5 gate with `--solkey` at a
   checkout of solkey `1b4341a303` (`TestSuite.sol` `2fe50a03`);
-  `../solkey` itself is stale (`4150e0a8`).
+  `../solkey` itself is stale (`c166991551`, `TestSuite.sol` `a4bca545`).
 - Lean docstrings may still call the erased side "today's" in places.
-
-### W10.1–2 record (2026-10-13, branch `w10-remnant`)
-
-Type the remnants W9 left untyped on purpose (the W9.8.4 record's list):
-`Update.lean`'s remnant over `Semantics.State` and
-`Tools/Counterexample`'s candidates.
-
-**W10.1, `Update.lean`.**  What it held over the untyped state had no user
-left once the run, the formulas and the callbacks were typed; each has a
-typed version that the calculus already reads:
-- `Modality.after` (a halt under a modality, at `Res State`): gone; the
-  typed reading is `Modality.afterRunTR` (`Calculus/Logic.lean`), the
-  callbacks' `COut.after` (`Semantics/Callback.lean`).
-- `Semantics.State.havoc`/`havoc_self`, `EnvAgreeExcept.havoc`; `anonEnv`,
-  `Semantics.State.anon`, `EnvAgreeExcept.anon` and their list lemmas
-  (`lookupBy_filter_self`/`_ne`, `lookupBy_anonEnv`): gone; the typed
-  `State.havoc`/`State.anon` of `Semantics/RunFrame.lean` are what
-  `holds`, the callbacks and the loop frame read.  `Close.State.havoc_eq_mk`
-  (`Calculus/CloseLemmas.lean`, the untyped `havoc` as a structure) went
-  with them (its `lean-key-rule-map.md` row now cites `CloseS.holds_havoc`
-  only).
-- `Denote.evalBinop_of_error`, `Denote.asInt_prim_of_asInt`,
-  `SVal.abs_of_asValue`: dead, gone.
-- `Update.lean` no longer imports `Semantics/Agree.lean` (still reached
-  through `TermSimp.lean`).
-
-**W10.2, `Tools/Counterexample`.**  A candidate is typed (`Cand C`: a
-`Storage C`, a `TTx`, the funds a `uint`, the ledger), its state
-`Cand.tstate` a `State C []` built directly, so nothing is decoded: the
-untyped storage reader (`SVal.decodeN`, `SFields`/`SVec`/`SList`/`SMap.decode`,
-`Storage.decode`), `State.ofSem?`/`ofSemD` and the kernel-reducible untyped
-equality (`Semantics.SVal.beqK` and its lemmas) are gone.
-- The storage is drawn typed (`TGen.sval`, fuel 32 as the reader had,
-  `SVal.arrayOf` for a dynamic array's bound) in the order `GenSpec.sval`
-  drew it, each word from `poolDom`, the typed pool of the same length, so
-  the same seed gives the same candidates: no pinned output moved.
-- Shrinking is typed: the integers and the renaming are folds
-  (`intsFold`, `renameFold`), a reset and a dropped entry walk the roots
-  (`SFields.resets`, `SFields.drops`, `SMap.drops`).
-- A certificate quotes the typed state (`quoteFold`, `Cand.quote`; a word
-  as `PrimTy.ofIntD`, which the kernel reads back) and the kernel checks
-  `Fml.eval3Peel` at `Cand.tstate`, no decoding in it.
-- `Witness`/`Search` are indexed by the contract; a `Refutation` keeps its
-  witness printed (`Witness.lines`), so `Tools/Verify` reads it without
-  the contract.  A witness prints its typed state erased (`fmtTx` of
-  `globE`, `fmtStorageLine` of `storage.erase`), as an outcome already did.
-- `State.lift?` stays: it reads an update's typed result (`GlobT` and the
-  locals' values) back as a typed state, typed to typed.
-
-**What stays untyped**, and why:
-- `readAddr` (`Update.lean`): the memory read of `sol_decide`'s language
-  (`Calculus/Decide.lean`, `DecideErase`, `MemNames`, `CloseLemmas`) and of
-  the Theory (`Theory/StateWrites.lean`'s `readLoc_eq`); the typed read is
-  `Heap.readAddr`.  With the language it stays (W9.8.4).
-- `PrimTy.admits`: a quantifier's range in `sol_decide`'s language
-  (`DecideLang`, `Closer`, `DecideTyped.admits_erase`).
-- `StValue.toRes`, `Res.toSt`: the Theory bridge (`Theory/Bridge/Denote.lean`),
-  for W10.3.
-- A candidate's arguments are `Semantics.Value`s, which `Fml.peel` reads at
-  each binder's type (`PrimTy.ofValue?`); `GenSpec.sval` stays untyped for
-  `#difftest`, which runs the untyped interpreter beside the EVM.
-- `Semantics/Agree.lean` (the untyped frame kit, `EnvAgreeExcept`) has no
-  user outside itself now.  Deleting it also takes a line of
-  `.claude/rules/typing.md`, which names it; left for W10.3.
-
-**Checked**: `lean_build` of the default targets (299 jobs) clean;
-`Examples/Verify.lean`'s pins unchanged (`#verify` and `#counterexample`,
-the certified ones still certified); `check-orphans` (0 orphaned);
-`check-doc-paths`; `sorry` count unchanged (23 matches, as master).
-`SolkeyTestSuite` not rebuilt: no declaration removed here is named
-anywhere under `Solidity/`.  Timing (`profiler` on a scratch copy of
-`Examples/Verify.lean`, each checkout's worker; ms): the loop search
-`while (i < a)` 2890 here / 3010 master, `count = a` 74 / 80, the
-certified ones within 10 ms of master: no slowdown.
