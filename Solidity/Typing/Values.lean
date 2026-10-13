@@ -131,6 +131,26 @@ theorem fst_mem_setBy {k : κ} {v : α} {l : List (κ × α)} {e : κ × α} (h 
   · exact Or.inl (by rw [h])
   · exact Or.inr ⟨e.2, h⟩
 
+theorem setBy_setBy_same (k : κ) (v v' : α) : (l : List (κ × α)) →
+    setBy k v' (setBy k v l) = setBy k v' l
+  | [] => by simp only [setBy, ↓reduceIte]
+  | (k', w) :: rest => by
+    by_cases h : k = k'
+    · simp only [setBy, h, ↓reduceIte]
+    · simp only [setBy, h, ↓reduceIte, setBy_setBy_same k v v' rest]
+
+theorem setBy_of_lookupBy {k : κ} {v : α} : {l : List (κ × α)} → lookupBy k l = some v →
+    setBy k v l = l
+  | [], h => by simp only [lookupBy, reduceCtorEq] at h
+  | (k', w) :: rest, h => by
+    simp only [lookupBy] at h
+    by_cases hk : k = k'
+    · simp only [hk, ↓reduceIte, Option.some.injEq] at h
+      subst hk h
+      simp only [setBy, ↓reduceIte]
+    · simp only [hk, ↓reduceIte] at h
+      simp only [setBy, hk, ↓reduceIte, setBy_of_lookupBy h]
+
 end Lists
 
 /-! ## Defaults by their equations
@@ -1075,5 +1095,195 @@ theorem save_eq_some {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
   exact ⟨v', by rw [← SVal.save_eq_saveM]; exact hv, rfl⟩
 
 end Storage
+
+/-! ## Saves read back
+
+A save is idempotent (`SVal.saveM_idem`) and the last of two saves at one
+path wins (`SVal.saveM_saveM`); with `SVal.findM_saveM` and the decomposition
+of a save below a path (`SVal.saveM_append`, `Theory/Typed/Obs.lean`) they
+are the algebra `Typing/Constructibility.lean`'s builder is tracked in. -/
+
+theorem SMap.ofList_toList {V : Ty} : (m : SMap V) → SMap.ofList m.toList = m
+  | .nil => by rw [SMap.toList_nil]; rfl
+  | .cons k v rest => by rw [SMap.toList_cons, SMap.ofList, SMap.ofList_toList rest]
+
+/-- Two dynamic arrays with the same live elements and slots are the same. -/
+theorem SVal.array_ext {E : Ty} {n m : Nat} (e : SVec E n) (e' : SVec E m) (sh sh' : SList E)
+    (h : n < 2 ^ 256) (h' : m < 2 ^ 256) (he : e.toList = e'.toList) (hs : sh.toList = sh'.toList) :
+    SVal.array e sh h = SVal.array e' sh' h' := by
+  have hnm : n = m := by rw [← SVec.length_toList e, he, SVec.length_toList]
+  subst hnm
+  rw [SVec.eq_of_toList_eq e e' he, ← SList.ofList_toList sh, hs, SList.ofList_toList]
+
+/-- The live elements and the slots past the end of an array saved at a slot,
+read back. -/
+theorem SVal.array_resplit {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256)
+    (h' : ((e.toList ++ sh.toList).take n).length < 2 ^ 256) :
+    SVal.array (SVec.ofList ((e.toList ++ sh.toList).take n))
+      (SList.ofList ((e.toList ++ sh.toList).drop n)) h' = SVal.array e sh h := by
+  apply SVal.array_ext
+  · rw [SVec.toList_ofList, List.take_left' (SVec.length_toList e)]
+  · rw [SList.toList_ofList, List.drop_left' (SVec.length_toList e)]
+
+theorem SFields.set_get_self {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
+    (h : lookupBy f fs = some T) → x.set h (x.get h) = x
+  | [], _, .nil, h => by simp only [lookupBy, reduceCtorEq] at h
+  | (f', T') :: fs, T, .cons v rest, h => by
+    rw [SFields.get_cons]
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      simp only [e, dite_true, SFields.set_cons]
+    · simp only [e, dite_false, SFields.set_cons, SFields.set_get_self rest]
+
+theorem SFields.set_set {f : Name} : {fs : List (Name × Ty)} → {T : Ty} → (x : SFields fs) →
+    (h : lookupBy f fs = some T) → (a b : SVal T) → (x.set h a).set h b = x.set h b
+  | [], _, .nil, h, _, _ => by simp only [lookupBy, reduceCtorEq] at h
+  | (f', T') :: fs, T, .cons v rest, h, a, b => by
+    by_cases e : f = f'
+    · have hT := SFields.lookupBy_cons_pos e h
+      subst hT
+      simp only [SFields.set_cons, e, dite_true]
+    · simp only [SFields.set_cons, e, dite_false, SFields.set_set rest]
+
+/-- **A save is idempotent**: saving again what a save left changes nothing
+(the key a save through a mapping's default added is there now). -/
+theorem SVal.saveM_idem : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v : SVal U) →
+    {x' : SVal T} → x.saveM p v = some x' → x'.saveM p v = some x'
+  | _, _, x, .nil, v, x', h => by
+    cases x <;> (simp only [SVal.saveM, Option.some.injEq] at h; subst h; cases v <;> rfl)
+  | _, _, .struct fs, .field hf p, v, x', h => by
+    simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+    obtain ⟨y, hy, rfl⟩ := h
+    simp only [SVal.saveM, SFields.get_set_same, SVal.saveM_idem _ p v hy, Option.bind_eq_bind,
+      Option.bind_some, SFields.set_set]
+  | _, _, @SVal.array _ n e sh hn, .at i p, v, x', h => by
+    simp only [SVal.saveM] at h
+    split at h
+    · rename_i hi
+      split at h
+      · rename_i y hy
+        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+        obtain ⟨z, hz, rfl⟩ := h
+        have hl : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
+        have hslots : (SVec.ofList (((e.toList ++ sh.toList).set i.toNat z).take n)).toList ++
+            (SList.ofList (((e.toList ++ sh.toList).set i.toNat z).drop n)).toList =
+            (e.toList ++ sh.toList).set i.toNat z := by
+          rw [SVec.toList_ofList, SList.toList_ofList, List.take_append_drop]
+        simp only [SVal.saveM, hi, if_true, hslots, List.getElem?_set_self hl,
+          SVal.saveM_idem y p v hz, Option.bind_eq_bind, Option.bind_some, List.set_set]
+        congr 1
+        apply SVal.array_ext <;> simp only [SVec.toList_ofList, SList.toList_ofList,
+          List.length_take, List.length_set, List.length_append, SVec.length_toList,
+          Nat.min_def, Nat.le_add_right, ↓reduceIte, List.take_append_drop, List.set_set]
+      · simp only [reduceCtorEq] at h
+    · simp only [reduceCtorEq] at h
+  | _, _, .fixed e, .atF i p, v, x', h => by
+    simp only [SVal.saveM] at h
+    split at h
+    · rename_i hi
+      split at h
+      · rename_i y hy
+        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+        obtain ⟨z, hz, rfl⟩ := h
+        have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hy).1
+        simp only [SVal.saveM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl,
+          SVal.saveM_idem y p v hz, Option.bind_eq_bind, Option.bind_some]
+        congr 2
+        apply SVec.eq_of_toList_eq
+        simp only [SVec.toList_set, List.set_set]
+      · simp only [reduceCtorEq] at h
+    · simp only [reduceCtorEq] at h
+  | _, _, .map m d, .key k p, v, x', h => by
+    simp only [SVal.saveM] at h
+    split at h
+    · rename_i y hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+      obtain ⟨z, hz, rfl⟩ := h
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, SVal.saveM_idem y p v hz,
+        Option.bind_eq_bind, Option.bind_some, setBy_setBy_same]
+    · rename_i hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+      obtain ⟨z, hz, rfl⟩ := h
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, SVal.saveM_idem d p v hz,
+        Option.bind_eq_bind, Option.bind_some, setBy_setBy_same]
+
+theorem SVal.saveM_nil {T : Ty} (y z : SVal T) : y.saveM .nil z = some z := by cases y <;> rfl
+
+/-- **The last of two saves at one path wins.** -/
+theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a b : SVal U) →
+    {x₁ x₂ : SVal T} → x.saveM p a = some x₁ → x₁.saveM p b = some x₂ → x.saveM p b = some x₂
+  | _, _, x, .nil, a, b, x₁, x₂, h₁, h₂ => by
+    rw [SVal.saveM_nil] at h₁ ⊢
+    cases h₁
+    rw [SVal.saveM_nil] at h₂
+    exact h₂
+  | _, _, .struct fs, .field hf p, a, b, x₁, x₂, h₁, h₂ => by
+    simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
+    obtain ⟨y, hy, rfl⟩ := h₁
+    simp only [SVal.saveM, SFields.get_set_same, Option.bind_eq_bind, Option.bind_eq_some_iff,
+      Option.some.injEq] at h₂
+    obtain ⟨z, hz, rfl⟩ := h₂
+    simp only [SVal.saveM, SVal.saveM_saveM _ p a b hy hz, Option.bind_eq_bind, Option.bind_some,
+      SFields.set_set]
+  | _, _, @SVal.array _ n e sh hn, .at i p, a, b, x₁, x₂, h₁, h₂ => by
+    simp only [SVal.saveM] at h₁
+    split at h₁
+    · rename_i hi
+      split at h₁
+      · rename_i y hy
+        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
+        obtain ⟨z, hz, rfl⟩ := h₁
+        have hl : i.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
+        simp only [SVal.saveM, hi, if_true, SVec.toList_ofList, SList.toList_ofList,
+          List.take_append_drop, List.getElem?_set_self hl, Option.bind_eq_bind,
+          Option.bind_eq_some_iff, Option.some.injEq] at h₂
+        obtain ⟨w, hw, rfl⟩ := h₂
+        simp only [SVal.saveM, hi, if_true, hy, SVal.saveM_saveM y p a b hz hw,
+          Option.bind_eq_bind, Option.bind_some]
+        congr 1
+        apply SVal.array_ext <;> simp only [SVec.toList_ofList, SList.toList_ofList,
+          List.length_take, List.length_set, List.length_append, SVec.length_toList,
+          Nat.min_def, Nat.le_add_right, ↓reduceIte, List.take_append_drop, List.set_set]
+      · simp only [reduceCtorEq] at h₁
+    · simp only [reduceCtorEq] at h₁
+  | _, _, .fixed e, .atF i p, a, b, x₁, x₂, h₁, h₂ => by
+    simp only [SVal.saveM] at h₁
+    split at h₁
+    · rename_i hi
+      split at h₁
+      · rename_i y hy
+        simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
+        obtain ⟨z, hz, rfl⟩ := h₁
+        have hl : i.toNat < e.toList.length := (List.getElem?_eq_some_iff.mp hy).1
+        simp only [SVal.saveM, hi, if_true, SVec.toList_set, List.getElem?_set_self hl,
+          Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₂
+        obtain ⟨w, hw, rfl⟩ := h₂
+        simp only [SVal.saveM, hi, if_true, hy, SVal.saveM_saveM y p a b hz hw,
+          Option.bind_eq_bind, Option.bind_some]
+        congr 2
+        apply SVec.eq_of_toList_eq
+        simp only [SVec.toList_set, List.set_set]
+      · simp only [reduceCtorEq] at h₁
+    · simp only [reduceCtorEq] at h₁
+  | _, _, .map m d, .key k p, a, b, x₁, x₂, h₁, h₂ => by
+    simp only [SVal.saveM] at h₁
+    split at h₁
+    · rename_i y hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
+      obtain ⟨z, hz, rfl⟩ := h₁
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, Option.bind_eq_bind,
+        Option.bind_eq_some_iff, Option.some.injEq] at h₂
+      obtain ⟨w, hw, rfl⟩ := h₂
+      simp only [SVal.saveM, hy, SVal.saveM_saveM y p a b hz hw, Option.bind_eq_bind,
+        Option.bind_some, SMap.toList_ofList, setBy_setBy_same]
+    · rename_i hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h₁
+      obtain ⟨z, hz, rfl⟩ := h₁
+      simp only [SVal.saveM, SMap.toList_ofList, lookupBy_setBy_same, Option.bind_eq_bind,
+        Option.bind_eq_some_iff, Option.some.injEq] at h₂
+      obtain ⟨w, hw, rfl⟩ := h₂
+      simp only [SVal.saveM, hy, SVal.saveM_saveM d p a b hz hw, Option.bind_eq_bind,
+        Option.bind_some, SMap.toList_ofList, setBy_setBy_same]
 
 end Solidity
