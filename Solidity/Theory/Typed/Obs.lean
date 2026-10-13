@@ -19,8 +19,8 @@ family appends a path and strips a prefix (`ObsLoc`), and every operation
 stated once, over any of them.
 
 **Total.**  A write is total (`save` at a path not there makes it there), so
-solkey's `findOnSave`/`findOnSaveFrame` hold with no premise that the write
-lands.  A location not there reads the default word, length `0`, and
+`findOnSave`/`findOnSaveFrame` (solkey's `selectOnSaveCons`) hold with no
+premise that the write lands.  A location not there reads the default word, length `0`, and
 `has = false`.
 
 **From the type.**  What a delete, a copy and a push do below the location
@@ -203,35 +203,6 @@ theorem strip?_none : {T U W : Ty} → (p : Path T U) → (q : Path T W) → str
       · exact .inr ⟨r, hr, by rw [append_key]⟩
     · exact .inl (.key p q e)
 
-/-- Two paths that part: neither goes through the other, at any rest. -/
-theorem strip?_diverges {T U W : Ty} {p : Path T U} {q : Path T W} (hd : Diverges p q) :
-    ∀ {V : Ty} (r : Path W V), strip? p (q.append r) = none := by
-  induction hd with
-  | field h h' p q hne =>
-    intro V r
-    rw [append_field]; simp only [strip?, hne, dite_false]
-  | fieldIn h _ ih =>
-    intro V r
-    rw [append_field]; simp only [strip?, dite_true]; exact ih r
-  | «at» p q hne =>
-    intro V r
-    rw [append_at]; simp only [strip?, hne, if_false]
-  | atIn i _ ih =>
-    intro V r
-    rw [append_at]; simp only [strip?, if_true]; exact ih r
-  | atF p q hne =>
-    intro V r
-    rw [append_atF]; simp only [strip?, hne, if_false]
-  | atFIn i _ ih =>
-    intro V r
-    rw [append_atF]; simp only [strip?, if_true]; exact ih r
-  | key p q hne =>
-    intro V r
-    rw [append_key]; simp only [strip?, hne, if_false]
-  | keyIn k _ ih =>
-    intro V r
-    rw [append_key]; simp only [strip?, if_true]; exact ih r
-
 theorem strip?_append_append : {T U V W : Ty} → (p : Path T U) → (q : Path U V) → (r : Path U W) →
     strip? (p.append q) (p.append r) = strip? q r
   | _, _, _, _, .nil, q, r => by rw [append_nil, append_nil]
@@ -354,10 +325,6 @@ theorem save_save (o : Obs L) {U : Ty} (p : L U) (v w : TVal U) :
 
 theorem save_word_below (o : Obs L) {U : Ty} (p : L U) {P : PrimTy} (r : Path U (.prim P))
     (v : TVal U) : (o.save p v).word (ObsLoc.app p r) = v.word r := by
-  simp only [save, ObsLoc.strip?_app]
-
-theorem save_len_below (o : Obs L) {U : Ty} (p : L U) {E : Ty} (r : Path U (.ref (.array E)))
-    (v : TVal U) : (o.save p v).len (ObsLoc.app p r) = v.len r := by
   simp only [save, ObsLoc.strip?_app]
 
 theorem save_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
@@ -499,8 +466,6 @@ instance : ObsLoc (SLoc C) where
 
 theorem app_ref {U W : Ty} (r : SRef C U) (q : Path U W) :
     (ObsLoc.app (SLoc.ref r) q : SLoc C W) = .ref (r.append q) := rfl
-theorem strip?_ref {U W : Ty} (r : SRef C U) (q : SRef C W) :
-    (ObsLoc.strip? (SLoc.ref r) (SLoc.ref q) : Option (Path U W)) = r.strip? q := rfl
 
 end SLoc
 
@@ -1969,13 +1934,7 @@ end Storage
 
 /-! ### Laws of the operations -/
 
-theorem TVal.overlay_word_nil {P : PrimTy} (o n : TVal (.prim P)) :
-    (TVal.overlay o n).word .nil = n.word .nil := rfl
-
 theorem TVal.ofWord_word_nil {P : PrimTy} (x : P.Denote) : (TVal.ofWord x).word .nil = x := rfl
-
-theorem TVal.del_word_nil {P : PrimTy} (o : TVal (.prim P)) :
-    (TVal.del o).word .nil = PrimTy.dflt P := rfl
 
 namespace Obs
 
@@ -2009,7 +1968,7 @@ theorem findOnSavePrefix (o : Obs L) {U V : Ty} (q : L U) (r : Path U V) (v : TV
     (o.copyTo (ObsLoc.app q r) v).find q = (o.find q).copyTo r v := by
   rw [copyTo, copyTo, find_save_below, find_find]
 
-/-- **`findOnSaveFrame`** (solkey's `findOnSaveDifferent`). -/
+/-- **`findOnSaveFrame`** (solkey's `selectOnSaveCons` `\else`). -/
 theorem findOnSaveFrame (o : Obs L) {U : Ty} {p : L U} {P : PrimTy} {q : L (.prim P)}
     (v : TVal U) (h : (ObsLoc.strip? p q).isNone = true) : (o.copyTo p v).word q = o.word q :=
   save_word_frame _ _ (Option.isNone_iff_eq_none.1 h)

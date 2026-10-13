@@ -10,8 +10,8 @@ W9.8.3).
 
 The laws on terms are `Storage`'s (`Signature.lean`) read through
 `Tm.eval`: `Tm.findOnSave`, `Tm.findOnSaveFrameRoot`, `Tm.findOnSaveIn`
-(under a `select`); the frame below one root (`Storage.findOnSaveFrame`,
-over `Path.Diverges`) waits for a term-level divergence test.
+(under a `select`); the frame below one root is `Storage.find_save_frame`
+(`Calculus/TermLaws.lean`, over `Theory.diverges`).
 -/
 
 namespace Solidity
@@ -90,7 +90,7 @@ end Tm
 namespace Tm
 
 /-- **`findOnSave`** on terms: `find(save(s, p, sval(v)), p) = v` where the
-write lands (solkey's `findOnSave`; `Storage.findOnSave`). -/
+write lands (solkey's `selectOnSaveCons` `\then`; `Storage.findOnSave`). -/
 theorem findOnSave (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
     (q : Tm C Γ (.path (.prim p))) (v : Tm C Γ (.val p))
     (hd : (Tm.app3 .save s q (.app1 .sval v)).eval σ ≠ none) :
@@ -108,7 +108,7 @@ theorem findOnSave (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
     rfl
 
 /-- **`findOnSaveFrame`** across roots on terms: a write leaves a read at
-another state variable (solkey's `findOnSaveDifferent`;
+another state variable (solkey's `selectOnSaveCons` `\else`;
 `Storage.findOnSaveFrameRoot`). -/
 theorem findOnSaveFrameRoot (σ : State C Γ) {T U : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path T))
     (v : Tm C Γ (.sv T)) (q' : Tm C Γ (.path U))

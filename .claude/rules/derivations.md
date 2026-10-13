@@ -1,7 +1,7 @@
 ---
 paths:
   - "Solidity/Examples/**/*.lean"
-  - "Solidity/Theory/*.lean"
+  - "Solidity/Theory/**/*.lean"
   - "Solidity/Update.lean"
   - "Solidity/Calculus/Notation.lean"
   - "Solidity/Calculus/SurfaceNotation.lean"
@@ -94,11 +94,11 @@ something, extend the notation (`Calculus/SurfaceNotation.lean`, its scoped
 reading `Calculus/Notation.lean`); if a goal prints with a `‹…›` escape,
 extend the printer (`Calculus/RuleSyntax.lean`, `Calculus/Delab.lean`).
 
-**Valid means every typed state** (`Valid`, `Calculus/Logic.lean`), but the
-closer reads a leaf's storage untyped (`docs/intrinsic.md`, "What is
-left"), including storages without the contract's roots, so a write under
-the diamond leaves its leaf open (`⟨ alice.age = 1; ⟩ true`,
-pinned in `Examples/ProofTree.lean`). Write the box, or state the
+**Valid means every typed state** (`Valid`, `Calculus/Logic.lean`): a typed
+storage has every member, so a write under the diamond along a path through
+no array slot returns and its leaf closes (`⟨ alice.age = 1; ⟩ true`,
+pinned in `Examples/ProofTree.lean`). A write at an index, or through the
+alias a `push()` returns, may revert: write the box, or state the
 precondition. A claim about the contract's initial store is a typed run
 (`Prog.runT` from `State.exampleStore`, `Tools/Run.lean`), pinned
 with `#guard_msgs in #eval`.

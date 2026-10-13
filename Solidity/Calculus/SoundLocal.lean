@@ -10,7 +10,7 @@ stuck: a short circuit runs exactly as its unfolded `if`.
 -/
 
 namespace Solidity
-open Solidity (Modality Srt Op0 Op1 Op2 Op3 NoPanic evalBinop)
+open Solidity (Modality Srt Op0 Op1 Op2 Op3 evalBinop)
 open Semantics (Value SVal MVal Seg Halt Res)
 
 variable {C : Contract}

@@ -61,7 +61,8 @@ theorem deepFieldWriteValue (s : TSto StandardExample) :
   Obs.findOnSave _ _ _
 
 /-- **The frame.**  `bob.age` does not see the write: the locations part at
-the root (`findOnSaveDifferent`, decided on the two literal locations). -/
+the root (`findOnSaveFrame`, solkey's `selectOnSaveCons` `\else`, decided
+on the two literal locations). -/
 theorem deepFieldWriteFrame (s : TSto StandardExample) :
     (s.copyTo (ObsLoc.app aliceL accountBalance) (TVal.ofWord (word 10))).word
       (ObsLoc.app bobL ageP) = s.word (ObsLoc.app bobL ageP) :=
@@ -160,20 +161,20 @@ private abbrev hAge : lookupBy "age" (structDef "Person") = some (.prim .uint) :
 private abbrev ageAt (carol : Nat) : MAddrT (.prim .uint) := .field (s := "Person") carol hAge
 
 /-- `carol.age = 34; x = carol.age;` — the read-over-write the memory
-examples end on (`readOnWrite`, solkey's `readWriteEqual`). -/
+examples end on (solkey's `readOnWrite` `\then`). -/
 theorem memoryFieldValue {H : HTy} {m m' : Grown H (fun _ => Unit)} (carol : Nat)
     (h : m.writeT (ageAt carol) (word 34) = some m') : m'.readId (ageAt carol) = some (word 34) :=
   Grown.readOnWrite h
 
 /-- …and the same member of another object does not see it
-(`readWriteDifferent`). -/
+(`readOnWrite` `\else`). -/
 theorem memoryFieldFrame {H : HTy} {m m' : Grown H (fun _ => Unit)} (carol bob : Nat)
     (hne : ¬ carol = bob) (h : m.writeT (ageAt carol) (word 34) = some m') :
     m'.readId (ageAt bob) = m.readId (ageAt bob) :=
-  Grown.readWriteDifferent h _ (.inl hne)
+  Grown.readOnWriteFrame h _ (.inl hne)
 
 /-- `Person memory carol; x = carol.age;` — a member of a fresh struct reads
-its default (`readAddEqual`, `initMember`). -/
+its default (`readOnAddM` `\then`, then `initMember`). -/
 theorem memoryDeclDefault {H : HTy} (hp : Heap H) :
     (hp.allocDefault (.struct "Person") rfl).heap.field
       (hp.allocDefault (.struct "Person") rfl).val hAge = word 0 :=
@@ -190,30 +191,29 @@ what the objects held.  Each is read back by solkey's law. -/
 section CrossDomain
 
 /-- `Person memory carol = alice; v = carol.age;` — the tail of
-`CrossDomain.storageToMemoryRootCopy` (`readCopySt`): the copy's member
+`CrossDomain.storageToMemoryRootCopy` (`readFromCopyToStorage` `\then`):
+the copy's member
 reads the storage struct's. -/
 theorem storageToMemoryRootCopyValue {H : HTy} (hp : Heap H)
     (alice : SVal (.ref (.struct "Person"))) :
     (alice.copyStToM hp rfl).heap.field (alice.copyStToM hp rfl).val hAge =
       (((SVal.view alice : SFields _).get hAge).view : PrimTy.uint.Denote) :=
-  SVal.readCopySt hp alice rfl hAge (by decide)
+  SVal.readFromCopyToStorage hp alice rfl hAge (by decide)
 
 /-- …and an object older than the copy does not see it
-(`readCopyStOther`). -/
+(`readFromCopyToStorage` `\else`). -/
 theorem storageToMemoryOtherRoot {H : HTy} (μ₀ : Grown H (fun _ => Unit))
     (alice : SVal (.ref (.struct "Person"))) (bob : Nat) (hid : bob < μ₀.H'.length) :
-    (((ageAt bob).resolve (μ₀.then (alice.copyStToM μ₀.heap rfl)).H').bind fun rb =>
-        (μ₀.then (alice.copyStToM μ₀.heap rfl)).heap.readAddr rb).map (MVal.erase _) =
-      (((ageAt bob).resolve μ₀.H').bind fun rb => μ₀.heap.readAddr rb).map (MVal.erase _) :=
-  Grown.readCopyStOther μ₀ alice rfl (ageAt bob) hid
+    (μ₀.then (alice.copyStToM μ₀.heap rfl)).readId (ageAt bob) = μ₀.readId (ageAt bob) :=
+  Grown.readFromCopyToStorageFrame μ₀ alice rfl (ageAt bob) hid
 
 /-- `alice = carol; v = alice.age;` — the tail of
-`CrossDomain.memoryToStorageRootCopy` (`findCopyMem`): the storage copy's
+`CrossDomain.memoryToStorageRootCopy` (`findOnCopy`): the storage copy's
 member holds the object's. -/
 theorem memoryToStorageRootCopyValue {H : HTy} (hp : Heap H) (carol : HRef H (.struct "Person")) :
     (MVal.copyMToSt hp (T := .ref (.struct "Person")) carol).find (.field hAge .nil) =
       some (.prim (hp.field carol hAge)) :=
-  MVal.findCopyMem hp carol hAge (by decide)
+  MVal.findOnCopy hp carol hAge (by decide)
 
 end CrossDomain
 

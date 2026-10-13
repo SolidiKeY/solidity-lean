@@ -1,4 +1,4 @@
-import Solidity.Semantics.Agree
+import Solidity.Semantics.Properties
 
 /-!
 # The simp sets of the generic term functions

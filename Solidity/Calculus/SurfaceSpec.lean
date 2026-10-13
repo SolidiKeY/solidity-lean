@@ -544,9 +544,7 @@ macro_rules
   | `(spec!{ $f:ident }) => `(spec[InContract.contract]{ $f })
 
 /-- What `sol_spec_close` does before its last step: `sol_close`'s
-evaluation and reads, knowing also that a word read is a word
-(`Close.asValue_eq_ok`), which the layout premises of a specification say of
-every key (a `delete` then leaves its type's default). -/
+evaluation and reads, the landed states opened to binders. -/
 macro "sol_spec_prep" : tactic => `(tactic|
   (sol_close_unwrap
    intro σ
@@ -559,7 +557,6 @@ macro "sol_spec_prep" : tactic => `(tactic|
    all_goals try (subst_vars; sol_close_reads_all)
    all_goals (try intros)
    all_goals (try simp only [Close.exists_unit, Close.forall_unit, exists_const, forall_const] at *)
-   all_goals (try simp only [Close.asValue_eq_ok] at *)
    -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
    -- state: every premise introduced, every conjunct its own goal
    all_goals (repeat' (first | intro _ | apply And.intro))))
@@ -567,7 +564,7 @@ macro "sol_spec_prep" : tactic => `(tactic|
 /-- The last step of `sol_spec_close`: `omega` or `grind`, `grind`'s
 instantiation bounded, since the layout premises are quantified. -/
 macro "sol_spec_finish" : tactic => `(tactic|
-  first | omega | grind (gen := 3) [Close.defaultOf_int, Close.defaultOf_bool])
+  first | omega | grind (gen := 3))
 
 /-- The closing half of `sol_spec`: `sol_spec_prep`, then `sol_spec_finish`
 on every goal. -/

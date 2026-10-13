@@ -1250,7 +1250,7 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       TermTaclet (.app2 .findIn (K.fill (.app1 (.selectIn hf) (.app2 .delAtIn s p))) q)
         (.app2 .findIn (K.fill (.app1 (.selectIn hf) s)) q)
   /-- **`findOnDelAt`**: where `s` reads the word `w` at `p`, the delete
-  leaves its default (`Obs.findOnDelAt`, `delValueDefault`). -/
+  leaves its default (`Obs.findOnDelAt`). -/
   | findOnDelAt {s : Tm C Γ .st} {P : PrimTy} {p q : Tm C Γ (.path (.prim P))} {w : P.Denote}
       (hw : TermTaclet (Tms.Term.find s p) (Tms.Term.lit w)) (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
@@ -1261,11 +1261,11 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       {q : Tm C Γ (.path (.prim P))} (hp : p.hasSeg = true := by rfl)
       (hq : p.sameSegs q = true := by first | rfl | exact Tm.sameSegs_refl _) :
       TermTaclet (Tms.Term.find (Tms.STerm.delAt s p) q) (Tms.Term.delValue (Tms.Term.find s q))
-  /-- **`delValueLit`**: the default of a word (`delValueDefault`). -/
+  /-- **`delValueLit`**: the default of a word (`delValue`'s denotation). -/
   | delValueLit {P : PrimTy} {w : P.Denote} :
       TermTaclet (Tms.Term.delValue (Tms.Term.lit w)) (Tms.Term.dflt P)
   /-- **`findOnDelAtBelow`**: below a deleted node that is not a mapping,
-  every word reads its default (`Obs.delAt_word_below`, `delValueDefault`). -/
+  every word reads its default (`Obs.delAt_word_below`). -/
   | findOnDelAtBelow {s : Tm C Γ .st} {T : Ty} {p : Tm C Γ (.path T)} {P : PrimTy}
       {q : Tm C Γ (.path (.prim P))} {w : P.Denote} (hk : s.KindFreeAt p)
       (hw : s.findLit? q = some w := by rfl) (hp : p.hasSeg = true := by rfl)
@@ -1274,8 +1274,7 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
   /-- **`findOnDelAtBelow`** in a storage of members:
   `findIn(delAtIn(s, p), q) ⇝ defVal` below a deleted member that is not a
   mapping, `q` going on below `p` by members (`Tm.extendsIn`) and `s`
-  writing the word there (`Tm.findLitIn?`) (`Obs.delAt_word_below`,
-  `delValueDefault`). -/
+  writing the word there (`Tm.findLitIn?`) (`Obs.delAt_word_below`). -/
   | findOnDelAtBelowIn {sn : Name} {s : Tm C Γ (.sts sn)} {T : Ty} {p : Tm C Γ (.spath sn T)}
       {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote} (hk : s.KindFreeAt p)
       (hw : s.findLitIn? q = some w := by rfl) (hq : q.extendsIn p = true := by rfl) :
@@ -1297,12 +1296,12 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
       {P : PrimTy} {q : Tm C Γ (.path (.prim P))} (h : p.diverges q = true := by rfl) :
       TermTaclet (Tms.Term.find (Tms.STerm.pop s p) q) (Tms.Term.find s q)
   /-- **`lenOnSaveFrame`**: a length read off the written path does not see
-  the write (`Obs.findOnSaveFrame`). -/
+  the write (`Obs.lenOnSaveFrame`). -/
   | lenOnSaveFrame {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)} {v : Tm C Γ (.sv T)}
       {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))} (h : q.divergesLen p = true := by rfl) :
       TermTaclet (Tms.Term.len (Tms.STerm.save s q v) p) (Tms.Term.len s p)
   /-- **`lenOnDelAtFrame`**: a length read off the deleted path does not see
-  the delete (`Obs.findOnDelAtFrame`). -/
+  the delete (`Obs.lenOnDelAtFrame`). -/
   | lenOnDelAtFrame {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)}
       {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))} (h : q.divergesLen p = true := by rfl) :
       TermTaclet (Tms.Term.len (Tms.STerm.delAt s q) p) (Tms.Term.len s p)

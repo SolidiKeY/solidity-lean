@@ -1,7 +1,6 @@
 import Solidity.Update
 import Solidity.Semantics.TypedErase
 import Solidity.Semantics.StorageErase
-import Solidity.Theory.StateWrites
 import Solidity.Theory.Typed.Obs
 
 /-!
@@ -506,7 +505,8 @@ theorem Storage.push_none {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E)
 
 /-! ## The laws, typed
 
-solkey's `findOnSave` and `findOnSaveDifferent` (`TermTaclet.findOnSave`,
+solkey's `selectOnSaveCons`, its `\then` and its `\else`, as the laws
+`findOnSave` and `findOnSaveFrame` (`TermTaclet.findOnSave`,
 `TermTaclet.findOnSaveFrame`) on the typed storage, where the write lands
 (the typed Theory's `Obs.findOnSave` and `Obs.findOnSaveFrame`,
 `Theory/Typed/Obs.lean`, need no premise: KeY's model is total).  A typed `save` is the program's
@@ -537,7 +537,7 @@ theorem write_some {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
     exact ⟨_, h⟩
 
 /-- **`findOnSave`**, typed: a word written where the write lands reads back
-(solkey's `findOnSave`; Theory `Obs.findOnSave`). -/
+(solkey's `selectOnSaveCons` `\then`; Theory `Obs.findOnSave`). -/
 theorem findOnSave {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (v : p.Denote)
     {st' : Storage C} (h : st.write r (.prim v) = some st') : st'.find r = some (.prim v) := by
   obtain ⟨x', hs, rfl⟩ := save_some (show st.save r (.prim v) = some st' from h)
@@ -545,7 +545,7 @@ theorem findOnSave {p : PrimTy} (st : Storage C) (r : SRef C (.prim p)) (v : p.D
   exact SVal.find_save_same _ _ _ hs
 
 /-- **`findOnSaveFrame`** across roots, typed: a write leaves another state
-variable as it was (solkey's `findOnSaveDifferent`; Theory
+variable as it was (solkey's `selectOnSaveCons` `\else`; Theory
 `Obs.findOnSaveFrame`). -/
 theorem findOnSaveFrameRoot {U W : Ty} (st : Storage C) (r : SRef C U) (q : SRef C W)
     (hne : r.root ≠ q.root) (v : SVal U) {st' : Storage C} (h : st.write r v = some st') :
@@ -553,20 +553,6 @@ theorem findOnSaveFrameRoot {U W : Ty} (st : Storage C) (r : SRef C U) (q : SRef
   obtain ⟨w, hw⟩ := write_some h
   obtain ⟨x', _, rfl⟩ := save_some hw
   simp only [Storage.find, SFields.get_set_ne _ r.hroot q.hroot hne]
-
-/-- **`findOnSaveFrame`** below one root, typed: a write leaves a path that
-parts from it as it was (solkey's `findOnSaveDifferent`, `p ≠ q` as
-`Path.Diverges`; Theory `Obs.findOnSaveFrame`). -/
-theorem findOnSaveFrame {T U W : Ty} (st : Storage C) (r : Name) (hr : C.rootType r = some T)
-    {p : Path T U} {q : Path T W} (hd : Path.Diverges p q) (v : SVal U) {st' : Storage C}
-    (h : st.write ⟨r, hr, p⟩ v = some st') :
-    st'.find ⟨r, hr, q⟩ = st.find ⟨r, hr, q⟩ := by
-  obtain ⟨w, hw⟩ := write_some h
-  obtain ⟨x', hs, rfl⟩ := save_some hw
-  simp only [Storage.find, SFields.get_set_same]
-  rw [SVal.save_eq_saveM] at hs
-  rw [SVal.find_eq_findM, SVal.find_eq_findM]
-  exact SVal.findM_saveM_diverges hd _ w hs
 
 /-! ### Under `select`
 

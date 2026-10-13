@@ -16,7 +16,7 @@ which both modalities accept (`TRun.push_nd`, decision 15).
 -/
 
 namespace Solidity
-open Solidity (Modality Srt Op0 Op1 Op2 Op3 NoPanic)
+open Solidity (Modality Srt Op0 Op1 Op2 Op3)
 open Semantics (Value SVal MVal Seg Halt Res)
 
 variable {C : Contract}

@@ -555,6 +555,12 @@ the old length before the push lands, a read that reverts at a full array,
 so the closer asks for room the formula does not give (`docs/intrinsic.md`,
 open items). -/
 
+/-- The write through a `push()`'s alias, under the diamond. -/
+def pushAlias : Fml StandardExample [] :=
+  .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; ⟩ true }
+
+#guard (Seq.residue .all .nil pushAlias).map List.isEmpty == some false
+
 /-! The length past a push, read back under the diamond: the push's room is
 the premise of what follows it (`roomM`), which bounds the length (W9.8.5). -/
 /--

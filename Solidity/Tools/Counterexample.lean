@@ -884,11 +884,11 @@ variable {C : Contract}
 
 /-! ## The search -/
 
-/-- **A counterexample**: the state the call starts in (its storage, the
-arguments bound as locals, the transaction, the ledger), the arguments, the
-storage the typed run ends with or how it halts (`none` for a formula with
-no run in front), and the indices of the conjuncts after the call that
-evaluate to `ff`. -/
+/-- **A counterexample**: the candidate the call starts from (`Cand C`: its
+storage, transaction, ledger and funds; the arguments are the formula's
+binders, not locals), the storage the typed run ends with or how it halts
+(`none` for a formula with no run in front), and the indices of the
+conjuncts after the call that evaluate to `ff`. -/
 structure Witness (C : Contract) where
   cand : Cand C
   outcome : Option (Except Halt (List (Name × Semantics.SVal)))

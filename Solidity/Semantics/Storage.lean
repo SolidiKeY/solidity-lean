@@ -1814,7 +1814,7 @@ theorem SVal.findM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (v
       exact SVal.findM_saveM _ p v hy
 
 /-- Two paths from one value that part: at two members, two slots or two
-keys, somewhere along them (solkey's `p ≠ q` of `findOnSaveDifferent`,
+keys, somewhere along them (the `a1 ≠ a2` of solkey's `selectOnSaveCons`,
 across the types the two paths reach). -/
 inductive Path.Diverges : {T U W : Ty} → Path T U → Path T W → Prop
   | field {s f f' : Name} {T T' U W : Ty} (h : lookupBy f (structDef s) = some T)

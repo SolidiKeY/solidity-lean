@@ -86,8 +86,8 @@ theorem ageWriteRead : ⊢ dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 
   intro σ
   -- the leaf read on the typed state (`holds`), a term at a time: the write
   -- named with what the typed laws say of the storage it leaves
-  -- (`CloseS.wp_box_write_prim`: solkey's `findOnSave` at `alice.age`, the
-  -- frame elsewhere)
+  -- (`CloseS.wp_box_write_prim`: `findOnSave` at `alice.age`, the frame
+  -- elsewhere)
   sol_close_eval
   intro st' _ hread _ _ _
   rw [CloseS.landedAll_def]

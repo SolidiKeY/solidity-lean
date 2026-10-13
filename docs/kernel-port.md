@@ -16,7 +16,7 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 |---|---|
 | `Ch01_Syntax`, `Ch02_Elab` | `AST.lean`, `Scope.lean`, `Syntax/Scoped.lean` (`Stmt C Γ Γ'`), `Syntax.lean` (the grammar), `Syntax/Elab.lean` (`sol[C]{}`, its output `Prog C Γ Γ'`) |
 | `Ch03_Theory` | `Theory/` |
-| `Ch04_Semantics` | `Semantics/Run.lean` (`Stmt.run`, typed), `Semantics/State.lean`, `Semantics.lean` (the untyped state's operations), `Semantics/Agree.lean` |
+| `Ch04_Semantics` | `Semantics/Run.lean` (`Stmt.run`, typed), `Semantics/State.lean`, `Semantics.lean` (the untyped state's operations) |
 | `Ch05_Logic` | `Calculus/Fml.lean` (`Fml C Γ`, both modalities), `Calculus/Logic.lean` (`holds`), `Update.lean` (terms, updates) |
 | `Notation` | `Calculus/RuleSyntax.lean` (schemas, printers), `Calculus/SurfaceNotation.lean` (`dl[C]{}`) |
 | `Ch06_Taclets` | `Calculus/Rules.lean`, `Calculus/Taclet.lean` (`Taclet.toStep`), `Calculus/Sound*.lean` (`Stmt.sound`), `Calculus/Proves.lean` (`Proves`) |
@@ -202,7 +202,7 @@ their names.
 
 | Question | Decision |
 |---|---|
-| Specifications | Compiled as solkey compiles them (`Calculus/SurfaceSpec.lean`): a clause reads a storage term, `\old(count)` is `find(old, count)` with `old` a storage variable bound by `{old := storage}`, and `\forall T x; e` is `Fml.all` over `PrimTy.admits`.  Lean adds two premises solkey's total typed reads need not: each parameter's range and the layout of the state the clauses read (`layoutFmls`).  `sol_decide` keeps `find(old, p)` and leaves `\forall` outside its fragment. |
+| Specifications | Compiled as solkey compiles them (`Calculus/SurfaceSpec.lean`): a clause reads a storage term, `\old(count)` is `find(old, count)` with `old` a storage variable bound by `{old := storage}`, and `\forall T x; e` is `Fml.all` over a local of type `T`.  Lean adds two premises solkey's total typed reads need not: each parameter's range and the layout of the state the clauses read (`layoutFmls`).  `sol_decide` keeps `find(old, p)` and reads `\forall` as a quantifier of its language (`LFml.all`). |
 
 ### Several returns, tuples and blocks
 

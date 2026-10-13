@@ -355,7 +355,8 @@ solc's other panics (overflow, a zero divisor, an index out of bounds, `pop`
 of an empty array) stay reverts, as in KeY, where a box accepts them.
 
 - **Meaning.** A program's formula reads its run with `Modality.afterRun`
-  (`Update.lean`): `Modality.after` and the run is not a panic.  So no
+  (`Update.lean` then; now `Modality.afterRunTR`, `Calculus/Logic.lean`):
+  `Modality.after` and the run is not a panic.  So no
   modality holds of a panic; `revert` and `stuck` keep their meaning (box
   true, diamond false).  An update keeps `Modality.after`: a term never
   panics (`Calculus/NoPanic` until W9.8.3, `Upd.apply_noPanic`), so the two
