@@ -456,6 +456,51 @@ theorem eqD_sound {φ ψ : Fml C Γ} {σ : Semantics.State} {ρ : SymS}
         (Tm.evalE_defined_iff τb' b).2 ⟨x, (B2 τb' hrb' x).1 hy⟩, peel_pos ψ₂ hp₂ τ₂ hr₂ fun τc' hrc' =>
         (holds_eq_of_eval ((A3 τc' hrc' x).1 hx) ((B3 τc' hrc' x).1 hy)).2 rfl⟩⟩
 
+/-- A guard that returns returns its push bounds aside (`Rhs.guardNB`). -/
+theorem rhs_guardNB_rets {t : LTy} {σ : Semantics.State} {ρ : SymS} (r : Rhs C Γ t)
+    (h : Rets ((r.guardS ρ).eval σ)) : Rets ((r.guardNB ρ).eval σ) := by
+  cases r with
+  | store s =>
+    obtain ⟨v, hv⟩ := h
+    simp only [Rhs.guardS, seqL_eval] at hv
+    cases hb : (s.boundS ρ).eval σ with
+    | error e => rw [hb] at hv; cases hv
+    | ok w => rw [hb] at hv; exact ⟨v, hv⟩
+  | _ => exact h
+
+theorem guardNB_rets {σ : Semantics.State} {ρ : SymS} (e : ElemS C Γ)
+    (h : Rets ((e.guard ρ).eval σ)) : Rets ((e.guardNB ρ).eval σ) := by
+  cases e with
+  | rhs r => exact rhs_guardNB_rets r h
+  | glob g =>
+    cases g with
+    | «local» _ r => exact rhs_guardNB_rets r h
+    | storage s =>
+      obtain ⟨v, hv⟩ := h
+      simp only [ElemS.guard, seqL_eval] at hv
+      cases hb : (s.boundS ρ).eval σ with
+      | error e => rw [hb] at hv; cases hv
+      | ok w => rw [hb] at hv; exact ⟨v, hv⟩
+    | _ => exact h
+
+/-- What the box asks of an element returns where its guard does. -/
+theorem guardAt_box_rets {σ : Semantics.State} {ρ : SymS} (e : ElemS C Γ)
+    (h : Rets ((e.guard ρ).eval σ)) : Rets ((e.guardAt .box ρ).eval σ) :=
+  guardNB_rets e h
+
+theorem guardAt_box_rets₂ {σ : Semantics.State} {ρ : SymS} (a b : ElemS C Γ)
+    (h : Rets ((seqL (a.guard ρ) (b.guard ρ)).eval σ)) :
+    Rets ((seqL (a.guardAt .box ρ) (b.guardAt .box ρ)).eval σ) := by
+  obtain ⟨v, hv⟩ := h
+  simp only [seqL_eval] at hv ⊢
+  cases ha : (a.guard ρ).eval σ with
+  | error e => rw [ha] at hv; cases hv
+  | ok w =>
+    rw [ha] at hv
+    obtain ⟨w', hw'⟩ := guardAt_box_rets a ⟨w, ha⟩
+    obtain ⟨v', hv'⟩ := guardAt_box_rets b ⟨v, hv⟩
+    exact ⟨v', by rw [hw', hv']; rfl⟩
+
 /-- **The scoped reduction is sound**, over the typed state, at the
 polarity `pos`: where the fragment takes a formula, its reduction read in
 `σ` gives the formula in every typed state `ρ` stands for (positive), and
@@ -569,7 +614,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
         have hgret : ∃ v, (a.guard ρ).eval σ = .ok v := hg.2 ⟨_, hap'⟩
         have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds σ := by
           cases m with
-          | box => exact (guardM_box σ _ _).1 hL hgret
+          | box => exact (guardM_box σ _ _).1 hL (guardAt_box_rets a hgret)
           | diamond => exact ((guardM_diamond σ _ _).1 hL).2
         exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
     | two a b =>
@@ -594,7 +639,7 @@ theorem _root_.Solidity.Fml.toLSM_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : 
           have hL' : (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ)).holds
               σ := by
             cases m with
-            | box => exact (guardM_box σ _ _).1 hL hgret
+            | box => exact (guardM_box σ _ _).1 hL (guardAt_box_rets₂ a b hgret)
             | diamond => exact ((guardM_diamond σ _ _).1 hL).2
           exact (ih true σ' (RelT.of_lands (hr _ hap') hg' hl) hf.2).1 rfl hL'
       | some p =>

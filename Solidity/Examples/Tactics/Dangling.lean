@@ -104,11 +104,11 @@ Each round adds a stale write and a pop below the slot reader, whose
 guards repeat at every read: the leaf grows quadratically with the rounds
 and the reduction by about 1.6 times a round.  Two rounds close; four
 (twelve statements) make a leaf within `closeSize` whose reduction is past
-`elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes16` in
-`Examples/ProofTree.lean`.  Five are the most whose leaf is within
+`elimSize`, refused in milliseconds (`Seq.leafFitsOn`), as `pushes22` in
+`Examples/ProofTree.lean`.  Six are the most whose leaf is within
 `closeSize`, so the largest reduction `leafFitsOn` builds before refusing;
-six are refused by the leaf's size (before W9.8.3d, when a push carried
-no bound guard, `Decide.pushBound`, six fitted and seven were refused).
+seven are refused by the leaf's size.  (Under the box a push carries no
+bound guard, `ElemS.guardAt`; with one, W9.8.3d, five fitted.)
 The leaves are the walk's (`Seq.residue`, the `⊢` walk `sol_prove` runs),
 read as the scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`,
 `Fml.toLS`). -/
@@ -127,14 +127,26 @@ def rounds4 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 3; persons.push();
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
-/-- Five rounds: the most whose leaf is within `closeSize`. -/
-def rounds5 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+/-- Six rounds: the most whose leaf is within `closeSize`. -/
+def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
     persons.pop(); r.age = 3; persons.push();
     persons.pop(); r.age = 4; persons.push();
-    persons.pop(); r.age = 5; persons.push(); ] persons[0].age == 5 }
+    persons.pop(); r.age = 5; persons.push();
+    persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
+
+/-- Seven rounds: refused by the leaf's size. -/
+def rounds7 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+    delete persons; persons.push(); Person storage r = persons[0];
+    persons.pop(); r.age = 1; persons.push();
+    persons.pop(); r.age = 2; persons.push();
+    persons.pop(); r.age = 3; persons.push();
+    persons.pop(); r.age = 4; persons.push();
+    persons.pop(); r.age = 5; persons.push();
+    persons.pop(); r.age = 6; persons.push();
+    persons.pop(); r.age = 7; persons.push(); ] persons[0].age == 7 }
 
 #guard (Seq.residue .all .nil rounds2).map List.isEmpty == some true
 #guard (Seq.residue .all .nil rounds4).map
@@ -142,9 +154,14 @@ def rounds5 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
 
-#guard (Seq.residue .all .nil rounds5).map
+#guard (Seq.residue .all .nil rounds6).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
     (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
+
+#guard (Seq.residue .all .nil rounds7).map
+  (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
+    (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome) ==
+  some [false]
 
 end Solidity.Examples.Tactics.Dangling

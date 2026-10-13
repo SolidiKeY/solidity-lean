@@ -52,14 +52,19 @@ the formula need not. -/
 
 set_option maxHeartbeats 400000 in
 /-- `balances[k] = 5; balances[j] = 6; uint y = balances[k];` — `y` is `6`
-where the keys meet and `5` where they do not.  `sol_close` does not close
-it, the two cases stated in the formula notwithstanding. -/
+where the keys meet and `5` where they do not.  `sol_close` closes it too,
+from the two cases the formula states (W9.8.4: a case `k == j` makes the
+two typed references one). -/
 theorem twoKeysBothWays :
     ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
            ((k == j → y == 6) ∧ (k != j → y == 5)) } := by
   sol_symex
-  fail_if_success sol_close
   sol_decide
+
+example : ⊨ dl!{ [ balances[k] = 5; balances[j] = 6; uint y = balances[k]; ]
+    ((k == j → y == 6) ∧ (k != j → y == 5)) } := by
+  sol_symex
+  sol_close
 
 /-- `balances[k] = 5; balances[j] = 5;` — whichever key wins, `balances[k]`
 reads `5`.  No hypothesis names `k = j`, so `sol_close` has no fact to

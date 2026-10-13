@@ -680,6 +680,14 @@ def _root_.Solidity.Rhs.guardS (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
   | .store s => seqL (s.boundS ρ) (.sok (s.toLS ρ))
   | .saveNet | .saveNetMt => .err
 
+/-- `Rhs.guardS` with no push bound: what the box asks of a right-hand
+side.  A push past the bound halts the typed update (`Storage.full`), and a
+halting update makes the box hold, so the bound is the diamond's only
+(`ElemS.guardAt`). -/
+def _root_.Solidity.Rhs.guardNB (ρ : SymS) {t : LTy} : Rhs C Γ t → LTerm
+  | .store s => .sok (s.toLS ρ)
+  | r => r.guardS ρ
+
 /-- A right-hand side in the fragment. -/
 def _root_.Solidity.Rhs.inLS (ρ : SymS) {t : LTy} : Rhs C Γ t → Bool
   | .val t => t.inLS ρ
@@ -711,6 +719,20 @@ def ElemS.guard (ρ : SymS) : ElemS C Γ → LTerm
     | some (M, g) => if M.within memSize then g else .err
     | none => .err
   | .glob _ => .err
+
+/-- `ElemS.guard` with no push bound (`Rhs.guardNB`). -/
+def ElemS.guardNB (ρ : SymS) : ElemS C Γ → LTerm
+  | .rhs r => r.guardNB ρ
+  | .glob (.local _ r) => r.guardNB ρ
+  | .glob (.storage s) => .sok (s.toLSt ρ)
+  | e => e.guard ρ
+
+/-- What an element's terms must return under `m`: the push bound is the
+diamond's (`Rhs.guardNB`). -/
+def ElemS.guardAt (m : Modality) (ρ : SymS) (e : ElemS C Γ) : LTerm :=
+  match m with
+  | .box => e.guardNB ρ
+  | .diamond => e.guard ρ
 
 /-- An element in the fragment. -/
 def ElemS.inLS (ρ : SymS) : ElemS C Γ → Bool
@@ -963,7 +985,8 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
   | _, ρ, .upd m U φ =>
     match U.view with
     | .zero => φ.toLSM (U.replayS noActE noActR ρ)
-    | .one a => guardM m (a.guard ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+    | .one a =>
+      guardM m (a.guardAt m ρ) (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
     | .two a b =>
       match pairViewS a b with
       | some ⟨_, i, mm⟩ =>
@@ -971,7 +994,7 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → SymS → Fml C Γ → LFml
         | some (g, M) => guardM m g (φ.toLSM (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
         | none => .tt
       | none =>
-        guardM m (seqL (a.guard ρ) (b.guard ρ))
+        guardM m (seqL (a.guardAt m ρ) (b.guardAt m ρ))
           (φ.toLSM (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
     | .many => .tt
   | _, _, .modal .. => .not .tt
@@ -1029,7 +1052,8 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
     (upd := fun m U _ ih ρ =>
       match U.view with
       | .zero => ih (U.replayS noActE noActR ρ)
-      | .one a => guardM m (a.guard ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
+      | .one a =>
+        guardM m (a.guardAt m ρ) (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
       | .two a b =>
         match pairViewS a b with
         | some ⟨_, i, mm⟩ =>
@@ -1037,7 +1061,7 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (ρ : SymS) (φ : Fml C Γ) : LFml :=
           | some (g, M) => guardM m g (ih (U.replayS (pairActE ρ M) (pairActR ρ) ρ))
           | none => .tt
         | none =>
-          guardM m (seqL (a.guard ρ) (b.guard ρ))
+          guardM m (seqL (a.guardAt m ρ) (b.guardAt m ρ))
             (ih (U.replayS (UpdElem.actS ρ) (fun r => .ofOpt (r.actS ρ)) ρ))
       | .many => .tt)
     (modal := fun _ _ _ _ _ _ => .not .tt) (havoc := fun _ _ _ => .tt)

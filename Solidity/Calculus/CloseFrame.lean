@@ -711,6 +711,39 @@ theorem wp_find_total {m : Modality} {T U : Ty} {st : Storage C} {r : Name}
       P ((st.find ((SRef.ofRoot r h).append p)).getD (SVal.dflt U)) :=
   wp_find_of_total (total_ofRoot_append r h p hp)
 
+/-- A result that does not read what a total read returns: the read returns. -/
+theorem find_root_bind_const {α : Type} {T : Ty} (st : Storage C) (r : Name)
+    (h : C.rootType r = some T) (y : Option α) :
+    (st.find (SRef.ofRoot r h)).bind (fun _ => y) = y := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st (SRef.ofRoot r h) rfl)
+  rw [ha, Option.bind_some]
+theorem find_total_bind_const {α : Type} {T U : Ty} (st : Storage C) (r : Name)
+    (h : C.rootType r = some T) (p : Path T U) (hp : p.total = true) (y : Option α) :
+    (st.find ((SRef.ofRoot r h).append p)).bind (fun _ => y) = y := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1
+    (Storage.find_ne_none_total st _ (total_ofRoot_append r h p hp))
+  rw [ha, Option.bind_some]
+
+theorem find_root_map_const {α : Type} {T : Ty} (st : Storage C) (r : Name)
+    (h : C.rootType r = some T) (y : α) :
+    (st.find (SRef.ofRoot r h)).map (fun _ => y) = some y := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1 (Storage.find_ne_none_total st (SRef.ofRoot r h) rfl)
+  rw [ha, Option.map_some]
+theorem find_total_map_const {α : Type} {T U : Ty} (st : Storage C) (r : Name)
+    (h : C.rootType r = some T) (p : Path T U) (hp : p.total = true) (y : α) :
+    (st.find ((SRef.ofRoot r h).append p)).map (fun _ => y) = some y := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1
+    (Storage.find_ne_none_total st _ (total_ofRoot_append r h p hp))
+  rw [ha, Option.map_some]
+/-- A mapping's key along a total path is always a slot. -/
+theorem checkIndex_map_total {k : PrimTy} {V T : Ty} (st : Storage C) (r : Name)
+    (h : C.rootType r = some T) (p : Path T (.ref (.mapping (.prim k) V))) (hp : p.total = true)
+    (i : Int) : st.checkIndex ((SRef.ofRoot r h).append p) IndexTy.map i = some () := by
+  obtain ⟨a, ha⟩ := Option.ne_none_iff_exists'.1
+    (Storage.find_ne_none_total st _ (total_ofRoot_append r h p hp))
+  simp only [Storage.checkIndex, ha, Option.bind_eq_bind, Option.bind_some]
+  rfl
+
 /-- What a read along a total path returns, read below. -/
 theorem getD_find_find {T U : Ty} (st : Storage C) (r : SRef C T) (h : r.path.total = true)
     (p : Path T U) : ((st.find r).getD (SVal.dflt T)).find p = st.find (r.append p) := by
@@ -822,7 +855,9 @@ attribute [close_rw_s]
   CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field
   CloseS.copyMToSt_find_field CloseS.wp_box_ofId CloseS.withStorage_memT_readId
   CloseS.withNet_memT_readId CloseS.withBalance_memT_readId
-  CloseS.getD_find_root CloseS.getD_find_append CloseS.path_ofRoot CloseS.path_append CloseS.find_init_ofRoot CloseS.find_init_append
+  CloseS.getD_find_root CloseS.getD_find_append CloseS.find_root_bind_const
+  CloseS.find_total_bind_const CloseS.find_root_map_const CloseS.find_total_map_const
+  CloseS.checkIndex_map_total CloseS.path_ofRoot CloseS.path_append CloseS.find_init_ofRoot CloseS.find_init_append
   Path.total SVal.dflt_prim' Semantics.lookupBy Option.getD_some Option.getD_none
   CloseS.wp_box_delete CloseS.map_const_eq_some SVal.defaultOf_prim' SVal.find_defaultOf_field
   Option.map_map CloseS.dflt_bool CloseS.dflt_uint_val CloseS.dflt_int_val

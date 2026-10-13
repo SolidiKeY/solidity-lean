@@ -153,7 +153,8 @@ info: @Taclet.storageFieldWriteSave : ∀ {C : Contract} {k : Nat} {m : Modality
     Taclet C k m (Stmt.assign (Loc.field sp fld hfld) (Src.val (Val.simple se)))
       (Premise.update
         (Upd.nil.snoc
-          (UpdElem.storage (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.field sp.lower fld) (Tms.SValT.val se.lower)))))
+          (UpdElem.storage
+            (Tms.STerm.save Tms.STerm.storage (Tms.PTerm.field sp.lower fld hfld) (Tms.SValT.val se.lower)))))
 -/
 #guard_msgs in
 set_option pp.sol.dl false in

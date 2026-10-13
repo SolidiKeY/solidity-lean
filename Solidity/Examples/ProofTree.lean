@@ -78,15 +78,13 @@ closed: 0 open goal(s), 11 node(s), 2 branch(es)
 #guard_msgs in
 #proof_tree dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 }
 
-/-! A write under the diamond is valid over typed states, but the closer
-reads its leaf's storage untyped (`State.globE`), with no layout without a
-`wt(storage)` premise (`docs/intrinsic.md`, "What is left"): the leaf stays
-open and shows its sequent. -/
+/-! A write under the diamond is valid over typed states: a typed storage
+has every member, so a write along a path through no array slot returns
+(`CloseS.wp_diamond_write_total`), and the leaf closes. -/
 /--
 info: 0: storageFieldWriteSave
-1: OPEN GOAL
-    dl{ { storage := save(storage, alice.age, 1) } ⟹ true }
-open: 1 open goal(s), 2 node(s), 1 branch(es)
+1: Closed goal
+closed: 0 open goal(s), 2 node(s), 1 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ ⟨ alice.age = 1; ⟩ true }
@@ -535,9 +533,11 @@ example : ⊢ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
 
 /-- `wt(storage)`, the premise of a storage obligation (`Fml.wt`).  The
 three below are box obligations: a typed push is exhausted at a full array
-(`Storage.full`), where the walk's update `{storage := save(…, len + 1)}` is
-undefined, so a diamond push leaf needs a bound on the length that `wt` does
-not give (W9.8.3d). -/
+(`Storage.full`).  The run's exhaustion is accepted by both modalities, but
+the update the walk leaves, `{storage := save(…, len + 1)}`, halts there, and
+the diamond rejects a halting update; so a diamond push leaf needs a bound
+on the length below `2^256 - 1`, which `wt` (a layout) does not give.  The
+box needs none (`ElemS.guardAt`). -/
 def wtStd : Fml StandardExample [] := Fml.wt StandardExample
 
 /--
@@ -628,17 +628,18 @@ is within `closeSize` and its reduction past `elimSize`: refused in
 milliseconds.  The leaves are the `⊢` walk's (`Seq.residue`), read as the
 scoped closer reads them (`Hyps.wrap`, `Fml.dropWtS`, `Fml.toLS`). -/
 
-/-- Sixteen pushes onto one array (twenty-two before each push carried its
-bound guard, `Decide.pushBound`: the leaf grew past `closeSize`). -/
-def pushes16 : Fml StandardExample [] :=
+/-- Twenty-two pushes onto one array (under the box a push carries no
+bound guard: `ElemS.guardAt`). -/
+def pushes22 : Fml StandardExample [] :=
   dl!{ [
     values.push(0); values.push(1); values.push(2); values.push(3); values.push(4);
     values.push(5); values.push(6); values.push(7); values.push(8); values.push(9);
     values.push(10); values.push(11); values.push(12); values.push(13); values.push(14);
-    values.push(15); ]
+    values.push(15); values.push(16); values.push(17); values.push(18); values.push(19);
+    values.push(20); values.push(21); ]
     values.length > 0 }
 
-#guard (Seq.residue .all .nil pushes16).map
+#guard (Seq.residue .all .nil pushes22).map
   (fun ls => ls.map fun (l : Seq.SLeaf StandardExample) =>
     (((l.2.1.wrap l.2.2).dropWtS.toLS Decide.SymS.empty).fits Decide.closeSize).isSome &&
       !Seq.leafFitsOn (l.2.1.wrap l.2.2)) == some [true]
