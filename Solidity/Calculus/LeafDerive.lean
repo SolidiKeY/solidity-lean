@@ -241,11 +241,11 @@ pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
 of the one before it appears twice in the next, so this tree doubles with
 each such write.  It is the cheap first test: computing the reduction of a
 leaf far past it would itself be slow. -/
-def closeSize : Nat := 4000
+def closeSize : Nat := 16000
 
 /-- The most nodes the closer takes in the reduction (`LFml.elim`), which
 is what it walks, counted as a tree. -/
-def elimSize : Nat := 40000
+def elimSize : Nat := 100000
 
 /-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the
 reduction does not read it; else whether it closes it: within `closeSize`

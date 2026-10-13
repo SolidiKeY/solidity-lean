@@ -2130,12 +2130,83 @@ theorem Facts.cmpBnds_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
         omega
     · exact absurd rfl hvt
 
+theorem _root_.Solidity.PrimTy.ival_inj : {p : PrimTy} → {u w : p.Denote} →
+    PrimTy.ival u = PrimTy.ival w → u = w
+  | .bool, u, w, h => by
+    cases hu : (show Bool from u) <;> cases hw : (show Bool from w) <;>
+      simp only [PrimTy.ival, hu, hw] at h <;> first | rfl | cases h |
+      (exact (show (u : Bool) = w from hu.trans hw.symm))
+  | .uint, _, _, h => Subtype.ext h
+  | .int, _, _, h => Subtype.ext h
+
+/-- The premise `¬ a ≐ v`, `v` a literal at an edge of `a`'s range: the
+range one narrower. -/
+def Facts.neEdge (F : Facts C) {p : PrimTy} (a : LTm C (.val p)) (v : p.Denote) : Facts C :=
+  let r := F.range a
+  if r.1 = PrimTy.ival v then { F with bnds := ⟨p, a, r.1 + 1, r.2⟩ :: F.bnds }
+  else if r.2 = PrimTy.ival v then { F with bnds := ⟨p, a, r.1, r.2 - 1⟩ :: F.bnds }
+  else F
+
+theorem Facts.neEdge_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
+    {a : LTm C (.val p)} {v : p.Denote}
+    (h : ∀ x, (a.eval g ν : Option p.Denote) = some x → x ≠ v) : (F.neEdge a v).Ok g ν := by
+  dsimp only [Facts.neEdge]
+  have key : ∀ x, (a.eval g ν : Option p.Denote) = some x →
+      InR (F.range a) (PrimTy.ival x) ∧ PrimTy.ival x ≠ PrimTy.ival v :=
+    fun x hx => ⟨F.range_sound hF a hx, fun e => h x hx (PrimTy.ival_inj e)⟩
+  split
+  · rename_i he
+    refine ⟨hF.eqs, hF.nes, hF.rets, fun b hb x hx => ?_⟩
+    rcases List.mem_cons.1 hb with rfl | hb
+    · obtain ⟨⟨h1, h2⟩, h3⟩ := key x hx
+      dsimp only
+      constructor <;> omega
+    · exact hF.bnds b hb x hx
+  · split
+    · rename_i _ he
+      refine ⟨hF.eqs, hF.nes, hF.rets, fun b hb x hx => ?_⟩
+      rcases List.mem_cons.1 hb with rfl | hb
+      · obtain ⟨⟨h1, h2⟩, h3⟩ := key x hx
+        dsimp only
+        constructor <;> omega
+      · exact hF.bnds b hb x hx
+    · exact hF
+
+/-- The premise `¬ a ≐ b` with a side a literal: the other's range narrowed. -/
+def Facts.neBnd (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
+  match b.litV?, a.litV? with
+  | some v, _ => F.neEdge a v
+  | none, some v => F.neEdge b v
+  | none, none => F
+
+theorem Facts.neBnd_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
+    {a b : LTm C (.val p)} (h : ¬ (LFml.eq a b).holds g ν) : (F.neBnd a b).Ok g ν := by
+  unfold Facts.neBnd
+  split
+  · rename_i v hv
+    refine Facts.neEdge_ok hF fun x hx e => h ((LFml.holds_eq_iff g ν a b).2 ⟨x, hx, ?_⟩)
+    rw [LTm.eval_litV? g ν hv, e]
+  · rename_i v hv
+    refine Facts.neEdge_ok hF fun x hx e => h ((LFml.holds_eq_iff g ν a b).2 ⟨x, ?_, hx⟩)
+    rw [LTm.eval_litV? g ν hv, e]
+  · exact hF
+
+/-- `x ≠ y` known: the disequation, and the edge of a range it cuts. -/
+def Facts.addNe2 (F : Facts C) {p : PrimTy} (x y : LTm C (.val p)) : Facts C :=
+  (F.addNe1 x y).neBnd (F.nf x) (F.nf y)
+
+theorem Facts.addNe2_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
+    {a b : LTm C (.val p)} (h : ¬ (LFml.eq a b).holds g ν) : (F.addNe2 a b).Ok g ν := by
+  have hn : ¬ (LFml.eq (F.nf a) (F.nf b)).holds g ν := by
+    rw [LFml.holds_eq_iff, F.nf_eval hF, F.nf_eval hF, ← LFml.holds_eq_iff]; exact h
+  exact Facts.neBnd_ok (Facts.addNe1_ok hF h) hn
+
 /-- The facts a binary symbol on two values gives, read as `v`. -/
 def Facts.boolStep (ih : Facts C → LTm C (.val .bool) → Bool → Facts C) (F : Facts C)
     {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) (v : Bool) : Facts C :=
   match o, x, y with
-  | .binop .eqB _, x, y => if v then F.addEq1 x y else F.addNe1 x y
-  | .binop .neB _, x, y => if v then F.addNe1 x y else F.addEq1 x y
+  | .binop .eqB _, x, y => if v then F.addEq1 x y else F.addNe2 x y
+  | .binop .neB _, x, y => if v then F.addNe2 x y else F.addEq1 x y
   | @Op2.binop _ .and p _, x, y =>
     if hp : p = .bool then (if v then ih (ih F (hp ▸ x) true) (hp ▸ y) true else F) else F
   | @Op2.binop _ .or p _, x, y =>
@@ -2195,13 +2266,13 @@ theorem binopT_or {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .or u y 
 theorem Facts.eqB_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
     {x y : LTm C (.val p)} {u w : p.Denote} (hx : (x.eval g ν : Option p.Denote) = some u)
     (hy : (y.eval g ν : Option p.Denote) = some w) (v : Bool) (hv : v = decide (u = w)) :
-    (if v then F.addEq1 x y else F.addNe1 x y).Ok g ν := by
+    (if v then F.addEq1 x y else F.addNe2 x y).Ok g ν := by
   split
   · rename_i hvt
     rw [hvt, eq_comm, decide_eq_true_iff] at hv
     exact Facts.addEq1_ok hF ((LFml.holds_eq_iff g ν x y).2 ⟨u, hx, hv ▸ hy⟩)
   · rename_i hvt
-    refine Facts.addNe1_ok hF fun hh => hvt ?_
+    refine Facts.addNe2_ok hF fun hh => hvt ?_
     obtain ⟨z, h1, h2⟩ := (LFml.holds_eq_iff g ν x y).1 hh
     rw [hx] at h1; rw [hy] at h2; cases h1; cases h2
     rw [hv]; exact decide_eq_true rfl
@@ -2516,67 +2587,6 @@ theorem Facts.addEqn_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
   · rename_i c v hc
     exact Facts.addBool_ok _ h1 (boolLit?_eval hc hn)
   · exact h1
-
-theorem _root_.Solidity.PrimTy.ival_inj : {p : PrimTy} → {u w : p.Denote} →
-    PrimTy.ival u = PrimTy.ival w → u = w
-  | .bool, u, w, h => by
-    cases hu : (show Bool from u) <;> cases hw : (show Bool from w) <;>
-      simp only [PrimTy.ival, hu, hw] at h <;> first | rfl | cases h |
-      (exact (show (u : Bool) = w from hu.trans hw.symm))
-  | .uint, _, _, h => Subtype.ext h
-  | .int, _, _, h => Subtype.ext h
-
-/-- The premise `¬ a ≐ v`, `v` a literal at an edge of `a`'s range: the
-range one narrower. -/
-def Facts.neEdge (F : Facts C) {p : PrimTy} (a : LTm C (.val p)) (v : p.Denote) : Facts C :=
-  let r := F.range a
-  if r.1 = PrimTy.ival v then { F with bnds := ⟨p, a, r.1 + 1, r.2⟩ :: F.bnds }
-  else if r.2 = PrimTy.ival v then { F with bnds := ⟨p, a, r.1, r.2 - 1⟩ :: F.bnds }
-  else F
-
-theorem Facts.neEdge_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
-    {a : LTm C (.val p)} {v : p.Denote}
-    (h : ∀ x, (a.eval g ν : Option p.Denote) = some x → x ≠ v) : (F.neEdge a v).Ok g ν := by
-  dsimp only [Facts.neEdge]
-  have key : ∀ x, (a.eval g ν : Option p.Denote) = some x →
-      InR (F.range a) (PrimTy.ival x) ∧ PrimTy.ival x ≠ PrimTy.ival v :=
-    fun x hx => ⟨F.range_sound hF a hx, fun e => h x hx (PrimTy.ival_inj e)⟩
-  split
-  · rename_i he
-    refine ⟨hF.eqs, hF.nes, hF.rets, fun b hb x hx => ?_⟩
-    rcases List.mem_cons.1 hb with rfl | hb
-    · obtain ⟨⟨h1, h2⟩, h3⟩ := key x hx
-      dsimp only
-      constructor <;> omega
-    · exact hF.bnds b hb x hx
-  · split
-    · rename_i _ he
-      refine ⟨hF.eqs, hF.nes, hF.rets, fun b hb x hx => ?_⟩
-      rcases List.mem_cons.1 hb with rfl | hb
-      · obtain ⟨⟨h1, h2⟩, h3⟩ := key x hx
-        dsimp only
-        constructor <;> omega
-      · exact hF.bnds b hb x hx
-    · exact hF
-
-/-- The premise `¬ a ≐ b` with a side a literal: the other's range narrowed. -/
-def Facts.neBnd (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
-  match b.litV?, a.litV? with
-  | some v, _ => F.neEdge a v
-  | none, some v => F.neEdge b v
-  | none, none => F
-
-theorem Facts.neBnd_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
-    {a b : LTm C (.val p)} (h : ¬ (LFml.eq a b).holds g ν) : (F.neBnd a b).Ok g ν := by
-  unfold Facts.neBnd
-  split
-  · rename_i v hv
-    refine Facts.neEdge_ok hF fun x hx e => h ((LFml.holds_eq_iff g ν a b).2 ⟨x, hx, ?_⟩)
-    rw [LTm.eval_litV? g ν hv, e]
-  · rename_i v hv
-    refine Facts.neEdge_ok hF fun x hx e => h ((LFml.holds_eq_iff g ν a b).2 ⟨x, ?_, hx⟩)
-    rw [LTm.eval_litV? g ν hv, e]
-  · exact hF
 
 /-- **The premise `¬ a ≐ b`**: `addNe1`, a boolean side read apart, and the
 facts read again. -/

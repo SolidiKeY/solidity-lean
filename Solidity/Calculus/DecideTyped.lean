@@ -784,6 +784,103 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
       rw [BEnv.get_thin] at hj
       exact hag.loc _ b' hj
 
+/-- A full array, read: where `fullL` is `true`, the storage and path
+return and the array there is full. -/
+theorem fullL_true {st : LTm C .st} {E : Ty} {q : LTm C (.path (.ref (.array E)))}
+    (h : ((fullL st q).eval g₀ ν : Option Bool) = some true) :
+    ∃ w r, (st.eval g₀ ν : Option (Storage C)) = some w ∧ (q.eval g₀ ν : Option (SRef C _)) = some r ∧
+      w.full r = true := by
+  unfold fullL at h
+  rw [LTm.eval_app2, Op2.eval_eq_evalM] at h
+  cases hl : ((LTm.app2 .len st q).eval g₀ ν : Option PrimTy.uint.Denote) with
+  | none => rw [hl] at h; cases h
+  | some l =>
+    rw [hl] at h
+    have hl1 : l.1 = ((2 ^ 256 - 1 : Nat) : Int) := by
+      have h' : BinOp.evalT .eqB l (uintOfNat (2 ^ 256 - 1)) = some true := h
+      have h'' : (some (decide (l.1 = (uintOfNat (2 ^ 256 - 1)).1)) : Option Bool) = some true := h'
+      simp only [Option.some.injEq, decide_eq_true_eq] at h''
+      rw [h'', uintOfNat_val (Nat.sub_one_lt (Nat.ne_of_gt (Nat.two_pow_pos 256)))]
+    rw [LTm.eval_app2, Op2.eval_eq_evalM] at hl
+    cases hs : (st.eval g₀ ν : Option (Storage C)) with
+    | none => rw [hs] at hl; cases hl
+    | some w =>
+      cases hr : (q.eval g₀ ν : Option (SRef C _)) with
+      | none => rw [hs, hr] at hl; cases hl
+      | some r =>
+        rw [hs, hr] at hl
+        refine ⟨w, r, rfl, rfl, ?_⟩
+        have hl' : w.len r = some l := hl
+        unfold Storage.len at hl'
+        unfold Storage.full
+        cases hf : w.find r with
+        | none => rw [hf] at hl'; cases hl'
+        | some v =>
+          rw [hf] at hl'
+          have hl'' : lenU (SVal.view v : ArrView E).n (SVal.view v : ArrView E).hn = l :=
+            Option.some.inj hl'
+          subst hl''
+          have hn : (SVal.view v : ArrView E).n = 2 ^ 256 - 1 := Int.ofNat.inj hl1
+          show (!decide ((SVal.view v : ArrView E).n + 1 < 2 ^ 256)) = true
+          simp only [Bool.not_eq_true', decide_eq_false_iff_not, Nat.not_lt]
+          omega
+
+/-- **What `Tm.exhL` reads**: where it is `true`, the term is a push out of
+gas (`Tm.exhB`). -/
+theorem Tm.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {s : Srt} (t : Tm C Γ s) {X : LTm C (.val .bool)}
+    (h : t.exhL ρ₀ = some X) (hX : (X.eval g₀ ν : Option Bool) = some true) : t.exhB τ = true := by
+  cases t with
+  | app2 o x y =>
+    cases o <;> simp only [Tm.exhL, Op2.exhL, reduceCtorEq] at h <;>
+    · obtain ⟨st', hst, h⟩ := Option.bind_eq_some_iff.1 h
+      obtain ⟨q', hq, rfl⟩ := Option.map_eq_some_iff.1 h
+      obtain ⟨w, r, hw, hr, hfull⟩ := fullL_true hX
+      have dx : (st'.eval g₀ ν : Option (Storage C)) = x.eval τ := Tm.toL_drel hA x st' hst
+      have dy : (q'.eval g₀ ν : Option (SRef C _)) = y.eval τ := Tm.toL_drel hA y q' hq
+      rw [hw] at dx
+      rw [hr] at dy
+      simp only [Tm.exhB, ← dx, ← dy, Op2.exhB, hfull, Bool.true_or]
+  | app3 o x y z =>
+    cases o <;> simp only [Tm.exhL, Op3.exhL, reduceCtorEq] at h
+    obtain ⟨st', hst, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨q', hq, h⟩ := Option.bind_eq_some_iff.1 h
+    obtain ⟨v', hv, rfl⟩ := Option.map_eq_some_iff.1 h
+    rw [LTm.eval_kite] at hX
+    cases hfl : ((fullL st' q').eval g₀ ν : Option Bool) with
+    | none => rw [hfl] at hX; cases hX
+    | some b =>
+      rw [hfl] at hX
+      cases b with
+      | false => cases hX
+      | true =>
+        obtain ⟨w, r, hw, hr, hfull⟩ := fullL_true hfl
+        have hv' : (v'.eval g₀ ν).isSome = true := by
+          change ((seqL v' LTm.tt).eval g₀ ν : Option Bool) = some true at hX
+          rw [seqL_eval] at hX
+          cases hve : v'.eval g₀ ν with
+          | none => rw [hve] at hX; cases hX
+          | some _ => rfl
+        have dx : (st'.eval g₀ ν : Option (Storage C)) = x.eval τ := Tm.toL_drel hA x st' hst
+        have dy : (q'.eval g₀ ν : Option (SRef C _)) = y.eval τ := Tm.toL_drel hA y q' hq
+        have dz := Tm.toL_drel hA z v' hv
+        obtain ⟨vv, hvv⟩ := Option.isSome_iff_exists.1 hv'
+        have hz : z.eval τ = some vv := by rw [← dz, hvv]
+        rw [hw] at dx
+        rw [hr] at dy
+        simp only [Tm.exhB, ← dx, ← dy, hz, Op3.exhB, hfull, Bool.true_or]
+  | _ => simp only [Tm.exhL, reduceCtorEq] at h
+
+/-- **What `Upd.exhL` reads**: where it is `true`, the update is out of gas. -/
+theorem Upd.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {Δ : Ctx} (U : Upd C Γ Δ) {X : LTm C (.val .bool)}
+    (h : U.exhL ρ₀ = some X) (hX : (X.eval g₀ ν : Option Bool) = some true) : U.exh τ = true := by
+  unfold Upd.exhL at h
+  split at h
+  · rename_i s
+    have hs := Tm.exhL_sound hA s h hX
+    simp only [Upd.exh, Upd.exhAny, Upd.exhOk, UpdElem.exhB, hs, Bool.or_true, Bool.false_or,
+      Bool.true_and, Bool.and_self]
+  · cases h
+
 end Upd
 
 /-! ## Formulas, by position -/
@@ -865,27 +962,47 @@ theorem SymS.Fresh.push {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (t : LTy) :
     ⟨(fun b hb => by cases hb), hF.loc.mono (Nat.le_succ _)⟩⟩
 
 theorem guardM_holds {ν : AEnv} {Γ : Ctx} {τ : State C Γ} {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ)
-    {gd : LTm C (.val .bool)} {ψ : LFml C} {φ : Fml C Δ}
+    {x : Option (LTm C (.val .bool))} {gd : LTm C (.val .bool)} {ψ : LFml C} {φ : Fml C Δ}
+    (hx : ∀ X, x = some X → (X.eval g₀ ν : Option Bool) = some true → U.exh τ = true)
     (hg : (gd.eval g₀ ν : Option Bool) = (U.applyV τ).map (fun _ => true))
     (hrest : ∀ q, U.applyV τ = some q → ψ.holds g₀ ν → ∀ σ' : State C Δ, σ'.glob = q.1.1 →
       (∀ {t : LTy} (i : Idx Δ t), σ'.getV i = q.2 t i) → holds σ' φ)
-    (h : (guardM m gd ψ).holds g₀ ν) : holds τ (.upd m U φ) := by
+    (h : (guardM m x gd ψ).holds g₀ ν) : holds τ (.upd m U φ) := by
   show U.afterT m τ (holds · φ)
   rw [Upd.afterT_applyV]
+  have hgd : (LFml.eq gd gd).holds g₀ ν ↔ (U.applyV τ).isSome = true := by
+    rw [LFml.holds_rets, hg]
+    cases U.applyV τ with
+    | none => exact ⟨fun ⟨_, h⟩ => (nomatch h), fun h => (nomatch h)⟩
+    | some _ => exact ⟨fun _ => rfl, fun _ => ⟨true, rfl⟩⟩
   cases hq : U.applyV τ with
   | none =>
     cases m with
     | box => exact .inl trivial
     | diamond =>
-      have h' := h.1
-      rw [LFml.holds_rets, hg, hq] at h'
-      obtain ⟨x, hx⟩ := h'
-      cases hx
+      cases x with
+      | none =>
+        have h' := (hgd.1 h.1)
+        rw [hq] at h'
+        cases h'
+      | some X =>
+        refine .inr (hx X rfl ?_)
+        have h1 : ¬ (LFml.not (LFml.eq X .tt)).holds g₀ ν := fun hn => by
+          have h' := hgd.1 (h.1 hn)
+          rw [hq] at h'
+          cases h'
+        have h2 : (LFml.eq X .tt).holds g₀ ν := Classical.byContradiction h1
+        obtain ⟨b, hb, hb'⟩ := (LFml.holds_eq_iff _ _ _ _).1 h2
+        cases hb'
+        exact hb
   | some q =>
+    have hgq : (LFml.eq gd gd).holds g₀ ν := hgd.2 (by rw [hq]; rfl)
     cases m with
-    | box =>
-      exact hrest q hq (h ((LFml.holds_rets _ _ _).2 ⟨true, by rw [hg, hq]; rfl⟩))
-    | diamond => exact hrest q hq h.2
+    | box => exact hrest q hq (h hgq)
+    | diamond =>
+      cases x with
+      | none => exact hrest q hq h.2
+      | some X => exact hrest q hq (h.2 hgq)
 
 /-- A hidden binder read as a quantifier (`LFml.allB`): what holds for
 every atom at its position holds for every value it binds. -/
@@ -978,15 +1095,16 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
     refine ⟨fun hp hψ hφ₁ => i₂ hp (hψ (j₁ (by simp only [hp, Bool.not_true]) hφ₁)),
       fun hp hφ hψ₁ => j₂ hp (hφ (i₁ (by simp only [hp, Bool.not_false]) hψ₁))⟩
   | _, .upd m U φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
-    have h' : (if pos then (U.toLS ρ).bind fun p => (φ.toLS pos p.1).map fun φ' => guardM m p.2 φ'
-      else none) = some ψ := h
+    have h' : (if pos then (U.toLS ρ).bind fun p => (φ.toLS pos p.1).map fun φ' =>
+      guardM m (U.exhL ρ) p.2 φ' else none) = some ψ := h
     split at h'
     · rename_i hp
       subst hp
       simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
       obtain ⟨⟨ρ', gd⟩, hU, ψ', hφ, rfl⟩ := h'
       obtain ⟨hg, hag, hf', -⟩ := Upd.toLS_sound hA hF U hU
-      refine ⟨fun _ hψ => guardM_holds m U hg (fun q hq hψ' σ' hσ hl => ?_) hψ, fun h => by cases h⟩
+      refine ⟨fun _ hψ => guardM_holds m U (fun X hX hXt => Upd.exhL_sound hA U hX hXt) hg
+        (fun q hq hψ' σ' hσ hl => ?_) hψ, fun h => by cases h⟩
       have hA' : Agrees g₀ ν ρ' σ' := by
         have hl' : σ'.locV = q.2 := funext fun _ => funext fun i => hl i
         show AgreesV g₀ ν ρ' σ'.glob σ'.locV

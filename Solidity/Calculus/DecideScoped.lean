@@ -282,16 +282,57 @@ def _root_.Solidity.Upd.toLS (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
     (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.next⟩, p.2))
     Δ U
 
+/-- The array at `q` of `st` is full (`Storage.full`): `2^256 - 1` live
+elements. -/
+def fullL (st : LTm C .st) {E : Ty} (q : LTm C (.path (.ref (.array E)))) : LTm C (.val .bool) :=
+  .app2 (.binop .eqB rfl) (.app2 .len st q) (.lit (uintOfNat (2 ^ 256 - 1)))
+
+/-- `Tm.exhL` at a binary symbol: `pushSlot`, `extend`. -/
+def _root_.Solidity.Op2.exhL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x : Tm C Γ a)
+    (y : Tm C Γ b) : Option (LTm C (.val .bool)) :=
+  match o, x, y with
+  | .pushSlot, st, q | .extend, st, q =>
+    (st.toL ρ).bind fun st' => (q.toL ρ).map fun q' => fullL st' q'
+  | _, _, _ => none
+
+/-- `Tm.exhL` at a ternary symbol: `push`, its value returning. -/
+def _root_.Solidity.Op3.exhL (ρ : SymS C Γ) {a b c s : Srt} (o : Op3 C a b c s) (x : Tm C Γ a)
+    (y : Tm C Γ b) (z : Tm C Γ c) : Option (LTm C (.val .bool)) :=
+  match o, x, y, z with
+  | .push, st, q, v =>
+    (st.toL ρ).bind fun st' => (q.toL ρ).bind fun q' => (v.toL ρ).map fun v' =>
+      .kite (fullL st' q') .tt (seqL v' .tt) (.lit (p := .bool) false)
+  | _, _, _, _ => none
+
+/-- **A push out of gas, read**: a word that is `true` where the storage
+term is a push at a full array, its arguments returning (`Tm.exhB`). -/
+def _root_.Solidity.Tm.exhL (ρ : SymS C Γ) {s : Srt} (t : Tm C Γ s) : Option (LTm C (.val .bool)) :=
+  match t with
+  | .app2 o x y => o.exhL ρ x y
+  | .app3 o x y z => o.exhL ρ x y z
+  | _ => none
+
+/-- **An update out of gas, read** (`Upd.exh`): its one element a push at a
+full array. -/
+def _root_.Solidity.Upd.exhL (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) : Option (LTm C (.val .bool)) :=
+  match U with
+  | .snoc .nil (.storage s) => s.exhL ρ₀
+  | _ => none
+
 end Upd
 
 /-! ## Formulas, by position -/
 
 section Fml
 
-/-- The update's guard as a premise (box) or a conjunct (diamond). -/
-def guardM : Modality → LTm C (.val .bool) → LFml C → LFml C
-  | .box, g, φ => .imp (.eq g g) φ
-  | .diamond, g, φ => .and (.eq g g) φ
+/-- The update's guard as a premise (box) or a conjunct (diamond); under
+the diamond, where the update is a push that may be out of gas (`X`, the
+array full: `Upd.exh`, which both modalities accept), the guard is asked
+only where it is not, and what follows only where the update lands. -/
+def guardM : Modality → Option (LTm C (.val .bool)) → LTm C (.val .bool) → LFml C → LFml C
+  | .box, _, g, φ => .imp (.eq g g) φ
+  | .diamond, none, g, φ => .and (.eq g g) φ
+  | .diamond, some X, g, φ => .and (.imp (.not (.eq X .tt)) (.eq g g)) (.imp (.eq g g) φ)
 
 /-- A term that returns in every state: a literal, a value of the
 transaction, a value local. -/
@@ -327,7 +368,7 @@ def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → Bool → SymS C Γ → Fml C Γ �
     | none => (φ.toLSM pos ρ).bind fun φ' => (ψ.toLSM pos ρ).map fun ψ' => .and φ' ψ'
   | _, pos, ρ, .imp φ ψ => (φ.toLSM (!pos) ρ).bind fun φ' => (ψ.toLSM pos ρ).map fun ψ' => .imp φ' ψ'
   | _, pos, ρ, .upd m U φ =>
-    if pos then (U.toLS ρ).bind fun p => (φ.toLSM pos p.1).map fun φ' => guardM m p.2 φ'
+    if pos then (U.toLS ρ).bind fun p => (φ.toLSM pos p.1).map fun φ' => guardM m (U.exhL ρ) p.2 φ'
     else none
   | _, pos, _, .modal .. => if pos then some .ff else none
   | _, _, _, .havoc _ => none
@@ -357,7 +398,7 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml 
       | none => (ihφ pos ρ).bind fun φ' => (ihψ pos ρ).map fun ψ' => .and φ' ψ')
     (fun _ _ ihφ ihψ pos ρ => (ihφ (!pos) ρ).bind fun φ' => (ihψ pos ρ).map fun ψ' => .imp φ' ψ')
     (fun m U _ ih pos ρ =>
-      if pos then (U.toLS ρ).bind fun p => (ih pos p.1).map fun φ' => guardM m p.2 φ'
+      if pos then (U.toLS ρ).bind fun p => (ih pos p.1).map fun φ' => guardM m (U.exhL ρ) p.2 φ'
       else none)
     (fun _ _ _ _ _ pos _ => if pos then some .ff else none)
     (fun _ _ _ _ => none)
