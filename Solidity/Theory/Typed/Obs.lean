@@ -626,7 +626,7 @@ theorem SVal.saveM_append_eq {T U W : Ty} : (x : SVal T) → (p : Path T U) → 
           simp only [Option.bind_some]
           cases y.saveM r v with
           | none => rfl
-          | some y' => simp only [Option.bind_some, SVal.saveM, hi, if_true, hx]
+          | some y' => simp only [Option.bind_some]
       · rfl
     · rfl
   | .fixed e, .atF i p, r, v => by
@@ -644,7 +644,7 @@ theorem SVal.saveM_append_eq {T U W : Ty} : (x : SVal T) → (p : Path T U) → 
           simp only [Option.bind_some]
           cases y.saveM r v with
           | none => rfl
-          | some y' => simp only [Option.bind_some, SVal.saveM, hi, if_true, hx]
+          | some y' => simp only [Option.bind_some]
       · rfl
     · rfl
   | .map m d, .key k p, r, v => by
@@ -660,7 +660,7 @@ theorem SVal.saveM_append_eq {T U W : Ty} : (x : SVal T) → (p : Path T U) → 
         simp only [Option.bind_some]
         cases y.saveM r v with
         | none => rfl
-        | some y' => simp only [Option.bind_some, SVal.saveM, hx]
+        | some y' => simp only [Option.bind_some]
     · rename_i hx
       simp only [Option.bind_eq_bind]
       rw [SVal.saveM_append_eq d p r v]
@@ -670,7 +670,7 @@ theorem SVal.saveM_append_eq {T U W : Ty} : (x : SVal T) → (p : Path T U) → 
         simp only [Option.bind_some]
         cases y.saveM r v with
         | none => rfl
-        | some y' => simp only [Option.bind_some, SVal.saveM, hx]
+        | some y' => simp only [Option.bind_some]
 
 /-- Where a path finds a value, a save at it lands. -/
 theorem SVal.saveM_of_findM {T U : Ty} : (x : SVal T) → (p : Path T U) → {y : SVal U} →
@@ -1435,33 +1435,33 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
     rw [SVal.obsOpt_find, SVal.obsOpt_find, TVal.ovR_obsOpt c _ _ r]
     congr 1
     cases y with
-    | none => simp only [Option.bind_none, SVal.overlayOpt_none, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+    | none => simp only [Option.bind_none, SVal.overlayOpt_none]
     | some n =>
       cases n with
       | struct nfs =>
         cases x with
         | none =>
-          simp only [Option.bind_none, Option.bind_some, SVal.findM_field_nil, SVal.findM_nil',
-            SVal.overlayOpt_none_some, SVal.findM_field', SVal.strip_struct, SFields.get_strip, Option.bind_some_id, Option.map_some]
+          simp only [Option.bind_none, Option.bind_some, SVal.findM_nil',
+            SVal.overlayOpt_none_some, SVal.findM_field', SVal.strip_struct, SFields.get_strip]
         | some o =>
           cases o with
           | struct ofs =>
-            simp only [Option.bind_some, SVal.findM_field_nil, SVal.findM_nil',
-              SVal.overlayOpt_some_some, SVal.findM_field', SVal.overlay_struct, SFields.get_overlay, Option.bind_some_id, Option.map_some]
+            simp only [Option.bind_some, SVal.findM_nil',
+              SVal.overlayOpt_some_some, SVal.findM_field', SVal.overlay_struct, SFields.get_overlay]
   | _, x, y, .atF i r => by
     show TVal.ovR c ((SVal.obsOpt x).find (.atF i .nil)) ((SVal.obsOpt y).find (.atF i .nil)) r = _
     rw [SVal.obsOpt_find, SVal.obsOpt_find, TVal.ovR_obsOpt c _ _ r]
     congr 1
     cases y with
-    | none => simp only [Option.bind_none, SVal.overlayOpt_none, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+    | none => simp only [Option.bind_none, SVal.overlayOpt_none]
     | some n =>
       cases n with
       | fixed nel =>
         cases x with
         | none =>
-          simp only [Option.bind_none, Option.bind_some, SVal.findM_atF_nil,
+          simp only [Option.bind_none, Option.bind_some,
             SVal.overlayOpt_none_some, SVal.findM_atF', SVal.strip_fixed, SVec.toList_strip,
-            List.getElem?_map, SVal.findM_nil', Option.bind_some_id, Option.map_some]
+            List.getElem?_map, SVal.findM_nil', Option.bind_some_id]
           by_cases h0 : 0 ≤ i
           · simp only [h0, if_true]
             cases nel.toList[i.toNat]? with
@@ -1471,43 +1471,43 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
         | some o =>
           cases o with
           | fixed oel =>
-            simp only [Option.bind_some, SVal.findM_atF_nil, SVal.findM_atF', SVal.findM_nil',
+            simp only [Option.bind_some, SVal.findM_atF', SVal.findM_nil',
               Option.bind_some_id, SVal.overlayOpt_some_some, SVal.overlay_fixed,
-              SVec.getElem?_overlayOn, Option.map_some]
+              SVec.getElem?_overlayOn]
             by_cases h0 : 0 ≤ i
-            · simp only [h0, if_true, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
-            · simp only [h0, if_false, SVal.overlayOpt_none, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]; rfl
+            · simp only [h0, if_true]
+            · simp only [h0, if_false, SVal.overlayOpt_none]; rfl
   | _, x, y, .key k r => by
     show (if (SVal.obsOpt y).has .nil then (if (SVal.obsOpt x).has .nil then
       c.read (SVal.obsOpt x) (.key k r) else c.read (SVal.obsOpt y) (.key k r)) else c.absent) = _
-    simp only [SVal.obsOpt_has_nil, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+    simp only [SVal.obsOpt_has_nil]
     cases y with
     | none => simp only [Option.isSome_none, Bool.false_eq_true, if_false, Option.bind_none,
-        SVal.overlayOpt_none, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+        SVal.overlayOpt_none]
     | some n =>
       cases n with
       | map ne nd =>
         cases x with
         | none =>
           simp only [Option.isSome_some, Option.isSome_none, if_true, Bool.false_eq_true,
-            if_false, c.read_obsOpt, SVal.overlayOpt_none_some, SVal.strip_map, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+            if_false, c.read_obsOpt, SVal.overlayOpt_none_some, SVal.strip_map, Option.bind_some]
         | some o =>
           cases o with
           | map oe od =>
             simp only [Option.isSome_some, if_true, c.read_obsOpt, SVal.overlayOpt_some_some,
-              SVal.overlay_map, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+              SVal.overlay_map, Option.bind_some]
   | _, x, y, .at i r => by
     cases y with
     | none =>
       simp only [TVal.ovR, SVal.obsOpt_has_nil, Option.isSome_none, Bool.false_eq_true, if_false,
-        Option.bind_none, SVal.overlayOpt_none, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+        Option.bind_none, SVal.overlayOpt_none]
     | some n =>
       cases n with
       | array nel nsh hn =>
         rename_i nn
         have eh : (SVal.obsOpt (some (SVal.array nel nsh hn))).has .nil = true := rfl
         have el : (SVal.obsOpt (some (SVal.array nel nsh hn))).len .nil = nn := rfl
-        simp only [TVal.ovR, eh, el, if_true, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+        simp only [TVal.ovR, eh, el, if_true]
         split
         · rename_i hi
           have hl : i.toNat < nel.toList.length := by rw [SVec.length_toList]; exact hi.2
@@ -1515,17 +1515,17 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
           congr 1
           cases x with
           | none =>
-            simp only [Option.bind_none, Option.bind_some, SVal.findM_at_nil, SVal.findM_at', hi.1,
+            simp only [Option.bind_none, Option.bind_some, SVal.findM_at', hi.1,
               if_true, SVal.overlayOpt_none_some, SVal.strip_array, SList.toList_nil,
-              List.append_nil, SVec.toList_strip, List.getElem?_map, List.getElem?_append_left hl, SVal.findM_nil', Option.bind_some_id, Option.map_some]
+              List.append_nil, SVec.toList_strip, List.getElem?_map, List.getElem?_append_left hl, SVal.findM_nil', Option.bind_some_id]
             cases nel.toList[i.toNat]? with
             | none => rfl
             | some w => rw [SVal.overlayOpt_none_some]; rfl
           | some o =>
             cases o with
             | array oel osh hm =>
-              simp only [Option.bind_some, SVal.findM_at_nil, SVal.findM_at', hi.1, if_true,
-                SVal.overlayOpt_some_some, SVal.overlay_array, SList.toList_ofList, SVal.findM_nil', Option.bind_some_id, Option.map_some]
+              simp only [Option.bind_some, SVal.findM_at', hi.1, if_true,
+                SVal.overlayOpt_some_some, SVal.overlay_array, SList.toList_ofList, SVal.findM_nil', Option.bind_some_id]
               have hl' : i.toNat < (SVec.overlayOn (oel.toList ++ osh.toList) nel).toList.length := by
                 rw [SVec.length_toList]; exact hi.2
               rw [List.getElem?_append_left hl', SVec.getElem?_overlayOn,
@@ -1533,9 +1533,9 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
         · rename_i hi
           cases x with
           | none =>
-            simp only [SVal.obsOpt_len_nil, SVal.lenOf, Nat.not_lt_zero, and_false, if_false, c.read_obsOpt, SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+            simp only [SVal.obsOpt_len_nil, SVal.lenOf, Nat.not_lt_zero, and_false, if_false, c.read_obsOpt]
             simp only [Option.bind_none, SVal.overlayOpt_none_some, Option.bind_some, SVal.strip_array,
-              SVal.findM_at', SList.toList_nil, List.append_nil, SVec.toList_strip, SVal.findM_nil', Option.bind_some_id, Option.map_some]
+              SVal.findM_at', SList.toList_nil, List.append_nil, SVec.toList_strip]
             split
             · rename_i h0
               have hge : (nel.toList.map SVal.strip).length ≤ i.toNat := by
@@ -1547,7 +1547,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
             | array oel osh hm =>
               rename_i mm
               have el' : (SVal.obsOpt (some (SVal.array oel osh hm))).len .nil = mm := rfl
-              simp only [el', SVal.findM_nil', Option.bind_some_id, Option.bind_some, Option.map_some]
+              simp only [el']
               split
               · rename_i hi'
                 rw [SVal.obsOpt_find, TVal.delR_obsOpt]
@@ -1555,7 +1555,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
                 have hge : nn ≤ i.toNat := by omega
                 have hlt : i.toNat < oel.toList.length := by rw [SVec.length_toList]; exact hi'.2
                 simp only [Option.bind_some, SVal.findM_at', hi'.1, if_true, SVal.findM_nil',
-                  SVal.overlayOpt, SVal.overlay_array, SList.toList_ofList, Option.bind_some_id, Option.map_some]
+                  SVal.overlayOpt, SVal.overlay_array, SList.toList_ofList, Option.bind_some_id]
                 have hl' : (SVec.overlayOn (oel.toList ++ osh.toList) nel).toList.length ≤ i.toNat := by
                   rw [SVec.length_toList]; exact hge
                 rw [List.getElem?_append_right hl', SVec.length_toList, show nn - mm =
@@ -1565,7 +1565,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
                 rw [c.read_obsOpt]
                 congr 1
                 simp only [Option.bind_some, SVal.findM_at', SVal.overlayOpt, SVal.overlay_array,
-                  SList.toList_ofList, SVal.findM_nil', Option.bind_some_id, Option.map_some]
+                  SList.toList_ofList]
                 split
                 · rename_i h0
                   have hge : nn ≤ i.toNat := by omega

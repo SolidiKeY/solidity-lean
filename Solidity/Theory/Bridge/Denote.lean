@@ -299,7 +299,7 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
   | _ =>
     cases y with
     | none => simp only [Op2.evalM, Option.bind_some, Option.bind_none, Option.bind_eq_bind,
-        Option.map_none, reduceCtorEq] at hv
+        reduceCtorEq] at hv
     | some w =>
     have hw := hy w rfl
     simp only [Srt.Bridge] at hu hw ⊢
