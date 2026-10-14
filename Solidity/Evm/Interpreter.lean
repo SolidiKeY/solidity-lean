@@ -91,7 +91,7 @@ theorem payOwner_interpreter :
       obtain ⟨σ', h1, hnet, hself⟩ := compile_net (Option.some_get payOwner_frag).symm
         (Sim.init StandardExample 0 W_pos _ ⟨0, W_pos⟩) (by decide +kernel) h
       refine ⟨σ', h1, ?_⟩
-      have h := hnet ⟨5, by unfold W; decide⟩ (fun he => absurd (congrArg Fin.val he) (by rw [hs]; decide))
+      have h := hnet (wmod 5) (fun he => absurd (congrArg Fin.val he) (by rw [hs]; decide))
       rw [h5, h50] at h
       rw [hs] at hself
       exact ⟨h, hself⟩

@@ -863,7 +863,7 @@ theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F 
     (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
-      (∀ a : Fin W, a ≠ m'.self → netAt o.st.net a.1 = (m'.bal₀ a.1 : Int) - m'.bal a.1) ∧
+      (∀ a : Fin W, a ≠ m'.self → netAt o.st.net a.1 = (m'.bal₀ a : Int) - m'.bal a) ∧
       netAt o.st.net m'.self = 0 := by
   obtain ⟨o, h1, h2⟩ := compile_box hP hm hL hrun
   exact ⟨o, h1, h2.net, h2.netSelf⟩
@@ -883,7 +883,7 @@ def freshT (C : Contract) (balance : Nat) (hb : balance < W) (self : Fin W) :
 /-- A fresh machine represents a fresh contract with no locals: every slot
 `0`, nothing moved, whatever the world's balances and the contract's
 address. -/
-theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Nat → Nat)
+theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Fin W → Nat)
     (self : Fin W) :
     Sim C 1 0 (Frag.init []) (freshT C balance hb self) (Machine.init bal self) :=
   ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
@@ -900,7 +900,7 @@ Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
 (`Evm/Interpreter.lean`'s `setAge_interpreter` derives it from this
 theorem). -/
 theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
-    (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Nat → Nat)
+    (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Fin W → Nat)
     (self : Fin W) :
     (∃ o m', Solidity.Prog.run (freshT C balance hb self) P = .ok o ∧
         run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧

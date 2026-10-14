@@ -215,7 +215,7 @@ theorem Slot.add_inj {s : Slot} {i j : Nat} (h : s.add i = s.add j) : i = j := b
 /-- `Desc x y`: `y` is `x` or one of the slots `x` is derived from by `keccak`. -/
 inductive Desc : Slot → Slot → Prop
   | refl {x : Slot} : Desc x x
-  | hash {k : Nat} {s y : Slot} {o : Nat} : Desc s y → Desc (.hash k s o) y
+  | hash {k : Fin W} {s y : Slot} {o : Nat} : Desc s y → Desc (.hash k s o) y
   | data {s y : Slot} {o : Nat} : Desc s y → Desc (.data s o) y
 
 /-- An ancestor is no deeper: `folks` (depth `0`) is an ancestor of `folks[7].age` (depth `1`). -/
@@ -259,7 +259,7 @@ inductive Occ : Ty → Slot → Slot → Prop
   | len {E : Ty} {s : Slot} : Occ (.ref (.array E)) s s
   | elem {E : Ty} {s x : Slot} (i : Nat) :
       Occ E (.data s (i * size E)) x → Occ (.ref (.array E)) s x
-  | entry {K : PrimTy} {V : Ty} {s x : Slot} (k : Nat) : Occ V (.hash k s 0) x → Occ (.ref (.mapping K V)) s x
+  | entry {K : PrimTy} {V : Ty} {s x : Slot} (k : Fin W) : Occ V (.hash k s 0) x → Occ (.ref (.mapping K V)) s x
   | felem {E : Ty} {n : Nat} {s x : Slot} (i : Nat) :
       i < n → Occ E (s.add (i * size E)) x → Occ (.ref (.fixed E n)) s x
 
@@ -307,7 +307,7 @@ theorem occ_members_disjoint {l : List (Name × Ty)} {s x : Slot} {f₁ f₂ : N
 
 /-- Two entries of a mapping share no slot: `balances[1]` and `balances[2]`
 are `keccak(1, 5)` and `keccak(2, 5)`. -/
-theorem occ_entries_disjoint {V : Ty} {s x : Slot} {k₁ k₂ : Nat} (hne : k₁ ≠ k₂)
+theorem occ_entries_disjoint {V : Ty} {s x : Slot} {k₁ k₂ : Fin W} (hne : k₁ ≠ k₂)
     (o₁ : Occ V (.hash k₁ s 0) x) (o₂ : Occ V (.hash k₂ s 0) x) : False := by
   obtain ⟨a, _, da⟩ := occ_desc o₁
   obtain ⟨b, _, db⟩ := occ_desc o₂

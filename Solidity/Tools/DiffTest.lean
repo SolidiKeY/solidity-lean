@@ -120,7 +120,7 @@ def encodeFold (keys : List Nat) : Fold where
   map {K _} _ _ m d s :=
     if K == .uint then
       let own := m.filterMap fun (k, _) => if 0 ≤ k ∧ k < (W : Int) then some k.toNat else none
-      (own ++ keys).eraseDups.flatMap fun (k : Nat) => ((lookupBy (k : Int) m).getD d) (.hash k s 0)
+      (own ++ keys).eraseDups.flatMap fun (k : Nat) => ((lookupBy (k : Int) m).getD d) (.hash (wmod k) s 0)
     else []
   fnil _ := []
   fcons {f _ _} _ _ v r slot := v (slot f) ++ r slot
@@ -255,10 +255,10 @@ def differences {Γ : Ctx} (C : Contract) (names : List Var) (keys : List Nat)
     | none => none
   let net := σ'.net.filterMap fun (address, n) =>
     let a := address.1
-    if a = m'.self then
+    if a = m'.self.1 then
       (if n != 0 then some s!"net {a}: typed run {n} at the contract itself, expected 0" else none)
-    else if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ a.toNat : Int) - m'.bal a.toNat then
-      some s!"net {a}: typed run {n}, account {m'.bal₀ a.toNat} → {m'.bal a.toNat}"
+    else if 0 ≤ a ∧ a < (W : Int) ∧ n != (m'.bal₀ (wmod a.toNat) : Int) - m'.bal (wmod a.toNat) then
+      some s!"net {a}: typed run {n}, account {m'.bal₀ (wmod a.toNat)} → {m'.bal (wmod a.toNat)}"
     else none
   let stack := if m'.stack.isEmpty then [] else [s!"stack left: {m'.stack}"]
   store ++ vals ++ net ++ stack
@@ -271,8 +271,8 @@ def runOnce (C : Contract) {Γ' : Ctx} (Q : Prog C [] Γ') (s : Start C) :
   let keys0 := storageKeys s.storage
   let σ := s.state
   let m : Machine :=
-    { Machine.init (fun a => if a = s.self then s.balance else 0) (wmod s.self) with
-      accepts := fun a _ => a != 3
+    { Machine.init (fun a => if a.1 = s.self then s.balance else 0) (wmod s.self) with
+      accepts := fun a _ => a.1 != 3
       store := storeOf (encodeStorage C keys0 s.storage)
       caller := wmod s.sender
       callvalue := wmod s.value

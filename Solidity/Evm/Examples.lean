@@ -32,7 +32,7 @@ theorem reverted_eq {o : Out} (h : reverted o = true) : o = .revert := by
 /-- A fresh `StandardExample` at address `0`, its account holding `balance`,
 every other account empty. -/
 abbrev fresh (balance : Nat := 0) : Machine :=
-  Machine.init (fun a => if a = 0 then balance else 0) ⟨0, W_pos⟩
+  Machine.init (fun a => if a.1 = 0 then balance else 0) ⟨0, W_pos⟩
 
 /-! ## Layout -/
 
@@ -183,8 +183,8 @@ PUSH @0; SSTORE
 #guard_msgs in #eval IO.println (code sol{ folks[7].age = 3; })
 
 theorem mappings_run :
-    slotAfter mappings (.hash 7 (.root 5) 0) = some 5 ∧ slotAfter mappings (.root 0) = some 5 ∧
-    slotAfter mappings (.hash 7 (.root 7) 2) = some 3 := by
+    slotAfter mappings (.hash (wmod 7) (.root 5) 0) = some 5 ∧ slotAfter mappings (.root 0) = some 5 ∧
+    slotAfter mappings (.hash (wmod 7) (.root 7) 2) = some 3 := by
   decide +kernel
 
 /-- A storage alias lives at level `0`. -/
@@ -243,7 +243,7 @@ theorem delete_run :
 
 theorem deleteMapping_run :
     let o := run (codeOf sol{ wallet.stash[3] = 7; wallet.owner = 1; delete wallet; }) (fresh)
-    Examples.storeAt o (.root 17) = some 0 ∧ Examples.storeAt o (.hash 3 (.root 18) 0) = some 7 := by
+    Examples.storeAt o (.root 17) = some 0 ∧ Examples.storeAt o (.hash (wmod 3) (.root 18) 0) = some 7 := by
   decide +kernel
 
 theorem arrays_revert :
@@ -260,19 +260,19 @@ theorem payOwner_wt : compiles payOwner := by decide +kernel
 
 theorem payOwner_run :
     (match run (codeOf payOwner) (fresh 100) with
-      | .ok m 0 => some (m.bal 0, m.bal 5, m.bal₀ 0, m.bal₀ 5, m.self.1)
+      | .ok m 0 => some (m.bal (wmod 0), m.bal (wmod 5), m.bal₀ (wmod 0), m.bal₀ (wmod 5), m.self.1)
       | _ => none) = some (70, 30, 100, 0, 0) := by
   decide +kernel
 
 theorem transfer_refused :
     reverts sol{ owner.transfer(200); } (fresh 100) = true ∧
-    reverts payOwner { fresh 100 with accepts := fun a _ => a != 5 } = true := by
+    reverts payOwner { fresh 100 with accepts := fun a _ => a.1 != 5 } = true := by
   decide +kernel
 
 theorem transfer_self :
     compiles sol{ owner = 0; owner.transfer(30); } ∧
     (match run (codeOf sol{ owner = 0; owner.transfer(30); }) (fresh 100) with
-      | .ok m 0 => some (m.bal 0)
+      | .ok m 0 => some (m.bal (wmod 0))
       | _ => none) = some 100 := by
   decide +kernel
 

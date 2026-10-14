@@ -8060,16 +8060,25 @@ left untyped") after the typed-boundary follow-up.  Each step is one commit.
   Checking cost: the `Evm/` files check as before (no new heartbeat
   overrides).
 
-**Validation (W11.7, again at W11.8, W11.9 and W11.10):** the default build (274 jobs), every
+- **W11.11, EVM addresses and keys.** A hashed slot's key is a word
+  (`Slot.hash (k : Fin W)`, `KECCAK256` hashes the word it pops), and so
+  are the accounts (`bal`, `bal₀ : Fin W → Nat`, `accepts`, `pay`):
+  `CALL`'s recipient and amount stay words. `PathAt.key` reaches
+  `.hash k.word` (`PrimTy.Denote.word`, a `uint` as its word) and
+  `PathAt.elem`/`felem` lose their `0 ≤ i` and `i < 2^256` premises, which
+  the index's type states; `ReprAt.map` ranges over `Fin W`.
+
+**Validation (W11.7, again at W11.8, W11.9, W11.10 and W11.11):** the default build (274 jobs), every
 `TestSuite/Derived*`, `Report`, `Suggestions` and every `Corpus/*` module,
 each through a one-import scratch module (not committed).
 
-**What is left, and why** (as of W11.10):
+**What is left, and why** (as of W11.11):
 
 - Memory identities in the term signature are `Nat` (`Srt.Den (.ident _)`,
   `MvT`, `MAddrT`), read through `HRef.ofId?`: a formula's memory terms grow
   heaps apart from the state's, so an identity can name an object another
   memory lacks (KeY's `Identity` sort, underspecified there).
-- The EVM machine's slots are symbolic (`Slot`: a root offset, hashes and
-  offsets as `Nat`), not words: the simulation's address space, which the
-  representation relation reads, not a value the run computes.
+- The EVM machine's slot offsets are `Nat` (`Slot.root`, `Slot.add`): the
+  simulation's symbolic address space, which the representation relation
+  reads, not a value the run computes; its memory cells are indexed by the
+  locals' levels.

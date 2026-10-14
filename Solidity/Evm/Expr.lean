@@ -141,11 +141,12 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
         · obtain ⟨n, hn, hv1, rfl⟩ := hrep.uint_inv
           have hk : PrimTy.key v = (n : Int) := hv1
           have hvn : v.1 = (n : Int) := hk
-          have hp' := PathSlot.key hp (k := v) (by omega) (by omega)
-          rw [hvn, Int.toNat_natCast] at hp'
-          have hent := hall rfl n hn
+          have hp' := PathSlot.key hp v
+          rw [show v.word = ⟨n, hn⟩ from Fin.ext (by show v.word.1 = n; have := word_val v; omega)] at hp'
+          have hent : ReprAt m.store L _ (.hash ⟨n, hn⟩ s₀ 0)
+              ((lookupBy (n : Int) mm.hashed).getD d) := hall rfl ⟨n, hn⟩
           rw [← hk, SMap.lookupBy_hashed] at hent
-          refine .inl ⟨r.index .map v, .hash n s₀ 0, _, ?_, ?_, ?_, hent, ?_⟩
+          refine .inl ⟨r.index .map v, .hash ⟨n, hn⟩ s₀ 0, _, ?_, ?_, ?_, hent, ?_⟩
           · simp only [Solidity.Loc.resolveT, hres, hv, bind, Except.bind]
             rw [Sto.checkIndex_map (Sto.find_of_findLive hsv)]; rfl
           · exact Sto.findLive_key hsv _
@@ -186,8 +187,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
           rw [hb, hl]
           by_cases hin : n < kk
           · rw [if_pos hin, if_pos hin]
-            have hp' := PathSlot.elem hp (i := v) (PrimTy.uint_nonneg v)
-              (by have : v.1 = (n : Int) := hk; omega)
+            have hp' := PathSlot.elem hp v
             rw [hvn] at hp'
             have hx : e.toList[n]? = some (e.toList[n]'(by rw [SVec.length_toList]; exact hin)) :=
               List.getElem?_eq_getElem _
@@ -232,7 +232,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
           rw [hb]
           by_cases hin : k < n
           · rw [if_pos hin, if_pos hin]
-            have hp' := PathSlot.felem hp (i := v) (PrimTy.uint_nonneg v)
+            have hp' := PathSlot.felem hp (i := v)
               (by have : v.1 = (k : Int) := hk; omega)
             rw [hvk] at hp'
             have hx : e.toList[k]? = some (e.toList[k]'(by rw [SVec.length_toList]; exact hin)) :=

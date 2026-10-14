@@ -96,7 +96,7 @@ theorem Lmax_lt_W : Lmax < W := by unfold Lmax W; decide
 /-- A storage slot: `root off`, `keccak256(k ‖ s) + off`, or `keccak256(s) + off`. -/
 inductive Slot where
   | root (off : Nat)
-  | hash (k : Nat) (s : Slot) (off : Nat)
+  | hash (k : Fin W) (s : Slot) (off : Nat)
   | data (s : Slot) (off : Nat)
   deriving DecidableEq, Repr, Inhabited
 
@@ -311,15 +311,15 @@ structure Machine where
   store : WordStore
   mem : Nat → Word
   /-- Every account's balance. -/
-  bal : Nat → Nat
+  bal : Fin W → Nat
   /-- The balances when the transaction began: a ghost, which no
   instruction reads or writes. -/
-  bal₀ : Nat → Nat
+  bal₀ : Fin W → Nat
   /-- The contract's own address. -/
   self : Fin W := ⟨0, W_pos⟩
   /-- Whether the account at `a` accepts a payment of `v`: one whose code
   reverts, or runs out of the 2300 gas `transfer` forwards, does not. -/
-  accepts : Nat → Nat → Bool := fun _ _ => true
+  accepts : Fin W → Fin W → Bool := fun _ _ => true
   /-- The transaction's sender, value and block time, as `CALLER`,
   `CALLVALUE`, `TIMESTAMP` push them. -/
   caller : Fin W := ⟨0, W_pos⟩
@@ -329,11 +329,11 @@ structure Machine where
 /-- A fresh contract at `self` in a world whose balances are `bal`: empty
 stack, storage and memory all zeroes, nothing moved yet, called by `0` with
 nothing at time `0`, every payment accepted. -/
-def Machine.init (bal : Nat → Nat := fun _ => 0) (self : Fin W := ⟨0, W_pos⟩) : Machine :=
+def Machine.init (bal : Fin W → Nat := fun _ => 0) (self : Fin W := ⟨0, W_pos⟩) : Machine :=
   { stack := [], store := WordStore.zero, mem := fun _ => w[0], bal, bal₀ := bal, self }
 
 /-- `v` moved from `s`'s account to `a`'s, another. -/
-def pay (bal : Nat → Nat) (s a v : Nat) : Nat → Nat :=
+def pay (bal : Fin W → Nat) (s a : Fin W) (v : Nat) : Fin W → Nat :=
   upd (upd bal s (bal s - v)) a (bal a + v)
 
 def Machine.push (m : Machine) (w : Word) : Machine := { m with stack := w :: m.stack }
@@ -439,7 +439,7 @@ def Instr.step : Instr → Machine → Out
       m.next (.val (if b.1 = 0 then ⟨0, W_pos⟩ else sword (Int.tmod (sgn a.1) (sgn b.1))) :: st)
     | _ => .fault
   | .keccakMap, m => match m.stack with
-    | .val k :: .slot s :: st => m.next (.slot (.hash k.1 s 0) :: st)
+    | .val k :: .slot s :: st => m.next (.slot (.hash k s 0) :: st)
     | _ => .fault
   | .keccakArr, m => match m.stack with
     | .slot s :: st => m.next (.slot (.data s 0) :: st)
@@ -460,9 +460,9 @@ def Instr.step : Instr → Machine → Out
     | _ => .fault
   | .call, m => match m.stack with
     | .val v :: .val a :: st =>
-      if m.bal m.self.1 < v.1 ∨ m.accepts a.1 v.1 = false then m.next (w[0] :: st)
-      else if a.1 = m.self.1 then m.next (w[1] :: st)
-      else .ok { m with stack := w[1] :: st, bal := pay m.bal m.self.1 a.1 v.1 } 0
+      if m.bal m.self < v.1 ∨ m.accepts a v = false then m.next (w[0] :: st)
+      else if a = m.self then m.next (w[1] :: st)
+      else .ok { m with stack := w[1] :: st, bal := pay m.bal m.self a v.1 } 0
     | _ => .fault
   | .revert, _ => .revert
   | .xor, m => match m.stack with
@@ -484,7 +484,7 @@ def Instr.step : Instr → Machine → Out
   | .caller, m => m.next (.val m.caller :: m.stack)
   | .callvalue, m => m.next (.val m.callvalue :: m.stack)
   | .timestamp, m => m.next (.val m.timestamp :: m.stack)
-  | .selfbalance, m => m.next (.val (wmod (m.bal m.self.1)) :: m.stack)
+  | .selfbalance, m => m.next (.val (wmod (m.bal m.self)) :: m.stack)
   | .address, m => m.next (.val m.self :: m.stack)
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/

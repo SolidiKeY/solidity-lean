@@ -212,7 +212,7 @@ structure SimL (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State C
       PathSlot C true r s
   /-- `net(a)` is what `a`'s account lost, at every address but the
   contract's own. -/
-  net : ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a.1 : Int) - m.bal a.1
+  net : ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a : Int) - m.bal a
   /-- The contract's own entry is never moved. -/
   netSelf : netAt σ.net m.self = 0
   /-- The bound on the arrays is at most solc's. -/
@@ -239,8 +239,8 @@ theorem push {m : Machine} (h : SimL C L b F σ ρ m) (w : Word) : SimL C L b F 
   h.stack _
 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
-theorem book {m : Machine} (h : SimL C L b F σ ρ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Nat → Nat)
-    (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a.1 : Int) - bl a.1)
+theorem book {m : Machine} (h : SimL C L b F σ ρ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Fin W → Nat)
+    (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a : Int) - bl a)
     (hself : netAt (σ.pay x y).net m.self = 0) :
     SimL C L b F (σ.pay x y) ρ { m with bal := bl, bal₀ := bl₀ } :=
   ⟨h.store, h.vals, h.aliases, hn, hself, h.bound, h.fragile, h.env⟩
@@ -943,7 +943,7 @@ theorem fragile (h : Sim C L b F σ m) {R : RefTy} (i : Idx Γ (.alias R))
   SimL.fragile h i hi
 
 theorem net (h : Sim C L b F σ m) :
-    ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a.1 : Int) - m.bal a.1 :=
+    ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a : Int) - m.bal a :=
   SimL.net h
 
 theorem netSelf (h : Sim C L b F σ m) : netAt σ.net m.self = 0 := SimL.netSelf h
@@ -951,8 +951,8 @@ theorem netSelf (h : Sim C L b F σ m) : netAt σ.net m.self = 0 := SimL.netSelf
 theorem env (h : Sim C L b F σ m) : EnvSim σ.tx m := SimL.env h
 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
-theorem book (h : Sim C L b F σ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Nat → Nat)
-    (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a.1 : Int) - bl a.1)
+theorem book (h : Sim C L b F σ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Fin W → Nat)
+    (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a : Int) - bl a)
     (hself : netAt (σ.pay x y).net m.self = 0) :
     Sim C L b F (σ.pay x y) { m with bal := bl, bal₀ := bl₀ } :=
   SimL.book h x y bl bl₀ hn hself

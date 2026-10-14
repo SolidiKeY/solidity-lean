@@ -897,68 +897,66 @@ theorem transfer_sim (r a : Solidity.Val C Γ .uint)
       (run (compileVal b r ++ compileVal b a ++ [.call] ++ assertTop) m) m := by
   simp only [List.append_assoc]
   rcases val_sim r hm hwr with ⟨vr, wr, hvr, hrv, hrunr⟩ | ⟨hvr, hrunr⟩
-  · obtain ⟨x, hx, hx1, rfl⟩ := hrv.uint_inv
+  · obtain ⟨x, rfl, hx1⟩ := hrv
     rw [run_append_ok hrunr]
     rcases val_sim a (hm.push _) hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
-    · obtain ⟨y, hy, hy1, rfl⟩ := hra.uint_inv
+    · obtain ⟨y, rfl, hy1⟩ := hra
       rw [run_append_ok hruna]
       have hres : Solidity.TRun.transfer r a σ =
-          .ok ⟨σ.pay vr y, List.prefix_refl _⟩ := by
+          .ok ⟨σ.pay vr y.1, List.prefix_refl _⟩ := by
         simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind, pure, Except.pure,
           hx1, hy1]
       rw [hres]
       obtain ⟨-, -, -, hself⟩ := hm.env
-      have hpay : ∀ a : Nat, netAt (σ.pay vr y).net a =
-          if x = m.self.1 then netAt σ.net a else if a = x then netAt σ.net x - y
-          else netAt σ.net a := by
-        intro a
+      have hpay : ∀ c : Fin W, netAt (σ.pay vr y.1).net c.1 =
+          if x = m.self then netAt σ.net c.1 else if c = x then netAt σ.net x.1 - y.1
+          else netAt σ.net c.1 := by
+        intro c
         rw [netAt_pay, hx1, hself]
-        simp only [Int.ofNat_inj]
-      have hns : netAt (σ.pay vr y).net m.self.1 = 0 := by
-        rw [hpay m.self.1]
+        simp only [Int.ofNat_inj, Fin.val_inj]
+      have hns : netAt (σ.pay vr y.1).net m.self.1 = 0 := by
+        rw [hpay m.self]
         split
         · exact hm.netSelf
         · rename_i hxs
           rw [if_neg (fun h => hxs h.symm)]
           exact hm.netSelf
-      by_cases hrf : m.bal m.self.1 < y ∨ m.accepts x y = false
+      by_cases hrf : m.bal m.self < y.1 ∨ m.accepts x y = false
       · refine .refused rfl ⟨by simp only [run, assertTop, List.cons_append, List.nil_append,
           Machine.push, exec_cons_zero, Instr.step, hrf, ↓reduceIte, Machine.next, Out.ok_bind,
           exec_nil, Out.revert_bind],
-          ⟨σ.pay vr y, List.prefix_refl _⟩, { m with bal := upd m.bal x (m.bal x + y) }, rfl,
+          ⟨σ.pay vr y.1, List.prefix_refl _⟩, { m with bal := upd m.bal x (m.bal x + y.1) }, rfl,
           ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
-          hm.book vr y _ _ (fun c hcs => ?_) hns⟩
+          hm.book vr y.1 _ _ (fun c hcs => ?_) hns⟩
         have h1 := hm.net c hcs
-        have hcs' : c.1 ≠ m.self.1 := fun h => hcs (Fin.ext h)
-        rw [hpay c.1]
+        rw [hpay c]
         simp only [upd]
-        by_cases hxs : x = m.self.1
-        · simp only [hxs, hcs', ↓reduceIte]; exact h1
-        · by_cases hcx : c.1 = x
+        by_cases hxs : x = m.self
+        · simp only [hxs, hcs, ↓reduceIte]; exact h1
+        · by_cases hcx : c = x
           · subst hcx; simp only [hxs, ↓reduceIte]; omega
           · simp only [hxs, hcx, ↓reduceIte]; exact h1
-      · by_cases hxe : x = m.self.1
+      · by_cases hxe : x = m.self
         · have hb := hm.book _ _ m.bal m.bal₀ (fun c hcs => by
-            rw [hpay c.1, if_pos hxe]; exact hm.net c hcs) hns
-          refine .inl ⟨⟨σ.pay vr y, List.prefix_refl _⟩, m, rfl, ?_, rfl, Keeps.refl m, hb⟩
-          rw [hxe] at hrf
+            rw [hpay c, if_pos hxe]; exact hm.net c hcs) hns
+          refine .inl ⟨⟨σ.pay vr y.1, List.prefix_refl _⟩, m, rfl, ?_, rfl, Keeps.refl m, hb⟩
+          subst hxe
           simp only [run, assertTop, List.cons_append, List.nil_append, Machine.push,
-              exec_cons_zero, Instr.step, hrf, hxe, ↓reduceIte, Machine.next, Out.ok_bind,
+              exec_cons_zero, Instr.step, hrf, ↓reduceIte, Machine.next, Out.ok_bind,
               Nat.succ_ne_self, exec_cons_succ, exec_nil]
         · simp only [not_or, Bool.not_eq_false] at hrf
-          refine .inl ⟨⟨σ.pay vr y, List.prefix_refl _⟩, { m with bal := pay m.bal m.self.1 x y },
+          refine .inl ⟨⟨σ.pay vr y.1, List.prefix_refl _⟩, { m with bal := pay m.bal m.self x y.1 },
             rfl, ?_, rfl, ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
-            hm.book vr y _ m.bal₀ (fun c hcs => ?_) hns⟩
+            hm.book vr y.1 _ m.bal₀ (fun c hcs => ?_) hns⟩
           · simp only [run, assertTop, List.cons_append, List.nil_append, Machine.push,
               exec_cons_zero, Instr.step, hrf, Bool.true_eq_false, or_self, ↓reduceIte, hxe,
               Out.ok_bind, Nat.succ_ne_self, exec_cons_succ, exec_nil]
           · have h1 := hm.net c hcs
-            have hcs' : c.1 ≠ m.self.1 := fun h => hcs (Fin.ext h)
-            rw [hpay c.1]
+            rw [hpay c]
             simp only [pay, upd, hxe, ↓reduceIte]
-            by_cases hcx : c.1 = x
+            by_cases hcx : c = x
             · subst hcx; simp only [↓reduceIte]; omega
-            · simp only [hcx, hcs', ↓reduceIte]; exact h1
+            · simp only [hcx, hcs, ↓reduceIte]; exact h1
     · exact .inr ⟨by simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind],
         run_append_revert hruna⟩
   · exact .inr ⟨by simp only [Solidity.TRun.transfer, hvr, bind, Except.bind],
