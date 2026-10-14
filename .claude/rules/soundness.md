@@ -23,6 +23,12 @@ way: no `sorry`, no new hypothesis.
 
 ## Proving a new arm
 
+Use **`docs/rule-repair.md`** before broad integration.
+State and attempt the local agreement/simulation lemma in the scratch
+prototype; do not defer all semantic checking until the rule is registered.
+Concrete agreement and bounded example closure are rejection gates, not
+substitutes for the general proof below.
+
 - **The shape** (`Calculus/SoundKit.lean`): state what the premise asks of
   the statement's typed run (`Premise.Runs`); the premise kinds' lemmas
   (`Premise.sound_update` … `sound_done`) turn it into `Premise.Sound`. Name

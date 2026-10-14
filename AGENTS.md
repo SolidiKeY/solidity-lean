@@ -198,6 +198,13 @@ summary), `#proof_node n φ` (sequent, rule, parent, children, tactics),
 `#proof_tree_json φ`. `Examples/ProofTree.lean` pins their output: a change
 to the strategy or a printer fails there.
 
+## Repairing a broken rule
+
+Follow [docs/rule-repair.md](docs/rule-repair.md): establish the execution
+meaning, prototype a lazy rule, reject bad candidates with concrete cases
+and bounded proofs, then prove local soundness and integrate it. Check
+coverage, overlap and termination separately. Keep detailed guidance there.
+
 ## Writing or fixing a tactic
 
 1. **Search once, replay cheaply.** A tactic that searches (`sol_chain`,
@@ -342,6 +349,10 @@ follows solkey.
   downstream is checked.
 
 ## Reading before writing
+
+When asked to change documentation, keep `AGENTS.md` succinct: put detailed
+guidance in the relevant `docs/` document, and add only essential instructions
+and pointers here. Update the docs index and affected conventions as needed.
 
 Module docstrings carry the conventions and the rationale for their file.
 They deliberately do not restate the declarations below them, so if you want

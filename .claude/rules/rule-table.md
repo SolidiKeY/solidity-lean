@@ -56,6 +56,13 @@ syntax, and every constructor's premise is the one it builds:
 
 ## Adding or changing a rule
 
+Start with **`docs/rule-repair.md`**: semantic diagnosis,
+a lazy scratch prototype, concrete rejection cases, bounded proof search and
+an early local soundness attempt. The steps below are the integration
+checklist for a candidate that survives those gates. A deterministic
+dispatcher and a terminating computation do not alone establish that the
+declared rules cover it or have disjoint applicability.
+
 1. The constructor, in its section of `Calculus/Rules.lean`, in `dl{ … }`. Spell its
    schema variables so that the side conditions they give it
    (`RuleSyntax.sideConds`) are **exactly** what its `Stmt.step` arm knows:
@@ -72,10 +79,12 @@ syntax, and every constructor's premise is the one it builds:
    dispatcher in `Calculus/Step.lean`, one `casesOn`, Gate G0's condition 1).
    Exhaustiveness is the coverage proof, so a statement form without an arm
    fails the build. Its lemma `Taclet.<rule>.toStep` (`Calculus/Taclet.lean`:
-   a `#replay_toStep` row from `#derive_toStep?`, or by hand) fails if a side
-   condition is weaker than the arm (two rules for one statement), and
-   `Stmt.<c>.ruleExists` (`RuleExists.lean`, `#replay_ruleExists`) if it is
-   stronger (no rule).
+   a `#replay_toStep` row from `#derive_toStep?`, or by hand) must prove the
+   same premise as the dispatcher on every input its side conditions admit.
+   Weaker conditions can expose a mismatching premise; stronger conditions
+   can leave `Stmt.<c>.ruleExists` (`RuleExists.lean`, `#replay_ruleExists`)
+   with no rule. Also inspect overlapping applicability explicitly: two
+   named rules with identical premises can both satisfy `toStep`.
 3. Its arm's soundness, `Stmt.StepSound` of the arm (`…_sound` in
    `Calculus/SoundArms.lean` for an update premise, `SoundStore`,
    `SoundMem`, `SoundLocal`, `SoundControl`, `SoundCapture`; `SoundCalls`,
