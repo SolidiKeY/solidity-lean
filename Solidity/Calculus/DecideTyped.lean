@@ -809,7 +809,7 @@ theorem fullL_true {st : LTm C .st} {E : Ty} {q : LTm C (.path (.ref (.array E))
   | some l =>
     rw [hl] at h
     have hl1 : l.1 = ((2 ^ 256 - 1 : Nat) : Int) := by
-      have h' : BinOp.evalT .eqB l (uintOfNat (2 ^ 256 - 1)) = some true := h
+      have h' : BinOp.evalT .eqB rfl l (uintOfNat (2 ^ 256 - 1)) = some true := h
       have h'' : (some (decide (l.1 = (uintOfNat (2 ^ 256 - 1)).1)) : Option Bool) = some true := h'
       simp only [Option.some.injEq, decide_eq_true_eq] at h''
       rw [h'', uintOfNat_val (Nat.sub_one_lt (Nat.ne_of_gt (Nat.two_pow_pos 256)))]

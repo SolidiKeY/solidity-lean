@@ -66,40 +66,40 @@ side condition is the operator's typed evaluation of the two literals,
 which decides the range check.  Hover a constructor for the taclet. -/
 inductive LitLaw : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ (.val P) → Prop
   /-- **`add_literals`**: `a + b ⇝ a + b` folded, in `uint` range. -/
-  | add_literals {a b c : PrimTy.uint.Denote} (h : BinOp.add.evalT a b = some c := by decide) :
+  | add_literals {a b c : PrimTy.uint.Denote} (h : BinOp.add.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .add .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.lit c)
   /-- **`sub_literals`**: `a - b ⇝ a - b` folded, in `uint` range. -/
-  | sub_literals {a b c : PrimTy.uint.Denote} (h : BinOp.sub.evalT a b = some c := by decide) :
+  | sub_literals {a b c : PrimTy.uint.Denote} (h : BinOp.sub.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .sub .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.lit c)
   /-- **`leq_literals`**: `a <= b ⇝ true` or `false`. -/
-  | leq_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.le.evalT a b = some c := by decide) :
+  | leq_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.le.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .le .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.litB c)
   /-- **`less_literals`**: `a < b ⇝ true` or `false`. -/
-  | less_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.lt.evalT a b = some c := by decide) :
+  | less_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.lt.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .lt .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.litB c)
   /-- **`greater_literals`**: `a > b ⇝ true` or `false`. -/
   | greater_literals {a b : PrimTy.uint.Denote} {c : Bool}
-      (h : BinOp.gt.evalT a b = some c := by decide) :
+      (h : BinOp.gt.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .gt .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.litB c)
   /-- **`geq_literals`**: `a >= b ⇝ true` or `false`. -/
-  | geq_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.ge.evalT a b = some c := by decide) :
+  | geq_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.ge.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .ge .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.litB c)
   /-- **`div_literals`**: `a / b ⇝ a / b` folded (truncated, as Solidity divides), the divisor not
   zero. -/
-  | div_literals {a b c : PrimTy.uint.Denote} (h : BinOp.div.evalT a b = some c := by decide) :
+  | div_literals {a b c : PrimTy.uint.Denote} (h : BinOp.div.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .div .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.lit c)
 
 /-- **A literal law is exact**: its right side is a literal, which its left
 side returns in every state. -/
 theorem LitLaw.exact {P : PrimTy} {t t' : Tm C Γ (.val P)} :
     LitLaw t t' → ∃ v, t' = Tms.Term.lit v ∧ ∀ σ : State C Γ, t.eval σ = some v
-  | @LitLaw.add_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .add a b).trans h⟩
-  | @LitLaw.sub_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .sub a b).trans h⟩
-  | @LitLaw.leq_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .le a b).trans h⟩
-  | @LitLaw.less_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .lt a b).trans h⟩
-  | @LitLaw.greater_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .gt a b).trans h⟩
-  | @LitLaw.geq_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .ge a b).trans h⟩
-  | @LitLaw.div_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .div a b).trans h⟩
+  | @LitLaw.add_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .add rfl a b).trans h⟩
+  | @LitLaw.sub_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .sub rfl a b).trans h⟩
+  | @LitLaw.leq_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .le rfl a b).trans h⟩
+  | @LitLaw.less_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .lt rfl a b).trans h⟩
+  | @LitLaw.greater_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .gt rfl a b).trans h⟩
+  | @LitLaw.geq_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .ge rfl a b).trans h⟩
+  | @LitLaw.div_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .div rfl a b).trans h⟩
 
 /-- The two sides of a literal law evaluate alike in every state. -/
 theorem LitLaw.evalEq {P : PrimTy} {t t' : Tm C Γ (.val P)} (r : LitLaw t t') (σ : State C Γ) :

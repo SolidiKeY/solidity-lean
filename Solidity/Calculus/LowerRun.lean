@@ -185,13 +185,13 @@ theorem Val.lower_evalT : {p : PrimTy} → (v : Val C Γ p) →
     exact TRes.AgreesO.bind (TRes.AgreesO.ofOpt_id _) fun _ => TRes.AgreesO.pure _
   | _, .binop op h hq a b => by
     subst hq
-    show TRes.AgreesO _ _ ((a.lower.eval σ).bind fun x => binopT op x (b.lower.eval σ))
+    show TRes.AgreesO _ _ ((a.lower.eval σ).bind fun x => binopT op h x (b.lower.eval σ))
     refine TRes.AgreesO.bind (Val.lower_evalT a) fun x => ?_
     show TRes.AgreesO _ (match op.shortT x with
       | some y => .ok y
       | none => do
         let y ← b.evalT σ
-        TRes.ofOpt (op.evalT x y)) (binopT op x (b.lower.eval σ))
+        TRes.ofOpt (op.evalT h x y)) (binopT op h x (b.lower.eval σ))
     unfold binopT
     cases op.shortT x with
     | some y => rfl
@@ -200,9 +200,9 @@ theorem Val.lower_evalT : {p : PrimTy} → (v : Val C Γ p) →
       exact TRes.AgreesO.ofOpt_id _
   | _, .unop op h hq a => by
     subst hq
-    show TRes.AgreesO _ _ ((a.lower.eval σ).bind op.evalT)
+    show TRes.AgreesO _ _ ((a.lower.eval σ).bind (op.evalT h))
     refine TRes.AgreesO.bind (Val.lower_evalT a) fun x => ?_
-    show TRes.AgreesO _ (TRes.ofOpt (op.evalT x)) _
+    show TRes.AgreesO _ (TRes.ofOpt (op.evalT h x)) _
     exact TRes.AgreesO.ofOpt_id _
   | _, .ternary c a b => by
     show TRes.AgreesO _ _ ((c.lower.eval σ).bind fun x => cond x (a.lower.eval σ) (b.lower.eval σ))

@@ -298,8 +298,9 @@ the typed operator does.
 Example: `a + b` with `a = 2^256 - 1`, `b = 1`: `ofInt?` reverts (the sum is
 not a `uint256`), and so does `add_tail`'s guard. -/
 private theorem utail_simT {op : BinOp} (hop : binInFrag op .uint = true) (hand : op ≠ .and)
-    (hor : op ≠ .or) {a b : Nat} (ha : a < W) (hb : b < W) (m : Machine) :
-    ValOutT (op.ret .uint) (TRes.ofOpt (BinOp.evalNum .uint a b op))
+    (hor : op ≠ .or) (hacc : op.accepts .uint = true) {a b : Nat} (ha : a < W) (hb : b < W)
+    (m : Machine) :
+    ValOutT (op.ret .uint) (TRes.ofOpt (BinOp.evalNum .uint rfl a b op hacc))
       (run (uTail op) { m with stack := .val b :: .val a :: m.stack }) m := by
   cases op <;> first | exact absurd hop (by decide) | exact absurd rfl hand | exact absurd rfl hor | skip
   all_goals simp only [BinOp.evalNum, BinOp.arithInt, some_bind']
@@ -378,8 +379,9 @@ private theorem utail_simT {op : BinOp} (hop : binInFrag op .uint = true) (hand 
 /-- **The operators agree at `int`**: `utail_simT`'s signed half, on the
 integers two words read as (`sgn`). -/
 private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand : op ≠ .and)
-    (hor : op ≠ .or) {a b : Nat} (ha : a < W) (hb : b < W) (m : Machine) :
-    ValOutT (op.ret .int) (TRes.ofOpt (BinOp.evalNum .int (sgn a) (sgn b) op))
+    (hor : op ≠ .or) (hacc : op.accepts .int = true) {a b : Nat} (ha : a < W) (hb : b < W)
+    (m : Machine) :
+    ValOutT (op.ret .int) (TRes.ofOpt (BinOp.evalNum .int rfl (sgn a) (sgn b) op hacc))
       (run (sTail op) { m with stack := .val b :: .val a :: m.stack }) m := by
   have hb0 : (sgn b = 0) ↔ b = 0 := sgn_eq_zero hb
   have heq : decide (a = b) = decide (sgn a = sgn b) :=
@@ -421,27 +423,27 @@ private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand :
 operator's tail computes the word of the typed result, or reverts exactly
 when the typed operator does. -/
 theorem tail_simT {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand : op ≠ .and)
-    (hor : op ≠ .or) (_hacc : op.accepts p = true) {a b : p.Denote} {wa wb : Word}
+    (hor : op ≠ .or) (hacc : op.accepts p = true) {a b : p.Denote} {wa wb : Word}
     (ha : ReprV p a wa) (hb : ReprV p b wb) (m : Machine) :
-    ValOutT (op.ret p) (TRes.ofOpt (op.evalT a b))
+    ValOutT (op.ret p) (TRes.ofOpt (op.evalT hacc a b))
       (run (binTail p op) { m with stack := wb :: wa :: m.stack }) m := by
   cases p with
   | uint =>
     obtain ⟨x, hx, hxa, rfl⟩ := ha.uint_inv
     obtain ⟨y, hy, hyb, rfl⟩ := hb.uint_inv
-    show ValOutT _ (TRes.ofOpt (BinOp.evalNum .uint a.1 b.1 op)) (run (uTail op) _) m
+    show ValOutT _ (TRes.ofOpt (BinOp.evalNum .uint rfl a.1 b.1 op hacc)) (run (uTail op) _) m
     rw [hxa, hyb]
-    exact utail_simT hop hand hor hx hy m
+    exact utail_simT hop hand hor hacc hx hy m
   | int =>
     obtain ⟨x, rfl, hx, hxa⟩ := ha
     obtain ⟨y, rfl, hy, hyb⟩ := hb
-    show ValOutT _ (TRes.ofOpt (BinOp.evalNum .int a.1 b.1 op)) (run (sTail op) _) m
+    show ValOutT _ (TRes.ofOpt (BinOp.evalNum .int rfl a.1 b.1 op hacc)) (run (sTail op) _) m
     rw [hxa, hyb]
-    exact stail_simT hop hand hor hx hy m
+    exact stail_simT hop hand hor hacc hx hy m
   | bool =>
     obtain rfl : wa = .val (bword a) := ha
     obtain rfl : wb = .val (bword b) := hb
-    show ValOutT _ (TRes.ofOpt (BinOp.evalBool a b op)) (run (uTail op) _) m
+    show ValOutT _ (TRes.ofOpt (BinOp.evalBool a b op hacc)) (run (uTail op) _) m
     have cmp := cmp_tail m m.stack (bword a) (bword b)
     have e : decide (bword a = bword b) = decide (a = b) := by cases a <;> cases b <;> rfl
     cases op <;> first | exact absurd hop (by decide) | exact absurd rfl hand | exact absurd rfl hor | skip
@@ -459,7 +461,7 @@ theorem ReprV.int_word (v : PrimTy.int.Denote) : ReprV .int v (.val (toWord v.1)
 
 /-- `-x` at `int`: the negation, or a revert at `-2^255`. -/
 theorem neg_simT {a : PrimTy.int.Denote} {wa : Word} (ha : ReprV .int a wa) (m : Machine) :
-    ValOutT .int (TRes.ofOpt (UnOp.neg.evalT a)) (run negCode (m.push wa)) m := by
+    ValOutT .int (TRes.ofOpt (UnOp.neg.evalT rfl a)) (run negCode (m.push wa)) m := by
   obtain ⟨x, rfl, hx, hax⟩ := ha
   show ValOutT .int (TRes.ofOpt (PrimTy.int.ofInt? (-a.1)))
     (run negCode { m with stack := .val x :: m.stack }) m
@@ -468,7 +470,7 @@ theorem neg_simT {a : PrimTy.int.Denote} {wa : Word} (ha : ReprV .int a wa) (m :
 
 /-- `~x` at `uint`: `NOT`. -/
 theorem bnot_simT {a : PrimTy.uint.Denote} {wa : Word} (ha : ReprV .uint a wa) (m : Machine) :
-    ValOutT .uint (TRes.ofOpt (UnOp.bnot.evalT a)) (run [.not] (m.push wa)) m := by
+    ValOutT .uint (TRes.ofOpt (UnOp.bnot.evalT rfl a)) (run [.not] (m.push wa)) m := by
   obtain ⟨x, hx, hxa, rfl⟩ := ha.uint_inv
   show ValOutT .uint (TRes.ofOpt (PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.1))) _ m
   have := W_pos

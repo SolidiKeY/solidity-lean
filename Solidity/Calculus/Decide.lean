@@ -252,7 +252,7 @@ def fold1 {a s : Srt} (o : Op1 C a s) (x : LTm C a) : LTm C s :=
   | .unop op h, x =>
     match x.litV? with
     | some v =>
-      match op.evalT v with
+      match op.evalT h v with
       | some r => .lit r
       | none => .err
     | none => .app1 (.unop op h) x
@@ -279,7 +279,7 @@ def fold2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s 
         | some v =>
           if (op == .pow || op == .powW) && expBig v then .app2 (.binop op h) x y
           else
-            match op.evalT u v with
+            match op.evalT h u v with
             | some r => .lit r
             | none => .err
         | none => .app2 (.binop op h) x y
@@ -301,9 +301,9 @@ theorem fold1_eval {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
   · rename_i v hv
     obtain rfl := LTm.eq_of_litV? hv
     split <;> rename_i r hr
-    · show some r = (some v).bind op.evalT
+    · show some r = (some v).bind (op.evalT h)
       rw [Option.bind_some, hr]
-    · show none = (some v).bind op.evalT
+    · show none = (some v).bind (op.evalT h)
       rw [Option.bind_some, hr]
   · rfl
 
@@ -315,7 +315,7 @@ theorem fold2_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
   split
   · rename_i u hu
     obtain rfl := LTm.eq_of_litV? hu
-    show _ = binopT op u _
+    show _ = binopT op h u _
     unfold binopT
     split
     · rename_i r hr
@@ -325,14 +325,14 @@ theorem fold2_eval {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
       split
       · rename_i v hv
         obtain rfl := LTm.eq_of_litV? hv
-        show _ = (some v).bind (op.evalT u)
+        show _ = (some v).bind (op.evalT h u)
         split
-        · show binopT op u (some v) = _
+        · show binopT op h u (some v) = _
           unfold binopT
           rw [hr]
         · rw [Option.bind_some]
           split <;> rename_i r' hr' <;> rw [hr'] <;> rfl
-      · show binopT op u _ = _
+      · show binopT op h u _ = _
         unfold binopT
         rw [hr]
   · rfl

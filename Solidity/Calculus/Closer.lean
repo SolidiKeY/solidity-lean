@@ -80,7 +80,7 @@ theorem _root_.Solidity.Op2.eval_none_right {a b s : Srt} (o : Op2 C a b s) (h :
   | some x =>
     cases o <;> try rfl
     rename_i op p _
-    show binopT op x none = none
+    show binopT op _ x none = none
     unfold binopT
     cases op <;> simp only [Op2.strictR, Bool.false_eq_true] at h <;> cases p <;> rfl
 
@@ -142,7 +142,7 @@ theorem _root_.Solidity.Op2.total_isSome {a b s : Srt} (o : Op2 C a b s) (h : o.
   cases o
   case binop op p hp =>
     simp only [Op2.total] at h
-    show (binopT op x (some y)).isSome = true
+    show (binopT op _ x (some y)).isSome = true
     unfold binopT
     cases op <;> simp only [BinOp.totalB, Bool.false_eq_true] at h <;>
       cases p <;> first | exact absurd hp (by decide) | skip <;>
@@ -355,18 +355,20 @@ theorem ofInt?_isSome {p : PrimTy} (hp : p.isNumeric = true) {n : Int} (h1 : p.l
     simp only [PrimTy.ofInt?]
     rw [dif_pos (by simp only [PrimTy.inRange, decide_eq_true_eq]; omega)]; rfl
 
-theorem evalT_add {p : PrimTy} {u w v : p.Denote} (h : BinOp.evalT .add u w = some v) :
+theorem evalT_add {p : PrimTy} {hp : BinOp.add.accepts p = true} {u w v : p.Denote}
+    (h : BinOp.evalT .add hp u w = some v) :
     PrimTy.ival v = PrimTy.ival u + PrimTy.ival w := by
   cases p with
-  | bool => cases h
+  | bool => exact absurd hp (by decide)
   | uint | int =>
     simp only [BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Option.bind_some] at h
     exact ofInt?_ival h
 
-theorem evalT_sub {p : PrimTy} {u w v : p.Denote} (h : BinOp.evalT .sub u w = some v) :
+theorem evalT_sub {p : PrimTy} {hp : BinOp.sub.accepts p = true} {u w v : p.Denote}
+    (h : BinOp.evalT .sub hp u w = some v) :
     PrimTy.ival v = PrimTy.ival u - PrimTy.ival w := by
   cases p with
-  | bool => cases h
+  | bool => exact absurd hp (by decide)
   | uint | int =>
     simp only [BinOp.evalT, BinOp.evalNum, BinOp.arithInt, Option.bind_some] at h
     exact ofInt?_ival h
@@ -387,7 +389,7 @@ theorem Facts.rangeOp_sound {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op
       | none => rw [hx] at h; cases h
       | some u =>
         rw [hx] at h
-        have h' : binopT _ u (y.eval g ν) = some v := h
+        have h' : binopT _ _ u (y.eval g ν) = some v := h
         unfold binopT at h'
         simp only [BinOp.shortT] at h'
         cases hy : (y.eval g ν : Option q.Denote) with
@@ -451,7 +453,7 @@ theorem Facts.arithOk_isSome {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : O
       have ru := F.range_sound hF x hx
       have rw' := F.range_sound hF y hy
       unfold InR at ru rw'
-      show (binopT _ u (some w)).isSome = true
+      show (binopT _ _ u (some w)).isSome = true
       unfold binopT
       cases q
       · cases hq
@@ -1184,7 +1186,7 @@ theorem Facts.cancel_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} (hs : BinO
       | none => rw [hl] at hvx; cases hvx
       | some va =>
         rw [hl] at hvx
-        have h1 : binopT .add va (r.eval g ν) = some vx := hvx
+        have h1 : binopT .add _ va (r.eval g ν) = some vx := hvx
         unfold binopT at h1
         simp only [BinOp.shortT] at h1
         cases hr : (r.eval g ν : Option q.Denote) with
@@ -1193,7 +1195,7 @@ theorem Facts.cancel_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} (hs : BinO
           rw [hr, Option.bind_some] at h1
           have hsum := evalT_add h1
           rw [LTm.eval_app2, LTm.eval_app2, hl, hr]
-          show some va = (binopT .add va (some vb)).bind fun z => binopT .sub z (some vb)
+          show some va = (binopT .add _ va (some vb)).bind fun z => binopT .sub _ z (some vb)
           unfold binopT
           simp only [BinOp.shortT, Option.bind_some]
           rw [h1, Option.bind_some]
@@ -1237,7 +1239,7 @@ theorem Facts.cancelAdd_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
       | none => rw [hl] at hvx; cases hvx
       | some va =>
         rw [hl] at hvx
-        have h1 : binopT .sub va (r.eval g ν) = some vx := hvx
+        have h1 : binopT .sub _ va (r.eval g ν) = some vx := hvx
         unfold binopT at h1
         simp only [BinOp.shortT] at h1
         cases hr : (r.eval g ν : Option q.Denote) with
@@ -1246,7 +1248,7 @@ theorem Facts.cancelAdd_eval {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
           rw [hr, Option.bind_some] at h1
           have hdiff := evalT_sub h1
           rw [LTm.eval_app2, LTm.eval_app2, hl, hr]
-          show some va = (binopT .sub va (some vb)).bind fun z => binopT .add z (some vb)
+          show some va = (binopT .sub _ va (some vb)).bind fun z => binopT .add _ z (some vb)
           unfold binopT
           simp only [BinOp.shortT, Option.bind_some]
           rw [h1, Option.bind_some]
@@ -1327,7 +1329,7 @@ theorem Facts.ltSucc_sound {F : Facts C} (hF : F.Ok g ν) {p : PrimTy} {x y : LT
       | none => rw [hxv] at hvy; cases hvy
       | some vx =>
         rw [hxv] at hvy
-        have h1 : binopT .add vx (some c) = some vy := hvy
+        have h1 : binopT .add _ vx (some c) = some vy := hvy
         unfold binopT at h1
         simp only [BinOp.shortT, Option.bind_some] at h1
         have hs := evalT_add h1
@@ -1452,7 +1454,7 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
         obtain ⟨v, hv⟩ := Option.isSome_iff_exists.1 (F.returns_sound hF x hb.2)
         rw [LTm.eval_app2, hv]
         refine Eq.trans (b := some _) rfl ?_
-        show _ = binopT _ v (some v)
+        show _ = binopT _ _ v (some v)
         cases p <;> simp only [binopT, BinOp.shortT, Option.bind_some, BinOp.evalT,
           BinOp.evalNum, BinOp.evalBool, decide_true, Bool.not_true]
       split
@@ -1460,7 +1462,7 @@ theorem Facts.fold2_eval {F : Facts C} (hF : F.Ok g ν) {a b s : Srt} (o : Op2 C
         obtain ⟨u, v, hu, hv, hne⟩ := F.apart_sound hF hb
         rw [LTm.eval_app2, hu, hv]
         refine Eq.trans (b := some _) rfl ?_
-        show _ = binopT _ u (some v)
+        show _ = binopT _ _ u (some v)
         cases p with
         | bool =>
           simp only [binopT, BinOp.shortT, Option.bind_some, BinOp.evalT, BinOp.evalBool,
@@ -2048,7 +2050,7 @@ theorem Facts.addNe1_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
 reads); `assert(c)` returning is `c ≐ true`. -/
 
 theorem evalT_eqB {p : PrimTy} (u w : p.Denote) :
-    BinOp.evalT .eqB u w = some (decide (u = w)) := by
+    BinOp.evalT .eqB rfl u w = some (decide (u = w)) := by
   cases p
   · rfl
   · show some (decide (u.1 = w.1)) = _
@@ -2059,7 +2061,7 @@ theorem evalT_eqB {p : PrimTy} (u w : p.Denote) :
     exact Subtype.ext_iff.symm
 
 theorem evalT_neB {p : PrimTy} (u w : p.Denote) :
-    BinOp.evalT .neB u w = some (!decide (u = w)) := by
+    BinOp.evalT .neB rfl u w = some (!decide (u = w)) := by
   cases p
   · rfl
   · show some (!decide (u.1 = w.1)) = _
@@ -2216,7 +2218,7 @@ def Facts.boolStep1 (ih : Facts C → LTm C (.val .bool) → Bool → Facts C) (
   | _, _ => F
 
 theorem binopT_eqB {p : PrimTy} {u : p.Denote} {y : Option p.Denote} {v : Bool}
-    (h : binopT .eqB u y = some v) : ∃ w, y = some w ∧ v = decide (u = w) := by
+    (h : binopT .eqB rfl u y = some v) : ∃ w, y = some w ∧ v = decide (u = w) := by
   unfold binopT at h
   cases p <;> simp only [BinOp.shortT] at h <;>
   · cases y with
@@ -2226,7 +2228,7 @@ theorem binopT_eqB {p : PrimTy} {u : p.Denote} {y : Option p.Denote} {v : Bool}
       exact ⟨w, rfl, h.symm⟩
 
 theorem binopT_neB {p : PrimTy} {u : p.Denote} {y : Option p.Denote} {v : Bool}
-    (h : binopT .neB u y = some v) : ∃ w, y = some w ∧ v = !decide (u = w) := by
+    (h : binopT .neB rfl u y = some v) : ∃ w, y = some w ∧ v = !decide (u = w) := by
   unfold binopT at h
   cases p <;> simp only [BinOp.shortT] at h <;>
   · cases y with
@@ -2235,7 +2237,7 @@ theorem binopT_neB {p : PrimTy} {u : p.Denote} {y : Option p.Denote} {v : Bool}
       rw [Option.bind_some, evalT_neB, Option.some.injEq] at h
       exact ⟨w, rfl, h.symm⟩
 
-theorem binopT_and {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .and u y = some true) :
+theorem binopT_and {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .and rfl u y = some true) :
     u = true ∧ y = some true := by
   unfold binopT at h
   cases u
@@ -2244,7 +2246,7 @@ theorem binopT_and {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .and u 
     | none => cases h
     | some w => cases w <;> first | exact ⟨rfl, rfl⟩ | cases h
 
-theorem binopT_or {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .or u y = some false) :
+theorem binopT_or {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .or rfl u y = some false) :
     u = false ∧ y = some false := by
   unfold binopT at h
   cases u

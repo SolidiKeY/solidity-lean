@@ -306,7 +306,7 @@ theorem Op0.eval_eq_evalM (g : State C []) {s : Srt} (o : Op0 C s) : o.eval g = 
 /-- `Op1.eval` by `match`, its compiled form. -/
 def Op1.evalM (g : State C []) {a s : Srt} :
     Op1 C a s → Option (a.Den C g.H) → Option (s.Den C g.H)
-  | .unop op _, x => x.bind op.evalT
+  | .unop op h, x => x.bind (op.evalT h)
   | .net, x => x.map fun n => (lookupBy n g.net).getD 0
   | .delValue, x => x.map fun _ => PrimTy.dflt _
   | .field h, x => x.map (·.field h)
@@ -329,7 +329,7 @@ def Op1.evalM (g : State C []) {a s : Srt} :
 def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     Option (a.Den C g.H) → Option (s.Den C g.H) :=
   @Op1.casesOn C (fun a s _ => Option (a.Den C g.H) → Option (s.Den C g.H)) a s o
-    (fun op {_} _ x => x.bind op.evalT)
+    (fun op {_} h x => x.bind (op.evalT h))
     (fun x => x.map fun n => (lookupBy n g.net).getD 0)
     (fun {_} x => x.map fun _ => PrimTy.dflt _)
     (fun {_} {_} {_} h x => x.map (·.field h))
@@ -352,11 +352,12 @@ theorem Op1.eval_eq_evalM (g : State C []) {a s : Srt} (o : Op1 C a s) :
   cases o <;> rfl
 
 /-- `a ⊕ b`: `&&`/`||` decided by `a` alone (`BinOp.shortT`), else both. -/
-def binopT (op : BinOp) {p : PrimTy} (a : p.Denote) (y : Option p.Denote) :
+def binopT (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a : p.Denote)
+    (y : Option p.Denote) :
     Option (op.ret p).Denote :=
   match op.shortT a with
   | some r => some r
-  | none => y.bind (op.evalT a)
+  | none => y.bind (op.evalT h a)
 
 /-- `read(m, a)`: the slot at `a` in `m`. -/
 def Grown.readT {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T) :
@@ -372,7 +373,7 @@ def Grown.writeT {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T)
 /-- `Op2.eval` by `match`, its compiled form. -/
 def Op2.evalM (g : State C []) {a b s : Srt} :
     Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H)
-  | .binop op _, x, y => x.bind fun a => binopT op a y
+  | .binop op h, x, y => x.bind fun a => binopT op h a y
   | .find, x, y => do let v ← (← x).find (← y); some v.view
   | .len, x, y => do (← x).len (← y)
   | .read, x, y => do (← x).readT (← y)
@@ -413,7 +414,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H) :=
   @Op2.casesOn C
     (fun a b s _ => Option (a.Den C g.H) → Option (b.Den C g.H) → Option (s.Den C g.H)) a b s o
-    (fun op {_} _ x y => x.bind fun a => binopT op a y)
+    (fun op {_} h x y => x.bind fun a => binopT op h a y)
     (fun {_} x y => do let v ← (← x).find (← y); some v.view)
     (fun {_} x y => do (← x).len (← y))
     (fun {_} x y => do (← x).readT (← y))
@@ -483,8 +484,8 @@ theorem Op3.eval_eq_evalM (g : State C []) {a b c s : Srt} (o : Op3 C a b c s) :
 
 
 
-theorem binopT_some (op : BinOp) {p : PrimTy} (a b : p.Denote) :
-    binopT op a (some b) = op.evalT a b := by
+theorem binopT_some (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : p.Denote) :
+    binopT op h a (some b) = op.evalT h a b := by
   unfold binopT
   cases op <;> cases p <;> (try cases a) <;> rfl
 

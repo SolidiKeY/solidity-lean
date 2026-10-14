@@ -62,61 +62,65 @@ def arithInt : BinOp → Int → Int → Option Int
   | .lt, _, _ | .gt, _, _ | .le, _, _ | .ge, _, _ | .eqB, _, _ | .neB, _, _ | .and, _, _
   | .or, _, _ => none
 
-/-- An operator at a numeric type, on the integers its operands hold. -/
-def evalNum (p : PrimTy) (x y : Int) : (op : BinOp) → Option (op.ret p).Denote
-  | .add => (arithInt .add x y).bind p.ofInt?
-  | .sub => (arithInt .sub x y).bind p.ofInt?
-  | .mul => (arithInt .mul x y).bind p.ofInt?
-  | .pow => (arithInt .pow x y).bind p.ofInt?
-  | .div => (arithInt .div x y).bind p.ofInt?
-  | .mod => (arithInt .mod x y).bind p.ofInt?
-  | .band => (arithInt .band x y).bind p.ofInt?
-  | .bor => (arithInt .bor x y).bind p.ofInt?
-  | .bxor => (arithInt .bxor x y).bind p.ofInt?
-  | .shl => (arithInt .shl x y).bind p.ofInt?
-  | .shr => (arithInt .shr x y).bind p.ofInt?
-  | .addW => (arithInt .addW x y).bind p.ofInt?
-  | .subW => (arithInt .subW x y).bind p.ofInt?
-  | .mulW => (arithInt .mulW x y).bind p.ofInt?
-  | .powW => (arithInt .powW x y).bind p.ofInt?
-  | .lt => some (decide (x < y))
-  | .gt => some (decide (y < x))
-  | .le => some (decide (x ≤ y))
-  | .ge => some (decide (y ≤ x))
-  | .eqB => some (decide (x = y))
-  | .neB => some (!decide (x = y))
-  | .and => none
-  | .or => none
+/-- An operator at a numeric type, on the integers its operands hold:
+`&&` and `||` take no number (`accepts`). -/
+def evalNum (p : PrimTy) (hp : p.isNumeric = true) (x y : Int) :
+    (op : BinOp) → op.accepts p = true → Option (op.ret p).Denote
+  | .add, _ => (arithInt .add x y).bind p.ofInt?
+  | .sub, _ => (arithInt .sub x y).bind p.ofInt?
+  | .mul, _ => (arithInt .mul x y).bind p.ofInt?
+  | .pow, _ => (arithInt .pow x y).bind p.ofInt?
+  | .div, _ => (arithInt .div x y).bind p.ofInt?
+  | .mod, _ => (arithInt .mod x y).bind p.ofInt?
+  | .band, _ => (arithInt .band x y).bind p.ofInt?
+  | .bor, _ => (arithInt .bor x y).bind p.ofInt?
+  | .bxor, _ => (arithInt .bxor x y).bind p.ofInt?
+  | .shl, _ => (arithInt .shl x y).bind p.ofInt?
+  | .shr, _ => (arithInt .shr x y).bind p.ofInt?
+  | .addW, _ => (arithInt .addW x y).bind p.ofInt?
+  | .subW, _ => (arithInt .subW x y).bind p.ofInt?
+  | .mulW, _ => (arithInt .mulW x y).bind p.ofInt?
+  | .powW, _ => (arithInt .powW x y).bind p.ofInt?
+  | .lt, _ => some (decide (x < y))
+  | .gt, _ => some (decide (y < x))
+  | .le, _ => some (decide (x ≤ y))
+  | .ge, _ => some (decide (y ≤ x))
+  | .eqB, _ => some (decide (x = y))
+  | .neB, _ => some (!decide (x = y))
+  | .and, h => absurd h (by cases p <;> simp_all [BinOp.accepts, PrimTy.isNumeric])
+  | .or, h => absurd h (by cases p <;> simp_all [BinOp.accepts, PrimTy.isNumeric])
 
-/-- An operator at `bool`. -/
-def evalBool (a b : Bool) : (op : BinOp) → Option (op.ret .bool).Denote
-  | .eqB => some (decide (a = b))
-  | .neB => some (!decide (a = b))
-  | .and => some (a && b)
-  | .or => some (a || b)
-  | .add | .sub | .mul | .pow | .div | .mod | .band | .bor | .bxor | .shl | .shr | .addW
-  | .subW | .mulW | .powW => none
-  | .lt | .gt | .le | .ge => none
+/-- An operator at `bool`: only `==`, `!=`, `&&` and `||` take one
+(`accepts`). -/
+def evalBool (a b : Bool) : (op : BinOp) → op.accepts .bool = true → Option (op.ret .bool).Denote
+  | .eqB, _ => some (decide (a = b))
+  | .neB, _ => some (!decide (a = b))
+  | .and, _ => some (a && b)
+  | .or, _ => some (a || b)
+  | .add, h | .sub, h | .mul, h | .pow, h | .div, h | .mod, h | .band, h | .bor, h | .bxor, h
+  | .shl, h | .shr, h | .addW, h | .subW, h | .mulW, h | .powW, h | .lt, h | .gt, h | .le, h
+  | .ge, h => absurd h (by decide)
 
-/-- `a ⊕ b` on typed values: `none` where it reverts. -/
-def evalT (op : BinOp) : {p : PrimTy} → p.Denote → p.Denote → Option (op.ret p).Denote
-  | .bool, a, b => evalBool a b op
-  | .uint, a, b => evalNum .uint a.1 b.1 op
-  | .int, a, b => evalNum .int a.1 b.1 op
+/-- `a ⊕ b` on typed values, at a type the operator takes: `none` where it
+reverts. -/
+def evalT (op : BinOp) : {p : PrimTy} → op.accepts p = true → p.Denote → p.Denote →
+    Option (op.ret p).Denote
+  | .bool, h, a, b => evalBool a b op h
+  | .uint, h, a, b => evalNum .uint rfl a.1 b.1 op h
+  | .int, h, a, b => evalNum .int rfl a.1 b.1 op h
 
 end BinOp
 
 namespace UnOp
 
-/-- `⊖ a` on a typed value: `none` where it reverts, and at an operand type
-the operator does not accept. -/
-def evalT : (op : UnOp) → {p : PrimTy} → p.Denote → Option (op.ret p).Denote
-  | .neg, .int, a => PrimTy.int.ofInt? (-a.1)
-  | .neg, .uint, _ | .neg, .bool, _ => none
-  | .not, .bool, a => some (!a)
-  | .not, .uint, _ | .not, .int, _ => none
-  | .bnot, .uint, a => PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.1)
-  | .bnot, .bool, _ | .bnot, .int, _ => none
+/-- `⊖ a` on a typed value, at a type the operator takes: `none` where it
+reverts. -/
+def evalT : (op : UnOp) → {p : PrimTy} → op.accepts p = true → p.Denote → Option (op.ret p).Denote
+  | .neg, .int, _, a => PrimTy.int.ofInt? (-a.1)
+  | .not, .bool, _, a => some (!a)
+  | .bnot, .uint, _, a => PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.1)
+  | .neg, .uint, h, _ | .neg, .bool, h, _ | .not, .uint, h, _ | .not, .int, h, _
+  | .bnot, .bool, h, _ | .bnot, .int, h, _ => absurd h (by decide)
 
 end UnOp
 

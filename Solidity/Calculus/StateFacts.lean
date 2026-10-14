@@ -182,8 +182,8 @@ theorem OLe.map {α β : Type} {a a' : Option α} (f : α → β) (ha : OLe a a'
 
 variable {C : Contract} {g : State C []}
 
-theorem binopT_le (op : BinOp) {p : PrimTy} (a : p.Denote) {y y' : Option p.Denote}
-    (h : OLe y y') : OLe (binopT op a y) (binopT op a y') := by
+theorem binopT_le (op : BinOp) {p : PrimTy} (hp : op.accepts p = true) (a : p.Denote)
+    {y y' : Option p.Denote} (h : OLe y y') : OLe (binopT op hp a y) (binopT op hp a y') := by
   unfold binopT
   split
   · exact OLe.refl _
@@ -211,7 +211,7 @@ theorem _root_.Solidity.Op2.eval_le {a b s : Srt} (o : Op2 C a b s)
   · rcases hy.cases with rfl | rfl
     · rw [Op2.eval_eq_evalM]
       cases o with
-      | binop op h => exact OLe.bind (OLe.refl _) fun a => binopT_le op a (OLe.none _)
+      | binop op h => exact OLe.bind (OLe.refl _) fun a => binopT_le op h a (OLe.none _)
       | _ => cases x <;> exact OLe.none _
     · exact OLe.refl _
 

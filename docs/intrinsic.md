@@ -8032,7 +8032,12 @@ left untyped") after the typed-boundary follow-up.  Each step is one commit.
   `shapeB`), `keysH`, `Path.Keys`, `Ty.Keyable`, `LTy.Keyed` and the
   `resolveT_keyed` lemmas; `heredInv` asks nothing of locals.
 
-**Validation (W11.7):** the default build (274 jobs), every
+- **W11.8, operators.** `BinOp.evalT`, `UnOp.evalT`, `evalNum`, `evalBool` and
+  `binopT` take the `accepts` proof the syntax carries (`Val.binop`,
+  `Op1.unop`, `Op2.binop`); an operator at a type it does not take is
+  refuted (`absurd`), so `none` is a revert only.
+
+**Validation (W11.7, again at W11.8):** the default build (274 jobs), every
 `TestSuite/Derived*`, `Report`, `Suggestions` and every `Corpus/*` module,
 each through a one-import scratch module (not committed).
 
@@ -8045,7 +8050,4 @@ each through a one-import scratch module (not committed).
   `MvT`, `MAddrT`), read through `HRef.ofId?`: a formula's memory terms grow
   heaps apart from the state's, so an identity can name an object another
   memory lacks (KeY's `Identity` sort, underspecified there).
-- `BinOp.evalT`/`UnOp.evalT` return `none` at an operator a type does not
-  accept, which no well-typed syntax reaches (`Op2.binop` carries
-  `accepts`).
 - The EVM machine's stack words (`Evm.Word`: `val (n : Nat) | slot`).

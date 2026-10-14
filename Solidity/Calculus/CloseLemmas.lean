@@ -137,7 +137,7 @@ theorem Op0.eval_mtSt : Op0.eval g .mtSt = some (Storage.init C) := rfl
 theorem Op0.eval_zlit (n : Int) : Op0.eval g (.zlit n) = some n := rfl
 
 theorem Op1.eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true)
-    (x : Option p.Denote) : Op1.eval g (.unop op h) x = x.bind op.evalT := rfl
+    (x : Option p.Denote) : Op1.eval g (.unop op h) x = x.bind (op.evalT h) := rfl
 theorem Op1.eval_net (x : Option PrimTy.uint.Denote) : Op1.eval g .net x =
     x.map fun n => (lookupBy n g.net).getD 0 := rfl
 theorem Op1.eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
@@ -169,7 +169,7 @@ theorem Op1.eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.s
     Op1.eval g (.select r h) x = x.map fun st => Storage.selectT st h := rfl
 
 theorem Op2.eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true)
-    (x y : Option p.Denote) : Op2.eval g (.binop op h) x y = x.bind fun a => binopT op a y := rfl
+    (x y : Option p.Denote) : Op2.eval g (.binop op h) x y = x.bind fun a => binopT op h a y := rfl
 theorem Op2.eval_find {p : PrimTy} (x : Option (Storage C)) (y : Option (SRef C (.prim p))) :
     Op2.eval g .find x y =
       x.bind fun st => y.bind fun r => (st.find r).bind fun v => some v.view := rfl

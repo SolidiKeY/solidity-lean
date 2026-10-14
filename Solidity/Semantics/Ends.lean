@@ -115,7 +115,7 @@ theorem Val.evalT_ends : {p : PrimTy} → (v : Val C Γ p) → (v.evalT σ).Ends
       | some y => pure y
       | none => do
         let y ← b.evalT σ
-        TRes.ofOpt (op.evalT x y) : TRes _).Ends
+        TRes.ofOpt (op.evalT _ x y) : TRes _).Ends
     cases op.shortT x with
     | some _ => exact TRes.Ends.ok _
     | none => exact (Val.evalT_ends b).bind fun _ => TRes.Ends.ofOpt _

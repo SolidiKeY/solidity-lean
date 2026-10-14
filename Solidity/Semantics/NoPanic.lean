@@ -87,7 +87,7 @@ theorem Val.evalT_noPanic (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) 
       | some y => pure y
       | none => do
         let y ← b.evalT σ
-        TRes.ofOpt (op.evalT x y) : TRes _).NoPanic
+        TRes.ofOpt (op.evalT _ x y) : TRes _).NoPanic
     cases op.shortT x with
     | some _ => exact fun h => nomatch h
     | none => exact (b.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _

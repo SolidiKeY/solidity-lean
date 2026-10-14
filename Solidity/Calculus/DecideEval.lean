@@ -754,7 +754,7 @@ theorem LTm.eval_succ {L : LTm C (.val .uint)} {n : Nat}
     (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat n)) (h : n + 1 < 2 ^ 256) :
     ((LTm.succ L).eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (n + 1)) := by
   rw [LTm.succ, LTm.eval_app2, LTm.eval_nat, hL]
-  show binopT .add (uintOfNat n) (some (uintOfNat 1)) = _
+  show binopT .add rfl (uintOfNat n) (some (uintOfNat 1)) = _
   rw [binopT_some]
   show ((some ((uintOfNat n).1 + (uintOfNat 1).1)).bind PrimTy.uint.ofInt? :
     Option PrimTy.uint.Denote) = _
@@ -767,7 +767,7 @@ theorem LTm.eval_pred {L : LTm C (.val .uint)} {n : Nat}
     (h : n < 2 ^ 256) :
     ((LTm.pred L).eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (n - 1)) := by
   rw [LTm.pred, LTm.eval_app2, LTm.eval_nat, hL]
-  show binopT .sub (uintOfNat n) (some (uintOfNat 1)) = _
+  show binopT .sub rfl (uintOfNat n) (some (uintOfNat 1)) = _
   rw [binopT_some]
   show ((some ((uintOfNat n).1 - (uintOfNat 1).1)).bind PrimTy.uint.ofInt? :
     Option PrimTy.uint.Denote) = _

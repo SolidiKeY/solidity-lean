@@ -74,7 +74,7 @@ def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen C
 
 /-- A unary symbol in the Theory, its argument's denotation given. -/
 def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen C
-  | .unop op _, da => da.bind op.evalT
+  | .unop op h, da => da.bind (op.evalT h)
   | .net, da => da.map fun n => (lookupBy n g.net).getD 0
   | .delValue, da => da.map fun _ => PrimTy.dflt _
   | .field h, dp => ObsLoc.app dp (.field h .nil)
@@ -96,7 +96,7 @@ def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen 
 denotations given. -/
 def Op2.denote (g : State C []) {a b s : Srt} :
     Op2 C a b s → Option (a.Den C g.H) → Option (b.Den C g.H) → a.TDen C → b.TDen C → s.TDen C
-  | .binop op _, _, _, da, db => da.bind fun x => binopT op x db
+  | .binop op h, _, _, da, db => da.bind fun x => binopT op h x db
   | .find, _, _, ds, dp => some (ds.word dp)
   | .len, _, _, ds, dp => lenW (ds.len dp)
   | .read, x, y, _, _ => Op2.eval g .read x y

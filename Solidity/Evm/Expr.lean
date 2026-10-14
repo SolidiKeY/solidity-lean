@@ -350,7 +350,7 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Val C Γ p) {m : Machine},
     simp only [valIn, Bool.and_eq_true] at hw
     obtain ⟨hop, hwa⟩ := hw
     have key : ∀ {va : p.Denote}, x.evalT σ = .ok va →
-        (Solidity.Val.unop op hacc rfl x).evalT σ = TRes.ofOpt (op.evalT va) := fun h => by
+        (Solidity.Val.unop op hacc rfl x).evalT σ = TRes.ofOpt (op.evalT hacc va) := fun h => by
       simp only [Solidity.Val.evalT, h, bind, Except.bind]
     have err : ∀ {e : Solidity.THalt}, x.evalT σ = .error e →
         (Solidity.Val.unop op hacc rfl x).evalT σ = .error e := fun h => by

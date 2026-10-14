@@ -198,7 +198,7 @@ theorem Tm.eval_castV {p q : PrimTy} (h : p = q) (t : Tm C Γ (.val p)) :
   subst h; rfl
 
 theorem Tm.eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
-    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op x (b.eval σ) := by
+    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op h x (b.eval σ) := by
   rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
 
 /-- A grown heap's memory, written at a typed address with a typed slot. -/

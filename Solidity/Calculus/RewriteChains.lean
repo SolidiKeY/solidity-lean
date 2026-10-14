@@ -240,13 +240,13 @@ operation that must stay in range; an argument the condition fixes, not yet
 known, as `?_`. -/
 def sideCondFmt (ty : Lean.Expr) : MetaM Format := do
   if let some (_, l, _) := ty.eq? then
-    if l.isAppOfArity ``BinOp.evalT 4 then
+    if l.isAppOfArity ``BinOp.evalT 5 then
       let ls := l.getAppArgs
       let val (v : Lean.Expr) : MetaM (Option Int) := do
         match_expr (← whnf v) with
         | Subtype.mk _ _ n _ => intOf? n
         | _ => pure none
-      if let (some sym, some a, some b) := (← termOpSym? ls[0]!, ← val ls[2]!, ← val ls[3]!) then
+      if let (some sym, some a, some b) := (← termOpSym? ls[0]!, ← val ls[3]!, ← val ls[4]!) then
         return f!"{a} {sym} {b} in range"
   withOptions (fun o => (o.setBool `pp.mvars false).setBool `pp.sol.closedTm true) (ppExpr ty)
 

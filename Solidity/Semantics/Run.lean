@@ -279,16 +279,16 @@ def Val.evalT (σ : State C Γ) : {p : PrimTy} → Val C Γ p → TRes p.Denote
     let r ← l.resolveT σ
     let v ← TRes.ofOpt (σ.storage.find r)
     pure v.view
-  | _, .binop op _ hq a b => do
+  | _, .binop op h hq a b => do
     let x ← a.evalT σ
     match op.shortT x with
     | some y => pure (hq ▸ y)
     | none => do
       let y ← b.evalT σ
-      hq ▸ TRes.ofOpt (op.evalT x y)
-  | _, .unop op _ hq a => do
+      hq ▸ TRes.ofOpt (op.evalT h x y)
+  | _, .unop op h hq a => do
     let x ← a.evalT σ
-    hq ▸ TRes.ofOpt (op.evalT x)
+    hq ▸ TRes.ofOpt (op.evalT h x)
   | _, .ternary c a b => do
     let v ← c.evalT σ
     if boolT v then a.evalT σ else b.evalT σ

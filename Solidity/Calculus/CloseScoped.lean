@@ -158,7 +158,7 @@ theorem eval_storage : (Tm.app0 .storage : Tm C Γ .st).eval σ = some σ.storag
 theorem eval_mtSt : (Tm.app0 .mtSt : Tm C Γ .st).eval σ = some (Storage.init C) := rfl
 
 theorem eval_unop (op : UnOp) {p : PrimTy} (h : op.accepts p = true) (a : Tm C Γ (.val p)) :
-    (Tm.app1 (.unop op h) a).eval σ = (a.eval σ).bind op.evalT := rfl
+    (Tm.app1 (.unop op h) a).eval σ = (a.eval σ).bind (op.evalT h) := rfl
 theorem eval_net (a : Tm C Γ (.val .uint)) : (Tm.app1 .net a).eval σ =
     (a.eval σ).map fun n => (lookupBy n σ.net).getD 0 := rfl
 theorem eval_delValue {p : PrimTy} (a : Tm C Γ (.val p)) :
@@ -193,7 +193,7 @@ theorem eval_zcmp (op : BinOp) (h : op.zCmp = true) (a b : Tm C Γ .kint) :
       (a.eval σ).bind fun x => (b.eval σ).bind fun y => some (op.cmpZ x y) := rfl
 
 theorem eval_binop (op : BinOp) {p : PrimTy} (h : op.accepts p = true) (a b : Tm C Γ (.val p)) :
-    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op x (b.eval σ) := rfl
+    (Tm.app2 (.binop op h) a b).eval σ = (a.eval σ).bind fun x => binopT op h x (b.eval σ) := rfl
 theorem eval_find {p : PrimTy} (s : Tm C Γ .st) (q : Tm C Γ (.path (.prim p))) :
     (Tm.app2 .find s q).eval σ =
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.find r).bind fun v => some v.view :=
@@ -627,28 +627,32 @@ theorem optRes_ite {α : Type} {c : Prop} [Decidable c] (x y : Option α) :
     Close.optRes (if c then x else y) = if c then Close.optRes x else Close.optRes y :=
   apply_ite _ _ _ _
 
-theorem binopT_uint (op : BinOp) (a : PrimTy.uint.Denote) (y : Option PrimTy.uint.Denote) :
-    binopT op a y = y.bind fun b => BinOp.evalNum .uint a.1 b.1 op := by
+theorem binopT_uint (op : BinOp) (h : op.accepts .uint = true) (a : PrimTy.uint.Denote)
+    (y : Option PrimTy.uint.Denote) :
+    binopT op h a y = y.bind fun b => BinOp.evalNum .uint rfl a.1 b.1 op h := by
   cases op <;> rfl
-theorem binopT_int (op : BinOp) (a : PrimTy.int.Denote) (y : Option PrimTy.int.Denote) :
-    binopT op a y = y.bind fun b => BinOp.evalNum .int a.1 b.1 op := by
+theorem binopT_int (op : BinOp) (h : op.accepts .int = true) (a : PrimTy.int.Denote)
+    (y : Option PrimTy.int.Denote) :
+    binopT op h a y = y.bind fun b => BinOp.evalNum .int rfl a.1 b.1 op h := by
   cases op <;> rfl
-theorem binopT_and (a : PrimTy.bool.Denote) (y : Option PrimTy.bool.Denote) :
-    binopT .and a y = if a = true then y.bind (fun b => some (a && b)) else some false := by
-  cases a <;> rfl
-theorem binopT_or (a : PrimTy.bool.Denote) (y : Option PrimTy.bool.Denote) :
-    binopT .or a y = if a = true then some true else y.bind (fun b => some (a || b)) := by
-  cases a <;> rfl
-theorem binopT_bool (op : BinOp) (h₁ : op ≠ .and) (h₂ : op ≠ .or) (a : PrimTy.bool.Denote)
+theorem binopT_and (h : BinOp.and.accepts .bool = true) (a : PrimTy.bool.Denote)
     (y : Option PrimTy.bool.Denote) :
-    binopT op a y = y.bind fun b => BinOp.evalBool a b op := by
+    binopT .and h a y = if a = true then y.bind (fun b => some (a && b)) else some false := by
+  cases a <;> rfl
+theorem binopT_or (h : BinOp.or.accepts .bool = true) (a : PrimTy.bool.Denote)
+    (y : Option PrimTy.bool.Denote) :
+    binopT .or h a y = if a = true then some true else y.bind (fun b => some (a || b)) := by
+  cases a <;> rfl
+theorem binopT_bool (op : BinOp) (h : op.accepts .bool = true) (h₁ : op ≠ .and) (h₂ : op ≠ .or)
+    (a : PrimTy.bool.Denote) (y : Option PrimTy.bool.Denote) :
+    binopT op h a y = y.bind fun b => BinOp.evalBool a b op h := by
   cases op <;> first | rfl | exact absurd rfl h₁ | exact absurd rfl h₂
-theorem evalT_uint (op : BinOp) (a b : PrimTy.uint.Denote) :
-    op.evalT a b = BinOp.evalNum .uint a.1 b.1 op := rfl
-theorem evalT_int (op : BinOp) (a b : PrimTy.int.Denote) :
-    op.evalT a b = BinOp.evalNum .int a.1 b.1 op := rfl
-theorem evalT_bool (op : BinOp) (a b : PrimTy.bool.Denote) :
-    op.evalT a b = BinOp.evalBool a b op := rfl
+theorem evalT_uint (op : BinOp) (h : op.accepts .uint = true) (a b : PrimTy.uint.Denote) :
+    op.evalT h a b = BinOp.evalNum .uint rfl a.1 b.1 op h := rfl
+theorem evalT_int (op : BinOp) (h : op.accepts .int = true) (a b : PrimTy.int.Denote) :
+    op.evalT h a b = BinOp.evalNum .int rfl a.1 b.1 op h := rfl
+theorem evalT_bool (op : BinOp) (h : op.accepts .bool = true) (a b : PrimTy.bool.Denote) :
+    op.evalT h a b = BinOp.evalBool a b op h := rfl
 theorem uint_eq_mk (a : PrimTy.uint.Denote) (n : Int) (h : PrimTy.uint.inRange n = true) :
     a = (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) ↔ a.val = n :=
   ⟨fun e => e ▸ rfl, fun e => Subtype.ext e⟩
