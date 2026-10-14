@@ -308,6 +308,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 
 ## Examples
 
+`Tools/Latex.lean` registers the scoped calculus with vendored LeanTeX and
+exports expressions and declaration statements to LaTeX strings/files.
+`Examples/Tactics/Latex.lean` pins the output, including a proved chain.
+
 Two directories, by proof style (`.claude/rules/derivations.md`).
 
 `Examples/Chains/` — the calculus's worked examples, one file per section in

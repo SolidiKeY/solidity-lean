@@ -30,3 +30,8 @@ weakLeanArgs = ["--tstack=131072"]
 [[lean_lib]]
 name = "SolkeyTestSuite"
 weakLeanArgs = ["--tstack=131072"]
+
+# LeanTeX text printer, vendored from fm-04; no ProofWidgets dependency.
+[[lean_lib]]
+name = "LeanTeX"
+srcDir = "vendor/LeanTeX"

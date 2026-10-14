@@ -5,6 +5,7 @@ the others link to it.
 
 | Document | Holds |
 |---|---|
+| [latex.md](latex.md) | LeanTeX paper notation and the Lean string/file export API. |
 | [module-map.md](module-map.md) | One row per module: where things live. |
 | [kernel-port.md](kernel-port.md) | Where each mini-solkey chapter landed, the design decisions, what is still open. |
 | [lean-key-rule-map.md](lean-key-rule-map.md) | The authority for the map from solkey's taclets, and its update and theory symbols, to Lean names. |
