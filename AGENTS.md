@@ -43,7 +43,7 @@ are typed states.  So is every other state read: the run invariants
 no untyped one (W10.5.6). External-call inputs retain their Solidity types (`CallValue`, `ExtKey`),
 path segments retain their endpoints (`Seg`, `Segs`, `RefSegments`), the
 ledger has bounded address keys and unbounded KeY `int` amounts (`Ledger`),
-and the EVM's store and stack hold `Fin (2^256)` words (`Evm.WordStore`, `Evm.Word`). External
+and the EVM's store holds `Fin (2^256)` words (`Evm.WordStore`), its stack words or symbolic slots (`Evm.Word`). External
 responses are ABI words (`ExtResult`, `Word`), decoded at the locals' types
 (`PrimTy.ofWord?`), and tool input/output are typed values (`CallValue`):
 there is no untyped value (W11). Selector labels, the paths' comparison

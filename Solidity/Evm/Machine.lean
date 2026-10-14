@@ -115,7 +115,7 @@ def Slot.toStr : Slot → String
 
 instance : ToString Slot := ⟨Slot.toStr⟩
 
-/-- A number's low 256 bits: `ADD`, `MUL`, `EXP` and `SSTORE` wrap. -/
+/-- A number's low 256 bits: `ADD`, `SUB`, `MUL`, `EXP`, `SHL` and `SELFBALANCE` wrap. -/
 def wmod (n : Nat) : Fin W := ⟨n % W, Nat.mod_lt _ W_pos⟩
 
 /-- The largest word, `2^256 - 1`: `-1`. -/

@@ -8047,8 +8047,8 @@ left untyped") after the typed-boundary follow-up.  Each step is one commit.
   simp set compares typed keys (`CloseS.sigma_key_eq`).
 
 - **W11.10, EVM words.** A machine word is `Word.val (n : Fin W) | slot`:
-  `ADD`, `MUL`, `EXP` and `SSTORE` wrap by `wmod`, the others carry their
-  bound, `SDIV`/`SMOD` push `sword` (`toWord`'s low bits); the environment
+  `ADD`, `SUB`, `MUL`, `EXP`, `SHL` and `SELFBALANCE` wrap by `wmod`, the
+  others carry their bound, `SDIV`/`SMOD` push `sword` (`toWord`'s low bits); the environment
   (`caller`, `callvalue`, `timestamp`, `self`) is `Fin W`, so `EnvSim` has no
   bound conjuncts and `Sim.net` ranges over `Fin W`; `ReprV` names its word
   (`∃ a : Fin W`). The constants the compiler pushes are words by the
