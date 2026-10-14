@@ -8072,12 +8072,20 @@ left untyped") after the typed-boundary follow-up.  Each step is one commit.
 `TestSuite/Derived*`, `Report`, `Suggestions` and every `Corpus/*` module,
 each through a one-import scratch module (not committed).
 
-**What is left, and why** (as of W11.11):
+**What is left, and why** (as of W11.11; W11.12 not merged):
 
-- Memory identities in the term signature are `Nat` (`Srt.Den (.ident _)`,
-  `MvT`, `MAddrT`), read through `HRef.ofId?`: a formula's memory terms grow
-  heaps apart from the state's, so an identity can name an object another
-  memory lacks (KeY's `Identity` sort, underspecified there).
+- Memory identities in the term signature are `Nat`, indexed by their sort
+  (`Srt.Den (.ident R)`, `MvT`, `MAddrT`), read through `HRef.ofId?`: a
+  formula's memory terms grow heaps apart from the state's, so an identity
+  can name an object another memory lacks (KeY's `Identity` sort,
+  underspecified there).  Typing them by the global part's heap
+  (`HId H R`: an `R` of `H`, or past its end) was tried (W11.12, local
+  branch `w11-ident`): it types every value of the update machinery by the
+  heap it was read over (`LTy.VDen C H`, `State.getVAt`, `Upd.Lands` with
+  the extension), and the closer then checked the call examples more than
+  ten times slower (`Examples/Tactics/Calls.lean`'s `withdrawShort` past 15
+  minutes), for an invariant that only excludes an identity naming another
+  type's object in the global heap.  It is not merged.
 - The EVM machine's slot offsets are `Nat` (`Slot.root`, `Slot.add`): the
   simulation's symbolic address space, which the representation relation
   reads, not a value the run computes; its memory cells are indexed by the
