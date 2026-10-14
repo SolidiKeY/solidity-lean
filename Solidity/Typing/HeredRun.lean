@@ -13,11 +13,9 @@ alone; `G` is a property of every type the contract reaches (`Ty.okDeep`
 for `Typing/Tight.lean`'s tight storage, nothing otherwise),
 which only a push and a copy out of memory read.
 
-The invariant (`heredInv P`) is the storage's `All P`, and every alias
-bound along keys a program can write (`LTy.Keyed`): a mapping indexed at a
-word key type, by a key in its range.  It is carried along the typed run
-statement by statement (`Stmt.keeps_all`), each leaf on `TRun.*`, once for
-all three predicates of `Typing/Reachability.lean`,
+The invariant (`heredInv P`) is the storage's `All P`.  It is carried along
+the typed run statement by statement (`Stmt.keeps_all`), each leaf on
+`TRun.*`, once for all three predicates of `Typing/Reachability.lean`,
 `Typing/Tight.lean` and `Typing/Fits.lean`.
 -/
 
@@ -37,7 +35,7 @@ structure HeredRun (P : Hered) (G : Ty → Prop) : Prop where
     P.arr (SVec.ofList (((e.toList ++ sh.toList).set i x).take n))
       (SList.ofList (((e.toList ++ sh.toList).set i x).drop n))
   /-- An entry written, at a key a program writes. -/
-  map : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V), Ty.Keyable K (PrimTy.key k) →
+  map : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V),
     x.All P → P.map K m d → P.map K (SMap.ofList (setBy k x m.toList)) d
   /-- The slots past the end dropped (a copy's source). -/
   strip : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), P.arr e sh → e.All P →
@@ -83,9 +81,9 @@ theorem overlay_all {T : Ty} {o v : SVal T} (ho : o.All P) (hv : v.All P) :
   SVal.overlay_all hP.strip hP.del hP.ov o v ho hv
 
 theorem saveM_all {T U : Ty} {x : SVal T} {p : Path T U} {new : SVal U} {x' : SVal T}
-    (hx : x.All P) (hn : new.All P) (hk : p.Keys Ty.Keyable) (hl : x.Live p)
+    (hx : x.All P) (hn : new.All P) (hl : x.Live p)
     (h : x.saveM p new = some x') : x'.All P :=
-  SVal.saveM_all hP.save hP.map p hx hn hk hl h
+  SVal.saveM_all hP.save hP.map p hx hn hl h
 
 /-- The slot a push lands on. -/
 theorem pushSlot_all {E : Ty} {sh : List (SVal E)} (h : ∀ w ∈ sh, w.All P) :
@@ -112,31 +110,31 @@ include hP
 /-- **A save keeps the predicate**, along keys a program writes, entering
 arrays of words at live slots. -/
 theorem save_all {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
-    (hs : st.All P) (hn : new.All P) (hk : r.path.Keys Ty.Keyable)
+    (hs : st.All P) (hn : new.All P)
     (hl : (st.get r.hroot).Live r.path) (h : st.save r new = some st') : st'.All P := by
   obtain ⟨v', hv, rfl⟩ := save_eq_some h
-  exact SFields.all_set r.hroot hs (hP.saveM_all (root_all r hs) hn hk hl hv)
+  exact SFields.all_set r.hroot hs (hP.saveM_all (root_all r hs) hn hl hv)
 
 theorem write_all {st st' : Storage C} {U : Ty} {r : SRef C U} {new : SVal U}
-    (hs : st.All P) (hn : new.All P) (hk : r.path.Keys Ty.Keyable)
+    (hs : st.All P) (hn : new.All P)
     (hl : (st.get r.hroot).Live r.path) (h : st.write r new = some st') : st'.All P := by
   unfold Storage.write at h
   split at h
-  · exact save_all hP hs hn hk hl h
+  · exact save_all hP hs hn hl h
   · simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
     obtain ⟨old, hold, h⟩ := h
-    exact save_all hP hs (hP.overlay_all (find_all hs hold) hn) hk hl h
+    exact save_all hP hs (hP.overlay_all (find_all hs hold) hn) hl h
 
 theorem delete_all {st st' : Storage C} {U : Ty} {r : SRef C U}
-    (hs : st.All P) (hk : r.path.Keys Ty.Keyable)
+    (hs : st.All P)
     (hl : (st.get r.hroot).Live r.path) (h : st.delete r = some st') : st'.All P := by
   simp only [Storage.delete, Option.bind_eq_bind, Option.bind_eq_some_iff] at h
   obtain ⟨old, hold, h⟩ := h
-  exact save_all hP hs (hP.defaultOf_all (find_all hs hold)) hk hl h
+  exact save_all hP hs (hP.defaultOf_all (find_all hs hold)) hl h
 
 theorem push_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
     {val : SVal E → Option (SVal E)} (hs : st.All P) (hG : G (.ref (.array E)))
-    (hk : r.path.Keys Ty.Keyable) (hval : ∀ s x, s.All P → val s = some x → x.All P)
+    (hval : ∀ s x, s.All P → val s = some x → x.All P)
     (h : st.push r val = some st') : st'.All P := by
   unfold Storage.push at h
   simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
@@ -151,7 +149,7 @@ theorem push_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
       simp only [SVal.All] at hvA
       have hsl := hP.pushSlot_all (SList.all_iff.mp hvA.2.2)
       have hxA := hval _ x hsl.1 hx
-      refine save_all hP hs ?_ hk (SVal.live_of_ref _ _ rfl) h
+      refine save_all hP hs ?_ (SVal.live_of_ref _ _ rfl) h
       simp only [SVal.All]
       refine ⟨hP.push e sh x hG hb hvA.1 hvA.2.1 hvA.2.2 hxA, SVec.all_ofList.mpr fun w hw => ?_,
         SList.all_ofList.mpr hsl.2⟩
@@ -162,7 +160,7 @@ theorem push_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
 
 theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
     {k : PrimTy.uint.Denote}
-    (hs : st.All P) (hG : G (.ref (.array E))) (hk : r.path.Keys Ty.Keyable)
+    (hs : st.All P) (hG : G (.ref (.array E)))
     (h : st.pushPlace r = some (st', k)) : st'.All P := by
   unfold Storage.pushPlace at h
   simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
@@ -177,7 +175,7 @@ theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E)
       obtain ⟨st₁, h, rfl, -⟩ := h
       simp only [SVal.All] at hvA
       have hsl := hP.pushSlot_all (SList.all_iff.mp hvA.2.2)
-      refine save_all hP hs ?_ hk (SVal.live_of_ref _ _ rfl) h
+      refine save_all hP hs ?_ (SVal.live_of_ref _ _ rfl) h
       simp only [SVal.All]
       refine ⟨hP.push e sh _ hG hb hvA.1 hvA.2.1 hvA.2.2 hsl.1, SVec.all_ofList.mpr fun w hw => ?_,
         SList.all_ofList.mpr hsl.2⟩
@@ -187,7 +185,7 @@ theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E)
     · exact nomatch h
 
 theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {keep : Bool}
-    (hs : st.All P) (hk : r.path.Keys Ty.Keyable) (hkeep : keep = true → E.isPrimitive = false)
+    (hs : st.All P) (hkeep : keep = true → E.isPrimitive = false)
     (h : st.pop keep r = some st') : st'.All P := by
   unfold Storage.pop at h
   simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
@@ -207,7 +205,7 @@ theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {ke
         split
         · exact hlA
         · exact hP.defaultOf_all hlA
-      refine save_all hP hs ?_ hk (SVal.live_of_ref _ _ rfl) h
+      refine save_all hP hs ?_ (SVal.live_of_ref _ _ rfl) h
       simp only [SVal.All]
       refine ⟨hP.pop e sh last keep hlast hkeep hvA.1 hvA.2.1 hvA.2.2,
         SVec.all_ofList.mpr fun w hw => SVec.all_iff.mp hvA.2.1 w (List.dropLast_subset _ hw),
@@ -218,23 +216,6 @@ theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {ke
 
 end Storage
 
-/-! ## Aliases along keys a program writes -/
-
-/-- An alias is bound, if at all, along keys a program writes; every other
-local is unconstrained. -/
-def LTy.Keyed {H : HTy} : (t : LTy) → t.TDenote C H → Prop
-  | .alias _, o => ∀ r, o = some r → r.path.Keys Ty.Keyable
-  | .val _, _ => True
-  | .mem _, _ => True
-  | .old, _ => True
-  | .oldNet, _ => True
-  | .kint, _ => True
-
-theorem LTy.Keyed.wk {H H' : HTy} (e : H <+: H') :
-    {t : LTy} → {v : t.TDenote C H} → LTy.Keyed t v → LTy.Keyed t (LTy.TDenote.wk e t v)
-  | .alias _, _, h => h
-  | .val _, _, _ | .mem _, _, _ | .old, _, _ | .oldNet, _, _ | .kint, _, _ => trivial
-
 /-! ## Resolved references -/
 
 theorem SVal.live_nil {T : Ty} (x : SVal T) : x.Live .nil := by cases x <;> simp only [SVal.Live]
@@ -243,50 +224,6 @@ section Resolve
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-mutual
-/-- A path resolves along keys a program writes, its aliases' included. -/
-theorem SPath.resolveT_keyed (he : TEnv.All LTy.Keyed σ.env) :
-    {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef C T}, b.resolveT σ = .ok r →
-      r.path.Keys Ty.Keyable
-  | _, .alias i, r, h => by
-    have hk := he.get i
-    change (match (TEnv.get i σ.env : Option (SRef C _)) with
-      | some r => .ok r
-      | none => .error .revert : TRes _) = .ok r at h
-    split at h
-    · rename_i r' hr'
-      cases h
-      exact hk r hr'
-    · exact nomatch h
-  | _, .loc l, r, h => Loc.resolveT_keyed he l h
-
-theorem Loc.resolveT_keyed (he : TEnv.All LTy.Keyed σ.env) :
-    {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T}, l.resolveT σ = .ok r →
-      r.path.Keys Ty.Keyable
-  | _, .root _ _, r, h => by
-    cases h
-    trivial
-  | _, .field b f hf, r, h => by
-    obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
-    cases h
-    show (r0.path.append (.field hf .nil)).Keys Ty.Keyable
-    rw [Path.keys_append]
-    exact ⟨SPath.resolveT_keyed he b h0, trivial⟩
-  | _, .index it b i, r, h => by
-    obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
-    obtain ⟨k, _, h⟩ := tbind_ok_inv h
-    obtain ⟨_, _, h⟩ := tbind_ok_inv h
-    cases h
-    show (r0.path.append (Path.index it k)).Keys Ty.Keyable
-    rw [Path.keys_append]
-    refine ⟨SPath.resolveT_keyed he b h0, ?_⟩
-    cases it with
-    | map => rw [Path.index_map]; exact ⟨PrimTy.keyFits_key k, trivial⟩
-    | arr a =>
-      cases a
-      · rw [Path.index_dyn]; trivial
-      · rw [Path.index_fixed]; trivial
-end
 
 /-- An index the program takes is in bounds where it takes it. -/
 theorem Storage.checkIndex_some {st : Storage C} {R : RefTy} {k : PrimTy} {V : Ty}
@@ -357,12 +294,11 @@ end Resolve
 
 /-! ## The invariant -/
 
-/-- What a run keeps of a hereditary predicate: the storage satisfies it, and
-every alias is bound along keys a program writes. -/
+/-- What a run keeps of a hereditary predicate: the storage satisfies it. -/
 def heredInv (C : Contract) (P : Hered) : RunInv C where
   glob st := st.All P
-  loc := LTy.Keyed
-  loc_wk e _ _ h := LTy.Keyed.wk e h
+  loc _ _ := True
+  loc_wk _ _ _ _ := trivial
 
 theorem heredInv.valMemOk {P : Hered} : (heredInv C P).ValMemOk :=
   ⟨fun _ _ _ => trivial, fun _ _ _ => trivial⟩
@@ -387,22 +323,18 @@ include hP hG
 
 theorem ARhs.evalT_all {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R : RefTy} :
     (r : ARhs C Γ R) → {st : Storage C} → {ref : SRef C (.ref R)} →
-      r.evalT σ = .ok (st, ref) → st.All P ∧ ref.path.Keys Ty.Keyable
+      r.evalT σ = .ok (st, ref) → st.All P
   | .path p, st, ref, h => by
     obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
     cases h
-    exact ⟨hσ.1, SPath.resolveT_keyed σ hσ.2 p h0⟩
+    exact hσ.1
   | .push b _, st, ref, h => by
     obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
     split at h
     · exact nomatch h
     · obtain ⟨⟨st', k⟩, hst, h⟩ := tbind_ok_inv h
       cases h
-      have hk := SPath.resolveT_keyed σ hσ.2 b h0
-      refine ⟨Storage.pushPlace_all hP hσ.1 (hG r0) hk (TRes.ofOpt_ok hst), ?_⟩
-      show (r0.path.append (Path.index (.arr .dyn) k)).Keys Ty.Keyable
-      rw [Path.keys_append, Path.index_dyn]
-      exact ⟨hk, trivial⟩
+      exact Storage.pushPlace_all hP hσ.1 (hG r0) (TRes.ofOpt_ok hst)
 
 omit hP hG in
 theorem MRhs.evalT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R : RefTy} :
@@ -423,7 +355,7 @@ theorem MRhs.evalT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) {R :
 
 omit hG in
 theorem opStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : BinOp)
-    {p : PrimTy} {r : SRef C (.prim p)} (hk : r.path.Keys Ty.Keyable)
+    {p : PrimTy} {r : SRef C (.prim p)}
     (hl : (σ.storage.get r.hroot).Live r.path) (v : p.Denote) {o : Out C σ.H Γ}
     (h : opStoreT σ op r v = .ok o) : (heredInv C P).HoldsT o.st := by
   unfold opStoreT at h
@@ -431,7 +363,7 @@ theorem opStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : 
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
-  exact hσ.withStorage (Storage.save_all hP hσ.1 (by simp only [SVal.All]) hk hl (TRes.ofOpt_ok hst))
+  exact hσ.withStorage (Storage.save_all hP hσ.1 (by simp only [SVal.All]) hl (TRes.ofOpt_ok hst))
 
 omit hP hG in
 theorem opMemT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : BinOp) {p : PrimTy}
@@ -453,14 +385,14 @@ theorem OpLoc.storeT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (o
     cases h
     exact hσ.setLocal i trivial
   | _, .root r hr, v, o, h =>
-    opStoreT_holds hP hσ op (r := SRef.ofRoot r hr) trivial (SVal.live_nil _) v h
+    opStoreT_holds hP hσ op (r := SRef.ofRoot r hr) (SVal.live_nil _) v h
   | _, .field b f hf, v, o, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact opStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact opStoreT_holds hP hσ op
       (Loc.resolveT_live σ _ href) v h
   | _, .index it b i, v, o, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact opStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact opStoreT_holds hP hσ op
       (Loc.resolveT_live σ _ href) v h
   | _, .mfield .., v, o, h => by
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
@@ -471,7 +403,7 @@ theorem OpLoc.storeT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (o
 
 omit hG in
 theorem bumpStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : IncDec)
-    {p : PrimTy} {r : SRef C (.prim p)} (hk : r.path.Keys Ty.Keyable)
+    {p : PrimTy} {r : SRef C (.prim p)}
     (hl : (σ.storage.get r.hroot).Live r.path) {o : Out C σ.H Γ} {w : p.Denote}
     (h : bumpStoreT σ op r = .ok (o, w)) : (heredInv C P).HoldsT o.st := by
   unfold bumpStoreT at h
@@ -479,7 +411,7 @@ theorem bumpStoreT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op 
   obtain ⟨_, _, h⟩ := tbind_ok_inv h
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
-  exact hσ.withStorage (Storage.save_all hP hσ.1 (by simp only [SVal.All]) hk hl (TRes.ofOpt_ok hst))
+  exact hσ.withStorage (Storage.save_all hP hσ.1 (by simp only [SVal.All]) hl (TRes.ofOpt_ok hst))
 
 omit hP hG in
 theorem bumpMemT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op : IncDec) {p : PrimTy}
@@ -501,14 +433,14 @@ theorem OpLoc.bumpT_holds {σ : State C Γ} (hσ : (heredInv C P).HoldsT σ) (op
     cases h
     exact hσ.setLocal i trivial
   | _, .root r hr, o, w, h =>
-    bumpStoreT_holds hP hσ op (r := SRef.ofRoot r hr) trivial (SVal.live_nil _) h
+    bumpStoreT_holds hP hσ op (r := SRef.ofRoot r hr) (SVal.live_nil _) h
   | _, .field b f hf, o, w, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact bumpStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact bumpStoreT_holds hP hσ op
       (Loc.resolveT_live σ _ href) h
   | _, .index it b i, o, w, h => by
     obtain ⟨ref, href, h⟩ := tbind_ok_inv h
-    exact bumpStoreT_holds hP hσ op (Loc.resolveT_keyed σ hσ.2 _ href)
+    exact bumpStoreT_holds hP hσ op
       (Loc.resolveT_live σ _ href) h
   | _, .mfield .., o, w, h => by
     obtain ⟨a, _, h⟩ := tbind_ok_inv h
@@ -542,7 +474,7 @@ theorem keeps_assign {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) :
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
   exact hσ.withStorage (Storage.write_all hP hσ.1 (Src.valueT_all hσ.1 r hsv)
-    (Loc.resolveT_keyed σ hσ.2 l href) (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
+    (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
 
 theorem keeps_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
     (heredInv C P).TKeeps (TRun.rebind i r) := by
@@ -550,8 +482,7 @@ theorem keeps_rebind {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
   unfold TRun.rebind at h
   obtain ⟨⟨st, ref⟩, he, h⟩ := tbind_ok_inv h
   cases h
-  obtain ⟨hst, hk⟩ := ARhs.evalT_all hP hG hσ r he
-  exact (hσ.withStorage hst).setLocal i fun r' hr' => by cases hr'; exact hk
+  exact (hσ.withStorage (ARhs.evalT_all hP hG hσ r he)).setLocal i trivial
 
 omit hP hG in
 theorem keeps_assignLocal {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
@@ -580,12 +511,11 @@ theorem keeps_declStorage (R : RefTy) (init : Option (ARhs C Γ R)) :
   intro σ o hσ h
   unfold TRun.declStorage at h
   cases init with
-  | none => cases h; exact hσ.push fun _ hr => nomatch hr
+  | none => cases h; exact hσ.push trivial
   | some r =>
     obtain ⟨⟨st, ref⟩, he, h⟩ := tbind_ok_inv h
     cases h
-    obtain ⟨hst, hk⟩ := ARhs.evalT_all hP hG hσ r he
-    exact (hσ.withStorage hst).push fun r' hr' => by cases hr'; exact hk
+    exact (hσ.withStorage (ARhs.evalT_all hP hG hσ r he)).push trivial
 
 omit hG in
 theorem keeps_opAssign {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (r : Val C Γ p) :
@@ -635,7 +565,7 @@ theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
   · exact nomatch h
   · obtain ⟨st, hst, h⟩ := tbind_ok_inv h
     cases h
-    refine hσ.withStorage (Storage.push_all hP hσ.1 (hG ref) (SPath.resolveT_keyed σ hσ.2 b href)
+    refine hσ.withStorage (Storage.push_all hP hσ.1 (hG ref)
       (fun s y hs hy => ?_) (TRes.ofOpt_ok hst))
     cases hy
     cases x with
@@ -649,7 +579,7 @@ theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (heredInv C P).TKeeps (
   obtain ⟨ref, href, h⟩ := tbind_ok_inv h
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
-  refine hσ.withStorage (Storage.pop_all hP hσ.1 (SPath.resolveT_keyed σ hσ.2 b href)
+  refine hσ.withStorage (Storage.pop_all hP hσ.1
     (fun hm => ?_) (TRes.ofOpt_ok hst))
   cases E with
   | prim _ => exact nomatch hm
@@ -709,7 +639,7 @@ theorem keeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ 
   cases h
   exact hσ.withStorage (Storage.write_all hP hσ.1
     (hP.plain _ (hG ref) (MVal.copyMToSt_plain σ.heap m))
-    (Loc.resolveT_keyed σ hσ.2 l href) (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
+    (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
 
 omit hP hG in
 theorem keeps_assignMem {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
@@ -729,7 +659,7 @@ theorem keeps_delete {T : Ty} (l : Loc C Γ T) : (heredInv C P).TKeeps (TRun.del
   obtain ⟨ref, href, h⟩ := tbind_ok_inv h
   obtain ⟨st, hst, h⟩ := tbind_ok_inv h
   cases h
-  exact hσ.withStorage (Storage.delete_all hP hσ.1 (Loc.resolveT_keyed σ hσ.2 l href)
+  exact hσ.withStorage (Storage.delete_all hP hσ.1
     (Loc.resolveT_live σ l href) (TRes.ofOpt_ok hst))
 
 omit hP hG in
@@ -756,7 +686,7 @@ theorem keeps_assignNew {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
     cases h
     exact hg.withStorage (Storage.write_all hP hg.1
       (hP.plain _ (hG ref) (MVal.copyMToSt_plain _ _))
-      (Loc.resolveT_keyed _ hg.2 l href) (Loc.resolveT_live _ l href) (TRes.ofOpt_ok hst))
+      (Loc.resolveT_live _ l href) (TRes.ofOpt_ok hst))
   | mem l =>
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     obtain ⟨_, _, h⟩ := tbind_ok_inv h

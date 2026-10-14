@@ -27,8 +27,9 @@ a root `defaultOkS` refuses is not proved here.
 
 `SVal.Fits` (`fitsH`) is what the builder of
 `Typing/Constructibility.lean` needs to write a value with literals: every
-mapping key in its key type's range, every dynamic array's slots, past its
-end too, fewer than `2^256`, every fixed-size array at most `2^256` long.
+dynamic array's slots, past its end too, fewer than `2^256`, every
+fixed-size array at most `2^256` long (a mapping's keys are values of its
+key type).
 -/
 
 namespace Solidity
@@ -106,7 +107,7 @@ theorem tightH_run : HeredRun tightH (fun T => T.okDeep = true) where
     · rw [SList.toList_ofList, List.drop_set, if_pos (hlive hp),
         List.drop_left' (SVec.length_toList e)] at hw
       exact harr.2 hp w hw
-  map _ _ _ _ _ _ _ := trivial
+  map _ _ _ _ _ _ := trivial
   strip _ sh harr _ :=
     ⟨fun hd => ⟨(harr.1 hd).1, rfl⟩, fun _ w hw => by rw [SList.toList_nil] at hw; exact nomatch hw⟩
   del e sh harr _ := by
@@ -177,15 +178,15 @@ theorem reachable_tight (hd : DeepOk C) {st : Storage C} (h : Reachable C st) : 
 
 /-! ## Values the builder writes -/
 
-/-- A node the builder writes with literals: a mapping's keys in range, a
-dynamic array's slots fewer than `2^256` in all (the builder pushes them
-all), a fixed-size array at most `2^256` long (its indices are `uint`s). -/
+/-- A node the builder writes with literals: a dynamic array's slots fewer
+than `2^256` in all (the builder pushes them all), a fixed-size array at
+most `2^256` long (its indices are `uint`s). -/
 def fitsH : Hered where
   arr := fun {_} {n} _ sh => n + sh.length < 2 ^ 256
   fix _ n := n ≤ 2 ^ 256
-  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
+  map _ := fun _ _ => True
 
-/-- `v`'s keys and slots in range. -/
+/-- `v`'s slots in range. -/
 abbrev SVal.Fits {T : Ty} (v : SVal T) : Prop := v.All fitsH
 
 /-- Every root's keys and slots in range. -/

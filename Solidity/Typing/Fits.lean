@@ -15,11 +15,9 @@ fits** (`reachable_fits`), so `reachable_iff_fits` drops the premise.
 A word is in range and a fixed-size array has exactly its type's length by
 the typed state; a dynamic array has fewer than `2^256` live elements
 (`SVal.array`'s bound).  What is not by construction is a third run
-invariant beside the canonical and the tight one (`bndH`): every mapping key
-is in its key type's range (`SMap`'s keys are `Int`s; a key is written
-through `PrimTy.key` of a typed index, or along an alias's path, which the
-locals part of the invariant keeps, `LTy.Keyed`), and every dynamic array's
-live and recycled slots together are fewer than `2^256`: `push` takes a
+invariant beside the canonical and the tight one (`bndH`): every dynamic
+array's live and recycled slots together are fewer than `2^256` (a
+mapping's keys are values of its key type, so in range by construction): `push` takes a
 recycled slot or checks the bound (`Storage.full`), `pop` and `delete` move
 slots, never add one, and a copy keeps the larger of the old slot count and
 the new length.
@@ -33,12 +31,11 @@ variable {C : Contract}
 
 /-! ## Bounded values -/
 
-/-- A bounded node: a dynamic array's slots fewer than `2^256` in all, a
-mapping's keys in their key type's range. -/
+/-- A bounded node: a dynamic array's slots fewer than `2^256` in all. -/
 def bndH : Hered where
   arr := fun {_} {n} _ sh => n + sh.length < 2 ^ 256
   fix _ _ := True
-  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
+  map _ := fun _ _ => True
 
 /-- `v` bounded. -/
 abbrev SVal.Bnd {T : Ty} (v : SVal T) : Prop := v.All bndH
@@ -59,11 +56,10 @@ theorem bndH_nil (E : Ty) : bndH.arr (SVec.nil (E := E)) (SList.nil (E := E)) :=
 /-- A default is bounded. -/
 theorem SVal.dflt_bnd (T : Ty) : (SVal.dflt T).Bnd :=
   SVal.dflt_all (P := bndH) bndH_nil (fun _ _ => trivial)
-    (fun _ _ e he => by rw [SMap.toList_nil] at he; exact nomatch he) T
+    (fun _ _ => trivial) T
 
-/-- **Every storage operation keeps the nodes bounded**: an entry is written
-at a key in range, and slots are moved, recycled or pushed below the
-bound. -/
+/-- **Every storage operation keeps the nodes bounded**: slots are moved,
+recycled or pushed below the bound. -/
 theorem bndH_run : HeredRun bndH (fun _ => True) where
   save e sh i x hi _ harr _ := by
     show (List.take _ _).length + (SList.ofList _).length < _
@@ -72,11 +68,7 @@ theorem bndH_run : HeredRun bndH (fun _ => True) where
     have : sh.toList.length = sh.length := rfl
     have harr' : _ + sh.length < 2 ^ 256 := harr
     omega
-  map m d k x hk _ hm e he := by
-    rw [SMap.toList_ofList] at he
-    rcases fst_mem_setBy he with h | ⟨w, hw⟩
-    · rw [h]; exact hk
-    · exact hm (e.1, w) hw
+  map _ _ _ _ _ _ := trivial
   strip _ _ harr _ := by
     show _ + SList.length .nil < _
     rw [SList.length_nil]
@@ -126,11 +118,9 @@ theorem bndH_run : HeredRun bndH (fun _ => True) where
 
 /-- The storage a contract starts with is bounded. -/
 theorem Storage.init_bnd : (Storage.init C).Bnd :=
-  SFields.dflt_all (P := bndH) bndH_nil (fun _ _ => trivial)
-    (fun _ _ e he => by rw [SMap.toList_nil] at he; exact nomatch he) C.vars
+  SFields.dflt_all (P := bndH) bndH_nil (fun _ _ => trivial) (fun _ _ => trivial) C.vars
 
-/-- The third run invariant: bounded storage, aliases along keys a program
-writes. -/
+/-- The third run invariant: bounded storage. -/
 abbrev fitsInv (C : Contract) : RunInv C := heredInv C bndH
 
 /-- A block run from a bounded state ends, if in a state, in a bounded one.
@@ -142,8 +132,7 @@ theorem Prog.run_bnd {Γ Γ' : Ctx} (P : Prog C Γ Γ') {σ : State C Γ} {o : O
   Prog.run_all bndH_run (fun _ => trivial) P hσ h
 
 /-- **Reachable ⇒ bounded**: every storage a program reaches from the
-contract's initial state has its keys in range and its arrays' slots below
-`2^256`. -/
+contract's initial state has its arrays' slots below `2^256`. -/
 theorem reachable_bnd {st : Storage C} (h : Reachable C st) : st.Bnd :=
   Reachable.all bndH_run (fun _ => trivial) Storage.init_bnd h
 

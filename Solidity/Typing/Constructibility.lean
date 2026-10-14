@@ -1285,10 +1285,6 @@ theorem bool_key_reachable : Reachable BoolKeyed BoolKeyed.flag := by
     decide
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, tightH, and_true]
   · simp only [BoolKeyed.flag, SFields.All, SVal.All, SMap.All, fitsH, and_true]
-    intro e he
-    simp only [SMap.toList, List.mem_cons, List.not_mem_nil, or_false] at he
-    subst he
-    exact PrimTy.keyFits_key (p := .bool) true
 
 /-- A `Token` past the end of `tokens`. -/
 def Tokens.dangling : Storage Tokens :=

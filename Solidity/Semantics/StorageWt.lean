@@ -6,8 +6,8 @@ import Solidity.Semantics.Storage
 `wt(storage)` (`Op1.wt`, `Signature.lean`) is a test the kernel evaluates
 in certificates (Gate G0): `SVal.allB B`, a fold (`SVal.fold`, compiled by
 its `match` twin), of node tests `B : HeredB`.  `Storage.shapeB` asks every
-root canonical and tight, `Storage.keysB` every mapping key in its key
-type's range, `Storage.wtB` both.  What they decide is
+root canonical and tight, which is all `Storage.wtB` asks: a mapping's keys
+are values of its key type, so no key is out of range.  What they decide is
 `Typing/CanonTest.lean`'s (`SVal.allB_iff`, `Storage.shapeB_iff`): the
 reachable storages (`wt_iff_reachable`, `Calculus/Problem.lean`).
 -/
@@ -17,13 +17,6 @@ namespace Solidity
 open Semantics (structDef nodupKeysB)
 
 variable {C : Contract}
-
-/-- A mapping key a literal writes: a number in its type's range, a `bool`
-key `0` or `1` (`false`/`true`, as `PrimTy.key` hashes them). -/
-def PrimTy.keyFits : PrimTy → Int → Bool
-  | .bool, k => k == 0 || k == 1
-  | .uint, k => PrimTy.uint.inRange k
-  | .int, k => PrimTy.int.inRange k
 
 /-- A predicate's node conditions as tests. -/
 structure HeredB where
@@ -110,21 +103,13 @@ def tightHB : HeredB where
   fix _ _ := true
   map _ := fun _ _ => true
 
-/-- `keysH`'s test. -/
-def keysHB : HeredB where
-  arr _ _ := true
-  fix _ _ := true
-  map K := fun m _ => m.toList.all fun e => K.keyFits (PrimTy.key e.1)
 
 /-! ## The storage's tests -/
 
 /-- Every root canonical and tight. -/
 def Storage.shapeB (st : Storage C) : Bool := SFields.allB canonHB st && SFields.allB tightHB st
 
-/-- Every mapping key in range. -/
-def Storage.keysB (st : Storage C) : Bool := SFields.allB keysHB st
-
-/-- What `wt(storage)` tests: the shape and the keys. -/
-def Storage.wtB (st : Storage C) : Bool := st.shapeB && st.keysB
+/-- What `wt(storage)` tests: the shape. -/
+def Storage.wtB (st : Storage C) : Bool := st.shapeB
 
 end Solidity

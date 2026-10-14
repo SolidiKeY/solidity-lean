@@ -56,7 +56,7 @@ theorem SVal.dflt_canon (T : Ty) : (SVal.dflt T).Canon :=
 `setBy` is written once, and nothing writes a mapping's default. -/
 theorem canonH_run : HeredRun canonH (fun _ => True) where
   save _ _ _ _ _ _ _ _ := trivial
-  map _ _ _ _ _ _ h := ⟨by rw [SMap.toList_ofList]; exact nodupKeysB_setBy' h.1, h.2⟩
+  map _ _ _ _ _ h := ⟨by rw [SMap.toList_ofList]; exact nodupKeysB_setBy' h.1, h.2⟩
   strip _ _ _ _ := trivial
   del _ _ _ _ := trivial
   ov _ _ _ _ _ _ _ _ _ := trivial

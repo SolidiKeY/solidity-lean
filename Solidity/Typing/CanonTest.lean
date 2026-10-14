@@ -4,11 +4,11 @@ import Solidity.Typing.Constructibility
 # What the tests of `wt(storage)` decide
 
 `SVal.Canon`, `SVal.Tight` (`Typing/Reachability.lean`, `Typing/Tight.lean`)
-and the keys in range are propositions; `wt(storage)` (`Calculus/Problem.lean`)
+are propositions; `wt(storage)` (`Calculus/Problem.lean`)
 asks them as tests the kernel evaluates (`Semantics/StorageWt.lean`:
 `SVal.allB B`, a fold of node tests `B : HeredB`).  Here each test decides
 its `Hered`'s node conditions clause for clause (`SVal.allB_iff`):
-`Storage.shapeB` is canonical and tight, `Storage.keysB` the keys in range.
+`Storage.shapeB` is canonical and tight.
 -/
 
 namespace Solidity
@@ -74,12 +74,6 @@ end Iff
 
 /-! ## The three tests -/
 
-/-- Every mapping's keys in range. -/
-def keysH : Hered where
-  arr _ _ := True
-  fix _ _ := True
-  map K := fun m _ => ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
-
 theorem canonHB_decides : canonHB.Decides canonH :=
   ⟨fun _ _ => by simp only [canonHB, canonH],
     fun _ _ => by simp only [canonHB, canonH],
@@ -133,37 +127,8 @@ theorem tightHB_decides : tightHB.Decides tightH :=
 theorem SVal.tightB_iff {T : Ty} (v : SVal T) : v.allB tightHB = true ↔ v.Tight :=
   SVal.allB_iff tightHB_decides v
 
-theorem keysHB_decides : keysHB.Decides keysH :=
-  ⟨fun _ _ => by simp only [keysHB, keysH],
-    fun _ _ => by simp only [keysHB, keysH],
-    fun K _ m d => by
-      show (m.toList.all fun e => K.keyFits (PrimTy.key e.1)) = true ↔ ∀ e ∈ m.toList, K.keyOk (PrimTy.key e.1)
-      simp only [List.all_eq_true, PrimTy.keyOk]⟩
-
-theorem SVal.keysB_iff {T : Ty} (v : SVal T) : v.allB keysHB = true ↔ v.All keysH :=
-  SVal.allB_iff keysHB_decides v
-
-/-! ## The storage's tests -/
-
 theorem Storage.shapeB_iff (st : Storage C) : st.shapeB = true ↔ st.Canon ∧ st.Tight := by
   simp only [Storage.shapeB, Bool.and_eq_true]
   rw [SFields.allB_iff canonHB_decides st, SFields.allB_iff tightHB_decides st]
-
-theorem Storage.keysB_iff (st : Storage C) : st.keysB = true ↔ st.All keysH :=
-  SFields.allB_iff keysHB_decides st
-
-/-- Keys and slots in range have their keys in range. -/
-theorem Storage.keysB_of_fits {st : Storage C} (h : st.Fits) : st.keysB = true :=
-  (Storage.keysB_iff st).2 (SFields.all_mono (P := keysH) (Q := fitsH) (G := fun _ => True)
-    ⟨fun _ _ _ _ => trivial, fun _ _ => trivial, fun _ _ _ => trivial, fun _ _ _ => trivial,
-      fun _ _ _ _ _ => trivial, fun _ _ _ _ => trivial, fun _ _ _ h => h⟩ st
-    (fun _ _ => trivial) h)
-
-/-- Bounded storage has its keys in range. -/
-theorem Storage.keysB_of_bnd {st : Storage C} (h : st.Bnd) : st.keysB = true :=
-  (Storage.keysB_iff st).2 (SFields.all_mono (P := keysH) (Q := bndH) (G := fun _ => True)
-    ⟨fun _ _ _ _ => trivial, fun _ _ => trivial, fun _ _ _ => trivial, fun _ _ _ => trivial,
-      fun _ _ _ _ _ => trivial, fun _ _ _ _ => trivial, fun _ _ _ h => h⟩ st
-    (fun _ _ => trivial) h)
 
 end Solidity

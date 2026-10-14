@@ -21,8 +21,8 @@ read finds (`SVal.findM_all`), of a member or element, of a default when
 the node conditions hold of the defaults' nodes (`SVal.dflt_all`).
 
 Also here: the defaults' equations (`SVal.dflt_struct` …, `SVal.dflt` is
-by fuel), the list lemmas the proofs above share, and the keys along a
-typed path (`Path.Keyed`).
+by fuel), the list lemmas the proofs above share, and the live slots along
+a typed path (`SVal.Live`).
 -/
 
 namespace Solidity
@@ -504,46 +504,7 @@ end Dflt
 
 end AllLemmas
 
-/-! ## Keys and live slots along a path -/
-
-/-- A mapping key in its key type's range. -/
-def PrimTy.keyOk (K : PrimTy) (k : Int) : Prop := K.keyFits k = true
-
-/-- A key a program indexes a mapping with: in its key type's range. -/
-def Ty.Keyable (K : PrimTy) (k : Int) : Prop := K.keyOk k
-
-theorem PrimTy.keyFits_key : {p : PrimTy} → (v : p.Denote) → p.keyFits (PrimTy.key v) = true
-  | .bool, v => by
-    cases hv : (v : Bool) <;> simp only [PrimTy.key, PrimTy.keyFits] <;> decide
-  | .uint, v => v.2
-  | .int, v => v.2
-
-/-- Every key step of a path satisfies `Q` at its mapping's key type. -/
-def Path.Keys (Q : PrimTy → Int → Prop) : {T U : Ty} → Path T U → Prop
-  | _, _, .nil => True
-  | _, _, .field _ p => p.Keys Q
-  | _, _, .at _ p => p.Keys Q
-  | _, _, .atF _ p => p.Keys Q
-  | _, _, @Path.key K _ _ k p => Q K (PrimTy.key k) ∧ p.Keys Q
-
-theorem Path.keys_mono {Q Q' : PrimTy → Int → Prop} (hQ : ∀ K k, Q K k → Q' K k) :
-    {T U : Ty} → (p : Path T U) → p.Keys Q → p.Keys Q'
-  | _, _, .nil, _ => trivial
-  | _, _, .field _ p, h => Path.keys_mono hQ p h
-  | _, _, .at _ p, h => Path.keys_mono hQ p h
-  | _, _, .atF _ p, h => Path.keys_mono hQ p h
-  | _, _, .key _ p, h => ⟨hQ _ _ h.1, Path.keys_mono hQ p h.2⟩
-
-theorem Path.keys_append {Q : PrimTy → Int → Prop} : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
-    (p.append q).Keys Q ↔ p.Keys Q ∧ q.Keys Q
-  | _, _, _, .nil, q => by rw [Path.append_nil]; simp only [Path.Keys, true_and]
-  | _, _, _, .field _ p, q => by rw [Path.append_field]; exact Path.keys_append p q
-  | _, _, _, .at _ p, q => by rw [Path.append_at]; exact Path.keys_append p q
-  | _, _, _, .atF _ p, q => by rw [Path.append_atF]; exact Path.keys_append p q
-  | _, _, _, .key _ p, q => by
-    rw [Path.append_key]
-    simp only [Path.Keys]
-    rw [Path.keys_append p q, and_assoc]
+/-! ## Live slots along a path -/
 
 /-- A path from a word is empty. -/
 theorem Path.eq_prim {p : PrimTy} {U : Ty} (q : Path (.prim p) U) : U = .prim p := by
@@ -621,33 +582,31 @@ theorem SVal.live_append : {T R U : Ty} → (x : SVal T) → (p : Path T R) → 
 
 section Save
 
-variable {P : Hered} {Q : PrimTy → Int → Prop}
+variable {P : Hered}
   (harr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (i : Nat) (x : SVal E),
     i < e.toList.length + sh.toList.length → (E.isPrimitive = true → i < n) → P.arr e sh →
     x.All P →
     P.arr (SVec.ofList (((e.toList ++ sh.toList).set i x).take n))
       (SList.ofList (((e.toList ++ sh.toList).set i x).drop n)))
-  (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V), Q K (PrimTy.key k) → x.All P →
+  (hmap : ∀ {K : PrimTy} {V : Ty} (m : SMap K V) (d : SVal V) (k : K.Denote) (x : SVal V), x.All P →
     P.map K m d → P.map K (SMap.ofList (setBy k x m.toList)) d)
 
 include harr hmap
 
 /-- **A save keeps a hereditary predicate** whose node conditions survive a
-slot or an entry replaced: along keys `Q` accepts, entering arrays of words
-at live slots. -/
+slot or an entry replaced, entering arrays of words at live slots. -/
 theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new : SVal U} →
-    {x' : SVal T} → x.All P → new.All P → p.Keys Q → x.Live p → x.saveM p new = some x' →
+    {x' : SVal T} → x.All P → new.All P → x.Live p → x.saveM p new = some x' →
     x'.All P
-  | _, _, x, .nil, new, x', _, hn, _, _, h => by
+  | _, _, x, .nil, new, x', _, hn, _, h => by
     cases x <;> (simp only [SVal.saveM, Option.some.injEq] at h; subst h; exact hn)
-  | _, _, .struct fs, .field hf p, new, x', hx, hn, hk, hl, h => by
+  | _, _, .struct fs, .field hf p, new, x', hx, hn, hl, h => by
     simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
     obtain ⟨y, hy, rfl⟩ := h
     simp only [SVal.All] at hx ⊢
     simp only [SVal.Live] at hl
-    simp only [Path.Keys] at hk
-    exact SFields.all_set hf hx (SVal.saveM_all p (SFields.all_get hf hx) hn hk hl hy)
-  | _, _, .array e sh _, .at i p, new, x', hx, hn, hk, hl, h => by
+    exact SFields.all_set hf hx (SVal.saveM_all p (SFields.all_get hf hx) hn hl hy)
+  | _, _, .array e sh _, .at i p, new, x', hx, hn, hl, h => by
     simp only [SVal.saveM] at h
     split at h
     · rename_i y hy
@@ -655,14 +614,13 @@ theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new
       obtain ⟨z, hz, rfl⟩ := h
       simp only [SVal.All] at hx ⊢
       simp only [SVal.Live] at hl
-      simp only [Path.Keys] at hk
       obtain ⟨hlive, hl⟩ := hl y hy
       have hall : ∀ w ∈ e.toList ++ sh.toList, w.All P := by
         intro w hw
         rcases List.mem_append.mp hw with hw | hw
         · exact SVec.all_iff.mp hx.2.1 w hw
         · exact SList.all_iff.mp hx.2.2 w hw
-      have hzA := SVal.saveM_all p (hall y (List.mem_of_getElem? hy)) hn hk hl hz
+      have hzA := SVal.saveM_all p (hall y (List.mem_of_getElem? hy)) hn hl hz
       have hlen : i.1.toNat < (e.toList ++ sh.toList).length := (List.getElem?_eq_some_iff.mp hy).1
       have hset : ∀ w ∈ (e.toList ++ sh.toList).set i.1.toNat z, w.All P := by
         intro w hw
@@ -673,7 +631,7 @@ theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new
         SVec.all_ofList.mpr fun w hw => hset w (List.mem_of_mem_take hw),
         SList.all_ofList.mpr fun w hw => hset w (List.mem_of_mem_drop hw)⟩
     · exact nomatch h
-  | _, _, .fixed e, .atF i p, new, x', hx, hn, hk, hl, h => by
+  | _, _, .fixed e, .atF i p, new, x', hx, hn, hl, h => by
     simp only [SVal.saveM] at h
     split at h
     · rename_i y hy
@@ -681,37 +639,35 @@ theorem SVal.saveM_all : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new
       obtain ⟨z, hz, rfl⟩ := h
       simp only [SVal.All] at hx ⊢
       simp only [SVal.Live] at hl
-      simp only [Path.Keys] at hk
       have hzA := SVal.saveM_all p
-        (SVec.all_iff.mp hx.2 y (List.mem_of_getElem? hy)) hn hk (hl y hy) hz
+        (SVec.all_iff.mp hx.2 y (List.mem_of_getElem? hy)) hn (hl y hy) hz
       refine ⟨hx.1, SVec.all_iff.mpr fun w hw => ?_⟩
       rw [SVec.toList_set] at hw
       rcases List.mem_or_eq_of_mem_set hw with hw | hw
       · exact SVec.all_iff.mp hx.2 w hw
       · exact hw ▸ hzA
     · exact nomatch h
-  | _, _, .map m d, .key k p, new, x', hx, hn, hk, hl, h => by
+  | _, _, .map m d, .key k p, new, x', hx, hn, hl, h => by
     simp only [SVal.All] at hx
     simp only [SVal.Live] at hl
-    simp only [Path.Keys] at hk
     simp only [SVal.saveM] at h
     split at h
     · rename_i y hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨z, hz, rfl⟩ := h
       have hzA := SVal.saveM_all p
-        (SMap.all_iff.mp hx.2.1 (k, y) (lookupBy_eq_some_mem hy)) hn hk.2 (by simpa only [hy] using hl) hz
+        (SMap.all_iff.mp hx.2.1 (k, y) (lookupBy_eq_some_mem hy)) hn (by simpa only [hy] using hl) hz
       simp only [SVal.All]
-      refine ⟨hmap m d k z hk.1 hzA hx.1, SMap.all_ofList.mpr fun e he => ?_, hx.2.2⟩
+      refine ⟨hmap m d k z hzA hx.1, SMap.all_ofList.mpr fun e he => ?_, hx.2.2⟩
       rcases mem_setBy he with he | he
       · rw [he]; exact hzA
       · exact SMap.all_iff.mp hx.2.1 e he
     · rename_i hy
       simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
       obtain ⟨z, hz, rfl⟩ := h
-      have hzA := SVal.saveM_all p hx.2.2 hn hk.2 (by simpa only [hy] using hl) hz
+      have hzA := SVal.saveM_all p hx.2.2 hn (by simpa only [hy] using hl) hz
       simp only [SVal.All]
-      refine ⟨hmap m d k z hk.1 hzA hx.1, SMap.all_ofList.mpr fun e he => ?_, hx.2.2⟩
+      refine ⟨hmap m d k z hzA hx.1, SMap.all_ofList.mpr fun e he => ?_, hx.2.2⟩
       rcases mem_setBy he with he | he
       · rw [he]; exact hzA
       · exact SMap.all_iff.mp hx.2.1 e he

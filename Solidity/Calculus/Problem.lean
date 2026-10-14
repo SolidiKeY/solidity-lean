@@ -26,9 +26,9 @@ well-formed heap; here the storage is a typed storage of the interpreter,
 its roots at their types, its words in range.  `wt(storage)` (`Fml.wt`)
 assumes most of what Solidity guarantees of a deployed contract's storage:
 every root canonical and tight, which is exactly reachable
-(`shape_iff_reachable`, for every key and slot in range), and every mapping
-key in its key type's range (`Storage.wtB`, `wt_iff_reachable`; the term
-runs that test, `Semantics/StorageWt.lean`).  Reachable is by
+(`shape_iff_reachable`, for every slot in range; `Storage.wtB`,
+`wt_iff_reachable`; the term runs that test, `Semantics/StorageWt.lean`).
+A mapping's keys are values of its key type, so in range by their type.  Reachable is by
 the typed interpreter (`Reachable`).
 It does not bound a dynamic array's length, which solc keeps at most
 `2^64` (`push` panics, 0x41, on an array already that long), and the
@@ -103,19 +103,17 @@ theorem shape_iff_reachable (hnd : nodupKeysB C.vars = true)
   rw [Storage.shapeB_iff, reachable_iff hnd hdeep hf]
 
 /-- **`wt` is reachability**: a storage whose keys and slots are in range is
-well-formed exactly when a program reaches it.  Its words are in range by
-their types; its keys, by `Fits`. -/
+well-formed exactly when a program reaches it.  Its words and keys are in
+range by their types. -/
 theorem wt_iff_reachable (hnd : nodupKeysB C.vars = true)
     (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C} (hf : st.Fits) :
     st.wtB = true ↔ Reachable C st := by
-  rw [Storage.wtB, Storage.keysB_of_fits hf, Bool.and_true, shape_iff_reachable hnd hdeep hf]
+  rw [Storage.wtB, shape_iff_reachable hnd hdeep hf]
 
-/-- A reachable storage is well-formed: its keys are in range
-(`reachable_bnd`). -/
+/-- A reachable storage is well-formed. -/
 theorem wt_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
     (h : Reachable C st) : st.wtB = true := by
-  rw [Storage.wtB, shape_of_reachable hdeep h, Storage.keysB_of_bnd (reachable_bnd h)]
-  rfl
+  rw [Storage.wtB, shape_of_reachable hdeep h]
 
 /-- The contract's initial storage is well-formed (the empty program reaches
 it), so the premise is satisfiable. -/
