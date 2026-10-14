@@ -254,34 +254,37 @@ def Tm.litW? {u : Srt} : Tm C Γ u → Option ((p : PrimTy) × p.Denote)
   | .app0 o => o.litW?
   | _ => none
 
-/-- An index literal, as the integer it is hashed as. -/
-def Tm.litInt? {u : Srt} (t : Tm C Γ u) : Option Int :=
-  t.litW?.map fun w => PrimTy.key w.2
-
 /-- A root's segment. -/
 def Op0.shapeLeaf? {s : Srt} : Op0 C s → Option (List SegT)
-  | .root r _ => some [.field r]
-  | .member _ f _ => some [.field f]
+  | .root r _ => some [.root r]
+  | .member _ f _ => some [.root f]
   | _ => none
+
+/-- An index's shape, by how the reference is indexed: a mapping's key, an
+array's index, at the literal it is (`some`) or not. -/
+def IndexTy.segT {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (w : Option ((K : PrimTy) × K.Denote)) : SegT :=
+  @IndexTy.casesOn (fun _ _ _ _ => SegT) R k V it (fun {_} {_} => .key w)
+    (fun {_} {_} _ => .idx w)
 
 /-- A member or an element after a path's shape. -/
 def Op1.shapeStep {a s : Srt} : Op1 C a s → Option (List SegT) → Option (List SegT)
   | .field (f := f) _, ih => ih.map (· ++ [.field f])
   | .fieldIn (f := f) _, ih => ih.map (· ++ [.field f])
-  | .next, ih => ih.map (· ++ [.at none])
+  | .next, ih => ih.map (· ++ [.idx none])
   | _, _ => none
 
 /-- An element after a path's shape, at a literal index or not. -/
 def Op2.shapeStep {a b s : Srt} : Op2 C a b s → Tm C Γ b → Option (List SegT) →
     Option (List SegT) → Option (List SegT)
-  | .at _, i, ihx, _ => ihx.map (· ++ [.at i.litInt?])
-  | .nextIn, _, _, ihy => ihy.map (· ++ [.at none])
+  | .at it, i, ihx, _ => ihx.map (· ++ [it.segT i.litW?])
+  | .nextIn, _, _, ihy => ihy.map (· ++ [.idx none])
   | _, _, _, _ => none
 
 /-- A checked element after a path's shape. -/
 def Op3.shapeStep {a b c s : Srt} : Op3 C a b c s → Tm C Γ c → Option (List SegT) →
     Option (List SegT)
-  | .atIn _, i, ihy => ihy.map (· ++ [.at i.litInt?])
+  | .atIn it, i, ihy => ihy.map (· ++ [it.segT i.litW?])
   | _, _, _ => none
 
 /-- A path's shape, read off its syntax: `none` through an alias.  Generic
@@ -302,7 +305,7 @@ def Tm.diverges {T U : Ty} (p : Tm C Γ (.path T)) (q : Tm C Γ (.path U)) : Boo
 /-- `q` leaves `p.length`. -/
 def Tm.divergesLen {T U : Ty} (q : Tm C Γ (.path T)) (p : Tm C Γ (.path U)) : Bool :=
   match q.shape?, p.shape? with
-  | some a, some b => SegT.diverges a (b ++ [.field "length"])
+  | some a, some b => SegT.diverges a (b ++ [.len])
   | _, _ => false
 
 /-- A member or an element, its path's checks erased. -/
@@ -546,12 +549,12 @@ another is it followed by a path. -/
 
 /-- A storage reference's segments: the state variable, then its path. -/
 def RefSegments.labels {C : Contract} {T : Ty} (r : RefSegments C T) : List Selector :=
-  .field r.root :: r.tail.labels
+  .root r.root :: r.tail.labels
 
 def SRef.labels {C : Contract} {T : Ty} (r : SRef C T) : List Selector := r.segments.labels
 
 theorem SRef.labels_eq {C : Contract} {T : Ty} (r : SRef C T) :
-    r.labels = .field r.root :: r.path.labels := by
+    r.labels = .root r.root :: r.path.labels := by
   unfold SRef.labels SRef.segments RefSegments.labels Path.labels
   rfl
 
@@ -651,18 +654,22 @@ theorem Tm.litW?_denote {p : PrimTy} {t : Tm C Γ (.val p)} {w : (p : PrimTy) ×
     | _ => cases h
   | _ => cases h
 
-/-- An index literal reads its integer in the Theory. -/
-theorem Tm.litInt?_denote {k : PrimTy} {t : Tm C Γ (.val k)} {i : Int}
-    (h : t.litInt? = some i) : PrimTy.key ((t.denote σ).getD (PrimTy.dflt _)) = i := by
-  obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.1 h
-  obtain ⟨e, hd⟩ := Tm.litW?_denote σ hw
-  obtain ⟨P, w⟩ := w
-  dsimp only at e
-  subst e
-  rw [hd, Option.getD_some]
-
 theorem Path.labels_index' {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (i : k.Denote) :
-    (Path.index it i).labels = [.at (PrimTy.key i)] := Path.labels_index it i
+    (Path.index it i).labels = [it.label i] := Path.labels_index it i
+
+/-- An index's shape fits its label in every state. -/
+theorem IndexTy.segT_fits {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (y : Tm C Γ (.val k)) :
+    (it.segT y.litW?).fits (it.label ((y.denote σ).getD (PrimTy.dflt _))) = true := by
+  cases hw : y.litW? with
+  | none => cases it <;> rfl
+  | some w =>
+    obtain ⟨e, hd⟩ := Tm.litW?_denote σ hw
+    obtain ⟨P, w⟩ := w
+    dsimp only at e
+    subst e
+    rw [hd, Option.getD_some]
+    cases it <;> simp only [IndexTy.segT, IndexTy.label, SegT.fits, beq_self_eq_true]
 
 /-- A path has its shape in every state; generic in the sort, a path's
 segments read by `Srt.labels`. -/
@@ -711,11 +718,7 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
       show SegT.matches _ (SLoc.labels (ObsLoc.app (x.denote σ) _)) = true
       rw [SLoc.labels_app, Path.labels_index']
       refine SegT.matches_append _ _ _ _ (ihx ha) ?_
-      cases hi : Tm.litInt? y with
-      | none => rfl
-      | some k =>
-        have hk := Tm.litInt?_denote σ hi
-        simp only [hk, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
+      simp only [SegT.matches, IndexTy.segT_fits σ it y, Bool.and_self]
     | nextIn =>
       obtain ⟨a', ha, rfl⟩ := Option.map_eq_some_iff.1 h
       show SegT.matches _ (SLoc.labels (ObsLoc.app (y.denote σ) _)) = true
@@ -731,11 +734,7 @@ theorem Tm.shape?_matches' {u : Srt} (p : Tm C Γ u) :
       show SegT.matches _ (SLoc.labels (ObsLoc.app (y.denote σ) _)) = true
       rw [SLoc.labels_app, Path.labels_index']
       refine SegT.matches_append _ _ _ _ (ihy ha) ?_
-      cases hi : Tm.litInt? z with
-      | none => rfl
-      | some k =>
-        have hk := Tm.litInt?_denote σ hi
-        simp only [hk, SegT.matches, SegT.fits, beq_self_eq_true, Bool.and_self]
+      simp only [SegT.matches, IndexTy.segT_fits σ it z, Bool.and_self]
     | _ => cases h
   | _ => intro a h; cases h
 

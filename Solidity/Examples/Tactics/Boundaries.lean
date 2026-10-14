@@ -43,7 +43,7 @@ example : True := by
   trivial
 
 /-- A path's comparison observation comes from its typed segments. -/
-example : (Path.at (E := .prim .uint) ⟨3, rfl⟩ .nil).segments.labels = [.at 3] := rfl
+example : (Path.at (E := .prim .uint) ⟨3, rfl⟩ .nil).segments.labels = [.idx ⟨3, rfl⟩] := rfl
 
 /-- An index is a `uint`: a negative one cannot be written. -/
 example : True := by

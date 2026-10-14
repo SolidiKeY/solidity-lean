@@ -8037,15 +8037,21 @@ left untyped") after the typed-boundary follow-up.  Each step is one commit.
   `Op1.unop`, `Op2.binop`); an operator at a type it does not take is
   refuted (`absurd`), so `none` is a revert only.
 
-**Validation (W11.7, again at W11.8):** the default build (274 jobs), every
+- **W11.9, selector labels.** `Selector` is `root | field | idx (i : uint) |
+  key ⟨K, k⟩ | len`: a root and a field are told apart, an array index is a
+  `uint`, a mapping key keeps its type (`Seg.label`, `IndexTy.label`). The
+  closer's shapes follow (`SegT`: `root | field | idx | key | len`, a
+  literal at its type, `SegT.apart` by kind then by value,
+  `IndexTy.segT_fits`); memory paths read `uint` literals (`Tm.uintLit?`,
+  `AddrShape.index`, `Op2.freshStep`); `Tm.litInt?` is gone. The closer's
+  simp set compares typed keys (`CloseS.sigma_key_eq`).
+
+**Validation (W11.7, again at W11.8 and W11.9):** the default build (274 jobs), every
 `TestSuite/Derived*`, `Report`, `Suggestions` and every `Corpus/*` module,
 each through a one-import scratch module (not committed).
 
-**What is left, and why** (as of W11.7):
+**What is left, and why** (as of W11.9):
 
-- `Selector` labels and the closer's `SegT` shapes: the side conditions'
-  path comparison (`Theory.diverges`, `lengthSeg`), an observation computed
-  from typed segments; its typed form is the next wave.
 - Memory identities in the term signature are `Nat` (`Srt.Den (.ident _)`,
   `MvT`, `MAddrT`), read through `HRef.ofId?`: a formula's memory terms grow
   heaps apart from the state's, so an identity can name an object another

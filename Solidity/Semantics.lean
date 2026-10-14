@@ -39,13 +39,32 @@ instance reprDenote : (p : PrimTy) → Repr p.Denote
 
 end PrimTy
 
+/-- Typed values of any primitive type compare. -/
+instance PrimTy.decEqSigma : DecidableEq ((K : PrimTy) × K.Denote) := fun a b =>
+  match a, b with
+  | ⟨K, x⟩, ⟨K', y⟩ =>
+    if h : K = K' then by
+      subst h
+      exact if hx : x = y then isTrue (hx ▸ rfl)
+        else isFalse fun e => hx (eq_of_heq (Sigma.mk.inj e).2)
+    else isFalse fun e => h (Sigma.mk.inj e).1
+
+instance PrimTy.reprSigma : Repr ((K : PrimTy) × K.Denote) where
+  reprPrec v _ := repr v.1 ++ " " ++ (PrimTy.reprDenote v.1).reprPrec v.2 0
+
 namespace Semantics
 
-/-- A selector label for comparison and schema analysis. A label carries no
-storage access operation; `Seg` is the typed segment that projects it. -/
+/-- A selector label for comparison and schema analysis, each at its type:
+a state variable (`root`), a struct member (`field`), an array's `uint`
+index (`idx`), a mapping's key of its key type (`key`), an array's length
+(`len`, KeY's `size`).  A label carries no storage access operation; `Seg`
+is the typed segment that projects it. -/
 inductive Selector where
+  | root (name : Name)
   | field (name : Name)
-  | at (i : Int)
+  | idx (i : PrimTy.uint.Denote)
+  | key (k : (K : PrimTy) × K.Denote)
+  | len
   deriving Repr, DecidableEq
 
 /-- An ABI word: 256 bits, read as a `uint256`. -/

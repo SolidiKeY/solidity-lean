@@ -41,20 +41,48 @@ section
 open Semantics Theory
 variable {C : Contract}
 
-/-- The shape of a path's segment: a member, or an element at a literal
-index (`some k`) or at an index the syntax does not decide (`none`: a
-local, a length, the slot past the end). -/
+/-- The shape of a path's segment: a state variable, a member, an array's
+index or a mapping's key at a literal (`some`, at its type) or at a term the
+syntax does not decide (`none`: a local, a length, the slot past the end),
+or an array's length. -/
 inductive SegT where
+  | root (r : Name)
   | field (f : Name)
-  | at (k : Option Int)
+  | idx (w : Option ((K : PrimTy) × K.Denote))
+  | key (w : Option ((K : PrimTy) × K.Denote))
+  | len
   deriving DecidableEq, Repr
+
+/-- The kind of a shape: which label it can fit. -/
+def SegT.kind : SegT → Nat
+  | .root _ => 0
+  | .field _ => 1
+  | .idx _ => 2
+  | .key _ => 3
+  | .len => 4
+
+/-- The kind of a label. -/
+def _root_.Solidity.Semantics.Selector.kind : Selector → Nat
+  | .root _ => 0
+  | .field _ => 1
+  | .idx _ => 2
+  | .key _ => 3
+  | .len => 4
 
 /-- The segment has the shape. -/
 def SegT.fits : SegT → Selector → Bool
+  | .root r, .root s => r == s
   | .field f, .field g => f == g
-  | .at (some k), .at i => k == i
-  | .at none, .at _ => true
+  | .idx (some w), .idx j => w == ⟨.uint, j⟩
+  | .idx none, .idx _ => true
+  | .key (some w), .key k => w == k
+  | .key none, .key _ => true
+  | .len, .len => true
   | _, _ => false
+
+theorem SegT.fits_kind {x : SegT} {s : Selector} (h : x.fits s = true) : x.kind = s.kind := by
+  rcases x with _ | _ | (_ | _) | (_ | _) | _ <;> cases s <;>
+    first | rfl | simp only [SegT.fits, Bool.false_eq_true] at h
 
 /-- The path has the shape, segment by segment. -/
 def SegT.matches : List SegT → List Selector → Bool
@@ -63,16 +91,18 @@ def SegT.matches : List SegT → List Selector → Bool
   | _, _ => false
 
 /-- Whether two shapes tell their segments apart: `some true` when the
-segments differ in every state (a member against an element, two members
-or two literal indices by name or value), `some false` when they are one
-segment in every state, `none` when a symbolic index decides nothing. -/
-def SegT.apart : SegT → SegT → Option Bool
+segments differ in every state (two kinds of segment, two names or two
+literal keys), `some false` when they are one segment in every state, `none`
+when a symbolic index decides nothing. -/
+def SegT.apart (x y : SegT) : Option Bool :=
+  if x.kind ≠ y.kind then some true else
+  match x, y with
+  | .root r, .root s => some (r != s)
   | .field f, .field g => some (f != g)
-  | .field _, .at _ => some true
-  | .at _, .field _ => some true
-  | .at (some i), .at (some j) => some (i != j)
-  | .at none, .at _ => none
-  | .at (some _), .at none => none
+  | .idx (some v), .idx (some w) => some (v != w)
+  | .key (some v), .key (some w) => some (v != w)
+  | .len, .len => some false
+  | _, _ => none
 
 /-- The two shapes leave each other: at some position both have a segment
 and the segments differ, the ones before being the same — the syntactic
@@ -95,30 +125,17 @@ theorem SegT.matches_append : (a b : List SegT) → (p q : List Selector) → Se
   | [], _, _ :: _, _, ha, _ | _ :: _, _, [], _, ha, _ => nomatch ha
 
 /-- `apart` decides the segments as it says. -/
-theorem SegT.apart_sound : {x y : SegT} → {d : Bool} → {s t : Selector} → x.apart y = some d →
-    x.fits s = true → y.fits t = true → (d = true → s ≠ t) ∧ (d = false → s = t)
-  | .field _, .field _, _, .field _, .field _, h, hs, ht => by
-    simp only [SegT.fits, beq_iff_eq] at hs ht
-    simp only [SegT.apart, Option.some.injEq] at h
-    subst hs ht h
-    exact ⟨fun hne e => (bne_iff_ne.1 hne) (Selector.field.inj e),
-      fun he => by rw [bne_eq_false_iff_eq.1 he]⟩
-  | .at (some _), .at (some _), _, .at _, .at _, h, hs, ht => by
-    simp only [SegT.fits, beq_iff_eq] at hs ht
-    simp only [SegT.apart, Option.some.injEq] at h
-    subst hs ht h
-    exact ⟨fun hne e => (bne_iff_ne.1 hne) (Selector.at.inj e),
-      fun he => by rw [bne_eq_false_iff_eq.1 he]⟩
-  | .field _, .at _, _, .field _, .at _, h, _, _ | .at _, .field _, _, .at _, .field _, h, _, _ => by
-    simp only [SegT.apart, Option.some.injEq] at h
+theorem SegT.apart_sound {x y : SegT} {d : Bool} {s t : Selector} (h : x.apart y = some d)
+    (hs : x.fits s = true) (ht : y.fits t = true) : (d = true → s ≠ t) ∧ (d = false → s = t) := by
+  unfold SegT.apart at h
+  split at h
+  · rename_i hk
+    simp only [Option.some.injEq] at h
     subst h
-    exact ⟨fun _ e => Selector.noConfusion e, fun h => nomatch h⟩
-  | .at none, .at _, _, _, _, h, _, _ | .at (some _), .at none, _, _, _, h, _, _ => by
-    simp only [SegT.apart, reduceCtorEq] at h
-  | .field _, _, _, .at _, _, _, hs, _ | .at _, _, _, .field _, _, _, hs, _ => by
-    simp only [SegT.fits, Bool.false_eq_true] at hs
-  | _, .field _, _, _, .at _, _, _, ht | _, .at _, _, _, .field _, _, _, ht => by
-    simp only [SegT.fits, Bool.false_eq_true] at ht
+    refine ⟨fun _ e => hk ?_, fun h => nomatch h⟩
+    rw [SegT.fits_kind hs, SegT.fits_kind ht, e]
+  · split at h <;> simp only [Option.some.injEq, reduceCtorEq] at h <;> subst h <;>
+      cases s <;> cases t <;> simp_all [SegT.fits]
 
 /-- Shapes that diverge have paths that diverge. -/
 theorem SegT.diverges_sound : (a b : List SegT) → (p q : List Selector) → SegT.diverges a b = true →

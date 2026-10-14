@@ -46,8 +46,8 @@ ledger has bounded address keys and unbounded KeY `int` amounts (`Ledger`),
 and the EVM store holds `Fin (2^256)` words (`Evm.WordStore`). External
 responses are ABI words (`ExtResult`, `Word`), decoded at the locals' types
 (`PrimTy.ofWord?`), and tool input/output are typed values (`CallValue`):
-there is no untyped value (W11). Selector labels are observations for
-comparison and schema analysis.
+there is no untyped value (W11). Selector labels, the paths' comparison
+observations, carry `uint` indices and typed keys (W11.9).
 
 
 **Updates are terms** (`Signature.lean`: KeY's sorts indexed by Solidity

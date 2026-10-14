@@ -35,7 +35,7 @@ open Semantics
 fixed array's element in range. -/
 def Ty.at : Ty → Selector → Option Ty
   | .ref (.struct sn), .field f => lookupBy f (structDef sn)
-  | .ref (.fixed E n), .at k => if 0 ≤ k ∧ k < n then some E else none
+  | .ref (.fixed E n), .idx k => if k.1.toNat < n then some E else none
   | _, _ => none
 
 /-- The declared type at the end of a path, member by member. -/

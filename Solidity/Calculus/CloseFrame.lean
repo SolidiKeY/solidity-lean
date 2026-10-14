@@ -60,7 +60,7 @@ theorem checkIndex_save_frame {k : PrimTy} {V : Ty} {T : Ty} {R' : RefTy}
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
     simp only [SRef.labels, List.cons_append, List.cons.injEq,
-      Semantics.Selector.field.injEq] at he
+      Semantics.Selector.root.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
@@ -235,7 +235,7 @@ theorem append_append {T U W : Ty} (r : SRef C T) (p : Path T U) (q : Path U W) 
   simp only [SRef.append, Path.append_assoc]
 theorem root_append {T U : Ty} (r : SRef C T) (p : Path T U) : (r.append p).root = r.root := rfl
 theorem labels_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
-    (SRef.ofRoot r h).labels = [.field r] := by
+    (SRef.ofRoot r h).labels = [.root r] := by
   simp only [SRef.labels, SRef.ofRoot, Path.labels]
 theorem labels_append {T U : Ty} (r : SRef C T) (p : Path T U) :
     (r.append p).labels = r.labels ++ p.labels := by
@@ -253,6 +253,10 @@ theorem diverges_cons (a b : Semantics.Selector) (p q : List Semantics.Selector)
   by_cases h : a = b
   · subst h; simp only [if_true, not_true_eq_false, or_self, false_or]
   · simp only [h, if_false, not_false_eq_true, true_or]
+/-- Two keys at one type are equal when their values are. -/
+theorem sigma_key_eq {p : PrimTy} (a b : p.Denote) :
+    (⟨p, a⟩ : (K : PrimTy) × K.Denote) = ⟨p, b⟩ ↔ a = b := by
+  simp only [Sigma.mk.injEq, heq_eq_eq, true_and]
 theorem key_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
     PrimTy.key (p := .uint) ⟨n, h⟩ = n := rfl
 theorem key_int (n : Int) (h : PrimTy.int.inRange n = true) :
@@ -640,7 +644,8 @@ attribute [close_rw_s]
   CloseS.exists_val_eq_int
   CloseS.wp_box_find SVal.find_overlay_field SVal.overlay_prim' SVal.find_nil Function.comp_def
   Path.index_map Path.index_dyn Path.index_fixed Path.append_nil Path.append_field Path.append_at
-  Path.append_atF Path.append_key Path.labels Semantics.Selector.field.injEq Semantics.Selector.at.injEq
+  Path.append_atF Path.append_key Path.labels Semantics.Selector.root.injEq Semantics.Selector.field.injEq Semantics.Selector.idx.injEq
+  Semantics.Selector.key.injEq CloseS.sigma_key_eq Subtype.mk.injEq
   List.cons_append List.nil_append
 
 end Solidity

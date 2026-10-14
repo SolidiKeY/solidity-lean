@@ -138,27 +138,25 @@ theorem split_of_labels {T U W : Ty} (p : Path T U) (q : Path T W) {s : List Sem
     cases q with
     | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | «at» j q =>
-      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
-      obtain ⟨hij, h⟩ := h
-      obtain rfl : i = j := Subtype.ext hij.symm
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.idx.injEq] at h
+      obtain ⟨rfl, h⟩ := h
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_at _ p r).symm, hr⟩
   | @atF E U₁ n i p ih =>
     cases q with
     | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | atF j q =>
-      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
-      obtain ⟨hij, h⟩ := h
-      obtain rfl : i = j := Subtype.ext hij.symm
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.idx.injEq] at h
+      obtain ⟨rfl, h⟩ := h
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_atF _ p r).symm, hr⟩
   | @key K V U₁ k p ih =>
     cases q with
     | nil => simp only [Path.labels, List.cons_append, reduceCtorEq] at h
     | key k' q =>
-      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.at.injEq] at h
+      simp only [Path.labels, List.cons_append, List.cons.injEq, Semantics.Selector.key.injEq] at h
       obtain ⟨hk, h⟩ := h
-      obtain rfl := PrimTy.key_inj hk
+      obtain rfl : k' = k := eq_of_heq (Sigma.mk.inj hk).2
       obtain ⟨r, rfl, hr⟩ := ih q h
       exact ⟨r, (Path.append_key _ p r).symm, hr⟩
 

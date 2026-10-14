@@ -16,7 +16,7 @@ namespace Theory
 open Semantics
 
 /-- The segment a length is read at. -/
-abbrev lengthSeg : Selector := .field "length"
+abbrev lengthSeg : Selector := .len
 
 /-- The read path leaves the written one: they agree up to some point and
 then differ.  Neither a prefix nor an extension diverges — `[]` is a prefix

@@ -720,9 +720,9 @@ inductive Semantics.Segs : Ty → Ty → Type where
 be followed to read or write storage. -/
 def Semantics.Seg.label : {T U : Ty} → Seg T U → Selector
   | _, _, @Seg.field _ f _ _ => .field f
-  | _, _, .at i => .at i.1
-  | _, _, .atF i => .at i.1
-  | _, _, .key k => .at (PrimTy.key k)
+  | _, _, .at i => .idx i
+  | _, _, .atF i => .idx i
+  | _, _, @Seg.key K _ k => .key ⟨K, k⟩
 
 /-- The comparison observations of a typed segment sequence. -/
 def Semantics.Segs.labelsM : {T U : Ty} → Semantics.Segs T U → List Semantics.Selector
@@ -773,11 +773,11 @@ theorem labels_nil {T : Ty} : (Path.nil (T := T)).labels = [] := rfl
 theorem labels_field {s f : Name} {T U : Ty} (h : lookupBy f (structDef s) = some T)
     (p : Path T U) : (Path.field h p).labels = .field f :: p.labels := rfl
 theorem labels_at {E U : Ty} (i : PrimTy.uint.Denote) (p : Path E U) :
-    (Path.at i p).labels = .at i.1 :: p.labels := rfl
+    (Path.at i p).labels = .idx i :: p.labels := rfl
 theorem labels_atF {E U : Ty} {n : Nat} (i : PrimTy.uint.Denote) (p : Path E U) :
-    (Path.atF (n := n) i p).labels = .at i.1 :: p.labels := rfl
+    (Path.atF (n := n) i p).labels = .idx i :: p.labels := rfl
 theorem labels_key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) :
-    (Path.key (K := K) k p).labels = .at (PrimTy.key k) :: p.labels := rfl
+    (Path.key (K := K) k p).labels = .key ⟨K, k⟩ :: p.labels := rfl
 
 attribute [irreducible] labels
 attribute [eqns labels_nil labels_field labels_at labels_atF labels_key] labels
@@ -851,9 +851,15 @@ theorem index_fixed {E : Ty} {n : Nat} (i : PrimTy.uint.Denote) :
 attribute [irreducible] index
 attribute [eqns index_map index_dyn index_fixed] index
 
+/-- The label of an index: a mapping's key, an array's index. -/
+def _root_.Solidity.IndexTy.label {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (i : k.Denote) : Semantics.Selector :=
+  @IndexTy.casesOn (fun _ k _ _ => k.Denote → Semantics.Selector) R k V it
+    (fun {k} {_} i => .key ⟨k, i⟩) (fun {_} {_} _ i => .idx i) i
+
 theorem labels_index : {R : RefTy} → {k : PrimTy} → {V : Ty} → (it : IndexTy R k V) →
-    (i : k.Denote) → (index it i).labels = [.at (PrimTy.key i)]
-  | _, _, _, .map, _ => by rw [index_map, labels_key, labels_nil]
+    (i : k.Denote) → (index it i).labels = [it.label i]
+  | _, _, _, .map, _ => by rw [index_map, labels_key, labels_nil]; rfl
   | _, _, _, .arr .dyn, _ => by rw [index_dyn, labels_at, labels_nil]; rfl
   | _, _, _, .arr .fixed, _ => by rw [index_fixed, labels_atF, labels_nil]; rfl
 

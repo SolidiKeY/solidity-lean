@@ -292,12 +292,11 @@ section Fresh
 variable {g : State C []} {ν : AEnv}
 
 /-- An index literal. -/
-def LTm.uintLit? (t : LTm C (.val .uint)) : Option Int := t.litV?.map (·.1)
+def LTm.uintLit? (t : LTm C (.val .uint)) : Option PrimTy.uint.Denote := t.litV?
 
-theorem LTm.uintLit?_eval {t : LTm C (.val .uint)} {k : Int} (h : t.uintLit? = some k) :
-    ∃ w, (t.eval g ν : Option PrimTy.uint.Denote) = some w ∧ w.1 = k := by
-  obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.1 h
-  exact ⟨w, LTm.eval_litV? g ν hw, rfl⟩
+theorem LTm.uintLit?_eval {t : LTm C (.val .uint)} {k : PrimTy.uint.Denote} (h : t.uintLit? = some k) :
+    (t.eval g ν : Option PrimTy.uint.Denote) = some k :=
+  LTm.eval_litV? g ν h
 
 /-- `M` is `addM(m, R)`. -/
 def LTm.isAddM (M m : LTm C .mem) (R : RefTy) : Bool :=
@@ -338,7 +337,7 @@ def _root_.Solidity.Op2.freshStepL (m : LTm C .mem) (R : RefTy) {a b s : Srt} :
     Op2 C a b s → LTm C a → LTm C b → Option (List Semantics.Selector) →
       Option (List Semantics.Selector) → Option (List Semantics.Selector)
   | .iread, x, _, _, ry => if x.isAddM m R then ry else none
-  | .mat _, _, y, rx, _ => y.uintLit?.bind fun k => rx.map (· ++ [Semantics.Selector.at k])
+  | .mat _, _, y, rx, _ => y.uintLit?.bind fun k => rx.map (· ++ [Semantics.Selector.idx k])
   | _, _, _, _, _ => none
 
 /-- `LTm.freshPath?`'s compiled twin. -/
@@ -424,16 +423,16 @@ theorem LTm.freshPath_eval {m : LTm C .mem} {R : RefTy} {hR : (Ty.ref R).mapFree
       simp only [LTm.freshPath?, Op2.freshStepL, Option.bind_eq_some_iff,
         Option.map_eq_some_iff] at h
       obtain ⟨k, hk, p', hp', rfl⟩ := h
-      obtain ⟨w, hw, hwk⟩ := LTm.uintLit?_eval (g := g) (ν := ν) hk
+      have hw := LTm.uintLit?_eval (g := g) (ν := ν) hk
       have he : (LTm.app2 (.mat a) x y).eval g ν =
-          (x.eval g ν : Option Nat).map fun id => MAddrT.index id a w := by
+          (x.eval g ν : Option Nat).map fun id => MAddrT.index id a k := by
         cases hx : (x.eval g ν : Option Nat) with
         | none => exact LTm.eval_app2_none _ x y hx
         | some id =>
           rw [LTm.eval_app2, Op2.eval_eq_evalM]
           simp only [Op2.evalM, hx, hw, Option.bind_eq_bind, Option.bind_some, Option.map_some]
-      rw [he, ← hwk]
-      exact Srt.FreshRead.index a w (ihx hp')
+      rw [he]
+      exact Srt.FreshRead.index a k (ihx hp')
     | _ => simp only [LTm.freshPath?, Op2.freshStepL, reduceCtorEq] at h
   | _ => intro p h; simp only [LTm.freshPath?, reduceCtorEq] at h
 
@@ -606,7 +605,7 @@ theorem LTm.identApart?_ne {R R' : RefTy} {t : LTm C (.ident R)} {t' : LTm C (.i
 /-- An address term's shape. -/
 inductive AddrShapeL (C : Contract) where
   | field (f : Name) (o : (R : RefTy) × LTm C (.ident R))
-  | index (i : (R : RefTy) × LTm C (.ident R)) (k : Option Int)
+  | index (i : (R : RefTy) × LTm C (.ident R)) (k : Option PrimTy.uint.Denote)
 
 /-- At a unary symbol. -/
 def _root_.Solidity.Op1.addrStepL {a u : Srt} : Op1 C a u → LTm C a → Option (AddrShapeL C)
@@ -644,7 +643,7 @@ def AddrShapeL.Reads (g : State C []) (ν : AEnv) {T : Ty} : AddrShapeL C → MA
   | .field f o, ad => ∃ (s : Name) (id : Nat) (h : lookupBy f (structDef s) = some T),
       ad = MAddrT.field id h ∧ (o.2.eval g ν : Option Nat) = some id
   | .index ⟨R, i⟩ k, ad => ∃ (id : Nat) (a : ArrTy R T) (j : PrimTy.uint.Denote),
-      (i.eval g ν : Option Nat) = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j.1 = k'
+      (i.eval g ν : Option Nat) = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j = k'
 
 theorem LTm.addrShape?_eval {T : Ty} {a : LTm C (.addr T)} {sh : AddrShapeL C}
     (h : a.addrShape? = some sh) {ad : MAddrT T} (ha : (a.eval g ν : Option (MAddrT T)) = some ad) :
@@ -667,10 +666,9 @@ theorem LTm.addrShape?_eval {T : Ty} {a : LTm C (.addr T)} {sh : AddrShapeL C}
     simp only [Option.bind_eq_some_iff, Option.some.injEq] at ha
     obtain ⟨id, hi, w, hw, rfl⟩ := ha
     refine ⟨id, arr, w, hi, rfl, fun k' hk => ?_⟩
-    obtain ⟨w', hw', hk'⟩ := LTm.uintLit?_eval (g := g) (ν := ν) hk
+    have hw' := LTm.uintLit?_eval (g := g) (ν := ν) hk
     rw [hw] at hw'
-    cases hw'
-    exact hk'
+    exact Option.some.inj hw'
   | _ => simp only [LTm.addrShape?, reduceCtorEq] at h
 
 /-- Two apart address terms resolve, in one heap typing, to apart
@@ -710,7 +708,7 @@ theorem LTm.apart?_resolve {T U : Ty} {a : LTm C (.addr T)} {b : LTm C (.addr U)
       split at hk
       · rename_i k₁ k₂
         have hk' : k₁ ≠ k₂ := by simpa only [bne_iff_ne, ne_eq] using hk
-        exact fun e => hk' ((hn k₁ rfl).symm.trans ((congrArg Subtype.val e).trans (hn' k₂ rfl)))
+        exact fun e => hk' ((hn k₁ rfl).symm.trans (e.trans (hn' k₂ rfl)))
       · cases hk
     · exact .inl (LTm.identApart?_ne h hi hi')
   · nomatch h

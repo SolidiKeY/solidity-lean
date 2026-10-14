@@ -470,7 +470,7 @@ theorem len_save_frame {U E : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal 
     rcases r with ⟨n, hr, p⟩
     rcases q with ⟨n', hq, p'⟩
     simp only [SRef.labels, List.cons_append, List.cons.injEq,
-      Semantics.Selector.field.injEq] at he
+      Semantics.Selector.root.injEq] at he
     obtain ⟨rfl, he⟩ := he
     rename_i T₁ T₂
     obtain rfl : T₁ = T₂ := Option.some.inj (hr.symm.trans hq)
@@ -1523,14 +1523,32 @@ variable {Γ : Ctx}
 index, literal or not. -/
 inductive AddrShape (C : Contract) (Γ : Ctx) where
   | field (f : Name)
-  | index (i : (R : RefTy) × Tm C Γ (.ident R)) (k : Option Int)
+  | index (i : (R : RefTy) × Tm C Γ (.ident R)) (k : Option PrimTy.uint.Denote)
 
 def Op1.addrStep {a u : Srt} : Op1 C a u → Option (AddrShape C Γ)
   | .mfield (f := f) _ => some (.field f)
   | _ => none
 
+/-- A `uint` literal term, its value. -/
+def Tm.uintLit? (y : Tm C Γ (.val .uint)) : Option PrimTy.uint.Denote :=
+  match y.litW? with
+  | some ⟨.uint, v⟩ => some v
+  | _ => none
+
+theorem Tm.uintLit?_eval {σ : State C Γ} {y : Tm C Γ (.val .uint)} {w : PrimTy.uint.Denote}
+    (h : y.uintLit? = some w) : y.eval σ = some w := by
+  cases y with
+  | app0 o =>
+    cases o with
+    | lit v' =>
+      simp only [Tm.uintLit?, Tm.litW?, Op0.litW?, Option.some.injEq] at h
+      subst h
+      rfl
+    | _ => simp only [Tm.uintLit?, Tm.litW?, Op0.litW?, reduceCtorEq] at h
+  | _ => simp only [Tm.uintLit?, Tm.litW?, reduceCtorEq] at h
+
 def Op2.addrStep {a b u : Srt} : Op2 C a b u → Tm C Γ a → Tm C Γ b → Option (AddrShape C Γ)
-  | .mat _, x, y => some (.index ⟨_, x⟩ y.litInt?)
+  | .mat _, x, y => some (.index ⟨_, x⟩ y.uintLit?)
   | _, _, _ => none
 
 /-- An address term's shape.  Generic in the sort. -/
@@ -1555,24 +1573,7 @@ def AddrShape.Reads (σ : State C Γ) {T : Ty} : AddrShape C Γ → MAddrT T →
   | .field f, ad => ∃ (s : Name) (id : Nat) (h : Semantics.lookupBy f (Semantics.structDef s) = some T),
       ad = MAddrT.field id h
   | .index ⟨R, i⟩ k, ad => ∃ (id : Nat) (E : Ty) (a : ArrTy R T) (j : PrimTy.uint.Denote),
-      i.eval σ = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j.1 = k'
-
-theorem Tm.litInt?_uint {σ : State C Γ} {y : Tm C Γ (.val .uint)} {k : Int} (h : y.litInt? = some k)
-    {w : PrimTy.uint.Denote} (hw : y.eval σ = some w) : w.1 = k := by
-  obtain ⟨⟨P, v⟩, hv, rfl⟩ := Option.map_eq_some_iff.1 h
-  cases y with
-  | app0 o =>
-    cases o with
-    | lit v' =>
-      simp only [Tm.litW?, Op0.litW?, Option.some.injEq, Sigma.mk.injEq] at hv
-      obtain ⟨rfl, hv⟩ := hv
-      cases hv
-      have : (Tm.app0 (Γ := Γ) (Op0.lit v')).eval σ = some v' := rfl
-      rw [this] at hw
-      cases hw
-      rfl
-    | _ => simp only [Tm.litW?, Op0.litW?, reduceCtorEq] at hv
-  | _ => simp only [Tm.litW?, reduceCtorEq] at hv
+      i.eval σ = some id ∧ ad = MAddrT.index id a j ∧ ∀ k', k = some k' → j = k'
 
 theorem Tm.addrShape?_eval (σ : State C Γ) {T : Ty} {a : Tm C Γ (.addr T)} {sh : AddrShape C Γ}
     (h : a.addrShape? = some sh) {ad : MAddrT T} (ha : a.eval σ = some ad) : sh.Reads σ ad := by
@@ -1592,7 +1593,7 @@ theorem Tm.addrShape?_eval (σ : State C Γ) {T : Ty} {a : Tm C Γ (.addr T)} {s
       some ad := ha
     simp only [Option.bind_eq_some_iff, Option.some.injEq] at ha
     obtain ⟨id, hi, w, hw, rfl⟩ := ha
-    exact ⟨id, T, arr, w, hi, rfl, fun k' hk => Tm.litInt?_uint hk hw⟩
+    exact ⟨id, T, arr, w, hi, rfl, fun k' hk => Option.some.inj (hw.symm.trans (Tm.uintLit?_eval hk))⟩
   | _ => simp only [Tm.addrShape?, reduceCtorEq] at h
 
 /-- Two apart address terms resolve, in one heap typing, to apart
@@ -1638,7 +1639,7 @@ theorem Tm.apart?_resolve (σ : State C Γ) {T U : Ty} {a : Tm C Γ (.addr T)} {
     obtain ⟨r, -, rfl⟩ := hra
     obtain ⟨r', -, rfl⟩ := hrb
     intro _ e
-    exact hk ((hn k rfl).symm.trans ((congrArg Subtype.val e).trans (hn' k' rfl)))
+    exact hk ((hn k rfl).symm.trans (e.trans (hn' k' rfl)))
   · nomatch h
 
 end MemEval
@@ -1900,7 +1901,7 @@ def Op2.freshStep (m : Tm C Γ .mem) (R : RefTy) {a b s : Srt} :
     Op2 C a b s → Tm C Γ a → Tm C Γ b → Option (List Semantics.Selector) →
       Option (List Semantics.Selector) → Option (List Semantics.Selector)
   | .iread, x, _, _, ry => if x.isAddM m R then ry else none
-  | .mat _, _, y, rx, _ => y.litInt?.bind fun k => rx.map (· ++ [Semantics.Selector.at k])
+  | .mat _, _, y, rx, _ => y.uintLit?.bind fun k => rx.map (· ++ [Semantics.Selector.idx k])
   | _, _, _, _, _ => none
 
 /-- The path at which a term reads below the root `addM(m, R)` allocates.
@@ -1909,16 +1910,6 @@ def Tm.freshPath? (m : Tm C Γ .mem) (R : RefTy) : {u : Srt} → Tm C Γ u → O
   | _, .app1 o x => o.freshStep m R x (Tm.freshPath? m R x)
   | _, .app2 o x y => o.freshStep m R x y (Tm.freshPath? m R x) (Tm.freshPath? m R y)
   | _, _ => none
-
-theorem Tm.litInt?_some {σ : State C Γ} {y : Tm C Γ (.val .uint)} {k : Int} (h : y.litInt? = some k) :
-    ∃ w, y.eval σ = some w := by
-  obtain ⟨⟨P, v⟩, hv, -⟩ := Option.map_eq_some_iff.1 h
-  cases y with
-  | app0 o =>
-    cases o with
-    | lit v' => exact ⟨v', rfl⟩
-    | _ => simp only [Tm.litW?, Op0.litW?, reduceCtorEq] at hv
-  | _ => simp only [Tm.litW?, reduceCtorEq] at hv
 
 /-- What a term at a fresh path `p` below the root of `addM(m, R)` reads, by
 sort, in the heap `hp₁` the allocation leaves: an identity is of an object
@@ -1978,7 +1969,7 @@ theorem field {p : List Semantics.Selector} {s f : Name} {T : Ty}
 theorem index {p : List Semantics.Selector} {R' : RefTy} {E : Ty} (a : ArrTy R' E)
     (k : PrimTy.uint.Denote)
     {x : Option Nat} (hx : Srt.FreshRead (C := C) (H := H) hp₁ R p (.ident R') x) :
-    Srt.FreshRead (C := C) (H := H) hp₁ R (p ++ [.at k.1]) (.addr E)
+    Srt.FreshRead (C := C) (H := H) hp₁ R (p ++ [.idx k]) (.addr E)
       (x.map fun id => MAddrT.index id a k) := by
   obtain ⟨ih1, ih2⟩ := hx
   have hres : ∀ r : HRef H₁ R',
@@ -2015,7 +2006,7 @@ theorem index {p : List Semantics.Selector} {R' : RefTy} {E : Ty} (a : ArrTy R' 
           exact (hp₁.get r : {l : List (MVal H₁ E) // l.length = n}).2
         have hlt : k.1.toNat < (MObj.elems .fixed (hp₁.get r)).length := by omega
         refine ⟨hT'.symm, _, _, (MObj.elems .fixed (hp₁.get r))[k.1.toNat], by rw [hid]; rfl, hres r, ?_⟩
-        simp only [Heap.readAddr, Heap.index, hk.1, if_true, List.getElem?_eq_getElem hlt]
+        simp only [Heap.readAddr, Heap.index, hk, if_true, List.getElem?_eq_getElem hlt]
       · simp only [Option.bind_none, reduceCtorEq] at hT'
 
 /-- An identity read out of the fresh memory at an address of the path. -/
@@ -2098,16 +2089,15 @@ theorem Tm.freshPath_eval {σ : State C Γ} {m : Tm C Γ .mem} {R : RefTy}
       simp only [Tm.freshPath?, Op2.freshStep, Option.bind_eq_some_iff,
         Option.map_eq_some_iff] at h
       obtain ⟨k, hk, p', hp', rfl⟩ := h
-      obtain ⟨w, hw⟩ := Tm.litInt?_some (σ := σ) hk
-      have hwk : w.1 = k := Tm.litInt?_uint hk hw
-      have he : (Tm.app2 (.mat a) x y).eval σ = (x.eval σ).map fun id => MAddrT.index id a w := by
+      have hw := Tm.uintLit?_eval (σ := σ) hk
+      have he : (Tm.app2 (.mat a) x y).eval σ = (x.eval σ).map fun id => MAddrT.index id a k := by
         cases hx : x.eval σ with
         | none => exact Tm.eval_app2_none _ x y hx
         | some id =>
           simp only [Tm.eval_app2, Op2.eval_eq_evalM, Op2.evalM, hx, hw, Option.bind_eq_bind,
             Option.bind_some, Option.map_some]
-      rw [he, ← hwk]
-      exact Srt.FreshRead.index a w (ihx hp')
+      rw [he]
+      exact Srt.FreshRead.index a k (ihx hp')
     | _ => simp only [Tm.freshPath?, Op2.freshStep, reduceCtorEq] at h
   | _ => intro p h; simp only [Tm.freshPath?, reduceCtorEq] at h
 
