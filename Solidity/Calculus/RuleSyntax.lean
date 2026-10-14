@@ -125,12 +125,18 @@ syntax:65 dl_term:65 " - " dl_term:66 : dl_term
 syntax:70 dl_term:70 " / " dl_term:71 : dl_term
 /-- `a * b`: a product (KeY's `mul`), checked as Solidity multiplies. -/
 syntax:70 dl_term:70 " * " dl_term:71 : dl_term
+/-- `a && b`, `a || b`: the `bool` operators of a value, short-circuiting. -/
+syntax:30 dl_term:30 " && " dl_term:31 : dl_term
+syntax:25 dl_term:25 " || " dl_term:26 : dl_term
 /-- `at(r)`: the ledger's key for the address `r` (`net := store(net, at(r), …)`). -/
 syntax:max "at" noWs "(" dl_term ")" : dl_term
 /-- `if(r = this) then net else …`: KeY's `\if … \then … \else`, the form of a
 payment's booking (`UpdElem.pay`), and read only there. -/
 syntax:max "if" noWs "(" dl_term " = " dl_term ")" " then " dl_term " else " dl_term : dl_term
 syntax:max "(" dl_term ")" : dl_term
+/-- `(a == b)`: a comparison as a `bool` term. Parenthesised, since a bare `==`
+after `:=` is the update `x := a == b`. -/
+syntax:max "(" dl_term " == " dl_term ")" : dl_term
 syntax:max "‹" term "›" : dl_term
 
 /-- One elementary update `x := t`.  The funds and the ledger are written
@@ -1371,6 +1377,12 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     `(Term.binop BinOp.div PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term * $b:dl_term) => do
     `(Term.binop BinOp.mul PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term && $b:dl_term) => do
+    `(Term.binop BinOp.and PrimTy.bool $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term || $b:dl_term) => do
+    `(Term.binop BinOp.or PrimTy.bool $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| ( $a:dl_term == $b:dl_term )) => do
+    `(Term.binop BinOp.eqB _ $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| ( $t:dl_term )) => schemaTerm Γ pos t
   | `(dl_term| ‹ $t:term ›) => pure t
   | stx@`(dl_term| $f:ident($args,*)) => do
@@ -2263,12 +2275,15 @@ def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term)
   match sym with
   | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b) | "/" => `(dl_term| $a / $b)
   | "*" => `(dl_term| $a * $b)
+  | "&&" => `(dl_term| $a && $b) | "||" => `(dl_term| $a || $b)
+  | "==" => `(dl_term| ($a == $b))
   | "±" => `(dl_term| $a ± $b)
   | _ => `(dl_term| $a ⊕ $b)
 
 /-- The term of `t ⊕ u` with a concrete operator: `+`, `-`, `*`, `/` have
-term syntax (at `uint`, the type they read back at: `ppTermS` escapes the
-others); the other operators escape (`‹…›`). -/
+term syntax at `uint`, `&&`, `||` at `bool` and `==` at any type (the types
+they read back at: `ppTermS` escapes the others); the other operators escape
+(`‹…›`). -/
 def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   if (← fvarName? op).isSome then return some "⊕"
   if op.isAppOfArity ``IncDec.binOp 1 then
@@ -2278,6 +2293,9 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   | BinOp.sub => return "-"
   | BinOp.div => return "/"
   | BinOp.mul => return "*"
+  | BinOp.and => return "&&"
+  | BinOp.or => return "||"
+  | BinOp.eqB => return "=="
   | _ => return none
 
 /-- A variable of a term sort, by its name, where a term prints as it is

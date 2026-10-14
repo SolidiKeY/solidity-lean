@@ -43,8 +43,9 @@
  *   --soljson     the directory holding the pinned soljson (default the
  *                 checkout's `keyext.solidity.core/build/soljson`; a fresh
  *                 clone has none, so point it at another checkout's)
- *   --source      the source, a path in this repository if there is one, else
- *                 in the checkout (default keyext.solidity.examples/TestSuite.sol);
+ *   --source      the source: an absolute path, else a path in this repository if
+ *                 there is one, else in the checkout (default
+ *                 keyext.solidity.examples/TestSuite.sol);
  *                 another one is another fixture (`Solidity/Solkey/Constructors.lean`),
  *                 and needs --out
  *   --out         where to write the fixture (default tests/solc/TestSuite.ast.json)
@@ -62,7 +63,7 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, isAbsolute } from "node:path";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
@@ -80,7 +81,8 @@ const OUT_ARG = optionOf("--out", null);
 const OUT = OUT_ARG ?? join(ROOT, "tests/solc/TestSuite.ast.json");
 const WRAPPER = optionOf("--wrapper", join(ROOT, "Solidity/Solkey/TestSuite.lean"));
 const SOURCE = optionOf("--source", "keyext.solidity.examples/TestSuite.sol");
-const SOURCE_PATH = existsSync(join(ROOT, SOURCE)) ? join(ROOT, SOURCE) : join(SOLKEY, SOURCE);
+const SOURCE_PATH = isAbsolute(SOURCE) ? SOURCE
+  : existsSync(join(ROOT, SOURCE)) ? join(ROOT, SOURCE) : join(SOLKEY, SOURCE);
 const UNIT = SOURCE.split("/").pop();
 
 const fail = (msg) => {

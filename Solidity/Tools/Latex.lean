@@ -51,7 +51,7 @@ def token (s : String) : String :=
   | "⟨" => "\\langle" | "⟩" => "\\rangle"
   | "⟨[" => "\\langle[" | "]⟩" => "]\\rangle"
   | "{" => "\\{" | "}" => "\\}"
-  | "∧" => "\\land" | "∨" => "\\lor" | "¬" => "\\neg"
+  | "∧" | "&&" => "\\land" | "∨" | "||" => "\\lor" | "¬" => "\\neg"
   | "→" => "\\rightarrow" | "↔" => "\\leftrightarrow"
   | "∀" => "\\forall" | "∃" => "\\exists"
   | "⊢" => "\\vdash" | "⊨" => "\\models" | "⟹" => "\\Longrightarrow"
@@ -63,16 +63,28 @@ def token (s : String) : String :=
   | "−" => "-"
   | t => escape t
 
+/-- A chain's arrow: a rule's name over `\rightsquigarrow` (`~[r]~>`), else its token. -/
+def arrowLatex (a : String) : String :=
+  if a.startsWith "~[" && a.endsWith "]~>" then
+    "\\overset{\\mathrm{" ++ escape ((a.drop 2).dropRight 3) ++ "}}{\\rightsquigarrow}"
+  else token a
+
+/-- An `aligned` environment: the first line, then each step as `arrow line`. -/
+def alignedLatex (first : String) (steps : List String) : String :=
+  "\\begin{aligned} " ++ " \\\\ ".intercalate (("&" ++ first) :: steps.map (" &" ++ ·)) ++
+    " \\end{aligned}"
+
 /-- Render the scoped notation tree, dropping only its Lean quotation wrapper. -/
 partial def syntaxLatex (s : Syntax) : MetaM String := do
+  -- A choice node holds one parse per alternative, all of the same text.
+  if s.isOfKind choiceKind then return ← syntaxLatex s[0]
   if s.isOfKind ``chainStx then
     let first ← syntaxLatex s[0]
-    let links ← s[1].getArgs.mapM fun link => do
-      return s!" &{← syntaxLatex link[0]} {← syntaxLatex link[1]}"
-    return "\\begin{aligned} &" ++ first ++ " \\\\ " ++
-      " \\\\ ".intercalate links.toList ++ " \\end{aligned}"
+    let steps ← s[1].getArgs.toList.mapM fun link => do
+      return s!"{← syntaxLatex link[0]} {← syntaxLatex link[1]}"
+    return alignedLatex first steps
   if let `(chain_arrow| ~[$n:ident]~>) := s then
-    return "\\overset{\\mathrm{" ++ escape n.getId.toString ++ "}}{\\rightsquigarrow}"
+    return arrowLatex s!"~[{n.getId}]~>"
   -- The wrapper adds a contract/modality to Lean syntax, not to the formula.
   if let `(dl{ $f:dl_fml }) := s then return ← syntaxLatex f
   if let `(dl!{ $f:dl_fml }) := s then return ← syntaxLatex f
@@ -99,6 +111,14 @@ def calculusLatex (e : Expr) : MetaM String := do
   if e.isAppOf ``Valid then
     return "\\models " ++ (← syntaxLatex (← Chain.ppCoreLine e.appArg!))
   return ← syntaxLatex (← PrettyPrinter.delab e)
+
+/-- A derivation from `φ` through its steps (`Gen.links`), each arrow over the
+line it reaches, as an `aligned` environment. -/
+def derivationLatex (φ : Expr) (links : Array (String × Expr)) : MetaM String := do
+  let first ← syntaxLatex (← Chain.ppCoreLine φ)
+  let steps ← links.toList.mapM fun (a, l) => do
+    return s!"{arrowLatex a} {← syntaxLatex (← Chain.ppCoreLine l)}"
+  return alignedLatex first steps
 
 -- LeanTeX falls back to the root key, so register each head explicitly.
 @[latex_pp app.Solidity.Fml.tt, latex_pp app.Solidity.Fml.eq,

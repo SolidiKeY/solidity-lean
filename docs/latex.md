@@ -30,6 +30,21 @@ over `\rightsquigarrow`; multiple steps use `\rightsquigarrow^{*}`.
 Updates use `\{x := t\}`, diamonds `\langle ... \rangle`, boxes `[ ... ]`,
 and either modality `\langle[ ... ]\rangle`, as in the pre-licenciate paper.
 
+## From a Solidity file
+
+```sh
+scripts/latex-sol.sh Counter.sol Counter.add               # the obligation
+scripts/latex-sol.sh --derivation Counter.sol Counter.add  # every step
+```
+
+The script compiles the file with solkey's pinned solc (`scripts/solc-ast.mjs`),
+imports it in a temporary module and prints the fragment on stdout;
+diagnostics go to stderr. `--derivation` prints the derivation `#chain`
+computes from the obligation, as an `aligned` environment, each rule's name
+over its `\rightsquigarrow`. In Lean, `Solidity.Tools.LatexSolkey` gives the
+commands it uses, over a `solc_import`ed contract `N`: `#latex_obligation N.f`,
+`#latex_derivation N.f`, and their `_file "path"` forms.
+
 The Lean API, in `MetaM`, is:
 
 ```lean

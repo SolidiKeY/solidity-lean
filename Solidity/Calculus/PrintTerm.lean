@@ -210,9 +210,11 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     | _ => escapeS e
   | .sym ``Op2.binop #[op, ty, _] #[a, b] =>
     let some sym ← termOpSym? op | escapeS e
-    -- `+ - * /` read back as `uint` arithmetic only (`schemaTerm0`): an
-    -- `int` (or unchecked `bool`) one escapes
-    unless sym == "⊕" || sym == "±" || (← whnf ty).isConstOf ``PrimTy.uint do return ← escapeS e
+    -- `+ - * /` read back as `uint` arithmetic, `&&` and `||` as `bool`, `==`
+    -- at any type (`schemaTerm0`); the others escape at another type
+    let t ← whnf ty
+    unless sym == "⊕" || sym == "±" || sym == "==" || t.isConstOf ``PrimTy.uint
+        || (sym == "&&" || sym == "||") && t.isConstOf ``PrimTy.bool do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
   | .sym ``Op2.zbin #[op, _] #[a, b] =>
     let some sym ← termOpSym? op | escapeS e

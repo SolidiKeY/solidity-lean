@@ -310,6 +310,8 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 
 `Tools/Latex.lean` registers the scoped calculus with vendored LeanTeX and
 exports expressions and declaration statements to LaTeX strings/files.
+`Tools/LatexSolkey.lean` exports a `solc_import`ed function's obligation and
+its derivation (`scripts/latex-sol.sh`).
 `Examples/Tactics/Latex.lean` pins the output, including a proved chain.
 
 Two directories, by proof style (`.claude/rules/derivations.md`).

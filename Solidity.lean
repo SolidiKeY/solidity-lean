@@ -258,4 +258,5 @@ import Solidity.Frontend.Problems
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip
 import Solidity.Tools.Latex
+import Solidity.Tools.LatexSolkey
 import Solidity.Examples.Tactics.Latex
