@@ -56,9 +56,9 @@ variable {L : Nat}
 itself (below `2^256` by its type), a `bool` as `1` or `0`, an `int` as its
 two's complement word (the word's signed reading, `sgn`, is the value). -/
 def ReprV : (p : PrimTy) → p.Denote → Word → Prop
-  | .uint, v, w => w = .val v.1.toNat
+  | .uint, v, w => ∃ a : Fin W, w = .val a ∧ v.1 = a.1
   | .bool, b, w => w = .val (bword b)
-  | .int, v, w => ∃ a, w = .val a ∧ a < W ∧ v.1 = sgn a
+  | .int, v, w => ∃ a : Fin W, w = .val a ∧ v.1 = sgn a.1
 
 /-- An index found in a list is below its length. -/
 theorem lt_of_getElem? {α : Type} {l : List α} {i : Nat} {x : α} (h : l[i]? = some x) :
@@ -70,7 +70,7 @@ from slot `s`, and every dynamic array in it holds fewer than `L` elements
 (`L` at most solc's `2^64`: what a `push` needs to agree with solc's). -/
 inductive ReprAt (st : WordStore) (L : Nat) : (T : Ty) → Slot → SVal T → Prop
   | prim {p : PrimTy} {s : Slot} {v : p.Denote} :
-      ReprV p v (.val (st s)) → ReprAt st L (.prim p) s (.prim v)
+      ReprV p v (.val (st.cells s)) → ReprAt st L (.prim p) s (.prim v)
   | struct {n : Name} {s : Slot} {fs : SFields (structDef n)} :
       (∀ f T (h : lookupBy f (structDef n) = some T),
         ReprAt st L T (s.add (offset n f)) (fs.get h)) →
@@ -94,7 +94,7 @@ Example: `bob` is represented in slots `[14, 17)`; a write to `alice.age`
 theorem ReprAt.frame {st st' : WordStore} {T : Ty} {s : Slot} {v : SVal T}
     (h : ReprAt st L T s v) (hf : ∀ x, Occ T s x → st' x = st x) : ReprAt st' L T s v := by
   induction h with
-  | prim h => exact .prim (by rw [hf _ .prim]; exact h)
+  | prim h => exact .prim (by rw [Fin.ext (hf _ .prim)]; exact h)
   | struct _ ih => exact .struct fun f T hT => ih f T hT fun x hx => hf x (.field hT hx)
   | array hl hW _ ih =>
     exact .array (by rw [hf _ .len, hl]) hW fun i x hx => ih i x hx fun y hy => hf y (.elem i hy)
@@ -474,11 +474,11 @@ theorem zeroAt_zero {s x : Slot} :
       · exact absurd ⟨o', ho', hx⟩ h'
 
 /-- The default of a primitive type is the word `0`. -/
-theorem ReprV.dflt_zero (p : PrimTy) : ReprV p (PrimTy.dflt p) (.val 0) := by
+theorem ReprV.dflt_zero (p : PrimTy) : ReprV p (PrimTy.dflt p) w[0] := by
   cases p with
-  | uint => rfl
+  | uint => exact ⟨⟨0, W_pos⟩, rfl, rfl⟩
   | bool => rfl
-  | int => exact ⟨0, rfl, W_pos, by decide⟩
+  | int => exact ⟨⟨0, W_pos⟩, rfl, by decide⟩
 
 /-- The first leaf of a primitive is its own slot. -/
 theorem mem_leavesF_prim (fuel : Nat) (p : PrimTy) : 0 ∈ leavesF fuel (.prim p) := by
@@ -500,7 +500,7 @@ theorem zero_repr {st st' : WordStore} {T : Ty} {s : Slot} {v : SVal T} (h : Rep
     intro fuel _ hz _
     rw [SVal.defaultOf_prim]
     have h0 : st' s = 0 := by have := hz 0 (mem_leavesF_prim fuel p); rwa [Slot.add_zero] at this
-    exact .prim (by rw [h0]; exact ReprV.dflt_zero p)
+    exact .prim (by rw [show st'.cells s = ⟨0, W_pos⟩ from Fin.ext h0]; exact ReprV.dflt_zero p)
   | @struct n s fs hall ih =>
     intro fuel hr hz ho
     cases fuel with
@@ -612,7 +612,7 @@ theorem move_repr {st st' : WordStore} {T : Ty} {s : Slot} {v : SVal T} (h : Rep
     intro fuel d _ _ hc
     have e : st' d = st s := by
       have := hc 0 (mem_leavesF_prim fuel p); rwa [Slot.add_zero, Slot.add_zero] at this
-    exact .prim (by rw [e]; exact hv)
+    exact .prim (by rw [Fin.ext e]; exact hv)
   | @struct n s fs hall ih =>
     intro fuel d hr hs hc
     cases fuel with

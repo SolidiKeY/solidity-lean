@@ -447,7 +447,7 @@ def boundsCheck : List Instr := [.dup 2, .sload, .dup 2, .lt] ++ assertTop
 
 /-- `… s i → … s i`, reverting unless `i < n`: a fixed-size array's bound is
 its type's, a constant. -/
-def fixedCheck (n : Nat) : List Instr := [.push (.val n), .dup 2, .lt] ++ assertTop
+def fixedCheck (n : Nat) : List Instr := [.push (.val (wmod n)), .dup 2, .lt] ++ assertTop
 
 /-- `z` times `DUP2; ADD`. -/
 def addRep : Nat → List Instr
@@ -467,35 +467,35 @@ def fixedSlot (z : Nat) : List Instr := [.swap 1] ++ addRep z ++ [.swap 1, .pop]
 revert if `bs · bs` overflows (`bs > (2^256 - 1) / bs`), multiply `pw` by `bs`
 when `ex` is odd, square `bs`, halve `ex`. -/
 def expBody : List Instr :=
-  [.dup 2, .push (.val (W - 1)), .div, .dup 3, .gt, .iszero] ++ assertTop ++
-    [.push (.val 2), .dup 2, .mod, .iszero, .jumpi 5, .dup 2, .dup 4, .mul, .swap 3, .pop] ++
-    [.dup 2, .dup 1, .mul, .swap 2, .pop, .push (.val 2), .swap 1, .div]
+  [.dup 2, .push (.val wMax), .div, .dup 3, .gt, .iszero] ++ assertTop ++
+    [.push (w[2]), .dup 2, .mod, .iszero, .jumpi 5, .dup 2, .dup 4, .mul, .swap 3, .pop] ++
+    [.dup 2, .dup 1, .mul, .swap 2, .pop, .push (w[2]), .swap 1, .div]
 
 /-- solc's `for { } gt(exponent, 1) { }` loop, unrolled `k` times: each round
 first skips all the rest once `ex ≤ 1`.  An exponent below `2^256` halves to
 `1` in at most `255` rounds, so `expLoop 255` is the loop. -/
 def expLoop : Nat → List Instr
   | 0 => []
-  | k + 1 => [.push (.val 1), .dup 2, .gt, .iszero, .jumpi (expBody.length + (expLoop k).length)] ++
+  | k + 1 => [.push (w[1]), .dup 2, .gt, .iszero, .jumpi (expBody.length + (expLoop k).length)] ++
       expBody ++ expLoop k
 
 /-- `b ** e` with `b` in `[1, 2^256)` and `e ≥ 1`: `pw = 1`, the loop, and
 the last multiplication checked (`pw > (2^256 - 1) / bs` reverts). -/
 def expGeneral : List Instr :=
-  [.push (.val 1), .swap 2, .swap 1] ++ expLoop 255 ++
-    [.pop, .dup 1, .push (.val (W - 1)), .div, .dup 3, .gt, .iszero] ++ assertTop ++ [.mul]
+  [.push (w[1]), .swap 2, .swap 1] ++ expLoop 255 ++
+    [.pop, .dup 1, .push (.val wMax), .div, .dup 3, .gt, .iszero] ++ assertTop ++ [.mul]
 
 /-- `… b e → … b ** e` for `e ≥ 1`: `0` when `b = 0`, else `expGeneral`. -/
 def expNonzero : List Instr :=
   [.dup 2, .iszero, .jumpi (expGeneral.length + 1)] ++ expGeneral ++
-    [.jump 3, .pop, .pop, .push (.val 0)]
+    [.jump 3, .pop, .pop, .push (w[0])]
 
 /-- `… b e → … b ** e` (`e` on top), solc's `checked_exp_unsigned`: `e = 0`
 gives `1`, `b = 0` gives `0`, else `expGeneral`.  (solc's shortcuts for small
 bases, with `EXP`, give the same result.) -/
 def expCode : List Instr :=
   [.dup 1, .iszero, .jumpi (expNonzero.length + 1)] ++ expNonzero ++
-    [.jump 3, .pop, .pop, .push (.val 1)]
+    [.jump 3, .pop, .pop, .push (w[1])]
 
 /-- `… a b → … a ⊕ b` (`b` on top) on `uint`s, with solc's guards: `+` reverts
 when the sum wraps below `a`, `-` when `b > a`, `*` when `a ≠ 0` and the
@@ -533,14 +533,14 @@ below the wrapped difference exactly when `y` is negative, `*` when `x` is
 negative and `y` is `-2^255` or when `x ≠ 0` and the product `SDIV` `x` is not
 `y`, `/` on a zero divisor and on `-2^255 / -1`, `%` on a zero divisor. -/
 def sTail : BinOp → List Instr
-  | .add => [.dup 2, .dup 2, .add, .dup 2, .dup 2, .slt, .push (.val 0), .dup 5, .slt, .eq] ++
+  | .add => [.dup 2, .dup 2, .add, .dup 2, .dup 2, .slt, .push (w[0]), .dup 5, .slt, .eq] ++
       assertTop ++ [.swap 2, .pop, .pop]
-  | .sub => [.dup 1, .dup 3, .sub, .dup 1, .dup 4, .slt, .push (.val 0), .dup 4, .slt, .eq] ++
+  | .sub => [.dup 1, .dup 3, .sub, .dup 1, .dup 4, .slt, .push (w[0]), .dup 4, .slt, .eq] ++
       assertTop ++ [.swap 2, .pop, .pop]
-  | .mul => [.dup 2, .dup 2, .mul, .push (.val 0), .dup 4, .slt, .push (.val H), .dup 4, .eq, .and,
+  | .mul => [.dup 2, .dup 2, .mul, .push (w[0]), .dup 4, .slt, .push (.val wH), .dup 4, .eq, .and,
       .iszero] ++ assertTop ++ [.dup 3, .dup 2, .sdiv, .dup 3, .eq, .dup 4, .iszero, .or] ++
       assertTop ++ [.swap 2, .pop, .pop]
-  | .div => [.dup 1] ++ assertTop ++ [.push (.val H), .dup 3, .eq, .push (.val (W - 1)), .dup 3, .eq,
+  | .div => [.dup 1] ++ assertTop ++ [.push (.val wH), .dup 3, .eq, .push (.val wMax), .dup 3, .eq,
       .and, .iszero] ++ assertTop ++ [.swap 1, .sdiv]
   | .mod => [.dup 1] ++ assertTop ++ [.swap 1, .smod]
   | .lt => [.sgt]
@@ -559,7 +559,7 @@ def binTail : PrimTy → BinOp → List Instr
 
 /-- `… x → … -x`, reverting on `-2^255` (solc's `negate_t_int256`). -/
 def negCode : List Instr :=
-  [.dup 1, .push (.val H), .eq, .iszero] ++ assertTop ++ [.push (.val 0), .sub]
+  [.dup 1, .push (.val wH), .eq, .iszero] ++ assertTop ++ [.push (w[0]), .sub]
 
 /-- The opcode that pushes a value of the environment. -/
 def envInstr : EnvKey → Instr
@@ -572,35 +572,35 @@ def envInstr : EnvKey → Instr
 
 /-- `… s → … s` with `0` written at `s + o` for each `o`. -/
 def zeroCode (os : List Nat) : List Instr :=
-  os.flatMap fun o => [.push (.val 0), .dup 2, .push (.val o), .add, .sstore]
+  os.flatMap fun o => [.push (w[0]), .dup 2, .push (.val (wmod o)), .add, .sstore]
 
 /-- `… s → …`: the length at `s` decremented, reverting at `0` (solc's
 `Panic(0x31)`). -/
 def popCode : List Instr :=
-  [.dup 1, .sload, .dup 1] ++ assertTop ++ [.push (.val 1), .swap 1, .sub, .swap 1, .sstore]
+  [.dup 1, .sload, .dup 1] ++ assertTop ++ [.push (w[1]), .swap 1, .sub, .swap 1, .sstore]
 
 /-- `… s → … s v₁ … vₖ`: the words at `s + o` for each `o`, loaded in order,
 the slot kept on top. -/
 def loadLeaves (os : List Nat) : List Instr :=
-  os.flatMap fun o => [.dup 1, .push (.val o), .add, .sload, .swap 1]
+  os.flatMap fun o => [.dup 1, .push (.val (wmod o)), .add, .sload, .swap 1]
 
 /-- `… vₖ … v₁ d → … d`: each word stored at `d + o`, for the offsets in the
 order given (the last loaded first). -/
 def storeLeaves (os : List Nat) : List Instr :=
-  os.flatMap fun o => [.swap 1, .dup 2, .push (.val o), .add, .sstore]
+  os.flatMap fun o => [.swap 1, .dup 2, .push (.val (wmod o)), .add, .sstore]
 
 /-- `… v s → … v slot`: the array at `s` grown by one, reverting at solc's
 maximum length `2^64` (`Panic(0x41)`), and the slot of the new element,
 whose elements take `z` slots. -/
 def pushSlotCode (z : Nat) : List Instr :=
-  [.dup 1, .sload, .push (.val Lmax), .dup 2, .lt] ++ assertTop ++
-    [.push (.val 1), .dup 2, .add, .dup 3, .sstore] ++ elemSlot z
+  [.dup 1, .sload, .push (.val wLmax), .dup 2, .lt] ++ assertTop ++
+    [.push (w[1]), .dup 2, .add, .dup 3, .sstore] ++ elemSlot z
 
 /-- `… old → … new v`: the checked `+ 1` or `- 1`, and the value of the
 expression, the new word for `++x`, the old one for `x++`. -/
 def bumpCode (p : PrimTy) (op : IncDec) : List Instr :=
-  if op.isPre then [.push (.val 1)] ++ binTail p op.binOp ++ [.dup 1]
-  else [.dup 1, .push (.val 1)] ++ binTail p op.binOp
+  if op.isPre then [.push (w[1])] ++ binTail p op.binOp ++ [.dup 1]
+  else [.dup 1, .push (w[1])] ++ binTail p op.binOp
 
 end Evm
 end Solidity

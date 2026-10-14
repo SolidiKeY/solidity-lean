@@ -20,7 +20,7 @@ local instance : InContract := ⟨StandardExample⟩
 
 /-- The fresh contract the typed run starts from, with no locals, no funds,
 at address `0`. -/
-abbrev freshState (C : Contract) : Solidity.State C [] := freshT C 0 W_pos 0 W_pos
+abbrev freshState (C : Contract) : Solidity.State C [] := freshT C 0 W_pos ⟨0, W_pos⟩
 
 theorem setAge_frag : (inFragP (Frag.init []) setAge).isSome = true := by
   decide +kernel
@@ -36,7 +36,7 @@ theorem setAge_interpreter :
     ∃ o, Solidity.Prog.run (freshState StandardExample) setAge = .ok o ∧
       ∀ v, o.st.storage.findLive aliceAge = some (.prim v) → v.1 = 10 := by
   rcases compile_storage (Option.some_get setAge_frag).symm (by decide +kernel) 0 W_pos (fresh).bal
-      0 W_pos with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
+      ⟨0, W_pos⟩ with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
   · refine ⟨o, h1, fun v hv => ?_⟩
     have hp : PathSlot StandardExample false aliceAge (.root 13) := PathAt.field PathAt.nil
     have hs := h3 _ _ v hp hv
@@ -60,7 +60,7 @@ reverts on the machine: it pays no one and asserts nothing, and
 theorem overflow_interpreter :
     Solidity.Prog.run (freshState StandardExample) overflow = .error .revert := by
   rcases compile_exact (Option.some_get overflow_frag).symm
-      (Sim.init StandardExample 0 W_pos (fresh).bal 0 W_pos) (by decide +kernel) (by decide +kernel) with
+      (Sim.init StandardExample 0 W_pos (fresh).bal ⟨0, W_pos⟩) (by decide +kernel) (by decide +kernel) with
     ⟨_, _, _, h, _⟩ | ⟨h | ⟨ha, _⟩, _⟩
   · have := reverted_eq Solidity.Evm.Examples.overflow_run
     unfold codeOf at this
@@ -89,9 +89,9 @@ theorem payOwner_interpreter :
       simp only [Option.some.injEq, Prod.mk.injEq] at hr
       obtain ⟨h0, h5, h00, h50, hs⟩ := hr
       obtain ⟨σ', h1, hnet, hself⟩ := compile_net (Option.some_get payOwner_frag).symm
-        (Sim.init StandardExample 0 W_pos _ 0 W_pos) (by decide +kernel) h
+        (Sim.init StandardExample 0 W_pos _ ⟨0, W_pos⟩) (by decide +kernel) h
       refine ⟨σ', h1, ?_⟩
-      have h := hnet 5 (by decide) (by rw [hs]; decide)
+      have h := hnet ⟨5, by unfold W; decide⟩ (fun he => absurd (congrArg Fin.val he) (by rw [hs]; decide))
       rw [h5, h50] at h
       rw [hs] at hself
       exact ⟨h, hself⟩
@@ -109,7 +109,7 @@ theorem callTwice_interpreter :
       ∀ v, o.st.storage.findLive (Solidity.SRef.ofRoot "total" rfl) = some (.prim v) →
         v.1 = 5 := by
   rcases compile_storage (Option.some_get callTwice_frag).symm (by decide +kernel) 0 W_pos
-      (fresh).bal 0 W_pos with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
+      (fresh).bal ⟨0, W_pos⟩ with ⟨o, m', h1, h2, h3⟩ | ⟨_, h2⟩ | ⟨hp, _⟩
   · refine ⟨o, h1, fun v hv => ?_⟩
     have hp : PathSlot CallsExample false (Solidity.SRef.ofRoot (C := CallsExample) "total"
         (T := .prim .uint) rfl) (.root 0) := PathSlot.root rfl

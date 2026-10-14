@@ -115,19 +115,70 @@ def Slot.toStr : Slot → String
 
 instance : ToString Slot := ⟨Slot.toStr⟩
 
-/-- A stack or memory word: a number or a slot. -/
+/-- A number's low 256 bits: `ADD`, `MUL`, `EXP` and `SSTORE` wrap. -/
+def wmod (n : Nat) : Fin W := ⟨n % W, Nat.mod_lt _ W_pos⟩
+
+/-- The largest word, `2^256 - 1`: `-1`. -/
+def wMax : Fin W := ⟨W - 1, by have := W_pos; omega⟩
+
+/-- The word `2^255`: the least negative `int256`. -/
+def wH : Fin W := ⟨H, by rw [W_eq]; have : 0 < H := Nat.pow_pos (by decide); omega⟩
+
+/-- solc's array bound as a word. -/
+def wLmax : Fin W := ⟨Lmax, Lmax_lt_W⟩
+
+/-! The words in one normal form, `⟨n, h⟩`, so that a word's equations are
+its number's. -/
+
+@[simp] theorem wmod_def (n : Nat) : wmod n = ⟨n % W, Nat.mod_lt _ W_pos⟩ := rfl
+@[simp] theorem wMax_def : wMax = ⟨W - 1, by have := W_pos; omega⟩ := rfl
+@[simp] theorem wH_def : wH = ⟨H, by rw [W_eq]; have : 0 < H := Nat.pow_pos (by decide); omega⟩ :=
+  rfl
+@[simp] theorem wLmax_def : wLmax = ⟨Lmax, Lmax_lt_W⟩ := rfl
+
+/-- A number below `2^256` is its own low bits. -/
+theorem wmod_of_lt {n : Nat} (h : n < W) : wmod n = ⟨n, h⟩ := Fin.ext (Nat.mod_eq_of_lt h)
+
+/-- The word of an integer, two's complement: what `SDIV` and `SMOD` push. -/
+def sword (n : Int) : Fin W := wmod (toWord n)
+
+/-- A word is the signed word of an integer it is the two's complement of. -/
+theorem mk_eq_sword {x : Nat} {n : Int} (hx : x < W) (h : x = toWord n) :
+    (⟨x, hx⟩ : Fin W) = sword n := by
+  subst h; exact (wmod_of_lt hx).symm
+
+/-- A word bound `n < 2^256`: a hypothesis, a remainder, or arithmetic. -/
+macro "word_lt" : tactic => `(tactic| first
+  | assumption
+  | exact Nat.mod_lt _ W_pos
+  | exact Fin.isLt _
+  | exact Nat.lt_of_le_of_lt (Nat.div_le_self _ _) ‹_›
+  | exact Nat.lt_of_le_of_lt (Nat.mod_le _ _) ‹_›
+  | omega
+  | (have := W_pos; omega)
+  | (unfold W; decide)
+  | (split <;> first | assumption | exact Nat.mod_lt _ W_pos | omega | (have := W_pos; omega)))
+
+/-- A stack or memory word: a number below `2^256`, or a slot. -/
 inductive Word where
-  | val (n : Nat)
+  | val (n : Fin W)
   | slot (s : Slot)
   deriving DecidableEq, Repr, Inhabited
 
+/-- The word of a number below `2^256`, its bound found by `word_lt`. -/
+syntax "w[" term "]" : term
+macro_rules | `(w[$x]) => `(Word.val ⟨$x, by word_lt⟩)
+
 instance : ToString Word where
   toString
-    | .val n => toString n
+    | .val n => toString n.val
     | .slot s => s!"@{s}"
 
 /-- A comparison's result word. -/
-def bword (b : Bool) : Nat := if b then 1 else 0
+def bword (b : Bool) : Fin W := ⟨if b then 1 else 0, by split <;> (unfold W; decide)⟩
+
+@[simp] theorem bword_inj (p q : Bool) : bword p = bword q ↔ p = q := by
+  cases p <;> cases q <;> decide
 
 inductive Instr where
   | push (w : Word)
@@ -236,6 +287,13 @@ theorem write_other (st : WordStore) (v : Nat) {s x : Slot} (h : x ≠ s) :
     write st s v x = st x := by
   simp only [write, read, upd_other _ _ h]
 
+/-- A cell's number is the store's reading. -/
+@[simp] theorem cells_val (st : WordStore) (s : Slot) : (st.cells s).val = st s := rfl
+
+/-- A word written is the word read back. -/
+theorem write_cells_same (st : WordStore) (s : Slot) (a : Fin W) : (write st s a.1).cells s = a :=
+  Fin.ext (by rw [cells_val, write_same, Nat.mod_eq_of_lt a.2])
+
 /-- Stores are equal when all their word observations agree. -/
 @[ext] theorem ext {st st' : WordStore} (h : ∀ s, st s = st' s) : st = st' := by
   cases st with
@@ -258,21 +316,21 @@ structure Machine where
   instruction reads or writes. -/
   bal₀ : Nat → Nat
   /-- The contract's own address. -/
-  self : Nat := 0
+  self : Fin W := ⟨0, W_pos⟩
   /-- Whether the account at `a` accepts a payment of `v`: one whose code
   reverts, or runs out of the 2300 gas `transfer` forwards, does not. -/
   accepts : Nat → Nat → Bool := fun _ _ => true
   /-- The transaction's sender, value and block time, as `CALLER`,
   `CALLVALUE`, `TIMESTAMP` push them. -/
-  caller : Nat := 0
-  callvalue : Nat := 0
-  timestamp : Nat := 0
+  caller : Fin W := ⟨0, W_pos⟩
+  callvalue : Fin W := ⟨0, W_pos⟩
+  timestamp : Fin W := ⟨0, W_pos⟩
 
 /-- A fresh contract at `self` in a world whose balances are `bal`: empty
 stack, storage and memory all zeroes, nothing moved yet, called by `0` with
 nothing at time `0`, every payment accepted. -/
-def Machine.init (bal : Nat → Nat := fun _ => 0) (self : Nat := 0) : Machine :=
-  { stack := [], store := WordStore.zero, mem := fun _ => .val 0, bal, bal₀ := bal, self }
+def Machine.init (bal : Nat → Nat := fun _ => 0) (self : Fin W := ⟨0, W_pos⟩) : Machine :=
+  { stack := [], store := WordStore.zero, mem := fun _ => w[0], bal, bal₀ := bal, self }
 
 /-- `v` moved from `s`'s account to `a`'s, another. -/
 def pay (bal : Nat → Nat) (s a v : Nat) : Nat → Nat :=
@@ -326,65 +384,71 @@ def Instr.step : Instr → Machine → Out
       | none => .fault
     | _, [] => .fault
   | .add, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val ((a + b) % W) :: st)
-    | .val i :: .slot s :: st => m.next (.slot (s.add i) :: st)
-    | .slot s :: .val i :: st => m.next (.slot (s.add i) :: st)
+    | .val a :: .val b :: st => m.next (.val (wmod (a.1 + b.1)) :: st)
+    | .val i :: .slot s :: st => m.next (.slot (s.add i.1) :: st)
+    | .slot s :: .val i :: st => m.next (.slot (s.add i.1) :: st)
     | _ => .fault
   | .sub, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val ((a + (W - b)) % W) :: st)
+    | .val a :: .val b :: st => m.next (.val (wmod (a.1 + (W - b.1))) :: st)
     | _ => .fault
   | .mul, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (a * b % W) :: st)
+    | .val a :: .val b :: st => m.next (.val (wmod (a.1 * b.1)) :: st)
     | _ => .fault
   | .div, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (if b = 0 then 0 else a / b) :: st)
+    | .val a :: .val b :: st => m.next (.val ⟨if b.1 = 0 then 0 else a.1 / b.1, by
+      split
+      · exact W_pos
+      · exact Nat.lt_of_le_of_lt (Nat.div_le_self _ _) a.2⟩ :: st)
     | _ => .fault
   | .mod, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (if b = 0 then 0 else a % b) :: st)
+    | .val a :: .val b :: st => m.next (.val ⟨if b.1 = 0 then 0 else a.1 % b.1, by
+      split
+      · exact W_pos
+      · exact Nat.lt_of_le_of_lt (Nat.mod_le _ _) a.2⟩ :: st)
     | _ => .fault
   | .lt, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (bword (decide (a < b))) :: st)
+    | .val a :: .val b :: st => m.next (.val (bword (decide (a.1 < b.1))) :: st)
     | _ => .fault
   | .gt, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (bword (decide (b < a))) :: st)
+    | .val a :: .val b :: st => m.next (.val (bword (decide (b.1 < a.1))) :: st)
     | _ => .fault
   | .eq, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (bword (decide (a = b))) :: st)
+    | .val a :: .val b :: st => m.next (.val (bword (decide (a.1 = b.1))) :: st)
     | _ => .fault
   | .iszero, m => match m.stack with
-    | .val a :: st => m.next (.val (bword (decide (a = 0))) :: st)
+    | .val a :: st => m.next (.val (bword (decide (a.1 = 0))) :: st)
     | _ => .fault
   | .or, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (a ||| b) :: st)
+    | .val a :: .val b :: st => m.next (.val ⟨a.1 ||| b.1, Nat.or_lt_two_pow a.2 b.2⟩ :: st)
     | _ => .fault
   | .and, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (a &&& b) :: st)
+    | .val a :: .val b :: st => m.next (.val ⟨a.1 &&& b.1, Nat.and_lt_two_pow _ b.2⟩ :: st)
     | _ => .fault
   | .slt, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (bword (decide (sgn a < sgn b))) :: st)
+    | .val a :: .val b :: st => m.next (.val (bword (decide (sgn a.1 < sgn b.1))) :: st)
     | _ => .fault
   | .sgt, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (bword (decide (sgn b < sgn a))) :: st)
+    | .val a :: .val b :: st => m.next (.val (bword (decide (sgn b.1 < sgn a.1))) :: st)
     | _ => .fault
   | .sdiv, m => match m.stack with
     | .val a :: .val b :: st =>
-      m.next (.val (if b = 0 then 0 else toWord (Int.tdiv (sgn a) (sgn b))) :: st)
+      m.next (.val (if b.1 = 0 then ⟨0, W_pos⟩ else sword (Int.tdiv (sgn a.1) (sgn b.1))) :: st)
     | _ => .fault
   | .smod, m => match m.stack with
     | .val a :: .val b :: st =>
-      m.next (.val (if b = 0 then 0 else toWord (Int.tmod (sgn a) (sgn b))) :: st)
+      m.next (.val (if b.1 = 0 then ⟨0, W_pos⟩ else sword (Int.tmod (sgn a.1) (sgn b.1))) :: st)
     | _ => .fault
   | .keccakMap, m => match m.stack with
-    | .val k :: .slot s :: st => m.next (.slot (.hash k s 0) :: st)
+    | .val k :: .slot s :: st => m.next (.slot (.hash k.1 s 0) :: st)
     | _ => .fault
   | .keccakArr, m => match m.stack with
     | .slot s :: st => m.next (.slot (.data s 0) :: st)
     | _ => .fault
   | .sload, m => match m.stack with
-    | .slot s :: st => m.next (.val (m.store s) :: st)
+    | .slot s :: st => m.next (.val (m.store.cells s) :: st)
     | _ => .fault
   | .sstore, m => match m.stack with
-    | .slot s :: .val v :: st => .ok { m with stack := st, store := WordStore.write m.store s v } 0
+    | .slot s :: .val v :: st => .ok { m with stack := st, store := WordStore.write m.store s v.1 } 0
     | _ => .fault
   | .mload x, m => m.next (m.mem x :: m.stack)
   | .mstore x, m => match m.stack with
@@ -392,34 +456,35 @@ def Instr.step : Instr → Machine → Out
     | [] => .fault
   | .jump n, m => .ok m n
   | .jumpi n, m => match m.stack with
-    | .val c :: st => .ok { m with stack := st } (if c = 0 then 0 else n)
+    | .val c :: st => .ok { m with stack := st } (if c.1 = 0 then 0 else n)
     | _ => .fault
   | .call, m => match m.stack with
     | .val v :: .val a :: st =>
-      if m.bal m.self < v ∨ m.accepts a v = false then m.next (.val 0 :: st)
-      else if a = m.self then m.next (.val 1 :: st)
-      else .ok { m with stack := .val 1 :: st, bal := pay m.bal m.self a v } 0
+      if m.bal m.self.1 < v.1 ∨ m.accepts a.1 v.1 = false then m.next (w[0] :: st)
+      else if a.1 = m.self.1 then m.next (w[1] :: st)
+      else .ok { m with stack := w[1] :: st, bal := pay m.bal m.self.1 a.1 v.1 } 0
     | _ => .fault
   | .revert, _ => .revert
   | .xor, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (a ^^^ b) :: st)
+    | .val a :: .val b :: st => m.next (.val ⟨a.1 ^^^ b.1, Nat.xor_lt_two_pow a.2 b.2⟩ :: st)
     | _ => .fault
   | .not, m => match m.stack with
-    | .val a :: st => m.next (.val (W - 1 - a) :: st)
+    | .val a :: st => m.next (.val ⟨W - 1 - a.1, by have := W_pos; omega⟩ :: st)
     | _ => .fault
   | .shl, m => match m.stack with
-    | .val n :: .val a :: st => m.next (.val (if n < 256 then a * 2 ^ n % W else 0) :: st)
+    | .val n :: .val a :: st => m.next (.val (if n.1 < 256 then wmod (a.1 * 2 ^ n.1) else ⟨0, W_pos⟩) :: st)
     | _ => .fault
   | .shr, m => match m.stack with
-    | .val n :: .val a :: st => m.next (.val (if n < 256 then a / 2 ^ n else 0) :: st)
+    | .val n :: .val a :: st => m.next (.val (if n.1 < 256 then ⟨a.1 / 2 ^ n.1,
+      Nat.lt_of_le_of_lt (Nat.div_le_self _ _) a.2⟩ else ⟨0, W_pos⟩) :: st)
     | _ => .fault
   | .exp, m => match m.stack with
-    | .val a :: .val b :: st => m.next (.val (a ^ b % W) :: st)
+    | .val a :: .val b :: st => m.next (.val (wmod (a.1 ^ b.1)) :: st)
     | _ => .fault
   | .caller, m => m.next (.val m.caller :: m.stack)
   | .callvalue, m => m.next (.val m.callvalue :: m.stack)
   | .timestamp, m => m.next (.val m.timestamp :: m.stack)
-  | .selfbalance, m => m.next (.val (m.bal m.self) :: m.stack)
+  | .selfbalance, m => m.next (.val (wmod (m.bal m.self.1)) :: m.stack)
   | .address, m => m.next (.val m.self :: m.stack)
 
 /-- Run code, skipping `k` instructions first (a jump still pending). -/

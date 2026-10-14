@@ -255,7 +255,7 @@ theorem compiler_net {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'} {σ : Sta
     (hP : F ⊩ P ⊣ F') (hm : σ ≈[C, L, b, F] mc) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : (⟦P⟧b, mc) ⇓ₘ mc') :
     ∃ o, (P, σ) ⇓ o ∧
-      (∀ a : Nat, a < W → a ≠ mc'.self → netAt o.st.net a = (mc'.bal₀ a : Int) - mc'.bal a) ∧
+      (∀ a : Fin W, a ≠ mc'.self → netAt o.st.net a.1 = (mc'.bal₀ a.1 : Int) - mc'.bal a.1) ∧
       netAt o.st.net mc'.self = 0 :=
   compile_net hP hm hL hrun
 

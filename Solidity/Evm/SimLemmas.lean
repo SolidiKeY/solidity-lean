@@ -31,11 +31,9 @@ namespace Evm
 
 /-- A `uint` is represented by itself, a word below `2^256`: `total` read as `7` pushes `7`. -/
 theorem ReprV.uint_inv {v : PrimTy.uint.Denote} {w : Word} (h : ReprV .uint v w) :
-    ∃ a : Nat, a < W ∧ v.1 = a ∧ w = .val a := by
-  obtain ⟨n, hn⟩ := v
-  simp only [PrimTy.inRange, decide_eq_true_eq] at hn
-  refine ⟨n.toNat, ?_, by simp only; omega, h⟩
-  unfold W; omega
+    ∃ a : Nat, ∃ ha : a < W, v.1 = a ∧ w = .val ⟨a, ha⟩ := by
+  obtain ⟨a, rfl, hv⟩ := h
+  exact ⟨a.1, a.2, hv, rfl⟩
 
 /-- A `bool` is represented by `1` or `0`: `flags[3]` read as `true` pushes `1`. -/
 theorem ReprV.bool_inv {b : PrimTy.bool.Denote} {w : Word} (h : ReprV .bool b w) :
@@ -43,14 +41,14 @@ theorem ReprV.bool_inv {b : PrimTy.bool.Denote} {w : Word} (h : ReprV .bool b w)
 
 /-- An `int` is represented by a word, its two's complement: `-1` is `2^256 - 1`. -/
 theorem ReprV.int_inv {v : PrimTy.int.Denote} {w : Word} (h : ReprV .int v w) :
-    ∃ a : Nat, a < W ∧ v.1 = sgn a ∧ w = .val a := by
-  obtain ⟨a, rfl, ha, hv⟩ := h
-  exact ⟨a, ha, hv, rfl⟩
+    ∃ a : Nat, ∃ ha : a < W, v.1 = sgn a ∧ w = .val ⟨a, ha⟩ := by
+  obtain ⟨a, rfl, hv⟩ := h
+  exact ⟨a.1, a.2, hv, rfl⟩
 
 /-- A word below `2^256` represents itself as a `uint`: `total = 7;` pushes `7`. -/
-theorem ReprV.uint_of {v : PrimTy.uint.Denote} {a : Nat} (h : v.1 = a) : ReprV .uint v (.val a) := by
-  show Word.val a = .val v.1.toNat
-  rw [h, Int.toNat_natCast]
+theorem ReprV.uint_of {v : PrimTy.uint.Denote} {a : Fin W} (h : v.1 = a.1) :
+    ReprV .uint v (.val a) :=
+  ⟨a, rfl, h⟩
 
 /-- A value's outcome, typed run and machine together: a value and the word
 representing it pushed, or both revert. -/
@@ -119,40 +117,41 @@ private theorem out_revert {p : PrimTy} {m : Machine} : ValOutT p (TRes.ofOpt no
 
 /-- A `uint` in range, its word pushed: `3 + 4` pushes `7`. -/
 private theorem out_uint_ok {n : Int} {r : Nat} (hr : n = r) (hrW : r < W) {out : Out}
-    {m : Machine} (hrun : out = .ok (m.push (.val r)) 0) :
+    {m : Machine} (hrun : out = .ok (m.push (.val ⟨r, hrW⟩)) 0) :
     ValOutT .uint (TRes.ofOpt (PrimTy.uint.ofInt? n)) out m := by
   rw [ofInt_uint ⟨by omega, by omega⟩]
-  refine .inl ⟨_, _, rfl, ?_, hrun⟩
-  show Word.val r = .val n.toNat
-  rw [hr, Int.toNat_natCast]
+  exact .inl ⟨_, _, rfl, ReprV.uint_of hr, hrun⟩
 
 /-- A `uint` guard: the word pushed when the result is in range, else a
 revert (`add_tail`'s shape). -/
 private theorem out_uint_if {n : Int} {r : Nat} {c : Prop} [Decidable c]
     (hc : c ↔ 0 ≤ n ∧ n < W) (hr : c → n = r) (m : Machine) :
     ValOutT .uint (TRes.ofOpt (PrimTy.uint.ofInt? n))
-      (if c then .ok { m with stack := .val r :: m.stack } 0 else .revert) m := by
+      (if h : c then .ok { m with stack := .val ⟨r, by have := hc.1 h; have := hr h; omega⟩ ::
+        m.stack } 0 else .revert) m := by
   by_cases h : c
   · have := hc.1 h
-    rw [if_pos h]
-    exact out_uint_ok (hr h) (by have := hr h; omega) rfl
-  · rw [if_neg h, ofInt_uint_none (fun h' => h (hc.2 h'))]
+    rw [dif_pos h]
+    exact out_uint_ok (hr h) _ rfl
+  · rw [dif_neg h, ofInt_uint_none (fun h' => h (hc.2 h'))]
     exact out_revert
 
 /-- An `int` in range, its two's complement pushed: `x = -1` pushes `2^256 - 1`. -/
 private theorem out_int_ok {n : Int} (h : -(H : Int) ≤ n ∧ n < H) {out : Out} {m : Machine}
-    (hrun : out = .ok (m.push (.val (toWord n))) 0) :
+    (hrun : out = .ok (m.push (.val (sword n))) 0) :
     ValOutT .int (TRes.ofOpt (PrimTy.int.ofInt? n)) out m := by
   rw [ofInt_int h]
   exact .inl ⟨_, _, rfl,
-    ⟨_, rfl, toWord_lt (by have := W_eq; omega) (by have := W_eq; omega), (sgn_toWord h.1 h.2).symm⟩,
+    ⟨_, rfl, by
+      rw [sword_val (by have := W_eq; omega) (by have := W_eq; omega)]
+      exact (sgn_toWord h.1 h.2).symm⟩,
     hrun⟩
 
 /-- An `int` guard: the word pushed when the result is in range, else a
 revert (`sadd_tail`'s shape). -/
 private theorem out_int_if {n : Int} (m : Machine) :
     ValOutT .int (TRes.ofOpt (PrimTy.int.ofInt? n))
-      (if -(H : Int) ≤ n ∧ n < H then .ok { m with stack := .val (toWord n) :: m.stack } 0
+      (if -(H : Int) ≤ n ∧ n < H then .ok { m with stack := .val (sword n) :: m.stack } 0
         else .revert) m := by
   by_cases h : -(H : Int) ≤ n ∧ n < H
   · rw [if_pos h]; exact out_int_ok h rfl
@@ -180,26 +179,26 @@ theorem mod_W_of_ge {x : Nat} (h₁ : W ≤ x) (h₂ : x < W + W) : x % W = x - 
 
 /-- `OR` of two comparison words is `0` exactly when both are false (the `*` guard). -/
 @[simp] theorem bword_or_eq_zero (x y : Bool) :
-    (bword x ||| bword y) = 0 ↔ x = false ∧ y = false := by
+    ((bword x).1 ||| (bword y).1) = 0 ↔ x = false ∧ y = false := by
   cases x <;> cases y <;> decide
 
 /-- `a + b` with solc's overflow check: the sum wraps exactly when it is below
 `a`.  With `a = 2^256 - 1` and `b = 1` the word is `0`, below `a`, and the code
 reverts; with `a = 3`, `b = 4` it is `7`. -/
 theorem add_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
-    run (uTail .add) { m with stack := .val b :: .val a :: st } =
-      if a + b < W then .ok { m with stack := .val (a + b) :: st } 0 else .revert := by
+    run (uTail .add) { m with stack := w[b] :: w[a] :: st } =
+      if _ : a + b < W then .ok { m with stack := w[a + b] :: st } 0 else .revert := by
   simp [run, uTail, assertTop, Instr.step, Machine.next]
   by_cases h : a + b < W
-  · rw [mod_W_of_lt h]; simp [h, show ¬ a + b < a by omega, Instr.step, Machine.next]
-  · rw [mod_W_of_ge (by omega) (by omega)]
+  · simp only [mod_W_of_lt h]; simp [h, show ¬ a + b < a by omega, Instr.step, Machine.next]
+  · simp only [mod_W_of_ge (show W ≤ a + b by omega) (by omega)]
     simp [h, Instr.step, show a + b - W < a by omega]
 
 /-- `a - b` with solc's underflow check: revert when `b > a`.  `3 - 4`
 reverts, `4 - 3` is `1`. -/
 theorem sub_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
-    run (uTail .sub) { m with stack := .val b :: .val a :: st } =
-      if b ≤ a then .ok { m with stack := .val (a - b) :: st } 0 else .revert := by
+    run (uTail .sub) { m with stack := w[b] :: w[a] :: st } =
+      if _ : b ≤ a then .ok { m with stack := w[a - b] :: st } 0 else .revert := by
   simp [run, uTail, assertTop, Instr.step, Machine.next]
   by_cases h : b ≤ a
   · have e : (a + (W - b)) % W = a - b := by
@@ -227,9 +226,9 @@ theorem mul_ok_iff {a b : Nat} :
     · right; rw [mod_W_of_lt h, Nat.mul_div_cancel_left _ hpos]
 
 /-- `a * b` with solc's overflow check. -/
-theorem mul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) :
-    run (uTail .mul) { m with stack := .val b :: .val a :: st } =
-      if a * b < W then .ok { m with stack := .val (a * b) :: st } 0 else .revert := by
+theorem mul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (uTail .mul) { m with stack := w[b] :: w[a] :: st } =
+      if _ : a * b < W then .ok { m with stack := w[a * b] :: st } 0 else .revert := by
   simp [run, uTail, assertTop, Instr.step, Machine.next]
   have key := mul_ok_iff (a := a) (b := b)
   by_cases h : a * b < W
@@ -246,34 +245,34 @@ theorem mul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) :
     simp [h0, h1, Instr.step]
 
 /-- `a / b`, reverting on `b = 0` (solc's `Panic(0x12)`). -/
-theorem div_tail (m : Machine) (st : List Word) (a b : Nat) :
-    run (uTail .div) { m with stack := .val b :: .val a :: st } =
-      if b = 0 then .revert else .ok { m with stack := .val (a / b) :: st } 0 := by
+theorem div_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (uTail .div) { m with stack := w[b] :: w[a] :: st } =
+      if b = 0 then .revert else .ok { m with stack := w[a / b] :: st } 0 := by
   by_cases h : b = 0
   · subst h; rfl
   · simp [run, uTail, assertTop, Instr.step, Machine.next, h]
 
 /-- `a % b`, reverting on `b = 0`. -/
-theorem mod_tail (m : Machine) (st : List Word) (a b : Nat) :
-    run (uTail .mod) { m with stack := .val b :: .val a :: st } =
-      if b = 0 then .revert else .ok { m with stack := .val (a % b) :: st } 0 := by
+theorem mod_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (uTail .mod) { m with stack := w[b] :: w[a] :: st } =
+      if b = 0 then .revert else .ok { m with stack := w[a % b] :: st } 0 := by
   by_cases h : b = 0
   · subst h; rfl
   · simp [run, uTail, assertTop, Instr.step, Machine.next, h]
 
 /-- A comparison or an equality: one or two instructions and no guard. -/
-theorem cmp_tail (m : Machine) (st : List Word) (a b : Nat) :
-    run (uTail .lt) { m with stack := .val b :: .val a :: st } =
+theorem cmp_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (uTail .lt) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (a < b))) :: st } 0 ∧
-    run (uTail .gt) { m with stack := .val b :: .val a :: st } =
+    run (uTail .gt) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (b < a))) :: st } 0 ∧
-    run (uTail .le) { m with stack := .val b :: .val a :: st } =
+    run (uTail .le) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (a ≤ b))) :: st } 0 ∧
-    run (uTail .ge) { m with stack := .val b :: .val a :: st } =
+    run (uTail .ge) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (b ≤ a))) :: st } 0 ∧
-    run (uTail .eqB) { m with stack := .val b :: .val a :: st } =
+    run (uTail .eqB) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (a = b))) :: st } 0 ∧
-    run (uTail .neB) { m with stack := .val b :: .val a :: st } =
+    run (uTail .neB) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (!decide (a = b))) :: st } 0 := by
   refine ⟨rfl, rfl, ?_, ?_, ?_, ?_⟩
   · simp [run, uTail, Instr.step, Machine.next, bword]
@@ -301,7 +300,7 @@ private theorem utail_simT {op : BinOp} (hop : binInFrag op .uint = true) (hand 
     (hor : op ≠ .or) (hacc : op.accepts .uint = true) {a b : Nat} (ha : a < W) (hb : b < W)
     (m : Machine) :
     ValOutT (op.ret .uint) (TRes.ofOpt (BinOp.evalNum .uint rfl a b op hacc))
-      (run (uTail op) { m with stack := .val b :: .val a :: m.stack }) m := by
+      (run (uTail op) { m with stack := w[b] :: w[a] :: m.stack }) m := by
   cases op <;> first | exact absurd hop (by decide) | exact absurd rfl hand | exact absurd rfl hor | skip
   all_goals simp only [BinOp.evalNum, BinOp.arithInt, some_bind']
   · -- `+`
@@ -311,32 +310,32 @@ private theorem utail_simT {op : BinOp} (hop : binInFrag op .uint = true) (hand 
     rw [sub_tail m m.stack ha hb]
     exact out_uint_if (n := (a : Int) - b) (r := a - b) (by omega) (fun _ => by omega) m
   · -- `*`
-    rw [mul_tail m m.stack ha, ← Int.natCast_mul]
+    rw [mul_tail m m.stack ha hb, ← Int.natCast_mul]
     exact out_uint_if (n := ((a * b : Nat) : Int)) (r := a * b) (by omega) (fun _ => rfl) m
   · -- `**`
     rw [if_neg (by omega), some_bind', Int.toNat_natCast, ← Int.natCast_pow,
       exp_tail m m.stack ha hb]
     exact out_uint_if (n := ((a ^ b : Nat) : Int)) (r := a ^ b) (by omega) (fun _ => rfl) m
   · -- `/`
-    rw [div_tail]
+    rw [div_tail m m.stack ha hb]
     by_cases h : b = 0
     · rw [if_pos (by omega), if_pos h]; exact out_revert
     · rw [if_neg (by omega), if_neg h, some_bind']
       exact out_uint_ok (n := Int.tdiv a b) (r := a / b) rfl
         (Nat.lt_of_le_of_lt (Nat.div_le_self a b) ha) rfl
   · -- `%`
-    rw [mod_tail]
+    rw [mod_tail m m.stack ha hb]
     by_cases h : b = 0
     · rw [if_pos (by omega), if_pos h]; exact out_revert
     · rw [if_neg (by omega), if_neg h, some_bind']
       exact out_uint_ok (n := Int.tmod a b) (r := a % b) rfl
         (Nat.lt_of_le_of_lt (Nat.mod_le a b) ha) rfl
-  · exact out_bool (by simp only [Int.ofNat_lt]) (cmp_tail m m.stack a b).1
-  · exact out_bool (by simp only [Int.ofNat_lt]) (cmp_tail m m.stack a b).2.1
-  · exact out_bool (by simp only [Int.ofNat_le]) (cmp_tail m m.stack a b).2.2.1
-  · exact out_bool (by simp only [Int.ofNat_le]) (cmp_tail m m.stack a b).2.2.2.1
-  · exact out_bool (by simp only [Int.ofNat_inj]) (cmp_tail m m.stack a b).2.2.2.2.1
-  · exact out_bool (by simp only [Int.ofNat_inj]) (cmp_tail m m.stack a b).2.2.2.2.2
+  · exact out_bool (by simp only [Int.ofNat_lt]) (cmp_tail m m.stack ha hb).1
+  · exact out_bool (by simp only [Int.ofNat_lt]) (cmp_tail m m.stack ha hb).2.1
+  · exact out_bool (by simp only [Int.ofNat_le]) (cmp_tail m m.stack ha hb).2.2.1
+  · exact out_bool (by simp only [Int.ofNat_le]) (cmp_tail m m.stack ha hb).2.2.2.1
+  · exact out_bool (by simp only [Int.ofNat_inj]) (cmp_tail m m.stack ha hb).2.2.2.2.1
+  · exact out_bool (by simp only [Int.ofNat_inj]) (cmp_tail m m.stack ha hb).2.2.2.2.2
   · -- `&`
     exact out_uint_ok (r := b &&& a) (by show ((a &&& b : Nat) : Int) = _; rw [Nat.and_comm])
       (Nat.and_lt_two_pow b ha) rfl
@@ -347,19 +346,21 @@ private theorem utail_simT {op : BinOp} (hop : binInFrag op .uint = true) (hand 
     exact out_uint_ok (r := b ^^^ a) (by show ((a ^^^ b : Nat) : Int) = _; rw [Nat.xor_comm])
       (Nat.xor_lt_two_pow hb ha) rfl
   · -- `<<`
-    refine out_uint_ok (r := if b < 256 then a * 2 ^ b % W else 0) ?_
-      (by split <;> first | exact Nat.mod_lt _ W_pos | exact W_pos) rfl
     by_cases h : b < 256
-    · rw [if_pos (by omega), if_pos h, Int.toNat_natCast]
+    · refine out_uint_ok (r := a * 2 ^ b % W) ?_ (Nat.mod_lt _ W_pos)
+        (by simp [run, uTail, Instr.step, Machine.next, Machine.push, h])
+      rw [if_pos (by omega), Int.toNat_natCast]
       show (a : Int) * 2 ^ b % (W : Int) = _
       rw [Int.natCast_emod, Int.natCast_mul, Int.natCast_pow]; rfl
-    · rw [if_neg (by omega), if_neg h]; rfl
+    · refine out_uint_ok (r := 0) ?_ W_pos (by simp [run, uTail, Instr.step, Machine.next, Machine.push, h])
+      rw [if_neg (by omega)]; rfl
   · -- `>>`
-    refine out_uint_ok (r := if b < 256 then a / 2 ^ b else 0) ?_
-      (by split <;> first | exact Nat.lt_of_le_of_lt (Nat.div_le_self _ _) ha | exact W_pos) rfl
     by_cases h : b < 256
-    · rw [if_pos (by omega), if_pos h, Int.toNat_natCast, Int.natCast_ediv, Int.natCast_pow]; rfl
-    · rw [if_neg (by omega), if_neg h]; rfl
+    · refine out_uint_ok (r := a / 2 ^ b) ?_ (Nat.lt_of_le_of_lt (Nat.div_le_self _ _) ha)
+        (by simp [run, uTail, Instr.step, Machine.next, Machine.push, h])
+      rw [if_pos (by omega), Int.toNat_natCast, Int.natCast_ediv, Int.natCast_pow]; rfl
+    · refine out_uint_ok (r := 0) ?_ W_pos (by simp [run, uTail, Instr.step, Machine.next, Machine.push, h])
+      rw [if_neg (by omega)]; rfl
   · -- `+%`
     refine out_uint_ok (r := (b + a) % W) ?_ (Nat.mod_lt _ W_pos) rfl
     show ((a : Int) + b) % (W : Int) = _
@@ -382,7 +383,7 @@ private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand :
     (hor : op ≠ .or) (hacc : op.accepts .int = true) {a b : Nat} (ha : a < W) (hb : b < W)
     (m : Machine) :
     ValOutT (op.ret .int) (TRes.ofOpt (BinOp.evalNum .int rfl (sgn a) (sgn b) op hacc))
-      (run (sTail op) { m with stack := .val b :: .val a :: m.stack }) m := by
+      (run (sTail op) { m with stack := w[b] :: w[a] :: m.stack }) m := by
   have hb0 : (sgn b = 0) ↔ b = 0 := sgn_eq_zero hb
   have heq : decide (a = b) = decide (sgn a = sgn b) :=
     decide_eq_decide.2 ⟨fun h => h ▸ rfl, sgn_inj ha hb⟩
@@ -392,7 +393,7 @@ private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand :
   · rw [ssub_tail m m.stack ha hb]; exact out_int_if m
   · rw [smul_tail m m.stack ha hb]; exact out_int_if m
   · -- `/`
-    rw [sdiv_tail]
+    rw [sdiv_tail m m.stack ha hb]
     by_cases h0 : b = 0
     · rw [if_pos h0, if_pos (hb0.2 h0)]; exact out_revert
     · rw [if_neg h0, if_neg (fun h => h0 (hb0.1 h)), some_bind']
@@ -407,17 +408,17 @@ private theorem stail_simT {op : BinOp} (hop : binInFrag op .int = true) (hand :
       · rw [if_neg hs]
         exact out_int_ok (hr.2 fun h => hs ⟨e1.2 h.1, e2.2 h.2⟩) rfl
   · -- `%`
-    rw [smod_tail]
+    rw [smod_tail m m.stack ha hb]
     by_cases h0 : b = 0
     · rw [if_pos h0, if_pos (hb0.2 h0)]; exact out_revert
     · rw [if_neg h0, if_neg (fun h => h0 (hb0.1 h)), some_bind']
       exact out_int_ok (tmod_range (x := sgn a) (sgn_range hb) (fun h => h0 (hb0.1 h))) rfl
-  · exact out_bool rfl (scmp_tail m m.stack a b).1
-  · exact out_bool rfl (scmp_tail m m.stack a b).2.1
-  · exact out_bool rfl (scmp_tail m m.stack a b).2.2.1
-  · exact out_bool rfl (scmp_tail m m.stack a b).2.2.2.1
-  · exact out_bool heq (scmp_tail m m.stack a b).2.2.2.2.1
-  · exact out_bool (by rw [heq]) (scmp_tail m m.stack a b).2.2.2.2.2
+  · exact out_bool rfl (scmp_tail m m.stack ha hb).1
+  · exact out_bool rfl (scmp_tail m m.stack ha hb).2.1
+  · exact out_bool rfl (scmp_tail m m.stack ha hb).2.2.1
+  · exact out_bool rfl (scmp_tail m m.stack ha hb).2.2.2.1
+  · exact out_bool heq (scmp_tail m m.stack ha hb).2.2.2.2.1
+  · exact out_bool (by rw [heq]) (scmp_tail m m.stack ha hb).2.2.2.2.2
 
 /-- **The operators agree**, typed: on words representing its operands, an
 operator's tail computes the word of the typed result, or reverts exactly
@@ -435,8 +436,8 @@ theorem tail_simT {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand 
     rw [hxa, hyb]
     exact utail_simT hop hand hor hacc hx hy m
   | int =>
-    obtain ⟨x, rfl, hx, hxa⟩ := ha
-    obtain ⟨y, rfl, hy, hyb⟩ := hb
+    obtain ⟨⟨x, hx⟩, rfl, hxa⟩ := ha
+    obtain ⟨⟨y, hy⟩, rfl, hyb⟩ := hb
     show ValOutT _ (TRes.ofOpt (BinOp.evalNum .int rfl a.1 b.1 op hacc)) (run (sTail op) _) m
     rw [hxa, hyb]
     exact stail_simT hop hand hor hacc hx hy m
@@ -444,27 +445,29 @@ theorem tail_simT {op : BinOp} {p : PrimTy} (hop : binInFrag op p = true) (hand 
     obtain rfl : wa = .val (bword a) := ha
     obtain rfl : wb = .val (bword b) := hb
     show ValOutT _ (TRes.ofOpt (BinOp.evalBool a b op hacc)) (run (uTail op) _) m
-    have cmp := cmp_tail m m.stack (bword a) (bword b)
-    have e : decide (bword a = bword b) = decide (a = b) := by cases a <;> cases b <;> rfl
+    have cmp := cmp_tail m m.stack (bword a).2 (bword b).2
+    have e : decide ((bword a).1 = (bword b).1) = decide (a = b) := by
+      cases a <;> cases b <;> rfl
     cases op <;> first | exact absurd hop (by decide) | exact absurd rfl hand | exact absurd rfl hor | skip
     · exact out_bool e cmp.2.2.2.2.1
     · exact out_bool (by rw [e]) cmp.2.2.2.2.2
 
 /-- An `int` is represented by its two's complement word: `-1` is `2^256 - 1`. -/
-theorem ReprV.int_word (v : PrimTy.int.Denote) : ReprV .int v (.val (toWord v.1)) := by
+theorem ReprV.int_word (v : PrimTy.int.Denote) : ReprV .int v (.val (sword v.1)) := by
   obtain ⟨n, hn⟩ := v
   simp only [PrimTy.inRange, decide_eq_true_eq] at hn
   have h1 : -(H : Int) ≤ n := hn.1
   have h2 : n < (H : Int) := hn.2
-  exact ⟨_, rfl, toWord_lt (n := n) (by have := W_eq; omega) (by have := W_eq; omega),
-    (sgn_toWord h1 h2).symm⟩
+  refine ⟨_, rfl, ?_⟩
+  rw [sword_val (n := n) (by have := W_eq; omega) (by have := W_eq; omega)]
+  exact (sgn_toWord h1 h2).symm
 
 /-- `-x` at `int`: the negation, or a revert at `-2^255`. -/
 theorem neg_simT {a : PrimTy.int.Denote} {wa : Word} (ha : ReprV .int a wa) (m : Machine) :
     ValOutT .int (TRes.ofOpt (UnOp.neg.evalT rfl a)) (run negCode (m.push wa)) m := by
-  obtain ⟨x, rfl, hx, hax⟩ := ha
+  obtain ⟨⟨x, hx⟩, rfl, hax⟩ := ha
   show ValOutT .int (TRes.ofOpt (PrimTy.int.ofInt? (-a.1)))
-    (run negCode { m with stack := .val x :: m.stack }) m
+    (run negCode { m with stack := w[x] :: m.stack }) m
   rw [neg_run m m.stack hx, hax]
   exact out_int_if m
 
@@ -517,19 +520,18 @@ theorem bump_frag (op : IncDec) : op.binOp.hasCompoundAssign = true := by
 theorem bump_simT {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) {a : p.Denote} {w : Word}
     (h : ReprV p a w) (m : Machine) :
     ValOutT p (TRes.ofOpt (Solidity.bumpT op p (PrimTy.key a)))
-      (run ([.push (.val 1)] ++ binTail p op.binOp) { m with stack := w :: m.stack }) m := by
-  rw [run_append_ok (m' := { m with stack := .val 1 :: w :: m.stack }) rfl]
+      (run ([.push w[1]] ++ binTail p op.binOp) { m with stack := w :: m.stack }) m := by
+  rw [run_append_ok (m' := { m with stack := w[1] :: w :: m.stack }) rfl]
   cases p with
   | bool => cases hp
   | uint =>
-    have h1 : ReprV .uint (⟨1, rfl⟩ : PrimTy.uint.Denote) (.val 1) := rfl
+    have h1 : ReprV .uint (⟨1, rfl⟩ : PrimTy.uint.Denote) w[1] := ⟨_, rfl, rfl⟩
     have ht := tail_simT (op := op.binOp) (by cases op <;> rfl) (by cases op <;> decide)
       (by cases op <;> decide) (by cases op <;> rfl) h h1 m
     cases op <;> exact ht
   | int =>
-    have h1 : ReprV .int (⟨1, rfl⟩ : PrimTy.int.Denote) (.val 1) :=
-      ⟨1, rfl, by have := W_eq; have := H_pos; omega,
-        by unfold sgn; rw [if_pos (by unfold H; decide)]; rfl⟩
+    have h1 : ReprV .int (⟨1, rfl⟩ : PrimTy.int.Denote) w[1] :=
+      ⟨_, rfl, by show (1 : Int) = sgn 1; unfold sgn; rw [if_pos (by unfold H; decide)]; rfl⟩
     have ht := tail_simT (op := op.binOp) (by cases op <;> rfl) (by cases op <;> decide)
       (by cases op <;> decide) (by cases op <;> rfl) h h1 m
     cases op <;> exact ht
@@ -540,51 +542,53 @@ end Words
 
 /-- With `… s i` on the stack, the bounds check passes when `i` is below the
 word at `s` and reverts otherwise: `values[3]` with three values reverts. -/
-theorem boundsCheck_run (m : Machine) (st : List Word) (rest : List Instr) (i : Nat) (s : Slot) :
-    run (boundsCheck ++ rest) { m with stack := .val i :: .slot s :: st } =
-      if i < m.store s then run rest { m with stack := .val i :: .slot s :: st } else .revert := by
+theorem boundsCheck_run (m : Machine) (st : List Word) (rest : List Instr) (i : Nat) (s : Slot)
+    (hi : i < W) :
+    run (boundsCheck ++ rest) { m with stack := w[i] :: .slot s :: st } =
+      if i < m.store s then run rest { m with stack := w[i] :: .slot s :: st } else .revert := by
   by_cases h : i < m.store s
   · simp [run, boundsCheck, assertTop, Instr.step, Machine.next, h, bword]
   · simp [run, boundsCheck, assertTop, Instr.step, Machine.next, h, bword]
 
 /-- `z` additions of `i` to a slot add `z·i`: element `i` of `Person[]` is `3·i` past
 `keccak(9)`. -/
-theorem addRep_run (m : Machine) (st : List Word) (i : Nat) :
-    ∀ (z : Nat) (t : Slot), run (addRep z) { m with stack := .slot t :: .val i :: st } =
-      .ok { m with stack := .slot (t.add (z * i)) :: .val i :: st } 0
+theorem addRep_run (m : Machine) (st : List Word) (i : Nat) (hi : i < W) :
+    ∀ (z : Nat) (t : Slot), run (addRep z) { m with stack := .slot t :: w[i] :: st } =
+      .ok { m with stack := .slot (t.add (z * i)) :: w[i] :: st } 0
   | 0, t => by simp [addRep]
   | z + 1, t => by
-    rw [addRep, run_append_ok (m' := { m with stack := .slot (t.add i) :: .val i :: st })
-      (by simp [run, Instr.step, Machine.next]), addRep_run m st i z (t.add i),
+    rw [addRep, run_append_ok (m' := { m with stack := .slot (t.add i) :: w[i] :: st })
+      (by simp [run, Instr.step, Machine.next]), addRep_run m st i hi z (t.add i),
       Slot.add_add, Nat.succ_mul, Nat.add_comm (z * i)]
 
 /-- Element `i` of the array at `s`, whose elements take `z` slots, is at
 `keccak(s) + i·z`: `persons[1].age` is `keccak(9) + 3 + 2`. -/
-theorem elemSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
-    run (elemSlot z) { m with stack := .val i :: .slot s :: st } =
+theorem elemSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) (hi : i < W) :
+    run (elemSlot z) { m with stack := w[i] :: .slot s :: st } =
       .ok { m with stack := .slot (.data s (i * z)) :: st } 0 := by
   rw [elemSlot, List.append_assoc,
-    run_append_ok (m' := { m with stack := .slot (.data s 0) :: .val i :: st })
-    (by simp [run, Instr.step, Machine.next]), run_append_ok (addRep_run m st i z _)]
+    run_append_ok (m' := { m with stack := .slot (.data s 0) :: w[i] :: st })
+    (by simp [run, Instr.step, Machine.next]), run_append_ok (addRep_run m st i hi z _)]
   simp [run, Instr.step, Machine.next, Slot.add, Nat.mul_comm]
 
 /-- A fixed-size array's bound is its type's, a constant: `fixedValues[k]`
 checks `k < 3` and reads no length slot. -/
-theorem fixedCheck_run (m : Machine) (st : List Word) (rest : List Instr) (n i : Nat) (s : Slot) :
-    run (fixedCheck n ++ rest) { m with stack := .val i :: .slot s :: st } =
-      if i < n then run rest { m with stack := .val i :: .slot s :: st } else .revert := by
+theorem fixedCheck_run (m : Machine) (st : List Word) (rest : List Instr) (n i : Nat) (s : Slot)
+    (hn : n < W) (hi : i < W) :
+    run (fixedCheck n ++ rest) { m with stack := w[i] :: .slot s :: st } =
+      if i < n then run rest { m with stack := w[i] :: .slot s :: st } else .revert := by
   by_cases h : i < n
-  · simp [run, fixedCheck, assertTop, Instr.step, Machine.next, h, bword]
-  · simp [run, fixedCheck, assertTop, Instr.step, Machine.next, h, bword]
+  · simp [run, fixedCheck, assertTop, Instr.step, Machine.next, h, bword, Nat.mod_eq_of_lt hn]
+  · simp [run, fixedCheck, assertTop, Instr.step, Machine.next, h, bword, Nat.mod_eq_of_lt hn]
 
 /-- Element `i` of the fixed-size array laid out from `s`, whose elements take
 `z` slots, is at `s + i·z`: `fixedTokens[1].value` is `fixedTokens`'s slot plus `1`. -/
-theorem fixedSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
-    run (fixedSlot z) { m with stack := .val i :: .slot s :: st } =
+theorem fixedSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) (hi : i < W) :
+    run (fixedSlot z) { m with stack := w[i] :: .slot s :: st } =
       .ok { m with stack := .slot (s.add (i * z)) :: st } 0 := by
   rw [fixedSlot, List.append_assoc,
-    run_append_ok (m' := { m with stack := .slot s :: .val i :: st })
-    (by simp [run, Instr.step, Machine.next]), run_append_ok (addRep_run m st i z _)]
+    run_append_ok (m' := { m with stack := .slot s :: w[i] :: st })
+    (by simp [run, Instr.step, Machine.next]), run_append_ok (addRep_run m st i hi z _)]
   simp [run, Instr.step, Machine.next, Nat.mul_comm]
 
 
@@ -592,11 +596,10 @@ theorem fixedSlot_run (m : Machine) (st : List Word) (i z : Nat) (s : Slot) :
 
 /-- The machine's environment is the transaction's: `CALLER` pushes
 `msg.sender`, `ADDRESS` the contract's address, `address(this)`, and each of
-them is a word. -/
+them a word by its type. -/
 def EnvSim (t : TTx) (m : Machine) : Prop :=
-  t.msgSender.1 = m.caller ∧ t.msgValue.1 = m.callvalue ∧ t.timestamp.1 = m.timestamp ∧
-    t.selfAddress.1 = m.self ∧
-    m.caller < W ∧ m.callvalue < W ∧ m.timestamp < W ∧ m.self < W
+  t.msgSender.1 = m.caller.1 ∧ t.msgValue.1 = m.callvalue.1 ∧ t.timestamp.1 = m.timestamp.1 ∧
+    t.selfAddress.1 = m.self.1
 
 /-- `net(a)`: the ledger's entry at `a`, `0` where nothing was booked. -/
 def netAt (net : Ledger) (a : Int) : Int := (Semantics.lookupBy a (Ledger.entries net)).getD 0
@@ -621,7 +624,7 @@ variable {C : Contract} {L : Nat}
 /-- A primitive storage value is read as the word at its slot: `alice.age`
 pushes slot `13`'s word, an `int` its two's complement. -/
 theorem prim_read {st : WordStore} {p : PrimTy} {s : Slot} {sv : SVal (.prim p)}
-    (h : ReprAt st L (.prim p) s sv) : ∃ v, sv = .prim v ∧ ReprV p v (.val (st s)) := by
+    (h : ReprAt st L (.prim p) s sv) : ∃ v, sv = .prim v ∧ ReprV p v (.val (st.cells s)) := by
   cases h with
   | prim h => exact ⟨_, rfl, h⟩
 
@@ -637,14 +640,16 @@ theorem upd_len {st : WordStore} {a : Bool} {p : PrimTy} {r : SRef C (.prim p)} 
 /-- `delete`'s writes: `0` at each leaf, the slot kept on the stack; `delete alice;` writes `11`,
 `12`, `13`. -/
 theorem zeroCode_run (m : Machine) (st : List Word) (s : Slot) : ∀ (os : List Nat),
+    (∀ o ∈ os, o < W) →
     run (zeroCode os) { m with stack := .slot s :: st } =
       .ok { m with stack := .slot s :: st, store := zeroAt m.store s os } 0
-  | [] => rfl
-  | o :: os => by
+  | [], _ => rfl
+  | o :: os, hos => by
     rw [zeroCode, List.flatMap_cons, ← zeroCode,
       run_append_ok (m' := { m with stack := .slot s :: st, store := WordStore.write m.store (s.add o) 0 })
-        (by simp [run, Instr.step, Machine.next])]
+        (by simp [run, Instr.step, Machine.next, Nat.mod_eq_of_lt (hos o List.mem_cons_self)])]
     exact zeroCode_run { m with store := WordStore.write m.store (s.add o) 0 } st s os
+      fun o' h' => hos o' (List.mem_cons_of_mem _ h')
 
 /-- `pop` on the array at `s`: revert on an empty array, else the length
 decremented. -/
@@ -664,18 +669,18 @@ theorem popCode_run (m : Machine) (st : List Word) (s : Slot) (hW : m.store s < 
 itself, an `int` as its word. -/
 theorem repr_write {p : PrimTy} {v : p.Denote} {w : Word}
     (hv : ReprV p v w) (st : WordStore) (s : Slot) :
-    ∃ a, w = .val a ∧ ReprAt (WordStore.write st s a) L (.prim p) s (.prim v) := by
+    ∃ a : Fin W, w = .val a ∧ ReprAt (WordStore.write st s a.1) L (.prim p) s (.prim v) := by
   cases p with
   | uint =>
-    obtain ⟨a, hW, ha, rfl⟩ := hv.uint_inv
-    exact ⟨a, rfl, .prim (by rw [WordStore.write_same_of_lt _ _ _ hW]; exact ReprV.uint_of ha)⟩
+    obtain ⟨a, rfl, ha⟩ := hv
+    exact ⟨a, rfl, .prim (by rw [WordStore.write_cells_same]; exact ReprV.uint_of ha)⟩
   | bool =>
     have := hv.bool_inv
     subst this
-    exact ⟨_, rfl, .prim (by rw [WordStore.write_same_of_lt _ _ _ (by cases v <;> decide)]; rfl)⟩
+    exact ⟨_, rfl, .prim (by rw [WordStore.write_cells_same]; rfl)⟩
   | int =>
-    obtain ⟨a, ha, hax, rfl⟩ := hv.int_inv
-    exact ⟨a, rfl, .prim ⟨a, by rw [WordStore.write_same_of_lt _ _ _ ha], ha, hax⟩⟩
+    obtain ⟨a, rfl, hax⟩ := hv
+    exact ⟨a, rfl, .prim ⟨a, by rw [WordStore.write_cells_same], hax⟩⟩
 
 /-- `x++`'s code as an expression: `… old → … new v`, with `v` the new word
 for `++x` and the old one for `x++`. -/
@@ -691,8 +696,8 @@ theorem bumpCode_simT {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) {a : 
   · -- `x++`: the old word kept under the new one
     have hv := (bump_simT hp op h { m with stack := w :: m.stack }).opt_cases
     simp only [if_false, Bool.false_eq_true]
-    rw [show [Instr.dup 1, .push (.val 1)] ++ binTail p op.binOp =
-      [Instr.dup 1] ++ ([.push (.val 1)] ++ binTail p op.binOp) from rfl,
+    rw [show [Instr.dup 1, .push w[1]] ++ binTail p op.binOp =
+      [Instr.dup 1] ++ ([.push w[1]] ++ binTail p op.binOp) from rfl,
       run_append_ok (m' := { m with stack := w :: w :: m.stack }) rfl]
     rcases hv with ⟨vn, wn, h1, h2, h3⟩ | ⟨h1, h3⟩
     · exact .inl ⟨vn, wn, h1, h2, h3⟩
@@ -757,33 +762,36 @@ theorem push_len {st st' : WordStore} {a : Bool} {E : Ty} {r : SRef C (.ref (.ar
       exact len_prim_disjoint hx ⟨r.root, T₀, h0, oc⟩
 
 /-- `loadLeaves`: the words at `s + o`, pushed in order below the slot. -/
-theorem loadLeaves_run (m : Machine) (s : Slot) : ∀ (os : List Nat) (st : List Word),
+theorem loadLeaves_run (m : Machine) (s : Slot) : ∀ (os : List Nat), (∀ o ∈ os, o < W) →
+    ∀ (st : List Word),
     run (loadLeaves os) { m with stack := .slot s :: st } =
       .ok { m with stack := .slot s ::
-        ((os.map fun o => m.store (s.add o)).reverse.map Word.val ++ st) } 0
-  | [], st => rfl
-  | o :: os, st => by
+        ((os.map fun o => m.store.cells (s.add o)).reverse.map Word.val ++ st) } 0
+  | [], _, st => rfl
+  | o :: os, hos, st => by
     rw [loadLeaves, List.flatMap_cons, ← loadLeaves,
-      run_append_ok (m' := { m with stack := .slot s :: .val (m.store (s.add o)) :: st })
-        (by simp [run, Instr.step, Machine.next]),
-      loadLeaves_run m s os]
+      run_append_ok (m' := { m with stack := .slot s :: .val (m.store.cells (s.add o)) :: st })
+        (by simp [run, Instr.step, Machine.next, Nat.mod_eq_of_lt (hos o List.mem_cons_self)]),
+      loadLeaves_run m s os fun o' h' => hos o' (List.mem_cons_of_mem _ h')]
     simp
 
 /-- `storeLeaves`: each word stored at `d + o`. -/
-theorem storeLeaves_run (m : Machine) (d : Slot) : ∀ (os vs : List Nat) (st : List Word)
-    (mst : WordStore), os.length = vs.length →
+theorem storeLeaves_run (m : Machine) (d : Slot) : ∀ (os : List Nat) (vs : List (Fin W))
+    (st : List Word) (mst : WordStore), (∀ o ∈ os, o < W) → os.length = vs.length →
     run (storeLeaves os) { m with stack := .slot d :: (vs.map Word.val ++ st), store := mst } =
-      .ok { m with stack := .slot d :: st, store := storeAt mst d os vs } 0
-  | [], [], st, mst, _ => rfl
-  | o :: os, v :: vs, st, mst, h => by
+      .ok { m with stack := .slot d :: st, store := storeAt mst d os (vs.map Fin.val) } 0
+  | [], [], st, mst, _, _ => rfl
+  | o :: os, v :: vs, st, mst, hos, h => by
     rw [storeLeaves, List.flatMap_cons, ← storeLeaves,
       run_append_ok
-        (m' := { m with stack := .slot d :: (vs.map Word.val ++ st), store := WordStore.write mst (d.add o) v })
-        (by simp [run, Instr.step, Machine.next]),
-      storeLeaves_run m d os vs st _ (by simpa using h)]
+        (m' := { m with
+          stack := .slot d :: (vs.map Word.val ++ st), store := WordStore.write mst (d.add o) v.1 })
+        (by simp [run, Instr.step, Machine.next, Nat.mod_eq_of_lt (hos o List.mem_cons_self)]),
+      storeLeaves_run m d os vs st _ (fun o' h' => hos o' (List.mem_cons_of_mem _ h'))
+        (by simpa using h)]
     rfl
-  | [], _ :: _, _, _, h => by simp at h
-  | _ :: _, [], _, _, h => by simp at h
+  | [], _ :: _, _, _, _, h => by simp at h
+  | _ :: _, [], _, _, _, h => by simp at h
 
 /-- A copied struct or fixed-size array is laid over what is there. -/
 theorem write_ref {R : RefTy} (stor : Solidity.Storage C) (r : SRef C (.ref R))
@@ -806,19 +814,20 @@ theorem pushSlotCode_run (m : Machine) (st : List Word) (z : Nat) (s : Slot)
         store := WordStore.write m.store s (m.store s + 1) } 0 := by
   have hW := Lmax_lt_W
   have e : (m.store s + 1) % W = m.store s + 1 := Nat.mod_eq_of_lt (by omega)
-  have h1 : run ([.dup 1, .sload, .push (.val Lmax), .dup 2, .lt] ++ assertTop ++
-      [.push (.val 1), .dup 2, .add, .dup 3, .sstore]) { m with stack := .slot s :: st } =
+  have h1 : run ([.dup 1, .sload, .push (.val wLmax), .dup 2, .lt] ++ assertTop ++
+      [.push w[1], .dup 2, .add, .dup 3, .sstore]) { m with stack := .slot s :: st } =
       .ok { m with
-        stack := .val (m.store s) :: .slot s :: st
+        stack := .val (m.store.cells s) :: .slot s :: st
         store := WordStore.write m.store s (m.store s + 1) } 0 := by
     simp [run, assertTop, Instr.step, Machine.next, hl, e, bword]
   rw [pushSlotCode, run_append_ok h1]
   exact elemSlot_run { m with store := WordStore.write m.store s (m.store s + 1) } st (m.store s) z s
+    (m.store.cells s).2
 
 /-- A slot holding `0` represents a primitive type's default. -/
 theorem zero_prim_repr {st : WordStore} {p : PrimTy} {x : Slot}
     (h : st x = 0) : ReprAt st L (.prim p) x (SVal.dflt (.prim p)) :=
-  .prim (by rw [h]; exact ReprV.dflt_zero p)
+  .prim (by rw [show st.cells x = ⟨0, W_pos⟩ from Fin.ext h]; exact ReprV.dflt_zero p)
 
 /-- The slot a `push` of a primitive lands on: its default. -/
 theorem pushSlot_prim (p : PrimTy) (l : List (SVal (.prim p))) :

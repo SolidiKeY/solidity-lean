@@ -40,16 +40,29 @@ theorem sgn_toWord {n : Int} (h1 : -(H : Int) ≤ n) (h2 : n < H) : sgn (toWord 
 theorem toWord_lt {n : Int} (h1 : -(W : Int) ≤ n) (h2 : n < W) : toWord n < W := by
   unfold toWord; split <;> omega
 
+/-- The signed word of an integer in `[-2^256, 2^256)` is its two's complement. -/
+theorem sword_val {n : Int} (h1 : -(W : Int) ≤ n) (h2 : n < W) : (sword n).1 = toWord n :=
+  Nat.mod_eq_of_lt (toWord_lt h1 h2)
+
+/-- A quotient of a signed reading is no larger than it. -/
+theorem tdiv_sgn_range {x : Nat} (hx : x < W) (y : Int) :
+    -(W : Int) ≤ (sgn x).tdiv y ∧ (sgn x).tdiv y < W := by
+  have := sgn_range hx
+  have : ((sgn x).tdiv y).natAbs ≤ (sgn x).natAbs := by
+    rw [Int.natAbs_tdiv]; exact Nat.div_le_self _ _
+  have := W_eq
+  omega
+
 /-- Two words with the same signed reading are the same word. -/
 theorem sgn_inj {a b : Nat} (ha : a < W) (hb : b < W) (h : sgn a = sgn b) : a = b := by
   rw [← toWord_sgn ha, ← toWord_sgn hb, h]
 
 /-- Comparison words are equal exactly when the comparisons are. -/
-@[simp] theorem bword_eq_bword (p q : Bool) : (bword p = bword q) = (p = q) := by
+@[simp] theorem bword_eq_bword (p q : Bool) : ((bword p).1 = (bword q).1) = (p = q) := by
   cases p <;> cases q <;> decide
 
 /-- A comparison's word is `0` exactly when it is false: `3 < 2` pushes `0`. -/
-@[simp] theorem bword_eq_zero (b : Bool) : bword b = 0 ↔ b = false := by cases b <;> decide
+@[simp] theorem bword_eq_zero (b : Bool) : (bword b).1 = 0 ↔ b = false := by cases b <;> decide
 
 /-- A sum of two words wraps at most once. -/
 theorem modW {x : Nat} (h : x < W + W) : x % W = if x < W then x else x - W := by
@@ -73,14 +86,14 @@ theorem sadd_ok {a b : Nat} (ha : a < W) (hb : b < W) :
 /-! ## The guard sequences -/
 
 theorem sadd_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
-    run (sTail .add) { m with stack := .val b :: .val a :: st } =
+    run (sTail .add) { m with stack := w[b] :: w[a] :: st } =
       if -(H : Int) ≤ sgn a + sgn b ∧ sgn a + sgn b < H then
-        .ok { m with stack := .val (toWord (sgn a + sgn b)) :: st } 0
+        .ok { m with stack := .val (sword (sgn a + sgn b)) :: st } 0
       else .revert := by
   obtain ⟨k1, k2⟩ := sadd_ok ha hb
   simp [run, sTail, assertTop, Instr.step, Machine.next]
   by_cases h : -(H : Int) ≤ sgn a + sgn b ∧ sgn a + sgn b < H
-  · rw [if_pos (k1.2 h), if_pos h, ← k2 h]; rfl
+  · rw [if_pos (k1.2 h), if_pos h, ← mk_eq_sword (Nat.mod_lt _ W_pos) (k2 h)]; rfl
   · rw [if_neg (fun e => h (k1.1 e)), if_neg h]; rfl
 
 /-- The arithmetic of solc's signed `-` check. -/
@@ -97,22 +110,22 @@ theorem ssub_ok {a b : Nat} (ha : a < W) (hb : b < W) :
     (try simp) <;> omega
 
 theorem ssub_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
-    run (sTail .sub) { m with stack := .val b :: .val a :: st } =
+    run (sTail .sub) { m with stack := w[b] :: w[a] :: st } =
       if -(H : Int) ≤ sgn a - sgn b ∧ sgn a - sgn b < H then
-        .ok { m with stack := .val (toWord (sgn a - sgn b)) :: st } 0
+        .ok { m with stack := .val (sword (sgn a - sgn b)) :: st } 0
       else .revert := by
   obtain ⟨k1, k2⟩ := ssub_ok ha hb
   simp [run, sTail, assertTop, Instr.step, Machine.next]
   by_cases h : -(H : Int) ≤ sgn a - sgn b ∧ sgn a - sgn b < H
-  · rw [if_pos (k1.2 h), if_pos h, ← k2 h]; rfl
+  · rw [if_pos (k1.2 h), if_pos h, ← mk_eq_sword (Nat.mod_lt _ W_pos) (k2 h)]; rfl
   · rw [if_neg (fun e => h (k1.1 e)), if_neg h]; rfl
 
 /-- `AND` of two comparison words is the conjunction's word. -/
-@[simp] theorem bword_and (p q : Bool) : (bword p &&& bword q) = bword (p && q) := by
+@[simp] theorem bword_and (p q : Bool) : ((bword p).1 &&& (bword q).1) = (bword (p && q)).1 := by
   cases p <;> cases q <;> decide
 
 /-- `OR` of two comparison words is the disjunction's word. -/
-@[simp] theorem bword_or (p q : Bool) : (bword p ||| bword q) = bword (p || q) := by
+@[simp] theorem bword_or (p q : Bool) : ((bword p).1 ||| (bword q).1) = (bword (p || q)).1 := by
   cases p <;> cases q <;> decide
 
 /-- A word is `0` exactly when it reads as `0`. -/
@@ -121,11 +134,11 @@ theorem sgn_eq_zero {a : Nat} (ha : a < W) : sgn a = 0 ↔ a = 0 := by
 
 /-- `x / y` on `int`s: revert on a zero divisor (`Panic(0x12)`) and on
 `-2^255 / -1` (`Panic(0x11)`), else `SDIV`. -/
-theorem sdiv_tail (m : Machine) (st : List Word) (a b : Nat) :
-    run (sTail .div) { m with stack := .val b :: .val a :: st } =
+theorem sdiv_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (sTail .div) { m with stack := w[b] :: w[a] :: st } =
       if b = 0 then .revert
       else if a = H ∧ b = W - 1 then .revert
-      else .ok { m with stack := .val (toWord (Int.tdiv (sgn a) (sgn b))) :: st } 0 := by
+      else .ok { m with stack := .val (sword (Int.tdiv (sgn a) (sgn b))) :: st } 0 := by
   by_cases h0 : b = 0
   · subst h0; simp [run, sTail, assertTop, Instr.step, Machine.next]
   · simp [run, sTail, assertTop, Instr.step, Machine.next, h0]
@@ -135,27 +148,27 @@ theorem sdiv_tail (m : Machine) (st : List Word) (a b : Nat) :
       simp [Instr.step, Machine.next, h0]
 
 /-- `x % y` on `int`s: revert on a zero divisor, else `SMOD`. -/
-theorem smod_tail (m : Machine) (st : List Word) (a b : Nat) :
-    run (sTail .mod) { m with stack := .val b :: .val a :: st } =
+theorem smod_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (sTail .mod) { m with stack := w[b] :: w[a] :: st } =
       if b = 0 then .revert
-      else .ok { m with stack := .val (toWord (Int.tmod (sgn a) (sgn b))) :: st } 0 := by
+      else .ok { m with stack := .val (sword (Int.tmod (sgn a) (sgn b))) :: st } 0 := by
   by_cases h0 : b = 0
   · subst h0; rfl
   · simp [run, sTail, assertTop, Instr.step, Machine.next, h0]
 
 /-- The signed comparisons: one or two instructions and no guard. -/
-theorem scmp_tail (m : Machine) (st : List Word) (a b : Nat) :
-    run (sTail .lt) { m with stack := .val b :: .val a :: st } =
+theorem scmp_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (sTail .lt) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (sgn a < sgn b))) :: st } 0 ∧
-    run (sTail .gt) { m with stack := .val b :: .val a :: st } =
+    run (sTail .gt) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (sgn b < sgn a))) :: st } 0 ∧
-    run (sTail .le) { m with stack := .val b :: .val a :: st } =
+    run (sTail .le) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (sgn a ≤ sgn b))) :: st } 0 ∧
-    run (sTail .ge) { m with stack := .val b :: .val a :: st } =
+    run (sTail .ge) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (sgn b ≤ sgn a))) :: st } 0 ∧
-    run (sTail .eqB) { m with stack := .val b :: .val a :: st } =
+    run (sTail .eqB) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (decide (a = b))) :: st } 0 ∧
-    run (sTail .neB) { m with stack := .val b :: .val a :: st } =
+    run (sTail .neB) { m with stack := w[b] :: w[a] :: st } =
         .ok { m with stack := .val (bword (!decide (a = b))) :: st } 0 := by
   refine ⟨rfl, rfl, ?_, ?_, ?_, ?_⟩
   · simp [run, sTail, Instr.step, Machine.next, bword]
@@ -167,9 +180,9 @@ theorem scmp_tail (m : Machine) (st : List Word) (a b : Nat) :
 
 /-- `-x` on `int`s: revert on `-2^255`, else `0 - x`. -/
 theorem neg_run (m : Machine) (st : List Word) {a : Nat} (ha : a < W) :
-    run negCode { m with stack := .val a :: st } =
+    run negCode { m with stack := w[a] :: st } =
       if -(H : Int) ≤ -sgn a ∧ -sgn a < H then
-        .ok { m with stack := .val (toWord (-sgn a)) :: st } 0
+        .ok { m with stack := .val (sword (-sgn a)) :: st } 0
       else .revert := by
   have hW := W_eq
   have e : (0 + (W - a)) % W = toWord (-sgn a) := by
@@ -182,7 +195,7 @@ theorem neg_run (m : Machine) (st : List Word) {a : Nat} (ha : a < W) :
   · have : -(H : Int) ≤ -sgn a ∧ -sgn a < H := by unfold sgn; split <;> omega
     rw [if_pos this]
     simp [run, negCode, assertTop, Instr.step, Machine.next, Ne.symm h]
-    simpa using e
+    exact mk_eq_sword _ (by simpa using e)
 
 /-! ## Signed division and multiplication -/
 
@@ -306,18 +319,25 @@ theorem smul_ok {a b : Nat} (ha : a < W) (hb : b < W) :
   · rw [← toWord_sgn hp, inr h]
 
 theorem smul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
-    run (sTail .mul) { m with stack := .val b :: .val a :: st } =
+    run (sTail .mul) { m with stack := w[b] :: w[a] :: st } =
       if -(H : Int) ≤ sgn a * sgn b ∧ sgn a * sgn b < H then
-        .ok { m with stack := .val (toWord (sgn a * sgn b)) :: st } 0
+        .ok { m with stack := .val (sword (sgn a * sgn b)) :: st } 0
       else .revert := by
   obtain ⟨k1, k2⟩ := smul_ok ha hb
-  simp [run, sTail, assertTop, Instr.step, Machine.next]
+  have hq' := tdiv_sgn_range (Nat.mod_lt (b * a) W_pos) (sgn a)
+  simp [run, sTail, assertTop, Instr.step, Machine.next, apply_ite Fin.val, sword_val hq'.1 hq'.2]
   by_cases h : -(H : Int) ≤ sgn a * sgn b ∧ sgn a * sgn b < H
   · obtain ⟨hn, hq⟩ := k1.2 h
     rw [if_neg hn, if_pos h]
     simp [Instr.step, Machine.next]
-    rw [if_neg (by rintro ⟨h1, h2⟩; rcases hq with hq | hq <;> contradiction)]
-    simp [Instr.step, Machine.next, k2 h]
+    rw [if_neg]
+    rotate_left
+    · rintro ⟨h1, h2⟩
+      rcases hq with hq | hq
+      · exact h2 (by rw [if_neg h1] at hq ⊢; rw [sword_val hq'.1 hq'.2]; exact hq)
+      · exact h1 hq
+    simp [Instr.step, Machine.next, k2 h, apply_ite Fin.val, sword_val hq'.1 hq'.2]
+    exact mk_eq_sword _ rfl
   · rw [if_neg h]
     by_cases hn : b = H ∧ sgn a < 0
     · rw [if_pos hn]; rfl
@@ -325,7 +345,8 @@ theorem smul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : 
       simp [Instr.step, Machine.next]
       rw [if_pos]
       · rfl
-      · refine ⟨fun ha0 => h (k1.1 ⟨hn, .inr ha0⟩), fun hq => h (k1.1 ⟨hn, .inl hq⟩)⟩
+      · refine ⟨fun ha0 => h (k1.1 ⟨hn, .inr ha0⟩), fun hq => h (k1.1 ⟨hn, .inl (by
+          exact hq.trans (by split <;> first | rfl | exact sword_val hq'.1 hq'.2))⟩)⟩
 
 end Evm
 end Solidity

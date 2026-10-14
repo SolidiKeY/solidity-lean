@@ -96,6 +96,10 @@ def restrict (Γ : Ctx) {Δ : Ctx} (F : Frag Δ) : Frag Γ := ⟨F.fl.drop (Δ.l
 
 end Frag
 
+/-- The slot offsets of `T`'s words are words: what a static copy or a
+`delete` pushes. -/
+def leavesFit (T : Ty) : Bool := (leaves T).all (· < W)
+
 /-- An environment value the fragment reads: not `address(this).balance`. -/
 def simpleIn {Γ : Ctx} : {p : PrimTy} → Solidity.Simple C Γ p → Bool
   | _, .env k _ => k != .selfBalance
@@ -108,9 +112,11 @@ def spathIn {Γ : Ctx} (F : Frag Γ) (free : Bool) : {T : Ty} → Solidity.SPath
   | _, .loc l => locIn F free l
 def locIn {Γ : Ctx} (F : Frag Γ) (free : Bool) : {T : Ty} → Solidity.Loc C Γ T → Bool
   | _, .root .. => true
-  | _, .field b _ _ => spathIn F free b
+  | _, @Solidity.Loc.field _ _ s _ b f _ => decide (offset s f < W) && spathIn F free b
   | _, @Solidity.Loc.index _ _ _ k _ .map b i => k == .uint && spathIn F free b && valIn F i
-  | _, .index (.arr _) b i => !free && spathIn F free b && valIn F i
+  | _, .index (.arr .dyn) b i => !free && spathIn F free b && valIn F i
+  | _, .index (.arr (.fixed (n := n))) b i =>
+    !free && decide (n < W) && spathIn F free b && valIn F i
 def valIn {Γ : Ctx} (F : Frag Γ) : {p : PrimTy} → Solidity.Val C Γ p → Bool
   | _, .simple s => simpleIn s
   | _, .read l => locIn F false l
@@ -162,7 +168,7 @@ def pushIn {Γ : Ctx} (F : Frag Γ) : {E : Ty} → Option (Solidity.Src C Γ E) 
   | E, none, b => E.isPrimitive && spathIn F false b
   | _, some (.val e), b => spathIn F false b && valIn F e
   | _, some (@Solidity.Src.copy _ _ R q _), b =>
-    static (.ref R) && spathIn F false b && spathIn F false q
+    static (.ref R) && leavesFit (.ref R) && spathIn F false b && spathIn F false q
 
 mutual
 /-- Whether a statement may shrink an array (a `pop` or a `delete`, in a
@@ -196,7 +202,7 @@ def assignIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → Solidity.Src C Γ T →
     Solidity.Loc C Γ T → Bool
   | _, .val v, l => locIn F false l && valIn F v
   | _, @Solidity.Src.copy _ _ R q _, l =>
-    static (.ref R) && spathIn F false q && locIn F false l
+    static (.ref R) && leavesFit (.ref R) && spathIn F false q && locIn F false l
 
 /-- A storage alias declared: unset (not readable), or bound to a path of
 the fragment. -/
@@ -222,7 +228,7 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
   | .push b v _ => F.guard (pushIn F v b)
   | .pop b => F.dropFragile.guard (spathIn F false b)
   | .transfer r a => F.guard (valIn F r && valIn F a)
-  | .delete l => F.dropFragile.guard (locIn F false l)
+  | @Solidity.Stmt.delete _ _ T l => F.dropFragile.guard (leavesFit T && locIn F false l)
   | .ite c t e =>
     if valIn F c then
       match inFragP F t, inFragP F e with
@@ -251,7 +257,7 @@ end
 /-! ## The compiler -/
 
 def compileSimple (b : Nat) {Γ : Ctx} : {p : PrimTy} → Solidity.Simple C Γ p → List Instr
-  | _, .lit n _ => [.push (.val (toWord n))]
+  | _, .lit n _ => [.push (.val (wmod (toWord n)))]
   | _, .bool v => [.push (.val (bword v))]
   | _, .local i => [.mload (cellOf b i)]
   | _, .env k _ => [envInstr k]
@@ -264,7 +270,7 @@ def compileSPath (b : Nat) {Γ : Ctx} : {T : Ty} → Solidity.SPath C Γ T → L
 /-- Push the slot of a location. -/
 def compileLoc (b : Nat) {Γ : Ctx} : {T : Ty} → Solidity.Loc C Γ T → List Instr
   | _, .root r _ => [.push (.slot (rootSlot C r))]
-  | _, @Solidity.Loc.field _ _ s _ q f _ => compileSPath b q ++ [.push (.val (offset s f)), .add]
+  | _, @Solidity.Loc.field _ _ s _ q f _ => compileSPath b q ++ [.push (.val (wmod (offset s f))), .add]
   | _, .index .map q i => compileSPath b q ++ compileVal b i ++ [.keccakMap]
   | _, @Solidity.Loc.index _ _ _ _ E (.arr .dyn) q i =>
     compileSPath b q ++ compileVal b i ++ boundsCheck ++ elemSlot (size E)
@@ -297,7 +303,7 @@ end
 words), the length checked and grown, the value stored at the new element. -/
 def pushCode (b : Nat) {Γ : Ctx} : {E : Ty} → Option (Solidity.Src C Γ E) →
     Solidity.SPath C Γ (.array E) → List Instr
-  | _, none, q => compileSPath b q ++ [.push (.val 0), .dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
+  | _, none, q => compileSPath b q ++ [.push (w[0]), .dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
   | _, some (.val e), q =>
     compileSPath b q ++ compileVal b e ++ [.dup 2] ++ pushSlotCode 1 ++ [.sstore, .pop]
   | _, some (@Solidity.Src.copy _ _ R p _), q =>
@@ -316,7 +322,7 @@ def argsCode (b : Nat) {Γ : Ctx} : {ps : Ctx} → Solidity.Args C Γ ps → Lis
 call of several returns has no code (it is outside the fragment). -/
 def retEnterCode (b : Nat) {Γ : Ctx} (ps : Ctx) : {rs Γ' : Ctx} →
     Solidity.CallRet Γ rs Γ' → List Instr
-  | _, _, .val .. => [.push (.val 0), .mstore (cell (b + Γ.length + ps.length))]
+  | _, _, .val .. => [.push (w[0]), .mstore (cell (b + Γ.length + ps.length))]
   | _, _, _ => []
 
 /-- The returned value copied where the call lands. -/
@@ -355,7 +361,7 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
     | .push .. => []
   | .assignLocal i r => compileVal b r ++ [.mstore (cellOf b i)]
   | .declLocal _ _ init => match init with
-    | none => [.push (.val 0), .mstore (cell (b + Γ.length))]
+    | none => [.push (w[0]), .mstore (cell (b + Γ.length))]
     | some e => compileVal b e ++ [.mstore (cell (b + Γ.length))]
   | .declStorage _ _ init => match init with
     | some (.path q) => compileSPath b q ++ [.mstore (cell (b + Γ.length))]
@@ -365,8 +371,8 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
       fun loc => compileLoc b loc ++ [.dup 1, .sload] ++ compileVal b r ++ binTail p op ++
         [.swap 1, .sstore]
   | @Solidity.Stmt.incDec _ _ p op _ l =>
-    opLocCode b l (fun x => [.mload x, .push (.val 1)] ++ binTail p op.binOp ++ [.mstore x])
-      fun loc => compileLoc b loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail p op.binOp ++
+    opLocCode b l (fun x => [.mload x, .push (w[1])] ++ binTail p op.binOp ++ [.mstore x])
+      fun loc => compileLoc b loc ++ [.dup 1, .sload, .push (w[1])] ++ binTail p op.binOp ++
         [.swap 1, .sstore]
   | @Solidity.Stmt.assignIncDec _ _ p i op _ l _ =>
     opLocCode b l (fun y => [.mload y] ++ bumpCode p op ++ [.mstore y, .mstore (cellOf b i)])

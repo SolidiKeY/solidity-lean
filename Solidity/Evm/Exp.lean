@@ -23,25 +23,35 @@ namespace Evm
 
 /-- One round on words: revert if `bs · bs` overflows, else the halved
 exponent, the squared base, and `pw` times `bs` when the exponent is odd. -/
-theorem expBody_run (m : Machine) (st : List Word) (ex bs pw : Nat) (hbs : 0 < bs) :
-    run expBody { m with stack := .val ex :: .val bs :: .val pw :: st } =
+theorem expBody_run (m : Machine) (st : List Word) (ex bs pw : Nat) (hbs : 0 < bs)
+    (hex : ex < W) (hbW : bs < W) (hpw : pw < W) :
+    run expBody { m with stack := w[ex] :: w[bs] :: w[pw] :: st } =
       if bs * bs < W then
         .ok { m with
-          stack := .val (ex / 2) :: .val (bs * bs % W) ::
-            .val (if ex % 2 = 0 then pw else pw * bs % W) :: st } 0
+          stack := w[ex / 2] :: w[bs * bs % W] ::
+            w[if ex % 2 = 0 then pw else pw * bs % W] :: st } 0
       else .revert := by
   have hdiv : (W - 1) / bs < bs ↔ ¬ bs * bs < W := by
     rw [Nat.div_lt_iff_lt_mul hbs]; have := W_pos; omega
   have hb0 : bs ≠ 0 := by omega
+  have e1 := Nat.mod_eq_of_lt hex
+  have e2 := Nat.mod_eq_of_lt hbW
+  have e3 := Nat.mod_eq_of_lt hpw
+  have e4 : W - 1 < W := by have := W_pos; omega
+  have e5 := Nat.mod_eq_of_lt e4
+  have e6 : (2 : Nat) % W = 2 := Nat.mod_eq_of_lt (by unfold W; decide)
   by_cases h : bs * bs < W
   · have h1 : ¬ (W - 1) / bs < bs := fun h' => hdiv.1 h' h
     by_cases h2 : ex % 2 = 0
-    · simp [run, expBody, assertTop, Instr.step, Machine.next, h, h1, h2, hb0, bword]
+    · simp [run, expBody, assertTop, Instr.step, Machine.next, h, h1, h2, hb0, bword, wMax,
+        e1, e2, e3, e5, e6]
       done
-    · simp [run, expBody, assertTop, Instr.step, Machine.next, h, h1, h2, hb0, bword]
+    · simp [run, expBody, assertTop, Instr.step, Machine.next, h, h1, h2, hb0, bword, wMax,
+        e1, e2, e3, e5, e6]
       done
   · have h1 : (W - 1) / bs < bs := hdiv.2 h
-    simp [run, expBody, assertTop, Instr.step, Machine.next, h, h1, hb0, bword]
+    simp [run, expBody, assertTop, Instr.step, Machine.next, h, h1, hb0, bword, wMax,
+      e1, e2, e3, e5, e6]
 
 /-- Squaring the base halves the exponent: `bs^ex = (bs·bs)^(ex/2) · bs^(ex % 2)`. -/
 theorem pow_halve (bs ex : Nat) : bs ^ ex = (bs * bs) ^ (ex / 2) * bs ^ (ex % 2) := by
@@ -52,20 +62,20 @@ theorem pow_halve (bs ex : Nat) : bs ^ ex = (bs * bs) ^ (ex / 2) * bs ^ (ex % 2)
 it reverts and `pw · bs^ex` overflows, or it stops at exponent `1` with
 `pw' · bs'` the same product and `pw' ≤ bs'` still. -/
 theorem expLoop_run (m : Machine) (st : List Word) : ∀ (k ex bs pw : Nat), 1 ≤ ex →
-    ex < 2 ^ (k + 1) → 1 ≤ bs → bs < W → 1 ≤ pw → pw ≤ bs →
+    ex < 2 ^ (k + 1) → (_ : ex < W) → 1 ≤ bs → (_ : bs < W) → 1 ≤ pw → (_ : pw ≤ bs) →
     (W ≤ pw * bs ^ ex ∧
-        run (expLoop k) { m with stack := .val ex :: .val bs :: .val pw :: st } = .revert) ∨
-      (∃ bs' pw', pw' * bs' = pw * bs ^ ex ∧ 1 ≤ pw' ∧ pw' ≤ bs' ∧ bs' < W ∧
-        run (expLoop k) { m with stack := .val ex :: .val bs :: .val pw :: st } =
-          .ok { m with stack := .val 1 :: .val bs' :: .val pw' :: st } 0)
-  | 0, ex, bs, pw, h1, h2, hb1, hbW, hp1, hpb => by
+        run (expLoop k) { m with stack := w[ex] :: w[bs] :: w[pw] :: st } = .revert) ∨
+      (∃ bs' pw' : Fin W, pw'.1 ≤ bs'.1 ∧ pw'.1 * bs'.1 = pw * bs ^ ex ∧ 1 ≤ pw'.1 ∧
+        run (expLoop k) { m with stack := w[ex] :: w[bs] :: w[pw] :: st } =
+          .ok { m with stack := w[1] :: .val bs' :: .val pw' :: st } 0)
+  | 0, ex, bs, pw, h1, h2, hexW, hb1, hbW, hp1, hpb => by
     obtain rfl : ex = 1 := by simp at h2; omega
-    exact .inr ⟨bs, pw, by simp, hp1, hpb, hbW, rfl⟩
-  | k + 1, ex, bs, pw, h1, h2, hb1, hbW, hp1, hpb => by
-    have guard : run [.push (.val 1), .dup 2, .gt, .iszero,
+    exact .inr ⟨⟨bs, hbW⟩, ⟨pw, by omega⟩, hpb, by simp, hp1, rfl⟩
+  | k + 1, ex, bs, pw, h1, h2, hexW, hb1, hbW, hp1, hpb => by
+    have guard : run [.push (w[1]), .dup 2, .gt, .iszero,
         .jumpi (expBody.length + (expLoop k).length)]
-        { m with stack := .val ex :: .val bs :: .val pw :: st } =
-        .ok { m with stack := .val ex :: .val bs :: .val pw :: st }
+        { m with stack := w[ex] :: w[bs] :: w[pw] :: st } =
+        .ok { m with stack := w[ex] :: w[bs] :: w[pw] :: st }
           (if ex ≤ 1 then expBody.length + (expLoop k).length else 0) := by
       by_cases hex : ex ≤ 1
       · simp [run, Instr.step, Machine.next, bword, hex, show ¬ 1 < ex by omega]
@@ -74,9 +84,9 @@ theorem expLoop_run (m : Machine) (st : List Word) : ∀ (k ex bs pw : Nat), 1 �
     by_cases hex : ex ≤ 1
     · obtain rfl : ex = 1 := by omega
       rw [if_pos hex, ← List.length_append]
-      exact .inr ⟨bs, pw, by simp, hp1, hpb, hbW, exec_length _ _⟩
+      exact .inr ⟨⟨bs, hbW⟩, ⟨pw, by omega⟩, hpb, by simp, hp1, exec_length _ _⟩
     · rw [if_neg hex]
-      have hb := expBody_run m st ex bs pw (by omega)
+      have hb := expBody_run m st ex bs pw (by omega) hexW hbW (by omega)
       simp only [run] at hb
       rw [exec_append, hb]
       by_cases hsq : bs * bs < W
@@ -85,7 +95,7 @@ theorem expLoop_run (m : Machine) (st : List Word) : ∀ (k ex bs pw : Nat), 1 �
           split
           · rfl
           · rw [Nat.mod_eq_of_lt (Nat.lt_of_le_of_lt (Nat.mul_le_mul_right bs hpb) hsq)]
-        rw [hpw, Nat.mod_eq_of_lt hsq]
+        simp only [hpw, Nat.mod_eq_of_lt hsq]
         have hprod : (if ex % 2 = 0 then pw else pw * bs) * (bs * bs) ^ (ex / 2) = pw * bs ^ ex := by
           rw [pow_halve bs ex]
           split
@@ -103,10 +113,10 @@ theorem expLoop_run (m : Machine) (st : List Word) : ∀ (k ex bs pw : Nat), 1 �
           · exact Nat.mul_pos hp1 (by omega)
         have hk : ex / 2 < 2 ^ (k + 1) := by
           rw [Nat.pow_succ] at h2; omega
-        rcases expLoop_run m st k (ex / 2) (bs * bs) _ (by omega) hk (Nat.mul_pos hb1 hb1) hsq hge hle
-          with ⟨hW, hrun⟩ | ⟨bs', pw', he, h1', h2', h3', hrun⟩
+        rcases expLoop_run m st k (ex / 2) (bs * bs) _ (by omega) hk (by omega) (Nat.mul_pos hb1 hb1) hsq
+          hge hle with ⟨hW, hrun⟩ | ⟨bs', pw', h2', he, h1', hrun⟩
         · exact .inl ⟨by rw [← hprod]; exact hW, hrun⟩
-        · exact .inr ⟨bs', pw', he.trans hprod, h1', h2', h3', hrun⟩
+        · exact .inr ⟨bs', pw', h2', he.trans hprod, h1', hrun⟩
       · simp only [if_neg hsq, Out.revert_bind]
         refine .inl ⟨?_, trivial⟩
         have : bs ^ 2 ≤ bs ^ ex := Nat.pow_le_pow_right (by omega) (by omega)
@@ -115,10 +125,11 @@ theorem expLoop_run (m : Machine) (st : List Word) : ∀ (k ex bs pw : Nat), 1 �
         omega
 
 /-- The last multiplication, checked: `pw > (2^256 - 1) / bs` reverts. -/
-theorem expLast_run (m : Machine) (st : List Word) (bs pw : Nat) (hbs : 0 < bs) :
-    run ([.pop, .dup 1, .push (.val (W - 1)), .div, .dup 3, .gt, .iszero] ++ (assertTop ++ [.mul]))
-      { m with stack := .val 1 :: .val bs :: .val pw :: st } =
-      if pw * bs < W then .ok { m with stack := .val (pw * bs) :: st } 0 else .revert := by
+theorem expLast_run (m : Machine) (st : List Word) (bs pw : Nat) (hbs : 0 < bs) (hbW : bs < W)
+    (hpw : pw < W) :
+    run ([.pop, .dup 1, .push (.val wMax), .div, .dup 3, .gt, .iszero] ++ (assertTop ++ [.mul]))
+      { m with stack := w[1] :: w[bs] :: w[pw] :: st } =
+      if _ : pw * bs < W then .ok { m with stack := w[pw * bs] :: st } 0 else .revert := by
   have hdiv : (W - 1) / bs < pw ↔ ¬ pw * bs < W := by
     rw [Nat.div_lt_iff_lt_mul hbs]; have := W_pos; omega
   have hb0 : bs ≠ 0 := by omega
@@ -133,55 +144,59 @@ theorem expLast_run (m : Machine) (st : List Word) (bs pw : Nat) (hbs : 0 < bs) 
 multiplication. -/
 theorem expGeneral_run (m : Machine) (st : List Word) {a b : Nat} (ha : 1 ≤ a) (haW : a < W)
     (hb : 1 ≤ b) (hbW : b < W) :
-    run expGeneral { m with stack := .val b :: .val a :: st } =
-      if a ^ b < W then .ok { m with stack := .val (a ^ b) :: st } 0 else .revert := by
+    run expGeneral { m with stack := w[b] :: w[a] :: st } =
+      if _ : a ^ b < W then .ok { m with stack := w[a ^ b] :: st } 0 else .revert := by
   simp only [expGeneral, List.append_assoc]
-  rw [run_append_ok (m' := { m with stack := .val b :: .val a :: .val 1 :: st }) rfl]
-  rcases expLoop_run m st 255 b a 1 hb (by unfold W at hbW; exact hbW) ha haW (Nat.le_refl 1) ha
-    with ⟨hW, hrun⟩ | ⟨bs', pw', he, h1, h2, h3, hrun⟩
-  · rw [run_append_revert hrun, if_neg (by omega)]
-  · rw [run_append_ok hrun, expLast_run m st bs' pw' (by omega), he, Nat.one_mul]
+  rw [run_append_ok (m' := { m with stack := w[b] :: w[a] :: w[1] :: st }) rfl]
+  rcases expLoop_run m st 255 b a 1 hb (by unfold W at hbW; exact hbW) hbW ha haW (Nat.le_refl 1) ha
+    with ⟨hW, hrun⟩ | ⟨⟨bs', h3⟩, ⟨pw', hpw'⟩, h2, he, h1, hrun⟩
+  · rw [run_append_revert hrun, dif_neg (by omega)]
+  · rw [run_append_ok hrun, expLast_run m st bs' pw' (by simp only at h1 h2; omega) h3 hpw']
+    simp only at he
+    simp only [he, Nat.one_mul]
 
 /-- `b ** e` for `e ≥ 1`: `0` for a zero base. -/
 theorem expNonzero_run (m : Machine) (st : List Word) {a b : Nat} (haW : a < W)
     (hb : 1 ≤ b) (hbW : b < W) :
-    run expNonzero { m with stack := .val b :: .val a :: st } =
-      if a ^ b < W then .ok { m with stack := .val (a ^ b) :: st } 0 else .revert := by
+    run expNonzero { m with stack := w[b] :: w[a] :: st } =
+      if _ : a ^ b < W then .ok { m with stack := w[a ^ b] :: st } 0 else .revert := by
   by_cases ha : a = 0
   · subst ha
-    rw [Nat.zero_pow (by omega), if_pos W_pos, expNonzero, List.append_assoc,
-      run_append_skip (m' := { m with stack := .val b :: .val 0 :: st })
+    simp only [Nat.zero_pow (show 0 < b by omega), dif_pos W_pos]
+    rw [expNonzero, List.append_assoc,
+      run_append_skip (m' := { m with stack := w[b] :: w[0] :: st })
         (k := expGeneral.length + 1) (by simp [run, Instr.step, Machine.next, bword]),
       exec_skip_append]
     rfl
   · rw [expNonzero, List.append_assoc,
-      run_append_ok (m' := { m with stack := .val b :: .val a :: st })
+      run_append_ok (m' := { m with stack := w[b] :: w[a] :: st })
         (by simp [run, Instr.step, Machine.next, bword, ha])]
     have hg := expGeneral_run m st (by omega) haW hb hbW
     by_cases h : a ^ b < W
-    · rw [if_pos h] at hg ⊢; rw [run_append_ok hg]; rfl
-    · rw [if_neg h] at hg ⊢; exact run_append_revert hg
+    · rw [dif_pos h] at hg ⊢; rw [run_append_ok hg]; rfl
+    · rw [dif_neg h] at hg ⊢; exact run_append_revert hg
 
 /-- **`a ** b` is solc's checked exponentiation**: `a ^ b`, or a revert exactly
 when it overflows.  `2 ** 255` fits, `2 ** 256` reverts, `0 ** 0` is `1`. -/
 theorem exp_tail (m : Machine) (st : List Word) {a b : Nat} (haW : a < W) (hbW : b < W) :
-    run (uTail .pow) { m with stack := .val b :: .val a :: st } =
-      if a ^ b < W then .ok { m with stack := .val (a ^ b) :: st } 0 else .revert := by
+    run (uTail .pow) { m with stack := w[b] :: w[a] :: st } =
+      if _ : a ^ b < W then .ok { m with stack := w[a ^ b] :: st } 0 else .revert := by
   show run expCode _ = _
   by_cases hb : b = 0
   · subst hb
-    rw [Nat.pow_zero, if_pos (by have := W_pos; unfold W at *; omega), expCode, List.append_assoc,
-      run_append_skip (m' := { m with stack := .val 0 :: .val a :: st })
+    simp only [Nat.pow_zero, dif_pos (show 1 < W by unfold W; decide)]
+    rw [expCode, List.append_assoc,
+      run_append_skip (m' := { m with stack := w[0] :: w[a] :: st })
         (k := expNonzero.length + 1) (by simp [run, Instr.step, Machine.next, bword]),
       exec_skip_append]
     rfl
   · rw [expCode, List.append_assoc,
-      run_append_ok (m' := { m with stack := .val b :: .val a :: st })
+      run_append_ok (m' := { m with stack := w[b] :: w[a] :: st })
         (by simp [run, Instr.step, Machine.next, bword, hb])]
     have hg := expNonzero_run m st haW (by omega) hbW
     by_cases h : a ^ b < W
-    · rw [if_pos h] at hg ⊢; rw [run_append_ok hg]; rfl
-    · rw [if_neg h] at hg ⊢; exact run_append_revert hg
+    · rw [dif_pos h] at hg ⊢; rw [run_append_ok hg]; rfl
+    · rw [dif_neg h] at hg ⊢; exact run_append_revert hg
 
 end Evm
 end Solidity

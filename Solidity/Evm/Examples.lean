@@ -32,7 +32,7 @@ theorem reverted_eq {o : Out} (h : reverted o = true) : o = .revert := by
 /-- A fresh `StandardExample` at address `0`, its account holding `balance`,
 every other account empty. -/
 abbrev fresh (balance : Nat := 0) : Machine :=
-  Machine.init (fun a => if a = 0 then balance else 0) 0
+  Machine.init (fun a => if a = 0 then balance else 0) ⟨0, W_pos⟩
 
 /-! ## Layout -/
 
@@ -260,7 +260,7 @@ theorem payOwner_wt : compiles payOwner := by decide +kernel
 
 theorem payOwner_run :
     (match run (codeOf payOwner) (fresh 100) with
-      | .ok m 0 => some (m.bal 0, m.bal 5, m.bal₀ 0, m.bal₀ 5, m.self)
+      | .ok m 0 => some (m.bal 0, m.bal 5, m.bal₀ 0, m.bal₀ 5, m.self.1)
       | _ => none) = some (70, 30, 100, 0, 0) := by
   decide +kernel
 
@@ -279,7 +279,7 @@ theorem transfer_self :
 theorem envReads_wt : compiles envReads := by decide +kernel
 
 theorem envReads_run :
-    let o := run (codeOf envReads) { fresh with caller := 7, callvalue := 100 }
+    let o := run (codeOf envReads) { fresh with caller := wmod 7, callvalue := wmod 100 }
     Examples.storeAt o (rootSlot StandardExample "owner") = some 7 ∧ Examples.storeAt o (.root 0) = some 100 := by
   decide +kernel
 

@@ -349,7 +349,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
   rcases args_sim hm args hwa with ⟨a, mem₁, ha, hrun₁, hmem₁, hv₁⟩ | ⟨ha, hrun₁⟩
   · rw [run_append_ok hrun₁, callVal_run_eq f args p r res body ha]
     simp only [retEnterCode]
-    rw [run_append_ok (m' := { m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) (.val 0) })
+    rw [run_append_ok (m' := { m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) w[0] })
       rfl]
     have hb := ((hm.congrMem (mem := mem₁) fun l _ hl => hmem₁ l hl).enter (b + Γ.length)
       (Look.ofTEnv a) hv₁ (Args.noAlias args)).consVal (v := PrimTy.dflt p)
@@ -358,7 +358,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
       ih (τ := (σ.withEnv a).push (t := .val p) (PrimTy.dflt p))
         (hb.congrLook fun j => Look.ofTEnv_cons (u := .val p) (PrimTy.dflt p) a j)
     have h₁ : ∀ l, l < b + Γ.length →
-        ({ m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) (.val 0) } : Machine).memAt l =
+        ({ m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) w[0] } : Machine).memAt l =
           m.memAt l := fun l hl => by
       show upd mem₁ _ _ (cell l) = _
       rw [upd_other _ _ (fun h => by have := cell_inj h; omega)]; exact hmem₁ l hl
@@ -366,7 +366,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
     have leave : ∀ {υ : Solidity.Out C ((σ.withEnv a).push (t := .val p) (PrimTy.dflt p)).H Γf}
         {m₃ : Machine},
         Keeps C (b + Γ.length) sh
-          { m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) (.val 0) } m₃ →
+          { m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) w[0] } m₃ →
         Sim C L' (b + Γ.length) G υ.st m₃ →
         ∃ m₄, run (retLeaveCode b ps (.val p r res)) m₃ = .ok m₄ 0 ∧ m₄.stack = m₃.stack ∧
           Keeps C b sh m m₄ ∧
@@ -429,7 +429,7 @@ theorem assign_family {T : Ty} (l : Solidity.Loc C Γ T) (r : Solidity.Src C Γ 
     exact assign_sim l v hm hok.1 hok.2
   | copy q hq =>
     simp only [assignIn, Bool.and_eq_true] at hok
-    exact copy_sim l q hq hok.1.1 hm hok.1.2 hok.2
+    exact copy_sim l q hq hok.1.1.1 hok.1.1.2 hm hok.1.2 hok.2
 
 theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.ARhs C Γ R)
     {F' : Frag Γ} (hm : Sim C L b F σ m)
@@ -549,7 +549,8 @@ theorem delete_family {T : Ty} (l : Solidity.Loc C Γ T) {F' : Frag Γ}
       (run (compileStmt b (.delete l)) m) m := by
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
-  exact delete_sim l hm hok
+  simp only [Bool.and_eq_true] at hok
+  exact delete_sim l hm hok.1 hok.2
 
 theorem transfer_family (r a : Solidity.Val C Γ .uint) {F' : Frag Γ}
     (hm : Sim C L b F σ m) (hw : inFrag F (.transfer r a) = some F') :
@@ -862,7 +863,7 @@ theorem compile_net {P : Solidity.Prog C Γ Γ'} {m' : Machine} (hP : inFragP F 
     (hm : Sim C L b F σ m) (hL : L + Prog.pushes P ≤ Lmax)
     (hrun : run (compileProg b P) m = .ok m' 0) :
     ∃ o, Solidity.Prog.run σ P = .ok o ∧
-      (∀ a : Nat, a < W → a ≠ m'.self → netAt o.st.net a = (m'.bal₀ a : Int) - m'.bal a) ∧
+      (∀ a : Fin W, a ≠ m'.self → netAt o.st.net a.1 = (m'.bal₀ a.1 : Int) - m'.bal a.1) ∧
       netAt o.st.net m'.self = 0 := by
   obtain ⟨o, h1, h2⟩ := compile_box hP hm hL hrun
   exact ⟨o, h1, h2.net, h2.netSelf⟩
@@ -874,20 +875,20 @@ def uintT (n : Nat) (h : n < W) : PrimTy.uint.Denote :=
 
 /-- A fresh contract, typed: its storage at deployment, no memory, no
 locals, its funds `balance` and its address `self`. -/
-def freshT (C : Contract) (balance : Nat) (hb : balance < W) (self : Nat) (hs : self < W) :
+def freshT (C : Contract) (balance : Nat) (hb : balance < W) (self : Fin W) :
     State C [] :=
   { storage := Solidity.Storage.init C, H := [], heap := Solidity.Heap.empty, env := (),
-    selfBalance := uintT balance hb, tx := { selfAddress := uintT self hs } }
+    selfBalance := uintT balance hb, tx := { selfAddress := uintT self.1 self.2 } }
 
 /-- A fresh machine represents a fresh contract with no locals: every slot
 `0`, nothing moved, whatever the world's balances and the contract's
 address. -/
-theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Nat → Nat) (self : Nat)
-    (hs : self < W) :
-    Sim C 1 0 (Frag.init []) (freshT C balance hb self hs) (Machine.init bal self) :=
+theorem Sim.init (C : Contract) (balance : Nat) (hb : balance < W) (bal : Nat → Nat)
+    (self : Fin W) :
+    Sim C 1 0 (Frag.init []) (freshT C balance hb self) (Machine.init bal self) :=
   ⟨initStorage_repr C Nat.one_pos, (fun i => nomatch i), (fun i => nomatch i),
-    fun _ _ _ => by simp only [netAt, Machine.init, Int.sub_self]; rfl,
-    rfl, by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl, W_pos, W_pos, W_pos, hs⟩⟩
+    fun _ _ => by simp only [netAt, Machine.init, Int.sub_self]; rfl,
+    rfl, by unfold Lmax; decide, (fun i => nomatch i), ⟨rfl, rfl, rfl, rfl⟩⟩
 
 /-- **The EVM agrees with the typed run's storage.**  From a fresh contract,
 a program of the fragment either reverts in both, or runs in both, and then
@@ -900,25 +901,29 @@ Example: `alice.age = 10;` leaves `10` at slot `13` of `StandardExample`
 theorem). -/
 theorem compile_storage {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
     (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Nat → Nat)
-    (self : Nat) (hs : self < W) :
-    (∃ o m', Solidity.Prog.run (freshT C balance hb self hs) P = .ok o ∧
+    (self : Fin W) :
+    (∃ o m', Solidity.Prog.run (freshT C balance hb self) P = .ok o ∧
         run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
       ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
         PathSlot C false r s →
         o.st.storage.findLive r = some (.prim v) → m'.store s = v.1.toNat) ∨
-    ((Solidity.Prog.run (freshT C balance hb self hs) P = .error .revert ∨
+    ((Solidity.Prog.run (freshT C balance hb self) P = .error .revert ∨
         (Prog.asserts P = true ∧
-          Solidity.Prog.run (freshT C balance hb self hs) P = .error .panic)) ∧
+          Solidity.Prog.run (freshT C balance hb self) P = .error .panic)) ∧
       run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
     (Prog.pays P = true ∧ run (compileProg 0 P) (Machine.init bal self) = .revert ∧
-      ∃ o, Solidity.Prog.run (freshT C balance hb self hs) P = .ok o) := by
-  rcases compile_correct hP (Sim.init C balance hb bal self hs) (by omega) with
+      ∃ o, Solidity.Prog.run (freshT C balance hb self) P = .ok o) := by
+  rcases compile_correct hP (Sim.init C balance hb bal self) (by omega) with
     ⟨o, m', h1, h2, _, hm⟩ | h | ⟨hp, h1, o, _, h2, _⟩
   · refine .inl ⟨o, m', h1, h2, fun r s v hp hf => ?_⟩
     rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩
     · rw [hf] at hsv; cases hsv
       cases hr with
-      | prim h => exact (Word.val.inj h).symm ▸ rfl
+      | prim h =>
+        obtain ⟨a, ha, hv⟩ := h
+        cases ha
+        rw [hv, Int.toNat_natCast]
+        rfl
     · rw [hf] at hsv; cases hsv
   · exact .inr (.inl h)
   · exact .inr (.inr ⟨hp, h1, o, h2⟩)

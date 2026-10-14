@@ -212,7 +212,7 @@ structure SimL (C : Contract) (L b : Nat) {Γ : Ctx} (F : Frag Γ) (σ : State C
       PathSlot C true r s
   /-- `net(a)` is what `a`'s account lost, at every address but the
   contract's own. -/
-  net : ∀ a : Nat, a < W → a ≠ m.self → netAt σ.net a = (m.bal₀ a : Int) - m.bal a
+  net : ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a.1 : Int) - m.bal a.1
   /-- The contract's own entry is never moved. -/
   netSelf : netAt σ.net m.self = 0
   /-- The bound on the arrays is at most solc's. -/
@@ -240,7 +240,7 @@ theorem push {m : Machine} (h : SimL C L b F σ ρ m) (w : Word) : SimL C L b F 
 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
 theorem book {m : Machine} (h : SimL C L b F σ ρ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Nat → Nat)
-    (hn : ∀ a : Nat, a < W → a ≠ m.self → netAt (σ.pay x y).net a = (bl₀ a : Int) - bl a)
+    (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a.1 : Int) - bl a.1)
     (hself : netAt (σ.pay x y).net m.self = 0) :
     SimL C L b F (σ.pay x y) ρ { m with bal := bl, bal₀ := bl₀ } :=
   ⟨h.store, h.vals, h.aliases, hn, hself, h.bound, h.fragile, h.env⟩
@@ -785,7 +785,7 @@ theorem storesFrom_retEnterCode (b : Nat) {Γ : Ctx} (ps : Ctx) {rs Γ' : Ctx}
     StoresFrom (b + Γ.length) (retEnterCode b ps ret) := by
   cases ret with
   | val =>
-    show StoresFrom _ ([.push (.val 0)] ++ [.mstore _])
+    show StoresFrom _ ([.push w[0]] ++ [.mstore _])
     stores_from
   | _ => exact fun _ _ h => nomatch h
 
@@ -835,7 +835,7 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
     have := noStore_compileVal b r
     simp only [compileStmt]; stores_from
   | .declLocal _ _ none => by
-    show StoresFrom _ ([.push (.val 0)] ++ [.mstore _])
+    show StoresFrom _ ([.push w[0]] ++ [.mstore _])
     stores_from
   | .declLocal _ _ (some e) => by
     have := noStore_compileVal b e
@@ -943,7 +943,7 @@ theorem fragile (h : Sim C L b F σ m) {R : RefTy} (i : Idx Γ (.alias R))
   SimL.fragile h i hi
 
 theorem net (h : Sim C L b F σ m) :
-    ∀ a : Nat, a < W → a ≠ m.self → netAt σ.net a = (m.bal₀ a : Int) - m.bal a :=
+    ∀ a : Fin W, a ≠ m.self → netAt σ.net a.1 = (m.bal₀ a.1 : Int) - m.bal a.1 :=
   SimL.net h
 
 theorem netSelf (h : Sim C L b F σ m) : netAt σ.net m.self = 0 := SimL.netSelf h
@@ -952,7 +952,7 @@ theorem env (h : Sim C L b F σ m) : EnvSim σ.tx m := SimL.env h
 
 /-- A payment booked: the ledger down at `x`, and the balances moved to match. -/
 theorem book (h : Sim C L b F σ m) (x : PrimTy.uint.Denote) (y : Int) (bl bl₀ : Nat → Nat)
-    (hn : ∀ a : Nat, a < W → a ≠ m.self → netAt (σ.pay x y).net a = (bl₀ a : Int) - bl a)
+    (hn : ∀ a : Fin W, a ≠ m.self → netAt (σ.pay x y).net a.1 = (bl₀ a.1 : Int) - bl a.1)
     (hself : netAt (σ.pay x y).net m.self = 0) :
     Sim C L b F (σ.pay x y) { m with bal := bl, bal₀ := bl₀ } :=
   SimL.book h x y bl bl₀ hn hself

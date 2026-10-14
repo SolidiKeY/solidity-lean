@@ -47,14 +47,17 @@ theorem simple_sim {m : Machine} (hm : Sim C L b F σ m) :
       ∃ w, ReprV p (s.evalT σ) w ∧ run (compileSimple b s) m = .ok (m.push w) 0
   | p, .lit n hr, _ => by
     cases p <;> simp only [PrimTy.inRange, decide_eq_true_eq, Bool.false_eq_true] at hr
-    · exact ⟨.val (toWord n), show Word.val (toWord n) = .val n.toNat by
-        simp only [toWord, hr.1, ↓reduceIte], rfl⟩
-    · exact ⟨.val (toWord n), ReprV.int_word _, rfl⟩
+    · have hlt : n.toNat < W := by unfold W; omega
+      refine ⟨.val (wmod (toWord n)), ⟨_, rfl, ?_⟩, rfl⟩
+      simp only [wmod_def, toWord, hr.1, ↓reduceIte, Nat.mod_eq_of_lt hlt]
+      show n = _
+      omega
+    · exact ⟨.val (sword n), ReprV.int_word _, rfl⟩
   | _, .bool b, _ => ⟨.val (bword b), rfl, rfl⟩
   | p, .local i, _ => ⟨m.memAt (lvl b i), hm.vals i, rfl⟩
   | _, .env k hp, hw => by
     subst hp
-    obtain ⟨h1, h2, h3, h4, -, -, -, -⟩ := hm.env
+    obtain ⟨h1, h2, h3, h4⟩ := hm.env
     cases k
     · exact ⟨_, ReprV.uint_of h1, rfl⟩
     · exact ⟨_, ReprV.uint_of h2, rfl⟩
@@ -107,7 +110,9 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
     .inl ⟨SRef.ofRoot r h, rootSlot C r, _, rfl, Sto.findLive_ofRoot _ r h, PathSlot.root h,
       hm.store r _ h, rfl⟩
   | _, @Solidity.Loc.field _ _ s T q f h, free, m, hm, hw => by
-    have hwb : spathIn F free q = true := by simpa only [locIn] using hw
+    have hw' : offset s f < W ∧ spathIn F free q = true := by
+      simpa only [locIn, Bool.and_eq_true, decide_eq_true_eq] using hw
+    obtain ⟨hoff, hwb⟩ := hw'
     simp only [Solidity.Loc.resolveT, compileLoc]
     rcases spath_sim q hm hwb with ⟨r, s₀, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
     · cases hr with
@@ -116,7 +121,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
           hp.field h, hall f T h, ?_⟩
         · simp only [hres]; rfl
         · rw [run_append_ok hrun]; simp only [run, Machine.push, exec_cons_zero, Instr.step,
-            Machine.next, Out.ok_bind, exec_nil]
+            Machine.next, Out.ok_bind, exec_nil, wmod_def, Nat.mod_eq_of_lt hoff]
     · exact .inr ⟨by simp only [hres]; rfl, run_append_revert hrun⟩
   | _, @Solidity.Loc.index _ _ _ k V .map q i, free, m, hm, hw => by
     have ihb : ∀ {m : Machine}, Sim C L b F σ m → spathIn F free q = true →
@@ -176,7 +181,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
             rw [Sto.checkIndex_dyn (Sto.find_of_findLive hsv), hvn]
             by_cases hin : n < kk <;> simp only [hin, ↓reduceIte] <;> rfl
           rw [hres']
-          have hb := boundsCheck_run m m.stack (elemSlot (size E)) n s₀
+          have hb := boundsCheck_run m m.stack (elemSlot (size E)) n s₀ hn
           simp only [Machine.push] at hb ⊢
           rw [hb, hl]
           by_cases hin : n < kk
@@ -187,7 +192,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
             have hx : e.toList[n]? = some (e.toList[n]'(by rw [SVec.length_toList]; exact hin)) :=
               List.getElem?_eq_getElem _
             refine .inl ⟨r.index (.arr .dyn) v, .data s₀ (n * size E), _, rfl, ?_, ?_,
-              hall n _ hx, elemSlot_run m m.stack n (size E) s₀⟩
+              hall n _ hx, elemSlot_run m m.stack n (size E) s₀ hn⟩
             · exact Sto.findLive_elem hsv (by rw [hvn]; exact hx)
             · exact hp'
           · rw [if_neg hin, if_neg hin]
@@ -204,8 +209,8 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
     have ihi : ∀ {m : Machine}, Sim C L b F σ m → valIn F i = true →
         ValOutT _ (i.evalT σ) (run (compileVal b i) m) m := fun hm hw => val_sim i hm hw
     rw [locIn] at hw
-    simp only [Bool.and_eq_true, Bool.not_eq_true'] at hw
-    obtain ⟨⟨rfl, hwb⟩, hwi⟩ := hw
+    simp only [Bool.and_eq_true, Bool.not_eq_true', decide_eq_true_eq] at hw
+    obtain ⟨⟨⟨rfl, hnW⟩, hwb⟩, hwi⟩ := hw
     simp only [compileLoc, List.append_assoc]
     rcases ihb hm hwb with ⟨r, s₀, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
     · cases hr with
@@ -222,7 +227,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
             rw [Sto.checkIndex_fixed (Sto.find_of_findLive hsv), hvk]
             by_cases hin : k < n <;> simp only [hin, ↓reduceIte] <;> rfl
           rw [hres']
-          have hb := fixedCheck_run m m.stack (fixedSlot (size E)) n k s₀
+          have hb := fixedCheck_run m m.stack (fixedSlot (size E)) n k s₀ hnW hkW
           simp only [Machine.push] at hb ⊢
           rw [hb]
           by_cases hin : k < n
@@ -233,7 +238,7 @@ theorem loc_sim : ∀ {T : Ty} (l : Solidity.Loc C Γ T) {free : Bool} {m : Mach
             have hx : e.toList[k]? = some (e.toList[k]'(by rw [SVec.length_toList]; exact hin)) :=
               List.getElem?_eq_getElem _
             refine .inl ⟨r.index (.arr .fixed) v, s₀.add (k * size E), _, rfl, ?_, ?_,
-              hall k _ hx, fixedSlot_run m m.stack k (size E) s₀⟩
+              hall k _ hx, fixedSlot_run m m.stack k (size E) s₀ hkW⟩
             · exact Sto.findLive_felem hsv (by rw [hvk]; exact hx)
             · exact hp'
           · rw [if_neg hin, if_neg hin]
@@ -260,7 +265,7 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Val C Γ p) {m : Machine},
     rcases loc_sim l hm hw with ⟨r, s, sv, hres, hsv, _, hr, hrun⟩ | ⟨hres, hrun⟩
     · rw [run_append_ok hrun]
       obtain ⟨v, rfl, hrv⟩ := prim_read hr
-      refine .inl ⟨v, .val (m.store s), ?_, hrv, rfl⟩
+      refine .inl ⟨v, .val (m.store.cells s), ?_, hrv, rfl⟩
       simp only [hres, Sto.find_of_findLive hsv, bind, Except.bind, TRes.ofOpt, pure,
         Except.pure, SVal.view_prim]
     · exact .inr ⟨by simp only [hres, bind, Except.bind], run_append_revert hrun⟩
@@ -418,10 +423,10 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Val C Γ p) {m : Machine},
       | @array _ kk _ e sh hk hl hW _ =>
         rw [run_append_ok hrun]
         have hlen := Sto.len_eq (Sto.find_of_findLive hsv)
-        refine .inl ⟨Solidity.lenU kk hk, .val kk, ?_, ReprV.uint_of rfl, ?_⟩
+        refine .inl ⟨Solidity.lenU kk hk, .val ⟨kk, hk⟩, ?_, ReprV.uint_of rfl, ?_⟩
         · simp only [hres, hlen, bind, Except.bind, TRes.ofOpt, pure, Except.pure]
-        · simp only [run, Machine.push, exec_cons_zero, Instr.step, Machine.next, hl, exec_nil,
-            Out.ok_bind]
+        · simp only [run, Machine.push, exec_cons_zero, Instr.step, Machine.next, exec_nil,
+            Out.ok_bind, show m.store.cells s = ⟨kk, hk⟩ from Fin.ext hl]
     · exact .inr ⟨by simp only [hres, bind, Except.bind], run_append_revert hrun⟩
   | _, .readMem _, _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw
   | _, .mlen .., _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw

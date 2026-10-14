@@ -141,9 +141,9 @@ def storeOf (ws : List (Slot × Nat)) : WordStore :=
 
 /-- The word a value local's cell holds: `ReprV` read as a function. -/
 def wordOf : (p : PrimTy) → p.Denote → Word
-  | .uint, n => .val n.1.toNat
+  | .uint, n => .val (wmod n.1.toNat)
   | .bool, b => .val (bword b)
-  | .int, n => .val (toWord n.1)
+  | .int, n => .val (sword n.1)
 
 /-! ## Random well-typed values -/
 
@@ -271,12 +271,12 @@ def runOnce (C : Contract) {Γ' : Ctx} (Q : Prog C [] Γ') (s : Start C) :
   let keys0 := storageKeys s.storage
   let σ := s.state
   let m : Machine :=
-    { Machine.init (fun a => if a = s.self then s.balance else 0) s.self with
+    { Machine.init (fun a => if a = s.self then s.balance else 0) (wmod s.self) with
       accepts := fun a _ => a != 3
       store := storeOf (encodeStorage C keys0 s.storage)
-      caller := s.sender
-      callvalue := s.value
-      timestamp := s.time }
+      caller := wmod s.sender
+      callvalue := wmod s.value
+      timestamp := wmod s.time }
   let res := Prog.run σ Q
   let out := Evm.run (Evm.compileProg 0 Q) m
   match res, out with

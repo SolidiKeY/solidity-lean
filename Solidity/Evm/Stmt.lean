@@ -233,12 +233,12 @@ theorem declLocal_sim (p : PrimTy) (init : Option (Solidity.Val C Γ p))
     (hm : Sim C L b F σ m) (hw : init.all (valIn F) = true) :
     StmtOut C L b (F.push (.val p) .ok) false false false (Solidity.TRun.declLocal p init σ)
       (run (match init with
-        | none => [.push (.val 0), .mstore (cell (b + Γ.length))]
+        | none => [.push w[0], .mstore (cell (b + Γ.length))]
         | some e => compileVal b e ++ [.mstore (cell (b + Γ.length))]) m) m := by
   cases init with
   | none =>
     exact .inl ⟨⟨σ.push (t := .val p) (PrimTy.dflt p), List.prefix_refl _⟩,
-      { m with mem := upd m.mem (cell (b + Γ.length)) (.val 0) }, rfl, rfl, rfl,
+      { m with mem := upd m.mem (cell (b + Γ.length)) w[0] }, rfl, rfl, rfl,
       Keeps.upd (Nat.le_add_right b _) _,
       hm.pushVal (ReprV.dflt_zero p)⟩
   | some e =>
@@ -377,7 +377,7 @@ theorem opStore_sim {p : PrimTy} (hpn : p.isNumeric = true) {op : BinOp} (hop : 
   · obtain ⟨told, rfl, hrold⟩ := prim_read hr
     have hf := Sto.find_of_findLive hsv
     rw [run_append_ok hrunl,
-      run_append_ok (m' := { m with stack := .val (m.store s) :: .slot s :: m.stack })
+      run_append_ok (m' := { m with stack := .val (m.store.cells s) :: .slot s :: m.stack })
       (by simp only [run, Machine.push, exec_cons_zero, Instr.step, Nat.sub_self, List.length_cons,
           Nat.zero_lt_succ, getElem?_pos, List.getElem_cons_zero, Machine.next, Out.ok_bind,
           exec_nil])]
@@ -395,13 +395,13 @@ theorem opStore_sim {p : PrimTy} (hpn : p.isNumeric = true) {op : BinOp} (hop : 
             Solidity.opStoreT, hf, SVal.view_prim, hc, hst', bind, Except.bind, TRes.ofOpt, pure,
             Except.pure]
         · change run (binTail p op ++ _)
-            { m with stack := wr :: .val (m.store s) :: .slot s :: m.stack } = _
+            { m with stack := wr :: .val (m.store.cells s) :: .slot s :: m.stack } = _
           rw [run_append_ok hrunt]; rfl
       · refine .inr ⟨?_, ?_⟩
         · simp only [Solidity.TRun.opAssign, hvr, opLocT_store hl, hres,
             Solidity.opStoreT, hf, SVal.view_prim, hc, bind, Except.bind, TRes.ofOpt]
         · change run (binTail p op ++ _)
-            { m with stack := wr :: .val (m.store s) :: .slot s :: m.stack } = _
+            { m with stack := wr :: .val (m.store.cells s) :: .slot s :: m.stack } = _
           rw [run_append_revert hrunt]
     · exact .inr ⟨by simp only [Solidity.TRun.opAssign, hvr, bind, Except.bind],
         run_append_revert hrunr⟩
@@ -451,17 +451,17 @@ theorem bumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) {l :
     {loc : Solidity.Loc C Γ (.prim p)} (hl : opLocToLoc l = some loc)
     (hm : Sim C L b F σ m) (hwl : locIn F false loc = true) :
     StmtOut C L b F false false false (Solidity.TRun.incDec op l σ)
-      (run (compileLoc b loc ++ [.dup 1, .sload, .push (.val 1)] ++ binTail p op.binOp ++
+      (run (compileLoc b loc ++ [.dup 1, .sload, .push w[1]] ++ binTail p op.binOp ++
         [.swap 1, .sstore]) m) m := by
   simp only [List.append_assoc]
   rcases loc_sim loc hm hwl with ⟨rt, s, sv, hres, hsv, hps, hr, hrunl⟩ | ⟨hres, hrunl⟩
   · obtain ⟨told, rfl, hrold⟩ := prim_read hr
     have hf := Sto.find_of_findLive hsv
     have hv := bump_simT hpn op hrold { m with stack := .slot s :: m.stack }
-    rw [run_append_ok hrunl, show [Instr.dup 1, .sload, .push (.val 1)] ++ (binTail p op.binOp ++
-        [.swap 1, .sstore]) = [Instr.dup 1, .sload] ++ (([.push (.val 1)] ++ binTail p op.binOp) ++
+    rw [run_append_ok hrunl, show [Instr.dup 1, .sload, .push w[1]] ++ (binTail p op.binOp ++
+        [.swap 1, .sstore]) = [Instr.dup 1, .sload] ++ (([.push w[1]] ++ binTail p op.binOp) ++
         [.swap 1, .sstore]) by simp only [List.cons_append, List.nil_append],
-      run_append_ok (m' := { m with stack := .val (m.store s) :: .slot s :: m.stack })
+      run_append_ok (m' := { m with stack := .val (m.store.cells s) :: .slot s :: m.stack })
       (by simp only [run, Machine.push, exec_cons_zero, Instr.step, Nat.sub_self, List.length_cons,
           Nat.zero_lt_succ, getElem?_pos, List.getElem_cons_zero, Machine.next, Out.ok_bind,
           exec_nil])]
@@ -485,12 +485,12 @@ theorem bumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) {l :
 theorem bumpLocal_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec) (i : Idx Γ (.val p))
     (hm : Sim C L b F σ m) :
     StmtOut C L b F false false false (Solidity.TRun.incDec op (.local i) σ)
-      (run ([.mload (cellOf b i), .push (.val 1)] ++ binTail p op.binOp ++ [.mstore (cellOf b i)]) m)
+      (run ([.mload (cellOf b i), .push w[1]] ++ binTail p op.binOp ++ [.mstore (cellOf b i)]) m)
       m := by
   have hrold := hm.vals i
   have hv := bump_simT hpn op hrold m
-  rw [show [Instr.mload (cellOf b i), .push (.val 1)] ++ binTail p op.binOp ++
-      [.mstore (cellOf b i)] = [Instr.mload (cellOf b i)] ++ (([.push (.val 1)] ++
+  rw [show [Instr.mload (cellOf b i), .push w[1]] ++ binTail p op.binOp ++
+      [.mstore (cellOf b i)] = [Instr.mload (cellOf b i)] ++ (([.push w[1]] ++
       binTail p op.binOp) ++ [.mstore (cellOf b i)]) by simp only [List.cons_append,
           List.nil_append],
     run_append_ok (m' := { m with stack := m.memAt (lvl b i) :: m.stack }) rfl]
@@ -551,7 +551,7 @@ theorem assignBumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec
     have hf := Sto.find_of_findLive hsv
     have hv := bumpCode_simT hpn op hrold { m with stack := .slot s :: m.stack }
     rw [run_append_ok hrunl,
-      run_append_ok (m' := { m with stack := .val (m.store s) :: .slot s :: m.stack })
+      run_append_ok (m' := { m with stack := .val (m.store.cells s) :: .slot s :: m.stack })
       (by simp only [run, Machine.push, exec_cons_zero, Instr.step, Nat.sub_self, List.length_cons,
           Nat.zero_lt_succ, getElem?_pos, List.getElem_cons_zero, Machine.next, Out.ok_bind,
           exec_nil])]
@@ -561,12 +561,12 @@ theorem assignBumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec
         (fun x hx => WordStore.write_other _ _ fun he => hx (he ▸ Occ.prim))
       have hs := (hm.store' hrep (upd_len hps an)).setLocalVal i
         (v := if op.isPre then tn else told)
-        (w := if op.isPre then .val an else .val (m.store s))
+        (w := if op.isPre then .val an else .val (m.store.cells s))
         (by cases op.isPre <;> simp only [Bool.false_eq_true, ↓reduceIte] <;> first | exact hrn | exact hrold)
       refine .inl ⟨⟨(σ.withStorage st').setLocal i
           (if op.isPre then tn else told), List.prefix_refl _⟩, { m with
           store := WordStore.write m.store s an
-          mem := upd m.mem (cellOf b i) (if op.isPre then .val an else .val (m.store s)) },
+          mem := upd m.mem (cellOf b i) (if op.isPre then .val an else .val (m.store.cells s)) },
         ?_, ?_, rfl, Keeps.storeUpd (le_lvl b i) _ (upd_len hps an), hs⟩
       · simp only [Solidity.TRun.assignIncDec, opLocT_bump hl, hres,
           Solidity.bumpStoreT, hf, SVal.view_prim, htn, hst', bind, Except.bind, TRes.ofOpt, pure,
@@ -584,11 +584,18 @@ theorem assignBumpStore_sim {p : PrimTy} (hpn : p.isNumeric = true) (op : IncDec
 
 /-! ## Copies, arrays, `delete`, payments -/
 
+/-- The offsets the fragment pushes are words. -/
+theorem leavesFit_mem {T : Ty} (h : leavesFit T = true) : ∀ o ∈ leaves T, o < W :=
+  fun o ho => by simpa only [decide_eq_true_eq] using List.all_eq_true.1 h o ho
+
+theorem leavesFit_rev {T : Ty} (h : leavesFit T = true) : ∀ o ∈ (leaves T).reverse, o < W :=
+  fun o ho => leavesFit_mem h o (List.mem_reverse.1 ho)
+
 /-- **`alice = bob;`** of a static type: the source's words loaded, the
 target resolved, the words stored at the target's slots. -/
 theorem copy_sim {R : RefTy} (l : Solidity.Loc C Γ (.ref R))
     (q : Solidity.SPath C Γ (.ref R)) (hq : (Ty.ref R).mapFree = true)
-    (hst : static (.ref R) = true)
+    (hst : static (.ref R) = true) (hfit : leavesFit (.ref R) = true)
     (hm : Sim C L b F σ m)
     (hwq : spathIn F false q = true) (hwl : locIn F false l = true) :
     StmtOut C L b F false false false (Solidity.TRun.assign l (.copy q hq) σ)
@@ -599,8 +606,8 @@ theorem copy_sim {R : RefTy} (l : Solidity.Loc C Γ (.ref R))
   · have hf := Sto.find_of_findLive hsv
     rw [run_append_ok hrun]
     simp only [Machine.push]
-    rw [run_append_ok (loadLeaves_run m s _ m.stack)]
-    generalize hvs : ((leaves (.ref R)).map fun o => m.store (s.add o)).reverse = vs
+    rw [run_append_ok (loadLeaves_run m s _ (leavesFit_mem hfit) m.stack)]
+    generalize hvs : ((leaves (.ref R)).map fun o => m.store.cells (s.add o)).reverse = vs
     rw [run_append_ok (m' := { m with stack := vs.map Word.val ++ m.stack }) rfl]
     rcases loc_sim l (hm.stack (vs.map Word.val ++ m.stack)) hwl with
       ⟨r', d, old, hres', hold, hpl, hro, hrunl⟩ | ⟨hres', hrunl⟩
@@ -609,10 +616,10 @@ theorem copy_sim {R : RefTy} (l : Solidity.Loc C Γ (.ref R))
       have hlen : (leaves (.ref R)).reverse.length = vs.length := by
         rw [← hvs]; simp only [List.length_reverse, List.length_map]
       rw [run_append_ok (storeLeaves_run { m with stack := vs.map Word.val ++ m.stack } d _ vs
-        m.stack m.store hlen)]
-      have hvs' : vs = (leaves (.ref R)).reverse.map fun o => m.store (s.add o) := by
-        rw [← hvs, List.map_reverse]
-      subst hvs'
+        m.stack m.store (leavesFit_rev hfit) hlen)]
+      have hvs' : vs.map Fin.val = (leaves (.ref R)).reverse.map fun o => m.store (s.add o) := by
+        simp only [← hvs, List.map_reverse, List.map_map]; rfl
+      rw [hvs']
       have hmove := move_repr (st' := storeAt m.store d (leaves (.ref R)).reverse
           ((leaves (.ref R)).reverse.map fun o => m.store (s.add o))) hr _ d
         (Nat.lt_succ_self _) hst fun o ho => storeAt_map _ (fun o => WordStore.read_lt m.store _) (List.mem_reverse.2 ho)
@@ -655,7 +662,7 @@ theorem push_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
       | @array _ kk _ e sh hk hl hW hall =>
         rw [run_append_ok hrun]
         simp only [Machine.push]
-        rw [run_append_ok (m' := { m with stack := .slot s :: .val 0 :: .slot s :: m.stack }) rfl,
+        rw [run_append_ok (m' := { m with stack := .slot s :: w[0] :: .slot s :: m.stack }) rfl,
           run_append_ok (pushSlotCode_run m _ 1 s (by omega))]
         obtain ⟨st', hst'⟩ : ∃ st', st' =
             WordStore.write (WordStore.write m.store s (m.store s + 1)) (.data s (m.store s * 1)) 0 := ⟨_, rfl⟩
@@ -744,7 +751,7 @@ theorem push_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
     | @copy R q' hq =>
       rw [pushIn] at hwp
       simp only [Bool.and_eq_true] at hwp
-      obtain ⟨⟨hst, hwb⟩, hwq⟩ := hwp
+      obtain ⟨⟨⟨hst, hfit⟩, hwb⟩, hwq⟩ := hwp
       simp only [pushCode, List.append_assoc]
       rcases spath_sim q hm hwb with ⟨r, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
       · have hr' := hr
@@ -756,8 +763,8 @@ theorem push_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
           · have hf' := Sto.find_of_findLive hsv'
             rw [run_append_ok hrunq]
             simp only [Machine.push]
-            rw [run_append_ok (loadLeaves_run m src _ (.slot s :: m.stack))]
-            generalize hvs : ((leaves (.ref R)).map fun o => m.store (src.add o)).reverse = vs
+            rw [run_append_ok (loadLeaves_run m src _ (leavesFit_mem hfit) (.slot s :: m.stack))]
+            generalize hvs : ((leaves (.ref R)).map fun o => m.store.cells (src.add o)).reverse = vs
             have hlen : (leaves (.ref R)).reverse.length = vs.length := by
               rw [← hvs]; simp only [List.length_reverse, List.length_map]
             rw [run_append_ok (m' := { m with stack := .slot s :: (vs.map Word.val ++
@@ -768,10 +775,11 @@ theorem push_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
                   Nat.zero_lt_succ, getElem?_pos, Nat.le_refl, List.getElem_append_right,
                   Nat.sub_self, List.getElem_cons_zero, exec_nil]),
               run_append_ok (pushSlotCode_run m _ (size (.ref R)) s (by omega)),
-              run_append_ok (storeLeaves_run m _ _ vs (.slot s :: m.stack) _ hlen)]
-            have hvs' : vs = (leaves (.ref R)).reverse.map fun o => m.store (src.add o) := by
-              rw [← hvs, List.map_reverse]
-            subst hvs'
+              run_append_ok (storeLeaves_run m _ _ vs (.slot s :: m.stack) _ (leavesFit_rev hfit) hlen)]
+            have hvs' : vs.map Fin.val =
+                (leaves (.ref R)).reverse.map fun o => m.store (src.add o) := by
+              simp only [← hvs, List.map_reverse, List.map_map]; rfl
+            rw [hvs']
             obtain ⟨st', hst'⟩ : ∃ st', st' = storeAt (WordStore.write m.store s (m.store s + 1))
                 (.data s (m.store s * size (.ref R))) (leaves (.ref R)).reverse
                 ((leaves (.ref R)).reverse.map fun o => m.store (src.add o)) := ⟨_, rfl⟩
@@ -858,14 +866,14 @@ theorem pop_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
 
 /-- `delete l;`: every leaf of `l` zeroed; the fragile aliases forgotten. -/
 theorem delete_sim {T : Ty} (l : Solidity.Loc C Γ T)
-    (hm : Sim C L b F σ m) (hwl : locIn F false l = true) :
+    (hm : Sim C L b F σ m) (hfit : leavesFit T = true) (hwl : locIn F false l = true) :
     StmtOut C L b F.dropFragile true false false (Solidity.TRun.delete l σ)
       (run (compileLoc b l ++ zeroCode (leaves T) ++ [.pop]) m) m := by
   simp only [List.append_assoc]
   rcases loc_sim l hm hwl with ⟨r, s, sv, hres, hsv, hp, hr, hrun⟩ | ⟨hres, hrun⟩
   · rw [run_append_ok hrun]
     simp only [Machine.push]
-    rw [run_append_ok (zeroCode_run m m.stack s (leaves T))]
+    rw [run_append_ok (zeroCode_run m m.stack s (leaves T) (leavesFit_mem hfit))]
     have hnew := zero_repr hr (tyRank T + 1) (Nat.lt_succ_self _)
       (st' := zeroAt m.store s (leaves T)) (fun o ho => zeroAt_zero ⟨o, ho, rfl⟩)
       (fun x _ hx => zeroAt_other hx)
@@ -899,57 +907,58 @@ theorem transfer_sim (r a : Solidity.Val C Γ .uint)
         simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind, pure, Except.pure,
           hx1, hy1]
       rw [hres]
-      obtain ⟨-, -, -, hself, -, -, -, hsw⟩ := hm.env
+      obtain ⟨-, -, -, hself⟩ := hm.env
       have hpay : ∀ a : Nat, netAt (σ.pay vr y).net a =
-          if x = m.self then netAt σ.net a else if a = x then netAt σ.net x - y
+          if x = m.self.1 then netAt σ.net a else if a = x then netAt σ.net x - y
           else netAt σ.net a := by
         intro a
         rw [netAt_pay, hx1, hself]
         simp only [Int.ofNat_inj]
-      have hns : netAt (σ.pay vr y).net m.self = 0 := by
-        rw [hpay m.self]
+      have hns : netAt (σ.pay vr y).net m.self.1 = 0 := by
+        rw [hpay m.self.1]
         split
         · exact hm.netSelf
         · rename_i hxs
           rw [if_neg (fun h => hxs h.symm)]
           exact hm.netSelf
-      by_cases hrf : m.bal m.self < y ∨ m.accepts x y = false
+      by_cases hrf : m.bal m.self.1 < y ∨ m.accepts x y = false
       · refine .refused rfl ⟨by simp only [run, assertTop, List.cons_append, List.nil_append,
           Machine.push, exec_cons_zero, Instr.step, hrf, ↓reduceIte, Machine.next, Out.ok_bind,
           exec_nil, Out.revert_bind],
           ⟨σ.pay vr y, List.prefix_refl _⟩, { m with bal := upd m.bal x (m.bal x + y) }, rfl,
           ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
-          hm.book vr y _ _ (fun c hc hcs => ?_) hns⟩
-        have h1 := hm.net c hc hcs
-        rw [hpay c]
+          hm.book vr y _ _ (fun c hcs => ?_) hns⟩
+        have h1 := hm.net c hcs
+        have hcs' : c.1 ≠ m.self.1 := fun h => hcs (Fin.ext h)
+        rw [hpay c.1]
         simp only [upd]
-        by_cases hxs : x = m.self
-        · subst hxs
-          simp only [hcs, ↓reduceIte]; exact h1
-        · by_cases hcx : c = x
+        by_cases hxs : x = m.self.1
+        · simp only [hxs, hcs', ↓reduceIte]; exact h1
+        · by_cases hcx : c.1 = x
           · subst hcx; simp only [hxs, ↓reduceIte]; omega
           · simp only [hxs, hcx, ↓reduceIte]; exact h1
-      · by_cases hxe : x = m.self
-        · subst hxe
-          have hb := hm.book _ _ m.bal m.bal₀ (fun c hc hcs => by
-            rw [hpay c]; simp only [↓reduceIte]; exact hm.net c hc hcs) hns
+      · by_cases hxe : x = m.self.1
+        · have hb := hm.book _ _ m.bal m.bal₀ (fun c hcs => by
+            rw [hpay c.1, if_pos hxe]; exact hm.net c hcs) hns
           refine .inl ⟨⟨σ.pay vr y, List.prefix_refl _⟩, m, rfl, ?_, rfl, Keeps.refl m, hb⟩
+          rw [hxe] at hrf
           simp only [run, assertTop, List.cons_append, List.nil_append, Machine.push,
-              exec_cons_zero, Instr.step, hrf, ↓reduceIte, Machine.next, Out.ok_bind,
+              exec_cons_zero, Instr.step, hrf, hxe, ↓reduceIte, Machine.next, Out.ok_bind,
               Nat.succ_ne_self, exec_cons_succ, exec_nil]
         · simp only [not_or, Bool.not_eq_false] at hrf
-          refine .inl ⟨⟨σ.pay vr y, List.prefix_refl _⟩, { m with bal := pay m.bal m.self x y },
+          refine .inl ⟨⟨σ.pay vr y, List.prefix_refl _⟩, { m with bal := pay m.bal m.self.1 x y },
             rfl, ?_, rfl, ⟨fun _ _ => rfl, fun _ _ _ => Nat.le_refl _⟩,
-            hm.book vr y _ m.bal₀ (fun c hc hcs => ?_) hns⟩
+            hm.book vr y _ m.bal₀ (fun c hcs => ?_) hns⟩
           · simp only [run, assertTop, List.cons_append, List.nil_append, Machine.push,
               exec_cons_zero, Instr.step, hrf, Bool.true_eq_false, or_self, ↓reduceIte, hxe,
               Out.ok_bind, Nat.succ_ne_self, exec_cons_succ, exec_nil]
-          · have h1 := hm.net c hc hcs
-            rw [hpay c]
+          · have h1 := hm.net c hcs
+            have hcs' : c.1 ≠ m.self.1 := fun h => hcs (Fin.ext h)
+            rw [hpay c.1]
             simp only [pay, upd, hxe, ↓reduceIte]
-            by_cases hcx : c = x
+            by_cases hcx : c.1 = x
             · subst hcx; simp only [↓reduceIte]; omega
-            · simp only [hcx, hcs, ↓reduceIte]; exact h1
+            · simp only [hcx, hcs', ↓reduceIte]; exact h1
     · exact .inr ⟨by simp only [Solidity.TRun.transfer, hvr, hva, bind, Except.bind],
         run_append_revert hruna⟩
   · exact .inr ⟨by simp only [Solidity.TRun.transfer, hvr, bind, Except.bind],
