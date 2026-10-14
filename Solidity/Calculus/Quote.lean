@@ -264,6 +264,8 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
   | @Stmt.assignIncDec _ _ p i op _ l _ =>
     sctor ``Stmt.assignIncDec #[Γe, toExpr p, ← qIdx Γ (.val p) i, toExpr op, rflTrue,
       ← qOpLoc Γ p l, rflTrue]
+  | @Stmt.assignLocalPush _ _ p i b _ =>
+    sctor ``Stmt.assignLocalPush #[Γe, toExpr p, ← qIdx Γ (.val p) i, ← qSPath Γ _ b, rflTrue]
   | @Stmt.push _ _ E b v _ =>
     sctor ``Stmt.push #[Γe, toExpr E, ← qSPath Γ _ b,
       ← qOpt (mkApp3 (mkConst ``Src) (← contract) Γe (toExpr E)) (qSrc Γ E) v, rflTrue]

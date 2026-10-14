@@ -130,7 +130,8 @@ def Stmt.asserts {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
     Prog.asserts ok || Prog.asserts err || Prog.asserts pnc || Prog.asserts other
   | .loop _ _ body => Prog.asserts body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .transfer .. | .send .. | .declMem ..
+  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .transfer ..
+  | .send .. | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
   | .require _ | .revert => false
 /-- Whether a sequence has an `assert`. -/
@@ -409,6 +410,8 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
       OpLoc.storeT_noPanic σ op l _
   | _, _, .incDec op _ l, _, σ => (OpLoc.bumpT_noPanic σ op l).bind fun _ => TRes.NoPanic.ok _
   | _, _, .assignIncDec _ op _ l _, _, σ => (OpLoc.bumpT_noPanic σ op l).bind fun _ =>
+      TRes.NoPanic.ok _
+  | _, _, .assignLocalPush i b _, _, σ => (TRun.push_noPanic b none σ).bind fun _ =>
       TRes.NoPanic.ok _
   | _, _, .push b v _, _, σ => TRun.push_noPanic b v σ
   | _, _, .pop b, _, σ => (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind

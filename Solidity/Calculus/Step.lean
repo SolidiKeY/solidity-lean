@@ -77,6 +77,8 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
     (opAssign := fun op hop hp l r => opStep k op hop hp l r)
     (incDec := fun op hp l => incStep k op hp l)
     (assignIncDec := fun i op hp l _ => assignIncStep i op hp l)
+    -- storageLocalPrimitivePushBind
+    (assignLocalPush := fun i b _ => .update (Upd.pushBindPrim i b))
     (push := fun b v hd => pushStep k b v hd) (pop := fun b => popStep k b)
     (transfer := fun r a => transferStep k m r a) (send := fun pv r a => sendStep k m pv r a)
     -- memoryReferenceDeclFreshAlloc, memoryLocalDeclInitDrop
@@ -118,7 +120,8 @@ def Stmt.maxIdx : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
     (assign := fun _ _ => 0) (rebind := fun _ _ => 0) (assignLocal := fun _ _ => 0)
     (declLocal := fun _ x _ => x.idx) (declStorage := fun _ x _ => x.idx)
     (opAssign := fun _ _ _ _ _ => 0) (incDec := fun _ _ _ => 0)
-    (assignIncDec := fun _ _ _ _ _ => 0) (push := fun _ _ _ => 0) (pop := fun _ => 0)
+    (assignIncDec := fun _ _ _ _ _ => 0) (assignLocalPush := fun _ _ _ => 0)
+    (push := fun _ _ _ => 0) (pop := fun _ => 0)
     (transfer := fun _ _ => 0) (send := fun _ _ _ => 0)
     (declMem := fun _ x _ _ _ => x.idx) (rebindMem := fun _ _ => 0)
     (assignFromMem := fun _ _ => 0) (assignMem := fun _ _ => 0) (delete := fun _ => 0)

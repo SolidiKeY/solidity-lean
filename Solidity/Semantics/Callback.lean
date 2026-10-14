@@ -142,7 +142,8 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
     (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
     (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
-    (assignIncDec := fun _ _ _ _ _ => false) (push := fun _ _ _ => false) (pop := fun _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false)
     (transfer := fun _ _ => true) (send := fun _ _ _ => true)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
@@ -169,7 +170,8 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
     (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
     (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
-    (assignIncDec := fun _ _ _ _ _ => false) (push := fun _ _ _ => false) (pop := fun _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false)
     (transfer := fun _ _ => true) (send := fun _ _ _ => true)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
@@ -626,7 +628,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       · exact .inr (.block (o := .violated) ht h)
   | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _ | _, _, .declLocal .., _
   | _, _, .declStorage .., _ | _, _, .opAssign .., _ | _, _, .incDec .., _
-  | _, _, .assignIncDec .., _ | _, _, .push .., _ | _, _, .pop .., _ | _, _, .declMem .., _
+  | _, _, .assignIncDec .., _ | _, _, .assignLocalPush .., _ | _, _, .push .., _
+  | _, _, .pop .., _ | _, _, .declMem .., _
   | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _ | _, _, .assignMem .., _
   | _, _, .delete .., _ | _, _, .deleteMem .., _ | _, _, .assignNew .., _ | _, _, .require .., _
   | _, _, .assert .., _ | _, _, .revert, _ => .inl (.det rfl)
@@ -738,6 +741,7 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
   | _, _, .assignLocal .., _, _, _, h | _, _, .declLocal .., _, _, _, h
   | _, _, .declStorage .., _, _, _, h | _, _, .opAssign .., _, _, _, h
   | _, _, .incDec .., _, _, _, h | _, _, .assignIncDec .., _, _, _, h
+  | _, _, .assignLocalPush .., _, _, _, h
   | _, _, .push .., _, _, _, h | _, _, .pop .., _, _, _, h | _, _, .declMem .., _, _, _, h
   | _, _, .rebindMem .., _, _, _, h | _, _, .assignFromMem .., _, _, _, h
   | _, _, .assignMem .., _, _, _, h | _, _, .delete .., _, _, _, h

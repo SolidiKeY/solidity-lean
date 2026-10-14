@@ -236,7 +236,7 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /-! Every rule prints as a rule line (`#check_rule_text`, `Tools/Taclet.lean`). -/
 
 /--
-info: all 159 rules of `Solidity.Taclet` print as rule lines
+info: all 160 rules of `Solidity.Taclet` print as rule lines
 ---
 info: all 9 rules of `Solidity.LeanTaclet` print as rule lines
 ---

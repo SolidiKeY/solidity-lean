@@ -572,6 +572,14 @@ theorem keeps_push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)
     | none => exact hs
     | some x0 => exact hx x0 rfl
 
+theorem keeps_assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) :
+    (heredInv C P).TKeeps (TRun.assignLocalPush i b) := by
+  intro σ o hσ h
+  unfold TRun.assignLocalPush at h
+  obtain ⟨o', ho', h⟩ := tbind_ok_inv h
+  cases h
+  exact (keeps_push hP hG b none σ o' hσ ho').setLocal i trivial
+
 omit hG in
 theorem keeps_pop {E : Ty} (b : SPath C Γ (.array E)) : (heredInv C P).TKeeps (TRun.pop b) := by
   intro σ o hσ h
@@ -714,6 +722,7 @@ theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
   | _, _, .opAssign op _ _ l r => keeps_opAssign hP op l r
   | _, _, .incDec op _ l => keeps_incDec hP op l
   | _, _, .assignIncDec i op _ l _ => keeps_assignIncDec hP i op l
+  | _, _, .assignLocalPush i b _ => keeps_assignLocalPush hP hG i b
   | _, _, .push b v _ => keeps_push hP hG b v
   | _, _, .pop b => keeps_pop hP b
   | _, _, .transfer r a => keeps_transfer r a

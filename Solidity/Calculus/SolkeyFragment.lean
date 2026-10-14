@@ -43,7 +43,8 @@ def Stmt.inSolkey (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assign := fun _ _ => true) (rebind := fun _ _ => true) (assignLocal := fun _ _ => true)
     (declLocal := fun _ _ _ => true) (declStorage := fun _ _ _ => true)
     (opAssign := fun _ _ _ _ _ => true) (incDec := fun _ _ _ => true)
-    (assignIncDec := fun _ _ _ _ _ => true) (push := fun _ _ _ => true) (pop := fun _ => true)
+    (assignIncDec := fun _ _ _ _ _ => true) (assignLocalPush := fun _ _ _ => true)
+    (push := fun _ _ _ => true) (pop := fun _ => true)
     (transfer := fun _ _ => m == .box) (send := fun _ _ _ => true)
     (declMem := fun _ _ _ _ _ => true) (rebindMem := fun _ _ => true)
     (assignFromMem := fun _ _ => true) (assignMem := fun _ _ => true) (delete := fun _ => true)
@@ -93,6 +94,7 @@ def Stmt.isLoop : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assignLocal := fun _ _ => false) (declLocal := fun _ _ _ => false)
     (declStorage := fun _ _ _ => false) (opAssign := fun _ _ _ _ _ => false)
     (incDec := fun _ _ _ => false) (assignIncDec := fun _ _ _ _ _ => false)
+    (assignLocalPush := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false) (transfer := fun _ _ => false)
     (send := fun _ _ _ => false) (declMem := fun _ _ _ _ _ => false)
     (rebindMem := fun _ _ => false) (assignFromMem := fun _ _ => false)
@@ -235,7 +237,8 @@ theorem Stmt.inSolkey_wk (m : Modality) {Γ Δ : Ctx} (h : Thin Γ Δ) :
     show Prog.inSolkey m (body.wk h).2.2 = _
     rw [Prog.inSolkey_wk m h body]; rfl
   | _, .assign .. | _, .rebind .. | _, .assignLocal .. | _, .declLocal .. | _, .declStorage ..
-  | _, .opAssign .. | _, .incDec .. | _, .assignIncDec .. | _, .push .. | _, .pop ..
+  | _, .opAssign .. | _, .incDec .. | _, .assignIncDec .. | _, .assignLocalPush .. | _, .push ..
+  | _, .pop ..
   | _, .transfer .. | _, .send .. | _, .declMem .. | _, .rebindMem .. | _, .assignFromMem ..
   | _, .assignMem .. | _, .delete .. | _, .deleteMem .. | _, .assignNew .. | _, .require ..
   | _, .assert .. | _, .revert | _, .tryCall .. | _, .loop .. => rfl

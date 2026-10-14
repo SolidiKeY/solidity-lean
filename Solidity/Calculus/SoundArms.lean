@@ -1235,6 +1235,70 @@ theorem sound_rebindPush {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.a
     TRes.NoDiv.bind (ARhs.evalT_nd σ (.push b hd)) fun _ => TRes.NoDiv.ok _)
     (hx := pushBind_exh σ i b hd)
 
+theorem assignLocalPush_agrees {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.assignLocalPush i b σ)
+      ((Upd.pushBindPrim i b).applyP σ) := by
+  have h := pushSlot_agrees σ b
+  rw [UpdElem.pushSlot, applyP_storage1, Tm.eval_pushSlot, Tm.eval_storage, Option.bind_some] at h
+  rw [Upd.pushBindPrim, UpdElem.pushSlot, applyP_snoc, applyV_storage1, Tm.eval_pushSlot,
+    Tm.eval_storage, Option.bind_some]
+  simp only [UpdElem.applyV_local]
+  unfold TRun.assignLocalPush
+  generalize TRun.push b none σ = t at h ⊢
+  generalize ((b.lower.eval σ).bind fun r => σ.storage.push r some) = u at h ⊢
+  cases t with
+  | ok o =>
+    cases u with
+    | none => cases h
+    | some st =>
+      obtain ⟨hg, hl⟩ := Prod.mk.inj (Option.some.inj h)
+      refine TRes.AgreesO.ret ?_
+      simp only [Option.map_some, Option.bind_some, Rhs.eval_eq_evalM, Rhs.evalM, Tm.eval_lit,
+        State.locV_setLocal, ← hl]
+      show some ((σ.globG.withStorage st).val, σ.locV.set i (PrimTy.dflt p)) =
+        some (o.st.glob, σ.locV.set i (PrimTy.dflt p))
+      rw [← hg]
+      rfl
+  | error e =>
+    cases e with
+    | revert => cases u with
+      | none => rfl
+      | some st => cases h
+    | panic => exact h
+    | diverge => trivial
+    | exhausted => trivial
+
+theorem assignLocalPush_exh {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p)))
+    (h : TRun.assignLocalPush i b σ = .error .revert) :
+    (Upd.pushBindPrim i b).exh σ = false := by
+  refine Upd.exh_of_exhAny ?_
+  show ((false || (Tm.app2 .pushSlot (.app0 .storage) b.lower).exhB σ) ||
+    (Rhs.val (Tm.app0 (.lit (PrimTy.dflt p)))).exhB σ) = false
+  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b),
+    Rhs.exhB_of_pushFree σ _ (by simp only [Rhs.pushFree, Tm.pushFree])]
+  show ((false || Op2.exhB .pushSlot (some σ.storage) (b.lower.eval σ)) || false) = false
+  cases hq : b.lower.eval σ with
+  | none => rfl
+  | some ref =>
+    cases hf : σ.storage.full ref with
+    | false => show ((false || σ.storage.full ref) || false) = false; rw [hf]; rfl
+    | true =>
+      have hx : TRun.assignLocalPush i b σ = .error .exhausted := by
+        show (TRun.push b none σ >>= _) = _
+        rw [push_exhausted σ b none hq nofun hf]
+        rfl
+      rw [hx] at h
+      cases h
+
+/-- `storageLocalPrimitivePushBind`: `{storage := pushSlot(storage, b) ‖ v := defVal(T)}`,
+`uint y = values.push();`. -/
+theorem sound_assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p)))
+    (hs : b.isSimple = true) :
+    Premise.Runs m (.assignLocalPush i b hs) (.update (Upd.pushBindPrim i b)) σ :=
+  Premise.sound_update_typed σ (assignLocalPush_agrees σ i b) (fun _ =>
+    TRes.NoDiv.bind (TRun.push_nd σ b none) fun _ => TRes.NoDiv.ok _)
+    (hx := assignLocalPush_exh σ i b)
+
 /-- `transferNoCallbackBox`: `{net := …}`. -/
 theorem sound_transferBox (sadr se : Simple C Γ .uint) :
     Premise.Runs m (.transfer (.simple sadr) (.simple se)) (.upd1 (UpdElem.payTo sadr se)) σ :=

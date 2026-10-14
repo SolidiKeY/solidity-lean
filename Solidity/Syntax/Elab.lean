@@ -328,7 +328,8 @@ its blocks). -/
 def RawStmt.exprs : RawStmt → List RawExpr
   | .assign l r | .assignPush l r | .opAssign _ l r | .assignIncDec l _ r => [l, r]
   | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i | .ret i => i.toList
-  | .declStoragePush _ _ b | .delete b | .incDec _ b | .require b | .assert b | .ite b _ _ => [b]
+  | .declStoragePush _ _ b | .declPush _ _ b | .delete b | .incDec _ b | .require b | .assert b
+  | .ite b _ _ => [b]
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
@@ -368,6 +369,7 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .declMemory T x i => return .declMemory T x (← i.mapM f)
   | .ret i => return .ret (← i.mapM f)
   | .declStoragePush T x b => return .declStoragePush T x (← f b)
+  | .declPush T x b => return .declPush T x (← f b)
   | .delete b => return .delete (← f b)
   | .incDec op b => return .incDec op (← f b)
   | .require b => return .require (← f b)
@@ -393,7 +395,8 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
 
 /-- The name a statement declares in its own block. -/
 def RawStmt.declared? : RawStmt → Option String
-  | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _ => some x
+  | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _
+  | .declPush _ x _ => some x
   | .send (some _) (.name x) _ _ => some x
   | _ => none
 
@@ -491,6 +494,7 @@ def RawStmt.renameDecl (x y : String) : RawStmt → RawStmt
   | .declStorage T z i => .declStorage T (if z == x then y else z) i
   | .declMemory T z i => .declMemory T (if z == x then y else z) i
   | .declStoragePush T z b => .declStoragePush T (if z == x then y else z) b
+  | .declPush T z b => .declPush T (if z == x then y else z) b
   | .send (some T) (.name z) r a => .send (some T) (.name (if z == x then y else z)) r a
   | .tupleDecl vs r => .tupleDecl (vs.map (·.map fun (T, z) => (T, if z == x then y else z))) r
   | s => s
@@ -912,6 +916,15 @@ def elabPush (Γ : NCtx) (R : RefTy) (b : RawExpr) : Except String (ARhs C Γ.ct
   | true => pure (.push (← checkPath C Γ (.array (.ref R)) b) hd)
   | false => throw "push() of an element whose default is not well-formed"
 
+/-- The array `y = b.push();` grows, `y` a value local: `uint y = values.push();`.
+solkey has no unfold for a receiver that is not simple, so one is refused. -/
+def elabPrimPush (Γ : NCtx) (p : PrimTy) (b : RawExpr) :
+    Except String ((b : SPath C Γ.ctx (.array (.prim p))) ×' b.isSimple = true) := do
+  let b ← checkPath C Γ (.array (.prim p)) b
+  match hs : b.isSimple with
+  | true => pure ⟨b, hs⟩
+  | false => throw "`= b.push()` into a value local: the receiver is not simple"
+
 /-- `x` may be declared: it is neither a local in scope nor a state variable. -/
 def checkFresh (Γ : ECtx) (x : Name) : Except String Unit :=
   if (lookupBy x Γ).isSome || (C.rootType x).isSome then
@@ -1274,6 +1287,9 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .declStoragePush T x b =>
       let (y, ρ') ← fresh "sp" x
       pure (.declStoragePush T y (r b) :: (← renameStmts ρ' ss))
+    | .declPush T x b =>
+      let (y, ρ') ← fresh "se" x
+      pure (.declPush T y (r b) :: (← renameStmts ρ' ss))
     | .send (some T) (.name x) e a =>
       let (y, ρ') ← fresh "se" x
       pure (.send (some T) (.name y) (r e) (r a) :: (← renameStmts ρ' ss))
@@ -2113,8 +2129,8 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
   | .declMemory T x (some (.newArr T' n)) => pure ([], .declMemory T x (some (.newArr T' n)))
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
-  | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _) | s@(.assert _)
-  | s@(.tryCall ..) => do
+  | s@(.declPush ..) | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
+  | s@(.assert _) | s@(.tryCall ..) => do
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
       if (← read).funs.any (·.1 == f) then
@@ -2258,11 +2274,22 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let r ← ElabM.lift (elabPush C Γ R b)
     declare C x (.alias R)
     pure [.of Γ (.declStorage R (Var.ofName x) (some r))]
+  | .declPush T x b => do
+    let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: a reference type needs a data location"
+    let Γ ← nctx
+    let ⟨b, hs⟩ ← ElabM.lift (elabPrimPush C Γ p b)
+    declare C x (.val p n)
+    let ⟨Γ', th, ix⟩ ← afterCapture Γ (Var.ofName x) (.val p)
+    pure [.of Γ (.declLocal p (Var.ofName x) none),
+      .of Γ' (.assignLocalPush ix (b.wk th) ((SPath.isSimple_wk th b).trans hs))]
   | .assignPush l b => do
     let ⟨Γ, t⟩ ← synthM C l
     match t with
     | .path (.ref R) (.alias x) => pure [.of Γ (.rebind x (← ElabM.lift (elabPush C Γ R b)))]
-    | _ => throw "`= b.push()` binds a storage pointer"
+    | .val p (.simple (.local i)) =>
+      let ⟨b, hs⟩ ← ElabM.lift (elabPrimPush C Γ p b)
+      pure [.of Γ (.assignLocalPush i b hs)]
+    | _ => throw "`= b.push()` binds a storage pointer or a value local"
   | .declMemory T x (some (.newArr T' n)) => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
     let ⟨R', hR⟩ ← elabNewTy C T'

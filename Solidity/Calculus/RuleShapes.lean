@@ -288,6 +288,7 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
     .taclet .storageLocalRootPush_unfold_leftFstReceiver),
   (``Taclet.storageLocalRootPushBind, .taclet .storageLocalRootPushBind),
+  (``Taclet.storageLocalPrimitivePushBind, .taclet .storageLocalPrimitivePushBind),
   (``Taclet.storageLocalRootPushBindMappingElement,
     .taclet .storageLocalRootPushBindMappingElement),
   -- Transfer
@@ -493,7 +494,7 @@ theorem taclets_partitioned :
     KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 308 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 309 := by decide +kernel
 
 theorem unclaimedTaclets_count : unclaimedTaclets.length = 15 := by decide +kernel
 

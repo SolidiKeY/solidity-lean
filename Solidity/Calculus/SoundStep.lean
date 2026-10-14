@@ -52,6 +52,7 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | opAssign op hop hp' l r => exact opStep_sound σ k op hop hp' l r p hp
   | incDec op hp' l => exact incStep_sound σ k op hp' l p hp
   | assignIncDec i op hp' l hs => cases hp; exact sound_assignIncDec σ i op hp' l hs
+  | assignLocalPush i b hs => cases hp; exact sound_assignLocalPush σ i b hs
   | push b v hd => exact pushStep_sound σ k b v hd p hp
   | pop b => exact popStep_sound σ k b p hp
   | transfer r a => exact transferStep_sound σ k r a p hp

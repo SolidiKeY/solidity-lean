@@ -591,6 +591,7 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   storagePop_unfold_leftFstReceiver "2."
   storageLocalRootPush_unfold_leftFstReceiver "2."
   storageLocalRootPushBind "2."
+  storageLocalPrimitivePushBind "2."
   storageLocalRootPushBindMappingElement "2."
   transfer_unfold_leftFstReceiver "29."
   transfer_unfold_rightSndArgument "29."

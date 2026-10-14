@@ -196,6 +196,12 @@ def pushBind {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R
   (Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) b.lower))).snoc
     (.local i (.path (.app1 .next b.lower)))
 
+/-- `{storage := pushSlot(storage, b) ‖ v := defVal(T)}`
+(`storageLocalPrimitivePushBind`): `uint y = values.push();`, `y` the default
+the cleared slot holds. -/
+def pushBindPrim {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) : Upd C Γ Γ :=
+  (Upd.nil.snoc (UpdElem.pushSlot b)).snoc (.local i (.val (.app0 (.lit (PrimTy.dflt p)))))
+
 end Upd
 
 /-! ### Compound assignment and `++`/`--` -/

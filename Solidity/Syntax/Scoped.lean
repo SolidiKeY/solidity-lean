@@ -239,6 +239,11 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
       Stmt C Γ Γ
   | assignIncDec {Γ : Ctx} {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
       (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) : Stmt C Γ Γ
+  /-- `y = values.push();` with `y` a value local: the slot appended, `y` its
+  default.  solkey has no unfold for a receiver that is not simple, so the
+  receiver is simple. -/
+  | assignLocalPush {Γ : Ctx} {p : PrimTy} (i : Idx Γ (.val p))
+      (b : SPath C Γ (.array (.prim p))) (hs : b.isSimple = true) : Stmt C Γ Γ
   | push {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
       (hd : (v.isSome || E.defaultOkS) = true) : Stmt C Γ Γ
   | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
@@ -509,6 +514,7 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .transfer r a => s!"{r.toStr ns}.transfer({a.toStr ns true});"
   | .send pv r a => s!"{pv.name ns} = {r.toStr ns}.send({a.toStr ns true});"
   | .assignIncDec x op _ l _ => s!"{x.name ns} = {IncDec.show op (l.toStr ns)};"
+  | .assignLocalPush x b _ => s!"{x.name ns} = {b.toStr ns}.push();"
   | .delete l => s!"delete {l.toStr ns};"
   | .deleteMem p _ => s!"delete {p.toStr ns};"
   | .assignNew (R := R) l n _ => s!"{l.toStr ns} = new {Ty.toStr (.ref R)}({n.toStr ns});"
@@ -692,6 +698,8 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
   | _, .incDec op hp l => ⟨Δ, h, .incDec op hp (l.wk h)⟩
   | _, .assignIncDec i op hp l hs =>
     ⟨Δ, h, .assignIncDec (i.wk h) op hp (l.wk h) ((OpLoc.recvSimple_wk h l).trans hs)⟩
+  | _, .assignLocalPush i b hs =>
+    ⟨Δ, h, .assignLocalPush (i.wk h) (b.wk h) ((SPath.isSimple_wk h b).trans hs)⟩
   | _, .push b v hd =>
     ⟨Δ, h, .push (b.wk h) (v.map (·.wk h)) (by rw [Option.isSome_map]; exact hd)⟩
   | _, .pop b => ⟨Δ, h, .pop (b.wk h)⟩
@@ -750,7 +758,7 @@ def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
   Stmt.casesOn (motive_1 := fun Γ Γ' _ => Ext Γ Γ') s
     (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ _ _ => .push .refl) (fun _ _ _ => .push .refl)
-    (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ _ _ _ _ => .refl)
+    (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ => .refl) (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ _ _ => .push .refl) (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)

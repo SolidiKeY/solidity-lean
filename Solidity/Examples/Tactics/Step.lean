@@ -117,10 +117,11 @@ run_meta agree se `Solidity.Examples.Tactics.Step.compound compoundφ
 /-- `storagePushValueSave`, `storagePushValue_unfold_rightSndArgument`,
 `storagePushLengthSave`, `storagePushLengthSaveReferenceElement`,
 `storagePushValueCopySource`, `storagePushValue_unfold_leftFstReceiver`,
-`storagePopSave`, `storagePop_unfold_leftFstReceiver`. -/
+`storagePopSave`, `storagePop_unfold_leftFstReceiver`, `storageLocalPrimitivePushBind`. -/
 private def arraysφ : Fml StandardExample [] :=
   dl!{ [ values.push(3); values.push(total + 1); values.push(); people.push();
-         persons.push(alice); matrix[total].push(2); values.pop(); matrix[total].pop(); ] true }
+         persons.push(alice); matrix[total].push(2); values.pop(); matrix[total].pop();
+         uint y; y = values.push(); ] true }
 
 run_meta agree se `Solidity.Examples.Tactics.Step.arrays arraysφ
 

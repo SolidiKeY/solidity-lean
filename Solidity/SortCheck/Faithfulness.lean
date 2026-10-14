@@ -68,16 +68,20 @@ inductive Read (C : Contract) (Γ : Ctx) where
   | slen {E : Ty} (p : SPath C Γ (.array E))
   /-- `xs.length` of a memory array. -/
   | mlen {E : Ty} (p : MPath C Γ (.array E))
+  /-- `y = values.push()`: the slot appended (`pushSlot`), read at the
+  element type. -/
+  | sslot {E : Ty} (p : SPath C Γ (.array E))
 
 /-- `alice.age` is read from storage, `m.age` from memory. -/
 def Read.domain {Γ : Ctx} : Read C Γ → ReadDomain
-  | .storage .. | .slen _ => .storage
+  | .storage .. | .slen _ | .sslot _ => .storage
   | .memory .. | .mlen _ => .memory
 
 /-- `alice.age` is read at `uint`, and so is a length. -/
 def Read.ty {Γ : Ctx} : Read C Γ → Ty
   | .storage T _ | .memory T _ => T
   | .slen _ | .mlen _ => .uint
+  | .sslot (E := E) _ => E
 
 /-- The place `x ⊕= e` and `x++` read: `alice.age` in storage, `m.age` in
 memory; a stack local is not read from a state component. -/
@@ -105,6 +109,7 @@ def Stmt.read? {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Read C Γ)
   | .opAssign _ _ _ l _ => OpLoc.read? l
   | .incDec _ _ l => OpLoc.read? l
   | .assignIncDec _ _ _ l _ => OpLoc.read? l
+  | .assignLocalPush _ b _ => some (.sslot b)
   | _ => none
 
 /-! ## What a declared sort claims -/
@@ -132,6 +137,9 @@ def Read.SortOk {Γ : Ctx} (σ : State C Γ) (rs : ReadSort) : Read C Γ → Pro
       SortOkS rs (SVal.prim v) = true
   | .mlen p => ∀ v, (Val.mlen (p := .uint) p rfl).evalT σ = .ok v →
       SortOkM (H := σ.H) rs (.prim .uint) v = true
+  | .sslot (E := E) p => ∀ r (v : SVal (.ref (.array E))), p.resolveT σ = .ok r →
+      σ.storage.find r = some v →
+      SortOkS rs (pushSlot E (SVal.view v : ArrView E).shadow.toList).1 = true
 
 /-- What a constructor's schema fixes about its read's static type. -/
 inductive ReadClass where
@@ -219,6 +227,19 @@ theorem Read.sortOk {Γ : Ctx} (σ : State C Γ)
       · exact MVal.keySort_le_memValue (H := σ.H) (.prim .uint) v
       · rfl
       · simp [ReadClass.fits, Read.ty, Ty.isReference, Ty.isPrimitive] at hfit
+  | @sslot E p =>
+    unfold Read.SortOk
+    intro r v _ _
+    generalize (pushSlot E (SVal.view v : ArrView E).shadow.toList).1 = x
+    cases rs with
+    | generic _ => rfl
+    | fixed s =>
+      show x.keySort.le s = true
+      cases s <;> simp only [ReadClass.supports, Read.domain, beq_iff_eq] at hsup <;>
+        (try exact Bool.noConfusion hsup) <;> subst_vars
+      · exact SVal.keySort_le_stValue x
+      · rw [SVal.keySort_numeric (T := E) hfit x]; rfl
+      · rw [SVal.keySort_ref (T := E) hfit x]; exact KeySort.le_refl _
 
 /-! ## Rows, constructors, statements -/
 
@@ -351,6 +372,8 @@ faithful_theorem storageIndexReadArrayFind .storage .any
 faithful_theorem storageIndexReadArrayStoreRoot .storage .reference
 faithful_theorem storageIndexWriteArrayCopySource .storage .reference
 faithful_theorem storagePushValueCopySource .storage .reference
+-- `y = values.push();` reads the slot appended, at the element type.
+faithful_theorem storageLocalPrimitivePushBind .storage .any
 faithful_theorem memoryStorageCopy .storage .reference
 faithful_theorem storageRootOpAssign .storage .numeric
 faithful_theorem storageFieldOpAssign .storage .numeric
@@ -397,6 +420,7 @@ def faithfulCtors : List Proved := [
   ⟨``Taclet.storageIndexReadArrayStoreRoot, _, @faithful_storageIndexReadArrayStoreRoot⟩,
   ⟨``Taclet.storageIndexWriteArrayCopySource, _, @faithful_storageIndexWriteArrayCopySource⟩,
   ⟨``Taclet.storagePushValueCopySource, _, @faithful_storagePushValueCopySource⟩,
+  ⟨``Taclet.storageLocalPrimitivePushBind, _, @faithful_storageLocalPrimitivePushBind⟩,
   ⟨``Taclet.memoryStorageCopy, _, @faithful_memoryStorageCopy⟩,
   ⟨``Taclet.storageRootOpAssign, _, @faithful_storageRootOpAssign⟩,
   ⟨``Taclet.storageFieldOpAssign, _, @faithful_storageFieldOpAssign⟩,
@@ -432,18 +456,18 @@ theorem rows_covered :
         (ctorsOf row.keyName).all ((faithfulCtors.map (·.ctor)).contains ·))) = true := by
   decide +kernel
 
-/-- What the theorems speak about: of the 119 rows, 95 carry a value read
-(65 in storage, 30 in memory), 87 of them with a sort that says something
+/-- What the theorems speak about: of the 120 rows, 96 carry a value read
+(66 in storage, 30 in memory), 88 of them with a sort that says something
 and 8 with only the claim-free `StValue`; the other 24 read only `size`
 cells, the `net` ledger or `delete` defaults, which `solkeycheck` checks
 token by token. -/
 theorem rows_accounting :
-    tacletReadAnns.length = 119 ∧
-    (tacletReadAnns.filter fun row => !(valueReads row).isEmpty).length = 95 ∧
-    (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .storage)).length = 65 ∧
+    tacletReadAnns.length = 120 ∧
+    (tacletReadAnns.filter fun row => !(valueReads row).isEmpty).length = 96 ∧
+    (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .storage)).length = 66 ∧
     (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .memory)).length = 30 ∧
     (tacletReadAnns.filter fun row => (valueReads row).any (·.sort != .fixed .stValue)).length
-      = 87 := by
+      = 88 := by
   decide +kernel
 
 end SortFaithfulness

@@ -180,7 +180,8 @@ def Stmt.shrinks {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .block body => Prog.shrinks body
   | .call _ _ _ body => Prog.shrinks body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .push .. | .transfer .. | .send .. | .declMem ..
+  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .transfer .. | .send ..
+  | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem .. | .assignNew ..
   | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => false
 def Prog.shrinks {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
@@ -244,7 +245,8 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
       | some _ => CallRetIn (F.after (Prog.shrinks body)) ret
       | none => none
     else none
-  | .send .. | .declMem .. | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem ..
+  | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..
+  | .assignMem .. | .deleteMem ..
   | .assignNew .. | .tryCall .. | .loop .. => none
 /-- A block of the fragment. -/
 def inFragP {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Prog C Γ Γ' → Option (Frag Γ')
@@ -392,7 +394,8 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
     argsCode b args ++ retEnterCode b ps ret ++ compileProg (b + Γ.length) body ++
       retLeaveCode b ps ret
   | .block body => compileProg b body
-  | .send .. | .declMem .. | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem ..
+  | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..
+  | .assignMem .. | .deleteMem ..
   | .assignNew .. | .tryCall .. | .loop .. => []
 /-- The code of a block: its statements' codes in order. -/
 def compileProg (b : Nat) {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → List Instr
@@ -409,7 +412,8 @@ def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Nat
   | .block body => Prog.pushes body
   | .call _ _ _ body => Prog.pushes body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .pop _ | .transfer .. | .send .. | .declMem ..
+  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .pop _ | .transfer .. | .send ..
+  | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
   | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => 0
 def Prog.pushes {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Nat
@@ -426,7 +430,7 @@ def Stmt.pays {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .block body => Prog.pays body
   | .call _ _ _ body => Prog.pays body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
-  | .incDec .. | .assignIncDec .. | .push .. | .pop _ | .declMem ..
+  | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
   | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => false
 def Prog.pays {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool

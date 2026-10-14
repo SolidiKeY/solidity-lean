@@ -686,6 +686,20 @@ theorem TRun.pop_wk {E : Ty} (b : SPath C Γ (.array E)) :
   simp only [TRun.pop, SPath.resolveT_wk, liftedT_bind]
   lift_fin
 
+theorem TRun.assignLocalPush_wk {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) :
+    TRun.assignLocalPush (i.wk h) (b.wk h) (τ.lift h d) =
+      liftedT h d (TRun.assignLocalPush i b τ) := by
+  have hp := TRun.push_wk h τ d b none
+  simp only [Option.map_none] at hp
+  simp only [TRun.assignLocalPush, hp]
+  cases TRun.push b none τ with
+  | error => rfl
+  | ok o =>
+    show Except.ok (⟨(o.st.lift h (TEnv.wk o.ext Δ d)).setLocal (i.wk h) (PrimTy.dflt p), o.ext⟩ :
+        Out C τ.H Δ) =
+      Except.ok ⟨(o.st.setLocal i (PrimTy.dflt p)).lift h (TEnv.wk o.ext Δ d), o.ext⟩
+    simp only [State.lift_setLocal]
+
 theorem TRun.transfer_wk (r a : Val C Γ .uint) :
     TRun.transfer (r.wk h) (a.wk h) (τ.lift h d) = liftedT h d (TRun.transfer r a τ) := by
   simp only [TRun.transfer, Val.evalT_wk, liftedT_bind, State.lift_pay]
@@ -1180,6 +1194,8 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
   | _, _, .incDec op _ l, _, h, τ, d => TWkRel.of_eq (TRun.incDec_wk h τ d op l)
   | _, _, .assignIncDec i op _ l _, _, h, τ, d =>
     TWkRel.of_eq (TRun.assignIncDec_wk h τ d i op l)
+  | _, _, .assignLocalPush i b _, _, h, τ, d =>
+    TWkRel.of_eq (TRun.assignLocalPush_wk h τ d i b)
   | _, _, .push b v _, _, h, τ, d => TWkRel.of_eq (TRun.push_wk h τ d b v)
   | _, _, .pop b, _, h, τ, d => TWkRel.of_eq (TRun.pop_wk h τ d b)
   | _, _, .transfer r a, _, h, τ, d => TWkRel.of_eq (TRun.transfer_wk h τ d r a)

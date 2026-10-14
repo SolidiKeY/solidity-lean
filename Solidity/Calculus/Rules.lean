@@ -552,6 +552,10 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝
           { storage := save(storage, darr.length, darr.length + 1) ‖ lsv := darr[darr.length] }
           ⟨[ ]⟩ }
+  | storageLocalPrimitivePushBind :
+      dl{ ⟨[ v = sp.push(); ]⟩ ⇝
+          { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1)
+            ‖ v := defVal(T) } ⟨[ ]⟩ }
   | storageLocalRootPushBindMappingElement :
       dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝
           { storage := save(storage, marr.length, marr.length + 1) ‖ lsv := marr[marr.length] }

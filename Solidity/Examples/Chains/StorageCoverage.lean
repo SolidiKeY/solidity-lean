@@ -551,6 +551,15 @@ def storageLocalRootPushBind (φ : Post Coverage [.alias (.struct "Token")]) :
   sol_chain
 #last_line storageLocalRootPushBind
 
+/-- `y = values.push();` -/
+def storageLocalPrimitivePushBind (φ : Post Coverage [.val .uint]) :
+    dl![m]{ ⟨[ y = values.push(); ]⟩ φ where uint y }
+    ~*>
+      dl![m]{ { storage := save(delAt(storage, values[values.length]), values.length, values.length + 1)
+                ‖ y := 0 } φ } := by
+  sol_chain
+#last_line storageLocalPrimitivePushBind
+
 /-- `led = ledgers.push();` -/
 def storageLocalRootPushBindMappingElement (φ : Post Coverage [.alias (.mapping .uint (.prim .uint))]) :
     dl![m]{ ⟨[ led = ledgers.push(); ]⟩ φ where mapping(uint => uint) storage led }

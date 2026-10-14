@@ -350,6 +350,9 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.incDec _ _ _ op _ l =>
     let some s ← ppIncDec op (← ppExprS ns l) | escape
     pure s
+  | Stmt.assignLocalPush _ _ _ i b _ =>
+    let some x ← var? i | escape
+    `(sol_stmt| $x:ident = $(← ppExprS ns b):sol_expr .push())
   | Stmt.assignIncDec _ _ _ i op _ l _ =>
     let some x ← var? i | escape
     let l ← ppExprS ns l

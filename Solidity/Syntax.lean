@@ -161,9 +161,11 @@ inductive RawStmt where
   /-- `b.push()`, `b.push(a)`, `b.pop()`, `a.transfer(v)`. -/
   | call (f : RawExpr) (args : List RawExpr)
   | assignIncDec (x : RawExpr) (op : IncDec) (l : RawExpr)
-  /-- `lsv = b.push();`, `T storage lsv = b.push();` -/
+  /-- `lsv = b.push();`, `y = b.push();`, `T storage lsv = b.push();` -/
   | assignPush (l b : RawExpr)
   | declStoragePush (T : RawTy) (x : String) (b : RawExpr)
+  /-- `uint y = values.push();` -/
+  | declPush (T : RawTy) (x : String) (b : RawExpr)
   | ite (c : RawExpr) (thn els : List RawStmt)
   | require (c : RawExpr)
   | assert (c : RawExpr)
@@ -594,6 +596,8 @@ with the `.push()` token; on a name or a member chain it is the push
 `b.push(e);`, on another receiver refused (`expandStmt.pushTarget`). -/
 syntax (name := solPushTarget) sol_expr ".push()" " = " sol_expr : sol_stmt
 syntax sol_ty &"storage" ident " = " sol_expr ".push()" : sol_stmt
+/-- `uint y = values.push();`: the slot appended, `y` its default. -/
+syntax sol_ty ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
 syntax sol_expr " = " sol_expr ".send(" sol_expr ")" : sol_stmt
 syntax sol_ty ident " = " sol_expr ".send(" sol_expr ")" : sol_stmt
@@ -610,6 +614,7 @@ syntax (priority := high) sol_ty ident " = " sol_expr:max "(" sol_expr,* ")" : s
 syntax (name := solReturn) "return " sol_expr : sol_stmt
 syntax (name := solReturnNone) "return" : sol_stmt
 syntax (priority := high) sol_ty &"storage" ident " = " sol_expr:max "(" ")" : sol_stmt
+syntax (priority := high) sol_ty ident " = " sol_expr:max "(" ")" : sol_stmt
 syntax sol_expr:max "++" : sol_stmt
 syntax "++" sol_expr : sol_stmt
 syntax sol_expr " = " sol_expr:max "++" : sol_stmt
@@ -977,6 +982,12 @@ where
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $as:sol_expr,* )) => do
       if let some s ← send? none (← expandExpr l) f as.getElems then return s
       assignTo l (← expandExpr.expandCall f as.getElems callMsg)
+  | `(sol_stmt| $T:sol_ty $x:ident = $b:sol_expr .push()) => do
+      `(RawStmt.declPush $(← expandTy T) $(strLit x) $(← expandExpr b))
+  | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( )) => do
+      match funName? f with
+      | some g => `(RawStmt.decl $(← expandTy T) $(strLit x) (some (RawExpr.call $(quote g) [])))
+      | none => `(RawStmt.declPush $(← expandTy T) $(strLit x) $(← pushRecv f))
   | `(sol_stmt| $T:sol_ty $x:ident = $f:sol_expr ( $as:sol_expr,* )) => do
       if let some s ← send? (some (← expandTy T)) (← `(RawExpr.name $(strLit x))) f as.getElems then
         return s

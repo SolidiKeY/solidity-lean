@@ -508,6 +508,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨hg, ha⟩ := Prog.run_frame body hw d h'
     exact ⟨hg.withEnv _, ha⟩
   | _, _, .rebind .., hw, _, _, _, _ | _, _, .declStorage .., hw, _, _, _, _
+  | _, _, .assignLocalPush .., hw, _, _, _, _
   | _, _, .push .., hw, _, _, _, _ | _, _, .pop _, hw, _, _, _, _
   | _, _, .declMem .., hw, _, _, _, _ | _, _, .rebindMem .., hw, _, _, _, _
   | _, _, .assignFromMem .., hw, _, _, _, _ | _, _, .assignMem .., hw, _, _, _, _

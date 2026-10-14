@@ -1,8 +1,9 @@
 /-!
 # The KeY taclets, as a Lean type
 
-`solidityProgramRules.key` is the calculus solkey actually runs: 323 named
-taclets (solkey `1b4341a303`).  This module is that list of names, one constructor each, plus the
+`solidityProgramRules.key` is the calculus solkey actually runs: the 323 named
+taclets of solkey `1b4341a303`, and `storageLocalPrimitivePushBind` of
+`c166991551`.  This module is that list of names, one constructor each, plus the
 `\heuristics` annotation each one carries.  It exists so that
 `RuleShapes.lean` can say *which* KeY taclet each rule transcribes with a
 typed `KeyOrigin` rather than a string — a misspelling is then a type error, and
@@ -108,6 +109,7 @@ inductive KeyTaclet where
   | storagePushLengthSave
   | storagePushLengthSaveReferenceElement
   | storageLocalRootPushBind
+  | storageLocalPrimitivePushBind
   | storageLocalRootPushBindMappingElement
   | storagePopSave
   | storagePopSaveMappingElement
@@ -437,6 +439,7 @@ def name : KeyTaclet -> String
   | storagePushLengthSave => "storagePushLengthSave"
   | storagePushLengthSaveReferenceElement => "storagePushLengthSaveReferenceElement"
   | storageLocalRootPushBind => "storageLocalRootPushBind"
+  | storageLocalPrimitivePushBind => "storageLocalPrimitivePushBind"
   | storageLocalRootPushBindMappingElement => "storageLocalRootPushBindMappingElement"
   | storagePopSave => "storagePopSave"
   | storagePopSaveMappingElement => "storagePopSaveMappingElement"
@@ -763,6 +766,7 @@ def heuristic : KeyTaclet -> Heuristic
   | storagePushLengthSave => Heuristic.simplifyExpression
   | storagePushLengthSaveReferenceElement => Heuristic.simplifyExpression
   | storageLocalRootPushBind => Heuristic.simplifyExpression
+  | storageLocalPrimitivePushBind => Heuristic.simplifyExpression
   | storageLocalRootPushBindMappingElement => Heuristic.simplifyExpression
   | storagePopSave => Heuristic.simplifyProg
   | storagePopSaveMappingElement => Heuristic.simplifyProg
@@ -1089,6 +1093,7 @@ def all : List KeyTaclet := [
   KeyTaclet.storagePushLengthSave,
   KeyTaclet.storagePushLengthSaveReferenceElement,
   KeyTaclet.storageLocalRootPushBind,
+  KeyTaclet.storageLocalPrimitivePushBind,
   KeyTaclet.storageLocalRootPushBindMappingElement,
   KeyTaclet.storagePopSave,
   KeyTaclet.storagePopSaveMappingElement,

@@ -118,6 +118,7 @@ inductive PrintedRule where
   | storagePushLengthSave
   | storagePushLengthSaveReferenceElement
   | storageLocalRootPushBind
+  | storageLocalPrimitivePushBind
   | storageLocalRootPushBindMappingElement
   | storagePopSave
   | storagePopSaveMappingElement
@@ -374,6 +375,7 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
     .printed .storageLocalRootPush_unfold_leftFstReceiver),
   (``Taclet.storageLocalRootPushBind, .printed .storageLocalRootPushBind),
+  (``Taclet.storageLocalPrimitivePushBind, .printed .storageLocalPrimitivePushBind),
   (``Taclet.storageLocalRootPushBindMappingElement,
     .printed .storageLocalRootPushBindMappingElement),
   -- Transfer
@@ -510,9 +512,9 @@ theorem printed_rules_partitioned :
       (fun p => claims p != (p.kind != .rule || unclaimedRules.contains p)) = true := by
   decide +kernel
 
-theorem printedRules_count : PrintedRule.all.length = 135 := by decide +kernel
+theorem printedRules_count : PrintedRule.all.length = 136 := by decide +kernel
 
-theorem claimedPrintedRules_count : claimedPrintedRules.length = 117 := by decide +kernel
+theorem claimedPrintedRules_count : claimedPrintedRules.length = 118 := by decide +kernel
 
 theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 

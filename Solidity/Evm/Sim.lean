@@ -905,6 +905,7 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
     simp only [compileStmt]; stores_from
   | .tryCall .. => fun _ _ h => nomatch h
   | .loop .. => fun _ _ h => nomatch h
+  | .assignLocalPush .. => fun _ _ h => nomatch h
   | .block body => by simp only [compileStmt]; exact storesFrom_compileProg b body
 /-- A block's code at base `b` stores to no level below `b`. -/
 theorem storesFrom_compileProg (b : Nat) {Γ Γ' : Ctx} :

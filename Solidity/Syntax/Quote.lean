@@ -228,6 +228,9 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
   | _, _, Γe, _, @Stmt.assignIncDec _ _ p i op _ l _ =>
     mkAppN (mkConst ``Stmt.assignIncDec) #[c, Γe, toExpr p, Idx.quote Γe i, toExpr op, rflTrue,
       OpLoc.quote c Γe l, rflTrue]
+  | _, _, Γe, _, @Stmt.assignLocalPush _ _ p i b _ =>
+    mkAppN (mkConst ``Stmt.assignLocalPush) #[c, Γe, toExpr p, Idx.quote Γe i,
+      SPath.quote c Γe b, rflTrue]
   | _, _, Γe, _, @Stmt.push _ _ E' b v _ =>
     mkAppN (mkConst ``Stmt.push) #[c, Γe, toExpr E', SPath.quote c Γe b,
       optE (mkAppN (mkConst ``Src) #[c, Γe, toExpr E']) (v.map (Src.quote c Γe)), rflTrue]

@@ -924,8 +924,13 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if isCallStem s then return (← fbsCall, Γ)
     return (x, Γ)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do
-    let some (.alias x) := lhsHead Γ l | Macro.throwErrorAt l "`= b.push()` binds a storage alias"
-    return (← `(Stmt.rebind (R := $(schemaIdent "R")) $x (ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))), Γ)
+    match lhsHead Γ l with
+    | some (.alias x) =>
+      return (← `(Stmt.rebind (R := $(schemaIdent "R")) $x (ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))), Γ)
+    | some (.local v) =>
+      return (← `(Stmt.assignLocalPush (p := $(schemaIdent "p")) $v $(← schemaAt Γ .spath b)
+        $(schemaIdent "hs")), Γ)
+    | _ => Macro.throwErrorAt l "`= b.push()` binds a storage alias or a value local"
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( )) => do
     let some (b, "push") ← callRecv? f | Macro.throwErrorAt f "only `b.push()` is a call on the right"
     schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $b:sol_expr .push()))
@@ -1475,7 +1480,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | `(dl_term| save($s', $q, $w)), `(dl_term| $_ + 1) =>
           if elem q then return ← `(STerm.push $(← st s') $(← pa b) $(← schemaTerm Γ .svalue w))
         | `(dl_term| delAt($s', $q)), `(dl_term| $_ + 1) =>
-          if elem q then return ← `(STerm.pushSlot $(← st s') $(← pa b) $(schemaIdent "E"))
+          if elem q then return ← `(STerm.pushSlot $(← st s') $(← pa b) _)
         | `(dl_term| delAt($s', $q)), `(dl_term| $_ - 1) =>
           if elem q then return ← `(STerm.pop $(← st s') $(← pa b))
         | _, _ => pure ()

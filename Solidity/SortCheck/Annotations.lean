@@ -5,8 +5,8 @@ import Solidity.AST
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `f2eb3d98eb`, re-checked at `1b4341a303`: 323
-taclets, 119 of them read-bearing, one row each; the two `try` taclets read
+(transcribed at solkey commit `f2eb3d98eb`, re-checked at `c166991551`: 324
+taclets, 120 of them read-bearing, one row each; the two `try` taclets read
 nothing). The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
 "removed valAt", `0f9b99ad55` "removed different fields" (which
@@ -269,6 +269,8 @@ def tacletReadAnns : List TacletReadAnn :=
       reads := [slen] },
     { keyName := "storageLocalRootPushBind"
       reads := [slen, slen] },
+    { keyName := "storageLocalPrimitivePushBind"
+      reads := [slen, slen, sread .value (.generic .hasElementSort)] },
     { keyName := "storageLocalRootPushBindMappingElement"
       reads := [slen, slen] },
     { keyName := "storagePopSave"
@@ -383,7 +385,7 @@ def preFixTacletReadAnns : List TacletReadAnn :=
 -- Taclet names must be unique, and the table has one row per
 -- read-bearing taclet of the pinned file.
 #guard (tacletReadAnns.map (·.keyName)).Nodup
-#guard tacletReadAnns.length = 119
+#guard tacletReadAnns.length = 120
 
 end TacletAnnotations
 end Solidity

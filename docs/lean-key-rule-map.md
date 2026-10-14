@@ -112,6 +112,7 @@ argument.
 | `storagePushLengthSave` | same | same | `parr.push()`: a primitive element, the slot cleared (`STerm.pushSlot`) |
 | `storagePushLengthSaveReferenceElement` | same | same | `rarr.push()`: a struct or array element, the recycled slot taken as it is (`STerm.extend`) |
 | `storageLocalRootPushBind`, `storageLocalRootPushBindMappingElement` | same names | same | `lsv = darr.push()` / `marr.push()` |
+| `storageLocalPrimitivePushBind` | same | deviation | `uint y = values.push();`, `y = values.push();` with `y` a value local (`Stmt.assignLocalPush`): the array grown as `storagePushLengthSave` grows it (`STerm.pushSlot`), and `y := defVal(T)`, the default the cleared slot holds, where KeY reads it back, `find(delAt(storage, sp[n]), sp[n])`: Lean's typed `delAt` has no reading at the slot past the end.  The receiver is simple by type (`hs`): solkey has no unfold for `y = nsp.push()`, so the elaborator refuses it.  The declaration form is two statements (`valueDeclSkip`, then this rule), where KeY fires `localValueDeclInitDrop` first |
 | `storagePopSave` | same | same | `darr.pop()`, both modalities: the element cleared into the recycled slots (`STerm.pop`) |
 | `storagePopSaveMappingElement` | same | same | `marr.pop()`: the element kept (`STerm.shrink`) |
 

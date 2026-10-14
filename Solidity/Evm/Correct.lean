@@ -753,6 +753,7 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
   | _, _, .assignNew .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
   | _, _, .tryCall .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
   | _, _, .loop .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .assignLocalPush .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
 
 /-- A block's code does what the block does. -/
 theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Prog C Γ Γ') {L b : Nat} {F : Frag Γ}

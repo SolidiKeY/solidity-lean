@@ -604,6 +604,13 @@ def push {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) : TStep 
   let st ← TRes.ofOpt (σ.storage.push ref fun slot => some (x.getD slot))
   pure ⟨σ.withStorage st, List.prefix_refl _⟩
 
+/-- `y = values.push();`: the array grown as `values.push();` grows it, `y`
+the default the cleared slot holds. -/
+def assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) :
+    TStep C Γ Γ := fun σ => do
+  let o ← TRun.push b none σ
+  pure ⟨o.st.setLocal i (PrimTy.dflt p), o.ext⟩
+
 def pop {E : Ty} (b : SPath C Γ (.array E)) : TStep C Γ Γ := fun σ => do
   let ref ← b.resolveT σ
   let st ← TRes.ofOpt (σ.storage.pop E.isMapping ref)
@@ -764,6 +771,7 @@ def Stmt.runC : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .opAssign op _ _ l r => TRun.opAssign op l r
   | _, _, .incDec op _ l => TRun.incDec op l
   | _, _, .assignIncDec i op _ l _ => TRun.assignIncDec i op l
+  | _, _, .assignLocalPush i b _ => TRun.assignLocalPush i b
   | _, _, .push b v _ => TRun.push b v
   | _, _, .pop b => TRun.pop b
   | _, _, .transfer r a => TRun.transfer r a
@@ -800,7 +808,8 @@ def Stmt.runR {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun l r => TRun.assign l r) (fun i r => TRun.rebind i r) (fun i r => TRun.assignLocal i r)
     (fun p _ init => TRun.declLocal p init) (fun R _ init => TRun.declStorage R init)
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
-    (fun i op _ l _ => TRun.assignIncDec i op l) (fun b v _ => TRun.push b v)
+    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b _ => TRun.assignLocalPush i b)
+    (fun b v _ => TRun.push b v)
     (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
     (fun l p => TRun.assignFromMem l p) (fun l r => TRun.assignMem l r)
@@ -820,7 +829,8 @@ def Prog.runR {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun l r => TRun.assign l r) (fun i r => TRun.rebind i r) (fun i r => TRun.assignLocal i r)
     (fun p _ init => TRun.declLocal p init) (fun R _ init => TRun.declStorage R init)
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
-    (fun i op _ l _ => TRun.assignIncDec i op l) (fun b v _ => TRun.push b v)
+    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b _ => TRun.assignLocalPush i b)
+    (fun b v _ => TRun.push b v)
     (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
     (fun l p => TRun.assignFromMem l p) (fun l r => TRun.assignMem l r)
@@ -866,7 +876,8 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
     rw [Prog.runR_eq body]
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
-  | _, _, .push .. | _, _, .pop .. | _, _, .transfer .. | _, _, .send .. | _, _, .declMem ..
+  | _, _, .assignLocalPush .. | _, _, .push .. | _, _, .pop .. | _, _, .transfer ..
+  | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
   | _, _, .revert => rfl
