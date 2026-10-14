@@ -7995,3 +7995,57 @@ types, malformed boundary terms fail elaboration, ledger amounts exceed
   existing ambiguous short filenames).
 - `git diff --check`: clean. Final finder/skeptic pass confirmed no
   material correctness, integration or documentation issue.
+
+## W11: nothing untyped (2026-10-14, branch `w11`)
+
+Asked by the user ("continue putting dependent types until there is nothing
+left untyped") after the typed-boundary follow-up.  Each step is one commit.
+
+- **W11.1–2, responses and the untyped value.** An external response is ABI
+  words (`ExtResult.ok (data : List Word)`, `Word := PrimTy.uint.Denote`;
+  `panic (code : Word)`), read at a local's type by `PrimTy.ofWord?` as solc's
+  decoder reads it (an `int256` is the word's two's complement, a `bool` `0`
+  or `1`, any other word reverts).  A `Panic(uint256)` code always decodes,
+  so `CodeBinder.decodeT` is total and `ExecS.tryCode` is gone.
+  `Semantics.PrimVal`/`Value`, `PrimTy.erase` and `ofValue?` are deleted:
+  tools take and print `CallValue` (a value with its type, `CallValue.as?`),
+  `PrimTy.ofInt?` is defined directly.
+- **W11.3, mapping keys.** `RefTy.mapping (key : PrimTy) (value : Ty)`: a
+  reference key cannot be written (`contract!`'s `pty!`, the elaborator and
+  the solc frontend refuse it).  `SMap K V` holds keys of the key type
+  (`K.Denote`), `Path.key`/`Seg.key` carry one, and `PrimTy.keyTy` is gone:
+  an index term is at its key type (a `bool` key is a `bool`), with no
+  `b ? 1 : 0` cast.  `PrimTy.key` (the word a key hashes to) remains the EVM
+  slot's and the comparison label's observation; `SMap.hashed` is the EVM's
+  view, `lookupBy_hashed`/`hashed_ofList_setBy` the bridge, `PrimTy.key_inj`
+  its injectivity.
+- **W11.4–5, indices.** `Path.at`/`atF`, `Seg.at`/`atF`, `Heap.index`,
+  `MAddr.index` and `MAddrT.index` take a `uint` (`PrimTy.uint.Denote`).
+  `Path.index`/`SRef.index` take the index at its key type, so
+  `SRef.atKey` is gone.  The Theory's `TVal` lengths stay `Nat`: the slot
+  past the end is `uintOfNat` of the length (moved to `Storage.lean`),
+  exact below `2^256` (`uintOfNat_eq_lenU`).
+- **W11.6–7, dead checks.** With typed indices and keys, the `0 ≤ i` guards
+  of `find`/`save`/`findLive`/`inBounds`/`Heap.index`/`setIndex` and the
+  Theory's `delR`/`stripR`/`ovR` are gone, and so is the key-range
+  machinery: `PrimTy.keyFits`, `keysHB`, `Storage.keysB` (`wtB` is
+  `shapeB`), `keysH`, `Path.Keys`, `Ty.Keyable`, `LTy.Keyed` and the
+  `resolveT_keyed` lemmas; `heredInv` asks nothing of locals.
+
+**Validation (W11.7):** the default build (274 jobs), every
+`TestSuite/Derived*`, `Report`, `Suggestions` and every `Corpus/*` module,
+each through a one-import scratch module (not committed).
+
+**What is left, and why** (as of W11.7):
+
+- `Selector` labels and the closer's `SegT` shapes: the side conditions'
+  path comparison (`Theory.diverges`, `lengthSeg`), an observation computed
+  from typed segments; its typed form is the next wave.
+- Memory identities in the term signature are `Nat` (`Srt.Den (.ident _)`,
+  `MvT`, `MAddrT`), read through `HRef.ofId?`: a formula's memory terms grow
+  heaps apart from the state's, so an identity can name an object another
+  memory lacks (KeY's `Identity` sort, underspecified there).
+- `BinOp.evalT`/`UnOp.evalT` return `none` at an operator a type does not
+  accept, which no well-typed syntax reaches (`Op2.binop` carries
+  `accepts`).
+- The EVM machine's stack words (`Evm.Word`: `val (n : Nat) | slot`).
