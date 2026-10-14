@@ -6,6 +6,9 @@ import Solidity.Calculus.ProvesDerive
 /-!
 # The obligations of an imported contract
 
+`Frontend/Testing.lean` runs these obligations and specifications from Solidity
+files through the machine-readable test API.
+
 `solc_scoped_problems N`, after `solc_import … as N`, states for each
 function `f` that elaborated its obligation as solkey states it,
 `N.f.problem : Fml N []` (`Problem.fml`, `Calculus/Problem.lean`): the

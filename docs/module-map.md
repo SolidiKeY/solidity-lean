@@ -293,6 +293,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | Module | What it defines |
 |---|---|
 | `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`). |
+| `Frontend/Testing.lean` | `#solkey_test`: kernel-checked function and specification tests with checkpointed JSON results; `scripts/test-solidity.mjs` compiles and tests `.sol` files/directories ([solidity-testing.md](solidity-testing.md)). |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N Γ Γ'` per function (read in its parameters' context, quoted hash-consed and checked by the kernel), `N.constructor : Prog N Γ Γ'` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 449 programs and the report, pinned. |
 | `Solkey/Constructors.lean` | solkey's `Counter.sol` and `EtherWallet.sol` imported (`tests/solc/Counter.ast.json`, `tests/solc/EtherWallet.ast.json`): their constructors and initializers, and `EtherWallet`'s constructor obligation derived; `tests/solc/CtorGap.sol` and `tests/solc/InitGap.sol` pin what the import leaves out. |

@@ -255,6 +255,7 @@ import Solidity.Theorems
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.Import
 import Solidity.Frontend.Problems
+import Solidity.Frontend.Testing
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip
 import Solidity.Tools.Latex

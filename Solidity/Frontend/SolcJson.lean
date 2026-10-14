@@ -137,6 +137,11 @@ structure SolcFun where
   /-- Declared `payable`: what a constructor's member keeps (`Contract.deploy`
   refuses value sent to one that is not). -/
   payable : Bool := false
+  /-- Specification members, retained only for the testing import mode. -/
+  specMembers : String := ""
+  /-- Raw directive/text pairs, for validating one clause at a time before
+  interpolating them into a contract member. -/
+  specClauses : List (String × String) := []
   deriving Inhabited
 
 /-- A contract as read: the `contract!` members of the state variables it
@@ -952,16 +957,16 @@ def SolcFun.member (f : SolcFun) (ss : List String) : String :=
   let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {x}")
   let rs := if f.rets.isEmpty then "" else
     s!" returns ({", ".intercalate (f.rets.map fun (x, t) => if x.isEmpty then t else s!"{t} {x}")})"
-  s!"function {f.name}({ps}){rs} \{ {String.join (ss.map (· ++ "; "))}}"
+  s!"{f.specMembers}function {f.name}({ps}){if f.payable then " payable" else ""}{rs} \{ {String.join (ss.map (· ++ "; "))}}"
 
 /-- The constructor as a `contract!` member, its body `ss`:
 `constructor(uint a) payable { … }`. -/
 def SolcFun.ctorMember (f : SolcFun) (ss : List String) : String :=
   let ps := ", ".intercalate (f.params.map fun (x, t) => s!"{t} {x}")
-  s!"constructor({ps}){if f.payable then " payable" else ""} \{ {String.join (ss.map (· ++ "; "))}}"
+  s!"{f.specMembers}constructor({ps}){if f.payable then " payable" else ""} \{ {String.join (ss.map (· ++ "; "))}}"
 
 /-- The contract `name` of the source unit `ast`, its structs renamed by `ren`. -/
-def readContract (ast : Json) (name : String) (ren : List (String × String)) :
+def readContract (ast : Json) (name : String) (ren : List (String × String)) (testing : Bool := false) :
     Except String SolcContract := do
   let units := match ast.getObjVal? "nodes" with
     | .ok (.arr a) => a.toList
@@ -976,10 +981,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     | .ok (.arr a) => a.toList
     | _ => []
   let cspec ← (keyClauses (docText c)).mapError fun m => s!"contract `{name}`'s NatSpec: {m}"
+  if testing && cspec.any (fun c => ["requires", "ensures", "assignable"].contains c.kind) then
+    throw "testing import: contract-level clauses must be invariants"
   let S := readStructs ren (nodes.filter (J.kind · == "StructDefinition"))
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
-  let mut members : List String := []
+  let invariants : List String := if testing then
+    (cspec.filter (·.kind == "invariant")).map (fun c => s!"invariant {c.text};") else []
+  let mut members : List String := invariants
   -- the variables kept: name, `sol` type, declaration
   let mut kept : List (String × String × Json) := []
   let mut dropped : List (Int × String × Gap) := []
@@ -1048,6 +1057,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     let tag := tagOf cspec f
     let body : Except Gap (List (Nat × String)) := do
       if let .error m := tag then throw (.unsupported s!"its NatSpec: {m}" (J.line f))
+      if testing && tag.toOption == some .specified && !(renames stateVars f).isEmpty then
+        throw (.unsupported "specification needs renamed locals: not imported" (J.line f))
+      if testing && ((keyClauses (docText f)).toOption.getD []).any (·.kind == "invariant") then
+        throw (.unsupported "function-level invariant: put invariants on the contract" (J.line f))
       if let some m := refused then throw (.unsupported m (J.line f))
       let b ← J.get f "body"
       let (ss, _) ← ((← J.arr b "statements").flatMapM fun s => do
@@ -1056,6 +1069,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
     { name := fname, line := J.line f, tag := (tag.toOption).getD .malformed,
       params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
       payable := (f.getObjValAs? String "stateMutability").toOption == some "payable",
+      specMembers := if testing then String.join (((keyClauses (docText f)).toOption.getD [])
+        |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
+        |>.map (fun c => s!"{c.kind} {c.text}; ")) else "",
+      specClauses := if testing then ((keyClauses (docText f)).toOption.getD [])
+        |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
+        |>.map (fun c => (c.kind, c.text)) else [],
       body := do let _ ← ps; let _ ← rs; body : SolcFun }
   -- the initializers, each printed against the variables kept, as the
   -- right-hand side of an assignment the constructor runs first
@@ -1097,7 +1116,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
   let order := ids.foldl (fun done i => (reach calls (ids.length + 1) [] done i).toOption.getD done) []
   let called := callsOf.flatMap (·.2) ++ initCalls
   let funMembers := order.filterMap fun i => do
-    guard (called.contains i)
+    guard (called.contains i || (testing && ctorId != some i))
     let r ← lookupBy i closed
     let ss ← r.body.toOption
     pure (r.name, r.member (ss.map (·.2)))
@@ -1110,7 +1129,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) :
         some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
       | _ => none
   let initMembers := match initGap, inits with
-    | none, .ok ms => ms
+    | none, .ok ms => invariants ++ ms
     | _, _ => members
   let all := (funs.zip read).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)

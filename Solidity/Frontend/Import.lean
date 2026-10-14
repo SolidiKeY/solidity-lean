@@ -167,7 +167,7 @@ def lowerBodyLoops (rets : List String) (nRets : Nat) (raw : List RawStmt) :
   lowerLoops (some rets) raw
 
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
-  (" renaming " sepBy1(ident " => " ident, ", "))? : command
+  (" renaming " sepBy1(ident " => " ident, ", "))? (&" testing")? : command
 
 @[command_elab solcImport]
 def elabSolcImport : CommandElab := fun stx => do
@@ -192,10 +192,18 @@ def elabSolcImport : CommandElab := fun stx => do
   let source := ((j.getObjVal? "header").toOption.bind fun hd =>
     (hd.getObjValAs? String "source").toOption).getD "?"
   let srcName := (System.FilePath.mk source).fileName.getD source
-  let c ← ofExcept (readContract ast N.getString! ren)
+  let c ← ofExcept (readContract ast N.getString! ren (!stx[7].isNone))
   let env ← getEnv
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
+  if !stx[7].isNone then
+    -- A clause must parse alone. Otherwise `ensures false; requires false`
+    -- could inject a second member and turn a failing specification vacuous.
+    for m in c.members do
+      let _ ← ofExcept (parse `sol_member m)
+    for f in c.funs ++ c.ctor.toList do
+      for (kind, text) in f.specClauses do
+        let _ ← ofExcept (parse `sol_member s!"{kind} {text};")
   -- the functions called, each checked alone first: one that does not
   -- expand is left out, with every function that calls it
   let ctTy := Lean.mkConst ``Contract
