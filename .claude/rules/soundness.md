@@ -42,6 +42,18 @@ substitutes for the general proof below.
   `TRun.x` against `U.applyV σ`, the step's state read as the typed global
   part and the locals' values, the operands through
   `Calculus/LowerRun.lean`), and close with `Premise.sound_update_typed`.
+- **Two sequential updates** (`Premise.updates U V`): establish
+  `Premise.UpdatesRuns`. `Upd.PairLands` supplies a typed intermediate state
+  linking both successful updates; `Upd.PairFails` covers ordinary failure
+  in either stage, with exhaustion excluded explicitly. Use
+  `Premise.sound_updatesH` for ordinary soundness; the same conditions give
+  `holdsC_updates` for a statement with no callback of its own. Keep the
+  initial two-update shape; merge only by an explicit update rewrite.
+- **Guarded sequential updates** (`Premise.guardedUpdates c U V`): keep
+  division/remainder's nonzero test outside both updates. Prove
+  `Premise.GuardedUpdatesRuns`: `c` reads no callback, its true branch has
+  `UpdatesRuns`, and its false branch simulates `revert` through `TRes.Sim`.
+  The latter permits the existing exhaustion boundary, never success or panic.
 - **Unfold premise** (`Calculus/SoundCapture.lean`, `SoundLocal`, …): the
   fresh local is pushed and popped by the premise's frame; the runs compare
   up to the halt (`TRes.Sim`, `sound_unfoldSim`), the schema variables read

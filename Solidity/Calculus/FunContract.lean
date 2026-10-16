@@ -21,7 +21,8 @@ call proved by its callee's contract instead of its inlined body.
 typed state of the callee's frame (its parameters `ps`) where `requires`
 holds, the body, entered as the call enters it (`CallRet.enterT`: its
 return variables at their defaults, a memory return a fresh default
-object), does not panic and, if it ends, ends where `ensures` holds of its
+object, a storage return an unset alias), does not panic and, if it ends,
+ends where `ensures` holds of its
 frame: the return variables, the snapshots `old` and `oldNet` of the
 storage and the ledger it was entered with (`\old`, `Olds`), and the
 parameters.  Its obligation (`FunContract.obligation`) is a scoped formula
@@ -307,6 +308,7 @@ def CallRet.declsThen {Δ : Ctx} (ret : CallRet Γ rs Γ') (rest : Prog C (rs ++
     (fun rest => rest) (fun p r _ rest => .cons (.declLocal p r Option.none) rest)
     (fun bs rest => bs.declsThen rest)
     (fun R r hd hm rest => .cons (.declMem R r Option.none hd hm) rest)
+    (fun R r rest => .cons (.declStorage R r Option.none) rest)
     rest
 
 /-- **A function contract** over the typed call run: from a typed state of
@@ -348,6 +350,10 @@ theorem CallRet.runSt_declsThen {Δ : Ctx} (ret : CallRet Γ rs Γ')
     show Prog.runSt σ (.cons (.declMem R r Option.none hd hm) rest) = _
     rw [Prog.runSt_cons, Stmt.runSt_declMem_none]
     rfl
+  | storage R r =>
+    show Prog.runSt σ (.cons (.declStorage R r Option.none) rest) = _
+    rw [Prog.runSt_cons, Stmt.runSt_declStorage_none]
+    rfl
 
 theorem TEnv.take_append {H : HTy} {Δ : Ctx} : (ρ : Ctx) → (r : TEnv C H ρ) → (e : TEnv C H Δ) →
     TEnv.take ρ (TEnv.append ρ r e) = r
@@ -379,6 +385,7 @@ theorem CallRet.enterT_snap (ret : CallRet Γ rs Γ') (σ : State C ps) :
     rw [TEnv.take_append, TEnv.drop_append]
     rfl
   | mem => rfl
+  | storage => rfl
 
 /-- A contract from a proof of its obligation. -/
 theorem FunContract.ofValid {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf} {req : Fml C ps}
@@ -457,6 +464,9 @@ def Fml.callResult {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') (ens : Fml C (rs ++ 
     (fun R r hd hm ens ω => .modal .box (.cons (.declMem R r Option.none hd hm) .nil) .nil
       (.imp (ens.wkD (Thin.atop (.mem R :: (Olds ++ ps)) Γ))
         (.modal .box .nil (.drop (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps)))) (.seq ω κ)) φ)))
+    (fun R r ens ω => .bind .box r (.alias R)
+      (.imp (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ))
+        (.modal .box .nil (.drop (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps)))) (.seq ω κ)) φ)))
     ens ω
 
 /-- **"post"**: `[ params := args ] {old := storage ‖ oldNet := net} {havoc}
@@ -467,14 +477,15 @@ def Fml.callPost (μ : Mutability) (args : Args C Γ ps) {rs Γ' : Ctx} (ret : C
   .modal .box (args.declsThen .nil) .nil
     (.upd .box snapOld (Fml.anonC μ (Fml.callResult ret ens ω κ φ)))
 
-/-- The return variables "post" reads off the body's end: every value one,
-none of a memory return (which stays the fresh object it was entered
-with). -/
+/-- Return locals that "post" reads off the body's end: value returns and
+the exported storage alias. A memory return keeps its fresh entry object.
+The existing `Prog.within` restriction still excludes alias rebinding in
+function contracts; ordinary inlined calls have no such restriction. -/
 def CallRet.nVals {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Nat :=
   CallRet.casesOn (motive := fun _ _ _ => Nat) r 0 (fun _ _ _ => 1) (fun {rs} _ => rs.length)
-    (fun _ _ _ _ => 0)
+    (fun _ _ _ _ => 0) (fun _ _ => 1)
 
-/-- The body writes only its first `n` locals, its value return variables,
+/-- The body writes only its first `n` locals, its return variables,
 so "post" reads the parameters at the arguments' values. -/
 def writesRets (n : Nat) {Δ Δ' : Ctx} (body : Prog C Δ Δ') : Bool :=
   (Prog.writesAt 0 body).all fun w => decide (w.2 < n)
@@ -911,6 +922,82 @@ theorem holds_callMem {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : Re
       simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
       exact hM
 
+/-- `uint[] storage r = f();`: the callee's contract exports its returned
+pointer, universally quantified in the postcondition. -/
+theorem holds_callStorage {μ : Mutability} {f : Name} {args : Args C Γ ps}
+    {R : RefTy} {r : Var} {body : Prog C ([.alias R] ++ ps) Γf}
+    {ω : Prog C (.alias R :: Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
+    {req : Fml C ps} {ens : Fml C ([.alias R] ++ (Olds ++ ps))}
+    (hc : FunContract (CallRet.storage (Γ := Γ) R r) body req ens)
+    (hμ : Prog.within μ body = true) (hw : writesRets 1 body = true) {σ : State C Γ}
+    (hpre : holds σ (Fml.callPre args req))
+    (hpost : holds σ (Fml.callPost μ args (.storage R r) ens ω κ φ)) :
+    holds σ (.modal .box (.cons (.call f args (.storage R r) body) ω) κ φ) := by
+  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
+  rw [holds_modal_iff, Prog.runSt_cons]
+  change Modality.box.afterRunTR _ ((((TRun.call args (.storage R r) body.ext body.runR σ).map
+    (·.st)).bind _).bind _)
+  rw [TRun.call_eq]
+  cases hA : args.evalT σ with
+  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
+  | ok a =>
+    have hct := hc _ (hpa a hA)
+    change Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom (.storage R r) body.ext
+      body.runR σ ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)))).bind _).bind _)
+    unfold TRun.callFrom
+    cases hB : body.runR ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st with
+    | error e =>
+      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
+      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
+    | ok o =>
+      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
+      have hens := hct.1
+      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
+      have hX := holds_callPost hpost a hA o.st.storage o.st.net hg.keeps
+      obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+      obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+      dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
+      dsimp only at hX
+      subst hH
+      cases hheap
+      have hps : (TEnv.drop body.ext env).2 = a :=
+        TLocAgree.drop_eq (ρ := [.alias R]) (e := (none, a)) hag hw
+      have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.alias R]
+          σ.net σ.storage = State.thin (Thin.atop (.alias R :: (Olds ++ ps)) Γ)
+            (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+              (TEnv.drop body.ext env).1) := by
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+        change ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
+          ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
+            (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
+        rw [TEnv.thin_atop_append, hps]
+      have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+          (t := .alias R) (TEnv.drop body.ext env).1)
+          (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ)) :=
+        holds_wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ) ens _ (hst ▸ hens)
+      have hM := hX (TEnv.drop body.ext env).1 hens'
+      rw [holds_modal_iff] at hM
+      dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
+      rw [TEnv.wk_self]
+      have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+            (TEnv.drop body.ext env).1) =
+          (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+            (CallRet.leaveT σ.env (CallRet.storage R r)
+              (TEnv.take [.alias R] (TEnv.drop body.ext env))) := by
+        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+        change ((TEnv.drop body.ext env).1,
+          TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
+            (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
+          ((TEnv.drop body.ext env).1, σ.env)
+        rw [TEnv.thin_ofExt]
+        change ((TEnv.drop body.ext env).1,
+          TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) =
+          ((TEnv.drop body.ext env).1, σ.env)
+        rw [TEnv.drop_append]
+      simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
+      exact hM
+
 /-- **A call by its callee's contract is sound** (`useContract`, at the
 state): "pre" and "post" there give the call and the rest. -/
 theorem holds_callContract {μ : Mutability} {f : Name} {args : Args C Γ ps}
@@ -926,6 +1013,7 @@ theorem holds_callContract {μ : Mutability} {f : Name} {args : Args C Γ ps}
   | val p r res => exact holds_callVal hc hμ hw hpre hpost
   | rets => exact holds_callRets hc hμ hw hpre hpost
   | mem => exact holds_callMem hc hμ hw hpre hpost
+  | storage => exact holds_callStorage hc hμ hw hpre hpost
 
 end Sound
 
@@ -939,7 +1027,9 @@ variable {Γ ps rs Γ' Γf Γ₂ Γ₀ : Ctx}
 parameter outermost, named as the call names them. -/
 def Fml.allArgs : {ps : Ctx} → Args C Γ ps → Fml C ps → Fml C []
   | _, args, φ => Args.casesOn (motive := fun ps _ => Fml C ps → Fml C []) args
-    (fun φ => φ) (fun as p x _ φ => Fml.allArgs as (.all x p φ)) φ
+    (fun φ => φ) (fun as p x _ φ => Fml.allArgs as (.all x p φ))
+    (fun as R x _ φ => Fml.allArgs as (.bind .box x (.alias R) φ))
+    (fun as R x _ φ => Fml.allArgs as (.bind .box x (.mem R) φ)) φ
   termination_by structural _ args => args
 
 theorem holds_allArgs : {ps : Ctx} → (args : Args C Γ ps) → {φ : Fml C ps} →
@@ -947,6 +1037,10 @@ theorem holds_allArgs : {ps : Ctx} → (args : Args C Γ ps) → {φ : Fml C ps}
   | _, .nil, _, h, σ => h σ
   | _, .snoc as p x _, φ, h, σ =>
     holds_allArgs as (φ := .all x p φ) h (σ.withEnv σ.env.2) σ.env.1
+  | _, .snocStorage as R x _, φ, h, σ =>
+    holds_allArgs as (φ := .bind .box x (.alias R) φ) h (σ.withEnv σ.env.2) σ.env.1
+  | _, .snocMemory as R x _, φ, h, σ =>
+    holds_allArgs as (φ := .bind .box x (.mem R) φ) h (σ.withEnv σ.env.2) σ.env.1
 
 /-- A contract from a proof of its obligation, the parameters bound by `∀`
 (`Fml.allArgs`), as `sol_symex; sol_close` prove it. -/
@@ -1022,6 +1116,7 @@ def elabFmlAtC (ns : List (String × LTy)) (φ : RawFml) :
     | .val p => some (x, LocalTy.val p)
     | .old => some (x, LocalTy.store)
     | .mem R => some (x, LocalTy.mem R)
+    | .alias R => some (x, LocalTy.alias R)
     | _ => none
   let taken := (ns.map fun (x, _) => (Var.ofName x).idx).filter (· > 0)
   ((elabFmlC C taken false φ (ctxOfLocals ns)).run { funs := C.funs }).run' (scope, 1)

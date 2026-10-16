@@ -242,8 +242,24 @@ theorem Op1.toL_ne {a s : Srt} (o : Op1 C a s) (x : LTm C a) (hnet : o.isNet = f
     (hnext : o.isNext = false) : o.toL ρ x = some (fold1 o x) := by
   cases o <;> simp only [Op1.isNet, Op1.isNext, reduceCtorEq] at hnet hnext <;> rfl
 
+theorem LTm.literalRead_eval (g : State C []) (ν : AEnv) {p : PrimTy}
+    (t : LTm C (.val p)) : t.literalRead.eval g ν = t.eval g ν := by
+  dsimp only [LTm.literalRead]
+  split
+  · split
+    · split
+      · exact LTm.elim_eval g ν t
+      · rfl
+    · rfl
+  · rfl
+
+theorem foldRead2_eval (g : State C []) (ν : AEnv) {a b s : Srt}
+    (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
+    (foldRead2 o x y).eval g ν = (LTm.app2 o x y).eval g ν := by
+  cases o <;> simp only [foldRead2, LTm.literalRead_eval, fold2_eval]
+
 theorem Op2.toL_ne {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
-    (hat : o.isAt = false) : o.toL ρ x y = some (fold2 o x y) := by
+    (hat : o.isAt = false) : o.toL ρ x y = some (foldRead2 o x y) := by
   cases o <;> simp only [Op2.isAt, reduceCtorEq] at hat <;> rfl
 
 /-- **A term pushed in reads what the scoped term reads.** -/
@@ -311,7 +327,7 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     | false =>
       rw [Op2.toL_ne o x' y' ha] at ht
       cases ht
-      rw [fold2_eval]
+      rw [foldRead2_eval]
       exact Op2.eval_drel g₀ τ.glob o ha hx hy
   | _, .app3 o x y z, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
@@ -424,6 +440,11 @@ theorem Fresh.fold2 {a b s : Srt} {n : Nat} (o : Op2 C a b s) {x : LTm C a} {y :
   simp only [fold2_eval]
   exact Fresh.app2 o hx hy g ν p k v hk
 
+theorem Fresh.foldRead2 {a b s : Srt} {n : Nat} (o : Op2 C a b s) {x : LTm C a} {y : LTm C b}
+    (hx : Fresh n x) (hy : Fresh n y) : Fresh n (foldRead2 o x y) := fun g ν p k v hk => by
+  simp only [foldRead2_eval]
+  exact Fresh.app2 o hx hy g ν p k v hk
+
 /-- **A term pushed in is fresh where the state is.** -/
 theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) →
     t.toL ρ = some t' → Fresh ρ.next t'
@@ -442,7 +463,7 @@ theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : L
     obtain ⟨x', hx', y', hy', ht⟩ := ht
     have hx := Tm.toL_fresh hF x x' hx'
     have hy := Tm.toL_fresh hF y y' hy'
-    cases o <;> cases ht <;> first | exact Fresh.fold2 _ hx hy | exact Fresh.app2 _ hx hy | exact Fresh.app3 _ hF.stor hx hy
+    cases o <;> cases ht <;> first | exact Fresh.foldRead2 _ hx hy | exact Fresh.fold2 _ hx hy | exact Fresh.app2 _ hx hy | exact Fresh.app3 _ hF.stor hx hy
   | _, .app3 o x y z, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', y', hy', z', hz', ht⟩ := ht
@@ -882,8 +903,31 @@ theorem Tm.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {s : Srt} (t : Tm C Γ s) {
         simp only [Tm.exhB, ← dx, ← dy, hz, Op3.exhB, hfull, Bool.true_or]
   | _ => simp only [Tm.exhL, reduceCtorEq] at h
 
+/-- A parallel push and local binding exhaust only where the binding returns.
+This covers `Token storage token = tokens.push()` at the length bound. -/
+theorem pushLocalExhL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh)
+    {t : LTy} (i : Idx Γ t) (s : Tm C Γ .st) (r : Rhs C Γ t)
+    {X : LTm C (.val .bool)} (h : pushLocalExhL ρ₀ s r = some X)
+    (hX : (X.eval g₀ ν : Option Bool) = some true) :
+    (Upd.snoc (Upd.snoc Upd.nil (.storage s)) (.local i r)).exh τ = true := by
+  unfold pushLocalExhL at h
+  obtain ⟨xs, hs, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨b, hb, h⟩ := Option.bind_eq_some_iff.1 h
+  cases h
+  rw [seqL_eval] at hX
+  obtain ⟨v, hg, hx⟩ := Option.bind_eq_some_iff.1 hX
+  have hsx := Tm.exhL_sound hA s hs hx
+  have hg' := (Rhs.toL_sound hA hF r hb).1
+  rw [hg] at hg'
+  have hr : (r.eval τ).isSome = true := by
+    cases he : r.eval τ <;> simp only [he, Option.map_none, Option.map_some,
+      reduceCtorEq, Option.isSome_some] at hg' ⊢
+  simp only [Upd.exh, Upd.exhAny, Upd.exhOk, UpdElem.exhB, UpdElem.okB,
+    hsx, hr, Bool.or_true, Bool.true_or, Bool.and_self]
+
 /-- **What `Upd.exhL` reads**: where it is `true`, the update is out of gas. -/
-theorem Upd.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {Δ : Ctx} (U : Upd C Γ Δ) {X : LTm C (.val .bool)}
+theorem Upd.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh)
+    {Δ : Ctx} (U : Upd C Γ Δ) {X : LTm C (.val .bool)}
     (h : U.exhL ρ₀ = some X) (hX : (X.eval g₀ ν : Option Bool) = some true) : U.exh τ = true := by
   unfold Upd.exhL at h
   split at h
@@ -891,6 +935,8 @@ theorem Upd.exhL_sound (hA : Agrees g₀ ν ρ₀ τ) {Δ : Ctx} (U : Upd C Γ �
     have hs := Tm.exhL_sound hA s h hX
     simp only [Upd.exh, Upd.exhAny, Upd.exhOk, UpdElem.exhB, hs, Bool.or_true, Bool.false_or,
       Bool.true_and, Bool.and_self]
+  · rename_i s t i r
+    exact pushLocalExhL_sound hA hF i s r h hX
   · cases h
 
 end Upd
@@ -1115,7 +1161,7 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
       simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
       obtain ⟨⟨ρ', gd⟩, hU, ψ', hφ, rfl⟩ := h'
       obtain ⟨hg, hag, hf', -⟩ := Upd.toLS_sound hA hF U hU
-      refine ⟨fun _ hψ => guardM_holds m U (fun X hX hXt => Upd.exhL_sound hA U hX hXt) hg
+      refine ⟨fun _ hψ => guardM_holds m U (fun X hX hXt => Upd.exhL_sound hA hF U hX hXt) hg
         (fun q hq hψ' σ' hσ hl => ?_) hψ, fun h => by cases h⟩
       have hA' : Agrees g₀ ν ρ' σ' := by
         have hl' : σ'.locV = q.2 := funext fun _ => funext fun i => hl i

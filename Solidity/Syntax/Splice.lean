@@ -34,11 +34,13 @@ def elabProgS (ss : List RawStmt) : Except String (Blk C []) := do
 
 /-- The statements `ss`, the `i`th first, from the state `st`, each appended
 to `acc`, the block so far, which leaves the context named `ns`. -/
-def elabProgAtS.goWt {Γ₀ : Ctx} (i : Nat) : List RawStmt → ECtx × Nat → List Var → Blk C Γ₀ →
-    Except (Nat × String) (Blk C Γ₀)
-  | [], _, _, acc => pure acc
-  | s :: ss, st, ns, acc =>
-    match ((elabStmtP C s).run { funs := C.funs }).run st with
+def elabProgAtS.goWt {Γ₀ : Ctx} (i : Nat) (ss : List RawStmt) (st : ECtx × Nat)
+    (ns : List Var) (acc : Blk C Γ₀) (mutableFreshNames : List String := []) :
+    Except (Nat × String) (Blk C Γ₀) :=
+  match ss with
+  | [] => pure acc
+  | s :: ss =>
+    match ((elabStmtP C s).run { funs := C.funs, mutableFreshNames }).run st with
     | .error e => .error (i, e)
     | .ok (P, st) =>
       match SProg.chain ns acc.1 P with
@@ -46,16 +48,20 @@ def elabProgAtS.goWt {Γ₀ : Ctx} (i : Nat) : List RawStmt → ECtx × Nat → 
       | .ok b =>
         match Blk.append acc b with
         | .error e => .error (i, e)
-        | .ok acc' => elabProgAtS.goWt (i + 1) ss st (b.2.outNames ns) acc'
+        | .ok acc' => elabProgAtS.goWt (i + 1) ss st (b.2.outNames ns) acc' mutableFreshNames
 
 /-- `elabProgS`, from the state `st`, an error naming the statement of the
 block it arose in (its position, from `i`): the same block, statement by
 statement, each typed from the locals the ones before it leave. -/
-def elabProgAtS.go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) :
+def elabProgAtS.go (i : Nat) (ss : List RawStmt) (st : ECtx × Nat) (source : Bool := false) :
     Except (Nat × String) (Blk C (ECtx.toNCtx st.1).ctx) := do
   -- a block's locals renamed apart (`freshenBlocks`)
   let ss ← (freshenBlocks (C.vars.map (·.1)) (st.1.map (·.1)) ss).mapError (i, ·)
-  elabProgAtS.goWt C i ss st (ECtx.toNCtx st.1).names ⟨_, .nil⟩
+  let names := if source then
+    C.vars.map (·.1) ++ st.1.map (·.1) ++ RawStmt.namesList ss ++ RawStmt.declsList ss else []
+  let st := if source then
+    (st.1, names.foldl (fun k x => max k ((Var.ofName x).idx + 1)) st.2) else st
+  elabProgAtS.goWt C i ss st (ECtx.toNCtx st.1).names ⟨_, .nil⟩ names
 
 /-- `elabProgS`, an error naming the statement of the block it arose in. -/
 def elabProgAtS (ss : List RawStmt) : Except (Nat × String) (Blk C []) :=

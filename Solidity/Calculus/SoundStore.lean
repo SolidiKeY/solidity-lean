@@ -260,6 +260,8 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
           (fun _ _ _ e hq => by cases hq; subst e; exact sound_save σ _ _)
           (fun _ _ _ _ e hq => by cases hq; subst e; exact sound_save σ _ _)
           (fun _ _ _ _ e hq => by cases hq; subst e; exact sound_save σ _ _) q hs
+    | copyMem p => cases hs; exact sound_save σ _ _
+    | fixedCopy p shape hm => cases hs; exact sound_save σ _ _
   | field b f h =>
     cases r with
     | val e =>
@@ -274,6 +276,8 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
       split at hs
       · exact copyStep_sound σ k (.field b f h) hm p q hs
       · cases hs; exact sound_fieldWriteRefUnfold σ b f h p hm _
+    | copyMem p => cases hs; exact sound_save σ _ _
+    | fixedCopy p shape hm => cases hs; exact sound_save σ _ _
   | index it b i =>
     cases r with
     | val e =>
@@ -295,6 +299,8 @@ theorem assignStep_sound (k : Nat) {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
         | simple ie => exact copyStep_sound σ k (.index it b (.simple ie)) hm p q hs
         | _ => cases hs; exact sound_indexRefCaptureAll σ k it b _ p hm
       · cases hs; exact sound_indexRefCaptureAll σ k it b i p hm
+    | copyMem p => cases hs; exact sound_save σ _ _
+    | fixedCopy p shape hm => cases hs; exact sound_save σ _ _
 
 /-- `memoryToStorageField_unfold_leftFst`: the receiver bound first; the
 statement reads the memory source first. -/
@@ -453,6 +459,42 @@ theorem sound_pushCapture {p : PrimTy} (b : SPath C Γ (.array (.prim p))) (e : 
     simp only [Src.valueT, hh]
     exact TRes.Sim.refl _
 
+/-- `target.push(rows[i])` binds the reference source before copying it. -/
+theorem sound_pushReferenceCapture (σ : State C Γ) {R : RefTy}
+    (b : SPath C Γ (.array (.ref R))) (source : SPath C Γ (.ref R))
+    (hm : (Ty.ref R).mapFree = true) (x : Var) :
+    Premise.Runs m (.push b (some (.copy source hm)) rfl)
+      (.captureSP x source (.push b.up (some (.copy (.alias .here) hm)) rfl)) σ := by
+  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh hp => ?_)
+  · refine runSt_pushed σ (t := .alias R) (some q)
+      (TRun.push_some_pushT σ (t := .alias R) (some q) b.up b _ (.copy source hm)
+        (SPath.resolveT_up σ _ b) ?_)
+    simp only [Src.valueT, SPath.resolveT, hq]
+    rfl
+  · show TRes.Sim _ ((TRun.push b (some (.copy source hm)) σ).map _)
+    simp only [TRun.push, TRes.map_bind]
+    refine TRes.Sim.err_bind (SPath.resolveT_noPanic σ b) hp fun _ _ => ?_
+    simp only [Src.valueT, hh]
+    exact TRes.Sim.refl _
+
+
+/-- `rows.push(b.rows[i])` captures its complex memory source before copying. -/
+theorem sound_pushMemoryCapture (σ : State C Γ) {R : RefTy}
+    (b : SPath C Γ (.array (.ref R))) (p : MPath C Γ (.ref R)) (x : Var) :
+    Premise.Runs m (.push b (some (.copyMem p)) rfl)
+      (.captureMV x p (.push b.up (some (.copyMem (.var .here p.mapFree))) rfl)) σ := by
+  refine Premise.sound_captureMVSim σ (fun mv hmv => ?_) (fun h hh hp => ?_)
+  · refine runSt_pushed σ (t := .mem R) (some mv)
+      (TRun.push_some_pushT σ (t := .mem R) (some mv) b.up b _ (.copyMem p)
+        (SPath.resolveT_up σ _ b) ?_)
+    simp only [Src.valueT, MPath.mvalT, hmv]
+    rfl
+  · show TRes.Sim _ ((TRun.push b (some (.copyMem p)) σ).map _)
+    simp only [TRun.push, TRes.map_bind]
+    refine TRes.Sim.err_bind (SPath.resolveT_noPanic σ b) hp fun _ _ => ?_
+    simp only [Src.valueT, hh]
+    exact TRes.Sim.refl _
+
 /-- `storagePush_unfold_leftFstReceiver`, `storagePushValue_unfold_leftFstReceiver`:
 the receiver bound first. -/
 theorem sound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
@@ -482,15 +524,49 @@ theorem pushStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (v : Optio
       simp only at hs
       split at hs
       · cases hs; exact sound_pushSlot σ b hd
-      · cases hs; exact sound_extend σ b hd
+      · split at hs
+        · cases hs; exact sound_extend σ b hd (by assumption)
+        · cases hs; exact sound_pushSlot σ b hd
     | some r =>
       cases r with
       | val e =>
         cases e with
         | simple se => cases hs; exact sound_pushSome σ b _ hd
         | _ => cases hs; exact sound_pushCapture σ b _ hd _
-      | copy p hm => cases hs; exact sound_pushSome σ b _ hd
+      | copy p hm =>
+        dsimp only at hs
+        split at hs
+        · cases hs; exact sound_pushSome σ b _ hd
+        · cases hs; exact sound_pushReferenceCapture σ b p hm _
+      | copyMem p =>
+        dsimp only at hs
+        split at hs
+        · cases hs; exact sound_pushSome σ b _ rfl
+        · cases hs; exact sound_pushMemoryCapture σ b p _
+      | fixedCopy p shape hm => cases hs; exact sound_pushSome σ b _ hd
   · cases hs; exact sound_pushRecvCapture σ b v hd _ _
+
+/-- `y = matrix[i].push()`: bind its receiver before appending and assigning. -/
+theorem sound_assignLocalPushCapture {p : PrimTy} (i : Idx Γ (.val p))
+    (b : SPath C Γ (.array (.prim p))) (x : Var) :
+    Premise.Runs m (.assignLocalPush i b)
+      (.captureSP x b (.assignLocalPush i.there (.alias .here))) σ := by
+  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
+  · exact runSt_pushed σ (t := .alias (.array (.prim p))) (some q)
+      (TRun.assignLocalPush_pushT σ (t := .alias _) (some q) i (.alias .here) b
+        (by rw [hq]; rfl))
+  · refine TRes.Sim.err_refl ?_
+    show (TRun.assignLocalPush i b σ).map _ = _
+    simp only [TRun.assignLocalPush, TRun.push, hh]; rfl
+
+/-- `y = matrix[i].push()` chooses receiver capture until the path is simple. -/
+theorem assignLocalPushStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p))
+    (b : SPath C Γ (.array (.prim p))) (q : Premise C Γ Γ)
+    (hs : assignLocalPushStep k i b = q) : Premise.Runs m (.assignLocalPush i b) q σ := by
+  simp only [assignLocalPushStep] at hs
+  split at hs
+  · cases hs; exact sound_assignLocalPush σ i b
+  · cases hs; exact sound_assignLocalPushCapture σ i b _
 
 /-- `storagePop_unfold_leftFstReceiver`: the receiver bound first. -/
 theorem sound_popCapture {E : Ty} (b : SPath C Γ (.array E)) (x : Var) :

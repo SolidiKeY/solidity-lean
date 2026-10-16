@@ -203,7 +203,10 @@ partial def Prog.keyStrs (skip : Nat) (ns : List Var) {Γ Γ' : Ctx} : Prog C Γ
         | none =>
           match Stmt.memCallStr? ns s P with
           | some c => c :: Prog.keyStrs 1 (s.outNames ns) P
-          | none => s.keyStr ns :: Prog.keyStrs 0 (s.outNames ns) P
+          | none =>
+            match Stmt.storageCallStr? ns s P with
+            | some c => c :: Prog.keyStrs 1 (s.outNames ns) P
+            | none => s.keyStr ns :: Prog.keyStrs 0 (s.outNames ns) P
 
 end
 
@@ -1064,10 +1067,16 @@ partial def focusProof (m? : Option Expr) (K : Nat) (A f B : Expr) : MetaM Expr 
 /-- `A.fresh = K`. -/
 def freshProof (A : Expr) (K : Nat) : MetaM Expr := do
   let (n, h) ← maxIdxProof A
-  unless n + 1 = K do throwError "sol_chain: the fresh index of{← indentLine A}\nis {n + 1}, not {K}"
   let C := A.getArg! 0
   let Γ := A.getArg! 1
-  return mkAppN (mkConst ``Fml.fresh_eq) #[C, Γ, A, toExpr n, h]
+  let rootExpr ← mkAppM ``Contract.rootMaxIdx #[C]
+  let rootValue ← withTransparency .all (whnf rootExpr)
+  let some r ← (evalNat rootValue).run
+    | throwError "sol_chain: cannot compute the contract's reserved root indices"
+  unless max n r + 1 = K do
+    throwError "sol_chain: the fresh index of{← indentLine A}\nis {max n r + 1}, not {K}"
+  return mkAppN (mkConst ``Fml.fresh_eq)
+    #[C, Γ, A, toExpr n, toExpr r, h, ← mkEqRefl rootExpr]
 
 /-- `A ~> B` along the computed line `B`. -/
 def oneStepProof (sp : Splice) (A : Expr) (B : Line) : MetaM Expr := do

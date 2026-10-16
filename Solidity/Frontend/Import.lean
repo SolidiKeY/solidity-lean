@@ -51,8 +51,8 @@ A function that does not elaborate is a row, not an error: the import
 never fails on one function.  Each body's elaboration has its own
 heartbeats and catches runtime exceptions too (`tryCatchRuntimeEx`), so a
 body that exhausts its budget is a row as well.  A row is found by its
-index, not its name, and the reader refuses an overloaded name or one named
-`report` before any constant is made.
+index, not its name. Overloaded declarations have distinct internal names;
+the reader refuses an unmangled function named `report` before any constant is made.
 -/
 
 namespace Solidity.Frontend
@@ -81,8 +81,13 @@ def ImportStatus.toStr : ImportStatus → String
 `file:line: …`. -/
 structure ImportRow where
   name : String
+  /-- The Solidity name; `name` identifies the generated Lean declaration. -/
+  sourceName : String := ""
+  sourceSignature : String := ""
   tag : Tag
   params : List (String × String)
+  /-- Elaborated parameter types, newest first, including reference locations. -/
+  paramTypes : Ctx := []
   status : ImportStatus
   reason : String
   deriving Repr, Inhabited
@@ -134,11 +139,19 @@ def paramTy? (t : String) : Option (PrimTy × Nat) :=
   | none, none => if t == "address payable" then some (.uint, 256) else none
 
 /-- The parameters of a function as locals in scope, most recent first. -/
-def paramCtx (ps : List (String × String)) : Except String ECtx :=
-  ps.reverse.mapM fun (x, t) =>
-    match paramTy? t with
-    | some (p, n) => pure (x, .val p n)
-    | none => throw s!"the parameter `{x}` has the type `{t}`, which is not a value type"
+def paramCtx (C : Contract) (ps : List RawStmt) : Except String ECtx :=
+  ps.reverse.mapM fun s => match s with
+    | .decl T x none => do
+      let (.prim p, n) ← elabDeclTy C T | throw s!"reference parameter {x} needs a data location"
+      pure (x, .val p n)
+    | .declStorage T x none => do
+      let .ref R ← elabTy C T | throw s!"storage location on value parameter {x}"
+      pure (x, .alias R)
+    | .declMemory T x none => do
+      let .ref R ← elabTy C T | throw s!"memory location on value parameter {x}"
+      unless (Ty.ref R).mapFree do throw s!"memory parameter {x} holds a mapping"
+      pure (x, .mem R)
+    | _ => throw "invalid parameter declaration"
 
 /-- A function's return variables, an unnamed one named as `contract!` names
 it: `_ret`, or `_ret0`, `_ret1`, … of several (Lean's spelling; KeY names
@@ -169,6 +182,171 @@ def lowerBodyLoops (rets : List String) (nRets : Nat) (raw : List RawStmt) :
 syntax (name := solcImport) "solc_import " str " hash " num " as " ident
   (" renaming " sepBy1(ident " => " ident, ", "))? (&" testing")? : command
 
+/-- A large imported function table, compiled in bounded list segments.
+For example, the testing import retains all of TestSuite's public functions.
+Lean's list notation uses nested lets, so expose only the spine, retaining
+the original heads. Every generated segment is checked by the kernel. -/
+private def compileListSegments (owner : Lean.Name) (value : Expr) : TermElabM Expr := do
+  let mut rest : Expr := ← whnf value
+  let mut cells : Array Expr := #[]
+  while rest.isAppOfArity ``List.cons 3 do
+    cells := cells.push rest
+    rest ← whnf rest.appArg!
+  if cells.size ≤ 64 then return value
+  let mut rebuilt : Expr := rest
+  let mut count : Nat := 0
+  for cell in cells.reverse do
+    rebuilt := cell.appFn!.app rebuilt
+    count := count + 1
+    if count % 64 == 0 then
+      let name ← mkFreshUserName (owner ++ `_list)
+      addAndCompile <| .defnDecl {
+        name, levelParams := [], type := ← inferType rebuilt, value := rebuilt,
+        hints := .abbrev, safety := .safe }
+      rebuilt := mkConst name
+  return rebuilt
+
+/-- Define an imported contract such as `TestSuite` without compiling its
+whole function table in one expression. A kernel-checked reflexivity proof
+certifies that segmentation preserves the complete original contract. -/
+private def defineImportedContract (name : Lean.Name) (contractSyntax : Syntax) : TermElabM Unit := do
+  let original ← elabTermEnsuringType contractSyntax (mkConst ``Contract)
+  synthesizeSyntheticMVarsNoPostponing
+  let original ← instantiateMVars original
+  let original ← whnf original
+  unless original.isAppOfArity ``Contract.mk 7 do
+    throwError "solc_import: expected a contract literal"
+  let mut fields : Array Expr := #[]
+  for arg in original.getAppArgs do
+    fields := fields.push (← compileListSegments name arg)
+  let value : Expr := mkAppN original.getAppFn fields
+  let certificate ← mkFreshUserName (name ++ `_inputEq)
+  -- Check in the kernel directly: a metaprogram's recursive comparison of
+  -- the full unsegmented table would itself exceed the elaborator's depth.
+  addDecl <| .thmDecl {
+    name := certificate, levelParams := [],
+    type := mkApp3 (mkConst ``Eq [1]) (mkConst ``Contract) original value,
+    value := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Contract) original }
+  addAndCompile <| .defnDecl {
+    name, levelParams := [], type := mkConst ``Contract, value,
+    hints := .regular 0, safety := .safe }
+
+/-! Renaming specification parameters is a syntax operation. In particular,
+quantified variables shadow parameters, and member labels are not variables. -/
+
+private partial def specCommentTokens (depth : Nat) : List String → List String × List String
+  | [] => ([], [])
+  | "/" :: "-" :: rest =>
+    let (body, tail) := specCommentTokens (depth + 1) rest
+    (["/", "-"] ++ body, tail)
+  | "-" :: "/" :: rest =>
+    if depth == 1 then (["-", "/"], rest) else
+      let (body, tail) := specCommentTokens (depth - 1) rest
+      (["-", "/"] ++ body, tail)
+  | token :: rest =>
+    let (body, tail) := specCommentTokens depth rest
+    (token :: body, tail)
+
+private partial def escapeSpecBindings (names : List String) : List String → List String
+  | [] => []
+  | "\\" :: keyword :: rest => "\\" :: keyword :: escapeSpecBindings names rest
+  | "«" :: rest =>
+    let quoted := rest.takeWhile (· != "»")
+    let tail := rest.drop quoted.length
+    match tail with
+    | [] => "«" :: quoted
+    | closing :: tail => "«" :: quoted ++ closing :: escapeSpecBindings names tail
+  | "-" :: "-" :: rest =>
+    let comment := rest.takeWhile (· != "\n")
+    ["-", "-"] ++ comment ++ escapeSpecBindings names (rest.drop comment.length)
+  | "/" :: "-" :: rest =>
+    let (comment, tail) := specCommentTokens 1 rest
+    ["/", "-"] ++ comment ++ escapeSpecBindings names tail
+  | token :: rest =>
+    let token := ".".intercalate (token.splitOn "." |>.map fun name =>
+      if names.contains name && leanKeywords.contains name then s!"«{name}»" else name)
+    token :: escapeSpecBindings names rest
+
+private partial def renameSpecSyntax (params rets : List (String × String)) (stx : Syntax) : Syntax :=
+  match stx with
+  | `(spec_expr| \forall $T:ident $x:ident; $body) =>
+    let _ := T
+    stx.setArg (stx.getNumArgs - 1)
+      (renameSpecSyntax (params.filter (·.1 != x.getId.toString))
+        (rets.filter (·.1 != x.getId.toString)) body.raw)
+  | `(spec_expr| \exists $T:ident $x:ident; $body) =>
+    let _ := T
+    stx.setArg (stx.getNumArgs - 1)
+      (renameSpecSyntax (params.filter (·.1 != x.getId.toString))
+        (rets.filter (·.1 != x.getId.toString)) body.raw)
+  | `(spec_expr| \old($body)) =>
+    stx.setArg (stx.getNumArgs - 2) (renameSpecSyntax params [] body.raw)
+  | `(spec_expr| $x:ident) =>
+    match x.getId.components.map (·.toString) with
+    | head :: tail =>
+      match Semantics.lookupBy head (params ++ rets) with
+      | none => stx
+      | some renamed =>
+        let name := (renamed :: tail).foldl Lean.Name.str .anonymous
+        let ident := Syntax.ident x.raw.getHeadInfo (name.toString.toSubstring) name []
+        match stx with
+        | .node info kind args => .node info kind (args.map fun a => if a == x.raw then ident else a)
+        | _ => ident
+    | [] => stx
+  | _ =>
+    match stx with
+    | .node info kind args => .node info kind (args.map (renameSpecSyntax params rets))
+    | _ => stx
+
+private def rewriteSpecBindings (env : Environment) (kind : String)
+    (params rets : List (String × String)) (text : String) : Except String String := do
+  let names := params ++ rets
+  if names.isEmpty || !["requires", "ensures", "invariant", "assignable"].contains kind then
+    return text
+  let escaped := String.join (escapeSpecBindings (names.map Prod.fst) (specTokens text))
+  let stx ← Parser.runParserCategory env `sol_member s!"{kind} {escaped};"
+  let some member := (renameSpecSyntax params (if kind == "ensures" then rets else []) stx).reprint
+    | throw "renamed specification cannot be printed"
+  -- Keep the reader's raw directive/text representation; validation parses
+  -- the complete member again before it can enter a contract.
+  let member := member.trim
+  let directivePrefix := kind ++ " "
+  unless member.startsWith directivePrefix && member.endsWith ";" do
+    throw "renamed specification has an unexpected member shape"
+  return (member.drop directivePrefix.length).take (member.length - directivePrefix.length - 1)
+
+private partial def renameLoopSyntax (names : List (String × String)) (stx : Syntax) : Syntax :=
+  match stx with
+  | `(sol_expr| $x:ident) =>
+    match x.getId.components.map (·.toString) with
+    | head :: tail =>
+      match Semantics.lookupBy head names with
+      | none => stx
+      | some renamed =>
+        let name := (renamed :: tail).foldl Lean.Name.str .anonymous
+        let ident := Syntax.ident x.raw.getHeadInfo (name.toString.toSubstring) name []
+        match stx with
+        | .node info kind args => .node info kind (args.map fun a => if a == x.raw then ident else a)
+        | _ => ident
+    | [] => stx
+  | _ =>
+    match stx with
+    | .node info kind args => .node info kind (args.map (renameLoopSyntax names))
+    | _ => stx
+
+private def rewriteLoopBindings (env : Environment) (names : List (String × String))
+    (text : String) : Except String String := do
+  unless names.any (fun (a, b) => a != b) do return text
+  let text := text.trim
+  let directive := text.takeWhile (!Char.isWhitespace ·)
+  unless ["invariant", "decreases"].contains directive do return text
+  let expression := (text.drop directive.length).trimLeft
+  let escaped := String.join (escapeSpecBindings (names.map Prod.fst) (specTokens expression))
+  let stx ← Parser.runParserCategory env `sol_expr escaped
+  let some expression := (renameLoopSyntax names stx).reprint
+    | throw "renamed loop specification cannot be printed"
+  return directive ++ " " ++ expression
+
 @[command_elab solcImport]
 def elabSolcImport : CommandElab := fun stx => do
   let ref := stx
@@ -192,8 +370,9 @@ def elabSolcImport : CommandElab := fun stx => do
   let source := ((j.getObjVal? "header").toOption.bind fun hd =>
     (hd.getObjValAs? String "source").toOption).getD "?"
   let srcName := (System.FilePath.mk source).fileName.getD source
-  let c ← ofExcept (readContract ast N.getString! ren (!stx[7].isNone))
   let env ← getEnv
+  let c ← ofExcept (readContract ast N.getString! ren (!stx[7].isNone)
+    (rewriteSpecBindings env) (rewriteLoopBindings env))
   let parse (cat : Lean.Name) (s : String) : Except String Syntax :=
     (Parser.runParserCategory env cat s).map (atRef ref)
   if !stx[7].isNone then
@@ -202,17 +381,25 @@ def elabSolcImport : CommandElab := fun stx => do
     for m in c.members do
       let _ ← ofExcept (parse `sol_member m)
     for f in c.funs ++ c.ctor.toList do
-      for (kind, text) in f.specClauses do
-        let _ ← ofExcept (parse `sol_member s!"{kind} {text};")
+      -- A refused body contributes no member or specification. Keep its
+      -- unsupported row local, even when its unimported clause needs a
+      -- renamed parameter (such as Solidity's `from`).
+      if let .ok _ := f.body then
+        for (kind, text) in f.specClauses do
+          let _ ← ofExcept (parse `sol_member s!"{kind} {text};")
   -- the functions called, each checked alone first: one that does not
   -- expand is left out, with every function that calls it
+  -- A malformed unused modifier must not enter every function's wrapper.
+  -- Its users still fail expansion because the named modifier is absent.
+  let modifierMembers := c.modifierMembers.filter fun m =>
+    match parse `sol_member m with | .ok _ => true | .error _ => false
   let ctTy := Lean.mkConst ``Contract
   let mut funMembers : Array String := #[]
   let mut badMembers : List (String × String) := []
   for (g, m) in c.funMembers do
     let calls := ((c.funs.find? (·.name == g)).map (·.calls)).getD []
     let r ← match calls.findSome? fun h => (Semantics.lookupBy h badMembers).map (h, ·),
-        parse `term s!"contract!\{ {m} }" with
+        parse `term s!"contract!\{ {" ".intercalate modifierMembers} {m} }" with
       | some (h, e), _ => pure (some s!"it calls `{h}`, which is left out: {e}")
       | none, .error e => pure (some s!"its declaration does not parse: {e}")
       | none, .ok s => liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
@@ -229,7 +416,8 @@ def elabSolcImport : CommandElab := fun stx => do
   -- the constructor, its member last (it may call every function): its row
   -- now if it is left out, else once its program is made
   let ctorRowOf (f : SolcFun) (st : ImportStatus) (msg : String) : ImportRow :=
-    { name := f.name, tag := f.tag, params := f.params, status := st, reason := msg }
+    { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
+      tag := f.tag, params := f.params, status := st, reason := msg }
   let mut ctorRow : Option ImportRow := none
   let mut ctorMember : Option String := none
   if let some f := c.ctor then
@@ -247,12 +435,12 @@ def elabSolcImport : CommandElab := fun stx => do
       logWarning m!"solc_import: the initializers are left out: {g.msg}"
   -- the contract, with the initializers and the constructor if it expands
   -- with them, else without
-  let plain := c.members ++ funMembers.toList
+  let plain := c.members ++ modifierMembers ++ funMembers.toList
   let mut memberList := plain
   -- a declared constructor left out takes the initializers with it: the
   -- implicit one would run them alone
   if (ctorMember.isSome || c.initMembers != c.members) && (c.ctor.isNone || ctorMember.isSome) then
-    let full := c.initMembers ++ funMembers.toList ++ ctorMember.toList
+    let full := c.initMembers ++ modifierMembers ++ funMembers.toList ++ ctorMember.toList
     let r ← match parse `term s!"contract!\{ {" ".intercalate full} }" with
       | .error e => pure (some s!"it does not parse: {e}")
       | .ok s => liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
@@ -270,15 +458,15 @@ def elabSolcImport : CommandElab := fun stx => do
     | some e, _, _ =>
       logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
   let ctStx ← ofExcept (parse `term s!"contract!\{ {" ".intercalate memberList} }")
-  let id := mkIdentFrom ref N
-  elabCommand (← `(command| def $id : Solidity.Contract := $(⟨ctStx⟩)))
+  liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
   let mut rows : Array ImportRow := #[]
   let mut raws : Array (Nat × SolcFun × List (Nat × String) × Expr) := #[]
   for f in c.funs do
     let row (st : ImportStatus) (msg : String) : ImportRow :=
-      { name := f.name, tag := f.tag, params := f.params, status := st, reason := msg }
+      { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
+        tag := f.tag, params := f.params, status := st, reason := msg }
     if f.tag == .skip then
       rows := rows.push (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
       continue
@@ -289,9 +477,12 @@ def elabSolcImport : CommandElab := fun stx => do
     | .error (.excluded m l) => rows := rows.push (row .excluded (at_ f l m))
     | .error (.unsupported m l) => rows := rows.push (row .unsupported (at_ f l m))
     | .ok ss =>
+      let ss := if f.modifierApps.isEmpty then ss else
+        [(f.line, s!"{f.name}({", ".intercalate (f.params.map Prod.fst)})")]
       -- its return variables first, at their defaults
       let ss := (retNames f).map (fun (x, t) => (f.line, s!"{t} {x}")) ++ ss
-      let text := "sol_raw!{ " ++ String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
+      let params := f.params.map fun (x, t) => s!"{t} {x}; "
+      let text := "sol_raw!{ " ++ String.join params ++ String.join (ss.map fun (_, s) => s ++ "; ") ++ "}"
       match parse `term text with
       | .error e => rows := rows.push (row .unsupported (at_ f 0 s!"the printed text does not parse: {e}"))
       | .ok s =>
@@ -321,16 +512,19 @@ def elabSolcImport : CommandElab := fun stx => do
       rows.set! k { rows[k]! with status := .unsupported, reason := msg }
     -- its loops, then its `return`s lowered, which moves statements: an
     -- error is then the function's
+    let (params, raw) := raw.splitAt f.params.length
     let lower := !f.rets.isEmpty || raw.any RawStmt.hasReturn
     let rets := (retNames f).map (·.1)
     let lowered : ECtx → Except String (List RawStmt × (ECtx × Nat)) := fun Γ => do
       let (raw, st) ← ((lowerBodyLoops rets rets.length raw).run { funs := C.funs }).run
         (Γ, RawStmt.maxIdxs raw + 1)
       pure ((← if lower then lowerReturns rets raw else pure raw), st)
-    match paramCtx f.params >>= lowered with
+    let scope := paramCtx C params
+    if let .ok Γ := scope then rows := rows.set! k { rows[k]! with paramTypes := (ECtx.toNCtx Γ).ctx }
+    match scope >>= lowered with
     | .error m => rows := fail (at_ f 0 m)
     | .ok (raw, st) =>
-      match elabProgAtS.go C 0 raw st with
+      match elabProgAtS.go C 0 raw st (source := true) with
       | .error (j, m) =>
         rows := fail (at_ f (if lower then 0 else (ss[j]?.map (·.1)).getD 0) m)
       | .ok ⟨_, P⟩ =>
@@ -346,10 +540,11 @@ def elabSolcImport : CommandElab := fun stx => do
       ctorRow := some (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
     else
       let raw : List RawStmt := [.call (.name "constructor") (f.params.map fun (x, _) => RawExpr.name x)]
-      match paramCtx f.params with
+      match (C.ctor.getD { params := [], body := [] }).paramCtx with
       | .error m => ctorRow := some (row .unsupported (at_ f 0 m))
       | .ok Γ =>
-        match elabProgAtS.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) with
+        let row := fun st msg => { (row st msg) with paramTypes := (ECtx.toNCtx Γ).ctx }
+        match elabProgAtS.go C 0 raw (Γ, RawStmt.maxIdxs raw + 1) (source := true) with
         | .error (_, m) => ctorRow := some (row .unsupported (at_ f 0 m))
         | .ok ⟨_, P⟩ =>
           let n : Lean.Name := N ++ Lean.Name.mkSimple f.name

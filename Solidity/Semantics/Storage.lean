@@ -1254,6 +1254,43 @@ theorem SVec.strip_eq_stripM : {E : Ty} → {n : Nat} → (l : SVec E n) → l.s
     rw [SVec.strip_cons, SVec.stripM, SVal.strip_eq_stripM v, SVec.strip_eq_stripM rest]
 end
 
+/-- Pad a vector on the right with `d`, to the requested length. The copy
+witness below admits only lengths that retain the whole source. -/
+def SVec.padRight {E : Ty} (d : SVal E) : {n : Nat} → SVec E n → (m : Nat) → SVec E m
+  | _, _, 0 => .nil
+  | 0, .nil, m + 1 => .cons d (SVec.padRight d .nil m)
+  | _ + 1, .cons v vs, m + 1 => .cons v (SVec.padRight d vs m)
+
+/-- A slot of `[a,b]` padded to four slots reads `a,b,d,d`; outside four
+slots it is absent. -/
+theorem SVec.getElem?_padRight {E : Ty} (d : SVal E) : {n : Nat} → (vs : SVec E n) →
+    (m i : Nat) → (vs.padRight d m).toList[i]? =
+      if i < m then (if i < n then vs.toList[i]? else some d) else none
+  | _, _, 0, i => by simp only [SVec.padRight, SVec.toList_nil, List.getElem?_nil, Nat.not_lt_zero, ↓reduceIte]
+  | 0, .nil, m + 1, i => by
+    cases i with
+    | zero => simp only [SVec.padRight, SVec.toList_cons, List.getElem?_cons_zero,
+        Nat.zero_lt_succ, Nat.not_lt_zero, ↓reduceIte]
+    | succ i =>
+      simp only [SVec.padRight, SVec.toList_cons, List.getElem?_cons_succ, Nat.succ_lt_succ_iff,
+        Nat.not_lt_zero, ↓reduceIte]
+      exact SVec.getElem?_padRight d .nil m i
+  | n + 1, .cons v vs, m + 1, i => by
+    cases i with
+    | zero => simp only [SVec.padRight, SVec.toList_cons, List.getElem?_cons_zero,
+        Nat.zero_lt_succ, ↓reduceIte]
+    | succ i =>
+      simp only [SVec.padRight, SVec.toList_cons, List.getElem?_cons_succ, Nat.succ_lt_succ_iff]
+      exact SVec.getElem?_padRight d vs m i
+
+/-- The source snapshot of `uint[2] -> uint[]` or `uint[2] -> uint[4]`,
+at the destination type. Copying subsequently uses `Storage.write` and
+`overlay`, which retain the destination's own shadow histories. -/
+def FixedCopy.apply {E : Ty} {n : Nat} : {R : RefTy} → FixedCopy E n R →
+    SVal (.ref (.fixed E n)) → SVal (.ref R)
+  | _, .dynamic bound, .fixed vs => .array vs.strip .nil bound
+  | _, .fixed m _, .fixed vs => .fixed (vs.strip.padRight (SVal.dflt E).strip m)
+
 mutual
 /-- `SVal.overlay` by `match`, its compiled form. -/
 def SVal.overlayM : {T : Ty} → SVal T → SVal T → SVal T
@@ -1591,10 +1628,34 @@ instance SVal.decEq {T : Ty} : DecidableEq (SVal T) := fun _ _ => decidable_of_i
 instance SFields.decEq {fs : List (Name × Ty)} : DecidableEq (SFields fs) :=
   fun _ _ => decidable_of_iff _ SFields.beq_iff
 
-/-- The slot `push` lands on, and the slots left. -/
+/-- The slot `push` lands on, reset to its default in place, and the slots
+left. Resetting a reference preserves its mapping entries and fixed arities. -/
 def pushSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
   | [] => (SVal.dflt E, [])
+  | c :: rest => (if E.isPrimitive then SVal.dflt E else c.defaultOf, rest)
+
+/-- A length-only extension exposes an existing reference slot unchanged.
+Primitive slots start at their default, as required by storage well-formedness. -/
+def extendSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
+  | [] => (SVal.dflt E, [])
   | c :: rest => (if E.isPrimitive then SVal.dflt E else c, rest)
+
+/-- Extending a mapping and resetting it retain the same entries. -/
+theorem extendSlot_eq_pushSlot {E : Ty} (hm : E.isMapping = true) (l : List (SVal E)) :
+    extendSlot E l = pushSlot E l := by
+  cases E with
+  | prim p => cases hm
+  | ref R =>
+    cases R with
+    | mapping k V =>
+      cases l with
+      | nil => rfl
+      | cons c rest =>
+        cases c with
+        | map entries d =>
+          simp only [extendSlot, pushSlot, Ty.isPrimitive, Bool.false_eq_true, if_false,
+            SVal.defaultOf_map]
+    | struct s | array V | fixed V n => cases hm
 
 /-- A length below `2^256` is a `uint`. -/
 theorem lenU_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
@@ -1750,6 +1811,26 @@ def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
       (SVec.snoc_lt_bound w.elems slot h))
     some (st', lenU w.n (Nat.lt_of_succ_lt h))
   else none
+
+/-- A length-only save, retaining the existing reference slot and its index.
+Unlike `pushPlace`, this term does not perform `delAt` before extending. -/
+def extendPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    Option (Storage C × PrimTy.uint.Denote) := do
+  let w : ArrView E := SVal.view (← st.find r)
+  let (slot, sh') := extendSlot E w.shadow.toList
+  if h : w.n + 1 < 2 ^ 256 then
+    let st' ← st.save r (.array (SVec.ofList (w.elems.toList ++ [slot])) (.ofList sh')
+      (SVec.snoc_lt_bound w.elems slot h))
+    some (st', lenU w.n (Nat.lt_of_succ_lt h))
+  else none
+
+/-- A mapping push needs no reset because deletion preserves mappings. -/
+theorem extendPlace_eq_pushPlace {E : Ty} (st : Storage C)
+    (r : SRef C (.ref (.array E))) (hm : E.isMapping = true) :
+    st.extendPlace r = st.pushPlace r := by
+  have hslot : extendSlot E = pushSlot E := funext (extendSlot_eq_pushSlot hm)
+  unfold extendPlace pushPlace
+  rw [hslot]
 
 /-- `b.pop()`: the last element cleared into the slots past the
 end, or moved there as it is when `keep`; an empty array reverts. -/
@@ -2089,6 +2170,59 @@ theorem SVal.find_save_same {T U : Ty} (x : SVal T) (p : Path T U) (v : SVal U)
   rw [SVal.save_eq_saveM] at h
   rw [SVal.find_eq_findM]
   exact SVal.findM_saveM x p v h
+
+/-- A successful `values[0] = v` reads back the complete typed value at
+that reference, including reference values. -/
+theorem Storage.find_save_same {C : Contract} {T : Ty} {st st' : Storage C}
+    {r : SRef C T} {v : SVal T} (h : st.save r v = some st') : st'.find r = some v := by
+  unfold Storage.save at h
+  cases hs : (st.get r.hroot).save r.path v with
+  | none => simp only [hs, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h
+  | some x =>
+    simp only [hs, Option.bind_eq_bind, Option.bind_some, Option.some.injEq] at h
+    subst st'
+    rw [Storage.find, SFields.get_set_same]
+    exact SVal.find_save_same _ _ _ hs
+
+/-- `values.push()` appends the reset next slot and returns its old length,
+for every typed storage, including a recycled shadow slot. -/
+theorem Storage.pushPlace_shape {C : Contract} {E : Ty} {st st' : Storage C}
+    {r : SRef C (.ref (.array E))} {k : PrimTy.uint.Denote}
+    (h : st.pushPlace r = some (st', k)) :
+    ∃ (n : Nat) (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
+      (hcap : n + 1 < 2 ^ 256),
+      k = lenU n hn ∧
+      st'.find r = some (.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+        (.ofList (pushSlot E sh.toList).2) (SVec.snoc_lt_bound e _ hcap)) := by
+  unfold Storage.pushPlace at h
+  cases hf : st.find r with
+  | none => simp only [hf, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h
+  | some a =>
+    cases a with
+    | array e sh hn =>
+      simp only [hf, Option.bind_eq_bind, Option.bind_some, SVal.view_array] at h
+      split at h
+      · rename_i hcap
+        cases hs : st.save r (SVal.array (SVec.ofList (e.toList ++ [(pushSlot _ sh.toList).1]))
+            (SList.ofList (pushSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ hcap)) with
+        | none => simp only [hs, Option.bind_none, reduceCtorEq] at h
+        | some st₁ =>
+          simp only [hs, Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h
+          obtain ⟨rfl, rfl⟩ := h
+          exact ⟨_, e, sh, hn, hcap, rfl, Storage.find_save_same hs⟩
+      · cases h
+
+/-- After `values.push()`, its length is exactly one greater than the
+index returned for the new slot. -/
+theorem Storage.pushPlace_len {C : Contract} {E : Ty} {st st' : Storage C}
+    {r : SRef C (.ref (.array E))} {k : PrimTy.uint.Denote}
+    (h : st.pushPlace r = some (st', k)) :
+    ∃ l : PrimTy.uint.Denote, st'.len r = some l ∧ l.1 = k.1 + 1 := by
+  obtain ⟨n, e, sh, hn, hcap, rfl, hf⟩ := Storage.pushPlace_shape h
+  refine ⟨lenU _ (SVec.snoc_lt_bound e (pushSlot E sh.toList).1 hcap), ?_, ?_⟩
+  · simp only [Storage.len, hf, Option.bind_eq_bind, Option.bind_some, SVal.view_array]
+  · simp only [lenU, List.length_append, List.length_singleton, SVec.length_toList]
+    omega
 
 /-- The members of a struct without mappings are without mappings too. -/
 theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT.2.mapFree = true := by

@@ -594,6 +594,22 @@ theorem TRun.push_some_pushT {E : Ty} (b' : SPath C (t :: Γ) (.array E)) (b : S
   simp only [TRun.push, hb, hr, liftedT_bind, liftedT_ite, liftedT_error]
   lift_fin
 
+/-- `y = b.push()` reads the same receiver once under a captured alias. -/
+theorem TRun.assignLocalPush_pushT {p : PrimTy} (i : Idx Γ (.val p))
+    (b' : SPath C (t :: Γ) (.array (.prim p))) (b : SPath C Γ (.array (.prim p)))
+    (hb : b'.resolveT (σ.push w) = b.resolveT σ) :
+    TRun.assignLocalPush i.there b' (σ.push w) =
+      pushedT σ w (TRun.assignLocalPush i b σ) := by
+  simp only [TRun.assignLocalPush, TRun.push_none_pushT σ w b' b hb]
+  cases TRun.push b none σ with
+  | error e => rfl
+  | ok o =>
+    show Except.ok (⟨(o.st.lift up (TEnv.wk o.ext (t :: Γ) (w, σ.env))).setLocal
+        (i.wk up) (PrimTy.dflt p), o.ext⟩ : Out C σ.H (t :: Γ)) =
+      Except.ok ⟨(o.st.setLocal i (PrimTy.dflt p)).lift up
+        (TEnv.wk o.ext (t :: Γ) (w, σ.env)), o.ext⟩
+    simp only [State.lift_setLocal]
+
 theorem TRun.pop_pushT {E : Ty} (b' : SPath C (t :: Γ) (.array E)) (b : SPath C Γ (.array E))
     (hb : b'.resolveT (σ.push w) = b.resolveT σ) :
     TRun.pop b' (σ.push w) = pushedT σ w (TRun.pop b σ) := by

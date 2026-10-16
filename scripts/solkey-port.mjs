@@ -138,10 +138,11 @@
  */
 
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rmSync } from "node:fs";
-import { join, basename, dirname } from "node:path";
+import { join, basename, dirname, relative } from "node:path";
 import { createHash } from "node:crypto";
 import { spawn, execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { verifySnapshot } from "./solkey-migration.mjs";
 
 const args = process.argv.slice(2);
 const optionOf = (flag, fallback) => {
@@ -269,22 +270,21 @@ const KEY_SUITES = [
       ].map((n) => [n, n.replace(/-/g, "_")]),
     ),
     reason: () =>
-      "KeY loader/taclet machinery: ad-hoc taclets over `\\problem { true }`, " +
-      "a sort condition, a list declaration or an empty problem — there is no " +
-      "identity and no judgment to state",
+      "KeY loader/taclet smoke fixture with a trivial active problem; " +
+      "its custom-rule parsing and matching checks are outside the Lean program corpus",
   },
   {
-    contract: "Rules",
-    suite: "storage",
-    dir: "storage",
-    ported: {},
-    unported: {},
-    reason: () =>
-      "storage-theory problem over a `MapField`: a copy of a mapping-carrying " +
-      "type, which no program writes (solc ≥ 0.7 and solkey's parser reject " +
-      "it); the typed Theory states the rule it exercises (`Theory/Typed/Obs.lean`, `Obs.copyTo`), " +
-      "and the corpus's obligations are programs' (`⟨ f() ⟩ true`)",
+    contract: "Rules", suite: "core-open",
+    dir: "../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/open",
+    ported: {}, unported: {}, defaultStatus: "unported",
+    reason: () => "upstream expected-open KeY obligation; its exact Lean statement is not ported, with no counterexample claim",
   },
+  {
+    contract: "Proofs", suite: "proofs", dir: "proofs",
+    ported: {}, unported: {}, defaultStatus: "unported",
+    reason: () => "pinned KeY proof obligation; its exact scoped Lean derivation is not ported",
+  },
+  // The old storage/copyKeepsMapping.key suite was removed at 048a74de51.
 ];
 
 const UNPORTED_REASON =
@@ -985,7 +985,8 @@ async function probe(jobs) {
     writeFileSync(file, lines.join("\n"));
 
     return new Promise((resolve, reject) => {
-      const child = spawn("lake", ["env", "lean", "--tstack=131072", file], { cwd: ROOT });
+      const child = spawn("lake", ["--quiet", "--no-build", "lean", file,
+        "--", "--tstack=131072"], { cwd: ROOT });
       let output = "";
       child.stdout.on("data", (d) => (output += d));
       child.stderr.on("data", (d) => (output += d));
@@ -1045,6 +1046,8 @@ async function probe(jobs) {
 /**
  * `TestSuite.sol` of the solkey checkout, which must be the source Lean
  * imported: the sha256 that `tests/solc/TestSuite.ast.json` records.
+ * Read the named contract's compiler declarations so file-level/library
+ * helpers, multiline headers and modifiers do not distort the row count.
  */
 function importedSource() {
   const path = join(SOLKEY, IMPORTED.file);
@@ -1057,7 +1060,22 @@ function importedSource() {
       `was imported from ${pinned}: point --solkey (or SOLKEY_EXAMPLES) at that ` +
       "checkout, or re-import it with scripts/solc-ast.mjs");
   }
-  return source;
+  const contracts = JSON.parse(fixture).ast.nodes.filter(n =>
+    n.nodeType === 'ContractDefinition' && n.name === IMPORTED.contract);
+  if (contracts.length !== 1) throw new Error('fixture must contain exactly one imported contract');
+  const declarations = contracts[0].nodes.filter(n =>
+    n.nodeType === 'FunctionDefinition' && n.kind === 'function');
+  const functions = declarations.filter(n => ['public', 'external'].includes(n.visibility)).map(n => {
+    const doc = typeof n.documentation === 'string' ? n.documentation : n.documentation?.text ?? '';
+    return {name:n.name, params:n.parameters.parameters.map(p =>
+      ({name:p.name, ty:p.typeDescriptions?.typeString})),
+      boxed:/^\s*@custom:key\s+box\s*$/m.test(doc),
+      skipped:/^\s*@custom:key\s+skip\s*$/m.test(doc),
+      doc:doc.split('\n').filter(l => l.trim() && !/^\s*@custom:key\s+(box|skip)\s*$/.test(l))};
+  });
+  if (new Set(functions.map(f => f.name)).size !== functions.length)
+    throw new Error('imported corpus rows require distinct public function names');
+  return {functions, internalCount:declarations.length - functions.length};
 }
 
 /** The text of the `info:` pin in `file` whose `#guard_msgs` checks `command`. */
@@ -1168,6 +1186,11 @@ function importedRows({ functions, internalCount: internal }, lean) {
 
 /** `Corpus/TestSuite.lean`: each derived obligation with no parameters, at the initial storage. */
 function importedModule(corollaries, rows, internal, commit) {
+  const scopedCount = rows.filter((r) => ["derived", "pending", "divergent"].includes(r[3])).length;
+  // Final-corollary checks needed depth 513 for 501 entries and 514 for 502.
+  // Retain that observed margin above the table length, with the ordinary default as
+  // a floor; this does not change any heartbeat/search budget.
+  const lookupDepth = Math.max(512, scopedCount + 12);
   const tally = IMPORTED_STATUSES.map((k) => [k, rows.filter((r) => r[3] === k).length])
     .filter(([, n]) => n > 0).map(([k, n]) => `${n} ${k}`).join(", ");
   const blocks = corollaries.map(({ fn, modality }) => {
@@ -1220,6 +1243,9 @@ function importedModule(corollaries, rows, internal, commit) {
     "",
     "namespace Solidity.Corpus.TestSuite",
     "",
+    `-- Indexed obligations at the end of the ${scopedCount}-entry table require this lookup depth.`,
+    `set_option maxRecDepth ${lookupDepth}`,
+    "",
     blocks.join("\n\n"),
     "",
     ...axiomsPin,
@@ -1231,6 +1257,9 @@ function importedModule(corollaries, rows, internal, commit) {
 // ───────────────────────────── emission ─────────────────────────────────
 
 function solkeyCommit() {
+  const snapshotRoot = dirname(SOLKEY);
+  if (existsSync(join(snapshotRoot, "snapshot.json")))
+    return verifySnapshot(snapshotRoot).commit.slice(0, 10);
   try {
     return execFileSync("git", ["-C", SOLKEY, "rev-parse", "--short=10", "HEAD"]).toString().trim();
   } catch {
@@ -1406,7 +1435,7 @@ async function main() {
   const perContract = [];
 
   // TestSuite: read off Lean's pins, not translated; checked first, as it is cheap.
-  const imported = importedRows(parseContract(importedSource()), readImported());
+  const imported = importedRows(importedSource(), readImported());
 
   for (const { file, suite } of CONTRACTS) {
     const contract = basename(file, ".sol");
@@ -1464,7 +1493,7 @@ async function main() {
           ? verdicts.get(`${contract}.${e.fn.name}`)
           : pins.get(`${suite}.${contract}.${e.fn.name}`) ?? { status: "pending", reason: "" };
         e.status = v.status === "unsupported" && !PROBE && !v.reason ? "pending" : v.status;
-        e.reason = v.reason;
+        e.reason = v.reason || (e.status === "proved" ? "kernel-checked concrete run" : "");
       }
       tally[e.status] = (tally[e.status] || 0) + 1;
       rows.push([suite, contract, e.fn.name, e.status, e.note, e.reason]);
@@ -1532,14 +1561,16 @@ async function main() {
     );
   }
 
-  // The `.key` suites: every problem accounted for.
-  for (const { contract, suite, dir, ported, unported, reason } of KEY_SUITES) {
+  // Every problem-bearing `.key` input is inventoried; a row need not be proved.
+  const problemFiles = new Set();
+  for (const { contract, suite, dir, ported, unported, reason, defaultStatus } of KEY_SUITES) {
     const problems = readdirSync(join(SOLKEY, dir))
       .filter((f) => f.endsWith(".key"))
       .map((f) => basename(f, ".key"))
       .filter((name) => readFileSync(join(SOLKEY, dir, `${name}.key`), "utf8").includes("\\problem"))
       .sort();
     for (const name of problems) {
+      problemFiles.add(relative(dirname(SOLKEY), join(SOLKEY, dir, `${name}.key`)));
       if (ported[name]) {
         const [fn, example] = ported[name];
         rows.push([suite, contract, fn, "proved", `solkey ${name}.key`,
@@ -1547,9 +1578,21 @@ async function main() {
       } else if (unported[name]) {
         rows.push([suite, contract, unported[name], "unported", `solkey ${name}.key`, UNPORTED_REASON]);
       } else {
-        rows.push([suite, contract, name.replace(/-/g, "_"), "unsupported", "", reason(name)]);
+        rows.push([suite, contract, name.replace(/-/g, "_"), defaultStatus ?? "unsupported",
+          `solkey ${dir}/${name}.key`, reason(name)]);
       }
     }
+  }
+  const snapshotRoot = dirname(SOLKEY);
+  if (existsSync(join(snapshotRoot, "snapshot.json"))) {
+    const expected = verifySnapshot(snapshotRoot).files.filter(f => f.path.endsWith('.key') &&
+      (f.path.startsWith('keyext.solidity.examples/') ||
+       f.path.startsWith('keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/')) &&
+      readFileSync(join(snapshotRoot, f.path), 'utf8').includes('\\problem')).map(f => f.path);
+    const missing = expected.filter(p => !problemFiles.has(p));
+    const extra = [...problemFiles].filter(p => !expected.includes(p));
+    if (missing.length || extra.length)
+      throw new Error(`KeY problem inventory drift: missing ${missing.join(', ') || '-'}; extra ${extra.join(', ') || '-'}`);
   }
 
   writeFileSync(join(OUT, "SolidityCorpus.lean"),

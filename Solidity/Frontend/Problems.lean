@@ -87,7 +87,10 @@ value type. -/
 def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
     Except String (Option Expr) := do
   let some m := r.tag.modality? | return none
-  let some xs := r.binders? | return none
+  unless r.params.length == r.paramTypes.length do
+    throw s!"{r.name}: its parameter types are missing"
+  let Γ : NCtx := (r.params.reverse.map fun (x, _) => Var.ofName x).zip r.paramTypes
+  let xs := Γ.reverse
   let n := N ++ Lean.Name.mkSimple r.name
   let some ci := env.find? n | throw s!"{r.name}: no program {n}"
   let ty := ci.type.consumeMData
@@ -95,7 +98,7 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
   unless ty.isAppOfArity ``Prog 3 do throw s!"{r.name}: {n} is not a scoped program"
   let Γe := ty.appFn!.appArg!
   let Γ'e := ty.appArg!
-  unless Γe == ctxE (paramsN xs).ctx do
+  unless Γe == ctxE Γ.ctx do
     throw s!"{r.name}: {n} is not read in its parameters' context"
   let c := mkConst N
   let modal := mkAppN (mkConst ``Fml.modal) #[c, Γe, Γ'e, Γ'e, toExpr m, v,
@@ -103,9 +106,15 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
   let body := if r.name == "constructor" then
       mkAppN (mkConst ``Fml.upd) #[c, Γe, Γe, toExpr m, mkApp2 (mkConst ``Problem.deployUpd) c Γe, modal]
     else mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.wt) c Γe, modal]
+  let body := if r.paramTypes.any (fun t => t matches .alias _ | .mem _) then
+      mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.refInputs) c Γe, body]
+    else body
   -- the binders, the last parameter innermost
-  let φ := xs.zipIdx.foldr (init := body) fun ((p, x), i) φ =>
-    mkAppN (mkConst ``Fml.all) #[c, ctxE (paramsN (xs.take i)).ctx, toExpr x, toExpr p, φ]
+  let φ := xs.zipIdx.foldr (init := body) fun ((x, t), i) φ =>
+    let ctx := ctxE ((xs.take i).reverse.map (·.2))
+    match t with
+    | .val p => mkAppN (mkConst ``Fml.all) #[c, ctx, toExpr x, toExpr p, φ]
+    | _ => mkAppN (mkConst ``Fml.bind) #[c, ctx, toExpr m, toExpr x, toExpr t, φ]
   return some φ
 
 /-- Declare each obligation of the import `N`, `N.f.problem : Fml N []`
@@ -120,8 +129,6 @@ def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
   let mut entries : Array (Lean.Name × Expr) := #[]
   for r in rows do
     unless r.status == .elaborated do continue
-    if r.tag.modality?.isSome && r.binders?.isNone then
-      logWarning m!"solc_scoped_problems: {r.name} has a parameter of no value type, so no statement"
     match obligation env N r with
     | .error e => errs0 := errs0.push e
     | .ok none => pure ()
@@ -279,7 +286,7 @@ def elabSolkeyDerive : CommandElab := fun stx => do
           unless ← Derive.replayFits s.heartbeats do
             let hb := if timed then s!" ({s.heartbeats / 1000} heartbeats)" else ""
             return .error s!"its replay is past maxHeartbeats as one declaration{hb}"
-          return .ok (Derive.replayLines s.found))
+          return .ok (Derive.replayLines s.found s.steps))
         fun e => do return .error (← e.toMessageData.toString)
     let t1 ← IO.monoMsNow
     let ms := if timed then s!", {t1 - t0} ms" else ""

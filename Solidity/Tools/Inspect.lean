@@ -141,10 +141,11 @@ partial def ruleAtC? (φ : Lean.Expr) : MetaM (Option Lean.Name) := do
     | _ => return none
   go φ
 
-/-- `#wp φ`. -/
+/-- `#wp φ`, including imported obligations declared without executable code. -/
 @[command_elab Solidity.Tools.«command#wp_»]
 def elabWpCore : CommandElab := fun stx => liftTermElabM do
   let some (φ, c) ← elabCoreFormula? ⟨stx[1]⟩ | notScoped "#wp"
+  let φ ← Symex.evaluable φ
   let e ← mkAppM ``wpQuotedC #[c, φ]
   let (ψ, red) ← unsafe evalExpr (Lean.Expr × Option String) (← inferType e) e
   let tail := match red with
@@ -152,10 +153,11 @@ def elabWpCore : CommandElab := fun stx => liftTermElabM do
     | none => m!"\noutside `sol_decide`'s fragment (`Fml.reduceS`): no reduction"
   logInfo (m!"symbolic execution leaves:\n    {ψ}" ++ tail)
 
-/-- `#step φ`. -/
+/-- `#step φ`, including imported obligations declared without executable code. -/
 @[command_elab Solidity.Tools.«command#step_»]
 def elabStepCore : CommandElab := fun stx => liftTermElabM do
   let some (φ, c) ← elabCoreFormula? ⟨stx[1]⟩ | notScoped "#step"
+  let φ ← Symex.evaluable φ
   let e ← mkAppM ``stepQuotedC #[c, φ]
   let ψ? ← unsafe evalExpr (Option Lean.Expr) (← inferType e) e
   match ψ? with

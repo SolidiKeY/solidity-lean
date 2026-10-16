@@ -111,6 +111,27 @@ def evalT (op : BinOp) : {p : PrimTy} → op.accepts p = true → p.Denote → p
 
 end BinOp
 
+namespace ModOp
+
+/-- `addmod`/`mulmod` compute before the final reduction, without word wrapping. -/
+def wide : ModOp → Int → Int → Int
+  | .addmod, x, y => x + y
+  | .mulmod, x, y => x * y
+
+/-- Solidity's modular builtin: a zero modulus fails, as division by zero does.
+Only the final remainder is converted back to a `uint256`. -/
+def evalT (op : ModOp) (x y k : PrimTy.uint.Denote) : Option PrimTy.uint.Denote :=
+  if k.val = 0 then none else PrimTy.uint.ofInt? (op.wide x.val y.val % k.val)
+
+/-- A nonzero unsigned modulus puts the wide remainder back in range. -/
+theorem remainder_inRange (op : ModOp) (x y k : PrimTy.uint.Denote)
+    (hk : k.val ≠ 0) : PrimTy.uint.inRange (op.wide x.val y.val % k.val) = true := by
+  have h : PrimTy.uint.inRange k.val = true := k.property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h ⊢
+  exact ⟨Int.emod_nonneg _ hk, Int.lt_trans (Int.emod_lt_of_pos _ (by omega)) h.2⟩
+
+end ModOp
+
 namespace UnOp
 
 /-- `⊖ a` on a typed value, at a type the operator takes: `none` where it

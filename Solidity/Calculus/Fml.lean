@@ -251,6 +251,9 @@ structure Branch (C : Contract) (Γ : Ctx) where
 inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   /-- `{U} ⟨[ ]⟩`: the statement is the update `U`. -/
   | update {Γ' : Ctx} (U : Upd C Γ Γ') : Premise C Γ Γ'
+  /-- `{U} {V} ⟨[ ]⟩`: `V` reads the state left by `U`, as in
+  `a.push() += x`. Each update remains parallel internally. -/
+  | updates {Δ Γ' : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ') : Premise C Γ Γ'
   /-- `⟨[ P ]⟩`: the statement is the block `P`, which may declare fresh
   locals on top of the statement's own (`h`), popped after it. -/
   | unfold {Γ' Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Ext Γ' Γ'') : Premise C Γ Γ'
@@ -287,6 +290,10 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   from anywhere in it: a call's frame under the return variables it leaves
   its caller. -/
   | inline {Γ' Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Thin Γ' Γ'') : Premise C Γ Γ'
+  /-- SolKey's outer zero-divisor branch in `sp.push() /= se`: when `c`
+  holds, append then save; otherwise run `revert();` before the rest. -/
+  | guardedUpdates {Δ : Ctx} (c : Fml C Γ) (U : Upd C Γ Δ) (V : Upd C Δ Γ) :
+      Premise C Γ Γ
 
 /-- `{anon(xs)} φ`, and `{anon(xs)} {havoc} φ` when the frame writes the
 storage too (`hv`): solkey's `#loopAnon`. -/
@@ -324,6 +331,7 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (φ : Fml C Γ₀) (p : Premise C Γ Γ') : Fml C Γ :=
   Premise.casesOn (motive := fun Γ' _ => Prog C Γ' Γ₁ → Fml C Γ) p
     (fun U ω => .upd m U (.modalK m ω κ φ))
+    (fun U V ω => .upd m U (.upd m V (.modalK m ω κ φ)))
     (fun P h ω => .modal m P (.pop .capture h (.seq ω κ)) φ)
     (fun x t P ω => .bind m x t (.modal m P (.seq ω κ) φ))
     (fun b c c' P Q ω =>
@@ -337,7 +345,9 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun I xs hv U c c' hu hb P post ω => .and I (Fml.anonHavoc xs hv (.imp I (.upd m U
       (.and (.imp c (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
         (.imp c' (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))))))))
-    (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ) ω
+    (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ)
+    (fun c U V ω => .and (.imp c (.upd m U (.upd m V (.modalK m ω κ φ))))
+      (.imp (.not c) (.modal m (.cons .revert ω) κ φ))) ω
 
 /-! ### Equations
 
@@ -352,6 +362,10 @@ variable {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁) (κ :
 theorem Premise.fml_update (U : Upd C Γ Γ') :
     (Premise.update U).fml m ω κ φ = .upd m U (.modalK m ω κ φ) := rfl
 
+/-- `a.push() += x` leaves two updates; the second reads the first's result. -/
+theorem Premise.fml_updates {Δ : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ') :
+    (Premise.updates U V).fml m ω κ φ = .upd m U (.upd m V (.modalK m ω κ φ)) := rfl
+
 theorem Premise.fml_unfold {Γ'' : Ctx} (P : Prog C Γ Γ'') (h : Ext Γ' Γ'') :
     (Premise.unfold P h).fml m ω κ φ = .modal m P (.pop .capture h (.seq ω κ)) φ := rfl
 
@@ -362,6 +376,14 @@ theorem Premise.fml_done (b : Bool) :
     (Premise.done (C := C) (Γ := Γ) (Γ' := Γ') b).fml m ω κ φ = if b then .tt else .ff := rfl
 
 end Equations
+
+/-- `sp.push() /= se` keeps the zero-divisor test outside both updates. -/
+theorem Premise.fml_guardedUpdates {Γ Δ Γ₁ Γ₀ : Ctx} (m : Modality)
+    (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀)
+    (c : Fml C Γ) (U : Upd C Γ Δ) (V : Upd C Δ Γ) :
+    (Premise.guardedUpdates c U V).fml m ω κ φ =
+      .and (.imp c (.upd m U (.upd m V (.modalK m ω κ φ))))
+        (.imp (.not c) (.modal m (.cons .revert ω) κ φ)) := rfl
 
 theorem Premise.fml_split {Γ Γ₁ Γ₀ Δ₁ Δ₂ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁)
     (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (b : BlockKind) (c c' : Fml C Γ) (P : Prog C Γ Δ₁)

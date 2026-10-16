@@ -3,23 +3,41 @@
 The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
-`1b4341a303`**: 323 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+`048a74de51`**: 345 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
 `KeyOrigin` (`.taclet t` or `.merged [t₁, …]`; a missing or misspelled row
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
-says every taclet is claimed or excused, never both
-(`claimedTaclets_count = 308`, `unclaimedTaclets_count = 15`). A rule that
-transcribes no taclet at the pin is a `LeanTaclet` (`leanTaclets`); there are nine,
-`functionCallArgCapture`, `tryCallDiamond`, `transferDiamond`, `whileUnwind`,
-`loopExit`, `whileInvariantBox`, `whileInvariantDiamond`, `whileClose` and
-`whileNoVariantDiamond`. A taclet may be claimed by two constructors (the
+says every taclet is claimed, architecturally excused, or a pending migration
+gap, in exactly one category (`claimedTaclets_count = 330`,
+`unclaimedTaclets_count = 15`, 0 pending). The pending-name list is empty;
+semantic and source-support gaps, including effectful call-receiver operands,
+remain tracked in `docs/solkey-migration.md`.
+The existing `LeanTaclet` layer (`leanTaclets`) has ten rules,
+`functionCallArgCapture`, `tryCallDiamond`, `transferDiamond`,
+`loopExit`, `whileClose`, `whileNoVariantDiamond`,
+`pushCompoundUnfoldReceiver`, `pushIncrementUnfoldReceiver`,
+`storageMemorySourceSave` and `pushMemorySourceCapture`.
+The two push-suffix rules capture a complex receiver; upstream's bare
+push receiver capture does not match that arithmetic target.
+The memory-source rules preserve internal snapshot assignments and capture
+complex memory paths; upstream's native memory push requires a memory variable.
+A taclet may be claimed by two constructors (the
 member reads by their `.length` rules, since KeY reads `sp.length` as the
 member `length`; `memoryFieldWrite`/`memoryIndexWriteArray` by the value and
 reference writes). What stays prose here is what a `KeyOrigin` cannot say:
 why a merge is a merge, and the symbol maps of the second half.
+
+The scoped reduction applies the existing data-structure read eliminator to
+demanded primitive `find` and `len` terms before later writes duplicate them.
+This schedules the same `Decide.lean` read clauses earlier; it adds no taclet
+or independent decision procedure. Each input must fit the shared 24,000-node
+and depth-12 bounds. Only literal results replace the read; symbolic or
+oversized inputs retain the original term for normalization under later
+hypotheses. `LTm.literalRead_eval` proves exact equality, including undefined
+reads, and `Tm.toL_drel` carries it through the scoped reduction.
 
 Legend (a row with several taclets or constructors lists them in one cell):
 
@@ -52,10 +70,11 @@ goal's update level and reads what it adds there: nothing to port.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `functionBodyExpand` | `functionBodyExpand` | same | a call with targets (`fbs`, `CallRet.isRets`: a tuple assignment's call, a specification obligation's `result = f(x̄)`, KeY's `FunctionBodyStatement`) carries its callee inlined (`Stmt.call`), closed over a frame of its own; with every argument simple the premise is KeY's `expand_function_body`, the targets the statements after it (`t = r;`, KeY's `function-frame{…} t0 = r0;` without the frame), and the frame ends with the expansion (`Premise.inline`: `functionFrameEmpty`, claimed merged). The parameters are positions in that frame (named by the elaborator's fresh names in the binders, `Args`/`CallRet`; `Syntax/Elab.lean`), so KeY's fresh renaming is done once, at elaboration; the returns start at their defaults (solc's), where KeY's `R ri;` leaves them unconstrained.  An unnamed return is `_ret` (one) or `_ret0`, `_ret1`, … (several), KeY's `ret0`, `ret1`, …; the solc import names them the same way (`Frontend/Import.lean`, `retNames`).  A deployment, `constructor(x̄);`, is one with no targets (`CallRet.rets []`, `elabCtor`): its body is the state variables' initializers (`x = e;`, in declaration order), then the constructor's modifiers and body, as solkey `a764703bf1`'s `ExpandFunctionBody` prepends them after the renaming |
-| `internalCallExpand` | `internalCallExpand` | same | any other call (`ic`: `f(a);`, `y = f(a);`, a memory return `T memory p = f(a);`, KeY's `InternalCall`, decision 19 of `docs/intrinsic.md`), same premise, frame end and soundness (`Stmt.sound_call`). **Lean only:** it also inlines a callee with modifiers (`wrapMods`), where KeY's `InternalCall` refuses one and leaves the call stuck; and it waits for simple arguments (`functionCallArgCapture`), where KeY's binds `T p = arg` as written. A bare call of a function of several returns declares them in its body (`CallRet.none`) |
+| `internalCallExpand` | `internalCallExpand` | same | any other call (`ic`: `f(a);`, `y = f(a);`, a memory return `T memory p = f(a);` or storage return `T storage p = f(a);`, KeY's `InternalCall`, decision 19 of `docs/intrinsic.md`), same premise, frame end and soundness (`Stmt.sound_call`). **Lean only:** it also inlines a callee with modifiers (`wrapMods`), where KeY's `InternalCall` refuses one and leaves the call stuck; and it waits for simple arguments (`functionCallArgCapture`), where KeY's binds `T p = arg` as written. A single storage return enters unset and exports its alias (`CallRet.storage`), as pinned `ExpandFunctionBody` preserves the return variable's data location; source binding follows the call, as for memory. The three native call-receiver capture taclets below retain the getter before its array operation; effectful operands still require deferred capture. A bare call of a function of several returns declares them in its body (`CallRet.none`) |
 | `blockReturn`, `functionFrameReturn` | — | unclaimed (architectural) | returns are lowered at elaboration (`lowerReturns`: a `return` in a block splices the block into the statements after it, which is `blockReturn`'s effect), so there is no `return` in `Stmt` to rewrite |
 | `functionFrameEmpty` | `functionBodyExpand`, `internalCallExpand` | merged | a call's body is a frame closed over its parameters and returns (`Stmt.call`, `Syntax/Scoped.lean`); the expansion's premise (`Premise.inline`) drops the frame under the return variables it exports once the body is done, which is `function-frame{} ⇝` with nothing printed (the frame's end is a `Thin`, `Calculus/Delab.lean`).  Claimed since the intrinsic refactor; the SolKey reader excuses the row, the pairing being one its shapes cannot see (decision 74) |
 | — | `LeanTaclet.functionCallArgCapture` | Lean only | `unfoldArgument`, which solkey's `docs/net.md` lists as missing: the leftmost non-simple argument is captured into a fresh `se` first, so that `Stmt.step` has one rule per call |
+| `expand_function_body` parameter declarations | `Args.snocStorage`, `Args.snocMemory`, `Args.declsThen` | same | reference formals retain their data location: storage paths bind aliases, memory paths bind identities, without allocation. The source elaborator's ordered preparation (`hoistCallArgs`) is Lean-only normalization; it emits ordinary reference declarations and storage-to-memory copy statements before the call. Pure value/path evaluations return or revert (`Semantics/RevertOnly.lean`), which justifies primitive capture past an earlier reference without changing failure priority. The SolKey program-rule fragment checks every argument's `keyValues`, including reference indices; the verified EVM fragment currently excludes reference arguments. |
 | `emptyModality` | `Proves.empty` (also `Proves.emptyModality`) | ⊢ rule | `⟨[ ]⟩ φ ⇝ φ` under either modality, as KeY's `#allmodal`; the proof tree prints the step under this name (`Calculus/ProofTree.lean`) |
 | `impRight` (`propRule.key`) | `Proves.intro` (also `Proves.impRight`) | ⊢ rule | `⟹ a → φ` becomes `a ⟹ φ` |
 | `allRight` (`firstOrderRules.key`) | `Proves.allIntro` (also `Proves.allRight`) | ⊢ rule | `⟹ ∀ T x; φ` becomes `∀ T x ⟹ φ`: the local holds any value of `T`, KeY's skolem constant (`Hyps.all`) |
@@ -73,6 +92,7 @@ goal's update level and reads what it adds there: nothing to port.
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `storageRootWriteStore`, `storageRootWriteCopySource`, `storageRootReadSelect` | same names | same | |
+| compatible fixed-array copy through `storageRootWriteCopySource` / `storageFieldWriteCopySource` and `pushStoreSource` | `LeanTaclet.storageFixedCopySave`, `LeanTaclet.pushFixedCopySave` | Lean-only typed adapters | `FixedCopy` changes only the outer shape: fixed to dynamic, or to a longer/equal fixed array, with the same mapping-free element type. `Op1.fixedCopy` preserves one snapshot; `FixedCopy.observe_apply`, `Src.lower_valueT` and `fixedCopyRd_rep` justify its lazy reader. The destination uses ordinary `save`/overlay. Missing source values retain their failure guard. KeY erases these outer types into `Struct`; the adapters are excluded from the native fragment and EVM compiler. Generic term printing preserves conversions by an exact Lean escape, including composed conversions; diagnostic terms print `fixedCopy(targetType, source)`. |
 | `storageFieldWriteSave`, `storageFieldWriteCopySource` | same names | same | |
 | `storageFieldReadBindLocalRoot`, `storageFieldReadStoreRoot` | same names | same | |
 | `storageFieldReadFind` | `storageFieldReadFind`, `storageLengthRead` | same | the second at the member `length`: `v = sp.length ⇝ { v := sp.length }`, the term `Term.len` (KeY's `find(storage, sp.size)`) |
@@ -108,11 +128,26 @@ argument.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
-| `storagePushValue_unfold_leftFstReceiver`, `storagePush_unfold_leftFstReceiver`, `storagePop_unfold_leftFstReceiver`, `storageLocalRootPush_unfold_leftFstReceiver`, `storagePushValue_unfold_rightSndArgument`, `storagePushValueSave`, `storagePushValueCopySource` | same names | same | |
+| `storagePushValue_unfold_leftFstReceiver`, `storagePush_unfold_leftFstReceiver`, `storagePop_unfold_leftFstReceiver`, `storageLocalRootPush_unfold_leftFstReceiver`, `storagePushValueSave` | same names | same | |
+| `storagePushValue_unfold_leftCallReceiver`, `storagePush_unfold_leftCallReceiver`, `storagePop_unfold_leftCallReceiver` | same names | same on typed sources | Retain `fc` until its native capture, evaluate the getter once, bind its returned alias, then push/pop. The value-push taclet covers both pure sources and scoped deferred prefixes; operand effects run after getter validation. `ProvesC.unfoldReceiver` preserves callbacks in the getter and prefix through exact capture correspondence. |
 | `storagePushLengthSave` | same | same | `parr.push()`: a primitive element, the slot cleared (`STerm.pushSlot`) |
-| `storagePushLengthSaveReferenceElement` | same | same | `rarr.push()`: a struct or array element, the recycled slot taken as it is (`STerm.extend`) |
+| `storagePushLengthSaveReferenceElement` | same | same | `rarr.push()`: a nonmapping reference element, the recycled slot reset before its length save (`STerm.pushSlot`) |
+| `storagePushLengthSaveMappingElement` | same | same | `marr.push()`: the length-only save (`STerm.extend`), mapping entries preserved |
+| `storagePushValueCopySource` | same | reference-copy case | Direct storage-reference copy requires both `sp1` and `sp2` simple, matching upstream's path conditions. Complex reference sources use the named capture below. |
+| `storagePushMemoryCopySource` | same | same | A simple receiver and memory variable use one update, with `copyMem(mtSt, memory, mv)` at the old length and the incremented length. The typed source is `Src.copyMem`; the receiver is resolved once. |
+| `pushMemorySourceCapture` | none | Lean-only | A complex memory source is bound to a memory local before the native copy. This extension is excluded from the SolKey fragment; it is not claimed as an upstream expression-capture taclet. |
+| `storageMemorySourceSave` | none | Lean-only | An embedded `Src.copyMem` storage assignment uses the existing save symbol directly. Ordinary Solidity memory-to-storage assignment still elaborates to `Stmt.assignFromMem` and its upstream rules. |
+| `storagePushValue_unfold_rightFstReferenceArgument` | same | same | `sp.push(nsp)` binds `T storage source = nsp` before copying through that alias. The alias names the source; the appended value is a deep copy, including when source and destination share an array. |
+| `storagePushValue_unfold_rightFstPrimitiveArgument` | same | same | `sp.push(nsp)` reads a complex primitive storage path into `T source` once before the push. |
+| `storagePushValue_unfold_rightSndArgument` | same | expression case | The general non-simple primitive-expression capture excludes direct complex storage reads, which use the preceding rule. Other arithmetic and memory reads retain the expression capture. |
+| `storagePushAddAssign`, `storagePushSubAssign`, `storagePushMulAssign` | same names | same | Typed numeric push compound assignments: reset and extend, then a sequential save of the appended primitive's arithmetic result. Kernel correspondence, typed text roundtrips and checked source statement elaboration are registered. Returned suffix values and unchecked push arithmetic remain unsupported. |
+| `storagePushDivAssign`, `storagePushModAssign` | same names | same | Outer nonzero guard; its true branch keeps the two updates and its false branch reverts. The sound false-branch simulation also permits interpreter capacity exhaustion. |
+| `storagePushPreincrement`, `storagePushPostincrement`, `storagePushPredecrement`, `storagePushPostdecrement` | same names | same | Discarded numeric increment/decrement statements: reset and extend, then update the appended slot. No returned prefix/postfix value is claimed. |
+| `addAssignValueRhsCapture`, `subAssignValueRhsCapture`, `mulAssignValueRhsCapture`, `divAssignValueRhsCapture`, `modAssignValueRhsCapture` | `pushCompoundAssignValueRhsCapture` | merged | These existing general RHS captures accept a push expression as their assignment target; this adds no upstream taclet name to the inventory. |
+| — | `LeanTaclet.pushCompoundUnfoldReceiver`, `LeanTaclet.pushIncrementUnfoldReceiver` | Lean only | Capture the receiver once after the compound assignment's RHS. Outside the SolKey fragment. |
 | `storageLocalRootPushBind`, `storageLocalRootPushBindMappingElement` | same names | same | `lsv = darr.push()` / `marr.push()` |
-| `storageLocalPrimitivePushBind` | same | deviation | `uint y = values.push();`, `y = values.push();` with `y` a value local (`Stmt.assignLocalPush`): the array grown as `storagePushLengthSave` grows it (`STerm.pushSlot`), and `y := defVal(T)`, the default the cleared slot holds, where KeY reads it back, `find(delAt(storage, sp[n]), sp[n])`: Lean's typed `delAt` has no reading at the slot past the end.  The receiver is simple by type (`hs`): solkey has no unfold for `y = nsp.push()`, so the elaborator refuses it.  The declaration form is two statements (`valueDeclSkip`, then this rule), where KeY fires `localValueDeclInitDrop` first |
+| `storageLocalPrimitivePushBind` | same | deviation | `uint y = values.push();`, `y = values.push();` with `y` a value local (`Stmt.assignLocalPush`): the array grown as `storagePushLengthSave` grows it (`STerm.pushSlot`), and `y := defVal(T)`, the default the cleared slot holds, where KeY reads it back, `find(delAt(storage, sp[n]), sp[n])`: Lean's typed `delAt` has no reading at the slot past the end. The receiver is simple at this rule; the calculus captures a complex receiver with the native rule below. The declaration form is two statements (`valueDeclSkip`, then this rule), where KeY fires `localValueDeclInitDrop` first |
+| `localValuePush_unfold_leftFstReceiver` | same | same | `v = nsp.push()` becomes `T storage sp = nsp; v = sp.push()` for a complex primitive-array receiver. `Stmt.assignLocalPush` retains the receiver; `assignLocalPushStep` chooses this capture or the disjoint simple-receiver update. |
 | `storagePopSave` | same | same | `darr.pop()`, both modalities: the element cleared into the recycled slots (`STerm.pop`) |
 | `storagePopSaveMappingElement` | same | same | `marr.pop()`: the element kept (`STerm.shrink`) |
 
@@ -147,7 +182,7 @@ one, and `push`/`pop` are written at `.array` only.
 | --- | --- | --- | --- |
 | `memoryReferenceDeclFreshAlloc` | same | same | `T memory mv; ⇝ { mv := freshId(addM(memory)) ‖ memory := addM(memory) }`, the pair KeY writes: `ITerm.alloc` and `MTerm.addM` agree on the minted root because both read the same pre-state |
 | `memoryArrayFreshAlloc` | same | same | `mv = new T(se); ⇝ { mv := freshId(copySt(memory, newArr(se))) ‖ memory := copySt(memory, newArr(se)) }`: Lean copies in `newArrVal R n` (defaults, each struct element its own object, as solc allocates) where KeY writes `size`; a non-simple size is captured by the elaborator |
-| `newArrayCapture` | same | same | `tgt = new T(se) ⇝ T memory mv = new T(se); tgt = mv`, `tgt` a storage or memory location (`NewLhs`) |
+| `newArrayCapture`, `newArrayCaptureStorageRoot` | `newArrayCapture` | merged | `tgt = new T(se) ⇝ T memory mv = new T(se); tgt = mv`, `tgt` a storage or memory location (`NewLhs`), including a storage root (`NewLhs.store (.root …)`). The shared replacement binds the same fresh memory local before copying it to either target. |
 | `memoryRootDeleteFreshRebind` | same | same | `delete mv; ⇝` the allocation pair (see "Memory delete") |
 | `memoryRootRebind` | same | same | `mv₁ = mv₂; ⇝ { mv₁ := mv₂ }`; a storage right-hand side is `memoryStorageCopy` |
 | `memoryStorageCopy` | same | same | `mv = sp;` deep copy: fresh identity plus `copySt` |
@@ -164,6 +199,7 @@ one, and `push`/`pop` are written at `.array` only.
 | `memoryIndexReadArrayValue` | same | same | KeY's `inBounds`/`outOfBounds` split is the read's own bounds check, which reverts |
 | `memoryIndexReadArrayMemory` | same | same | likewise |
 | `memoryFieldRead_unfold_rightFst` | `memoryFieldRead_unfold_rightFst`, `memoryLengthRead_unfold_rightFst` | same | |
+| `memoryFieldRead` at `size` | `Grown.lenId`, `CloseS.eval_mlen` | bridge | packages the existing `HRef.ofId?`/`Heap.lenU` length read with a heap-independent result type. `Landed.memT_lenId` and `push_memT_lenId` transport it across unchanged globals and local pushes; `Grown.lenId_ref` resolves an intrinsically valid identity. Invalid identities still fail. This repairs closer normalization, without a new taclet or a range assumption. |
 | `memoryIndexRead_unfold_rightFst`, `memoryIndexRead_unfold_rightSndIndex` | same names | same | |
 | `memoryFieldWrite_unfold_leftFst` | same | same | also claims the row below |
 | `memoryFieldWriteMemRef_unfold_leftFst` | `memoryFieldWrite_unfold_leftFst` | merged | `msrc` is a value or a memory reference, one rule for both |
@@ -236,6 +272,16 @@ node of an operator family as KeY's taclet at its operator
 | `ternaryToIfStorage` | `ternaryToIf` | merged | one rule for a local or storage target; a memory target is lowered the same way, a conditional never being a write's source (`Val.notTernary`) |
 
 ## Compound assignment
+
+The frozen upstream inventory has no native `addmod`/`mulmod` taclets.
+`LeanTaclet.addmodAssignment` and `LeanTaclet.mulmodAssignment` preserve the
+three typed operands in `Op3.modular`, using unbounded intermediate
+arithmetic (`ModOp.evalT`). Literal folding (`foldModular`) has a general
+evaluation-preservation proof, `foldModular_eval`; symbolic operands remain
+native terms. These are **Lean-only**, excluded recursively from
+`Stmt.inSolkey` even in initializers and path indices. They are outside the
+verified EVM compiler fragment. Their regression and imported proof are
+`Examples/Tactics/ModularArithmetic.lean` and `TestSuite/Derived18.lean`.
 
 Pattern per `⊕ ∈ {Add, Sub, Mul, Div, Mod}`; one constructor per receiver
 shape, `op` free. Mapping and array stay **separate** here, unlike increments.
@@ -314,16 +360,21 @@ receiver kind, Lean does not.
 
 ## Loops
 
-solkey's loop taclets were added in `ed7849d5b6`, after the pinned
-`1b4341a303`; `docs/loops.md`
-gives their shapes and the stages that port them.
+Solkey's loop taclets exist at the migration pin and are in the `Taclet` table.
+Their bounded unwinding, frame restrictions and typed variant are documented
+below; `docs/loops.md` gives the shapes and their soundness arguments.
+The supported invariant is a typed boolean expression, not an arbitrary
+quantified KeY formula, and the variant is a `uint`, rather than KeY's
+unbounded `int`. Conditions and specifications must be capture-free. These
+restrictions and the conservative frame prove fewer obligations; the port
+does not claim coverage of the wider upstream syntax.
 
 | KeY taclet | Lean | Status | Notes |
 | --- | --- | --- | --- |
-| `whileUnwind` | `LeanTaclet.whileUnwind` | bounded (past the pin) | `/// @custom:key unwind n + 1 while (cond) body` ⇝ `if (cond) { body; /// @custom:key unwind n while (cond) body; }`, KeY's `s#cond`, `s#body` as `cond`, `body`. solkey's strategy unwinds a loop with no specification without a bound; here the annotation counts the unwindings down (`LoopAnn.unwind`), so that symbolic execution ends. Sound by `Premise.sound_whileUnwind` (`TLoop.run_unfold`, `Calculus/SoundLoops.lean`). A `LeanTaclet` until the solkey pin moves past `ed7849d5b6`, then a `Taclet` |
+| `whileUnwind` | `Taclet.whileUnwind` | literal schema, bounded search | `while (cond) body` ⇝ `if (cond) { body; while (cond) body; }`, KeY's `s#cond`, `s#body` as `cond`, `body`. Unannotated loops use `LoopAnn.auto`; the one constructor's `LoopUnwind` mode also supports explicit bounds, decrementing `unwind n + 1` to `unwind n`. Sound by `Premise.sound_whileUnwind` (`TLoop.run_unfold`, `Calculus/SoundLoops.lean`). Annotations are proof-strategy metadata and do not change execution; exhausted search fails, while an exhausted explicit bound leaves an exit obligation. `sol_prove?` retains its discovered walk budget for replay |
 | — | `LeanTaclet.loopExit` | Lean only | a loop at its bound (`unwind 0`, the annotation of a loop with no clause): a check (`Premise.check`, `Proves.check`; walk: `apply checkLean r`), "loop exited" the rest with `cond = false` assumed, "unwound to the end" `cond = false` (`Fml.eqD`, so a condition that halts is not false). Sound by `Premise.sound_loopExit`. Not `assert(!cond)`, which would make running out of unwindings a panic of the program |
-| `whileInvariantBox` | `LeanTaclet.whileInvariantBox` | ported (past the pin) | `[ /// @custom:key invariant inv while (cond) body; ]` ⇝ "invariant initially valid": `inv = TRUE`; "invariant preserved and used": `{anon(body)} (inv = TRUE → { b := cond } (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩))`. KeY's `s#b` (`bType b = cond;`) is a fresh local (printed `se`), `#loopAnon` is `{anon(body)}` (`Fml.anonHavoc`: `{anon(xs)}` of the body's frame `Prog.frame`, with `{havoc}` when the body writes storage or pays). `TRUE` is `Fml.eqD` (defined and equal). Premise `Premise.inv`; in a walk the scoped `Proves.inv` (a `Proves` step by `Taclet.toStep`; `apply invBox r`, `apply invLean r` under the diamond), its goals `init`, and `thn`, `els` past the context's `{anon(body)}` (`Hyps.anonHavoc`): solkey's two goals. A condition, invariant or variant that needs a capture (a call, a cast, a narrow operation, a constructor, an `++`) is refused at elaboration (`loopExpr`), where solkey evaluates it per iteration. Sound by `Premise.sound_whileInvBox` (`Calculus/SoundLoops.lean`, `TLoop.run_induct`) |
-| `whileInvariantDiamond` | `LeanTaclet.whileInvariantDiamond` | ported (past the pin) | the box's premise with `{ variant := dec ‖ b := cond }` and the body's postcondition `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: KeY's skolem `variant` a fresh local (printed `ie`), the variant checked only where the condition holds again. Lean reads `dec` where KeY compares it, so it must be defined where the invariant holds; and under the diamond the cover (`b` is `TRUE` or `FALSE`, `Premise.inv`). Sound by `Premise.sound_whileInvDiamond` (`TLoop.run_variant`) |
+| `whileInvariantBox` | `Taclet.whileInvariantBox` | restricted port | `[ /// @custom:key invariant inv while (cond) body; ]` ⇝ "invariant initially valid": `inv = TRUE`; "invariant preserved and used": `{anon(body)} (inv = TRUE → { b := cond } (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩))`. KeY's `s#b` (`bType b = cond;`) is a fresh local (printed `se`), `#loopAnon` is `{anon(body)}` (`Fml.anonHavoc`: `{anon(xs)}` of the body's frame `Prog.frame`, with `{havoc}` when the body writes storage or pays). `TRUE` is `Fml.eqD` (defined and equal). Premise `Premise.inv`; in a walk the scoped `Proves.inv` (a `Proves` step by `Taclet.toStep`; `apply invBox r`, `apply invLean r` under the diamond), its goals `init`, and `thn`, `els` past the context's `{anon(body)}` (`Hyps.anonHavoc`): solkey's two goals. A condition, invariant or variant that needs a capture (a call, a cast, a narrow operation, a constructor, an `++`) is refused at elaboration (`loopExpr`), where solkey evaluates it per iteration. Sound by `Premise.sound_whileInvBox` (`Calculus/SoundLoops.lean`, `TLoop.run_induct`) |
+| `whileInvariantDiamond` | `Taclet.whileInvariantDiamond` | restricted port | the box's premise with `{ variant := dec ‖ b := cond }` and the body's postcondition `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: KeY's skolem `variant` a fresh local (printed `ie`), the variant checked only where the condition holds again. Lean reads `dec` where KeY compares it, so it must be defined where the invariant holds; and under the diamond the cover (`b` is `TRUE` or `FALSE`, `Premise.inv`). Sound by `Premise.sound_whileInvDiamond` (`TLoop.run_variant`) |
 | — | `LeanTaclet.whileClose` | Lean only | a loop with an invariant whose body has no frame (`Prog.frame`: it writes memory, pushes, pops, rebinds an alias or calls out), under either modality, closes to `false`: sound, and nothing about it is derived. solkey refuses only memory-writing bodies (and unwinds them); a push, a pop or a call it frames as writing storage and the ledger, so those refusals are Lean's own (`Stmt.within`) |
 | — | `LeanTaclet.whileNoVariantDiamond` | Lean only | a loop with an invariant and no `decreases` closes to `false` under the diamond (solkey unwinds it). `Stmt.inSolkey` is `false` on every loop |
 | `LoopLowering` (meta-construct) | `lowerLoops` (`Syntax/Elab.lean`) | elaborator | `break`/`continue`/`return` in a loop to the flags `brk`/`cnt`/`ret`, `for` and `do … while` to `while`, shape for shape |
@@ -389,7 +440,7 @@ diamond (`Hyps.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | `selectOnEmptyStorage` at a root and below it (a deployment's storage) | `CloseS.find_init_ofRoot`, `CloseS.find_init_append` (`Calculus/CloseFrame.lean`), `close_rw_s` | done (W9.8.4) | the typed empty storage (`Storage.init`) reads a root, and a path through no array slot below it (`Path.total`), at its type's default (`Storage.find_init_total`) |
 | — (an index checked at a mapping root; a checked index) | `CloseS.atT_map_root`, `CloseS.atT_bind` (`Calculus/CloseScoped.lean`), `close_rw_s` | Lean only (W9.8.4) | a key of a mapping at a root is always a slot (the check passes), so two reads of `balances[0]` name one reference; any other index is its check, then the slot's reference: the typed `Storage.atT` unfolded so the closer compares references |
 | `storeSt`/`selectSt` on the ledger (`netHeader.key`) | `Close.lookupBy_setBy_int` (`Calculus/CloseLemmas.lean`), `close_rw_s` | done | a ledger entry after a write: the written amount at that address, the old entry elsewhere, the entries KeY `int`s (`Srt.kint`) |
-| — (a push's room under the diamond) | `Upd.exhL`, `guardM` (`Calculus/DecideScoped.lean`), `Upd.exhL_sound`, `guardM_holds` (`Calculus/DecideTyped.lean`) | Lean only (W10.4) | a push at a full array is out of gas, which both modalities accept: under the diamond the update's guard is asked only where the array is not full (`fullL`), and what follows only where the update lands; the elimination's push asserts `len < 2^256 - 1` (`maxLen`). KeY's `int` lengths need no room |
+| — (a push's room under the diamond) | `Upd.exhL`, `guardM` (`Calculus/DecideScoped.lean`), `Upd.exhL_sound`, `guardM_holds` (`Calculus/DecideTyped.lean`) | Lean only (W10.4) | a push at a full array is out of gas, which both modalities accept: under the diamond the update's guard is asked only where the array is not full (`fullL`), and what follows only where the update lands; the elimination's push asserts `len < 2^256 - 1` (`maxLen`). The reader covers a single storage push and a storage push paired with a local binding; the latter retains the parallel RHS's returning guard (`pushLocalExhL`). Other multi-element shapes remain outside this shortcut. KeY's `int` lengths need no room |
 | `eqClose` | `Proves.eqRefl`; `Proves.eqClose` (`v ≐ v`), `Proves.eqDClose` (`v = v`); on two literals in a chain, `FmlRw.concrete` (`Fml.litCS`) | done | `t ≐ t` for any term, halting or not (`Fml.eq` compares `Tm.denote`s by `=`); `v ≐ w` for distinct literals folds to `false` |
 | `concrete_and_1-4`, `concrete_impl_1-4`, `concrete_not_2` | `FmlRw.concrete` (`Calculus/RewriteScoped.lean`, `Fml.concreteAlongS`) | done | on a chain's scoped line while the program is open: `true ∧ A ⇝ A`, `false → A ⇝ true`, `A → false ⇝ ¬A`, `¬false ⇝ true`, …, bottom-up through `¬`, `∧`, `→`, `false` being `¬true`; `concrete_not_1` (`¬true ⇝ false`) rewrites nothing |
 | `andRight` | `Proves.andSplit` | done | |
@@ -401,6 +452,18 @@ diamond (`Hyps.boxOnly`). A program comparison produces `Fml.eqD a b` —
 | the same, inside an update, on a chain's line past the program | `FmlRw.lawUpdS` (`Calculus/RewriteLaws.lean`) | done (W9.4), any modality | a term taclet (`TermTaclet`), a memory law (`EvalLaw`) or a literal law (`LitLaw`) at an update's right-hand sides, its two sides read at the update's scope (`LawPair`); exact where the update holds the write it reads back (`LawCov.covered`, `Upd.covers`; `LawCov.ref`, `Upd.coversRef`; `LawCov.eval`, `Upd.coversEval`) or member-wise (`LawCov.eqv`, `Tm.sameBase`) (`Calculus/TermLaws.lean`) |
 
 ### The closer's clauses (`Calculus/Closer.lean`)
+
+The scoped tactic closer also exposes `exLeft`/`andLeft` witnesses and
+conjunctions with checked single-branch eliminations (`sol_close_enrich`,
+`Calculus/CloseScoped.lean`). Equality substitution follows `applyEq`; goal
+introductions follow `allRight`. Anonymous dependent locals retain their
+intrinsic unsigned/signed ranges (`CloseS.uintRange`, `CloseS.intRange`),
+which are Lean type facts rather than new SolKey taclets. This fallback runs
+after the existing arithmetic closer. Each range scan inspects at most 8,192
+declarations/expression nodes and adds 128 facts; witness elimination inspects
+8,192 declarations across its scans and performs at most 128 eliminations.
+There are two range scans per fallback, and these inspection limits do not
+bound the cost of subsequent simplification or arithmetic.
 
 `sol_prove` closes a leaf inside one `Bool`: the reduction (`Fml.toLS`),
 the reads of writes eliminated (`LFml.elimF`), memory read
@@ -457,7 +520,7 @@ what the premises say (`LFml.elimF`, `Calculus/ElimFacts.lean`).
 | `selectOnSaveEmptyMap` below a key of a copy | `ovRS` at a key | subsumed | a mapping met in both keeps the target's entries; a well-typed program copies none, solc rejects it |
 | `selectOnSaveCons` on a `size` write, `selectOnDelAtCons` past the end (`storagePushValueSave`, `storagePopSave`) | `SFun.push` with `pushRd`, `SFun.pop` with `popRd`, `SFun.extend` with `extendRd` | subsumed | the symbolic `TVal.pushA`, `popA`, `extendA`: a read below the array compares its index with the old length, the pushed value (stripped, `stripRS`) there, the old element below it; a pop deletes the last element unless `keep`; the length one more or one less (`LTm.succK`, `predK`). `SFun.push_rep`, `SFun.pop_rep`, `SFun.extend_rep`, `pushRd_rep`, `popRd_rep`, `extendRd_rep`; the Theory's `Obs.findOnPushFrame`, `findOnPopFrame` |
 | `storageFieldWriteSave`, `storagePushValueSave` with `sp` a stale alias (bound before the storage last changed, dangling after a `pop`) | the alias's path, its index checked in the storage it was bound in (`pathAtIn`), then `SFun.save`/`SFun.push` at it | subsumed | KeY's `consr(sp, at(ie))` names a slot, checked only when `storageIndexReadArrayBindLocalRoot` bound it: the write is a plain `save` there.  The observations keep an array's slots past its live end (`SLoc.dangling`, `TVal.delR`), so no reader of its own is needed. `pathIdx_rep`, `SFun.save_rep` |
-| `storagePushLengthSaveReferenceElement` (`size ≠ at(n)`: the recycled slot is the old one) | `extendRd`, the slot past the end made live as it is | subsumed | a word's slot reset, a missing slot at its default (`TVal.extendA`); a push through a stale alias lands in the recycled array, its length read off the slot. `extendRd_rep` (`Storage.obs_pushPlace`) |
+| `storagePushLengthSaveReferenceElement`, `storagePushLengthSaveMappingElement` | `resetRd` for the resetting push, `extendRd` for the length-only mapping save | subsumed | the appended reference is reset in place (`TVal.resetA`), with mapping entries and fixed arity preserved; a missing slot starts at its default. Length-only generic terms preserve existing reference slots (`TVal.extendA`). `resetRd_rep`, `extendRd_rep`, `Storage.obs_pushPlace`, `Storage.obs_extendPlace` |
 | `selectStDelNodeIndexStruct`, its `iv ≥ size` branch | `delRS` at an index past the live end | subsumed | a `delete` keeps the slots past the end (`TVal.delR`). `delRS_rep` |
 | `selectOnSaveEmptyIndexStruct`, branches 2 and 3, under the folded copy of `storageRootWriteCopySource` or `storageFieldWriteCopySource` | `ovRS` at an index | subsumed | below the new length the new element, past it and below the old length the old element deleted, past both the old slot (`TVal.ovR`). `ovRS_rep` |
 | — (Lean only: KeY's `save` and `delAt` are total, the interpreter's halt) | `SFun.ok`, the guard of each storage operation | Lean only | a write returns where the storage below does, its path and value return and the location is there (the `has` observation); a push where the array is not full (`maxLen`); an index checked where it is a key or below the length (`boundG`). `SFun.save_rep` (`Storage.write_isSome`), `SFun.push_rep` (`Storage.push_isSome`) |
@@ -490,6 +553,8 @@ names"), with the lemma it restates.  A name is an identity term: KeY's
 | `readOnAddM` `\else` | the `.addM` arms: an address whose object is older than the allocation (`LTm.boundedIn`: allocated on the spine below it, or read out of a memory there) reads below | `LTm.read_addM_old`, `LTm.iread_addM_old`, `LTm.boundedIn_eval` | `Grown.readOnAddMFrame` (`Grown.read_then_old`, `SVal.keeps_copyStToM`) | used |
 | `readOnAddM` `\then`, `initMember`, `defaultValueInt`, `defaultValueBool` | `memReadN`, `.addM` arm: an address at a member path of the fresh root (`LTm.freshPath?`, `Ty.memberTy`) of a primitive type reads its default (`PrimTy.dflt`) | `LTm.read_addM_fresh`, `LTm.freshPath_eval` | `Heap.initMember` | used |
 | `initElement` | the same, at a literal index of a fixed-size array (`Op2.freshStepL`) | `LTm.read_addM_fresh` | — | used |
+| `memoryArrayFreshAlloc`, `initElement`, `selectOnCopyMemPrim` | `copyNewArrayRd?`, the `.copySt` word-read arm: the same fresh primitive array copy reads a default exactly when its index is below the allocated size | `copyNewArrayRd?_eval`, `memReadN_eval` | `newArrT_copy_prim_index`, `SVec.copyStToM_prim_defaults` | used composition; typed absence beyond the size is retained; reference-element copies remain open |
+| `memoryArrayFreshAlloc`, `initElement`, `initMember`, `initSize` | `newArrArrayRd`, `newArrRd`: a fresh array value has its written length and typed default elements | `newArrRd_rep`, `newArr_rep` | `newArrT_find_at` | used composition in the typed storage-value reader; preserves allocation definedness and absent elements |
 | `initSize`, `sizeOfDyn` | `lenAtN`, `.addM` arm: a fresh dynamic array's length is `0` | `lenAtN_eval` (`Heap.allocDefault_array_len`) | `Heap.initSize` | used |
 | `sizeOfFixed` | none: a fixed-size array's length is its type's `n` (`lenCond`) | `lenCond_iff` | — | subsumed |
 | `sizeOfLeaf` | none: no well-typed program reads the length of a struct or a primitive | — | — | unreached |

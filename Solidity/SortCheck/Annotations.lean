@@ -5,9 +5,11 @@ import Solidity.AST
 
 A machine-checked transcription of the *read-sort annotations* carried
 by the read-bearing taclets of solkey's `solidityProgramRules.key`
-(transcribed at solkey commit `f2eb3d98eb`, re-checked at `c166991551`: 324
-taclets, 120 of them read-bearing, one row each; the two `try` taclets read
-nothing). The sort-relevant history is
+(initially transcribed at solkey commit `f2eb3d98eb`). The migration target
+`048a74de51` has 345 program taclets, 131 read-bearing. This table
+contains all 131 read-bearing rows. Annotation coverage alone does not
+establish native taclet correspondence. The two `try` taclets read nothing.
+The sort-relevant history is
 `12e72a1b4b` "removed find<int> to be more generic", `52c9c2477a`
 "removed valAt", `0f9b99ad55` "removed different fields" (which
 dropped the `Field[primitive]`/`Field[reference]` schema sorts in favour
@@ -257,20 +259,47 @@ def tacletReadAnns : List TacletReadAnn :=
     { keyName := "memoryToStorageIndexArrayCopyRoot"
       reads := [slen, slen] },
     -- Push / pop.
+    -- Native primitive push suffixes: two old-size reads in append/reset,
+    -- two new-size reads addressing the appended slot, and its numeric value.
+    { keyName := "storagePushAddAssign"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushSubAssign"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushMulAssign"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushDivAssign"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushModAssign"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushPreincrement"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushPostincrement"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushPredecrement"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+    { keyName := "storagePushPostdecrement"
+      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushValueSave"
       reads := [slen, slen] },
     { keyName := "storagePushValueCopySource"
       -- Sort-free since `29c44e225b`; the second former `find<[Struct]>`
       -- open finding (see `storageFieldWriteCopySource`).
       reads := [slen, sread .value (.fixed .stValue), slen] },
+    { keyName := "storagePushMemoryCopySource"
+      -- The appended index and new length each read the old array size.
+      -- `copyMem` itself is not a sorted read token in this taclet.
+      reads := [slen, slen] },
     { keyName := "storagePushLengthSave"
       reads := [slen, slen] },
     { keyName := "storagePushLengthSaveReferenceElement"
+      reads := [slen, slen] },
+    { keyName := "storagePushLengthSaveMappingElement"
       reads := [slen] },
     { keyName := "storageLocalRootPushBind"
-      reads := [slen, slen] },
+      reads := [slen, slen, slen] },
     { keyName := "storageLocalPrimitivePushBind"
-      reads := [slen, slen, sread .value (.generic .hasElementSort)] },
+      -- The value read's storage argument itself resets/appends the slot.
+      reads := [slen, slen, sread .value (.generic .hasElementSort), slen, slen] },
     { keyName := "storageLocalRootPushBindMappingElement"
       reads := [slen, slen] },
     { keyName := "storagePopSave"
@@ -385,7 +414,7 @@ def preFixTacletReadAnns : List TacletReadAnn :=
 -- Taclet names must be unique, and the table has one row per
 -- read-bearing taclet of the pinned file.
 #guard (tacletReadAnns.map (·.keyName)).Nodup
-#guard tacletReadAnns.length = 120
+#guard tacletReadAnns.length = 131
 
 end TacletAnnotations
 end Solidity

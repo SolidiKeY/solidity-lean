@@ -1,8 +1,8 @@
 {
  "header": {
   "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
-  "sourceSha256": "cbb78e2ae10f7d2b23d45786fd3d487ca195fcdb24ca995c626b990cb72e0591",
-  "solkeyCommit": "unknown",
+  "sourceSha256": "c899d4782436f7db5b85b5c28193a0073f6a9d01bfd236e903a3a8d49cc37cc0",
+  "solkeyCommit": "048a74de51a7cfb2cf497a043658424098f91e8e",
   "source": "tests/solc/CtorGap.sol"
  },
  "ast": {
@@ -18,8 +18,9 @@
     "nodeType": "PragmaDirective"
    },
    {
+    "canonicalName": "CtorGap",
     "contractKind": "contract",
-    "id": 40,
+    "id": 41,
     "name": "CtorGap",
     "nodeType": "ContractDefinition",
     "nodes": [
@@ -29,7 +30,7 @@
       "mutability": "mutable",
       "name": "limit",
       "nodeType": "VariableDeclaration",
-      "src": "236:14:0",
+      "src": "235:14:0",
       "line": 7,
       "stateVariable": true,
       "storageLocation": "default",
@@ -59,7 +60,7 @@
       "mutability": "mutable",
       "name": "count",
       "nodeType": "VariableDeclaration",
-      "src": "256:10:0",
+      "src": "255:10:0",
       "line": 8,
       "stateVariable": true,
       "storageLocation": "default",
@@ -79,10 +80,11 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"arguments":[{"leftExpression":{"name":"x","nodeType":"Identifier","referencedDeclaration":8,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":">","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"309:14:0","line":11},
-        {"nodeType":"PlaceholderStatement","src":"333:1:0","line":12}
+        {"expression":{"arguments":[{"leftExpression":{"name":"x","nodeType":"Identifier","referencedDeclaration":8,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":">","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"require","nodeType":"Identifier","referencedDeclaration":-18,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"308:14:0","line":11},
+        {"nodeType":"PlaceholderStatement","src":"332:1:0","line":12}
        ]
       },
+      "id": 18,
       "name": "positive",
       "nodeType": "ModifierDefinition",
       "parameters": {
@@ -94,7 +96,7 @@
          "mutability": "mutable",
          "name": "x",
          "nodeType": "VariableDeclaration",
-         "src": "291:6:0",
+         "src": "290:6:0",
          "line": 10,
          "stateVariable": false,
          "storageLocation": "default",
@@ -112,16 +114,19 @@
         }
        ]
       },
+      "src": "272:68:0",
+      "line": 10,
       "visibility": "internal"
      },
      {
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"count","nodeType":"Identifier","referencedDeclaration":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"name":"start","nodeType":"Identifier","referencedDeclaration":20,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"397:13:0","line":16}
+        {"AST":{"nativeSrc":"405:2:0","nodeType":"YulBlock","statements":[]},"evmVersion":"osaka","externalReferences":[],"nodeType":"InlineAssembly","src":"396:11:0","line":16},
+        {"expression":{"leftHandSide":{"name":"count","nodeType":"Identifier","referencedDeclaration":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"name":"start","nodeType":"Identifier","referencedDeclaration":20,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"416:13:0","line":17}
        ]
       },
-      "id": 31,
+      "id": 32,
       "kind": "constructor",
       "modifiers": [
        {
@@ -155,7 +160,7 @@
          "mutability": "mutable",
          "name": "start",
          "nodeType": "VariableDeclaration",
-         "src": "359:10:0",
+         "src": "358:10:0",
          "line": 15,
          "stateVariable": false,
          "storageLocation": "default",
@@ -177,7 +182,7 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "347:70:0",
+      "src": "346:90:0",
       "line": 15,
       "stateMutability": "nonpayable",
       "visibility": "public"
@@ -186,10 +191,10 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"name":"count","nodeType":"Identifier","referencedDeclaration":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"475:12:0","line":20}
+        {"expression":{"name":"count","nodeType":"Identifier","referencedDeclaration":6,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"494:12:0","line":21}
        ]
       },
-      "id": 39,
+      "id": 40,
       "kind": "function",
       "name": "get",
       "nodeType": "FunctionDefinition",
@@ -202,12 +207,12 @@
        "parameters": [
         {
          "constant": false,
-         "id": 34,
+         "id": 35,
          "mutability": "mutable",
          "name": "",
          "nodeType": "VariableDeclaration",
-         "src": "459:4:0",
-         "line": 19,
+         "src": "478:4:0",
+         "line": 20,
          "stateVariable": false,
          "storageLocation": "default",
          "typeDescriptions": {
@@ -224,13 +229,13 @@
         }
        ]
       },
-      "src": "423:71:0",
-      "line": 19,
+      "src": "442:71:0",
+      "line": 20,
       "stateMutability": "view",
       "visibility": "public"
      }
     ],
-    "src": "213:283:0",
+    "src": "212:303:0",
     "line": 6
    }
   ]

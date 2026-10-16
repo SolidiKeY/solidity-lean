@@ -65,7 +65,7 @@ private def iteLt : Stmt SE [.val .uint] [.val .uint] :=
 #guard_msgs in #rule_of .box (Stmt.block (C := SE) (Γ := []) .nil)
 /-- info: Solidity.LeanTaclet.loopExit -/
 #guard_msgs in #rule_of .box (Stmt.loop (C := SE) (Γ := []) (.unwind 0) (.simple (.bool true)) .nil)
-/-- info: Solidity.LeanTaclet.whileUnwind -/
+/-- info: Solidity.Taclet.whileUnwind -/
 #guard_msgs in #rule_of .box (Stmt.loop (C := SE) (Γ := []) (.unwind 2) (.simple (.bool true)) .nil)
 
 /-! The axioms `Rule.premise_unique` (and so every `toStep` lemma) uses. -/

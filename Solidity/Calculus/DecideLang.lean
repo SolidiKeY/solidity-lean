@@ -397,6 +397,7 @@ partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
     | @Op1.mfield _ _ f _ _ => s!"{x.ppWith nm}.{f}"
     | @Op1.fieldIn _ _ _ f _ _ => s!"{x.ppWith nm}.{f}"
     | .sval | .mval | .ref => x.ppWith nm
+    | @Op1.fixedCopy _ _ _ R _ => s!"fixedCopy({(Ty.ref R).toStr}, {x.ppWith nm})"
     | .next => s!"next({x.ppWith nm})"
     | .toInt => s!"toInt({x.ppWith nm})"
     | .net => s!"net({x.ppWith nm})"
@@ -438,6 +439,7 @@ partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
     | .atIn _ => s!"{y.ppWith nm}[{z.ppWith nm}]"
     | .write => s!"write({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
     | .saveIn => s!"save({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
+    | .modular op => s!"{op.toStr}({x.ppWith nm}, {y.ppWith nm}, {z.ppWith nm})"
   | .index _ q i => s!"{q.ppWith nm}[{i.ppWith nm}]"
   | .obsW q => s!"find(storage, {q.ppWith nm})"
   | .obsL q => s!"find(storage, {q.ppWith nm}.length)"

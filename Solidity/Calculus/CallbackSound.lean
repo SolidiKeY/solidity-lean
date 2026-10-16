@@ -2,6 +2,7 @@ import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.Sound
 import Solidity.Calculus.UpdateRules
+import Solidity.Semantics.NativeDeferredCallback
 
 /-!
 # The calculus with callbacks is sound
@@ -223,6 +224,50 @@ theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = fal
       · exact hx
       · exact (Upd.afterT.of_noExh h (Upd.globT_none_of_applyV (hd rfl hx).1) (hd rfl hx).2).elim
 
+/-- Two sequential updates, such as the append then save in
+`a.push() += x`, preserve the callback reading of the continuation. -/
+theorem holdsC_updates {Δ : Ctx} {s : Stmt C Γ Γ'} {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+    (hs : s.forks = false) (hr : Premise.Runs m s (.updates U V) σ)
+    (h : holdsC I σ (.upd m U (.upd m V (Fml.modalK m ω κ φ)))) :
+    holdsC I σ (.modal m (.cons s ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  rw [ExecS.det_inv he hs]
+  cases ht : s.run σ with
+  | ok o =>
+    have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
+    exact COut.after_seq (holdsC_modalK o.st ω κ φ
+      (Upd.afterT_pair_of_lands h (hr.1 _ hst)))
+  | error e =>
+    have hst : Stmt.runSt σ s = .error e := by simp only [Stmt.runSt, ht]; rfl
+    obtain ⟨hp, hd⟩ := hr.2 e hst
+    refine ⟨?_, hp⟩
+    cases m with
+    | box => trivial
+    | diamond =>
+      show e = .exhausted
+      by_cases hx : e = .exhausted
+      · exact hx
+      · exact (Upd.afterT_pair_noHalt h (hd rfl hx)).elim
+
+/-- The outer zero-divisor test of `sp.push() /= se` reads no callbacks;
+the successful branch keeps the two updates in order before its continuation. -/
+theorem holdsC_guardedUpdates {Γ Δ Γ₁ Γ₀ : Ctx} {I : Fml C []} {m : Modality}
+    {σ : State C Γ} {s : Stmt C Γ Γ} {c : Fml C Γ}
+    {U : Upd C Γ Δ} {V : Upd C Δ Γ} {ω : Prog C Γ Γ₁}
+    {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (hs : s.forks = false) (hr : Premise.Runs m s (.guardedUpdates c U V) σ)
+    (h : holdsC I σ ((Premise.guardedUpdates c U V).fml m ω κ φ)) :
+    holdsC I σ (.modal m (.cons s ω) κ φ) := by
+  by_cases hc : holds σ c
+  · exact holdsC_updates (U := U) (V := V) hs (hr.2.1 hc)
+      (h.1 ((holdsC_iff_holds c hr.1 σ).2 hc))
+  · have hn : holdsC I σ (.not c) := fun hh => hc ((holdsC_iff_holds c hr.1 σ).1 hh)
+    have he := h.2 hn
+    refine holdsC_cons fun o₁ hex => ?_
+    rw [ExecS.det_inv hex hs]
+    refine COut.thenF_of_sim (r := (.error .revert : TRes (Out C σ.H Γ))) (hr.2.2 hc) ?_
+    exact he (.halt .revert) (.halt (.det rfl))
+
 /-- **A block that pays nothing, with callbacks.** -/
 theorem holdsC_unfold {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e : Ext Γ' Γ''}
     (hs : s.forks = false) (hP : Prog.hasTransfer P = false)
@@ -239,6 +284,18 @@ theorem holdsC_unfold {Γ'' : Ctx} {s : Stmt C Γ Γ'} {P : Prog C Γ Γ''} {e :
     simp only [Prog.runSt]; cases Prog.run σ P <;> rfl
   rw [e₁]
   exact hr
+
+/-- Capturing `f()` before `e` preserves `f().push(e)` even when either calls back. -/
+theorem holdsC_unfoldReceiver {ps Γf Γv : Ctx} {E : Ty} {f : Name}
+    {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+    {code : Prog C Γ Γv} {value : Src C Γv E} {k : Nat}
+    {ω : Prog C Γ Γ₁}
+    (h : holdsC I σ (.modal m (callReceiverPushCapture k f args r body code value)
+      (.pop .capture (.push (.push .refl)) (.seq ω κ)) φ)) :
+    holdsC I σ (.modal m (.cons (.callReceiverPush f args r body code value) ω) κ φ) := by
+  refine holdsC_cons fun o he => ?_
+  obtain ⟨u, hu, rfl⟩ := (NativeDeferred.capture_iff k f args r body code value).mpr he
+  exact COut.thenF_drop _ (h _ hu)
 
 /-- **A hidden binder over a program that pays nothing, with callbacks.** -/
 theorem holdsC_bind {s : Stmt C Γ Γ'} {x : Var} {t : LTy} {P : Prog C (t :: Γ) Γ'}
@@ -457,9 +514,18 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   | update d hs _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_update hs
       (Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)
+  | updates d hs _ ih =>
+    exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_updates hs
+      (Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)
+  | guardedUpdates d hs _ _ ihT ihE =>
+    refine fun σ => Hyps.wrapC_and _ ?_ σ (ihT σ) (ihE σ)
+    exact fun τ a b => holdsC_guardedUpdates hs (Stmt.runs _ _ _ _ d.toStep τ)
+      (holdsC_and_intro a b)
   | unfold d hs hP _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_unfold hs hP
       (Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)
+  | unfoldReceiver _ _ ih =>
+    exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_unfoldReceiver h) σ (ih σ)
   | bind d hs hP _ ih =>
     exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_bind hs hP
       (Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)

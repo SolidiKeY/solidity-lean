@@ -77,8 +77,7 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
     (opAssign := fun op hop hp l r => opStep k op hop hp l r)
     (incDec := fun op hp l => incStep k op hp l)
     (assignIncDec := fun i op hp l _ => assignIncStep i op hp l)
-    -- storageLocalPrimitivePushBind
-    (assignLocalPush := fun i b _ => .update (Upd.pushBindPrim i b))
+    (assignLocalPush := fun i b => assignLocalPushStep k i b)
     (push := fun b v hd => pushStep k b v hd) (pop := fun b => popStep k b)
     (transfer := fun r a => transferStep k m r a) (send := fun pv r a => sendStep k m pv r a)
     -- memoryReferenceDeclFreshAlloc, memoryLocalDeclInitDrop
@@ -104,6 +103,11 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
     (loop := fun a c body => loopStep k m a c body)
     -- a block is its statements, its locals popped after it
     (block := fun body => .unfold body body.ext)
+    (pushOpAssign := fun op hop hp b r => pushOpStep k op hop hp b r)
+    (pushIncDec := fun op hp b => pushIncStep k op hp b)
+    (callReceiver := fun f args r body op => callReceiverStep k f args r body op)
+    (callReceiverPush := fun f args r body code value =>
+      ReceiverValue.step k f args r body (.deferred code value))
 
 /-! ## Fresh names: one above every index in the formula -/
 
@@ -120,7 +124,7 @@ def Stmt.maxIdx : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
     (assign := fun _ _ => 0) (rebind := fun _ _ => 0) (assignLocal := fun _ _ => 0)
     (declLocal := fun _ x _ => x.idx) (declStorage := fun _ x _ => x.idx)
     (opAssign := fun _ _ _ _ _ => 0) (incDec := fun _ _ _ => 0)
-    (assignIncDec := fun _ _ _ _ _ => 0) (assignLocalPush := fun _ _ _ => 0)
+    (assignIncDec := fun _ _ _ _ _ => 0) (assignLocalPush := fun _ _ => 0)
     (push := fun _ _ _ => 0) (pop := fun _ => 0)
     (transfer := fun _ _ => 0) (send := fun _ _ _ => 0)
     (declMem := fun _ x _ _ _ => x.idx) (rebindMem := fun _ _ => 0)
@@ -134,6 +138,12 @@ def Stmt.maxIdx : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
       max (max (max rets.maxIdx ((code.names).foldl (fun n x => max n x.idx) 0))
         (max (Prog.maxIdx ok) (Prog.maxIdx err))) (max (Prog.maxIdx pnc) (Prog.maxIdx other)))
     (loop := fun _ _ body => Prog.maxIdx body) (block := fun body => Prog.maxIdx body)
+    (pushOpAssign := fun _ _ _ _ _ => 0) (pushIncDec := fun _ _ _ => 0)
+    (callReceiver := fun _ args r body _ =>
+      max r.idx (max ((args.names).foldl (fun n x => max n x.idx) 0) (Prog.maxIdx body)))
+    (callReceiverPush := fun _ args r body code _ =>
+      max r.idx (max ((args.names).foldl (fun n x => max n x.idx) 0)
+        (max (Prog.maxIdx body) (Prog.maxIdx code))))
   termination_by structural _ _ s => s
 
 /-- The largest index of a name a block binds. -/
@@ -170,8 +180,24 @@ def Fml.maxIdx : {Γ : Ctx} → Fml C Γ → Nat
     (bind := fun _ x _ φ => max x.idx (Fml.maxIdx φ)) (anon := fun _ φ => Fml.maxIdx φ)
   termination_by structural _ φ => φ
 
-/-- The index of the next fresh names. -/
-def Fml.fresh {Γ : Ctx} (φ : Fml C Γ) : Nat := φ.maxIdx + 1
+/-- Roots at the calculus's fresh prefixes, such as `source9`, reserve their
+numeric suffix: a printed capture must not hide a root when read back.
+Ordinary numbered roots such as `flag2` do not change the capture indices.
+Custom display prefixes must be chosen to avoid roots; `FreshNames.clashes`
+checks the explicit aliases in display tables. -/
+def Contract.rootMaxIdx (C : Contract) : Nat :=
+  C.vars.foldl (fun n r =>
+    let chars := r.1.toList
+    let stem := chars.takeWhile (!·.isDigit)
+    if !(["se", "sp", "ie", "mv", "brk", "cnt", "ret", "first", "source"].any
+        (fun pre => pre.toList == stem)) then n else
+      let digits := chars.dropWhile (!·.isDigit)
+      let idx := if digits.isEmpty || !digits.all Char.isDigit then 0
+        else digits.foldl (fun acc c => acc * 10 + (c.toNat - '0'.toNat)) 0
+      max n idx) 0
+
+/-- The next fresh index is above the formula's binders and named roots. -/
+def Fml.fresh {Γ : Ctx} (φ : Fml C Γ) : Nat := max φ.maxIdx C.rootMaxIdx + 1
 
 end Fresh
 

@@ -1,0 +1,23 @@
+{
+  "mode": "audit-with-focused-retries",
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "completedSources": 112,
+  "totalSources": 112,
+  "results": {
+    "internal": 234,
+    "proved": 1079,
+    "excluded": 3,
+    "skipped": 27,
+    "pending": 176,
+    "unsupported": 243,
+    "error": 29,
+    "compileRejected": 13,
+    "notRun": 4
+  },
+  "originalAuditErrors": 17,
+  "supplementaryErrors": 5,
+  "retryTargets": 87,
+  "retryResults": 87,
+  "missingRetryRows": [],
+  "note": "Function-at-a-time retries replace only original notRun rows in these summary counts. Original uniform audit, errors and strict comparison are preserved; this summary is not a passing comparison report."
+}

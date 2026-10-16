@@ -300,6 +300,11 @@ def Val.evalT (σ : State C Γ) : {p : PrimTy} → Val C Γ p → TRes p.Denote
   | _, .mlen b hp => do
     let r ← b.mvalT σ
     pure (hp ▸ σ.heap.lenU r)
+  | _, .modular op a b k => do
+    let x ← a.evalT σ
+    let y ← b.evalT σ
+    let m ← k.evalT σ
+    TRes.ofOpt (op.evalT x y m)
 
 end
 
@@ -309,6 +314,12 @@ def Src.valueT (σ : State C Γ) {T : Ty} : Src C Γ T → TRes (SVal T)
   | .copy p _ => do
     let r ← p.resolveT σ
     TRes.ofOpt (σ.storage.find r)
+  | .fixedCopy p shape _ => do
+    let r ← p.resolveT σ
+    let v ← TRes.ofOpt (σ.storage.find r)
+    pure (shape.apply v)
+  | .copyMem p => do
+    pure (MVal.copyMToSt σ.heap (← p.mvalT σ))
 
 /-- The slot a memory source writes. -/
 def MSrc.mvalT (σ : State C Γ) {T : Ty} : MSrc C Γ T → TRes (MVal σ.H T)
@@ -415,6 +426,14 @@ def Args.evalT (σ : State C Γ) : {ps : Ctx} → Args C Γ ps → TRes (TEnv C 
         let r ← Args.evalT σ as
         let v ← e.evalT σ
         pure (v, r))
+      (fun as _ _ e => do
+        let r ← Args.evalT σ as
+        let v ← e.resolveT σ
+        pure (some v, r))
+      (fun as _ _ e => do
+        let r ← Args.evalT σ as
+        let v ← e.mvalT σ
+        pure (some v, r))
   termination_by structural _ as => as
 
 end Eval
@@ -459,6 +478,7 @@ def CallRet.enterT {Γ : Ctx} {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {ps : Ctx
     (fun R _ _ hm =>
       let g := τ.allocDefaultG R hm
       ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩)
+    (fun R _ => ⟨τ.push (t := .alias R) Option.none, List.prefix_refl _⟩)
 
 /-- Leaving a call: the caller's locals `e`, with what the call leaves them. -/
 def CallRet.leaveT {H : HTy} {Γ : Ctx} (e : TEnv C H Γ) {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') :
@@ -470,6 +490,7 @@ def CallRet.leaveT {H : HTy} {Γ : Ctx} (e : TEnv C H Γ) {rs Γ' : Ctx} (ret : 
       | .none => e)
     (fun {rs} _ r => TEnv.append rs r e)
     (fun _ _ _ _ r => (r.1, e))
+    (fun _ _ r => (r.1, e))
 
 /-! ## Loops
 
@@ -611,6 +632,25 @@ def assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (
   let o ← TRun.push b none σ
   pure ⟨o.st.setLocal i (PrimTy.dflt p), o.ext⟩
 
+/-- `values.push() += e`: RHS first, receiver once, then reset/append and
+checked arithmetic. Capacity exhaustion precedes arithmetic failure. -/
+def pushOpAssign {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
+    (rhs : Val C Γ p) : TStep C Γ Γ := fun σ => do
+  let value ← rhs.evalT σ
+  let ref ← b.resolveT σ
+  if σ.storage.full ref then .error .exhausted else
+  let (st, index) ← TRes.ofOpt (σ.storage.pushPlace ref)
+  opStoreT (σ.withStorage st) op (ref.index (.arr .dyn) index) value
+
+/-- `++values.push()` and `values.push()++` as statements: append/reset,
+then bump the new slot; the prefix/postfix value is discarded. -/
+def pushIncDec {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p))) :
+    TStep C Γ Γ := fun σ => do
+  let ref ← b.resolveT σ
+  if σ.storage.full ref then .error .exhausted else
+  let (st, index) ← TRes.ofOpt (σ.storage.pushPlace ref)
+  pure (← bumpStoreT (σ.withStorage st) op (ref.index (.arr .dyn) index)).1
+
 def pop {E : Ty} (b : SPath C Γ (.array E)) : TStep C Γ Γ := fun σ => do
   let ref ← b.resolveT σ
   let st ← TRes.ofOpt (σ.storage.pop E.isMapping ref)
@@ -717,6 +757,47 @@ def call {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
   pure ⟨o.st.withEnv
     (ret.leaveT (TEnv.wk e Γ σ.env) (TEnv.take rs (TEnv.drop hb o.st.env))), e⟩
 
+/-- The array operation at its already resolved receiver alias. -/
+def receiverOp {E : Ty} (op : ReceiverOp C Γ E) (b : SPath C Γ (.array E)) : TStep C Γ Γ :=
+  match op with
+  | .push v _ => push b v
+  | .pop => pop b
+
+/-- A storage-returning receiver runs once, before its array operation reads
+the source. The temporary return alias is dropped afterwards. -/
+def callReceiver {ps Γf : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (h : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E) :
+    TStep C Γ Γ := fun σ => do
+  let o ← call args (.storage (.array E) r) h body σ
+  let o' ← receiverOp (op.wk (.drop .refl)) (.alias .here) o.st
+  pure ⟨o'.st.drop (.push .refl), o.ext.trans o'.ext⟩
+
+/-- Complete a deferred operand at its already validated receiver; its temporary
+locals end after the source has been read and copied. -/
+def pushAfterPrefix {Γv : Ctx} {E : Ty} (h : Ext Γ Γv) (code : TStep C Γ Γv)
+    (value : Src C Γv E) (ref : SRef C (.ref (.array E))) : TStep C Γ Γ := fun σ => do
+  let a ← code σ
+  let v ← value.valueT a.st
+  if a.st.storage.full ref then .error .exhausted else
+  let st ← TRes.ofOpt (a.st.storage.push ref fun _ => some v.strip)
+  pure ⟨(a.st.withStorage st).drop h, a.ext⟩
+
+/-- Validate a getter result before any deferred operand effect runs. -/
+def afterReceiverPrefix {Γv : Ctx} {E : Ty} (he : Ext Γ Γv) (code : TStep C Γ Γv)
+    (value : Src C Γv E) : TStep C (.alias (.array E) :: Γ) Γ := fun σ => do
+  let ref ← SPath.resolveT σ (.alias .here)
+  pushAfterPrefix he code value ref (σ.drop (.push .refl))
+
+/-- `f().push(e)` with effects in `e`: getter once, validation before the
+operand prefix, then the source snapshot and push at that fixed receiver. -/
+def callReceiverPush {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf)
+    (he : Ext Γ Γv) (code : TStep C Γ Γv) (value : Src C Γv E) : TStep C Γ Γ := fun σ => do
+  let a ← call args (.storage (.array E) r) hb body σ
+  (afterReceiverPrefix he code value a.st).map fun b => ⟨b.st, a.ext.trans b.ext⟩
+
 /-- `try`: the clause the transaction's outcome picks, its locals popped. -/
 def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (h₁ : Ext (ρ ++ Γ) Γ₁) (ok : TStep C (ρ ++ Γ) Γ₁)
@@ -770,8 +851,10 @@ def Stmt.runC : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .declStorage R _ init => TRun.declStorage R init
   | _, _, .opAssign op _ _ l r => TRun.opAssign op l r
   | _, _, .incDec op _ l => TRun.incDec op l
+  | _, _, .pushOpAssign op _ _ b r => TRun.pushOpAssign op b r
+  | _, _, .pushIncDec op _ b => TRun.pushIncDec op b
   | _, _, .assignIncDec i op _ l _ => TRun.assignIncDec i op l
-  | _, _, .assignLocalPush i b _ => TRun.assignLocalPush i b
+  | _, _, .assignLocalPush i b => TRun.assignLocalPush i b
   | _, _, .push b v _ => TRun.push b v
   | _, _, .pop b => TRun.pop b
   | _, _, .transfer r a => TRun.transfer r a
@@ -788,6 +871,9 @@ def Stmt.runC : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .assert c => TRun.assert c
   | _, _, .revert => fun _ => .error .revert
   | _, _, .call _ args ret body => TRun.call args ret body.ext (Prog.runC body)
+  | _, _, .callReceiver _ args r body op => TRun.callReceiver args r body.ext (Prog.runC body) op
+  | _, _, .callReceiverPush _ args r body code value =>
+    TRun.callReceiverPush args r body.ext (Prog.runC body) code.ext (Prog.runC code) value
   | _, _, .tryCall call rets ok err code pnc other =>
     TRun.tryCall call rets ok.ext (Prog.runC ok) err.ext (Prog.runC err) code pnc.ext
       (Prog.runC pnc) other.ext (Prog.runC other)
@@ -808,7 +894,7 @@ def Stmt.runR {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun l r => TRun.assign l r) (fun i r => TRun.rebind i r) (fun i r => TRun.assignLocal i r)
     (fun p _ init => TRun.declLocal p init) (fun R _ init => TRun.declStorage R init)
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
-    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b _ => TRun.assignLocalPush i b)
+    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b => TRun.assignLocalPush i b)
     (fun b v _ => TRun.push b v)
     (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
@@ -820,6 +906,10 @@ def Stmt.runR {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
     (fun _ c body ih => TRun.loop c body.ext ih) (fun body ih => TRun.block body.ext ih)
+    (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
+    (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
+    (fun _ args r body code value ihBody ihCode =>
+      TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) s
 
 /-- The typed run of a sequence, by its recursor. -/
@@ -829,7 +919,7 @@ def Prog.runR {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun l r => TRun.assign l r) (fun i r => TRun.rebind i r) (fun i r => TRun.assignLocal i r)
     (fun p _ init => TRun.declLocal p init) (fun R _ init => TRun.declStorage R init)
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
-    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b _ => TRun.assignLocalPush i b)
+    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b => TRun.assignLocalPush i b)
     (fun b v _ => TRun.push b v)
     (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
@@ -841,6 +931,10 @@ def Prog.runR {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
     (fun _ c body ih => TRun.loop c body.ext ih) (fun body ih => TRun.block body.ext ih)
+    (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
+    (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
+    (fun _ args r body code value ihBody ihCode =>
+      TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
 
 /-- The typed run of a statement from `σ`: the state it leaves, or how it
@@ -862,6 +956,13 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
   | _, _, .call f args ret body => by
     show TRun.call args ret body.ext body.runR = TRun.call args ret body.ext body.runC
     rw [Prog.runR_eq body]
+  | _, _, .callReceiver f args r body op => by
+    show TRun.callReceiver args r body.ext body.runR op = TRun.callReceiver args r body.ext body.runC op
+    rw [Prog.runR_eq body]
+  | _, _, .callReceiverPush f args r body code value => by
+    show TRun.callReceiverPush args r body.ext body.runR code.ext code.runR value =
+      TRun.callReceiverPush args r body.ext body.runC code.ext code.runC value
+    rw [Prog.runR_eq body, Prog.runR_eq code]
   | _, _, .tryCall call rets ok err code pnc other => by
     show TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext pnc.runR
         other.ext other.runR =
@@ -876,6 +977,7 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
     rw [Prog.runR_eq body]
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
+  | _, _, .pushOpAssign .. | _, _, .pushIncDec ..
   | _, _, .assignLocalPush .. | _, _, .push .. | _, _, .pop .. | _, _, .transfer ..
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..

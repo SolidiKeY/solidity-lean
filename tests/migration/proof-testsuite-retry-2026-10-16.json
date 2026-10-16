@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "focused-proof-retry",
+  "startedAt": "2026-10-16T06:34:23.892Z",
+  "implementationSha256": "417e3d86c60ae86496230b2e850cd80315c76cf6c4f6bb433ca93513dd23e200",
+  "source": "keyext.solidity.examples/TestSuite.sol",
+  "functions": [
+    "invariantForCountsArrayLength()",
+    "invariantClosedFormSum()",
+    "invariantVariantSkipsBreakIteration(uint)",
+    "invariantOverStorageWrites(uint)",
+    "invariantQuantifiedOverPrefix()",
+    "constantInlined()",
+    "contractQualifiedConstantAndEnum()",
+    "fileLevelConstantEnumAndFunction()",
+    "fileLevelStructThroughLibrary()",
+    "libraryCallAndUsingFor()",
+    "valueTypeWrapUnwrap()",
+    "typeBounds()",
+    "addmodMulmod()"
+  ],
+  "completed": [
+    "invariantForCountsArrayLength()",
+    "invariantClosedFormSum()",
+    "invariantVariantSkipsBreakIteration(uint)",
+    "invariantOverStorageWrites(uint)",
+    "invariantQuantifiedOverPrefix()",
+    "constantInlined()",
+    "contractQualifiedConstantAndEnum()",
+    "fileLevelConstantEnumAndFunction()",
+    "fileLevelStructThroughLibrary()",
+    "libraryCallAndUsingFor()",
+    "valueTypeWrapUnwrap()",
+    "typeBounds()",
+    "addmodMulmod()"
+  ],
+  "results": [
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "invariantForCountsArrayLength()",
+      "reason": "",
+      "function": "invariantForCountsArrayLength",
+      "elapsedMs": 8263
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "invariantClosedFormSum()",
+      "reason": "open proof goals",
+      "function": "invariantClosedFormSum",
+      "elapsedMs": 8508
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "invariantVariantSkipsBreakIteration(uint)",
+      "reason": "",
+      "function": "invariantVariantSkipsBreakIteration",
+      "elapsedMs": 9464
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "invariantOverStorageWrites(uint)",
+      "reason": "",
+      "function": "invariantOverStorageWrites",
+      "elapsedMs": 8589
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "invariantQuantifiedOverPrefix()",
+      "reason": "TestSuite.sol:4140: the loop clause `invariant \\forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language",
+      "function": "invariantQuantifiedOverPrefix",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "constantInlined()",
+      "reason": "",
+      "function": "constantInlined",
+      "elapsedMs": 417
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "contractQualifiedConstantAndEnum()",
+      "reason": "",
+      "function": "contractQualifiedConstantAndEnum",
+      "elapsedMs": 442
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "fileLevelConstantEnumAndFunction()",
+      "reason": "",
+      "function": "fileLevelConstantEnumAndFunction",
+      "elapsedMs": 508
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "fileLevelStructThroughLibrary()",
+      "reason": "",
+      "function": "fileLevelStructThroughLibrary",
+      "elapsedMs": 590
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "libraryCallAndUsingFor()",
+      "reason": "",
+      "function": "libraryCallAndUsingFor",
+      "elapsedMs": 601
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "valueTypeWrapUnwrap()",
+      "reason": "",
+      "function": "valueTypeWrapUnwrap",
+      "elapsedMs": 422
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "typeBounds()",
+      "reason": "",
+      "function": "typeBounds",
+      "elapsedMs": 529
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "addmodMulmod()",
+      "reason": "",
+      "function": "addmodMulmod",
+      "elapsedMs": 473
+    }
+  ],
+  "errors": [],
+  "profile": {
+    "timeoutMs": 120000,
+    "functionAtATime": true
+  },
+  "note": "Supplementary retry of original notRun TestSuite rows. Does not overwrite the uniform audit or erase its timeout.",
+  "completedAt": "2026-10-16T06:38:35.239Z"
+}

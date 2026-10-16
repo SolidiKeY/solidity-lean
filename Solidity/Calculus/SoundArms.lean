@@ -158,11 +158,11 @@ theorem Tm.eval_pushSlot {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.
 
 theorem Tm.eval_extend {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .extend s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.pushPlace r).map (·.1) := by
+      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.extendPlace r).map (·.1) := by
   rw [Tm.eval_app2, Op2.eval_eq_evalM]
-  show (s.eval σ).bind (fun st => (q.eval σ).bind fun r => (st.pushPlace r).bind fun p => some p.1) = _
+  show (s.eval σ).bind (fun st => (q.eval σ).bind fun r => (st.extendPlace r).bind fun p => some p.1) = _
   congr 1; funext st; congr 1; funext r
-  cases st.pushPlace r <;> rfl
+  cases st.extendPlace r <;> rfl
 
 theorem Tm.eval_pop {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .pop s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop false r := by
@@ -791,13 +791,13 @@ theorem pushSlot_agrees {E : Ty} (b : SPath C Γ (.array E)) :
   · trivial
   · cases σ.storage.push ref some <;> rfl
 
-theorem extend_agrees {E : Ty} (b : SPath C Γ (.array E)) :
+theorem extend_agrees {E : Ty} (b : SPath C Γ (.array E)) (hm : E.isMapping = true) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.push b none σ)
       ((Upd.nil.snoc (UpdElem.extend b)).applyP σ) := by
   have h := pushSlot_agrees σ b
   rw [UpdElem.pushSlot, applyP_storage1, Tm.eval_pushSlot, Tm.eval_storage, Option.bind_some] at h
   rw [UpdElem.extend, applyP_storage1, Tm.eval_extend, Tm.eval_storage, Option.bind_some]
-  simp only [Storage.pushPlace_fst]
+  simp only [Storage.extendPlace_eq_pushPlace _ _ hm, Storage.pushPlace_fst]
   exact h
 
 theorem pushSome_agrees {E : Ty} (b : SPath C Γ (.array E)) (v : Src C Γ E) :
@@ -846,8 +846,8 @@ theorem rebindPush_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.
     (hd : (Ty.ref R).defaultOkS = true) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebind i (.push b hd) σ)
       ((Upd.pushBind i b).applyP σ) := by
-  rw [Upd.pushBind, applyP_snoc, applyV_storage1, Tm.eval_extend, Tm.eval_storage, Option.bind_some]
-  simp only [UpdElem.applyV_local]
+  rw [Upd.pushBind, applyP_snoc, applyV_storage1, Tm.eval_pushSlot, Tm.eval_storage, Option.bind_some]
+  simp only [UpdElem.applyV_local, ← Storage.pushPlace_fst]
   show TRes.AgreesO _ _ ((((b.lower.eval σ).bind fun r => (σ.storage.pushPlace r).map (·.1)).map
     _).bind fun q => ((((Tm.app1 .next b.lower).eval σ).bind fun r => some (some r)).map _).map _)
   rw [Tm.eval_next]
@@ -871,6 +871,15 @@ theorem rebindPush_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.
       refine TRes.AgreesO.ret ?_
       simp only [Option.map_some, Option.bind_some, Storage.nextT, hv, State.locV_setLocal]
       rfl
+
+theorem rebindPushMapping_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
+    (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).isMapping = true) :
+    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebind i (.push b hd) σ)
+      ((Upd.pushBindMapping i b).applyP σ) := by
+  have h := rebindPush_agrees σ i b hd
+  simpa only [Upd.pushBind, Upd.pushBindMapping, applyP_snoc, applyV_storage1,
+    Tm.eval_pushSlot, Tm.eval_extend, Storage.extendPlace_eq_pushPlace _ _ hm,
+    Storage.pushPlace_fst] using h
 
 /-! ### A push's update is out of gas where the run is -/
 
@@ -949,10 +958,9 @@ theorem pushSome_exh {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
         rw [push_exhausted σ b (some r) hq (fun r' hr => by cases hr; rw [hv]; rfl) hf] at h
         cases h
 
-theorem pushBind_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
+theorem pushBindMapping_exhAny {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) (h : TRun.rebind i (.push b hd) σ = .error .revert) :
-    (Upd.pushBind i b).exh σ = false := by
-  refine Upd.exh_of_exhAny ?_
+    (Upd.pushBindMapping i b).exhAny σ = false := by
   show ((false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) ||
     (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false
   rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b),
@@ -974,6 +982,26 @@ theorem pushBind_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array
         rfl
       rw [hx] at h
       cases h
+
+theorem pushBindMapping_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
+    (hd : (Ty.ref R).defaultOkS = true) (h : TRun.rebind i (.push b hd) σ = .error .revert) :
+    (Upd.pushBindMapping i b).exh σ = false := by
+  exact Upd.exh_of_exhAny (pushBindMapping_exhAny σ i b hd h)
+
+theorem pushBind_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
+    (hd : (Ty.ref R).defaultOkS = true) (h : TRun.rebind i (.push b hd) σ = .error .revert) :
+    (Upd.pushBind i b).exh σ = false := by
+  apply Upd.exh_of_exhAny
+  have hm := pushBindMapping_exhAny σ i b hd h
+  change ((false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) ||
+    (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false at hm
+  show ((false || (Tm.app2 .pushSlot (.app0 .storage) b.lower).exhB σ) ||
+    (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false
+  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b),
+    Rhs.exhB_of_pushFree σ _ (by simp only [Rhs.pushFree, Tm.pushFree, SPath.lower_pushFree])] at hm ⊢
+  change ((false || Op2.exhB .extend (some σ.storage) (b.lower.eval σ)) || false) = false at hm
+  show ((false || Op2.exhB .pushSlot (some σ.storage) (b.lower.eval σ)) || false) = false
+  cases hq : b.lower.eval σ <;> rw [hq] at hm <;> exact hm
 
 theorem applyV_pay {Δ : Ctx} (r a : Tm C Γ (.val .uint)) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
     (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ g ℓ =
@@ -1202,11 +1230,11 @@ theorem sound_pushSlot {E : Ty} (b : SPath C Γ (.array E))
   Premise.sound_update_typed σ (pushSlot_agrees σ b) (fun _ => TRun.push_nd σ b none)
     (hx := pushSlot_exh σ b)
 
-/-- `storagePushLengthSaveReferenceElement`: `{storage := extend(storage, b)}`. -/
+/-- The mapping-specific push uses a length-only save. -/
 theorem sound_extend {E : Ty} (b : SPath C Γ (.array E))
-    (hd : (none.isSome || E.defaultOkS) = true) :
+    (hd : (none.isSome || E.defaultOkS) = true) (hm : E.isMapping = true) :
     Premise.Runs m (.push b none hd) (.upd1 (UpdElem.extend b)) σ :=
-  Premise.sound_update_typed σ (extend_agrees σ b) (fun _ => TRun.push_nd σ b none)
+  Premise.sound_update_typed σ (extend_agrees σ b hm) (fun _ => TRun.push_nd σ b none)
     (hx := extend_exh σ b)
 
 /-- `storagePushValueSave`, `storagePushValueCopySource`:
@@ -1234,6 +1262,14 @@ theorem sound_rebindPush {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.a
   Premise.sound_update_typed σ (rebindPush_agrees σ i b hd) (fun _ =>
     TRes.NoDiv.bind (ARhs.evalT_nd σ (.push b hd)) fun _ => TRes.NoDiv.ok _)
     (hx := pushBind_exh σ i b hd)
+
+/-- The mapping-specific binding uses the length-only printed update. -/
+theorem sound_rebindPushMapping {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
+    (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).isMapping = true) :
+    Premise.Runs m (.rebind i (.push b hd)) (.update (Upd.pushBindMapping i b)) σ :=
+  Premise.sound_update_typed σ (rebindPushMapping_agrees σ i b hd hm) (fun _ =>
+    TRes.NoDiv.bind (ARhs.evalT_nd σ (.push b hd)) fun _ => TRes.NoDiv.ok _)
+    (hx := pushBindMapping_exh σ i b hd)
 
 theorem assignLocalPush_agrees {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.assignLocalPush i b σ)
@@ -1293,8 +1329,7 @@ theorem assignLocalPush_exh {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (
 /-- `storageLocalPrimitivePushBind`: `{storage := pushSlot(storage, b) ‖ v := defVal(T)}`,
 `uint y = values.push();`. -/
 theorem sound_assignLocalPush {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p)))
-    (hs : b.isSimple = true) :
-    Premise.Runs m (.assignLocalPush i b hs) (.update (Upd.pushBindPrim i b)) σ :=
+    : Premise.Runs m (.assignLocalPush i b) (.update (Upd.pushBindPrim i b)) σ :=
   Premise.sound_update_typed σ (assignLocalPush_agrees σ i b) (fun _ =>
     TRes.NoDiv.bind (TRun.push_nd σ b none) fun _ => TRes.NoDiv.ok _)
     (hx := assignLocalPush_exh σ i b)

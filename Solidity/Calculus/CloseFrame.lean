@@ -353,6 +353,16 @@ theorem Landed.memT_readId {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : L
   rfl
 theorem push_memT_readId {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {T : Ty}
     (a : MAddrT T) : (σ.push v).glob.memT.readId a = σ.glob.memT.readId a := rfl
+
+theorem Landed.memT_lenId {Δ : Ctx} {g : State C []} {ℓ : LocsV C Δ} (x : Landed g ℓ)
+    (E : Ty) (id : Nat) : x.val.glob.memT.lenId E id = g.memT.lenId E id := by
+  have e : x.val.glob = g := x.glob_eq
+  generalize x.val.glob = y at e ⊢
+  subst e
+  rfl
+
+theorem push_memT_lenId {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H)
+    (E : Ty) (id : Nat) : (σ.push v).glob.memT.lenId E id = σ.glob.memT.lenId E id := rfl
 theorem withMem_memT_readId {H : HTy} (g : GlobT C H) (μ : Grown H (fun _ => Unit)) {T : Ty}
     (a : MAddrT T) : (g.withMem μ).1.memT.readId a = μ.readId a := rfl
 
@@ -630,6 +640,7 @@ attribute [close_rw_s]
   CloseS.key_uint' CloseS.key_int' CloseS.netOfT_def
   CloseS.checkIndex_map_root CloseS.writeVal_prim CloseS.writeVal_ref
   CloseS.readT_prim CloseS.readT_ident CloseS.Landed.memT_readId CloseS.push_memT_readId
+  CloseS.Landed.memT_lenId CloseS.push_memT_lenId Grown.lenId_ref
   CloseS.withMem_memT_readId CloseS.wp_box_writeT MAddrT.Apart CloseS.readId_copySt_field
   CloseS.copyMToSt_find_field CloseS.wp_box_ofId CloseS.withStorage_memT_readId
   CloseS.withNet_memT_readId CloseS.withBalance_memT_readId

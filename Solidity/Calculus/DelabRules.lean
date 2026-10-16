@@ -133,7 +133,9 @@ def tacletLine? (e s p m : Expr) (inv : Bool := false) :
     let rule? := if inv && p'.isAppOf ``Premise.inv then some "whileInvariantBox"
       else Solidity.Taclet.labelledBy (labelHead s') (m.isConstOf ``Modality.diamond)
     let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []
-    let some p ← ppPremiseS [] p labels (m.isConstOf ``Modality.box) | return none
+    let nativePush := s'.isAppOf ``Stmt.pushOpAssign || s'.isAppOf ``Stmt.pushIncDec
+    let some p ← withOptions (fun o => o.setBool `pp.sol.pushArithmetic nativePush)
+      (ppPremiseS [] p labels (m.isConstOf ``Modality.box)) | return none
     return some (← ppStmtS [] s, p)
 
 /-- `Taclet C k m s p` as `dl{ ⟨[ s; ]⟩ ⇝ p }` (none where it does not
@@ -148,7 +150,7 @@ def tacletTerm? (e : Expr) : MetaM (Option Lean.Term) := do
     | _ => `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p })
   if let some l ← blockLine? e then
     return some (← mkTerm l)
-  let some l ← tacletLine? e (e.getArg! 5) (e.getArg! 6) m | return none
+  let some l ← tacletLine? e (e.getArg! 5) (e.getArg! 6) m (inv := true) | return none
   if isEscape l.1 then return none
   return some (← mkTerm l)
 
@@ -170,7 +172,9 @@ def delabPremise : Delab := do
   let some p ← withPrinter e false (ppPremiseS [] e) | failure
   `(dl{ $p:dl_premise })
 
-attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.unfold,
+attribute [delab app.Solidity.Premise.update, delab app.Solidity.Premise.updates,
+  delab app.Solidity.Premise.guardedUpdates,
+  delab app.Solidity.Premise.unfold,
   delab app.Solidity.Premise.bind, delab app.Solidity.Premise.split,
   delab app.Solidity.Premise.check, delab app.Solidity.Premise.done,
   delab app.Solidity.Premise.branches, delab app.Solidity.Premise.cases,

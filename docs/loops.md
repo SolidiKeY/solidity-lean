@@ -3,10 +3,11 @@
 `while`, `for`, `do … while`, `break`, `continue`: four decisions and the
 stages that implement them. L1 to L4 are built (the
 syntax, the lowering, the semantics, the typing, unwinding and the
-invariant rules; `Examples/Tactics/Loops.lean`): a loop is unwound to the
-bound its `/// @custom:key unwind k` clause gives (`LeanTaclet.whileUnwind`)
-and left there (`LeanTaclet.loopExit`), or proved by its invariant
-(`LeanTaclet.whileInvariantBox`, `whileInvariantDiamond`).
+invariant rules; `Examples/Tactics/Loops.lean`): an unannotated loop is unwound
+within the proof search budget (`Taclet.whileUnwind`). An explicit
+`/// @custom:key unwind k` clause limits it to that bound
+(`LeanTaclet.loopExit`), or it is proved by its invariant
+(`Taclet.whileInvariantBox`, `whileInvariantDiamond`).
 Background: `docs/kernel-port.md` (its topics "Modalities", "Semantics",
 "One rule per statement" and "Conditions" are the decisions this plan
 extends).
@@ -73,10 +74,15 @@ also on the iteration a `break` or `return` ends.
 Loops block Ballot and BlindAuction (after `bytes32` and events),
 `MultiAuction.closeAuction` is `skip`ped, and the solc ports unroll by hand.
 Lean's rules take solkey's names (`whileUnwind`, `whileInvariantBox`,
-`whileInvariantDiamond`). They are `LeanTaclet` constructors while the solkey
-pin (`RuleShapes.tacletOrigins`, `KeyTaclets.lean`) is before `ed7849d5b6`,
-and become `Taclet` constructors when it moves past; what solkey lacks
-(`loopExit`, the bound's end) stays a `LeanTaclet`.
+`whileInvariantDiamond`). At the current pin they are `Taclet` constructors,
+with their correspondence recorded by `RuleShapes.tacletOrigins`. Lean retains
+its explicit unwind bound, capture-free conditions, boolean-expression
+invariants, conservative frame restrictions and unsigned variant. KeY accepts
+formula invariants and an unbounded integer variant; those broader shapes are
+not claimed here. The origin table checks inventory coverage; soundness comes
+from the existing kernel theorems, and upstream shape correspondence from the
+recorded review. What solkey
+lacks (`loopExit`, the bound's end) stays a `LeanTaclet`.
 
 ## Decision 1: semantics, the least fixed point inside `Stmt.run`
 
@@ -192,12 +198,13 @@ per statement" (`Stmt.rule_exists`, `Rule.iff_step` in
 `Calculus/RuleExists.lean`; `Rule.premise_unique` in
 `Calculus/Taclet.lean`), the choice is syntax. `LoopAnn C` is either
 `.inv (I : Val C .bool) (dec : Option (Val C .uint))` (an invariant and an
-optional variant) or `.unwind (k : Nat)`. `Stmt.step`
+optional variant), `.unwind (k : Nat)` or `.auto`. `Stmt.step`
 (`Calculus/Step.lean`, its loop arm `loopStep` in
 `Calculus/Blocks.lean`) dispatches:
 
 | Annotation | Box | Diamond |
 |---|---|---|
+| `.auto` | `whileUnwind`: one iteration followed by the same automatic loop | same |
 | `.unwind (k+1)` | `whileUnwind`: `unfold [if (c) { body while[k] (c) body }]` | same |
 | `.unwind 0` | `loopExit`: `Premise.check (c = false) []`, the goals "loop exited" (`c = false ⟹ ⟨[ ω ]⟩ φ`) and "unwound to the end" (`c = false`), by `Proves.check` (walk: `apply checkLean r`) | same |
 | `.inv I dec` | `whileInvariantBox`, below | `whileInvariantDiamond` with `dec = some v`; with `none`, `whileNoVariantDiamond`, the premise `done false` (sound, unprovable; solkey unwinds instead) |
@@ -209,7 +216,22 @@ offset, as solkey does, and the front end prints them above the loop:
 `Examples/Tactics/LoopsImport.lean`),
 `/// @custom:key invariant …` and `/// @custom:key decreases …` above the
 loop, and, Lean only, `/// @custom:key unwind k` for the bound; a loop with
-neither is `.unwind 0`.
+neither is `.auto`. `LoopUnwind` gives the one `whileUnwind` constructor
+either automatic mode or a remaining explicit bound. The mode is proof
+metadata; execution ignores all loop annotations.
+
+`sol_prove` probes increasing walk budgets up to the existing 20,000-step
+maximum and kernel-checks the first completed walk. A completed walk can
+still leave goals; exhaustion is failure, never a proof. The probing stages
+can attempt 52,640 nodes in total. `sol_prove?` retains the selected bound as
+`sol_prove (steps := n)` so replay runs just that walk. An explicit step budget
+must be between 1 and 20,000. It bounds both path depth and total walk nodes,
+independently of the scoped closer's limits.
+
+Use `sol_prove` for automatic unwinding: it refutes impossible branches while
+walking. `sol_symex` expands both branches before closing leaves, so automatic
+loops can exhaust its budget even when their guard is initially false. Give
+that workflow an explicit unwind bound or invariant.
 
 `.unwind 0` is not `assert(!c)`: a failed `assert` panics, so running out of
 unwindings would be a failure of the program rather than of the bound.

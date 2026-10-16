@@ -291,7 +291,7 @@ example : ⊨ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ ok = to.send(5); ] true } := by
@@ -299,7 +299,7 @@ example : ⊢ dl!{ [ ok = to.send(5); ] true } := by
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ ⟨ uint to = 9; ok = to.send(5); ⟩ true } := by
@@ -407,11 +407,21 @@ theorem transferFrameStorage :
 /-! ## `sol_prove?`: the walk in one evaluation
 
 A write read back: the leaf closes by the closer (`LFml.close`) inside the
-residue, and the replay is `sol_prove` alone. -/
+residue, and the replay retains its selected step budget. -/
+
+/-- error: sol_prove: steps must be between 1 and 20000 -/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ ⟩ true } := by
+  sol_prove (steps := 0)
+
+/-- error: sol_prove: steps must be between 1 and 20000 -/
+#guard_msgs in
+example : ⊢ dl!{ ⟨ ⟩ true } := by
+  sol_prove (steps := 20001)
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ alice.age = v; uint y = alice.age; ] y == v } := by
@@ -422,7 +432,7 @@ gives `a` the value `1` (KeY's `applyEq`), and `x == 1` folds to `true`. -/
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := by
@@ -433,7 +443,7 @@ example : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x == 1 } := b
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ balances[k] = 5; balances[j] = 5; ] balances[k] == 5 } := by
@@ -445,7 +455,7 @@ which the scoped closer reads with both elements in the state before it
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
@@ -458,7 +468,7 @@ branch it takes (`Hyps.groundS`, `Seq.refutes`): the `revert()` branches are clo
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ ⟨ int v = -3; int r = 0; if (v < 0) { r = 1; } else { revert(); }; ⟩ r == 1 } := by
@@ -466,7 +476,7 @@ example : ⊢ dl!{ ⟨ int v = -3; int r = 0; if (v < 0) { r = 1; } else { rever
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ uint y = 1; y = y * y; y = y * y; y = y * y; y = y * y; y = y * y;
@@ -482,7 +492,7 @@ residue. -/
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x == 5 } := by
@@ -490,7 +500,7 @@ example : ⊢ dl!{ [ Person memory carol; carol.age = 5; uint x = carol.age; ] x
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ Person memory carol; carol.age = 42; alice = carol; carol.age = 43;
@@ -505,7 +515,7 @@ index. -/
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ values.push(3); uint n = values.length; ] n > 0 } := by
@@ -513,7 +523,7 @@ example : ⊢ dl!{ [ values.push(3); uint n = values.length; ] n > 0 } := by
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ uint n = values.length; values.push(3); values.pop(); uint m = values.length; ]
@@ -522,7 +532,7 @@ example : ⊢ dl!{ [ uint n = values.length; values.push(3); values.pop(); uint 
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ [ alice = bob; uint x = bob.age; ] alice.age == x } := by
@@ -535,7 +545,7 @@ def wtStd : Fml StandardExample [] := Fml.wt StandardExample
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ .imp wtStd dl!{ ⟨ values.push(3); values.pop(); ⟩ true } := by
@@ -543,29 +553,36 @@ example : ⊢ .imp wtStd dl!{ ⟨ values.push(3); values.pop(); ⟩ true } := by
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); persons[0].age = 1; ⟩ true } := by
   sol_prove?
 
 /- Through the alias a `push()` returns (`Person storage p = persons.push();
-p.age = 1;`) the leaf is left open under the diamond: the alias is read at
-the old length before the push lands, a read that reverts at a full array,
-so the closer asks for room the formula does not give (`docs/intrinsic.md`,
-open items). -/
+p.age = 1;`), the parallel binding's definedness is retained. The scoped
+reader accepts resource exhaustion at a full array for this two-element
+update as it does for a single storage push. -/
 
 /-- The write through a `push()`'s alias, under the diamond. -/
 def pushAlias : Fml StandardExample [] :=
   .imp wtStd dl!{ ⟨ Person storage p = persons.push(); p.age = 1; ⟩ true }
 
-#guard (Seq.residue .all .nil pushAlias).map List.isEmpty == some false
+#guard (Seq.residue .all .nil pushAlias).map List.isEmpty == some true
+
+/--
+info: Try this:
+  sol_prove (steps := 128)
+-/
+#guard_msgs in
+example : ⊢ pushAlias := by
+  sol_prove?
 
 /-! The length past a push, read back under the diamond: the push's room is
 the premise of what follows it (`roomM`), which bounds the length (W9.8.5). -/
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ .imp wtStd dl!{ ⟨ persons.push(); uint n = persons.length - 1; ⟩ true } := by
@@ -580,7 +597,7 @@ reads each at its type). -/
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ ∀ uint x; x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
@@ -588,7 +605,7 @@ example : ⊢ dl!{ ∀ uint x; x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 }
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ ∀ uint x; [ require(x >= 1 && x <= 100); uint y = x - 1; ] y < 100 } := by
@@ -606,7 +623,7 @@ example : ⊢ dl!{ x <= 100 → ⟨ uint y = x + 1; ⟩ y == x + 1 } := by
   run_tac do
     let ty ← Lean.instantiateMVars (← Lean.Elab.Tactic.getMainTarget)
     Lean.logInfo m!"{← Seq.paramCount ty.appFn!.appArg! (← Symex.evaluable ty.appArg!)}"
-  sol_prove
+  sol_prove (steps := 128)
 
 end Scoped
 
@@ -745,7 +762,7 @@ example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 example : ⊢ dl!{ a == 1 → [ uint x = a; assert(x == 1); ] x == 1 } := by
@@ -839,7 +856,7 @@ closed: 0 open goal(s), 13 node(s), 1 branch(es)
 
 /-! ## Loops (`Examples/Tactics/Loops.lean`)
 
-`whileUnwind` is `unfoldLean`, `loopExit` is `checkLean`; under the box the
+`whileUnwind` is `unfold`, `loopExit` is `checkLean`; under the box the
 invariant rule is `invBox` (`Proves.inv`), solkey's two goals past
 `init`. -/
 
@@ -847,7 +864,7 @@ invariant rule is `invBox` (`Proves.inv`), solkey's two goals past
 info: Try this:
   apply unfold .localValueDeclInitDrop
     apply update .localValueAssign
-    apply unfoldLean .whileUnwind
+    apply unfold .whileUnwind
     apply unfold .ifElseUnfold
     apply unfold .localValueDeclInitDrop
     apply update .binopAssignment
@@ -904,5 +921,52 @@ example : ⊢ dl!{ [ require(n >= 0); uint i = 0;
   sol_derive?
 
 end Scoped
+
+namespace PushSourceNames
+
+/-- A root with the upstream capture prefix must survive printed replay. -/
+def contract : Contract := contract!{
+  uint source9; uint[] values; uint[][] matrix;
+}
+
+local instance : InContract := ⟨contract⟩
+open scoped Solidity.Scoped
+
+/--
+info: Try this:
+  refine Proves.unfold rfl ?_ -- storagePushValue_unfold_rightFstPrimitiveArgument
+    apply unfold .localValueDeclInitDrop
+    refine Proves.unfold rfl ?_ -- storageIndexRead_unfold_rightFst
+    apply unfold .storageLocalDeclInitDrop
+    apply update .storageIndexReadArrayBindLocalRoot
+    apply update .storageIndexReadArrayFind
+    apply update .storagePushValueSave
+    sol_leaf
+    sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ values.push(matrix[0][0]); ] true } := by
+  sol_derive?
+
+end PushSourceNames
+
+namespace MemoryPushNative
+
+local instance : InContract := ⟨StandardExample⟩
+open scoped Solidity.Scoped
+
+/--
+info: Try this:
+  apply unfold .memoryLocalDeclInitDrop
+    apply update .memoryArrayFreshAlloc
+    apply update .storagePushMemoryCopySource
+    sol_leaf
+    sol_close
+-/
+#guard_msgs in
+example : ⊢ dl!{ [ uint[] memory row = new uint[](1); matrix.push(row); ] true } := by
+  sol_derive?
+
+end MemoryPushNative
 
 end Solidity.Examples.ProofTree

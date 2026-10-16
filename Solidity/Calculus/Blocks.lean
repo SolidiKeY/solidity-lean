@@ -44,10 +44,20 @@ def Val.unders {p : PrimTy} (v : Val C Γ p) : (ρ : Ctx) → Val C (ρ ++ Γ) p
   | [] => v
   | _ :: ρ => (v.unders ρ).up
 
+def SPath.unders {T : Ty} (v : SPath C Γ T) : (ρ : Ctx) → SPath C (ρ ++ Γ) T
+  | [] => v
+  | _ :: ρ => (v.unders ρ).up
+
+def MPath.unders {T : Ty} (v : MPath C Γ T) : (ρ : Ctx) → MPath C (ρ ++ Γ) T
+  | [] => v
+  | _ :: ρ => (v.unders ρ).up
+
 /-- The arguments read with one local more on top. -/
 def Args.up {t : LTy} : {ps : Ctx} → Args C Γ ps → Args C (t :: Γ) ps
   | _, as => Args.casesOn (motive := fun ps _ => Args C (t :: Γ) ps) as .nil
       (fun as p x e => .snoc (Args.up as) p x e.up)
+      (fun as R x e => .snocStorage (Args.up as) R x e.up)
+      (fun as R x e => .snocMemory (Args.up as) R x e.up)
   termination_by structural _ as => as
 
 /-- The leftmost argument that is not simple, and the arguments read with it
@@ -59,6 +69,12 @@ def Args.capture : {ps : Ctx} → Args C Γ ps →
       (fun as p' x e => match Args.capture as with
         | some ⟨p, v, as'⟩ => some ⟨p, v, .snoc as' p' x e.up⟩
         | none => if e.isSimple then none else some ⟨p', e, .snoc as.up p' x (.simple (.local .here))⟩)
+      (fun as R x e => match Args.capture as with
+        | some ⟨p, v, as'⟩ => some ⟨p, v, .snocStorage as' R x e.up⟩
+        | none => none)
+      (fun as R x e => match Args.capture as with
+        | some ⟨p, v, as'⟩ => some ⟨p, v, .snocMemory as' R x e.up⟩
+        | none => none)
   termination_by structural _ as => as
 
 /-- `T x = e; …; rest`: the parameters declared with their arguments, in
@@ -66,6 +82,10 @@ order, each argument read under the parameters before it. -/
 def Args.declsThen {Δ : Ctx} : {ps : Ctx} → Args C Γ ps → Prog C (ps ++ Γ) Δ → Prog C Γ Δ
   | _, as => Args.casesOn (motive := fun ps _ => Prog C (ps ++ Γ) Δ → Prog C Γ Δ) as (fun rest => rest)
       (fun {ps'} as p x e rest => Args.declsThen as (.cons (.declLocal p x (some (e.unders ps'))) rest))
+      (fun {ps'} as R x e rest =>
+        Args.declsThen as (.cons (.declStorage R x (some (.path (e.unders ps')))) rest))
+      (fun {ps'} as R x e rest =>
+        Args.declsThen as (.cons (.declMem R x (some (.alias (e.unders ps'))) rfl e.mapFree) rest))
   termination_by structural _ as => as
 
 /-- `T r; …; rest`: the locals of the binders declared at their defaults. -/
@@ -108,7 +128,74 @@ def callStep (k : Nat) {Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (r
       | none => .inline (args.declsThen (.cons (.declMem R r none hd hm)
           (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
           (.keep (Thin.ofExt (Ext.append Γ ps))))
+    (fun R r body => match args.capture with
+      | some ⟨p', v, as'⟩ => .inline
+          (.cons (.declLocal p' (fse k) (some v)) (.cons (.call f as' (.storage R r) body) .nil))
+          (.keep (.drop .refl))
+      | none => .inline (args.declsThen (.cons (.declStorage R r none)
+          (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+          (.keep (Thin.ofExt (Ext.append Γ ps))))
     body
+
+/-- The array operation in `f().push(e)` after the receiver was captured. -/
+def ReceiverOp.toStmt {E : Ty} (op : ReceiverOp C Γ E) (b : SPath C Γ (.array E)) : Stmt C Γ Γ
+  := match op with
+  | .push v hd => .push b v hd
+  | .pop => .pop b
+
+/-- Capture `f()` once in `sp`, then run `sp.push(e)` or `sp.pop()`.
+The getter's return alias and the explicit capture both end with the statement. -/
+def callReceiverCapture (k : Nat) {ps Γf : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps)
+    (r : Var) (body : Prog C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E) :
+    Prog C Γ (.alias (.array E) :: .alias (.array E) :: Γ) :=
+  .cons (.call f args (.storage _ r) body)
+    (.cons (.declStorage (.array E) (fsp k) (some (.path (.alias .here))))
+      (.cons (((op.wk (.drop .refl)).wk (.drop .refl)).toStmt (.alias .here)) .nil))
+
+/-- The native call-receiver capture in `f().push(e)`, `f().push()` and `f().pop()`. -/
+def callReceiverStep (k : Nat) {ps Γf : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps)
+    (r : Var) (body : Prog C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E) :
+    Premise C Γ Γ :=
+  .unfold (callReceiverCapture k f args r body op) (.push (.push .refl))
+
+/-- The operand of `f().push(e)`: a source, or its scoped evaluation prefix.
+The two forms retain the same upstream capture taclet. -/
+inductive ReceiverValue (C : Contract) (Γ : Ctx) (E : Ty) where
+  | pure (value : Src C Γ E)
+  | deferred {Γv : Ctx} (code : Prog C Γ Γv) (value : Src C Γv E)
+
+/-- Keep `f().push(i++)` intact until the receiver capture rule fires. -/
+def ReceiverValue.statement {ps Γf : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps)
+    (r : Var) (body : Prog C ([.alias (.array E)] ++ ps) Γf)
+    (e : ReceiverValue C Γ E) : Stmt C Γ Γ :=
+  match e with
+  | .pure value => .callReceiver f args r body (.push (some value) rfl)
+  | .deferred code value => .callReceiverPush f args r body code value
+
+/-- Capture `f()` before the private evaluation prefix of `f().push(i++)`. -/
+def callReceiverPushCapture (k : Nat) {ps Γf Γv : Ctx} {E : Ty}
+    (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf)
+    (code : Prog C Γ Γv) (value : Src C Γv E) :
+    Prog C Γ (.alias (.array E) :: .alias (.array E) :: Γ) :=
+  let h : Thin Γ (.alias (.array E) :: Γ) := .drop .refl
+  let p := code.wk h
+  let q := p.2.2.wk (.drop .refl)
+  .cons (.call f args (.storage _ r) body)
+    (.cons (.declStorage (.array E) (fsp k) (some (.path (.alias .here))))
+      (.cons (.block (q.2.2.join
+        (.cons (.push (.alias ((Idx.here).ext q.2.2.ext))
+          (some ((value.wk p.2.1).wk q.2.1)) rfl) .nil))) .nil))
+
+/-- One replacement for both pure and effectful operands of `f().push(e)`. -/
+def ReceiverValue.step (k : Nat) {ps Γf : Ctx} {E : Ty}
+    (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf)
+    (e : ReceiverValue C Γ E) : Premise C Γ Γ :=
+  match e with
+  | .pure value => callReceiverStep k f args r body (.push (some value) rfl)
+  | .deferred code value =>
+    .unfold (callReceiverPushCapture k f args r body code value) (.push (.push .refl))
 
 end Calls
 
@@ -139,6 +226,7 @@ def Val.readsState : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple _ => false
   | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. => true
   | _, .binop _ _ _ a b => a.readsState || b.readsState
+  | _, .modular _ a b k => a.readsState || b.readsState || k.readsState
   | _, .unop _ _ _ a => a.readsState
   | _, .ternary c a b => c.readsState || a.readsState || b.readsState
 
@@ -162,12 +250,14 @@ def OpLoc.writableIn {p : PrimTy} (μ : Mutability) (l : OpLoc C Γ p) : Bool :=
 def Args.readsIn (μ : Mutability) : {ps : Ctx} → Args C Γ ps → Bool
   | _, as => Args.casesOn (motive := fun _ _ => Bool) as true
       (fun as _ _ e => Args.readsIn μ as && e.readsIn μ)
+      (fun as _ _ _ => Args.readsIn μ as && μ != .pure)
+      (fun as _ _ _ => Args.readsIn μ as && μ != .pure)
   termination_by structural _ as => as
 
 /-- No memory return (its body would allocate, which no frame allows). -/
 def CallRet.noMem {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Bool :=
   CallRet.casesOn (motive := fun _ _ _ => Bool) r true (fun _ _ _ => true) (fun _ => true)
-    (fun _ _ _ _ => false)
+    (fun _ _ _ _ => false) (fun _ _ => true)
 
 /-- A position of `Γ'` read as one of the context `d` locals below it, if it
 is one. -/
@@ -180,7 +270,7 @@ def CallRet.writesAt (d : Nat) {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : List (LT
     (fun _ _ res => match res with
       | .some j => j.outer d
       | .none => [])
-    (fun _ => []) (fun _ _ _ _ => [])
+    (fun _ => []) (fun _ _ _ _ => []) (fun _ _ => [])
 
 /-- The local `x ⊕= e` or `x++` writes, if its target is one. -/
 def OpLoc.writesAt (d : Nat) {p : PrimTy} : OpLoc C Γ p → List (LTy × Nat)
@@ -202,7 +292,8 @@ def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (declStorage := fun _ _ _ => false)
     (opAssign := fun _ _ _ l r => r.readsIn μ && l.writableIn μ)
     (incDec := fun _ _ l => l.writableIn μ) (assignIncDec := fun _ _ _ l _ => l.writableIn μ)
-    (assignLocalPush := fun _ _ _ => false)
+    (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
     (transfer := fun _ _ => μ == .nonpayable) (send := fun _ _ _ => μ == .nonpayable)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
@@ -215,6 +306,8 @@ def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (tryCall := fun _ _ _ _ _ _ _ => false)
     (loop := fun _ c body => c.readsIn μ && Prog.within μ body)
     (block := fun body => Prog.within μ body)
+    (callReceiver := fun _ _ _ _ _ => false)
+    (callReceiverPush := fun _ _ _ _ _ _ => false)
   termination_by structural _ _ s => s
 
 def Prog.within (μ : Mutability) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
@@ -235,7 +328,8 @@ def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × 
     (declLocal := fun _ _ _ => []) (declStorage := fun _ _ _ => [])
     (opAssign := fun _ _ _ l _ => l.writesAt d) (incDec := fun _ _ l => l.writesAt d)
     (assignIncDec := fun i _ _ l _ => i.outer d ++ l.writesAt d)
-    (assignLocalPush := fun i _ _ => i.outer d)
+    (assignLocalPush := fun i _ => i.outer d)
+    (pushOpAssign := fun _ _ _ _ _ => []) (pushIncDec := fun _ _ _ => [])
     (push := fun _ _ _ => []) (pop := fun _ => []) (transfer := fun _ _ => [])
     (send := fun pv _ _ => pv.outer d)
     (declMem := fun _ _ _ _ _ => []) (rebindMem := fun _ _ => []) (assignFromMem := fun _ _ => [])
@@ -245,6 +339,8 @@ def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × 
     (require := fun _ => []) (assert := fun _ => []) (revert := [])
     (call := fun _ _ ret _ => ret.writesAt d) (tryCall := fun _ _ _ _ _ _ _ => [])
     (loop := fun _ _ body => Prog.writesAt d body) (block := fun body => Prog.writesAt d body)
+    (callReceiver := fun _ _ _ _ _ => [])
+    (callReceiverPush := fun _ _ _ _ code _ => Prog.writesAt d code)
   termination_by structural _ _ s => s
 
 def Prog.writesAt (d : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → List (LTy × Nat)
@@ -268,6 +364,12 @@ end Frame
 
 /-! ## Loops -/
 
+/-- One application of `whileUnwind`, with either a written bound or automatic search. -/
+def loopUnwindStep {Γ Γ₁ : Ctx} (u : LoopUnwind) (c : Val C Γ .bool)
+    (body : Prog C Γ Γ₁) : Premise C Γ Γ :=
+  .unfold (.cons (.ite c (.cons (.block body) (.cons (.loop u.after c body) .nil)) .nil) .nil)
+    .refl
+
 /-- A loop (`loopStep`): unwound (`whileUnwind`), ended (`loopExit`), or by
 its invariant (`whileInvariantBox`, `whileInvariantDiamond`), closed to
 `false` when its body has no frame (`whileClose`) or, under the diamond,
@@ -279,8 +381,8 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
   | .unwind 0 => .check (.eqD c.lower (Tm.lit (p := .bool) false))
   -- whileUnwind
   | .unwind (n + 1) =>
-    .unfold (.cons (.ite c (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil)) .nil) .nil)
-      .refl
+    loopUnwindStep (.bounded n) c body
+  | .auto => loopUnwindStep .automatic c body
   | .inv I dec =>
     match body.frame with
     -- whileClose

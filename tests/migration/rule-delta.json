@@ -1,0 +1,104 @@
+{
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/memoryRules.key": {
+    "added": [
+      "shapeAtSize",
+      "sizeOfMap"
+    ],
+    "removed": [],
+    "changed": []
+  },
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key": {
+    "added": [
+      "localValuePush_unfold_leftFstReceiver",
+      "newArrayCaptureStorageRoot",
+      "storageLocalPrimitivePushBind",
+      "storagePop_unfold_leftCallReceiver",
+      "storagePushAddAssign",
+      "storagePushDivAssign",
+      "storagePushLengthSaveMappingElement",
+      "storagePushMemoryCopySource",
+      "storagePushModAssign",
+      "storagePushMulAssign",
+      "storagePushPostdecrement",
+      "storagePushPostincrement",
+      "storagePushPredecrement",
+      "storagePushPreincrement",
+      "storagePushSubAssign",
+      "storagePushValue_unfold_leftCallReceiver",
+      "storagePushValue_unfold_rightFstPrimitiveArgument",
+      "storagePushValue_unfold_rightFstReferenceArgument",
+      "storagePush_unfold_leftCallReceiver",
+      "whileInvariantBox",
+      "whileInvariantDiamond",
+      "whileUnwind"
+    ],
+    "removed": [],
+    "changed": [
+      "storageFieldDelete",
+      "storageIndexArrayDelete",
+      "storageIndexDelete",
+      "storageLocalRootPushBind",
+      "storagePopSave",
+      "storagePushLengthSaveReferenceElement",
+      "storageRootDelete"
+    ]
+  },
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structRules.key": {
+    "added": [
+      "fixedDelAt",
+      "fixedDelNode",
+      "fixedDelNodeFixed",
+      "fixedEmpty",
+      "fixedSave",
+      "fixedShapeDyn",
+      "fixedShapeFixed",
+      "fixedStore",
+      "selectOnSaveEmptyIndexPrim",
+      "selectOnSaveEmptyMember",
+      "selectOnSaveEmptySize",
+      "selectOnShapeElement",
+      "selectOnShapeMember",
+      "selectOnShapeSize",
+      "selectOnShapeStruct",
+      "selectStDelNodeElement",
+      "selectStDelNodeMember",
+      "selectStDelNodeSize",
+      "wfDelAtRight",
+      "wfDelNodeFixedRight",
+      "wfDelNodeRight",
+      "wfDynElem",
+      "wfDynElemMap",
+      "wfDynIsNotFixed",
+      "wfDynRight",
+      "wfDynSize",
+      "wfFixedElem",
+      "wfFixedElemMap",
+      "wfFixedIsFixed",
+      "wfFixedRight",
+      "wfFixedSize",
+      "wfLeaf",
+      "wfMapElem",
+      "wfMapRight",
+      "wfSaveRight",
+      "wfShape",
+      "wfStoreRight"
+    ],
+    "removed": [
+      "selectOnSaveEmptyDefault",
+      "selectOnTypedDynSize",
+      "selectOnTypedElement",
+      "selectOnTypedFixedSize",
+      "selectOnTypedLeafSize",
+      "selectOnTypedMapSize",
+      "selectOnTypedMember",
+      "selectOnTypedStruct",
+      "selectStDelNodeDefault",
+      "typedTyped"
+    ],
+    "changed": [
+      "findDefinitionMemberCons",
+      "findDefinitionMemberStruct",
+      "selectStDelNodeIndexStruct"
+    ]
+  }
+}

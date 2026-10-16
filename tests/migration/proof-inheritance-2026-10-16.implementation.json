@@ -1,0 +1,13 @@
+{
+  "phase": "after-inheritance-before-specification-address-and-constant-repairs",
+  "upstreamCommit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "baseGitHead": "c423fc3d14d7743c28c96b8acb5d83a9b9382fe3",
+  "overlayArchive": "/tmp/migration-inheritance-reviewed.tar.gz",
+  "overlayArchiveSha256": "234dec676dfae176e3846d9810c2bec21359942ae80fec96afbe504da65277af",
+  "proofReportSha256": "225ccb4aabca288143c60d02fe47943348623212df08e9a6a1983f10039133a6",
+  "profile": {
+    "batchSize": 32,
+    "timeoutMs": 120000
+  },
+  "note": "Historical completed audit; does not validate subsequent importer repairs. Runtime failures and unattempted rows are retained."
+}

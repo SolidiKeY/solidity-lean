@@ -17,8 +17,8 @@ lowered `while`, by solkey's `LoopLowering` (`lowerLoops`): the flags `brk`,
 `cnt`, `ret`, made only when used; the pins below are its shapes.  A loop
 runs as the least fixed point of its unwinding (`TLoop.run`), so `#run` runs
 it and a concrete one is decided with fuel (`Prog.runF_approx`).  The calculus
-unwinds a loop to the bound its `/// @custom:key unwind k` clause gives
-(`whileUnwind`, solkey's taclet with a bound) and leaves it there by
+unwinds an unannotated loop with `whileUnwind` within the proof search budget.
+An explicit `/// @custom:key unwind k` clause limits unwinding and leaves it there by
 `loopExit`; a loop with an invariant is proved by it (`whileInvariantBox`,
 `whileInvariantDiamond`, with a variant), past the anonymising update of the
 locals its body writes (`{anon(…)}`).
@@ -72,7 +72,7 @@ while (!brk1 && (i < 3)) { i++; brk1 = true; } -/
 
 /-! The specification above a loop is its annotation (`LoopAnn`): solkey's
 `invariant` and `decreases` clauses, or Lean's bound on unwinding; a loop
-with neither is unwound zero times. -/
+with neither uses automatic unwinding within the proof search budget. -/
 
 /-- info: uint i = 0;
 /// @custom:key invariant i <= 3 /// @custom:key decreases 3 - i while (i < 3) { i++; } -/
@@ -311,34 +311,83 @@ theorem countUpRun :
 
 /-! ## Unwinding
 
-`whileUnwind` is solkey's taclet of that name with a bound: a loop that may
-still be unwound `n + 1` times is one iteration, then the loop that may be
-unwound `n` times.  At the bound `loopExit` leaves the loop, with KeY's two
+`whileUnwind` follows solkey's literal one-iteration schema. An automatic
+loop keeps its mode; an explicit bound decreases by one. At zero,
+`loopExit` leaves the loop, with KeY's two
 goals of a check: the rest with the condition false assumed, and that it is
-false, which fails where the loop runs longer than its bound.  A loop with no
-clause is `unwind 0`. -/
+false, which fails where the loop runs longer than its bound. -/
 
 /--
-info: Solidity.LeanTaclet.whileUnwind : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {n : Nat} {x : Ctx}
+info: Solidity.Taclet.whileUnwind : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {u : LoopUnwind} {x : Ctx}
   {body : Prog C Γ x} {cond : Val C Γ PrimTy.bool},
-  dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1 while (cond) body; ]⟩ ⇝
-    ⟨[ if (cond) {body;/// @custom:key unwind n while (cond) body;}; ]⟩ }
-solkey: whileUnwind (loop_expand), past the pin
+  dl{ ⟨[ while (cond) body; ]⟩ ⇝ ⟨[ if (cond) {body;while (cond) body;}; ]⟩ }
+solkey: whileUnwind (loop_expand)
 printed: none (a solkey taclet not printed)
-sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileUnwind
 
 /--
 info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {x : Ctx} {body : Prog C Γ x}
   {cond : Val C Γ PrimTy.bool},
-  dl[LeanTaclet C k]{ ⟨[ while (cond) body; ]⟩ ⇝
+  dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0 while (cond) body; ]⟩ ⇝
     "loop exited": cond = false ⟹ ⟨[ ]⟩ ; "unwound to the end": cond = false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet loopExit
+
+/-- A terminating automatic loop proves its result using upstream rules alone. -/
+example : Proves StandardExample .solkey [] .nil
+    dl!{ ⟨ uint i = 0; while (i < 3) { i++; }; ⟩ i == 3 } := by
+  sol_prove (steps := 128)
+
+-- An unfinished infinite loop cannot be mistaken for a completed walk.
+#guard (Seq.residueWithin 32 .all .nil
+  (dl!{ ⟨ while (true) { }; ⟩ true })).isNone
+
+-- A completed loop with a false postcondition leaves an obligation.
+#guard match Seq.residueWithin 128 .all .nil
+    (dl!{ ⟨ uint i = 0; while (i < 3) { i++; }; ⟩ i == 4 }) with
+  | some leaves => !leaves.isEmpty
+  | none => false
+
+/-- Automatic and explicit bounds must survive both source printers. -/
+private def annotatedLoop (a : LoopAnn StandardExample []) : Prog StandardExample [] [] :=
+  .cons (.loop a (.simple (.bool false)) .nil) .nil
+
+private def automaticLoop := annotatedLoop .auto
+private def zeroLoop := annotatedLoop (.unwind 0)
+private def beforeBoundLoop := annotatedLoop (LoopUnwind.before (.bounded 0))
+private def afterBoundLoop := annotatedLoop (LoopUnwind.after (.bounded 0))
+
+/-- info: automatic and concrete loop bounds roundtrip through both source printers -/
+#guard_msgs in
+run_meta do
+  for name in [``automaticLoop, ``zeroLoop, ``beforeBoundLoop, ``afterBoundLoop] do
+    let info ← Lean.getConstInfo name
+    let original := info.value!
+    let some ss ← Delab.withPrinter original false (Delab.ppProgS [] original)
+      | throwError "loop printer failed: {name}"
+    let printed ← `(sol[StandardExample]{ $[$ss;]* })
+    let parsed ← Lean.Elab.Term.TermElabM.run' do
+      let p ← Lean.Elab.Term.elabTermEnsuringType printed info.type
+      Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+      pure p
+    unless ← Lean.Meta.isDefEq original parsed do
+      throwError "loop source roundtrip changed {name}: {printed}"
+    let shownExpr ← Lean.Meta.mkAppM ``Prog.show #[Lean.toExpr ([] : List Var), original]
+    let shown ← unsafe Lean.Meta.evalExpr String (Lean.mkConst ``String) shownExpr
+    let .ok shownSyntax := Lean.Parser.runParserCategory (← Lean.getEnv) `term s!"sol[StandardExample]\{ {shown} }"
+      | throwError "loop display does not parse: {shown}"
+    let parsed ← Lean.Elab.Term.TermElabM.run' do
+      let p ← Lean.Elab.Term.elabTermEnsuringType shownSyntax info.type
+      Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
+      pure p
+    unless ← Lean.Meta.isDefEq original parsed do
+      throwError "loop display roundtrip changed {name}: {shown}"
+  Lean.logInfo "automatic and concrete loop bounds roundtrip through both source printers"
 
 /-- `while (i < 3) { i++; }` from `i = 0`, unwound three times, ends at `3`,
 under the diamond: the strategy fires `whileUnwind` three times, and
@@ -350,17 +399,72 @@ theorem countTo3Diamond :
   sol_symex
   sol_close
 
-/-- A loop with no clause is not unwound: it ends where its condition is
+/-- A loop with an explicit zero bound is not unwound: it ends where its condition is
 false on entry. -/
-theorem notEntered : ⊨ dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 } := by
+theorem notEntered : ⊨ dl!{ ⟨ uint i = 5;
+    /// @custom:key unwind 0
+    while (i < 3) { i++; }; ⟩ i == 5 } := by
   sol_symex
   sol_close
 
 
+/-! ## Anonymous loop locals
+
+An invariant anonymises the locals written by its body. Their dependent
+function reads still have their intrinsic range; exposing witnesses also
+makes repeated optional reads available to the arithmetic closer. -/
+
+/-- A dependent anonymous unsigned read retains both of its bounds. -/
+example (_σ : State StandardExample []) (f : (t : PrimTy) → t.Denote) :
+    0 ≤ (f .uint).val ∧ (f .uint).val <
+      115792089237316195423570985008687907853269984665640564039457584007913129639936 := by
+  sol_close_enrich
+  all_goals first | trivial | omega
+
+/-- A signed read retains its signed bounds, including negative values. -/
+example (_σ : State StandardExample []) (f : (t : PrimTy) → t.Denote) :
+    -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤
+        (f .int).val ∧ (f .int).val <
+      57896044618658097711785492504343953926634992332820282019728792003956564819968 := by
+  sol_close_enrich
+  all_goals first | trivial | omega
+
+/-- A nested invariant witness identifies a repeated optional length read. -/
+example (_σ : State StandardExample []) (f : (t : PrimTy) → t.Denote)
+    (len : Option PrimTy.uint.Denote)
+    (h : ∃ v, len = some v ∧ (True ∧ v.val = (f .uint).val)) :
+    ∃ v, len = some v ∧ 0 < v.val + 1 := by
+  sol_close_enrich
+  all_goals omega
+
+/-- Enrichment closing the focused goal preserves the following goal. -/
+example (_σ : State StandardExample []) (f : (t : PrimTy) → t.Denote) :
+    (f .uint).val = (f .uint).val ∧ (False ∨ True) := by
+  constructor
+  sol_close_enrich
+  exact Or.inr True.intro
+
+/-- An ordinary KeY integer receives no unsigned range facts. -/
+example (_σ : State StandardExample []) (x : Int) (h : x < 0) : x < 0 := by
+  fail_if_success
+    have : 0 ≤ x := by
+      sol_close_enrich
+      all_goals omega
+  exact h
+
+/-- Negative signed values are also left consistent with their type. -/
+example (_σ : State StandardExample []) (x : PrimTy.int.Denote)
+    (h : x.val < 0) : x.val < 0 := by
+  fail_if_success
+    have : 0 ≤ x.val := by
+      sol_close_enrich
+      all_goals omega
+  exact h
+
 /-! ## solkey's solc ports, as loops
 
 solkey's `solc/SolcControlFlow.sol` unrolled its two loops by hand until it
-had loop rules (`ed7849d5b6`, past the pinned checkout); the corpus
+had loop rules (`ed7849d5b6`, correspondence pending against the pinned checkout); the corpus
 (`Corpus/SolcControlFlow.lean`) keeps the unrolled ports.  Here they are the
 loops solkey now writes, each unwound as often as it runs. -/
 
@@ -404,27 +508,27 @@ checked after it only where the condition holds again.  The fresh `b` and
 `variant` print as `se` and `ie`, the fresh names they are. -/
 
 /--
-info: Solidity.LeanTaclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
+info: Solidity.Taclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
   {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)} {cond inv : Val C Γ PrimTy.bool},
-  dl[LeanTaclet C k]{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
+  dl{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { se := cond } (se = true ⟹ ⟨[ body ]⟩ inv = true ; se = false ⟹ ⟨[ ]⟩)) }
-solkey: whileInvariantBox (loop_inv), past the pin
+solkey: whileInvariantBox (loop_inv)
 printed: none (a solkey taclet not printed)
-sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileInvariantBox
 
 /--
-info: Solidity.LeanTaclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
+info: Solidity.Taclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
   {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
-  dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
+  dl{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
       (inv = true ∧ { se := cond } (se = true → 0 <= dec ∧ dec < ie)) ; se = false ⟹ ⟨[ ]⟩)) }
-solkey: whileInvariantDiamond (loop_inv), past the pin
+solkey: whileInvariantDiamond (loop_inv)
 printed: none (a solkey taclet not printed)
-sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
+sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 -/
 #guard_msgs in #taclet whileInvariantDiamond
 
@@ -542,14 +646,14 @@ closed: 0 open goal(s), 14 node(s), 4 branch(es)
              while (i < n) { i = i + 1; }; ] i == n }
 
 /-- The same proved by the walk `sol_derive?` writes: `whileUnwind` is
-`unfoldLean`, `loopExit` is `checkLean` with its goals `thn` and `els`; the
+`unfold`, `loopExit` is `checkLean` with its goals `thn` and `els`; the
 branch the unwinding leaves is a block (`blockEmpty`). -/
 theorem countTo1Walk : ⊢ dl!{ ⟨ uint i = 0;
     /// @custom:key unwind 1
     while (i < 1) { i++; }; ⟩ i == 1 } := by
   apply unfold .localValueDeclInitDrop
   apply update .localValueAssign
-  apply unfoldLean .whileUnwind
+  apply unfold .whileUnwind
   apply unfold .ifElseUnfold
   apply unfold .localValueDeclInitDrop
   apply update .binopAssignment
@@ -581,7 +685,9 @@ info: 0: localValueDeclInitDrop
 closed: 0 open goal(s), 5 node(s), 2 branch(es)
 -/
 #guard_msgs in
-#proof_tree dl!{ ⟨ uint i = 5; while (i < 3) { i++; }; ⟩ i == 5 }
+#proof_tree dl!{ ⟨ uint i = 5;
+    /// @custom:key unwind 0
+    while (i < 3) { i++; }; ⟩ i == 5 }
 
 /-! A body with no frame has no invariant rule: one that writes memory, as in
 solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,

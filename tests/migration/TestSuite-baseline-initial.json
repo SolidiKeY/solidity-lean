@@ -1,0 +1,5544 @@
+{
+  "version": 1,
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "proof",
+  "sources": [
+    "keyext.solidity.examples/TestSuite.sol"
+  ],
+  "completed": [
+    "keyext.solidity.examples/TestSuite.sol"
+  ],
+  "results": [
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "PairLib",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "bump(uint)",
+      "reason": "TestSuite.sol:20: it reads the state variable `UNIT`: `UNIT` (line 17) is constant: a value fixed before any call, not a storage slot",
+      "function": "bump",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "PairLib",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "swap()",
+      "reason": "TestSuite.sol:23: type `FileLevelPair` is not a struct of the contract",
+      "function": "swap",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "additionStorageWrite(uint,uint)",
+      "reason": "",
+      "function": "additionStorageWrite",
+      "elapsedMs": 897
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootReadWrite()",
+      "reason": "",
+      "function": "storageRootReadWrite",
+      "elapsedMs": 376
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldWriteRead()",
+      "reason": "",
+      "function": "storageFieldWriteRead",
+      "elapsedMs": 394
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepAddAssign()",
+      "reason": "",
+      "function": "storageFieldDeepAddAssign",
+      "elapsedMs": 492
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldGlobalAge()",
+      "reason": "",
+      "function": "storageFieldGlobalAge",
+      "elapsedMs": 467
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageAliasWrite()",
+      "reason": "",
+      "function": "storageAliasWrite",
+      "elapsedMs": 615
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexRootMapping()",
+      "reason": "",
+      "function": "storageIndexRootMapping",
+      "elapsedMs": 422
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexAddAssign()",
+      "reason": "",
+      "function": "storageIndexAddAssign",
+      "elapsedMs": 910
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingAddAssign()",
+      "reason": "",
+      "function": "storageIndexMappingAddAssign",
+      "elapsedMs": 455
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexArrayAddAssignOutOfBoundsReverts()",
+      "reason": "",
+      "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "elapsedMs": 480
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexArrayReadOutOfBoundsReverts()",
+      "reason": "",
+      "function": "storageIndexArrayReadOutOfBoundsReverts",
+      "elapsedMs": 490
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexReadComplexReceiverBindLocalRoot()",
+      "reason": "",
+      "function": "storageIndexReadComplexReceiverBindLocalRoot",
+      "elapsedMs": 977
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexWriteComplexReceiverCopySource()",
+      "reason": "",
+      "function": "storageIndexWriteComplexReceiverCopySource",
+      "elapsedMs": 1205
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldWriteRootRhsComplexReceiver()",
+      "reason": "",
+      "function": "storageFieldWriteRootRhsComplexReceiver",
+      "elapsedMs": 474
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexWriteRootRhsComplexReceiver()",
+      "reason": "",
+      "function": "storageIndexWriteRootRhsComplexReceiver",
+      "elapsedMs": 482
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushValue()",
+      "reason": "",
+      "function": "storagePushValue",
+      "elapsedMs": 671
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushComplexReceiverNonsimpleArg(uint,uint)",
+      "reason": "",
+      "function": "storagePushComplexReceiverNonsimpleArg",
+      "elapsedMs": 2372
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushValueCopySource()",
+      "reason": "",
+      "function": "storagePushValueCopySource",
+      "elapsedMs": 685
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushMemoryCopySource()",
+      "reason": "",
+      "function": "storagePushMemoryCopySource",
+      "elapsedMs": 2091
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushMemoryStructCopySource()",
+      "reason": "",
+      "function": "storagePushMemoryStructCopySource",
+      "elapsedMs": 1157
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "storagePushReturnPrimitiveBindComplexReceiver()",
+      "reason": "open proof goals",
+      "function": "storagePushReturnPrimitiveBindComplexReceiver",
+      "elapsedMs": 4020
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storagePushCompoundTarget()",
+      "reason": "TestSuite.sol:305: a call's callee is a function's name",
+      "function": "storagePushCompoundTarget",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storagePushDivModTarget()",
+      "reason": "TestSuite.sol:313: a call's callee is a function's name",
+      "function": "storagePushDivModTarget",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storagePushIncrementTarget()",
+      "reason": "TestSuite.sol:321: the printed text does not parse: <input>:1:55: expected ';'",
+      "function": "storagePushIncrementTarget",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storagePushCompoundSigned()",
+      "reason": "TestSuite.sol:329: the printed text does not parse: <input>:1:99: expected ';'",
+      "function": "storagePushCompoundSigned",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "valuesRef()",
+      "reason": "TestSuite.sol:338: _ret: a reference type needs a data location",
+      "function": "valuesRef",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storagePushPopCallReceiver()",
+      "reason": "TestSuite.sol:344: valuesRef: its return of reference type uint[] needs the location `memory`",
+      "function": "storagePushPopCallReceiver",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "newArrayCaptureStorageRoot()",
+      "reason": "open proof goals",
+      "function": "newArrayCaptureStorageRoot",
+      "elapsedMs": 9063
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "requireTrueLiteral()",
+      "reason": "",
+      "function": "requireTrueLiteral",
+      "elapsedMs": 322
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "requireFalseLiteral()",
+      "reason": "",
+      "function": "requireFalseLiteral",
+      "elapsedMs": 314
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageBoolRootReadWrite()",
+      "reason": "",
+      "function": "storageBoolRootReadWrite",
+      "elapsedMs": 345
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageBoolRootCopy()",
+      "reason": "",
+      "function": "storageBoolRootCopy",
+      "elapsedMs": 392
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageBoolFieldRead()",
+      "reason": "",
+      "function": "storageBoolFieldRead",
+      "elapsedMs": 439
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageBoolMappingRead()",
+      "reason": "",
+      "function": "storageBoolMappingRead",
+      "elapsedMs": 439
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageBoolArrayRead()",
+      "reason": "",
+      "function": "storageBoolArrayRead",
+      "elapsedMs": 687
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageBoolFieldStoreRoot()",
+      "reason": "",
+      "function": "storageBoolFieldStoreRoot",
+      "elapsedMs": 449
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryDeclDefault()",
+      "reason": "",
+      "function": "memoryDeclDefault",
+      "elapsedMs": 449
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryArrayIndex()",
+      "reason": "",
+      "function": "memoryArrayIndex",
+      "elapsedMs": 501
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryNewIntoStructField()",
+      "reason": "",
+      "function": "memoryNewIntoStructField",
+      "elapsedMs": 530
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryNewIntoNestedField()",
+      "reason": "",
+      "function": "memoryNewIntoNestedField",
+      "elapsedMs": 611
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryNewIntoIndex()",
+      "reason": "",
+      "function": "memoryNewIntoIndex",
+      "elapsedMs": 527
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageNewIntoField()",
+      "reason": "",
+      "function": "storageNewIntoField",
+      "elapsedMs": 499
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageComplexReceiverEmptyPush()",
+      "reason": "",
+      "function": "testStorageComplexReceiverEmptyPush",
+      "elapsedMs": 674
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "additionBothStorage()",
+      "reason": "",
+      "function": "additionBothStorage",
+      "elapsedMs": 494
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "additionSimple()",
+      "reason": "",
+      "function": "additionSimple",
+      "elapsedMs": 350
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "additionStorageRead()",
+      "reason": "",
+      "function": "additionStorageRead",
+      "elapsedMs": 431
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "divisionSimple()",
+      "reason": "",
+      "function": "divisionSimple",
+      "elapsedMs": 377
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "greaterEqualSimple()",
+      "reason": "",
+      "function": "greaterEqualSimple",
+      "elapsedMs": 363
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "greaterThanSimple()",
+      "reason": "",
+      "function": "greaterThanSimple",
+      "elapsedMs": 353
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "lessEqualSimple()",
+      "reason": "",
+      "function": "lessEqualSimple",
+      "elapsedMs": 347
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "lessThanSimple()",
+      "reason": "",
+      "function": "lessThanSimple",
+      "elapsedMs": 365
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "logicalAndSimple()",
+      "reason": "",
+      "function": "logicalAndSimple",
+      "elapsedMs": 363
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "logicalAndShortCircuitRhs()",
+      "reason": "",
+      "function": "logicalAndShortCircuitRhs",
+      "elapsedMs": 426
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "logicalNotSimple()",
+      "reason": "",
+      "function": "logicalNotSimple",
+      "elapsedMs": 337
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "logicalOrSimple()",
+      "reason": "",
+      "function": "logicalOrSimple",
+      "elapsedMs": 347
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "logicalOrShortCircuitRhs()",
+      "reason": "",
+      "function": "logicalOrShortCircuitRhs",
+      "elapsedMs": 426
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ternaryCaptureCond()",
+      "reason": "",
+      "function": "ternaryCaptureCond",
+      "elapsedMs": 419
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ternaryToIf()",
+      "reason": "",
+      "function": "ternaryToIf",
+      "elapsedMs": 394
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifUnfold()",
+      "reason": "",
+      "function": "ifUnfold",
+      "elapsedMs": 423
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifElseUnfold()",
+      "reason": "",
+      "function": "ifElseUnfold",
+      "elapsedMs": 425
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifSplit()",
+      "reason": "",
+      "function": "ifSplit",
+      "elapsedMs": 396
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifElseSplit()",
+      "reason": "",
+      "function": "ifElseSplit",
+      "elapsedMs": 398
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifTrue()",
+      "reason": "",
+      "function": "ifTrue",
+      "elapsedMs": 385
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifFalse()",
+      "reason": "",
+      "function": "ifFalse",
+      "elapsedMs": 394
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifElseTrue()",
+      "reason": "",
+      "function": "ifElseTrue",
+      "elapsedMs": 387
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifElseFalse()",
+      "reason": "",
+      "function": "ifElseFalse",
+      "elapsedMs": 390
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ifElseNegated()",
+      "reason": "",
+      "function": "ifElseNegated",
+      "elapsedMs": 420
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryDeepField()",
+      "reason": "",
+      "function": "memoryDeepField",
+      "elapsedMs": 514
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldAddAssign()",
+      "reason": "",
+      "function": "memoryFieldAddAssign",
+      "elapsedMs": 490
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldSubAssign()",
+      "reason": "",
+      "function": "memoryFieldSubAssign",
+      "elapsedMs": 491
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldMulAssign()",
+      "reason": "",
+      "function": "memoryFieldMulAssign",
+      "elapsedMs": 490
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldDivAssign()",
+      "reason": "",
+      "function": "memoryFieldDivAssign",
+      "elapsedMs": 490
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldModAssign()",
+      "reason": "",
+      "function": "memoryFieldModAssign",
+      "elapsedMs": 511
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldAddAssignUnfold()",
+      "reason": "",
+      "function": "memoryFieldAddAssignUnfold",
+      "elapsedMs": 641
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldAddAssignNse()",
+      "reason": "",
+      "function": "memoryFieldAddAssignNse",
+      "elapsedMs": 502
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPreincrement()",
+      "reason": "",
+      "function": "memoryFieldPreincrement",
+      "elapsedMs": 497
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPostincrement()",
+      "reason": "",
+      "function": "memoryFieldPostincrement",
+      "elapsedMs": 495
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPredecrement()",
+      "reason": "",
+      "function": "memoryFieldPredecrement",
+      "elapsedMs": 492
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPostdecrement()",
+      "reason": "",
+      "function": "memoryFieldPostdecrement",
+      "elapsedMs": 498
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPreincrementAssignment()",
+      "reason": "",
+      "function": "memoryFieldPreincrementAssignment",
+      "elapsedMs": 621
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPostincrementAssignment()",
+      "reason": "",
+      "function": "memoryFieldPostincrementAssignment",
+      "elapsedMs": 561
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPredecrementAssignment()",
+      "reason": "",
+      "function": "memoryFieldPredecrementAssignment",
+      "elapsedMs": 597
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPostdecrementAssignment()",
+      "reason": "",
+      "function": "memoryFieldPostdecrementAssignment",
+      "elapsedMs": 567
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPreincrementUnfold()",
+      "reason": "",
+      "function": "memoryFieldPreincrementUnfold",
+      "elapsedMs": 593
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldAlias()",
+      "reason": "",
+      "function": "memoryFieldAlias",
+      "elapsedMs": 487
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldReferenceAssign()",
+      "reason": "",
+      "function": "memoryFieldReferenceAssign",
+      "elapsedMs": 569
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayAddAssign()",
+      "reason": "",
+      "function": "memoryIndexArrayAddAssign",
+      "elapsedMs": 498
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArraySubAssign()",
+      "reason": "",
+      "function": "memoryIndexArraySubAssign",
+      "elapsedMs": 501
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayMulAssign()",
+      "reason": "",
+      "function": "memoryIndexArrayMulAssign",
+      "elapsedMs": 502
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayDivAssign()",
+      "reason": "",
+      "function": "memoryIndexArrayDivAssign",
+      "elapsedMs": 524
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayModAssign()",
+      "reason": "",
+      "function": "memoryIndexArrayModAssign",
+      "elapsedMs": 529
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayAddAssignUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayAddAssignUnfold",
+      "elapsedMs": 776
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPreincrementUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayPreincrementUnfold",
+      "elapsedMs": 771
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPreincrement()",
+      "reason": "",
+      "function": "memoryIndexArrayPreincrement",
+      "elapsedMs": 522
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPostdecrement()",
+      "reason": "",
+      "function": "memoryIndexArrayPostdecrement",
+      "elapsedMs": 532
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPostincrementAssignment()",
+      "reason": "",
+      "function": "memoryIndexArrayPostincrementAssignment",
+      "elapsedMs": 626
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPredecrementAssignment()",
+      "reason": "",
+      "function": "memoryIndexArrayPredecrementAssignment",
+      "elapsedMs": 682
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "memoryIndexWriteNse(uint,uint,uint)",
+      "reason": "",
+      "function": "memoryIndexWriteNse",
+      "elapsedMs": 1484
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryRootAlias()",
+      "reason": "",
+      "function": "memoryRootAlias",
+      "elapsedMs": 478
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryRootDeleteFresh()",
+      "reason": "",
+      "function": "memoryRootDeleteFresh",
+      "elapsedMs": 345
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryStructArrayIndex()",
+      "reason": "",
+      "function": "memoryStructArrayIndex",
+      "elapsedMs": 602
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryToStorage()",
+      "reason": "",
+      "function": "memoryToStorage",
+      "elapsedMs": 496
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryToStorageIndexMappingCopyRootExample()",
+      "reason": "",
+      "function": "memoryToStorageIndexMappingCopyRootExample",
+      "elapsedMs": 533
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "memoryToStorageIndexArrayCopyRootExample()",
+      "reason": "",
+      "function": "memoryToStorageIndexArrayCopyRootExample",
+      "elapsedMs": 904
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "memoryToStorageIndexArrayCopyRootOutOfBoundsReverts()",
+      "reason": "",
+      "function": "memoryToStorageIndexArrayCopyRootOutOfBoundsReverts",
+      "elapsedMs": 499
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "moduloSimple()",
+      "reason": "",
+      "function": "moduloSimple",
+      "elapsedMs": 366
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "multiplicationSimple()",
+      "reason": "",
+      "function": "multiplicationSimple",
+      "elapsedMs": 373
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "notEqualSimple()",
+      "reason": "",
+      "function": "notEqualSimple",
+      "elapsedMs": 360
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "powerSimple()",
+      "reason": "",
+      "function": "powerSimple",
+      "elapsedMs": 366
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "requireGuardBox(uint)",
+      "reason": "",
+      "function": "requireGuardBox",
+      "elapsedMs": 480
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "requireHoldsDiamond()",
+      "reason": "",
+      "function": "requireHoldsDiamond",
+      "elapsedMs": 469
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageAliasRebindAlias()",
+      "reason": "",
+      "function": "storageAliasRebindAlias",
+      "elapsedMs": 435
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageDeepFieldPostincrement()",
+      "reason": "",
+      "function": "storageDeepFieldPostincrement",
+      "elapsedMs": 498
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageDeepFieldPreincrement()",
+      "reason": "",
+      "function": "storageDeepFieldPreincrement",
+      "elapsedMs": 511
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldAddAssign()",
+      "reason": "",
+      "function": "storageFieldAddAssign",
+      "elapsedMs": 448
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldCopyStruct()",
+      "reason": "",
+      "function": "storageFieldCopyStruct",
+      "elapsedMs": 497
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldCopyValueField()",
+      "reason": "",
+      "function": "storageFieldCopyValueField",
+      "elapsedMs": 463
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepDivAssign()",
+      "reason": "",
+      "function": "storageFieldDeepDivAssign",
+      "elapsedMs": 498
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepModAssign()",
+      "reason": "",
+      "function": "storageFieldDeepModAssign",
+      "elapsedMs": 493
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepMulAssign()",
+      "reason": "",
+      "function": "storageFieldDeepMulAssign",
+      "elapsedMs": 510
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepSubAssign()",
+      "reason": "",
+      "function": "storageFieldDeepSubAssign",
+      "elapsedMs": 500
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepWriteRead()",
+      "reason": "",
+      "function": "storageFieldDeepWriteRead",
+      "elapsedMs": 463
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDelete()",
+      "reason": "",
+      "function": "storageFieldDelete",
+      "elapsedMs": 427
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeleteThenCopy()",
+      "reason": "",
+      "function": "storageFieldDeleteThenCopy",
+      "elapsedMs": 519
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeleteThenCopyDeep()",
+      "reason": "",
+      "function": "storageFieldDeleteThenCopyDeep",
+      "elapsedMs": 556
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDivAssign()",
+      "reason": "",
+      "function": "storageFieldDivAssign",
+      "elapsedMs": 454
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldModAssign()",
+      "reason": "",
+      "function": "storageFieldModAssign",
+      "elapsedMs": 456
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldMulAssign()",
+      "reason": "",
+      "function": "storageFieldMulAssign",
+      "elapsedMs": 446
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPostdecrementAssign()",
+      "reason": "",
+      "function": "storageFieldPostdecrementAssign",
+      "elapsedMs": 456
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPostdecrement()",
+      "reason": "",
+      "function": "storageFieldPostdecrement",
+      "elapsedMs": 449
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPostincrementAssign()",
+      "reason": "",
+      "function": "storageFieldPostincrementAssign",
+      "elapsedMs": 448
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPostincrement()",
+      "reason": "",
+      "function": "storageFieldPostincrement",
+      "elapsedMs": 441
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPredecrementAssign()",
+      "reason": "",
+      "function": "storageFieldPredecrementAssign",
+      "elapsedMs": 448
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPredecrement()",
+      "reason": "",
+      "function": "storageFieldPredecrement",
+      "elapsedMs": 440
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPreincrementAssign()",
+      "reason": "",
+      "function": "storageFieldPreincrementAssign",
+      "elapsedMs": 453
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPreincrement()",
+      "reason": "",
+      "function": "storageFieldPreincrement",
+      "elapsedMs": 441
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldReadBindLocal()",
+      "reason": "",
+      "function": "storageFieldReadBindLocal",
+      "elapsedMs": 456
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldReadStoreRoot()",
+      "reason": "",
+      "function": "storageFieldReadStoreRoot",
+      "elapsedMs": 442
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldSubAssign()",
+      "reason": "",
+      "function": "storageFieldSubAssign",
+      "elapsedMs": 443
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldWriteCaptureSrc()",
+      "reason": "",
+      "function": "storageFieldWriteCaptureSrc",
+      "elapsedMs": 504
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageFieldWriteRhsCapture(uint,uint,uint)",
+      "reason": "",
+      "function": "storageFieldWriteRhsCapture",
+      "elapsedMs": 1496
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexCopyValue(uint,uint)",
+      "reason": "",
+      "function": "storageIndexCopyValue",
+      "elapsedMs": 1598
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexCopysourceAfterPush()",
+      "reason": "",
+      "function": "storageIndexCopysourceAfterPush",
+      "elapsedMs": 675
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexDecomposeAfterPush()",
+      "reason": "",
+      "function": "storageIndexDecomposeAfterPush",
+      "elapsedMs": 2066
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexDeleteMappingBool()",
+      "reason": "",
+      "function": "storageIndexDeleteMappingBool",
+      "elapsedMs": 426
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexDeleteMappingStruct()",
+      "reason": "",
+      "function": "storageIndexDeleteMappingStruct",
+      "elapsedMs": 557
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexDeleteNseIndex(uint)",
+      "reason": "",
+      "function": "storageIndexDeleteNseIndex",
+      "elapsedMs": 655
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexDelete()",
+      "reason": "",
+      "function": "storageIndexDelete",
+      "elapsedMs": 834
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexDivAssign()",
+      "reason": "",
+      "function": "storageIndexDivAssign",
+      "elapsedMs": 912
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexModAssign()",
+      "reason": "",
+      "function": "storageIndexModAssign",
+      "elapsedMs": 894
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexMulAssign()",
+      "reason": "",
+      "function": "storageIndexMulAssign",
+      "elapsedMs": 906
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexMultipleWrites()",
+      "reason": "",
+      "function": "storageIndexMultipleWrites",
+      "elapsedMs": 842
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPostdecrementAssign()",
+      "reason": "",
+      "function": "storageIndexPostdecrementAssign",
+      "elapsedMs": 808
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPostdecrement()",
+      "reason": "",
+      "function": "storageIndexPostdecrement",
+      "elapsedMs": 893
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPostincrementAssign()",
+      "reason": "",
+      "function": "storageIndexPostincrementAssign",
+      "elapsedMs": 811
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPostincrement()",
+      "reason": "",
+      "function": "storageIndexPostincrement",
+      "elapsedMs": 917
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPredecrementAssign()",
+      "reason": "",
+      "function": "storageIndexPredecrementAssign",
+      "elapsedMs": 869
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPredecrement()",
+      "reason": "",
+      "function": "storageIndexPredecrement",
+      "elapsedMs": 934
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPreincrementAssign()",
+      "reason": "",
+      "function": "storageIndexPreincrementAssign",
+      "elapsedMs": 867
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexPreincrement()",
+      "reason": "",
+      "function": "storageIndexPreincrement",
+      "elapsedMs": 914
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexReadMappingStoreRoot(uint)",
+      "reason": "",
+      "function": "storageIndexReadMappingStoreRoot",
+      "elapsedMs": 627
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexReadNseIndex(uint)",
+      "reason": "",
+      "function": "storageIndexReadNseIndex",
+      "elapsedMs": 954
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexSubAssign()",
+      "reason": "",
+      "function": "storageIndexSubAssign",
+      "elapsedMs": 916
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexWriteNseChain(uint,uint,uint)",
+      "reason": "",
+      "function": "storageIndexWriteNseChain",
+      "elapsedMs": 1626
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageLocalDeclSkip()",
+      "reason": "",
+      "function": "storageLocalDeclSkip",
+      "elapsedMs": 412
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageMatrixNseIndex(uint,uint,uint,uint)",
+      "reason": "",
+      "function": "storageMatrixNseIndex",
+      "elapsedMs": 4434
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageMatrixWriteRead()",
+      "reason": "",
+      "function": "storageMatrixWriteRead",
+      "elapsedMs": 1604
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePopAfterPush()",
+      "reason": "",
+      "function": "storagePopAfterPush",
+      "elapsedMs": 586
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePopNonempty()",
+      "reason": "",
+      "function": "storagePopNonempty",
+      "elapsedMs": 741
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storagePopUnknownLength()",
+      "reason": "",
+      "function": "storagePopUnknownLength",
+      "elapsedMs": 502
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushEmpty()",
+      "reason": "",
+      "function": "storagePushEmpty",
+      "elapsedMs": 567
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storagePushLengthPositive()",
+      "reason": "",
+      "function": "storagePushLengthPositive",
+      "elapsedMs": 592
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushLocalBind()",
+      "reason": "",
+      "function": "storagePushLocalBind",
+      "elapsedMs": 596
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushNonsimpleArg(uint,uint)",
+      "reason": "",
+      "function": "storagePushNonsimpleArg",
+      "elapsedMs": 1494
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storagePushReadBack()",
+      "reason": "",
+      "function": "storagePushReadBack",
+      "elapsedMs": 894
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePushReturnAssign()",
+      "reason": "",
+      "function": "storagePushReturnAssign",
+      "elapsedMs": 741
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "storagePushReturnPrimitiveBind()",
+      "reason": "TestSuite.sol:1461: elaboration function for `Solidity.«termSol_raw!{__}»` has not been implemented\n  sol_raw!{require(values.length ==\n        2);uint y = values.push();assert(y == 0);assert(values.length == 3);assert(values[2] == 0);}",
+      "function": "storagePushReturnPrimitiveBind",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootAddAssign()",
+      "reason": "",
+      "function": "storageRootAddAssign",
+      "elapsedMs": 461
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootCopySource()",
+      "reason": "",
+      "function": "storageRootCopySource",
+      "elapsedMs": 447
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootCopyStruct()",
+      "reason": "",
+      "function": "storageRootCopyStruct",
+      "elapsedMs": 456
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootDeleteStruct()",
+      "reason": "",
+      "function": "storageRootDeleteStruct",
+      "elapsedMs": 433
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootDeleteThenCopy()",
+      "reason": "",
+      "function": "storageRootDeleteThenCopy",
+      "elapsedMs": 483
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootDelete()",
+      "reason": "",
+      "function": "storageRootDelete",
+      "elapsedMs": 420
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootDisjoint()",
+      "reason": "",
+      "function": "storageRootDisjoint",
+      "elapsedMs": 425
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootDivAssign()",
+      "reason": "",
+      "function": "storageRootDivAssign",
+      "elapsedMs": 450
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootModAssign()",
+      "reason": "",
+      "function": "storageRootModAssign",
+      "elapsedMs": 469
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootMulAssign()",
+      "reason": "",
+      "function": "storageRootMulAssign",
+      "elapsedMs": 460
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootMultipleWrites()",
+      "reason": "",
+      "function": "storageRootMultipleWrites",
+      "elapsedMs": 439
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPostdecrementAssign()",
+      "reason": "",
+      "function": "storageRootPostdecrementAssign",
+      "elapsedMs": 451
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPostincrementAssign()",
+      "reason": "",
+      "function": "storageRootPostincrementAssign",
+      "elapsedMs": 451
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPostincrement()",
+      "reason": "",
+      "function": "storageRootPostincrement",
+      "elapsedMs": 435
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPredecrement()",
+      "reason": "",
+      "function": "storageRootPredecrement",
+      "elapsedMs": 436
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPreincrementAssign()",
+      "reason": "",
+      "function": "storageRootPreincrementAssign",
+      "elapsedMs": 455
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPreincrement()",
+      "reason": "",
+      "function": "storageRootPreincrement",
+      "elapsedMs": 436
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootSubAssign()",
+      "reason": "",
+      "function": "storageRootSubAssign",
+      "elapsedMs": 440
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageRootWriteRhsCapture(uint,uint,uint)",
+      "reason": "",
+      "function": "storageRootWriteRhsCapture",
+      "elapsedMs": 1434
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageToMemory()",
+      "reason": "",
+      "function": "storageToMemory",
+      "elapsedMs": 527
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "subtractionSimple()",
+      "reason": "",
+      "function": "subtractionSimple",
+      "elapsedMs": 363
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "subtractionStorageRead()",
+      "reason": "",
+      "function": "subtractionStorageRead",
+      "elapsedMs": 443
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "unaryMinusSimple(int)",
+      "reason": "",
+      "function": "unaryMinusSimple",
+      "elapsedMs": 501
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testDeepPopDoesNotResetMappingMember()",
+      "reason": "",
+      "function": "testDeepPopDoesNotResetMappingMember",
+      "elapsedMs": 1862
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testDeleteArrayDoesNotResetElementMappingMember()",
+      "reason": "",
+      "function": "testDeleteArrayDoesNotResetElementMappingMember",
+      "elapsedMs": 3964
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryAliasing()",
+      "reason": "",
+      "function": "testMemoryAliasing",
+      "elapsedMs": 519
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryDeleteAlias()",
+      "reason": "",
+      "function": "testMemoryDeleteAlias",
+      "elapsedMs": 532
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryDeleteIdentityFieldFreshensSlot()",
+      "reason": "",
+      "function": "testMemoryDeleteIdentityFieldFreshensSlot",
+      "elapsedMs": 660
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryDeletePrimitiveField()",
+      "reason": "",
+      "function": "testMemoryDeletePrimitiveField",
+      "elapsedMs": 465
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryEvaluationOrder()",
+      "reason": "",
+      "function": "testMemoryEvaluationOrder",
+      "elapsedMs": 533
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryFieldShallowCopy()",
+      "reason": "",
+      "function": "testMemoryFieldShallowCopy",
+      "elapsedMs": 823
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryIndexWriteImpureIndexPrimitiveRhs()",
+      "reason": "",
+      "function": "testMemoryIndexWriteImpureIndexPrimitiveRhs",
+      "elapsedMs": 532
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryIndexWriteImpureIndexRefRhs()",
+      "reason": "",
+      "function": "testMemoryIndexWriteImpureIndexRefRhs",
+      "elapsedMs": 596
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryRootAlias()",
+      "reason": "",
+      "function": "testMemoryRootAlias",
+      "elapsedMs": 551
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryRootDeleteRebindsOnlyLocal()",
+      "reason": "",
+      "function": "testMemoryRootDeleteRebindsOnlyLocal",
+      "elapsedMs": 571
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryToStorageCopyComplexSource()",
+      "reason": "",
+      "function": "testMemoryToStorageCopyComplexSource",
+      "elapsedMs": 619
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryToStorageCopyComplexTarget()",
+      "reason": "",
+      "function": "testMemoryToStorageCopyComplexTarget",
+      "elapsedMs": 560
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryToStorageCopyField()",
+      "reason": "",
+      "function": "testMemoryToStorageCopyField",
+      "elapsedMs": 525
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryToStorageCopyRoot()",
+      "reason": "",
+      "function": "testMemoryToStorageCopyRoot",
+      "elapsedMs": 502
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testMemoryToStorageIndexCopyImpureIndex()",
+      "reason": "",
+      "function": "testMemoryToStorageIndexCopyImpureIndex",
+      "elapsedMs": 1155
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryTokenArrayAuxiliaryCases()",
+      "reason": "",
+      "function": "testMemoryTokenArrayAuxiliaryCases",
+      "elapsedMs": 1307
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryUintArrayAuxiliaryCases()",
+      "reason": "",
+      "function": "testMemoryUintArrayAuxiliaryCases",
+      "elapsedMs": 614
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryUintArrayPostdecrement()",
+      "reason": "",
+      "function": "testMemoryUintArrayPostdecrement",
+      "elapsedMs": 668
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryUintArrayPostincrement()",
+      "reason": "",
+      "function": "testMemoryUintArrayPostincrement",
+      "elapsedMs": 679
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryUintArrayPredecrement()",
+      "reason": "",
+      "function": "testMemoryUintArrayPredecrement",
+      "elapsedMs": 651
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testNestedIndexWriteImpureIndexPrimitiveRhs()",
+      "reason": "",
+      "function": "testNestedIndexWriteImpureIndexPrimitiveRhs",
+      "elapsedMs": 3686
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testNestedIndexReadImpureIndex()",
+      "reason": "",
+      "function": "testNestedIndexReadImpureIndex",
+      "elapsedMs": 2158
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testNestedIndexWriteImpureReceiverAndIndex()",
+      "reason": "",
+      "function": "testNestedIndexWriteImpureReceiverAndIndex",
+      "elapsedMs": 24871
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testNestedIndexReadImpureReceiverAndIndex()",
+      "reason": "",
+      "function": "testNestedIndexReadImpureReceiverAndIndex",
+      "elapsedMs": 4530
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageDeleteImpureReceiver()",
+      "reason": "",
+      "function": "testStorageDeleteImpureReceiver",
+      "elapsedMs": 3513
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStoragePushImpureReceiver()",
+      "reason": "",
+      "function": "testStoragePushImpureReceiver",
+      "elapsedMs": 2030
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testCompoundAssignImpureReceiver()",
+      "reason": "",
+      "function": "testCompoundAssignImpureReceiver",
+      "elapsedMs": 1801
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryFieldWriteImpureReceiver()",
+      "reason": "",
+      "function": "testMemoryFieldWriteImpureReceiver",
+      "elapsedMs": 706
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testIndexWriteReceiverReadsMutatedVar()",
+      "reason": "",
+      "function": "testIndexWriteReceiverReadsMutatedVar",
+      "elapsedMs": 8980
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testNestedStorageWrites()",
+      "reason": "",
+      "function": "testNestedStorageWrites",
+      "elapsedMs": 649
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageAliases()",
+      "reason": "",
+      "function": "testStorageAliases",
+      "elapsedMs": 642
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageArrayReadWrite()",
+      "reason": "",
+      "function": "testStorageArrayReadWrite",
+      "elapsedMs": 842
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageComplexReceiverPushFieldLvalue()",
+      "reason": "",
+      "function": "testStorageComplexReceiverPushFieldLvalue",
+      "elapsedMs": 1217
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageComplexReceiverPushLvalueCopy()",
+      "reason": "",
+      "function": "testStorageComplexReceiverPushLvalueCopy",
+      "elapsedMs": 1177
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageDeletePaperCase()",
+      "reason": "",
+      "function": "testStorageDeletePaperCase",
+      "elapsedMs": 640
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageIndexWriteImpureIndexPrimitiveRhs()",
+      "reason": "",
+      "function": "testStorageIndexWriteImpureIndexPrimitiveRhs",
+      "elapsedMs": 785
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageIndexWriteImpureIndexRefRhs()",
+      "reason": "",
+      "function": "testStorageIndexWriteImpureIndexRefRhs",
+      "elapsedMs": 1523
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageEvaluationOrder()",
+      "reason": "",
+      "function": "testStorageEvaluationOrder",
+      "elapsedMs": 821
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageFieldDeepCopy()",
+      "reason": "",
+      "function": "testStorageFieldDeepCopy",
+      "elapsedMs": 800
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageMapReadWriteAndDelete()",
+      "reason": "",
+      "function": "testStorageMapReadWriteAndDelete",
+      "elapsedMs": 814
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageMapStructCopy()",
+      "reason": "",
+      "function": "testStorageMapStructCopy",
+      "elapsedMs": 1437
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageNestedPushReturnAlias()",
+      "reason": "",
+      "function": "testStorageNestedPushReturnAlias",
+      "elapsedMs": 997
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStoragePushFieldLvalue()",
+      "reason": "",
+      "function": "testStoragePushFieldLvalue",
+      "elapsedMs": 1042
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStoragePushLvalueCopiesStorageSource()",
+      "reason": "",
+      "function": "testStoragePushLvalueCopiesStorageSource",
+      "elapsedMs": 1029
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStoragePushLvaluePrimitive()",
+      "reason": "",
+      "function": "testStoragePushLvaluePrimitive",
+      "elapsedMs": 709
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStoragePushReturnAlias()",
+      "reason": "",
+      "function": "testStoragePushReturnAlias",
+      "elapsedMs": 1030
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testArrayCopyClearsOldElements()",
+      "reason": "",
+      "function": "testArrayCopyClearsOldElements",
+      "elapsedMs": 1931
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testStorageIndexDeleteOutOfBoundsReverts()",
+      "reason": "",
+      "function": "testStorageIndexDeleteOutOfBoundsReverts",
+      "elapsedMs": 374
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testFixedArrayDeleteKeepsLength()",
+      "reason": "",
+      "function": "testFixedArrayDeleteKeepsLength",
+      "elapsedMs": 609
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedArrayLength()",
+      "reason": "",
+      "function": "testFixedArrayLength",
+      "elapsedMs": 360
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedArrayIndexInBounds()",
+      "reason": "",
+      "function": "testFixedArrayIndexInBounds",
+      "elapsedMs": 437
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedStructArrayLength()",
+      "reason": "",
+      "function": "testFixedStructArrayLength",
+      "elapsedMs": 352
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "testStructFixedMemberLength()",
+      "reason": "TestSuite.sol:2171: it reads the state variable `triple`: struct `Triple` (line 63) differs from the table's `Triple`: [items, tag] against [x, y, z]",
+      "function": "testStructFixedMemberLength",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "testMemoryStructFixedMemberLength()",
+      "reason": "TestSuite.sol:2175: struct `Triple` (line 63) differs from the table's `Triple`: [items, tag] against [x, y, z]",
+      "function": "testMemoryStructFixedMemberLength",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testFixedElementOfDynamicArrayLength()",
+      "reason": "",
+      "function": "testFixedElementOfDynamicArrayLength",
+      "elapsedMs": 550
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryFixedArrayLength()",
+      "reason": "",
+      "function": "testMemoryFixedArrayLength",
+      "elapsedMs": 569
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryNestedFixedArrayLength()",
+      "reason": "",
+      "function": "testMemoryNestedFixedArrayLength",
+      "elapsedMs": 436
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testNewArrayOfFixedElementLength()",
+      "reason": "",
+      "function": "testNewArrayOfFixedElementLength",
+      "elapsedMs": 506
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMappingOfFixedArrayLength(uint)",
+      "reason": "",
+      "function": "testMappingOfFixedArrayLength",
+      "elapsedMs": 401
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testMemoryDynamicArrayDefaultLength()",
+      "reason": "",
+      "function": "testMemoryDynamicArrayDefaultLength",
+      "elapsedMs": 427
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testFixedStructArrayDeleteResetsElements()",
+      "reason": "",
+      "function": "testFixedStructArrayDeleteResetsElements",
+      "elapsedMs": 718
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "testStructWithFixedArrayDeleteKeepsLength()",
+      "reason": "TestSuite.sol:2228: it reads the state variable `triple`: struct `Triple` (line 63) differs from the table's `Triple`: [items, tag] against [x, y, z]",
+      "function": "testStructWithFixedArrayDeleteKeepsLength",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "testStructWithFixedArrayCopy()",
+      "reason": "TestSuite.sol:2239: it reads the state variable `triple`: struct `Triple` (line 63) differs from the table's `Triple`: [items, tag] against [x, y, z]",
+      "function": "testStructWithFixedArrayCopy",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testFixedMappingArrayDeleteKeepsEntries()",
+      "reason": "",
+      "function": "testFixedMappingArrayDeleteKeepsEntries",
+      "elapsedMs": 768
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testPopKeepsMappingElementEntries()",
+      "reason": "",
+      "function": "testPopKeepsMappingElementEntries",
+      "elapsedMs": 992
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testDeleteKeepsMappingElementEntries()",
+      "reason": "",
+      "function": "testDeleteKeepsMappingElementEntries",
+      "elapsedMs": 943
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testPushBindMappingElement()",
+      "reason": "",
+      "function": "testPushBindMappingElement",
+      "elapsedMs": 610
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageRootDeepCopy()",
+      "reason": "",
+      "function": "testStorageRootDeepCopy",
+      "elapsedMs": 689
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageStructDeleteSkipsMappingMember()",
+      "reason": "",
+      "function": "testStorageStructDeleteSkipsMappingMember",
+      "elapsedMs": 1292
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageToMemoryCopyComplexPath()",
+      "reason": "",
+      "function": "testStorageToMemoryCopyComplexPath",
+      "elapsedMs": 699
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageToMemoryCopyField()",
+      "reason": "",
+      "function": "testStorageToMemoryCopyField",
+      "elapsedMs": 645
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageToMemoryCopyRoot()",
+      "reason": "",
+      "function": "testStorageToMemoryCopyRoot",
+      "elapsedMs": 541
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testStorageWriteAndRead()",
+      "reason": "",
+      "function": "testStorageWriteAndRead",
+      "elapsedMs": 467
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDecomposition()",
+      "reason": "",
+      "function": "storageFieldDecomposition",
+      "elapsedMs": 518
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeepValue()",
+      "reason": "",
+      "function": "storageFieldDeepValue",
+      "elapsedMs": 594
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexDecomposition()",
+      "reason": "",
+      "function": "storageIndexDecomposition",
+      "elapsedMs": 2070
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexRootArray()",
+      "reason": "",
+      "function": "storageIndexRootArray",
+      "elapsedMs": 905
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDisjointFields()",
+      "reason": "",
+      "function": "storageFieldDisjointFields",
+      "elapsedMs": 659
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDisjointRoots()",
+      "reason": "",
+      "function": "storageFieldDisjointRoots",
+      "elapsedMs": 512
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryAssignForms()",
+      "reason": "",
+      "function": "memoryAssignForms",
+      "elapsedMs": 798
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryDelete()",
+      "reason": "",
+      "function": "memoryDelete",
+      "elapsedMs": 865
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageAliasRebindOriginal()",
+      "reason": "",
+      "function": "storageAliasRebindOriginal",
+      "elapsedMs": 483
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testSimpleAssert()",
+      "reason": "",
+      "function": "testSimpleAssert",
+      "elapsedMs": 440
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "localArithmeticInRange(uint)",
+      "reason": "",
+      "function": "localArithmeticInRange",
+      "elapsedMs": 957
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "signedUnaryMinusInRange(int8)",
+      "reason": "",
+      "function": "signedUnaryMinusInRange",
+      "elapsedMs": 765
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexWriteRefSourceImpureIndex()",
+      "reason": "",
+      "function": "storageIndexWriteRefSourceImpureIndex",
+      "elapsedMs": 1306
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageFieldWriteRefSourceImpureReceiver()",
+      "reason": "",
+      "function": "storageFieldWriteRefSourceImpureReceiver",
+      "elapsedMs": 1490
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageFieldWriteStorageRefImpureReceiver()",
+      "reason": "",
+      "function": "storageFieldWriteStorageRefImpureReceiver",
+      "elapsedMs": 1622
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageFieldWriteRootRefImpureReceiver()",
+      "reason": "",
+      "function": "storageFieldWriteRootRefImpureReceiver",
+      "elapsedMs": 1736
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldWriteMemRefImpureReceiver()",
+      "reason": "",
+      "function": "memoryFieldWriteMemRefImpureReceiver",
+      "elapsedMs": 693
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexWriteRootRefImpureReceiver()",
+      "reason": "",
+      "function": "storageIndexWriteRootRefImpureReceiver",
+      "elapsedMs": 7048
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexWriteStorageRefImpureReceiver()",
+      "reason": "",
+      "function": "storageIndexWriteStorageRefImpureReceiver",
+      "elapsedMs": 7247
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "memoryToStorageIndexImpureReceiver()",
+      "reason": "",
+      "function": "memoryToStorageIndexImpureReceiver",
+      "elapsedMs": 6601
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexWriteMemRefImpureReceiver()",
+      "reason": "",
+      "function": "memoryIndexWriteMemRefImpureReceiver",
+      "elapsedMs": 1325
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "additionLeftImpureRightReadFirst()",
+      "reason": "",
+      "function": "additionLeftImpureRightReadFirst",
+      "elapsedMs": 456
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "additionRightImpure()",
+      "reason": "",
+      "function": "additionRightImpure",
+      "elapsedMs": 447
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "additionBothOperandsImpure()",
+      "reason": "",
+      "function": "additionBothOperandsImpure",
+      "elapsedMs": 473
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "subtractionLeftImpureRightReadFirst()",
+      "reason": "",
+      "function": "subtractionLeftImpureRightReadFirst",
+      "elapsedMs": 450
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "lessThanLeftImpureRightReadFirst()",
+      "reason": "",
+      "function": "lessThanLeftImpureRightReadFirst",
+      "elapsedMs": 443
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testCopyRootKeepsValueMembers()",
+      "reason": "",
+      "function": "testCopyRootKeepsValueMembers",
+      "elapsedMs": 704
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testCopyFieldNested()",
+      "reason": "",
+      "function": "testCopyFieldNested",
+      "elapsedMs": 610
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testCopyOfCopy()",
+      "reason": "",
+      "function": "testCopyOfCopy",
+      "elapsedMs": 1036
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testCopyIntoMappingEntry(uint)",
+      "reason": "",
+      "function": "testCopyIntoMappingEntry",
+      "elapsedMs": 835
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testCopyArrayMemberElements()",
+      "reason": "",
+      "function": "testCopyArrayMemberElements",
+      "elapsedMs": 1791
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testCopyPrimitiveRoot()",
+      "reason": "",
+      "function": "testCopyPrimitiveRoot",
+      "elapsedMs": 508
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testCopyStoreRootFromField()",
+      "reason": "",
+      "function": "testCopyStoreRootFromField",
+      "elapsedMs": 605
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testCopyStoreRootFromIndex()",
+      "reason": "",
+      "function": "testCopyStoreRootFromIndex",
+      "elapsedMs": 573
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testPushCopyThenDeleteTarget()",
+      "reason": "",
+      "function": "testPushCopyThenDeleteTarget",
+      "elapsedMs": 1085
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "indexWriteBothImpureStorageRef()",
+      "reason": "",
+      "function": "indexWriteBothImpureStorageRef",
+      "elapsedMs": 15566
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "indexWriteBothImpureMemToStorage()",
+      "reason": "",
+      "function": "indexWriteBothImpureMemToStorage",
+      "elapsedMs": 13949
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "indexWriteBothImpureMemoryValue()",
+      "reason": "",
+      "function": "indexWriteBothImpureMemoryValue",
+      "elapsedMs": 1089
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "indexWriteBothImpureMemRef()",
+      "reason": "",
+      "function": "indexWriteBothImpureMemRef",
+      "elapsedMs": 1529
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "nestedMappingWriteRead()",
+      "reason": "",
+      "function": "nestedMappingWriteRead",
+      "elapsedMs": 536
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "nestedMappingRowAlias()",
+      "reason": "",
+      "function": "nestedMappingRowAlias",
+      "elapsedMs": 504
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "arrayOfMappingsIndex()",
+      "reason": "",
+      "function": "arrayOfMappingsIndex",
+      "elapsedMs": 2107
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "mappingOfLedgerMember()",
+      "reason": "",
+      "function": "mappingOfLedgerMember",
+      "elapsedMs": 797
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "mappingPointerTernary()",
+      "reason": "",
+      "function": "mappingPointerTernary",
+      "elapsedMs": 656
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "mappingReadAsKey()",
+      "reason": "",
+      "function": "mappingReadAsKey",
+      "elapsedMs": 522
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldAsMappingKey()",
+      "reason": "",
+      "function": "memoryFieldAsMappingKey",
+      "elapsedMs": 716
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "mappingEntryThroughMemoryToMappingEntry()",
+      "reason": "",
+      "function": "mappingEntryThroughMemoryToMappingEntry",
+      "elapsedMs": 1135
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "boolKeyMapping()",
+      "reason": "",
+      "function": "boolKeyMapping",
+      "elapsedMs": 625
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "boolIsTrueOrFalse(bool)",
+      "reason": "",
+      "function": "boolIsTrueOrFalse",
+      "elapsedMs": 504
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "boolKeyMappingSymbolicKey(bool)",
+      "reason": "",
+      "function": "boolKeyMappingSymbolicKey",
+      "elapsedMs": 1015
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "excluded",
+      "signature": "recursiveStructMapping()",
+      "reason": "TestSuite.sol:2829: struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite",
+      "function": "recursiveStructMapping",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "numberLiteralForms()",
+      "reason": "",
+      "function": "numberLiteralForms",
+      "elapsedMs": 582
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localAddAssign()",
+      "reason": "",
+      "function": "localAddAssign",
+      "elapsedMs": 422
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localMulAssign()",
+      "reason": "",
+      "function": "localMulAssign",
+      "elapsedMs": 422
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localDivAssign()",
+      "reason": "",
+      "function": "localDivAssign",
+      "elapsedMs": 444
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localModAssign()",
+      "reason": "",
+      "function": "localModAssign",
+      "elapsedMs": 428
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localPostincrement()",
+      "reason": "",
+      "function": "localPostincrement",
+      "elapsedMs": 415
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localPreincrementAssign()",
+      "reason": "",
+      "function": "localPreincrementAssign",
+      "elapsedMs": 466
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localPostdecrement()",
+      "reason": "",
+      "function": "localPostdecrement",
+      "elapsedMs": 422
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localPredecrement()",
+      "reason": "",
+      "function": "localPredecrement",
+      "elapsedMs": 429
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localDeclPostdecrement()",
+      "reason": "",
+      "function": "localDeclPostdecrement",
+      "elapsedMs": 480
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "localDeclPredecrement()",
+      "reason": "",
+      "function": "localDeclPredecrement",
+      "elapsedMs": 494
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "subAssignValueRhsCapture()",
+      "reason": "",
+      "function": "subAssignValueRhsCapture",
+      "elapsedMs": 459
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "mulAssignValueRhsCapture()",
+      "reason": "",
+      "function": "mulAssignValueRhsCapture",
+      "elapsedMs": 457
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "divAssignValueRhsCapture()",
+      "reason": "",
+      "function": "divAssignValueRhsCapture",
+      "elapsedMs": 461
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "modAssignValueRhsCapture()",
+      "reason": "",
+      "function": "modAssignValueRhsCapture",
+      "elapsedMs": 444
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "indexWriteValueRhsCapture()",
+      "reason": "",
+      "function": "indexWriteValueRhsCapture",
+      "elapsedMs": 545
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexWriteMemRefRhsCapture()",
+      "reason": "",
+      "function": "memoryIndexWriteMemRefRhsCapture",
+      "elapsedMs": 797
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexDeleteNonSimpleIndexCapture()",
+      "reason": "",
+      "function": "memoryIndexDeleteNonSimpleIndexCapture",
+      "elapsedMs": 585
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "boolInequalityCaptureLhs()",
+      "reason": "",
+      "function": "boolInequalityCaptureLhs",
+      "elapsedMs": 436
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "boolInequalityCaptureRhs()",
+      "reason": "",
+      "function": "boolInequalityCaptureRhs",
+      "elapsedMs": 437
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "greaterThanCaptureRhs()",
+      "reason": "",
+      "function": "greaterThanCaptureRhs",
+      "elapsedMs": 404
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "greaterEqualCaptureLhs()",
+      "reason": "",
+      "function": "greaterEqualCaptureLhs",
+      "elapsedMs": 407
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "greaterEqualCaptureRhs()",
+      "reason": "",
+      "function": "greaterEqualCaptureRhs",
+      "elapsedMs": 402
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "lessEqualCaptureLhs()",
+      "reason": "",
+      "function": "lessEqualCaptureLhs",
+      "elapsedMs": 409
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "lessEqualCaptureRhs()",
+      "reason": "",
+      "function": "lessEqualCaptureRhs",
+      "elapsedMs": 416
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "logicalNotCapture()",
+      "reason": "",
+      "function": "logicalNotCapture",
+      "elapsedMs": 405
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "unaryMinusCapture()",
+      "reason": "",
+      "function": "unaryMinusCapture",
+      "elapsedMs": 402
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "multiplicationUnfoldLeft()",
+      "reason": "",
+      "function": "multiplicationUnfoldLeft",
+      "elapsedMs": 407
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "multiplicationUnfoldRight()",
+      "reason": "",
+      "function": "multiplicationUnfoldRight",
+      "elapsedMs": 411
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "divisionUnfoldLeft()",
+      "reason": "",
+      "function": "divisionUnfoldLeft",
+      "elapsedMs": 417
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "divisionUnfoldRight()",
+      "reason": "",
+      "function": "divisionUnfoldRight",
+      "elapsedMs": 410
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "moduloUnfoldLeft()",
+      "reason": "",
+      "function": "moduloUnfoldLeft",
+      "elapsedMs": 406
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "moduloUnfoldRight()",
+      "reason": "",
+      "function": "moduloUnfoldRight",
+      "elapsedMs": 405
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "signedDivisionTruncates()",
+      "reason": "",
+      "function": "signedDivisionTruncates",
+      "elapsedMs": 483
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "signedModuloTakesDividendSign()",
+      "reason": "",
+      "function": "signedModuloTakesDividendSign",
+      "elapsedMs": 481
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageSignedDivModAssign()",
+      "reason": "",
+      "function": "storageSignedDivModAssign",
+      "elapsedMs": 604
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "powerUnfoldLeft()",
+      "reason": "",
+      "function": "powerUnfoldLeft",
+      "elapsedMs": 423
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "powerUnfoldRight()",
+      "reason": "",
+      "function": "powerUnfoldRight",
+      "elapsedMs": 414
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "subtractionUnfoldRight()",
+      "reason": "",
+      "function": "subtractionUnfoldRight",
+      "elapsedMs": 410
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "parenthesizedRightOperand()",
+      "reason": "",
+      "function": "parenthesizedRightOperand",
+      "elapsedMs": 421
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "parenthesizedLeftOperand()",
+      "reason": "",
+      "function": "parenthesizedLeftOperand",
+      "elapsedMs": 426
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "parenthesizedCondition()",
+      "reason": "",
+      "function": "parenthesizedCondition",
+      "elapsedMs": 418
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldSubAssignUnfold()",
+      "reason": "",
+      "function": "memoryFieldSubAssignUnfold",
+      "elapsedMs": 626
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldMulAssignUnfold()",
+      "reason": "",
+      "function": "memoryFieldMulAssignUnfold",
+      "elapsedMs": 615
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldDivAssignUnfold()",
+      "reason": "",
+      "function": "memoryFieldDivAssignUnfold",
+      "elapsedMs": 629
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldModAssignUnfold()",
+      "reason": "",
+      "function": "memoryFieldModAssignUnfold",
+      "elapsedMs": 613
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPostincrementUnfold()",
+      "reason": "",
+      "function": "memoryFieldPostincrementUnfold",
+      "elapsedMs": 631
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPredecrementUnfold()",
+      "reason": "",
+      "function": "memoryFieldPredecrementUnfold",
+      "elapsedMs": 628
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldPostdecrementUnfold()",
+      "reason": "",
+      "function": "memoryFieldPostdecrementUnfold",
+      "elapsedMs": 629
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldDeleteUnfold()",
+      "reason": "",
+      "function": "memoryFieldDeleteUnfold",
+      "elapsedMs": 586
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryFieldReadUnfoldResult()",
+      "reason": "",
+      "function": "memoryFieldReadUnfoldResult",
+      "elapsedMs": 596
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexReadUnfoldResult()",
+      "reason": "",
+      "function": "memoryIndexReadUnfoldResult",
+      "elapsedMs": 639
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArraySubAssignUnfold()",
+      "reason": "",
+      "function": "memoryIndexArraySubAssignUnfold",
+      "elapsedMs": 789
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayMulAssignUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayMulAssignUnfold",
+      "elapsedMs": 777
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayDivAssignUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayDivAssignUnfold",
+      "elapsedMs": 764
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayModAssignUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayModAssignUnfold",
+      "elapsedMs": 762
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPostincrementUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayPostincrementUnfold",
+      "elapsedMs": 754
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPredecrementUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayPredecrementUnfold",
+      "elapsedMs": 781
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPostdecrementUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayPostdecrementUnfold",
+      "elapsedMs": 779
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayDeleteUnfold()",
+      "reason": "",
+      "function": "memoryIndexArrayDeleteUnfold",
+      "elapsedMs": 726
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPostincrement()",
+      "reason": "",
+      "function": "memoryIndexArrayPostincrement",
+      "elapsedMs": 536
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPredecrement()",
+      "reason": "",
+      "function": "memoryIndexArrayPredecrement",
+      "elapsedMs": 534
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPreincrementAssignment()",
+      "reason": "",
+      "function": "memoryIndexArrayPreincrementAssignment",
+      "elapsedMs": 687
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "memoryIndexArrayPostdecrementAssignment()",
+      "reason": "",
+      "function": "memoryIndexArrayPostdecrementAssignment",
+      "elapsedMs": 634
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldDeleteUnfold()",
+      "reason": "",
+      "function": "storageFieldDeleteUnfold",
+      "elapsedMs": 495
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPredecrementUnfold()",
+      "reason": "",
+      "function": "storageFieldPredecrementUnfold",
+      "elapsedMs": 509
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageFieldPostdecrementUnfold()",
+      "reason": "",
+      "function": "storageFieldPostdecrementUnfold",
+      "elapsedMs": 532
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexAddAssignUnfold()",
+      "reason": "",
+      "function": "storageIndexAddAssignUnfold",
+      "elapsedMs": 546
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexSubAssignUnfold()",
+      "reason": "",
+      "function": "storageIndexSubAssignUnfold",
+      "elapsedMs": 568
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMulAssignUnfold()",
+      "reason": "",
+      "function": "storageIndexMulAssignUnfold",
+      "elapsedMs": 561
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexDivAssignUnfold()",
+      "reason": "",
+      "function": "storageIndexDivAssignUnfold",
+      "elapsedMs": 553
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexModAssignUnfold()",
+      "reason": "",
+      "function": "storageIndexModAssignUnfold",
+      "elapsedMs": 565
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexPreincrementUnfold()",
+      "reason": "",
+      "function": "storageIndexPreincrementUnfold",
+      "elapsedMs": 567
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexPostincrementUnfold()",
+      "reason": "",
+      "function": "storageIndexPostincrementUnfold",
+      "elapsedMs": 545
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexPredecrementUnfold()",
+      "reason": "",
+      "function": "storageIndexPredecrementUnfold",
+      "elapsedMs": 546
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexPostdecrementUnfold()",
+      "reason": "",
+      "function": "storageIndexPostdecrementUnfold",
+      "elapsedMs": 542
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingSubAssign()",
+      "reason": "",
+      "function": "storageIndexMappingSubAssign",
+      "elapsedMs": 481
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingMulAssign()",
+      "reason": "",
+      "function": "storageIndexMappingMulAssign",
+      "elapsedMs": 474
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingDivAssign()",
+      "reason": "",
+      "function": "storageIndexMappingDivAssign",
+      "elapsedMs": 482
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingModAssign()",
+      "reason": "",
+      "function": "storageIndexMappingModAssign",
+      "elapsedMs": 483
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPreincrement()",
+      "reason": "",
+      "function": "storageIndexMappingPreincrement",
+      "elapsedMs": 471
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPostincrement()",
+      "reason": "",
+      "function": "storageIndexMappingPostincrement",
+      "elapsedMs": 470
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPredecrement()",
+      "reason": "",
+      "function": "storageIndexMappingPredecrement",
+      "elapsedMs": 492
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPostdecrement()",
+      "reason": "",
+      "function": "storageIndexMappingPostdecrement",
+      "elapsedMs": 474
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPreincrementAssignment()",
+      "reason": "",
+      "function": "storageIndexMappingPreincrementAssignment",
+      "elapsedMs": 579
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPostincrementAssignment()",
+      "reason": "",
+      "function": "storageIndexMappingPostincrementAssignment",
+      "elapsedMs": 571
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPredecrementAssignment()",
+      "reason": "",
+      "function": "storageIndexMappingPredecrementAssignment",
+      "elapsedMs": 582
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageIndexMappingPostdecrementAssignment()",
+      "reason": "",
+      "function": "storageIndexMappingPostdecrementAssignment",
+      "elapsedMs": 572
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storageIndexReadArrayStoreRoot()",
+      "reason": "",
+      "function": "storageIndexReadArrayStoreRoot",
+      "elapsedMs": 903
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "storagePopUnfold()",
+      "reason": "",
+      "function": "storagePopUnfold",
+      "elapsedMs": 378
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPostdecrement()",
+      "reason": "",
+      "function": "storageRootPostdecrement",
+      "elapsedMs": 441
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "storageRootPredecrementAssign()",
+      "reason": "",
+      "function": "storageRootPredecrementAssign",
+      "elapsedMs": 529
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "ternaryToIfStorage()",
+      "reason": "",
+      "function": "ternaryToIfStorage",
+      "elapsedMs": 451
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "transferToOwner()",
+      "reason": "TestSuite.sol:3553: the printed text does not parse: <input>:1:26: expected 'storage' or identifier",
+      "function": "transferToOwner",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "transferUnfoldReceiver()",
+      "reason": "",
+      "function": "transferUnfoldReceiver",
+      "elapsedMs": 341
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "transferUnfoldArgument()",
+      "reason": "TestSuite.sol:3564: the printed text does not parse: <input>:1:26: expected 'storage' or identifier",
+      "function": "transferUnfoldArgument",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "sendToOwner()",
+      "reason": "TestSuite.sol:3571: the printed text does not parse: <input>:1:26: expected 'storage' or identifier",
+      "function": "sendToOwner",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "sendUnfoldReceiver()",
+      "reason": "",
+      "function": "sendUnfoldReceiver",
+      "elapsedMs": 346
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "sendUnfoldArgument()",
+      "reason": "TestSuite.sol:3584: the printed text does not parse: <input>:1:26: expected 'storage' or identifier",
+      "function": "sendUnfoldArgument",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "callToSender()",
+      "reason": "",
+      "function": "callToSender",
+      "elapsedMs": 351
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "skip",
+      "status": "skipped",
+      "signature": "tryCalleeGet(uint)",
+      "reason": "TestSuite.sol:3599: tagged `@custom:key skip`",
+      "function": "tryCalleeGet",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "skip",
+      "status": "skipped",
+      "signature": "tryCalleePing()",
+      "reason": "TestSuite.sol:3604: tagged `@custom:key skip`",
+      "function": "tryCalleePing",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "tryCallCatchKeepsState()",
+      "reason": "",
+      "function": "tryCallCatchKeepsState",
+      "elapsedMs": 1293
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "tryCallBindsReturnAndPanicCode()",
+      "reason": "",
+      "function": "tryCallBindsReturnAndPanicCode",
+      "elapsedMs": 737
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "tryCallUnmatchedFailureReverts()",
+      "reason": "",
+      "function": "tryCallUnmatchedFailureReverts",
+      "elapsedMs": 944
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnOne()",
+      "reason": "",
+      "function": "returnOne",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnSign(int)",
+      "reason": "",
+      "function": "returnSign",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnOrdered(uint,uint)",
+      "reason": "",
+      "function": "returnOrdered",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnSwapped()",
+      "reason": "",
+      "function": "returnSwapped",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnStats(uint,uint,uint)",
+      "reason": "",
+      "function": "returnStats",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "internalCallDeclaration()",
+      "reason": "",
+      "function": "internalCallDeclaration",
+      "elapsedMs": 407
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "internalCallInExpression()",
+      "reason": "",
+      "function": "internalCallInExpression",
+      "elapsedMs": 455
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "internalCallToStorage()",
+      "reason": "",
+      "function": "internalCallToStorage",
+      "elapsedMs": 453
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnEarly()",
+      "reason": "",
+      "function": "returnEarly",
+      "elapsedMs": 1008
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "tupleReturnPair()",
+      "reason": "",
+      "function": "tupleReturnPair",
+      "elapsedMs": 574
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "tupleReturnReadsReturnVariables()",
+      "reason": "",
+      "function": "tupleReturnReadsReturnVariables",
+      "elapsedMs": 524
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "tupleReturnDiscardsComponents()",
+      "reason": "",
+      "function": "tupleReturnDiscardsComponents",
+      "elapsedMs": 1295
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "tupleReturnAssignsExisting()",
+      "reason": "",
+      "function": "tupleReturnAssignsExisting",
+      "elapsedMs": 607
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "tupleAssignmentRotates()",
+      "reason": "",
+      "function": "tupleAssignmentRotates",
+      "elapsedMs": 568
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "tupleDeclaration()",
+      "reason": "",
+      "function": "tupleDeclaration",
+      "elapsedMs": 396
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnFromNestedBlock(uint)",
+      "reason": "",
+      "function": "returnFromNestedBlock",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnOrFallThrough(bool)",
+      "reason": "",
+      "function": "returnOrFallThrough",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnAddOne(uint)",
+      "reason": "",
+      "function": "returnAddOne",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnAddTwo(uint)",
+      "reason": "",
+      "function": "returnAddTwo",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnRevertsOnZero(uint)",
+      "reason": "",
+      "function": "returnRevertsOnZero",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnInsideTry()",
+      "reason": "",
+      "function": "returnInsideTry",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnVoidEarly(uint)",
+      "reason": "",
+      "function": "returnVoidEarly",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnLeavesNestedBlocks()",
+      "reason": "",
+      "function": "returnLeavesNestedBlocks",
+      "elapsedMs": 680
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnOrFallThroughNamed()",
+      "reason": "",
+      "function": "returnOrFallThroughNamed",
+      "elapsedMs": 622
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnFromNestedCall()",
+      "reason": "",
+      "function": "returnFromNestedCall",
+      "elapsedMs": 499
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnAfterRevertGuard()",
+      "reason": "",
+      "function": "returnAfterRevertGuard",
+      "elapsedMs": 457
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "returnFromTryBranches()",
+      "reason": "",
+      "function": "returnFromTryBranches",
+      "elapsedMs": 886
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnFromVoidFunction()",
+      "reason": "",
+      "function": "returnFromVoidFunction",
+      "elapsedMs": 1069
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnDefaults()",
+      "reason": "",
+      "function": "returnDefaults",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnDefaultsAreZero()",
+      "reason": "",
+      "function": "returnDefaultsAreZero",
+      "elapsedMs": 490
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnDefaultAddress()",
+      "reason": "",
+      "function": "returnDefaultAddress",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "returnDefaultEnum()",
+      "reason": "TestSuite.sol:3826: type `Phase` is not a struct of the contract",
+      "function": "returnDefaultEnum",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnDefaultMemoryArray()",
+      "reason": "",
+      "function": "returnDefaultMemoryArray",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnInThenBranch(bool)",
+      "reason": "",
+      "function": "returnInThenBranch",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnInElseBranch(bool)",
+      "reason": "",
+      "function": "returnInElseBranch",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "returnEnumInOneBranch(bool)",
+      "reason": "TestSuite.sol:3846: type `Phase` is not a struct of the contract",
+      "function": "returnEnumInOneBranch",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnAssignsOneOfTwo()",
+      "reason": "",
+      "function": "returnAssignsOneOfTwo",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "returnReadsItsDefault()",
+      "reason": "",
+      "function": "returnReadsItsDefault",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnDefaultAddressIsZero()",
+      "reason": "",
+      "function": "returnDefaultAddressIsZero",
+      "elapsedMs": 409
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "returnDefaultEnumIsFirstMember()",
+      "reason": "TestSuite.sol:3864: type `Phase` is not a struct of the contract",
+      "function": "returnDefaultEnumIsFirstMember",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnDefaultMemoryArrayIsEmpty()",
+      "reason": "",
+      "function": "returnDefaultMemoryArrayIsEmpty",
+      "elapsedMs": 444
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnInThenBranchElseIsDefault()",
+      "reason": "",
+      "function": "returnInThenBranchElseIsDefault",
+      "elapsedMs": 686
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnInElseBranchThenIsDefault()",
+      "reason": "",
+      "function": "returnInElseBranchThenIsDefault",
+      "elapsedMs": 605
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnDefaultIsFreshPerCall()",
+      "reason": "",
+      "function": "returnDefaultIsFreshPerCall",
+      "elapsedMs": 736
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "returnEnumOtherBranchIsDefault()",
+      "reason": "TestSuite.sol:3894: type `Phase` is not a struct of the contract",
+      "function": "returnEnumOtherBranchIsDefault",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnUnassignedComponentIsDefault()",
+      "reason": "",
+      "function": "returnUnassignedComponentIsDefault",
+      "elapsedMs": 565
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "returnDefaultIsVisibleInBody()",
+      "reason": "",
+      "function": "returnDefaultIsVisibleInBody",
+      "elapsedMs": 458
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "overloadPick(uint)",
+      "reason": "TestSuite.sol:3909: `overloadPick` is overloaded: the import names a program by its function's name",
+      "function": "overloadPick",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "overloadPick(bool)",
+      "reason": "TestSuite.sol:3913: `overloadPick` is overloaded: the import names a program by its function's name",
+      "function": "overloadPick",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "overloadedInternalCall()",
+      "reason": "TestSuite.sol:3917: it calls `overloadPick`, which is left out: `overloadPick` is overloaded: the import names a program by its function's name",
+      "function": "overloadedInternalCall",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "modifierGuarded(uint)",
+      "reason": "TestSuite.sol:3951: the modifier `nonZero`: its code would be dropped",
+      "function": "modifierGuarded",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "modifierAroundBody()",
+      "reason": "TestSuite.sol:3955: the modifier `countAround`: its code would be dropped",
+      "function": "modifierAroundBody",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "modifierOrdered()",
+      "reason": "TestSuite.sol:3960: the modifier `doubleAfter`: its code would be dropped",
+      "function": "modifierOrdered",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "modifierArgument()",
+      "reason": "TestSuite.sol:3964: it calls `modifierGuarded`, which is left out: the modifier `nonZero`: its code would be dropped",
+      "function": "modifierArgument",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "modifierResumesAfterReturn()",
+      "reason": "TestSuite.sol:3969: it calls `modifierAroundBody`, which is left out: the modifier `countAround`: its code would be dropped",
+      "function": "modifierResumesAfterReturn",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "modifierFirstListedOutermost()",
+      "reason": "TestSuite.sol:3975: it calls `modifierOrdered`, which is left out: the modifier `doubleAfter`: its code would be dropped",
+      "function": "modifierFirstListedOutermost",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "modifierOnObligation()",
+      "reason": "TestSuite.sol:3980: the modifier `setsFive`: its code would be dropped",
+      "function": "modifierOnObligation",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "whileCountsUp()",
+      "reason": "open proof goals",
+      "function": "whileCountsUp",
+      "elapsedMs": 384
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "whileBodyDeclaresLocal()",
+      "reason": "open proof goals",
+      "function": "whileBodyDeclaresLocal",
+      "elapsedMs": 447
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "whileBreakLeavesLoop()",
+      "reason": "open proof goals",
+      "function": "whileBreakLeavesLoop",
+      "elapsedMs": 450
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "whileContinueSkipsRest()",
+      "reason": "open proof goals",
+      "function": "whileContinueSkipsRest",
+      "elapsedMs": 450
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "forContinueStillUpdates()",
+      "reason": "open proof goals",
+      "function": "forContinueStillUpdates",
+      "elapsedMs": 477
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "forBreakKeepsCounter()",
+      "reason": "open proof goals",
+      "function": "forBreakKeepsCounter",
+      "elapsedMs": 469
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "doWhileRunsBodyFirst()",
+      "reason": "open proof goals",
+      "function": "doWhileRunsBodyFirst",
+      "elapsedMs": 463
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "pending",
+      "signature": "forWritesStorageArray()",
+      "reason": "open proof goals",
+      "function": "forWritesStorageArray",
+      "elapsedMs": 1322
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "loopNestedReturn(uint)",
+      "reason": "",
+      "function": "loopNestedReturn",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "returnLeavesNestedLoops()",
+      "reason": "open proof goals",
+      "function": "returnLeavesNestedLoops",
+      "elapsedMs": 752
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "invariantCountsToBound(uint)",
+      "reason": "",
+      "function": "invariantCountsToBound",
+      "elapsedMs": 1677
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "invariantForCountsArrayLength()",
+      "reason": "open proof goals",
+      "function": "invariantForCountsArrayLength",
+      "elapsedMs": 6880
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "invariantClosedFormSum()",
+      "reason": "open proof goals",
+      "function": "invariantClosedFormSum",
+      "elapsedMs": 7993
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "invariantVariantSkipsBreakIteration(uint)",
+      "reason": "",
+      "function": "invariantVariantSkipsBreakIteration",
+      "elapsedMs": 10006
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "invariantOverStorageWrites(uint)",
+      "reason": "",
+      "function": "invariantOverStorageWrites",
+      "elapsedMs": 8796
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "unsupported",
+      "signature": "invariantQuantifiedOverPrefix()",
+      "reason": "TestSuite.sol:4140: the loop clause `invariant \\forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language",
+      "function": "invariantQuantifiedOverPrefix",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "constantInlined()",
+      "reason": "TestSuite.sol:4149: it reads the state variable `LIMIT`: `LIMIT` (line 122) is constant: a value fixed before any call, not a storage slot",
+      "function": "constantInlined",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "contractQualifiedConstantAndEnum()",
+      "reason": "TestSuite.sol:4155: type `TestSuite.Phase` is not a struct of the contract",
+      "function": "contractQualifiedConstantAndEnum",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "fileLevelConstantEnumAndFunction()",
+      "reason": "TestSuite.sol:4162: type `FileLevelColor` is not a struct of the contract",
+      "function": "fileLevelConstantEnumAndFunction",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "fileLevelStructThroughLibrary()",
+      "reason": "TestSuite.sol:4168: it reads the state variable `pair`: type `FileLevelPair` is not a struct of the contract",
+      "function": "fileLevelStructThroughLibrary",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "libraryCallAndUsingFor()",
+      "reason": "TestSuite.sol:4175: elaboration function for `Solidity.«termSol_raw!{__}»` has not been implemented\n  sol_raw!{uint v = 5;assert(PairLib.bump(v) == 15);assert(v.bump() == 15);assert(PairLib.UNIT == 10);}",
+      "function": "libraryCallAndUsingFor",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "valueTypeWrapUnwrap()",
+      "reason": "TestSuite.sol:4183: type `Wei` is not a struct of the contract",
+      "function": "valueTypeWrapUnwrap",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "typeBounds()",
+      "reason": "TestSuite.sol:4188: the expression `ElementaryTypeNameExpression`",
+      "function": "typeBounds",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "addmodMulmod()",
+      "reason": "TestSuite.sol:4197: addmod is not a function declared before this one",
+      "function": "addmodMulmod",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "setTotalToOne()",
+      "reason": "",
+      "function": "setTotalToOne",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "modifierCallsInternalFunction()",
+      "reason": "TestSuite.sol:4212: the modifier `callsInternal`: its code would be dropped",
+      "function": "modifierCallsInternalFunction",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "firstOf(uint[])",
+      "reason": "TestSuite.sol:4216: the parameter `xs` has the type `uint[]`, which is not a value type",
+      "function": "firstOf",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "indexParameter()",
+      "reason": "TestSuite.sol:4223: firstOf: the parameter xs has a reference type",
+      "function": "indexParameter",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "setTokenValue(Token,uint)",
+      "reason": "TestSuite.sol:4227: the parameter `t` has the type `Token`, which is not a value type",
+      "function": "setTokenValue",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "readTokenValue(Token)",
+      "reason": "TestSuite.sol:4231: the parameter `t` has the type `Token`, which is not a value type",
+      "function": "readTokenValue",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storageStructParameter()",
+      "reason": "TestSuite.sol:4236: setTokenValue: the parameter t has a reference type",
+      "function": "storageStructParameter",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "credit(mapping(uint => uint),uint)",
+      "reason": "TestSuite.sol:4241: the parameter `m` has the type `mapping(uint => uint)`, which is not a value type",
+      "function": "credit",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storageMappingParameter()",
+      "reason": "TestSuite.sol:4246: credit: the parameter m has a reference type",
+      "function": "storageMappingParameter",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "pinWithInequality(uint,uint)",
+      "reason": "",
+      "function": "pinWithInequality",
+      "elapsedMs": 681
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "payableAddressParameter(address payable)",
+      "reason": "",
+      "function": "payableAddressParameter",
+      "elapsedMs": 455
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "digits(uint,uint,uint)",
+      "reason": "",
+      "function": "digits",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "namedArgumentsBindByName()",
+      "reason": "",
+      "function": "namedArgumentsBindByName",
+      "elapsedMs": 494
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "internal",
+      "status": "unsupported",
+      "signature": "twiceKeepsLocal()",
+      "reason": "TestSuite.sol:4278: the modifier `keepsLocal`: its code would be dropped",
+      "function": "twiceKeepsLocal",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "modifierLocalsArePerApplication()",
+      "reason": "TestSuite.sol:4280: it calls `twiceKeepsLocal`, which is left out: the modifier `keepsLocal`: its code would be dropped",
+      "function": "modifierLocalsArePerApplication",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "uninitialisedLocalsAreDefault()",
+      "reason": "",
+      "function": "uninitialisedLocalsAreDefault",
+      "elapsedMs": 433
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storageStaticToDynamicCopyKeepsLength()",
+      "reason": "TestSuite.sol:4297: copySource9: a storage reference to a uint[9] where a uint[] is expected",
+      "function": "storageStaticToDynamicCopyKeepsLength",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "storageShorterStaticCopyClearsTail()",
+      "reason": "TestSuite.sol:4307: copySmall: a storage reference to a uint[20] where a uint[40] is expected",
+      "function": "storageShorterStaticCopyClearsTail",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedArrayOfFixedArraysLength()",
+      "reason": "",
+      "function": "testFixedArrayOfFixedArraysLength",
+      "elapsedMs": 420
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testEmptyPushReadsDefaultValue()",
+      "reason": "",
+      "function": "testEmptyPushReadsDefaultValue",
+      "elapsedMs": 867
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testPopPushValueResetsValue()",
+      "reason": "",
+      "function": "testPopPushValueResetsValue",
+      "elapsedMs": 1776
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "testFixedCopyThenEmptyPushReadsZero()",
+      "reason": "TestSuite.sol:4338: copySource9: a storage reference to a uint[9] where a uint[] is expected",
+      "function": "testFixedCopyThenEmptyPushReadsZero",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "testShorterCopyThenEmptyPushClearsTail()",
+      "reason": "TestSuite.sol:4348: copySource9: a storage reference to a uint[9] where a uint[] is expected",
+      "function": "testShorterCopyThenEmptyPushClearsTail",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testPushMappingOfFixedArrayPreservesEntries()",
+      "reason": "",
+      "function": "testPushMappingOfFixedArrayPreservesEntries",
+      "elapsedMs": 1980
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "unsupported",
+      "signature": "testShapeCopyFixedTailAndSourceIndependence()",
+      "reason": "TestSuite.sol:4372: copySmall: a storage reference to a uint[20] where a uint[40] is expected",
+      "function": "testShapeCopyFixedTailAndSourceIndependence",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testShapeCopyDynamicShrinkClearsReusedSlot()",
+      "reason": "",
+      "function": "testShapeCopyDynamicShrinkClearsReusedSlot",
+      "elapsedMs": 2626
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testShapeCopyNestedSelfAliasPreservesValues()",
+      "reason": "",
+      "function": "testShapeCopyNestedSelfAliasPreservesValues",
+      "elapsedMs": 1549
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedArrayOfMappingsOfFixedArraysLength()",
+      "reason": "",
+      "function": "testFixedArrayOfMappingsOfFixedArraysLength",
+      "elapsedMs": 423
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "box",
+      "status": "proved",
+      "signature": "testDynamicArrayOfMappingsOfFixedArraysLength()",
+      "reason": "",
+      "function": "testDynamicArrayOfMappingsOfFixedArraysLength",
+      "elapsedMs": 585
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testPushIndexedPrimitiveSourceOnce()",
+      "reason": "",
+      "function": "testPushIndexedPrimitiveSourceOnce",
+      "elapsedMs": 924
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testPushIndexedFixedArraySourceOnce()",
+      "reason": "",
+      "function": "testPushIndexedFixedArraySourceOnce",
+      "elapsedMs": 2871
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedShapePopPushResetsFixedElement()",
+      "reason": "",
+      "function": "testFixedShapePopPushResetsFixedElement",
+      "elapsedMs": 6966
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedShapeDeleteFixedElementKeepsLength()",
+      "reason": "",
+      "function": "testFixedShapeDeleteFixedElementKeepsLength",
+      "elapsedMs": 1857
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedShapeDeleteDynamicThenPushFixedElement()",
+      "reason": "",
+      "function": "testFixedShapeDeleteDynamicThenPushFixedElement",
+      "elapsedMs": 4905
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "testFixedShapeFixedElementStorageAlias()",
+      "reason": "",
+      "function": "testFixedShapeFixedElementStorageAlias",
+      "elapsedMs": 1608
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "testFixedShapeEmptyPushFixedElementReadsZero()",
+      "reason": "open proof goals",
+      "function": "testFixedShapeEmptyPushFixedElementReadsZero",
+      "elapsedMs": 17108
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "testEmptyPushFixedArrayReturnReadsZero()",
+      "reason": "open proof goals",
+      "function": "testEmptyPushFixedArrayReturnReadsZero",
+      "elapsedMs": 6589
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "testEmptyPushDynamicArrayReturnReadsZero()",
+      "reason": "open proof goals",
+      "function": "testEmptyPushDynamicArrayReturnReadsZero",
+      "elapsedMs": 11905
+    },
+    {
+      "source": "keyext.solidity.examples/TestSuite.sol",
+      "contract": "TestSuite",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "testEmptyPushStructReturnReadsZero()",
+      "reason": "open proof goals",
+      "function": "testEmptyPushStructReturnReadsZero",
+      "elapsedMs": 1057
+    }
+  ],
+  "errors": []
+}

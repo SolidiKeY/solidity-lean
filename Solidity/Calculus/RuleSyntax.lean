@@ -1,4 +1,5 @@
 import Solidity.Update
+import Solidity.Syntax.PushSource
 
 /-!
 # The calculus's notation: `dl{ … }`
@@ -51,7 +52,7 @@ hypothesis):
 | `e` | a value | `Val C Γ p` | not a conditional, when written to storage or to a memory target |
 | `nse`, `nadr` | a value that is not simple | `Val C Γ p` | not simple (and as `e`) |
 | `sp`, `map`, `arr` | a simple storage path (`map`/`arr` fix how it is indexed) | `SPath C Γ T` | simple |
-| `parr`, `rarr` | a simple path to an array of primitives, of references | `SPath C Γ T` | simple; the element primitive (`SPath.elemPrim`), or not |
+| `parr`, `rarr` | a simple path to an array of primitives, of nonmapping references | `SPath C Γ T` | simple; the element primitive (`SPath.elemPrim`), or neither primitive nor mapping |
 | `marr`, `darr` | a simple path to an array of mappings, of anything else | `SPath C Γ T` | simple; the element a mapping (`SPath.elemMapping`), or not |
 | `nsp` | a storage path that is not simple | `SPath C Γ T` | not simple |
 | `path` | any storage path | `SPath C Γ T` | |
@@ -125,6 +126,7 @@ syntax:65 dl_term:65 " - " dl_term:66 : dl_term
 syntax:70 dl_term:70 " / " dl_term:71 : dl_term
 /-- `a * b`: a product (KeY's `mul`), checked as Solidity multiplies. -/
 syntax:70 dl_term:70 " * " dl_term:71 : dl_term
+syntax:70 dl_term:70 " % " dl_term:71 : dl_term
 /-- `a && b`, `a || b`: the `bool` operators of a value, short-circuiting. -/
 syntax:30 dl_term:30 " && " dl_term:31 : dl_term
 syntax:25 dl_term:25 " || " dl_term:26 : dl_term
@@ -244,6 +246,10 @@ solkey's label (`"Holds": …`); the macro drops it, and `Taclet.branchLabels`
 keeps it for the printers. -/
 declare_syntax_cat dl_premise (behavior := both)
 syntax dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
+syntax dl_upd ppSpace dl_upd " ⟨" "[ " "]" "⟩" : dl_premise
+/-- SolKey's outer conditional for division/remainder push suffixes. -/
+syntax "if " dl_fml " then " "(" dl_upd ppSpace dl_upd " ⟨" "[ " "]" "⟩" ")"
+  " else " "(" "⟨" "[ " &"revert" "(" ")" "; " "]" "⟩" ")" : dl_premise
 syntax "⟨" "[ " (sol_stmt "; ")* "]" "⟩" : dl_premise
 syntax (str ": ")? dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" " ; "
   (str ": ")? dl_fml " ⟹ " "⟨" "[ " sol_block " ]" "⟩" : dl_premise
@@ -563,6 +569,7 @@ def headAt (pos : Pos) (stx : Lean.Syntax) : Head → MacroM Lean.Term
     | _ => posError stx "a value" pos
   | .spath x => match pos with
     | .spath => pure x
+    | .val => `(SPath.primitiveRead $x)
     | _ => posError stx "a storage path" pos
   | .mpath x => match pos with
     | .mpath => pure x
@@ -719,6 +726,13 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
       | _ => posError stx "a storage entry" pos
   | `(sol_expr| ( $e:sol_expr )) => schemaAt Γ pos e
   | `(sol_expr| ‹ $t:term ›) => pure t
+  | stx@`(sol_expr| $f:ident($a:sol_expr, $b:sol_expr, $k:sol_expr)) => do
+    unless pos == .val do posError stx "a modular builtin" pos
+    let op : Lean.Term ← match f.getId.eraseMacroScopes.toString with
+      | "addmod" => `(ModOp.addmod)
+      | "mulmod" => `(ModOp.mulmod)
+      | _ => Macro.throwUnsupported
+    `(Val.modular $op $(← schemaAt Γ .val a) $(← schemaAt Γ .val b) $(← schemaAt Γ .val k))
   | stx@`(sol_expr| $a:sol_expr ⊕ $b:sol_expr) => do
     unless pos == .val do posError stx "an operator application" pos
     `(Val.binop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
@@ -750,7 +764,8 @@ def declVar (fresh : Bool) (x : Ident) : MacroM Lean.Term := do
   | "sp" => `(Var.fresh "sp" $k)
   | "ie" => `(Var.fresh "ie" $k)
   | "mv" => `(Var.fresh "mv" $k)
-  | _ => Macro.throwErrorAt x "a taclet declares only fresh `se`, `sp`, `ie` or `mv`"
+  | "source" => `(Var.fresh "source" $k)
+  | _ => Macro.throwErrorAt x "a taclet declares only fresh `se`, `sp`, `ie`, `mv` or `source`"
 
 /-- `sp.push` called: the receiver `sp` and the method `push`. -/
 def callRecv? (f : TSyntax `sol_expr) : MacroM (Option (TSyntax `sol_expr × String)) := do
@@ -763,6 +778,51 @@ def callRecv? (f : TSyntax `sol_expr) : MacroM (Option (TSyntax `sol_expr × Str
     | _ => return none
   | `(sol_expr| $e:sol_expr . $g:ident) => return some (e, g.getId.toString)
   | _ => return none
+
+/-- The array receiver of a primitive push used as an lvalue. -/
+partial def pushExprBase? : TSyntax `sol_expr → MacroM (Option (TSyntax `sol_expr))
+  | `(sol_expr| $f:sol_expr ( )) => do
+    let some (b, "push") ← callRecv? f | return none
+    return some b
+  | `(sol_expr| ($e:sol_expr)) => pushExprBase? e
+  | _ => return none
+
+/-- A fixed native push operator, for specializing its replacement terms. -/
+partial def fixedPushOperator? (s : TSyntax `sol_stmt) : MacroM (Option (Lean.Term × Bool)) := do
+  if s.raw.getKind == Lean.choiceKind then
+    for alt in s.raw.getArgs do
+      if let some fixed ← fixedPushOperator? ⟨alt⟩ then return some fixed
+    return none
+  if let some (op, _, _) ← pushCompoundParts? s.raw then
+    return some (⟨(ctorIdent ``BinOp op).raw⟩, true)
+  if let some (op, _) ← pushIncrementParts? s.raw then
+    return some (⟨(ctorIdent ``IncDec op).raw⟩, false)
+  let (l, op, compound) ← match s with
+    | `(sol_stmt| $l:sol_expr += $_:sol_expr) => pure (l, ← `(BinOp.add), true)
+    | `(sol_stmt| $l:sol_expr -= $_:sol_expr) => pure (l, ← `(BinOp.sub), true)
+    | `(sol_stmt| $l:sol_expr *= $_:sol_expr) => pure (l, ← `(BinOp.mul), true)
+    | `(sol_stmt| $l:sol_expr /= $_:sol_expr) => pure (l, ← `(BinOp.div), true)
+    | `(sol_stmt| $l:sol_expr %= $_:sol_expr) => pure (l, ← `(BinOp.mod), true)
+    | `(sol_stmt| $l:sol_expr ++) => pure (l, ← `(IncDec.postInc), false)
+    | `(sol_stmt| ++ $l:sol_expr) => pure (l, ← `(IncDec.preInc), false)
+    | `(sol_stmt| $l:sol_expr −−) => pure (l, ← `(IncDec.postDec), false)
+    | `(sol_stmt| −− $l:sol_expr) => pure (l, ← `(IncDec.preDec), false)
+    | _ => return none
+  if (← pushExprBase? l).isSome then return some (op, compound) else return none
+
+/-- The native statement shape of `sp.push() += se`. -/
+def schemaPushCompound (Γ : Scope) (op : Lean.Term) (l r : TSyntax `sol_expr) :
+    MacroM (Lean.Term × Scope) := do
+  let some b ← pushExprBase? l | Macro.throwUnsupported
+  return (← `(Stmt.pushOpAssign (p := $(schemaIdent "p")) $op rfl $(schemaIdent "hp")
+    $(← schemaAt Γ .spath b) $(← schemaAt Γ .val r)), Γ)
+
+/-- The native statement shape of `++sp.push();` or `sp.push()++;`. -/
+def schemaPushIncrement (Γ : Scope) (op : Lean.Term) (l : TSyntax `sol_expr) :
+    MacroM (Lean.Term × Scope) := do
+  let some b ← pushExprBase? l | Macro.throwUnsupported
+  return (← `(Stmt.pushIncDec (p := $(schemaIdent "p")) $op $(schemaIdent "hp")
+    $(← schemaAt Γ .spath b)), Γ)
 
 /-- `new T(n)`: its size. -/
 def newRhs? : TSyntax `sol_expr → Option (TSyntax `sol_expr)
@@ -928,8 +988,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     | some (.alias x) =>
       return (← `(Stmt.rebind (R := $(schemaIdent "R")) $x (ARhs.push $(← schemaAt Γ .spath b) $(schemaIdent "hd"))), Γ)
     | some (.local v) =>
-      return (← `(Stmt.assignLocalPush (p := $(schemaIdent "p")) $v $(← schemaAt Γ .spath b)
-        $(schemaIdent "hs")), Γ)
+      return (← `(Stmt.assignLocalPush (p := $(schemaIdent "p")) $v $(← schemaAt Γ .spath b)), Γ)
     | _ => Macro.throwErrorAt l "`= b.push()` binds a storage alias or a value local"
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( )) => do
     let some (b, "push") ← callRecv? f | Macro.throwErrorAt f "only `b.push()` is a call on the right"
@@ -941,12 +1000,41 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     let some (.local v) := lhsHead Γ x | Macro.throwErrorAt x "the value of `++` goes to a stack local"
     return (← `(Stmt.assignIncDec (p := $(schemaIdent "p")) $v $(schemaIdent "op") $(schemaIdent "hp")
       $(← schemaAt Γ .oploc l) $(schemaIdent "hs")), Γ)
+  | `(sol_stmt| $l:sol_expr += $r:sol_expr) => do
+    schemaPushCompound Γ (← `(BinOp.add)) l r
+  | `(sol_stmt| $l:sol_expr -= $r:sol_expr) => do
+    schemaPushCompound Γ (← `(BinOp.sub)) l r
+  | `(sol_stmt| $l:sol_expr *= $r:sol_expr) => do
+    schemaPushCompound Γ (← `(BinOp.mul)) l r
+  | `(sol_stmt| $l:sol_expr /= $r:sol_expr) => do
+    schemaPushCompound Γ (← `(BinOp.div)) l r
+  | `(sol_stmt| $l:sol_expr %= $r:sol_expr) => do
+    schemaPushCompound Γ (← `(BinOp.mod)) l r
+  | `(sol_stmt| $l:sol_expr ++) => do
+    schemaPushIncrement Γ (← `(IncDec.postInc)) l
+  | `(sol_stmt| ++ $l:sol_expr) => do
+    schemaPushIncrement Γ (← `(IncDec.preInc)) l
+  | `(sol_stmt| $l:sol_expr −−) => do
+    schemaPushIncrement Γ (← `(IncDec.postDec)) l
+  | `(sol_stmt| −− $l:sol_expr) => do
+    schemaPushIncrement Γ (← `(IncDec.preDec)) l
   | `(sol_stmt| $l:sol_expr ⊕⊕) => do
+    if let some b ← pushExprBase? l then
+      return (← `(Stmt.pushIncDec (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hp")
+        $(← schemaAt Γ .spath b)), Γ)
     return (← `(Stmt.incDec (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hp")
       $(← schemaAt Γ .oploc l)), Γ)
   | `(sol_stmt| $l:sol_expr ⊕= $r:sol_expr) => do
+    if let some b ← pushExprBase? l then
+      return (← `(Stmt.pushOpAssign (p := $(schemaIdent "p")) $(schemaIdent "op")
+        $(schemaIdent "hop") $(schemaIdent "hp") $(← schemaAt Γ .spath b)
+        $(← schemaAt Γ .val r)), Γ)
     return (← `(Stmt.opAssign (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hp")
       $(← schemaAt Γ .oploc l) $(← schemaAt Γ .val r)), Γ)
+  | `(sol_stmt| $l:sol_expr = $f:sol_expr($a:sol_expr, $b:sol_expr, $k:sol_expr)) => do
+    let r ← `(sol_expr| $f:sol_expr($a:sol_expr, $b:sol_expr, $k:sol_expr))
+    let some (.local v) := lhsHead Γ l | Macro.throwUnsupported
+    return (← `(Stmt.assignLocal $v $(← schemaAt Γ .val r)), Γ)
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) => do
     let R := schemaIdent "R"
     if let some n := newRhs? r then
@@ -1059,7 +1147,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     let t ← `(Stmt.declLocal $(schemaIdent "p") $v none)
     return (t, (x.getId.toString, .val v) :: Γ)
   | `(sol_stmt| $b:sol_expr .push( $a:sol_expr )) => do
-    let v : Lean.Term ← if let some r := rhsTerm Γ "src" a then pure r else if isPath Γ a then `(Src.copy $(← schemaAt Γ .spath a) $(schemaIdent "hm"))
+    let v : Lean.Term ← if let some r := rhsTerm Γ "src" a then pure r else if isMem Γ a then `(Src.copyMem $(← schemaAt Γ .mpath a))
+      else if isPath Γ a then `(Src.copy $(← schemaAt Γ .spath a) $(schemaIdent "hm"))
       else `(Src.val $(← schemaAt Γ .val a))
     return (← `(Stmt.push $(← schemaAt Γ .spath b) (some $v) rfl), Γ)
   | `(sol_stmt| $b:sol_expr .push()) => do
@@ -1094,6 +1183,12 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (← `(Stmt.ite $(← schemaAt Γ .val c) $(← schemaBlock fresh Γ t) $nil), Γ)
   | stx => do
     let k := stx.raw.getKind
+    if let some (op, b, r) ← pushCompoundParts? stx.raw then
+      return (← `(Stmt.pushOpAssign (p := $(schemaIdent "p")) $(ctorIdent ``BinOp op)
+        rfl $(schemaIdent "hp") $(← schemaAt Γ .spath b) $(← schemaAt Γ .val r)), Γ)
+    if let some (op, b) ← pushIncrementParts? stx.raw then
+      return (← `(Stmt.pushIncDec (p := $(schemaIdent "p")) $(ctorIdent ``IncDec op)
+        $(schemaIdent "hp") $(← schemaAt Γ .spath b)), Γ)
     if k == ``solDelete then
       let e : TSyntax `sol_expr := ⟨stx.raw[1]⟩
       if isMem Γ e then
@@ -1176,6 +1271,8 @@ def tposError (x : Lean.Syntax) (what : String) (pos : TPos) : MacroM α :=
 (`se` is the term `se.lower`), a stack local is `pv`. -/
 def headTerm (Γ : Scope) (pos : TPos) (x : Ident) : MacroM Lean.Term := do
   let n := x.getId.toString
+  if stemOf n == "src" && pos == .svalue then
+    return ← `($(Lean.mkCIdent `Solidity.Src.lower) $(rhsTerm Γ "src" ⟨x⟩ |>.getD x))
   if (n == "true" || n == "false") && pos == .val then
     return ← `(Term.litB $(mkIdent (Name.mkSimple n)))
   if n == "storage" && pos == .storage then return ← `(STerm.storage)
@@ -1260,6 +1357,9 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
   match pos with
   | .svalue =>
     match t with
+    | `(dl_term| $x:ident) =>
+      if stemOf x.getId.toString == "src" then headTerm Γ .svalue x
+      else `(SValT.val $(← schemaTerm0 Γ .val t))
     | `(dl_term| $f:ident($_,*)) =>
       if ["find", "copyMem", "newArr"].contains f.getId.toString then schemaTerm0 Γ .svalue t
       else `(SValT.val $(← schemaTerm0 Γ .val t))
@@ -1382,6 +1482,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     `(Term.binop BinOp.div PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term * $b:dl_term) => do
     `(Term.binop BinOp.mul PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+  | `(dl_term| $a:dl_term % $b:dl_term) => do
+    `(Term.binop BinOp.mod PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term && $b:dl_term) => do
     `(Term.binop BinOp.and PrimTy.bool $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
   | `(dl_term| $a:dl_term || $b:dl_term) => do
@@ -1404,7 +1506,13 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       | `(dl_term| $g:ident) =>
         `(MAddr.field $(← schemaTerm Γ .ident i) $g $(proofIdent g g.getId.toString))
       | _ => tposError a "a member `f` or an element `at(k)`" .addr
-    match f.getId.toString, args, pos with
+    match f.getId.eraseMacroScopes.toString, args, pos with
+    | "addmod", #[a, b, k], .val =>
+      `(Term.modular ModOp.addmod $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b)
+        $(← schemaTerm Γ .val k))
+    | "mulmod", #[a, b, k], .val =>
+      `(Term.modular ModOp.mulmod $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b)
+        $(← schemaTerm Γ .val k))
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
     | "select", #[s, r], .storage | "selectSt", #[s, r], .storage =>
       let `(dl_term| $r:ident) := r | tposError r "a member name" .storage
@@ -1486,13 +1594,7 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         | _, _ => pure ()
         match v with
         | `(dl_term| $_ + 1) =>
-          -- a bare `rarr.push()` extends at its element type `E`, an alias's
-          -- `lsv = sp.push()` at the alias's `R`
-          let bare := match b with
-            | `(dl_term| $x:ident) => stemOf x.getId.toString == "rarr"
-            | _ => false
-          if bare then `(STerm.extend $(← st s) $(← pa b) $(schemaIdent "E"))
-          else `(STerm.extend $(← st s) $(← pa b) (Ty.ref $(schemaIdent "R")))
+          `(STerm.extend $(← st s) $(← pa b) _)
         | `(dl_term| $_ - 1) => `(STerm.shrink $(← st s) $(← pa b))
         | _ => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
       | none => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
@@ -1664,6 +1766,8 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
         | _ => (`Solidity.SPath.elemMapping, false)
       let bv ← if b then `(true) else `(false)
       out := out.push (hyp (n ++ "_e"), ← `($(mkIdent pred) $v = $bv))
+      if stemOf n == "rarr" then
+        out := out.push (hyp (n ++ "_nm"), ← `($(mkIdent `Solidity.SPath.elemMapping) $v = false))
     | "nse" | "nadr" => out := out.push (hyp n, ← `(Val.isSimple $v = false))
     | "nmp" => out := out.push (hyp n, ← `(MPath.isSimple $v = false))
     | "loc" =>
@@ -1674,6 +1778,17 @@ def sideConds (s : TSyntax `sol_stmt) : MacroM (Array (Ident × Lean.Term)) := d
     let some n := singleVar? r | return #[]
     unless ["e", "nse"].contains (stemOf n) do return #[]
     return #[(hyp (n ++ "_nt"), ← `($(mkIdent `Solidity.Val.notTernary) $(schemaIdent n) = true))]
+  let pushArg ← match s with
+    | `(sol_stmt| $_:sol_expr .push( $e:sol_expr )) => pure (some e)
+    | `(sol_stmt| $f:sol_expr ( $e:sol_expr )) => do
+      let some (_, "push") ← callRecv? f | pure none
+      pure (some e)
+    | _ => pure none
+  if let some e := pushArg then
+    if let some n := singleVar? e then
+      if stemOf n == "nse" then
+        out := out.push (hyp (n ++ "_path"),
+          ← `(Val.complexStorageRead $(schemaIdent n) = false))
   match s with
   | `(sol_stmt| $x:ident) =>
     -- `fbs`, `ic`, a call: its arguments simple (`functionCallArgCapture`
@@ -1839,6 +1954,8 @@ it.  The forms the rule lines write. -/
 partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| true) => pure (fmlC "tt")
   | `(dl_fml| false) => `($(fmlC "not") $(fmlC "tt"))
+  | `(dl_fml| $a:dl_term != $b:dl_term) => do
+    `($(fmlC "not") ($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b)))
   | `(dl_fml| $a:dl_term = $b:dl_term) => do
     if let `(dl_term| $c:ident) := b then
       let n := c.getId.toString
@@ -1906,6 +2023,25 @@ def expandBody? : TSyntax `sol_stmt → Bool
 it declares (its name and its variable), `split` how a split's goals end. -/
 def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split : Lean.Term) :
     TSyntax `dl_premise → MacroM Lean.Term
+  | `(dl_premise| if $c:dl_fml then ($U:dl_upd $V:dl_upd ⟨[ ]⟩) else (⟨[ revert(); ]⟩)) => do
+    let (Ut, Δ) ← schemaUpdCore coreScope none U
+    let (Vt, _) ← schemaUpdCore Δ none V
+    let ct ← match c with
+      | `(dl_fml| $a:dl_term != 0) => do
+        let lhsTerm ← schemaTerm coreScope .val a
+        `($(fmlC "not") ($(fmlC "eq") $lhsTerm
+          ($(Lean.mkCIdent `Solidity.Tm.zeroLike) $lhsTerm)))
+      | _ => schemaFmlCore coreScope c
+    `($(Lean.mkCIdent `Solidity.Premise.guardedUpdates) $ct $Ut $Vt)
+  | `(dl_premise| $U:dl_upd $V:dl_upd ⟨[ ]⟩) => do
+    let declared := found.map (·.1)
+    let inFirst := declared.filter fun n => U.raw[1].getSepArgs.any fun e =>
+      match (⟨e⟩ : TSyntax `dl_upd_elem) with
+      | `(dl_upd_elem| $x:ident := $_:dl_term) => x.getId.toString == n
+      | _ => false
+    let (Ut, Δ) ← schemaUpdCore coreScope inFirst U
+    let (Vt, _) ← schemaUpdCore Δ (if inFirst.isSome then none else declared) V
+    `($(Lean.mkCIdent `Solidity.Premise.updates) $Ut $Vt)
   | `(dl_premise| $U:dl_upd ⟨[ ]⟩) => do
     `($(Lean.mkCIdent `Solidity.Premise.update)
       $((← schemaUpdCore coreScope (found.map (·.1)) U).1))
@@ -1967,20 +2103,171 @@ partial def compoundOps : Syntax → Syntax
   | .node i k args => .node i k (args.map compoundOps)
   | stx => stx
 
+/-- Instantiate a fixed push operator in its otherwise shared replacement
+shape; its appended index is always a dynamic-array index. -/
+partial def specializePush (op proof index : Syntax) : Syntax → Syntax
+  | stx@(.ident _ _ val _) =>
+    match val.eraseMacroScopes with
+    | `op => op
+    | `hop => proof
+    | `it => index
+    | _ => stx
+  | .node i k args => .node i k (args.map (specializePush op proof index))
+  | stx => stx
+
+/-- The indexed primitive read in a push suffix replacement, excluding its
+`size` reads. `sp.push() += se` determines the arithmetic's numeric type;
+the index arithmetic remains `uint`. -/
+def pushValueRead : TSyntax `dl_term → Bool
+  | `(dl_term| find($_, $_:dl_term[$_:dl_term])) => true
+  | `(dl_term| find($_, consr($_, at($_)))) => true
+  | _ => false
+
+/-- Read the literal arithmetic of a native push rule at its target type.
+Only the matching operator on the appended primitive is specialized: a
+`size + 1` or `size - 1` still uses the ordinary `uint` term reader. -/
+partial def pushArithmetic (compound : Bool) (sym : String) (s : Syntax) : MacroM Syntax := do
+  let .node info kind args := s | return s
+  let s := Syntax.node info kind (← args.mapM (pushArithmetic compound sym))
+  let bin : Option (String × TSyntax `dl_term × TSyntax `dl_term) := match (⟨s⟩ : TSyntax `dl_term) with
+    | `(dl_term| $a + $b) => some ("+", a, b)
+    | `(dl_term| $a - $b) => some ("-", a, b)
+    | `(dl_term| $a * $b) => some ("*", a, b)
+    | `(dl_term| $a / $b) => some ("/", a, b)
+    | `(dl_term| $a % $b) => some ("%", a, b)
+    | _ => none
+  let some (actual, a, b) := bin | return s
+  unless actual == sym && pushValueRead a do return s
+  if compound then return (← `(dl_term| $a ⊕ $b)).raw
+  if let `(dl_term| 1) := b then return (← `(dl_term| $a ± $b)).raw
+  return s
+
+/-- The literal arithmetic symbol supplied by a native push statement. -/
+def pushOperatorSymbol (op : Lean.Term) : String :=
+  match op with
+  | `($name:ident) =>
+    match name.getId.eraseMacroScopes.getString! with
+    | "add" | "preInc" | "postInc" => "+"
+    | "sub" | "preDec" | "postDec" => "-"
+    | "mul" => "*" | "div" => "/" | "mod" => "%"
+    | _ => ""
+  | _ => ""
+
 /-- Whether a statement is a compound assignment `l ⊕= r`. -/
 def isCompound : TSyntax `sol_stmt → Bool
   | `(sol_stmt| $_:sol_expr ⊕= $_:sol_expr) => true
   | _ => false
 
-/-- The taclet `s ⇝ p` under the modality `m`: the `\find` binds its names,
-read in its context `Γ` (named, so that the constructor binds it as `Γ`);
-the `\replacewith` sees them, and its own declarations are fresh, numbered
-by the taclet's `k`.  The `\find`'s side conditions (`sideConds`) are
-hypotheses that prove themselves. -/
+/-- The receiver and argument of either spelling of `sp.push(arg)`. -/
+def valuePushParts? : TSyntax `sol_stmt → MacroM (Option (TSyntax `sol_expr × TSyntax `sol_expr))
+  | `(sol_stmt| $b:sol_expr .push( $a:sol_expr )) => pure (some (b, a))
+  | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
+    let some (b, "push") ← callRecv? f | pure none
+    pure (some (b, a))
+  | _ => pure none
+
+/-- The operation in either spelling of `fc.push(e)`, `fc.push()` or `fc.pop()`. -/
+def receiverParts? (s : TSyntax `sol_stmt) :
+    MacroM (Option (TSyntax `sol_expr × Option (TSyntax `sol_expr) × Bool)) := do
+  if let some (b, a) ← valuePushParts? s then return some (b, some a, false)
+  match s with
+  | `(sol_stmt| $b:sol_expr .push()) => return some (b, none, false)
+  | `(sol_stmt| $b:sol_expr .pop()) => return some (b, none, true)
+  | `(sol_stmt| $f:sol_expr ( )) =>
+    let some (b, method) ← callRecv? f | return none
+    if method == "push" then return some (b, none, false)
+    if method == "pop" then return some (b, none, true)
+    return none
+  | _ => return none
+
+/-- A native call-receiver capture. The two written statements must retain
+the same getter, operation and operand, and bind the fresh `sp` they use. -/
+def callReceiverTaclet? (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise) :
+    MacroM (Option (Lean.Term × Lean.Term)) := do
+  let some (fc, arg, pop) ← receiverParts? s | return none
+  unless (singleVar? fc).any (fun n => stemOf n == "fc") do return none
+  let `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) := p |
+    Macro.throwErrorAt p "a call receiver is captured in `sp` before its array operation"
+  unless ss.size == 2 do
+    Macro.throwErrorAt p "a call-receiver capture has a declaration and its array operation"
+  let `(sol_stmt| $aliasType:sol_ty storage $sp:ident = $getter:sol_expr) := ss[0]! |
+    Macro.throwErrorAt ss[0]! "a call receiver is bound as a storage alias"
+  let _ := aliasType
+  unless stemOf sp.getId.toString == "sp" && fc.raw.structEq getter.raw do
+    Macro.throwErrorAt ss[0]! "the fresh `sp` captures the getter of the find"
+  let some (recv, arg', pop') ← receiverParts? ss[1]! |
+    Macro.throwErrorAt ss[1]! "the captured receiver is pushed or popped"
+  let sameArg := match arg, arg' with
+    | none, none => true
+    | some a, some b => a.raw.structEq b.raw
+    | _, _ => false
+  unless singleVar? recv == some sp.getId.toString && pop == pop' && sameArg do
+    Macro.throwErrorAt ss[1]! "the replacement keeps the operation and operand on fresh `sp`"
+  if let some a := arg then
+    let some n := singleVar? a |
+      Macro.throwErrorAt a "the call-receiver operand is a typed source schema variable"
+    let st ← `($(Lean.mkCIdent `Solidity.ReceiverValue.statement) $(schemaIdent "f")
+      $(schemaIdent "args") $(schemaIdent "r") $(schemaIdent "body") $(schemaIdent n))
+    let pt ← `($(Lean.mkCIdent `Solidity.ReceiverValue.step) $(schemaIdent "k")
+      $(schemaIdent "f") $(schemaIdent "args") $(schemaIdent "r") $(schemaIdent "body")
+      $(schemaIdent n))
+    return some (st, pt)
+  let op ← if pop then `($(Lean.mkCIdent `Solidity.ReceiverOp.pop)) else
+    match arg with
+    | none => `($(Lean.mkCIdent `Solidity.ReceiverOp.push) none $(schemaIdent "hd"))
+    | some a =>
+      let some n := singleVar? a |
+        Macro.throwErrorAt a "the call-receiver operand is a typed source schema variable"
+      `($(Lean.mkCIdent `Solidity.ReceiverOp.push) (some $(schemaIdent n)) rfl)
+  let st ← `($(Lean.mkCIdent `Solidity.Stmt.callReceiver) $(schemaIdent "f")
+    $(schemaIdent "args") $(schemaIdent "r") $(schemaIdent "body") $op)
+  let pt ← `($(Lean.mkCIdent `Solidity.callReceiverStep) $(schemaIdent "k")
+    $(schemaIdent "f") $(schemaIdent "args") $(schemaIdent "r") $(schemaIdent "body") $op)
+  return some (st, pt)
+
+/-- Recognise the exact upstream `whileUnwind` shape, retaining a typed proof-search mode. -/
+def whileUnwindTaclet? (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise) :
+    MacroM (Option (Lean.Term × Lean.Term)) := do
+  let rec plain : Syntax → Syntax
+    | .ident info raw name _ => .ident info raw name.eraseMacroScopes []
+    | .node info kind args => .node info kind (args.map plain)
+    | stx => stx
+  let find ← `(sol_stmt| while (cond) body)
+  unless (plain s.raw).structEq (plain find.raw) do return none
+  let expected ← `(dl_premise| ⟨[ if (cond) { body; while (cond) body; }; ]⟩)
+  unless (plain p.raw).structEq (plain expected.raw) do return none
+  let c ← schemaAt coreScope .val ⟨s.raw[2]⟩
+  let body ← schemaBlock false coreScope ⟨s.raw[4]⟩
+  let st ← `($(Lean.mkCIdent `Solidity.Stmt.loop)
+    ($(Lean.mkCIdent `Solidity.LoopUnwind.before) $(schemaIdent "u")) $c $body)
+  let pt ← `($(Lean.mkCIdent `Solidity.loopUnwindStep) $(schemaIdent "u") $c $body)
+  return some (st, pt)
+
+/-- The taclet `s ⇝ p` under modality `m`: the find binds schema variables;
+the replacement reads them and introduces its own fresh declarations. -/
 def schemaTacletCore (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_premise)
     (J : Option Lean.Term := none) : MacroM Lean.Term := do
+  let receiver ← callReceiverTaclet? s p
+  let native ← if receiver.isSome then pure receiver else whileUnwindTaclet? s p
   let conds ← sideConds s
-  let (st, Γ) ← schemaStmt false coreScope s
+  -- A value declaration in this capture replacement identifies a primitive
+  -- source. A storage declaration instead keeps the reference-copy reading.
+  let primitive : Option (TSyntax `sol_expr × TSyntax `sol_expr) ← do
+    let some (b, a) ← valuePushParts? s | pure none
+    let `(dl_premise| ⟨[ $[$ss:sol_stmt;]* ]⟩) := p | pure none
+    if ss.size != 2 then pure none else do
+      let `(sol_stmt| $sourceTy:sol_ty $source:ident = $r:sol_expr) := ss[0]! | pure none
+      let _ := sourceTy
+      let some (b', v) ← valuePushParts? ss[1]! | pure none
+      if isPath coreScope a && a.raw.structEq r.raw && b.raw.structEq b'.raw &&
+          (singleVar? v) == some source.getId.toString then pure (some (b, a)) else pure none
+  let (st, Γ) ← match native, primitive with
+    | some (st, _), _ => pure (st, coreScope)
+    | none, some (b, a) => do
+      let src ← schemaAt coreScope .spath a
+      let recv ← schemaAt coreScope .spath b
+      pure (← `(Stmt.push $recv (some (Src.val (SPath.primitiveRead $src))) rfl), coreScope)
+    | none, none => schemaStmt false coreScope s
   let found : Option (String × Lean.Term) := match Γ with
     | (n, .val v) :: _ | (n, .alias v) :: _ | (n, .mem v _) :: _ => some (n, v)
     | _ => none
@@ -1988,8 +2275,18 @@ def schemaTacletCore (m : Lean.Term) (s : TSyntax `sol_stmt) (p : TSyntax `dl_pr
     | `(sol_stmt| if ($_:sol_expr) $_:sol_block else $_:sol_block) =>
       Lean.mkCIdent `Solidity.BlockKind.block
     | _ => Lean.mkCIdent `Solidity.BlockKind.capture
-  let pt ← schemaPremiseCore Γ found split p
-  let pt : Lean.Term := if isCompound s then ⟨compoundOps pt⟩ else pt
+  let fixed ← fixedPushOperator? s
+  let p : TSyntax `dl_premise ← match fixed with
+    | none => pure p
+    | some (op, compound) => do pure ⟨← pushArithmetic compound (pushOperatorSymbol op) p⟩
+  let pt ← match native with
+    | some (_, pt) => pure pt
+    | none => schemaPremiseCore Γ found split p
+  let pt : Lean.Term := if isCompound s || fixed.any (·.2) then ⟨compoundOps pt⟩ else pt
+  let pt : Lean.Term ← match fixed with
+    | none => pure pt
+    | some (op, _) => do
+      pure ⟨specializePush op (← `(by rfl)) (← `(IndexTy.arr ArrTy.dyn)) pt⟩
   let st ← `(($st : $(Lean.mkCIdent `Solidity.Stmt) $(schemaIdent "C") $(schemaIdent "Γ") _))
   let jArgs : Array Lean.Term := #[schemaIdent "C", schemaIdent "k"]
   let ((f, args) : Ident × Array Lean.Term) ← match J with
@@ -2021,6 +2318,13 @@ namespace Schema
 taclet (`schemaTacletCore`): the same text, the `Taclet` (or the judgement
 named) in scope where it is used. -/
 scoped macro_rules
+  | `(dl{ if $c:dl_fml then ($U:dl_upd $V:dl_upd ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }) => do
+    let t ← schemaPremiseCore coreScope none (← `(BlockKind.capture))
+      (← `(dl_premise| if $c:dl_fml then ($U:dl_upd $V:dl_upd ⟨[ ]⟩) else (⟨[ revert(); ]⟩)))
+    coreNames t
+  | `(dl{ $U:dl_upd $V:dl_upd ⟨[ ]⟩ }) => do
+    schemaPremiseCore coreScope none (← `(BlockKind.capture))
+      (← `(dl_premise| $U:dl_upd $V:dl_upd ⟨[ ]⟩))
   | `(dl{ ⟨[ $s:sol_stmt; ]⟩ ⇝ $p:dl_premise }) => schemaTacletCore (schemaIdent "m") s p
   | `(dl{ [ $s:sol_stmt; ] ⇝ $p:dl_premise }) => do schemaTacletCore (← `(Modality.box)) s p
   | `(dl{ ⟨ $s:sol_stmt; ⟩ ⇝ $p:dl_premise }) => do schemaTacletCore (← `(Modality.diamond)) s p
@@ -2214,7 +2518,7 @@ where
     | RefTy.fixed E n =>
       let some n ← natOf? n | `(sol_ty| T)
       `(sol_ty| $(← ppTy E):sol_ty[$(Syntax.mkNumLit (toString n)):num])
-    | RefTy.mapping K V => `(sol_ty| mapping($(← ppTy K) => $(← ppTy V)))
+    | RefTy.mapping K V => `(sol_ty| mapping($(← ppPrim K) => $(← ppTy V)))
     | _ => `(sol_ty| T)
 
 /-- `l++`, `−−l` and the rest; `l⊕⊕` for a schema operator. -/
@@ -2279,7 +2583,7 @@ partial def allocTy? (R : Lean.Expr) : MetaM (Option (TSyntax `dl_term)) := do
 def mkBinTerm (sym : String) (a b : TSyntax `dl_term) : MetaM (TSyntax `dl_term) :=
   match sym with
   | "+" => `(dl_term| $a + $b) | "-" => `(dl_term| $a - $b) | "/" => `(dl_term| $a / $b)
-  | "*" => `(dl_term| $a * $b)
+  | "*" => `(dl_term| $a * $b) | "%" => `(dl_term| $a % $b)
   | "&&" => `(dl_term| $a && $b) | "||" => `(dl_term| $a || $b)
   | "==" => `(dl_term| ($a == $b))
   | "±" => `(dl_term| $a ± $b)
@@ -2298,6 +2602,7 @@ def termOpSym? (op : Lean.Expr) : MetaM (Option String) := do
   | BinOp.sub => return "-"
   | BinOp.div => return "/"
   | BinOp.mul => return "*"
+  | BinOp.mod => return "%"
   | BinOp.and => return "&&"
   | BinOp.or => return "||"
   | BinOp.eqB => return "=="

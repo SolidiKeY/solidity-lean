@@ -1,0 +1,3680 @@
+[
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/benchmark/ERC20.sol",
+    "contract": "ERC20"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/contracts/MultiAuction.sol",
+    "contract": "MultiAuction"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/real-world/ERC20.sol",
+    "contract": "ERC20"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/SolcHigherLevel.sol",
+    "contract": "SolcHigherLevel"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/SolcHigherLevel.sol",
+    "contract": "SolcHigherLevelA"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/SolcModifiers.sol",
+    "contract": "SolcModifiers"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/SolcModifiers.sol",
+    "contract": "SolcModifiersB"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/SolcModifiers.sol",
+    "contract": "SolcModifiersC"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/SolcTypes.sol",
+    "contract": "SolcTypes"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/open/SolcArithmeticOpen.sol",
+    "contract": "SolcArithmeticOpen"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
+    "contract": "SolcHigherLevelOpen"
+  },
+  {
+    "kind": "unaccountedImport",
+    "source": "keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
+    "contract": "SolcHigherLevelOpenBase"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"PairLib\",\"swap(struct FileLevelPair)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"storagePushCompoundSigned()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"valuesRef()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"storagePushPopCallReceiver()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"whileCountsUp()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"whileBodyDeclaresLocal()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"whileBreakLeavesLoop()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"whileContinueSkipsRest()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"forContinueStillUpdates()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"forBreakKeepsCounter()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"doWhileRunsBodyFirst()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"forWritesStorageArray()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"returnLeavesNestedLoops()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"invariantForCountsArrayLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"invariantClosedFormSum()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"invariantQuantifiedOverPrefix()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"fileLevelStructThroughLibrary()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"addmodMulmod()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"firstOf(uint[])\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"indexParameter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"setTokenValue(struct TestSuite.Token,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"readTokenValue(struct TestSuite.Token)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"storageStructParameter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"credit(mapping(uint => uint),uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"storageMappingParameter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"storageStaticToDynamicCopyKeepsLength()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"storageShorterStaticCopyClearsTail()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"testFixedCopyThenEmptyPushReadsZero()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"testShorterCopyThenEmptyPushClearsTail()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/TestSuite.sol\",\"TestSuite\",\"testShapeCopyFixedTailAndSourceIndependence()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/AccessRestriction.sol\",\"AccessRestriction\",\"forceOwnerChange(address)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Coin.sol\",\"Coin\",\"send(address,uint)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/ERC20.sol\",\"IERC20\",\"totalSupply()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/ERC20.sol\",\"IERC20\",\"balanceOf(address)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/ERC20.sol\",\"IERC20\",\"transfer(address,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/ERC20.sol\",\"IERC20\",\"allowance(address,address)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/ERC20.sol\",\"IERC20\",\"approve(address,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/ERC20.sol\",\"IERC20\",\"transferFrom(address,address,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/EtherWallet.sol\",\"EtherWallet\",\"receive()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/EtherWallet.sol\",\"EtherWallet\",\"withdraw(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Fund.sol\",\"Fund\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Purchase.sol\",\"Purchase\",\"abort()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Purchase.sol\",\"Purchase\",\"confirmPurchase()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Purchase.sol\",\"Purchase\",\"confirmReceived()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Purchase.sol\",\"Purchase\",\"refundSeller()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SendContract.sol\",\"SendContract\",\"becomeRichest()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SendingEther.sol\",\"ReceiveEther\",\"receive()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SendingEther.sol\",\"ReceiveEther\",\"fallback()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SendingEther.sol\",\"SendEther\",\"sendViaTransfer(address payable)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SendingEther.sol\",\"SendEther\",\"sendViaSend(address payable)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SendingEther.sol\",\"SendEther\",\"sendViaCall(address payable)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SimpleAuction.sol\",\"SimpleAuction\",\"bid()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SimpleAuction.sol\",\"SimpleAuction\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/SimpleAuction.sol\",\"SimpleAuction\",\"auctionEnd()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Todos.sol\",\"Todos\",\"get(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Todos.sol\",\"Todos\",\"updateText(uint,string)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/Todos.sol\",\"Todos\",\"toggleCompleted(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/WithdrawalContract.sol\",\"WithdrawalContract\",\"becomeRichest()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/benchmark/WithdrawalContract.sol\",\"WithdrawalContract\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCopyShapes.sol\",\"ArrayCopyShapes\",\"fixedCopyKeepsTargetLengthAndClearsTail()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCopyShapes.sol\",\"ArrayCopyShapes\",\"fixedToDynamicCopyTakesSourceLength()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCopyShapes.sol\",\"ArrayCopyShapes\",\"nestedFixedCopyClearsInnerAndOuterTails()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCopyShapes.sol\",\"ArrayCopyShapes\",\"structCopyPreservesFixedMemberShape()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"storageAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"storageAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"storageRowAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"deleteRowKeepsOuterLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"deleteRootRestoresShapeAndDefaultValues()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"popPushAtDepth1ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"pushArgumentAtDepth1CopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"popPushAtDepth3ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFD.sol\",\"ArrayCubeDFD\",\"pushReturnAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFDMemory.sol\",\"ArrayCubeDFDMemory\",\"storageToMemoryCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFDMemory.sol\",\"ArrayCubeDFDMemory\",\"memoryToStorageCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFDMemory.sol\",\"ArrayCubeDFDMemory\",\"memoryAssignmentSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeDFDMemory.sol\",\"ArrayCubeDFDMemory\",\"memoryRowAliasBecomesIndependentStorageRows()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"storageAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"storageAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"storageToMemoryCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"memoryToStorageCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"memoryAssignmentSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"storageRowAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"memoryRowAliasBecomesIndependentStorageRows()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"deleteRowKeepsOuterLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"deleteRootRestoresShapeAndDefaultValues()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"popPushAtDepth2ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayCubeFDF.sol\",\"ArrayCubeFDF\",\"pushArgumentAtDepth2CopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMappingShapes.sol\",\"ArrayMappingShapes\",\"deleteNestedKeyResetsOnlyItsValue()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixConversions.sol\",\"ArrayMatrixConversions\",\"fixedRowsToDynamicOuter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixConversions.sol\",\"ArrayMatrixConversions\",\"fixedRowsToDynamicInner()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixConversions.sol\",\"ArrayMatrixConversions\",\"fixedRowsToDynamicBoth()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixConversions.sol\",\"ArrayMatrixConversions\",\"dynamicRowsToDynamicOuter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixConversions.sol\",\"ArrayMatrixConversions\",\"shorterFixedOuterClearsDynamicRow()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixConversions.sol\",\"ArrayMatrixConversions\",\"fixedMemoryRowsToDynamicStorageOuter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"storageAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"storageAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"storageToMemoryCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"memoryToStorageCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"memoryAssignmentSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"storageRowAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"memoryRowAliasBecomesIndependentStorageRows()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"deleteRowKeepsOuterLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"deleteRootRestoresShapeAndDefaultValues()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"popPushAtDepth1ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"pushArgumentAtDepth1CopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"popPushAtDepth2ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDD.sol\",\"ArrayMatrixDD\",\"pushReturnAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"storageAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"storageAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"storageToMemoryCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"memoryToStorageCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"memoryAssignmentSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"storageRowAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"memoryRowAliasBecomesIndependentStorageRows()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"deleteRowKeepsOuterLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"deleteRootRestoresShapeAndDefaultValues()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"popPushAtDepth1ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"pushArgumentAtDepth1CopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixDF.sol\",\"ArrayMatrixDF\",\"pushReturnAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"storageAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"storageAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"storageToMemoryCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"memoryToStorageCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"memoryAssignmentSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"storageRowAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"memoryRowAliasBecomesIndependentStorageRows()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"deleteRowKeepsOuterLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"deleteRootRestoresShapeAndDefaultValues()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFD.sol\",\"ArrayMatrixFD\",\"popPushAtDepth2ResetsRemovedElement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"storageAliasSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"storageAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"storageToMemoryCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"memoryToStorageCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"memoryAssignmentSharesWrites()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"storageRowAssignmentCopiesDeeply()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"memoryRowAliasBecomesIndependentStorageRows()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/ArrayMatrixFF.sol\",\"ArrayMatrixFF\",\"deleteRowKeepsOuterLength()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/Escrow.sol\",\"Escrow\",\"constructor(address,address payable,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/Escrow.sol\",\"Escrow\",\"placeInEscrow()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/Escrow.sol\",\"Escrow\",\"releaseEscrow()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/Escrow.sol\",\"Escrow\",\"withdrawFromEscrow()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"constructor()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"f()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"g()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"emptyPushReadsZero()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"fixedCopyIsIndependent()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"shorterCopyClearsTailBeforePush()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"fixedElementMemoryCopyIsIndependent()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"popPushResetsFixedElement()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"deleteFixedElementKeepsLength()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"deleteDynamicThenPushFixedElement()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"fixedElementStorageAlias()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/FixedLengths.sol\",\"FixedLengths\",\"emptyPushFixedElementReadsZero()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "missing",
+    "key": "[\"keyext.solidity.examples/contracts/PiggyBank.sol\",\"PiggyBank\",\"constructor(address payable)\"]"
+  },
+  {
+    "kind": "missing",
+    "key": "[\"keyext.solidity.examples/contracts/PiggyBank.sol\",\"PiggyBank\",\"addMoney()\"]"
+  },
+  {
+    "kind": "missing",
+    "key": "[\"keyext.solidity.examples/contracts/PiggyBank.sol\",\"PiggyBank\",\"breakPiggyBank()\"]"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/Storage.sol\",\"Storage\",\"m()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/contracts/Storage.sol\",\"Storage\",\"a1()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/illegal/nocompile/NestedArrayCalldataToStorage.sol\",\"NestedArrayCalldataToStorage\",\"copyRows(uint[][])\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/AuctionNet.sol\",\"AuctionNet\",\"makeBid()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/AuctionNet.sol\",\"AuctionNet\",\"closeAuction()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/AuctionWithdrawNet.sol\",\"AuctionWithdrawNet\",\"makeBid()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/AuctionWithdrawNet.sol\",\"AuctionWithdrawNet\",\"closeAuction()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/AuctionWithdrawNet.sol\",\"AuctionWithdrawNet\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/CasinoNet.sol\",\"CasinoNet\",\"addToPot()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/CasinoNet.sol\",\"CasinoNet\",\"placeBet(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/CasinoNet.sol\",\"CasinoNet\",\"decideBet(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/EscrowNet.sol\",\"EscrowNet\",\"placeInEscrow()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/EscrowNet.sol\",\"EscrowNet\",\"releaseEscrow()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/EscrowNet.sol\",\"EscrowNet\",\"withdrawFromEscrow()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/PiggyBankNet.sol\",\"PiggyBankNet\",\"payTo(address payable)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/PiggyBankNet.sol\",\"PiggyBankNet\",\"payToPlus(address payable,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/PiggyBankNet.sol\",\"PiggyBankNet\",\"payOwner()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/PiggyBankNet.sol\",\"PiggyBankNet\",\"addMoney()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/net/PiggyBankNet.sol\",\"PiggyBankNet\",\"breakPiggyBank()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Account.sol\",\"Account\",\"withdraw(uint)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/ArrayRemoveByShifting.sol\",\"ArrayRemoveByShifting\",\"remove(uint)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/ArrayRemoveByShifting.sol\",\"ArrayRemoveByShifting\",\"test()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/ArrayReplaceFromEnd.sol\",\"ArrayReplaceFromEnd\",\"remove(uint)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/DocsBallot.sol\",\"DocsBallot\",\"constructor(uint[])\"]",
+    "expected": "skipped",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/DocsBallot.sol\",\"DocsBallot\",\"giveRightToVote(address)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/DocsBallot.sol\",\"DocsBallot\",\"delegate(address)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/DocsBallot.sol\",\"DocsBallot\",\"vote(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/DocsBallot.sol\",\"DocsBallot\",\"winningProposal()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/DocsBallot.sol\",\"DocsBallot\",\"winnerName()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/EtherGame.sol\",\"EtherGame\",\"deposit()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/EtherGame.sol\",\"EtherGame\",\"claimReward()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/EtherStore.sol\",\"EtherStore\",\"deposit()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/EtherStore.sol\",\"EtherStore\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/EtherWallet.sol\",\"EtherWallet\",\"receive()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/EtherWallet.sol\",\"EtherWallet\",\"withdraw(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/FunctionModifier.sol\",\"FunctionModifier\",\"decrement(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/IterableMapping.sol\",\"IterableMapping\",\"setInMapping(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/IterableMapping.sol\",\"IterableMapping\",\"getFromMap()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/IterableMapping.sol\",\"IterableMapping\",\"getKeyAtIndex(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/IterableMapping.sol\",\"IterableMapping\",\"sizeOfMapping()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/IterableMapping.sol\",\"IterableMapping\",\"removeFromMapping()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/KingOfEther.sol\",\"KingOfEther\",\"claimThrone()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/KingOfEther.sol\",\"KingOfEther\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Mapping.sol\",\"Mapping\",\"set(address,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Mapping.sol\",\"Mapping\",\"remove(address)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/NestedMapping.sol\",\"NestedMapping\",\"set(address,uint,bool)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/NestedMapping.sol\",\"NestedMapping\",\"remove(address,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZCounters.sol\",\"OZCounters\",\"current()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZCounters.sol\",\"OZCounters\",\"increment()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZCounters.sol\",\"OZCounters\",\"decrement()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZCounters.sol\",\"OZCounters\",\"reset()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZMath.sol\",\"OZMath\",\"tryMul(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZNonces.sol\",\"OZNonces\",\"_useNonce(address)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZNonces.sol\",\"OZNonces\",\"_useCheckedNonce(address,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZNonces.sol\",\"OZNonces\",\"useNonce(address)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZNonces.sol\",\"OZNonces\",\"useCheckedNonce(address,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZReentrancyGuard.sol\",\"OZReentrancyGuard\",\"constructor()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZReentrancyGuard.sol\",\"OZReentrancyGuard\",\"callback()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZReentrancyGuard.sol\",\"OZReentrancyGuard\",\"countLocalRecursive(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZReentrancyGuard.sol\",\"OZReentrancyGuard\",\"guardedCheckEntered()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/OZReentrancyGuard.sol\",\"OZReentrancyGuard\",\"unguardedCheckNotEntered()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Purchase.sol\",\"Purchase\",\"abort()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Purchase.sol\",\"Purchase\",\"confirmPurchase()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Purchase.sol\",\"Purchase\",\"confirmReceived()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/Purchase.sol\",\"Purchase\",\"refundSeller()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/SendEther.sol\",\"SendEther\",\"sendViaTransfer(address payable)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/SendEther.sol\",\"SendEther\",\"sendViaSend(address payable)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/SendEther.sol\",\"SendEther\",\"sendViaCall(address payable)\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/SimpleAuction.sol\",\"SimpleAuction\",\"bid()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/SimpleAuction.sol\",\"SimpleAuction\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/SimpleAuction.sol\",\"SimpleAuction\",\"auctionEnd()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/TimeLock.sol\",\"TimeLock\",\"deposit()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/TimeLock.sol\",\"TimeLock\",\"increaseLockTime(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/TimeLock.sol\",\"TimeLock\",\"withdraw()\"]",
+    "expected": "proved",
+    "actual": "error"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/WETH9.sol\",\"WETH9\",\"receive()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/WETH9.sol\",\"WETH9\",\"withdraw(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/WETH9.sol\",\"WETH9\",\"transferFrom(address,address,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/open/ArrayRemoveByShifting.sol\",\"ArrayRemoveByShifting\",\"remove(uint)\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/open/DocsBallot.sol\",\"DocsBallot\",\"winnerName()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/open/OZMath.sol\",\"OZMath\",\"tryDiv(uint,uint)\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/real-world/open/OZMath.sol\",\"OZMath\",\"tryMod(uint,uint)\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArithmetic.sol\",\"SolcArithmetic\",\"literalBaseThirteen(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArithmetic.sol\",\"SolcArithmetic\",\"literalBaseEvenExponent(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArithmetic.sol\",\"SolcArithmetic\",\"compoundAssignSequence()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArithmetic.sol\",\"SolcArithmetic\",\"compoundAddArrayIndex(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArithmetic.sol\",\"SolcArithmetic\",\"compoundMulArrayIndex(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"threeRows()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"memory2dZeroed(uint,uint,uint,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"memoryArrayOfStaticZeroed(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"memoryMultipleDynamic()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"memoryArrayOfFixed()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushNoArgsStructLvalue(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"copyMemoryFixedToStorage()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"copyNestedMemoryToStorage()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"copyNestedStorageToMemory()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"storageMemoryNestedFixed()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"arrayToMappingFromStorage()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"nestedElementStorageToStorage()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"nestedMemoryElementToMemory()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"fixedArraysInStorage()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"setGetLength(uint)\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"arrayAccessor()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"mappingArray2dPopRepush(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushArgReadsBackAtEnd(uint)\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushZeroReadsZero()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushZero2d()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushPushNoArgs2d()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushPushNoArgs3d()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLhs1dEmpty()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLhs1dLast()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushStructMember2()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushRefAliasing()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushRefAliasingWrite()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLhsAndRhs1d()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"storagePointerPushSafe()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pop2dSafe()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"popLoopSafe()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushKeepsFirst()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLoopKeepsFirst(uint)\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthBasic()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthStorageToStorage()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthStorageToMemory()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthMemoryToStorage()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"length2dMemoryToMemory()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"length2dStorageToMemory()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthMappingArray(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthMappingArray2d(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthStructArray2d()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthFunctionCall()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthSameAfterMemoryCopy()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthSameAfterElementWrite()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"lengthSameAfterRowCopy()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushNested()\"]",
+    "expected": "proved",
+    "actual": "notRun"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"setX(struct SolcArrayMembers.S,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushNoArgsStruct(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"copyStaticToDynamic()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"copyStaticToLargerStatic()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLhs2dLast()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLhs3dLast()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushLhsStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushMemoryRowThenValue()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"storagePointerPush()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcArrayMembers.sol\",\"SolcArrayMembers\",\"pushStructFromMemory()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"identity(uint[])\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"allocateS(uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"arraysInConstructors()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"multipleInitializations()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"c99ScopingAssignOuter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"c99ScopingReadOuter()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"c99ScopingSelfInit()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"c99ScopingShadowDefault()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcConstructors.sol\",\"SolcConstructors\",\"fileLevelStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcControlFlow.sol\",\"SolcControlFlow\",\"doWhileFalseRunsBodyOnce()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcControlFlow.sol\",\"SolcControlFlow\",\"forLoopOverArray()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcExpressions.sol\",\"SolcExpressions\",\"ternaryNestedOuterHigh(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcExpressions.sol\",\"SolcExpressions\",\"ternaryNestedOuterLow(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcExpressions.sol\",\"SolcExpressions\",\"ternaryNestedInnerHigh(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcExpressions.sol\",\"SolcExpressions\",\"ternaryNestedInnerLow(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcExpressions.sol\",\"SolcExpressions\",\"exponentiationSignedBaseEvenExponent(int)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcExpressions.sol\",\"SolcExpressions\",\"exponentiationSignedBaseOddExponent(int)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"sumSeq(uint[])\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"arrayMultipleLocalVars()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"arrayMultipleLocalVarsBreak()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"exp(uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"freeFunctionRecursion()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"fun(uint[],uint[])\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"storageCalldataRefs()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"lenAndFirst(uint[])\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"calldataArgumentInternalDynamicArray()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"fields(struct SolcFunctionCalls.S)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"calldataArgumentInternalStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"pick(uint[][])\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"calldataArgumentInternalMultiArray()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"callInternalFunctionViaExpression()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"chainF()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"chainG()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"chainH()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"functionsIdentityAsTuple()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"functionsRecursive()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"recursiveG()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"functionsRecursiveIndirect()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"indirectF()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"indirectG()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"internalCallStateVarInit()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcFunctionCalls.sol\",\"SolcFunctionCalls\",\"internalCallStateVarInit2()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcHigherLevel.sol\",\"SolcHigherLevelParent\",\"parentFun()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"emptyForLoopBreaksAtTen()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forLoopDoubles()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileLoopDoubles()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileRunsUntilConditionFails()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forBreakAfterFirstIteration()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileBreakSkipsRestOfBody()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileBreakSkipsCondition()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forContinueRunsUpdate()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileContinueSkipsRestOfBody()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileContinueEvaluatesCondition()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"returnLeavesLoop()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"breakOutOfDoWhileFalseSmallSums()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"breakOutOfDoWhileFalseLargeSums()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"collatzReachesOne()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"boundaryTestPushedSlotsAreZero()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"fillThenHalfClear()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"memoryArrayLoopWriteRead()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"newInnerArraysInLoop(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"innerDoWhileBreakLeavesOuterBody()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forBreakDirectKeepsInit()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileCountsDownToOne()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileBreakAfterIncrement()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileBreakDirect()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"nestedDoWhileBreak(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"nestedDoWhileContinue(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forCallsInConditionAndUpdate()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"whileToggleConditionRunsOnce()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileToggleConditionRunsTwice()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forContinueThenBreak()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"nestedLoopsAllocate3d(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"nestedLoopsAllocate3dThenAlias(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"receiver(uint[],uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"loopFillsMemoryParameter(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileBreakSkipsAssignment()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"nestedWhileContinueSkipsCount()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"binomialRowsSmall()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"setLengthsByPushLoops(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forConditionCallRunsThrice()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileConditionCallRunsThrice()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"doWhileContinueThenBreak()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forSecondBreakUnreachable()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forContinueRunsUpdateAfterReassign()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"forShallowUnrollAssertIsFalse()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcLoops.sol\",\"SolcLoops\",\"pushChainedAssign(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcMappings.sol\",\"SolcMappings\",\"arrayElementsToMappingElementwise()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcMemory.sol\",\"SolcMemory\",\"nestedStorageStructToMemory()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcMemory.sol\",\"SolcMemory\",\"storageArrayCopiedIntoMemory()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcPayments.sol\",\"SolcPayments\",\"receive()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcPayments.sol\",\"SolcPayments\",\"fallback()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcPayments.sol\",\"SolcPayments\",\"shadowBuiltins()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcPayments.sol\",\"SolcPayments\",\"errorStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"conditionalIncrementStruct()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"conditionalIncrementStructLiteral()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"conditionalIncrementTuple()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitAnd()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitAndNeedBoth()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitOr()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitOrNeedBoth()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitOrInsideBranch(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitAndTouchedFunction()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"shortCircuitOrTouchedFunction()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"sideEffectsInsideTernary1()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"sideEffectsInsideTernary2()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"sideEffectsInsideTernary3()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"sideEffectsInsideTernary4()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"simpleIfStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"simpleIfStruct2()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"simpleIfTuple()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"loopNested()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"loopNestedFor()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"structAccess()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"stateMachineStep(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"aonBlogPostSolvable()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"dataDependencyReferenceSet3(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcSmtControlFlow.sol\",\"SolcSmtControlFlow\",\"constructorStateVariableInit(int)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"deleteStructKeepsNestedMappings()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"assignReferenceToStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"structCopyBetweenMappingEntries()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"structCopyFromZeroEntry()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"deleteSmallStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"deleteRecursiveStruct()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"deleteStructWithFixedAndDynamicArrays()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"deleteRecursiveMemoryAndStorage()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"loadNestedStructToMemory()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"storeNestedStructFromMemory()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"copyStructWithNestedArrays()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"makeStruct()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"structReturnedFromInternal()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructIncrementAfterDelete(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructDecrementAfterDelete(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructDeleteResetsArray(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"storageStructDeleteResetsArray()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"storageTernaryStructAlias(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryTernaryStructAlias(uint,uint,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"recursiveStructTernaryAliases(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"recursiveStorageToMemory()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"setSumAndArray(struct SolcStructsMappings.SumArr,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"setNestedSumAndArray(struct SolcStructsMappings.HoldsSum,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructParameterAliases(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryInnerStructParameterAliases(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryOuterStructParameterAliases(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"combine(uint,uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"extract(struct SolcStructsMappings.InnerL,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructsAsFunctionArgs()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructArrayBranch1d(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructArrayBranch2d(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryStructArrayLengths3d()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryNestedStructArrays()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"memoryArrayOfNestedStructArrays()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"setPx(mapping(uint => uint),uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingAsParameter(uint,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"setInternal(mapping(uint => uint),uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingAsInternalArgument()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"setInternalPair(mapping(uint => uint)[2],uint,uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"fixedArrayOfMappingsAsInternalArgument()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"pickMapping()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingReturnedFromInternal()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingLocalTupleReassignment()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingComputedKeys(uint)\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingOfArrays()\"]",
+    "expected": "proved",
+    "actual": "pending"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"writeTwoMappings(mapping(uint => uint),mapping(uint => uint))\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"mappingParametersMayAlias(uint,uint,uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"writeMappingElement(mapping(uint => uint))\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"arrayOfMappingsElementAlias(uint)\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"pushedStructIsZero()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/SolcStructsMappings.sol\",\"SolcStructsMappings\",\"copyStructArrayIntoNestedArray()\"]",
+    "expected": "proved",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcArrayMembersOpen.sol\",\"SolcArrayMembersOpen\",\"popIsolated()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"constructor()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"immutableUninitialized()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"deleteLocal()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"deleteLocals()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"multipleInitializationsAssignExpr()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"mappingLocalCompoundAssignment()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol\",\"SolcConstructorsOpen\",\"baseConstructorArgumentsSelfMul()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"exp(uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"freeFunctionRecursionBitAnd()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"conditionalWithArguments()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"setA(uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"functionsStorageVar1()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"functionsStorageVar2()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol\",\"SolcFunctionCallsOpen\",\"functionsRecursiveUnbounded()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcLoopsOpen.sol\",\"SolcLoopsOpen\",\"binomialFaithful(uint,uint)\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcLoopsOpen.sol\",\"SolcLoopsOpen\",\"binomialFaithfulRowsSmall()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcLoopsOpen.sol\",\"SolcLoopsOpen\",\"multiArrayFillByPushLoops()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"returnsAssigned()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"incUntilReturn()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"stackedReturn()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"modifierArgumentEvaluationOrder()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"modifierArgumentAssignsReturn()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"returnInModifier()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"stackedReturnWithModifiers()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"multiInvocationOnce()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"multiInvocationTwice()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"multiWithReturnTwice()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcModifiersOpen.sol\",\"SolcModifiersOpen\",\"smtModifierReturn(uint)\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"receive()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"msgSenderRange()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"msgValueRange()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"trySuccessKeepsStorageUnsound(address)\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"tryArgumentSideEffect(address)\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"callWithoutCodeReverts()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol\",\"SolcPaymentsOpen\",\"callKeepsStorageUnsound(address)\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"resetIfOverflow()\"]",
+    "expected": "internal",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"shortCircuitAndTouched()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"shortCircuitOrTouched()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"bmcRequireAlwaysTrue(uint)\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"msgValueNonNegative()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"branchesInModifiers()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol\",\"SolcSmtControlFlowOpen\",\"branchesInModifiers2()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcStructsMappingsOpen.sol\",\"SolcStructsMappingsOpen\",\"copyStructArraysIntoMemoryRows()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcStructsMappingsOpen.sol\",\"SolcStructsMappingsOpen\",\"storageNestedStructArrays()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcStructsMappingsOpen.sol\",\"SolcStructsMappingsOpen\",\"storageArrayOfNestedStructArrays()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"constructingEnumsFromInts()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"enumExplicitConversionInRange()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"enumFromUint(uint)\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"storageValueVarsNonNegative()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"castSmallerTruncates()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"downcastTruncates()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"sameSizeReinterprets()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"upcastAfterTruncation()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"numberLiteralWraps()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"typeConversionCleanup()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"packingSignedTypes()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/solc/open/SolcTypesOpen.sol\",\"SolcTypesOpen\",\"nestedTuplesParenthesized()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedLocalOverflowReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedStorageUnderflowReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedStorageDecrementUnderflowReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedFieldDecrementUnderflowReverts()\"]",
+    "expected": "pending",
+    "actual": "unsupported"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedMappingEntryDecrementUnderflowReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedPowerOverflowReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedDivisionOverflowReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "changed",
+    "key": "[\"keyext.solidity.examples/unprovable/Unprovable.sol\",\"Unprovable\",\"checkedUnaryMinusMinReverts()\"]",
+    "expected": "pending",
+    "actual": "proved"
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/benchmark/ERC20.sol",
+    "contract": "ERC20",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-ESGpxm/Test.lean:2:0: error: contract `ERC20` inherits: the import reads one contract's own members\n/tmp/solidity-test-ESGpxm/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\n/tmp/solidity-test-ESGpxm/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/benchmark/Purchase.sol",
+    "contract": "Purchase",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-CRUYNf/Test.lean:4:0: error: Solidity elaboration failed: operator - does not take uint\n/tmp/solidity-test-CRUYNf/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/benchmark/SendContract.sol",
+    "contract": "SendContract",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-DaDRG6/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-DaDRG6/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/benchmark/SendingEther.sol",
+    "contract": "SendEther",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-KRt5as/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-KRt5as/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-KRt5as/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-KRt5as/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-KRt5as/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-KRt5as/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/benchmark/SimpleAuction.sol",
+    "contract": "SimpleAuction",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-HM2JBL/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\n(deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/tmp/solidity-test-HM2JBL/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-HM2JBL/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/contracts/Escrow.sol",
+    "contract": "Escrow",
+    "stage": "lean",
+    "reason": "lake exited 135",
+    "tool": {
+      "command": "lake",
+      "exitCode": 135,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/contracts/FixedLengths.sol",
+    "contract": "FixedLengths",
+    "stage": "lean",
+    "reason": "lake exited 135",
+    "tool": {
+      "command": "lake",
+      "exitCode": 135,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/contracts/MultiAuction.sol",
+    "contract": "MultiAuction",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-eMkwfA/Test.lean:2:0: error: <input>:1:42: expected 'old' or 'result'\n/tmp/solidity-test-eMkwfA/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.MultiAuction`\n/tmp/solidity-test-eMkwfA/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.MultiAuction`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/contracts/PiggyBank.sol",
+    "contract": "PiggyBank",
+    "stage": "lean",
+    "reason": "lake exited 135",
+    "tool": {
+      "command": "lake",
+      "exitCode": 135,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/ERC20.sol",
+    "contract": "ERC20",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-kz50qU/Test.lean:2:0: error: <input>:1:18: expected spec_expr\n/tmp/solidity-test-kz50qU/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`\n/tmp/solidity-test-kz50qU/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.ERC20`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/EtherGame.sol",
+    "contract": "EtherGame",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-aPgl3K/Test.lean:4:0: error: Solidity elaboration failed: unknown name TARGET_AMOUNT\n/tmp/solidity-test-aPgl3K/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-aPgl3K/Test.lean:4:0: error: Solidity elaboration failed: unknown name TARGET_AMOUNT\n/tmp/solidity-test-aPgl3K/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/OZReentrancyGuard.sol",
+    "contract": "OZReentrancyGuard",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: Solidity elaboration failed: unknown name NOT_ENTERED\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: Solidity elaboration failed: unknown name NOT_ENTERED\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: Solidity elaboration failed: unknown name NOT_ENTERED\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: Solidity elaboration failed: unknown name NOT_ENTERED\n/tmp/solidity-test-MfDoZp/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/Purchase.sol",
+    "contract": "Purchase",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-mNryNN/Test.lean:4:0: error: Solidity elaboration failed: operator - does not take uint\n/tmp/solidity-test-mNryNN/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/SendEther.sol",
+    "contract": "SendEther",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-H7dhbH/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-H7dhbH/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-H7dhbH/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-H7dhbH/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-H7dhbH/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-H7dhbH/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/SimpleAuction.sol",
+    "contract": "SimpleAuction",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-lPOiYV/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-lPOiYV/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-lPOiYV/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-lPOiYV/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors\n/tmp/solidity-test-lPOiYV/Test.lean:4:0: error: Solidity elaboration failed: unknown name this\n/tmp/solidity-test-lPOiYV/Test.lean:4:0: error: cannot evaluate code because 'sorryAx' uses 'sorry' and/or contains errors",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/WETH9.sol",
+    "contract": "WETH9",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-N7DtUl/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\nmaximum recursion depth has been reached\nuse `set_option maxRecDepth <num>` to increase limit\nuse `set_option diagnostics true` to get diagnostic information",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/real-world/open/ArrayRemoveByShifting.sol",
+    "contract": "ArrayRemoveByShifting",
+    "stage": "lean",
+    "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-By8gmh/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\n(deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcArrayMembers.sol",
+    "contract": "SolcArrayMembers",
+    "stage": "lean",
+    "reason": "spawnSync lake ETIMEDOUT; lake terminated by SIGKILL",
+    "tool": {
+      "command": "lake",
+      "exitCode": null,
+      "signal": "SIGKILL",
+      "errorCode": "ETIMEDOUT",
+      "timedOut": true,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcArrayMembers.sol",
+    "contract": "SolcArrayMembers",
+    "stage": "lean",
+    "reason": "spawnSync lake ETIMEDOUT; lake terminated by SIGKILL",
+    "tool": {
+      "command": "lake",
+      "exitCode": null,
+      "signal": "SIGKILL",
+      "errorCode": "ETIMEDOUT",
+      "timedOut": true,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcHigherLevel.sol",
+    "contract": "SolcHigherLevel",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-uZelxA/Test.lean:2:0: error: contract `SolcHigherLevel` inherits: the import reads one contract's own members\n/tmp/solidity-test-uZelxA/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevel`\n/tmp/solidity-test-uZelxA/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevel`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcHigherLevel.sol",
+    "contract": "SolcHigherLevelA",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-uZelxA/Test.lean:2:0: error: contract `SolcHigherLevelA` inherits: the import reads one contract's own members\n/tmp/solidity-test-uZelxA/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevelA`\n/tmp/solidity-test-uZelxA/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevelA`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcModifiers.sol",
+    "contract": "SolcModifiers",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-rJTo0s/Test.lean:2:0: error: contract `SolcModifiers` inherits: the import reads one contract's own members\n/tmp/solidity-test-rJTo0s/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcModifiers`\n/tmp/solidity-test-rJTo0s/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcModifiers`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcModifiers.sol",
+    "contract": "SolcModifiersB",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-rJTo0s/Test.lean:2:0: error: contract `SolcModifiersB` inherits: the import reads one contract's own members\n/tmp/solidity-test-rJTo0s/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcModifiersB`\n/tmp/solidity-test-rJTo0s/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcModifiersB`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcModifiers.sol",
+    "contract": "SolcModifiersC",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-rJTo0s/Test.lean:2:0: error: contract `SolcModifiersC` inherits: the import reads one contract's own members\n/tmp/solidity-test-rJTo0s/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcModifiersC`\n/tmp/solidity-test-rJTo0s/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcModifiersC`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/SolcTypes.sol",
+    "contract": "SolcTypes",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-FgNSvG/Test.lean:2:0: error: uint8: a narrow integer type is the type of a local, a parameter, a return value or a state variable only, not of an array's element, a mapping's key or value, or a struct's member\n/tmp/solidity-test-FgNSvG/Test.lean:2:0: error: cannot evaluate code because 'SolTests.SolcTypes' uses 'sorry' and/or contains errors\n/tmp/solidity-test-FgNSvG/Test.lean:3:0: error: (interpreter) unknown declaration 'SolTests.SolcTypes.report'\n/tmp/solidity-test-FgNSvG/Test.lean:4:0: error: (interpreter) unknown declaration 'SolTests.SolcTypes.report'",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/open/SolcArithmeticOpen.sol",
+    "contract": "SolcArithmeticOpen",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-e0BMOK/Test.lean:2:0: error: <input>:1:111: expected '='\n/tmp/solidity-test-e0BMOK/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcArithmeticOpen`\n/tmp/solidity-test-e0BMOK/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcArithmeticOpen`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
+    "contract": "SolcHigherLevelOpen",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-meBhab/Test.lean:2:0: error: contract `SolcHigherLevelOpen` inherits: the import reads one contract's own members\n/tmp/solidity-test-meBhab/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevelOpen`\n/tmp/solidity-test-meBhab/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevelOpen`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  },
+  {
+    "kind": "error",
+    "source": "keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
+    "contract": "SolcHigherLevelOpenBase",
+    "stage": "lean",
+    "reason": "lake exited 1\n/tmp/solidity-test-meBhab/Test.lean:2:0: error: contract `SolcHigherLevelOpenBase` inherits: the import reads one contract's own members\n/tmp/solidity-test-meBhab/Test.lean:3:21: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevelOpenBase`\n/tmp/solidity-test-meBhab/Test.lean:4:13: error(lean.unknownIdentifier): Unknown constant `SolTests.SolcHigherLevelOpenBase`",
+    "tool": {
+      "command": "lake",
+      "exitCode": 1,
+      "signal": null,
+      "errorCode": null,
+      "timedOut": false,
+      "timeoutMs": 120000
+    }
+  }
+]

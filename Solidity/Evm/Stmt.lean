@@ -696,6 +696,8 @@ theorem push_sim {E : Ty} (q : Solidity.SPath C Γ (.array E))
         run_append_revert hrun⟩
   | some src =>
     cases src with
+    | copyMem p => cases hwp
+    | fixedCopy p shape hm => cases hwp
     | @val p e =>
       rw [pushIn] at hwp
       simp only [Bool.and_eq_true] at hwp

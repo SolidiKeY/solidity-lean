@@ -453,6 +453,16 @@ def Grown.readId {H : HTy} {T : Ty} (m : Grown H (fun _ => Unit)) (a : MAddrT T)
     Option (MvT T) :=
   (m.readT a).map (MVal.toMvT m.H' T)
 
+/-- A dynamic array's length by identity, independent of the heap typing in
+the result, as the memory `size` read of `memoryLengthRead`. -/
+def Grown.lenId {H : HTy} (m : Grown H (fun _ => Unit)) (E : Ty) (id : Nat) :
+    Option PrimTy.uint.Denote :=
+  (HRef.ofId? m.H' (.array E) id).bind fun r => some (m.heap.lenU r)
+
+theorem Grown.lenId_ref {H : HTy} (m : Grown H (fun _ => Unit)) {E : Ty}
+    (r : HRef m.H' (.array E)) : m.lenId E r.id = some (m.heap.lenU r) := by
+  simp only [Grown.lenId, HRef.ofId?_self, Option.bind_some]
+
 /-- Two memory addresses that never meet: two objects, two members of one
 object, or two elements of one array; or a member and an element. -/
 def MAddrT.Apart {T U : Ty} : MAddrT T → MAddrT U → Prop
@@ -777,6 +787,54 @@ theorem newArrT_copy_len {H : HTy} (hp : Heap H) (E : Ty) (n : PrimTy.uint.Denot
   refine (Grown.alloc_len _ .dyn).trans ?_
   rw [MObj.elems_dyn]
   exact (SVec.copyStToM hp _ _).val.2.trans (List.length_replicate ..)
+
+/-- A fresh array's element is a default in range and absent past its end.
+This is the typed observation behind allocation's initialized memory reads. -/
+theorem newArrT_find_at {E V : Ty} (n k : PrimTy.uint.Denote)
+    (h : (RefTy.array E).newArrOk = true) (p : Path E V) :
+    (newArrT (.array E) n h).findM (.at k p) =
+      if k.1.toNat < n.1.toNat then (SVal.dflt E).findM p else none := by
+  simp only [newArrT, SVal.findM_at', SVec.toList_ofList, SList.toList_nil,
+    List.append_nil, List.getElem?_replicate]
+  split <;> rfl
+
+/-- Copying primitive defaults allocates no child objects. -/
+theorem SVec.copyStToM_prim_defaults {H : HTy} (hp : Heap H) (P : PrimTy) (n : Nat) :
+    (SVec.ofList (List.replicate n (SVal.prim (PrimTy.dflt P)))).copyStToM hp rfl =
+      (⟨List.prefix_refl H, hp, ⟨List.replicate n (PrimTy.dflt P), by
+        simp only [List.length_replicate]⟩⟩ :
+        Grown H (fun H' => {l : List (MVal H' (.prim P)) //
+          l.length = (List.replicate n (SVal.prim (PrimTy.dflt P))).length})) := by
+  induction n with
+  | zero => simp only [List.replicate_zero, SVec.ofList, SVec.copyStToM_nil]
+  | succ n ih =>
+    let step : Grown H (fun H' => {l : List (MVal H' (.prim P)) //
+        l.length = (List.replicate n (SVal.prim (PrimTy.dflt P))).length}) →
+        Grown H (fun H' => {l : List (MVal H' (.prim P)) //
+          l.length = (List.replicate (n + 1) (SVal.prim (PrimTy.dflt P))).length}) :=
+      fun g => ⟨g.ext, g.heap, ⟨PrimTy.dflt P :: g.val.1, by
+        simpa only [List.length_cons, List.length_replicate] using congrArg Nat.succ g.val.2⟩⟩
+    simpa only [step, List.replicate_succ, SVec.ofList, SVec.copyStToM_cons,
+      SVal.copyStToM_prim, MVal.wk] using congrArg step ih
+
+/-- `initElement` for a primitive element of a freshly allocated array;
+an out-of-range address remains absent in the typed heap. -/
+theorem newArrT_copy_prim_index {H : HTy} (hp : Heap H) (P : PrimTy)
+    (n i : PrimTy.uint.Denote) (h : (RefTy.array (.prim P)).newArrOk = true) :
+    let g := (newArrT (.array (.prim P)) n h).copyStToM hp rfl
+    g.heap.readAddr (.index g.val .dyn i) =
+      if i.1.toNat < n.1.toNat then some (PrimTy.dflt P) else none := by
+  simp only [newArrT, SVal.dflt_prim, SVal.copyStToM_array,
+    Heap.readAddr, Heap.index, Grown.alloc_get, MObj.elems_wk, MObj.elems_dyn]
+  have hwk : ∀ {A B : HTy} (e : A <+: B),
+      MVal.wk e (.prim P) = (id : P.Denote → P.Denote) := by
+    intro A B e
+    rfl
+  simp only [hwk, List.map_id]
+  change ((SVec.ofList (List.replicate n.1.toNat (SVal.prim (PrimTy.dflt P)))).copyStToM hp
+    rfl).val.1[i.1.toNat]? = _
+  rw [SVec.copyStToM_prim_defaults]
+  exact List.getElem?_replicate
 
 /-- **A write keeps every length**, on the grown heap. -/
 theorem Grown.writeT_lenU {H : HTy} {T : Ty} {m m' : Grown H (fun _ => Unit)} {a : MAddrT T}

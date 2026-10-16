@@ -36,11 +36,33 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | Fixed-size arrays | `delete` resets in place, the length is the literal `n`, a literal index `≥ n` is a compile error | `SVal.array … fixed`, `MObj.array` | |
 | `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `TRun.transfer`; `Evm.compile_correct` | `Semantics/Run.lean` |
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `TRun.send`, `TTx.ext` | `Examples/Tactics/Net.lean` |
-| Call arguments | all read, left to right, before the callee runs | `Args.evalT`, `CallRet.enterT` (`Semantics/Run.lean`) | |
+| Call arguments | all read, left to right, before the callee runs; storage parameters alias, memory parameters alias memory, and storage-to-memory arguments copy at their evaluation point before later argument effects | `Args.evalT`, `hoistCallArgs`, `CallRet.enterT` (`Semantics/Run.lean`, `Syntax/Elab.lean`) | Calldata parameters remain unsupported. |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is imported as `bool ok = a.send(v)`, as solkey's `SolJSONParser.isValueCall` reads it; solc forwards all gas there, so the callee can re-enter and write storage, which `holds` ignores (the no-callback reading) and only `holdsC` covers (`Semantics/Callback.lean`). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`) | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `Binders.decodeT` | `Examples/Tactics/TryCatch.lean` |
 
 ## Evaluation order
+
+Native `addmod(a,b,k)` and `mulmod(a,b,k)` retain all three unsigned
+operands and compute the intermediate sum/product as an unbounded integer,
+then reduce modulo `k`; they do not perform checked `uint256` addition or
+multiplication first. This follows Solidity's
+[builtin arithmetic specification](https://docs.soliditylang.org/en/v0.8.17/units-and-global-variables.html#mathematical-and-cryptographic-functions).
+A statically literal zero modulus is rejected, including when another
+argument has effects. Dynamic zero follows the interpreter's existing
+arithmetic-failure abstraction: `THalt.revert`. Solc's checked builtin
+raises Panic 0x12, while the raw EVM ADDMOD/MULMOD opcode returns zero; the
+model does not claim their halt classifications are identical.
+
+The frontend uses the legacy right-to-left argument order described below,
+captures a modulus read before a later argument changes it, and preserves
+an ordinary declared function named `addmod` or `mulmod`. The modulus is
+captured and checked before the other operands' effect prefixes: a zero
+modulus suppresses an operand's failing helper, matching the legacy
+compiler's guard order. Kernel-checked
+execution and derivation regressions are in
+`Examples/Tactics/ModularArithmetic.lean`. The native operations are
+explicitly outside `Evm.valIn`; this change extends the interpreter and
+proof calculus, not the verified EVM compiler.
 
 solc compiles `lhs = rhs` by evaluating the right-hand side first, in both
 the legacy and the via-IR pipeline, and resolves an increment, decrement or
@@ -69,11 +91,21 @@ A callee's parameters and locals, inlined under fresh names, are captured as
 a caller's are: `return a++ + a;` reads the right `a` first
 (`ElabScope.inlined`; before 2026-10-08 a fresh name was taken for a capture
 holding its value, and `bumpRead(1)` of `Tactics/Calls.lean` was `1 + 2`).
-A program's own fresh-shaped local (`se1`, `sp1`, `ie1`, `mv1`, `brk1`, …,
+In a written derivation, a program's own fresh-shaped local (`se1`, `sp1`, `ie1`, `mv1`, `brk1`, …,
 as `FreshNames.parse` reads it) is still taken for a written-out capture and
 is not captured again: `uint se1 = 0; y = se1++ + se1;` reads the right
 `se1` after the `++` (`1`, where solc gives `0`), by the convention of
 written lines (proposed decision 30 of `docs/intrinsic.md`).
+
+Imported Solidity source has no such convention. `solc_import` supplies the
+names of its roots, parameters and raw statements to the elaborator
+(`ElabScope.mutableFreshNames`), so source locals such as `se2` remain mutable.
+Generated temporaries start beyond those names' fresh indices; source
+provenance survives an inlined call. A fresh-shaped state-variable read is
+captured in both modes, since a root is never a generated local capture.
+`Examples/Tactics/PushSuffixSource.lean` checks the correct result and rejects
+the former wrong result for source locals, parameters, state variables and
+ordinary binary arithmetic.
 
 `Examples/Tools.lean` pins three of them (a block run typed,
 `Prog.runT`, `Tools/Run.lean`). An effect under the right
@@ -207,14 +239,26 @@ elements, `shadow` the slots past the end.
   `SVal.find`/`SVal.save` then address the slot, past the end included, so
   an alias used later is not checked again. An index into a word or a struct
   is `.undef` (no typed path is one).
+- **A memory push resolves its receiver once.** In
+  `cube[cube[0].length].push(row)`, with both initial cube rows empty, the
+  target is `cube[0]`. The former append/assignment elaboration evaluated
+  that expression twice and incorrectly selected `cube[1]` after appending.
+  A typed `Src.copyMem` now keeps the copy inside one `Stmt.push`.
+  `TRun.push` resolves the receiver, snapshots the typed memory value and
+  appends it with the new length. The solc 0.8.34 IR computes a single target
+  slot and passes it to `array_push_from_*`; `Examples/Tactics/MemoryPush.lean`
+  checks the successful source and the old expansion's concrete reversion.
 - **A write through a reference to a popped element writes the slot.**
   `Token storage r = tokens[0]; tokens.pop(); r.value = 5;` writes the
-  cleared slot, and a `push()` of a struct or array element takes that slot
-  as it is (`storagePushLengthSaveReferenceElement`), so `tokens.push();
-  tokens[0].value` reads `5` (`testDanglingReferenceSurvivesPush`). A `push()`
-  of a primitive clears its slot first (`storagePushLengthSave`); a `pop()`
+  cleared slot. A subsequent zero-argument `push()` of a struct or array
+  resets that slot before exposing it (`storagePushLengthSaveReferenceElement`),
+  so the model reads `0` from `tokens[0].value`. Mapping entries survive reset;
+  a mapping push needs only its length save (`storagePushLengthSaveMappingElement`).
+  A primitive push also clears its slot (`storagePushLengthSave`); a `pop()`
   clears the element into the shadow (`storagePopSave`), but keeps a mapping
-  element as it is (`storagePopSaveMappingElement`).
+  element as it is (`storagePopSaveMappingElement`). These dangling executions
+  are compiler-specific/undefined; the old resurrection specifications are
+  migration cases to reclassify, not portable Solidity guarantees.
 - **`delete arr` keeps the elements' mapping entries.** `SVal.defaultOf`
   clears each live element in place (words to `0`, structs member by member,
   mappings kept) and moves it in front of the shadow, so `delete arr;
@@ -361,6 +405,34 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   states it with solkey's specified update (`Problem.deployUpd`), where
   solkey's unspecified problem writes `{storage := mtSt || net := mtSt}`
   (`docs/solkey-feedback.md`).
+
+## Specification integer negation
+
+SolKey's `SpecCompiler.visitUnary` compiles mathematical negation with
+`neg`. Lean represents ledger negation with its existing typed integer
+subtraction from zero. A ledger operand supplies the integer context for
+negating an unsigned Solidity value, including a typed unsigned constant
+and a value under `\old`. Negative literals also take the ledger integer
+sort in this context. Either operand order works.
+Unsigned negation without a ledger context and signed/ledger mixtures
+retain their refusal boundaries. Primitive arithmetic nested inside the
+negation stays checked: negating `amount + 1` does not bypass overflow of
+that unsigned addition. This changes specification compilation, not
+Solidity statement evaluation or the calculus's signature.
+
+## Specification frames and entry premises
+
+Frozen SolKey `048a74de51` accepts but ignores `assignable` clauses
+(`KeyNatspec.java`, `SolidityProblemSynthesizer.java`). Lean enforces its
+existing storage frames as a stronger extension. Ledger locations and
+array-length permissions do not yet have frame semantics; source functions
+with ledger locations are explicitly refused. `selfBalance` is separate from
+the `net` ledger. See [solkey-migration.md](solkey-migration.md).
+
+The pinned specified-obligation synthesizer assumes `msg.sender != this`.
+Lean does not currently impose this condition, so its specified obligations
+also cover entry states in which the two addresses coincide. This is a
+stronger obligation, not an additional assumption available to its proofs.
 
 ## Remaining deltas (documented, intentionally out of scope)
 

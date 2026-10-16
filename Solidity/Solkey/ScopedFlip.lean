@@ -44,7 +44,7 @@ info: \programVariables {
 
 /--
 info: theorem Solkey.ScopedFlip.additionStorageWrite.proved : ⊢ Solkey.ScopedFlip.additionStorageWrite.problem := by
-  sol_prove
+  sol_prove (steps := 128)
 
 additionStorageWrite: derived
 -/
@@ -52,7 +52,7 @@ additionStorageWrite: derived
 #solkey_derive? Solkey.ScopedFlip only additionStorageWrite
 
 theorem Solkey.ScopedFlip.additionStorageWrite.proved : ⊢ Solkey.ScopedFlip.additionStorageWrite.problem := by
-  sol_prove
+  sol_prove (steps := 128)
 
 /--
 info: 1 functions: 1 derived, 0 pending, 0 other

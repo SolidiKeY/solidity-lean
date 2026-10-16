@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "proof",
+  "scope": "focused-specification-negation-contracts",
+  "sources": [
+    "keyext.solidity.examples/benchmark/Purchase.sol",
+    "keyext.solidity.examples/contracts/Escrow.sol",
+    "keyext.solidity.examples/real-world/Purchase.sol"
+  ],
+  "completed": [
+    "keyext.solidity.examples/benchmark/Purchase.sol",
+    "keyext.solidity.examples/contracts/Escrow.sol",
+    "keyext.solidity.examples/real-world/Purchase.sol"
+  ],
+  "results": [
+    {
+      "source": "keyext.solidity.examples/benchmark/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "constructor()",
+      "reason": "",
+      "function": "constructor",
+      "elapsedMs": 3597
+    },
+    {
+      "source": "keyext.solidity.examples/benchmark/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "abort()",
+      "reason": "(deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "abort",
+      "elapsedMs": 8801
+    },
+    {
+      "source": "keyext.solidity.examples/benchmark/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "confirmPurchase()",
+      "reason": "(deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "confirmPurchase",
+      "elapsedMs": 7741
+    },
+    {
+      "source": "keyext.solidity.examples/benchmark/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "confirmReceived()",
+      "reason": "(deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "confirmReceived",
+      "elapsedMs": 8353
+    },
+    {
+      "source": "keyext.solidity.examples/benchmark/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "refundSeller()",
+      "reason": "(deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "refundSeller",
+      "elapsedMs": 9475
+    },
+    {
+      "source": "keyext.solidity.examples/contracts/Escrow.sol",
+      "contract": "Escrow",
+      "tag": "specified",
+      "status": "unsupported",
+      "signature": "constructor(address,address payable,uint)",
+      "reason": "proof uses nonstandard axioms",
+      "function": "constructor",
+      "elapsedMs": 8029
+    },
+    {
+      "source": "keyext.solidity.examples/contracts/Escrow.sol",
+      "contract": "Escrow",
+      "tag": "specified",
+      "status": "unsupported",
+      "signature": "placeInEscrow()",
+      "reason": "proof uses nonstandard axioms",
+      "function": "placeInEscrow",
+      "elapsedMs": 8381
+    },
+    {
+      "source": "keyext.solidity.examples/contracts/Escrow.sol",
+      "contract": "Escrow",
+      "tag": "specified",
+      "status": "unsupported",
+      "signature": "releaseEscrow()",
+      "reason": "proof uses nonstandard axioms",
+      "function": "releaseEscrow",
+      "elapsedMs": 8173
+    },
+    {
+      "source": "keyext.solidity.examples/contracts/Escrow.sol",
+      "contract": "Escrow",
+      "tag": "specified",
+      "status": "unsupported",
+      "signature": "withdrawFromEscrow()",
+      "reason": "proof uses nonstandard axioms",
+      "function": "withdrawFromEscrow",
+      "elapsedMs": 1083
+    },
+    {
+      "source": "keyext.solidity.examples/real-world/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "skip",
+      "status": "skipped",
+      "signature": "constructor()",
+      "reason": "Purchase.sol:28: tagged `@custom:key skip`",
+      "function": "constructor",
+      "elapsedMs": 0
+    },
+    {
+      "source": "keyext.solidity.examples/real-world/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "abort()",
+      "reason": "(deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "abort",
+      "elapsedMs": 7955
+    },
+    {
+      "source": "keyext.solidity.examples/real-world/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "confirmPurchase()",
+      "reason": "(deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "confirmPurchase",
+      "elapsedMs": 7401
+    },
+    {
+      "source": "keyext.solidity.examples/real-world/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "confirmReceived()",
+      "reason": "(deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "confirmReceived",
+      "elapsedMs": 8277
+    },
+    {
+      "source": "keyext.solidity.examples/real-world/Purchase.sol",
+      "contract": "Purchase",
+      "tag": "specified",
+      "status": "error",
+      "signature": "refundSeller()",
+      "reason": "(deterministic) timeout at `«tactic execution»`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.(invalid MessageData.lazy, missing context)",
+      "function": "refundSeller",
+      "elapsedMs": 8484
+    }
+  ],
+  "errors": [
+    {
+      "source": "keyext.solidity.examples/contracts/Escrow.sol",
+      "contract": "Escrow",
+      "stage": "lean",
+      "reason": "lake exited 1\n0 obligations declared scoped\n/tmp/solidity-test-8jfWNC/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\n(deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/tmp/solidity-test-8jfWNC/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\n(deterministic) timeout at `simp`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/tmp/solidity-test-8jfWNC/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\n(deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/tmp/solidity-test-8jfWNC/Test.lean:4:0: error: Tactic `simp` failed with a nested error:\nmaximum recursion depth has been reached\nuse `set_option maxRecDepth <num>` to increase limit\nuse `set_option diagnostics true` to get diagnostic information",
+      "tool": {
+        "command": "lake",
+        "exitCode": 1,
+        "signal": null,
+        "errorCode": null,
+        "timedOut": false,
+        "timeoutMs": 120000
+      }
+    }
+  ]
+}

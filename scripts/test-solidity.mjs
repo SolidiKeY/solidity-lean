@@ -24,13 +24,26 @@ export function solidityFiles(paths) {
   return [...files].sort();
 }
 
-function run(command, args, timeoutMs) {
+/** Run one bounded tool job; a timed-out Lake job must not leave Lean running. */
+export function runTool(command, args, timeoutMs) {
+  const group = process.platform !== 'win32';
   const p = spawnSync(command, args, {
     cwd: ROOT, encoding: "utf8", timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024,
+    detached: group, killSignal: 'SIGKILL',
   });
   if (p.error || p.status !== 0) {
-    throw new Error([p.error?.message, p.stdout, p.stderr].filter(Boolean).join("\n").trim()
-      || `${command} exited ${p.status}`);
+    if (group && p.pid > 0) {
+      try { process.kill(-p.pid, 'SIGKILL'); }
+      catch (e) { if (e.code !== 'ESRCH') throw e; }
+    }
+    const tool = {command, exitCode:p.status, signal:p.signal,
+      errorCode:p.error?.code ?? null, timedOut:p.error?.code === 'ETIMEDOUT', timeoutMs};
+    const outcome = [p.error?.message,
+      p.signal ? `${command} terminated by ${p.signal}` : null,
+      p.status !== null ? `${command} exited ${p.status}` : null].filter(Boolean).join('; ');
+    const failure = new Error([outcome, p.stdout, p.stderr].filter(Boolean).join("\n").trim());
+    failure.tool = tool;
+    throw failure;
   }
   return p.stdout;
 }
@@ -39,6 +52,13 @@ function leanString(s) { return JSON.stringify(s); }
 function leanName(s) {
   if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(s)) throw new Error(`unsupported contract name: ${s}`);
   return `SolTests.«${s}»`;
+}
+function renameClause(renaming = {}) {
+  const entries = Object.entries(renaming).map(([from,to]) => {
+    leanName(from); leanName(to); // Validate both names before constructing syntax.
+    return `«${from}» => «${to}»`;
+  });
+  return entries.length ? ` renaming ${entries.join(', ')}` : '';
 }
 
 /**
@@ -52,15 +72,19 @@ export function runSolidityTests(paths, options = {}) {
   if (!files.length) throw new Error("no Solidity files selected");
   const timeoutMs = options.timeoutMs ?? 120000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) throw new Error("timeout must be positive milliseconds");
-  if (options.build !== false) run("lake", ["build", "Solidity.Frontend.Testing"], timeoutMs);
+  const batchSize = options.batchSize ?? 32;
+  if (!Number.isSafeInteger(batchSize) || batchSize <= 0) throw new Error("batch size must be positive");
+  if (options.build !== false) runTool("lake", ["build", "Solidity.Frontend.Testing"], timeoutMs);
   const results = [], errors = [];
   for (const source of files) {
     const scratch = mkdtempSync(join(tmpdir(), "solidity-test-"));
+    let stage = "compile";
     try {
       const fixture = join(scratch, "source.ast.json");
       const args = ["scripts/solc-ast.mjs", "--source", source, "--out", fixture, "--no-wrapper"];
       for (const key of ["solkey", "soljson"]) if (options[key]) args.push(`--${key}`, resolve(options[key]));
-      run(process.execPath, args, timeoutMs);
+      runTool(process.execPath, args, timeoutMs);
+      stage = "discovery";
       const data = readFileSync(fixture);
       let hash = 0xcbf29ce484222325n;
       for (const byte of data) hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
@@ -68,26 +92,50 @@ export function runSolidityTests(paths, options = {}) {
         .map(n => n.name).filter(n => !options.contract || n === options.contract).sort();
       if (!contracts.length) throw new Error("no contracts selected");
       for (const contract of contracts) {
-        const output = join(scratch, `${contract}.results.json`);
-        try {
+        function invoke(first, count, listing) {
+          const output = join(scratch, `${contract}.${first ?? 'all'}.${listing ? 'list' : 'proof'}.json`);
+          const found = [];
+          try {
           const name = leanName(contract);
           const wrapper = join(scratch, "Test.lean");
           writeFileSync(wrapper, `import Solidity.Frontend.Testing
-solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${name} testing
+solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${name}${renameClause(options.renaming)} testing
 solc_scoped_problems ${name} decl
-#solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${options.list ? " listing" : ""} to ${leanString(output)}
+#solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${first === undefined ? '' : ` from ${first} count ${count}`}${listing ? " listing" : ""} to ${leanString(output)}
 `);
-          const diagnostics = run("lake", ["env", "lean", "--tstack=131072", wrapper], timeoutMs);
+          // `lake lean` supplies the artifact-cache import map. `lake env lean`
+          // only sees local oleans, which a freshly cached worktree need not have.
+          // The API's build step above owns rebuilding; keep this check read-only.
+          const diagnostics = runTool("lake", ["--quiet", "--no-build", "lean", wrapper,
+            "--", "--tstack=131072"], timeoutMs);
           // Implicit-constructor gaps are currently warnings, not ImportRows.
           if (diagnostics.includes("warning: solc_import:")) errors.push({ source, contract, reason: diagnostics.trim() });
-        } catch (e) { errors.push({ source, contract, reason: e.message }); }
+          } catch (e) { errors.push({ source, contract, stage: "lean", reason: e.message,
+            ...(e.tool ? {tool:e.tool} : {}) }); }
         if (existsSync(output)) {
           try {
-            for (const row of JSON.parse(readFileSync(output, "utf8"))) results.push({ source, contract, ...row });
+            for (const row of JSON.parse(readFileSync(output, "utf8"))) found.push({ source, contract, ...row });
           } catch (e) { errors.push({ source, contract, reason: `invalid result checkpoint: ${e.message}` }); }
         }
+          return found;
+        }
+        const node = JSON.parse(data).ast.nodes.find(n => n.nodeType === 'ContractDefinition' && n.name === contract);
+        const large = node.nodes.filter(n => n.nodeType === 'FunctionDefinition').length > batchSize;
+        if (!options.list && !options.function && large) {
+          const rows = invoke(undefined, undefined, true);
+          for (let first=0; first<rows.length; first+=batchSize) {
+            const part = invoke(first,batchSize,false);
+            // A failed batch with no checkpoint must retain its discovered functions.
+            results.push(...(part.length ? part : rows.slice(first,first+batchSize).map(r => ({...r,status:'notRun',reason:'batch failed before checkpoint'}))));
+            options.onProgress?.({results,errors});
+          }
+        } else {
+          results.push(...invoke(undefined, undefined, options.list));
+          options.onProgress?.({results,errors});
+        }
       }
-    } catch (e) { errors.push({ source, reason: e.message }); }
+    } catch (e) { errors.push({ source, stage, reason: e.message,
+      ...(e.tool ? {tool:e.tool} : {}) }); }
     finally { rmSync(scratch, { recursive: true, force: true }); }
   }
   return { results, errors };

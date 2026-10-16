@@ -63,7 +63,7 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { join, dirname, isAbsolute } from "node:path";
+import { join, dirname, isAbsolute, resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
@@ -76,7 +76,7 @@ const optionOf = (flag, fallback) => {
 };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SOLKEY = optionOf("--solkey", process.env.SOLKEY_ROOT || join(ROOT, "../solkey"));
+const SOLKEY = resolve(optionOf("--solkey", process.env.SOLKEY_ROOT || join(ROOT, "../solkey")));
 const OUT_ARG = optionOf("--out", null);
 const OUT = OUT_ARG ?? join(ROOT, "tests/solc/TestSuite.ast.json");
 const WRAPPER = optionOf("--wrapper", join(ROOT, "Solidity/Solkey/TestSuite.lean"));
@@ -98,7 +98,7 @@ const gradle = readFileSync(join(SOLKEY, "keyext.solidity.core/build.gradle"), "
 const soljsonFile = gradle.match(/ext\.soljsonFile\s*=\s*"([^"]+)"/)?.[1];
 const soljsonSha = gradle.match(/ext\.soljsonSha256\s*=\s*"([0-9a-f]{64})"/)?.[1];
 if (!soljsonFile || !soljsonSha) fail("no soljsonFile/soljsonSha256 in build.gradle");
-const soljsonDir = optionOf("--soljson", join(SOLKEY, "keyext.solidity.core/build/soljson"));
+const soljsonDir = resolve(optionOf("--soljson", join(SOLKEY, "keyext.solidity.core/build/soljson")));
 const soljsonPath = join(soljsonDir, soljsonFile);
 if (!existsSync(soljsonPath)) {
   fail(`${soljsonPath} is missing: run solkey's \`./gradlew downloadSoljson\` first`);
@@ -145,7 +145,7 @@ const NOISE = new Set([
   "isConstant", "isLValue", "isPure", "lValueRequested", "nameLocation", "nameLocations",
   "memberLocation", "keyNameLocation", "valueNameLocation", "keyName", "valueName", "scope",
   "functionSelector", "implemented", "virtual", "exportedSymbols", "contractDependencies",
-  "linearizedBaseContracts", "usedErrors", "usedEvents", "canonicalName", "fullyImplemented",
+  "linearizedBaseContracts", "usedErrors", "usedEvents", "fullyImplemented",
   "argumentTypes", "overloadedDeclarations", "hexValue", "assignments",
   "functionReturnParameters", "abstract", "license", "absolutePath",
   "commonType", "tryCall",
@@ -155,6 +155,8 @@ const KEPT_IF_ANY = new Set(["modifiers", "baseContracts"]);
 // The declarations an `id` is kept on: what `referencedDeclaration` points to.
 const DECLS = new Set([
   "VariableDeclaration", "StructDefinition", "FunctionDefinition", "ContractDefinition",
+  "EnumDefinition", "EnumValue", "UserDefinedValueTypeDefinition",
+  "ModifierDefinition",
 ]);
 // The nodes `src` and `line` are kept on.
 const located = (n, parentKey) =>
@@ -200,7 +202,9 @@ function trim(n, parentKey) {
   if (!n || typeof n !== "object") return signed(n);
   const out = {};
   for (const [k, v] of Object.entries(n)) {
-    if (NOISE.has(k)) continue;
+    // Inherited contracts need Solc's C3 order. Self-only lists remain noise,
+    // keeping existing non-inherited fixture hashes unchanged.
+    if (NOISE.has(k) && !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
     if (k === "id" && !DECLS.has(n.nodeType)) continue;
     if (k === "src") {
@@ -224,7 +228,9 @@ function trim(n, parentKey) {
 }
 
 let solkeyCommit = "unknown";
-try {
+if (existsSync(join(SOLKEY, "snapshot.json"))) {
+  solkeyCommit = JSON.parse(readFileSync(join(SOLKEY, "snapshot.json"), "utf8")).commit;
+} else try {
   solkeyCommit = execFileSync("git", ["-C", SOLKEY, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
 } catch {
   // not a git checkout: the header says so

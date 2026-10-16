@@ -38,6 +38,8 @@ def Heuristic.keyName : Heuristic → String
   | .simplifyExpression => "simplify_expression"
   | .concreteSolidity => "concrete_solidity"
   | .simplifyProgExpensive => "simplify_prog_expensive"
+  | .loopExpand => "loop_expand"
+  | .loopInv => "loop_inv"
 
 /-- A KeY taclet with its rule set: `storageFieldWriteSave (simplify_prog)`. -/
 def KeyTaclet.fmt (t : KeyTaclet) : String := s!"{t.name} ({Heuristic.keyName t.heuristic})"
@@ -47,14 +49,7 @@ def keyLine (n : Lean.Name) : String :=
   match lookupBy n (RuleShapes.tacletOrigins ++ RuleShapes.callbackOrigins) with
   | some (.taclet t) => s!"solkey: {KeyTaclet.fmt t}"
   | some (.merged ts) => "solkey (merged): " ++ ", ".intercalate (ts.map KeyTaclet.fmt)
-  | none =>
-    -- solkey's taclets past the pinned checkout (`ed7849d5b6`), unwinding bounded here
-    if n == ``LeanTaclet.whileUnwind then "solkey: whileUnwind (loop_expand), past the pin"
-    else if n == ``LeanTaclet.whileInvariantBox then
-      "solkey: whileInvariantBox (loop_inv), past the pin"
-    else if n == ``LeanTaclet.whileInvariantDiamond then
-      "solkey: whileInvariantDiamond (loop_inv), past the pin"
-    else "solkey: none (a rule solkey does not have)"
+  | none => "solkey: none (a rule solkey does not have)"
 
 /-- The printed rule of a constructor, one line. -/
 def texLine (n : Lean.Name) : String :=

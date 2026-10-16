@@ -38,12 +38,10 @@ section Resolve
 variable [FreshNames]
 
 /-- The parameters of the function `f` (`constructor` the constructor). -/
-def specParams (C : Contract) (f : String) : Except String (List (PrimTy × Var)) := do
+def specParams (C : Contract) (f : String) : Except String NCtx := do
   let some d := if f == "constructor" then C.ctor else Semantics.lookupBy f C.funs
     | throw s!"{f} is not a function of the contract"
-  d.params.mapM fun (n, T) => match T with
-    | .prim p => pure (p, Var.ofName n)
-    | _ => throw s!"{f}: the parameter {n} has a reference type"
+  pure (ECtx.toNCtx (← d.paramCtx))
 
 /-- `[ P ] (φ₁ ∧ … ∧ φₙ)` read in `Δ`: the call `P` placed there
 (`SProg.chain`), the postconditions in the context it leaves. -/
@@ -63,7 +61,7 @@ binders: the update declares `old` and `oldNet` at `LTy.old` and
 (`specModal`), and the update is left out when it is empty. -/
 def specObligation (C : Contract) (f : String) : Except String (Fml C []) := do
   let (a, b, U, P, posts) ← specPieces C f
-  let Γ := paramsN (← specParams C f)
+  let Γ ← specParams C f
   let pre ← NRead.conj (a ++ b) Γ
   let body ← if U.isEmpty then specModal Γ P posts else do
     let ⟨Δ, U'⟩ ← Upd.resolveN (fun _ => none) Γ Γ .nil U

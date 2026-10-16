@@ -18,7 +18,7 @@ under solkey's names where solkey has the rule:
 
 * `intro` (`impRight`), `allIntro` (`allRight`), `updIntro`, `bindIntro`
   (the hidden binder, Lean only: it puts the local of `T v = e;` in scope);
-* `update`, `unfold`, `bind`, `split`, `check`, `done`, `branches`,
+* `update`, `updates`, `unfold`, `bind`, `split`, `check`, `done`, `branches`,
   `cases`, `inv`, `inline`: a taclet's premise in front of the rest `ω` and
   the frames `κ` (`Premise.fml`, its parts apart), one goal per conjunct.
   `split` has KeY's two goals, under either modality: a `bool` local of
@@ -52,7 +52,7 @@ statement): its premise is `s.step k m = p`, which `rfl` proves and
 The rule must be one of `R`'s (`hR : R.admits m s = true`, last, proved by
 default): every rule under `.all`; under `.solkey` the statement must be one
 whose rule is solkey's (`Stmt.keyStep`: no argument to capture, no payment
-or `try` under the diamond, no loop), so a derivation of `⊢ₖ` fires
+or `try` under the diamond, no exhausted unwinding bound), so a derivation of `⊢ₖ` fires
 `Taclet`s alone (`Stmt.taclet_of_admits`,
 `Calculus/SolkeyFragment.lean`; decision 36).  `Stmt.stepIn` is the
 step with `R`'s rules, the walk's (`Calculus/ProvesDerive.lean`).
@@ -74,23 +74,33 @@ variable {C : Contract}
 /-- Whether the rule `Stmt.step` fires on `s` under `m` is one of solkey's
 (`Taclet`), read off the statement alone: a call with an argument to capture
 (`functionCallArgCapture`), a payment or a `try` under the diamond
-(`transferDiamond`, `tryCallDiamond`) and a loop (`whileUnwind`, `loopExit`,
-the invariant rules) have Lean's rules only (`LeanTaclet.keyStep`). -/
+(`transferDiamond`, `tryCallDiamond`), an exhausted loop bound (`loopExit`)
+and unsupported invariant shapes have Lean's rules only (`LeanTaclet.keyStep`).
+Automatic and positive-bound loops use `whileUnwind`; framed invariants use
+the upstream box rule, or its diamond rule when a variant is supplied. -/
 def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
   Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
-    (assign := fun _ _ => true) (rebind := fun _ _ => true) (assignLocal := fun _ _ => true)
+    (assign := fun _ r => !r.isMemory && !r.isFixedCopy) (rebind := fun _ _ => true) (assignLocal := fun _ v => !v.isModular)
     (declLocal := fun _ _ _ => true) (declStorage := fun _ _ _ => true)
     (opAssign := fun _ _ _ _ _ => true) (incDec := fun _ _ _ => true)
-    (assignIncDec := fun _ _ _ _ _ => true) (assignLocalPush := fun _ _ _ => true)
-    (push := fun _ _ _ => true) (pop := fun _ => true)
+    (assignIncDec := fun _ _ _ _ _ => true) (assignLocalPush := fun _ _ => true)
+    (push := fun b v _ => v.elim true Src.keyPushSource || !b.isSimple) (pop := fun _ => true)
     (transfer := fun _ _ => m == .box) (send := fun _ _ _ => true)
     (declMem := fun _ _ _ _ _ => true) (rebindMem := fun _ _ => true)
     (assignFromMem := fun _ _ => true) (assignMem := fun _ _ => true) (delete := fun _ => true)
     (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)
     (ite := fun _ _ _ => true) (require := fun _ => true) (assert := fun _ => true)
     (revert := true) (call := fun _ args _ _ => (Args.capture args).isNone)
-    (tryCall := fun _ _ _ _ _ _ _ => m == .box) (loop := fun _ _ _ => false)
+    (tryCall := fun _ _ _ _ _ _ _ => m == .box)
+    (loop := fun a _ body => match a with
+      | .auto | .unwind (_ + 1) => true
+      | .unwind 0 => false
+      | .inv _ dec => body.frame.isSome && (m == .box || dec.isSome))
     (block := fun _ => true)
+    (pushOpAssign := fun _ _ _ b r => !r.isSimple || b.isSimple)
+    (pushIncDec := fun _ _ b => b.isSimple)
+    (callReceiver := fun _ _ _ _ _ => true)
+    (callReceiverPush := fun _ _ _ _ _ _ => true)
 
 /-- Whether the rule set `R` has the rule `Stmt.step` fires on `s` under `m`:
 `.all` every rule, `.solkey` solkey's (`Stmt.keyStep`). -/
@@ -143,6 +153,23 @@ theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C �
   | functionCallArgCapture hcap =>
     show (Args.capture _).isNone = false
     rw [hcap]; rfl
+  | pushCompoundUnfoldReceiver h => exact h
+  | pushIncrementUnfoldReceiver h => exact h
+  | storageMemorySourceSave hmem =>
+    simp only [Stmt.keyStep, hmem, Bool.not_true, Bool.false_and]
+  | storageFixedCopySave hshape =>
+    simp only [Stmt.keyStep, hshape, Bool.not_true, Bool.and_false]
+  | pushFixedCopySave hshape hsp =>
+    simp only [Stmt.keyStep, Option.elim, Src.keyPushSource_ofFixedCopy hshape, hsp,
+      Bool.not_true, Bool.false_or]
+  | pushMemorySourceCapture hsp hnmp =>
+    simp only [Stmt.keyStep, Option.elim, Src.keyPushSource, hnmp, hsp,
+      Bool.not_true, Bool.false_or]
+  | whileClose hf => simp only [Stmt.keyStep, hf, Option.isSome_none, Bool.false_and]
+  | whileNoVariantDiamond _ hd =>
+    cases ‹Option (Val C Γ .uint)› <;>
+      simp_all only [Stmt.keyStep, Option.isNone, Option.isSome, Bool.false_eq_true,
+        Bool.false_or, Bool.and_false] <;> rfl
   | _ => rfl
 
 /-- The default proof of a step rule's `hR`: `RuleSet.admits` of a closed
@@ -282,6 +309,24 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {U : Upd C Γ Γ'}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .update U)
       (h : Proves C R Γ₀ (H.upd m U) (.modalK m ω κ φ))
+      (hR : R.admits m s = true := by rule_admits) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- Two sequential updates join the context in order: the second can read
+  the slot appended by `a.push()`. -/
+  | updates {Γ Δ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .updates U V)
+      (h : Proves C R Γ₀ ((H.upd m U).upd m V) (.modalK m ω κ φ))
+      (hR : R.admits m s = true := by rule_admits) :
+      Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- `sp.push() /= se`: the zero-divisor branch encloses both updates. -/
+  | guardedUpdates {Γ Δ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality}
+      {s : Stmt C Γ Γ} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      {c : Fml C Γ} {U : Upd C Γ Δ} {V : Upd C Δ Γ}
+      (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .guardedUpdates c U V)
+      (thn : Proves C R Γ₀ (H.pre c) (.upd m U (.upd m V (.modalK m ω κ φ))))
+      (els : Proves C R Γ₀ (H.pre (.not c)) (.modal m (.cons .revert ω) κ φ))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet that produces statements: they replace the first one, their

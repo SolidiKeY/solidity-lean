@@ -431,6 +431,7 @@ theorem Val.evalT_wk : {p : PrimTy} → (v : Val C Γ p) → (v.wk h).evalT (τ.
   | _, .mlen b _ => by
     simp only [Val.wk, Val.evalT, MPath.mvalT_wk b]
     rfl
+  | _, .modular .. => by simp only [Val.wk, Val.evalT, Val.evalT_wk]
 
 end
 
@@ -438,6 +439,12 @@ theorem Src.valueT_wk {T : Ty} (r : Src C Γ T) : (r.wk h).valueT (τ.lift h d) 
   cases r with
   | val v => simp only [Src.wk, Src.valueT, Val.evalT_wk]
   | copy p _ =>
+    simp only [Src.wk, Src.valueT, SPath.resolveT_wk]
+    rfl
+  | copyMem p =>
+    simp only [Src.wk, Src.valueT, MPath.mvalT_wk]
+    rfl
+  | fixedCopy p shape _ =>
     simp only [Src.wk, Src.valueT, SPath.resolveT_wk]
     rfl
 
@@ -471,6 +478,26 @@ theorem Args.evalT_wk : {ps : Ctx} → (as : Args C Γ ps) →
         let v ← e.evalT τ
         pure (v, r))
     rw [Args.evalT_wk as, Val.evalT_wk]
+    rfl
+  | _, .snocStorage as R x e => by
+    show (do
+      let r ← Args.evalT (τ.lift h d) (as.wk h)
+      let v ← (e.wk h).resolveT (τ.lift h d)
+      pure (some v, r)) = (do
+      let r ← Args.evalT τ as
+      let v ← e.resolveT τ
+      pure (some v, r))
+    rw [Args.evalT_wk as, SPath.resolveT_wk]
+    rfl
+  | _, .snocMemory as R x e => by
+    show (do
+      let r ← Args.evalT (τ.lift h d) (as.wk h)
+      let v ← (e.wk h).mvalT (τ.lift h d)
+      pure (some v, r)) = (do
+      let r ← Args.evalT τ as
+      let v ← e.mvalT τ
+      pure (some v, r))
+    rw [Args.evalT_wk as, MPath.mvalT_wk]
     rfl
 
 end Parts
@@ -658,6 +685,33 @@ theorem TRun.incDec_wk {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) :
   simp only [TRun.incDec, OpLoc.bumpT_wk]
   cases l.bumpT τ op <;> rfl
 
+/-- `values.push() += e` is unchanged by adding caller locals to its context. -/
+theorem TRun.pushOpAssign_wk {p : PrimTy} (op : BinOp)
+    (b : SPath C Γ (.array (.prim p))) (r : Val C Γ p) :
+    TRun.pushOpAssign op (b.wk h) (r.wk h) (τ.lift h d) =
+      liftedT h d (TRun.pushOpAssign op b r τ) := by
+  simp only [TRun.pushOpAssign, Val.evalT_wk, SPath.resolveT_wk, liftedT_bind,
+    liftedT_ite, liftedT_error, State.lift_storage, State.lift_withStorage, opStoreT_lift]
+
+/-- The discarded prefix/postfix value of `values.push()++` does not affect weakening. -/
+theorem TRun.pushIncDec_wk {p : PrimTy} (op : IncDec)
+    (b : SPath C Γ (.array (.prim p))) :
+    TRun.pushIncDec op (b.wk h) (τ.lift h d) = liftedT h d (TRun.pushIncDec op b τ) := by
+  simp only [TRun.pushIncDec, SPath.resolveT_wk, liftedT_bind, liftedT_ite, liftedT_error,
+    State.lift_storage, State.lift_withStorage, bumpStoreT_lift]
+  cases hr : b.resolveT τ with
+  | error => rfl
+  | ok ref =>
+    simp only [bind, Except.bind]
+    split
+    · rfl
+    · cases hp : τ.storage.pushPlace ref with
+      | none => rfl
+      | some pair =>
+        obtain ⟨st, k⟩ := pair
+        simp only [TRes.ofOpt]
+        cases bumpStoreT (τ.withStorage st) op (ref.index (.arr .dyn) k) <;> rfl
+
 theorem TRun.assignIncDec_wk {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (l : OpLoc C Γ p) :
     TRun.assignIncDec (i.wk h) op (l.wk h) (τ.lift h d) =
       liftedT h d (TRun.assignIncDec i op l τ) := by
@@ -685,6 +739,34 @@ theorem TRun.pop_wk {E : Ty} (b : SPath C Γ (.array E)) :
     TRun.pop (b.wk h) (τ.lift h d) = liftedT h d (TRun.pop b τ) := by
   simp only [TRun.pop, SPath.resolveT_wk, liftedT_bind]
   lift_fin
+
+/-- A source in `f().push(e)` reads caller locals past the returned alias. -/
+theorem Src.valueT_wk_afterAlias {R : RefTy} {T : Ty}
+    (r : Src C Γ T) (a : State C (.alias R :: Γ)) (d' : TEnv C a.H (.alias R :: Δ)) :
+    ((r.wk h).wk (.drop .refl)).valueT (a.lift (.keep h) d') =
+      (r.wk (.drop .refl)).valueT a := by
+  apply Eq.trans (b := (r.wk h).valueT ((a.drop (.push .refl)).lift h d'.2))
+  · exact Src.valueT_wk (.drop .refl) ((a.drop (.push .refl)).lift h d'.2)
+      (a.lift (.keep h) d').env (r.wk h)
+  · exact (Src.valueT_wk h _ _ r).trans (Src.valueT_wk (.drop .refl) _ _ r).symm
+
+/-- `f().push(e)` and `f().pop()` keep extra caller locals after the getter. -/
+theorem TRun.receiverOp_afterAlias_wk {E : Ty} (op : ReceiverOp C Γ E)
+    (a : State C (.alias (.array E) :: Γ)) (d' : TEnv C a.H (.alias (.array E) :: Δ)) :
+    TRun.receiverOp ((op.wk h).wk (.drop .refl)) (.alias .here) (a.lift (.keep h) d') =
+      liftedT (.keep h) d' (TRun.receiverOp (op.wk (.drop .refl)) (.alias .here) a) := by
+  cases op with
+  | pop => exact TRun.pop_wk (.keep h) a d' (.alias .here)
+  | push v _ =>
+    cases v with
+    | none => exact TRun.push_wk (.keep h) a d' (.alias .here) none
+    | some r =>
+      have hb : SPath.resolveT (a.lift (.keep h) d') (.alias (.here : Idx _ (.alias (.array E)))) =
+          SPath.resolveT a (.alias .here) := SPath.resolveT_wk (.keep h) a d' (.alias .here)
+      simp only [ReceiverOp.wk, Option.map_some, TRun.receiverOp, TRun.push,
+        Src.valueT_wk_afterAlias, liftedT_bind, liftedT_ite, liftedT_error,
+        State.lift_storage, hb]
+      lift_fin
 
 theorem TRun.assignLocalPush_wk {p : PrimTy} (i : Idx Γ (.val p)) (b : SPath C Γ (.array (.prim p))) :
     TRun.assignLocalPush (i.wk h) (b.wk h) (τ.lift h d) =
@@ -1144,6 +1226,7 @@ theorem CallRet.leaveT_wk {Γ Δ : Ctx} {H : HTy} (h : Thin Γ Δ) (e : TEnv C H
   | rets bs =>
     exact ⟨TEnv.append _ x d, TEnv.off_keepAll h _ x d, (TEnv.put_keepAll h _ x x e d).symm⟩
   | mem R r hd hm => exact ⟨(x.1, d), rfl, rfl⟩
+  | storage R r => exact ⟨(x.1, d), rfl, rfl⟩
 
 /-- A call after its arguments: the frame entered (`o₁`), the body run, the
 caller's locals given back (`TRun.call`). -/
@@ -1177,6 +1260,89 @@ theorem TRun.callFrom_wk {Γ Δ Γ' ps rs Γf : Ctx} (h : Thin Γ Δ) (τ : Stat
     rw [TEnv.put_wk, he]
     rfl
 
+/-- `f().push(e)` is one getter followed by the operation with its alias removed. -/
+theorem TRun.callReceiver_eq_seq {Γ ps Γf : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E) (σ : State C Γ) :
+    TRun.callReceiver args r hb body op σ =
+      TRun.seq (TRun.call args (.storage _ r) hb body)
+        (fun a => (TRun.receiverOp (op.wk (.drop .refl)) (.alias .here) a).map
+          (Out.drop (.push .refl))) σ := by
+  unfold TRun.callReceiver TRun.seq
+  cases TRun.call args (.storage _ r) hb body σ with
+  | error => rfl
+  | ok a =>
+    dsimp only [bind, Except.bind]
+    cases TRun.receiverOp (op.wk (.drop .refl)) (.alias .here) a.st <;> rfl
+
+/-- An inlined `f(args)` keeps extra caller locals, including under storage returns. -/
+theorem TRun.call_wk {Γ Δ Γ' ps rs Γf : Ctx} (h : Thin Γ Δ) (τ : State C Γ)
+    (d : TEnv C τ.H Δ) (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
+    (hb : Ext (rs ++ ps) Γf) (body : TStep C (rs ++ ps) Γf) :
+    TWkRel (ret.wk h).2.1 (TEnv.off h d) (TRun.call args ret hb body τ)
+      (TRun.call (args.wk h) (ret.wk h).2.2 hb body (τ.lift h d)) := by
+  rw [TRun.call_eq, TRun.call_eq, Args.evalT_wk]
+  refine TWkRel.bind_same _ fun a => ?_
+  rw [CallRet.enterT_wk]
+  exact TRun.callFrom_wk h τ d ret hb body _
+
+theorem TRun.callReceiverPush_eq_seq {Γ ps Γf Γv : Ctx} {E : Ty}
+    (args : Args C Γ ps) (r : Var) (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf) (he : Ext Γ Γv)
+    (code : TStep C Γ Γv) (value : Src C Γv E) (τ : State C Γ) :
+    TRun.callReceiverPush args r hb body he code value τ =
+      TRun.seq (TRun.call args (.storage _ r) hb body) (TRun.afterReceiverPrefix he code value) τ := by
+  unfold TRun.callReceiverPush TRun.seq
+  cases TRun.call args (.storage _ r) hb body τ <;> rfl
+
+theorem TRun.pushAfterPrefix_wk {Γ Δ Γv Δv : Ctx} {E : Ty} (h : Thin Γ Δ)
+    (hv : Thin Γv Δv) (he : Ext Γ Γv) (he' : Ext Δ Δv) (ho : Thin.Over he h he' hv)
+    (F : TStep C Γ Γv) (G : TStep C Δ Δv) (value : Src C Γv E)
+    (ref : SRef C (.ref (.array E))) (τ : State C Γ) (d : TEnv C τ.H Δ)
+    (hc : TWkRel hv (TEnv.off h d) (F τ) (G (τ.lift h d))) :
+    TWkRel h (TEnv.off h d) (TRun.pushAfterPrefix he F value ref τ)
+      (TRun.pushAfterPrefix he' G (value.wk hv) ref (τ.lift h d)) := by
+  unfold TRun.pushAfterPrefix
+  generalize F τ = a at hc ⊢
+  generalize G (τ.lift h d) = b at hc ⊢
+  cases a with
+  | error err =>
+    cases b with
+    | error err' => exact hc
+    | ok b => cases hc
+  | ok a =>
+    cases b with
+    | error err => cases hc
+    | ok b =>
+      obtain ⟨d', hd, rfl⟩ := hc
+      simp only [bind, Except.bind, Src.valueT_wk]
+      cases hx : value.valueT a.st with
+      | error err => rfl
+      | ok v =>
+        dsimp only [State.lift, State.withEnv]
+        cases hf : a.st.storage.full ref with
+        | true => rfl
+        | false =>
+          cases hs : a.st.storage.push ref (fun _ => some v.strip) with
+          | none => rfl
+          | some st =>
+            exact TWkRel.drop ho (r₀ := .ok ⟨a.st.withStorage st, a.ext⟩)
+              (r := .ok ⟨(a.st.withStorage st).lift hv d', a.ext⟩) ⟨d', hd, rfl⟩
+
+theorem TRun.afterReceiverPrefix_wk {Γ Δ Γv Δv : Ctx} {E : Ty} (h : Thin Γ Δ)
+    (hv : Thin Γv Δv) (he : Ext Γ Γv) (he' : Ext Δ Δv) (ho : Thin.Over he h he' hv)
+    (F : TStep C Γ Γv) (G : TStep C Δ Δv) (value : Src C Γv E)
+    (τ : State C (.alias (.array E) :: Γ)) (d : TEnv C τ.H (.alias (.array E) :: Δ))
+    (hc : TWkRel hv (TEnv.off h d.2) (F (τ.drop (.push .refl)))
+      (G ((τ.drop (.push .refl)).lift h d.2))) :
+    TWkRel h (TEnv.off (.keep h) d) (TRun.afterReceiverPrefix he F value τ)
+      (TRun.afterReceiverPrefix he' G (value.wk hv) (τ.lift (.keep h) d)) := by
+  unfold TRun.afterReceiverPrefix
+  rw [show SPath.resolveT (τ.lift (.keep h) d) (.alias (.here : Idx _ (.alias (.array E)))) =
+    SPath.resolveT τ (.alias .here) from SPath.resolveT_wk (.keep h) τ d (.alias .here)]
+  exact TWkRel.bind_same _ fun ref =>
+    TRun.pushAfterPrefix_wk h hv he he' ho F G value ref (τ.drop (.push .refl)) d.2 hc
+
 mutual
 
 /-- **A weakened statement runs as the statement**: from a state of `Δ`, it
@@ -1192,9 +1358,11 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
   | _, _, .declStorage R _ init, _, h, τ, d => TWkRel.of_top (TRun.declStorage_wk h τ d R init)
   | _, _, .opAssign op _ _ l r, _, h, τ, d => TWkRel.of_eq (TRun.opAssign_wk h τ d op l r)
   | _, _, .incDec op _ l, _, h, τ, d => TWkRel.of_eq (TRun.incDec_wk h τ d op l)
+  | _, _, .pushOpAssign op _ _ b r, _, h, τ, d => TWkRel.of_eq (TRun.pushOpAssign_wk h τ d op b r)
+  | _, _, .pushIncDec op _ b, _, h, τ, d => TWkRel.of_eq (TRun.pushIncDec_wk h τ d op b)
   | _, _, .assignIncDec i op _ l _, _, h, τ, d =>
     TWkRel.of_eq (TRun.assignIncDec_wk h τ d i op l)
-  | _, _, .assignLocalPush i b _, _, h, τ, d =>
+  | _, _, .assignLocalPush i b, _, h, τ, d =>
     TWkRel.of_eq (TRun.assignLocalPush_wk h τ d i b)
   | _, _, .push b v _, _, h, τ, d => TWkRel.of_eq (TRun.push_wk h τ d b v)
   | _, _, .pop b, _, h, τ, d => TWkRel.of_eq (TRun.pop_wk h τ d b)
@@ -1220,13 +1388,25 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
     cases boolT v
     · exact TWkRel.drop (Prog.wk_over els h) (Prog.run_wk els h τ d)
     · exact TWkRel.drop (Prog.wk_over thn h) (Prog.run_wk thn h τ d)
-  | _, _, .call f args ret body, _, h, τ, d => by
-    show TWkRel (ret.wk h).2.1 (TEnv.off h d) (TRun.call args ret body.ext body.runR τ)
-      (TRun.call (args.wk h) (ret.wk h).2.2 body.ext body.runR (τ.lift h d))
-    rw [TRun.call_eq, TRun.call_eq, Args.evalT_wk]
-    refine TWkRel.bind_same _ fun a => ?_
-    rw [CallRet.enterT_wk]
-    exact TRun.callFrom_wk h τ d ret body.ext body.runR _
+  | _, _, .call _ args ret body, _, h, τ, d =>
+    TRun.call_wk h τ d args ret body.ext body.runR
+  | _, _, .callReceiver _ args r body op, _, h, τ, d => by
+    change TWkRel h (TEnv.off h d) (TRun.callReceiver args r body.ext body.runR op τ)
+      (TRun.callReceiver (args.wk h) r body.ext body.runR (op.wk h) (τ.lift h d))
+    rw [TRun.callReceiver_eq_seq, TRun.callReceiver_eq_seq]
+    exact TWkRel.seq (TRun.call_wk h τ d args (.storage _ r) body.ext body.runR)
+      fun a d' => TWkRel.drop (.push (.refl h))
+        (TWkRel.of_eq (TRun.receiverOp_afterAlias_wk h op a d'))
+  | _, _, .callReceiverPush _ args r body code value, _, h, τ, d => by
+    change TWkRel h (TEnv.off h d)
+      (TRun.callReceiverPush args r body.ext body.runR code.ext code.runR value τ)
+      (TRun.callReceiverPush (args.wk h) r body.ext body.runR
+        (code.wk h).2.2.ext (code.wk h).2.2.runR (value.wk (code.wk h).2.1) (τ.lift h d))
+    rw [TRun.callReceiverPush_eq_seq, TRun.callReceiverPush_eq_seq]
+    exact TWkRel.seq (TRun.call_wk h τ d args (.storage _ r) body.ext body.runR)
+      fun a d' => TRun.afterReceiverPrefix_wk h (code.wk h).2.1 code.ext (code.wk h).2.2.ext
+        (Prog.wk_over code h) code.runR (code.wk h).2.2.runR value a d'
+        (Prog.run_wk code h (a.drop (.push .refl)) d'.2)
   | _, _, .tryCall call rets ok err code pnc other, _, h, τ, d => by
     show TWkRel h (TEnv.off h d)
       (TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext pnc.runR other.ext

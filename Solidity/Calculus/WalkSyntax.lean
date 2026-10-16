@@ -161,7 +161,26 @@ syntax (name := coreRule) "core_rule " ident ppSpace term:max : tactic
 @[inherit_doc coreRule]
 syntax (name := coreRule2) "core_rule2 " ident ppSpace term:max : tactic
 
+/-- Seed the loop mode from the named rule's find, then check its whole type. -/
+syntax (name := coreWhileUnwind) "core_while_unwind" : tactic
+
+@[tactic coreWhileUnwind]
+def evalCoreWhileUnwind : Tactic := fun _ => withMainContext do
+  let g ← getMainGoal
+  let goal ← instantiateMVars (← g.getType)
+  let_expr Taclet _ _ _ _ _ s _ := goal | throwUnsupportedSyntax
+  let ctor := mkConst ``Taclet.whileUnwind
+  let (xs, _, ty) ← forallMetaTelescope (← inferType ctor)
+  let_expr Taclet _ _ _ _ _ f _ := ty | throwUnsupportedSyntax
+  unless ← matchFind f (← whnfD s) [] do throwError "whileUnwind: find does not match"
+  unless ← isDefEq ty goal do throwError "whileUnwind: premise does not match"
+  g.assign (mkAppN ctor xs)
+  replaceMainGoal []
+
 macro_rules
+  | `(tactic| core_rule $c .whileUnwind) =>
+    `(tactic| core_silent;
+      (refine $c (by exact Solidity.Taclet.step_eq (by core_while_unwind)) ?_) <;> core_silent)
   | `(tactic| core_rule $c $r) =>
     `(tactic| core_silent; first
       | (refine $c (by exact Solidity.Taclet.step_eq $r) ?_) <;> core_silent
@@ -187,7 +206,8 @@ namespace Scoped
 scoped macro_rules
   | `(tactic| apply update $r:term) =>
     `(tactic| first
-      | core_rule Solidity.Proves.update $r)
+      | core_rule Solidity.Proves.update $r
+      | core_rule Solidity.Proves.updates $r)
   | `(tactic| apply unfold $r:term) =>
     `(tactic| first
       | core_rule Solidity.Proves.unfold $r
@@ -211,10 +231,12 @@ scoped macro_rules
       | (core_silent; apply Solidity.Proves.inline rfl) <;> core_silent)
   | `(tactic| apply split $r:term) =>
     `(tactic| first
-      | core_rule2 Solidity.Proves.split $r)
+      | core_rule2 Solidity.Proves.split $r
+      | core_rule2 Solidity.Proves.guardedUpdates $r)
   | `(tactic| apply splitBox $r:term) =>
     `(tactic| first
-      | core_rule2 Solidity.Proves.split $r)
+      | core_rule2 Solidity.Proves.split $r
+      | core_rule2 Solidity.Proves.guardedUpdates $r)
   | `(tactic| apply done $r:term) =>
     `(tactic| first
       | core_rule Solidity.Proves.done $r)

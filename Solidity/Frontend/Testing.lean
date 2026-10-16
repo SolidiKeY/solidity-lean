@@ -13,9 +13,17 @@ namespace Solidity.Frontend
 
 open Lean Elab Command Meta
 
+private def ImportRow.displayName (r : ImportRow) : String :=
+  if r.sourceName.isEmpty then r.name else r.sourceName
+
+private def ImportRow.signature (r : ImportRow) : String :=
+  if r.sourceSignature.isEmpty then
+    s!"{r.displayName}({",".intercalate (r.params.map Prod.snd)})"
+  else r.sourceSignature
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
-checks it in the kernel before it can be reported as proved. Open goals and
-budget exhaustion are pending, never evidence that a Solidity claim is false. -/
+checks it in the kernel before it can be reported as proved. Open goals are
+pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
 def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × String) := do
   let f := N ++ Lean.Name.mkSimple r.name
   let env ← getEnv
@@ -44,32 +52,39 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
           pure s.open_
       unless goals.isEmpty do return ("pending", "open proof goals")
       let proof ← instantiateMVars g
-      if proof.hasMVar || proof.hasFVar then return ("pending", "incomplete proof term")
+      if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term")
       let name := f ++ `tested
       addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
       unless (← collectAxioms name).all (standardAxioms.contains ·) do
         return ("unsupported", "proof uses nonstandard axioms")
       return ("proved", ""))
-      fun e => return ("pending", ← e.toMessageData.toString)
+      fun e => return ("error", ← e.toMessageData.toString)
 
 /-- Machine-readable testing entry point for a solc import. Listing performs
 no proof search. Every selected import row is retained, including gaps and
 functions whose specification has no plain box/diamond obligation. -/
 syntax (name := solkeyTest) "#solkey_test " ident (&" only " str)?
-  (&" listing")? " to " str : command
+  (&" from " num)? (&" count " num)? (&" listing")? " to " str : command
 
 @[command_elab solkeyTest]
 def elabSolkeyTest : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
   let only? := if stx[2].isNone then none else stx[2][1].isStrLit?
-  let listing := !stx[3].isNone
-  let rows := (← reportRows N).filter fun r => only?.all (· == r.name)
-  if rows.isEmpty then throwError "#solkey_test: no functions selected"
-  let output := stx[5].isStrLit?.getD ""
+  let first := if stx[3].isNone then 0 else stx[3][1].isNatLit?.getD 0
+  let count? := if stx[4].isNone then none else stx[4][1].isNatLit?
+  let listing := !stx[5].isNone
+  let allRows ← reportRows N
+  let selected := (allRows.filter fun r =>
+    only?.all fun n => n == r.name || n == r.displayName || n == r.signature).drop first
+  let rows := count?.map (selected.take ·) |>.getD selected
+  if rows.isEmpty && (!allRows.isEmpty || only?.isSome) then
+    throwError "#solkey_test: no functions selected"
+  let output := stx[7].isStrLit?.getD ""
   -- Checkpoint before search, then after every function: a process timeout
   -- preserves completed results and explicitly marks the unattempted rows.
   let mut results : Array Json := rows.toArray.map fun r => Json.mkObj [
-    ("function", toJson r.name), ("tag", toJson r.tag.toStr),
+    ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
+    ("signature", toJson r.signature),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
     ("elapsedMs", toJson (0 : Nat))]
   IO.FS.writeFile output (Json.arr results).pretty
@@ -84,7 +99,8 @@ def elabSolkeyTest : CommandElab := fun stx => do
       else testObligation N r
     let elapsed ← IO.monoMsNow
     results := results.set! i <| Json.mkObj [
-      ("function", toJson r.name), ("tag", toJson r.tag.toStr),
+      ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
+      ("signature", toJson r.signature),
       ("status", toJson status), ("reason", toJson reason),
       ("elapsedMs", toJson (elapsed - t0))]
     IO.FS.writeFile output (Json.arr results).pretty

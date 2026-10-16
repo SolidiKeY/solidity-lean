@@ -68,6 +68,10 @@ macro_rules
 
 namespace Tms
 
+/-- A native `addmod`/`mulmod`, retaining its three typed operands. -/
+@[reducible] def Term.modular (op : ModOp) (a b k : Tm C Γ (.val .uint)) :
+    Tm C Γ (.val .uint) := .app3 (.modular op) a b k
+
 @[reducible] def Term.lit {p : PrimTy} (v : p.Denote) : Tm C Γ (.val p) := .app0 (.lit v)
 @[reducible] def Term.litB (b : Bool) : Tm C Γ (.val .bool) := .app0 (.lit (p := .bool) b)
 /-- A numeral, a `uint`. -/
@@ -267,6 +271,7 @@ rows 54/55), is an `InternalCall` (`ic`, `internalCallExpand`). -/
 def CallRet.isRets {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Bool :=
   CallRet.casesOn (motive := fun _ _ _ => Bool) r false (fun _ _ _ => false) (fun _ => true)
     (fun _ _ _ _ => false)
+    (fun _ _ => false)
 
 /-- The first argument that is not simple, if any (`functionCallArgCapture`
 captures it). -/
@@ -296,6 +301,9 @@ def Premise.expandCall (_k : Nat) {Γ' ps rs Γf : Ctx} (args : Args C Γ ps)
     (fun R r hd hm body => .inline (args.declsThen (.cons (.declMem R r none hd hm)
       (.cons (.block (body.wk (Thin.atop (.mem R :: ps) Γ)).2.2) .nil)))
       (.keep (Thin.ofExt (Ext.append Γ ps))))
+    (fun R r body => .inline (args.declsThen (.cons (.declStorage R r none)
+      (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+      (.keep (Thin.ofExt (Ext.append Γ ps))))
     body
 
 /-- `functionCallArgCapture`'s premise: the leftmost argument that is not
@@ -312,6 +320,9 @@ def Premise.argCapture (k : Nat) (f : Name) {Γ' ps rs Γf : Ctx} (p : PrimTy) (
       (Thin.keepAll rs (.drop .refl)))
     (fun R r hd hm body => .inline
       (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.mem R r hd hm) body) .nil))
+      (.keep (.drop .refl)))
+    (fun R r body => .inline
+      (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.storage R r) body) .nil))
       (.keep (.drop .refl)))
     body
 
@@ -519,19 +530,73 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨[ v = mv[ie]⊕⊕; ]⟩ ⇝
           { memory := write(memory, mv[ie], mv[ie] ± 1) ‖ v := mv[ie]⊕⊕ } ⟨[ ]⟩ }
   -- Arrays ---------------------------------------------------------------
+  | storagePushAddAssign :
+      dl{ ⟨[ sp.push() += se; ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }
+  | storagePushSubAssign :
+      dl{ ⟨[ sp.push() -= se; ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }
+  | storagePushMulAssign :
+      dl{ ⟨[ sp.push() *= se; ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }
+  | storagePushDivAssign :
+      dl{ ⟨[ sp.push() /= se; ]⟩ ⇝
+        if se != 0 then ({ storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }
+  | storagePushModAssign :
+      dl{ ⟨[ sp.push() %= se; ]⟩ ⇝
+        if se != 0 then ({ storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }
+  | storagePushPreincrement :
+      dl{ ⟨[ ++sp.push(); ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }
+  | storagePushPostincrement :
+      dl{ ⟨[ (sp.push())++; ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }
+  | storagePushPredecrement :
+      dl{ ⟨[ −−sp.push(); ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }
+  | storagePushPostdecrement :
+      dl{ ⟨[ (sp.push())−−; ]⟩ ⇝
+        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }
+  | pushCompoundAssignValueRhsCapture :
+      dl{ ⟨[ path.push() ⊕= nse; ]⟩ ⇝
+        ⟨[ T se = nse; path.push() ⊕= se; ]⟩ }
   | storagePushValueSave :
       dl{ ⟨[ sp.push(se); ]⟩ ⇝
           { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 1) } ⟨[ ]⟩ }
   | storagePushValueCopySource :
-      dl{ ⟨[ sp.push(path); ]⟩ ⇝
-          { storage := save(save(storage, sp[sp.length], find(storage, path)), sp.length,
+      dl{ ⟨[ sp1.push(sp2); ]⟩ ⇝
+          { storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), sp1.length,
+              sp1.length + 1) } ⟨[ ]⟩ }
+  /-- `rows.push(mv)` copies the memory object and advances the length together. -/
+  | storagePushMemoryCopySource :
+      dl{ ⟨[ sp.push(mv); ]⟩ ⇝
+          { storage := save(save(storage, sp[sp.length], copyMem(mtSt, memory, mv)), sp.length,
               sp.length + 1) } ⟨[ ]⟩ }
+  | storagePushValue_unfold_rightFstReferenceArgument :
+      dl{ ⟨[ sp.push(nsp); ]⟩ ⇝
+          ⟨[ T storage source = nsp; sp.push(source); ]⟩ }
+  | storagePushValue_unfold_rightFstPrimitiveArgument :
+      dl{ ⟨[ sp.push(nsp); ]⟩ ⇝
+          ⟨[ T source = nsp; sp.push(source); ]⟩ }
   | storagePushLengthSave :
       dl{ ⟨[ parr.push(); ]⟩ ⇝
           { storage := save(delAt(storage, parr[parr.length]), parr.length, parr.length + 1) }
           ⟨[ ]⟩ }
   | storagePushLengthSaveReferenceElement :
-      dl{ ⟨[ rarr.push(); ]⟩ ⇝ { storage := save(storage, rarr.length, rarr.length + 1) } ⟨[ ]⟩ }
+      dl{ ⟨[ rarr.push(); ]⟩ ⇝
+          { storage := save(delAt(storage, rarr[rarr.length]), rarr.length, rarr.length + 1) }
+          ⟨[ ]⟩ }
+  | storagePushLengthSaveMappingElement :
+      dl{ ⟨[ marr.push(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length + 1) } ⟨[ ]⟩ }
   | storagePushValue_unfold_rightSndArgument :
       dl{ ⟨[ sp.push(nse); ]⟩ ⇝ ⟨[ T se = nse; sp.push(se); ]⟩ }
   | storagePushValue_unfold_leftFstReceiver :
@@ -540,6 +605,15 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨[ nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.push(); ]⟩ }
   | storagePop_unfold_leftFstReceiver :
       dl{ ⟨[ nsp.pop(); ]⟩ ⇝ ⟨[ T storage sp = nsp; sp.pop(); ]⟩ }
+  /-- `f().push(e)` captures the storage-returning getter before the operand. -/
+  | storagePushValue_unfold_leftCallReceiver :
+      dl{ ⟨[ fc.push(e); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; sp.push(e); ]⟩ }
+  /-- `f().push()` captures the getter before the default append. -/
+  | storagePush_unfold_leftCallReceiver :
+      dl{ ⟨[ fc.push(); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; sp.push(); ]⟩ }
+  /-- `f().pop()` captures the getter before removing the selected element. -/
+  | storagePop_unfold_leftCallReceiver :
+      dl{ ⟨[ fc.pop(); ]⟩ ⇝ ⟨[ aliasType storage sp = fc; sp.pop(); ]⟩ }
   | storagePopSave :
       dl{ ⟨[ darr.pop(); ]⟩ ⇝
           { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 1) }
@@ -550,12 +624,15 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨[ lsv = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; lsv = sp.push(); ]⟩ }
   | storageLocalRootPushBind :
       dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝
-          { storage := save(storage, darr.length, darr.length + 1) ‖ lsv := darr[darr.length] }
+          { storage := save(delAt(storage, darr[darr.length]), darr.length, darr.length + 1)
+            ‖ lsv := darr[darr.length] }
           ⟨[ ]⟩ }
   | storageLocalPrimitivePushBind :
       dl{ ⟨[ v = sp.push(); ]⟩ ⇝
           { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1)
             ‖ v := defVal(T) } ⟨[ ]⟩ }
+  | localValuePush_unfold_leftFstReceiver :
+      dl{ ⟨[ v = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.push(); ]⟩ }
   | storageLocalRootPushBindMappingElement :
       dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝
           { storage := save(storage, marr.length, marr.length + 1) ‖ lsv := marr[marr.length] }
@@ -742,10 +819,96 @@ inductive Taclet (C : Contract) (k : Nat) :
   | blockEmpty {Γ Γ₁ : Ctx} {body : Prog C Γ Γ₁} :
       Taclet C k m (.block body) (.unfold body body.ext)
 
+  /-- SolKey's `whileUnwind`: take one iteration, then the same loop.
+  Automatic mode retains that mode; a written bound decreases by one.
+  Both use the same taclet, with proof search bounded independently. -/
+  | whileUnwind {cond : Val C Γ .bool} :
+      dl{ ⟨[ while (cond) body; ]⟩ ⇝
+        ⟨[ if (cond) { body; while (cond) body; }; ]⟩ }
+
+  /-- solkey's `whileInvariantBox`.  The invariant holds now, and from every
+  state the body's frame allows (`{anon(body)}`, solkey's `#loopAnon`) where
+  it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
+  body, which keeps the invariant, or the rest of the program; a `bool`
+  local holds a `bool`, so the two goals cover every state.  A body with no
+  frame (`Prog.frame`) has no invariant rule: one that writes memory, as in
+  solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
+  rebinds an alias or calls out, which solkey frames as writing storage and
+  the ledger. -/
+  | whileInvariantBox {cond inv : Val C Γ .bool}
+      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
+      dl{ [ /// @custom:key invariant inv
+          while (cond) body; ] ⇝
+        "invariant initially valid": inv = TRUE ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE → { b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩)) }
+
+  /-- solkey's `whileInvariantDiamond`: `whileInvariantBox` with the variant
+  `dec`, its value before the iteration kept in a fresh local (KeY's skolem
+  `variant`), and checked after the body only where the condition holds
+  again (`{ b := cond } (b = TRUE → …)`): an iteration after which the loop
+  ends need not decrease it.  Lean reads `dec` where solkey compares it
+  (`dec = variant`), so the variant must be defined where the invariant
+  holds. -/
+  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
+      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
+      dl{ ⟨ /// @custom:key invariant inv
+          /// @custom:key decreases dec
+          while (cond) body; ⟩ ⇝
+        "invariant initially valid": inv = TRUE ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;
+            b = FALSE ⟹ ⟨[ ]⟩)) }
+
 /-! ## The rules solkey does not have -/
 
 inductive LeanTaclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
+
+  /-- Native wide addition followed by reduction; the frozen upstream has no rule. -/
+  | addmodAssignment :
+      dl[LeanTaclet C k]{ ⟨[ v = addmod(e₁, e₂, e₃); ]⟩ ⇝
+        { v := addmod(e₁, e₂, e₃) } ⟨[ ]⟩ }
+  /-- Native wide multiplication followed by reduction. -/
+  | mulmodAssignment :
+      dl[LeanTaclet C k]{ ⟨[ v = mulmod(e₁, e₂, e₃); ]⟩ ⇝
+        { v := mulmod(e₁, e₂, e₃) } ⟨[ ]⟩ }
+
+  /-- A memory source embedded in a storage write is saved as its snapshot. -/
+  | storageMemorySourceSave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}
+      (hmem : src.isMemory = true) :
+      dl[LeanTaclet C k]{ ⟨[ nlhs = src; ]⟩ ⇝
+        { storage := save(storage, nlhs, src) } ⟨[ ]⟩ }
+
+  /-- A typed shape-compatible source saved through the ordinary copy update.
+  This is the intrinsic adapter for KeY's erased `Struct` source sort. -/
+  | storageFixedCopySave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}
+      (hshape : src.isFixedCopy = true) :
+      dl[LeanTaclet C k]{ ⟨[ nlhs = src; ]⟩ ⇝
+        { storage := save(storage, nlhs, src) } ⟨[ ]⟩ }
+
+  /-- A shape-compatible snapshot pushed as one reference element. -/
+  | pushFixedCopySave {Γ : Ctx} {E : Ty} {sp : SPath C Γ (.array E)} {src : Src C Γ E}
+      (hshape : src.isFixedCopy = true) :
+      dl[LeanTaclet C k]{ ⟨[ sp.push(src); ]⟩ ⇝
+        { storage := save(save(storage, sp[sp.length], src), sp.length,
+            sp.length + 1) } ⟨[ ]⟩ }
+
+  /-- `rows.push(b.rows[i])` first captures its complex memory source. -/
+  | pushMemorySourceCapture :
+      dl[LeanTaclet C k]{ ⟨[ sp.push(nmp); ]⟩ ⇝
+        ⟨[ T memory mv = nmp; sp.push(mv); ]⟩ }
+
+  /-- Capture the receiver of `nsp.push() += se` once. Upstream's receiver
+  rule matches a bare push statement, not a push used as a compound target. -/
+  | pushCompoundUnfoldReceiver :
+      dl[LeanTaclet C k]{ ⟨[ nsp.push() ⊕= se; ]⟩ ⇝
+        ⟨[ T storage sp = nsp; sp.push() ⊕= se; ]⟩ }
+  /-- Capture the receiver of `++nsp.push()` once. Upstream's receiver
+  rule matches a bare push statement, not a push used as an increment target. -/
+  | pushIncrementUnfoldReceiver :
+      dl[LeanTaclet C k]{ ⟨[ (nsp.push())⊕⊕; ]⟩ ⇝
+        ⟨[ T storage sp = nsp; (sp.push())⊕⊕; ]⟩ }
 
   /-- A `try` under the diamond closes to `false`.  solkey has no diamond
   rule: the call may revert in the caller (no code at the address, data that
@@ -761,61 +924,19 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   | transferDiamond :
       dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }
 
-  /-- solkey's `whileUnwind`, bounded: a loop that may still be unwound `n + 1`
-  times is one iteration, then the loop that may be unwound `n` times (KeY's
-  `if (s#cond) { s#body while (s#cond) s#body }`).  The bound is Lean's
-  (`/// @custom:key unwind n`), so that symbolic execution ends; solkey's
-  strategy unwinds without one. -/
-  | whileUnwind {cond : Val C Γ .bool} :
-      dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind n + 1
-          while (cond) body; ]⟩ ⇝
-        ⟨[ if (cond) { body; /// @custom:key unwind n
-          while (cond) body; }; ]⟩ }
 
   /-- A loop unwound to its bound ends there: the rest with the condition
   false assumed, and that it is false (`Premise.check`).  Not
   `assert(!cond)`, which would make running out of unwindings a failure of
   the program; and not a capture of the condition, which the loop must
-  evaluate afresh.  A loop with no clause is `unwind 0`. -/
+  evaluate afresh. A written `unwind 0` requests this exit check. -/
   | loopExit {cond : Val C Γ .bool} :
       dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0
           while (cond) body; ]⟩ ⇝
         "loop exited": defined(cond) ∧ defined(false) ∧ cond ≐ false ⟹ ⟨[ ]⟩ ;
         "unwound to the end": defined(cond) ∧ defined(false) ∧ cond ≐ false }
 
-  /-- solkey's `whileInvariantBox`.  The invariant holds now, and from every
-  state the body's frame allows (`{anon(body)}`, solkey's `#loopAnon`) where
-  it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
-  body, which keeps the invariant, or the rest of the program; a `bool`
-  local holds a `bool`, so the two goals cover every state.  A body with no
-  frame (`Prog.frame`) has no invariant rule: one that writes memory, as in
-  solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
-  rebinds an alias or calls out, which solkey frames as writing storage and
-  the ledger. -/
-  | whileInvariantBox {cond inv : Val C Γ .bool}
-      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
-      dl[LeanTaclet C k]{ [ /// @custom:key invariant inv
-          while (cond) body; ] ⇝
-        "invariant initially valid": inv = TRUE ;
-        "invariant preserved and used": {anon(body)} (inv = TRUE → { b := cond }
-          (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩)) }
 
-  /-- solkey's `whileInvariantDiamond`: `whileInvariantBox` with the variant
-  `dec`, its value before the iteration kept in a fresh local (KeY's skolem
-  `variant`), and checked after the body only where the condition holds
-  again (`{ b := cond } (b = TRUE → …)`): an iteration after which the loop
-  ends need not decrease it.  Lean reads `dec` where solkey compares it
-  (`dec = variant`), so the variant must be defined where the invariant
-  holds. -/
-  | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
-      (hf : Prog.frame body = some (xs, hv) := by side_cond) :
-      dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv
-          /// @custom:key decreases dec
-          while (cond) body; ⟩ ⇝
-        "invariant initially valid": inv = TRUE ;
-        "invariant preserved and used": {anon(body)} (inv = TRUE → { variant := dec ‖ b := cond }
-          (b = TRUE ⟹ ⟨[ body ]⟩ (inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)) ;
-            b = FALSE ⟹ ⟨[ ]⟩)) }
 
   /-- A loop with an invariant whose body has no frame closes to `false`,
   under either modality: sound, and nothing about it is derived.  solkey

@@ -91,6 +91,7 @@ def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen 
   | .selectIn h, ds => Obs.select (C := Contract.ofStruct _) ds h
   | .fieldIn h, dp => ObsLoc.app dp (.field h .nil)
   | .toInt, da => da.map (·.1)
+  | .fixedCopy shape, da => shape.observe da
 
 /-- A binary symbol in the Theory, its arguments' typed readings and
 denotations given. -/
@@ -104,7 +105,7 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .at it, _, _, dp, di => ObsLoc.app dp (Path.index it (di.getD (PrimTy.dflt _)))
   | .nextIn, _, _, ds, dp => ObsLoc.app dp (.at (uintOfNat (ds.len dp)) .nil)
   | .delAt, _, _, ds, dp => ds.delAt dp
-  | .pushSlot, _, _, ds, dp => ds.extend dp
+  | .pushSlot, _, _, ds, dp => ds.reset dp
   | .pop, _, _, ds, dp => ds.pop false dp
   | .shrink, _, _, ds, dp => ds.pop true dp
   | .extend, _, _, ds, dp => ds.extend dp
@@ -130,6 +131,7 @@ def Op3.denote {a b c s : Srt} : Op3 C a b c s → a.TDen C → b.TDen C → c.T
   | .atIn it, _, dp, di => ObsLoc.app dp (Path.index it (di.getD (PrimTy.dflt _)))
   | .write, _, _, _ => ()
   | .saveIn, ds, dp, dv => ds.copyTo dp dv
+  | .modular op, dx, dy, dk => do op.evalT (← dx) (← dy) (← dk)
 
 /-! ## The bridge -/
 
@@ -205,6 +207,20 @@ theorem Storage.full_of_pushPlace {C : Contract} {E : Ty} {st : Storage C}
     · simp only [hb, decide_true, Bool.not_true]
     · simp only [hb, dite_false, reduceCtorEq] at h
 
+/-- A length-only extension that returns had room. -/
+theorem Storage.full_of_extendPlace {C : Contract} {E : Ty} {st : Storage C}
+    {r : SRef C (.ref (.array E))} {q : Storage C × PrimTy.uint.Denote}
+    (h : st.extendPlace r = some q) : st.full r = false := by
+  unfold Storage.extendPlace at h
+  unfold Storage.full
+  cases hf : st.find r with
+  | none => rfl
+  | some v =>
+    simp only [hf, Option.bind_eq_bind, Option.bind_some] at h
+    by_cases hb : (SVal.view v : ArrView E).n + 1 < 2 ^ 256
+    · simp only [hb, decide_true, Bool.not_true]
+    · simp only [hb, dite_false, reduceCtorEq] at h
+
 theorem Op0.denote_eval {s : Srt} (o : Op0 C s) : Srt.BridgeO C g.H s (o.denote g) (o.eval g) := by
   intro v hv
   rw [Op0.eval_eq_evalM] at hv
@@ -250,6 +266,11 @@ theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {
     subst hv
     simp only [Srt.Bridge] at hu ⊢
     rw [Op1.denote, hu]; rfl
+  | fixedCopy shape =>
+    simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv
+    subst hv
+    simp only [Srt.Bridge] at hu ⊢
+    rw [Op1.denote, hu, FixedCopy.observe_apply]
   | alloc | mfield | addM | mval | ref => trivial
   | wt =>
     simp only [Op1.evalM, Option.bind_some, Storage.wtT] at hv
@@ -332,7 +353,7 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
     | (rw [Op2.denote, Storage.obs_pop hv])
     | (simp only [Option.bind_eq_some_iff, Option.some.injEq] at hv
        obtain ⟨⟨st', k⟩, hp, rfl⟩ := hv
-       rw [Op2.denote, Storage.obs_pushPlace hp])
+       rw [Op2.denote, Storage.obs_extendPlace hp])
     | (rw [Op2.denote, Storage.obs_find_some hv])
     | (simp only [Option.some.injEq] at hv
        subst hv
@@ -380,6 +401,7 @@ theorem Op3.denote_eval {a b c s : Srt} (o : Op3 C a b c s) {x : Option (a.Den C
        obtain ⟨_, _, rfl⟩ := hv
        rfl)
     | (rw [Op3.denote, ← SVal.obs_strip, Storage.obs_push hv])
+    | (simpa only [Op3.denote, Option.bind_some] using hv)
 
 end Bridge
 

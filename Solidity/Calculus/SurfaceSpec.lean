@@ -1,5 +1,6 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.NotationResolve
+import Solidity.Calculus.RefInputs
 
 /-!
 # Specifications, compiled to dynamic logic
@@ -68,7 +69,7 @@ the empty ledger, `0`.  Lean only: a `requires` that reads a state
 variable, the ledger or the funds is refused, since solkey reads it before
 the update, of a storage the deployment never sees.
 
-Not ported: the benchmarks' clauses over `net(a)` are not tried.  A spec's
+The benchmarks' clauses over `net(a)` still leave proof gaps. A spec's
 arithmetic over Solidity values is Solidity's, checked at its operands'
 type, where solkey's is KeY's unbounded `int`: an overflowing side makes its
 equation false rather than true of a larger number.  Every equation compiled
@@ -94,6 +95,10 @@ structure SpecCtx (C : Contract) where
   storage : NSTerm C
   ensures : Bool
   locals : List (String × PrimTy)
+  /-- Reference parameters retain their storage or memory location. -/
+  refs : List (String × LocalTy) := []
+  /-- `\old` does not currently snapshot the heap. -/
+  memory : Option (NMTerm C) := some .memory
   result : Option PrimTy
   /-- The ledger `net(a)` reads: the current one, or the snapshot bound at
   the variable (`oldNet` under `\old`). -/
@@ -113,7 +118,7 @@ def resultVar : Var := .ofName "result"
 
 /-- `\old(e)` is read against `old` and `oldNet`, and not nested. -/
 def SpecCtx.old (ctx : SpecCtx C) : SpecCtx C :=
-  { ctx with storage := .pv oldVar, ensures := false, ledger := some oldNetVar }
+  { ctx with storage := .pv oldVar, ensures := false, ledger := some oldNetVar, memory := none }
 
 /-- The fold every query over a clause is: `here e` where it answers for the
 node `e` itself, else `join` over its operands, `leaf` at a leaf. -/
@@ -127,7 +132,7 @@ def SpecExpr.foldMap {α : Type} (leaf : α) (join : α → α → α) (here : S
     match here e with
     | some r => r
     | none => join (a.foldMap leaf join here) (b.foldMap leaf join here)
-  | e@(.num _) | e@(.bool _) | e@(.name _) | e@.result => (here e).getD leaf
+  | e@(.num _) | e@(.uintLit _) | e@(.bool _) | e@(.name _) | e@.result => (here e).getD leaf
 
 /-- Whether a node `here` picks out occurs, and what it says of it. -/
 def SpecExpr.any (here : SpecExpr → Option Bool) : SpecExpr → Bool :=
@@ -148,6 +153,15 @@ def SpecExpr.usesOld : SpecExpr → Bool :=
 /-- A number literal: it takes the type of the other operand. -/
 def SpecExpr.isNum : SpecExpr → Bool
   | .num _ => true
+  | _ => false
+
+/-- A ledger-integer result shape, used to select an operand context before
+compilation. Comparisons and reads through a ledger-valued index do not have
+this result shape. The compiler still checks every operand and address. -/
+private def SpecExpr.hasLedgerInt : SpecExpr → Bool
+  | .net _ => true
+  | .old a | .unop .neg a => a.hasLedgerInt
+  | .binop op a b => op.zArith && (a.hasLedgerInt || b.hasLedgerInt)
   | _ => false
 
 /-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`, `!t`
@@ -190,13 +204,47 @@ variable (C)
 
 mutual
 
+/-- A memory parameter followed through its members and entries. -/
+partial def SpecExpr.memPath (ctx : SpecCtx C) :
+    SpecExpr → Except String (Option (Ty × (NITerm C ⊕ NMAddr C)))
+  | .name x =>
+    match lookupBy x ctx.refs with
+    | some (.mem R) =>
+      if ctx.memory.isSome then pure (some (.ref R, .inl (.pv (.ofName x))))
+      else throw "\\old of memory contents needs a heap snapshot, which is not supported"
+    | _ => pure none
+  | .field e f => do
+    let some (T, p) ← e.memPath ctx | return none
+    let .ref (.struct s) := T | throw s!"member access .{f} on a non-struct"
+    let .inl i := p | throw "a memory reference is expected"
+    let some T' := C.fieldType s f | throw s!"struct {s} has no member {f}"
+    let a := NMAddr.field i f
+    pure (some (T', match T' with
+      | .prim _ => .inr a
+      | .ref _ => .inl (.read (ctx.memory.getD .memory) a)))
+  | .index e k => do
+    let some (T, p) ← e.memPath ctx | return none
+    let .inl i := p | throw "a memory reference is expected"
+    let E ← match T with
+      | .ref (.array E) | .ref (.fixed E _) => pure E
+      | _ => throw "indexing something that is not a memory array"
+    let (_, t) ← k.term ctx
+    let a := NMAddr.at i t
+    pure (some (E, match E with
+      | .prim _ => .inr a
+      | .ref _ => .inl (.read (ctx.memory.getD .memory) a)))
+  | _ => pure none
+
 /-- A path of state variables, members and entries, and the type it names:
 `balances[a]` is `balances[a]` at `uint`. -/
 partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × NPTerm C)
   | .name x =>
-    match C.rootType x with
-    | some T => pure (T, .root x)
-    | none => throw s!"unknown name {x}"
+    match lookupBy x ctx.refs with
+    | some (.alias R) => pure (.ref R, .pv (.ofName x))
+    | some (.mem _) => throw s!"{x} is a memory reference, not a storage path"
+    | _ => match C.rootType x with
+      | some T => pure (T, .root x)
+      | none => throw s!"unknown name {x}"
   | .field e f => do
     let (T, p) ← e.path ctx
     let .ref (.struct s) := T | throw s!"member access .{f} on a non-struct"
@@ -218,9 +266,15 @@ partial def SpecExpr.path (ctx : SpecCtx C) : SpecExpr → Except String (Ty × 
 
 /-- A value, and its sort: a state variable is read from the context's
 storage, `find(storage, count)`, or `find(old, count)` under `\old`; a
-ledger entry is a KeY `int` (`VSort.kint`), and so is arithmetic over one. -/
-partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (NTm.VSort × NTerm C)
+ledger entry is a KeY `int` (`VSort.kint`), and so is arithmetic over one.
+`expectK` permits an unsigned negand to widen in a ledger expression;
+primitive arithmetic inside it keeps its own checked type. -/
+partial def SpecExpr.term (ctx : SpecCtx C) (e : SpecExpr) (expectK : Bool := false) :
+    Except String (NTm.VSort × NTerm C) := match e with
   | .num n => pure (.prim .uint, .num n)
+  | .uintLit n => do
+    let value ← numLit s!"uint({n})" n .uint
+    pure (.prim .uint, .lit value)
   | .bool b => pure (.prim .bool, .bool b)
   | .result => do
     unless ctx.ensures do throw "\\result is only allowed in ensures"
@@ -228,7 +282,7 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (NTm.VS
     pure (.prim p, .pv resultVar)
   | .old e => do
     unless ctx.ensures do throw "\\old is only allowed in ensures, and not nested"
-    e.term ctx.old
+    e.term ctx.old expectK
   | .net e => do
     let (p, t) ← e.term ctx
     unless p = .prim .uint || e.isNum do
@@ -242,9 +296,12 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (NTm.VS
     | none =>
       match ctx.ensures, ctx.rets.find? (·.1 == x) with
       | true, some (_, v, p) => pure (.prim p, .pv (.ofName v))
-      | _, _ => do let (p, t) ← SpecExpr.read ctx (.name x); pure (.prim p, t)
+      | _, _ =>
+        if x == "this" && (C.rootType x).isNone && (lookupBy x ctx.refs).isNone then
+          pure (.prim .uint, .env .selfAddress)
+        else do let (p, t) ← SpecExpr.read ctx (.name x); pure (.prim p, t)
   | .field (.name b) m => do
-    if (lookupBy b ctx.locals).isNone && (C.rootType b).isNone then
+    if (lookupBy b ctx.locals).isNone && (lookupBy b ctx.refs).isNone && (C.rootType b).isNone then
       if let some k := EnvKey.ofParts b m then return (.prim .uint, .env k)
       if b == "this" && m == "balance" then return (.prim .uint, .env .selfBalance)
       let some ms := lookupBy b C.enums | throw s!"unknown name {b}"
@@ -253,15 +310,18 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (NTm.VS
     let (p, t) ← SpecExpr.read ctx (.field (.name b) m)
     pure (.prim p, t)
   | e@(.field ..) | e@(.index ..) => do let (p, t) ← SpecExpr.read ctx e; pure (.prim p, t)
-  | .unop .neg (.num n) => pure (.prim .int, .num (-(n : Int)))
+  | .unop .neg (.num n) =>
+    if expectK then pure (.kint, NTm.app0 (.zlit (-(n : Int))) s!"-{n}")
+    else pure (.prim .int, .num (-(n : Int)))
   | .unop op a => do
-    let (p, t) ← a.term ctx
+    let (p, t) ← a.term ctx expectK
+    if op == .neg && (p == .kint || expectK && p == .prim .uint) then
+      return (.kint, NTm.app2 (.zbin .sub rfl) (NTerm.num 0) t s!"-({t.text})")
     let .prim p := p | throw s!"operator {UnOp.sym op} does not take a KeY `int`"
     unless op.accepts p do throw s!"operator {UnOp.sym op} does not take {p.toStr}"
     pure (.prim (op.ret p), .unop op t)
   | .binop op a b => do
-    let (pa, ta) ← a.term ctx
-    let (pb, tb) ← b.term ctx
+    let ((pa, ta), (pb, tb)) ← SpecExpr.termPair ctx a b expectK
     -- beside a KeY `int` (a ledger entry), a `uint` is widened and the
     -- arithmetic is KeY's, unbounded (`NTm.resolvePairV`)
     if pa = .kint || pb = .kint then
@@ -279,15 +339,34 @@ partial def SpecExpr.term (ctx : SpecCtx C) : SpecExpr → Except String (NTm.VS
     pure (.prim (op.ret p), .binop op ta tb)
   | .imp .. | .iff .. | .all .. | .ex .. => throw "a formula where a value is expected"
 
+/-- Select the ledger context from the operands' result shapes, then compile
+each operand once. A ledger read resets its address operand's context without
+causing retries of malformed nested expressions. -/
+partial def SpecExpr.termPair (ctx : SpecCtx C) (a b : SpecExpr) (expectK : Bool := false) :
+    Except String ((NTm.VSort × NTerm C) × (NTm.VSort × NTerm C)) := do
+  let ledger := expectK || a.hasLedgerInt || b.hasLedgerInt
+  let left ← a.term ctx ledger
+  let right ← b.term ctx ledger
+  pure (left, right)
+
 /-- A read: `.length` of an array, or the word at a path. -/
 partial def SpecExpr.read (ctx : SpecCtx C) : SpecExpr → Except String (PrimTy × NTerm C)
   | .field e "length" => do
+    if let some (T, p) ← e.memPath ctx then
+      match T, p with
+      | .ref (.array _), .inl i => return (.uint, .mlen (ctx.memory.getD .memory) i)
+      | .ref (.fixed _ n), .inl _ => return (.uint, .num n)
+      | _, _ => throw "`.length` of something that is not a memory array"
     let (T, p) ← e.path ctx
     match T with
     | .ref (.array _) => pure (.uint, .len ctx.storage p)
     | .ref (.fixed _ n) => pure (.uint, .num n)
     | _ => throw "`.length` of something that is not an array"
   | e => do
+    if let some (T, p) ← e.memPath ctx then
+      match T, p with
+      | .prim q, .inr a => return (q, .read (ctx.memory.getD .memory) a)
+      | _, _ => throw "a memory reference where a value is expected"
     let (T, p) ← e.path ctx
     let .prim q := T | throw "a storage reference where a value is expected"
     pure (q, .find ctx.storage p)
@@ -313,8 +392,7 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
     e.fml ctx.old
   | .binop op a b => do
     if op = .eqB || op = .neB then
-      let (pa, ta) ← a.term C ctx
-      let (pb, tb) ← b.term C ctx
+      let ((pa, ta), (pb, tb)) ← SpecExpr.termPair (C := C) ctx a b
       let eq ← if pa = .prim .bool && pb = .prim .bool then iff a b else pure (NRead.eqD ta tb)
       return if op = .eqB then eq else .not eq
     cond (.binop op a b)
@@ -458,10 +536,11 @@ def specPieces (f : String) :
     | throw (if ctor then "the contract declares no constructor: an implicit one has no obligation"
       else s!"{f} is not a function of the contract")
   if d.spec.skip then throw s!"{f} is marked `skip`: it has no obligation"
-  let ps ← d.params.mapM fun (n, T) => match T with
-    | .prim p => pure (n, p)
-    | _ => throw s!"{f}: the parameter {n} has a reference type"
-  for (n, _) in ps do
+  let Γ ← d.paramCtx
+  let ps := d.params.filterMap fun (n, T) => match T with
+    | .prim p => some (n, p)
+    | _ => none
+  for (n, _) in d.params do
     if n == "old" || n == "oldNet" || n == "result" || n.startsWith "result_" then
       throw s!"{f}: a parameter named {n}, which the obligation names"
     -- `k1`, `k2`, …: the keys the layout and the frame quantify over
@@ -478,26 +557,30 @@ def specPieces (f : String) :
   -- solkey reads it before `storage := mtSt`, of a storage the run never sees)
   if ctor then
     for r in d.spec.requires do
-      if let some x := r.names.find? fun x => (C.rootType x).isSome && !ps.any (·.1 == x) then
+      if let some x := r.names.find? fun x => (C.rootType x).isSome && !d.params.any (·.1 == x) then
         throw s!"constructor: a `requires` reads the state variable {x}, which a deployment discards"
       if r.usesNet || r.any (fun | .field (.name "this") "balance" => some true | _ => none) then
         throw "constructor: a `requires` reads the ledger or the funds, which a deployment sets"
-  let pre : SpecCtx C := { storage := .storage, ensures := false, locals := ps, result := none }
+  let pre : SpecCtx C := {
+    storage := .storage
+    ensures := false
+    locals := ps
+    refs := Γ.filter (fun (_, t) => t matches .alias _ | .mem _)
+    result := none }
   let post : SpecCtx C := { pre with ensures := true, result := res, rets := rets }
-  let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [] })
+  let inv ← C.inv.mapM (SpecExpr.fml C { pre with locals := [], refs := [] })
   let reqs ← d.spec.requires.mapM (SpecExpr.fml C pre)
   let enss ← d.spec.ensures.mapM (SpecExpr.fml C post)
   let frame ← match d.spec.assignable with
     | some locs =>
       assignableFml C { post with storage := .pv oldVar, ledger := some oldNetVar, result := none } locs
     | none => pure []
-  let args := ps.map fun (n, _) => RawExpr.name n
+  let args := d.params.map fun (n, _) => RawExpr.name n
   -- `T result; result = f(x̄)@C;`: the call returns to its targets (none
   -- for a void function, `f(x̄)@C;`, still a `FunctionBodyStatement`)
   let call : List RawStmt := if ctor then [.call (.name f) args] else
     rets.map (fun (_, v, p) => RawStmt.decl (.named (p.toStr)) v none) ++
       [.tupleAssign (rets.map fun (_, v, _) => some (.name v)) (.call f args)]
-  let Γ : ECtx := ps.reverse.map fun (n, p) => (n, LocalTy.val p)
   let P ← ((elabStmtsP C call).run { funs := C.funs }).run' (Γ, 1)
   -- the snapshots `\old` reads, taken where something reads them
   -- (a deployment's `old` and `oldNet` are solkey's `old := mtSt ‖
@@ -525,7 +608,9 @@ def specPieces (f : String) :
     (d.spec.assignable.getD []).flatMap SpecLoc.names
   -- a deployment assumes no invariant and no layout: both are of the
   -- storage it discards (solkey's has no `CInv(storage, net)` premise)
-  pure (ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++
+  pure ((if Γ.any (fun (_, t) => t matches .alias _ | .mem _) then
+        [NRead.refInputs (ECtx.toNCtx Γ)] else []) ++
+      ps.map (fun (n, p) => rangeFml (.pv (.ofName n)) p) ++
       (if ctor then [] else layoutFmls C read) ++ [msgValue],
     (if ctor then [] else inv) ++ reqs, U, P, inv ++ enss ++ frame)
 

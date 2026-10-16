@@ -235,6 +235,20 @@ theorem Val.lower_evalT : {p : PrimTy} → (v : Val C Γ p) →
     simp only [HRef.ofId?_id, Option.bind_some]
     rfl
 
+  | _, .modular op a b k => by
+    show TRes.AgreesO id (do
+      let x ← a.evalT σ
+      let y ← b.evalT σ
+      let m ← k.evalT σ
+      TRes.ofOpt (op.evalT x y m)) (do
+      let x ← a.lower.eval σ
+      let y ← b.lower.eval σ
+      let m ← k.lower.eval σ
+      op.evalT x y m)
+    exact TRes.AgreesO.bind (Val.lower_evalT a) fun _ =>
+      TRes.AgreesO.bind (Val.lower_evalT b) fun _ =>
+        TRes.AgreesO.bind (Val.lower_evalT k) fun _ => TRes.AgreesO.ofOpt_id _
+
 end
 
 /-- A storage write's source. -/
@@ -248,6 +262,21 @@ theorem Src.lower_valueT {T : Ty} (r : Src C Γ T) :
     show TRes.AgreesO _ (do let r ← p.resolveT σ; TRes.ofOpt (σ.storage.find r))
       ((p.lower.eval σ).bind fun r => σ.storage.find r)
     exact TRes.AgreesO.bind (SPath.lower_resolveT σ p) fun r => TRes.AgreesO.ofOpt_id _
+  | copyMem p =>
+    show TRes.AgreesO _ (do pure (MVal.copyMToSt σ.heap (← p.mvalT σ)))
+      ((Tm.app2 .copyMem (.app0 .memory) p.lower).eval σ)
+    rw [Tm.eval_app2, Op2.eval_eq_evalM]
+    simp only [Tm.eval_app0, Op0.eval, State.memT, Option.bind_some]
+    refine TRes.AgreesO.bind (MPath.lower_mvalT σ p) fun mv => ?_
+    simp only [HRef.ofId?_id]
+    rfl
+  | fixedCopy p shape _ =>
+    show TRes.AgreesO id (do let r ← p.resolveT σ; let v ← TRes.ofOpt (σ.storage.find r); pure (shape.apply v))
+      (((p.lower.eval σ).bind fun r => σ.storage.find r).map shape.apply)
+    rw [Option.map_bind]
+    refine TRes.AgreesO.bind (SPath.lower_resolveT σ p) fun r => ?_
+    exact TRes.AgreesO.map (TRes.AgreesO.ofOpt_id (σ.storage.find r))
+      (g := id) (k := shape.apply) (k' := shape.apply) fun _ => rfl
 
 /-- A memory slot as a memory write writes it: a word, or an identity. -/
 def MVal.toT {H : HTy} : (T : Ty) → MVal H T → MvT T

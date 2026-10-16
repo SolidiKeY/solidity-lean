@@ -161,4 +161,86 @@ theorem ordered_inc : ⊨ spec!{ inc } := by sol_spec
 theorem ordered_order : ⊨ spec!{ order } := by sol_spec
 end
 
+/-! The `this` adapter must preserve the existing name-resolution priority,
+including intrinsic inputs that Solidity itself would not admit. -/
+private def selfResolution {C : Contract} (ctx : SpecCtx C) : Option String :=
+  (SpecExpr.term C ctx (.name "this")).toOption.map fun (_, term) => term.key
+
+private def selfContext : SpecCtx { vars := [] } :=
+  { storage := .storage, ensures := true, locals := [], result := none }
+
+example : spec!(uint(7)) = SpecExpr.uintLit 7 := rfl
+#guard !(spec!(uint(7))).isNum
+#guard !(SpecExpr.term { vars := [] } { selfContext with locals := [("x", .int)] }
+  (spec!(uint(1) + x))).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext
+  (spec!(uint(1) && true))).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext (.uintLit (2 ^ 256))).isOk
+
+private def unsignedContext : SpecCtx { vars := [] } :=
+  { selfContext with locals := [("x", .uint)] }
+
+#guard !(SpecExpr.term { vars := [] } unsignedContext (spec!(-x))).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext (spec!(-true))).isOk
+#guard (SpecExpr.fml { vars := [] } unsignedContext (spec!(net(msg.sender) == -x))).isOk
+#guard (SpecExpr.fml { vars := [] } unsignedContext (spec!(-x == net(msg.sender)))).isOk
+#guard (SpecExpr.fml { vars := [] } selfContext (spec!(net(msg.sender) == -4))).isOk
+#guard !(SpecExpr.term { vars := [] } { selfContext with locals := [("x", .int)] }
+  (spec!(net(msg.sender) + -x))).isOk
+
+/-- Invalid nested ledger clauses must fail without repeating an already
+selected integer context exponentially. -/
+private def invalidLedgerNest : Nat → SpecExpr
+  | 0 => spec!(true)
+  | n + 1 => .binop .add (spec!(net(msg.sender))) (invalidLedgerNest n)
+
+#guard !(SpecExpr.term { vars := [] } selfContext (invalidLedgerNest 20)).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext (invalidLedgerNest 20) true).isOk
+
+/-- Invalid ledger addresses reset their operands' context; negating the
+ledger read must not cause that invalid operand to be compiled again. -/
+private def invalidLedgerAddressNest (negate : Bool) : Nat → SpecExpr
+  | 0 => spec!(true)
+  | n + 1 =>
+    let rhs : SpecExpr := .net (invalidLedgerAddressNest negate n)
+    .binop .add (spec!(net(msg.sender))) (if negate then .unop .neg rhs else rhs)
+
+#guard !(SpecExpr.term { vars := [] } selfContext (invalidLedgerAddressNest false 20)).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext (invalidLedgerAddressNest true 20)).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext (invalidLedgerAddressNest false 20) true).isOk
+#guard !(SpecExpr.term { vars := [] } selfContext (invalidLedgerAddressNest true 20) true).isOk
+
+#guard selfResolution selfContext == some (NTerm.env (C := { vars := [] }) .selfAddress).key
+#guard selfResolution { selfContext with locals := [("this", .uint)] } ==
+  some (NTerm.pv (C := { vars := [] }) (.ofName "this")).key
+#guard selfResolution { selfContext with rets := [("this", "result_ret", .uint)] } ==
+  some (NTerm.pv (C := { vars := [] }) (.ofName "result_ret")).key
+#guard (selfResolution { selfContext with refs := [("this", .alias (.array (.prim .uint)))] }).isNone
+#guard selfResolution ({ storage := .storage, ensures := true, locals := [], result := none } :
+  SpecCtx { vars := [("this", .prim .uint)] }) ==
+    some (NTerm.find (C := { vars := [("this", .prim .uint)] }) .storage (.root "this")).key
+
+def LedgerNegation : Contract := contract!{
+  ensures -net(msg.sender) == 0 - net(msg.sender);
+  function ledger() public pure { }
+  requires net(msg.sender) == value;
+  ensures -net(msg.sender) == -value;
+  function unsigned(uint value) public pure { }
+  requires net(msg.sender) == -value;
+  ensures -value == net(msg.sender);
+  function reversed(uint value) public pure { }
+}
+
+section
+local instance : InContract := ⟨LedgerNegation⟩
+open scoped Scoped
+
+/-- `ledger()`: negation is unbounded integer subtraction from zero. -/
+theorem ledger_negation : ⊨ spec!{ ledger } := by sol_spec
+/-- `unsigned(value)`: the unsigned negand widens beside the ledger integer. -/
+theorem unsigned_negation : ⊨ spec!{ unsigned } := by sol_spec
+/-- `reversed(value)`: the ledger context also reaches the left operand. -/
+theorem reversed_negation : ⊨ spec!{ reversed } := by sol_spec
+end
+
 end Solidity.Examples.Tactics.Specs

@@ -30,6 +30,15 @@ def Tm.castV {p q : PrimTy} (h : p = q) (t : Tm C Γ (.val p)) : Tm C Γ (.val q
 def Tm.one (p : PrimTy) (hp : p.isNumeric = true) : Tm C Γ (.val p) :=
   .app0 (.lit (PrimTy.ofLit p 1 (by cases p <;> first | rfl | exact absurd hp Bool.false_ne_true)))
 
+/-- `0` at a numeric type, as in the outer guard of `sp.push() /= se`. -/
+def Tm.zero (p : PrimTy) (hp : p.isNumeric = true) : Tm C Γ (.val p) :=
+  .app0 (.lit (PrimTy.ofLit p 0 (by cases p <;> first | rfl | exact absurd hp Bool.false_ne_true)))
+
+/-- The zero compared with `se` in `sp.push() /= se`: infer its numeric type
+from the term, independent of the names of the rule's type/proof binders. -/
+def Tm.zeroLike {p : PrimTy} (_ : Tm C Γ (.val p))
+    (hp : p.isNumeric = true := by first | rfl | assumption) : Tm C Γ (.val p) := Tm.zero p hp
+
 /-- A compound operator (`+=` …) takes and returns its numeric type. -/
 theorem BinOp.compound_accepts {op : BinOp} (hop : op.hasCompoundAssign = true) {p : PrimTy}
     (hp : p.isNumeric = true) : op.accepts p = true := by
@@ -93,6 +102,7 @@ def Val.lower : {p : PrimTy} → Val C Γ p → Tm C Γ (.val p)
   | _, .readMem l => .app2 .read (.app0 .memory) l.lower
   | _, .len b hp => Tm.castV hp.symm (.app2 .len (.app0 .storage) b.lower)
   | _, .mlen b hp => Tm.castV hp.symm (.app2 .mlen (.app0 .memory) b.lower)
+  | _, .modular op a b k => .app3 (.modular op) a.lower b.lower k.lower
 
 end
 
@@ -100,6 +110,8 @@ end
 def Src.lower {T : Ty} : Src C Γ T → Tm C Γ (.sv T)
   | .val v => .app1 .sval v.lower
   | .copy p _ => .app2 .sfind (.app0 .storage) p.lower
+  | .fixedCopy p shape _ => .app1 (.fixedCopy shape) (.app2 .sfind (.app0 .storage) p.lower)
+  | .copyMem p => .app2 .copyMem (.app0 .memory) p.lower
 
 /-- A memory write's source. -/
 def MSrc.lower {T : Ty} : MSrc C Γ T → Tm C Γ (.mv T)
@@ -190,9 +202,14 @@ def allocFresh {R : RefTy} (i : Idx Γ (.mem R)) (h : (Ty.ref R).mapFree = true)
   (Upd.nil.snoc (.local i (.mref (.app1 (.alloc R h) (.app0 .memory))))).snoc
     (.memory (.app1 (.addM R h) (.app0 .memory)))
 
-/-- `{storage := extend(storage, b) ‖ lsv := b[b.length]}`
+/-- `{storage := pushSlot(storage, b) ‖ lsv := b[b.length]}`
 (`storageLocalRootPushBind`). -/
 def pushBind {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R))) : Upd C Γ Γ :=
+  (Upd.nil.snoc (.storage (.app2 .pushSlot (.app0 .storage) b.lower))).snoc
+    (.local i (.path (.app1 .next b.lower)))
+
+/-- A mapping slot retained while the array grows and its alias binds. -/
+def pushBindMapping {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R))) : Upd C Γ Γ :=
   (Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) b.lower))).snoc
     (.local i (.path (.app1 .next b.lower)))
 
@@ -244,5 +261,35 @@ def Tm.bumped (op : IncDec) {p : PrimTy} (hp : p.isNumeric = true) (t : Tm C Γ 
     Tm.castV (BinOp.compound_ret op.binOp_compound p)
       (.app2 (.binop op.binOp (BinOp.compound_accepts op.binOp_compound hp)) t (Tm.one p hp))
   else t
+
+/-! ### Primitive push followed by a compound update -/
+
+namespace PushSuffix
+
+/-- Division and remainder test their simple source before either update. -/
+def needsZeroGuard (op : BinOp) : Bool := op == .div || op == .mod
+
+/-- `se != 0`, the outer condition of `sp.push() /= se` and `%= se`. -/
+def nonzero {p : PrimTy} (hp : p.isNumeric = true) (se : Simple C Γ p) : Fml C Γ :=
+  .not (.eq se.lower (Tm.zero p hp))
+
+/-- `size(sp) - 1`, read after the push update in `sp.push() += se`. -/
+def lastIndex {E : Ty} (b : SPath C Γ (.array E)) : Tm C Γ (.val .uint) :=
+  .app2 (.binop .sub rfl) (.app2 .len (.app0 .storage) b.lower)
+    (.app0 (.lit ⟨1, rfl⟩))
+
+/-- The appended primitive slot, addressed in the storage left by the push. -/
+def lastPath {p : PrimTy} (b : SPath C Γ (.array (.prim p))) : Tm C Γ (.path (.prim p)) :=
+  .app2 (.at (.arr .dyn)) b.lower (lastIndex b)
+
+/-- The second update of `sp.push() += se`: read and modify the appended slot. -/
+def saveOp {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (b : SPath C Γ (.array (.prim p)))
+    (se : Simple C Γ p) : Upd C Γ Γ :=
+  Upd.nil.snoc (.storage (.app3 .save (.app0 .storage) (lastPath b) (.app1 .sval
+    (Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp))
+      (.app2 .find (.app0 .storage) (lastPath b)) se.lower)))))
+
+end PushSuffix
 
 end Solidity

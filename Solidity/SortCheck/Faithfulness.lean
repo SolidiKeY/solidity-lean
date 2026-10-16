@@ -109,7 +109,8 @@ def Stmt.read? {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Read C Γ)
   | .opAssign _ _ _ l _ => OpLoc.read? l
   | .incDec _ _ l => OpLoc.read? l
   | .assignIncDec _ _ _ l _ => OpLoc.read? l
-  | .assignLocalPush _ b _ => some (.sslot b)
+  | .assignLocalPush _ b => some (.sslot b)
+  | .pushOpAssign _ _ _ b _ | .pushIncDec _ _ b => some (.sslot b)
   | _ => none
 
 /-! ## What a declared sort claims -/
@@ -374,6 +375,15 @@ faithful_theorem storageIndexWriteArrayCopySource .storage .reference
 faithful_theorem storagePushValueCopySource .storage .reference
 -- `y = values.push();` reads the slot appended, at the element type.
 faithful_theorem storageLocalPrimitivePushBind .storage .any
+faithful_theorem storagePushAddAssign .storage .numeric
+faithful_theorem storagePushSubAssign .storage .numeric
+faithful_theorem storagePushMulAssign .storage .numeric
+faithful_theorem storagePushDivAssign .storage .numeric
+faithful_theorem storagePushModAssign .storage .numeric
+faithful_theorem storagePushPreincrement .storage .numeric
+faithful_theorem storagePushPostincrement .storage .numeric
+faithful_theorem storagePushPredecrement .storage .numeric
+faithful_theorem storagePushPostdecrement .storage .numeric
 faithful_theorem memoryStorageCopy .storage .reference
 faithful_theorem storageRootOpAssign .storage .numeric
 faithful_theorem storageFieldOpAssign .storage .numeric
@@ -421,6 +431,15 @@ def faithfulCtors : List Proved := [
   ⟨``Taclet.storageIndexWriteArrayCopySource, _, @faithful_storageIndexWriteArrayCopySource⟩,
   ⟨``Taclet.storagePushValueCopySource, _, @faithful_storagePushValueCopySource⟩,
   ⟨``Taclet.storageLocalPrimitivePushBind, _, @faithful_storageLocalPrimitivePushBind⟩,
+  ⟨``Taclet.storagePushAddAssign, _, @faithful_storagePushAddAssign⟩,
+  ⟨``Taclet.storagePushSubAssign, _, @faithful_storagePushSubAssign⟩,
+  ⟨``Taclet.storagePushMulAssign, _, @faithful_storagePushMulAssign⟩,
+  ⟨``Taclet.storagePushDivAssign, _, @faithful_storagePushDivAssign⟩,
+  ⟨``Taclet.storagePushModAssign, _, @faithful_storagePushModAssign⟩,
+  ⟨``Taclet.storagePushPreincrement, _, @faithful_storagePushPreincrement⟩,
+  ⟨``Taclet.storagePushPostincrement, _, @faithful_storagePushPostincrement⟩,
+  ⟨``Taclet.storagePushPredecrement, _, @faithful_storagePushPredecrement⟩,
+  ⟨``Taclet.storagePushPostdecrement, _, @faithful_storagePushPostdecrement⟩,
   ⟨``Taclet.memoryStorageCopy, _, @faithful_memoryStorageCopy⟩,
   ⟨``Taclet.storageRootOpAssign, _, @faithful_storageRootOpAssign⟩,
   ⟨``Taclet.storageFieldOpAssign, _, @faithful_storageFieldOpAssign⟩,
@@ -456,18 +475,18 @@ theorem rows_covered :
         (ctorsOf row.keyName).all ((faithfulCtors.map (·.ctor)).contains ·))) = true := by
   decide +kernel
 
-/-- What the theorems speak about: of the 120 rows, 96 carry a value read
-(66 in storage, 30 in memory), 88 of them with a sort that says something
-and 8 with only the claim-free `StValue`; the other 24 read only `size`
+/-- What the theorems speak about: of the 131 rows, 105 carry a value read
+(75 in storage, 30 in memory), 97 of them with a sort that says something
+and 8 with only the claim-free `StValue`; the other 26 read only `size`
 cells, the `net` ledger or `delete` defaults, which `solkeycheck` checks
 token by token. -/
 theorem rows_accounting :
-    tacletReadAnns.length = 120 ∧
-    (tacletReadAnns.filter fun row => !(valueReads row).isEmpty).length = 96 ∧
-    (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .storage)).length = 66 ∧
+    tacletReadAnns.length = 131 ∧
+    (tacletReadAnns.filter fun row => !(valueReads row).isEmpty).length = 105 ∧
+    (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .storage)).length = 75 ∧
     (tacletReadAnns.filter fun row => (valueReads row).any (·.domain == .memory)).length = 30 ∧
     (tacletReadAnns.filter fun row => (valueReads row).any (·.sort != .fixed .stValue)).length
-      = 88 := by
+      = 97 := by
   decide +kernel
 
 end SortFaithfulness

@@ -88,7 +88,53 @@ metavariables) is `s`: a hole's statement by its hole and its part, one of
 the candidates read off `s`; any other by unification. -/
 def matchFind (f s : Expr) (cands : List (Expr × Expr)) : MetaM Bool := do
   let f ← instantiateMVars f
-  unless fillFns.any f.isAppOf do return ← isDefEq f s
+  if f.isAppOf ``Solidity.Stmt.loop && s.isAppOf ``Solidity.Stmt.loop then
+    let fa ← instantiateMVars (f.getArg! (f.getAppNumArgs - 3))
+    if fa.isAppOf ``Solidity.LoopUnwind.before then
+      let sa ← whnfD (s.getArg! (s.getAppNumArgs - 3))
+      let mode ← if sa.isAppOf ``Solidity.LoopAnn.auto then
+        pure (mkConst ``Solidity.LoopUnwind.automatic)
+      else if sa.isAppOf ``Solidity.LoopAnn.unwind then do
+        let n ← whnfD sa.appArg!
+        let pred ← match n with
+          | .lit (.natVal (n + 1)) => pure (mkNatLit n)
+          | _ =>
+            if n.isAppOf ``Nat.succ then pure n.appArg! else return false
+        mkAppM ``Solidity.LoopUnwind.bounded #[pred]
+      else return false
+      unless ← isDefEq fa.appArg! mode do return false
+      return ← isDefEq f s
+  if f.isAppOf ``Solidity.ReceiverValue.statement then
+    let value ← if s.isAppOf ``Solidity.Stmt.callReceiverPush then
+      mkAppM ``Solidity.ReceiverValue.deferred
+        #[s.getArg! (s.getAppNumArgs - 2), s.appArg!]
+    else if s.isAppOf ``Solidity.Stmt.callReceiver then
+      let op ← whnfD s.appArg!
+      unless op.isAppOf ``Solidity.ReceiverOp.push do return false
+      let arg ← whnfD (op.getArg! (op.getAppNumArgs - 2))
+      unless arg.isAppOf ``Option.some do return false
+      mkAppM ``Solidity.ReceiverValue.pure #[arg.appArg!]
+    else return false
+    unless ← isDefEq f.appArg! value do return false
+    return ← isDefEq f s
+  unless fillFns.any f.isAppOf do
+    -- A primitive path has only a location constructor, but unification
+    -- cannot invert its reader while that path is still a metavariable.
+    -- Seed that typed path from the concrete read, then check the whole find.
+    if f.isAppOf ``Solidity.Stmt.push && s.isAppOf ``Solidity.Stmt.push then
+      let farg ← instantiateMVars (f.getArg! (f.getAppNumArgs - 2))
+      let sarg ← instantiateMVars (s.getArg! (s.getAppNumArgs - 2))
+      if farg.isAppOf ``Option.some && sarg.isAppOf ``Option.some then
+        let fv ← instantiateMVars farg.appArg!
+        let sv ← instantiateMVars sarg.appArg!
+        if fv.isAppOf ``Solidity.Src.val && sv.isAppOf ``Solidity.Src.val then
+          let fe ← instantiateMVars fv.appArg!
+          let se ← instantiateMVars sv.appArg!
+          if fe.isAppOfArity ``Solidity.SPath.primitiveRead 4 &&
+              se.isAppOfArity ``Solidity.Val.read 4 then
+            unless ← isDefEq fe.appArg! (← mkAppM ``Solidity.SPath.loc #[se.appArg!]) do
+              return false
+    return ← isDefEq f s
   let h := f.getArg! (f.getAppNumArgs - 2)
   for (c, part) in cands do
     let st ← saveState

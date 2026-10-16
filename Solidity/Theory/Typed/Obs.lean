@@ -1432,6 +1432,121 @@ theorem SVal.obs_strip {U : Ty} (x : SVal U) : x.strip.obs = x.obs.strip :=
   TVal.eq_ofComp fun c r => by
     rw [SVal.obs, c.read_obsOpt, SVal.obs, TVal.stripR_obsOpt]; rfl
 
+/-- Stripping a fixed array and then reading a child strips that child;
+the fixed outer vector has no shadow slots of its own. -/
+theorem TVal.strip_find_atF {E : Ty} {n : Nat} (o : TVal (.ref (.fixed E n)))
+    (i : PrimTy.uint.Denote) :
+    o.strip.find (.atF i .nil) = (o.find (.atF i .nil)).strip := by
+  apply Obs.ext <;> intro _ r <;>
+    simp only [Obs.find, ObsLoc.app_path, Path.append_atF, Path.append_nil,
+      TVal.strip, TVal.ofComp, TVal.stripR, Comp.word, Comp.len, Comp.has]
+
+/-- The length of a converted array: source length for a dynamic target, declared length for a fixed one. -/
+def FixedCopy.targetLength {E : Ty} {n : Nat} {R : RefTy} : FixedCopy E n R → Nat
+  | .dynamic _ => n
+  | .fixed m _ => m
+
+/-- A converted array element, read lazily: source, padded default, or absence. The source observation is assumed defined. -/
+def FixedCopy.child {E : Ty} {n : Nat} {R : RefTy} (c : FixedCopy E n R)
+    (o : TVal (.ref (.fixed E n))) (i : PrimTy.uint.Denote) : TVal E :=
+  if i.1.toNat < c.targetLength then
+    if i.1.toNat < n then o.strip.find (.atF i .nil)
+    else (SVal.dflt E).strip.obs
+  else SVal.obsOpt none
+
+/-- The destination-shaped observations of a successful fixed-array snapshot. -/
+def FixedCopy.observe {E : Ty} {n : Nat} : {R : RefTy} → (c : FixedCopy E n R) →
+    TVal (.ref (.fixed E n)) → TVal (.ref R)
+  | _, .dynamic hn, o =>
+    ⟨fun q => match q with | .at i r => ((FixedCopy.dynamic hn).child o i).word r,
+     fun q => match q with | .nil => n | .at i r => ((FixedCopy.dynamic hn).child o i).len r,
+     fun q => match q with | .nil => true | .at i r => ((FixedCopy.dynamic hn).child o i).has r⟩
+  | _, .fixed m hm, o =>
+    ⟨fun q => match q with | .atF i r => ((FixedCopy.fixed m hm).child o i).word r,
+     fun q => match q with | .atF i r => ((FixedCopy.fixed m hm).child o i).len r,
+     fun q => match q with | .nil => true | .atF i r => ((FixedCopy.fixed m hm).child o i).has r⟩
+
+/-- An element selector at the destination's array shape. -/
+def FixedCopy.index {E : Ty} {n : Nat} {R : RefTy} : FixedCopy E n R →
+    PrimTy.uint.Denote → Path (.ref R) E
+  | .dynamic _, i => .at i .nil
+  | .fixed _ _, i => .atF i .nil
+
+/-- A converted array element has exactly the lazy observation of its source or padded default. -/
+theorem FixedCopy.child_apply {E : Ty} {n : Nat} {R : RefTy}
+    (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) (i : PrimTy.uint.Denote) :
+    c.child v.obs i = (c.apply v).obs.find (c.index i) := by
+  cases v with
+  | fixed vs =>
+    cases c with
+    | dynamic bound =>
+      simp only [FixedCopy.child, FixedCopy.targetLength, FixedCopy.apply, FixedCopy.index]
+      rw [← SVal.obs_strip, SVal.strip_fixed]
+      simp only [SVal.obs_find, SVal.findM_atF', SVal.findM_at', SList.toList_nil,
+        List.append_nil, SVal.findM_nil', Option.bind_some_id]
+      by_cases hi : i.1.toNat < n
+      · simp only [hi, ↓reduceIte]
+      · simp only [hi, ↓reduceIte]
+        rw [List.getElem?_eq_none (by rw [SVec.length_toList]; omega)]
+    | fixed m fits =>
+      simp only [FixedCopy.child, FixedCopy.targetLength, FixedCopy.apply, FixedCopy.index]
+      rw [← SVal.obs_strip, SVal.strip_fixed]
+      simp only [SVal.obs_find, SVal.findM_atF', SVal.findM_nil', Option.bind_some_id,
+        SVec.getElem?_padRight]
+      split
+      · split <;> rfl
+      · rfl
+
+/-- Every component below a converted element agrees with the actual converted snapshot. -/
+theorem FixedCopy.child_apply_read {E : Ty} {n : Nat} {R : RefTy} {V : Ty} {α : Type}
+    (k : Comp V α) (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n)))
+    (i : PrimTy.uint.Denote) (r : Path E V) :
+    k.read (c.child v.obs i) r = k.read (c.apply v).obs ((c.index i).append r) := by
+  rw [FixedCopy.child_apply, k.read_find]
+
+/-- The converted snapshot agrees with its lazy observation for all word, length and presence reads. -/
+theorem FixedCopy.observe_apply {E : Ty} {n : Nat} {R : RefTy}
+    (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) :
+    (c.apply v).obs = c.observe v.obs := by
+  cases c with
+  | dynamic bound =>
+    apply Obs.ext
+    · intro P q
+      cases q with
+      | «at» i r =>
+        simpa only [Comp.word, FixedCopy.observe, FixedCopy.index, Path.append_at,
+          Path.append_nil] using (FixedCopy.child_apply_read (Comp.word P) (.dynamic bound) v i r).symm
+    · intro E' q
+      cases q with
+      | nil => cases v; rfl
+      | «at» i r =>
+        simpa only [Comp.len, FixedCopy.observe, FixedCopy.index, Path.append_at,
+          Path.append_nil] using (FixedCopy.child_apply_read (Comp.len E') (.dynamic bound) v i r).symm
+    · intro U q
+      cases q with
+      | nil => cases v; rfl
+      | «at» i r =>
+        simpa only [Comp.has, FixedCopy.observe, FixedCopy.index, Path.append_at,
+          Path.append_nil] using (FixedCopy.child_apply_read (Comp.has U) (.dynamic bound) v i r).symm
+  | fixed m fits =>
+    apply Obs.ext
+    · intro P q
+      cases q with
+      | atF i r =>
+        simpa only [Comp.word, FixedCopy.observe, FixedCopy.index, Path.append_atF,
+          Path.append_nil] using (FixedCopy.child_apply_read (Comp.word P) (.fixed m fits) v i r).symm
+    · intro E' q
+      cases q with
+      | atF i r =>
+        simpa only [Comp.len, FixedCopy.observe, FixedCopy.index, Path.append_atF,
+          Path.append_nil] using (FixedCopy.child_apply_read (Comp.len E') (.fixed m fits) v i r).symm
+    · intro U q
+      cases q with
+      | nil => cases v; rfl
+      | atF i r =>
+        simpa only [Comp.has, FixedCopy.observe, FixedCopy.index, Path.append_atF,
+          Path.append_nil] using (FixedCopy.child_apply_read (Comp.has U) (.fixed m fits) v i r).symm
+
 theorem SVal.obs_overlay {U : Ty} (x y : SVal U) : (x.overlay y).obs = x.obs.overlay y.obs :=
   TVal.eq_ofComp fun c r => by
     rw [SVal.obs, c.read_obsOpt, SVal.obs, SVal.obs, TVal.ovR_obsOpt]; rfl
@@ -1518,6 +1633,12 @@ def ofWord {P : PrimTy} (x : P.Denote) : TVal (.prim P) := (SVal.prim x).obs
 def pushA {E : Ty} (a : TVal (.ref (.array E))) (x : TVal E) : TVal (.ref (.array E)) :=
   TVal.setLen (a.save (.at (uintOfNat (a.len .nil)) .nil) x) (a.len .nil + 1)
 
+/-- One more live element: the appended slot reset in place, preserving
+mapping entries and fixed lengths; a missing slot starts at its default. -/
+def resetA {E : Ty} (a : TVal (.ref (.array E))) : TVal (.ref (.array E)) :=
+  if E.isPrimitive || !a.has (.at (uintOfNat (a.len .nil)) .nil) then a.pushA (SVal.dflt E).obs
+  else a.pushA (a.find (.at (uintOfNat (a.len .nil)) .nil)).del
+
 /-- One more live element: the slot past the end as it is (a word reset, a
 missing slot at its default). -/
 def extendA {E : Ty} (a : TVal (.ref (.array E))) : TVal (.ref (.array E)) :=
@@ -1546,7 +1667,10 @@ def copyTo (o : Obs L) {U : Ty} (p : L U) (v : TVal U) : Obs L :=
 /-- **`push`**: `x` appended to the array at `p`. -/
 def push (o : Obs L) {E : Ty} (p : L (.ref (.array E))) (x : TVal E) : Obs L :=
   o.save p (TVal.pushA (o.find p) x)
-/-- One more live element at the array at `p` (`pushSlot`, `extend`). -/
+/-- One more live element at the array at `p` (`pushSlot`). -/
+def reset (o : Obs L) {E : Ty} (p : L (.ref (.array E))) : Obs L :=
+  o.save p (TVal.resetA (o.find p))
+/-- A length-only extension at the array at `p` (`extend`). -/
 def extend (o : Obs L) {E : Ty} (p : L (.ref (.array E))) : Obs L :=
   o.save p (TVal.extendA (o.find p))
 /-- **`pop`** at `p`, the element reset unless `keep` (`shrink`). -/
@@ -1761,12 +1885,12 @@ theorem obs_push {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {x
   rw [obs_save hs, Obs.push, obs_find_some hf,
     SVal.obs_pushArr e sh hn x _ (pushSlot_snd _) h']
 
-/-- The slot past the end, appended as it is. -/
-theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
+/-- The slot past the end, reset in place and appended. -/
+theorem obs_resetArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (h' : (e.toList ++ [(pushSlot E sh.toList).1]).length < 2 ^ 256) :
     (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
-      (.ofList (pushSlot E sh.toList).2) h').obs = TVal.extendA (SVal.array e sh hn).obs := by
-  rw [SVal.obs_pushArr e sh hn _ _ (pushSlot_snd _) h', TVal.extendA]
+      (.ofList (pushSlot E sh.toList).2) h').obs = TVal.resetA (SVal.array e sh hn).obs := by
+  rw [SVal.obs_pushArr e sh hn _ _ (pushSlot_snd _) h', TVal.resetA]
   have hl : e.toList.length = n := SVec.length_toList e
   have el : (SVal.array e sh hn).obs.len .nil = n := rfl
   cases hs : sh.toList with
@@ -1795,18 +1919,57 @@ theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n <
         simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
         rw [List.getElem?_append_right (by omega), hl, Nat.sub_self, List.getElem?_cons_zero]
         rfl
+      rw [SVal.obs_defaultOf, ← hc]
+
+theorem extendSlot_snd {E : Ty} (l : List (SVal E)) : (extendSlot E l).2 = l.tail := by
+  cases l <;> rfl
+
+/-- The slot past the end, appended as it is. -/
+theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
+    (h' : (e.toList ++ [(extendSlot E sh.toList).1]).length < 2 ^ 256) :
+    (SVal.array (SVec.ofList (e.toList ++ [(extendSlot E sh.toList).1]))
+      (.ofList (extendSlot E sh.toList).2) h').obs = TVal.extendA (SVal.array e sh hn).obs := by
+  rw [SVal.obs_pushArr e sh hn _ _ (extendSlot_snd _) h', TVal.extendA]
+  have hl : e.toList.length = n := SVec.length_toList e
+  have el : (SVal.array e sh hn).obs.len .nil = n := rfl
+  cases hs : sh.toList with
+  | nil =>
+    have hh : (SVal.array e sh hn).obs.has (.at (uintOfNat n) .nil) = false := by
+      show Option.isSome ((some _).bind _) = false
+      rw [Option.bind_some, SVal.findM_at', hs, List.append_nil]
+      simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
+      rw [List.getElem?_eq_none (by omega)]; rfl
+    simp only [el, hh, Bool.not_false, Bool.or_true, if_true]
+    rfl
+  | cons c rest =>
+    have hh : (SVal.array e sh hn).obs.has (.at (uintOfNat n) .nil) = true := by
+      show Option.isSome ((some _).bind _) = true
+      rw [Option.bind_some, SVal.findM_at', hs]
+      simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
+      rw [List.getElem?_append_right (by omega), hl, Nat.sub_self, List.getElem?_cons_zero,
+        Option.bind_some, SVal.findM_nil']; rfl
+    simp only [el, hh, Bool.not_true, Bool.or_false]
+    cases hp : E.isPrimitive with
+    | true => simp only [extendSlot, hp, if_true]
+    | false =>
+      simp only [extendSlot, hp, Bool.false_eq_true, if_false]
+      have hc : (SVal.array e sh hn).obs.find (.at (uintOfNat n) .nil) = c.obs := by
+        rw [SVal.obs_find, SVal.findM_at_nil, hs]
+        simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
+        rw [List.getElem?_append_right (by omega), hl, Nat.sub_self, List.getElem?_cons_zero]
+        rfl
       rw [TVal.pushA, el, ← hc, Obs.save_find]
 
-/-- **The bridge of `pushSlot`**: one more live element, the slot as it is. -/
+/-- **The bridge of `pushSlot`**: one more live element, the slot reset in place. -/
 theorem obs_push_slot {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
-    (h : st.push r some = some st') : st'.obs = st.obs.extend (.ref r) := by
+    (h : st.push r some = some st') : st'.obs = st.obs.reset (.ref r) := by
   obtain ⟨n, e, sh, hn, x', h', hf, hx, hs⟩ := push_some h
   cases hx
-  rw [obs_save hs, Obs.extend, obs_find_some hf, obs_extendArr e sh hn h']
+  rw [obs_save hs, Obs.reset, obs_find_some hf, obs_resetArr e sh hn h']
 
-/-- **The bridge of `extend`** (`pushPlace`). -/
+/-- **The bridge of a resetting push** (`pushPlace`). -/
 theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
-    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) := by
+    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) : st'.obs = st.obs.reset (.ref r) := by
   unfold Storage.pushPlace at h
   cases hf : st.find r with
   | none => simp only [hf, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h
@@ -1818,6 +1981,27 @@ theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E)
       · rename_i h'
         cases hs : st.save r (SVal.array (SVec.ofList (e.toList ++ [(pushSlot _ sh.toList).1]))
             (SList.ofList (pushSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h')) with
+        | none => simp only [hs, Option.bind_none, reduceCtorEq] at h
+        | some st₁ =>
+          simp only [hs, Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h
+          obtain ⟨rfl, -⟩ := h
+          rw [obs_save hs, Obs.reset, obs_find_some hf, obs_resetArr]
+      · cases h
+
+/-- **The bridge of `extend`** (`extendPlace`). -/
+theorem obs_extendPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (h : st.extendPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) := by
+  unfold Storage.extendPlace at h
+  cases hf : st.find r with
+  | none => simp only [hf, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h
+  | some a =>
+    cases a with
+    | array e sh hn =>
+      simp only [hf, Option.bind_eq_bind, Option.bind_some, SVal.view_array] at h
+      split at h
+      · rename_i h'
+        cases hs : st.save r (SVal.array (SVec.ofList (e.toList ++ [(extendSlot _ sh.toList).1]))
+            (SList.ofList (extendSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h')) with
         | none => simp only [hs, Option.bind_none, reduceCtorEq] at h
         | some st₁ =>
           simp only [hs, Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h

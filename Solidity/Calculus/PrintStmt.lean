@@ -174,6 +174,7 @@ partial def framePiecesS (ns : List Expr) (κ : Expr) : PrM (Array SPiece × Lis
 not shown. -/
 partial def ppExprS (ns : List Expr) (e : Expr) : MetaM (TSyntax `sol_expr) := do
   let e := (← instantiateMVars e).consumeMData
+  if e.isAppOfArity ``SPath.primitiveRead 4 then return ← ppExprS ns (e.getArg! 3)
   if let some n ← fvarName? e then return ← `(sol_expr| $(nameIdent n):ident)
   if let some n := e.getAppFn.constName? then
     if isUp n && e.getAppNumArgs > 0 then return ← ppExprS ns.tail e.appArg!
@@ -234,11 +235,18 @@ partial def ppExprS (ns : List Expr) (e : Expr) : MetaM (TSyntax `sol_expr) := d
     `(sol_expr| $(← ppExprS ns c) ? $(← ppExprS ns a) : $(← ppExprS ns b))
   | Val.len _ _ _ _ b _ => dotExpr (← ppExprS ns b) "length"
   | Val.mlen _ _ _ _ b _ => dotExpr (← ppExprS ns b) "length"
+  | Val.modular _ _ op a b k =>
+    match_expr (← whnf op) with
+    | ModOp.addmod => `(sol_expr| addmod($(← ppExprS ns a), $(← ppExprS ns b), $(← ppExprS ns k)))
+    | ModOp.mulmod => `(sol_expr| mulmod($(← ppExprS ns a), $(← ppExprS ns b), $(← ppExprS ns k)))
+    | _ => escape
   | MRhs.newArr _ _ R n _ => `(sol_expr| new $(← ppTy.ppRef R):sol_ty ( $(← ppExprS ns n) ))
   | NewLhs.store _ _ _ l => ppExprS ns l
   | NewLhs.mem _ _ _ l => ppExprS ns l
   | Src.val _ _ _ v => ppExprS ns v
   | Src.copy _ _ _ p _ => ppExprS ns p
+  | Src.fixedCopy _ _ _ _ _ p _ _ => ppExprS ns p
+  | Src.copyMem _ _ _ p => ppExprS ns p
   | ARhs.path _ _ _ p => ppExprS ns p
   | MRhs.alias _ _ _ p => ppExprS ns p
   | MRhs.copy _ _ _ p _ => ppExprS ns p
@@ -261,11 +269,74 @@ partial def ppCallPartsS (ns : List Expr) (f args : Expr) :
   let rec go (as : Expr) : MetaM (Option (Array (TSyntax `sol_expr))) := do
     let as ← whnf as
     if as.isAppOf ``Args.nil then return some #[]
-    unless as.isAppOfArity ``Args.snoc 7 do return none
+    unless as.isAppOfArity ``Args.snoc 7 || as.isAppOfArity ``Args.snocStorage 7 ||
+        as.isAppOfArity ``Args.snocMemory 7 do return none
     let some xs ← go (as.getArg! 3) | return none
     return some (xs.push (← ppExprS ns (as.getArg! 6)))
   let some xs ← go args | return none
   return some (fe, xs)
+
+/-- A retained storage-returning call, or the native schema variable `fc`. -/
+def ppCallReceiverExprS (ns : List Expr) (f args r body : Expr) :
+    MetaM (Option (TSyntax `sol_expr)) := do
+  if ← [f, args, r, body].allM fun x => return (← instantiateMVars x).consumeMData.isFVar then
+    return some (← `(sol_expr| fc))
+  let some (fe, xs) ← ppCallPartsS ns f args | return none
+  return some (← `(sol_expr| $fe:sol_expr ( $xs,* )))
+
+/-- Print the typed array operation of `f().push(e)` or `f().pop()`. -/
+def ppReceiverOpS (ns : List Expr) (recv : TSyntax `sol_expr) (op : Expr) :
+    MetaM (Option (TSyntax `sol_stmt)) := do
+  match_expr (← whnf op) with
+  | ReceiverOp.push _ _ _ v _ =>
+    match ← optSome? v with
+    | none => return some (← `(sol_stmt| $recv:sol_expr .push()))
+    | some a => return some (← `(sol_stmt| $recv:sol_expr .push($(← ppExprS ns a))))
+  | ReceiverOp.pop _ _ _ => return some (← `(sol_stmt| $recv:sol_expr .pop()))
+  | _ => return none
+
+/-- Reconstruct the canonical sole increment or primitive call of `f().push(e)`. -/
+def ppDeferredExprS (ns : List Expr) (code value : Expr) :
+    MetaM (Option (TSyntax `sol_expr)) := do
+  let code ← whnf code
+  if code.isAppOf ``Prog.nil then return none
+  unless code.isAppOfArity ``Prog.cons 6 do return none
+  let decl ← whnf (code.getArg! 4)
+  unless decl.isAppOfArity ``Stmt.declLocal 5 do return none
+  if (← optSome? decl.appArg!).isSome then return none
+  let ns := decl.getArg! 3 :: ns
+  let tail ← whnf code.appArg!
+  unless tail.isAppOfArity ``Prog.cons 6 && (← whnf tail.appArg!).isAppOf ``Prog.nil do
+    return none
+  let value ← whnf value
+  unless value.isAppOf ``Src.val do return none
+  let value ← whnf value.appArg!
+  unless value.isAppOf ``Val.simple do return none
+  let value ← whnf value.appArg!
+  unless value.isAppOf ``Simple.local && (← whnf value.appArg!).isAppOf ``Idx.here do
+    return none
+  match_expr (← whnf (tail.getArg! 4)) with
+  | Stmt.assignIncDec _ _ _ i op _ l _ =>
+    unless (← whnf i).isAppOf ``Idx.here do return none
+    unless (← whnf (← mkAppM ``OpLoc.readsLocal #[mkNatLit 0, l])).isConstOf ``Bool.false do
+      return none
+    let l ← ppExprS ns l
+    match_expr (← whnf op) with
+    | IncDec.postInc => return some (← `(sol_expr| $l:sol_expr ++))
+    | IncDec.preInc => return some (← `(sol_expr| ++ $l:sol_expr))
+    | IncDec.postDec => return some (← `(sol_expr| $l:sol_expr −−))
+    | IncDec.preDec => return some (← `(sol_expr| −− $l:sol_expr))
+    | _ => return none
+  | Stmt.call _ _ _ _ _ _ f args ret _ =>
+    let ret ← whnf ret
+    unless ret.isAppOfArity ``CallRet.val 4 do return none
+    let some i ← optSome? ret.appArg! | return none
+    unless (← whnf i).isAppOf ``Idx.here do return none
+    unless (← whnf (← mkAppM ``Args.readsLocal #[mkNatLit 0, args])).isConstOf ``Bool.false do
+      return none
+    let some (f, args) ← ppCallPartsS ns f args | return none
+    return some (← `(sol_expr| $f:sol_expr ( $args,* )))
+  | _ => return none
 
 /-! ## Statements and blocks -/
 
@@ -282,6 +353,11 @@ mutual
 partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   let e := (← instantiateMVars e).consumeMData
   let escape := do `(sol_stmt| ‹$(← escapeTerm e):term›)
+  if e.isAppOf ``ReceiverValue.statement then
+    let a := e.getAppArgs
+    let some recv ← ppCallReceiverExprS ns a[5]! a[6]! a[7]! a[8]! | return ← escape
+    let operand ← ppExprS ns a[9]!
+    return ← `(sol_stmt| $recv:sol_expr .push($operand))
   -- a hole that is a schema variable, filled: `lhs = e`, as the rule line writes it
   if holeFillNames.any (e.isAppOfArity · 5) then
     if let some h ← fvarName? (← stripUps (e.getArg! 3)) then
@@ -350,7 +426,22 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.incDec _ _ _ op _ l =>
     let some s ← ppIncDec op (← ppExprS ns l) | escape
     pure s
-  | Stmt.assignLocalPush _ _ _ i b _ =>
+  | Stmt.pushOpAssign _ _ _ op _ _ b r =>
+    let l ← `(sol_expr| $(← dotExpr (← ppExprS ns b) "push"):sol_expr ( ))
+    let r ← ppExprS ns r
+    if (← fvarName? op).isSome then return ← `(sol_stmt| $l:sol_expr ⊕= $r:sol_expr)
+    match_expr (← whnf op) with
+    | BinOp.add => `(sol_stmt| $l:sol_expr += $r:sol_expr)
+    | BinOp.sub => `(sol_stmt| $l:sol_expr -= $r:sol_expr)
+    | BinOp.mul => `(sol_stmt| $l:sol_expr *= $r:sol_expr)
+    | BinOp.div => `(sol_stmt| $l:sol_expr /= $r:sol_expr)
+    | BinOp.mod => `(sol_stmt| $l:sol_expr %= $r:sol_expr)
+    | _ => escape
+  | Stmt.pushIncDec _ _ _ op _ b =>
+    let l ← `(sol_expr| $(← dotExpr (← ppExprS ns b) "push"):sol_expr ( ))
+    let some s ← ppIncDec op l | escape
+    pure s
+  | Stmt.assignLocalPush _ _ _ i b =>
     let some x ← var? i | escape
     `(sol_stmt| $x:ident = $(← ppExprS ns b):sol_expr .push())
   | Stmt.assignIncDec _ _ _ i op _ l _ =>
@@ -385,6 +476,14 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.require _ _ c => `(sol_stmt| require($(← ppExprS ns c)))
   | Stmt.assert _ _ c => `(sol_stmt| assert($(← ppExprS ns c)))
   | Stmt.revert _ _ => `(sol_stmt| revert())
+  | Stmt.callReceiver _ _ _ _ _ f args r body op =>
+    let some recv ← ppCallReceiverExprS ns f args r body | escape
+    let some st ← ppReceiverOpS ns recv op | escape
+    return st
+  | Stmt.callReceiverPush _ _ _ _ _ _ f args r body code value =>
+    let some recv ← ppCallReceiverExprS ns f args r body | escape
+    let some operand ← ppDeferredExprS ns code value | escape
+    return ← `(sol_stmt| $recv:sol_expr .push($operand))
   | Stmt.call _ _ _ _ _ _ f args ret body =>
     -- KeY's `fbs` (`ic` under `pp.sol.ic`): a call whose parts are all schema variables
     if ← [f, args, ret, body].allM fun x => return (← instantiateMVars x).consumeMData.isFVar then
@@ -396,7 +495,8 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
       if let some y ← optSome? (ret.getArg! 3) then res ← var? y
     else if ret.isAppOfArity ``CallRet.rets 3 then
       if (← bindersS? (ret.getArg! 2)).isNone then return ← escape
-    else unless ret.isAppOfArity ``CallRet.none 1 || ret.isAppOfArity ``CallRet.mem 5 do
+    else unless ret.isAppOfArity ``CallRet.none 1 || ret.isAppOfArity ``CallRet.mem 5 ||
+        ret.isAppOfArity ``CallRet.storage 3 do
       return ← escape
     match res, xs.toList with
     | none, [] => `(sol_stmt| $fe:sol_expr ( ))
@@ -455,7 +555,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
       `(sol_stmt| try $call:sol_expr returns ($ps,*) $okB:sol_block $catches:sol_catch*)
   | Stmt.loop _ _ _ a c body =>
     let w ← `(sol_stmt| while ($(← ppExprS ns c)) $(← ppBlockS ns body):sol_block)
-    -- the annotation: none for a schema variable (`ann`) and for `.unwind 0`
+    -- A schema annotation is hidden; concrete zero bounds stay explicit.
     if (← instantiateMVars a).consumeMData.isFVar then return w
     let clause (k : String) (e : TSyntax `sol_expr) (s : TSyntax `sol_stmt) :
         MetaM (TSyntax `sol_stmt) := do
@@ -466,14 +566,16 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
       let_expr HAdd.hAdd _ _ _ _ x o := e | return none
       unless (← (evalNat o).run) == some 1 do return none
       name? x
+    if a.isAppOf ``LoopUnwind.before || a.isAppOf ``LoopUnwind.after then
+      if (← instantiateMVars a.getAppArgs.back!).consumeMData.isFVar then return w
     match_expr (← whnf a) with
+    | LoopAnn.auto _ _ => return w
     | LoopAnn.unwind _ _ k =>
       -- a taclet's bound: `n`, `n + 1`
       if let some x ← name? k then return ← clause "unwind" (← `(sol_expr| $x:ident)) w
       if let some x ← succName? k then
         return ← clause "unwind" (← `(sol_expr| $x:ident + 1)) w
       let some n ← (evalNat k).run | escape
-      if n == 0 then return w
       clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
     | LoopAnn.inv _ _ I dec =>
       let w ← match ← optSome? dec with
@@ -618,6 +720,34 @@ partial def ppMemCallS (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
     return some (← `(sol_stmt| $x:ident = $call:sol_expr))
   | _ => return none
 
+/-- A storage return and its following alias binding, printed as their source
+statement. A bare call already exports its return local, as memory calls do. -/
+partial def ppStorageCallS (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
+  let .stmt ns s := s | return none
+  let .stmt ns' t := t | return none
+  let s := (← instantiateMVars s).consumeMData
+  let t := (← instantiateMVars t).consumeMData
+  if s.isFVar || t.isFVar then return none
+  let_expr Stmt.call _ _ _ _ _ _ f args ret _ := (← whnf s) | return none
+  let_expr CallRet.storage _ _ r := (← whnf ret) | return none
+  let bound (rhs : Expr) : MetaM Bool := do
+    let_expr ARhs.path _ _ _ p := (← whnf rhs) | return false
+    let_expr SPath.alias _ _ _ i := (← whnf p) | return false
+    isDefEq r (← idxName ns' i)
+  let some (fe, xs) ← ppCallPartsS ns f args | return none
+  let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
+  match_expr (← whnf t) with
+  | Stmt.declStorage _ _ R x init =>
+    let some rhs ← optSome? init | return none
+    unless ← bound rhs do return none
+    let some x ← ppVar? x | return none
+    return some (← `(sol_stmt| $(← ppTy.ppRef R):sol_ty storage $x:ident = $call:sol_expr))
+  | Stmt.rebind _ _ _ i rhs =>
+    unless ← bound rhs do return none
+    let some x ← ppVar? (← idxName ns' i) | return none
+    return some (← `(sol_stmt| $x:ident = $call:sol_expr))
+  | _ => return none
+
 /-- The statements of a block of pieces with no variable in it, a tuple
 call and a memory call each as the one statement it is elaborated from;
 none if a variable or a stuck part is in it. -/
@@ -635,6 +765,10 @@ partial def ppItemsS (ps : Array SPiece) : PrM (Option (Array (TSyntax `sol_stmt
         out := out.push st
         i := i + 2
         continue
+      if let some st ← ppStorageCallS s t then
+        out := out.push st
+        i := i + 2
+        continue
     out := out.push (← ppPieceS ps[i]!)
     i := i + 1
   return some out
@@ -645,14 +779,21 @@ ends in a variable. -/
 partial def ppPartsS (ps : Array SPiece) :
     PrM (Option (Array (TSyntax `sol_stmt) × Option Ident)) := do
   let mut out : Array (TSyntax `sol_stmt) := #[]
-  for h : i in [0:ps.size] do
-    match ps[i] with
+  let mut i := 0
+  while i < ps.size do
+    if let (some s, some t) := (ps[i]?, ps[i + 1]?) then
+      if let some st ← ppStorageCallS s t then
+        out := out.push st
+        i := i + 2
+        continue
+    match ps[i]! with
     | .var P =>
       let some n ← fvarName? P | return none
       if i + 1 == ps.size then return some (out, some (nameIdent n))
       out := out.push (← `(sol_stmt| $(nameIdent n):ident))
     | .stuck _ => return none
     | p => out := out.push (← ppPieceS p)
+    i := i + 1
   return some (out, none)
 
 /-- A branch: `{ s₁; …; sₙ; }`, or the name of a schema variable, or a block
@@ -898,6 +1039,21 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
   let l0 := lbl 0
   let l1 := lbl 1
   let e := (← instantiateMVars e).consumeMData
+  if e.isAppOf ``ReceiverValue.step then
+    let a := e.getAppArgs
+    if ← [a[6]!, a[7]!, a[8]!, a[9]!].allM fun x =>
+        return (← instantiateMVars x).consumeMData.isFVar then
+      let operand ← ppExprS ns a[10]!
+      let recv ← `(sol_expr| sp)
+      let st ← `(sol_stmt| $recv:sol_expr .push($operand))
+      return some (← `(dl_premise| ⟨[ aliasType storage sp = fc; $st:sol_stmt; ]⟩))
+  -- The native capture keeps `fc` as a whole getter schema variable.
+  if e.isAppOfArity ``callReceiverStep 11 then
+    let a := e.getAppArgs
+    if ← [a[6]!, a[7]!, a[8]!, a[9]!].allM fun x =>
+        return (← instantiateMVars x).consumeMData.isFVar then
+      let some st ← ppReceiverOpS ns (← `(sol_expr| sp)) a[10]! | return none
+      return some (← `(dl_premise| ⟨[ aliasType storage sp = fc; $st:sol_stmt; ]⟩))
   -- `expand_function_body(fbs)`: the statements a call of schema variables runs
   if e.isAppOf ``Premise.expandCall && e.getAppNumArgs ≥ 3 then
     let a := e.getAppArgs
@@ -912,6 +1068,24 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
   | Premise.update _ _ _ U =>
     let (u, _) ← ppUpdS ns U
     return some (← `(dl_premise| $u:dl_upd ⟨[ ]⟩))
+  | Premise.updates _ _ _ _ U V =>
+    let (u, ns') ← ppUpdS ns U
+    let (v, _) ← ppUpdS ns' V
+    return some (← `(dl_premise| $u:dl_upd $v:dl_upd ⟨[ ]⟩))
+  | Premise.guardedUpdates _ _ _ c U V =>
+    let c ← do
+      let c ← whnf c
+      match_expr c with
+      | Fml.not _ _ e =>
+        match_expr (← whnf e) with
+        | Fml.eq _ _ _ a b =>
+          `(dl_fml| $(← ppTermS ns a):dl_term != $(← ppTermS ns b):dl_term)
+        | _ => ppFmlS ns c
+      | _ => ppFmlS ns c
+    let (u, ns') ← ppUpdS ns U
+    let (v, _) ← ppUpdS ns' V
+    return some (← `(dl_premise| if $c:dl_fml then ($u:dl_upd $v:dl_upd ⟨[ ]⟩)
+      else (⟨[ revert(); ]⟩)))
   | Premise.unfold _ _ _ _ P _ => unfold ns P
   | Premise.inline _ _ _ _ P _ => unfold ns P
   | Premise.bind _ _ _ x _ P => unfold (x :: ns) P

@@ -53,6 +53,7 @@ theorem CallRet.wk_over {Γ Δ : Ctx} (h : Thin Γ Δ) {rs Γ' : Ctx} (ret : Cal
   | val => exact .refl h
   | rets bs => exact Thin.Over.append h _
   | mem => exact .push (.refl h)
+  | storage => exact .push (.refl h)
 
 theorem Stmt.wk_over {Γ Γ' Δ : Ctx} (h : Thin Γ Δ) (s : Stmt C Γ Γ') :
     Thin.Over s.ext h (s.wk h).2.2.ext (s.wk h).2.1 := by

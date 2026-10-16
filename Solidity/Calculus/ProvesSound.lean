@@ -162,6 +162,15 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+  | @updates Γ Δ Γ' Γ₁ Γ₂ H m s ω κ φ U V d _ _ ih =>
+    exact fun σ => H.wrap_mono (φ := (Premise.updates U V).fml m ω κ φ)
+      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+  | @guardedUpdates Γ Δ Γ₁ Γ₂ H m s ω κ φ c U V d _ _ _ ihT ihE =>
+    intro σ
+    have hTE : holds σ (H.wrap ((Premise.guardedUpdates c U V).fml m ω κ φ)) :=
+      H.wrap_and (χ := (Premise.guardedUpdates c U V).fml m ω κ φ)
+        (fun _ x y => ⟨x, y⟩) σ (ihT σ) (ihE σ)
+    exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hTE
   | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
     exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ)
       (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)

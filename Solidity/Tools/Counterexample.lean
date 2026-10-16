@@ -436,7 +436,7 @@ variable {C : Contract}
 
 /-- The integer literals a clause mentions. -/
 def specNums : SpecExpr → List Int
-  | .num n => [n]
+  | .num n | .uintLit n => [n]
   | .old e | .net e | .field e _ | .unop _ e | .all _ _ e | .ex _ _ e => specNums e
   | .index a b | .binop _ a b | .imp a b | .iff a b => specNums a ++ specNums b
   | .bool _ | .name _ | .result => []

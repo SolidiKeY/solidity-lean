@@ -89,6 +89,9 @@ syntax "sol_close_reads" : tactic
 /-- `sol_close_reads` on the goal and every hypothesis. -/
 syntax "sol_close_reads_all" : tactic
 
+/-- Expose typed ranges and existential read witnesses before the final arithmetic pass. -/
+syntax (name := tacticSol_close_enrich) "sol_close_enrich" : tactic
+
 /-- `sol_close`'s first step: a scoped leaf (`Valid ψ`) read as `holds`
 in every typed state (`Calculus/CloseScoped.lean`); any other goal is
 left as it is. -/
@@ -119,7 +122,12 @@ macro "sol_close" : tactic => `(tactic|
     -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
     -- state: every premise introduced, every conjunct its own goal
     all_goals (repeat' (first | intro _ | apply And.intro))
-    all_goals first | omega | grind [Close.lookupBy_uint_congr]))
+    all_goals first
+      | omega
+      | grind [Close.lookupBy_uint_congr]
+      | (sol_close_enrich
+         all_goals (repeat' (first | intro _ | apply And.intro))
+         all_goals first | omega | grind [Close.lookupBy_uint_congr])))
 
 /-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
 evaluators unfolded over a deployment's storage. -/

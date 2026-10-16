@@ -1,4 +1,5 @@
 import Solidity.Calculus.Decide
+import Solidity.Calculus.ReadBounds
 import Solidity.Calculus.TermEq
 
 /-!
@@ -165,7 +166,25 @@ def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LT
     (fun {_} r h x => some (.app1 (.select r h) x))
     (fun {_} {_} {_} h x => some (.app1 (.selectIn h) x))
     (fun {_} {_} {_} {_} h x => some (.app1 (.fieldIn h) x))
-    (fun x => some (.app1 .toInt x)) x
+    (fun x => some (.app1 .toInt x))
+    (fun {_} {_} {_} shape x => some (.app1 (.fixedCopy shape) x)) x
+
+/-- Keep symbolic reads in their original form so later antecedents can normalize them. -/
+def LTm.literalRead {p : PrimTy} (t : LTm C (.val p)) : LTm C (.val p) :=
+  if (t.fits normalizationSize).isSome then
+    if t.stDepth ≤ normalizationDepth then
+      let r := t.elim
+      if r.litV?.isSome then r else t
+    else t
+  else t
+
+/-- Resolve demanded primitive storage observations before later writes duplicate them.
+The storage itself remains a lazy term; all other symbols retain literal folding. -/
+def foldRead2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s :=
+  match o with
+  | .find => (LTm.app2 .find x y).literalRead
+  | .len => (LTm.app2 .len x y).literalRead
+  | o => fold2 o x y
 
 /-- A binary symbol pushed in: an operator folded on literals, a checked
 index onto the storage the updates left (`atIn`). -/
@@ -173,8 +192,8 @@ def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x 
     (y : LTm C b) : Option (LTm C s) :=
   @Op2.casesOn C (fun a b s _ => LTm C a → LTm C b → Option (LTm C s)) a b s o
     (fun op {_} h x y => some (fold2 (.binop op h) x y))
-    (fun {_} x y => some (.app2 .find x y))
-    (fun {_} x y => some (.app2 .len x y))
+    (fun {_} x y => some (foldRead2 .find x y))
+    (fun {_} x y => some (foldRead2 .len x y))
     (fun {_} x y => some (.app2 .read x y))
     (fun {_} x y => some (.app2 .mlen x y))
     (fun {_} {_} {_} it x y => some (.app3 (.atIn it) ρ.stor x y))
@@ -333,11 +352,20 @@ def _root_.Solidity.Tm.exhL (ρ : SymS C Γ) {s : Srt} (t : Tm C Γ s) : Option 
   | .app3 o x y z => o.exhL ρ x y z
   | _ => none
 
-/-- **An update out of gas, read** (`Upd.exh`): its one element a push at a
-full array. -/
+/-- A push paired with a local binding: exhaustion is accepted only where
+the parallel binding's right-hand side returns in the original state. -/
+def pushLocalExhL (ρ : SymS C Γ) {t : LTy} (s : Tm C Γ .st) (r : Rhs C Γ t) :
+    Option (LTm C (.val .bool)) := do
+  let X ← s.exhL ρ
+  let b ← r.toL ρ
+  some (seqL b.2 X)
+
+/-- **An update out of gas, read** (`Upd.exh`): a single push, or a push
+paired with a returning local binding, at a full array. -/
 def _root_.Solidity.Upd.exhL (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) : Option (LTm C (.val .bool)) :=
   match U with
   | .snoc .nil (.storage s) => s.exhL ρ₀
+  | .snoc (.snoc .nil (.storage s)) (.local _ r) => pushLocalExhL ρ₀ s r
   | _ => none
 
 end Upd

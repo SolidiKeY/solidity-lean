@@ -84,6 +84,7 @@ inductive Op1Code where
   | next (E : Ty) | sval (p : PrimTy) | newArr (R : RefTy) | alloc (R : RefTy)
   | mfield (s f : Name) (T : Ty) | addM (R : RefTy) | mval (p : PrimTy) | ref (R : RefTy) | wt
   | select (s r : Name) | selectIn (s s' f : Name) | fieldIn (s s' f : Name) (T : Ty) | toInt
+  | fixedCopy (E : Ty) (n : Nat) (R : RefTy)
   deriving DecidableEq
 
 /-- A binary symbol's constructor, data and types, its proofs dropped. -/
@@ -100,6 +101,7 @@ inductive Op2Code where
 inductive Op3Code where
   | ite (p : PrimTy) | save (T : Ty) | push (E : Ty) | atIn (R : RefTy) (k : PrimTy) (V : Ty)
   | write (T : Ty) | saveIn (s : Name) (T : Ty)
+  | modular (op : ModOp)
   deriving DecidableEq
 
 /-- A unary symbol's code. -/
@@ -121,6 +123,7 @@ def Op1.code {a s : Srt} : Op1 C a s → Op1Code
   | @Op1.selectIn _ s s₂ f _ => .selectIn s s₂ f
   | @Op1.fieldIn _ s s₂ f T _ => .fieldIn s s₂ f T
   | .toInt => .toInt
+  | @Op1.fixedCopy _ E n R _ => .fixedCopy E n R
 
 /-- A binary symbol's code. -/
 def Op2.code {a b s : Srt} : Op2 C a b s → Op2Code
@@ -156,6 +159,7 @@ def Op3.code {a b c s : Srt} : Op3 C a b c s → Op3Code
   | @Op3.atIn _ R k V _ => .atIn R k V
   | @Op3.write _ T => .write T
   | @Op3.saveIn _ s T => .saveIn s T
+  | .modular op => .modular op
 
 /-- Two unary symbols are one: constructor, data and types. -/
 def Op1.hbeq {a s a' s' : Srt} (o : Op1 C a s) (o' : Op1 C a' s') : Bool := o.code == o'.code
@@ -171,7 +175,9 @@ def Op3.hbeq {a b c s a' b' c' s' : Srt} (o : Op3 C a b c s) (o' : Op3 C a' b' c
 theorem Op1.eq_of_code {a s a' s' : Srt} {o : Op1 C a s} {o' : Op1 C a' s'}
     (h : o.code = o'.code) :
     (⟨(a, s), o⟩ : (q : Srt × Srt) × Op1 C q.1 q.2) = ⟨(a', s'), o'⟩ := by
-  cases o <;> cases o' <;> cases h <;> rfl
+  cases o <;> cases o' <;> cases h <;> first
+    | rfl
+    | (rename_i shape shape'; cases FixedCopy.eq shape shape'; rfl)
 
 theorem Op2.eq_of_code {a b s a' b' s' : Srt} {o : Op2 C a b s} {o' : Op2 C a' b' s'}
     (h : o.code = o'.code) :

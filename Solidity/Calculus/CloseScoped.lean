@@ -1,5 +1,6 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.SeqRewrite
+import Solidity.Theory.Typed.Mem
 
 /-!
 # `sol_close` on a scoped leaf
@@ -222,7 +223,7 @@ theorem eval_shrink {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop true r := rfl
 theorem eval_extend {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .extend s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
-      (st.pushPlace r).bind fun x => some x.1 := rfl
+      (st.extendPlace r).bind fun x => some x.1 := rfl
 theorem eval_nextIn {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .nextIn s q).eval σ =
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.nextT r := rfl
@@ -244,7 +245,7 @@ theorem eval_read {p : PrimTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.prim p))
   rfl
 theorem eval_mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
     (Tm.app2 .mlen m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
-      (HRef.ofId? g.H' (.array E) id).bind fun r => some (g.heap.lenU r) := rfl
+      g.lenId E id := rfl
 theorem eval_copyMem {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
     (Tm.app2 .copyMem m i).eval σ = (m.eval σ).bind fun g => (i.eval σ).bind fun id =>
       (HRef.ofId? g.H' R id).bind fun r => some (MVal.copyMToSt g.heap (T := .ref R) r) := rfl
@@ -508,6 +509,21 @@ theorem forall_int (P : PrimTy.int.Denote → Prop) :
   ⟨fun h n _ _ => h _, fun h ⟨n, hn⟩ => by
     simp only [PrimTy.inRange, decide_eq_true_eq] at hn
     exact h n hn.1 hn.2⟩
+
+/-- A typed unsigned value, including an anonymous local, retains its range. -/
+theorem uintRange (a : PrimTy.uint.Denote) : 0 ≤ a.val ∧
+    a.val < 115792089237316195423570985008687907853269984665640564039457584007913129639936 := by
+  have h : PrimTy.uint.inRange a.val = true := a.property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  exact h
+
+/-- A typed signed value retains its range when read through a dependent function. -/
+theorem intRange (a : PrimTy.int.Denote) :
+    -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ a.val ∧
+    a.val < 57896044618658097711785492504343953926634992332820282019728792003956564819968 := by
+  have h : PrimTy.int.inRange a.val = true := a.property
+  simp only [PrimTy.inRange, decide_eq_true_eq] at h
+  exact h
 theorem ofLit_uint (n : Int) (h : PrimTy.uint.inRange n = true) :
     PrimTy.ofLit .uint n h = (⟨n, h⟩ : {n : Int // PrimTy.uint.inRange n = true}) := rfl
 theorem ofLit_int (n : Int) (h : PrimTy.int.inRange n = true) :
@@ -941,5 +957,103 @@ def evalSolCloseReadsAllS : Tactic := onScoped `(tactic|
 @[tactic Solidity.tacticSol_close_mt_eval]
 def evalSolCloseMtEvalS : Tactic := onScoped `(tactic|
   simp only [close_rw_s])
+
+/-- Typed values occurring under projections, including dependent anonymous locals.
+Inspect at most 8,192 local declarations/expression nodes and add at most
+128 range facts. Unresolved types are left alone. -/
+private def addRangeFacts (g : MVarId) : MetaM MVarId := g.withContext do
+  let mut todo : Array Expr := #[← g.getType]
+  let mut known : Array Expr := #[]
+  let mut nodes := 0
+  for d in ← getLCtx do
+    if nodes ≥ 8192 then break
+    nodes := nodes + 1
+    unless d.isImplementationDetail do
+      todo := todo.push d.type
+      known := known.push d.type
+  let unsigned ← whnfR (mkApp (mkConst ``PrimTy.Denote) (mkConst ``PrimTy.uint))
+  let signed ← whnfR (mkApp (mkConst ``PrimTy.Denote) (mkConst ``PrimTy.int))
+  let mut seen : Std.HashSet Expr := {}
+  let mut values : Std.HashSet Expr := {}
+  let mut goal := g
+  let mut facts := 0
+  while !todo.isEmpty && nodes < 8192 && facts < 128 do
+    let e := todo.back!
+    todo := todo.pop
+    nodes := nodes + 1
+    if seen.contains e then continue
+    seen := seen.insert e
+    let value? := if e.isAppOfArity ``Subtype.val 3 then some (e.getArg! 2)
+      else match e with
+        | .proj ``Subtype 0 v => some v
+        | _ => none
+    if let some v := value? then
+      unless v.hasLooseBVars || v.hasMVar || values.contains v do
+        values := values.insert v
+        let ty ← whnfR (← inferType v)
+        if ty.hasMVar then continue
+        let lemma? ← if ← isDefEq ty unsigned then pure (some ``CloseS.uintRange)
+          else if ← isDefEq ty signed then pure (some ``CloseS.intRange)
+          else pure none
+        if let some lemma := lemma? then
+          let pf ← mkAppM lemma #[v]
+          let ty ← inferType pf
+          unless known.contains ty do
+            let (_, next) ← goal.note `range pf
+            goal := next
+            known := known.push ty
+            facts := facts + 1
+    match e with
+    | .app f a => todo := (todo.push f).push a
+    | .lam _ t b _ | .forallE _ t b _ => todo := (todo.push t).push b
+    | .letE _ t v b _ => todo := ((todo.push t).push v).push b
+    | .mdata _ b | .proj _ _ b => todo := todo.push b
+    | _ => pure ()
+  return goal
+
+/-- KeY's `exLeft` and `andLeft`, each a single-branch elimination.
+Inspect at most 8,192 declarations across all scans and eliminate at most
+128 witnesses/conjunctions. -/
+private def exposeWitnesses (g : MVarId) : MetaM MVarId := do
+  let mut goal := g
+  let mut remaining := 8192
+  for _ in [0:128] do
+    let (selected, left) ← goal.withContext do
+      let mut left := remaining
+      for d in ← getLCtx do
+        if left == 0 then return (none, 0)
+        left := left - 1
+        unless d.isImplementationDetail do
+          if ← isProp d.type then
+            let ty ← whnfR d.type
+            if ty.isAppOf ``Exists || ty.isAppOf ``And then return (some d.fvarId, left)
+      return (none, left)
+    remaining := left
+    let some h := selected | return goal
+    let tag ← goal.getTag
+    let branches ← goal.cases h
+    let [branch] := branches.toList
+      | throwError "sol_close_enrich: expected a single witness branch"
+    goal := branch.mvarId
+    goal.setTag tag
+  return goal
+
+/-- Expose intrinsic range facts and witnesses that become visible after a read.
+Each operation constructs ordinary checked proofs; no arithmetic result is assumed. -/
+@[tactic Solidity.tacticSol_close_enrich]
+def evalSolCloseEnrichS : Tactic := fun _ => focus <| withMainContext do
+  unless ← Close.scopedGoal do throwUnsupportedSyntax
+  let g ← addRangeFacts (← getMainGoal)
+  replaceMainGoal [g]
+  evalTactic (← `(tactic| simp_all only [CloseS.uintRange, CloseS.intRange,
+    true_implies, not_true_eq_false, false_implies]))
+  let some g := (← getUnsolvedGoals).head? | return
+  let g ← exposeWitnesses g
+  replaceMainGoal [g]
+  evalTactic (← `(tactic| simp_all only [Option.some.injEq, exists_eq_left', exists_eq',
+    forall_eq', Classical.not_not]))
+  let some g := (← getUnsolvedGoals).head? | return
+  let g ← addRangeFacts g
+  replaceMainGoal [g]
 
 end Solidity

@@ -2051,6 +2051,116 @@ def LTm.mvArg? {s : Srt} (v : LTm C s) : Option ((u : Srt) × LTm C u) :=
   | .app1 o x => o.mvArg x
   | _ => none
 
+/-- An array-element address, retaining the array's element type. -/
+structure ArrayV (C : Contract) where
+  {R : RefTy}
+  {E : Ty}
+  ak : ArrTy R E
+  t : LTm C (.ident R)
+  i : LTm C (.val .uint)
+
+def arrayArg {a b s : Srt} (o : Op2 C a b s)
+    (x : LTm C a) (y : LTm C b) : Option (ArrayV C) :=
+  match o, x, y with
+  | .mat ak, x, y => some ⟨ak, x, y⟩
+  | _, _, _ => none
+
+def arrayV? {s : Srt} (b : LTm C s) : Option (ArrayV C) :=
+  match b with
+  | .app2 o x y => arrayArg o x y
+  | _ => none
+
+/-- `selectOnCopyMemPrim` followed by `initElement`: a primitive read of
+the same fresh-array copy, guarded by its size. -/
+def copyNewArrayRd? {U : Ty} {P : PrimTy}
+    (m : LTm C .mem) (S : LTm C (.sv U)) (b : LTm C (.addr (.prim P))) :
+    Option (LTm C (.val P)) := do
+  let a ← arrayV? b
+  let t ← a.t.castTo? (s' := .ident (.array (.prim P)))
+  match t.identView with
+  | .copy m' _ S' =>
+    if m'.beqR m && S'.beqR S then
+      let n ← S'.newArrLen?
+      some (.app3 .ite (.app2 (.binop .lt rfl) a.i n) (.lit (PrimTy.dflt P)) .err)
+    else none
+  | _ => none
+
+theorem copyNewArrayRd?_eval (g : State C []) (ν : AEnv)
+    {U : Ty} {hU : U.mapFree = true} {m : LTm C .mem} {S : LTm C (.sv U)}
+    {P : PrimTy} {b : LTm C (.addr (.prim P))} {y : LTm C (.val P)}
+    (h : copyNewArrayRd? m S b = some y) :
+    ((LTm.app2 .read (.app2 (.copySt hU) m S) b).eval g ν : Option P.Denote) =
+      (LTm.seq (.app2 (.copySt hU) m S) y).eval g ν := by
+  unfold copyNewArrayRd? at h
+  obtain ⟨a, ha, h⟩ := Option.bind_eq_some_iff.1 h
+  obtain ⟨t, ht, h⟩ := Option.bind_eq_some_iff.1 h
+  split at h
+  · rename_i m' R' hR S' hview
+    split at h
+    · rename_i hc
+      obtain ⟨n, hn, h⟩ := Option.bind_eq_some_iff.1 h
+      cases h
+      simp only [Bool.and_eq_true] at hc
+      obtain ⟨hm, hS⟩ := hc
+      cases LTm.sigma_eq_of_beqR hm
+      obtain ⟨hUU, hSS⟩ := Sigma.mk.inj (LTm.sigma_eq_of_beqR hS)
+      cases hUU
+      cases eq_of_heq hSS
+      cases b with
+      | app2 o xb ib =>
+        cases o <;> simp only [arrayV?, arrayArg, Option.some.injEq] at ha
+        rename_i ak
+        cases ha
+        obtain ⟨hType, het⟩ := Sigma.mk.inj (LTm.castTo?_eq ht)
+        cases hType
+        cases eq_of_heq het
+        have hak : ak = .dyn := match ak with | .dyn => rfl
+        rw [hak]
+        dsimp only at hview ⊢
+        cases xb with
+        | app2 o xm xS =>
+          cases o <;> simp only [LTm.identView, Op2.identV, reduceCtorEq,
+            IdentV.copy.injEq] at hview
+          obtain ⟨rfl, hType, heq⟩ := hview
+          cases hType
+          cases eq_of_heq heq
+          cases xS with
+          | app1 o z =>
+            cases o <;> simp only [LTm.newArrLen?, Op1.newArrArg,
+              Option.some.injEq, reduceCtorEq] at hn
+            subst n
+            simp only [LTm.eval_app1, LTm.eval_app2, LTm.eval_app3, LTm.eval_seq,
+              Op1.eval_eq_evalM, Op2.eval_eq_evalM, Op3.eval_eq_evalM,
+              Op1.evalM, Op2.evalM, Op3.evalM, Option.bind_eq_bind]
+            cases hx : (xm.eval g ν : Option (Grown g.H (fun _ => Unit))) <;>
+              (try simp only [Option.bind_none, Option.bind_some])
+            rename_i μ
+            cases hz : (z.eval g ν : Option PrimTy.uint.Denote) <;>
+              (try simp only [Option.map_none, Option.map_some, Option.bind_none, Option.bind_some])
+            rename_i v
+            cases hi : (ib.eval g ν : Option PrimTy.uint.Denote) <;>
+              (try simp only [Option.bind_none, Option.bind_some])
+            rename_i k
+            simp only [Grown.readT, Grown.then, MAddrT.resolve_eq_resolveM, MAddrT.resolveM,
+              HRef.ofId?_self, Option.map_some]
+            simp only [Option.bind_eq_bind, Option.bind_some]
+            rw [newArrT_copy_prim_index]
+            change (if k.1.toNat < v.1.toNat then some (PrimTy.dflt P) else none) =
+              (bif decide (k.1 < v.1) then some (PrimTy.dflt P) else none)
+            have hv := v.2
+            have hk := k.2
+            simp only [PrimTy.inRange, decide_eq_true_eq] at hv hk
+            have he : (k.1.toNat < v.1.toNat) = (k.1 < v.1) := propext (by omega)
+            simp only [he]
+            by_cases hc : k.1 < v.1 <;>
+              simp only [hc, decide_true, decide_false, if_true, if_false] <;> rfl
+          | _ => simp only [LTm.newArrLen?, reduceCtorEq] at hn
+        | app1 o x => cases o <;> simp only [LTm.identView, Op1.identV, reduceCtorEq] at hview
+        | _ => simp only [LTm.identView, reduceCtorEq] at hview
+      | _ => simp only [arrayV?, reduceCtorEq] at ha
+    · cases h
+  · cases h
+
 /-- **A read of a word, walked down its memory** `n` writes and
 allocations deep: `readOnWrite`, `readOnWriteFrame`, `readOnAddMFrame`,
 `readOnAddM`.  By the recursor on the depth. -/
@@ -2079,7 +2189,10 @@ def memReadN (n : Nat) : {P : PrimTy} → LTm C .mem → LTm C (.addr (.prim P))
         else
           match copyFieldRd? m S b with
           | some y => seqMemL X y
-          | none => .app2 .read X b
+          | none =>
+            match copyNewArrayRd? m S b with
+            | some y => seqMemL X y
+            | none => .app2 .read X b
       | .other => .app2 .read X b) n
 
 /-- **A read of an identity, walked down its memory.** -/
@@ -2131,7 +2244,10 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
         else
           match copyFieldRd? m S b with
           | some y => seqMemL X y
-          | none => .app2 .read X b
+          | none =>
+            match copyNewArrayRd? m S b with
+            | some y => seqMemL X y
+            | none => .app2 .read X b
       | .other => .app2 .read X b : LTm C (.val P)).eval g ν = _
     split
     · rename_i m T a v hX
@@ -2175,7 +2291,11 @@ theorem memReadN_eval (n : Nat) : ∀ {P : PrimTy} (X : LTm C .mem) (b : LTm C (
         · rename_i y hy
           rw [seqMemL_eval]
           exact (copyFieldRd?_eval hy).symm
-        · rfl
+        · split
+          · rename_i y hy
+            rw [seqMemL_eval]
+            exact (copyNewArrayRd?_eval g ν hy).symm
+          · rfl
     · rfl
 
 theorem memIReadN_eval (n : Nat) : ∀ {R : RefTy} (X : LTm C .mem) (b : LTm C (.addr (.ref R))),
@@ -2596,71 +2716,6 @@ def LFml.decideMem (φ : LFml C) : Bool := (φ.nfE.elimF {}).closeMem
 theorem LFml.decideMem_valid {φ : LFml C} (h : φ.decideMem = true) : φ.Valid := fun g ν =>
   (LFml.nfE_holds φ ν).1 ((LFml.elimF_holds g φ.nfE {} ν (Facts.ok_empty ν)).1
     (LFml.closeMem_valid h g ν))
-
-/-- A storage sort. -/
-def _root_.Solidity.Srt.isSt : Srt → Bool
-  | .st => true
-  | _ => false
-
-/-- `LTm.stDepth`'s compiled twin. -/
-def LTm.stDepthM : {s : Srt} → LTm C s → Nat
-  | s, .app1 _ x => (if s.isSt then 1 else 0) + x.stDepthM
-  | s, .app2 _ x y => (if s.isSt then 1 else 0) + max x.stDepthM y.stDepthM
-  | s, .app3 _ x y z => (if s.isSt then 1 else 0) + max x.stDepthM (max y.stDepthM z.stDepthM)
-  | _, .index _ q i => max q.stDepthM i.stDepthM
-  | _, .seq d a => max d.stDepthM a.stDepthM
-  | _, .orElse a b => max a.stDepthM b.stDepthM
-  | _, .kite a b t e => max (max a.stDepthM b.stDepthM) (max t.stDepthM e.stDepthM)
-  | _, _ => 0
-
-/-- **How many storage updates a term stacks**, at its deepest: what the
-elimination's readers nest, each reading the one below it.  By the
-recursor. -/
-@[implemented_by LTm.stDepthM]
-def LTm.stDepth {s : Srt} (t : LTm C s) : Nat :=
-  @LTm.rec C (fun _ _ => Nat)
-    (@fun _ _ => 0) (@fun _ _ => 0)
-    (@fun _ s _ _ ihx => (if s.isSt then 1 else 0) + ihx)
-    (@fun _ _ s _ _ _ ihx ihy => (if s.isSt then 1 else 0) + max ihx ihy)
-    (@fun _ _ _ s _ _ _ _ ihx ihy ihz => (if s.isSt then 1 else 0) + max ihx (max ihy ihz))
-    (@fun _ _ _ _ _ _ ihq ihi => max ihq ihi)
-    (@fun _ _ _ => 0) (@fun _ _ _ => 0) (@fun _ _ _ => 0)
-    (@fun _ _ _ _ ihd iha => max ihd iha)
-    (@fun _ _ _ iha ihb => max iha ihb)
-    (@fun _ _ _ _ _ _ iha ihb iht ihe => max (max iha ihb) (max iht ihe))
-    (@fun _ => 0) s t
-
-theorem LTm.stDepth_eq_stDepthM {s : Srt} (t : LTm C s) : t.stDepth = t.stDepthM := by
-  induction t with
-  | var | app0 | obsW | obsL | obsH | err => rfl
-  | app1 o x ih => simp only [LTm.stDepthM, ← ih]; rfl
-  | app2 o x y ihx ihy => simp only [LTm.stDepthM, ← ihx, ← ihy]; rfl
-  | app3 o x y z ihx ihy ihz => simp only [LTm.stDepthM, ← ihx, ← ihy, ← ihz]; rfl
-  | index it q i ihq ihi => simp only [LTm.stDepthM, ← ihq, ← ihi]; rfl
-  | seq d a ihd iha => simp only [LTm.stDepthM, ← ihd, ← iha]; rfl
-  | orElse a b iha ihb => simp only [LTm.stDepthM, ← iha, ← ihb]; rfl
-  | kite a b t e iha ihb iht ihe => simp only [LTm.stDepthM, ← iha, ← ihb, ← iht, ← ihe]; rfl
-
-/-- `LFml.stDepth`'s compiled twin. -/
-def LFml.stDepthM : LFml C → Nat
-  | .eq a b => max a.stDepth b.stDepth
-  | .not φ => φ.stDepthM
-  | .and φ ψ | .imp φ ψ => max φ.stDepthM ψ.stDepthM
-  | .all _ _ φ => φ.stDepthM
-  | .tt => 0
-
-/-- The most storage updates a formula's term stacks.  By the recursor. -/
-@[implemented_by LFml.stDepthM]
-def LFml.stDepth (φ : LFml C) : Nat :=
-  @LFml.rec C (fun _ => Nat) 0 (@fun _ a b => max a.stDepth b.stDepth)
-    (fun _ ih => ih) (fun _ _ ihφ ihψ => max ihφ ihψ) (fun _ _ ihφ ihψ => max ihφ ihψ)
-    (fun _ _ _ ih => ih) φ
-
-theorem LFml.stDepth_eq_stDepthM (φ : LFml C) : φ.stDepth = φ.stDepthM := by
-  induction φ with
-  | tt | eq => rfl
-  | not φ ih | all k p φ ih => simp only [LFml.stDepthM, ← ih]; rfl
-  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.stDepthM, ← ihφ, ← ihψ]; rfl
 
 end Fold
 

@@ -316,8 +316,9 @@ nothing allocated. -/
 theorem CallRet.enterT_frame {Γ' rs ps : Ctx} (ret : CallRet Γ rs Γ') (hm : ret.noMem = true)
     (σ : State C ps) : TGFrame μ σ (ret.enterT σ).st := by
   cases ret with
-  | none | val | rets => exact ⟨rfl, HEq.rfl, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
+  | none | val | rets | storage => exact ⟨rfl, HEq.rfl, rfl, rfl, fun _ => ⟨rfl, rfl⟩⟩
   | mem => exact absurd hm Bool.false_ne_true
+
 
 /-- What a call with no memory return leaves its caller's locals: the result
 where it lands, the rest as they were (over a heap typing the call did not
@@ -336,6 +337,7 @@ theorem CallRet.leaveT_frame {Γ' rs : Ctx} (ret : CallRet Γ rs Γ') (hm : ret.
     rw [TEnv.drop_append]
     exact TLocAgree.wk e₀ hH e
   | mem => exact absurd hm Bool.false_ne_true
+  | storage => exact TLocAgree.wk e₀ hH e
 
 end Ops
 
@@ -509,6 +511,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     exact ⟨hg.withEnv _, ha⟩
   | _, _, .rebind .., hw, _, _, _, _ | _, _, .declStorage .., hw, _, _, _, _
   | _, _, .assignLocalPush .., hw, _, _, _, _
+  | _, _, .pushOpAssign .., hw, _, _, _, _ | _, _, .pushIncDec .., hw, _, _, _, _
   | _, _, .push .., hw, _, _, _, _ | _, _, .pop _, hw, _, _, _, _
   | _, _, .declMem .., hw, _, _, _, _ | _, _, .rebindMem .., hw, _, _, _, _
   | _, _, .assignFromMem .., hw, _, _, _, _ | _, _, .assignMem .., hw, _, _, _, _

@@ -277,19 +277,19 @@ theorem memCallMemberWrite :
   sol_symex
   sol_close
 
-/-! What is refused: a reference return not declared `memory` (solc's
-rule), and a memory reference where a value is expected. -/
+/-! What is refused: a reference return without its data location, and a
+memory reference where a value is expected. -/
 
 def NoLocation : Contract := contract!{
   function makeAccount() returns (Account a) { a.balance = 1; }
 }
 
 /--
-error: Solidity elaboration failed: makeAccount: its return of reference type Account needs the location `memory`
+error: Solidity elaboration failed: makeAccount: its return of reference type Account needs `memory` or `storage`
 -/
 #guard_msgs in #check sol[NoLocation]{ Account memory acc = makeAccount(); }
 
-/-- error: Solidity elaboration failed: makeAccount returns a memory Account, not a uint -/
+/-- error: Solidity elaboration failed: makeAccount returns a reference Account, not a uint -/
 #guard_msgs in #check sol[MemCalls]{ uint x = makeAccount(); }
 
 /-- The call's first step: a memory return is an `InternalCall`, inlined by

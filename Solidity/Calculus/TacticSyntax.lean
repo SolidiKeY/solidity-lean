@@ -48,7 +48,7 @@ syntax (name := tacticSol_derive) "sol_derive" : tactic
 
 /-- `sol_prove`: the strategy as one kernel evaluation, on a goal `Γ ⊢ φ` or
 `⊨ φ`; one goal `leafᵢ` per leaf the closer leaves. -/
-syntax (name := tacticSol_prove) "sol_prove" : tactic
+syntax (name := tacticSol_prove) "sol_prove" ("(" &"steps" ":=" num ")")? : tactic
 
 /-- `sol_prove?`: `sol_prove`, each leaf closed by the first tactic that
 closes it; suggests the replay. -/

@@ -85,13 +85,18 @@ inductive Val (C : Contract) (Γ : Ctx) : PrimTy → Type where
   | readMem {p : PrimTy} (l : MLoc C Γ (.prim p)) : Val C Γ p
   | len {p : PrimTy} {E : Ty} (b : SPath C Γ (.array E)) (hp : p = .uint) : Val C Γ p
   | mlen {p : PrimTy} {E : Ty} (b : MPath C Γ (.array E)) (hp : p = .uint) : Val C Γ p
+  | modular (op : ModOp) (a b k : Val C Γ .uint) : Val C Γ .uint
 
 end
 
-/-- The source of a storage write: a value, or a storage path copied. -/
+/-- The source of a storage write: a value, a storage path copied, or a
+memory object copied into storage. -/
 inductive Src (C : Contract) (Γ : Ctx) : Ty → Type where
   | val {p : PrimTy} (v : Val C Γ p) : Src C Γ (.prim p)
   | copy {R : RefTy} (p : SPath C Γ (.ref R)) (h : (Ty.ref R).mapFree = true) : Src C Γ (.ref R)
+  | fixedCopy {E : Ty} {n : Nat} {R : RefTy} (p : SPath C Γ (.ref (.fixed E n)))
+      (shape : FixedCopy E n R) (h : E.mapFree = true) : Src C Γ (.ref R)
+  | copyMem {R : RefTy} (p : MPath C Γ (.ref R)) : Src C Γ (.ref R)
 
 /-- What a storage alias is bound to: a path, or the slot `b.push()` appends. -/
 inductive ARhs (C : Contract) (Γ : Ctx) (R : RefTy) where
@@ -152,6 +157,11 @@ def Val.isSimple {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .simple _ => true
   | _ => false
 
+/-- Whether this expression needs a native modular assignment rule at its root. -/
+def Val.isModular {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
+  | .modular .. => true
+  | _ => false
+
 def SPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool
   | .alias _ => true
   | .loc (.root ..) => true
@@ -179,6 +189,12 @@ inductive Args (C : Contract) (Γ : Ctx) : Ctx → Type where
   | nil : Args C Γ []
   | snoc {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var) (e : Val C Γ p) :
       Args C Γ (.val p :: ps)
+  /-- A storage parameter shares the selected storage identity. -/
+  | snocStorage {ps : Ctx} (as : Args C Γ ps) (R : RefTy) (x : Var)
+      (e : SPath C Γ (.ref R)) : Args C Γ (.alias R :: ps)
+  /-- A memory parameter shares an existing object; caller preparation does copies. -/
+  | snocMemory {ps : Ctx} (as : Args C Γ ps) (R : RefTy) (x : Var)
+      (e : MPath C Γ (.ref R)) : Args C Γ (.mem R :: ps)
 
 /-- What a call does with its return variables `rs`, which its frame
 declares at their defaults on its parameters, and the context `Γ'` it
@@ -193,13 +209,17 @@ leaves the caller in:
   `lo = r0; hi = r1;`), KeY's `functionBodyExpand`;
 * `mem R r`: a memory return, a fresh default object (as solc allocates one
   on entry), left in the caller's context for the statement after the call
-  to bind (`Person memory m = f();` is the call and `Person memory m = r;`). -/
+  to bind (`Person memory m = f();` is the call and `Person memory m = r;`);
+* `storage R r`: an unset storage alias on entry, exported by identity for
+  the following storage declaration or rebinding. -/
 inductive CallRet (Γ : Ctx) : Ctx → Ctx → Type where
   | none : CallRet Γ [] Γ
   | val (p : PrimTy) (r : Var) (res : Option (Idx Γ (.val p))) : CallRet Γ [.val p] Γ
   | rets {rs : Ctx} (bs : Binders rs) : CallRet Γ rs (rs ++ Γ)
   | mem (R : RefTy) (r : Var) (hd : (Ty.ref R).defaultOkS = true)
       (hm : (Ty.ref R).mapFree = true) : CallRet Γ [.mem R] (.mem R :: Γ)
+  /-- A storage return is an alias, initially unset and exported by identity. -/
+  | storage (R : RefTy) (r : Var) : CallRet Γ [.alias R] (.alias R :: Γ)
 
 /-- An argument of an external call, at its type. -/
 abbrev ExtArg (C : Contract) (Γ : Ctx) := (p : PrimTy) × Simple C Γ p
@@ -210,13 +230,33 @@ structure ExtCall (C : Contract) (Γ : Ctx) where
   fn : Name
   args : List (ExtArg C Γ)
 
-/-- What a loop is proved by: unwound at most `k` times, or by its invariant
-and variant (read in the loop's context). -/
+/-- How a loop is proved: a written unwind bound, an invariant/variant,
+or automatic unwinding within the proof search's existing budget. -/
 inductive LoopAnn (C : Contract) (Γ : Ctx) where
   | unwind (k : Nat)
   | inv (I : Val C Γ .bool) (dec : Option (Val C Γ .uint))
+  | auto
+
+/-- The two ways the same `whileUnwind` taclet takes another iteration. -/
+inductive LoopUnwind where
+  | bounded (remaining : Nat)
+  | automatic
+
+def LoopUnwind.before {C : Contract} {Γ : Ctx} : LoopUnwind → LoopAnn C Γ
+  | .bounded n => .unwind (n + 1)
+  | .automatic => .auto
+
+def LoopUnwind.after {C : Contract} {Γ : Ctx} : LoopUnwind → LoopAnn C Γ
+  | .bounded n => .unwind n
+  | .automatic => .auto
 
 /-! ## Statements -/
+
+/-- The array operation after a storage-returning receiver call. Its source
+is read in the caller after the getter, and the returned alias is temporary. -/
+inductive ReceiverOp (C : Contract) (Γ : Ctx) (E : Ty) where
+  | push (v : Option (Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true)
+  | pop
 
 mutual
 
@@ -240,10 +280,9 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | assignIncDec {Γ : Ctx} {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
       (hp : p.isNumeric = true) (l : OpLoc C Γ p) (hs : l.recvSimple = true) : Stmt C Γ Γ
   /-- `y = values.push();` with `y` a value local: the slot appended, `y` its
-  default.  solkey has no unfold for a receiver that is not simple, so the
-  receiver is simple. -/
+  default. A complex receiver is captured by the calculus before the push. -/
   | assignLocalPush {Γ : Ctx} {p : PrimTy} (i : Idx Γ (.val p))
-      (b : SPath C Γ (.array (.prim p))) (hs : b.isSimple = true) : Stmt C Γ Γ
+      (b : SPath C Γ (.array (.prim p))) : Stmt C Γ Γ
   | push {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
       (hd : (v.isSome || E.defaultOkS) = true) : Stmt C Γ Γ
   | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
@@ -279,6 +318,23 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | loop {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁) : Stmt C Γ Γ
   /-- `{ … }`: a block, its locals ending with it. -/
   | block {Γ Γ₁ : Ctx} (body : Prog C Γ Γ₁) : Stmt C Γ Γ
+  /-- `values.push() += e`: evaluate the RHS, append/reset one primitive
+  slot, then perform the checked compound assignment at that slot. -/
+  | pushOpAssign {Γ : Ctx} {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+      (hp : p.isNumeric = true) (b : SPath C Γ (.array (.prim p))) (r : Val C Γ p) : Stmt C Γ Γ
+  /-- `++values.push()` / `values.push()++` (and decrement), as statements.
+  The value is discarded; the appended slot is changed once. -/
+  | pushIncDec {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+      (b : SPath C Γ (.array (.prim p))) : Stmt C Γ Γ
+  /-- `f(args).push(e)`, `f(args).push()` or `f(args).pop()`: the receiver call
+  remains one statement until the native storage-alias capture fires. -/
+  | callReceiver {Γ ps Γf : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps) (r : Var)
+      (body : Prog C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E) : Stmt C Γ Γ
+  /-- `f(args).push(e)` when `e` has effects. Its scoped prefix and source
+  remain inside the receiver statement, to run after the getter. -/
+  | callReceiverPush {Γ ps Γf Γv : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps) (r : Var)
+      (body : Prog C ([.alias (.array E)] ++ ps) Γf)
+      (code : Prog C Γ Γv) (value : Src C Γv E) : Stmt C Γ Γ
 
 /-- A sequence of statements, each read where the one before leaves. -/
 inductive Prog (C : Contract) : Ctx → Ctx → Type where
@@ -335,12 +391,15 @@ def Val.toStr {Γ : Ctx} {p : PrimTy} (ns : List Var) : Val C Γ p → (top : Bo
   | .readMem l, _ => l.toStr ns
   | .len b _, _ => s!"{b.toStr ns}.length"
   | .mlen b _, _ => s!"{b.toStr ns}.length"
+  | .modular op a b k, _ => s!"{op.toStr}({a.toStr ns true}, {b.toStr ns true}, {k.toStr ns true})"
 
 end
 
 def Src.toStr {Γ : Ctx} {T : Ty} (ns : List Var) : Src C Γ T → String
   | .val v => v.toStr ns true
   | .copy p _ => p.toStr ns
+  | .fixedCopy p _ _ => p.toStr ns
+  | .copyMem p => p.toStr ns
 
 def ARhs.toStr {Γ : Ctx} {R : RefTy} (ns : List Var) : ARhs C Γ R → String
   | .path p => p.toStr ns
@@ -368,7 +427,7 @@ def MSrc.toStr {Γ : Ctx} {T : Ty} (ns : List Var) : MSrc C Γ T → String
   | .ref p => p.toStr ns
 
 def LoopAnn.toStr {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → String
-  | .unwind 0 => ""
+  | .auto => ""
   | .unwind k => s!"/// @custom:key unwind {k} "
   | .inv I dec =>
     s!"/// @custom:key invariant {I.toStr ns true} " ++
@@ -378,12 +437,15 @@ def LoopAnn.toStr {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → String
 def Args.toStrs {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → List String
   | _, .nil => []
   | _, .snoc as _ _ e => as.toStrs ns ++ [e.toStr ns true]
+  | _, .snocStorage as _ _ e => as.toStrs ns ++ [e.toStr ns]
+  | _, .snocMemory as _ _ e => as.toStrs ns ++ [e.toStr ns]
 
 /-- The parameters' names, innermost first: the frame's names below the
 return variables. -/
 def Args.names {Γ : Ctx} : {ps : Ctx} → Args C Γ ps → List Var
   | _, .nil => []
   | _, .snoc as _ x _ => x :: as.names
+  | _, .snocStorage as _ x _ | _, .snocMemory as _ x _ => x :: as.names
 
 /-- The return variables' names, innermost first. -/
 def CallRet.names {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List Var
@@ -391,6 +453,7 @@ def CallRet.names {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List Var
   | _, _, .val _ r _ => [r]
   | _, _, .rets bs => bs.names
   | _, _, .mem _ r _ _ => [r]
+  | _, _, .storage _ r => [r]
 
 /-- The names of the context a call leaves its caller in. -/
 def CallRet.outNames {Γ : Ctx} (ns : List Var) : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List Var
@@ -398,6 +461,7 @@ def CallRet.outNames {Γ : Ctx} (ns : List Var) : {rs Γ' : Ctx} → CallRet Γ 
   | _, _, .val .. => ns
   | _, _, .rets bs => bs.names ++ ns
   | _, _, .mem _ r _ _ => r :: ns
+  | _, _, .storage _ r => r :: ns
 
 /-- The names of the context a statement leaves. -/
 def Stmt.outNames {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → List Var
@@ -438,6 +502,30 @@ def Stmt.memCallStr? {Γ Γ₁ Γ₂ : Ctx} (ns : List Var) (s : Stmt C Γ Γ₁
   match s.memRet? ns, P with
   | some (r, c), .cons t _ =>
     match t.bindsMem? (s.outNames ns) with
+    | some (r', w) => if r' = r then some (w c) else none
+    | none => none
+  | _, _ => none
+
+/-- A storage-returning call: its exported alias and the call. -/
+def Stmt.storageRet? {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → Option (Var × String)
+  | .call f args (.storage _ r) _ => some (r, callStr ns f args)
+  | _ => none
+
+/-- A storage declaration or rebinding that consumes the exported alias. -/
+def Stmt.bindsStorage? {Γ Γ' : Ctx} (ns : List Var) :
+    Stmt C Γ Γ' → Option (Var × (String → String))
+  | .declStorage R x (some (.path (.alias i))) =>
+    some (i.name ns, fun c => s!"{Ty.toStr (.ref R)} storage {x} = {c}")
+  | .rebind x (.path (.alias i)) =>
+    some (i.name ns, fun c => s!"{x.name ns} = {c}")
+  | _ => none
+
+/-- A storage call and its following binding as their original source statement. -/
+def Stmt.storageCallStr? {Γ Γ₁ Γ₂ : Ctx} (ns : List Var) (s : Stmt C Γ Γ₁)
+    (P : Prog C Γ₁ Γ₂) : Option String :=
+  match s.storageRet? ns, P with
+  | some (r, c), .cons t _ =>
+    match t.bindsStorage? (s.outNames ns) with
     | some (r', w) => if r' = r then some (w c) else none
     | none => none
   | _, _ => none
@@ -483,6 +571,76 @@ def Stmt.tupleCallStr? {Γ Γ₁ Γ₂ : Ctx} (ns : List Var) (s : Stmt C Γ Γ�
       let slots := (List.range rs.length).map fun i => ((ts.find? (·.1 == i)).map (·.2)).getD ""
       some (s!"({", ".intercalate slots}) = {cs}", ts.length)
 
+/-- Whether a printed primitive reads the local at position `n`. -/
+def Simple.readsLocal {Γ : Ctx} {p : PrimTy} (n : Nat) : Simple C Γ p → Bool
+  | .local i => i.toNat == n
+  | .lit .. | .bool _ | .env .. => false
+
+mutual
+
+def SPath.readsLocal {Γ : Ctx} (n : Nat) : {T : Ty} → SPath C Γ T → Bool
+  | _, .alias i => i.toNat == n
+  | _, .loc l => l.readsLocal n
+
+def Loc.readsLocal {Γ : Ctx} (n : Nat) : {T : Ty} → Loc C Γ T → Bool
+  | _, .root .. => false
+  | _, .field b _ _ => b.readsLocal n
+  | _, .index _ b i => b.readsLocal n || i.readsLocal n
+
+def MPath.readsLocal {Γ : Ctx} (n : Nat) : {T : Ty} → MPath C Γ T → Bool
+  | _, .var i _ => i.toNat == n
+  | _, .loc l => l.readsLocal n
+
+def MLoc.readsLocal {Γ : Ctx} (n : Nat) : {T : Ty} → MLoc C Γ T → Bool
+  | _, .field b _ _ => b.readsLocal n
+  | _, .index _ b i => b.readsLocal n || i.readsLocal n
+
+def Val.readsLocal {Γ : Ctx} (n : Nat) : {p : PrimTy} → Val C Γ p → Bool
+  | _, .simple s => s.readsLocal n
+  | _, .read l => l.readsLocal n
+  | _, .binop _ _ _ a b => a.readsLocal n || b.readsLocal n
+  | _, .unop _ _ _ a => a.readsLocal n
+  | _, .ternary c a b => c.readsLocal n || a.readsLocal n || b.readsLocal n
+  | _, .readMem l => l.readsLocal n
+  | _, .len b _ => b.readsLocal n
+  | _, .mlen b _ => b.readsLocal n
+  | _, .modular _ a b k => a.readsLocal n || b.readsLocal n || k.readsLocal n
+
+end
+
+/-- The dependencies of a printed increment lvalue include every path index. -/
+def OpLoc.readsLocal {Γ : Ctx} {p : PrimTy} (n : Nat) : OpLoc C Γ p → Bool
+  | .local i => i.toNat == n
+  | .root .. => false
+  | .field b _ _ => b.readsLocal n
+  | .index _ b i => b.readsLocal n || i.readsLocal n
+  | .mfield b _ _ => b.readsLocal n
+  | .mindex _ b i => b.readsLocal n || i.readsLocal n
+
+/-- A source call may be reconstructed only when its arguments exclude the private local. -/
+def Args.readsLocal {Γ : Ctx} (n : Nat) : {ps : Ctx} → Args C Γ ps → Bool
+  | _, .nil => false
+  | _, .snoc args _ _ value => args.readsLocal n || value.readsLocal n
+  | _, .snocStorage args _ _ value => args.readsLocal n || value.readsLocal n
+  | _, .snocMemory args _ _ value => args.readsLocal n || value.readsLocal n
+
+/-- Reconstruct a sole increment or primitive call captured as a receiver operand.
+Arbitrary statement prefixes have no single Solidity-expression spelling. -/
+def Prog.receiverExpr? {Γ Γv : Ctx} {E : Ty} (ns : List Var)
+    (code : Prog C Γ Γv) (value : Src C Γv E) : Option String :=
+  match code, value with
+  | .nil, _ => none
+  | .cons (.declLocal _ x none)
+      (.cons (.assignIncDec i op _ l _) .nil), .val (.simple (.local j)) =>
+    if i.toNat == 0 && j.toNat == 0 && !l.readsLocal 0 then
+      some (IncDec.show op (l.toStr (x :: ns))) else none
+  | .cons (.declLocal _ x none)
+      (.cons (.call f args (.val _ _ (some i)) _) .nil), .val (.simple (.local j)) =>
+    if i.toNat == 0 && j.toNat == 0 && !args.readsLocal 0 then
+      some s!"{f}({", ".intercalate (args.toStrs (x :: ns))})"
+    else none
+  | _, _ => none
+
 mutual
 
 def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
@@ -506,6 +664,8 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .assignFromMem l p => s!"{l.toStr ns} = {p.toStr ns};"
   | .opAssign op _ _ l r => s!"{l.toStr ns} {BinOp.sym op}= {r.toStr ns true};"
   | .incDec op _ l => s!"{IncDec.show op (l.toStr ns)};"
+  | .pushOpAssign op _ _ b r => s!"{b.toStr ns}.push() {BinOp.sym op}= {r.toStr ns true};"
+  | .pushIncDec op _ b => s!"{IncDec.show op (b.toStr ns ++ ".push()")};"
   | .push b v _ =>
     match v with
     | none => s!"{b.toStr ns}.push();"
@@ -514,7 +674,7 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .transfer r a => s!"{r.toStr ns}.transfer({a.toStr ns true});"
   | .send pv r a => s!"{pv.name ns} = {r.toStr ns}.send({a.toStr ns true});"
   | .assignIncDec x op _ l _ => s!"{x.name ns} = {IncDec.show op (l.toStr ns)};"
-  | .assignLocalPush x b _ => s!"{x.name ns} = {b.toStr ns}.push();"
+  | .assignLocalPush x b => s!"{x.name ns} = {b.toStr ns}.push();"
   | .delete l => s!"delete {l.toStr ns};"
   | .deleteMem p _ => s!"delete {p.toStr ns};"
   | .assignNew (R := R) l n _ => s!"{l.toStr ns} = new {Ty.toStr (.ref R)}({n.toStr ns});"
@@ -528,6 +688,17 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
     match ret with
     | .val _ _ (some y) => s!"{y.name ns} = {call}"
     | _ => call
+  | .callReceiver f args _ _ op =>
+    let receiver := s!"{f}({", ".intercalate (args.toStrs ns)})"
+    match op with
+    | .push none _ => s!"{receiver}.push();"
+    | .push (some v) _ => s!"{receiver}.push({v.toStr ns});"
+    | .pop => s!"{receiver}.pop();"
+  | .callReceiverPush f args _ _ code value =>
+    let receiver := s!"{f}({", ".intercalate (args.toStrs ns)})"
+    match code.receiverExpr? ns value with
+    | some operand => s!"{receiver}.push({operand});"
+    | none => s!"{receiver}.push(eval {braced (Prog.toStrs 0 ns code)} {value.toStr (code.outNames ns)});"
   | .tryCall c rets ok err code pnc other =>
     let args := ", ".intercalate (c.args.map fun a => a.2.toStr ns)
     let rs := rets.toList
@@ -560,7 +731,10 @@ def Prog.toStrs {Γ Γ' : Ctx} (skip : Nat) (ns : List Var) : Prog C Γ Γ' → 
       | none =>
         match Stmt.memCallStr? ns s P with
         | some c => c :: Prog.toStrs 1 (s.outNames ns) P
-        | none => s.toStr ns :: Prog.toStrs 0 (s.outNames ns) P
+        | none =>
+          match Stmt.storageCallStr? ns s P with
+          | some c => c :: Prog.toStrs 1 (s.outNames ns) P
+          | none => s.toStr ns :: Prog.toStrs 0 (s.outNames ns) P
 
 end
 
@@ -618,12 +792,15 @@ def Val.wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} : Val C Γ p → Val C Δ
   | .readMem l => .readMem (l.wk h)
   | .len b hp => .len (b.wk h) hp
   | .mlen b hp => .mlen (b.wk h) hp
+  | .modular op a b k => .modular op (a.wk h) (b.wk h) (k.wk h)
 
 end
 
 def Src.wk {Γ Δ : Ctx} (h : Thin Γ Δ) {T : Ty} : Src C Γ T → Src C Δ T
   | .val v => .val (v.wk h)
   | .copy p hm => .copy (p.wk h) hm
+  | .fixedCopy p shape hm => .fixedCopy (p.wk h) shape hm
+  | .copyMem p => .copyMem (p.wk h)
 
 def ARhs.wk {Γ Δ : Ctx} (h : Thin Γ Δ) {R : RefTy} : ARhs C Γ R → ARhs C Δ R
   | .path p => .path (p.wk h)
@@ -668,10 +845,17 @@ def ExtCall.wk {Γ Δ : Ctx} (h : Thin Γ Δ) (c : ExtCall C Γ) : ExtCall C Δ 
 def LoopAnn.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : LoopAnn C Γ → LoopAnn C Δ
   | .unwind k => .unwind k
   | .inv I dec => .inv (I.wk h) (dec.map (·.wk h))
+  | .auto => .auto
 
 def Args.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {ps : Ctx} → Args C Γ ps → Args C Δ ps
   | _, .nil => .nil
   | _, .snoc as p x e => .snoc (as.wk h) p x (e.wk h)
+  | _, .snocStorage as R x e => .snocStorage (as.wk h) R x (e.wk h)
+  | _, .snocMemory as R x e => .snocMemory (as.wk h) R x (e.wk h)
+
+def ReceiverOp.wk {Γ Δ : Ctx} {E : Ty} (h : Thin Γ Δ) : ReceiverOp C Γ E → ReceiverOp C Δ E
+  | .push v hd => .push (v.map (·.wk h)) (by rw [Option.isSome_map]; exact hd)
+  | .pop => .pop
 
 /-- A call's result weakened: the context it leaves in `Δ`, and how its own
 output thins into it. -/
@@ -681,6 +865,7 @@ def CallRet.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {rs Γ' : Ctx} → CallRet Γ rs
   | _, _, .val p r res => ⟨Δ, h, .val p r (res.map (·.wk h))⟩
   | rs, _, .rets bs => ⟨rs ++ Δ, Thin.keepAll rs h, .rets bs⟩
   | _, _, .mem R r hd hm => ⟨.mem R :: Δ, .keep h, .mem R r hd hm⟩
+  | _, _, .storage R r => ⟨.alias R :: Δ, .keep h, .storage R r⟩
 
 mutual
 
@@ -696,10 +881,12 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
   | _, .declStorage R x init => ⟨_, .keep h, .declStorage R x (init.map (·.wk h))⟩
   | _, .opAssign op hop hp l r => ⟨Δ, h, .opAssign op hop hp (l.wk h) (r.wk h)⟩
   | _, .incDec op hp l => ⟨Δ, h, .incDec op hp (l.wk h)⟩
+  | _, .pushOpAssign op hop hp b r => ⟨Δ, h, .pushOpAssign op hop hp (b.wk h) (r.wk h)⟩
+  | _, .pushIncDec op hp b => ⟨Δ, h, .pushIncDec op hp (b.wk h)⟩
   | _, .assignIncDec i op hp l hs =>
     ⟨Δ, h, .assignIncDec (i.wk h) op hp (l.wk h) ((OpLoc.recvSimple_wk h l).trans hs)⟩
-  | _, .assignLocalPush i b hs =>
-    ⟨Δ, h, .assignLocalPush (i.wk h) (b.wk h) ((SPath.isSimple_wk h b).trans hs)⟩
+  | _, .assignLocalPush i b =>
+    ⟨Δ, h, .assignLocalPush (i.wk h) (b.wk h)⟩
   | _, .push b v hd =>
     ⟨Δ, h, .push (b.wk h) (v.map (·.wk h)) (by rw [Option.isSome_map]; exact hd)⟩
   | _, .pop b => ⟨Δ, h, .pop (b.wk h)⟩
@@ -725,6 +912,10 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
       (pnc.wk (Thin.keepAll κ h)).2.2 (other.wk h).2.2⟩
   | _, .loop a c body => ⟨Δ, h, .loop (a.wk h) (c.wk h) (body.wk h).2.2⟩
   | _, .block body => ⟨Δ, h, .block (body.wk h).2.2⟩
+  | _, .callReceiver f args r body op => ⟨Δ, h, .callReceiver f (args.wk h) r body (op.wk h)⟩
+  | _, .callReceiverPush f args r body code value =>
+    ⟨Δ, h, .callReceiverPush f (args.wk h) r body (code.wk h).2.2
+      (value.wk (code.wk h).2.1)⟩
 
 def Prog.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Prog C Γ Γ' →
     (Δ' : Ctx) × Thin Γ' Δ' × Prog C Δ Δ'
@@ -753,18 +944,22 @@ variable {C : Contract}
 def CallRet.ext {Γ : Ctx} {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Ext Γ Γ' :=
   CallRet.casesOn (motive := fun _ Γ' _ => Ext Γ Γ') r .refl (fun _ _ _ => .refl)
     (fun {rs} _ => Ext.append Γ rs) (fun _ _ _ _ => .push .refl)
+    (fun _ _ => .push .refl)
 
 def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
   Stmt.casesOn (motive_1 := fun Γ Γ' _ => Ext Γ Γ') s
     (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ _ _ => .push .refl) (fun _ _ _ => .push .refl)
-    (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl)
+    (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ _ _ _ _ => .refl) (fun _ _ => .refl)
     (fun _ _ _ => .refl) (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ _ _ => .push .refl) (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ => .refl) (fun _ => .refl) (fun _ => .refl) .refl
     (fun _ _ ret _ => ret.ext)
     (fun _ _ _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ => .refl)
+    (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl)
+    (fun _ _ _ _ _ => .refl)
+    (fun _ _ _ _ _ _ => .refl)
 
 def Prog.ext : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
   | _, _, P => Prog.casesOn (motive_2 := fun Γ Γ' _ => Ext Γ Γ') P .refl

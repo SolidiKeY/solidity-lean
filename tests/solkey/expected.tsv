@@ -16,6 +16,15 @@ taclets	TestSuite	storageIndexWriteRootRhsComplexReceiver	derived	diamond	`Solke
 taclets	TestSuite	storagePushValue	derived	box	`Solkey.TestSuite.storagePushValue.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushComplexReceiverNonsimpleArg	derived	box; for all x, y	`Solkey.TestSuite.storagePushComplexReceiverNonsimpleArg.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushValueCopySource	derived	box	`Solkey.TestSuite.storagePushValueCopySource.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushMemoryCopySource	derived	box	`Solkey.TestSuite.storagePushMemoryCopySource.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	storagePushMemoryStructCopySource	derived	box	`Solkey.TestSuite.storagePushMemoryStructCopySource.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	storagePushReturnPrimitiveBindComplexReceiver	derived	diamond	`Solkey.TestSuite.storagePushReturnPrimitiveBindComplexReceiver.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	storagePushCompoundTarget	derived	diamond	`Solkey.TestSuite.storagePushCompoundTarget.proved` (`Solidity/TestSuite/Derived16.lean`)
+taclets	TestSuite	storagePushDivModTarget	derived	diamond	`Solkey.TestSuite.storagePushDivModTarget.proved` (`Solidity/TestSuite/Derived16.lean`)
+taclets	TestSuite	storagePushIncrementTarget	derived	diamond	`Solkey.TestSuite.storagePushIncrementTarget.proved` (`Solidity/TestSuite/Derived16.lean`)
+taclets	TestSuite	storagePushCompoundSigned	derived	diamond	`Solkey.TestSuite.storagePushCompoundSigned.proved` (`Solidity/TestSuite/Derived16.lean`)
+taclets	TestSuite	storagePushPopCallReceiver	derived	diamond	`Solkey.TestSuite.storagePushPopCallReceiver.proved` (`Solidity/TestSuite/Derived16.lean`)
+taclets	TestSuite	newArrayCaptureStorageRoot	derived	diamond	`Solkey.TestSuite.newArrayCaptureStorageRoot.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	requireTrueLiteral	derived	diamond	`Solkey.TestSuite.requireTrueLiteral.proved` (`Solidity/TestSuite/Derived1.lean`)
 taclets	TestSuite	requireFalseLiteral	derived	box	`Solkey.TestSuite.requireFalseLiteral.proved` (`Solidity/TestSuite/Derived1.lean`)
 taclets	TestSuite	storageBoolRootReadWrite	derived	diamond	`Solkey.TestSuite.storageBoolRootReadWrite.proved` (`Solidity/TestSuite/Derived1.lean`)
@@ -164,6 +173,7 @@ taclets	TestSuite	storagePushLocalBind	derived	box	`Solkey.TestSuite.storagePush
 taclets	TestSuite	storagePushNonsimpleArg	derived	box; for all x, y	`Solkey.TestSuite.storagePushNonsimpleArg.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushReadBack	derived	diamond	`Solkey.TestSuite.storagePushReadBack.proved` (`Solidity/TestSuite/Derived7.lean`)
 taclets	TestSuite	storagePushReturnAssign	derived	box	`Solkey.TestSuite.storagePushReturnAssign.proved` (`Solidity/TestSuite/Derived7.lean`)
+taclets	TestSuite	storagePushReturnPrimitiveBind	derived	box	`Solkey.TestSuite.storagePushReturnPrimitiveBind.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	storageRootAddAssign	derived	diamond	`Solkey.TestSuite.storageRootAddAssign.proved` (`Solidity/TestSuite/Derived3.lean`)
 taclets	TestSuite	storageRootCopySource	derived	diamond	`Solkey.TestSuite.storageRootCopySource.proved` (`Solidity/TestSuite/Derived3.lean`)
 taclets	TestSuite	storageRootCopyStruct	derived	diamond	`Solkey.TestSuite.storageRootCopyStruct.proved` (`Solidity/TestSuite/Derived7.lean`)
@@ -235,9 +245,7 @@ taclets	TestSuite	testStoragePushFieldLvalue	derived	box	`Solkey.TestSuite.testS
 taclets	TestSuite	testStoragePushLvalueCopiesStorageSource	derived	box	`Solkey.TestSuite.testStoragePushLvalueCopiesStorageSource.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStoragePushLvaluePrimitive	derived	box	`Solkey.TestSuite.testStoragePushLvaluePrimitive.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStoragePushReturnAlias	derived	box	`Solkey.TestSuite.testStoragePushReturnAlias.proved` (`Solidity/TestSuite/Derived8.lean`)
-taclets	TestSuite	testDanglingReferenceSurvivesPush	derived	diamond	`Solkey.TestSuite.testDanglingReferenceSurvivesPush.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testArrayCopyClearsOldElements	derived	diamond	`Solkey.TestSuite.testArrayCopyClearsOldElements.proved` (`Solidity/TestSuite/Derived13.lean`)
-taclets	TestSuite	testArrayCopyKeepsDestinationTail	derived	diamond	`Solkey.TestSuite.testArrayCopyKeepsDestinationTail.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testStorageIndexDeleteOutOfBoundsReverts	derived	box	`Solkey.TestSuite.testStorageIndexDeleteOutOfBoundsReverts.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testFixedArrayLength	derived	diamond	`Solkey.TestSuite.testFixedArrayLength.proved` (`Solidity/TestSuite/Derived4.lean`)
@@ -255,11 +263,9 @@ taclets	TestSuite	testFixedStructArrayDeleteResetsElements	derived	box	`Solkey.T
 taclets	TestSuite	testStructWithFixedArrayDeleteKeepsLength	derived	box	`Solkey.TestSuite.testStructWithFixedArrayDeleteKeepsLength.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testStructWithFixedArrayCopy	derived	box	`Solkey.TestSuite.testStructWithFixedArrayCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testFixedMappingArrayDeleteKeepsEntries	derived	box	`Solkey.TestSuite.testFixedMappingArrayDeleteKeepsEntries.proved` (`Solidity/TestSuite/Derived4.lean`)
-taclets	TestSuite	testDeleteArrayLeavesDataPastLength	derived	diamond	`Solkey.TestSuite.testDeleteArrayLeavesDataPastLength.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testPopKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testPopKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testDeleteKeepsMappingElementEntries	derived	diamond	`Solkey.TestSuite.testDeleteKeepsMappingElementEntries.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testPushBindMappingElement	derived	diamond	`Solkey.TestSuite.testPushBindMappingElement.proved` (`Solidity/TestSuite/Derived8.lean`)
-taclets	TestSuite	testDanglingInnerArrayReappearsAfterPush	derived	diamond	`Solkey.TestSuite.testDanglingInnerArrayReappearsAfterPush.proved` (`Solidity/TestSuite/Derived13.lean`)
 taclets	TestSuite	testStorageRootDeepCopy	derived	diamond	`Solkey.TestSuite.testStorageRootDeepCopy.proved` (`Solidity/TestSuite/Derived8.lean`)
 taclets	TestSuite	testStorageStructDeleteSkipsMappingMember	derived	diamond	`Solkey.TestSuite.testStorageStructDeleteSkipsMappingMember.proved` (`Solidity/TestSuite/Derived4.lean`)
 taclets	TestSuite	testStorageToMemoryCopyComplexPath	derived	diamond	`Solkey.TestSuite.testStorageToMemoryCopyComplexPath.proved` (`Solidity/TestSuite/Derived12.lean`)
@@ -316,7 +322,7 @@ taclets	TestSuite	mappingEntryThroughMemoryToMappingEntry	derived	diamond	`Solke
 taclets	TestSuite	boolKeyMapping	derived	diamond	`Solkey.TestSuite.boolKeyMapping.proved` (`Solidity/TestSuite/Derived5.lean`)
 taclets	TestSuite	boolIsTrueOrFalse	derived	diamond; for all b	`Solkey.TestSuite.boolIsTrueOrFalse.proved` (`Solidity/TestSuite/Derived5.lean`)
 taclets	TestSuite	boolKeyMappingSymbolicKey	derived	diamond; for all b	`Solkey.TestSuite.boolKeyMappingSymbolicKey.proved` (`Solidity/TestSuite/Derived5.lean`)
-taclets	TestSuite	recursiveStructMapping	excluded	diamond	TestSuite.sol:2741: struct `Tree` (line 36) is recursive through a mapping: its default value is infinite, and the model's are finite
+taclets	TestSuite	recursiveStructMapping	excluded	diamond	TestSuite.sol:2829: struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite
 taclets	TestSuite	numberLiteralForms	derived	diamond	`Solkey.TestSuite.numberLiteralForms.proved` (`Solidity/TestSuite/Derived5.lean`)
 taclets	TestSuite	localAddAssign	derived	diamond	`Solkey.TestSuite.localAddAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
 taclets	TestSuite	localMulAssign	derived	diamond	`Solkey.TestSuite.localMulAssign.proved` (`Solidity/TestSuite/Derived5.lean`)
@@ -417,8 +423,8 @@ taclets	TestSuite	sendToOwner	derived	box	`Solkey.TestSuite.sendToOwner.proved` 
 taclets	TestSuite	sendUnfoldReceiver	derived	box	`Solkey.TestSuite.sendUnfoldReceiver.proved` (`Solidity/TestSuite/Derived14.lean`)
 taclets	TestSuite	sendUnfoldArgument	derived	box	`Solkey.TestSuite.sendUnfoldArgument.proved` (`Solidity/TestSuite/Derived14.lean`)
 taclets	TestSuite	callToSender	derived	box	`Solkey.TestSuite.callToSender.proved` (`Solidity/TestSuite/Derived14.lean`)
-taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3511: tagged `@custom:key skip`
-taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3516: tagged `@custom:key skip`
+taclets	TestSuite	tryCalleeGet	skip	skip; for all x	TestSuite.sol:3599: tagged `@custom:key skip`
+taclets	TestSuite	tryCalleePing	skip	skip	TestSuite.sol:3604: tagged `@custom:key skip`
 taclets	TestSuite	tryCallCatchKeepsState	derived	box	`Solkey.TestSuite.tryCallCatchKeepsState.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallBindsReturnAndPanicCode	derived	box	`Solkey.TestSuite.tryCallBindsReturnAndPanicCode.proved` (`Solidity/TestSuite/Derived6.lean`)
 taclets	TestSuite	tryCallUnmatchedFailureReverts	derived	box	`Solkey.TestSuite.tryCallUnmatchedFailureReverts.proved` (`Solidity/TestSuite/Derived6.lean`)
@@ -438,121 +444,191 @@ taclets	TestSuite	returnFromNestedCall	derived	diamond	`Solkey.TestSuite.returnF
 taclets	TestSuite	returnAfterRevertGuard	derived	diamond	`Solkey.TestSuite.returnAfterRevertGuard.proved` (`Solidity/TestSuite/Derived14.lean`)
 taclets	TestSuite	returnFromTryBranches	derived	box	`Solkey.TestSuite.returnFromTryBranches.proved` (`Solidity/TestSuite/Derived14.lean`)
 taclets	TestSuite	returnFromVoidFunction	derived	diamond	`Solkey.TestSuite.returnFromVoidFunction.proved` (`Solidity/TestSuite/Derived14.lean`)
-solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	
-solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	
-solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	
-solc	SolcExpressions	incDecChainOnStateVariable	proved	`T r = x++;` split into `T r; r = x++;`	
-solc	SolcExpressions	postDecrementYieldsOldValue	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-solc	SolcExpressions	preDecrementYieldsNewValue	unsupported		decrement: `--` is Lean's comment token, and the grammar has no `x--`/`--x`
-solc	SolcExpressions	compoundAssignOnLocal	proved		
-solc	SolcExpressions	bareIncrementOnLocal	proved		
-solc	SolcExpressions	bareIncrementOnStateVariable	proved		
-solc	SolcExpressions	ternaryTrueLiteral	proved		
-solc	SolcExpressions	ternaryFalseLiteral	proved		
-solc	SolcExpressions	ternaryNestedOuterHigh	proved	concretized: solkey proves this for all parameters; ported at x = 1001	
-solc	SolcExpressions	ternaryNestedOuterLow	proved	concretized: solkey proves this for all parameters; ported at x = 500	
-solc	SolcExpressions	ternaryNestedInnerHigh	proved	concretized: solkey proves this for all parameters; ported at x = 80	
-solc	SolcExpressions	ternaryNestedInnerLow	proved	concretized: solkey proves this for all parameters; ported at x = 40	
-solc	SolcExpressions	exponentiationIsRightAssociative	unsupported		exponentiation `**` is not in the sol_expr grammar
-solc	SolcExpressions	exponentiationZeroBaseZeroExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
-solc	SolcExpressions	exponentiationZeroExponent	unsupported		exponentiation `**` is not in the sol_expr grammar
-solc	SolcExpressions	exponentiationSignedBaseEvenExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	exponentiation `**` is not in the sol_expr grammar
-solc	SolcExpressions	exponentiationSignedBaseOddExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	exponentiation `**` is not in the sol_expr grammar
-solc	SolcStructs	deleteMemberThroughStorageAlias	proved		
-solc	SolcStructs	deleteStructLeavesNeighbours	proved		
-solc	SolcStructs	deleteStructResetsArrayLength	unsupported		`.length` is not a program expression
-solc	SolcStructs	deleteStructInMapping	proved		
-solc	SolcStructs	deleteEntryKeepsOtherKeys	proved		
+taclets	TestSuite	returnDefaultsAreZero	derived	diamond	`Solkey.TestSuite.returnDefaultsAreZero.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnDefaultAddressIsZero	derived	diamond	`Solkey.TestSuite.returnDefaultAddressIsZero.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnDefaultEnumIsFirstMember	derived	diamond	`Solkey.TestSuite.returnDefaultEnumIsFirstMember.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnDefaultMemoryArrayIsEmpty	derived	diamond	`Solkey.TestSuite.returnDefaultMemoryArrayIsEmpty.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnInThenBranchElseIsDefault	derived	diamond	`Solkey.TestSuite.returnInThenBranchElseIsDefault.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnInElseBranchThenIsDefault	derived	diamond	`Solkey.TestSuite.returnInElseBranchThenIsDefault.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnDefaultIsFreshPerCall	derived	diamond	`Solkey.TestSuite.returnDefaultIsFreshPerCall.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnEnumOtherBranchIsDefault	derived	diamond	`Solkey.TestSuite.returnEnumOtherBranchIsDefault.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnUnassignedComponentIsDefault	derived	diamond	`Solkey.TestSuite.returnUnassignedComponentIsDefault.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	returnDefaultIsVisibleInBody	derived	diamond	`Solkey.TestSuite.returnDefaultIsVisibleInBody.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	overloadedInternalCall	derived	diamond	`Solkey.TestSuite.overloadedInternalCall.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	modifierArgument	derived	diamond	`Solkey.TestSuite.modifierArgument.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	modifierResumesAfterReturn	derived	diamond	`Solkey.TestSuite.modifierResumesAfterReturn.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	modifierFirstListedOutermost	derived	diamond	`Solkey.TestSuite.modifierFirstListedOutermost.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	modifierOnObligation	derived	diamond	`Solkey.TestSuite.modifierOnObligation.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	whileCountsUp	derived	diamond	`Solkey.TestSuite.whileCountsUp.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	whileBodyDeclaresLocal	derived	diamond	`Solkey.TestSuite.whileBodyDeclaresLocal.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	whileBreakLeavesLoop	derived	diamond	`Solkey.TestSuite.whileBreakLeavesLoop.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	whileContinueSkipsRest	derived	diamond	`Solkey.TestSuite.whileContinueSkipsRest.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	forContinueStillUpdates	derived	diamond	`Solkey.TestSuite.forContinueStillUpdates.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	forBreakKeepsCounter	derived	diamond	`Solkey.TestSuite.forBreakKeepsCounter.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	doWhileRunsBodyFirst	derived	diamond	`Solkey.TestSuite.doWhileRunsBodyFirst.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	forWritesStorageArray	derived	box	`Solkey.TestSuite.forWritesStorageArray.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	returnLeavesNestedLoops	derived	diamond	`Solkey.TestSuite.returnLeavesNestedLoops.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	invariantCountsToBound	derived	box; for all n	`Solkey.TestSuite.invariantCountsToBound.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	invariantForCountsArrayLength	derived	diamond	`Solkey.TestSuite.invariantForCountsArrayLength.proved` (`Solidity/TestSuite/Derived17.lean`)
+taclets	TestSuite	invariantClosedFormSum	pending	diamond	not derived yet
+taclets	TestSuite	invariantVariantSkipsBreakIteration	derived	diamond; for all n	`Solkey.TestSuite.invariantVariantSkipsBreakIteration.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	invariantOverStorageWrites	derived	box; for all n	`Solkey.TestSuite.invariantOverStorageWrites.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	invariantQuantifiedOverPrefix	unsupported	box	TestSuite.sol:4140: the loop clause `invariant \forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language
+taclets	TestSuite	constantInlined	derived	diamond	`Solkey.TestSuite.constantInlined.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	contractQualifiedConstantAndEnum	derived	diamond	`Solkey.TestSuite.contractQualifiedConstantAndEnum.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	fileLevelConstantEnumAndFunction	derived	diamond	`Solkey.TestSuite.fileLevelConstantEnumAndFunction.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	fileLevelStructThroughLibrary	derived	diamond	`Solkey.TestSuite.fileLevelStructThroughLibrary.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	libraryCallAndUsingFor	derived	diamond	`Solkey.TestSuite.libraryCallAndUsingFor.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	valueTypeWrapUnwrap	derived	diamond	`Solkey.TestSuite.valueTypeWrapUnwrap.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	typeBounds	derived	diamond	`Solkey.TestSuite.typeBounds.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	addmodMulmod	derived	diamond	`Solkey.TestSuite.addmodMulmod.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	modifierCallsInternalFunction	derived	diamond	`Solkey.TestSuite.modifierCallsInternalFunction.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	indexParameter	derived	diamond	`Solkey.TestSuite.indexParameter.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	storageStructParameter	derived	diamond	`Solkey.TestSuite.storageStructParameter.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	storageMappingParameter	derived	diamond	`Solkey.TestSuite.storageMappingParameter.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	pinWithInequality	derived	box; for all x, y	`Solkey.TestSuite.pinWithInequality.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	payableAddressParameter	derived	box; for all p	`Solkey.TestSuite.payableAddressParameter.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	namedArgumentsBindByName	derived	diamond	`Solkey.TestSuite.namedArgumentsBindByName.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	modifierLocalsArePerApplication	derived	diamond	`Solkey.TestSuite.modifierLocalsArePerApplication.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	uninitialisedLocalsAreDefault	derived	diamond	`Solkey.TestSuite.uninitialisedLocalsAreDefault.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	storageStaticToDynamicCopyKeepsLength	derived	diamond	`Solkey.TestSuite.storageStaticToDynamicCopyKeepsLength.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	storageShorterStaticCopyClearsTail	derived	diamond	`Solkey.TestSuite.storageShorterStaticCopyClearsTail.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	testFixedArrayOfFixedArraysLength	derived	diamond	`Solkey.TestSuite.testFixedArrayOfFixedArraysLength.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testEmptyPushReadsDefaultValue	derived	diamond	`Solkey.TestSuite.testEmptyPushReadsDefaultValue.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testPopPushValueResetsValue	derived	diamond	`Solkey.TestSuite.testPopPushValueResetsValue.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedCopyThenEmptyPushReadsZero	derived	diamond	`Solkey.TestSuite.testFixedCopyThenEmptyPushReadsZero.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	testShorterCopyThenEmptyPushClearsTail	derived	diamond	`Solkey.TestSuite.testShorterCopyThenEmptyPushClearsTail.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	testPushMappingOfFixedArrayPreservesEntries	derived	diamond	`Solkey.TestSuite.testPushMappingOfFixedArrayPreservesEntries.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testShapeCopyFixedTailAndSourceIndependence	derived	diamond	`Solkey.TestSuite.testShapeCopyFixedTailAndSourceIndependence.proved` (`Solidity/TestSuite/Derived18.lean`)
+taclets	TestSuite	testShapeCopyDynamicShrinkClearsReusedSlot	derived	diamond	`Solkey.TestSuite.testShapeCopyDynamicShrinkClearsReusedSlot.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testShapeCopyNestedSelfAliasPreservesValues	derived	diamond	`Solkey.TestSuite.testShapeCopyNestedSelfAliasPreservesValues.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedArrayOfMappingsOfFixedArraysLength	derived	diamond	`Solkey.TestSuite.testFixedArrayOfMappingsOfFixedArraysLength.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testDynamicArrayOfMappingsOfFixedArraysLength	derived	box	`Solkey.TestSuite.testDynamicArrayOfMappingsOfFixedArraysLength.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testPushIndexedPrimitiveSourceOnce	derived	diamond	`Solkey.TestSuite.testPushIndexedPrimitiveSourceOnce.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testPushIndexedFixedArraySourceOnce	derived	diamond	`Solkey.TestSuite.testPushIndexedFixedArraySourceOnce.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedShapePopPushResetsFixedElement	derived	diamond	`Solkey.TestSuite.testFixedShapePopPushResetsFixedElement.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedShapeDeleteFixedElementKeepsLength	derived	diamond	`Solkey.TestSuite.testFixedShapeDeleteFixedElementKeepsLength.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedShapeDeleteDynamicThenPushFixedElement	derived	diamond	`Solkey.TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedShapeFixedElementStorageAlias	derived	diamond	`Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testFixedShapeEmptyPushFixedElementReadsZero	derived	diamond	`Solkey.TestSuite.testFixedShapeEmptyPushFixedElementReadsZero.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testEmptyPushFixedArrayReturnReadsZero	derived	diamond	`Solkey.TestSuite.testEmptyPushFixedArrayReturnReadsZero.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testEmptyPushDynamicArrayReturnReadsZero	derived	diamond	`Solkey.TestSuite.testEmptyPushDynamicArrayReturnReadsZero.proved` (`Solidity/TestSuite/Derived15.lean`)
+taclets	TestSuite	testEmptyPushStructReturnReadsZero	derived	diamond	`Solkey.TestSuite.testEmptyPushStructReturnReadsZero.proved` (`Solidity/TestSuite/Derived15.lean`)
+solc	SolcExpressions	postIncrementYieldsOldValue	proved	`T r = x++;` split into `T r; r = x++;`	kernel-checked concrete run
+solc	SolcExpressions	preIncrementYieldsNewValue	proved	`T r = x++;` split into `T r; r = x++;`	kernel-checked concrete run
+solc	SolcExpressions	incDecChainOnLocal	proved	`T r = x++;` split into `T r; r = x++;`	kernel-checked concrete run
+solc	SolcExpressions	incDecChainOnStateVariable	proved	`T r = x++;` split into `T r; r = x++;`	kernel-checked concrete run
+solc	SolcExpressions	postDecrementYieldsOldValue	proved		kernel-checked concrete run
+solc	SolcExpressions	preDecrementYieldsNewValue	proved		kernel-checked concrete run
+solc	SolcExpressions	compoundAssignOnLocal	proved		kernel-checked concrete run
+solc	SolcExpressions	bareIncrementOnLocal	proved		kernel-checked concrete run
+solc	SolcExpressions	bareIncrementOnStateVariable	proved		kernel-checked concrete run
+solc	SolcExpressions	ternaryTrueLiteral	proved		kernel-checked concrete run
+solc	SolcExpressions	ternaryFalseLiteral	proved		kernel-checked concrete run
+solc	SolcExpressions	ternaryNestedOuterHigh	proved	concretized: solkey proves this for all parameters; ported at x = 1001	kernel-checked concrete run
+solc	SolcExpressions	ternaryNestedOuterLow	proved	concretized: solkey proves this for all parameters; ported at x = 500	kernel-checked concrete run
+solc	SolcExpressions	ternaryNestedInnerHigh	proved	concretized: solkey proves this for all parameters; ported at x = 80	kernel-checked concrete run
+solc	SolcExpressions	ternaryNestedInnerLow	proved	concretized: solkey proves this for all parameters; ported at x = 40	kernel-checked concrete run
+solc	SolcExpressions	exponentiationIsRightAssociative	proved		kernel-checked concrete run
+solc	SolcExpressions	exponentiationZeroBaseZeroExponent	proved		kernel-checked concrete run
+solc	SolcExpressions	exponentiationZeroExponent	proved		kernel-checked concrete run
+solc	SolcExpressions	exponentiationSignedBaseEvenExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	Solidity elaboration failed: operator ** does not take int
+solc	SolcExpressions	exponentiationSignedBaseOddExponent	unsupported	concretized: solkey proves this for all parameters; ported at b = minusTwo	Solidity elaboration failed: operator ** does not take int
+solc	SolcStructs	deleteMemberThroughStorageAlias	proved		kernel-checked concrete run
+solc	SolcStructs	deleteStructLeavesNeighbours	proved		kernel-checked concrete run
+solc	SolcStructs	deleteStructResetsArrayLength	proved		kernel-checked concrete run
+solc	SolcStructs	deleteStructInMapping	proved		kernel-checked concrete run
+solc	SolcStructs	deleteEntryKeepsOtherKeys	proved		kernel-checked concrete run
 solc	SolcStructs	recursiveStructThroughAliases	unsupported		field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table
 solc	SolcStructs	nestedRecursiveStructSetAndCheck	unsupported		field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint)
-solc	SolcStructs	structCopyViaMemoryLocal	proved		
-solc	SolcStructs	structCopyFromStorageIsDeep	proved		
-solc	SolcStructs	structArrayElementCopy	proved		
-solc	SolcStructs	structArrayElementCopyMemberwise	proved		
+solc	SolcStructs	structCopyViaMemoryLocal	proved		kernel-checked concrete run
+solc	SolcStructs	structCopyFromStorageIsDeep	proved		kernel-checked concrete run
+solc	SolcStructs	structArrayElementCopy	proved		kernel-checked concrete run
+solc	SolcStructs	structArrayElementCopyMemberwise	proved		kernel-checked concrete run
 solc	SolcArrays	pushLvalueAssignsAndGrows	unsupported		`b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet
-solc	SolcArrays	pushWithArgument	unsupported		`.length` is not a program expression
-solc	SolcArrays	pushThenPopRestoresLength	unsupported		`.length` is not a program expression
-solc	SolcArrays	pushEmptyGrowsLength	unsupported		`.length` is not a program expression
-solc	SolcArrays	popThenPushSlotIsZeroed	proved		
-solc	SolcArrays	pushedSlotIsZeroed	proved		
-solc	SolcArrays	storageIndexReadWrite	proved		
-solc	SolcArrays	storageArrayAliasWritesThrough	unsupported		`.length` is not a program expression
-solc	SolcArrays	storageStructArrayAliasWritesThrough	unsupported		`.length` is not a program expression
-solc	SolcArrays	deleteArrayElementOfStructs	proved		
-solc	SolcArrays	matrixElementWriteRead	proved		
-solc	SolcArrays	lengthTracksPushAndPop	unsupported		`.length` is not a program expression
-solc	SolcMemory	memoryStructDefaultsToZero	proved		
-solc	SolcMemory	memoryStructWriteRead	proved		
-solc	SolcMemory	storageArrayElementCopiedIntoMemory	proved		
-solc	SolcMemory	nestedStorageStructToMemory	proved		
-solc	SolcMemory	memoryStructToStorage	proved		
-solc	SolcMemory	storageToMemoryCopyIsDeep	proved		
-solc	SolcMemory	memoryToStorageCopyIsDeep	proved		
-solc	SolcMemory	memoryAliasIsNotACopy	proved		
-solc	SolcMemory	memoryArrayInStruct	unsupported		`new T[](n)` array allocation is not in the fragment
-solc	SolcMemory	deleteMemoryArrayElement	unsupported		`new T[](n)` array allocation is not in the fragment
-solc	SolcMemory	storageArrayCopiedIntoMemory	proved		
-solc	SolcMappings	structStorageToMappingEntry	proved		
-solc	SolcMappings	mappingEntryToStorageStruct	proved		
-solc	SolcMappings	mappingEntryCopyIsDeep	proved		
-solc	SolcMappings	copySubstructureIntoMapping	proved		
-solc	SolcMappings	copySubstructureFromMapping	proved		
-solc	SolcMappings	mappingKeysAreIndependent	proved		
-solc	SolcMappings	deleteStructKeepsMappingMember	proved		
-solc	SolcMappings	arrayElementsToMapping	proved		
-solc	SolcMappings	arrayElementsToMappingElementwise	unsupported		`.length` is not a program expression
-solc	SolcControlFlow	doWhileFalseRunsBodyOnce	proved		
-solc	SolcControlFlow	forLoopUnrolledOverArray	proved		
-solc	SolcControlFlow	sequentialAssignmentDoesNotSwap	proved		
-solc	SolcControlFlow	swapViaTemporary	proved		
-solc	SolcControlFlow	ternarySelectsFirstMemorySource	unsupported	concretized: solkey proves this for all parameters; ported at cond = 1	Solidity elaboration failed: a conditional of reference type
-solc	SolcControlFlow	ternaryIntoMemoryTarget	unsupported	concretized: solkey proves this for all parameters; ported at cond = 1	Solidity elaboration failed: a conditional of reference type
-solc	SolcControlFlow	ifElseSelectsMemorySource	proved	concretized: solkey proves this for all parameters; ported at cond = 0	
-solc	SolcControlFlow	ternarySelectsValueByFlag	proved	concretized: solkey proves this for all parameters; ported at cond = 0	
-solc	SolcControlFlow	chainedIfsSelectLastMatch	proved		
-solc	SolcControlFlow	nestedIfElseSelectsBranch	proved	concretized: solkey proves this for all parameters; ported at x = 500	
-net	Net	auction_closeAuction_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	auction_makeBid_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	auction_makeBid_withcallback	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
-net	Net	auction_withdraw_makeBid_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	auction_withdraw_withdraw_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	casino_addToPot_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	casino_decideBet_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	casino_decideBet_withcallback	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
-net	Net	casino_placeBet_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	escrow_placeInEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	escrow_releaseEscrow_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	escrow_withdrawFrom_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_call_withcallback_simple	unsupported		`(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
-net	Net	net_msg_value	unsupported		`msg.value` is not a program expression
+solc	SolcArrays	pushWithArgument	proved		kernel-checked concrete run
+solc	SolcArrays	pushThenPopRestoresLength	proved		kernel-checked concrete run
+solc	SolcArrays	pushEmptyGrowsLength	proved		kernel-checked concrete run
+solc	SolcArrays	popThenPushSlotIsZeroed	proved		kernel-checked concrete run
+solc	SolcArrays	pushedSlotIsZeroed	proved		kernel-checked concrete run
+solc	SolcArrays	storageIndexReadWrite	proved		kernel-checked concrete run
+solc	SolcArrays	storageArrayAliasWritesThrough	proved		kernel-checked concrete run
+solc	SolcArrays	storageStructArrayAliasWritesThrough	proved		kernel-checked concrete run
+solc	SolcArrays	deleteArrayElementOfStructs	proved		kernel-checked concrete run
+solc	SolcArrays	matrixElementWriteRead	proved		kernel-checked concrete run
+solc	SolcArrays	lengthTracksPushAndPop	proved		kernel-checked concrete run
+solc	SolcMemory	memoryStructDefaultsToZero	proved		kernel-checked concrete run
+solc	SolcMemory	memoryStructWriteRead	proved		kernel-checked concrete run
+solc	SolcMemory	storageArrayElementCopiedIntoMemory	proved		kernel-checked concrete run
+solc	SolcMemory	nestedStorageStructToMemory	proved		kernel-checked concrete run
+solc	SolcMemory	memoryStructToStorage	proved		kernel-checked concrete run
+solc	SolcMemory	storageToMemoryCopyIsDeep	proved		kernel-checked concrete run
+solc	SolcMemory	memoryToStorageCopyIsDeep	proved		kernel-checked concrete run
+solc	SolcMemory	memoryAliasIsNotACopy	proved		kernel-checked concrete run
+solc	SolcMemory	memoryArrayInStruct	proved		kernel-checked concrete run
+solc	SolcMemory	deleteMemoryArrayElement	proved		kernel-checked concrete run
+solc	SolcMemory	storageArrayCopiedIntoMemory	proved		kernel-checked concrete run
+solc	SolcMappings	structStorageToMappingEntry	proved		kernel-checked concrete run
+solc	SolcMappings	mappingEntryToStorageStruct	proved		kernel-checked concrete run
+solc	SolcMappings	mappingEntryCopyIsDeep	proved		kernel-checked concrete run
+solc	SolcMappings	copySubstructureIntoMapping	proved		kernel-checked concrete run
+solc	SolcMappings	copySubstructureFromMapping	proved		kernel-checked concrete run
+solc	SolcMappings	mappingKeysAreIndependent	proved		kernel-checked concrete run
+solc	SolcMappings	deleteStructKeepsMappingMember	proved		kernel-checked concrete run
+solc	SolcMappings	arrayElementsToMapping	proved		kernel-checked concrete run
+solc	SolcMappings	arrayElementsToMappingElementwise	proved		kernel-checked concrete run
+solc	SolcControlFlow	doWhileFalseRunsBodyOnce	unsupported		a loop: the translator emits no `/// @custom:key` clauses (the solc front end, `solc_import`, reads them)
+solc	SolcControlFlow	forLoopOverArray	unsupported		a loop: the translator emits no `/// @custom:key` clauses (the solc front end, `solc_import`, reads them)
+solc	SolcControlFlow	sequentialAssignmentDoesNotSwap	proved		kernel-checked concrete run
+solc	SolcControlFlow	swapViaTemporary	proved		kernel-checked concrete run
+solc	SolcControlFlow	ternarySelectsFirstMemorySource	proved	concretized: solkey proves this for all parameters; ported at cond = 1	kernel-checked concrete run
+solc	SolcControlFlow	ternaryIntoMemoryTarget	proved	concretized: solkey proves this for all parameters; ported at cond = 1	kernel-checked concrete run
+solc	SolcControlFlow	ifElseSelectsMemorySource	proved	concretized: solkey proves this for all parameters; ported at cond = 0	kernel-checked concrete run
+solc	SolcControlFlow	ternarySelectsValueByFlag	proved	concretized: solkey proves this for all parameters; ported at cond = 0	kernel-checked concrete run
+solc	SolcControlFlow	chainedIfsSelectLastMatch	proved		kernel-checked concrete run
+solc	SolcControlFlow	nestedIfElseSelectsBranch	proved	concretized: solkey proves this for all parameters; ported at x = 500	kernel-checked concrete run
+net	Net	auction_closeAuction_invariant	unsupported	solkey net/auction-closeAuction-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	auction_makeBid_invariant	unsupported	solkey net/auction-makeBid-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	auction_makeBid_withcallback	unsupported	solkey net/auction-makeBid-withcallback.key	the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	auction_withdraw_makeBid_invariant	unsupported	solkey net/auction-withdraw-makeBid-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	auction_withdraw_withdraw_invariant	unsupported	solkey net/auction-withdraw-withdraw-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	casino_addToPot_invariant	unsupported	solkey net/casino-addToPot-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	casino_decideBet_invariant	unsupported	solkey net/casino-decideBet-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	casino_decideBet_withcallback	unsupported	solkey net/casino-decideBet-withcallback.key	the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	casino_placeBet_invariant	unsupported	solkey net/casino-placeBet-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	escrow_placeInEscrow_invariant	unsupported	solkey net/escrow-placeInEscrow-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	escrow_releaseEscrow_invariant	unsupported	solkey net/escrow-releaseEscrow-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	escrow_withdrawFrom_invariant	unsupported	solkey net/escrow-withdrawFrom-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_call_withcallback_simple	unsupported	solkey net/net-call-withcallback-simple.key	`(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_msg_value	unsupported	solkey net/net-msg-value.key	`msg.value` is not a program expression
 net	Net	net_send_simple	proved	solkey net-send-simple.key	`Examples/Tactics/Net.lean` `Net.netSendSimple`
 net	Net	net_transfer_capture_argument	proved	solkey net-transfer-capture-argument.key	`Examples/Tactics/Net.lean` `Net.netTransferCapturedAmount`
 net	Net	net_transfer_capture_receiver	proved	solkey net-transfer-capture-receiver.key	`Examples/Tactics/Net.lean` `Net.netTransferStorageReceiver`
-net	Net	net_transfer_diamond	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_transfer_self	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_diamond	unsupported	solkey net/net-transfer-diamond.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_self	unsupported	solkey net/net-transfer-self.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
 net	Net	net_transfer_simple	proved	solkey net-transfer-simple.key	`Examples/Tactics/Net.lean` `Net.netTransferSimple`
-net	Net	net_transfer_unfunded	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	net_transfer_withcallback_diamond	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
-net	Net	net_transfer_withcallback_self	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
-net	Net	net_transfer_withcallback_simple	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
-net	Net	piggybank_addMoney_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	piggybank_breakPiggyBank_invariant	unsupported		assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
-net	Net	piggybank_breakPiggyBank_withcallback	unsupported		the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_transfer_unfunded	unsupported	solkey net/net-transfer-unfunded.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	net_transfer_withcallback_diamond	unsupported	solkey net/net-transfer-withcallback-diamond.key	the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_transfer_withcallback_self	unsupported	solkey net/net-transfer-withcallback-self.key	the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	net_transfer_withcallback_simple	unsupported	solkey net/net-transfer-withcallback-simple.key	the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
+net	Net	piggybank_addMoney_invariant	unsupported	solkey net/piggybank-addMoney-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	piggybank_breakPiggyBank_invariant	unsupported	solkey net/piggybank-breakPiggyBank-invariant.key	assumes an uninterpreted CInv over a symbolic ledger and books msg.value/msg.sender before the call; the fragment has no msg.*
+net	Net	piggybank_breakPiggyBank_withcallback	unsupported	solkey net/piggybank-breakPiggyBank-withcallback.key	the callback semantics is ported (`Semantics/Callback.lean`, `ExecS.transferResume`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads
 rules	Rules	assignRuleExample	unported	solkey assignRuleExample.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	contextAssignTest	unported	solkey contextAssignTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	fieldAccessTest	unported	solkey fieldAccessTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
-rules	Rules	functionBodyExpandTest	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
-rules	Rules	hasSortVarcondTest	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
-rules	Rules	listTests	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	functionBodyExpandTest	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/functionBodyExpandTest.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
+rules	Rules	hasSortVarcondTest	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/hasSortVarcondTest.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
+rules	Rules	listTests	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/listTests.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
 rules	Rules	mainExamples	unported	solkey mainExamples.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
-rules	Rules	memberAccessExample	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	memberAccessExample	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memberAccessExample.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
 rules	Rules	memoryExample1	unported	solkey memoryExample1.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	memoryExample2	unported	solkey memoryExample2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	memoryExample2_2	unported	solkey memoryExample2-2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	memoryExample3	unported	solkey memoryExample3.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	memoryExample4	unported	solkey memoryExample4.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	memoryExample5	unported	solkey memoryExample5.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
-rules	Rules	problem	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
+rules	Rules	problem	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/problem.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
 rules	Rules	problem1	unported	solkey problem1.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	problem2	unported	solkey problem2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	programRulesTest	unported	solkey programRulesTest.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
@@ -577,6 +653,71 @@ rules	Rules	storageExample3	unported	solkey storageExample3.key	hand-written in 
 rules	Rules	storageExample4	unported	solkey storageExample4.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	storageExample4_2	unported	solkey storageExample4-2.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
 rules	Rules	storageExample5	unported	solkey storageExample5.key	hand-written in the removed untyped layer (its Corpus/Wp/Rules module); not yet re-derived over the typed syntax (docs/kernel-port.md, Port later)
-rules	Rules	storageFieldRead	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
-rules	Rules	storageFieldWrite	unsupported		KeY loader/taclet machinery: ad-hoc taclets over `\problem { true }`, a sort condition, a list declaration or an empty problem — there is no identity and no judgment to state
-storage	Rules	copyKeepsMapping	unsupported		storage-theory problem over a `MapField`: a copy of a mapping-carrying type, which no program writes (solc ≥ 0.7 and solkey's parser reject it); the typed Theory states the rule it exercises (`Theory/Typed/Obs.lean`, `Obs.copyTo`), and the corpus's obligations are programs' (`⟨ f() ⟩ true`)
+rules	Rules	storageFieldRead	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageFieldRead.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
+rules	Rules	storageFieldWrite	unsupported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageFieldWrite.key	KeY loader/taclet smoke fixture with a trivial active problem; its custom-rule parsing and matching checks are outside the Lean program corpus
+core-open	Rules	net_transfer_diamond_negative_amount	unported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/open/net-transfer-diamond-negative-amount.key	upstream expected-open KeY obligation; its exact Lean statement is not ported, with no counterexample claim
+core-open	Rules	net_transfer_withcallback_diamond_negative_amount	unported	solkey ../keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/open/net-transfer-withcallback-diamond-negative-amount.key	upstream expected-open KeY obligation; its exact Lean statement is not ported, with no counterexample claim
+proofs	Proofs	applyOnDifferentPVLastInParallel	unported	solkey proofs/applyOnDifferentPVLastInParallel.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	applyOnPVLastInParallel	unported	solkey proofs/applyOnPVLastInParallel.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	applyOnSkip	unported	solkey proofs/applyOnSkip.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	applySkip1	unported	solkey proofs/applySkip1.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	applySkip2	unported	solkey proofs/applySkip2.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	applySkip3	unported	solkey proofs/applySkip3.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	cons1Def	unported	solkey proofs/cons1Def.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	cons2Def	unported	solkey proofs/cons2Def.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	cons3Def	unported	solkey proofs/cons3Def.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	defaultValueStruct	unported	solkey proofs/defaultValueStruct.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	delAtEmpty	unported	solkey proofs/delAtEmpty.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	delFieldMap	unported	solkey proofs/delFieldMap.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	findDefinitionEmpty	unported	solkey proofs/findDefinitionEmpty.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	findOnCopy	unported	solkey proofs/findOnCopy.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	findStValueCast	unported	solkey proofs/findStValueCast.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	firstsConsNil	unported	solkey proofs/firstsConsNil.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	firstsConsRest	unported	solkey proofs/firstsConsRest.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	fixedDelNodeFixed	unported	solkey proofs/fixedDelNodeFixed.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	fixedEmpty	unported	solkey proofs/fixedEmpty.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	fixedShapeDyn	unported	solkey proofs/fixedShapeDyn.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	fixedShapeFixed	unported	solkey proofs/fixedShapeFixed.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	fixedStore	unported	solkey proofs/fixedStore.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	headDefinition	unported	solkey proofs/headDefinition.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	idCCDef	unported	solkey proofs/idCCDef.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	lastConsNil	unported	solkey proofs/lastConsNil.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	lastConsRest	unported	solkey proofs/lastConsRest.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	localDeclPostdecrement	unported	solkey proofs/localDeclPostdecrement.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	localDeclPredecrement	unported	solkey proofs/localDeclPredecrement.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	newFromEmptyMemory	unported	solkey proofs/newFromEmptyMemory.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	parallelWithSkip1	unported	solkey proofs/parallelWithSkip1.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	parallelWithSkip2	unported	solkey proofs/parallelWithSkip2.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	precOfInt	unported	solkey proofs/precOfInt.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	readFromCopyToStorageIdentity	unported	solkey proofs/readFromCopyToStorageIdentity.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	readFromEmptyMemory	unported	solkey proofs/readFromEmptyMemory.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	readRCons	unported	solkey proofs/readRCons.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	readREmpty	unported	solkey proofs/readREmpty.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	saveOnEmptyStorage	unported	solkey proofs/saveOnEmptyStorage.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	saveOnStoreCons	unported	solkey proofs/saveOnStoreCons.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnCopyMemRef	unported	solkey proofs/selectOnCopyMemRef.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnEmptyStorage	unported	solkey proofs/selectOnEmptyStorage.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnSaveEmptyIndexStruct	unported	solkey proofs/selectOnSaveEmptyIndexStruct.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnSaveEmptyMap	unported	solkey proofs/selectOnSaveEmptyMap.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnShapeElement	unported	solkey proofs/selectOnShapeElement.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnShapeMember	unported	solkey proofs/selectOnShapeMember.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnShapeSize	unported	solkey proofs/selectOnShapeSize.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnShapeStruct	unported	solkey proofs/selectOnShapeStruct.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectOnStore	unported	solkey proofs/selectOnStore.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectStDelNodeFixedSize	unported	solkey proofs/selectStDelNodeFixedSize.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	selectStValueCast	unported	solkey proofs/selectStValueCast.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sendNoCallbackDiamond	unported	solkey proofs/sendNoCallbackDiamond.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sendWithCallbackDiamond	unported	solkey proofs/sendWithCallbackDiamond.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sequentialToParallel3	unported	solkey proofs/sequentialToParallel3.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	shapeAtLeafElement	unported	solkey proofs/shapeAtLeafElement.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	shapeAtLeafMapElement	unported	solkey proofs/shapeAtLeafMapElement.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sizeLE1Cons	unported	solkey proofs/sizeLE1Cons.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sizeLE1ConsCons	unported	solkey proofs/sizeLE1ConsCons.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sizeLE1Empty	unported	solkey proofs/sizeLE1Empty.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sizeOfLeaf	unported	solkey proofs/sizeOfLeaf.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	sizeOfMap	unported	solkey proofs/sizeOfMap.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	tailDefinition	unported	solkey proofs/tailDefinition.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	transferNoCallbackDiamond	unported	solkey proofs/transferNoCallbackDiamond.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	transferWithCallbackDiamond	unported	solkey proofs/transferWithCallbackDiamond.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	wfShape	unported	solkey proofs/wfShape.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported
+proofs	Proofs	wfStoreRight	unported	solkey proofs/wfStoreRight.key	pinned KeY proof obligation; its exact scoped Lean derivation is not ported

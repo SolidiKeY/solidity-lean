@@ -1,0 +1,26 @@
+{
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "proof",
+  "completedSources": 3,
+  "totalSources": 3,
+  "results": {
+    "proved": 1,
+    "error": 8,
+    "unsupported": 4,
+    "skipped": 1
+  },
+  "errors": 1,
+  "suites": {
+    "benchmark": {
+      "proved": 1,
+      "error": 4
+    },
+    "contracts": {
+      "unsupported": 4
+    },
+    "real-world": {
+      "skipped": 1,
+      "error": 4
+    }
+  }
+}

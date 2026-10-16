@@ -1,6 +1,9 @@
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.SoundCapture
+import Solidity.Calculus.SoundStore
 import Solidity.Calculus.SoundKit
+import Solidity.Semantics.NativeDeferred
+import Solidity.Semantics.RevertOnly
 
 /-!
 # The rules of calls and `try` are sound
@@ -38,6 +41,18 @@ theorem Args.capture_snoc {ps : Ctx} (as : Args C Γ ps) (p : PrimTy) (x : Var) 
       | some ⟨p', v, as'⟩ => some ⟨p', v, .snoc as' p x e.up⟩
       | none => if e.isSimple then none else
           some ⟨p, e, .snoc as.up p x (.simple (.local .here))⟩ := rfl
+
+theorem Args.capture_snocStorage {ps : Ctx} (as : Args C Γ ps) (R : RefTy) (x : Var)
+    (e : SPath C Γ (.ref R)) :
+    (Args.snocStorage as R x e).capture = match as.capture with
+      | some ⟨p, v, as'⟩ => some ⟨p, v, .snocStorage as' R x e.up⟩
+      | none => none := rfl
+
+theorem Args.capture_snocMemory {ps : Ctx} (as : Args C Γ ps) (R : RefTy) (x : Var)
+    (e : MPath C Γ (.ref R)) :
+    (Args.snocMemory as R x e).capture = match as.capture with
+      | some ⟨p, v, as'⟩ => some ⟨p, v, .snocMemory as' R x e.up⟩
+      | none => none := rfl
 
 end Args
 
@@ -135,6 +150,24 @@ theorem Val.evalT_unders {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) :
     show ((v.unders ρ).up).evalT ((σ.withEnv (TEnv.append ρ r.2 σ.env)).push r.1) = _
     rw [Val.evalT_up, Val.evalT_unders v σ ρ r.2]
 
+theorem SPath.resolveT_unders {a : Ty} (v : SPath C Γ a) (σ : State C Γ) :
+    (ρ : Ctx) → (r : TEnv C σ.H ρ) →
+      (v.unders ρ).resolveT (σ.withEnv (TEnv.append ρ r σ.env)) = v.resolveT σ
+  | [], _ => rfl
+  | _ :: ρ, r => by
+    show ((v.unders ρ).up).resolveT
+      ((σ.withEnv (TEnv.append ρ r.2 σ.env)).push r.1) = _
+    rw [SPath.resolveT_up, SPath.resolveT_unders v σ ρ r.2]
+
+theorem MPath.mvalT_unders {a : Ty} (v : MPath C Γ a) (σ : State C Γ) :
+    (ρ : Ctx) → (r : TEnv C σ.H ρ) →
+      (v.unders ρ).mvalT (σ.withEnv (TEnv.append ρ r σ.env)) = v.mvalT σ
+  | [], _ => rfl
+  | _ :: ρ, r => by
+    show ((v.unders ρ).up).mvalT
+      ((σ.withEnv (TEnv.append ρ r.2 σ.env)).push r.1) = _
+    rw [MPath.mvalT_up, MPath.mvalT_unders v σ ρ r.2]
+
 theorem Stmt.runSt_declLocal_none (p : PrimTy) (x : Var) (σ : State C Γ) :
     Stmt.runSt σ (.declLocal p x none) = .ok (σ.push (t := .val p) (PrimTy.dflt p)) := rfl
 
@@ -143,6 +176,16 @@ theorem Args.evalT_snoc (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps) (p : Pr
     (Args.snoc as p x e).evalT σ = as.evalT σ >>= fun r => e.evalT σ >>= fun v => pure (v, r) :=
   rfl
 
+theorem Args.evalT_snocStorage (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps)
+    (R : RefTy) (x : Var) (e : SPath C Γ (.ref R)) :
+    (Args.snocStorage as R x e).evalT σ =
+      as.evalT σ >>= fun r => e.resolveT σ >>= fun v => pure (some v, r) := rfl
+
+theorem Args.evalT_snocMemory (σ : State C Γ) {ps : Ctx} (as : Args C Γ ps)
+    (R : RefTy) (x : Var) (e : MPath C Γ (.ref R)) :
+    (Args.snocMemory as R x e).evalT σ =
+      as.evalT σ >>= fun r => e.mvalT σ >>= fun v => pure (some v, r) := rfl
+
 theorem Args.evalT_up {t : LTy} (σ : State C Γ) (w : t.TDenote C σ.H) : {ps : Ctx} →
     (as : Args C Γ ps) → (as.up (t := t)).evalT (σ.push w) = as.evalT σ
   | _, .nil => rfl
@@ -150,24 +193,16 @@ theorem Args.evalT_up {t : LTy} (σ : State C Γ) (w : t.TDenote C σ.H) : {ps :
     show (Args.snoc (as.up (t := t)) p x e.up).evalT (σ.push w) = _
     rw [Args.evalT_snoc, Args.evalT_snoc, Args.evalT_up σ w as, Val.evalT_up]
     rfl
-
-/-- Arguments that are all simple read without halting. -/
-theorem Args.evalT_ok (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps) → as.capture = none →
-    ∃ a, as.evalT σ = .ok a
-  | _, .nil, _ => ⟨(), rfl⟩
-  | _, .snoc as p x e, h => by
-    rw [Args.capture_snoc] at h
-    cases hc : as.capture with
-    | some q => rw [hc] at h; cases h
-    | none =>
-      rw [hc] at h
-      obtain ⟨a, ha⟩ := Args.evalT_ok σ as hc
-      cases e with
-      | simple s =>
-        refine ⟨(s.evalT σ, a), ?_⟩
-        rw [Args.evalT_snoc, ha]
-        rfl
-      | _ => simp only [Val.isSimple, Bool.false_eq_true, if_false, reduceCtorEq] at h
+  | _, .snocStorage as R x e => by
+    show (Args.snocStorage (as.up (t := t)) R x e.up).evalT (σ.push w) = _
+    rw [Args.evalT_snocStorage, Args.evalT_snocStorage, Args.evalT_up σ w as,
+      SPath.resolveT_up]
+    rfl
+  | _, .snocMemory as R x e => by
+    show (Args.snocMemory (as.up (t := t)) R x e.up).evalT (σ.push w) = _
+    rw [Args.evalT_snocMemory, Args.evalT_snocMemory, Args.evalT_up σ w as,
+      MPath.mvalT_up]
+    rfl
 
 /-- **The arguments with one captured** read as the captured value, then the
 arguments over it. -/
@@ -176,7 +211,7 @@ theorem Args.evalT_capture (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps
       as.capture = some ⟨p, v, as'⟩ →
         as.evalT σ = v.evalT σ >>= fun w => as'.evalT (σ.push (t := .val p) w)
   | _, .nil, _, _, _, h => by cases h
-  | _, .snoc as p' x e, p, v, as', h => by
+  | _, .snoc (ps := ps) as p' x e, p, v, as', h => by
     rw [Args.capture_snoc] at h
     cases hc : as.capture with
     | some q =>
@@ -197,15 +232,45 @@ theorem Args.evalT_capture (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps
       split at h
       · cases h
       · cases h
-        obtain ⟨a, ha⟩ := Args.evalT_ok σ as hc
-        rw [Args.evalT_snoc, ha]
-        cases e.evalT σ with
-        | error => rfl
-        | ok w =>
-          show _ = (Args.snoc (as.up (t := .val p')) p' x (.simple (.local .here))).evalT
-            (σ.push (t := .val p') w)
-          rw [Args.evalT_snoc, Args.evalT_up, ha]
-          rfl
+        rw [Args.evalT_snoc]
+        show _ = (e.evalT σ >>= fun w =>
+          (as.up (t := .val p')).evalT (σ.push (t := .val p') w) >>= fun a =>
+            (pure (w, a) : TRes (TEnv C σ.H (.val p' :: ps))))
+        simp only [Args.evalT_up]
+        exact TRes.RevertOnly.bind_comm (as.evalT_revertOnly σ) (e.evalT_revertOnly σ)
+          (fun a w => pure (w, a))
+  | _, .snocStorage as R x e, p, v, as', h => by
+    rw [Args.capture_snocStorage] at h
+    cases hc : as.capture with
+    | none => rw [hc] at h; cases h
+    | some q =>
+      obtain ⟨p₀, v₀, as₀⟩ := q
+      rw [hc] at h
+      dsimp only at h
+      cases h
+      rw [Args.evalT_snocStorage, Args.evalT_capture σ as hc]
+      cases v.evalT σ with
+      | error => rfl
+      | ok w =>
+        show _ = (Args.snocStorage as₀ R x e.up).evalT (σ.push (t := .val p) w)
+        rw [Args.evalT_snocStorage, SPath.resolveT_up]
+        rfl
+  | _, .snocMemory as R x e, p, v, as', h => by
+    rw [Args.capture_snocMemory] at h
+    cases hc : as.capture with
+    | none => rw [hc] at h; cases h
+    | some q =>
+      obtain ⟨p₀, v₀, as₀⟩ := q
+      rw [hc] at h
+      dsimp only at h
+      cases h
+      rw [Args.evalT_snocMemory, Args.evalT_capture σ as hc]
+      cases v.evalT σ with
+      | error => rfl
+      | ok w =>
+        show _ = (Args.snocMemory as₀ R x e.up).evalT (σ.push (t := .val p) w)
+        rw [Args.evalT_snocMemory, MPath.mvalT_up]
+        rfl
 
 /-- **The parameters declared** with the arguments: the arguments read, then
 the rest with them on top. -/
@@ -224,6 +289,32 @@ theorem Args.runSt_declsThen {Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as :
       show Prog.runSt _ (.cons _ rest) = (e.evalT σ >>= fun v => pure (v, a)).bind _
       rw [Prog.runSt_cons, Stmt.runSt_declLocal, Val.evalT_unders]
       cases e.evalT σ <;> rfl
+  | _, .snocStorage (ps := ps') as R x e, rest => by
+    show Prog.runSt σ (as.declsThen
+      (.cons (.declStorage R x (some (.path (e.unders ps')))) rest)) = _
+    rw [Args.runSt_declsThen σ as]
+    show _ = (Args.evalT σ as >>= fun r =>
+      e.resolveT σ >>= fun v => pure (some v, r)).bind _
+    cases as.evalT σ with
+    | error => rfl
+    | ok a =>
+      show Prog.runSt _ (.cons _ rest) =
+        (e.resolveT σ >>= fun v => pure (some v, a)).bind _
+      rw [Prog.runSt_cons, Stmt.runSt_declStorage, SPath.resolveT_unders]
+      cases e.resolveT σ <;> rfl
+  | _, .snocMemory (ps := ps') as R x e, rest => by
+    show Prog.runSt σ (as.declsThen
+      (.cons (.declMem R x (some (.alias (e.unders ps'))) rfl e.mapFree) rest)) = _
+    rw [Args.runSt_declsThen σ as]
+    show _ = (Args.evalT σ as >>= fun r =>
+      e.mvalT σ >>= fun v => pure (some v, r)).bind _
+    cases as.evalT σ with
+    | error => rfl
+    | ok a =>
+      show Prog.runSt _ (.cons _ rest) =
+        (e.mvalT σ >>= fun v => pure (some v, a)).bind _
+      rw [Prog.runSt_cons, Stmt.runSt_declMem, MPath.mvalT_unders]
+      cases e.mvalT σ <;> rfl
 
 /-- **The return variables declared** at their defaults. -/
 theorem Binders.runSt_declsThen {Δ : Ctx} (σ : State C Γ) : {ρ : Ctx} → (bs : Binders ρ) →
@@ -409,6 +500,43 @@ theorem Premise.sound_callMem {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (R
 
 /-! ## `functionCallArgCapture` -/
 
+/-- `uint[] storage r;` starts an unset return alias without allocation. -/
+theorem Stmt.runSt_declStorage_none {Γ : Ctx} (R : RefTy) (r : Var) (σ : State C Γ) :
+    Stmt.runSt σ (.declStorage R r none) = .ok (σ.push (t := .alias R) none) := rfl
+
+/-- `internalCallExpand` of `uint[] storage r = f();` keeps the returned
+pointer while dropping the call's parameters and local frame. -/
+theorem Premise.sound_callStorage {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
+    (R : RefTy) (r : Var) (body : Prog C ([.alias R] ++ ps) Γf) (σ : State C Γ) :
+    Premise.Runs m (.call f args (.storage R r) body)
+      (.inline (args.declsThen (.cons (.declStorage R r none)
+        (.cons (.block (body.wk (Thin.atop (.alias R :: ps) Γ)).2.2) .nil)))
+        (.keep (Thin.ofExt (Ext.append Γ ps)))) σ := by
+  refine Premise.sound_inline σ ?_
+  rw [Args.runSt_declsThen]
+  change _ = (TRun.call args (.storage R r) body.ext body.runR σ).map (·.st)
+  rw [TRun.call_eq]
+  cases args.evalT σ with
+  | error => rfl
+  | ok a =>
+    simp only [TRes.ok_bind, TRes.ok_bind', Prog.runSt_cons, Stmt.runSt_declStorage_none]
+    rw [show (σ.withEnv (TEnv.append ps a σ.env)).push (t := .alias R) none =
+      σ.withEnv (TEnv.append (.alias R :: ps) (none, a) σ.env) from rfl,
+      State.withEnv_append_lift, Stmt.runSt, Stmt.run_block_wk]
+    unfold TRun.callFrom Prog.run CallRet.enterT
+    dsimp only
+    change _ = Except.map (fun o : Out C σ.H (.alias R :: Γ) => o.st)
+      ((body.runR (σ.withEnv (Δ := .alias R :: ps) (none, a))).bind fun o =>
+        .ok ⟨o.st.withEnv (Δ := .alias R :: Γ)
+          ((TEnv.drop body.ext o.st.env).1, TEnv.wk o.ext Γ σ.env), o.ext⟩)
+    cases body.runR (σ.withEnv (Δ := .alias R :: ps) (none, a)) with
+    | error => rfl
+    | ok o =>
+      apply congrArg Except.ok
+      simp only [Out.drop, Out.lift, State.lift, State.drop, State.thin, State.withEnv]
+      erw [TEnv.thin_put_keepAllAtop (rs := [.alias R]) (r := (none, ()))]
+      rfl
+
 /-- A call's body run from the caller with a captured value on top: what it
 leaves the caller, the capture popped (`F`), is what it leaves without it. -/
 theorem TRun.callFrom_capture {Γ' Γ'' ps rs Γf : Ctx} {t : LTy} (ret : CallRet Γ rs Γ')
@@ -538,6 +666,34 @@ theorem Premise.sound_callCaptureMem {ps Γf : Ctx} (k : Nat) (f : Name) (args :
         (State.thin (.keep (.drop .refl)))
         (fun _ _ _ => rfl)
 
+/-- `uint[] storage r = f(x + 1);`: capture the non-simple argument before
+the storage-returning call and drop it from under the returned pointer. -/
+theorem Premise.sound_callCaptureStorage {ps Γf : Ctx} (k : Nat) (f : Name)
+    (args : Args C Γ ps) (R : RefTy) (r : Var) (body : Prog C ([.alias R] ++ ps) Γf)
+    {p : PrimTy} {v : Val C Γ p} {as' : Args C (.val p :: Γ) ps}
+    (hc : args.capture = some ⟨p, v, as'⟩) (σ : State C Γ) :
+    Premise.Runs m (.call f args (.storage R r) body)
+      (.inline (.cons (.declLocal p (fse k) (some v))
+        (.cons (.call f as' (.storage R r) body) .nil)) (.keep (.drop .refl))) σ := by
+  refine Premise.sound_inline σ ?_
+  rw [Prog.runSt_cons, Stmt.runSt_declLocal]
+  change _ = (TRun.call args (.storage R r) body.ext body.runR σ).map (·.st)
+  rw [TRun.call_eq, Args.evalT_capture σ args hc, bind_assoc]
+  cases v.evalT σ with
+  | error => rfl
+  | ok w =>
+    rw [TRes.ok_bind']
+    change (Prog.runSt (σ.push (t := .val p) w) _).map _ = _
+    rw [Prog.runSt_single]
+    change ((TRun.call as' (.storage R r) body.ext body.runR
+      (σ.push (t := .val p) w)).map _).map _ = _
+    rw [TRun.call_eq]
+    cases as'.evalT (σ.push (t := .val p) w) with
+    | error => rfl
+    | ok a =>
+      exact TRun.callFrom_capture (t := .val p) (.storage R r) (.storage R r)
+        body.ext body.runR σ w _ (State.thin (.keep (.drop .refl))) (fun _ _ _ => rfl)
+
 /-- **The rule of a call is sound** over the typed state: its leftmost
 argument that is not simple captured, or its body inlined. -/
 theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name)
@@ -589,6 +745,194 @@ theorem Stmt.sound_call (k : Nat) (m : Modality) {Γ' ps rs Γf : Ctx} (f : Name
     | none =>
       rw [hc] at hp; cases hp
       exact Premise.sound_callMem f args R r hd hm body σ
+  | storage R r =>
+    dsimp only at hp
+    cases hc : args.capture with
+    | some x =>
+      obtain ⟨p, v, as'⟩ := x
+      rw [hc] at hp; cases hp
+      exact Premise.sound_callCaptureStorage k f args R r body hc σ
+    | none =>
+      rw [hc] at hp; cases hp
+      exact Premise.sound_callStorage f args R r body σ
+
+namespace CallReceiver
+
+variable {E : Ty}
+
+def shiftSource (v : Option (Src C Γ E)) :
+    Option (Src C (.alias (.array E) :: Γ) E) :=
+  v.map fun r => r.up
+
+def pushAction (v : Option (Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true) :
+    Stmt C (.alias (.array E) :: Γ) (.alias (.array E) :: Γ) :=
+  .push (.alias .here) (shiftSource v) (by cases v <;> exact hd)
+
+def pushCaptured (sp : Var) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) :
+    Prog C (.alias (.array E) :: Γ) (.alias (.array E) :: .alias (.array E) :: Γ) :=
+  .cons (.declStorage (.array E) sp (some (.path (.alias .here))))
+    (.cons (pushAction (shiftSource v) (by cases v <;> exact hd)) .nil)
+
+/-- Duplicating the returned alias before push preserves the run, including
+unset returns, argument failure, exhaustion and memory-copy sources. -/
+theorem pushCaptureAgree (τ : State C (.alias (.array E) :: Γ)) (sp : Var)
+    (v : Option (Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true) :
+    (Prog.runSt τ (pushCaptured sp v hd)).map (State.drop (.push (.push .refl))) =
+      (Stmt.runSt τ (pushAction v hd)).map (State.drop (.push .refl)) := by
+  rw [pushCaptured, Prog.runSt_declStorage_cons, TRes.map_bind']
+  cases hq : (SPath.alias (C := C) (Γ := .alias (.array E) :: Γ) (R := .array E) .here).resolveT τ with
+  | ok q =>
+    simp only [Except.bind, Prog.runSt_single]
+    have hrun : (Stmt.runSt (τ.push (some q))
+        (pushAction (shiftSource v) (by cases v <;> exact hd))).map (State.drop (.push .refl)) =
+        Stmt.runSt τ (pushAction v hd) := by
+      apply runSt_pushed τ (t := .alias (.array E)) (some q)
+      cases v with
+      | some src =>
+        refine TRun.push_some_pushT τ (t := .alias (.array E)) (some q) _ _ _ _ ?_ ?_
+        · exact hq.symm
+        · exact Src.valueT_up τ (t := .alias (.array E)) (some q) src.up
+      | none =>
+        exact TRun.push_none_pushT τ (t := .alias (.array E)) (some q) _ _ hq.symm
+    rw [← hrun]
+    cases Stmt.runSt (τ.push (some q))
+      (pushAction (shiftSource v) (by cases v <;> exact hd)) <;> rfl
+  | error e =>
+    simp only [bind, Except.bind, Except.map, pushAction, Stmt.runSt, Stmt.run, Stmt.runR,
+      TRun.push, hq]
+
+def popAction : Stmt C (.alias (.array E) :: Γ) (.alias (.array E) :: Γ) :=
+  .pop (.alias .here)
+
+def popCaptured (sp : Var) :
+    Prog C (.alias (.array E) :: Γ) (.alias (.array E) :: .alias (.array E) :: Γ) :=
+  .cons (.declStorage (.array E) sp (some (.path (.alias .here))))
+    (.cons popAction .nil)
+
+/-- A returned alias is captured once before pop, including an unset alias
+or an empty array. -/
+theorem popCaptureAgree (τ : State C (.alias (.array E) :: Γ)) (sp : Var) :
+    (Prog.runSt τ (popCaptured sp)).map (State.drop (.push (.push .refl))) =
+      (Stmt.runSt τ popAction).map (State.drop (.push .refl)) := by
+  rw [popCaptured, Prog.runSt_declStorage_cons, TRes.map_bind']
+  cases hq : (SPath.alias (C := C) (Γ := .alias (.array E) :: Γ) (R := .array E) .here).resolveT τ with
+  | ok q =>
+    simp only [Except.bind, Prog.runSt_single]
+    have hrun : (Stmt.runSt (τ.push (some q)) popAction).map (State.drop (.push .refl)) =
+        Stmt.runSt τ popAction :=
+      runSt_pushed τ (t := .alias (.array E)) (some q)
+        (TRun.pop_pushT τ (t := .alias (.array E)) (some q) _ _ hq.symm)
+    rw [← hrun]
+    cases Stmt.runSt (τ.push (some q)) (popAction (E := E)) <;> rfl
+  | error e =>
+    simp only [bind, Except.bind, Except.map, popAction, Stmt.runSt, Stmt.run, Stmt.runR,
+      TRun.pop, hq]
+
+def directPush {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) (σ : State C Γ) : TRes (State C Γ) :=
+  (Stmt.runSt σ (.call f args (.storage (.array E) r) body)).bind fun τ =>
+    (Stmt.runSt τ (pushAction v hd)).map (State.drop (.push .refl))
+
+/-- The native push capture agrees for every callee, including failures,
+heap growth and caller locals: the same getter is evaluated once on both sides. -/
+theorem callPushCaptureAgree {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (r sp : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) (σ : State C Γ) :
+    (Prog.runSt σ (.cons (.call f args (.storage (.array E) r) body)
+      (pushCaptured sp v hd))).map (State.drop (.push (.push .refl))) =
+        directPush f args r body v hd σ := by
+  simp only [directPush, Prog.runSt_cons, TRes.map_bind', pushCaptureAgree]
+
+def directPop {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (σ : State C Γ) : TRes (State C Γ) :=
+  (Stmt.runSt σ (.call f args (.storage (.array E) r) body)).bind fun τ =>
+    (Stmt.runSt τ popAction).map (State.drop (.push .refl))
+
+/-- The native pop capture agrees for every callee, including failed and
+unset storage returns. -/
+theorem callPopCaptureAgree {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (r sp : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (σ : State C Γ) :
+    (Prog.runSt σ (.cons (.call f args (.storage (.array E) r) body)
+      (popCaptured sp))).map (State.drop (.push (.push .refl))) =
+        directPop f args r body σ := by
+  simp only [directPop, Prog.runSt_cons, TRes.map_bind', popCaptureAgree]
+
+/-- Bridge the prototype's ordered push to the integrated typed statement. -/
+theorem callReceiver_push_run {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (v : Option (Src C Γ E))
+    (hd : (v.isSome || E.defaultOkS) = true) (σ : State C Γ) :
+    Stmt.runSt σ (.callReceiver f args r body (.push v hd)) =
+      directPush f args r body v hd σ := by
+  change (TRun.callReceiver args r body.ext body.runR (.push v hd) σ).map (·.st) =
+    ((TRun.call args (.storage (.array E) r) body.ext body.runR σ).map (·.st)).bind fun τ =>
+      ((TRun.push (.alias .here) (shiftSource v) τ).map (·.st)).map (State.drop (.push .refl))
+  simp only [TRun.callReceiver, TRun.receiverOp, ReceiverOp.wk, shiftSource, Src.up_eq]
+  cases TRun.call args (.storage (.array E) r) body.ext body.runR σ with
+  | error => rfl
+  | ok o =>
+    dsimp only [bind, Except.bind, Except.map]
+    cases TRun.push (.alias .here) (v.map (·.wk (.drop .refl))) o.st <;> rfl
+
+/-- Bridge the prototype's ordered pop to the integrated typed statement. -/
+theorem callReceiver_pop_run {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (σ : State C Γ) :
+    Stmt.runSt σ (.callReceiver f args r body (.pop (E := E))) =
+      directPop f args r body σ := by
+  change (TRun.callReceiver args r body.ext body.runR .pop σ).map (·.st) =
+    ((TRun.call args (.storage (.array E) r) body.ext body.runR σ).map (·.st)).bind fun τ =>
+      ((TRun.pop (.alias .here) τ).map (·.st)).map (State.drop (.push .refl))
+  simp only [TRun.callReceiver, TRun.receiverOp, ReceiverOp.wk]
+  cases TRun.call args (.storage (.array E) r) body.ext body.runR σ with
+  | error => rfl
+  | ok o =>
+    dsimp only [bind, Except.bind, Except.map]
+    cases TRun.pop (.alias .here) o.st <;> rfl
+
+/-- The integrated strategy capture agrees with its native statement for every getter. -/
+theorem callReceiver_capture_run {ps Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
+    (r : Var) (body : Prog C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E)
+    (σ : State C Γ) :
+    (Prog.runSt σ (callReceiverCapture k f args r body op)).map
+        (State.drop (.push (.push .refl))) =
+      Stmt.runSt σ (.callReceiver f args r body op) := by
+  cases op with
+  | push v hd =>
+    rw [callReceiver_push_run]
+    simpa only [callReceiverCapture, ReceiverOp.wk, ReceiverOp.toStmt,
+      pushCaptured, pushAction, shiftSource, Src.up_eq] using
+      callPushCaptureAgree f args r (fsp k) body v hd σ
+  | pop =>
+    rw [callReceiver_pop_run]
+    exact callPopCaptureAgree f args r (fsp k) body σ
+
+end CallReceiver
+
+/-- Capturing `f()` in `sp` before `sp.push(e)` or `sp.pop()` preserves its run. -/
+theorem Stmt.sound_callReceiver (k : Nat) (m : Modality) {ps Γf : Ctx} {E : Ty}
+    (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E)
+    (σ : State C Γ) (pr : Premise C Γ Γ)
+    (hp : Stmt.step k m (.callReceiver f args r body op) = pr) :
+    Premise.Runs m (.callReceiver f args r body op) pr σ := by
+  cases hp
+  exact Premise.sound_unfold σ (CallReceiver.callReceiver_capture_run k f args r body op σ)
+
+/-- The capture taclet for `f().push(i++)` preserves the native statement's run. -/
+theorem Stmt.sound_callReceiverPush (k : Nat) (m : Modality) {ps Γf Γv : Ctx} {E : Ty}
+    (f : Name) (args : Args C Γ ps) (r : Var)
+    (body : Prog C ([.alias (.array E)] ++ ps) Γf)
+    (code : Prog C Γ Γv) (value : Src C Γv E)
+    (σ : State C Γ) (pr : Premise C Γ Γ)
+    (hp : Stmt.step k m (.callReceiverPush f args r body code value) = pr) :
+    Premise.Runs m (.callReceiverPush f args r body code value) pr σ := by
+  cases hp
+  apply Premise.sound_unfold σ
+  have h := congrArg (fun x => x.map (·.st))
+    (NativeDeferred.capture_run k f args r body code value σ)
+  cases hr : (callReceiverPushCapture k f args r body code value).run σ <;>
+    simpa only [Prog.runSt, Stmt.runSt, hr, Except.map, Out.drop] using h
 
 end Calls
 

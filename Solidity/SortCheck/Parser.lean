@@ -127,8 +127,9 @@ private def captureParen (fuel : Nat) (depth : Int) (cs : List Char) :
 private def knownReadTokens : List String :=
   ["find", "read", "selectSt", "defaultValue"]
 
-/-- Scan a taclet body for read tokens. `identBuf` holds the (reversed)
-identifier immediately before the scan position. -/
+/-- Scan a taclet body for read tokens, including reads nested inside the
+captured argument list. `identBuf` holds the reversed identifier immediately
+before the scan position. -/
 private def scanReadsGo :
     Nat -> List Char -> List Char -> List ParsedRead -> List String ->
       List ParsedRead × List String
@@ -142,8 +143,8 @@ private def scanReadsGo :
       if knownReadTokens.contains tok then
         match afterSort with
         | '(' :: argRest =>
-            let (inner, rem) := captureParen (argRest.length + 1) 0 argRest
-            scanReadsGo fuel rem []
+            let (inner, _) := captureParen (argRest.length + 1) 0 argRest
+            scanReadsGo fuel argRest []
               (⟨tok, sortTok, stripWs (String.mk inner)⟩ :: acc) unk
         | _ =>
             scanReadsGo fuel afterSort [] (⟨tok, sortTok, ""⟩ :: acc) unk
@@ -151,8 +152,8 @@ private def scanReadsGo :
         scanReadsGo fuel afterSort [] acc ((tok ++ "<[" ++ sortTok) :: unk)
   | fuel + 1, c :: rest, identBuf, acc, unk =>
       if c = '(' && String.mk identBuf.reverse = "valAt" then
-        let (inner, rem) := captureParen (rest.length + 1) 0 rest
-        scanReadsGo fuel rem []
+        let (inner, _) := captureParen (rest.length + 1) 0 rest
+        scanReadsGo fuel rest []
           (⟨"valAt", "", stripWs (String.mk inner)⟩ :: acc) unk
       else if isIdentChar c then
         scanReadsGo fuel rest (c :: identBuf) acc unk
@@ -161,6 +162,21 @@ private def scanReadsGo :
 
 def scanReads (body : String) : List ParsedRead × List String :=
   scanReadsGo (body.length + 1) body.toList [] [] []
+
+/-- `sp.push() += se` reads the appended value at an index that itself
+reads the new length. Both sorted reads must be counted. -/
+example :
+    (scanReads "find<[int]>(storage, consr(sp, at(find<[int]>(storage, consr(sp, size)) - 1)))").1 =
+      [⟨"find", "int", "storage,consr(sp,at(find<[int]>(storage,consr(sp,size))-1))"⟩,
+        ⟨"find", "int", "storage,consr(sp,size)"⟩] := by
+  decide +kernel
+
+/-- The legacy `valAt` reader must not hide a nested length read either. -/
+example :
+    (scanReads "valAt(storage, consr(sp, at(find<[int]>(storage, consr(sp, size)) - 1)))").1 =
+      [⟨"valAt", "", "storage,consr(sp,at(find<[int]>(storage,consr(sp,size))-1))"⟩,
+        ⟨"find", "int", "storage,consr(sp,size)"⟩] := by
+  decide +kernel
 
 def varcondNames : List String :=
   ["hasSort", "hasFieldSort", "hasElementSort", "hasMemoryFieldSort",

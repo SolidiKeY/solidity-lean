@@ -29,6 +29,8 @@ namespace Solidity
 /-- A clause of the specification language, as read. -/
 inductive SpecExpr where
   | num (n : Nat)
+  /-- A fixed unsigned constant, not a context-polymorphic numeral. -/
+  | uintLit (n : Nat)
   | bool (b : Bool)
   | name (x : String)
   /-- `\result`: the function's return variable. -/
@@ -73,6 +75,7 @@ declare_syntax_cat spec_expr (behavior := both)
 
 syntax:max "(" spec_expr ")" : spec_expr
 syntax:max num : spec_expr
+syntax:max &"uint" "(" num ")" : spec_expr
 syntax:max ident : spec_expr
 syntax:max "\\" noWs &"result" : spec_expr
 syntax:max "\\" noWs &"old" "(" spec_expr ")" : spec_expr
@@ -98,8 +101,10 @@ syntax:35 spec_expr:35 " && " spec_expr:36 : spec_expr
 syntax:30 spec_expr:30 " || " spec_expr:31 : spec_expr
 syntax:25 spec_expr:26 " -> " spec_expr:25 : spec_expr
 syntax:20 spec_expr:20 " <-> " spec_expr:21 : spec_expr
-syntax:10 "\\" noWs &"forall"  ident ident "; " spec_expr:10 : spec_expr
-syntax:10 "\\" noWs &"exists"  ident ident "; " spec_expr:10 : spec_expr
+-- A quantifier may start an implication's right operand. Its body still
+-- extends through the remaining formula, as in SolSpec.g4.
+syntax:max "\\" noWs &"forall"  ident ident "; " spec_expr:10 : spec_expr
+syntax:max "\\" noWs &"exists"  ident ident "; " spec_expr:10 : spec_expr
 
 section
 open Lean
@@ -132,6 +137,7 @@ partial def expandSpec (e : TSyntax `spec_expr) : MacroM Term := do
   match e with
   | `(spec_expr| ( $a )) => expandSpec a
   | `(spec_expr| $n:num) => `(SpecExpr.num $n)
+  | `(spec_expr| uint ( $n:num )) => `(SpecExpr.uintLit $n)
   | `(spec_expr| $x:ident) =>
     match x.getId.toString with
     | "true" => `(SpecExpr.bool true)

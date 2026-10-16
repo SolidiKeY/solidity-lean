@@ -522,7 +522,7 @@ def Suite : Contract := contract!{
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 theorem internalCallDeclaration :
@@ -544,7 +544,7 @@ theorem returnEarly :
 
 /--
 info: Try this:
-  sol_prove
+  sol_prove (steps := 128)
 -/
 #guard_msgs in
 theorem tupleReturnPairDerived :

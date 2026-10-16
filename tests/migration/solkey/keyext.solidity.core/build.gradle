@@ -1,0 +1,382 @@
+plugins {
+     id 'java'
+     id 'com.gradleup.shadow' version "9.4.1"
+}
+
+description = "The core data structures for KeY for Solidity"
+
+// 23.1.x is the Graal line built against JDK 21: its compiler jar upgrades the module this JDK
+// actually has, which is what lets Truffle compile the WebAssembly solc instead of interpreting
+// it. A newer line ships a module JDK 21 will not load.
+ext.graalVersion = "23.1.7"
+ext.graalRuntimeDir = "graal-runtime"
+ext.graalCompilerDir = "graal-compiler"
+
+// The solc build hosted on the JVM. Pinned: the AST shape the taclet examples were written
+// against must not shift underneath them. Metadata: https://binaries.soliditylang.org/wasm/list.json
+ext.soljsonFile = "soljson-v0.8.34+commit.80d5c536.js"
+ext.soljsonSha256 = "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+
+configurations {
+    antlr4
+    proguardTool
+    graalCompiler
+    graalRuntime
+}
+
+dependencies {
+    api project(':key.util')
+    api project(':key.ncore')
+    api project(':key.ncore.calculus')
+    antlr4 "org.antlr:antlr4:4.13.2"
+    proguardTool 'com.guardsquare:proguard-gradle:7.5.0'
+    api "org.antlr:antlr4-runtime:4.13.2"
+
+    implementation 'org.jspecify:jspecify:1.0.0'
+    implementation('com.google.code.gson:gson:2.11.0')
+    testImplementation(platform('org.junit:junit-bom:5.10.0'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+
+    // The in-process EVM the `runtime` package drives: `--solc` runs a function on it, and
+    // SolidityRuntimeExecutionTest cross-checks every example against it.
+    implementation('org.hyperledger.besu:evm:24.12.2')
+    implementation('org.hyperledger.besu:besu-datatypes:24.12.2')
+    implementation('io.tmio:tuweni-bytes:2.4.2')
+    implementation('io.tmio:tuweni-units:2.4.2')
+    implementation('org.bouncycastle:bcprov-jdk18on:1.78.1')
+
+    // Import the Jackson BOM — pick the version you want
+    implementation platform("tools.jackson:jackson-bom:3.1.2")
+    implementation "tools.jackson.core:jackson-databind"
+    implementation "tools.jackson.core:jackson-core"
+
+    implementation 'ch.qos.logback:logback-classic:1.5.32'
+
+    // solc runs inside the JVM: GraalJS hosts soljson.js, GraalWasm provides its WebAssembly.
+    // graalRuntime holds the same artifacts a second time, to be laid down next to the fat jar
+    // rather than shaded into it.
+    ["org.graalvm.polyglot:polyglot:$graalVersion",
+     "org.graalvm.polyglot:js-community:$graalVersion",
+     "org.graalvm.polyglot:wasm-community:$graalVersion"].each {
+        implementation it
+        graalRuntime it
+    }
+    graalCompiler "org.graalvm.compiler:compiler:$graalVersion"
+
+    implementation('info.picocli:picocli:4.7.7')
+    annotationProcessor('info.picocli:picocli-codegen:4.7.7')
+
+}
+
+def antlr4OutputKey = String.valueOf(projectDir) + '/build/generated-src/antlr/main/org/key_project/solidity/parser'
+
+sourceSets.main.java.srcDirs(String.valueOf(projectDir) + '/build/generated-src/antlr/main/')
+
+
+tasks.register('runAntlr4Key', JavaExec) {
+    //see incremental task api, prevents rerun if nothing has changed.
+    inputs.files "src/main/antlr/KeYSolidityDLLexer.g4", "src/main/antlr/KeYSolidityDLParser.g4",
+            "src/main/antlr/SolidityLexer.g4", "src/main/antlr/SolidityRules.g4",
+            "src/main/antlr/SolSpec.g4"
+    inputs.dir "../key.ncore/src/main/antlr/"
+    outputs.dir antlr4OutputKey
+    classpath = configurations.antlr4
+    mainClass.set("org.antlr.v4.Tool")
+    args = ["-visitor",
+            "-lib", "../key.ncore/src/main/antlr/",
+            "-Xexact-output-dir", "-o", antlr4OutputKey,
+            //"-package", "org.key_project.solidity.parser",
+            "src/main/antlr/KeYSolidityDLLexer.g4",
+            "src/main/antlr/KeYSolidityDLParser.g4",
+            "src/main/antlr/SolSpec.g4"
+    ]
+    doFirst {
+        delete antlr4OutputKey
+        file(antlr4OutputKey).mkdirs()
+        println("create $antlr4OutputKey")
+    }
+}
+compileJava.dependsOn runAntlr4Key
+
+tasks.withType(Test) {
+    enableAssertions = true
+    // Surface skipped/aborted tests (e.g. @ExpectedToFail and known-unsupported examples) as
+    // warnings in the console, so they stay visible without failing the build. A local run
+    // reports only failures unless -PverboseTests asks for the rest; CI always gets both.
+    if (System.getenv("CI") != null || project.hasProperty("verboseTests")) {
+        testLogging {
+            events "skipped"
+        }
+    }
+    doFirst {
+        def rulesTestInvocation = ~/^org\.key_project\.solidity\.taclets\.RulesTest\.exampleLoads(?:\(String, Path\))?\[(\d+)]$/
+        def selectedRulesTestInvocation = filter.commandLineIncludePatterns.find { it ==~ rulesTestInvocation }
+
+        if (selectedRulesTestInvocation != null) {
+            def matcher = selectedRulesTestInvocation =~ rulesTestInvocation
+            systemProperty "org.key_project.solidity.taclets.RulesTest.exampleIndex", matcher[0][1]
+
+            filter.commandLineIncludePatterns.remove(selectedRulesTestInvocation)
+            filter.includeTestsMatching("org.key_project.solidity.taclets.RulesTest.exampleLoads")
+        }
+    }
+}
+
+
+// The tag groups CI runs as separate jobs. The common `test` task keeps the untagged unit
+// tests and the TestSuite.sol suites; the tagged groups only run locally on explicit request.
+def ciOnlyTestTags = ["solidityExamples", "ruleGeneralization", "openExamples"]
+
+test {
+    useJUnitPlatform {
+        excludeTags(*ciOnlyTestTags)
+    }
+}
+
+tasks.named('testFast', Test) {
+    useJUnitPlatform {
+        excludeTags(*ciOnlyTestTags)
+    }
+}
+
+tasks.register('testSolidityExamples', Test) {
+    group = "verification"
+    description = "CI test group: the proof example suites over keyext.solidity.examples " +
+        "(net/, solc/, the one-example showcases), the .key problems run by RulesTest and " +
+        "the taclet coverage of TestSuite.sol and proofs/."
+    useJUnitPlatform {
+        includeTags "solidityExamples"
+    }
+    def updateProperty = "org.key_project.solidity.taclets.TacletCoverageTest.update"
+    if (System.getProperty(updateProperty) != null) {
+        systemProperty updateProperty, System.getProperty(updateProperty)
+    }
+}
+
+tasks.register('testOpenExamples', Test) {
+    group = "verification"
+    description = "CI test group: OpenExamplesStayOpenTest, every function of the open/ " +
+        "example directories keeps its status (open, or a known closer)."
+    useJUnitPlatform {
+        includeTags "openExamples"
+    }
+}
+
+tasks.register('testRuleGeneralization', Test) {
+    group = "verification"
+    description = "CI test group: RuleGeneralizationTest, the taclet family skeleton checker."
+    useJUnitPlatform {
+        includeTags "ruleGeneralization"
+    }
+    testLogging {
+        showStandardStreams = true
+    }
+    def updateProperty = "org.key_project.solidity.taclets.RuleGeneralizationTest.update"
+    if (System.getProperty(updateProperty) != null) {
+        systemProperty updateProperty, System.getProperty(updateProperty)
+    }
+}
+
+checkerFramework {
+    if(System.getProperty("ENABLE_NULLNESS")) {
+        checkers = [
+                "org.checkerframework.checker.nullness.NullnessChecker",
+        ]
+        extraJavacArgs = [
+                // Nullness is enforced on program.ast. parser.builder is not checked yet (its
+                // ANTLR-generated accessors still produce ~190 findings); add it back here once
+                // those are cleaned up.
+                "-AonlyDefs=^org\\.key_project\\.solidity\\.program\\.ast",
+                "-Xmaxerrs", "10000",
+                "-Astubs=$rootDir/key.util/src/main/checkerframework:permit-nullness-assertion-exception.astub",
+                "-AstubNoWarnIfNotFound",
+                "-Werror",
+                "-Aversion",
+        ]
+    }
+}
+
+def soljsonCache = layout.buildDirectory.file("soljson/${soljsonFile}")
+def soljsonResource = layout.buildDirectory.file("resources/main/soljson.js")
+
+tasks.register("downloadSoljson") {
+    inputs.property("file", soljsonFile)
+    inputs.property("sha256", soljsonSha256)
+    outputs.file(soljsonResource)
+
+    doLast {
+        def cached = soljsonCache.get().asFile
+        if (!cached.exists() || digestOf(cached) != soljsonSha256) {
+            cached.parentFile.mkdirs()
+            new URL("https://binaries.soliditylang.org/wasm/${soljsonFile}")
+                    .withInputStream { input -> cached.withOutputStream { it << input } }
+            def actual = digestOf(cached)
+            if (actual != soljsonSha256) {
+                cached.delete()
+                throw new GradleException(
+                        "${soljsonFile} has sha256 ${actual}, expected ${soljsonSha256}")
+            }
+        }
+        def target = soljsonResource.get().asFile
+        target.parentFile.mkdirs()
+        target.bytes = cached.bytes
+    }
+}
+
+static String digestOf(File file) {
+    file.withInputStream { input ->
+        java.security.MessageDigest.getInstance("SHA-256").digest(input.bytes)
+                .encodeHex().toString()
+    }
+}
+
+processResources.dependsOn("downloadSoljson")
+
+task proguardAnalyze(dependsOn: jar) {
+    group = 'verification'
+    description = 'Finds unused public methods in the AST package via ProGuard shrink analysis'
+
+    def unusedReport = layout.buildDirectory.file('reports/proguard/unused-ast-methods.txt')
+    def outputJar    = layout.buildDirectory.file('proguard/analyzed.jar')
+    def rulesFile    = layout.buildDirectory.file('proguard/rules.pro')
+
+    inputs.files jar.archiveFile, configurations.runtimeClasspath
+    outputs.file unusedReport
+
+    doLast {
+        rulesFile.get().asFile.parentFile.mkdirs()
+        outputJar.get().asFile.parentFile.mkdirs()
+
+        def libLines = configurations.runtimeClasspath.files.collect {
+            "-libraryjars ${it.absolutePath}"
+        }.join('\n')
+        def javaHome = System.getProperty('java.home')
+        def jmodBase = new File("${javaHome}/jmods/java.base.jmod")
+
+        rulesFile.get().asFile.text = """\
+${libLines}
+${jmodBase.exists() ? "-libraryjars ${jmodBase.absolutePath}(!**.jar;!module-info.class)" : ''}
+
+-injars ${jar.archiveFile.get().asFile.absolutePath}
+-outjars ${outputJar.get().asFile.absolutePath}
+
+-dontoptimize
+-dontobfuscate
+-dontwarn
+
+-keep class !org.key_project.solidity.program.ast.** { public protected *; }
+-keep interface org.key_project.solidity.program.ast.** { *; }
+-keepclassmembers,allowshrinking class org.key_project.solidity.program.ast.** {
+    public protected *;
+}
+
+-printusage '${unusedReport.get().asFile.absolutePath}'
+"""
+        def javaPath = "${System.getProperty('java.home')}/bin/java"
+        def classpathStr = configurations.proguardTool.asPath
+        def proc = new ProcessBuilder(
+                javaPath, '-cp', classpathStr, 'proguard.ProGuard',
+                "@${rulesFile.get().asFile.absolutePath}"
+        ).redirectErrorStream(true).start()
+        proc.inputStream.eachLine { line -> logger.lifecycle(line) }
+        def exitCode = proc.waitFor()
+        if (exitCode != 0) throw new GradleException("ProGuard failed with exit code $exitCode")
+
+        logger.lifecycle("ProGuard unused AST report: ${unusedReport.get().asFile.absolutePath}")
+    }
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "org.key_project.solidity.CLI"
+    }
+}
+
+def solidityCliMainClass = "org.key_project.solidity.CLI"
+def solidityExamplesDir = rootProject.file("keyext.solidity.core/src/test/resources/org/key_project/solidity/examples")
+def resolveKeyFile = rootProject.ext.resolveSolidityFile
+
+tasks.register('solidityCli', JavaExec) {
+    group = "application"
+    description = "Run the Solidity CLI. Use -PkeyFile=file.key|file.sol to specify the file, " +
+        "and -Pfunction=name to pick one function of a .sol (all of them otherwise)."
+    mainClass.set(solidityCliMainClass)
+    classpath = sourceSets.main.runtimeClasspath
+    workingDir = solidityExamplesDir
+    args resolveKeyFile(project.findProperty('keyFile') ?: "problem2.key")
+    def function = project.findProperty('function')
+    if (function) {
+        args('--function', function.toString())
+    }
+    def contract = project.findProperty('contract')
+    if (contract) {
+        args('--contract', contract.toString())
+    }
+    // forward extra CLI arguments, e.g. -PcliArgs="--output=/tmp/p.proof --verbose"
+    def extra = project.findProperty('cliArgs')
+    if (extra) {
+        args(*extra.toString().split("\\s+"))
+    }
+}
+
+shadowJar {
+    archiveClassifier = "exe"
+    archiveBaseName = "keyext.solidity.core"
+    // no version in the name, so that .run/ configurations can point at a stable path
+    archiveVersion = ""
+    // Truffle locates GraalJS and GraalWasm by the jars they ship in, and shading them into one
+    // archive loses the language registrations. They are staged beside the fat jar and reached
+    // through the manifest instead.
+    dependsOn "stageGraalRuntime"
+    dependencies {
+        exclude { it.moduleGroup.startsWith("org.graalvm") }
+    }
+    manifest {
+        attributes["Class-Path"] = project.configurations.graalRuntime.files
+                .collect { "${graalRuntimeDir}/${it.name}" }.join(" ")
+    }
+}
+
+// Truffle 23.1 reaches for sun.misc.Unsafe.ensureClassInitialized, which JDK 24 removed, so
+// anything that runs solc has to fork on JDK 21 rather than on whatever JVM the Gradle daemon
+// happens to use. JDK 21 is also the only one that ships the module the Graal compiler jar
+// upgrades — without it in the boot layer Truffle interprets the WebAssembly solc, which costs
+// roughly a factor of ten.
+def solcLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(21)
+}
+
+def graalJit = new org.gradle.process.CommandLineArgumentProvider() {
+    @Override
+    Iterable<String> asArguments() {
+        return ["-XX:+UnlockExperimentalVMOptions", "-XX:+EnableJVMCI",
+                "--upgrade-module-path=" + configurations.graalCompiler.asPath]
+    }
+}
+
+tasks.withType(Test).configureEach {
+    javaLauncher = solcLauncher
+    jvmArgumentProviders.add(graalJit)
+}
+
+tasks.named('solidityCli', JavaExec) {
+    javaLauncher = solcLauncher
+    jvmArgumentProviders.add(graalJit)
+}
+
+// run-key.sh runs the fat jar directly, so both sets of Graal jars have to be on disk next to
+// it: the languages on the class path, the compiler on the upgrade module path.
+tasks.register('stageGraalRuntime', Copy) {
+    from configurations.graalRuntime
+    into layout.buildDirectory.dir("libs/$graalRuntimeDir")
+}
+
+tasks.register('stageGraalCompiler', Copy) {
+    from configurations.graalCompiler
+    into layout.buildDirectory.dir("libs/$graalCompilerDir")
+}
+
+tasks.named('shadowJar') {
+    finalizedBy('stageGraalCompiler')
+}
+

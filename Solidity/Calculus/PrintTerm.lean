@@ -37,6 +37,11 @@ register_option pp.sol.closedTm : Bool := {
             set where a law's side condition is shown (`lawAt`)"
 }
 
+register_option pp.sol.pushArithmetic : Bool := {
+  defValue := false
+  descr := "print numeric arithmetic at the type supplied by a native push rule's target"
+}
+
 namespace Delab
 
 section PrintTerm
@@ -214,6 +219,7 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     -- at any type (`schemaTerm0`); the others escape at another type
     let t ← whnf ty
     unless sym == "⊕" || sym == "±" || sym == "==" || t.isConstOf ``PrimTy.uint
+        || pp.sol.pushArithmetic.get (← getOptions)
         || (sym == "&&" || sym == "||") && t.isConstOf ``PrimTy.bool do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
   | .sym ``Op2.zbin #[op, _] #[a, b] =>
@@ -228,6 +234,11 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     if (← whnf op).isConstOf ``UnOp.not then return ← `(dl_term| !$(← ppTermS ns a))
     escapeS e
   | .sym ``Op2.find _ #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
+  | .sym ``Op3.modular #[op] #[a, b, k] =>
+    match_expr (← whnf op) with
+    | ModOp.addmod => `(dl_term| addmod($(← ppTermS ns a), $(← ppTermS ns b), $(← ppTermS ns k)))
+    | ModOp.mulmod => `(dl_term| mulmod($(← ppTermS ns a), $(← ppTermS ns b), $(← ppTermS ns k)))
+    | _ => escapeS e
   | .sym ``Op2.findIn _ #[s, p] => `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
   | .sym ``Op2.len _ #[s, p] =>
     let (lenPath, lenVal, _) ← lenTerms (← ppPTermS ns p)
@@ -388,6 +399,9 @@ partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   | .sym ``Op2.sfind _ #[s, p] | .sym ``Op2.sfindIn _ #[s, p] =>
     `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
   | .sym ``Op2.copyMem _ #[m, i] => `(dl_term| copyMem(mtSt, $(← ppMTermS ns m), $(← ppITermS ns i)))
+  -- A composed conversion cannot be recovered from the enclosing save's
+  -- target type: fixed2 → fixed4 → dynamic must retain length four.
+  | .sym ``Op1.fixedCopy _ _ => escapeS e
   | .sym ``Op1.newArr #[R, _] #[n] =>
     match ← allocTy? R with
     | some T => `(dl_term| newArr($T, $(← ppTermS ns n)))

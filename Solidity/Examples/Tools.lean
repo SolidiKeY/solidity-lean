@@ -115,6 +115,25 @@ update-free:
 -/
 #guard_msgs in #wp dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
 
+/-! Imported obligations are declared without executable code. The inspector
+reads their declaration values, as symbolic execution does. -/
+noncomputable def declaredObligation : Fml StandardExample [] :=
+  dl!{ [ alice.age = 42; uint x = alice.age; ] x == 42 }
+
+/--
+info: symbolic execution leaves:
+    dl{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x = 42 }
+update-free:
+    true = true → ∀ uint x; true = true → 42 = 42
+-/
+#guard_msgs in #wp declaredObligation
+
+/--
+info:   ~[storageFieldWriteSave]~>
+    dl{ { storage := save(storage, alice.age, 42) } [ uint x = alice.age; ] x = 42 }
+-/
+#guard_msgs in #step declaredObligation
+
 
 /-! Memory is pushed in as terms of the typed heap: a copy from storage is
 the pair `copy` (the root it allocates) and `copySt` (the memory after
@@ -236,9 +255,9 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /-! Every rule prints as a rule line (`#check_rule_text`, `Tools/Taclet.lean`). -/
 
 /--
-info: all 160 rules of `Solidity.Taclet` print as rule lines
+info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 9 rules of `Solidity.LeanTaclet` print as rule lines
+info: all 14 rules of `Solidity.LeanTaclet` print as rule lines
 ---
 info: all 3 rules of `Solidity.CallbackTaclet` print as rule lines
 -/

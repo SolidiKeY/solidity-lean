@@ -29,10 +29,16 @@ existing deployment obligations. Internal functions are helpers rather than
 independent obligations. These are verification obligations over typed states
 and all arguments, not calls at a few concrete inputs.
 
+Source-unit free functions and library functions can be inlined as helpers,
+resolved by solc declaration identity. Extension receivers are the first
+argument, including with named arguments and tuple returns. Independent rows
+belong to contracts and libraries; top-level free functions have no independent
+test row. Recursion and unsupported helper signatures remain import gaps.
+
 | Result | Meaning |
 |---|---|
 | `proved` | Kernel-checked proof, using only Lean's standard three axioms. |
-| `pending` | Open goals, incomplete proof, or a search/kernel budget failure; no claim of falsity. |
+| `pending` | Ordinary open proof goals; no claim of falsity. Runtime and budget failures are errors. |
 | `skipped` / `skip` | Explicit NatSpec skip tag. |
 | `internal` | Internal helper; no independent obligation. |
 | `unsupported` / `excluded` | An import or obligation gap; prevents suite success. |
@@ -40,7 +46,11 @@ and all arguments, not calls at a few concrete inputs.
 | `notRun` | Contract process interrupted before this function completed. |
 
 The JSON report is `{results, errors}`. Each result includes the absolute source
-path, contract, function, tag, status, reason and elapsed milliseconds. Compiler,
+path, contract, function, signature, tag, status, reason and elapsed milliseconds.
+Large contracts run in batches of 32 imported rows. `batchSize` selects the
+JavaScript API batch size, and `onProgress` receives each retained batch.
+Runtime and heartbeat exceptions report `error`, distinct from ordinary
+`pending` open goals. Compiler,
 contract import and subprocess failures appear in `errors`. Importer warnings
 about omitted initializers also appear there and prevent success. A result file
 is checkpointed before search and after each function, preserving completed
@@ -58,7 +68,10 @@ apply. A timeout is not an expected-open verdict.
 The JavaScript API exports `solidityFiles(paths)`,
 `runSolidityTests(paths, options)`, and `testsPassed(report, listing)` from
 `scripts/test-solidity.mjs`. It is synchronous. The options are `contract`,
-`function`, `list`, `timeoutMs`, `solkey`, `soljson` and `build`.
+`function`, `list`, `timeoutMs`, `solkey`, `soljson`, `build`, `batchSize`,
+`onProgress` and `renaming`. A function selector may be a source name (all its
+overloads) or its source signature (one overload). Reports retain source types
+before enum, address or value-type lowering.
 
 For an existing solc fixture, the Lean entry point is:
 
@@ -68,7 +81,8 @@ import Solidity.Frontend.Testing
 solc_import "Example.ast.json" hash 0xHASH as Imported.Example testing
 solc_scoped_problems Imported.Example decl
 #solkey_test Imported.Example to "/tmp/results.json"
--- Optional: only "functionName", then listing, before `to`.
+-- Optional: only "functionName" or "functionName(uint)", then
+-- from N count K, then listing, before `to`.
 ```
 
 The hash must be the fixture's actual FNV-1a hash, as written by
@@ -76,17 +90,66 @@ The hash must be the fixture's actual FNV-1a hash, as written by
 as well as the result file; the file runner does this automatically.
 The explicit `testing` import mode retains NatSpec clauses and all callable
 function declarations. The original import mode retains only declarations
-needed for internal calls. Specifications requiring renamed locals are
-reported as unsupported, contract-level specification clauses must be
-invariants, and function-level invariants are refused. Unsupported clause
-syntax remains an import failure.
+needed for internal calls. Specifications follow declaration renaming through
+the parsed syntax: parameters remain available in preconditions and `\old`,
+named returns only in post-state `ensures`, and quantified variables retain
+their shadows. Generated names avoid other generated names and annotation
+identifiers. Loop annotations use the locals visible at their lexical position,
+including modifier, return and catch parameters; leaving a block or `for`
+restores the enclosing scope. Contract-level specification clauses must be
+invariants, and function-level invariants are refused. Quantifiers may begin
+an implication's consequent; their bodies extend through the remaining formula.
+Clauses of an admitted body are validated individually before insertion.
+A refused body contributes no clause or member, and its callers remain gaps.
+Parser-invalid modifiers are omitted from the declaration environment; their
+users fail modifier lookup rather than running without the modifier.
+Unsupported elementary state fields and narrow container fields stay gaps,
+including functions whose specifications mention an omitted field. Contract
+invariants retain their existing whole-contract validation. Unsupported clause
+syntax on an admitted body remains an import failure.
 
-The runner exposes frontend limitations: Solidity source imports/remappings,
-inheritance and unsupported AST forms are not added by this API. The current
-compiler helper reads one source unit, and the Lean frontend reads each
-contract's own members. Expected-open suites will need a separate expectation
+Large literal tables are compiled in segments of at most 64 list cells.
+A kernel-checked reflexivity certificate verifies that the resulting contract
+equals the original literal. This lets the testing import retain the full
+551-function frozen TestSuite without increasing code-generation or proof
+limits. Imported scoped programs remain uncompiled, as before.
+
+Enum members in NatSpec are resolved from the validated solc declarations,
+using canonical names and short names visible in the imported contract or
+source unit. Resolution preserves whole dotted names and refuses ambiguity or
+a head shadowed by a state variable, parameter, return or local. Clauses with
+quantifiers or escaped identifiers stay verbatim; enum resolution in them
+requires a future parser-based extension. Function and loop annotations use
+their defining contract or library's scope, including inlined helpers.
+The test runner uses `lake --no-build lean` after building the API, so its
+single-file checks can also read imports held only in Lake's shared cache.
+
+The compiler helper reads one source unit; source imports/remappings and
+unsupported AST forms remain frontend limitations. The frontend imports
+inherited state, helper bodies and modifiers using checked Solc C3 metadata.
+Only the selected contract's own functions receive independent test rows.
+Specifications can read `this`/`address(this)` and its ledger entry; `\old`
+retains the address and selects the existing ledger snapshot.
+Ledger integers support unary minus. Beside a ledger integer, an unsigned
+negand widens before negation, including under `\old` and on either side of
+a comparison. Primitive subexpressions keep their checked arithmetic;
+unsigned negation outside that context and signed/ledger mixtures remain
+refused.
+Lexical unsigned constants with bounded literal-only initializers are imported
+as typed `uint(n)` specification literals. Private visibility, shadows and
+ambiguity are preserved. Other constant forms, quantified substitutions and
+casts in loop invariants remain explicit limitations.
+Ledger locations in `assignable` clauses are refused per function and the
+refusal propagates through callers. Builtin call heads and escaped keywords
+remain distinct from constants sharing their spelling.
+Explicit base constructors, inherited contract NatSpec, duplicate state root
+names and `super` calls are rejected. Virtual calls use the most-derived
+implementation; explicit `Base.f` calls keep the named implementation, and
+external calls retain their external semantics. Expected-open suites use an expectation
 manifest when the SolKey corpus is imported; `pending` alone does not certify
-an invalid specification. The SolKey test sources have not been copied yet.
+an invalid specification. The pinned SolKey test sources and their expectation manifest now live in
+`tests/migration/`; see [solkey-migration.md](solkey-migration.md) for the
+in-progress migration and its remaining coverage gaps.
 
 ## Verification and review
 

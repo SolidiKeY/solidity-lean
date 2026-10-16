@@ -92,6 +92,21 @@ structure Search where
   found : List (Lean.Name × Array String)
   open_ : List MVarId
   heartbeats : Nat
+  steps : Option Nat := none
+
+/-- Recover the bounded walk certified by the generated proof, without rerunning it. -/
+partial def replaySteps (e : Expr) : Option Nat :=
+  if e.isAppOfArity `Solidity.Proves.of_residueWithin 9 then
+    let n := e.getArg! 1
+    let n := if n.isAppOfArity ``OfNat.ofNat 3 then n.getArg! 1 else n
+    match n with
+    | .lit (.natVal n) => some n
+    | _ => none
+  else match e with
+    | .app f a => replaySteps f <|> replaySteps a
+    | .lam _ _ b _ | .forallE _ _ b _ | .mdata _ b => replaySteps b
+    | .letE _ _ v b _ => replaySteps v <|> replaySteps b
+    | _ => none
 
 /-- The walk `prove` on `g`, then `searchLeaf` on each leaf it leaves, the
 open ones left as goals; with `stopAtOpen`, the search ends at the first
@@ -100,6 +115,7 @@ def proveSearch (g : MVarId) (prove : MVarId → MetaM (List MVarId))
     (fits : MVarId → MetaM Bool) (stopAtOpen : Bool := false) : TacticM Search := do
   let h0 ← IO.getNumHeartbeats
   let leaves ← prove g
+  let steps := replaySteps (← instantiateMVars (.mvar g))
   let mut hb : Nat := (← IO.getNumHeartbeats) - h0
   let mut found : List (Lean.Name × Array String) := []
   let mut open_ : List MVarId := []
@@ -113,7 +129,7 @@ def proveSearch (g : MVarId) (prove : MVarId → MetaM (List MVarId))
       open_ := open_ ++ [l]
       found := found ++ [(name, #["sorry"])]
       if stopAtOpen then break
-  return { found, open_, heartbeats := hb }
+  return { found, open_, heartbeats := hb, steps }
 
 /-- Whether a replay of `hb` raw heartbeats fits in one declaration's
 `maxHeartbeats`.  Each try ran with heartbeats of its own; the replay runs
@@ -126,11 +142,12 @@ def replayFits (hb : Nat) : CoreM Bool := do
 /-- The replay of a `sol_prove` whose leaves are closed by `found`:
 `sol_prove`, then each leaf's lines, under `case leafᵢ =>` when there are
 several. -/
-def replayLines (found : List (Lean.Name × Array String)) : Array String :=
+def replayLines (found : List (Lean.Name × Array String)) (steps : Option Nat := none) : Array String :=
+  let first := steps.map (fun n => s!"sol_prove (steps := {n})") |>.getD "sol_prove"
   match found with
-  | [(_, body)] => #["sol_prove"] ++ body
+  | [(_, body)] => #[first] ++ body
   | _ => found.foldl (fun ls (n, body) =>
-      (ls.push s!"case {n} =>") ++ body.map ("  " ++ ·)) #["sol_prove"]
+      (ls.push s!"case {n} =>") ++ body.map ("  " ++ ·)) #[first]
 
 end Derive
 
@@ -167,6 +184,8 @@ open Lean Elab Tactic Meta
 def provesCtor? (p : Expr) : Option Lean.Name :=
   match p.getAppFn.constName? with
   | some ``Premise.update => some ``Proves.update
+  | some ``Premise.updates => some ``Proves.updates
+  | some ``Premise.guardedUpdates => some ``Proves.guardedUpdates
   | some ``Premise.unfold => some ``Proves.unfold
   | some ``Premise.bind => some ``Proves.bind
   | some ``Premise.split => some ``Proves.split
@@ -236,10 +255,10 @@ def shortTac (c : Lean.Name) (r : Lean.Name) (lean box : Bool) :
     MetaM (Option (TSyntax `tactic)) := do
   let rule := ProofTree.dotIdent r
   let kind? : Option Lean.Name :=
-    if c == ``Proves.update then some `update
+    if c == ``Proves.update || c == ``Proves.updates then some `update
     else if c == ``Proves.unfold || c == ``Proves.bind || c == ``Proves.inline then
       some (if lean then `unfoldLean else `unfold)
-    else if c == ``Proves.split then some (if box then `splitBox else `split)
+    else if c == ``Proves.split || c == ``Proves.guardedUpdates then some (if box then `splitBox else `split)
     else if c == ``Proves.check then some (if lean then `checkLean else `Proves.check)
     else if c == ``Proves.done then some (if lean then `doneLean else `done)
     else if c == ``Proves.cases then some `cases

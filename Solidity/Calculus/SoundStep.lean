@@ -1,6 +1,7 @@
 import Solidity.Calculus.SoundControl
 import Solidity.Calculus.SoundMem
 import Solidity.Calculus.SoundStore
+import Solidity.Calculus.SoundPush
 
 /-!
 # Every arm of `Stmt.step` but the blocks is sound
@@ -29,7 +30,8 @@ variable {C : Contract}
 /-- The statements whose rules are `Calculus/Blocks.lean`'s: calls,
 `try`, loops. -/
 def Stmt.isBlockArm : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
-  | _, _, .call .. | _, _, .tryCall .. | _, _, .loop .. => true
+  | _, _, .call .. | _, _, .callReceiver .. | _, _, .callReceiverPush ..
+  | _, _, .tryCall .. | _, _, .loop .. => true
   | _, _, _ => false
 
 /-- **The rule of every statement but a block's is sound over the typed
@@ -52,7 +54,7 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | opAssign op hop hp' l r => exact opStep_sound σ k op hop hp' l r p hp
   | incDec op hp' l => exact incStep_sound σ k op hp' l p hp
   | assignIncDec i op hp' l hs => cases hp; exact sound_assignIncDec σ i op hp' l hs
-  | assignLocalPush i b hs => cases hp; exact sound_assignLocalPush σ i b hs
+  | assignLocalPush i b => exact assignLocalPushStep_sound σ k i b p hp
   | push b v hd => exact pushStep_sound σ k b v hd p hp
   | pop b => exact popStep_sound σ k b p hp
   | transfer r a => exact transferStep_sound σ k r a p hp
@@ -72,8 +74,12 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | assert c => exact assertStep_sound σ k c p hp
   | revert => cases m <;> cases hp <;> exact sound_revert σ
   | call => cases hb
+  | callReceiver => cases hb
+  | callReceiverPush => cases hb
   | tryCall => cases hb
   | loop => cases hb
   | block body => cases hp; exact sound_block σ body
+  | pushOpAssign op hop hp' b r => exact PushSuffix.pushOpStep_sound k op hop hp' b r p hp σ
+  | pushIncDec op hp' b => exact PushSuffix.pushIncStep_sound k op hp' b p hp σ
 
 end Solidity

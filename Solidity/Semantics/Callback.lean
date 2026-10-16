@@ -106,6 +106,49 @@ extensions composed (`TRun.seq`). -/
 def Out.cat {H : HTy} {Γ₁ Γ₂ : Ctx} (o₁ : Out C H Γ₁) (o : Out C o₁.st.H Γ₂) : Out C H Γ₂ :=
   ⟨o.st, o₁.ext.trans o.ext⟩
 
+/-- After `f()` returns an array alias, run its push/pop and remove the alias.
+Halts and broken callback invariants propagate before the operation. -/
+def COut.receiverOp {H : HTy} {Γ : Ctx} {E : Ty} (op : ReceiverOp C Γ E) :
+    COut C H (.alias (.array E) :: Γ) → COut C H Γ
+  | .ok a => .ofRes ((TRun.receiverOp (op.wk (.drop .refl)) (.alias .here) a.st).map
+      fun o => Out.cat a (Out.drop (.push .refl) o))
+  | .halt e => .halt e
+  | .violated => .violated
+
+/-- Finish `f().push(e)` after the operand prefix, snapshotting its final source. -/
+def COut.pushPrefix {H : HTy} {Γ Γv : Ctx} {E : Ty} (he : Ext Γ Γv)
+    (value : Src C Γv E) (ref : SRef C (.array E)) : COut C H Γv → COut C H Γ
+  | .ok a => .ofRes (do
+      let v ← value.valueT a.st
+      if a.st.storage.full ref then throw .exhausted else do
+        let st ← TRes.ofOpt (a.st.storage.push ref (fun _ => some v.strip))
+        pure ⟨(a.st.withStorage st).drop he, a.ext⟩)
+  | .halt e => .halt e
+  | .violated => .violated
+
+/-- With no callback, the operand prefix of `f().push(e)` has its ordinary result. -/
+theorem COut.pushPrefix_ofRes {Γ Γv : Ctx} {E : Ty} (he : Ext Γ Γv)
+    (code : TStep C Γ Γv) (value : Src C Γv E) (ref : SRef C (.array E))
+    (σ : State C Γ) :
+    (COut.ofRes (code σ)).pushPrefix he value ref =
+      COut.ofRes (TRun.pushAfterPrefix he code value ref σ) := by
+  cases h : code σ <;> simp only [pushPrefix, TRun.pushAfterPrefix, h, ofRes,
+    bind, Except.bind] <;> rfl
+
+/-- The callback continuation of `f().push(e)` agrees with its deterministic run. -/
+theorem COut.receiverOp_of_call {Γ ps Γf : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E) (σ : State C Γ) :
+    (COut.ofRes (TRun.call args (.storage _ r) hb body σ)).receiverOp op =
+      COut.ofRes (TRun.callReceiver args r hb body op σ) := by
+  rw [TRun.callReceiver_eq_seq]
+  unfold TRun.seq
+  cases TRun.call args (.storage _ r) hb body σ with
+  | error => rfl
+  | ok a =>
+    dsimp only [COut.ofRes, COut.receiverOp]
+    cases TRun.receiverOp (op.wk (.drop .refl)) (.alias .here) a.st <;> rfl
+
 /-! ## The invariant, the callee -/
 
 /-- A contract invariant, read on a state with no locals (solkey's
@@ -142,7 +185,8 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
     (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
     (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
-    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
     (transfer := fun _ _ => true) (send := fun _ _ _ => true)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
@@ -151,6 +195,8 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (ite := fun _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els)
     (require := fun _ => false) (assert := fun _ => false) (revert := false)
     (call := fun _ _ _ body => Prog.hasTransfer body)
+    (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
+    (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
     (tryCall := fun _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
   termination_by structural _ _ s => s
@@ -170,7 +216,8 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
     (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
     (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
-    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
     (transfer := fun _ _ => true) (send := fun _ _ _ => true)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
@@ -179,6 +226,8 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (ite := fun _ _ _ => true)
     (require := fun _ => false) (assert := fun _ => false) (revert := false)
     (call := fun _ _ _ _ => true)
+    (callReceiver := fun _ _ _ _ _ => true)
+    (callReceiverPush := fun _ _ _ _ _ _ => true)
     (tryCall := fun _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
 
@@ -288,6 +337,41 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       args.evalT σ = .ok a → ExecP J (ret.enterT (σ.withEnv a)).st body o →
         ExecS J σ (.call f args ret body)
           (o.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))))
+  /-- `f().push(e)` and `f().pop()` continue the getter's callback run once. -/
+  | callReceiver {Γ ps Γf : Ctx} {E : Ty} {σ : State C Γ} {f : Name}
+      {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+      {op : ReceiverOp C Γ E} {o : COut C σ.H (.alias (.array E) :: Γ)} :
+      ExecS J σ (.call f args (.storage _ r) body) o →
+        ExecS J σ (.callReceiver f args r body op) (o.receiverOp op)
+  /-- A successful getter precedes every callback in the deferred operand. -/
+  | callReceiverPush {Γ ps Γf Γv : Ctx} {E : Ty} {σ : State C Γ} {f : Name}
+      {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+      {code : Prog C Γ Γv} {value : Src C Γv E}
+      {a : Out C σ.H (.alias (.array E) :: Γ)} {ref : SRef C (.array E)}
+      {u : COut C a.st.H Γv} :
+      ExecS J σ (.call f args (.storage _ r) body) (.ok a) →
+      a.st.env.1 = some ref → ExecP J (a.st.drop (.push .refl)) code u →
+      ExecS J σ (.callReceiverPush f args r body code value)
+        ((u.pushPrefix code.ext value ref).map (fun b => ⟨b.st, a.ext.trans b.ext⟩))
+  /-- An unset getter result reverts before the operand's first effect. -/
+  | callReceiverPushUnset {Γ ps Γf Γv : Ctx} {E : Ty} {σ : State C Γ} {f : Name}
+      {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+      {code : Prog C Γ Γv} {value : Src C Γv E}
+      {a : Out C σ.H (.alias (.array E) :: Γ)} :
+      ExecS J σ (.call f args (.storage _ r) body) (.ok a) → a.st.env.1 = none →
+      ExecS J σ (.callReceiverPush f args r body code value) (.halt .revert)
+  /-- Getter failure stops `f().push(e)` before its operand. -/
+  | callReceiverPushHalt {Γ ps Γf Γv : Ctx} {E : Ty} {σ : State C Γ} {f : Name}
+      {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+      {code : Prog C Γ Γv} {value : Src C Γv E} {err : THalt} :
+      ExecS J σ (.call f args (.storage _ r) body) (.halt err) →
+      ExecS J σ (.callReceiverPush f args r body code value) (.halt err)
+  /-- A getter's invariant violation stops `f().push(e)` before its operand. -/
+  | callReceiverPushViolated {Γ ps Γf Γv : Ctx} {E : Ty} {σ : State C Γ} {f : Name}
+      {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+      {code : Prog C Γ Γv} {value : Src C Γv E} :
+      ExecS J σ (.call f args (.storage _ r) body) .violated →
+      ExecS J σ (.callReceiverPush f args r body code value) .violated
   /-- The call reverts in the caller: no code at the address, or the callee
   reverts. -/
   | tryRevert {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
@@ -524,6 +608,65 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       rcases Prog.exec_run J body (ret.enterT (σ.withEnv a)).st with h | h
       · exact .inl (ExecS.callBody (f := f) ha h)
       · exact .inr (ExecS.callBody (f := f) (o := .violated) ha h)
+  | _, _, .callReceiver f args r body op, σ => by
+    have hc : ExecS J σ (.call f args (.storage _ r) body)
+        (.ofRes (TRun.call args (.storage _ r) body.ext body.runR σ)) ∨
+        ExecS J σ (.call f args (.storage _ r) body) .violated := by
+      rw [TRun.call_eq]
+      cases ha : args.evalT σ with
+      | error e => exact .inl (.callArgs ha)
+      | ok a =>
+        change ExecS J σ _ (.ofRes (TRun.callFrom (.storage _ r) body.ext body.runR σ
+          ⟨σ.withEnv (none, a), List.prefix_refl _⟩)) ∨ _
+        rw [TRun.callFrom_eq, ← COut.map_ofRes]
+        rcases Prog.exec_run J body (σ.withEnv (none, a)) with h | h
+        · exact .inl (ExecS.callBody (f := f) ha h)
+        · exact .inr (ExecS.callBody (f := f) (o := .violated) ha h)
+    rcases hc with h | h
+    · exact .inl (by
+        simpa only [COut.receiverOp_of_call] using (ExecS.callReceiver (op := op) h))
+    · exact .inr (ExecS.callReceiver (op := op) h)
+  | _, _, .callReceiverPush f args r body code value, σ => by
+    change ExecS J σ _ (.ofRes (TRun.callReceiverPush args r body.ext body.runR
+      code.ext code.runR value σ)) ∨ _
+    have hc : ExecS J σ (.call f args (.storage _ r) body)
+        (.ofRes (TRun.call args (.storage _ r) body.ext body.runR σ)) ∨
+        ExecS J σ (.call f args (.storage _ r) body) .violated := by
+      rw [TRun.call_eq]
+      cases ha : args.evalT σ with
+      | error e => exact .inl (.callArgs ha)
+      | ok a =>
+        change ExecS J σ _ (.ofRes (TRun.callFrom (.storage _ r) body.ext body.runR σ
+          ⟨σ.withEnv (none, a), List.prefix_refl _⟩)) ∨ _
+        rw [TRun.callFrom_eq, ← COut.map_ofRes]
+        rcases Prog.exec_run J body (σ.withEnv (none, a)) with h | h
+        · exact .inl (ExecS.callBody (f := f) ha h)
+        · exact .inr (ExecS.callBody (f := f) (o := .violated) ha h)
+    rcases hc with h | h
+    · cases hg : TRun.call args (.storage _ r) body.ext body.runR σ with
+      | error err =>
+        rw [hg] at h
+        exact .inl (by
+          simpa only [TRun.callReceiverPush, hg, bind, Except.bind,
+            COut.ofRes] using (ExecS.callReceiverPushHalt (code := code) (value := value) h))
+      | ok a =>
+        rw [hg] at h
+        cases hp : a.st.env.1 with
+        | none =>
+          exact .inl (by
+            simpa only [TRun.callReceiverPush, hg,
+              TRun.afterReceiverPrefix, SPath.resolveT, TEnv.get, hp, bind, Except.bind,
+              Except.map, COut.ofRes] using
+              (ExecS.callReceiverPushUnset (code := code) (value := value) h hp))
+        | some ref =>
+          rcases Prog.exec_run J code (a.st.drop (.push .refl)) with hu | hu
+          · exact .inl (by
+              simpa only [TRun.callReceiverPush, hg,
+                TRun.afterReceiverPrefix, SPath.resolveT, TEnv.get, hp, bind, Except.bind,
+                COut.pushPrefix_ofRes, Prog.run, COut.map_ofRes] using
+                (ExecS.callReceiverPush (value := value) h hp hu))
+          · exact .inr (ExecS.callReceiverPush (value := value) h hp hu)
+    · exact .inr (ExecS.callReceiverPushViolated (code := code) (value := value) h)
   | _, _, .tryCall call rets ok err code pnc other, σ => by
     show ExecS J σ _ (.ofRes (TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code
       pnc.ext pnc.runR other.ext other.runR σ)) ∨ _
@@ -629,6 +772,7 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
   | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _ | _, _, .declLocal .., _
   | _, _, .declStorage .., _ | _, _, .opAssign .., _ | _, _, .incDec .., _
   | _, _, .assignIncDec .., _ | _, _, .assignLocalPush .., _ | _, _, .push .., _
+  | _, _, .pushOpAssign .., _ | _, _, .pushIncDec .., _
   | _, _, .pop .., _ | _, _, .declMem .., _
   | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _ | _, _, .assignMem .., _
   | _, _, .delete .., _ | _, _, .deleteMem .., _ | _, _, .assignNew .., _ | _, _, .require .., _
@@ -726,6 +870,71 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
       rw [TRun.call_eq, ha]
       show _ = COut.ofRes (TRun.callFrom ret body.ext body.runR σ (ret.enterT (σ.withEnv a)))
       rw [TRun.callFrom_eq, COut.map_ofRes]
+  | _, _, .callReceiver f args r body op, ht, σ, _, h => by
+    cases h with
+    | det _ => rfl
+    | callReceiver hc =>
+      have he : ∀ {o}, ExecS J σ (.call f args (.storage _ r) body) o →
+          o = COut.ofRes (TRun.call args (.storage _ r) body.ext body.runR σ) := by
+        intro o h
+        cases h with
+        | det _ => rfl
+        | callArgs ha =>
+          rw [TRun.call_eq, ha]
+          rfl
+        | @callBody _ _ _ _ _ _ _ _ _ _ a _ ha hp =>
+          rw [Prog.eq_run J body ht hp]
+          rw [TRun.call_eq, ha]
+          simp only [bind, Except.bind, TRun.callFrom_eq, COut.map_ofRes]
+      rw [he hc]
+      exact COut.receiverOp_of_call args r body.ext body.runR op σ
+  | _, _, .callReceiverPush f args r body code value, ht, σ, _, h => by
+    obtain ⟨hb, hp⟩ := Bool.or_eq_false_iff.mp ht
+    have he : ∀ {o}, ExecS J σ (.call f args (.storage _ r) body) o →
+        o = COut.ofRes (TRun.call args (.storage _ r) body.ext body.runR σ) := by
+      intro o hc
+      cases hc with
+      | det _ => rfl
+      | callArgs ha => rw [TRun.call_eq, ha]; rfl
+      | @callBody _ _ _ _ _ _ _ _ _ _ a _ ha hc =>
+        rw [Prog.eq_run J body hb hc, TRun.call_eq, ha]
+        simp only [bind, Except.bind, TRun.callFrom_eq, COut.map_ofRes]
+    change _ = COut.ofRes (TRun.callReceiverPush args r body.ext body.runR
+      code.ext code.runR value σ)
+    cases h with
+    | det _ => rfl
+    | @callReceiverPush _ _ _ _ _ _ _ _ _ _ _ _ a ref u hc hr hu =>
+      have hg := he hc
+      cases ht : TRun.call args (.storage _ r) body.ext body.runR σ with
+      | error err => rw [ht] at hg; cases hg
+      | ok a' =>
+        rw [ht] at hg
+        have ha : a = a' := COut.ok.inj hg
+        subst a'
+        rw [Prog.eq_run J code hp hu, COut.pushPrefix_ofRes, COut.map_ofRes]
+        simp only [TRun.callReceiverPush, ht, TRun.afterReceiverPrefix,
+          SPath.resolveT, TEnv.get, hr, bind, Except.bind]
+    | @callReceiverPushUnset _ _ _ _ _ _ _ _ _ _ _ _ a hc hr =>
+      have hg := he hc
+      cases ht : TRun.call args (.storage _ r) body.ext body.runR σ with
+      | error err => rw [ht] at hg; cases hg
+      | ok a' =>
+        rw [ht] at hg
+        have ha : a = a' := COut.ok.inj hg
+        subst a'
+        simp only [TRun.callReceiverPush, ht, TRun.afterReceiverPrefix,
+          SPath.resolveT, TEnv.get, hr, bind, Except.bind, Except.map, COut.ofRes]
+    | callReceiverPushHalt hc =>
+      have hg := he hc
+      cases ht : TRun.call args (.storage _ r) body.ext body.runR σ <;>
+        simp only [ht, COut.ofRes] at hg
+      · cases hg
+        simp only [TRun.callReceiverPush, ht, bind, Except.bind, COut.ofRes]
+      · cases hg
+    | callReceiverPushViolated hc =>
+      have hg := he hc
+      cases ht : TRun.call args (.storage _ r) body.ext body.runR σ <;>
+        simp only [ht, COut.ofRes] at hg <;> cases hg
   | _, _, .loop _ _ body, ht, _, _, h => by
     simp only [Stmt.hasTransfer] at ht
     cases h with
@@ -742,6 +951,7 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
   | _, _, .declStorage .., _, _, _, h | _, _, .opAssign .., _, _, _, h
   | _, _, .incDec .., _, _, _, h | _, _, .assignIncDec .., _, _, _, h
   | _, _, .assignLocalPush .., _, _, _, h
+  | _, _, .pushOpAssign .., _, _, _, h | _, _, .pushIncDec .., _, _, _, h
   | _, _, .push .., _, _, _, h | _, _, .pop .., _, _, _, h | _, _, .declMem .., _, _, _, h
   | _, _, .rebindMem .., _, _, _, h | _, _, .assignFromMem .., _, _, _, h
   | _, _, .assignMem .., _, _, _, h | _, _, .delete .., _, _, _, h

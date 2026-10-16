@@ -182,6 +182,106 @@ theorem Premise.sound_updateH {U : Upd C Γ Γ'} {s : Stmt C Γ Γ'} (σ : State
       · exact hx
       · exact (h.of_noExh (Upd.globT_none_of_applyV (hd rfl hx).1) (hd rfl hx).2).elim
 
+/-- Successful sequential updates, as in `a.push() += x`, land on an
+intermediate state before computing the final state. -/
+def Upd.PairLands {Δ : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ')
+    (σ : State C Γ) (τ : State C Γ') : Prop :=
+  ∃ ρ : State C Δ, U.applyP σ = some (ρ.glob, ρ.locV) ∧
+    V.applyP ρ = some (τ.glob, τ.locV)
+
+/-- An ordinary halt in `{U} {V}`: either `U` fails without exhaustion, or
+`U` lands and `V` fails without exhaustion. For example, division by zero
+after appending a slot must not prove a returning diamond. -/
+def Upd.PairFails {Δ : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ') (σ : State C Γ) : Prop :=
+  (U.applyV σ = none ∧ U.exh σ = false) ∨
+    ∃ ρ : State C Δ, U.applyP σ = some (ρ.glob, ρ.locV) ∧
+      V.applyV ρ = none ∧ V.exh ρ = false
+
+/-- A postcondition after both updates holds in their final state; `V`
+reads the slot which `U` appended. -/
+theorem Upd.afterT_pair_of_lands {Δ : Ctx} {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+    {σ : State C Γ} {τ : State C Γ'} {P : State C Γ' → Prop}
+    (h : U.afterT m σ (fun ρ => V.afterT m ρ P)) (hs : U.PairLands V σ τ) : P τ := by
+  obtain ⟨ρ, hU, hV⟩ := hs
+  exact (h.of_lands (Upd.lands_of_applyP hU).choose_spec).of_lands
+    (Upd.lands_of_applyP hV).choose_spec
+
+/-- A non-exhaustion halt in either update refutes a diamond, including
+division by zero in the second update. -/
+theorem Upd.afterT_pair_noHalt {Δ : Ctx} {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+    {σ : State C Γ} {P : State C Γ' → Prop}
+    (h : U.afterT m σ (fun ρ => V.afterT m ρ P)) (hf : U.PairFails V σ) : m.onHalt := by
+  rcases hf with ⟨hU, hx⟩ | ⟨ρ, hU, hV, hx⟩
+  · exact h.of_noExh (Upd.globT_none_of_applyV hU) hx
+  · exact (h.of_lands (Upd.lands_of_applyP hU).choose_spec).of_noExh
+      (Upd.globT_none_of_applyV hV) hx
+
+/-- Run agreement for the two updates of `a.push() += x`, including failure
+of the append and of the arithmetic save. -/
+def Premise.UpdatesRuns {Δ : Ctx} (m : Modality) (s : Stmt C Γ Γ')
+    (U : Upd C Γ Δ) (V : Upd C Δ Γ') (σ : State C Γ) : Prop :=
+  (∀ τ, Stmt.runSt σ s = .ok τ → U.PairLands V σ τ) ∧
+    (∀ e, Stmt.runSt σ s = .error e → e ≠ .panic ∧
+      (m = .diamond → e ≠ .exhausted → U.PairFails V σ))
+
+/-- Agreement for `a.push() += x`: successful outcomes land through both
+updates; a revert fails one stage; exhaustion is allowed by both modalities.
+Panic and divergence cannot be represented by these update premises. -/
+def Upd.PairAgrees {Δ : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ') (σ : State C Γ) :
+    TRes (Out C σ.H Γ') → Prop
+  | .ok o => U.PairLands V σ o.st
+  | .error .revert => U.PairFails V σ
+  | .error .exhausted => True
+  | .error .panic | .error .diverge => False
+
+/-- Agreement with the typed run supplies both modal run conditions for
+`a.push() += x`, without an additional storage invariant. -/
+theorem Premise.updatesRuns_of_agrees {Δ : Ctx} {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+    {s : Stmt C Γ Γ'} (σ : State C Γ) (ha : U.PairAgrees V σ (s.run σ)) :
+    Premise.UpdatesRuns m s U V σ := by
+  constructor
+  · intro τ hτ
+    simp only [Stmt.runSt] at hτ
+    cases ht : s.run σ with
+    | error => rw [ht] at hτ; cases hτ
+    | ok o =>
+      rw [ht] at hτ ha
+      obtain rfl : o.st = τ := Except.ok.inj hτ
+      exact ha
+  · intro e he
+    simp only [Stmt.runSt] at he
+    cases ht : s.run σ with
+    | ok o => rw [ht] at he; cases he
+    | error e' =>
+      rw [ht] at he ha
+      obtain rfl : e' = e := Except.error.inj he
+      cases e' with
+      | revert => exact ⟨nofun, fun _ _ => ha⟩
+      | exhausted => exact ⟨nofun, fun _ hx => absurd rfl hx⟩
+      | panic | diverge => exact ha.elim
+
+/-- `{U} {V} ⟨ ω κ ⟩ φ` is sound when both updates agree with the run;
+in `a.push() += x`, arithmetic reads the newly appended slot. -/
+theorem Premise.sound_updatesH {Δ : Ctx} {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+    {s : Stmt C Γ Γ'} (σ : State C Γ) (hr : Premise.UpdatesRuns m s U V σ) :
+    Premise.Sound m s (.updates U V) σ := by
+  intro _ _ ω κ φ h
+  rw [holds_modal_iff, runSt_cons_frames]
+  cases hτ : Stmt.runSt σ s with
+  | ok τ =>
+    exact (holds_modal_iff τ ω κ φ).1 (holds_modalK τ ω κ φ
+      (Upd.afterT_pair_of_lands h (hr.1 τ hτ)))
+  | error e =>
+    obtain ⟨hp, hd⟩ := hr.2 e hτ
+    refine ⟨?_, fun he => hp (Except.error.inj he)⟩
+    cases m with
+    | box => trivial
+    | diamond =>
+      show e = .exhausted
+      by_cases hx : e = .exhausted
+      · exact hx
+      · exact (Upd.afterT_pair_noHalt h (hd rfl hx)).elim
+
 /-- **A block dropping a frame from under what it keeps**
 (`Premise.inline`). -/
 theorem Premise.sound_inline {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Thin Γ' Γ''} {s : Stmt C Γ Γ'}
@@ -428,7 +528,8 @@ theorem Premise.sound_unfoldSimH {Γ'' : Ctx} {P : Prog C Γ Γ''} {h : Ext Γ' 
 
 /-! ## What a premise asks of the typed run
 
-`Premise.Sound` reads a premise in the formulas.  For the update, a block,
+`Premise.Sound` reads a premise in the formulas. For one update, two
+sequential updates (through their intermediate typed state), a block,
 a hidden binder and a split, what the shapes above ask of the statement's
 typed run is kept as it is (`Premise.Runs`, any other kind read as
 `Premise.Sound`): the arms prove that, it gives `Premise.Sound`
@@ -436,12 +537,35 @@ typed run is kept as it is (`Premise.Runs`, any other kind read as
 (`Calculus/CallbackSound.lean`), where the rest of the program is read
 over runs that may call back. -/
 
+/-- Run conditions for `sp.push() /= se`: the true branch agrees with the
+sequential updates; the false branch simulates revert without success or panic. -/
+def Premise.GuardedUpdatesRuns {Γ Δ : Ctx} (m : Modality) (s : Stmt C Γ Γ)
+    (c : Fml C Γ) (U : Upd C Γ Δ) (V : Upd C Δ Γ) (σ : State C Γ) : Prop :=
+  c.hasTransfer = false ∧
+    (holds σ c → Premise.UpdatesRuns m s U V σ) ∧
+    (¬ holds σ c → TRes.Sim (.error .revert) (Stmt.runSt σ s))
+
+/-- `sp.push() /= se`: preserve the outer zero-divisor test and both
+updates; the false branch reverts, or exhausts at the interpreter's bound. -/
+theorem Premise.sound_guardedUpdatesH {Γ Δ : Ctx} {m : Modality}
+    {s : Stmt C Γ Γ} {c : Fml C Γ} {U : Upd C Γ Δ} {V : Upd C Δ Γ}
+    (σ : State C Γ) (hr : Premise.GuardedUpdatesRuns m s c U V σ) :
+    Premise.Sound m s (.guardedUpdates c U V) σ := by
+  intro _ _ ω κ φ h
+  by_cases hc : holds σ c
+  · exact Premise.sound_updatesH σ (hr.2.1 hc) ω κ φ (h.1 hc)
+  · have he := (holds_modal_iff σ (.cons .revert ω) κ φ).1 (h.2 hc)
+    rw [holds_modal_iff, runSt_cons_frames]
+    exact ((hr.2.2 hc).bind _).afterRunTR he
+
 /-- **What the premise `p` asks of the typed run of `s` from `σ`**, by its
 kind. -/
 def Premise.Runs (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → State C Γ → Prop
   | _, _, s, .update U, σ => (∀ τ, Stmt.runSt σ s = .ok τ → U.applyP σ = some (τ.glob, τ.locV)) ∧
       (∀ e, Stmt.runSt σ s = .error e →
         e ≠ .panic ∧ (m = .diamond → e ≠ .exhausted → U.applyV σ = none ∧ U.exh σ = false))
+  | _, _, s, .updates U V, σ => Premise.UpdatesRuns m s U V σ
+  | _, _, s, .guardedUpdates c U V, σ => Premise.GuardedUpdatesRuns m s c U V σ
   | _, _, s, .unfold P h, σ => TRes.Sim ((Prog.runSt σ P).map (State.drop h)) (Stmt.runSt σ s)
   | _, _, s, .bind _ t P, σ => ∃ v : t.TDenote C σ.H, Prog.runSt (σ.push v) P = Stmt.runSt σ s
   | _, _, s, .split _ c c' P Q, σ =>
@@ -459,6 +583,8 @@ theorem Premise.Runs.sound {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {p 
     {σ : State C Γ} (h : Premise.Runs m s p σ) : Premise.Sound m s p σ := by
   cases p with
   | update U => exact Premise.sound_updateH σ h.1 h.2
+  | updates U V => exact Premise.sound_updatesH σ h
+  | guardedUpdates c U V => exact Premise.sound_guardedUpdatesH σ h
   | unfold P e => exact Premise.sound_unfoldSimH σ h
   | bind x t P => exact Premise.sound_bindH σ h
   | split b c c' P Q =>

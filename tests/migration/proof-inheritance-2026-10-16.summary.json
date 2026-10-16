@@ -1,0 +1,72 @@
+{
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "proof",
+  "completedSources": 112,
+  "totalSources": 112,
+  "results": {
+    "internal": 231,
+    "proved": 1018,
+    "excluded": 3,
+    "skipped": 25,
+    "notRun": 109,
+    "error": 39,
+    "unsupported": 224,
+    "pending": 127,
+    "compileRejected": 13
+  },
+  "errors": 28,
+  "suites": {
+    "TestSuite.sol": {
+      "internal": 37,
+      "proved": 498,
+      "excluded": 1,
+      "skipped": 2,
+      "notRun": 15
+    },
+    "benchmark": {
+      "proved": 21,
+      "error": 13,
+      "unsupported": 18,
+      "internal": 2,
+      "pending": 3
+    },
+    "contracts": {
+      "pending": 52,
+      "proved": 22,
+      "unsupported": 10,
+      "notRun": 14,
+      "error": 1
+    },
+    "illegal": {
+      "compileRejected": 13,
+      "unsupported": 1
+    },
+    "net": {
+      "notRun": 4,
+      "pending": 12,
+      "proved": 3
+    },
+    "real-world": {
+      "proved": 39,
+      "error": 21,
+      "pending": 15,
+      "unsupported": 31,
+      "skipped": 7,
+      "internal": 8
+    },
+    "solc": {
+      "proved": 428,
+      "unsupported": 163,
+      "internal": 184,
+      "pending": 45,
+      "notRun": 76,
+      "error": 4,
+      "skipped": 16,
+      "excluded": 2
+    },
+    "unprovable": {
+      "proved": 7,
+      "unsupported": 1
+    }
+  }
+}

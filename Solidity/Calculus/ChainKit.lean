@@ -373,10 +373,11 @@ theorem Fml.StepBy.ofFocus {r : StepRule C} (hk : φ.fresh = k)
 theorem Fml.StepBy.oneStep {r : StepRule C} (h : Fml.StepBy r φ ψ) : Fml.OneStep φ ψ :=
   Fml.OneStep.ofFocus rfl h
 
-/-- The fresh index from the formula's largest. -/
-theorem Fml.fresh_eq {n : Nat} (h : φ.maxIdx = n) : φ.fresh = n + 1 := by
+/-- The fresh index is above the formula and contract-root indices. -/
+theorem Fml.fresh_eq {n r : Nat} (h : φ.maxIdx = n) (hr : C.rootMaxIdx = r) :
+    φ.fresh = max n r + 1 := by
   unfold Fml.fresh
-  rw [h]
+  rw [h, hr]
 
 theorem Fml.OneStep.unique {χ : Fml C Γ} (s : Fml.OneStep φ ψ) (t : Fml.OneStep φ χ) : ψ = χ :=
   Option.some.inj (s.symm.trans t)

@@ -507,4 +507,46 @@ open scoped Scoped
 #guard_msgs in -- a read of the ledger is outside the fragment
 #eval ((dl!{ { y := net(a) } y = 0 }).toLS true Solidity.Decide.SymS.init).isSome
 
+/-! Early normalization retains symbolic reads and refuses oversized inputs. -/
+
+open Solidity.Decide
+
+private def arrayRoot : LTm StandardExample (.path (.array .uint)) :=
+  .app0 (.root "values" rfl)
+
+private def history : Nat → LTm StandardExample .st
+  | 0 => .app0 .storage
+  | n + 1 => .app2 .pushSlot (history n) arrayRoot
+
+private def deepRead : LTm StandardExample (.val .uint) := .app2 .len (history 13) arrayRoot
+
+/-- An unknown initial length retains the symbolic read for later hypotheses. -/
+example : (LTm.app2 .len (.app0 .storage) arrayRoot).literalRead =
+    LTm.app2 .len (.app0 .storage) arrayRoot := rfl
+
+/-- Depth thirteen exceeds the shared limit: early elimination keeps the raw read. -/
+example : deepRead.literalRead = deepRead := rfl
+
+/-- A dead RHS with an over-depth storage history still short-circuits to false. -/
+example : fold2 (.binop .and rfl) (LTm.lit (p := .bool) false)
+    (.app2 (.binop .eqB rfl) deepRead.literalRead (.lit ⟨0, rfl⟩)) = LTm.lit (p := .bool) false := rfl
+
+private def wide : Nat → LTm StandardExample (.val .uint)
+  | 0 => .lit ⟨0, rfl⟩
+  | n + 1 => .app2 (.binop .add rfl) (wide n) (wide n)
+
+-- The tree contains 32,767 nodes and is rejected before early elimination.
+#guard ((wide 14).fits normalizationSize).isNone
+#guard LTm.beqR (wide 14).literalRead (wide 14)
+
+private def SignedReads : Contract := contract!{ int[] values; }
+private def signedFalse : Fml SignedReads [] := dl[SignedReads]{ [
+    delete values; values.push() -= 4; −−values.push(); values.push()−−;
+    assert(values[2] == 0); ] true }
+
+-- A wrong signed result is still an open obligation after the new normalization.
+#guard match Seq.residueWithin 256 .all .nil signedFalse with
+  | some leaves => !leaves.isEmpty
+  | none => false
+
 end Solidity.Examples.Tactics.Decide

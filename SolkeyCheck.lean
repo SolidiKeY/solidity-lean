@@ -11,8 +11,9 @@ artifact it models).
 
 Path resolution: `--key <path>` > `SOLKEY_RULES` env var > the default
 relative location of a solkey checkout beside this repository
-(`../solkey`). A missing file is a warning + exit 0; a parse anomaly is
-exit 2; any conformance mismatch is exit 1.
+(`../solkey`). An absent default checkout is a warning + exit 0. An explicitly
+selected missing file or a parse anomaly is exit 2; any conformance mismatch
+is exit 1.
 
 `--list` prints the parsed reads per read-bearing taclet — use it to
 update `SortCheck/Annotations.lean` after a legitimate upstream change.
@@ -61,6 +62,9 @@ def main (args : List String) : IO UInt32 := do
     | some p => pure (System.FilePath.mk p)
     | none => pure defaultKeyPath
   unless (<- path.pathExists) do
+    if opts.keyPath.isSome || envPath.isSome then
+      IO.eprintln s!"solkeycheck: ERROR — explicitly selected rules file {path} not found"
+      return 2
     IO.eprintln s!"solkeycheck: SKIPPED — {path} not found \
       (set SOLKEY_RULES or pass --key <path>)"
     return 0

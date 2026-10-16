@@ -507,9 +507,9 @@ theorem storagePush_unfold_leftFstReceiver :
     dl![m]{ ⟨[ bucket.tokens.push(); ]⟩ φ }
     ~[storagePush_unfold_leftFstReceiver]~> dl![m]{ ⟨[ Token[] storage sp1 = bucket.tokens; sp1.push(); ]⟩ φ }
     ~*> dl![m]{ { sp1 := bucket.tokens } ⟨[ sp1.push(); ]⟩ φ }
-    ~*> dl![m]{ { sp1 := bucket.tokens } { storage := save(storage, sp1.length, sp1.length + 1) } φ }
+    ~*> dl![m]{ { sp1 := bucket.tokens } { storage := save(delAt(storage, sp1[sp1.length]), sp1.length, sp1.length + 1) } φ }
     ~[sequentialToParallel]~> dl![m]{ { sp1 := bucket.tokens ‖
-        storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } := by
+        storage := save(delAt(storage, bucket.tokens[bucket.tokens.length]), bucket.tokens.length, bucket.tokens.length + 1) } φ } := by
   sol_chain
 #last_line storagePush_unfold_leftFstReceiver
 
@@ -524,7 +524,7 @@ def storagePushLengthSave :
 /-- `tokens.push();` -/
 def storagePushLengthSaveReferenceElement :
     dl![m]{ ⟨[ tokens.push(); ]⟩ φ }
-    ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } φ } := by
+    ~*> dl![m]{ { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } φ } := by
   sol_chain
 #last_line storagePushLengthSaveReferenceElement
 
@@ -536,9 +536,9 @@ theorem storageLocalRootPush_unfold_leftFstReceiver (φ : Post Coverage [.alias 
     ~[storageLocalRootPush_unfold_leftFstReceiver]~>
       dl![m]{ ⟨[ Token[] storage sp1 = bucket.tokens; sp = sp1.push(); ]⟩ φ where Token storage sp }
     ~*> dl![m]{ { sp1 := bucket.tokens } ⟨[ sp = sp1.push(); ]⟩ φ }
-    ~*> dl![m]{ { sp1 := bucket.tokens } { storage := save(storage, sp1.length, sp1.length + 1) ‖ sp := sp1[sp1.length] } φ }
+    ~*> dl![m]{ { sp1 := bucket.tokens } { storage := save(delAt(storage, sp1[sp1.length]), sp1.length, sp1.length + 1) ‖ sp := sp1[sp1.length] } φ }
     ~[sequentialToParallel]~> dl![m]{ { sp1 := bucket.tokens ‖
-        storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) ‖
+        storage := save(delAt(storage, bucket.tokens[bucket.tokens.length]), bucket.tokens.length, bucket.tokens.length + 1) ‖
         sp := bucket.tokens[bucket.tokens.length] } φ } := by
   sol_chain
 #last_line storageLocalRootPush_unfold_leftFstReceiver
@@ -547,7 +547,7 @@ theorem storageLocalRootPush_unfold_leftFstReceiver (φ : Post Coverage [.alias 
 def storageLocalRootPushBind (φ : Post Coverage [.alias (.struct "Token")]) :
     dl![m]{ ⟨[ sp = tokens.push(); ]⟩ φ where Token storage sp }
     ~*>
-      dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] } φ } := by
+      dl![m]{ { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] } φ } := by
   sol_chain
 #last_line storageLocalRootPushBind
 

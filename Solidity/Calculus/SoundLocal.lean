@@ -203,6 +203,7 @@ theorem localStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C 
     Premise.Runs m (.assignLocal i v) q σ := by
   cases v with
   | simple s => cases hs; exact sound_setLocal σ i _
+  | modular op a b modulus => cases hs; exact sound_setLocal σ i _
   | read l =>
     exact SHole.readStep_sound σ k (.local i) l
       (fun _ _ _ _ h => by cases h; exact sound_setLocal σ i _)
@@ -267,7 +268,9 @@ theorem rebindStep_sound (k : Nat) {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs
   | push b hd =>
     simp only [rebindStep] at hs
     split at hs
-    · cases hs; exact sound_rebindPush σ i b hd
+    · split at hs
+      · cases hs; exact sound_rebindPushMapping σ i b hd (by assumption)
+      · cases hs; exact sound_rebindPush σ i b hd
     · cases hs; exact sound_rebindPushCapture σ i b hd _
 
 /-! ### Compound assignment and `++`/`--` -/

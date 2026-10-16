@@ -79,6 +79,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
   let h0 ← IO.getNumHeartbeats
   setGoals [g]
   evalTactic (← `(tactic| sol_prove))
+  let steps := Derive.replaySteps (← instantiateMVars (.mvar g))
   let leaves ← getUnsolvedGoals
   let mut hb : Nat := (← IO.getNumHeartbeats) - h0
   let mut found : List (Lean.Name × Array String) := []
@@ -98,7 +99,7 @@ def evalSolProveQCore : Tactic := fun stx => withMainContext do
     logWarning m!"sol_prove?: the replay needs about {hb / 1000} heartbeats in one \
       declaration, past `maxHeartbeats`"
   setGoals (open_ ++ rest)
-  ProofTree.suggest stx[0] (Derive.replayLines found)
+  ProofTree.suggest stx[0] (Derive.replayLines found steps)
 
 /-! ## A scoped formula refuted at a state
 

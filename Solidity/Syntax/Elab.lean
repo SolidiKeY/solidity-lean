@@ -108,6 +108,21 @@ inductive LocalTy where
 /-- The locals in scope, most recent first. -/
 abbrev ECtx := List (Name × LocalTy)
 
+/-- Parameters retain their declared data locations in the function frame. -/
+def FunDecl.paramCtx (d : FunDecl) : Except String ECtx :=
+  d.params.reverse.mapM fun (n, T) => match T with
+    | .prim p =>
+      if (lookupBy n d.paramLocs).isSome then
+        .error s!"data location on value parameter {n}"
+      else .ok (n, .val p ((lookupBy n d.widths).getD 256))
+    | .ref R => match lookupBy n d.paramLocs with
+      | some .storage => .ok (n, .alias R)
+      | some .memory =>
+        if (Ty.ref R).mapFree then .ok (n, .mem R)
+        else .error s!"memory parameter {n} holds a mapping"
+      | some .calldata => .error s!"calldata parameter {n} is not supported"
+      | none => .error s!"reference parameter {n} needs a data location"
+
 /-- A type as read, against the contract: a primitive type (`PrimTy.ofName?`),
 an enum of `C` (a `uint`, as a state variable of it is), a struct of
 `structDef`.  Any other name is refused (`unknownStructMsg`: a struct
@@ -192,6 +207,7 @@ partial def RawExpr.toStr (e : RawExpr) (top : Bool := true) : String :=
   | .incDec op e => IncDec.show op (e.toStr false)
   | .newArr T n => s!"new {T.toStr}({n.toStr})"
   | .call f as => s!"{f}({", ".intercalate (as.map (·.toStr))})"
+  | .modular op a b k => s!"{op.toStr}({a.toStr}, {b.toStr}, {k.toStr})"
   | .named f ns as =>
     s!"{f}(\{{", ".intercalate ((ns.zip as).map fun (n, a) => s!"{n}: {a.toStr}")}})"
   | .env k => k.toStr
@@ -203,6 +219,7 @@ def RawExpr.any (p : RawExpr → Bool) (e : RawExpr) : Bool :=
     | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => a.any p
     | .index a b | .binop _ a b => a.any p || b.any p
     | .ternary c a b => c.any p || a.any p || b.any p
+    | .modular _ a b k => a.any p || b.any p || k.any p
     | .call _ as | .named _ _ as | .tuple as => as.attach.any fun ⟨a, _⟩ => a.any p
     | .num _ | .name _ | .bool _ | .env _ => false
 
@@ -219,6 +236,7 @@ partial def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
   | .incDec op a => return .incDec op (← a.mapM f)
   | .newArr T n => return .newArr T (← n.mapM f)
   | .call g as => return .call g (← as.mapM (·.mapM f))
+  | .modular op a b k => return .modular op (← a.mapM f) (← b.mapM f) (← k.mapM f)
   | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
   | .tuple as => return .tuple (← as.mapM (·.mapM f))
   | e => pure e
@@ -230,6 +248,7 @@ def RawExpr.names : RawExpr → List String
   | .index a b | .binop _ a b => a.names ++ b.names
   | .ternary c a b => c.names ++ a.names ++ b.names
   | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
+  | .modular _ a b k => a.names ++ b.names ++ k.names
   | .named _ _ as | .tuple as => as.attach.flatMap fun ⟨a, _⟩ => a.names
   | .num _ | .bool _ | .env _ => []
 
@@ -256,6 +275,13 @@ arguments: put in its parameters' order, `f(a, b)`, as solkey's parser
 does.  Any other `T({…})` is left to `hoist`, a struct's constructor. -/
 def RawExpr.orderNamed (funs : List (Name × FunDecl)) : RawExpr → Except String RawExpr :=
   RawExpr.mapM fun
+    | .call f as =>
+      if funs.any (·.1 == f) then pure (.call f as)
+      else if let some op := ModOp.ofName? f then
+        match as with
+        | [a, b, k] => pure (.modular op a b k)
+        | _ => throw s!"{f} takes three uint arguments"
+      else pure (.call f as)
     | .named f ns as => match funs.find? (·.1 == f) with
       | some (_, d) => do
         let ps := d.params.map (·.1)
@@ -326,9 +352,9 @@ def RawExpr.maxIdxs [FreshNames] (es : List RawExpr) : Nat :=
 /-- A statement's own expressions, in the order it is written (not those of
 its blocks). -/
 def RawStmt.exprs : RawStmt → List RawExpr
-  | .assign l r | .assignPush l r | .opAssign _ l r | .assignIncDec l _ r => [l, r]
+  | .assign l r | .assignPush l r | .opAssign _ l r | .pushOpAssign _ l r | .assignIncDec l _ r => [l, r]
   | .decl _ _ i | .declStorage _ _ i | .declMemory _ _ i | .ret i => i.toList
-  | .declStoragePush _ _ b | .declPush _ _ b | .delete b | .incDec _ b | .require b | .assert b
+  | .declStoragePush _ _ b | .declPush _ _ b | .delete b | .incDec _ b | .pushIncDec _ b | .require b | .assert b
   | .ite b _ _ => [b]
   | .call f as => f :: as
   | .eval as => as
@@ -363,6 +389,7 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .assign l r => return .assign (← f l) (← f r)
   | .assignPush l r => return .assignPush (← f l) (← f r)
   | .opAssign op l r => return .opAssign op (← f l) (← f r)
+  | .pushOpAssign op b r => return .pushOpAssign op (← f b) (← f r)
   | .assignIncDec l op r => return .assignIncDec (← f l) op (← f r)
   | .decl T x i => return .decl T x (← i.mapM f)
   | .declStorage T x i => return .declStorage T x (← i.mapM f)
@@ -372,6 +399,7 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .declPush T x b => return .declPush T x (← f b)
   | .delete b => return .delete (← f b)
   | .incDec op b => return .incDec op (← f b)
+  | .pushIncDec op b => return .pushIncDec op (← f b)
   | .require b => return .require (← f b)
   | .assert b => return .assert (← f b)
   | .ite c t e => return .ite (← f c) t e
@@ -693,6 +721,7 @@ def Val.vars {Γ : Ctx} (ns : List Var) : {p : PrimTy} → Val C Γ p → List V
   | _, .readMem l => l.vars ns
   | _, .len b _ => b.vars ns
   | _, .mlen b _ => b.vars ns
+  | _, .modular _ a b k => a.vars ns ++ b.vars ns ++ k.vars ns
 
 end
 
@@ -705,6 +734,10 @@ def Args.separated {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → 
   | _, .nil => true
   | _, .snoc as _ _ e =>
     as.separated ns && (e.isSimple || (e.vars ns).all fun y => !as.names.contains y)
+  | _, .snocStorage as _ _ e =>
+    as.separated ns && (e.vars ns).all fun y => !as.names.contains y
+  | _, .snocMemory as _ _ e =>
+    as.separated ns && (e.vars ns).all fun y => !as.names.contains y
 
 mutual
 /-- A memory path that indexes nothing: a local and its members, which a
@@ -834,6 +867,11 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     | false => throw s!"operator {UnOp.sym op} does not take {p.toStr}"
   | .incDec .. => throw "`++` or `−−` under a short-circuit operator or in a conditional's branch"
   | .newArr .. => throw "`new` stands only on the right of `=`"
+  | .modular op a b k => do
+    let m ← check Γ .uint k
+    if let .simple (.lit n _) := m then
+      if n == 0 then throw s!"{op.toStr}: arithmetic modulo zero"
+    pure (.val .uint (.modular op (← check Γ .uint a) (← check Γ .uint b) m))
   | .call f _ => throw s!"the call {f}(…) under a short-circuit operator or in a conditional's branch"
   | .named f .. => throw s!"the constructor {f}(\{…}) under a short-circuit operator or in a conditional's branch"
   | .env k => pure (.val .uint (.simple (.env k rfl)))
@@ -887,6 +925,36 @@ def checkPath (Γ : NCtx) (T : Ty) (e : RawExpr) : Except String (SPath C Γ.ctx
     else throw s!"{e.toStr}: a storage reference to a {T'} where a {T} is expected"
   | .mpath .. | .val .. => throw "a value where a storage reference is expected"
 
+/-- A storage-copy source, retaining a compatible fixed-array shape change
+as one intrinsic source rather than expanding it into element writes. -/
+def checkStorageCopy (Γ : NCtx) (R : RefTy) (e : RawExpr) : Except String (Src C Γ.ctx (.ref R)) := do
+  match ← synth C Γ e with
+  | .path T p =>
+    if ht : T = .ref R then
+      match hm : (Ty.ref R).mapFree with
+      | true => pure (.copy (ht ▸ p) hm)
+      | false => throw "a storage copy of a type that holds a mapping"
+    else match T, p with
+      | .ref (.fixed E n), p =>
+        match hm : E.mapFree with
+        | false => throw "a storage copy of a type that holds a mapping"
+        | true =>
+          match R with
+          | .array E' =>
+            if he : E = E' then
+              if hb : n < 2 ^ 256 then
+                pure (he ▸ Src.fixedCopy p (.dynamic hb) hm)
+              else throw "a fixed-array length exceeds the dynamic-array bound"
+            else throw "an array copy changes its element type"
+          | .fixed E' m =>
+            if he : E = E' then
+              if hf : n ≤ m then pure (he ▸ Src.fixedCopy p (.fixed m hf) hm)
+              else throw "a fixed-array copy would truncate source elements"
+            else throw "an array copy changes its element type"
+          | _ => throw s!"{e.toStr}: incompatible storage-copy shapes {T} and {Ty.ref R}"
+      | _, _ => throw s!"{e.toStr}: a storage reference to a {T} where a {Ty.ref R} is expected"
+  | _ => throw "a value where a storage reference is expected"
+
 /-- `e` as a memory path of type `T`. -/
 def checkMPath (Γ : NCtx) (T : Ty) (e : RawExpr) : Except String (MPath C Γ.ctx T) := do
   match ← synth C Γ e with
@@ -916,14 +984,11 @@ def elabPush (Γ : NCtx) (R : RefTy) (b : RawExpr) : Except String (ARhs C Γ.ct
   | true => pure (.push (← checkPath C Γ (.array (.ref R)) b) hd)
   | false => throw "push() of an element whose default is not well-formed"
 
-/-- The array `y = b.push();` grows, `y` a value local: `uint y = values.push();`.
-solkey has no unfold for a receiver that is not simple, so one is refused. -/
+/-- The typed array `y = b.push();` grows. Receiver capture belongs to the
+calculus so its named rule remains visible in a derivation. -/
 def elabPrimPush (Γ : NCtx) (p : PrimTy) (b : RawExpr) :
-    Except String ((b : SPath C Γ.ctx (.array (.prim p))) ×' b.isSimple = true) := do
-  let b ← checkPath C Γ (.array (.prim p)) b
-  match hs : b.isSimple with
-  | true => pure ⟨b, hs⟩
-  | false => throw "`= b.push()` into a value local: the receiver is not simple"
+    Except String (SPath C Γ.ctx (.array (.prim p))) :=
+  checkPath C Γ (.array (.prim p)) b
 
 /-- `x` may be declared: it is neither a local in scope nor a state variable. -/
 def checkFresh (Γ : ECtx) (x : Name) : Except String Unit :=
@@ -944,6 +1009,9 @@ structure ElabScope where
   name in one is a local, which an effect may write, not a capture
   (`captureExpr`). -/
   inlined : List (Nat × Nat) := []
+  /-- Names supplied by imported source, including fresh-shaped user locals
+  such as `se1`. They are mutable values, never written-out captures. -/
+  mutableFreshNames : List String := []
 
 /-- Elaboration threads the locals in scope, newest first, and the index of
 the next variable a capture declares, and reads its scope (`ElabScope`). -/
@@ -1174,6 +1242,8 @@ partial def narrowPure (Γ : ECtx) : RawExpr → Except String RawExpr
   | .incDec op e => do pure (.incDec op (← narrowPure Γ e))
   | .newArr T e => do pure (.newArr T (← narrowPure Γ e))
   | .call f as => do pure (.call f (← as.mapM (narrowPure Γ)))
+  | .modular op a b k => do
+    pure (.modular op (← narrowPure Γ a) (← narrowPure Γ b) (← narrowPure Γ k))
   | .named f ns as => do pure (.named f ns (← as.mapM (narrowPure Γ)))
   | e => pure e
 
@@ -1245,7 +1315,9 @@ def captureExpr (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   if e.isLit || e matches .bool _ then return ([], e)
   if let .name x := e then
     if let .fresh _ i := Var.ofName x then
-      unless (← read).inlined.any fun (k₀, k₁) => k₀ ≤ i && i < k₁ do return ([], e)
+      let sc ← read
+      unless (C.rootType x).isSome || sc.mutableFreshNames.contains x ||
+          sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁) do return ([], e)
   let ⟨Γ, t⟩ ← synthM C e
   match e, t with
   | .name _, .path (.ref _) _ | .name _, .mpath (.ref _) _ => return ([], e)
@@ -1686,6 +1758,8 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | .incDec op l => do
         pure (.opAssign (if op.isIncrement then .addW else .subW) (← l.uncheck) (.num 1))
       | .assignIncDec .. => throw "`v = x++;` inside `unchecked`: write `v = x; x += 1;`"
+      | .pushOpAssign .. | .pushIncDec .. =>
+        throw "push arithmetic inside `unchecked` is not supported"
       | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
       | .block b => do pure (.block (← uncheckStmts b))
@@ -1708,12 +1782,13 @@ def refReturnMsg (f : String) (T : Ty) : String :=
 
 /-- What a call returns, before the context it is read in is known: nothing,
 the value of `r`, the return variables `rs` (a tuple's, an obligation's), or
-the memory return `r`. -/
+the memory or storage return `r`. -/
 inductive RetKind where
   | none
   | val (p : PrimTy) (r : Var)
   | rets (rs : List (PrimTy × Var))
   | mem (R : RefTy) (r : Var)
+  | storage (R : RefTy) (r : Var)
 
 mutual
 
@@ -1836,6 +1911,26 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     if ns != flds && args.any (·.hasIncDec) then
       throw s!"{f}(\{…}): an argument with an effect, out of the members' order"
     hoist (.call f (flds.map fun g => (lookupBy g (ns.zip args)).getD (.num 0)))
+  | .modular op a b k => do
+    -- Reject a statically zero modulus before captures can hide the literal.
+    if let .ok (.simple (.lit n _)) := check C (← nctx) .uint k then
+      if n == 0 then throw s!"{op.toStr}: arithmetic modulo zero"
+    -- Legacy solc checks the modulus before evaluating the other arguments.
+    -- Save it once: an operand's later effects may change its source.
+    let (P, k) ← hoist k
+    let (Pc, k) ← captureExpr C k
+    let Γ ← nctx
+    let guard ← checkIn C Γ .bool (.binop .neB k (.num 0))
+    let (Q, args) ← hoistArgs [b, a]
+    let [b, a] := args | throw "internal: modular argument capture changed arity"
+    pure (P ++ Pc ++ [.of Γ (.require guard)] ++ Q, .modular op a b k)
+  | .newArr T n => do
+    let (P, n) ← hoist n
+    let ⟨R, hR⟩ ← elabNewTy C T
+    let (Q, ⟨Γ, se⟩) ← elabSize C n
+    let x ← captureAs C "mv" (.mem R)
+    pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
+      (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
   | .call f args => do
     if (castTy? f).isSome then
       let [a] := args | throw s!"a cast {f}(…) takes one argument"
@@ -1855,7 +1950,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         (flds.zip args).map fun ((g, _), a) => .assign (.field (.name x) g) a)
       return (P ++ Q, .name x)
     -- a call inside an expression runs before the statement, into a fresh local
-    let (P, args) ← hoistArgs args
+    let (P, args) ← hoistCallArgs f args
     let some (_, d) := (← read).funs.find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
     match d.ret with
       | some (r, .prim p) =>
@@ -1866,6 +1961,12 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         declare C (toString x) (.val p n)
         pure (P ++ [.of Γ (.declLocal p x none)] ++ Q, .name (toString x))
       | some (_, .ref R) =>
+        if d.retStorage then
+          let x ← freshCapture "sp"
+          let Q ← elabStorageCall f args R fun Γ r =>
+            pure (.of ((r, .alias R) :: Γ) (.declStorage R x (some (.path (.alias .here)))))
+          declare C (toString x) (.alias R)
+          return (P ++ Q, .name (toString x))
         -- `Account memory mv1 = makeAccount();`
         let x ← freshCapture "mv"
         let Q ← elabMemCall f args R fun Γ r hm =>
@@ -1920,6 +2021,56 @@ partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
     let (Q, as) ← hoistArgs as
     pure (P ++ Pc ++ Q, a :: as)
 
+/-- Prepare a reference call in argument order. Storage-to-memory conversion
+copies at the argument's evaluation point; every reference's identity and
+each scalar read are held before a later argument can change them. Calls
+with only value parameters retain the ordinary capture policy. -/
+partial def hoistCallArgs (f : String) (args : List RawExpr) :
+    ElabM (SProg C × List RawExpr) := do
+  let funs := (← read).funs
+  let d := if f == "constructor" then C.ctor else lookupBy f funs
+  let some d := d | return ← hoistArgs args
+  unless d.params.any (fun (_, T) => T matches .ref _) do return ← hoistArgs args
+  unless d.params.length == args.length do
+    throw s!"{f} takes {d.params.length} arguments, not {args.length}"
+  let mut P : SProg C := []
+  let mut prepared : List RawExpr := []
+  for ((n, T), a) in d.params.zip args do
+    let (Q, a) ← hoist a
+    P := P ++ Q
+    let Γ ← nctx
+    let (Q, a) ← match T with
+      | .prim p => do
+        if (lookupBy n d.paramLocs).isSome then
+          throw s!"{f}: data location on value parameter {n}"
+        ElabM.lift (fitCheck C (← ctx) p ((lookupBy n d.widths).getD 256) a)
+        captureExpr C a
+      | .ref R => do
+        let stable ← match a with
+          | .name n => match Var.ofName n with
+            | .fresh _ i => do
+              let sc ← read
+              pure (!(C.rootType n).isSome && !sc.mutableFreshNames.contains n &&
+                !sc.inlined.any (fun (k₀, k₁) => k₀ ≤ i && i < k₁))
+            | _ => pure false
+          | _ => pure false
+        match lookupBy n d.paramLocs with
+        | some .storage =>
+          let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
+          if stable then pure ([], a) else do
+          let x ← captureAs C "sp" (.alias R)
+          pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
+        | some .memory =>
+          let rhs ← ElabM.lift (elabMRhs C Γ R a)
+          if stable && (rhs matches .alias _) then pure ([], a) else do
+          let x ← captureAs C "mv" (.mem R)
+          pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
+        | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
+        | none => throw s!"{f}: reference parameter {n} needs a data location"
+    P := P ++ Q
+    prepared := prepared ++ [a]
+  pure (P, prepared)
+
 /-- **A call, inlined** (KeY's `FunctionBodyStatement`, then its body): `f`
 is found among the functions the scope may call, its arguments are checked
 at its parameters' types in the caller's scope, and its body is elaborated in
@@ -1940,11 +2091,66 @@ partial def elabMemCall (f : String) (args : List RawExpr) (R : RefTy)
     ElabM (SProg C) := do
   let (P, r, _) ← elabCallRet f args none
   match r with
-  | some ⟨Γ, R', r⟩ =>
+  | some ⟨Γ, R', r, storage⟩ =>
+    if storage then throw s!"{f} returns a storage reference, not a memory reference"
     unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
     let ⟨hm⟩ ← ElabM.lift (memOk R)
     pure (P ++ [← ElabM.lift (bind Γ r hm)])
   | none => throw s!"{f} does not return a memory reference"
+
+/-- Bind the alias exported by a storage-returning call, without a copy or
+an allocation. The return variable is the newest local after the call. -/
+partial def elabStorageCall (f : String) (args : List RawExpr) (R : RefTy)
+    (bind : (Γ : NCtx) → Var → Except String (SStmt C)) : ElabM (SProg C) := do
+  let (P, result, _) ← elabCallRet f args none
+  match result with
+  | some ⟨Γ, R', r, storage⟩ =>
+    unless storage do throw s!"{f} returns a memory reference, not a storage reference"
+    unless R' = R do throw s!"{f} returns a {Ty.ref R'}, not a {Ty.ref R}"
+    pure (P ++ [← ElabM.lift (bind Γ r)])
+  | none => throw s!"{f} does not return a storage reference"
+
+/-- Retain `f().push(e)` or `f().pop()` as the calculus's native receiver
+statement. The callee is elaborated in its frame, without exporting a caller local. -/
+partial def elabCallReceiver (f : String) (args : List RawExpr)
+    (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) :
+    ElabM (SProg C) := do
+  let (P, _, _) ← elabCallRet f args none
+  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
+  match s with
+  | .call f args (.storage (.array E) r) body =>
+    pure [.of Γ (.callReceiver f args r body (← op Γ E))]
+  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
+
+/-- Keep an effectful operand inside `f().push(e)`, in a private caller scope.
+Its prefix is expanded only after the getter has been captured by the taclet. -/
+partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr) :
+    ElabM (SProg C) := do
+  let caller ← ctx
+  let (P, _, _) ← elabCallRet f args none
+  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
+  match s with
+  | .call f args (.storage (.array E) r) body =>
+    let (Q, a) ← hoist a
+    let Γv ← nctx
+    let value ← (match E with
+      | .prim p => do pure (Src.val (← checkIn C Γv p a))
+      | .ref R => do
+        if let .mpath (.ref _) _ ← ElabM.lift (synth C Γv a) then
+          pure (Src.copyMem (← ElabM.lift (checkMPath C Γv (.ref R) a)))
+        else ElabM.lift (checkStorageCopy C Γv R a)
+      : ElabM (Src C Γv.ctx E))
+    let result ← if Q.isEmpty then do
+      let h ← ElabM.lift (Γv.wkTo Γ)
+      pure (.of Γ (.callReceiver f args r body (.push (some (value.wk h)) rfl)))
+    else do
+      let ⟨Δ, code⟩ ← ElabM.lift (SProg.chain Γ.names Γ.ctx Q)
+      let some h := Γv.thinInto (code.outNames Γ.names) Δ |
+        throw "internal: a deferred receiver operand left an unmatched local scope"
+      pure (.of Γ (.callReceiverPush f args r body code (value.wk h)))
+    modify fun (_, k) => (caller, k)
+    pure [result]
+  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
 
 /-- `elabCall`, and the fresh return variable of a callee that returns a
 memory reference, with its type and the caller's context: the call's frame
@@ -1961,7 +2167,7 @@ the call is read in the context it pushes, its arguments where `res` is not
 yet in scope. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
     (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false) :
-    ElabM (SProg C × Option (NCtx × RefTy × Var) × List (PrimTy × Var × Nat)) := do
+    ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
   let funs := (← read).funs
   -- the callee and the functions its body may call: the constructor (`elabCtor`)
   -- may call every function, a function those declared before it
@@ -1979,15 +2185,34 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   -- the frame: the parameters, then the return variables, each newest first
   let mut Γp : ECtx := []
   for ((n, T), a) in d.params.zip args do
-    let .prim p := T | throw s!"{f}: the parameter {n} has a reference type"
-    let w := (lookupBy n d.widths).getD 256
-    ElabM.lift (fitCheck C Γ p w a)
-    let e ← checkIn C Γn p a
-    let x ← freshCapture "se"
-    targs := ⟨_, targs.2.snoc p x e⟩
-    ρ := (n, toString x) :: ρ
-    Γp := (toString x, .val p w) :: Γp
-  let mut mret : Option (RefTy × Var) := none
+    match T with
+    | .prim p =>
+      if (lookupBy n d.paramLocs).isSome then
+        throw s!"{f}: data location on value parameter {n}"
+      let w := (lookupBy n d.widths).getD 256
+      ElabM.lift (fitCheck C Γ p w a)
+      let e ← checkIn C Γn p a
+      let x ← freshCapture "se"
+      targs := ⟨_, targs.2.snoc p x e⟩
+      ρ := (n, toString x) :: ρ
+      Γp := (toString x, .val p w) :: Γp
+    | .ref R =>
+      match lookupBy n d.paramLocs with
+      | some .storage =>
+        let e ← ElabM.lift (checkPath C Γn (.ref R) a)
+        let x ← freshCapture "sp"
+        targs := ⟨_, targs.2.snocStorage R x e⟩
+        ρ := (n, toString x) :: ρ
+        Γp := (toString x, .alias R) :: Γp
+      | some .memory =>
+        let e ← ElabM.lift (checkMPath C Γn (.ref R) a)
+        let x ← freshCapture "mv"
+        targs := ⟨_, targs.2.snocMemory R x e⟩
+        ρ := (n, toString x) :: ρ
+        Γp := (toString x, .mem R) :: Γp
+      | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
+      | none => throw s!"{f}: reference parameter {n} needs a data location"
+  let mut mret : Option (RefTy × Var × Bool) := none
   let mut mrets : List (PrimTy × Var × Nat) := []
   let mut Γr : ECtx := []
   let kind ← match d.rets, res with
@@ -1997,15 +2222,24 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | [], some _ => throw s!"{f} returns no value"
     | [(n, .ref R)], none => do
       if targets then throw s!"{f} returns a {Ty.ref R}, which a tuple assignment does not take"
-      unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs the location `memory`"
-      let r ← freshCapture "mv"
-      ρ := (n, toString r) :: ρ
-      Γr := [(toString r, .mem R)]
-      mret := some ⟨R, r⟩
-      pure (RetKind.mem R r)
-    | [(_, .ref R)], some (_, q) => throw s!"{f} returns a memory {Ty.ref R}, not a {q.toStr}"
+      if d.retMem && d.retStorage then throw s!"{f}: its return has two data locations"
+      if d.retStorage then
+        let r ← freshCapture "sp"
+        ρ := (n, toString r) :: ρ
+        Γr := [(toString r, .alias R)]
+        mret := some ⟨R, r, true⟩
+        pure (RetKind.storage R r)
+      else
+        unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs `memory` or `storage`"
+        let r ← freshCapture "mv"
+        ρ := (n, toString r) :: ρ
+        Γr := [(toString r, .mem R)]
+        mret := some ⟨R, r, false⟩
+        pure (RetKind.mem R r)
+    | [(_, .ref R)], some (_, q) => throw s!"{f} returns a reference {Ty.ref R}, not a {q.toStr}"
     | [(n, .prim p)], res => do
       if d.retMem then throw s!"{f}: `memory` on its return of value type {p.toStr}"
+      if d.retStorage then throw s!"{f}: `storage` on its return of value type {p.toStr}"
       if let some (_, q) := res then
         unless q = p do throw s!"{f} returns a {p.toStr}, not a {q.toStr}"
       let w := (lookupBy n d.widths).getD 256
@@ -2020,6 +2254,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | rs, some _ => throw s!"{f} returns {rs.length} values, which a tuple assignment takes"
     | rs, none => do
       if d.retMem then throw s!"{f}: `memory` on a return of a function of several returns"
+      if d.retStorage then throw s!"{f}: `storage` on a return of a function of several returns"
       for (n, T) in rs do
         let .prim p := T | throw s!"{f}: its return {n} has a reference type"
         let w := (lookupBy n d.widths).getD 256
@@ -2040,7 +2275,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
   let k₁ := (← get).2
   modify fun (_, k) => (Γf, k)
-  let P ← withReader (fun sc => { funs := scope, top := false, inlined := (k₀, k₁) :: sc.inlined })
+  let P ← withReader (fun sc => { sc with funs := scope, top := false, inlined := (k₀, k₁) :: sc.inlined })
     (elabStmtsP body)
   modify fun (_, k) => (Γ, k)
   -- the call's context: the caller's, with `res` pushed when the statement
@@ -2076,8 +2311,11 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.mem R] ++ ps) P)
         pure (.of Γs (.call f as (.mem R r hd hm) b))
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
+    | .storage R r =>
+      let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.alias R] ++ ps) P)
+      pure (.of Γs (.call f as (.storage R r) b))
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
-  pure ([call], mret.map fun (R, r) => (Γs, R, r), mrets)
+  pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
 
 /-- **`constructor(args);`**, a deployment (solkey's obligation's
 `constructor(x̄)@C;`): the constructor inlined as any call is
@@ -2098,35 +2336,50 @@ statement left: a right-hand side before the left-hand side, as the
 interpreter evaluates them, a receiver before an argument.  A branch's statements are elaborated on their
 own. -/
 partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
+  | .pushOpAssign op b r => do
+    let (P, r) ← hoist r
+    let (Pc, r) ← if b.hasIncDec then captureExpr C r else pure ([], r)
+    let (Q, b) ← hoist b
+    pure (P ++ Pc ++ Q, .pushOpAssign op b r)
+  | .pushIncDec op b => do
+    let (P, b) ← hoist b
+    pure (P, .pushIncDec op b)
   | .assign l r => do
-    -- `m = f(a);` to a memory local: its arguments only (`elabStmt1`)
+    -- `m = f(a);` to a reference local: its arguments only (`elabStmt1`)
     if let .call f args := r then
-      if (← read).funs.any (·.1 == f) && synth C (← nctx) l matches .ok (.mpath (.ref _) (.var ..)) then
-        let (P, args) ← hoistArgs args
+      let isRefLocal := match synth C (← nctx) l with
+        | .ok (.mpath (.ref _) (.var ..)) | .ok (.path (.ref _) (.alias ..)) => true
+        | _ => false
+      if (← read).funs.any (·.1 == f) && isRefLocal then
+        let (P, args) ← hoistCallArgs f args
         return (P, .assign l (.call f args))
     match r, synth C (← nctx) l with
     | .incDec op e, .ok (.val _ (.simple (.local _))) =>
       let (P, e) ← hoist e
       pure (P, .assignIncDec l op e)
     | .newArr T n, _ =>
+      let (P, n) ← hoist n
+      let (Pc, n) ← if l.hasIncDec then captureExpr C n else pure ([], n)
       let (Q, l) ← hoist l
-      pure (Q, .assign l (.newArr T n))
+      pure (P ++ Pc ++ Q, .assign l (.newArr T n))
     | .call f args, .ok (.val _ (.simple (.local _))) =>
       if (castTy? f).isSome then hoistAssign l r
       else
-        let (P, args) ← hoistArgs args
+        let (P, args) ← hoistCallArgs f args
         pure (P, .assign l (.call f args))
     | _, _ => hoistAssign l r
   | .decl T x (some (.call f args)) => do
     if (castTy? f).isSome then
       let (P, r) ← hoist (.call f args)
       return (P, .decl T x (some r))
-    let (P, args) ← hoistArgs args
+    let (P, args) ← hoistCallArgs f args
     pure (P, .decl T x (some (.call f args)))
   | .decl T x (some r) => do
     let (P, r) ← hoistTop r
     pure (P, .decl T x (some r))
-  | .declMemory T x (some (.newArr T' n)) => pure ([], .declMemory T x (some (.newArr T' n)))
+  | .declMemory T x (some (.newArr T' n)) => do
+    let (P, n) ← hoist n
+    pure (P, .declMemory T x (some (.newArr T' n)))
   -- a statement of one expression: its captures, then the statement
   | s@(.decl ..) | s@(.declStorage ..) | s@(.declMemory ..) | s@(.declStoragePush ..)
   | s@(.declPush ..) | s@(.delete _) | s@(.incDec ..) | s@(.ite ..) | s@(.require _)
@@ -2134,8 +2387,12 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
     -- `T memory x = f(a);`: its arguments only (`elabStmt1`)
     if let .declMemory T x (some (.call f args)) := s then
       if (← read).funs.any (·.1 == f) then
-        let (P, args) ← hoistArgs args
+        let (P, args) ← hoistCallArgs f args
         return (P, .declMemory T x (some (.call f args)))
+    if let .declStorage T x (some (.call f args)) := s then
+      if (← read).funs.any (·.1 == f) then
+        let (P, args) ← hoistCallArgs f args
+        return (P, .declStorage T x (some (.call f args)))
     let (s, P) ← (s.mapExprsM fun e => do
       let (Q, e) ← hoist e
       modify (· ++ Q)
@@ -2150,6 +2407,10 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
     let (P, l) ← hoist l
     pure (P, .assignIncDec x op l)
   | .call (.field e m) args => do
+    if let .call f getterArgs := e then
+      if m == "push" || m == "pop" then
+        let (P, getterArgs) ← hoistCallArgs f getterArgs
+        return (P, .call (.field (.call f getterArgs) m) args)
     -- the receiver first, then the arguments
     let (P, e) ← hoist e
     let (Pc, e) ← if args.any (·.hasIncDec) && !(e matches .name _) then captureExpr C e
@@ -2162,7 +2423,13 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
       args' := args' ++ [a]
     pure (Q, .call (.field e m) args')
   | .call (.name f) args => do
-    let (P, args) ← hoistArgs args
+    if (← read).funs.all (·.1 != f) then
+      if let some op := ModOp.ofName? f then
+        let [a, b, k] := args | throw s!"{f} takes three uint arguments"
+        let (P, e) ← hoist (.modular op a b k)
+        let (Q, _) ← captureExpr C e
+        return (P ++ Q, .eval [])
+    let (P, args) ← hoistCallArgs f args
     pure (P, .call (.name f) args)
   | .assignPush l b => do
     let (P, b) ← hoist b
@@ -2199,6 +2466,22 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
 
 /-- A statement whose expressions have no effect left. -/
 partial def elabStmt1 : RawStmt → ElabM (SProg C)
+  | .pushOpAssign op b r => do
+    let ⟨Γ, t⟩ ← synthM C b
+    let .path (.ref (.array (.prim p))) path := t
+      | throw "push arithmetic needs a storage array of primitive numeric elements"
+    ElabM.lift (fitCheck C (← ctx) p 256 r)
+    match hop : op.hasCompoundAssign, hp : p.isNumeric with
+    | true, true => pure [.of Γ (.pushOpAssign op hop hp path (← checkIn C Γ p r))]
+    | false, _ => throw s!"no push compound assignment for {BinOp.sym op}"
+    | _, false => throw s!"push arithmetic at {p.toStr}"
+  | .pushIncDec op b => do
+    let ⟨Γ, t⟩ ← synthM C b
+    let .path (.ref (.array (.prim p))) path := t
+      | throw "push arithmetic needs a storage array of primitive numeric elements"
+    match hp : p.isNumeric with
+    | true => pure [.of Γ (.pushIncDec op hp path)]
+    | false => throw s!"push increment/decrement at {p.toStr}"
   | .assign l (.newArr T n) => do
     let ⟨R, hR⟩ ← elabNewTy C T
     let (P, ⟨Γ, se⟩) ← elabSize C n
@@ -2223,6 +2506,11 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       elabMemCall f args R fun Γ' r hm => do
         let Γr : NCtx := (r, .mem R) :: Γ'
         pure (.of Γr (.rebindMem (← Γr.idx xn (.mem R)) (.alias (.var .here hm))))
+    | .path (.ref R) (.alias x) =>
+      let xn := x.name Γ.names
+      elabStorageCall f args R fun Γ' r => do
+        let Γr : NCtx := (r, .alias R) :: Γ'
+        pure (.of Γr (.rebind (← Γr.idx xn (.alias R)) (.path (.alias .here))))
     | _ => throw "a call's value is assigned to a stack local"
   | .assign l r => do
     let post ← narrowPost C l r
@@ -2236,10 +2524,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
         | .mpath T mp =>
           if hT : T = .ref R then pure [.of Γ (.assignFromMem l (hT ▸ mp))]
           else throw s!"{r.toStr}: a memory reference to a {T} where a {Ty.ref R} is expected"
-        | _ =>
-          match h : (Ty.ref R).mapFree with
-          | true => do pure [.of Γ (.assign l (.copy (← ElabM.lift (checkPath C Γ (.ref R) r)) h))]
-          | false => throw "a storage copy of a type that holds a mapping"
+        | _ => do pure [.of Γ (.assign l (← ElabM.lift (checkStorageCopy C Γ R r)))]
       | .path (.ref R) (.alias x) => do
         pure [.of Γ (.rebind x (.path (← ElabM.lift (checkPath C Γ (.ref R) r))))]
       | .mpath (.ref R) (.var x _) => do pure [.of Γ (.rebindMem x (← ElabM.lift (elabMRhs C Γ R r)))]
@@ -2262,6 +2547,12 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       | some r => narrowPost C (.name x) r
       | none => pure []
     pure (.of Γ (.declLocal p (Var.ofName x) v) :: post)
+  | .declStorage T x (some (.call f args)) => do
+    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
+    let P ← elabStorageCall f args R fun Γ r =>
+      pure (.of ((r, .alias R) :: Γ) (.declStorage R (Var.ofName x) (some (.path (.alias .here)))))
+    declare C x (.alias R)
+    pure P
   | .declStorage T x init => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
     let Γ ← nctx
@@ -2277,18 +2568,20 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
   | .declPush T x b => do
     let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: a reference type needs a data location"
     let Γ ← nctx
-    let ⟨b, hs⟩ ← ElabM.lift (elabPrimPush C Γ p b)
+    let b ← ElabM.lift (elabPrimPush C Γ p b)
     declare C x (.val p n)
     let ⟨Γ', th, ix⟩ ← afterCapture Γ (Var.ofName x) (.val p)
     pure [.of Γ (.declLocal p (Var.ofName x) none),
-      .of Γ' (.assignLocalPush ix (b.wk th) ((SPath.isSimple_wk th b).trans hs))]
+      .of Γ' (.assignLocalPush ix (b.wk th))]
   | .assignPush l b => do
     let ⟨Γ, t⟩ ← synthM C l
     match t with
     | .path (.ref R) (.alias x) => pure [.of Γ (.rebind x (← ElabM.lift (elabPush C Γ R b)))]
-    | .val p (.simple (.local i)) =>
-      let ⟨b, hs⟩ ← ElabM.lift (elabPrimPush C Γ p b)
-      pure [.of Γ (.assignLocalPush i b hs)]
+    | .val _ (.simple (.local _)) => do
+      let ⟨Γ, .val p (.simple (.local i))⟩ ← synthM C l
+        | throw "a pushed primitive's target must remain a value local"
+      let b ← ElabM.lift (elabPrimPush C Γ p b)
+      pure [.of Γ (.assignLocalPush i b)]
     | _ => throw "`= b.push()` binds a storage pointer or a value local"
   | .declMemory T x (some (.newArr T' n)) => do
     let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
@@ -2362,6 +2655,17 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
                 else throw s!"a {p.toStr} assigned to a {q.toStr}"
       | false => throw s!"++ or −− at {p.toStr}"
     | _ => throw "the result of ++ or −− goes to a stack local"
+  | .call (.field (.call f args) "push") values => do
+    match values with
+    | [] =>
+      elabCallReceiver f args fun _ E => do
+        match hd : E.defaultOkS with
+        | true => pure (.push none (by simp only [Option.isSome_none, hd, Bool.or_true]))
+        | false => throw "push() of an element whose default is not well-formed"
+    | [a] => elabCallReceiverPush f args a
+    | _ => throw "push takes at most one argument"
+  | .call (.field (.call f args) "pop") [] =>
+    elabCallReceiver f args fun _ _ => pure .pop
   | .call (.field e "push") args => do
     let ⟨Γ, t⟩ ← synthM C e
     let .path (.ref (.array E)) b := t | throw "push on something that is not an array"
@@ -2374,14 +2678,10 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       match E with
       | .prim p => pure [.of Γ (.push b (some (.val (← checkIn C Γ p a))) rfl)]
       | .ref R =>
-        -- a memory object (a struct's constructor): a default slot pushed,
-        -- then written with its copy
-        if (← ElabM.lift (synth C Γ a)) matches .mpath .. then
-          return ← elabStmtsP [.call (.field e "push") [],
-            .assign (.index e (.binop .sub (.field e "length") (.num 1))) a]
-        match h : (Ty.ref R).mapFree with
-        | true => pure [.of Γ (.push b (some (.copy (← ElabM.lift (checkPath C Γ (.ref R) a)) h)) rfl)]
-        | false => throw "a push copying a type that holds a mapping"
+        if let .mpath (.ref _) _ ← ElabM.lift (synth C Γ a) then
+          let mp ← ElabM.lift (checkMPath C Γ (.ref R) a)
+          return [.of Γ (.push b (some (.copyMem mp)) rfl)]
+        pure [.of Γ (.push b (some (← ElabM.lift (checkStorageCopy C Γ R a))) rfl)]
     | _ => throw "push takes at most one argument"
   | .call (.field e "pop") [] => do
     let ⟨Γ, t⟩ ← synthM C e
@@ -2421,7 +2721,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let a : LoopAnn C Γ.ctx ← match a.inv, a.unwind with
       | [], u => do
         if a.dec.isSome then throw "a loop's `decreases` clause without an `invariant`"
-        pure (LoopAnn.unwind (u.getD 0))
+        pure (u.map LoopAnn.unwind |>.getD LoopAnn.auto)
       | i :: is, none => do
         let I ← loopExpr Γ .bool (RawExpr.andAll (i :: is).dropLast ((i :: is).getLast?.getD i))
           "invariant"
@@ -2558,7 +2858,7 @@ partial def elabTuple (ts : List (Option RawExpr)) (rhs : RawExpr) (direct : Boo
     -- a function not declared before this one is `elabCallRet`'s error
     unless (castTy? f).isNone do
       throw s!"{f}(…): the right-hand side of a tuple assignment is a call of a function"
-    let (P, args) ← hoistArgs args
+    let (P, args) ← hoistCallArgs f args
     let (Q, _, rs) ← elabCallRet f args none (targets := true)
     unless rs.length == ts.length do throw s!"{f} returns {rs.length} values, not {ts.length}"
     for (p, r, w) in rs do declare C (toString r) (.val p w)

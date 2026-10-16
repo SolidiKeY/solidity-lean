@@ -175,12 +175,14 @@ theorem Args.evalT_snoc {ps : Ctx} (as : Solidity.Args C Γ ps) (p : PrimTy) (x 
     Solidity.Args.evalT σ (.snoc as p x e) =
       (do let r ← Solidity.Args.evalT σ as; let v ← e.evalT σ; pure (v, r)) := rfl
 
-/-- A call's parameters are values. -/
-theorem Args.noAlias : ∀ {ps : Ctx}, Solidity.Args C Γ ps → ∀ {R : RefTy},
+/-- A call in the EVM fragment has value parameters. -/
+theorem Args.noAlias : ∀ {ps : Ctx} (as : Solidity.Args C Γ ps), argsIn F as = true → ∀ {R : RefTy},
     Idx ps (.alias R) → False
-  | _, .snoc as _ _ _, _, i => by
+  | _, .snoc as _ _ _, h, _, i => by
     cases i with
-    | there j => exact Args.noAlias as j
+    | there j => exact Args.noAlias as (Bool.and_eq_true _ _ ▸ h).1 j
+  | _, .snocStorage .., h, _, _ | _, .snocMemory .., h, _, _ =>
+    absurd h Bool.false_ne_true
 
 /-- **A call's arguments**: each read in the caller's state, in order, and
 stored at its level in the callee's frame, which starts at `b + Γ.length`;
@@ -219,6 +221,7 @@ theorem args_sim (hm : Sim C L b F σ m) :
             rw [lvl_there, upd_other _ _ (fun h => by have := cell_inj h; omega)]; exact hv₁ j
       · exact .inr ⟨by simp only [bind, Except.bind, hv], run_append_revert hrun⟩
     · exact .inr ⟨by simp only [bind, Except.bind, ha], run_append_revert hrun₁⟩
+  | _, .snocStorage .., h | _, .snocMemory .., h => absurd h Bool.false_ne_true
 
 /-- **Back from a call**: the caller's locals where they were (the callee
 kept every cell below its frame), its storage, ledger and transaction the
@@ -310,7 +313,7 @@ theorem callNone_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps)
   rcases args_sim hm args hwa with ⟨a, mem₁, ha, hrun₁, hmem₁, hv₁⟩ | ⟨ha, hrun₁⟩
   · rw [run_append_ok hrun₁, callNone_run_eq f args body ha]
     have hb := (hm.congrMem (mem := mem₁) fun l _ hl => hmem₁ l hl).enter (b + Γ.length)
-      (Look.ofTEnv a) hv₁ (Args.noAlias args)
+      (Look.ofTEnv a) hv₁ (Args.noAlias args hwa)
     obtain ⟨G, hout⟩ := ih (τ := σ.withEnv a) hb
     have h₁ : ∀ l, l < b + Γ.length →
         ({ m with mem := mem₁ } : Machine).memAt l = m.memAt l := fun l hl => hmem₁ l hl
@@ -352,7 +355,7 @@ theorem callVal_sim {ps Γf : Ctx} (f : Name) (args : Solidity.Args C Γ ps) (p 
     rw [run_append_ok (m' := { m with mem := upd mem₁ (cell (b + Γ.length + ps.length)) w[0] })
       rfl]
     have hb := ((hm.congrMem (mem := mem₁) fun l _ hl => hmem₁ l hl).enter (b + Γ.length)
-      (Look.ofTEnv a) hv₁ (Args.noAlias args)).consVal (v := PrimTy.dflt p)
+      (Look.ofTEnv a) hv₁ (Args.noAlias args hwa)).consVal (v := PrimTy.dflt p)
       (ReprV.dflt_zero p)
     obtain ⟨G, hout⟩ :=
       ih (τ := (σ.withEnv a).push (t := .val p) (PrimTy.dflt p))
@@ -430,6 +433,8 @@ theorem assign_family {T : Ty} (l : Solidity.Loc C Γ T) (r : Solidity.Src C Γ 
   | copy q hq =>
     simp only [assignIn, Bool.and_eq_true] at hok
     exact copy_sim l q hq hok.1.1.1 hok.1.1.2 hm hok.1.2 hok.2
+  | copyMem p => cases hok
+  | fixedCopy p shape hm => cases hok
 
 theorem rebind_family {R : RefTy} (i : Idx Γ (.alias R)) (r : Solidity.ARhs C Γ R)
     {F' : Frag Γ} (hm : Sim C L b F σ m)
@@ -642,6 +647,7 @@ theorem call_family {Γ' ps rs Γf : Ctx} (f : Name) (args : Solidity.Args C Γ 
       fun hm₂ => ⟨G, ih hb hm₂⟩
   | rets _ => cases hret
   | mem _ _ _ _ => cases hret
+  | storage _ _ => cases hret
 
 end Families
 
@@ -743,17 +749,20 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
     exact block_sim body (prog_sim body hm hb hL)
   | _, _, .call f args ret body => fun hm hw hL =>
     call_family f args ret body hm hw fun hb hm₂ => prog_sim body hm₂ hb hL
-  | _, _, .send .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .declMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .rebindMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignFromMem .. => fun _ hw _ => by
-    simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .deleteMem .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignNew .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .tryCall .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .loop .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
-  | _, _, .assignLocalPush .. => fun _ hw _ => by simp only [inFrag, reduceCtorEq] at hw
+  | _, _, .send .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .declMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .rebindMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .assignFromMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .assignMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .deleteMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .assignNew .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .tryCall .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .loop .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .assignLocalPush .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .pushOpAssign .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .pushIncDec .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .callReceiver .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .callReceiverPush .. => fun _ hw _ => False.elim (Option.noConfusion hw)
 
 /-- A block's code does what the block does. -/
 theorem prog_sim : ∀ {Γ Γ' : Ctx} (P : Solidity.Prog C Γ Γ') {L b : Nat} {F : Frag Γ}

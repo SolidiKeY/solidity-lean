@@ -24,14 +24,13 @@ The parameters stay quantified: the reduction binds each to its position
 storage is in the shape its contract declares, so the closer needs no
 layout.
 
-A split's branch whose condition is ground under the context
-(`Hyps.groundS`) is asked of the closer first: `if (v < 0)` after
+A split's branch is asked of the bounded scoped closer first: `if (v < 0)` after
 `int v = -3;` takes one branch only.  KeY applies the update to the
 condition in each branch's antecedent, simplifies it, and closes the branch
 it became `false` in (`closeFalse`); here a refuted branch is closed by
-`Proves.closeFalse` (`Seq.refutes`), not walked.  The test reads only
-positions and literals and decides only when to ask; the closer proves what
-is closed.
+`Proves.closeFalse` (`Seq.refutes`), not walked. Symbolic hypotheses, including
+required storage lengths, may also refute a branch. The closer proves every
+branch it closes.
 
 The functions the kernel evaluates are written with their recursors, each
 with a `match` twin for compiled code and a link theorem (Gate G0).

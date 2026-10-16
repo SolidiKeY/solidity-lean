@@ -165,10 +165,10 @@ theorem Stmt.runSt_loop_ann (σ : State C Γ) (a a' : LoopAnn C Γ) (c : Val C �
   rfl
 
 /-- `whileUnwind`: `⟨[ while (nse) body ]⟩ ⇝ ⟨[ if (nse) { { body } while (nse) body } ]⟩`. -/
-theorem Premise.sound_whileUnwind {m : Modality} (n : Nat) (c : Val C Γ .bool)
+theorem Premise.sound_whileUnwind {m : Modality} (u : LoopUnwind) (c : Val C Γ .bool)
     (body : Prog C Γ Γ₁) (σ : State C Γ) :
-    Premise.Runs m (.loop (.unwind (n + 1)) c body)
-      (.unfold (.cons (.ite c (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil)) .nil)
+    Premise.Runs m (.loop u.before c body)
+      (.unfold (.cons (.ite c (.cons (.block body) (.cons (.loop u.after c body) .nil)) .nil)
         .nil) .refl) σ := by
   refine Premise.sound_unfold σ ?_
   rw [Prog.runSt_single, Stmt.runSt_ite, Stmt.runSt_loop_unfold]
@@ -178,16 +178,16 @@ theorem Premise.sound_whileUnwind {m : Modality} (n : Nat) (c : Val C Γ .bool)
     cases v with
     | false => rfl
     | true =>
-      show ((Prog.runSt σ (.cons (.block body) (.cons (.loop (.unwind n) c body) .nil))).map
+      show ((Prog.runSt σ (.cons (.block body) (.cons (.loop u.after c body) .nil))).map
         (State.drop (Ext.refl (Γ := Γ)))).map (State.drop .refl) = _
       rw [Prog.runSt_cons, Stmt.runSt_block]
       cases (Prog.runSt σ body).map (State.drop body.ext) with
       | error => rfl
       | ok τ =>
-        show ((Prog.runSt τ (.cons (.loop (.unwind n) c body) .nil)).map _).map _ = _
-        rw [Prog.runSt_single, Stmt.runSt_loop_ann τ (.unwind n) (.unwind (n + 1))]
-        show _ = Stmt.runSt τ (.loop (.unwind (n + 1)) c body)
-        cases Stmt.runSt τ (.loop (.unwind (n + 1)) c body) <;> rfl
+        show ((Prog.runSt τ (.cons (.loop u.after c body) .nil)).map _).map _ = _
+        rw [Prog.runSt_single, Stmt.runSt_loop_ann τ u.after u.before]
+        show _ = Stmt.runSt τ (.loop u.before c body)
+        cases Stmt.runSt τ (.loop u.before c body) <;> rfl
 
 /-- `loopExit`: `⟨[ while (nse) body ]⟩ ⇝ nse = FALSE ⟹ ⟨[ ]⟩ ; nse = FALSE`. -/
 theorem Premise.sound_loopExit {m : Modality} (c : Val C Γ .bool) (body : Prog C Γ Γ₁)
@@ -495,7 +495,11 @@ theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C
     | succ n =>
       unfold loopStep at hp
       cases hp
-      exact Premise.sound_whileUnwind n c body σ
+      exact Premise.sound_whileUnwind (.bounded n) c body σ
+  | auto =>
+    unfold loopStep at hp
+    cases hp
+    exact Premise.sound_whileUnwind .automatic c body σ
   | inv I dec =>
     cases hf : body.frame with
     | none =>

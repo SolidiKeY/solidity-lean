@@ -13,7 +13,7 @@ scopes (a branch, a block, a loop's iteration, a call's frame, a `try`'s
 clause) only push and pop locals, so they keep any such invariant once their
 sub-programs do (`tkeeps_ite` … `tkeeps_tryCall`, a loop by
 `TLoop.run_induct`); a call's arguments, return variables and decoded data
-are values or fresh memory objects, which every invariant here accepts
+are values, memory references or storage aliases, which every invariant here accepts
 (`RunInv.ValMemOk`).  A statement without sub-programs is proved once for
 every hereditary invariant (`Stmt.keeps_all`, `Typing/HeredRun.lean`), read
 on `TRun.*`.
@@ -96,9 +96,15 @@ theorem of_valMem (hv : ∀ p v, P (.val p) v) (hm : ∀ R v, P (.mem R) v) :
 
 end TEnv.All
 
-theorem Args.valMem {Γ : Ctx} : {ps : Ctx} → Args C Γ ps → Ctx.ValMem ps
-  | _, .nil => trivial
-  | .val _ :: ps, .snoc as _ _ _ => (Args.valMem as : Ctx.ValMem ps)
+theorem Args.env_all {Γ : Ctx} {H : HTy}
+    {P : (t : LTy) → t.TDenote C H → Prop}
+    (hv : ∀ p v, P (.val p) v) (hm : ∀ R v, P (.mem R) v)
+    (ha : ∀ R v, P (.alias R) v) :
+    {ps : Ctx} → Args C Γ ps → (e : TEnv C H ps) → TEnv.All P e
+  | _, .nil, _ => trivial
+  | _, .snoc as _ _ _, e => ⟨hv _ _, Args.env_all hv hm ha as e.2⟩
+  | _, .snocStorage as _ _ _, e => ⟨ha _ _, Args.env_all hv hm ha as e.2⟩
+  | _, .snocMemory as _ _ _, e => ⟨hm _ _, Args.env_all hv hm ha as e.2⟩
 
 theorem Binders.valMem : {ρ : Ctx} → Binders ρ → Ctx.ValMem ρ
   | _, .nil => trivial
@@ -121,6 +127,7 @@ theorem CallRet.leaveT_all {H : HTy} {P : (t : LTy) → t.TDenote C H → Prop} 
     | some i => exact TEnv.All.set i he hr.1
   | rets bs => exact TEnv.All.append _ hr he
   | mem R x hd hm => exact ⟨hr.1, he⟩
+  | storage R x => exact ⟨hr.1, he⟩
 
 /-- Entering a call leaves the storage alone. -/
 theorem CallRet.enterT_storage {Γ rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (τ : State C ps) :
@@ -139,10 +146,11 @@ theorem env_wk {H H' : HTy} (x : H <+: H') : {Γ : Ctx} → {e : TEnv C H Γ} �
   | [], _, _ => trivial
   | _ :: _, _, he => ⟨I.loc_wk x he.1, env_wk x he.2⟩
 
-/-- Entering a call: the frame's return variables, values or a fresh memory
-object, on top of the parameters. -/
+/-- Entering a call: value returns, a fresh memory object or an unset storage
+alias, on top of the parameters. -/
 theorem enterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
-    (hm : ∀ H R v, I.loc (H := H) (.mem R) v) {Γ rs Γ' ps : Ctx}
+    (hm : ∀ H R v, I.loc (H := H) (.mem R) v)
+    (ha : ∀ H R, I.loc (H := H) (.alias R) none) {Γ rs Γ' ps : Ctx}
     (ret : CallRet Γ rs Γ') (τ : State C ps) (he : TEnv.All I.loc τ.env) :
     TEnv.All I.loc (ret.enterT τ).st.env := by
   cases ret with
@@ -151,6 +159,7 @@ theorem enterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
   | rets bs =>
     exact TEnv.All.append _ (TEnv.All.of_valMem (hv _) (hm _) (Binders.valMem bs) _) he
   | mem R x hd hm' => exact ⟨hm _ _ _, env_wk _ he⟩
+  | storage R x => exact ⟨ha _ _, he⟩
 
 /-- The invariant holds of a typed state: of its storage, and of each local
 at its type. -/
@@ -189,12 +198,12 @@ step ends, if in a state, in one it holds of. -/
 def TKeeps {Γ Γ' : Ctx} (I : RunInv C) (t : TStep C Γ Γ') : Prop :=
   ∀ (σ : State C Γ) (o : Out C σ.H Γ'), I.HoldsT σ → t σ = .ok o → I.HoldsT o.st
 
-/-- The invariant accepts every value and every memory local: what a call's
-arguments, return variables and decoded data, and a frame's allocation,
-need. -/
+/-- The invariant accepts values, memory locals and storage aliases: what
+call frames, arguments and decoded external data need. -/
 structure ValMemOk (I : RunInv C) : Prop where
   val : ∀ H p v, I.loc (H := H) (.val p) v
   mem : ∀ H R v, I.loc (H := H) (.mem R) v
+  alias : ∀ H R v, I.loc (H := H) (.alias R) v
 
 theorem TKeeps.drop {Γ Δ Δ' : Ctx} {t : TStep C Γ Δ} (hf : I.TKeeps t) (x : Ext Δ' Δ) :
     I.TKeeps (fun σ => (t σ).map fun o => ⟨o.st.drop x, o.ext⟩) := by
@@ -269,8 +278,8 @@ theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {bo
       | ok τ' => exact (hb τ.st τ' h₁ hr).drop x
 
 /-- A call keeps an invariant `ValMemOk` accepts when its body does: the
-arguments are values, the frame's return variables values or a fresh
-memory object, the storage as it was. -/
+arguments are values or references, its returns are values, a fresh memory object or an
+unset alias, and entry keeps storage as it was. -/
 theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (hI : I.ValMemOk) (args : Args C Γ ps)
     (ret : CallRet Γ rs Γ') (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf}
     (hb : I.TKeeps body) : I.TKeeps (TRun.call args ret x body) := by
@@ -281,10 +290,10 @@ theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (hI : I.ValMemOk) (args : Args C Γ
   obtain ⟨o₂, hr, h⟩ := tbind_ok_inv h
   cases h
   have h₀ : I.HoldsT (σ.withEnv a) :=
-    hσ.withEnv (TEnv.All.of_valMem (hI.val _) (hI.mem _) (Args.valMem args) _)
+    hσ.withEnv (Args.env_all (hI.val _) (hI.mem _) (hI.alias _) args _)
   have h₁ : I.HoldsT (ret.enterT (σ.withEnv a)).st :=
     ⟨by rw [CallRet.enterT_storage]; exact h₀.1,
-      enterT_env hI.val hI.mem ret _ h₀.2⟩
+      enterT_env hI.val hI.mem (fun H R => hI.alias H R none) ret _ h₀.2⟩
   have h₂ := hb _ o₂ h₁ hr
   exact ⟨h₂.1, CallRet.leaveT_all ret (env_wk _ hσ.2)
     (TEnv.All.take rs (TEnv.All.drop x h₂.2))⟩

@@ -430,6 +430,7 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Val C Γ p) {m : Machine},
     · exact .inr ⟨by simp only [hres, bind, Except.bind], run_append_revert hrun⟩
   | _, .readMem _, _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw
   | _, .mlen .., _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw
+  | _, .modular .., _, _, hw => by simp only [valIn, Bool.false_eq_true] at hw
 
 end
 

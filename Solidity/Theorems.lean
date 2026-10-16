@@ -170,12 +170,13 @@ is rewritten by one of solkey's taclets. -/
 theorem solkey_rule_exists (h : s.inSolkey m = true) (hs : s.step k m = p) : s ⇝ₖ[k, m] p :=
   Stmt.step_taclet h hs
 
-/-- **Off the fragment the rules differ**: a loop has a rule of the
-calculus, and none of solkey's. -/
-theorem solkey_rule_lt_calculus (k : Nat) (m : Modality) {Γ₁ : Ctx} (a : LoopAnn C Γ)
+/-- **Off the fragment the rules differ**: a zero-bound loop uses Lean's
+`loopExit`, rather than an upstream unwinding or invariant taclet. -/
+theorem solkey_rule_lt_calculus (k : Nat) (m : Modality) {Γ₁ : Ctx}
     (c : Val C Γ .bool) (body : Prog C Γ Γ₁) :
-    (∃ p, Stmt.loop a c body ⇝[k, m] p) ∧ ∀ p, ¬ Stmt.loop a c body ⇝ₖ[k, m] p :=
-  Stmt.solkey_lt_calculus k m a c body
+    (∃ p, Stmt.loop (.unwind 0) c body ⇝[k, m] p) ∧
+      ∀ p, ¬ Stmt.loop (.unwind 0) c body ⇝ₖ[k, m] p :=
+  Stmt.solkey_lt_calculus k m c body
 
 /-- **A step of `⊢ₖ` is one of solkey's taclets**: the rule set admits the
 statement only where the rule the strategy fires is a `Taclet`. -/

@@ -11,17 +11,18 @@ import and in the stale-fixture test's expected message.  The struct
 (`Semantics.structDef`: `Triple` is another contract's).
 -/
 
-solc_import "../../tests/solc/TestSuite.ast.json" hash 0x7d6bb282699871b5 as Solkey.TestSuite
+solc_import "../../tests/solc/TestSuite.ast.json" hash 0x6553ea1d6de3da1f as Solkey.TestSuite
   renaming Triple => FixedTriple
 
-/-! What became of each function: every one but the two solkey skips and the
-struct recursive through a mapping is a program of the imported contract. -/
+/-! The pinned migration source, including explicit unsupported rows.
+An unsupported function has no program or proof obligation. -/
 
 /--
-info: 452 functions (331 diamond, 107 box, 2 skip, 12 internal): 449 elaborated, 2 skipped, 1 excluded, 0 unsupported
-excluded recursiveStructMapping: TestSuite.sol:2741: struct `Tree` (line 36) is recursive through a mapping: its default value is infinite, and the model's are finite
-skipped tryCalleeGet: TestSuite.sol:3511: tagged `@custom:key skip`
-skipped tryCalleePing: TestSuite.sol:3516: tagged `@custom:key skip`
+info: 551 functions (397 diamond, 117 box, 2 skip, 35 internal): 547 elaborated, 2 skipped, 1 excluded, 1 unsupported
+excluded recursiveStructMapping: TestSuite.sol:2829: struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite
+skipped tryCalleeGet: TestSuite.sol:3599: tagged `@custom:key skip`
+skipped tryCalleePing: TestSuite.sol:3604: tagged `@custom:key skip`
+unsupported invariantQuantifiedOverPrefix: TestSuite.sol:4140: the loop clause `invariant \forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language
 -/
 #guard_msgs in
 #eval IO.println (Solidity.Frontend.ImportRow.summary Solkey.TestSuite.report)
@@ -29,7 +30,7 @@ skipped tryCalleePing: TestSuite.sol:3516: tagged `@custom:key skip`
 /-! A fixture of another hash is refused: the module would be stale. -/
 
 /--
-error: ../../tests/solc/TestSuite.ast.json has the hash 0x7d6bb282699871b5, not the one named: re-run scripts/solc-ast.mjs, which rewrites the literal
+error: ../../tests/solc/TestSuite.ast.json has the hash 0x6553ea1d6de3da1f, not the one named: re-run scripts/solc-ast.mjs, which rewrites the literal
 -/
 #guard_msgs in
 solc_import "../../tests/solc/TestSuite.ast.json" hash 0x1 as Solkey.Stale

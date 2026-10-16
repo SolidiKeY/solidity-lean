@@ -30,7 +30,7 @@ hand-written contract is a root of the imported one, at the same type, up
 to two renames (`people` is `folks` and `a` is `aux` there, since those
 names mean other things in other contracts).  Struct members need no check:
 both contracts read `Semantics.structDef`, and both name solkey's `Triple`
-`FixedTriple`.  The imported contract has two roots more (below); `tree`,
+`FixedTriple`. The imported contract's additional roots are listed below; `tree`,
 the struct recursive through a mapping, is in neither.
 -/
 
@@ -48,12 +48,12 @@ theorem testSuite_agrees :
       lookupBy ((lookupBy n testSuiteRenames).getD n) Solkey.TestSuite.vars == some T) = true := by
   decide +kernel
 
-/-! The roots only the imported contract has: `fixedByKey`, and the
-bool-keyed mapping, its key read as a `uint` (solc encodes a bool key as
-`0` or `1`). -/
+/-! The roots only the current imported contract has, including the new
+array-shape and signed-push fixtures. The bool-keyed mapping's key is read
+as a `uint` (solc encodes a bool key as `0` or `1`). -/
 
 /--
-info: [fixedByKey, boolKeyed]
+info: [signedValues, copySource9, copyTargetDyn, fixedGrid, fixedMapsOfFixed, dynMapsOfFixed, copyBig, copySmall, localOut, fixedByKey, boolKeyed, pair]
 -/
 #guard_msgs in
 #eval IO.println ((Solkey.TestSuite.vars.filter fun (n, _) =>

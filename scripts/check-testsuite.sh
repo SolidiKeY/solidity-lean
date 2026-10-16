@@ -104,23 +104,19 @@ console.log("axioms: " + (axOk
   : "FAILED"));
 
 // 3. parity with solkey's testSuiteFunctions
-// a function is an obligation when it is `public` or `external`, read in its
-// header up to the `{` (a header may span lines); an internal helper is not
-const sol = readFileSync(join(solkey, "TestSuite.sol"), "utf8").split("\n");
+// Read only the imported contract's declarations; file-level and library
+// helpers are separate roots. solkey-port above checks the source hash.
+const fixture = JSON.parse(readFileSync("tests/solc/TestSuite.ast.json", "utf8"));
+const contracts = fixture.ast.nodes.filter(n =>
+  n.nodeType === "ContractDefinition" && n.name === "TestSuite");
+if (contracts.length !== 1) throw new Error("expected exactly one TestSuite contract");
 const provable = new Set();
 const skipped = new Set();
-let tags = [];
-for (let i = 0; i < sol.length; i++) {
-  const t = sol[i].trim();
-  if (t.startsWith("///")) { tags.push(t.slice(3).trim()); continue; }
-  const f = t.match(/^function\s+(\w+)\s*\(/);
-  if (f) {
-    let header = t;
-    for (let j = i + 1; !header.includes("{") && j < sol.length; j++) header += " " + sol[j].trim();
-    const visible = /\b(public|external)\b/.test(header.slice(0, header.indexOf("{") + 1 || undefined));
-    if (visible) (tags.includes("@custom:key skip") ? skipped : provable).add(f[1]);
-  }
-  if (t !== "") tags = [];
+for (const f of contracts[0].nodes) {
+  if (f.nodeType !== "FunctionDefinition" || f.kind !== "function" ||
+      !["public", "external"].includes(f.visibility)) continue;
+  const doc = typeof f.documentation === "string" ? f.documentation : f.documentation?.text ?? "";
+  (/^\s*@custom:key\s+skip\s*$/m.test(doc) ? skipped : provable).add(f.name);
 }
 const tsvRows = (path) => readFileSync(path, "utf8").split("\n")
   .map((l) => l.split("\t")).filter((r) => r[1] === "TestSuite");

@@ -153,12 +153,17 @@ partial def qVal (Γ : Ctx) : (p : PrimTy) → Val C Γ p → QM Expr
   | p, @Val.len _ _ _ E b _ => do ctor ``Val.len Γ #[toExpr p, toExpr E, ← qSPath Γ _ b, rflPrim p]
   | p, @Val.mlen _ _ _ E b _ => do
     ctor ``Val.mlen Γ #[toExpr p, toExpr E, ← qMPath Γ _ b, rflPrim p]
+  | _, .modular op a b k => do
+    ctor ``Val.modular Γ #[toExpr op, ← qVal Γ .uint a, ← qVal Γ .uint b, ← qVal Γ .uint k]
 
 end
 
 def qSrc (Γ : Ctx) : (T : Ty) → Src C Γ T → QM Expr
   | _, @Src.val _ _ p v => do ctor ``Src.val Γ #[toExpr p, ← qVal Γ p v]
   | _, @Src.copy _ _ R p _ => do ctor ``Src.copy Γ #[toExpr R, ← qSPath Γ _ p, rflTrue]
+  | _, @Src.fixedCopy _ _ E n R p shape _ => do
+    ctor ``Src.fixedCopy Γ #[toExpr E, toExpr n, toExpr R, ← qSPath Γ _ p, FixedCopy.quote shape, rflTrue]
+  | _, @Src.copyMem _ _ R p => do ctor ``Src.copyMem Γ #[toExpr R, ← qMPath Γ _ p]
 
 def qARhs (Γ : Ctx) (R : RefTy) : ARhs C Γ R → QM Expr
   | .path p => do ctor ``ARhs.path Γ #[toExpr R, ← qSPath Γ _ p]
@@ -195,6 +200,12 @@ def qArgs (Γ : Ctx) : (ps : Ctx) → Args C Γ ps → QM Expr
   | _, .nil => ctor ``Args.nil Γ #[]
   | _ :: ps, .snoc as p x e => do
     ctor ``Args.snoc Γ #[← qCtx ps, ← qArgs Γ ps as, toExpr p, toExpr x, ← qVal Γ p e]
+  | _ :: ps, .snocStorage as R x e => do
+    ctor ``Args.snocStorage Γ #[← qCtx ps, ← qArgs Γ ps as, toExpr R, toExpr x,
+      ← qSPath Γ (.ref R) e]
+  | _ :: ps, .snocMemory as R x e => do
+    ctor ``Args.snocMemory Γ #[← qCtx ps, ← qArgs Γ ps as, toExpr R, toExpr x,
+      ← qMPath Γ (.ref R) e]
 
 def qCallRet (Γ : Ctx) : (rs Γ' : Ctx) → CallRet Γ rs Γ' → QM Expr
   | _, _, .none => return mkApp (mkConst ``CallRet.none) (← qCtx Γ)
@@ -209,6 +220,8 @@ def qCallRet (Γ : Ctx) : (rs Γ' : Ctx) → CallRet Γ rs Γ' → QM Expr
     return mkApp3 (mkConst ``CallRet.rets) (← qCtx Γ) (← qCtx rs) b
   | _, _, .mem R r _ _ => do
     return mkAppN (mkConst ``CallRet.mem) #[← qCtx Γ, toExpr R, toExpr r, rflTrue, rflTrue]
+  | _, _, .storage R r => do
+    return mkAppN (mkConst ``CallRet.storage) #[← qCtx Γ, toExpr R, toExpr r]
 
 def qExtCall (Γ : Ctx) (call : ExtCall C Γ) : QM Expr := do
   let argTy ← fam ``ExtArg Γ
@@ -222,6 +235,7 @@ def qExtCall (Γ : Ctx) (call : ExtCall C Γ) : QM Expr := do
 
 def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
   | .unwind k => ctor ``LoopAnn.unwind Γ #[toExpr k]
+  | .auto => ctor ``LoopAnn.auto Γ #[]
   | .inv I dec => do
     let ty := mkApp3 (mkConst ``Val) (← contract) (← qCtx Γ) (toExpr PrimTy.uint)
     let d ← match dec with
@@ -239,6 +253,14 @@ def sctor (n : Lean.Name) (args : Array Expr) : QM Expr :=
 def qOpt {α : Type} (ty : Expr) (q : α → QM Expr) : Option α → QM Expr
   | none => pure (optE ty none)
   | some a => return optE ty (some (← q a))
+
+/-- Quote the typed operation of `f().push(e)` or `f().pop()`. -/
+def qReceiverOp (Γ : Ctx) (E : Ty) : ReceiverOp C Γ E → QM Expr
+  | .push v _ => do
+    sctor ``ReceiverOp.push #[← qCtx Γ, toExpr E,
+      ← qOpt (mkApp3 (mkConst ``Src) (← contract) (← qCtx Γ) (toExpr E)) (qSrc Γ E) v,
+      rflTrue]
+  | .pop => do sctor ``ReceiverOp.pop #[← qCtx Γ, toExpr E]
 
 mutual
 
@@ -264,8 +286,13 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
   | @Stmt.assignIncDec _ _ p i op _ l _ =>
     sctor ``Stmt.assignIncDec #[Γe, toExpr p, ← qIdx Γ (.val p) i, toExpr op, rflTrue,
       ← qOpLoc Γ p l, rflTrue]
-  | @Stmt.assignLocalPush _ _ p i b _ =>
-    sctor ``Stmt.assignLocalPush #[Γe, toExpr p, ← qIdx Γ (.val p) i, ← qSPath Γ _ b, rflTrue]
+  | @Stmt.assignLocalPush _ _ p i b =>
+    sctor ``Stmt.assignLocalPush #[Γe, toExpr p, ← qIdx Γ (.val p) i, ← qSPath Γ _ b]
+  | @Stmt.pushOpAssign _ _ p op _ _ b r =>
+    sctor ``Stmt.pushOpAssign #[Γe, toExpr p, toExpr op, rflTrue, rflTrue,
+      ← qSPath Γ _ b, ← qVal Γ p r]
+  | @Stmt.pushIncDec _ _ p op _ b =>
+    sctor ``Stmt.pushIncDec #[Γe, toExpr p, toExpr op, rflTrue, ← qSPath Γ _ b]
   | @Stmt.push _ _ E b v _ =>
     sctor ``Stmt.push #[Γe, toExpr E, ← qSPath Γ _ b,
       ← qOpt (mkApp3 (mkConst ``Src) (← contract) Γe (toExpr E)) (qSrc Γ E) v, rflTrue]
@@ -295,6 +322,14 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
   | @Stmt.call _ _ _ ps rs Γf f args ret body =>
     sctor ``Stmt.call #[Γe, ← qCtx Γ', ← qCtx ps, ← qCtx rs, ← qCtx Γf, toExpr f,
       ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, ← qProg (rs ++ ps) Γf body]
+  | @Stmt.callReceiver _ _ ps Γf E f args r body op =>
+    sctor ``Stmt.callReceiver #[Γe, ← qCtx ps, ← qCtx Γf, toExpr E, toExpr f,
+      ← qArgs Γ ps args, toExpr r, ← qProg ([.alias (.array E)] ++ ps) Γf body,
+      ← qReceiverOp Γ E op]
+  | @Stmt.callReceiverPush _ _ ps Γf Γv E f args r body code value =>
+    sctor ``Stmt.callReceiverPush #[Γe, ← qCtx ps, ← qCtx Γf, ← qCtx Γv, toExpr E, toExpr f,
+      ← qArgs Γ ps args, toExpr r, ← qProg ([.alias (.array E)] ++ ps) Γf body,
+      ← qProg Γ Γv code, ← qSrc Γv E value]
   | @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ call rets ok err code pnc other =>
     sctor ``Stmt.tryCall #[Γe, ← qCtx ρ, ← qCtx κ, ← qCtx Γ₁, ← qCtx Γ₂, ← qCtx Γ₃, ← qCtx Γ₄,
       ← qExtCall Γ call, ← qBinders ρ rets, ← qProg (ρ ++ Γ) Γ₁ ok, ← qProg Γ Γ₂ err,
@@ -358,6 +393,8 @@ def qOp1 : {a s : Srt} → Op1 C a s → QM Expr
   | _, _, @Op1.mval _ p => do return mkApp2 (mkConst ``Op1.mval) (← contract) (toExpr p)
   | _, _, @Op1.ref _ R => do return mkApp2 (mkConst ``Op1.ref) (← contract) (toExpr R)
   | _, _, .wt => do return mkApp (mkConst ``Op1.wt) (← contract)
+  | _, _, @Op1.fixedCopy _ E n R shape => do
+    return mkAppN (mkConst ``Op1.fixedCopy) #[← contract, toExpr E, toExpr n, toExpr R, FixedCopy.quote shape]
   | _, _, @Op1.select _ s r _ => do
     return mkAppN (mkConst ``Op1.select) #[← contract, toExpr s, toExpr r,
       rflSome (.ref (.struct s))]
@@ -410,6 +447,7 @@ def qOp3 : {a b c s : Srt} → Op3 C a b c s → QM Expr
   | _, _, _, _, @Op3.write _ T => do return mkApp2 (mkConst ``Op3.write) (← contract) (toExpr T)
   | _, _, _, _, @Op3.saveIn _ s T => do
     return mkApp3 (mkConst ``Op3.saveIn) (← contract) (toExpr s) (toExpr T)
+  | _, _, _, _, .modular op => do return mkApp2 (mkConst ``Op3.modular) (← contract) (toExpr op)
 
 partial def qTm (Γ : Ctx) : (s : Srt) → Tm C Γ s → QM Expr
   | _, @Tm.pvV _ _ p i => do ctor ``Tm.pvV Γ #[toExpr p, ← qIdx Γ (.val p) i]
@@ -510,6 +548,10 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
   let mk (n : Lean.Name) (args : Array Expr) : Expr := mkAppN (mkConst n) (pre ++ args)
   match p with
   | .update U => return mk ``Premise.update #[← qCtx Γ', ← qUpd Γ Γ' U]
+  | @Premise.updates _ _ Δ _ U V =>
+    return mk ``Premise.updates #[← qCtx Δ, ← qCtx Γ', ← qUpd Γ Δ U, ← qUpd Δ Γ' V]
+  | @Premise.guardedUpdates _ _ Δ c U V =>
+    return mk ``Premise.guardedUpdates #[← qCtx Δ, ← qFml Γ c, ← qUpd Γ Δ U, ← qUpd Δ Γ V]
   | @Premise.unfold _ _ _ Γ'' P h =>
     return mk ``Premise.unfold #[← qCtx Γ', ← qCtx Γ'', ← qProg Γ Γ'' P, ← qExt Γ' h]
   | .bind x t P => return mk ``Premise.bind #[← qCtx Γ', toExpr x, qLTy t, ← qProg (t :: Γ) Γ' P]

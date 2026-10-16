@@ -106,6 +106,8 @@ theorem Val.evalT_noPanic (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) 
   | _, .mlen b hp => by
     subst hp
     exact (b.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
+  | _, .modular _ a b k => (a.evalT_noPanic σ).bind fun _ =>
+      (b.evalT_noPanic σ).bind fun _ => (k.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
 
 end
 
@@ -113,6 +115,9 @@ theorem Src.valueT_noPanic (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valu
   cases r with
   | val v => exact (v.evalT_noPanic σ).bind fun _ => fun h => nomatch h
   | copy p _ => exact (p.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
+  | fixedCopy p shape _ => exact (p.resolveT_noPanic σ).bind fun _ =>
+      (TRes.NoPanic.ofOpt _).bind fun _ => fun h => nomatch h
+  | copyMem p => exact (p.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
 
 end Eval
 
@@ -126,11 +131,14 @@ def Stmt.asserts {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
   | .ite _ t e => Prog.asserts t || Prog.asserts e
   | .block body => Prog.asserts body
   | .call _ _ _ body => Prog.asserts body
+  | .callReceiver _ _ _ body _ => Prog.asserts body
+  | .callReceiverPush _ _ _ body code _ => Prog.asserts body || Prog.asserts code
   | .tryCall _ _ ok err _ pnc other =>
     Prog.asserts ok || Prog.asserts err || Prog.asserts pnc || Prog.asserts other
   | .loop _ _ body => Prog.asserts body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .transfer ..
+  | .pushOpAssign .. | .pushIncDec ..
   | .send .. | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
   | .require _ | .revert => false
@@ -263,6 +271,10 @@ theorem Args.evalT_noPanic : {ps : Ctx} → (as : Args C Γ ps) → (as.evalT σ
   | _, .nil => TRes.NoPanic.ok _
   | _, .snoc as _ _ e => (Args.evalT_noPanic as).bind fun _ => (e.evalT_noPanic σ).bind fun _ =>
       TRes.NoPanic.ok _
+  | _, .snocStorage as _ _ e => (Args.evalT_noPanic as).bind fun _ =>
+      (e.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
+  | _, .snocMemory as _ _ e => (Args.evalT_noPanic as).bind fun _ =>
+      (e.mvalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
 
 end Ops
 
@@ -284,6 +296,25 @@ Each step of `TRun` but `assert`, its sub-steps assumed not to panic. -/
 namespace TRun
 
 variable {Γ : Ctx}
+
+/-- `values.push() += e` may revert or exhaust, but cannot panic. -/
+theorem pushOpAssign_noPanic {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
+    (r : Val C Γ p) (σ : State C Γ) : (pushOpAssign op b r σ).NoPanic := by
+  unfold pushOpAssign
+  refine (r.evalT_noPanic σ).bind fun value => (b.resolveT_noPanic σ).bind fun ref => ?_
+  split
+  · exact TRes.NoPanic.exhausted
+  · exact (TRes.NoPanic.ofOpt _).bind fun pair => opStoreT_noPanic _ op _ value
+
+/-- `values.push()++` and `--values.push()` may revert or exhaust, but cannot panic. -/
+theorem pushIncDec_noPanic {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p)))
+    (σ : State C Γ) : (pushIncDec op b σ).NoPanic := by
+  unfold pushIncDec
+  refine (b.resolveT_noPanic σ).bind fun ref => ?_
+  split
+  · exact TRes.NoPanic.exhausted
+  · exact (TRes.NoPanic.ofOpt _).bind fun pair =>
+      (bumpStoreT_noPanic _ op _).bind fun _ => TRes.NoPanic.ok _
 
 theorem push_noPanic {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     (σ : State C Γ) : (push b v σ).NoPanic := by
@@ -349,6 +380,44 @@ theorem call_noPanic {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet 
   unfold call
   exact (Args.evalT_noPanic σ args).bind fun _ => (hbody _).bind fun _ => TRes.NoPanic.ok _
 
+theorem receiverOp_noPanic {E : Ty} (op : ReceiverOp C Γ E)
+    (b : SPath C Γ (.array E)) (σ : State C Γ) : (receiverOp op b σ).NoPanic := by
+  cases op with
+  | push v _ => exact push_noPanic b v σ
+  | pop =>
+    exact (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind
+      fun _ => TRes.NoPanic.ok _
+
+theorem callReceiver_noPanic {ps Γf : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf) (op : ReceiverOp C Γ E)
+    (hbody : ∀ σ, (body σ).NoPanic) (σ : State C Γ) :
+    (callReceiver args r hb body op σ).NoPanic := by
+  unfold callReceiver
+  exact (call_noPanic args (.storage (.array E) r) hb body hbody σ).bind fun o =>
+    (receiverOp_noPanic _ _ o.st).bind fun _ => TRes.NoPanic.ok _
+
+/-- `f().push(i++)` can panic only in its getter or operand prefix. -/
+theorem callReceiverPush_noPanic {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    (body : TStep C ([.alias (.array E)] ++ ps) Γf)
+    (he : Ext Γ Γv) (code : TStep C Γ Γv) (value : Src C Γv E)
+    (hbody : ∀ σ, (body σ).NoPanic) (hcode : ∀ σ, (code σ).NoPanic) (σ : State C Γ) :
+    (callReceiverPush args r hb body he code value σ).NoPanic := by
+  unfold callReceiverPush afterReceiverPrefix pushAfterPrefix
+  apply (call_noPanic args (.storage (.array E) r) hb body hbody σ).bind
+  intro a
+  apply TRes.NoPanic.map
+  apply (SPath.resolveT_noPanic a.st (.alias .here)).bind
+  intro ref
+  apply (hcode _).bind
+  intro b
+  apply (Src.valueT_noPanic b.st value).bind
+  intro v
+  split
+  · exact TRes.NoPanic.exhausted
+  · exact (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
+
 theorem tryCall_noPanic {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (h₁ : Ext (ρ ++ Γ) Γ₁) (ok : TStep C (ρ ++ Γ) Γ₁)
     (h₂ : Ext Γ Γ₂) (err : TStep C Γ Γ₂) (code : CodeBinder κ)
@@ -409,9 +478,11 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .opAssign op _ _ l r, _, σ => (r.evalT_noPanic σ).bind fun _ =>
       OpLoc.storeT_noPanic σ op l _
   | _, _, .incDec op _ l, _, σ => (OpLoc.bumpT_noPanic σ op l).bind fun _ => TRes.NoPanic.ok _
+  | _, _, .pushOpAssign op _ _ b r, _, σ => TRun.pushOpAssign_noPanic op b r σ
+  | _, _, .pushIncDec op _ b, _, σ => TRun.pushIncDec_noPanic op b σ
   | _, _, .assignIncDec _ op _ l _, _, σ => (OpLoc.bumpT_noPanic σ op l).bind fun _ =>
       TRes.NoPanic.ok _
-  | _, _, .assignLocalPush i b _, _, σ => (TRun.push_noPanic b none σ).bind fun _ =>
+  | _, _, .assignLocalPush i b, _, σ => (TRun.push_noPanic b none σ).bind fun _ =>
       TRes.NoPanic.ok _
   | _, _, .push b v _, _, σ => TRun.push_noPanic b v σ
   | _, _, .pop b, _, σ => (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind
@@ -442,6 +513,12 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .call _ args ret body, h, σ => by
     simp only [Stmt.asserts] at h
     exact TRun.call_noPanic args ret _ _ (Prog.run_noPanic body h) σ
+  | _, _, .callReceiver _ args r body op, h, σ => by
+    exact TRun.callReceiver_noPanic args r _ _ op (Prog.run_noPanic body h) σ
+  | _, _, .callReceiverPush _ args r body code value, h, σ => by
+    obtain ⟨hb, hc⟩ := Bool.or_eq_false_iff.mp h
+    exact TRun.callReceiverPush_noPanic args r _ _ _ _ value
+      (Prog.run_noPanic body hb) (Prog.run_noPanic code hc) σ
   | _, _, .tryCall call rets ok err code pnc other, h, σ => by
     simp only [Stmt.asserts, Bool.or_eq_false_iff] at h
     obtain ⟨⟨⟨hok, herr⟩, hpnc⟩, hother⟩ := h

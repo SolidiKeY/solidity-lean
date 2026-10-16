@@ -1,9 +1,62 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { runSolidityTests, solidityFiles, testsPassed } from "./test-solidity.mjs";
+import { execFileSync } from "node:child_process";
+import { runSolidityTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
+
+test("timed-out tool jobs terminate their descendant processes", {skip:process.platform === 'win32'}, async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'solidity-timeout-'));
+  const pidFile = join(dir, 'child.pid'), marker = join(dir, 'late-output');
+  let child;
+  try {
+    const job = join(dir, 'job.mjs');
+    const code = `process.on('SIGTERM',()=>{});require('node:fs').writeFileSync(${JSON.stringify(pidFile)},String(process.pid));setTimeout(()=>require('node:fs').writeFileSync(${JSON.stringify(marker)},'alive'),1200);setInterval(()=>{},1000)`;
+    writeFileSync(job, `import {spawn} from 'node:child_process';
+spawn(process.execPath,['-e',${JSON.stringify(code)}],{stdio:'ignore'});
+process.on('SIGTERM',()=>{});
+setInterval(()=>{},1000);`);
+    assert.throws(() => runTool(process.execPath, [job], 500), e => {
+      assert.match(e.message, /ETIMEDOUT/);
+      assert.equal(e.tool.errorCode, 'ETIMEDOUT');
+      assert.equal(e.tool.timedOut, true);
+      assert.equal(e.tool.signal, 'SIGKILL');
+      assert.equal(e.tool.exitCode, null);
+      return true;
+    });
+    assert.ok(existsSync(pidFile), 'the child must have started before the timeout');
+    child = Number(readFileSync(pidFile, 'utf8'));
+    await new Promise(resolve => setTimeout(resolve, 1100));
+    assert.equal(existsSync(marker), false, 'a descendant survived the failed tool job');
+  } finally {
+    if (child) { try { process.kill(child, 'SIGKILL'); } catch (e) { if (e.code !== 'ESRCH') throw e; } }
+    rmSync(dir, {recursive:true, force:true});
+  }
+});
+
+test("failed tool jobs retain exit and signal metadata even with output", () => {
+  assert.throws(() => runTool(process.execPath,
+    ['-e', 'console.warn("diagnostic"); process.exit(7)'], 2000), e => {
+    assert.match(e.message, /exited 7/);
+    assert.match(e.message, /diagnostic/);
+    assert.equal(e.tool.exitCode, 7);
+    assert.equal(e.tool.signal, null);
+    assert.equal(e.tool.timedOut, false);
+    return true;
+  });
+  if (process.platform !== 'win32') {
+    assert.throws(() => runTool(process.execPath,
+      ['-e', 'console.warn("diagnostic"); process.kill(process.pid, "SIGTERM")'], 2000), e => {
+      assert.match(e.message, /terminated by SIGTERM/);
+      assert.match(e.message, /diagnostic/);
+      assert.equal(e.tool.exitCode, null);
+      assert.equal(e.tool.signal, 'SIGTERM');
+      assert.equal(e.tool.timedOut, false);
+      return true;
+    });
+  }
+});
 
 test("discovery deduplicates overlapping inputs", () => {
   const files = solidityFiles(["tests/solc", "tests/solc/Runner.sol"]);
@@ -18,8 +71,13 @@ test("empty and untested suites cannot pass", () => {
 });
 
 test("Solidity source through solc and kernel-checked proof search", () => {
-  const report = runSolidityTests(["tests/solc/Runner.sol"], { build: false });
+  const checkpoints = [];
+  const report = runSolidityTests(["tests/solc/Runner.sol"], { build: false, batchSize:3,
+    onProgress: part => checkpoints.push(part.results.length) });
   assert.deepEqual(report.errors, []);
+  assert.ok(checkpoints.length > 3);
+  assert.equal(checkpoints.at(-1),report.results.length);
+  assert.ok(checkpoints.every((n,i) => i === 0 || n >= checkpoints[i-1]));
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   assert.equal(status.passes, "proved");
   assert.equal(status.passesToo, "proved");
@@ -39,9 +97,46 @@ test("Solidity source through solc and kernel-checked proof search", () => {
   assert.equal(testsPassed(report), false);
 });
 
+test("fixed-array copy shapes preserve tails, snapshots and evaluation order", () => {
+  const report = runSolidityTests(["tests/solc/ArrayShapes.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function, r.status]), [
+    ['fixedTail', 'proved'], ['dynamicLength', 'proved'], ['fieldTarget', 'proved'],
+    ['sourceAndTargetEffects', 'proved'], ['pushedShape', 'proved'],
+    ['falseTail', 'pending'], ['falseAlias', 'pending'], ['badSourceReverts', 'proved']
+  ]);
+  assert.equal(testsPassed(report), false);
+});
+
 test("implicit initializer omissions cannot silently pass", () => {
   const report = runSolidityTests(["tests/solc/InitGap.sol"], { build: false });
   assert.ok(report.errors.some(e => e.reason.includes("initializers are left out")));
+  assert.equal(testsPassed(report), false);
+});
+
+test("file-level structs and library references retain declaration identity", () => {
+  const report = runSolidityTests(["tests/solc/FileLevelStructs.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = report.results.map(r => [r.contract, r.function, r.status]);
+  assert.deepEqual(rows, [
+    ['DifferentFileStruct', 'unsupportedShape', 'unsupported'],
+    ['DifferentOwnStruct', 'unsupportedShape', 'unsupported'],
+    ['FileLevelStructs', 'swaps', 'proved'],
+    ['FileLevelStructs', 'falsePost', 'pending'],
+    ['FilePairLib', 'swap', 'internal'],
+    ['OwnStructWins', 'ownPair', 'proved']
+  ]);
+  assert.equal(testsPassed(report), false);
+});
+
+test("invalid nested and hidden struct declarations cannot use a same-named table shape", () => {
+  const report = runSolidityTests(["tests/solc/FileLevelStructGaps.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.filter(r => r.contract !== 'HiddenStructLib')
+    .map(r => [r.contract, r.function, r.status]), [
+    ['HiddenStructCaller', 'narrowLibraryMember', 'unsupported'],
+    ['InvalidNestedStruct', 'narrowMember', 'unsupported']
+  ]);
   assert.equal(testsPassed(report), false);
 });
 
@@ -72,4 +167,441 @@ test("selection, listing and missing selections", () => {
   const missing = runSolidityTests(["tests/solc/Runner.sol"], { ...options, function: "absent" });
   assert.equal(missing.errors.length, 1);
   assert.equal(testsPassed(missing), false);
+});
+
+test("value push captures complex receivers once", () => {
+  const report = runSolidityTests(["tests/solc/PushReceiver.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.equal(report.results.length,5);
+  assert.deepEqual(report.results.map(r => r.signature),
+    ['nested()','falsePost()','effectfulReceiver()','oldTargetIndex()','falseTargetIndex()']);
+  const status = Object.fromEntries(report.results.map(r => [r.function,r.status]));
+  assert.equal(status.nested,'proved');
+  assert.equal(status.effectfulReceiver,'proved');
+  assert.equal(status.falsePost,'pending');
+  assert.equal(status.oldTargetIndex,'proved');
+  assert.equal(status.falseTargetIndex,'pending');
+});
+
+test("push source captures preserve values, independent copies and mutable source names", () => {
+  const report = runSolidityTests(["tests/solc/PushSources.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function,r.status]), [
+    ['primitive','proved'], ['primitiveField','proved'], ['primitiveFalse','pending'],
+    ['referenceCopy','proved'], ['referenceFalse','pending'], ['selfCopy','proved'],
+    ['effectfulSource','proved'], ['complexReceiver','proved'], ['badSourceIndex','proved'],
+    ['freshSourceNames','proved']
+  ]);
+});
+
+test("memory push copies atomically and resolves a changing receiver once", () => {
+  const report = runSolidityTests(["tests/solc/MemoryPush.sol"], {build:false, batchSize:3});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function,r.status]), [
+    ['arrayCopy','proved'], ['arrayFalse','pending'], ['structCopy','proved'],
+    ['recycledSlot','proved'], ['receiverUsesLength','proved'], ['receiverFalse','pending'],
+    ['complexMemorySource','proved'], ['complexMemoryFalse','pending'],
+    ['badMemorySource','proved']
+  ]);
+});
+
+test("storage-return bindings retain alias identity, effects and caller memory", () => {
+  const report = runSolidityTests(["tests/solc/StorageReturns.sol"], {build:false, batchSize:3});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function,r.status]), [
+    ['valuesRef','internal'], ['otherRef','internal'], ['rowRef','internal'],
+    ['allocatedRef','internal'], ['rejectedRef','internal'],
+    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','proved'],
+    ['heapGrowth','proved'], ['calleeReverts','proved'], ['falseCopy','pending'],
+    ['receiverPush','proved'], ['receiverPushValue','proved'], ['receiverPop','proved'],
+    ['receiverReadsAfterGetter','proved'], ['receiverReadsBeforeGetterFalse','pending'],
+    ['receiverEffectfulOperand','proved']
+  ]);
+});
+
+test("solc unchecked blocks wrap locally and restore checked arithmetic", () => {
+  const report = runSolidityTests(["tests/solc/UncheckedImport.sol"],{build:false});
+  assert.deepEqual(report.errors,[]);
+  const status=Object.fromEntries(report.results.map(r => [r.function,r.status]));
+  assert.equal(status.wraps,'proved');
+  assert.equal(status.falsePost,'pending');
+  assert.equal(status.scopeEnds,'proved');
+});
+
+test("mapping push and its returned alias preserve recycled entries", () => {
+  const report = runSolidityTests(["tests/solc/MappingPush.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function, r.status]), [
+    ['boundPushDiamond', 'proved'],
+    ['barePushKeepsEntries', 'proved'], ['boundPushKeepsEntries', 'proved']
+  ]);
+});
+
+test("overloads use solc declaration identities and retain source signatures", () => {
+  const report = runSolidityTests(["tests/solc/Overloads.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.filter(r => r.function === 'pick').map(r => r.signature),
+    ['pick(uint)', 'pick(bool)']);
+  const status = Object.fromEntries(report.results.map(r => [r.signature, r.status]));
+  assert.equal(status['choosesByDeclaration()'], 'proved');
+  assert.equal(status['falsePost()'], 'pending');
+  assert.equal(status['check(uint)'], 'proved');
+  assert.equal(status['check(bool)'], 'proved');
+  assert.equal(status['selectsDistinctSourceTypes()'], 'proved');
+  const typed = report.results.filter(r => r.function === 'typedPick');
+  assert.equal(typed.length, 3);
+  assert.equal(new Set(typed.map(r => r.signature)).size, 3);
+  const named = report.results.filter(r => r.function === 'namedType').map(r => r.signature);
+  assert.equal(new Set(named).size, 2);
+  assert.ok(named.some(s => s.includes('uint256Flavor')));
+  const selected = runSolidityTests(["tests/solc/Overloads.sol"],
+    {build:false, function:'check(bool)'});
+  assert.deepEqual(selected.errors, []);
+  assert.deepEqual(selected.results.map(r => r.signature), ['check(bool)']);
+  assert.equal(testsPassed(selected), true);
+});
+
+test("constant and enum declarations are imported without storage slots", () => {
+  const report = runSolidityTests(["tests/solc/ConstantsEnums.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.constantsInline, 'proved');
+  assert.equal(status.enumsHaveOrdinals, 'proved');
+  assert.equal(status.reservedLocal, 'proved');
+  assert.equal(status.boundsAndValueTypes, 'proved');
+  assert.equal(status.boundsFalsePost, 'pending');
+  assert.equal(status.otherValueTypes, 'proved');
+  assert.equal(status.falsePost, 'pending');
+  assert.equal(status.immutableGap, 'unsupported');
+});
+
+test("enum NatSpec names respect declaration scope and preserve false obligations", () => {
+  const report = runSolidityTests(["tests/solc/EnumSpecs.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.contract, r.function, r.status]), [
+    ['EnumInvariant', 'set', 'proved'], ['EnumInvariant', 'falsePost', 'pending'],
+    ['EnumLibrary', 'last', 'proved'],
+    ['EnumSpecs', 'set', 'proved'], ['EnumSpecs', 'reset', 'proved'],
+    ['EnumSpecs', 'qualifiedFile', 'proved'], ['EnumSpecs', 'otherScope', 'proved'],
+    ['EnumSpecs', 'falsePost', 'pending'], ['EnumSpecs', 'quantifiedShadow', 'proved'],
+    ['EnumSpecs', 'parameterShadow', 'proved'], ['EnumSpecs', 'loopAnnotation', 'proved'],
+    ['EnumSpecs', 'libraryScope', 'proved']
+  ]);
+});
+
+test("imported library helper annotations retain their defining enum scope", () => {
+  const dir = mkdtempSync(join(tmpdir(), "solidity-enum-library-"));
+  try {
+    const ast = join(dir, "source.ast.json");
+    execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source',
+      'tests/solc/EnumSpecs.sol', '--out', ast, '--no-wrapper']);
+    const check = join(dir, "Check.lean");
+    writeFileSync(check, `import Solidity.Frontend.SolcJson
+open Lean Solidity.Frontend
+#eval do
+  let text ← IO.FS.readFile ${JSON.stringify(ast)}
+  let j ← IO.ofExcept (Json.parse text)
+  let ast ← IO.ofExcept (j.getObjVal? "ast")
+  let c ← IO.ofExcept (readContract ast "EnumSpecs" [] true)
+  unless c.funMembers.any (fun (_, m) => m.startsWith "ensures \\\\result == 0; ") do
+    throw (IO.userError "library helper annotation resolved outside its defining scope")
+`);
+    execFileSync('lake', ['--quiet', '--no-build', 'lean', check, '--', '--tstack=131072']);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("a shadowed enum head cannot silently become a numeral", () => {
+  const dir = mkdtempSync(join(tmpdir(), "solidity-enum-shadow-"));
+  try {
+    const source = join(dir, "EnumShadow.sol");
+    writeFileSync(source, `pragma solidity ^0.8.26;
+contract EnumShadow {
+    enum Status { First, Last }
+    /// @custom:key ensures Status.Last == 1
+    function parameter(uint Status) public pure {}
+    /// @custom:key ensures \\forall uint Status; Status.Last == 1
+    function quantified() public pure {}
+    /// @custom:key ensures \\forall uint «Status»; Status.Last == 1
+    function escapedQuantified() public pure {}
+    /// @custom:key ensures \\forall uint /- note -/ Status; Status.Last == 1
+    function commentedQuantified() public pure {}
+}`);
+    const report = runSolidityTests([source], {build:false});
+    assert.equal(report.results.length, 4);
+    assert.ok(report.results.every(r => r.status === 'error'));
+    assert.equal(testsPassed(report), false);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("source types preserve overflow and declaration scope", () => {
+  const report = runSolidityTests(["tests/solc/SourceTypes.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.signedAliasIsNotAlwaysPositive, 'pending');
+  assert.equal(status.negativeAlias, 'proved');
+  assert.equal(status.narrowOverflowCannotReturn, 'pending');
+  assert.equal(status.narrowOverflowPanics, 'proved');
+  assert.equal(status.signedOverflowCannotReturn, 'pending');
+  assert.equal(status.signedOverflowPanics, 'proved');
+  assert.equal(status.ternaryOverflowCannotReturn, 'pending');
+  for (const name of ['ternaryOverflowPanics', 'ternaryUncheckedWraps',
+    'ternaryExplicitWidening']) assert.equal(status[name], 'proved');
+  assert.equal(status.ternaryEffectsOnce, 'unsupported');
+  assert.equal(status.nestedTypedConditionals, 'proved');
+  assert.equal(status.signedTernaryOverflowCannotReturn, 'pending');
+  assert.equal(status.signedLiteralConditional, 'unsupported');
+  assert.equal(status.nestedLiteralConditional, 'unsupported');
+  assert.equal(status.shortCircuitLiteralConditional, 'unsupported');
+});
+
+test("modifiers use the existing inliner for calls and root obligations", () => {
+  const report = runSolidityTests(["tests/solc/Modifiers.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['constructor', 'arguments', 'resumesAfterReturn',
+    'firstListedOutermost', 'directApplication', 'argumentEvaluation',
+    'localsPerApplication', 'multiplePlaceholders', 'internalCallFromModifier',
+    'unnamedParameter', 'unnamedArgumentStillRuns']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  assert.equal(status.falsePost, 'pending');
+  assert.equal(status.narrowModifierGap, 'unsupported');
+  assert.equal(status.narrowArrayModifierGap, 'unsupported');
+});
+
+test("free and library calls resolve by declaration with attached receivers", () => {
+  const report = runSolidityTests(["tests/solc/LibraryCalls.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['ownCalls', 'declarationsStayDistinct', 'attachedAndNamed', 'receiverOnce', 'tupleCalls']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  assert.equal(status.falsePost, 'pending');
+  assert.equal(status.recursionGap, 'unsupported');
+});
+
+test("root primitive push bindings and empty user calls parse unambiguously", () => {
+  const report = runSolidityTests(["tests/solc/PushBindings.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.rootBinding, 'proved');
+  assert.equal(status.falsePost, 'pending');
+  for (const name of ['fixedReturn', 'dynamicReturn', 'structReturn']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  assert.equal(status.falseReferencePost, 'pending');
+});
+
+test("fresh arrays expose their written size and initialized elements", () => {
+  const report = runSolidityTests(["tests/solc/NewArrays.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['storageRoot', 'sizeOnce', 'memorySizeOnce', 'receiverAfterSize', 'symbolicSize']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  // Reference-element copy reads remain a required migration gap.
+  assert.equal(status.nestedDefaults, 'pending');
+  assert.equal(status.falsePost, 'pending');
+  assert.equal(status.emptyRead, 'pending');
+});
+
+test("the full frozen TestSuite compiles its testing function table within default limits", () => {
+  const report = runSolidityTests([
+    "tests/migration/solkey/keyext.solidity.examples/TestSuite.sol",
+  ], {build:false, list:true, renaming:{Triple:'FixedTriple'}});
+  assert.deepEqual(report.errors, []);
+  const rows = report.results.filter(r => r.contract === 'TestSuite');
+  assert.equal(rows.length, 551);
+  assert.equal(rows.filter(r => r.status === 'ready').length, 512);
+  const status = Object.fromEntries(rows.map(r => [r.function, r.status]));
+  assert.equal(status.storagePushMemoryCopySource, 'ready');
+  assert.equal(status.storagePushCompoundSigned, 'ready');
+  assert.equal(status.whileCountsUp, 'ready');
+  assert.equal(status.storagePushPopCallReceiver, 'ready');
+  assert.equal(status.addmodMulmod, 'ready');
+  assert.equal(status.indexParameter, 'ready');
+  assert.equal(status.storageStructParameter, 'ready');
+  assert.equal(status.storageMappingParameter, 'ready');
+});
+
+test("reference parameters preserve locations, copies and initialized source inputs", () => {
+  const report = runSolidityTests(["tests/solc/ReferenceParameters.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const fn of ["storageAndMemory", "nestedStorageReturn", "allocationArgument", "initializedInput"]) {
+    assert.equal(status[fn], "proved", fn);
+  }
+  // Executable kernel regressions cover the copy's evaluation order. Symbolic
+  // closure of that larger update remains open.
+  assert.equal(status.copiesBeforeEffects, "pending");
+});
+
+test("quantified consequents parse and omitted specification bodies stay local", () => {
+  const report = runSolidityTests(["tests/solc/SpecImport.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.filter(r => r.contract === "SpecImport")
+    .map(r => [r.function, r]));
+  assert.equal(rows.universalConsequent.status, "proved");
+  assert.equal(rows.existentialConsequent.status, "proved");
+  assert.equal(rows.falseUniversal.status, "pending");
+  assert.equal(rows.renamedSpec.status, "proved");
+  assert.equal(rows.omittedCaller.status, "pending");
+  assert.equal(rows.omittedBody.status, "unsupported");
+  assert.equal(rows.omittedModifier.status, "unsupported");
+  assert.equal(rows.stillChecked.status, "pending");
+  const ctor = Object.fromEntries(report.results.filter(r => r.contract === "SpecCtorGap")
+    .map(r => [r.function, r]));
+  assert.equal(ctor.constructor.status, "proved");
+  assert.equal(ctor.stillChecked.status, "pending");
+  const types = Object.fromEntries(report.results.filter(r => r.contract === "OmittedTypes")
+    .map(r => [r.function, r]));
+  assert.equal(types.unrelated.status, "proved");
+  assert.equal(types.stillChecked.status, "pending");
+  for (const fn of ["readsString", "readsNarrow", "readsNarrowKey", "readsNarrowValue", "specReadsNarrow"]) {
+    assert.equal(types[fn].status, "unsupported", fn);
+  }
+  assert.match(types.specReadsNarrow.reason, /specification reads omitted state variable/);
+});
+
+test("specification parameter renaming preserves scopes, distinct names and frames", () => {
+  const report = runSolidityTests(["tests/solc/SpecBindings.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.filter(r => r.contract === "SpecBindings")
+    .map(r => [r.function, r]));
+  for (const fn of ["keywords", "oldParameter", "stateShadow", "distinctParameters", "namedReturn",
+    "returnScope", "existentialShadow", "quantifiedSibling", "avoidCapture", "memberLabel",
+    "splitMemberLabel", "assignableIndex", "bodyLocal", "escaped", "comments", "parameterLoop",
+    "localLoop", "loopScopeExit", "blockScopeExit", "returnLoop", "modifierLoop", "externalValue",
+    "tryScopeExit"]) {
+    assert.equal(rows[fn].status, "proved", fn);
+  }
+  for (const fn of ["falseStateShadow", "falseDistinctParameters", "falseOldReturnScope",
+    "falseQuantifiedShadow", "falseQuantifiedSibling", "falseCapture", "falseDeepCapture", "falseFrame", "stillChecked"]) {
+    assert.equal(rows[fn].status, "pending", fn);
+  }
+  assert.equal(rows.malformedRenamed.status, "unsupported");
+  assert.match(rows.malformedRenamed.reason, /expected end of input/);
+  assert.equal(rows.unknownLoopName.status, "unsupported");
+  assert.match(rows.unknownLoopName.reason, /unknown name from_/);
+  assert.equal(report.results.find(r => r.contract === "SpecBindingConstructor").status, "proved");
+  assert.equal(report.results.find(r => r.contract === "SpecBindingInherited").status, "proved");
+});
+
+test("unsupported ledger frames stay local and retain their caller gaps", () => {
+  const report = runSolidityTests(["tests/solc/NetAssignable.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["ledgerGap", "mixedGap"]) {
+    assert.equal(rows[fn].status, "unsupported", fn);
+    assert.match(rows[fn].reason, /ledger locations in assignable/);
+  }
+  assert.equal(rows.callerGap.status, "unsupported");
+  assert.equal(rows.unrelated.status, "proved");
+  assert.equal(rows.falseUnrelated.status, "pending");
+  assert.equal(rows.bareStateName.status, "proved");
+  assert.equal(rows.builtinLedger.status, "proved");
+  assert.equal(rows.falseBuiltinLedger.status, "pending");
+  assert.equal(rows.constantLedgerGap.status, "unsupported");
+  assert.match(rows.constantLedgerGap.reason, /ledger locations in assignable/);
+  assert.equal(rows.builtinEscapes.status, "proved");
+});
+
+test("constant specifications preserve units, lexical visibility and unsigned types", () => {
+  const run = contract => runSolidityTests(["tests/solc/SpecConstants.sol"], {build:false, contract});
+  const base = run("SpecConstants");
+  assert.deepEqual(base.errors, []);
+  const rows = Object.fromEntries(base.results.map(r => [r.function, r]));
+  assert.equal(rows.exactUnits.status, "proved");
+  assert.equal(rows.falseConstant.status, "pending");
+  for (const fn of ["boundedLoop", "quantifiedShadow"]) {
+    assert.equal(rows[fn].status, "unsupported", fn);
+  }
+  assert.match(rows.boundedLoop.reason, /loop's invariant needs a statement/);
+  assert.equal(rows.parameterShadow.status, "pending");
+  const other = run("OtherConstants");
+  assert.deepEqual(other.errors, []);
+  assert.equal(other.results[0].status, "proved");
+  const defining = run("PrivateConstants");
+  assert.deepEqual(defining.errors, []);
+  assert.equal(defining.results[0].status, "proved");
+  const inherited = run("InheritedConstants");
+  assert.deepEqual(inherited.errors, []);
+  const inheritedRows = Object.fromEntries(inherited.results.map(r => [r.function, r]));
+  assert.equal(inheritedRows.inheritedVisible.status, "proved");
+  assert.equal(inheritedRows.callDefiningScope.status, "proved");
+  assert.equal(inheritedRows.privateIsHidden.status, "unsupported");
+  const typed = run("ConstantTypes");
+  assert.equal(typed.results[0].status, "error");
+  assert.equal(testsPassed(typed), false);
+  assert.match(typed.errors.map(e => e.reason).join("\n"), /operands of \+ of types uint and int/);
+  const isolated = run("ConstantIsolation");
+  assert.ok(isolated.results.every(r => r.status === "error"));
+  assert.equal(testsPassed(isolated), false);
+  const isolationErrors = isolated.errors.map(e => e.reason).join("\n");
+  assert.match(isolationErrors, /unknown name LIMIT/);
+  assert.match(isolationErrors, /unknown name LIB_ONLY/);
+});
+
+test("specifications retain the contract address and its ledger snapshot", () => {
+  const report = runSolidityTests(["tests/solc/SpecSelf.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["identity", "snapshot", "unchangedLedger", "parameter", "returned"]) {
+    assert.equal(rows[fn].status, "proved", fn);
+  }
+  for (const fn of ["falseAddress", "falseLedger"]) {
+    assert.equal(rows[fn].status, "pending", fn);
+  }
+});
+
+test("inheritance preserves virtual, static, named and modifier dispatch", () => {
+  const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"Inherited"});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["dispatch", "staticCall", "staticStillDispatches", "namedCall", "privateCall",
+    "modified", "staticModifier", "inheritedStruct", "inheritedEnumSpec", "inheritedEnumModifier", "externalValue"]) {
+    assert.equal(rows[fn].status, "proved", fn);
+  }
+  assert.equal(rows.falseDispatch.status, "pending");
+  assert.equal(rows.falseInheritedEnumSpec.status, "pending");
+  assert.equal(rows.externalStaysExternal.status, "pending");
+  assert.equal(rows.superRemainsUnsupported.status, "unsupported");
+  assert.match(rows.superRemainsUnsupported.reason, /super call/);
+  assert.equal(rows.viaBase, undefined); // inherited helpers have no new independent row
+  const init = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"InitDiamond"});
+  assert.deepEqual(init.errors, []);
+  // Exact deployment and all constructor assertions are checked in the kernel
+  // by Examples/Tactics/Inheritance.lean; automatic symbolic closure is open.
+  assert.equal(init.results.find(r => r.function === "constructor").status, "pending");
+});
+
+test("unmodelled inheritance boundaries are rejected instead of omitted", () => {
+  for (const [contract, reason] of [["CtorGap", /base constructor/],
+    ["SpecGap", /inherited contract NatSpec/], ["NameGap", /distinct storage roots/]]) {
+    const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract});
+    assert.ok(report.errors.some(e => reason.test(e.reason)), contract);
+    assert.equal(testsPassed(report), false);
+  }
+});
+
+test("native modular builtins retain wide results, failure priority and source effects", () => {
+  const report = runSolidityTests(["tests/solc/Modular.sol"], {build:false, batchSize:3});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const fn of ["wide", "zeroBeforeBad", "ordered", "capturedRead", "usesDeclaredFunction"]) {
+    assert.equal(status[fn], "proved", fn);
+  }
+  assert.equal(status.positiveBad, "pending");
+});
+
+test("specification negation widens unsigned operands only beside the ledger", () => {
+  const report = runSolidityTests(["tests/solc/SpecNegation.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["ledgerEquation", "unsignedNegation", "reversedNegation", "negativeLiteral",
+    "oldUnsignedNegation", "typedConstantNegation", "negativeLedger", "maximumUnsignedNegation"]) {
+    assert.equal(rows[fn].status, "proved", fn);
+  }
+  assert.equal(rows.falseNegation.status, "pending");
+  assert.equal(rows.checkedInnerArithmetic.status, "pending");
 });

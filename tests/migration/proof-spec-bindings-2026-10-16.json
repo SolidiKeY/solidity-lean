@@ -1,0 +1,385 @@
+{
+  "version": 1,
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "proof",
+  "scope": "local-specification-binding-regressions-only",
+  "sources": [
+    "tests/solc/SpecBindings.sol"
+  ],
+  "completed": [
+    "tests/solc/SpecBindings.sol"
+  ],
+  "results": [
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindingBase",
+      "tag": "internal",
+      "status": "internal",
+      "signature": "identity(uint)",
+      "reason": "",
+      "function": "identity",
+      "elapsedMs": 0
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindingConstructor",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "constructor(uint)",
+      "reason": "",
+      "function": "constructor",
+      "elapsedMs": 1199
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindingInherited",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "inheritedHelper(uint)",
+      "reason": "",
+      "function": "inheritedHelper",
+      "elapsedMs": 654
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "keywords(uint,uint)",
+      "reason": "",
+      "function": "keywords",
+      "elapsedMs": 581
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "oldParameter(uint)",
+      "reason": "",
+      "function": "oldParameter",
+      "elapsedMs": 294
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "stateShadow(uint)",
+      "reason": "",
+      "function": "stateShadow",
+      "elapsedMs": 329
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseStateShadow(uint)",
+      "reason": "open proof goals",
+      "function": "falseStateShadow",
+      "elapsedMs": 174
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseDistinctParameters(uint,uint)",
+      "reason": "open proof goals",
+      "function": "falseDistinctParameters",
+      "elapsedMs": 397
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "distinctParameters(uint,uint)",
+      "reason": "",
+      "function": "distinctParameters",
+      "elapsedMs": 591
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "namedReturn(uint)",
+      "reason": "",
+      "function": "namedReturn",
+      "elapsedMs": 334
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "returnScope()",
+      "reason": "",
+      "function": "returnScope",
+      "elapsedMs": 377
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseOldReturnScope()",
+      "reason": "open proof goals",
+      "function": "falseOldReturnScope",
+      "elapsedMs": 196
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseQuantifiedShadow(uint)",
+      "reason": "open proof goals",
+      "function": "falseQuantifiedShadow",
+      "elapsedMs": 207
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "existentialShadow(uint)",
+      "reason": "",
+      "function": "existentialShadow",
+      "elapsedMs": 457
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "quantifiedSibling(uint)",
+      "reason": "",
+      "function": "quantifiedSibling",
+      "elapsedMs": 346
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseQuantifiedSibling(uint)",
+      "reason": "open proof goals",
+      "function": "falseQuantifiedSibling",
+      "elapsedMs": 191
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "avoidCapture(uint)",
+      "reason": "",
+      "function": "avoidCapture",
+      "elapsedMs": 352
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseCapture(uint)",
+      "reason": "open proof goals",
+      "function": "falseCapture",
+      "elapsedMs": 215
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseDeepCapture(uint)",
+      "reason": "open proof goals",
+      "function": "falseDeepCapture",
+      "elapsedMs": 675
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "memberLabel(uint)",
+      "reason": "",
+      "function": "memberLabel",
+      "elapsedMs": 426
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "splitMemberLabel(uint)",
+      "reason": "",
+      "function": "splitMemberLabel",
+      "elapsedMs": 418
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "assignableIndex(uint)",
+      "reason": "",
+      "function": "assignableIndex",
+      "elapsedMs": 1217
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "pending",
+      "signature": "falseFrame(uint)",
+      "reason": "open proof goals",
+      "function": "falseFrame",
+      "elapsedMs": 1567
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "bodyLocal()",
+      "reason": "",
+      "function": "bodyLocal",
+      "elapsedMs": 338
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "escaped(uint)",
+      "reason": "",
+      "function": "escaped",
+      "elapsedMs": 346
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "comments(uint)",
+      "reason": "",
+      "function": "comments",
+      "elapsedMs": 346
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "parameterLoop(uint)",
+      "reason": "",
+      "function": "parameterLoop",
+      "elapsedMs": 1188
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "localLoop()",
+      "reason": "",
+      "function": "localLoop",
+      "elapsedMs": 880
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "loopScopeExit()",
+      "reason": "",
+      "function": "loopScopeExit",
+      "elapsedMs": 843
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "blockScopeExit()",
+      "reason": "",
+      "function": "blockScopeExit",
+      "elapsedMs": 1129
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "returnLoop()",
+      "reason": "",
+      "function": "returnLoop",
+      "elapsedMs": 747
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "modifierLoop()",
+      "reason": "",
+      "function": "modifierLoop",
+      "elapsedMs": 772
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "unsupported",
+      "signature": "unknownLoopName(uint)",
+      "reason": "SpecBindings.sol:174: unknown name from_",
+      "function": "unknownLoopName",
+      "elapsedMs": 0
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "diamond",
+      "status": "proved",
+      "signature": "externalValue()",
+      "reason": "",
+      "function": "externalValue",
+      "elapsedMs": 297
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "proved",
+      "signature": "tryScopeExit()",
+      "reason": "",
+      "function": "tryScopeExit",
+      "elapsedMs": 1708
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "specified",
+      "status": "unsupported",
+      "signature": "malformedRenamed(uint)",
+      "reason": "SpecBindings.sol:200: <input>:1:15: expected end of input",
+      "function": "malformedRenamed",
+      "elapsedMs": 0
+    },
+    {
+      "source": "tests/solc/SpecBindings.sol",
+      "contract": "SpecBindings",
+      "tag": "diamond",
+      "status": "pending",
+      "signature": "stillChecked()",
+      "reason": "open proof goals",
+      "function": "stillChecked",
+      "elapsedMs": 96
+    }
+  ],
+  "errors": []
+}

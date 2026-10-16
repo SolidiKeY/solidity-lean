@@ -34,13 +34,13 @@ solc_import "../../tests/solc/Counter.ast.json" hash 0x2d54a4ea32c96108 as Solke
 
 solc_import "../../tests/solc/EtherWallet.ast.json" hash 0x381a46a368c7fa67 as Solkey.EtherWallet
 
-solc_import "../../tests/solc/CtorGap.ast.json" hash 0x8cab24cd55b14f16 as Solkey.CtorGap
+solc_import "../../tests/solc/CtorGap.ast.json" hash 0xc422f333726d501d as Solkey.CtorGap
 
 /--
-warning: solc_import: the initializers are left out: an initializer calls `cap`, which is left out: the modifier `always`: its code would be dropped
+warning: solc_import: the initializers are left out: an initializer calls `cap`, which is left out: the statement `InlineAssembly`
 -/
 #guard_msgs in
-solc_import "../../tests/solc/InitGap.ast.json" hash 0x83328c56fa8af038 as Solkey.InitGap
+solc_import "../../tests/solc/InitGap.ast.json" hash 0x1fb55aa0ceab10b9 as Solkey.InitGap
 
 /-! `EtherWallet`'s obligations (`solc_scoped_problems`): each stated on
 its program `N.f`, read in its parameters' context, `N.f.problem`. -/
@@ -125,15 +125,15 @@ pending:
 
 /-! ## What the import leaves out
 
-`CtorGap`'s constructor has a modifier, so it is left out (a row), and
+`CtorGap`'s constructor contains inline assembly, so it is left out (a row), and
 its initializer `limit = 5` with it: the implicit constructor would run
 the initializer alone.  `InitGap`'s implicit constructor has an
-initializer that calls `cap`, left out for its modifier: the initializers
+initializer that calls `cap`, left out for its inline assembly: the initializers
 are left out, with a warning at the import. -/
 
 /--
 info: 2 functions (2 diamond, 0 box, 0 skip): 1 elaborated, 0 skipped, 0 excluded, 1 unsupported
-unsupported constructor: CtorGap.sol:15: the modifier `positive`: its code would be dropped
+unsupported constructor: CtorGap.sol:16: the statement `InlineAssembly`
 -/
 #guard_msgs in
 #eval IO.println (Solidity.Frontend.ImportRow.summary Solkey.CtorGap.report)

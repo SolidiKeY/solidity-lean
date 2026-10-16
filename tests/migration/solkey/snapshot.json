@@ -1,0 +1,1376 @@
+{
+  "version": 1,
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "files": [
+    {
+      "path": "keyext.solidity.core/build.gradle",
+      "sha256": "a2087246127abed980ca9134fe72438ebff596e41b10cbe718776fed44f877d9",
+      "bytes": 14748
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/boolHeader.key",
+      "sha256": "31bfc99f39540fc0ca541757264a817380608f9bf53e04e6b49238bae3da973f",
+      "bytes": 74
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/cast.key",
+      "sha256": "a3f4b9f3a14189fd56bc80f9f140b6332f0c8eeb4d0291d2e1df50f9a9efd191",
+      "bytes": 452
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/firstOrderRules.key",
+      "sha256": "56ba4852d86e84e119671f4ad31f9f1a6288e840f03c5d85bafd86c99d24c861",
+      "bytes": 6084
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/formulaNormalizationRules.key",
+      "sha256": "7886e71092b414f3c6be3ee6fe5ab2b1b7616ce484bf9ad5ef4564513ab32a31",
+      "bytes": 25498
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/ifThenElseRules.key",
+      "sha256": "1ee3cd3fdcb2bb1031719af1cc81e1e352b091d2703ac8f1d23986a9fd837971",
+      "bytes": 9350
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intDiv.key",
+      "sha256": "9379a00f056fc16aef31e2cf82b71f5cbe9ec44978ce09397a70a98d72abc3ef",
+      "bytes": 15469
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intHeader.key",
+      "sha256": "d9ee9b49c59134c990ea2ae1938bf86acf14defe302d72d162806027733ca2d1",
+      "bytes": 1028
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intSimplificationRules.key",
+      "sha256": "4cbebeeceddafc1f9ed7557b170b71663bd201965ee241c34b43904c81ce1924",
+      "bytes": 78742
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/ldt.key",
+      "sha256": "693b2ae229b0f8a93f48f553976fdaad748e5a142493da3e6a838acf4a819957",
+      "bytes": 198
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/listHeader.key",
+      "sha256": "0e015884198e3215a8bf82bcf09fb544363d114a5b34eb4e3132d63125fd3389",
+      "bytes": 408
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/listRules.key",
+      "sha256": "b4e79d74b23b0839f1d1afed3c2b08d958e56494f1a9f893af3485694446a266",
+      "bytes": 2169
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/memoryHeader.key",
+      "sha256": "8c49124d5cb61529e926b8c9e16265c0980345b60466d6210d36ba4fe1e8134a",
+      "bytes": 233
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/memoryRules.key",
+      "sha256": "35536aea3e2fa70519147614d9b50bdf13a0e3a005be4b1a03ec88ba7847260e",
+      "bytes": 6359
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/netHeader.key",
+      "sha256": "b36de9481ca2e41b97f2fd0265fbfe725554e1775cd8e0a7e5b417ed5b8dfd4f",
+      "bytes": 293
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/optionsDeclarations.key",
+      "sha256": "f1cd3a01b13b31957bbcb5bd5458077183a39dfeeb023b733479c13f5554fcdd",
+      "bytes": 1833
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/precRules.key",
+      "sha256": "408b67f5da23442c50e1aed3b163c611a1e2b1155a19f8ddca42ed2c081724d2",
+      "bytes": 359
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/propRule.key",
+      "sha256": "e37e037999128578ac8e0d65cdbeb21b7b9b23403176fafd2deff03720bc6bf8",
+      "bytes": 8870
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/ruleSetDeclarations.key",
+      "sha256": "436a711e25e050631c22cb710ada506f30c90f6436054866d2c1b578c2f8a7b5",
+      "bytes": 5196
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityDLHeader.key",
+      "sha256": "ec657b96f6b9096654e90b334995d5b237a6f50959ff60e48830695fc06990d9",
+      "bytes": 76
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+      "sha256": "48a5b55c1a1c75860536a84c197f565759764b956c87ced62b46bed873e7a2f1",
+      "bytes": 283346
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/standardSolidityRules.key",
+      "sha256": "f00315da82bb53883ce86ba9d23d1c4359347ade05c49250b3fcecbbe92032a0",
+      "bytes": 700
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structHeader.key",
+      "sha256": "d6dcf6a89dca78bd05dc6d4005584545125b91233e37f5d78eb425893906b980",
+      "bytes": 678
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structMemoryRules.key",
+      "sha256": "6e27efabee5275e5630ca3b6de686c18dcbb37d64ee135dcebbddd0b8a6a00d3",
+      "bytes": 1613
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structRules.key",
+      "sha256": "efedab8783ec53472c26a5c4c418be139fbcf8911be18455cbcad3de9758780b",
+      "bytes": 16220
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/updateRules.key",
+      "sha256": "ebb37108cb58d3281569478e6fa0061d399208ab438b704890d8c93f33f0c027",
+      "bytes": 8023
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/wellfound.key",
+      "sha256": "c2f1ab6a8f6576809694fb7612d4e9ca39e014f8148870f4637420d78a19da0b",
+      "bytes": 888
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/FieldBox.sol",
+      "sha256": "9c1d9f88d8be535f9ae84fbd9a8a49536fb25eb77653a14f410e9101c4e08536",
+      "bytes": 107
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/assignRuleExample.key",
+      "sha256": "57b58be7618954cf1eea512c443e894b2873da237f7d1bdf2f54ce6964b4ada8",
+      "bytes": 407
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/commonFields.key",
+      "sha256": "908f60e8d0743f8c2950c7d461a9bd5d80ee93da2b2ab5e1deffc4c7a25b99ca",
+      "bytes": 878
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/contextAssignTest.key",
+      "sha256": "6a2de19b0141a76982e8f09f66ae0f30068acfc9295002d39acacc4585c0c25f",
+      "bytes": 832
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/fieldAccessTest.key",
+      "sha256": "1c1cb188b0f9c8886a887d59fefb2e9ee0b94103303cac9d8fa83ede44ee92ff",
+      "bytes": 960
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/functionBodyExpandTest.key",
+      "sha256": "a6f7d9bf9e30bd39b1bd146d72c6ff71b818ad93f2bb7b2896ddf17b75eb11bc",
+      "bytes": 700
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/hasSortVarcondTest.key",
+      "sha256": "372b32808ec21f53709a7388af72e3b38c1f11045b993ca48faad67eef004f4a",
+      "bytes": 641
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/listTests.key",
+      "sha256": "21c9e8bc5b0c43372516d582f58039fc0e208a4fbba193d02c7459e5b6186769",
+      "bytes": 299
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/mainExamples.key",
+      "sha256": "e6d2ed5ade9fc554fbcba14eb63875f5e3bc0ac4da9f7df9a396e03a872b7d14",
+      "bytes": 2581
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memberAccessExample.key",
+      "sha256": "4d481c822bf49de638a21252c16551ca48a7a180b02e2d74517fbfe0df63e41a",
+      "bytes": 317
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memoryExample1.key",
+      "sha256": "4ea0450f1ad1a4ecb6cac8537fe33d3e7ee543358903fb53c89ec6df027a9d9f",
+      "bytes": 365
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memoryExample2-2.key",
+      "sha256": "288a73fc975503e377f61f55f9d2172480667c7609ca5bdc044fe30b23d9ac40",
+      "bytes": 892
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memoryExample2.key",
+      "sha256": "ed432f24015d70747f45af093ccf3426d2e27cf35dd7b31962a426659200a5dd",
+      "bytes": 654
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memoryExample3.key",
+      "sha256": "50884ab1f0d02978841ba950523a870b065ba6538ab788929d7202d7aa7e89ce",
+      "bytes": 674
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memoryExample4.key",
+      "sha256": "06c9604c14c8893508fa150c356cf23c9798a9c089588b4dc0ff138b6cd3edf8",
+      "bytes": 311
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/memoryExample5.key",
+      "sha256": "7c973b5faa22b2d828fce0c71c8c38a5ee2da14b1d60d8974202ffb7c92b3ab2",
+      "bytes": 763
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/open/net-transfer-diamond-negative-amount.key",
+      "sha256": "fa909cd3d3f18de7e9d3f2463d80bab45cfb854e80dcb8a7e2c1f7486b9cb5a6",
+      "bytes": 489
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/open/net-transfer-withcallback-diamond-negative-amount.key",
+      "sha256": "d36d3d3824d009e5ae1537fc5f26908c1d423ee7f44869c353a37ad2eac3f1ec",
+      "bytes": 624
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/problem.key",
+      "sha256": "c12f1da1ae309459003a9620d4217d98ebd80e3de7c80dfb5c13cf382e94e50e",
+      "bytes": 22
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/problem1.key",
+      "sha256": "6c28c2ea9d21c2ed327eaf268c4cad2b797244b659377c1a626c6b61e39312fe",
+      "bytes": 128
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/problem2.key",
+      "sha256": "7647dcbce7707ec8d4210a845f568935c3dbd253e81ccf9f55ba2b4f69cb8635",
+      "bytes": 133
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/programRulesTest.key",
+      "sha256": "3643cad554f69ea862fd2df5c8c26ed8cf4cd2e1cd381075ded3ffbc79f9c79a",
+      "bytes": 1130
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/revert.key",
+      "sha256": "96de7241a35353c452a45954427b3efc9f1ec4572474d813144c01f173b0937d",
+      "bytes": 428
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/schemaVarExample.key",
+      "sha256": "f021aa8585c7f5008021e346fcf25f31e469f8978631293d44af30d4c749a23e",
+      "bytes": 360
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample1.key",
+      "sha256": "4c7b29b02c619a5943d3e21f9547c22f1d3f87ad7511983a437c120de6b4a884",
+      "bytes": 107
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample10.key",
+      "sha256": "d66fcf8c54f77ca7a64cd74195d5d6bb2fdab64b7c8262057e24274ef773163e",
+      "bytes": 227
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample2.key",
+      "sha256": "65114e5a6b607335d8eab51110763968b2791dfd37807e0484dc35d64a8ee7e6",
+      "bytes": 151
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample3.key",
+      "sha256": "65365bedbbc5faecae0c90b9502a6b58a78260bf6fd8fe009536dc8fdffa88e3",
+      "bytes": 147
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample4.key",
+      "sha256": "2bf6a2d6b71344da0a052edb543e254256877836500c192d5904510fd9bdc6b2",
+      "bytes": 102
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample5.key",
+      "sha256": "48e212620c60e0658feb318c571af09ae11dd2338554fac45a616ecf7506a4b2",
+      "bytes": 153
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample6.key",
+      "sha256": "e3774b12b0870ffba415d3fbf7e067ee9d97c86a90c6a17326d7046c9a785db4",
+      "bytes": 219
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample7.key",
+      "sha256": "8bae730a3535bea097656b4a47b972afc478183c0d4527397e4c9ebf4f312224",
+      "bytes": 106
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample8.key",
+      "sha256": "634388d0ef5a1ad0f572febbd1843f3f6fa7f06330c1467b542bdbe439470175",
+      "bytes": 146
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExample9.key",
+      "sha256": "5eca3910a2d4dd2123d2801cc0961736bc558dc4beb0e72fea00e0e571e33432",
+      "bytes": 227
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/simpleExpressionTest.key",
+      "sha256": "c139995871f9de835081d4797783f3f9dc91eec6d1624912794bcaea45668568",
+      "bytes": 440
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample1-2.key",
+      "sha256": "875e01189a66e92a72e04f0b1b481f0c41a37c1333d7c532fc602db5ca9fcd04",
+      "bytes": 331
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample1.key",
+      "sha256": "03c67eb85585c4b20383471065aba2f2e68ed481e76bddd549d2daf99537a1e9",
+      "bytes": 329
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample2-2.key",
+      "sha256": "85e15118e029f754e83aef44ec5f577e007e77f866b84b459c8140025c39e4b9",
+      "bytes": 310
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample2.key",
+      "sha256": "1bbb7a2b0bd1d460a720b49fca64dd0b04a4eb5014aa71117ec62873c4021c5e",
+      "bytes": 308
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample3.key",
+      "sha256": "66a50c5d6392c7605ef6b65b98c262c432a9f3afd9a80b42dad27a3ee94a876e",
+      "bytes": 210
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample4-2.key",
+      "sha256": "ed2e28ac9ab3ca19924ec58ace03cacfa902391f6f22d4f1c6a9cd86b7b04600",
+      "bytes": 392
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample4.key",
+      "sha256": "5cc17a85a2f5232fe381212357f624726a79dafcb337bdcfe25f264354e2ea40",
+      "bytes": 390
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageExample5.key",
+      "sha256": "b94a49999ede71f2c9ded0af808c21e3e8d4ddfa2bda8f0dc849d74c7f5b1425",
+      "bytes": 1135
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageFieldRead.key",
+      "sha256": "a5040c2e0dab8991991aa7994e849fe19bf628700a44dda72c5262e3b1de3163",
+      "bytes": 1634
+    },
+    {
+      "path": "keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/storageFieldWrite.key",
+      "sha256": "7d5228be7ff9157b3fe6c250dfed1928a6899dbbb4dd3bba2a5193be85df9b7d",
+      "bytes": 1667
+    },
+    {
+      "path": "keyext.solidity.examples/TestSuite.sol",
+      "sha256": "8ef8758ec2d014463f2479152916a04beecf517e29f80b49f9e28eeabd03f212",
+      "bytes": 118032
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/AccessRestriction.sol",
+      "sha256": "3cc0b3c58bd3f49e41c0095a14a81d26a2c40993ee34a06e86e07d0ec0eec050",
+      "bytes": 2923
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/Coin.sol",
+      "sha256": "372050e21ca490640f81f7ee9cbbc67747f7fbd40a76594571d70f1334ab1cba",
+      "bytes": 2235
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/Counter.sol",
+      "sha256": "80b8b71dbe0881bf62f298dc19d6e8e77473e0b56d55c55b0b9208a537349147",
+      "bytes": 820
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/ERC20.sol",
+      "sha256": "6d4f4e73e9a1b7bddf76fa017176955277516945eb0b763c0b3ecec0ac933318",
+      "bytes": 4135
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/EtherWallet.sol",
+      "sha256": "9c7ec49fed9f6f2ecb4aab221200dff797d87c78b78982075f9d21ad6171b6bd",
+      "bytes": 891
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/Fund.sol",
+      "sha256": "3bc430aabf58c1da70e93baed4fccefb4c64a9034d7885927a0ed8ff72821fe1",
+      "bytes": 859
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/Mapping.sol",
+      "sha256": "50e44af9167e83a199b1911f5bd44e786367e7815d4b9f0b815243304fb008c8",
+      "bytes": 1827
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/Purchase.sol",
+      "sha256": "962e67a0c3fe245a35b494e7c8c36cfa9e7c2d37256e3ce0cf6ea322ed4765ae",
+      "bytes": 4634
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/SendContract.sol",
+      "sha256": "4b37b74d19223346d3bd35124d99a579cab64dfa2215ebfa8a24ee94fe55add9",
+      "bytes": 1202
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/SendingEther.sol",
+      "sha256": "e39e439c071148931f13e3e2e03017be917f29686ded942097f5a3780a2462c0",
+      "bytes": 2442
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/SimpleAuction.sol",
+      "sha256": "69c3af12177e8f214806080033892c61f553476680899c775559f4551ecf0d87",
+      "bytes": 6106
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/SimpleStorage.sol",
+      "sha256": "44281a448a6c5e9e698a88bab2ef5add4abccc4b0cd1e810fc2b30dc8b3404ad",
+      "bytes": 508
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/Todos.sol",
+      "sha256": "78a0a160e93958213cc3ef05e2cd6926dbaebd08532e060987307c781aa26d45",
+      "bytes": 1372
+    },
+    {
+      "path": "keyext.solidity.examples/benchmark/WithdrawalContract.sol",
+      "sha256": "1ee9b63b12d66bb605002543e62642d1c64798083649ec2985cb5444ae1de121",
+      "bytes": 1903
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayCopyShapes.sol",
+      "sha256": "00851b16c662a2577762e7b8bd5281e3afc53a8a8456c22fdbf7c9dd3cce2ec2",
+      "bytes": 3249
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayCubeDFD.sol",
+      "sha256": "d9b253878f8fc4cabb707f374abbf3b854d2e465bc118153ef5e208e1fe63ca1",
+      "bytes": 4234
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayCubeDFDMemory.sol",
+      "sha256": "4b4dee0c8d839455ca7adbce9ca08a06d50b0d582701968b41dff46b0b4ebca4",
+      "bytes": 1833
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayCubeFDF.sol",
+      "sha256": "21812cfcd77e78806d4fb9b6b9430bf4b51a084afd65c2efeaa7c42fa75adce8",
+      "bytes": 4720
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayMappingShapes.sol",
+      "sha256": "cf552d6d671df837fbd45bb4a5f65574b5973628dfced5800d493675a8bf4d59",
+      "bytes": 1254
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayMatrixConversions.sol",
+      "sha256": "bca0b71ded3de8f52b038df5bb05e815b199fead8549a5bfe9a8314d55a71669",
+      "bytes": 4307
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayMatrixDD.sol",
+      "sha256": "92ffbd299a66fba6e4632b335424987cf0b1f780e9e5f79d1699d81fe24ae9f9",
+      "bytes": 6449
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayMatrixDF.sol",
+      "sha256": "d3962da5040d3856b7ba5f8e52134ce7808158814674bee74a2fd8faad26f794",
+      "bytes": 4675
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayMatrixFD.sol",
+      "sha256": "f646698b32b9bf61e673c3abf1b9481bcc849bd573995398e50de1da715cf987",
+      "bytes": 4508
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/ArrayMatrixFF.sol",
+      "sha256": "4a0ef2d5b587fcfb07e1afd882296b5508266cc522b6c47a98597e64306f013c",
+      "bytes": 3043
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/Counter.sol",
+      "sha256": "e00a85a99c50520749c74d0cc8f524d610ea31e4bc04a8e165ecb0473ede5b80",
+      "bytes": 398
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/Escrow.sol",
+      "sha256": "9a4614087a4fb5f8f5555e273066d5e00de84215a0e42f6b3949f5dadd344914",
+      "bytes": 3179
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/FixedLengths.sol",
+      "sha256": "8574473f929f44f04726f4e60a23bbf82874f6ff762f11bbea5dd77a779a14ec",
+      "bytes": 3428
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/MultiAuction.sol",
+      "sha256": "964c6f319eb176411ae53bcab61a7c3c4f0dafdf440cc792b3ea2f751be508ee",
+      "bytes": 3391
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/PiggyBank.sol",
+      "sha256": "7541d8607f58d749c8e617460ff4dc0b394ccb271f31a8167b1b5617907d993a",
+      "bytes": 1781
+    },
+    {
+      "path": "keyext.solidity.examples/contracts/Storage.sol",
+      "sha256": "0fa88de893d35c185e1c13679845d32d50b2da0bdc6fd315bdbdf8fc45ee2c3f",
+      "bytes": 1495
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingAssignedWhole.sol",
+      "sha256": "db417a8f44c79027e2638a3c932d0c3269d331aeb30ceb86ae85c270d0a7f8ad",
+      "bytes": 401
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingDeletedWhole.sol",
+      "sha256": "2f080f0d8d576ba1e74c7eb2192cb84c55f239aac3c527d4834f7bbeffe53409",
+      "bytes": 394
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingInMemory.sol",
+      "sha256": "112635c71c09fe305e0c86155b26c191bf4ec2928ac015b1dd2b0da7640d8a55",
+      "bytes": 417
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingKeyArray.sol",
+      "sha256": "6c341a92e1846a1b801a12aca5f165d8ed9350b39ac3e699424348b37bc360c3",
+      "bytes": 263
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingKeyStruct.sol",
+      "sha256": "ee83bb45659649004c9449abe923b105889825218c9f0c8db01dc20489f18d13",
+      "bytes": 350
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingParameter.sol",
+      "sha256": "23c484bee594d79f4382e26f906dcd369c0717c278d0b06273b880660824d6d6",
+      "bytes": 387
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MappingReturn.sol",
+      "sha256": "7faae10eec51d6240c5b1c1350c0007206ff696ae780d47e49f848c9d2e50b41",
+      "bytes": 440
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/MemoryArrayOfStructsWithMapping.sol",
+      "sha256": "6ff7fbd186201bcf1803dc23ce64a6d7a1f7df49c16025b9d3ce78aaf89ebd2d",
+      "bytes": 432
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/NestedArrayCalldataToStorage.sol",
+      "sha256": "34dc973cfc3f75aa205a6a60b37f99c868a1ea6187b205ed25d8bfe0eafa2d8b",
+      "bytes": 763
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/NestedMappingRowAssigned.sol",
+      "sha256": "1139591bd92d79862f48de86a34e58f1d76977774cb330e2b3dd4da2c13a85ae",
+      "bytes": 402
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/StructWithMappingArrayElementAssigned.sol",
+      "sha256": "e57f14bfd225f153fb9dfbcf36e89b862247325cf3d88c821e0781cc95575c11",
+      "bytes": 441
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/StructWithMappingAssigned.sol",
+      "sha256": "b1e302f35bd448ac8a176808a3cf1a17bc213603af9965ec86a33a51af9602a5",
+      "bytes": 563
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/StructWithMappingToMemory.sol",
+      "sha256": "a1ae0a7685e7401e94bfc57750a80aa6b4155c3f708c5f9e2dd19bdcdb6bd76a",
+      "bytes": 451
+    },
+    {
+      "path": "keyext.solidity.examples/illegal/nocompile/UninitializedMappingPointer.sol",
+      "sha256": "06df5edfe69f41df8a218efa57a4829d1f6b227ac61906f9bf993876e035ad3d",
+      "bytes": 404
+    },
+    {
+      "path": "keyext.solidity.examples/net/AuctionNet.sol",
+      "sha256": "f15f0195e746e26c48e8e27e3e8ace37f96595b4b6640690cbdb38805d856bea",
+      "bytes": 1622
+    },
+    {
+      "path": "keyext.solidity.examples/net/AuctionWithdrawNet.sol",
+      "sha256": "b5d31b6c9e9e8ea51148971ba00fa51108441819a8995d5acc0f9d2a74c01e90",
+      "bytes": 2140
+    },
+    {
+      "path": "keyext.solidity.examples/net/CasinoNet.sol",
+      "sha256": "9ad0d4c98d7c2a1dab123dbe30b33955d822d36352b18f14232e35792178dd54",
+      "bytes": 1761
+    },
+    {
+      "path": "keyext.solidity.examples/net/EscrowNet.sol",
+      "sha256": "b9033914da7b1252bb81e1585ec29054b6efce052e73cff27b3a51bd60413e96",
+      "bytes": 1832
+    },
+    {
+      "path": "keyext.solidity.examples/net/PiggyBankNet.sol",
+      "sha256": "3bb2d4e12ddeea1dd77e3e3b17e828eaf1cefba4161bb7abda799223fc9fd7bb",
+      "bytes": 2319
+    },
+    {
+      "path": "keyext.solidity.examples/net/auction-closeAuction-invariant.key",
+      "sha256": "68c065c32fde4cbd4fb36e23db0ad29dfc01d5ed81ae96ce3d6edc30007c7f88",
+      "bytes": 1842
+    },
+    {
+      "path": "keyext.solidity.examples/net/auction-makeBid-invariant.key",
+      "sha256": "ca6bfbe9ad529bb388d51ba846dca6d2021e3600575e937a608dffb1ac393272",
+      "bytes": 2538
+    },
+    {
+      "path": "keyext.solidity.examples/net/auction-makeBid-withcallback.key",
+      "sha256": "518473a9f6af150edc8170b60ae9b20efe4921536b90596ead754ead25ab41cf",
+      "bytes": 1907
+    },
+    {
+      "path": "keyext.solidity.examples/net/auction-withdraw-makeBid-invariant.key",
+      "sha256": "ba6e80fccee5f91185e18264291020eaf9be37ba68f6b8352ac54392aba171aa",
+      "bytes": 3696
+    },
+    {
+      "path": "keyext.solidity.examples/net/auction-withdraw-withdraw-invariant.key",
+      "sha256": "6a81cf580ae15cee2fbe3fd12126c3339b03ee174e1c1ae3c4807c46ab4b92b6",
+      "bytes": 3416
+    },
+    {
+      "path": "keyext.solidity.examples/net/casino-addToPot-invariant.key",
+      "sha256": "a9f5a24e4414759679719bffad5e05348112c4cd0a901833664c9329adcb415f",
+      "bytes": 1913
+    },
+    {
+      "path": "keyext.solidity.examples/net/casino-decideBet-invariant.key",
+      "sha256": "4afe08551bb7ad4c141976205485b26bebb8a5cc7594a844bb522b9d458fbdc0",
+      "bytes": 2112
+    },
+    {
+      "path": "keyext.solidity.examples/net/casino-decideBet-withcallback.key",
+      "sha256": "7797d7010eb5054a7652ee3fc5b5dbb7153fcc05f99cbeea42efca2a67a9d01d",
+      "bytes": 2058
+    },
+    {
+      "path": "keyext.solidity.examples/net/casino-placeBet-invariant.key",
+      "sha256": "12d6ac86c45e307cdfddaeb8e63b70aca7310612e24d6d403ede3fe693d693bb",
+      "bytes": 1864
+    },
+    {
+      "path": "keyext.solidity.examples/net/escrow-placeInEscrow-invariant.key",
+      "sha256": "1b3837da4239457086fdec81c503c7c976e9d18adf59f1b47b392e4529e386dc",
+      "bytes": 1916
+    },
+    {
+      "path": "keyext.solidity.examples/net/escrow-releaseEscrow-invariant.key",
+      "sha256": "a021518e0f7d63c78f97ddf9e5c7787c60002fe3a30936ae1671a3a6a825a23d",
+      "bytes": 1561
+    },
+    {
+      "path": "keyext.solidity.examples/net/escrow-withdrawFrom-invariant.key",
+      "sha256": "2d7e26e82667551d16f2e1487cbbd3368230bad3ecf4116399d217df228a5cd1",
+      "bytes": 2251
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-call-withcallback-simple.key",
+      "sha256": "ef1336619b6a454adb0439fe9ef7230ce610940adc05acf76354398e36af9edc",
+      "bytes": 723
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-msg-value.key",
+      "sha256": "dd034f238118e75ada75cc0c05aba83765c774272c7402d596b6c630d735156c",
+      "bytes": 591
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-send-simple.key",
+      "sha256": "9ba7f036478f7b6989c517b053492338d31ed2dad6f4527375cde6ef50fbf25f",
+      "bytes": 585
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-capture-argument.key",
+      "sha256": "71757dd42242128f2ba8b33b8021e99365ffd2117c7340bfda3ee89e8aa9a831",
+      "bytes": 481
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-capture-receiver.key",
+      "sha256": "0e47c1b9ee721068e30fd52e059970dff147f1b4617a75dbdbfd6452948eee4e",
+      "bytes": 529
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-diamond.key",
+      "sha256": "ebf707d313ca1db2a6f3053660b166810120f5e2198dff94a9dde3c0a99b6f42",
+      "bytes": 409
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-self.key",
+      "sha256": "97bfad47935796de91512fc06b5fa687ee91c2c1b9c0d8c8005717279871375b",
+      "bytes": 349
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-simple.key",
+      "sha256": "852d512f932d4c4eec513a3660effe50064f7058c2cb6af2dfc236ad1b87c6e5",
+      "bytes": 691
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-unfunded.key",
+      "sha256": "baa197a8f1cc84e4f0d7dc3615608f1b6f0d046e26849938193043dfc31aaadb",
+      "bytes": 430
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-withcallback-diamond.key",
+      "sha256": "c018ae6d1767f66d35b44b0e9bfaafc958b7ed8b2fb11cc3dbb475453efc73f7",
+      "bytes": 695
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-withcallback-self.key",
+      "sha256": "9fa28e4725093449365748eb5c37707d947e520e21544bc594fa7375dd811401",
+      "bytes": 706
+    },
+    {
+      "path": "keyext.solidity.examples/net/net-transfer-withcallback-simple.key",
+      "sha256": "4e2fe3e056a4cc34da544149d14ec7b95641fd1201cd17229bcb5f3d15c176fe",
+      "bytes": 878
+    },
+    {
+      "path": "keyext.solidity.examples/net/piggybank-addMoney-invariant.key",
+      "sha256": "c63fb3b0181017330524bd1b2e74f86c417f0e3df4d0f95624d65ade63da2ff5",
+      "bytes": 1974
+    },
+    {
+      "path": "keyext.solidity.examples/net/piggybank-breakPiggyBank-invariant.key",
+      "sha256": "57cbf680e9c6bcefd09f5be958f1668ac1dd0a865c16ec0f3707fcd2c809e76a",
+      "bytes": 1811
+    },
+    {
+      "path": "keyext.solidity.examples/net/piggybank-breakPiggyBank-withcallback.key",
+      "sha256": "57c16cea957beecc30029aac408ce6e3e5f5c8d27e19eb10e347dc47e564c70e",
+      "bytes": 1662
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/applyOnDifferentPVLastInParallel.key",
+      "sha256": "912abc0cdd9163ca1d615d9dae72f6525d072a44e5b82bd4215962f350878be8",
+      "bytes": 86
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/applyOnPVLastInParallel.key",
+      "sha256": "0c07b945f465333e80a5f3a952dc54534f462600b0323859af68843ed6df5dbe",
+      "bytes": 86
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/applyOnSkip.key",
+      "sha256": "37f10b190bbb9a79944935f4cd73af73dbf8060da808ddec614d36f8cbde9f83",
+      "bytes": 146
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/applySkip1.key",
+      "sha256": "c89711654fdab0403a952ae535ad0a5290bf1ac83b5627a857687a9d23ab9939",
+      "bytes": 136
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/applySkip2.key",
+      "sha256": "8b4b8a2bc693d1f08466acfda757305bae04662f0252a46a6675ce007bf66a68",
+      "bytes": 137
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/applySkip3.key",
+      "sha256": "5ec4123fcb2a44e4cbc800b0aa279787d993a5c22ffa7ffec2d394f4244e4d4a",
+      "bytes": 148
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/cons1Def.key",
+      "sha256": "4948b0dcc4a4687f6bb23843b47ed782823a4bc7f37c13b1fbc5da32b86dc972",
+      "bytes": 41
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/cons2Def.key",
+      "sha256": "02e54b52442dc121428bdede21f70baeed6c3b706c6c971da1f24f505523ebb8",
+      "bytes": 53
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/cons3Def.key",
+      "sha256": "d43c6b84197d941b9f8db9d4a9acf8465e21cbb8eee77ef542e23a6cd62eb6f7",
+      "bytes": 65
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/defaultValueStruct.key",
+      "sha256": "c0855eeb0c6f940fe548dbc7ea5a7bec2e53cb789c235127e1abf2e200869b8e",
+      "bytes": 227
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/delAtEmpty.key",
+      "sha256": "9257aefc6f398ba3daeb5bca69b08c2f52ab5534185e4dbe7eb3ede57d9c9865",
+      "bytes": 224
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/delFieldMap.key",
+      "sha256": "a50732236f1e0397b2f02aaf53fd14e23cbdd75583a7b5703c9faf7cf16cd5c1",
+      "bytes": 132
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/findDefinitionEmpty.key",
+      "sha256": "40e784ccf5d42cb0634669d53ee62eee8c2705d63377fd9aac2d5233d96d5e21",
+      "bytes": 224
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/findOnCopy.key",
+      "sha256": "84f7a0a788553a060a881c216282adc2852145ce6d615d397ce72b380d20dafc",
+      "bytes": 266
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/findStValueCast.key",
+      "sha256": "ecbf0d6bceab566622abcc9c122ad1ff039db9f2dbc931e8ce949584e60d483d",
+      "bytes": 280
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/firstsConsNil.key",
+      "sha256": "ee14933faba8381c82f4a678b5ca0f6051ec947c2447469d3d550a753a52bec5",
+      "bytes": 44
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/firstsConsRest.key",
+      "sha256": "009a1cf935e8960e05f8c1b4d558c5c78f00103999c32153865a3757ec68dd1c",
+      "bytes": 62
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/fixedDelNodeFixed.key",
+      "sha256": "94acb45988cbf9fe39352e74bcbca6e6e61d8ddee6d42763a5c887c0644ed77b",
+      "bytes": 122
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/fixedEmpty.key",
+      "sha256": "a776687eccd11ba48dc1740ceb729f502b7ef1137f0a387d728668bcbec01cdb",
+      "bytes": 58
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/fixedShapeDyn.key",
+      "sha256": "617ef5050f8641e7036cd8611ca19ea779bb9338afd3a8473fa2ad04c5279464",
+      "bytes": 66
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/fixedShapeFixed.key",
+      "sha256": "730d188275f579c0ba6ef6ec378c07d5631bf2cc7356b0daf7a43c97ea44f136",
+      "bytes": 71
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/fixedStore.key",
+      "sha256": "3644580bbb1590a784d558de2d529aa3db01e5802b0f7991207e77cb54bd8e98",
+      "bytes": 129
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/headDefinition.key",
+      "sha256": "8e7e92a6251d20e3aa671eaa5de343328adb22f20f2cb107e81f78ea339da02d",
+      "bytes": 47
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/idCCDef.key",
+      "sha256": "669729d2816b87259dd513e46e2e1d4d5408a19bd7399cb4dc5eef263192516d",
+      "bytes": 160
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/lastConsNil.key",
+      "sha256": "336e6ef3a256dd1a446f9bdab06a044bba09612b5d443300be4975c0a2e221f9",
+      "bytes": 47
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/lastConsRest.key",
+      "sha256": "d0ba7bceeb1fdd0d4bb4a9cca16dcd3589383fbd0e412e16e3a622bbe6a65261",
+      "bytes": 56
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/localDeclPostdecrement.key",
+      "sha256": "7b4f589ad598662c57c74f6a394368fe5e0be4f01c661655dcf6119fc4d30b48",
+      "bytes": 103
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/localDeclPredecrement.key",
+      "sha256": "e791b60c7e9bed65effa95ee74c857d6c9cddb4b7c4cdd7e806b9eeb57437ac5",
+      "bytes": 102
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/newFromEmptyMemory.key",
+      "sha256": "b217f26dc6ade109deac0657a3038ea765cd4cd099916013d2932f890610c81a",
+      "bytes": 152
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/parallelWithSkip1.key",
+      "sha256": "45027c92e3145bb8b5cc9d22aed82d2c8fb7499122b81895e1efeb08483b7c76",
+      "bytes": 148
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/parallelWithSkip2.key",
+      "sha256": "0df843318c6e8d1f88c447d3b2bcc5e68bcd118d8098064221f8ab3bf33fc5d4",
+      "bytes": 148
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/precOfInt.key",
+      "sha256": "aa4a46efa5428ed9f3cc57fdf4959a017dc900e71b4c95abeca5b630a5d657b1",
+      "bytes": 28
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/readFromCopyToStorageIdentity.key",
+      "sha256": "c7c8a4b5d9cbdb96c00e2984e59cf528a3ceb44b5daab6c89a31cc6d54645ab6",
+      "bytes": 270
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/readFromEmptyMemory.key",
+      "sha256": "8e89e7d7705e89306468674967e7a8e622e4de1959b5ad5f49f03c25eb999bf7",
+      "bytes": 185
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/readRCons.key",
+      "sha256": "8ed779fb89bee00a8fe03a8a926ceb1660d0a112d77299f33868f04c269f0cb5",
+      "bytes": 229
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/readREmpty.key",
+      "sha256": "ccc8b5dfb8c233f65a56bd3c03006567c4fc68744d9d849087008edd845ed4a9",
+      "bytes": 196
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/saveOnEmptyStorage.key",
+      "sha256": "78cbd28e6bbf520c0bba38e16b9a29f2f636c177477c8884055dc55ab0db1d98",
+      "bytes": 249
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/saveOnStoreCons.key",
+      "sha256": "54ad76813659643636b90ebdc6876adce5926c9fde86c7cec9a09534255a9f53",
+      "bytes": 264
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnCopyMemRef.key",
+      "sha256": "079b253f7bf66648ef268881cfb47fed5ebcc8403d73a33c61bb59a9bc466d95",
+      "bytes": 285
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnEmptyStorage.key",
+      "sha256": "880a3e1e70de3cbde659987657afbc2529f0a9f3040ebd9b71b29438b5e57dca",
+      "bytes": 226
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnSaveEmptyIndexStruct.key",
+      "sha256": "ede28bde718816309dbc533ca1844486a7005056b9e1412d2d89a76eca87347e",
+      "bytes": 344
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnSaveEmptyMap.key",
+      "sha256": "dc79a86b4cf8ae27456b8a2cdd4a745697f01605051a9b0de2b4860f9889520b",
+      "bytes": 265
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnShapeElement.key",
+      "sha256": "4b099932fbb8704a037c33aa1e32782c722dab1018cc543afd4d7f792568c258",
+      "bytes": 63
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnShapeMember.key",
+      "sha256": "50e637636e7a9b0973b0dfbc177bad76f364e56a93ac1bded212878870aa1a40",
+      "bytes": 89
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnShapeSize.key",
+      "sha256": "97d0561e8eb02d8ad7b2aef70e931704c683d2c99db37f8a14d451403a73419c",
+      "bytes": 62
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnShapeStruct.key",
+      "sha256": "b8ff6dc669f0e0e984eca00c7346d9c8be0cb13c2e92141e6c5de4db75f68c96",
+      "bytes": 97
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectOnStore.key",
+      "sha256": "310c630aee4b1200e57c53c0b14833714eb9e6922f804ed03466b9dede0b2c91",
+      "bytes": 238
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectStDelNodeFixedSize.key",
+      "sha256": "6a12f1b8487ba0b511ebdaa94bdb5c14e32fdac454f1075b4fb7a5682b3fb12e",
+      "bytes": 138
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/selectStValueCast.key",
+      "sha256": "f4231afb4d21057b59fefac8613c791e11f530b1e739878c0dbe949fc3d064fe",
+      "bytes": 266
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sendNoCallbackDiamond.key",
+      "sha256": "705c38702e09842a7f2d5387732d82da433a49706aed569f97ef2c0a2b0d9a08",
+      "bytes": 92
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sendWithCallbackDiamond.key",
+      "sha256": "e96d7f61d35f141a541a8c87f22c7504a809c40d566a1d17849ebf32bc9c05d3",
+      "bytes": 295
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sequentialToParallel3.key",
+      "sha256": "c025a950551be58238b6c9e316020c8e35ca23fb99814abdc4e5691cddae3e00",
+      "bytes": 158
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/shapeAtLeafElement.key",
+      "sha256": "1f3f1166e6366bea4eb66117c855ffb15741085bf1a708ba1d89912a0fe632e0",
+      "bytes": 112
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/shapeAtLeafMapElement.key",
+      "sha256": "8d172ea8ee2afb61c477468d4324bafac39f98e20555a2cdb912eaa76636f54d",
+      "bytes": 114
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sizeLE1Cons.key",
+      "sha256": "54827c35b3f8eefb4033ae7e6cfc7c3516bd5fd09338cd4abab8b13f8be7efb5",
+      "bytes": 39
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sizeLE1ConsCons.key",
+      "sha256": "fd8248fe71ac71019e1bbc9a8d4f9e5f4cc119f7db78ce17744c57bdd34d0cc5",
+      "bytes": 49
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sizeLE1Empty.key",
+      "sha256": "75a5cc78cff68c0b0232a764ec854ec12163b87571b6bc5f9e2a557581b4aa73",
+      "bytes": 30
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sizeOfLeaf.key",
+      "sha256": "a3e78cffc21ecbb51a34f3d6249822c794a34368fcf50bb8d0cec4bd0d206ca8",
+      "bytes": 89
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/sizeOfMap.key",
+      "sha256": "cf6df22947bb24c8c9ea979680b6e432f918e372a9158943e272f1d27f4e54cf",
+      "bytes": 56
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/tailDefinition.key",
+      "sha256": "40d9d720099dee3defcf818049815b447b6bda728588f503a589a701072f225a",
+      "bytes": 60
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/transferNoCallbackDiamond.key",
+      "sha256": "55223dd1ef0dc2aa0034fe36fcd2b8921d33f80684e4c2cb4528d5272d566d62",
+      "bytes": 96
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/transferWithCallbackDiamond.key",
+      "sha256": "83fe692e39604020486a5bcd672cd2ffe16bfcff849dce57fd0c126507fc59a2",
+      "bytes": 299
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/wfShape.key",
+      "sha256": "075aeb9a5d6c1dc95d7dde694b01e84b93b3603fedb5eed9e901339110ea8d59",
+      "bytes": 58
+    },
+    {
+      "path": "keyext.solidity.examples/proofs/wfStoreRight.key",
+      "sha256": "18dcbc12e3bea49f41f6e43273a2e3c04bb13979cdc098ba774f5e289a4a2536",
+      "bytes": 106
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/Account.sol",
+      "sha256": "1bbbf32691c9f21d9d7da54f58f8af28ca1d036dcde12b857975e806a285daba",
+      "bytes": 1253
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/ArrayRemoveByShifting.sol",
+      "sha256": "30423e721a6cf8269692639f018172121138816f718650c345e967dd73da2af2",
+      "bytes": 1509
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/ArrayReplaceFromEnd.sol",
+      "sha256": "08630ae04977bb23ff3123748aaebc2ae563f64f20440d99fbbc3adb777d5fdd",
+      "bytes": 1194
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/Counter.sol",
+      "sha256": "b1625da491a3b9ad1595439a89267a78f46144c1a4b3b1dee47a885c0b59c19f",
+      "bytes": 866
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/DocsBallot.sol",
+      "sha256": "191b29ef9f3548424ddcea5c6081df7a2d765f8128b8efa373f6bfd102ebfdbb",
+      "bytes": 5830
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/ERC20.sol",
+      "sha256": "4c4ec559d94bbe6bc02900964a074496f37e2c0b8f5bb49a4f632140658cba0c",
+      "bytes": 3508
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/Enum.sol",
+      "sha256": "1abc0d7058b6f36d3d989f92f4d109a7f74794dac663c420af1d806bf83a5122",
+      "bytes": 930
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/EtherGame.sol",
+      "sha256": "582c133638a46fded97a952e2b41ac58bbb290759777364313c4a84885aacc0c",
+      "bytes": 1482
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/EtherStore.sol",
+      "sha256": "2a6c0f924a35113a8fdfdefa300e656dfbca3b6a310cea6ae41018b7e4eb721a",
+      "bytes": 1358
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/EtherWallet.sol",
+      "sha256": "bcafe4f7dafb65f547b4ecdde7dfafb7e2682d03a8499f7e58e416220bb65244",
+      "bytes": 957
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/FunctionModifier.sol",
+      "sha256": "177d89f9256d9fe8d309ddecca7eb380b406184819b29d53775d9ff8285f5223",
+      "bytes": 1613
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/IterableMapping.sol",
+      "sha256": "635553b780350821c13ff8f8bfc59701ef2a43a0d3c91201e85664f5e3489377",
+      "bytes": 3458
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/KingOfEther.sol",
+      "sha256": "520293bdb1c4573f154ba1aae793ade6c135db516ab674d9d51a43d6ac03459d",
+      "bytes": 1820
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/Mapping.sol",
+      "sha256": "9beb7810111719c9bd19c88672e70b09a7201ce950f98aa20f7fde5112bd798d",
+      "bytes": 1169
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/NestedMapping.sol",
+      "sha256": "bdbf53566543dc78aedfde4c71591014cc36868b7c4bc16a53216a784eefb0dd",
+      "bytes": 1146
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/OZCounters.sol",
+      "sha256": "16ea7c127c08b6ef37eb1de3f02577ec33db8e7734b13f247baf10f85de146c3",
+      "bytes": 1506
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/OZMath.sol",
+      "sha256": "9fa038ddbc096f791799b0983651d1a1d0c294b5a626f4d85e6ad07c37042d93",
+      "bytes": 2229
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/OZNonces.sol",
+      "sha256": "c01a0ff7512475db5339888077bea4b14c4e5b1611e73ad4fef6dad2145ba600",
+      "bytes": 2005
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/OZOwnable2Step.sol",
+      "sha256": "6ca91626c79ac1a309b9af56808d1319280fa929ee4597fe128f21a4ac81c9e8",
+      "bytes": 2699
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/OZPausable.sol",
+      "sha256": "b6056598a53ecc1e1b3f9acb15760f837e3ad80b0176b01beb85d9c5c7aaaf75",
+      "bytes": 2337
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/OZReentrancyGuard.sol",
+      "sha256": "bfc6f689ad7e6e9c7833b6c114521f9123d02dba547b0807a0b8092b84a52709",
+      "bytes": 2195
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/Ownable.sol",
+      "sha256": "aac46ffaa5499dbe8ca956b8c26491b4ab070fa7c89d87215d325804d68563bd",
+      "bytes": 1425
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/Purchase.sol",
+      "sha256": "d4ccdb83fa10556ffa812d46afc607a5612bd44af7f53bf95867d777f2100891",
+      "bytes": 3424
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/SendEther.sol",
+      "sha256": "1060dd815259b02b7929611fc6173edf3fff96a8b39696c8453b841b399b6534",
+      "bytes": 2037
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/SimpleAuction.sol",
+      "sha256": "49a7cf3a8e9a6b1e37bd63e65c21ec550bd74a76fad878652f7d1ad58efb1016",
+      "bytes": 2680
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/SolmateOwned.sol",
+      "sha256": "99288057d2ef14f103ad72410aa3272c5f83f354652c9ce740229865d0143705",
+      "bytes": 761
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/TimeLock.sol",
+      "sha256": "2840102ac62196afda375e0c0ee5d1b82eca606060199c799b7cefcfb45ccdef",
+      "bytes": 2103
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/WETH9.sol",
+      "sha256": "406759cd6fed5913e377ae697183bfefa5f19b025ecbee8519e0f00aa69856f2",
+      "bytes": 3352
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/open/ArrayRemoveByShifting.sol",
+      "sha256": "e406e88ae477b523da8037d04d433d3fc28ffdfb5c5e564296f5889913995db5",
+      "bytes": 1195
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/open/DocsBallot.sol",
+      "sha256": "c94e9a9866ac1745562fe65d80680e7384fabc95cb8f0affd20ea764dc21d238",
+      "bytes": 2031
+    },
+    {
+      "path": "keyext.solidity.examples/real-world/open/OZMath.sol",
+      "sha256": "700b1e4126642537417384c2c2c8dc54954213435161cc691603ddb719bc02b7",
+      "bytes": 2050
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcArithmetic.sol",
+      "sha256": "e28f9695be69f12e365dc4b396805b96c995724e9a37d324fbb56e850c40161f",
+      "bytes": 15197
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcArrayMembers.sol",
+      "sha256": "290d818b6e7d197ae5ff02ed5b645c743c3cef1fff51e46d82ca8b7c4817e8b6",
+      "bytes": 31656
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcArrays.sol",
+      "sha256": "307f9fd875574e1766cca9225c9e54ae76234ab94962545fc5c49dc0167de66c",
+      "bytes": 6047
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcConstructors.sol",
+      "sha256": "c0ad1e5b796035a7218b056db4c89d71c2ef970f46ad6baa7348c62281951b09",
+      "bytes": 12434
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcControlFlow.sol",
+      "sha256": "d5a0aa9872cdde4439989c73a4d0f1702994f7538958efb6850622f3e0016e09",
+      "bytes": 5462
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcExpressions.sol",
+      "sha256": "f18a1b88df40a6ab536828b1828c5770e8409552ea29a4c30c166afbd4208944",
+      "bytes": 6398
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcFunctionCalls.sol",
+      "sha256": "fe452878ca65c1366129920cbef014bd77734ae3695c475b82f10e4579e606c6",
+      "bytes": 13621
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcHigherLevel.sol",
+      "sha256": "a5fe0af2dc051d2c493543f3ce4ad6058353346de2507f9d9dd8bdadeaea1a1a",
+      "bytes": 10635
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcLoops.sol",
+      "sha256": "22105caaeecf9c5d738edf144d0d9f7ce6fe8b4396ac42074a32881d03e2f9ce",
+      "bytes": 20471
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcMappings.sol",
+      "sha256": "77f895f27d46c3800be2e3b898cad7615e69df26c6bc9feb5a1a05dd3b2e0ffe",
+      "bytes": 4448
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcMemory.sol",
+      "sha256": "6c3aa7c3430d3d903c588a23f734da626c61e20cef796ad78144b861ddaaecd6",
+      "bytes": 4647
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcModifiers.sol",
+      "sha256": "80a94378c786517d7666bc5d11631395f103f74490737cbcf4772128a4ae534f",
+      "bytes": 14081
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcPayments.sol",
+      "sha256": "913f818fb2c4ce5a1066d39ea5371efc0c040d8f3e1035c7c68cad763d9f162a",
+      "bytes": 15383
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcSmtControlFlow.sol",
+      "sha256": "691ed2a5f7ae747c4de50a3ace3eb63141ed94eada6edd6ad9e4f98e00f1484e",
+      "bytes": 28369
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcStructs.sol",
+      "sha256": "5a3d0fe29ee658a734dd3fdf78e971198994096945da8e8ea7eb469104f13a76",
+      "bytes": 6892
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcStructsMappings.sol",
+      "sha256": "0762631c1a48f488a8070d0300ea2c7a16fd0ba373fe534f7719127fc6f9e57e",
+      "bytes": 28677
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcTypes.sol",
+      "sha256": "c7d88e2a2d23692031455ae703e83922c27052f3d5eae9700d3993217c73bb5c",
+      "bytes": 13154
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcArithmeticOpen.sol",
+      "sha256": "bdfaa9dc62a16911bf569c8ad8e37ae0fb76df9210548fc5dd6b1b8ebf9c33ab",
+      "bytes": 7504
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcArrayMembersOpen.sol",
+      "sha256": "c85ba8ebae2feb5177e28cb99b7b0aba6fe6b053e7bac5a512ed003482dcb126",
+      "bytes": 400
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol",
+      "sha256": "fa599ec30800140f84515081bf97c7e5722fa610ed0cfa5cf3d02252b0b5154c",
+      "bytes": 4998
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol",
+      "sha256": "d6ac57f79594bec91404db442a0bf23cf09493a72b0f8dc49e2ab3a724e48669",
+      "bytes": 2266
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
+      "sha256": "24614abee95725f6f09a3f69dca8a53a37b9c8a6f6625d45b3d0a0459a87437d",
+      "bytes": 2803
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcLoopsOpen.sol",
+      "sha256": "2de855cd723e05070908d825ae239e772660dd8e0a110d7a4945e3e93386f338",
+      "bytes": 6080
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcModifiersOpen.sol",
+      "sha256": "f34966217143dbe5de4d55fb2ed2f69da84d492c25961f79c865d4c3151e34ab",
+      "bytes": 6162
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol",
+      "sha256": "a69ae3e1b2dd87a26f63d079e9bd90fa68410768ba3f006d44455ec66b25a019",
+      "bytes": 7081
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol",
+      "sha256": "e8727de507f3f9cae24fbe4a5e0ae3ffe745a7b0d7f074d1ecdb42822f808379",
+      "bytes": 3399
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcStructsMappingsOpen.sol",
+      "sha256": "0b11e094da36cb142e450af91164390335d0a0c1dc147b799501ae79b706cb4d",
+      "bytes": 3704
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/SolcTypesOpen.sol",
+      "sha256": "d16eb6a09c5a7e0e953cf6f2e0c8d7ead833b2e2ca4a0e00aa79499fc89885a4",
+      "bytes": 5661
+    },
+    {
+      "path": "keyext.solidity.examples/solc/open/StorageDanglingOpen.sol",
+      "sha256": "4e2801499a2085c817ac024e52e6486e22c1dbd5a726a4d94c64d900a7c6e3b9",
+      "bytes": 1770
+    },
+    {
+      "path": "keyext.solidity.examples/unprovable/Unprovable.sol",
+      "sha256": "acd8888cc4999c4299ea9d185d26bc4e07ceb816a31bc549e19944f9a0d770ec",
+      "bytes": 2288
+    }
+  ]
+}

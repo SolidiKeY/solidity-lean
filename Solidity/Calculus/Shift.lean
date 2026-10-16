@@ -73,6 +73,7 @@ def Val.up {Γ : Ctx} {t : LTy} {p : PrimTy} : Val C Γ p → Val C (t :: Γ) p
   | .readMem l => .readMem l.up
   | .len b hp => .len b.up hp
   | .mlen b hp => .mlen b.up hp
+  | .modular op a b k => .modular op a.up b.up k.up
 
 end
 
@@ -121,6 +122,10 @@ theorem Val.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} :
   | .readMem l => congrArg Val.readMem (MLoc.up_eq l)
   | .len b hp => congrArg (Val.len · hp) (SPath.up_eq b)
   | .mlen b hp => congrArg (Val.mlen · hp) (MPath.up_eq b)
+  | .modular op a b k => by
+    show Val.modular op a.up b.up k.up =
+      Val.modular op (a.wk Solidity.up) (b.wk Solidity.up) (k.wk Solidity.up)
+    rw [Val.up_eq a, Val.up_eq b, Val.up_eq k]
 
 end
 
@@ -139,6 +144,8 @@ section ShiftMore
 def Src.up {Γ : Ctx} {t : LTy} {T : Ty} : Src C Γ T → Src C (t :: Γ) T
   | .val v => .val v.up
   | .copy p hm => .copy p.up hm
+  | .fixedCopy p shape hm => .fixedCopy p.up shape hm
+  | .copyMem p => .copyMem p.up
 
 def MSrc.up {Γ : Ctx} {t : LTy} {T : Ty} : MSrc C Γ T → MSrc C (t :: Γ) T
   | .val v => .val v.up
@@ -165,6 +172,8 @@ theorem Src.up_eq {Γ : Ctx} {t : LTy} {T : Ty} (r : Src C Γ T) : r.up (t := t)
   cases r with
   | val v => exact congrArg Src.val (Val.up_eq v)
   | copy p hm => exact congrArg (Src.copy · hm) (SPath.up_eq p)
+  | fixedCopy p shape hm => exact congrArg (Src.fixedCopy · shape hm) (SPath.up_eq p)
+  | copyMem p => exact congrArg Src.copyMem (MPath.up_eq p)
 
 theorem MSrc.up_eq {Γ : Ctx} {t : LTy} {T : Ty} (r : MSrc C Γ T) :
     r.up (t := t) = r.wk Solidity.up := by

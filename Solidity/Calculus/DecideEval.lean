@@ -1038,12 +1038,134 @@ theorem dfltRd_rep (E : Ty) : VRd.Rep g ν (dfltRd E) (SVal.dflt E).obs := by
     show some p.dfltOk = some ((SVal.dflt E).findM p).isSome
     rw [findM_dflt]; split <;> simp_all only [Option.isSome_some, Option.isSome_none]
 
+/-- The initialized reads of a newly allocated dynamic array. -/
+theorem newArrRd_array_rep (E : Ty) (n : LTm C (.val .uint)) (v : PrimTy.uint.Denote)
+    (h : (RefTy.array E).newArrOk = true) (hn : n.eval g ν = some v) :
+    VRd.Rep g ν (newArrArrayRd E n) (newArrT (.array E) v h).obs := by
+  apply arrRd_rep
+  · simp only [newArrT, SVal.obs_len, SVal.findM_nil', SVal.lenOf, SVal.view,
+      List.length_replicate]
+    rw [hn]
+    congr 1
+    apply Subtype.ext
+    have hv := v.2
+    simp only [PrimTy.inRange, decide_eq_true_eq] at hv
+    rw [uintOfNat_val (by omega), Int.toNat_of_nonneg hv.1]
+  · rfl
+  · intro i k hk V c r p hr
+    rw [LTm.eval_cond_some g ν _ _ (LTm.eval_lt_some g ν hk hn)]
+    have hv := v.2
+    have hkv := k.2
+    simp only [PrimTy.inRange, decide_eq_true_eq] at hv hkv
+    have he : (k.1 < v.1) = (k.1.toNat < v.1.toNat) := propext (by omega)
+    simp only [he]
+    by_cases hkn : k.1.toNat < v.1.toNat
+    · simp only [hkn, decide_true, if_true]
+      have hd := dfltRd_rep g ν E V c r p hr
+      cases c <;> simpa only [CK.obsV, CK.obsC, Comp.word, Comp.len, Comp.has,
+        SVal.obs, SVal.obsOpt, Option.bind_some, newArrT_find_at, hkn, if_true] using hd
+    · simp only [hkn, decide_false]
+      cases c <;> simp only [Bool.false_eq_true, if_false, CK.obsV, CK.obsC,
+        Comp.word, Comp.len, Comp.has, SVal.obs, SVal.obsOpt, Option.bind_some,
+        newArrT_find_at, hkn, CK.absent] <;> rfl
+
+theorem newArrRd_rep (R : RefTy) (h : R.newArrOk = true)
+    (n : LTm C (.val .uint)) (v : PrimTy.uint.Denote) (hn : n.eval g ν = some v) :
+    VRd.Rep g ν (newArrRd R h n) (newArrT R v h).obs := by
+  cases R with
+  | array E => exact newArrRd_array_rep g ν E n v h hn
+  | struct | fixed | mapping => cases h
+
 theorem bnd_obs {T : Ty} (v : SVal T) : Bnd v.obs := by
   intro E p
   show SVal.lenOf (v.findM p) < 2 ^ 256
   cases v.findM p with
   | none => exact SVal.zero_lt_bound
   | some w => cases w with | array e sh hn => exact hn
+
+/-- Every lazy read below a converted fixed-array element matches the
+source snapshot, padded default or absent destination slot. -/
+theorem fixedCopyChildRd_rep {E : Ty} {n : Nat} {R : RefTy}
+    (shape : FixedCopy E n R) (a : VRd C (.ref (.fixed E n)))
+    (v : SVal (.ref (.fixed E n))) (ha : VRd.Rep g ν a v.obs)
+    (i : LTm C (.val .uint)) (k : PrimTy.uint.Denote)
+    (hi : i.eval g ν = some k) :
+    VRd.Rep g ν (fixedCopyChildRd shape a i) (shape.child v.obs k) := by
+  intro V c r p hr
+  unfold fixedCopyChildRd
+  rw [LTm.eval_cond_some g ν _ _ (LTm.eval_ltNat g ν shape.targetLength hi)]
+  by_cases ht : k.1.toNat < shape.targetLength
+  · simp only [ht, decide_true, if_true]
+    rw [LTm.eval_cond_some g ν _ _ (LTm.eval_ltNat g ν n hi)]
+    by_cases hs : k.1.toNat < n
+    · simp only [hs, decide_true, if_true]
+      have hp := ha.find g ν (s := .atF i .nil) (by rw [TSegs.eval_atF, hi]; rfl)
+      have he := stripRS_rep g ν r c hp (Bnd.find (bnd_obs v) (.atF k .nil)) hr
+      simp only [FixedCopy.child, ht, hs, if_true, TVal.strip_find_atF]
+      cases c <;> simpa only [CK.obsV, CK.obsC, Comp.word, Comp.len, Comp.has,
+        TVal.strip, TVal.ofComp] using he
+    · simp only [hs, decide_false, Bool.false_eq_true, if_false]
+      have he := stripRS_rep g ν r c (dfltRd_rep g ν E) (bnd_obs (SVal.dflt E)) hr
+      cases c <;> simpa only [FixedCopy.child, ht, hs, if_true, if_false, SVal.obs_strip,
+        CK.obsV, CK.obsC, Comp.word, Comp.len, Comp.has, TVal.strip, TVal.ofComp] using he
+  · simp only [ht, decide_false, Bool.false_eq_true, if_false]
+    cases c <;> simp only [FixedCopy.child, ht, if_false, CK.absent, CK.obsV, CK.obsC,
+      Comp.word, Comp.len, Comp.has, SVal.obsOpt, Option.bind_none] <;> rfl
+
+/-- The lazy fixed-array copy reader preserves all observations of a
+successful snapshot, including padded fixed tails. -/
+theorem fixedCopyRd_rep {E : Ty} {n : Nat} {R : RefTy}
+    (shape : FixedCopy E n R) (a : VRd C (.ref (.fixed E n)))
+    (v : SVal (.ref (.fixed E n))) (ha : VRd.Rep g ν a v.obs) :
+    VRd.Rep g ν (fixedCopyRd shape a) (shape.observe v.obs) := by
+  cases shape with
+  | dynamic bound =>
+    apply arrRd_rep
+    · rfl
+    · rfl
+    · intro i k hi V c r p hr
+      have he := fixedCopyChildRd_rep g ν (.dynamic bound) a v ha i k hi V c r p hr
+      cases c <;> simpa only [FixedCopy.observe, CK.obsV, CK.obsC,
+        Comp.word, Comp.len, Comp.has] using he
+  | fixed m fits =>
+    intro V c r p hr
+    cases r with
+    | nil => cases hr; cases c; rfl
+    | atF i r =>
+      obtain ⟨k, p', hk, hp, rfl⟩ := eval_atF_some g ν hr
+      have he := fixedCopyChildRd_rep g ν (.fixed m fits) a v ha i k hk V c r p' hp
+      cases c <;> simpa only [fixedCopyRd, fixedArrRd, FixedCopy.observe, CK.obsV,
+        CK.obsC, Comp.word, Comp.len, Comp.has] using he
+
+/-- **One more live element, read, is `TVal.resetA`.** -/
+theorem resetRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm C (.val .uint)}
+    {t : TVal (.ref (.array E))} (ha : VRd.Rep g ν a t)
+    (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (t.len .nil)))
+    (hn : t.len .nil + 1 < 2 ^ 256) (hb : Bnd t) :
+    VRd.Rep g ν (resetRd a L) (TVal.resetA t) := by
+  unfold resetRd TVal.resetA
+  by_cases hp : E.isPrimitive = true
+  · simp only [hp, if_true, Bool.true_or]
+    exact pushRd_rep g ν ha (dfltRd_rep g ν E) hL hn
+  · simp only [hp, if_false, Bool.false_or, Bool.false_eq_true]
+    have hh : ((a (.has _) (.at L .nil)).eval g ν : Option Bool) =
+        some (t.has (.at (uintOfNat (t.len .nil)) .nil)) := by
+      have := ha _ (.has _) (.at L .nil) (.at (uintOfNat (t.len .nil)) .nil)
+        (by rw [TSegs.eval_at, hL]; rfl)
+      rw [this]; rfl
+    intro V c r p hr
+    rw [LTm.eval_cond_some g ν _ _ hh]
+    by_cases h : t.has (.at (uintOfNat (t.len .nil)) .nil) = true
+    · simp only [h, if_true, Bool.not_true, Bool.false_eq_true, if_false]
+      refine pushRd_rep g ν ha ?_ hL hn V c r p hr
+      intro V' c' r' p' hr'
+      rw [delRS_rep g ν r' c'
+        (ha.find g ν (s := .at L .nil) (by rw [TSegs.eval_at, hL]; rfl))
+        (hb.find _) hr']
+      cases c' <;> rfl
+    · simp only [h, if_false, Bool.false_eq_true, Bool.not_false, if_true]
+      exact pushRd_rep g ν ha (dfltRd_rep g ν E) hL hn V c r p hr
+
 
 /-- **One more live element, read, is `TVal.extendA`.** -/
 theorem extendRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm C (.val .uint)}
@@ -1391,6 +1513,30 @@ theorem Storage.pushPlace_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.a
       · rename_i h'
         rw [decide_eq_false h']; rfl
 
+theorem Storage.extendPlace_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    (st.extendPlace r).isSome = (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)) := by
+  rw [has_obs]
+  unfold Storage.extendPlace
+  cases h : st.find r with
+  | none => rfl
+  | some a =>
+    rw [len_obs st r h]
+    cases a with
+    | array e sh hn =>
+      simp only [Option.bind_eq_bind, Option.bind_some, SVal.view_array, Option.isSome_some,
+        Bool.true_and]
+      split
+      · rename_i h'
+        rw [decide_eq_true h']
+        cases hs : st.save r _ with
+        | none =>
+          have := Storage.save_isSome st r (.array (SVec.ofList (e.toList ++ [(extendSlot _ sh.toList).1]))
+            (SList.ofList (extendSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h'))
+          rw [hs, h] at this; cases this
+        | some st' => rfl
+      · rename_i h'
+        rw [decide_eq_false h']; rfl
+
 theorem Storage.pop_isSome {E : Ty} (st : Storage C) (keep : Bool) (r : SRef C (.ref (.array E))) :
     (st.pop keep r).isSome = (st.obs.has (.ref r) && decide (0 < st.obs.len (.ref r))) := by
   rw [has_obs]
@@ -1663,6 +1809,25 @@ theorem SFun.arrOp_rep {E : Ty} {S : SFun C} {s : LTm C .st} {pt : LTm C (.path 
       (hnew st r _ _ ((hS.rd st hs).at g ν (hPe r hp)) (hS.rd st hs _ (.len _) P r (hPe r hp))
         hcond'.2) (hobs st r st' hw)
 
+theorem SFun.reset_rep {E : Ty} {S : SFun C} {s : LTm C .st} {pt : LTm C (.path (.ref (.array E)))}
+    {Pg : LTm C (.val .bool)} {P : SPath C (.ref (.array E))} {t : LTm C .st}
+    (f : Storage C → SRef C (.ref (.array E)) → Option (Storage C))
+    (hS : S.Rep g ν s) (hP : PRep g ν (some (Pg, P)) pt)
+    (ev : (t.eval g ν : Option (Storage C)) =
+      (s.eval g ν : Option (Storage C)).bind fun st => (pt.eval g ν : Option (SRef C _)).bind
+        fun r => f st r)
+    (hsome : ∀ st r, (f st r).isSome =
+      (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)))
+    (hobs : ∀ st r st', f st r = some st' → st'.obs = st.obs.reset (.ref r)) :
+    (S.reset Pg P t).Rep g ν t := by
+  refine SFun.arrOp_rep g ν f (fun n => decide (n + 1 < 2 ^ 256)) (fun L => .lt L maxLen)
+    resetRd TVal.resetA hS hP ev (fun L n hL hn => lt_maxLen_eval g ν hL hn) hsome
+    (fun st r st' h => hobs st r st' h) ?_
+  intro st r a L ha hL hc
+  exact resetRd_rep g ν ha (by rw [find_len_nil]; exact hL)
+    (by rw [find_len_nil]; simpa only [decide_eq_true_eq] using hc)
+    (bnd_sto st r)
+
 theorem SFun.extend_rep {E : Ty} {S : SFun C} {s : LTm C .st} {pt : LTm C (.path (.ref (.array E)))}
     {Pg : LTm C (.val .bool)} {P : SPath C (.ref (.array E))} {t : LTm C .st}
     (f : Storage C → SRef C (.ref (.array E)) → Option (Storage C))
@@ -1862,6 +2027,25 @@ theorem sval_rep {p : PrimTy} {x ex : LTm C (.val p)}
     | some v =>
       rw [hxe] at hw; cases hw
       exact svalRd_rep g ν (hx.trans hxe)
+
+/-- Fresh allocation's symbolic reader agrees with its stored value. -/
+theorem newArr_rep (R : RefTy) (h : R.newArrOk = true) {x ex : LTm C (.val .uint)}
+    (hx : ex.eval g ν = x.eval g ν) :
+    VRep g ν (some (seqL ex .tt, newArrRd R h ex)) (.app1 (.newArr h) x) := by
+  intro gd V he
+  simp only [Option.some.injEq, Prod.mk.injEq] at he
+  obtain ⟨rfl, rfl⟩ := he
+  refine ⟨?_, ?_⟩
+  · rw [seqL_eval, hx, LTm.eval_app1]
+    cases (x.eval g ν : Option PrimTy.uint.Denote) <;> rfl
+  · intro w hw
+    rw [LTm.eval_app1] at hw
+    cases hxe : (x.eval g ν : Option PrimTy.uint.Denote) with
+    | none => rw [hxe] at hw; cases hw
+    | some v =>
+      rw [hxe] at hw
+      cases hw
+      exact newArrRd_rep g ν R h ex v (hx.trans hxe)
 
 /-- A subtree of a storage, eliminated. -/
 theorem sfind_rep {T : Ty} {S : SFun C} {s : LTm C .st} (hS : S.Rep g ν s)
@@ -2461,7 +2645,7 @@ theorem Op1.elim_rep {a s : Srt} (o : Op1 C a s) (x : LTm C a) (ex : ElimM C a)
     rw [LTm.eval_app1]
     cases (x.eval g ν : Option (SRef C _)) <;> rfl
   | sval => exact sval_rep g ν hx
-  | newArr h => exact fun _ _ he => nomatch he
+  | newArr h => exact newArr_rep g ν _ h hx
   | alloc R h => rfl
   | mfield h => rfl
   | addM R h => rfl
@@ -2474,6 +2658,23 @@ theorem Op1.elim_rep {a s : Srt} (o : Op1 C a s) (x : LTm C a) (ex : ElimM C a)
   | toInt =>
     show (LTm.app1 _ _).eval g ν = _
     rw [LTm.eval_app1, LTm.eval_app1]; exact congrArg _ hx
+  | fixedCopy shape =>
+    show VRep g ν (ex.map fun (gd, rd) => (gd, fixedCopyRd shape rd)) (.app1 (.fixedCopy shape) x)
+    cases ex with
+    | none => intro gd rd h; cases h
+    | some pair =>
+      obtain ⟨gd₀, rd₀⟩ := pair
+      intro gd rd h
+      obtain ⟨rfl, rfl⟩ := Option.some.inj h
+      obtain ⟨hg, hrd⟩ := hx gd₀ rd₀ rfl
+      constructor
+      · rw [hg, LTm.eval_app1, Op1.eval_eq_evalM, Op1.evalM]
+        cases (x.eval g ν : Option (SVal _)) <;> rfl
+      · intro v hv
+        rw [LTm.eval_app1, Op1.eval_eq_evalM, Op1.evalM] at hv
+        obtain ⟨w, hw, rfl⟩ := Option.map_eq_some_iff.mp hv
+        rw [FixedCopy.observe_apply]
+        exact fixedCopyRd_rep g ν shape rd₀ w (hrd w hw)
 
 theorem bind_fst_eq_map {α β : Type} (x : Option (α × β)) :
     (x.bind fun p => some p.1) = x.map Prod.fst := by
@@ -2523,7 +2724,7 @@ theorem Op2.elim_rep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     cases ey with
     | none => exact SFun.ofOrig_rep g ν _
     | some z =>
-      refine SFun.extend_rep g ν (fun st r => st.push r some) hx hy ?_
+      refine SFun.reset_rep g ν (fun st r => st.push r some) hx hy ?_
         (fun st r => Storage.push_isSome st r some (fun _ => rfl))
         (fun st r st' h => Storage.obs_push_slot h)
       rw [LTm.eval_app2]
@@ -2552,12 +2753,12 @@ theorem Op2.elim_rep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     cases ey with
     | none => exact SFun.ofOrig_rep g ν _
     | some z =>
-      refine SFun.extend_rep g ν (fun st r => (st.pushPlace r).map Prod.fst) hx hy ?_
-        (fun st r => by rw [Option.isSome_map]; exact Storage.pushPlace_isSome st r)
+      refine SFun.extend_rep g ν (fun st r => (st.extendPlace r).map Prod.fst) hx hy ?_
+        (fun st r => by rw [Option.isSome_map]; exact Storage.extendPlace_isSome st r)
         (fun st r st' h => by
           rw [Option.map_eq_some_iff] at h
           obtain ⟨⟨st₁, k⟩, h, rfl⟩ := h
-          exact Storage.obs_pushPlace h)
+          exact Storage.obs_extendPlace h)
       rw [LTm.eval_app2]
       cases (x.eval g ν : Option (Storage C)) <;> cases (y.eval g ν : Option (SRef C _)) <;>
         first | rfl | exact bind_fst_eq_map _
@@ -2619,6 +2820,12 @@ theorem Op3.elim_rep {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm 
       cases (z.eval g ν : Option _) <;> rfl
   | write => rfl
   | saveIn => rfl
+  | modular op =>
+    show (foldModular op ex ey ez).eval g ν = _
+    rw [foldModular_eval, LTm.eval_app3, LTm.eval_app3]
+    rw [show (ex : LTm C (.val .uint)).eval g ν = x.eval g ν from hx,
+      show (ey : LTm C (.val .uint)).eval g ν = y.eval g ν from hy,
+      show (ez : LTm C (.val .uint)).eval g ν = z.eval g ν from hz]
 
 /-- **The elimination keeps what a term reads**, at every sort. -/
 theorem LTm.elim_rep : {s : Srt} → (t : LTm C s) → ElimM.Rep g ν s t.elim t

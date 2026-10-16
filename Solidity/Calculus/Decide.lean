@@ -288,9 +288,36 @@ def fold2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s 
 
 
 
+/-- Native modular arithmetic folds only when all three operands are literals. -/
+def foldModular (op : ModOp) (x y k : LTm C (.val .uint)) : LTm C (.val .uint) :=
+  match x.litV?, y.litV?, k.litV? with
+  | some a, some b, some m =>
+    match op.evalT a b m with
+    | some r => .lit r
+    | none => .err
+  | _, _, _ => .app3 (.modular op) x y k
+
 section FoldEval
 
 variable (g : State C []) (ν : AEnv)
+
+/-- Folding a native modular call preserves failure and the complete typed result. -/
+theorem foldModular_eval (op : ModOp) (x y k : LTm C (.val .uint)) :
+    (foldModular op x y k).eval g ν = (LTm.app3 (.modular op) x y k).eval g ν := by
+  unfold foldModular
+  split
+  · rename_i a b m ha hb hm
+    obtain rfl := LTm.eq_of_litV? ha
+    obtain rfl := LTm.eq_of_litV? hb
+    obtain rfl := LTm.eq_of_litV? hm
+    cases h : op.evalT a b m with
+    | none =>
+      show none = op.evalT a b m
+      exact h.symm
+    | some v =>
+      show some v = op.evalT a b m
+      exact h.symm
+  · rfl
 
 theorem fold1_eval {a s : Srt} (o : Op1 C a s) (x : LTm C a) :
     (fold1 o x).eval g ν = (LTm.app1 o x).eval g ν := by
@@ -830,6 +857,47 @@ theorem dfltHas_eq_dfltHasM {U V : Ty} (r : TSegs C U V) : dfltHas r = dfltHasM 
 length `0`, there as `dfltHas` says. -/
 def dfltRd (E : Ty) : VRd C E := fun c r => c.reset (dfltHas r)
 
+/-- Fresh allocation read lazily: the written size, initialized defaults in
+range, and typed absence past the end. This folds `memoryArrayFreshAlloc`,
+`readOnWrite`, `readOnAddM` and the memory initialization rules. -/
+def newArrArrayRd (E : Ty) (n : LTm C (.val .uint)) : VRd C (.ref (.array E)) :=
+  arrRd n .tt fun i {_} c r => .cond (.lt i n) (dfltRd E c r) c.absent
+
+def newArrRd : (R : RefTy) → R.newArrOk = true → LTm C (.val .uint) → VRd C (.ref R)
+  | .array E, _, n => newArrArrayRd E n
+  | .struct _, h, _ | .fixed .., h, _ | .mapping .., h, _ => nomatch h
+
+/-- A converted fixed-array element: copied below the source length,
+default padding within the target, absent past its end. -/
+def fixedCopyChildRd {E : Ty} {n : Nat} {R : RefTy} (shape : FixedCopy E n R)
+    (a : VRd C (.ref (.fixed E n))) (i : LTm C (.val .uint)) : VRd C E := fun c r =>
+  .cond (.ltNat i shape.targetLength)
+    (.cond (.ltNat i n) (stripRS (a.find (.atF i .nil)) r c)
+      (stripRS (dfltRd E) r c)) c.absent
+
+/-- The lazy selector clauses of a typed fixed-array copy source. -/
+def fixedArrRd {E : Ty} (n : Nat) (has : LTm C (.val .bool))
+    (below : LTm C (.val .uint) → VRd C E) : VRd C (.ref (.fixed E n)) :=
+  fun {V} c r => match V, r with
+    | _, .nil => c.reset has
+    | _, .atF i r => below i c r
+
+/-- The lazy selector clauses of a typed fixed-array copy source. -/
+def fixedCopyRd {E : Ty} {n : Nat} : {R : RefTy} → FixedCopy E n R →
+    VRd C (.ref (.fixed E n)) → VRd C (.ref R)
+  | _, .dynamic hb, a => arrRd (.nat n) .tt (fixedCopyChildRd (.dynamic hb) a)
+  | _, .fixed m hm, a => fixedArrRd m .tt (fixedCopyChildRd (.fixed m hm) a)
+
+/-- **One more live element, read** (`TVal.resetA`): the appended slot
+reset in place, or a missing slot at its default. -/
+def resetRd {E : Ty} (a : VRd C (.ref (.array E))) (L : LTm C (.val .uint)) :
+    VRd C (.ref (.array E)) :=
+  if E.isPrimitive then pushRd a (dfltRd E) L
+  else fun c r =>
+    .cond (a (.has _) (.at L .nil))
+      (pushRd a (fun c r => delRS (a.find (.at L .nil)) r c) L c r)
+      (pushRd a (dfltRd E) L c r)
+
 /-- **One more live element, read** (`TVal.extendA`): a word's slot reset,
 a missing slot at its default, a slot past the end as it is. -/
 def extendRd {E : Ty} (a : VRd C (.ref (.array E))) (L : LTm C (.val .uint)) :
@@ -1032,7 +1100,14 @@ def push {E : Ty} (S : SFun C) (Pg : LTm C (.val .bool)) (P : SPath C (.ref (.ar
   ⟨seqL S.ok (seqL Pg (seqL Vok (seqL (LTm.assert (S.rd (.has _) P)) (LTm.assert (.lt L maxLen))))),
     writeAt S.rd P (pushRd (SRd.at S.rd P) (fun c r => stripRS V r c) L), orig⟩
 
-/-- `pushSlot(s, P)`, `extend(s, P)`: one more live element. -/
+/-- `pushSlot(s, P)`: one more live element. -/
+def reset {E : Ty} (S : SFun C) (Pg : LTm C (.val .bool)) (P : SPath C (.ref (.array E)))
+    (orig : LTm C .st) : SFun C :=
+  let L := S.rd (.len _) P
+  ⟨seqL S.ok (seqL Pg (seqL (LTm.assert (S.rd (.has _) P)) (LTm.assert (.lt L maxLen)))),
+    writeAt S.rd P (resetRd (SRd.at S.rd P) L), orig⟩
+
+/-- `extend(s, P)`: one more live element. -/
 def extend {E : Ty} (S : SFun C) (Pg : LTm C (.val .bool)) (P : SPath C (.ref (.array E)))
     (orig : LTm C .st) : SFun C :=
   let L := S.rd (.len _) P
@@ -1179,7 +1254,7 @@ def _root_.Solidity.Op1.elim {a s : Srt} (o : Op1 C a s) : LTm C a → ElimM C a
       (x.1, x.2.snoc (.field h .nil)))
     (fun {_} _ ex => pathNext SFun.init ex)
     (fun {_} _ ex => some (seqL (ex : LTm C (.val _)) .tt, svalRd ex))
-    (fun {_} _ _ _ => none)
+    (fun {R} h _ ex => some (seqL ex .tt, newArrRd R h ex))
     (fun R h x _ => (.app1 (.alloc R h) x : LTm C (.ident _)))
     (fun {_} {_} {_} h x _ => (.app1 (.mfield h) x : LTm C (.addr _)))
     (fun R h x _ => (.app1 (.addM R h) x : LTm C .mem))
@@ -1190,6 +1265,7 @@ def _root_.Solidity.Op1.elim {a s : Srt} (o : Op1 C a s) : LTm C a → ElimM C a
     (fun {_} {_} {_} h x _ => (.app1 (.selectIn h) x : LTm C (.sts _)))
     (fun {_} {_} {_} {_} h x _ => (.app1 (.fieldIn h) x : LTm C (.spath _ _)))
     (fun _ ex => (.app1 .toInt (ex : LTm C (.val .uint)) : LTm C .kint))
+    (fun {_} {_} {_} shape _ ex => ex.map fun (gd, rd) => (gd, fixedCopyRd shape rd))
 
 /-- A binary symbol, eliminated. -/
 def _root_.Solidity.Op2.elim {a b s : Srt} (o : Op2 C a b s) : LTm C a → LTm C b → ElimM C a → ElimM C b →
@@ -1213,7 +1289,7 @@ def _root_.Solidity.Op2.elim {a b s : Srt} (o : Op2 C a b s) : LTm C a → LTm C
       | some (g, Q) => SFun.delAt ex g Q (.app2 .delAt x y)
       | none => SFun.ofOrig (.app2 .delAt x y))
     (fun {_} x y ex ey => match (ey : Option (LTm C (.val .bool) × SPath C _)) with
-      | some (g, Q) => SFun.extend ex g Q (.app2 .pushSlot x y)
+      | some (g, Q) => SFun.reset ex g Q (.app2 .pushSlot x y)
       | none => SFun.ofOrig (.app2 .pushSlot x y))
     (fun {_} x y ex ey => match (ey : Option (LTm C (.val .bool) × SPath C _)) with
       | some (g, Q) => SFun.pop false ex g Q (.app2 .pop x y)
@@ -1259,6 +1335,7 @@ def _root_.Solidity.Op3.elim {a b c s : Srt} (o : Op3 C a b c s) : LTm C a → L
     (fun {_} {_} {_} it _ _ _ ex ey ez => pathAtIn it ex ey ez)
     (fun {_} x y z _ _ _ => (.app3 .write x y z : LTm C .mem))
     (fun {_} {_} x y z _ _ _ => (.app3 .saveIn x y z : LTm C (.sts _)))
+    (fun op _ _ _ ex ey ez => foldModular op ex ey ez)
 
 /-- `LTm.elim` by `match`, its compiled form. -/
 def LTm.elimM : {s : Srt} → LTm C s → ElimM C s

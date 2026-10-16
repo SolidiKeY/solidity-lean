@@ -29,14 +29,14 @@ pushed in, counted as a tree (`LFml.fits`).  A storage written from a read
 of the one before it appears twice in the next, so this tree doubles with
 each such write.  It is the cheap first test: computing the reduction of a
 leaf far past it would itself be slow. -/
-def closeSize : Nat := 24000
+def closeSize : Nat := normalizationSize
 
 /-- The most storage updates one term of a leaf stacks, with its updates
 pushed in and before the elimination (`LFml.stDepth`): the elimination
 reads each through the ones below it, so its size grows with each.  A
 bound on the stack, not on the elimination's nodes: the kernel would
 build the elimination twice to count it. -/
-def stackSize : Nat := 12
+def stackSize : Nat := normalizationDepth
 
 /-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the
 reduction does not read it; else whether it closes it: within `closeSize`

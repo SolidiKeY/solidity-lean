@@ -182,8 +182,10 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .declStorage R _ init => TRun.declStorage R init
   | _, _, .opAssign op _ _ l r => TRun.opAssign op l r
   | _, _, .incDec op _ l => TRun.incDec op l
+  | _, _, .pushOpAssign op _ _ b r => TRun.pushOpAssign op b r
+  | _, _, .pushIncDec op _ b => TRun.pushIncDec op b
   | _, _, .assignIncDec i op _ l _ => TRun.assignIncDec i op l
-  | _, _, .assignLocalPush i b _ => TRun.assignLocalPush i b
+  | _, _, .assignLocalPush i b => TRun.assignLocalPush i b
   | _, _, .push b v _ => TRun.push b v
   | _, _, .pop b => TRun.pop b
   | _, _, .transfer r a => TRun.transfer r a
@@ -200,6 +202,11 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .assert c => TRun.assert c
   | _, _, .revert => fun _ => .error .revert
   | _, _, .call _ args ret body => TRun.call args ret body.ext (Prog.runFC n body)
+  | _, _, .callReceiver _ args r body op =>
+    TRun.callReceiver args r body.ext (Prog.runFC n body) op
+  | _, _, .callReceiverPush _ args r body code value =>
+    TRun.callReceiverPush args r body.ext (Prog.runFC n body)
+      code.ext (Prog.runFC n code) value
   | _, _, .tryCall call rets ok err code pnc other =>
     TRun.tryCall call rets ok.ext (Prog.runFC n ok) err.ext (Prog.runFC n err) code pnc.ext
       (Prog.runFC n pnc) other.ext (Prog.runFC n other)
@@ -221,7 +228,7 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun l r => TRun.assign l r) (fun i r => TRun.rebind i r) (fun i r => TRun.assignLocal i r)
     (fun p _ init => TRun.declLocal p init) (fun R _ init => TRun.declStorage R init)
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
-    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b _ => TRun.assignLocalPush i b)
+    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b => TRun.assignLocalPush i b)
     (fun b v _ => TRun.push b v)
     (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
@@ -233,6 +240,10 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
     (fun _ c body ih => TRun.loopF n c body.ext ih) (fun body ih => TRun.block body.ext ih)
+    (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
+    (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
+    (fun _ args r body code value ihBody ihCode =>
+      TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) s
 
 /-- The typed run of a sequence with fuel, by its recursor. -/
@@ -242,7 +253,7 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun l r => TRun.assign l r) (fun i r => TRun.rebind i r) (fun i r => TRun.assignLocal i r)
     (fun p _ init => TRun.declLocal p init) (fun R _ init => TRun.declStorage R init)
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
-    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b _ => TRun.assignLocalPush i b)
+    (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b => TRun.assignLocalPush i b)
     (fun b v _ => TRun.push b v)
     (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
@@ -254,6 +265,10 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
     (fun _ c body ih => TRun.loopF n c body.ext ih) (fun body ih => TRun.block body.ext ih)
+    (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
+    (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
+    (fun _ args r body code value ihBody ihCode =>
+      TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
 
 mutual
@@ -267,6 +282,14 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .call f args ret body => by
     show TRun.call args ret body.ext (body.runF n) = TRun.call args ret body.ext (body.runFC n)
     rw [Prog.runF_eq n body]
+  | _, _, .callReceiver _ args r body op => by
+    change TRun.callReceiver args r body.ext (body.runF n) op =
+      TRun.callReceiver args r body.ext (body.runFC n) op
+    rw [Prog.runF_eq n body]
+  | _, _, .callReceiverPush _ args r body code value => by
+    change TRun.callReceiverPush args r body.ext (body.runF n) code.ext (code.runF n) value =
+      TRun.callReceiverPush args r body.ext (body.runFC n) code.ext (code.runFC n) value
+    rw [Prog.runF_eq n body, Prog.runF_eq n code]
   | _, _, .tryCall call rets ok err code pnc other => by
     show TRun.tryCall call rets ok.ext (ok.runF n) err.ext (err.runF n) code pnc.ext
         (pnc.runF n) other.ext (other.runF n) =
@@ -281,6 +304,7 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
     rw [Prog.runF_eq n body]
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
+  | _, _, .pushOpAssign .. | _, _, .pushIncDec ..
   | _, _, .assignLocalPush .. | _, _, .push .. | _, _, .pop .. | _, _, .transfer ..
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
@@ -304,6 +328,21 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .ite c thn els =>
     TRun.ite_approx c thn.ext els.ext (Prog.runF_approx n thn) (Prog.runF_approx n els)
   | _, _, .call _ args ret body => TRun.call_approx args ret body.ext (Prog.runF_approx n body)
+  | _, _, .callReceiver _ args r body op => by
+    intro σ
+    exact (TRun.call_approx args (.storage _ r) body.ext (Prog.runF_approx n body) σ).bind
+      fun _ => .refl _
+  | _, _, .callReceiverPush _ args r body code value => by
+    intro σ
+    change TRes.Approx (TRun.callReceiverPush args r body.ext (body.runF n)
+      code.ext (code.runF n) value σ) (TRun.callReceiverPush args r body.ext body.runR
+      code.ext code.runR value σ)
+    unfold TRun.callReceiverPush
+    apply (TRun.call_approx args (.storage _ r) body.ext (Prog.runF_approx n body) σ).bind
+    intro a
+    apply TRes.Approx.map
+    unfold TRun.afterReceiverPrefix TRun.pushAfterPrefix
+    exact (TRes.Approx.refl _).bind fun _ => (Prog.runF_approx n code _).bind fun _ => .refl _
   | _, _, .tryCall call rets ok err code pnc other =>
     TRun.tryCall_approx call rets ok.ext err.ext code pnc.ext other.ext
       (Prog.runF_approx n ok) (Prog.runF_approx n err) (Prog.runF_approx n pnc)
@@ -312,6 +351,7 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .block body => TRun.block_approx body.ext (Prog.runF_approx n body)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
   | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
+  | _, _, .pushOpAssign .. | _, _, .pushIncDec ..
   | _, _, .assignLocalPush .. | _, _, .push .. | _, _, .pop .. | _, _, .transfer ..
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..

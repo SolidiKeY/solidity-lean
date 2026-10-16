@@ -8,7 +8,7 @@ Each runs the search, so this module imports only the statements and no
 before them.  A statement is picked by name (`only`), so a function added
 to `TestSuite.sol` does not move a pin.
 
-A statement the closer proves in the residue is `sol_prove` alone; a leaf
+A statement the closer proves in the residue is `sol_prove` with its selected step budget; a leaf
 it leaves would be closed on its scoped form (`sol_leaf`, then a closer:
 `Derive.searchLeaf`), and several leaves each under their `case`.  Since
 W10.4 every statement closes in the residue, the member written through the
@@ -17,7 +17,7 @@ alias a nested `push` returns included.
 
 /--
 info: theorem Solkey.TestSuite.additionStorageWrite.proved : ⊢ Solkey.TestSuite.additionStorageWrite.problem := by
-  sol_prove
+  sol_prove (steps := 128)
 
 additionStorageWrite: derived
 -/
@@ -26,7 +26,7 @@ additionStorageWrite: derived
 
 /--
 info: theorem Solkey.TestSuite.testStorageNestedPushReturnAlias.proved : ⊢ Solkey.TestSuite.testStorageNestedPushReturnAlias.problem := by
-  sol_prove
+  sol_prove (steps := 128)
 
 testStorageNestedPushReturnAlias: derived
 -/
@@ -42,7 +42,7 @@ declaration (`Derive.replayFits`). -/
 
 /--
 info: theorem Solkey.TestSuite.returnEarly.proved : ⊢ Solkey.TestSuite.returnEarly.problem := by
-  sol_prove
+  sol_prove (steps := 128)
 
 returnEarly: derived
 -/
@@ -51,7 +51,7 @@ returnEarly: derived
 
 /--
 info: theorem Solkey.TestSuite.tupleReturnDiscardsComponents.proved : ⊢ Solkey.TestSuite.tupleReturnDiscardsComponents.problem := by
-  sol_prove
+  sol_prove (steps := 128)
 
 tupleReturnDiscardsComponents: derived
 -/

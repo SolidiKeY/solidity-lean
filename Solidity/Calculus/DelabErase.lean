@@ -92,6 +92,7 @@ def callOutNames (ns : List Expr) (ret : Expr) : MetaM (List Expr) := do
   let ret ← whnf ret
   match ret.getAppFn.constName? with
   | some ``CallRet.mem => return ret.getArg! 2 :: ns
+  | some ``CallRet.storage => return ret.getArg! 2 :: ns
   | some ``CallRet.rets => do
     if let some xs ← bindersNames? (ret.getArg! 2) then return xs ++ ns
     match ← ctxLength? (ret.getArg! 1) with

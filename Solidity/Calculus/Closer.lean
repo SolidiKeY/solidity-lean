@@ -1,4 +1,5 @@
 import Solidity.Calculus.DecideLang
+import Solidity.Calculus.ReadBounds
 import Solidity.Calculus.TermEq
 import Solidity.Calculus.Decide
 
@@ -2975,84 +2976,6 @@ theorem LFml.close_valid {φ : LFml C} (h : φ.close = true) : φ.Valid := fun g
 
 end Close
 
-/-! ## A bound on the work -/
-
-section Fits
-
-/-- One node, its subterms counted after it: `none` out of fuel. -/
-def fitsNode (n : Nat) (k : Nat → Option Nat) : Option Nat :=
-  match n with
-  | 0 => none
-  | n + 1 => k n
-
-/-- `LTm.fits`' compiled twin. -/
-def LTm.fitsM : {s : Srt} → LTm C s → Nat → Option Nat
-  | _, .var _, n | _, .app0 _, n | _, .err, n => fitsNode n some
-  | _, .app1 _ x, n | _, .obsW x, n | _, .obsL x, n | _, .obsH x, n => fitsNode n x.fitsM
-  | _, .app2 _ x y, n | _, .index _ x y, n | _, .seq x y, n | _, .orElse x y, n =>
-    fitsNode n fun m => (x.fitsM m).bind y.fitsM
-  | _, .app3 _ x y z, n => fitsNode n fun m => ((x.fitsM m).bind y.fitsM).bind z.fitsM
-  | _, .kite a b t e, n =>
-    fitsNode n fun m => (((a.fitsM m).bind b.fitsM).bind t.fitsM).bind e.fitsM
-
-/-- **`t` has at most `n` nodes**, counted as a tree: the fuel left.  By
-the recursor. -/
-@[implemented_by LTm.fitsM]
-def LTm.fits {s : Srt} (t : LTm C s) : Nat → Option Nat :=
-  @LTm.rec C (fun _ _ => Nat → Option Nat)
-    (@fun _ _ n => fitsNode n some) (@fun _ _ n => fitsNode n some)
-    (@fun _ _ _ _ ihx n => fitsNode n ihx)
-    (@fun _ _ _ _ _ _ ihx ihy n => fitsNode n fun m => (ihx m).bind ihy)
-    (@fun _ _ _ _ _ _ _ _ ihx ihy ihz n => fitsNode n fun m => ((ihx m).bind ihy).bind ihz)
-    (@fun _ _ _ _ _ _ ihq ihi n => fitsNode n fun m => (ihq m).bind ihi)
-    (@fun _ _ ih n => fitsNode n ih) (@fun _ _ ih n => fitsNode n ih)
-    (@fun _ _ ih n => fitsNode n ih)
-    (@fun _ _ _ _ ihd iha n => fitsNode n fun m => (ihd m).bind iha)
-    (@fun _ _ _ iha ihb n => fitsNode n fun m => (iha m).bind ihb)
-    (@fun _ _ _ _ _ _ iha ihb iht ihe n =>
-      fitsNode n fun m => (((iha m).bind ihb).bind iht).bind ihe)
-    (@fun _ n => fitsNode n some) s t
-
-theorem LTm.fits_eq_fitsM {s : Srt} (t : LTm C s) : t.fits = t.fitsM := by
-  induction t with
-  | var | app0 | err => funext n; rfl
-  | app1 o x ih => funext n; simp only [LTm.fitsM, ← ih]; rfl
-  | app2 o x y ihx ihy => funext n; simp only [LTm.fitsM, ← ihx, ← ihy]; rfl
-  | app3 o x y z ihx ihy ihz => funext n; simp only [LTm.fitsM, ← ihx, ← ihy, ← ihz]; rfl
-  | index it q i ihq ihi => funext n; simp only [LTm.fitsM, ← ihq, ← ihi]; rfl
-  | obsW q ih | obsL q ih | obsH q ih => funext n; simp only [LTm.fitsM, ← ih]; rfl
-  | seq d a ihd iha => funext n; simp only [LTm.fitsM, ← ihd, ← iha]; rfl
-  | orElse a b iha ihb => funext n; simp only [LTm.fitsM, ← iha, ← ihb]; rfl
-  | kite a b t e iha ihb iht ihe =>
-    funext n; simp only [LTm.fitsM, ← iha, ← ihb, ← iht, ← ihe]; rfl
-
-/-- `LFml.fits`' compiled twin. -/
-def LFml.fitsM : LFml C → Nat → Option Nat
-  | .tt, n => fitsNode n some
-  | .eq a b, n => fitsNode n fun m => (a.fits m).bind b.fits
-  | .not φ, n | .all _ _ φ, n => fitsNode n φ.fitsM
-  | .and φ ψ, n | .imp φ ψ, n => fitsNode n fun m => (φ.fitsM m).bind ψ.fitsM
-
-/-- **`φ` has at most `n` nodes**, counted as a tree: its terms share
-subterms, a storage written from a read of the one before it twice, so the
-tree doubles with each such write.  By the recursor. -/
-@[implemented_by LFml.fitsM]
-def LFml.fits (φ : LFml C) : Nat → Option Nat :=
-  @LFml.rec C (fun _ => Nat → Option Nat)
-    (fun n => fitsNode n some)
-    (@fun _ a b n => fitsNode n fun m => (a.fits m).bind b.fits)
-    (fun _ ih n => fitsNode n ih)
-    (fun _ _ ihφ ihψ n => fitsNode n fun m => (ihφ m).bind ihψ)
-    (fun _ _ ihφ ihψ n => fitsNode n fun m => (ihφ m).bind ihψ)
-    (fun _ _ _ ih n => fitsNode n ih) φ
-
-theorem LFml.fits_eq_fitsM (φ : LFml C) : φ.fits = φ.fitsM := by
-  induction φ with
-  | tt | eq => funext n; rfl
-  | not φ ih | all k p φ ih => funext n; simp only [LFml.fitsM, ← ih]; rfl
-  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => funext n; simp only [LFml.fitsM, ← ihφ, ← ihψ]; rfl
-
-end Fits
 
 end Decide
 

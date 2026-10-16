@@ -125,16 +125,28 @@ def Val.quote : {p : PrimTy} → Val C Γ p → Lean.Expr
     mkAppN (mkConst ``Val.len) #[c, Γe, toExpr p, toExpr E', SPath.quote b, rflPrim p]
   | p, @Val.mlen _ _ _ E' b _ =>
     mkAppN (mkConst ``Val.mlen) #[c, Γe, toExpr p, toExpr E', MPath.quote b, rflPrim p]
+  | _, .modular op a b k =>
+    mkAppN (mkConst ``Val.modular) #[c, Γe, toExpr op, Val.quote a, Val.quote b, Val.quote k]
 
 end
 
 /-- `Option α`'s term, at `α` = `ty`. -/
 private def optQ {α : Type} (ty : Lean.Expr) (q : α → Lean.Expr) (o : Option α) : Lean.Expr := optE ty (o.map q)
 
+/-- A shape witness: `uint[2] -> uint[]` or `uint[2] -> uint[4]`. -/
+def FixedCopy.quote {E : Ty} {n : Nat} {R : RefTy} : FixedCopy E n R → Lean.Expr
+  | .dynamic _ => mkAppN (mkConst ``FixedCopy.dynamicChecked) #[toExpr E, toExpr n, rflTrue]
+  | .fixed m _ => mkAppN (mkConst ``FixedCopy.fixedChecked) #[toExpr E, toExpr n, toExpr m, rflTrue]
+
 def Src.quote : {T : Ty} → Src C Γ T → Lean.Expr
   | _, @Src.val _ _ p v => mkAppN (mkConst ``Src.val) #[c, Γe, toExpr p, Val.quote c Γe v]
   | _, @Src.copy _ _ R p _ =>
     mkAppN (mkConst ``Src.copy) #[c, Γe, toExpr R, SPath.quote c Γe p, rflTrue]
+  | _, @Src.fixedCopy _ _ E n R p shape _ =>
+    mkAppN (mkConst ``Src.fixedCopy) #[c, Γe, toExpr E, toExpr n, toExpr R,
+      SPath.quote c Γe p, FixedCopy.quote shape, rflTrue]
+  | _, @Src.copyMem _ _ R p =>
+    mkAppN (mkConst ``Src.copyMem) #[c, Γe, toExpr R, MPath.quote c Γe p]
 
 def ARhs.quote {R : RefTy} : ARhs C Γ R → Lean.Expr
   | .path p => mkAppN (mkConst ``ARhs.path) #[c, Γe, toExpr R, SPath.quote c Γe p]
@@ -181,6 +193,7 @@ def ExtCall.quote (call : ExtCall C Γ) : Lean.Expr :=
 
 def LoopAnn.quote : LoopAnn C Γ → Lean.Expr
   | .unwind k => mkAppN (mkConst ``LoopAnn.unwind) #[c, Γe, toExpr k]
+  | .auto => mkAppN (mkConst ``LoopAnn.auto) #[c, Γe]
   | .inv I dec =>
     mkAppN (mkConst ``LoopAnn.inv) #[c, Γe, Val.quote c Γe I,
       optQ (mkAppN (mkConst ``Val) #[c, Γe, toExpr PrimTy.uint]) (Val.quote c Γe) dec]
@@ -192,6 +205,14 @@ def Args.quote : {ps : Ctx} → Args C Γ ps → Lean.Expr × Lean.Expr
     let (ase, pse) := Args.quote as
     (mkAppN (mkConst ``Args.snoc) #[c, Γe, pse, ase, toExpr p, toExpr x, Val.quote c Γe e],
       consE (.val p) pse)
+  | _, @Args.snocStorage _ _ ps as R x e =>
+    let (ase, pse) := Args.quote as
+    (mkAppN (mkConst ``Args.snocStorage) #[c, Γe, pse, ase, toExpr R, toExpr x,
+      SPath.quote c Γe e], consE (.alias R) pse)
+  | _, @Args.snocMemory _ _ ps as R x e =>
+    let (ase, pse) := Args.quote as
+    (mkAppN (mkConst ``Args.snocMemory) #[c, Γe, pse, ase, toExpr R, toExpr x,
+      MPath.quote c Γe e], consE (.mem R) pse)
 
 /-- What a call leaves its caller. -/
 def CallRet.quote : {rs Γ' : Ctx} → CallRet Γ rs Γ' → Lean.Expr
@@ -201,6 +222,12 @@ def CallRet.quote : {rs Γ' : Ctx} → CallRet Γ rs Γ' → Lean.Expr
       optQ (mkAppN (mkConst ``Idx) #[Γe, toExpr (LTy.val p)]) (Idx.quote Γe) res]
   | _, _, @CallRet.rets _ rs bs => mkAppN (mkConst ``CallRet.rets) #[Γe, ctxE rs, Binders.quote bs]
   | _, _, .mem R r _ _ => mkAppN (mkConst ``CallRet.mem) #[Γe, toExpr R, toExpr r, rflTrue, rflTrue]
+  | _, _, .storage R r => mkAppN (mkConst ``CallRet.storage) #[Γe, toExpr R, toExpr r]
+
+def ReceiverOp.quote {E : Ty} : ReceiverOp C Γ E → Lean.Expr
+  | .push v _ => mkAppN (mkConst ``ReceiverOp.push) #[c, Γe, toExpr E,
+      optE (mkAppN (mkConst ``Src) #[c, Γe, toExpr E]) (v.map (Src.quote c Γe)), rflTrue]
+  | .pop => mkAppN (mkConst ``ReceiverOp.pop) #[c, Γe, toExpr E]
 
 end Parts
 
@@ -225,16 +252,37 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
       OpLoc.quote c Γe l, Val.quote c Γe r]
   | _, _, Γe, _, @Stmt.incDec _ _ p op _ l =>
     mkAppN (mkConst ``Stmt.incDec) #[c, Γe, toExpr p, toExpr op, rflTrue, OpLoc.quote c Γe l]
+  | _, _, Γe, _, @Stmt.pushOpAssign _ _ p op _ _ b r =>
+    mkAppN (mkConst ``Stmt.pushOpAssign) #[c, Γe, toExpr p, toExpr op, rflTrue, rflTrue,
+      SPath.quote c Γe b, Val.quote c Γe r]
+  | _, _, Γe, _, @Stmt.pushIncDec _ _ p op _ b =>
+    mkAppN (mkConst ``Stmt.pushIncDec) #[c, Γe, toExpr p, toExpr op, rflTrue,
+      SPath.quote c Γe b]
   | _, _, Γe, _, @Stmt.assignIncDec _ _ p i op _ l _ =>
     mkAppN (mkConst ``Stmt.assignIncDec) #[c, Γe, toExpr p, Idx.quote Γe i, toExpr op, rflTrue,
       OpLoc.quote c Γe l, rflTrue]
-  | _, _, Γe, _, @Stmt.assignLocalPush _ _ p i b _ =>
+  | _, _, Γe, _, @Stmt.assignLocalPush _ _ p i b =>
     mkAppN (mkConst ``Stmt.assignLocalPush) #[c, Γe, toExpr p, Idx.quote Γe i,
-      SPath.quote c Γe b, rflTrue]
+      SPath.quote c Γe b]
   | _, _, Γe, _, @Stmt.push _ _ E' b v _ =>
     mkAppN (mkConst ``Stmt.push) #[c, Γe, toExpr E', SPath.quote c Γe b,
       optE (mkAppN (mkConst ``Src) #[c, Γe, toExpr E']) (v.map (Src.quote c Γe)), rflTrue]
   | _, _, Γe, _, @Stmt.pop _ _ E' b => mkAppN (mkConst ``Stmt.pop) #[c, Γe, toExpr E', SPath.quote c Γe b]
+  | _, _, Γe, _, @Stmt.callReceiver _ _ ps Γf E' f args r body op =>
+    let (ase, pse) := Args.quote c Γe args
+    let Γfe := ctxOnto pse [.alias (.array E')]
+    mkAppN (mkConst ``Stmt.callReceiver) #[c, Γe, pse,
+      ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf, toExpr E', toExpr f,
+      ase, toExpr r, Prog.quote Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
+      ReceiverOp.quote c Γe op]
+  | Γ, _, Γe, _, @Stmt.callReceiverPush _ _ ps Γf Γv E' f args r body code value =>
+    let (ase, pse) := Args.quote c Γe args
+    let Γfe := ctxOnto pse [.alias (.array E')]
+    let Γve := ctxFrom Γ Γe Γv
+    mkAppN (mkConst ``Stmt.callReceiverPush) #[c, Γe, pse,
+      ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf, Γve, toExpr E', toExpr f,
+      ase, toExpr r, Prog.quote Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
+      Prog.quote Γe Γve code, Src.quote c Γve value]
   | _, _, Γe, _, .transfer r a =>
     mkAppN (mkConst ``Stmt.transfer) #[c, Γe, Val.quote c Γe r, Val.quote c Γe a]
   | _, _, Γe, _, .send pv r a =>

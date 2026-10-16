@@ -124,7 +124,7 @@ def valIn {Γ : Ctx} (F : Frag Γ) : {p : PrimTy} → Solidity.Val C Γ p → Bo
   | _, @Solidity.Val.unop _ _ p _ op _ _ a => unInFrag op p && valIn F a
   | _, .ternary c a b => valIn F c && valIn F a && valIn F b
   | _, .len b _ => spathIn F false b
-  | _, .readMem _ | _, .mlen .. => false
+  | _, .readMem _ | _, .mlen .. | _, .modular .. => false
 end
 
 /-- The storage location an `op=` target names, if it is one. -/
@@ -146,15 +146,17 @@ def opLocIn {Γ : Ctx} (F : Frag Γ) {p : PrimTy} (l : Solidity.OpLoc C Γ p) : 
 def argsIn {Γ : Ctx} (F : Frag Γ) : {ps : Ctx} → Solidity.Args C Γ ps → Bool
   | _, .nil => true
   | _, .snoc as _ _ e => argsIn F as && valIn F e
+  | _, .snocStorage .. | _, .snocMemory .. => false
 
 /-- What a call leaves the caller knowing: nothing new for no return or one
-return value; a call of several returns, or of a memory return, is out. -/
+return value; calls exporting several returns, memory or storage aliases are out. -/
 def CallRetIn {Γ : Ctx} (F : Frag Γ) : {rs Γ' : Ctx} → Solidity.CallRet Γ rs Γ' →
     Option (Frag Γ')
   | _, _, .none => some F
   | _, _, .val .. => some F
   | _, _, .rets _ => none
   | _, _, .mem .. => none
+  | _, _, .storage .. => none
 
 /-- An alias bound to `q`: plain if `q` indexes no array, fragile if it does. -/
 def bindFl {Γ : Ctx} (F : Frag Γ) {R : RefTy} (q : Solidity.SPath C Γ (.ref R)) :
@@ -169,6 +171,7 @@ def pushIn {Γ : Ctx} (F : Frag Γ) : {E : Ty} → Option (Solidity.Src C Γ E) 
   | _, some (.val e), b => spathIn F false b && valIn F e
   | _, some (@Solidity.Src.copy _ _ R q _), b =>
     static (.ref R) && leavesFit (.ref R) && spathIn F false b && spathIn F false q
+  | _, some (.copyMem _), _ | _, some (.fixedCopy ..), _ => false
 
 mutual
 /-- Whether a statement may shrink an array (a `pop` or a `delete`, in a
@@ -179,11 +182,15 @@ def Stmt.shrinks {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .ite _ t e => Prog.shrinks t || Prog.shrinks e
   | .block body => Prog.shrinks body
   | .call _ _ _ body => Prog.shrinks body
+  | .callReceiver _ _ _ body op =>
+    Prog.shrinks body || match op with | .pop => true | .push .. => false
+  | .callReceiverPush _ _ _ body code _ => Prog.shrinks body || Prog.shrinks code
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .transfer .. | .send ..
   | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => false
+  | .require _ | .assert _ | .revert | .tryCall .. | .loop ..
+  | .pushOpAssign .. | .pushIncDec .. => false
 def Prog.shrinks {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
   | .nil => false
   | .cons s P => Stmt.shrinks s || Prog.shrinks P
@@ -204,6 +211,7 @@ def assignIn {Γ : Ctx} (F : Frag Γ) : {T : Ty} → Solidity.Src C Γ T →
   | _, .val v, l => locIn F false l && valIn F v
   | _, @Solidity.Src.copy _ _ R q _, l =>
     static (.ref R) && leavesFit (.ref R) && spathIn F false q && locIn F false l
+  | _, .copyMem _, _ | _, .fixedCopy .., _ => false
 
 /-- A storage alias declared: unset (not readable), or bound to a path of
 the fragment. -/
@@ -247,7 +255,9 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
     else none
   | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..
   | .assignMem .. | .deleteMem ..
-  | .assignNew .. | .tryCall .. | .loop .. => none
+  | .assignNew .. | .tryCall .. | .loop .. | .pushOpAssign .. | .pushIncDec ..
+  | .callReceiver .. => none
+  | .callReceiverPush .. => none
 /-- A block of the fragment. -/
 def inFragP {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Prog C Γ Γ' → Option (Frag Γ')
   | .nil => some F
@@ -298,7 +308,7 @@ def compileVal (b : Nat) {Γ : Ctx} : {p : PrimTy} → Solidity.Val C Γ p → L
     compileVal b c ++ [.iszero, .jumpi ((compileVal b x).length + 1)] ++ compileVal b x ++
       [.jump (compileVal b y).length] ++ compileVal b y
   | _, .len q _ => compileSPath b q ++ [.sload]
-  | _, .readMem _ | _, .mlen .. => []
+  | _, .readMem _ | _, .mlen .. | _, .modular .. => []
 end
 
 /-- `b.push(…)`: the array's slot, the value (a word, or a static value's
@@ -312,6 +322,7 @@ def pushCode (b : Nat) {Γ : Ctx} : {E : Ty} → Option (Solidity.Src C Γ E) �
     compileSPath b q ++ compileSPath b p ++ loadLeaves (leaves (.ref R)) ++
       [.pop, .dup ((leaves (.ref R)).length + 1)] ++ pushSlotCode (size (.ref R)) ++
       storeLeaves (leaves (.ref R)).reverse ++ [.pop, .pop]
+  | _, some (.copyMem _), _ | _, some (.fixedCopy ..), _ => []
 
 /-- A call's parameters bound, each argument evaluated in the caller's
 context and stored at its level in the frame, which starts at `b + Γ.length`. -/
@@ -319,6 +330,7 @@ def argsCode (b : Nat) {Γ : Ctx} : {ps : Ctx} → Solidity.Args C Γ ps → Lis
   | _, .nil => []
   | _, @Solidity.Args.snoc _ _ ps as _ _ e =>
     argsCode b as ++ compileVal b e ++ [.mstore (cell (b + Γ.length + ps.length))]
+  | _, .snocStorage .. | _, .snocMemory .. => []
 
 /-- The return variable declared: `0` in its cell, above the parameters.  A
 call of several returns has no code (it is outside the fragment). -/
@@ -340,6 +352,7 @@ def assignCode (b : Nat) {Γ : Ctx} : {T : Ty} → Solidity.Src C Γ T →
   | _, @Solidity.Src.copy _ _ R q _, l =>
     compileSPath b q ++ loadLeaves (leaves (.ref R)) ++ [.pop] ++ compileLoc b l ++
       storeLeaves (leaves (.ref R)).reverse ++ [.pop]
+  | _, .copyMem _, _ | _, .fixedCopy .., _ => []
 
 /-- The code of an update of `l` (`op=`, `++`): `onLocal` a local's cell,
 `onLoc` a storage location; nothing for a memory target. -/
@@ -396,7 +409,9 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
   | .block body => compileProg b body
   | .assignLocalPush .. | .send .. | .declMem .. | .rebindMem .. | .assignFromMem ..
   | .assignMem .. | .deleteMem ..
-  | .assignNew .. | .tryCall .. | .loop .. => []
+  | .assignNew .. | .tryCall .. | .loop .. | .pushOpAssign .. | .pushIncDec ..
+  | .callReceiver .. => []
+  | .callReceiverPush .. => []
 /-- The code of a block: its statements' codes in order. -/
 def compileProg (b : Nat) {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → List Instr
   | .nil => []
@@ -407,10 +422,13 @@ mutual
 /-- How many `push` statements a statement has: each runs at
 most once, since the fragment has no loop. -/
 def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Nat
-  | .push .. => 1
+  | .push .. | .pushOpAssign .. | .pushIncDec .. => 1
   | .ite _ t e => Prog.pushes t + Prog.pushes e
   | .block body => Prog.pushes body
   | .call _ _ _ body => Prog.pushes body
+  | .callReceiver _ _ _ body op =>
+    Prog.pushes body + match op with | .push .. => 1 | .pop => 0
+  | .callReceiverPush _ _ _ body code _ => Prog.pushes body + Prog.pushes code + 1
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .pop _ | .transfer .. | .send ..
   | .declMem ..
@@ -429,10 +447,13 @@ def Stmt.pays {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .ite _ t e => Prog.pays t || Prog.pays e
   | .block body => Prog.pays body
   | .call _ _ _ body => Prog.pays body
+  | .callReceiver _ _ _ body _ => Prog.pays body
+  | .callReceiverPush _ _ _ body code _ => Prog.pays body || Prog.pays code
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => false
+  | .require _ | .assert _ | .revert | .tryCall .. | .loop ..
+  | .pushOpAssign .. | .pushIncDec .. => false
 def Prog.pays {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
   | .nil => false
   | .cons s P => Stmt.pays s || Prog.pays P

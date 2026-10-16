@@ -111,11 +111,10 @@ example : Prog.toStr [] (sol{ pair = Pair(total, 2); }) =
 example : Prog.toStr [] (sol{ pair = Pair({b: 2, a: total}); }) =
     "Pair memory mv1; mv1.a = total; mv1.b = 2; pair = mv1;" := rfl
 
-/-- A memory local names the fresh object; a push is a default slot written
-with its copy. -/
+/-- A memory local names the fresh object; a push copies it atomically. -/
 example : Prog.toStr [] (sol{ Pair memory q = Pair(1, 2); pairs.push(Pair(1, 2)); }) =
     "Pair memory mv1; mv1.a = 1; mv1.b = 2; Pair memory q = mv1; \
-    Pair memory mv2; mv2.a = 1; mv2.b = 2; pairs.push(); pairs[pairs.length - 1] = mv2;" := rfl
+    Pair memory mv2; mv2.a = 1; mv2.b = 2; pairs.push(mv2);" := rfl
 
 /-- error: Solidity elaboration failed: Pair({…}) names each member of Pair once: [a, b] -/
 #guard_msgs in #check sol{ pair = Pair({a: 1}); }

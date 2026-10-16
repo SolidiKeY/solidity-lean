@@ -1,4 +1,5 @@
 import Solidity.Calculus.Close
+import Solidity.Calculus.Closers
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Derive
 import Solidity.Tools.Inspect
@@ -179,8 +180,65 @@ run_meta do
   Lean.Meta.check e
   Lean.logInfo m!"{e} : {← Lean.Meta.inferType e}"
 
+section SequentialPremises
+open scoped Solidity.Schema
+
+/-- The two updates of `a.push() += x` retain their intermediate scope. -/
+example {C : Contract} {Γ Δ Γ' : Ctx} (U : Upd C Γ Δ) (V : Upd C Δ Γ') :
+    (dl{ ‹U› ‹V› ⟨[ ]⟩ } : Premise C Γ Γ') = .updates U V := rfl
+
+/-- `x = a; x = b;` uses two updates, each parallel internally. -/
+example {C : Contract} {Γ : Ctx} (lv : Idx Γ (.val .uint))
+    (se₁ se₂ : Simple C Γ .uint) :
+    (dl{ { lv := se₁ } { lv := se₂ } ⟨[ ]⟩ } : Premise C Γ Γ) =
+      .updates (Upd.nil.snoc (.setLocal lv (.simple se₁)))
+        (Upd.nil.snoc (.setLocal lv (.simple se₂))) := rfl
+
+/-- In `T v;`, the first update can declare `v` and the second read it. -/
+example {C : Contract} {Γ : Ctx} {k : Nat} {m : Modality}
+    (p : PrimTy) (v : Var) (se : Simple C Γ p) :
+    (dl{ ⟨[ T v; ]⟩ ⇝ { v := se } { v := v } ⟨[ ]⟩ }) =
+      Taclet C k m (.declLocal p v none)
+        (.updates (Upd.nil.decl v (.val se.lower))
+          (Upd.nil.snoc (.local .here (.val (.pvV .here))))) := rfl
+
+/-- In `T v;`, a storage-only first update leaves declaration to the second. -/
+example {C : Contract} {Γ : Ctx} {k : Nat} {m : Modality}
+    (p : PrimTy) (v : Var) (se : Simple C Γ p) :
+    (dl{ ⟨[ T v; ]⟩ ⇝ { storage := storage } { v := se } ⟨[ ]⟩ }) =
+      Taclet C k m (.declLocal p v none)
+        (.updates (Upd.nil.snoc (.storage (.app0 .storage)))
+          (Upd.nil.decl v (.val se.lower))) := rfl
+
+/--
+info: dl{ { x := 2 } { x := x } ⟨[ ]⟩ } : Premise StandardExample [] [LTy.val PrimTy.uint]
+-/
+#guard_msgs in
+run_meta do
+  let U : Upd StandardExample [] [.val .uint] :=
+    Upd.nil.decl (.user "x") (.val (.app0 (.lit (p := .uint) ⟨2, by decide⟩)))
+  let V : Upd StandardExample [.val .uint] [.val .uint] :=
+    Upd.nil.snoc (.local .here (.val (.pvV .here)))
+  let e := Premise.quote (Lean.mkConst ``StandardExample) (.updates U V)
+  Lean.Meta.check e
+  Lean.logInfo m!"{e} : {← Lean.Meta.inferType e}"
+
+end SequentialPremises
+
 section Scoped
 open scoped Scoped
+
+/-- `x = 2; x += 3;` reads the first assignment and leaves five. -/
+example : ⊨ dl!{ { x := 9 } { x := 2 } { x := x + 3 } x = 5 } := by
+  sol_close
+
+/-- In a parallel update both assignments read the old nine, leaving twelve. -/
+example : ⊨ dl!{ { x := 9 } { x := 2 ‖ x := x + 3 } x = 12 } := by
+  sol_close
+
+/-- Sequential assignment must not accidentally use the parallel result. -/
+example : ⊨ dl!{ { x := 9 } { x := 2 } { x := x + 3 } x != 12 } := by
+  sol_close
 
 /-! ## A formula prints as it reads
 

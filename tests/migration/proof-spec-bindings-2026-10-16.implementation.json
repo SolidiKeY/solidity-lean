@@ -1,0 +1,2140 @@
+{
+  "phase": "after-specification-and-loop-binding-renaming",
+  "capturedAt": "2026-10-16T09:26:22.883Z",
+  "baseGitHead": "c423fc3d14d7743c28c96b8acb5d83a9b9382fe3",
+  "implementationSha256": "99be8e2c780d1253d04c73284bd013e85ece487ce6350a67c8b89d25aec997b0",
+  "files": [
+    {
+      "path": "Solidity.lean",
+      "sha256": "ed9800ba02d09db7a3f80fea166315805f40138a10e21d8a56205f647335a104"
+    },
+    {
+      "path": "Solidity/AST.lean",
+      "sha256": "a6693d8627b8cd05994f1f6fb538dfa949725a28517e9f20f5d14974e4e9d4e2"
+    },
+    {
+      "path": "Solidity/Calculus/Arms.lean",
+      "sha256": "bfdb6d4bbb25b835a510040ee97d18660ba66fa4ca775f49ff27b0c332d328d1"
+    },
+    {
+      "path": "Solidity/Calculus/Blocks.lean",
+      "sha256": "8d1bd28b0575b5bb9f851847e61066a517ef408acaa94bf88b7aa2d0f784405c"
+    },
+    {
+      "path": "Solidity/Calculus/Callback.lean",
+      "sha256": "492156167ec1302c80f872fadd5c67e9d1b4cd24f67962c427ceb7047a76d7c7"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackHolds.lean",
+      "sha256": "77ee9b786eac16ca73f9b1cac15f6380bf53cff73c78437bb178c3d1b4c5c34e"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackRules.lean",
+      "sha256": "d34daa582b4178c055dc6c51e7e6f3acd9c2243a7532f2f3d34c28d720a3aa82"
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound.lean",
+      "sha256": "d064b06a3260dbcf47c4f15456e06565f91828d2152611d5174cd17653f553f9"
+    },
+    {
+      "path": "Solidity/Calculus/ChainGen.lean",
+      "sha256": "3f12147429bc9bdba000425cc65d3d35918f331f35a03f8320429c129fc72c72"
+    },
+    {
+      "path": "Solidity/Calculus/ChainKit.lean",
+      "sha256": "5d4c61b839f1f11ebbe8e3b849fad26d63df97b78c6e515692e3c34898416c43"
+    },
+    {
+      "path": "Solidity/Calculus/ChainRules.lean",
+      "sha256": "9e2fe153585ee05fe055d1ea85476ea477a70d2c5ebe4f1a7d0f9626aa7b0acd"
+    },
+    {
+      "path": "Solidity/Calculus/Chains.lean",
+      "sha256": "42407cda87dad259fded17b803c8b37ac49cac93736ffeb4e8eb0aa57de20d3c"
+    },
+    {
+      "path": "Solidity/Calculus/Close.lean",
+      "sha256": "6269171b4fbc0ecf2e62267ccf815535e03657849e1d5055c04feefc5abb57d3"
+    },
+    {
+      "path": "Solidity/Calculus/CloseFrame.lean",
+      "sha256": "cb1c3d9934f6f8df1ef5c9bf86e3444279cc4b64977bb1a0c5dd894100cf06b9"
+    },
+    {
+      "path": "Solidity/Calculus/CloseLemmas.lean",
+      "sha256": "304453807aa94155429179844e7cc2ff23ad208996c864aeb549fc2bf97b8744"
+    },
+    {
+      "path": "Solidity/Calculus/CloseScoped.lean",
+      "sha256": "548c596accabdad0c57404c9bf2f3da5fa01f80c61819f8f75039371d9f5df89"
+    },
+    {
+      "path": "Solidity/Calculus/CloseTests.lean",
+      "sha256": "bc409e83210c7a98b65eadf16a21463dbca0300147aade97619674dc349ac8f8"
+    },
+    {
+      "path": "Solidity/Calculus/Closer.lean",
+      "sha256": "204bd722df6e6e498e19a072115f469139fa6c5ee9cf0456f858c9a0fb08333c"
+    },
+    {
+      "path": "Solidity/Calculus/Closers.lean",
+      "sha256": "4dafc427459281356d8f5a991ea9a7fc47fa91ccb3570aac17848c5b0d35d4e7"
+    },
+    {
+      "path": "Solidity/Calculus/Completeness.lean",
+      "sha256": "932cc3f29fc09ca3214db87436ff689cabf677da4accfbc0b57556e298d64c8c"
+    },
+    {
+      "path": "Solidity/Calculus/Decide.lean",
+      "sha256": "4dbae66318f09bc7411b00e8a9bf997652dc594dd5ec90b9d680f585927946a9"
+    },
+    {
+      "path": "Solidity/Calculus/DecideComplete.lean",
+      "sha256": "6a264ed4b105c9cffb2be39d624b21873d26ab89c6a53309a56541444f5b1a8c"
+    },
+    {
+      "path": "Solidity/Calculus/DecideEval.lean",
+      "sha256": "a516bd41f878795e51bb9dbd3563d3e6fd49d44c2c3c08d077856334c3b39cea"
+    },
+    {
+      "path": "Solidity/Calculus/DecideLang.lean",
+      "sha256": "45c24c19f3a65c25b4d6fc7bdc47b1f1eca9eca56691b77c4e18bfda7da9aaa9"
+    },
+    {
+      "path": "Solidity/Calculus/DecideScoped.lean",
+      "sha256": "735e0eb667e3a8447828929436a8eca4ce3d45f4f16759d4e5bf88fce33025d1"
+    },
+    {
+      "path": "Solidity/Calculus/DecideTyped.lean",
+      "sha256": "034983a2bb028ca215b7347ca0fc60f2b9f2dbb23d4896e63e533a57200a7a12"
+    },
+    {
+      "path": "Solidity/Calculus/Delab.lean",
+      "sha256": "fdfea6c6bb420315c036bd308493d9216454bbb2462f691df486b1b8f96137e5"
+    },
+    {
+      "path": "Solidity/Calculus/DelabErase.lean",
+      "sha256": "de7ea23a9a28595603627a7a98fddb10b44b118bd87b19f03f6cc5c3b7ab546d"
+    },
+    {
+      "path": "Solidity/Calculus/DelabLean.lean",
+      "sha256": "e694d34af93264a70d8e808af0df110ba89b6313c99a0d6c057ed4189985e7eb"
+    },
+    {
+      "path": "Solidity/Calculus/DelabRules.lean",
+      "sha256": "7ac3a421c67fbd42dbbeb5b9cc1ecdbcb65f03b6197a3650bb2d78982ce426d4"
+    },
+    {
+      "path": "Solidity/Calculus/Deploy.lean",
+      "sha256": "236327ceee2eb4caeda1bad011ab5ebfa36e028ba752e2eb73f73a1e6cca5db9"
+    },
+    {
+      "path": "Solidity/Calculus/Derive.lean",
+      "sha256": "920c01009bd29e267ec1c5cb52e6b8eaf88d8e1b01941888fb05e1726c0489bc"
+    },
+    {
+      "path": "Solidity/Calculus/ElimFacts.lean",
+      "sha256": "792138c6ab3d9eb62d68cb68eaf2062b78b0b6ecdb002e008090fcd0e1068d50"
+    },
+    {
+      "path": "Solidity/Calculus/FirstOrder.lean",
+      "sha256": "e164fabc4f5f1ee6c1a8f3f134b8f52ecf22093518a2901b4a452dfe29909c13"
+    },
+    {
+      "path": "Solidity/Calculus/Fml.lean",
+      "sha256": "096fd108f7dbb8439bd1040487f14833fff4ccf1edc335195fdbb2804bf384d0"
+    },
+    {
+      "path": "Solidity/Calculus/FunContract.lean",
+      "sha256": "a9371ba8417097d0d31dbdff7eb88e7a6a97f9e53bbd225e6b11f06572c732d1"
+    },
+    {
+      "path": "Solidity/Calculus/Graft.lean",
+      "sha256": "ad878ad79648d293990d897949dfa6a9b609dd089d746f849d9752f8270434b2"
+    },
+    {
+      "path": "Solidity/Calculus/Hyp.lean",
+      "sha256": "b86c6e85a02edbe2109b80e46aae20b20fdeeb848b7d282a6571930ac695861d"
+    },
+    {
+      "path": "Solidity/Calculus/KeyTaclets.lean",
+      "sha256": "2ebd72e7b535e00bc96e0759806bfb0d944e0173d357293e1c40e7a0b27edd6c"
+    },
+    {
+      "path": "Solidity/Calculus/KeyValues.lean",
+      "sha256": "cedb41e8953101265b29ed3b9701238faaf95f16ce1ef62d51775c3591434572"
+    },
+    {
+      "path": "Solidity/Calculus/Lands.lean",
+      "sha256": "47d121fcb056b02fb0b16d7d590668e730e15aed8df2923c2fe2cfe15374c258"
+    },
+    {
+      "path": "Solidity/Calculus/LastLine.lean",
+      "sha256": "155f7e2b2923318aa239b33d6e95518f35dd95db3e88dc0d641f92eb3aa4baaa"
+    },
+    {
+      "path": "Solidity/Calculus/LeafDerive.lean",
+      "sha256": "e5b90b5b08fb2c002e389c0e653f53c4ee963ecff77a962ec94da171574f8673"
+    },
+    {
+      "path": "Solidity/Calculus/Logic.lean",
+      "sha256": "0a2512fa09dacb08ac49a93b4fa284ea833cd4064a8808b3c4b74ffc608d532e"
+    },
+    {
+      "path": "Solidity/Calculus/Lower.lean",
+      "sha256": "a14d968b6e2980637b3a41d6e94bf455bdad3c34efcefd8df684c427b95a7820"
+    },
+    {
+      "path": "Solidity/Calculus/LowerRun.lean",
+      "sha256": "98850dd602ca3af65d90ec376c27f385bf74622352de44b31f37dc17bfb2e6dd"
+    },
+    {
+      "path": "Solidity/Calculus/MemRead.lean",
+      "sha256": "61835988eac8551eead0e8edfb4e7857965e5a4533c634ceb716d50aaf860cc8"
+    },
+    {
+      "path": "Solidity/Calculus/Merge.lean",
+      "sha256": "037272e4cd5cd491b4791da53797040180a100f712d302828b95e64e53a20ded"
+    },
+    {
+      "path": "Solidity/Calculus/NamedTerm.lean",
+      "sha256": "1ce3dfc2fb68b9903a3701b907b53fd67349ab995f4102c7b85abe2a909df227"
+    },
+    {
+      "path": "Solidity/Calculus/Notation.lean",
+      "sha256": "acbd7e047a01e90b2ce8e58c8783f6b9168e0773a09aeef32330fa7298a3f5a7"
+    },
+    {
+      "path": "Solidity/Calculus/NotationResolve.lean",
+      "sha256": "33bbb8aa43ee8a5ee006d82669c6e58cb3f3c47d6b67226981f51d26993a770e"
+    },
+    {
+      "path": "Solidity/Calculus/PremiseSound.lean",
+      "sha256": "4aed9036c674074ecbdd6e3d7f9b646909448181b845ba6f315be1425a6e58b7"
+    },
+    {
+      "path": "Solidity/Calculus/Print.lean",
+      "sha256": "41a77b2da31007378af01a335f026be49ee786ce623e9ed422dfe136812bb573"
+    },
+    {
+      "path": "Solidity/Calculus/PrintStmt.lean",
+      "sha256": "82e7cf7ba9237ae89960fbafb53be91dd0e0378f7a5872fc7e5cf932b0de3e96"
+    },
+    {
+      "path": "Solidity/Calculus/PrintTerm.lean",
+      "sha256": "73c248cbf7f42cbbc8ae28539e4a7278433d9a9dd38ae3a33dc09efe23071091"
+    },
+    {
+      "path": "Solidity/Calculus/PrintedRules.lean",
+      "sha256": "62deb7874967b45af004914c0fd3a87724b245f0fd286d49f47d95b6245bced3"
+    },
+    {
+      "path": "Solidity/Calculus/Problem.lean",
+      "sha256": "ffd1e092d34e12e19f6e7ebccbf873708cf794325d39af5e99c1b5cda464ca64"
+    },
+    {
+      "path": "Solidity/Calculus/ProofTree.lean",
+      "sha256": "6fa59498a0d375908514d6240224e0634126e6082fe74088bf1d781816da045c"
+    },
+    {
+      "path": "Solidity/Calculus/Proves.lean",
+      "sha256": "7eab273a0a161a92978bf28ab491f565ff16b77fa330fd1bc9f6542b33de068f"
+    },
+    {
+      "path": "Solidity/Calculus/ProvesDerive.lean",
+      "sha256": "0e4b37b6f351ee77dfbd1943e51f6d9dd50a7ee98200c7ce039c6627252c3b40"
+    },
+    {
+      "path": "Solidity/Calculus/ProvesSound.lean",
+      "sha256": "1b391fe2e0827321f4269a974b9875d91336d7c8753c9c127fb3b9374ea56ffe"
+    },
+    {
+      "path": "Solidity/Calculus/Quote.lean",
+      "sha256": "53a467d99dc04882d03768b551d6937cd2b067bfe421634d8a6a51803a126b4b"
+    },
+    {
+      "path": "Solidity/Calculus/ReadBounds.lean",
+      "sha256": "96702294c7ae3c85350658a442616836747376e2da78d8a083349b0abfe8ad41"
+    },
+    {
+      "path": "Solidity/Calculus/ReadWrite.lean",
+      "sha256": "ae32dc1bbe0f19e5b64be81170d0ff71165d4021f48188ef0ca2784e7fdc9216"
+    },
+    {
+      "path": "Solidity/Calculus/RefInputs.lean",
+      "sha256": "b5efc0c790c85a2d7246216a7fc7400785cfa38cb42a0497c108f72af2ab8fcb"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteChainGen.lean",
+      "sha256": "79493586d7e7e6e422e2a32ea93eab303c3fc4875e0a18b66f1d90b5b33862ce"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteChains.lean",
+      "sha256": "73cafd02d88dd6977fc75ee095e87ecb4914d02d5e718563128bae1cb90263a4"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteLaws.lean",
+      "sha256": "662555db2c1cf45d9a9a3f09348f7caf89ac44db1ea93a430c7719398ff71609"
+    },
+    {
+      "path": "Solidity/Calculus/RewritePast.lean",
+      "sha256": "437de6a643c6e50a457ce49311b513b53dfe09e6696878cc1c88442a1bf3638f"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteScoped.lean",
+      "sha256": "2bfe2a279e26ce02a1c5247ecb3bee5d7e9e0eb9644f7b7b86af356b6e93ccaa"
+    },
+    {
+      "path": "Solidity/Calculus/RewriteSyntax.lean",
+      "sha256": "5965e7c61a3584527494eaf788ead0498d8c73fa4668d12798d450ff889a49f0"
+    },
+    {
+      "path": "Solidity/Calculus/RuleExists.lean",
+      "sha256": "096ed5ea4ae471278573ea99aec3f14a87be86184ae019e88999609ddc408004"
+    },
+    {
+      "path": "Solidity/Calculus/RuleKit.lean",
+      "sha256": "be986dace611d4ae7941c8dc26c3dd7b45fa3a3ff6ead59db6cea7befc47ad77"
+    },
+    {
+      "path": "Solidity/Calculus/RuleShapes.lean",
+      "sha256": "d25dec8dd74ab9625f5d44091d9e3a7188cd1377e0407a159f974e04df0a479f"
+    },
+    {
+      "path": "Solidity/Calculus/RuleSyntax.lean",
+      "sha256": "fcb61dba6f9e164aa7878d075a56d28c8d6a003306d9177d787184f7d6733c52"
+    },
+    {
+      "path": "Solidity/Calculus/Rules.lean",
+      "sha256": "d0bb06b0ae1d7a757a344cde040d8594cd02c630a65253e1a81961cde0a1e192"
+    },
+    {
+      "path": "Solidity/Calculus/SeqRewrite.lean",
+      "sha256": "c99aede9c913a3ffb41b8e24283a88c4d6ae67912a2dac3913348050f8458461"
+    },
+    {
+      "path": "Solidity/Calculus/SequentNotation.lean",
+      "sha256": "93515a4237135a6a9ac589e4609e01617d9b706f5e81849156cfc2993f35820f"
+    },
+    {
+      "path": "Solidity/Calculus/Sequents.lean",
+      "sha256": "2fb9b426ffcc884ba8b78264fedbde1e280b2f175c86e3b0bb759630309c678c"
+    },
+    {
+      "path": "Solidity/Calculus/Shift.lean",
+      "sha256": "67a0ef8e02ef1427aba60a81af1e8be32e31ec06b26a6ffc15814b3b5929cb53"
+    },
+    {
+      "path": "Solidity/Calculus/SolSpec.lean",
+      "sha256": "6d16b1ff10870a8dca3e4aaba3f40b22d08b2a8b48d43760c508d3af37724e4c"
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyFragment.lean",
+      "sha256": "52a0e3dae93d986813d4335398621930d65d15238b0c7e5e49eeba06ed3cdb0e"
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyProves.lean",
+      "sha256": "5575756618c255f850c9409ec7052cb360c9cb30cc23befbe9184c93375803b5"
+    },
+    {
+      "path": "Solidity/Calculus/Sound.lean",
+      "sha256": "9b61c5bf1ac883eb569fcbe62bc00f908d815523f8c7cb09887325d18442eb69"
+    },
+    {
+      "path": "Solidity/Calculus/SoundArms.lean",
+      "sha256": "8e86dd0a4ddb509bb194a39b248e5875264dee6ca33b0cbeb64c73eca8687c3f"
+    },
+    {
+      "path": "Solidity/Calculus/SoundCalls.lean",
+      "sha256": "b1368e514f288a250a67dc6d0a9edec4f3ea047b0a61ab8f85a69d5b585fe674"
+    },
+    {
+      "path": "Solidity/Calculus/SoundCapture.lean",
+      "sha256": "be1e116a383af5fb192994ca486be09bf74e2cadf5a44592aacfaa1b9b2450f6"
+    },
+    {
+      "path": "Solidity/Calculus/SoundControl.lean",
+      "sha256": "24a5b4ccdd9a3e57b6bebd971e3e55a9d7f3902ab3d4720a29088493f3372304"
+    },
+    {
+      "path": "Solidity/Calculus/SoundKit.lean",
+      "sha256": "15df60774e6923d25c060a20319d7cb910b89516c138223f8f8d0f951ed49d9e"
+    },
+    {
+      "path": "Solidity/Calculus/SoundLocal.lean",
+      "sha256": "b6332d285999ff974ace806bbd163a7ec3f0d6b1c2007efafb6816f9eb5e099b"
+    },
+    {
+      "path": "Solidity/Calculus/SoundLoops.lean",
+      "sha256": "6f81b54c6e9b22e4c408165e3cd3d0286c32682929cbd0225fdcc2b321bcfc0d"
+    },
+    {
+      "path": "Solidity/Calculus/SoundMem.lean",
+      "sha256": "a09c5ce81202083c2ee734d965287ca85870d71a82360a868f0071f3c38f6725"
+    },
+    {
+      "path": "Solidity/Calculus/SoundPush.lean",
+      "sha256": "365ce15244c712cd165daeb4971fb2a6aa836d6c070c4ae4329cc1f10caf04f1"
+    },
+    {
+      "path": "Solidity/Calculus/SoundStep.lean",
+      "sha256": "93c57e8706b7acf0f935c7bff2291872bb96b7ee46c3dcc7d7fe6aea3e240cac"
+    },
+    {
+      "path": "Solidity/Calculus/SoundStore.lean",
+      "sha256": "9eff18e5eb55ecd251411f35b993c6789175b313e8fc5549adb23a2db5998789"
+    },
+    {
+      "path": "Solidity/Calculus/Spec.lean",
+      "sha256": "104914a1b57a8e4d46fc541d5bc66eca9771b42810622b751b27df42e3160285"
+    },
+    {
+      "path": "Solidity/Calculus/StateFacts.lean",
+      "sha256": "70a3921a903ca2b35a871c2d7514fd3d4b9e76006204bb7071f39460de3949f1"
+    },
+    {
+      "path": "Solidity/Calculus/StatePartsScoped.lean",
+      "sha256": "879c5d05e834ada5aff66b3e46982739a4e6cc21a730e66b6ddff64d147cb01a"
+    },
+    {
+      "path": "Solidity/Calculus/Step.lean",
+      "sha256": "c5cced5b31110f3d8247b7ab44053f7764575a661d5d58832df0c14d8fbd1185"
+    },
+    {
+      "path": "Solidity/Calculus/StmtSound.lean",
+      "sha256": "ecfa0583dbd7dbd732fdb0d8d5e9a8c5e2c5cac5cf260333da4fba97a0a1bf4d"
+    },
+    {
+      "path": "Solidity/Calculus/Surface.lean",
+      "sha256": "31da6a472b8b9bc4725aef2c8e23398101abd61e84990858f1f1fac4429eaf9a"
+    },
+    {
+      "path": "Solidity/Calculus/SurfaceNotation.lean",
+      "sha256": "a42daf3c3a8785ec6d68b2dda2df30aa8e379d8436b407bbfed519a93af187f1"
+    },
+    {
+      "path": "Solidity/Calculus/SurfaceSpec.lean",
+      "sha256": "bc170aad1cd7e74791333397b3b9dc7c3443af6c666f8d8f2273280e86ad6725"
+    },
+    {
+      "path": "Solidity/Calculus/Symex.lean",
+      "sha256": "b6dbba64f0cea05a8dc5f2b4e1b63de83b3e67942547df5ce6f59df98965b009"
+    },
+    {
+      "path": "Solidity/Calculus/Taclet.lean",
+      "sha256": "634ad4e34fe4744d93830af2598dab0523c62324b102a369ffe993cb1efd6fa5"
+    },
+    {
+      "path": "Solidity/Calculus/TacticSyntax.lean",
+      "sha256": "d9d3ab85ce1e332c1cc54ecd25ae87a9eb2dd99626be81a2238891f0efc1354c"
+    },
+    {
+      "path": "Solidity/Calculus/TermEq.lean",
+      "sha256": "e344ba888f8fbbb8f9d0c77d5a64553c36e45061f1c72e9792aa9935753a2f77"
+    },
+    {
+      "path": "Solidity/Calculus/TermEval.lean",
+      "sha256": "dfe6fa04ba7a3dd68c5f608b4b7a50b21c8fa18bf839115030a0f8e584901bf7"
+    },
+    {
+      "path": "Solidity/Calculus/TermLaws.lean",
+      "sha256": "609ece32bf79dd4c98d9a0f1e929390801c38124e05e1924b01132d067ab0e59"
+    },
+    {
+      "path": "Solidity/Calculus/TermLib.lean",
+      "sha256": "c8bf197745ff85ae8bb111401fbdf826def6eff807b6a37de76e7fe57d05af54"
+    },
+    {
+      "path": "Solidity/Calculus/TreeData.lean",
+      "sha256": "dd18443fc51add2cbea4c7bbd47491f25732e59bef4a3a6d45086eedc41f375c"
+    },
+    {
+      "path": "Solidity/Calculus/UpdRuleScoped.lean",
+      "sha256": "5e9b5b4dbcce150aa41a4ff5849475ea150c8ad1c79bfaddbe0b3d7b5777eda3"
+    },
+    {
+      "path": "Solidity/Calculus/UpdateRules.lean",
+      "sha256": "432285d959845211355bcd365de136c85c32fb3e7bd1e806f6f4799774b14ab3"
+    },
+    {
+      "path": "Solidity/Calculus/WalkSyntax.lean",
+      "sha256": "c49b9ea2e034617ff1f472284180dbd949166953a6000b0d1d91dce9f5ffa021"
+    },
+    {
+      "path": "Solidity/Calculus/WkOver.lean",
+      "sha256": "ade922f4315b4773af76c610b5eccf6d1f090f756e22c1f374f051c722a9991e"
+    },
+    {
+      "path": "Solidity/Corpus/Basic.lean",
+      "sha256": "47dfeadc2c3b560944970ecc9bd66f251d2c7ecb84bf0e5befc419771f44e031"
+    },
+    {
+      "path": "Solidity/Corpus/Imported.lean",
+      "sha256": "7254551dc8a31e19033dfd9423cac654a1c358f4b1b2a98deb8614e75e2ee4af"
+    },
+    {
+      "path": "Solidity/Corpus/SolcArrays.lean",
+      "sha256": "0fd77b91223ed25cd21e5c92edca80b6ceb6a555e8280adcdca1067efd954db2"
+    },
+    {
+      "path": "Solidity/Corpus/SolcControlFlow.lean",
+      "sha256": "ce0689bbba82ed20a72e3685fcca20ff019cf7f431e4e91cde01191641e03cc4"
+    },
+    {
+      "path": "Solidity/Corpus/SolcExpressions.lean",
+      "sha256": "21374001964ea3ee15da99a493b0d9635ae0280c5cd698f4f20148ac86cd3fe3"
+    },
+    {
+      "path": "Solidity/Corpus/SolcMappings.lean",
+      "sha256": "68989996bfc1b58eb6270597f1462844fbb5045c9bb0de70f79eb9b463ccf41d"
+    },
+    {
+      "path": "Solidity/Corpus/SolcMemory.lean",
+      "sha256": "0f3b80326dbca5d78964f277b558c8a2e125a2e723aae079b7e4693172b9d523"
+    },
+    {
+      "path": "Solidity/Corpus/SolcStructs.lean",
+      "sha256": "041e747bcec5999ab4297f5a449c151b90ff7907e95bcda4e9b752d4726137a7"
+    },
+    {
+      "path": "Solidity/Corpus/TestSuite.lean",
+      "sha256": "8489e07a02fb043741f8680bc2cc3596bb712b3101a664cf786a92aa59876fe0"
+    },
+    {
+      "path": "Solidity/Counterexamples/DeleteFamilyGenericOverlap.lean",
+      "sha256": "e5ae7376b4012afd650fbebbe49f9017c1b3261a82960a4984ee747a77e02deb"
+    },
+    {
+      "path": "Solidity/Counterexamples/PreFixSortAnnotations.lean",
+      "sha256": "762e8484d2d4fe50f5f4b39c6a03708425f6d4f94de5d32e41feacd85a02dc7f"
+    },
+    {
+      "path": "Solidity/Counterexamples/StaticRuntimeSort.lean",
+      "sha256": "1b4895f71a6fbcfb4d4c273421cdff58f643d4b4b0a5eb42eb0caf25fb8590d9"
+    },
+    {
+      "path": "Solidity/Counterexamples/StorageDangling.lean",
+      "sha256": "513e1a2983ef41af7910175697510c2a80018f408c76ef763f31ff72a5757021"
+    },
+    {
+      "path": "Solidity/Eqns.lean",
+      "sha256": "22d8e97848d5fc7938f82148d6737311477d3a3b183f4633be205dbe60c2c344"
+    },
+    {
+      "path": "Solidity/Evm/Compile.lean",
+      "sha256": "13f3c0386cabaf1bfeaaf9be8ce2fdc01eed0f6dd246a318b7b46ddbd528bbd7"
+    },
+    {
+      "path": "Solidity/Evm/Correct.lean",
+      "sha256": "301396b16ecf9c83f1e717e22db4b462dfa76463a94c845c1991c6a4cc49cc01"
+    },
+    {
+      "path": "Solidity/Evm/Examples.lean",
+      "sha256": "b147b526cac0146137a84afc12ece3c0e78ec57a6f334dbe1f9499e9dec88f31"
+    },
+    {
+      "path": "Solidity/Evm/Exp.lean",
+      "sha256": "c0b3da3a583c13563162fd5cbd74a496caca559a5a9f1c8289ed31490df8ce35"
+    },
+    {
+      "path": "Solidity/Evm/Expr.lean",
+      "sha256": "799daccd806c26875199ee165d55d5dfbe61775903a2c6ead7c2be7d6e313f55"
+    },
+    {
+      "path": "Solidity/Evm/Interpreter.lean",
+      "sha256": "8ad4375a5a625ac63bf2d64228fc20eddddc5917ea36709c3a34adcc777ff4fb"
+    },
+    {
+      "path": "Solidity/Evm/Layout.lean",
+      "sha256": "3d6bed2356ddfe24903d6d03fbe0e36d1dbb900183cbddb390cc0dffa25ecc6c"
+    },
+    {
+      "path": "Solidity/Evm/Machine.lean",
+      "sha256": "515ff9a46977611fa67b74ad3b732d58fcc2f2935ed856fdb8b542bbd3b56977"
+    },
+    {
+      "path": "Solidity/Evm/Repr.lean",
+      "sha256": "22a13f2ffc3cc82a0484fd8ba8b5d464acfc2c4189da65f13836b797e906d794"
+    },
+    {
+      "path": "Solidity/Evm/Signed.lean",
+      "sha256": "5012a6c6b28affd7c417394e2f9562c2053b74e274b541e6be6cf68622441c7a"
+    },
+    {
+      "path": "Solidity/Evm/Sim.lean",
+      "sha256": "86abd7bc15e54c87d84ec4e0c61054a834fd381f68fcafd081897572384f2113"
+    },
+    {
+      "path": "Solidity/Evm/SimLemmas.lean",
+      "sha256": "1eac88b5a76f1a4fadc5d6b5f4fd632d8c20fe9553d6f7ba4e6e98e29f43074c"
+    },
+    {
+      "path": "Solidity/Evm/Stmt.lean",
+      "sha256": "4fb1eb6a178385a133170aacef7cdcaca309f5a7a73bc572e5db61b00bb1f1fc"
+    },
+    {
+      "path": "Solidity/Evm/StorageLemmas.lean",
+      "sha256": "6594bbda38a92d75aecaa9b29608d76f3eefface950912bbb92a4ee223a3be74"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Coin.lean",
+      "sha256": "a8b859c71ef74520bbdc00f8a30848a3c8140ab5c4463e71244652af48c41d7c"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Counter.lean",
+      "sha256": "e9d53bb1533dcec3468b23f417b66cf0e0cae8100d72accfaecd30301b98684b"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/ERC20.lean",
+      "sha256": "d5c27797cee4fd327475e45e7890af94a566a9b849c6f237f3900ed62741c808"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/EtherWallet.lean",
+      "sha256": "5e2de3cc0fd2da9cd30c248d86e797a4dc85bd8a9c57cafe7ea119d561ca2452"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Mapping.lean",
+      "sha256": "412d45a9e2d9eb724c1a253dbe48e38d049944bdd66fb00f6056845855d036cc"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Purchase.lean",
+      "sha256": "4635a6b63c1c38b5dc7ffedc641248dede77aaeafbf4b0bd6d15d3cbc248f7fe"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/SimpleStorage.lean",
+      "sha256": "394d7039960b8583d42272156b95975897d48d561d99a204e9202293289578a5"
+    },
+    {
+      "path": "Solidity/Examples/Benchmark/Syntax.lean",
+      "sha256": "808d7d8df3e90dea655a6a0bcc4928d88483e295dbca53f961faefe7988d2484"
+    },
+    {
+      "path": "Solidity/Examples/ChainNotation.lean",
+      "sha256": "58673ccdf1b4e9a3d95b59b0de2fdb321861521e95eb83702b8ff1e257229c10"
+    },
+    {
+      "path": "Solidity/Examples/ChainRewrites.lean",
+      "sha256": "5c10d48a1df68a7e1740828a0b0d5607b01e1f9ad2fe6ba2cf4a41aaa3bb691c"
+    },
+    {
+      "path": "Solidity/Examples/ChainRewritesOpen.lean",
+      "sha256": "ef84990ff58e23a5844d6ecf63e601c82a81c3962ba34cce847b5a99513d0457"
+    },
+    {
+      "path": "Solidity/Examples/Chains/Arithmetic.lean",
+      "sha256": "10fabcc99594cab9a56f4d0c8fed15c19bef1733478799042aaaaf32112baa8c"
+    },
+    {
+      "path": "Solidity/Examples/Chains/CheckedArithmetic.lean",
+      "sha256": "9f4d36fbe9e8fd101f03445faebb0713d63eb5cf72eb7f1bad545407eef3dcd7"
+    },
+    {
+      "path": "Solidity/Examples/Chains/EvaluationOrder.lean",
+      "sha256": "d8268ecafa3865ec62818a925b72dd2be0b2abf206964a7403b58d7df40a8651"
+    },
+    {
+      "path": "Solidity/Examples/Chains/Memory.lean",
+      "sha256": "36ef65f028ef818c2e8aa0a358642c4f1d0dbdd93c4127ea7eaedc9cbcbd17f6"
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryArrays.lean",
+      "sha256": "e56295b1c6233085d8927c1b110bc07d10559577b5890dbbdce444d322376e17"
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryCoverage.lean",
+      "sha256": "c7cdff01a450ac816e815bc09b410a7fa2ce4a004440b55b6f42b205bb87d751"
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryDelete.lean",
+      "sha256": "cd00d1c29ed48aef666a9fb106a78f981d828e2ca8586c482e9fd1a948f93f90"
+    },
+    {
+      "path": "Solidity/Examples/Chains/MemoryToStorage.lean",
+      "sha256": "6731eceb6e8d55be4052a417f702ce56fe8c03a2121ef528b96e2b09d4656f9f"
+    },
+    {
+      "path": "Solidity/Examples/Chains/Payment.lean",
+      "sha256": "e3de3a0865c9ad4db1631ea4fe43f98693466db4eac1e357bbf44f42ed44c6f3"
+    },
+    {
+      "path": "Solidity/Examples/Chains/Storage.lean",
+      "sha256": "f46c307d99207153d84afe31246c09f3bc6fd60cacb30b0e5f97feb05eb8d458"
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageArrays.lean",
+      "sha256": "b13b72935d8dfe0e07391fc3673e77781b4d9612a1488c1cf609baf02bec32e7"
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageCoverage.lean",
+      "sha256": "852663a965dce787bd6f6527a756bf311c1dededc4781f7a0e1f591d114e5c75"
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageDelete.lean",
+      "sha256": "f1b9553fbf77c38b105705da416bd70d76a370763cb05073226041f619398a45"
+    },
+    {
+      "path": "Solidity/Examples/Chains/StorageToMemory.lean",
+      "sha256": "e2cc08daa97aa1b6ba55fbbc01d25b494cfb028ea9b45b8806517756566f80c1"
+    },
+    {
+      "path": "Solidity/Examples/ExampleNames.lean",
+      "sha256": "7bd8aa445c2daf1c26d773ea6a441447742820ac59ac728f5e16dfb24d166463"
+    },
+    {
+      "path": "Solidity/Examples/Notation.lean",
+      "sha256": "a7994d0785b5035d728c577a623efc12d2ff82c5dac8fa8cf5b7055a3a505255"
+    },
+    {
+      "path": "Solidity/Examples/ProofTree.lean",
+      "sha256": "3525fd105b106e87b50eb588586d64d3fc3df7388974041d58460ea85fee3b2e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ApplySteps.lean",
+      "sha256": "5a5af562891726907a4145d567847d8c7a0d909400ccbcce0e98e44647e1cc4a"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ArrayShapeCopy.lean",
+      "sha256": "335c9876c4f3836834a190f98c591606a5277067caaa83ebf2f8ccdfd1345ed9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Boundaries.lean",
+      "sha256": "c7cc6f50f33dffd5c334fa8df6ab0a83f9296a5f43c6d4e2912f77269a62466f"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Branch.lean",
+      "sha256": "a0a6cd9671788f8d0c34f90edfe7eabf0b49bbeb10a1ff793c4aae79fced803e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallOperands.lean",
+      "sha256": "525d9ad9f2159b4971146de784728ad94d329883a33de69dcb603085832af134"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Callback.lean",
+      "sha256": "95fd59fe9bb89834c60c2e7013264878da84b2748dc2eebcba54bda675eade46"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallbackRuns.lean",
+      "sha256": "0dbac0650996280394126ed158d82581a9fe3e70d278947347c6b50f77e06ff6"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallbackUnwk.lean",
+      "sha256": "119941d455fc219409c9f89bbe956f2440ba37468df2b5d10130aacc81345dfa"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CallbackWk.lean",
+      "sha256": "9fc29e01f5f3fa505cf4c4d3dfab94fe320908941ec628dd2af72bab353b6f0c"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Calls.lean",
+      "sha256": "8d58cc456a2fbc9a3aaa22dc2eb737e3f47fedbd24a67ab59fb9379706e8b6e6"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Chains.lean",
+      "sha256": "3ad747b554865d5b53d9202cdb6d43529605a58b44beea8e7f2675d4bb3f64f8"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Checked.lean",
+      "sha256": "1f1006f1af1fbf480a9b91b0883939b6872bf539539da7e4d181739708003305"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Constructors.lean",
+      "sha256": "6cc3171519c6eede81712491c8fa498aa469af052e7a2b8e19e1b3e260ec335b"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Contracts.lean",
+      "sha256": "af00ada9f919369eb545234a00aeca62f6781f63473bb157b52000705ec3bd33"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/CrossDomain.lean",
+      "sha256": "6a3f3396b0da3d0122550b8e2a695f8e4b2816059a050daed91bc23bbbe2a3ff"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Dangling.lean",
+      "sha256": "e9496a6c698f9df77898f749f5e301a10c7c4d4ce9b9f7a0633de6d7695fea1a"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Decide.lean",
+      "sha256": "4b3a6da0697630ba22ae7bdbc41acc6b7addea4d2d9ec95c813a0db41af62077"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/DeferredCallback.lean",
+      "sha256": "ab3e7bd8a6509eb9399e33e1156b1c8d759918dfbe2e898de6dd84716ab23d95"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/DeferredCorrespondence.lean",
+      "sha256": "f80b3caaf9ae0e349d638d8b4f513780a50136b75aed740a4c872c6aa4560620"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/DeferredSource.lean",
+      "sha256": "8942e7f8692bf4dd4c4adf56f00dc9f3a5f5932c3935d963f00f521d1b8dc198"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Derive.lean",
+      "sha256": "a8e242128ce04e10942863699bf9369efc12a50bdb6f165fe9a62fdf9a97cc4c"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/DlNotation.lean",
+      "sha256": "764efe8ef51ed0cbad15866cd875633c69b677785e341849c36f4cb00cef016a"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Inheritance.lean",
+      "sha256": "6602312b54c15b8d44b51684c92ea65a4ea690462d7a8e08fc06174b54b66de9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Latex.lean",
+      "sha256": "9dfdee0229c596419a9808dd0637237dcc90603cf2dec80ceed447c185f4d1ed"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/LedgerDelete.lean",
+      "sha256": "b7eabc1615ea61332b81dc21d2733eb287d8dc04001390c956ac0f8ddd57a090"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Loops.lean",
+      "sha256": "e2cf80a57bfeff75bf0ecb922836d3b62e76d4e809682bb66a910b37d193509e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/LoopsImport.lean",
+      "sha256": "e68fdb8954e6c25c29be122efdb84b939458fa7edc2ab8a80bf8c914cee7b1a6"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Memory.lean",
+      "sha256": "ec5b2b3272dd2278514eb8fb42f3fb1a6b989128ba895ae5f4425f6fa3555b69"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/MemoryPush.lean",
+      "sha256": "82b9bc39832617ef77cdf5a9089b9d28805f050b4961d6ab1391fc8086a9f41c"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ModularArithmetic.lean",
+      "sha256": "00acd8594834fa8fdd4bbc336757b685adecfe52f5712668003a87cc6df1a679"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/NativeDeferred.lean",
+      "sha256": "bf21d45532a5c7ae5d9b8de9c824d5770ad996e0fa39e875f4106f581b4c446e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/NativeDeferredCallback.lean",
+      "sha256": "2ba7f816dd7eeaae6d8933497983f6d36d51e7f0e7530188c7ce7cd9ef273fce"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/NativeDeferredSource.lean",
+      "sha256": "5a0c51e1b34db5453da92a7d7d5ae75953b3443eacded2d032dce040b0315e4b"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Net.lean",
+      "sha256": "e33b16321d1134e015df409344e4f2e4ccaf012fca2f3b00d8811cc1b2704520"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/NewArrays.lean",
+      "sha256": "ff47920c9d3a798c2710acbd1557d81dd91db057036dbcab070c6a911098d222"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Notation.lean",
+      "sha256": "72a76978257882e7a1c137ec84db3acddf32176a6167dbe8293972fc3412272e"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Operators.lean",
+      "sha256": "2c0cc72442221b51d595d1c987c6cf7013649934d4437f1115aaa6ed69375116"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Payment.lean",
+      "sha256": "f78ec3c4214046b384b8f37d997e8bb548ce315b91827d578c3bbf96b6e0d523"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Print.lean",
+      "sha256": "2129eca206809cde8f830cc4c95a9a9259a889c878c95b60d734a650b8d0df5b"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ProofTree.lean",
+      "sha256": "74d13d8f4caf6bc25cdba8da061e6f74609a3ae70879b1d59c395a1207587088"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushReceiver.lean",
+      "sha256": "16259e218d8cfea071f1a223a6b1fadded0d8db808d54bcb4afe4d8219fbf731"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushSource.lean",
+      "sha256": "1893e6e5df26658af6809240af8a248f649538bb0a42973eff04c7618a9102ba"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushSuffixGuards.lean",
+      "sha256": "bb0b972caa2d9dc2ddb9fd673c00a45b2d53834f26ce68cb213b862ad690303d"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushSuffixRules.lean",
+      "sha256": "5ee28b66ce3ecbc768cc020f9859f03f4606773dfd96d8b3ba6000da381258d4"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushSuffixRun.lean",
+      "sha256": "ecf9d0a0b31835e79244f89967665cef242a13fcc74a5d2418552a5b0baf7fbd"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/PushSuffixSource.lean",
+      "sha256": "57e5d5302c531045a54949aeddcfc9529e13fd0fec8336d9af3dcf8962b22157"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/ReferenceParameters.lean",
+      "sha256": "3e24f90ffb9ebc547431e4e79e55842b57e7250989c22ec1db6cc4f58139e152"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Revert.lean",
+      "sha256": "ff67af2f91d103f1f4c23b5b071df69c7d62a5da65024405ff6dde6be1b306bb"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Rules.lean",
+      "sha256": "0ef93825e3cb7988f897b4c94645c4562c6dc841e93cf963ecb9aab21d1b4b59"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/SelectOnSaveConsr.lean",
+      "sha256": "a34ac86321d1d1aa89ce5b82e6fcc96208fd803ba30510087dae2f4c8248db88"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Sequents.lean",
+      "sha256": "1da5737bbff548f23cbe06eb02aabd8cb8063af649b4db2ef139fd17f64355ec"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/SolSpec.lean",
+      "sha256": "fb4ab1e5a055f38198867127013ae05a7ca41c5054f7be3689b98b4245e65b3b"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Spec.lean",
+      "sha256": "2d8eb9258b24aa1f73c5011b8cdd4f5d2b3b633448561e7fa5f5bab4d00312c5"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Specs.lean",
+      "sha256": "f641a8233dc2eb982a1dfbcf97c698b59c383bbb69f0a5949d40d71a221db698"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Step.lean",
+      "sha256": "bfa3bfe6dcdb3a45192d08db47b29bfeb72793969e5b2850991b5b89c2be6bc2"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/StorageDelete.lean",
+      "sha256": "33c787ef09aa351deb404429c834b5775c847d7a3d1fa510a187c70435343ba9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/StorageReturns.lean",
+      "sha256": "fcc16edced0bb75bf3e42ecf796f7ca8d5f55fa15230a18cc49a3c174df11c65"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/StorageSteps.lean",
+      "sha256": "6a45388e9d5a64e7a7c439f78460c56f74bcb4ee12362f30a86e00146b36c1dc"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/StorageSuite.lean",
+      "sha256": "823226867dca70c4c1c3aa49aa3dae5bc7785ae6116a077460293a0882323db2"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Surface.lean",
+      "sha256": "554a834e7fd734915d54b3677687f5390bcaa18bad4f00e3d62ea1d18dc600b6"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Symex.lean",
+      "sha256": "75fffe6ccec63513db28a3d99d35c2e0c65d8d820b8792fe9747eccaac7e4f0d"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TermTaclets.lean",
+      "sha256": "633acbc2c796680148e5b30d70b0f30e3623736332fb687d2bd21fb18e4d5ca9"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Theory.lean",
+      "sha256": "c457b9e8ea1bb0421513df84a42017936615febf5f549147ef5ffb8969945f12"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Tour.lean",
+      "sha256": "ca34922f66d8fd52fa274ecad3f081d80753a29e5afebd9db7e0e4b2cc16ef1a"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/TryCatch.lean",
+      "sha256": "9bd276296d64af495342f4a64e05116f9719a4c08d5fd73173892df5b9a25cdc"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/UpdRulesScoped.lean",
+      "sha256": "482176b82dd1d84d3845e24bc216cccb3671e0ece8fb6930054cf697fbe69e28"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/UpdateRules.lean",
+      "sha256": "0ea8b670ee704009b8680e8393868fdbac87014a8bf6e18e3603a3e26c9311a2"
+    },
+    {
+      "path": "Solidity/Examples/Tactics/Values.lean",
+      "sha256": "157138cbca4f35791f0f7e5bf3d12b20efb5c8b5a0f242bb5c596db28007317b"
+    },
+    {
+      "path": "Solidity/Examples/Tools.lean",
+      "sha256": "329a302fd2df8dab42426f129690e2f7c7cd80a58d8c382dac90ccb538f38e31"
+    },
+    {
+      "path": "Solidity/Examples/Verify.lean",
+      "sha256": "1ed6decb3cc1e92f4543f3c70338bf00a4504eae149b4059a0e05de72bf80927"
+    },
+    {
+      "path": "Solidity/FreshNames.lean",
+      "sha256": "b3f1db193f5b9d52fc8c27fda5ae6915e7602a5baa74ef8cfbe48ef01e82ab5f"
+    },
+    {
+      "path": "Solidity/Frontend/Import.lean",
+      "sha256": "c8a26706969fbcd4da5573b1c9092832a65f5bad8818dbf7881e8a88cdf22998"
+    },
+    {
+      "path": "Solidity/Frontend/Problems.lean",
+      "sha256": "f95fddbc24b97f41867714ac8336dd04b56303ac70770dc93a0bb316e07b51d2"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson.lean",
+      "sha256": "0b9846428e6a9837b74417316fad7fb653bad2d87229dac079c8e1036f8b10b6"
+    },
+    {
+      "path": "Solidity/Frontend/Testing.lean",
+      "sha256": "7d7ae2169ae5adb8564cc660b33627689ddc638126191593720339b2a3ca2761"
+    },
+    {
+      "path": "Solidity/KeySort.lean",
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    {
+      "path": "Solidity/Scope.lean",
+      "sha256": "13f5faeb88cb2bb0fafcc2ed9649110a5a91e45094123dd89a64ce0f722a7149"
+    },
+    {
+      "path": "Solidity/Semantics.lean",
+      "sha256": "a5ba278b0f0b66aef21fe7f3b81c753360d0d9331b7f4ddad631a543cc8969bc"
+    },
+    {
+      "path": "Solidity/Semantics/Callback.lean",
+      "sha256": "fa839f6c5a71e86462d3e0cd50bb28611e2015916b3a171668d62206aa1ad8e4"
+    },
+    {
+      "path": "Solidity/Semantics/CallbackUnwk.lean",
+      "sha256": "998cfda0abaeb2e9e69133694e766161d5739b455adeddc0d351d5b83d77c5dd"
+    },
+    {
+      "path": "Solidity/Semantics/CallbackWk.lean",
+      "sha256": "e85ae75d51bd670c6fb6d983649c4b9b7053cfa2de222c09927c122d32f8f6e6"
+    },
+    {
+      "path": "Solidity/Semantics/DeferredCallback.lean",
+      "sha256": "887cf0bdc126fa5820779a651062d17ac5635633f214616536c7d4d8055b30af"
+    },
+    {
+      "path": "Solidity/Semantics/DeferredCorrespondence.lean",
+      "sha256": "ef1aacb0a4b8216a40891cd3b483dad3fec9250d8542d70ebef40a1ddefcac54"
+    },
+    {
+      "path": "Solidity/Semantics/DeferredSource.lean",
+      "sha256": "992e78ee70191e7f110d1cd1759584dcefcd9868a963ba25027ce4e74ceb0fa6"
+    },
+    {
+      "path": "Solidity/Semantics/Deploy.lean",
+      "sha256": "31c6a5b2c0cfd15399294df77365ff615b1a7d8e29ea9ee41f0bab9d616ebb88"
+    },
+    {
+      "path": "Solidity/Semantics/Ends.lean",
+      "sha256": "2a20db70b3fc22cc6e8190f1821df7232b31c6e584dec9175cff02483d7450db"
+    },
+    {
+      "path": "Solidity/Semantics/Heap.lean",
+      "sha256": "17d2b85de48d03e16a1af165a3eecb59afa9213262ded7b5c7930953d0257d26"
+    },
+    {
+      "path": "Solidity/Semantics/NativeDeferred.lean",
+      "sha256": "d1907240b5a8dc311462904f8b09129f31f8bb311f31c83a65d69696f4cc7e81"
+    },
+    {
+      "path": "Solidity/Semantics/NativeDeferredCallback.lean",
+      "sha256": "5152f88e997d7c0fe9424741ae1d9146e5227ec10f21ccaa4d354fba4e74d1b9"
+    },
+    {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "sha256": "f8a4fb348fa839384b1179dc5a3c5af0d9d03e672f69a4255e183094bfd8da8f"
+    },
+    {
+      "path": "Solidity/Semantics/Ops.lean",
+      "sha256": "02ff9cd8c9b9c41d7529035b56d285ff5d463d0f013efdc41300d008f33a93a4"
+    },
+    {
+      "path": "Solidity/Semantics/RevertOnly.lean",
+      "sha256": "733f90cfb2495f7158975acbe60641196c38eb6461bbefaa9ec7b6a7cbed162c"
+    },
+    {
+      "path": "Solidity/Semantics/Run.lean",
+      "sha256": "4c891c541040eb974581d981281b5f3967182c026f6efdaeae05d889c1f04af2"
+    },
+    {
+      "path": "Solidity/Semantics/RunFrame.lean",
+      "sha256": "32118d422f170451480f69526d0748bf13251971ac7c4fec1e442f43000a06b3"
+    },
+    {
+      "path": "Solidity/Semantics/RunFuel.lean",
+      "sha256": "fdbfab459bb502f9fc264cfdb0964593fd2eb81bd01c74b7e83f8c7510d76b34"
+    },
+    {
+      "path": "Solidity/Semantics/RunWk.lean",
+      "sha256": "278ff87528f4a1d907273217decd81f3f2129076c19f07258db958c406df207c"
+    },
+    {
+      "path": "Solidity/Semantics/State.lean",
+      "sha256": "7c47f24a18cf9ef3015700be135d9850f33733693a77b00a8c9ba77891d4b924"
+    },
+    {
+      "path": "Solidity/Semantics/Storage.lean",
+      "sha256": "ce82c2a5ff90a46e4397a17516ffecf083d5e5985e6ab61a115db4eb42ca88a2"
+    },
+    {
+      "path": "Solidity/Semantics/StorageWt.lean",
+      "sha256": "c2840360b0e832959cc22a4628930b048e5e54ac39691796893664e68f1014df"
+    },
+    {
+      "path": "Solidity/Semantics/Value.lean",
+      "sha256": "146238b8eeaa6c242af058ad2f82a685fa006bbc556551b2d277034f78aea301"
+    },
+    {
+      "path": "Solidity/Signature.lean",
+      "sha256": "b6221d16ef0f152fa878d3a41d9efca3623b88a3c37f68a57958869ab8b3734e"
+    },
+    {
+      "path": "Solidity/Solkey/Constructors.lean",
+      "sha256": "ca277b271645729bf799e1466a62d5bbd61ac37b12fd75ac021a445fd90e167d"
+    },
+    {
+      "path": "Solidity/Solkey/ScopedFlip.lean",
+      "sha256": "79e1da1652a0321b6db6eb5054fdc703c0230323b817191cdbf68260c8e51aa3"
+    },
+    {
+      "path": "Solidity/Solkey/TestSuite.lean",
+      "sha256": "3d0106235a7169e0154fd5ec0b4c7cb0f44e5f8a08a5cdead1f6d67bac311071"
+    },
+    {
+      "path": "Solidity/SortCheck/Annotations.lean",
+      "sha256": "3196bb027abc443855b9b3f9e885e817930e2c57da2202ca8097eef5e5c7a91b"
+    },
+    {
+      "path": "Solidity/SortCheck/Faithfulness.lean",
+      "sha256": "b006ff2d3243ae5b6a2510a1eae5e1e1d8459ba254ff16a89151054b4b67ea8b"
+    },
+    {
+      "path": "Solidity/SortCheck/Parser.lean",
+      "sha256": "27d6f31a0929d7195febccd1356ed84160a330b57440b90a3cfe6486b62cfd8a"
+    },
+    {
+      "path": "Solidity/SpecSyntax.lean",
+      "sha256": "e44867d87aa0c427e4c4abb25467f31de07d72bd09fd4bba801bca4c8276955b"
+    },
+    {
+      "path": "Solidity/Syntax.lean",
+      "sha256": "66edd30adeef9bd0be72235e079ed9f6999dbc5eda3de4878f489de96e1a857f"
+    },
+    {
+      "path": "Solidity/Syntax/Elab.lean",
+      "sha256": "cda5701363a4fcfbbe0f3a8300a36e7208f3d2fbec21d3e9a1a1e2a133c0c078"
+    },
+    {
+      "path": "Solidity/Syntax/Inlined.lean",
+      "sha256": "036fb220fea414b9578e3e63795a5bcd49576859284f026070945a258ae4c37b"
+    },
+    {
+      "path": "Solidity/Syntax/PushSource.lean",
+      "sha256": "46d2a4ce1c0451941759f1dbd80c6a75ad4c8b57ea05e0a87a8d8b1848f00a5e"
+    },
+    {
+      "path": "Solidity/Syntax/Quote.lean",
+      "sha256": "f3a7ea6f7fffac0cbf90c1e3dff4adb65b06be61527e95ac1372ba0d2500d202"
+    },
+    {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "sha256": "fae66de0821db79e390e3d33559feedef6854f87083eb2eade1001de1b1fb312"
+    },
+    {
+      "path": "Solidity/Syntax/Splice.lean",
+      "sha256": "ad0d4784034f1609e94fa1024e0152a322e7160c3937688aceb04f2cbddec6e1"
+    },
+    {
+      "path": "Solidity/TermSimp.lean",
+      "sha256": "64853314877ed833c6ac7ebc53957fa8467c2986288d28ce734230ff3d8f7578"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived1.lean",
+      "sha256": "ad4f5330de2877260102a31be65312df71c1b83d1a88eed5109ee0dd246d124e"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived10.lean",
+      "sha256": "788dcf27f88d9a4f384c7fe11f8df8959d1f95858d33cb7f435a9f45ef0c8201"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived11.lean",
+      "sha256": "ef10829a3422117c157fd991f3caeb2b4fcbe0d784f78644322e7f4cb59cedb2"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived12.lean",
+      "sha256": "901c586c73cc40e915f5794bd34490e37df5bedc7adb461bf929797c4c07fc28"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived13.lean",
+      "sha256": "5afe67f429d5e503101cd14045d4be8c173bf6b15440d27bae15827f81eda476"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived14.lean",
+      "sha256": "a9cae920f9d06feb4c99535ebcc7d7e7d9b1a004b5b2cc37d0fb611bfcd55989"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived15.lean",
+      "sha256": "9b2eddbb5f3637918b3cf187bc5947c4ebc0dcf6672a0a7fe519a1b92e779eec"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived16.lean",
+      "sha256": "552ad1d97e3d28b13bced0cd01a95ae267108317a1de4344369544e7837dbdd7"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived17.lean",
+      "sha256": "5ddbd7922a3d418fde5e46ae6ff48951e03c55eb4f6482e5701b9b840e592c54"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived18.lean",
+      "sha256": "50556583b828cc23b9a2af72e54aabeec8c98ca568e296375e30fc4c71db28b0"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived2.lean",
+      "sha256": "85e25d8b816243408ea1704c90f42bca35d903a5c1a17748e20989c4f7225910"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived3.lean",
+      "sha256": "3a9baecd3ecf98af77142313aba7753bf3f9de4be0cc92019d420962baf264eb"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived4.lean",
+      "sha256": "6083debc80cdf21d890b43375bbf4478b7820fa075543f84919a827bc2289609"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived5.lean",
+      "sha256": "69a34cee06af650ee0a3c428986746904b794afb868d34cfa5a8a3af8643f219"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived6.lean",
+      "sha256": "bc8281caa6bba40a48d055e8b093efad7da146d0e4a45cb43e8a161a3ca9fe76"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived7.lean",
+      "sha256": "16bea00807d08bc890a7d5ba23f5b29bd13a37cd3b6cecf892d8a128f168a068"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived8.lean",
+      "sha256": "5f7970432be405677212549efba1b59c92dfc9c8e0c974b75ac25cc55f77283f"
+    },
+    {
+      "path": "Solidity/TestSuite/Derived9.lean",
+      "sha256": "ae40da97fa92850e4c052e7ff6e59868dce45780fc9f957805d8e675a9944f0f"
+    },
+    {
+      "path": "Solidity/TestSuite/Problems.lean",
+      "sha256": "91af95c8893cfd90e5f049318f23f062b9c94262b7aa82b546571aa7941f3366"
+    },
+    {
+      "path": "Solidity/TestSuite/Report.lean",
+      "sha256": "fd83eec14ce6cff7a2b5f17eda7efd2f0b5e1494056e2936c28096da4e2e534c"
+    },
+    {
+      "path": "Solidity/TestSuite/ScopedProblems.lean",
+      "sha256": "cfd4593eb852b3607c4a85f5c778debda6712f4594a73270fac75fbc23b4eee7"
+    },
+    {
+      "path": "Solidity/TestSuite/Suggestions.lean",
+      "sha256": "a26d7d85ba2abb537cb9141b9ff385059ad71d34c65c6ca1fdf1b5057b576272"
+    },
+    {
+      "path": "Solidity/Theorems.lean",
+      "sha256": "29f853be1375f6d7df5affb3339252e3b3d5198364d938be2a0ac8001ff29f97"
+    },
+    {
+      "path": "Solidity/Theory/Bridge/Denote.lean",
+      "sha256": "4df6a49bbe6427fe6a03e8f2ed3e2e116d8bbb8a19b74d05b66029b8151eaa42"
+    },
+    {
+      "path": "Solidity/Theory/Segs.lean",
+      "sha256": "57e4a32ca89346c6e840f90866f0cdfd8fc2765cb268e09f693e267a5cb0b673"
+    },
+    {
+      "path": "Solidity/Theory/Typed/Mem.lean",
+      "sha256": "0a85c63a716147a0a02dca0de0009a267e364a12c34864bf38c9faad381b079b"
+    },
+    {
+      "path": "Solidity/Theory/Typed/Obs.lean",
+      "sha256": "bf8240d4dd0b856077f3c2566893f2723341bfa52fd2473b085f129ab1d7618d"
+    },
+    {
+      "path": "Solidity/Tools/Common.lean",
+      "sha256": "3835ece5d6a1590af118bfdd9269389fc575a99162766af472d9fc91c2951b17"
+    },
+    {
+      "path": "Solidity/Tools/Counterexample.lean",
+      "sha256": "124d96d1118548d3e12ee222add46a3c81ef2d956e66c5a9106000ecfbf64bda"
+    },
+    {
+      "path": "Solidity/Tools/DiffTest.lean",
+      "sha256": "a440ccf2903fbb8bfcd2182dc1cbe5bc7b993526060a6f1ee2aca7815b0a82d9"
+    },
+    {
+      "path": "Solidity/Tools/Inspect.lean",
+      "sha256": "6e7d54bc2bfa978bd14bcbe4dd0078724a24af56f9cd449a05bb2ea85a0f0cdb"
+    },
+    {
+      "path": "Solidity/Tools/Latex.lean",
+      "sha256": "7b23a87d2c49b088d2c46f98aa7c2f148bed11dea11796bc569516ece1e27106"
+    },
+    {
+      "path": "Solidity/Tools/LatexSolkey.lean",
+      "sha256": "aa35eb9c050d85e7705467a334f75b9628e33fe83f2dbce1f825cf7594ba4412"
+    },
+    {
+      "path": "Solidity/Tools/ProofTree.lean",
+      "sha256": "45b841c8898a60af052481906234b59f5c931b3794a3eb4d95b5844d86518c07"
+    },
+    {
+      "path": "Solidity/Tools/Run.lean",
+      "sha256": "dc25295d9c8a075f5ad4c34dd7365cecdcfb5ba01c63d3a1d6b93cca52c94d89"
+    },
+    {
+      "path": "Solidity/Tools/Show.lean",
+      "sha256": "dda21af6354fa2c5aeb0fb39277a095b88d598e8aa98e0f91f97c40cfd787a17"
+    },
+    {
+      "path": "Solidity/Tools/Taclet.lean",
+      "sha256": "24810dcbbbe009d76f04d5ba0711c6b69ff64bd01c4cf925469992bce519e41c"
+    },
+    {
+      "path": "Solidity/Tools/Verify.lean",
+      "sha256": "1f869ce8c57bc6c8a94fec083f1bbc493a001ccff4e7c6f47a67492a408fa75a"
+    },
+    {
+      "path": "Solidity/Typing/CanonTest.lean",
+      "sha256": "b46a465faefeda22342626d29e00abd6271f889b151384702ac5ca50487cd346"
+    },
+    {
+      "path": "Solidity/Typing/Constructibility.lean",
+      "sha256": "a70e0376d71e457f58c477c172226f16ba3bf129812c321a4ba2a84154e9d3b6"
+    },
+    {
+      "path": "Solidity/Typing/Fits.lean",
+      "sha256": "077bb72e812053667f559a0b271c052f0f7f00f2fb1db1a2776929c8c89fba71"
+    },
+    {
+      "path": "Solidity/Typing/HeredRun.lean",
+      "sha256": "8a15f13fd9eca2d21b55ead3458e31c16c41a5bfe7f024960489c6f5ce065b3e"
+    },
+    {
+      "path": "Solidity/Typing/Reachability.lean",
+      "sha256": "2004789b49a1b9e054fccd84bfb4bf44e941c9fb279db53597341bc58c224fc2"
+    },
+    {
+      "path": "Solidity/Typing/Sorts.lean",
+      "sha256": "42491f1a21d579ca6a535a6df997a0f204938bb536ed171761b6f6de0b858d0a"
+    },
+    {
+      "path": "Solidity/Typing/Soundness.lean",
+      "sha256": "a4aafcddf6e0aedb60a371a8ef0c926268f7aa1fcb4e3ee2f4d3d0aae847434d"
+    },
+    {
+      "path": "Solidity/Typing/Tight.lean",
+      "sha256": "63bb058798ba527cb8a29b81a772cdebcd8302f820d0c1856eb7e6718af23fed"
+    },
+    {
+      "path": "Solidity/Typing/TypedRunInv.lean",
+      "sha256": "82a732ebe8105797eaad845faa2c5c15826e7b708289c31c97f09b952deac676"
+    },
+    {
+      "path": "Solidity/Typing/Values.lean",
+      "sha256": "da5260faf9981ec93e39c9c58e44d1e47ab3e9b9ba2e48f8e51c2da7feee41db"
+    },
+    {
+      "path": "Solidity/Update.lean",
+      "sha256": "5673b36438f31df74444acc85b823a8353c3a2dec6dc037170177e47331707b1"
+    },
+    {
+      "path": "SolidityCorpus.lean",
+      "sha256": "e05533b97b3fb54ba6d8800ba457419a5ac103e4d5d0621b30a8f15d64ad8266"
+    },
+    {
+      "path": "SolkeyCheck.lean",
+      "sha256": "2952e9b1e807360d0565ac0c2670aebcea06a36ffa9aff0243edd8ca3cef6062"
+    },
+    {
+      "path": "SolkeyTestSuite.lean",
+      "sha256": "6a0120717f28e7782cd6cd763fceacd2ec071f204d3e3e4632fc699422eb7df5"
+    },
+    {
+      "path": "cloud.sh",
+      "sha256": "fa28903058aad283a867db85031b0d778b6d4a6077462ff7223d0788a825312b"
+    },
+    {
+      "path": "lakefile.toml",
+      "sha256": "422c52547ba0bc826815c4eabd25fa164708487762cdf86dc97b82e6e4718f35"
+    },
+    {
+      "path": "lean-toolchain",
+      "sha256": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434"
+    },
+    {
+      "path": "run-lean.sh",
+      "sha256": "4152bba96ad954bc787f4e5a9de50dd037c6df5f8634b9af8651a1fddf2383ce"
+    },
+    {
+      "path": "scripts/check-corpus.sh",
+      "sha256": "bb73ac9098d24369822b3d151d1cac3511c34644f093ae7b03b4616e33c7391f"
+    },
+    {
+      "path": "scripts/check-doc-paths.sh",
+      "sha256": "371f08b5e99afa191d17b089115b3a57fc1d5c7cb913749d8be4e21531183597"
+    },
+    {
+      "path": "scripts/check-orphans.mjs",
+      "sha256": "647092893ad5f01bd1ecbf1ea51a508d522822264f23e45a93b8d4c7fff76949"
+    },
+    {
+      "path": "scripts/check-rule-text.sh",
+      "sha256": "e871dad64da62499673d92b2cc4dd7d2fe20ff1a9a3c09521c2b35ca25fb584f"
+    },
+    {
+      "path": "scripts/check-solc-ast.sh",
+      "sha256": "3ff4fc3ac0cb474eb483c0330828b8dba1c82199078a8634c4b4f8466b8e25d6"
+    },
+    {
+      "path": "scripts/check-solkey.sh",
+      "sha256": "473b43c8c2845a4329fcad37d6fc5298f3a8986b882d6876f2528e2604d01261"
+    },
+    {
+      "path": "scripts/check-testsuite.sh",
+      "sha256": "0ac13c726dc17b9f8bc5030ca76116a0cc93513f05cc484f6ab9d70da0d6c58b"
+    },
+    {
+      "path": "scripts/latex-sol.sh",
+      "sha256": "57701820211388d995ca88aec11c6f1fe3eeacb94f70c187ec1eb01cca4bbc58"
+    },
+    {
+      "path": "scripts/run-lean-mcp.sh",
+      "sha256": "57a2361d3b3e1771f0a2cb95eb5908251fced0bdd7184dd8abd44c19bdd36b2c"
+    },
+    {
+      "path": "scripts/solc-ast.mjs",
+      "sha256": "f9dc2ad6c5d351f74a3c6b3ee7a1238c0779a3b389fc929712ca87bdea7fb48c"
+    },
+    {
+      "path": "scripts/solkey-migration.mjs",
+      "sha256": "3c1ddb125113b5217679f752e340c182dca9e1b68eed00cadbf922d137fad2e3"
+    },
+    {
+      "path": "scripts/solkey-migration.test.mjs",
+      "sha256": "b1a8914d936bb23ac55dfa578b860e891f5976085ff20a8bfa3c240b8a79c751"
+    },
+    {
+      "path": "scripts/solkey-port.mjs",
+      "sha256": "78442890ff4ec70daa3a25ebe4c4109caa2413e8f320691577ed9bae34ddb0ac"
+    },
+    {
+      "path": "scripts/test-solidity.mjs",
+      "sha256": "b20cf1e81f9e65d0a48133bab86036c3a88d453f3a947afb10f8d476b6e73571"
+    },
+    {
+      "path": "scripts/test-solidity.test.mjs",
+      "sha256": "a47202bd8ed96318be6dccef98bb64937402ce3a69649930e00202dd48061e31"
+    },
+    {
+      "path": "tests/migration/solkey.pin.json",
+      "sha256": "bcd9f9dde2af9e3b3be96fa26804b3e325216c3535ececb0e2e151723c43eaaf"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.core/src/test/resources/org/key_project/solidity/examples/FieldBox.sol",
+      "sha256": "9c1d9f88d8be535f9ae84fbd9a8a49536fb25eb77653a14f410e9101c4e08536"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/TestSuite.sol",
+      "sha256": "8ef8758ec2d014463f2479152916a04beecf517e29f80b49f9e28eeabd03f212"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/AccessRestriction.sol",
+      "sha256": "3cc0b3c58bd3f49e41c0095a14a81d26a2c40993ee34a06e86e07d0ec0eec050"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/Coin.sol",
+      "sha256": "372050e21ca490640f81f7ee9cbbc67747f7fbd40a76594571d70f1334ab1cba"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/Counter.sol",
+      "sha256": "80b8b71dbe0881bf62f298dc19d6e8e77473e0b56d55c55b0b9208a537349147"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/ERC20.sol",
+      "sha256": "6d4f4e73e9a1b7bddf76fa017176955277516945eb0b763c0b3ecec0ac933318"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/EtherWallet.sol",
+      "sha256": "9c7ec49fed9f6f2ecb4aab221200dff797d87c78b78982075f9d21ad6171b6bd"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/Fund.sol",
+      "sha256": "3bc430aabf58c1da70e93baed4fccefb4c64a9034d7885927a0ed8ff72821fe1"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/Mapping.sol",
+      "sha256": "50e44af9167e83a199b1911f5bd44e786367e7815d4b9f0b815243304fb008c8"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/Purchase.sol",
+      "sha256": "962e67a0c3fe245a35b494e7c8c36cfa9e7c2d37256e3ce0cf6ea322ed4765ae"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/SendContract.sol",
+      "sha256": "4b37b74d19223346d3bd35124d99a579cab64dfa2215ebfa8a24ee94fe55add9"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/SendingEther.sol",
+      "sha256": "e39e439c071148931f13e3e2e03017be917f29686ded942097f5a3780a2462c0"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/SimpleAuction.sol",
+      "sha256": "69c3af12177e8f214806080033892c61f553476680899c775559f4551ecf0d87"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/SimpleStorage.sol",
+      "sha256": "44281a448a6c5e9e698a88bab2ef5add4abccc4b0cd1e810fc2b30dc8b3404ad"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/Todos.sol",
+      "sha256": "78a0a160e93958213cc3ef05e2cd6926dbaebd08532e060987307c781aa26d45"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/benchmark/WithdrawalContract.sol",
+      "sha256": "1ee9b63b12d66bb605002543e62642d1c64798083649ec2985cb5444ae1de121"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayCopyShapes.sol",
+      "sha256": "00851b16c662a2577762e7b8bd5281e3afc53a8a8456c22fdbf7c9dd3cce2ec2"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayCubeDFD.sol",
+      "sha256": "d9b253878f8fc4cabb707f374abbf3b854d2e465bc118153ef5e208e1fe63ca1"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayCubeDFDMemory.sol",
+      "sha256": "4b4dee0c8d839455ca7adbce9ca08a06d50b0d582701968b41dff46b0b4ebca4"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayCubeFDF.sol",
+      "sha256": "21812cfcd77e78806d4fb9b6b9430bf4b51a084afd65c2efeaa7c42fa75adce8"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayMappingShapes.sol",
+      "sha256": "cf552d6d671df837fbd45bb4a5f65574b5973628dfced5800d493675a8bf4d59"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayMatrixConversions.sol",
+      "sha256": "bca0b71ded3de8f52b038df5bb05e815b199fead8549a5bfe9a8314d55a71669"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayMatrixDD.sol",
+      "sha256": "92ffbd299a66fba6e4632b335424987cf0b1f780e9e5f79d1699d81fe24ae9f9"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayMatrixDF.sol",
+      "sha256": "d3962da5040d3856b7ba5f8e52134ce7808158814674bee74a2fd8faad26f794"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayMatrixFD.sol",
+      "sha256": "f646698b32b9bf61e673c3abf1b9481bcc849bd573995398e50de1da715cf987"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/ArrayMatrixFF.sol",
+      "sha256": "4a0ef2d5b587fcfb07e1afd882296b5508266cc522b6c47a98597e64306f013c"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/Counter.sol",
+      "sha256": "e00a85a99c50520749c74d0cc8f524d610ea31e4bc04a8e165ecb0473ede5b80"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/Escrow.sol",
+      "sha256": "9a4614087a4fb5f8f5555e273066d5e00de84215a0e42f6b3949f5dadd344914"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/FixedLengths.sol",
+      "sha256": "8574473f929f44f04726f4e60a23bbf82874f6ff762f11bbea5dd77a779a14ec"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/MultiAuction.sol",
+      "sha256": "964c6f319eb176411ae53bcab61a7c3c4f0dafdf440cc792b3ea2f751be508ee"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/PiggyBank.sol",
+      "sha256": "7541d8607f58d749c8e617460ff4dc0b394ccb271f31a8167b1b5617907d993a"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/contracts/Storage.sol",
+      "sha256": "0fa88de893d35c185e1c13679845d32d50b2da0bdc6fd315bdbdf8fc45ee2c3f"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingAssignedWhole.sol",
+      "sha256": "db417a8f44c79027e2638a3c932d0c3269d331aeb30ceb86ae85c270d0a7f8ad"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingDeletedWhole.sol",
+      "sha256": "2f080f0d8d576ba1e74c7eb2192cb84c55f239aac3c527d4834f7bbeffe53409"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingInMemory.sol",
+      "sha256": "112635c71c09fe305e0c86155b26c191bf4ec2928ac015b1dd2b0da7640d8a55"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingKeyArray.sol",
+      "sha256": "6c341a92e1846a1b801a12aca5f165d8ed9350b39ac3e699424348b37bc360c3"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingKeyStruct.sol",
+      "sha256": "ee83bb45659649004c9449abe923b105889825218c9f0c8db01dc20489f18d13"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingParameter.sol",
+      "sha256": "23c484bee594d79f4382e26f906dcd369c0717c278d0b06273b880660824d6d6"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MappingReturn.sol",
+      "sha256": "7faae10eec51d6240c5b1c1350c0007206ff696ae780d47e49f848c9d2e50b41"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/MemoryArrayOfStructsWithMapping.sol",
+      "sha256": "6ff7fbd186201bcf1803dc23ce64a6d7a1f7df49c16025b9d3ce78aaf89ebd2d"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/NestedArrayCalldataToStorage.sol",
+      "sha256": "34dc973cfc3f75aa205a6a60b37f99c868a1ea6187b205ed25d8bfe0eafa2d8b"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/NestedMappingRowAssigned.sol",
+      "sha256": "1139591bd92d79862f48de86a34e58f1d76977774cb330e2b3dd4da2c13a85ae"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/StructWithMappingArrayElementAssigned.sol",
+      "sha256": "e57f14bfd225f153fb9dfbcf36e89b862247325cf3d88c821e0781cc95575c11"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/StructWithMappingAssigned.sol",
+      "sha256": "b1e302f35bd448ac8a176808a3cf1a17bc213603af9965ec86a33a51af9602a5"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/StructWithMappingToMemory.sol",
+      "sha256": "a1ae0a7685e7401e94bfc57750a80aa6b4155c3f708c5f9e2dd19bdcdb6bd76a"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/illegal/nocompile/UninitializedMappingPointer.sol",
+      "sha256": "06df5edfe69f41df8a218efa57a4829d1f6b227ac61906f9bf993876e035ad3d"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/net/AuctionNet.sol",
+      "sha256": "f15f0195e746e26c48e8e27e3e8ace37f96595b4b6640690cbdb38805d856bea"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/net/AuctionWithdrawNet.sol",
+      "sha256": "b5d31b6c9e9e8ea51148971ba00fa51108441819a8995d5acc0f9d2a74c01e90"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/net/CasinoNet.sol",
+      "sha256": "9ad0d4c98d7c2a1dab123dbe30b33955d822d36352b18f14232e35792178dd54"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/net/EscrowNet.sol",
+      "sha256": "b9033914da7b1252bb81e1585ec29054b6efce052e73cff27b3a51bd60413e96"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/net/PiggyBankNet.sol",
+      "sha256": "3bb2d4e12ddeea1dd77e3e3b17e828eaf1cefba4161bb7abda799223fc9fd7bb"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/Account.sol",
+      "sha256": "1bbbf32691c9f21d9d7da54f58f8af28ca1d036dcde12b857975e806a285daba"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/ArrayRemoveByShifting.sol",
+      "sha256": "30423e721a6cf8269692639f018172121138816f718650c345e967dd73da2af2"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/ArrayReplaceFromEnd.sol",
+      "sha256": "08630ae04977bb23ff3123748aaebc2ae563f64f20440d99fbbc3adb777d5fdd"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/Counter.sol",
+      "sha256": "b1625da491a3b9ad1595439a89267a78f46144c1a4b3b1dee47a885c0b59c19f"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/DocsBallot.sol",
+      "sha256": "191b29ef9f3548424ddcea5c6081df7a2d765f8128b8efa373f6bfd102ebfdbb"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/ERC20.sol",
+      "sha256": "4c4ec559d94bbe6bc02900964a074496f37e2c0b8f5bb49a4f632140658cba0c"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/Enum.sol",
+      "sha256": "1abc0d7058b6f36d3d989f92f4d109a7f74794dac663c420af1d806bf83a5122"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/EtherGame.sol",
+      "sha256": "582c133638a46fded97a952e2b41ac58bbb290759777364313c4a84885aacc0c"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/EtherStore.sol",
+      "sha256": "2a6c0f924a35113a8fdfdefa300e656dfbca3b6a310cea6ae41018b7e4eb721a"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/EtherWallet.sol",
+      "sha256": "bcafe4f7dafb65f547b4ecdde7dfafb7e2682d03a8499f7e58e416220bb65244"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/FunctionModifier.sol",
+      "sha256": "177d89f9256d9fe8d309ddecca7eb380b406184819b29d53775d9ff8285f5223"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/IterableMapping.sol",
+      "sha256": "635553b780350821c13ff8f8bfc59701ef2a43a0d3c91201e85664f5e3489377"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/KingOfEther.sol",
+      "sha256": "520293bdb1c4573f154ba1aae793ade6c135db516ab674d9d51a43d6ac03459d"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/Mapping.sol",
+      "sha256": "9beb7810111719c9bd19c88672e70b09a7201ce950f98aa20f7fde5112bd798d"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/NestedMapping.sol",
+      "sha256": "bdbf53566543dc78aedfde4c71591014cc36868b7c4bc16a53216a784eefb0dd"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/OZCounters.sol",
+      "sha256": "16ea7c127c08b6ef37eb1de3f02577ec33db8e7734b13f247baf10f85de146c3"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/OZMath.sol",
+      "sha256": "9fa038ddbc096f791799b0983651d1a1d0c294b5a626f4d85e6ad07c37042d93"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/OZNonces.sol",
+      "sha256": "c01a0ff7512475db5339888077bea4b14c4e5b1611e73ad4fef6dad2145ba600"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/OZOwnable2Step.sol",
+      "sha256": "6ca91626c79ac1a309b9af56808d1319280fa929ee4597fe128f21a4ac81c9e8"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/OZPausable.sol",
+      "sha256": "b6056598a53ecc1e1b3f9acb15760f837e3ad80b0176b01beb85d9c5c7aaaf75"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/OZReentrancyGuard.sol",
+      "sha256": "bfc6f689ad7e6e9c7833b6c114521f9123d02dba547b0807a0b8092b84a52709"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/Ownable.sol",
+      "sha256": "aac46ffaa5499dbe8ca956b8c26491b4ab070fa7c89d87215d325804d68563bd"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/Purchase.sol",
+      "sha256": "d4ccdb83fa10556ffa812d46afc607a5612bd44af7f53bf95867d777f2100891"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/SendEther.sol",
+      "sha256": "1060dd815259b02b7929611fc6173edf3fff96a8b39696c8453b841b399b6534"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/SimpleAuction.sol",
+      "sha256": "49a7cf3a8e9a6b1e37bd63e65c21ec550bd74a76fad878652f7d1ad58efb1016"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/SolmateOwned.sol",
+      "sha256": "99288057d2ef14f103ad72410aa3272c5f83f354652c9ce740229865d0143705"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/TimeLock.sol",
+      "sha256": "2840102ac62196afda375e0c0ee5d1b82eca606060199c799b7cefcfb45ccdef"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/WETH9.sol",
+      "sha256": "406759cd6fed5913e377ae697183bfefa5f19b025ecbee8519e0f00aa69856f2"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/open/ArrayRemoveByShifting.sol",
+      "sha256": "e406e88ae477b523da8037d04d433d3fc28ffdfb5c5e564296f5889913995db5"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/open/DocsBallot.sol",
+      "sha256": "c94e9a9866ac1745562fe65d80680e7384fabc95cb8f0affd20ea764dc21d238"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/real-world/open/OZMath.sol",
+      "sha256": "700b1e4126642537417384c2c2c8dc54954213435161cc691603ddb719bc02b7"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcArithmetic.sol",
+      "sha256": "e28f9695be69f12e365dc4b396805b96c995724e9a37d324fbb56e850c40161f"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcArrayMembers.sol",
+      "sha256": "290d818b6e7d197ae5ff02ed5b645c743c3cef1fff51e46d82ca8b7c4817e8b6"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcArrays.sol",
+      "sha256": "307f9fd875574e1766cca9225c9e54ae76234ab94962545fc5c49dc0167de66c"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcConstructors.sol",
+      "sha256": "c0ad1e5b796035a7218b056db4c89d71c2ef970f46ad6baa7348c62281951b09"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcControlFlow.sol",
+      "sha256": "d5a0aa9872cdde4439989c73a4d0f1702994f7538958efb6850622f3e0016e09"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcExpressions.sol",
+      "sha256": "f18a1b88df40a6ab536828b1828c5770e8409552ea29a4c30c166afbd4208944"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcFunctionCalls.sol",
+      "sha256": "fe452878ca65c1366129920cbef014bd77734ae3695c475b82f10e4579e606c6"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcHigherLevel.sol",
+      "sha256": "a5fe0af2dc051d2c493543f3ce4ad6058353346de2507f9d9dd8bdadeaea1a1a"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcLoops.sol",
+      "sha256": "22105caaeecf9c5d738edf144d0d9f7ce6fe8b4396ac42074a32881d03e2f9ce"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcMappings.sol",
+      "sha256": "77f895f27d46c3800be2e3b898cad7615e69df26c6bc9feb5a1a05dd3b2e0ffe"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcMemory.sol",
+      "sha256": "6c3aa7c3430d3d903c588a23f734da626c61e20cef796ad78144b861ddaaecd6"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcModifiers.sol",
+      "sha256": "80a94378c786517d7666bc5d11631395f103f74490737cbcf4772128a4ae534f"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcPayments.sol",
+      "sha256": "913f818fb2c4ce5a1066d39ea5371efc0c040d8f3e1035c7c68cad763d9f162a"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcSmtControlFlow.sol",
+      "sha256": "691ed2a5f7ae747c4de50a3ace3eb63141ed94eada6edd6ad9e4f98e00f1484e"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcStructs.sol",
+      "sha256": "5a3d0fe29ee658a734dd3fdf78e971198994096945da8e8ea7eb469104f13a76"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcStructsMappings.sol",
+      "sha256": "0762631c1a48f488a8070d0300ea2c7a16fd0ba373fe534f7719127fc6f9e57e"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/SolcTypes.sol",
+      "sha256": "c7d88e2a2d23692031455ae703e83922c27052f3d5eae9700d3993217c73bb5c"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcArithmeticOpen.sol",
+      "sha256": "bdfaa9dc62a16911bf569c8ad8e37ae0fb76df9210548fc5dd6b1b8ebf9c33ab"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcArrayMembersOpen.sol",
+      "sha256": "c85ba8ebae2feb5177e28cb99b7b0aba6fe6b053e7bac5a512ed003482dcb126"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol",
+      "sha256": "fa599ec30800140f84515081bf97c7e5722fa610ed0cfa5cf3d02252b0b5154c"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol",
+      "sha256": "d6ac57f79594bec91404db442a0bf23cf09493a72b0f8dc49e2ab3a724e48669"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
+      "sha256": "24614abee95725f6f09a3f69dca8a53a37b9c8a6f6625d45b3d0a0459a87437d"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcLoopsOpen.sol",
+      "sha256": "2de855cd723e05070908d825ae239e772660dd8e0a110d7a4945e3e93386f338"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcModifiersOpen.sol",
+      "sha256": "f34966217143dbe5de4d55fb2ed2f69da84d492c25961f79c865d4c3151e34ab"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol",
+      "sha256": "a69ae3e1b2dd87a26f63d079e9bd90fa68410768ba3f006d44455ec66b25a019"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol",
+      "sha256": "e8727de507f3f9cae24fbe4a5e0ae3ffe745a7b0d7f074d1ecdb42822f808379"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcStructsMappingsOpen.sol",
+      "sha256": "0b11e094da36cb142e450af91164390335d0a0c1dc147b799501ae79b706cb4d"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/SolcTypesOpen.sol",
+      "sha256": "d16eb6a09c5a7e0e953cf6f2e0c8d7ead833b2e2ca4a0e00aa79499fc89885a4"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/solc/open/StorageDanglingOpen.sol",
+      "sha256": "4e2801499a2085c817ac024e52e6486e22c1dbd5a726a4d94c64d900a7c6e3b9"
+    },
+    {
+      "path": "tests/migration/solkey/keyext.solidity.examples/unprovable/Unprovable.sol",
+      "sha256": "acd8888cc4999c4299ea9d185d26bc4e07ceb816a31bc549e19944f9a0d770ec"
+    },
+    {
+      "path": "tests/migration/solkey/snapshot.json",
+      "sha256": "0cca8e573882a10b9da70d3bf1980599d19697a0afa0b569a02779b41faf696b"
+    },
+    {
+      "path": "tests/solc/ArrayShapes.sol",
+      "sha256": "2948e574f7fdabd5d07f75d80e6e455ddf09397bc4af36f5dc0831714f1bd3f2"
+    },
+    {
+      "path": "tests/solc/ConstantsEnums.sol",
+      "sha256": "0610e89032b48c631bfa4315e8be5349399f980ddffad642b65267b83d046a0e"
+    },
+    {
+      "path": "tests/solc/Counter.ast.json",
+      "sha256": "5ebd0fa656df704c838adbe45205c18958a93db9ee47fdd4a356353307bafd3e"
+    },
+    {
+      "path": "tests/solc/CtorGap.ast.json",
+      "sha256": "d8879c9bd6b7bcbb19e948a7ac6908f81d18587ea91d9ba89d6d0774738acd4c"
+    },
+    {
+      "path": "tests/solc/CtorGap.sol",
+      "sha256": "c899d4782436f7db5b85b5c28193a0073f6a9d01bfd236e903a3a8d49cc37cc0"
+    },
+    {
+      "path": "tests/solc/EnumSpecs.sol",
+      "sha256": "d412cbb8d18952da6d365d08e854a29b8c5b5212175784e9d6f838dfa88214e0"
+    },
+    {
+      "path": "tests/solc/EtherWallet.ast.json",
+      "sha256": "e6cd1f162e89c6819002e1ab167b6d4da8b490e1467334623bacefe46b810e21"
+    },
+    {
+      "path": "tests/solc/FileLevelStructGaps.sol",
+      "sha256": "1e59a755db3b35ea9a3b9e25d2268d71b5fa30891e0e54cff9656e8cd85351b2"
+    },
+    {
+      "path": "tests/solc/FileLevelStructs.sol",
+      "sha256": "c8bf07b624495d7c35422fb87049747d579be3c49b34d50962fdfe54afc909ec"
+    },
+    {
+      "path": "tests/solc/Inheritance.ast.json",
+      "sha256": "f61dd45901e2c5867e454b3ad328ebda521eadbe81434c90e3ab242551fc793a"
+    },
+    {
+      "path": "tests/solc/Inheritance.sol",
+      "sha256": "3cd19efb6e9bb0e445173a56d62ad233ac4c0d7fb9cd9120dd3d94453271af98"
+    },
+    {
+      "path": "tests/solc/InheritanceGaps.sol",
+      "sha256": "51979f41be3c3d42e9a92db596c961eaa2c3031f906f3406d59e1a989fb17c6e"
+    },
+    {
+      "path": "tests/solc/InitGap.ast.json",
+      "sha256": "ca04fc4d665f4e6922a58a5adbc11b38e7c153deec7b36701e2bda24f81b2ccd"
+    },
+    {
+      "path": "tests/solc/InitGap.sol",
+      "sha256": "e7d4c35055ed34a03056da1889be1061f4081396ea6e92b0604e7db1c57ef9d4"
+    },
+    {
+      "path": "tests/solc/LibraryCalls.sol",
+      "sha256": "d08b7e93f1e28b83e91e0ca21ef40791ab37b485b358963c4deb16c7976a2a92"
+    },
+    {
+      "path": "tests/solc/Loops.ast.json",
+      "sha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a"
+    },
+    {
+      "path": "tests/solc/Loops.sol",
+      "sha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+    },
+    {
+      "path": "tests/solc/MappingPush.sol",
+      "sha256": "9090e6c328eb94c98e9aa16371c05ed7df3d7cf1e0ba1f38cae490e1971effd2"
+    },
+    {
+      "path": "tests/solc/MemoryPush.ast.json",
+      "sha256": "f4069df3d8f70527290e8c4494817c8140d7ae74ee1483f2464c7610ed70893b"
+    },
+    {
+      "path": "tests/solc/MemoryPush.sol",
+      "sha256": "714f3077564420dbf777242cd8b18f206a2cc8cc5c0ecf0fc887d5ba7a66f09f"
+    },
+    {
+      "path": "tests/solc/Modifiers.sol",
+      "sha256": "86eb10a3412a8c439a9feb1c05d77f24b0da18b4ffdbd4de0cb295231ac9bde2"
+    },
+    {
+      "path": "tests/solc/Modular.sol",
+      "sha256": "f1cfd472a344394828ae3004ea10402781cee74961aa153d6663f32771027fe7"
+    },
+    {
+      "path": "tests/solc/NetAssignable.sol",
+      "sha256": "76334082107c0193371d96c02d0ad53a758a71b94ce024e326ae3426152228a3"
+    },
+    {
+      "path": "tests/solc/NewArrays.ast.json",
+      "sha256": "e29dea3f2769fc0dab710b1a0de4211e897cc6ae5bb2b357b889ca174832a60f"
+    },
+    {
+      "path": "tests/solc/NewArrays.sol",
+      "sha256": "0ceefdde95b7eddb69c9a7421649c562ce0df13ffd8f19a91df45036ea13e4ed"
+    },
+    {
+      "path": "tests/solc/Overloads.sol",
+      "sha256": "2fdcdc51c6cc5943688a3ad13caab6825cd5a106cadb6f9fe71e40ab059a7509"
+    },
+    {
+      "path": "tests/solc/PushBindings.sol",
+      "sha256": "4c8f72748fa7e67b84c0931cd0da98c344319f86857d791ae12f3c71aed743d9"
+    },
+    {
+      "path": "tests/solc/PushReceiver.ast.json",
+      "sha256": "fc3c9484ac96be8c84e49b3b6978fc2d2fc99ec21154c939fbdbeefe1d283824"
+    },
+    {
+      "path": "tests/solc/PushReceiver.sol",
+      "sha256": "b7c03f854f79ffe9b72ae378ccc5932f8e7a3b163d12e95435c01dcb956a0781"
+    },
+    {
+      "path": "tests/solc/PushSources.ast.json",
+      "sha256": "e384af8f7034886f4ebb7b32766828edfac1b015e70a9582ae265521d92e8c61"
+    },
+    {
+      "path": "tests/solc/PushSources.sol",
+      "sha256": "97b8e731f212bee4f94e042e82f91f348528c638defb690089dc605a78846682"
+    },
+    {
+      "path": "tests/solc/PushSuffixes.ast.json",
+      "sha256": "fcefee5e37c9c92175fbf7175e84859a7e70cc32424e68c4d7e29c5950206e55"
+    },
+    {
+      "path": "tests/solc/PushSuffixes.sol",
+      "sha256": "c039c143d0b19fab82e18e96afcbbc5f5ad119ec7ce1856044a97bf6c79e8a45"
+    },
+    {
+      "path": "tests/solc/ReferenceParameters.sol",
+      "sha256": "a4e1265bad33ecaf5e8842c634330fcd6b30deacbc083ded4d3a9e1c25bb2770"
+    },
+    {
+      "path": "tests/solc/Runner.sol",
+      "sha256": "d3c560f358a8bc5e6e00fc8bdc565557a37608c40e617735e4a7aacee1ce0688"
+    },
+    {
+      "path": "tests/solc/ScopedFlip.ast.json",
+      "sha256": "2cc0092763ceb04137e69b1d00a9dbad533195e83eee54944dc0346a82af7451"
+    },
+    {
+      "path": "tests/solc/ScopedFlip.sol",
+      "sha256": "996fef2cb00c4c27a201f4d3477cbe792182c301804099877aee10283abeb4c1"
+    },
+    {
+      "path": "tests/solc/SourceTypes.sol",
+      "sha256": "1be5d9c5e7df25f009bcd3203e07dcb3109962ea5d40e427ffa05fef97635a5c"
+    },
+    {
+      "path": "tests/solc/SpecBindings.sol",
+      "sha256": "eb32a57f0c906b0fde391e93dc66a7f94800d8154127d2b7584b0b8b1d7d3d0c"
+    },
+    {
+      "path": "tests/solc/SpecConstants.sol",
+      "sha256": "a16a55ba82876f4861b36a9af940dc3129bda7e7dc7969f1264c42052b72257a"
+    },
+    {
+      "path": "tests/solc/SpecImport.sol",
+      "sha256": "880b5670f62ce45fa6b43830281cf8751eae91e6547f18ef7ffa1cd5181c0926"
+    },
+    {
+      "path": "tests/solc/SpecNegation.sol",
+      "sha256": "97a712c06e7860334910098b23b4925798928a9c7f3f225f7a4cb0dd6652ee62"
+    },
+    {
+      "path": "tests/solc/SpecSelf.sol",
+      "sha256": "87ddbfcf102d9f3fbab5777aff00dc4a01e49af1507611d2e6d946af6ceb8e31"
+    },
+    {
+      "path": "tests/solc/StorageDanglingOpen.ast.json",
+      "sha256": "0d3c1ebf39d4c9081237085beee558bfdb43b31988d9c54acd04dd3c31d49f19"
+    },
+    {
+      "path": "tests/solc/StorageReturns.ast.json",
+      "sha256": "0f53b9294230c64e836525debe65a9f9bb888bd2703d0635f4ae324def40efb2"
+    },
+    {
+      "path": "tests/solc/StorageReturns.sol",
+      "sha256": "9030d764e195c035b3983e4146b97fb1d9845b08c6eff11ee624a7a6a0c12712"
+    },
+    {
+      "path": "tests/solc/TestSuite.ast.json",
+      "sha256": "e35198c2349f27047f8bcc217e74ccbc47baf2c6f5a961fc1bf976725dd84e5a"
+    },
+    {
+      "path": "tests/solc/UncheckedImport.sol",
+      "sha256": "1e2b56f16700e667513b25f30fdbfcefe5ce6b999ff678e4036961b7a963d4db"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX.lean",
+      "sha256": "0f2d8f0590ce2958c684feaa6952dec064d6314db60edf5029f8736a2f4b6901"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/Basic.lean",
+      "sha256": "95d86d97b17772c30357113be902d6c5284c197a8363a955cfb5c99b2e4b06a1"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/Builtins.lean",
+      "sha256": "d165311a33092217e09af5fd42e53c350dac658443dc767c1d4b718facf2acf9"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/Defs.lean",
+      "sha256": "67cacb08d39518e07c11253e22e50c7711f895599a3337402aa757bdfd03a8cf"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/LatexChar.lean",
+      "sha256": "f68fb4f8e2bf7aee43b7410d49091a6285dc105014ef8593a000c4447ac26dec"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/LatexCmd.lean",
+      "sha256": "23c1af50baf81487b74115cd8cacb18fdccbfd7ae1037e60d0a6aeacd7649b3b"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/MkAppN.lean",
+      "sha256": "ea36492c36b4bf8f29d77ab222f71bb46d53f024e00d19e25ff67615d8a75ccd"
+    },
+    {
+      "path": "vendor/LeanTeX/LeanTeX/RuleSyntax.lean",
+      "sha256": "628f1e2e6d5f4e31ef3928fc44f1b3465b19a789ac6aae71dc907726b2bb18da"
+    }
+  ],
+  "proofReportSha256": "3e3fff6d0cec57cf3a92114001497fa8754a07956f31b4d260d6c2b82f02c60f",
+  "inputs": [
+    {
+      "path": "/tmp/migration-spec-renames-focused.json",
+      "sha256": "be3dee56f79a02558a11b80526b10d83fd42de5746e63f3cf012ca5cc53a273c"
+    }
+  ],
+  "priorCheckpoint": "/tmp/migration-spec-neg-reviewed.tar.gz",
+  "priorCheckpointSha256": "85b3dbf5f0af490f7c8210ee9465767462ff267f004e21ddfcd1aeb42c23f457",
+  "verification": {
+    "fullBuildLog": "/tmp/migration-spec-renames-run-lean.log",
+    "frozenSortLog": "/tmp/migration-spec-renames-sort.log",
+    "regressionLog": "/tmp/migration-spec-renames-js-tests.log",
+    "targetedRegressionLog": "/tmp/migration-spec-renames-regression.log",
+    "correctedConstantRegressionLog": "/tmp/migration-spec-renames-constant-regression.log",
+    "corpusLog": "/tmp/migration-spec-renames-corpus.log",
+    "trustParityLog": "/tmp/migration-spec-renames-parity.log",
+    "javascriptScope": "Full run:41passed/42,one stale assertion; corrected constant-specification group rerun:1passed/1. No implementation or fixture changed between runs."
+  },
+  "note": "Source hashes captured after observed final verification. Only a stale JavaScript test expectation changed after the full run. This report covers only the local binding fixture, not upstream source parity. The earlier112-source audit predates this compiler change."
+}

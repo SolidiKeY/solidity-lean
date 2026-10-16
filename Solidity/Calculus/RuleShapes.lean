@@ -20,7 +20,8 @@ an origin does not build here.
 
 The other direction is `taclets_partitioned`: every taclet of
 `solidityProgramRules.key` is claimed by some row or listed in
-`unclaimedTaclets` with a reason, never both.  The reasons are the places the
+`unclaimedTaclets` with a reason, or tracked in `migrationPendingTaclets`
+as an unfinished migration gap. The three categories are disjoint.  The reasons are the places the
 typed syntax is narrower than solkey's, the places it is coarser (a memory path is a source as it stands,
 so nothing captures one), and the places the calculus has no strategy to
 express (the literal-condition `if` rules).  The callback semantics of
@@ -272,23 +273,46 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
     .memoryIndexArrayPreincrementAssignment, .memoryIndexArrayPredecrementAssignment,
     .memoryIndexArrayPostincrementAssignment, .memoryIndexArrayPostdecrementAssignment]),
   -- Arrays
+  (``Taclet.storagePushAddAssign, .taclet .storagePushAddAssign),
+  (``Taclet.storagePushSubAssign, .taclet .storagePushSubAssign),
+  (``Taclet.storagePushMulAssign, .taclet .storagePushMulAssign),
+  (``Taclet.storagePushDivAssign, .taclet .storagePushDivAssign),
+  (``Taclet.storagePushModAssign, .taclet .storagePushModAssign),
+  (``Taclet.storagePushPreincrement, .taclet .storagePushPreincrement),
+  (``Taclet.storagePushPostincrement, .taclet .storagePushPostincrement),
+  (``Taclet.storagePushPredecrement, .taclet .storagePushPredecrement),
+  (``Taclet.storagePushPostdecrement, .taclet .storagePushPostdecrement),
+  (``Taclet.pushCompoundAssignValueRhsCapture, .merged [.addAssignValueRhsCapture,
+    .subAssignValueRhsCapture, .mulAssignValueRhsCapture, .divAssignValueRhsCapture,
+    .modAssignValueRhsCapture]),
   (``Taclet.storagePushValueSave, .taclet .storagePushValueSave),
   (``Taclet.storagePushValueCopySource, .taclet .storagePushValueCopySource),
+  (``Taclet.storagePushMemoryCopySource, .taclet .storagePushMemoryCopySource),
+  (``Taclet.storagePushValue_unfold_rightFstReferenceArgument,
+    .taclet .storagePushValue_unfold_rightFstReferenceArgument),
+  (``Taclet.storagePushValue_unfold_rightFstPrimitiveArgument,
+    .taclet .storagePushValue_unfold_rightFstPrimitiveArgument),
   (``Taclet.storagePushLengthSave, .taclet .storagePushLengthSave),
   (``Taclet.storagePushLengthSaveReferenceElement,
     .taclet .storagePushLengthSaveReferenceElement),
+  (``Taclet.storagePushLengthSaveMappingElement,
+    .taclet .storagePushLengthSaveMappingElement),
   (``Taclet.storagePushValue_unfold_rightSndArgument,
     .taclet .storagePushValue_unfold_rightSndArgument),
   (``Taclet.storagePushValue_unfold_leftFstReceiver,
     .taclet .storagePushValue_unfold_leftFstReceiver),
   (``Taclet.storagePush_unfold_leftFstReceiver, .taclet .storagePush_unfold_leftFstReceiver),
   (``Taclet.storagePop_unfold_leftFstReceiver, .taclet .storagePop_unfold_leftFstReceiver),
+  (``Taclet.storagePushValue_unfold_leftCallReceiver, .taclet .storagePushValue_unfold_leftCallReceiver),
+  (``Taclet.storagePush_unfold_leftCallReceiver, .taclet .storagePush_unfold_leftCallReceiver),
+  (``Taclet.storagePop_unfold_leftCallReceiver, .taclet .storagePop_unfold_leftCallReceiver),
   (``Taclet.storagePopSave, .taclet .storagePopSave),
   (``Taclet.storagePopSaveMappingElement, .taclet .storagePopSaveMappingElement),
   (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
     .taclet .storageLocalRootPush_unfold_leftFstReceiver),
   (``Taclet.storageLocalRootPushBind, .taclet .storageLocalRootPushBind),
   (``Taclet.storageLocalPrimitivePushBind, .taclet .storageLocalPrimitivePushBind),
+  (``Taclet.localValuePush_unfold_leftFstReceiver, .taclet .localValuePush_unfold_leftFstReceiver),
   (``Taclet.storageLocalRootPushBindMappingElement,
     .taclet .storageLocalRootPushBindMappingElement),
   -- Transfer
@@ -335,7 +359,7 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.memoryIndexDeleteNonSimpleIndexCapture,
     .taclet .memoryIndexDeleteNonSimpleIndexCapture),
   (``Taclet.memoryArrayFreshAlloc, .taclet .memoryArrayFreshAlloc),
-  (``Taclet.newArrayCapture, .taclet .newArrayCapture),
+  (``Taclet.newArrayCapture, .merged [.newArrayCapture, .newArrayCaptureStorageRoot]),
   -- Storage and memory: `mpath` is any memory path, a member one included
   (``Taclet.memoryStorageCopy, .taclet .memoryStorageCopy),
   (``Taclet.memoryStorageCopyUnfold, .taclet .memoryStorageCopyUnfold),
@@ -358,6 +382,9 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.assertSimple, .taclet .assertSimple),
   (``Taclet.revertBox, .taclet .revertBox),
   (``Taclet.revertDiamond, .taclet .revertDiamond),
+  (``Taclet.whileUnwind, .taclet .whileUnwind),
+  (``Taclet.whileInvariantBox, .taclet .whileInvariantBox),
+  (``Taclet.whileInvariantDiamond, .taclet .whileInvariantDiamond),
   -- Calls
   -- a call's body runs as a block of its own frame, popped (or dropped from
   -- under its return variables) after it: the expansion claims `functionFrameEmpty`
@@ -407,7 +434,7 @@ def operatorOrder : List (Lean.Name × List Lean.Name) :=
     ``Taclet.memoryFieldOpAssign, ``Taclet.memoryIndexArrayOpAssign,
     ``Taclet.storageFieldOpAssignUnfoldLeftFst, ``Taclet.storageIndexOpAssignUnfoldLeftFst,
     ``Taclet.memoryFieldOpAssignUnfoldLeftFst, ``Taclet.memoryIndexOpAssignUnfoldLeftFst,
-    ``Taclet.compoundAssignValueRhsCapture].map (·, compound)) ++
+    ``Taclet.compoundAssignValueRhsCapture, ``Taclet.pushCompoundAssignValueRhsCapture].map (·, compound)) ++
   ([``Taclet.localIncrement, ``Taclet.storageRootIncrement, ``Taclet.storageFieldIncrement,
     ``Taclet.memoryFieldIncrement, ``Taclet.memoryIndexArrayIncrement,
     ``Taclet.storageFieldIncrementUnfoldLeftFst, ``Taclet.storageIndexIncrementUnfoldLeftFst,
@@ -486,22 +513,31 @@ def unclaimedTaclets : List KeyTaclet :=
     .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
     .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
 
+/-- Added upstream rules still awaiting correspondence and soundness review.
+These are migration gaps, not implemented or architecturally excused rules. -/
+def migrationPendingTaclets : List KeyTaclet :=
+  []
+
 /-- **The coverage fact**: the corpus splits into what the table claims and
-what this file excuses, with nothing in both and nothing in neither.  A taclet
+what this file excuses or records as pending migration work. Exactly one
+category holds; pending work is not implementation coverage.  A taclet
 that appears upstream and is never ported fails this, and so does a row that
 claims a taclet the list above excuses. -/
 theorem taclets_partitioned :
-    KeyTaclet.all.all (fun t => claims t != unclaimedTaclets.contains t) = true := by
+    KeyTaclet.all.all (fun t =>
+      (if claims t then (1 : Nat) else 0) +
+      (if unclaimedTaclets.contains t then 1 else 0) +
+      (if migrationPendingTaclets.contains t then 1 else 0) == 1) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 309 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 330 := by decide +kernel
 
 theorem unclaimedTaclets_count : unclaimedTaclets.length = 15 := by decide +kernel
 
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet.  There are nine:
+every row above claims a taclet. There are ten:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
@@ -509,19 +545,25 @@ only, so that inlining is exact); `tryCallDiamond`, a `try` under the
 diamond closed to `false`, where solkey has no rule (a call may revert in the
 caller, which no formula rules out); and `transferDiamond`, a payment under
 the diamond closed to `false`, where solkey's diamond rules are not ported;
-`whileUnwind`, `whileInvariantBox` and `whileInvariantDiamond`, solkey's
-taclets of those names, added in `ed7849d5b6` after the pinned `1b4341a303`,
-the first with a bound on the unwinding; `loopExit`, the loop at its bound; and
+`loopExit`, the loop at its bound; and
 `whileClose` and `whileNoVariantDiamond`, a loop with an invariant closed to
 `false` where its body has no frame or, under the diamond, it has no
-variant (solkey unwinds those).  The list is checked against the
+variant (solkey unwinds those); and `pushCompoundUnfoldReceiver` and
+`pushIncrementUnfoldReceiver`, which capture a complex receiver when push is
+used as an arithmetic lvalue (upstream only captures the receiver of a bare
+push statement). `pushMemorySourceCapture` handles a complex memory push
+source; `storageMemorySourceSave` handles an embedded memory snapshot source
+of an internal storage assignment. The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
 def leanTaclets : List Lean.Name :=
-  [``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
-    ``LeanTaclet.whileUnwind, ``LeanTaclet.loopExit, ``LeanTaclet.whileInvariantBox,
-    ``LeanTaclet.whileInvariantDiamond, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond]
+  [``LeanTaclet.addmodAssignment, ``LeanTaclet.mulmodAssignment,
+    ``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
+    ``LeanTaclet.loopExit, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
+    ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,
+    ``LeanTaclet.storageMemorySourceSave, ``LeanTaclet.pushMemorySourceCapture,
+    ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

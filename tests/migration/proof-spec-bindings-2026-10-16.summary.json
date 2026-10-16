@@ -1,0 +1,21 @@
+{
+  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "mode": "proof",
+  "completedSources": 1,
+  "totalSources": 1,
+  "results": {
+    "internal": 1,
+    "proved": 25,
+    "pending": 9,
+    "unsupported": 2
+  },
+  "errors": 0,
+  "suites": {
+    "solc": {
+      "internal": 1,
+      "proved": 25,
+      "pending": 9,
+      "unsupported": 2
+    }
+  }
+}

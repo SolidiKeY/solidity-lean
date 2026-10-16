@@ -15,7 +15,7 @@ sequent, now that a step of `⊢ₖ` asks its rule to be solkey's
   keep the goal in the fragment (`Taclet.premise_inSolkey`), so on it the
   two derive the same (`Proves.solkey_iff`);
 * off it they differ (`Proves.solkey_lt_calculus`): `⊢` derives
-  `[ while (false) { } ] true` by `loopExit`, and `⊢ₖ` does not, since a
+  `[ while (false) { } ] true` annotated `unwind 0` by `loopExit`, and `⊢ₖ` does not, since a
   step it cannot take leaves it only `closeFalse` (`Proves.solkey_blocked`),
   which its soundness refutes.
 -/
@@ -35,6 +35,8 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
   | updIntro _ ih => exact .updIntro ih
   | bindIntro _ ih => exact .bindIntro ih
   | update d _ _ ih => exact .update d ih
+  | updates d _ _ ih => exact .updates d ih
+  | guardedUpdates d _ _ _ ihT ihE => exact .guardedUpdates d ihT ihE
   | unfold d _ _ ih => exact .unfold d ih
   | bind d _ _ ih => exact .bind d ih
   | split d _ _ _ ihT ihE => exact .split d ihT ihE
@@ -100,6 +102,14 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
   | update d _ _ ih =>
     obtain ⟨hs, hω⟩ := Fml.inSolkey_modal_cons hφ
     exact .update d (ih hω) (Stmt.keyStep_of_inSolkey hs)
+  | updates d _ _ ih =>
+    obtain ⟨hs, hω⟩ := Fml.inSolkey_modal_cons hφ
+    exact .updates d (ih hω) (Stmt.keyStep_of_inSolkey hs)
+  | @guardedUpdates Γ Δ Γ₁ Γ₂ H m s ω κ φ c U V d _ _ _ ihT ihE =>
+    obtain ⟨hs, hω⟩ := Fml.inSolkey_modal_cons hφ
+    refine .guardedUpdates d (ihT hω) (ihE ?_) (Stmt.keyStep_of_inSolkey hs)
+    rw [Fml.modalK_inSolkey] at hω
+    exact hω
   | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
     obtain ⟨hs, hω⟩ := Fml.inSolkey_modal_cons hφ
     have hP : Prog.inSolkey m P = true := Stmt.premise_inSolkey_of_step hs d
@@ -197,7 +207,7 @@ of solkey's is a refutation of its context. -/
 theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ}
     (h : Proves C .solkey Γ₀ H φ) (hφ : φ.blockedK = true) : Proves C .solkey Γ₀ H .ff := by
   induction h with
-  | update _ _ hR _ | unfold _ _ hR _ | bind _ _ hR _ | split _ _ _ hR _ _ | check _ _ _ hR _ _
+  | update _ _ hR _ | updates _ _ hR _ | guardedUpdates _ _ _ hR _ _ | unfold _ _ hR _ | bind _ _ hR _ | split _ _ _ hR _ _ | check _ _ _ hR _ _
   | done _ _ hR _ | branches _ _ _ hR _ | cases _ _ _ _ hR _ _ | inv _ _ _ _ hR _ _ _
   | inline _ _ hR _ =>
     have h' : (!RuleSet.admits .solkey _ _) = true := hφ
@@ -231,7 +241,8 @@ theorem loopFalse_derived : Proves C .all [] .nil (loopFalse (C := C)) := by
       rfl⟩))
 
 /-- **Off the fragment solkey's rules fall short**: the calculus derives
-`[ while (false) { } ] true`, solkey's rules do not (today's
+`[ while (false) { } ] true` at the explicit `unwind 0` annotation, solkey's
+ported rules do not (today's
 `Proves.solkey_lt_calculus`). -/
 theorem Proves.solkey_lt_calculus :
     ∃ φ : Fml C [], Proves C .all [] .nil φ ∧ ¬ Proves C .solkey [] .nil φ :=

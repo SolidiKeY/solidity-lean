@@ -7908,10 +7908,11 @@ selector labels serve comparison and schema analysis.
   (`Tactics/Chains`' memory example) is written as an explicit chain.
 - Printing a reduction's atoms by their binders' names (proposal 99) would
   take the leaf's context to `LTm.ppWith`.
-- Under the diamond, the alias a `push()` returns (`Person storage p =
-  persons.push(); p.age = 1;`) is read at the old length before the push
-  lands, which reverts at a full array: the leaf asks for room the formula
-  does not give, and stays open.
+- Resolved in the SolKey migration: the alias a `push()` returns (`Person
+  storage p = persons.push(); p.age = 1;`) now closes under the diamond.
+  `pushLocalExhL` retains the parallel binding's definedness while accepting
+  the push's resource exhaustion. `Examples/ProofTree.lean` pins the closed
+  leaf and its kernel derivation; `docs/solkey-migration.md` records the gate.
 - Not run since W4: `check-corpus.sh` (its probes need `lake`), the
   reader's `keycheck` executable and the VS Code extension's tests.
 - `check-testsuite.sh` passes at the W8.5 gate with `--solkey` at a

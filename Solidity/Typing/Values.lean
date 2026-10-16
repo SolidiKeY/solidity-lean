@@ -822,6 +822,69 @@ def plainH : Hered where
 /-- No slot past an array's end, no mapping. -/
 abbrev SVal.Plain {T : Ty} (v : SVal T) : Prop := v.All plainH
 
+mutual
+/-- Copying a mapping-free storage value, such as a row of arrays, drops
+its source histories and yields a plain value. -/
+theorem SVal.strip_plain : {T : Ty} → (v : SVal T) → T.mapFree = true → v.strip.Plain
+  | _, .prim _, _ => by simp only [SVal.strip, SVal.All]
+  | _, .struct fs, h => by
+    simp only [SVal.strip, SVal.All]
+    exact SFields.strip_plain fs (mapFree_structDef _ (by
+      simpa only [Ty.mapFree, decide_eq_true_eq] using h))
+  | _, .array e _ _, h => by
+    simp only [SVal.strip, SVal.All, plainH, SList.All]
+    exact ⟨trivial, SVec.strip_plain e h, trivial⟩
+  | _, .fixed e, h => by
+    simp only [SVal.strip, SVal.All, plainH]
+    exact ⟨trivial, SVec.strip_plain e h⟩
+  | _, .map _ _, h => by cases h
+
+/-- The fields of a mapping-free struct remain plain when copied. -/
+theorem SFields.strip_plain : {fs : List (Name × Ty)} → (vs : SFields fs) →
+    (∀ nt ∈ fs, nt.2.mapFree = true) → vs.strip.All plainH
+  | _, .nil, _ => by simp only [SFields.strip, SFields.All]
+  | _, .cons v vs, h => by
+    simp only [SFields.strip, SFields.All]
+    exact ⟨SVal.strip_plain v (h _ List.mem_cons_self),
+      SFields.strip_plain vs (fun nt hn => h nt (List.mem_cons_of_mem _ hn))⟩
+
+/-- Copying the live elements of an array keeps only plain children. -/
+theorem SVec.strip_plain : {E : Ty} → {n : Nat} → (vs : SVec E n) →
+    E.mapFree = true → vs.strip.All plainH
+  | _, _, .nil, _ => by simp only [SVec.strip, SVec.All]
+  | _, _, .cons v vs, h => by
+    simp only [SVec.strip, SVec.All]
+    exact ⟨SVal.strip_plain v h, SVec.strip_plain vs h⟩
+end
+
+/-- Padding `[a,b]` with a default preserves every hereditary predicate
+held by `a`, `b` and the default. -/
+theorem SVec.padRight_all {E : Ty} {P : Hered} {d : SVal E} (hd : d.All P) :
+    {n : Nat} → (vs : SVec E n) → (m : Nat) → vs.All P → (vs.padRight d m).All P
+  | _, _, 0, _ => by rw [SVec.padRight, SVec.All_nil]; trivial
+  | 0, .nil, m + 1, _ => by
+    simp only [SVec.padRight, SVec.All]
+    exact ⟨hd, SVec.padRight_all hd .nil m (by rw [SVec.All_nil]; trivial)⟩
+  | _ + 1, .cons v vs, m + 1, h => by
+    simp only [SVec.All] at h
+    simp only [SVec.padRight, SVec.All]
+    exact ⟨h.1, SVec.padRight_all hd vs m h.2⟩
+
+/-- A map-free fixed-array snapshot converted to its destination shape is
+plain, so the existing memory-copy preservation principle applies to it. -/
+theorem FixedCopy.apply_plain {E : Ty} {n : Nat} {R : RefTy}
+    (c : FixedCopy E n R) (v : SVal (.ref (.fixed E n))) (hm : E.mapFree = true) :
+    (c.apply v).Plain := by
+  cases v with
+  | fixed vs =>
+    cases c with
+    | dynamic bound =>
+      simp only [FixedCopy.apply, SVal.All, plainH, SList.All]
+      exact ⟨trivial, SVec.strip_plain vs hm, trivial⟩
+    | fixed m fits =>
+      simp only [FixedCopy.apply, SVal.All, plainH]
+      exact ⟨trivial, SVec.padRight_all (SVal.strip_plain (SVal.dflt E) hm) _ _ (SVec.strip_plain vs hm)⟩
+
 theorem SVec.ofLen_all {P : Hered} {α : Type} {E : Ty} (f : α → SVal E) :
     (n : Nat) → (l : List α) → (h : l.length = n) → (∀ a ∈ l, (f a).All P) →
     (SVec.ofLen f n l h).All P
@@ -898,7 +961,7 @@ theorem struct_okDeep {s : Name} (h : s ∈ defaultOkStructs) :
     ∀ nt ∈ structDef s, nt.2.okDeep = true := by
   simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
   rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-      rfl | rfl | rfl | rfl | rfl | rfl <;>
+      rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
     simp only [structDef, List.mem_cons, List.not_mem_nil, or_false, forall_eq, Ty.okDeep,
         String.reduceEq, imp_self, forall_eq_or_imp, defaultOkStructs, or_self, decide_true,
         and_self, or_true]

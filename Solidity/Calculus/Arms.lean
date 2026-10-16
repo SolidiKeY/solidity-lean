@@ -1,4 +1,5 @@
 import Solidity.Calculus.Shift
+import Solidity.Syntax.PushSource
 
 /-!
 # The rule of each statement, on scoped statements
@@ -323,6 +324,8 @@ def localStep {p : PrimTy} (i : Idx Γ (.val p)) : Val C Γ p → Premise C Γ �
   -- memoryLengthRead_unfold_rightFst
   | .mlen (.loc l) hp =>
     .captureMV (fmv k) (.loc l) (.assignLocal i.there (.mlen (.var .here (MPath.loc l).mapFree) hp))
+  -- Native modular builtin; its operands remain lazy typed terms.
+  | .modular op a b modulus => .setLocal i (.modular op a b modulus)
 
 /-- The elements of the array are mappings (`marr`; `darr` its negation). -/
 def SPath.elemMapping {T : Ty} (_ : SPath C Γ T) : Bool := T.elemIsMapping
@@ -345,7 +348,8 @@ def rebindStep {R : RefTy} (i : Idx Γ (.alias R)) : ARhs C Γ R → Premise C �
   | .push b hd =>
     -- storageLocalRootPushBind, storageLocalRootPushBindMappingElement
     if b.isSimple then
-      .update (Upd.pushBind i b)
+      if b.elemMapping then .update (Upd.pushBindMapping i b)
+      else .update (Upd.pushBind i b)
     -- storageLocalRootPush_unfold_leftFstReceiver
     else .captureSP (fsp k) b (.rebind i.there (.push (.alias .here) hd))
 
@@ -386,6 +390,8 @@ def indexRefCaptureAll {R R' : RefTy} {kp : PrimTy} (it : IndexTy R kp (.ref R')
 /-- A storage write (`assignStep`): the receiver unfolded first, then the
 index, then the source. -/
 def assignStep : {T : Ty} → Loc C Γ T → Src C Γ T → Premise C Γ Γ
+  | _, l, .copyMem p => .save l (.copyMem p)
+  | _, l, .fixedCopy p shape hm => .save l (.fixedCopy p shape hm)
   -- storageRootWriteStore, storageRootWriteValueRhsCapture
   | _, .root r h, .val e =>
     (VHole.store (.root r h)).step k (fun se => .save (.root r h) (.val (.simple se))) e
@@ -530,6 +536,36 @@ def assignIncStep {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec) (hp : p.isNum
 
 /-! ### Arrays and payments -/
 
+/-- `v = b.push()`: bind a complex receiver before appending its zero. -/
+def assignLocalPushStep {p : PrimTy} (i : Idx Γ (.val p))
+    (b : SPath C Γ (.array (.prim p))) : Premise C Γ Γ :=
+  if b.isSimple then .update (Upd.pushBindPrim i b)
+  else .captureSP (fsp k) b (.assignLocalPush i.there (.alias .here))
+
+/-- `b.push() op= rhs`: capture the source first, then the receiver, and
+keep the append and arithmetic as two successive updates. -/
+def pushOpStep {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
+    (hp : p.isNumeric = true) (b : SPath C Γ (.array (.prim p))) :
+    Val C Γ p → Premise C Γ Γ
+  | .simple se =>
+    if b.isSimple then
+      if PushSuffix.needsZeroGuard op then
+        .guardedUpdates (PushSuffix.nonzero hp se) (Upd.nil.snoc (UpdElem.pushSlot b))
+          (PushSuffix.saveOp op hop hp b se)
+      else .updates (Upd.nil.snoc (UpdElem.pushSlot b)) (PushSuffix.saveOp op hop hp b se)
+    else .captureSP (fsp k) b (.pushOpAssign op hop hp (.alias .here) (.simple se.up))
+  | r => .capture p (fse k) r (.pushOpAssign op hop hp b.up (.simple (.local .here)))
+
+/-- `++b.push()` or `b.push()++` as a statement: capture the receiver once,
+append, then modify the new slot. The expression's value is discarded. -/
+def pushIncStep {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+    (b : SPath C Γ (.array (.prim p))) : Premise C Γ Γ :=
+  if b.isSimple then
+    .updates (Upd.nil.snoc (UpdElem.pushSlot b))
+      (PushSuffix.saveOp op.binOp op.binOp_compound hp b
+        (.lit 1 (by cases p <;> first | rfl | exact absurd hp Bool.false_ne_true)))
+  else .captureSP (fsp k) b (.pushIncDec op hp (.alias .here))
+
 /-- `b.push(v);` (`pushStep`): the receiver first, then the argument. -/
 def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     (hd : (v.isSome || E.defaultOkS) = true) : Premise C Γ Γ :=
@@ -538,15 +574,26 @@ def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     | E, b, none =>
       -- storagePushLengthSave
       if b.elemPrim then .upd1 (UpdElem.pushSlot b)
-      -- storagePushLengthSaveReferenceElement
-      else .upd1 (UpdElem.extend b)
+      -- A mapping element is retained; every other reference is reset in place.
+      else if b.elemMapping then .upd1 (UpdElem.extend b)
+      else .upd1 (UpdElem.pushSlot b)
     -- storagePushValueSave
     | _, b, some (.val (.simple se)) =>
       .upd1 (UpdElem.push b (.val (.simple se)))
     -- storagePushValue_unfold_rightSndArgument
-    | _, b, some (.val e) => .capture _ (fse k) e (.push b.up (some (.val (.simple (.local .here)))) rfl)
+    | _, b, some (.val e) =>
+      .capture _ (if e.complexStorageRead then .fresh "source" k else fse k) e
+        (.push b.up (some (.val (.simple (.local .here)))) rfl)
     -- storagePushValueCopySource
-    | _, b, some (.copy p hm) => .upd1 (UpdElem.push b (.copy p hm))
+    | _, b, some (.copy p hm) =>
+      if p.isSimple then .upd1 (UpdElem.push b (.copy p hm))
+      else .captureSP (.fresh "source" k) p
+        (.push b.up (some (.copy (.alias .here) hm)) rfl)
+    | _, b, some (.copyMem p) =>
+      if p.isSimple then .upd1 (UpdElem.push b (.copyMem p))
+      else .captureMV (fmv k) p
+        (.push b.up (some (.copyMem (.var .here p.mapFree))) rfl)
+    | _, b, some (.fixedCopy p shape hm) => .upd1 (UpdElem.push b (.fixedCopy p shape hm))
   -- storagePush_unfold_leftFstReceiver, storagePushValue_unfold_leftFstReceiver
   else .captureSP (fsp k) b (.push (.alias .here) (v.map Src.up) (by
     cases v <;> exact hd))

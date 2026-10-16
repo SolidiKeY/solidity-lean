@@ -178,7 +178,8 @@ example : Proves StandardExample .solkey [] .nil
     exact Proves.closeTrue rfl
 
 -- Off the fragment `sol_prove` gives up under `⊢ₖ`: solkey has no rule
--- for a loop (`loopFalse`, `[ while (false) { } ] true`).
+-- for the explicit exhausted bound (`loopFalse`, `unwind 0`), whose exit
+-- check is Lean-only. Automatic loops use the upstream whileUnwind rule.
 /--
 error: sol_prove: the walk does not reach the end of the sequent: a step with no rule, or more than 20000 steps
 -/

@@ -206,6 +206,9 @@ inductive Op1 (C : Contract) : Srt → Srt → Type where
   nothing (its `msgValue` and the ledger's entries are `int`s, `netHeader.key`);
   a specification's `net(a) + msg.value` reads `msg.value` so.  Total. -/
   | toInt : Op1 C (.val .uint) .kint
+  /-- The typed view of a fixed-array copy source at its destination shape. -/
+  | fixedCopy {E : Ty} {n : Nat} {R : RefTy} (shape : FixedCopy E n R) :
+      Op1 C (.sv (.ref (.fixed E n))) (.sv (.ref R))
 
 /-- Binary symbols. -/
 inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
@@ -250,6 +253,8 @@ inductive Op3 (C : Contract) : Srt → Srt → Srt → Srt → Type where
   | write {T : Ty} : Op3 C .mem (.addr T) (.mv T) .mem
   /-- `save(s, p, v)` under a `select`. -/
   | saveIn {s : Name} {T : Ty} : Op3 C (.sts s) (.spath s T) (.sv T) (.sts s)
+  /-- Native modular arithmetic, with an unbounded intermediate. -/
+  | modular (op : ModOp) : Op3 C (.val .uint) (.val .uint) (.val .uint) (.val .uint)
 
 
 /-! ## Evaluation on the typed global part
@@ -323,6 +328,7 @@ def Op1.evalM (g : State C []) {a s : Srt} :
   | .selectIn h, x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h
   | .fieldIn h, x => x.map (SRef.field · h)
   | .toInt, x => x.map fun n => n.1
+  | .fixedCopy shape, x => x.map shape.apply
 
 /-- A unary symbol on the typed global part. -/
 @[implemented_by Op1.evalM]
@@ -346,6 +352,7 @@ def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     (fun {_} {_} {_} h x => x.map fun st => Storage.selectT (C := Contract.ofStruct _) st h)
     (fun {_} {_} {_} {_} h x => x.map (SRef.field · h))
     (fun x => x.map fun n => n.1)
+    (fun {_} {_} {_} shape x => x.map shape.apply)
 
 theorem Op1.eval_eq_evalM (g : State C []) {a s : Srt} (o : Op1 C a s) :
     o.eval g = o.evalM g := by
@@ -386,7 +393,7 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
   | .pushSlot, x, y => do (← x).push (← y) some
   | .pop, x, y => do (← x).pop false (← y)
   | .shrink, x, y => do (← x).pop true (← y)
-  | .extend, x, y => do some ((← (← x).pushPlace (← y)).1)
+  | .extend, x, y => do some ((← (← x).extendPlace (← y)).1)
   | .sfind, x, y => do (← x).find (← y)
   | .copyMem, x, y => do
     let m ← x
@@ -427,7 +434,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     (fun {_} x y => do (← x).push (← y) some)
     (fun {_} x y => do (← x).pop false (← y))
     (fun {_} x y => do (← x).pop true (← y))
-    (fun {_} x y => do some ((← (← x).pushPlace (← y)).1))
+    (fun {_} x y => do some ((← (← x).extendPlace (← y)).1))
     (fun {_} x y => do (← x).find (← y))
     (fun {_} x y => do
       let m ← x
@@ -463,6 +470,7 @@ def Op3.evalM (g : State C []) {a b c s : Srt} :
   | .atIn it, x, y, z => do (← x).atT it (← y) (← z)
   | .write, x, y, z => do (← x).writeT (← y) (← z)
   | .saveIn, x, y, z => do (← x).write (← y) (← z)
+  | .modular op, x, y, z => do op.evalT (← x) (← y) (← z)
 
 /-- A ternary symbol on the typed global part. -/
 @[implemented_by Op3.evalM]
@@ -476,6 +484,7 @@ def Op3.eval (g : State C []) {a b c s : Srt} (o : Op3 C a b c s) :
     (fun {_} {_} {_} it x y z => do (← x).atT it (← y) (← z))
     (fun {_} x y z => do (← x).writeT (← y) (← z))
     (fun {_} {_} x y z => do (← x).write (← y) (← z))
+    (fun op x y z => do op.evalT (← x) (← y) (← z))
 
 theorem Op3.eval_eq_evalM (g : State C []) {a b c s : Srt} (o : Op3 C a b c s) :
     o.eval g = o.evalM g := by

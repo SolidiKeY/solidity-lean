@@ -117,6 +117,7 @@ inductive PrintedRule where
   | storagePushValueCopySource
   | storagePushLengthSave
   | storagePushLengthSaveReferenceElement
+  | storagePushLengthSaveMappingElement
   | storageLocalRootPushBind
   | storageLocalPrimitivePushBind
   | storageLocalRootPushBindMappingElement
@@ -359,23 +360,42 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.memoryFieldIncrementAssignment, .leanOnly .keyTier),
   (``Taclet.memoryIndexArrayIncrementAssignment, .leanOnly .keyTier),
   -- Arrays: the printed rules, as solkey, split by the element type
+  (``Taclet.storagePushAddAssign, .leanOnly .keyTier),
+  (``Taclet.storagePushSubAssign, .leanOnly .keyTier),
+  (``Taclet.storagePushMulAssign, .leanOnly .keyTier),
+  (``Taclet.storagePushDivAssign, .leanOnly .keyTier),
+  (``Taclet.storagePushModAssign, .leanOnly .keyTier),
+  (``Taclet.storagePushPreincrement, .leanOnly .keyTier),
+  (``Taclet.storagePushPostincrement, .leanOnly .keyTier),
+  (``Taclet.storagePushPredecrement, .leanOnly .keyTier),
+  (``Taclet.storagePushPostdecrement, .leanOnly .keyTier),
+  (``Taclet.pushCompoundAssignValueRhsCapture, .leanOnly .keyTier),
   (``Taclet.storagePushValueSave, .printed .storagePushValueSave),
   (``Taclet.storagePushValueCopySource, .printed .storagePushValueCopySource),
+  (``Taclet.storagePushMemoryCopySource, .leanOnly .keyTier),
+  (``Taclet.storagePushValue_unfold_rightFstReferenceArgument, .leanOnly .keyTier),
+  (``Taclet.storagePushValue_unfold_rightFstPrimitiveArgument, .leanOnly .keyTier),
   (``Taclet.storagePushLengthSave, .printed .storagePushLengthSave),
   (``Taclet.storagePushLengthSaveReferenceElement,
     .printed .storagePushLengthSaveReferenceElement),
+  (``Taclet.storagePushLengthSaveMappingElement,
+    .printed .storagePushLengthSaveMappingElement),
   (``Taclet.storagePushValue_unfold_rightSndArgument,
     .printed .storagePushValue_unfold_rightSndArgument),
   (``Taclet.storagePushValue_unfold_leftFstReceiver,
     .printed .storagePushValue_unfold_leftFstReceiver),
   (``Taclet.storagePush_unfold_leftFstReceiver, .printed .storagePush_unfold_leftFstReceiver),
   (``Taclet.storagePop_unfold_leftFstReceiver, .printed .storagePop_unfold_leftFstReceiver),
+  (``Taclet.storagePushValue_unfold_leftCallReceiver, .leanOnly .keyTier),
+  (``Taclet.storagePush_unfold_leftCallReceiver, .leanOnly .keyTier),
+  (``Taclet.storagePop_unfold_leftCallReceiver, .leanOnly .keyTier),
   (``Taclet.storagePopSave, .printed .storagePopSave),
   (``Taclet.storagePopSaveMappingElement, .printed .storagePopSaveMappingElement),
   (``Taclet.storageLocalRootPush_unfold_leftFstReceiver,
     .printed .storageLocalRootPush_unfold_leftFstReceiver),
   (``Taclet.storageLocalRootPushBind, .printed .storageLocalRootPushBind),
   (``Taclet.storageLocalPrimitivePushBind, .printed .storageLocalPrimitivePushBind),
+  (``Taclet.localValuePush_unfold_leftFstReceiver, .leanOnly .keyTier),
   (``Taclet.storageLocalRootPushBindMappingElement,
     .printed .storageLocalRootPushBindMappingElement),
   -- Transfer
@@ -444,6 +464,10 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``Taclet.assertSimple, .printed .assertSimple),
   (``Taclet.revertBox, .printed .revertBox),
   (``Taclet.revertDiamond, .printed .revertDiamond),
+  -- The loop taclets are upstream, but not printed in the paper's rule table.
+  (``Taclet.whileUnwind, .leanOnly .keyTier),
+  (``Taclet.whileInvariantBox, .leanOnly .keyTier),
+  (``Taclet.whileInvariantDiamond, .leanOnly .keyTier),
   -- Calls: none printed; solkey has `functionBodyExpand`, `internalCallExpand`
   (``Taclet.functionBodyExpand, .leanOnly .keyTier),
   (``Taclet.internalCallExpand, .leanOnly .keyTier),
@@ -456,20 +480,24 @@ def printedOrigins : List (Lean.Name × PrintedOrigin) := [
 
 /-- The rules solkey does not have (`LeanTaclet`), and the printed rule each is.
 The capture of an argument (`unfoldArgument`), a `try` and a payment under
-the diamond, a loop at its bound and one with an invariant, have no taclet
-and no printed rule; `whileUnwind`, `whileInvariantBox` and
-`whileInvariantDiamond` are solkey's, past the pinned checkout, and not
-printed. -/
+the diamond, a loop at its bound and the conservative invariant refusals
+have no taclet and no printed rule. The three upstream loop rules are
+classified in `printedOrigins` as KeY rules outside the paper's table. -/
 def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
+  (``LeanTaclet.addmodAssignment, .leanOnly .calculus),
+  (``LeanTaclet.mulmodAssignment, .leanOnly .calculus),
   (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
   (``LeanTaclet.tryCallDiamond, .leanOnly .calculus),
   (``LeanTaclet.transferDiamond, .leanOnly .calculus),
-  (``LeanTaclet.whileUnwind, .leanOnly .keyTier),
   (``LeanTaclet.loopExit, .leanOnly .calculus),
-  (``LeanTaclet.whileInvariantBox, .leanOnly .keyTier),
-  (``LeanTaclet.whileInvariantDiamond, .leanOnly .keyTier),
   (``LeanTaclet.whileClose, .leanOnly .calculus),
-  (``LeanTaclet.whileNoVariantDiamond, .leanOnly .calculus) ]
+  (``LeanTaclet.whileNoVariantDiamond, .leanOnly .calculus),
+  (``LeanTaclet.pushCompoundUnfoldReceiver, .leanOnly .calculus),
+  (``LeanTaclet.pushIncrementUnfoldReceiver, .leanOnly .calculus),
+  (``LeanTaclet.storageMemorySourceSave, .leanOnly .calculus),
+  (``LeanTaclet.storageFixedCopySave, .leanOnly .calculus),
+  (``LeanTaclet.pushFixedCopySave, .leanOnly .calculus),
+  (``LeanTaclet.pushMemorySourceCapture, .leanOnly .calculus) ]
 
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
@@ -512,9 +540,9 @@ theorem printed_rules_partitioned :
       (fun p => claims p != (p.kind != .rule || unclaimedRules.contains p)) = true := by
   decide +kernel
 
-theorem printedRules_count : PrintedRule.all.length = 136 := by decide +kernel
+theorem printedRules_count : PrintedRule.all.length = 137 := by decide +kernel
 
-theorem claimedPrintedRules_count : claimedPrintedRules.length = 118 := by decide +kernel
+theorem claimedPrintedRules_count : claimedPrintedRules.length = 119 := by decide +kernel
 
 theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 
@@ -524,9 +552,9 @@ theorem unclaimedRules_count : unclaimedRules.length = 8 := by decide +kernel
 def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
   ((printedOrigins ++ leanPrintedOrigins).filter fun r => r.2 == .leanOnly why).map Prod.fst
 
-theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 43 := by decide +kernel
+theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 60 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 6 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 14 := by decide +kernel
 
 end PrintedRules
 end Solidity

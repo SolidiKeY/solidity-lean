@@ -1,0 +1,947 @@
+{
+ "header": {
+  "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+  "sourceSha256": "c039c143d0b19fab82e18e96afcbbc5f5ad119ec7ce1856044a97bf6c79e8a45",
+  "solkeyCommit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "source": "tests/solc/PushSuffixes.sol"
+ },
+ "ast": {
+  "nodeType": "SourceUnit",
+  "nodes": [
+   {
+    "literals": [
+     "solidity",
+     "^",
+     "0.8",
+     ".0"
+    ],
+    "nodeType": "PragmaDirective"
+   },
+   {
+    "canonicalName": "PushSuffixes",
+    "contractKind": "contract",
+    "id": 891,
+    "name": "PushSuffixes",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 4,
+      "mutability": "mutable",
+      "name": "values",
+      "nodeType": "VariableDeclaration",
+      "src": "89:12:0",
+      "line": 5,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "int256[]"
+      },
+      "typeName": {
+       "baseType": {
+        "name": "int",
+        "nodeType": "ElementaryTypeName",
+        "typeDescriptions": {
+         "typeString": "int256"
+        }
+       },
+       "nodeType": "ArrayTypeName",
+       "typeDescriptions": {
+        "typeString": "int256[]"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 7,
+      "mutability": "mutable",
+      "name": "unsignedValues",
+      "nodeType": "VariableDeclaration",
+      "src": "107:21:0",
+      "line": 6,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256[]"
+      },
+      "typeName": {
+       "baseType": {
+        "name": "uint",
+        "nodeType": "ElementaryTypeName",
+        "typeDescriptions": {
+         "typeString": "uint256"
+        }
+       },
+       "nodeType": "ArrayTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256[]"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 11,
+      "mutability": "mutable",
+      "name": "matrix",
+      "nodeType": "VariableDeclaration",
+      "src": "134:14:0",
+      "line": 7,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "int256[][]"
+      },
+      "typeName": {
+       "baseType": {
+        "baseType": {
+         "name": "int",
+         "nodeType": "ElementaryTypeName",
+         "typeDescriptions": {
+          "typeString": "int256"
+         }
+        },
+        "nodeType": "ArrayTypeName",
+        "typeDescriptions": {
+         "typeString": "int256[]"
+        }
+       },
+       "nodeType": "ArrayTypeName",
+       "typeDescriptions": {
+        "typeString": "int256[][]"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 13,
+      "mutability": "mutable",
+      "name": "cursor",
+      "nodeType": "VariableDeclaration",
+      "src": "154:11:0",
+      "line": 8,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 15,
+      "mutability": "mutable",
+      "name": "seen",
+      "nodeType": "VariableDeclaration",
+      "src": "171:8:0",
+      "line": 9,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "int256"
+      },
+      "typeName": {
+       "name": "int",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "int256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 19,
+      "mutability": "mutable",
+      "name": "unsignedMatrix",
+      "nodeType": "VariableDeclaration",
+      "src": "185:23:0",
+      "line": 10,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256[][]"
+      },
+      "typeName": {
+       "baseType": {
+        "baseType": {
+         "name": "uint",
+         "nodeType": "ElementaryTypeName",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         }
+        },
+        "nodeType": "ArrayTypeName",
+        "typeDescriptions": {
+         "typeString": "uint256[]"
+        }
+       },
+       "nodeType": "ArrayTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256[][]"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 21,
+      "mutability": "mutable",
+      "name": "se1",
+      "nodeType": "VariableDeclaration",
+      "src": "214:8:0",
+      "line": 11,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":true,"subExpression":{"name":"seen","nodeType":"Identifier","referencedDeclaration":15,"typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"271:6:0","line":13},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"279:15:0","line":13}
+       ]
+      },
+      "id": 33,
+      "kind": "function",
+      "name": "next",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 24,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "263:4:0",
+         "line": 13,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "229:68:0",
+      "line": 13,
+      "stateMutability": "nonpayable",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":true,"subExpression":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"342:8:0","line":14},
+        {"expression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"nodeType":"Return","src":"352:8:0","line":14}
+       ]
+      },
+      "id": 44,
+      "kind": "function",
+      "name": "rhs",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 36,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "335:3:0",
+         "line": 14,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "int256"
+         },
+         "typeName": {
+          "name": "int",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "int256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "302:61:0",
+      "line": 14,
+      "stateMutability": "nonpayable",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":true,"subExpression":{"name":"se1","nodeType":"Identifier","referencedDeclaration":21,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"415:5:0","line":15},
+        {"expression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"Return","src":"422:8:0","line":15}
+       ]
+      },
+      "id": 55,
+      "kind": "function",
+      "name": "nextFresh",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 47,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "407:4:0",
+         "line": 15,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "368:65:0",
+      "line": 15,
+      "stateMutability": "nonpayable",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"477:13:0","line":18},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"500:18:0","line":19},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"-=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"528:18:0","line":20},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"*=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"556:18:0","line":21},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"/=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"584:18:0","line":22},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"%=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"612:18:0","line":23},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":true,"subExpression":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"640:15:0","line":24},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"665:15:0","line":25},
+        {"expression":{"nodeType":"UnaryOperation","operator":"--","prefix":true,"subExpression":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"690:15:0","line":26},
+        {"expression":{"nodeType":"UnaryOperation","operator":"--","prefix":false,"subExpression":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"715:15:0","line":27},
+        {"expression":{"arguments":[{"leftExpression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"length","nodeType":"MemberAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 9"},"value":"9"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"740:26:0","line":28},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"nodeType":"UnaryOperation","operator":"-","prefix":true,"subExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int_const -2"}},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"776:41:0","line":29},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"827:58:0","line":30},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 6"},"value":"6"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"895:40:0","line":31},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"nodeType":"UnaryOperation","operator":"-","prefix":true,"subExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"int_const -1"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 8"},"value":"8"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"nodeType":"UnaryOperation","operator":"-","prefix":true,"subExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"int_const -1"}},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"945:42:0","line":32}
+       ]
+      },
+      "id": 191,
+      "kind": "function",
+      "name": "signedOps",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "439:555:0",
+      "line": 17,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1040:21:0","line":36},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1071:26:0","line":37},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"-=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1107:26:0","line":38},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"*=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1143:26:0","line":39},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"/=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1179:26:0","line":40},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"%=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1215:26:0","line":41},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":true,"subExpression":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1251:23:0","line":42},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"1284:23:0","line":43},
+        {"expression":{"arguments":[{"leftExpression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"length","nodeType":"MemberAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1317:34:0","line":44},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1361:56:0","line":45},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1427:82:0","line":46},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 6"},"value":"6"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1519:56:0","line":47}
+       ]
+      },
+      "id": 299,
+      "kind": "function",
+      "name": "unsignedOps",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "1000:582:0",
+      "line": 35,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1626:13:0","line":51},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage ref[] storage pointer) returns (int256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256[] storage ref"}},"nodeType":"ExpressionStatement","src":"1649:13:0","line":52},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1672:21:0","line":53},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"-=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1703:21:0","line":54},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"*=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1734:21:0","line":55},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"/=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1765:21:0","line":56},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"%=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1796:21:0","line":57},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":true,"subExpression":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1827:18:0","line":58},
+        {"expression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1855:18:0","line":59},
+        {"expression":{"nodeType":"UnaryOperation","operator":"--","prefix":true,"subExpression":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1883:18:0","line":60},
+        {"expression":{"nodeType":"UnaryOperation","operator":"--","prefix":false,"subExpression":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"1911:18:0","line":61},
+        {"expression":{"arguments":[{"leftExpression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"length","nodeType":"MemberAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 9"},"value":"9"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1939:29:0","line":62},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"nodeType":"UnaryOperation","operator":"-","prefix":true,"subExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"int_const -2"}},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"1978:47:0","line":63},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 5"},"value":"5"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 6"},"value":"6"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2035:46:0","line":64},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 7"},"value":"7"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"nodeType":"UnaryOperation","operator":"-","prefix":true,"subExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"int_const -1"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 8"},"value":"8"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"nodeType":"UnaryOperation","operator":"-","prefix":true,"subExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"int_const -1"}},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2091:48:0","line":65}
+       ]
+      },
+      "id": 445,
+      "kind": "function",
+      "name": "nestedOps",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "1588:558:0",
+      "line": 50,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2195:13:0","line":69},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage ref[] storage pointer) returns (int256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256[] storage ref"}},"nodeType":"ExpressionStatement","src":"2218:13:0","line":70},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage ref[] storage pointer) returns (int256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256[] storage ref"}},"nodeType":"ExpressionStatement","src":"2241:13:0","line":71},
+        {"expression":{"leftHandSide":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2264:10:0","line":72},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"arguments":[],"expression":{"name":"rhs","nodeType":"Identifier","referencedDeclaration":44,"typeDescriptions":{"typeString":"function () returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2284:32:0","line":73},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"leftExpression":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"length","nodeType":"MemberAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2326:65:0","line":74}
+       ]
+      },
+      "id": 497,
+      "kind": "function",
+      "name": "effectfulIndex",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2152:246:0",
+      "line": 68,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2446:13:0","line":78},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage ref[] storage pointer) returns (int256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256[] storage ref"}},"nodeType":"ExpressionStatement","src":"2469:13:0","line":79},
+        {"expression":{"leftHandSide":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2492:10:0","line":80},
+        {"expression":{"leftHandSide":{"name":"seen","nodeType":"Identifier","referencedDeclaration":15,"typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2512:8:0","line":81},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"arguments":[],"expression":{"name":"next","nodeType":"Identifier","referencedDeclaration":33,"typeDescriptions":{"typeString":"function () returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"seen","nodeType":"Identifier","referencedDeclaration":15,"typeDescriptions":{"typeString":"int256"}},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2530:29:0","line":82},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"leftExpression":{"name":"cursor","nodeType":"Identifier","referencedDeclaration":13,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"name":"seen","nodeType":"Identifier","referencedDeclaration":15,"typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"matrix","nodeType":"Identifier","referencedDeclaration":11,"typeDescriptions":{"typeString":"int256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2569:53:0","line":83}
+       ]
+      },
+      "id": 544,
+      "kind": "function",
+      "name": "effectfulCall",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2404:225:0",
+      "line": 77,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2672:18:0","line":87},
+        {"expression":{"arguments":[{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2700:22:0","line":88}
+       ]
+      },
+      "id": 563,
+      "kind": "function",
+      "name": "recycled",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2635:94:0",
+      "line": 86,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2773:13:0","line":92},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2796:18:0","line":93},
+        {"expression":{"arguments":[{"leftExpression":{"baseExpression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"int256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2824:22:0","line":94}
+       ]
+      },
+      "id": 585,
+      "kind": "function",
+      "name": "falsePost",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2735:118:0",
+      "line": 91,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"/=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2891:18:0","line":97}
+       ]
+      },
+      "id": 596,
+      "kind": "function",
+      "name": "zeroDivisor",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2859:53:0",
+      "line": 97,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"name":"values","nodeType":"Identifier","referencedDeclaration":4,"typeDescriptions":{"typeString":"int256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (int256[] storage pointer) returns (int256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"int256"}},"nodeType":"Assignment","operator":"%=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"int256"}},"nodeType":"ExpressionStatement","src":"2951:18:0","line":98}
+       ]
+      },
+      "id": 607,
+      "kind": "function",
+      "name": "zeroRemainder",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2917:55:0",
+      "line": 98,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"--","prefix":true,"subExpression":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3010:23:0","line":99}
+       ]
+      },
+      "id": 616,
+      "kind": "function",
+      "name": "preUnderflow",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2977:59:0",
+      "line": 99,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"--","prefix":false,"subExpression":{"arguments":[],"expression":{"expression":{"name":"unsignedValues","nodeType":"Identifier","referencedDeclaration":7,"typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3075:23:0","line":100}
+       ]
+      },
+      "id": 626,
+      "kind": "function",
+      "name": "postUnderflow",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3041:60:0",
+      "line": 100,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3146:21:0","line":103},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage ref[] storage pointer) returns (uint256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256[] storage ref"}},"nodeType":"ExpressionStatement","src":"3177:21:0","line":104},
+        {"declarations":[{"constant":false,"id":638,"mutability":"mutable","name":"se2","nodeType":"VariableDeclaration","src":"3208:8:0","line":105,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"3208:12:0","line":105},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"se2","nodeType":"Identifier","referencedDeclaration":638,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"se2","nodeType":"Identifier","referencedDeclaration":638,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3230:35:0","line":106},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"name":"se2","nodeType":"Identifier","referencedDeclaration":638,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3275:45:0","line":107}
+       ]
+      },
+      "id": 665,
+      "kind": "function",
+      "name": "freshLocal",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3107:220:0",
+      "line": 102,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3376:21:0","line":110},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage ref[] storage pointer) returns (uint256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256[] storage ref"}},"nodeType":"ExpressionStatement","src":"3407:21:0","line":111},
+        {"declarations":[{"constant":false,"id":677,"mutability":"mutable","name":"se2","nodeType":"VariableDeclaration","src":"3438:8:0","line":112,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"3438:12:0","line":112},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"se2","nodeType":"Identifier","referencedDeclaration":677,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"se2","nodeType":"Identifier","referencedDeclaration":677,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3460:35:0","line":113},
+        {"expression":{"arguments":[{"leftExpression":{"baseExpression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3505:33:0","line":114}
+       ]
+      },
+      "id": 700,
+      "kind": "function",
+      "name": "freshLocalFalse",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3332:213:0",
+      "line": 109,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3601:21:0","line":117},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage ref[] storage pointer) returns (uint256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256[] storage ref"}},"nodeType":"ExpressionStatement","src":"3632:21:0","line":118},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":702,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":702,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3663:35:0","line":119},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":702,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3708:45:0","line":120}
+       ]
+      },
+      "id": 737,
+      "kind": "function",
+      "name": "freshParameter",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 702,
+         "mutability": "mutable",
+         "name": "ie1",
+         "nodeType": "VariableDeclaration",
+         "src": "3574:8:0",
+         "line": 116,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3550:210:0",
+      "line": 116,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3821:21:0","line":123},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage ref[] storage pointer) returns (uint256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256[] storage ref"}},"nodeType":"ExpressionStatement","src":"3852:21:0","line":124},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":739,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":739,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3883:35:0","line":125},
+        {"expression":{"arguments":[{"leftExpression":{"baseExpression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3928:33:0","line":126}
+       ]
+      },
+      "id": 770,
+      "kind": "function",
+      "name": "freshParameterFalse",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 739,
+         "mutability": "mutable",
+         "name": "ie1",
+         "nodeType": "VariableDeclaration",
+         "src": "3794:8:0",
+         "line": 122,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3765:203:0",
+      "line": 122,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4012:21:0","line":129},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage ref[] storage pointer) returns (uint256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256[] storage ref"}},"nodeType":"ExpressionStatement","src":"4043:21:0","line":130},
+        {"expression":{"leftHandSide":{"name":"se1","nodeType":"Identifier","referencedDeclaration":21,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4074:7:0","line":131},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"arguments":[],"expression":{"name":"nextFresh","nodeType":"Identifier","referencedDeclaration":55,"typeDescriptions":{"typeString":"function () returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"se1","nodeType":"Identifier","referencedDeclaration":21,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4091:41:0","line":132},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"name":"se1","nodeType":"Identifier","referencedDeclaration":21,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"baseExpression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4142:45:0","line":133}
+       ]
+      },
+      "id": 809,
+      "kind": "function",
+      "name": "freshState",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3973:221:0",
+      "line": 128,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"nodeType":"UnaryOperation","operator":"delete","prefix":true,"subExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4243:21:0","line":136},
+        {"expression":{"arguments":[],"expression":{"expression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage ref[] storage pointer) returns (uint256[] storage ref)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256[] storage ref"}},"nodeType":"ExpressionStatement","src":"4274:21:0","line":137},
+        {"expression":{"leftHandSide":{"name":"se1","nodeType":"Identifier","referencedDeclaration":21,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4305:7:0","line":138},
+        {"expression":{"leftHandSide":{"arguments":[],"expression":{"expression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"arguments":[],"expression":{"name":"nextFresh","nodeType":"Identifier","referencedDeclaration":55,"typeDescriptions":{"typeString":"function () returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"memberName":"push","nodeType":"MemberAccess","typeDescriptions":{"typeString":"function (uint256[] storage pointer) returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"name":"se1","nodeType":"Identifier","referencedDeclaration":21,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4322:41:0","line":139},
+        {"expression":{"arguments":[{"leftExpression":{"baseExpression":{"baseExpression":{"name":"unsignedMatrix","nodeType":"Identifier","referencedDeclaration":19,"typeDescriptions":{"typeString":"uint256[] storage ref[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256[] storage ref"}},"indexExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"IndexAccess","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4373:33:0","line":140}
+       ]
+      },
+      "id": 844,
+      "kind": "function",
+      "name": "freshStateFalse",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4199:214:0",
+      "line": 135,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"declarations":[{"constant":false,"id":848,"mutability":"mutable","name":"ie1","nodeType":"VariableDeclaration","src":"4458:8:0","line":143,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"4458:12:0","line":143},
+        {"declarations":[{"constant":false,"id":852,"mutability":"mutable","name":"result","nodeType":"VariableDeclaration","src":"4480:11:0","line":144,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"leftExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":848,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":848,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"VariableDeclarationStatement","src":"4480:25:0","line":144},
+        {"expression":{"arguments":[{"leftExpression":{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":852,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"BinaryOperation","operator":"&&","rightExpression":{"leftExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":848,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4515:31:0","line":145}
+       ]
+      },
+      "id": 869,
+      "kind": "function",
+      "name": "freshBinary",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4418:135:0",
+      "line": 142,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"declarations":[{"constant":false,"id":873,"mutability":"mutable","name":"ie1","nodeType":"VariableDeclaration","src":"4603:8:0","line":148,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"VariableDeclarationStatement","src":"4603:12:0","line":148},
+        {"declarations":[{"constant":false,"id":877,"mutability":"mutable","name":"result","nodeType":"VariableDeclaration","src":"4625:11:0","line":149,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"leftExpression":{"nodeType":"UnaryOperation","operator":"++","prefix":false,"subExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":873,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"ie1","nodeType":"Identifier","referencedDeclaration":873,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"VariableDeclarationStatement","src":"4625:25:0","line":149},
+        {"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":877,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4660:19:0","line":150}
+       ]
+      },
+      "id": 890,
+      "kind": "function",
+      "name": "freshBinaryFalse",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4558:128:0",
+      "line": 147,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "61:4627:0",
+    "line": 4
+   }
+  ]
+ }
+}

@@ -82,6 +82,38 @@ end
 
 instance : Coe PrimTy Ty := ⟨Ty.prim⟩
 
+/-- Outer-array copy compatibility: fixed `n` into a dynamic array, or into
+a fixed array with room for every source element. The element type stays
+intrinsic; the dynamic length bound and the absence of truncation are evidence. -/
+inductive FixedCopy (E : Ty) (n : Nat) : RefTy → Type where
+  | dynamic (bound : n < 2 ^ 256) : FixedCopy E n (.array E)
+  | fixed (m : Nat) (fits : n ≤ m) : FixedCopy E n (.fixed E m)
+
+/-- Reify a fixed-to-dynamic witness using a kernel-rechecked Boolean fact. -/
+def FixedCopy.dynamicChecked (E : Ty) (n : Nat) (h : decide (n < 2 ^ 256) = true) :
+    FixedCopy E n (.array E) := .dynamic (of_decide_eq_true h)
+
+/-- Reify a fixed-to-fixed witness without trusting an elaborator proof. -/
+def FixedCopy.fixedChecked (E : Ty) (n m : Nat) (h : decide (n ≤ m) = true) :
+    FixedCopy E n (.fixed E m) := .fixed m (of_decide_eq_true h)
+
+/-- Resolve a fixed-array source at a compatible destination shape. -/
+def FixedCopy.ofTarget (E : Ty) (n : Nat) : (R : RefTy) → Option (FixedCopy E n R)
+  | .array E' =>
+    if he : E = E' then
+      if hb : n < 2 ^ 256 then some (he ▸ FixedCopy.dynamic hb) else none
+    else none
+  | .fixed E' m =>
+    if he : E = E' then
+      if hf : n ≤ m then some (he ▸ FixedCopy.fixed m hf) else none
+    else none
+  | _ => none
+
+/-- At fixed source and destination types, shape compatibility has one
+witness; its bound evidence is proof-irrelevant. -/
+theorem FixedCopy.eq {E : Ty} {n : Nat} {R : RefTy} (a b : FixedCopy E n R) : a = b := by
+  cases a <;> cases b <;> rfl
+
 namespace Ty
 
 /- Source-level names of the primitive types, usable in patterns.
@@ -225,6 +257,7 @@ def structDef : Name -> List (Name × Ty)
   | "FixedTriple" => [("items", Ty.ref (RefTy.fixed Ty.uint 3)), ("tag", Ty.uint)]
   -- solc/SolcArrays.sol, SolcControlFlow.sol, SolcStructs.sol (agree).
   | "Pair" => [("a", Ty.uint), ("b", Ty.uint)]
+  | "FileLevelPair" => [("left", Ty.uint), ("right", Ty.uint)]
   -- solc/SolcMappings.sol.
   | "S" => [("a", Ty.uint)]
   | "Sub" => [("x", Ty.uint), ("y", Ty.uint)]
@@ -292,6 +325,7 @@ def structRank : Name -> Nat
   | "Toggle" => 1
   | "FixedTriple" => 2
   | "Pair" => 1
+  | "FileLevelPair" => 1
   | "S" => 1
   | "Sub" => 1
   | "WithSub" => 2
@@ -506,6 +540,20 @@ theorem Ty.keySort_memory_le_identity (ty : Ty) :
   | prim p => cases p <;> rfl
   | ref r => cases r <;> rfl
 
+/-- Solidity's ternary modular builtins use an unbounded intermediate. -/
+inductive ModOp where
+  | addmod | mulmod
+  deriving DecidableEq, Repr, Lean.ToExpr
+
+def ModOp.toStr : ModOp → String
+  | .addmod => "addmod"
+  | .mulmod => "mulmod"
+
+def ModOp.ofName? : String → Option ModOp
+  | "addmod" => some .addmod
+  | "mulmod" => some .mulmod
+  | _ => none
+
 /-- Binary operators of the KeY calculus (`solidityProgramRules.key`):
 arithmetic (`addition` .. `modulo`), comparisons (`lessThan` ..
 `greaterEqual`) and boolean connectives (`boolEquality`, `boolInequality`,
@@ -642,7 +690,7 @@ their proofs are `Eq.refl`, from a list of the structs checked once
 
 /-- The structs of `structDef` that hold no mapping. -/
 def mapFreeStructs : List Name :=
-  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "S",
+  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S",
    "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple"]
 
 /-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
@@ -668,7 +716,7 @@ has the wrong type for what the name looks up to), and solc refuses one
 (`refusedStructs`). -/
 def defaultOkStructs : List Name :=
   ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
-   "Toggle", "FixedTriple", "Pair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
+   "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
    "WithArray", "Triple"]
 
 /-- `T`'s fresh default is well-formed: what `values.push();` and
@@ -742,7 +790,10 @@ attribute [nospecialize] FreshNames
 
 /-- The `k`-th fresh variable of each kind is a prefix and `k`.  The four
 prefixes must be distinct identifiers that do not end in a digit.  A loop's
-flags keep solkey's names (`brk1`, `cnt2`, `ret3`, `first4`: `lowerLoops`). -/
+flags keep solkey's names (`brk1`, `cnt2`, `ret3`, `first4`: `lowerLoops`),
+and push-source captures use `source1`. These fixed prefixes must also be
+distinct from the four configurable prefixes. Custom prefixes must avoid
+contract roots; `FreshNames.clashes` checks explicit table aliases only. -/
 def FreshNames.ofPrefixes (se sp ie mv : String) : FreshNames where
   name b k :=
     let pre := if b = "se" then se else if b = "sp" then sp else if b = "ie" then ie
@@ -753,7 +804,7 @@ def FreshNames.ofPrefixes (se sp ie mv : String) : FreshNames where
     let digits := s.drop stem.length
     if digits.isEmpty || !digits.all (·.isDigit) then none
     else ([("se", se), ("sp", sp), ("ie", ie), ("mv", mv), ("brk", "brk"), ("cnt", "cnt"),
-        ("ret", "ret"), ("first", "first")].find? (·.2 == stem)).map
+        ("ret", "ret"), ("first", "first"), ("source", "source")].find? (·.2 == stem)).map
       (·.1, digits.toNat!)
 
 /-- `se1`, `sp1`, `ie1`, `mv1`, unless a file declares its own. -/

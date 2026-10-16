@@ -76,6 +76,25 @@ inductive ProvesC (I : Fml C []) (Γ₀ : Ctx) : {Γ : Ctx} → Hyps C Γ₀ Γ 
       (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.update U)) (hs : s.forks = false)
       (h : ProvesC I Γ₀ (H.upd m U) (.modalK m ω κ φ)) :
       ProvesC I Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- Two updates in sequence, as in `a.push() += x`, on a statement that
+  runs no callback of its own. -/
+  | updates {Γ Δ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
+      (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.updates U V))
+      (hs : s.forks = false)
+      (h : ProvesC I Γ₀ ((H.upd m U).upd m V) (.modalK m ω κ φ)) :
+      ProvesC I Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- The outer zero-divisor branch of `sp.push() /= se`, with callbacks
+  permitted only in the continuation. -/
+  | guardedUpdates {Γ Δ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality}
+      {s : Stmt C Γ Γ} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      {c : Fml C Γ} {U : Upd C Γ Δ} {V : Upd C Δ Γ}
+      (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.guardedUpdates c U V))
+      (hs : s.forks = false)
+      (thn : ProvesC I Γ₀ (H.pre c) (.upd m U (.upd m V (.modalK m ω κ φ))))
+      (els : ProvesC I Γ₀ (H.pre (.not c)) (.modal m (.cons .revert ω) κ φ)) :
+      ProvesC I Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A rule that produces statements, on a statement that runs no other and
   pays nothing, when they pay nothing either. -/
   | unfold {Γ Γ' Γ'' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
@@ -84,6 +103,20 @@ inductive ProvesC (I : Fml C []) (Γ₀ : Ctx) : {Γ : Ctx} → Hyps C Γ₀ Γ 
       (hP : P.hasTransfer = false)
       (h : ProvesC I Γ₀ H (.modal m P (.pop .capture e (.seq ω κ)) φ)) :
       ProvesC I Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- `storagePushValue_unfold_leftCallReceiver`, including callbacks in the
+  getter or deferred operand. Both captured aliases end with this statement. -/
+  | unfoldReceiver {Γ Γv ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality}
+      {E : Ty} {f : Name} {args : Args C Γ ps} {r : Var}
+      {body : Prog C ([.alias (.array E)] ++ ps) Γf}
+      {code : Prog C Γ Γv} {value : Src C Γv E} {k : Nat}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (d : Rule C (H.freshC I (.modal m
+        (.cons (.callReceiverPush f args r body code value) ω) κ φ)) m
+        (.callReceiverPush f args r body code value)
+        (.unfold (callReceiverPushCapture k f args r body code value) (.push (.push .refl))))
+      (h : ProvesC I Γ₀ H (.modal m (callReceiverPushCapture k f args r body code value)
+        (.pop .capture (.push (.push .refl)) (.seq ω κ)) φ)) :
+      ProvesC I Γ₀ H (.modal m (.cons (.callReceiverPush f args r body code value) ω) κ φ)
   /-- A declaration with its initializer dropped (`localValueDeclInitDrop`),
   when the assignment pays nothing. -/
   | bind {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}

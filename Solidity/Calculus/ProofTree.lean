@@ -93,6 +93,8 @@ def closeTacs : MetaM (Array (TSyntax `tactic)) := do
 /-- The `Proves` constructor of a premise kind. -/
 def provesCtor (premise : Lean.Name) : Option Lean.Name :=
   [(``Premise.update, ``Proves.update), (``Premise.unfold, ``Proves.unfold),
+   (``Premise.updates, ``Proves.updates),
+   (``Premise.guardedUpdates, ``Proves.guardedUpdates),
    (``Premise.bind, ``Proves.bind), (``Premise.split, ``Proves.split),
    (``Premise.check, ``Proves.check), (``Premise.done, ``Proves.done),
    (``Premise.branches, ``Proves.branches), (``Premise.cases, ``Proves.cases),

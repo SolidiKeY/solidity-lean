@@ -736,6 +736,7 @@ theorem noStore_compileVal (b : Nat) {Γ : Ctx} : {p : PrimTy} →
     simp only [compileVal]; no_store
   | _, .readMem _ => rfl
   | _, .mlen .. => rfl
+  | _, .modular .. => rfl
 end
 
 /-- Code that stores to no level below `n`. -/
@@ -779,6 +780,7 @@ theorem storesFrom_argsCode (b : Nat) {Γ : Ctx} : {ps : Ctx} →
   | _, .snoc as _ _ e => by
     have := storesFrom_argsCode b as; have := noStore_compileVal b e
     simp only [argsCode]; stores_from
+  | _, .snocStorage .. | _, .snocMemory .. => fun _ _ h => nomatch h
 
 theorem storesFrom_retEnterCode (b : Nat) {Γ : Ctx} (ps : Ctx) {rs Γ' : Ctx}
     (ret : Solidity.CallRet Γ rs Γ') :
@@ -804,12 +806,14 @@ theorem noStore_pushCode (b : Nat) {Γ : Ctx} {E : Ty} (v : Option (Solidity.Src
     (q : Solidity.SPath C Γ (.array E)) : NoStore (pushCode b v q) := by
   have := noStore_compileSPath b q
   have := noStore_pushSlotCode 1
-  rcases v with _ | (v | q')
+  rcases v with _ | (v | q' | mp | shape)
   · simp only [pushCode]; no_store
   · have := noStore_compileVal b v
     simp only [pushCode]; no_store
   · have := noStore_compileSPath b q'
     simp only [pushCode]; no_store
+  · rfl
+  · rfl
 
 theorem storesFrom_opLocCode (b n : Nat) {Γ : Ctx} {p : PrimTy} (l : Solidity.OpLoc C Γ p)
     (onLocal : Nat → List Instr) (onLoc : Solidity.Loc C Γ (.prim p) → List Instr)
@@ -827,6 +831,7 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .assign l (.copy q _) => by
     have := noStore_compileSPath b q; have := noStore_compileLoc b l
     simp only [compileStmt, assignCode]; stores_from
+  | .assign _ (.copyMem _) | .assign _ (.fixedCopy ..) => fun _ _ h => nomatch h
   | .rebind i (.path q) => by
     have := noStore_compileSPath b q
     simp only [compileStmt]; stores_from
@@ -906,6 +911,10 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .tryCall .. => fun _ _ h => nomatch h
   | .loop .. => fun _ _ h => nomatch h
   | .assignLocalPush .. => fun _ _ h => nomatch h
+  | .pushOpAssign .. => fun _ _ h => nomatch h
+  | .pushIncDec .. => fun _ _ h => nomatch h
+  | .callReceiver .. => fun _ _ h => nomatch h
+  | .callReceiverPush .. => fun _ _ h => nomatch h
   | .block body => by simp only [compileStmt]; exact storesFrom_compileProg b body
 /-- A block's code at base `b` stores to no level below `b`. -/
 theorem storesFrom_compileProg (b : Nat) {Γ Γ' : Ctx} :

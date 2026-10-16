@@ -10,5 +10,9 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 export PATH="$repo_root/scripts/lean-vscode/bin:$PATH"
 
+# Lake 4.24 restores a cached executable only when its destination is absent.
+# After another checkout supplies a newer artifact, an existing executable
+# can otherwise survive a successful build. Refresh this generated file.
+rm -f -- ./.lake/build/bin/solkeycheck
 lake build solkeycheck >/dev/null
 exec ./.lake/build/bin/solkeycheck "$@"

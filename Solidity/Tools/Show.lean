@@ -115,6 +115,7 @@ def SpecExpr.prec : SpecExpr → Nat
 the grammar needs it. -/
 partial def SpecExpr.fmt : SpecExpr → String
   | .num n => toString n
+  | .uintLit n => s!"uint({n})"
   | .bool b => toString b
   | .name x => x
   | .result => "\\result"
@@ -142,5 +143,7 @@ partial def SpecLoc.fmt : SpecLoc → String
   | .field l f => s!"{SpecLoc.fmt l}.{f}"
   | .index l e => s!"{SpecLoc.fmt l}[{SpecExpr.fmt e}]"
   | .all l => s!"{SpecLoc.fmt l}[*]"
+
+#guard SpecExpr.fmt (spec!(uint(7))) == "uint(7)"
 
 end Solidity.Tools

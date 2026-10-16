@@ -59,6 +59,11 @@ mv2;`, `m = mv2;`, KeY's `resultVar = freshReturn`).  The printers write the
 two statements as the call they are (`Person memory mv1 =
 choosePersonMem();`), which reads back to them.  A member of a call's value
 is a member of that capture (`choosePersonMem().account = a;`).
+
+A single storage return (`returns (uint[] storage r)`) instead enters with
+an unset alias and exports that alias without allocation (`CallRet.storage`).
+Storage-local declarations and rebinding consume it; a direct call receiver
+is retained as an unsupported case until its native capture taclet is added.
 -/
 
 namespace Solidity
@@ -125,6 +130,7 @@ inductive RawExpr where
   side of an assignment or a declaration, or of a `return`; captured before
   the statement anywhere else (`hoist`). -/
   | call (f : String) (args : List RawExpr)
+  | modular (op : ModOp) (a b k : RawExpr)
   /-- `T({f: a, g: b})`, a struct constructor with named arguments: put in
   the members' order by `hoist`, then read as the positional `T(a, b)`; a
   function's call `f({q: b, p: a})`, put in its parameters' order
@@ -158,6 +164,10 @@ inductive RawStmt where
   | delete (e : RawExpr)
   | opAssign (op : BinOp) (l r : RawExpr)
   | incDec (op : IncDec) (l : RawExpr)
+  /-- `b.push() += r`: a primitive push result used as a compound target. -/
+  | pushOpAssign (op : BinOp) (b r : RawExpr)
+  /-- `++b.push()` / `b.push()++`: the result is discarded. -/
+  | pushIncDec (op : IncDec) (b : RawExpr)
   /-- `b.push()`, `b.push(a)`, `b.pop()`, `a.transfer(v)`. -/
   | call (f : RawExpr) (args : List RawExpr)
   | assignIncDec (x : RawExpr) (op : IncDec) (l : RawExpr)
@@ -245,18 +255,27 @@ structure ModApp where
   body : List RawStmt
   deriving Repr, Inhabited
 
+/-- A reference parameter's declared data location. -/
+inductive ParamLoc where
+  | memory | storage | calldata
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
 /-- An internal function as the contract declares it: its parameters and
 its return variables (`returns (uint r)`; unnamed, `returns (uint)`, it is
 called `_ret`, and the `i`-th of several `_ret{i}`, solkey's `ret{i}`;
-`returns (Account memory a)`, a memory reference), at their types, and its
+`returns (Account memory a)` or `returns (Account storage a)`, a reference
+at its location), at their types, and its
 body as read.  The elaborator types the body where the function is called
 and inlines it there (`Stmt.call`). -/
 structure FunDecl where
   params : List (Name × Ty)
+  /-- Reference parameters retain their locations separately from their types. -/
+  paramLocs : List (Name × ParamLoc) := []
   rets : List (Name × Ty) := []
-  /-- A return variable is declared `memory`, as a reference one must be
-  (only a function of one return may return a reference). -/
+  /-- The single reference return is declared `memory`. -/
   retMem : Bool := false
+  /-- The single reference return is declared `storage`, exporting an alias. -/
+  retStorage : Bool := false
   body : List RawStmt
   /-- The modifiers it applies, the first listed outermost. -/
   mods : List ModApp := []
@@ -589,6 +608,19 @@ syntax (name := solDelete) "delete" ppSpace sol_expr : sol_stmt
 -- called.
 syntax sol_expr ".push(" sol_expr ")" : sol_stmt
 syntax sol_expr ".push()" : sol_stmt
+syntax (name := solPushAddAssign) sol_expr ".push()" " += " sol_expr : sol_stmt
+syntax (name := solPushSubAssign) sol_expr ".push()" " -= " sol_expr : sol_stmt
+syntax (name := solPushMulAssign) sol_expr ".push()" " *= " sol_expr : sol_stmt
+syntax (name := solPushDivAssign) sol_expr ".push()" " /= " sol_expr : sol_stmt
+syntax (name := solPushModAssign) sol_expr ".push()" " %= " sol_expr : sol_stmt
+syntax (name := solPushPreInc) "++" sol_expr ".push()" : sol_stmt
+syntax (name := solPushPreDec) "−−" sol_expr ".push()" : sol_stmt
+syntax (name := solPushPostInc) sol_expr ".push()" "++" : sol_stmt
+syntax (name := solPushPostDec) sol_expr ".push()" "−−" : sol_stmt
+syntax (name := solPushCallPreInc) "++" sol_expr:max "(" ")" : sol_stmt
+syntax (name := solPushCallPreDec) "−−" sol_expr:max "(" ")" : sol_stmt
+syntax (name := solPushCallPostInc) sol_expr:max "(" ")" "++" : sol_stmt
+syntax (name := solPushCallPostDec) sol_expr:max "(" ")" "−−" : sol_stmt
 syntax sol_expr ".pop()" : sol_stmt
 syntax sol_expr " = " sol_expr ".push()" : sol_stmt
 /-- `values .push() = e;`, `a[i].push() = e;`: a push used as a target spelt
@@ -614,7 +646,6 @@ syntax (priority := high) sol_ty ident " = " sol_expr:max "(" sol_expr,* ")" : s
 syntax (name := solReturn) "return " sol_expr : sol_stmt
 syntax (name := solReturnNone) "return" : sol_stmt
 syntax (priority := high) sol_ty &"storage" ident " = " sol_expr:max "(" ")" : sol_stmt
-syntax (priority := high) sol_ty ident " = " sol_expr:max "(" ")" : sol_stmt
 syntax sol_expr:max "++" : sol_stmt
 syntax "++" sol_expr : sol_stmt
 syntax sol_expr " = " sol_expr:max "++" : sol_stmt
@@ -688,6 +719,8 @@ external call.  A clause's parameter is `sol_tparam`: a type, `memory` for
 `string`/`bytes`, an optional name. -/
 declare_syntax_cat sol_tparam (behavior := both)
 syntax sol_ty (ppSpace &"memory")? (ppSpace ident)? : sol_tparam
+declare_syntax_cat sol_rparam (behavior := both)
+syntax sol_ty (ppSpace (&"memory" <|> &"storage"))? (ppSpace ident)? : sol_rparam
 declare_syntax_cat sol_catch (behavior := both)
 syntax (name := solCatchError) "catch " &"Error" "(" sol_tparam ") " sol_block : sol_catch
 syntax (name := solCatchPanic) "catch " &"Panic" "(" sol_tparam ") " sol_block : sol_catch
@@ -806,6 +839,56 @@ def incDecParts? (s : Syntax) : Option (IncDec × Syntax) :=
   else if s[0].isAtom then (IncDec.ofTok? true s[0].getAtomVal).map (·, s[1])
   else none
 
+/-- The receiver of a method named `push`, before its empty argument list. -/
+def pushMethodBase? : TSyntax `sol_expr → MacroM (Option (TSyntax `sol_expr))
+  | `(sol_expr| $x:ident) => do
+    match (nameParts x.getId).reverse with
+    | "push" :: r :: rs =>
+      let n := (r :: rs).reverse.foldl (fun n s => Name.str n s) Name.anonymous
+      return some (← `(sol_expr| $(mkIdentFrom x n):ident))
+    | _ => return none
+  | `(sol_expr| $b:sol_expr . $f:ident) =>
+    pure (if f.getId.toString == "push" then some b else none)
+  | _ => pure none
+
+/-- `b.push()` as a compound or increment lvalue, optionally parenthesized. -/
+partial def pushLvalueBase? : TSyntax `sol_expr → MacroM (Option (TSyntax `sol_expr))
+  | `(sol_expr| $f:sol_expr ( )) => pushMethodBase? f
+  | `(sol_expr| ($e:sol_expr)) => pushLvalueBase? e
+  | _ => pure none
+
+/-- Both the fused `.push()` token and an ordinary method-call expression
+can spell `rows[i].push() += rhs`. -/
+def pushCompoundParts? (s : Syntax) : MacroM (Option (BinOp × TSyntax `sol_expr × TSyntax `sol_expr)) := do
+  let fixed := match s.getKind with
+    | ``solPushAddAssign => some BinOp.add | ``solPushSubAssign => some BinOp.sub
+    | ``solPushMulAssign => some BinOp.mul | ``solPushDivAssign => some BinOp.div
+    | ``solPushModAssign => some BinOp.mod | _ => none
+  if let some op := fixed then return some (op, ⟨s[0]⟩, ⟨s[3]⟩)
+  if s.getNumArgs == 3 && s[1].isAtom && s[1].getAtomVal.endsWith "=" then
+    if let some op := BinOp.ofSym? (s[1].getAtomVal.dropRight 1) then
+      if let some b ← pushLvalueBase? ⟨s[0]⟩ then return some (op, b, ⟨s[2]⟩)
+  return none
+
+/-- A discarded push increment/decrement, including calls whose callee
+lexes as the dotted identifier `values.push`. -/
+def pushIncrementParts? (s : Syntax) : MacroM (Option (IncDec × TSyntax `sol_expr)) := do
+  match s.getKind with
+  | ``solPushPreInc => return some (.preInc, ⟨s[1]⟩)
+  | ``solPushPreDec => return some (.preDec, ⟨s[1]⟩)
+  | ``solPushPostInc => return some (.postInc, ⟨s[0]⟩)
+  | ``solPushPostDec => return some (.postDec, ⟨s[0]⟩)
+  | ``solPushCallPreInc | ``solPushCallPreDec =>
+    let some b ← pushMethodBase? ⟨s[1]⟩ | return none
+    return some ((if s.isOfKind ``solPushCallPreInc then .preInc else .preDec), b)
+  | ``solPushCallPostInc | ``solPushCallPostDec =>
+    let some b ← pushMethodBase? ⟨s[0]⟩ | return none
+    return some ((if s.isOfKind ``solPushCallPostInc then .postInc else .postDec), b)
+  | _ =>
+    if let some (op, l) := incDecParts? s then
+      if let some b ← pushLvalueBase? ⟨l⟩ then return some (op, b)
+    return none
+
 /-- Of an ambiguous parse, the readings `good` accepts first, then all of them;
 of an unambiguous one, itself. -/
 def readings (s : Syntax) (good : Syntax → Bool) : Array Syntax :=
@@ -886,6 +969,10 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   -- an assignment of the expression `x++`, which `hoistStmt` makes an
   -- `assignIncDec` when `y` is a local: its other parse is not expanded.)
   let r := s.raw
+  if let some (op, b, rhs) ← pushCompoundParts? r then
+    return ← `(RawStmt.pushOpAssign $(ctorIdent ``BinOp op) $(← expandExpr b) $(← expandExpr rhs))
+  if let some (op, b) ← pushIncrementParts? r then
+    return ← `(RawStmt.pushIncDec $(ctorIdent ``IncDec op) $(← expandExpr b))
   if let some (op, l) := incDecParts? r then
     return ← `(RawStmt.incDec $(ctorIdent ``IncDec op) $(← expandExpr ⟨l⟩))
   if r.getNumArgs == 3 && r[1].isAtom && r[1].getAtomVal.endsWith "=" then
@@ -1004,7 +1091,10 @@ where
   | `(sol_stmt| $T:sol_ty storage $x:ident = $b:sol_expr .push()) => do
       `(RawStmt.declStoragePush $(← expandTy T) $(strLit x) $(← expandExpr b))
   | `(sol_stmt| $T:sol_ty storage $x:ident = $f:sol_expr ( )) => do
-      `(RawStmt.declStoragePush $(← expandTy T) $(strLit x) $(← pushRecv f))
+      match funName? f with
+      | some g => `(RawStmt.declStorage $(← expandTy T) $(strLit x)
+          (some (RawExpr.call $(quote g) [])))
+      | none => `(RawStmt.declStoragePush $(← expandTy T) $(strLit x) $(← pushRecv f))
   | `(sol_stmt| $T:sol_ty storage $x:ident = $e) => do
       `(RawStmt.declStorage $(← expandTy T) $(strLit x) (some $(← expandExpr e)))
   | `(sol_stmt| $T:sol_ty storage $x:ident) => do
@@ -1211,13 +1301,14 @@ syntax sol_ty sol_vis* ident " = " sol_expr ";" : sol_member
 /-- A parameter, `uint x`. -/
 declare_syntax_cat sol_param (behavior := both)
 syntax sol_ty ident : sol_param
+syntax sol_ty (&"memory" <|> &"storage" <|> &"calldata") ident : sol_param
 
 /-- A function's attribute: its return variables, `returns (uint r)`,
 `returns (Person memory p)`, `returns (uint lo, uint hi)`; a visibility or a
 mutability (dropped); or a modifier applied, `onlyOwner`,
 `inState(State.Created)`. -/
 declare_syntax_cat sol_fattr (behavior := both)
-syntax (name := solAttrReturns) &"returns" "(" sol_tparam,+ ")" : sol_fattr
+syntax (name := solAttrReturns) &"returns" "(" sol_rparam,+ ")" : sol_fattr
 syntax (name := solAttrKw) (&"public" <|> &"external" <|> &"internal" <|> &"private" <|> &"view" <|>
   &"pure" <|> &"payable" <|> &"virtual" <|> &"override") : sol_fattr
 syntax (name := solAttrMod) ident ("(" sol_expr,* ")")? : sol_fattr
@@ -1293,15 +1384,27 @@ def expandMemberTyW (enums : List String) (T : TSyntax `sol_ty) : MacroM (Term �
 
 /-- A function's parameters, and the rows of `FunDecl.widths` for the narrow ones. -/
 def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
-    MacroM (Array Term × Array Term) := do
+    MacroM (Array Term × Array Term × Array Term) := do
   let mut rows := #[]
   let mut ws := #[]
+  let mut locs := #[]
   for p in ps do
-    let `(sol_param| $T:sol_ty $x:ident) := p | Macro.throwUnsupported
+    let (T, x, loc) ← match p with
+      | `(sol_param| $T:sol_ty $x:ident) => pure (T, x, none)
+      | `(sol_param| $T:sol_ty memory $x:ident) => pure (T, x, some ParamLoc.memory)
+      | `(sol_param| $T:sol_ty storage $x:ident) => pure (T, x, some ParamLoc.storage)
+      | `(sol_param| $T:sol_ty calldata $x:ident) => pure (T, x, some ParamLoc.calldata)
+      | _ => Macro.throwUnsupported
     let (t, w) ← expandMemberTyW enums T
     rows := rows.push (← `(($(strLit x), $t)))
     if let some n := w then ws := ws.push (← `(($(strLit x), $(quote n))))
-  pure (rows, ws)
+    if let some loc := loc then
+      let l ← match loc with
+        | .memory => `(ParamLoc.memory)
+        | .storage => `(ParamLoc.storage)
+        | .calldata => `(ParamLoc.calldata)
+      locs := locs.push (← `(($(strLit x), $l)))
+  pure (rows, ws, locs)
 
 /-- A modifier: its name, its parameters, and its body, with a `_;` at least
 (solc's "Modifier body does not contain '_'"), anywhere. -/
@@ -1317,7 +1420,7 @@ modifiers read off its attributes. -/
 def expandFun (enums : List String) (mods : List (String × Array Term × Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
-  let (ps, ws) ← expandParamsW enums ps
+  let (ps, ws, locs) ← expandParamsW enums ps
   let mut ws := ws
   -- `payable` is an atom of the keyword reading and an identifier of the
   -- modifier reading
@@ -1325,6 +1428,7 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term))
     s.isAtom && s.getAtomVal == "payable" || s.isIdent && s.getId == `payable).isSome
   let mut rets : Array Term := #[]
   let mut retMem := false
+  let mut retStorage := false
   let mut apps : Array Term := #[]
   for a in attrs do
     -- `returns (uint)` also reads as a modifier `returns` applied to `uint`,
@@ -1332,17 +1436,18 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term))
     let a := preferReading a.raw (!·.isOfKind ``solAttrMod)
     if a.isOfKind ``solAttrKw then continue
     if a.isOfKind ``solAttrReturns then
-      -- `returns ( T memory? r?, … )`: unnamed, `_ret`, or `_ret0`, `_ret1`, …
+      -- Return locations are separate from external try/catch parameters.
       let ps := a[2].getSepArgs
       for i in [0:ps.size] do
-        -- `T memory` also reads as `T` named `memory`: take the location
+        -- A location also reads as the return variable's name: take the location.
         let p := preferReading ps[i]! (!·[1].isNone)
         let n := (p[2].getOptional?.map (·.getId.toString)).getD
           (if ps.size == 1 then "_ret" else s!"_ret{i}")
         let (t, w) ← expandMemberTyW enums ⟨p[0]⟩
         if let some b := w then ws := ws.push (← `(($(quote n), $(quote b))))
         rets := rets.push (← `(($(quote n), $t)))
-        retMem := retMem || !p[1].isNone
+        retMem := retMem || (p[1].find? fun s => s.isAtom && s.getAtomVal == "memory").isSome
+        retStorage := retStorage || (p[1].find? fun s => s.isAtom && s.getAtomVal == "storage").isSome
       continue
     match (⟨a⟩ : TSyntax `sol_fattr) with
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
@@ -1357,7 +1462,8 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term))
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(strLit f),
-    ({ params := [$ps,*], rets := [$rets,*], retMem := $(quote retMem), body := $body,
+    ({ params := [$ps,*], paramLocs := [$locs,*], rets := [$rets,*], retMem := $(quote retMem),
+       retStorage := $(quote retStorage), body := $body,
        mods := [$apps,*], spec := $spec, payable := $(quote payable),
        widths := [$ws,*] } : FunDecl)))
 

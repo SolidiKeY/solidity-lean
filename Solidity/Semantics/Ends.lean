@@ -133,12 +133,17 @@ theorem Val.evalT_ends : {p : PrimTy} → (v : Val C Γ p) → (v.evalT σ).Ends
   | _, .mlen b hp => by
     subst hp
     exact (MPath.mvalT_ends b).bind fun _ => TRes.Ends.ok _
+  | _, .modular _ a b k => (Val.evalT_ends a).bind fun _ =>
+      (Val.evalT_ends b).bind fun _ => (Val.evalT_ends k).bind fun _ => TRes.Ends.ofOpt _
 
 end
 
 theorem Src.valueT_ends {T : Ty} : (r : Src C Γ T) → (r.valueT σ).Ends
   | .val v => (Val.evalT_ends σ v).bind fun _ => TRes.Ends.ok _
   | .copy p _ => (SPath.resolveT_ends σ p).bind fun _ => TRes.Ends.ofOpt _
+  | .fixedCopy p _ _ => (SPath.resolveT_ends σ p).bind fun _ =>
+      (TRes.Ends.ofOpt _).bind fun _ => TRes.Ends.ok _
+  | .copyMem p => (MPath.mvalT_ends σ p).bind fun _ => TRes.Ends.ok _
 
 theorem MSrc.mvalT_ends {T : Ty} : (r : MSrc C Γ T) → (r.mvalT σ).Ends
   | .val v => Val.evalT_ends σ v

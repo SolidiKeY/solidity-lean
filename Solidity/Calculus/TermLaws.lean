@@ -423,13 +423,6 @@ theorem pop_save {E : Ty} {st st' : Storage C} {keep : Bool} {r : SRef C (.ref (
   · simp only [reduceCtorEq] at h
   · exact ⟨_, h⟩
 
-/-- A save that lands reads back at its reference. -/
-theorem find_save_same {U : Ty} {st st' : Storage C} {r : SRef C U} {v : SVal U}
-    (h : st.save r v = some st') : st'.find r = some v := by
-  obtain ⟨x', hs, rfl⟩ := save_some h
-  simp only [Storage.find, SFields.get_set_same]
-  exact SVal.find_save_same _ _ _ hs
-
 /-- **A save leaves a reference that parts from it** (`findOnSaveFrame`,
 solkey's `selectOnSaveCons` `\else`): across roots, or below one root,
 by `Theory.diverges`. -/

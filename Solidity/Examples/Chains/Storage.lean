@@ -386,7 +386,7 @@ end Pop
 
 namespace PushAfterPop
 /-- `tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value;`: the
-push, the write, the pop, then a bound push (`storageLocalRootPushBind`, which only bumps the length).
+push, the write, the pop, then a bound push (`storageLocalRootPushBind`, which resets the slot before extending).
 Stand-in: the printed `tokens.push().value` is a member of a call, which is refused; `sp` binds the slot.  The
 seven updates merge into one; the explicit-check paths record the storage term in which each index was
 checked.  The paper's `i == 0` is not reached: the indices are the symbolic length (`tokens[tokens.length]`),
@@ -394,62 +394,62 @@ and the read laws read literal indices only. -/
 theorem chain (φ : Post TestSuite [.val .uint, .alias (.struct "Token")]) :
     dl![m]{ ⟨[ tokens.push(); tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storagePushLengthSaveReferenceElement]~> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) }
           ⟨[ tokens[0].value = 7; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storageFieldWrite_unfold_leftFst]~> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) }
           ⟨[ uint se1 = 7; Token storage sp1 = tokens[0]; sp1.value = se1; tokens.pop(); Token storage sp = tokens.push();
             uint i = sp.value; ]⟩ φ }
     ~*> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           ⟨[ sp1.value = se1; tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storageFieldWriteSave]~> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           ⟨[ tokens.pop(); Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storagePopSave]~> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
           ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storageLocalDeclInitDrop]~> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
           ⟨[ sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~[storageLocalRootPushBind]~> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
-          { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
+          { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
           ⟨[ uint i = sp.value; ]⟩ φ }
     ~*> dl![m]{
-        { storage := save(storage, tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
+        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } { se1 := 7 } { sp1 := tokens[0] }
           { storage := save(storage, sp1.value, se1) }
           { storage := save(delAt(storage, tokens[tokens.length - 1]), tokens.length, tokens.length - 1) }
-          { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
+          { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
           { i := find(storage, sp.value) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { se1 := 7 ‖ sp1 := tokens[0]@save(storage, tokens.length, tokens.length + 1) ‖
+        { se1 := 7 ‖ sp1 := tokens[0]@save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖
             storage :=
-              save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                      (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              save(delAt(save(delAt(save(save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1),
+                      (tokens[0]@save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1)).value, 7),
                     tokens[tokens.length - 1]),
-                  tokens.length, tokens.length - 1),
+                  tokens.length, tokens.length - 1), tokens[tokens.length]),
                 tokens.length, tokens.length + 1) ‖
             sp :=
-              tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                      (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              tokens[tokens.length]@save(delAt(save(save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1),
+                      (tokens[0]@save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1)).value, 7),
                     tokens[tokens.length - 1]),
                   tokens.length, tokens.length - 1) ‖
             i :=
-              find(save(save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                        (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+              find(save(delAt(save(delAt(save(save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1),
+                        (tokens[0]@save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1)).value, 7),
                       tokens[tokens.length - 1]),
-                    tokens.length, tokens.length - 1),
+                    tokens.length, tokens.length - 1), tokens[tokens.length]),
                   tokens.length, tokens.length + 1),
-                (tokens[tokens.length]@save(delAt(save(save(storage, tokens.length, tokens.length + 1),
-                            (tokens[0]@save(storage, tokens.length, tokens.length + 1)).value, 7),
+                (tokens[tokens.length]@save(delAt(save(save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1),
+                            (tokens[0]@save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1)).value, 7),
                           tokens[tokens.length - 1]),
                         tokens.length, tokens.length - 1)).value) } φ } := by
   sol_chain

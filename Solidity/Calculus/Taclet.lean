@@ -42,7 +42,8 @@ def coreSidePreds : List Lean.Name :=
   [``SPath.isSimple, ``Val.isSimple, ``MPath.isSimple, ``Loc.isTarget, ``Loc.isRoot,
     ``MLoc.isTarget, ``MPath.isBindable, ``Val.notTernary, ``SHole.isTarget, ``MHole.isTarget,
     ``VHole.isTarget, ``SPath.elemMapping, ``SPath.elemPrim, ``CallRet.isRets,
-    ``Args.firstNonSimple, ``BinOp.accepts, ``BinOp.shortCircuits]
+    ``Args.firstNonSimple, ``BinOp.accepts, ``BinOp.shortCircuits, ``Val.complexStorageRead,
+    ``Src.isMemory]
 
 /-- Settle the side conditions that compute: drop the true ones, close the
 goal on a false one. -/
@@ -104,7 +105,8 @@ elab "core_cases_part" : tactic => withMainContext do
 /-- The parts `core_brute` splits, in the order it tries them, by the letter
 a replay plan names them with. -/
 def coreBruteHeads : List (Char × Lean.Name) :=
-  [('S', ``SPath), ('M', ``MPath), ('L', ``Loc), ('m', ``MLoc), ('R', ``MSrc), ('V', ``Val)]
+  [('S', ``SPath), ('M', ``MPath), ('L', ``Loc), ('m', ``MLoc), ('R', ``MSrc), ('V', ``Val),
+   ('Z', ``ReceiverValue), ('Y', ``LoopUnwind)]
 
 /-- The plans of consecutive goals, a run of one plan written once after
 its length (`58.`: fifty-eight goals, each by `rfl`). -/
@@ -389,13 +391,110 @@ theorem Taclet.storagePushLengthSave.toStep {E : Ty} {parr : SPath C Γ E.array}
 
 theorem Taclet.storagePushLengthSaveReferenceElement.toStep {E : Ty} {rarr : SPath C Γ E.array}
     {hd : ((none : Option (Src C Γ E)).isSome || E.defaultOkS) = true}
-    (h1 : rarr.isSimple = true) (h2 : rarr.elemPrim = false) :
+    (h1 : rarr.isSimple = true) (h2 : rarr.elemPrim = false) (h3 : rarr.elemMapping = false) :
     Stmt.step k m (Stmt.push rarr none hd) =
       Premise.update (Upd.nil.snoc (UpdElem.storage
-        (Tms.STerm.extend Tms.STerm.storage rarr.lower E))) := by
+        (Tms.STerm.pushSlot Tms.STerm.storage rarr.lower E))) := by
   show pushStep k rarr none hd = _
-  simp only [pushStep, h1, h2]
+  simp only [pushStep, h1, h2, h3]
   rfl
+
+theorem Taclet.storagePushLengthSaveMappingElement.toStep {E : Ty} {marr : SPath C Γ E.array}
+    {hd : ((none : Option (Src C Γ E)).isSome || E.defaultOkS) = true}
+    (h1 : marr.isSimple = true) (h2 : marr.elemMapping = true) :
+    Stmt.step k m (Stmt.push marr none hd) =
+      Premise.update (Upd.nil.snoc (UpdElem.storage
+        (Tms.STerm.extend Tms.STerm.storage marr.lower E))) := by
+  have hp : marr.elemPrim = false := by
+    cases E with
+    | prim p => cases h2
+    | ref R => rfl
+  show pushStep k marr none hd = _
+  simp only [pushStep, h1, hp, h2]
+  rfl
+
+theorem Taclet.storageLocalRootPushBind.toStep {R : RefTy} {lsv : Idx Γ (.alias R)}
+    {darr : SPath C Γ (.array (.ref R))} {hd : (Ty.ref R).defaultOkS = true}
+    (h1 : darr.isSimple = true) (h2 : darr.elemMapping = false) :
+    Stmt.step k m (.rebind lsv (.push darr hd)) = .update (Upd.pushBind lsv darr) := by
+  show rebindStep k lsv (.push darr hd) = _
+  simp only [rebindStep, h1, h2]
+  rfl
+
+theorem Taclet.storageLocalRootPushBindMappingElement.toStep {R : RefTy} {lsv : Idx Γ (.alias R)}
+    {marr : SPath C Γ (.array (.ref R))} {hd : (Ty.ref R).defaultOkS = true}
+    (h1 : marr.isSimple = true) (h2 : marr.elemMapping = true) :
+    Stmt.step k m (.rebind lsv (.push marr hd)) = .update (Upd.pushBindMapping lsv marr) := by
+  show rebindStep k lsv (.push marr hd) = _
+  simp only [rebindStep, h1, h2]
+  rfl
+
+/-- `sp1.push(sp2)` copies directly when both storage paths are simple. -/
+theorem Taclet.storagePushValueCopySource.toStep {R : RefTy}
+    {sp1 : SPath C Γ (.array (.ref R))} {sp2 : SPath C Γ (.ref R)}
+    {hm : (Ty.ref R).mapFree = true} (h1 : sp1.isSimple = true) (h2 : sp2.isSimple = true) :
+    Stmt.step k m (.push sp1 (some (.copy sp2 hm)) rfl) =
+      .upd1 (UpdElem.push sp1 (.copy sp2 hm)) := by
+  show pushStep k sp1 (some (.copy sp2 hm)) rfl = _
+  simp only [pushStep, h1, h2, if_pos]
+
+/-- `sp.push(mv)` copies a memory variable's value at the old array length. -/
+theorem Taclet.storagePushMemoryCopySource.toStep {R : RefTy}
+    {sp : SPath C Γ (.array (.ref R))} {mv : Idx Γ (.mem R)}
+    {hmv : (Ty.ref R).mapFree = true} (hsp : sp.isSimple = true) :
+    Stmt.step k m (.push sp (some (.copyMem (.var mv hmv))) rfl) =
+      .upd1 (UpdElem.push sp (.copyMem (.var mv hmv))) := by
+  show pushStep k sp (some (.copyMem (.var mv hmv))) rfl = _
+  simp only [pushStep, hsp, MPath.isSimple, if_true]
+
+/-- `sp.push(nsp)` binds a complex reference source to its fresh alias. -/
+theorem Taclet.storagePushValue_unfold_rightFstReferenceArgument.toStep {R : RefTy}
+    {sp : SPath C Γ (.array (.ref R))} {nsp : SPath C Γ (.ref R)}
+    {hm : (Ty.ref R).mapFree = true} (h1 : sp.isSimple = true) (h2 : nsp.isSimple = false) :
+    Stmt.step k m (.push sp (some (.copy nsp hm)) rfl) =
+      .captureSP (.fresh "source" k) nsp
+        (.push sp.up (some (.copy (.alias .here) hm)) rfl) := by
+  show pushStep k sp (some (.copy nsp hm)) rfl = _
+  simp only [pushStep, h1, h2, Bool.false_eq_true, if_true, if_false]
+
+/-- `sp.push(nsp)` reads its complex primitive source once into `source`. -/
+theorem Taclet.storagePushValue_unfold_rightFstPrimitiveArgument.toStep {p : PrimTy}
+    {sp : SPath C Γ (.array (.prim p))} {nsp : SPath C Γ (.prim p)}
+    (h1 : sp.isSimple = true) (h2 : nsp.isSimple = false) :
+    Stmt.step k m (.push sp (some (.val nsp.primitiveRead)) rfl) =
+      .capture p (.fresh "source" k) nsp.primitiveRead
+        (.push sp.up (some (.val (.simple (.local .here)))) rfl) := by
+  cases nsp with
+  | loc l =>
+    show pushStep k sp (some (.val (.read l))) rfl = _
+    simp only [pushStep, h1, SPath.primitiveRead, Val.complexStorageRead, h2,
+      Bool.not_false, if_true]
+
+/-- `sp.push(nse)` captures an ordinary expression rather than a complex storage path. -/
+theorem Taclet.storagePushValue_unfold_rightSndArgument.toStep {p : PrimTy}
+    {sp : SPath C Γ (.array (.prim p))} {nse : Val C Γ p}
+    (h1 : sp.isSimple = true) (h2 : nse.isSimple = false)
+    (h3 : nse.complexStorageRead = false) :
+    Stmt.step k m (.push sp (some (.val nse)) rfl) =
+      .capture p (fse k) nse (.push sp.up (some (.val (.simple (.local .here)))) rfl) := by
+  cases nse <;> (try contradiction) <;>
+    (show pushStep k sp (some (.val _)) rfl = _
+     simp only [pushStep, h1, h3, Bool.false_eq_true, if_true, if_false])
+
+/-- `v = sp.push()` updates directly only when its receiver is simple. -/
+theorem Taclet.storageLocalPrimitivePushBind.toStep {p : PrimTy} {v : Idx Γ (.val p)}
+    {sp : SPath C Γ (.array (.prim p))} (h : sp.isSimple = true) :
+    Stmt.step k m (.assignLocalPush v sp) = .update (Upd.pushBindPrim v sp) := by
+  show assignLocalPushStep k v sp = _
+  simp only [assignLocalPushStep, h, if_pos]
+
+/-- `v = nsp.push()` first binds the complex receiver to a fresh alias. -/
+theorem Taclet.localValuePush_unfold_leftFstReceiver.toStep {p : PrimTy}
+    {v : Idx Γ (.val p)} {nsp : SPath C Γ (.array (.prim p))} (h : nsp.isSimple = false) :
+    Stmt.step k m (.assignLocalPush v nsp) =
+      .captureSP (fsp k) nsp (.assignLocalPush v.there (.alias .here)) := by
+  show assignLocalPushStep k v nsp = _
+  simp only [assignLocalPushStep, h, Bool.false_eq_true, if_false]
 
 theorem Taclet.storagePopSave.toStep {E : Ty} {darr : SPath C Γ E.array}
     (h1 : darr.isSimple = true) (h2 : darr.elemMapping = false) :
@@ -435,7 +534,7 @@ theorem Taclet.internalCallExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ
     Stmt.step k m (Stmt.call f args ret body) = Premise.expandCall k args ret body :=
   Premise.expandCall_step h1
 
-theorem LeanTaclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
+theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
     {cond inv : Val C Γ .bool} (hf : body.frame = some (xs, hv)) :
     Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec) cond body) =
@@ -447,7 +546,7 @@ theorem LeanTaclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ�
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
-theorem LeanTaclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
+theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
     (hf : body.frame = some (xs, hv)) :
     Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec)) cond body) =
@@ -501,18 +600,18 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   storageIndexRead_unfold_rightFst "14."
   storageFieldRead_unfold_rightSndResult "8."
   storageIndexRead_unfold_rightSndResult "8."
-  storageFieldWrite_unfold_leftFst "58."
+  storageFieldWrite_unfold_leftFst "60."
   storageFieldWriteStorageRef_unfold_leftFst "2."
-  storageIndexWriteCaptureAllComplexRecv "58."
+  storageIndexWriteCaptureAllComplexRecv "60."
   storageIndexWriteStorageRefCaptureAllComplexRecv "2."
-  storageIndexWriteCaptureAllNonSimpleIndex "1682."
-  storageIndexWriteStorageRefCaptureAllNonSimpleIndex "58."
-  storageRootWriteValueRhsCapture "28."
-  fieldWriteValueRhsCapture "56."
-  indexWriteValueRhsCapture "56."
+  storageIndexWriteCaptureAllNonSimpleIndex "1800."
+  storageIndexWriteStorageRefCaptureAllNonSimpleIndex "60."
+  storageRootWriteValueRhsCapture "29."
+  fieldWriteValueRhsCapture "58."
+  indexWriteValueRhsCapture "58."
   storageFieldDelete_unfold_leftFst "2."
   storageIndexDelete_unfold_leftFst "2."
-  storageIndexDeleteNonSimpleIndexCapture "58."
+  storageIndexDeleteNonSimpleIndexCapture "60."
   localValueDeclInitDrop "."
   valueDeclSkip "."
   storageLocalDeclInitDrop "."
@@ -549,12 +648,12 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   memoryLengthRead "."
   memoryLengthRead_unfold_rightFst "."
   binopAssignment "23."
-  binopUnfoldLeft "667."
-  binopUnfoldRight "609."
+  binopUnfoldLeft "688."
+  binopUnfoldRight "630."
   logicalAndShortCircuitRhs "29."
   logicalOrShortCircuitRhs "29."
   unopAssignment "."
-  unopCapture "29."
+  unopCapture "30."
   localOpAssign "."
   storageRootOpAssign "."
   storageFieldOpAssign "2."
@@ -566,7 +665,7 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   storageIndexOpAssignUnfoldLeftFst "2."
   memoryFieldOpAssignUnfoldLeftFst "."
   memoryIndexOpAssignUnfoldLeftFst "."
-  compoundAssignValueRhsCapture "29."
+  compoundAssignValueRhsCapture "30."
   localIncrement "."
   storageRootIncrement "."
   storageFieldIncrement "2."
@@ -583,26 +682,34 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   storageIndexIncrementAssignment "2."
   memoryFieldIncrementAssignment "."
   memoryIndexArrayIncrementAssignment "."
+  storagePushAddAssign "2."
+  storagePushSubAssign "2."
+  storagePushMulAssign "2."
+  storagePushDivAssign "2."
+  storagePushModAssign "2."
+  storagePushPreincrement "2."
+  storagePushPostincrement "2."
+  storagePushPredecrement "2."
+  storagePushPostdecrement "2."
+  pushCompoundAssignValueRhsCapture "30."
   storagePushValueSave "2."
-  storagePushValueCopySource "2."
-  storagePushValue_unfold_rightSndArgument "58."
   storagePushValue_unfold_leftFstReceiver "2."
   storagePush_unfold_leftFstReceiver "2."
   storagePop_unfold_leftFstReceiver "2."
+  storagePushValue_unfold_leftCallReceiver "Z(2.)"
+  storagePush_unfold_leftCallReceiver "."
+  storagePop_unfold_leftCallReceiver "."
   storageLocalRootPush_unfold_leftFstReceiver "2."
-  storageLocalRootPushBind "2."
-  storageLocalPrimitivePushBind "2."
-  storageLocalRootPushBindMappingElement "2."
-  transfer_unfold_leftFstReceiver "29."
-  transfer_unfold_rightSndArgument "29."
+  transfer_unfold_leftFstReceiver "30."
+  transfer_unfold_rightSndArgument "30."
   transferNoCallbackBox "."
-  send_unfold_leftFstReceiver "29."
-  send_unfold_rightSndArgument "29."
+  send_unfold_leftFstReceiver "30."
+  send_unfold_rightSndArgument "30."
   sendNoCallbackBox "."
   sendNoCallbackDiamond "."
   memoryFieldRead_unfold_rightFst "4."
   memoryIndexRead_unfold_rightFst "4."
-  memoryIndexRead_unfold_rightSndIndex "116."
+  memoryIndexRead_unfold_rightSndIndex "120."
   memoryFieldRead "."
   memoryIndexReadArrayValue "."
   memoryRootRebind "."
@@ -614,10 +721,10 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   memoryIndexWriteCopy "3."
   memoryIndexWriteCaptureAllComplexRecv "."
   memoryIndexWriteMemRefCaptureAllComplexRecv "."
-  memoryIndexWriteCaptureAllNonSimpleIndex "29."
-  memoryIndexWriteMemRefCaptureAllNonSimpleIndex "29."
-  memoryFieldWriteUnfoldSource "28."
-  memoryIndexWriteUnfoldSource "28."
+  memoryIndexWriteCaptureAllNonSimpleIndex "30."
+  memoryIndexWriteMemRefCaptureAllNonSimpleIndex "30."
+  memoryFieldWriteUnfoldSource "29."
+  memoryIndexWriteUnfoldSource "29."
   memoryRootDeleteFreshRebind "."
   memoryFieldDeletePrimitive "."
   memoryFieldDeleteReference "."
@@ -625,7 +732,7 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   memoryIndexDeleteReference "."
   memoryFieldDelete_unfold_leftFst "."
   memoryIndexDelete_unfold_leftFst "."
-  memoryIndexDeleteNonSimpleIndexCapture "29."
+  memoryIndexDeleteNonSimpleIndexCapture "30."
   memoryArrayFreshAlloc "."
   newArrayCapture "."
   memoryStorageCopy "2."
@@ -636,7 +743,7 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   memoryToStorageIndexArrayCopyRoot "2."
   memoryToStorageField_unfold_leftFst "2."
   memoryToStorageIndexCaptureAllComplexRecv "2."
-  memoryToStorageIndexCaptureAllNonSimpleIndex "58."
+  memoryToStorageIndexCaptureAllNonSimpleIndex "60."
   ifElseUnfold "29."
   ifElseSplit "."
   requireConditionCapture "29."
@@ -647,11 +754,42 @@ a count of goals the prefix leaves, each closed by `rfl`. -/
   revertDiamond "."
   tryCallNoCallbackBox "."
   blockEmpty "."
+  whileUnwind "V(8Y(2.))"
+
+/-- A memory snapshot source writes through the same typed save update. -/
+theorem LeanTaclet.storageMemorySourceSave.toStep {T : Ty} {loc : Loc C Γ T}
+    {src : Src C Γ T} (hmem : src.isMemory = true) :
+    Stmt.step k m (.assign loc src) = .save loc src := by
+  cases src with
+  | val v => cases hmem
+  | copy p hm => cases hmem
+  | fixedCopy p shape hm => cases hmem
+  | copyMem p => cases loc <;> rfl
+
+/-- A compatible fixed-array source uses the native typed save update. -/
+theorem LeanTaclet.storageFixedCopySave.toStep {T : Ty} {loc : Loc C Γ T}
+    {src : Src C Γ T} (hshape : src.isFixedCopy = true) :
+    Stmt.step k m (.assign loc src) = .save loc src := by
+  cases src with
+  | val | copy | copyMem => cases hshape
+  | fixedCopy => cases loc <;> rfl
+
+/-- A converted fixed-array snapshot is pushed by the ordinary push symbol. -/
+theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)}
+    {src : Src C Γ E} (hshape : src.isFixedCopy = true) (hsp : sp.isSimple = true) :
+    Stmt.step k m (.push sp (some src) rfl) = .upd1 (UpdElem.push sp src) := by
+  cases src with
+  | val | copy | copyMem => cases hshape
+  | fixedCopy => simp only [Stmt.step, pushStep, hsp, ↓reduceIte]
 
 #replay_toStep LeanTaclet
+  addmodAssignment "."
+  mulmodAssignment "."
+  pushMemorySourceCapture "2."
+  pushCompoundUnfoldReceiver "2."
+  pushIncrementUnfoldReceiver "2."
   tryCallDiamond "."
   transferDiamond "."
-  whileUnwind "."
   loopExit "."
 
 /-! ## The rule `Stmt.step` fires -/

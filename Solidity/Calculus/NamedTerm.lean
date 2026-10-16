@@ -159,6 +159,7 @@ def Op1.key {a s : Srt} : Op1 C a s → String
   | @Op1.selectIn _ _ _ f _ => s!"select {f}"
   | @Op1.fieldIn _ _ _ f _ _ => s!"field {f}"
   | .toInt => "toInt"
+  | @Op1.fixedCopy _ E n R _ => s!"fixedCopy {Ty.ref (.fixed E n)} {Ty.ref R}"
 
 def Op2.key {a b s : Srt} : Op2 C a b s → String
   | .binop op _ => s!"binop {op.sym}"
@@ -188,6 +189,7 @@ def Op3.key {a b c s : Srt} : Op3 C a b c s → String
   | .push => "push"
   | .atIn _ => "atIn"
   | .write => "write"
+  | .modular op => op.toStr
 
 /-- A term as text, its positions named by `ns`: the key a line is compared
 by (`Calculus/Chains.lean`'s `Fml.lineKey`). -/
@@ -244,6 +246,11 @@ local, a read, `msg.value`: what synthesizes) used as a KeY `int` widened
 mismatch. -/
 def widen (text : String) {Γ : Ctx} : (s' s : Srt) → Tm C Γ s' → Except String (Tm C Γ s)
   | .val .uint, .kint, x => pure (.app1 .toInt x)
+  | .sv (.ref (.fixed E n)), .sv (.ref R), x =>
+    if h : RefTy.fixed E n = R then pure (h ▸ x)
+    else match FixedCopy.ofTarget E n R with
+      | some shape => pure (.app1 (.fixedCopy shape) x)
+      | none => sortError text (.sv (.ref (.fixed E n))) (.sv (.ref R))
   | s', s, x => if h : s' = s then pure (h ▸ x) else sortError text s' s
 
 /-- `t` at the sort `s`: synthesized and compared (a `uint` widened to an

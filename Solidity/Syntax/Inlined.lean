@@ -28,6 +28,10 @@ variable {C : Contract} [FreshNames]
 def Args.declStrs {Γ : Ctx} (ns : List Var) : {ps : Ctx} → Args C Γ ps → List String
   | _, .nil => []
   | _, .snoc as p x e => as.declStrs ns ++ [s!"{Ty.toStr (.prim p)} {x} = {e.toStr ns true};"]
+  | _, .snocStorage as R x e =>
+    as.declStrs ns ++ [s!"{Ty.toStr (.ref R)} storage {x} = {e.toStr ns};"]
+  | _, .snocMemory as R x e =>
+    as.declStrs ns ++ [s!"{Ty.toStr (.ref R)} memory {x} = {e.toStr ns};"]
 
 /-- `T r;` for each return variable, at its default; a memory return as the
 `T memory r;` its body begins with. -/
@@ -36,6 +40,7 @@ def CallRet.declStrs {Γ : Ctx} : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List 
   | _, _, .val p r _ => [s!"{Ty.toStr (.prim p)} {r};"]
   | _, _, .rets bs => bs.toList.map fun (p, r) => s!"{Ty.toStr (.prim p)} {r};"
   | _, _, .mem R r _ _ => [s!"{Ty.toStr (.ref R)} memory {r};"]
+  | _, _, .storage R r => [s!"{Ty.toStr (.ref R)} storage {r};"]
 
 /-- `res = r;`: the returned value assigned where the call is. -/
 def CallRet.resultStrs {Γ : Ctx} (ns : List Var) : {rs Γ' : Ctx} → CallRet Γ rs Γ' → List String
