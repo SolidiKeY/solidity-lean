@@ -264,8 +264,11 @@ example : Prog.toStr [] (sol[Returns]{ bool b = total > 0 && incr(1) > 0; } : Pr
     "bool se1 = total > 0; if (se1) { uint se2; se2 = incr(1); se1 = se2 > 0; } else { } bool b = se1;" := by
   decide
 
-/-- error: Solidity elaboration failed: a call in a conditional's branch -/
-#guard_msgs in #check sol[Returns]{ uint z = total > 0 ? incr(1) : 0; }
+/-- A call in a conditional's branch runs only in that branch: the
+conditional is an `if` on a capture (solkey's `ternaryToIf`). -/
+example : Prog.toStr [] (sol[Returns]{ uint z = total > 0 ? incr(1) : 0; } : Prog Returns [] _) =
+    "uint se1; if (total > 0) { se1 = incr(1); } else { se1 = 0; } uint z = se1;" := by
+  decide
 
 /-! ## A callee's local, written where it is read
 

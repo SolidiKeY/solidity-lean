@@ -713,6 +713,21 @@ def withPush {α : Type} (ok : Bool) (x : PM α) : PM α := do
   modify fun st => { st with pushOk := false }
   pure a
 
+/-- `(c ? f : g)(as)`, a conditional callee: its condition and the two calls
+`f(as)`, `g(as)`.  Only one of them runs, so the arguments are evaluated
+once, after the condition, as solc evaluates them. -/
+def condCallee? (j : Json) : Option (Json × Json × Json) := do
+  guard (J.kind j == "FunctionCall")
+  let f ← J.opt j "expression"
+  let f ← if J.kind f == "TupleExpression" then
+      match (J.opt f "components").bind (·.getArr?.toOption) with
+      | some #[c] => some c
+      | _ => none
+    else some f
+  guard (J.kind f == "Conditional")
+  pure (← J.opt f "condition", j.setObjVal! "expression" (← J.opt f "trueExpression"),
+    j.setObjVal! "expression" (← J.opt f "falseExpression"))
+
 mutual
 
 partial def expr (j : Json) : PM String := do
@@ -843,6 +858,8 @@ partial def operand (j : Json) (pow : Bool) : PM String := do
 partial def call (j : Json) : PM String := do
   let f ← PM.lift (J.get j "expression")
   let args ← PM.lift (J.arr j "arguments")
+  if let some (c, a, b) := condCallee? j then
+    return s!"({← operand c false} ? {← call a} : {← call b})"
   if J.kind f == "MemberAccess" then
     let member := (f.getObjValAs? String "memberName").toOption.getD ""
     if member == "wrap" || member == "unwrap" then
@@ -1012,6 +1029,10 @@ partial def stmt1 (j : Json) : PM (List String) := do
       let k := (← get).discards + 1
       modify fun st => { st with discards := k }
       return [s!"{← storageRefTy r} storage discarded{k} = {← expr r}"]
+    -- `(c ? f : g)();` of no value: `if (c) { f(); } else { g(); }`
+    if let some (c, a, b) := condCallee? e then
+      if J.tyStr e == "tuple()" then
+        return [s!"if ({← expr c}) {"{"} {← call a}; {"}"} else {"{"} {← call b}; {"}"}"]
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
     if ["BinaryOperation", "Conditional"].contains (J.kind e) then
@@ -1297,21 +1318,30 @@ def specBodyBindings (f : Json) (names : List (Int × String)) : List (String ×
       let id ← J.id? p
       pure (source, (lookupBy id names).getD source)
 
+/-- A callee's expressions that name the function called: itself, or both
+branches of a conditional callee `(c ? f : g)` (`condCallee?`). -/
+partial def calleeArms (e : Json) : List Json :=
+  match J.kind e with
+  | "TupleExpression" => match (J.opt e "components").bind (·.getArr?.toOption) with
+    | some #[c] => calleeArms c
+    | _ => [e]
+  | "Conditional" =>
+    ((J.opt e "trueExpression").toList ++ (J.opt e "falseExpression").toList).flatMap calleeArms
+  | _ => [e]
+
 /-- The functions among `ids` that `f` calls by name, in order, each once. -/
 def callees (ids : List Int) (f : Json) (freeFunctions : List Int := [])
     (aliases : List (Int × Int) := []) (contracts : List Int := []) : List Int :=
   (J.nodes f).foldl (init := []) fun acc n =>
-    let r := if J.kind n == "FunctionCall" then
-        (J.opt n "expression").bind fun e =>
+    let rs := if J.kind n == "FunctionCall" then
+        ((J.opt n "expression").toList.flatMap calleeArms).filterMap fun e =>
           if J.kind e == "Identifier" then
             (J.ref? e).map fun id => (lookupBy id aliases).getD id
           else if !isSuperMember e && (isBaseMember contracts e ||
               (J.kind e == "MemberAccess" && (J.ref? e).any freeFunctions.contains)) then J.ref? e
           else none
-      else none
-    match r with
-    | some r => if ids.contains r && !acc.contains r then acc ++ [r] else acc
-    | none => acc
+      else []
+    rs.foldl (init := acc) fun acc r => if ids.contains r && !acc.contains r then acc ++ [r] else acc
 
 /-- The functions `f` reaches through `calls`, callees first and `f` last,
 added to `done`; or a function on a cycle.  Each level adds a function to

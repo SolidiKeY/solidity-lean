@@ -125,3 +125,9 @@ theorem Solkey.TestSuite.modifierTakenPlaceholder.proved : ⊢ Solkey.TestSuite.
 
 theorem Solkey.TestSuite.modifierReturnResumesOuterSuffix.proved : ⊢ Solkey.TestSuite.modifierReturnResumesOuterSuffix.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.conditionalCallee.proved : ⊢ Solkey.TestSuite.conditionalCallee.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.conditionalCalleeEffects.proved : ⊢ Solkey.TestSuite.conditionalCalleeEffects.problem := by
+  sol_prove (steps := 128)

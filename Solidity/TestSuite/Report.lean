@@ -41,7 +41,7 @@ are pending, as they stay open in solkey.
 -/
 
 /--
-info: 617 functions: 543 derived, 17 pending, 57 other
+info: 617 functions: 545 derived, 17 pending, 55 other
 internal valuesRef
 internal valuesRefWithEffect
 internal matrixRefWithEffect
@@ -56,9 +56,7 @@ internal returnOrdered
 internal returnSwapped
 internal returnStats
 internal bitAndSetTotal
-unsupported conditionalCallee
 internal retConditionalTwo
-unsupported conditionalCalleeEffects
 internal conditionalSetOne
 internal conditionalSetTwo
 internal returnFromNestedBlock

@@ -1867,10 +1867,23 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     pure (P ++ Q, e)
   | .ternary c a b => do
     let (P, c) ← hoist c
-    if a.hasCall || b.hasCall then throw "a call in a conditional's branch"
-    if a.hasIncDec || b.hasIncDec then throw "`++` or `−−` in a conditional's branch"
-    if hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
-      throw "narrow arithmetic in a conditional's branch: its check would run where the program does not evaluate it"
+    if a.hasCall || b.hasCall || a.hasIncDec || b.hasIncDec ||
+        hasNarrow C (← ctx) a || hasNarrow C (← ctx) b then
+      -- a branch's effects, calls and checks run only in the branch solc
+      -- evaluates: `T se; if (c) { se = a; } else { se = b; }`, solkey's
+      -- `ternaryToIf` on a capture.  `T` is the type of the branch that is
+      -- not a literal, read after its effects are hoisted, which is undone
+      let typed := if a.isLit then b else a
+      let st ← get
+      let (_, typed) ← hoist typed
+      let ⟨_, t⟩ ← synthM C typed
+      let w := widthIn C (← ctx) typed
+      set st
+      let some ⟨p, _⟩ := t.toVal? | throw "a conditional of references with effects in a branch"
+      let x := toString (← freshCapture "se")
+      let Q ← elabStmtsP [.decl (.named (tyName p w)) x none,
+        .ite c [.assign (.name x) a] [.assign (.name x) b]]
+      return (P ++ Q, .name x)
     let Γ ← nctx
     match synth C Γ a, synth C Γ b with
     | .ok (.path (.ref R) pa), .ok (.path (.ref R') pb) =>
