@@ -1729,9 +1729,10 @@ parameters are declared fresh with its arguments (read in the function's
 scope, and evaluated when the modifier is entered: after the code before
 the `_;` of the modifiers outside it), then its body with each `_;` the
 next modifier (or the function's body), as a block.  A modifier's locals are
-renamed fresh, so the body cannot see them.  A `return` in a modifier is
-not read; one in the body is its last statement (`lowerReturns`), so the
-code after `_;` runs after it, as it does in solc.  A body run by several
+renamed fresh, so the body cannot see them.  A `return` in the body is
+its last statement and one in a modifier that modifier's (`lowerReturns`,
+before its `_;` is filled), so the code after `_;` runs after either, as
+it does in solc.  A body run by several
 `_;` (or by one in a loop) is run again in the same locals, its parameters
 and return variables not reset: solc's legacy pipeline (via-IR resets
 them). -/
@@ -1741,7 +1742,6 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     let inner ← wrapMods body ms
     unless m.params.length == m.args.length do
       throw s!"modifier {m.name} takes {m.params.length} arguments, not {m.args.length}"
-    if m.body.any RawStmt.hasReturn then throw s!"modifier {m.name}: `return` in a modifier"
     let mut ρ : List (String × String) := []
     let mut decls : List RawStmt := []
     for ((n, T), a) in m.params.zip m.args do
@@ -1750,6 +1750,11 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
       decls := decls ++ [.decl (.named (p.toStr)) y (some a)]
       ρ := (n, y) :: ρ
     let code ← renameStmts ρ m.body
+    -- a `return` ends the modifier alone: the code after the `_;` of the
+    -- modifiers outside it still runs (solc's legacy pipeline)
+    let code ← if code.any RawStmt.hasReturn then
+        ElabM.lift (lowerReturns [] (← lowerLoops (some []) code))
+      else pure code
     pure (decls ++ (← ElabM.lift (code.mapM (RawStmt.fillHole inner))))
 
 /-- The statements of `unchecked { … }` with their arithmetic wrapping: `x += 1;`

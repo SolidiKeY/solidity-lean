@@ -116,3 +116,12 @@ theorem Solkey.TestSuite.arithmeticRemainderBoundAllSigns.proved : ⊢ Solkey.Te
   sol_prove (steps := 128)
   sol_leaf
   sol_close
+
+theorem Solkey.TestSuite.modifierSkippedPlaceholder.proved : ⊢ Solkey.TestSuite.modifierSkippedPlaceholder.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.modifierTakenPlaceholder.proved : ⊢ Solkey.TestSuite.modifierTakenPlaceholder.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.modifierReturnResumesOuterSuffix.proved : ⊢ Solkey.TestSuite.modifierReturnResumesOuterSuffix.problem := by
+  sol_prove (steps := 128)

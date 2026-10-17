@@ -41,7 +41,7 @@ are pending, as they stay open in solkey.
 -/
 
 /--
-info: 617 functions: 540 derived, 17 pending, 60 other
+info: 617 functions: 543 derived, 17 pending, 57 other
 internal valuesRef
 internal valuesRefWithEffect
 internal matrixRefWithEffect
@@ -94,11 +94,8 @@ internal twiceKeepsLocal
 internal repeatedContinuationBody
 internal nextContinuationArgument
 internal reenteredArgumentBody
-unsupported conditionalContinuationBody
-unsupported modifierSkippedPlaceholder
-unsupported modifierTakenPlaceholder
-unsupported nestedReturningContinuation
-unsupported modifierReturnResumesOuterSuffix
+internal conditionalContinuationBody
+internal nestedReturningContinuation
 internal loopContinuationBody
 internal whileContinuationBody
 internal doWhileContinuationBody

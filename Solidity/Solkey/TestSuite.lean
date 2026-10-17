@@ -18,18 +18,13 @@ solc_import "../../tests/solc/TestSuite.ast.json" hash 0x1ec4bfde1445b2df as Sol
 An unsupported function has no program or proof obligation. -/
 
 /--
-info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 606 elaborated, 2 skipped, 1 excluded, 8 unsupported
+info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 611 elaborated, 2 skipped, 1 excluded, 3 unsupported
 excluded recursiveStructMapping: TestSuite.sol:2973: struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite
 skipped tryCalleeGet: TestSuite.sol:3804: tagged `@custom:key skip`
 skipped tryCalleePing: TestSuite.sol:3809: tagged `@custom:key skip`
 unsupported conditionalCallee: TestSuite.sol:3934: a call's callee is a function's name
 unsupported conditionalCalleeEffects: TestSuite.sol:3947: only push, pop and transfer are calls on a receiver
 unsupported invariantQuantifiedOverPrefix: TestSuite.sol:4485: the loop clause `invariant \forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language
-unsupported conditionalContinuationBody: TestSuite.sol:4686: modifier solcModifier19451: `return` in a modifier
-unsupported modifierSkippedPlaceholder: TestSuite.sol:4695: modifier solcModifier19451: `return` in a modifier
-unsupported modifierTakenPlaceholder: TestSuite.sol:4702: modifier solcModifier19451: `return` in a modifier
-unsupported nestedReturningContinuation: TestSuite.sol:4719: modifier solcModifier19545: `return` in a modifier
-unsupported modifierReturnResumesOuterSuffix: TestSuite.sol:4728: modifier solcModifier19545: `return` in a modifier
 -/
 #guard_msgs in
 #eval IO.println (Solidity.Frontend.ImportRow.summary Solkey.TestSuite.report)
