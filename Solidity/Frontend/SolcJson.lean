@@ -669,6 +669,22 @@ def pushedTy (j : Json) : PM String := do
   | some (.error g) => throw g
   | none => unsupported s!"a member of a pushed `{t}`"
 
+/-- A storage reference's type, from solc's type string, as `sol` text:
+`uint256[][] storage ref` is `uint[][]`, `struct C.Token[] storage ref` is
+`Token[]`. -/
+def storageRefTy (j : Json) : PM String := do
+  let t := ((J.tyStr j).replace " storage ref" "").replace " storage pointer" ""
+  let base := t.takeWhile (· != '[')
+  let dims := t.drop base.length
+  let base ← if base.startsWith "struct " then
+      let n := ((base.drop 7).splitOn ".").getLast!
+      match lookupBy n (← get).structs with
+      | some (.ok m) => pure m
+      | some (.error g) => throw g
+      | none => unsupported s!"a reference to `{n}`"
+    else pure (sourceType base)
+  pure s!"{base}{sourceType dims}"
+
 /-- Is the node `x.push()`? -/
 def isPushCall (e : Json) : Bool :=
   J.kind e == "FunctionCall" &&
@@ -985,6 +1001,17 @@ partial def stmt1 (j : Json) : PM (List String) := do
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>
         constTy r || (J.kind r == "Literal" && J.tyStr r == "bool")
+    -- `x.pop;`, `x.push;`: the member named, not called: the receiver is
+    -- evaluated (its effects, its bounds checks) into a fresh storage alias and
+    -- dropped (solkey's `storagePopReference_unfold_leftFstReceiver`,
+    -- `storagePopReferenceDiscard`)
+    if J.kind e == "MemberAccess" &&
+        (J.opt e "memberName").any (fun m => m == .str "pop" || m == .str "push") &&
+        (J.tyStr e).startsWith "function" then
+      let r ← PM.lift (J.get e "expression")
+      let k := (← get).discards + 1
+      modify fun st => { st with discards := k }
+      return [s!"{← storageRefTy r} storage discarded{k} = {← expr r}"]
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
     if ["BinaryOperation", "Conditional"].contains (J.kind e) then

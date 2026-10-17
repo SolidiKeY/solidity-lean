@@ -580,6 +580,8 @@ syntax:arg (name := solCallExpr) sol_expr:max "(" sol_expr,* ")" : sol_expr
 reference (`hoist` captures the call).  At `max`, as a member is; `atomic`,
 so that a call with no member after it is left to the readings above. -/
 syntax:max (name := solCallMember) sol_expr:max atomic("(" sol_expr,* ")" ".") ident : sol_expr
+/-- A call's storage reference indexed, `matrixRef()[i]`: the call before the index. -/
+syntax:max (name := solCallIndex) sol_expr:max atomic("(" sol_expr,* ")" "[") sol_expr "]" : sol_expr
 
 declare_syntax_cat sol_stmt (behavior := both)
 declare_syntax_cat sol_block (behavior := both)
@@ -976,6 +978,8 @@ where
       `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) . $g:ident) => do
       fieldChain (← expandCall f as.getElems callMsg) (nameParts g.getId)
+  | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) [ $k:sol_expr ]) => do
+      `(RawExpr.index $(← expandCall f as.getElems callMsg) $(← expandExpr k))
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* )) => expandCall f as.getElems callMsg
   | _ => Macro.throwUnsupported
   -- `f(a, b)`, a call of the function `f` (or a struct's constructor, `msg`

@@ -506,6 +506,12 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   right-hand side held in a fresh local, the write made before the
   statement, the value the local or the target read again), as an `++`
   inside an expression is, so no `Stmt` assigns inside a value.
+* `storagePopReferenceDiscard`, `storagePopReference_unfold_leftFstReceiver`,
+  `storagePopReference_unfold_leftCallReceiver` — architectural.  A member
+  named and not called, `x.pop;`, is imported as the declaration of a fresh
+  storage alias bound to its receiver (`discardedK`, `Frontend/SolcJson.lean`):
+  the receiver's capture these rules make, its bounds checks and calls the
+  binding's; the alias is then unused, which is the discard.
 * `discard{Add,Sub,Mul,Div,Mod,Pow}Expression` — architectural.  A discarded
   operator's value, `a + b;`, is imported as the declaration of a fresh local
   holding it (`discardedK`, `Frontend/SolcJson.lean`), which is these rules'
@@ -531,7 +537,8 @@ def unclaimedTaclets : List KeyTaclet :=
     .localSubAssignmentValue, .localMulAssignmentValue, .localDivAssignmentValue,
     .localModAssignmentValue,
     .discardAddExpression, .discardSubExpression, .discardMulExpression, .discardDivExpression,
-    .discardModExpression, .discardPowExpression,
+    .discardModExpression, .discardPowExpression, .storagePopReferenceDiscard,
+    .storagePopReference_unfold_leftFstReceiver, .storagePopReference_unfold_leftCallReceiver,
     .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
 
 /-- Added upstream rules still awaiting correspondence and soundness review.
@@ -539,9 +546,7 @@ These are migration gaps, not implemented or architecturally excused rules. -/
 def migrationPendingTaclets : List KeyTaclet :=
   [ .loopNormalize,
     .memoryIndexWriteStorageRefRhsCapture, .storageFieldRead_unfold_rightCallReceiver,
-    .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver,
-    .storagePopReferenceDiscard, .storagePopReference_unfold_leftCallReceiver,
-    .storagePopReference_unfold_leftFstReceiver ]
+    .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses or records as pending migration work. Exactly one
@@ -557,7 +562,7 @@ theorem taclets_partitioned :
 
 theorem claimedTaclets_count : claimedTaclets.length = 341 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 28 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 31 := by decide +kernel
 
 /-! ## The rules with no taclet
 

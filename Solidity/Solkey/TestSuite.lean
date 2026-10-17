@@ -18,13 +18,7 @@ solc_import "../../tests/solc/TestSuite.ast.json" hash 0x1ec4bfde1445b2df as Sol
 An unsupported function has no program or proof obligation. -/
 
 /--
-info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 595 elaborated, 2 skipped, 1 excluded, 19 unsupported
-unsupported storageArrayMethodReferences: TestSuite.sol:352: the printed text does not parse: <input>:1:35: expected '=', 'storage' or identifier
-unsupported storageArrayMethodReferencesComplexReceiver: TestSuite.sol:362: the printed text does not parse: <input>:1:102: expected '='
-unsupported storageArrayMethodReferencesComposedCallReceiver: TestSuite.sol:401: a member of a pushed element (`x.push().f`) other than an assignment's left-hand side of a constant or a declaration's whole initial value: hoisting the push would change solc's order of evaluation
-unsupported storageArrayMethodReferencesCallReceiver: TestSuite.sol:411: the printed text does not parse: <input>:1:40: expected '='
-unsupported storagePopReferenceOutOfBounds: TestSuite.sol:421: the printed text does not parse: <input>:1:38: expected '='
-unsupported storagePopReferenceCallOutOfBounds: TestSuite.sol:428: the printed text does not parse: <input>:1:46: expected ';'
+info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 601 elaborated, 2 skipped, 1 excluded, 13 unsupported
 excluded recursiveStructMapping: TestSuite.sol:2973: struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite
 unsupported memoryIndexWriteStorageRefRhsCapture: TestSuite.sol:3105: a memory reference is expected
 unsupported memoryIndexWriteStorageStructCopy: TestSuite.sol:3123: a memory reference is expected

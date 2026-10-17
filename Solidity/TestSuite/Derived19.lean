@@ -93,3 +93,15 @@ theorem Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.proved : ⊢ Solkey.T
 
 theorem Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.proved : ⊢ Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storageArrayMethodReferences.proved : ⊢ Solkey.TestSuite.storageArrayMethodReferences.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storageArrayMethodReferencesCallReceiver.proved : ⊢ Solkey.TestSuite.storageArrayMethodReferencesCallReceiver.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storagePopReferenceOutOfBounds.proved : ⊢ Solkey.TestSuite.storagePopReferenceOutOfBounds.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storagePopReferenceCallOutOfBounds.proved : ⊢ Solkey.TestSuite.storagePopReferenceCallOutOfBounds.problem := by
+  sol_prove (steps := 128)
