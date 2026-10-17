@@ -160,26 +160,6 @@ theorem saveOp_exh {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     Op3.pushFree, Tm.castV_pushFree, lastPath, lastIndex,
     SPath.lower_pushFree, Simple.lower_pushFree, Bool.and_true]
 
-/-- The numeric source `1` used by `++sp.push()`. -/
-def oneSimple (p : PrimTy) (hp : p.isNumeric = true) : Simple C Γ p :=
-  .lit 1 (by cases p <;> first | rfl | exact absurd hp Bool.false_ne_true)
-
-/-- The arithmetic of `++sp.push()` is compound addition of one. -/
-theorem bumpT_compoundOne {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
-    (σ : State C Γ) (x : Int) :
-    bumpT op p x = compoundT op.binOp p x (PrimTy.key ((oneSimple p hp).evalT σ)) := by
-  cases p with
-  | bool => cases hp
-  | uint | int => cases op <;> rfl
-
-/-- Discarding the value of `sp.push()++` leaves compound addition of one. -/
-theorem bumpStore_is_compound {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
-    (σ : State C Γ) (r : SRef C (.prim p)) :
-    (bumpStoreT σ op r).map Prod.fst =
-      opStoreT σ op.binOp r ((oneSimple p hp).evalT σ) := by
-  simp only [bumpStoreT, opStoreT, TRes.map_bind, bumpT_compoundOne op hp σ]
-  rfl
-
 /-- The statement `sp.push()++` has the state result of `sp.push() += 1`. -/
 theorem bump_step_eq_compound {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
     (b : SPath C Γ (.array (.prim p))) (σ : State C Γ) :
@@ -208,7 +188,7 @@ theorem compound_pair_agrees {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssi
       (TRun.pushOpAssign op b (.simple se) σ) := by
   cases hr : b.resolveT σ with
   | error e =>
-    have he : e = .revert := SPath.resolveT_revert σ b hr
+    have he : e = .revert := SPath.resolveT_revertOnly σ b _ hr
     subst e
     have hpush : TRun.push b none σ = .error .revert := by
       simp only [TRun.push, hr, bind, Except.bind]
@@ -303,12 +283,11 @@ theorem sound_pushOpCapture {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssig
     (x : Var) (σ : State C Γ) {m : Modality} :
     Premise.Runs m (.pushOpAssign op hop hp b r)
       (.capture p x r (.pushOpAssign op hop hp b.up (.simple (.local .here)))) σ := by
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .val p) v (pushOpAssign_pushT (t := .val p) σ v op b.up b (.simple (.local .here)) r
-      (SPath.resolveT_up (t := .val p) σ v b) (by rw [hv]; rfl))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.pushOpAssign op b r σ).map _ = _
-    simp only [TRun.pushOpAssign, hh]; rfl
+  refine Premise.sound_capturePushed σ
+    (fun v hv => pushOpAssign_pushT (t := .val p) σ v op b.up b (.simple (.local .here)) r
+      (SPath.resolveT_up (t := .val p) σ v b) (by rw [hv]; rfl)) (fun h hh => ?_)
+  show (TRun.pushOpAssign op b r σ).map _ = _
+  simp only [TRun.pushOpAssign, hh]; rfl
 
 /-- After its simple source, `b.push() += se` captures a complex receiver
 once, before appending or reading the new slot. -/
@@ -317,13 +296,11 @@ theorem sound_pushOpRecv {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign =
     (x : Var) (σ : State C Γ) {m : Modality} :
     Premise.Runs m (.pushOpAssign op hop hp b (.simple se))
       (.captureSP x b (.pushOpAssign op hop hp (.alias .here) (.simple se.up))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .alias _) (some q)
-      (pushOpAssign_pushT (t := .alias _) σ (some q) op (.alias .here) b (.simple se.up) (.simple se)
-        (by rw [hq]; rfl) (by simp only [Val.evalT, Simple.evalT_up]))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.pushOpAssign op b (.simple se) σ).map _ = _
-    simp only [TRun.pushOpAssign, Val.evalT, hh]; rfl
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => pushOpAssign_pushT (t := .alias _) σ (some q) op (.alias .here) b (.simple se.up) (.simple se)
+        (by rw [hq]; rfl) (by simp only [Val.evalT, Simple.evalT_up])) (fun h hh => ?_)
+  show (TRun.pushOpAssign op b (.simple se) σ).map _ = _
+  simp only [TRun.pushOpAssign, Val.evalT, hh]; rfl
 
 /-- Capturing a receiver of `++b.push();` preserves its state result. -/
 theorem pushIncDec_pushT {p : PrimTy} {t : LTy} (σ : State C Γ)
@@ -340,12 +317,11 @@ theorem sound_pushIncRecv {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
     (b : SPath C Γ (.array (.prim p))) (x : Var) (σ : State C Γ) {m : Modality} :
     Premise.Runs m (.pushIncDec op hp b)
       (.captureSP x b (.pushIncDec op hp (.alias .here))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .alias _) (some q)
-      (pushIncDec_pushT (t := .alias _) σ (some q) op hp (.alias .here) b (by rw [hq]; rfl))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.pushIncDec op b σ).map _ = _
-    simp only [TRun.pushIncDec, hh]; rfl
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => pushIncDec_pushT (t := .alias _) σ (some q) op hp (.alias .here) b (by rw [hq]; rfl))
+    (fun h hh => ?_)
+  show (TRun.pushIncDec op b σ).map _ = _
+  simp only [TRun.pushIncDec, hh]; rfl
 
 /-- The outer guard of `sp.push() /= se` holds exactly when its simple
 source is nonzero at its Solidity type. -/
@@ -390,7 +366,7 @@ theorem pushOp_zero_sim {p : PrimTy} (op : BinOp) (hg : needsZeroGuard op = true
   change TRes.Sim (.error .revert) ((TRun.pushOpAssign op b (.simple se) σ).map (·.st))
   cases hr : b.resolveT σ with
   | error e =>
-    have he : e = .revert := SPath.resolveT_revert σ b hr
+    have he : e = .revert := SPath.resolveT_revertOnly σ b _ hr
     subst e
     simp only [TRun.pushOpAssign, Val.evalT, hr, ok_bind, error_bind]
     exact TRes.Sim.refl _

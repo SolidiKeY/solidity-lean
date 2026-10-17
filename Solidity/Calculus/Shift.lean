@@ -211,10 +211,6 @@ theorem OpLoc.up_eq {Γ : Ctx} {t : LTy} {p : PrimTy} (l : OpLoc C Γ p) :
     show OpLoc.mindex a b.up i.up = OpLoc.mindex a (b.wk Solidity.up) (i.wk Solidity.up)
     rw [MPath.up_eq b, Simple.up_eq i]
 
-theorem SPath.isSimple_up {Γ : Ctx} {t : LTy} {T : Ty} (b : SPath C Γ T) :
-    (b.up (t := t)).isSimple = b.isSimple := by
-  rw [SPath.up_eq]; exact SPath.isSimple_wk _ b
-
 end ShiftMore
 
 /-! ## Shifting under a block

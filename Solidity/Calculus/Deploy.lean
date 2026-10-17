@@ -76,13 +76,6 @@ theorem Problem.deploy_of_valid_typed {m : Modality} {Γ' : Ctx} {P : Prog C [] 
 theorem Prog.runFrames_nil {Γ Γ' : Ctx} (σ : State C Γ) (P : Prog C Γ Γ') :
     Prog.runFrames σ P .nil = (do let o ← Prog.run σ P; pure o.st) := rfl
 
-/-- Value sent to a constructor that is not `payable` reverts the
-deployment. -/
-theorem Contract.deployT_refuses (C : Contract) {Γ' : Ctx} (P : Prog C [] Γ') (tx : TTx)
-    (hp : (C.ctor.map (·.payable)).getD false = false) (hv : tx.msgValue.1 ≠ 0) :
-    Contract.deployT C P tx = .error .revert := by
-  simp only [Contract.deployT, hp, Bool.not_false, Bool.true_and, bne_iff_ne.2 hv, if_true]
-
 /-- **A derived constructor obligation of no parameters holds of the
 deployment**: its program runs under `m` at `Contract.deployT`, and does not
 panic; a constructor that is not `payable` is sent no value. -/

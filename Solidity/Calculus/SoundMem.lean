@@ -22,10 +22,8 @@ section Mem
 
 variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
 
-theorem MSrc.mvalT_noPanic {T : Ty} (r : MSrc C Γ T) : (r.mvalT σ).NoPanic := by
-  cases r with
-  | val v => exact Val.evalT_noPanic σ v
-  | ref p => exact MPath.mvalT_noPanic σ p
+theorem MSrc.mvalT_noPanic {T : Ty} (r : MSrc C Γ T) : (r.mvalT σ).NoPanic :=
+  (MSrc.mvalT_revertOnly σ r).noPanic
 
 theorem State.copyStToMG_push {t : LTy} (w : t.TDenote C σ.H) {T : Ty} (v : SVal T)
     (hm : T.mapFree = true) :
@@ -39,10 +37,10 @@ theorem sound_memCopyCapture {R : RefTy} (i : Idx Γ (.mem R)) (sp : SPath C Γ 
     (hm : (Ty.ref R).mapFree = true) (x : Var) :
     Premise.Runs m (.rebindMem i (.copy sp hm))
       (.captureSP x sp (.rebindMem i.there (.copy (.alias .here) hm))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .alias R) (some q)
-      (TRun.rebindMem_pushT σ (t := .alias R) (some q) i _ (.copy sp hm) ?_)
-    show (do
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => TRun.rebindMem_pushT σ (t := .alias R) (some q) i _ (.copy sp hm) ?_)
+    (fun h hh => ?_)
+  · show (do
         let r ← (SPath.alias (C := C) (Γ := .alias R :: Γ) .here).resolveT (σ.push (some q))
         let sv ← TRes.ofOpt (σ.storage.find r)
         pure ((σ.push (t := .alias R) (some q)).copyStToMG sv hm)) = Except.map _ (do
@@ -51,8 +49,7 @@ theorem sound_memCopyCapture {R : RefTy} (i : Idx Γ (.mem R)) (sp : SPath C Γ 
         pure (σ.copyStToMG sv hm))
     simp only [hq, TRes.map_bind, State.copyStToMG_push]
     rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.rebindMem i (.copy sp hm) σ).map _ = _
+  · show (TRun.rebindMem i (.copy sp hm) σ).map _ = _
     simp only [TRun.rebindMem, MRhs.evalT, hh]; rfl
 
 /-- **A memory local bound** (`rebindMemStep`). -/
@@ -131,7 +128,7 @@ theorem sound_memIndexWriteUnfold (k : Nat) {R : RefTy} {p : PrimTy} (a : ArrTy 
     | error h' =>
       simp only [TRun.assignMem, MSrc.mvalT, he, MLoc.addrT, hi, ok_bind, TRes.map_bind,
         bind_assoc]
-      exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) (Val.evalT_revert σ i hi)
+      exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) (Val.evalT_revertOnly σ i _ hi)
         fun _ _ => TRes.Sim.refl _
     | ok n =>
       refine TRes.Sim.of_eq ?_
@@ -237,7 +234,7 @@ theorem sound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref 
   show TRes.Sim _ ((TRun.assignMem (.index a (.loc l) i) (.ref src) σ).map _)
   cases hb : (MPath.loc l).mvalT σ with
   | error h' =>
-    have hp : h' = .revert := MPath.mvalT_revert σ (.loc l) hb
+    have hp : h' = .revert := MPath.mvalT_revertOnly σ (.loc l) _ hb
     simp only [TRun.assignMem, TRes.map_bind]
     refine TRes.Sim.err_bind (MSrc.mvalT_noPanic σ _) hp fun _ _ => ?_
     simp only [MLoc.addrT, hb]
@@ -247,7 +244,7 @@ theorem sound_memIndexRefRecvUnfold (k : Nat) {R R' : RefTy} (a : ArrTy R (.ref 
     rw [Prog.runSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      have hp : h' = .revert := Val.evalT_revert σ i hi
+      have hp : h' = .revert := Val.evalT_revertOnly σ i _ hi
       simp only [TRun.assignMem, TRes.map_bind]
       refine TRes.Sim.err_bind (MSrc.mvalT_noPanic σ _) hp fun _ _ => ?_
       simp only [MLoc.addrT, hb, hi, ok_bind]
@@ -310,12 +307,10 @@ theorem sound_deleteMemFieldRecv {s : Name} {T : Ty} (b : MPath C Γ (.struct s)
     (hd : T.defaultOkS = true) (x : Var) :
     Premise.Runs m (.deleteMem (.loc (.field b f hf)) hd)
       (.captureMV x b (.deleteMem (.loc (.field (.var .here hm) f hf)) hd)) σ := by
-  refine Premise.sound_captureMVSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .mem (.struct s)) (some v) (TRun.deleteMem_pushT σ (t := .mem _) (some v)
-      (.field (.var .here hm) f hf) (.field b f hf) ?_)
-    simp only [MLoc.addrT, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.deleteMem (.loc (.field b f hf)) σ).map _ = _
+  refine Premise.sound_captureMVPushed σ (fun v hv => TRun.deleteMem_pushT σ (t := .mem _) (some v)
+      (.field (.var .here hm) f hf) (.field b f hf) ?_) (fun h hh => ?_)
+  · simp only [MLoc.addrT, hv]; rfl
+  · show (TRun.deleteMem (.loc (.field b f hf)) σ).map _ = _
     simp only [TRun.deleteMem, MLoc.addrT, hh]; rfl
 
 /-- `memoryIndexDeleteNonSimpleIndexCapture`: the index captured. -/
@@ -331,7 +326,7 @@ theorem sound_deleteMemIndexCapture {R : RefTy} {T : Ty} (a : ArrTy R T) (mv : I
     cases (TEnv.get mv σ.env : Option (HRef σ.H R)) <;> rfl
   · show TRes.Sim _ ((TRun.deleteMem (.loc (.index a (.var mv hmv) i)) σ).map _)
     simp only [TRun.deleteMem, MLoc.addrT, hh, bind_assoc, TRes.map_bind]
-    exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) (Val.evalT_revert σ i hh)
+    exact TRes.Sim.err_bind (MPath.mvalT_noPanic σ _) (Val.evalT_revertOnly σ i _ hh)
       fun _ _ => TRes.Sim.refl _
 
 /-- `memoryIndexDelete_unfold_leftFst`: the receiver bound first. -/
@@ -339,12 +334,10 @@ theorem sound_deleteMemIndexRecv {R : RefTy} {T : Ty} (a : ArrTy R T) (b : MPath
     (hm : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (hd : T.defaultOkS = true) (x : Var) :
     Premise.Runs m (.deleteMem (.loc (.index a b i)) hd)
       (.captureMV x b (.deleteMem (.loc (.index a (.var .here hm) i.up)) hd)) σ := by
-  refine Premise.sound_captureMVSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .mem R) (some v) (TRun.deleteMem_pushT σ (t := .mem _) (some v)
-      (.index a (.var .here hm) i.up) (.index a b i) ?_)
-    simp only [MLoc.addrT, Val.evalT_up, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.deleteMem (.loc (.index a b i)) σ).map _ = _
+  refine Premise.sound_captureMVPushed σ (fun v hv => TRun.deleteMem_pushT σ (t := .mem _) (some v)
+      (.index a (.var .here hm) i.up) (.index a b i) ?_) (fun h hh => ?_)
+  · simp only [MLoc.addrT, Val.evalT_up, hv]; rfl
+  · show (TRun.deleteMem (.loc (.index a b i)) σ).map _ = _
     simp only [TRun.deleteMem, MLoc.addrT, hh]; rfl
 
 /-- **`delete p;` on memory** (`deleteMemStep`). -/

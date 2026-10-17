@@ -42,17 +42,6 @@ variable {Γ Γ' Γ₁ Γ₀ : Ctx}
 /-- The state a statement's typed run ends in. -/
 def Stmt.runSt (σ : State C Γ) (s : Stmt C Γ Γ') : TRes (State C Γ') := (s.run σ).map (·.st)
 
-/-- A statement's typed run only grows the heap typing. -/
-theorem Stmt.runSt_ext {σ : State C Γ} {s : Stmt C Γ Γ'} {τ : State C Γ'}
-    (h : Stmt.runSt σ s = .ok τ) : σ.H <+: τ.H := by
-  unfold Stmt.runSt at h
-  cases ho : s.run σ with
-  | error => rw [ho] at h; cases h
-  | ok o =>
-    rw [ho] at h
-    cases h
-    exact o.ext
-
 /-- The state a sequence's typed run ends in. -/
 def Prog.runSt (σ : State C Γ) (P : Prog C Γ Γ') : TRes (State C Γ') :=
   (Prog.run σ P).map (·.st)
@@ -124,6 +113,32 @@ theorem runSt_cons_frames (s : Stmt C Γ Γ') (ω : Prog C Γ' Γ₁) (κ : Fram
       (Stmt.runSt σ s).bind fun τ => (Prog.runSt τ ω).bind (Frames.runSt · κ) := by
   rw [Prog.runSt_cons]
   cases Stmt.runSt σ s <;> rfl
+
+/-- An outcome's states, each mapped, read through the states. -/
+theorem TRes.map_st {H : HTy} {Δ Γ' : Ctx} (X : TRes (Out C H Δ)) (f : Out C H Δ → Out C H Γ')
+    (g : State C Δ → State C Γ') (hfg : ∀ o, (f o).st = g o.st) :
+    (X.map f).map (·.st) = (X.map (·.st)).map g := by
+  cases X with
+  | error => rfl
+  | ok o => exact congrArg Except.ok (hfg o)
+
+/-- A block, read through its states: the body, its locals popped. -/
+theorem Stmt.runSt_block (σ : State C Γ) (P : Prog C Γ Γ₁) :
+    Stmt.runSt σ (.block P) = (Prog.runSt σ P).map (State.drop P.ext) :=
+  TRes.map_st _ _ _ fun _ => rfl
+
+/-- An `if`, read through its states. -/
+theorem Stmt.runSt_ite {Γ₂ : Ctx} (σ : State C Γ) (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
+    (els : Prog C Γ Γ₂) :
+    Stmt.runSt σ (.ite c thn els) =
+      (c.evalT σ).bind fun v => if boolT v then (Prog.runSt σ thn).map (State.drop thn.ext)
+        else (Prog.runSt σ els).map (State.drop els.ext) := by
+  unfold Stmt.runSt
+  show (TRun.ite c thn.ext thn.runR els.ext els.runR σ).map _ = _
+  unfold TRun.ite
+  cases c.evalT σ with
+  | error => rfl
+  | ok v => cases v <;> exact TRes.map_st _ _ _ fun _ => rfl
 
 end Runs
 
@@ -389,29 +404,6 @@ name), and 17' the last (a memory local may be unset, so the box
 section Revert
 
 variable {Γ : Ctx} (σ : State C Γ)
-
-/-- A typed result that neither panics, diverges nor is exhausted halts
-with a revert. -/
-theorem TRes.eq_revert {α : Type} {t : TRes α} (hp : t ≠ .error .panic) (he : t.Ends)
-    {h : THalt} (ht : t = .error h) : h = .revert := by
-  subst ht
-  cases h with
-  | revert => rfl
-  | panic => exact absurd rfl hp
-  | diverge => exact absurd rfl he.1
-  | exhausted => exact absurd rfl he.2
-
-theorem Val.evalT_revert {p : PrimTy} (v : Val C Γ p) {h : THalt} (hv : v.evalT σ = .error h) :
-    h = .revert :=
-  TRes.eq_revert (Val.evalT_noPanic σ v) (Val.evalT_ends σ v) hv
-
-theorem SPath.resolveT_revert {T : Ty} (b : SPath C Γ T) {h : THalt}
-    (hb : b.resolveT σ = .error h) : h = .revert :=
-  TRes.eq_revert (SPath.resolveT_noPanic σ b) (SPath.resolveT_ends σ b) hb
-
-theorem MPath.mvalT_revert {T : Ty} (b : MPath C Γ T) {h : THalt}
-    (hb : b.mvalT σ = .error h) : h = .revert :=
-  TRes.eq_revert (MPath.mvalT_noPanic σ b) (MPath.mvalT_ends σ b) hb
 
 /-- **A push never diverges**: onto `2^256 - 1` elements it is exhausted
 (`Storage.full`, decision 15), which both modalities accept. -/
@@ -723,73 +715,14 @@ theorem Stmt.runSt_declMem (σ : State C Γ) (R : RefTy) (x : Var) (b : MPath C 
   simp only [TRun.declMem, MRhs.evalT]
   cases b.mvalT σ <;> rfl
 
-/-- A declaration, then a statement on top of it, its local popped: the
-declaration's outcome, then the statement's. -/
-theorem runSt_declThen {t : LTy} (σ : State C Γ) (d : Stmt C Γ (t :: Γ))
-    (s' : Stmt C (t :: Γ) (t :: Γ)) :
-    (Prog.runSt σ (.cons d (.cons s' .nil))).map (State.drop (.push .refl)) =
-      (Stmt.runSt σ d).bind fun τ => (Stmt.runSt τ s').map (State.drop (.push .refl)) := by
-  rw [Prog.runSt_cons]
-  cases Stmt.runSt σ d with
-  | error => rfl
-  | ok τ =>
-    show (Prog.runSt τ (.cons s' .nil)).map _ = _
-    rw [Prog.runSt_single]
-    rfl
-
-/-- **A value captured**, by what the statement does with the value (`G`):
-the statement on top of the local runs as `G`, and the statement is the value
-read, then `G`, up to the halt. -/
-theorem Premise.sound_captureK {p : PrimTy} {x : Var} {e : Val C Γ p}
-    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} (σ : State C Γ)
-    (G : p.Denote → TRes (State C Γ))
-    (hs' : ∀ v, (Stmt.runSt (σ.push (t := .val p) v) s').map (State.drop (.push .refl)) = G v)
-    (hs : TRes.Sim ((e.evalT σ).bind G) (Stmt.runSt σ s)) :
-    Premise.Runs m s (.capture p x e s') σ := by
-  refine Premise.sound_unfoldSim σ ?_
-  rw [runSt_declThen, Stmt.runSt_declLocal]
-  have : ((e.evalT σ).map fun v => σ.push (t := .val p) v).bind
-      (fun τ => (Stmt.runSt τ s').map (State.drop (.push .refl))) = (e.evalT σ).bind G := by
-    cases e.evalT σ with
-    | error => rfl
-    | ok v => exact hs' v
-  rw [this]; exact hs
-
-/-- **A storage path captured**, by what the statement does with the
-reference. -/
-theorem Premise.sound_captureSPK {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
-    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ} (σ : State C Γ)
-    (G : SRef C (.ref R) → TRes (State C Γ))
-    (hs' : ∀ q, (Stmt.runSt (σ.push (t := .alias R) (some q)) s').map
-      (State.drop (.push .refl)) = G q)
-    (hs : TRes.Sim ((b.resolveT σ).bind G) (Stmt.runSt σ s)) :
-    Premise.Runs m s (.captureSP x b s') σ := by
-  refine Premise.sound_unfoldSim σ ?_
-  rw [runSt_declThen, Stmt.runSt_declStorage]
-  have : ((b.resolveT σ).map fun q => σ.push (t := .alias R) (some q)).bind
-      (fun τ => (Stmt.runSt τ s').map (State.drop (.push .refl))) = (b.resolveT σ).bind G := by
-    cases b.resolveT σ with
-    | error => rfl
-    | ok q => exact hs' q
-  rw [this]; exact hs
-
-/-- **A memory path captured**, by what the statement does with the
-object. -/
-theorem Premise.sound_captureMVK {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
-    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ} (σ : State C Γ)
-    (G : MVal σ.H (.ref R) → TRes (State C Γ))
-    (hs' : ∀ r, (Stmt.runSt (σ.push (t := .mem R) (some r)) s').map
-      (State.drop (.push .refl)) = G r)
-    (hs : TRes.Sim ((b.mvalT σ).bind G) (Stmt.runSt σ s)) :
-    Premise.Runs m s (.captureMV x b s') σ := by
-  refine Premise.sound_unfoldSim σ ?_
-  rw [runSt_declThen, Stmt.runSt_declMem]
-  have : ((b.mvalT σ).map fun r => σ.push (t := .mem R) (some r)).bind
-      (fun τ => (Stmt.runSt τ s').map (State.drop (.push .refl))) = (b.mvalT σ).bind G := by
-    cases b.mvalT σ with
-    | error => rfl
-    | ok r => exact hs' r
-  rw [this]; exact hs
+/-- A declaration that reads a part (`X`) and pushes it (`inj`), then a
+sequence: the part read, then the sequence over it. -/
+theorem Prog.runSt_declCons {t : LTy} {α : Type} {Γ₁ : Ctx} {σ : State C Γ}
+    {d : Stmt C Γ (t :: Γ)} {X : TRes α} {inj : α → t.TDenote C σ.H}
+    (hd : Stmt.runSt σ d = X.map fun a => σ.push (inj a)) (P : Prog C (t :: Γ) Γ₁) :
+    Prog.runSt σ (.cons d P) = X.bind fun a => Prog.runSt (σ.push (inj a)) P := by
+  rw [Prog.runSt_cons, hd]
+  cases X <;> rfl
 
 end ShapesSim
 
@@ -995,20 +928,35 @@ theorem TRes.Sim.err_bind {α β : Type} {X : TRes α} (hX : X.NoPanic) {h : THa
 theorem TRes.Sim.err_refl {α : Type} {h : THalt} {r : TRes α} (hr : r = .error h) :
     TRes.Sim (.error h) r := hr ▸ TRes.Sim.refl _
 
-/-- **A value captured**: `T se = nse; s'` gives `s`, `s'` running as `s`
-with the value on top, and `s` halting alike where `nse` halts. -/
+/-- **A part captured**: a declaration `d` that reads the part (`X`, which
+halts only by a revert) and pushes it, then `s'`, gives `s`, `s'` running as
+`s` with the part on top, and `s` halting alike where the part halts. -/
+theorem Premise.sound_captureGen {t : LTy} {α : Type} {d : Stmt C Γ (t :: Γ)}
+    {s' : Stmt C (t :: Γ) (t :: Γ)} {s : Stmt C Γ Γ} (σ : State C Γ) {X : TRes α}
+    {inj : α → t.TDenote C σ.H} (hd : Stmt.runSt σ d = X.map fun a => σ.push (inj a))
+    (hX : X.RevertOnly)
+    (hok : ∀ a, X = .ok a →
+      (Stmt.runSt (σ.push (inj a)) s').map (State.drop (.push .refl)) = Stmt.runSt σ s)
+    (herr : ∀ h, X = .error h → h = .revert → TRes.Sim (.error h) (Stmt.runSt σ s)) :
+    Premise.Runs m s (.unfold (.cons d (.cons s' .nil)) (.push .refl)) σ := by
+  refine Premise.sound_unfoldSim σ ?_
+  rw [Prog.runSt_declCons hd]
+  cases hx : X with
+  | ok a =>
+    show TRes.Sim ((Prog.runSt _ (.cons s' .nil)).map _) _
+    rw [Prog.runSt_single]
+    exact TRes.Sim.of_eq (hok a hx)
+  | error h => exact herr h hx (hX h hx)
+
+/-- **A value captured**: `T se = nse; s'`. -/
 theorem Premise.sound_captureSim {p : PrimTy} {x : Var} {e : Val C Γ p}
     {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ} (σ : State C Γ)
     (hok : ∀ v, e.evalT σ = .ok v →
       (Stmt.runSt (σ.push (t := .val p) v) s').map (State.drop (.push .refl)) = Stmt.runSt σ s)
     (herr : ∀ h, e.evalT σ = .error h → h = .revert → TRes.Sim (.error h) (Stmt.runSt σ s)) :
-    Premise.Runs m s (.capture p x e s') σ := by
-  refine Premise.sound_captureK σ
-    (fun v => (Stmt.runSt (σ.push (t := .val p) v) s').map (State.drop (.push .refl)))
-    (fun _ => rfl) ?_
-  cases he : e.evalT σ with
-  | ok v => exact TRes.Sim.of_eq (hok v he)
-  | error h => exact herr h he (Val.evalT_revert σ e he)
+    Premise.Runs m s (.capture p x e s') σ :=
+  Premise.sound_captureGen σ (inj := id) (Stmt.runSt_declLocal σ p x e)
+    (Val.evalT_revertOnly σ e) hok herr
 
 /-- **A storage path captured**: `T storage sp = nsp; s'`. -/
 theorem Premise.sound_captureSPSim {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
@@ -1017,13 +965,9 @@ theorem Premise.sound_captureSPSim {R : RefTy} {x : Var} {b : SPath C Γ (.ref R
       (Stmt.runSt (σ.push (t := .alias R) (some q)) s').map (State.drop (.push .refl)) =
         Stmt.runSt σ s)
     (herr : ∀ h, b.resolveT σ = .error h → h = .revert → TRes.Sim (.error h) (Stmt.runSt σ s)) :
-    Premise.Runs m s (.captureSP x b s') σ := by
-  refine Premise.sound_captureSPK σ
-    (fun q => (Stmt.runSt (σ.push (t := .alias R) (some q)) s').map (State.drop (.push .refl)))
-    (fun _ => rfl) ?_
-  cases hb : b.resolveT σ with
-  | ok q => exact TRes.Sim.of_eq (hok q hb)
-  | error h => exact herr h hb (SPath.resolveT_revert σ b hb)
+    Premise.Runs m s (.captureSP x b s') σ :=
+  Premise.sound_captureGen σ (inj := some) (Stmt.runSt_declStorage σ R x b)
+    (SPath.resolveT_revertOnly σ b) hok herr
 
 /-- **A memory path captured**: `T memory mv = nmp; s'`. -/
 theorem Premise.sound_captureMVSim {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
@@ -1032,27 +976,18 @@ theorem Premise.sound_captureMVSim {R : RefTy} {x : Var} {b : MPath C Γ (.ref R
       (Stmt.runSt (σ.push (t := .mem R) (some r)) s').map (State.drop (.push .refl)) =
         Stmt.runSt σ s)
     (herr : ∀ h, b.mvalT σ = .error h → h = .revert → TRes.Sim (.error h) (Stmt.runSt σ s)) :
-    Premise.Runs m s (.captureMV x b s') σ := by
-  refine Premise.sound_captureMVK σ
-    (fun r => (Stmt.runSt (σ.push (t := .mem R) (some r)) s').map
-      (State.drop (.push .refl)))
-    (fun _ => rfl) ?_
-  cases hb : b.mvalT σ with
-  | ok r => exact TRes.Sim.of_eq (hok r hb)
-  | error h => exact herr h hb (MPath.mvalT_revert σ b hb)
+    Premise.Runs m s (.captureMV x b s') σ :=
+  Premise.sound_captureGen σ (inj := some) (Stmt.runSt_declMem σ R x b)
+    (MPath.mvalT_revertOnly σ b) hok herr
 
 end CaptureSim
 
 /-! ## A scope end that pops nothing -/
 
-theorem Ext.length_le {Γ : Ctx} : {Δ : Ctx} → Ext Γ Δ → Γ.length ≤ Δ.length
-  | _, .refl => Nat.le_refl _
-  | _, .push h => Nat.le_succ_of_le (Ext.length_le h)
-
 theorem Ext.eq_refl_of {Γ : Ctx} : {Δ : Ctx} → (e : Ext Γ Δ) → (h : Δ = Γ) → h ▸ e = .refl
   | _, .refl, _ => rfl
   | _, .push e, h => by
-    have := Ext.length_le e
+    have := (Thin.ofExt e).length_le
     have := congrArg List.length h
     simp only [List.length_cons] at this
     omega

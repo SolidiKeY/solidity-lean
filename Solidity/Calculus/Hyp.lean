@@ -22,14 +22,6 @@ def maxIdx : List Var → Nat
   | [] => 0
   | x :: xs => max x.idx (maxIdx xs)
 
-/-- The largest index of two lists is the larger of theirs: `[x, se1] ++ [sp2]`
-has `2`.  With it the fresh index of a line whose postcondition `φ` names no
-fresh variable is computed without knowing `φ` (`Chains.lean`). -/
-theorem maxIdx_append (xs ys : List Var) : maxIdx (xs ++ ys) = max (maxIdx xs) (maxIdx ys) := by
-  induction xs with
-  | nil => exact (Nat.zero_max _).symm
-  | cons x xs ih => simp only [List.cons_append, maxIdx, ih, Nat.max_assoc]
-
 /-- Which rules a derivation may use: solkey's (`Taclet`), or all of them
 (`LeanTaclet` too). -/
 inductive RuleSet where

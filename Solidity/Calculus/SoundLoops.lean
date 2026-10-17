@@ -46,12 +46,6 @@ theorem holds_isBoolD (t : Tm C Γ (.val .bool)) (σ : State C Γ) (b : Bool) :
   · intro h
     exact ⟨b, h, rfl⟩
 
-/-- **`eqD` is the typed reading's equation**: both sides return, with one
-value. -/
-theorem holds_eqD_iffS {p : PrimTy} {σ : State C Γ} {a b : Tm C Γ (.val p)} :
-    holds σ (Fml.eqD a b) ↔ ∃ x, a.eval σ = some x ∧ b.eval σ = some x :=
-  holds_eqD σ a b
-
 /-- A value that returns over the typed state: its lowered term reads it
 (`Val.lower_evalT`). -/
 theorem Val.lower_eval_ok {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {x : p.Denote}
@@ -140,24 +134,6 @@ theorem Stmt.runSt_loop_unfold (σ : State C Γ) (a : LoopAnn C Γ) (c : Val C �
       cases Prog.run σ body with
       | error => rfl
       | ok o => exact Stmt.run_loop_from σ a c body _
-
-/-- A block, read through its states: the body, its locals popped. -/
-theorem Stmt.runSt_block (σ : State C Γ) (P : Prog C Γ Γ₁) :
-    Stmt.runSt σ (.block P) = (Prog.runSt σ P).map (State.drop P.ext) :=
-  TRes.map_st _ _ _ fun _ => rfl
-
-/-- An `if`, read through its states. -/
-theorem Stmt.runSt_ite {Γ₂ : Ctx} (σ : State C Γ) (c : Val C Γ .bool) (thn : Prog C Γ Γ₁)
-    (els : Prog C Γ Γ₂) :
-    Stmt.runSt σ (.ite c thn els) =
-      (c.evalT σ).bind fun v => if boolT v then (Prog.runSt σ thn).map (State.drop thn.ext)
-        else (Prog.runSt σ els).map (State.drop els.ext) := by
-  unfold Stmt.runSt
-  show (TRun.ite c thn.ext thn.runR els.ext els.runR σ).map _ = _
-  unfold TRun.ite
-  cases c.evalT σ with
-  | error => rfl
-  | ok v => cases v <;> exact TRes.map_st _ _ _ fun _ => rfl
 
 /-- The loop's annotation plays no part in its run. -/
 theorem Stmt.runSt_loop_ann (σ : State C Γ) (a a' : LoopAnn C Γ) (c : Val C Γ .bool)
