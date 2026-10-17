@@ -16,6 +16,7 @@ import Solidity.TestSuite.Derived15
 import Solidity.TestSuite.Derived16
 import Solidity.TestSuite.Derived17
 import Solidity.TestSuite.Derived18
+import Solidity.TestSuite.Derived19
 
 /-!
 # What is derived of solkey's `TestSuite`
@@ -27,7 +28,7 @@ finds: derived when its theorem `N.f.proved` exists, states
 statement does, and the import's verdict for a function with no statement
 (solkey states an obligation only for a public or external function, and
 inlines an `internal` one at its calls).  A pending obligation is no theorem
-and no `sorry`. The fixture pins solkey `048a74de51`. `Derived15.lean`
+and no `sorry`. The fixture pins solkey `473da8944c`. `Derived15.lean`
 adds the migration's newly provable obligations; `Derived14.lean` retains
 the earlier send, internal-call, return and tuple derivations.
 `testArrayCopyClearsOldElements` (a write through an alias a `pop` made
@@ -40,9 +41,32 @@ are pending, as they stay open in solkey.
 -/
 
 /--
-info: 551 functions: 506 derived, 6 pending, 39 other
+info: 617 functions: 519 derived, 11 pending, 87 other
 internal valuesRef
+unsupported storageArrayMethodReferences
+unsupported storageArrayMethodReferencesComplexReceiver
+internal valuesRefWithEffect
+internal matrixRefWithEffect
+internal basketRefWithEffect
+unsupported storageArrayMethodReferencesComposedCallReceiver
+unsupported storageArrayMethodReferencesCallReceiver
+unsupported storagePopReferenceOutOfBounds
+unsupported storagePopReferenceCallOutOfBounds
+unsupported logicalAndStorageAssignment
+unsupported logicalOrStorageAssignment
+unsupported storageAssignmentValueNested
+unsupported storageAssignmentValueIndexOnce
+unsupported storageAssignmentValueRhsBeforeIndex
+unsupported logicalAndStorageAssignmentSkipsIndex
+unsupported logicalOrStorageAssignmentSkipsIndex
+unsupported unprovableStorageShortCircuitMutation
 excluded recursiveStructMapping
+unsupported memoryIndexWriteStorageRefRhsCapture
+unsupported memoryIndexWriteStorageStructCopy
+internal mutateStorageCopySource
+unsupported memoryIndexWriteStorageRefImpureIndex
+unsupported memoryIndexWriteStorageRefOutOfBoundsReverts
+unsupported memoryIndexWriteStorageRefSourceOutOfBoundsReverts
 skipped tryCalleeGet
 skipped tryCalleePing
 internal returnOne
@@ -50,6 +74,15 @@ internal returnSign
 internal returnOrdered
 internal returnSwapped
 internal returnStats
+unsupported bitAndOneValues
+unsupported bitAndGeneralValues
+unsupported bitAndSymbolic
+internal bitAndSetTotal
+unsupported conditionalCallee
+internal retConditionalTwo
+unsupported conditionalCalleeEffects
+internal conditionalSetOne
+internal conditionalSetTwo
 internal returnFromNestedBlock
 internal returnOrFallThrough
 internal returnAddOne
@@ -66,8 +99,8 @@ internal returnInElseBranch
 internal returnEnumInOneBranch
 internal returnAssignsOneOfTwo
 internal returnReadsItsDefault
-internal overloadPick__solc16378
-internal overloadPick__solc16391
+internal overloadPick__solc17820
+internal overloadPick__solc17833
 internal modifierGuarded
 internal modifierAroundBody
 internal modifierOrdered
@@ -80,8 +113,25 @@ internal readTokenValue
 internal credit
 internal digits
 internal twiceKeepsLocal
+internal repeatedContinuationBody
+internal nextContinuationArgument
+internal reenteredArgumentBody
+unsupported conditionalContinuationBody
+unsupported modifierSkippedPlaceholder
+unsupported modifierTakenPlaceholder
+unsupported nestedReturningContinuation
+unsupported modifierReturnResumesOuterSuffix
+internal loopContinuationBody
+internal whileContinuationBody
+internal doWhileContinuationBody
+unsupported arithmeticAssignmentValues
+unsupported arithmeticDiscardKeepsSideEffects
+unsupported arithmeticDiscardKeepsZeroDivisorRevert
+unsupported testShiftRightNegativeRoundsDown
+unsupported testShiftOperandEvaluation
 pending:
-storagePushReturnPrimitiveBindComplexReceiver invariantClosedFormSum testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero
+storagePushReturnPrimitiveBindComplexReceiver invariantClosedFormSum invariantBreakLeavesInvariantRange invariantForBreakSkipsUpdate unprovableInvariantBreakPostcondition unprovableInvariantForContinueUpdate
+testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero arithmeticRemainderBoundAllSigns
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

@@ -324,6 +324,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Derived16.lean` | Native push compound, DIV/MOD, increment and signed three-push derivations; demanded primitive reads close the signed case within the existing bounds. |
 | `TestSuite/Derived17.lean` | Nine unannotated upstream loop derivations, including storage-dependent bounds, break/continue and nested returns; fixed-budget kernel-checked replay. |
 | `TestSuite/Derived18.lean` | The imported native modular arithmetic obligation, proved with explicit Lean-only assignment rules. |
+| `TestSuite/Derived19.lean` | Obligations new at solkey `473da8944c`: `&`'s operand order, a `continue` under an invariant, modifier continuations, the four dangling-storage claims (a length-only push) and shifts, by `sol_prove`. |
 | `Calculus/KeyValues.lean` | Recursive exclusion of native modular arithmetic from upstream-only programs, including path indices; weakening preserves the check. |
 | `Examples/Tactics/ModularArithmetic.lean` | Kernel-checked modular arithmetic, intermediate overflow, dynamic zero, short circuiting, argument effects, function shadowing and fragment boundaries. |
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and rows without statements (excluded, skipped, unsupported and internal helpers). |
