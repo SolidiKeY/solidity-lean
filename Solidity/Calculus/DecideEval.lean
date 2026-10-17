@@ -87,10 +87,6 @@ theorem eval_ofIndex {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
 
 end TSegs
 
-theorem SRef.append_append' {U V W : Ty} (r : SRef C U) (p : Path U V) (q : Path V W) :
-    (r.append p).append q = r.append (p.append q) := by
-  simp only [SRef.append, Path.append_assoc]
-
 theorem LTm.eval_field {s f : Name} {T : Ty} (h : C.fieldType s f = some T)
     (q : LTm C (.path (.ref (.struct s)))) :
     ((LTm.app1 (.field h) q).eval g ν : Option (SRef C T)) =
@@ -109,28 +105,28 @@ theorem TSegs.eval_toLTm {S T : Ty} (p : TSegs C S T) (acc : LTm C (.path S)) :
     rw [ih, LTm.eval_field, eval_field]
     cases (acc.eval g ν : Option (SRef C _)) <;> cases r.eval g ν <;>
       simp only [Option.map_none, Option.bind_none, Option.map_some, Option.bind_some,
-        SRef.append_append', Path.append_field, Path.append_nil]
+        SRef.append_append, Path.append_field, Path.append_nil]
   | «at» i r ih =>
     show ((r.toLTm _).eval g ν : Option (SRef C _)) = _
     rw [ih, LTm.eval_index, eval_at]
     cases (acc.eval g ν : Option (SRef C _)) <;> cases (i.eval g ν : Option _) <;>
       cases r.eval g ν <;>
       simp only [Option.map_none, Option.bind_none, Option.map_some, Option.bind_some,
-        SRef.index, SRef.append_append', Path.index_dyn, Path.append_at, Path.append_nil] <;> rfl
+        SRef.index, SRef.append_append, Path.index_dyn, Path.append_at, Path.append_nil] <;> rfl
   | atF i r ih =>
     show ((r.toLTm _).eval g ν : Option (SRef C _)) = _
     rw [ih, LTm.eval_index, eval_atF]
     cases (acc.eval g ν : Option (SRef C _)) <;> cases (i.eval g ν : Option _) <;>
       cases r.eval g ν <;>
       simp only [Option.map_none, Option.bind_none, Option.map_some, Option.bind_some,
-        SRef.index, SRef.append_append', Path.index_fixed, Path.append_atF, Path.append_nil] <;> rfl
+        SRef.index, SRef.append_append, Path.index_fixed, Path.append_atF, Path.append_nil] <;> rfl
   | key i r ih =>
     show ((r.toLTm _).eval g ν : Option (SRef C _)) = _
     rw [ih, LTm.eval_index, eval_key]
     cases (acc.eval g ν : Option (SRef C _)) <;> cases (i.eval g ν : Option _) <;>
       cases r.eval g ν <;>
       simp only [Option.map_none, Option.bind_none, Option.map_some, Option.bind_some,
-        SRef.index, SRef.append_append', Path.index_map, Path.append_key, Path.append_nil] <;> rfl
+        SRef.index, SRef.append_append, Path.index_map, Path.append_key, Path.append_nil] <;> rfl
 
 namespace SPath
 
@@ -738,12 +734,6 @@ theorem ovRS_rep : ∀ {U V : Ty} (r : TSegs C U V) (c : CK V) {o n : VRd C U} {
 
 /-! ### Arrays -/
 
-theorem uintOfNat_eq_iff {k : PrimTy.uint.Denote} {n : Nat} (hn : n < 2 ^ 256) :
-    k = uintOfNat n ↔ k.1 = (n : Int) := by
-  constructor
-  · rintro rfl; exact uintOfNat_val hn
-  · intro h; exact Subtype.ext (h.trans (uintOfNat_val hn).symm)
-
 theorem uintOfNat_one : (uintOfNat 1).1 = 1 := uintOfNat_val (by decide)
 
 theorem ofInt?_uint {m : Int} (h : PrimTy.uint.inRange m = true) :
@@ -932,32 +922,6 @@ theorem svalRd_rep {p : PrimTy} {w : LTm C (.val p)} {v : p.Denote}
 
 /-! ### Defaults -/
 
-theorem dflt_struct (s : Name) :
-    SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
-  SVal.dflt_struct s
-
-theorem dflt_map (K : PrimTy) (V : Ty) : SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
-  SVal.dflt_map K V
-
-theorem dflt_fixed (E : Ty) (n : Nat) :
-    SVal.dflt (.ref (.fixed E n)) = .fixed (SVec.replicate (SVal.dflt E) n) :=
-  SVal.dflt_fixed E n
-
-theorem dflt_array (E : Ty) : SVal.dflt (.ref (.array E)) = .array .nil .nil SVal.zero_lt_bound :=
-  rfl
-
-theorem dfltGet {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
-  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, h => by
-    rw [SFields.dflt, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact dfltGet _
-
 /-- A location is there in a default value: no dynamic array's index on the
 way (it is empty), a fixed one's in range. -/
 def _root_.Solidity.Path.dfltOk : {T U : Ty} → Path T U → Bool
@@ -971,15 +935,15 @@ theorem findM_dflt : {T U : Ty} → (p : Path T U) →
     (SVal.dflt T).findM p = if p.dfltOk then some (SVal.dflt U) else none
   | _, _, .nil => by simp only [Path.dfltOk, if_true, SVal.findM_nil']
   | _, _, .field h p => by
-    rw [dflt_struct, SVal.findM_field', dfltGet, findM_dflt p]; rfl
+    rw [SVal.dflt_struct, SVal.findM_field', SFields.dflt_get, findM_dflt p]; rfl
   | _, _, .key k p => by
-    rw [dflt_map]; simp only [SVal.findM, SMap.toList, SMap.fold]; exact findM_dflt p
+    rw [SVal.dflt_map]; simp only [SVal.findM, SMap.toList, SMap.fold]; exact findM_dflt p
   | _, _, .at i p => by
-    rw [dflt_array, SVal.findM_at']
+    rw [SVal.dflt_array, SVal.findM_at']
     simp only [Path.dfltOk, Bool.false_eq_true, if_false, SVec.toList_nil, SList.toList_nil,
       List.append_nil, List.getElem?_nil, Option.bind_none, ite_self]
   | _, _, .atF (n := n) i p => by
-    rw [dflt_fixed, SVal.findM_atF', SVec.toList_replicate]
+    rw [SVal.dflt_fixed, SVal.findM_atF', SVec.toList_replicate]
     simp only [Path.dfltOk, Bool.and_eq_true, decide_eq_true_eq]
     by_cases h : i.1.toNat < n
     · rw [List.getElem?_replicate_of_lt h, Option.bind_some, findM_dflt p]
@@ -1586,13 +1550,6 @@ theorem guard_has {α : Type} {b : Bool} {x : Option α} (h : x.isSome = b) :
     (if b = true then some true else none) = x.map (fun _ => true) := by
   cases b <;> cases x <;> simp_all only [Option.isSome_none, Option.isSome_some, reduceCtorEq,
     if_true, if_false, Bool.false_eq_true, Option.map_none, Option.map_some]
-
-theorem obs_len_lt (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
-    st.obs.len (.ref r) < 2 ^ 256 := by
-  rw [Storage.obs_len_ref, SVal.obs_len]
-  cases (st.get r.hroot).findM r.path with
-  | none => exact SVal.zero_lt_bound
-  | some w => cases w with | array e sh hn => exact hn
 
 theorem find_len_nil (o : TSto C) {E : Ty} (r : SRef C (.ref (.array E))) :
     (o.find (.ref r)).len .nil = o.len (.ref r) := by

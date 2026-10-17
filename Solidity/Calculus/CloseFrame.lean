@@ -116,37 +116,15 @@ def Path.total : {T U : Ty} → Path T U → Bool
   | _, _, .at _ _ => false
   | _, _, .atF _ _ => false
 
-theorem SVal.dflt_prim' (p : PrimTy) : SVal.dflt (.prim p) = .prim (PrimTy.dflt p) := rfl
-
-theorem SVal.dflt_struct' (s : Name) :
-    SVal.dflt (.ref (.struct s)) = .struct (SFields.dflt (structDef s)) :=
-  SVal.dflt_struct s
-
-theorem SVal.dflt_map' (K : PrimTy) (V : Ty) :
-    SVal.dflt (.ref (.mapping K V)) = .map .nil (SVal.dflt V) :=
-  SVal.dflt_map K V
-
-theorem SFields.get_dflt {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
-  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, h => by
-    rw [SFields.dflt, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact SFields.get_dflt _
-
 theorem SVal.findM_dflt_total : {T U : Ty} → (p : Path T U) → p.total = true →
     (SVal.dflt T).findM p = some (SVal.dflt U)
   | _, _, .nil, _ => by cases h : SVal.dflt _ <;> rfl
   | _, _, @Path.field s _ _ _ hf p, hp => by
-    rw [SVal.dflt_struct']
-    simp only [SVal.findM, SFields.get_dflt]
+    rw [SVal.dflt_struct]
+    simp only [SVal.findM, SFields.dflt_get]
     exact SVal.findM_dflt_total p hp
   | _, _, @Path.key K V _ k p, hp => by
-    rw [SVal.dflt_map']
+    rw [SVal.dflt_map]
     simp only [SVal.findM, SMap.toList, SVal.findM]
     exact SVal.findM_dflt_total p hp
   | _, _, .at _ _, hp => by simp only [Path.total, Bool.false_eq_true] at hp
@@ -154,7 +132,7 @@ theorem SVal.findM_dflt_total : {T U : Ty} → (p : Path T U) → p.total = true
 
 theorem Storage.find_init_total {C : Contract} {U : Ty} (r : SRef C U) (h : r.path.total = true) :
     (Storage.init C).find r = some (SVal.dflt U) := by
-  simp only [Storage.find, Storage.init, SFields.get_dflt, SVal.find_eq_findM]
+  simp only [Storage.find, Storage.init, SFields.dflt_get, SVal.find_eq_findM]
   exact SVal.findM_dflt_total _ h
 
 theorem SVal.saveM_total : {T U : Ty} → (x : SVal T) → (p : Path T U) → p.total = true →
@@ -230,9 +208,6 @@ theorem field_append {s f : Name} {T : Ty} (r : SRef C (.ref (.struct s)))
     (h : C.fieldType s f = some T) : r.field h = r.append (.field h .nil) := rfl
 theorem index_append {R : RefTy} {k : PrimTy} {V : Ty} (r : SRef C (.ref R))
     (it : IndexTy R k V) (i : k.Denote) : r.index it i = r.append (Path.index it i) := rfl
-theorem append_append {T U W : Ty} (r : SRef C T) (p : Path T U) (q : Path U W) :
-    (r.append p).append q = r.append (p.append q) := by
-  simp only [SRef.append, Path.append_assoc]
 theorem root_append {T U : Ty} (r : SRef C T) (p : Path T U) : (r.append p).root = r.root := rfl
 theorem labels_ofRoot {T : Ty} (r : Name) (h : C.rootType r = some T) :
     (SRef.ofRoot r h).labels = [.root r] := by
@@ -634,7 +609,7 @@ attribute [close_rw_s high] CloseS.wp_box_write_prim CloseS.wp_diamond_write_tot
   CloseS.wp_find_total CloseS.wp_find_root
 
 attribute [close_rw_s]
-  CloseS.wp_box_write CloseS.field_append CloseS.index_append CloseS.append_append
+  CloseS.wp_box_write CloseS.field_append CloseS.index_append SRef.append_append
   CloseS.root_append CloseS.labels_ofRoot CloseS.labels_append CloseS.diverges_nil_left
   CloseS.diverges_nil_right CloseS.diverges_cons CloseS.key_uint CloseS.key_int
   CloseS.key_uint' CloseS.key_int' CloseS.netOfT_def
@@ -647,7 +622,7 @@ attribute [close_rw_s]
   CloseS.getD_find_root CloseS.getD_find_append CloseS.find_root_bind_const
   CloseS.find_total_bind_const CloseS.find_root_map_const CloseS.find_total_map_const
   CloseS.checkIndex_map_total CloseS.path_ofRoot CloseS.path_append CloseS.find_init_ofRoot CloseS.find_init_append
-  Path.total SVal.dflt_prim' Semantics.lookupBy Option.getD_some Option.getD_none
+  Path.total SVal.dflt_prim Semantics.lookupBy Option.getD_some Option.getD_none
   CloseS.wp_box_delete CloseS.map_const_eq_some SVal.defaultOf_prim' SVal.find_defaultOf_field
   Option.map_map CloseS.dflt_bool CloseS.dflt_uint_val CloseS.dflt_int_val
   CloseS.bind_const_eq_some CloseS.optRes_eq_ok CloseS.forall_val_eq_uint CloseS.forall_val_eq_int

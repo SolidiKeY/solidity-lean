@@ -130,34 +130,6 @@ def Upd.storTerms : {Δ : Ctx} → Upd C Γ Δ → List (Tm C Γ .st)
   | _, .pop U _ => U.storTerms
   | _, .drop U _ => U.storTerms
 
-/-- **A storage write that is an element of an update that returns,
-returns.** -/
-theorem Upd.storage_eval_of_globT {σ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
-    {g : GlobT C σ.H} → U.globT σ = some g → ∀ s ∈ U.storTerms, ∃ st, s.eval σ = some st
-  | _, .nil, _, _ => fun _ h => nomatch h
-  | _, .snoc U e, g, h => by
-    change (U.globT σ).bind (e.globT σ) = some g at h
-    rw [Option.bind_eq_some_iff] at h
-    obtain ⟨g₀, hU, hw⟩ := h
-    intro s hs
-    rcases List.mem_append.1 hs with hs | hs
-    · exact Upd.storage_eval_of_globT U hU s hs
-    · cases e with
-      | storage s' =>
-        simp only [UpdElem.storTerms, List.mem_singleton] at hs
-        subst hs
-        rw [UpdElem.globT_eq_globTM] at hw
-        simp only [UpdElem.globTM, Option.bind_eq_some_iff] at hw
-        obtain ⟨st, hst, -⟩ := hw
-        exact ⟨st, hst⟩
-      | _ => nomatch hs
-  | _, .decl U _ r, g, h => by
-    change (U.globT σ).bind (fun g => (r.eval σ).bind fun _ => some g) = some g at h
-    rw [Option.bind_eq_some_iff] at h
-    obtain ⟨g₀, hU, -⟩ := h
-    exact Upd.storage_eval_of_globT U hU
-  | _, .pop U _, _, h | _, .drop U _, _, h => Upd.storage_eval_of_globT U h
-
 /-- **A storage write that is an element of an update that reverts nowhere
 returns or is out of gas.** -/
 theorem Upd.storage_okx {σ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) → U.exhOk σ = true →
@@ -2431,35 +2403,6 @@ def Upd.memTerms : {Δ : Ctx} → Upd C Γ Δ → List (Tm C Γ .mem)
   | _, .decl U _ _ => U.memTerms
   | _, .pop U _ => U.memTerms
   | _, .drop U _ => U.memTerms
-
-/-- **A memory write that is an element of an update that returns,
-returns.** -/
-theorem Upd.memory_eval_of_globT {σ : State C Γ} : {Δ : Ctx} → (U : Upd C Γ Δ) →
-    {g : GlobT C σ.H} → U.globT σ = some g → ∀ s ∈ U.memTerms, s.eval σ ≠ none
-  | _, .nil, _, _ => fun _ h => nomatch h
-  | _, .snoc U e, g, h => by
-    change (U.globT σ).bind (e.globT σ) = some g at h
-    rw [Option.bind_eq_some_iff] at h
-    obtain ⟨g₀, hU, hw⟩ := h
-    intro s hs
-    rcases List.mem_append.1 hs with hs | hs
-    · exact Upd.memory_eval_of_globT U hU s hs
-    · cases e with
-      | memory s' =>
-        simp only [UpdElem.memTerms, List.mem_singleton] at hs
-        subst hs
-        rw [UpdElem.globT_eq_globTM] at hw
-        simp only [UpdElem.globTM, Option.bind_eq_some_iff] at hw
-        obtain ⟨μ, hμ, -⟩ := hw
-        rw [hμ]
-        exact Option.some_ne_none _
-      | _ => nomatch hs
-  | _, .decl U _ r, g, h => by
-    change (U.globT σ).bind (fun g => (r.eval σ).bind fun _ => some g) = some g at h
-    rw [Option.bind_eq_some_iff] at h
-    obtain ⟨g₀, hU, -⟩ := h
-    exact Upd.memory_eval_of_globT U hU
-  | _, .pop U _, _, h | _, .drop U _, _, h => Upd.memory_eval_of_globT U h
 
 /-- **A memory write that is an element of an update that reverts nowhere
 returns or is out of gas.** -/

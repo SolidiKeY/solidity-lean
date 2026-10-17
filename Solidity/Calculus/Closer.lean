@@ -714,13 +714,6 @@ theorem findM_at_isSome {E : Ty} (v : SVal (.ref (.array E))) {i : PrimTy.uint.D
     rw [List.getElem?_append_left hl, List.getElem?_eq_getElem hl]
     simp only [SVal.findM_nil', Option.isSome_some]
 
-theorem obs_len_lt' (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
-    st.obs.len (.ref r) < 2 ^ 256 := by
-  rw [Storage.obs_len_ref, SVal.obs_len]
-  cases (st.get r.hroot).findM r.path with
-  | none => exact Nat.two_pow_pos 256
-  | some w => cases w with | array e sh hn => exact hn
-
 theorem has_below (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) {i : PrimTy.uint.Denote}
     (h0 : 0 ≤ i.1) (hi : i.1 < (st.obs.len (.ref r) : Int)) :
     st.obs.has (.ref (r.append (.at i .nil))) = true := by
@@ -786,7 +779,7 @@ theorem Facts.hasDyn_core {F : Facts C} (hF : F.Ok g ν) {E : Ty}
       have ri := F.range_sound hF i hi
       have rl := F.range_sound hF (.obsL q) hl
       unfold InR at ri rl
-      rw [ival_uintOfNat (obs_len_lt' _ _)] at rl
+      rw [ival_uintOfNat (obs_len_lt _ _)] at rl
       have hk : 0 ≤ PrimTy.ival k := (PrimTy.ival_mem k).1
       have hkey : k.val = PrimTy.ival k := rfl
       simp only [Option.bind_some, hl, SRef.index, Path.index_dyn]

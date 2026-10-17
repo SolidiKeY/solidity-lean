@@ -185,6 +185,13 @@ theorem OLe.cases {α : Type} {a b : Option α} (h : OLe a b) : a = Option.none 
   | none => exact .inl rfl
   | some x => exact .inr (h x rfl).symm
 
+theorem OLe.antisymm {α : Type} {a b : Option α} (h₁ : OLe a b) (h₂ : OLe b a) : a = b := by
+  cases a with
+  | none => cases b with
+    | none => rfl
+    | some y => exact h₂ y rfl
+  | some x => exact (h₁ x rfl).symm
+
 theorem OLe.bind {α β : Type} {a a' : Option α} {f f' : α → Option β} (ha : OLe a a')
     (hf : ∀ x, OLe (f x) (f' x)) : OLe (a.bind f) (a'.bind f') := fun y h => by
   obtain ⟨x, hx, hy⟩ := Option.bind_eq_some_iff.1 h

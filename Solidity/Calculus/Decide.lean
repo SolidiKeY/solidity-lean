@@ -1446,6 +1446,14 @@ def LFml.elim : LFml C → LFml C
   | .imp φ ψ => .imp φ.elim ψ.elim
   | .all k p φ => .all k p φ.elim
 
+/-- An array's length is below `2^256`. -/
+theorem obs_len_lt (st : Storage C) {E : Ty} (r : SRef C (.ref (.array E))) :
+    st.obs.len (.ref r) < 2 ^ 256 := by
+  rw [Storage.obs_len_ref, SVal.obs_len]
+  cases (st.get r.hroot).findM r.path with
+  | none => exact SVal.zero_lt_bound
+  | some w => cases w with | array e sh hn => exact hn
+
 end Decide
 
 end Solidity

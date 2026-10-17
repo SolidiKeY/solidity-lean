@@ -34,7 +34,7 @@ The kernel unfolds `Fml.rwEqC` and `Hyps.rwEqC` where `Proves.rewrite'`
 checks the rewritten sequent (`rfl`), so both are written by the
 recursors (Gate G0, conditions 1 and 2), each with its `match` form as the
 compiled twin (`Fml.rwEqCM`, `Hyps.rwEqCM`) and a link theorem; the
-recursor's clauses are stated by hand (`Fml.rwEqC_not`, …), by `rfl`.
+recursor's clauses are stated by hand (`Fml.rwEqC_and`, …), by `rfl`.
 `Tm.toNil?`, `Tm.ofNil` and the update's rewrite use `match` (the
 exemption of `Calculus/Graft.lean`'s functions): they run once a rule.
 -/
@@ -334,6 +334,12 @@ def PickGe (f : {s : Srt} → Tm C Γ s → Option (Tm C Γ s)) (σ : State C Γ
 def PickEq (f : {s : Srt} → Tm C Γ s → Option (Tm C Γ s)) (σ : State C Γ) : Prop :=
   ∀ {s : Srt} {t t' : Tm C Γ s}, f t = some t' → t'.eval σ = t.eval σ
 
+theorem PickEq.le {σ : State C Γ} (hf : PickEq f σ) : PickLe f σ :=
+  fun h _ hx => (hf h).trans hx
+
+theorem PickEq.ge {σ : State C Γ} (hf : PickEq f σ) : PickGe f σ :=
+  fun h _ hx => (hf h).symm.trans hx
+
 theorem Tm.getD_le (hf : PickLe f σ) {s : Srt} {t d : Tm C Γ s}
     (hd : OLe (t.eval σ) (d.eval σ)) : OLe (t.eval σ) (((f t).getD d).eval σ) := by
   cases h : f t with
@@ -342,12 +348,6 @@ theorem Tm.getD_le (hf : PickLe f σ) {s : Srt} {t d : Tm C Γ s}
 
 theorem Tm.getD_ge (hf : PickGe f σ) {s : Srt} {t d : Tm C Γ s}
     (hd : OLe (d.eval σ) (t.eval σ)) : OLe (((f t).getD d).eval σ) (t.eval σ) := by
-  cases h : f t with
-  | none => exact hd
-  | some t' => exact hf h
-
-theorem Tm.getD_eq (hf : PickEq f σ) {s : Srt} {t d : Tm C Γ s}
-    (hd : d.eval σ = t.eval σ) : ((f t).getD d).eval σ = t.eval σ := by
   cases h : f t with
   | none => exact hd
   | some t' => exact hf h
@@ -376,24 +376,9 @@ theorem Tm.rwBy_eval_rev (hf : PickGe f σ) :
       (o.eval_le (Tm.rwBy_eval_rev hf x) (Tm.rwBy_eval_rev hf y) (Tm.rwBy_eval_rev hf z))
 
 /-- **An exact rewrite keeps what every term returns.** -/
-theorem Tm.rwBy_eval_eq (hf : PickEq f σ) :
-    {s : Srt} → (t : Tm C Γ s) → (Tm.rwBy f t).eval σ = t.eval σ
-  | _, .pvV _ | _, .pvP _ | _, .pvS _ | _, .pvI _ | _, .pvZ _ => rfl
-  | _, .netOf i a => by
-    show ((Tm.rwBy f a).eval σ).bind _ = (a.eval σ).bind _
-    rw [Tm.rwBy_eval_eq hf a]
-  | _, .app0 _ => Tm.getD_eq σ hf rfl
-  | _, .app1 o x => Tm.getD_eq σ hf (by
-      show o.eval σ.glob ((Tm.rwBy f x).eval σ) = o.eval σ.glob (x.eval σ)
-      rw [Tm.rwBy_eval_eq hf x])
-  | _, .app2 o x y => Tm.getD_eq σ hf (by
-      show o.eval σ.glob ((Tm.rwBy f x).eval σ) ((Tm.rwBy f y).eval σ) =
-        o.eval σ.glob (x.eval σ) (y.eval σ)
-      rw [Tm.rwBy_eval_eq hf x, Tm.rwBy_eval_eq hf y])
-  | _, .app3 o x y z => Tm.getD_eq σ hf (by
-      show o.eval σ.glob ((Tm.rwBy f x).eval σ) ((Tm.rwBy f y).eval σ) ((Tm.rwBy f z).eval σ) =
-        o.eval σ.glob (x.eval σ) (y.eval σ) (z.eval σ)
-      rw [Tm.rwBy_eval_eq hf x, Tm.rwBy_eval_eq hf y, Tm.rwBy_eval_eq hf z])
+theorem Tm.rwBy_eval_eq (hf : PickEq f σ) {s : Srt} (t : Tm C Γ s) :
+    (Tm.rwBy f t).eval σ = t.eval σ :=
+  OLe.antisymm (Tm.rwBy_eval_rev σ hf.ge t) (Tm.rwBy_eval σ hf.le t)
 
 theorem Rhs.rwBy_eval (hf : PickLe f σ) {t : LTy} (r : Rhs C Γ t) :
     OLe (r.eval σ) ((Rhs.rwBy f r).eval σ) := by
@@ -418,19 +403,8 @@ theorem Rhs.rwBy_eval_rev (hf : PickGe f σ) {t : LTy} (r : Rhs C Γ t) :
   | saveNetMt => exact OLe.refl _
 
 theorem Rhs.rwBy_eval_eq (hf : PickEq f σ) {t : LTy} (r : Rhs C Γ t) :
-    (Rhs.rwBy f r).eval σ = r.eval σ := by
-  cases r with
-  | val t | zint t => exact Tm.rwBy_eval_eq σ hf t
-  | path p =>
-    show ((Tm.rwBy f p).eval σ).bind _ = (p.eval σ).bind _
-    rw [Tm.rwBy_eval_eq σ hf p]
-  | mref i =>
-    show ((Tm.rwBy f i).eval σ).bind _ = (i.eval σ).bind _
-    rw [Tm.rwBy_eval_eq σ hf i]
-  | store s =>
-    show ((Tm.rwBy f s).eval σ).bind _ = (s.eval σ).bind _
-    rw [Tm.rwBy_eval_eq σ hf s]
-  | unset | saveNet | saveNetMt => rfl
+    (Rhs.rwBy f r).eval σ = r.eval σ :=
+  OLe.antisymm (Rhs.rwBy_eval_rev σ hf.ge r) (Rhs.rwBy_eval σ hf.le r)
 
 /-- An element's global part, by its right-hand sides' readings: a map of
 `globT`'s arguments, so that the three rewrites below share one proof. -/
@@ -461,9 +435,8 @@ theorem UpdElem.rwBy_globT_rev (hf : PickGe f σ) {Δ : Ctx} (e : UpdElem C Γ �
   | setBalance a => exact OLe.bind (hv a) fun _ => OLe.refl _
 
 theorem UpdElem.rwBy_globT_eq (hf : PickEq f σ) {Δ : Ctx} (e : UpdElem C Γ Δ)
-    (G : GlobT C σ.H) : (UpdElem.rwBy f e).globT σ G = e.globT σ G := by
-  rw [UpdElem.globT_eq_globTM, UpdElem.globT_eq_globTM]
-  cases e <;> simp only [UpdElem.rwBy, UpdElem.globTM, Rhs.rwBy_eval_eq σ hf, Tm.rwBy_eval_eq σ hf]
+    (G : GlobT C σ.H) : (UpdElem.rwBy f e).globT σ G = e.globT σ G :=
+  OLe.antisymm (UpdElem.rwBy_globT_rev σ hf.ge e G) (UpdElem.rwBy_globT σ hf.le e G)
 
 /-- **Where an update returns, its rewrite returns the same global part.** -/
 theorem Upd.rwBy_globT (hf : PickLe f σ) :
@@ -486,20 +459,9 @@ theorem Upd.rwBy_globT_rev (hf : PickGe f σ) :
   | _, .drop U _ => Upd.rwBy_globT_rev hf U
 
 /-- **An exact rewrite keeps the global part every update computes.** -/
-theorem Upd.rwBy_globT_eq (hf : PickEq f σ) :
-    {Δ : Ctx} → (U : Upd C Γ Δ) → (Upd.rwBy f U).globT σ = U.globT σ
-  | _, .nil => rfl
-  | _, .snoc U e => by
-    show ((Upd.rwBy f U).globT σ).bind _ = (U.globT σ).bind _
-    rw [Upd.rwBy_globT_eq hf U]
-    cases U.globT σ with
-    | none => rfl
-    | some G => exact UpdElem.rwBy_globT_eq σ hf e G
-  | _, .decl U x r => by
-    show ((Upd.rwBy f U).globT σ).bind _ = (U.globT σ).bind _
-    rw [Upd.rwBy_globT_eq hf U, Rhs.rwBy_eval_eq σ hf]
-  | _, .pop U _ => Upd.rwBy_globT_eq hf U
-  | _, .drop U _ => Upd.rwBy_globT_eq hf U
+theorem Upd.rwBy_globT_eq (hf : PickEq f σ) {Δ : Ctx} (U : Upd C Γ Δ) :
+    (Upd.rwBy f U).globT σ = U.globT σ :=
+  OLe.antisymm (Upd.rwBy_globT_rev σ hf.ge U) (Upd.rwBy_globT σ hf.le U)
 
 /-- What a local holds, its right-hand side rewritten. -/
 def Held.rwBy {t : LTy} : Held C Γ t → Held C Γ t
@@ -764,7 +726,6 @@ section Clauses
 
 variable (q : Tm C [] (.val p) × Tm C [] (.val p))
 
-theorem Fml.rwEqC_not (φ : Fml C Γ) : (Fml.not φ).rwEqC q = .not (φ.rwEqC q) := rfl
 theorem Fml.rwEqC_and (φ ψ : Fml C Γ) : (Fml.and φ ψ).rwEqC q = .and (φ.rwEqC q) (ψ.rwEqC q) :=
   rfl
 theorem Fml.rwEqC_imp (φ ψ : Fml C Γ) : (Fml.imp φ ψ).rwEqC q = .imp (φ.rwEqC q) (ψ.rwEqC q) :=

@@ -623,11 +623,6 @@ roots for a storage, from the members under a `select`. -/
   | .sts sn, T => .spath sn T
   | _, T => .path T
 
-/-- The storage contract of a storage sort. -/
-@[reducible] def Srt.stC (C : Contract) : Srt → Contract
-  | .sts sn => Contract.ofStruct sn
-  | _ => C
-
 /-- **A delete at `p` resets every word below it**, in every state: no
 mapping's entry and no slot past an array's live end below `p` in `s`
 (both of which a delete keeps; `TVal.delR`).  `s` a storage, or a storage of
@@ -1042,22 +1037,6 @@ theorem Tm.sameSegs_hasSeg {T U : Ty} {p : Tm C Γ (.path T)} {q : Tm C Γ (.pat
   cases e
   rfl
 
-/-- A literal written value reads its word in the Theory. -/
-theorem Tm.svLit?_word (σ : State C Γ) {P : PrimTy} {v : Tm C Γ (.sv (.prim P))}
-    {w : (p : PrimTy) × p.Denote} (h : v.svLit? = some w) :
-    ∃ e : w.1 = P, (v.denote σ).word .nil = e ▸ w.2 := by
-  cases v with
-  | app1 o x =>
-    cases o with
-    | sval =>
-      obtain ⟨e, hx⟩ := Tm.litW?_denote σ (t := x) h
-      refine ⟨e, ?_⟩
-      show (TVal.ofWord ((x.denote σ).getD _)).word .nil = _
-      rw [hx]
-      rfl
-    | _ => cases h
-  | _ => cases h
-
 end SideSyntax
 
 /-! ## A storage of members with a hole
@@ -1436,118 +1415,6 @@ theorem Tm.findIn_fill_theq {sn sn₁ : Name} {s s' : Tm C Γ (.sts sn)}
     Tm.Theq (.app2 .findIn (K.fill s) q) (.app2 .findIn (K.fill s') q) := fun σ => by
   show some (((K.fill s).denote σ).word (q.denote σ)) = some (((K.fill s').denote σ).word (q.denote σ))
   rw [SCtxS.fill_denote h K σ]
-
-/-- What a storage term reads at a word location, if it is a storage;
-generic in the sort. -/
-def Srt.WordAt {P : PrimTy} (q : SLoc C (.prim P)) (x : P.Denote) : (u : Srt) → u.TDen C → Prop
-  | .st, d => d.word q = x
-  | _, _ => True
-
-/-- The word read off the writes is the word read; generic in the sort. -/
-theorem Tm.findLitBy_theq {P : PrimTy} {q : Tm C Γ (.path (.prim P))}
-    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote} (e : w.1 = P),
-      s.findLitBy (·.sameSegs q) (·.diverges q) = some w →
-      Srt.WordAt (q.denote σ) (e ▸ w.2) u (s.denote σ) := by
-  induction s with
-  | app3 o x y z ihx _ _ =>
-    intro w e h
-    cases o with
-    | save =>
-      have h : (if y.sameSegs q then z.svLit? else if y.diverges q then
-          x.findLitBy (·.sameSegs q) (·.diverges q) else none) = some w := h
-      show ((x.denote σ).copyTo (y.denote σ) (z.denote σ)).word (q.denote σ) = _
-      split at h
-      · rename_i hpq
-        obtain ⟨rfl, hh⟩ := Tm.sameSegs_heq σ hpq
-        rw [← eq_of_heq hh, Obs.copyTo_word_same]
-        obtain ⟨e', hz⟩ := Tm.svLit?_word σ h
-        rw [hz]
-      · split at h
-        · rename_i hd
-          rw [Obs.copyTo, Obs.save_word_frame _ _ (Tm.diverges_denote_nil σ hd)]
-          exact ihx e h
-        · cases h
-    | _ => cases h
-  | _ => intro w e h; cases h
-
-/-- `findLit?` reads the word the storage holds there. -/
-theorem Tm.findLit?_theq {s : Tm C Γ .st} {P : PrimTy} {q : Tm C Γ (.path (.prim P))}
-    {w : P.Denote} (h : s.findLit? q = some w) :
-    Tm.Theq (Tms.Term.find s q) (Tms.Term.lit w) := fun σ => by
-  unfold Tm.findLit? at h
-  split at h
-  · obtain ⟨w', hw', h⟩ := Option.bind_eq_some_iff.1 h
-    split at h
-    · rename_i e
-      cases h
-      show some ((s.denote σ).word (q.denote σ)) = some _
-      rw [Tm.findLitBy_theq σ s e hw']
-    · cases h
-  · cases h
-
-/-- `Tm.divergesU` gives two locations neither below the other, in every
-state. -/
-theorem Tm.divergesU_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C Γ (.spath sn T)}
-    {q : Tm C Γ (.spath sn U)} (h : p.divergesU q = true) :
-    ObsLoc.strip? (p.denote σ) (q.denote σ) = none := by
-  unfold Tm.divergesU at h
-  split at h
-  · rename_i a b ha hb
-    have e := SLoc.strip?_none_of_diverges
-      (SegT.diverges_sound a b _ _ h (p.shape?_matches' σ ha) (q.shape?_matches' σ hb)) .nil
-    rwa [ObsLoc.app_nil] at e
-  · exact absurd h Bool.false_ne_true
-
-/-- What a storage of members reads at a word location, if it is that
-storage; generic in the sort. -/
-def Srt.WordAtIn {sn : Name} {P : PrimTy} (q : SLoc (Contract.ofStruct sn) (.prim P)) (x : P.Denote) :
-    (u : Srt) → u.TDen C → Prop
-  | .sts sn', d => ∀ e : sn' = sn, (e ▸ d : TSto (Contract.ofStruct sn)).word q = x
-  | _, _ => True
-
-/-- The word read off the member-wise writes is the word read; generic in
-the sort. -/
-theorem Tm.findLitInBy_theq {sn : Name} {P : PrimTy} {q : Tm C Γ (.spath sn (.prim P))}
-    (σ : State C Γ) {u : Srt} (s : Tm C Γ u) : ∀ {w : (p : PrimTy) × p.Denote} (e : w.1 = P),
-      s.findLitInBy (·.beqR q) (·.divergesU q) = some w →
-      Srt.WordAtIn (q.denote σ) (e ▸ w.2) u (s.denote σ) := by
-  induction s with
-  | app3 o x y z ihx _ _ =>
-    intro w e h
-    cases o with
-    | saveIn =>
-      rename_i sn' T
-      have h2 : (if y.beqR q then z.svLit? else if y.divergesU q then
-          x.findLitInBy (·.beqR q) (·.divergesU q) else none) = some w := h
-      clear h
-      intro esn
-      subst esn
-      show (Obs.copyTo (x.denote σ) (y.denote σ) (z.denote σ)).word (q.denote σ) = _
-      split at h2
-      · rename_i hpq
-        cases Tm.sigma_eq_of_beqR hpq
-        rw [Obs.copyTo_word_same]
-        obtain ⟨e', hz⟩ := Tm.svLit?_word σ h2
-        rw [hz]
-      · split at h2
-        · rename_i hd
-          rw [Obs.copyTo, Obs.save_word_frame _ _ (Tm.divergesU_denote σ hd)]
-          exact ihx e h2 rfl
-        · cases h2
-    | _ => cases h
-  | _ => intro w e h; cases h
-
-/-- `findLitIn?` reads the word the storage of members holds there. -/
-theorem Tm.findLitIn?_denote {sn : Name} {s : Tm C Γ (.sts sn)} {P : PrimTy}
-    {q : Tm C Γ (.spath sn (.prim P))} {w : P.Denote} (h : s.findLitIn? q = some w)
-    (σ : State C Γ) : (s.denote σ).word (q.denote σ) = w := by
-  unfold Tm.findLitIn? at h
-  obtain ⟨w', hw', h⟩ := Option.bind_eq_some_iff.1 h
-  split at h
-  · rename_i he
-    cases h
-    exact Tm.findLitInBy_theq σ s he hw' rfl
-  · cases h
 
 /-- `q.extendsIn p` gives `q`'s location `p`'s followed by a path. -/
 theorem Tm.extendsIn_denote (σ : State C Γ) {sn : Name} {T U : Ty} {p : Tm C Γ (.spath sn U)}

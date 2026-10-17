@@ -74,13 +74,6 @@ inductive Skel where
   | upd (s : Skel)
   deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
 
-/-- A connective somewhere, through the updates: a rewrite under a branch
-has somewhere to act. -/
-def Skel.hasConn : Skel → Bool
-  | .and .. | .imp .. | .not .. => true
-  | .upd s => s.hasConn
-  | _ => false
-
 /-- A literal leaf or a connective somewhere: a fold or a literal law has
 somewhere to act. -/
 def Skel.hasLit : Skel → Bool

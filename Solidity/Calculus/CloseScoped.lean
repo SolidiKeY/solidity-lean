@@ -551,12 +551,6 @@ theorem intOf_val {n : Int} (h : -intBound ≤ n ∧ n < intBound) : (intOf n).v
   have h' : PrimTy.int.inRange n = true := by
     simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
   simp only [intOf, h', dite_true]
-theorem eq_uintOf {n : Int} (h : 0 ≤ n ∧ n < uintBound) (a : PrimTy.uint.Denote) :
-    a = uintOf n ↔ a.val = n :=
-  ⟨fun e => e ▸ uintOf_val h, fun e => Subtype.ext (e.trans (uintOf_val h).symm)⟩
-theorem eq_intOf {n : Int} (h : -intBound ≤ n ∧ n < intBound) (a : PrimTy.int.Denote) :
-    a = intOf n ↔ a.val = n :=
-  ⟨fun e => e ▸ intOf_val h, fun e => Subtype.ext (e.trans (intOf_val h).symm)⟩
 /-- `uintOf_val` for every `n`: the closer's form, which `grind` splits. -/
 theorem uintOf_val' (n : Int) :
     (uintOf n).val = if 0 ≤ n ∧ n < uintBound then n else 0 := by
@@ -941,7 +935,7 @@ def onScoped (tac : TacticM Syntax) : Tactic := fun _ => do
   unless ← Close.scopedGoal do throwUnsupportedSyntax
   evalTactic (← tac)
 
-@[tactic Solidity.tacticSol_close_eval]
+@[tactic Solidity.tacticSol_close_eval, tactic Solidity.tacticSol_close_mt_eval]
 def evalSolCloseEvalS : Tactic := onScoped `(tactic| simp only [close_rw_s])
 
 @[tactic Solidity.tacticSol_close_facts]
@@ -955,10 +949,6 @@ def evalSolCloseReadsS : Tactic := onScoped `(tactic|
 @[tactic Solidity.tacticSol_close_reads_all]
 def evalSolCloseReadsAllS : Tactic := onScoped `(tactic|
   simp_all (config := { maxSteps := 400000 }) only [close_rw_s, close_rw_s_last])
-
-@[tactic Solidity.tacticSol_close_mt_eval]
-def evalSolCloseMtEvalS : Tactic := onScoped `(tactic|
-  simp only [close_rw_s])
 
 /-- Typed values occurring under projections, including dependent anonymous locals.
 Inspect at most 8,192 local declarations/expression nodes and add at most
