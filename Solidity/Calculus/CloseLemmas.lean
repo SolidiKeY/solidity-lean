@@ -130,6 +130,13 @@ theorem uintBitwise_and_self (x : Int) (h : -57896044618658097711785492504343953
     uintBitwise (· &&& ·) x x = x := by
   cases x <;> simp only [uintBitwise, signedOf, wordOf, Nat.and_self] <;> split <;> omega
 
+/-- solkey's `smod_geZero`, a non-positive dividend: its remainder is not
+positive (`Int.tmod_nonneg` the other side). -/
+theorem tmod_nonpos {a : Int} (b : Int) (h : a ≤ 0) : a.tmod b ≤ 0 := by
+  have := Int.tmod_nonneg b (show 0 ≤ -a by omega)
+  rw [Int.neg_tmod] at this
+  omega
+
 /-- A ledger entry after a payment: the entry of the ledger the payment chose. -/
 theorem lookupBy_ite (c : Prop) [Decidable c] (k : PrimTy.uint.Denote) (l l' : Ledger) :
     lookupBy k (if c then l else l') = if c then lookupBy k l else lookupBy k l' := by

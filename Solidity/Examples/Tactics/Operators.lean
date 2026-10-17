@@ -141,6 +141,13 @@ theorem bitAndSymbolic :
       a == 0 && b == x && p >= 0 && p < 2 } := by
   sol_prove; sol_leaf; sol_close
 
+/-- `%` on a symbolic `int` (solkey's `smodMultiple`, `smod_geZero`): a
+multiple of `7` leaves no remainder, and a remainder has the dividend's sign. -/
+theorem signedRemainder :
+    ⊨ dl!{ ∀ int x; [ int m = x * 7; int r = m % 7; int s = x % 5; ]
+      r == 0 && (x >= 0 → s >= 0) && (x <= 0 → s <= 0) } := by
+  sol_prove; sol_leaf; sol_close
+
 /-- error: Solidity elaboration failed: operator << does not take int -/
 #guard_msgs in #check sol[TestSuite]{ int x = 1; x = x << 1; }
 
