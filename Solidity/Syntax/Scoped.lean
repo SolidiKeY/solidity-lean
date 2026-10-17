@@ -233,7 +233,7 @@ structure ExtCall (C : Contract) (Γ : Ctx) where
 /-- A quantified clause of a loop's invariant, `/// @custom:key invariant
 \forall T x; a -> c` (solkey's specification language above a loop): its
 bound local the innermost of its body's context, read by the invariant
-rules as `∀` (`LoopAnn.invFml`). -/
+rules as `∀` (`invFml`, `Calculus/Blocks.lean`). -/
 inductive LoopQ (C : Contract) : Ctx → Type where
   | val {Γ : Ctx} (a : Val C Γ .bool) : LoopQ C Γ
   | imp {Γ : Ctx} (a c : Val C Γ .bool) : LoopQ C Γ

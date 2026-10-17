@@ -713,9 +713,38 @@ def withPush {α : Type} (ok : Bool) (x : PM α) : PM α := do
   modify fun st => { st with pushOk := false }
   pure a
 
+/-- An expression with no effect and no call: its value does not depend on
+when it is read among others of its kind (a read may still panic). -/
+partial def pureExpr (j : Json) : Bool :=
+  let sub (k : String) : Bool := (J.opt j k).all pureExpr
+  match J.kind j with
+  | "Literal" | "Identifier" | "ElementaryTypeNameExpression" => true
+  | "BinaryOperation" => sub "leftExpression" && sub "rightExpression"
+  | "UnaryOperation" =>
+    !(J.opt j "operator").any (fun o => o == .str "++" || o == .str "--" || o == .str "delete") &&
+      sub "subExpression"
+  | "IndexAccess" => sub "baseExpression" && sub "indexExpression"
+  | "MemberAccess" => sub "expression"
+  | "Conditional" => sub "condition" && sub "trueExpression" && sub "falseExpression"
+  | "TupleExpression" =>
+    ((J.opt j "components").bind (·.getArr?.toOption)).all (·.all pureExpr)
+  | "FunctionCall" =>
+    (J.opt j "kind").any (· == .str "typeConversion") &&
+      ((J.opt j "arguments").bind (·.getArr?.toOption)).all (·.all pureExpr)
+  | _ => false
+
 /-- `(c ? f : g)(as)`, a conditional callee: its condition and the two calls
-`f(as)`, `g(as)`.  Only one of them runs, so the arguments are evaluated
-once, after the condition, as solc evaluates them. -/
+`f(as)`, `g(as)`.  solc's legacy pipeline evaluates the arguments before the
+callee, the condition after them, so the import reads it so only where
+neither has an effect (`condCalleeOk`). -/
+def condCalleeMsg : String :=
+  "a conditional callee whose condition or arguments have an effect: solc evaluates \
+    the arguments before the callee"
+
+def condCalleeOk (j : Json) : Bool :=
+  ((J.opt j "expression").all pureExpr) &&
+    ((J.opt j "arguments").bind (·.getArr?.toOption)).all (·.all pureExpr)
+
 def condCallee? (j : Json) : Option (Json × Json × Json) := do
   guard (J.kind j == "FunctionCall")
   let f ← J.opt j "expression"
@@ -859,6 +888,7 @@ partial def call (j : Json) : PM String := do
   let f ← PM.lift (J.get j "expression")
   let args ← PM.lift (J.arr j "arguments")
   if let some (c, a, b) := condCallee? j then
+    unless condCalleeOk j do unsupported condCalleeMsg
     return s!"({← operand c false} ? {← call a} : {← call b})"
   if J.kind f == "MemberAccess" then
     let member := (f.getObjValAs? String "memberName").toOption.getD ""
@@ -1031,6 +1061,7 @@ partial def stmt1 (j : Json) : PM (List String) := do
       return [s!"{← storageRefTy r} storage discarded{k} = {← expr r}"]
     -- `(c ? f : g)();` of no value: `if (c) { f(); } else { g(); }`
     if let some (c, a, b) := condCallee? e then
+      unless condCalleeOk e do unsupported condCalleeMsg
       if J.tyStr e == "tuple()" then
         return [s!"if ({← expr c}) {"{"} {← call a}; {"}"} else {"{"} {← call b}; {"}"}"]
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
@@ -1147,7 +1178,8 @@ partial def loopSpec (j : Json) : PM String := do
     let some t := c.getStr?.toOption | unsupported "a loop clause that is not text"
     -- a quantifier, `\forall T x; …`, reads as a loop clause of its own
     -- (`RawInv`); the rest of the specification language does not
-    if (t.splitOn "\\").tail.any (!·.startsWith "forall ") then
+    if t.contains '\\' && (!t.startsWith "invariant \\forall " ||
+        (t.splitOn "\\").tail.any (!·.startsWith "forall ")) then
       unsupported s!"the loop clause `{t}`: the specification language"
     let t := resolveSpecConstants (← get).specConstants (← get).specConstBlocked t
     let t := resolveSpecEnums (← get).specEnums (← get).specBlocked t

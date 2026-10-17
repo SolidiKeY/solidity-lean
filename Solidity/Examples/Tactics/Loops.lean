@@ -591,6 +591,23 @@ theorem countWithPrefix :
   /// @custom:key invariant \forall uint q; q < i -> q < 3
   while (i < 3) { i++; } }))
 
+/-! Renaming a callee's locals stops at a quantifier's own binder
+(`RawInv.rename`): the inlined parameter `q` becomes `se1` outside the
+`∀`, the bound `q` stays below it. -/
+
+/-- info: Solidity.RawInv.imp (Solidity.RawExpr.name "se1") (Solidity.RawExpr.name "i") -/
+#guard_msgs in
+#eval RawInv.rename [("q", "se1")] (.imp (.name "q") (.name "i"))
+
+/--
+info: Solidity.RawInv.all
+  (Solidity.PrimTy.uint)
+  "q"
+  (Solidity.RawInv.imp (Solidity.RawExpr.name "q") (Solidity.RawExpr.name "i"))
+-/
+#guard_msgs in
+#eval RawInv.rename [("q", "se1")] (.all .uint "q" (.imp (.name "q") (.name "i")))
+
 /-! A loop with `break`: the invariant moves to the `while` the lowering
 leaves, so it holds at the head of the iteration the `break` ends too.  Lean
 adds that the flag the condition tests is a `bool` (`brk1 || !brk1`), which

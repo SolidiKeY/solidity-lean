@@ -258,6 +258,27 @@ other seven:
   needs the old `∀` instantiated through the write's frame (`values[q]`
   diverging from `values[i]`), which the closer does not do.
 
+**Review pass (2026-10-17).** A read-only finder and skeptic over
+`3dc319e9^..7c2dad3d` confirmed three defects, now fixed:
+
+- A conditional callee was imported with its condition before its
+  arguments; solc's legacy pipeline evaluates the arguments first.  The
+  import now refuses one whose condition or arguments have an effect
+  (`condCalleeOk`, `pureExpr`).
+- Renaming an inlined callee's locals reached below a quantifier's binder
+  of the same name (`RawInv.mapM`); quantified clauses are now renamed only
+  by `RawInv.rename`, which stops at the binder (pinned in
+  `Examples/Tactics/Loops.lean`).
+- A loop lowered twice (its `_;` filled into a modifier's loop) lost its
+  `break` flag; `lowerLoop` keeps it.
+
+Left as they are: a conditional with effects in a branch takes its capture's
+type from the non-literal branch, not solc's common type (a refusal, never
+a wrong program); the `brk` flag is not printed, so a printed lowered loop
+re-read has no break test (a weaker rule, not an unsound one); a
+`\forall` clause of a function whose locals are renamed by the import is
+unsupported (`rewriteLoopBindings` reads a program expression).
+
 ## Reproduce the inputs
 
 The committed snapshot contains 274 files: the tracked Solidity and `.key`

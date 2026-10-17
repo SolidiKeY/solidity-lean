@@ -334,6 +334,22 @@ def RawExpr.rename (ρ : List (String × String)) (e : RawExpr) : RawExpr :=
     | .name x => .name ((lookupBy x ρ).getD x)
     | e => e
 
+/-- A quantified clause with the names of `ρ` renamed, but not below a
+binder of the same name (its own local). -/
+def RawInv.rename (ρ : List (String × String)) : RawInv → RawInv
+  | .expr e => .expr (e.rename ρ)
+  | .imp a c => .imp (a.rename ρ) (c.rename ρ)
+  | .all p x b => .all p x (RawInv.rename (ρ.filter (·.1 != x)) b)
+
+/-- A loop's quantified clauses renamed by `ρ` (`RawInv.rename`); other
+statements as they are. -/
+def RawStmt.renameQInv (ρ : List (String × String)) : RawStmt → RawStmt
+  | .whileLoop a c b => .whileLoop { a with qinv := a.qinv.map (RawInv.rename ρ) } c b
+  | .doWhile a b c => .doWhile { a with qinv := a.qinv.map (RawInv.rename ρ) } b c
+  | .loop a c b => .loop { a with qinv := a.qinv.map (RawInv.rename ρ) } c b
+  | .forLoop a i c u b => .forLoop { a with qinv := a.qinv.map (RawInv.rename ρ) } i c u b
+  | s => s
+
 /-- An expression inside `unchecked { … }`: `+ - * **` wrap (`+%` …).  An
 `++`/`−−` inside it is an error: its capture (`hoist`) is checked. -/
 def RawExpr.uncheck : RawExpr → Except String RawExpr :=
@@ -381,17 +397,12 @@ def RawStmt.blocks : RawStmt → List (List RawStmt)
   | .forLoop _ i _ u b => [i, b, u]
   | _ => []
 
-/-- A quantified clause with its expressions rewritten by `f`. -/
-def RawInv.mapM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) : RawInv → m RawInv
-  | .expr e => return .expr (← f e)
-  | .imp a c => return .imp (← f a) (← f c)
-  | .all p x b => return .all p x (← RawInv.mapM f b)
-
-/-- A loop's specification with its expressions rewritten by `f`. -/
+/-- A loop's specification with its expressions rewritten by `f`; its
+quantified clauses are left as they are, renamed only by `RawInv.rename`,
+which knows their binders. -/
 def RawLoopSpec.mapM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) (a : RawLoopSpec) :
     m RawLoopSpec :=
-  return { a with inv := ← a.inv.mapM f, dec := ← a.dec.mapM f,
-                  qinv := ← a.qinv.mapM (RawInv.mapM f) }
+  return { a with inv := ← a.inv.mapM f, dec := ← a.dec.mapM f }
 
 /-- A statement with its own expressions rewritten by `f`, left to right (its
 blocks as they are). -/
@@ -520,7 +531,7 @@ def RawStmt.mapBlocks (f : List RawStmt → List RawStmt) : RawStmt → RawStmt
 
 /-- Every read of the name `x` renamed `y`, at any depth. -/
 partial def RawStmt.renameName (x y : String) (s : RawStmt) : RawStmt :=
-  (Id.run (s.mapExprsM (pure ∘ RawExpr.rename [(x, y)]))).mapBlocks
+  ((Id.run (s.mapExprsM (pure ∘ RawExpr.rename [(x, y)]))).renameQInv [(x, y)]).mapBlocks
     (·.map (RawStmt.renameName x y))
 
 /-- The names a statement declares in its own block. -/
@@ -1355,7 +1366,8 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
   | [] => pure []
   | s :: ss => do
     let r := RawExpr.rename ρ
-    let ra (a : RawLoopSpec) : RawLoopSpec := Id.run (a.mapM (pure ∘ r))
+    let ra (a : RawLoopSpec) : RawLoopSpec :=
+      { Id.run (a.mapM (pure ∘ r)) with qinv := a.qinv.map (RawInv.rename ρ) }
     let fresh (base x : String) : ElabM (String × List (String × String)) := do
       let y := toString (← freshCapture base)
       pure (y, (x, y) :: ρ)
@@ -1695,7 +1707,7 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
   -- types say of `brk`, `ret` and `first`
   let spec := if spec.inv.isEmpty && spec.qinv.isEmpty then spec else
     { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)),
-                brk := exits.contains .brk }
+                brk := spec.brk || exits.contains .brk }
   let w := RawStmt.loop spec cond iter
   let ab' := if returns then [Abrupt.ret] else []
   if before.isEmpty && !(returns && outermost) then return (w, ab')
