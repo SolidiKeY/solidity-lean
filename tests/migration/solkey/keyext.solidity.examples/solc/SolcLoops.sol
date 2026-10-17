@@ -768,4 +768,100 @@ contract SolcLoops {
         assert(a == 512);
     }
 
+    /// solc: smtCheckerTests/loops/for_1_break.sol
+    /// @custom:key box
+    function forBreakOrIncrement(uint x, uint bb) public pure {
+        require(x >= 0 && x < 10 && bb <= 1);
+        bool b = bb == 1;
+        /// @custom:key invariant (0 <= x && x <= 10) || x == 20
+        for (; x < 10; ) {
+            if (b)
+                ++x;
+            else {
+                x = 20;
+                break;
+            }
+        }
+        assert(x >= 10);
+    }
+
+    /// solc: smtCheckerTests/loops/while_1_break.sol
+    /// @custom:key box
+    function whileBreakOrIncrement(uint x, uint bb) public pure {
+        require(x >= 0 && x < 10 && bb <= 1);
+        bool b = bb == 1;
+        /// @custom:key invariant (0 <= x && x <= 10) || x == 20
+        while (x < 10) {
+            if (b)
+                ++x;
+            else {
+                x = 20;
+                break;
+            }
+        }
+        assert(x >= 10);
+    }
+
+    /// solc: smtCheckerTests/loops/while_nested_break.sol
+    /// @custom:key box
+    function nestedWhileBreak(uint x, uint y, uint bb, uint cc) public pure {
+        require(x >= 0 && x < 10 && y >= 0 && bb <= 1 && cc <= 1);
+        bool b = bb == 1;
+        bool c = cc == 1;
+        /// @custom:key invariant ((0 <= x && x < 10) || x == 15) && y >= 0
+        while (x < 10) {
+            if (b) {
+                ++x;
+                if (x == 10)
+                    x = 15;
+            }
+            else {
+                require(y < 10);
+                /// @custom:key invariant (0 <= y && y <= 10) || y == 20
+                while (y < 10) {
+                    if (c)
+                        ++y;
+                    else {
+                        y = 20;
+                        break;
+                    }
+                }
+                assert(y >= 10);
+                x = 15;
+                break;
+            }
+        }
+        assert(x >= 15);
+    }
+
+    /// solc: smtCheckerTests/loops/while_nested_continue.sol
+    /// @custom:key box
+    function nestedWhileContinue(uint x, uint y, uint bb, uint cc) public pure {
+        require(x >= 0 && x < 10 && y >= 0 && bb <= 1 && cc <= 1);
+        bool b = bb == 1;
+        bool c = cc == 1;
+        /// @custom:key invariant ((0 <= x && x < 10) || x >= 15) && y >= 0
+        while (x < 10) {
+            if (b) {
+                x = 20;
+                continue;
+            }
+            else {
+                require(y < 10);
+                /// @custom:key invariant (0 <= y && y < 10) || y == 15 || y == 20
+                while (y < 10) {
+                    if (c) {
+                        y = 20;
+                        continue;
+                    }
+                    y = 15;
+                    break;
+                }
+                assert(y >= 15);
+                x = y;
+            }
+        }
+        assert(x >= 15);
+    }
+
 }

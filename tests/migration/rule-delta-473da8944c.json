@@ -1,0 +1,98 @@
+{
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/binaryLemmas.key": {
+    "added": [
+      "binaryAndIdentity",
+      "binaryAndOne",
+      "binaryAndOneLeft",
+      "binaryAndZeroLeft",
+      "binaryAndZeroRight",
+      "binaryAnd_literals"
+    ],
+    "removed": [],
+    "changed": []
+  },
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intDiv.key": {
+    "added": [
+      "smodMultiple",
+      "smod_lessPositiveDenom"
+    ],
+    "removed": [],
+    "changed": [
+      "smod_NumNeg",
+      "smod_NumPos",
+      "smod_geZero"
+    ]
+  },
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key": {
+    "added": [
+      "bitAndAssignment",
+      "bitAnd_unfold_left",
+      "bitAnd_unfold_right",
+      "discardAddExpression",
+      "discardDivExpression",
+      "discardModExpression",
+      "discardMulExpression",
+      "discardPowExpression",
+      "discardSubExpression",
+      "localAddAssignmentValue",
+      "localCopyAssignmentValue",
+      "localDivAssignmentValue",
+      "localModAssignmentValue",
+      "localMulAssignmentValue",
+      "localShiftLeftAssign",
+      "localShiftRightAssign",
+      "localSubAssignmentValue",
+      "loopNormalize",
+      "memoryIndexWriteStorageRefRhsCapture",
+      "shiftLeftAssignment",
+      "shiftLeft_unfold_left",
+      "shiftLeft_unfold_right",
+      "shiftRightAssignment",
+      "shiftRight_unfold_left",
+      "shiftRight_unfold_right",
+      "storageCopyAssignmentValue",
+      "storageFieldRead_unfold_rightCallReceiver",
+      "storageIndexRead_unfold_rightCallReceiver",
+      "storageLocalRootPush_unfold_leftCallReceiver",
+      "storagePopReferenceDiscard",
+      "storagePopReference_unfold_leftCallReceiver",
+      "storagePopReference_unfold_leftFstReceiver"
+    ],
+    "removed": [],
+    "changed": [
+      "storageLocalPrimitivePushBind",
+      "storageLocalRootPushBind",
+      "storagePushAddAssign",
+      "storagePushDivAssign",
+      "storagePushLengthSave",
+      "storagePushLengthSaveReferenceElement",
+      "storagePushModAssign",
+      "storagePushMulAssign",
+      "storagePushPostdecrement",
+      "storagePushPostincrement",
+      "storagePushPredecrement",
+      "storagePushPreincrement",
+      "storagePushSubAssign",
+      "whileInvariantBox"
+    ]
+  },
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structMemoryRules.key": {
+    "added": [
+      "newFromCopySt"
+    ],
+    "removed": [],
+    "changed": []
+  },
+  "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structRules.key": {
+    "added": [
+      "fixedDelNodeIndex",
+      "selectStDelNodeIndex",
+      "wfDelNodeIndexRight"
+    ],
+    "removed": [],
+    "changed": [
+      "selectStDelNodeElement",
+      "selectStDelNodeIndexStruct"
+    ]
+  }
+}

@@ -262,23 +262,23 @@ def tacletReadAnns : List TacletReadAnn :=
     -- Native primitive push suffixes: two old-size reads in append/reset,
     -- two new-size reads addressing the appended slot, and its numeric value.
     { keyName := "storagePushAddAssign"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushSubAssign"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushMulAssign"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushDivAssign"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushModAssign"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushPreincrement"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushPostincrement"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushPredecrement"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushPostdecrement"
-      reads := [slen, slen, slen, sread .value (.fixed .int), slen] },
+      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushValueSave"
       reads := [slen, slen] },
     { keyName := "storagePushValueCopySource"
@@ -290,16 +290,16 @@ def tacletReadAnns : List TacletReadAnn :=
       -- `copyMem` itself is not a sorted read token in this taclet.
       reads := [slen, slen] },
     { keyName := "storagePushLengthSave"
-      reads := [slen, slen] },
+      reads := [slen] },
     { keyName := "storagePushLengthSaveReferenceElement"
-      reads := [slen, slen] },
+      reads := [slen] },
     { keyName := "storagePushLengthSaveMappingElement"
       reads := [slen] },
     { keyName := "storageLocalRootPushBind"
-      reads := [slen, slen, slen] },
+      reads := [slen, slen] },
     { keyName := "storageLocalPrimitivePushBind"
-      -- The value read's storage argument itself resets/appends the slot.
-      reads := [slen, slen, sread .value (.generic .hasElementSort), slen, slen] },
+      -- The value read's storage argument is the storage before the push.
+      reads := [slen, sread .value (.generic .hasElementSort), slen] },
     { keyName := "storageLocalRootPushBindMappingElement"
       reads := [slen, slen] },
     { keyName := "storagePopSave"

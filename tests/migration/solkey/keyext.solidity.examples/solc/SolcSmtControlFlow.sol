@@ -539,6 +539,34 @@ contract SolcSmtControlFlow {
         assert(b);
     }
 
+    /// solc: smtCheckerTests/control_flow/short_circuit_and_touched.sol
+    function shortCircuitAndTouched() public {
+        bool c1 = (flag = false) && (flag == true);
+        assert(!c1);
+        bool c2 = (flag == false) && (flag = true);
+        assert(c2);
+        bool c3 = (flag = false) && (flag = true);
+        assert(!c3);
+        bool c4 = (flag == false) && (flag == true);
+        assert(!c4);
+        bool c5 = (flag = true) && flag;
+        assert(c5);
+    }
+
+    /// solc: smtCheckerTests/control_flow/short_circuit_or_touched.sol
+    function shortCircuitOrTouched() public {
+        bool c1 = (flag = true) || (flag == false);
+        assert(c1);
+        bool c2 = (flag == true) || (flag = false);
+        assert(c2);
+        bool c3 = (flag = true) || (flag = false);
+        assert(c3);
+        bool c4 = (flag == true) || (flag == false);
+        assert(c4);
+        bool c5 = (flag = false) || flag;
+        assert(!c5);
+    }
+
     /// solc: smtCheckerTests/control_flow/short_circuit_and_touched_function.sol
     function shortCircuitAndTouchedFunction() public {
         bool c1 = setFlag(false) && (flag == true);
@@ -1019,5 +1047,57 @@ contract SolcSmtControlFlow {
         uint r = X;
         uint e = 32**22 + 8;
         assert(r == e);
+    }
+
+    /// solc: smtCheckerTests/bmc_coverage/assert.sol
+    function bmcRequireAlwaysTrue(uint x) public pure {
+        require(x >= 0);
+    }
+    modifier check() {
+        require(counter == 0);
+        _;
+        assert(counter == 0);
+    }
+
+    modifier incM() {
+        if (counter == 0) {
+            return;
+        }
+        counter = counter + 1;
+        _;
+    }
+
+    modifier postinc() {
+        if (counter == 0) {
+            return;
+        }
+        _;
+        counter = counter + 1;
+    }
+
+    function resetIfOverflow() internal postinc {
+        if (counter < 10)
+            return;
+        counter = 0;
+    }
+
+    /// solc: smtCheckerTests/control_flow/branches_with_return/branches_in_modifiers.sol
+    /// @custom:key box
+    function branchesInModifiers() public check incM {
+    }
+
+    /// solc: smtCheckerTests/control_flow/branches_with_return/branches_in_modifiers_2.sol
+    function branchesInModifiers2() public {
+        if (counter == 0) {
+            resetIfOverflow();
+            assert(counter == 0);
+            return;
+        }
+        if (counter < 10) {
+            resetIfOverflow();
+            return;
+        }
+        resetIfOverflow();
+        assert(counter == 1);
     }
 }

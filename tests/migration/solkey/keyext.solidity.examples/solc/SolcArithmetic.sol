@@ -526,4 +526,115 @@ contract SolcArithmetic {
         assert(len == 1);
         assert(r == 1);
     }
+
+    modifier addUnchecked(uint a, uint b) {
+        unchecked { a + b; }
+        _;
+    }
+
+    /// solc: smtCheckerTests/operators/mod_signed.sol
+    /// @custom:key box
+    function modSignFollowsDividend(int x, int y) public pure {
+        require(y != 0 && x == 42);
+        int z1 = x % y;
+        assert((x >= 0 && z1 >= 0) || (x <= 0 && z1 <= 0));
+    }
+
+    /// solc: smtCheckerTests/operators/mod_n.sol
+    /// @custom:key box
+    function modBelowDivisor(uint x, uint y) public pure {
+        require(y > 0);
+        uint z = x % y;
+        assert(z < y);
+    }
+
+    /// solc: smtCheckerTests/operators/mod_even.sol
+    /// @custom:key box
+    function modOfDoubleIsZero(uint x) public pure {
+        require(x < 10000);
+        uint y = x * 2;
+        uint m = y % 2;
+        assert(m == 0);
+    }
+
+    /// solc: smtCheckerTests/operators/compound_add_chain.sol
+    function compoundAddChain() public pure {
+        uint a = 1;
+        uint b = 3;
+        uint c = 7;
+        a += b += c;
+        assert(b == 10 && a == 11);
+        a += (b += c);
+        assert(b == 17 && a == 28);
+        a += a += a;
+        assert(a == 112);
+    }
+
+    /// solc: semanticTests/arithmetics/checked_modifier_called_by_unchecked.sol
+    /// @custom:key box
+    function checkedModifierCalledByUnchecked(uint a, uint b, uint c) public pure addUnchecked(a, b) {
+        require(a == 0xe000 && b == 0xe500 && c == 2);
+        uint r = b + c;
+        assert(r == 58626);
+    }
+
+    /// solc: smtCheckerTests/operators/compound_sub.sol
+    /// @custom:key box
+    function compoundSubSelfReference(uint x) public pure {
+        require(x < 100);
+        uint y = 200;
+        y -= y - x;
+        assert(y >= 0);
+    }
+
+    /// solc: smtCheckerTests/operators/compound_sub_mapping.sol
+    /// @custom:key box
+    function compoundSubMapping(uint x, uint p) public {
+        require(x < 100);
+        map[p] = 200;
+        map[p] -= map[p] - x;
+        uint r = map[p];
+        assert(r >= 0);
+    }
+
+    /// solc: smtCheckerTests/operators/compound_sub_array_index.sol
+    /// @custom:key box
+    function compoundSubArrayIndex(uint x, uint p) public {
+        require(p < array.length);
+        require(x < 100);
+        array[p] = 200;
+        array[p] -= array[p] - x;
+        uint r = array[p];
+        assert(r >= 0);
+    }
+
+    /// solc: semanticTests/operators/shifts/shift_left.sol
+    /// @custom:key box
+    function shiftLeftParam(uint a, uint b) public pure {
+        require(a == 0x4266 && b == 8);
+        uint r = a << b;
+        assert(r == 0x426600);
+    }
+
+    /// solc: semanticTests/operators/shifts/shift_right.sol
+    /// @custom:key box
+    function shiftRightParam(uint a, uint b) public pure {
+        require(a == 0x4266 && b == 8);
+        uint r = a >> b;
+        assert(r == 0x42);
+    }
+
+    /// solc: semanticTests/operators/shifts/shift_constant_right_assignment.sol
+    function shiftRightAssign() public pure {
+        uint a = 0x4200;
+        a >>= 8;
+        assert(a == 0x42);
+    }
+
+    /// solc: semanticTests/operators/shifts/shift_right_negative_literal.sol
+    function shiftRightNegativeLiteral() public pure {
+        int r = -4266 >> 1;
+        int e = -2133;
+        assert(r == e);
+    }
 }

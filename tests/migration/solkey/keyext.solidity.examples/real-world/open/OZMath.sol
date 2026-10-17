@@ -28,7 +28,7 @@ contract OZMath {
         }
     }
 
-    // open: & and ^ have no rule (no bitwise LDT), so the body is stuck on its program text
+    // open: ^ has no rule, so the body is stuck on its program text
     /// @custom:key requires a >= 0 && b >= 0
     /// @custom:key ensures r == (a + b) / 2
     function average(uint256 a, uint256 b) public pure returns (uint256 r) {

@@ -203,6 +203,14 @@ contract SolcArrayMembers {
         assert(r == 0);
     }
 
+    /// solc: semanticTests/array/pop/array_pop_isolated.sol
+    function popIsolated() public view {
+        uint x = 2;
+        popData.pop;
+        x = 3;
+        assert(x == 3);
+    }
+
     /// solc: semanticTests/array/pop/array_pop.sol
     /// @custom:key box
     function popTracksLength() public {

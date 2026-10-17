@@ -106,6 +106,7 @@ contract TestSuite {
     Ledger ledger;
     Token tok;
     Token[] tokens;
+    Token[] emptyTokens;
     TokenBucket bucket;
     TokenBucket[] buckets;
     Basket basketA;
@@ -348,6 +349,88 @@ contract TestSuite {
         assert(values[0] == 0);
     }
 
+    function storageArrayMethodReferences() public {
+        delete values;
+        values.pop;
+        assert(values.length == 0);
+        values.push(42);
+        values.pop;
+        assert(values.length == 1);
+        assert(values[0] == 42);
+    }
+
+    function storageArrayMethodReferencesComplexReceiver() public {
+        delete matrix;
+        matrix.push();
+        matrix.push();
+        matrix[0].push(42);
+        uint i = 0;
+        matrix[i++].pop;
+        matrix[i++].pop;
+        assert(i == 2);
+        assert(matrix[0].length == 1);
+        assert(matrix[0][0] == 42);
+        assert(matrix[1].length == 0);
+        delete basketA.items;
+        basketA.items.pop;
+        assert(basketA.items.length == 0);
+    }
+
+    function valuesRefWithEffect() internal returns (uint[] storage) {
+        values.push(7);
+        return values;
+    }
+
+    function matrixRefWithEffect() internal returns (uint[][] storage) {
+        matrix.push();
+        return matrix;
+    }
+
+    function basketRefWithEffect() internal returns (Basket storage) {
+        basketA.items.push(9);
+        return basketA;
+    }
+
+    function storageArrayMethodReferencesComposedCallReceiver() public {
+        delete matrix;
+        uint i = 0;
+        matrixRefWithEffect()[i++].pop;
+        assert(i == 1);
+        assert(matrix.length == 1);
+        assert(matrix[0].length == 0);
+        matrixRefWithEffect().push().pop;
+        assert(matrix.length == 3);
+        assert(matrix[1].length == 0);
+        assert(matrix[2].length == 0);
+        delete basketA;
+        basketRefWithEffect().items.pop;
+        assert(basketA.items.length == 1);
+        assert(basketA.items[0] == 9);
+    }
+
+    function storageArrayMethodReferencesCallReceiver() public {
+        delete values;
+        valuesRef().pop;
+        assert(values.length == 0);
+        valuesRefWithEffect().pop;
+        assert(values.length == 1);
+        assert(values[0] == 7);
+    }
+
+    /// @custom:key box
+    function storagePopReferenceOutOfBounds() public {
+        delete matrix;
+        matrix[0].pop;
+        assert(false);
+    }
+
+    /// @custom:key box
+    function storagePopReferenceCallOutOfBounds() public {
+        delete matrix;
+        matrixRefWithEffect()[1].pop;
+        assert(false);
+    }
+
     function newArrayCaptureStorageRoot() public {
         values = new uint[](3);
         assert(values.length == 3);
@@ -511,6 +594,67 @@ contract TestSuite {
         uint x = 5;
         bool r = x == 5 && x + 1 == 6;
         assert(r);
+    }
+
+    function logicalAndStorageAssignment(bool left) public {
+        flag = false;
+        bool r = left && (flag = true);
+        assert(r == left);
+        assert(flag == left);
+    }
+
+    function logicalOrStorageAssignment(bool left) public {
+        flag = true;
+        bool r = left || (flag = false);
+        assert(r == left);
+        assert(flag == left);
+    }
+
+    function storageAssignmentValueNested() public {
+        bool r = (flag = (flag2 = true));
+        assert(r && flag && flag2);
+        uint n = (total = 7);
+        assert(n == 7 && total == 7);
+        bool m = (toggle.on = false);
+        assert(!m && !toggle.on);
+    }
+
+    function storageAssignmentValueIndexOnce() public {
+        uint i = 0;
+        flags[0] = false;
+        flags[1] = false;
+        bool r = (flags[i++] = true);
+        assert(r && flags[0]);
+        assert(!flags[1] && i == 1);
+    }
+
+    function storageAssignmentValueRhsBeforeIndex() public {
+        uint i = 0;
+        flags[0] = false;
+        bool r = (flags[i++] = ((i = 2) == 2));
+        assert(r && flags[2]);
+        assert(!flags[0] && i == 3);
+    }
+
+    function logicalAndStorageAssignmentSkipsIndex() public {
+        uint i = 0;
+        flags[0] = false;
+        bool r = false && (flags[i++] = true);
+        assert(!r && !flags[0] && i == 0);
+    }
+
+    function logicalOrStorageAssignmentSkipsIndex() public {
+        uint i = 0;
+        flags[0] = true;
+        bool r = true || (flags[i++] = false);
+        assert(r && flags[0] && i == 0);
+    }
+
+    function unprovableStorageShortCircuitMutation() public {
+        flag = false;
+        bool r = false && (flag = true);
+        assert(!r);
+        assert(flag);
     }
 
     function logicalNotSimple() public pure {
@@ -2954,6 +3098,67 @@ contract TestSuite {
         assert(r == 5);
     }
 
+    function memoryIndexWriteStorageRefRhsCapture() public {
+        values = new uint[](1);
+        values[0] = 7;
+        uint[][] memory xs = new uint[][](2);
+        xs[0] = values;
+        xs[1] = values;
+        values[0] = 9;
+        xs[0][0] = 11;
+        assert(xs[0].length == 1);
+        assert(xs[1].length == 1);
+        assert(xs[0][0] == 11);
+        assert(xs[1][0] == 7);
+        assert(values[0] == 9);
+        uint[] memory fresh = new uint[](1);
+        assert(fresh[0] == 0);
+        assert(xs[1][0] == 7);
+    }
+
+    function memoryIndexWriteStorageStructCopy() public {
+        persons.push();
+        persons[0].account.balance = 7;
+        Person[] memory xs = new Person[](2);
+        xs[0] = persons[0];
+        xs[1] = persons[0];
+        persons[0].account.balance = 9;
+        xs[0].account.balance = 11;
+        assert(xs[0].account.balance == 11);
+        assert(xs[1].account.balance == 7);
+        assert(persons[0].account.balance == 9);
+    }
+
+    function mutateStorageCopySource() internal returns (uint) {
+        values[0] = 9;
+        return 0;
+    }
+
+    function memoryIndexWriteStorageRefImpureIndex() public {
+        values = new uint[](1);
+        values[0] = 7;
+        uint[][][] memory xs = new uint[][][](1);
+        xs[0] = new uint[][](1);
+        xs[0][mutateStorageCopySource()] = values;
+        assert(xs[0][0][0] == 7);
+        assert(values[0] == 9);
+    }
+
+    /// @custom:key box
+    function memoryIndexWriteStorageRefOutOfBoundsReverts() public view {
+        uint[][] memory xs = new uint[][](0);
+        xs[0] = values;
+        assert(false);
+    }
+
+    /// @custom:key box
+    function memoryIndexWriteStorageRefSourceOutOfBoundsReverts() public view {
+        require(matrix.length == 0);
+        uint[][] memory xs = new uint[][](1);
+        xs[0] = matrix[0];
+        assert(false);
+    }
+
     function memoryIndexWriteMemRefRhsCapture() public pure {
         Token[] memory ts = new Token[](2);
         Person memory carol;
@@ -3674,6 +3879,85 @@ contract TestSuite {
         return (lo, hi, x + y + z, x == y && y == z);
     }
 
+    function bitAndOneValues() public pure {
+        uint odd = 7;
+        uint even = 8;
+        int negative = -3;
+        assert((odd & 1) == 1);
+        assert((even & 1) == 0);
+        assert((negative & 1) == 1);
+        assert(((odd + even) & 1) == 1);
+        assert((returnOne() & 1) == 1);
+    }
+
+    function bitAndGeneralValues() public pure {
+        uint x = 13;
+        uint y = 10;
+        int negative = -3;
+        int otherNegative = -6;
+        assert((x & y) == 8);
+        assert((x & 7) == 5);
+        assert((negative & 6) == 4);
+        assert((negative & otherNegative) == -8);
+        assert(((x + 2) & (y - 1)) == 9);
+        assert((returnOne() & returnOne()) == 1);
+        uint256 high = 0x100000000000000000000000000000000;
+        assert((high & (high + 7)) == high);
+    }
+
+    function bitAndSymbolic(int x) public pure {
+        assert((x & 0) == 0);
+        assert((0 & x) == 0);
+        assert((x & x) == x);
+        int parity = x & 1;
+        int reversed = 1 & x;
+        assert(parity == reversed);
+        assert(parity >= 0 && parity < 2);
+    }
+
+    function bitAndOperandEvaluation() public {
+        total = 12;
+        uint r = bitAndSetTotal() & total;
+        assert(r == 4);
+        assert(total == 7);
+        total = 12;
+        r = total & bitAndSetTotal();
+        assert(r == 7);
+        assert(total == 7);
+    }
+
+    function bitAndSetTotal() internal returns (uint) {
+        total = 7;
+        return 7;
+    }
+
+    function conditionalCallee(bool choose) public pure {
+        int r = (choose ? returnSign : returnSign)(-3);
+        assert(r < 0);
+        uint v = (choose ? returnOne : retConditionalTwo)() + 1;
+        assert(choose ? v == 2 : v == 3);
+    }
+
+    function retConditionalTwo() internal pure returns (uint) {
+        return 2;
+    }
+
+    function conditionalCalleeEffects() public {
+        total = 0;
+        (true ? conditionalSetOne : conditionalSetTwo)();
+        assert(total == 1);
+        (false ? conditionalSetOne : conditionalSetTwo)();
+        assert(total == 2);
+    }
+
+    function conditionalSetOne() internal {
+        total = 1;
+    }
+
+    function conditionalSetTwo() internal {
+        total = 2;
+    }
+
     function internalCallDeclaration() public pure {
         uint r = returnOne();
         assert(r == 1);
@@ -4111,6 +4395,67 @@ contract TestSuite {
         assert(s == 2 * values.length);
     }
 
+    /// @custom:key box
+    function invariantBreakLeavesInvariantRange(uint n) public pure {
+        require(n > 0);
+        uint i = 0;
+        /// @custom:key invariant i == 0
+        while (i < n) {
+            i = n + 1;
+            break;
+        }
+        assert(i == n + 1);
+    }
+
+    /// @custom:key box
+    function invariantForContinueRunsUpdate(uint n) public pure {
+        uint count = 0;
+        /// @custom:key invariant 0 <= i && i <= n && count == i
+        for (uint i = 0; i < n; ++i) {
+            ++count;
+            continue;
+        }
+        assert(count == n);
+    }
+
+    /// @custom:key box
+    function invariantForBreakSkipsUpdate(uint n) public pure {
+        require(n > 0);
+        uint i = 0;
+        /// @custom:key invariant i == 0
+        for (; i < n; ++i) {
+            if (i == 0) {
+                i = n + 1;
+                break;
+            }
+        }
+        assert(i == n + 1);
+    }
+
+    /// @custom:key box
+    function unprovableInvariantBreakPostcondition(uint n) public pure {
+        require(n > 0);
+        uint i = 0;
+        /// @custom:key invariant i == 0
+        while (i < n) {
+            i = n + 1;
+            break;
+        }
+        assert(i <= n);
+    }
+
+    /// @custom:key box
+    function unprovableInvariantForContinueUpdate(uint n) public pure {
+        require(n > 0);
+        uint count = 0;
+        /// @custom:key invariant 0 <= i && i <= n && count == i
+        for (uint i = 0; i < n; ++i) {
+            ++count;
+            continue;
+        }
+        assert(count == n + 1);
+    }
+
     function invariantVariantSkipsBreakIteration(uint n) public pure {
         uint i = 0;
         /// @custom:key invariant 0 <= i && i <= 10
@@ -4280,6 +4625,167 @@ contract TestSuite {
     function modifierLocalsArePerApplication() public {
         twiceKeepsLocal();
         uint r = localOut;
+        assert(r == 2);
+    }
+
+    modifier twiceContinuation() {
+        _;
+        _;
+    }
+
+    modifier continuationArgument(uint v) {
+        assert(v == localOut);
+        _;
+    }
+
+    function repeatedContinuationBody() internal twiceContinuation returns (uint r) {
+        uint v;
+        v += 1;
+        assert(v == 1);
+        localOut += v;
+        r += 1;
+        if (r == 1) return r;
+        r += 10;
+    }
+
+    function modifierRepeatedReturnAndLocals() public {
+        localOut = 0;
+        uint r = repeatedContinuationBody();
+        assert(localOut == 2);
+        assert(r == 12);
+    }
+
+    function nextContinuationArgument() internal returns (uint) {
+        localOut += 1;
+        return localOut;
+    }
+
+    function reenteredArgumentBody() internal twiceContinuation
+        continuationArgument(nextContinuationArgument()) returns (uint r)
+    {
+        uint value = localOut;
+        r += value;
+    }
+
+    function modifierReentersArguments() public {
+        localOut = 0;
+        uint r = reenteredArgumentBody();
+        assert(localOut == 2);
+        assert(r == 3);
+    }
+
+    modifier conditionalContinuation(bool run) {
+        if (run) {
+            _;
+        } else {
+            return;
+        }
+        localOut += 10;
+    }
+
+    function conditionalContinuationBody(bool run) internal
+        conditionalContinuation(run) returns (uint r)
+    {
+        r = 1;
+        return r;
+    }
+
+    function modifierSkippedPlaceholder() public {
+        localOut = 0;
+        uint r = conditionalContinuationBody(false);
+        assert(r == 0);
+        assert(localOut == 0);
+    }
+
+    function modifierTakenPlaceholder() public {
+        localOut = 0;
+        uint r = conditionalContinuationBody(true);
+        assert(r == 1);
+        assert(localOut == 10);
+    }
+
+    modifier enclosingContinuation() {
+        _;
+        localOut += 1000;
+    }
+
+    modifier returningContinuation() {
+        _;
+        localOut += 10;
+        if (localOut == 11) return;
+        localOut = 100;
+    }
+
+    function nestedReturningContinuation() internal
+        enclosingContinuation returningContinuation returns (uint r)
+    {
+        localOut = 1;
+        return 7;
+    }
+
+    function modifierReturnResumesOuterSuffix() public {
+        localOut = 0;
+        uint r = nestedReturningContinuation();
+        assert(r == 7);
+        assert(localOut == 1011);
+    }
+
+    modifier loopContinuation() {
+        for (uint i = 0; i < 3; ++i) {
+            _;
+            localOut += 10;
+        }
+    }
+
+    function loopContinuationBody() internal loopContinuation returns (uint r) {
+        r += 1;
+        return r;
+    }
+
+    function modifierLoopBodyReturnStaysInFrame() public {
+        localOut = 0;
+        uint r = loopContinuationBody();
+        assert(r == 3);
+        assert(localOut == 30);
+    }
+
+    modifier whileContinuation() {
+        uint i;
+        while (i < 4) {
+            ++i;
+            if (i == 2) continue;
+            _;
+            if (i == 3) break;
+        }
+    }
+
+    modifier doWhileContinuation() {
+        uint i;
+        do {
+            ++i;
+            if (i == 2) continue;
+            _;
+            if (i == 3) break;
+        } while (i < 4);
+    }
+
+    function whileContinuationBody() internal pure whileContinuation returns (uint r) {
+        r += 1;
+        return r;
+    }
+
+    function doWhileContinuationBody() internal pure doWhileContinuation returns (uint r) {
+        r += 1;
+        return r;
+    }
+
+    function modifierWhileJumps() public pure {
+        uint r = whileContinuationBody();
+        assert(r == 2);
+    }
+
+    function modifierDoWhileJumps() public pure {
+        uint r = doWhileContinuationBody();
         assert(r == 2);
     }
 
@@ -4515,5 +5021,122 @@ contract TestSuite {
     function testEmptyPushStructReturnReadsZero() public {
         Token storage token = tokens.push();
         assert(token.value == 0);
+    }
+
+    function arithmeticAssignmentValues() public pure {
+        uint left = 28;
+        left += left += left;
+        assert(left == 112);
+        uint result = (left = 24);
+        assert(result == 24 && left == 24);
+        result = (left -= 4);
+        assert(result == 20 && left == 20);
+        result = (left *= 3);
+        assert(result == 60 && left == 60);
+        result = (left /= 4);
+        assert(result == 15 && left == 15);
+        result = (left %= 4);
+        assert(result == 3 && left == 3);
+    }
+
+    function arithmeticDiscardKeepsSideEffects() public pure {
+        uint ix = 0;
+        ix++ + ix++;
+        assert(ix == 2);
+        ix++ - ix++;
+        assert(ix == 4);
+        ix++ * ix++;
+        assert(ix == 6);
+        ix++ / ix++;
+        assert(ix == 8);
+        ix++ % ix++;
+        assert(ix == 10);
+        ix++ ** 2;
+        assert(ix == 11);
+    }
+
+    /// @custom:key box
+    function arithmeticDiscardKeepsZeroDivisorRevert() public pure {
+        uint numerator = 1;
+        uint denominator = 0;
+        numerator / denominator;
+        assert(false);
+    }
+
+    /// @custom:key box
+    function arithmeticRemainderBoundAllSigns(int numerator, int denominator) public pure {
+        require(denominator > 0);
+        int result = numerator % denominator;
+        assert(result < denominator);
+    }
+
+    function testDeleteArrayLeavesDataPastLength() public {
+        delete tokens;
+        tokens.push();
+        Token storage r = tokens[0];
+        tokens.pop();
+        r.value = 5;
+        delete tokens;
+        tokens.push();
+        assert(tokens[0].value == 5);
+    }
+
+    function testDanglingReferenceSurvivesPush() public {
+        delete tokens;
+        tokens.push();
+        Token storage r = tokens[0];
+        tokens.pop();
+        r.value = 5;
+        tokens.push();
+        assert(tokens[0].value == 5);
+    }
+
+    function testArrayCopyKeepsDestinationTail() public {
+        delete emptyTokens;
+        delete tokens;
+        tokens.push();
+        Token storage r = tokens[0];
+        tokens.pop();
+        r.value = 5;
+        tokens = emptyTokens;
+        tokens.push();
+        assert(tokens[0].value == 5);
+    }
+
+    function testDanglingInnerArrayReappearsAfterPush() public {
+        delete matrix;
+        matrix.push();
+        uint[] storage ptr = matrix[0];
+        matrix.pop();
+        ptr.push(66);
+        matrix.push();
+        assert(matrix[0].length == 1);
+        assert(matrix[0][0] == 66);
+    }
+
+    function testShiftRightNegativeRoundsDown() public pure {
+        int x = -4267;
+        int r = x >> 1;
+        assert(r == -2134);
+        x >>= 256;
+        assert(x == -1);
+    }
+
+    function testShiftLeftFitsUint8() public pure {
+        uint8 x = 3;
+        x <<= 6;
+        assert(x == 192);
+    }
+
+    function testShiftOperandEvaluation() public pure {
+        uint x = 8;
+        uint r = x >> (x = 2);
+        assert(r == 0 && x == 2);
+        r = (x + 1) << (x + 2);
+        assert(r == 48);
+    }
+
+    function testUnsignedParameterNonnegative(uint x) public pure {
+        assert(x >= 0);
     }
 }

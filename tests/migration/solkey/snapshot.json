@@ -1,11 +1,16 @@
 {
   "version": 1,
-  "commit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "commit": "473da8944ca7329e6b76819863591407db26e7ec",
   "files": [
     {
       "path": "keyext.solidity.core/build.gradle",
       "sha256": "a2087246127abed980ca9134fe72438ebff596e41b10cbe718776fed44f877d9",
       "bytes": 14748
+    },
+    {
+      "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/binaryLemmas.key",
+      "sha256": "8bc8ca0d9a76b3f91095c3b80dc20e21ec88d59d94b9dd5466c456089a7207c6",
+      "bytes": 1019
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/boolHeader.key",
@@ -34,13 +39,13 @@
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intDiv.key",
-      "sha256": "9379a00f056fc16aef31e2cf82b71f5cbe9ec44978ce09397a70a98d72abc3ef",
-      "bytes": 15469
+      "sha256": "c2735460ea8d4b5624c98c27de77ba14c86833a1312df8d0fd38af15c10328a8",
+      "bytes": 16028
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intHeader.key",
-      "sha256": "d9ee9b49c59134c990ea2ae1938bf86acf14defe302d72d162806027733ca2d1",
-      "bytes": 1028
+      "sha256": "3825fa11bb971234c36342ba877c9b0043865eb082dcd1b830a5efe2a974ef4f",
+      "bytes": 1057
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/intSimplificationRules.key",
@@ -94,8 +99,8 @@
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/ruleSetDeclarations.key",
-      "sha256": "436a711e25e050631c22cb710ada506f30c90f6436054866d2c1b578c2f8a7b5",
-      "bytes": 5196
+      "sha256": "a96c76ccd8509d0bffaef852c48ddfb733961e6700c7a29fde3952f4c2de741f",
+      "bytes": 5227
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityDLHeader.key",
@@ -104,13 +109,13 @@
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
-      "sha256": "48a5b55c1a1c75860536a84c197f565759764b956c87ced62b46bed873e7a2f1",
-      "bytes": 283346
+      "sha256": "02b7a995c9aaf1a856019d7071ca3e75a57de91b071c93b24ebf6ae7eef989eb",
+      "bytes": 303419
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/standardSolidityRules.key",
-      "sha256": "f00315da82bb53883ce86ba9d23d1c4359347ade05c49250b3fcecbbe92032a0",
-      "bytes": 700
+      "sha256": "190d473284588818fb8e7be886bd684a32c19cb8826ea9b88ce9174d95a81a3f",
+      "bytes": 723
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structHeader.key",
@@ -119,13 +124,13 @@
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structMemoryRules.key",
-      "sha256": "6e27efabee5275e5630ca3b6de686c18dcbb37d64ee135dcebbddd0b8a6a00d3",
-      "bytes": 1613
+      "sha256": "b771b1573578ad9eb9d5317d7127db905767cb39f714e55bda2543fe476fc048",
+      "bytes": 1766
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structRules.key",
-      "sha256": "efedab8783ec53472c26a5c4c418be139fbcf8911be18455cbcad3de9758780b",
-      "bytes": 16220
+      "sha256": "607edffdab3faa0e9ded6d54c6dfadff258f435d2eccb8c34e9cff08186f4622",
+      "bytes": 17089
     },
     {
       "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/updateRules.key",
@@ -364,8 +369,8 @@
     },
     {
       "path": "keyext.solidity.examples/TestSuite.sol",
-      "sha256": "8ef8758ec2d014463f2479152916a04beecf517e29f80b49f9e28eeabd03f212",
-      "bytes": 118032
+      "sha256": "12de663ea2bbe38e6be7254589e6e43d6c39be16716940da072279ae385db792",
+      "bytes": 134438
     },
     {
       "path": "keyext.solidity.examples/benchmark/AccessRestriction.sol",
@@ -1058,6 +1063,11 @@
       "bytes": 299
     },
     {
+      "path": "keyext.solidity.examples/proofs/wfDelNodeIndexRight.key",
+      "sha256": "fa4d640d80b03a1c67e9579104e02f82eb5f774bc1a4f1980ee5f1743f6d1856",
+      "bytes": 1026
+    },
+    {
       "path": "keyext.solidity.examples/proofs/wfShape.key",
       "sha256": "075aeb9a5d6c1dc95d7dde694b01e84b93b3603fedb5eed9e901339110ea8d59",
       "bytes": 58
@@ -1219,18 +1229,18 @@
     },
     {
       "path": "keyext.solidity.examples/real-world/open/OZMath.sol",
-      "sha256": "700b1e4126642537417384c2c2c8dc54954213435161cc691603ddb719bc02b7",
-      "bytes": 2050
+      "sha256": "ded35ef1f0e00e5e84f3a47e70eac5feb112ac692abacbf95423c99dcc7d803b",
+      "bytes": 2026
     },
     {
       "path": "keyext.solidity.examples/solc/SolcArithmetic.sol",
-      "sha256": "e28f9695be69f12e365dc4b396805b96c995724e9a37d324fbb56e850c40161f",
-      "bytes": 15197
+      "sha256": "6cee361a9fd786b3335387b4baf72eb6bcb3ea9e6374600e8804e86786219011",
+      "bytes": 18423
     },
     {
       "path": "keyext.solidity.examples/solc/SolcArrayMembers.sol",
-      "sha256": "290d818b6e7d197ae5ff02ed5b645c743c3cef1fff51e46d82ca8b7c4817e8b6",
-      "bytes": 31656
+      "sha256": "fd4da9b5128b81efb1f036fad2215b7106317fa1665c7e1b064f8462013cd61b",
+      "bytes": 31845
     },
     {
       "path": "keyext.solidity.examples/solc/SolcArrays.sol",
@@ -1254,8 +1264,8 @@
     },
     {
       "path": "keyext.solidity.examples/solc/SolcFunctionCalls.sol",
-      "sha256": "fe452878ca65c1366129920cbef014bd77734ae3695c475b82f10e4579e606c6",
-      "bytes": 13621
+      "sha256": "b07710b30e8b8cfa443610557b968351dbdccaf04ef7be72286b5bf33c4dfbeb",
+      "bytes": 14933
     },
     {
       "path": "keyext.solidity.examples/solc/SolcHigherLevel.sol",
@@ -1264,8 +1274,8 @@
     },
     {
       "path": "keyext.solidity.examples/solc/SolcLoops.sol",
-      "sha256": "22105caaeecf9c5d738edf144d0d9f7ce6fe8b4396ac42074a32881d03e2f9ce",
-      "bytes": 20471
+      "sha256": "65fd8dcc32f5fa315c0a0e07fe034058301a25b1cd869bbaf4154e04f2d4c394",
+      "bytes": 23321
     },
     {
       "path": "keyext.solidity.examples/solc/SolcMappings.sol",
@@ -1279,8 +1289,8 @@
     },
     {
       "path": "keyext.solidity.examples/solc/SolcModifiers.sol",
-      "sha256": "80a94378c786517d7666bc5d11631395f103f74490737cbcf4772128a4ae534f",
-      "bytes": 14081
+      "sha256": "81bbc6a15f56b4317e648e8a6d07bb01963ee995589e6c4d74eb7ccd654da85b",
+      "bytes": 19128
     },
     {
       "path": "keyext.solidity.examples/solc/SolcPayments.sol",
@@ -1289,8 +1299,13 @@
     },
     {
       "path": "keyext.solidity.examples/solc/SolcSmtControlFlow.sol",
-      "sha256": "691ed2a5f7ae747c4de50a3ace3eb63141ed94eada6edd6ad9e4f98e00f1484e",
-      "bytes": 28369
+      "sha256": "16df5b89e44b878478e588bdab0088e4bf8586f58afa0719c429d1073097eb2d",
+      "bytes": 30541
+    },
+    {
+      "path": "keyext.solidity.examples/solc/SolcStructArrays.sol",
+      "sha256": "ae462de1bd2ae74be57aed5d70d3d5e664586633249f9de64b489288900a18a3",
+      "bytes": 2535
     },
     {
       "path": "keyext.solidity.examples/solc/SolcStructs.sol",
@@ -1299,8 +1314,8 @@
     },
     {
       "path": "keyext.solidity.examples/solc/SolcStructsMappings.sol",
-      "sha256": "0762631c1a48f488a8070d0300ea2c7a16fd0ba373fe534f7719127fc6f9e57e",
-      "bytes": 28677
+      "sha256": "835038da4db8f9eabf69be1c72cc04db3a4656c43993cb4e4cea4840e2afffbf",
+      "bytes": 29311
     },
     {
       "path": "keyext.solidity.examples/solc/SolcTypes.sol",
@@ -1308,14 +1323,14 @@
       "bytes": 13154
     },
     {
-      "path": "keyext.solidity.examples/solc/open/SolcArithmeticOpen.sol",
-      "sha256": "bdfaa9dc62a16911bf569c8ad8e37ae0fb76df9210548fc5dd6b1b8ebf9c33ab",
-      "bytes": 7504
+      "path": "keyext.solidity.examples/solc/StorageDangling.sol",
+      "sha256": "c3036b886ce9060f991f64a489ce04fffc553b704b53a5aa422f8403f1e72cbc",
+      "bytes": 1333
     },
     {
-      "path": "keyext.solidity.examples/solc/open/SolcArrayMembersOpen.sol",
-      "sha256": "c85ba8ebae2feb5177e28cb99b7b0aba6fe6b053e7bac5a512ed003482dcb126",
-      "bytes": 400
+      "path": "keyext.solidity.examples/solc/open/SolcArithmeticOpen.sol",
+      "sha256": "855b04796bcd2b7869e3266bfadf501db997d4bcd8de79b1ae30d348afc0e034",
+      "bytes": 3302
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcConstructorsOpen.sol",
@@ -1324,8 +1339,8 @@
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcFunctionCallsOpen.sol",
-      "sha256": "d6ac57f79594bec91404db442a0bf23cf09493a72b0f8dc49e2ab3a724e48669",
-      "bytes": 2266
+      "sha256": "ad3e9d00d3b064bb6b64b26c67418c8fda5247701947f3c801779ca4de3f9cee",
+      "bytes": 831
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcHigherLevelOpen.sol",
@@ -1334,13 +1349,8 @@
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcLoopsOpen.sol",
-      "sha256": "2de855cd723e05070908d825ae239e772660dd8e0a110d7a4945e3e93386f338",
-      "bytes": 6080
-    },
-    {
-      "path": "keyext.solidity.examples/solc/open/SolcModifiersOpen.sol",
-      "sha256": "f34966217143dbe5de4d55fb2ed2f69da84d492c25961f79c865d4c3151e34ab",
-      "bytes": 6162
+      "sha256": "27b81ab8c1ffff62bc427d23c3c6e38c471acb8b7546f0606a5124b473f40ef8",
+      "bytes": 2888
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcPaymentsOpen.sol",
@@ -1349,23 +1359,13 @@
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcSmtControlFlowOpen.sol",
-      "sha256": "e8727de507f3f9cae24fbe4a5e0ae3ffe745a7b0d7f074d1ecdb42822f808379",
-      "bytes": 3399
-    },
-    {
-      "path": "keyext.solidity.examples/solc/open/SolcStructsMappingsOpen.sol",
-      "sha256": "0b11e094da36cb142e450af91164390335d0a0c1dc147b799501ae79b706cb4d",
-      "bytes": 3704
+      "sha256": "2e7a193a5df3adf5694d069fe5aa1aa9fc1319417ec73a19ec909f106386b521",
+      "bytes": 813
     },
     {
       "path": "keyext.solidity.examples/solc/open/SolcTypesOpen.sol",
       "sha256": "d16eb6a09c5a7e0e953cf6f2e0c8d7ead833b2e2ca4a0e00aa79499fc89885a4",
       "bytes": 5661
-    },
-    {
-      "path": "keyext.solidity.examples/solc/open/StorageDanglingOpen.sol",
-      "sha256": "4e2801499a2085c817ac024e52e6486e22c1dbd5a726a4d94c64d900a7c6e3b9",
-      "bytes": 1770
     },
     {
       "path": "keyext.solidity.examples/unprovable/Unprovable.sol",

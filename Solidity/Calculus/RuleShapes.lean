@@ -516,7 +516,18 @@ def unclaimedTaclets : List KeyTaclet :=
 /-- Added upstream rules still awaiting correspondence and soundness review.
 These are migration gaps, not implemented or architecturally excused rules. -/
 def migrationPendingTaclets : List KeyTaclet :=
-  []
+  [ .bitAndAssignment, .bitAnd_unfold_left, .bitAnd_unfold_right, .discardAddExpression,
+    .discardDivExpression, .discardModExpression, .discardMulExpression,
+    .discardPowExpression, .discardSubExpression, .localAddAssignmentValue,
+    .localCopyAssignmentValue, .localDivAssignmentValue, .localModAssignmentValue,
+    .localMulAssignmentValue, .localShiftLeftAssign, .localShiftRightAssign,
+    .localSubAssignmentValue, .loopNormalize, .memoryIndexWriteStorageRefRhsCapture,
+    .shiftLeftAssignment, .shiftLeft_unfold_left, .shiftLeft_unfold_right,
+    .shiftRightAssignment, .shiftRight_unfold_left, .shiftRight_unfold_right,
+    .storageCopyAssignmentValue, .storageFieldRead_unfold_rightCallReceiver,
+    .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver,
+    .storagePopReferenceDiscard, .storagePopReference_unfold_leftCallReceiver,
+    .storagePopReference_unfold_leftFstReceiver ]
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses or records as pending migration work. Exactly one
