@@ -25,14 +25,20 @@ def uintBound : Int := ((2 ^ 256 : Nat) : Int)
 bound) of `int256`. -/
 def intBound : Int := ((2 ^ 255 : Nat) : Int)
 
-/-- `&&&`, `|||` or `^^^` on two `uint` words, behind a match on the operands:
+/-- An `int256` as its 256-bit two's-complement word. -/
+def wordOf (x : Int) : Nat := (x % ((2 ^ 256 : Nat) : Int)).toNat
+
+/-- A 256-bit word read as an `int256`, in two's complement. -/
+def signedOf (r : Nat) : Int := if r < 2 ^ 255 then (r : Int) else (r : Int) - ((2 ^ 256 : Nat) : Int)
+
+/-- `&&&`, `|||` or `^^^` on two words, behind a match on the operands:
 the kernel meets `Nat.land` only on numerals, where it computes it, and never
 unfolds it (well-founded recursion, a deep-recursion error), even when an
-operand is still a read of the state.  A negative operand, which `uint`
-rules out, gives `0`. -/
+operand is still a read of the state.  A negative operand, an `int256`, is
+read in two's complement as solc reads it (`wordOf`, `signedOf`). -/
 def uintBitwise (f : Nat → Nat → Nat) : Int → Int → Int
   | .ofNat a, .ofNat b => .ofNat (f a b)
-  | _, _ => 0
+  | x, y => signedOf (f (wordOf x) (wordOf y))
 
 theorem uintBitwise_natCast (f : Nat → Nat → Nat) (a b : Nat) :
     uintBitwise f (a : Int) (b : Int) = ((f a b : Nat) : Int) := rfl
@@ -54,7 +60,8 @@ def arithInt : BinOp → Int → Int → Option Int
   | .bor, x, y => some (Semantics.uintBitwise (· ||| ·) x y)
   | .bxor, x, y => some (Semantics.uintBitwise (· ^^^ ·) x y)
   | .shl, a, n => some (if n < 256 then a * 2 ^ n.toNat % Semantics.uintBound else 0)
-  | .shr, a, n => some (if n < 256 then a / 2 ^ n.toNat else 0)
+  -- an arithmetic shift: `/` rounds toward `-∞`, as solc's `sar` on an `int`
+  | .shr, a, n => some (if n < 256 then a / 2 ^ n.toNat else if a < 0 then -1 else 0)
   | .addW, x, y => some ((x + y) % Semantics.uintBound)
   | .subW, x, y => some ((x - y) % Semantics.uintBound)
   | .mulW, x, y => some (x * y % Semantics.uintBound)

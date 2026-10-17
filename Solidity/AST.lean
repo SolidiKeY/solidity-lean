@@ -738,9 +738,10 @@ def BinOp.accepts : BinOp → PrimTy → Bool
   -- solc takes an unsigned exponent, and an operator here is applied at one
   -- type: `**` is `uint ** uint`
   | .pow, p => p == .uint
-  -- bitwise, shifts and wrapping arithmetic at `uint` only: at `int` solc
-  -- reads them in two's complement, which the interpreter does not model
-  | .band, p | .bor, p | .bxor, p | .shl, p | .shr, p => p == .uint
+  -- bitwise and `>>` at either: at `int` solc reads them in two's complement
+  -- (`uintBitwise`, an arithmetic `>>`); `<<` and wrapping arithmetic at `uint`
+  | .band, p | .bor, p | .bxor, p | .shr, p => p.isNumeric
+  | .shl, p => p == .uint
   | .addW, p | .subW, p | .mulW, p | .powW, p => p == .uint
   | _, p => p.isNumeric
 

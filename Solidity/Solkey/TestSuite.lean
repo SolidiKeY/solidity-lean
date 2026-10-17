@@ -18,7 +18,7 @@ solc_import "../../tests/solc/TestSuite.ast.json" hash 0x1ec4bfde1445b2df as Sol
 An unsupported function has no program or proof obligation. -/
 
 /--
-info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 579 elaborated, 2 skipped, 1 excluded, 35 unsupported
+info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 583 elaborated, 2 skipped, 1 excluded, 31 unsupported
 unsupported storageArrayMethodReferences: TestSuite.sol:352: the printed text does not parse: <input>:1:35: expected '=', 'storage' or identifier
 unsupported storageArrayMethodReferencesComplexReceiver: TestSuite.sol:362: the printed text does not parse: <input>:1:102: expected '='
 unsupported storageArrayMethodReferencesComposedCallReceiver: TestSuite.sol:401: a member of a pushed element (`x.push().f`) other than an assignment's left-hand side of a constant or a declaration's whole initial value: hoisting the push would change solc's order of evaluation
@@ -41,9 +41,6 @@ unsupported memoryIndexWriteStorageRefOutOfBoundsReverts: TestSuite.sol:3150: a 
 unsupported memoryIndexWriteStorageRefSourceOutOfBoundsReverts: TestSuite.sol:3158: a memory reference is expected
 skipped tryCalleeGet: TestSuite.sol:3804: tagged `@custom:key skip`
 skipped tryCalleePing: TestSuite.sol:3809: tagged `@custom:key skip`
-unsupported bitAndOneValues: TestSuite.sol:3888: operator & does not take int
-unsupported bitAndGeneralValues: TestSuite.sol:3900: operator & does not take int
-unsupported bitAndSymbolic: TestSuite.sol:3909: operator & does not take int
 unsupported conditionalCallee: TestSuite.sol:3934: a call's callee is a function's name
 unsupported conditionalCalleeEffects: TestSuite.sol:3947: only push, pop and transfer are calls on a receiver
 unsupported invariantQuantifiedOverPrefix: TestSuite.sol:4485: the loop clause `invariant \forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language
@@ -55,7 +52,6 @@ unsupported modifierReturnResumesOuterSuffix: TestSuite.sol:4728: modifier solcM
 unsupported arithmeticAssignmentValues: TestSuite.sol:5026: the printed text does not parse: <input>:1:39: expected ';'
 unsupported arithmeticDiscardKeepsSideEffects: TestSuite.sol:5042: the printed text does not parse: <input>:1:34: expected '='
 unsupported arithmeticDiscardKeepsZeroDivisorRevert: TestSuite.sol:5059: the printed text does not parse: <input>:1:75: expected '='
-unsupported testShiftRightNegativeRoundsDown: TestSuite.sol:5119: operator >> does not take int
 unsupported testShiftOperandEvaluation: TestSuite.sol:5131: the printed text does not parse: <input>:1:39: expected ')' or ','
 -/
 #guard_msgs in

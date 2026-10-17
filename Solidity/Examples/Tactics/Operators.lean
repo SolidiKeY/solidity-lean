@@ -124,8 +124,17 @@ example : Prog.toStr [] (sol{ uint x = 1; unchecked { x += 1; x = x * 2 - 1; x++
 example : Prog.toStr [] (sol{ uint x = 1; x &= ~x; x <<= 2; }) =
     "uint x = 1; x = x & ~x; x = x << 2;" := by decide
 
-/-- error: Solidity elaboration failed: operator & does not take int -/
-#guard_msgs in #check sol[TestSuite]{ int x = 1; x = x & x; }
+/-- `&` and `>>` at `int` in two's complement, as solc: `-3 & 6` is `4`,
+`-3 & -6` is `-8`, `-4267 >> 1` is `-2134` (toward `-∞`), and a negative
+shifted past its width is `-1`. -/
+theorem signedBitwise :
+    ⊨ dl!{ ⟨ int x = -3; int m = -6; int a = x & 6; int b = x & m; int y = -4267;
+             int c = y >> 1; int d = y >> 256; ⟩
+      a == 4 && b + 8 == 0 && c + 2134 == 0 && d + 1 == 0 } := by
+  sol_prove
+
+/-- error: Solidity elaboration failed: operator << does not take int -/
+#guard_msgs in #check sol[TestSuite]{ int x = 1; x = x << 1; }
 
 /-- error: Solidity elaboration failed: operator +% does not take int -/
 #guard_msgs in #check sol[TestSuite]{ int x = 1; unchecked { x = x + x; }; }

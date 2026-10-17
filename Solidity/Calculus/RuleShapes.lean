@@ -169,18 +169,21 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
     .multiplicationAssignment, .powerAssignment, .divisionAssignment, .moduloAssignment,
     .lessThanAssignment, .greaterThanAssignment, .lessEqualAssignment, .greaterEqualAssignment,
     .boolEqualityAssignment, .boolInequalityAssignment,
-    .logicalAndAssignment, .logicalOrAssignment]),
+    .logicalAndAssignment, .logicalOrAssignment,
+    .bitAndAssignment, .shiftLeftAssignment, .shiftRightAssignment]),
   (``Taclet.binopUnfoldLeft, .merged [.addition_unfold_left, .subtraction_unfold_left,
     .multiplication_unfold_left, .power_unfold_left, .division_unfold_left, .modulo_unfold_left,
     .lessThanCaptureLhs, .greaterThanCaptureLhs, .lessEqualCaptureLhs, .greaterEqualCaptureLhs,
     .boolEqualityCaptureLhs, .boolInequalityCaptureLhs,
-    .logicalAndCaptureLhs, .logicalOrCaptureLhs]),
+    .logicalAndCaptureLhs, .logicalOrCaptureLhs,
+    .bitAnd_unfold_left, .shiftLeft_unfold_left, .shiftRight_unfold_left]),
   -- no `&&`/`||` instance: those are the short-circuit rows below
   (``Taclet.binopUnfoldRight, .merged [.addition_unfold_right, .subtraction_unfold_right,
     .multiplication_unfold_right, .power_unfold_right, .division_unfold_right,
     .modulo_unfold_right,
     .lessThanCaptureRhs, .greaterThanCaptureRhs, .lessEqualCaptureRhs, .greaterEqualCaptureRhs,
-    .boolEqualityCaptureRhs, .boolInequalityCaptureRhs]),
+    .boolEqualityCaptureRhs, .boolInequalityCaptureRhs,
+    .bitAnd_unfold_right, .shiftLeft_unfold_right, .shiftRight_unfold_right]),
   (``Taclet.logicalAndShortCircuitRhs, .taclet .logicalAndShortCircuitRhs),
   (``Taclet.logicalOrShortCircuitRhs, .taclet .logicalOrShortCircuitRhs),
   (``Taclet.unopAssignment, .merged [.unaryMinusAssignment, .logicalNotAssignment]),
@@ -424,9 +427,10 @@ def operatorOrder : List (Lean.Name × List Lean.Name) :=
   let cmp := [``BinOp.lt, ``BinOp.gt, ``BinOp.le, ``BinOp.ge, ``BinOp.eqB, ``BinOp.neB]
   let compound := [``BinOp.add, ``BinOp.sub, ``BinOp.mul, ``BinOp.div, ``BinOp.mod]
   let incDec := [``IncDec.preInc, ``IncDec.preDec, ``IncDec.postInc, ``IncDec.postDec]
-  [(``Taclet.binopAssignment, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
-   (``Taclet.binopUnfoldLeft, arith ++ cmp ++ [``BinOp.and, ``BinOp.or]),
-   (``Taclet.binopUnfoldRight, arith ++ cmp),
+  let bits := [``BinOp.band, ``BinOp.shl, ``BinOp.shr]
+  [(``Taclet.binopAssignment, arith ++ cmp ++ [``BinOp.and, ``BinOp.or] ++ bits),
+   (``Taclet.binopUnfoldLeft, arith ++ cmp ++ [``BinOp.and, ``BinOp.or] ++ bits),
+   (``Taclet.binopUnfoldRight, arith ++ cmp ++ bits),
    (``Taclet.unopAssignment, [``UnOp.neg, ``UnOp.not]),
    (``Taclet.unopCapture, [``UnOp.neg, ``UnOp.not])] ++
   ([``Taclet.localOpAssign, ``Taclet.storageRootOpAssign, ``Taclet.storageFieldOpAssign,
@@ -516,14 +520,12 @@ def unclaimedTaclets : List KeyTaclet :=
 /-- Added upstream rules still awaiting correspondence and soundness review.
 These are migration gaps, not implemented or architecturally excused rules. -/
 def migrationPendingTaclets : List KeyTaclet :=
-  [ .bitAndAssignment, .bitAnd_unfold_left, .bitAnd_unfold_right, .discardAddExpression,
+  [ .discardAddExpression,
     .discardDivExpression, .discardModExpression, .discardMulExpression,
     .discardPowExpression, .discardSubExpression, .localAddAssignmentValue,
     .localCopyAssignmentValue, .localDivAssignmentValue, .localModAssignmentValue,
     .localMulAssignmentValue, .localShiftLeftAssign, .localShiftRightAssign,
     .localSubAssignmentValue, .loopNormalize, .memoryIndexWriteStorageRefRhsCapture,
-    .shiftLeftAssignment, .shiftLeft_unfold_left, .shiftLeft_unfold_right,
-    .shiftRightAssignment, .shiftRight_unfold_left, .shiftRight_unfold_right,
     .storageCopyAssignmentValue, .storageFieldRead_unfold_rightCallReceiver,
     .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver,
     .storagePopReferenceDiscard, .storagePopReference_unfold_leftCallReceiver,
@@ -541,7 +543,7 @@ theorem taclets_partitioned :
       (if migrationPendingTaclets.contains t then 1 else 0) == 1) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 330 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 339 := by decide +kernel
 
 theorem unclaimedTaclets_count : unclaimedTaclets.length = 15 := by decide +kernel
 

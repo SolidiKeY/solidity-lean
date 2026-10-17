@@ -41,7 +41,7 @@ are pending, as they stay open in solkey.
 -/
 
 /--
-info: 617 functions: 519 derived, 11 pending, 87 other
+info: 617 functions: 522 derived, 12 pending, 83 other
 internal valuesRef
 unsupported storageArrayMethodReferences
 unsupported storageArrayMethodReferencesComplexReceiver
@@ -74,9 +74,6 @@ internal returnSign
 internal returnOrdered
 internal returnSwapped
 internal returnStats
-unsupported bitAndOneValues
-unsupported bitAndGeneralValues
-unsupported bitAndSymbolic
 internal bitAndSetTotal
 unsupported conditionalCallee
 internal retConditionalTwo
@@ -127,11 +124,10 @@ internal doWhileContinuationBody
 unsupported arithmeticAssignmentValues
 unsupported arithmeticDiscardKeepsSideEffects
 unsupported arithmeticDiscardKeepsZeroDivisorRevert
-unsupported testShiftRightNegativeRoundsDown
 unsupported testShiftOperandEvaluation
 pending:
-storagePushReturnPrimitiveBindComplexReceiver invariantClosedFormSum invariantBreakLeavesInvariantRange invariantForBreakSkipsUpdate unprovableInvariantBreakPostcondition unprovableInvariantForContinueUpdate
-testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero arithmeticRemainderBoundAllSigns
+storagePushReturnPrimitiveBindComplexReceiver bitAndSymbolic invariantClosedFormSum invariantBreakLeavesInvariantRange invariantForBreakSkipsUpdate unprovableInvariantBreakPostcondition
+unprovableInvariantForContinueUpdate testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero arithmeticRemainderBoundAllSigns
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

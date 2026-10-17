@@ -51,3 +51,12 @@ theorem Solkey.TestSuite.testShiftLeftFitsUint8.proved : ⊢ Solkey.TestSuite.te
 
 theorem Solkey.TestSuite.testUnsignedParameterNonnegative.proved : ⊢ Solkey.TestSuite.testUnsignedParameterNonnegative.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.bitAndOneValues.proved : ⊢ Solkey.TestSuite.bitAndOneValues.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.bitAndGeneralValues.proved : ⊢ Solkey.TestSuite.bitAndGeneralValues.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.testShiftRightNegativeRoundsDown.proved : ⊢ Solkey.TestSuite.testShiftRightNegativeRoundsDown.problem := by
+  sol_prove (steps := 128)
