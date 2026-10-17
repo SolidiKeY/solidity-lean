@@ -137,15 +137,6 @@ partial def atRef (ref : Syntax) (stx : Syntax) : Syntax :=
   | .ident _ raw v pre => .ident info raw v pre
   | .missing => .missing
 
-/-- The value type a parameter's type names, with its width: what a
-parameter may be (`paramCtx`), and what its obligation binds
-(`solc_scoped_problems`). -/
-def paramTy? (t : String) : Option (PrimTy × Nat) :=
-  match PrimTy.ofName? t, narrowTy? t with
-  | some p, _ => some (p, 256)
-  | none, some pn => some pn
-  | none, none => if t == "address payable" then some (.uint, 256) else none
-
 /-- The parameters of a function as locals in scope, most recent first. -/
 def paramCtx (C : Contract) (ps : List RawStmt) : Except String ECtx :=
   ps.reverse.mapM fun s => match s with
