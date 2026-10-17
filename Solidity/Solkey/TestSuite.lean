@@ -18,13 +18,8 @@ solc_import "../../tests/solc/TestSuite.ast.json" hash 0x1ec4bfde1445b2df as Sol
 An unsupported function has no program or proof obligation. -/
 
 /--
-info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 601 elaborated, 2 skipped, 1 excluded, 13 unsupported
+info: 617 functions (436 diamond, 128 box, 2 skip, 51 internal): 606 elaborated, 2 skipped, 1 excluded, 8 unsupported
 excluded recursiveStructMapping: TestSuite.sol:2973: struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite
-unsupported memoryIndexWriteStorageRefRhsCapture: TestSuite.sol:3105: a memory reference is expected
-unsupported memoryIndexWriteStorageStructCopy: TestSuite.sol:3123: a memory reference is expected
-unsupported memoryIndexWriteStorageRefImpureIndex: TestSuite.sol:3142: a memory reference is expected
-unsupported memoryIndexWriteStorageRefOutOfBoundsReverts: TestSuite.sol:3150: a memory reference is expected
-unsupported memoryIndexWriteStorageRefSourceOutOfBoundsReverts: TestSuite.sol:3158: a memory reference is expected
 skipped tryCalleeGet: TestSuite.sol:3804: tagged `@custom:key skip`
 skipped tryCalleePing: TestSuite.sol:3809: tagged `@custom:key skip`
 unsupported conditionalCallee: TestSuite.sol:3934: a call's callee is a function's name

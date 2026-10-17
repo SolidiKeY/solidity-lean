@@ -105,3 +105,9 @@ theorem Solkey.TestSuite.storagePopReferenceOutOfBounds.proved : ⊢ Solkey.Test
 
 theorem Solkey.TestSuite.storagePopReferenceCallOutOfBounds.proved : ⊢ Solkey.TestSuite.storagePopReferenceCallOutOfBounds.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.problem := by
+  sol_prove (steps := 128)

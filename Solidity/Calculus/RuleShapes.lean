@@ -512,6 +512,20 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   storage alias bound to its receiver (`discardedK`, `Frontend/SolcJson.lean`):
   the receiver's capture these rules make, its bounds checks and calls the
   binding's; the alias is then unused, which is the discard.
+* `storageFieldRead_unfold_rightCallReceiver`,
+  `storageIndexRead_unfold_rightCallReceiver`,
+  `storageLocalRootPush_unfold_leftCallReceiver` — architectural.  A call
+  inside an expression is captured before its statement (`hoist`): a
+  storage-returning call into a fresh alias, `T storage sp = f();`, which is
+  these rules' `\replacewith`; the read or the push is then the simple
+  receiver's rule.
+* `loopNormalize` — architectural.  solkey's `normalize_loop` turns a loop's
+  `break`, `continue` and `return` into flags; here `lowerLoops` does it at
+  elaboration, so every loop `Stmt` is already normal.
+* `memoryIndexWriteStorageRefRhsCapture` — architectural.  A storage
+  reference written into a memory object's member or element is copied into
+  a fresh memory local first (`hoistAssign`, `T memory mv = sp; m[i] = mv;`),
+  so the write is `memoryIndexWriteMemRef…`'s.
 * `discard{Add,Sub,Mul,Div,Mod,Pow}Expression` — architectural.  A discarded
   operator's value, `a + b;`, is imported as the declaration of a fresh local
   holding it (`discardedK`, `Frontend/SolcJson.lean`), which is these rules'
@@ -539,14 +553,15 @@ def unclaimedTaclets : List KeyTaclet :=
     .discardAddExpression, .discardSubExpression, .discardMulExpression, .discardDivExpression,
     .discardModExpression, .discardPowExpression, .storagePopReferenceDiscard,
     .storagePopReference_unfold_leftFstReceiver, .storagePopReference_unfold_leftCallReceiver,
+    .memoryIndexWriteStorageRefRhsCapture, .storageFieldRead_unfold_rightCallReceiver,
+    .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver,
+    .loopNormalize,
     .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
 
 /-- Added upstream rules still awaiting correspondence and soundness review.
 These are migration gaps, not implemented or architecturally excused rules. -/
 def migrationPendingTaclets : List KeyTaclet :=
-  [ .loopNormalize,
-    .memoryIndexWriteStorageRefRhsCapture, .storageFieldRead_unfold_rightCallReceiver,
-    .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver ]
+  []
 
 /-- **The coverage fact**: the corpus splits into what the table claims and
 what this file excuses or records as pending migration work. Exactly one
@@ -562,7 +577,7 @@ theorem taclets_partitioned :
 
 theorem claimedTaclets_count : claimedTaclets.length = 341 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 31 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 36 := by decide +kernel
 
 /-! ## The rules with no taclet
 

@@ -2032,6 +2032,24 @@ partial def hoistTop : RawExpr → ElabM (SProg C × RawExpr)
 the top of `r` stays there when `l` is a variable (`hoistTop`). -/
 partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
   let (P, r) ← if l matches .name _ then hoistTop r else hoist r
+  -- a storage reference into a memory object's member or element: copied
+  -- into a fresh memory object first, before the target's index (solkey's
+  -- `memoryIndexWriteStorageRefRhsCapture`: `T memory mv = sp; m[i] = mv;`)
+  let (P, r) ← do
+    let Γ ← nctx
+    -- the target's shape: its indices, which may have effects, read as `0`
+    let rec shape : RawExpr → RawExpr
+      | .index e _ => .index (shape e) (.num 0)
+      | .field e f => .field (shape e) f
+      | e => e
+    match synth C Γ (shape l), synth C Γ r with
+    | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
+      match hm : (Ty.ref R).mapFree with
+      | true =>
+        let x ← captureAs C "mv" (.mem R)
+        pure (P ++ [.of Γ (.declMem R x (some (.copy sp hm)) rfl hm)], .name (toString x))
+      | false => throw "a copy into memory of a type that holds a mapping"
+    | _, _ => pure (P, r)
   let (Pc, r) ← if l.hasIncDec then captureExpr C r else pure ([], r)
   let (Q, l) ← hoist l
   pure (P ++ Pc ++ Q, .assign l r)
