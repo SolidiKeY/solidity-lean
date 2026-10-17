@@ -1136,15 +1136,19 @@ partial def stmt1 (j : Json) : PM (List String) := do
 
 /-- A loop's specification, the `/// @custom:key` clauses above it that the
 fixture keeps (`loopSpec`, read from the source by the loop's `src` offset as
-solkey's `LoopSpecCompiler` reads them), each on a line of its own.  A clause
-in the specification language proper (`\forall`, `\old`) is not a program
-expression, which the grammar reads. -/
+solkey's `LoopSpecCompiler` reads them), each on a line of its own.  A
+quantified clause (`\forall T x; a -> c`) the grammar reads as one; the rest
+of the specification language (`\old`, `\exists`) is not a program
+expression. -/
 partial def loopSpec (j : Json) : PM String := do
   let some (.arr cs) := J.opt j "loopSpec" | pure ""
   let mut out := ""
   for c in cs do
     let some t := c.getStr?.toOption | unsupported "a loop clause that is not text"
-    if t.contains '\\' then unsupported s!"the loop clause `{t}`: the specification language"
+    -- a quantifier, `\forall T x; …`, reads as a loop clause of its own
+    -- (`RawInv`); the rest of the specification language does not
+    if (t.splitOn "\\").tail.any (!·.startsWith "forall ") then
+      unsupported s!"the loop clause `{t}`: the specification language"
     let t := resolveSpecConstants (← get).specConstants (← get).specConstBlocked t
     let t := resolveSpecEnums (← get).specEnums (← get).specBlocked t
     let st ← get

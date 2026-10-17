@@ -577,13 +577,38 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
         return ← clause "unwind" (← `(sol_expr| $x:ident + 1)) w
       let some n ← (evalNat k).run | escape
       clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
-    | LoopAnn.inv _ _ I dec _ =>
-      let w ← match ← optSome? dec with
+    | LoopAnn.inv _ _ I dec _ qs =>
+      let mut w ← match ← optSome? dec with
         | some d => clause "decreases" (← ppExprS ns d) w
         | none => pure w
+      -- the quantified clauses, written where the list computes
+      if let some qs ← listElems? qs then
+        for q in qs.reverse do
+          let_expr LoopQ.all _ _ x p b := (← whnf q) | return ← escape
+          let x := x.consumeMData
+          let some xi ← ppVar? x | return ← escape
+          let some T ← primName? p | return ← escape
+          let some b ← ppLoopQ (x :: ns) b | return ← escape
+          w ← `(sol_stmt| /// @custom:key invariant \forall $(mkIdent (Name.mkSimple T)):ident
+            $xi:ident; $b:sol_loop_inv $w:sol_stmt)
       clause "invariant" (← ppExprS ns I) w
     | _ => escape
   | _ => escape
+
+/-- A quantified invariant clause, `\forall uint q; a -> c`, its bound
+local named where its body is read. -/
+partial def ppLoopQ (ns : List Expr) (q : Expr) : PrM (Option (TSyntax `sol_loop_inv)) := do
+  match_expr (← whnf q) with
+  | LoopQ.val _ _ a => return some (← `(sol_loop_inv| $(← ppExprS ns a):sol_expr))
+  | LoopQ.imp _ _ a c =>
+    return some (← `(sol_loop_inv| $(← ppExprS ns a):sol_expr -> $(← ppExprS ns c):sol_expr))
+  | LoopQ.all _ _ x p b =>
+    let x := x.consumeMData
+    let some xi ← ppVar? x | return none
+    let some T ← primName? p | return none
+    let some body ← ppLoopQ (x :: ns) b | return none
+    return some (← `(sol_loop_inv| \forall $(mkIdent (Name.mkSimple T)):ident $xi:ident; $body))
+  | _ => return none
 
 /-- `address(a).f(e₁, …)`: an external call. -/
 partial def ppExtCallS (ns : List Expr) (c : Expr) : PrM (Option (TSyntax `sol_expr)) := do
@@ -934,6 +959,12 @@ def iffPartsS (ns : List Expr) (e : Expr) :
 
 /-- A scoped formula read at `ns`, as `ppFml` prints the closer's. -/
 partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
+  -- a taclet's loop invariant, its quantified clauses a variable: `inv = TRUE`
+  -- as the rule writes it (`invFml`)
+  if e.isAppOfArity ``invFml 4 &&
+      !((← whnf e.appArg!).isAppOf ``List.cons || (← whnf e.appArg!).isAppOf ``List.nil) then
+    let I := e.appFn!.appArg!
+    return ← ppFmlS ns (← mkAppM ``Fml.isBoolD #[← mkAppM ``Val.lower #[I], mkConst ``Bool.true])
   let (ns, e) ← viewF ns e
   if let some x ← fmlVar? e then return ← `(dl_fml| $x:ident)
   let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)

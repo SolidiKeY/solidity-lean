@@ -960,7 +960,7 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
     let d : Ident ← match (⟨w[0][6]⟩ : TSyntax `sol_expr) with
       | `(sol_expr| $d:ident) => pure d
       | _ => Macro.throwErrorAt cl msg
-    return (← `(LoopAnn.inv $x (some $d) $(schemaIdent "brk")), w')
+    return (← `(LoopAnn.inv $x (some $d) $(schemaIdent "brk") $(schemaIdent "qs")), w')
   unless w.getKind == ``solWhile do
     Macro.throwErrorAt w "a taclet's `/// @custom:key` clause stands above `while`"
   let e : TSyntax `sol_expr := ⟨cl[6]⟩
@@ -975,7 +975,8 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
       | _ => bad
     else if kw == "invariant" then
       match e with
-      | `(sol_expr| $x:ident) => `(LoopAnn.inv $x $(schemaIdent "dec") $(schemaIdent "brk"))
+      | `(sol_expr| $x:ident) =>
+        `(LoopAnn.inv $x $(schemaIdent "dec") $(schemaIdent "brk") $(schemaIdent "qs"))
       | _ => bad
     else bad
   return (ann, w)
@@ -1965,6 +1966,15 @@ partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| $a:dl_term = $b:dl_term) => do
     if let `(dl_term| $c:ident) := b then
       let n := c.getId.toString
+      -- a loop's invariant: `inv` read `true` and its quantified clauses `qs`
+      -- (`invFml`, solkey's `\getInvariant`), under the scope's locals
+      if let `(dl_term| $i:ident) := a then
+        if n == "TRUE" && i.getId.toString == "inv" && (Γ.lookup "inv").isNone then
+          let d := Γ.depth
+          let qs := (List.range d).foldl (fun (acc : Lean.Term) _ =>
+            Lean.Syntax.mkApp (Lean.mkCIdent ``List.map) #[Lean.mkCIdent `Solidity.LoopQ.up, acc])
+            (schemaIdent "qs")
+          return ← `($(Lean.mkCIdent `Solidity.invFml) $(iterApp `Solidity.Val.up d i) $qs)
       if n == "TRUE" || n == "FALSE" then
         let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
         return ← `($(fmlC "eqD") $(← schemaTerm Γ .val a) (Term.litB $v))

@@ -222,27 +222,41 @@ solkey's `StorageDangling` suite closes, as on its EVM runner). The
   effect or a call in a conditional's branch runs in that branch only
   (`T se; if (c) { se = a; } else { se = b; }`, `ternaryToIf`); a
   conditional callee `(c ? f : g)(x̄)` is imported as `c ? f(x̄) : g(x̄)`.
-- The closer has `intDiv.key`'s signed-remainder bounds and
-  `binaryLemmas.key`'s `binaryAnd*` lemmas (`Calculus/CloseLemmas.lean`).
+- The closer has `intDiv.key`'s signed-remainder bounds, its sign and
+  multiple lemmas, and `binaryLemmas.key`'s `binaryAnd*` lemmas
+  (`Calculus/CloseLemmas.lean`).
+- `whileInvariantBox` reads the loop's `break` flag (`\getLoopBreak`,
+  `loopBreak`): an iteration that breaks goes on to the rest; the walk splits
+  the body's goal by `andRight` (`Proves.andIntro`).  Lean also asks `¬broke`
+  of the first goal, which solkey's lowering gives.
+- A loop invariant may have quantified clauses, `\forall T x; a -> c`
+  (`RawInv`, `LoopQ`, `invFml`), read by the box rule as `∀`.
+- `structRules.key`'s `delNodeIndex` lemmas and `structMemoryRules.key`'s
+  `newFromCopySt` are subsumed (rows in `docs/lean-key-rule-map.md`): Lean's
+  `delete` already clears the live range and keeps the slots past it.
 
-TestSuite at `473da8944c` (`Report.lean`): **617 functions, 545 derived,
-17 pending, 55 other**. Two functions remain unsupported: a quantified loop
-invariant (`invariantQuantifiedOverPrefix`) and a struct that is recursive
-through a mapping. Of the pending rows, ten are open in solkey too: its
+TestSuite at `473da8944c` (`Report.lean`): **617 functions, 546 derived,
+17 pending, 54 other**; every function imports but the struct recursive
+through a mapping.  Of the pending rows, ten are open in solkey too: its
 `SYMBOLIC_TAIL_OPENS` (the four `testEmptyPush*`/`testFixedShape*` and the
-three complex/composed push receivers) and the `unprovable*` rows. The
-other seven are:
+three complex/composed push receivers) and the `unprovable*` rows.  The
+other seven:
 
-- `bitAndSymbolic`: every leaf closes, but together they need about twice
-  one declaration's `maxHeartbeats`, mostly `sol_close_eval` on eight
-  leaves that repeat the prefix (`Examples/Tactics/Operators.lean` proves
-  the same lemmas on one leaf).
+- `bitAndSymbolic`, `invariantForBreakSkipsUpdate`: every leaf closes, but
+  together they need more than one declaration's `maxHeartbeats` (about
+  400k and 270k against 200k), mostly `sol_close_eval` on leaves that repeat
+  the prefix; `Examples/Tactics/Operators.lean` proves the `&` lemmas on one
+  leaf, and `check-testsuite.sh` refuses a `maxHeartbeats` in the TestSuite.
 - `memoryIndexWriteStorageRefRhsCapture`,
   `memoryIndexWriteStorageStructCopy` and
-  `memoryIndexWriteStorageRefImpureIndex`: memory reads of a storage copy;
-  the last one's search runs away.
-- `invariantClosedFormSum`, `invariantBreakLeavesInvariantRange` and
-  `invariantForBreakSkipsUpdate`: loop invariants with `break`.
+  `memoryIndexWriteStorageRefImpureIndex`: memory reads through a storage
+  copy below its root (the memory closer reads one level); the last one's
+  search runs away.
+- `invariantClosedFormSum`: a diamond leaf whose length witnesses (`∃ a,
+  len = some a`) the closer does not pick.
+- `invariantQuantifiedOverPrefix`: imports and runs; its preservation leaf
+  needs the old `∀` instantiated through the write's frame (`values[q]`
+  diverging from `values[i]`), which the closer does not do.
 
 ## Reproduce the inputs
 

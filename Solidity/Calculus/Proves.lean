@@ -95,7 +95,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true
       | .unwind 0 => false
-      | .inv _ dec _ => body.frame.isSome && (m == .box || dec.isSome))
+      | .inv _ dec _ qs => body.frame.isSome && (m == .box || (dec.isSome && qs.isEmpty)))
     (block := fun _ => true)
     (pushOpAssign := fun _ _ _ b r => !r.isSimple || b.isSimple)
     (pushIncDec := fun _ _ b => b.isSimple)
@@ -167,9 +167,10 @@ theorem LeanTaclet.keyStep {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stmt C �
       Bool.not_true, Bool.false_or]
   | whileClose hf => simp only [Stmt.keyStep, hf, Option.isSome_none, Bool.false_and]
   | whileNoVariantDiamond _ hd =>
-    cases ‹Option (Val C Γ .uint)› <;>
-      simp_all only [Stmt.keyStep, Option.isNone, Option.isSome, Bool.false_eq_true,
-        Bool.false_or, Bool.and_false] <;> rfl
+    cases ‹Option (Val C Γ .uint)› <;> cases ‹List (LoopQ C Γ)› <;>
+      simp_all only [Stmt.keyStep, Option.isNone, Option.isSome, List.isEmpty, Bool.false_eq_true,
+        Bool.false_or, Bool.or_false, Bool.and_false, Bool.and_true, Bool.not_true,
+        Bool.not_false, Bool.true_or] <;> rfl
   | _ => rfl
 
 /-- The default proof of a step rule's `hR`: `RuleSet.admits` of a closed

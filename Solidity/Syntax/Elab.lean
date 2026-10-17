@@ -381,10 +381,17 @@ def RawStmt.blocks : RawStmt → List (List RawStmt)
   | .forLoop _ i _ u b => [i, b, u]
   | _ => []
 
+/-- A quantified clause with its expressions rewritten by `f`. -/
+def RawInv.mapM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) : RawInv → m RawInv
+  | .expr e => return .expr (← f e)
+  | .imp a c => return .imp (← f a) (← f c)
+  | .all p x b => return .all p x (← RawInv.mapM f b)
+
 /-- A loop's specification with its expressions rewritten by `f`. -/
 def RawLoopSpec.mapM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) (a : RawLoopSpec) :
     m RawLoopSpec :=
-  return { a with inv := ← a.inv.mapM f, dec := ← a.dec.mapM f }
+  return { a with inv := ← a.inv.mapM f, dec := ← a.dec.mapM f,
+                  qinv := ← a.qinv.mapM (RawInv.mapM f) }
 
 /-- A statement with its own expressions rewritten by `f`, left to right (its
 blocks as they are). -/
@@ -1686,7 +1693,7 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
   -- Lean's locals are untyped: an invariant says the flags its condition
   -- reads hold a `bool` (`f || !f` is defined exactly then), which KeY's
   -- types say of `brk`, `ret` and `first`
-  let spec := if spec.inv.isEmpty then spec else
+  let spec := if spec.inv.isEmpty && spec.qinv.isEmpty then spec else
     { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)),
                 brk := exits.contains .brk }
   let w := RawStmt.loop spec cond iter
@@ -2780,6 +2787,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     -- evaluated again each iteration, so it is not captured before the loop
     let Γ ← nctx
     let c ← loopExpr Γ .bool c "condition"
+    -- quantified clauses alone: the plain invariant is `true`
+    let a := if a.inv.isEmpty && !a.qinv.isEmpty then { a with inv := [.bool true] } else a
     let a : LoopAnn C Γ.ctx ← match a.inv, a.unwind with
       | [], u => do
         if a.dec.isSome then throw "a loop's `decreases` clause without an `invariant`"
@@ -2787,7 +2796,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       | i :: is, none => do
         let I ← loopExpr Γ .bool (RawExpr.andAll (i :: is).dropLast ((i :: is).getLast?.getD i))
           "invariant"
-        pure (.inv I (← a.dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk)
+        pure (.inv I (← a.dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk
+          (← a.qinv.mapM (loopQ Γ)))
       | _ :: _, some _ => throw "a loop has an `invariant` or an `unwind` clause, not both"
     pure [.of Γ (.loop a c (← elabScope Γ body).2)]
   | .block b => elabBranch b
@@ -2868,6 +2878,19 @@ partial def loopExpr (Γ : NCtx) (p : PrimTy) (e : RawExpr) (what : String) : El
     throw s!"{e.toStr}: a loop's {what} needs a statement before it (an effect, a call, \
       a cast, a narrow operation or a constructor), and is evaluated again each iteration"
   checkIn C Γ p e
+
+/-- A quantified invariant clause (`LoopQ`): its bound local pushed while
+its body is read. -/
+partial def loopQ (Γ : NCtx) : RawInv → ElabM (LoopQ C Γ.ctx)
+  | .expr e => do pure (.val (← loopExpr Γ .bool e "invariant"))
+  | .imp a b => do
+    pure (.imp (← loopExpr Γ .bool a "invariant") (← loopExpr Γ .bool b "invariant"))
+  | .all p x b => do
+    let st ← get
+    modify fun (Γe, k) => ((x, .val p) :: Γe, k)
+    let body ← loopQ ((Var.ofName x, .val p) :: Γ) b
+    set st
+    pure (.all (Var.ofName x) p body)
 
 /-- A block. -/
 partial def elabStmtsP : List RawStmt → ElabM (SProg C)

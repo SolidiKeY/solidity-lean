@@ -191,12 +191,23 @@ def ExtCall.quote (call : ExtCall C Γ) : Lean.Expr :=
     (mkAppN (mkConst ``List.nil [0]) #[argTy])
   mkAppN (mkConst ``ExtCall.mk) #[c, Γe, Simple.quote c Γe call.addr, toExpr call.fn, args]
 
+/-- A quantified invariant clause, its body under the bound local's
+context. -/
+def LoopQ.quote : {Δ : Ctx} → Lean.Expr → LoopQ C Δ → Lean.Expr
+  | _, Δe, .val a => mkAppN (mkConst ``LoopQ.val) #[c, Δe, Val.quote c Δe a]
+  | _, Δe, .imp a d => mkAppN (mkConst ``LoopQ.imp) #[c, Δe, Val.quote c Δe a, Val.quote c Δe d]
+  | _, Δe, .all x p b =>
+    mkAppN (mkConst ``LoopQ.all) #[c, Δe, toExpr x, toExpr p, LoopQ.quote (consE (.val p) Δe) b]
+
 def LoopAnn.quote : LoopAnn C Γ → Lean.Expr
   | .unwind k => mkAppN (mkConst ``LoopAnn.unwind) #[c, Γe, toExpr k]
   | .auto => mkAppN (mkConst ``LoopAnn.auto) #[c, Γe]
-  | .inv I dec brk =>
+  | .inv I dec brk qs =>
+    let qTy := mkAppN (mkConst ``LoopQ) #[c, Γe]
     mkAppN (mkConst ``LoopAnn.inv) #[c, Γe, Val.quote c Γe I,
-      optQ (mkAppN (mkConst ``Val) #[c, Γe, toExpr PrimTy.uint]) (Val.quote c Γe) dec, toExpr brk]
+      optQ (mkAppN (mkConst ``Val) #[c, Γe, toExpr PrimTy.uint]) (Val.quote c Γe) dec, toExpr brk,
+      qs.foldr (fun q acc => mkAppN (mkConst ``List.cons [0]) #[qTy, LoopQ.quote c Γe q, acc])
+        (mkAppN (mkConst ``List.nil [0]) #[qTy])]
 
 /-- A call's arguments, and the term of the parameters' context they bind. -/
 def Args.quote : {ps : Ctx} → Args C Γ ps → Lean.Expr × Lean.Expr

@@ -263,14 +263,14 @@ theorem breakTest_loopBreak (brk : Bool) (c : Val C Γ .bool) : BreakTest c (loo
 `B`: every loop head is a state the frame allows where the invariant holds
 and the loop has not broken, or one where the condition is `false` and the
 rest holds (a body that broke). -/
-theorem Premise.sound_whileInvBoxB (k : Nat) (I c : Val C Γ .bool)
-    (dec : Option (Val C Γ .uint)) (brk : Bool) (body : Prog C Γ Γ₁)
+theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (c : Val C Γ .bool)
+    (body : Prog C Γ Γ₁)
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} (hf : body.frame = some (xs, hv))
     (σ : State C Γ) {B : Option (Fml C Γ)} (hB : BreakTest c B) :
-    Premise.Runs .box (.loop (.inv I dec brk) c body)
-      (.inv (.isBoolD I.lower true) B xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+    Premise.Runs .box (.loop a c body)
+      (.inv J B xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
         (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
-        .refl (.push .refl) body (.isBoolD I.lower true)) σ := by
+        .refl (.push .refl) body J) σ := by
   intro _ _ ω κ φ hp
   obtain ⟨hI0, hA⟩ := hp
   obtain ⟨hwμ, hxs⟩ := Prog.frame_some hf
@@ -282,7 +282,7 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (I c : Val C Γ .bool)
   refine TLoop.run_induct
     (P := fun a : Out C σ.H Γ =>
       (TGFrame (frameMut hv) σ a.st ∧ TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧
-        holds a.st ((Fml.isBoolD I.lower true).invHyp B)) ∨
+        holds a.st (J.invHyp B)) ∨
       (c.evalT a.st = .ok false ∧
         Modality.afterRunTR .box (holds · φ) (loopThen σ ω κ (.ok a))))
     (Q := fun r => Modality.afterRunTR .box (holds · φ) (loopThen σ ω κ r))
@@ -341,15 +341,15 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (I c : Val C Γ .bool)
 
 /-- **`whileInvariantBox` is sound** over the typed state. -/
 theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
-    (dec : Option (Val C Γ .uint)) (brk : Bool) (body : Prog C Γ Γ₁)
+    (dec : Option (Val C Γ .uint)) (brk : Bool) (qs : List (LoopQ C Γ)) (body : Prog C Γ Γ₁)
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} (hf : body.frame = some (xs, hv))
     (σ : State C Γ) :
-    Premise.Runs .box (.loop (.inv I dec brk) c body)
-      (.inv (.isBoolD I.lower true) (loopBreak brk c) xs hv
+    Premise.Runs .box (.loop (.inv I dec brk qs) c body)
+      (.inv (invFml I qs) (loopBreak brk c) xs hv
         (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
         (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
-        .refl (.push .refl) body (.isBoolD I.lower true)) σ :=
-  Premise.sound_whileInvBoxB k I c dec brk body hf σ (breakTest_loopBreak brk c)
+        .refl (.push .refl) body (invFml I qs)) σ :=
+  Premise.sound_whileInvBoxB k _ (invFml I qs) c body hf σ (breakTest_loopBreak brk c)
 
 /-- A block's run, its frame popped with nothing after it, read through
 its states. -/
@@ -418,8 +418,8 @@ bounds the iterations left. -/
 theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val C Γ .uint)
     (brk : Bool) (body : Prog C Γ Γ₁) {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool}
     (hf : body.frame = some (xs, hv)) (σ : State C Γ) {p : Premise C Γ Γ}
-    (hp : loopStep k .diamond (.inv I (some d) brk) c body = p) :
-    Premise.Runs .diamond (.loop (.inv I (some d) brk) c body) p σ := by
+    (hp : loopStep k .diamond (.inv I (some d) brk []) c body = p) :
+    Premise.Runs .diamond (.loop (.inv I (some d) brk []) c body) p σ := by
   unfold loopStep at hp
   rw [hf] at hp
   dsimp only at hp
@@ -564,7 +564,7 @@ theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C
     unfold loopStep at hp
     cases hp
     exact Premise.sound_whileUnwind .automatic c body σ
-  | inv I dec brk =>
+  | inv I dec brk qs =>
     cases hf : body.frame with
     | none =>
       unfold loopStep at hp
@@ -579,15 +579,21 @@ theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C
         rw [hf] at hp
         dsimp only at hp
         cases hp
-        exact Premise.sound_whileInvBox k I c dec brk body hf σ
+        exact Premise.sound_whileInvBox k I c dec brk qs body hf σ
       | diamond =>
         cases dec with
         | none =>
           unfold loopStep at hp
           rw [hf] at hp
-          dsimp only at hp
-          cases hp
-          exact Premise.sound_done σ false nofun
-        | some d => exact Premise.sound_whileInvDiamond k I c d brk body hf σ hp
+          cases qs <;> (dsimp only at hp; cases hp; exact Premise.sound_done σ false nofun)
+        | some d =>
+          cases qs with
+          | nil => exact Premise.sound_whileInvDiamond k I c d brk body hf σ hp
+          | cons =>
+            unfold loopStep at hp
+            rw [hf] at hp
+            dsimp only at hp
+            cases hp
+            exact Premise.sound_done σ false nofun
 
 end Solidity

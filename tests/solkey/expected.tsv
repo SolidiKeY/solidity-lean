@@ -503,7 +503,7 @@ taclets	TestSuite	unprovableInvariantBreakPostcondition	pending	box; for all n	n
 taclets	TestSuite	unprovableInvariantForContinueUpdate	pending	box; for all n	not derived yet
 taclets	TestSuite	invariantVariantSkipsBreakIteration	derived	diamond; for all n	`Solkey.TestSuite.invariantVariantSkipsBreakIteration.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	invariantOverStorageWrites	derived	box; for all n	`Solkey.TestSuite.invariantOverStorageWrites.proved` (`Solidity/TestSuite/Derived15.lean`)
-taclets	TestSuite	invariantQuantifiedOverPrefix	unsupported	box	TestSuite.sol:4485: the loop clause `invariant \forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language
+taclets	TestSuite	invariantQuantifiedOverPrefix	pending	box	not derived yet
 taclets	TestSuite	constantInlined	derived	diamond	`Solkey.TestSuite.constantInlined.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	contractQualifiedConstantAndEnum	derived	diamond	`Solkey.TestSuite.contractQualifiedConstantAndEnum.proved` (`Solidity/TestSuite/Derived15.lean`)
 taclets	TestSuite	fileLevelConstantEnumAndFunction	derived	diamond	`Solkey.TestSuite.fileLevelConstantEnumAndFunction.proved` (`Solidity/TestSuite/Derived15.lean`)

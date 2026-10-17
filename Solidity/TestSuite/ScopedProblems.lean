@@ -18,5 +18,5 @@ own: in `Problems.lean` the scoped table would put that module past its
 timing gate (`docs/intrinsic.md`, W3b lane `testsuite`).
 -/
 
-/-- info: 562 obligations declared scoped -/
+/-- info: 563 obligations declared scoped -/
 #guard_msgs in solc_scoped_problems Solkey.TestSuite decl

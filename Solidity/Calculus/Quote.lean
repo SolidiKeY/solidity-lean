@@ -233,15 +233,25 @@ def qExtCall (Γ : Ctx) (call : ExtCall C Γ) : QM Expr := do
     args := mkApp3 (mkConst ``List.cons [levelZero]) argTy ae args
   ctor ``ExtCall.mk Γ #[← qSimple Γ .uint call.addr, toExpr call.fn, args]
 
+/-- A quantified invariant clause. -/
+def qLoopQ : (Γ : Ctx) → LoopQ C Γ → QM Expr
+  | Γ, .val a => do ctor ``LoopQ.val Γ #[← qVal Γ .bool a]
+  | Γ, .imp a c => do ctor ``LoopQ.imp Γ #[← qVal Γ .bool a, ← qVal Γ .bool c]
+  | Γ, .all x p b => do ctor ``LoopQ.all Γ #[toExpr x, toExpr p, ← qLoopQ (.val p :: Γ) b]
+
 def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
   | .unwind k => ctor ``LoopAnn.unwind Γ #[toExpr k]
   | .auto => ctor ``LoopAnn.auto Γ #[]
-  | .inv I dec brk => do
+  | .inv I dec brk qs => do
     let ty := mkApp3 (mkConst ``Val) (← contract) (← qCtx Γ) (toExpr PrimTy.uint)
     let d ← match dec with
       | none => pure (optE ty none)
       | some d => pure (optE ty (some (← qVal Γ .uint d)))
-    ctor ``LoopAnn.inv Γ #[← qVal Γ .bool I, d, toExpr brk]
+    let qTy := mkApp2 (mkConst ``LoopQ) (← contract) (← qCtx Γ)
+    let mut l := mkApp (mkConst ``List.nil [levelZero]) qTy
+    for q in qs.reverse do
+      l := mkApp3 (mkConst ``List.cons [levelZero]) qTy (← qLoopQ Γ q) l
+    ctor ``LoopAnn.inv Γ #[← qVal Γ .bool I, d, toExpr brk, l]
 
 /-! ## Statements -/
 

@@ -28,9 +28,8 @@ an internal helper has no obligation, so the table's
 | | diamond | box | skip | total |
 |---|---:|---:|---:|---:|
 | derived | 422 | 124 | 0 | 546 |
-| pending | 13 | 3 | 0 | 16 |
+| pending | 13 | 4 | 0 | 17 |
 | excluded | 1 | 0 | 0 | 1 |
-| unsupported | 0 | 1 | 0 | 1 |
 | skip | 0 | 0 | 2 | 2 |
 | **all** | **436** | **128** | **2** | **566** |
 
@@ -38,10 +37,9 @@ Not derived, by reason:
 
 | Status | Because | # | functions |
 |---|---|---:|---|
-| pending | not derived yet | 16 | `storagePushReturnPrimitiveBindComplexReceiver`, `storageArrayMethodReferencesComplexReceiver`, `storageArrayMethodReferencesComposedCallReceiver`, … |
+| pending | not derived yet | 17 | `storagePushReturnPrimitiveBindComplexReceiver`, `storageArrayMethodReferencesComplexReceiver`, `storageArrayMethodReferencesComposedCallReceiver`, … |
 | skip | tagged `@custom:key skip` | 2 | `tryCalleeGet`, `tryCalleePing` |
 | excluded | struct `Tree` (line 64) is recursive through a mapping: its default value is infinite, and the model's are finite | 1 | `recursiveStructMapping` |
-| unsupported | the loop clause `invariant \forall uint q; 0 <= q && q < i -> values[q] == 0`: the specification language | 1 | `invariantQuantifiedOverPrefix` |
 
 ## The other suites
 

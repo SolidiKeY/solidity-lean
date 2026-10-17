@@ -67,7 +67,10 @@ no invariant rule**: the heap is not anonymised. A loop without `invariant`
 Specifications are `///` lines directly above the loop,
 `/// @custom:key invariant <expr>` (several conjoined) and
 `/// @custom:key decreases <term>` (at most one), in the function-spec
-expression language; `LoopLowering` moves them to the `while` it produces, so
+expression language; in Lean an invariant is a program expression, or a
+quantified clause `\forall T x; a -> c` (`RawInv`, `LoopQ`), which the box
+rule reads as `∀` (`invFml`, solkey's `\getInvariant`) and under which the
+diamond rule closes to `false` (`whileNoVariantDiamond`, Lean only); `LoopLowering` moves them to the `while` it produces, so
 the invariant of a `for` or `do … while` holds at the head of that `while`,
 also on the iteration a `return` ends.  Under the box an iteration that
 `break`s goes on to the rest of the program instead (solkey `473da8944c`'s

@@ -510,7 +510,7 @@ checked after it only where the condition holds again.  The fresh `b` and
 /--
 info: Solidity.Taclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
   {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool}
-  {cond inv : Val C Γ PrimTy.bool},
+  {qs : List (LoopQ C Γ)} {cond inv : Val C Γ PrimTy.bool},
   dl{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
     "invariant initially valid": inv = true ∧ ¬broke ; "invariant preserved and used": { anon(body) } (inv = true ∧
       ¬broke → { se := cond } (se = true ⟹ ⟨[ body ]⟩ (¬broke → inv = true) ∧ (broke → ⟨[ ]⟩) ; se = false ⟹ ⟨[ ]⟩)) }
@@ -522,7 +522,8 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.Taclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv brk : Bool} {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {qs : List (LoopQ C Γ)} {brk : Bool} {cond inv : Val C Γ PrimTy.bool}
+  {dec : Val C Γ PrimTy.uint},
   dl{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
@@ -570,6 +571,25 @@ theorem breakKeepsBound :
              while (i < 10) { if (i == n) { break; } i = i + 1; }; ] i <= 10 } := by
   sol_symex
   sol_close
+
+/-- A quantified clause, solkey's specification language above a loop
+(`\forall uint q; a -> c`, `LoopQ`): every number below `i` is below `n` at
+every head. -/
+theorem countWithPrefix :
+    ⊨ dl!{ [ require(n >= 0); uint i = 0;
+             /// @custom:key invariant i <= n
+             /// @custom:key invariant \forall uint q; q < i -> q < n
+             while (i < n) { i = i + 1; }; ] i == n } := by
+  sol_symex
+  sol_close
+
+/-- info: uint i = 0;
+/// @custom:key invariant i <= 3 /// @custom:key invariant \forall uint q; q < i -> q < 3 while (i < 3) { i++; } -/
+#guard_msgs in
+#eval IO.println (Prog.show [] (sol{ uint i = 0;
+  /// @custom:key invariant i <= 3
+  /// @custom:key invariant \forall uint q; q < i -> q < 3
+  while (i < 3) { i++; } }))
 
 /-! A loop with `break`: the invariant moves to the `while` the lowering
 leaves, so it holds at the head of the iteration the `break` ends too.  Lean
@@ -698,8 +718,8 @@ diamond with no variant does (`whileNoVariantDiamond`). -/
 
 /--
 info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x} {m : Modality}
-  {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool} {cond : Val C Γ PrimTy.bool},
-  dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
+  {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool} {qs : List (LoopQ C Γ)}
+  {cond : Val C Γ PrimTy.bool}, dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
@@ -708,7 +728,8 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {inv : Val C Γ PrimTy.bool} {brk : Bool} {cond : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)},
+  {inv : Val C Γ PrimTy.bool} {brk : Bool} {qs : List (LoopQ C Γ)} {cond : Val C Γ PrimTy.bool}
+  {dec : Option (Val C Γ PrimTy.uint)},
   dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)

@@ -536,53 +536,59 @@ theorem Taclet.internalCallExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ
 
 theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
-    {cond inv : Val C Γ .bool} {brk : Bool} (hf : body.frame = some (xs, hv)) :
-    Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec brk) cond body) =
-      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) (loopBreak brk cond) xs hv
+    {cond inv : Val C Γ .bool} {brk : Bool} {qs : List (LoopQ C Γ)}
+    (hf : body.frame = some (xs, hv)) :
+    Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec brk qs) cond body) =
+      Premise.inv (invFml inv qs) (loopBreak brk cond) xs hv
         (Upd.nil.decl (Var.fresh "se" k) (Rhs.val cond.lower))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl
-        Ext.refl.push body (Fml.eqD inv.lower (Tms.Term.litB true)) := by
+        Ext.refl.push body (invFml inv qs) := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
 theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
-    {brk : Bool} (hf : body.frame = some (xs, hv)) :
-    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec) brk) cond body) =
-      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) none xs hv
+    {brk : Bool} {qs : List (LoopQ C Γ)} (hf : body.frame = some (xs, hv)) (hq : qs = []) :
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec) brk qs) cond body) =
+      Premise.inv (invFml inv qs) none xs hv
         ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
           (Rhs.val (p := .bool) cond.lower))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl.push
         Ext.refl.push body.up
-        ((Fml.eqD inv.up.lower (Tms.Term.litB true)).and
+        ((invFml inv.up (List.map LoopQ.up qs)).and
           (Fml.upd .diamond (Upd.nil.decl (Var.fresh "se" k) (Rhs.val (p := .bool) cond.up.lower))
             ((Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true)).imp
               ((Fml.eqD (Tms.Term.binop .le .uint (Tms.Term.nat 0) dec.up.up.lower)
                   (Tms.Term.litB true)).and
                 (Fml.eqD (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
                   (Tms.Term.litB true)))))) := by
+  subst hq
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
   rfl
 
 theorem LeanTaclet.whileClose.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁} {inv : Val C Γ .bool}
-    {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} {brk : Bool} (hf : body.frame = none) :
-    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec brk) cond body) = Premise.done false := by
+    {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} {brk : Bool} {qs : List (LoopQ C Γ)}
+    (hf : body.frame = none) :
+    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec brk qs) cond body) = Premise.done false := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
 theorem LeanTaclet.whileNoVariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
-    {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} {brk : Bool}
-    (hf : body.frame.isSome = true) (hd : dec.isNone = true) :
-    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec brk) cond body) = Premise.done false := by
+    {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} {brk : Bool} {qs : List (LoopQ C Γ)}
+    (hf : body.frame.isSome = true) (hd : (dec.isNone || !qs.isEmpty) = true) :
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec brk qs) cond body) = Premise.done false := by
+  obtain ⟨⟨xs, hv⟩, hfr⟩ := Option.isSome_iff_exists.mp hf
+  dsimp only [Stmt.step]
   cases dec with
-  | some => simp only [Option.isNone_some, Bool.false_eq_true] at hd
-  | none =>
-    obtain ⟨⟨xs, hv⟩, hfr⟩ := Option.isSome_iff_exists.mp hf
-    dsimp only [Stmt.step]
-    simp only [loopStep, hfr]
+  | none => cases qs <;> simp only [loopStep, hfr]
+  | some =>
+    cases qs with
+    | nil => simp only [Option.isNone_some, List.isEmpty_nil, Bool.not_true, Bool.or_self,
+        Bool.false_eq_true] at hd
+    | cons => simp only [loopStep, hfr]
 
 theorem LeanTaclet.functionCallArgCapture.toStep {f : Name} {ps : Ctx} {args : Args C Γ ps}
     {rs Γ' : Ctx} {ret : CallRet Γ rs Γ'} {Γf : Ctx} {body : Prog C (rs ++ ps) Γf} {p : PrimTy}

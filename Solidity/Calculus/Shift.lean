@@ -75,6 +75,9 @@ def Val.up {Γ : Ctx} {t : LTy} {p : PrimTy} : Val C Γ p → Val C (t :: Γ) p
   | .mlen b hp => .mlen b.up hp
   | .modular op a b k => .modular op a.up b.up k.up
 
+/-- A quantified invariant clause under one more local. -/
+def LoopQ.up {Γ : Ctx} {t : LTy} (q : LoopQ C Γ) : LoopQ C (t :: Γ) := q.wk (.drop .refl)
+
 end
 
 def ARhs.up {Γ : Ctx} {t : LTy} {R : RefTy} : ARhs C Γ R → ARhs C (t :: Γ) R

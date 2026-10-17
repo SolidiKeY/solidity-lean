@@ -150,6 +150,21 @@ inductive RawExpr where
   | opAssign (op : BinOp) (l r : RawExpr)
   deriving Repr, Inhabited
 
+/-- A quantified clause of a loop's invariant as read, solkey's
+specification language above a loop (`LoopSpecCompiler`): `\forall T x; b`,
+`b` an expression or `a -> c`. -/
+inductive RawInv where
+  | expr (e : RawExpr)
+  | imp (a c : RawExpr)
+  | all (p : PrimTy) (x : String) (body : RawInv)
+  deriving Repr, Inhabited
+
+/-- The expressions of a clause, as written. -/
+def RawInv.exprs : RawInv → List RawExpr
+  | .expr e => [e]
+  | .imp a c => [a, c]
+  | .all _ _ b => b.exprs
+
 /-- A loop's specification as read, solkey's `///` lines above the loop:
 `/// @custom:key invariant e` (several conjoined), `/// @custom:key
 decreases e` (at most one) and, Lean only, `/// @custom:key unwind k`, the
@@ -161,10 +176,13 @@ structure RawLoopSpec where
   /-- The loop was lowered with a `break` flag, the first conjunct of its
   condition (`while (!brk && …)`, `lowerLoops`): solkey's `\getLoopBreak`. -/
   brk : Bool := false
+  /-- The quantified `invariant` clauses (`\forall T x; …`). -/
+  qinv : List RawInv := []
   deriving Repr, Inhabited
 
 /-- The expressions of a loop's specification, as written. -/
-def RawLoopSpec.exprs (a : RawLoopSpec) : List RawExpr := a.inv ++ a.dec.toList
+def RawLoopSpec.exprs (a : RawLoopSpec) : List RawExpr :=
+  a.inv ++ a.qinv.flatMap RawInv.exprs ++ a.dec.toList
 
 inductive RawStmt where
   | assign (l r : RawExpr)
@@ -736,6 +754,15 @@ atom must already be a token (`sol_stmt` reads leading keywords as
 identifiers too), and `///` is not one. -/
 declare_syntax_cat sol_loop_clause
 syntax "/// " "@" &"custom" ":" &"key" ident sol_expr : sol_loop_clause
+/-- A quantified invariant's body: an expression, `a -> c`, or another
+`\forall`. -/
+declare_syntax_cat sol_loop_inv
+syntax "\\" noWs &"forall " ident ident "; " sol_loop_inv : sol_loop_inv
+syntax sol_expr " -> " sol_expr : sol_loop_inv
+syntax sol_expr : sol_loop_inv
+/-- `/// @custom:key invariant \forall uint q; a -> c`: a quantified clause. -/
+syntax (name := solLoopForall) "/// " "@" &"custom" ":" &"key" &"invariant" "\\" noWs &"forall "
+  ident ident "; " sol_loop_inv : sol_loop_clause
 syntax (name := solLoopSpec) sol_loop_clause ppSpace sol_stmt : sol_stmt
 /-! `try e.f(a) returns (uint v) { … } catch Error(string memory m) { … }
 catch Panic(uint c) { … } catch (bytes memory d) { … } catch { … }`: an
@@ -1039,8 +1066,13 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
     let mut inv : Array Term := #[]
     let mut dec : Option Term := none
     let mut unw : Option Term := none
+    let mut qinv : Array Term := #[]
     while cur.getKind == ``solLoopSpec do
       let cl := cur[0]
+      if cl.getKind == ``solLoopForall then
+        qinv := qinv.push (← expandStmt.loopForall cl[8] cl[9] cl[11])
+        cur := cur[1]
+        continue
       let k := cl[5].getId.toString
       let e := cl[6]
       match k with
@@ -1063,7 +1095,8 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
     let unwT ← match unw with
       | some n => `(some $n)
       | none => `(none)
-    expandStmt.loop ⟨cur⟩ (← `({ inv := [$inv,*], dec := $decT, unwind := $unwT : RawLoopSpec }))
+    expandStmt.loop ⟨cur⟩
+      (← `({ inv := [$inv,*], dec := $decT, unwind := $unwT, qinv := [$qinv,*] : RawLoopSpec }))
   | ``solPushTarget =>
     expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
@@ -1094,6 +1127,21 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
 where
   /-- The expressions of a `sol_expr,*`. -/
   exprs (as : Syntax) : MacroM (Array Term) := as.getSepArgs.mapM (expandExpr ⟨·⟩)
+  /-- `\forall T x; b`, a quantified invariant clause (`RawInv`); a sort as the
+  specification language reads it, an `address` a `uint`. -/
+  loopForall (T x body : Syntax) : MacroM Term := do
+    let p ← match T.getId.toString with
+      | "uint" | "address" => `(PrimTy.uint)
+      | "int" => `(PrimTy.int)
+      | "bool" => `(PrimTy.bool)
+      | s => Macro.throwErrorAt T s!"a quantifier ranges over uint, int, bool or address, not {s}"
+    let b ← match (⟨body⟩ : TSyntax `sol_loop_inv) with
+      | `(sol_loop_inv| \forall $T':ident $x':ident; $b') => loopForall T' x' b'
+      | `(sol_loop_inv| $a:sol_expr -> $c:sol_expr) => do
+        `(RawInv.imp $(← expandExpr a) $(← expandExpr c))
+      | `(sol_loop_inv| $e:sol_expr) => do `(RawInv.expr $(← expandExpr e))
+      | _ => Macro.throwErrorAt body "a quantified invariant's body is `e` or `a -> c`"
+    `(RawInv.all $p $(strLit ⟨x⟩) $b)
   expandStmt1 : TSyntax `sol_stmt → MacroM Term
   | `(sol_stmt| $l:sol_expr = $r:sol_expr) => do assignTo l (← expandExpr r)
   | `(sol_stmt| $l:sol_expr = $b:sol_expr .push()) => do

@@ -230,13 +230,23 @@ structure ExtCall (C : Contract) (Γ : Ctx) where
   fn : Name
   args : List (ExtArg C Γ)
 
+/-- A quantified clause of a loop's invariant, `/// @custom:key invariant
+\forall T x; a -> c` (solkey's specification language above a loop): its
+bound local the innermost of its body's context, read by the invariant
+rules as `∀` (`LoopAnn.invFml`). -/
+inductive LoopQ (C : Contract) : Ctx → Type where
+  | val {Γ : Ctx} (a : Val C Γ .bool) : LoopQ C Γ
+  | imp {Γ : Ctx} (a c : Val C Γ .bool) : LoopQ C Γ
+  | all {Γ : Ctx} (x : Var) (p : PrimTy) (body : LoopQ C (.val p :: Γ)) : LoopQ C Γ
+
 /-- How a loop is proved: a written unwind bound, an invariant/variant,
 or automatic unwinding within the proof search's existing budget.  An
 invariant's `brk` says the loop was lowered with a `break` flag
-(`Val.breakExit`, solkey's `\getLoopBreak`). -/
+(`Val.breakExit`, solkey's `\getLoopBreak`), and `qs` are its quantified
+clauses, conjoined after `I`. -/
 inductive LoopAnn (C : Contract) (Γ : Ctx) where
   | unwind (k : Nat)
-  | inv (I : Val C Γ .bool) (dec : Option (Val C Γ .uint)) (brk : Bool)
+  | inv (I : Val C Γ .bool) (dec : Option (Val C Γ .uint)) (brk : Bool) (qs : List (LoopQ C Γ))
   | auto
 
 /-- The two ways the same `whileUnwind` taclet takes another iteration. -/
@@ -428,11 +438,18 @@ def MSrc.toStr {Γ : Ctx} {T : Ty} (ns : List Var) : MSrc C Γ T → String
   | .val v => v.toStr ns true
   | .ref p => p.toStr ns
 
+/-- A quantified clause as written, `\forall uint q; a -> c`. -/
+def LoopQ.toStr : {Γ : Ctx} → List Var → LoopQ C Γ → String
+  | _, ns, .val a => a.toStr ns true
+  | _, ns, .imp a c => s!"{a.toStr ns true} -> {c.toStr ns true}"
+  | _, ns, .all x p b => s!"\\forall {p.toStr} {x}; {LoopQ.toStr (x :: ns) b}"
+
 def LoopAnn.toStr {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → String
   | .auto => ""
   | .unwind k => s!"/// @custom:key unwind {k} "
-  | .inv I dec _ =>
+  | .inv I dec _ qs =>
     s!"/// @custom:key invariant {I.toStr ns true} " ++
+      String.join (qs.map fun q => s!"/// @custom:key invariant {q.toStr ns} ") ++
       ((dec.map fun d => s!"/// @custom:key decreases {d.toStr ns true} ").getD "")
 
 /-- The arguments as written, in order. -/
@@ -844,9 +861,14 @@ theorem OpLoc.recvSimple_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} (l : OpL
 def ExtCall.wk {Γ Δ : Ctx} (h : Thin Γ Δ) (c : ExtCall C Γ) : ExtCall C Δ :=
   ⟨c.addr.wk h, c.fn, c.args.map fun a => ⟨a.1, a.2.wk h⟩⟩
 
+def LoopQ.wk : {Γ Δ : Ctx} → Thin Γ Δ → LoopQ C Γ → LoopQ C Δ
+  | _, _, h, .val a => .val (a.wk h)
+  | _, _, h, .imp a c => .imp (a.wk h) (c.wk h)
+  | _, _, h, .all x p b => .all x p (LoopQ.wk h.keep b)
+
 def LoopAnn.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : LoopAnn C Γ → LoopAnn C Δ
   | .unwind k => .unwind k
-  | .inv I dec brk => .inv (I.wk h) (dec.map (·.wk h)) brk
+  | .inv I dec brk qs => .inv (I.wk h) (dec.map (·.wk h)) brk (qs.map (·.wk h))
   | .auto => .auto
 
 def Args.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {ps : Ctx} → Args C Γ ps → Args C Δ ps
