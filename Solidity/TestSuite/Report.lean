@@ -33,11 +33,14 @@ the earlier send, internal-call, return and tuple derivations.
 `testArrayCopyClearsOldElements` (a write through an alias a `pop` made
 dangle, read again after a copy) and `storagePushReadBack` (the slot at
 `(len + 1) - 1` after a push) are derived since W10.4, in `Derived13.lean`
-and `Derived7.lean`.
+and `Derived7.lean`.  Since solkey `d85018517f` an empty push saves only the
+length and exposes the slot as it is: the five obligations that read an
+appended reference slot as its default (solkey's `SYMBOLIC_TAIL_OPENS`)
+are pending, as they stay open in solkey.
 -/
 
 /--
-info: 551 functions: 511 derived, 1 pending, 39 other
+info: 551 functions: 506 derived, 6 pending, 39 other
 internal valuesRef
 excluded recursiveStructMapping
 skipped tryCalleeGet
@@ -78,7 +81,7 @@ internal credit
 internal digits
 internal twiceKeepsLocal
 pending:
-invariantClosedFormSum
+storagePushReturnPrimitiveBindComplexReceiver invariantClosedFormSum testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite

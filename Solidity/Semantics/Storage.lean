@@ -1628,34 +1628,20 @@ instance SVal.decEq {T : Ty} : DecidableEq (SVal T) := fun _ _ => decidable_of_i
 instance SFields.decEq {fs : List (Name × Ty)} : DecidableEq (SFields fs) :=
   fun _ _ => decidable_of_iff _ SFields.beq_iff
 
-/-- The slot `push` lands on, reset to its default in place, and the slots
-left. Resetting a reference preserves its mapping entries and fixed arities. -/
+/-- The slot `push` lands on, as it is, and the slots left: an empty push
+saves only the length (solkey's `storagePushLengthSave`), so a recycled
+reference slot is exposed with what a dangling alias wrote there, as solc
+leaves it.  A primitive slot past the end holds its default on every
+reachable storage (`tightH`), so it starts at its default. -/
 def pushSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
-  | [] => (SVal.dflt E, [])
-  | c :: rest => (if E.isPrimitive then SVal.dflt E else c.defaultOf, rest)
-
-/-- A length-only extension exposes an existing reference slot unchanged.
-Primitive slots start at their default, as required by storage well-formedness. -/
-def extendSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
   | [] => (SVal.dflt E, [])
   | c :: rest => (if E.isPrimitive then SVal.dflt E else c, rest)
 
-/-- Extending a mapping and resetting it retain the same entries. -/
-theorem extendSlot_eq_pushSlot {E : Ty} (hm : E.isMapping = true) (l : List (SVal E)) :
-    extendSlot E l = pushSlot E l := by
-  cases E with
-  | prim p => cases hm
-  | ref R =>
-    cases R with
-    | mapping k V =>
-      cases l with
-      | nil => rfl
-      | cons c rest =>
-        cases c with
-        | map entries d =>
-          simp only [extendSlot, pushSlot, Ty.isPrimitive, Bool.false_eq_true, if_false,
-            SVal.defaultOf_map]
-    | struct s | array V | fixed V n => cases hm
+/-- A length-only extension, the slot exposed as `push` exposes it. -/
+def extendSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E) := pushSlot E
+
+theorem extendSlot_eq_pushSlot {E : Ty} (l : List (SVal E)) : extendSlot E l = pushSlot E l :=
+  rfl
 
 /-- A length below `2^256` is a `uint`. -/
 theorem lenU_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
@@ -1812,8 +1798,8 @@ def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     some (st', lenU w.n (Nat.lt_of_succ_lt h))
   else none
 
-/-- A length-only save, retaining the existing reference slot and its index.
-Unlike `pushPlace`, this term does not perform `delAt` before extending. -/
+/-- A length-only save, retaining the existing reference slot and its index
+(`pushPlace`, by `extendSlot`). -/
 def extendPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     Option (Storage C × PrimTy.uint.Denote) := do
   let w : ArrView E := SVal.view (← st.find r)
@@ -1824,13 +1810,9 @@ def extendPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     some (st', lenU w.n (Nat.lt_of_succ_lt h))
   else none
 
-/-- A mapping push needs no reset because deletion preserves mappings. -/
-theorem extendPlace_eq_pushPlace {E : Ty} (st : Storage C)
-    (r : SRef C (.ref (.array E))) (hm : E.isMapping = true) :
-    st.extendPlace r = st.pushPlace r := by
-  have hslot : extendSlot E = pushSlot E := funext (extendSlot_eq_pushSlot hm)
-  unfold extendPlace pushPlace
-  rw [hslot]
+/-- A length-only extension is a push. -/
+theorem extendPlace_eq_pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    st.extendPlace r = st.pushPlace r := rfl
 
 /-- `b.pop()`: the last element cleared into the slots past the
 end, or moved there as it is when `keep`; an empty array reverts. -/
@@ -2184,7 +2166,7 @@ theorem Storage.find_save_same {C : Contract} {T : Ty} {st st' : Storage C}
     rw [Storage.find, SFields.get_set_same]
     exact SVal.find_save_same _ _ _ hs
 
-/-- `values.push()` appends the reset next slot and returns its old length,
+/-- `values.push()` appends the next slot and returns its old length,
 for every typed storage, including a recycled shadow slot. -/
 theorem Storage.pushPlace_shape {C : Contract} {E : Ty} {st st' : Storage C}
     {r : SRef C (.ref (.array E))} {k : PrimTy.uint.Denote}

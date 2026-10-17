@@ -169,6 +169,43 @@ What stays open in these suites, by cause:
 - **Frontend**: three element-type-changing copies and a struct layout
   (unsupported, unchanged).
 
+## Toward SolKey `473da8944c` (2026-10-17)
+
+Upstream moved seven commits past the pin. Its rule delta
+(`node scripts/solkey-migration.mjs rules ../solkey 048a74de51 473da8944c`)
+adds 32 program taclets (bitwise `&`, shifts, discarded expressions, local
+and copy assignment values, `loopNormalize`, call-receiver reads and pops,
+`memoryIndexWriteStorageRefRhsCapture`), changes 14, and adds
+`newFromCopySt`, `fixedDelNodeIndex`, `selectStDelNodeIndex`,
+`wfDelNodeIndexRight` and integer lemmas.
+
+**Push semantics (done).** `d85018517f` made every empty push length-only:
+`storagePushLengthSave`, `…ReferenceElement`, `storageLocalRootPushBind`,
+`storageLocalPrimitivePushBind` and the compound pushes write
+`save(storage, sp.length, sp.length + 1)`, no `delAt` of the appended
+slot, so a slot past the end is exposed as it is (no clean-tail invariant;
+solkey's `StorageDangling` suite closes, as on its EVM runner). The
+048a74de51 port had made Lean reset the slot; this change reverts that:
+
+- `Storage.pushSlot` keeps a reference slot as it is (a primitive slot past
+  the end is the default on every `wt` storage, `tightH`, so it starts
+  there); `pushPlace = extendPlace` by `rfl`; `Obs.reset`, `TVal.resetA`,
+  `resetRd`, `SFun.reset` are gone, `pushSlot` reads as `extend`.
+- The rule text, notation and printer use upstream's length save, which
+  elaborates to `pushSlot` for every element kind; `UpdElem.extend` and
+  `Upd.pushBindMapping` are the same updates.
+- `Examples/Tactics/StorageDangling.lean` (was a refutation module in
+  `Counterexamples/`) and `Examples/Tactics/Dangling.lean` now prove the
+  resurrection claims in every state; `PushReceiver.lean`'s dirty-entry
+  pins flip.
+- TestSuite: five obligations that read an appended reference slot as its
+  default are pending, as they stay open upstream (`SYMBOLIC_TAIL_OPENS`):
+  506 derived, 6 pending (`Report.lean`).
+- A push of a reference element exposes an old slot, so the concrete
+  admission tier (`LTm.known?`) no longer counts it (`Op2.exposes`). The
+  nested-array suites that start `delete a; a.push()` read rows of unknown
+  length again, upstream's "needs an empty-inner precondition".
+
 ## Reproduce the inputs
 
 The committed snapshot contains 274 files: the tracked Solidity and `.key`

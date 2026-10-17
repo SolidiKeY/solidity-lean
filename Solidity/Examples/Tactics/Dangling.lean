@@ -4,14 +4,13 @@ import Solidity.Calculus.Closers
 import Solidity.Tools.Counterexample
 
 /-!
-# Historical dangling-resurrection claims, refuted
+# Dangling-resurrection claims
 
-These claims used to close when reference pushes exposed dirty slots unchanged.
-The migrated push resets the slot before exposing it. Five original claims are
-retained below and refuted at the initial typed state by kernel evaluation.
-These are facts about this model; dangling storage aliases have undefined or
-compiler-specific behavior in Solidity. The upstream cases belong to the open
-suite, not to portable proof claims.
+An empty `push()` saves only the length (solkey's `storagePushLengthSave`
+since `d85018517f`), so a slot a popped alias wrote is exposed again as it
+was: each claim below holds in every state, as solc's code behaves.
+Dangling storage aliases are undefined or compiler-specific in Solidity;
+these are facts about the model, solkey's `solc/StorageDangling.sol`.
 
 The longer rounds also retain the closer's resource-bound regressions.
 -/
@@ -23,61 +22,63 @@ local instance : InContract := ⟨StandardExample⟩
 
 open scoped Scoped
 
-/-- The old resurrection claim, retained as a migration counterexample. -/
+/-- A write through a popped alias survives the next push. -/
 def survivesPush : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ] persons[0].age == 5 }
 
-/-- Resetting the reused slot refutes resurrection already at the initial state. -/
-theorem survivesPush_refuted : ¬ Valid survivesPush := by
-  apply Fml.not_valid_of_eval3Peel (dom := Tools.poolDom []) [] (State.init StandardExample)
-  decide +kernel
+/-- The push exposes the slot as the dangling alias left it. -/
+theorem survivesPush_holds : Valid survivesPush := by
+  unfold survivesPush
+  sol_prove
 
 /-- The old diamond resurrection claim. -/
 def survivesDiamond : Fml StandardExample [] := dl!{ defined(wt(storage)) → ⟨
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ⟩ persons[0].age == 5 }
 
-/-- The resetting push refutes the historical claim at the initial state. -/
-theorem survivesDiamond_refuted : ¬ Valid survivesDiamond := by
-  apply Fml.not_valid_of_eval3Peel (dom := Tools.poolDom []) [] (State.init StandardExample)
-  decide +kernel
+/-- The push exposes the slot as the dangling alias left it. -/
+theorem survivesDiamond_holds : Valid survivesDiamond := by
+  unfold survivesDiamond
+  sol_prove
 
 /-- The old claim after deleting the emptied array. -/
 def survivesDelete : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; delete persons; persons.push(); ] persons[0].age == 5 }
 
-/-- The resetting push refutes the historical claim at the initial state. -/
-theorem survivesDelete_refuted : ¬ Valid survivesDelete := by
-  apply Fml.not_valid_of_eval3Peel (dom := Tools.poolDom []) [] (State.init StandardExample)
-  decide +kernel
+/-- The push exposes the slot as the dangling alias left it. -/
+theorem survivesDelete_holds : Valid survivesDelete := by
+  unfold survivesDelete
+  sol_prove
 
 /-- The old claim after copying an empty array. -/
 def survivesCopy : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete people; delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 5; persons = people; persons.push(); ] persons[0].age == 5 }
 
-/-- The resetting push refutes the historical claim at the initial state. -/
-theorem survivesCopy_refuted : ¬ Valid survivesCopy := by
-  apply Fml.not_valid_of_eval3Peel (dom := Tools.poolDom []) [] (State.init StandardExample)
-  decide +kernel
+/-- The push exposes the slot as the dangling alias left it. -/
+theorem survivesCopy_holds : Valid survivesCopy := by
+  unfold survivesCopy
+  sol_prove
 
 /-- The old claim that a dirty inner array reappears after push. -/
 def innerReappears : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     delete matrix; matrix.push(); uint[] storage ptr = matrix[0]; matrix.pop();
     ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 }
 
-/-- The resetting push refutes the historical claim at the initial state. -/
-theorem innerReappears_refuted : ¬ Valid innerReappears := by
-  apply Fml.not_valid_of_eval3Peel (dom := Tools.poolDom []) [] (State.init StandardExample)
-  decide +kernel
+/-- The push exposes the slot as the dangling alias left it. -/
+theorem innerReappears_holds : Valid innerReappears := by
+  unfold innerReappears
+  sol_prove
 
 /-! ## Rounds of `pop`, write, `push()`
 
-These variants retain search and storage-stack capacity regressions. The
-two-round claim stays open; that search result alone is not a refutation.
-Each additional round adds three storage updates. -/
+These variants retain search and storage-stack capacity regressions. Each
+round's write survives its push, so every claim holds; the two-round one
+closes.  Each additional round adds three storage updates, past the
+closer's bounds by four rounds (a `pop` leaves the history unknown,
+`Op2.exposes`). -/
 
 /-- Two rounds through one alias. -/
 def rounds2 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
@@ -122,7 +123,7 @@ def leafStats (φ : Fml StandardExample []) : Option (List (Bool × Nat × Bool)
     | some x => ((x.fits Seq.closeSize).isSome, x.stDepth, Seq.leafFitsOn (l.2.1.wrap l.2.2))
     | none => (false, 0, false)
 
-#guard (Seq.residue .all .nil rounds2).map List.isEmpty == some false
+#guard (Seq.residue .all .nil rounds2).map List.isEmpty == some true
 #guard leafStats rounds4 == some [(true, 14, false)]
 #guard leafStats rounds6 == some [(true, 20, false)]
 #guard leafStats rounds7 == some [(true, 23, false)]

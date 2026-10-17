@@ -3,9 +3,9 @@ import Solidity.TestSuite.ScopedProblems
 /-!
 # Storage-copy derivation retained after the dangling-suite migration
 
-Four former resurrection claims moved upstream to `StorageDanglingOpen.sol`.
-Their source import and kernel refutations are in
-`Solidity/Counterexamples/StorageDangling.lean`. They are no longer derived here.
+Four former resurrection claims moved upstream to `StorageDangling.sol`.
+They are derived from that source in
+`Solidity/Examples/Tactics/StorageDangling.lean`, not here.
 The historical TestSuite fixture still lists them until its separate repin.
 `testArrayCopyClearsOldElements` remains a valid storage-copy derivation.
 -/

@@ -532,39 +532,39 @@ inductive Taclet (C : Contract) (k : Nat) :
   -- Arrays ---------------------------------------------------------------
   | storagePushAddAssign :
       dl{ ⟨[ sp.push() += se; ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }
   | storagePushSubAssign :
       dl{ ⟨[ sp.push() -= se; ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }
   | storagePushMulAssign :
       dl{ ⟨[ sp.push() *= se; ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }
   | storagePushDivAssign :
       dl{ ⟨[ sp.push() /= se; ]⟩ ⇝
-        if se != 0 then ({ storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }
           { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }
   | storagePushModAssign :
       dl{ ⟨[ sp.push() %= se; ]⟩ ⇝
-        if se != 0 then ({ storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }
           { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }
   | storagePushPreincrement :
       dl{ ⟨[ ++sp.push(); ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }
   | storagePushPostincrement :
       dl{ ⟨[ (sp.push())++; ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }
   | storagePushPredecrement :
       dl{ ⟨[ −−sp.push(); ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }
   | storagePushPostdecrement :
       dl{ ⟨[ (sp.push())−−; ]⟩ ⇝
-        { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) }
+        { storage := save(storage, sp.length, sp.length + 1) }
         { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }
   | pushCompoundAssignValueRhsCapture :
       dl{ ⟨[ path.push() ⊕= nse; ]⟩ ⇝
@@ -589,11 +589,11 @@ inductive Taclet (C : Contract) (k : Nat) :
           ⟨[ T source = nsp; sp.push(source); ]⟩ }
   | storagePushLengthSave :
       dl{ ⟨[ parr.push(); ]⟩ ⇝
-          { storage := save(delAt(storage, parr[parr.length]), parr.length, parr.length + 1) }
+          { storage := save(storage, parr.length, parr.length + 1) }
           ⟨[ ]⟩ }
   | storagePushLengthSaveReferenceElement :
       dl{ ⟨[ rarr.push(); ]⟩ ⇝
-          { storage := save(delAt(storage, rarr[rarr.length]), rarr.length, rarr.length + 1) }
+          { storage := save(storage, rarr.length, rarr.length + 1) }
           ⟨[ ]⟩ }
   | storagePushLengthSaveMappingElement :
       dl{ ⟨[ marr.push(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length + 1) } ⟨[ ]⟩ }
@@ -624,12 +624,12 @@ inductive Taclet (C : Contract) (k : Nat) :
       dl{ ⟨[ lsv = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; lsv = sp.push(); ]⟩ }
   | storageLocalRootPushBind :
       dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝
-          { storage := save(delAt(storage, darr[darr.length]), darr.length, darr.length + 1)
+          { storage := save(storage, darr.length, darr.length + 1)
             ‖ lsv := darr[darr.length] }
           ⟨[ ]⟩ }
   | storageLocalPrimitivePushBind :
       dl{ ⟨[ v = sp.push(); ]⟩ ⇝
-          { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1)
+          { storage := save(storage, sp.length, sp.length + 1)
             ‖ v := defVal(T) } ⟨[ ]⟩ }
   | localValuePush_unfold_leftFstReceiver :
       dl{ ⟨[ v = nsp.push(); ]⟩ ⇝ ⟨[ T storage sp = nsp; v = sp.push(); ]⟩ }

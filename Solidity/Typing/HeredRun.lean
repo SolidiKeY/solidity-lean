@@ -92,10 +92,10 @@ theorem pushSlot_all {E : Ty} {sh : List (SVal E)} (h : ∀ w ∈ sh, w.All P) :
   | nil => exact ⟨hP.dflt E, fun _ h => nomatch h⟩
   | cons c rest =>
     refine ⟨?_, fun w hw => h w (List.mem_cons_of_mem _ hw)⟩
-    show (if E.isPrimitive then SVal.dflt E else c.defaultOf).All P
+    show (if E.isPrimitive then SVal.dflt E else c).All P
     split
     · exact hP.dflt E
-    · exact hP.defaultOf_all (h c List.mem_cons_self)
+    · exact h c List.mem_cons_self
 
 end HeredRun
 

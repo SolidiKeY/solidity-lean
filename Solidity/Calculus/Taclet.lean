@@ -404,7 +404,7 @@ theorem Taclet.storagePushLengthSaveMappingElement.toStep {E : Ty} {marr : SPath
     (h1 : marr.isSimple = true) (h2 : marr.elemMapping = true) :
     Stmt.step k m (Stmt.push marr none hd) =
       Premise.update (Upd.nil.snoc (UpdElem.storage
-        (Tms.STerm.extend Tms.STerm.storage marr.lower E))) := by
+        (Tms.STerm.pushSlot Tms.STerm.storage marr.lower E))) := by
   have hp : marr.elemPrim = false := by
     cases E with
     | prim p => cases h2

@@ -102,7 +102,7 @@ namespace EmptyPush
 (the rule and the empty program after it). -/
 def bare :
     dl![m]{ ⟨[ tokens.push(); ]⟩ φ }
-    ~*> dl![m]{ { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) } φ } := by
+    ~*> dl![m]{ { storage := save(storage, tokens.length, tokens.length + 1) } φ } := by
   sol_chain
 #last_line bare
 
@@ -113,11 +113,11 @@ holds), as printed: no law reads a slot through a push's length write. -/
 theorem bound (φ : Post Pushes [.val .uint, .alias (.struct "Token")]) :
     dl![m]{ ⟨[ Token storage sp = tokens.push(); uint i = sp.value; ]⟩ φ }
     ~*> dl![m]{
-        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
+        { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
           { i := find(storage, sp.value) } φ }
     ~[sequentialToParallel]~> dl![m]{
-        { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] ‖
-            i := find(save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1), tokens[tokens.length].value) }
+        { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] ‖
+            i := find(save(storage, tokens.length, tokens.length + 1), tokens[tokens.length].value) }
           φ } := by
   sol_chain
 #last_line bound
@@ -155,11 +155,11 @@ theorem field (φ : Post Pushes [.alias (.struct "Token"), .val .uint]) :
     dl![m]{ ⟨[ uint pv = 11; Token storage sp = tokens.push(); sp.value = pv; ]⟩ φ }
     ~*> dl![m]{
         { pv := 11 }
-          { storage := save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
+          { storage := save(storage, tokens.length, tokens.length + 1) ‖ sp := tokens[tokens.length] }
           { storage := save(storage, sp.value, pv) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { pv := 11 ‖ sp := tokens[tokens.length] ‖
-            storage := save(save(delAt(storage, tokens[tokens.length]), tokens.length, tokens.length + 1), tokens[tokens.length].value, 11) }
+            storage := save(save(storage, tokens.length, tokens.length + 1), tokens[tokens.length].value, 11) }
           φ } := by
   sol_chain
 #last_line field
@@ -174,9 +174,9 @@ bound and the bare push; the merge puts the push on the original path. -/
 theorem bare :
     dl![m]{ ⟨[ bucket.tokens.push(); ]⟩ φ }
     ~[storagePush_unfold_leftFstReceiver]~> dl![m]{ ⟨[ Token[] storage sp = bucket.tokens; sp.push(); ]⟩ φ }
-    ~*> dl![m]{ { sp := bucket.tokens } { storage := save(delAt(storage, sp[sp.length]), sp.length, sp.length + 1) } φ }
+    ~*> dl![m]{ { sp := bucket.tokens } { storage := save(storage, sp.length, sp.length + 1) } φ }
     ~[sequentialToParallel]~>
-      dl![m]{ { sp := bucket.tokens ‖ storage := save(delAt(storage, bucket.tokens[bucket.tokens.length]), bucket.tokens.length, bucket.tokens.length + 1) } φ } := by
+      dl![m]{ { sp := bucket.tokens ‖ storage := save(storage, bucket.tokens.length, bucket.tokens.length + 1) } φ } := by
   sol_chain
 #last_line bare
 end BucketPush
@@ -222,12 +222,12 @@ theorem field (φ : Post Pushes [.alias (.struct "Token"), .val .uint, .val .uin
         { valueVal := 42 }
           { pv := valueVal }
           { sp1 := bucket.tokens }
-          { storage := save(delAt(storage, sp1[sp1.length]), sp1.length, sp1.length + 1) ‖ sp := sp1[sp1.length] }
+          { storage := save(storage, sp1.length, sp1.length + 1) ‖ sp := sp1[sp1.length] }
           { storage := save(storage, sp.value, pv) } φ }
     ~[sequentialToParallel]~> dl![m]{
         { valueVal := 42 ‖ pv := 42 ‖ sp1 := bucket.tokens ‖ sp := bucket.tokens[bucket.tokens.length] ‖
             storage :=
-              save(save(delAt(storage, bucket.tokens[bucket.tokens.length]), bucket.tokens.length, bucket.tokens.length + 1), bucket.tokens[bucket.tokens.length].value,
+              save(save(storage, bucket.tokens.length, bucket.tokens.length + 1), bucket.tokens[bucket.tokens.length].value,
                 42) }
           φ } := by
   sol_chain

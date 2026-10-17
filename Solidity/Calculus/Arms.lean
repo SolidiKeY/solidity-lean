@@ -574,7 +574,7 @@ def pushStep {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E))
     | E, b, none =>
       -- storagePushLengthSave
       if b.elemPrim then .upd1 (UpdElem.pushSlot b)
-      -- A mapping element is retained; every other reference is reset in place.
+      -- Every element is kept as it is: the push saves only the length.
       else if b.elemMapping then .upd1 (UpdElem.extend b)
       else .upd1 (UpdElem.pushSlot b)
     -- storagePushValueSave

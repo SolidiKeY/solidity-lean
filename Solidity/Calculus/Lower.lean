@@ -158,9 +158,9 @@ def clearMem : (T : Ty) → Tm C Γ (.addr T) → T.mapFree = true → UpdElem C
 def pushSlot {E : Ty} (b : SPath C Γ (.array E)) : UpdElem C Γ Γ :=
   .storage (.app2 .pushSlot (.app0 .storage) b.lower)
 
-/-- `storage := extend(storage, b)`. -/
-def extend {E : Ty} (b : SPath C Γ (.array E)) : UpdElem C Γ Γ :=
-  .storage (.app2 .extend (.app0 .storage) b.lower)
+/-- `storage := pushSlot(storage, b)` at a mapping element: the same
+length-only save. -/
+abbrev extend {E : Ty} (b : SPath C Γ (.array E)) : UpdElem C Γ Γ := pushSlot b
 
 /-- `storage := push(storage, b, src)` (`storagePushValueSave`, `…CopySource`). -/
 def push {E : Ty} (b : SPath C Γ (.array E)) (v : Src C Γ E) : UpdElem C Γ Γ :=
@@ -210,7 +210,7 @@ def pushBind {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R
 
 /-- A mapping slot retained while the array grows and its alias binds. -/
 def pushBindMapping {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R))) : Upd C Γ Γ :=
-  (Upd.nil.snoc (.storage (.app2 .extend (.app0 .storage) b.lower))).snoc
+  (Upd.nil.snoc (.storage (.app2 .pushSlot (.app0 .storage) b.lower))).snoc
     (.local i (.path (.app1 .next b.lower)))
 
 /-- `{storage := pushSlot(storage, b) ‖ v := defVal(T)}`

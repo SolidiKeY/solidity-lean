@@ -791,14 +791,10 @@ theorem pushSlot_agrees {E : Ty} (b : SPath C Γ (.array E)) :
   · trivial
   · cases σ.storage.push ref some <;> rfl
 
-theorem extend_agrees {E : Ty} (b : SPath C Γ (.array E)) (hm : E.isMapping = true) :
+theorem extend_agrees {E : Ty} (b : SPath C Γ (.array E)) (_hm : E.isMapping = true) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.push b none σ)
-      ((Upd.nil.snoc (UpdElem.extend b)).applyP σ) := by
-  have h := pushSlot_agrees σ b
-  rw [UpdElem.pushSlot, applyP_storage1, Tm.eval_pushSlot, Tm.eval_storage, Option.bind_some] at h
-  rw [UpdElem.extend, applyP_storage1, Tm.eval_extend, Tm.eval_storage, Option.bind_some]
-  simp only [Storage.extendPlace_eq_pushPlace _ _ hm, Storage.pushPlace_fst]
-  exact h
+      ((Upd.nil.snoc (UpdElem.extend b)).applyP σ) :=
+  pushSlot_agrees σ b
 
 theorem pushSome_agrees {E : Ty} (b : SPath C Γ (.array E)) (v : Src C Γ E) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.push b (some v) σ)
@@ -873,13 +869,10 @@ theorem rebindPush_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.
       rfl
 
 theorem rebindPushMapping_agrees {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
-    (hd : (Ty.ref R).defaultOkS = true) (hm : (Ty.ref R).isMapping = true) :
+    (hd : (Ty.ref R).defaultOkS = true) (_hm : (Ty.ref R).isMapping = true) :
     TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV)) (TRun.rebind i (.push b hd) σ)
-      ((Upd.pushBindMapping i b).applyP σ) := by
-  have h := rebindPush_agrees σ i b hd
-  simpa only [Upd.pushBind, Upd.pushBindMapping, applyP_snoc, applyV_storage1,
-    Tm.eval_pushSlot, Tm.eval_extend, Storage.extendPlace_eq_pushPlace _ _ hm,
-    Storage.pushPlace_fst] using h
+      ((Upd.pushBindMapping i b).applyP σ) :=
+  rebindPush_agrees σ i b hd
 
 /-! ### A push's update is out of gas where the run is -/
 
@@ -927,17 +920,8 @@ theorem pushSlot_exh {E : Ty} (b : SPath C Γ (.array E))
 
 theorem extend_exh {E : Ty} (b : SPath C Γ (.array E))
     (h : TRun.push b none σ = .error .revert) :
-    (Upd.nil.snoc (UpdElem.extend b)).exh σ = false := by
-  refine Upd.exh_of_exhAny ?_
-  show (false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) = false
-  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b)]
-  show (false || Op2.exhB .extend (some σ.storage) (b.lower.eval σ)) = false
-  cases hq : b.lower.eval σ with
-  | none => rfl
-  | some ref =>
-    cases hf : σ.storage.full ref with
-    | false => show (false || σ.storage.full ref) = false; rw [hf]; rfl
-    | true => rw [push_exhausted σ b none hq nofun hf] at h; cases h
+    (Upd.nil.snoc (UpdElem.extend b)).exh σ = false :=
+  pushSlot_exh σ b h
 
 theorem pushSome_exh {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
     (h : TRun.push b (some r) σ = .error .revert) :
@@ -961,11 +945,11 @@ theorem pushSome_exh {E : Ty} (b : SPath C Γ (.array E)) (r : Src C Γ E)
 theorem pushBindMapping_exhAny {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) (h : TRun.rebind i (.push b hd) σ = .error .revert) :
     (Upd.pushBindMapping i b).exhAny σ = false := by
-  show ((false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) ||
+  show ((false || (Tm.app2 .pushSlot (.app0 .storage) b.lower).exhB σ) ||
     (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false
   rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b),
     Rhs.exhB_of_pushFree σ _ (by simp only [Rhs.pushFree, Tm.pushFree, SPath.lower_pushFree])]
-  show ((false || Op2.exhB .extend (some σ.storage) (b.lower.eval σ)) || false) = false
+  show ((false || Op2.exhB .pushSlot (some σ.storage) (b.lower.eval σ)) || false) = false
   cases hq : b.lower.eval σ with
   | none => rfl
   | some ref =>
@@ -990,18 +974,8 @@ theorem pushBindMapping_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ 
 
 theorem pushBind_exh {R : RefTy} (i : Idx Γ (.alias R)) (b : SPath C Γ (.array (.ref R)))
     (hd : (Ty.ref R).defaultOkS = true) (h : TRun.rebind i (.push b hd) σ = .error .revert) :
-    (Upd.pushBind i b).exh σ = false := by
-  apply Upd.exh_of_exhAny
-  have hm := pushBindMapping_exhAny σ i b hd h
-  change ((false || (Tm.app2 .extend (.app0 .storage) b.lower).exhB σ) ||
-    (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false at hm
-  show ((false || (Tm.app2 .pushSlot (.app0 .storage) b.lower).exhB σ) ||
-    (Rhs.path (Tm.app1 .next b.lower)).exhB σ) = false
-  rw [Tm.exhB_app2_pushFree σ _ _ _ rfl (SPath.lower_pushFree b),
-    Rhs.exhB_of_pushFree σ _ (by simp only [Rhs.pushFree, Tm.pushFree, SPath.lower_pushFree])] at hm ⊢
-  change ((false || Op2.exhB .extend (some σ.storage) (b.lower.eval σ)) || false) = false at hm
-  show ((false || Op2.exhB .pushSlot (some σ.storage) (b.lower.eval σ)) || false) = false
-  cases hq : b.lower.eval σ <;> rw [hq] at hm <;> exact hm
+    (Upd.pushBind i b).exh σ = false :=
+  pushBindMapping_exh σ i b hd h
 
 theorem applyV_pay {Δ : Ctx} (r a : Tm C Γ (.val .uint)) (g : GlobT C σ.H) (ℓ : LocsV C Δ) :
     (UpdElem.pay r a : UpdElem C Γ Δ).applyV σ g ℓ =

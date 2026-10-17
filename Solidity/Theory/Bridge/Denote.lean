@@ -105,7 +105,7 @@ def Op2.denote (g : State C []) {a b s : Srt} :
   | .at it, _, _, dp, di => ObsLoc.app dp (Path.index it (di.getD (PrimTy.dflt _)))
   | .nextIn, _, _, ds, dp => ObsLoc.app dp (.at (uintOfNat (ds.len dp)) .nil)
   | .delAt, _, _, ds, dp => ds.delAt dp
-  | .pushSlot, _, _, ds, dp => ds.reset dp
+  | .pushSlot, _, _, ds, dp => ds.extend dp
   | .pop, _, _, ds, dp => ds.pop false dp
   | .shrink, _, _, ds, dp => ds.pop true dp
   | .extend, _, _, ds, dp => ds.extend dp

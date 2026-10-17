@@ -803,10 +803,8 @@ def rStor (R : Readers C) (Γ : ECtx) : RawTerm → Except String (NSTerm C)
     match s, v with
     | .app "save" [s', .at _ _, w], .add _ (.num 1) =>
       pure (.push (← R.stor s') (← R.path b) (← R.sval w))
-    | .app "delAt" [s', .at _ _], .add _ (.num 1) =>
-      pure (.pushSlot (← R.stor s') (← R.path b))
     | .app "delAt" [s', .at _ _], .sub _ (.num 1) => pure (.pop (← R.stor s') (← R.path b))
-    | _, .add _ (.num 1) => pure (.extend (← R.stor s) (← R.path b))
+    | _, .add _ (.num 1) => pure (.pushSlot (← R.stor s) (← R.path b))
     | _, .sub _ (.num 1) => pure (.shrink (← R.stor s) (← R.path b))
     | _, _ => throw "the length of an array is written by a push or a pop"
   | .app "save" [s, p, v] => do pure (.save (← R.stor s) (← pathIn C R s p) (← R.sval v))

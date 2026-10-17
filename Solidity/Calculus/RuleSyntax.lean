@@ -1587,14 +1587,13 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
         match s, v with
         | `(dl_term| save($s', $q, $w)), `(dl_term| $_ + 1) =>
           if elem q then return ← `(STerm.push $(← st s') $(← pa b) $(← schemaTerm Γ .svalue w))
-        | `(dl_term| delAt($s', $q)), `(dl_term| $_ + 1) =>
-          if elem q then return ← `(STerm.pushSlot $(← st s') $(← pa b) _)
         | `(dl_term| delAt($s', $q)), `(dl_term| $_ - 1) =>
           if elem q then return ← `(STerm.pop $(← st s') $(← pa b))
         | _, _ => pure ()
         match v with
         | `(dl_term| $_ + 1) =>
-          `(STerm.extend $(← st s) $(← pa b) _)
+          -- an empty push saves only the length (solkey's `storagePushLengthSave`)
+          `(STerm.pushSlot $(← st s) $(← pa b) _)
         | `(dl_term| $_ - 1) => `(STerm.shrink $(← st s) $(← pa b))
         | _ => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))
       | none => `(STerm.save $(← st s) $(← pa p) $(← schemaTerm Γ .svalue v))

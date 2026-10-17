@@ -1633,12 +1633,6 @@ def ofWord {P : PrimTy} (x : P.Denote) : TVal (.prim P) := (SVal.prim x).obs
 def pushA {E : Ty} (a : TVal (.ref (.array E))) (x : TVal E) : TVal (.ref (.array E)) :=
   TVal.setLen (a.save (.at (uintOfNat (a.len .nil)) .nil) x) (a.len .nil + 1)
 
-/-- One more live element: the appended slot reset in place, preserving
-mapping entries and fixed lengths; a missing slot starts at its default. -/
-def resetA {E : Ty} (a : TVal (.ref (.array E))) : TVal (.ref (.array E)) :=
-  if E.isPrimitive || !a.has (.at (uintOfNat (a.len .nil)) .nil) then a.pushA (SVal.dflt E).obs
-  else a.pushA (a.find (.at (uintOfNat (a.len .nil)) .nil)).del
-
 /-- One more live element: the slot past the end as it is (a word reset, a
 missing slot at its default). -/
 def extendA {E : Ty} (a : TVal (.ref (.array E))) : TVal (.ref (.array E)) :=
@@ -1667,10 +1661,8 @@ def copyTo (o : Obs L) {U : Ty} (p : L U) (v : TVal U) : Obs L :=
 /-- **`push`**: `x` appended to the array at `p`. -/
 def push (o : Obs L) {E : Ty} (p : L (.ref (.array E))) (x : TVal E) : Obs L :=
   o.save p (TVal.pushA (o.find p) x)
-/-- One more live element at the array at `p` (`pushSlot`). -/
-def reset (o : Obs L) {E : Ty} (p : L (.ref (.array E))) : Obs L :=
-  o.save p (TVal.resetA (o.find p))
-/-- A length-only extension at the array at `p` (`extend`). -/
+/-- One more live element at the array at `p`, its slot as it is
+(`pushSlot`, `extend`). -/
 def extend (o : Obs L) {E : Ty} (p : L (.ref (.array E))) : Obs L :=
   o.save p (TVal.extendA (o.find p))
 /-- **`pop`** at `p`, the element reset unless `keep` (`shrink`). -/
@@ -1885,42 +1877,6 @@ theorem obs_push {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {x
   rw [obs_save hs, Obs.push, obs_find_some hf,
     SVal.obs_pushArr e sh hn x _ (pushSlot_snd _) h']
 
-/-- The slot past the end, reset in place and appended. -/
-theorem obs_resetArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
-    (h' : (e.toList ++ [(pushSlot E sh.toList).1]).length < 2 ^ 256) :
-    (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
-      (.ofList (pushSlot E sh.toList).2) h').obs = TVal.resetA (SVal.array e sh hn).obs := by
-  rw [SVal.obs_pushArr e sh hn _ _ (pushSlot_snd _) h', TVal.resetA]
-  have hl : e.toList.length = n := SVec.length_toList e
-  have el : (SVal.array e sh hn).obs.len .nil = n := rfl
-  cases hs : sh.toList with
-  | nil =>
-    have hh : (SVal.array e sh hn).obs.has (.at (uintOfNat n) .nil) = false := by
-      show Option.isSome ((some _).bind _) = false
-      rw [Option.bind_some, SVal.findM_at', hs, List.append_nil]
-      simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
-      rw [List.getElem?_eq_none (by omega)]; rfl
-    simp only [el, hh, Bool.not_false, Bool.or_true, if_true]
-    rfl
-  | cons c rest =>
-    have hh : (SVal.array e sh hn).obs.has (.at (uintOfNat n) .nil) = true := by
-      show Option.isSome ((some _).bind _) = true
-      rw [Option.bind_some, SVal.findM_at', hs]
-      simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
-      rw [List.getElem?_append_right (by omega), hl, Nat.sub_self, List.getElem?_cons_zero,
-        Option.bind_some, SVal.findM_nil']; rfl
-    simp only [el, hh, Bool.not_true, Bool.or_false]
-    cases hp : E.isPrimitive with
-    | true => simp only [pushSlot, hp, if_true]
-    | false =>
-      simp only [pushSlot, hp, Bool.false_eq_true, if_false]
-      have hc : (SVal.array e sh hn).obs.find (.at (uintOfNat n) .nil) = c.obs := by
-        rw [SVal.obs_find, SVal.findM_at_nil, hs]
-        simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
-        rw [List.getElem?_append_right (by omega), hl, Nat.sub_self, List.getElem?_cons_zero]
-        rfl
-      rw [SVal.obs_defaultOf, ← hc]
-
 theorem extendSlot_snd {E : Ty} (l : List (SVal E)) : (extendSlot E l).2 = l.tail := by
   cases l <;> rfl
 
@@ -1950,9 +1906,9 @@ theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n <
         Option.bind_some, SVal.findM_nil']; rfl
     simp only [el, hh, Bool.not_true, Bool.or_false]
     cases hp : E.isPrimitive with
-    | true => simp only [extendSlot, hp, if_true]
+    | true => simp only [extendSlot, pushSlot, hp, if_true]
     | false =>
-      simp only [extendSlot, hp, Bool.false_eq_true, if_false]
+      simp only [extendSlot, pushSlot, hp, Bool.false_eq_true, if_false]
       have hc : (SVal.array e sh hn).obs.find (.at (uintOfNat n) .nil) = c.obs := by
         rw [SVal.obs_find, SVal.findM_at_nil, hs]
         simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
@@ -1960,33 +1916,13 @@ theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n <
         rfl
       rw [TVal.pushA, el, ← hc, Obs.save_find]
 
-/-- **The bridge of `pushSlot`**: one more live element, the slot reset in place. -/
+/-- **The bridge of `pushSlot`**: one more live element, its slot as it is. -/
 theorem obs_push_slot {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
-    (h : st.push r some = some st') : st'.obs = st.obs.reset (.ref r) := by
+    (h : st.push r some = some st') : st'.obs = st.obs.extend (.ref r) := by
   obtain ⟨n, e, sh, hn, x', h', hf, hx, hs⟩ := push_some h
   cases hx
-  rw [obs_save hs, Obs.reset, obs_find_some hf, obs_resetArr e sh hn h']
-
-/-- **The bridge of a resetting push** (`pushPlace`). -/
-theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
-    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) : st'.obs = st.obs.reset (.ref r) := by
-  unfold Storage.pushPlace at h
-  cases hf : st.find r with
-  | none => simp only [hf, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h
-  | some a =>
-    cases a with
-    | array e sh hn =>
-      simp only [hf, Option.bind_eq_bind, Option.bind_some, SVal.view_array] at h
-      split at h
-      · rename_i h'
-        cases hs : st.save r (SVal.array (SVec.ofList (e.toList ++ [(pushSlot _ sh.toList).1]))
-            (SList.ofList (pushSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h')) with
-        | none => simp only [hs, Option.bind_none, reduceCtorEq] at h
-        | some st₁ =>
-          simp only [hs, Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h
-          obtain ⟨rfl, -⟩ := h
-          rw [obs_save hs, Obs.reset, obs_find_some hf, obs_resetArr]
-      · cases h
+  rw [obs_save hs, Obs.extend, obs_find_some hf]
+  exact congrArg _ (obs_extendArr e sh hn h')
 
 /-- **The bridge of `extend`** (`extendPlace`). -/
 theorem obs_extendPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
@@ -2008,6 +1944,12 @@ theorem obs_extendPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array 
           obtain ⟨rfl, -⟩ := h
           rw [obs_save hs, Obs.extend, obs_find_some hf, obs_extendArr]
       · cases h
+
+/-- **The bridge of a push** as a place (`pushPlace`): `extend`'s. -/
+theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) :
+    st'.obs = st.obs.extend (.ref r) :=
+  obs_extendPlace h
 
 /-- **The bridge of a pop**: the last element past the end, reset unless
 `keep`. -/

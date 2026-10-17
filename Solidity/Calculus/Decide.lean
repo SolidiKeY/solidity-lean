@@ -888,16 +888,6 @@ def fixedCopyRd {E : Ty} {n : Nat} : {R : RefTy} → FixedCopy E n R →
   | _, .dynamic hb, a => arrRd (.nat n) .tt (fixedCopyChildRd (.dynamic hb) a)
   | _, .fixed m hm, a => fixedArrRd m .tt (fixedCopyChildRd (.fixed m hm) a)
 
-/-- **One more live element, read** (`TVal.resetA`): the appended slot
-reset in place, or a missing slot at its default. -/
-def resetRd {E : Ty} (a : VRd C (.ref (.array E))) (L : LTm C (.val .uint)) :
-    VRd C (.ref (.array E)) :=
-  if E.isPrimitive then pushRd a (dfltRd E) L
-  else fun c r =>
-    .cond (a (.has _) (.at L .nil))
-      (pushRd a (fun c r => delRS (a.find (.at L .nil)) r c) L c r)
-      (pushRd a (dfltRd E) L c r)
-
 /-- **One more live element, read** (`TVal.extendA`): a word's slot reset,
 a missing slot at its default, a slot past the end as it is. -/
 def extendRd {E : Ty} (a : VRd C (.ref (.array E))) (L : LTm C (.val .uint)) :
@@ -1170,14 +1160,7 @@ def push {E : Ty} (S : SFun C) (Pg : LTm C (.val .bool)) (P : SPath C (.ref (.ar
   ⟨seqL S.ok (seqL Pg (seqL Vok (seqL (LTm.assert (S.rd (.has _) P)) (LTm.assert (.lt L maxLen))))),
     writeAt S.rd P (pushRd (SRd.at S.rd P) (fun c r => stripRS V r c) L), orig⟩
 
-/-- `pushSlot(s, P)`: one more live element. -/
-def reset {E : Ty} (S : SFun C) (Pg : LTm C (.val .bool)) (P : SPath C (.ref (.array E)))
-    (orig : LTm C .st) : SFun C :=
-  let L := S.rd (.len _) P
-  ⟨seqL S.ok (seqL Pg (seqL (LTm.assert (S.rd (.has _) P)) (LTm.assert (.lt L maxLen)))),
-    writeAt S.rd P (resetRd (SRd.at S.rd P) L), orig⟩
-
-/-- `extend(s, P)`: one more live element. -/
+/-- `extend(s, P)`, `pushSlot(s, P)`: one more live element, its slot as it is. -/
 def extend {E : Ty} (S : SFun C) (Pg : LTm C (.val .bool)) (P : SPath C (.ref (.array E)))
     (orig : LTm C .st) : SFun C :=
   let L := S.rd (.len _) P
@@ -1359,7 +1342,7 @@ def _root_.Solidity.Op2.elim {a b s : Srt} (o : Op2 C a b s) : LTm C a → LTm C
       | some (g, Q) => SFun.delAt ex g Q (.app2 .delAt x y)
       | none => SFun.ofOrig (.app2 .delAt x y))
     (fun {_} x y ex ey => match (ey : Option (LTm C (.val .bool) × SPath C _)) with
-      | some (g, Q) => SFun.reset ex g Q (.app2 .pushSlot x y)
+      | some (g, Q) => SFun.extend ex g Q (.app2 .pushSlot x y)
       | none => SFun.ofOrig (.app2 .pushSlot x y))
     (fun {_} x y ex ey => match (ey : Option (LTm C (.val .bool) × SPath C _)) with
       | some (g, Q) => SFun.pop false ex g Q (.app2 .pop x y)

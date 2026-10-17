@@ -1137,36 +1137,6 @@ theorem fixedCopyRd_rep {E : Ty} {n : Nat} {R : RefTy}
       cases c <;> simpa only [fixedCopyRd, fixedArrRd, FixedCopy.observe, CK.obsV,
         CK.obsC, Comp.word, Comp.len, Comp.has] using he
 
-/-- **One more live element, read, is `TVal.resetA`.** -/
-theorem resetRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm C (.val .uint)}
-    {t : TVal (.ref (.array E))} (ha : VRd.Rep g ν a t)
-    (hL : (L.eval g ν : Option PrimTy.uint.Denote) = some (uintOfNat (t.len .nil)))
-    (hn : t.len .nil + 1 < 2 ^ 256) (hb : Bnd t) :
-    VRd.Rep g ν (resetRd a L) (TVal.resetA t) := by
-  unfold resetRd TVal.resetA
-  by_cases hp : E.isPrimitive = true
-  · simp only [hp, if_true, Bool.true_or]
-    exact pushRd_rep g ν ha (dfltRd_rep g ν E) hL hn
-  · simp only [hp, if_false, Bool.false_or, Bool.false_eq_true]
-    have hh : ((a (.has _) (.at L .nil)).eval g ν : Option Bool) =
-        some (t.has (.at (uintOfNat (t.len .nil)) .nil)) := by
-      have := ha _ (.has _) (.at L .nil) (.at (uintOfNat (t.len .nil)) .nil)
-        (by rw [TSegs.eval_at, hL]; rfl)
-      rw [this]; rfl
-    intro V c r p hr
-    rw [LTm.eval_cond_some g ν _ _ hh]
-    by_cases h : t.has (.at (uintOfNat (t.len .nil)) .nil) = true
-    · simp only [h, if_true, Bool.not_true, Bool.false_eq_true, if_false]
-      refine pushRd_rep g ν ha ?_ hL hn V c r p hr
-      intro V' c' r' p' hr'
-      rw [delRS_rep g ν r' c'
-        (ha.find g ν (s := .at L .nil) (by rw [TSegs.eval_at, hL]; rfl))
-        (hb.find _) hr']
-      cases c' <;> rfl
-    · simp only [h, if_false, Bool.false_eq_true, Bool.not_false, if_true]
-      exact pushRd_rep g ν ha (dfltRd_rep g ν E) hL hn V c r p hr
-
-
 /-- **One more live element, read, is `TVal.extendA`.** -/
 theorem extendRd_rep {E : Ty} {a : VRd C (.ref (.array E))} {L : LTm C (.val .uint)}
     {t : TVal (.ref (.array E))} (ha : VRd.Rep g ν a t)
@@ -1852,25 +1822,6 @@ theorem SFun.arrOp_rep {E : Ty} {S : SFun C} {s : LTm C .st} {pt : LTm C (.path 
     exact writeAt_rep g ν (hS.rd st hs) (hPe r hp)
       (hnew st r _ _ ((hS.rd st hs).at g ν (hPe r hp)) (hS.rd st hs _ (.len _) P r (hPe r hp))
         hcond'.2) (hobs st r st' hw)
-
-theorem SFun.reset_rep {E : Ty} {S : SFun C} {s : LTm C .st} {pt : LTm C (.path (.ref (.array E)))}
-    {Pg : LTm C (.val .bool)} {P : SPath C (.ref (.array E))} {t : LTm C .st}
-    (f : Storage C → SRef C (.ref (.array E)) → Option (Storage C))
-    (hS : S.Rep g ν s) (hP : PRep g ν (some (Pg, P)) pt)
-    (ev : (t.eval g ν : Option (Storage C)) =
-      (s.eval g ν : Option (Storage C)).bind fun st => (pt.eval g ν : Option (SRef C _)).bind
-        fun r => f st r)
-    (hsome : ∀ st r, (f st r).isSome =
-      (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)))
-    (hobs : ∀ st r st', f st r = some st' → st'.obs = st.obs.reset (.ref r)) :
-    (S.reset Pg P t).Rep g ν t := by
-  refine SFun.arrOp_rep g ν f (fun n => decide (n + 1 < 2 ^ 256)) (fun L => .lt L maxLen)
-    resetRd TVal.resetA hS hP ev (fun L n hL hn => lt_maxLen_eval g ν hL hn) hsome
-    (fun st r st' h => hobs st r st' h) ?_
-  intro st r a L ha hL hc
-  exact resetRd_rep g ν ha (by rw [find_len_nil]; exact hL)
-    (by rw [find_len_nil]; simpa only [decide_eq_true_eq] using hc)
-    (bnd_sto st r)
 
 theorem SFun.extend_rep {E : Ty} {S : SFun C} {s : LTm C .st} {pt : LTm C (.path (.ref (.array E)))}
     {Pg : LTm C (.val .bool)} {P : SPath C (.ref (.array E))} {t : LTm C .st}
@@ -2768,7 +2719,7 @@ theorem Op2.elim_rep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     cases ey with
     | none => exact SFun.ofOrig_rep g ν _
     | some z =>
-      refine SFun.reset_rep g ν (fun st r => st.push r some) hx hy ?_
+      refine SFun.extend_rep g ν (fun st r => st.push r some) hx hy ?_
         (fun st r => Storage.push_isSome st r some (fun _ => rfl))
         (fun st r st' h => Storage.obs_push_slot h)
       rw [LTm.eval_app2]

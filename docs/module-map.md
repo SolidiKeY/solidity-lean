@@ -242,8 +242,8 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `SortCheck/Parser.lean` | Token-level `.key` scanner and the `conforms` cross-check. |
 | `SortCheck/Faithfulness.lean` | Each annotation holds of what the typed run's evaluators read in every typed state, at the value's runtime sort (`Read.SortOk`, `Read.sortOk`, `Typing/Sorts.lean`), at every statement its `Taclet` rule fires on (`faithful_theorem`, the statement read off the constructor's type). |
 | `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. |
-| `Counterexamples/*.lean` | Four refutation modules pinning design decisions: `DeleteFamilyGenericOverlap`, `StaticRuntimeSort`, `PreFixSortAnnotations`, `StorageDangling` (`WellTypedNecessity` went at W10.5.1: its `badStore` is an untyped state, and no typed state is one). |
-| `Counterexamples/StorageDangling.lean` | Imports the pinned upstream open-suite storage claims and refutes their original obligations at the initial typed state with kernel certificates. |
+| `Counterexamples/*.lean` | Three refutation modules pinning design decisions: `DeleteFamilyGenericOverlap`, `StaticRuntimeSort`, `PreFixSortAnnotations` (`WellTypedNecessity` went at W10.5.1: its `badStore` is an untyped state, and no typed state is one). |
+| `Examples/Tactics/StorageDangling.lean` | solkey's dangling-storage suite: an empty push saves only the length, so a popped alias's writes are exposed again; the four obligations derived in every state by `sol_prove`. |
 
 ## The EVM compiler
 
@@ -318,7 +318,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Problems.lean` | Two of `Solkey.TestSuite`'s 501 statements pinned in solkey's syntax (`#solkey_problem`), `initState_wt`. |
 | `TestSuite/ScopedProblems.lean` | The pinned 501 statements, `Solkey.TestSuite.f.problem : Fml Solkey.TestSuite []`, by `solc_scoped_problems … decl` (entries of one table, declared, not compiled), each on its program `Solkey.TestSuite.f`; what the `Derived` modules prove. |
 | `TestSuite/Derived1.lean` … `TestSuite/Derived12.lean` | `Solkey.TestSuite.f.proved : ⊢ Solkey.TestSuite.f.problem`, the scoped sequent (`open scoped Solidity.Scoped`, `Calculus/ProvesDerive.lean`), 40, 40, 40, 40, 40, 37, 41, 23, 40, 40, 11 and 20 (412 in all), by `sol_prove` and explicit leaf tactics; 7 and 8 are what pushes, pops and storage copies added, 9 to 11 what memory added, 12 what copies between memory and storage added. |
-| `TestSuite/Derived13.lean` | `testArrayCopyClearsOldElements`, by `sol_prove`; four former resurrection claims moved upstream to the open suite and are refuted in `Counterexamples/StorageDangling.lean`. |
+| `TestSuite/Derived13.lean` | `testArrayCopyClearsOldElements`, by `sol_prove`; four resurrection claims, upstream's `solc/StorageDangling.sol`, are proved in `Examples/Tactics/StorageDangling.lean`. |
 | `TestSuite/Derived14.lean` | The twenty obligations added at solkey `1b4341a303` (`send`, internal calls, `return`, tuples), each by `sol_prove`; ground splits are pruned (`Seq.refutes`, closed by `Proves.closeFalse`). |
 | `TestSuite/Derived15.lean` | 53 migration derivations for returns, overloads, modifiers, helpers, storage shapes, fresh arrays and push operands; the report counts only kernel-checked declarations. |
 | `TestSuite/Derived16.lean` | Native push compound, DIV/MOD, increment and signed three-push derivations; demanded primitive reads close the signed case within the existing bounds. |
@@ -373,7 +373,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |
 | `Examples/Tactics/Dangling.lean` | Historical dangling-resurrection formulas, refuted by kernel-checked initial-state counterexamples after the resetting-push migration; longer rounds retain storage-stack capacity regressions. |
-| `Examples/Tactics/NestedArrays.lean` | `uint[][]` histories closed by `sol_prove` (solkey's `ArrayMatrix*` shapes): a row alias, its checked indices folded; a deleted row, past `normalizationDepth`. |
+| `Examples/Tactics/NestedArrays.lean` | Concrete storage histories closed by `sol_prove` (solkey's `Array*` shapes): a fixed matrix's row alias, its checked indices folded; thirteen pushes after a delete, past `normalizationDepth`. |
 | `Examples/Tactics/ApplySteps.lean`, `UpdateRules.lean`, `Decide.lean`, `TermTaclets.lean` | The proof style, update simplification, `sol_decide`, term taclets. |
 | `Examples/Tactics/UpdRulesScoped.lean` | The scoped update rules and merges (`Fml.updAtS`, `Fml.simpUpdsS`, `Fml.mergeAtS`) computed by the kernel on `dl!{ … }` leaves, each entry point (`Valid.of_simpUpdsS`, `Valid.of_updAtS`, `Valid.of_mergeAtS`) used on a `⊨` goal; `applyOnRigid` under the diamond on an alias to a root's field; a rule refused under a negation, and `Upd.seqPar` refusing a memory term after a storage write that the storage merge reads. |
 | `Examples/Tactics/Specs.lean` | Clauses as obligations (`spec!{f}`, `sol_spec`) beyond the benchmarks. |

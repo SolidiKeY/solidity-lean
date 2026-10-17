@@ -205,10 +205,12 @@ def _root_.Solidity.Op2.isDelAt {a b s : Srt} : Op2 C a b s → Bool
   | _ => false
 
 /-- An update that may make slots past an array's live end reachable again:
-`pop` and `shrink` leave a dangling alias's slot behind the end, `extend`
-exposes the old slot without resetting it. -/
+`pop` and `shrink` leave a dangling alias's slot behind the end; an empty
+push of a reference element (`pushSlot`, `extend`) exposes the old slot as
+it is, what a delete kept there (solkey's `storagePushLengthSave`). -/
 def _root_.Solidity.Op2.exposes {a b s : Srt} : Op2 C a b s → Bool
-  | .pop | .shrink | .extend => true
+  | .pop | .shrink => true
+  | @Op2.pushSlot _ E | @Op2.extend _ E => !E.isPrimitive
   | _ => false
 
 /-- An array's index (not a mapping's key). -/

@@ -8,22 +8,10 @@ open scoped Scoped
 theorem Solkey.TestSuite.newArrayCaptureStorageRoot.proved : ⊢ Solkey.TestSuite.newArrayCaptureStorageRoot.problem := by
   sol_prove
 
-theorem Solkey.TestSuite.testEmptyPushFixedArrayReturnReadsZero.proved : ⊢ Solkey.TestSuite.testEmptyPushFixedArrayReturnReadsZero.problem := by
-  sol_prove
-
-theorem Solkey.TestSuite.testEmptyPushDynamicArrayReturnReadsZero.proved : ⊢ Solkey.TestSuite.testEmptyPushDynamicArrayReturnReadsZero.problem := by
-  sol_prove
-
-theorem Solkey.TestSuite.testEmptyPushStructReturnReadsZero.proved : ⊢ Solkey.TestSuite.testEmptyPushStructReturnReadsZero.problem := by
-  sol_prove
-
 theorem Solkey.TestSuite.storagePushMemoryCopySource.proved : ⊢ Solkey.TestSuite.storagePushMemoryCopySource.problem := by
   sol_prove
 
 theorem Solkey.TestSuite.storagePushMemoryStructCopySource.proved : ⊢ Solkey.TestSuite.storagePushMemoryStructCopySource.problem := by
-  sol_prove
-
-theorem Solkey.TestSuite.storagePushReturnPrimitiveBindComplexReceiver.proved : ⊢ Solkey.TestSuite.storagePushReturnPrimitiveBindComplexReceiver.problem := by
   sol_prove
 
 theorem Solkey.TestSuite.storagePushReturnPrimitiveBind.proved : ⊢ Solkey.TestSuite.storagePushReturnPrimitiveBind.problem := by
@@ -191,5 +179,3 @@ theorem Solkey.TestSuite.testFixedShapeDeleteDynamicThenPushFixedElement.proved 
 theorem Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.proved : ⊢ Solkey.TestSuite.testFixedShapeFixedElementStorageAlias.problem := by
   sol_prove
 
-theorem Solkey.TestSuite.testFixedShapeEmptyPushFixedElementReadsZero.proved : ⊢ Solkey.TestSuite.testFixedShapeEmptyPushFixedElementReadsZero.problem := by
-  sol_prove

@@ -358,8 +358,8 @@ partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
     let (len, val, slot) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save(save($(← ppSTermS ns s), $slot, $(← ppSValS ns v)), $len, $val + 1))
   | .sym ``Op2.pushSlot _ #[s, p] =>
-    let (len, val, slot) ← lenTerms (← ppPTermS ns p)
-    `(dl_term| save(delAt($(← ppSTermS ns s), $slot), $len, $val + 1))
+    let (len, val, _) ← lenTerms (← ppPTermS ns p)
+    `(dl_term| save($(← ppSTermS ns s), $len, $val + 1))
   | .sym ``Op2.pop _ #[s, p] =>
     let p ← ppPTermS ns p
     let (len, val, _) ← lenTerms p

@@ -242,7 +242,7 @@ import Solidity.SortCheck.Faithfulness
 import Solidity.Counterexamples.PreFixSortAnnotations
 import Solidity.Counterexamples.DeleteFamilyGenericOverlap
 import Solidity.Counterexamples.StaticRuntimeSort
-import Solidity.Counterexamples.StorageDangling
+import Solidity.Examples.Tactics.StorageDangling
 import Solidity.Evm.Layout
 import Solidity.Evm.StorageLemmas
 import Solidity.Evm.SimLemmas

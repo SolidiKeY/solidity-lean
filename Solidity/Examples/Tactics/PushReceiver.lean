@@ -90,16 +90,17 @@ def dirtyStorage : Storage Solkey.Migration.PushReceiver :=
 
 theorem dirtyStorage_wellformed : dirtyStorage.wtB = true := by decide +kernel
 
-/-- A zero-argument reference push resets that reused slot before exposing it. -/
+/-- A zero-argument reference push exposes that reused slot as it is: the
+old row's element stays, and `nested`'s length assertion fails from this
+well-formed entry (solkey: an empty inner array needs a precondition). -/
 theorem nested_dirty :
     (Prog.run ((State.init Solkey.Migration.PushReceiver).withStorage dirtyStorage)
-      Solkey.Migration.PushReceiver.nested).isOk = true := by
+      Solkey.Migration.PushReceiver.nested).isOk = false := by
   decide +kernel
 
-/-- Resetting the appended mapping slot retains every stored entry. -/
+/-- The appended mapping slot keeps every stored entry. -/
 theorem mappingSlot_kept {K : PrimTy} {V : Ty} (entries : SMap K V) (d : SVal V) :
-    (pushSlot (.ref (.mapping K V)) [SVal.map entries d]).1 = SVal.map entries d := by
-  exact SVal.defaultOf_map entries d
+    (pushSlot (.ref (.mapping K V)) [SVal.map entries d]).1 = SVal.map entries d := rfl
 
 private def matrixPath : SRef Solkey.Migration.PushReceiver
     (.ref (.array (.ref (.array (.prim .uint))))) := .ofRoot "matrix" rfl
@@ -113,18 +114,16 @@ theorem lengthOnly_keepsRow :
       (some matrixPath)).bind fun st => st.len firstRow).map Subtype.val) = some 1 := by
   decide +kernel
 
-/-- The separately printed `delAt` and length save resets that same row. -/
-theorem resettingPush_clearsRow :
+/-- `pushSlot` is the same length-only save: the old row is kept. -/
+theorem pushSlot_keepsRow :
     (((Op2.eval (State.init Solkey.Migration.PushReceiver) .pushSlot (some dirtyStorage)
-      (some matrixPath)).bind fun st => st.len firstRow).map Subtype.val) = some 0 := by
+      (some matrixPath)).bind fun st => st.len firstRow).map Subtype.val) = some 1 := by
   decide +kernel
 
-/-- A fixed array retains its arity and the entries of its mapping element. -/
+/-- A fixed array keeps its arity and the entries of its mapping element. -/
 theorem fixedMappingSlot_kept {K : PrimTy} {V : Ty} (entries : SMap K V) (d : SVal V) :
     (pushSlot (.ref (.fixed (.ref (.mapping K V)) 1))
       [.fixed (.cons (.map entries d) .nil)]).1 =
-      .fixed (.cons (.map entries d) .nil) := by
-  simp only [pushSlot, Ty.isPrimitive, Bool.false_eq_true, if_false,
-    SVal.defaultOf_fixed, SVec.defaultOf_cons, SVal.defaultOf_map, SVec.defaultOf_nil]
+      .fixed (.cons (.map entries d) .nil) := rfl
 
 end Solidity.Examples.Tactics.PushReceiver
