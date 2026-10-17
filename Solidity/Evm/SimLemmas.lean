@@ -39,12 +39,6 @@ theorem ReprV.uint_inv {v : PrimTy.uint.Denote} {w : Word} (h : ReprV .uint v w)
 theorem ReprV.bool_inv {b : PrimTy.bool.Denote} {w : Word} (h : ReprV .bool b w) :
     w = .val (bword b) := h
 
-/-- An `int` is represented by a word, its two's complement: `-1` is `2^256 - 1`. -/
-theorem ReprV.int_inv {v : PrimTy.int.Denote} {w : Word} (h : ReprV .int v w) :
-    ∃ a : Nat, ∃ ha : a < W, v.1 = sgn a ∧ w = .val ⟨a, ha⟩ := by
-  obtain ⟨a, rfl, hv⟩ := h
-  exact ⟨a.1, a.2, hv, rfl⟩
-
 /-- A word below `2^256` represents itself as a `uint`: `total = 7;` pushes `7`. -/
 theorem ReprV.uint_of {v : PrimTy.uint.Denote} {a : Fin W} (h : v.1 = a.1) :
     ReprV .uint v (.val a) :=
@@ -79,30 +73,22 @@ of `uint` and `int` against the words a guard pushes, or the revert. -/
 
 /-- An integer in `uint`'s range is a `uint`. -/
 private theorem ofInt_uint {n : Int} (h : 0 ≤ n ∧ n < W) :
-    PrimTy.uint.ofInt? n = some ⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ := by
-  have hr : PrimTy.uint.inRange n = true := by
-    simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, dif_pos hr]
+    PrimTy.uint.ofInt? n = some ⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ :=
+  dif_pos (by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h)
 
 /-- An integer out of `uint`'s range reverts. -/
-private theorem ofInt_uint_none {n : Int} (h : ¬(0 ≤ n ∧ n < W)) : PrimTy.uint.ofInt? n = none := by
-  have hr : ¬PrimTy.uint.inRange n = true := by
-    simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, dif_neg hr]
+private theorem ofInt_uint_none {n : Int} (h : ¬(0 ≤ n ∧ n < W)) : PrimTy.uint.ofInt? n = none :=
+  dif_neg (by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h)
 
 /-- An integer in `int`'s range is an `int`. -/
 private theorem ofInt_int {n : Int} (h : -(H : Int) ≤ n ∧ n < H) :
-    PrimTy.int.ofInt? n = some ⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ := by
-  have hr : PrimTy.int.inRange n = true := by
-    simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, dif_pos hr]
+    PrimTy.int.ofInt? n = some ⟨n, by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h⟩ :=
+  dif_pos (by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h)
 
 /-- An integer out of `int`'s range reverts. -/
 private theorem ofInt_int_none {n : Int} (h : ¬(-(H : Int) ≤ n ∧ n < H)) :
-    PrimTy.int.ofInt? n = none := by
-  have hr : ¬PrimTy.int.inRange n = true := by
-    simp only [PrimTy.inRange, decide_eq_true_eq]; exact h
-  simp only [PrimTy.ofInt?, dif_neg hr]
+    PrimTy.int.ofInt? n = none :=
+  dif_neg (by simp only [PrimTy.inRange, decide_eq_true_eq]; exact h)
 
 /-- `Option.bind` on a result: the range check of a computed integer.  Not
 a `rfl` lemma on purpose: `simp` then rewrites with a proof, and the kernel
@@ -170,9 +156,6 @@ private theorem out_int_none {n : Int} (h : ¬(-(H : Int) ≤ n ∧ n < H)) {m :
 
 /-! ## The guard sequences -/
 
-/-- A sum below `2^256` does not wrap: `3 + 4` is `7`. -/
-theorem mod_W_of_lt {x : Nat} (h : x < W) : x % W = x := Nat.mod_eq_of_lt h
-
 /-- A sum of two words that wraps loses exactly `2^256`: `(2^256 - 1) + 1` wraps to `0`. -/
 theorem mod_W_of_ge {x : Nat} (h₁ : W ≤ x) (h₂ : x < W + W) : x % W = x - W := by
   rw [Nat.mod_eq_sub_mod h₁, Nat.mod_eq_of_lt (by omega)]
@@ -190,7 +173,7 @@ theorem add_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b
       if _ : a + b < W then .ok { m with stack := w[a + b] :: st } 0 else .revert := by
   simp [run, uTail, assertTop, Instr.step, Machine.next]
   by_cases h : a + b < W
-  · simp only [mod_W_of_lt h]; simp [h, show ¬ a + b < a by omega, Instr.step, Machine.next]
+  · simp only [Nat.mod_eq_of_lt h]; simp [h, show ¬ a + b < a by omega, Instr.step, Machine.next]
   · simp only [mod_W_of_ge (show W ≤ a + b by omega) (by omega)]
     simp [h, Instr.step, show a + b - W < a by omega]
 
@@ -202,7 +185,7 @@ theorem sub_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b
   simp [run, uTail, assertTop, Instr.step, Machine.next]
   by_cases h : b ≤ a
   · have e : (a + (W - b)) % W = a - b := by
-      rw [show a + (W - b) = (a - b) + W by omega, Nat.add_mod_right, mod_W_of_lt (by omega)]
+      rw [show a + (W - b) = (a - b) + W by omega, Nat.add_mod_right, Nat.mod_eq_of_lt (by omega)]
     simp [h, show ¬ a < b by omega, Instr.step, Machine.next, e]
   · simp [show a < b by omega, Instr.step]
 
@@ -223,7 +206,7 @@ theorem mul_ok_iff {a b : Nat} :
   · intro h
     rcases Nat.eq_zero_or_pos a with rfl | hpos
     · exact .inl rfl
-    · right; rw [mod_W_of_lt h, Nat.mul_div_cancel_left _ hpos]
+    · right; rw [Nat.mod_eq_of_lt h, Nat.mul_div_cancel_left _ hpos]
 
 /-- `a * b` with solc's overflow check. -/
 theorem mul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
@@ -233,7 +216,7 @@ theorem mul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b
   have key := mul_ok_iff (a := a) (b := b)
   by_cases h : a * b < W
   · simp only [h, if_true]
-    have e : b * a % W = a * b := by rw [Nat.mul_comm, mod_W_of_lt h]
+    have e : b * a % W = a * b := by rw [Nat.mul_comm, Nat.mod_eq_of_lt h]
     by_cases h0 : a = 0
     · subst h0; simp [Instr.step, Machine.next]
     · have h2 : a * b / a = b := Nat.mul_div_cancel_left b (Nat.pos_of_ne_zero h0)
@@ -512,10 +495,6 @@ theorem compound_simT {op : BinOp} (hop : op.hasCompoundAssign = true) {p : Prim
     have ht := tail_simT hfrag hand hor hacc ha hb m
     cases op <;> first | exact absurd hop (by decide) | exact ht
 
-/-- `++` and `--` are the `+=`/`-=` of the fragment: `x++;` is checked as `x += 1;`. -/
-theorem bump_frag (op : IncDec) : op.binOp.hasCompoundAssign = true := by
-  cases op <;> rfl
-
 /-- The step of `++`, typed: `PUSH 1` and the operator's tail, `x += 1`. -/
 theorem bump_simT {p : PrimTy} (hp : p.isNumeric = true) (op : IncDec) {a : p.Denote} {w : Word}
     (h : ReprV p a w) (m : Machine) :
@@ -661,7 +640,7 @@ theorem popCode_run (m : Machine) (st : List Word) (s : Slot) (hW : m.store s < 
   · simp [run, popCode, assertTop, Instr.step, Machine.next, h]
   · have e : (m.store s + (W - 1)) % W = m.store s - 1 := by
       rw [show m.store s + (W - 1) = (m.store s - 1) + W by omega, Nat.add_mod_right,
-        mod_W_of_lt (by omega)]
+        Nat.mod_eq_of_lt (by omega)]
     simp [run, popCode, assertTop, Instr.step, Machine.next, h]
     rw [e]
 

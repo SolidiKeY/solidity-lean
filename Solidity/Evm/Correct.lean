@@ -479,6 +479,24 @@ theorem declStorage_family (R : RefTy) (x : Var) (init : Option (Solidity.ARhs C
   · exact declAlias_sim q hm hw
   · simp only [declStorageIn, reduceCtorEq] at hw
 
+/-- An update of an `OpLoc` in the fragment: a local, or a storage
+location; `inFrag` rejects a memory one. -/
+theorem opLoc_sim {p : PrimTy} {l : Solidity.OpLoc C Γ p} {H : HTy} {res : TRes (Solidity.Out C H Γ)}
+    {onLocal : Nat → List Instr} {onLoc : Solidity.Loc C Γ (.prim p) → List Instr}
+    (hl : opLocIn F l = true)
+    (hlocal : ∀ i, l = .local i →
+      StmtOut C L b F false false false res (run (onLocal (cellOf b i)) m) m)
+    (hstore : ∀ loc, opLocToLoc l = some loc → locIn F false loc = true →
+      StmtOut C L b F false false false res (run (onLoc loc) m) m) :
+    StmtOut C L b F false false false res (run (opLocCode b l onLocal onLoc) m) m := by
+  cases l with
+  | «local» i => exact hlocal i rfl
+  | root rt h => exact hstore _ rfl hl
+  | field q f h => exact hstore _ rfl hl
+  | index it q i => exact hstore _ rfl hl
+  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+
 theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)
     (hpn : p.isNumeric = true) (l : Solidity.OpLoc C Γ p) (r : Solidity.Val C Γ p)
     {F' : Frag Γ} (hm : Sim C L b F σ m)
@@ -488,14 +506,9 @@ theorem opAssign_family {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
   simp only [Bool.and_eq_true] at hok
-  obtain ⟨hl, hr⟩ := hok
-  cases l with
-  | «local» i => exact opLocal_sim hpn hop i r hm hr
-  | root rt h => exact opStore_sim hpn hop rfl r hm hl hr
-  | field q f h => exact opStore_sim hpn hop rfl r hm hl hr
-  | index it q i => exact opStore_sim hpn hop rfl r hm hl hr
-  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
-  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  rw [compileStmt]
+  exact opLoc_sim hok.1 (fun i h => by subst h; exact opLocal_sim hpn hop i r hm hok.2)
+    fun _ h hwl => opStore_sim hpn hop h r hm hwl hok.2
 
 theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
     (l : Solidity.OpLoc C Γ p) {F' : Frag Γ} (hm : Sim C L b F σ m)
@@ -504,14 +517,9 @@ theorem incDec_family {p : PrimTy} (op : IncDec) (hpn : p.isNumeric = true)
       (run (compileStmt b (.incDec op hpn l)) m) m := by
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
-  have hl := hok
-  cases l with
-  | «local» i => exact bumpLocal_sim hpn op i hm
-  | root rt h => exact bumpStore_sim hpn op rfl hm hl
-  | field q f h => exact bumpStore_sim hpn op rfl hm hl
-  | index it q i => exact bumpStore_sim hpn op rfl hm hl
-  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
-  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  rw [compileStmt]
+  exact opLoc_sim hok (fun i h => by subst h; exact bumpLocal_sim hpn op i hm)
+    fun _ h hwl => bumpStore_sim hpn op h hm hwl
 
 theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
     (hpn : p.isNumeric = true) (l : Solidity.OpLoc C Γ p) (hs : l.recvSimple = true)
@@ -521,14 +529,9 @@ theorem assignIncDec_family {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
       (run (compileStmt b (.assignIncDec i op hpn l hs)) m) m := by
   simp only [inFrag] at hw
   obtain ⟨hok, rfl⟩ := Frag.guard_some hw
-  have hl := hok
-  cases l with
-  | «local» j => exact assignBumpLocal_sim hpn op i j hm
-  | root rt h => exact assignBumpStore_sim hpn op i rfl hm hl
-  | field q f h => exact assignBumpStore_sim hpn op i rfl hm hl
-  | index it q j => exact assignBumpStore_sim hpn op i rfl hm hl
-  | mfield _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
-  | mindex _ _ _ => simp only [opLocIn, opLocToLoc, Bool.false_eq_true] at hl
+  rw [compileStmt]
+  exact opLoc_sim hok (fun j h => by subst h; exact assignBumpLocal_sim hpn op i j hm)
+    fun _ h hwl => assignBumpStore_sim hpn op i h hm hwl
 
 theorem push_family {E : Ty} (q : Solidity.SPath C Γ (.array E))
     (v : Option (Solidity.Src C Γ E)) (hd : (v.isSome || E.defaultOkS) = true) {F' : Frag Γ}

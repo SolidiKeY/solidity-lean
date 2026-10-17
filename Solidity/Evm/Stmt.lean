@@ -53,14 +53,6 @@ theorem trans {sh₁ sh₂ : Bool} {m₁ m₂ m₃ : Machine} (h₁ : Keeps C b 
     simp only [Bool.or_eq_false_iff] at h
     exact Nat.le_trans (h₁.len h.1 x hx) (h₂.len h.2 x hx)⟩
 
-theorem or_left {sh' : Bool} {m m' : Machine} (h : Keeps C b sh m m') :
-    Keeps C b (sh || sh') m m' :=
-  ⟨h.mem, fun hs => h.len (by simp only [Bool.or_eq_false_iff] at hs; exact hs.1)⟩
-
-theorem or_right {sh' : Bool} {m m' : Machine} (h : Keeps C b sh' m m') :
-    Keeps C b (sh || sh') m m' :=
-  ⟨h.mem, fun hs => h.len (by simp only [Bool.or_eq_false_iff] at hs; exact hs.2)⟩
-
 theorem base {b' : Nat} {m m' : Machine} (h : Keeps C b' sh m m') (hb : b ≤ b') :
     Keeps C b sh m m' :=
   ⟨fun l hl => h.mem l (Nat.lt_of_lt_of_le hl hb), h.len⟩

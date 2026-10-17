@@ -118,14 +118,6 @@ def Look.drop {Γ Δ : Ctx} (h : Ext Γ Δ) (ρ : Look C Δ) : Look C Γ := fun 
 @[simp] theorem Look.cons_there {Γ : Ctx} {u t : LTy} (v : Seen C u) (ρ : Look C Γ)
     (j : Idx Γ t) : Look.cons (u := u) v ρ (.there j) = ρ j := rfl
 
-/-- Two positions with one number are one. -/
-theorem Idx.eq_of_toNat {Γ : Ctx} {t : LTy} : (i j : Idx Γ t) → i.toNat = j.toNat → i = j
-  | .here, .here, _ => rfl
-  | .there i, .there j, h => by
-    rw [Idx.eq_of_toNat i j (by simp only [Idx.toNat, Nat.add_right_cancel_iff] at h; exact h)]
-  | .here, .there j, h => by simp only [Idx.toNat, Nat.zero_ne_add_one] at h
-  | .there i, .here, h => by simp only [Idx.toNat, Nat.add_one_ne_zero] at h
-
 theorem Look.set_same : {Γ : Ctx} → {t : LTy} → (ρ : Look C Γ) → (i : Idx Γ t) →
     (v : Seen C t) → Look.set ρ i v i = v
   | _ :: _, _, _, .here, _ => rfl
@@ -178,13 +170,15 @@ theorem get_meet {Γ : Ctx} (F G : Frag Γ) {t : LTy} (i : Idx Γ t) {g : Fl}
     not_true_eq_false]
   split at h <;> simp_all only [not_true_eq_false]
 
+theorem meet_comm {Γ : Ctx} (F G : Frag Γ) : F.meet G = G.meet F := by
+  simp only [meet, mk.injEq]
+  rw [List.zipWith_comm]
+  congr; funext f g
+  split <;> split <;> simp_all only [not_true_eq_false]
+
 theorem get_meet_right {Γ : Ctx} (F G : Frag Γ) {t : LTy} (i : Idx Γ t) {g : Fl}
-    (h : (F.meet G).get i = g) (hg : g ≠ .dead) : G.get i = g := by
-  simp only [get, meet, List.getD_eq_getElem?_getD, List.getElem?_zipWith] at h ⊢
-  cases h1 : F.fl[i.toNat]? <;> cases h2 : G.fl[i.toNat]? <;>
-    simp_all only [ne_eq, Option.getD_none, getElem?_eq_none_iff, Nat.not_lt, Option.getD_some,
-    not_true_eq_false]
-  split at h <;> simp_all only [not_true_eq_false]
+    (h : (F.meet G).get i = g) (hg : g ≠ .dead) : G.get i = g :=
+  get_meet G F i (meet_comm F G ▸ h) hg
 
 theorem get_dropFragile {Γ : Ctx} (F : Frag Γ) {t : LTy} (i : Idx Γ t) {g : Fl}
     (h : F.dropFragile.get i = g) (hg : g ≠ .dead) : F.get i = g ∧ g ≠ .fragile := by
@@ -272,10 +266,6 @@ theorem flags {m : Machine} {G : Frag Γ} (h : SimL C L b F σ ρ m)
 theorem meet {m : Machine} (G : Frag Γ) (h : SimL C L b F σ ρ m) :
     SimL C L b (F.meet G) σ ρ m :=
   h.flags fun i _ hg hd => Frag.get_meet F G i hg hd
-
-theorem meet_right {m : Machine} (G : Frag Γ) (h : SimL C L b F σ ρ m) :
-    SimL C L b (G.meet F) σ ρ m :=
-  h.flags fun i _ hg hd => Frag.get_meet_right G F i hg hd
 
 /-- A storage write that may shrink an array (`pop`, `delete`): the fragile
 aliases forgotten. -/
@@ -402,7 +392,7 @@ theorem setVal {m : Machine} (h : SimL C L b F σ ρ m) {p : PrimTy} (i : Idx Γ
   · rw [e]
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
-      cases Idx.eq_of_toNat j i hji
+      cases Idx.toNat_inj j i hji
       rw [if_pos rfl, Look.set_same]; exact hv
     · rw [if_neg hji, Look.set_other ρ i v j hji]; exact h.vals j
   · have hji : ¬ j.toNat = i.toNat := fun hh => by cases Idx.ty_eq j i hh
@@ -426,7 +416,7 @@ theorem setAlias {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy} (i : Idx �
   · rw [Frag.get_set] at hj
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
-      cases Idx.eq_of_toNat j i hji
+      cases Idx.toNat_inj j i hji
       split at hj
       · rw [e, if_pos rfl, Look.set_same]; exact ⟨r, s, rfl, rfl, hp⟩
       · rw [Frag.get_eq_dead F _ (by omega)] at hj; cases hj
@@ -466,7 +456,7 @@ theorem setFragile {m : Machine} (h : SimL C L b F σ ρ m) {R : RefTy} (i : Idx
   · rw [Frag.get_set] at hj
     by_cases hji : j.toNat = i.toNat
     · cases Idx.ty_eq j i hji
-      cases Idx.eq_of_toNat j i hji
+      cases Idx.toNat_inj j i hji
       split at hj
       · rw [e, if_pos rfl, Look.set_same]; exact ⟨r, s, rfl, rfl, hp, hlive⟩
       · rw [Frag.get_eq_dead F _ (by omega)] at hj; cases hj
