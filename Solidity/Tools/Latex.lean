@@ -131,12 +131,8 @@ def derivationLatex (φ : Expr) (links : Array (String × Expr)) : MetaM String 
   latex_pp app.Solidity.Fml.Steps, latex_pp app.Solidity.Fml.StepBy,
   latex_pp app.Solidity.Fml.RwBy, latex_pp app.Solidity.Fml.MergeBy,
   latex_pp app.Solidity.Fml.Via, latex_pp app.Solidity.Fml.LeadsK,
-  latex_pp app.Solidity.Fml.Leads]
-def ppFormula : LatexPrinter := fun e => do
-  return LatexData.atomString (← calculusLatex e)
-
-@[latex_pp app.Solidity.Valid, latex_pp app.Solidity.Proves]
-def ppJudgement : LatexPrinter := fun e => do
+  latex_pp app.Solidity.Fml.Leads, latex_pp app.Solidity.Valid, latex_pp app.Solidity.Proves]
+def ppCalculus : LatexPrinter := fun e => do
   return LatexData.atomString (← calculusLatex e)
 
 /-- LaTeX string of an elaborated expression; also composes with LeanTeX's

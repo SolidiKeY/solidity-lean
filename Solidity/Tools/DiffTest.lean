@@ -167,8 +167,8 @@ def genBool : Gen Bool := do pure ((← randBelow 2) == 1)
 
 /-- A value of the type `p`: `genUint`, `genInt`, `genBool`. -/
 def genVal : (p : PrimTy) → Gen p.Denote
-  | .uint => do pure ((PrimTy.ofInt? .uint (← genUint)).getD (PrimTy.dflt .uint))
-  | .int => do pure ((PrimTy.ofInt? .int (← genInt)).getD (PrimTy.dflt .int))
+  | .uint => do pure (PrimTy.ofIntD .uint (← genUint))
+  | .int => do pure (PrimTy.ofIntD .int (← genInt))
   | .bool => do pure (show Bool from ← genBool)
 
 /-- How `#difftest` draws a storage: words by `genVal`;

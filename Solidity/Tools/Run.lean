@@ -105,10 +105,10 @@ def _root_.Solidity.State.exampleStore : State StandardExample [] :=
 def _root_.Solidity.State.testSuiteStore : State TestSuite [] :=
   freshState TestSuite (balance := PrimTy.ofIntD .uint 1000000000)
 
-/-- A word read as a `uint`, or the error `#run` reports. -/
-def uintOf (n : Int) : Except String PrimTy.uint.Denote :=
-  match PrimTy.ofInt? .uint n with
-  | some u => pure u
+/-- An integer read at the type `p`, or the error `#run` reports. -/
+def ofIntE (p : PrimTy) (n : Int) : Except String p.Denote :=
+  match PrimTy.ofInt? p n with
+  | some v => pure v
   | none => throw "the start state is not of the contract's types"
 
 /-- `σ` with the transaction fields given replaced; an error where one is
@@ -116,7 +116,7 @@ not a `uint`. -/
 def State.withTx {C : Contract} (σ : State C []) (sender value time balance : Option Int) :
     Except String (State C []) := do
   let w (n : Option Int) (d : PrimTy.uint.Denote) := match n with
-    | some n => uintOf n
+    | some n => ofIntE .uint n
     | none => pure d
   pure { σ with
     tx := { σ.tx with msgSender := ← w sender σ.tx.msgSender, msgValue := ← w value σ.tx.msgValue,
@@ -136,9 +136,7 @@ def State.withRoot {C : Contract} (σ : State C []) (r : Name) (v : Semantics.Ca
 
 /-- A state variable's integer given to `#run`, read at its type `p`. -/
 def rootInt (r : Name) (p : PrimTy) (n : Int) : Except String (Name × Semantics.CallValue) :=
-  match PrimTy.ofInt? p n with
-  | some v => pure (r, .ofTyped v)
-  | none => throw "the start state is not of the contract's types"
+  return (r, .ofTyped (← ofIntE p n))
 
 /-- `σ` with the state variables given replaced, in order. -/
 def State.withRoots {C : Contract} (σ : State C []) (roots : List (Name × Semantics.CallValue)) :
