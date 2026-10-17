@@ -48,6 +48,127 @@ Next work, when explicitly resumed:
    negation and binding compiler fixes. Its counts must not be presented as
    validation of the current implementation.
 
+## Resumed — 2026-10-17
+
+**Scope.** The target stays the weekly update `1b4341a303..048a74de51`
+(25 SolKey commits). It has two parts: the rule delta in
+`tests/migration/rule-delta.json`, and 79 added or modified Solidity
+sources. Those sources are almost the whole 112-source audit (950 of the
+1,032 proved rows, 140 of the 162 pending), so "weekly delta" and "source
+parity" largely coincide; the distinction that remains is that pre-existing
+whole-repository gaps (calldata, short-circuit calls, recursive structs) are
+in scope only where a weekly source needs them. Upstream has moved seven
+commits past the pin (`473da8944c`, 2026-10-16); they are out of scope
+until a repin.
+
+**Step 1, the rule delta, is complete at the rule level.** All 22 added and
+7 changed program taclets have rule-map rows: 21 are `Taclet` constructors
+of the same name, and `newArrayCaptureStorageRoot` is merged into
+`newArrayCapture` (`RuleShapes`). The
+changes are: `noFixedArrayElement` dropped from the delete and `storagePopSave`
+taclets (Lean never had it; the rule-map note is updated), the appended slot
+reset (`delAt(…, sp[sp.length])`) in `storageLocalRootPushBind` and
+`storagePushLengthSaveReferenceElement` (both already Lean's form), and
+`nonMappingElement` added to `storagePushLengthSaveReferenceElement`
+(the mapping-element case is `storagePushLengthSaveMappingElement`). The
+`structRules.key`/`memoryRules.key` delta (`wf*`, `fixed*`, `selectOnShape*`,
+`selectStDelNode{Element,Member,Size}`, `shapeAtSize`, `sizeOfMap`) is the
+shape/well-formedness theory of an untyped storage; the rule map records it
+as subsumed by the typed `Storage C`. The 12 new `proofs/*.key` files prove
+those lemmas in KeY and have no Lean counterpart to check.
+
+**Step 2, renamed specifications upstream.** Run through the testing entry
+point against the pinned snapshot: benchmark and real-world `ERC20.mint` and
+`ERC20.burn` (four rows, unsupported in the 2026-10-16 audit for renamed
+locals) are now **proved** (3.4–6.3 s each). `DocsBallot.delegate` is no
+longer refused for renaming; it now stops at the struct-layout gap (struct
+`Voter` is not in the struct table).
+
+**Step 3, nested storage arrays (the `contracts/Array*` suites).** solkey
+closes each index's `inBounds` branch at its statement, so its paths are
+plain `at(i)` and its reads walk the writes one at a time. Lean's
+reduction kept every checked index as `atIn(S, q, i)`, the whole storage
+inside the path, so each later write copied it: one `uint[][]` leaf had
+908,084 nodes against the 24,000-node bound. Four changes, none in the
+rules or the run, each with its evaluation lemma:
+
+- `foldAt`/`foldNext`/`foldRead3` (`Calculus/DecideScoped.lean`): a checked
+  index whose check reads as literal `true` (the existing bounded
+  `literalRead` on `seq(atIn(S, q, i), true)`) is lowered as the plain
+  `q[i]`; `q[q.length]` at a literal length likewise. `foldAt_eval`,
+  `foldNext_eval`, `foldRead3_eval` (`Calculus/DecideTyped.lean`).
+- `LTm.retsS` looks through comparisons and `&&`/`||` (`BinOp.isCmp`,
+  `binopT_isSome`) and through `seq`/`kite` of returning terms, so `seqL`
+  drops guards such as `0 < find(storage, a.length)` that a delete leaves.
+- `TSegs.hasFrom` (`Calculus/Decide.lean`): `has` at a starting-storage path
+  is `has` at its last dynamic index; a member, a key and a fixed index in
+  range below it are always there on a typed storage (solkey's
+  `wfFixedSize`/`selectOnShape*`, subsumed by `Storage C`; `findM_atF`,
+  `TSegs.hasFrom_eval`). The typed `has` lemmas moved from `Closer.lean`.
+- A second admission tier (`Calculus/ReadBounds.lean`): where every storage
+  history is concrete (`LTm.known?`: updates at literal paths below a root
+  deleted earlier, or `mtSt`, and no `pop`/`shrink`/`extend`), the closer
+  and `literalRead` take up to 96,000 nodes and 40 storage updates; else
+  the old 24,000/12. Measured first: on an undeleted `uint[][]` the
+  elimination of `len` through 1–4 pushes grows 160, 994, 11,612, 279,608
+  characters, so the old bound stays for symbolic histories. A first
+  version that admitted `pop` ran away on `Examples/Tactics/Dangling.lean`
+  (a dangling alias writes past the live end, whose slots a delete keeps);
+  `Op2.exposes` excludes those updates.
+
+Results against the pinned snapshot, through the testing entry point (no
+regression in any row):
+
+| Suite | 2026-10-16 audit | Now |
+|---|---|---|
+| `ArrayMatrixDD` | 13 pending | 8 proved, 5 pending |
+| `ArrayMatrixDF` | 11 pending, 1 not run | 8 proved, 4 pending |
+| `ArrayMatrixFD` | 10 pending | 7 proved, 3 pending |
+| `ArrayMatrixFF` | 1 proved, 8 pending | 5 proved, 4 pending |
+| `ArrayCubeDFD` | 9 pending | 9 proved |
+| `ArrayCubeFDF` | 11 pending | 7 proved, 4 pending |
+| `ArrayCubeDFDMemory` | 4 pending | 4 pending |
+| `ArrayMatrixConversions` | 2 proved, 3 pending, 3 unsupported | 5 proved, 3 unsupported |
+| `ArrayCopyShapes` | 4 proved, 1 pending, 2 unsupported | 5 proved, 2 unsupported |
+| `ArrayMappingShapes` | 3 proved, 1 pending | 4 proved |
+| `FixedLengths` | 10 proved, 2 pending | 10 proved, 2 pending |
+| total | 20 proved | 68 proved, 26 pending, 5 unsupported |
+
+The default build (322 jobs) and the TestSuite (`Report.lean`: 511
+derived, 1 pending) pass; one pin moved (`Examples/Tools.lean`, a guard
+now dropped) and the oversized-input regression of
+`Examples/Tactics/Decide.lean` grew past `concreteSize`.
+`Examples/Tactics/NestedArrays.lean` is the regression for the shape.
+The corpus, sort and JavaScript gates were not rerun.
+
+A read-only finder review found no soundness defect (every new twin has its
+link theorem; the evaluation lemmas state equality). It found three cost
+risks, all repaired: `boundsOk` tested concreteness before size; a history
+counted as concrete with a value read from the memory, a read below a root
+never deleted, or a path through a mapping's key (a delete keeps a mapping's
+entries); and the early index probe ran on unknown histories too, where the
+reduction used to stay lazy (`LTm.foldable` now gates it). Stale
+docstrings were corrected. The results above are after the repairs.
+
+What stays open in these suites, by cause:
+
+- **Nested copies between storage and memory** (`storageToMemoryCopiesDeeply`,
+  `memoryToStorageCopiesDeeply`, `memoryRowAliasBecomesIndependentStorageRows`
+  in every shape; all of `ArrayCubeDFDMemory`): the memory closer reads one
+  level of `copySt(m, select(S, a))` (`readFromCopyToStorage`), not the
+  identity of an inner copied row. A closer feature, from
+  `structMemoryRules.key`.
+- **Default-allocated nested fixed memory arrays** (`memoryAssignmentSharesWrites`
+  in `DF`, `FF`, `FDF`: `uint[2][2] memory m; m[0][0] = 11; …`): within
+  the bounds (6,828 nodes in `FF`), but the memory closer answers `false`:
+  it does not read the inner rows a declaration allocates with its
+  parent. A memory-closer feature (`initIdentity`, `structMemoryRules.key`).
+- **`pop` then `push`** (`ArrayMatrixDD.popPushAtDepth{1,2}…`): excluded
+  from concrete histories by design; needs a read of slots past the live
+  end that does not branch.
+- **Frontend**: three element-type-changing copies and a struct layout
+  (unsupported, unchanged).
+
 ## Reproduce the inputs
 
 The committed snapshot contains 274 files: the tracked Solidity and `.key`

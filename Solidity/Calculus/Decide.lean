@@ -1014,31 +1014,101 @@ structure SFun (C : Contract) where
   rd : SRd C
   orig : LTm C .st
 
-/-- `TSegs.noIdx`'s compiled twin. -/
-def TSegs.noIdxM : {S T : Ty} → TSegs C S T → Bool
-  | _, _, .nil => true
-  | _, _, .field _ p => p.noIdxM
-  | _, _, .key _ p => p.noIdxM
-  | _, _, _ => false
+/-- A fixed-size array's index, a literal below its size `n`. -/
+def TSegs.litBelow (i : LTm C (.val .uint)) (n : Nat) : Bool :=
+  match i.litV? with
+  | some v => decide ((v : PrimTy.uint.Denote).1.toNat < n)
+  | none => false
 
-/-- Segments of members and keys alone: a location below them is always
+/-! ### Where a typed storage has a location
+
+A typed storage has its contract's shape (solkey's `wf*` and
+`selectOnShape*` taclets, subsumed by `Storage C`): below a location, a
+member, a mapping's key and a fixed-size array's index in range are always
 there. -/
-@[implemented_by TSegs.noIdxM]
-def TSegs.noIdx {S T : Ty} (p : TSegs C S T) : Bool :=
-  @TSegs.rec C (fun _ _ _ => Bool) true (fun _ _ ih => ih) (fun _ _ _ => false)
-    (fun _ _ _ => false) (fun _ _ ih => ih) S T p
 
-theorem TSegs.noIdx_eq_noIdxM {S T : Ty} (p : TSegs C S T) : p.noIdx = p.noIdxM := by
-  induction p with
-  | nil | «at» | atF => rfl
-  | field h p ih | key i p ih => simp only [TSegs.noIdxM, ← ih]; rfl
+/-- A location one path further has a location where its base has one, when
+every value has the path: a struct its members, a mapping its keys. -/
+theorem has_append (st : Storage C) {U W : Ty} (r : SRef C U) (p : Path U W)
+    (hp : ∀ v : SVal U, (v.findM p).isSome = true) :
+    st.obs.has (.ref (r.append p)) = st.obs.has (.ref r) := by
+  rw [Storage.obs_has_ref, Storage.obs_has_ref, SVal.obs_has, SVal.obs_has]
+  show ((st.get r.hroot).findM (r.path.append p)).isSome = _
+  rw [SVal.findM_append]
+  cases (st.get r.hroot).findM r.path with
+  | none => rfl
+  | some v => exact hp v
 
-/-- The starting storage's observation `c` at a path; a path of members and
-keys alone is there. -/
+theorem has_root (st : Storage C) (r : Name) {T : Ty} (h : C.rootType r = some T) :
+    st.obs.has (.ref (SRef.ofRoot r h)) = true := by
+  rw [Storage.obs_has_ref, SVal.obs_has]
+  show ((st.get h).findM .nil).isSome = true
+  rw [SVal.findM_nil']; rfl
+
+theorem findM_field {s f : Name} {T : Ty} (h : Semantics.lookupBy f (Semantics.structDef s) = some T)
+    (v : SVal (.ref (.struct s))) : (v.findM (.field h .nil)).isSome = true := by
+  cases v
+  simp only [SVal.findM, SVal.findM_nil', Option.isSome_some]
+
+theorem findM_key {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal (.ref (.mapping K V))) :
+    (v.findM (.key k .nil)).isSome = true := by
+  cases v
+  simp only [SVal.findM]
+  split <;> rfl
+
+theorem findM_atF {E : Ty} {n : Nat} (k : PrimTy.uint.Denote)
+    (hk : (k : PrimTy.uint.Denote).1.toNat < n) (v : SVal (.ref (.fixed E n))) :
+    (v.findM (.atF k .nil)).isSome = true := by
+  cases v with
+  | fixed e =>
+    show (match e.toList[(k : PrimTy.uint.Denote).1.toNat]? with
+      | some x => x.findM .nil
+      | none => none).isSome = true
+    rw [List.getElem?_eq_getElem (by rw [SVec.length_toList]; exact hk)]
+    show (SVal.findM _ .nil).isSome = true
+    rw [SVal.findM_nil']; rfl
+
+/-- `TSegs.hasFrom`'s compiled twin. -/
+def TSegs.hasFromM : {S T : Ty} → TSegs C S T → LTm C (.path S) → LTm C (.val .bool) →
+    LTm C (.val .bool)
+  | _, _, .nil, _, acc => acc
+  | _, _, .field h p, base, acc => p.hasFromM (.app1 (.field h) base) acc
+  | _, _, .at i p, base, _ =>
+    p.hasFromM (.index (.arr .dyn) base i) (.obsH (.index (.arr .dyn) base i))
+  | _, _, @TSegs.atF _ _ _ n i p, base, acc =>
+    p.hasFromM (.index (.arr .fixed) base i)
+      (if TSegs.litBelow i n then acc else .obsH (.index (.arr .fixed) base i))
+  | _, _, .key i p, base, acc => p.hasFromM (.index .map base i) acc
+
+/-- **`has` at the segments `p` below `base`** on a typed storage, `acc`
+`has` at `base`: past the last segment a location need not be below (a
+dynamic index, a fixed one not known in range), `has` there; past the
+others (a member, a key, a fixed index in range), `acc` unchanged.  By the
+recursor. -/
+@[implemented_by TSegs.hasFromM]
+def TSegs.hasFrom {S T : Ty} (p : TSegs C S T) :
+    LTm C (.path S) → LTm C (.val .bool) → LTm C (.val .bool) :=
+  @TSegs.rec C (fun S _ _ => LTm C (.path S) → LTm C (.val .bool) → LTm C (.val .bool))
+    (fun _ acc => acc)
+    (fun h _ ih base acc => ih (.app1 (.field h) base) acc)
+    (fun i _ ih base _ => ih (.index (.arr .dyn) base i) (.obsH (.index (.arr .dyn) base i)))
+    (@fun _ _ n i _ ih base acc => ih (.index (.arr .fixed) base i)
+      (if TSegs.litBelow i n then acc else .obsH (.index (.arr .fixed) base i)))
+    (fun i _ ih base acc => ih (.index .map base i) acc) S T p
+
+theorem TSegs.hasFrom_eq_hasFromM {S T : Ty} (p : TSegs C S T) : p.hasFrom = p.hasFromM := by
+  funext base acc
+  induction p generalizing acc with
+  | nil => rfl
+  | field h p ih | «at» i p ih | atF i p ih | key i p ih =>
+    simp only [TSegs.hasFromM, ← ih]; rfl
+
+/-- The starting storage's observation `c` at a path; `has` read from the
+last segment a location need not be below (`TSegs.hasFrom`). -/
 def initRd : SRd C := fun {V} c P =>
   @CK.casesOn (fun V c => LTm C (.path V) → LTm C (.val c.out)) V c
     (fun _ q => .obsW q) (fun _ q => .obsL q)
-    (fun _ q => if P.segs.noIdx then .tt else .obsH q) P.toLTm
+    (fun _ _ => P.segs.hasFrom (.app0 (.root P.r P.hr)) .tt) P.toLTm
 
 /-- The starting storage. -/
 def SFun.init : SFun C := ⟨.tt, initRd, .app0 .storage⟩

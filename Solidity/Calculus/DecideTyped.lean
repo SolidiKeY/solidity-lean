@@ -247,9 +247,7 @@ theorem LTm.literalRead_eval (g : State C []) (ν : AEnv) {p : PrimTy}
   dsimp only [LTm.literalRead]
   split
   · split
-    · split
-      · exact LTm.elim_eval g ν t
-      · rfl
+    · exact LTm.elim_eval g ν t
     · rfl
   · rfl
 
@@ -257,6 +255,65 @@ theorem foldRead2_eval (g : State C []) (ν : AEnv) {a b s : Srt}
     (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     (foldRead2 o x y).eval g ν = (LTm.app2 o x y).eval g ν := by
   cases o <;> simp only [foldRead2, LTm.literalRead_eval, fold2_eval]
+
+theorem Op3.eval_atIn (g : State C []) {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V)
+    (x : Option (Storage C)) (y : Option (SRef C (.ref R))) (z : Option k.Denote) :
+    (Op3.eval g (.atIn it) x y z : Option (SRef C V)) =
+      x.bind fun st => y.bind fun r => z.bind fun j => st.atT it r j := rfl
+
+theorem foldAt_eval (g : State C []) (ν : AEnv) {R : RefTy} {k : PrimTy} {V : Ty}
+    (it : IndexTy R k V) (S : LTm C .st) (q : LTm C (.path (.ref R))) (i : LTm C (.val k)) :
+    (foldAt it S q i).eval g ν = (LTm.app3 (.atIn it) S q i).eval g ν := by
+  unfold foldAt
+  split
+  case isFalse => rfl
+  split
+  · rename_i h
+    have h' := congrArg (fun t => LTm.eval g ν t) (LTm.eq_of_litV? h)
+    simp only [LTm.literalRead_eval, LTm.eval_seq, LTm.eval_app3] at h'
+    rw [LTm.eval_index, LTm.eval_app3, Op3.eval_atIn]
+    rw [Op3.eval_atIn, show LTm.eval g ν (LTm.lit (p := .bool) true) = some true from rfl] at h'
+    revert h'
+    cases (LTm.eval g ν S : Option (Storage C)) <;> cases (LTm.eval g ν q : Option (SRef C _)) <;>
+      cases (LTm.eval g ν i : Option k.Denote) <;>
+      simp only [Option.bind_none, Option.bind_some, reduceCtorEq, imp_self, false_implies]
+    rename_i st r j
+    unfold Storage.atT
+    generalize Storage.checkIndex st r it j = c
+    cases c with
+    | none => intro h; cases h
+    | some _ => intro _; rfl
+  · rfl
+
+theorem foldNext_eval (g : State C []) (ν : AEnv) {E : Ty} (S : LTm C .st)
+    (q : LTm C (.path (.ref (.array E)))) :
+    (foldNext S q).eval g ν = (LTm.app2 .nextIn S q).eval g ν := by
+  unfold foldNext
+  split
+  case isFalse => rfl
+  split
+  · rename_i n h
+    have h' := congrArg (fun t => LTm.eval g ν t) (LTm.eq_of_litV? h)
+    simp only [LTm.literalRead_eval, LTm.eval_app2] at h'
+    rw [LTm.eval_index, LTm.eval_app2, show LTm.eval g ν (LTm.lit n) = some n from rfl]
+    rw [show LTm.eval g ν (LTm.lit n) = some n from rfl] at h'
+    revert h'
+    cases (LTm.eval g ν S : Option (Storage C)) <;> cases (LTm.eval g ν q : Option (SRef C _))
+    · intro h; cases h
+    · intro h; cases h
+    · intro h; cases h
+    rename_i st r
+    show st.len r = some n → some (r.index (.arr .dyn) n) = st.nextT r
+    unfold Storage.len Storage.nextT
+    cases st.find r with
+    | none => intro h; cases h
+    | some v => intro h; cases h; rfl
+  · rfl
+
+theorem foldRead3_eval (g : State C []) (ν : AEnv) {a b c s : Srt} (o : Op3 C a b c s)
+    (x : LTm C a) (y : LTm C b) (z : LTm C c) :
+    (foldRead3 o x y z).eval g ν = (LTm.app3 o x y z).eval g ν := by
+  cases o <;> first | rfl | exact foldAt_eval g ν _ x y z
 
 theorem Op2.toL_ne {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     (hat : o.isAt = false) : o.toL ρ x y = some (foldRead2 o x y) := by
@@ -303,7 +360,7 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
       | true =>
         cases o <;> simp only [Op1.isNext, reduceCtorEq] at hm
         cases ht
-        rw [LTm.eval_app2, Tm.eval_app1, h.stor]
+        rw [foldNext_eval, LTm.eval_app2, Tm.eval_app1, h.stor]
         show (Option.bind _ _ : Option _) = Option.bind _ _
         rw [show (x'.eval g₀ ν : Option (SRef C _)) = x.eval τ from hx]
       | false =>
@@ -320,7 +377,7 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     | true =>
       cases o <;> simp only [Op2.isAt, reduceCtorEq] at ha
       cases ht
-      rw [LTm.eval_app3, Tm.eval_app2, h.stor]
+      rw [foldAt_eval, LTm.eval_app3, Tm.eval_app2, h.stor]
       rw [show (x'.eval g₀ ν : Option (SRef C _)) = x.eval τ from hx,
         show (y'.eval g₀ ν : Option _) = y.eval τ from hy]
       rfl
@@ -333,6 +390,8 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', y', hy', z', hz', ht⟩ := ht
     cases ht
+    show Srt.DRel _ ((foldRead3 o x' y' z').eval g₀ ν) _
+    rw [foldRead3_eval]
     exact Op3.eval_drel g₀ τ.glob o (Tm.toL_drel h x x' hx') (Tm.toL_drel h y y' hy')
       (Tm.toL_drel h z z' hz')
 
@@ -445,6 +504,24 @@ theorem Fresh.foldRead2 {a b s : Srt} {n : Nat} (o : Op2 C a b s) {x : LTm C a} 
   simp only [foldRead2_eval]
   exact Fresh.app2 o hx hy g ν p k v hk
 
+theorem Fresh.foldAt {R : RefTy} {k : PrimTy} {V : Ty} {n : Nat} (it : IndexTy R k V)
+    {S : LTm C .st} {x : LTm C (.path (.ref R))} {y : LTm C (.val k)}
+    (hS : Fresh n S) (hx : Fresh n x) (hy : Fresh n y) : Fresh n (foldAt it S x y) :=
+  fun g ν p k v hk => by
+    simp only [foldAt_eval]
+    exact Fresh.app3 (.atIn it) hS hx hy g ν p k v hk
+
+theorem Fresh.foldRead3 {a b c s : Srt} {n : Nat} (o : Op3 C a b c s) {x : LTm C a}
+    {y : LTm C b} {z : LTm C c} (hx : Fresh n x) (hy : Fresh n y) (hz : Fresh n z) :
+    Fresh n (foldRead3 o x y z) := fun g ν p k v hk => by
+  simp only [foldRead3_eval]
+  exact Fresh.app3 o hx hy hz g ν p k v hk
+
+theorem Fresh.foldNext {E : Ty} {n : Nat} {S : LTm C .st} {x : LTm C (.path (.ref (.array E)))}
+    (hS : Fresh n S) (hx : Fresh n x) : Fresh n (foldNext S x) := fun g ν p k v hk => by
+  simp only [foldNext_eval]
+  exact Fresh.app2 .nextIn hS hx g ν p k v hk
+
 /-- **A term pushed in is fresh where the state is.** -/
 theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : LTm C s) →
     t.toL ρ = some t' → Fresh ρ.next t'
@@ -457,18 +534,18 @@ theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : L
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', ht⟩ := ht
     have hx := Tm.toL_fresh hF x x' hx'
-    cases o <;> cases ht <;> first | exact Fresh.fold1 _ hx | exact Fresh.app1 _ hx | exact Fresh.app2 _ hF.stor hx
+    cases o <;> cases ht <;> first | exact Fresh.fold1 _ hx | exact Fresh.app1 _ hx | exact Fresh.foldNext hF.stor hx
   | _, .app2 o x y, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', y', hy', ht⟩ := ht
     have hx := Tm.toL_fresh hF x x' hx'
     have hy := Tm.toL_fresh hF y y' hy'
-    cases o <;> cases ht <;> first | exact Fresh.foldRead2 _ hx hy | exact Fresh.fold2 _ hx hy | exact Fresh.app2 _ hx hy | exact Fresh.app3 _ hF.stor hx hy
+    cases o <;> cases ht <;> first | exact Fresh.foldRead2 _ hx hy | exact Fresh.fold2 _ hx hy | exact Fresh.app2 _ hx hy | exact Fresh.foldAt _ hF.stor hx hy
   | _, .app3 o x y z, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', y', hy', z', hz', ht⟩ := ht
     cases ht
-    exact Fresh.app3 _ (Tm.toL_fresh hF x x' hx') (Tm.toL_fresh hF y y' hy')
+    exact Fresh.foldRead3 _ (Tm.toL_fresh hF x x' hx') (Tm.toL_fresh hF y y' hy')
       (Tm.toL_fresh hF z z' hz')
 
 end FreshTerms

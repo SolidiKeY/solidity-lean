@@ -14,7 +14,10 @@ starts in.  The reduction's terms are the typed signature's (`LTm`,
 symbol (`Tm.toL`): the symbols read their arguments as the scoped term's
 do.  Two symbols read the state they are read in, and are pushed in onto
 the storage the updates left: an index checked (`at`, onto `atIn`) and
-the slot past an array's end (`next`, onto `nextIn`).
+the slot past an array's end (`next`, onto `nextIn`).  Where the check, or
+the length, reads as a literal there (`foldAt`, `foldNext`), the index is
+the plain `q[i]`: solkey closes `inBounds` at the statement too, and a path
+that kept the storage would be copied by every later write that reads it.
 
 The symbolic state (`SymS C Γ`) is indexed by the leaf's context: at each
 position the term an update bound its local to (`BEnv`, a sort per local
@@ -144,6 +147,49 @@ def _root_.Solidity.Op0.toL (ρ : SymS C Γ) {s : Srt} (o : Op0 C s) : Option (L
     (some (.app0 .mtSt)) (fun s f {_} h => some (.app0 (.member s f h)))
     (fun n => some (.app0 (.zlit n)))
 
+/-- Keep symbolic reads in their original form so later antecedents can normalize them. -/
+def LTm.literalRead {p : PrimTy} (t : LTm C (.val p)) : LTm C (.val p) :=
+  if t.boundsOk then
+    let r := t.elim
+    if r.litV?.isSome then r else t
+  else t
+
+/-- Resolve demanded primitive storage observations before later writes duplicate them.
+The storage itself remains a lazy term; all other symbols retain literal folding. -/
+def foldRead2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s :=
+  match o with
+  | .find => (LTm.app2 .find x y).literalRead
+  | .len => (LTm.app2 .len x y).literalRead
+  | o => fold2 o x y
+
+/-- A storage worth reading at a formation: within `concreteSize` nodes,
+its history concrete (`LTm.known?`).  Elsewhere a read may grow with the
+history, and the checked index stays lazy. -/
+def LTm.foldable (S : LTm C .st) : Bool :=
+  (S.fits concreteSize).isSome && S.known?.isSome
+
+/-- `q[i]` checked in the storage `S` (`atIn`), unchecked where the check
+reads as `true`: solkey's `inBounds` branch closed at the statement, the
+index a plain `at(i)`.  The path then no longer carries the storage it was
+checked in, which each later write would otherwise copy. -/
+def foldAt {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (S : LTm C .st)
+    (q : LTm C (.path (.ref R))) (i : LTm C (.val k)) : LTm C (.path V) :=
+  if S.foldable then
+    match (LTm.seq (.app3 (.atIn it) S q i) LTm.tt).literalRead.litV? with
+    | some true => .index it q i
+    | _ => .app3 (.atIn it) S q i
+  else .app3 (.atIn it) S q i
+
+/-- `q[q.length]` in the storage `S` (`nextIn`), at a literal index where
+the length reads as one (`foldAt`'s reason). -/
+def foldNext {E : Ty} (S : LTm C .st) (q : LTm C (.path (.ref (.array E)))) :
+    LTm C (.path E) :=
+  if S.foldable then
+    match (LTm.app2 .len S q).literalRead.litV? with
+    | some n => .index (.arr .dyn) q (.lit n)
+    | none => .app2 .nextIn S q
+  else .app2 .nextIn S q
+
 /-- A unary symbol pushed in: an operator folded on a literal, `next`
 onto the storage the updates left; a read of the ledger outside the
 fragment. -/
@@ -154,7 +200,7 @@ def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LT
     (fun _ => none)
     (fun {_} x => some (.app1 .delValue x))
     (fun {_} {_} {_} h x => some (.app1 (.field h) x))
-    (fun {_} x => some (.app2 .nextIn ρ.stor x))
+    (fun {_} x => some (foldNext ρ.stor x))
     (fun {_} x => some (.app1 .sval x))
     (fun {_} h x => some (.app1 (.newArr h) x))
     (fun R h x => some (.app1 (.alloc R h) x))
@@ -169,23 +215,6 @@ def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LT
     (fun x => some (.app1 .toInt x))
     (fun {_} {_} {_} shape x => some (.app1 (.fixedCopy shape) x)) x
 
-/-- Keep symbolic reads in their original form so later antecedents can normalize them. -/
-def LTm.literalRead {p : PrimTy} (t : LTm C (.val p)) : LTm C (.val p) :=
-  if (t.fits normalizationSize).isSome then
-    if t.stDepth ≤ normalizationDepth then
-      let r := t.elim
-      if r.litV?.isSome then r else t
-    else t
-  else t
-
-/-- Resolve demanded primitive storage observations before later writes duplicate them.
-The storage itself remains a lazy term; all other symbols retain literal folding. -/
-def foldRead2 {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) : LTm C s :=
-  match o with
-  | .find => (LTm.app2 .find x y).literalRead
-  | .len => (LTm.app2 .len x y).literalRead
-  | o => fold2 o x y
-
 /-- A binary symbol pushed in: an operator folded on literals, a checked
 index onto the storage the updates left (`atIn`). -/
 def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x : LTm C a)
@@ -196,7 +225,7 @@ def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x 
     (fun {_} x y => some (foldRead2 .len x y))
     (fun {_} x y => some (.app2 .read x y))
     (fun {_} x y => some (.app2 .mlen x y))
-    (fun {_} {_} {_} it x y => some (.app3 (.atIn it) ρ.stor x y))
+    (fun {_} {_} {_} it x y => some (foldAt it ρ.stor x y))
     (fun {_} x y => some (.app2 .nextIn x y))
     (fun {_} x y => some (.app2 .delAt x y))
     (fun {_} x y => some (.app2 .pushSlot x y))
@@ -215,10 +244,18 @@ def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x 
     (fun op h x y => some (.app2 (.zbin op h) x y))
     (fun op h x y => some (.app2 (.zcmp op h) x y)) x y
 
+/-- A ternary symbol, an index checked in a storage it names (`atIn`)
+folded as `foldAt`. -/
+def foldRead3 {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm C b) (z : LTm C c) :
+    LTm C s :=
+  match o with
+  | .atIn it => foldAt it x y z
+  | o => .app3 o x y z
+
 /-- A ternary symbol pushed in. -/
 def _root_.Solidity.Op3.toL {a b c s : Srt} (o : Op3 C a b c s) (x : LTm C a) (y : LTm C b)
     (z : LTm C c) : Option (LTm C s) :=
-  some (.app3 o x y z)
+  some (foldRead3 o x y z)
 
 /-- `Tm.toL`'s compiled twin. -/
 def _root_.Solidity.Tm.toLM (ρ : SymS C Γ) : {s : Srt} → Tm C Γ s → Option (LTm C s)

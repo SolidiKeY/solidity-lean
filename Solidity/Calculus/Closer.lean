@@ -619,35 +619,6 @@ end Returns
 
 section Has
 
-/-- A location one path further has a location where its base has one, when
-every value has the path: a struct its members, a mapping its keys. -/
-theorem has_append (st : Storage C) {U W : Ty} (r : SRef C U) (p : Path U W)
-    (hp : ∀ v : SVal U, (v.findM p).isSome = true) :
-    st.obs.has (.ref (r.append p)) = st.obs.has (.ref r) := by
-  rw [Storage.obs_has_ref, Storage.obs_has_ref, SVal.obs_has, SVal.obs_has]
-  show ((st.get r.hroot).findM (r.path.append p)).isSome = _
-  rw [SVal.findM_append]
-  cases (st.get r.hroot).findM r.path with
-  | none => rfl
-  | some v => exact hp v
-
-theorem has_root (st : Storage C) (r : Name) {T : Ty} (h : C.rootType r = some T) :
-    st.obs.has (.ref (SRef.ofRoot r h)) = true := by
-  rw [Storage.obs_has_ref, SVal.obs_has]
-  show ((st.get h).findM .nil).isSome = true
-  rw [SVal.findM_nil']; rfl
-
-theorem findM_field {s f : Name} {T : Ty} (h : Semantics.lookupBy f (Semantics.structDef s) = some T)
-    (v : SVal (.ref (.struct s))) : (v.findM (.field h .nil)).isSome = true := by
-  cases v
-  simp only [SVal.findM, SVal.findM_nil', Option.isSome_some]
-
-theorem findM_key {K : PrimTy} {V : Ty} (k : K.Denote) (v : SVal (.ref (.mapping K V))) :
-    (v.findM (.key k .nil)).isSome = true := by
-  cases v
-  simp only [SVal.findM]
-  split <;> rfl
-
 /-- `has` at an entry: a mapping's where its base has one, its key
 returning. -/
 def hasIdx {R : RefTy} {k : PrimTy} {V : Ty} (it : IndexTy R k V) (q : LTm C (.path (.ref R)))

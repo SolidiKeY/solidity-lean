@@ -162,19 +162,20 @@ A push is one term, not KeY's two parallel `save`s (see "Deviations").
 
 ## Storage delete
 
-solkey leaves `delete` and `pop()` open on a path through a fixed-size array
-element (`noFixedArrayElement`, on `storageRootDelete`, `storageFieldDelete`,
-`storageIndexDelete`, `storageIndexArrayDelete`, `storagePopSave`). The Lean
-constructors have no such restriction and are sound there: `SVal.defaultOf`
-keeps a fixed-size array's `n` elements (reset) where it empties a dynamic
-one, and `push`/`pop` are written at `.array` only.
+Since `048a74de51`, solkey's `delete` and `pop()` taclets no longer exclude a
+path through a fixed-size array element (`noFixedArrayElement` was dropped from
+`storageRootDelete`, `storageFieldDelete`, `storageIndexDelete`,
+`storageIndexArrayDelete` and `storagePopSave`). The Lean constructors never
+had that restriction: `SVal.defaultOf` keeps a fixed-size array's `n` elements
+(reset) where it empties a dynamic one, and `push`/`pop` are written at
+`.array` only.
 
 | KeY taclet | `Taclet` constructor | Status | Notes |
 | --- | --- | --- | --- |
 | `storageRootDelete` | same | same | `delete(gsp) ⇝ { storage := delAt(storage, gsp) }` |
 | `storageFieldDelete`, `storageFieldDelete_unfold_leftFst`, `storageIndexDelete_unfold_leftFst`, `storageIndexDeleteNonSimpleIndexCapture` | same names | same | |
 | `storageIndexDelete` | same | same | a mapping entry |
-| `storageIndexArrayDelete` | same | same | KeY's `inBounds` split is the path's own bounds check, which reverts |
+| `storageIndexArrayDelete` | same | same | KeY's `inBounds` split is the path's own bounds check, which reverts; where it reads as `true`, the reduction lowers the path as the plain index (`foldAt`), as KeY's closed branch leaves `at(i)` |
 
 ## Memory allocation, aliasing, declarations
 
@@ -484,7 +485,7 @@ storage has the shape its contract declares, so no clause reads a layout.
 | `applyEq`, `applyEqRigid` | closer clauses `Facts.addEqR` (`orient`), `Facts.rw`, `Facts.rebuild` | subsumed | a premise `t ≐ v` rewrites `t` to a literal or a lower position everywhere after it, a constant included; every fact is read again under the others (`Facts.rebuild`, KeY's `applyEq` on the antecedent), the pairs apart kept |
 | `closeFalse` (in the closer), `replace_known_left` | closer clauses `Facts.refuteEq`, `Facts.apart` | subsumed | a premise refuted (two literals apart, a side that halts, a pair the premises keep apart) closes the leaf; a comparison of a pair kept apart folds (`a == b` to `false`, `a != b` to `true`, `Facts.fold2`) |
 | `cut`, `cut_direct` on a `bool` | closer clauses `boolSplit`, `LTm.pick`, `Facts.proveEqN` | subsumed | a case split on a `bool` local, or on a key comparison the normal forms leave open (KeY's `cut` on `k = j`), at most `closeFuel` deep |
-| `selectOnShape{Struct,Element,Member,Size}`, `wfFixedSize`, `wfDynSize`, `wf{Fixed,Dyn,Map}Elem` | none | subsumed | a typed storage has its contract's shape (`Storage C`): a read at a path its type gives returns, and `has` at a member or a mapping's entry is its base's (`hasOf`, `hasN`) |
+| `selectOnShape{Struct,Element,Member,Size}`, `wfFixedSize`, `wfDynSize`, `wf{Fixed,Dyn,Map}Elem` | none | subsumed | a typed storage has its contract's shape (`Storage C`): a read at a path its type gives returns, and `has` at a member, a mapping's entry or a fixed-size array's index in range is its base's (`hasOf`, `hasN`; on the starting storage `TSegs.hasFrom`, `findM_atF`) |
 | `sizeNotNegative` | closer clause `Facts.range` | subsumed | a length is at least `0`, its type's range (`PrimTy.lo`), KeY's `\add(0 <= selectSt<[int]>(st, size) ==>)`. The slot at `(len + 1) - 1` after a `push` is the one pushed: `(a + b) - b` cancels (`Facts.cancel`) and `len < len + 1` folds (`Facts.ltSucc`, Lean only), so `storagePushReadBack` is derived (W10.4) |
 | `arrayLengthNonNegative` with a bound a premise gives | closer clauses `Facts.hasIdxDyn`, `Facts.hasRange` | subsumed | a dynamic array has a slot at every index its ranges put below its length |
 | `inEqSimp_*` on bounds by constants | closer clauses `Facts.range`, `Facts.rangeOp`, `Facts.arithOk`, `ltDec`, `leDec`, `Facts.cmpFold`, `Facts.lessBnd`, `Facts.cmpBnds`, `Facts.neEdge`, `Facts.neBnd` | subsumed | a value's type range, a premise `t op k` or `t ≠ k` narrowing `t`, ranges added through `+`, `-`; a comparison whose ranges decide it folds, and an addition or subtraction whose operands' ranges keep it in its type returns |
@@ -494,7 +495,7 @@ storage has the shape its contract declares, so no clause reads a layout.
 | — (a guard is Lean's) | closer clause `kiteBool?` | Lean only | `c = true ? true : false` read as `c` |
 | — (a guard is Lean's) | closer clauses `kiteAssert`, `assertArg?`, `Facts.addAsserts` | Lean only | a guard `kite(c, true, a, err)` that returns, like `assert(c)`, gives the premise `c ≐ true` |
 | `inEqSimp_*` on differences, `polySimp_*` in general | — | open | no bound on `y - x` for two symbolic terms, no polynomial normal form |
-| — (Lean only: a cost bound) | `Seq.closeSize`, `Seq.stackSize` (`Calculus/DecideComplete.lean`), `LFml.fits`, `LFml.stDepth` | Lean only | a leaf whose reduction is past `closeSize` nodes, or stacks more than `stackSize` storage updates, is left to the walk |
+| — (Lean only: a cost bound) | `Seq.closeSize`, `Seq.stackSize` (`Calculus/DecideComplete.lean`), `LFml.fits`, `LFml.stDepth`, `LFml.boundsOk` (`Calculus/ReadBounds.lean`) | Lean only | a leaf whose reduction is past `closeSize` nodes, or stacks more than `stackSize` storage updates, is left to the walk, unless every storage history is concrete (`LTm.known?`), where `concreteSize` and `concreteDepth` apply |
 
 ### The storage readers (`Calculus/Decide.lean`)
 

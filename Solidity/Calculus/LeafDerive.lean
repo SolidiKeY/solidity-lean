@@ -8,7 +8,8 @@ where no program rule fits.  Here it is closed on its scoped form
 (`Seq.leafCheckS`): the sequent put back together (`Hyps.wrap`), no
 modality left (`Fml.modalFree`), its updates pushed in by position
 (`Fml.toLS`, `Calculus/DecideScoped.lean`) within `closeSize` nodes and
-`stackSize` storage updates on the same pushed-in leaf (`Seq.checkCore`,
+`stackSize` storage updates on the same pushed-in leaf, or the concrete
+tier (`LFml.boundsOk`; `Seq.checkCore`,
 `Calculus/DecideComplete.lean`), the reads of writes
 eliminated under the premises (`LFml.elimF`, `Calculus/ElimFacts.lean`),
 memory read as solkey reads it and the reduction closed by the closer
@@ -248,8 +249,10 @@ def leafCheckOn (ψ : Fml C []) : Option Bool :=
 `sol_prove?` asks before it tries a step that reduces the leaf (the
 reduction, its quoting and its kernel check heed no heartbeats): the
 leaf with its updates pushed in is within `closeSize` nodes and within
-`stackSize` storage updates (`Seq.fitsCore`, `Calculus/DecideComplete.lean`), both before the
-elimination. -/
+`stackSize` storage updates, or the concrete tier (`Seq.fitsCore`,
+`LFml.boundsOk`, `Calculus/DecideComplete.lean`), before the elimination.
+Pushing in reads storage early only on a concrete history
+(`LTm.literalRead`, `LTm.foldable`), within the same tiers. -/
 def leafFitsOn (ψ : Fml C []) : Bool :=
   ψ.modalFree && (fitsCore ψ).getD false
 

@@ -195,6 +195,7 @@ import Solidity.Examples.ExampleNames
 import Solidity.Examples.Tactics.Specs
 import Solidity.Examples.Tactics.SelectOnSaveConsr
 import Solidity.Examples.Tactics.Dangling
+import Solidity.Examples.Tactics.NestedArrays
 import Solidity.Examples.Tactics.Symex
 import Solidity.Examples.Tactics.Step
 import Solidity.Examples.Tactics.Print

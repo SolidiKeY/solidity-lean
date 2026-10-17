@@ -276,34 +276,63 @@ def _root_.Solidity.Op1.retsStep {a s : Srt} : Op1 C a s → Bool
   | .field _ => true
   | _ => false
 
+/-- An operator that returns on every pair of operands it takes: a
+comparison or a connective. -/
+def _root_.Solidity.BinOp.isCmp : BinOp → Bool
+  | .lt | .gt | .le | .ge | .eqB | .neB | .and | .or => true
+  | _ => false
+
+theorem binopT_isSome (op : BinOp) (hc : op.isCmp = true) {p : PrimTy}
+    (h : op.accepts p = true) (a : p.Denote) {y : Option p.Denote} (hy : y.isSome = true) :
+    (binopT op h a y).isSome = true := by
+  obtain ⟨b, rfl⟩ := Option.isSome_iff_exists.1 hy
+  unfold binopT
+  split
+  · rfl
+  · show (op.evalT h a b).isSome = true
+    cases p <;> cases op <;> simp only [BinOp.isCmp, Bool.false_eq_true] at hc <;>
+      first | rfl | exact absurd h (by decide)
+
+/-- A binary symbol that returns where its arguments do: a comparison. -/
+def _root_.Solidity.Op2.retsStep {a b s : Srt} : Op2 C a b s → Bool
+  | .binop op _ => op.isCmp
+  | _ => false
+
 /-- `LTm.retsS`'s compiled twin. -/
 def LTm.retsSM : {s : Srt} → LTm C s → Bool
   | _, .var _ | _, .app0 _ => true
   | _, .app1 o x => o.retsStep && x.retsSM
+  | _, .app2 o x y => o.retsStep && x.retsSM && y.retsSM
   | _, .index _ q i => q.retsSM && i.retsSM
   | _, .obsW q | _, .obsL q | _, .obsH q => q.retsSM
+  | _, .seq d a => d.retsSM && a.retsSM
+  | _, .kite a b t e => a.retsSM && b.retsSM && t.retsSM && e.retsSM
   | _, _ => false
 
 /-- **The term always returns**: an atom, a constant, a path of members
-and unchecked indices below a root, the starting storage read at one.  By
-the recursor. -/
+and unchecked indices below a root, the starting storage read at one, a
+comparison of such terms, and a guard or a choice between them (the
+starting storage's reads after a delete keep these).  By the recursor. -/
 @[implemented_by LTm.retsSM]
 def LTm.retsS {s : Srt} (t : LTm C s) : Bool :=
   @LTm.rec C (fun _ _ => Bool)
     (@fun _ _ => true) (@fun _ _ => true)
     (@fun _ _ o _ ihx => o.retsStep && ihx)
-    (@fun _ _ _ _ _ _ _ _ => false)
+    (@fun _ _ _ o _ _ ihx ihy => o.retsStep && ihx && ihy)
     (@fun _ _ _ _ _ _ _ _ _ _ _ => false)
     (@fun _ _ _ _ _ _ ihq ihi => ihq && ihi)
     (@fun _ _ ih => ih) (@fun _ _ ih => ih) (@fun _ _ ih => ih)
-    (@fun _ _ _ _ _ _ => false) (@fun _ _ _ _ _ => false)
-    (@fun _ _ _ _ _ _ _ _ _ _ => false) (@fun _ => false) s t
+    (@fun _ _ _ _ ihd iha => ihd && iha) (@fun _ _ _ _ _ => false)
+    (@fun _ _ _ _ _ _ iha ihb iht ihe => iha && ihb && iht && ihe) (@fun _ => false) s t
 
 theorem LTm.retsS_eq_retsSM {s : Srt} (t : LTm C s) : t.retsS = t.retsSM := by
   induction t with
-  | var | app0 | app2 | app3 | seq | orElse | kite | err => rfl
+  | var | app0 | app3 | orElse | err => rfl
   | app1 o x ih | obsW x ih | obsL x ih | obsH x ih => simp only [LTm.retsSM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.retsSM, ← ihx, ← ihy]; rfl
   | index it q i ihq ihi => simp only [LTm.retsSM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.retsSM, ← ihd, ← iha]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.retsSM, ← iha, ← ihb, ← iht, ← ihe]; rfl
 
 theorem Op0.eval_isSome (g : State C []) {s : Srt} (o : Op0 C s) : (o.eval g).isSome = true := by
   cases o <;> rfl
@@ -327,6 +356,34 @@ theorem LTm.retsS_eval {g : State C []} {ν : AEnv} {s : Srt} {t : LTm C s} (h :
   | obsW q ih | obsL q ih | obsH q ih =>
     obtain ⟨v, hv⟩ := ih h
     exact ⟨_, by show (q.eval g ν).bind _ = _; rw [hv]; rfl⟩
+  | app2 o x y ihx ihy =>
+    have h' : (o.retsStep && x.retsS) = true ∧ y.retsS = true := Bool.and_eq_true_iff.1 h
+    have h'' : o.retsStep = true ∧ x.retsS = true := Bool.and_eq_true_iff.1 h'.1
+    obtain ⟨v, hv⟩ := ihx h''.2
+    obtain ⟨w, hw⟩ := ihy h'.2
+    have h1 := h''.1
+    cases o with
+    | binop op hp =>
+      have hs := binopT_isSome op h1 hp v (y := some w) rfl
+      obtain ⟨r, hr⟩ := Option.isSome_iff_exists.1 hs
+      exact ⟨r, by rw [LTm.eval_app2, hv, hw]; exact hr⟩
+    | _ => simp only [Op2.retsStep, Bool.false_eq_true] at h1
+  | seq d a ihd iha =>
+    have h' : d.retsS = true ∧ a.retsS = true := Bool.and_eq_true_iff.1 h
+    obtain ⟨v, hv⟩ := ihd h'.1
+    obtain ⟨w, hw⟩ := iha h'.2
+    exact ⟨w, by rw [LTm.eval_seq, hv]; exact hw⟩
+  | kite a b t e iha ihb iht ihe =>
+    simp only [LTm.retsS, Bool.and_eq_true] at h
+    obtain ⟨⟨⟨ha, hb⟩, ht⟩, he⟩ := h
+    obtain ⟨x, hx⟩ := iha ha
+    obtain ⟨y, hy⟩ := ihb hb
+    obtain ⟨u, hu⟩ := iht ht
+    obtain ⟨w, hw⟩ := ihe he
+    rw [LTm.eval_kite, hx, hy]
+    by_cases hxy : x = y
+    · exact ⟨u, by simp only [Option.bind_some, hxy, if_true]; exact hu⟩
+    · exact ⟨w, by simp only [Option.bind_some, hxy, if_false]; exact hw⟩
   | _ => simp only [LTm.retsS, Bool.false_eq_true] at h
 
 /-- `a`, guarded by `g` returning; `a` alone after a term that always

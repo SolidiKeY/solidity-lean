@@ -1222,35 +1222,80 @@ theorem SRd.Rep.at {S : SRd C} {st : Storage C} (h : SRd.Rep g ν S st) {T : Ty}
     rw [SPath.eval_snoc, hP, Option.bind_some, hr]; rfl
   exact (h V c _ _ e).trans (by cases c <;> rfl)
 
-/-- Below members and keys alone, a value always has a location. -/
-theorem TSegs.findM_noIdx {S T : Ty} (p : TSegs C S T) :
-    ∀ (pp : Path S T), p.eval g ν = some pp → p.noIdx = true → ∀ v : SVal S, (v.findM pp).isSome = true := by
+/-- **`has` read past the segments always there**: `TSegs.hasFrom` reads what
+`has` at the whole path reads, where the path evaluates and `acc` reads
+`has` at its base. -/
+theorem TSegs.hasFrom_eval {S T : Ty} (p : TSegs C S T) :
+    ∀ (base : LTm C (.path S)) (acc : LTm C (.val .bool)) (rb : SRef C S) (pp : Path S T),
+      (base.eval g ν : Option (SRef C S)) = some rb → p.eval g ν = some pp →
+      (acc.eval g ν : Option Bool) = some (g.storage.obs.has (.ref rb)) →
+      ((p.hasFrom base acc).eval g ν : Option Bool) =
+        some (g.storage.obs.has (.ref (rb.append pp))) := by
   induction p with
   | nil =>
-    intro pp hp _ v
+    intro base acc rb pp _ hp ha
     cases hp
-    cases v <;> rfl
+    show (acc.eval g ν : Option Bool) = _
+    rw [ha, SRef.append_nil]
   | field h rest ih =>
-    intro pp hp hn v
-    rw [TSegs.eval_field] at hp
-    obtain ⟨pp', hpp', rfl⟩ := Option.map_eq_some_iff.1 hp
-    cases v with
-    | struct fs => exact ih pp' hpp' hn _
-  | «at» i rest _ => intro _ _ hn; cases hn
-  | atF i rest _ => intro _ _ hn; cases hn
-  | key i rest ih =>
-    intro pp hp hn v
-    rw [TSegs.eval_key] at hp
-    obtain ⟨j, -, hp⟩ := Option.bind_eq_some_iff.1 hp
-    obtain ⟨pp', hpp', rfl⟩ := Option.map_eq_some_iff.1 hp
-    cases v with
-    | map m d =>
-      show (match lookupBy _ m.toList with
-        | some x => x.findM pp'
-        | none => d.findM pp').isSome = true
+    intro base acc rb pp hb hp ha
+    obtain ⟨pp', hpp', rfl⟩ := eval_field_some (g := g) (ν := ν) hp
+    have hb' : ((LTm.app1 (.field h) base).eval g ν : Option (SRef C _)) =
+        some (rb.append (.field h .nil)) := by
+      rw [LTm.eval_field, hb]; rfl
+    have ha' : (acc.eval g ν : Option Bool) =
+        some (g.storage.obs.has (.ref (rb.append (.field h .nil)))) := by
+      rw [ha, has_append _ _ _ (findM_field h)]
+    have := ih _ acc _ pp' hb' hpp' ha'
+    rw [SRef.append_append, Path.append_field, Path.append_nil] at this
+    exact this
+  | «at» i rest ih =>
+    intro base acc rb pp hb hp _
+    obtain ⟨k, pp', hk, hpp', rfl⟩ := eval_at_some (g := g) (ν := ν) hp
+    have hb' : ((LTm.index (.arr .dyn) base i).eval g ν : Option (SRef C _)) =
+        some (rb.append (.at k .nil)) := by
+      rw [LTm.eval_index, hb, hk]; simp only [Option.bind_some, SRef.index, Path.index_dyn]
+    have ha' : ((LTm.obsH (.index (.arr .dyn) base i)).eval g ν : Option Bool) =
+        some (g.storage.obs.has (.ref (rb.append (.at k .nil)))) := by
+      rw [LTm.eval_obsH, hb']; rfl
+    have := ih _ _ _ pp' hb' hpp' ha'
+    rw [SRef.append_append, Path.append_at, Path.append_nil] at this
+    exact this
+  | @atF E U n i rest ih =>
+    intro base acc rb pp hb hp ha
+    obtain ⟨k, pp', hk, hpp', rfl⟩ := eval_atF_some (g := g) (ν := ν) hp
+    have hb' : ((LTm.index (.arr .fixed) base i).eval g ν : Option (SRef C _)) =
+        some (rb.append (.atF k .nil)) := by
+      rw [LTm.eval_index, hb, hk]; simp only [Option.bind_some, SRef.index, Path.index_fixed]
+    have ha' : ((if TSegs.litBelow i n then acc else .obsH (.index (.arr .fixed) base i)).eval g ν :
+        Option Bool) = some (g.storage.obs.has (.ref (rb.append (.atF k .nil)))) := by
       split
-      · exact ih pp' hpp' hn _
-      · exact ih pp' hpp' hn _
+      · rename_i hl
+        unfold TSegs.litBelow at hl
+        split at hl
+        · rename_i w hw
+          have hi := LTm.eq_of_litV? hw
+          subst hi
+          have hkw : k = w := by cases hk; rfl
+          subst hkw
+          rw [ha, has_append _ _ _ (findM_atF k (of_decide_eq_true hl))]
+        · cases hl
+      · rw [LTm.eval_obsH, hb']; rfl
+    have := ih _ _ _ pp' hb' hpp' ha'
+    rw [SRef.append_append, Path.append_atF, Path.append_nil] at this
+    exact this
+  | key i rest ih =>
+    intro base acc rb pp hb hp ha
+    obtain ⟨j, pp', hj, hpp', rfl⟩ := eval_key_some (g := g) (ν := ν) hp
+    have hb' : ((LTm.index .map base i).eval g ν : Option (SRef C _)) =
+        some (rb.append (.key j .nil)) := by
+      rw [LTm.eval_index, hb, hj]; simp only [Option.bind_some, SRef.index, Path.index_map]
+    have ha' : (acc.eval g ν : Option Bool) =
+        some (g.storage.obs.has (.ref (rb.append (.key j .nil)))) := by
+      rw [ha, has_append _ _ _ (findM_key j)]
+    have := ih _ acc _ pp' hb' hpp' ha'
+    rw [SRef.append_append, Path.append_key, Path.append_nil] at this
+    exact this
 
 theorem initRd_rep : SRd.Rep g ν initRd g.storage := by
   intro V c Q r hQ
@@ -1262,15 +1307,14 @@ theorem initRd_rep : SRd.Rep g ν initRd g.storage := by
     show ((LTm.obsL Q.toLTm).eval g ν : Option _) = _
     rw [LTm.eval_obsL, SPath.eval_toLTm, hQ]; rfl
   | has V =>
-    show ((if Q.segs.noIdx then LTm.tt else LTm.obsH Q.toLTm).eval g ν : Option _) = _
-    split
-    · rename_i hn
-      show some true = some (g.storage.obs.has (.ref r))
-      rw [Storage.obs_has_ref, SVal.obs_has]
-      unfold SPath.eval at hQ
-      obtain ⟨pp, hpp, rfl⟩ := Option.map_eq_some_iff.1 hQ
-      rw [TSegs.findM_noIdx g ν Q.segs pp hpp hn]
-    · rw [LTm.eval_obsH, SPath.eval_toLTm, hQ]; rfl
+    show ((Q.segs.hasFrom (.app0 (.root Q.r Q.hr)) .tt).eval g ν : Option _) = _
+    unfold SPath.eval at hQ
+    obtain ⟨pp, hpp, rfl⟩ := Option.map_eq_some_iff.1 hQ
+    have := TSegs.hasFrom_eval g ν Q.segs (.app0 (.root Q.r Q.hr)) .tt (SRef.ofRoot Q.r Q.hr) pp
+      rfl hpp (by show some true = _; rw [has_root])
+    rw [this]
+    simp only [SRef.ofRoot, SRef.append, Path.append_nil]
+    rfl
 
 theorem sto_find_findM {U : Ty} (st : Storage C) (r : SRef C U) :
     st.find r = (st.get r.hroot).findM r.path := by

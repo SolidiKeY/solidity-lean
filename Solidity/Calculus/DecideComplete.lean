@@ -10,7 +10,9 @@ import Solidity.Calculus.Symex
 `Calculus/DecideScoped.lean`), the reads of writes eliminated under the
 premises (`LFml.elimF`), memory read and the result closed by the closer
 (`LFml.decideMem`), within the closer's bounds (`Seq.checkCore`:
-`Seq.closeSize`, `Seq.stackSize`), all of it evaluated once by the kernel
+`Seq.closeSize`, `Seq.stackSize`, or `concreteSize` and `concreteDepth`
+where every storage history is concrete, `LFml.boundsOk`), all of it
+evaluated once by the kernel
 (`Seq.checkCore_valid`).  Where the closer does not close it, or the leaf
 is past the bounds, it fails; `sol_reduce?` shows the reduction
 (`Fml.reduceS`, `Valid.of_reduceS`).
@@ -40,11 +42,13 @@ def stackSize : Nat := normalizationDepth
 
 /-- **The scoped closer on a leaf `ψ` of no modality**: `none` where the
 reduction does not read it; else whether it closes it: within `closeSize`
-nodes and within `stackSize` storage updates on the same pushed-in leaf
-(both tested before the elimination), and closed by `LFml.decideMem`. -/
+nodes and within `stackSize` storage updates on the same pushed-in leaf,
+or `concreteSize` and `concreteDepth` where its histories are concrete
+(`LFml.boundsOk`, tested before the elimination), and closed by
+`LFml.decideMem`. -/
 def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
-    (l.fits closeSize).isSome && decide (l.stDepth ≤ stackSize) && l.decideMem
+    l.boundsOk && l.decideMem
 
 /-- What `checkCore` closes is valid: `Valid.of_toLS` and
 `LFml.decideMem_valid`. -/
@@ -53,10 +57,11 @@ theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Valid �
   obtain ⟨l, hl, -, hc⟩ := h
   exact Valid.of_toLS hl (LFml.decideMem_valid hc)
 
-/-- `checkCore`'s bounds alone: `none` where the reduction does not read
-the leaf; else whether it is within `closeSize` and `stackSize`. -/
+/-- `checkCore`'s bounds alone (`LFml.boundsOk`): `none` where the
+reduction does not read the leaf; else whether it is within `closeSize` and
+`stackSize`, or the concrete tier. -/
 def fitsCore (ψ : Fml C []) : Option Bool :=
-  (ψ.toLS true SymS.init).map fun l => (l.fits closeSize).isSome && decide (l.stDepth ≤ stackSize)
+  (ψ.toLS true SymS.init).map fun l => l.boundsOk
 
 end Seq
 
@@ -135,7 +140,7 @@ def closeScoped (g : MVarId) (C φ : Expr) : MetaM Bool := do
   | some false =>
     if (← evalCore ``Seq.fitsCore C φ) == some false then
       throwError "sol_decide: the leaf is past the closer's bounds (`Seq.closeSize` nodes, \
-        `Seq.stackSize` storage updates)"
+        `Seq.stackSize` storage updates; `concreteSize`, `concreteDepth` for a concrete history)"
     return false
   | some true =>
     let ob := mkApp (mkConst ``Option [0]) (mkConst ``Bool)

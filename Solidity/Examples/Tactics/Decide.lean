@@ -535,9 +535,10 @@ private def wide : Nat → LTm StandardExample (.val .uint)
   | 0 => .lit ⟨0, rfl⟩
   | n + 1 => .app2 (.binop .add rfl) (wide n) (wide n)
 
--- The tree contains 32,767 nodes and is rejected before early elimination.
-#guard ((wide 14).fits normalizationSize).isNone
-#guard LTm.beqR (wide 14).literalRead (wide 14)
+-- The tree contains 262,143 nodes, past both size bounds (`concreteSize`
+-- for a concrete history), and is rejected before early elimination.
+#guard ((wide 17).fits concreteSize).isNone
+#guard LTm.beqR (wide 17).literalRead (wide 17)
 
 private def SignedReads : Contract := contract!{ int[] values; }
 private def signedFalse : Fml SignedReads [] := dl[SignedReads]{ [
