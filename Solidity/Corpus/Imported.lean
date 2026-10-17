@@ -53,7 +53,7 @@ array-shape and signed-push fixtures. The bool-keyed mapping's key is read
 as a `uint` (solc encodes a bool key as `0` or `1`). -/
 
 /--
-info: [signedValues, copySource9, copyTargetDyn, fixedGrid, fixedMapsOfFixed, dynMapsOfFixed, copyBig, copySmall, localOut, fixedByKey, boolKeyed, pair]
+info: [signedValues, copySource9, copyTargetDyn, fixedGrid, fixedMapsOfFixed, dynMapsOfFixed, copyBig, copySmall, localOut, fixedByKey, emptyTokens, boolKeyed, pair]
 -/
 #guard_msgs in
 #eval IO.println ((Solkey.TestSuite.vars.filter fun (n, _) =>
