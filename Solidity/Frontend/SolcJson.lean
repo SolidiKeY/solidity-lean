@@ -205,7 +205,16 @@ def arr (j : Json) (k : String) : Except Gap (List Json) := do
   | .ok a => pure a.toList
   | .error e => throw (.unsupported s!"solc JSON: {e}")
 
-def kind (j : Json) : String := (j.getObjValAs? String "nodeType").toOption.getD ""
+/-- The string at `k`, if there is one. -/
+def str? (j : Json) (k : String) : Option String := (j.getObjValAs? String k).toOption
+
+/-- The array at `k`, if there is one. -/
+def arr? (j : Json) (k : String) : Option (Array Json) := (opt j k).bind (·.getArr?.toOption)
+
+/-- The array at `k`, empty if there is none. -/
+def arrD (j : Json) (k : String) : Array Json := (arr? j k).getD #[]
+
+def kind (j : Json) : String := (J.str? j "nodeType").getD ""
 
 def line (j : Json) : Nat := (j.getObjValAs? Nat "line").toOption.getD 0
 
@@ -216,7 +225,11 @@ def id? (j : Json) : Option Int := (j.getObjValAs? Int "id").toOption
 /-- solc's type of an expression, `typeDescriptions.typeString`. -/
 def tyStr (j : Json) : String :=
   ((j.getObjVal? "typeDescriptions").toOption.bind
-    fun t => (t.getObjValAs? String "typeString").toOption).getD ""
+    fun t => J.str? t "typeString").getD ""
+
+/-- The names of the variable declarations among `ns`. -/
+def varDeclNames (ns : List Json) : List String :=
+  ns.filterMap fun n => if kind n == "VariableDeclaration" then str? n "name" else none
 
 /-- Every node of `j`, depth first. -/
 partial def nodes (j : Json) : List Json :=
@@ -345,7 +358,7 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
 partial def mentionsStruct (s : String) (j : Json) : Bool :=
   (J.nodes j).any fun n =>
     J.kind n == "UserDefinedTypeName" &&
-      ((J.opt n "pathNode").bind (fun p => (p.getObjValAs? String "name").toOption)) == some s
+      ((J.opt n "pathNode").bind (fun p => J.str? p "name")) == some s
 
 /-- Does a mapping inside the type node name the struct `s`? -/
 def mentionsThroughMapping (s : String) (j : Json) : Bool :=
@@ -358,10 +371,10 @@ file-level name. -/
 def readStructs (ren : List (String × String)) (defs : List Json) : Structs := Id.run do
   let identities := defs.filterMap fun d => do
     let i ← J.id? d
-    let n ← (d.getObjValAs? String "name").toOption
+    let n ← J.str? d "name"
     pure (s!"#solc{i}", (lookupBy n ren).getD n)
   let shapes := defs.map fun d =>
-    let n := ((d.getObjValAs? String "name").toOption).getD ""
+    let n := (J.str? d "name").getD ""
     let m := (lookupBy n ren).getD n
     let line := J.line d
     let check : Except Gap String := do
@@ -577,18 +590,18 @@ rational arithmetic, the bitwise operators and shifts on integers (`&`, `|`,
 partial def constVal (j : Json) : Option Q := do
   match J.kind j with
   | "Literal" =>
-    let v ← (j.getObjValAs? String "value").toOption
+    let v ← J.str? j "value"
     let q ← parseRational v
     match J.opt j "subdenomination" with
     | some (.str u) => Q.mul q (Q.ofInt (← unitFactor? u))
     | _ => pure q
   | "TupleExpression" =>
-    match (j.getObjVal? "components").toOption.bind (·.getArr?.toOption) with
+    match J.arr? j "components" with
     | some #[c] => constVal c
     | _ => none
   | "UnaryOperation" =>
     let a ← constVal (← (j.getObjVal? "subExpression").toOption)
-    match (j.getObjValAs? String "operator").toOption with
+    match J.str? j "operator" with
     | some "-" => pure { a with num := - a.num }
     | some "~" => pure (Q.ofInt (- (← a.int?) - 1))
     | _ => none
@@ -598,7 +611,7 @@ partial def constVal (j : Json) : Option Q := do
     let nat (q : Q) : Option Nat := do
       let n ← q.int?
       if n < 0 then none else pure n.toNat
-    match (j.getObjValAs? String "operator").toOption with
+    match J.str? j "operator" with
     | some "+" => a.add b
     | some "-" => a.sub b
     | some "*" => a.mul b
@@ -636,11 +649,11 @@ def typeBound? (enums : List (Int × Nat)) (j : Json) (member : String) : Option
   guard (J.kind j == "FunctionCall")
   let f ← J.opt j "expression"
   guard (J.kind f == "Identifier" && J.opt f "name" == some (.str "type"))
-  let [a] ← ((J.opt j "arguments").bind (·.getArr?.toOption)).map (·.toList) | none
+  let [a] ← (J.arr? j "arguments").map (·.toList) | none
   if let some n := (J.ref? a).bind (lookupBy · enums) then
     return if member == "min" then 0 else (n : Int)
   let t ← J.opt a "typeName"
-  let name ← (t.getObjValAs? String "name").toOption
+  let name ← J.str? t "name"
   let signed := name.startsWith "int"
   guard (signed || name.startsWith "uint")
   let suffix := name.drop (if signed then 3 else 4)
@@ -689,7 +702,7 @@ def storageRefTy (j : Json) : PM String := do
 def isPushCall (e : Json) : Bool :=
   J.kind e == "FunctionCall" &&
     ((J.opt e "expression").any fun f => J.kind f == "MemberAccess" &&
-      (f.getObjValAs? String "memberName").toOption == some "push")
+      J.str? f "memberName" == some "push")
 
 /-- Is the node `x.push().f`? -/
 def isPushedMember (e : Json) : Bool :=
@@ -727,10 +740,10 @@ partial def pureExpr (j : Json) : Bool :=
   | "MemberAccess" => sub "expression"
   | "Conditional" => sub "condition" && sub "trueExpression" && sub "falseExpression"
   | "TupleExpression" =>
-    ((J.opt j "components").bind (·.getArr?.toOption)).all (·.all pureExpr)
+    (J.arr? j "components").all (·.all pureExpr)
   | "FunctionCall" =>
     (J.opt j "kind").any (· == .str "typeConversion") &&
-      ((J.opt j "arguments").bind (·.getArr?.toOption)).all (·.all pureExpr)
+      (J.arr? j "arguments").all (·.all pureExpr)
   | _ => false
 
 /-- `(c ? f : g)(as)`, a conditional callee: its condition and the two calls
@@ -743,13 +756,13 @@ def condCalleeMsg : String :=
 
 def condCalleeOk (j : Json) : Bool :=
   ((J.opt j "expression").all pureExpr) &&
-    ((J.opt j "arguments").bind (·.getArr?.toOption)).all (·.all pureExpr)
+    (J.arr? j "arguments").all (·.all pureExpr)
 
 def condCallee? (j : Json) : Option (Json × Json × Json) := do
   guard (J.kind j == "FunctionCall")
   let f ← J.opt j "expression"
   let f ← if J.kind f == "TupleExpression" then
-      match (J.opt f "components").bind (·.getArr?.toOption) with
+      match J.arr? f "components" with
       | some #[c] => some c
       | _ => none
     else some f
@@ -891,7 +904,7 @@ partial def call (j : Json) : PM String := do
     unless condCalleeOk j do unsupported condCalleeMsg
     return s!"({← operand c false} ? {← call a} : {← call b})"
   if J.kind f == "MemberAccess" then
-    let member := (f.getObjValAs? String "memberName").toOption.getD ""
+    let member := (J.str? f "memberName").getD ""
     if member == "wrap" || member == "unwrap" then
       if let some owner := J.opt f "expression" then
         if let some t := (J.ref? owner).bind (lookupBy · (← get).valueTypes) then
@@ -918,7 +931,7 @@ partial def call (j : Json) : PM String := do
     let attached := !staticBase && (J.ref? f).any ((← get).freeFunctions.contains) &&
       J.kind f == "MemberAccess" &&
       !((J.opt f "expression").bind J.ref?).any ((← get).libraries.contains)
-    let names : List String := ((J.opt j "names").bind (·.getArr?.toOption)).map
+    let names : List String := (J.arr? j "names").map
       (·.toList.filterMap (·.getStr?.toOption)) |>.getD []
     let args ← if names.isEmpty then pure args else
       -- named arguments, put in the callee's parameter order
@@ -948,7 +961,7 @@ end
 array (`SolJSONParser.isTuple`)? -/
 def isTuple (j : Json) : Bool :=
   J.kind j == "TupleExpression" && !(J.opt j "isInlineArray").any (· == .bool true) &&
-    ((J.opt j "components").bind (·.getArr?.toOption)).any (·.size > 1)
+    (J.arr? j "components").any (·.size > 1)
 
 /-- Is the node a call by name, `f(a)`: of a function of the contract, where
 a tuple is its value (`SolJSONParser.requireTupleValue`)? -/
@@ -963,21 +976,21 @@ one value call solkey reads, matched as `SolJSONParser.isValueCall` matches
 it: two declarations, a `bool` and an empty one; the options exactly
 `value`; the member `call`; one argument, the empty string. -/
 def valueCall? (j : Json) : Option (Json × Json × Json) := do
-  let [d, Json.null] := ((J.opt j "declarations").bind (·.getArr?.toOption)).map (·.toList) |>.getD []
+  let [d, Json.null] := (J.arr? j "declarations").map (·.toList) |>.getD []
     | none
   let call ← J.opt j "initialValue"
   let opts ← J.opt call "expression"
   let m ← J.opt opts "expression"
   guard (d != .null && J.tyStr d == "bool")
   guard (J.kind call == "FunctionCall" && J.kind opts == "FunctionCallOptions")
-  let [Json.str "value"] := ((J.opt opts "names").bind (·.getArr?.toOption)).map (·.toList) |>.getD []
+  let [Json.str "value"] := (J.arr? opts "names").map (·.toList) |>.getD []
     | none
-  guard (J.kind m == "MemberAccess" && (m.getObjValAs? String "memberName").toOption == some "call")
-  let [a] := ((J.opt call "arguments").bind (·.getArr?.toOption)).map (·.toList) |>.getD []
+  guard (J.kind m == "MemberAccess" && J.str? m "memberName" == some "call")
+  let [a] := (J.arr? call "arguments").map (·.toList) |>.getD []
     | none
-  guard (J.kind a == "Literal" && (a.getObjValAs? String "kind").toOption == some "string" &&
-    (a.getObjValAs? String "value").toOption == some "")
-  let v ← ((J.opt opts "options").bind (·.getArr?.toOption)).bind (·[0]?)
+  guard (J.kind a == "Literal" && J.str? a "kind" == some "string" &&
+    J.str? a "value" == some "")
+  let v ← (J.arr? opts "options").bind (·[0]?)
   pure (d, ← J.opt m "expression", v)
 
 /-- A tuple's components, one left out printed empty: `(a, , b)`. -/
@@ -1002,7 +1015,7 @@ def declText (d : Json) : PM String := do
     | some (.str "memory") => pure " memory"
     | _ => pure ""
   let name ← nameOf d
-  if let some source := (d.getObjValAs? String "name").toOption then
+  if let some source := J.str? d "name" then
     unless source.isEmpty do
       modify fun st => { st with specLocals := (source, name) :: st.specLocals }
   pure s!"{T}{loc} {name}"
@@ -1110,14 +1123,14 @@ partial def stmt1 (j : Json) : PM (List String) := do
         match J.opt cl "parameters" with
         | some ps => (← PM.lift (J.arr ps "parameters")).mapM fun p => do
             let t ← declText p
-            pure (if (p.getObjValAs? String "name").toOption == some "" then t.trimRight else t)
+            pure (if J.str? p "name" == some "" then t.trimRight else t)
         | none => pure []
       -- an unnamed return value is bound to a fresh local no statement reads:
       -- `sol{}` names what an external call returns
       let rets ← match J.opt ok "parameters" with
         | some ps => (← PM.lift (J.arr ps "parameters")).mapM fun p => do
             let t ← declText p
-            if (p.getObjValAs? String "name").toOption != some "" then pure t else
+            if J.str? p "name" != some "" then pure t else
               let st ← get
               set { st with fresh := st.fresh + 1 }
               pure s!"{t.trimRight} tryRet{st.fresh + 1}"
@@ -1127,7 +1140,7 @@ partial def stmt1 (j : Json) : PM (List String) := do
       modify fun st => { st with specLocals := outerLocals }
       let cs ← catches.mapM fun cl => do
         withSpecScope do
-          let e := ((cl.getObjValAs? String "errorName").toOption).getD ""
+          let e := (J.str? cl "errorName").getD ""
           let ps ← params cl
           let b ← block (← PM.lift (J.get cl "block"))
           match e, ps with
@@ -1194,7 +1207,7 @@ end
 
 /-- The NatSpec text of a node, `""` if none. -/
 def docText (n : Json) : String :=
-  ((J.opt n "documentation").bind fun d => (d.getObjValAs? String "text").toOption).getD ""
+  ((J.opt n "documentation").bind fun d => J.str? d "text").getD ""
 
 /-- One `@custom:key` clause: its directive and its text. -/
 structure KeyClause where
@@ -1246,13 +1259,13 @@ def keyClauses (doc : String) : Except String (List KeyClause) := do
 enum of this contract or the source unit. Other contracts' enums cannot leak. -/
 def specEnumValues (units nodes enums : List Json) : List (String × Nat) :=
   enums.flatMap fun e =>
-    let name := (e.getObjValAs? String "name").toOption.getD ""
-    let canonical := (e.getObjValAs? String "canonicalName").toOption.getD name
+    let name := (J.str? e "name").getD ""
+    let canonical := (J.str? e "canonicalName").getD name
     let visible := (units ++ nodes).any fun n => J.id? n == J.id? e
     let names := (canonical :: if visible then [name] else []).eraseDups
-    let members := ((J.opt e "members").bind (·.getArr?.toOption)).getD #[]
+    let members := J.arrD e "members"
     members.toList.zipIdx |>.flatMap fun (m, i) =>
-      let member := (m.getObjValAs? String "name").toOption.getD ""
+      let member := (J.str? m "name").getD ""
       names.map fun n => (s!"{n}.{member}", i)
 
 /-- Ledger frame locations are outside Lean's storage-only assignable model.
@@ -1266,7 +1279,7 @@ def ledgerAssignable (clause : KeyClause) : Bool :=
 def declarationOwner (units : List Json) (declaration : Json) : Option Int :=
   units.findSome? fun unit => do
     guard (J.kind unit == "ContractDefinition")
-    let members ← (J.opt unit "nodes").bind (·.getArr?.toOption)
+    let members ← J.arr? unit "nodes"
     guard (members.any fun member => J.id? member == J.id? declaration)
     J.id? unit
 
@@ -1282,19 +1295,19 @@ def specConstantScope (units nodes : List Json) (owner : Option Int) :
       guard (defining.isSome && defining == owner)
     let typeNode ← J.opt declaration "typeName"
     guard (J.kind typeNode == "ElementaryTypeName")
-    let typeName ← (typeNode.getObjValAs? String "name").toOption
+    let typeName ← J.str? typeNode "name"
     guard (["uint", "uint256"].contains typeName)
     let expression ← J.opt declaration "value"
     guard (constTy expression)
     let n ← (constVal expression).bind Q.int?
     guard (0 ≤ n && n < (2 : Int) ^ 256)
     let id ← J.id? declaration
-    let name ← (declaration.getObjValAs? String "name").toOption
+    let name ← J.str? declaration "name"
     pure (id, name, n.toNat)
   let ids := values.map (·.1)
   let blocked := declarations.filterMap fun declaration => do
     guard (!(J.id? declaration).any ids.contains)
-    (declaration.getObjValAs? String "name").toOption
+    J.str? declaration "name"
   return (values.map fun (_, name, n) => (name, n), blocked)
 
 /-- Does a comment carry a specification proper (`KeyNatspec.isSpecified`)? -/
@@ -1307,9 +1320,9 @@ def isSpecified (cs : List KeyClause) : Bool :=
 plain one, and `box` chooses its modality.  A clause solkey refuses is the
 error. -/
 def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
-  let vis := ((f.getObjValAs? String "visibility").toOption).getD ""
+  let vis := (J.str? f "visibility").getD ""
   -- a constructor has one whatever its visibility (`SolidityOutline.functionsOf`)
-  let ctor := (f.getObjValAs? String "kind").toOption == some "constructor"
+  let ctor := J.str? f "kind" == some "constructor"
   unless ctor || vis == "public" || vis == "external" do return .internal
   let cs ← keyClauses (docText f)
   if cs.any (·.kind == "skip") then return .skip
@@ -1326,14 +1339,14 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
   -- A generated parameter name must not capture a quantified specification
   -- variable. Include every specification identifier, even in comments.
   let annotations := (J.nodes f).flatMap fun node =>
-    docText node :: (((J.opt node "loopSpec").bind (·.getArr?.toOption)).getD #[]
+    docText node :: (J.arrD node "loopSpec"
       |>.toList.filterMap (·.getStr?.toOption))
   let specNames := annotations.flatMap fun text => (specTokens text).flatMap (·.splitOn ".")
   let taken := stateVars ++ specNames ++
-    decls.filterMap fun d => (d.getObjValAs? String "name").toOption
+    decls.filterMap fun d => J.str? d "name"
   (decls.foldl (fun (acc : List String × List (Int × String)) d =>
     let (taken, out) := acc
-    match (d.getObjValAs? String "name").toOption, J.id? d with
+    match J.str? d "name", J.id? d with
     | some n, some i => if n != "" && (stateVars.contains n || leanKeywords.contains n) then
       let rec fresh (k : Nat) (x : String) : String :=
         match k with
@@ -1347,9 +1360,9 @@ def renames (stateVars : List String) (f : Json) : List (Int × String) :=
 /-- Parameters and named returns initially visible inside a source body. -/
 def specBodyBindings (f : Json) (names : List (Int × String)) : List (String × String) :=
   ["parameters", "returnParameters"].flatMap fun key =>
-    (((J.opt f key).bind (J.opt · "parameters") |>.bind (·.getArr?.toOption)).getD #[]
+    (((J.opt f key).bind (J.arr? · "parameters")).getD #[]
       |>.toList).filterMap fun p => do
-      let source ← (p.getObjValAs? String "name").toOption
+      let source ← J.str? p "name"
       guard (!source.isEmpty)
       let id ← J.id? p
       pure (source, (lookupBy id names).getD source)
@@ -1358,7 +1371,7 @@ def specBodyBindings (f : Json) (names : List (Int × String)) : List (String ×
 branches of a conditional callee `(c ? f : g)` (`condCallee?`). -/
 partial def calleeArms (e : Json) : List Json :=
   match J.kind e with
-  | "TupleExpression" => match (J.opt e "components").bind (·.getArr?.toOption) with
+  | "TupleExpression" => match J.arr? e "components" with
     | some #[c] => calleeArms c
     | _ => [e]
   | "Conditional" =>
@@ -1501,14 +1514,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     | .ok (.arr a) => a.toList
     | _ => []
   let some c := units.find? fun u =>
-      J.kind u == "ContractDefinition" && (u.getObjValAs? String "name").toOption == some name
+      J.kind u == "ContractDefinition" && J.str? u "name" == some name
     | throw s!"no contract `{name}` in the AST"
   let lineage ← contractLineage units c
   let membersOf (node : Json) : List Json :=
-    ((J.opt node "nodes").bind (·.getArr?.toOption)).getD #[] |>.toList
+    J.arrD node "nodes" |>.toList
   let ownNodes := membersOf c
   for base in lineage.tail do
-    let baseName := (base.getObjValAs? String "name").toOption.getD "?"
+    let baseName := (J.str? base "name").getD "?"
     if (membersOf base).any fun node =>
         J.kind node == "FunctionDefinition" && J.opt node "kind" == some (.str "constructor") then
       throw s!"base constructor of `{baseName}` is not modelled"
@@ -1527,24 +1540,24 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     throw "testing import: contract-level clauses must be invariants"
   let enumDefs := (J.nodes ast).filter (J.kind · == "EnumDefinition")
   let enumNames : Structs := enumDefs.flatMap fun e =>
-    let n := (e.getObjValAs? String "name").toOption.getD ""
-    let canonical := (e.getObjValAs? String "canonicalName").toOption.getD n
+    let n := (J.str? e "name").getD ""
+    let canonical := (J.str? e "canonicalName").getD n
     ((J.id? e).toList.map fun i => (s!"#solc{i}", .ok "uint")) ++ [(canonical, .ok "uint")]
   let enumValues : List (Int × Nat) := enumDefs.flatMap fun e =>
-    let vs := ((J.opt e "members").bind (·.getArr?.toOption)).getD #[]
+    let vs := J.arrD e "members"
     vs.toList.zipIdx |>.filterMap fun (v, i) => (J.id? v).map (·, i)
   let enumBounds : List (Int × Nat) := enumDefs.filterMap fun e => do
     let i ← J.id? e
-    let vs ← (J.opt e "members").bind (·.getArr?.toOption)
+    let vs ← J.arr? e "members"
     pure (i, vs.size - 1)
   let aliases := (J.nodes ast).filterMap fun d => do
     guard (J.kind d == "UserDefinedValueTypeDefinition")
     let i ← J.id? d
-    let n ← (d.getObjValAs? String "name").toOption
+    let n ← J.str? d "name"
     let t ← J.opt d "underlyingType"
     let t ← (tyText [] t).toOption
     guard (PrimTy.ofName? t).isSome
-    pure (i, n, (d.getObjValAs? String "canonicalName").toOption.getD n, t)
+    pure (i, n, (J.str? d "canonicalName").getD n, t)
   let valueTypes : List (Int × String) := aliases.map fun (i, _, _, t) => (i, t)
   let aliasNames : Structs := aliases.flatMap fun (i, _, qualified, t) =>
     [(s!"#solc{i}", .ok t), (qualified, .ok t)]
@@ -1561,11 +1574,11 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
-  let variableNames := vars.filterMap fun v => (v.getObjValAs? String "name").toOption
+  let variableNames := vars.filterMap fun v => J.str? v "name"
   unless variableNames.eraseDups.length == variableNames.length do
     throw "inherited state declarations share a name: distinct storage roots need renaming"
   let specValues := specEnumValues units nodes enumDefs
-  let stateNames := vars.filterMap fun v => (v.getObjValAs? String "name").toOption
+  let stateNames := vars.filterMap fun v => J.str? v "name"
   let (constantValues, constantBlocked) := specConstantScope units nodes (J.id? c)
   let cspec := cspec.map fun c =>
     { c with text := resolveSpecEnums specValues stateNames (resolveSpecConstants constantValues constantBlocked c.text) }
@@ -1577,9 +1590,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let mut dropped : List (Int × String × Gap) := []
   let mut droppedNames : List (String × Gap) := []
   for v in vars do
-    let n := ((v.getObjValAs? String "name").toOption).getD ""
+    let n := (J.str? v "name").getD ""
     let i := (J.id? v).getD 0
-    let mutab := ((v.getObjValAs? String "mutability").toOption).getD "mutable"
+    let mutab := (J.str? v "mutability").getD "mutable"
     let fixed := (v.getObjValAs? Bool "constant").toOption == some true || mutab != "mutable"
     match (do
         if fixed then
@@ -1588,9 +1601,9 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let typeNode ← J.get v "typeName"
         if let some bad := (J.nodes typeNode).find? fun node =>
             J.kind node == "ElementaryTypeName" &&
-              let t := (node.getObjValAs? String "name").toOption.getD ""
+              let t := (J.str? node "name").getD ""
               !(PrimTy.ofName? t).isSome && !(narrowTy? t).isSome then
-          throw (.unsupported s!"elementary state type `{(bad.getObjValAs? String "name").toOption.getD ""}` is not modelled")
+          throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
         tyText S typeNode : Except Gap String) with
     | .ok t =>
       members := members ++ [s!"{t} {n};"]
@@ -1598,7 +1611,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     | .error g =>
       dropped := dropped ++ [(i, n, g)]
       droppedNames := droppedNames ++ [(n, g)]
-  let stateVars := vars.filterMap fun v => (v.getObjValAs? String "name").toOption
+  let stateVars := vars.filterMap fun v => J.str? v "name"
   -- every function, the constructor (`kind` `constructor`, named `""`) among them
   let ownFuns := ownNodes.filter (J.kind · == "FunctionDefinition")
   let ownIds := ownFuns.filterMap J.id?
@@ -1607,19 +1620,19 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let libraryNodes := units.filter fun unit => J.opt unit "contractKind" == some (.str "library")
   let libraries := libraryNodes.filterMap J.id?
   let freeHelpers := (units.filter (J.kind · == "FunctionDefinition") ++
-    libraryNodes.flatMap (fun unit => ((J.opt unit "nodes").bind (·.getArr?.toOption)).getD #[]
+    libraryNodes.flatMap (fun unit => J.arrD unit "nodes"
       |>.toList.filter (J.kind · == "FunctionDefinition")))
     |>.filter fun f => !(J.id? f).any ownIds.contains
   let helperFuns := inheritedFuns ++ freeHelpers
   let helperIds := helperFuns.filterMap J.id?
   let freeFunctions := (freeHelpers.filterMap J.id? ++ libraryNodes.flatMap (fun unit =>
-    ((J.opt unit "nodes").bind (·.getArr?.toOption)).getD #[] |>.toList.filterMap fun node =>
+    J.arrD unit "nodes" |>.toList.filterMap fun node =>
       if J.kind node == "FunctionDefinition" then J.id? node else none)).eraseDups
   let funs := ownFuns ++ helperFuns
-  let kindOf (f : Json) : String := ((f.getObjValAs? String "kind").toOption).getD "function"
+  let kindOf (f : Json) : String := (J.str? f "kind").getD "function"
   let nameOfFun (f : Json) : String :=
-    match (f.getObjValAs? String "kind").toOption with
-    | some "function" | none => ((f.getObjValAs? String "name").toOption).getD ""
+    match J.str? f "kind" with
+    | some "function" | none => (J.str? f "name").getD ""
     | some k => k
   let funNames := ownFuns.map nameOfFun
   let internalName (f : Json) : String := Id.run do
@@ -1648,7 +1661,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let ps ← (f.getObjVal? "parameters").toOption
     let ps ← (ps.getObjVal? "parameters").toOption
     let ps ← ps.getArr?.toOption
-    pure (i, ps.toList.filterMap fun p => (p.getObjValAs? String "name").toOption)
+    pure (i, ps.toList.filterMap fun p => J.str? p "name")
   let modifierDefs := nodes.filter (J.kind · == "ModifierDefinition")
   let scopedIds := (funs ++ modifierDefs).filterMap J.id?
   let lexicalScopes ← (units.filter fun unit =>
@@ -1662,17 +1675,23 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       guard ((membersOf unit).any fun member => J.id? member == J.id? declaration)
       let id ← J.id? unit
       lookupBy id lexicalScopes) |>.getD []
+  -- A declaration's specification scope: lexical visibility belongs to the
+  -- defining contract and its ancestors, rather than the most-derived
+  -- contract that executes it.
+  let specState (d : Json) (names : List (Int × String)) : PState :=
+    let scopeNodes := scopeNodesOf d
+    let (specConstants, scopeConstBlocked) :=
+      specConstantScope units scopeNodes (declarationOwner units d)
+    let localNames := J.varDeclNames (J.nodes d)
+    { names, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues,
+      enumBounds, valueTypes, freeFunctions, libraries,
+      specEnums := specEnumValues units scopeNodes enumDefs,
+      specBlocked := J.varDeclNames scopeNodes ++ localNames, specConstants,
+      specConstBlocked := scopeConstBlocked ++ localNames, specLocals := specBodyBindings d names,
+      rewriteLoop }
   let modifierReads : List (Int × Except Gap String) := modifierDefs.filterMap fun m =>
     (J.id? m).map fun id => (id, do
-      let scopeNodes := scopeNodesOf m
-      let scopeValues := specEnumValues units scopeNodes enumDefs
-      let (scopeConstants, scopeConstBlocked) := specConstantScope units scopeNodes (declarationOwner units m)
-      let scopeNames := scopeNodes.filterMap fun node =>
-        if J.kind node == "VariableDeclaration" then (node.getObjValAs? String "name").toOption else none
-      let localNames := (J.nodes m).filterMap fun n =>
-        if J.kind n == "VariableDeclaration" then (n.getObjValAs? String "name").toOption else none
-      let names := renames stateVars m ++ funRenames
-      let st : PState := { names, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries, specEnums := scopeValues, specBlocked := scopeNames ++ localNames, specConstants := scopeConstants, specConstBlocked := scopeConstBlocked ++ localNames, specLocals := specBodyBindings m names, rewriteLoop }
+      let st := specState m (renames stateVars m ++ funRenames)
       let (text, _) ← (do
         unless (J.nodes m).any (J.kind · == "PlaceholderStatement") do
           unsupported "a modifier without a placeholder"
@@ -1685,9 +1704,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
             unsupported s!"a modifier parameter of unsupported type `{t}`"
           let n ← nameOf p
           let n := if !n.isEmpty then n else Id.run do
-            let taken := stateVars ++ (J.nodes m).filterMap fun node =>
-              if J.kind node == "VariableDeclaration" then
-                (node.getObjValAs? String "name").toOption else none
+            let taken := stateVars ++ J.varDeclNames (J.nodes m)
             let mut name := s!"solcModArg{id}_{index}"
             for _ in [:taken.length + 1] do
               if !taken.contains name then return name
@@ -1699,36 +1716,29 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       pure text)
   let modifierMembers := modifierReads.filterMap fun (_, text) => text.toOption
   let modifierInvocations (f : Json) : List Json :=
-    ((J.opt f "modifiers").bind (·.getArr?.toOption)).getD #[] |>.toList
+    J.arrD f "modifiers" |>.toList
   let modifierId (m : Json) : Option Int := do
     let name ← J.opt m "modifierName"
     let id ← J.ref? name
-    let text := (name.getObjValAs? String "name").toOption.getD ""
+    let text := (J.str? name "name").getD ""
     if text.startsWith "super." then none
     else if text.contains '.' then some id
     else some ((lookupBy id modifierAliases).getD id)
   let read := funs.map fun f =>
     let fname := internalName f
-    -- Lexical visibility belongs to the defining contract and its ancestors,
-    -- rather than the most-derived contract that executes this helper.
-    let scopeNodes := scopeNodesOf f
-    let scopeValues := specEnumValues units scopeNodes enumDefs
-    let (scopeConstants, scopeConstBlocked) := specConstantScope units scopeNodes (declarationOwner units f)
-    let scopeNames := scopeNodes.filterMap fun n =>
-      if J.kind n == "VariableDeclaration" then (n.getObjValAs? String "name").toOption else none
-    let localNames := (J.nodes f).filterMap fun n =>
-      if J.kind n == "VariableDeclaration" then (n.getObjValAs? String "name").toOption else none
+    let st := specState f (renames stateVars f ++ funRenames)
     let rawSpec := (keyClauses (docText f)).toOption.getD []
     let resolvedSpec := rawSpec.map fun c =>
-      { c with text := resolveSpecEnums scopeValues (scopeNames ++ localNames) (resolveSpecConstants scopeConstants (scopeConstBlocked ++ localNames) c.text) }
+      let text := resolveSpecConstants st.specConstants st.specConstBlocked c.text
+      { c with text := resolveSpecEnums st.specEnums st.specBlocked text }
     -- Only parameters and named returns are in a function clause's scope.
     -- Renamed body locals cannot change the meaning of a pre/postcondition.
     let bindingsOf (key : String) :=
-      ((J.opt f key).bind (J.opt · "parameters") |>.bind (·.getArr?.toOption)).getD #[] |>.toList
+      ((J.opt f key).bind (J.arr? · "parameters")).getD #[] |>.toList
     let parameters := bindingsOf "parameters"
     let specRenamesOf (bindings : List Json) := bindings.filterMap fun p => do
       let id ← J.id? p
-      let original ← (p.getObjValAs? String "name").toOption
+      let original ← J.str? p "name"
       let renamed ← lookupBy id (renames stateVars f)
       pure (original, renamed)
     let fspecResult := resolvedSpec.mapM fun c => do
@@ -1742,15 +1752,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       if kind != "function" && kind != "freeFunction" && kind != "constructor" then some s!"a `{kind}` function"
       else if fname == "report" then some "named like the import's `report` table"
       else none
-    let names := renames stateVars f ++ funRenames
-    let st : PState := { names, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries, specEnums := scopeValues, specBlocked := scopeNames ++ localNames, specConstants := scopeConstants, specConstBlocked := scopeConstBlocked ++ localNames, specLocals := specBodyBindings f names, rewriteLoop }
     let apps : Except Gap String := do
       let apps ← (modifierInvocations f).mapM fun m => do
         let some id := modifierId m | throw (.unsupported "a modifier without a declaration identity" (J.line f))
         let some declared := lookupBy id modifierReads
           | throw (.unsupported "a modifier outside the imported contract" (J.line f))
         let _ ← declared
-        let args := ((J.opt m "arguments").bind (·.getArr?.toOption)).getD #[]
+        let args := J.arrD m "arguments"
         let (args, _) ← (args.toList.mapM expr).run st
         pure s!" solcModifier{id}({", ".intercalate args})"
       pure (String.join apps)
@@ -1787,7 +1795,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           throw (.unsupported reason (J.line f))
       if testing then
         if let some (name, gap) := droppedNames.find? fun (name, _) =>
-            !(parameters.any fun p => (p.getObjValAs? String "name").toOption == some name) &&
+            !(parameters.any fun p => J.str? p "name" == some name) &&
               resolvedSpec.any fun clause => specReadsName name (specTokens clause.text) then
           throw (.unsupported s!"its specification reads omitted state variable `{name}`: {gap.msg}" (J.line f))
       if testing && ((keyClauses (docText f)).toOption.getD []).any (·.kind == "invariant") then
@@ -1798,15 +1806,14 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       let (ss, _) ← ((← J.arr b "statements").flatMapM fun s => do
         pure ((← stmt s).map (J.line s, ·))).run st
       pure ss
-    let sourceParams := ((J.opt f "parameters").bind (J.opt · "parameters")
-      |>.bind (·.getArr?.toOption)).getD #[]
+    let sourceParams := ((J.opt f "parameters").bind (J.arr? · "parameters")).getD #[]
     let sourceTypes := sourceParams.toList.map fun p => sourceType (J.tyStr p)
     { name := fname, sourceName := nameOfFun f,
       sourceSignature := s!"{nameOfFun f}({",".intercalate sourceTypes})",
       modifierApps := apps.toOption.getD "",
       line := J.line f, tag := (tag.toOption).getD .malformed,
       params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
-      payable := (f.getObjValAs? String "stateMutability").toOption == some "payable",
+      payable := J.str? f "stateMutability" == some "payable",
       specMembers := if testing then String.join (fspec
         |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
         |>.map (fun c => s!"{c.kind} {c.text}; ")) else "",
