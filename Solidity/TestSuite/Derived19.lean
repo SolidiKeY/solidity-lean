@@ -111,3 +111,8 @@ theorem Solkey.TestSuite.memoryIndexWriteStorageRefOutOfBoundsReverts.proved : �
 
 theorem Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.proved : ⊢ Solkey.TestSuite.memoryIndexWriteStorageRefSourceOutOfBoundsReverts.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.arithmeticRemainderBoundAllSigns.proved : ⊢ Solkey.TestSuite.arithmeticRemainderBoundAllSigns.problem := by
+  sol_prove (steps := 128)
+  sol_leaf
+  sol_close

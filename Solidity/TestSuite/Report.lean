@@ -41,7 +41,7 @@ are pending, as they stay open in solkey.
 -/
 
 /--
-info: 617 functions: 539 derived, 18 pending, 60 other
+info: 617 functions: 540 derived, 17 pending, 60 other
 internal valuesRef
 internal valuesRefWithEffect
 internal matrixRefWithEffect
@@ -105,7 +105,7 @@ internal doWhileContinuationBody
 pending:
 storagePushReturnPrimitiveBindComplexReceiver storageArrayMethodReferencesComplexReceiver storageArrayMethodReferencesComposedCallReceiver unprovableStorageShortCircuitMutation memoryIndexWriteStorageRefRhsCapture memoryIndexWriteStorageStructCopy
 memoryIndexWriteStorageRefImpureIndex bitAndSymbolic invariantClosedFormSum invariantBreakLeavesInvariantRange invariantForBreakSkipsUpdate unprovableInvariantBreakPostcondition
-unprovableInvariantForContinueUpdate testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero arithmeticRemainderBoundAllSigns
+unprovableInvariantForContinueUpdate testFixedShapeEmptyPushFixedElementReadsZero testEmptyPushFixedArrayReturnReadsZero testEmptyPushDynamicArrayReturnReadsZero testEmptyPushStructReturnReadsZero
 -/
 #guard_msgs in
 #solkey_obligations Solkey.TestSuite
