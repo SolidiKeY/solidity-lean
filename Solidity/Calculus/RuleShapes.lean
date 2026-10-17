@@ -193,7 +193,8 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
   (``Taclet.ternaryCaptureCond, .taclet .ternaryCaptureCond),
   -- Compound assignment (`+= -= *= /= %=`) and `++`/`--` (pre, post)
   (``Taclet.localOpAssign, .merged [.localAddAssign, .localSubAssign, .localMulAssign,
-    .localDivAssign, .localModAssign]),
+    .localDivAssign, .localModAssign,
+    .localShiftLeftAssign, .localShiftRightAssign]),
   (``Taclet.storageRootOpAssign, .merged [.storageRootAddAssign, .storageRootSubAssign,
     .storageRootMulAssign, .storageRootDivAssign, .storageRootModAssign]),
   (``Taclet.storageFieldOpAssign, .merged [.storageFieldAddAssign, .storageFieldSubAssign,
@@ -433,7 +434,8 @@ def operatorOrder : List (Lean.Name × List Lean.Name) :=
    (``Taclet.binopUnfoldRight, arith ++ cmp ++ bits),
    (``Taclet.unopAssignment, [``UnOp.neg, ``UnOp.not]),
    (``Taclet.unopCapture, [``UnOp.neg, ``UnOp.not])] ++
-  ([``Taclet.localOpAssign, ``Taclet.storageRootOpAssign, ``Taclet.storageFieldOpAssign,
+  [(``Taclet.localOpAssign, compound ++ [``BinOp.shl, ``BinOp.shr])] ++
+  ([``Taclet.storageRootOpAssign, ``Taclet.storageFieldOpAssign,
     ``Taclet.storageIndexMappingOpAssign, ``Taclet.storageIndexArrayOpAssign,
     ``Taclet.memoryFieldOpAssign, ``Taclet.memoryIndexArrayOpAssign,
     ``Taclet.storageFieldOpAssignUnfoldLeftFst, ``Taclet.storageIndexOpAssignUnfoldLeftFst,
@@ -498,6 +500,16 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   simple, so `ifElseSplit` applies and one of its goals assumes `true = false`;
   `!se` is not simple, so `ifElseUnfold` captures it.  They are strategy, and
   the table has no strategy.
+* `localCopyAssignmentValue`, `storageCopyAssignmentValue`,
+  `local{Add,Sub,Mul,Div,Mod}AssignmentValue` — architectural.  An
+  assignment inside an expression is lowered at elaboration (`hoist`: the
+  right-hand side held in a fresh local, the write made before the
+  statement, the value the local or the target read again), as an `++`
+  inside an expression is, so no `Stmt` assigns inside a value.
+* `discard{Add,Sub,Mul,Div,Mod,Pow}Expression` — architectural.  A discarded
+  operator's value, `a + b;`, is imported as the declaration of a fresh local
+  holding it (`discardedK`, `Frontend/SolcJson.lean`), which is these rules'
+  `\replacewith`; its effects and its revert are the declaration's.
 * `transferNoCallbackDiamond`, `transferWithCallbackDiamond` — a payment
   under the diamond.  solkey's diamond rules owe a "non-negative amount" goal
   and book the payment; here a payment has a rule under the box only, and the
@@ -515,18 +527,18 @@ def unclaimedTaclets : List KeyTaclet :=
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
     .memoryFieldWriteCaptureSrc, .memoryIndexWriteMemRefRhsCapture,
     .ifTrue, .ifFalse, .ifElseTrue, .ifElseFalse, .ifElseNegated,
+    .localCopyAssignmentValue, .storageCopyAssignmentValue, .localAddAssignmentValue,
+    .localSubAssignmentValue, .localMulAssignmentValue, .localDivAssignmentValue,
+    .localModAssignmentValue,
+    .discardAddExpression, .discardSubExpression, .discardMulExpression, .discardDivExpression,
+    .discardModExpression, .discardPowExpression,
     .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
 
 /-- Added upstream rules still awaiting correspondence and soundness review.
 These are migration gaps, not implemented or architecturally excused rules. -/
 def migrationPendingTaclets : List KeyTaclet :=
-  [ .discardAddExpression,
-    .discardDivExpression, .discardModExpression, .discardMulExpression,
-    .discardPowExpression, .discardSubExpression, .localAddAssignmentValue,
-    .localCopyAssignmentValue, .localDivAssignmentValue, .localModAssignmentValue,
-    .localMulAssignmentValue, .localShiftLeftAssign, .localShiftRightAssign,
-    .localSubAssignmentValue, .loopNormalize, .memoryIndexWriteStorageRefRhsCapture,
-    .storageCopyAssignmentValue, .storageFieldRead_unfold_rightCallReceiver,
+  [ .loopNormalize,
+    .memoryIndexWriteStorageRefRhsCapture, .storageFieldRead_unfold_rightCallReceiver,
     .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver,
     .storagePopReferenceDiscard, .storagePopReference_unfold_leftCallReceiver,
     .storagePopReference_unfold_leftFstReceiver ]
@@ -543,9 +555,9 @@ theorem taclets_partitioned :
       (if migrationPendingTaclets.contains t then 1 else 0) == 1) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 339 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 341 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 15 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 28 := by decide +kernel
 
 /-! ## The rules with no taclet
 

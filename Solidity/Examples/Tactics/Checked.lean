@@ -184,8 +184,12 @@ example : Prog.toStr [] (sol{ uint8 z = 200 + 100; }) = "uint z = 200 + 100; req
 /-- error: Solidity elaboration failed: 300 does not fit uint8 -/
 #guard_msgs in #check sol{ uint8 x = 1; x = x + 300; }
 
-/-- error: Solidity elaboration failed: narrow arithmetic under a short-circuit operator: its check would run where the program does not evaluate it -/
-#guard_msgs in #check sol{ uint8 x = 1; bool b = true && x + 1 > 0; }
+/-- Narrow arithmetic under `&&` is checked only where solc evaluates it: in
+the branch the left operand takes. -/
+example : Prog.toStr [] (sol{ uint8 x = 1; bool b = true && x + 1 > 0; } :
+    Prog StandardExample [] _) =
+    "uint x = 1; bool se1 = true; if (se1) { uint se2 = x + 1; require(se2 <= 255); se1 = se2 > 0; } else { } bool b = se1;" := by
+  decide
 
 /-- error: Solidity elaboration failed: uint8: a narrow integer type is the type of a local, a parameter, a return value or a state variable only, not of an array's element, a mapping's key or value, or a struct's member -/
 #guard_msgs in #check sol{ uint8[] storage x; }

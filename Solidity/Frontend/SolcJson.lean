@@ -487,6 +487,8 @@ structure PState where
     fun names text => if names.any (fun (a, b) => a != b) then
       .error "loop specification needs renamed locals: not imported" else .ok text
   valueTypes : List (Int × String) := []
+  /-- How many discarded values (`a + b;`) were named so far. -/
+  discards : Nat := 0
   freeFunctions : List Int := []
   libraries : List Int := []
   pre : Array String := #[]
@@ -766,8 +768,9 @@ partial def expr (j : Json) : PM String := do
       constTy (← PM.lift (J.get j "falseExpression"))
     pure (if literals && (narrowTy? t).isSome then sourceCast t value else value)
   | "Assignment" =>
-    let op ← PM.lift (J.str j "operator")
-    pure s!"{← expr (← PM.lift (J.get j "leftHandSide"))} {op} {← expr (← PM.lift (J.get j "rightHandSide"))}"
+    -- inside an expression an assignment is parenthesized: `(x = e)`; its
+    -- statement prints it bare (`assignText`)
+    pure s!"({← assignText j})"
   | "IndexAccess" =>
     let b ← expr (← PM.lift (J.get j "baseExpression"))
     let some ij := J.opt j "indexExpression" | unsupported "an index access with no index"
@@ -808,6 +811,12 @@ partial def expr (j : Json) : PM String := do
   | "NewExpression" =>
     pure s!"new {← PM.lift (tyText (← get).structs (← PM.lift (J.get j "typeName")))}"
   | k => unsupported s!"the expression `{k}`"
+
+/-- An assignment's text, `l op r`; a nested assignment on the right
+parenthesized by `expr`. -/
+partial def assignText (j : Json) : PM String := do
+  let op ← PM.lift (J.str j "operator")
+  pure s!"{← expr (← PM.lift (J.get j "leftHandSide"))} {op} {← expr (← PM.lift (J.get j "rightHandSide"))}"
 
 /-- An operand, parenthesised when it is itself an operator (`pow`: also a
 unary one, which `**` would otherwise take inside). -/
@@ -976,7 +985,14 @@ partial def stmt1 (j : Json) : PM (List String) := do
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>
         constTy r || (J.kind r == "Literal" && J.tyStr r == "bool")
-    pure [← withPush ok (expr e)]
+    -- an operator's value discarded, `a + b;`: held in a fresh local, its
+    -- effects and its revert kept (solkey's `discardAddExpression`, …)
+    if ["BinaryOperation", "Conditional"].contains (J.kind e) then
+      let t := elemTy (J.tyStr e) false
+      let k := (← get).discards + 1
+      modify fun st => { st with discards := k }
+      return [s!"{t} discarded{k} = {← expr e}"]
+    pure [← withPush ok (if J.kind e == "Assignment" then assignText e else expr e)]
   | "VariableDeclarationStatement" =>
     if let some (d, r, v) := valueCall? j then
       -- `(bool ok, ) = R.call{value: V}("")` is `bool ok = R.send(V)`, as solkey reads it;

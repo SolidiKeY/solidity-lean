@@ -239,10 +239,12 @@ example : Prog.toStr [] (sol{ uint t = 0; if (t > 0) { bool y = true; } else { }
     if (t > 1) { uint y = 1; } else { } }) =
     "uint t = 0; if (t > 0) { bool y = true; } else { } if (t > 1) { uint y = 1; } else { }" := rfl
 
--- An increment under `&&` is evaluated only when the left operand does not
--- decide, so it cannot be captured before the statement.
-/-- error: Solidity elaboration failed: `++` or `−−` under a short-circuit operator -/
-#guard_msgs in #check sol{ bool c = true; uint i = 0; c = c && i++ > 0; }
+/-- An increment under `&&` is evaluated only when the left operand does not
+decide: the right operand runs in a branch (solkey's `logicalAndShortCircuitRhs`). -/
+example : Prog.toStr [] (sol{ bool c = true; uint i = 0; c = c && i++ > 0; } :
+    Prog StandardExample [] _) =
+    "bool c = true; uint i = 0; bool se1 = c; if (se1) { uint se2; se2 = i++; se1 = se2 > 0; } else { } c = se1;" := by
+  decide
 
 /-- A negative literal takes the type it stands at. -/
 example : (sol{ int e = -5; } : Prog StandardExample [] _) =

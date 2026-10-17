@@ -212,12 +212,14 @@ partial def RawExpr.toStr (e : RawExpr) (top : Bool := true) : String :=
     s!"{f}(\{{", ".intercalate ((ns.zip as).map fun (n, a) => s!"{n}: {a.toStr}")}})"
   | .env k => k.toStr
   | .tuple es => s!"({", ".intercalate (es.map (·.toStr))})"
+  | .assign l r => s!"({l.toStr} = {r.toStr})"
+  | .opAssign op l r => s!"({l.toStr} {op.sym}= {r.toStr})"
 
 /-- Whether `p` holds of the expression or of an expression inside it. -/
 def RawExpr.any (p : RawExpr → Bool) (e : RawExpr) : Bool :=
   p e || match e with
     | .field a _ | .unop _ a | .incDec _ a | .newArr _ a => a.any p
-    | .index a b | .binop _ a b => a.any p || b.any p
+    | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => a.any p || b.any p
     | .ternary c a b => c.any p || a.any p || b.any p
     | .modular _ a b k => a.any p || b.any p || k.any p
     | .call _ as | .named _ _ as | .tuple as => as.attach.any fun ⟨a, _⟩ => a.any p
@@ -239,13 +241,15 @@ partial def RawExpr.mapM {m : Type → Type} [Monad m] [Inhabited (m RawExpr)]
   | .modular op a b k => return .modular op (← a.mapM f) (← b.mapM f) (← k.mapM f)
   | .named g ns as => return .named g ns (← as.mapM (·.mapM f))
   | .tuple as => return .tuple (← as.mapM (·.mapM f))
+  | .assign l r => return .assign (← l.mapM f) (← r.mapM f)
+  | .opAssign op l r => return .opAssign op (← l.mapM f) (← r.mapM f)
   | e => pure e
 
 /-- The names a raw expression reads, in order. -/
 def RawExpr.names : RawExpr → List String
   | .name x => [x]
   | .field e _ | .unop _ e | .incDec _ e | .newArr _ e => e.names
-  | .index a b | .binop _ a b => a.names ++ b.names
+  | .index a b | .binop _ a b | .assign a b | .opAssign _ a b => a.names ++ b.names
   | .ternary c a b => c.names ++ a.names ++ b.names
   | .call _ as => as.attach.flatMap fun ⟨a, _⟩ => a.names
   | .modular _ a b k => a.names ++ b.names ++ k.names
@@ -262,11 +266,11 @@ bounds check although the length is a literal, so `hoist` captures it. -/
 def RawExpr.hasIdxLen : RawExpr → Bool :=
   RawExpr.any fun | .field b "length" => b.hasIndex | _ => false
 
-/-- Whether an effect occurs in the expression: an `++` or `−−`, or a call
-(a cast `uint8(e)` is not one). -/
+/-- Whether an effect occurs in the expression: an `++` or `−−`, an
+assignment, or a call (a cast `uint8(e)` is not one). -/
 def RawExpr.hasIncDec : RawExpr → Bool :=
   RawExpr.any fun
-    | .incDec .. | .named .. => true
+    | .incDec .. | .named .. | .assign .. | .opAssign .. => true
     | .call f _ => (castTy? f).isNone
     | _ => false
 
@@ -866,6 +870,8 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     | true => pure (.val _ (.unop op h rfl v))
     | false => throw s!"operator {UnOp.sym op} does not take {p.toStr}"
   | .incDec .. => throw "`++` or `−−` under a short-circuit operator or in a conditional's branch"
+  | .assign .. | .opAssign .. =>
+    throw "an assignment inside an expression in a conditional's branch"
   | .newArr .. => throw "`new` stands only on the right of `=`"
   | .modular op a b k => do
     let m ← check Γ .uint k
@@ -1837,10 +1843,14 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
   | .binop op a b => do
     if op.shortCircuits then
       let (P, a) ← hoist a
-      if b.hasCall then throw "a call under a short-circuit operator"
-      if b.hasIncDec then throw "`++` or `−−` under a short-circuit operator"
-      if hasNarrow C (← ctx) b then
-        throw "narrow arithmetic under a short-circuit operator: its check would run where the program does not evaluate it"
+      if b.hasCall || b.hasIncDec || hasNarrow C (← ctx) b then
+        -- the right operand's effects, its calls and its checks run only where
+        -- solc evaluates it: `bool se = a; if (se) { se = b; }` for `&&`, the
+        -- negated test for `||` (solkey's `logicalAndShortCircuitRhs`)
+        let x := toString (← freshCapture "se")
+        let test := if op == .and then RawExpr.name x else .unop .not (.name x)
+        let Q ← elabStmtsP [.decl (.named "bool") x (some a), .ite test [.assign (.name x) b] []]
+        return (P ++ Q, .name x)
       pure (P, .binop op a b)
     else
       let (P, e) ← hoistBinop op a b
@@ -1977,6 +1987,21 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         if d.rets.isEmpty then throw s!"{f} returns no value"
         else throw s!"{f} returns {d.rets.length} values, which a tuple assignment takes"
   | .tuple _ => throw "a tuple is the right-hand side of a tuple assignment or of a `return`"
+  | .assign l r => do
+    -- the right-hand side, then the target (`hoistAssign`); the value is the
+    -- one written, held first (solkey's `storageCopyAssignmentValue`:
+    -- `pv = e; sp = pv; v = pv;`)
+    let (P, r) ← hoist r
+    let (Pc, r) ← captureExpr C r
+    let Q ← elabStmtsP [.assign l r]
+    pure (P ++ Pc ++ Q, r)
+  | .opAssign op l r => do
+    -- the write, then the target read again (solkey's `localAddAssignmentValue`:
+    -- `lv += e; v = lv;`): a target with an effect would run it twice
+    if l.hasIncDec then
+      throw s!"{(RawExpr.opAssign op l r).toStr}: a compound assignment's value, its target with an effect"
+    let Q ← elabStmtsP [.opAssign op l r]
+    pure (Q, l)
   | e => pure ([], e)
 
 /-- `a ⊕ b`'s captures: the right operand first (solc evaluates it first: `i++ +

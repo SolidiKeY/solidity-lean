@@ -60,3 +60,36 @@ theorem Solkey.TestSuite.bitAndGeneralValues.proved : ⊢ Solkey.TestSuite.bitAn
 
 theorem Solkey.TestSuite.testShiftRightNegativeRoundsDown.proved : ⊢ Solkey.TestSuite.testShiftRightNegativeRoundsDown.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.logicalAndStorageAssignment.proved : ⊢ Solkey.TestSuite.logicalAndStorageAssignment.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.logicalOrStorageAssignment.proved : ⊢ Solkey.TestSuite.logicalOrStorageAssignment.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storageAssignmentValueNested.proved : ⊢ Solkey.TestSuite.storageAssignmentValueNested.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storageAssignmentValueIndexOnce.proved : ⊢ Solkey.TestSuite.storageAssignmentValueIndexOnce.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.storageAssignmentValueRhsBeforeIndex.proved : ⊢ Solkey.TestSuite.storageAssignmentValueRhsBeforeIndex.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.logicalAndStorageAssignmentSkipsIndex.proved : ⊢ Solkey.TestSuite.logicalAndStorageAssignmentSkipsIndex.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.logicalOrStorageAssignmentSkipsIndex.proved : ⊢ Solkey.TestSuite.logicalOrStorageAssignmentSkipsIndex.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.arithmeticAssignmentValues.proved : ⊢ Solkey.TestSuite.arithmeticAssignmentValues.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.testShiftOperandEvaluation.proved : ⊢ Solkey.TestSuite.testShiftOperandEvaluation.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.proved : ⊢ Solkey.TestSuite.arithmeticDiscardKeepsSideEffects.problem := by
+  sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.proved : ⊢ Solkey.TestSuite.arithmeticDiscardKeepsZeroDivisorRevert.problem := by
+  sol_prove (steps := 128)

@@ -258,8 +258,11 @@ statement reading it. -/
 example : Prog.toStr [] (sol[Returns]{ uint z = incr(4) + 1; } : Prog Returns [] _) =
     "uint se1; se1 = incr(4); uint z = se1 + 1;" := rfl
 
-/-- error: Solidity elaboration failed: a call under a short-circuit operator -/
-#guard_msgs in #check sol[Returns]{ bool b = total > 0 && incr(1) > 0; }
+/-- A call under `&&` runs only where solc evaluates it: in the branch the
+left operand takes (solkey's `logicalAndShortCircuitRhs`). -/
+example : Prog.toStr [] (sol[Returns]{ bool b = total > 0 && incr(1) > 0; } : Prog Returns [] _) =
+    "bool se1 = total > 0; if (se1) { uint se2; se2 = incr(1); se1 = se2 > 0; } else { } bool b = se1;" := by
+  decide
 
 /-- error: Solidity elaboration failed: a call in a conditional's branch -/
 #guard_msgs in #check sol[Returns]{ uint z = total > 0 ? incr(1) : 0; }

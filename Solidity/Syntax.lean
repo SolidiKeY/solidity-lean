@@ -141,6 +141,13 @@ inductive RawExpr where
   /-- `(a, b)`, two components or more: only the right-hand side of a tuple
   assignment (`RawStmt.tupleAssign`) or a `return` of several values. -/
   | tuple (es : List RawExpr)
+  /-- `(l = r)` inside an expression: the value assigned, the write made
+  before the statement (`hoist`; solkey's `localCopyAssignmentValue`,
+  `storageCopyAssignmentValue`). -/
+  | assign (l r : RawExpr)
+  /-- `(l ⊕= r)` inside an expression: `l`'s new value, the write made before
+  the statement (`hoist`; solkey's `local…AssignmentValue`). -/
+  | opAssign (op : BinOp) (l r : RawExpr)
   deriving Repr, Inhabited
 
 /-- A loop's specification as read, solkey's `///` lines above the loop:
@@ -484,6 +491,18 @@ syntax:max "(" sol_expr ")" : sol_expr
 /-- `(a, b)`: a tuple, the right-hand side of a tuple assignment or of a
 `return` of several values (`RawExpr.tuple`). -/
 syntax:max (name := solTupleExpr) "(" sol_expr ", " sol_expr,+ ")" : sol_expr
+/-- An assignment inside an expression, parenthesized: `(x = e)`, `(x += e)`. -/
+syntax:max "(" sol_expr " = " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " += " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " -= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " *= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " /= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " %= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " &= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " |= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " ^= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " <<= " sol_expr ")" : sol_expr
+syntax:max "(" sol_expr " >>= " sol_expr ")" : sol_expr
 syntax:80 "!" sol_expr:80 : sol_expr
 syntax:80 "-" sol_expr:80 : sol_expr
 /-- `a ** b`, right-associative and tighter than `*` (solc ≥ 0.8). -/
@@ -915,6 +934,16 @@ partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
   if e.raw.isOfKind ``solTupleExpr then
     let es := #[e.raw[1]] ++ e.raw[3].getSepArgs
     return ← `(RawExpr.tuple [$(← es.mapM (expandExpr ⟨·⟩)),*])
+  -- `(l = r)`, `(l ⊕= r)`: by their tokens
+  let r := e.raw
+  if r.getNumArgs == 5 && r[0].isAtom && r[0].getAtomVal == "(" && r[2].isAtom &&
+      r[2].getAtomVal.endsWith "=" && r[4].isAtom then
+    let sym := r[2].getAtomVal
+    if sym == "=" then
+      return ← `(RawExpr.assign $(← expandExpr ⟨r[1]⟩) $(← expandExpr ⟨r[3]⟩))
+    if let some op := BinOp.ofSym? (sym.dropRight 1) then
+      return ← `(RawExpr.opAssign $(ctorIdent ``BinOp op) $(← expandExpr ⟨r[1]⟩)
+        $(← expandExpr ⟨r[3]⟩))
   -- the operators, by their table: one arm for all of them
   if let some (op, a, b) := binParts? e then
     return ← `(RawExpr.binop $(ctorIdent ``BinOp op) $(← expandExpr ⟨a⟩) $(← expandExpr ⟨b⟩))
