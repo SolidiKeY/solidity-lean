@@ -32,14 +32,12 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
     liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
       let C := mkConst N
-      let nilCtx := ctxE []
       let ty ← if r.tag == .specified then do
           let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
           let φ ← Term.elabTerm stx none
           Term.synthesizeSyntheticMVarsNoPostponing
           pure <| mkApp2 (mkConst ``Valid) C (← instantiateMVars φ)
-        else pure <| mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, nilCtx, nilCtx,
-          mkApp2 (mkConst ``Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
+        else pure <| ProofTree.provesE C (mkConst (f ++ `problem))
       let g ← mkFreshExprSyntheticOpaqueMVar ty
       let goals ← if r.tag == .specified then do
           let tac ← `(tactic| sol_spec_try)

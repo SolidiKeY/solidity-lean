@@ -268,10 +268,7 @@ def elabSolkeyDerive : CommandElab := fun stx => do
         { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <| liftTermElabM do
       -- the scoped `⊢ N.f.problem` (`Calculus/Surface.lean`)
       unless env.contains (f ++ `problem) do return .error "no statement"
-      let nilCtx := ctxE []
-      let ty := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, nilCtx, nilCtx,
-        mkApp2 (mkConst ``Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
-      let g ← mkFreshExprSyntheticOpaqueMVar ty
+      let g ← mkFreshExprSyntheticOpaqueMVar (ProofTree.provesE C (mkConst (f ++ `problem)))
       tryCatchRuntimeEx (do
           let out ← IO.mkRef (none : Option Derive.Search)
           let _ ← Tactic.run g.mvarId! do

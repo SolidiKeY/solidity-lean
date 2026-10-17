@@ -104,6 +104,31 @@ def provesCtor (premise : Lean.Name) : Option Lean.Name :=
    (``Premise.branches, ``Proves.branches), (``Premise.cases, ``Proves.cases),
    (``Premise.inv, ``Proves.inv), (``Premise.inline, ``Proves.inline)].lookup premise
 
+/-- The rule the strategy fires on the first statement of the program `P`
+under `m`, the sequent's fresh names `k` (`Hyps.fresh`): the statement,
+the rule, its premise's kind and the `Proves` constructor of that kind;
+`none` past the program's end or where no rule fires. -/
+def ruleAt? (k m P : Expr) : MetaM (Option (Expr × Lean.Name × Lean.Name × Lean.Name)) := do
+  unless P.isAppOf ``Prog.cons do return none
+  let s := P.getArg! (P.getAppNumArgs - 2)
+  let some (c, p) ← ruleOf? k m s | return none
+  -- a premise built by a function (`Premise.expandCall`) is its constructor's
+  -- (the call trees over `Callees`, `Examples/ProofTree.lean`)
+  let some premise := (← whnf p).getAppFn.constName? | return none
+  let some ctor := provesCtor premise | return none
+  return some (s, c, premise, ctor)
+
+/-- The lemmas that take a goal `∀ b ∈ bs, …` apart. -/
+def forallMemLemmas : MetaM (Array (TSyntax ``Lean.Parser.Tactic.simpLemma)) :=
+  #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
+    ``and_true].mapM fun n => do `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
+
+/-- The line `app` of a rule of labelled goals (`∀ f ∈ fs, …`), its goals
+taken apart, one goal per outcome. -/
+def takeApart (app : TSyntax `tactic) : MetaM (TSyntax `tactic) := do
+  let lemmas ← forallMemLemmas
+  `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros))
+
 /-- The operator a statement applies, its first `BinOp`, `UnOp` or `IncDec`
 constructor: a constructor, not a function of the namespace (`BinOp.ret` in
 a value's type, which an `if`'s branch carries). -/
@@ -197,14 +222,7 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     if P.isAppOf ``Prog.nil then
       return #[{ name := `emptyModality,
                  tacs := #[← `(tactic| apply $(← short ``Proves.emptyModality))] }]
-    unless P.isAppOf ``Prog.cons do return #[]
-    let s := P.getArg! (P.getAppNumArgs - 2)
-    let k ← mkAppM ``Hyps.fresh #[H, φ0]
-    let some (c, p) ← ruleOf? k m s | return #[]
-    -- a premise built by a function (`Premise.expandCall`) is its constructor's
-    -- (the call trees over `Callees`, `Examples/ProofTree.lean`)
-    let some premise := (← whnf p).getAppFn.constName? | return #[]
-    let some ctor := provesCtor premise | return #[]
+    let some (s, c, premise, ctor) ← ruleAt? (← mkAppM ``Hyps.fresh #[H, φ0]) m P | return #[]
     let toStep := if (`Solidity.LeanTaclet).isPrefixOf c then ``LeanTaclet.toStep
       else ``Taclet.toStep
     let d ← `(($(← short toStep) $(dotIdent (Chain.lastName c))))
@@ -222,9 +240,7 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
 /-- After `apply branches r`: the goal `∀ b ∈ bs, …` taken apart, one goal
 per outcome. -/
 def splitBranches (g : MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId) := do
-  let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
-    ``and_true]
-  let lemmas ← names.mapM fun n => do `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
+  let lemmas ← forallMemLemmas
   let simp ← `(tactic| simp only [$lemmas,*])
   let gs ← runOn g #[simp]
   let [g'] := gs | return (#[simp], gs)
@@ -242,12 +258,8 @@ def splitBranches (g : MVarId) : TacticM (Array (TSyntax `tactic) × List MVarId
 goal per update. -/
 def applyCases (g : MVarId) (tacs : Array (TSyntax `tactic)) :
     TacticM (Array (TSyntax `tactic) × List MVarId) := do
-  let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
-    ``and_true]
-  let lemmas ← names.mapM fun n => do `(Lean.Parser.Tactic.simpLemma| $(← short n):ident)
   let some last := tacs.back? | return (tacs, ← runOn g tacs)
-  let t ← `(tactic| $last <;> (try simp only [$lemmas,*]) <;> (try and_intros))
-  let tacs := tacs.pop.push t
+  let tacs := tacs.pop.push (← takeApart last)
   return (tacs, ← runOn g tacs)
 
 /-- The silent moves at a goal, as long as there is one: their tactics and the
@@ -323,12 +335,14 @@ def build (g : MVarId) (cfg : Config := {}) : TacticM Tree := do
   setGoals t.openGoals.toList
   return t
 
+/-- `⊢ φ` as a term, `φ : Fml C []`: `Proves C .all [] .nil φ`. -/
+def provesE (C φ : Expr) : Expr :=
+  mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, ctxE [], ctxE [],
+    mkApp2 (mkConst ``Hyps.nil) C (ctxE []), φ]
+
 /-- The tree of `⊢ φ`, `φ : Fml C []`, on a goal of its own. -/
 def ofFormula (C φ : Expr) (cfg : Config := {}) : TermElabM Tree := do
-  let nil := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-  let ty := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, nil, nil,
-    mkApp2 (mkConst ``Hyps.nil) C nil, φ]
-  let g ← mkFreshExprSyntheticOpaqueMVar ty
+  let g ← mkFreshExprSyntheticOpaqueMVar (provesE C φ)
   let out ← IO.mkRef (default : Tree)
   discard <| Tactic.run g.mvarId! do out.set (← build g.mvarId! cfg)
   out.get

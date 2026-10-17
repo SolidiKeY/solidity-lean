@@ -180,23 +180,6 @@ namespace Walk
 
 open Lean Elab Tactic Meta
 
-/-- The `Proves` constructor of a premise's kind. -/
-def provesCtor? (p : Expr) : Option Lean.Name :=
-  match p.getAppFn.constName? with
-  | some ``Premise.update => some ``Proves.update
-  | some ``Premise.updates => some ``Proves.updates
-  | some ``Premise.guardedUpdates => some ``Proves.guardedUpdates
-  | some ``Premise.unfold => some ``Proves.unfold
-  | some ``Premise.bind => some ``Proves.bind
-  | some ``Premise.split => some ``Proves.split
-  | some ``Premise.check => some ``Proves.check
-  | some ``Premise.done => some ``Proves.done
-  | some ``Premise.branches => some ``Proves.branches
-  | some ``Premise.cases => some ``Proves.cases
-  | some ``Premise.inv => some ``Proves.inv
-  | some ``Premise.inline => some ``Proves.inline
-  | _ => none
-
 /-- The explicit arguments of the constructor `c` after the rule `d`, but
 those a default proves (`hR`). -/
 def ctorArgs (c : Lean.Name) : MetaM (Array Lean.Name) := do
@@ -230,11 +213,7 @@ def ctorTacs (c : Lean.Name) (d : Lean.Term) : MetaM (Array (Array (TSyntax `tac
   -- a rule of labelled goals (`∀ f ∈ fs, …`): taken apart on its `apply`
   -- line, one goal per outcome, as today's walk writes it
   if c == ``Proves.cases || c == ``Proves.branches then
-    let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
-      ``and_true]
-    let lemmas ← names.mapM fun n => do
-      `(Lean.Parser.Tactic.simpLemma| $(← ProofTree.short n):ident)
-    return #[#[← `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros))],
+    return #[#[← ProofTree.takeApart app],
       #[← `(tactic| refine $f $d $args*)]]
   return #[#[app], #[← `(tactic| refine $f $d $args*)]]
 
@@ -270,11 +249,7 @@ def shortTac (c : Lean.Name) (r : Lean.Name) (lean box : Bool) :
   -- a rule of labelled goals (`∀ f ∈ fs, …`): taken apart on its `apply`
   -- line, one goal per outcome, as today's walk writes it
   if c == ``Proves.cases || c == ``Proves.branches then
-    let names := #[``List.forall_mem_cons, ``List.not_mem_nil, ``false_implies, ``implies_true,
-      ``and_true]
-    let lemmas ← names.mapM fun n => do
-      `(Lean.Parser.Tactic.simpLemma| $(← ProofTree.short n):ident)
-    return some (← `(tactic| $app <;> (try simp only [$lemmas,*]) <;> (try and_intros)))
+    return some (← ProofTree.takeApart app)
   return some app
 
 /-- The steps that may apply at the goal `g`, each as tactics, in the order
@@ -313,11 +288,8 @@ def movesAt (g : MVarId) (short : Bool := false) :
     let m := args[args.size - 4]!
     let P ← whnf args[args.size - 3]!
     if P.isAppOf ``Prog.nil then return plain (← alias `emptyModality ``Proves.emptyModality)
-    unless P.isAppOf ``Prog.cons do return #[]
-    let s := P.getArg! (P.getAppNumArgs - 2)
     let k := mkAppN (mkConst ``Hyps.fresh) #[C, Γ₀, Γ, H, φ]
-    let some (r, p) ← ruleOf? k m s | return #[]
-    let some c := provesCtor? (← whnf p) | return #[]
+    let some (_, r, _, c) ← ProofTree.ruleAt? k m P | return #[]
     let rName := Lean.Name.mkSimple r.getString!
     let rule := mkIdent rName
     let lean := r.getPrefix != ``Taclet

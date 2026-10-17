@@ -600,6 +600,53 @@ theorem holds_callPost {μ : Mutability} {args : Args C Γ ps} {ret : CallRet Γ
     obtain ⟨rfl, rfl⟩ := hk (by decide)
     exact hX
 
+/-- A call by its contract, up to what it leaves: the arguments read, the
+body entered and ended where `ensures` holds and within its frame, the
+call's goal is the rest of the program after the call leaves. -/
+theorem holds_call_of {μ : Mutability} {f : Name} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf} {ω : Prog C Γ' Γ₂}
+    {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
+    (hc : FunContract ret body req ens) (hμ : Prog.within μ body = true) {σ : State C Γ}
+    (hpre : holds σ (Fml.callPre args req))
+    (hpost : holds σ (Fml.callPost μ args ret ens ω κ φ))
+    (k : ∀ (a : TEnv C σ.H ps), args.evalT σ = .ok a →
+      ∀ (o : Out C (ret.enterT (σ.withEnv a)).st.H Γf),
+      holds (State.withOlds rs (σ.withEnv a).net (σ.withEnv a).storage
+        (State.drop body.ext o.st)) ens →
+      TGFrame μ (ret.enterT (σ.withEnv a)).st o.st →
+      TLocAgree 0 (Prog.writesAt 0 body) (ret.enterT (σ.withEnv a)).st.env
+        (TEnv.drop body.ext o.st.env) →
+      holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc o.st.storage o.st.net)
+        (Fml.callResult ret ens ω κ φ) →
+      Modality.box.afterRunTR (fun x => holds x φ)
+        ((Prog.runSt (o.st.withEnv (ret.leaveT
+          (TEnv.wk ((ret.enterT (σ.withEnv a)).ext.trans o.ext) Γ σ.env)
+          (TEnv.take rs (TEnv.drop body.ext o.st.env)))) ω).bind
+            fun x => Frames.runSt x κ)) :
+    holds σ (.modal .box (.cons (.call f args ret body) ω) κ φ) := by
+  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
+  rw [holds_modal_iff, Prog.runSt_cons]
+  show Modality.box.afterRunTR _ ((((TRun.call args ret body.ext body.runR σ).map
+    (·.st)).bind _).bind _)
+  rw [TRun.call_eq]
+  cases hA : args.evalT σ with
+  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
+  | ok a =>
+    have hct := hc _ (hpa a hA)
+    show Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom ret body.ext
+      body.runR σ (ret.enterT (σ.withEnv a)))).bind _).bind _)
+    unfold TRun.callFrom
+    cases hB : body.runR (ret.enterT (σ.withEnv a)).st with
+    | error e =>
+      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
+      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
+    | ok o =>
+      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
+      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
+      refine k a hA o hct.1 hg hag (holds_callPost hpost a hA o.st.storage o.st.net fun hn => ?_)
+      have hk := hg.keeps hn
+      cases ret <;> exact hk
+
 /-- A call by its contract, no result. -/
 theorem holds_callNone {μ : Mutability} {f : Name} {args : Args C Γ ps}
     {body : Prog C ([] ++ ps) Γf} {ω : Prog C Γ Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
@@ -609,60 +656,40 @@ theorem holds_callNone {μ : Mutability} {f : Name} {args : Args C Γ ps}
     (hpre : holds σ (Fml.callPre args req))
     (hpost : holds σ (Fml.callPost μ args .none ens ω κ φ)) :
     holds σ (.modal .box (.cons (.call f args .none body) ω) κ φ) := by
-  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
-  rw [holds_modal_iff, Prog.runSt_cons]
-  show Modality.box.afterRunTR _ ((((TRun.call args .none body.ext body.runR σ).map
-    (·.st)).bind _).bind _)
-  rw [TRun.call_eq]
-  cases hA : args.evalT σ with
-  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
-  | ok a =>
-    have hct := hc _ (hpa a hA)
-    show Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom .none body.ext
-      body.runR σ ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)))).bind _).bind _)
-    unfold TRun.callFrom
-    cases hB : body.runR ((CallRet.none (Γ := Γ)).enterT (σ.withEnv a)).st with
-    | error e =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
-    | ok o =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      have hens := hct.1
-      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
-      have hX := holds_callPost hpost a hA o.st.storage o.st.net hg.keeps
-      obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
-      obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
-      dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
-      dsimp only at hX
-      subst hH
-      cases hheap
-      -- the parameters keep the arguments' values
-      have hps : TEnv.drop body.ext env = a :=
-        TLocAgree.drop_eq (ρ := []) hag hw
-      have hens' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net)
-          (ens.wkD (Thin.atop (Olds ++ ps) Γ)) := by
-        apply holds_wkD
-        have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds []
-            σ.net σ.storage = State.thin (Thin.atop (Olds ++ ps) Γ)
-              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) := by
-          refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
-          show TEnv.olds σ.net σ.storage (TEnv.drop body.ext env) =
-            TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env))
-          rw [TEnv.thin_atop_append, hps]
-        exact hst ▸ hens
-      have hM := hX hens'
-      rw [holds_modal_iff] at hM
-      dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
-      rw [TEnv.wk_self]
-      have hT : State.drop (Ext.append Γ (Olds ++ ps))
-          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) =
-          (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-            (CallRet.leaveT σ.env (CallRet.none (Γ := Γ))
-              (TEnv.take [] (TEnv.drop body.ext env))) :=
-        State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
-          htx.symm
-      simp only [Prog.runSt_nil, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
-      exact hM
+  refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  -- the parameters keep the arguments' values
+  have hps : TEnv.drop body.ext env = a :=
+    TLocAgree.drop_eq (ρ := []) hag hw
+  have hens' : holds ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net)
+      (ens.wkD (Thin.atop (Olds ++ ps) Γ)) := by
+    apply holds_wkD
+    have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds []
+        σ.net σ.storage = State.thin (Thin.atop (Olds ++ ps) Γ)
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      show TEnv.olds σ.net σ.storage (TEnv.drop body.ext env) =
+        TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env))
+      rw [TEnv.thin_atop_append, hps]
+    exact hst ▸ hens
+  have hM := hX hens'
+  rw [holds_modal_iff] at hM
+  dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
+  rw [TEnv.wk_self]
+  have hT : State.drop (Ext.append Γ (Olds ++ ps))
+      ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net) =
+      (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+        (CallRet.leaveT σ.env (CallRet.none (Γ := Γ))
+          (TEnv.take [] (TEnv.drop body.ext env))) :=
+    State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+      htx.symm
+  simp only [Prog.runSt_nil, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
+  exact hM
 
 /-- A call by its contract, one result. -/
 theorem holds_callVal {μ : Mutability} {f : Name} {args : Args C Γ ps} {p : PrimTy} {r : Var}
@@ -673,89 +700,69 @@ theorem holds_callVal {μ : Mutability} {f : Name} {args : Args C Γ ps} {p : Pr
     (hpre : holds σ (Fml.callPre args req))
     (hpost : holds σ (Fml.callPost μ args (.val p r res) ens ω κ φ)) :
     holds σ (.modal .box (.cons (.call f args (.val p r res) body) ω) κ φ) := by
-  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
-  rw [holds_modal_iff, Prog.runSt_cons]
-  show Modality.box.afterRunTR _ ((((TRun.call args (.val p r res) body.ext body.runR σ).map
-    (·.st)).bind _).bind _)
-  rw [TRun.call_eq]
-  cases hA : args.evalT σ with
-  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
-  | ok a =>
-    have hct := hc _ (hpa a hA)
-    show Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom (.val p r res) body.ext
-      body.runR σ ((CallRet.val p r res).enterT (σ.withEnv a)))).bind _).bind _)
-    unfold TRun.callFrom
-    cases hB : body.runR ((CallRet.val p r res).enterT (σ.withEnv a)).st with
-    | error e =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
-    | ok o =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      have hens := hct.1
-      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
-      have hX := holds_callPost hpost a hA o.st.storage o.st.net hg.keeps
-      obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
-      obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
-      dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
-      dsimp only at hX
-      subst hH
-      cases hheap
-      -- the parameters keep the arguments' values
-      have hps : (TEnv.drop body.ext env).2 = a :=
-        TLocAgree.drop_eq (ρ := [.val p]) (e := (PrimTy.dflt p, a)) hag hw
-      have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
-          (t := .val p) (TEnv.drop body.ext env).1)
-          (ens.wkD (Thin.atop (.val p :: (Olds ++ ps)) Γ)) := by
-        apply holds_wkD
-        have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.val p]
-            σ.net σ.storage = State.thin (Thin.atop (.val p :: (Olds ++ ps)) Γ)
-              (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
-                (TEnv.drop body.ext env).1) := by
-          refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
-          show ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
-            ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
-              (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
-          rw [TEnv.thin_atop_append, hps]
-        exact hst ▸ hens
-      have hM := hX (TEnv.drop body.ext env).1 hens'
-      rw [holds_modal_iff] at hM
-      dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
-      rw [TEnv.wk_self]
-      cases res with
-      | none =>
-        have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-            (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
-              (TEnv.drop body.ext env).1) =
-            (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-              (CallRet.leaveT σ.env (CallRet.val p r Option.none)
-                (TEnv.take [LTy.val p] (TEnv.drop body.ext env))) :=
-          State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
-            htx.symm
-        simp only [CallRet.resultC, Prog.runSt_nil, Except.bind, Frames.runSt_pop,
-          Frames.runSt_seq, hT] at hM
-        exact hM
-      | some j =>
-        have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-            ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
-              (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
-                (TEnv.drop body.ext env).1) =
-            (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-              (CallRet.leaveT σ.env (CallRet.val p r (some j))
-                (TEnv.take [LTy.val p] (TEnv.drop body.ext env))) := by
-          refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
-          show TEnv.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
-            (TEnv.set (j.under (.val p :: (Olds ++ ps))) _ _) = _
-          rw [TEnv.drop_set_under]
-          show TEnv.set j _ (TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) = _
-          rw [TEnv.drop_append]
-          rfl
-        have hs : Prog.runSt (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
-            (t := .val p) (TEnv.drop body.ext env).1) (CallRet.resultC (Olds ++ ps) (some j)) =
-            .ok ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
-              (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
-                (TEnv.drop body.ext env).1) := rfl
-        simp only [hs, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
-        exact hM
+  refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  -- the parameters keep the arguments' values
+  have hps : (TEnv.drop body.ext env).2 = a :=
+    TLocAgree.drop_eq (ρ := [.val p]) (e := (PrimTy.dflt p, a)) hag hw
+  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+      (t := .val p) (TEnv.drop body.ext env).1)
+      (ens.wkD (Thin.atop (.val p :: (Olds ++ ps)) Γ)) := by
+    apply holds_wkD
+    have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.val p]
+        σ.net σ.storage = State.thin (Thin.atop (.val p :: (Olds ++ ps)) Γ)
+          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+            (TEnv.drop body.ext env).1) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      show ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
+        ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
+          (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
+      rw [TEnv.thin_atop_append, hps]
+    exact hst ▸ hens
+  have hM := hX (TEnv.drop body.ext env).1 hens'
+  rw [holds_modal_iff] at hM
+  dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
+  rw [TEnv.wk_self]
+  cases res with
+  | none =>
+    have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
+        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+          (TEnv.drop body.ext env).1) =
+        (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+          (CallRet.leaveT σ.env (CallRet.val p r Option.none)
+            (TEnv.take [LTy.val p] (TEnv.drop body.ext env))) :=
+      State.ext' rfl rfl HEq.rfl (heq_of_eq (TEnv.drop_append ps a σ.env)) rfl hsb.symm
+        htx.symm
+    simp only [CallRet.resultC, Prog.runSt_nil, Except.bind, Frames.runSt_pop,
+      Frames.runSt_seq, hT] at hM
+    exact hM
+  | some j =>
+    have hT : State.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
+        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+          (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
+            (TEnv.drop body.ext env).1) =
+        (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+          (CallRet.leaveT σ.env (CallRet.val p r (some j))
+            (TEnv.take [LTy.val p] (TEnv.drop body.ext env))) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+      show TEnv.drop (Ext.append Γ (.val p :: (Olds ++ ps)))
+        (TEnv.set (j.under (.val p :: (Olds ++ ps))) _ _) = _
+      rw [TEnv.drop_set_under]
+      show TEnv.set j _ (TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) = _
+      rw [TEnv.drop_append]
+      rfl
+    have hs : Prog.runSt (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+        (t := .val p) (TEnv.drop body.ext env).1) (CallRet.resultC (Olds ++ ps) (some j)) =
+        .ok ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .val p)
+          (TEnv.drop body.ext env).1).setLocal (j.under (Olds ++ ps)).there
+            (TEnv.drop body.ext env).1) := rfl
+    simp only [hs, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
+    exact hM
 
 /-- A call by its contract, several results left in the caller's context. -/
 theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : Binders rs}
@@ -766,79 +773,59 @@ theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : 
     (hpre : holds σ (Fml.callPre args req))
     (hpost : holds σ (Fml.callPost μ args (.rets bs) ens ω κ φ)) :
     holds σ (.modal .box (.cons (.call f args (.rets bs) body) ω) κ φ) := by
-  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
-  rw [holds_modal_iff, Prog.runSt_cons]
-  show Modality.box.afterRunTR _ ((((TRun.call args (.rets bs) body.ext body.runR σ).map
-    (·.st)).bind _).bind _)
-  rw [TRun.call_eq]
-  cases hA : args.evalT σ with
-  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
-  | ok a =>
-    have hct := hc _ (hpa a hA)
-    show Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom (.rets bs) body.ext
-      body.runR σ ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)))).bind _).bind _)
-    unfold TRun.callFrom
-    cases hB : body.runR ((CallRet.rets (Γ := Γ) bs).enterT (σ.withEnv a)).st with
-    | error e =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
-    | ok o =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      have hens := hct.1
-      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
-      have hX := holds_callPost hpost a hA o.st.storage o.st.net hg.keeps
-      obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
-      obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
-      dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
-      dsimp only at hX
-      subst hH
-      cases hheap
-      have hps : TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env) = a := by
-        rw [TLocAgree.drop_eq hag hw, TEnv.drop_append]
-      have hX' := holds_binders_all bs _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
-        (.modal .box .nil (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-          (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX
-      have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
-          (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-            ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env))
-          (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))) := by
-        apply holds_wkD
-        have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds rs
-            σ.net σ.storage = State.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
-              (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
-                (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-                  ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) := by
-          refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
-          show TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-              (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env))) =
-            TEnv.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
-              (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-                (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))
-          rw [TEnv.thin_keepAll, hps]
-          show _ = TEnv.append rs _ (TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ)
-            (TEnv.append ps a σ.env)))
-          rw [TEnv.thin_atop_append]
-        exact hst ▸ hens
-      have hM := hX' hens'
-      rw [holds_modal_iff] at hM
-      dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
-      rw [TEnv.wk_self]
-      have hT : State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+  refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  have hps : TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env) = a := by
+    rw [TLocAgree.drop_eq hag hw, TEnv.drop_append]
+  have hX' := holds_binders_all bs _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
+    (.modal .box .nil (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+      (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX
+  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+      (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
+        ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env))
+      (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))) := by
+    apply holds_wkD
+    have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds rs
+        σ.net σ.storage = State.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
           (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
             (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
-              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) =
-          (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-            (CallRet.leaveT σ.env (CallRet.rets bs)
-              (TEnv.take rs (TEnv.drop body.ext env))) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
-        show TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-            (TEnv.append rs _ (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
-              TEnv.append rs _ σ.env
-        rw [TEnv.thin_keepAll, TEnv.thin_ofExt]
-        show TEnv.append rs _ (TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) = _
-        rw [TEnv.drop_append]
-      simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
-      exact hM
+              ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) := by
+      refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+      show TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
+          (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env))) =
+        TEnv.thin (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ))
+          (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
+            (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))
+      rw [TEnv.thin_keepAll, hps]
+      show _ = TEnv.append rs _ (TEnv.olds σ.net σ.storage (TEnv.thin (Thin.atop ps Γ)
+        (TEnv.append ps a σ.env)))
+      rw [TEnv.thin_atop_append]
+    exact hst ▸ hens
+  have hM := hX' hens'
+  rw [holds_modal_iff] at hM
+  dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
+  rw [TEnv.wk_self]
+  have hT : State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).withEnv
+        (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
+          ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).env)) =
+      (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+        (CallRet.leaveT σ.env (CallRet.rets bs)
+          (TEnv.take rs (TEnv.drop body.ext env))) := by
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    show TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+        (TEnv.append rs _ (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
+          TEnv.append rs _ σ.env
+    rw [TEnv.thin_keepAll, TEnv.thin_ofExt]
+    show TEnv.append rs _ (TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) = _
+    rw [TEnv.drop_append]
+  simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
+  exact hM
 
 /-- A call by its contract, a memory return: the fresh object it is entered
 with, which the body leaves as it is. -/
@@ -851,76 +838,56 @@ theorem holds_callMem {μ : Mutability} {f : Name} {args : Args C Γ ps} {R : Re
     (hpre : holds σ (Fml.callPre args req))
     (hpost : holds σ (Fml.callPost μ args (.mem R r hd hm) ens ω κ φ)) :
     holds σ (.modal .box (.cons (.call f args (.mem R r hd hm) body) ω) κ φ) := by
-  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
-  rw [holds_modal_iff, Prog.runSt_cons]
-  show Modality.box.afterRunTR _ ((((TRun.call args (.mem R r hd hm) body.ext body.runR σ).map
-    (·.st)).bind _).bind _)
-  rw [TRun.call_eq]
-  cases hA : args.evalT σ with
-  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
-  | ok a =>
-    have hct := hc _ (hpa a hA)
-    show Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom (.mem R r hd hm) body.ext
-      body.runR σ ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)))).bind _).bind _)
-    unfold TRun.callFrom
-    cases hB : body.runR ((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).st with
-    | error e =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
-    | ok o =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      have hens := hct.1
-      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
-      have hX := holds_callPost hpost a hA o.st.storage o.st.net hg.keeps
-      obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
-      obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
-      dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
-      dsimp only at hX
-      subst hH
-      cases hheap
-      -- the object and the parameters as the callee was entered with them
-      have hE := TLocAgree.eq_of_none hag hw
-      have hX1 := (holds_modal_iff _ _ _ _).1 hX
-      rw [Prog.runSt_single, Stmt.runSt_declMem_none] at hX1
-      replace hX1 := hX1.1
-      have hst : State.withOlds [.mem R] σ.net σ.storage (State.drop body.ext
-          (⟨st, _, ((σ.withEnv a).allocDefaultG R hm).st.heap, env, net, sb, tx⟩ : State C Γf)) =
-          State.thin (Thin.atop (.mem R :: (Olds ++ ps)) Γ)
-            ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).st.push
-              (t := .mem R)
-              (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).val)) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
-        show TEnv.append [.mem R] (TEnv.take [.mem R] (TEnv.drop body.ext env))
-          (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps [.mem R]) (TEnv.drop body.ext env))) = _
-        rw [hE]
-        show (some _, TEnv.olds σ.net σ.storage (TEnv.wk _ ps a)) =
-          (some _, TEnv.olds σ.net σ.storage
-            (TEnv.thin (Thin.atop ps Γ) (TEnv.wk _ (ps ++ Γ) (TEnv.append ps a σ.env))))
-        rw [TEnv.append_wk, TEnv.thin_atop_append]
-        rfl
-      have hens' := holds_wkD (Thin.atop (.mem R :: (Olds ++ ps)) Γ) ens _ (by rw [← hst]; exact hens)
-      have hM := hX1 hens'
-      rw [holds_modal_iff] at hM
-      dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
-      have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-          ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).st.push
-            (t := .mem R)
-            (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).val)) =
-          (⟨st, _, ((σ.withEnv a).allocDefaultG R hm).st.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-            (CallRet.leaveT (TEnv.wk (((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext.trans
-              ext) Γ σ.env) (CallRet.mem R r hd hm)
-              (TEnv.take [.mem R] (TEnv.drop body.ext env))) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
-        show _ = ((TEnv.drop body.ext env).1, _)
-        rw [hE]
-        show (some _, TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
-          (TEnv.wk _ (Olds ++ (ps ++ Γ)) (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) = _
-        rw [TEnv.thin_ofExt]
-        show (some _, TEnv.drop (Ext.append Γ ps) (TEnv.wk _ (ps ++ Γ) (TEnv.append ps a σ.env))) = _
-        rw [TEnv.append_wk, TEnv.drop_append]
-        rfl
-      simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
-      exact hM
+  refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  -- the object and the parameters as the callee was entered with them
+  have hE := TLocAgree.eq_of_none hag hw
+  have hX1 := (holds_modal_iff _ _ _ _).1 hX
+  rw [Prog.runSt_single, Stmt.runSt_declMem_none] at hX1
+  replace hX1 := hX1.1
+  have hst : State.withOlds [.mem R] σ.net σ.storage (State.drop body.ext
+      (⟨st, _, ((σ.withEnv a).allocDefaultG R hm).st.heap, env, net, sb, tx⟩ : State C Γf)) =
+      State.thin (Thin.atop (.mem R :: (Olds ++ ps)) Γ)
+        ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).st.push
+          (t := .mem R)
+          (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).val)) := by
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+    show TEnv.append [.mem R] (TEnv.take [.mem R] (TEnv.drop body.ext env))
+      (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps [.mem R]) (TEnv.drop body.ext env))) = _
+    rw [hE]
+    show (some _, TEnv.olds σ.net σ.storage (TEnv.wk _ ps a)) =
+      (some _, TEnv.olds σ.net σ.storage
+        (TEnv.thin (Thin.atop ps Γ) (TEnv.wk _ (ps ++ Γ) (TEnv.append ps a σ.env))))
+    rw [TEnv.append_wk, TEnv.thin_atop_append]
+    rfl
+  have hens' := holds_wkD (Thin.atop (.mem R :: (Olds ++ ps)) Γ) ens _ (by rw [← hst]; exact hens)
+  have hM := hX1 hens'
+  rw [holds_modal_iff] at hM
+  dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
+  have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+      ((((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).st.push
+        (t := .mem R)
+        (some (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).allocDefaultG R hm).val)) =
+      (⟨st, _, ((σ.withEnv a).allocDefaultG R hm).st.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+        (CallRet.leaveT (TEnv.wk (((CallRet.mem (Γ := Γ) R r hd hm).enterT (σ.withEnv a)).ext.trans
+          ext) Γ σ.env) (CallRet.mem R r hd hm)
+          (TEnv.take [.mem R] (TEnv.drop body.ext env))) := by
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    show _ = ((TEnv.drop body.ext env).1, _)
+    rw [hE]
+    show (some _, TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
+      (TEnv.wk _ (Olds ++ (ps ++ Γ)) (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env)))) = _
+    rw [TEnv.thin_ofExt]
+    show (some _, TEnv.drop (Ext.append Γ ps) (TEnv.wk _ (ps ++ Γ) (TEnv.append ps a σ.env))) = _
+    rw [TEnv.append_wk, TEnv.drop_append]
+    rfl
+  simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
+  exact hM
 
 /-- `uint[] storage r = f();`: the callee's contract exports its returned
 pointer, universally quantified in the postcondition. -/
@@ -933,70 +900,50 @@ theorem holds_callStorage {μ : Mutability} {f : Name} {args : Args C Γ ps}
     (hpre : holds σ (Fml.callPre args req))
     (hpost : holds σ (Fml.callPost μ args (.storage R r) ens ω κ φ)) :
     holds σ (.modal .box (.cons (.call f args (.storage R r) body) ω) κ φ) := by
-  obtain ⟨hpe, hpa⟩ := holds_callPre hpre
-  rw [holds_modal_iff, Prog.runSt_cons]
-  change Modality.box.afterRunTR _ ((((TRun.call args (.storage R r) body.ext body.runR σ).map
-    (·.st)).bind _).bind _)
-  rw [TRun.call_eq]
-  cases hA : args.evalT σ with
-  | error e => exact ⟨trivial, fun hp => hpe e hA (by cases hp; rfl)⟩
-  | ok a =>
-    have hct := hc _ (hpa a hA)
-    change Modality.box.afterRunTR _ (((Except.map (·.st) (TRun.callFrom (.storage R r) body.ext
-      body.runR σ ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)))).bind _).bind _)
-    unfold TRun.callFrom
-    cases hB : body.runR ((CallRet.storage (Γ := Γ) R r).enterT (σ.withEnv a)).st with
-    | error e =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      exact ⟨trivial, fun hp => hct.2 (by cases hp; rfl)⟩
-    | ok o =>
-      rw [show Prog.run _ body = body.runR _ from rfl, hB] at hct
-      have hens := hct.1
-      obtain ⟨hg, hag⟩ := Prog.run_frame body hμ 0 hB
-      have hX := holds_callPost hpost a hA o.st.storage o.st.net hg.keeps
-      obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
-      obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
-      dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
-      dsimp only at hX
-      subst hH
-      cases hheap
-      have hps : (TEnv.drop body.ext env).2 = a :=
-        TLocAgree.drop_eq (ρ := [.alias R]) (e := (none, a)) hag hw
-      have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.alias R]
-          σ.net σ.storage = State.thin (Thin.atop (.alias R :: (Olds ++ ps)) Γ)
-            (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
-              (TEnv.drop body.ext env).1) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
-        change ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
-          ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
-            (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
-        rw [TEnv.thin_atop_append, hps]
-      have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
-          (t := .alias R) (TEnv.drop body.ext env).1)
-          (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ)) :=
-        holds_wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ) ens _ (hst ▸ hens)
-      have hM := hX (TEnv.drop body.ext env).1 hens'
-      rw [holds_modal_iff] at hM
-      dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
-      rw [TEnv.wk_self]
-      have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-          (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
-            (TEnv.drop body.ext env).1) =
-          (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-            (CallRet.leaveT σ.env (CallRet.storage R r)
-              (TEnv.take [.alias R] (TEnv.drop body.ext env))) := by
-        refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
-        change ((TEnv.drop body.ext env).1,
-          TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
-            (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
-          ((TEnv.drop body.ext env).1, σ.env)
-        rw [TEnv.thin_ofExt]
-        change ((TEnv.drop body.ext env).1,
-          TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) =
-          ((TEnv.drop body.ext env).1, σ.env)
-        rw [TEnv.drop_append]
-      simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
-      exact hM
+  refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+  obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
+  obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
+  dsimp only [CallRet.enterT, State.push, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only at hX
+  subst hH
+  cases hheap
+  have hps : (TEnv.drop body.ext env).2 = a :=
+    TLocAgree.drop_eq (ρ := [.alias R]) (e := (none, a)) hag hw
+  have hst : (State.drop body.ext ⟨st, σ.H, σ.heap, env, net, sb, tx⟩).withOlds [.alias R]
+      σ.net σ.storage = State.thin (Thin.atop (.alias R :: (Olds ++ ps)) Γ)
+        (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+          (TEnv.drop body.ext env).1) := by
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb htx
+    change ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage (TEnv.drop body.ext env).2) =
+      ((TEnv.drop body.ext env).1, TEnv.olds σ.net σ.storage
+        (TEnv.thin (Thin.atop ps Γ) (TEnv.append ps a σ.env)))
+    rw [TEnv.thin_atop_append, hps]
+  have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push
+      (t := .alias R) (TEnv.drop body.ext env).1)
+      (ens.wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ)) :=
+    holds_wkD (Thin.atop (.alias R :: (Olds ++ ps)) Γ) ens _ (hst ▸ hens)
+  have hM := hX (TEnv.drop body.ext env).1 hens'
+  rw [holds_modal_iff] at hM
+  dsimp only [bind, Except.bind, Except.map, pure, Except.pure]
+  rw [TEnv.wk_self]
+  have hT : State.thin (.keep (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
+      (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net).push (t := .alias R)
+        (TEnv.drop body.ext env).1) =
+      (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
+        (CallRet.leaveT σ.env (CallRet.storage R r)
+          (TEnv.take [.alias R] (TEnv.drop body.ext env))) := by
+    refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl hsb.symm htx.symm
+    change ((TEnv.drop body.ext env).1,
+      TEnv.thin (Thin.ofExt (Ext.append Γ (Olds ++ ps)))
+        (TEnv.olds σ.net σ.storage (TEnv.append ps a σ.env))) =
+      ((TEnv.drop body.ext env).1, σ.env)
+    rw [TEnv.thin_ofExt]
+    change ((TEnv.drop body.ext env).1,
+      TEnv.drop (Ext.append Γ ps) (TEnv.append ps a σ.env)) =
+      ((TEnv.drop body.ext env).1, σ.env)
+    rw [TEnv.drop_append]
+  simp only [Prog.runSt_nil, Except.bind, Frames.runSt_drop, Frames.runSt_seq, hT] at hM
+  exact hM
 
 /-- **A call by its callee's contract is sound** (`useContract`, at the
 state): "pre" and "post" there give the call and the rest. -/
@@ -1177,7 +1124,7 @@ open Lean Elab Tactic Meta
 the context it ends in and the rest. -/
 partial def peel (C H Γ φ : Expr) : MetaM (Expr × Expr × Expr) := do
   let φ ← whnfR (← instantiateMVars φ)
-  let nil := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nil := ctxE []
   let a := φ.getAppArgs
   let cons (t Γ : Expr) := mkApp3 (mkConst ``List.cons [0]) (mkConst ``LTy) t Γ
   if φ.isAppOfArity ``Fml.all 5 then
@@ -1200,7 +1147,7 @@ def run (rule : Lean.Name) (μ req ens : Syntax) : TacticM Unit := withMainConte
   let g ← getMainGoal
   let ty ← whnfR (← instantiateMVars (← g.getType))
   let_expr Valid C φ := ty | throwError "core_contract: expected a goal `⊨ φ`, scoped"
-  let nil := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nil := ctxE []
   let (H, _, χ) ← peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil φ
   unless χ.isAppOf ``Fml.modal do
     throwError "core_contract: no modality at the head of the formula{indentExpr χ}"

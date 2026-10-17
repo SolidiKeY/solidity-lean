@@ -287,10 +287,6 @@ def residueQuoteWithin (steps : Nat) (R : RuleSet) (c : Lean.Expr) (np : Option 
     (φ : Fml C Γ) : Option (List Lean.Expr) :=
   (run R (leafQuoteS c np) (refutes leafS) steps H φ steps).map (·.1)
 
-def residueQuote (R : RuleSet) (c : Lean.Expr) (np : Option Nat) {Γ : Ctx} (H : Hyps C [] Γ)
-    (φ : Fml C Γ) : Option (List Lean.Expr) :=
-  residueQuoteWithin fuel R c np H φ
-
 /-- The closer's bounds on a leaf, which `sol_prove?` asks before it
 reduces it: the scoped closer's (`leafFitsOn`) on a leaf it reads; a leaf it
 does not read fits (the reducing tries fail on it). -/
@@ -495,22 +491,16 @@ theorem Proves.of_residueWithin (steps : Nat) {R : RuleSet} {Γ : Ctx} {H : Hyps
   obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
   cases he
   exact Seq.run_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
-    (fun H φ ls h hl => Seq.leafS_sound H φ ls h hl)
-    (Seq.refutes_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
-      (fun H φ ls h hl => Seq.leafS_sound H φ ls h hl))
+    Seq.leafS_sound
+    (Seq.refutes_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2) Seq.leafS_sound)
     _ H φ _ _ _ hr hl
 
+/-- `Proves.of_residueWithin` at the walk's full fuel. -/
 theorem Proves.of_residue {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ}
     {φ : Fml C Γ} {ls : List (Seq.SLeaf C)}
     (h : Seq.residue R H φ = some ls)
-    (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ := by
-  obtain ⟨⟨ls', b'⟩, hr, he⟩ := Option.map_eq_some_iff.1 h
-  cases he
-  exact Seq.run_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
-    (fun H φ ls h hl => Seq.leafS_sound H φ ls h hl)
-    (Seq.refutes_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
-      (fun H φ ls h hl => Seq.leafS_sound H φ ls h hl))
-    _ H φ _ _ _ hr hl
+    (hl : ∀ l ∈ ls, Proves C R [] l.2.1 l.2.2) : Proves C R [] H φ :=
+  Proves.of_residueWithin Seq.fuel h hl
 
 /-! ## The tactic -/
 
@@ -597,7 +587,7 @@ def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none) : Meta
   let parts (l : Expr) : Expr × Expr × Expr :=
     let pr := l.getArg! 3
     (l.getArg! 2, pr.getArg! 2, pr.getArg! 3)
-  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nilCtx := ctxE []
   let mut goals : Array MVarId := #[]
   let mut proofs : Array Expr := #[]
   for l in leaves, i in [1:leaves.length + 1] do
@@ -646,7 +636,7 @@ def leafValid : TacticM Unit := withMainContext do
   let_expr Proves C R Γ₀ Γ H φ := ty | throwError "sol_leaf: not a scoped sequent"
   unless (← whnfR Γ₀).isAppOf ``List.nil do throwError "sol_leaf: not a sequent of the outer scope"
   if ty.hasFVar || ty.hasMVar then throwError "sol_leaf: the sequent mentions a local or a metavariable"
-  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nilCtx := ctxE []
   let ψ := mkAppN (mkConst ``Hyps.wrap) #[C, nilCtx, Γ, H, φ]
   let hm ← try Decide.trueLemma (mkApp3 (mkConst ``Fml.modalFree) C nilCtx ψ)
     catch _ => throwError "sol_leaf: a modality is left in the leaf"
@@ -692,12 +682,10 @@ def evalSolProveValid : Tactic := fun stx => withMainContext do
   let rest := (← getUnsolvedGoals).erase g
   Symex.reporting g do
     let R := mkConst ``RuleSet.all
-    let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
-    let H := mkApp2 (mkConst ``Hyps.nil) C nilCtx
-    let g' ← mkFreshExprSyntheticOpaqueMVar
-      (mkAppN (mkConst ``Proves) #[C, R, nilCtx, nilCtx, H, φ]) (← g.getTag)
+    let g' ← mkFreshExprSyntheticOpaqueMVar (ProofTree.provesE C φ) (← g.getTag)
     g.assign (mkAppN (mkConst ``Proves.valid) #[C, R, φ, g'])
-    let leaves ← Seq.prove g'.mvarId! C R nilCtx H φ (n.map (·.getNat))
+    let leaves ← Seq.prove g'.mvarId! C R (ctxE []) (mkApp2 (mkConst ``Hyps.nil) C (ctxE [])) φ
+      (n.map (·.getNat))
     setGoals (leaves ++ rest)
 
 end Solidity
