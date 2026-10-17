@@ -131,3 +131,15 @@ theorem Solkey.TestSuite.conditionalCallee.proved : ⊢ Solkey.TestSuite.conditi
 
 theorem Solkey.TestSuite.conditionalCalleeEffects.proved : ⊢ Solkey.TestSuite.conditionalCalleeEffects.problem := by
   sol_prove (steps := 128)
+
+theorem Solkey.TestSuite.invariantBreakLeavesInvariantRange.proved : ⊢ Solkey.TestSuite.invariantBreakLeavesInvariantRange.problem := by
+  sol_prove (steps := 128)
+  case leaf1 =>
+    sol_leaf
+    sol_close
+  case leaf2 =>
+    sol_leaf
+    sol_close
+  case leaf3 =>
+    sol_leaf
+    sol_close

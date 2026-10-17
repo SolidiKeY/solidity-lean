@@ -156,6 +156,8 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) := by
   induction d with
   | intro _ ih => exact ih
+  | @andIntro Γ H φ ψ _ _ ih₁ ih₂ =>
+    exact fun σ => H.wrap_and (χ := .and φ ψ) (fun _ a b => ⟨a, b⟩) σ (ih₁ σ) (ih₂ σ)
   | allIntro _ ih => exact ih
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
@@ -217,18 +219,20 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
       · exact ihF ψ hf σ
       · obtain ⟨U, hU, rfl⟩ := List.mem_map.mp hu
         exact ihU U hU σ
-  | @inv Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ H m s ω κ φ I xs hv U c c' hu hb P post d _ _ _ _ ihI ihT ihE =>
+  | @inv Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ H m s ω κ φ I Bk xs hv U c c' hu hb P post d _ _ _ _ ihI ihT ihE =>
     intro σ
-    let A : Fml C Δ := .upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)
+    let A : Fml C Δ := .upd m (Upd.nil.pop hb)
+      (.modalK m P (.pop .block P.ext .nil) (Fml.invPost m hu ω κ φ post Bk))
     let B : Fml C Δ := .upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)
-    let X : Fml C Γ := .imp I (.upd m U (.and (.imp c A) (.imp c' B)))
+    let X : Fml C Γ := .imp (I.invHyp Bk) (.upd m U (.and (.imp c A) (.imp c' B)))
     have hX : holds σ ((H.anonHavoc xs hv).wrap X) :=
-      (H.anonHavoc xs hv).wrap_and (φ := .imp I (.upd m U (.imp c A)))
-        (ψ := .imp I (.upd m U (.imp c' B))) (χ := X)
+      (H.anonHavoc xs hv).wrap_and (φ := .imp (I.invHyp Bk) (.upd m U (.imp c A)))
+        (ψ := .imp (I.invHyp Bk) (.upd m U (.imp c' B))) (χ := X)
         (fun τ x y hI => Upd.afterT_and (x hI) (y hI) fun _ f g => ⟨f, g⟩) σ (ihT σ) (ihE σ)
     rw [Hyps.wrap_anonHavoc] at hX
-    have hF : holds σ (H.wrap ((Premise.inv I xs hv U c c' hu hb P post).fml m ω κ φ)) :=
-      H.wrap_and (φ := I) (ψ := Fml.anonHavoc xs hv X) (χ := .and I (Fml.anonHavoc xs hv X))
+    have hF : holds σ (H.wrap ((Premise.inv I Bk xs hv U c c' hu hb P post).fml m ω κ φ)) :=
+      H.wrap_and (φ := I.invHyp Bk) (ψ := Fml.anonHavoc xs hv X)
+        (χ := .and (I.invHyp Bk) (Fml.anonHavoc xs hv X))
         (fun _ x y => ⟨x, y⟩) σ (ihI σ) hX
     exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hF
   | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>

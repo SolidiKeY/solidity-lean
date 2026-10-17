@@ -1687,7 +1687,8 @@ partial def lowerLoop (rs : Option (List String)) (s : RawStmt) :
   -- reads hold a `bool` (`f || !f` is defined exactly then), which KeY's
   -- types say of `brk`, `ret` and `first`
   let spec := if spec.inv.isEmpty then spec else
-    { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)) }
+    { spec with inv := spec.inv ++ heads.map fun f => .binop .or (.name f) (.unop .not (.name f)),
+                brk := exits.contains .brk }
   let w := RawStmt.loop spec cond iter
   let ab' := if returns then [Abrupt.ret] else []
   if before.isEmpty && !(returns && outermost) then return (w, ab')
@@ -2786,7 +2787,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       | i :: is, none => do
         let I ← loopExpr Γ .bool (RawExpr.andAll (i :: is).dropLast ((i :: is).getLast?.getD i))
           "invariant"
-        pure (.inv I (← a.dec.mapM fun d => loopExpr Γ .uint d "variant"))
+        pure (.inv I (← a.dec.mapM fun d => loopExpr Γ .uint d "variant") a.brk)
       | _ :: _, some _ => throw "a loop has an `invariant` or an `unwind` clause, not both"
     pure [.of Γ (.loop a c (← elabScope Γ body).2)]
   | .block b => elabBranch b

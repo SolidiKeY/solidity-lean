@@ -95,7 +95,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true
       | .unwind 0 => false
-      | .inv _ dec => body.frame.isSome && (m == .box || dec.isSome))
+      | .inv _ dec _ => body.frame.isSome && (m == .box || dec.isSome))
     (block := fun _ => true)
     (pushOpAssign := fun _ _ _ b r => !r.isSimple || b.isSimple)
     (pushIncDec := fun _ _ b => b.isSimple)
@@ -294,6 +294,11 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   /-- `impRight`: the precondition moves into the context. -/
   | intro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : Proves C R Γ₀ (H.pre a) φ) :
       Proves C R Γ₀ H (.imp a φ)
+  /-- `andRight`: a conjunction from each conjunct, in the same context; the
+  walk takes it where a conjunct is still a program's (a loop body's
+  `(¬broke → inv) ∧ (broke → ⟨[ ]⟩)`), the closer reads the others. -/
+  | andIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ ψ : Fml C Γ} (h₁ : Proves C R Γ₀ H φ)
+      (h₂ : Proves C R Γ₀ H ψ) : Proves C R Γ₀ H (.and φ ψ)
   /-- `allRight`: a quantified local joins the context. -/
   | allIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
       (h : Proves C R Γ₀ (H.all x p) φ) : Proves C R Γ₀ H (.all x p φ)
@@ -399,17 +404,20 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   invariant now ("invariant initially valid"), and past the frame's
   anonymising update, the invariant and the condition's update, the body to
   its postcondition where the condition holds ("body preserves
-  invariant"), the rest where it does not ("use case"). -/
+  invariant"), the rest where it does not ("use case").  With a break test
+  the iteration assumes `I ∧ ¬B` and a body that breaks goes on to the rest
+  (`Fml.invHyp`, `Fml.invPost`). -/
   | inv {Γ Γ₁ Γ₂ Δ₀ Δ Γ₃ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
-      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {I : Fml C Γ}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {I : Fml C Γ} {B : Option (Fml C Γ)}
       {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {U : Upd C Γ Δ} {c c' : Fml C Δ}
       {hu : Ext Γ Δ₀} {hb : Ext Δ₀ Δ} {P : Prog C Δ₀ Γ₃} {post : Fml C Δ₀}
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m =
-        .inv I xs hv U c c' hu hb P post)
-      (init : Proves C R Γ₀ H I)
-      (thn : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c)
-        (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
-      (els : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre I).upd m U).pre c')
+        .inv I B xs hv U c c' hu hb P post)
+      (init : Proves C R Γ₀ H (I.invHyp B))
+      (thn : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c)
+        (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil)
+          (Fml.invPost m hu ω κ φ post B))))
+      (els : Proves C R Γ₀ ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c')
         (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)

@@ -194,9 +194,9 @@ def ExtCall.quote (call : ExtCall C Γ) : Lean.Expr :=
 def LoopAnn.quote : LoopAnn C Γ → Lean.Expr
   | .unwind k => mkAppN (mkConst ``LoopAnn.unwind) #[c, Γe, toExpr k]
   | .auto => mkAppN (mkConst ``LoopAnn.auto) #[c, Γe]
-  | .inv I dec =>
+  | .inv I dec brk =>
     mkAppN (mkConst ``LoopAnn.inv) #[c, Γe, Val.quote c Γe I,
-      optQ (mkAppN (mkConst ``Val) #[c, Γe, toExpr PrimTy.uint]) (Val.quote c Γe) dec]
+      optQ (mkAppN (mkConst ``Val) #[c, Γe, toExpr PrimTy.uint]) (Val.quote c Γe) dec, toExpr brk]
 
 /-- A call's arguments, and the term of the parameters' context they bind. -/
 def Args.quote : {ps : Ctx} → Args C Γ ps → Lean.Expr × Lean.Expr

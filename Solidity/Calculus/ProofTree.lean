@@ -49,6 +49,10 @@ variable {C : Contract} {R : RuleSet} {Γ₀ : Ctx}
 theorem impRight {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : Proves C R Γ₀ (H.pre a) φ) :
     Proves C R Γ₀ H (.imp a φ) := .intro h
 
+/-- `andRight` (`andIntro`). -/
+theorem andRight {Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ ψ : Fml C Γ} (h₁ : Proves C R Γ₀ H φ)
+    (h₂ : Proves C R Γ₀ H ψ) : Proves C R Γ₀ H (.and φ ψ) := .andIntro h₁ h₂
+
 /-- `allRight` (`allIntro`). -/
 theorem allRight {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
     (h : Proves C R Γ₀ (H.all x p) φ) : Proves C R Γ₀ H (.all x p φ) := .allIntro h
@@ -179,6 +183,11 @@ def movesAt (g : MVarId) : MetaM (Array Move) := g.withContext do
     return #[{ name := `impRight, tacs := #[← `(tactic| apply $(← short ``Proves.impRight))] }]
   | Fml.all _ _ _ _ _ =>
     return #[{ name := `allRight, tacs := #[← `(tactic| apply $(← short ``Proves.allRight))] }]
+  | Fml.and _ _ _ _ =>
+    -- a conjunct still a program's: split (the walk's `andRight`); else a leaf
+    let mf ← whnfD (← mkAppM ``Fml.modalFree #[φ])
+    if mf.isConstOf ``Bool.true then return #[]
+    return #[{ name := `andRight, tacs := #[← `(tactic| apply $(← short ``Proves.andRight))] }]
   | Fml.upd _ _ _ _ _ _ =>
     return #[{ name := `updIntro, tacs := #[← `(tactic| apply $(← short ``Proves.updIntro))] }]
   | Fml.bind _ _ _ _ _ _ =>

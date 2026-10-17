@@ -69,7 +69,11 @@ Specifications are `///` lines directly above the loop,
 `/// @custom:key decreases <term>` (at most one), in the function-spec
 expression language; `LoopLowering` moves them to the `while` it produces, so
 the invariant of a `for` or `do … while` holds at the head of that `while`,
-also on the iteration a `break` or `return` ends.
+also on the iteration a `return` ends.  Under the box an iteration that
+`break`s goes on to the rest of the program instead (solkey `473da8944c`'s
+`\getLoopBreak`: `whileInvariantBox` assumes `inv ∧ ¬broke` and the body
+ends in `(¬broke → inv) ∧ (broke → ⟨[ ]⟩)`); under the diamond the
+invariant still holds where the `break` leaves, as upstream.
 
 Loops block Ballot and BlindAuction (after `bytes32` and events),
 `MultiAuction.closeAuction` is `skip`ped, and the solc ports unroll by hand.
@@ -188,8 +192,9 @@ solkey has"), as `lowerLoops` in `Syntax.lean`:
 - A `break`, `continue` or `return` inside a `try` inside a loop is an
   elaboration error, as in solkey.
 
-The cost: goals and invariants mention the flags; an invariant for a loop
-with `break` must say what holds when `brk` is set.
+The cost: goals and invariants mention the flags; under the diamond an
+invariant for a loop with `break` must say what holds when `brk` is set
+(under the box the rule reads the flag, `loopBreak`).
 
 ## Decision 3: one rule per loop, chosen by an annotation
 

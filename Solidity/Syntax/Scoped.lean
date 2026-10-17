@@ -231,10 +231,12 @@ structure ExtCall (C : Contract) (Γ : Ctx) where
   args : List (ExtArg C Γ)
 
 /-- How a loop is proved: a written unwind bound, an invariant/variant,
-or automatic unwinding within the proof search's existing budget. -/
+or automatic unwinding within the proof search's existing budget.  An
+invariant's `brk` says the loop was lowered with a `break` flag
+(`Val.breakExit`, solkey's `\getLoopBreak`). -/
 inductive LoopAnn (C : Contract) (Γ : Ctx) where
   | unwind (k : Nat)
-  | inv (I : Val C Γ .bool) (dec : Option (Val C Γ .uint))
+  | inv (I : Val C Γ .bool) (dec : Option (Val C Γ .uint)) (brk : Bool)
   | auto
 
 /-- The two ways the same `whileUnwind` taclet takes another iteration. -/
@@ -429,7 +431,7 @@ def MSrc.toStr {Γ : Ctx} {T : Ty} (ns : List Var) : MSrc C Γ T → String
 def LoopAnn.toStr {Γ : Ctx} (ns : List Var) : LoopAnn C Γ → String
   | .auto => ""
   | .unwind k => s!"/// @custom:key unwind {k} "
-  | .inv I dec =>
+  | .inv I dec _ =>
     s!"/// @custom:key invariant {I.toStr ns true} " ++
       ((dec.map fun d => s!"/// @custom:key decreases {d.toStr ns true} ").getD "")
 
@@ -844,7 +846,7 @@ def ExtCall.wk {Γ Δ : Ctx} (h : Thin Γ Δ) (c : ExtCall C Γ) : ExtCall C Δ 
 
 def LoopAnn.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : LoopAnn C Γ → LoopAnn C Δ
   | .unwind k => .unwind k
-  | .inv I dec => .inv (I.wk h) (dec.map (·.wk h))
+  | .inv I dec brk => .inv (I.wk h) (dec.map (·.wk h)) brk
   | .auto => .auto
 
 def Args.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {ps : Ctx} → Args C Γ ps → Args C Δ ps

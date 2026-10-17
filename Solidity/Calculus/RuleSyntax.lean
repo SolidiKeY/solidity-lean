@@ -271,6 +271,13 @@ syntax (str ": ")? dl_fml " ; " (str ": ")? "{ " &"anon" "(" sol_block ")" " } "
 syntax (str ": ")? dl_fml " ; " (str ": ")? "{ " &"anon" "(" sol_block ")" " } " "(" dl_fml:26 " → "
   dl_upd " (" dl_fml:26 " ⟹ " "⟨" "[ " sol_block " ]" "⟩ " dl_fml:50 " ; " dl_fml:26 " ⟹ "
   "⟨" "[ " "]" "⟩" ")" ")" : dl_premise
+/-- `whileInvariantBox` with its break test `broke` (solkey's
+`\getLoopBreak`): the iteration assumes `¬broke`, and a body that breaks
+goes on to the rest (`⟨[ ]⟩`) in place of keeping the invariant. -/
+syntax (str ": ")? dl_fml " ; " (str ": ")? "{ " &"anon" "(" sol_block ")" " } " "(" dl_fml:36
+  " ∧ " "¬" dl_fml:max " → " dl_upd " (" dl_fml:26 " ⟹ " "⟨" "[ " sol_block " ]" "⟩ "
+  "(" "¬" dl_fml:max " → " dl_fml:26 ")" " ∧ " "(" dl_fml:max " → " "⟨" "[ " "]" "⟩" ")"
+  " ; " dl_fml:26 " ⟹ " "⟨" "[ " "]" "⟩" ")" ")" : dl_premise
 /-- One goal of a taclet with a goal per way a statement may end (KeY's
 `"label": \replacewith(…)`): the block in the statement's place, for every
 value of the locals `xs` it binds (`∀ xs.`).  The label is solkey's; the
@@ -953,7 +960,7 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
     let d : Ident ← match (⟨w[0][6]⟩ : TSyntax `sol_expr) with
       | `(sol_expr| $d:ident) => pure d
       | _ => Macro.throwErrorAt cl msg
-    return (← `(LoopAnn.inv $x (some $d)), w')
+    return (← `(LoopAnn.inv $x (some $d) $(schemaIdent "brk")), w')
   unless w.getKind == ``solWhile do
     Macro.throwErrorAt w "a taclet's `/// @custom:key` clause stands above `while`"
   let e : TSyntax `sol_expr := ⟨cl[6]⟩
@@ -968,7 +975,7 @@ def schemaLoopSpec (stx : Lean.Syntax) : MacroM (Lean.Term × Lean.Syntax) := do
       | _ => bad
     else if kw == "invariant" then
       match e with
-      | `(sol_expr| $x:ident) => `(LoopAnn.inv $x $(schemaIdent "dec"))
+      | `(sol_expr| $x:ident) => `(LoopAnn.inv $x $(schemaIdent "dec") $(schemaIdent "brk"))
       | _ => bad
     else bad
   return (ann, w)
@@ -1995,7 +2002,7 @@ it; the body and its postcondition read where `b` is popped (`hb`), the
 variant kept above the loop's context (`hu`). -/
 def schemaInvCore (i : TSyntax `dl_fml) (b : TSyntax `sol_block) (h : TSyntax `dl_fml)
     (U : TSyntax `dl_upd) (c : TSyntax `dl_fml) (t : TSyntax `sol_block)
-    (post c' : TSyntax `dl_fml) : MacroM Lean.Term := do
+    (post c' : TSyntax `dl_fml) (B : Option Lean.Term := none) : MacroM Lean.Term := do
   unless i.raw.structEq h.raw do
     Macro.throwErrorAt h "the invariant assumed is the one shown initially valid"
   unless b.raw.structEq t.raw do
@@ -2005,7 +2012,10 @@ def schemaInvCore (i : TSyntax `dl_fml) (b : TSyntax `sol_block) (h : TSyntax `d
   let Γ₀ : Scope := Γu.filter (·.1 != "b")
   let hu ← extPush (Scope.depth Γ₀)
   let hb ← extPush (Scope.depth Γu - Scope.depth Γ₀)
-  `($(Lean.mkCIdent `Solidity.Premise.inv) $(← schemaFmlCore coreScope i)
+  let B ← match B with
+    | some B => pure B
+    | none => `(Option.none)
+  `($(Lean.mkCIdent `Solidity.Premise.inv) $(← schemaFmlCore coreScope i) $B
       $(schemaIdent "xs") $(schemaIdent "hv") $Ut $(← schemaFmlCore Γu c) $(← schemaFmlCore Γu c')
       $hu $hb $(← schemaBlock true Γ₀ t) $(← schemaFmlCore Γ₀ post))
 
@@ -2087,6 +2097,27 @@ def schemaPremiseCore (Γ : Scope) (found : Option (String × Lean.Term)) (split
   | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml →
       $U:dl_upd ($c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩))) => do
     schemaInvCore i b h U c t post c'
+  | `(dl_premise| $[$_:str :]? $i:dl_fml ; $[$_:str :]? { anon($b:sol_block) } ($h:dl_fml ∧ ¬$k₁:dl_fml →
+      $U:dl_upd ($c:dl_fml ⟹ ⟨[ $t:sol_block ]⟩ (¬$k₂:dl_fml → $post:dl_fml) ∧ ($k₃:dl_fml → ⟨[ ]⟩) ;
+        $c':dl_fml ⟹ ⟨[ ]⟩))) => do
+    -- the break test is the one `Stmt.step` computes (`loopBreak`), named
+    -- `broke` as solkey names it
+    for k in [k₁, k₂, k₃] do
+      let named := match k with
+        | `(dl_fml| $x:ident) => x.getId.toString == "broke"
+        | _ => false
+      unless named do Macro.throwErrorAt k "a loop's break test is written `broke`"
+    unless post.raw.structEq h.raw do
+      Macro.throwErrorAt post "a body that does not break keeps the invariant"
+    -- the invariant initially valid, the flag not set
+    let i ← match i with
+      | `(dl_fml| $i:dl_fml ∧ ¬$k₀:dl_fml) =>
+        unless k₀.raw.structEq k₁.raw do
+          Macro.throwErrorAt k₀ "a loop's break test is written `broke`"
+        pure i
+      | _ => Macro.throwErrorAt i "the loop starts with the invariant and its flag not set"
+    schemaInvCore i b h U c t post c'
+      (some (← `($(Lean.mkCIdent `Solidity.loopBreak) $(schemaIdent "brk") $(schemaIdent "cond"))))
   | p => Macro.throwErrorAt p "no scoped reading of this premise yet"
 
 /-- A compound assignment's operator terms: `l ⊕ se` in `l ⊕= se`'s premise

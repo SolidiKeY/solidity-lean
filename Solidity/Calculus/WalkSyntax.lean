@@ -268,6 +268,9 @@ scoped macro_rules
   | `(tactic| apply allRight) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.allIntro) <;> core_silent)
+  | `(tactic| apply andRight) =>
+    `(tactic| first
+      | (core_silent; apply Solidity.Proves.andIntro) <;> core_silent)
   | `(tactic| apply emptyModality) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.empty) <;> core_silent

@@ -296,6 +296,12 @@ def movesAt (g : MVarId) (short : Bool := false) :
   match φ.getAppFn.constName? with
   | some ``Fml.imp => plain <$> alias `impRight ``Proves.impRight
   | some ``Fml.all => plain <$> alias `allRight ``Proves.allRight
+  | some ``Fml.and =>
+    let mf ← whnfD (← mkAppM ``Fml.modalFree #[φ])
+    if mf.isConstOf ``Bool.true then return #[]
+    let both ← `(tactic| refine $(← ProofTree.short ``Proves.andRight) ?_ ?_)
+    if short then return plain #[#[← `(tactic| apply $(mkIdent `andRight))], #[both]]
+    return plain #[#[both]]
   | some ``Fml.upd => plain <$> alias `updIntro ``Proves.updIntro
   | some ``Fml.bind => plain <$> one ``Proves.bindIntro
   | some ``Fml.tt =>

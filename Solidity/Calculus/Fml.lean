@@ -282,8 +282,11 @@ inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
   variant's, declared on top of `Γ`), the body `P` to `post` where `c`
   holds, the rest where `c'` does.  The condition's local is popped before
   the body (`hb`), so the body reads `Δ₀`: `Γ`, or `Γ` with the variant on
-  top (`hu`); every local `U` declares is popped before the rest. -/
-  | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool)
+  top (`hu`); every local `U` declares is popped before the rest.  With a
+  break test `B` (solkey's `\getLoopBreak`) the loop starts and each
+  iteration assumes `I ∧ ¬B`, and the body ends in `post` where `B` does not
+  hold, in the rest where it does (`Fml.invHyp`, `Fml.invPost`). -/
+  | inv {Δ₀ Δ Γ₁ : Ctx} (I : Fml C Γ) (B : Option (Fml C Γ)) (xs : List ((t : LTy) × Idx Γ t)) (hv : Bool)
       (U : Upd C Γ Δ) (c c' : Fml C Δ) (hu : Ext Γ Δ₀) (hb : Ext Δ₀ Δ) (P : Prog C Δ₀ Γ₁)
       (post : Fml C Δ₀) : Premise C Γ Γ
   /-- `⟨[ P ]⟩` whose end drops the locals of `Γ''` that `Γ'` does not keep,
@@ -323,6 +326,22 @@ def Fml.modalK {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ Γ₁) (κ 
   Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Fml C Γ) ω
     (fun κ => κ.exit m φ) (fun s ω κ => .modal m (.cons s ω) κ φ) κ
 
+/-- What a loop's iteration assumes: the invariant `I`, and `¬B` with a break
+test `B` (solkey's `inv & !broke`). -/
+def Fml.invHyp {Γ : Ctx} (I : Fml C Γ) : Option (Fml C Γ) → Fml C Γ
+  | none => I
+  | some B => .and I (.not B)
+
+/-- What a loop's body ends in: `post`, and with a break test `B` `post`
+where `B` does not hold, the rest of the program `⟨[ ω κ ]⟩ φ` where it does
+(solkey's `(!broke -> inv) & (broke -> [c# #c] post)`), both read at the
+body's scope `Δ₀` (`hu`). -/
+def Fml.invPost {Γ Δ₀ Γ₁ Γ₀ : Ctx} (m : Modality) (hu : Ext Γ Δ₀) (ω : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (post : Fml C Δ₀) : Option (Fml C Γ) → Fml C Δ₀
+  | none => post
+  | some B => .and (.imp (.not (.upd m (Upd.nil.pop hu) B)) post)
+      (.imp (.upd m (Upd.nil.pop hu) B) (.upd m (Upd.nil.pop hu) (.modalK m ω κ φ)))
+
 /-- The premise as one formula, under the modality `m` the rule found, in
 front of the rest `ω` of the program, the frames `κ` and the postcondition
 `φ`.  The rest and the frames are passed apart (Gate G0, condition 6): an
@@ -342,8 +361,9 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun bs ω => Fml.conj (bs.map fun b =>
       b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
     (fun fs us ω => Fml.conj (fs ++ us.map fun U => .upd m U (.modalK m ω κ φ)))
-    (fun I xs hv U c c' hu hb P post ω => .and I (Fml.anonHavoc xs hv (.imp I (.upd m U
-      (.and (.imp c (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
+    (fun I B xs hv U c c' hu hb P post ω => .and (I.invHyp B) (Fml.anonHavoc xs hv (.imp (I.invHyp B)
+      (.upd m U (.and (.imp c (.upd m (Upd.nil.pop hb)
+          (.modalK m P (.pop .block P.ext .nil) (Fml.invPost m hu ω κ φ post B))))
         (.imp c' (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ))))))))
     (fun P h ω => .modal m P (.drop h (.seq ω κ)) φ)
     (fun c U V ω => .and (.imp c (.upd m U (.upd m V (.modalK m ω κ φ))))

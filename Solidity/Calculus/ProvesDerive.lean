@@ -93,10 +93,11 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (Li
       (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))) bs b))
     (fun fs us ω => cond (fs.isEmpty && us.isEmpty) none
       (both (each (fun f => r H f) fs) (each (fun U => r (H.upd m U) (.modalK m ω κ φ)) us) b))
-    (fun I xs hv U c c' hu hb P post ω => both (r H I)
-      (both (r ((((H.anonHavoc xs hv).pre I).upd m U).pre c)
-          (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil) post)))
-        (r ((((H.anonHavoc xs hv).pre I).upd m U).pre c')
+    (fun I B xs hv U c c' hu hb P post ω => both (r H (I.invHyp B))
+      (both (r ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c)
+          (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil)
+            (Fml.invPost m hu ω κ φ post B))))
+        (r ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c')
           (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))) b)
     (fun P e ω => r H (.modal m P (.drop e (.seq ω κ)) φ) b)
     (fun c U V ω =>
@@ -139,7 +140,8 @@ def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Optio
       (eq := fun t u H => (leaf H (.eq t u)).map (·, b))
       (defined := fun t H => (leaf H (.defined t)).map (·, b))
       (not := fun ψ H => (leaf H (.not ψ)).map (·, b))
-      (and := fun ψ χ H => (leaf H (.and ψ χ)).map (·, b))
+      (and := fun ψ χ H => cond (Fml.and ψ χ).modalFree ((leaf H (.and ψ χ)).map (·, b))
+        (both (run R leaf rf n H ψ) (run R leaf rf n H χ) b))
       (imp := fun a ψ H => run R leaf rf n (H.pre a) ψ b)
       (upd := fun m U ψ H => run R leaf rf n (H.upd m U) ψ b)
       (modal := fun m P κ ψ H => modal R (fun H φ b => run R leaf rf n H φ b) rf m H P κ ψ b)
@@ -388,7 +390,7 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → 
         (fun _ _ _ h₁ hl₁ => each_sound h₁ hl₁ fun _ _ _ _ => hr _ _ _ _ _)
       exact .cases (hR := hR) hd hb this.1 this.2
     · simp only [premise, hb, cond_true, reduceCtorEq] at h
-  | inv I xs hv U c c' hu hb P post =>
+  | inv I B xs hv U c c' hu hb P post =>
     have := both_sound h hl (hr _ _)
       (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
     exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
@@ -436,7 +438,12 @@ theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) 
     | eq => exact leaf_sound hleaf h hl
     | defined => exact leaf_sound hleaf h hl
     | not => exact leaf_sound hleaf h hl
-    | and => exact leaf_sound hleaf h hl
+    | and ψ χ =>
+      cases hm : (Fml.and ψ χ).modalFree
+      · simp only [run, hm, cond_false] at h
+        have := both_sound h hl (ih _ _) (ih _ _)
+        exact .andIntro this.1 this.2
+      · exact leaf_sound hleaf (b := b) (by simpa only [run, hm, cond_true] using h) hl
     | imp a ψ => exact .intro (ih _ _ _ _ _ h hl)
     | upd m U ψ => exact .updIntro (ih _ _ _ _ _ h hl)
     | modal m P κ ψ =>

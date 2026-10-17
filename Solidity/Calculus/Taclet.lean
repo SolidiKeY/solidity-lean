@@ -536,9 +536,9 @@ theorem Taclet.internalCallExpand.toStep {f : Name} {ps : Ctx} {args : Args C Γ
 
 theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ .uint)}
-    {cond inv : Val C Γ .bool} (hf : body.frame = some (xs, hv)) :
-    Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec) cond body) =
-      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) xs hv
+    {cond inv : Val C Γ .bool} {brk : Bool} (hf : body.frame = some (xs, hv)) :
+    Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec brk) cond body) =
+      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) (loopBreak brk cond) xs hv
         (Upd.nil.decl (Var.fresh "se" k) (Rhs.val cond.lower))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl
@@ -548,9 +548,9 @@ theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
 
 theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
-    (hf : body.frame = some (xs, hv)) :
-    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec)) cond body) =
-      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) xs hv
+    {brk : Bool} (hf : body.frame = some (xs, hv)) :
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv (some dec) brk) cond body) =
+      Premise.inv (Fml.eqD inv.lower (Tms.Term.litB true)) none xs hv
         ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
           (Rhs.val (p := .bool) cond.lower))
         (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
@@ -568,15 +568,15 @@ theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ�
   rfl
 
 theorem LeanTaclet.whileClose.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁} {inv : Val C Γ .bool}
-    {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} (hf : body.frame = none) :
-    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec) cond body) = Premise.done false := by
+    {dec : Option (Val C Γ .uint)} {cond : Val C Γ .bool} {brk : Bool} (hf : body.frame = none) :
+    Stmt.step k m (Stmt.loop (LoopAnn.inv inv dec brk) cond body) = Premise.done false := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
 
 theorem LeanTaclet.whileNoVariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
-    {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} (hf : body.frame.isSome = true)
-    (hd : dec.isNone = true) :
-    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec) cond body) = Premise.done false := by
+    {inv cond : Val C Γ .bool} {dec : Option (Val C Γ .uint)} {brk : Bool}
+    (hf : body.frame.isSome = true) (hd : dec.isNone = true) :
+    Stmt.step k .diamond (Stmt.loop (LoopAnn.inv inv dec brk) cond body) = Premise.done false := by
   cases dec with
   | some => simp only [Option.isNone_some, Bool.false_eq_true] at hd
   | none =>

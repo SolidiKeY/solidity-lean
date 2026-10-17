@@ -1372,4 +1372,59 @@ example : ((Upd.aliceAgeWrite.globT (State.init StandardExample)).bind fun g =>
   decide +kernel
 
 
+/-! ## Two typed states read alike are one
+
+With nothing erased, a typed state is its global part and its locals'
+values (a memory local's identity types its reference in the one heap
+typing), so two states a term reads alike are equal (`State.eq_of_readsAs`)
+and every congruence of the erased reading is `subst`. -/
+
+section ReadsAs
+
+variable {Γ : Ctx}
+
+/-- Two typed states with one global part and one value per local. -/
+def State.ReadsAs (σ σ' : State C Γ) : Prop :=
+  σ.glob = σ'.glob ∧ ∀ {t : LTy} (i : Idx Γ t), σ.getV i = σ'.getV i
+
+theorem LTy.VDen.ofT_injective {H : HTy} : (t : LTy) → {v w : t.TDenote C H} →
+    LTy.VDen.ofT t v = LTy.VDen.ofT t w → v = w
+  | .val _, _, _, h | .alias _, _, _, h | .old, _, _, h | .oldNet, _, _, h | .kint, _, _, h => h
+  | .mem _, v, w, h => by
+    rcases v with _ | ⟨i, hi⟩ <;> rcases w with _ | ⟨j, hj⟩
+    · rfl
+    · cases h
+    · cases h
+    · simp only [LTy.VDen.ofT, Option.map_some, Option.some.injEq] at h
+      subst h
+      rfl
+
+/-- **Two typed states read alike are one.** -/
+theorem State.eq_of_readsAs {σ σ' : State C Γ} (h : σ.ReadsAs σ') : σ = σ' := by
+  obtain ⟨hg, hl⟩ := h
+  rcases σ with ⟨st, H, hp, env, nt, sb, tx⟩
+  rcases σ' with ⟨st', H', hp', env', nt', sb', tx'⟩
+  simp only [State.glob, State.mk.injEq] at hg
+  obtain ⟨rfl, rfl, hh, -, rfl, rfl, rfl⟩ := hg
+  cases hh
+  have he : env = env' :=
+    TEnv.ext fun _ i => LTy.VDen.ofT_injective _ (hl i)
+  rw [he]
+
+end ReadsAs
+
+/-- **An update lands on one state**: what it leaves in each local is
+determined (`Held.OK`), and so is the global part. -/
+theorem Upd.Lands.eq {Γ Δ : Ctx} {σ₀ : State C Γ} {U : Upd C Γ Δ} {g g' : GlobT C σ₀.H}
+    {σ' σ'' : State C Δ} (h : U.Lands σ₀ g σ') (h' : U.Lands σ₀ g' σ'') : σ' = σ'' := by
+  apply State.eq_of_readsAs
+  refine ⟨?_, fun {t} i => ?_⟩
+  · rw [h.2.1, h'.2.1, Option.some.inj (h.1.symm.trans h'.1)]
+  · have a := h.2.2 i
+    have b := h'.2.2 i
+    revert a b
+    cases U.held i with
+    | pos j => exact fun a b => a.trans b.symm
+    | rhs r => exact fun a b => Option.some.inj (a.symm.trans b)
+
 end Solidity

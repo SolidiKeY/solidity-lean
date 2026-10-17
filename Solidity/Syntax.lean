@@ -158,6 +158,9 @@ structure RawLoopSpec where
   inv : List RawExpr := []
   dec : Option RawExpr := none
   unwind : Option Nat := none
+  /-- The loop was lowered with a `break` flag, the first conjunct of its
+  condition (`while (!brk && …)`, `lowerLoops`): solkey's `\getLoopBreak`. -/
+  brk : Bool := false
   deriving Repr, Inhabited
 
 /-- The expressions of a loop's specification, as written. -/

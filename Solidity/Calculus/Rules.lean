@@ -828,9 +828,15 @@ inductive Taclet (C : Contract) (k : Nat) :
 
   /-- solkey's `whileInvariantBox`.  The invariant holds now, and from every
   state the body's frame allows (`{anon(body)}`, solkey's `#loopAnon`) where
-  it holds, the condition's value `b` (solkey's `bType b = cond;`) picks the
-  body, which keeps the invariant, or the rest of the program; a `bool`
-  local holds a `bool`, so the two goals cover every state.  A body with no
+  it holds and the loop has not broken, the condition's value `b` (solkey's
+  `bType b = cond;`) picks the body, which keeps the invariant or breaks
+  and goes on to the rest, or the rest of the program; a `bool` local holds
+  a `bool`, so the two goals cover every state.  `broke` is the loop's
+  `break` flag read `true` (`loopBreak`, solkey's `\getLoopBreak`), none
+  where the elaborator lowered no `break`: the condition starts with the
+  flag's negation, so a body that sets it ends the loop.  Lean asks `¬broke`
+  initially too, which solkey's lowering gives by declaring the flag `false`
+  before the loop; the rule is sound for every loop.  A body with no
   frame (`Prog.frame`) has no invariant rule: one that writes memory, as in
   solkey, and, Lean's own refusals (`Stmt.within`), one that pushes, pops,
   rebinds an alias or calls out, which solkey frames as writing storage and
@@ -839,9 +845,10 @@ inductive Taclet (C : Contract) (k : Nat) :
       (hf : Prog.frame body = some (xs, hv) := by side_cond) :
       dl{ [ /// @custom:key invariant inv
           while (cond) body; ] ⇝
-        "invariant initially valid": inv = TRUE ;
-        "invariant preserved and used": {anon(body)} (inv = TRUE → { b := cond }
-          (b = TRUE ⟹ ⟨[ body ]⟩ inv = TRUE ; b = FALSE ⟹ ⟨[ ]⟩)) }
+        "invariant initially valid": inv = TRUE ∧ ¬broke ;
+        "invariant preserved and used": {anon(body)} (inv = TRUE ∧ ¬broke → { b := cond }
+          (b = TRUE ⟹ ⟨[ body ]⟩ (¬broke → inv = TRUE) ∧ (broke → ⟨[ ]⟩) ;
+            b = FALSE ⟹ ⟨[ ]⟩)) }
 
   /-- solkey's `whileInvariantDiamond`: `whileInvariantBox` with the variant
   `dec`, its value before the iteration kept in a fresh local (KeY's skolem

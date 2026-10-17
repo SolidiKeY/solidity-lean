@@ -31,6 +31,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
     (h : Proves C R Γ₀ H φ) : Proves C .all Γ₀ H φ := by
   induction h with
   | intro _ ih => exact .intro ih
+  | andIntro _ _ ih₁ ih₂ => exact .andIntro ih₁ ih₂
   | allIntro _ ih => exact .allIntro ih
   | updIntro _ ih => exact .updIntro ih
   | bindIntro _ ih => exact .bindIntro ih
@@ -96,6 +97,9 @@ theorem Proves.toSolkey {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ
   | intro _ ih =>
     have h' : (_ && _) = true := hφ
     exact .intro (ih (Bool.and_eq_true _ _ ▸ h').2)
+  | andIntro _ _ ih₁ ih₂ =>
+    have h' : (_ && _) = true := hφ
+    exact .andIntro (ih₁ (Bool.and_eq_true _ _ ▸ h').1) (ih₂ (Bool.and_eq_true _ _ ▸ h').2)
   | allIntro _ ih => exact .allIntro (ih hφ)
   | updIntro _ ih => exact .updIntro (ih hφ)
   | bindIntro _ ih => exact .bindIntro (ih hφ)
@@ -213,7 +217,7 @@ theorem Proves.solkey_blocked {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C
     have h' : (!RuleSet.admits .solkey _ _) = true := hφ
     rw [hR] at h'
     exact absurd h' Bool.false_ne_true
-  | intro | allIntro | updIntro | bindIntro | empty | closeTrue =>
+  | intro | andIntro | allIntro | updIntro | bindIntro | empty | closeTrue =>
     exact absurd hφ Bool.false_ne_true
   | closeFalse h _ => exact h
   | @closeHolds Γ H φ _ hm =>

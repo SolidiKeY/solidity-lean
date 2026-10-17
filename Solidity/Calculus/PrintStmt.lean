@@ -577,7 +577,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
         return ← clause "unwind" (← `(sol_expr| $x:ident + 1)) w
       let some n ← (evalNat k).run | escape
       clause "unwind" (← `(sol_expr| $(Lean.Syntax.mkNumLit (toString n)):num)) w
-    | LoopAnn.inv _ _ I dec =>
+    | LoopAnn.inv _ _ I dec _ =>
       let w ← match ← optSome? dec with
         | some d => clause "decreases" (← ppExprS ns d) w
         | none => pure w
@@ -1151,7 +1151,7 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     let some c := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $c:dl_case ; $[$(out.extract 1 out.size)];*))
-  | Premise.inv _ _ _ _ _ I _ _ U c c' _ hb P post =>
+  | Premise.inv _ _ _ _ _ I B _ _ U c c' _ hb P post =>
     let (ps, ms) ← updPiecesS ns U
     let ks := ms.drop (← extDepth hb)
     let I ← ppFmlS ns I
@@ -1159,6 +1159,19 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     let c' ← ppFmlS ms c'
     let post ← ppFmlS ks post
     let b ← ppBlockOf (← progPiecesS ks P).1
+    -- the break test: `broke` in a taclet (`loopBreak brk cond`), the flag
+    -- read in a goal, none where the loop has no `break`
+    let B ← whnf B
+    let broke? : Option (TSyntax `dl_fml) ←
+      if B.isAppOfArity ``Option.none 1 then pure none
+      else if B.isAppOfArity ``Option.some 2 then
+        pure (some (← `(dl_fml| ($(← ppFmlS ns B.appArg!)))))
+      else pure (some (← `(dl_fml| $(mkIdent `broke):ident)))
+    if let some k := broke? then
+      let (u, _) ← ppUpdS ns U
+      return some (← `(dl_premise| $[$l0:str :]? $I:dl_fml ∧ ¬$k ; $[$l1:str :]? { anon($b) } ($I ∧ ¬$k →
+        $u:dl_upd ($c:dl_fml ⟹ ⟨[ $b ]⟩ (¬$k → $post:dl_fml) ∧ ($k → ⟨[ ]⟩) ;
+          $c':dl_fml ⟹ ⟨[ ]⟩))))
     if ps.isEmpty then
       return some (← `(dl_premise| $[$l0:str :]? $I:dl_fml ; $[$l1:str :]? { anon($b) } ($I →
         $c:dl_fml ⟹ ⟨[ $b ]⟩ $post:dl_fml ; $c':dl_fml ⟹ ⟨[ ]⟩)))

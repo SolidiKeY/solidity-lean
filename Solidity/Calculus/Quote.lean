@@ -236,12 +236,12 @@ def qExtCall (Γ : Ctx) (call : ExtCall C Γ) : QM Expr := do
 def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
   | .unwind k => ctor ``LoopAnn.unwind Γ #[toExpr k]
   | .auto => ctor ``LoopAnn.auto Γ #[]
-  | .inv I dec => do
+  | .inv I dec brk => do
     let ty := mkApp3 (mkConst ``Val) (← contract) (← qCtx Γ) (toExpr PrimTy.uint)
     let d ← match dec with
       | none => pure (optE ty none)
       | some d => pure (optE ty (some (← qVal Γ .uint d)))
-    ctor ``LoopAnn.inv Γ #[← qVal Γ .bool I, d]
+    ctor ``LoopAnn.inv Γ #[← qVal Γ .bool I, d, toExpr brk]
 
 /-! ## Statements -/
 
@@ -578,8 +578,12 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
     for U in us.reverse do
       lu := mkApp3 (mkConst ``List.cons [levelZero]) uTy (← qUpd Γ Γ U) lu
     return mk ``Premise.cases #[lf, lu]
-  | @Premise.inv _ _ Δ₀ Δ Γ₁ I xs hv U c c' hu hb P post =>
-    return mk ``Premise.inv #[← qCtx Δ₀, ← qCtx Δ, ← qCtx Γ₁, ← qFml Γ I, ← qIdxList Γ xs,
+  | @Premise.inv _ _ Δ₀ Δ Γ₁ I B xs hv U c c' hu hb P post => do
+    let fTy := mkApp2 (mkConst ``Fml) (← contract) (← qCtx Γ)
+    let B ← match B with
+      | none => pure (optE fTy none)
+      | some B => pure (optE fTy (some (← qFml Γ B)))
+    return mk ``Premise.inv #[← qCtx Δ₀, ← qCtx Δ, ← qCtx Γ₁, ← qFml Γ I, B, ← qIdxList Γ xs,
       toExpr hv, ← qUpd Γ Δ U, ← qFml Δ c, ← qFml Δ c', ← qExt Γ hu, ← qExt Δ₀ hb,
       ← qProg Δ₀ Γ₁ P, ← qFml Δ₀ post]
   | @Premise.inline _ _ Γ' Γ'' P h =>

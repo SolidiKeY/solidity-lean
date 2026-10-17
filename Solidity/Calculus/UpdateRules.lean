@@ -12,7 +12,8 @@ are derived here from `Proves.closeHolds`; each needs a sequent with no modality
 left (`Fml.modalFree`), and those that drop a fact a context gives, no
 diamond in it (`Hyps.boxOnly`):
 
-* `andSplit` (`andRight`), `eqDSplit`: `a = b` into `defined(a)`,
+* `andSplit` (`andRight`, the constructor `Proves.andIntro`, which needs
+  no modality-free sequent), `eqDSplit`: `a = b` into `defined(a)`,
   `defined(b)` and `a ≐ b`;
 * `definedWritten`, `definedLit`, `eqRefl`, `eqClose`, `eqDClose`: a local
   of the typed state always holds a value of its type, so `defined(x)`
@@ -208,47 +209,6 @@ theorem Tm.denote_substH (hL : U.Lands σ₀ g σ₁) :
 
 end Denote
 
-/-! ## Two typed states read alike are one
-
-With nothing erased, a typed state is its global part and its locals'
-values (a memory local's identity types its reference in the one heap
-typing), so two states a term reads alike are equal (`State.eq_of_readsAs`)
-and every congruence of the erased reading is `subst`. -/
-
-section ReadsAs
-
-variable {Γ : Ctx}
-
-/-- Two typed states with one global part and one value per local. -/
-def State.ReadsAs (σ σ' : State C Γ) : Prop :=
-  σ.glob = σ'.glob ∧ ∀ {t : LTy} (i : Idx Γ t), σ.getV i = σ'.getV i
-
-theorem LTy.VDen.ofT_injective {H : HTy} : (t : LTy) → {v w : t.TDenote C H} →
-    LTy.VDen.ofT t v = LTy.VDen.ofT t w → v = w
-  | .val _, _, _, h | .alias _, _, _, h | .old, _, _, h | .oldNet, _, _, h | .kint, _, _, h => h
-  | .mem _, v, w, h => by
-    rcases v with _ | ⟨i, hi⟩ <;> rcases w with _ | ⟨j, hj⟩
-    · rfl
-    · cases h
-    · cases h
-    · simp only [LTy.VDen.ofT, Option.map_some, Option.some.injEq] at h
-      subst h
-      rfl
-
-/-- **Two typed states read alike are one.** -/
-theorem State.eq_of_readsAs {σ σ' : State C Γ} (h : σ.ReadsAs σ') : σ = σ' := by
-  obtain ⟨hg, hl⟩ := h
-  rcases σ with ⟨st, H, hp, env, nt, sb, tx⟩
-  rcases σ' with ⟨st', H', hp', env', nt', sb', tx'⟩
-  simp only [State.glob, State.mk.injEq] at hg
-  obtain ⟨rfl, rfl, hh, -, rfl, rfl, rfl⟩ := hg
-  cases hh
-  have he : env = env' :=
-    TEnv.ext fun _ i => LTy.VDen.ofT_injective _ (hl i)
-  rw [he]
-
-end ReadsAs
-
 /-! ## Applying an update to a first-order goal -/
 
 /-- A first-order formula of the scope an update leaves, read in the scope it
@@ -403,12 +363,11 @@ section Rules
 
 variable {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ}
 
-/-- **`andRight`**: a conjunction from each conjunct, in the same context. -/
-theorem Proves.andSplit {φ ψ : Fml C Γ} (h₁ : Proves C R Γ₀ H φ) (h₂ : Proves C R Γ₀ H ψ)
-    (hm : (H.wrap (.and φ ψ)).modalFree = true := by first | rfl | decide) :
+/-- **`andRight`**: a conjunction from each conjunct, in the same context
+(`Proves.andIntro`). -/
+theorem Proves.andSplit {φ ψ : Fml C Γ} (h₁ : Proves C R Γ₀ H φ) (h₂ : Proves C R Γ₀ H ψ) :
     Proves C R Γ₀ H (.and φ ψ) :=
-  .closeHolds (fun σ => H.wrap_and (χ := .and φ ψ) (fun _ a b => ⟨a, b⟩) σ
-    (Proves.sound h₁ σ) (Proves.sound h₂ σ)) hm
+  .andIntro h₁ h₂
 
 /-- A program comparison `a = b` (`Fml.eqD`) from its three parts: `a` and
 `b` return, and they are equal in the Theory. -/

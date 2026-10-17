@@ -509,10 +509,11 @@ checked after it only where the condition holds again.  The fresh `b` and
 
 /--
 info: Solidity.Taclet.whileInvariantBox : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)} {cond inv : Val C Γ PrimTy.bool},
+  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool}
+  {cond inv : Val C Γ PrimTy.bool},
   dl{ [ /// @custom:key invariant inv while (cond) body; ] ⇝
-    "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
-      { se := cond } (se = true ⟹ ⟨[ body ]⟩ inv = true ; se = false ⟹ ⟨[ ]⟩)) }
+    "invariant initially valid": inv = true ∧ ¬broke ; "invariant preserved and used": { anon(body) } (inv = true ∧
+      ¬broke → { se := cond } (se = true ⟹ ⟨[ body ]⟩ (¬broke → inv = true) ∧ (broke → ⟨[ ]⟩) ; se = false ⟹ ⟨[ ]⟩)) }
 solkey: whileInvariantBox (loop_inv)
 printed: none (a solkey taclet not printed)
 sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
@@ -521,7 +522,7 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.Taclet.whileInvariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {xs : List ((t : LTy) × Idx Γ t)} {hv : Bool} {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
+  {xs : List ((t : LTy) × Idx Γ t)} {hv brk : Bool} {cond inv : Val C Γ PrimTy.bool} {dec : Val C Γ PrimTy.uint},
   dl{ ⟨ /// @custom:key invariant inv /// @custom:key decreases dec while (cond) body; ⟩ ⇝
     "invariant initially valid": inv = true ; "invariant preserved and used": { anon(body) } (inv = true →
       { ie := dec ‖ se := cond } (se = true ⟹ ⟨[ body ]⟩
@@ -697,7 +698,7 @@ diamond with no variant does (`whileNoVariantDiamond`). -/
 
 /--
 info: Solidity.LeanTaclet.whileClose : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x} {m : Modality}
-  {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)} {cond : Val C Γ PrimTy.bool},
+  {inv : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)} {brk : Bool} {cond : Val C Γ PrimTy.bool},
   dl[LeanTaclet C k]{ ⟨[ /// @custom:key invariant inv while (cond) body; ]⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
@@ -707,7 +708,7 @@ sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.LeanTaclet.whileNoVariantDiamond : ∀ {C : Contract} {k : Nat} {Γ x : Ctx} {body : Prog C Γ x}
-  {inv cond : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)},
+  {inv : Val C Γ PrimTy.bool} {brk : Bool} {cond : Val C Γ PrimTy.bool} {dec : Option (Val C Γ PrimTy.uint)},
   dl[LeanTaclet C k]{ ⟨ /// @custom:key invariant inv while (cond) body; ⟩ ⇝ false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)

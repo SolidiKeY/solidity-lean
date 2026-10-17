@@ -370,6 +370,39 @@ def loopUnwindStep {Γ Γ₁ : Ctx} (u : LoopUnwind) (c : Val C Γ .bool)
   .unfold (.cons (.ite c (.cons (.block body) (.cons (.loop u.after c body) .nil)) .nil) .nil)
     .refl
 
+/-- `!x && r` is `false` where `x` reads `true`, `r` not read. -/
+theorem Val.evalT_andNotFlag {Γ : Ctx} {p : PrimTy} (h : BinOp.and.accepts p = true)
+    (hq : BinOp.and.ret p = .bool) (h' : UnOp.not.accepts .bool = true)
+    (hq' : UnOp.not.ret .bool = p) (x : Idx Γ (.val .bool)) (r : Val C Γ p) (σ : State C Γ)
+    (hx : (Val.simple (.local x) : Val C Γ .bool).evalT σ = .ok true) :
+    (Val.binop .and h hq (.unop .not h' hq' (.simple (.local x))) r).evalT σ = .ok false := by
+  subst hq'
+  have hx' : Simple.evalT σ (.local x) = true := by injection hx
+  dsimp only [Val.evalT]
+  rw [hx']
+  rfl
+
+/-- `c` is `!x && r`. -/
+def Val.AndNotFlag {Γ : Ctx} (c : Val C Γ .bool) (x : Idx Γ (.val .bool)) : Prop :=
+  ∃ (p : PrimTy) (h : BinOp.and.accepts p = true) (hq : BinOp.and.ret p = .bool)
+    (h' : UnOp.not.accepts .bool = true) (hq' : UnOp.not.ret .bool = p) (r : Val C Γ p),
+    c = .binop .and h hq (.unop .not h' hq' (.simple (.local x))) r
+
+/-- The flag a lowered `break` sets, where the loop's condition starts with
+its negation, `!brk && …` (`lowerLoops`), with the condition's shape: where
+the flag reads `true` the condition is `false` (`Val.evalT_andNotFlag`). -/
+def Val.breakExit {Γ : Ctx} : (c : Val C Γ .bool) →
+    Option ((x : Idx Γ (.val .bool)) ×' c.AndNotFlag x)
+  | .binop .and h hq (.unop .not h' hq' (@Val.simple _ _ .bool (.local x))) r =>
+    some ⟨x, _, h, hq, h', hq', r, rfl⟩
+  | _ => none
+
+/-- A box loop's break test (solkey's `\getLoopBreak`): its `break` flag
+read `true`, where the elaborator lowered a `break` (`brk`) and the
+condition starts with the flag's negation (`Val.breakExit`). -/
+def loopBreak {Γ : Ctx} (brk : Bool) (c : Val C Γ .bool) : Option (Fml C Γ) :=
+  (if brk then c.breakExit else none).map fun x => .isBoolD (.pvV (p := .bool) x.1) true
+
 /-- A loop (`loopStep`): unwound (`whileUnwind`), ended (`loopExit`), or by
 its invariant (`whileInvariantBox`, `whileInvariantDiamond`), closed to
 `false` when its body has no frame (`whileClose`) or, under the diamond,
@@ -383,7 +416,7 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
   | .unwind (n + 1) =>
     loopUnwindStep (.bounded n) c body
   | .auto => loopUnwindStep .automatic c body
-  | .inv I dec =>
+  | .inv I dec brk =>
     match body.frame with
     -- whileClose
     | none => .done false
@@ -391,7 +424,8 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
       match m, dec with
       -- whileInvariantBox
       | .box, _ =>
-        .inv (.isBoolD I.lower true) xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+        .inv (.isBoolD I.lower true) (loopBreak brk c) xs hv
+          (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
           (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
           .refl (.push .refl) body (.isBoolD I.lower true)
       -- whileInvariantDiamond
@@ -405,7 +439,7 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
               (.imp (.isBoolD (.pvV (p := .bool) .here) true)
                 (.and (.isBoolD (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) d') true)
                   (.isBoolD (.app2 (.binop .lt (p := .uint) rfl) d' (.pvV (p := .uint) (.there .here))) true))))
-        .inv (.isBoolD I.lower true) xs hv U
+        .inv (.isBoolD I.lower true) none xs hv U
           (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
           (.push .refl) (.push .refl) (body.wk up).2.2 post
       -- whileNoVariantDiamond
