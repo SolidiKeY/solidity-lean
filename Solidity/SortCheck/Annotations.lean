@@ -152,20 +152,18 @@ def compoundOpName : BinOp -> String
 /-- The compound-assignment ops with KeY taclets (`+=` .. `%=`). -/
 def compoundOps : List BinOp := [.add, .sub, .mul, .div, .mod]
 
+/-- The six targets of an arithmetic update, the taclet names ending in
+`suffix`, each reading its cell `k` times (`v = sp.fld++;` reads it twice). -/
+private def targetRows (suffix : String) (k : Nat) : List TacletReadAnn :=
+  [ ⟨s!"storageRoot{suffix}", .replicate k sint⟩,
+    ⟨s!"storageField{suffix}", .replicate k sint⟩,
+    ⟨s!"storageIndexMapping{suffix}", .replicate k sint⟩,
+    ⟨s!"storageIndexArray{suffix}", slen :: .replicate k sint ++ [slen]⟩,
+    ⟨s!"memoryField{suffix}", .replicate k mint⟩,
+    ⟨s!"memoryIndexArray{suffix}", .replicate k mint ++ [mlen, mlen]⟩ ]
+
 private def compoundRows : List TacletReadAnn :=
-  compoundOps.flatMap fun op =>
-    [ { keyName := s!"storageRoot{compoundOpName op}Assign"
-        reads := [sint] },
-      { keyName := s!"storageField{compoundOpName op}Assign"
-        reads := [sint] },
-      { keyName := s!"storageIndexMapping{compoundOpName op}Assign"
-        reads := [sint] },
-      { keyName := s!"storageIndexArray{compoundOpName op}Assign"
-        reads := [slen, sint, slen] },
-      { keyName := s!"memoryField{compoundOpName op}Assign"
-        reads := [mint] },
-      { keyName := s!"memoryIndexArray{compoundOpName op}Assign"
-        reads := [mint, mlen, mlen] } ]
+  compoundOps.flatMap fun op => targetRows s!"{compoundOpName op}Assign" 1
 
 /-! ### Increment / decrement
 
@@ -187,30 +185,25 @@ def incDecOps : List IncDec := [.preInc, .preDec, .postInc, .postDec]
 
 private def incDecRows : List TacletReadAnn :=
   incDecOps.flatMap fun op =>
-    [ { keyName := s!"storageRoot{incDecOpName op}"
-        reads := [sint] },
-      { keyName := s!"storageField{incDecOpName op}"
-        reads := [sint] },
-      { keyName := s!"storageIndexMapping{incDecOpName op}"
-        reads := [sint] },
-      { keyName := s!"storageIndexArray{incDecOpName op}"
-        reads := [slen, sint, slen] },
-      { keyName := s!"storageRoot{incDecOpName op}Assignment"
-        reads := [sint, sint] },
-      { keyName := s!"storageField{incDecOpName op}Assignment"
-        reads := [sint, sint] },
-      { keyName := s!"storageIndexMapping{incDecOpName op}Assignment"
-        reads := [sint, sint] },
-      { keyName := s!"storageIndexArray{incDecOpName op}Assignment"
-        reads := [slen, sint, sint, slen] },
-      { keyName := s!"memoryField{incDecOpName op}"
-        reads := [mint] },
-      { keyName := s!"memoryIndexArray{incDecOpName op}"
-        reads := [mint, mlen, mlen] },
-      { keyName := s!"memoryField{incDecOpName op}Assignment"
-        reads := [mint, mint] },
-      { keyName := s!"memoryIndexArray{incDecOpName op}Assignment"
-        reads := [mint, mint, mlen, mlen] } ]
+    targetRows (incDecOpName op) 1 ++ targetRows s!"{incDecOpName op}Assignment" 2
+
+/-- The arithmetic suffixes of a native push (`values.push() += x`,
+`values.push()++`): two old-size reads in append/reset, two new-size reads
+addressing the appended slot, and its numeric value. -/
+private def pushArithRows : List TacletReadAnn :=
+  (compoundOps.map (s!"{compoundOpName ·}Assign") ++ incDecOps.map incDecOpName).map
+    fun op => ⟨s!"storagePush{op}", [slen, slen, sint, slen]⟩
+
+/-- The payments, `{transfer,send}{No,With}Callback{Box,Diamond}`. solkey
+`333cc7b353` split each rule by modality: the box rule books the debit
+unconditionally, the diamond rule additionally owes a "non-negative amount"
+goal (not ported: `LeanTaclet.transferDiamond`). `send` (solkey
+`b959555181`) books it on the "send succeeded" goal of the no-callback rules
+and the "invariant on exit" goal of the callback rules. The ledger read is the
+same `selectSt<[int]>(net, at(a))` in all eight. -/
+private def paymentRows : List TacletReadAnn :=
+  ["transfer", "send"].flatMap fun k => ["NoCallback", "WithCallback"].flatMap fun c =>
+    ["Box", "Diamond"].map fun m => ⟨k ++ c ++ m, [⟨.net, .net, .fixed .int⟩]⟩
 
 /-! ## The table -/
 
@@ -259,26 +252,6 @@ def tacletReadAnns : List TacletReadAnn :=
     { keyName := "memoryToStorageIndexArrayCopyRoot"
       reads := [slen, slen] },
     -- Push / pop.
-    -- Native primitive push suffixes: two old-size reads in append/reset,
-    -- two new-size reads addressing the appended slot, and its numeric value.
-    { keyName := "storagePushAddAssign"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushSubAssign"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushMulAssign"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushDivAssign"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushModAssign"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushPreincrement"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushPostincrement"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushPredecrement"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
-    { keyName := "storagePushPostdecrement"
-      reads := [slen, slen, sread .value (.fixed .int), slen] },
     { keyName := "storagePushValueSave"
       reads := [slen, slen] },
     { keyName := "storagePushValueCopySource"
@@ -337,32 +310,8 @@ def tacletReadAnns : List TacletReadAnn :=
     { keyName := "memoryIndexDeletePrimitive"
       reads := [mlen, mlen] },
     { keyName := "memoryIndexDeleteReference"
-      reads := [mlen, mlen] },
-    -- Payments. solkey `333cc7b353` split each rule by modality: the box
-    -- rule books the debit unconditionally (as `transferNoCallbackBox` does),
-    -- the diamond rule additionally owes a "non-negative amount" goal (not
-    -- ported: `LeanTaclet.transferDiamond`). The ledger read is the same
-    -- `selectSt<[int]>(net, at(a))` in all four.
-    { keyName := "transferNoCallbackBox"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    { keyName := "transferNoCallbackDiamond"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    { keyName := "transferWithCallbackBox"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    { keyName := "transferWithCallbackDiamond"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    -- `send` (solkey `b959555181`): the same booking on the "send succeeded"
-    -- goal of the no-callback rules and the "invariant on exit" goal of the
-    -- callback rules, one ledger read each.
-    { keyName := "sendNoCallbackBox"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    { keyName := "sendNoCallbackDiamond"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    { keyName := "sendWithCallbackBox"
-      reads := [⟨.net, .net, .fixed .int⟩] },
-    { keyName := "sendWithCallbackDiamond"
-      reads := [⟨.net, .net, .fixed .int⟩] } ]
-  ++ compoundRows ++ incDecRows
+      reads := [mlen, mlen] } ]
+  ++ pushArithRows ++ paymentRows ++ compoundRows ++ incDecRows
 
 /-! ## The pre-fix annotations (solkey `12e72a1b4b^`)
 
