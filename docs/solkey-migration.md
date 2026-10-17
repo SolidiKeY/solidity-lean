@@ -200,11 +200,49 @@ solkey's `StorageDangling` suite closes, as on its EVM runner). The
   pins flip.
 - TestSuite: five obligations that read an appended reference slot as its
   default are pending, as they stay open upstream (`SYMBOLIC_TAIL_OPENS`):
-  506 derived, 6 pending (`Report.lean`).
+  506 derived, 6 pending at the old fixture.
 - A push of a reference element exposes an old slot, so the concrete
   admission tier (`LTm.known?`) no longer counts it (`Op2.exposes`). The
   nested-array suites that start `delete a; a.push()` read rows of unknown
   length again, upstream's "needs an empty-inner precondition".
+
+**Repin and the new taclets (done).** The snapshot moved to `473da8944c`
+(`tests/migration/rule-delta-473da8944c.json`): `KeyTaclets.lean` lists
+377 taclets, 341 claimed and 36 unclaimed with reasons
+(`RuleShapes.unclaimedTaclets`), `migrationPendingTaclets` is empty and
+`solkeycheck` is at zero.
+
+- Signed `&`, `|`, `^` and `>>` read the operands in two's complement
+  (`uintBitwise`, `wordOf`, `signedOf`); `<<` stays at `uint`.
+- An assignment is a value (`(x = e)`, `x += e`, `RawExpr.assign`), an
+  effect under `&&`/`||` runs only where solc evaluates it, a discarded
+  value (`a + b;`, `x.pop;`) is held in a fresh local, and a storage
+  reference assigned to a memory element is copied first.
+- A `return` in a modifier ends that modifier alone (`wrapMods`), and an
+  effect or a call in a conditional's branch runs in that branch only
+  (`T se; if (c) { se = a; } else { se = b; }`, `ternaryToIf`); a
+  conditional callee `(c ? f : g)(x̄)` is imported as `c ? f(x̄) : g(x̄)`.
+- The closer has `intDiv.key`'s signed-remainder bounds and
+  `binaryLemmas.key`'s `binaryAnd*` lemmas (`Calculus/CloseLemmas.lean`).
+
+TestSuite at `473da8944c` (`Report.lean`): **617 functions, 545 derived,
+17 pending, 55 other**. Two functions remain unsupported: a quantified loop
+invariant (`invariantQuantifiedOverPrefix`) and a struct that is recursive
+through a mapping. Of the pending rows, ten are open in solkey too: its
+`SYMBOLIC_TAIL_OPENS` (the four `testEmptyPush*`/`testFixedShape*` and the
+three complex/composed push receivers) and the `unprovable*` rows. The
+other seven are:
+
+- `bitAndSymbolic`: every leaf closes, but together they need about twice
+  one declaration's `maxHeartbeats`, mostly `sol_close_eval` on eight
+  leaves that repeat the prefix (`Examples/Tactics/Operators.lean` proves
+  the same lemmas on one leaf).
+- `memoryIndexWriteStorageRefRhsCapture`,
+  `memoryIndexWriteStorageStructCopy` and
+  `memoryIndexWriteStorageRefImpureIndex`: memory reads of a storage copy;
+  the last one's search runs away.
+- `invariantClosedFormSum`, `invariantBreakLeavesInvariantRange` and
+  `invariantForBreakSkipsUpdate`: loop invariants with `break`.
 
 ## Reproduce the inputs
 
@@ -523,9 +561,10 @@ a separate outstanding gate.
 
 The historical `Derived13` check failed exactly four former resurrection
 derivations; its remaining `testArrayCopyClearsOldElements` still checks.
-`Solidity/Counterexamples/StorageDangling.lean` imports the pinned upstream
-`solc/open/StorageDanglingOpen.sol` fixture and kernel-refutes all four original
-obligations at the initial typed state. Their obsolete `.proved` declarations
+The former `Counterexamples` module `StorageDangling` imported the pinned upstream
+`solc/open/StorageDanglingOpen.sol` fixture and kernel-refuted all four original
+obligations at the initial typed state (since `473da8944c`'s length-only push
+it is `Examples/Tactics/StorageDangling.lean`, which proves them). Their obsolete `.proved` declarations
 were removed from `Derived13`. Until the main TestSuite fixture is repinned,
 its historical report expects 433 derived and four pending rows; that full
 report still needs verification. The current source removed those four rows
@@ -1111,7 +1150,7 @@ Verification and remaining integration work:
 - Three new upstream obligations close with the native strategy in `TestSuite/Derived16.lean`. The signed three-push obligation remains a required pending proof. Its twelve residual leaves exceed `Seq.closeSize` before elimination, with storage depth seven (`/tmp/migration-native-push-signed-size-4.log`); no limit is raised. An attempted full reduction and bounded leaf search timed out and are retained only as outside-checkout prototypes.
 - The fresh full runner passed the default build (294 jobs) and imported TestSuite (146 jobs), including the three new derivations and the verified report pin of 489 derived, twelve pending and 50 other (`/tmp/migration-native-push-source-reviewed-run-lean.log`). It exits 1 only for the remaining `storagePushMemoryCopySource` annotation gap.
 - The regenerated 723-row corpus has 489 derived, twelve pending, 49 unsupported, 70 concrete proofs, 100 unported, one excluded and two skipped. The parity audit passes with 23 trust-checked modules (`/tmp/migration-native-push-source-reviewed-parity.log`). Generation uses the frozen snapshot so its revision metadata stays `048a74de51`.
-- The enlarged obligation table exposed an elaboration-depth failure in its last corpus corollary. Explicit program arguments and tactic wrappers did not fix it; those attempts are removed. Inspection of Lean's `Init/Prelude.lean` confirms the default depth is 512. The generated corpus uses the minimal passing local `maxRecDepth` of 513, retaining the table representation and all heartbeat/search limits. `lake build SolidityCorpus` passes, 154 jobs (`/tmp/migration-native-push-source-corpus-depth513.log`). The strict live corpus re-probe also passes (`/tmp/migration-native-push-source-corpus-depth513-final.log`).
+- The enlarged obligation table exposed an elaboration-depth failure in its last corpus corollary. Explicit program arguments and tactic wrappers did not fix it; those attempts are removed. Inspection of Lean's prelude (`Init.Prelude`) confirms the default depth is 512. The generated corpus uses the minimal passing local `maxRecDepth` of 513, retaining the table representation and all heartbeat/search limits. `lake build SolidityCorpus` passes, 154 jobs (`/tmp/migration-native-push-source-corpus-depth513.log`). The strict live corpus re-probe also passes (`/tmp/migration-native-push-source-corpus-depth513-final.log`).
 - `SOLKEY_ROOT=/home/guilherme/projects/solkey node --test scripts/test-solidity.test.mjs scripts/solkey-migration.test.mjs`: all 25 pass, zero skipped (`/tmp/migration-native-push-source-tool-regressions-final.log`). The explicit root is necessary because the isolated worktree has no sibling SolKey checkout.
 - The final read-only finder and skeptic accepted the three new proofs, the unchanged corollary bridge and the documented remaining boundaries. Main-checkout integration remains pending.
 
