@@ -746,17 +746,6 @@ section Agrees2
 
 variable {Γ : Ctx} (σ : State C Γ)
 
-theorem Storage.pushPlace_fst {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    (st.pushPlace r).map (·.1) = st.push r some := by
-  unfold Storage.pushPlace Storage.push
-  cases st.find r with
-  | none => rfl
-  | some v =>
-    simp only [Option.bind_eq_bind, Option.bind_some]
-    split
-    · cases st.save r _ <;> rfl
-    · rfl
-
 /-- A push as a place returns the slot past the live elements found. -/
 theorem Storage.pushPlace_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
     {n : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', n)) :

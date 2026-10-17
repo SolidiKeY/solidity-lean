@@ -161,28 +161,8 @@ theorem push_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
 theorem pushPlace_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))}
     {k : PrimTy.uint.Denote}
     (hs : st.All P) (hG : G (.ref (.array E)))
-    (h : st.pushPlace r = some (st', k)) : st'.All P := by
-  unfold Storage.pushPlace at h
-  simp only [Option.bind_eq_bind, Option.bind_eq_some_iff] at h
-  obtain ⟨v, hv, h⟩ := h
-  have hvA := find_all hs hv
-  cases v with
-  | array e sh hn =>
-    simp only [SVal.view_array] at h
-    split at h
-    · rename_i hb
-      simp only [Option.bind_eq_some_iff, Option.some.injEq, Prod.mk.injEq] at h
-      obtain ⟨st₁, h, rfl, -⟩ := h
-      simp only [SVal.All] at hvA
-      have hsl := hP.pushSlot_all (SList.all_iff.mp hvA.2.2)
-      refine save_all hP hs ?_ (SVal.live_of_ref _ _ rfl) h
-      simp only [SVal.All]
-      refine ⟨hP.push e sh _ hG hb hvA.1 hvA.2.1 hvA.2.2 hsl.1, SVec.all_ofList.mpr fun w hw => ?_,
-        SList.all_ofList.mpr hsl.2⟩
-      rcases List.mem_append.mp hw with hw | hw
-      · exact SVec.all_iff.mp hvA.2.1 w hw
-      · rw [List.mem_singleton.mp hw]; exact hsl.1
-    · exact nomatch h
+    (h : st.pushPlace r = some (st', k)) : st'.All P :=
+  push_all hP hs hG (fun _ _ hx e => Option.some.inj e ▸ hx) (Storage.push_of_pushPlace h)
 
 theorem pop_all {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.array E))} {keep : Bool}
     (hs : st.All P) (hkeep : keep = true → E.isPrimitive = false)

@@ -144,9 +144,6 @@ def as? : (p : PrimTy) → CallValue → Option p.Denote
   | .int, .int n => some n
   | _, _ => none
 
-theorem as?_ofTyped {p : PrimTy} (v : p.Denote) : as? p (ofTyped v) = some v := by
-  cases p <;> rfl
-
 /-- A number's integer; `none` for a `bool`. -/
 def num? (v : CallValue) : Option Int := match v with
   | .bool _ => none

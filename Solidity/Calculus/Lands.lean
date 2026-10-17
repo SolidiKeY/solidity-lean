@@ -339,12 +339,6 @@ theorem Storage.pushPlace_of_full {E : Ty} {st : Storage C} {r : SRef C (.ref (.
   | none => rfl
   | some _ => rw [Storage.full_of_pushPlace hp] at h; cases h
 
-theorem Storage.extendPlace_of_full {E : Ty} {st : Storage C} {r : SRef C (.ref (.array E))}
-    (h : st.full r = true) : st.extendPlace r = none := by
-  cases hp : st.extendPlace r with
-  | none => rfl
-  | some _ => rw [Storage.full_of_extendPlace hp] at h; cases h
-
 /-- A binary symbol out of gas on its arguments: `pushSlot` or `extend` at a
 full array. -/
 def Op2.exhB {H : HTy} {a b s : Srt} :
@@ -386,7 +380,7 @@ theorem Op2.eval_of_exhB (g : State C []) {a b s : Srt} (o : Op2 C a b s)
     simp only [Op2.exhB, Bool.false_eq_true, false_implies, Op2.evalM, Option.bind_eq_bind,
       Option.bind_none, Option.bind_some]
   · exact fun hf => Storage.push_of_full hf some
-  · exact fun hf => by rw [Storage.extendPlace_of_full hf, Option.bind_none]
+  · exact fun hf => by rw [Storage.pushPlace_of_full hf, Option.bind_none]
 
 theorem Op3.eval_of_exhB (g : State C []) {a b c s : Srt} (o : Op3 C a b c s)
     (x : Option (a.Den C g.H)) (y : Option (b.Den C g.H)) (z : Option (c.Den C g.H))

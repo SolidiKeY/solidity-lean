@@ -293,8 +293,6 @@ theorem find_word (o : Obs L) {U : Ty} (p : L U) {P : PrimTy} (r : Path U (.prim
     (o.find p).word r = o.word (ObsLoc.app p r) := rfl
 theorem find_len (o : Obs L) {U : Ty} (p : L U) {E : Ty} (r : Path U (.ref (.array E))) :
     (o.find p).len r = o.len (ObsLoc.app p r) := rfl
-theorem find_has (o : Obs L) {U : Ty} (p : L U) {V : Ty} (r : Path U V) :
-    (o.find p).has r = o.has (ObsLoc.app p r) := rfl
 
 /-- **`findOnSave`**: a save reads back where it was made. -/
 theorem find_save_same (o : Obs L) {U : Ty} (p : L U) (v : TVal U) :
@@ -320,11 +318,6 @@ theorem find_nil (o : Obs L) {U : Ty} (p : L U) : (o.find p).find .nil = o.find 
 theorem save_find (o : Obs L) {U : Ty} (p : L U) : o.save p (o.find p) = o := by
   apply Obs.ext <;> intro _ q <;> simp only [save, find] <;> split <;>
     first | rfl | (rename_i r h; rw [ObsLoc.eq_of_strip? p q h])
-
-/-- A save over a save at one location: the second wins. -/
-theorem save_save (o : Obs L) {U : Ty} (p : L U) (v w : TVal U) :
-    (o.save p v).save p w = o.save p w := by
-  apply Obs.ext <;> intro _ q <;> simp only [save] <;> split <;> rfl
 
 theorem save_word_below (o : Obs L) {U : Ty} (p : L U) {P : PrimTy} (r : Path U (.prim P))
     (v : TVal U) : (o.save p v).word (ObsLoc.app p r) = v.word r := by
@@ -1016,9 +1009,6 @@ theorem SVal.findM_atF' {E U : Ty} {n : Nat} (e : SVec E n) (i : PrimTy.uint.Den
   simp only [SVal.findM]
   cases e.toList[i.1.toNat]? <;> rfl
 
-theorem Option.bind_some_id {β : Type} (x : Option β) : x.bind (fun y => some y) = x := by
-  cases x <;> rfl
-
 theorem SVal.findM_at_nil {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
     (i : PrimTy.uint.Denote) : (SVal.array e sh hn).findM (.at i .nil) =
       (e.toList ++ sh.toList)[i.1.toNat]? := by
@@ -1319,7 +1309,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
         | none =>
           simp only [Option.bind_none, Option.bind_some,
             SVal.overlayOpt_none_some, SVal.findM_atF', SVal.strip_fixed, SVec.toList_strip,
-            List.getElem?_map, SVal.findM_nil', Option.bind_some_id]
+            List.getElem?_map, SVal.findM_nil', Option.bind_fun_some]
           cases nel.toList[i.1.toNat]? with
           | none => rfl
           | some w => rw [SVal.overlayOpt_none_some]; rfl
@@ -1327,7 +1317,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
           cases o with
           | fixed oel =>
             simp only [Option.bind_some, SVal.findM_atF', SVal.findM_nil',
-              Option.bind_some_id, SVal.overlayOpt_some_some, SVal.overlay_fixed,
+              Option.bind_fun_some, SVal.overlayOpt_some_some, SVal.overlay_fixed,
               SVec.getElem?_overlayOn]
   | _, x, y, .key k r => by
     show (if (SVal.obsOpt y).has .nil then (if (SVal.obsOpt x).has .nil then
@@ -1369,7 +1359,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
           | none =>
             simp only [Option.bind_none, Option.bind_some, SVal.findM_at',
               SVal.overlayOpt_none_some, SVal.strip_array, SList.toList_nil,
-              List.append_nil, SVec.toList_strip, List.getElem?_map, List.getElem?_append_left hl, SVal.findM_nil', Option.bind_some_id]
+              List.append_nil, SVec.toList_strip, List.getElem?_map, List.getElem?_append_left hl, SVal.findM_nil', Option.bind_fun_some]
             cases nel.toList[i.1.toNat]? with
             | none => rfl
             | some w => rw [SVal.overlayOpt_none_some]; rfl
@@ -1377,7 +1367,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
             cases o with
             | array oel osh hm =>
               simp only [Option.bind_some, SVal.findM_at',
-                SVal.overlayOpt_some_some, SVal.overlay_array, SList.toList_ofList, SVal.findM_nil', Option.bind_some_id]
+                SVal.overlayOpt_some_some, SVal.overlay_array, SList.toList_ofList, SVal.findM_nil', Option.bind_fun_some]
               have hl' : i.1.toNat < (SVec.overlayOn (oel.toList ++ osh.toList) nel).toList.length := by
                 rw [SVec.length_toList]; exact hi
               rw [List.getElem?_append_left hl', SVec.getElem?_overlayOn,
@@ -1404,7 +1394,7 @@ theorem TVal.ovR_obsOpt {V : Ty} {α : Type} (c : Comp V α) : {U : Ty} → (x y
                 have hge : nn ≤ i.1.toNat := by omega
                 have hlt : i.1.toNat < oel.toList.length := by rw [SVec.length_toList]; exact hi'
                 simp only [Option.bind_some, SVal.findM_at', SVal.findM_nil',
-                  SVal.overlayOpt, SVal.overlay_array, SList.toList_ofList, Option.bind_some_id]
+                  SVal.overlayOpt, SVal.overlay_array, SList.toList_ofList, Option.bind_fun_some]
                 have hl' : (SVec.overlayOn (oel.toList ++ osh.toList) nel).toList.length ≤ i.1.toNat := by
                   rw [SVec.length_toList]; exact hge
                 rw [List.getElem?_append_right hl', SVec.length_toList, show nn - mm =
@@ -1483,7 +1473,7 @@ theorem FixedCopy.child_apply {E : Ty} {n : Nat} {R : RefTy}
       simp only [FixedCopy.child, FixedCopy.targetLength, FixedCopy.apply, FixedCopy.index]
       rw [← SVal.obs_strip, SVal.strip_fixed]
       simp only [SVal.obs_find, SVal.findM_atF', SVal.findM_at', SList.toList_nil,
-        List.append_nil, SVal.findM_nil', Option.bind_some_id]
+        List.append_nil, SVal.findM_nil', Option.bind_fun_some]
       by_cases hi : i.1.toNat < n
       · simp only [hi, ↓reduceIte]
       · simp only [hi, ↓reduceIte]
@@ -1491,7 +1481,7 @@ theorem FixedCopy.child_apply {E : Ty} {n : Nat} {R : RefTy}
     | fixed m fits =>
       simp only [FixedCopy.child, FixedCopy.targetLength, FixedCopy.apply, FixedCopy.index]
       rw [← SVal.obs_strip, SVal.strip_fixed]
-      simp only [SVal.obs_find, SVal.findM_atF', SVal.findM_nil', Option.bind_some_id,
+      simp only [SVal.obs_find, SVal.findM_atF', SVal.findM_nil', Option.bind_fun_some,
         SVec.getElem?_padRight]
       split
       · split <;> rfl
@@ -1877,15 +1867,12 @@ theorem obs_push {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))} {x
   rw [obs_save hs, Obs.push, obs_find_some hf,
     SVal.obs_pushArr e sh hn x _ (pushSlot_snd _) h']
 
-theorem extendSlot_snd {E : Ty} (l : List (SVal E)) : (extendSlot E l).2 = l.tail := by
-  cases l <;> rfl
-
 /-- The slot past the end, appended as it is. -/
 theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
-    (h' : (e.toList ++ [(extendSlot E sh.toList).1]).length < 2 ^ 256) :
-    (SVal.array (SVec.ofList (e.toList ++ [(extendSlot E sh.toList).1]))
-      (.ofList (extendSlot E sh.toList).2) h').obs = TVal.extendA (SVal.array e sh hn).obs := by
-  rw [SVal.obs_pushArr e sh hn _ _ (extendSlot_snd _) h', TVal.extendA]
+    (h' : (e.toList ++ [(pushSlot E sh.toList).1]).length < 2 ^ 256) :
+    (SVal.array (SVec.ofList (e.toList ++ [(pushSlot E sh.toList).1]))
+      (.ofList (pushSlot E sh.toList).2) h').obs = TVal.extendA (SVal.array e sh hn).obs := by
+  rw [SVal.obs_pushArr e sh hn _ _ (pushSlot_snd _) h', TVal.extendA]
   have hl : e.toList.length = n := SVec.length_toList e
   have el : (SVal.array e sh hn).obs.len .nil = n := rfl
   cases hs : sh.toList with
@@ -1906,9 +1893,9 @@ theorem obs_extendArr {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n <
         Option.bind_some, SVal.findM_nil']; rfl
     simp only [el, hh, Bool.not_true, Bool.or_false]
     cases hp : E.isPrimitive with
-    | true => simp only [extendSlot, pushSlot, hp, if_true]
+    | true => simp only [pushSlot, hp, if_true]
     | false =>
-      simp only [extendSlot, pushSlot, hp, Bool.false_eq_true, if_false]
+      simp only [pushSlot, hp, Bool.false_eq_true, if_false]
       have hc : (SVal.array e sh hn).obs.find (.at (uintOfNat n) .nil) = c.obs := by
         rw [SVal.obs_find, SVal.findM_at_nil, hs]
         simp only [uintOfNat_val hn, Int.natCast_nonneg, if_true, Int.toNat_natCast]
@@ -1924,32 +1911,16 @@ theorem obs_push_slot {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E)
   rw [obs_save hs, Obs.extend, obs_find_some hf]
   exact congrArg _ (obs_extendArr e sh hn h')
 
-/-- **The bridge of `extend`** (`extendPlace`). -/
-theorem obs_extendPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
-    {k : PrimTy.uint.Denote} (h : st.extendPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) := by
-  unfold Storage.extendPlace at h
-  cases hf : st.find r with
-  | none => simp only [hf, Option.bind_eq_bind, Option.bind_none, reduceCtorEq] at h
-  | some a =>
-    cases a with
-    | array e sh hn =>
-      simp only [hf, Option.bind_eq_bind, Option.bind_some, SVal.view_array] at h
-      split at h
-      · rename_i h'
-        cases hs : st.save r (SVal.array (SVec.ofList (e.toList ++ [(extendSlot _ sh.toList).1]))
-            (SList.ofList (extendSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h')) with
-        | none => simp only [hs, Option.bind_none, reduceCtorEq] at h
-        | some st₁ =>
-          simp only [hs, Option.bind_some, Option.some.injEq, Prod.mk.injEq] at h
-          obtain ⟨rfl, -⟩ := h
-          rw [obs_save hs, Obs.extend, obs_find_some hf, obs_extendArr]
-      · cases h
-
 /-- **The bridge of a push** as a place (`pushPlace`): `extend`'s. -/
 theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
     {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) :
     st'.obs = st.obs.extend (.ref r) :=
-  obs_extendPlace h
+  obs_push_slot (push_of_pushPlace h)
+
+/-- **The bridge of `extend`** (`extendPlace`). -/
+theorem obs_extendPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (h : st.extendPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) :=
+  obs_pushPlace h
 
 /-- **The bridge of a pop**: the last element past the end, reset unless
 `keep`. -/

@@ -559,14 +559,38 @@ theorem run_of_iterN {body : α → TRes α} {c : α → TRes Bool} {n : Nat} {�
   obtain ⟨n', h'⟩ := Classical.choose_spec hex
   exact iterN_done_unique h' h
 
-/-- A loop no iteration finishes diverges. -/
-theorem run_of_not_done {body : α → TRes α} {c : α → TRes Bool} {σ : α}
-    (h : ∀ n, ∃ τ, iterN body c n σ = .inl τ) : run body c σ = .error .diverge := by
-  have hex : ¬∃ r n, iterN body c n σ = .inr r := fun ⟨r, n, hn⟩ => by
-    obtain ⟨τ, hτ⟩ := h n
-    rw [hn] at hτ
-    cases hτ
-  simp only [run, hex, dite_false]
+/-- **Induction over a loop's run**: `P` holds of the first state and of
+every state an iteration from a state in `P` goes on in, and `Q` of every
+outcome an iteration from a state in `P` is done with, and of a divergence:
+then `Q` holds of the loop's run. -/
+theorem run_induct {body : α → TRes α} {c : α → TRes Bool} {P : α → Prop} {Q : TRes α → Prop}
+    {σ : α} (h0 : P σ)
+    (hstep : ∀ τ, P τ →
+      match step body c τ with
+      | .inl τ' => P τ'
+      | .inr r => Q r)
+    (hdiv : Q (.error .diverge)) : Q (run body c σ) := by
+  have key : ∀ (n : Nat) (τ : α) (r : TRes α), P τ → iterN body c n τ = .inr r → Q r := by
+    intro n
+    induction n with
+    | zero => intro τ r _ h; exact nomatch h
+    | succ n ih =>
+      intro τ r hp h
+      have hs := hstep τ hp
+      simp only [iterN] at h
+      revert hs h
+      cases step body c τ with
+      | inl τ' => exact fun he hp => ih τ' r hp he
+      | inr r' =>
+        intro he hp
+        cases (show Sum.inr r' = (Sum.inr r : α ⊕ TRes α) from he)
+        exact hp
+  unfold run
+  split
+  · rename_i hex
+    obtain ⟨n, hn⟩ := Classical.choose_spec hex
+    exact key n σ _ h0 hn
+  · exact hdiv
 
 end TLoop
 

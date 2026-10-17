@@ -189,7 +189,7 @@ solkey's `StorageDangling` suite closes, as on its EVM runner). The
 
 - `Storage.pushSlot` keeps a reference slot as it is (a primitive slot past
   the end is the default on every `wt` storage, `tightH`, so it starts
-  there); `pushPlace = extendPlace` by `rfl`; `Obs.reset`, `TVal.resetA`,
+  there); `extendPlace` is an alias of `pushPlace`; `Obs.reset`, `TVal.resetA`,
   `resetRd`, `SFun.reset` are gone, `pushSlot` reads as `extend`.
 - The rule text, notation and printer use upstream's length save, which
   elaborates to `pushSlot` for every element kind; `UpdElem.extend` and

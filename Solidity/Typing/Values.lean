@@ -100,13 +100,6 @@ theorem nodupKeysB_setBy' {k : κ} {v : α} : {l : List (κ × α)} → nodupKey
       simp only [nodupKeysB, Bool.and_eq_true, Option.isNone_iff_eq_none]
       exact ⟨lookupBy_none_setBy (Ne.symm hk) hnd.1, nodupKeysB_setBy' hnd.2⟩
 
-/-- The keys of `setBy k v l`: `l`'s, and `k`. -/
-theorem fst_mem_setBy {k : κ} {v : α} {l : List (κ × α)} {e : κ × α} (h : e ∈ setBy k v l) :
-    e.1 = k ∨ ∃ w, (e.1, w) ∈ l := by
-  rcases mem_setBy h with h | h
-  · exact Or.inl (by rw [h])
-  · exact Or.inr ⟨e.2, h⟩
-
 theorem setBy_of_lookupBy {k : κ} {v : α} : {l : List (κ × α)} → lookupBy k l = some v →
     setBy k v l = l
   | [], h => by simp only [lookupBy, reduceCtorEq] at h

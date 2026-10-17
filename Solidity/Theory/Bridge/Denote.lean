@@ -196,30 +196,8 @@ theorem Storage.full_of_push {C : Contract} {E : Ty} {st st' : Storage C}
 /-- A push as a place that returns had room. -/
 theorem Storage.full_of_pushPlace {C : Contract} {E : Ty} {st : Storage C}
     {r : SRef C (.ref (.array E))} {q : Storage C × PrimTy.uint.Denote}
-    (h : st.pushPlace r = some q) : st.full r = false := by
-  unfold Storage.pushPlace at h
-  unfold Storage.full
-  cases hf : st.find r with
-  | none => rfl
-  | some v =>
-    simp only [hf, Option.bind_eq_bind, Option.bind_some] at h
-    by_cases hb : (SVal.view v : ArrView E).n + 1 < 2 ^ 256
-    · simp only [hb, decide_true, Bool.not_true]
-    · simp only [hb, dite_false, reduceCtorEq] at h
-
-/-- A length-only extension that returns had room. -/
-theorem Storage.full_of_extendPlace {C : Contract} {E : Ty} {st : Storage C}
-    {r : SRef C (.ref (.array E))} {q : Storage C × PrimTy.uint.Denote}
-    (h : st.extendPlace r = some q) : st.full r = false := by
-  unfold Storage.extendPlace at h
-  unfold Storage.full
-  cases hf : st.find r with
-  | none => rfl
-  | some v =>
-    simp only [hf, Option.bind_eq_bind, Option.bind_some] at h
-    by_cases hb : (SVal.view v : ArrView E).n + 1 < 2 ^ 256
-    · simp only [hb, decide_true, Bool.not_true]
-    · simp only [hb, dite_false, reduceCtorEq] at h
+    (h : st.pushPlace r = some q) : st.full r = false :=
+  Storage.full_of_push (Storage.push_of_pushPlace (k := q.2) h)
 
 theorem Op0.denote_eval {s : Srt} (o : Op0 C s) : Srt.BridgeO C g.H s (o.denote g) (o.eval g) := by
   intro v hv
@@ -353,7 +331,7 @@ theorem Op2.denote_eval {a b s : Srt} (o : Op2 C a b s) {x : Option (a.Den C g.H
     | (rw [Op2.denote, Storage.obs_pop hv])
     | (simp only [Option.bind_eq_some_iff, Option.some.injEq] at hv
        obtain ⟨⟨st', k⟩, hp, rfl⟩ := hv
-       rw [Op2.denote, Storage.obs_extendPlace hp])
+       rw [Op2.denote, Storage.obs_pushPlace hp])
     | (rw [Op2.denote, Storage.obs_find_some hv])
     | (simp only [Option.some.injEq] at hv
        subst hv
