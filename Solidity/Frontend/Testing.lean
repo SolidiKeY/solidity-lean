@@ -25,14 +25,14 @@ private def ImportRow.signature (r : ImportRow) : String :=
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
 def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × String) := do
-  let f := N ++ Lean.Name.mkSimple r.name
+  let f := r.declName N
   let env ← getEnv
   unless r.tag == .specified || env.contains (f ++ `problem) do
     return ("unsupported", "no scoped obligation")
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
     liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
       let C := mkConst N
-      let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+      let nilCtx := ctxE []
       let ty ← if r.tag == .specified then do
           let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
           let φ ← Term.elabTerm stx none

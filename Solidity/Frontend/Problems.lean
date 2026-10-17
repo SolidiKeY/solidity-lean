@@ -69,11 +69,6 @@ def Tag.modality? : Tag → Option Modality
   | .box => some .box
   | .skip | .specified | .internal | .malformed => none
 
-/-- The parameters of an obligation, each at its type's 256-bit range
-(`paramTy?`): `none` for a parameter of no value type. -/
-def ImportRow.binders? (r : ImportRow) : Option (List (PrimTy × Var)) :=
-  r.params.mapM fun (x, t) => (paramTy? t).map fun (pn : PrimTy × Nat) => (pn.1, Var.ofName x)
-
 /-- **The statement of `N.f`** (the row `r`), written on the program
 `N.f : Prog N Γ Γ'` (its type and value read off the environment):
 `∀x̄. wt(storage) → [m] N.f`, or a deployment's `∀x̄. {deployUpd} [m] N.f`,
@@ -91,7 +86,7 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
     throw s!"{r.name}: its parameter types are missing"
   let Γ : NCtx := (r.params.reverse.map fun (x, _) => Var.ofName x).zip r.paramTypes
   let xs := Γ.reverse
-  let n := N ++ Lean.Name.mkSimple r.name
+  let n := r.declName N
   let some ci := env.find? n | throw s!"{r.name}: no program {n}"
   let ty := ci.type.consumeMData
   let some v := ci.value? | throw s!"{r.name}: {n} is not a scoped program"
@@ -122,7 +117,7 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
 when `compile`.  How many. -/
 def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
   let rows ← reportRows N
-  let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+  let nilCtx := ctxE []
   let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
   let env ← getEnv
   let mut errs0 : Array String := #[]
@@ -132,7 +127,7 @@ def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
     match obligation env N r with
     | .error e => errs0 := errs0.push e
     | .ok none => pure ()
-    | .ok (some φ) => entries := entries.push (N ++ Lean.Name.mkSimple r.name ++ `problem, φ)
+    | .ok (some φ) => entries := entries.push (r.declName N ++ `problem, φ)
   let errs ← liftTermElabM do
     let mut errs := errs0
     let mut defined : Array Lean.Name := #[]
@@ -180,7 +175,7 @@ def statement? (N f : Lean.Name) : CommandElabM (Option Expr) := do
   let env ← getEnv
   if env.contains (f ++ `problem) then
     return some (← liftTermElabM <| Symex.evaluable (mkConst (f ++ `problem)))
-  let some r := (← reportRows N).find? (fun r => N ++ Lean.Name.mkSimple r.name == f)
+  let some r := (← reportRows N).find? (fun r => r.declName N == f)
     | return none
   match obligation env N r with
   | .ok φ => return φ
@@ -213,7 +208,7 @@ def elabSolkeyScan : CommandElab := fun stx => do
   let mut out : Array String := #[]
   for r in rows do
     unless r.status == .elaborated do continue
-    let f := N ++ Lean.Name.mkSimple r.name
+    let f := r.declName N
     let some φ ← statement? N f | continue
     let e := mkAppN (mkConst ``Seq.scanLeaves) #[C, toExpr walk, φ]
     let t0 ← IO.monoMsNow
@@ -259,21 +254,21 @@ def elabSolkeyDerive : CommandElab := fun stx => do
   let env ← getEnv
   let rows := ((← reportRows N).filter fun r => r.status == .elaborated &&
     only?.all (· == Lean.Name.mkSimple r.name) &&
-    (!pendingOnly || !env.contains (N ++ Lean.Name.mkSimple r.name ++ `proved))).drop start
+    (!pendingOnly || !env.contains (r.declName N ++ `proved))).drop start
     |>.take count
   if rows.isEmpty then throwError "#solkey_derive?: no statement of {N} selected"
   let C := mkConst N
   let mut thms : Array String := #[]
   let mut notes : Array String := #[]
   for r in rows do
-    let f := N ++ Lean.Name.mkSimple r.name
+    let f := r.declName N
     let t0 ← IO.monoMsNow
     -- the tactics' names resolve as in a `Derived` module
     let res : Except String (Array String) ← withScope (fun sc =>
         { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <| liftTermElabM do
       -- the scoped `⊢ N.f.problem` (`Calculus/Surface.lean`)
       unless env.contains (f ++ `problem) do return .error "no statement"
-      let nilCtx := mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)
+      let nilCtx := ctxE []
       let ty := mkAppN (mkConst ``Proves) #[C, mkConst ``RuleSet.all, nilCtx, nilCtx,
         mkApp2 (mkConst ``Hyps.nil) C nilCtx, mkConst (f ++ `problem)]
       let g ← mkFreshExprSyntheticOpaqueMVar ty
@@ -332,7 +327,7 @@ def elabSolkeyObligations : CommandElab := fun stx => do
   let mut other : Array String := #[]
   for r in rows do
     if r.status == .elaborated then
-      let f := N ++ Lean.Name.mkSimple r.name
+      let f := r.declName N
       if !env.contains (f ++ `problem) then
         let why := if r.tag.modality?.isNone then r.tag.toStr else "unstated"
         other := other.push s!"{why} {r.name}"

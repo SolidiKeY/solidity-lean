@@ -96,6 +96,14 @@ deriving instance ToExpr for Tag
 deriving instance ToExpr for ImportStatus
 deriving instance ToExpr for ImportRow
 
+/-- The row of an imported function. -/
+def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : ImportRow :=
+  { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
+    tag := f.tag, params := f.params, status, reason }
+
+/-- The declaration `N.f` of the row `f` of `N`'s import. -/
+def ImportRow.declName (N : Lean.Name) (r : ImportRow) : Lean.Name := N ++ Lean.Name.mkSimple r.name
+
 /-- The counts by status, then every row that did not elaborate. -/
 def ImportRow.summary (rows : List ImportRow) : String :=
   let count (s : ImportStatus) := (rows.filter (·.status == s)).length
@@ -347,6 +355,24 @@ private def rewriteLoopBindings (env : Environment) (names : List (String × Str
     | throw "renamed loop specification cannot be printed"
   return directive ++ " " ++ expression
 
+/-- The text of a contract with these members. -/
+private def contractText (members : List String) : String :=
+  s!"contract!\{ {" ".intercalate members} }"
+
+/-- Why `s` does not elaborate as a contract, if it does not. -/
+private def contractError? (s : Syntax) : TermElabM (Option String) :=
+  withEnableInfoTree false <| withoutErrToSorry do
+    tryCatchRuntimeEx (withCurrHeartbeats do
+        let _ ← elabTermEnsuringType s (Lean.mkConst ``Contract)
+        synthesizeSyntheticMVarsNoPostponing
+        pure none)
+      fun ex => do pure (some (← ex.toMessageData.toString))
+
+/-- Why a function calling `calls` is left out, if one of them is. -/
+private def callsLeftOut? (bad : List (String × String)) (calls : List String) : Option String :=
+  calls.findSome? fun g =>
+    (Semantics.lookupBy g bad).map fun m => s!"it calls `{g}`, which is left out: {m}"
+
 @[command_elab solcImport]
 def elabSolcImport : CommandElab := fun stx => do
   let ref := stx
@@ -393,21 +419,15 @@ def elabSolcImport : CommandElab := fun stx => do
   -- Its users still fail expansion because the named modifier is absent.
   let modifierMembers := c.modifierMembers.filter fun m =>
     match parse `sol_member m with | .ok _ => true | .error _ => false
-  let ctTy := Lean.mkConst ``Contract
   let mut funMembers : Array String := #[]
   let mut badMembers : List (String × String) := []
   for (g, m) in c.funMembers do
     let calls := ((c.funs.find? (·.name == g)).map (·.calls)).getD []
-    let r ← match calls.findSome? fun h => (Semantics.lookupBy h badMembers).map (h, ·),
-        parse `term s!"contract!\{ {" ".intercalate modifierMembers} {m} }" with
-      | some (h, e), _ => pure (some s!"it calls `{h}`, which is left out: {e}")
+    let r ← match callsLeftOut? badMembers calls,
+        parse `term (contractText [" ".intercalate modifierMembers, m]) with
+      | some e, _ => pure (some e)
       | none, .error e => pure (some s!"its declaration does not parse: {e}")
-      | none, .ok s => liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
-          tryCatchRuntimeEx (withCurrHeartbeats do
-              let _ ← elabTermEnsuringType s ctTy
-              synthesizeSyntheticMVarsNoPostponing
-              pure none)
-            fun ex => do pure (some (← ex.toMessageData.toString))
+      | none, .ok s => liftTermElabM (contractError? s)
     match r with
     | none => funMembers := funMembers.push m
     | some e => badMembers := badMembers ++ [(g, e)]
@@ -415,17 +435,14 @@ def elabSolcImport : CommandElab := fun stx => do
     s!"{srcName}:{if line == 0 then f.line else line}: {msg}"
   -- the constructor, its member last (it may call every function): its row
   -- now if it is left out, else once its program is made
-  let ctorRowOf (f : SolcFun) (st : ImportStatus) (msg : String) : ImportRow :=
-    { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
-      tag := f.tag, params := f.params, status := st, reason := msg }
   let mut ctorRow : Option ImportRow := none
   let mut ctorMember : Option String := none
   if let some f := c.ctor then
-    if let some (g, m) := f.calls.findSome? fun g => (Semantics.lookupBy g badMembers).map (g, ·) then
-      ctorRow := some (ctorRowOf f .unsupported (at_ f 0 s!"it calls `{g}`, which is left out: {m}"))
+    if let some m := callsLeftOut? badMembers f.calls then
+      ctorRow := some (.ofFun f .unsupported (at_ f 0 m))
     else match f.body with
-      | .error (.excluded m l) => ctorRow := some (ctorRowOf f .excluded (at_ f l m))
-      | .error (.unsupported m l) => ctorRow := some (ctorRowOf f .unsupported (at_ f l m))
+      | .error (.excluded m l) => ctorRow := some (.ofFun f .excluded (at_ f l m))
+      | .error (.unsupported m l) => ctorRow := some (.ofFun f .unsupported (at_ f l m))
       | .ok ss => ctorMember := some (f.ctorMember (ss.map (·.2)))
   -- an implicit constructor's initializer that does not print, or calls a
   -- function left out: the initializers are left out, which a deployment of
@@ -441,37 +458,30 @@ def elabSolcImport : CommandElab := fun stx => do
   -- implicit one would run them alone
   if (ctorMember.isSome || c.initMembers != c.members) && (c.ctor.isNone || ctorMember.isSome) then
     let full := c.initMembers ++ modifierMembers ++ funMembers.toList ++ ctorMember.toList
-    let r ← match parse `term s!"contract!\{ {" ".intercalate full} }" with
+    let r ← match parse `term (contractText full) with
       | .error e => pure (some s!"it does not parse: {e}")
-      | .ok s => liftTermElabM <| withEnableInfoTree false <| withoutErrToSorry do
-          tryCatchRuntimeEx (withCurrHeartbeats do
-              let _ ← elabTermEnsuringType s ctTy
-              synthesizeSyntheticMVarsNoPostponing
-              pure none)
-            fun ex => do pure (some (← ex.toMessageData.toString))
+      | .ok s => liftTermElabM (contractError? s)
     match r, c.ctor, ctorMember with
     | none, _, _ => memberList := full
     | some e, some f, some _ =>
-      ctorRow := some (ctorRowOf f .unsupported
+      ctorRow := some (.ofFun f .unsupported
         (at_ f 0 s!"the contract with its constructor and initializers: {e}"))
       ctorMember := none
     | some e, _, _ =>
       logWarning m!"solc_import: the initializers are left out: the contract with them: {e}"
-  let ctStx ← ofExcept (parse `term s!"contract!\{ {" ".intercalate memberList} }")
+  let ctStx ← ofExcept (parse `term (contractText memberList))
   liftTermElabM <| defineImportedContract N ctStx
   -- each body, read by the macros to a `List RawStmt` term
   let rawTy := mkApp (mkConst ``List [0]) (mkConst ``RawStmt)
   let mut rows : Array ImportRow := #[]
   let mut raws : Array (Nat × SolcFun × List (Nat × String) × Expr) := #[]
   for f in c.funs do
-    let row (st : ImportStatus) (msg : String) : ImportRow :=
-      { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
-        tag := f.tag, params := f.params, status := st, reason := msg }
+    let row := ImportRow.ofFun f
     if f.tag == .skip then
       rows := rows.push (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
       continue
-    if let some (g, m) := f.calls.findSome? fun g => (Semantics.lookupBy g badMembers).map (g, ·) then
-      rows := rows.push (row .unsupported (at_ f 0 s!"it calls `{g}`, which is left out: {m}"))
+    if let some m := callsLeftOut? badMembers f.calls then
+      rows := rows.push (row .unsupported (at_ f 0 m))
       continue
     match f.body with
     | .error (.excluded m l) => rows := rows.push (row .excluded (at_ f l m))
@@ -535,7 +545,7 @@ def elabSolcImport : CommandElab := fun stx => do
   -- the constructor's program, a deployment: `constructor(x̄);` with its
   -- parameters in scope (`elabCtor`), the obligation's program
   if let (some f, some _) := (c.ctor, ctorMember) then
-    let row := ctorRowOf f
+    let row := ImportRow.ofFun f
     if f.tag == .skip then
       ctorRow := some (row .skipped (at_ f 0 "tagged `@custom:key skip`"))
     else
@@ -577,7 +587,7 @@ def elabSolcShow : CommandElab := fun stx => do
   let n ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
   let N := n.getPrefix
   let rows ← liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)
-  let some r := rows.find? (N ++ Lean.Name.mkSimple ·.name == n) | throwError "{n} is no row of {N}"
+  let some r := rows.find? (·.declName N == n) | throwError "{n} is no row of {N}"
   let (v, _, _, ns) ← liftCoreM <| programValue n r
   logInfo (← liftTermElabM do
     unsafe evalExpr String (mkConst ``String) (← mkAppM ``Prog.show #[toExpr ns, v]))

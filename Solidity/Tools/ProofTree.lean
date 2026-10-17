@@ -80,7 +80,7 @@ def notScoped {α : Type} (cmd : String) : MetaM α :=
 def coreProofTree? (t : Lean.Term) : TermElabM (Option ProofTree.Tree) := do
   let some (φ, _) ← elabCoreFormula? t | return none
   let ty ← whnf (← inferType φ)
-  unless ← isDefEq (ty.getArg! 1) (mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)) do
+  unless ← isDefEq (ty.getArg! 1) (ctxE []) do
     throwError "#proof_tree: the formula is not closed at the empty context"
   return some (← ProofTree.ofFormula ty.appFn!.appArg! φ)
 
