@@ -133,6 +133,14 @@ theorem signedBitwise :
       a == 4 && b + 8 == 0 && c + 2134 == 0 && d + 1 == 0 } := by
   sol_prove
 
+/-- `&` on a symbolic `int`, by solkey's `binaryAnd*` lemmas
+(`Calculus/CloseLemmas.lean`): `x & 0` is `0`, `x & x` is `x`, and
+`x & 1` is a parity, `0` or `1`. -/
+theorem bitAndSymbolic :
+    ⊨ dl!{ ∀ int x; ⟨ int a = x & 0; int b = x & x; int p = x & 1; ⟩
+      a == 0 && b == x && p >= 0 && p < 2 } := by
+  sol_prove; sol_leaf; sol_close
+
 /-- error: Solidity elaboration failed: operator << does not take int -/
 #guard_msgs in #check sol[TestSuite]{ int x = 1; x = x << 1; }
 

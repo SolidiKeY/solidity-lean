@@ -98,6 +98,38 @@ theorem uintBitwise_ofNat_cast (f : Nat → Nat → Nat) (a b : Nat) :
 theorem uintBitwise_cast_ofNat (f : Nat → Nat → Nat) (a b : Nat) :
     uintBitwise f (a : Int) (no_index (OfNat.ofNat b)) = ((f a b : Nat) : Int) := rfl
 
+/-- solkey's `binaryAndZeroRight`: `i & 0` is `0`. -/
+theorem uintBitwise_and_zero_right (x : Int) : uintBitwise (· &&& ·) x 0 = 0 := by
+  cases x <;> simp [uintBitwise, signedOf, wordOf]
+/-- solkey's `binaryAndZeroLeft`: `0 & i` is `0`. -/
+theorem uintBitwise_and_zero_left (x : Int) : uintBitwise (· &&& ·) 0 x = 0 := by
+  cases x <;> simp [uintBitwise, signedOf, wordOf]
+/-- solkey's `binaryAndOne`: `i & 1` is `i`'s parity, `i % 2` (solkey's
+`\if(mod(i, 2) = 0) \then(0) \else(1)`; an `if` in a value slows `simp`). -/
+theorem uintBitwise_and_one_right (x : Int) :
+    uintBitwise (· &&& ·) x 1 = x % 2 := by
+  have h1 : wordOf 1 = 1 := rfl
+  cases x with
+  | ofNat a => simp only [uintBitwise, Nat.and_one_is_mod, Int.ofNat_eq_coe]; omega
+  | negSucc n =>
+    simp only [uintBitwise, h1, Nat.and_one_is_mod, signedOf]
+    simp only [wordOf]; split <;> omega
+/-- solkey's `binaryAndOneLeft`: `1 & i` is `i`'s parity. -/
+theorem uintBitwise_and_one_left (x : Int) :
+    uintBitwise (· &&& ·) 1 x = x % 2 := by
+  have h1 : wordOf 1 = 1 := rfl
+  cases x with
+  | ofNat a => simp only [uintBitwise, Nat.one_and_eq_mod_two, Int.ofNat_eq_coe]; omega
+  | negSucc n =>
+    have h1' : wordOf (Int.ofNat 1) = 1 := rfl
+    simp only [uintBitwise, h1, h1', Nat.one_and_eq_mod_two, signedOf]
+    simp only [wordOf]; split <;> omega
+/-- solkey's `binaryAndIdentity`: `i & i` is `i`, at an `int256` (two's
+complement reads a word back as the integer it was). -/
+theorem uintBitwise_and_self (x : Int) (h : -57896044618658097711785492504343953926634992332820282019728792003956564819968 ≤ x) :
+    uintBitwise (· &&& ·) x x = x := by
+  cases x <;> simp only [uintBitwise, signedOf, wordOf, Nat.and_self] <;> split <;> omega
+
 /-- A ledger entry after a payment: the entry of the ledger the payment chose. -/
 theorem lookupBy_ite (c : Prop) [Decidable c] (k : PrimTy.uint.Denote) (l l' : Ledger) :
     lookupBy k (if c then l else l') = if c then lookupBy k l else lookupBy k l' := by

@@ -909,6 +909,8 @@ attribute [close_rw_s]
   Int.reduceMod Int.reduceDiv Int.reduceTMod Int.reduceTDiv Semantics.uintBound Semantics.intBound
   Close.uintBitwise_ofNat Close.uintBitwise_ofNat_cast Close.uintBitwise_cast_ofNat
   Semantics.uintBitwise_natCast Nat.reduceAnd Nat.reduceOr Nat.reduceXor
+  Close.uintBitwise_and_zero_right Close.uintBitwise_and_zero_left
+  Close.uintBitwise_and_one_right Close.uintBitwise_and_one_left
   Close.lookupBy_ite Close.lookupBy_setBy_int CloseS.root_ofRoot CloseS.root_field CloseS.root_index CloseS.atT_bind
   CloseS.getD_ite Option.getD_some
   CloseS.uint_eq_iff CloseS.int_eq_iff CloseS.bool_eq_iff CloseS.view_eq_uint CloseS.view_eq_int
