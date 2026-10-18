@@ -202,18 +202,17 @@ theorem conditional (_h : 1 = 1) : 2 = 2 := by rfl
 -- in the macros backend: the side line is `lenOnSaveFixedCopy`'s instance.
 /--
 info: \begin{aligned}
-&\forall \mathsf{uint}\,\mathit{x};\ \dlf{d2 = d1; x = d2.length;}{(\mathit{x} = 9)} \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\}\dlf{x = d2.length;}{(\mathit{x} = 9)} \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\} \\
-&\qquad \{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\mathit{x} = 9 \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \\
+&\dlf{d2 = d1; x = d2.length;}{(\mathit{x} = 9)} \\
+&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\}\dlf{x = d2.length;}{(\mathit{x} = 9)} \\
+&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\}\{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\mathit{x} = 9 \\
+&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \\
 &\qquad \mathit{x} \upd \TFind{\intS}(\save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})), \pField{\mathit{d2}}{\lengthField})\}\mathit{x} = 9 \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \\
+&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \\
 &\qquad \mathit{x} \upd \TFind{\intS}(\save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})), \pField{\mathit{d2}}{\lengthField})\}(\mathit{defined}(\mathit{x}) \land \mathit{x} = 9) \\
 &\TFind{\intS}(\save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})), \pField{\mathit{d2}}{\lengthField}) \rightsquigarrow 9 \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \mathit{x} \upd 9\}(\mathit{defined}(\mathit{x}) \land \mathit{x} = 9) \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \mathit{defined}(9) \land 9 = 9 \\
-&\rightsquigarrow\ \forall \mathsf{uint}\,\mathit{x};\ \mathit{true}
+&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \mathit{x} \upd 9\}(\mathit{defined}(\mathit{x}) \land \mathit{x} = 9) \\
+&\rightsquigarrow\ \mathit{defined}(9) \land 9 = 9 \\
+&\rightsquigarrow\ \mathit{true}
 \end{aligned}
 -/
 #guard_msgs in
