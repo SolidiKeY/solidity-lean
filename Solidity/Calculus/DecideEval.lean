@@ -1472,10 +1472,6 @@ theorem Storage.pushPlace_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.a
   rw [← Option.isSome_map (f := (·.1)), Storage.pushPlace_fst]
   exact Storage.push_isSome st r some (fun _ => rfl)
 
-theorem Storage.extendPlace_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    (st.extendPlace r).isSome = (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)) :=
-  Storage.pushPlace_isSome st r
-
 theorem Storage.pop_isSome {E : Ty} (st : Storage C) (keep : Bool) (r : SRef C (.ref (.array E))) :
     (st.pop keep r).isSome = (st.obs.has (.ref r) && decide (0 < st.obs.len (.ref r))) := by
   rw [has_obs]
@@ -2666,12 +2662,12 @@ theorem Op2.elim_rep {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b)
     cases ey with
     | none => exact SFun.ofOrig_rep g ν _
     | some z =>
-      refine SFun.extend_rep g ν (fun st r => (st.extendPlace r).map Prod.fst) hx hy ?_
-        (fun st r => by rw [Option.isSome_map]; exact Storage.extendPlace_isSome st r)
+      refine SFun.extend_rep g ν (fun st r => (st.pushPlace r).map Prod.fst) hx hy ?_
+        (fun st r => by rw [Option.isSome_map]; exact Storage.pushPlace_isSome st r)
         (fun st r st' h => by
           rw [Option.map_eq_some_iff] at h
           obtain ⟨⟨st₁, k⟩, h, rfl⟩ := h
-          exact Storage.obs_extendPlace h)
+          exact Storage.obs_pushPlace h)
       rw [LTm.eval_app2]
       cases (x.eval g ν : Option (Storage C)) <;> cases (y.eval g ν : Option (SRef C _)) <;>
         first | rfl | exact bind_fst_eq_map _

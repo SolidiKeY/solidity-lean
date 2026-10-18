@@ -1917,11 +1917,6 @@ theorem obs_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E)
     st'.obs = st.obs.extend (.ref r) :=
   obs_push_slot (push_of_pushPlace h)
 
-/-- **The bridge of `extend`** (`extendPlace`). -/
-theorem obs_extendPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
-    {k : PrimTy.uint.Denote} (h : st.extendPlace r = some (st', k)) : st'.obs = st.obs.extend (.ref r) :=
-  obs_pushPlace h
-
 /-- **The bridge of a pop**: the last element past the end, reset unless
 `keep`. -/
 theorem obs_pop {E : Ty} {st st' : Storage C} {keep : Bool} {r : SRef C (.ref (.array E))}

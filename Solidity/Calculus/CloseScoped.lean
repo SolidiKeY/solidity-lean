@@ -223,7 +223,7 @@ theorem eval_shrink {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop true r := rfl
 theorem eval_extend {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .extend s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r =>
-      (st.extendPlace r).bind fun x => some x.1 := rfl
+      (st.pushPlace r).bind fun x => some x.1 := rfl
 theorem eval_nextIn {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .nextIn s q).eval σ =
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.nextT r := rfl

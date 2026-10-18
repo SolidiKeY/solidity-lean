@@ -1789,12 +1789,6 @@ def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     some (st', lenU w.n (Nat.lt_of_succ_lt h))
   else none
 
-/-- The term `extend` reads a push as a place: a length-only save that
-exposes the slot as it is (`pushSlot`). -/
-abbrev extendPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    Option (Storage C × PrimTy.uint.Denote) :=
-  st.pushPlace r
-
 theorem pushPlace_fst {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     (st.pushPlace r).map (·.1) = st.push r some := by
   unfold Storage.pushPlace Storage.push

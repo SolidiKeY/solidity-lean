@@ -239,7 +239,7 @@ theorem Op2.eval_mat {R : RefTy} {E : Ty} (a : ArrTy R E) (x : Option Nat)
 
 theorem Op2.eval_extend {E : Ty} (x : Option (Storage C))
     (y : Option (SRef C (.ref (.array E)))) :
-    Op2.eval g .extend x y = x.bind fun st => y.bind fun r => (st.extendPlace r).bind fun q => some q.1 :=
+    Op2.eval g .extend x y = x.bind fun st => y.bind fun r => (st.pushPlace r).bind fun q => some q.1 :=
       rfl
 theorem Op2.eval_nextIn {E : Ty} (x : Option (Storage C))
     (y : Option (SRef C (.ref (.array E)))) :
