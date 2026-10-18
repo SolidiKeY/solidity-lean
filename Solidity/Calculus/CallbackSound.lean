@@ -200,54 +200,52 @@ theorem COut.thenF_of_sim {J : StateInv C} {H : HTy} {Δ : Ctx} {κ' : Frames C 
       | box => trivial
       | diamond => exact hx h₁
 
-/-- **An update, with callbacks.** -/
-theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = false)
-    (hr : Premise.Runs m s (.update U) σ) (h : holdsC I σ (.upd m U (Fml.modalK m ω κ φ))) :
+/-- **A statement that does not fork, with callbacks**, by its typed run:
+where it ends the rest holds, where it halts the halt is no panic, and an
+exhaustion under the diamond. -/
+theorem holdsC_cons_det {s : Stmt C Γ Γ'} (hs : s.forks = false)
+    (hok : ∀ τ, Stmt.runSt σ s = .ok τ → holdsC I τ (Fml.modalK m ω κ φ))
+    (herr : ∀ e, Stmt.runSt σ s = .error e → e ≠ .panic ∧ (m = .diamond → e = .exhausted)) :
     holdsC I σ (.modal m (.cons s ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
   rw [ExecS.det_inv he hs]
-  obtain ⟨h₁, h₂⟩ := hr
   cases ht : s.run σ with
   | ok o =>
     have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
-    exact COut.after_seq (holdsC_modalK o.st ω κ φ
-      (Upd.afterT.of_lands h (Upd.lands_of_applyP (h₁ _ hst)).choose_spec))
+    exact COut.after_seq (holdsC_modalK o.st ω κ φ (hok _ hst))
   | error e =>
     have hst : Stmt.runSt σ s = .error e := by simp only [Stmt.runSt, ht]; rfl
-    obtain ⟨hp, hd⟩ := h₂ e hst
+    obtain ⟨hp, hd⟩ := herr e hst
     refine ⟨?_, hp⟩
     cases m with
     | box => trivial
-    | diamond =>
-      show e = .exhausted
+    | diamond => exact hd rfl
+
+/-- **An update, with callbacks.** -/
+theorem holdsC_update {s : Stmt C Γ Γ'} {U : Upd C Γ Γ'} (hs : s.forks = false)
+    (hr : Premise.Runs m s (.update U) σ) (h : holdsC I σ (.upd m U (Fml.modalK m ω κ φ))) :
+    holdsC I σ (.modal m (.cons s ω) κ φ) :=
+  holdsC_cons_det hs
+    (fun _ hτ => Upd.afterT.of_lands h (Upd.lands_of_applyP (hr.1 _ hτ)).choose_spec)
+    fun e he => ⟨(hr.2 e he).1, fun hm => by
+      subst hm
       by_cases hx : e = .exhausted
       · exact hx
-      · exact (Upd.afterT.of_noExh h (Upd.globT_none_of_applyV (hd rfl hx).1) (hd rfl hx).2).elim
+      · have hd := (hr.2 e he).2 rfl hx
+        exact (Upd.afterT.of_noExh h (Upd.globT_none_of_applyV hd.1) hd.2).elim⟩
 
 /-- Two sequential updates, such as the append then save in
 `a.push() += x`, preserve the callback reading of the continuation. -/
 theorem holdsC_updates {Δ : Ctx} {s : Stmt C Γ Γ'} {U : Upd C Γ Δ} {V : Upd C Δ Γ'}
     (hs : s.forks = false) (hr : Premise.Runs m s (.updates U V) σ)
     (h : holdsC I σ (.upd m U (.upd m V (Fml.modalK m ω κ φ)))) :
-    holdsC I σ (.modal m (.cons s ω) κ φ) := by
-  refine holdsC_cons fun o₁ he => ?_
-  rw [ExecS.det_inv he hs]
-  cases ht : s.run σ with
-  | ok o =>
-    have hst : Stmt.runSt σ s = .ok o.st := by simp only [Stmt.runSt, ht]; rfl
-    exact COut.after_seq (holdsC_modalK o.st ω κ φ
-      (Upd.afterT_pair_of_lands h (hr.1 _ hst)))
-  | error e =>
-    have hst : Stmt.runSt σ s = .error e := by simp only [Stmt.runSt, ht]; rfl
-    obtain ⟨hp, hd⟩ := hr.2 e hst
-    refine ⟨?_, hp⟩
-    cases m with
-    | box => trivial
-    | diamond =>
-      show e = .exhausted
+    holdsC I σ (.modal m (.cons s ω) κ φ) :=
+  holdsC_cons_det hs (fun _ hτ => Upd.afterT_pair_of_lands h (hr.1 _ hτ))
+    fun e he => ⟨(hr.2 e he).1, fun hm => by
+      subst hm
       by_cases hx : e = .exhausted
       · exact hx
-      · exact (Upd.afterT_pair_noHalt h (hd rfl hx)).elim
+      · exact (Upd.afterT_pair_noHalt h ((hr.2 e he).2 rfl hx)).elim⟩
 
 /-- The outer zero-divisor test of `sp.push() /= se` reads no callbacks;
 the successful branch keeps the two updates in order before its continuation. -/
@@ -340,29 +338,7 @@ variable {I : Fml C []} {Γ₀ : Ctx}
 theorem Hyps.wrapC_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
     ∀ {φ ψ χ : Fml C Γ}, (∀ τ, holdsC I τ φ → holdsC I τ ψ → holdsC I τ χ) →
       ∀ σ, holdsC I σ (H.wrap φ) → holdsC I σ (H.wrap ψ) → holdsC I σ (H.wrap χ) := by
-  induction H with
-  | nil => intro φ ψ χ h σ; exact h σ
-  | pre H a ih =>
-    intro φ ψ χ h
-    exact ih (φ := .imp a φ) (ψ := .imp a ψ) (χ := .imp a χ) fun τ f g ha => h τ (f ha) (g ha)
-  | upd H m U ih =>
-    intro φ ψ χ h
-    exact ih (φ := .upd m U φ) (ψ := .upd m U ψ) (χ := .upd m U χ) fun τ f g =>
-      Upd.afterT_and f g fun σ' x y => h σ' x y
-  | havoc H ih =>
-    intro φ ψ χ h
-    exact ih (φ := .havoc φ) (ψ := .havoc ψ) (χ := .havoc χ) fun τ f g st nt =>
-      h _ (f st nt) (g st nt)
-  | all H x p ih =>
-    intro φ ψ χ h
-    exact ih (φ := .all x p φ) (ψ := .all x p ψ) (χ := .all x p χ) fun τ f g v => h _ (f v) (g v)
-  | bind H m x t ih =>
-    intro φ ψ χ h
-    exact ih (φ := .bind m x t φ) (ψ := .bind m x t ψ) (χ := .bind m x t χ) fun τ f g =>
-      Modality.forallB_and (fun _ a b => h _ a b) f g
-  | anon H xs ih =>
-    intro φ ψ χ h
-    exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)
+  hyps_wrap_and
 
 /-- The context is monotone. -/
 theorem Hyps.wrapC_mono {Γ : Ctx} (H : Hyps C Γ₀ Γ) {φ ψ : Fml C Γ}
