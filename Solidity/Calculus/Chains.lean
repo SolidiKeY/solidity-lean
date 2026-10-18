@@ -1121,32 +1121,18 @@ def labelAs? (c : Lean.Name) (k m s : Expr)
   unless ← mayFind c hs do return none
   let st ← saveState
   let r ← observing? do
-    let ctor ← mkConstWithFreshMVarLevels c
-    let (xs, _, ty) ← forallMetaTelescopeReducing (← inferType ctor)
-    let args := ty.getAppArgs
-    unless args.size == 7 do failure
-    unless ← isDefEq args[0]! C <&&> isDefEq args[1]! k <&&> isDefEq args[2]! m do failure
-    unless ← matchFind args[5]! s cands do failure
+    let some (ctor, xs, p) ← ctorAt? c C k m s cands | failure
     for x in xs do
       if (← instantiateMVars x).isMVar then
-        let t ← whnfR (← instantiateMVars (← inferType x))
-        let t := if t.isAppOfArity ``autoParam 2 then t.getArg! 0 else t
+        let t := (← whnfR (← instantiateMVars (← inferType x))).unAutoParam
         if let some (_, a, b) := t.eq? then
           unless ← isDefEq a b do failure
           x.mvarId!.assign (← mkEqRefl a)
         else if ← isProp t then
           x.mvarId!.assign (← mkDecideProof t)
-    -- a local's type that only a side condition's proof mentions (a rule's
-    -- `MRhs.mapFree` under a pushed local): no unification sets it, and any
-    -- type will do there
-    let mut defaulted := false
-    for x in xs do
-      if (← instantiateMVars x).isMVar then
-        if (← whnfR (← instantiateMVars (← inferType x))).isConstOf ``LTy then
-          x.mvarId!.assign (mkApp (mkConst ``LTy.val) (mkConst ``PrimTy.uint))
-          defaulted := true
+    let defaulted ← defaultLocalTys xs
     let d ← instantiateMVars (mkAppN ctor xs)
-    let p ← instantiateMVars args[6]!
+    let p ← instantiateMVars p
     if d.hasMVar || p.hasMVar then failure
     if defaulted then Meta.check d
     let wrap := if (`Solidity.Taclet).isPrefixOf c then ``Rule.key else ``Rule.lean
@@ -1160,14 +1146,6 @@ def ruleCtors (r : Lean.Name) : MetaM (List Lean.Name) := do
   let env ← getEnv
   return [`Solidity.Taclet ++ r, `Solidity.LeanTaclet ++ r].filter env.contains
 
-/-- Every rule constructor, solkey's first. -/
-def allRuleCtors : MetaM (List Lean.Name) := do
-  let mut out := []
-  for J in [``Taclet, ``LeanTaclet] do
-    let some (.inductInfo ii) := (← getEnv).find? J | continue
-    out := out ++ ii.ctors
-  return out
-
 /-- The rule `Stmt.step` fires on the focus `f` (quoted), by name, and its
 label: `emptyModality`, or the first constructor that derives it. -/
 def labelOfFocus? (f : Expr) : MetaM (Option (Lean.Name × Expr)) := do
@@ -1177,7 +1155,7 @@ def labelOfFocus? (f : Expr) : MetaM (Option (Lean.Name × Expr)) := do
   unless a.size == 6 do return none
   let cands ← holeCandidates a[5]!
   let pre := (cands, ← FindHeads.of a[5]! cands)
-  for c in ← allRuleCtors do
+  for c in ← ruleTableCtors do
     if let some l ← labelAs? c a[1]! a[2]! a[5]! pre then return some (lastName c, l)
   return none
 

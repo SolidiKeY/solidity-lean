@@ -188,6 +188,46 @@ def mayFind (c : Lean.Name) (hs : FindHeads) : MetaM Bool := do
     | _, _ => return true
   | none => return true
 
+/-- The judgements of the rule table, solkey's first, and how a derivation
+of each is a `Rule`. -/
+def ruleTables : List (Lean.Name × Lean.Name) :=
+  [(``Taclet, ``Rule.key), (``LeanTaclet, ``Rule.lean)]
+
+/-- Every constructor of the rule table, solkey's first. -/
+def ruleTableCtors : MetaM (List Lean.Name) := do
+  let mut out := []
+  for (J, _) in ruleTables do
+    let some (.inductInfo ii) := (← getEnv).find? J | continue
+    out := out ++ ii.ctors
+  return out
+
+/-- The constructor `c` of the rule table at the contract `C`, the fresh
+index `k` and the modality `m`, its `\find` matched on the statement `s`
+(`matchFind`, over `s`'s hole candidates `cands`): the constructor, its
+arguments (metavariables where unification left them) and its premise. -/
+def ctorAt? (c : Lean.Name) (C k m s : Expr) (cands : List (Expr × Expr)) :
+    MetaM (Option (Expr × Array Expr × Expr)) := do
+  let ctor ← mkConstWithFreshMVarLevels c
+  let (xs, _, ty) ← forallMetaTelescopeReducing (← inferType ctor)
+  let args := ty.getAppArgs
+  unless args.size == 7 do return none
+  unless ← isDefEq args[0]! C <&&> isDefEq args[1]! k <&&> isDefEq args[2]! m do return none
+  unless ← matchFind args[5]! s cands do return none
+  return some (ctor, xs, args[6]!)
+
+/-- A local's type among the arguments `xs` that only a side condition's
+proof mentions (a rule's `MRhs.mapFree` under a pushed local, as in
+`memoryIndexWriteCaptureAllComplexRecv`): no unification sets it, and any
+type will do there, so `uint`; whether there was one. -/
+def defaultLocalTys (xs : Array Expr) : MetaM Bool := do
+  let mut defaulted := false
+  for x in xs do
+    if (← instantiateMVars x).isMVar then
+      if (← whnfR (← instantiateMVars (← inferType x))).isConstOf ``LTy then
+        x.mvarId!.assign (mkApp (mkConst ``LTy.val) (mkConst ``PrimTy.uint))
+        defaulted := true
+  return defaulted
+
 /-- **The rule `Stmt.step` fires on `s` under `m`**, its fresh names at `k`
 (`s : Stmt C Γ Γ'`): the constructor of `Taclet` or
 `LeanTaclet` it is, and its premise, which is `Stmt.step`'s. -/
@@ -197,42 +237,28 @@ def ruleOf? (k m s : Expr) : MetaM (Option (Lean.Name × Expr)) := do
   let C := sTy.getArg! 0
   let cands ← holeCandidates s
   let hs ← FindHeads.of s cands
-  for J in [``Solidity.Taclet, ``Solidity.LeanTaclet] do
-    let some (.inductInfo ii) := (← getEnv).find? J | continue
-    for c in ii.ctors do
-      unless ← mayFind c hs do continue
-      let st ← saveState
-      let r ← withNewMCtxDepth do
-        let (xs, _, ty) ← forallMetaTelescopeReducing (← inferType (← mkConstWithFreshMVarLevels c))
-        let args := ty.getAppArgs
-        unless args.size == 7 do return none
-        unless ← isDefEq args[0]! C <&&> isDefEq args[1]! k <&&> isDefEq args[2]! m do return none
-        unless ← matchFind args[5]! s cands do return none
-        -- every side condition holds by evaluation
-        for x in xs do
-          let t ← whnfR (← instantiateMVars (← inferType x))
-          let t := if t.isAppOfArity ``autoParam 2 then t.getArg! 0 else t
-          if let some (_, a, b) := t.eq? then
-            unless ← isDefEq a b do return none
-        -- a local's type that only a side condition's proof mentions (a
-        -- rule's `MRhs.mapFree` under a pushed local, as in
-        -- `memoryIndexWriteCaptureAllComplexRecv`): no unification sets it,
-        -- and any type will do there
-        for x in xs do
-          if (← instantiateMVars x).isMVar then
-            if (← whnfR (← instantiateMVars (← inferType x))).isConstOf ``Solidity.LTy then
-              x.mvarId!.assign (mkApp (mkConst ``Solidity.LTy.val) (mkConst ``Solidity.PrimTy.uint))
-        let p ← instantiateMVars args[6]!
-        if p.hasMVar then return none
-        return some (c, p)
-      match r with
-      | some (c, p) =>
-        -- the premise is the step's (`Rule.toStep`)
-        let step ← whnfD (← mkAppM ``Solidity.Stmt.step #[k, m, s])
-        unless ← isDefEq step p do
-          throwError "ruleOf?: `{c}` does not leave `Stmt.step`'s premise"
-        return some (c, p)
-      | none => st.restore
+  for c in ← ruleTableCtors do
+    unless ← mayFind c hs do continue
+    let st ← saveState
+    let r ← withNewMCtxDepth do
+      let some (_, xs, p) ← ctorAt? c C k m s cands | return none
+      -- every side condition holds by evaluation
+      for x in xs do
+        let t := (← whnfR (← instantiateMVars (← inferType x))).unAutoParam
+        if let some (_, a, b) := t.eq? then
+          unless ← isDefEq a b do return none
+      discard <| defaultLocalTys xs
+      let p ← instantiateMVars p
+      if p.hasMVar then return none
+      return some (c, p)
+    match r with
+    | some (c, p) =>
+      -- the premise is the step's (`Rule.toStep`)
+      let step ← whnfD (← mkAppM ``Solidity.Stmt.step #[k, m, s])
+      unless ← isDefEq step p do
+        throwError "ruleOf?: `{c}` does not leave `Stmt.step`'s premise"
+      return some (c, p)
+    | none => st.restore
   return none
 
 /-- `#rule_of m s`: the rule `Stmt.step` fires on the scoped statement `s`

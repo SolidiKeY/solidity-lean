@@ -123,27 +123,6 @@ theorem Stmt.solkey_rule_exists (k : Nat) {m : Modality} {Γ Γ' : Ctx} {s : Stm
     (h : s.inSolkey m = true) : Taclet C k m s (s.step k m) :=
   Stmt.step_taclet h rfl
 
-/-- Whether a statement is a loop. -/
-def Stmt.isLoop : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
-  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
-    (assign := fun _ _ => false) (rebind := fun _ _ => false)
-    (assignLocal := fun _ _ => false) (declLocal := fun _ _ _ => false)
-    (declStorage := fun _ _ _ => false) (opAssign := fun _ _ _ _ _ => false)
-    (incDec := fun _ _ _ => false) (assignIncDec := fun _ _ _ _ _ => false)
-    (assignLocalPush := fun _ _ => false)
-    (push := fun _ _ _ => false) (pop := fun _ => false) (transfer := fun _ _ => false)
-    (send := fun _ _ _ => false) (declMem := fun _ _ _ _ _ => false)
-    (rebindMem := fun _ _ => false) (assignFromMem := fun _ _ => false)
-    (assignMem := fun _ _ => false) (delete := fun _ => false)
-    (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
-    (ite := fun _ _ _ => false) (require := fun _ => false) (assert := fun _ => false)
-    (revert := false) (call := fun _ _ _ _ => false)
-    (tryCall := fun _ _ _ _ _ _ _ => false) (loop := fun _ _ _ => true)
-    (block := fun _ => false)
-    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
-    (callReceiver := fun _ _ _ _ _ => false)
-    (callReceiverPush := fun _ _ _ _ _ _ => false)
-
 /-- A loop at `unwind 0` needs Lean's `loopExit`; the bounded port of
 `whileUnwind` requires a positive bound, and invariant rules need an invariant. -/
 def Stmt.isUnwindZero : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
@@ -241,9 +220,6 @@ def Premise.inSolkey (m : Modality) {Γ Γ' : Ctx} : Premise C Γ Γ' → Bool
   | .check c => c.inSolkey
   | .branches _ | .inv .. => false
   | .cases fs _ => fs.all Fml.inSolkey
-
-theorem Prog.inSolkey_cons {m : Modality} {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) :
-    Prog.inSolkey m (.cons s P) = (s.inSolkey m && Prog.inSolkey m P) := rfl
 
 theorem Frames.exit_inSolkey (m : Modality) {Γ Γ₀ : Ctx} (κ : Frames C Γ Γ₀) :
     ∀ φ : Fml C Γ₀, (κ.exit m φ).inSolkey = (κ.inSolkey m && φ.inSolkey) := by
@@ -532,17 +508,14 @@ elab "#check_fragment_rules" : command => do
   let some (.inductInfo info) := (← getEnv).find? ``Taclet
     | throwError "Taclet is not an inductive"
   for c in info.ctors do
-    Command.liftTermElabM <| withCurrHeartbeats do
-      let ci ← getConstInfo c
-      let ty ← forallTelescope ci.type fun xs body => do
+    let ty : TermElabM Expr := do
+      let ty ← forallTelescope (← getConstInfo c).type fun xs body => do
         let args := body.getAppArgs
         let hs ← mkEq (← mkAppM ``Stmt.inSolkey #[args[2]!, args[5]!]) (mkConst ``Bool.true)
         let hp ← mkEq (← mkAppM ``Premise.inSolkey #[args[2]!, args[6]!]) (mkConst ``Bool.true)
         mkForallFVars xs (← mkArrow hs hp)
-      let ty := ty.replace fun e =>
-        if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
-      let proof ← mkFreshExprMVar ty
-      let goals ← tryCatchRuntimeEx (Term.withoutErrToSorry <| Tactic.run proof.mvarId! do
+      return ty.dropAutoParams
+    discard <| addCtorLemma c `inSolkey ty (err := m!"{c}: incomplete fragment proof") do
         match c.getString! with
         | "storagePushValue_unfold_leftCallReceiver" =>
           evalTactic (← `(tactic| (intros; rename_i h; exact ReceiverValue.step_inSolkey _ _ _ _ _ _ _ h)))
@@ -577,13 +550,7 @@ elab "#check_fragment_rules" : command => do
     | (cases ‹NewLhs _ _ _› <;> simp_all only [NewLhs.fill, NewLhs.keyValue,
         Loc.up_eq, MLoc.up_eq, Loc.keyValue_wk, MLoc.keyValue_wk,
         Premise.inSolkey, Prog.inSolkey, Stmt.inSolkey, MSrc.keyValue, MPath.keyValue,
-        Bool.true_and, Bool.and_true, Bool.and_self, Option.elim])))))
-        (fun ex => throwError "{c}: {ex.toMessageData}")
-      unless goals.isEmpty do
-        throwError "{c}: open fragment goals {goals}"
-      let value ← instantiateMVars proof
-      if value.hasSorry then throwError "{c}: incomplete fragment proof"
-      addDecl (.thmDecl { name := c ++ `inSolkey, levelParams := ci.levelParams, type := ty, value })
+        Bool.true_and, Bool.and_true, Bool.and_self, Option.elim]))))
 
 elab "apply_fragment_rule" : tactic => do
   let tag ← getMainTag

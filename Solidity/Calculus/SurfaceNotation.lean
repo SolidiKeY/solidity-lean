@@ -877,16 +877,10 @@ def tPath (Γ : ECtx) (t : RawTerm) : Except String (NPTerm C) := (readers C Γ)
 def tFPath (Γ : ECtx) (S : Name) (t : RawTerm) : Except String (NPTerm C) := (readers C Γ).fpath S t
 /-- A term at the storage sort. -/
 def tStor (Γ : ECtx) (t : RawTerm) : Except String (NSTerm C) := (readers C Γ).stor t
-/-- What a storage `save` writes. -/
-def tSVal (Γ : ECtx) (t : RawTerm) : Except String (NSValT C) := (readers C Γ).sval t
 /-- A term at the memory-identity sort. -/
 def tIdent (Γ : ECtx) (t : RawTerm) : Except String (NITerm C) := (readers C Γ).ident t
-/-- A term at the memory-location sort. -/
-def tAddr (Γ : ECtx) (t : RawTerm) : Except String (NMAddr C) := (readers C Γ).addr t
 /-- A term at the memory sort. -/
 def tMem (Γ : ECtx) (t : RawTerm) : Except String (NMTerm C) := (readers C Γ).mem t
-/-- What a memory `write` writes. -/
-def tMVal (Γ : ECtx) (t : RawTerm) : Except String (NMValT C) := (readers C Γ).mval t
 
 /-- The type of a storage path expression, from the contract alone. -/
 def RawExpr.pathTy : RawExpr → Option Ty

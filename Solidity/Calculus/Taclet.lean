@@ -214,15 +214,18 @@ def toStepType (c : Lean.Name) : MetaM Expr := do
     let args := body.getAppArgs
     let concl ← mkEq (← mkAppM ``Stmt.step #[args[1]!, args[2]!, args[5]!]) args[6]!
     mkForallFVars xs concl
-  return ty.replace fun e => if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
+  return ty.dropAutoParams
 
-/-- Add `c.toStep`, proved by `tac`, in its own heartbeat budget; what `tac`
-returned.  A failure is logged; `strict` then throws, otherwise it is `none`
-and the caller goes on with the next constructor. -/
-def addToStep {α} (c : Lean.Name) (tac : TacticM α) (strict : Bool := true) :
+/-- Add the lemma `c ++ suffix` of the constructor `c`, of the type `ty`,
+proved by `tac` in its own heartbeat budget; what `tac` returned.  A failure
+is logged (`msg`); `strict` then throws `err`, otherwise it is `none` and the
+caller goes on with the next constructor. -/
+def addCtorLemma {α} (c suffix : Lean.Name) (ty : TermElabM Expr) (tac : TacticM α)
+    (err : MessageData) (strict : Bool := true)
+    (msg : Exception → TermElabM MessageData := fun ex => pure ex.toMessageData) :
     Command.CommandElabM (Option α) :=
   Command.liftTermElabM <| withCurrHeartbeats do
-    let ty ← toStepType c
+    let ty ← ty
     let mvar ← mkFreshExprMVar ty
     let r ← tryCatchRuntimeEx (do
         let out ← IO.mkRef none
@@ -230,18 +233,22 @@ def addToStep {α} (c : Lean.Name) (tac : TacticM α) (strict : Bool := true) :
           Tactic.run mvar.mvarId! do out.set (some (← tac))
         let a ← out.get
         pure (if gs.isEmpty && !(← instantiateMVars mvar).hasSorry then a else none))
-      (fun ex => do logError m!"{c}: {ex.toMessageData}"; pure none)
-    let some a := r | if strict then throwError "no proof that `{c}` is `Stmt.step`'s rule"
-                      else pure none
+      (fun ex => do logError m!"{c}: {← msg ex}"; pure none)
+    let some a := r | if strict then throwError err else pure none
     addDecl (Declaration.thmDecl
-      { name := c ++ `toStep, levelParams := [], type := ty, value := ← instantiateMVars mvar })
+      { name := c ++ suffix, levelParams := [], type := ty, value := ← instantiateMVars mvar })
     return some a
 
-/-- The constructors of `J` without a `toStep` lemma. -/
-def missingToStep (J : Lean.Name) : Command.CommandElabM (Array Lean.Name) := do
+/-- The constructors of `J` without their lemma `c ++ suffix`. -/
+def ctorsMissing (J suffix : Lean.Name) : Command.CommandElabM (Array Lean.Name) := do
   let some (.inductInfo ii) := (← getEnv).find? J | throwError "no inductive `{J}`"
   let env ← getEnv
-  return ii.ctors.toArray.filter fun c => !env.contains (c ++ `toStep)
+  return ii.ctors.toArray.filter fun c => !env.contains (c ++ suffix)
+
+/-- Add `c.toStep`, proved by `tac` (`addCtorLemma`). -/
+def addToStep {α} (c : Lean.Name) (tac : TacticM α) (strict : Bool := true) :
+    Command.CommandElabM (Option α) :=
+  addCtorLemma c `toStep (toStepType c) tac m!"no proof that `{c}` is `Stmt.step`'s rule" strict
 
 /-- `#derive_toStep? J` searches a `Taclet.<rule>.toStep` for every
 constructor of `J` without one (`to_step_tac`), and offers the
@@ -251,7 +258,7 @@ elab tk:"#derive_toStep? " j:ident : command => do
   let J ← Command.liftCoreM <| realizeGlobalConstNoOverload j
   let t0 ← IO.monoMsNow
   let mut rows : Array String := #[]
-  for c in ← missingToStep J do
+  for c in ← ctorsMissing J `toStep do
     let some plan ← addToStep c toStepSearch (strict := false) | pure ()
     rows := rows.push s!"\n  {c.replacePrefix J .anonymous} \"{plan}\""
   let text := s!"#replay_toStep {j.getId}" ++ String.join rows.toList
@@ -269,7 +276,7 @@ elab_rules : command
     let J ← Command.liftCoreM <| realizeGlobalConstNoOverload j
     for c in cs, p in ps do
       discard <| addToStep (J ++ c.getId) (toStepReplay p.getString)
-    let left ← missingToStep J
+    let left ← ctorsMissing J `toStep
     unless left.isEmpty do
       throwError "#replay_toStep: no lemma for {left.toList}; run `#derive_toStep? {J}`"
 

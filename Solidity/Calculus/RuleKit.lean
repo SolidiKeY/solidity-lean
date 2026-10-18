@@ -60,6 +60,14 @@ partial def dropSide : Lean.Expr → Lean.Expr
     else .forallE n t b' bi
   | e => e
 
+/-- A side condition's type, its `autoParam` wrapper dropped. -/
+def _root_.Lean.Expr.unAutoParam (t : Lean.Expr) : Lean.Expr :=
+  if t.isAppOfArity ``autoParam 2 then t.getArg! 0 else t
+
+/-- A type with every `autoParam` wrapper in it dropped. -/
+def _root_.Lean.Expr.dropAutoParams (e : Lean.Expr) : Lean.Expr :=
+  e.replace fun e => if e.isAppOfArity ``autoParam 2 then some (e.getArg! 0) else none
+
 /-- Whether a binder type of the telescope `e` mentions the bound variable `i`. -/
 def usedInBinders : Lean.Expr → Nat → Bool
   | .forallE _ t b _, i => t.hasLooseBVar i || usedInBinders b (i + 1)

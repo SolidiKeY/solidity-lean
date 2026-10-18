@@ -51,9 +51,6 @@ def qCtxRaw : Ctx → Expr
 
 def qSrt (s : Srt) : Expr := toExpr s
 
-/-- `b = b`, at `Bool`. -/
-def rflBool (b : Bool) : Expr := quoteRefl (mkConst ``Bool) (toExpr b)
-
 end Quote
 
 open Quote

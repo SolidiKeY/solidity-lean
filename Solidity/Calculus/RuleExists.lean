@@ -129,7 +129,7 @@ def replaceStep (t e' : Expr) : MetaM Expr := do
 /-- The side conditions a rule's constructor asks, proved: by evaluation, by
 a hypothesis, or by `simp_all` over the side predicates. -/
 def proveSide (t : Expr) : TacticM (Option Expr) := do
-  let t := if t.isAppOfArity ``autoParam 2 then t.getArg! 0 else t
+  let t := t.unAutoParam
   if let some (_, a, b) := t.eq? then
     if ← withNewMCtxDepth (isDefEq a b) then
       if ← isDefEq a b then return some (← mkEqRefl a)
@@ -174,22 +174,16 @@ def tryCtor (R : Expr) (c wrap : Lean.Name) (cands : List (Expr × Expr)) : Tact
   let st ← saveState
   let r ← (do
     let ty ← whnfR R
-    let cE ← mkConstWithFreshMVarLevels c
-    let (xs, _, cty) ← forallMetaTelescopeReducing (← inferType cE)
-    let args := cty.getAppArgs
-    unless args.size == 7 do return Try.no
-    unless ← isDefEq args[0]! (ty.getArg! 0) <&&> isDefEq args[1]! (ty.getArg! 1)
-      <&&> isDefEq args[2]! (ty.getArg! 2) do return .no
-    unless ← matchFind args[5]! (ty.getArg! 5) cands do return .no
-    unless ← isDefEq args[6]! (ty.getArg! 6) do return .no
+    let some (cE, xs, p) ← ctorAt? c (ty.getArg! 0) (ty.getArg! 1) (ty.getArg! 2) (ty.getArg! 5)
+      cands | return Try.no
+    unless ← isDefEq p (ty.getArg! 6) do return .no
     for x in xs do
       let x ← instantiateMVars x
       unless x.isMVar do continue
       let t ← instantiateMVars (← inferType x)
       if ← isProp t then
         let some pf ← proveSide t | do
-          let t' := if t.isAppOfArity ``autoParam 2 then t.getArg! 0 else t
-          if let some (ty, d, _) := t'.eq? then
+          if let some (ty, d, _) := t.unAutoParam.eq? then
             if ty.isConstOf ``Bool && !d.hasExprMVar && !d.isFVar then
               let v ← whnfD d
               unless v.isConstOf ``Bool.true || v.isConstOf ``Bool.false do return .undecided d
@@ -208,11 +202,6 @@ def tryCtor (R : Expr) (c wrap : Lean.Name) (cands : List (Expr × Expr)) : Tact
   | _ => st.restore
   return r
 
-/-- The judgements of the rule table, and how a derivation of each is a
-`Rule`. -/
-def tables : List (Lean.Name × Lean.Name) :=
-  [(``Taclet, ``Rule.key), (``LeanTaclet, ``Rule.lean)]
-
 /-- The rule of a leaf `Rule C k m s P`: the constructor named `c?` (the
 replay), or the first that closes it (the search); its name.  Otherwise
 the side condition the first matching constructor could not decide, with
@@ -224,7 +213,7 @@ def leaf (R : Expr) (c? : Option Lean.Name) :
   let cands ← holeCandidates s
   let hs ← FindHeads.of s cands
   let mut und := #[]
-  for (J, wrap) in tables do
+  for (J, wrap) in ruleTables do
     let some (.inductInfo ii) := (← getEnv).find? J | continue
     for c in ii.ctors do
       if let some c' := c? then
@@ -469,30 +458,17 @@ in its own heartbeat budget; its plan.  A failure is logged; `strict` then
 throws. -/
 def addLemma (c : Lean.Name) (plan : Option (List Tok)) (strict : Bool := true) :
     Command.CommandElabM (Option (Array Tok)) :=
-  Command.liftTermElabM <| withCurrHeartbeats do
-    let ty ← lemmaType c
-    let mvar ← mkFreshExprMVar ty
-    let r ← tryCatchRuntimeEx (do
-        let out ← IO.mkRef #[]
-        let gs ← Term.withoutErrToSorry <| Tactic.run mvar.mvarId! do
-          let (_, g) ← (← getMainGoal).intros
-          setGoals [g]
-          let (ts, rest) ← go plan
-          if let some (_ :: _) := rest then throwError "rule_exists: the plan has more leaves than the proof"
-          out.set ts
-        let ok := gs.isEmpty && !(← instantiateMVars mvar).hasSorry
-        if ok then return some (← out.get) else return none)
-      (fun ex => do logError m!"{c}: {((← ex.toMessageData.toString).take 1500)}"; pure none)
-    let some ts := r | if strict then throwError "no proof that `{c}`'s step is a rule's" else pure none
-    addDecl (Declaration.thmDecl
-      { name := c ++ `ruleExists, levelParams := [], type := ty, value := ← instantiateMVars mvar })
-    return some ts
+  addCtorLemma c `ruleExists (lemmaType c) (do
+      let (_, g) ← (← getMainGoal).intros
+      setGoals [g]
+      let (ts, rest) ← go plan
+      if let some (_ :: _) := rest then throwError "rule_exists: the plan has more leaves than the proof"
+      return ts)
+    m!"no proof that `{c}`'s step is a rule's" strict
+    (msg := fun ex => return m!"{(← ex.toMessageData.toString).take 1500}")
 
 /-- The constructors of `Stmt` without a `ruleExists` lemma. -/
-def missing : Command.CommandElabM (Array Lean.Name) := do
-  let some (.inductInfo ii) := (← getEnv).find? ``Stmt | throwError "no `Stmt`"
-  let env ← getEnv
-  return ii.ctors.toArray.filter fun c => !env.contains (c ++ `ruleExists)
+def missing : Command.CommandElabM (Array Lean.Name) := ctorsMissing ``Stmt `ruleExists
 
 /-- `#derive_ruleExists?` searches `Stmt.<c>.ruleExists` for every
 constructor of `Stmt` without one, and offers the `#replay_ruleExists`
