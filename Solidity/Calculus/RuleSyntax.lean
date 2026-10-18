@@ -495,9 +495,28 @@ def Pos.coreUp : Pos → Lean.Name
   | .mpath => `Solidity.MPath.up | .mloc => `Solidity.MLoc.up
   | .oploc => `Solidity.OpLoc.up
 
+/-- A schema variable's head by its stem (`s`, the name of `x`), weakened
+past `d` locals: a position by `.there`, a part by its `up`; `none` for a
+stem of no fixed sort. -/
+def headOfStem (x : Ident) (s : String) (d : Nat) : Option Head :=
+  let there := iterApp `Solidity.Idx.there d
+  match stemOf s with
+  | "v" | "lv" | "vp" | "pv" => some (.local (there x))
+  | "lsv" => some (.alias (there x))
+  | "mv" | "pmv" | "rmv" => some (.mem (there x) (proofIdent x s))
+  | "gsp" => some (.root x (proofIdent x s))
+  | "se" | "ie" | "sadr" => some (.simple (iterApp `Solidity.Simple.up d x))
+  | "e" | "nse" | "nadr" | "cond" | "inv" | "dec" => some (.val (iterApp `Solidity.Val.up d x))
+  | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" =>
+    some (.spath (iterApp `Solidity.SPath.up d x))
+  | "nmp" | "mpath" => some (.mpath (iterApp `Solidity.MPath.up d x))
+  | "nlhs" | "loc" => some (.loc (iterApp `Solidity.Loc.up d x))
+  | "mloc" => some (.mloc (iterApp `Solidity.MLoc.up d x))
+  | _ => none
+
 /-- `headOf` in a scoped taclet: a name declared above the mark is its
 position; a schema variable of the `\find` is weakened past every local
-declared above the mark, a position by `.there`, a part by its `up`. -/
+declared above the mark (`headOfStem`). -/
 def headOfCore (Γ : Scope) (x : Ident) (s : String) : Head :=
   match Γ.findIdx? (·.1 == s), Γ.lookup s with
   | some j, some (.val _) => .local (corePos j)
@@ -505,20 +524,7 @@ def headOfCore (Γ : Scope) (x : Ident) (s : String) : Head :=
   | some j, some (.mem _ h) => .mem (corePos j) h
   | _, _ =>
     let d := Γ.depth
-    let there := iterApp `Solidity.Idx.there d
-    match stemOf s with
-    | "v" | "lv" | "vp" | "pv" => .local (there x)
-    | "lsv" => .alias (there x)
-    | "mv" | "pmv" | "rmv" => .mem (there x) (proofIdent x s)
-    | "gsp" => .root x (proofIdent x s)
-    | "se" | "ie" | "sadr" => .simple (iterApp `Solidity.Simple.up d x)
-    | "e" | "nse" | "nadr" | "cond" | "inv" | "dec" => .val (iterApp `Solidity.Val.up d x)
-    | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" =>
-      .spath (iterApp `Solidity.SPath.up d x)
-    | "nmp" | "mpath" => .mpath (iterApp `Solidity.MPath.up d x)
-    | "nlhs" | "loc" => .loc (iterApp `Solidity.Loc.up d x)
-    | "mloc" => .mloc (iterApp `Solidity.MLoc.up d x)
-    | _ => if d == 0 then .other x else .weak x d
+    (headOfStem x s d).getD (if d == 0 then .other x else .weak x d)
 
 def headOf (Γ : Scope) (x : Ident) : Head :=
   let s := x.getId.toString
@@ -529,12 +535,6 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
   | some (.mem v h) => .mem v h
   | some .raw => .other x
   | none => if Γ.isRaw then .other x else match stemOf s with
-    | "v" | "lv" | "vp" | "pv" => .local x
-    | "lsv" => .alias x
-    | "mv" | "pmv" | "rmv" => .mem x (proofIdent x s)
-    | "gsp" => .root x (proofIdent x s)
-    | "se" | "ie" | "sadr" => .simple x
-    | "e" | "nse" | "nadr" | "cond" | "inv" | "dec" => .val x
     -- the invariant rules' fresh locals: KeY's `s#b` (`bType b = cond;`), the
     -- condition's value, and `\skolemTerm int variant`, the variant's before
     -- the iteration (`whileInvariantBox`, `whileInvariantDiamond`)
@@ -542,11 +542,7 @@ def headOf (Γ : Scope) (x : Ident) : Head :=
         #[Lean.Syntax.mkStrLit "se", schemaIdent "k"])
     | "variant" => .local (Lean.Syntax.mkApp (mkIdent ``Var.fresh)
         #[Lean.Syntax.mkStrLit "ie", schemaIdent "k"])
-    | "sp" | "nsp" | "path" | "map" | "arr" | "parr" | "rarr" | "marr" | "darr" => .spath x
-    | "nmp" | "mpath" => .mpath x
-    | "nlhs" | "loc" => .loc x
-    | "mloc" => .mloc x
-    | _ => .other x
+    | _ => (headOfStem x s 0).getD (.other x)
 
 /-- A head at a position. -/
 def headAt (pos : Pos) (stx : Lean.Syntax) : Head → MacroM Lean.Term
@@ -639,16 +635,19 @@ def rhsTerm (Γ : Scope) (stem : String) (r : TSyntax `sol_expr) : Option Lean.T
       | "src" => `Solidity.Src.up | _ => `Solidity.MSrc.up
     iterApp up Γ.depth x
 
+/-- How a storage receiver of the name `n` is indexed, by its stem. -/
+def indexTyOfStem (n : String) : MacroM Lean.Term :=
+  match stemOf n with
+  | "map" => `(IndexTy.map)
+  | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr $(schemaIdent "ak"))
+  | _ => pure (schemaIdent "it")
+
 /-- How a storage receiver is indexed: `map[ie]` by key, `arr[ie]` by
 position — into a dynamic or a fixed-size array, the schema variable `ak`
 (`ArrTy`), as solkey's `Path[…,array]` takes either — anything else by the
 schema variable `it`. -/
 def indexTyOf : TSyntax `sol_expr → MacroM Lean.Term
-  | `(sol_expr| $x:ident) =>
-    match stemOf x.getId.toString with
-    | "map" => `(IndexTy.map)
-    | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr $(schemaIdent "ak"))
-    | _ => pure (schemaIdent "it")
+  | `(sol_expr| $x:ident) => indexTyOfStem x.getId.toString
   | _ => pure (schemaIdent "it")
 
 mutual
@@ -1345,10 +1344,7 @@ else by the schema variable `it`. -/
 def indexTyOfTerm : TSyntax `dl_term → MacroM Lean.Term
   | `(dl_term| $x:ident) =>
     match nameParts x.getId with
-    | [n] => match stemOf n with
-      | "map" => `(IndexTy.map)
-      | "arr" | "parr" | "rarr" | "marr" | "darr" => `(IndexTy.arr $(schemaIdent "ak"))
-      | _ => pure (schemaIdent "it")
+    | [n] => indexTyOfStem n
     | _ => pure (schemaIdent "it")
   | _ => pure (schemaIdent "it")
 
@@ -2569,6 +2565,17 @@ def ppIncDec (op : Lean.Expr) (l : TSyntax `sol_expr) : MetaM (Option (TSyntax `
   | IncDec.preInc => return some (← `(sol_stmt| ++ $l:sol_expr))
   | IncDec.postDec => return some (← `(sol_stmt| $l:sol_expr −−))
   | IncDec.preDec => return some (← `(sol_stmt| −− $l:sol_expr))
+  | _ => return none
+
+/-- `l += r`, `l -= r` and the rest; `l ⊕= r` for a schema operator. -/
+def ppCompound (op : Lean.Expr) (l r : TSyntax `sol_expr) : MetaM (Option (TSyntax `sol_stmt)) := do
+  if (← fvarName? op).isSome then return some (← `(sol_stmt| $l:sol_expr ⊕= $r:sol_expr))
+  match_expr (← whnf op) with
+  | BinOp.add => return some (← `(sol_stmt| $l:sol_expr += $r:sol_expr))
+  | BinOp.sub => return some (← `(sol_stmt| $l:sol_expr -= $r:sol_expr))
+  | BinOp.mul => return some (← `(sol_stmt| $l:sol_expr *= $r:sol_expr))
+  | BinOp.div => return some (← `(sol_stmt| $l:sol_expr /= $r:sol_expr))
+  | BinOp.mod => return some (← `(sol_stmt| $l:sol_expr %= $r:sol_expr))
   | _ => return none
 
 /-! ### Terms -/

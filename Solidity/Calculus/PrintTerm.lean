@@ -163,6 +163,15 @@ partial def eqTmS (n₁ : List Expr) (x : Expr) (n₂ : List Expr) (y : Expr) : 
 
 /-! ## Terms -/
 
+/-- `viewTmS` at `ns` as the printers read a term, and the term printed
+where it is a variable `tmVar?` names. -/
+def viewS (ns : List Expr) (e : Expr) :
+    MetaM (List Expr × TmV × Expr × Option (TSyntax `dl_term)) := do
+  let (ns, v, e) ← viewTmS (← reduceOn) ns e
+  if let .var x := v then
+    if let some t ← tmVar? x then return (ns, v, e, some t)
+  return (ns, v, e, none)
+
 /-- `‹e›`. -/
 def escapeS (e : Expr) : MetaM (TSyntax `dl_term) := escapeDl e
 
@@ -183,9 +192,8 @@ mutual
 
 /-- A value term read at `ns`. -/
 partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let (ns, v, e) ← viewTmS (← reduceOn) ns e
-  if let .var x := v then
-    if let some t ← tmVar? x then return t
+  let (ns, v, e, t?) ← viewS ns e
+  if let some t := t? then return t
   match v with
   | .bumped _ _ t => `(dl_term| $(← ppTermS ns t):dl_term ⊕⊕)
   | .pv x =>
@@ -308,9 +316,8 @@ partial def keyAddrS? (ns : List Expr) (a : Expr) :
 
 /-- A storage path read at `ns`. -/
 partial def ppPTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let (ns, v, e) ← viewTmS (← reduceOn) ns e
-  if let .var x := v then
-    if let some t ← tmVar? x then return t
+  let (ns, v, e, t?) ← viewS ns e
+  if let some t := t? then return t
   match v with
   | .sym ``Op0.root #[r, _, _] _ =>
     let some r ← nameOf? r | escapeS e
@@ -321,11 +328,7 @@ partial def ppPTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .pv x =>
     let some x ← ppVar? x | escapeS e
     `(dl_term| $x:ident)
-  | .sym ``Op1.field #[_, f, _, _] #[p] =>
-    let some f ← nameOf? f | escapeS e
-    if ← keyOn then return ← `(dl_term| consr($(← ppPTermS ns p), $(nameIdent f):ident))
-    dotTerm (← ppPTermS ns p) f
-  | .sym ``Op1.fieldIn #[_, _, f, _, _] #[p] =>
+  | .sym ``Op1.field #[_, f, _, _] #[p] | .sym ``Op1.fieldIn #[_, _, f, _, _] #[p] =>
     let some f ← nameOf? f | escapeS e
     if ← keyOn then return ← `(dl_term| consr($(← ppPTermS ns p), $(nameIdent f):ident))
     dotTerm (← ppPTermS ns p) f
@@ -357,16 +360,13 @@ partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
   | .sym ``Op3.push _ #[s, p, v] =>
     let (len, val, slot) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save(save($(← ppSTermS ns s), $slot, $(← ppSValS ns v)), $len, $val + 1))
-  | .sym ``Op2.pushSlot _ #[s, p] =>
+  | .sym ``Op2.pushSlot _ #[s, p] | .sym ``Op2.extend _ #[s, p] =>
     let (len, val, _) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save($(← ppSTermS ns s), $len, $val + 1))
   | .sym ``Op2.pop _ #[s, p] =>
     let p ← ppPTermS ns p
     let (len, val, _) ← lenTerms p
     `(dl_term| save(delAt($(← ppSTermS ns s), $(← elemTerm p (← `(dl_term| $val - 1)))), $len, $val - 1))
-  | .sym ``Op2.extend _ #[s, p] =>
-    let (len, val, _) ← lenTerms (← ppPTermS ns p)
-    `(dl_term| save($(← ppSTermS ns s), $len, $val + 1))
   | .sym ``Op2.shrink _ #[s, p] =>
     let (len, val, _) ← lenTerms (← ppPTermS ns p)
     `(dl_term| save($(← ppSTermS ns s), $len, $val - 1))
@@ -378,9 +378,8 @@ partial def ppSTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
 
 /-- What a storage `save` writes, read at `ns`. -/
 partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let (ns, v, e) ← viewTmS (← reduceOn) ns e
-  if let .var x := v then
-    if let some t ← tmVar? x then return t
+  let (ns, v, e, t?) ← viewS ns e
+  if let some t := t? then return t
   match v with
   | .sym ``Op1.sval _ #[t] =>
     -- `find` here reads back as the copy below, so a value read prints as `select`
@@ -410,9 +409,8 @@ partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
 
 /-- A memory identity read at `ns`. -/
 partial def ppITermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let (ns, v, e) ← viewTmS (← reduceOn) ns e
-  if let .var x := v then
-    if let some t ← tmVar? x then return t
+  let (ns, v, e, t?) ← viewS ns e
+  if let some t := t? then return t
   match v with
   | .pv x =>
     let some x ← ppVar? x | escapeS e
@@ -431,9 +429,8 @@ partial def ppITermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
 
 /-- A member or an element of a memory object, read at `ns`. -/
 partial def ppMAddrS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let (ns, v, e) ← viewTmS (← reduceOn) ns e
-  if let .var x := v then
-    if let some t ← tmVar? x then return t
+  let (ns, v, e, t?) ← viewS ns e
+  if let some t := t? then return t
   match v with
   | .sym ``Op1.mfield #[_, f, _, _] #[i] =>
     let some f ← nameOf? f | escapeS e
@@ -463,9 +460,8 @@ partial def ppMTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := d
 
 /-- What a memory `write` writes, read at `ns`. -/
 partial def ppMValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
-  let (ns, v, e) ← viewTmS (← reduceOn) ns e
-  if let .var x := v then
-    if let some t ← tmVar? x then return t
+  let (ns, v, e, t?) ← viewS ns e
+  if let some t := t? then return t
   match v with
   | .sym ``Op1.mval _ #[t] => ppTermS ns t
   | .sym ``Op1.ref _ #[i] => ppITermS ns i
@@ -544,34 +540,30 @@ def rhsElemS (ns : List Expr) (x r : Expr) : MetaM (Option (TSyntax `dl_upd_elem
   let x : TSyntax `dl_term ← `(dl_term| $xi:ident)
   let r ← whnf (← instantiateMVars r)
   let t := r.getAppArgs.back?.getD r
+  -- `x := a op b`, a comparison; `==` and `!=` only where `eqs`
+  let cmp (op : Expr) (eqs : MetaM Bool) (a b : TSyntax `dl_term) :
+      MetaM (Option (TSyntax `dl_upd_elem)) := do
+    match_expr (← whnf op) with
+    | BinOp.le => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term <= $b:dl_term))
+    | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
+    | BinOp.gt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term > $b:dl_term))
+    | BinOp.ge => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term >= $b:dl_term))
+    | BinOp.eqB =>
+      if ← eqs then return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term == $b:dl_term))
+      return none
+    | BinOp.neB =>
+      if ← eqs then return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
+      return none
+    | _ => return none
   match r.getAppFn.constName? with
   | some ``Rhs.val =>
     let (nt, vt, _) ← viewTmS true ns t
     if let .sym ``Op2.binop #[op, ty, _] #[a, b] := vt then
-      let a ← ppTermS nt a
-      let b ← ppTermS nt b
-      match_expr (← whnf op) with
-      | BinOp.le => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term <= $b:dl_term))
-      | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
-      | BinOp.gt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term > $b:dl_term))
-      | BinOp.ge => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term >= $b:dl_term))
-      | BinOp.eqB =>
-        if (← whnf ty).isConstOf ``PrimTy.uint then
-          return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term == $b:dl_term))
-      | BinOp.neB =>
-        if (← whnf ty).isConstOf ``PrimTy.uint then
-          return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
-      | _ => pure ()
+      let eqs : MetaM Bool := return (← whnf ty).isConstOf ``PrimTy.uint
+      if let some u ← cmp op eqs (← ppTermS nt a) (← ppTermS nt b) then return some u
     if let .sym ``Op2.zcmp #[op, _] #[a, b] := vt then
       if let some (a, b) ← ppKPairS nt a b then
-        match_expr (← whnf op) with
-        | BinOp.le => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term <= $b:dl_term))
-        | BinOp.lt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term < $b:dl_term))
-        | BinOp.gt => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term > $b:dl_term))
-        | BinOp.ge => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term >= $b:dl_term))
-        | BinOp.eqB => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term == $b:dl_term))
-        | BinOp.neB => return some (← `(dl_upd_elem| $x:dl_term := $a:dl_term != $b:dl_term))
-        | _ => pure ()
+        if let some u ← cmp op (pure true) a b then return some u
     return some (← `(dl_upd_elem| $x:dl_term := $(← ppTermS ns t):dl_term))
   | some ``Rhs.path => return some (← `(dl_upd_elem| $x:dl_term := $(← ppPTermS ns t):dl_term))
   | some ``Rhs.unset => return some (← `(dl_upd_elem| $x:dl_term := unset))

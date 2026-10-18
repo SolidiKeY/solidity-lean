@@ -213,11 +213,7 @@ scoped macro_rules
       | core_rule Solidity.Proves.unfold $r
       | core_rule Solidity.Proves.bind $r
       | core_rule Solidity.Proves.inline $r)
-  | `(tactic| apply unfoldLean $r:term) =>
-    `(tactic| first
-      | core_rule Solidity.Proves.unfold $r
-      | core_rule Solidity.Proves.bind $r
-      | core_rule Solidity.Proves.inline $r)
+  | `(tactic| apply unfoldLean $r:term) => `(tactic| apply unfold $r)
   | `(tactic| apply doneLean $r:term) =>
     `(tactic| first
       | core_rule Solidity.Proves.done $r)
@@ -233,10 +229,7 @@ scoped macro_rules
     `(tactic| first
       | core_rule2 Solidity.Proves.split $r
       | core_rule2 Solidity.Proves.guardedUpdates $r)
-  | `(tactic| apply splitBox $r:term) =>
-    `(tactic| first
-      | core_rule2 Solidity.Proves.split $r
-      | core_rule2 Solidity.Proves.guardedUpdates $r)
+  | `(tactic| apply splitBox $r:term) => `(tactic| apply split $r)
   | `(tactic| apply done $r:term) =>
     `(tactic| first
       | core_rule Solidity.Proves.done $r)
@@ -255,10 +248,7 @@ scoped macro_rules
     `(tactic| first
       | (core_silent; core_inv (Solidity.Taclet.step_eq $r))
       | (core_silent; core_inv (Solidity.LeanTaclet.toStep $r)))
-  | `(tactic| apply invLean $r:term) =>
-    `(tactic| first
-      | (core_silent; core_inv (Solidity.Taclet.step_eq $r))
-      | (core_silent; core_inv (Solidity.LeanTaclet.toStep $r)))
+  | `(tactic| apply invLean $r:term) => `(tactic| apply invBox $r)
   | `(tactic| apply updIntro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.updIntro) <;> core_silent)
@@ -275,10 +265,7 @@ scoped macro_rules
     `(tactic| first
       | (core_silent; apply Solidity.Proves.empty) <;> core_silent
       | core_skip empty)
-  | `(tactic| apply empty) =>
-    `(tactic| first
-      | (core_silent; apply Solidity.Proves.empty) <;> core_silent
-      | core_skip empty)
+  | `(tactic| apply empty) => `(tactic| apply emptyModality)
   | `(tactic| apply intro) =>
     `(tactic| first
       | (core_silent; apply Solidity.Proves.intro) <;> core_silent)

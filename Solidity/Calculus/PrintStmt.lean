@@ -413,30 +413,15 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.assignMem _ _ _ l r =>
     `(sol_stmt| $(← ppExprS ns l):sol_expr = $(← ppExprS ns r):sol_expr)
   | Stmt.opAssign _ _ _ op _ _ l r =>
-    let l ← ppExprS ns l
-    let r ← ppExprS ns r
-    if (← fvarName? op).isSome then return ← `(sol_stmt| $l:sol_expr ⊕= $r:sol_expr)
-    match_expr (← whnf op) with
-    | BinOp.add => `(sol_stmt| $l:sol_expr += $r:sol_expr)
-    | BinOp.sub => `(sol_stmt| $l:sol_expr -= $r:sol_expr)
-    | BinOp.mul => `(sol_stmt| $l:sol_expr *= $r:sol_expr)
-    | BinOp.div => `(sol_stmt| $l:sol_expr /= $r:sol_expr)
-    | BinOp.mod => `(sol_stmt| $l:sol_expr %= $r:sol_expr)
-    | _ => escape
+    let some s ← ppCompound op (← ppExprS ns l) (← ppExprS ns r) | escape
+    pure s
   | Stmt.incDec _ _ _ op _ l =>
     let some s ← ppIncDec op (← ppExprS ns l) | escape
     pure s
   | Stmt.pushOpAssign _ _ _ op _ _ b r =>
     let l ← `(sol_expr| $(← dotExpr (← ppExprS ns b) "push"):sol_expr ( ))
-    let r ← ppExprS ns r
-    if (← fvarName? op).isSome then return ← `(sol_stmt| $l:sol_expr ⊕= $r:sol_expr)
-    match_expr (← whnf op) with
-    | BinOp.add => `(sol_stmt| $l:sol_expr += $r:sol_expr)
-    | BinOp.sub => `(sol_stmt| $l:sol_expr -= $r:sol_expr)
-    | BinOp.mul => `(sol_stmt| $l:sol_expr *= $r:sol_expr)
-    | BinOp.div => `(sol_stmt| $l:sol_expr /= $r:sol_expr)
-    | BinOp.mod => `(sol_stmt| $l:sol_expr %= $r:sol_expr)
-    | _ => escape
+    let some s ← ppCompound op l (← ppExprS ns r) | escape
+    pure s
   | Stmt.pushIncDec _ _ _ op _ b =>
     let l ← `(sol_expr| $(← dotExpr (← ppExprS ns b) "push"):sol_expr ( ))
     let some s ← ppIncDec op l | escape
@@ -714,64 +699,63 @@ partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
   return some (⟨mkNode ``Solidity.solTupleAssign
     #[mkAtom "(", opt slots[0]!, mkNullNode groups, mkAtom ")", mkAtom "=", call.raw]⟩, n)
 
-/-- A call returning a memory reference (`CallRet.mem`) and the statement
-after it binding the return variable, as the one statement they are
-elaborated from: `Person memory mv1 = choosePersonMem();`,
-`m = choosePersonMem();`. -/
-partial def ppMemCallS (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
+/-- A call returning a reference and the statement after it binding the
+return variable, as the one statement they are elaborated from: the return
+variable read off the call's `CallRet` (`ret?`), the alias a right-hand side
+reads (`alias?`), the binding a declaration (`decl?`: the type, the
+variable, the initializer, printed by `declS`) or a rebinding (`rebind?`:
+the local, the right-hand side). -/
+partial def ppRefCallS (ret? : Expr → Option Expr) (alias? : Expr → MetaM (Option Expr))
+    (decl? : Expr → Option (Expr × Expr × Expr)) (rebind? : Expr → Option (Expr × Expr))
+    (declS : TSyntax `sol_ty → Ident → TSyntax `sol_expr → PrM (TSyntax `sol_stmt))
+    (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
   let .stmt ns s := s | return none
   let .stmt ns' t := t | return none
   let s := (← instantiateMVars s).consumeMData
   let t := (← instantiateMVars t).consumeMData
   if s.isFVar || t.isFVar then return none
   let_expr Stmt.call _ _ _ _ _ _ f args ret _ := (← whnf s) | return none
-  let_expr CallRet.mem _ _ r _ _ := (← whnf ret) | return none
+  let some r := ret? (← whnf ret) | return none
   -- the local `t` binds to `r`
   let bound (rhs : Expr) : MetaM Bool := do
-    let_expr MRhs.alias _ _ _ p := (← whnf rhs) | return false
-    let_expr MPath.var _ _ _ i _ := (← whnf p) | return false
+    let some i ← alias? (← whnf rhs) | return false
     isDefEq r (← idxName ns' i)
   let some (fe, xs) ← ppCallPartsS ns f args | return none
   let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
-  match_expr (← whnf t) with
-  | Stmt.declMem _ _ R x init _ _ =>
+  let t ← whnf t
+  if let some (R, x, init) := decl? t then
     let some rhs ← optSome? init | return none
     unless ← bound rhs do return none
     let some x ← ppVar? x | return none
-    return some (← `(sol_stmt| $(← ppTy.ppRef R):sol_ty memory $x:ident = $call:sol_expr))
-  | Stmt.rebindMem _ _ _ i rhs =>
-    unless ← bound rhs do return none
-    let some x ← ppVar? (← idxName ns' i) | return none
-    return some (← `(sol_stmt| $x:ident = $call:sol_expr))
-  | _ => return none
+    return some (← declS (← ppTy.ppRef R) x call)
+  let some (i, rhs) := rebind? t | return none
+  unless ← bound rhs do return none
+  let some x ← ppVar? (← idxName ns' i) | return none
+  return some (← `(sol_stmt| $x:ident = $call:sol_expr))
+
+/-- A call returning a memory reference (`CallRet.mem`) and its binding:
+`Person memory mv1 = choosePersonMem();`, `m = choosePersonMem();`. -/
+partial def ppMemCallS : SPiece → SPiece → PrM (Option (TSyntax `sol_stmt)) :=
+  ppRefCallS (fun ret => match_expr ret with | CallRet.mem _ _ r _ _ => some r | _ => none)
+    (fun rhs => do
+      let_expr MRhs.alias _ _ _ p := rhs | return none
+      let_expr MPath.var _ _ _ i _ := (← whnf p) | return none
+      return some i)
+    (fun t => match_expr t with | Stmt.declMem _ _ R x init _ _ => some (R, x, init) | _ => none)
+    (fun t => match_expr t with | Stmt.rebindMem _ _ _ i rhs => some (i, rhs) | _ => none)
+    fun T x call => `(sol_stmt| $T:sol_ty memory $x:ident = $call:sol_expr)
 
 /-- A storage return and its following alias binding, printed as their source
 statement. A bare call already exports its return local, as memory calls do. -/
-partial def ppStorageCallS (s t : SPiece) : PrM (Option (TSyntax `sol_stmt)) := do
-  let .stmt ns s := s | return none
-  let .stmt ns' t := t | return none
-  let s := (← instantiateMVars s).consumeMData
-  let t := (← instantiateMVars t).consumeMData
-  if s.isFVar || t.isFVar then return none
-  let_expr Stmt.call _ _ _ _ _ _ f args ret _ := (← whnf s) | return none
-  let_expr CallRet.storage _ _ r := (← whnf ret) | return none
-  let bound (rhs : Expr) : MetaM Bool := do
-    let_expr ARhs.path _ _ _ p := (← whnf rhs) | return false
-    let_expr SPath.alias _ _ _ i := (← whnf p) | return false
-    isDefEq r (← idxName ns' i)
-  let some (fe, xs) ← ppCallPartsS ns f args | return none
-  let call ← `(sol_expr| $fe:sol_expr ( $xs,* ))
-  match_expr (← whnf t) with
-  | Stmt.declStorage _ _ R x init =>
-    let some rhs ← optSome? init | return none
-    unless ← bound rhs do return none
-    let some x ← ppVar? x | return none
-    return some (← `(sol_stmt| $(← ppTy.ppRef R):sol_ty storage $x:ident = $call:sol_expr))
-  | Stmt.rebind _ _ _ i rhs =>
-    unless ← bound rhs do return none
-    let some x ← ppVar? (← idxName ns' i) | return none
-    return some (← `(sol_stmt| $x:ident = $call:sol_expr))
-  | _ => return none
+partial def ppStorageCallS : SPiece → SPiece → PrM (Option (TSyntax `sol_stmt)) :=
+  ppRefCallS (fun ret => match_expr ret with | CallRet.storage _ _ r => some r | _ => none)
+    (fun rhs => do
+      let_expr ARhs.path _ _ _ p := rhs | return none
+      let_expr SPath.alias _ _ _ i := (← whnf p) | return none
+      return some i)
+    (fun t => match_expr t with | Stmt.declStorage _ _ R x init => some (R, x, init) | _ => none)
+    (fun t => match_expr t with | Stmt.rebind _ _ _ i rhs => some (i, rhs) | _ => none)
+    fun T x call => `(sol_stmt| $T:sol_ty storage $x:ident = $call:sol_expr)
 
 /-- The statements of a block of pieces with no variable in it, a tuple
 call and a memory call each as the one statement it is elaborated from;
