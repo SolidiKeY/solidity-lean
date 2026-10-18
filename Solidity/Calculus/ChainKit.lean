@@ -77,6 +77,32 @@ section Equations
 
 variable {k : Nat} {Γ : Ctx}
 
+/-! A unary connective `w` the strategy looks through maps its part's step
+(`(f, φ') ↦ (f, w φ')`); these are that map's equations. -/
+
+theorem Focus.map_some {Δ Δ' : Ctx} (w : Fml C Δ → Fml C Δ') {o : Option (Focus C × Fml C Δ)}
+    {f : Focus C} {φ : Fml C Δ} (h : o = some (f, φ)) :
+    o.map (fun (f, φ') => (f, w φ')) = some (f, w φ) := by
+  rw [h]; rfl
+
+theorem Focus.map_none {Δ Δ' : Ctx} (w : Fml C Δ → Fml C Δ') {o : Option (Focus C × Fml C Δ)}
+    (h : o = none) : o.map (fun (f, φ') => (f, w φ')) = none := by
+  rw [h]; rfl
+
+theorem Focus.map_eq_some {Δ Δ' : Ctx} (w : Fml C Δ → Fml C Δ')
+    {o : Option (Focus C × Fml C Δ)} {f : Focus C} {ψ : Fml C Δ'}
+    (h : o.map (fun (f, φ') => (f, w φ')) = some (f, ψ)) : ∃ φ', o = some (f, φ') ∧ ψ = w φ' := by
+  cases o with
+  | none => cases h
+  | some q =>
+    obtain ⟨f', φ'⟩ := q
+    cases h
+    exact ⟨φ', rfl, rfl⟩
+
+theorem Focus.map_snd {Δ Δ' : Ctx} (w : Fml C Δ → Fml C Δ') (o : Option (Focus C × Fml C Δ)) :
+    (o.map fun (f, φ') => (f, w φ')).map Prod.snd = (o.map Prod.snd).map w := by
+  cases o <;> rfl
+
 theorem Fml.stepFocusR_and_left {φ ψ φ' : Fml C Γ} {f : Focus C}
     (h : φ.stepFocusR k = some (f, φ')) : (Fml.and φ ψ).stepFocusR k = some (f, .and φ' ψ) := by
   show (match φ.stepFocusR k with
@@ -93,42 +119,30 @@ theorem Fml.stepFocusR_and_right {φ ψ ψ' : Fml C Γ} {f : Focus C} (h : φ.st
   rfl
 
 theorem Fml.stepFocusR_imp {a φ φ' : Fml C Γ} {f : Focus C} (h : φ.stepFocusR k = some (f, φ')) :
-    (Fml.imp a φ).stepFocusR k = some (f, .imp a φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.imp a φ')) = _
-  rw [h]
-  rfl
+    (Fml.imp a φ).stepFocusR k = some (f, .imp a φ') :=
+  Focus.map_some (Fml.imp a) h
 
 theorem Fml.stepFocusR_upd {Γ' : Ctx} {m : Modality} {U : Upd C Γ Γ'} {φ φ' : Fml C Γ'}
     {f : Focus C} (h : φ.stepFocusR k = some (f, φ')) :
-    (Fml.upd m U φ).stepFocusR k = some (f, .upd m U φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.upd m U φ')) = _
-  rw [h]
-  rfl
+    (Fml.upd m U φ).stepFocusR k = some (f, .upd m U φ') :=
+  Focus.map_some (Fml.upd m U) h
 
 theorem Fml.stepFocusR_havoc {φ φ' : Fml C Γ} {f : Focus C} (h : φ.stepFocusR k = some (f, φ')) :
-    (Fml.havoc φ).stepFocusR k = some (f, .havoc φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = _
-  rw [h]
-  rfl
+    (Fml.havoc φ).stepFocusR k = some (f, .havoc φ') :=
+  Focus.map_some Fml.havoc h
 
 theorem Fml.stepFocusR_all {x : Var} {p : PrimTy} {φ φ' : Fml C (.val p :: Γ)} {f : Focus C}
-    (h : φ.stepFocusR k = some (f, φ')) : (Fml.all x p φ).stepFocusR k = some (f, .all x p φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = _
-  rw [h]
-  rfl
+    (h : φ.stepFocusR k = some (f, φ')) : (Fml.all x p φ).stepFocusR k = some (f, .all x p φ') :=
+  Focus.map_some (Fml.all x p) h
 
 theorem Fml.stepFocusR_bind {m : Modality} {x : Var} {t : LTy} {φ φ' : Fml C (t :: Γ)} {f : Focus C}
     (h : φ.stepFocusR k = some (f, φ')) :
-    (Fml.bind m x t φ).stepFocusR k = some (f, .bind m x t φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = _
-  rw [h]
-  rfl
+    (Fml.bind m x t φ).stepFocusR k = some (f, .bind m x t φ') :=
+  Focus.map_some (Fml.bind m x t) h
 
 theorem Fml.stepFocusR_anon {xs : List ((t : LTy) × Idx Γ t)} {φ φ' : Fml C Γ} {f : Focus C}
-    (h : φ.stepFocusR k = some (f, φ')) : (Fml.anon xs φ).stepFocusR k = some (f, .anon xs φ') := by
-  show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = _
-  rw [h]
-  rfl
+    (h : φ.stepFocusR k = some (f, φ')) : (Fml.anon xs φ).stepFocusR k = some (f, .anon xs φ') :=
+  Focus.map_some (Fml.anon xs) h
 
 /-- A formula with no modality takes no step: a postcondition
 (`Post.inactive`). -/
@@ -144,26 +158,13 @@ theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = 
       | none => (ψ.stepFocusR k).map fun (f, ψ') => (f, Fml.and φ ψ')) = _
     rw [Fml.stepFocusR_eq_none φ h'.1, Fml.stepFocusR_eq_none ψ h'.2]
     rfl
-  | _, .imp a φ, h => by
-    have h' : a.active = false ∧ φ.active = false := by
-      exact Bool.or_eq_false_iff.mp h
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.imp a φ')) = _
-    rw [Fml.stepFocusR_eq_none φ h'.2]; rfl
-  | _, .upd m U φ, h => by
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.upd m U φ')) = _
-    rw [Fml.stepFocusR_eq_none φ h]; rfl
-  | _, .havoc φ, h => by
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = _
-    rw [Fml.stepFocusR_eq_none φ h]; rfl
-  | _, .all x p φ, h => by
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = _
-    rw [Fml.stepFocusR_eq_none φ h]; rfl
-  | _, .bind m x t φ, h => by
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = _
-    rw [Fml.stepFocusR_eq_none φ h]; rfl
-  | _, .anon xs φ, h => by
-    show (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = _
-    rw [Fml.stepFocusR_eq_none φ h]; rfl
+  | _, .imp a φ, h =>
+    Focus.map_none (Fml.imp a) (Fml.stepFocusR_eq_none φ (Bool.or_eq_false_iff.mp h).2)
+  | _, .upd m U φ, h => Focus.map_none (Fml.upd m U) (Fml.stepFocusR_eq_none φ h)
+  | _, .havoc φ, h => Focus.map_none Fml.havoc (Fml.stepFocusR_eq_none φ h)
+  | _, .all x p φ, h => Focus.map_none (Fml.all x p) (Fml.stepFocusR_eq_none φ h)
+  | _, .bind m x t φ, h => Focus.map_none (Fml.bind m x t) (Fml.stepFocusR_eq_none φ h)
+  | _, .anon xs φ, h => Focus.map_none (Fml.anon xs) (Fml.stepFocusR_eq_none φ h)
 
 /-- The strategy's step is the line `stepFocusR` leaves. -/
 theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
@@ -187,29 +188,17 @@ theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
     | some p => rfl
     | none => cases ψ.stepFocusR k <;> rfl
   | imp a φ _ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.imp a φ')).map Prod.snd =
-      (Fml.stepR k φ).map (Fml.imp a)
-    rw [← ih]; cases φ.stepFocusR k <;> rfl
+    exact (Focus.map_snd (Fml.imp a) _).trans (congrArg (Option.map (Fml.imp a)) ih)
   | upd m U φ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.upd m U φ')).map Prod.snd =
-      (Fml.stepR k φ).map (Fml.upd m U)
-    rw [← ih]; cases φ.stepFocusR k <;> rfl
+    exact (Focus.map_snd (Fml.upd m U) _).trans (congrArg (Option.map (Fml.upd m U)) ih)
   | havoc φ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.havoc φ')).map Prod.snd =
-      (Fml.stepR k φ).map Fml.havoc
-    rw [← ih]; cases φ.stepFocusR k <;> rfl
+    exact (Focus.map_snd Fml.havoc _).trans (congrArg (Option.map Fml.havoc) ih)
   | all x p φ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.all x p φ')).map Prod.snd =
-      (Fml.stepR k φ).map (Fml.all x p)
-    rw [← ih]; cases φ.stepFocusR k <;> rfl
+    exact (Focus.map_snd (Fml.all x p) _).trans (congrArg (Option.map (Fml.all x p)) ih)
   | bind m x t φ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.bind m x t φ')).map Prod.snd =
-      (Fml.stepR k φ).map (Fml.bind m x t)
-    rw [← ih]; cases φ.stepFocusR k <;> rfl
+    exact (Focus.map_snd (Fml.bind m x t) _).trans (congrArg (Option.map (Fml.bind m x t)) ih)
   | anon xs φ ih =>
-    show ((φ.stepFocusR k).map fun (f, φ') => (f, Fml.anon xs φ')).map Prod.snd =
-      (Fml.stepR k φ).map (Fml.anon xs)
-    rw [← ih]; cases φ.stepFocusR k <;> rfl
+    exact (Focus.map_snd (Fml.anon xs) _).trans (congrArg (Option.map (Fml.anon xs)) ih)
 
 /-! ### `Fml.active` and `Fml.maxIdx` along the connectives
 
@@ -428,59 +417,23 @@ theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ 
         cases h
         exact ⟨hψ.1, Fml.stepFocusR_sound φ₂ h₂ σ hψ.2⟩
   | _, .imp a φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.imp a φ')) = some (f, ψ) := h
-    cases h₁ : φ.stepFocusR k with
-    | none => rw [h₁] at h; cases h
-    | some q =>
-      rw [h₁] at h
-      obtain ⟨f', φ'⟩ := q
-      cases h
-      exact fun ha => Fml.stepFocusR_sound φ h₁ σ (hψ ha)
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.imp a) h
+    exact fun ha => Fml.stepFocusR_sound φ h₁ σ (hψ ha)
   | _, .upd m U φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.upd m U φ')) = some (f, ψ) := h
-    cases h₁ : φ.stepFocusR k with
-    | none => rw [h₁] at h; cases h
-    | some q =>
-      rw [h₁] at h
-      obtain ⟨f', φ'⟩ := q
-      cases h
-      exact Upd.afterT_imp hψ fun σ' a => Fml.stepFocusR_sound φ h₁ σ' a
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.upd m U) h
+    exact Upd.afterT_imp hψ fun σ' a => Fml.stepFocusR_sound φ h₁ σ' a
   | _, .havoc φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.havoc φ')) = some (f, ψ) := h
-    cases h₁ : φ.stepFocusR k with
-    | none => rw [h₁] at h; cases h
-    | some q =>
-      rw [h₁] at h
-      obtain ⟨f', φ'⟩ := q
-      cases h
-      exact fun st nt => Fml.stepFocusR_sound φ h₁ _ (hψ st nt)
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some Fml.havoc h
+    exact fun st nt => Fml.stepFocusR_sound φ h₁ _ (hψ st nt)
   | _, .all x p φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.all x p φ')) = some (f, ψ) := h
-    cases h₁ : φ.stepFocusR k with
-    | none => rw [h₁] at h; cases h
-    | some q =>
-      rw [h₁] at h
-      obtain ⟨f', φ'⟩ := q
-      cases h
-      exact fun v => Fml.stepFocusR_sound φ h₁ _ (hψ v)
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.all x p) h
+    exact fun v => Fml.stepFocusR_sound φ h₁ _ (hψ v)
   | _, .bind m x t φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.bind m x t φ')) = some (f, ψ) := h
-    cases h₁ : φ.stepFocusR k with
-    | none => rw [h₁] at h; cases h
-    | some q =>
-      rw [h₁] at h
-      obtain ⟨f', φ'⟩ := q
-      cases h
-      exact Modality.forallB_imp (fun v => Fml.stepFocusR_sound φ h₁ _) hψ
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.bind m x t) h
+    exact Modality.forallB_imp (fun v => Fml.stepFocusR_sound φ h₁ _) hψ
   | _, .anon xs φ, f, ψ, h, σ, hψ => by
-    have h : (φ.stepFocusR k).map (fun (f, φ') => (f, Fml.anon xs φ')) = some (f, ψ) := h
-    cases h₁ : φ.stepFocusR k with
-    | none => rw [h₁] at h; cases h
-    | some q =>
-      rw [h₁] at h
-      obtain ⟨f', φ'⟩ := q
-      cases h
-      exact fun b => Fml.stepFocusR_sound φ h₁ _ (hψ b)
+    obtain ⟨φ', h₁, rfl⟩ := Focus.map_eq_some (Fml.anon xs) h
+    exact fun b => Fml.stepFocusR_sound φ h₁ _ (hψ b)
 
 variable {Γ : Ctx} {φ ψ : Fml C Γ}
 

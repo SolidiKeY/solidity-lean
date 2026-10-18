@@ -469,6 +469,27 @@ def lineType (φ : Expr) : MetaM (Expr × Expr) := do
   unless ty.isAppOfArity ``Fml 2 do throwError "not a scoped formula{indentExpr φ}"
   return (ty.getArg! 0, ty.getArg! 1)
 
+/-- A scoped line as the compiled code reads it: its contract, its
+context, the contract's name, its postconditions in slots (`punch`), the
+line with them punched, and its modality, if it is a variable. -/
+structure Prepared where
+  C : Expr
+  Γ : Expr
+  name : Lean.Name
+  sp : Splice
+  fml : Expr
+  modality : Option Expr
+
+/-- `φ` prepared (`Prepared`). -/
+def prepare (φ : Expr) : MetaM Prepared := do
+  let (C, Γ) ← lineType φ
+  let some name := (← whnfR C).constName?
+    | throwError "sol_chain: the contract is not a named constant: {C}"
+  let sp ← collectPosts φ {}
+  let fml := punch C sp φ
+  let m? ← modalityOf? fml
+  return { C, Γ, name, sp := { sp with modality := m? }, fml, modality := m? }
+
 /-- Whether `e`'s type is a scoped formula. -/
 def isCoreLine (e : Expr) : MetaM Bool := do
   let ty ← whnfR (← instantiateMVars (← inferType e))
@@ -489,13 +510,7 @@ structure MergeCand where
 in slots and a modality `m` computed as the diamond and as the box. -/
 def mergeCands (φ : Expr) : MetaM (Splice × List MergeCand) := do
   let φ ← instantiateMVars φ
-  let (C, Γ) ← lineType φ
-  let some nm := (← whnfR C).constName?
-    | throwError "sol_chain: the contract is not a named constant: {C}"
-  let sp ← collectPosts φ {}
-  let φ' := punch C sp φ
-  let m? ← modalityOf? φ'
-  let sp := { sp with modality := m? }
+  let { C, Γ, name := nm, sp, fml := φ', modality := m? } ← prepare φ
   let ty := mkApp (mkConst ``List [0]) (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat)
     (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat)
       (mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Expr) (mkConst ``Expr))))
@@ -633,13 +648,7 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
     (branches := true) (past := false) (keep : Expr → Bool := fun _ => true) :
     TermElabM (Splice × Array (List RwCand × Option MessageData)) := do
   let φ ← instantiateMVars φ
-  let (C, Γ) ← lineType φ
-  let some nm := (← whnfR C).constName?
-    | throwError "sol_chain: the contract is not a named constant: {C}"
-  let sp ← collectPosts φ {}
-  let φ' := punch C sp φ
-  let m? ← modalityOf? φ'
-  let sp := { sp with modality := m? }
+  let { C, Γ, name := nm, sp, fml := φ', modality := m? } ← prepare φ
   let φb := match m? with
     | some m => φ'.replaceFVar m (mkConst ``Modality.box)
     | none => φ'
@@ -844,13 +853,7 @@ def runChain (φ : Expr) : MetaM Run := do
   if φ.hasMVar then throwError "sol_chain: the formula is not known{indentExpr φ}"
   if let some (r, i) := (runCache.getState (← getEnv))[φ]? then
     return { r with lines := r.lines.drop i }
-  let (C, Γ) ← lineType φ
-  let some n := (← whnfR C).constName?
-    | throwError "sol_chain: the contract is not a named constant: {C}"
-  let sp ← collectPosts φ {}
-  let φ' := punch C sp φ
-  let m? ← modalityOf? φ'
-  let sp := { sp with modality := m? }
+  let { C, Γ, name := n, sp, fml := φ', modality := m? } ← prepare φ
   let line (q : LineQ) : Line :=
     let (f, ψ) := unpair q.pair
     { fml := unpunch sp ψ, focus := unpunch sp f, fresh := q.fresh, keys := #[q.keys] }
@@ -918,13 +921,15 @@ partial def maxIdxProof (A : Expr) : MetaM (Nat × Expr) := do
   let Γ := A.getArg! 1
   if !hasPost A then return ← natRefl (mkApp3 (mkConst ``Fml.maxIdx) C Γ A)
   let a := A.getAppArgs
-  let unary (lem : Lean.Name) (pre : Array Expr) (child : Expr) : MetaM (Nat × Expr) := do
-    let (n, h) ← maxIdxProof child
-    return (n, mkAppN (mkConst lem) (pre ++ #[child, toExpr n, h]))
+  -- a connective whose fresh index is its part's: its lemma at its
+  -- arguments, the part last
+  let unary? := A.getAppFn.constName?.bind fun c =>
+    [(``Fml.not, ``Fml.maxIdx_not_eq), (``Fml.havoc, ``Fml.maxIdx_havoc_eq),
+     (``Fml.anon, ``Fml.maxIdx_anon_eq)].lookup c
+  if let some lem := unary? then
+    let (n, h) ← maxIdxProof a.back!
+    return (n, mkAppN (mkConst lem) (a ++ #[toExpr n, h]))
   match A.getAppFn.constName? with
-  | some ``Fml.not => unary ``Fml.maxIdx_not_eq #[C, Γ] a[2]!
-  | some ``Fml.havoc => unary ``Fml.maxIdx_havoc_eq #[C, Γ] a[2]!
-  | some ``Fml.anon => unary ``Fml.maxIdx_anon_eq #[C, Γ, a[2]!] a[3]!
   | some ``Fml.and | some ``Fml.imp =>
     let lem := if A.isAppOf ``Fml.and then ``Fml.maxIdx_and_eq else ``Fml.maxIdx_imp_eq
     let (n₁, h₁) ← maxIdxProof a[2]!
@@ -970,16 +975,15 @@ partial def inactiveProof (A : Expr) : MetaM (Option Expr) := do
     unless ← kernelDefEq goal (toExpr false) do return none
     return some (← mkExpectedTypeHint (← mkEqRefl (toExpr false)) (← mkEq goal (toExpr false)))
   let a := A.getAppArgs
-  let one (lem : Lean.Name) (pre : Array Expr) (child : Expr) : MetaM (Option Expr) := do
-    let some h ← inactiveProof child | return none
-    return some (mkAppN (mkConst lem) (pre ++ #[child, h]))
+  -- a connective of one part: its lemma at its arguments, the part last
+  let unary? := A.getAppFn.constName?.bind fun c =>
+    [(``Fml.not, ``Fml.active_not_false), (``Fml.havoc, ``Fml.active_havoc_false),
+     (``Fml.anon, ``Fml.active_anon_false), (``Fml.upd, ``Fml.active_upd_false),
+     (``Fml.all, ``Fml.active_all_false), (``Fml.bind, ``Fml.active_bind_false)].lookup c
+  if let some lem := unary? then
+    let some h ← inactiveProof a.back! | return none
+    return some (mkAppN (mkConst lem) (a.push h))
   match A.getAppFn.constName? with
-  | some ``Fml.not => one ``Fml.active_not_false #[C, Γ] a[2]!
-  | some ``Fml.havoc => one ``Fml.active_havoc_false #[C, Γ] a[2]!
-  | some ``Fml.anon => one ``Fml.active_anon_false #[C, Γ, a[2]!] a[3]!
-  | some ``Fml.upd => one ``Fml.active_upd_false #[C, Γ, a[2]!, a[3]!, a[4]!] a[5]!
-  | some ``Fml.all => one ``Fml.active_all_false #[C, Γ, a[2]!, a[3]!] a[4]!
-  | some ``Fml.bind => one ``Fml.active_bind_false #[C, Γ, a[2]!, a[3]!, a[4]!] a[5]!
   | some ``Fml.and | some ``Fml.imp =>
     let lem := if A.isAppOf ``Fml.and then ``Fml.active_and_false else ``Fml.active_imp_false
     let some h₁ ← inactiveProof a[2]! | return none
@@ -1044,24 +1048,13 @@ partial def focusProof (m? : Option Expr) (K : Nat) (A f B : Expr) : MetaM Expr 
         #[C, kE, Γ, a[2]!, a[3]!, b[3]!, f, h₀, ← focusProof m? K a[3]! f b[3]!]
     return mkAppN (mkConst ``Fml.stepFocusR_and_left)
       #[C, kE, Γ, a[2]!, a[3]!, b[2]!, f, ← focusProof m? K a[2]! f b[2]!]
-  if same ``Fml.imp then
-    return mkAppN (mkConst ``Fml.stepFocusR_imp)
-      #[C, kE, Γ, a[2]!, a[3]!, b[3]!, f, ← focusProof m? K a[3]! f b[3]!]
-  if same ``Fml.upd then
-    return mkAppN (mkConst ``Fml.stepFocusR_upd)
-      #[C, kE, Γ, a[2]!, a[3]!, a[4]!, a[5]!, b[5]!, f, ← focusProof m? K a[5]! f b[5]!]
-  if same ``Fml.havoc then
-    return mkAppN (mkConst ``Fml.stepFocusR_havoc)
-      #[C, kE, Γ, a[2]!, b[2]!, f, ← focusProof m? K a[2]! f b[2]!]
-  if same ``Fml.all then
-    return mkAppN (mkConst ``Fml.stepFocusR_all)
-      #[C, kE, Γ, a[2]!, a[3]!, a[4]!, b[4]!, f, ← focusProof m? K a[4]! f b[4]!]
-  if same ``Fml.bind then
-    return mkAppN (mkConst ``Fml.stepFocusR_bind)
-      #[C, kE, Γ, a[2]!, a[3]!, a[4]!, a[5]!, b[5]!, f, ← focusProof m? K a[5]! f b[5]!]
-  if same ``Fml.anon then
-    return mkAppN (mkConst ``Fml.stepFocusR_anon)
-      #[C, kE, Γ, a[2]!, a[3]!, b[3]!, f, ← focusProof m? K a[3]! f b[3]!]
+  -- a connective of one part: its lemma at its arguments, the parts last
+  for (c, lem) in [(``Fml.imp, ``Fml.stepFocusR_imp), (``Fml.upd, ``Fml.stepFocusR_upd),
+      (``Fml.havoc, ``Fml.stepFocusR_havoc), (``Fml.all, ``Fml.stepFocusR_all),
+      (``Fml.bind, ``Fml.stepFocusR_bind), (``Fml.anon, ``Fml.stepFocusR_anon)] do
+    if same c then
+      return mkAppN (mkConst lem) (#[C, kE, Γ] ++ a.extract 2 a.size ++
+        #[b.back!, f, ← focusProof m? K a.back! f b.back!])
   leaf
 
 /-- `A.fresh = K`. -/
@@ -1393,27 +1386,27 @@ def writtenMatcher (w : Written) :
       return readingMatches sp es rs keys
   | _ => return fun sp B keys => matchWritten sp w B keys
 
-/-- The computed line, shown (`#derivation`). -/
-def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
-  let mut out := m!"{← indentLine φ}"
+/-- `first`, then each computed line after the rule that reached it,
+printed by `pp`. -/
+def showLinesBy (pp : Expr → MetaM MessageData) (first : MessageData) (lines : List Line) :
+    MetaM MessageData := do
+  let mut out := first
   for l in lines do
     let r := match ← labelOfFocus? l.focus with
       | some (n, _) => toString n
       | none => "?"
-    out := out ++ m!"\n  ~[{r}]~>{← indentLine l.fml}"
+    out := out ++ m!"\n  ~[{r}]~>{← pp l.fml}"
   return out
+
+/-- The computed line, shown (`#derivation`). -/
+def showLines (φ : Expr) (lines : List Line) : MetaM MessageData := do
+  showLinesBy indentLine (← indentLine φ) lines
 
 /-- The computed lines, shown for an error as today's `sol_chain` shows them
 (as today's chains' `notReached` did): every line with the rule that
 reached it. -/
 def showLinesErr (φ : Expr) (lines : List Line) : MetaM MessageData := do
-  let mut out := m!"    {← showLine φ}"
-  for l in lines do
-    let r := match ← labelOfFocus? l.focus with
-      | some (n, _) => toString n
-      | none => "?"
-    out := out ++ m!"\n  ~[{r}]~>\n    {← showLine l.fml}"
-  return out
+  showLinesBy (fun ψ => return m!"\n    {← showLine ψ}") m!"    {← showLine φ}" lines
 
 def modalStopNote (run : Run) : MessageData :=
   match run.modalStop, run.splice.modality with
@@ -2136,45 +2129,36 @@ def linkLines (ws : Expr) : MetaM (Array (TSyntax `chain_arrow × Lean.Term)) :=
     guard (w.isAppOfArity ``Prod.mk 4)
     pure (← arrowOf (w.getArg! 2), ← ppCoreLine (w.getArg! 3))
 
-@[delab app.Solidity.Fml.OneStep]
-def delabOneStep : Delab := do
+/-- A relation of one link, `A ⇝ B`, with `n` arguments, the lines its last
+two, printed with the arrow `arrow` reads off it. -/
+def delabLink (n : Nat) (arrow : Expr → MetaM (TSyntax `chain_arrow)) : Delab := do
   let e ← getExpr
-  guard (e.getAppNumArgs == 4)
-  return chainNode (← ppCoreLine (e.getArg! 2))
-    #[(← `(chain_arrow| ~>), ← ppCoreLine (e.getArg! 3))]
+  guard (e.getAppNumArgs == n)
+  return chainNode (← ppCoreLine (e.getArg! (n - 2)))
+    #[(← arrow e, ← ppCoreLine (e.getArg! (n - 1)))]
+
+@[delab app.Solidity.Fml.OneStep]
+def delabOneStep : Delab := delabLink 4 fun _ => `(chain_arrow| ~>)
 
 @[delab app.Solidity.Fml.Steps]
-def delabSteps : Delab := do
-  let e ← getExpr
-  guard (e.getAppNumArgs == 4)
-  return chainNode (← ppCoreLine (e.getArg! 2))
-    #[(← `(chain_arrow| ~*>), ← ppCoreLine (e.getArg! 3))]
+def delabSteps : Delab := delabLink 4 fun _ => `(chain_arrow| ~*>)
 
 @[delab app.Solidity.Fml.StepBy]
-def delabStepBy : Delab := do
-  let e ← getExpr
-  guard (e.getAppNumArgs == 5)
+def delabStepBy : Delab := delabLink 5 fun e => do
   let some n ← ruleName? (e.getArg! 2) | failure
-  return chainNode (← ppCoreLine (e.getArg! 3))
-    #[(← `(chain_arrow| ~[$(mkIdent n):ident]~>), ← ppCoreLine (e.getArg! 4))]
+  `(chain_arrow| ~[$(mkIdent n):ident]~>)
 
 /-- `φ ~[n]~> ψ`, a rewrite of the scoped line (`Calculus/RewriteScoped.lean`). -/
 @[delab app.Solidity.Fml.RwBy]
-def delabRwBy : Delab := do
-  let e ← getExpr
-  guard (e.getAppNumArgs == 6)
+def delabRwBy : Delab := delabLink 6 fun e => do
   let .lit (.strVal n) := e.getArg! 2 | failure
-  return chainNode (← ppCoreLine (e.getArg! 4))
-    #[(← `(chain_arrow| ~[$(mkIdent (.mkSimple n)):ident]~>), ← ppCoreLine (e.getArg! 5))]
+  `(chain_arrow| ~[$(mkIdent (.mkSimple n)):ident]~>)
 
 /-- `φ ~[sequentialToParallel]~> ψ`, a merge of the scoped line's spine
 (`Calculus/Merge.lean`). -/
 @[delab app.Solidity.Fml.MergeBy]
-def delabMergeBy : Delab := do
-  let e ← getExpr
-  guard (e.getAppNumArgs == 6)
-  return chainNode (← ppCoreLine (e.getArg! 4))
-    #[(← `(chain_arrow| ~[$(mkIdent `sequentialToParallel):ident]~>), ← ppCoreLine (e.getArg! 5))]
+def delabMergeBy : Delab := delabLink 6 fun _ =>
+  `(chain_arrow| ~[$(mkIdent `sequentialToParallel):ident]~>)
 
 @[delab app.Solidity.Fml.Via]
 def delabVia : Delab := do
