@@ -937,7 +937,7 @@ theorem findM_dflt : {T U : Ty} → (p : Path T U) →
   | _, _, .field h p => by
     rw [SVal.dflt_struct, SVal.findM_field', SFields.dflt_get, findM_dflt p]; rfl
   | _, _, .key k p => by
-    rw [SVal.dflt_map]; simp only [SVal.findM, SMap.toList, SMap.fold]; exact findM_dflt p
+    rw [SVal.dflt_map]; simp only [SVal.findM, SMap.toList]; exact findM_dflt p
   | _, _, .at i p => by
     rw [SVal.dflt_array, SVal.findM_at']
     simp only [Path.dfltOk, Bool.false_eq_true, if_false, SVec.toList_nil, SList.toList_nil,

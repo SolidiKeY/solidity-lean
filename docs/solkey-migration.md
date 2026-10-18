@@ -483,7 +483,8 @@ search exhausted its budget. No heartbeat limits were raised.
 
 The integration review found that generic `Op2.extend` still printed as a bare
 length save while its evaluator reset reused references. The two operations now
-have separate interpreter helpers (`extendPlace`, `pushPlace`), observations
+have separate interpreter helpers (`extendPlace`, `pushPlace`; `extendPlace` was
+later folded into `pushPlace`), observations
 (`extendA`, `resetA`) and symbolic readers (`extendRd`, `resetRd`). The mapping
 agreement theorems require the mapping side condition; the overall statement
 soundness theorem retains its unconditional contract. A kernel regression on

@@ -551,6 +551,8 @@ elab "#check_fragment_rules" : command => do
         Loc.up_eq, MLoc.up_eq, Loc.keyValue_wk, MLoc.keyValue_wk,
         Premise.inSolkey, Prog.inSolkey, Stmt.inSolkey, MSrc.keyValue, MPath.keyValue,
         Bool.true_and, Bool.and_true, Bool.and_self, Option.elim]))))
+        let gs ← getGoals
+        unless gs.isEmpty do throwError "open fragment goals {goalsToMessageData gs}"
 
 elab "apply_fragment_rule" : tactic => do
   let tag ← getMainTag

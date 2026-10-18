@@ -39,12 +39,15 @@ theorem Upd.popsOnly_globT {Γ : Ctx} (σ : State C Γ) {Δ : Ctx} (U : Upd C Γ
 
 /-! ## The context -/
 
+namespace Hyps
+
 set_option hygiene false in
 /-- The proof of `Hyps.wrap_and`, by induction on the context `H`: it reads
 the formulas only through `Upd.afterT_and` and `Modality.forallB_and`, so the
 reading with callbacks (`Hyps.wrapC_and`, `Calculus/CallbackSound.lean`) is
-the same script. -/
-macro "hyps_wrap_and" : tactic => `(tactic| (
+the same script.  Unhygienic: it reads the context by its name `H`; scoped,
+so only the two readings open it. -/
+scoped macro "hyps_wrap_and" : tactic => `(tactic| (
   induction H with
   | nil => intro φ ψ χ h σ; exact h σ
   | pre H a ih =>
@@ -69,7 +72,11 @@ macro "hyps_wrap_and" : tactic => `(tactic| (
     intro φ ψ χ h
     exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)))
 
+end Hyps
+
 section Wrap
+
+open scoped Solidity.Hyps
 
 variable {Γ₀ : Ctx}
 

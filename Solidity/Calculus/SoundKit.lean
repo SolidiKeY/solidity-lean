@@ -15,7 +15,7 @@ between typed runs (`Premise.Runs`, the arms' statement), which gives
 (`Calculus/CallbackSound.lean`).  The runs are read at the states they
 end in (`Stmt.runSt`, `Prog.runSt`, `Frames.runSt`), so that a block and
 the statement it replaces compare as states; a run only grows the heap
-typing (`Stmt.runSt_ext`, from `Out.ext`), which an update's reading asks.
+typing (`Out.ext`), which an update's reading asks.
 
 An update rule needs that its update computes the global part and the
 locals of the state the typed run ends in (`Upd.applyV`, typed), and halts

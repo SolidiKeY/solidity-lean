@@ -130,7 +130,7 @@ with the run wherever it does not say `diverge` (`Prog.runF_approx`), and
 `TLoop.run_of_iterN : iterN n σ = .inr r → TLoop.run … σ = r` underlies it.
 
 **Proofs that recurse on `Stmt.run`** take a loop's case from the lemmas of
-`Semantics/RunWk.lean`: `TLoop.run_map` (two loops whose iterations go in
+`Semantics/RunWk.lean` and `Semantics/Run.lean`: `TLoop.run_map` (two loops whose iterations go in
 step from related states run alike: `Prog.run_wk`, `Prog.run_frame`),
 `TLoop.run_induct` (an invariant of the loop head), `TLoop.run_unfold` (the
 unwinding) and `TLoop.run_variant` (a variant bounds the iterations). The

@@ -332,6 +332,8 @@ end Rules
 
 section Wrap
 
+open scoped Solidity.Hyps
+
 variable {I : Fml C []} {Γ₀ : Ctx}
 
 /-- Two formulas under the context give a third that follows from both. -/
