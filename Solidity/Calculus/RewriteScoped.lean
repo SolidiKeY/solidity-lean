@@ -296,6 +296,56 @@ def Tm.totalV {Γ : Ctx} {u : Srt} : Tm C Γ u → Bool
   | .app0 o => o.totalV
   | _ => false
 
+/-! ### A storage write that cannot halt
+
+A save at a root or a member of one (`Tm.totalP`) of a value read the same
+way cannot miss: the path goes through members only (`Path.fieldsB`: no
+index to check, no mapping key), so the place is found and written
+(`SVal.findM_fieldsB`, `SVal.saveM_of_findM`).  KeY's updates never halt;
+an update of locals and such writes does not either. -/
+
+/-- A path of members only. -/
+def Path.fieldsB : {T U : Ty} → Path T U → Bool
+  | _, _, .nil => true
+  | _, _, .field _ p => p.fieldsB
+  | _, _, _ => false
+
+/-- `storage`. -/
+def Op0.isStorageS {u : Srt} : Op0 C u → Bool
+  | .storage => true
+  | _ => false
+/-- `sval`, a word stored. -/
+def Op1.isSvalS {a u : Srt} : Op1 C a u → Bool
+  | .sval => true
+  | _ => false
+/-- `fixedCopy`, a fixed array at its destination's shape. -/
+def Op1.isFixedCopyS {a u : Srt} : Op1 C a u → Bool
+  | .fixedCopy _ => true
+  | _ => false
+/-- `sfind`, a stored value read. -/
+def Op2.isSfindS {a b u : Srt} : Op2 C a b u → Bool
+  | .sfind => true
+  | _ => false
+/-- `delAt`. -/
+def Op2.isDelAtS {a b u : Srt} : Op2 C a b u → Bool
+  | .delAt => true
+  | _ => false
+/-- `save`. -/
+def Op3.isSaveS {a b c u : Srt} : Op3 C a b c u → Bool
+  | .save => true
+  | _ => false
+
+/-- A storage or stored value that cannot halt: the storage; a save of such a
+value, or a delete, at a root or a member of one (`Tm.totalP`) in such a
+storage; a word that cannot halt; a read of such a place; a fixed array
+viewed at its destination's shape. -/
+def Tm.totalW {Γ : Ctx} : {u : Srt} → Tm C Γ u → Bool
+  | _, .app0 o => o.isStorageS
+  | _, .app1 o x => (o.isSvalS && x.totalV) || (o.isFixedCopyS && x.totalW)
+  | _, .app2 o x y => (o.isSfindS || o.isDelAtS) && x.totalW && y.totalP
+  | _, .app3 o x y z => o.isSaveS && x.totalW && y.totalP && z.totalW
+  | _, _ => false
+
 /-- A right-hand side that cannot halt. -/
 def Rhs.totalS {Γ : Ctx} : {t : LTy} → Rhs C Γ t → Bool
   | _, .val t => t.totalV
@@ -303,11 +353,12 @@ def Rhs.totalS {Γ : Ctx} : {t : LTy} → Rhs C Γ t → Bool
   | _, .saveNetMt => true
   | _, _ => false
 
-/-- An update of locals whose right-hand sides cannot halt: it returns in
-every state. -/
+/-- An update of locals and storage writes whose right-hand sides cannot
+halt (`Tm.totalW`): it returns in every state. -/
 def Upd.totalS {Γ : Ctx} : {Δ : Ctx} → Upd C Γ Δ → Bool
   | _, .nil => true
   | _, .snoc U (.local _ r) => Upd.totalS U && r.totalS
+  | _, .snoc U (.storage s) => Upd.totalS U && s.totalW
   | _, .snoc _ _ => false
   | _, .decl U _ r => Upd.totalS U && r.totalS
   | _, .pop U _ | _, .drop U _ => Upd.totalS U
@@ -329,6 +380,123 @@ theorem Rhs.totalS_eval {Γ : Ctx} (σ : State C Γ) :
   | _, .saveNetMt, _ => Option.some_ne_none _
   | _, .path _, h | _, .mref _, h | _, .store _, h | _, .saveNet, h => by cases h
 
+theorem Path.fieldsB_append : {T U W : Ty} → (p : Path T U) → (q : Path U W) →
+    p.fieldsB = true → q.fieldsB = true → (p.append q).fieldsB = true
+  | _, _, _, .nil, _, _, hq => by rw [Path.append_nil]; exact hq
+  | _, _, _, .field _ p, q, hp, hq => by
+    rw [Path.append_field]; exact Path.fieldsB_append p q hp hq
+  | _, _, _, .at .., _, hp, _ | _, _, _, .atF .., _, hp, _ | _, _, _, .key .., _, hp, _ => by
+    cases hp
+
+theorem SVal.findM_fieldsB : {T U : Ty} → (x : SVal T) → (p : Path T U) → p.fieldsB = true →
+    ∃ y, x.findM p = some y
+  | _, _, x, .nil, _ => ⟨x, SVal.findM_nil' x⟩
+  | _, _, .struct fs, .field h p, hp => by
+    rw [SVal.findM_field']; exact SVal.findM_fieldsB _ p hp
+  | _, _, _, .at .., hp | _, _, _, .atF .., hp | _, _, _, .key .., hp => by cases hp
+
+/-- A write at a place reached by members only returns. -/
+theorem Storage.write_fieldsB {T : Ty} (st : Storage C) (r : SRef C T) (w : SVal T)
+    (hr : r.path.fieldsB = true) : ∃ st', st.write r w = some st' := by
+  obtain ⟨y, hy⟩ := SVal.findM_fieldsB (st.get r.hroot) r.path hr
+  have hsave : ∀ v : SVal T, ∃ st', st.save r v = some st' := fun v => by
+    obtain ⟨x', hx'⟩ := SVal.saveM_of_findM _ _ hy v
+    exact ⟨st.set r.hroot x', by rw [Storage.save, SVal.save_eq_saveM, hx']; rfl⟩
+  have hf : st.find r = some y := by rw [Storage.find, SVal.find_eq_findM, hy]
+  unfold Storage.write
+  split
+  · exact hsave w
+  · obtain ⟨st', h'⟩ := hsave (y.overlay w)
+    exact ⟨st', by rw [hf]; exact h'⟩
+
+/-- A delete at a place reached by members only returns. -/
+theorem Storage.delete_fieldsB {T : Ty} (st : Storage C) (r : SRef C T)
+    (hr : r.path.fieldsB = true) : ∃ st', st.delete r = some st' := by
+  obtain ⟨y, hy⟩ := SVal.findM_fieldsB (st.get r.hroot) r.path hr
+  have hf : st.find r = some y := by rw [Storage.find, SVal.find_eq_findM, hy]
+  obtain ⟨x', hx'⟩ := SVal.saveM_of_findM _ _ hy y.defaultOf
+  exact ⟨st.set r.hroot x', by
+    rw [Storage.delete, hf, Option.bind_eq_bind, Option.bind_some, Storage.save,
+      SVal.save_eq_saveM, hx']; rfl⟩
+
+/-- A place reached by members only, at a path sort. -/
+def Srt.fieldsOK {H : HTy} : (s : Srt) → s.Den C H → Prop
+  | .path _, r => r.path.fieldsB = true
+  | _, _ => True
+
+theorem Tm.totalP_fieldsOK {Γ : Ctx} (σ : State C Γ) {s : Srt} (p : Tm C Γ s)
+    (h : p.totalP = true) : ∀ v, p.eval σ = some v → Srt.fieldsOK s v := by
+  induction p with
+  | app0 o =>
+    cases o with
+    | root r hr => intro v hv; cases hv; rfl
+    | _ => simp only [Tm.totalP, Bool.false_eq_true] at h
+  | app1 o x ih =>
+    cases o with
+    | field hf =>
+      intro v hv
+      have hv : (x.eval σ).map (·.field hf) = some v := hv
+      obtain ⟨r, hr, rfl⟩ := Option.map_eq_some_iff.1 hv
+      exact Path.fieldsB_append _ _ (ih h r hr) rfl
+    | _ => simp only [Tm.totalP, Bool.false_eq_true] at h
+  | _ => simp only [Tm.totalP, Bool.false_eq_true] at h
+
+/-- A root and its members reach a place by members only. -/
+theorem Tm.totalP_evalF {Γ : Ctx} (σ : State C Γ) {T : Ty} (p : Tm C Γ (.path T))
+    (h : p.totalP = true) : ∃ r : SRef C T, p.eval σ = some r ∧ r.path.fieldsB = true := by
+  obtain ⟨r, hr⟩ := Tm.totalP_eval σ p h
+  exact ⟨r, hr, Tm.totalP_fieldsOK σ p h r hr⟩
+
+theorem Tm.totalW_eval {Γ : Ctx} (σ : State C Γ) {u : Srt} (t : Tm C Γ u)
+    (h : t.totalW = true) : t.eval σ ≠ none := by
+  induction t with
+  | app0 o =>
+    cases o <;> simp only [Tm.totalW, Op0.isStorageS, Bool.false_eq_true] at h
+    exact Option.some_ne_none _
+  | app1 o x ihx =>
+    cases o <;> simp only [Tm.totalW, Op1.isSvalS, Op1.isFixedCopyS, Bool.false_eq_true,
+      Bool.true_and, Bool.false_and, Bool.or_false, Bool.false_or] at h
+    · obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 (Tm.totalV_eval σ x h)
+      show Op1.eval σ.glob .sval (x.eval σ) ≠ none
+      rw [Op1.eval_eq_evalM, hv]
+      simp only [Op1.evalM, Option.map_some, ne_eq, reduceCtorEq, not_false_eq_true]
+    · obtain ⟨v, hv⟩ := Option.ne_none_iff_exists'.1 (ihx h)
+      show Op1.eval σ.glob (.fixedCopy _) (x.eval σ) ≠ none
+      rw [Op1.eval_eq_evalM, hv]
+      simp only [Op1.evalM, Option.map_some, ne_eq, reduceCtorEq, not_false_eq_true]
+  | app2 o x y ihx ihy =>
+    cases o <;> simp only [Tm.totalW, Op2.isSfindS, Op2.isDelAtS, Bool.false_eq_true,
+      Bool.true_and, Bool.false_and, Bool.or_false, Bool.false_or, Bool.and_eq_true] at h
+    · obtain ⟨hs, hp⟩ := h
+      obtain ⟨st, hst⟩ := Option.ne_none_iff_exists'.1 (ihx hs)
+      obtain ⟨r, hr, hf⟩ := Tm.totalP_evalF σ y hp
+      obtain ⟨st', h'⟩ := Storage.delete_fieldsB st r hf
+      show Op2.eval σ.glob .delAt (x.eval σ) (y.eval σ) ≠ none
+      rw [Op2.eval_eq_evalM, hst, hr]
+      simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_some, h', ne_eq, reduceCtorEq,
+        not_false_eq_true]
+    obtain ⟨hs, hp⟩ := h
+    obtain ⟨st, hst⟩ := Option.ne_none_iff_exists'.1 (ihx hs)
+    obtain ⟨r, hr, hf⟩ := Tm.totalP_evalF σ y hp
+    obtain ⟨w, hw⟩ := SVal.findM_fieldsB (st.get r.hroot) r.path hf
+    show Op2.eval σ.glob .sfind (x.eval σ) (y.eval σ) ≠ none
+    rw [Op2.eval_eq_evalM, hst, hr]
+    simp only [Op2.evalM, Option.bind_eq_bind, Option.bind_some, Storage.find,
+      SVal.find_eq_findM, hw, ne_eq, reduceCtorEq, not_false_eq_true]
+  | app3 o x y z ihx ihy ihz =>
+    cases o <;> simp only [Tm.totalW, Op3.isSaveS, Bool.false_eq_true, Bool.true_and,
+      Bool.false_and, Bool.and_eq_true] at h
+    obtain ⟨⟨hs, hp⟩, hv⟩ := h
+    obtain ⟨st, hst⟩ := Option.ne_none_iff_exists'.1 (ihx hs)
+    obtain ⟨r, hr, hf⟩ := Tm.totalP_evalF σ y hp
+    obtain ⟨w, hw⟩ := Option.ne_none_iff_exists'.1 (ihz hv)
+    obtain ⟨st', h'⟩ := Storage.write_fieldsB st r w hf
+    show Op3.eval σ.glob .save (x.eval σ) (y.eval σ) (z.eval σ) ≠ none
+    rw [Op3.eval_eq_evalM, hst, hr, hw]
+    simp only [Op3.evalM, Option.bind_eq_bind, Option.bind_some, h', ne_eq, reduceCtorEq,
+      not_false_eq_true]
+  | _ => simp only [Tm.totalW, Bool.false_eq_true] at h
+
 theorem Upd.totalS_globT {Γ : Ctx} (σ₀ : State C Γ) :
     {Δ : Ctx} → (U : Upd C Γ Δ) → U.totalS = true → ∃ g, U.globT σ₀ = some g
   | _, .nil, _ => ⟨_, rfl⟩
@@ -340,7 +508,15 @@ theorem Upd.totalS_globT {Γ : Ctx} (σ₀ : State C Γ) :
     show (U.globT σ₀).bind (UpdElem.globT σ₀ (.local i r)) = some g
     rw [hg, Option.bind_some, UpdElem.globT_eq_globTM]
     simp only [UpdElem.globTM, hv, Option.bind_some]
-  | _, .snoc _ (.storage _), h | _, .snoc _ (.memory _), h | _, .snoc _ (.selfBalance ..), h
+  | _, .snoc U (.storage s), h => by
+    obtain ⟨hU, hs⟩ := Bool.and_eq_true_iff.1 h
+    obtain ⟨g, hg⟩ := Upd.totalS_globT σ₀ U hU
+    obtain ⟨st, hst⟩ := Option.ne_none_iff_exists'.1 (Tm.totalW_eval σ₀ s hs)
+    refine ⟨g.withStorage st, ?_⟩
+    show (U.globT σ₀).bind (UpdElem.globT σ₀ (.storage s)) = _
+    rw [hg, Option.bind_some, UpdElem.globT_eq_globTM]
+    simp only [UpdElem.globTM, hst, Option.bind_some]
+  | _, .snoc _ (.memory _), h | _, .snoc _ (.selfBalance ..), h
   | _, .snoc _ (.net ..), h | _, .snoc _ (.pay ..), h | _, .snoc _ (.netMt ..), h
   | _, .snoc _ (.setBalance _), h => by cases h
   | _, .decl U x r, h => by
@@ -705,6 +881,11 @@ end of the path `p` merged into one (`Fml.mergeRun`). -/
 def FmlRw.mergeIn (p : List PathStep) (n : Nat) : FmlRw C :=
   ⟨fun φ => Fml.atPath (fun ψ => ψ.mergeRun 0 n) p φ,
     fun h σ hψ => Fml.atPath_sound (fun h' σ' => Fml.mergeRun_leads 0 n _ h' σ') p h σ hψ⟩
+
+/-- `r` at the end of the path `p`: past the program, a rewrite of the line
+under the premises it begins with (`A → ψ`, `ψ` rewritten). -/
+def FmlRw.inPath (p : List PathStep) (r : FmlRw C) : FmlRw C :=
+  ⟨fun φ => Fml.atPath r.apply p φ, fun h σ hψ => Fml.atPath_sound r.sound p h σ hψ⟩
 
 /-- **A merge over a storage or memory write** (`Calculus/StatePartsScoped.lean`:
 `{L ‖ storage := S}{V}`, `{memory := M}{V}`, `{L ‖ memory := M}{V}`) at
@@ -1196,5 +1377,27 @@ def Fml.spineSkels {Γ : Ctx} : Fml C Γ → List Skel
   | .bind _ _ _ φ => Fml.spineSkels φ
   | .upd m U ψ => (Fml.skelS (.upd m U ψ)).1 :: Fml.spineSkels ψ
   | φ => [(Fml.skelS φ).1]
+
+/-- `applyOnRigid` past the scope ends the formula under the update begins
+with, merged into it first (`Fml.absorbPops`: they print as nothing, so the
+merge alone is no step of a chain). -/
+def Fml.pushPopsAt {Γ Δ : Ctx} (m : Modality) (U : Upd C Γ Δ) (φ : Fml C Δ) : Option (Fml C Γ) :=
+  match Fml.absorbPops m U φ with
+  | .upd m' U' φ' => Fml.pushAt (Fml.skelS φ').1 m' U' φ'
+  | _ => none
+
+theorem Fml.pushPopsAt_sound {Γ Δ : Ctx} {m : Modality} {U : Upd C Γ Δ} {φ : Fml C Δ}
+    {ψ : Fml C Γ} (h : Fml.pushPopsAt m U φ = some ψ) (σ : State C Γ) (hψ : holds σ ψ) :
+    holds σ (.upd m U φ) := by
+  unfold Fml.pushPopsAt at h
+  split at h
+  · rename_i m' U' φ' he
+    exact Fml.absorbPops_holds σ (he ▸ Fml.pushAt_sound h σ hψ)
+  · cases h
+
+/-- **`applyOnRigid`** at position `i` of the spine, through the scope ends
+under that update (`Fml.pushPopsAt`). -/
+def FmlRw.applyOnRigidPops (i : Nat) : FmlRw C :=
+  FmlRw.atSpine (fun m U φ => Fml.pushPopsAt m U φ) (fun h σ hψ => Fml.pushPopsAt_sound h σ hψ) i
 
 end Solidity

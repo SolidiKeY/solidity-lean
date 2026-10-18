@@ -84,6 +84,10 @@ inductive LitLaw : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ (.val P) → Pr
   /-- **`geq_literals`**: `a >= b ⇝ true` or `false`. -/
   | geq_literals {a b : PrimTy.uint.Denote} {c : Bool} (h : BinOp.ge.evalT (p := .uint) rfl a b = some c := by decide) :
       LitLaw (Tms.Term.binop .ge .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.litB c)
+  /-- **`equal_literals`**: `a == b ⇝ true` or `false`. -/
+  | equal_literals {a b : PrimTy.uint.Denote} {c : Bool}
+      (h : BinOp.eqB.evalT (p := .uint) rfl a b = some c := by decide) :
+      LitLaw (Tms.Term.binop .eqB .uint (Tms.Term.lit a) (Tms.Term.lit b)) (Tms.Term.litB c)
   /-- **`div_literals`**: `a / b ⇝ a / b` folded (truncated, as Solidity divides), the divisor not
   zero. -/
   | div_literals {a b c : PrimTy.uint.Denote} (h : BinOp.div.evalT (p := .uint) rfl a b = some c := by decide) :
@@ -99,6 +103,7 @@ theorem LitLaw.exact {P : PrimTy} {t t' : Tm C Γ (.val P)} :
   | @LitLaw.less_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .lt rfl a b).trans h⟩
   | @LitLaw.greater_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .gt rfl a b).trans h⟩
   | @LitLaw.geq_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .ge rfl a b).trans h⟩
+  | @LitLaw.equal_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .eqB rfl a b).trans h⟩
   | @LitLaw.div_literals _ _ a b c h => ⟨c, rfl, fun _ => (binopT_some .div rfl a b).trans h⟩
 
 /-- The two sides of a literal law evaluate alike in every state. -/
@@ -1400,13 +1405,25 @@ def Tm.saveLitPath {u : Srt} : Tm C Γ u → Option ((T : Ty) × Tm C Γ (.path 
   | .app3 o _ y z => o.saveLitPath y z
   | _ => none
 
-/-- A read of a save of a literal word, at its path, the save held by `U`. -/
+def Op3.savePath {a b c u : Srt} : Op3 C a b c u → Tm C Γ b → Tm C Γ c →
+    Option ((T : Ty) × Tm C Γ (.path T))
+  | .save, y, _ => some ⟨_, y⟩
+  | _, _, _ => none
+
+/-- A storage term's path, where it saves. -/
+def Tm.savePath {u : Srt} : Tm C Γ u → Option ((T : Ty) × Tm C Γ (.path T))
+  | .app3 o _ y z => o.savePath y z
+  | _ => none
+
+/-- A read of a save of a literal word, at its path, or a length read at the
+path of any save (`lenOnSaveFixedCopy`'s), the save held by `U`. -/
 def Op2.findSaveLitStep {Δ : Ctx} (U : Upd C Γ Δ) {a b u : Srt} :
     Op2 C a b u → Tm C Γ a → Tm C Γ b → Bool
   | .find, x, y => (x.saveLitPath.any fun p => p.2.beqR y) && U.holdsWrite x
+  | .len, x, y => (x.savePath.any fun p => p.2.beqR y) && U.holdsWrite x
   | _, _, _ => false
 
-/-- `find(save(s, p, sval(w)), p)`, the save held by `U`. -/
+/-- `find(save(s, p, sval(w)), p)` or `len(save(s, p, v), p)`, the save held by `U`. -/
 def Tm.findSaveLitAt {Δ : Ctx} (U : Upd C Γ Δ) {u : Srt} : Tm C Γ u → Bool
   | .app2 o x y => o.findSaveLitStep U x y
   | _ => false
@@ -1414,20 +1431,40 @@ def Tm.findSaveLitAt {Δ : Ctx} (U : Upd C Γ Δ) {u : Srt} : Tm C Γ u → Bool
 /-- `t` reads, member-wise or not, the word a save writes at the path it
 reads, and `U` holds the save: `find(save(s, p, sval(w)), p)` over
 `storage := save(s, p, sval(w))`; or a word by members below a delete `U`
-holds (`Tm.findDelBelowAt`, `findOnDelAtBelow`'s reads).  Syntactic, so
-that `rfl` decides it. -/
+holds (`Tm.findDelBelowAt`, `findOnDelAtBelow`'s reads); or a length read
+at the path of a save `U` holds (`Tm.findSaveLitAt` of `t` itself, which has
+no `base?`).  Syntactic, so that `rfl` decides it. -/
 def Upd.coversLit {Δ : Ctx} {u : Srt} (U : Upd C Γ Δ) (t : Tm C Γ u) : Bool :=
-  match t.base? with
-  | some b => Tm.findSaveLitAt U b || Tm.findDelBelowAt U b
-  | none => false
+  (match t.base? with
+    | some b => Tm.findSaveLitAt U b || Tm.findDelBelowAt U b
+    | none => false) || Tm.findSaveLitAt U t
 
 theorem Tm.findSaveLitAt_eval {Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ}
     (hU : U.exhOk σ = true) {u : Srt} (b : Tm C Γ u) (h : Tm.findSaveLitAt U b = true) :
     b.eval σ ≠ none := by
   cases b with
   | app2 o x y =>
-    cases o <;> simp only [Tm.findSaveLitAt, Op2.findSaveLitStep, Bool.false_eq_true,
-      Bool.and_eq_true, Option.any_eq_true] at h
+    cases o with
+    | len =>
+      simp only [Tm.findSaveLitAt, Op2.findSaveLitStep, Bool.and_eq_true,
+        Option.any_eq_true] at h
+      obtain ⟨⟨⟨T, p⟩, hp, hpy⟩, hw⟩ := h
+      obtain ⟨st', hst'⟩ := Option.ne_none_iff_exists'.1 (Upd.holdsWrite_eval hw hU)
+      cases x with
+      | app3 o' s p₀ z =>
+        cases o' <;> simp only [Tm.savePath, Op3.savePath, reduceCtorEq, Option.some.injEq,
+          Sigma.mk.injEq] at hp
+        obtain ⟨rfl, hp⟩ := hp
+        cases hp
+        cases Tm.sigma_eq_of_beqR hpy
+        obtain ⟨st, r, w, -, hr, hsave⟩ := Tm.savesAt_save (σ := σ) s p₀ z st' hst'
+        rw [Tm.len_evalT, hst', Option.bind_some, hr, Option.bind_some]
+        simp only [Storage.len, Storage.find_save_same hsave, Option.bind_some]
+        exact Option.some_ne_none _
+      | _ => simp only [Tm.savePath, reduceCtorEq] at hp
+    | find => ?_
+    | _ => simp only [Tm.findSaveLitAt, Op2.findSaveLitStep, Bool.false_eq_true] at h
+    simp only [Tm.findSaveLitAt, Op2.findSaveLitStep, Bool.and_eq_true, Option.any_eq_true] at h
     obtain ⟨⟨⟨T, p⟩, hp, hpy⟩, hw⟩ := h
     have hx := Upd.holdsWrite_eval hw hU
     obtain ⟨st', hst'⟩ := Option.ne_none_iff_exists'.1 hx
@@ -1461,13 +1498,15 @@ theorem Upd.coversLit_eval {Δ : Ctx} {U : Upd C Γ Δ} {u : Srt} {t : Tm C Γ u
     (hc : U.coversLit t = true) {σ : State C Γ} (hU : U.exhOk σ = true) :
     t.eval σ ≠ none := by
   unfold Upd.coversLit at hc
-  split at hc
-  · rename_i b hb
-    rw [Tm.base?_eval σ hb]
-    rcases Bool.or_eq_true_iff.mp hc with hc | hc
-    · exact Tm.findSaveLitAt_eval hU b hc
-    · exact Tm.findDelBelowAt_eval hU b hc
-  · nomatch hc
+  rcases Bool.or_eq_true_iff.mp hc with hc | hc
+  · split at hc
+    · rename_i b hb
+      rw [Tm.base?_eval σ hb]
+      rcases Bool.or_eq_true_iff.mp hc with hc | hc
+      · exact Tm.findSaveLitAt_eval hU b hc
+      · exact Tm.findDelBelowAt_eval hU b hc
+    · nomatch hc
+  · exact Tm.findSaveLitAt_eval hU t hc
 
 
 /-! ## The laws of memory reads

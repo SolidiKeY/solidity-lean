@@ -1284,6 +1284,15 @@ inductive TermTaclet {Γ : Ctx} : {P : PrimTy} → Tm C Γ (.val P) → Tm C Γ 
   | lenOnDelAtFrame {s : Tm C Γ .st} {T : Ty} {q : Tm C Γ (.path T)}
       {E : Ty} {p : Tm C Γ (.path (.ref (.array E)))} (h : q.divergesLen p = true := by rfl) :
       TermTaclet (Tms.Term.len (Tms.STerm.delAt s q) p) (Tms.Term.len s p)
+  /-- **`selectOnSaveEmptySize`** of a fixed array copied to a dynamic one: a
+  length read where the copy was saved is the source's length `n` (solkey's
+  `\else`, the destination not `fixed` by its type; `fixedCopy` is Lean's
+  typed adapter) (`Obs.copyTo_len_same`, `FixedCopy.observe_len`). -/
+  | lenOnSaveFixedCopy {s : Tm C Γ .st} {E : Ty} {n : Nat} {c : FixedCopy E n (.array E)}
+      {q p : Tm C Γ (.path (.ref (.array E)))} {v : Tm C Γ (.sv (.ref (.fixed E n)))}
+      {w : PrimTy.uint.Denote} (hw : lenW n = some w := by rfl)
+      (hq : q.sameSegs p = true := by first | rfl | exact Tm.sameSegs_refl _) :
+      TermTaclet (Tms.Term.len (Tms.STerm.save s q (.app1 (.fixedCopy c) v)) p) (Tms.Term.lit w)
   /-- Any law of the Theory: `t` and `t'` have one Theory value in every
   state. -/
   | theory {P : PrimTy} {t t' : Tm C Γ (.val P)} (h : Tm.Theq t t') : TermTaclet t t'
@@ -1538,6 +1547,10 @@ theorem TermTaclet.sound {P : PrimTy} {t t' : Tm C Γ (.val P)} : TermTaclet t t
     show lenW (((s.denote σ).delAt (q.denote σ)).len (p.denote σ)) =
       lenW ((s.denote σ).len (p.denote σ))
     rw [Obs.delAt, Obs.save_len_frame _ _ (Tm.divergesLen_denote σ h)]
+  | @lenOnSaveFixedCopy _ _ s _ _ c q p v w hw hq => fun σ => by
+    show lenW (((s.denote σ).copyTo (q.denote σ) (c.observe (v.denote σ))).len (p.denote σ)) =
+      some w
+    rw [← Tm.sameSegs_denote σ hq, Obs.copyTo_len_same, FixedCopy.observe_len, hw]
   | .theory h => h
   | .symm r => r.sound.symm
 

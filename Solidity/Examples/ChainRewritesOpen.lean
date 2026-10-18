@@ -164,7 +164,9 @@ example (φ : Post StandardExample []) :
   sol_chain
 
 -- `applyStorageBox` is the box's (the write halts where its path does not
--- resolve), and so is `applyOnRigidBox` for an update that may halt.
+-- resolve), and so is `applyOnRigidBox` for an update that may halt: a write
+-- through an index (`values[0]`, its bound checked).  A write at a root or a
+-- member of one cannot halt (`Tm.totalW`), so it is pushed under the diamond.
 /--
 error: ~[applyStorageBox]~>: applyStorageBox does not apply to
   dl{ { storage := save(storage, alice.age, 42) } (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
@@ -179,14 +181,21 @@ example (φ : Post StandardExample []) :
 
 /--
 error: ~[applyOnRigidBox]~>: applyOnRigidBox does not apply to
-  dl{ { storage := save(storage, alice.age, 42) } (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+  dl{ { storage := save(storage, values[0], 42) } (find(storage, values[0]) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
 while the program is open
 -/
 #guard_msgs in
 example (φ : Post StandardExample []) :
+    dl![.diamond]{ { storage := save(storage, values[0], 42) }
+      (find(storage, values[0]) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+    ~[applyOnRigidBox]~> _ := by
+  sol_chain
+
+example (φ : Post StandardExample []) :
     dl![.diamond]{ { storage := save(storage, alice.age, 42) }
       (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
-    ~[applyOnRigidBox]~> _ := by
+    ~[applyOnRigidBox]~> dl![.diamond]{ { storage := save(storage, alice.age, 42) } find(storage, alice.age) ≐ 42 ∧
+      { storage := save(storage, alice.age, 42) } ⟨ revert(); ⟩ φ } := by
   sol_chain
 
 /-- `simplifyUpdate` under `m` with the revert still to run: the declaration

@@ -353,7 +353,7 @@ def rwLaws : List Lean.Name :=
     ``TermTaclet.delValueLit, ``TermTaclet.findOnDelAtBelow,
     ``TermTaclet.findOnDelAtBelowIn, ``TermTaclet.findOnDelAtFrame,
     ``TermTaclet.findOnPushFrame, ``TermTaclet.findOnPopFrame, ``TermTaclet.lenOnSaveFrame,
-    ``TermTaclet.lenOnDelAtFrame]
+    ``TermTaclet.lenOnDelAtFrame, ``TermTaclet.lenOnSaveFixedCopy]
 
 /-- The laws of memory reads `~=>` tries, after the term taclets. -/
 def rwEvalLaws : List Lean.Name :=
@@ -365,7 +365,8 @@ def rwEvalLaws : List Lean.Name :=
 /-- The literal laws `~=>` tries, after the laws of memory reads. -/
 def rwLitLaws : List Lean.Name :=
   [``LitLaw.add_literals, ``LitLaw.sub_literals, ``LitLaw.div_literals, ``LitLaw.leq_literals,
-    ``LitLaw.less_literals, ``LitLaw.greater_literals, ``LitLaw.geq_literals]
+    ``LitLaw.less_literals, ``LitLaw.greater_literals, ``LitLaw.geq_literals,
+    ``LitLaw.equal_literals]
 
 /-- What `~=>` tries, in order: the update rules, then the laws in scope. -/
 def rwAnyArrows : MetaM (List (String × RwArrow)) := do

@@ -159,7 +159,8 @@ def Op1.key {a s : Srt} : Op1 C a s → String
   | @Op1.selectIn _ _ _ f _ => s!"select {f}"
   | @Op1.fieldIn _ _ _ f _ _ => s!"field {f}"
   | .toInt => "toInt"
-  | @Op1.fixedCopy _ E n R _ => s!"fixedCopy {Ty.ref (.fixed E n)} {Ty.ref R}"
+  -- the source's type is its term's: only the destination's is written
+  | @Op1.fixedCopy _ _ _ R _ => s!"fixedCopy {Ty.ref R}"
 
 def Op2.key {a b s : Srt} : Op2 C a b s → String
   | .binop op _ => s!"binop {op.sym}"
@@ -727,6 +728,20 @@ def NSValT.newArr (R : RefTy) (n : NTerm C) : NSValT C :=
   syn s!"newArr {Ty.ref R}({n.key})" s!"newArr({Ty.ref R}, {n.text})" fun Γ => do
     if h : R.newArrOk = true then pure ⟨_, .app1 (.newArr h) (← n.check (.val .uint) Γ)⟩
     else .error s!"`newArr({Ty.ref R}, …)`: `{Ty.ref R}` is not allocated by `new`"
+
+/-- A fixed array viewed at the destination type `R` it is copied to
+(`Op1.fixedCopy`), written `fixedCopy(R, v)`: each conversion says its
+destination, so a composed one (`uint[2]` to `uint[4]` to `uint[]`) reads
+back as it was. -/
+def NSValT.fixedCopy (R : RefTy) (v : NSValT C) : NSValT C :=
+  syn s!"fixedCopy {Ty.ref R}({v.key})" s!"fixedCopy({Ty.ref R}, {v.text})" fun Γ => do
+    match ← v.resolve Γ with
+    | ⟨.sv (.ref (.fixed E n)), v'⟩ =>
+      match FixedCopy.ofTarget E n R with
+      | some c => pure ⟨_, .app1 (.fixedCopy c) v'⟩
+      | none => .error s!"`fixedCopy({Ty.ref R}, …)`: a `{Ty.ref (.fixed E n)}` is not copied to a \
+          `{Ty.ref R}`"
+    | ⟨σ, _⟩ => useError v.text σ "a fixed-size array"
 
 def NITerm.pv (x : Var) : NITerm C := .pvI x
 

@@ -164,6 +164,11 @@ namespace Tms
     Tm C Γ (.sv (.ref R)) := .app2 .copyMem m i
 @[reducible] def SValT.newArr (R : RefTy) (n : Tm C Γ (.val .uint))
     (h : R.newArrOk = true := by tm_side) : Tm C Γ (.sv (.ref R)) := .app1 (.newArr h) n
+/-- A fixed array viewed at the destination type `R` it is copied to, the
+witness found from the types (`FixedCopy.ofTarget`): `tm{ fixedCopy(R, v) }`. -/
+@[reducible] def SValT.fixedCopyTo {E : Ty} {n : Nat} (R : RefTy) (v : Tm C Γ (.sv (.ref (.fixed E n))))
+    (h : (FixedCopy.ofTarget E n R).isSome = true := by decide) : Tm C Γ (.sv (.ref R)) :=
+  .app1 (.fixedCopy ((FixedCopy.ofTarget E n R).get h)) v
 
 @[reducible] def ITerm.pv {R : RefTy} (i : Idx Γ (.mem R)) : Tm C Γ (.ident R) := .pvI i
 @[reducible] def ITerm.read {R : RefTy} (m : Tm C Γ .mem) (a : Tm C Γ (.addr (.ref R))) :

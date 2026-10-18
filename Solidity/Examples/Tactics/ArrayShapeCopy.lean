@@ -53,20 +53,28 @@ private def composed : Tm Shapes [] (.sv (.ref (.array Ty.uint))) :=
     (.app1 (.fixedCopy (.fixed 4 (by decide)))
       (.app2 .sfind (.app0 .storage) (.app0 (.root "small" rfl))))
 
-/-- info: composed shape conversion printing preserves the typed term -/
+/-- info: fixedCopy(uint[], fixedCopy(uint[4], find(storage, small))) -/
 #guard_msgs in
 run_meta do
-  let info ← Lean.getConstInfo ``composed
-  let original := info.value!
-  let value ← Delab.withPrinter original false (Delab.ppSValS [] original)
-  let printed ← `(tm{ $value })
-  let parsed ← Lean.Elab.Term.TermElabM.run' do
-    let p ← Lean.Elab.Term.elabTermEnsuringType printed info.type
-    Lean.Elab.Term.synthesizeSyntheticMVarsNoPostponing
-    pure p
-  unless ← Lean.Meta.isDefEq original parsed do
-    throwError "composed shape conversion lost information: {printed}"
-  Lean.logInfo "composed shape conversion printing preserves the typed term"
+  let value ← Delab.withPrinter (← Lean.getConstInfo ``composed).value! false
+    (Delab.ppSValS [] (← Lean.getConstInfo ``composed).value!)
+  Lean.logInfo m!"{value}"
+
+/-- Each conversion prints its destination, so the composed one reads back as
+it was (`NSValT.fixedCopy`, the formulas' reading of the text above). -/
+example : (NSValT.fixedCopy (C := Shapes) (.array Ty.uint) (NSValT.fixedCopy (.fixed Ty.uint 4)
+    (NSValT.find NSTerm.storage (NPTerm.root "small")))).check (.sv (.ref (.array Ty.uint))) [] =
+    .ok composed := rfl
+
+/-- …and the formulas' reader reads the printed text back as it was. -/
+example : dl!{ { storage := save(storage, values, fixedCopy(uint[], fixedCopy(uint[4], find(storage, small)))) } true } =
+    Fml.upd .diamond (Upd.snoc .nil (.storage (.app3 .save (.app0 .storage) (.app0 (.root "values" rfl)) composed)))
+      .tt := rfl
+
+/-- `tm{ … }` reads a conversion too, its schema variables Lean's. -/
+example (s : Tm Shapes [] .st) (p : Tm Shapes [] (.path (.ref (.fixed Ty.uint 2)))) :
+    tm{ fixedCopy(uint[], find(s, p)) } = .app1 (.fixedCopy (.dynamic (by decide))) (.app2 .sfind s p) :=
+  rfl
 
 private def word (n : Nat) : SVal Ty.uint := .prim (uintOfNat n)
 private def fixed (xs : List (SVal Ty.uint)) : SVal (.ref (.fixed Ty.uint xs.length)) :=

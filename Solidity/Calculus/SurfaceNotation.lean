@@ -819,6 +819,12 @@ def rSVal (R : Readers C) (_Γ : ECtx) : RawTerm → Except String (NSValT C)
   | .app "copyMem" [_, m, i] => do pure (.copyMem (← R.mem m) (← R.ident i))
   | .app "newArr" [T, n] => do pure (.newArr (← allocTy C T) (← R.val n))
   | .app "newArr" _ => throw "`newArr(n)` does not say what it allocates: write `newArr(T, n)`"
+  | .app "fixedCopy" [T, v] => do
+    let some T' := T.toTy? | throw "`fixedCopy(T, v)`: `T` is the array type `v` is copied to"
+    let .ref RT ← elabTy C T' | throw "`fixedCopy(T, v)`: `T` is an array type"
+    pure (.fixedCopy RT (← R.sval v))
+  | .app "fixedCopy" _ => throw "`fixedCopy(v)` does not say the type it is copied to: write \
+      `fixedCopy(T, v)`"
   | t => do pure (.val (← R.val t))
 
 /-- A term at the memory-identity sort. -/

@@ -148,6 +148,7 @@ import Solidity.Examples.Chains.Storage
 import Solidity.Examples.Chains.StorageArrays
 import Solidity.Examples.Chains.StorageDelete
 import Solidity.Examples.Chains.StorageCoverage
+import Solidity.Examples.Chains.FixedLength
 import Solidity.Examples.Chains.Arithmetic
 import Solidity.Examples.Chains.Memory
 import Solidity.Examples.Chains.MemoryDelete
@@ -272,6 +273,7 @@ import Solidity.Frontend.Problems
 import Solidity.Frontend.Testing
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.ScopedFlip
+import Solidity.Tools.LatexTerm
 import Solidity.Tools.Latex
 import Solidity.Tools.LatexSolkey
 import Solidity.Examples.Tactics.Latex

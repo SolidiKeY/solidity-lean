@@ -55,7 +55,9 @@ Two directories, by proof style:
      free parameter (`ageVal`, `v`, `i`, …) a small distinct int there:
      `dl![m]{ { ageVal := 42 ‖ storage := save(storage, alice.account.balance, 10) } ⟨[ … ]⟩ φ }`,
      so every read resolves to a literal and arithmetic folds at the last
-     line.
+     line.  Where the section itself states a concrete postcondition (`x = 9`,
+     `Examples/Chains/FixedLength.lean`), the chain keeps it, its program
+     reads no free parameter, and it runs to `true`.
   7. **Fast.** A file checks in the time it did before or faster, and no
      chain is given a bigger `maxHeartbeats`. A scoped chain is one
      declaration however long (`Storage.BalanceWriteRead` has 13 links,

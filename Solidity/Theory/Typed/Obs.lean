@@ -1469,6 +1469,11 @@ def FixedCopy.observe {E : Ty} {n : Nat} : {R : RefTy} → (c : FixedCopy E n R)
      fun q => match q with | .atF i r => ((FixedCopy.fixed m hm).child o i).len r,
      fun q => match q with | .nil => true | .atF i r => ((FixedCopy.fixed m hm).child o i).has r⟩
 
+/-- A fixed array viewed as a dynamic one has its length. -/
+theorem FixedCopy.observe_len {E : Ty} {n : Nat} (c : FixedCopy E n (.array E))
+    (o : TVal (.ref (.fixed E n))) : (c.observe o).len .nil = n := by
+  cases c; rfl
+
 /-- An element selector at the destination's array shape. -/
 def FixedCopy.index {E : Ty} {n : Nat} {R : RefTy} : FixedCopy E n R →
     PrimTy.uint.Denote → Path (.ref R) E
@@ -2001,6 +2006,17 @@ variable {L : Ty → Type} [ObsLoc L]
 theorem copyTo_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) (v : TVal (.prim P)) :
     (o.copyTo p v).word p = v.word .nil := by
   rw [copyTo, save_word_same]; rfl
+
+/-- **`selectOnSaveEmptySize`** of a copy: the length where it was saved is
+the copy's. -/
+theorem copyTo_len_same (o : Obs L) {E : Ty} (p : L (.ref (.array E)))
+    (v : TVal (.ref (.array E))) : (o.copyTo p v).len p = v.len .nil := by
+  have e : (o.save p (TVal.overlay (o.find p) v)).len (ObsLoc.app p .nil) =
+      (TVal.overlay (o.find p) v).len .nil := by
+    simp only [save, ObsLoc.strip?_app]
+  rw [ObsLoc.app_nil] at e
+  rw [copyTo, e]
+  rfl
 
 /-- **`findOnDelAt`**: a word deleted reads its default. -/
 theorem delAt_word_same (o : Obs L) {P : PrimTy} (p : L (.prim P)) :

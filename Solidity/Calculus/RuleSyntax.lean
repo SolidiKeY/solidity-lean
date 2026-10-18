@@ -1348,6 +1348,20 @@ def indexTyOfTerm : TSyntax `dl_term → MacroM Lean.Term
     | _ => pure (schemaIdent "it")
   | _ => pure (schemaIdent "it")
 
+/-- A reference type written as a term: `S`, `T[]`, `T[n]`. -/
+partial def refTyTerm (t : TSyntax `dl_term) : MacroM Lean.Term := do
+  let elem (e : TSyntax `dl_term) : MacroM Lean.Term := do
+    match e with
+    | `(dl_term| uint) => `(Ty.prim PrimTy.uint)
+    | `(dl_term| int) => `(Ty.prim PrimTy.int)
+    | `(dl_term| bool) => `(Ty.prim PrimTy.bool)
+    | _ => `(Ty.ref $(← refTyTerm e))
+  match t with
+  | `(dl_term| $e:dl_term []) => `(RefTy.array $(← elem e))
+  | `(dl_term| $e:dl_term [ $k:num ]) => `(RefTy.fixed $(← elem e) $k)
+  | `(dl_term| $s:ident) => `(RefTy.struct $(Lean.quote s.getId.toString))
+  | _ => Macro.throwErrorAt t "a reference type: `S`, `T[]` or `T[n]`"
+
 mutual
 
 /-- A term at a sort.  At a storage or a memory value's sort, a value term is
@@ -1365,7 +1379,8 @@ partial def schemaTerm (Γ : Scope) (pos : TPos) (t : TSyntax `dl_term) : MacroM
       if stemOf x.getId.toString == "src" then headTerm Γ .svalue x
       else `(SValT.val $(← schemaTerm0 Γ .val t))
     | `(dl_term| $f:ident($_,*)) =>
-      if ["find", "copyMem", "newArr"].contains f.getId.toString then schemaTerm0 Γ .svalue t
+      if ["find", "copyMem", "newArr", "fixedCopy"].contains f.getId.toString then
+        schemaTerm0 Γ .svalue t
       else `(SValT.val $(← schemaTerm0 Γ .val t))
     | _ => `(SValT.val $(← schemaTerm0 Γ .val t))
   | .mvalue =>
@@ -1573,6 +1588,8 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
       | _ => tposError v "a value variable" .val
     | "copyMem", #[_, m, i], .svalue => `(SValT.copyMem $(← me m) $(← schemaTerm Γ .ident i))
     | "newArr", #[n], .svalue => `(SValT.newArr $(schemaIdent "R") $(← schemaTerm Γ .val n))
+    | "fixedCopy", #[T, v], .svalue =>
+      `(SValT.fixedCopyTo $(← refTyTerm T) $(← schemaTerm Γ .svalue v))
     | "freshId", #[t], .ident =>
       match t with
       | `(dl_term| addM($m)) => `(ITerm.alloc $(← me m) $(schemaIdent "R"))
@@ -1620,7 +1637,7 @@ def tmSort : TSyntax `dl_term → TPos
     | "write" | "addM" | "copySt" => .memory
     | "consr" => .path
     | "freshId" => .ident
-    | "copyMem" | "newArr" => .svalue
+    | "copyMem" | "newArr" | "fixedCopy" => .svalue
     | _ => .val
   | `(dl_term| $x:ident) =>
     match x.getId.toString with

@@ -179,11 +179,14 @@ structure Gen where
   openRws : Array (String × Expr × Array Expr) := #[]
   /-- Rewrites past the program, each with its line's keys. -/
   rewrites : Array (String × Expr × Array Expr)
+  /-- The rewrites' `FmlRw`s, one per entry of `rewrites` where `generate`
+  found them (the LaTeX export's side lines read them). -/
+  rws : Array Expr := #[]
   stop : Option MessageData
 
 /-- Run the strategy from the scoped line `φ`, then the rewrites of its last
 line to a last line (`pastSearch`). -/
-def generate (φ : Expr) : TermElabM Gen := do
+def generate (φ : Expr) (past : Bool := true) : TermElabM Gen := do
   let run ← runChain φ
   let (_, Γ) ← lineType φ
   let mut steps := #[]
@@ -200,12 +203,13 @@ def generate (φ : Expr) : TermElabM Gen := do
   if steps.size ≥ runFuel then
     return { splice := run.splice, keys := run.keys, steps, rewrites := #[],
              stop := some m!"the strategy ran {runFuel} steps: go on from the last line" }
-  unless (← whnfR Γ).isAppOf ``List.nil do
+  unless past && (← whnfR Γ).isAppOf ``List.nil do
     return { splice := run.splice, keys := run.keys, steps, rewrites := #[], stop := none }
   let Z := (steps.back?.map (·.2.1)).getD φ
   let (rws, stop) ← pastSearch Z
   return { splice := run.splice, keys := run.keys, steps, stop,
-           rewrites := (rws.getD #[]).map fun st => (st.name, st.fml, st.keys) }
+           rewrites := (rws.getD #[]).map fun st => (st.name, st.fml, st.keys),
+           rws := (rws.getD #[]).map (·.rw) }
 
 /-- The links of a generated chain: the strategy's steps grouped
 (`groupSteps`), then one `~[r]~>` per rewrite; each with its line. -/

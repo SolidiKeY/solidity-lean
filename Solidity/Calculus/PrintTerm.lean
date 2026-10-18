@@ -398,9 +398,13 @@ partial def ppSValS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
   | .sym ``Op2.sfind _ #[s, p] | .sym ``Op2.sfindIn _ #[s, p] =>
     `(dl_term| find($(← ppSTermS ns s), $(← ppPTermS ns p)))
   | .sym ``Op2.copyMem _ #[m, i] => `(dl_term| copyMem(mtSt, $(← ppMTermS ns m), $(← ppITermS ns i)))
-  -- A composed conversion cannot be recovered from the enclosing save's
-  -- target type: fixed2 → fixed4 → dynamic must retain length four.
-  | .sym ``Op1.fixedCopy _ _ => escapeS e
+  -- each conversion with its destination type (`NSValT.fixedCopy`): a
+  -- composed one, fixed2 → fixed4 → dynamic, keeps its length four
+  | .sym ``Op1.fixedCopy ps #[v] =>
+    let some R := ps[2]? | escapeS e
+    match ← allocTy? R with
+    | some T => `(dl_term| fixedCopy($T, $(← ppSValS ns v)))
+    | none => escapeS e
   | .sym ``Op1.newArr #[R, _] #[n] =>
     match ← allocTy? R with
     | some T => `(dl_term| newArr($T, $(← ppTermS ns n)))

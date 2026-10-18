@@ -627,6 +627,11 @@ def plainReadAny (t : Expr) : Bool :=
       t.getAppArgs[t.getAppArgs.size - 3]!.isAppOf ``Op2.findIn) &&
     plainStorageS t.getAppArgs[t.getAppArgs.size - 2]!
 
+/-- The premises a line begins with (`A → ψ`), as the path to `ψ`, and `ψ`. -/
+partial def premisePath (e : Expr) (p : List PathStep) : List PathStep × Expr :=
+  let e := e.consumeMData
+  if e.isAppOfArity ``Fml.imp 4 then premisePath e.appArg! (p ++ [.impR]) else (p, e)
+
 /-- The rewrites `~[r]~>` names on the scoped line `φ` while its program is
 open (`Calculus/RewriteScoped.lean`), each with the line it leaves, in the
 order they are tried: `applyOnRigid` at each update of the spine, along the
@@ -641,7 +646,12 @@ skeleton below each number of updates (`FmlRw.litEq`, `FmlRw.lawEq`);
 each update (`FmlRw.applyOnPV`); `applyOnRigidBox` as `applyOnRigid`,
 `applyStorageBox` on a box update of the storage (`FmlRw.applyStorageBox`); for `sequentialToParallel`, the merges
 over a storage or memory write at each update (`FmlRw.stateMerge`) and the
-merges under a branch (`FmlRw.mergeIn`), the spine's own being `mergeCands`'.  Their postconditions in slots and a
+merges under a branch (`FmlRw.mergeIn`), the spine's own being `mergeCands`'; `applyOnRigid` through the
+scope ends under an update (`FmlRw.applyOnRigidPops`).  Past the program a line
+`A → ψ` is read through its premises (`premisePath`): each rewrite is computed
+on `ψ` and applied there (`FmlRw.inPath`), and `concrete`, a law in the
+equations and the merges under a branch also on the whole line, where they
+reach `A`.  Their postconditions in slots and a
 modality `m` computed as the diamond and as the box; and why a law found no
 instance. -/
 def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
@@ -652,6 +662,19 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
   let φb := match m? with
     | some m => φ'.replaceFVar m (mkConst ``Modality.box)
     | none => φ'
+  -- past the program, the premises the line begins with (`A → ψ`, an
+  -- obligation's `defined(wt(storage))`) read through: the rewrites are
+  -- computed on `ψ` and applied there (`FmlRw.inPath`)
+  let (pre, φb₀) := if past then premisePath φb [] else ([], φb)
+  let lift (r : Expr) : Expr :=
+    if pre.isEmpty then r else mkApp3 (mkConst ``FmlRw.inPath) C (toExpr pre) r
+  let φl := φb
+  let φb := φb₀
+  -- the skeleton of the whole line, where it begins with premises: the
+  -- candidates there (`top`) are not lifted
+  let skelL? : Option Skel ← if pre.isEmpty then pure none else
+    pure (← unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))
+      (mkAppN (mkConst ``Fml.spineSkels) #[C, Γ, φl]))[0]?
   let skels ← unsafe evalQuoted (List Skel) (mkApp (mkConst ``List [0]) (mkConst ``Skel))
     (mkAppN (mkConst ``Fml.spineSkels) #[C, Γ, φb])
   let k := skels.length - 1
@@ -669,6 +692,7 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
   for h : ai in [0:as.size] do
     let a := as[ai]
     let mut rs : Array Expr := #[]
+    let mut top : Array Expr := #[]
     let mut failed := none
     match a with
     | .table n =>
@@ -680,6 +704,9 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
           let s := skels[i + 1]!
           if s.pushable then
             rs := rs.push (mkApp3 (mkConst ``FmlRw.applyOnRigid) C (toExpr i) (toExpr s))
+          -- through the scope ends under the update (`FmlRw.applyOnRigidPops`)
+          if s matches .upd _ then
+            rs := rs.push (mkApp2 (mkConst ``FmlRw.applyOnRigidPops) C (toExpr i))
       else if n == `applyStorageBox then
         -- past the program: a lone storage write on a first-order line, `storage`
         -- substituted (`FmlRw.applyStorageBoxP`, `Calculus/RewritePast.lean`)
@@ -700,6 +727,9 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
         for i in List.range (k + 1) do
           let s := skels[i]!
           if s.hasLit then rs := rs.push (mkApp3 (mkConst ``FmlRw.concrete) C (toExpr i) (toExpr s))
+        -- the premises too: `A → true ⇝ true`, on the whole line
+        if let some s := skelL? then
+          if s.hasLit then top := top.push (mkApp3 (mkConst ``FmlRw.concrete) C (toExpr 0) (toExpr s))
       else if n == `simplifyUpdate then
         -- past the program: the locals no one reads dropped with their writes
         -- (`FmlRw.simplifyPast`, `Calculus/RewritePast.lean`)
@@ -728,16 +758,20 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
         for i in List.range k do
           for r in [``MergeNameS.storage, ``MergeNameS.memory, ``MergeNameS.localsMemory] do
             rs := rs.push (mkApp3 (mkConst ``FmlRw.stateMerge) C (mkConst r) (toExpr i))
+        -- the merges under a branch, on the whole line; past the program not
+        -- those on the spine under the premises, which the lifted merges take
+        let onSpine (p : List PathStep) : Bool := past && !pre.isEmpty &&
+          p.take pre.length == pre && (p.drop pre.length).all (· matches .upd | .binder)
         let below := if !branches then [] else
-          (updPaths φb 16).filter (·.any fun d => d matches .andL | .andR | .impR)
+          (updPaths φl 16).filter fun p => p.any (· matches .andL | .andR | .impR) && !onSpine p
         for p in below do
           for j in (List.range 7).reverse do
-            rs := rs.push (mkApp3 (mkConst ``FmlRw.mergeIn) C (toExpr p) (toExpr (j + 1)))
+            top := top.push (mkApp3 (mkConst ``FmlRw.mergeIn) C (toExpr p) (toExpr (j + 1)))
     | .litLaw c =>
       -- a literal law at each closed term of the line read at the empty scope
       let ts ← match tsMemo with
         | some ts => pure ts
-        | none => Tm.closedNilVals φb
+        | none => Tm.closedNilVals φl
       tsMemo := some ts
       let (is, f) ← if h : 0 < ts.size then
           lawInstances c (← mkListLit (← inferType ts[0]) ts.toList)
@@ -751,13 +785,16 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
           let s := skels[i]!
           if s.hasLit then
             rs := rs.push (← mkAppM ``FmlRw.litEq #[pf, toExpr i, toExpr s])
+        -- in the premises too, on the whole line
+        if let some s := skelL? then
+          if s.hasLit then top := top.push (← mkAppM ``FmlRw.litEq #[pf, toExpr 0, toExpr s])
     | .law c₀ =>
       -- the law matched against the line's closed terms read at the empty scope;
       -- a law with a twin in a storage of members (`findOnSave` and
       -- `findOnSaveIn`, …) is either
       let ts ← match tsMemo with
         | some ts => pure ts
-        | none => Tm.closedNilVals φb
+        | none => Tm.closedNilVals φl
       tsMemo := some ts
       for c in Chain.lawTwins (← getEnv) c₀ do
         let (is, f) ← if h : 0 < ts.size then
@@ -774,6 +811,8 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
             let s := skels[i]!
             if s.hasLit then
               rs := rs.push (← mkAppM ``FmlRw.lawEq #[pf, toExpr i, toExpr s])
+          if let some s := skelL? then
+            if s.hasLit then top := top.push (← mkAppM ``FmlRw.lawEq #[pf, toExpr 0, toExpr s])
         -- past the program: in an update's right-hand sides under any modality,
         -- the law at the update's scope (`FmlRw.lawUpdS`)
         if past then
@@ -790,6 +829,8 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
         let (es, f) ← lawUpdCands C c' true φb scopes keep
         rs := rs ++ es
         if failed.isNone || !es.isEmpty then failed := f
+    -- the candidates on `ψ` lifted under the premises, the whole line's as they are
+    rs := rs.map lift ++ top
     rsAll := rsAll ++ rs
     owner := owner ++ Array.replicate rs.size ai
     fails := fails.push failed
@@ -815,7 +856,7 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
     return (sp, (split cs).zipWith (fun c f => (c, f)) fails)
   | some m =>
     let ds ← eval (φ'.replaceFVar m (mkConst ``Modality.diamond))
-    let bs ← eval φb
+    let bs ← eval φl
     let all := (rs.toList.zip owner.toList).zip (ds.zip bs)
     let cs := all.filterMap fun
       | ((r, o), some (fd, ed), some (fb, eb)) => do
