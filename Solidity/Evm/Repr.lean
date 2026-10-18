@@ -1016,7 +1016,7 @@ termination_by k T => (k, sizeOf T)
 theorem initStorage_repr (C : Contract) (hL : 0 < L) :
     ReprStore C L WordStore.zero (Solidity.Storage.init C) := fun r T h => by
   show ReprAt _ _ _ _ ((SFields.dflt C.vars).get h)
-  rw [get_dflt]
+  rw [SFields.dflt_get]
   exact dfltBelow_repr hL _ T _ _
 
 end Evm

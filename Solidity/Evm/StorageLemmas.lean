@@ -210,18 +210,5 @@ theorem get_dfltBelow {f : Name} (k : Nat) (ih : (T : Ty) → tyRank T < k → S
     · simp only [e, dite_false]
       exact get_dfltBelow k ih _ _
 
-/-- A default storage's state variable is its type's default. -/
-theorem get_dflt {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
-  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, h => by
-    rw [SFields.dflt, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact get_dflt _
-
 end Evm
 end Solidity

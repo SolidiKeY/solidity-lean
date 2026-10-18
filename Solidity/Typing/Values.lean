@@ -1265,18 +1265,6 @@ theorem SVal.saveM_saveM : {T U : Ty} → (x : SVal T) → (p : Path T U) → (a
 
 /-! ## Defaults, read and cleared -/
 
-theorem SFields.dflt_get {f : Name} : {fs : List (Name × Ty)} → {T : Ty} →
-    (h : lookupBy f fs = some T) → (SFields.dflt fs).get h = SVal.dflt T
-  | [], _, h => by simp only [lookupBy, reduceCtorEq] at h
-  | (f', T') :: fs, T, h => by
-    rw [SFields.dflt, SFields.get_cons]
-    by_cases e : f = f'
-    · have hT := SFields.lookupBy_cons_pos e h
-      subst hT
-      simp only [e, dite_true]
-    · simp only [e, dite_false]
-      exact SFields.dflt_get _
-
 /-- Members with distinct names are equal when every member is. -/
 theorem SFields.ext_get : {fs : List (Name × Ty)} → nodupKeysB fs = true → (x y : SFields fs) →
     (∀ f T (h : lookupBy f fs = some T), x.get h = y.get h) → x = y
