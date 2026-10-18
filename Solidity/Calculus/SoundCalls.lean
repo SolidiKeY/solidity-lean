@@ -351,12 +351,11 @@ section Calls
 variable {Γ : Ctx} {m : Modality}
 
 /-- `internalCallExpand` of a call with no result. -/
-theorem Premise.sound_callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
+theorem Stmt.runSt_callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
     (body : Prog C ([] ++ ps) Γf) (σ : State C Γ) :
-    Premise.Runs m (.call f args .none body)
-      (.unfold (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))
-        (Ext.append Γ ps)) σ := by
-  refine Premise.sound_unfold σ ?_
+    (Prog.runSt σ (args.declsThen
+      (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))).map (State.drop (Ext.append Γ ps)) =
+      Stmt.runSt σ (.call f args .none body) := by
   rw [Args.runSt_declsThen]
   show _ = (TRun.call args .none body.ext body.runR σ).map (·.st)
   rw [TRun.call_eq]
@@ -375,20 +374,26 @@ theorem Premise.sound_callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
         simp only [Out.drop, Out.lift, State.lift, State.drop, State.withEnv, TEnv.put_atop,
           TEnv.drop_append, TEnv.drop_wk, CallRet.leaveT])
 
+/-- Soundness reuses the exact inlined call run. -/
+theorem Premise.sound_callNone {ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
+    (body : Prog C ([] ++ ps) Γf) (σ : State C Γ) :
+    Premise.Runs m (.call f args .none body)
+      (.unfold (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))
+        (Ext.append Γ ps)) σ :=
+  Premise.sound_unfold σ (Stmt.runSt_callNone f args body σ)
+
 theorem TRes.ok_bind {α β : Type} (a : α) (f : α → TRes β) : (Except.ok a : TRes α).bind f = f a :=
   rfl
 
 /-- `functionBodyExpand` of a call whose result lands in `res`. -/
-theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p : PrimTy)
+theorem Stmt.runSt_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p : PrimTy)
     (r : Var) (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf)
     (σ : State C Γ) :
-    Premise.Runs m (.call f args (.val p r res) body)
-      (.unfold (args.declsThen (.cons (.declLocal p r none)
-        (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (match res with
-          | none => .nil
-          | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil))))
-        (.push (Ext.append Γ ps))) σ := by
-  refine Premise.sound_unfold σ ?_
+    (Prog.runSt σ (args.declsThen (.cons (.declLocal p r none)
+      (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (match res with
+        | none => .nil
+        | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil))))).map
+      (State.drop (.push (Ext.append Γ ps))) = Stmt.runSt σ (.call f args (.val p r res) body) := by
   rw [Args.runSt_declsThen]
   show _ = (TRun.call args (.val p r res) body.ext body.runR σ).map (·.st)
   rw [TRun.call_eq]
@@ -421,15 +426,28 @@ theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p
           erw [TEnv.drop_put_atop_wk (Γ := Γ) _ (LTy.val p :: ps)]
           rfl)
 
+/-- Soundness reuses the exact inlined call run. -/
+theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p : PrimTy)
+    (r : Var) (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf)
+    (σ : State C Γ) :
+    Premise.Runs m (.call f args (.val p r res) body)
+      (.unfold (args.declsThen (.cons (.declLocal p r none)
+        (.cons (.block (body.wk (Thin.atop (.val p :: ps) Γ)).2.2) (match res with
+          | none => .nil
+          | some j => .cons (.assignLocal (j.under ps).there (.simple (.local .here))) .nil))))
+        (.push (Ext.append Γ ps))) σ := by
+  cases res with
+  | none => exact Premise.sound_unfold σ (Stmt.runSt_callVal f args p r none body σ)
+  | some j => exact Premise.sound_unfold σ (Stmt.runSt_callVal f args p r (some j) body σ)
+
 /-- `internalCallExpand` of a call that leaves its return variables
 (`CallRet.rets`): the frame dropped from under them. -/
-theorem Premise.sound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
+theorem Stmt.runSt_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
     (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
-    Premise.Runs m (.call f args (.rets bs) body)
-      (.inline (args.declsThen (bs.declsThen
-          (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
-        (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))) σ := by
-  refine Premise.sound_inline σ ?_
+    (Prog.runSt σ (args.declsThen (bs.declsThen
+      (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))).map
+      (State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))) =
+        Stmt.runSt σ (.call f args (.rets bs) body) := by
   rw [Args.runSt_declsThen]
   show _ = (TRun.call args (.rets bs) body.ext body.runR σ).map (·.st)
   rw [TRun.call_eq]
@@ -454,6 +472,15 @@ theorem Premise.sound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps
         simp only [Out.drop, Out.lift, State.lift, State.drop, State.thin, State.withEnv,
           CallRet.leaveT]
         erw [TEnv.thin_put_keepAllAtop])
+
+/-- Soundness reuses the exact inlined call run. -/
+theorem Premise.sound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
+    (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
+    Premise.Runs m (.call f args (.rets bs) body)
+      (.inline (args.declsThen (bs.declsThen
+          (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
+        (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))) σ :=
+  Premise.sound_inline σ (Stmt.runSt_callRets f args bs body σ)
 
 theorem Stmt.runSt_declMem_none {Γ : Ctx} (R : RefTy) (x : Var) (hd : (Ty.ref R).defaultOkS = true)
     (hm : (Ty.ref R).mapFree = true) (σ : State C Γ) :

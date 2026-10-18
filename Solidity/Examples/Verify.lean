@@ -6,9 +6,8 @@ import Solidity.Tools.Verify
 Each verdict of `Tools/Verify.lean` once: a specification proved (with the
 theorem as a `Try this:` suggestion), one refuted with a certified
 counterexample (the kernel checked `¬ ⊨ spec[C]{f}`), one refuted by its
-`assignable` frame, one refuted by a tested counterexample only (the layout
-premise of a mapping is a `\forall` over a `uint`, which the certificate
-cannot evaluate), one refuted by a failed `assert`, and one given up on: true,
+`assignable` frame, one whose mapping-layout premise is proved structurally
+rather than by finite evaluation, one refuted by a failed `assert`, and one given up on: true,
 but outside what `sol_spec_try` closes.  Then `#counterexample` on a formula,
 and on a contract with a struct, both arrays and a mapping.
 
@@ -96,10 +95,10 @@ def Bank : Contract := contract!{
 }
 
 /--
-info: ✗ credit (tested):
-  a = 2, msg.sender = 1, msg.value = 0
-  before: balances = {2: 1, _: 0}
-  after: balances = {2: 1, _: 0}
+info: ✗ credit (certified):
+  a = 0, msg.sender = 0, msg.value = 0
+  before: balances = {0: 1, _: 0}
+  after: balances = {0: 1, _: 0}
   fails: ensures balances[a] == \old(balances[a]) + 1
 -/
 #guard_msgs in #verify Bank
@@ -116,7 +115,7 @@ def Guarded : Contract := contract!{
 
 /--
 info: ✗ check (certified):
-  x = 0, msg.sender = 1, msg.value = 0
+  x = 0, msg.sender = 0, msg.value = 0
   before: count = 0
   after: panic (an `assert` failed)
 -/
@@ -177,6 +176,51 @@ info: counterexample (certified):
 -/
 #guard_msgs in #counterexample dl!{ [ alice.age = 1; ]
   (xs.length == 0 ∨ bal[1] == 0 ∨ pair[0] == 0 ∨ alice.account.balance == 0) }
+end
+
+/-- Declaration ranges include struct fields, nested mappings, signed keys
+and values, and boolean keys and values. Arrays retain their partial reads. -/
+def Declarations : Contract := contract!{
+  mapping(uint => Person) people;
+  mapping(int => mapping(bool => int)) debts;
+  mapping(bool => bool) flags;
+  uint[] xs;
+}
+
+/-- These are the actual generated premises, compiled by the specification
+reader. Compilation errors are reported, never silently dropped. -/
+def declarationRanges : Fml Declarations [] :=
+  declaration_facts[Declarations]
+
+theorem declarationRanges_valid : ⊨ declarationRanges := by sol_decl_facts
+
+section
+local instance : InContract := ⟨Declarations⟩
+
+/-- A declaration supplies a range, not a particular stored value. -/
+example : True := by
+  fail_if_success
+    have : ⊨ dl!{ ∀ uint k; people[k].age == 0 } := by sol_decl_facts
+  trivial
+
+/-- An array's index can fail even though its element type is a uint. -/
+example : True := by
+  fail_if_success
+    have : ⊨ dl!{ 0 <= xs[0] ∧ xs[0] <= 115792089237316195423570985008687907853269984665640564039457584007913129639935 } := by
+      sol_decl_facts
+  trivial
+
+/-- A false quantified entry clause must not be treated as a declaration
+fact when the fallback assembles a refutation of the original implication. -/
+def refusesFalsePremise : Lean.Elab.Term.TermElabM Bool := do
+  let c : Cand Declarations := { st := Storage.init Declarations, args := [] }
+  let φ : Fml Declarations [] := dl!{ (∀ uint k; people[k].age == 1) → false }
+  let cE := Lean.mkConst ``Declarations
+  certifyDeclarations cE (Fml.quote cE φ) [] [] c
+
+/-- info: false -/
+#guard_msgs in #eval refusesFalsePremise
+
 end
 
 end Solidity.Examples.Verify

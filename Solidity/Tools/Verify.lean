@@ -1,12 +1,15 @@
-import Solidity.Tools.Counterexample
+import Solidity.Tools.CompleteVerification
 
 /-!
 # `#verify`: prove a specification, or refute it
 
 `#verify C.f` states the obligation of the function `f` of the contract `C`,
 scoped (`cspec[C]{f}`, `Calculus/Spec.lean`: `spec[C]{f}` under `open
-scoped Solidity.Scoped`), and tries `sol_spec_try` on `⊨` of it
-(`Valid`).  With
+scoped Solidity.Scoped`), as `⊨` of it (`Valid`). It first tries exact
+declaration/input compilation and complete
+arithmetic decision (`CompleteVerification.lean`), with both verdicts checked
+against that original obligation. A proof is offered with `sol_exact`.
+Unsupported syntax or a resource failure falls back to `sol_spec_try`. With
 no goal left the function is proved, and the command offers the theorem
 as a suggestion (`Try this:`; a click replaces the `#verify C.f` with it;
 `#verify C` prints it as text).  Otherwise it searches for a counterexample (`refuteSpec`,
@@ -15,8 +18,8 @@ the kernel checked it; none found leaves the function open (`gaveUp`), with the 
 `sol_spec_try` could not close.  `#verify C` does so for every function of
 `C` with an obligation.
 
-Each function runs under the ambient `maxHeartbeats`, counted from its own
-start; running out is reported as `gaveUp`, not as a failure of the command.
+Each stage has its own ambient `maxHeartbeats` allowance; a timed-out exact
+stage falls back, and a timed-out proof leaves heuristic refutation available.
 A verdict is only as strong as its word: `✓` is a proof the kernel checked
 (and no `sorry` in it), `✗ (certified)` a kernel-checked `¬ ⊨ spec[C]{f}` of
 the scoped obligation, `✗ (tested)` a state in which the typed run runs the
@@ -31,6 +34,8 @@ open Lean Elab Term Meta
 /-- What `#verify` concludes about a function. -/
 inductive Verdict where
   | proved
+  /-- A proof from the exact supported-fragment decision. -/
+  | provedExact
   /-- A counterexample, whether the kernel certified it, and the conjuncts
   it fails. -/
   | refuted (r : Refutation)
@@ -43,8 +48,8 @@ def errText (e : Exception) : MetaM String := do
   let msg ← (← addMessageContext e.toMessageData).toString
   pure ((msg.splitOn "\n").headD msg)
 
-/-- **Verify `f`**: elaborate the scoped `cspec[C]{f}`, run `sol_spec_try` on
-`Valid` of it, and search for a counterexample where goals are left. -/
+/-- **Verify `f`**: exact supported-fragment decision first, then
+`sol_spec_try` and heuristic refutation of the original `cspec[C]{f}`. -/
 def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrHeartbeats do
   let C ← unsafe evalConst Contract n
   let cE := Lean.mkConst n
@@ -57,6 +62,15 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
   let φE ← match φE? with
     | .ok e => pure e
     | .error msg => return .error msg
+  let saved ← saveState
+  let complete ← tryCatchRuntimeEx (withCurrHeartbeats do
+      match ← exactVerify φE with
+      | .proved _ => pure (some Verdict.provedExact)
+      | .refuted _ r xs => return some (.refuted (← exactRefutation n C f φE r xs))
+      | .refutedDependent _ r xs => return some (.refuted (← dependentRefutation n C f φE r xs)))
+    (fun _ => pure none)
+  saved.restore
+  if let some v := complete then return v
   let goal ← mkFreshExprMVar (mkApp2 (Lean.mkConst ``Valid) cE φE)
   let tac ← `(tactic| sol_spec_try)
   let run : TermElabM (Except String (List MVarId)) := do
@@ -84,15 +98,17 @@ def verifyFunction (n : Lean.Name) (f : String) : TermElabM Verdict := withCurrH
 `#verify` proved, written `⊨ spec[C]{f}` where `open scoped
 Solidity.Scoped` is in effect (`inScope`; `spec[C]{f}` is then
 `cspec[C]{f}`), `valid% cspec[C]{f}` (`Valid`) elsewhere. -/
-def provedTheorem (c : Lean.Name) (f : String) (inScope : Bool) : String :=
-  if inScope then s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by sol_spec"
-  else s!"theorem {f}_spec : valid% cspec[{c}]\{{f}} := by sol_spec"
+def provedTheorem (c : Lean.Name) (f : String) (inScope : Bool) (exactDecision : Bool := false) : String :=
+  let tactic := if exactDecision then "sol_exact" else "sol_spec"
+  if inScope then s!"theorem {f}_spec : ⊨ spec[{c}]\{{f}} := by {tactic}"
+  else s!"theorem {f}_spec : valid% cspec[{c}]\{{f}} := by {tactic}"
 
 /-- The report of a verdict: one line, then the witness or the first goal
 left (`inScope` as in `provedTheorem`). -/
 def Verdict.report (C : Contract) (c : Lean.Name) (f : String) (inScope : Bool) :
     Verdict → MetaM MessageData
   | .proved => pure m!"✓ {f}\n{provedTheorem c f inScope}"
+  | .provedExact => pure m!"✓ {f}\n{provedTheorem c f inScope true}"
   | .refuted r => pure (reportMsg (r.head f) r.lines)
   | .gaveUp [] note => pure m!"? {f}: gave up: {note}"
   | .gaveUp (g :: gs) _ =>
@@ -118,6 +134,12 @@ def elabVerify : Lean.Elab.Command.CommandElab := fun stx => liftTermElabM do
         Lean.Meta.Tactic.TryThis.addSuggestion stx
           { suggestion := .string (provedTheorem (short c) f inScope) }
       else logInfo (← Verdict.report C (short c) f inScope .proved)
+    | .provedExact =>
+      if suggest then
+        logInfo m!"✓ {f}"
+        Lean.Meta.Tactic.TryThis.addSuggestion stx
+          { suggestion := .string (provedTheorem (short c) f inScope true) }
+      else logInfo (← Verdict.report C (short c) f inScope .provedExact)
     | v => logInfo (← v.report C (short c) f inScope)
   match ← resolveTarget "#verify" stx[1].getId with
   | .function c C f => one c C f true

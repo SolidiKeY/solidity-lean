@@ -3,6 +3,7 @@ import Solidity.Tools.Inspect
 import Solidity.Calculus.Derive
 import Solidity.Calculus.Closers
 import Solidity.Calculus.ProvesDerive
+import Solidity.Tools.CompleteVerification
 
 /-!
 # The proof tree, pinned
@@ -968,5 +969,31 @@ example : ⊢ dl!{ [ uint[] memory row = new uint[](1); matrix.push(row); ] true
   sol_derive?
 
 end MemoryPushNative
+
+namespace ExactDecision
+
+local instance : InContract := ⟨StandardExample⟩
+open scoped Solidity.Scoped
+
+/--
+info: Try this:
+  exact
+    Decide.InputReduction.valid_of_decide
+      ((DeclarationReduction.certified Fml.tt DeclarationFacts.valid_true).input?.get
+        (id (Eq.refl true)))
+      (id (Eq.refl true))
+-/
+#guard_msgs in
+example : Valid (dl!{ true } : Fml StandardExample []) := by sol_exact?
+
+/-- Replay the offered certificate without tactic search. -/
+example : Valid (dl!{ true } : Fml StandardExample []) := by
+  exact
+    Decide.InputReduction.valid_of_decide
+      ((DeclarationReduction.certified Fml.tt DeclarationFacts.valid_true).input?.get
+        (id (Eq.refl true)))
+      (id (Eq.refl true))
+
+end ExactDecision
 
 end Solidity.Examples.ProofTree

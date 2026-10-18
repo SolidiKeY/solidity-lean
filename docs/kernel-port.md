@@ -26,7 +26,13 @@ parallel layer.  `docs/module-map.md` says what each module holds and
 | `Ch12_Termination` | retired at W4 `calc-del` (the scoped strategy is fuelled) |
 | `Ch13_Chains` | `Calculus/Chains.lean` |
 | `Ch14_Updates` | `Calculus/UpdRuleScoped.lean`, `Calculus/UpdateRules.lean` |
-| `Ch15_Decide` | `Calculus/Decide.lean` (the storage fragment), `Calculus/DecideComplete.lean` (realizability, `LFml.valid_iff_cons`) |
+| `Ch15_Decide` | `Calculus/Decide.lean` (storage reduction), `Calculus/DecideComplete.lean` (the bounded scoped closer); current typed read realization and its exact fragment are in `Calculus/ReadRealization.lean` and `Calculus/QueryReduction.lean`; `Calculus/ReadTrace.lean` and `Calculus/QueryReadBounds.lean` add bounded typed occurrence replay and no-loss witnesses |
+| `Ch19_Arith` | `Calculus/LinearDecision.lean`: complete local decision of Boolean combinations of linear equations and inequalities over natural assignments; `Calculus/ScalarCode.lean` and `Calculus/TypedLinear.lean` add exact bounded primitive contexts without dependencies. |
+| `Ch20_Decision`, `Ch21_NoLoss` | `Calculus/ExactReduction.lean` and `Calculus/QueryReduction.lean` prove exact reduction and read abstraction for their recognized leaf fragment; `Calculus/StaticLinear.lean` completes arithmetic compilation and both verdicts for static primitive equalities. `Calculus/CheckedLinear.lean` adds exact checked addition/subtraction, comparisons and Boolean expressions. `Calculus/ExactUpdates.lean` adds push-free update equivalence without memory-local destinations. `Calculus/ParameterReduction.lean` adds complete typed universal prefixes through that shared compiler. `Calculus/ProgramReduction.lean` adds exact assignments, primitive declarations, deletion, blocks, branches, require/assert/revert and primitive-result calls before that compiler. `Calculus/InputReduction.lean` reconstructs observed transaction fields, parameters and storage together; `Tools/CompleteVerification.lean` connects both original-function verdicts to `#verify`. `Calculus/TraceReduction.lean` adds exact original-source validity over consistent occurrence traces, with syntax-derived bounds; `Calculus/QueryArithmetic.lean` completes arithmetic extraction from explicit fixed-layout dependent-query certificates. `Calculus/AliasConstraints.lean` generates symbolic path-alias constraints through the existing comparison and checked compiler. `Calculus/DependentReduction.lean` adds automatic fresh occurrence flattening, guarded alias arithmetic and original-source proof/counterstate transport, including universal parameters and the public exact verifier. Broader arithmetic, interior quantifiers and remaining updates stay open. See `docs/complete-verification.md`. |
+| `Ch25_DeclarationFacts` | `Calculus/DeclarationFacts.lean`, integrated into specification-candidate certification by `Tools/Counterexample.lean`; `Calculus/DeclarationReduction.lean` removes certified facts by exact equivalence before read-query recognition |
+| `Ch27_Certificates` | Arithmetic finite-graph certificates are not ported; the declaration certificates above prove a different family of facts |
+| `Ch28_Countermodels` | `Calculus/LinearCountermodel.lean` extracts guaranteed arithmetic counterassignments from traced derivative graphs. `Calculus/ReadRealization.lean`, `Calculus/ReadQuery.lean`, `Calculus/QueryReduction.lean` reconstruct actual typed counterstates from supplied assignments; `Calculus/StaticLinear.lean` connects complete model extraction to original-source counterstates for static primitive equalities. `Calculus/CheckedLinear.lean` extends it to checked addition/subtraction, comparisons and Boolean expressions. `Calculus/ParameterReduction.lean` reconstructs typed universal parameter instances alongside storage. `Calculus/ProgramReduction.lean` transports both verdicts through supported source programs. `Calculus/InputReduction.lean` adds actual transaction-input reconstruction, and `Tools/CompleteVerification.lean` connects both verdicts to `#verify`. `Calculus/TraceReduction.lean` reconstructs original-source counterstates from supplied finite dependent-read values, rejecting conflicting aliases. `Calculus/QueryArithmetic.lean` adds complete value selection and actual counterstores from explicit alias-aware query certificates. `Calculus/AliasConstraints.lean` generates path-alias formulas and their arithmetic encodings. `Calculus/DependentReduction.lean` automatically compiles dependent mapping reads and reconstructs original-source counterstates through universal prefixes; interior quantifiers and broader source arithmetic remain open. |
+| `Ch29_StorageModels` | The separate Mathlib first-order storage-model packaging is not ported; this repository keeps its typed interpreter and Theory laws without external dependencies |
 | `Examples/` | `Solidity/Examples/` |
 
 Beyond mini-solkey: type soundness and reachability (`Typing/`), sort
@@ -78,10 +84,25 @@ and the run, and moved the calculus onto both.
   interpreter reads keys as `Int`) nor `tree` (a struct recursive through a
   mapping, which `structRank` forbids).  The corpus's `TestSuite` rows come
   from the imported contract, which has `boolKeyed` (`Corpus/Imported.lean`).
-- **`sol_decide`, past realizability.**  A write or `delete` through a member
-  named `length` falls back to `sol_decide_heuristic`, and `omega`/`grind` are
-  not proved complete on the statement realizability leaves
-  (`Calculus/DecideComplete.lean`).  Memory the updates allocate is read
+- **Complete decision and countermodels.** The scoped closer is sound but
+  bounded (`Calculus/DecideComplete.lean`); failure is not a refutation.
+  Exact reduction and typed read realization now cover a recognized leaf
+  fragment, and complete automatic model extraction covers static primitive
+  read/literal equalities, checked addition/subtraction, comparisons and Boolean
+  expressions, also after supported push-free updates with no memory locals
+  in their output context. Exact source-program reduction now covers assignments,
+  primitive declarations, deletion, blocks, branches, require/assert/revert and
+  primitive-result calls. Observed transaction inputs are reconstructed exactly
+  by `Calculus/InputReduction.lean`, with both verdicts connected to `#verify`.
+  Dependent-key traces now have bounded no-loss witnesses and original-source
+  counterstate replay (`Calculus/TraceReduction.lean`), with values supplied
+  externally; `Calculus/QueryArithmetic.lean` also provides complete arithmetic
+  selection from explicit fixed-layout query certificates.
+  `Calculus/DependentReduction.lean` now supplies automatic occurrence
+  flattening, guarded aliases and original-function proof/counterstates through
+  universal parameters, connected to `sol_exact` and `#verify`. Broader source
+  arithmetic and remaining updates stay open (`docs/complete-verification.md`). Memory the updates
+  allocate is read
   by solkey's `memoryRules.key`/`structMemoryRules.key` taclets
   (`Calculus/MemRead.lean`; `docs/lean-key-rule-map.md`, "The closer's
   memory clauses"), copies between memory and storage included; a `push`

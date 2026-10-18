@@ -3,6 +3,7 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.SoundLoops
 import Solidity.Semantics.RunFuel
 import Solidity.Tools.Common
+import Solidity.Calculus.DeclarationFacts
 
 /-!
 # Counterexamples: scoped formulas evaluated in a typed state
@@ -48,10 +49,12 @@ formula from it: `Fml.not_valid_of_eval3Peel` applied to
 `Fml.eval3Peel dom vals σ₀ φ = .ff`, `φ` with its leading parameters bound
 to the witness's arguments `vals` (`Fml.peel`), which the kernel decides by
 evaluating `peel`, `eval3` and the typed run on closed terms, the
-candidate's typed state quoted constructor by constructor (`certifyRefl`).  That needs every
-premise to evaluate to `tt` in `σ₀`, and so fails when one is quantified
-over a `uint`, as the layout premise of a mapping is; the witness is then
-only **tested**.  What the kernel runs is written by the recursor
+candidate's typed state quoted constructor by constructor (`certifyRefl`).
+When a quantified declaration premise cannot evaluate to `tt`, the fallback
+(`certifyDeclarations`) proves its ranges and total reads structurally
+(`Calculus/DeclarationFacts.lean`) and evaluates the remaining premises and
+the body. Every premise of the original obligation is proved; unsupported
+premises can still leave the witness only **tested**. What the kernel runs is written by the recursor
 (`Fml.eval3`, `Fml.peel`, `Prog.runF`; Gate G0 conditions 1 and 2), each
 with a compiled `match` twin the search runs (`Fml.eval3C`, `Fml.peelC`,
 `Prog.runFC`) and a theorem that they agree.
@@ -759,6 +762,26 @@ theorem Fml.not_valid_of_eval3Peel {dom : TDom} (vals : List (Var × Semantics.C
   obtain ⟨_, σ', ψ⟩ := q
   exact key (Fml.eval3_ff h) (hv σ)
 
+/-- A proof of failure under the chosen parameters refutes the original
+formula. This permits structural proofs of quantified declaration premises
+alongside the finite evaluator's proof of a false consequent. -/
+theorem Fml.not_valid_of_peel (vals : List (Var × Semantics.CallValue)) (σ : State C [])
+    {φ : Fml C []}
+    (h : ¬ holds (Fml.peel vals σ φ).2.1 (Fml.peel vals σ φ).2.2) : ¬ Valid φ := by
+  intro hv
+  have key := Fml.not_holds_of_peelC vals σ φ
+  rw [← Fml.peel_eq] at key
+  exact key h (hv σ)
+
+/-- A true entry premise and an evaluated false body refute the implication. -/
+theorem Fml.not_holds_imp_of_eval3 (dom : TDom) {Γ : Ctx} {σ : State C Γ} {pre body : Fml C Γ}
+    (hp : holds σ pre) (hb : body.eval3 dom σ = .ff) : ¬ holds σ (.imp pre body) :=
+  fun h => Fml.eval3_ff hb (h hp)
+
+/-- Entry premises are proved conjunct by conjunct without dropping any. -/
+theorem Fml.holds_and_intro {Γ : Ctx} {σ : State C Γ} {φ ψ : Fml C Γ}
+    (hφ : holds σ φ) (hψ : holds σ ψ) : holds σ (.and φ ψ) := ⟨hφ, hψ⟩
+
 /-- The first `n` conjuncts of `φ₁ ∧ (φ₂ ∧ …)`, the last one the rest
 (`Fml.conj`'s shape). -/
 def Fml.conjN {Γ : Ctx} : Nat → Fml C Γ → List (Fml C Γ)
@@ -1077,6 +1100,75 @@ def certifyRefl (cE φE : Expr) (lits : List Int) (vals : List (Var × Semantics
   | .ok _ => pure true
   | .error _ => pure false
 
+/-- Prove each entry premise by the typed declaration laws or by its finite
+evaluation. The shared budget bounds conjunction traversal; a universal
+formula can only be accepted through an actual proof of that formula. -/
+private partial def certifyPremise (domE : Expr) (g : MVarId) : StateRefT Nat MetaM Unit := do
+  let n ← get
+  if n == 0 then throwError "counterexample: entry-premise budget exhausted"
+  set (n - 1)
+  g.withContext do
+    let ty ← g.getType
+    let_expr holds _ _ σ φ := ty | throwError "counterexample: expected an entry premise"
+    let saved ← saveState
+    try
+      let proof ← liftM <| DeclarationFacts.prove φ (conjunctions := false)
+      g.assign (mkApp proof σ)
+      return
+    catch _ => saved.restore
+    -- Split mixed premises before evaluation or further structural search:
+    -- otherwise each successive tail would re-traverse the declaration prefix.
+    let saved ← saveState
+    let conjunction ← try
+      pure (some (← g.apply (← mkConstWithFreshMVarLevels ``Fml.holds_and_intro)))
+    catch _ => saved.restore; pure none
+    if let some goals := conjunction then
+      for next in goals do certifyPremise domE next
+      return
+    let saved ← saveState
+    try
+      let ev ← mkAppM ``Fml.eval3 #[domE, σ, φ]
+      let eq ← mkEq ev (mkConst ``Tri.tt)
+      unless ← isDefEq (← mkDecide eq) (mkConst ``Bool.true) do
+        throwError "counterexample: finite evaluator did not establish the entry premise"
+      let h ← mkDecideProof eq
+      g.assign (← mkAppM ``Fml.eval3_tt #[h])
+      return
+    catch _ => saved.restore
+    throwError "counterexample: entry premise is not certified"
+
+/-- Certify the original scoped obligation with structural declaration
+facts. This is a fallback when a mapping's universal layout makes the
+finite evaluator return `unknown`; the kernel checks the complete proof. -/
+def certifyDeclarations (cE φE : Expr) (lits : List Int)
+    (vals : List (Var × Semantics.CallValue)) (c : Cand C)
+    (heartbeats : Nat := 100000) : MetaM Bool := do
+  let saved ← saveState
+  let result ← tryCatchRuntimeEx (withCurrHeartbeats do
+    let domE := mkApp (mkConst ``poolDom) (toExpr lits)
+    let σE := mkApp2 (mkConst ``Cand.tstate) cE (c.quote cE)
+    let type := mkNot (← mkAppM ``Solidity.Valid #[φE])
+    let goal ← mkFreshExprMVar type
+    let peel ← mkAppM ``Fml.not_valid_of_peel #[toExpr vals, σE]
+    let [failure] ← goal.mvarId!.apply peel | return false
+    let rule := mkApp2 (mkConst ``Fml.not_holds_imp_of_eval3) cE domE
+    let [pre, body] ← failure.apply rule | return false
+    (certifyPremise domE pre).run' 1024
+    let h ← mkDecideProof (← body.getType)
+    body.assign h
+    let value ← instantiateMVars goal
+    if value.hasSorry || value.hasMVar then return false
+    let decl := Declaration.thmDecl {
+      name := `_counterexample_declaration_certificate, levelParams := [], type, value }
+    let opts := maxHeartbeats.set (← getOptions) heartbeats
+    let result := match Kernel.Environment.addDecl (← getEnv).toKernelEnv opts decl with
+      | .ok _ => true
+      | .error _ => false
+    return result) fun _ => do
+      pure false
+  saved.restore
+  pure result
+
 /-- A refutation: the witness, printed (`Witness.lines`), whether the
 kernel certified it, and the conjuncts it fails. -/
 structure Refutation where
@@ -1113,9 +1205,11 @@ def refuteSpec (n : Lean.Name) (C : Contract) (f : String) (budget : Nat := 2000
     let c := w.cand
     let lits := P.domLits c
     -- the kernel is asked only what the evaluator already answered
-    let certified ← if Fml.eval3Peel (poolDom lits) c.vals (c.tstate C)
+    let direct ← if Fml.eval3Peel (poolDom lits) c.vals (c.tstate C)
         P.fml = .ff then certifyRefl cE (Fml.quote cE P.fml) lits c.vals c
       else pure false
+    let certified ← if direct then pure true else
+      certifyDeclarations cE (Fml.quote cE P.fml) lits c.vals c
     let fails := w.failing.map fun i => postLabel C P.decl cE i (P.posts.getD i NRead.tt)
     pure (.ok (s, some { witness := w.lines C, certified, fails }))
 

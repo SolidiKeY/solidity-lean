@@ -329,6 +329,76 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `TestSuite/Report.lean` | The pinned count: derived, pending (named), and rows without statements (excluded, skipped, unsupported and internal helpers). |
 | `TestSuite/Suggestions.lean` | `#solkey_derive?` suggestions pinned by name, off the `Derived` modules' import path; `returnEarly` and `tupleReturnDiscardsComponents` pinned as derived since ground splits are pruned. |
 
+## Exact verification
+
+| Module | What it defines |
+|---|---|
+| `Calculus/DeclarationFacts.lean` | Generated scalar, struct and mapping ranges certified by total declaration reads (`declaration_facts[C]`, `sol_decl_facts`). |
+| `Calculus/ExactReduction.lean` | Structurally agreeing positive/negative reductions, their per-state equivalence and exact read-elimination transport. |
+| `Calculus/ExactUpdates.lean` | Constructive landing states without memory locals, exact push-free update guards, compositional scoped reductions and original-source certificates (`sourceReduction?`). |
+| `Calculus/ExactRun.lean` | Exact update/run agreement with termination and exhaustion conditions; statement certificates for local/storage assignment, deletion and primitive declarations. |
+| `Calculus/ProgramReduction.lean` | Exact bounded normalization of supported source programs, primitive-result calls, scope frames and primitive binders; control-flow failure/panic distinctions and original-program arithmetic proofs/counterstates (`programReduction?`). |
+| `Calculus/ReadRealization.lean` | Alias-consistent finite typed reads realized by actual saves (`Assignment.realizable_iff`). |
+| `Calculus/ReadQuery.lean` | Finite computations with read-dependent locations and trace-preserving reconstruction (`Query.run_realize`). |
+| `Calculus/ReadTrace.lean` | Typed occurrence replay, actual-length composition, alias-consistent storage realization and bounded/no-loss trace witnesses. |
+| `Calculus/QueryReduction.lean` | Recognition of existing typed leaf expressions and universal-prefix formulas, source-to-query equivalence (`ReadReduction.valid_iff`) and certified counterstates from supplied assignments. |
+| `Calculus/QueryReadBounds.lean` | Syntax-derived bounds for every typed leaf-query occurrence stream and selected branch. |
+| `Calculus/TraceReduction.lean` | Original-source validity over consistent dependent-read traces and actual counterstates from supplied finite occurrence values. |
+| `Calculus/QueryArithmetic.lean` | Exact finite typed occurrence layouts, complete arithmetic validity and actual counterstore extraction from alias-aware query certificates. |
+| `Calculus/SymbolicPaths.lean` | Bounded recognition of existing rooted path terms as the closer's symbolic paths, preserving optional key/path evaluation exactly. |
+| `Calculus/AliasConstraints.lean` | Existing path-comparison trees compiled to alias formulas/arithmetic, with successful-path side conditions and exact finite read-matrix consistency. |
+| `Calculus/PathGuards.lean` | Exact optional definedness guards and declaration proofs for root/field/mapping paths, retaining failed keys. |
+| `Calculus/FlattenReads.lean` | Shared-budget source term/formula flattening into fresh typed read occurrences, with local evaluation equivalence and atom-bound agreement. |
+| `Calculus/ReadFree.lean` | Executable zero-read query certificates proving term/formula storage independence. |
+| `Calculus/OccurrenceLayout.lean` | Checked causal fresh slots, actual-state filling, active assignment extraction and consistent-storage reconstruction. |
+| `Calculus/ReadFlattening.lean` | Exact source-leaf validity over consistent fresh occurrences, with actual original-leaf counterstates. |
+| `Calculus/ActiveReadConstraints.lean` | Guarded symbolic alias formulas exactly equivalent to active occurrence consistency, including failed paths. |
+| `Calculus/LeafArithmetic.lean` | Automatic typed input collection and complete arithmetic decisions/counterstates for flattened leaves, with a pair-count budget. |
+| `Calculus/LeafInputs.lean` | Term/formula agreement at exactly their typed atom inputs and universal-prefix assignment agreement. |
+| `Calculus/DependentReduction.lean` | Automatic dependent-read original-source proofs/counterstates through exact normalization, covered universal parameters and guarded arithmetic. |
+| `Calculus/DeclarationReduction.lean` | Exact removal of certified declaration premises through logical connectives and typed quantifiers (`declaration_reduce`, `declaration_read_reduce`, `DeclarationReadReduction.valid_iff`). |
+| `Calculus/LinearDecision.lean` | Complete binary-derivative decision of Boolean combinations of linear equations and inequalities over natural assignments (`AFml.decide_iff`); no external dependencies. |
+| `Calculus/LinearCountermodel.lean` | Traced graph exploration equivalent to the arithmetic decision, guaranteed counterassignment extraction, finite-list witnesses and a proof-or-model verifier using one traversal. |
+| `Calculus/LinearSyntax.lean` | Macro-only `linear!{ … }` notation for the arithmetic intermediate language and its numbered-variable printer. |
+| `Calculus/ScalarCode.lean` | Exact primitive-value codes, signed offset, checked decoding, codec inverses and arithmetic range constraints. |
+| `Calculus/TypedLinear.lean` | Complete guarded arithmetic decisions over finite heterogeneous primitive contexts with decoded typed counterassignments. |
+| `Calculus/LinearForms.lean` | Affine literals and variables, linear subtraction and exact equality/inequality translation. |
+| `Calculus/ReadLayout.lean` | Distinct actual-reference layouts, typed observation vectors and successful-save realization of every vector. |
+| `Calculus/ParameterLayout.lean` | Typed atom keys, finite parameter/storage vectors, prefix instantiation and independent reconstruction with exact observation readback. |
+| `Calculus/InputLayout.lean` | Observed transaction fields before parameter/storage vectors, independent actual-state reconstruction and exact observation readback. |
+| `Calculus/InputReduction.lean` | Exact source-program and typed-input compilation, original validity equivalence, complete proof-or-counterstate decisions and finite scalar-code replay. |
+| `Calculus/StaticLinear.lean` | Automatic exact compilation of static primitive read/literal/defined-constant equalities and logical connectives, with original-formula proofs or guaranteed typed counterstates. |
+| `Calculus/CheckedScalar.lean` | Exact definedness guards and affine signed/unsigned codes for checked addition/subtraction; defined equality preserves failed computations. |
+| `Calculus/CheckedBool.lean` | Exact true/false success predicates for partial Boolean values, short circuit, strict equality and signed/unsigned comparisons. |
+| `Calculus/CheckedLinear.lean` | Shared checked arithmetic, Boolean and definedness compilation over observed environment fields and finite typed parameter contexts; empty-prefix storage/update counterstates (`checkedReduction?`). |
+| `Calculus/ParameterReduction.lean` | Exact universal-prefix compilation, validity equivalence and guaranteed original-source counterstates with failing typed parameter instances (`parameterReduction?`); equality-certified explicit witness layouts (`withLayout`). |
+| `Calculus/DeclarationStaticReduction.lean` | Certified declaration normalization before static/checked/parameter/input decisions and trace replay, with a shared compiled recognizer and kernel-checked computation equality. |
+| `Tools/CompleteVerification.lean` | Compiled exact decisions with kernel-checked original proofs or finite countermodel replay, `sol_exact`/`sol_exact?`, and actual-state report fallback. |
+| `Tools/QueryArithmetic.lean` | Compiled arithmetic value selection for dependent-query certificates (`query_countermodel`) and independently kernel-checked finite-code replay. |
+| `Tools/LeafArithmetic.lean` | Compiled automatic leaf countermodels (`leaf_countermodel`) with independently kernel-checked original-leaf refutations. |
+| `Examples/ReadRealization.lean` | Mixed typed finite reads, equal locations and unrealizable conflicting aliases. |
+| `Examples/ExactReduction.lean` | Exact leaf certificates and rejection of directional program/update fallbacks. |
+| `Examples/QueryReduction.lean` | Original-formula counterstates with dependent mapping keys, typed quantified instances and nested mapped struct fields; unsupported-fragment regressions. |
+| `Examples/ReadTrace.lean` | Nested-read and original-function trace counterstates, finite typed occurrences, skipped reads, source-level alias acceptance/conflict rejection and retained quantified requirements. |
+| `Examples/QueryArithmetic.lean` | Solver-selected nested-read original counterstates, positive alias validity, heterogeneous signed/Boolean/unsigned extraction and forged-code/valid-query rejection. |
+| `Examples/AliasConstraints.lean` | Generated alias/arithmetic original counterstates, source-path/checked-key recognition, nested typed keys/fields, subset aliases and failed path/result witness rejection. |
+| `Examples/ReadFlattening.lean` | Automatic dependent leaves, positive/negative arithmetic, actual mixed storage, high fresh positions, failed/overflowing keys, alternatives and resource budgets. |
+| `Examples/DependentReduction.lean` | Public original-function dependent-read verdicts, mixed arguments, minimal reports, forged-code rejection and retained quantified requirements. |
+| `Examples/DeclarationReduction.lean` | Generated declaration premises removed exactly, also beneath parameters, with true/false user requirements preserved and false quantified facts rejected. |
+| `Examples/LinearDecision.lean` | Parity validity and extracted arithmetic models, negative coefficients/targets, different widths, finite-list witnesses and both verifier verdicts. |
+| `Examples/TypedLinear.lean` | Codec boundaries and rejection, Boolean range constraints, unsigned 17 and mixed Boolean/signed/unsigned counterassignments. |
+| `Examples/StaticLinear.lean` | Automatic original-formula counterstates, actual alias sharing, mixed typed reads, retained declaration/user premises and unsupported-source rejection. |
+| `Examples/CheckedLinear.lean` | Checked source arithmetic, all signed/unsigned bounds, failed equality, intermediate cancellation, no-wrap premises, and declaration-normalized original counterstates. |
+| `Examples/BooleanLinear.lean` | Original-source numeric comparisons, interval counterstates, partial Boolean expressions, short-circuit order and strict equality. |
+| `Examples/ExactUpdates.lean` | Box/diamond update failure, successful false values, storage writes and counterstates, parallel binding/swap, and memory-context/push/program rejection. |
+| `Examples/ParameterReduction.lean` | Automatic typed parameter and storage counterinstances, repeated reads, mixed types, overflow, updates and declaration premises beneath a universal prefix. |
+| `Examples/ProgramReduction.lean` | Original-program proofs and counterstates, nested blocks, checked local failure, require/assert/revert, both branches, ignored panic, partial conditions and unsupported-program rejection. |
+| `Examples/CallReduction.lean` | Void/scalar/tuple/nested call decisions and original counterstates, discarded/default returns, caller-local preservation, failed arguments and callee panic/revert. |
+| `Examples/InputReduction.lean` | All five transaction fields, mixed typed parameters/storage, actual function validity and explicit original-function countermodel certificates. |
+| `Examples/CompleteVerification.lean` | Public exact proof/countermodel reports, generated mapping premises, mixed function arguments, nonzero contract address and minimal report fallback. |
+
+See `docs/complete-verification.md` for integration and open work.
+
 ## Examples
 
 `Tools/LatexTerm.lean` renders scoped terms, updates and formulas from

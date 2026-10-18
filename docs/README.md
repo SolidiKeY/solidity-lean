@@ -13,6 +13,7 @@ the others link to it.
 | [solc-alignment.md](solc-alignment.md) | Where the interpreter follows solc rather than KeY, and why. |
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
+| [complete-verification.md](complete-verification.md) | Declaration certificates, exact reductions, automatic dependent-read compilation, guarded aliases, original-source countermodels and the complete `#verify` fragment. |
 | [solkey-migration.md](solkey-migration.md) | Pinned upstream inputs, migration tooling, evidence and remaining parity work. |
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files and directories: CLI, JavaScript and Lean APIs, results and limits. |
 | [testsuite-proofs.md](testsuite-proofs.md) | Proving solkey's TestSuite by `⊢`: the decisions, the milestones, the measured costs. |
