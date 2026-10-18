@@ -89,12 +89,10 @@ end Tm
 
 namespace Tm
 
-/-- **`findOnSave`** on terms: `find(save(s, p, sval(v)), p) = v` where the
-write lands (solkey's `selectOnSaveCons` `\then`; `Storage.findOnSave`). -/
-theorem findOnSave (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
-    (q : Tm C Γ (.path (.prim p))) (v : Tm C Γ (.val p))
-    (hd : (Tm.app3 .save s q (.app1 .sval v)).eval σ ≠ none) :
-    (Tm.app2 .find (.app3 .save s q (.app1 .sval v)) q).eval σ = v.eval σ := by
+set_option hygiene false in
+/-- The proof of `findOnSave`, at a root (`save`/`find`) and under a `select`
+(`saveIn`/`findIn`): both read `Storage.findOnSave` where the write lands. -/
+local macro "find_on_save" : tactic => `(tactic| (
   simp only [eval_app1, eval_app2, eval_app3, Op1.eval_eq_evalM, Op2.eval_eq_evalM,
     Op3.eval_eq_evalM, Op1.evalM, Op2.evalM, Op3.evalM, Option.bind_eq_bind] at hd ⊢
   cases hs : s.eval σ <;> cases hq : q.eval σ <;> cases hv : v.eval σ <;>
@@ -105,7 +103,15 @@ theorem findOnSave (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
   | none => simp only [hw, not_true_eq_false] at hd
   | some st' =>
     simp only [Option.bind_some, Storage.findOnSave st r w hw]
-    rfl
+    rfl))
+
+/-- **`findOnSave`** on terms: `find(save(s, p, sval(v)), p) = v` where the
+write lands (solkey's `selectOnSaveCons` `\then`; `Storage.findOnSave`). -/
+theorem findOnSave (σ : State C Γ) {p : PrimTy} (s : Tm C Γ .st)
+    (q : Tm C Γ (.path (.prim p))) (v : Tm C Γ (.val p))
+    (hd : (Tm.app3 .save s q (.app1 .sval v)).eval σ ≠ none) :
+    (Tm.app2 .find (.app3 .save s q (.app1 .sval v)) q).eval σ = v.eval σ := by
+  find_on_save
 
 /-- **`findOnSaveFrame`** across roots on terms: a write leaves a read at
 another state variable (solkey's `selectOnSaveCons` `\else`;
@@ -135,17 +141,7 @@ theorem findOnSaveIn (σ : State C Γ) {sn : Name} {p : PrimTy} (s : Tm C Γ (.s
     (q : Tm C Γ (.spath sn (.prim p))) (v : Tm C Γ (.val p))
     (hd : (Tm.app3 .saveIn s q (.app1 .sval v)).eval σ ≠ none) :
     (Tm.app2 .findIn (.app3 .saveIn s q (.app1 .sval v)) q).eval σ = v.eval σ := by
-  simp only [eval_app1, eval_app2, eval_app3, Op1.eval_eq_evalM, Op2.eval_eq_evalM,
-    Op3.eval_eq_evalM, Op1.evalM, Op2.evalM, Op3.evalM, Option.bind_eq_bind] at hd ⊢
-  cases hs : s.eval σ <;> cases hq : q.eval σ <;> cases hv : v.eval σ <;>
-    simp only [hs, hq, hv, Option.bind_none, Option.bind_some, Option.map_some, Option.map_none,
-      ne_eq, not_true_eq_false] at hd ⊢
-  rename_i st r w
-  cases hw : st.write r (.prim w) with
-  | none => simp only [hw, not_true_eq_false] at hd
-  | some st' =>
-    simp only [Option.bind_some, Storage.findOnSave st r w hw]
-    rfl
+  find_on_save
 
 end Tm
 

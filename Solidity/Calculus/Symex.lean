@@ -38,6 +38,14 @@ theorem Fml.modalStep_sound (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P :
     cases h
     exact Stmt.sound k m s _ rfl σ ω κ φ hψ
 
+set_option hygiene false in
+/-- A connective over one formula: its step is the step of the formula under
+it (`φ'`, `hφ : φ.stepR k = some φ'`), the connective `f` around it. -/
+local macro "step_under " f:term:max : tactic => `(tactic| (
+  intro χ h σ hχ
+  obtain ⟨φ', hφ, rfl⟩ :=
+    Option.map_eq_some_iff.1 (show (Fml.stepR k φ).map $f = some χ from h)))
+
 /-- **One step of the strategy is sound**, at any fresh index. -/
 theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     ∀ {ψ : Fml C Γ}, φ.stepR k = some ψ → ∀ σ, holds σ ψ → holds σ φ := by
@@ -55,35 +63,23 @@ theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     · obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 h
       exact ⟨hχ.1, ihψ hψ σ hχ.2⟩
   | imp a φ _ ih =>
-    intro χ h σ hχ
-    change (Fml.stepR k φ).map (Fml.imp a) = some χ at h
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    step_under (Fml.imp a)
     exact fun ha => ih hφ σ (hχ ha)
   | upd m U φ ih =>
-    intro χ h σ hχ
-    change (Fml.stepR k φ).map (Fml.upd m U) = some χ at h
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    step_under (Fml.upd m U)
     exact Upd.afterT_imp hχ fun σ' h => ih hφ σ' h
   | modal m P κ φ => intro χ h σ hχ; exact Fml.modalStep_sound k m P κ φ h σ hχ
   | havoc φ ih =>
-    intro χ h σ hχ
-    change (Fml.stepR k φ).map Fml.havoc = some χ at h
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    step_under Fml.havoc
     exact fun st nt => ih hφ _ (hχ st nt)
   | all x p φ ih =>
-    intro χ h σ hχ
-    change (Fml.stepR k φ).map (Fml.all x p) = some χ at h
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    step_under (Fml.all x p)
     exact fun v => ih hφ _ (hχ v)
   | bind m x t φ ih =>
-    intro χ h σ hχ
-    change (Fml.stepR k φ).map (Fml.bind m x t) = some χ at h
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    step_under (Fml.bind m x t)
     exact Modality.forallB_imp (fun v => ih hφ _) hχ
   | anon xs φ ih =>
-    intro χ h σ hχ
-    change (Fml.stepR k φ).map (Fml.anon xs) = some χ at h
-    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
+    step_under (Fml.anon xs)
     exact fun b => ih hφ _ (hχ b)
 
 /-- `n` steps are sound. -/
