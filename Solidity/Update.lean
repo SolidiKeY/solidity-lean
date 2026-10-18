@@ -1,4 +1,3 @@
-import Solidity.TermSimp
 import Solidity.Theory.Segs
 
 /-!

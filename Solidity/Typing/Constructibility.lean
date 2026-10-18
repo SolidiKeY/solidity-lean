@@ -31,11 +31,6 @@ open Semantics (structDef lookupBy setBy nodupKeysB lookupBy_eq_some_mem)
 
 variable {C : Contract}
 
-/-- A sequence followed by another. -/
-def Prog.append {Γ Δ Ε : Ctx} : Prog C Γ Δ → Prog C Δ Ε → Prog C Γ Ε
-  | .nil, Q => Q
-  | .cons s P, Q => .cons s (P.append Q)
-
 /-- One statement `n` times. -/
 def Prog.rep {Γ : Ctx} (n : Nat) (s : Stmt C Γ Γ) : Prog C Γ Γ :=
   match n with
@@ -48,10 +43,6 @@ namespace Build
 
 /-- The name of the alias a fill at depth `d` binds. -/
 def slot (d : Nat) : Var := .fresh "slot" d
-
-theorem inRange_of_lt {j : Nat} (h : j < 2 ^ 256) : PrimTy.uint.inRange (j : Int) = true := by
-  simp only [PrimTy.inRange, decide_eq_true_eq]
-  omega
 
 /-- The literal `n` at the numeric type `p`, or `0` where `n` is out of its
 range (an index the builder writes has none, `SVal.Fits`). -/
@@ -70,7 +61,7 @@ def litOf {Γ : Ctx} : (p : PrimTy) → p.Denote → Simple C Γ p
 
 /-- An index below `2^256` as a `uint`. -/
 def idxU (j : Nat) (hb : j < 2 ^ 256) : PrimTy.uint.Denote :=
-  (⟨(j : Int), inRange_of_lt hb⟩ : {n : Int // PrimTy.uint.inRange n = true})
+  (⟨(j : Int), lenU_inRange hb⟩ : {n : Int // PrimTy.uint.inRange n = true})
 
 /-- `{ R storage slot d = q; body }`: the alias bound for the body, which
 fills through it, and ended with the block. -/
@@ -96,8 +87,8 @@ def fill {Γ : Ctx} (d : Nat) : {T : Ty} → SPath C Γ T → SVal T → Prog C 
       (if hE : E.defaultOkS = true then
         (Prog.rep (n + sh.length)
             (.push (.alias .here : SPath C _ (.array E)) none (by simp only [Option.isSome_none,
-                hE, Bool.or_true]))).append
-          ((fillShadow d .here n sh).append (fillElems d (ArrTy.dyn (E := E)) .here 0 e))
+                hE, Bool.or_true]))).join
+          ((fillShadow d .here n sh).join (fillElems d (ArrTy.dyn (E := E)) .here 0 e))
       else .nil)
   | .ref (.fixed E n), q, .fixed e => bound d _ q (fillElems d (ArrTy.fixed (E := E) (n := n)) .here 0 e)
   | .ref (.mapping K _), q, .map m _ => bound d _ q (fillEntries d K .here m)
@@ -108,7 +99,7 @@ def fillFields {Γ : Ctx} (d : Nat) {s : Name} (a : Idx Γ (.alias (.struct s)))
     SFields fs → Prog C Γ Γ
   | _, _, .nil => .nil
   | (f, T) :: _, hsub, .cons v rest =>
-      (fill (d + 1) (.loc (.field (.alias a) f (hsub f T List.mem_cons_self))) v).append
+      (fill (d + 1) (.loc (.field (.alias a) f (hsub f T List.mem_cons_self))) v).join
         (fillFields d a (fun g U hm => hsub g U (List.mem_cons_of_mem _ hm)) rest)
 
 /-- The slots past the end of the array bound to `a`, from the last: slot
@@ -118,7 +109,7 @@ def fillShadow {Γ : Ctx} (d : Nat) {E : Ty} (a : Idx Γ (.alias (.array E))) (i
     SList E → Prog C Γ Γ
   | .nil => .nil
   | .cons w rest =>
-      (fillShadow d a (i + 1) rest).append
+      (fillShadow d a (i + 1) rest).join
         (match (generalizing := false) hE : E with
          | .prim _ => .cons (.pop (.alias a)) .nil
          | .ref R => bound (d + 1) R
@@ -130,7 +121,7 @@ def fillElems {Γ : Ctx} (d : Nat) {R : RefTy} {E : Ty} (ak : ArrTy R E) (a : Id
     (j : Nat) : {n : Nat} → SVec E n → Prog C Γ Γ
   | _, .nil => .nil
   | _, .cons w rest =>
-      (fill (d + 1) (.loc (.index (.arr ak) (.alias a) (.simple (numLit .uint rfl (j : Int))))) w).append
+      (fill (d + 1) (.loc (.index (.arr ak) (.alias a) (.simple (numLit .uint rfl (j : Int))))) w).join
         (fillElems d ak a (j + 1) rest)
 
 /-- The entries of the mapping bound to `a`: each created by `delete`, then
@@ -140,7 +131,7 @@ def fillEntries {Γ : Ctx} (d : Nat) (k : PrimTy) {V : Ty}
   | .nil => .nil
   | .cons key w rest =>
       .cons (.delete (.index .map (.alias a) (.simple (litOf k key)) : Loc C Γ V))
-        ((fill (d + 1) (.loc (.index .map (.alias a) (.simple (litOf k key)))) w).append
+        ((fill (d + 1) (.loc (.index .map (.alias a) (.simple (litOf k key)))) w).join
           (fillEntries d k a rest))
 
 end
@@ -287,7 +278,7 @@ theorem TRuns.cons_inv {Γ₁ Γ₂ : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ�
 
 theorem TRuns.append : {Γ Δ Ε : Ctx} → {σ : State C Γ} → {P : Prog C Γ Δ} →
     {Q : Prog C Δ Ε} → {τ : State C Δ} → {υ : State C Ε} → TRuns σ P τ → TRuns τ Q υ →
-    TRuns σ (P.append Q) υ
+    TRuns σ (P.join Q) υ
   | _, _, _, _, .nil, _, _, _, hP, hQ => by
     obtain ⟨o, ho, rfl⟩ := hP
     cases ho
@@ -328,7 +319,7 @@ theorem resolveT_index_lit {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R 
     (hck : σ.storage.checkIndex ref (.arr ak) (idxU j hb) = some ()) :
     (Loc.index (C := C) (.arr ak) (.alias a) (.simple (numLit .uint rfl (j : Int)))).resolveT σ =
       .ok (ref.index (.arr ak) (idxU j hb)) := by
-  rw [numLit_eq (inRange_of_lt hb)]
+  rw [numLit_eq (lenU_inRange hb)]
   show (do
     let r ← (SPath.alias a).resolveT σ
     let k ← (Val.simple (Simple.lit (C := C) (Γ := Γ) (p := .uint) (j : Int) _)).evalT σ
@@ -336,7 +327,7 @@ theorem resolveT_index_lit {σ : State C Γ} {R : RefTy} {E : Ty} (ak : ArrTy R 
     pure (r.index (.arr ak) k) : TRes _) = _
   rw [resolveT_alias h]
   simp only [bind, Except.bind, Val.evalT, Simple.evalT]
-  rw [show PrimTy.ofLit .uint (j : Int) (inRange_of_lt hb) = idxU j hb from rfl, hck]
+  rw [show PrimTy.ofLit .uint (j : Int) (lenU_inRange hb) = idxU j hb from rfl, hck]
   rfl
 
 theorem resolveT_index_map {σ : State C Γ} {k : PrimTy} {V : Ty} {key : k.Denote}
@@ -1092,7 +1083,7 @@ def rootsProg (st : Storage C) :
     (vs : List (Name × Ty)) → (∀ r T, (r, T) ∈ vs → C.rootType r = some T) → Prog C [] []
   | [], _ => .nil
   | (r, T) :: vs, h =>
-    (fill 0 (.loc (.root r (h r T List.mem_cons_self))) (st.get (h r T List.mem_cons_self))).append
+    (fill 0 (.loc (.root r (h r T List.mem_cons_self))) (st.get (h r T List.mem_cons_self))).join
       (rootsProg st vs fun r' T' hm => h r' T' (List.mem_cons_of_mem _ hm))
 
 theorem rootsProg_run (st : Storage C) (hnd : nodupKeysB C.vars = true) :

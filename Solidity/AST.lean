@@ -116,8 +116,7 @@ theorem FixedCopy.eq {E : Ty} {n : Nat} {R : RefTy} (a b : FixedCopy E n R) : a 
 
 namespace Ty
 
-/- Source-level names of the primitive types, usable in patterns.
-The package and the `SolKey` reader match through these. -/
+/- Source-level names of the primitive types, usable in patterns. -/
 @[match_pattern] abbrev bool : Ty := .prim .bool
 @[match_pattern] abbrev uint : Ty := .prim .uint
 @[match_pattern] abbrev int : Ty := .prim .int
@@ -149,12 +148,6 @@ def elemIsPrim : Ty -> Bool
   | ref (.fixed e _) => e.isPrimitive
   | _ => false
 
-def indexElemTy : Ty -> Ty
-  | Ty.ref (RefTy.array elem) => elem
-  | Ty.ref (RefTy.fixed elem _) => elem
-  | Ty.ref (RefTy.mapping _ value) => value
-  | _ => Ty.uint
-
 end Ty
 
 def PrimTy.isNumeric : PrimTy -> Bool
@@ -169,10 +162,6 @@ def PrimTy.inRange : PrimTy → Int → Bool
   | .uint, n => decide (0 ≤ n ∧ n < ((2 ^ 256 : Nat) : Int))
   | .int, n => decide (-((2 ^ 255 : Nat) : Int) ≤ n ∧ n < ((2 ^ 255 : Nat) : Int))
   | .bool, _ => false
-
-theorem PrimTy.isNumeric_of_inRange {p : PrimTy} {n : Int} (h : p.inRange n = true) :
-    p.isNumeric = true := by
-  cases p <;> simp only [PrimTy.inRange, Bool.false_eq_true] at h <;> rfl
 
 mutual
   def Ty.allowsMemory : Ty -> Bool
@@ -496,10 +485,6 @@ mutual
         KeySort.mapping (if key == .bool then KeySort.bool else KeySort.int)
           (value.keySort false)
 end
-
-/-- `Ty.keySort` under the name the `SolKey` reader's decoder uses. -/
-abbrev keySortOf (memoryPayload : Bool) (ty : Ty) : KeySort :=
-  ty.keySort memoryPayload
 
 /-- `\generic alphaPrim \extends Prim` binds exactly the primitive
 types: the bound is `Ty.isPrimitive` by computation, not by fiat. -/

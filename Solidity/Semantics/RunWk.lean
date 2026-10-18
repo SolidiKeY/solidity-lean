@@ -19,9 +19,9 @@ weakened (`offWk`).  The syntax of a scope's end on both sides (`Thin.Over`,
 `Prog.wk_over`) is `Calculus/WkOver.lean`'s.
 
 The loop lemmas the soundness of the loop rules reads are here too, on
-`TLoop`: a loop every turn of which is lifted runs lifted (`TLoop.run_map`),
-induction on its heads (`TLoop.run_induct`), and a loop with a variant ends
-(`TLoop.run_variant`).
+`TLoop`: a loop every turn of which is lifted runs lifted (`TLoop.run_map`)
+and a loop with a variant ends (`TLoop.run_variant`); induction on its heads
+(`TLoop.run_induct`) is `Semantics/Run.lean`'s.
 -/
 
 namespace Solidity
@@ -271,9 +271,6 @@ theorem lift_pay (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) (a : Pr
 theorem lift_withStorage (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) (st : Storage C) :
     (τ.lift h d).withStorage st = (τ.withStorage st).lift h d := rfl
 
-theorem lift_push (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) {t : LTy}
-    (v w : t.TDenote C τ.H) : (τ.lift h d).push v = (τ.push v).lift (.keep h) (w, d) := rfl
-
 theorem get_lift (h : Thin Γ Δ) (τ : State C Γ) (d : TEnv C τ.H Δ) {t : LTy} (i : Idx Γ t) :
     TEnv.get (i.wk h) (τ.lift h d).env = TEnv.get i τ.env :=
   TEnv.get_put h i τ.env d
@@ -306,9 +303,6 @@ def Frames.run {Γ₀ : Ctx} : {Γ : Ctx} → (σ : State C Γ) → Frames C Γ 
 theorem TRes.map_bind {α β γ : Type} (f : β → γ) (x : TRes α) (g : α → TRes β) :
     (x >>= g).map f = x >>= fun a => (g a).map f := by
   cases x <;> rfl
-
-theorem TRes.map_pure {α β : Type} (f : α → β) (a : α) :
-    (pure a : TRes α).map f = pure (f a) := rfl
 
 section Lifted
 
@@ -1120,38 +1114,6 @@ theorem run_unfold (σ : α) :
         | zero => simp only [iterN, reduceCtorEq] at h
         | succ n => exact hex ⟨r, n, (hshift n).symm.trans h⟩
       simp only [run, hex, hex', dite_false]
-
-/-- **Induction over a loop's run**: `P` holds of the first state and of
-every state an iteration from a state in `P` goes on in, and `Q` of every
-outcome an iteration from a state in `P` is done with, and of a divergence:
-then `Q` holds of the loop's run. -/
-theorem run_induct {P : α → Prop} {Q : TRes α → Prop} {σ : α} (h0 : P σ)
-    (hstep : ∀ τ, P τ →
-      match step body c τ with
-      | .inl τ' => P τ'
-      | .inr r => Q r)
-    (hdiv : Q (.error .diverge)) : Q (run body c σ) := by
-  have key : ∀ (n : Nat) (τ : α) (r : TRes α), P τ → iterN body c n τ = .inr r → Q r := by
-    intro n
-    induction n with
-    | zero => intro τ r _ h; exact nomatch h
-    | succ n ih =>
-      intro τ r hp h
-      have hs := hstep τ hp
-      simp only [iterN] at h
-      revert hs h
-      cases step body c τ with
-      | inl τ' => exact fun he hp => ih τ' r hp he
-      | inr r' =>
-        intro he hp
-        cases (show Sum.inr r' = (Sum.inr r : α ⊕ TRes α) from he)
-        exact hp
-  unfold run
-  split
-  · rename_i hex
-    obtain ⟨n, hn⟩ := Classical.choose_spec hex
-    exact key n σ _ h0 hn
-  · exact hdiv
 
 /-- **A loop with a variant ends**: from every head in `H` the variant `D`
 is defined and the condition is read, the loop ends well (`G`) where it is

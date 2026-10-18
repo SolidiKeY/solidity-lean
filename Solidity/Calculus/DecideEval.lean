@@ -1469,51 +1469,12 @@ theorem Storage.push_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.array 
 
 theorem Storage.pushPlace_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     (st.pushPlace r).isSome = (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)) := by
-  rw [has_obs]
-  unfold Storage.pushPlace
-  cases h : st.find r with
-  | none => rfl
-  | some a =>
-    rw [len_obs st r h]
-    cases a with
-    | array e sh hn =>
-      simp only [Option.bind_eq_bind, Option.bind_some, SVal.view_array, Option.isSome_some,
-        Bool.true_and]
-      split
-      · rename_i h'
-        rw [decide_eq_true h']
-        cases hs : st.save r _ with
-        | none =>
-          have := Storage.save_isSome st r (.array (SVec.ofList (e.toList ++ [(pushSlot _ sh.toList).1]))
-            (SList.ofList (pushSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h'))
-          rw [hs, h] at this; cases this
-        | some st' => rfl
-      · rename_i h'
-        rw [decide_eq_false h']; rfl
+  rw [← Option.isSome_map (f := (·.1)), Storage.pushPlace_fst]
+  exact Storage.push_isSome st r some (fun _ => rfl)
 
 theorem Storage.extendPlace_isSome {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    (st.extendPlace r).isSome = (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)) := by
-  rw [has_obs]
-  unfold Storage.extendPlace
-  cases h : st.find r with
-  | none => rfl
-  | some a =>
-    rw [len_obs st r h]
-    cases a with
-    | array e sh hn =>
-      simp only [Option.bind_eq_bind, Option.bind_some, SVal.view_array, Option.isSome_some,
-        Bool.true_and]
-      split
-      · rename_i h'
-        rw [decide_eq_true h']
-        cases hs : st.save r _ with
-        | none =>
-          have := Storage.save_isSome st r (.array (SVec.ofList (e.toList ++ [(extendSlot _ sh.toList).1]))
-            (SList.ofList (extendSlot _ sh.toList).2) (SVec.snoc_lt_bound e _ h'))
-          rw [hs, h] at this; cases this
-        | some st' => rfl
-      · rename_i h'
-        rw [decide_eq_false h']; rfl
+    (st.extendPlace r).isSome = (st.obs.has (.ref r) && decide (st.obs.len (.ref r) + 1 < 2 ^ 256)) :=
+  Storage.pushPlace_isSome st r
 
 theorem Storage.pop_isSome {E : Ty} (st : Storage C) (keep : Bool) (r : SRef C (.ref (.array E))) :
     (st.pop keep r).isSome = (st.obs.has (.ref r) && decide (0 < st.obs.len (.ref r))) := by

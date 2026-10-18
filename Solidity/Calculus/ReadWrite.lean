@@ -21,12 +21,6 @@ register_simp_attr close_rw_s
 `close_rw_s`: a `simp` set listed later is consulted later. -/
 register_simp_attr close_rw_s_last
 
-/-- The evaluation of the reduced formulas `sol_decide` closes (`Decide.lean`). -/
-register_simp_attr decide_eval
-
-/-- The same over free reads, for `sol_decide`'s constraints (`DecideComplete.lean`). -/
-register_simp_attr decide_evalA
-
 namespace Solidity
 
 open Semantics

@@ -1,4 +1,4 @@
-import Solidity.Semantics.Run
+import Solidity.Semantics.Ends
 
 /-!
 # Only an `assert` panics
@@ -13,8 +13,8 @@ body) never panics (`Prog.run_noPanic`), on every typed state, inside the
 EVM fragment or not; master's statement over the untyped run, restated
 over the typed one.
 
-Each lemma follows its operation's definition, as `Semantics/Ends.lean`
-does for `TRes.Ends`.
+An evaluator only reverts (`TRes.RevertOnly`, `Semantics/Ends.lean`), so
+its lemma here is that one's; each step's follows its definition.
 -/
 
 namespace Solidity
@@ -36,88 +36,27 @@ theorem TRes.NoPanic.bind {α γ : Type} {t : TRes α} (h : t.NoPanic) {k : α �
 theorem TRes.NoPanic.ofOpt {α : Type} (x : Option α) : (TRes.ofOpt x).NoPanic := by
   cases x <;> exact fun h => nomatch h
 
+theorem TRes.RevertOnly.noPanic {α : Type} {t : TRes α} (h : t.RevertOnly) : t.NoPanic :=
+  fun h' => nomatch (h _ h')
+
 /-! ## An expression does not panic -/
 
 section Eval
 
 variable {Γ : Ctx}
 
-mutual
-
-theorem SPath.resolveT_noPanic (σ : State C Γ) : {T : Ty} → (b : SPath C Γ T) →
-    (b.resolveT σ).NoPanic
-  | _, .alias i => by
-    show (match (TEnv.get i σ.env : Option (SRef C _)) with
-      | some r => .ok r
-      | none => .error .revert : TRes _).NoPanic
-    cases (TEnv.get i σ.env : Option (SRef C _)) <;> exact fun h => nomatch h
-  | _, .loc l => l.resolveT_noPanic σ
-
-theorem Loc.resolveT_noPanic (σ : State C Γ) : {T : Ty} → (l : Loc C Γ T) →
-    (l.resolveT σ).NoPanic
-  | _, .root .. => fun h => nomatch h
-  | _, .field b _ _ => (b.resolveT_noPanic σ).bind fun _ => fun h => nomatch h
-  | _, .index _ b i => (b.resolveT_noPanic σ).bind fun _ => (i.evalT_noPanic σ).bind fun _ =>
-      (TRes.NoPanic.ofOpt _).bind fun _ => fun h => nomatch h
-
-theorem MPath.mvalT_noPanic (σ : State C Γ) : {T : Ty} → (b : MPath C Γ T) →
-    (b.mvalT σ).NoPanic
-  | _, .var i _ => by
-    show (match (TEnv.get i σ.env : Option (HRef σ.H _)) with
-      | some r => .ok r
-      | none => .error .revert : TRes _).NoPanic
-    cases (TEnv.get i σ.env : Option (HRef σ.H _)) <;> exact fun h => nomatch h
-  | _, .loc l => (l.addrT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-
-theorem MLoc.addrT_noPanic (σ : State C Γ) : {T : Ty} → (l : MLoc C Γ T) →
-    (l.addrT σ).NoPanic
-  | _, .field b _ _ => (b.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
-  | _, .index _ b i => (b.mvalT_noPanic σ).bind fun _ => (i.evalT_noPanic σ).bind fun _ =>
-      fun h => nomatch h
-
-theorem Val.evalT_noPanic (σ : State C Γ) : {p : PrimTy} → (v : Val C Γ p) →
-    (v.evalT σ).NoPanic
-  | _, .simple _ => fun h => nomatch h
-  | _, .read l => (l.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-      fun h => nomatch h
-  | _, .binop op _ hq a b => by
-    subst hq
-    refine (a.evalT_noPanic σ).bind fun x => ?_
-    show (match op.shortT x with
-      | some y => pure y
-      | none => do
-        let y ← b.evalT σ
-        TRes.ofOpt (op.evalT _ x y) : TRes _).NoPanic
-    cases op.shortT x with
-    | some _ => exact fun h => nomatch h
-    | none => exact (b.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-  | _, .unop op _ hq a => by
-    subst hq
-    exact (a.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-  | _, .ternary c a b => (c.evalT_noPanic σ).bind fun x => by
-    cases x
-    · exact b.evalT_noPanic σ
-    · exact a.evalT_noPanic σ
-  | _, .readMem l => (l.addrT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-  | _, .len b hp => by
-    subst hp
-    exact (b.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-      fun h => nomatch h
-  | _, .mlen b hp => by
-    subst hp
-    exact (b.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
-  | _, .modular _ a b k => (a.evalT_noPanic σ).bind fun _ =>
-      (b.evalT_noPanic σ).bind fun _ => (k.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-
-end
-
-theorem Src.valueT_noPanic (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valueT σ).NoPanic := by
-  cases r with
-  | val v => exact (v.evalT_noPanic σ).bind fun _ => fun h => nomatch h
-  | copy p _ => exact (p.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ofOpt _
-  | fixedCopy p shape _ => exact (p.resolveT_noPanic σ).bind fun _ =>
-      (TRes.NoPanic.ofOpt _).bind fun _ => fun h => nomatch h
-  | copyMem p => exact (p.mvalT_noPanic σ).bind fun _ => fun h => nomatch h
+theorem SPath.resolveT_noPanic (σ : State C Γ) {T : Ty} (b : SPath C Γ T) :
+    (b.resolveT σ).NoPanic := (SPath.resolveT_revertOnly σ b).noPanic
+theorem Loc.resolveT_noPanic (σ : State C Γ) {T : Ty} (l : Loc C Γ T) :
+    (l.resolveT σ).NoPanic := (Loc.resolveT_revertOnly σ l).noPanic
+theorem MPath.mvalT_noPanic (σ : State C Γ) {T : Ty} (b : MPath C Γ T) :
+    (b.mvalT σ).NoPanic := (MPath.mvalT_revertOnly σ b).noPanic
+theorem MLoc.addrT_noPanic (σ : State C Γ) {T : Ty} (l : MLoc C Γ T) :
+    (l.addrT σ).NoPanic := (MLoc.addrT_revertOnly σ l).noPanic
+theorem Val.evalT_noPanic (σ : State C Γ) {p : PrimTy} (v : Val C Γ p) :
+    (v.evalT σ).NoPanic := (Val.evalT_revertOnly σ v).noPanic
+theorem Src.valueT_noPanic (σ : State C Γ) {T : Ty} (r : Src C Γ T) : (r.valueT σ).NoPanic :=
+  (Src.valueT_revertOnly σ r).noPanic
 
 end Eval
 
@@ -170,48 +109,27 @@ theorem TRes.NoPanic.map {α γ : Type} {t : TRes α} (h : t.NoPanic) (k : α �
 
 /-- A loop whose body and condition do not panic does not: it ends as an
 iteration does, or diverges. -/
-theorem TLoop.iterN_noPanic {α : Type} {body : α → TRes α} {c : α → TRes Bool}
-    (hb : ∀ a, (body a).NoPanic) (hc : ∀ a, (c a).NoPanic) :
-    ∀ (n : Nat) (σ : α) {r : TRes α}, TLoop.iterN body c n σ = .inr r → r.NoPanic
-  | 0, _, _, h => nomatch h
-  | n + 1, σ, r, h => by
-    simp only [TLoop.iterN] at h
-    split at h
-    · exact TLoop.iterN_noPanic hb hc n _ h
-    · rename_i r' hs
-      cases h
-      unfold TLoop.step at hs
-      split at hs
-      · rename_i e he
-        cases hs
-        exact fun h' => hc σ (by cases h'; exact he)
-      · cases hs; exact TRes.NoPanic.ok _
-      · split at hs
-        · rename_i e he
-          cases hs
-          exact fun h' => hb σ (by cases h'; exact he)
-        · cases hs
-
 theorem TLoop.run_noPanic {α : Type} {body : α → TRes α} {c : α → TRes Bool}
     (hb : ∀ a, (body a).NoPanic) (hc : ∀ a, (c a).NoPanic) (σ : α) :
     (TLoop.run body c σ).NoPanic := by
-  unfold TLoop.run
-  split
-  · rename_i h
-    obtain ⟨n, hn⟩ := Classical.choose_spec h
-    exact TLoop.iterN_noPanic hb hc n σ hn
-  · exact TRes.NoPanic.diverge
+  refine TLoop.run_induct (P := fun _ => True) (Q := TRes.NoPanic) trivial (fun τ _ => ?_)
+    TRes.NoPanic.diverge
+  unfold TLoop.step
+  cases hc' : c τ with
+  | error e => exact fun h' => hc τ (by cases h'; exact hc')
+  | ok v =>
+    cases v with
+    | false => exact TRes.NoPanic.ok _
+    | true =>
+      cases hb' : body τ with
+      | error e => exact fun h' => hb τ (by cases h'; exact hb')
+      | ok _ => trivial
 
 /-! ## Operations do not panic -/
 
 section Ops
 
 variable {Γ : Ctx} (σ : State C Γ)
-
-/-- `Calculus/SoundMem.lean`'s `MSrc.mvalT_noPanic`, below it. -/
-private theorem MSrc.mvalT_noPanic' {T : Ty} : (r : MSrc C Γ T) → (r.mvalT σ).NoPanic
-  | .val v => v.evalT_noPanic σ
-  | .ref p => p.mvalT_noPanic σ
 
 theorem ARhs.evalT_noPanic {R : RefTy} : (r : ARhs C Γ R) → (r.evalT σ).NoPanic
   | .path p => (p.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
@@ -223,58 +141,22 @@ theorem ARhs.evalT_noPanic {R : RefTy} : (r : ARhs C Γ R) → (r.evalT σ).NoPa
     · exact TRes.NoPanic.exhausted
     · exact (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
 
-theorem MRhs.evalT_noPanic {R : RefTy} : (r : MRhs C Γ R) → (r.evalT σ).NoPanic
-  | .alias p => (p.mvalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
-  | .copy p _ => (p.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-      TRes.NoPanic.ok _
-  | .newArr .. => TRes.NoPanic.ok _
-
+theorem MRhs.evalT_noPanic {R : RefTy} (r : MRhs C Γ R) : (r.evalT σ).NoPanic :=
+  (MRhs.evalT_revertOnly σ r).noPanic
 theorem opStoreT_noPanic (op : BinOp) {p : PrimTy} (r : SRef C (.prim p)) (v : p.Denote) :
-    (opStoreT σ op r v).NoPanic :=
-  (TRes.NoPanic.ofOpt _).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-    (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-
+    (opStoreT σ op r v).NoPanic := (opStoreT_revertOnly σ op r v).noPanic
 theorem opMemT_noPanic (op : BinOp) {p : PrimTy} (a : MAddr σ.H (.prim p)) (v : p.Denote) :
-    (opMemT σ op a v).NoPanic :=
-  (TRes.NoPanic.ofOpt _).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-    (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-
-theorem OpLoc.storeT_noPanic (op : BinOp) {p : PrimTy} : (l : OpLoc C Γ p) → (v : p.Denote) →
-    (l.storeT σ op v).NoPanic
-  | .local _, _ => (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-  | .root .., _ => opStoreT_noPanic σ op _ _
-  | .field .., _ => (Loc.resolveT_noPanic σ _).bind fun _ => opStoreT_noPanic σ op _ _
-  | .index .., _ => (Loc.resolveT_noPanic σ _).bind fun _ => opStoreT_noPanic σ op _ _
-  | .mfield .., _ => (MLoc.addrT_noPanic σ _).bind fun _ => opMemT_noPanic σ op _ _
-  | .mindex .., _ => (MLoc.addrT_noPanic σ _).bind fun _ => opMemT_noPanic σ op _ _
-
+    (opMemT σ op a v).NoPanic := (opMemT_revertOnly σ op a v).noPanic
+theorem OpLoc.storeT_noPanic (op : BinOp) {p : PrimTy} (l : OpLoc C Γ p) (v : p.Denote) :
+    (l.storeT σ op v).NoPanic := (OpLoc.storeT_revertOnly σ op l v).noPanic
 theorem bumpStoreT_noPanic (op : IncDec) {p : PrimTy} (r : SRef C (.prim p)) :
-    (bumpStoreT σ op r).NoPanic :=
-  (TRes.NoPanic.ofOpt _).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-    (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-
+    (bumpStoreT σ op r).NoPanic := (bumpStoreT_revertOnly σ op r).noPanic
 theorem bumpMemT_noPanic (op : IncDec) {p : PrimTy} (a : MAddr σ.H (.prim p)) :
-    (bumpMemT σ op a).NoPanic :=
-  (TRes.NoPanic.ofOpt _).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ =>
-    (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-
-theorem OpLoc.bumpT_noPanic (op : IncDec) {p : PrimTy} : (l : OpLoc C Γ p) →
-    (l.bumpT σ op).NoPanic
-  | .local _ => (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-  | .root .. => bumpStoreT_noPanic σ op _
-  | .field .. => (Loc.resolveT_noPanic σ _).bind fun _ => bumpStoreT_noPanic σ op _
-  | .index .. => (Loc.resolveT_noPanic σ _).bind fun _ => bumpStoreT_noPanic σ op _
-  | .mfield .. => (MLoc.addrT_noPanic σ _).bind fun _ => bumpMemT_noPanic σ op _
-  | .mindex .. => (MLoc.addrT_noPanic σ _).bind fun _ => bumpMemT_noPanic σ op _
-
-theorem Args.evalT_noPanic : {ps : Ctx} → (as : Args C Γ ps) → (as.evalT σ).NoPanic
-  | _, .nil => TRes.NoPanic.ok _
-  | _, .snoc as _ _ e => (Args.evalT_noPanic as).bind fun _ => (e.evalT_noPanic σ).bind fun _ =>
-      TRes.NoPanic.ok _
-  | _, .snocStorage as _ _ e => (Args.evalT_noPanic as).bind fun _ =>
-      (e.resolveT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
-  | _, .snocMemory as _ _ e => (Args.evalT_noPanic as).bind fun _ =>
-      (e.mvalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
+    (bumpMemT σ op a).NoPanic := (bumpMemT_revertOnly σ op a).noPanic
+theorem OpLoc.bumpT_noPanic (op : IncDec) {p : PrimTy} (l : OpLoc C Γ p) :
+    (l.bumpT σ op).NoPanic := (OpLoc.bumpT_revertOnly σ op l).noPanic
+theorem Args.evalT_noPanic {ps : Ctx} (as : Args C Γ ps) : (as.evalT σ).NoPanic :=
+  (Args.evalT_revertOnly σ as).noPanic
 
 end Ops
 
@@ -498,7 +380,7 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .rebindMem _ r, _, σ => (r.evalT_noPanic σ).bind fun _ => TRes.NoPanic.ok _
   | _, _, .assignFromMem l p, _, σ => (p.mvalT_noPanic σ).bind fun _ =>
       (l.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
-  | _, _, .assignMem l r, _, σ => (MSrc.mvalT_noPanic' σ r).bind fun _ => (l.addrT_noPanic σ).bind
+  | _, _, .assignMem l r, _, σ => (MSrc.mvalT_revertOnly σ r).noPanic.bind fun _ => (l.addrT_noPanic σ).bind
       fun _ => (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
   | _, _, .delete l, _, σ => (l.resolveT_noPanic σ).bind fun _ => (TRes.NoPanic.ofOpt _).bind
       fun _ => TRes.NoPanic.ok _

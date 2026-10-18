@@ -44,6 +44,47 @@ theorem runSt_pushed {s' : Stmt C (t :: Γ) (t :: Γ)} {s : Stmt C Γ Γ}
 
 end Pushed
 
+/-! ## Captures, the statement run lifted
+
+The usual capture: the statement on top of the part runs as the statement,
+lifted (`runSt_pushed`), and halts as the part does. -/
+
+section CapturePushed
+
+variable {Γ : Ctx} {m : Modality} (σ : State C Γ)
+
+/-- **A value captured**, the statement run lifted. -/
+theorem Premise.sound_capturePushed {p : PrimTy} {x : Var} {e : Val C Γ p}
+    {s' : Stmt C (.val p :: Γ) (.val p :: Γ)} {s : Stmt C Γ Γ}
+    (hok : ∀ v, e.evalT σ = .ok v →
+      s'.run (σ.push (t := .val p) v) = liftedT up (v, σ.env) (s.run σ))
+    (herr : ∀ h, e.evalT σ = .error h → Stmt.runSt σ s = .error h) :
+    Premise.Runs m s (.capture p x e s') σ :=
+  Premise.sound_captureSim σ (fun v hv => runSt_pushed σ (t := .val p) v (hok v hv))
+    (fun h hh _ => TRes.Sim.err_refl (herr h hh))
+
+/-- **A storage path captured**, the statement run lifted. -/
+theorem Premise.sound_captureSPPushed {R : RefTy} {x : Var} {b : SPath C Γ (.ref R)}
+    {s' : Stmt C (.alias R :: Γ) (.alias R :: Γ)} {s : Stmt C Γ Γ}
+    (hok : ∀ q, b.resolveT σ = .ok q →
+      s'.run (σ.push (t := .alias R) (some q)) = liftedT up (some q, σ.env) (s.run σ))
+    (herr : ∀ h, b.resolveT σ = .error h → Stmt.runSt σ s = .error h) :
+    Premise.Runs m s (.captureSP x b s') σ :=
+  Premise.sound_captureSPSim σ (fun q hq => runSt_pushed σ (t := .alias R) (some q) (hok q hq))
+    (fun h hh _ => TRes.Sim.err_refl (herr h hh))
+
+/-- **A memory path captured**, the statement run lifted. -/
+theorem Premise.sound_captureMVPushed {R : RefTy} {x : Var} {b : MPath C Γ (.ref R)}
+    {s' : Stmt C (.mem R :: Γ) (.mem R :: Γ)} {s : Stmt C Γ Γ}
+    (hok : ∀ r, b.mvalT σ = .ok r →
+      s'.run (σ.push (t := .mem R) (some r)) = liftedT up (some r, σ.env) (s.run σ))
+    (herr : ∀ h, b.mvalT σ = .error h → Stmt.runSt σ s = .error h) :
+    Premise.Runs m s (.captureMV x b s') σ :=
+  Premise.sound_captureMVSim σ (fun r hr => runSt_pushed σ (t := .mem R) (some r) (hok r hr))
+    (fun h hh _ => TRes.Sim.err_refl (herr h hh))
+
+end CapturePushed
+
 /-! ## Holes: the read, then what the hole does with it -/
 
 section Holes
@@ -205,11 +246,11 @@ theorem SHole.sound_fieldCapture {T : Ty} (lhs : SHole C Γ T) {s : Name}
     (b : SPath C Γ (.struct s)) (f : Name) (hf : C.fieldType s f = some T) (x : Var) :
     Premise.Runs m (lhs.fill (.loc (.field b f hf)))
       (.captureSP x b (lhs.up.fill (.loc (.field (.alias .here) f hf)))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ _ (SHole.fill_pushT σ (t := .alias (.struct s)) (some q) lhs _ (.field b f hf) ?_)
-    simp only [Loc.resolveT, hq]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show ((lhs.fill (.loc (.field b f hf))).run σ).map _ = _
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => SHole.fill_pushT σ (t := .alias (.struct s)) (some q) lhs _ (.field b f hf) ?_)
+    (fun h hh => ?_)
+  · simp only [Loc.resolveT, hq]; rfl
+  · show ((lhs.fill (.loc (.field b f hf))).run σ).map _ = _
     rw [SHole.fill_run]
     simp only [Loc.resolveT, hh]; rfl
 
@@ -218,11 +259,11 @@ theorem SHole.sound_indexRecvCapture {T : Ty} (lhs : SHole C Γ T) {R : RefTy} {
     (it : IndexTy R kp T) (b : SPath C Γ (.ref R)) (i : Val C Γ kp) (x : Var) :
     Premise.Runs m (lhs.fill (.loc (.index it b i)))
       (.captureSP x b (lhs.up.fill (.loc (.index it (.alias .here) i.up)))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ _ (SHole.fill_pushT σ (t := .alias R) (some q) lhs _ (.index it b i) ?_)
-    simp only [Loc.resolveT, Val.evalT_up, hq]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show ((lhs.fill (.loc (.index it b i))).run σ).map _ = _
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => SHole.fill_pushT σ (t := .alias R) (some q) lhs _ (.index it b i) ?_)
+    (fun h hh => ?_)
+  · simp only [Loc.resolveT, Val.evalT_up, hq]; rfl
+  · show ((lhs.fill (.loc (.index it b i))).run σ).map _ = _
     rw [SHole.fill_run]
     simp only [Loc.resolveT, hh]; rfl
 
@@ -281,12 +322,11 @@ theorem MHole.sound_fieldCapture {T : Ty} (lhs : MHole C Γ T) {s : Name}
     (hf : C.fieldType s f = some T) (x : Var) :
     Premise.Runs m (lhs.fill (.field b f hf))
       (.captureMV x b (lhs.up.fill (.field (.var .here hm) f hf))) σ := by
-  refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ _ (MHole.fill_pushT σ (t := .mem (.struct s)) (some r) lhs _
-      (.field b f hf) ?_)
-    simp only [MLoc.addrT, hr]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show ((lhs.fill (.field b f hf)).run σ).map _ = _
+  refine Premise.sound_captureMVPushed σ
+    (fun r hr => MHole.fill_pushT σ (t := .mem (.struct s)) (some r) lhs _
+      (.field b f hf) ?_) (fun h hh => ?_)
+  · simp only [MLoc.addrT, hr]; rfl
+  · show ((lhs.fill (.field b f hf)).run σ).map _ = _
     rw [MHole.fill_run]
     simp only [MLoc.addrT, hh]; rfl
 
@@ -295,11 +335,10 @@ theorem MHole.sound_indexRecvCapture {T : Ty} (lhs : MHole C Γ T) {R : RefTy} (
     (b : MPath C Γ (.ref R)) (hm : (Ty.ref R).mapFree = true) (i : Val C Γ .uint) (x : Var) :
     Premise.Runs m (lhs.fill (.index a b i))
       (.captureMV x b (lhs.up.fill (.index a (.var .here hm) i.up))) σ := by
-  refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ _ (MHole.fill_pushT σ (t := .mem R) (some r) lhs _ (.index a b i) ?_)
-    simp only [MLoc.addrT, Val.evalT_up, hr]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show ((lhs.fill (.index a b i)).run σ).map _ = _
+  refine Premise.sound_captureMVPushed σ
+    (fun r hr => MHole.fill_pushT σ (t := .mem R) (some r) lhs _ (.index a b i) ?_) (fun h hh => ?_)
+  · simp only [MLoc.addrT, Val.evalT_up, hr]; rfl
+  · show ((lhs.fill (.index a b i)).run σ).map _ = _
     rw [MHole.fill_run]
     simp only [MLoc.addrT, hh]; rfl
 
@@ -348,22 +387,20 @@ theorem MHole.readStep_sound (k : Nat) {T : Ty} (lhs : MHole C Γ T)
 /-- `…ValueRhsCapture`, `…UnfoldSource`: `T se = nse; lhs = se;`. -/
 theorem VHole.sound_capture {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) (x : Var) :
     Premise.Runs m (lhs.fill e) (.capture p x e (lhs.up.fill (.simple (.local .here)))) σ := by
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ _ (VHole.fill_pushT σ (t := .val p) v lhs _ e (by rw [hv]; rfl))
-  · refine TRes.Sim.err_refl ?_
-    show ((lhs.fill e).run σ).map _ = _
-    rw [VHole.fill_run, hh]; rfl
+  refine Premise.sound_capturePushed σ
+    (fun v hv => VHole.fill_pushT σ (t := .val p) v lhs _ e (by rw [hv]; rfl)) (fun h hh => ?_)
+  show ((lhs.fill e).run σ).map _ = _
+  rw [VHole.fill_run, hh]; rfl
 
 /-- `ternaryCaptureCond`: the condition captured first. -/
 theorem VHole.sound_ternaryCapture {p : PrimTy} (lhs : VHole C Γ p) (c : Val C Γ .bool)
     (a b : Val C Γ p) (x : Var) :
     Premise.Runs m (lhs.fill (.ternary c a b))
       (.capture .bool x c (lhs.up.fill (.ternary (.simple (.local .here)) a.up b.up))) σ := by
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ _ (VHole.fill_pushT σ (t := .val .bool) v lhs _ (.ternary c a b) ?_)
-    simp only [Val.evalT, Val.evalT_up, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show ((lhs.fill (.ternary c a b)).run σ).map _ = _
+  refine Premise.sound_capturePushed σ
+    (fun v hv => VHole.fill_pushT σ (t := .val .bool) v lhs _ (.ternary c a b) ?_) (fun h hh => ?_)
+  · simp only [Val.evalT, Val.evalT_up, hv]; rfl
+  · show ((lhs.fill (.ternary c a b)).run σ).map _ = _
     rw [VHole.fill_run]
     simp only [Val.evalT, hh]; rfl
 
@@ -374,13 +411,7 @@ theorem Stmt.runSt_ite_simple {Γ₁ Γ₂ : Ctx} (se : Simple C Γ .bool) (thn 
     Stmt.runSt σ (.ite (.simple se) thn els) =
       if boolT (se.evalT σ) then (Prog.runSt σ thn).map (State.drop thn.ext)
       else (Prog.runSt σ els).map (State.drop els.ext) := by
-  show ((TRun.ite (.simple se) thn.ext thn.runR els.ext els.runR σ).map (·.st)) = _
-  simp only [TRun.ite, Val.evalT, ok_bind, Prog.runSt]
-  split
-  · show _ = ((thn.runR σ).map _).map _
-    cases thn.runR σ <;> rfl
-  · show _ = ((els.runR σ).map _).map _
-    cases els.runR σ <;> rfl
+  rw [Stmt.runSt_ite]; rfl
 
 /-- A value hole filled runs as the value, then what the hole does with it. -/
 theorem VHole.runSt_fill {p : PrimTy} (lhs : VHole C Γ p) (e : Val C Γ p) :

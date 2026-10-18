@@ -33,23 +33,20 @@ variable {Γ : Ctx} (σ : State C Γ)
 theorem Prog.runSt_declLocal_cons {Γ' : Ctx} (p : PrimTy) (x : Var) (e : Val C Γ p)
     (P : Prog C (.val p :: Γ) Γ') :
     Prog.runSt σ (.cons (.declLocal p x (some e)) P) =
-      (e.evalT σ).bind fun v => Prog.runSt (σ.push (t := .val p) v) P := by
-  rw [Prog.runSt_cons, Stmt.runSt_declLocal]
-  cases e.evalT σ <;> rfl
+      (e.evalT σ).bind fun v => Prog.runSt (σ.push (t := .val p) v) P :=
+  Prog.runSt_declCons (inj := id) (Stmt.runSt_declLocal σ p x e) P
 
 theorem Prog.runSt_declStorage_cons {Γ' : Ctx} {R : RefTy} (x : Var) (b : SPath C Γ (.ref R))
     (P : Prog C (.alias R :: Γ) Γ') :
     Prog.runSt σ (.cons (.declStorage R x (some (.path b))) P) =
-      (b.resolveT σ).bind fun q => Prog.runSt (σ.push (t := .alias R) (some q)) P := by
-  rw [Prog.runSt_cons, Stmt.runSt_declStorage]
-  cases b.resolveT σ <;> rfl
+      (b.resolveT σ).bind fun q => Prog.runSt (σ.push (t := .alias R) (some q)) P :=
+  Prog.runSt_declCons (inj := some) (Stmt.runSt_declStorage σ R x b) P
 
 theorem Prog.runSt_declMem_cons {Γ' : Ctx} {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
     (P : Prog C (.mem R :: Γ) Γ') :
     Prog.runSt σ (.cons (.declMem R x (some (.alias b)) rfl b.mapFree) P) =
-      (b.mvalT σ).bind fun r => Prog.runSt (σ.push (t := .mem R) (some r)) P := by
-  rw [Prog.runSt_cons, Stmt.runSt_declMem]
-  cases b.mvalT σ <;> rfl
+      (b.mvalT σ).bind fun r => Prog.runSt (σ.push (t := .mem R) (some r)) P :=
+  Prog.runSt_declCons (inj := some) (Stmt.runSt_declMem σ R x b) P
 
 theorem TRes.map_bind' {α β γ : Type} (x : TRes α) (f : α → TRes β) (g : β → γ) :
     (x.bind f).map g = x.bind fun a => (f a).map g := by
@@ -69,11 +66,6 @@ theorem pushedT3_drop {t u y : LTy} (v : t.TDenote C σ.H) (w : u.TDenote C σ.H
       (State.drop (.push (.push (.push .refl)))) = r.map (·.st) := by
   cases r <;> rfl
 
-/-- A revert alike to a halt from a run that does not panic and does not end. -/
-theorem TRes.Sim.err_of_not_ok {α : Type} {h : THalt} (hh : h = .revert) {r : TRes α}
-    (hr : r.NoPanic) (hn : ∀ a, r ≠ .ok a) : TRes.Sim (.error h) r :=
-  TRes.Sim.err hh hr hn
-
 end Blocks
 
 /-! ## Storage writes -/
@@ -88,12 +80,11 @@ theorem sound_copyCapture {R : RefTy} (l : Loc C Γ (.ref R)) (p : SPath C Γ (.
     (hm : (Ty.ref R).mapFree = true) (x : Var) :
     Premise.Runs m (.assign l (.copy p hm))
       (.captureSP x p (.assign l.up (.copy (.alias .here) hm))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .alias R) (some q) (TRun.assign_pushT σ (t := .alias R) (some q) l.up _ l
-      (.copy p hm) ?_ (Loc.resolveT_up σ _ l))
-    simp only [Src.valueT, hq]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assign l (.copy p hm) σ).map _ = _
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => TRun.assign_pushT σ (t := .alias R) (some q) l.up _ l
+      (.copy p hm) ?_ (Loc.resolveT_up σ _ l)) (fun h hh => ?_)
+  · simp only [Src.valueT, hq]; rfl
+  · show (TRun.assign l (.copy p hm) σ).map _ = _
     simp only [TRun.assign, Src.valueT, hh]; rfl
 
 /-- **A copy into a target of simple parts** (`copyStep`). -/
@@ -212,7 +203,7 @@ theorem sound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
   show TRes.Sim _ ((TRun.assign (.index it b i) (.copy p hm) σ).map _)
   cases hb : b.resolveT σ with
   | error h' =>
-    have hp : h' = .revert := SPath.resolveT_revert σ b hb
+    have hp : h' = .revert := SPath.resolveT_revertOnly σ b _ hb
     simp only [TRun.assign, TRes.map_bind]
     refine TRes.Sim.err_bind (Src.valueT_noPanic σ _) hp fun _ _ => ?_
     simp only [Loc.resolveT, hb]
@@ -222,7 +213,7 @@ theorem sound_indexRefCaptureAll (k : Nat) {R R' : RefTy} {kp : PrimTy}
     rw [Prog.runSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      have hp : h' = .revert := Val.evalT_revert σ i hi
+      have hp : h' = .revert := Val.evalT_revertOnly σ i _ hi
       simp only [TRun.assign, TRes.map_bind]
       refine TRes.Sim.err_bind (Src.valueT_noPanic σ _) hp fun _ _ => ?_
       simp only [Loc.resolveT, hb, hi, ok_bind]
@@ -335,7 +326,7 @@ theorem sound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
   show TRes.Sim _ ((TRun.assignFromMem (.index it b i) p σ).map _)
   cases hb : b.resolveT σ with
   | error h' =>
-    have hp : h' = .revert := SPath.resolveT_revert σ b hb
+    have hp : h' = .revert := SPath.resolveT_revertOnly σ b _ hb
     simp only [TRun.assignFromMem, TRes.map_bind]
     refine TRes.Sim.err_bind (MPath.mvalT_noPanic σ p) hp fun _ _ => ?_
     simp only [Loc.resolveT, hb]
@@ -345,7 +336,7 @@ theorem sound_fromMemIndexUnfold (k : Nat) {R R' : RefTy} {kp : PrimTy}
     rw [Prog.runSt_declLocal_cons, TRes.map_bind', Val.evalT_up]
     cases hi : i.evalT σ with
     | error h' =>
-      have hp : h' = .revert := Val.evalT_revert σ i hi
+      have hp : h' = .revert := Val.evalT_revertOnly σ i _ hi
       simp only [TRun.assignFromMem, TRes.map_bind]
       refine TRes.Sim.err_bind (MPath.mvalT_noPanic σ p) hp fun _ _ => ?_
       simp only [Loc.resolveT, hb, hi, ok_bind]
@@ -394,12 +385,10 @@ theorem sound_deleteRecvCapture {R : RefTy} {T : Ty} (l' : Loc C (.alias R :: Γ
       l'.resolveT (σ.push (t := .alias R) (some q)) = l.resolveT σ)
     (herr : ∀ h, b.resolveT σ = .error h → l.resolveT σ = .error h) :
     Premise.Runs m (.delete l) (.captureSP x b (.delete l')) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .alias R) (some q)
-      (TRun.delete_pushT σ (t := .alias R) (some q) l' l (hl q hq))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.delete l σ).map _ = _
-    simp only [TRun.delete, herr h hh]; rfl
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => TRun.delete_pushT σ (t := .alias R) (some q) l' l (hl q hq)) (fun h hh => ?_)
+  show (TRun.delete l σ).map _ = _
+  simp only [TRun.delete, herr h hh]; rfl
 
 /-- `storageIndexDeleteNonSimpleIndexCapture`: the index captured; the
 statement reads the receiver first. -/
@@ -501,16 +490,14 @@ theorem sound_pushRecvCapture {E : Ty} (b : SPath C Γ (.array E)) (v : Option (
     (hd : (v.isSome || E.defaultOkS) = true)
     (hd' : ((v.map Src.up).isSome || E.defaultOkS) = true) (x : Var) :
     Premise.Runs m (.push b v hd) (.captureSP x b (.push (.alias .here) (v.map Src.up) hd')) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .alias (.array E)) (some q) ?_
-    cases v with
+  refine Premise.sound_captureSPPushed σ (fun q hq => ?_) (fun h hh => ?_)
+  · cases v with
     | none =>
       exact TRun.push_none_pushT σ (t := .alias _) (some q) (.alias .here) b (by rw [hq]; rfl)
     | some r =>
       exact TRun.push_some_pushT σ (t := .alias _) (some q) (.alias .here) b r.up r
         (by rw [hq]; rfl) (Src.valueT_up σ _ r)
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.push b v σ).map _ = _
+  · show (TRun.push b v σ).map _ = _
     simp only [TRun.push, hh]; rfl
 
 /-- **`b.push(v);`** (`pushStep`). -/
@@ -551,13 +538,11 @@ theorem sound_assignLocalPushCapture {p : PrimTy} (i : Idx Γ (.val p))
     (b : SPath C Γ (.array (.prim p))) (x : Var) :
     Premise.Runs m (.assignLocalPush i b)
       (.captureSP x b (.assignLocalPush i.there (.alias .here))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .alias (.array (.prim p))) (some q)
-      (TRun.assignLocalPush_pushT σ (t := .alias _) (some q) i (.alias .here) b
-        (by rw [hq]; rfl))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assignLocalPush i b σ).map _ = _
-    simp only [TRun.assignLocalPush, TRun.push, hh]; rfl
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => TRun.assignLocalPush_pushT σ (t := .alias _) (some q) i (.alias .here) b
+        (by rw [hq]; rfl)) (fun h hh => ?_)
+  show (TRun.assignLocalPush i b σ).map _ = _
+  simp only [TRun.assignLocalPush, TRun.push, hh]; rfl
 
 /-- `y = matrix[i].push()` chooses receiver capture until the path is simple. -/
 theorem assignLocalPushStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p))
@@ -571,12 +556,11 @@ theorem assignLocalPushStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p))
 /-- `storagePop_unfold_leftFstReceiver`: the receiver bound first. -/
 theorem sound_popCapture {E : Ty} (b : SPath C Γ (.array E)) (x : Var) :
     Premise.Runs m (.pop b) (.captureSP x b (.pop (.alias .here))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .alias (.array E)) (some q)
-      (TRun.pop_pushT σ (t := .alias _) (some q) (.alias .here) b (by rw [hq]; rfl))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.pop b σ).map _ = _
-    simp only [TRun.pop, hh]; rfl
+  refine Premise.sound_captureSPPushed σ
+    (fun q hq => TRun.pop_pushT σ (t := .alias _) (some q) (.alias .here) b (by rw [hq]; rfl))
+    (fun h hh => ?_)
+  show (TRun.pop b σ).map _ = _
+  simp only [TRun.pop, hh]; rfl
 
 /-- **`b.pop();`** (`popStep`). -/
 theorem popStep_sound (k : Nat) {E : Ty} (b : SPath C Γ (.array E)) (q : Premise C Γ Γ)

@@ -244,9 +244,6 @@ theorem SVal.view_prim {p : PrimTy} (x : p.Denote) : (SVal.prim x).view = x := r
 theorem SVal.view_struct {s : Name} (fs : SFields (structDef s)) : (SVal.struct fs).view = fs := rfl
 theorem SVal.view_array {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (h : n < 2 ^ 256) :
     (SVal.array e sh h).view = ⟨e, sh, h⟩ := rfl
-theorem SVal.view_fixed {E : Ty} {n : Nat} (e : SVec E n) : (SVal.fixed e).view = e := rfl
-theorem SVal.view_map {K : PrimTy} {U : Ty} (m : SMap K U) (d : SVal U) :
-    (SVal.map (K := K) m d).view = (m, d) := rfl
 
 /-- What the members of `fs` hold: the first one and the others. -/
 def FShape : List (Name × Ty) → Type
@@ -1637,12 +1634,6 @@ def pushSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E)
   | [] => (SVal.dflt E, [])
   | c :: rest => (if E.isPrimitive then SVal.dflt E else c, rest)
 
-/-- A length-only extension, the slot exposed as `push` exposes it. -/
-def extendSlot (E : Ty) : List (SVal E) → SVal E × List (SVal E) := pushSlot E
-
-theorem extendSlot_eq_pushSlot {E : Ty} (l : List (SVal E)) : extendSlot E l = pushSlot E l :=
-  rfl
-
 /-- A length below `2^256` is a `uint`. -/
 theorem lenU_inRange {n : Nat} (h : n < 2 ^ 256) : PrimTy.uint.inRange (n : Int) = true := by
   simp only [PrimTy.inRange, decide_eq_true_eq]
@@ -1798,21 +1789,26 @@ def pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
     some (st', lenU w.n (Nat.lt_of_succ_lt h))
   else none
 
-/-- A length-only save, retaining the existing reference slot and its index
-(`pushPlace`, by `extendSlot`). -/
-def extendPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    Option (Storage C × PrimTy.uint.Denote) := do
-  let w : ArrView E := SVal.view (← st.find r)
-  let (slot, sh') := extendSlot E w.shadow.toList
-  if h : w.n + 1 < 2 ^ 256 then
-    let st' ← st.save r (.array (SVec.ofList (w.elems.toList ++ [slot])) (.ofList sh')
-      (SVec.snoc_lt_bound w.elems slot h))
-    some (st', lenU w.n (Nat.lt_of_succ_lt h))
-  else none
+/-- The term `extend` reads a push as a place: a length-only save that
+exposes the slot as it is (`pushSlot`). -/
+abbrev extendPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    Option (Storage C × PrimTy.uint.Denote) :=
+  st.pushPlace r
 
-/-- A length-only extension is a push. -/
-theorem extendPlace_eq_pushPlace {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    st.extendPlace r = st.pushPlace r := rfl
+theorem pushPlace_fst {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
+    (st.pushPlace r).map (·.1) = st.push r some := by
+  unfold Storage.pushPlace Storage.push
+  cases st.find r with
+  | none => rfl
+  | some v =>
+    simp only [Option.bind_eq_bind, Option.bind_some]
+    split
+    · cases st.save r _ <;> rfl
+    · rfl
+
+theorem push_of_pushPlace {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}
+    {k : PrimTy.uint.Denote} (h : st.pushPlace r = some (st', k)) : st.push r some = some st' := by
+  rw [← pushPlace_fst, h]; rfl
 
 /-- `b.pop()`: the last element cleared into the slots past the
 end, or moved there as it is when `keep`; an empty array reverts. -/

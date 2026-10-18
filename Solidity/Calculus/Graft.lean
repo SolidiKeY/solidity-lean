@@ -128,38 +128,23 @@ local macro "same_subst " h:ident x:ident y:ident : tactic =>
 
 theorem Srt.sameO_val {H₀ H₁ : HTy} {p : PrimTy} {x : Option ((Srt.val p).Den C H₀)}
     {y : Option ((Srt.val p).Den C H₁)} : Srt.SameO (.val p) x y ↔ x = y :=
-  ⟨fun h => by
-    cases x <;> cases y <;>
-      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
-   fun h => by rw [h]; rfl⟩
+  ⟨fun h => by same_eq h x y, fun h => by rw [h]; rfl⟩
 
 theorem Srt.sameO_path {H₀ H₁ : HTy} {T : Ty} {x : Option ((Srt.path T).Den C H₀)}
     {y : Option ((Srt.path T).Den C H₁)} : Srt.SameO (.path T) x y ↔ x = y :=
-  ⟨fun h => by
-    cases x <;> cases y <;>
-      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
-   fun h => by rw [h]; rfl⟩
+  ⟨fun h => by same_eq h x y, fun h => by rw [h]; rfl⟩
 
 theorem Srt.sameO_st {H₀ H₁ : HTy} {x : Option (Srt.st.Den C H₀)}
     {y : Option (Srt.st.Den C H₁)} : Srt.SameO .st x y ↔ x = y :=
-  ⟨fun h => by
-    cases x <;> cases y <;>
-      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
-   fun h => by rw [h]; rfl⟩
+  ⟨fun h => by same_eq h x y, fun h => by rw [h]; rfl⟩
 
 theorem Srt.sameO_ident {H₀ H₁ : HTy} {R : RefTy} {x : Option ((Srt.ident R).Den C H₀)}
     {y : Option ((Srt.ident R).Den C H₁)} : Srt.SameO (.ident R) x y ↔ x = y :=
-  ⟨fun h => by
-    cases x <;> cases y <;>
-      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
-   fun h => by rw [h]; rfl⟩
+  ⟨fun h => by same_eq h x y, fun h => by rw [h]; rfl⟩
 
 theorem Srt.sameO_kint {H₀ H₁ : HTy} {x : Option (Srt.kint.Den C H₀)}
     {y : Option (Srt.kint.Den C H₁)} : Srt.SameO .kint x y ↔ x = y :=
-  ⟨fun h => by
-    cases x <;> cases y <;>
-      first | rfl | exact Option.noConfusion h | exact congrArg some (Option.some.inj h),
-   fun h => by rw [h]; rfl⟩
+  ⟨fun h => by same_eq h x y, fun h => by rw [h]; rfl⟩
 
 /-! ## Symbols that read no global part -/
 
@@ -1199,8 +1184,6 @@ def Upd.liftG? {Γ : Ctx} {t : LTy} : {Δ : Ctx} → Upd C Γ Δ → Option (Upd
 section Lift
 
 variable {Γ : Ctx} {t : LTy}
-
-theorem Upd.dropTop_envOnly : (Upd.dropTop (C := C) Γ t).envOnly = true := rfl
 
 /-- Dropping the top local lands on the state below it. -/
 theorem Upd.lands_dropTop (σ : State C Γ) (v : t.TDenote C σ.H) :

@@ -457,51 +457,48 @@ def RawStmt.binds : RawStmt → List String
   | .tupleDecl vs _ => vs.filterMap (·.map (·.2))
   | _ => []
 
+/-- Whether `p` holds of the statement or of one in its blocks, at any depth. -/
+partial def RawStmt.anyDeep (p : RawStmt → Bool) (s : RawStmt) : Bool :=
+  p s || s.blocks.any (·.any (RawStmt.anyDeep p))
+
+/-- `f` of the statement, then of each one in its blocks, at any depth. -/
+partial def RawStmt.flatMapDeep {α : Type} (f : RawStmt → List α) (s : RawStmt) : List α :=
+  f s ++ s.blocks.flatMap (·.flatMap (RawStmt.flatMapDeep f))
+
 /-- Whether a `return` occurs in the statement. -/
-partial def RawStmt.hasReturn (s : RawStmt) : Bool :=
-  s matches .ret _ || s.blocks.any (·.any RawStmt.hasReturn)
+def RawStmt.hasReturn (s : RawStmt) : Bool :=
+  s.anyDeep (· matches .ret _)
 
 /-- Whether the name `x` occurs in the statement, read, written or declared. -/
-partial def RawStmt.mentions (x : String) (s : RawStmt) : Bool :=
-  s.declared? == some x || s.binds.contains x || s.exprs.any (·.mentions x) ||
-    s.blocks.any (·.any (·.mentions x))
-
-mutual
+def RawStmt.mentions (x : String) (s : RawStmt) : Bool :=
+  s.anyDeep fun s => s.declared? == some x || s.binds.contains x || s.exprs.any (·.mentions x)
 
 /-- The names a raw statement reads (a function's name is not one). -/
-partial def RawStmt.names (s : RawStmt) : List String :=
-  let es := match s with
-    | .call (.name _) as => as
-    | s => s.exprs
-  es.flatMap RawExpr.names ++ s.blocks.flatMap RawStmt.namesList
+def RawStmt.names (s : RawStmt) : List String :=
+  s.flatMapDeep fun s =>
+    let es := match s with
+      | .call (.name _) as => as
+      | s => s.exprs
+    es.flatMap RawExpr.names
 
-partial def RawStmt.namesList (ss : List RawStmt) : List String :=
+def RawStmt.namesList (ss : List RawStmt) : List String :=
   ss.flatMap RawStmt.names
 
-end
-
-mutual
-
 /-- The names a raw statement declares, in either branch of an `if`. -/
-partial def RawStmt.decls (s : RawStmt) : List String :=
-  s.declared?.toList ++ s.binds ++ s.blocks.flatMap RawStmt.declsList
+def RawStmt.decls (s : RawStmt) : List String :=
+  s.flatMapDeep fun s => s.declared?.toList ++ s.binds
 
-partial def RawStmt.declsList (ss : List RawStmt) : List String :=
+def RawStmt.declsList (ss : List RawStmt) : List String :=
   ss.flatMap RawStmt.decls
 
-end
-
-mutual
-
 /-- The largest index among the fresh variables a raw statement writes. -/
-partial def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
-  max (((s.declared?.toList ++ s.binds).map fun x => (Var.ofName x).idx).foldl max 0)
-    (max (RawExpr.maxIdxs s.exprs) ((s.blocks.map RawStmt.maxIdxs).foldl max 0))
+def RawStmt.maxIdx [FreshNames] (s : RawStmt) : Nat :=
+  (s.flatMapDeep fun s =>
+    RawExpr.maxIdxs s.exprs :: (s.declared?.toList ++ s.binds).map fun x => (Var.ofName x).idx).foldl
+    max 0
 
-partial def RawStmt.maxIdxs [FreshNames] (ss : List RawStmt) : Nat :=
+def RawStmt.maxIdxs [FreshNames] (ss : List RawStmt) : Nat :=
   ss.foldl (fun n s => max n s.maxIdx) 0
-
-end
 
 /-! ### Block locals, renamed apart
 
@@ -1588,8 +1585,8 @@ def RawStmt.isJump : RawStmt → Bool
 
 /-- Whether a `break`, `continue` or `return` occurs in the statement, at any
 depth (solkey's `containsJump`). -/
-partial def RawStmt.hasJump (s : RawStmt) : Bool :=
-  s.isJump || s.blocks.any (·.any RawStmt.hasJump)
+def RawStmt.hasJump (s : RawStmt) : Bool :=
+  s.anyDeep RawStmt.isJump
 
 /-- Lower outside every loop: a `try`'s clauses inside a loop, which have no
 jump. -/
@@ -1722,8 +1719,8 @@ def lowerLoops (rs : Option (List String)) (ss : List RawStmt) : ElabM (List Raw
   pure (← (lowerList rs ss).run' {}).1
 
 /-- Whether a `_;` occurs in the statement, at any depth. -/
-partial def RawStmt.hasHole (s : RawStmt) : Bool :=
-  s matches .hole || s.blocks.any (·.any RawStmt.hasHole)
+def RawStmt.hasHole (s : RawStmt) : Bool :=
+  s.anyDeep (· matches .hole)
 
 /-- A modifier's body with each `_;` the block `inner`, at any depth.  Not
 inside `unchecked`, as solc refuses it there. -/

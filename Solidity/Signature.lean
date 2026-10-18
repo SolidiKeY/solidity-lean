@@ -393,7 +393,7 @@ def Op2.evalM (g : State C []) {a b s : Srt} :
   | .pushSlot, x, y => do (← x).push (← y) some
   | .pop, x, y => do (← x).pop false (← y)
   | .shrink, x, y => do (← x).pop true (← y)
-  | .extend, x, y => do some ((← (← x).extendPlace (← y)).1)
+  | .extend, x, y => do some ((← (← x).pushPlace (← y)).1)
   | .sfind, x, y => do (← x).find (← y)
   | .copyMem, x, y => do
     let m ← x
@@ -434,7 +434,7 @@ def Op2.eval (g : State C []) {a b s : Srt} (o : Op2 C a b s) :
     (fun {_} x y => do (← x).push (← y) some)
     (fun {_} x y => do (← x).pop false (← y))
     (fun {_} x y => do (← x).pop true (← y))
-    (fun {_} x y => do some ((← (← x).extendPlace (← y)).1))
+    (fun {_} x y => do some ((← (← x).pushPlace (← y)).1))
     (fun {_} x y => do (← x).find (← y))
     (fun {_} x y => do
       let m ← x

@@ -90,15 +90,6 @@ theorem map_ofRes (f : Out C H Γ → Out C H' Δ) (r : TRes (Out C H Γ)) :
     (ofRes r).map f = ofRes (r.map f) := by
   cases r <;> rfl
 
-theorem isOk_map (f : Out C H Γ → Out C H' Δ) (o : COut C H Γ) : (o.map f).isOk = o.isOk := by
-  cases o <;> rfl
-
-theorem after_ofRes_ok (m : Modality) (p : State C Γ → Prop) (o : Out C H Γ) :
-    (ofRes (.ok o)).after m p ↔ p o.st := Iff.rfl
-
-theorem after_ofRes_error (m : Modality) (p : State C Γ → Prop) (e : THalt) :
-    (ofRes (.error e : TRes (Out C H Γ))).after m p ↔ m.onTHalt e ∧ e ≠ .panic := Iff.rfl
-
 end COut
 
 /-- A run continued: the second outcome over the first's heap, the

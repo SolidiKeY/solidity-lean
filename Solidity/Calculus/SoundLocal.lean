@@ -60,12 +60,10 @@ theorem sound_binopRight {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
       (.capture p' x b
         (.assignLocal i.there (.binop op ha hq (.simple a.up) (.simple (.local .here))))) σ := by
   subst hq
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .val p') v (TRun.assignLocal_pushT σ (t := .val p') v i _
-      (.binop op ha rfl (.simple a) b) ?_)
-    simp only [Val.evalT, Simple.evalT_up, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assignLocal i _ σ).map _ = _
+  refine Premise.sound_capturePushed σ (fun v hv => TRun.assignLocal_pushT σ (t := .val p') v i _
+      (.binop op ha rfl (.simple a) b) ?_) (fun h hh => ?_)
+  · simp only [Val.evalT, Simple.evalT_up, hv]; rfl
+  · show (TRun.assignLocal i _ σ).map _ = _
     simp only [TRun.assignLocal, Val.evalT, ok_bind, BinOp.shortT_none hsc, hh]; rfl
 
 /-- `storageLengthRead_unfold_rightFst`: the receiver bound first. -/
@@ -74,12 +72,10 @@ theorem sound_lenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : SPath 
     Premise.Runs m (.assignLocal i (.len b hp))
       (.captureSP x b (.assignLocal i.there (.len (.alias .here) hp))) σ := by
   subst hp
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .alias _) (some q) (TRun.assignLocal_pushT σ (t := .alias _)
-      (some q) i _ (.len b rfl) ?_)
-    simp only [Val.evalT, hq]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assignLocal i _ σ).map _ = _
+  refine Premise.sound_captureSPPushed σ (fun q hq => TRun.assignLocal_pushT σ (t := .alias _)
+      (some q) i _ (.len b rfl) ?_) (fun h hh => ?_)
+  · simp only [Val.evalT, hq]; rfl
+  · show (TRun.assignLocal i _ σ).map _ = _
     simp only [TRun.assignLocal, Val.evalT, hh]; rfl
 
 /-- `memoryLengthRead_unfold_rightFst`: the receiver bound first. -/
@@ -88,12 +84,11 @@ theorem sound_mlenCapture {p : PrimTy} (i : Idx Γ (.val p)) {E : Ty} (b : MPath
     Premise.Runs m (.assignLocal i (.mlen b hp))
       (.captureMV x b (.assignLocal i.there (.mlen (.var .here hm) hp))) σ := by
   subst hp
-  refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .mem _) (some r) (TRun.assignLocal_pushT σ (t := .mem _) (some r) i _
-      (.mlen b rfl) ?_)
-    simp only [Val.evalT, hr]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assignLocal i _ σ).map _ = _
+  refine Premise.sound_captureMVPushed σ
+    (fun r hr => TRun.assignLocal_pushT σ (t := .mem _) (some r) i _
+      (.mlen b rfl) ?_) (fun h hh => ?_)
+  · simp only [Val.evalT, hr]; rfl
+  · show (TRun.assignLocal i _ σ).map _ = _
     simp only [TRun.assignLocal, Val.evalT, hh]; rfl
 
 /-- `binopUnfoldLeft`: `⟨[ v = nse ⊕ e; ]⟩ ⇝ ⟨[ T se = nse; v = se ⊕ e; ]⟩`. -/
@@ -102,12 +97,10 @@ theorem sound_binopUnfoldLeft {p p' : PrimTy} (i : Idx Γ (.val p)) (op : BinOp)
     Premise.Runs m (.assignLocal i (.binop op ha hq a b))
       (.capture p' x a (.assignLocal i.there (.binop op ha hq (.simple (.local .here)) b.up))) σ := by
   subst hq
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .val p') v (TRun.assignLocal_pushT σ (t := .val p') v i _
-      (.binop op ha rfl a b) ?_)
-    simp only [Val.evalT, Val.evalT_up, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assignLocal i _ σ).map _ = _
+  refine Premise.sound_capturePushed σ (fun v hv => TRun.assignLocal_pushT σ (t := .val p') v i _
+      (.binop op ha rfl a b) ?_) (fun h hh => ?_)
+  · simp only [Val.evalT, Val.evalT_up, hv]; rfl
+  · show (TRun.assignLocal i _ σ).map _ = _
     simp only [TRun.assignLocal, Val.evalT, hh]; rfl
 
 /-- `unopCapture`: `⟨[ v = ⊖nse; ]⟩ ⇝ ⟨[ T se = nse; v = ⊖se; ]⟩`. -/
@@ -116,12 +109,10 @@ theorem sound_unopCapture {p p' : PrimTy} (i : Idx Γ (.val p)) (op : UnOp)
     Premise.Runs m (.assignLocal i (.unop op ha hq a))
       (.capture p' x a (.assignLocal i.there (.unop op ha hq (.simple (.local .here))))) σ := by
   subst hq
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .val p') v (TRun.assignLocal_pushT σ (t := .val p') v i _
-      (.unop op ha rfl a) ?_)
-    simp only [Val.evalT, hv]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.assignLocal i _ σ).map _ = _
+  refine Premise.sound_capturePushed σ (fun v hv => TRun.assignLocal_pushT σ (t := .val p') v i _
+      (.unop op ha rfl a) ?_) (fun h hh => ?_)
+  · simp only [Val.evalT, hv]; rfl
+  · show (TRun.assignLocal i _ σ).map _ = _
     simp only [TRun.assignLocal, Val.evalT, hh]; rfl
 
 /-- `logicalAndShortCircuitRhs`: `v = se && nse;` is
@@ -242,12 +233,10 @@ theorem sound_rebindPushCapture {R : RefTy} (i : Idx Γ (.alias R))
     (b : SPath C Γ (.array (.ref R))) (hd : (Ty.ref R).defaultOkS = true) (x : Var) :
     Premise.Runs m (.rebind i (.push b hd))
       (.captureSP x b (.rebind i.there (.push (.alias .here) hd))) σ := by
-  refine Premise.sound_captureSPSim σ (fun q hq => ?_) (fun h hh _ => ?_)
-  · refine runSt_pushed σ (t := .alias _) (some q) (TRun.rebind_pushT σ (t := .alias _)
-      (some q) i _ (.push b hd) ?_)
-    simp only [ARhs.evalT, hq]; rfl
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.rebind i (.push b hd) σ).map _ = _
+  refine Premise.sound_captureSPPushed σ (fun q hq => TRun.rebind_pushT σ (t := .alias _)
+      (some q) i _ (.push b hd) ?_) (fun h hh => ?_)
+  · simp only [ARhs.evalT, hq]; rfl
+  · show (TRun.rebind i (.push b hd) σ).map _ = _
     simp only [TRun.rebind, ARhs.evalT, hh]; rfl
 
 /-- **An alias bound** (`rebindStep`). -/
@@ -298,39 +287,34 @@ theorem OpLoc.unfoldRecv_sound (k : Nat) {p : PrimTy}
     split at hq
     · cases hq
     · cases hq
-      refine Premise.sound_captureSPSim σ (fun r hr => ?_) (fun e he _ => ?_)
-      · exact runSt_pushed σ (t := .alias _) (some r)
-          (hpush (some r) (.field (.alias .here) f h) (.field b f h) (.field f h (by rw [hr]; rfl)))
-      · exact TRes.Sim.err_refl (hstore b f h e he)
+      exact Premise.sound_captureSPPushed σ
+        (fun r hr => hpush (some r) (.field (.alias .here) f h) (.field b f h)
+          (.field f h (by rw [hr]; rfl))) (hstore b f h)
   | index it b ie =>
     simp only [OpLoc.unfoldRecv] at hq
     split at hq
     · cases hq
     · cases hq
-      refine Premise.sound_captureSPSim σ (fun r hr => ?_) (fun e he _ => ?_)
-      · exact runSt_pushed σ (t := .alias _) (some r) (hpush (some r) (.index it (.alias .here) ie.up) (.index it b ie)
-          (.index it (by rw [hr]; rfl) (Simple.evalT_up σ _ ie)))
-      · exact TRes.Sim.err_refl (hindex it b ie e he)
+      exact Premise.sound_captureSPPushed σ
+        (fun r hr => hpush (some r) (.index it (.alias .here) ie.up) (.index it b ie)
+          (.index it (by rw [hr]; rfl) (Simple.evalT_up σ _ ie))) (hindex it b ie)
   | mfield b f h =>
     cases b with
     | var => cases hq
     | loc l =>
       cases hq
-      refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun e he _ => ?_)
-      · exact runSt_pushed σ (t := .mem _) (some r) (hpush (some r)
-          (.mfield (.var .here (MPath.loc l).mapFree) f h) (.mfield (.loc l) f h)
-          (.mfield f h (by rw [hr]; rfl)))
-      · exact TRes.Sim.err_refl (hmfield _ f h e he)
+      exact Premise.sound_captureMVPushed σ
+        (fun r hr => hpush (some r) (.mfield (.var .here (MPath.loc l).mapFree) f h)
+          (.mfield (.loc l) f h) (.mfield f h (by rw [hr]; rfl))) (hmfield _ f h)
   | mindex a b ie =>
     cases b with
     | var => cases hq
     | loc l =>
       cases hq
-      refine Premise.sound_captureMVSim σ (fun r hr => ?_) (fun e he _ => ?_)
-      · exact runSt_pushed σ (t := .mem _) (some r) (hpush (some r)
-          (.mindex a (.var .here (MPath.loc l).mapFree) ie.up) (.mindex a (.loc l) ie)
-          (.mindex a (by rw [hr]; rfl) (Simple.evalT_up σ _ ie)))
-      · exact TRes.Sim.err_refl (hmindex a _ ie e he)
+      exact Premise.sound_captureMVPushed σ
+        (fun r hr => hpush (some r) (.mindex a (.var .here (MPath.loc l).mapFree) ie.up)
+          (.mindex a (.loc l) ie) (.mindex a (by rw [hr]; rfl) (Simple.evalT_up σ _ ie)))
+        (hmindex a _ ie)
   | _ => cases hq
 
 /-- `compoundAssignValueRhsCapture`: the source captured first. -/
@@ -338,12 +322,10 @@ theorem sound_opCapture {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = 
     (hp : p.isNumeric = true) (l : OpLoc C Γ p) (r : Val C Γ p) (x : Var) :
     Premise.Runs m (.opAssign op hop hp l r)
       (.capture p x r (.opAssign op hop hp l.up (.simple (.local .here)))) σ := by
-  refine Premise.sound_captureSim σ (fun v hv => ?_) (fun h hh _ => ?_)
-  · exact runSt_pushed σ (t := .val p) v (TRun.opAssign_pushT σ (t := .val p) v op
-      (OpLoc.AgreeT.of_up (t := .val p) σ v l) _ r (by rw [hv]; rfl))
-  · refine TRes.Sim.err_refl ?_
-    show (TRun.opAssign op l r σ).map _ = _
-    simp only [TRun.opAssign, hh]; rfl
+  refine Premise.sound_capturePushed σ (fun v hv => TRun.opAssign_pushT σ (t := .val p) v op
+      (OpLoc.AgreeT.of_up (t := .val p) σ v l) _ r (by rw [hv]; rfl)) (fun h hh => ?_)
+  show (TRun.opAssign op l r σ).map _ = _
+  simp only [TRun.opAssign, hh]; rfl
 
 /-- **A compound assignment** (`opStep`). -/
 theorem opStep_sound (k : Nat) {p : PrimTy} (op : BinOp) (hop : op.hasCompoundAssign = true)

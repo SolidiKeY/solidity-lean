@@ -47,10 +47,6 @@ theorem TRes.AgreesO.cases {α β γ δ : Type} {f : α → β} {t : TRes α} {u
 theorem TRes.AgreesO.ret {γ δ : Type} {g : γ → δ} {c : γ} {X : Option δ} (h : X = some (g c)) :
     TRes.AgreesO g (Except.ok c : TRes γ) X := h
 
-theorem Option.bind_swap {α β γ : Type} (x : Option α) (y : Option β) (f : α → β → Option γ) :
-    (x.bind fun a => y.bind fun b => f a b) = y.bind fun b => x.bind fun a => f a b := by
-  cases x <;> cases y <;> rfl
-
 /-! ## Updates computed -/
 
 section Updates
@@ -155,14 +151,6 @@ theorem Tm.eval_pushSlot {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.
     (Tm.app2 .pushSlot s q).eval σ =
       (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.push r some := by
   rw [Tm.eval_app2, Op2.eval_eq_evalM]; rfl
-
-theorem Tm.eval_extend {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
-    (Tm.app2 .extend s q).eval σ =
-      (s.eval σ).bind fun st => (q.eval σ).bind fun r => (st.extendPlace r).map (·.1) := by
-  rw [Tm.eval_app2, Op2.eval_eq_evalM]
-  show (s.eval σ).bind (fun st => (q.eval σ).bind fun r => (st.extendPlace r).bind fun p => some p.1) = _
-  congr 1; funext st; congr 1; funext r
-  cases st.extendPlace r <;> rfl
 
 theorem Tm.eval_pop {E : Ty} (s : Tm C Γ .st) (q : Tm C Γ (.path (.ref (.array E)))) :
     (Tm.app2 .pop s q).eval σ = (s.eval σ).bind fun st => (q.eval σ).bind fun r => st.pop false r := by
@@ -326,6 +314,30 @@ theorem rebindMemAlias_agrees {R : RefTy} (i : Idx Γ (.mem R)) (p : MPath C Γ 
 
 end Agrees
 
+namespace PushSuffix
+
+/-- The numeric source `1` used by `++sp.push()`. -/
+def oneSimple {Γ : Ctx} (p : PrimTy) (hp : p.isNumeric = true) : Simple C Γ p :=
+  .lit 1 (by cases p <;> first | rfl | exact absurd hp Bool.false_ne_true)
+
+/-- The arithmetic of `++sp.push()` is compound addition of one. -/
+theorem bumpT_compoundOne {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+    (σ : State C Γ) (x : Int) :
+    bumpT op p x = compoundT op.binOp p x (PrimTy.key ((oneSimple p hp).evalT σ)) := by
+  cases p with
+  | bool => cases hp
+  | uint | int => cases op <;> rfl
+
+/-- Discarding the value of `sp.push()++` leaves compound addition of one. -/
+theorem bumpStore_is_compound {Γ : Ctx} {p : PrimTy} (op : IncDec) (hp : p.isNumeric = true)
+    (σ : State C Γ) (r : SRef C (.prim p)) :
+    (bumpStoreT σ op r).map Prod.fst =
+      opStoreT σ op.binOp r ((oneSimple p hp).evalT σ) := by
+  simp only [bumpStoreT, opStoreT, TRes.map_bind, bumpT_compoundOne op hp σ]
+  rfl
+
+end PushSuffix
+
 /-! ### Compound targets -/
 
 section OpLoc
@@ -471,85 +483,17 @@ theorem Tm.eval_bumped (o : IncDec) (hp : p.isNumeric = true) (a : Tm C Γ (.val
   | true => exact Tm.eval_bump σ o hp a
   | false => simp only [Bool.false_eq_true, ↓reduceIte]; cases a.eval σ <;> rfl
 
-theorem bumpLoc_agrees (o : IncDec) (hp : p.isNumeric = true) (L : Loc C Γ (.prim p)) :
-    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
-      ((do bumpStoreT σ o (← L.resolveT σ)) >>= fun x => pure x.1)
-      ((Upd.nil.snoc (.storage (.app3 .save (.app0 .storage) L.lower (.app1 .sval
-        (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
-          (.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp))
-            (Val.read L).lower (Tm.one p hp))))))).applyP σ) := by
-  rw [applyP_storage1, Tm.eval_save, Tm.eval_storage, Option.bind_some, Tm.eval_sval,
-    Tm.eval_bump σ o hp]
-  show TRes.AgreesO _ _ (((L.lower.eval σ).bind fun r =>
-    ((((Tm.app2 .find (.app0 .storage) L.lower).eval σ).bind fun x =>
-      bumpT o p (PrimTy.key x)).map SVal.prim).bind fun w => σ.storage.write r w).map _)
-  rw [Tm.eval_find, Tm.eval_storage, Option.bind_some, bind_assoc]
-  refine (Loc.lower_resolveT σ L).cases (fun ref href => ?_) (fun href => by rw [href]; rfl)
-  rw [href]
-  simp only [Option.bind_some, id, bumpStoreT, bind_assoc]
-  cases hf : σ.storage.find ref with
-  | none => rfl
-  | some old =>
-    simp only [Option.bind_some, TRes.ofOpt_some_bind]
-    cases hc : bumpT o p (PrimTy.key (SVal.view old)) with
-    | none => rfl
-    | some new =>
-      simp only [Option.map_some, Option.bind_some, TRes.ofOpt_some_bind]
-      rw [Storage.write_prim]
-      cases σ.storage.save ref (.prim new) <;> rfl
-
-theorem bumpMem_agrees (o : IncDec) (hp : p.isNumeric = true) (L : MLoc C Γ (.prim p)) :
-    TRes.AgreesO (fun o : Out C σ.H Γ => (o.st.glob, o.st.locV))
-      ((do bumpMemT σ o (← L.addrT σ)) >>= fun x => pure x.1)
-      ((Upd.nil.snoc (.memory (.app3 .write (.app0 .memory) L.lower (.app1 .mval
-        (Tm.castV (BinOp.compound_ret (IncDec.binOp_compound o) p)
-          (.app2 (.binop o.binOp (BinOp.compound_accepts (IncDec.binOp_compound o) hp))
-            (Val.readMem L).lower (Tm.one p hp))))))).applyP σ) := by
-  rw [applyP_memory1, Tm.eval_write, Tm.eval_memory, Option.bind_some, Tm.eval_mval,
-    Tm.eval_bump σ o hp]
-  show TRes.AgreesO _ _ (((L.lower.eval σ).bind fun ad =>
-    ((((Tm.app2 .read (.app0 .memory) L.lower).eval σ).bind fun x =>
-      bumpT o p (PrimTy.key x))).bind fun w => σ.glob.memT.writeT ad w).map _)
-  rw [Tm.eval_read, Tm.eval_memory, Option.bind_some, bind_assoc]
-  refine (MLoc.lower_addrT σ L).cases (fun a ha => ?_) (fun ha => by rw [ha]; rfl)
-  rw [ha]
-  simp only [Option.bind_some, bumpMemT, Grown.readT, State.memT, MAddr.resolve_toT,
-    Option.bind_eq_bind, bind_assoc]
-  change TRes.AgreesO _ _ ((((σ.heap.readAddr a).bind fun x => _).bind fun w =>
-    Grown.writeT ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a.toT w).map _)
-  cases hf : σ.heap.readAddr a with
-  | none => rfl
-  | some old =>
-    simp only [Option.bind_some, TRes.ofOpt_some_bind]
-    cases hc : bumpT o p (PrimTy.key (p := p) old) with
-    | none => rfl
-    | some new =>
-      simp only [Option.bind_some, TRes.ofOpt_some_bind]
-      rw [Grown.writeT_toT_prim ⟨List.prefix_refl σ.H, σ.heap, ()⟩ a new]
-      cases σ.heap.writeAddr a new <;> rfl
+/-- `l++`, its value dropped, is `l += 1`. -/
+theorem TRun.incDec_eq_opAssign (o : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
+    TRun.incDec o l σ = TRun.opAssign o.binOp l (.simple (PushSuffix.oneSimple p hp)) σ := by
+  cases l <;> simp only [TRun.incDec, TRun.opAssign, OpLoc.bumpT, OpLoc.storeT, bumpStoreT,
+    opStoreT, bumpMemT, opMemT, Val.evalT, bind_assoc, PushSuffix.bumpT_compoundOne o hp σ] <;> rfl
 
 theorem incDec_agrees (o : IncDec) (hp : p.isNumeric = true) (l : OpLoc C Γ p) :
     TRes.AgreesO (fun x : Out C σ.H Γ => (x.st.glob, x.st.locV)) (TRun.incDec o l σ)
       ((Upd.nil.snoc (l.set (l.op o.binOp (IncDec.binOp_compound o) hp (Tm.one p hp)))).applyP σ) := by
-  show TRes.AgreesO _ (l.bumpT σ o >>= fun x => pure x.1) _
-  cases l with
-  | «local» i =>
-    rw [OpLoc.set, applyP_local1]
-    show TRes.AgreesO _ _ (((Tm.castV _ (.app2 (.binop o.binOp _) (.pvV i) (Tm.one p hp))).eval
-      σ).map _)
-    rw [Tm.eval_bump σ o hp, Tm.eval_pvV]
-    simp only [Option.bind_some, OpLoc.bumpT, bind_assoc]
-    cases bumpT o p (PrimTy.key (TEnv.get i σ.env)) with
-    | none => rfl
-    | some new =>
-      refine TRes.AgreesO.ret ?_
-      rw [Option.map_some, State.locV_setLocal]
-      rfl
-  | root r h => exact bumpLoc_agrees σ o hp (.root r h)
-  | field b f h => exact bumpLoc_agrees σ o hp (.field b f h)
-  | index it b ie => exact bumpLoc_agrees σ o hp (.index it b (.simple ie))
-  | mfield b f h => exact bumpMem_agrees σ o hp (.field b f h)
-  | mindex a b ie => exact bumpMem_agrees σ o hp (.index a b (.simple ie))
+  rw [TRun.incDec_eq_opAssign σ o hp l]
+  exact opAssign_agrees σ (IncDec.binOp_compound o) hp l _
 
 theorem bumpAssignLoc_agrees (i : Idx Γ (.val p)) (o : IncDec) (hp : p.isNumeric = true)
     (L : Loc C Γ (.prim p)) :
@@ -745,17 +689,6 @@ end Arms
 section Agrees2
 
 variable {Γ : Ctx} (σ : State C Γ)
-
-theorem Storage.pushPlace_fst {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) :
-    (st.pushPlace r).map (·.1) = st.push r some := by
-  unfold Storage.pushPlace Storage.push
-  cases st.find r with
-  | none => rfl
-  | some v =>
-    simp only [Option.bind_eq_bind, Option.bind_some]
-    split
-    · cases st.save r _ <;> rfl
-    · rfl
 
 /-- A push as a place returns the slot past the live elements found. -/
 theorem Storage.pushPlace_some {E : Ty} {st st' : Storage C} {r : SRef C (.ref (.array E))}

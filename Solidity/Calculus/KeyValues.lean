@@ -165,8 +165,4 @@ theorem Args.keyValues_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {ps : Ctx} (args : Args
     show ((as.wk h).keyValues && (e.wk h).keyValue) = _
     rw [ih, MPath.keyValue_wk]; rfl
 
-theorem Val.keyValue_of_isSimple {Γ : Ctx} {p : PrimTy} {e : Val C Γ p}
-    (h : e.isSimple = true) : e.keyValue = true := by
-  cases e <;> first | rfl | exact absurd h Bool.false_ne_true
-
 end Solidity

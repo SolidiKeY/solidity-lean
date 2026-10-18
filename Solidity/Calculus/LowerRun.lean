@@ -69,11 +69,6 @@ theorem congr {f' : α → β} {t : TRes α} {u : Option β} (h : TRes.AgreesO f
   | .error .diverge, _ => trivial
   | .error .exhausted, _ => trivial
 
-/-- A typed result that agrees with a reading does not panic. -/
-theorem noPanic {t : TRes α} {u : Option β} (h : TRes.AgreesO f t u) : t ≠ .error .panic := by
-  rintro rfl
-  exact h
-
 end TRes.AgreesO
 
 /-! ## Addresses -/

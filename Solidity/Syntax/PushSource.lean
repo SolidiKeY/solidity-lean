@@ -52,10 +52,4 @@ def Val.complexStorageRead {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p �
   | .read l => !(SPath.loc l).isSimple
   | _ => false
 
-/-- Reading `rows[i].value` retains the source path's complexity. -/
-theorem SPath.primitiveRead_complex {C : Contract} {Γ : Ctx} {p : PrimTy}
-    (b : SPath C Γ (.prim p)) : b.primitiveRead.complexStorageRead = !b.isSimple := by
-  cases b with
-  | loc l => rfl
-
 end Solidity

@@ -43,10 +43,6 @@ def run (e : Operand C Γ T) (σ : State C Γ) : TRes (Out C σ.H Γ × SVal T) 
   let v ← e.value.valueT a.st
   pure (⟨a.st.drop e.code.ext, a.ext⟩, v)
 
-theorem run_pure (v : Src C Γ T) (σ : State C Γ) :
-    (ofSrc v).run σ = (v.valueT σ).map (fun x => (⟨σ, List.prefix_refl _⟩, x)) := by
-  rfl
-
 theorem run_wk (e : Operand C Γ T) (h : Thin Γ Δ) (σ : State C Γ) (d : TEnv C σ.H Δ) :
     (e.wk h).run (σ.lift h d) = liftedT₂ h d (e.run σ) := by
   have hr : TWkRel (e.code.wk h).2.1 (TEnv.off h d)
@@ -90,16 +86,6 @@ theorem run_afterAlias {R : RefTy} (e : Operand C Γ T) (σ : State C Γ)
       (e.run σ).map (fun x => (⟨x.1.st.push (t := .alias R) p, x.1.ext⟩, x.2)) := by
   simpa only [liftedT₂, Out.lift, State.lift, State.push, TEnv.put, TEnv.wk, LTy.TDenote.wk]
     using run_wk e (.drop (t := .alias R) .refl) σ (p, σ.env)
-
-theorem run_afterTwoAliases {R : RefTy} (e : Operand C Γ T) (σ : State C Γ)
-    (p q : Option (SRef C (.ref R))) :
-    ((e.wk (.drop .refl)).wk (.drop .refl)).run
-        ((σ.push (t := .alias R) p).push (t := .alias R) q) =
-      (e.run σ).map (fun x =>
-        (⟨(x.1.st.push (t := .alias R) p).push (t := .alias R) q, x.1.ext⟩, x.2)) := by
-  rw [run_afterAlias, run_afterAlias]
-  cases e.run σ
-  all_goals rfl
 
 def pushAt {E : Ty} (e : Operand C Γ E) (ref : SRef C (.ref (.array E))) : TStep C Γ Γ := fun σ => do
   let x ← e.run σ

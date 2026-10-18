@@ -39,14 +39,12 @@ theorem Upd.popsOnly_globT {Γ : Ctx} (σ : State C Γ) {Δ : Ctx} (U : Upd C Γ
 
 /-! ## The context -/
 
-section Wrap
-
-variable {Γ₀ : Ctx}
-
-/-- Two formulas under the context give a third that follows from both. -/
-theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
-    ∀ {φ ψ χ : Fml C Γ}, (∀ τ, holds τ φ → holds τ ψ → holds τ χ) →
-      ∀ σ, holds σ (H.wrap φ) → holds σ (H.wrap ψ) → holds σ (H.wrap χ) := by
+set_option hygiene false in
+/-- The proof of `Hyps.wrap_and`, by induction on the context `H`: it reads
+the formulas only through `Upd.afterT_and` and `Modality.forallB_and`, so the
+reading with callbacks (`Hyps.wrapC_and`, `Calculus/CallbackSound.lean`) is
+the same script. -/
+macro "hyps_wrap_and" : tactic => `(tactic| (
   induction H with
   | nil => intro φ ψ χ h σ; exact h σ
   | pre H a ih =>
@@ -69,7 +67,17 @@ theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
       Modality.forallB_and (fun _ a b => h _ a b) f g
   | anon H xs ih =>
     intro φ ψ χ h
-    exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)
+    exact ih (φ := .anon xs φ) (ψ := .anon xs ψ) (χ := .anon xs χ) fun τ f g b => h _ (f b) (g b)))
+
+section Wrap
+
+variable {Γ₀ : Ctx}
+
+/-- Two formulas under the context give a third that follows from both. -/
+theorem Hyps.wrap_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
+    ∀ {φ ψ χ : Fml C Γ}, (∀ τ, holds τ φ → holds τ ψ → holds τ χ) →
+      ∀ σ, holds σ (H.wrap φ) → holds σ (H.wrap ψ) → holds σ (H.wrap χ) := by
+  hyps_wrap_and
 
 /-- The context is monotone. -/
 theorem Hyps.wrap_mono {Γ : Ctx} (H : Hyps C Γ₀ Γ) {φ ψ : Fml C Γ}
@@ -148,6 +156,14 @@ theorem Hyps.wrap_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) 
 
 /-! ## Soundness -/
 
+/-- **A rule under the context**: the premise the strategy builds for `s`,
+under `H`, gives the modality over `s`. -/
+theorem Hyps.wrap_step (hS : Stmt.Sound C) {Γ₀ Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C Γ₀ Γ) {k : Nat}
+    {m : Modality} {s : Stmt C Γ Γ'} {p : Premise C Γ Γ'} (d : s.step k m = p)
+    {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} (σ : State C Γ₀)
+    (h : holds σ (H.wrap (p.fml m ω κ φ))) : holds σ (H.wrap (.modal m (.cons s ω) κ φ)) :=
+  H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ h
+
 /-- **Soundness of the scoped sequent over the typed state**, given the
 arms' (`Stmt.Sound`): what `H ⊢ φ` proves holds, its context in front, in
 every typed state of the outer scope.  The arms' are proved in
@@ -162,40 +178,34 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
   | @update Γ Γ' Γ₁ Γ₂ H m s ω κ φ U d _ _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.update U).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_step hS d σ (ih σ)
   | @updates Γ Δ Γ' Γ₁ Γ₂ H m s ω κ φ U V d _ _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.updates U V).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_step hS d σ (ih σ)
   | @guardedUpdates Γ Δ Γ₁ Γ₂ H m s ω κ φ c U V d _ _ _ ihT ihE =>
     intro σ
     have hTE : holds σ (H.wrap ((Premise.guardedUpdates c U V).fml m ω κ φ)) :=
       H.wrap_and (χ := (Premise.guardedUpdates c U V).fml m ω κ φ)
         (fun _ x y => ⟨x, y⟩) σ (ihT σ) (ihE σ)
-    exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hTE
+    exact H.wrap_step hS d σ hTE
   | @unfold Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.unfold P e).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_step hS d σ (ih σ)
   | @bind Γ Γ' Γ₁ Γ₂ H m s ω κ φ x t P d _ _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.bind x t P).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_step hS d σ (ih σ)
   | @split Γ Γ₁ Γ₂ Δ₁ Δ₂ H m s ω κ φ b c c' P Q d _ _ _ ihT ihE =>
     intro σ
     have hTE : holds σ (H.wrap ((Premise.split b c c' P Q).fml m ω κ φ)) :=
       H.wrap_and (χ := (Premise.split b c c' P Q).fml m ω κ φ) (fun _ x y => ⟨x, y⟩) σ
         (ihT σ) (ihE σ)
-    exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hTE
+    exact H.wrap_step hS d σ hTE
   | @check Γ Γ₁ Γ₂ H m s ω κ φ c d _ _ _ ihT ihE =>
     exact fun σ => H.wrap_and
       (fun τ a b => hS _ _ s _ d τ ω κ φ (show holds τ ((Premise.check c).fml m ω κ φ)
         from ⟨a, b⟩)) σ (ihT σ) (ihE σ)
   | @done Γ Γ' Γ₁ Γ₂ H m s ω κ φ b d _ _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.done b).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_step hS d σ (ih σ)
   | @branches Γ Γ₁ Γ₂ H m s ω κ φ bs d hne _ _ ih =>
     intro σ
-    refine H.wrap_mono (φ := (Premise.branches bs).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
+    refine H.wrap_step hS d σ ?_
     refine H.wrap_conj σ _ ?_ ?_
     · cases bs with
       | nil => exact nomatch hne
@@ -205,8 +215,7 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
       exact ih b hb σ
   | @cases Γ Γ₁ Γ₂ H m s ω κ φ fs us d hne _ _ _ ihF ihU =>
     intro σ
-    refine H.wrap_mono (φ := (Premise.cases fs us).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ ?_
+    refine H.wrap_step hS d σ ?_
     refine H.wrap_conj σ _ ?_ ?_
     · cases fs with
       | cons _ _ => exact List.cons_ne_nil _ _
@@ -234,10 +243,9 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
       H.wrap_and (φ := I.invHyp Bk) (ψ := Fml.anonHavoc xs hv X)
         (χ := .and (I.invHyp Bk) (Fml.anonHavoc xs hv X))
         (fun _ x y => ⟨x, y⟩) σ (ihI σ) hX
-    exact H.wrap_mono (fun τ h => hS _ _ s _ d τ ω κ φ h) σ hF
+    exact H.wrap_step hS d σ hF
   | @inline Γ Γ' Γ'' Γ₁ Γ₂ H m s ω κ φ P e d _ _ ih =>
-    exact fun σ => H.wrap_mono (φ := (Premise.inline P e).fml m ω κ φ)
-      (fun τ h => hS _ _ s _ d τ ω κ φ h) σ (ih σ)
+    exact fun σ => H.wrap_step hS d σ (ih σ)
   | @empty Γ Γ₂ H m κ φ _ ih =>
     exact fun σ => H.wrap_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
       (fun τ h => holds_exit m κ φ τ h) σ (ih σ)

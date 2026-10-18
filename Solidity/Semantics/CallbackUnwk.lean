@@ -88,17 +88,6 @@ theorem asLoop {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ} {s : Stmt C Γ 
   | loopDiverge ht => exact .diverge ht
   | _ => trivial
 
-theorem LoopExec.toExecS {J : StateInv C} {Γ Γ₁ : Ctx} {a : LoopAnn C Γ} {c : Val C Γ .bool}
-    {body : Prog C Γ Γ₁} {σ : State C Γ} {o : COut C σ.H Γ} (h : LoopExec J a c body σ o) :
-    ExecS J σ (.loop a c body) o := by
-  induction h with
-  | det ht => exact .det ht
-  | halt ht hc => exact .loopHalt ht hc
-  | exit ht hc => exact .loopExit ht hc
-  | iter ht hc hp hl ih => exact .loopIter ht hc hp ih
-  | stop ht hc hp hn => exact .loopStop ht hc hp hn
-  | diverge ht => exact .loopDiverge ht
-
 theorem loop_unwk {Γ Γ₁ : Ctx} (J : StateInv C) (a : LoopAnn C Γ) (c : Val C Γ .bool)
     (body : Prog C Γ Γ₁) (hb : UWkP J body) : UWkS J (.loop a c body) := by
   intro Δ h τ o' he

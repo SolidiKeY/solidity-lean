@@ -233,34 +233,24 @@ theorem MObj.elems_wk {H H' : HTy} (e : H <+: H') {R : RefTy} {E : Ty} (a : ArrT
     (o : MObj H R) : MObj.elems a (MObj.wk e R o) = (MObj.elems a o).map (MVal.wk e E) := by
   cases a <;> simp only [MObj.wk, MObj.elems_dyn, MObj.elems_fixed]
 
+/-- An array object's elements weakened twice, pointwise once. -/
+private theorem map_wk_wk {H H₁ H₂ : HTy} (e₁ : H <+: H₁) (e₂ : H₁ <+: H₂) {E : Ty}
+    (l : List (MVal H E)) :
+    (l.map (MVal.wk e₁ E)).map (MVal.wk e₂ E) = l.map (MVal.wk (e₁.trans e₂) E) :=
+  List.map_map.trans (congrArg (List.map · l) (funext (MVal.wk_wk e₁ e₂ E)))
+
 theorem MObj.wk_wk {H H₁ H₂ : HTy} (e₁ : H <+: H₁) (e₂ : H₁ <+: H₂) :
     (R : RefTy) → (o : MObj H R) → MObj.wk e₂ R (MObj.wk e₁ R o) = MObj.wk (e₁.trans e₂) R o
   | .struct s, o => MFields.wk_wk e₁ e₂ (structDef s) o
-  | .array E, o => Subtype.ext (by
-      show ((o : {l : List (MVal H E) // l.length < 2 ^ 256}).1.map (MVal.wk e₁ E)).map
-        (MVal.wk e₂ E) = (o : {l : List (MVal H E) // l.length < 2 ^ 256}).1.map
-          (MVal.wk (e₁.trans e₂) E)
-      rw [List.map_map]
-      exact congrArg (fun f => List.map f _) (funext (MVal.wk_wk e₁ e₂ E)))
-  | .fixed E n, o => Subtype.ext (by
-      show ((o : {l : List (MVal H E) // l.length = n}).1.map (MVal.wk e₁ E)).map
-        (MVal.wk e₂ E) = (o : {l : List (MVal H E) // l.length = n}).1.map
-          (MVal.wk (e₁.trans e₂) E)
-      rw [List.map_map]
-      exact congrArg (fun f => List.map f _) (funext (MVal.wk_wk e₁ e₂ E)))
+  | .array _, o => Subtype.ext (map_wk_wk e₁ e₂ o.1)
+  | .fixed _ _, o => Subtype.ext (map_wk_wk e₁ e₂ o.1)
   | .mapping _ _, o => (o : Empty).elim
 
 theorem MObj.wk_refl {H : HTy} : (R : RefTy) → (o : MObj H R) →
     MObj.wk (List.prefix_refl H) R o = o
   | .struct s, o => MFields.wk_refl (structDef s) o
-  | .array E, o => Subtype.ext (by
-      show (o : {l : List (MVal H E) // l.length < 2 ^ 256}).1.map (MVal.wk (List.prefix_refl H) E) =
-        (o : {l : List (MVal H E) // l.length < 2 ^ 256}).1
-      exact (congrArg (fun f => List.map f _) (funext (MVal.wk_refl E))).trans (List.map_id _))
-  | .fixed E n, o => Subtype.ext (by
-      show (o : {l : List (MVal H E) // l.length = n}).1.map (MVal.wk (List.prefix_refl H) E) =
-        (o : {l : List (MVal H E) // l.length = n}).1
-      exact (congrArg (fun f => List.map f _) (funext (MVal.wk_refl E))).trans (List.map_id _))
+  | .array E, o => Subtype.ext (List.map_id'' (MVal.wk_refl E) o.1)
+  | .fixed E _, o => Subtype.ext (List.map_id'' (MVal.wk_refl E) o.1)
   | .mapping _ _, o => (o : Empty).elim
 
 theorem Objs.get_wk {H H' : HTy} (e : H <+: H') {R : RefTy} : (Rs : List RefTy) →

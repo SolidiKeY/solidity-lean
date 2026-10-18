@@ -133,8 +133,6 @@ def Idx.ext {Γ : Ctx} {t : LTy} (i : Idx Γ t) : {Δ : Ctx} → Ext Γ Δ → I
 
 namespace Ext
 
-theorem trans_refl {Γ Δ : Ctx} (a : Ext Γ Δ) : a.trans .refl = a := rfl
-
 theorem trans_push {Γ Δ Ε : Ctx} {t : LTy} (a : Ext Γ Δ) (b : Ext Δ Ε) :
     a.trans (.push (t := t) b) = .push (a.trans b) := rfl
 
@@ -156,11 +154,6 @@ theorem length_eq {Γ Δ : Ctx} (h : Ext Γ Δ) : Δ.length = Γ.length + h.dept
     show _ + 1 = _ + (h.depth + 1)
     rw [ih, Nat.add_assoc]
 
-theorem depth_append (Γ ρ : Ctx) : (append Γ ρ).depth = ρ.length := by
-  induction ρ with
-  | nil => rfl
-  | cons t ρ ih => show (append Γ ρ).depth + 1 = _; rw [ih]; rfl
-
 theorem toNat_idx {Γ Δ : Ctx} {t : LTy} (h : Ext Γ Δ) (i : Idx Γ t) :
     (i.ext h).toNat = i.toNat + h.depth := by
   induction h with
@@ -168,12 +161,6 @@ theorem toNat_idx {Γ Δ : Ctx} {t : LTy} (h : Ext Γ Δ) (i : Idx Γ t) :
   | push h ih =>
     show (i.ext h).toNat + 1 = i.toNat + (h.depth + 1)
     rw [ih, Nat.add_assoc]
-
-theorem idx_trans {Γ Δ Ε : Ctx} {t : LTy} (a : Ext Γ Δ) (b : Ext Δ Ε) (i : Idx Γ t) :
-    i.ext (a.trans b) = (i.ext a).ext b := by
-  induction b with
-  | refl => rfl
-  | push b ih => rw [trans_push]; exact congrArg Idx.there ih
 
 /-- Two suffix witnesses of the same contexts are equal: an `Ext` is proof-like
 data, and a scope end has only one way to pop. -/
@@ -285,11 +272,6 @@ def Binders.toList {ρ : Ctx} : Binders ρ → List (PrimTy × Var)
 def Binders.names {ρ : Ctx} : Binders ρ → List Var
   | .nil => []
   | .snoc bs _ x => x :: bs.names
-
-theorem Binders.length_names {ρ : Ctx} (bs : Binders ρ) : bs.names.length = ρ.length := by
-  induction bs with
-  | nil => rfl
-  | snoc bs _ _ ih => simp only [names, List.length_cons, ih]
 
 /-- The `Panic` clause's code, a `uint`, if the clause names it. -/
 inductive CodeBinder : Ctx → Type where
