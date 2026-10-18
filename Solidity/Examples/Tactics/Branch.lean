@@ -40,7 +40,7 @@ block, whose end prints as `}`.
 The old table's condition-directed rewrites (`ifElseTrue`, `ifElseFalse`,
 `ifElseNegated`) are gone: a literal is simple, so `if (true)` splits like any
 other condition, and `!c` is captured like `a == b`.  The goal whose
-hypothesis is `true ≐ false` is then closed by the logic, not by a rule.
+hypothesis is `true = false` is then closed by the logic, not by a rule.
 -/
 
 namespace Solidity.Examples.Tactics.Branch
@@ -65,7 +65,7 @@ info: @Taclet.ifElseUnfold : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : C
 info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool} {x : Ctx}
   {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
-    "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
+    "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseSplit
 
@@ -81,10 +81,10 @@ the state the `if` runs in. -/
 
 /--
 trace: case thn
-⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ true ⟹ [ x = 2; } ] ¬x = 0 }
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = true ⟹ [ x = 2; } ] ¬x = 0 }
 
 case els
-⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ x = 1; } ] ¬x = 0 }
+⊢ dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = false ⟹ [ x = 1; } ] ¬x = 0 }
 -/
 #guard_msgs in
 /-- `if (a == b) { x = 2; } else { x = 1; }` ends with `x != 0`. -/
@@ -97,13 +97,13 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
   apply split .ifElseSplit
   trace_state
   case thn =>
-    -- dl{ { se1 := a == b }, se1 ≐ true ⟹ [ x = 2; ] ¬x = 0 }
+    -- dl{ { se1 := a == b }, se1 = true ⟹ [ x = 2; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
     sol_leaf
     sol_close
   case els =>
-    -- dl{ { se1 := a == b }, se1 ≐ false ⟹ [ x = 1; ] ¬x = 0 }
+    -- dl{ { se1 := a == b }, se1 = false ⟹ [ x = 1; ] ¬x = 0 }
     apply update .localValueAssign
     apply empty
     sol_leaf
@@ -112,10 +112,10 @@ theorem branchLocals : ⊢ dl!{ [ if (a == b) { x = 2; } else { x = 1; }; ] x !=
 /-! ## A literal condition
 
 `true` is simple: no capture, and the split's `else` goal carries
-`true ≐ false`.  (The old `ifElseTrue` collapsed this in one rewrite.) -/
+`true = false`.  (The old `ifElseTrue` collapsed this in one rewrite.) -/
 
 /--
-trace: ⊢ ⊨ dl{ (true ≐ true → [ age = 1; } ] find(storage, age) = 1) ∧ (true ≐ false → [ age = 2; } ] find(storage, age) = 1) }
+trace: ⊢ ⊨ dl{ (true = true → [ age = 1; } ] find(storage, age) = 1) ∧ (true = false → [ age = 2; } ] find(storage, age) = 1) }
 -/
 #guard_msgs in
 /-- `if (true) { age = 1; } else { age = 2; }` writes `1`. -/
@@ -232,7 +232,7 @@ example : Prog StandardExample [] [.val .bool] := sol{ bool c = true;
 /-! ## Under the diamond: the condition decides
 
 With the precondition `a == b` the `else` goal has both `a = b` and
-`se1 ≐ false` in its context, a contradiction. -/
+`se1 = false` in its context, a contradiction. -/
 
 /-- `a == b → ⟨ if (a == b) { x = 2; } else { x = 1; } ⟩ x == 2`. -/
 theorem branchDiamond :
@@ -248,7 +248,7 @@ theorem branchDiamond :
     sol_leaf
     sol_close
   case els =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 = false ⟹
     --     ⟨ x = 1; } ⟩ x = 2 }
     apply update .localValueAssign
     apply empty

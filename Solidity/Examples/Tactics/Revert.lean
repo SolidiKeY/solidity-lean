@@ -83,7 +83,7 @@ info: @Taclet.revertDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx}, dl{ ⟨ r
 
 /--
 info: @Taclet.requireSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool},
-  dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Reverts": se ≐ false ⟹ ⟨[ revert(); ]⟩ }
+  dl{ ⟨[ require(se); ]⟩ ⇝ "Holds": se = true ⟹ ⟨[ ]⟩ ; "Reverts": se = false ⟹ ⟨[ revert(); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.requireSimple
 
@@ -106,15 +106,15 @@ theorem requireBox : ⊢ dl!{ [ require(a == b); x = a; ] x == b } := by
   -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b } ⟹ [ require(se1); x = a; ] x = b }
   apply split .requireSimple
   case thn =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
     sol_leaf
     sol_close
   case els =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ revert(); x = a; ] x = b }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = false ⟹ [ revert(); x = a; ] x = b }
     apply done .revertBox
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ true }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = false ⟹ true }
     sol_leaf
     sol_close
 
@@ -135,8 +135,8 @@ example : ¬ (⊨ dl!{ ⟨ require(a == b); x = a; ⟩ x == b }) :=
 solc compiles a failing `assert` to a `Panic(0x01)`, and KeY's
 `assertSimple` leaves its condition as a goal under either modality
 ("Violated"): a failed assertion is a proof failure, not a revert the box
-accepts.  The table transcribes it: the rest of the program with `se ≐ true`
-assumed, and `se ≐ true` itself (`Proves.check`, goals `thn` and `els`).
+accepts.  The table transcribes it: the rest of the program with `se = true`
+assumed, and `se = true` itself (`Proves.check`, goals `thn` and `els`).
 
 ```
 assertSimple {
@@ -155,7 +155,7 @@ assertSimple {
 
 /--
 info: @Taclet.assertSimple : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool},
-  dl{ ⟨[ assert(se); ]⟩ ⇝ "Holds": se ≐ true ⟹ ⟨[ ]⟩ ; "Violated": se ≐ true }
+  dl{ ⟨[ assert(se); ]⟩ ⇝ "Holds": se = true ⟹ ⟨[ ]⟩ ; "Violated": se = true }
 -/
 #guard_msgs in #check @Taclet.assertSimple
 
@@ -169,13 +169,13 @@ theorem assertBox : ⊢ dl!{ a == b → [ assert(a == b); x = a; ] x == b } := b
   -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b } ⟹ [ assert(se1); x = a; ] x = b }
   apply Proves.check .assertSimple
   case thn =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ true ⟹ [ x = a; ] x = b }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 = true ⟹ [ x = a; ] x = b }
     apply update .localValueAssign
     apply empty
     sol_leaf
     sol_close
   case els =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b } ⟹ se1 ≐ true }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b } ⟹ se1 = true }
     sol_leaf
     sol_close
 
@@ -259,14 +259,14 @@ theorem branchBox : ⊢ dl!{ [ if (a == b) { x = 1; } else { revert(); }; ] x ==
     sol_leaf
     sol_close
   case els =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 ≐ false ⟹ [ revert(); } ] x = 1 }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, { se1 := a == b }, se1 = false ⟹ [ revert(); } ] x = 1 }
     apply done .revertBox
     sol_leaf
     sol_close
 
 /-- `a == b → ⟨ require(a == b); x = a; ⟩ x == b`: with the precondition,
 `revertDiamond` leaves `false`, and the second goal has both `a = b` and
-`se1 ≐ false` in its context. -/
+`se1 = false` in its context. -/
 theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x == b } := by
   apply intro
   apply unfold .requireConditionCapture
@@ -280,7 +280,7 @@ theorem requireDiamond : ⊢ dl!{ a == b → ⟨ require(a == b); x = a; ⟩ x =
     sol_close
   case els =>
     apply done .revertDiamond
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹ false }: the context is contradictory
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 = false ⟹ false }: the context is contradictory
     sol_leaf
     sol_close
 
@@ -298,7 +298,7 @@ theorem branchDiamond :
     sol_leaf
     sol_close
   case els =>
-    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 ≐ false ⟹ ⟨ revert(); } ⟩ x = 1 }
+    -- dl{ ∀ uint x, ∀ uint b, ∀ uint a, a = b, { se1 := a == b }, se1 = false ⟹ ⟨ revert(); } ⟩ x = 1 }
     apply done .revertDiamond
     sol_leaf
     sol_close

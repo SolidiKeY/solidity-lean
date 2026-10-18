@@ -806,15 +806,15 @@ partial def fml (ns : List Expr) (e : Expr) : RM Doc := do
           .ident x.getId.toString, .tx ";\\ " 2, ← fml na a]
     return .cat #[.tx "\\lnot " 1, ← fmlArg ns φ]
   | Fml.eq _ _ _ a b =>
-    if let some ("=", true, (nl, l), (_, r)) ← liftM (Delab.cmpPartsS ns a ns b : MetaM _) then
-      return .bin (← side nl l) "=" 1 (← side nl r)
-    return .bin (← side ns a) (if mac then "=" else "\\doteq") 1 (← side ns b)
-  | Fml.defined _ _ _ t =>
-    let (nt, v, _) ← Delab.viewTmS true ns t
-    if mac then
-      if let .sym ``Op1.wt _ #[s] := v then
-        return .cat #[.tx "\\wellformed{" 11, .whole (← tm nt s), .tx "}"]
-    return .app (.kw "defined") #[← tm ns t]
+    if let some (sym, k, (nl, l), (nr, r)) ← liftM (Delab.cmpPartsS ns a ns b : MetaM _) then
+      if k then
+        if sym == "=" then return .bin (← side nl l) "=" 1 (← side nl r)
+      else
+        return .bin (← side nl l) (cmpTeX sym) 2 (← side nr r)
+    return .bin (← side ns a) "=" 1 (← side ns b)
+  | Fml.wellFormed _ _ s =>
+    if mac then return .cat #[.tx "\\wellformed{" 11, .whole (← tm ns s), .tx "}"]
+    return .app (.kw "wt") #[← tm ns s]
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | unknownFml e
@@ -822,10 +822,6 @@ partial def fml (ns : List Expr) (e : Expr) : RM Doc := do
     return .cat #[.tx "\\forall " 1, .tx ("\\mathsf{" ++ T ++ "}") T.length, .tx "\\," 1,
       .ident xi.getId.toString, .tx ";\\ " 2, ← fml (x :: ns) φ]
   | Fml.and _ _ φ ψ =>
-    if let some ((na, a), (nb, b)) ← pr (Delab.eqDPartsS ns e) then
-      if let some (sym, _, (nl, l), (nr, r)) ← liftM (Delab.cmpPartsS na a nb b : MetaM _) then
-        return .bin (← side nl l) (cmpTeX sym) 2 (← side nr r)
-      return .bin (← side na a) "=" 1 (← side nb b)
     if let some ((na, a), (nb, b)) ← pr (Delab.iffPartsS ns e) then
       return .bin (← fmlArg na a) "\\leftrightarrow" 3 (← fmlArg nb b)
     let r ← fml ns ψ

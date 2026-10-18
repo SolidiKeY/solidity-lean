@@ -8,9 +8,7 @@ import Solidity.Calculus.ProvesDerive
 Under `open scoped Solidity.Scoped` the lines that finish a goal keep
 their text: `refine merge rfl ?_` and
 `refine Proves.mergeStorage ?_` (`sequentialToParallel`), `refine simplify
-?_`, `refine Proves.eqDSplit ?_ ?_ ?_`, `exact Proves.definedWritten`,
-`exact Proves.definedLit`, `exact Proves.eqRefl`, `exact Proves.eqDClose`,
-`sol_apply_upd`, and `rw [r]`/`sol_rw [r, …]`.  On a scoped goal
+?_`, `exact Proves.eqRefl`, `exact Proves.eqClose`, `sol_apply_upd`, and `rw [r]`/`sol_rw [r, …]`.  On a scoped goal
 (`Proves`) each is the scoped rule of `Calculus/Proves.lean` or
 `Calculus/UpdateRules.lean`.
 
@@ -593,18 +591,10 @@ scoped macro_rules
     `(tactic| core_simplify)
   | `(tactic| refine Proves.simplify ?_) =>
     `(tactic| core_simplify)
-  | `(tactic| refine Proves.eqDSplit ?_ ?_ ?_) =>
-    `(tactic| refine Solidity.Proves.eqDSplit ?_ ?_ ?_)
-  | `(tactic| exact Proves.definedWritten) =>
-    `(tactic| exact Solidity.Proves.definedWritten)
-  | `(tactic| exact Proves.definedLit) =>
-    `(tactic| exact Solidity.Proves.definedLit)
   | `(tactic| exact Proves.eqRefl) =>
     `(tactic| exact Solidity.Proves.eqRefl)
   | `(tactic| exact Proves.eqClose) =>
     `(tactic| exact Solidity.Proves.eqClose)
-  | `(tactic| exact Proves.eqDClose) =>
-    `(tactic| exact Solidity.Proves.eqDClose)
   | `(tactic| sol_apply_upd) => `(tactic| core_apply_upd)
   | `(tactic| sol_rw [$rs,*]) => `(tactic| core_rw [$rs,*])
   | `(tactic| rw [$rs,*]) => `(tactic| core_rw [$rs,*])

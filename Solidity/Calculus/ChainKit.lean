@@ -61,7 +61,7 @@ kernel unfolds (Gate G0, condition 2).  Never run as compiled code. -/
 noncomputable def Fml.stepFocusR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     Option (Focus C × Fml C Γ) :=
   Fml.rec (motive := fun Γ _ => Option (Focus C × Fml C Γ))
-    (tt := none) (eq := fun _ _ => none) (defined := fun _ => none) (not := fun _ _ => none)
+    (tt := none) (eq := fun _ _ => none) (wellFormed := fun _ => none) (not := fun _ _ => none)
     (and := fun φ ψ ihφ ihψ => match ihφ with
       | some (f, φ') => some (f, .and φ' ψ)
       | none => ihψ.map fun (f, ψ') => (f, .and φ ψ'))
@@ -148,7 +148,7 @@ theorem Fml.stepFocusR_anon {xs : List ((t : LTy) × Idx Γ t)} {φ φ' : Fml C 
 (`Post.inactive`). -/
 theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = false →
     φ.stepFocusR k = none
-  | _, .tt, _ | _, .eq .., _ | _, .defined _, _ | _, .not _, _ => rfl
+  | _, .tt, _ | _, .eq .., _ | _, .wellFormed _, _ | _, .not _, _ => rfl
   | _, .modal .., h => nomatch h
   | _, .and φ ψ, h => by
     have h' : φ.active = false ∧ ψ.active = false := by
@@ -170,7 +170,7 @@ theorem Fml.stepFocusR_eq_none : {Γ : Ctx} → (φ : Fml C Γ) → φ.active = 
 theorem Fml.stepFocusR_snd {Γ : Ctx} (φ : Fml C Γ) :
     (φ.stepFocusR k).map Prod.snd = φ.stepR k := by
   induction φ with
-  | tt | eq | defined | not => rfl
+  | tt | eq | wellFormed | not => rfl
   | modal m P κ φ =>
     show (Fml.modalFocus k m P κ φ).map Prod.snd = Fml.modalStep k m P κ φ
     cases P with
@@ -385,7 +385,7 @@ section Sound
 /-- The connectives the strategy looks through keep a step sound. -/
 theorem Fml.stepFocusR_sound {k : Nat} : {Γ : Ctx} → (φ : Fml C Γ) → ∀ {f : Focus C} {ψ : Fml C Γ},
     φ.stepFocusR k = some (f, ψ) → ∀ σ, holds σ ψ → holds σ φ
-  | _, .tt, _, _, h, _, _ | _, .eq .., _, _, h, _, _ | _, .defined _, _, _, h, _, _
+  | _, .tt, _, _, h, _, _ | _, .eq .., _, _, h, _, _ | _, .wellFormed _, _, _, h, _, _
   | _, .not _, _, _, h, _, _ => nomatch h
   | _, .modal m P κ φ, f, ψ, h, σ, hψ => by
     have h : Fml.modalFocus k m P κ φ = some (f, ψ) := h
@@ -592,7 +592,7 @@ theorem Upd.held_eraseNames {Γ : Ctx} : {Δ : Ctx} → (U : Upd C Γ Δ) →
 its binders' names blanked. -/
 theorem holds_eraseNames : {Γ : Ctx} → (σ : State C Γ) → (φ : Fml C Γ) →
     (holds σ φ.eraseNames ↔ holds σ φ)
-  | _, _, .tt | _, _, .eq _ _ | _, _, .defined _ | _, _, .modal _ _ _ _ => Iff.rfl
+  | _, _, .tt | _, _, .eq _ _ | _, _, .wellFormed _ | _, _, .modal _ _ _ _ => Iff.rfl
   | _, σ, .not φ => not_congr (holds_eraseNames σ φ)
   | _, σ, .and φ ψ => and_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)
   | _, σ, .imp φ ψ => imp_congr (holds_eraseNames σ φ) (holds_eraseNames σ ψ)

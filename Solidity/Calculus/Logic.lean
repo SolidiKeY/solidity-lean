@@ -9,9 +9,11 @@ The scoped formulas of `Calculus/Fml.lean` read over the typed state
 
 * A term in an equation is read in the typed Theory (`Tm.denote`,
   `Calculus/Lands.lean`, KeY's total model), a typed value as its
-  observations (`SVal.obs`), equal by `=`; a definedness test reads it on
-  the typed state (`Tm.eval`, `Calculus/TermEval.lean`): `none` where it
-  reverts.
+  observations (`SVal.obs`), equal by `=`, total as KeY's `=` is: there
+  is no definedness test.  What a program reads where it may revert is
+  evaluated by the program (a rule captures it in a local), not by a
+  formula.  `wt(s)` is a predicate, KeY's `wellFormed(heap)`, the
+  interpreter's test of the storage `s` evaluates to (`Storage.wtB`).
 * An update is parallel (every right-hand side read in the state it is
   applied in) and leaves the context `Δ` its type says: a declaration
   pushes, a pop drops a suffix, a `drop` thins.  What follows it is read in
@@ -75,7 +77,7 @@ def Prog.runFrames {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁
 def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
   | _, σ, .eq a b => a.denote σ = b.denote σ
-  | _, σ, .defined t => t.eval σ ≠ none
+  | _, σ, .wellFormed s => ∃ st, s.eval σ = some st ∧ st.wtB = true
   | _, σ, .not φ => ¬ holds σ φ
   | _, σ, .and φ ψ => holds σ φ ∧ holds σ ψ
   | _, σ, .imp φ ψ => holds σ φ → holds σ ψ
@@ -90,29 +92,36 @@ def holds : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
 theorem holds_eq {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
     holds σ (.eq a b) ↔ a.denote σ = b.denote σ := Iff.rfl
 
-/-- A `defined` of `holds`, read by the typed readers. -/
-theorem holds_defined {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (t : Tm C Γ (.val p)) :
-    holds σ (.defined t) ↔ t.eval σ ≠ none := Iff.rfl
+/-- `wt(s)` of `holds`: the storage `s` evaluates to passes the test. -/
+theorem holds_wellFormed {Γ : Ctx} (σ : State C Γ) (s : Tm C Γ .st) :
+    holds σ (.wellFormed s) ↔ ∃ st, s.eval σ = some st ∧ st.wtB = true := Iff.rfl
 
-/-- An equation of two defined values holds where they read alike. -/
-theorem holds_eqD {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
-    holds σ (.eqD a b) ↔ ∃ x, a.eval σ = some x ∧ b.eval σ = some x := by
-  constructor
-  · rintro ⟨ha, hb, he⟩
-    rw [holds_defined] at ha hb
-    rw [holds_eq] at he
-    obtain ⟨x, hx⟩ := Option.ne_none_iff_exists'.1 ha
-    obtain ⟨y, hy⟩ := Option.ne_none_iff_exists'.1 hb
-    have ex : a.denote σ = some x := Tm.denote_eval σ a x hx
-    have ey : b.denote σ = some y := Tm.denote_eval σ b y hy
-    rw [ex, ey, Option.some.injEq] at he
-    subst he
-    exact ⟨x, hx, hy⟩
-  · rintro ⟨x, hx, hy⟩
-    refine ⟨(holds_defined σ a).2 (by rw [hx]; exact nofun),
-      (holds_defined σ b).2 (by rw [hy]; exact nofun), ?_⟩
-    show a.denote σ = b.denote σ
-    rw [Tm.denote_eval σ a x hx, Tm.denote_eval σ b x hy]
+/-- `wt(s)` holds exactly where the symbol `wt(s)` returns. -/
+theorem holds_wellFormed_eval {Γ : Ctx} (σ : State C Γ) (s : Tm C Γ .st) :
+    holds σ (.wellFormed s) ↔ (Tm.app1 .wt s).eval σ ≠ none := by
+  show _ ↔ (s.eval σ).bind Storage.wtT ≠ none
+  rw [holds_wellFormed]
+  cases s.eval σ with
+  | none => simp only [reduceCtorEq, false_and, exists_false, Option.bind_none, ne_eq,
+      not_true_eq_false]
+  | some st =>
+    simp only [Option.some.injEq, exists_eq_left', Option.bind_some, Storage.wtT, ne_eq]
+    cases st.wtB <;> simp only [if_true, Bool.false_eq_true, if_false, reduceCtorEq,
+      not_true_eq_false, not_false_eq_true]
+
+/-- An equation of a value local and a literal holds where the local holds
+the literal: both sides return. -/
+theorem holds_eq_pvV_lit {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (i : Idx Γ (.val p))
+    (v : p.Denote) :
+    holds σ (.eq (.pvV i) (.app0 (.lit v))) ↔ TEnv.get i σ.env = v :=
+  ⟨fun h => Option.some.inj h, fun h => congrArg some h⟩
+
+/-- An equation of two terms that return holds where they return one value
+(`Tm.denote_eval`). -/
+theorem holds_eq_of_eval {Γ : Ctx} {p : PrimTy} {σ : State C Γ} {a b : Tm C Γ (.val p)}
+    {x y : p.Denote} (ha : a.eval σ = some x) (hb : b.eval σ = some y) :
+    holds σ (.eq a b) ↔ x = y := by
+  rw [holds_eq, Tm.denote_eval σ a x ha, Tm.denote_eval σ b y hb, Option.some.injEq]
 
 /-- Every local's type has a value in every typed state: an alias and a
 memory local unset among them (decision 17'). -/

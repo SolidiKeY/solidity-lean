@@ -400,20 +400,20 @@ def Val.breakExit {Γ : Ctx} : (c : Val C Γ .bool) →
 /-- A quantified invariant clause as a formula: a value read `true`, `→`
 and `∀` as written (`Fml.all`). -/
 def LoopQ.toFml : {Γ : Ctx} → LoopQ C Γ → Fml C Γ
-  | _, .val a => .isBoolD a.lower true
-  | _, .imp a c => .imp (.isBoolD a.lower true) (.isBoolD c.lower true)
+  | _, .val a => .isBool a.lower true
+  | _, .imp a c => .imp (.isBool a.lower true) (.isBool c.lower true)
   | _, .all x p b => .all x p b.toFml
 
 /-- A loop's invariant as the rules read it (solkey's `\getInvariant`): `I`
 read `true`, then each quantified clause. -/
 def invFml {Γ : Ctx} (I : Val C Γ .bool) (qs : List (LoopQ C Γ)) : Fml C Γ :=
-  qs.foldl (fun acc q => .and acc q.toFml) (.isBoolD I.lower true)
+  qs.foldl (fun acc q => .and acc q.toFml) (.isBool I.lower true)
 
 /-- A box loop's break test (solkey's `\getLoopBreak`): its `break` flag
 read `true`, where the elaborator lowered a `break` (`brk`) and the
 condition starts with the flag's negation (`Val.breakExit`). -/
 def loopBreak {Γ : Ctx} (brk : Bool) (c : Val C Γ .bool) : Option (Fml C Γ) :=
-  (if brk then c.breakExit else none).map fun x => .isBoolD (.pvV (p := .bool) x.1) true
+  (if brk then c.breakExit else none).map fun x => .isBool (.pvV (p := .bool) x.1) true
 
 /-- A loop (`loopStep`): unwound (`whileUnwind`), ended (`loopExit`), or by
 its invariant (`whileInvariantBox`, `whileInvariantDiamond`), closed to
@@ -423,7 +423,9 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
     (body : Prog C Γ Γ₁) : Premise C Γ Γ :=
   match a with
   -- loopExit
-  | .unwind 0 => .check (.eqD c.lower (Tm.lit (p := .bool) false))
+  | .unwind 0 =>
+    .check (.upd .diamond (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+      (.isBool (.pvV (p := .bool) .here) false))
   -- whileUnwind
   | .unwind (n + 1) =>
     loopUnwindStep (.bounded n) c body
@@ -438,7 +440,7 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
       | .box, _, _ =>
         .inv (invFml I qs) (loopBreak brk c) xs hv
           (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
-          (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
+          (.isBool (.pvV (p := .bool) .here) true) (.isBool (.pvV (p := .bool) .here) false)
           .refl (.push .refl) body (invFml I qs)
       -- whileInvariantDiamond
       | .diamond, some d, [] =>
@@ -446,13 +448,13 @@ def loopStep (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : V
           (Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k) (.val (p := .bool) c.lower)
         let d' : Tm C (.val .bool :: .val .uint :: Γ) (.val .uint) := (d.up.up).lower
         let post : Fml C (.val .uint :: Γ) :=
-          .and (.isBoolD I.up.lower true)
+          .and (.isBool I.up.lower true)
             (.upd .diamond (Upd.nil.decl (fse k) (.val (p := .bool) c.up.lower))
-              (.imp (.isBoolD (.pvV (p := .bool) .here) true)
-                (.and (.isBoolD (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) d') true)
-                  (.isBoolD (.app2 (.binop .lt (p := .uint) rfl) d' (.pvV (p := .uint) (.there .here))) true))))
-        .inv (.isBoolD I.lower true) none xs hv U
-          (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
+              (.imp (.isBool (.pvV (p := .bool) .here) true)
+                (.and (.isBool (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) d') true)
+                  (.isBool (.app2 (.binop .lt (p := .uint) rfl) d' (.pvV (p := .uint) (.there .here))) true))))
+        .inv (.isBool I.lower true) none xs hv U
+          (.isBool (.pvV (p := .bool) .here) true) (.isBool (.pvV (p := .bool) .here) false)
           (.push .refl) (.push .refl) (body.wk up).2.2 post
       -- whileNoVariantDiamond: no variant, or a quantified clause (Lean only)
       | .diamond, _, _ => .done false

@@ -536,7 +536,7 @@ partial def qFml (Γ : Ctx) (φ : Fml C Γ) : QM Expr := do
   match φ with
   | .tt => sctor ``Fml.tt #[Γe]
   | @Fml.eq _ _ p a b => sctor ``Fml.eq #[Γe, toExpr p, ← qTm Γ (.val p) a, ← qTm Γ (.val p) b]
-  | @Fml.defined _ _ p t => sctor ``Fml.defined #[Γe, toExpr p, ← qTm Γ (.val p) t]
+  | @Fml.wellFormed _ _ s => sctor ``Fml.wellFormed #[Γe, ← qTm Γ .st s]
   | .not φ => sctor ``Fml.not #[Γe, ← qFml Γ φ]
   | .and φ ψ => sctor ``Fml.and #[Γe, ← qFml Γ φ, ← qFml Γ ψ]
   | .imp φ ψ => sctor ``Fml.imp #[Γe, ← qFml Γ φ, ← qFml Γ ψ]

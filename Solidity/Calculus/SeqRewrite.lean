@@ -19,7 +19,7 @@ connectives, updates, quantifiers and hidden binders, and in the
 postcondition of a modality still open (`Fml.rwEqC`).  A Theory equation
 holds in every state (`Tm.Theq`), so the formula rewritten holds exactly
 where it does (`Fml.rwEqC_holds`): under a modality, in every state its
-program ends in.  An update's right-hand sides and a `defined` are not
+program ends in.  An update's right-hand sides and a `wt(s)` are not
 rewritten there: they are read by the interpreter, which a Theory equation
 does not preserve.  `Proves.rewrite` (`Calculus/Proves.lean`) rewrites the
 context's preconditions and the goal at once (`Hyps.rwEqC`).
@@ -698,7 +698,7 @@ def Tm.sideC (q : Tm C [] (.val p) × Tm C [] (.val p)) {p' : PrimTy} (t : Tm C 
 def Fml.rwEqCM (q : Tm C [] (.val p) × Tm C [] (.val p)) : {Γ : Ctx} → Fml C Γ → Fml C Γ
   | _, .tt => .tt
   | _, .eq a b => .eq (a.sideC q) (b.sideC q)
-  | _, .defined t => .defined t
+  | _, .wellFormed s => .wellFormed s
   | _, .not φ => .not (Fml.rwEqCM q φ)
   | _, .and φ ψ => .and (Fml.rwEqCM q φ) (Fml.rwEqCM q ψ)
   | _, .imp φ ψ => .imp (Fml.rwEqCM q φ) (Fml.rwEqCM q ψ)
@@ -715,7 +715,7 @@ postcondition of a modality; by the recursor. -/
 @[implemented_by Fml.rwEqCM]
 def Fml.rwEqC (q : Tm C [] (.val p) × Tm C [] (.val p)) {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ :=
   Fml.rec (motive := fun Γ _ => Fml C Γ)
-    (tt := .tt) (eq := fun a b => .eq (a.sideC q) (b.sideC q)) (defined := fun t => .defined t)
+    (tt := .tt) (eq := fun a b => .eq (a.sideC q) (b.sideC q)) (wellFormed := fun s => .wellFormed s)
     (not := fun _ ih => .not ih) (and := fun _ _ ihφ ihψ => .and ihφ ihψ)
     (imp := fun _ _ ihφ ihψ => .imp ihφ ihψ) (upd := fun m U _ ih => .upd m U ih)
     (modal := fun m P κ _ ih => .modal m P κ ih) (havoc := fun _ ih => .havoc ih)
@@ -746,7 +746,7 @@ theorem Fml.rwEqC_anon (xs : List ((t : LTy) × Idx Γ t)) (φ : Fml C Γ) :
 /-- The recursor's rewrite is the twin's. -/
 theorem Fml.rwEqC_eq_rwEqCM (φ : Fml C Γ) : φ.rwEqC q = φ.rwEqCM q := by
   induction φ with
-  | tt | eq | defined => rfl
+  | tt | eq | wellFormed => rfl
   | not φ ih | upd m U φ ih | modal m P κ φ ih | havoc φ ih | all x p φ ih | bind m x t φ ih
   | anon xs φ ih => simp only [Fml.rwEqCM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.rwEqCM, ← ihφ, ← ihψ]; rfl
@@ -775,7 +775,7 @@ theorem Fml.rwEqC_holds {q : Tm C [] (.val p) × Tm C [] (.val p)} (hq : Tm.Theq
     show holds σ (.eq (a.sideC q) (b.sideC q)) ↔ holds σ (.eq a b)
     rw [holds_eq, holds_eq]
     rw [Tm.sideC_denote hq σ a, Tm.sideC_denote hq σ b]
-  | _, .defined _, _ => Iff.rfl
+  | _, .wellFormed _, _ => Iff.rfl
   | _, .not φ, σ => not_congr (Fml.rwEqC_holds hq φ σ)
   | _, .and φ ψ, σ => and_congr (Fml.rwEqC_holds hq φ σ) (Fml.rwEqC_holds hq ψ σ)
   | _, .imp φ ψ, σ => imp_congr (Fml.rwEqC_holds hq φ σ) (Fml.rwEqC_holds hq ψ σ)

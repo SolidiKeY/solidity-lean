@@ -160,10 +160,7 @@ def update {Γ Δ : Ctx} {ρ : SymS C Γ} (m : Modality) (U : Upd C Γ Δ)
 def ofFormula? : Nat → {Γ : Ctx} → (ρ : SymS C Γ) → (φ : Fml C Γ) → Option (ExactAt ρ φ)
   | 0, _, _, _ => none
   | fuel + 1, _, ρ, .not φ => (ofFormula? fuel ρ φ).map not
-  | fuel + 1, _, ρ, .and φ ψ =>
-    match Fml.eqDView? φ ψ with
-    | some _ => directional? ρ (.and φ ψ)
-    | none => do return and (← ofFormula? fuel ρ φ) (← ofFormula? fuel ρ ψ)
+  | fuel + 1, _, ρ, .and φ ψ => do return and (← ofFormula? fuel ρ φ) (← ofFormula? fuel ρ ψ)
   | fuel + 1, _, ρ, .imp φ ψ => do return imp (← ofFormula? fuel ρ φ) (← ofFormula? fuel ρ ψ)
   | fuel + 1, _, ρ, .all x p φ => (ofFormula? fuel (ρ.pushQ p) φ).map (all x p)
   | fuel + 1, _, ρ, .upd m U φ =>

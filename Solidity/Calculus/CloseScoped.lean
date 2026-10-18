@@ -1,6 +1,8 @@
 import Solidity.Calculus.Close
 import Solidity.Calculus.SeqRewrite
 import Solidity.Theory.Typed.Mem
+import Solidity.Calculus.EvalEqs
+import Solidity.Calculus.TermAgree
 
 /-!
 # `sol_close` on a scoped leaf
@@ -277,6 +279,17 @@ theorem denote_env (k : EnvKey) :
     (Tm.app0 (.env k) : Tm C Γ (.val .uint)).denote σ = some (σ.envVal k) := rfl
 theorem denote_pvV {p : PrimTy} (i : Idx Γ (.val p)) :
     (Tm.pvV i : Tm C Γ (.val p)).denote σ = some (σ.locV _ i) := rfl
+/-- An operator reads its operands' Theory values as the interpreter reads
+their values (`Op2.denote`, `Op1.denote`, `Op3.denote`). -/
+theorem denote_binop {p : PrimTy} (op : BinOp) (h : op.accepts p = true)
+    (a b : Tm C Γ (.val p)) :
+    (Tm.app2 (.binop op h) a b).denote σ =
+      (a.denote σ).bind fun x => binopT op h x (b.denote σ) := rfl
+theorem denote_unop {p : PrimTy} (op : UnOp) (h : op.accepts p = true) (a : Tm C Γ (.val p)) :
+    (Tm.app1 (.unop op h) a).denote σ = (a.denote σ).bind (op.evalT h) := rfl
+theorem denote_ite {p : PrimTy} (c : Tm C Γ (.val .bool)) (a b : Tm C Γ (.val p)) :
+    (Tm.app3 .ite c a b).denote σ = (c.denote σ).bind fun x => cond x (a.denote σ) (b.denote σ) :=
+  rfl
 
 end Terms
 
@@ -697,18 +710,59 @@ theorem holds_imp (σ : State C Γ) (φ ψ : Fml C Γ) :
     holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
 theorem holds_eq {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
     holds σ (.eq a b) ↔ a.denote σ = b.denote σ := Iff.rfl
-theorem holds_defined {p : PrimTy} (σ : State C Γ) (t : Tm C Γ (.val p)) :
-    holds σ (.defined t) ↔ Modality.diamond.wp (Close.optRes (t.eval σ)) fun _ => True := by
-  show t.eval σ ≠ none ↔ _
-  cases t.eval σ <;> simp only [Close.optRes, ne_eq, not_true_eq_false, reduceCtorEq,
-    not_false_eq_true, Modality.wp, Modality.onHalt]
-theorem holds_eqD {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p)) :
-    holds σ (Fml.eqD a b) ↔ Modality.diamond.wp (Close.optRes (a.eval σ)) fun x =>
-      Modality.diamond.wp (Close.optRes (b.eval σ)) fun y => x = y := by
-  rw [Solidity.holds_eqD]
+/-- An equation of two values the Theory reads as the interpreter does
+(`Tm.agreeB`, `Calculus/TermAgree.lean`), marked so by `sol_close_unwrap`
+(`Fml.eqA`, `Calculus/EvalEqs.lean`): both return one value, or both halt. -/
+theorem holds_eqA {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p))
+    (h : (a.agreeB && b.agreeB) = true) :
+    holds σ (Fml.eqA a b h) ↔ (Modality.diamond.wp (Close.optRes (a.eval σ)) fun x =>
+      Modality.diamond.wp (Close.optRes (b.eval σ)) fun y => x = y) ∨
+      (a.eval σ = none ∧ b.eval σ = none) := by
+  simp only [Bool.and_eq_true] at h
+  show holds σ (.eq a b) ↔ _
+  rw [holds_eq_of_agree h.1 h.2 σ]
   cases a.eval σ <;> cases b.eval σ <;>
     simp only [Close.optRes, Modality.wp, Modality.onHalt, Option.some.injEq, reduceCtorEq,
-      false_and, and_false, exists_false, exists_eq_left', eq_comm]
+      and_self, or_true, false_or, or_false, and_false, false_and]
+
+/-- `CloseS.holds_eqA` where a side returns in every state (`Fml.eqT`): both
+return, with one value. -/
+theorem holds_eqT {p : PrimTy} (σ : State C Γ) (a b : Tm C Γ (.val p))
+    (h : (a.agreeB && b.agreeB && (a.totB || b.totB)) = true) :
+    holds σ (Fml.eqT a b h) ↔ Modality.diamond.wp (Close.optRes (a.eval σ)) fun x =>
+      Modality.diamond.wp (Close.optRes (b.eval σ)) fun y => x = y := by
+  have hab : (a.agreeB && b.agreeB) = true := by
+    simp only [Bool.and_eq_true] at h ⊢; exact h.1
+  have ht : (a.totB || b.totB) = true := by
+    simp only [Bool.and_eq_true] at h; exact h.2
+  show holds σ (Fml.eqA a b hab) ↔ _
+  rw [holds_eqA]
+  have hn : ¬ (a.eval σ = none ∧ b.eval σ = none) := by
+    rintro ⟨h₁, h₂⟩
+    rcases Bool.or_eq_true_iff.1 ht with h | h
+    · obtain ⟨v, hv⟩ := Tm.totB_total h σ
+      rw [h₁] at hv; cases hv
+    · obtain ⟨v, hv⟩ := Tm.totB_total h σ
+      rw [h₂] at hv; cases hv
+  simp only [hn, or_false]
+
+/-- An equation of atoms (`Fml.eqAtom`, marked by `sol_close_unwrap`): both
+return, with one value. -/
+theorem holds_eqAtom {p : PrimTy} (σ : State C Γ) (x y : Fml.Atom C Γ p) :
+    holds σ (Fml.eqAtom x y) ↔ Modality.diamond.wp (Close.optRes (x.tm.eval σ)) fun u =>
+      Modality.diamond.wp (Close.optRes (y.tm.eval σ)) fun w => u = w := by
+  obtain ⟨u, hu⟩ := x.eval_some σ
+  obtain ⟨w, hw⟩ := y.eval_some σ
+  show holds σ (.eq x.tm y.tm) ↔ _
+  rw [holds_eq_of_eval hu hw, hu, hw]
+  simp only [Close.optRes, Modality.wp]
+
+theorem holds_wellFormed (σ : State C Γ) (s : Tm C Γ .st) :
+    holds σ (.wellFormed s) ↔
+      Modality.diamond.wp (Close.optRes ((Tm.app1 .wt s).eval σ)) fun _ => True := by
+  rw [Solidity.holds_wellFormed_eval]
+  cases (Tm.app1 .wt s).eval σ <;> simp only [Close.optRes, ne_eq, not_true_eq_false, reduceCtorEq,
+    not_false_eq_true, Modality.wp, Modality.onHalt]
 
 /-- A typed state an update lands on: the global part `g`, the locals `ℓ`
 (`Upd.afterT_applyV`).  What it reads is in its type, so a plain rewrite
@@ -815,12 +869,12 @@ end CloseS
 
 /-! ## The set -/
 
-attribute [close_rw_s high] CloseS.holds_eqD CloseS.atT_map_root
+attribute [close_rw_s high] CloseS.holds_eqAtom CloseS.holds_eqT CloseS.holds_eqA CloseS.atT_map_root
 
 attribute [close_rw_s]
   -- formulas
-  CloseS.holds_tt CloseS.holds_not CloseS.holds_and CloseS.holds_imp CloseS.holds_eq
-  CloseS.holds_defined CloseS.holds_upd CloseS.holds_havoc CloseS.holds_all
+  Fml.Atom.tm CloseS.holds_tt CloseS.holds_not CloseS.holds_and CloseS.holds_imp CloseS.holds_eq
+  CloseS.holds_wellFormed CloseS.holds_upd CloseS.holds_havoc CloseS.holds_all
   CloseS.exh_pushFree Upd.pushFree UpdElem.pushFree Rhs.pushFree Tm.pushFree Op2.pushFree
   Op3.pushFree Bool.false_eq_true and_false
   CloseS.holds_bind_val CloseS.holds_bind_alias CloseS.holds_bind_mem CloseS.holds_bind_old
@@ -832,7 +886,8 @@ attribute [close_rw_s]
   CloseS.uint_eq_mk CloseS.int_eq_mk CloseS.mk_eq_uint CloseS.mk_eq_int and_assoc exists_prop
   BinOp.evalNum BinOp.evalBool BinOp.arithInt UnOp.evalT PrimTy.inRange
   CloseS.natCast_ofNat
-  CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env Option.some.injEq
+  CloseS.denote_lit CloseS.denote_pvV CloseS.denote_env CloseS.denote_binop
+  CloseS.denote_unop CloseS.denote_ite Option.some.injEq
   -- the typed state
   State.locV_push State.locV_setLocal State.locV_drop State.locV_thin CloseS.locV_havoc
   CloseS.glob_storage CloseS.glob_net CloseS.glob_selfBalance CloseS.glob_tx CloseS.glob_envVal
@@ -918,15 +973,90 @@ attribute [close_rw_s_last] Modality.wp_box
 
 open Lean Elab Tactic Meta
 
-/-- `sol_close_unwrap` on a scoped leaf `Valid ψ`: `holds` in every typed
-state (`CloseS.valid_of_holds`). -/
+/-- A Boolean of the formula's terms, evaluated (`Tm.agreeB`, `Tm.totB`,
+`Tm.pushFree`); one that does not reduce to a literal (a term with a free
+variable) fails, and `sol_close_unwrap` then leaves the leaf as it is. -/
+private def evalBoolE (e : Expr) : MetaM Bool := do
+  let e' ← whnfD e
+  if e'.isConstOf ``Bool.true then return true
+  if e'.isConstOf ``Bool.false then return false
+  throwError "evalEqsE: {e} does not reduce"
+
+/-- A local, a literal or a value of the transaction, read off the syntax, as
+the atom (`Fml.Atom`) whose term it is. -/
+private def atomE? (e : Expr) : MetaM (Option Expr) := do
+  let (C, Γ) := (e.getArg! 0, e.getArg! 1)
+  if e.isAppOfArity ``Tm.pvV 4 then
+    return some (← mkAppOptM ``Fml.Atom.loc #[C, Γ, e.getArg! 2, e.appArg!])
+  if e.isAppOfArity ``Tm.app0 4 then
+    let o := e.appArg!
+    if o.isAppOfArity ``Op0.lit 3 then
+      return some (← mkAppOptM ``Fml.Atom.lit #[C, Γ, o.getArg! 1, o.appArg!])
+    if o.isAppOfArity ``Op0.env 2 then
+      return some (← mkAppOptM ``Fml.Atom.env #[C, Γ, o.appArg!])
+  return none
+
+/-- `Fml.evalEqs goal φ` computed on the formula's syntax: each equation's
+Booleans evaluated once (`evalBoolE`), the marks' proofs `rfl`.  The result
+is definitionally `Fml.evalEqs goal φ`; a formula whose head does not reduce
+to a connective is left under `Fml.evalEqs`. -/
+private partial def evalEqsE (goal : Bool) (φ : Expr) : MetaM Expr := do
+  let heads := [``Fml.tt, ``Fml.eq, ``Fml.wellFormed, ``Fml.not, ``Fml.and, ``Fml.imp, ``Fml.upd,
+    ``Fml.modal, ``Fml.havoc, ``Fml.all, ``Fml.bind, ``Fml.anon]
+  let φ ← whnfR φ
+  let φ ← if heads.any φ.isAppOf then pure φ else whnfD φ
+  let f := φ.getAppFn
+  let args := φ.getAppArgs
+  let last (g : Bool) : MetaM Expr := do
+    return mkAppN f (args.pop.push (← evalEqsE g args.back!))
+  match f.constName?, args.size with
+  | some ``Fml.eq, 5 =>
+    let (a, b) := (args[3]!, args[4]!)
+    let ag ← mkAppM ``Bool.and #[← mkAppM ``Tm.agreeB #[a], ← mkAppM ``Tm.agreeB #[b]]
+    let tot ← mkAppM ``Bool.or #[← mkAppM ``Tm.totB #[a], ← mkAppM ``Tm.totB #[b]]
+    let rflT := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Bool) (mkConst ``Bool.true)
+    -- an equation of atoms, which the closer reads by value as it stands
+    -- (`CloseS.holds_eq`, `CloseS.denote_pvV`, …); a capture's own is marked
+    -- (`Fml.eqCap`, `CloseS.holds_eqAtom`)
+    if (← atomE? a).isSome && (← atomE? b).isSome then return φ
+    if ← evalBoolE ag then
+      if ← evalBoolE tot then
+        let h ← mkExpectedTypeHint rflT (← mkEq (← mkAppM ``Bool.and #[ag, tot]) (mkConst ``Bool.true))
+        return ← mkAppM ``Fml.eqT #[a, b, h]
+      let h ← mkExpectedTypeHint rflT (← mkEq ag (mkConst ``Bool.true))
+      return ← mkAppM ``Fml.eqA #[a, b, h]
+    if goal then
+      if ← evalBoolE (← mkAppM ``Bool.and #[← mkAppM ``Tm.pushFree #[a], ← mkAppM ``Tm.pushFree #[b]]) then
+        let e ← mkAppM ``Fml.eqCap #[mkConst ``Modality.diamond, a, b]
+        return (← unfoldDefinition? e).getD e
+    return φ
+  | some ``Fml.not, 3 => last false
+  | some ``Fml.and, 4 =>
+    return mkAppN f #[args[0]!, args[1]!, ← evalEqsE goal args[2]!, ← evalEqsE goal args[3]!]
+  | some ``Fml.imp, 4 =>
+    return mkAppN f #[args[0]!, args[1]!, ← evalEqsE false args[2]!, ← evalEqsE goal args[3]!]
+  | some ``Fml.upd, 6 | some ``Fml.all, 5 | some ``Fml.bind, 6 | some ``Fml.havoc, 3
+  | some ``Fml.anon, 4 => last goal
+  | some ``Fml.tt, _ | some ``Fml.wellFormed, _ | some ``Fml.modal, _ => return φ
+  | _, _ => mkAppM ``Fml.evalEqs #[toExpr goal, φ]
+
+/-- `sol_close_unwrap` on a scoped leaf `Valid ψ`: its equations read by the
+interpreter (`Valid.of_evalEqs`, `Calculus/EvalEqs.lean`, computed by
+`evalEqsE`), then `holds` in every typed state (`CloseS.valid_of_holds`). -/
 @[tactic Solidity.tacticSol_close_unwrap]
 def evalSolCloseUnwrapS : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let ty ← instantiateMVars (← g.getType)
   unless ty.isAppOf ``Solidity.Valid do throwUnsupportedSyntax
   let tag ← g.getTag
-  let gs ← g.apply (← mkConstWithFreshMVarLevels ``CloseS.valid_of_holds)
+  -- the pass where every equation's Booleans reduce, else the leaf as it is
+  let g₂ ← try
+      let φ' ← evalEqsE true ty.appArg!
+      let [g₁] ← g.apply (← mkConstWithFreshMVarLevels ``Valid.of_evalEqs) | failure
+      let ty₁ ← instantiateMVars (← g₁.getType)
+      g₁.replaceTargetDefEq (mkApp ty₁.appFn! φ')
+    catch _ => pure g
+  let gs ← g₂.apply (← mkConstWithFreshMVarLevels ``CloseS.valid_of_holds)
   for g' in gs do g'.setTag tag
   replaceMainGoal gs
 

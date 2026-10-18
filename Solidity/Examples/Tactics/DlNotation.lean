@@ -85,18 +85,19 @@ example : dl!{ ∃ uint y; y == a } = dl!{ ¬(∀ uint y; ¬y == a) } := rfl
 /-- info: dl{ ∃ uint y; y = a } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ ∃ uint y; y == a }
 
-/-- `=` is `==`'s equation; `≐` the total one, and `defined` is its own atom. -/
+/-- `=` is KeY's `=`, and `==` its spelling of a program comparison;
+`wt(s)` is its own atom. -/
 example : dl!{ a = 1 } = (Fml.bind .box (.user "a") (.val .uint)
-    (.eqD (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample []) := rfl
-example : dl!{ a ≐ 1 } = (Fml.bind .box (.user "a") (.val .uint)
+    (.eq (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample []) := rfl
+example : dl!{ a == 1 } = (Fml.bind .box (.user "a") (.val .uint)
     (.eq (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample []) := rfl
 
-/-- info: dl{ (defined(a) ∧ a ≐ 1) → a = 1 } : Fml StandardExample [] -/
-#guard_msgs in #check dl!{ defined(a) ∧ a ≐ 1 → a = 1 }
+/-- info: dl{ wt(storage) → a = 1 } : Fml StandardExample [] -/
+#guard_msgs in #check dl!{ wt(storage) → a = 1 }
 
 /-- info: dl{ a = 1 } : Fml StandardExample [] -/
 #guard_msgs in #check (Fml.bind .box (.user "a") (.val .uint)
-  (Fml.eqD (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample [])
+  (Fml.eq (.pvV .here) (Tms.Term.lit (p := .uint) ⟨1, rfl⟩)) : Fml StandardExample [])
 
 /-- info: dl{ ¬a = 1 ∧ a < 2 } : Fml StandardExample [] -/
 #guard_msgs in #check dl!{ a != 1 ∧ a < 2 }

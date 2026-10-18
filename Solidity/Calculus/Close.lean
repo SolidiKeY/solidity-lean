@@ -130,13 +130,15 @@ macro "sol_close" : tactic => `(tactic|
     all_goals first
       | omega
       | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
-          Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Close.uintBitwise_and_self]
+          Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
+          Close.uintBitwise_and_self]
       | (sol_close_enrich
          all_goals (repeat' (first | intro _ | apply And.intro))
          all_goals first
            | omega
            | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
-               Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Close.uintBitwise_and_self])))
+               Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
+          Close.uintBitwise_and_self])))
 
 /-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
 evaluators unfolded over a deployment's storage. -/

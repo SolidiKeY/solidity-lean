@@ -2,6 +2,7 @@ import Solidity.Theory.Bridge.Denote
 import Solidity.Calculus.SoundArms
 import Solidity.Calculus.SoundCalls
 import Solidity.Semantics.NoPanic
+import Solidity.Calculus.TermWk
 
 /-!
 # The rules of loops are sound
@@ -20,10 +21,13 @@ import Solidity.Semantics.NoPanic
   under the variant's local (`Prog.wk up`), which it keeps
   (`Prog.run_wk`), and the variant bounds the iterations left
   (`TLoop.run_variant`).  A condition is a `bool` of the typed state, so it
-  is `true` or `false` wherever it is read; what the rule's terms read is
-  the typed value (`holds_isBoolD_lower`, from `Val.lower_evalT`
-  (`Calculus/LowerRun.lean`), `Val.evalT_ends` and the term bridge
-  `Tm.denote_eval`, `Calculus/Lands.lean`).
+  is `true` or `false` wherever it is read, and the rules read it by an
+  update, `{ b := cond }`, which lands where the typed value returns
+  (`Val.lower_evalT`, `Calculus/LowerRun.lean`, `Val.evalT_ends`); an
+  invariant and a variant are read in the Theory, where the typed value
+  returns as it does (`holds_isBool_lower`, the term bridge
+  `Tm.denote_eval`, `Calculus/Lands.lean`), and under the variant's local as
+  without it (`Val.lower_denote_up`).
 -/
 
 namespace Solidity
@@ -35,16 +39,10 @@ section Cond
 
 variable {Γ : Ctx}
 
-/-- `t ≐ b` holds over the typed state where `t` returns `b`. -/
-theorem holds_isBoolD (t : Tm C Γ (.val .bool)) (σ : State C Γ) (b : Bool) :
-    holds σ (Fml.isBoolD t b) ↔ t.eval σ = some b := by
-  rw [holds_eqD]
-  constructor
-  · rintro ⟨x, hx, hb⟩
-    cases hb
-    exact hx
-  · intro h
-    exact ⟨b, h, rfl⟩
+/-- `x = b` holds over the typed state where the local `x` holds `b`. -/
+theorem holds_isBool_pvV (x : Idx Γ (.val .bool)) (σ : State C Γ) (b : Bool) :
+    holds σ (Fml.isBool (Tm.pvV x) b) ↔ TEnv.get x σ.env = b :=
+  holds_eq_pvV_lit σ x b
 
 /-- A value that returns over the typed state: its lowered term reads it
 (`Val.lower_evalT`). -/
@@ -69,16 +67,9 @@ theorem Val.lower_eval_error {p : PrimTy} (v : Val C Γ p) (σ : State C Γ) {e 
 
 /-- **A lowered condition** holds `b` over the typed state where it
 evaluates to `b`. -/
-theorem holds_isBoolD_lower (c : Val C Γ .bool) (σ : State C Γ) (b : Bool) :
-    holds σ (Fml.isBoolD c.lower b) ↔ c.evalT σ = .ok b := by
-  rw [holds_isBoolD]
-  cases h : c.evalT σ with
-  | ok v =>
-    rw [Val.lower_eval_ok c σ h]
-    exact ⟨fun h' => by cases h'; rfl, fun h' => by cases h'; rfl⟩
-  | error e =>
-    rw [Val.lower_eval_error c σ h]
-    exact ⟨nofun, nofun⟩
+theorem holds_isBool_lower (c : Val C Γ .bool) (σ : State C Γ) {b : Bool}
+    (h : c.evalT σ = .ok b) : holds σ (Fml.isBool c.lower b) :=
+  (holds_eq_of_eval (Val.lower_eval_ok c σ h) rfl).2 rfl
 
 end Cond
 
@@ -165,13 +156,31 @@ theorem Premise.sound_whileUnwind {m : Modality} (u : LoopUnwind) (c : Val C Γ 
         show _ = Stmt.runSt τ (.loop u.before c body)
         cases Stmt.runSt τ (.loop u.before c body) <;> rfl
 
-/-- `loopExit`: `⟨[ while (nse) body ]⟩ ⇝ nse = FALSE ⟹ ⟨[ ]⟩ ; nse = FALSE`. -/
-theorem Premise.sound_loopExit {m : Modality} (c : Val C Γ .bool) (body : Prog C Γ Γ₁)
+/-- `loopExit`: `⟨[ while (cond) body ]⟩ ⇝ { b := cond } (b = FALSE) ⟹ ⟨[ ]⟩ ;
+{ b := cond } (b = FALSE)`. -/
+theorem Premise.sound_loopExit {m : Modality} (k : Nat) (c : Val C Γ .bool) (body : Prog C Γ Γ₁)
     (σ : State C Γ) :
-    Premise.Runs m (.loop (.unwind 0) c body) (.check (Fml.isBoolD c.lower false)) σ :=
+    Premise.Runs m (.loop (.unwind 0) c body)
+      (.check (.upd .diamond (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
+        (Fml.isBool (Tm.pvV (p := .bool) .here) false))) σ :=
   Premise.sound_check σ fun h => by
-    rw [Stmt.runSt_loop_unfold, (holds_isBoolD_lower c σ false).1 h]
-    rfl
+    have hglob : (Upd.nil.decl (fse k) (.val (p := .bool) c.lower)).globT σ =
+        (c.lower.eval σ).bind fun _ => some σ.globG := rfl
+    rw [Stmt.runSt_loop_unfold]
+    cases hc : c.evalT σ with
+    | error e =>
+      rw [Val.lower_eval_error c σ hc] at hglob
+      exact (h.of_noExh hglob (Upd.exh_of_pushFree (by
+        simp only [Upd.pushFree, Rhs.pushFree, Val.lower_pushFree, Bool.and_self]))).elim
+    | ok v =>
+      have hcl : (Rhs.val (p := .bool) c.lower).eval σ =
+          some (LTy.VDen.ofT (H := σ.H) (.val .bool) v) := by
+        show c.lower.eval σ = _
+        exact Val.lower_eval_ok c σ hc
+      have hv : v = false :=
+        (holds_isBool_pvV _ _ _).1 (h.of_lands (Upd.lands_decl (Upd.lands_nil σ) (fse k) hcl))
+      subst hv
+      rfl
 
 end Turn
 
@@ -220,7 +229,7 @@ theorem holds_upd_popNil {Δ : Ctx} (m : Modality) (h : Ext Γ Δ) (σ : State C
 /-- A break test the box rule may read: its flag read `true`, where the
 condition is `false` (`Val.breakExit`). -/
 def BreakTest (c : Val C Γ .bool) (B : Option (Fml C Γ)) : Prop :=
-  ∀ Bf, B = some Bf → ∃ x : Idx Γ (.val .bool), Bf = Fml.isBoolD (Tm.pvV (p := .bool) x) true ∧
+  ∀ Bf, B = some Bf → ∃ x : Idx Γ (.val .bool), Bf = Fml.isBool (Tm.pvV (p := .bool) x) true ∧
     ∀ τ : State C Γ, (Val.simple (.local x) : Val C Γ .bool).evalT τ = .ok true →
       c.evalT τ = .ok false
 
@@ -245,7 +254,7 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
     (σ : State C Γ) {B : Option (Fml C Γ)} (hB : BreakTest c B) :
     Premise.Runs .box (.loop a c body)
       (.inv J B xs hv (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
-        (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
+        (.isBool (.pvV (p := .bool) .here) true) (.isBool (.pvV (p := .bool) .here) false)
         .refl (.push .refl) body J) σ := by
   intro _ _ ω κ φ hp
   obtain ⟨hI0, hA⟩ := hp
@@ -286,11 +295,11 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
       hY.of_lands (Upd.lands_decl (Upd.lands_nil a.st) (fse k) hcl)
     cases v with
     | false =>
-      have hF' : holds a.st _ := Upd.afterT.of_lands (hF ((holds_isBoolD _ _ _).2 rfl))
+      have hF' : holds a.st _ := Upd.afterT.of_lands (hF ((holds_isBool_pvV _ _ _).2 rfl))
           (Upd.lands_pop_nil _ _)
       exact (holds_modal_iff a.st ω κ φ).1 (holds_modalK a.st ω κ φ hF')
     | true =>
-      have hT' : holds a.st _ := Upd.afterT.of_lands (hT ((holds_isBoolD _ _ _).2 rfl))
+      have hT' : holds a.st _ := Upd.afterT.of_lands (hT ((holds_isBool_pvV _ _ _).2 rfl))
           (Upd.lands_pop_nil _ _)
       have h' := (holds_modal_iff a.st body _ _).1 (holds_modalK a.st body _ _ hT')
       unfold Prog.runSt at h'
@@ -307,8 +316,8 @@ theorem Premise.sound_whileInvBoxB (k : Nat) (a : LoopAnn C Γ) (J : Fml C Γ) (
         | some Bf =>
           obtain ⟨x, rfl, hx⟩ := hB _ rfl
           have hpost := h'.1
-          by_cases hbk : holds (o.st.drop body.ext) (Fml.isBoolD (Tm.pvV (p := .bool) x) true)
-          · refine .inr ⟨hx _ ((holds_isBoolD_lower (.simple (.local x)) _ true).1 hbk), ?_⟩
+          by_cases hbk : holds (o.st.drop body.ext) (Fml.isBool (Tm.pvV (p := .bool) x) true)
+          · refine .inr ⟨hx _ (by rw [← (holds_isBool_pvV x _ true).1 hbk]; rfl), ?_⟩
             have hr := (holds_upd_popNil .box .refl _ _).1
               (hpost.2 ((holds_upd_popNil .box .refl _ _).2 hbk))
             exact (holds_modal_iff _ ω κ φ).1 (holds_modalK _ ω κ φ hr)
@@ -323,7 +332,7 @@ theorem Premise.sound_whileInvBox (k : Nat) (I c : Val C Γ .bool)
     Premise.Runs .box (.loop (.inv I dec brk qs) c body)
       (.inv (invFml I qs) (loopBreak brk c) xs hv
         (Upd.nil.decl (fse k) (.val (p := .bool) c.lower))
-        (.isBoolD (.pvV (p := .bool) .here) true) (.isBoolD (.pvV (p := .bool) .here) false)
+        (.isBool (.pvV (p := .bool) .here) true) (.isBool (.pvV (p := .bool) .here) false)
         .refl (.push .refl) body (invFml I qs)) σ :=
   Premise.sound_whileInvBoxB k _ (invFml I qs) c body hf σ (breakTest_loopBreak brk c)
 
@@ -423,7 +432,7 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       exact ⟨rfl, nofun⟩
   refine TLoop.run_variant_or (X := fun e => e = .exhausted)
     (H := fun a : Out C σ.H Γ => TGFrame (frameMut hv) σ a.st ∧
-      TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ holds a.st (Fml.isBoolD I.lower true))
+      TLocAgree 0 (Prog.writesAt 0 body) σ.env a.st.env ∧ holds a.st (Fml.isBool I.lower true))
     (D := fun a : Out C σ.H Γ => (d.evalT a.st).map (·.1)) ?_
     ⟨TGFrame.refl σ, TLocAgree.refl _, hI0⟩
   rintro a ⟨hg, hag, hI⟩
@@ -458,11 +467,11 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
     · exact .inl rfl
   · have hcv : cv = false := Except.ok.inj hc'
     subst hcv
-    exact Upd.afterT.of_lands (hF ((holds_isBoolD _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+    exact Upd.afterT.of_lands (hF ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
   · have hcv : cv = true := Except.ok.inj hc'
     subst hcv
     have hT' : holds (a.st.push (t := .val .uint) dv) _ :=
-      Upd.afterT.of_lands (hT ((holds_isBoolD _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
+      Upd.afterT.of_lands (hT ((holds_isBool_pvV _ _ _).2 rfl)) (Upd.lands_pop_nil _ _)
     have h' := (holds_modal_iff _ _ _ _).1 (holds_modalK _ _ _ _ hT')
     unfold Prog.runSt at h'
     rw [frames_pop_nil_run, State.push_lift,
@@ -479,40 +488,48 @@ theorem Premise.sound_whileInvDiamond (k : Nat) (I c : Val C Γ .bool) (d : Val 
       obtain ⟨hI₁, hdec⟩ := h'.1
       let τ₀ : State C Γ := o.st.drop body.ext
       change holds (τ₀.push (t := .val .uint) dv) _ at hI₁ hdec
-      refine .inr ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hg.trans (hg'.withEnv _), hag.trans ha', ?_⟩,
-        fun hc₁ => ?_⟩
-      · have hI' := (holds_isBoolD_lower I.up (τ₀.push (t := .val .uint) dv) true).1 hI₁
-        rw [Val.evalT_up] at hI'
-        exact (holds_isBoolD_lower I τ₀ true).2 hI'
-      · change c.evalT τ₀ = _ at hc₁
-        have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
-          rw [Val.evalT_up]; exact hc₁
-        have hcl₁ : (Rhs.val (p := .bool) c.up.lower).eval (τ₀.push (t := .val .uint) dv) =
-            some (LTy.VDen.ofT (H := τ₀.H) (.val .bool) true) := by
-          show c.up.lower.eval _ = _
-          exact Val.lower_eval_ok _ _ hcu
-        obtain ⟨hle, hlt⟩ := hdec.of_lands
-          (Upd.lands_decl (Upd.lands_nil (τ₀.push (t := .val .uint) dv)) (fse k) hcl₁)
-          ((holds_isBoolD _ _ _).2 rfl)
-        rw [holds_isBoolD] at hle hlt
-        cases hdx : d.evalT τ₀ with
-        | error e =>
-          have hd₂ : (d.up.up (t := .val .bool)).evalT
-              ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .error e := by
-            rw [Val.evalT_up, Val.evalT_up]; exact hdx
-          rw [Tm.eval_binop, Tm.eval_lit, Option.bind_some, Val.lower_eval_error _ _ hd₂] at hle
-          exact absurd hle (by unfold binopT; exact nofun)
-        | ok x =>
-          have hd₂ : (d.up.up (t := .val .bool)).evalT
-              ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .ok x := by
-            rw [Val.evalT_up, Val.evalT_up]; exact hdx
+      have hIτ : holds τ₀ (Fml.isBool I.lower true) := by
+        have h₁ : holds (τ₀.push (t := .val .uint) dv) (Fml.isBool I.up.lower true) := hI₁
+        show I.lower.denote τ₀ = _
+        rw [← Val.lower_denote_up (t := .val .uint) I τ₀ dv]
+        exact h₁
+      have hgτ : TGFrame (frameMut hv) σ τ₀ := hg.trans (hg'.withEnv _)
+      have hagτ : TLocAgree 0 (Prog.writesAt 0 body) σ.env τ₀.env := hag.trans ha'
+      refine .inr ⟨⟨τ₀, a.ext.trans o.ext⟩, rfl, ⟨hgτ, hagτ, hIτ⟩, fun hc₁ => ?_⟩
+      change c.evalT τ₀ = _ at hc₁
+      have hcu : c.up.evalT (τ₀.push (t := .val .uint) dv) = .ok true := by
+        rw [Val.evalT_up]; exact hc₁
+      have hcl₁ : (Rhs.val (p := .bool) c.up.lower).eval (τ₀.push (t := .val .uint) dv) =
+          some (LTy.VDen.ofT (H := τ₀.H) (.val .bool) true) := by
+        show c.up.lower.eval _ = _
+        exact Val.lower_eval_ok _ _ hcu
+      obtain ⟨hle, hlt⟩ := hdec.of_lands
+        (Upd.lands_decl (Upd.lands_nil (τ₀.push (t := .val .uint) dv)) (fse k) hcl₁)
+        ((holds_isBool_pvV _ _ _).2 rfl)
+      cases hdx : d.evalT τ₀ with
+      | error e =>
+        -- the next head reads the variant, which halts there: no landing
+        have hY' := holds_anonHavoc hxs hgτ hagτ hA hIτ
+        have hglob' : ((Upd.nil.decl (fie k) (.val (p := .uint) d.lower)).decl (fse k)
+            (.val (p := .bool) c.lower)).globT τ₀ =
+            ((d.lower.eval τ₀).bind fun _ => some τ₀.globG).bind fun g =>
+              (c.lower.eval τ₀).bind fun _ => some g := rfl
+        rw [Val.lower_eval_error d τ₀ hdx] at hglob'
+        exact (hY'.of_noExh hglob' (Upd.exh_of_pushFree (by simp only [Upd.pushFree,
+          Rhs.pushFree, Val.lower_pushFree, Bool.and_self]))).elim
+      | ok x =>
+        have hd₂ : (d.up.up (t := .val .bool)).evalT
+            ((τ₀.push (t := .val .uint) dv).push (t := .val .bool) true) = .ok x := by
+          rw [Val.evalT_up, Val.evalT_up]; exact hdx
+        have hle' := (holds_eq_of_eval (p := .bool) (x := decide ((0 : Int) ≤ x.1)) (by
           rw [Tm.eval_binop, Tm.eval_lit, Option.bind_some, Val.lower_eval_ok _ _ hd₂,
-            binopT_some] at hle
+            binopT_some]; try rfl) rfl).1 hle
+        have hlt' := (holds_eq_of_eval (p := .bool) (x := decide (x.1 < dv.1)) (by
           rw [Tm.eval_binop, Val.lower_eval_ok _ _ hd₂, Option.bind_some, Tm.eval_pvV,
-            binopT_some] at hlt
-          have h₁ : (0 : Int) ≤ x.1 := of_decide_eq_true (Option.some.inj hle)
-          have h₂ : x.1 < dv.1 := of_decide_eq_true (Option.some.inj hlt)
-          exact ⟨x.1, by show (d.evalT τ₀).map _ = _; rw [hdx]; rfl, h₁, h₂⟩
+            binopT_some]; try rfl) rfl).1 hlt
+        have h₁ : (0 : Int) ≤ x.1 := of_decide_eq_true hle'
+        have h₂ : x.1 < dv.1 := of_decide_eq_true hlt'
+        exact ⟨x.1, by show (d.evalT τ₀).map _ = _; rw [hdx]; rfl, h₁, h₂⟩
 
 end Inv
 
@@ -531,7 +548,7 @@ theorem Stmt.sound_loop (k : Nat) (m : Modality) {Γ Γ₁ : Ctx} (a : LoopAnn C
     | zero =>
       unfold loopStep at hp
       cases hp
-      exact Premise.sound_loopExit c body σ
+      exact Premise.sound_loopExit k c body σ
     | succ n =>
       unfold loopStep at hp
       cases hp

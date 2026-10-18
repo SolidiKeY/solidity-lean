@@ -559,7 +559,7 @@ def Tm.reclose? {Γ Γ' : Ctx} {s : Srt} (t : Tm C Γ s) : Option (Tm C Γ' s) :
 def Fml.reclose? {Γ Γ' : Ctx} : Fml C Γ → Option (Fml C Γ')
   | .tt => some .tt
   | .eq a b => do pure (.eq (← a.reclose?) (← b.reclose?))
-  | .defined t => (t.reclose?).map .defined
+  | .wellFormed t => (t.reclose?).map .wellFormed
   | .not φ => (Fml.reclose? φ).map .not
   | .and φ ψ => do pure (.and (← Fml.reclose? φ) (← Fml.reclose? ψ))
   | .imp φ ψ => do pure (.imp (← Fml.reclose? φ) (← Fml.reclose? ψ))
@@ -611,9 +611,9 @@ theorem holds_reclose {Γ Γ' : Ctx} : (φ : Fml C Γ) → {φ' : Fml C Γ'} →
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     rw [holds_eq, holds_eq, Tm.reclose_denote ha _ _ hg, Tm.reclose_denote hb _ _ hg]
-  | .defined t, _, h, σ, τ, hg => by
+  | .wellFormed t, _, h, σ, τ, hg => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [holds_defined, holds_defined, Srt.sameO_val.1 (Tm.reclose_eval ht _ _ hg)]
+    rw [holds_wellFormed, holds_wellFormed, Srt.sameO_st.1 (Tm.reclose_eval ht _ _ hg)]
   | .not φ, _, h, σ, τ, hg => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (holds_reclose φ hφ σ τ hg)

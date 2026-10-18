@@ -28,7 +28,7 @@ schema variables prints back as `tm{ … }` through the scoped term printers
 (`delabTmS`, `Delab.ppTermS`).  The rules are stated over the `Tms`
 symbols, which print so.
 
-`holds_eqD` is in `Calculus/Logic.lean`, with the term bridge
+`holds_eq` is in `Calculus/Logic.lean`, with the term bridge
 `Tm.denote_eval` (`Calculus/Lands.lean`).
 -/
 

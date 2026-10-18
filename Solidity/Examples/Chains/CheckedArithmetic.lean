@@ -46,17 +46,17 @@ theorem box :
     ~*> dl!{ { x := 250 } [ x += 10; require(x <= 255); ] φ }
     ~[localOpAssign]~> dl!{ { x := 250 } { x := x + 10 } [ require(x <= 255); ] φ }
     ~*> dl![.box]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
     ~[revertBox]~> dl![.box]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+          ((se1 = true → φ) ∧ (se1 = false → true)) }
     ~[sequentialToParallel]~> dl![.box]{ { x := 250 ‖ x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+          ((se1 = true → φ) ∧ (se1 = false → true)) }
     ~[add_literals]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := 260 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+          ((se1 = true → φ) ∧ (se1 = false → true)) }
     ~[leq_literals]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
-    ~[applyOnRigid]~> dl![.box]{ (false ≐ true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
-          (false ≐ false → true) }
+          ((se1 = true → φ) ∧ (se1 = false → true)) }
+    ~[applyOnRigid]~> dl![.box]{ (false = true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
+          (false = false → true) }
     ~[concrete]~> dl!{ true } := by
   sol_chain
 #last_line box
@@ -69,17 +69,17 @@ theorem diamond :
     ~*> dl!{ { x := 250 } ⟨ x += 10; require(x <= 255); ⟩ φ }
     ~[localOpAssign]~> dl!{ { x := 250 } { x := x + 10 } ⟨ require(x <= 255); ⟩ φ }
     ~*> dl!{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
     ~[revertDiamond]~> dl!{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → false)) }
+          ((se1 = true → φ) ∧ (se1 = false → false)) }
     ~[sequentialToParallel]~> dl!{ { x := 250 ‖ x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → false)) }
+          ((se1 = true → φ) ∧ (se1 = false → false)) }
     ~[add_literals]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := 260 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → false)) }
+          ((se1 = true → φ) ∧ (se1 = false → false)) }
     ~[leq_literals]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → false)) }
-    ~[applyOnRigid]~> dl!{ (false ≐ true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
-          (false ≐ false → false) }
+          ((se1 = true → φ) ∧ (se1 = false → false)) }
+    ~[applyOnRigid]~> dl!{ (false = true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
+          (false = false → false) }
     ~[concrete]~> dl!{ false } := by
   sol_chain
 #last_line diamond

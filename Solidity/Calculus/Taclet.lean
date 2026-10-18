@@ -548,8 +548,8 @@ theorem Taclet.whileInvariantBox.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ₁}
     Stmt.step k .box (Stmt.loop (LoopAnn.inv inv dec brk qs) cond body) =
       Premise.inv (invFml inv qs) (loopBreak brk cond) xs hv
         (Upd.nil.decl (Var.fresh "se" k) (Rhs.val cond.lower))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl
+        (Fml.eq (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
+        (Fml.eq (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl
         Ext.refl.push body (invFml inv qs) := by
   dsimp only [Stmt.step]
   simp only [loopStep, hf]
@@ -561,15 +561,15 @@ theorem Taclet.whileInvariantDiamond.toStep {Γ₁ : Ctx} {body : Prog C Γ Γ�
       Premise.inv (invFml inv qs) none xs hv
         ((Upd.nil.decl (Var.fresh "ie" k) (Rhs.val (p := .uint) dec.lower)).decl (Var.fresh "se" k)
           (Rhs.val (p := .bool) cond.lower))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
-        (Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl.push
+        (Fml.eq (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true))
+        (Fml.eq (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB false)) Ext.refl.push
         Ext.refl.push body.up
         ((invFml inv.up (List.map LoopQ.up qs)).and
           (Fml.upd .diamond (Upd.nil.decl (Var.fresh "se" k) (Rhs.val (p := .bool) cond.up.lower))
-            ((Fml.eqD (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true)).imp
-              ((Fml.eqD (Tms.Term.binop .le .uint (Tms.Term.nat 0) dec.up.up.lower)
+            ((Fml.eq (Tms.Term.pv (p := .bool) Idx.here) (Tms.Term.litB true)).imp
+              ((Fml.eq (Tms.Term.binop .le .uint (Tms.Term.nat 0) dec.up.up.lower)
                   (Tms.Term.litB true)).and
-                (Fml.eqD (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
+                (Fml.eq (Tms.Term.binop .lt .uint dec.up.up.lower (Tms.Term.pv (p := .uint) Idx.here.there))
                   (Tms.Term.litB true)))))) := by
   subst hq
   dsimp only [Stmt.step]

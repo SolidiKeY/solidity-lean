@@ -219,11 +219,11 @@ example : dl!{ ⟨ balances[a] = 1; if (true) { x = 2; } else { x = 1; }; ⟩ ba
             ⟨ if (true) { x = 2; } else { x = 1; }; ⟩ balances[a] == x }
     ~[ifElseSplit]~>
         dl!{ { storage := save(storage, balances[a], 1) }
-            ((true ≐ true → ⟨ x = 2; } ⟩ balances[a] == x) ∧
-              (true ≐ false → ⟨ x = 1; } ⟩ balances[a] == x)) }
+            ((true = true → ⟨ x = 2; } ⟩ balances[a] == x) ∧
+              (true = false → ⟨ x = 1; } ⟩ balances[a] == x)) }
     ~*> dl!{ { storage := save(storage, balances[a], 1) }
-            ((true ≐ true → { x := 2 } balances[a] == x) ∧
-              (true ≐ false → { x := 1 } balances[a] == x)) } := by
+            ((true = true → { x := 2 } balances[a] == x) ∧
+              (true = false → { x := 1 } balances[a] == x)) } := by
   sol_chain
 
 /-! ## 6 · The evidence is unique
@@ -329,7 +329,7 @@ example : ∃ ψ, dl![m]{ { x := 1 } ⟨[ revert(); ]⟩ true } ~> ψ := by
 info:
   dl{ ∀ uint x; ⟨[ if (true) {revert();} else {x = 1;}; ]⟩ x = 1 }
   ~[ifElseSplit]~>
-  dl{ ∀ uint x; (true ≐ true → ⟨[ revert(); } ]⟩ x = 1) ∧ (true ≐ false → ⟨[ x = 1; } ]⟩ x = 1) }
+  dl{ ∀ uint x; (true = true → ⟨[ revert(); } ]⟩ x = 1) ∧ (true = false → ⟨[ x = 1; } ]⟩ x = 1) }
   (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
 -/
 #guard_msgs in
@@ -390,7 +390,7 @@ split, the goal where it holds run to its end; the goal where it fails is
 left at its revert. -/
 def requireTrace : dl![m]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ)) } :=
+          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → ⟨[ revert(); y = 1; ]⟩ φ)) } :=
   calc dl![m]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
     _ ~[requireConditionCapture]~> dl![m]{ ⟨[ bool se1 = flags[a]; require(se1); y = 1; ]⟩ φ } := by
       sol_chain
@@ -398,22 +398,22 @@ def requireTrace : dl![m]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
     -- lines between leave `se1` bound by an update in a statement, which `dl![m]{ … }`
     -- reads as a `uint` parameter (`Branch.lean`), so they are not written
     _ ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → ⟨[ y = 1; ]⟩ φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ)) } := by
+          ((se1 = true → ⟨[ y = 1; ]⟩ φ) ∧ (se1 = false → ⟨[ revert(); y = 1; ]⟩ φ)) } := by
       sol_chain
     _ ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); y = 1; ]⟩ φ)) } := by
+          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → ⟨[ revert(); y = 1; ]⟩ φ)) } := by
       sol_chain
 
 /-- Under the box the failing goal closes: the trace, then `revertBox`. -/
 example : dl![.box]{ ⟨[ require(flags[a]); y = 1; ]⟩ φ }
     ~*> dl![.box]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → true)) } :=
+          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → true)) } :=
   (requireTrace .box φ).trans (by sol_chain)
 
 /-- Under the diamond it leaves `false`: the condition must hold. -/
 example : dl!{ ⟨ require(flags[a]); y = 1; ⟩ φ }
     ~*> dl!{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → false)) } :=
+          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → false)) } :=
   (requireTrace .diamond φ).trans (by sol_chain)
 
 /-- `assert` checks instead (the table's `assertSimple`, KeY's): the rest
@@ -422,7 +422,7 @@ no revert, so no goal the box closes. -/
 theorem assertTrace : dl![m]{ ⟨[ assert(flags[a]); y = 1; ]⟩ φ }
     ~[assertConditionCapture]~> dl![m]{ ⟨[ bool se1 = flags[a]; assert(se1); y = 1; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ se1 ≐ true) } := by
+          ((se1 = true → { y := 1 } φ) ∧ se1 = true) } := by
   sol_chain
 
 /-- A split behind a stack of updates, under `m`: the overflow of `Chains.CheckedArithmetic`, the lines
@@ -431,22 +431,22 @@ example (φ : Post StandardExample [.val .uint]) : dl![m]{ ⟨[ uint8 x = 250; x
     ~*> dl![m]{ { x := 250 } ⟨[ x += 10; require(x <= 255); ]⟩ φ }
     ~[localOpAssign]~> dl![m]{ { x := 250 } { x := x + 10 } ⟨[ require(x <= 255); ]⟩ φ }
     ~*> dl![m]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) } := by
+          ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) } := by
   sol_chain
 
 /-- The `ifElseSplit` trace: both goals to their end, under `m`. -/
 theorem ifTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { y = 2; }; ]⟩ φ }
     ~[ifElseUnfold]~> dl![m]{ ⟨[ bool se1 = flags[a]; if (se1) { y = 1; } else { y = 2; }; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → ⟨[ y = 1; } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ y = 2; } ]⟩ φ)) }
+          ((se1 = true → ⟨[ y = 1; } ]⟩ φ) ∧ (se1 = false → ⟨[ y = 2; } ]⟩ φ)) }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → { y := 2 } φ)) } := by
+          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → { y := 2 } φ)) } := by
   sol_chain
 
 /-- A revert in the `else` branch: the lines stop at it, the `then` goal done. -/
 def ifRevertTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { revert(); }; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → { y := 1 } φ) ∧ (se1 ≐ false → ⟨[ revert(); } ]⟩ φ)) } := by
+          ((se1 = true → { y := 1 } φ) ∧ (se1 = false → ⟨[ revert(); } ]⟩ φ)) } := by
   sol_chain
 
 -- In the `then` branch it stops them before the `else` goal: go on after `cases m`.
@@ -454,7 +454,7 @@ def ifRevertTrace : dl![m]{ ⟨[ if (flags[a]) { y = 1; } else { revert(); }; ]�
 error: sol_chain: the derivation of
   dl{ ∀ uint y; ∀ uint a; ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
 does not reach
-  dl{ ∀ uint a; { se1 := find(storage, flags[a]) } ((se1 ≐ true → true) ∧ (se1 ≐ false → { y := 1 } φ)) }
+  dl{ ∀ uint a; { se1 := find(storage, flags[a]) } ((se1 = true → true) ∧ (se1 = false → { y := 1 } φ)) }
 Its lines:
     dl{ ∀ uint y; ∀ uint a; ⟨[ if (flags[a]) {revert();} else {y = 1;}; ]⟩ φ }
   ~[ifElseUnfold]~>
@@ -467,13 +467,13 @@ Its lines:
     dl{
   ∀ uint y;
     ∀ uint a;
-      { se1 := find(storage, flags[a]) } ((se1 ≐ true → ⟨[ revert(); } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ y = 1; } ]⟩ φ)) }
+      { se1 := find(storage, flags[a]) } ((se1 = true → ⟨[ revert(); } ]⟩ φ) ∧ (se1 = false → ⟨[ y = 1; } ]⟩ φ)) }
   (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
 -/
 #guard_msgs in
 example : dl![m]{ ⟨[ if (flags[a]) { revert(); } else { y = 1; }; ]⟩ φ }
     ~*> dl![m]{ { se1 := find(storage, flags[a]) }
-          ((se1 ≐ true → true) ∧ (se1 ≐ false → { y := 1 } φ)) } := by
+          ((se1 = true → true) ∧ (se1 = false → { y := 1 } φ)) } := by
   sol_chain
 
 /-- After `cases m`, each modality runs to the end. -/
@@ -486,25 +486,25 @@ example : ∃ ψ, Nonempty (dl![m]{ ⟨[ if (flags[a]) { revert(); } else { y = 
 info:
   dl{ ∀ uint x; ⟨[ if (true) {if (true) {x = 2;} else {x = 1;};} else {x = 1;}; ]⟩ φ }
   ~[ifElseSplit]~>
-  dl{ ∀ uint x; (true ≐ true → ⟨[ if (true) {x = 2;} else {x = 1;}; } ]⟩ φ) ∧ (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+  dl{ ∀ uint x; (true = true → ⟨[ if (true) {x = 2;} else {x = 1;}; } ]⟩ φ) ∧ (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[ifElseSplit]~>
   dl{
     ∀ uint x;
-      (true ≐ true → (true ≐ true → ⟨[ x = 2; } } ]⟩ φ) ∧ (true ≐ false → ⟨[ x = 1; } } ]⟩ φ)) ∧
-        (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+      (true = true → (true = true → ⟨[ x = 2; } } ]⟩ φ) ∧ (true = false → ⟨[ x = 1; } } ]⟩ φ)) ∧
+        (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[localValueAssign]~>
   dl{
     ∀ uint x;
-      (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → ⟨[ x = 1; } } ]⟩ φ)) ∧
-        (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → ⟨[ x = 1; } } ]⟩ φ)) ∧
+        (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[localValueAssign]~>
   dl{
     ∀ uint x;
-      (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧ (true ≐ false → ⟨[ x = 1; } ]⟩ φ) }
+      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } φ)) ∧ (true = false → ⟨[ x = 1; } ]⟩ φ) }
   ~[localValueAssign]~>
   dl{
     ∀ uint x;
-      (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧ (true ≐ false → { x := 1 } φ) }
+      (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } φ)) ∧ (true = false → { x := 1 } φ) }
 -/
 #guard_msgs in
 variable (φ : Post StandardExample [.val .uint]) in
@@ -512,8 +512,8 @@ variable (φ : Post StandardExample [.val .uint]) in
 
 example (φ : Post StandardExample [.val .uint]) :
     dl![m]{ ⟨[ if (true) { if (true) { x = 2; } else { x = 1; } } else { x = 1; }; ]⟩ φ }
-    ~*> dl![m]{ (true ≐ true → (true ≐ true → { x := 2 } φ) ∧ (true ≐ false → { x := 1 } φ)) ∧
-          (true ≐ false → { x := 1 } φ) } := by
+    ~*> dl![m]{ (true = true → (true = true → { x := 2 } φ) ∧ (true = false → { x := 1 } φ)) ∧
+          (true = false → { x := 1 } φ) } := by
   sol_chain
 
 end Past

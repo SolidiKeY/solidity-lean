@@ -321,8 +321,9 @@ Found while porting solkey's constructor obligations (`Problem.ctorFml`,
   (`/// @custom:key unwind k`, counted down by each unwinding) and closes the loop at the bound
   with a check, `loopExit`: "loop exited", the rest with the condition false
   assumed, and "unwound to the end", the condition false. Its soundness side
-  condition is that the condition *returns* false (`Fml.eqD`, defined and
-  equal), not only that it is not true: a condition that halts makes the
+  condition is that the condition *returns* false (Lean reads it by an
+  update, `{ b := cond } (b = FALSE)` under the diamond, as the invariant
+  rules do), not only that it is not true: a condition that halts makes the
   loop halt, not exit. Suggested: an `unwind k` clause in `LoopSpecCompiler`
   and an exit taclet with these two goals, so that a bounded proof attempt
   ends in an open goal rather than running on.

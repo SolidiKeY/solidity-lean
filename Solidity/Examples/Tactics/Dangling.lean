@@ -23,7 +23,7 @@ local instance : InContract := ⟨StandardExample⟩
 open scoped Scoped
 
 /-- A write through a popped alias survives the next push. -/
-def survivesPush : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def survivesPush : Fml StandardExample [] := dl!{ wt(storage) → [
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ] persons[0].age == 5 }
 
@@ -33,7 +33,7 @@ theorem survivesPush_holds : Valid survivesPush := by
   sol_prove
 
 /-- The old diamond resurrection claim. -/
-def survivesDiamond : Fml StandardExample [] := dl!{ defined(wt(storage)) → ⟨
+def survivesDiamond : Fml StandardExample [] := dl!{ wt(storage) → ⟨
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; persons.push(); ⟩ persons[0].age == 5 }
 
@@ -43,7 +43,7 @@ theorem survivesDiamond_holds : Valid survivesDiamond := by
   sol_prove
 
 /-- The old claim after deleting the emptied array. -/
-def survivesDelete : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def survivesDelete : Fml StandardExample [] := dl!{ wt(storage) → [
     delete persons; persons.push(); Person storage r = persons[0]; persons.pop();
     r.age = 5; delete persons; persons.push(); ] persons[0].age == 5 }
 
@@ -53,7 +53,7 @@ theorem survivesDelete_holds : Valid survivesDelete := by
   sol_prove
 
 /-- The old claim after copying an empty array. -/
-def survivesCopy : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def survivesCopy : Fml StandardExample [] := dl!{ wt(storage) → [
     delete people; delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 5; persons = people; persons.push(); ] persons[0].age == 5 }
 
@@ -63,7 +63,7 @@ theorem survivesCopy_holds : Valid survivesCopy := by
   sol_prove
 
 /-- The old claim that a dirty inner array reappears after push. -/
-def innerReappears : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def innerReappears : Fml StandardExample [] := dl!{ wt(storage) → [
     delete matrix; matrix.push(); uint[] storage ptr = matrix[0]; matrix.pop();
     ptr.push(66); matrix.push(); ] matrix[0].length == 1 && matrix[0][0] == 66 }
 
@@ -81,13 +81,13 @@ closer's bounds by four rounds (a `pop` leaves the history unknown,
 `Op2.exposes`). -/
 
 /-- Two rounds through one alias. -/
-def rounds2 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds2 : Fml StandardExample [] := dl!{ wt(storage) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push(); ] persons[0].age == 2 }
 
 /-- Four rounds through one alias: twelve statements after the binding. -/
-def rounds4 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds4 : Fml StandardExample [] := dl!{ wt(storage) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
@@ -95,7 +95,7 @@ def rounds4 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 4; persons.push(); ] persons[0].age == 4 }
 
 /-- Six rounds. -/
-def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds6 : Fml StandardExample [] := dl!{ wt(storage) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();
@@ -105,7 +105,7 @@ def rounds6 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
     persons.pop(); r.age = 6; persons.push(); ] persons[0].age == 6 }
 
 /-- Seven rounds. -/
-def rounds7 : Fml StandardExample [] := dl!{ defined(wt(storage)) → [
+def rounds7 : Fml StandardExample [] := dl!{ wt(storage) → [
     delete persons; persons.push(); Person storage r = persons[0];
     persons.pop(); r.age = 1; persons.push();
     persons.pop(); r.age = 2; persons.push();

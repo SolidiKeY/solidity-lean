@@ -67,9 +67,13 @@ names the storage term a clause reads, whether `\old`/`\result` are allowed,
 and the locals in scope. A state variable is `find(ctx.storage, p)`;
 `msg.sender`, `msg.value`, `block.timestamp`, `this.balance` are `Term.env`;
 an enum member is its position; `==` between conditions is `<->`; `\exists`
-is `¬∀¬`. Equations are the interpreter's `Fml.eqD` (both sides defined),
-and arithmetic is Solidity's, checked at its operands' type, where solkey's
-is unbounded `int`: an overflowing side makes the equation false.
+is `¬∀¬`. Equations are KeY's `=` (`Fml.eq`), read in the Theory, where a
+storage read is total (a word of its type, the default where nothing is
+written), so the frame owes `find(storage, p) = find(old, p)` with no
+guard; arithmetic is Solidity's, checked at its operands' type, where
+solkey's is unbounded `int`: an overflowing side halts, and an equation with
+one halting side is false (two that halt are equal, as KeY's `=` is
+reflexive).
 
 **`old` is a storage variable**, KeY's `Struct old`: the update
 `{old := storage}` (`Rhs.store`) binds it (a local of type `old`, a `Storage C`), only when an

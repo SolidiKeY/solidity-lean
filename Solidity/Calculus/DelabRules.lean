@@ -188,7 +188,7 @@ def delabFml : Delab := do
   guard !(isEscape φ)
   `(dl{ $φ:dl_fml })
 
-attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.defined,
+attribute [delab app.Solidity.Fml.eq, delab app.Solidity.Fml.wellFormed,
   delab app.Solidity.Fml.not, delab app.Solidity.Fml.and,
   delab app.Solidity.Fml.imp, delab app.Solidity.Fml.upd,
   delab app.Solidity.Fml.modal, delab app.Solidity.Fml.all,

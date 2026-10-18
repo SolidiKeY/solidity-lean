@@ -43,7 +43,7 @@ variable {C : Contract}
 /-- Whether a modality occurs in the formula. -/
 def Fml.active : {Γ : Ctx} → Fml C Γ → Bool
   | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
-    (tt := false) (eq := fun _ _ => false) (defined := fun _ => false)
+    (tt := false) (eq := fun _ _ => false) (wellFormed := fun _ => false)
     (not := fun φ => Fml.active φ) (and := fun φ ψ => Fml.active φ || Fml.active ψ)
     (imp := fun φ ψ => Fml.active φ || Fml.active ψ) (upd := fun _ _ φ => Fml.active φ)
     (modal := fun _ _ _ _ => true) (havoc := fun φ => Fml.active φ)
@@ -183,22 +183,14 @@ def ff : NRead C := fun _ => pure .ff
 def eqK {Γ : NCtx} (eqv : {p : PrimTy} → Tm C Γ.ctx (.val p) → Tm C Γ.ctx (.val p) → Fml C Γ.ctx)
     (a b : Tm C Γ.ctx .kint) : Fml C Γ.ctx :=
   eqv (.app2 (.zcmp .eqB rfl) a b) (.app0 (.lit (p := .bool) true))
-/-- `a ≐ b`, KeY's `=`, at the sides' type (on KeY's `int`, its
-comparison `≐ true`). -/
+/-- `a = b`, KeY's `=`, at the sides' type (on KeY's `int`, its
+comparison `= true`). -/
 def eq (a b : NTerm C) : NRead C := fun Γ => do
   match ← NTm.resolvePairV a b Γ with
   | ⟨.prim _, a', b'⟩ => pure (.eq a' b')
   | ⟨.kint, a', b'⟩ => pure (eqK (fun x y => .eq x y) a' b')
-/-- `a = b`, both sides defined (`Fml.eqD`; on KeY's `int`, its
-comparison `= true`). -/
-def eqD (a b : NTerm C) : NRead C := fun Γ => do
-  match ← NTm.resolvePairV a b Γ with
-  | ⟨.prim _, a', b'⟩ => pure (.eqD a' b')
-  | ⟨.kint, a', b'⟩ => pure (eqK (fun x y => .eqD x y) a' b')
-/-- `defined(t)`. -/
-def defined (t : NTerm C) : NRead C := fun Γ => do
-  let ⟨_, t'⟩ ← t.resolveVal Γ
-  pure (.defined t')
+/-- `wt(s)`, KeY's `wellFormed(heap)` (`Fml.wellFormed`). -/
+def wt (s : NSTerm C) : NRead C := fun Γ => do pure (.wellFormed (← s.check .st Γ))
 /-- `¬φ`. -/
 def not (φ : NRead C) : NRead C := fun Γ => do pure (.not (← φ Γ))
 /-- `φ ∧ ψ`. -/
@@ -211,10 +203,10 @@ def all (x : Var) (p : PrimTy) (φ : NRead C) : NRead C := fun Γ => do
 /-- `φ₁ ∧ … ∧ φₙ`, `true` when there are none (`Fml.conj`). -/
 def conj (φs : List (NRead C)) : NRead C := fun Γ => do pure (Fml.conj (← φs.mapM (· Γ)))
 
-/-- `t = true`, both sides defined: a condition as a formula. -/
-def bool (t : NTerm C) : NRead C := eqD t (.bool true)
+/-- `t = true`: a condition as a formula. -/
+def bool (t : NTerm C) : NRead C := eq t (.bool true)
 
-/-- `a ⊕ b = true`, defined: a comparison as a formula, at the operands' type. -/
+/-- `a ⊕ b = true`: a comparison as a formula, at the operands' type. -/
 def cmp (op : BinOp) (a b : NTerm C) : NRead C := bool (.binop op a b)
 
 end NRead

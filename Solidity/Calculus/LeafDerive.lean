@@ -191,7 +191,7 @@ def _root_.Solidity.Fml.litPosM : {Γ : Ctx} → Fml C Γ → Option (List Nat)
     match a.litVarsS, b.litVarsS with
     | some u, some v => some ((u ++ v).map (·.2.toNatR))
     | _, _ => none
-  | _, .defined t => t.litVarsS.map (·.map (·.2.toNatR))
+  | _, .wellFormed t => t.litVarsS.map (·.map (·.2.toNatR))
   | _, .not φ => φ.litPosM
   | _, .and φ ψ | _, .imp φ ψ =>
     match φ.litPosM, ψ.litPosM with

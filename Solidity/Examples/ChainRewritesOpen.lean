@@ -35,10 +35,10 @@ variable (m : Modality)
 /-- `applyOnRigid` and `concrete` with the revert still to run, then the
 step that runs it (`revertBox`). -/
 example (φ : Post StandardExample []) :
-    dl![.box]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+    dl![.box]{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
     ~[applyOnRigid]~>
-      dl![.box]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } [ revert(); ] φ) }
+      dl![.box]{ (false = true → { se1 := false } φ) ∧
+        (false = false → { se1 := false } [ revert(); ] φ) }
     ~[concrete]~> dl![.box]{ { se1 := false } [ revert(); ] φ }
     ~[revertBox]~> dl![.box]{ { se1 := false } true } := by
   sol_chain
@@ -49,15 +49,15 @@ rewrites in one chain. -/
 example (φ : Post StandardExample [.val .uint]) :
     dl!{ [ uint8 x = 250; x += 10; ] φ }
     ~*> dl![.box]{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
     ~[sequentialToParallel]~> dl![.box]{ { x := 250 ‖ x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
     ~[add_literals]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := 260 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
     ~[leq_literals]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
-    ~[applyOnRigid]~> dl![.box]{ (false ≐ true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
-          (false ≐ false → { x := 250 ‖ x := 260 ‖ se1 := false } [ revert(); ] φ) }
+          ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
+    ~[applyOnRigid]~> dl![.box]{ (false = true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
+          (false = false → { x := 250 ‖ x := 260 ‖ se1 := false } [ revert(); ] φ) }
     ~[concrete]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false } [ revert(); ] φ }
     ~[revertBox]~> dl![.box]{ { x := 250 ‖ x := 260 ‖ se1 := false } true } := by
   sol_chain
@@ -66,15 +66,15 @@ example (φ : Post StandardExample [.val .uint]) :
 example (φ : Post StandardExample [.val .uint]) :
     dl!{ ⟨ uint8 x = 250; x += 10; ⟩ φ }
     ~*> dl!{ { x := 250 } { x := x + 10 } { se1 := x <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
     ~[sequentialToParallel]~> dl!{ { x := 250 ‖ x := 250 + 10 ‖ se1 := 250 + 10 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
     ~[add_literals]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := 260 <= 255 }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+          ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
     ~[leq_literals]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[applyOnRigid]~> dl!{ (false ≐ true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
-          (false ≐ false → { x := 250 ‖ x := 260 ‖ se1 := false } ⟨ revert(); ⟩ φ) }
+          ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
+    ~[applyOnRigid]~> dl!{ (false = true → { x := 250 ‖ x := 260 ‖ se1 := false } φ) ∧
+          (false = false → { x := 250 ‖ x := 260 ‖ se1 := false } ⟨ revert(); ⟩ φ) }
     ~[concrete]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false } ⟨ revert(); ⟩ φ }
     ~[revertDiamond]~> dl!{ { x := 250 ‖ x := 260 ‖ se1 := false } false } := by
   sol_chain
@@ -83,12 +83,12 @@ example (φ : Post StandardExample [.val .uint]) :
 -- line after would hold where the update halts, the line before not.
 /--
 error: ~[applyOnRigid]~>: applyOnRigid does not apply to
-  dl{ { se1 := 1 / 0 == 0 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+  dl{ { se1 := 1 / 0 == 0 } ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
 while the program is open
 -/
 #guard_msgs in
 example (φ : Post StandardExample []) :
-    dl!{ { se1 := 1 / 0 == 0 } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
+    dl!{ { se1 := 1 / 0 == 0 } ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
     ~[applyOnRigid]~> _ := by
   sol_chain
 
@@ -123,10 +123,10 @@ example (φ : Post StandardExample [.val .uint]) :
 /-- The check's branches folded under `m`: `{ se1 := false }` cannot halt,
 so `applyOnRigid` applies under the diamond too. -/
 example (φ : Post StandardExample []) :
-    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    dl![m]{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) }
     ~[applyOnRigid]~>
-      dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-        (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+      dl![m]{ (false = true → { se1 := false } φ) ∧
+        (false = false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
     ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
   sol_chain
 
@@ -134,12 +134,12 @@ example (φ : Post StandardExample []) :
 -- refuses it.
 /--
 error: ~[applyOnRigid]~>: applyOnRigid does not apply to
-  dl{ { se1 := 1 / 0 == 0 } (se1 ≐ false → ⟨[ revert(); ]⟩ φ) }
+  dl{ { se1 := 1 / 0 == 0 } (se1 = false → ⟨[ revert(); ]⟩ φ) }
 while the program is open
 -/
 #guard_msgs in
 example (φ : Post StandardExample []) :
-    dl![m]{ { se1 := 1 / 0 == 0 } (se1 ≐ false → ⟨[ revert(); ]⟩ φ) }
+    dl![m]{ { se1 := 1 / 0 == 0 } (se1 = false → ⟨[ revert(); ]⟩ φ) }
     ~[applyOnRigid]~> _ := by
   sol_chain
 
@@ -159,7 +159,7 @@ example (φ : Post StandardExample [.val .uint]) :
 of the storage applied to the first-order part (`FmlRw.applyStorageBox`). -/
 example (φ : Post StandardExample []) :
     dl![.box]{ { storage := save(storage, alice.age, 42) }
-      (find(storage, alice.age) ≐ 42 ∧ [ revert(); ] φ) }
+      (find(storage, alice.age) = 42 ∧ [ revert(); ] φ) }
     ~[applyStorageBox]~> _ := by
   sol_chain
 
@@ -169,32 +169,32 @@ example (φ : Post StandardExample []) :
 -- member of one cannot halt (`Tm.totalW`), so it is pushed under the diamond.
 /--
 error: ~[applyStorageBox]~>: applyStorageBox does not apply to
-  dl{ { storage := save(storage, alice.age, 42) } (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+  dl{ { storage := save(storage, alice.age, 42) } (find(storage, alice.age) = 42 ∧ ⟨ revert(); ⟩ φ) }
 while the program is open
 -/
 #guard_msgs in
 example (φ : Post StandardExample []) :
     dl![.diamond]{ { storage := save(storage, alice.age, 42) }
-      (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+      (find(storage, alice.age) = 42 ∧ ⟨ revert(); ⟩ φ) }
     ~[applyStorageBox]~> _ := by
   sol_chain
 
 /--
 error: ~[applyOnRigidBox]~>: applyOnRigidBox does not apply to
-  dl{ { storage := save(storage, values[0], 42) } (find(storage, values[0]) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+  dl{ { storage := save(storage, values[0], 42) } (find(storage, values[0]) = 42 ∧ ⟨ revert(); ⟩ φ) }
 while the program is open
 -/
 #guard_msgs in
 example (φ : Post StandardExample []) :
     dl![.diamond]{ { storage := save(storage, values[0], 42) }
-      (find(storage, values[0]) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
+      (find(storage, values[0]) = 42 ∧ ⟨ revert(); ⟩ φ) }
     ~[applyOnRigidBox]~> _ := by
   sol_chain
 
 example (φ : Post StandardExample []) :
     dl![.diamond]{ { storage := save(storage, alice.age, 42) }
-      (find(storage, alice.age) ≐ 42 ∧ ⟨ revert(); ⟩ φ) }
-    ~[applyOnRigidBox]~> dl![.diamond]{ { storage := save(storage, alice.age, 42) } find(storage, alice.age) ≐ 42 ∧
+      (find(storage, alice.age) = 42 ∧ ⟨ revert(); ⟩ φ) }
+    ~[applyOnRigidBox]~> dl![.diamond]{ { storage := save(storage, alice.age, 42) } find(storage, alice.age) = 42 ∧
       { storage := save(storage, alice.age, 42) } ⟨ revert(); ⟩ φ } := by
   sol_chain
 
@@ -252,34 +252,34 @@ example (φ : Post StandardExample [.val .uint]) :
 /-- `sequentialToParallel` under a branch with the revert still to run
 (`FmlRw.mergeIn`): the first merge the line's connectives lead to. -/
 example (φ : Post StandardExample [.val .uint, .val .uint]) (ψ : Post StandardExample [.val .uint]) :
-    dl![.box]{ (x ≐ 1 → { x := 1 } { y := x } [ revert(); ] φ) ∧ (x ≐ 2 → ψ) }
+    dl![.box]{ (x = 1 → { x := 1 } { y := x } [ revert(); ] φ) ∧ (x = 2 → ψ) }
     ~[sequentialToParallel]~>
-      dl![.box]{ (x ≐ 1 → { x := 1 ‖ y := 1 } [ revert(); ] φ) ∧ (x ≐ 2 → ψ) } := by
+      dl![.box]{ (x = 1 → { x := 1 ‖ y := 1 } [ revert(); ] φ) ∧ (x = 2 → ψ) } := by
   sol_chain
 
 /-- `add_literals` in an equation of the line, the revert still to run
 (`FmlRw.litEq`): an equivalence, so on the left of the implication too. -/
 example (φ : Post StandardExample []) :
-    dl![m]{ (250 + 10 ≐ 260 → ⟨[ revert(); ]⟩ φ) }
-    ~[add_literals]~> dl![m]{ (260 ≐ 260 → ⟨[ revert(); ]⟩ φ) } := by
+    dl![m]{ (250 + 10 = 260 → ⟨[ revert(); ]⟩ φ) }
+    ~[add_literals]~> dl![m]{ (260 = 260 → ⟨[ revert(); ]⟩ φ) } := by
   sol_chain
 
 /-- `~=>` with the revert still to run: each line picks its rewrite. -/
 example (φ : Post StandardExample []) :
-    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
-    ~=> dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-          (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
+    dl![m]{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) }
+    ~=> dl![m]{ (false = true → { se1 := false } φ) ∧
+          (false = false → { se1 := false } ⟨[ revert(); ]⟩ φ) }
     ~=> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by
   sol_chain
 
 /-- The same as a `calc`, each step's line computed from the line before
 (`pendingLines`, the rewrite found by `sol_chain`). -/
 example (φ : Post StandardExample []) :
-    dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+    dl![m]{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) }
       ~~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } :=
-  calc dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
-    _ ~[applyOnRigid]~> dl![m]{ (false ≐ true → { se1 := false } φ) ∧
-          (false ≐ false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := by sol_chain
+  calc dl![m]{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) }
+    _ ~[applyOnRigid]~> dl![m]{ (false = true → { se1 := false } φ) ∧
+          (false = false → { se1 := false } ⟨[ revert(); ]⟩ φ) } := by sol_chain
     _ ~[concrete]~> dl![m]{ { se1 := false } ⟨[ revert(); ]⟩ φ } := by sol_chain
 
 -- The line prints as it is written, the postcondition under the capture
@@ -288,19 +288,19 @@ example (φ : Post StandardExample []) :
 info: fun φ =>
   dl{
     { se1 := false }
-      ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) } : Post StandardExample [] → Fml StandardExample []
+      ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) } : Post StandardExample [] → Fml StandardExample []
 -/
 #guard_msgs in
 #check fun (φ : Post StandardExample []) =>
-  dl![m]{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+  dl![m]{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) }
 
 /-- The same line under the diamond, `⟨ revert(); ⟩` (a regression: its
 postcondition under the capture once printed ill-typed), a chain's line
 like the others. -/
 example (φ : Post StandardExample []) :
-    dl!{ { se1 := false } ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨ revert(); ⟩ φ)) }
-    ~[applyOnRigid]~> dl!{ (false ≐ true → { se1 := false } φ) ∧
-      (false ≐ false → { se1 := false } ⟨ revert(); ⟩ φ) }
+    dl!{ { se1 := false } ((se1 = true → φ) ∧ (se1 = false → ⟨ revert(); ⟩ φ)) }
+    ~[applyOnRigid]~> dl!{ (false = true → { se1 := false } φ) ∧
+      (false = false → { se1 := false } ⟨ revert(); ⟩ φ) }
     ~[concrete]~> dl!{ { se1 := false } ⟨ revert(); ⟩ φ } := by
   sol_chain
 
@@ -333,9 +333,9 @@ holding `true` is read as `true` in the branches' conditions, which
 `concrete` then folds. -/
 example (φ : Post StandardExample []) :
     dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true }
-      ((se1 ≐ true → φ) ∧ (se1 ≐ false → [ revert(); ] φ)) }
+      ((se1 = true → φ) ∧ (se1 = false → [ revert(); ] φ)) }
     ~[applyOnPV]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true }
-      ((true ≐ true → φ) ∧ (true ≐ false → [ revert(); ] φ)) }
+      ((true = true → φ) ∧ (true = false → [ revert(); ] φ)) }
     ~[concrete]~> dl![.box]{ { storage := save(storage, alice.age, 1) ‖ se1 := true } φ } := by
   sol_chain
 
@@ -343,9 +343,9 @@ example (φ : Post StandardExample []) :
 (decision 93, revisited at W9.4): here over the storage write
 (`FmlRw.stateMerge`); the strategy's own last line declares `x` behind a
 hidden binder, which the merge absorbs (`FmlRw.mergePast`). -/
-example : dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x ≐ 42 }
+example : dl![.box]{ { storage := save(storage, alice.age, 42) } { x := find(storage, alice.age) } x = 42 }
     ~[sequentialToParallel]~> dl![.box]{ { storage := save(storage, alice.age, 42) ‖
-      x := find(save(storage, alice.age, 42), alice.age) } x ≐ 42 } := by
+      x := find(save(storage, alice.age, 42), alice.age) } x = 42 } := by
   sol_chain
 
 end Open

@@ -1412,7 +1412,7 @@ theorem Fml.absorbBinds_holds : {Δ : Ctx} → (φ : Fml C Δ) → (σ : State C
   | _, .bind m x t ψ, σ, h => by
     have h' := Fml.absorbBind_holds (Fml.absorbBinds ψ) σ h
     exact Modality.forallB_imp (fun w hw => Fml.absorbBinds_holds ψ _ hw) h'
-  | _, .tt, _, h | _, .eq .., _, h | _, .defined _, _, h | _, .not _, _, h | _, .and .., _, h
+  | _, .tt, _, h | _, .eq .., _, h | _, .wellFormed _, _, h | _, .not _, _, h | _, .and .., _, h
   | _, .imp .., _, h | _, .upd .., _, h | _, .modal .., _, h | _, .havoc _, _, h
   | _, .all .., _, h | _, .anon .., _, h => h
 
@@ -1484,7 +1484,7 @@ theorem Fml.merge2P_sound {m : Modality} {reorder : Bool} : {Γ Δ : Ctx} → (U
           exact Fml.upd_bind_of_liftG hU' ht σ
             (Modality.forallB_imp (fun v h => Fml.merge2P_sound U' χ hχ' _ h) hψ)
         · cases h
-  | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .defined _, _, h | _, _, _, .not _, _, h
+  | _, _, _, .tt, _, h | _, _, _, .eq .., _, h | _, _, _, .wellFormed _, _, h | _, _, _, .not _, _, h
   | _, _, _, .and .., _, h | _, _, _, .imp .., _, h | _, _, _, .modal .., _, h
   | _, _, _, .havoc _, _, h | _, _, _, .all .., _, h | _, _, _, .anon .., _, h => nomatch h
 
@@ -1520,7 +1520,7 @@ theorem Fml.mergeAtP_sound (reorder : Bool) : {Γ : Ctx} → (k : Nat) → (φ :
   | _, k + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.mergeAtP_sound reorder k φ hψ σ' a
-  | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .defined _, _, h | _, k, .not _, _, h
+  | _, k, .tt, _, h | _, k, .eq .., _, h | _, k, .wellFormed _, _, h | _, k, .not _, _, h
   | _, k, .and .., _, h | _, k, .imp .., _, h | _, k, .modal .., _, h | _, k, .havoc _, _, h
   | _, k, .anon .., _, h => by
     cases k <;> cases h
@@ -1801,7 +1801,7 @@ the storage (`Tm.substP`); `none` past anything else. -/
 def Fml.substSt (s : Subst C Γ Δ) (S : Tm C Γ .st) : Fml C Δ → Option (Fml C Γ)
   | .tt => some .tt
   | .eq a b => do pure (.eq (← Tm.substP s (some S) none a) (← Tm.substP s (some S) none b))
-  | .defined t => (Tm.substP s (some S) none t).map .defined
+  | .wellFormed t => (Tm.substP s (some S) none t).map .wellFormed
   | .not φ => (Fml.substSt s S φ).map .not
   | .and φ ψ => do pure (.and (← Fml.substSt s S φ) (← Fml.substSt s S ψ))
   | .imp φ ψ => do pure (.imp (← Fml.substSt s S φ) (← Fml.substSt s S ψ))
@@ -1821,9 +1821,9 @@ theorem Fml.substSt_holds {S : Tm C Γ .st} (hL : U.Lands σ₀ g σ₁)
     cases h
     rw [holds_eq, holds_eq, Tm.substP_denote hL hr hst hmem a ha,
       Tm.substP_denote hL hr hst hmem b hb]
-  | .defined t, _, h => by
+  | .wellFormed t, _, h => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [holds_defined, holds_defined, Srt.sameO_val.1 (Tm.substP_eval hL hr hst hmem t ht)]
+    rw [holds_wellFormed, holds_wellFormed, Srt.sameO_st.1 (Tm.substP_eval hL hr hst hmem t ht)]
   | .not φ, _, h => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (Fml.substSt_holds hL hr hst hmem φ hφ)
@@ -2472,7 +2472,7 @@ theorem Thin.closeU_exh {Δ' Δ : Ctx} {n : Thin Δ' Δ} {U : Upd C Γ' Δ'} {U'
 def Fml.thinFO? : {Γ' Γ : Ctx} → Thin Γ' Γ → Fml C Γ → Option (Fml C Γ')
   | _, _, _, .tt => some .tt
   | _, _, h, .eq a b => do pure (.eq (← Tm.thinS? h a) (← Tm.thinS? h b))
-  | _, _, h, .defined t => (Tm.thinS? h t).map .defined
+  | _, _, h, .wellFormed t => (Tm.thinS? h t).map .wellFormed
   | _, _, h, .not φ => (Fml.thinFO? h φ).map .not
   | _, _, h, .and φ ψ => do pure (.and (← Fml.thinFO? h φ) (← Fml.thinFO? h ψ))
   | _, _, h, .imp φ ψ => do pure (.imp (← Fml.thinFO? h φ) (← Fml.thinFO? h ψ))
@@ -2489,9 +2489,9 @@ theorem Fml.thinFO?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C
     obtain ⟨b', hb, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     cases hφ
     rw [holds_eq, holds_eq, Tm.denote_thinS? h σ a ha, Tm.denote_thinS? h σ b hb]
-  | _, _, h, .defined t, _, hφ, σ => by
+  | _, _, h, .wellFormed t, _, hφ, σ => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hφ
-    rw [holds_defined, holds_defined, Tm.eval_thinS? h σ t ht]
+    rw [holds_wellFormed, holds_wellFormed, Tm.eval_thinS? h σ t ht]
   | _, _, h, .not φ, _, hφ, σ => by
     obtain ⟨φ', hφ', rfl⟩ := Option.map_eq_some_iff.1 hφ
     exact not_congr (Fml.thinFO?_holds h φ hφ' σ)
@@ -2516,7 +2516,7 @@ theorem Fml.thinFO?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C
 def Fml.thinS? : {Γ' Γ : Ctx} → Thin Γ' Γ → Fml C Γ → Option (Fml C Γ')
   | _, _, _, .tt => some .tt
   | _, _, h, .eq a b => do pure (.eq (← Tm.thinS? h a) (← Tm.thinS? h b))
-  | _, _, h, .defined t => (Tm.thinS? h t).map .defined
+  | _, _, h, .wellFormed t => (Tm.thinS? h t).map .wellFormed
   | _, _, h, .not φ => (Fml.thinFO? h φ).map .not
   | _, _, h, .and φ ψ => do pure (.and (← Fml.thinS? h φ) (← Fml.thinS? h ψ))
   | _, _, h, .imp φ ψ => do pure (.imp (← Fml.thinFO? h φ) (← Fml.thinS? h ψ))
@@ -2539,9 +2539,9 @@ theorem Fml.thinS?_holds : {Γ' Γ : Ctx} → (h : Thin Γ' Γ) → (φ : Fml C 
     obtain ⟨b', hb, hφ⟩ := Option.bind_eq_some_iff.1 hφ
     cases hφ
     exact (Fml.thinFO?_holds h (.eq a b) (by simp only [Fml.thinFO?, ha, hb]; rfl) σ).1 hs
-  | _, _, h, .defined t, _, hφ, σ, hs => by
+  | _, _, h, .wellFormed t, _, hφ, σ, hs => by
     obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 hφ
-    exact (Fml.thinFO?_holds h (.defined t) (by simp only [Fml.thinFO?, ht]; rfl) σ).1 hs
+    exact (Fml.thinFO?_holds h (.wellFormed t) (by simp only [Fml.thinFO?, ht]; rfl) σ).1 hs
   | _, _, h, .not φ, _, hφ, σ, hs => by
     obtain ⟨φ', hφ', rfl⟩ := Option.map_eq_some_iff.1 hφ
     exact fun hn => hs ((Fml.thinFO?_holds h φ hφ' σ).2 hn)
@@ -2791,7 +2791,7 @@ theorem Fml.simpPastAt_sound (every absorb : Bool) : {Γ : Ctx} → (n : Nat) �
   | _, n + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.simpPastAt_sound every absorb n φ hψ σ' a
-  | _, n, .tt, _, h | _, n, .eq .., _, h | _, n, .defined _, _, h | _, n, .not _, _, h
+  | _, n, .tt, _, h | _, n, .eq .., _, h | _, n, .wellFormed _, _, h | _, n, .not _, _, h
   | _, n, .and .., _, h | _, n, .imp .., _, h | _, n, .modal .., _, h | _, n, .havoc _, _, h
   | _, n, .anon .., _, h => by
     cases n <;> cases h

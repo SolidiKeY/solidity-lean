@@ -22,7 +22,7 @@ dropped, a key compared with itself or with one it is apart from read as
 its branch (`select(store(h, k, v), j)` under `k = j` or `k ≠ j`), a
 comparison of two terms apart folded, `(a - b) + b` and `(a + b) - b`
 cancelled, `2 * a` read as `a + a`, `a < a + c` read `true` (Lean only),
-and a subterm (a constant included) the premises know rewritten.  A conclusion `a ≐ b` holds where the two normal
+and a subterm (a constant included) the premises know rewritten.  A conclusion `a = b` holds where the two normal
 forms are one term that returns; where a key comparison is left open, the
 closer splits on it (`LTm.pick`, KeY's `cut` on `k = j`).
 
@@ -1955,7 +1955,7 @@ theorem orient_ok {ν : AEnv} {p : PrimTy} (a b : LTm C (.val p)) {x : p.Denote}
   · exact ⟨x, ha, hb⟩
   · exact ⟨x, hb, ha⟩
 
-/-- The rewrite `a ≐ b` gives, their normal forms oriented (`orient`). -/
+/-- The rewrite `a = b` gives, their normal forms oriented (`orient`). -/
 def Facts.addEqR (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
   let a' := F.nf a
   let b' := F.nf b
@@ -1973,7 +1973,7 @@ theorem Facts.addEqR_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
     · exact orient_ok _ _ ha hb
     · exact hF.eqs e he
 
-/-- The premise `a ≐ b` alone: both normal forms return, with their strict
+/-- The premise `a = b` alone: both normal forms return, with their strict
 subterms, and the one rewrites to the other. -/
 def Facts.addEq1 (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
   ((F.addRets (F.nf a)).addRets (F.nf b)).addEqR a b
@@ -1985,7 +1985,7 @@ theorem Facts.addEq1_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
   exact Facts.addEqR_ok (Facts.addRets_ok (Facts.addRets_ok hF (by rw [ha]; rfl))
     (by rw [hb]; rfl)) h
 
-/-- The premise `¬ a ≐ b` alone: where both normal forms return, they are
+/-- The premise `¬ a = b` alone: where both normal forms return, they are
 apart. -/
 def Facts.addNe1 (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
   let a' := F.nf a
@@ -2010,9 +2010,9 @@ theorem Facts.addNe1_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
 
 /-! ### What a boolean premise tells
 
-`c ≐ true` with `c` an equation, a conjunction, a negation is taken apart
+`c = true` with `c` an equation, a conjunction, a negation is taken apart
 (KeY's `equal_literals`, `andLeft`, `notLeft` on the formula a boolean term
-reads); `assert(c)` returning is `c ≐ true`. -/
+reads); `assert(c)` returning is `c = true`. -/
 
 theorem evalT_eqB {p : PrimTy} (u w : p.Denote) :
     BinOp.evalT .eqB rfl u w = some (decide (u = w)) := by
@@ -2097,7 +2097,7 @@ theorem _root_.Solidity.PrimTy.ival_inj : {p : PrimTy} → {u w : p.Denote} →
   | .uint, _, _, h => Subtype.ext h
   | .int, _, _, h => Subtype.ext h
 
-/-- The premise `¬ a ≐ v`, `v` a literal at an edge of `a`'s range: the
+/-- The premise `¬ a = v`, `v` a literal at an edge of `a`'s range: the
 range one narrower. -/
 def Facts.neEdge (F : Facts C) {p : PrimTy} (a : LTm C (.val p)) (v : p.Denote) : Facts C :=
   let r := F.range a
@@ -2130,7 +2130,7 @@ theorem Facts.neEdge_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
       · exact hF.bnds b hb x hx
     · exact hF
 
-/-- The premise `¬ a ≐ b` with a side a literal: the other's range narrowed. -/
+/-- The premise `¬ a = b` with a side a literal: the other's range narrowed. -/
 def Facts.neBnd (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
   match b.litV?, a.litV? with
   | some v, _ => F.neEdge a v
@@ -2220,7 +2220,7 @@ theorem binopT_or {u : Bool} {y : Option Bool} (h : binopT (p := .bool) .or rfl 
     | some w => cases w <;> first | exact ⟨rfl, rfl⟩ | cases h
   · cases h
 
-/-- The premise `x ≐ y` where `x == y` reads `v`. -/
+/-- The premise `x = y` where `x == y` reads `v`. -/
 theorem Facts.eqB_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) {p : PrimTy}
     {x y : LTm C (.val p)} {u w : p.Denote} (hx : (x.eval g ν : Option p.Denote) = some u)
     (hy : (y.eval g ν : Option p.Denote) = some w) (v : Bool) (hv : v = decide (u = w)) :
@@ -2363,7 +2363,7 @@ theorem Facts.boolDecomp_ok {ih : Facts C → LTm C (.val .bool) → Bool → Fa
   | app1 o x => exact Facts.boolStep1_ok hih hG o x hs h
   | _ => exact hG
 
-/-- **The premise `c ≐ v`**, `c` boolean: the rewrite, and what `c` says
+/-- **The premise `c = v`**, `c` boolean: the rewrite, and what `c` says
 taken apart, `n` deep.  By the recursor. -/
 def Facts.addBool (n : Nat) : Facts C → LTm C (.val .bool) → Bool → Facts C :=
   Nat.rec (motive := fun _ => Facts C → LTm C (.val .bool) → Bool → Facts C)
@@ -2524,7 +2524,7 @@ theorem Facts.rebuild_ok {ν : AEnv} {F : Facts C} (hF : F.Ok g ν) : F.rebuild.
       rw [← Facts.nf_eval h2]; exact hv
     exact h2.bnds w hw v hv'
 
-/-- `p ≐ v` at `bool`, a side a literal: the other side and `v`. -/
+/-- `p = v` at `bool`, a side a literal: the other side and `v`. -/
 def boolLit? {p : PrimTy} (a b : LTm C (.val p)) : Option (LTm C (.val .bool) × Bool) :=
   match p, a, b with
   | .bool, a, b =>
@@ -2556,7 +2556,7 @@ theorem boolLit?_eval {ν : AEnv} {p : PrimTy} {a b : LTm C (.val p)} {c : LTm C
       · cases h
   | uint | int => simp only [boolLit?, reduceCtorEq] at h
 
-/-- **The premise `a ≐ b`**: `addEq1`, the `assert`s among its terms, a
+/-- **The premise `a = b`**: `addEq1`, the `assert`s among its terms, a
 boolean side read apart, and the facts read again (`rebuild`). -/
 def Facts.addEqn (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
   let F1 := (F.addEq1 a b).addAsserts ((F.nf a).strict ++ (F.nf b).strict)
@@ -2582,7 +2582,7 @@ theorem Facts.addEqn_ok {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimTy}
     exact Facts.addBool_ok _ h1 (boolLit?_eval hc hn)
   · exact h1
 
-/-- **The premise `¬ a ≐ b`**: `addNe1`, a boolean side read apart, and the
+/-- **The premise `¬ a = b`**: `addNe1`, a boolean side read apart, and the
 facts read again. -/
 def Facts.addNeq (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Facts C :=
   let F1 := (F.addNe1 a b).neBnd (F.nf a) (F.nf b)
@@ -2633,7 +2633,7 @@ section Close
 
 variable {g : State C []}
 
-/-- A `bool` atom to split on: `x ≐ true` or not. -/
+/-- A `bool` atom to split on: `x = true` or not. -/
 def boolSplit (p : PrimTy) (k : Nat) : Option (EqF C) :=
   match p with
   | .bool => some ⟨.bool, .var k, .tt⟩
@@ -2682,7 +2682,7 @@ theorem LTm.pick_eq_pickM (F : Facts C) {s : Srt} (t : LTm C s) : t.pick F = t.p
   | orElse a b iha ihb => simp only [LTm.pickM, ← iha, ← ihb]; rfl
   | kite a b t e iha ihb iht ihe => simp only [LTm.pickM, ← iha, ← ihb, ← iht, ← ihe]; rfl
 
-/-- `a ≐ b` by the normal forms: one term, which returns. -/
+/-- `a = b` by the normal forms: one term, which returns. -/
 def Facts.direct (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Bool :=
   (F.nf a).beqR (F.nf b) && F.returns (F.nf a)
 
@@ -2696,7 +2696,7 @@ theorem Facts.direct_sound {F : Facts C} {ν : AEnv} (hF : F.Ok g ν) {p : PrimT
   rw [F.nf_eval hF] at hx hb
   exact (LFml.holds_eq_iff g ν a b).2 ⟨x, hx, hb⟩
 
-/-- `a ≐ b` by the normal forms, splitting on a key comparison at most
+/-- `a = b` by the normal forms, splitting on a key comparison at most
 `n` deep (KeY's `cut` on `k = j`).  By the recursor. -/
 def Facts.proveEqN {p : PrimTy} (a b : LTm C (.val p)) (n : Nat) : Facts C → Bool :=
   Nat.rec (motive := fun _ => Facts C → Bool) (fun F => F.direct a b)
@@ -2727,7 +2727,7 @@ theorem Facts.proveEqN_sound {p : PrimTy} (a b : LTm C (.val p)) (n : Nat) :
 /-- How deep `proveEqN` splits. -/
 def closeFuel : Nat := 3
 
-/-- `a ≐ b` is false by the normal forms: two literals that differ, a
+/-- `a = b` is false by the normal forms: two literals that differ, a
 pair the facts hold apart, or a side that halts. -/
 def Facts.refuteEq (F : Facts C) {p : PrimTy} (a b : LTm C (.val p)) : Bool :=
   let a' := F.nf a

@@ -171,15 +171,12 @@ syntax "‹" term "›" : dl_upd
 declare_syntax_cat dl_fml (behavior := both)
 syntax:max &"true" : dl_fml
 syntax:max &"false" : dl_fml
-/-- `a = b`.  In a taclet (`dl{ … }`) the total equation `Fml.eq`, KeY's
-`=`; against a contract (`dl[C]{ … }`) the defined one, `Fml.eqD`, which is
-what `==` means.  `Fml.eqD` prints as it. -/
+/-- `a = b`: KeY's `=`, the total equation `Fml.eq` (what the sides denote
+in the Theory), in a taclet and against a contract alike. -/
 syntax:50 dl_term:51 " = " dl_term:51 : dl_fml
-/-- `a ≐ b`: the total equation `Fml.eq` in either reading, which may hold of
-terms that halt.  `Fml.eq` prints as it. -/
-syntax:50 dl_term:51 " ≐ " dl_term:51 : dl_fml
-/-- `defined(t)`: `t` returns (`Fml.defined`). -/
-syntax:max &"defined" "(" dl_term ")" : dl_fml
+/-- `wt(s)`: the storage `s` is well-formed (`Fml.wellFormed`), KeY's
+`wellFormed(heap)`. -/
+syntax:max &"wt" "(" dl_term ")" : dl_fml
 syntax:max "¬" dl_fml:50 : dl_fml
 syntax:35 dl_fml:36 " ∧ " dl_fml:35 : dl_fml
 syntax:25 dl_fml:26 " → " dl_fml:25 : dl_fml
@@ -1990,11 +1987,8 @@ partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
           return ← `($(Lean.mkCIdent `Solidity.invFml) $(iterApp `Solidity.Val.up d i) $qs)
       if n == "TRUE" || n == "FALSE" then
         let v := mkIdent (Name.mkSimple (if n == "TRUE" then "true" else "false"))
-        return ← `($(fmlC "eqD") $(← schemaTerm Γ .val a) (Term.litB $v))
+        return ← `($(fmlC "eq") $(← schemaTerm Γ .val a) (Term.litB $v))
     `($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
-  | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do
-    `($(fmlC "eq") $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
-  | `(dl_fml| defined( $t:dl_term )) => do `($(fmlC "defined") $(← schemaTerm Γ .val t))
   | `(dl_fml| ¬ $φ:dl_fml) => do `($(fmlC "not") $(← schemaFmlCore Γ φ))
   | `(dl_fml| $φ:dl_fml ∧ $ψ:dl_fml) => do
     `($(fmlC "and") $(← schemaFmlCore Γ φ) $(← schemaFmlCore Γ ψ))
@@ -2010,10 +2004,10 @@ partial def schemaFmlCore (Γ : Scope) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| ‹ $t:term ›) => pure t
   | `(dl_fml| $x:ident) => pure x
   | `(dl_fml| $a:dl_term <= $b:dl_term) => do
-    `($(fmlC "eqD") (Term.binop BinOp.le PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+    `($(fmlC "eq") (Term.binop BinOp.le PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
         (Term.litB true))
   | `(dl_fml| $a:dl_term < $b:dl_term) => do
-    `($(fmlC "eqD") (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
+    `($(fmlC "eq") (Term.binop BinOp.lt PrimTy.uint $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b))
         (Term.litB true))
   | φ => Macro.throwErrorAt φ "no scoped reading of this formula yet"
 

@@ -46,7 +46,7 @@ over every run with callbacks, and none of them may break `I`. -/
 def holdsC (I : Fml C []) : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
   | _, _, .tt => True
   | _, σ, .eq a b => holds σ (.eq a b)
-  | _, σ, .defined t => holds σ (.defined t)
+  | _, σ, .wellFormed t => holds σ (.wellFormed t)
   | _, σ, .not φ => ¬ holdsC I σ φ
   | _, σ, .and φ ψ => holdsC I σ φ ∧ holdsC I σ ψ
   | _, σ, .imp φ ψ => holdsC I σ φ → holdsC I σ ψ
@@ -60,7 +60,7 @@ def holdsC (I : Fml C []) : {Γ : Ctx} → State C Γ → Fml C Γ → Prop
 
 /-- A first-order formula has no program, so no payment. -/
 theorem Fml.hasTransfer_of_FO : {Γ : Ctx} → (φ : Fml C Γ) → φ.FO = true → φ.hasTransfer = false
-  | _, .tt, _ | _, .eq _ _, _ | _, .defined _, _ => rfl
+  | _, .tt, _ | _, .eq _ _, _ | _, .wellFormed _, _ => rfl
   | _, .not φ, h => Fml.hasTransfer_of_FO φ h
   | _, .and φ ψ, h | _, .imp φ ψ, h => by
     have h' : (φ.FO && ψ.FO) = true := h
@@ -164,7 +164,7 @@ end Frames
 theorem holdsC_iff_holds {I : Fml C []} : {Γ : Ctx} → (φ : Fml C Γ) → φ.hasTransfer = false →
     ∀ σ : State C Γ, (holdsC I σ φ ↔ holds σ φ)
   | _, .tt, _, _ => Iff.rfl
-  | _, .eq _ _, _, _ | _, .defined _, _, _ => Iff.rfl
+  | _, .eq _ _, _, _ | _, .wellFormed _, _, _ => Iff.rfl
   | _, .not φ, h, σ => not_congr (holdsC_iff_holds φ h σ)
   | _, .and φ ψ, h, σ => by
     rw [Fml.hasTransfer_and, Bool.or_eq_false_iff] at h

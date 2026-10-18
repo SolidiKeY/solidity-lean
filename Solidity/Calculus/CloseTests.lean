@@ -147,4 +147,9 @@ example : ⊨ dl!{ [ revert(); ] true } := by
   sol_close
   sol_close
 
+/-- A leaf whose term is a variable: the closer's pass cannot evaluate its
+Booleans, so the leaf is read as it stands (`t = t`, KeY's `=` reflexive). -/
+example (t : Tm StandardExample [] (.val .uint)) : Valid (.eq t t) := by
+  sol_close
+
 end Solidity.CloseTests

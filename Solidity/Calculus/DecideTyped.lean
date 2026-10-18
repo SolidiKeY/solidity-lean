@@ -1032,27 +1032,6 @@ theorem Tm.retsS_eval {Γ : Ctx} (τ : State C Γ) {p : PrimTy} {t : Tm C Γ (.v
     cases o <;> simp only [Tm.retsS, reduceCtorEq, Bool.false_eq_true] at h <;> exact ⟨_, rfl⟩
   | _ => simp only [Tm.retsS, Bool.false_eq_true] at h
 
-theorem Fml.eqDView?_some {Γ : Ctx} {φ ψ : Fml C Γ} {p : PrimTy} {a b : Tm C Γ (.val p)}
-    (h : Fml.eqDView? φ ψ = some ⟨p, a, b⟩) : Fml.and φ ψ = Fml.eqD a b := by
-  unfold Fml.eqDView? at h
-  split at h
-  · rename_i p₁ a₁ q b₁ r a' b'
-    split at h
-    · rename_i hpq
-      obtain ⟨rfl, rfl⟩ := hpq
-      split at h
-      · rename_i hb
-        simp only [Bool.and_eq_true] at hb
-        obtain rfl := Tm.eq_of_beqR hb.1
-        obtain rfl := Tm.eq_of_beqR hb.2
-        simp only [Option.some.injEq, Sigma.mk.injEq] at h
-        obtain ⟨rfl, h⟩ := h
-        cases h
-        rfl
-      · cases h
-    · cases h
-  · cases h
-
 theorem Agrees.pushQ {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
     (hF : ρ.Fresh) (p : PrimTy) (v : p.Denote) :
     Agrees g₀ (ν.set p ρ.next v) (ρ.pushQ p) (τ.push (t := .val p) v) := by
@@ -1150,6 +1129,19 @@ theorem Fml.allB_push {Γ : Ctx} {t : LTy} {ρ : SymS C Γ} {τ : State C Γ} {�
   | val p => exact ih _ _ (hA.pushQ hF p v) (hF.pushQ p) (hψ v)
   | _ => exact ih _ _ (hA.push v) (hF.push _) hψ
 
+/-- `LFml.optEq` holds where the two typed readings are one `Option`. -/
+theorem LFml.optEq_holds (g : State C []) (ν : AEnv) {p : PrimTy} (a b : LTm C (.val p)) :
+    (LFml.optEq a b).holds g ν ↔ (a.eval g ν : Option p.Denote) = b.eval g ν := by
+  show ((LFml.eq a a).holds g ν → (LFml.eq b b).holds g ν → (LFml.eq a b).holds g ν) ∧
+      (((LFml.eq a a).holds g ν → (LFml.eq b b).holds g ν) ∧
+        ((LFml.eq b b).holds g ν → (LFml.eq a a).holds g ν)) ↔ _
+  rw [LFml.holds_rets, LFml.holds_rets, LFml.holds_eq_iff]
+  cases (a.eval g ν : Option p.Denote) <;> cases (b.eval g ν : Option p.Denote) <;>
+    simp only [reduceCtorEq, false_and, exists_false, false_implies, implies_true, and_self,
+      Option.some.injEq, exists_eq', exists_eq_left', true_implies, and_true, iff_true,
+      imp_false, not_true_eq_false, and_false, iff_false, true_and, exists_eq_right',
+      not_false_eq_true, eq_comm]
+
 /-- **A formula pushed in** implies the formula at the positive polarity,
 and follows from it at the negative one. -/
 theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS C Γ} {ψ : LFml C},
@@ -1158,37 +1150,59 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
   | _, .tt, _, _, _, h, _, _, _, _ => by
     cases h; exact ⟨fun _ _ => trivial, fun _ _ => trivial⟩
   | _, .eq (p := p) a b, pos, ρ, ψ, h, τ, ν, hA, _ => by
-    have h' : (if pos || (a.retsS && b.retsS) then
-        (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => LFml.eq a' b' else none) = some ψ := h
-    split at h'
-    · rename_i hc
-      simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
-      obtain ⟨a', ha', b', hb', rfl⟩ := h'
-      have hda : (a'.eval g₀ ν : Option p.Denote) = a.eval τ := Tm.toL_drel hA a a' ha'
-      have hdb : (b'.eval g₀ ν : Option p.Denote) = b.eval τ := Tm.toL_drel hA b b' hb'
-      refine ⟨fun _ hψ => ?_, fun hpos hφ => ?_⟩
-      · rw [LFml.holds_eq_iff] at hψ
-        obtain ⟨x, hx, hy⟩ := hψ
-        rw [hda] at hx; rw [hdb] at hy
-        show a.denote τ = b.denote τ
-        rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b x hy]
-      · subst hpos
-        simp only [Bool.false_or, Bool.and_eq_true] at hc
-        obtain ⟨x, hx⟩ := Tm.retsS_eval τ hc.1
-        obtain ⟨y, hy⟩ := Tm.retsS_eval τ hc.2
-        have hφ' : a.denote τ = b.denote τ := hφ
-        rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b y hy] at hφ'
-        obtain rfl : x = y := Option.some.inj hφ'
-        rw [LFml.holds_eq_iff]
-        exact ⟨x, by rw [hda, hx], by rw [hdb, hy]⟩
-    · cases h'
-  | _, .defined (p := p) t, pos, ρ, ψ, h, τ, ν, hA, _ => by
-    have h' : (t.toL ρ).map (fun t' => LFml.eq t' t') = some ψ := h
+    have h' : ((a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => Fml.eqAt pos a b a' b') =
+      some ψ := h
+    simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+    obtain ⟨a', ha', b', hb', rfl⟩ := h'
+    have hda : (a'.eval g₀ ν : Option p.Denote) = a.eval τ := Tm.toL_drel hA a a' ha'
+    have hdb : (b'.eval g₀ ν : Option p.Denote) = b.eval τ := Tm.toL_drel hA b b' hb'
+    unfold Fml.eqAt
+    split
+    · rename_i hag
+      simp only [Bool.and_eq_true] at hag
+      split
+      · rename_i ht
+        have key : (LFml.eq a' b').holds g₀ ν ↔ holds τ (.eq a b) := by
+          rw [LFml.holds_eq_iff, holds_eq_of_agree hag.1 hag.2, hda, hdb]
+          rcases Bool.or_eq_true_iff.1 ht with h | h
+          · obtain ⟨v, hv⟩ := Tm.totB_total h τ
+            rw [hv]
+            exact ⟨fun ⟨x, hx, hy⟩ => by rw [hy, ← hx], fun e => ⟨v, rfl, e.symm⟩⟩
+          · obtain ⟨v, hv⟩ := Tm.totB_total h τ
+            rw [hv]
+            exact ⟨fun ⟨x, hx, hy⟩ => by rw [hx, ← hy], fun e => ⟨v, e, rfl⟩⟩
+        exact ⟨fun _ => key.1, fun _ => key.2⟩
+      · have key : (LFml.optEq a' b').holds g₀ ν ↔ holds τ (.eq a b) := by
+          rw [LFml.optEq_holds, holds_eq_of_agree hag.1 hag.2, hda, hdb]
+        exact ⟨fun _ => key.1, fun _ => key.2⟩
+    split
+    · rename_i hpos
+      refine ⟨fun _ hψ => ?_, fun hpos' _ => absurd hpos (by rw [hpos']; exact Bool.false_ne_true)⟩
+      rw [LFml.holds_eq_iff] at hψ
+      obtain ⟨x, hx, hy⟩ := hψ
+      rw [hda] at hx; rw [hdb] at hy
+      show a.denote τ = b.denote τ
+      rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b x hy]
+    · rename_i hpos
+      refine ⟨fun hpos' _ => absurd hpos' (by simpa only [Bool.not_eq_true] using hpos),
+        fun _ hφ ha hb => ?_⟩
+      rw [LFml.holds_rets] at ha hb
+      obtain ⟨x, hx⟩ := ha
+      obtain ⟨y, hy⟩ := hb
+      rw [hda] at hx; rw [hdb] at hy
+      have hφ' : a.denote τ = b.denote τ := hφ
+      rw [Tm.denote_eval τ a x hx, Tm.denote_eval τ b y hy] at hφ'
+      obtain rfl : x = y := Option.some.inj hφ'
+      rw [LFml.holds_eq_iff]
+      exact ⟨x, by rw [hda, hx], by rw [hdb, hy]⟩
+  | _, .wellFormed s, pos, ρ, ψ, h, τ, ν, hA, _ => by
+    have h' : ((Tm.app1 .wt s).toL ρ).map (fun t' => LFml.eq t' t') = some ψ := h
     rw [Option.map_eq_some_iff] at h'
     obtain ⟨t', ht', rfl⟩ := h'
-    have hd : (t'.eval g₀ ν : Option p.Denote) = t.eval τ := Tm.toL_drel hA t t' ht'
-    have key : (LFml.eq t' t').holds g₀ ν ↔ holds τ (.defined t) := by
-      rw [LFml.holds_rets, holds_defined, hd]
+    have hd : (t'.eval g₀ ν : Option PrimTy.bool.Denote) = (Tm.app1 .wt s).eval τ :=
+      Tm.toL_drel hA _ t' ht'
+    have key : (LFml.eq t' t').holds g₀ ν ↔ holds τ (.wellFormed s) := by
+      rw [LFml.holds_rets, holds_wellFormed_eval, hd]
       constructor
       · rintro ⟨x, hx⟩; rw [hx]; exact nofun
       · intro h; exact Option.ne_none_iff_exists'.1 h
@@ -1201,25 +1215,13 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
     refine ⟨fun hp hψ hφ => hψ (ih₂ (by simp only [hp, Bool.not_true]) hφ),
       fun hp hφ hψ => hφ (ih₁ (by simp only [hp, Bool.not_false]) hψ)⟩
   | _, .and φ₁ φ₂, pos, ρ, ψ, h, τ, ν, hA, hF => by
-    have h' : (match Fml.eqDView? φ₁ φ₂ with
-      | some ⟨_, a, b⟩ => (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => LFml.eq a' b'
-      | none => (φ₁.toLS pos ρ).bind fun ψ₁ => (φ₂.toLS pos ρ).map fun ψ₂ => .and ψ₁ ψ₂) =
+    have h' : ((φ₁.toLS pos ρ).bind fun ψ₁ => (φ₂.toLS pos ρ).map fun ψ₂ => LFml.and ψ₁ ψ₂) =
         some ψ := h
-    split at h'
-    · rename_i p a b he
-      rw [Fml.eqDView?_some he]
-      simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
-      obtain ⟨a', ha', b', hb', rfl⟩ := h'
-      have hda : (a'.eval g₀ ν : Option p.Denote) = a.eval τ := Tm.toL_drel hA a a' ha'
-      have hdb : (b'.eval g₀ ν : Option p.Denote) = b.eval τ := Tm.toL_drel hA b b' hb'
-      have key : (LFml.eq a' b').holds g₀ ν ↔ holds τ (Fml.eqD a b) := by
-        rw [LFml.holds_eq_iff, holds_eqD, hda, hdb]
-      exact ⟨fun _ => key.1, fun _ => key.2⟩
-    · simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
-      obtain ⟨ψ₁, h₁, ψ₂, h₂, rfl⟩ := h'
-      obtain ⟨i₁, j₁⟩ := Fml.toLS_sound φ₁ pos h₁ τ ν hA hF
-      obtain ⟨i₂, j₂⟩ := Fml.toLS_sound φ₂ pos h₂ τ ν hA hF
-      exact ⟨fun hp hψ => ⟨i₁ hp hψ.1, i₂ hp hψ.2⟩, fun hp hφ => ⟨j₁ hp hφ.1, j₂ hp hφ.2⟩⟩
+    simp only [Option.bind_eq_some_iff, Option.map_eq_some_iff] at h'
+    obtain ⟨ψ₁, h₁, ψ₂, h₂, rfl⟩ := h'
+    obtain ⟨i₁, j₁⟩ := Fml.toLS_sound φ₁ pos h₁ τ ν hA hF
+    obtain ⟨i₂, j₂⟩ := Fml.toLS_sound φ₂ pos h₂ τ ν hA hF
+    exact ⟨fun hp hψ => ⟨i₁ hp hψ.1, i₂ hp hψ.2⟩, fun hp hφ => ⟨j₁ hp hφ.1, j₂ hp hφ.2⟩⟩
   | _, .imp φ₁ φ₂, pos, ρ, ψ, h, τ, ν, hA, hF => by
     have h' : (φ₁.toLS (!pos) ρ).bind (fun ψ₁ => (φ₂.toLS pos ρ).map fun ψ₂ => LFml.imp ψ₁ ψ₂) =
       some ψ := h
@@ -1231,7 +1233,7 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
       fun hp hφ hψ₁ => j₂ hp (hφ (i₁ (by simp only [hp, Bool.not_false]) hψ₁))⟩
   | _, .upd m U φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
     have h' : (if pos then (U.toLS ρ).bind fun p => (φ.toLS pos p.1).map fun φ' =>
-      guardM m (U.exhL ρ) p.2 φ' else none) = some ψ := h
+      guardM m (U.exhL ρ) p.2 φ' else some .tt) = some ψ := h
     split at h'
     · rename_i hp
       subst hp
@@ -1246,14 +1248,30 @@ theorem Fml.toLS_sound : ∀ {Γ : Ctx} (φ : Fml C Γ) (pos : Bool) {ρ : SymS 
         rw [hσ, hl']
         exact hag q hq
       exact (Fml.toLS_sound φ true hφ σ' ν hA' hf').1 rfl hψ'
-    · cases h'
+    · rename_i hp
+      cases h'
+      exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
   | _, .modal .., pos, ρ, ψ, h, τ, ν, hA, hF => by
-    have h' : (if pos then some LFml.ff else none) = some ψ := h
+    have h' : (if pos then some LFml.ff else some LFml.tt) = some ψ := h
     split at h'
     · cases h'; exact ⟨fun _ hψ => (hψ trivial).elim, fun hp => by subst hp; contradiction⟩
+    · rename_i hp
+      cases h'
+      exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
+  | _, .havoc _, pos, _, _, h, _, _, _, _ => by
+    have h' : (if pos then none else some LFml.tt) = some _ := h
+    split at h'
     · cases h'
-  | _, .havoc _, _, _, _, h, _, _, _, _ => by cases h
-  | _, .anon .., _, _, _, h, _, _, _, _ => by cases h
+    · rename_i hp
+      cases h'
+      exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
+  | _, .anon .., pos, _, _, h, _, _, _, _ => by
+    have h' : (if pos then none else some LFml.tt) = some _ := h
+    split at h'
+    · cases h'
+    · rename_i hp
+      cases h'
+      exact ⟨fun hp' => absurd hp' hp, fun _ _ => trivial⟩
   | _, .all x p φ, pos, ρ, ψ, h, τ, ν, hA, hF => by
     have h' : (φ.toLS pos (ρ.pushQ p)).map (fun φ' => LFml.all ρ.next p φ') = some ψ := h
     rw [Option.map_eq_some_iff] at h'

@@ -138,7 +138,7 @@ def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Optio
     Fml.casesOn (motive := fun Γ _ => Hyps C [] Γ → Option (List α × Nat)) φ
       (tt := fun H => cond H.boxOnly (some ([], b)) ((leaf H .tt).map (·, b)))
       (eq := fun t u H => (leaf H (.eq t u)).map (·, b))
-      (defined := fun t H => (leaf H (.defined t)).map (·, b))
+      (wellFormed := fun s H => (leaf H (.wellFormed s)).map (·, b))
       (not := fun ψ H => (leaf H (.not ψ)).map (·, b))
       (and := fun ψ χ H => cond (Fml.and ψ χ).modalFree ((leaf H (.and ψ χ)).map (·, b))
         (both (run R leaf rf n H ψ) (run R leaf rf n H χ) b))
@@ -432,7 +432,7 @@ theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) 
       · exact leaf_sound hleaf (b := b) (by simpa only [run, hb, cond_false] using h) hl
       · exact .closeTrue hb
     | eq => exact leaf_sound hleaf h hl
-    | defined => exact leaf_sound hleaf h hl
+    | wellFormed => exact leaf_sound hleaf h hl
     | not => exact leaf_sound hleaf h hl
     | and ψ χ =>
       cases hm : (Fml.and ψ χ).modalFree

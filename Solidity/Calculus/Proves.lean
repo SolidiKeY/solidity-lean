@@ -43,7 +43,7 @@ under solkey's names where solkey has the rule:
   rewrite, on the scoped sequent (decision 90);
 * `closeHolds`: a sequent with no modality left, proved over the typed
   reading (`sol_leaf`, `Proves.closeValid`); the steps after the program
-  (`Proves.eqDSplit`, `definedWritten`, `applyOnRigidBox`, `simplify`, the
+  (`Proves.eqRefl`, `applyOnRigidBox`, `simplify`, the
   rewrites of the goal) are derived from it (`Calculus/UpdateRules.lean`).
 
 A program rule fires the rule the strategy fires (`Stmt.step`, one per
@@ -205,7 +205,7 @@ def Hyps.binds {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → (bs : List (Mo
 /-- No modality: what `closeHolds` leaves the calculus with. -/
 def Fml.modalFree : {Γ : Ctx} → Fml C Γ → Bool
   | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
-    (tt := true) (eq := fun _ _ => true) (defined := fun _ => true)
+    (tt := true) (eq := fun _ _ => true) (wellFormed := fun _ => true)
     (not := fun φ => Fml.modalFree φ) (and := fun φ ψ => Fml.modalFree φ && Fml.modalFree ψ)
     (imp := fun φ ψ => Fml.modalFree φ && Fml.modalFree ψ) (upd := fun _ _ φ => Fml.modalFree φ)
     (modal := fun _ _ _ _ => false) (havoc := fun φ => Fml.modalFree φ)

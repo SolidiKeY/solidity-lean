@@ -616,21 +616,21 @@ theorem requireConditionCapture :
     ~*> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) } ⟨[ require(se1); ]⟩ φ
         where bool se1 }
     ~*> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) where bool se1 }
+        ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) where bool se1 }
     ~[revertBox]~> dl![.box]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) where bool se1 }
+        ((se1 = true → φ) ∧ (se1 = false → true)) where bool se1 }
     ~[sequentialToParallel]~> dl![.box]{
         { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
-          ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+          ((se1 = true → φ) ∧ (se1 = false → true)) }
     ~[concrete]~> dl![.box]{
         { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
-          (se1 ≐ true → φ) }
+          (se1 = true → φ) }
     ~[findOnSave]~> dl![.box]{
         { storage := save(storage, flag, true) ‖ se1 := true }
-          (se1 ≐ true → φ) }
+          (se1 = true → φ) }
     ~[applyOnPV]~> dl![.box]{
         { storage := save(storage, flag, true) ‖ se1 := true }
-          (true ≐ true → φ) }
+          (true = true → φ) }
     ~[concrete]~> dl![.box]{ { storage := save(storage, flag, true) ‖ se1 := true } φ } := by
   sol_chain
 #last_line requireConditionCapture
@@ -643,12 +643,12 @@ theorem assertConditionCapture :
     ~*> dl![m]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) } ⟨[ assert(se1); ]⟩ φ
         where bool se1 }
     ~*> dl![m]{ { storage := save(storage, flag, true) } { se1 := find(storage, flag) }
-        ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+        ((se1 = true → φ) ∧ se1 = true) }
     ~[sequentialToParallel]~> dl![m]{
         { storage := save(storage, flag, true) ‖ se1 := find(save(storage, flag, true), flag) }
-          ((se1 ≐ true → φ) ∧ se1 ≐ true) }
-    ~[findOnSave]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } ((se1 ≐ true → φ) ∧ se1 ≐ true) }
-    ~[applyOnPV]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } ((true ≐ true → φ) ∧ true ≐ true) }
+          ((se1 = true → φ) ∧ se1 = true) }
+    ~[findOnSave]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } ((se1 = true → φ) ∧ se1 = true) }
+    ~[applyOnPV]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } ((true = true → φ) ∧ true = true) }
     ~[concrete]~> dl![m]{ { storage := save(storage, flag, true) ‖ se1 := true } φ } := by
   sol_chain
 #last_line assertConditionCapture
@@ -657,9 +657,9 @@ theorem assertConditionCapture :
 folded. -/
 theorem requireSimple (φ : Post Coverage [.val .bool]) :
     dl![.box]{ { ok := true } ⟨[ require(ok); ]⟩ φ }
-    ~*> dl![.box]{ { ok := true } ((ok ≐ true → φ) ∧ (ok ≐ false → ⟨[ revert(); ]⟩ φ)) }
-    ~[revertBox]~> dl![.box]{ { ok := true } ((ok ≐ true → φ) ∧ (ok ≐ false → true)) }
-    ~[applyOnRigid]~> dl![.box]{ (true ≐ true → { ok := true } φ) ∧ (true ≐ false → true) }
+    ~*> dl![.box]{ { ok := true } ((ok = true → φ) ∧ (ok = false → ⟨[ revert(); ]⟩ φ)) }
+    ~[revertBox]~> dl![.box]{ { ok := true } ((ok = true → φ) ∧ (ok = false → true)) }
+    ~[applyOnRigid]~> dl![.box]{ (true = true → { ok := true } φ) ∧ (true = false → true) }
     ~[concrete]~> dl![.box]{ { ok := true } φ } := by
   sol_chain
 #last_line requireSimple
@@ -667,8 +667,8 @@ theorem requireSimple (φ : Post Coverage [.val .bool]) :
 /-- `assert(ok);` with `ok` `true`: the two goals, the condition assumed and owed, folded. -/
 theorem assertSimple (φ : Post Coverage [.val .bool]) :
     dl![m]{ { ok := true } ⟨[ assert(ok); ]⟩ φ }
-    ~*> dl![m]{ { ok := true } ((ok ≐ true → φ) ∧ ok ≐ true) }
-    ~[applyOnRigid]~> dl![m]{ (true ≐ true → { ok := true } φ) ∧ true ≐ true }
+    ~*> dl![m]{ { ok := true } ((ok = true → φ) ∧ ok = true) }
+    ~[applyOnRigid]~> dl![m]{ (true = true → { ok := true } φ) ∧ true = true }
     ~[concrete]~> dl![m]{ { ok := true } φ } := by
   sol_chain
 #last_line assertSimple
@@ -711,37 +711,37 @@ theorem ifElseUnfold (φ : Post Coverage [.val .uint, .val .uint, .val .uint]) :
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
           { se2 := find(storage, alice.age) }
             { se1 := se2 > ageVal }
-              ((se1 ≐ true → ⟨[ s0 = 1; } ]⟩ φ) ∧
-                  (se1 ≐ false → ⟨[ s1 = 1; } ]⟩ φ)) }
+              ((se1 = true → ⟨[ s0 = 1; } ]⟩ φ) ∧
+                  (se1 = false → ⟨[ s1 = 1; } ]⟩ φ)) }
     ~*> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
           { se2 := find(storage, alice.age) }
             { se1 := se2 > ageVal }
-              ((se1 ≐ true → { s0 := 1 } φ) ∧
-                  (se1 ≐ false → ⟨[ s1 = 1; } ]⟩ φ)) }
+              ((se1 = true → { s0 := 1 } φ) ∧
+                  (se1 = false → ⟨[ s1 = 1; } ]⟩ φ)) }
     ~*> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 }
           { se2 := find(storage, alice.age) }
             { se1 := se2 > ageVal }
-              ((se1 ≐ true → { s0 := 1 } φ) ∧
-                  (se1 ≐ false → { s1 := 1 } φ)) }
+              ((se1 = true → { s0 := 1 } φ) ∧
+                  (se1 = false → { s1 := 1 } φ)) }
     ~[sequentialToParallel]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := find(save(storage, alice.age, 42), alice.age) ‖
             se1 := find(save(storage, alice.age, 42), alice.age) > 30 }
-          ((se1 ≐ true → { s0 := 1 } φ) ∧
-              (se1 ≐ false → { s1 := 1 } φ)) }
+          ((se1 = true → { s0 := 1 } φ) ∧
+              (se1 = false → { s1 := 1 } φ)) }
     ~[findOnSave]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := 42 > 30 }
-          ((se1 ≐ true → { s0 := 1 } φ) ∧
-              (se1 ≐ false → { s1 := 1 } φ)) }
+          ((se1 = true → { s0 := 1 } φ) ∧
+              (se1 = false → { s1 := 1 } φ)) }
     ~[greater_literals]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true }
-          ((se1 ≐ true → { s0 := 1 } φ) ∧
-              (se1 ≐ false → { s1 := 1 } φ)) }
+          ((se1 = true → { s0 := 1 } φ) ∧
+              (se1 = false → { s1 := 1 } φ)) }
     ~[applyOnPV]~> dl![m]{
         { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true }
-          ((true ≐ true → { s0 := 1 } φ) ∧
-              (true ≐ false → { s1 := 1 } φ)) }
+          ((true = true → { s0 := 1 } φ) ∧
+              (true = false → { s1 := 1 } φ)) }
     ~[concrete]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true } { s0 := 1 } φ }
     ~[sequentialToParallel]~> dl![m]{ { storage := save(storage, alice.age, 42) ‖ ageVal := 30 ‖ se2 := 42 ‖ se1 := true ‖ s0 := 1 } φ } := by
   sol_chain
@@ -753,20 +753,20 @@ theorem ifElseSplit (φ : Post Coverage [.val .bool, .val .uint, .val .uint]) :
     dl![m]{ { ok := true } ⟨[ if (ok) { s0 = 1; } else { s1 = 1; }; ]⟩ φ }
     ~[ifElseSplit]~> dl![m]{
         { ok := true }
-          ((ok ≐ true → ⟨[ s0 = 1; } ]⟩ φ) ∧
-              (ok ≐ false → ⟨[ s1 = 1; } ]⟩ φ)) }
+          ((ok = true → ⟨[ s0 = 1; } ]⟩ φ) ∧
+              (ok = false → ⟨[ s1 = 1; } ]⟩ φ)) }
     ~*> dl![m]{
         { ok := true }
-          ((ok ≐ true → { s0 := 1 } φ) ∧ (ok ≐ false → ⟨[ s1 = 1; } ]⟩ φ)) }
+          ((ok = true → { s0 := 1 } φ) ∧ (ok = false → ⟨[ s1 = 1; } ]⟩ φ)) }
     ~*> dl![m]{
         { ok := true }
-          ((ok ≐ true → { s0 := 1 } φ) ∧ (ok ≐ false → { s1 := 1 } φ)) }
+          ((ok = true → { s0 := 1 } φ) ∧ (ok = false → { s1 := 1 } φ)) }
     ~[applyOnRigid]~> dl![m]{
-        (true ≐ true → { ok := true } { s0 := 1 } φ) ∧
-          (true ≐ false → { ok := true } { s1 := 1 } φ) }
+        (true = true → { ok := true } { s0 := 1 } φ) ∧
+          (true = false → { ok := true } { s1 := 1 } φ) }
     ~[sequentialToParallel]~> dl![m]{
-        (true ≐ true → { ok := true ‖ s0 := 1 } φ) ∧
-          (true ≐ false → { ok := true } { s1 := 1 } φ) }
+        (true = true → { ok := true ‖ s0 := 1 } φ) ∧
+          (true = false → { ok := true } { s1 := 1 } φ) }
     ~[concrete]~> dl![m]{ { ok := true ‖ s0 := 1 } φ } := by
   sol_chain
 #last_line ifElseSplit
@@ -925,14 +925,14 @@ theorem requireConditionCapture_call (φ : Post Coverage []) :
     ~[internalCallExpand]~> dl![.box]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; require(se1); ]⟩ φ }
     ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ require(se1); ]⟩ φ }
     ~*> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → ⟨[ revert(); ]⟩ φ)) }
+        ((se1 = true → φ) ∧ (se1 = false → ⟨[ revert(); ]⟩ φ)) }
     ~[revertBox]~> dl![.box]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+        ((se1 = true → φ) ∧ (se1 = false → true)) }
     ~[sequentialToParallel]~> dl![.box]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true }
-        ((se1 ≐ true → φ) ∧ (se1 ≐ false → true)) }
+        ((se1 = true → φ) ∧ (se1 = false → true)) }
     ~[applyOnRigid]~> dl![.box]{
-        (true ≐ true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧
-          (true ≐ false → true) }
+        (true = true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧
+          (true = false → true) }
     ~[concrete]~> dl![.box]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ } := by
   sol_chain
 #last_line requireConditionCapture_call
@@ -949,11 +949,11 @@ theorem assertConditionCapture_call (φ : Post Coverage []) :
     ~[internalCallExpand]~> dl![m]{ { se1 := false } ⟨[ bool se2; se2 = true; se1 = se2; assert(se1); ]⟩ φ }
     ~*> dl![m]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 } ⟨[ assert(se1); ]⟩ φ }
     ~*> dl![m]{ { se1 := false } { se2 := false } { se2 := true } { se1 := se2 }
-        ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+        ((se1 = true → φ) ∧ se1 = true) }
     ~[sequentialToParallel]~> dl![m]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true }
-        ((se1 ≐ true → φ) ∧ se1 ≐ true) }
+        ((se1 = true → φ) ∧ se1 = true) }
     ~[applyOnRigid]~> dl![m]{
-        (true ≐ true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧ true ≐ true }
+        (true = true → { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ) ∧ true = true }
     ~[concrete]~> dl![m]{ { se1 := false ‖ se2 := false ‖ se2 := true ‖ se1 := true } φ } := by
   sol_chain
 #last_line assertConditionCapture_call

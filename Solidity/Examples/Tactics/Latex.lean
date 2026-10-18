@@ -137,14 +137,14 @@ theorem conditional (_h : 1 = 1) : 2 = 2 := by rfl
 #latex_expr (macros := true) dl!{ ∀ uint x; [ x−−; ] true }
 
 -- `fixedCopy`: written in the plain backend, its source alone in the macros one.
-/-- info: \mathit{defined}(\mathit{wt}(\mathit{storage})) \rightarrow \langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} -/
+/-- info: \mathit{wt}(\mathit{storage}) \rightarrow \langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} -/
 #guard_msgs in
 #latex_obligation Solc.Latex.C.f
 /-- info: \wellformed{\storage} \rightarrow \dlf{uint x; d2 = d1; x = d2.length; assert(x == 9);}{\mathit{true}} -/
 #guard_msgs in
 #latex_obligation (macros := true) Solc.Latex.C.f
 /-- info: \begin{aligned}
-&\Gamma = \{\mathit{defined}(\mathit{wt}(\mathit{storage}))\}\\[4pt]
+&\Gamma = \{\mathit{wt}(\mathit{storage})\}\\[4pt]
 &\langle \texttt{uint x; d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
 &\rightsquigarrow^{*}\ \{\mathit{x} \mathrel{:=} 0\}\langle \texttt{d2 = d1; x = d2.length; assert(x == 9);}\rangle \mathit{true} \\
 &\overset{\mathsf{storageFixedCopySave}}{\rightsquigarrow}\ \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
@@ -152,7 +152,7 @@ theorem conditional (_h : 1 = 1) : 2 = 2 := by rfl
 &\overset{\mathsf{storageLengthRead}}{\rightsquigarrow}\ \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
 &\qquad \{\mathit{x} \mathrel{:=} \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{d2}.\mathit{length})\}\langle \texttt{assert(x == 9);}\rangle \mathit{true} \\
 &\rightsquigarrow^{*}\ \{\mathit{x} \mathrel{:=} 0\}\{\mathit{storage} \mathrel{:=} \mathit{save}(\mathit{storage}, \mathit{d2}, \mathit{fixedCopy}(\mathit{find}_{\mathsf{Struct}}(\mathit{storage}, \mathit{d1})))\} \\
-&\qquad \{\mathit{x} \mathrel{:=} \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{d2}.\mathit{length})\}\{\mathit{se1} \mathrel{:=} \mathit{x} = 9\}((\mathit{se1} \doteq \mathit{true} \rightarrow \mathit{true}) \land \mathit{se1} \doteq \mathit{true})
+&\qquad \{\mathit{x} \mathrel{:=} \mathit{find}_{\mathsf{int}}(\mathit{storage}, \mathit{d2}.\mathit{length})\}\{\mathit{se1} \mathrel{:=} \mathit{x} = 9\}((\mathit{se1} = \mathit{true} \rightarrow \mathit{true}) \land \mathit{se1} = \mathit{true})
 \end{aligned} -/
 #guard_msgs in
 #latex_derivation (past := false) Solc.Latex.C.f
@@ -207,11 +207,9 @@ info: \begin{aligned}
 &\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1}))\}\{\mathit{x} \upd \TFind{\intS}(\storage, \pField{\mathit{d2}}{\lengthField})\}\mathit{x} = 9 \\
 &\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \\
 &\qquad \mathit{x} \upd \TFind{\intS}(\save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})), \pField{\mathit{d2}}{\lengthField})\}\mathit{x} = 9 \\
-&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \\
-&\qquad \mathit{x} \upd \TFind{\intS}(\save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})), \pField{\mathit{d2}}{\lengthField})\}(\mathit{defined}(\mathit{x}) \land \mathit{x} = 9) \\
 &\TFind{\intS}(\save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})), \pField{\mathit{d2}}{\lengthField}) \rightsquigarrow 9 \\
-&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \mathit{x} \upd 9\}(\mathit{defined}(\mathit{x}) \land \mathit{x} = 9) \\
-&\rightsquigarrow\ \mathit{defined}(9) \land 9 = 9 \\
+&\rightsquigarrow\ \{\storage \upd \save(\storage, \mathit{d2}, \TFind{\Struct}(\storage, \mathit{d1})) \parallel \mathit{x} \upd 9\}\mathit{x} = 9 \\
+&\rightsquigarrow\ 9 = 9 \\
 &\rightsquigarrow\ \mathit{true}
 \end{aligned}
 -/

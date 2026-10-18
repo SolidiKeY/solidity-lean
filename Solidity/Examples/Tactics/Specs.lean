@@ -104,11 +104,9 @@ info: dl{
         selfBalance := selfBalance + msg.value }
       [ pay(); ]
         (net(msg.sender) = net(oldNet, msg.sender) + msg.value ∧
-            (find(old, count) = find(old, count) → find(storage, count) = find(old, count)) ∧
-              (find(old, total) = find(old, total) → find(storage, total) = find(old, total)) ∧
-                (∀ uint k1;
-                    find(old, seen[k1]) = find(old, seen[k1]) →
-                      find(storage, seen[k1]) = find(old, seen[k1]))) } : Fml Tally []
+            find(storage, count) = find(old, count) ∧
+              find(storage, total) = find(old, total) ∧
+                (∀ uint k1; find(storage, seen[k1]) = find(old, seen[k1]))) } : Fml Tally []
 -/
 #guard_msgs in #check spec!{ pay }
 

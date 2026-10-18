@@ -46,13 +46,10 @@ with `→` ("Chain-only spellings" below).  In `dl{ Γ ⟹ φ }`, and in the
 goals a `⊢` derivation prints, it is a sequent, a `Proves` with its context
 apart, which no `dl!{ … }` reads back.
 
-**Two equations.**  `a = b` here is the interpreter's equation, `Fml.eqD`:
-both sides return, with one value — what `==` means, and what `a = b`
-meant before `holds` read an equation in the Theory.  `a ≐ b` is the total
-one, `Fml.eq` (KeY's `=`, which a taclet writes as `=` in `dl{ … }`): it
-compares what the sides denote, and may hold of sides that halt.
-`defined(t)` says `t` returns.  The printer follows: `Fml.eqD` prints as `=`
-(a comparison `a < b` as itself), `Fml.eq` as `≐`.
+**One equation.**  `a = b` is KeY's `=`, `Fml.eq`, as in a taclet's
+`dl{ … }`: it compares what the sides denote in the Theory, total as KeY's
+terms are.  A comparison `a < b` is `a < b = true`, and prints as itself.
+`wt(s)` is the predicate `Fml.wellFormed`, KeY's `wellFormed(heap)`.
 
 What a name is:
 
@@ -164,12 +161,10 @@ inductive RawUpdElem where
 /-- A formula as written.  `peq`/`pne` compare program expressions (`==`, `!=`). -/
 inductive RawFml where
   | tt
-  /-- `a = b`: both sides return, with one value (`Fml.eqD`). -/
+  /-- `a = b`, KeY's `=` (`Fml.eq`). -/
   | eq (a b : RawTerm)
-  /-- `a ≐ b`: the total equation (`Fml.eq`). -/
-  | teq (a b : RawTerm)
-  /-- `defined(t)` -/
-  | defined (t : RawTerm)
+  /-- `wt(s)` (`Fml.wellFormed`) -/
+  | wt (s : RawTerm)
   | peq (a b : RawExpr)
   | pne (a b : RawExpr)
   /-- `a < b`, `a <= b`, `a > b`, `a >= b`: terms, compared as `uint`s
@@ -369,8 +364,7 @@ partial def expandFml (r : Reading) : TSyntax `dl_fml → MacroM Lean.Term
   | `(dl_fml| true) => `(RawFml.tt)
   | `(dl_fml| false) => `(RawFml.not RawFml.tt)
   | `(dl_fml| $a:dl_term = $b:dl_term) => do `(RawFml.eq $(← expandTerm a) $(← expandTerm b))
-  | `(dl_fml| $a:dl_term ≐ $b:dl_term) => do `(RawFml.teq $(← expandTerm a) $(← expandTerm b))
-  | `(dl_fml| defined( $t:dl_term )) => do `(RawFml.defined $(← expandTerm t))
+  | `(dl_fml| wt( $t:dl_term )) => do `(RawFml.wt $(← expandTerm t))
   | `(dl_fml| $a:dl_term == $b:dl_term) => do
       `(RawFml.peq $(← expandOperand a) $(← expandOperand b))
   | `(dl_fml| $a:dl_term != $b:dl_term) => do
@@ -497,8 +491,8 @@ def RawUpdElem.names : RawUpdElem → List String
 /-- The names a raw formula mentions, and those its programs declare. -/
 def RawFml.names : RawFml → List String × List String
   | .tt => ([], [])
-  | .eq a b | .teq a b => (a.names ++ b.names, [])
-  | .defined t => (t.names, [])
+  | .eq a b => (a.names ++ b.names, [])
+  | .wt t => (t.names, [])
   | .peq a b | .pne a b => (a.names ++ b.names, [])
   | .cmp _ a b => (a.names ++ b.names, [])
   | .all _ x φ =>
@@ -547,7 +541,7 @@ def RawTerm.arithLeaves : RawTerm → List String
 /-- The names read as arithmetic operands of an equation or a comparison
 over a KeY `int` (`isKintIn`). -/
 def RawFml.kintLeaves (ks : List String) : RawFml → List String
-  | .eq a b | .teq a b | .cmp _ a b =>
+  | .eq a b | .cmp _ a b =>
     if a.isKintIn ks || b.isKintIn ks then a.arithLeaves ++ b.arithLeaves else []
   | .all _ _ φ | .not φ | .upd _ _ φ | .modal _ _ φ | .decl _ φ => φ.kintLeaves ks
   | .and φ ψ | .imp φ ψ => φ.kintLeaves ks ++ ψ.kintLeaves ks

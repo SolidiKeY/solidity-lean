@@ -52,6 +52,9 @@ import Solidity.Calculus.SolkeyFragment
 import Solidity.Calculus.KeyValues
 import Solidity.Calculus.SolkeyProves
 import Solidity.Calculus.Lands
+import Solidity.Calculus.TermWk
+import Solidity.Calculus.EvalEqs
+import Solidity.Calculus.TermAgree
 import Solidity.Calculus.TermEval
 import Solidity.Calculus.Logic
 import Solidity.Calculus.SoundKit

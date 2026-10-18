@@ -29,28 +29,28 @@ open scoped Scoped
 
 /-- `alice.age = 42; alice.account.balance = 7;` read back at `alice.age`:
 the frame steps over the second write, `findOnSave` reads the first, and the
-goal `42 ≐ 42` closes.  The taclets are named bare: their paths come from
+goal `42 = 42` closes.  The taclets are named bare: their paths come from
 the sequent, and `diverges` and `hasSeg` close on them. -/
 example : ⊢ dl!{ find(save(save(storage, alice.age, 42), alice.account.balance, 7), alice.age)
-    ≐ 42 } := by
+    = 42 } := by
   rw [findOnSaveFrame, findOnSave]
   exact Proves.eqRefl
 
 /-- `alice.age = 42; delete alice.age;` reads `0` at `alice.age`. -/
-example : ⊢ dl!{ find(delAt(save(storage, alice.age, 42), alice.age), alice.age) ≐ 0 } := by
+example : ⊢ dl!{ find(delAt(save(storage, alice.age, 42), alice.age), alice.age) = 0 } := by
   sol_rw [findOnDelAtSave]
   exact Proves.eqRefl
 
 /-- The same, with the typed Theory's own law named instead of
 `findOnDelAtSave`: a word deleted reads its default (`Obs.findOnDelAt`),
 whatever was written there. -/
-example : ⊢ dl!{ find(delAt(save(storage, alice.age, 42), alice.age), alice.age) ≐ 0 } := by
+example : ⊢ dl!{ find(delAt(save(storage, alice.age, 42), alice.age), alice.age) = 0 } := by
   sol_rw [Obs.findOnDelAt]
   exact Proves.eqRefl
 
 /-- A Theory frame law: a read off the deleted location, `alice` against
 `bob.age`, its side condition decided on the two literal locations. -/
-example : ⊢ dl!{ find(delAt(storage, alice), bob.age) ≐ find(storage, bob.age) } := by
+example : ⊢ dl!{ find(delAt(storage, alice), bob.age) = find(storage, bob.age) } := by
   rw [Obs.findOnDelAtFrame]
   exact Proves.eqRefl
 
@@ -58,13 +58,13 @@ example : ⊢ dl!{ find(delAt(storage, alice), bob.age) ≐ find(storage, bob.ag
 `alice.account.balance` do not diverge, so the scoped `rw` does not apply
 it (and Lean's `rw`, tried after, knows no such name). -/
 #guard_msgs (drop error) in
-example : ⊢ dl!{ find(save(storage, alice.account, 1), alice.account.balance) ≐ 0 } := by
+example : ⊢ dl!{ find(save(storage, alice.account, 1), alice.account.balance) = 0 } := by
   rw [findOnSaveFrame]
 
 /-- A path named, as an argument: its side condition's default (`by rfl`)
 runs once the other path is found. -/
 example : ⊢ dl!{ find(save(storage, alice.account.balance, 7), alice.age)
-    ≐ find(storage, alice.age) } := by
+    = find(storage, alice.age) } := by
   rw [findOnSaveFrame (p := pt!{ alice.account.balance })]
   exact Proves.eqRefl
 

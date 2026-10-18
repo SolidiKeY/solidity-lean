@@ -102,14 +102,14 @@ theorem guardedCopy : ⊢ dl!{ a == 1 → ⟨ uint x = a; require(x == 1); ⟩ x
   -- dl{ ∀ uint a, a = 1, { x := a }, { se1 := x == 1 } ⟹ ⟨ require(se1); ⟩ x = 1 }
   apply split .requireSimple
   case thn =>
-    -- dl{ …, se1 ≐ true ⟹ x = 1 }: no statement left, `empty` does nothing
+    -- dl{ …, se1 = true ⟹ x = 1 }: no statement left, `empty` does nothing
     apply empty
     sol_leaf
     sol_close
   case els =>
-    -- dl{ …, se1 ≐ false ⟹ ⟨ revert(); ⟩ x = 1 }
+    -- dl{ …, se1 = false ⟹ ⟨ revert(); ⟩ x = 1 }
     apply done .revertDiamond
-    -- dl{ …, se1 ≐ false ⟹ false }: `a = 1` and `x == 1` false contradict
+    -- dl{ …, se1 = false ⟹ false }: `a = 1` and `x == 1` false contradict
     sol_leaf
     sol_close
 

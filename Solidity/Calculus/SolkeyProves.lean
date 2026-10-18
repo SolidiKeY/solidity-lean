@@ -59,7 +59,7 @@ theorem Proves.toAll {R : RuleSet} {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : 
 sides of its equations. -/
 theorem Fml.inSolkey_rwEqC {p : PrimTy} (q : Tm C [] (.val p) × Tm C [] (.val p)) :
     {Γ : Ctx} → (φ : Fml C Γ) → (φ.rwEqC q).inSolkey = φ.inSolkey
-  | _, .tt | _, .eq .. | _, .defined _ => rfl
+  | _, .tt | _, .eq .. | _, .wellFormed _ => rfl
   | _, .not φ => Fml.inSolkey_rwEqC q φ
   | _, .and φ ψ | _, .imp φ ψ => by
     simp only [Fml.rwEqC_and, Fml.rwEqC_imp, Fml.inSolkey, Fml.inSolkey_rwEqC q φ,
@@ -241,8 +241,11 @@ def loopFalse : Fml C [] :=
 condition false assumed, and that it is false. -/
 theorem loopFalse_derived : Proves C .all [] .nil (loopFalse (C := C)) := by
   refine .check (LeanTaclet.toStep .loopExit) (.closeTrue rfl)
-    (.closeHolds (fun _ => ⟨fun h => Option.noConfusion h, fun h => Option.noConfusion h,
-      rfl⟩))
+    (.closeHolds (fun σ => Upd.afterT_intro (fun he => Option.noConfusion he) fun _ σ' hL => by
+      obtain rfl := Upd.Lands.eq (Upd.lands_decl (Upd.lands_nil σ) _
+        (rfl : (Rhs.val (p := .bool) (Val.simple (C := C) (Γ := []) (Simple.bool false)).lower).eval σ =
+          some (LTy.VDen.ofT (H := σ.H) (.val .bool) false))) hL
+      rfl))
 
 /-- **Off the fragment solkey's rules fall short**: the calculus derives
 `[ while (false) { } ] true` at the explicit `unwind 0` annotation, solkey's

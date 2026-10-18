@@ -73,8 +73,9 @@ The benchmarks' clauses over `net(a)` still leave proof gaps. A spec's
 arithmetic over Solidity values is Solidity's, checked at its operands'
 type, where solkey's is KeY's unbounded `int`: an overflowing side makes its
 equation false rather than true of a larger number.  Every equation compiled
-here is the interpreter's, `Fml.eqD` (both sides return, with one value),
-not the total `Fml.eq`.  `net(a)` is a ledger entry, a KeY `int`
+here is KeY's `=`, `Fml.eq`, read in the Theory: a storage read is total
+there, a word of its type (an equation of two sides that both overflow
+holds, and `!=` of them does not); `==` of two conditions is `<->`.  `net(a)` is a ledger entry, a KeY `int`
 (`Srt.kint`, solkey's `netHeader.key`), unbounded; beside one a `uint`
 (`msg.value`, solkey's `msgValue`, also a KeY `int`) is widened
 (`Op1.toInt`, total, printed bare where the other side shows the sort), and
@@ -164,12 +165,12 @@ private def SpecExpr.hasLedgerInt : SpecExpr → Bool
   | .binop op a b => op.zArith && (a.hasLedgerInt || b.hasLedgerInt)
   | _ => false
 
-/-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`, `!t`
-defined for a `bool`. -/
+/-- `t` is a value of its type: `0 <= t <= 2^256 - 1` for a `uint`; every
+`bool` is one. -/
 def rangeFml (t : NTerm C) : PrimTy → NRead C
   | .uint => .and (NRead.cmp .le (.num 0) t) (NRead.cmp .le t (.num (uintBound - 1)))
   | .int => .and (NRead.cmp .le (.num (-intBound)) t) (NRead.cmp .le t (.num (intBound - 1)))
-  | .bool => .eqD (.unop .not t) (.unop .not t)
+  | .bool => .tt
 
 /-- **The layout, as premises**: every word the declared state holds is a
 value of its type, `0 <= count <= 2^256 - 1`, and so at every key of a
@@ -393,7 +394,7 @@ partial def SpecExpr.fml (ctx : SpecCtx C) : SpecExpr → Except String (NRead C
   | .binop op a b => do
     if op = .eqB || op = .neB then
       let ((pa, ta), (pb, tb)) ← SpecExpr.termPair (C := C) ctx a b
-      let eq ← if pa = .prim .bool && pb = .prim .bool then iff a b else pure (NRead.eqD ta tb)
+      let eq ← if pa = .prim .bool && pb = .prim .bool then iff a b else pure (NRead.eq ta tb)
       return if op = .eqB then eq else .not eq
     cond (.binop op a b)
   | e => cond e
@@ -468,7 +469,7 @@ on under the condition `x = t`, `m[*]` unconditionally. -/
 def enterKey (x : Var) (ls : List (List (NRead C) × List (SpecStep C))) :
     List (List (NRead C) × List (SpecStep C)) :=
   ls.filterMap fun
-    | (cs, .key t :: rest) => some (cs ++ [.eqD (.pv x) t], rest)
+    | (cs, .key t :: rest) => some (cs ++ [.eq (.pv x) t], rest)
     | (cs, .all :: rest) => some (cs, rest)
     | _ => none
 
@@ -485,9 +486,7 @@ partial def frameAt (T : Ty) (p : NPTerm C) (keys : List (Var × PrimTy)) (hyps 
   if here.any (·.1.isEmpty) then [] else
   let hyps := hyps ++ here.map fun (cs, _) => NRead.not (NRead.conj cs)
   let ls := ls.filter (!·.2.isEmpty)
-  -- owed where the word was there to begin with: `⊨` also ranges over
-  -- storages without it, where both sides halt
-  let owe (a b : NTerm C) : NRead C := closeFml C keys hyps (.imp (.eqD b b) (.eqD a b))
+  let owe (a b : NTerm C) : NRead C := closeFml C keys hyps (.eq a b)
   match T with
   | .prim _ => [owe (.find .storage p) (.find (.pv oldVar) p)]
   | .ref (.mapping K V) =>
@@ -603,7 +602,7 @@ def specPieces (f : String) :
   else snap ++ if d.payable then
     [.net (.env .msgSender) .add (.env .msgValue), .selfBalance .add (.env .msgValue)] else []
   let msgValue : NRead C := if d.payable then NRead.cmp .ge (.env .msgValue) (.num 0)
-    else .eqD (.env .msgValue) (.num 0)
+    else .eq (.env .msgValue) (.num 0)
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
     (d.spec.assignable.getD []).flatMap SpecLoc.names
   -- a deployment assumes no invariant and no layout: both are of the

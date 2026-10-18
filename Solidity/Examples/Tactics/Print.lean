@@ -43,7 +43,7 @@ info: @Taclet.storageFieldDelete_unfold_leftFst : ∀ {C : Contract} {k : Nat} {
 info: @Taclet.ifElseSplit : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx} {se : Simple C Γ PrimTy.bool} {x : Ctx}
   {thenStm : Prog C Γ x} {x_1 : Ctx} {elseStm : Prog C Γ x_1},
   dl{ ⟨[ if (se) thenStm else elseStm; ]⟩ ⇝
-    "if s#se true": se ≐ true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se ≐ false ⟹ ⟨[ elseStm ]⟩ }
+    "if s#se true": se = true ⟹ ⟨[ thenStm ]⟩ ; "if s#se false": se = false ⟹ ⟨[ elseStm ]⟩ }
 -/
 #guard_msgs in #check @Taclet.ifElseSplit
 
@@ -79,13 +79,13 @@ run_meta do
 /-- info: dl{ ∀ uint x; x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1 } : Fml SE [] -/
 #guard_msgs in
 #check (Fml.all (.user "x") .uint
-  (.imp (.eqD (.app2 (.binop .gt (p := .uint) rfl) (.pvV .here) (.app0 (.lit (p := .uint) ⟨0, rfl⟩)))
+  (.imp (.eq (.app2 (.binop .gt (p := .uint) rfl) (.pvV .here) (.app0 (.lit (p := .uint) ⟨0, rfl⟩)))
       (.app0 (.lit (p := .bool) true)))
     (.modal .box
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local .here))))
         (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil))
       (.pop .block (.push .refl) (.seq (.cons (.assignLocal .here (.simple (.lit 2 rfl))) .nil) .nil))
-      (.eqD (.pvV .here) (.app0 (.lit (p := .uint) ⟨1, rfl⟩))))) : Fml SE [])
+      (.eq (.pvV .here) (.app0 (.lit (p := .uint) ⟨1, rfl⟩))))) : Fml SE [])
 
 /-- The scoped strategy's formula after `n` steps on `φ`, printed from its
 quoted `Expr` and checked against `Fml.show` on the value. -/
@@ -126,12 +126,12 @@ info: { se2 := find(storage, alice.age) } [ se1 = se2 > 4; if (se1) {uint z = 1;
 #guard_msgs in run_meta stepsShow branchφ 5
 
 /--
-info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → [ uint z = 1; total = z; } uint y = total; ] true) ∧ (se1 ≐ false → [ total = 2; } uint y = total; ] true))
+info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 = true → [ uint z = 1; total = z; } uint y = total; ] true) ∧ (se1 = false → [ total = 2; } uint y = total; ] true))
 -/
 #guard_msgs in run_meta stepsShow branchφ 7
 
 /--
-info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → { z := 1 } [ total = z; } uint y = total; ] true) ∧ (se1 ≐ false → [ total = 2; } uint y = total; ] true))
+info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 = true → { z := 1 } [ total = z; } uint y = total; ] true) ∧ (se1 = false → [ total = 2; } uint y = total; ] true))
 -/
 #guard_msgs in run_meta stepsShow branchφ 9
 
@@ -316,7 +316,7 @@ info: dl{ ∀ uint x, x = 1, { y := x } ⟹ [ x = y; ] true } : Prop
 -/
 #guard_msgs in
 #check (Proves SE .all [] (((Hyps.nil.all (.user "x") .uint).pre
-    (.eqD (.pvV .here) (.app0 (.lit (p := .uint) ⟨1, rfl⟩)))).upd .box
+    (.eq (.pvV .here) (.app0 (.lit (p := .uint) ⟨1, rfl⟩)))).upd .box
       (Upd.nil.decl (.user "y") (.val (.pvV .here))))
   (.modal .box (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil) .nil .tt))
 
@@ -325,12 +325,12 @@ info: fun H => dl{ ..H ⟹ₖ _ = 1 } : Hyps SE [] [LTy.val PrimTy.uint] → Pro
 -/
 #guard_msgs in
 #check fun (H : Hyps SE [] [.val .uint]) =>
-  Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eqD (.pvV (.there .here)) (.app0 (.lit (p := .uint) ⟨1, rfl⟩)))
+  Proves SE .solkey [] (H.bind .box (.user "z") (.val .bool)) (.eq (.pvV (.there .here)) (.app0 (.lit (p := .uint) ⟨1, rfl⟩)))
 
 -- A goal of a walk prints as the line it is.
 /--
 trace: case h.thn
-⊢ dl{ ∀ bool b, b ≐ true ⟹ true }
+⊢ dl{ ∀ bool b, b = true ⟹ true }
 -/
 #guard_msgs in
 example : Proves SE .all [] .nil (.all (.user "b") .bool

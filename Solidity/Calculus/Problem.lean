@@ -55,14 +55,14 @@ excludes it, so the Lean theorem need not imply solkey's obligation.
 * **Diamond**: `∀x̄. wt(storage) → ⟨ f(x̄); ⟩ true`.  The diamond does not
   hold of every storage: `total + 0` reverts on a `uint` root holding `-1`.
 
-**Why one atomic term.**  `wt` is a symbol of the term language, `Op1.wt`,
-read by the interpreter as a test of the storage it is given, and stated
-as `defined(wt(storage))`: it returns exactly on a well-formed storage.  An
-expanded layout (`∀` over every root and member) would make every leaf a
-quantified formula the closer has to instantiate; one atom costs one
-constructor of `Op1` and nothing in `Fml`.  The closer keeps it as an opaque
-atom (`Tm.toL` translates it to itself, `Calculus/DecideScoped.lean`; it is
-not total, `Op1.total`): no leaf reads the layout it states.
+**Why one atomic predicate.**  `wt(storage)` is a predicate, KeY's
+`wellFormed(heap)` (`Fml.wellFormed`), read by the interpreter as a test
+of the storage it is given (`Storage.wtB`).  An expanded layout (`∀` over
+every root and member) would make every leaf a quantified formula the
+closer has to instantiate; one atom costs one constructor of `Fml`.  The
+closer keeps it as an opaque atom (the symbol `Op1.wt` returning,
+`Calculus/DecideScoped.lean`; it is not total, `Op1.total`): no leaf reads
+the layout it states.
 -/
 
 namespace Solidity
@@ -75,18 +75,14 @@ variable {C : Contract}
 
 /-- `wt(storage)`: the storage is one `C` can be in. -/
 def Fml.wt (C : Contract) {Γ : Ctx} : Fml C Γ :=
-  .defined (.app1 .wt (.app0 .storage))
+  .wellFormed (.app0 .storage)
 
 /-- `wt(storage)` holds in a typed state exactly when its storage passes the
 test (`Storage.wtB`). -/
 theorem holds_wt {Γ : Ctx} {σ : State C Γ} :
     holds σ (Fml.wt C) ↔ σ.storage.wtB = true := by
-  rw [Fml.wt, holds_defined]
-  show (Storage.wtT σ.storage) ≠ none ↔ _
-  unfold Storage.wtT
-  cases σ.storage.wtB with
-  | true => exact ⟨fun _ => rfl, fun _ h => nomatch h⟩
-  | false => exact ⟨fun h => absurd rfl h, fun h => nomatch h⟩
+  rw [Fml.wt, holds_wellFormed]
+  exact ⟨fun ⟨_, h, hw⟩ => by cases h; exact hw, fun h => ⟨_, rfl, h⟩⟩
 
 /-- A reachable storage passes the shape test. -/
 theorem shape_of_reachable (hdeep : C.vars.all (·.2.okDeep) = true) {st : Storage C}
@@ -199,9 +195,9 @@ elab_rules (kind := problemCtor) : term
 macro_rules (kind := problemCtorBang)
   | `(problem!{ constructor }) => `(problem[InContract.contract]{ constructor })
 
-/-- Whether a term is `wt(storage)`. -/
+/-- Whether a storage term is `storage`, the argument of `wt(storage)`. -/
 def Problem.isWt {Γ : Ctx} : {s : Srt} → Tm C Γ s → Bool
-  | _, .app1 .wt (.app0 .storage) => true
+  | _, .app0 .storage => true
   | _, _ => false
 
 /-- Whether an update is the deployment's, `Problem.deployUpd`'s shape. -/
@@ -215,7 +211,7 @@ def Problem.isDeploy {Γ Δ : Ctx} : Upd C Γ Δ → Bool
 modality, read back off the formula: what `Problem.text` prints. -/
 def Problem.parts : {Γ : Ctx} → Fml C Γ → Option (List (PrimTy × Var) × Bool × Modality)
   | _, .all x p φ => (Problem.parts φ).map fun (xs, r) => ((p, x) :: xs, r)
-  | _, .imp (.defined t) (.modal m _ _ .tt) => if Problem.isWt t then some ([], false, m) else none
+  | _, .imp (.wellFormed t) (.modal m _ _ .tt) => if Problem.isWt t then some ([], false, m) else none
   | _, .upd m U (.modal m' _ _ .tt) =>
     if Problem.isDeploy U && m = m' then some ([], true, m) else none
   | _, _ => none

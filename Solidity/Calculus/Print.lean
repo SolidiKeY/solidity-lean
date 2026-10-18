@@ -81,19 +81,9 @@ def Tm.sameAt {Γ : Ctx} {s s' : Srt} (ns : List Var) (a : Tm C Γ s) (a' : Tm C
   let new ← Delab.eqTmS ns' (a.quote c) ns' (a'.quote c)
   return new
 
-/-- `a = b` as `Fml.eqD` writes it: `defined(a) ∧ defined(b) ∧ a ≐ b`. -/
-def Fml.eqDParts? {Γ : Ctx} (ns : List Var) :
-    Fml C Γ → MetaM (Option ((p : PrimTy) × Tm C Γ (.val p) × Tm C Γ (.val p)))
-  | .and (.defined (p := p) a) (.and (.defined (p := q) b) (.eq a' b')) => do
-    if h : q = p then
-      if (← a.sameAt c ns a') && (← b.sameAt c ns b') then return some ⟨p, a, h ▸ b⟩
-    return none
-  | _ => return none
-
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
-def Fml.isConnective {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM Bool := do
-  if (← φ.eqDParts? c ns).isSome then return false
-  return match (Fml.visible φ).2 with
+def Fml.isConnective {Γ : Ctx} (φ : Fml C Γ) : Bool :=
+  match (Fml.visible φ).2 with
     | .and .. | .imp .. | .all .. => true
     | _ => false
 
@@ -112,7 +102,7 @@ def Tm.binopParts? {Γ : Ctx} : {s : Srt} → Tm C Γ s →
     | _, _, _ => none
   | _, _ => none
 
-/-- `a < b` as a specification writes it, `defined(a < b) ∧ … ∧ a < b ≐ true`:
+/-- `a < b` as a specification writes it, `a < b = true`:
 the operator and the operands. -/
 def cmpParts? {Γ : Ctx} {s s' : Srt} (a : Tm C Γ s) (b : Tm C Γ s') :
     Option (String × (q : PrimTy) × Tm C Γ (.val q) × Tm C Γ (.val q)) := do
@@ -141,7 +131,7 @@ connective explicitly, so does this; the rest is the grammar's. -/
 partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String × Nat) := do
   let arg {Δ : Ctx} (ms : List Var) (ψ : Fml C Δ) (min : Nat) : MetaM String := do
     let s ← Fml.showP ms ψ
-    return if ← ψ.isConnective c ms then s!"({s.1})" else paren s min
+    return if ψ.isConnective then s!"({s.1})" else paren s min
   let sub {Δ : Ctx} (ms : List Var) (ψ : Fml C Δ) (min : Nat) : MetaM String :=
     return paren (← Fml.showP ms ψ) min
   match φ with
@@ -150,14 +140,13 @@ partial def Fml.showP {Γ : Ctx} (ns : List Var) (φ : Fml C Γ) : MetaM (String
   | .not (.and (.not a) (.not b)) => return (s!"{← sub ns a 31} ∨ {← sub ns b 30}", 30)
   | .not (.all x p (.not a)) => return (s!"∃ {primName p} {x}; {← sub (x :: ns) a 25}", 25)
   | .not ψ => return (s!"¬{← arg ns ψ 50}", 1024)
-  | .eq a b => return (s!"{← a.show c ns} ≐ {← b.show c ns}", 50)
-  | .defined t => return (s!"defined({← t.show c ns})", 1024)
+  | .eq a b =>
+    if let some (sym, ⟨_, l, r⟩) := cmpParts? a b then
+      return (s!"{← l.show c ns} {sym} {← r.show c ns}", 55)
+    return (s!"{← a.show c ns} = {← b.show c ns}", 50)
+  | .wellFormed t => return (s!"wt({← t.show c ns})", 1024)
   | .all x p ψ => return (s!"∀ {primName p} {x}; {← sub (x :: ns) ψ 25}", 25)
   | .and ψ χ =>
-    if let some a ← φ.eqDParts? c ns then
-      if let some (sym, ⟨_, l, r⟩) := cmpParts? a.2.1 a.2.2 then
-        return (s!"{← l.show c ns} {sym} {← r.show c ns}", 55)
-      return (s!"{← a.2.1.show c ns} = {← a.2.2.show c ns}", 50)
     if let .imp a b := ψ then
       if let .imp b' a' := χ then
         let iff := a.quote c == a'.quote c && b.quote c == b'.quote c
@@ -214,7 +203,7 @@ private def locV {Γ : Ctx} {q : PrimTy} (i : Idx Γ (.val q)) : Val SE Γ q := 
 private def upd₁ : Fml SE [] :=
   .upd .box ((Upd.nil.decl x (.val (p := .uint) (lit 3))).decl p
       (.path (.app1 (.field (s := "Person") (f := "account") rfl) (.app0 (.root "alice" rfl)))))
-    (.eqD (pv (.there .here)) (lit 3))
+    (.eq (pv (.there .here)) (lit 3))
 
 /-- info: { x := 3 ‖ p := alice.account } x = 3 -/
 #guard_msgs in #eval showFml cSE [] upd₁
@@ -222,7 +211,7 @@ private def upd₁ : Fml SE [] :=
 /-- A connective under `∀`, `¬`, `∨`, `∃`, `↔` and a comparison. -/
 private def conn₁ : Fml SE [] :=
   .all x .uint (.and
-    (.imp (.eqD (.app2 (.binop .lt rfl) (pv (q := .uint) .here) (lit 3)) tru) (.not (.and (.not .tt) (.not .ff))))
+    (.imp (.eq (.app2 (.binop .lt rfl) (pv (q := .uint) .here) (lit 3)) tru) (.not (.and (.not .tt) (.not .ff))))
     (.and (.imp .tt .ff) (.imp .ff .tt)))
 
 /-- info: ∀ uint x; (x < 3 → true ∨ false) ∧ (true ↔ false) -/
@@ -237,7 +226,7 @@ private def prog₁ : Prog SE [] [.val .uint] :=
     (.cons .revert .nil)) .nil
 
 /-- info: [ uint x = 1; if (x > 0) {uint y = x;x = y;} else {revert();}; ] x = 1 -/
-#guard_msgs in #eval showFml cSE [] (.modal .box prog₁ .nil (.eqD (pv .here) (lit 1)))
+#guard_msgs in #eval showFml cSE [] (.modal .box prog₁ .nil (.eq (pv .here) (lit 1)))
 
 /-- The branches of `prog₁`'s `if`. -/
 private def thn₁ : Prog SE [.val .uint] [.val .uint, .val .uint] :=
@@ -246,11 +235,11 @@ private def els₁ : Prog SE [.val .uint] [.val .uint] := .cons .revert .nil
 
 /-- `x > 0`, as the condition of a goal. -/
 private def pos₁ : Fml SE [.val .uint] :=
-  .eqD (.app2 (.binop .gt rfl) (pv (q := .uint) .here) (lit 0)) tru
+  .eq (.app2 (.binop .gt rfl) (pv (q := .uint) .here) (lit 0)) tru
 
 /-- `ifElseSplit` on `if (x > 0) …; x = 2;`: each branch ends with a `}`. -/
 private def split₁ : Fml SE [.val .uint] :=
-  Premise.fml .box (.cons (.assignLocal .here (litV 2)) .nil) .nil (.eqD (pv .here) (lit 1))
+  Premise.fml .box (.cons (.assignLocal .here (litV 2)) .nil) .nil (.eq (pv .here) (lit 1))
     (Premise.split .block pos₁ (.not pos₁) thn₁ els₁)
 
 /--
@@ -262,7 +251,7 @@ info: (x > 0 → [ uint y = x; x = y; } x = 2; ] x = 1) ∧ (¬x > 0 → [ rever
 capture popped after it, invisibly; then the frames left: the pop is an
 update that prints as nothing, and the empty modality is gone. -/
 private def unfold₁ : Fml SE [.val .uint] :=
-  Premise.fml .diamond .nil .nil (.eqD (pv .here) (lit 1))
+  Premise.fml .diamond .nil .nil (.eq (pv .here) (lit 1))
     (Premise.unfold (.cons (.declStorage (.struct "Person") (.fresh "sp" 1) (some (.path alice))) <|
       .cons (.assignLocal (.there .here) (.read (.field (.alias .here) "age" rfl))) .nil)
       (.push .refl))
@@ -273,21 +262,21 @@ private def unfold₁ : Fml SE [.val .uint] :=
 /-- info: x = 1 -/
 #guard_msgs in #eval showFml cSE [.fresh "sp" 1, x]
   (Frames.exit (C := SE) (Γ := [.alias (.struct "Person"), .val .uint]) .diamond
-    (.pop .capture (.push .refl) .nil) (.eqD (pv .here) (lit 1)))
+    (.pop .capture (.push .refl) .nil) (.eq (pv .here) (lit 1)))
 
 /-- `uint v = x;` with its initializer dropped (`localValueDeclInitDrop`):
 `v = x;` under a hidden binder. -/
 private def bind₁ : Fml SE [.val .uint] :=
   Premise.fml .box (.cons (.assignLocal (.there .here) (locV .here)) .nil) .nil
-    (.eqD (pv (.there .here)) (lit 1))
+    (.eq (pv (.there .here)) (lit 1))
     (Premise.bind (.user "v") (.val .uint) (.cons (.assignLocal .here (locV (.there .here))) .nil))
 
 /-- info: [ v = x; x = v; ] x = 1 -/
 #guard_msgs in #eval showFml cSE [x] bind₁
 
-/-- info: { anon(x) } { havoc } ¬defined(x) -/
+/-- info: { anon(x) } { havoc } ¬x = 1 -/
 #guard_msgs in #eval showFml cSE [x]
-  (Fml.anon (C := SE) [⟨_, (.here : Idx [.val .uint] (.val .uint))⟩] (.havoc (.not (.defined (pv .here)))))
+  (Fml.anon (C := SE) [⟨_, (.here : Idx [.val .uint] (.val .uint))⟩] (.havoc (.not (.eq (pv .here) (lit 1)))))
 
 end Example
 

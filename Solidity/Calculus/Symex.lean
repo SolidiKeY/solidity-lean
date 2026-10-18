@@ -50,7 +50,7 @@ local macro "step_under " f:term:max : tactic => `(tactic| (
 theorem Fml.stepR_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
     ∀ {ψ : Fml C Γ}, φ.stepR k = some ψ → ∀ σ, holds σ ψ → holds σ φ := by
   induction φ with
-  | tt | eq | defined | not => intro _ h; cases h
+  | tt | eq | wellFormed | not => intro _ h; cases h
   | and φ ψ ihφ ihψ =>
     intro χ h σ hχ
     change (match Fml.stepR k φ with

@@ -214,17 +214,12 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
           (.cons (execOfRun rfl rfl) .nil))))
   case inv =>
     simp only [holdsC, holds]
-    refine ⟨?_, ?_, ?_⟩
-    · exact Option.ne_none_iff_exists'.2 ⟨_, by with_unfolding_all rfl⟩
-    · exact Option.ne_none_iff_exists'.2 ⟨_, by with_unfolding_all rfl⟩
-    · with_unfolding_all exact rfl
-  case exit => with_unfolding_all exact ⟨Option.ne_none_iff_exists'.2 ⟨_, rfl⟩,
-    Option.ne_none_iff_exists'.2 ⟨_, rfl⟩, rfl⟩
-  case resume => with_unfolding_all exact ⟨Option.ne_none_iff_exists'.2 ⟨_, rfl⟩,
-    Option.ne_none_iff_exists'.2 ⟨_, rfl⟩, rfl⟩
+    with_unfolding_all exact rfl
+  case exit => with_unfolding_all exact rfl
+  case resume => with_unfolding_all exact rfl
   have H2 := H _ ExecF.nil
   simp only [COut.after, holdsC, holds] at H2
-  obtain ⟨-, -, hE⟩ := H2
+  have hE := H2
   -- `0 + 10 == 5` fails
   exact absurd hE (by with_unfolding_all decide)
 

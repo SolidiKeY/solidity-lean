@@ -150,7 +150,7 @@ theorem deleteBelowAndBeside :
 default of its declared type, `0`.  (The premise `wt(storage)` once stood
 in for the typing the erased storage dropped.) -/
 theorem deleteWithoutWrite :
-    ⊨ dl!{ defined(wt(storage)) → [ delete alice.account; ] alice.account.balance == 0 } := by
+    ⊨ dl!{ wt(storage) → [ delete alice.account; ] alice.account.balance == 0 } := by
   sol_prove
 
 /-- `people[a].age = 1; people[b].age = 2; delete people[a];` — the element
@@ -293,7 +293,7 @@ theorem postIncrementParallel :
 /-- `deleteWithoutWrite` by the closer alone: `alice.account` is at its
 declared type, so its member reads `0` after the `delete`. -/
 theorem deleteWithoutWriteScoped :
-    ⊨ dl!{ defined(wt(storage)) → [ delete alice.account; ] alice.account.balance == 0 } := by
+    ⊨ dl!{ wt(storage) → [ delete alice.account; ] alice.account.balance == 0 } := by
   sol_symex
   sol_decide_close
 
@@ -411,7 +411,7 @@ theorem survives :
 /-- **`survives` is `20`**: `ledger.balances` is the mapping `TestSuite`
 declares, whose entries a `delete` keeps. -/
 theorem survivesMappingOnly :
-    ⊨ dl!{ defined(wt(storage)) →
+    ⊨ dl!{ wt(storage) →
       [ ledger.balances[2] = 20; delete ledger; uint survives = ledger.balances[2]; ]
         survives == 20 } := by
   sol_prove

@@ -131,7 +131,7 @@ end Rw
 
 section Facts
 
-/-- `x == v` read `true` states `x ≐ v`. -/
+/-- `x == v` read `true` states `x = v`. -/
 def _root_.Solidity.Op2.eqBFact {a b s : Srt} (o : Op2 C a b s) (x : LTm C a) (y : LTm C b) :
     Option (EqF C) :=
   match o, x, y with
@@ -147,8 +147,8 @@ def LTm.eqBFact? (t : LTm C (.val .bool)) : Option (EqF C) :=
   | .app2 o x y => o.eqBFact x y
   | _ => none
 
-/-- The equations `a ≐ b` states that the elimination rewrites by: toward
-a literal side; `x == v` read `true`, `x ≐ v`. -/
+/-- The equations `a = b` states that the elimination rewrites by: toward
+a literal side; `x == v` read `true`, `x = v`. -/
 def eqFacts {p : PrimTy} (a b : LTm C (.val p)) : List (EqF C) :=
   (match b.litV?, a.litV? with
     | some _, _ => [⟨p, a, b⟩]

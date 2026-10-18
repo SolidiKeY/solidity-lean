@@ -8,7 +8,7 @@ import Solidity.Calculus.SeqRewrite
 
 A chain's rewrite links on the scoped line itself (`Fml C Γ`), so that a
 rewrite goes in while the program is still open and the strategy's steps go
-on after it: `{ x := 250 ‖ se1 := 250 + 10 <= 255 } (… ∧ (se1 ≐ false → [ revert(); ] φ))`
+on after it: `{ x := 250 ‖ se1 := 250 + 10 <= 255 } (… ∧ (se1 = false → [ revert(); ] φ))`
 folds its literals, pushes the update through the branches and folds them,
 and `revertBox` then fires on what is left.  Past the program they rewrite
 the scoped line too, with `Calculus/RewritePast.lean`'s and
@@ -24,11 +24,11 @@ link `φ ~[n]~> ψ` is `r.apply φ = some ψ` (`Fml.RwBy`), proved by `rfl`.
 | `lawUpd r ht i` | a term taclet (`TermTaclet`) onto a literal, in the box update at `i` | `holds_upd_rwC` | `updRw` |
 | `applyOnRigid i s` | `{U}(A ∧ B)`, `{U}(a → B)`, `{U}¬a`, `{U}a` with `a` first-order: `U` applied to the first-order parts (`Fml.substU`), kept in front of the rest; `U` at `i`, cannot halt or under the box | `Fml.pushS_sound` | `applyOnRigidFormula` |
 | `applyStorageBox i s` | `applyOnRigid` where `U` is a box update of the storage and locals (`Fml.pushStAt`) | `Fml.pushS_sound` | `applyOnRigidFormula` (`applyStorageBox`) |
-| `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v ≐ v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
-| `litEq r n s`, `lawEq r n s` | a literal law or a term taclet (`TermTaclet`) in the equations along the skeleton `s` below `n` updates: a whole side, and in `defined(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
+| `concrete n s` | `true ∧ A ⇝ A`, `false → A ⇝ true`, `v = v ⇝ true`, … below `n` updates | `Fml.concreteAlongS_holds` (iff) | `concrete_*`, `eqClose` |
+| `litEq r n s`, `lawEq r n s` | a literal law or a term taclet (`TermTaclet`) in the equations along the skeleton `s` below `n` updates: a whole side, and in `wt(…)` for a literal law | `Fml.lawAlongS_holds` (iff) | `add_literals`, …, a term taclet's `\find` on an equation's side |
 | `mergeIn p n` | the `n + 1` updates at the end of the path `p` (through `∧`, the right of `→`, updates and binders) merged | `Fml.mergeRun_leads` | `sequentialToParallel2` |
 | `stateMerge r i` | the update at `i` merged with the next over its storage or memory write (`MergeNameS`) | `MergeNameS.top_sound` | `sequentialToParallel2` |
-| `applyOnPV i s` | `{U}(x ≐ c → A) ⇝ {U}(v ≐ c → A)`, `U` leaving the literal `v` in `x`, in the atoms along `s` | `Fml.applyOnPVTop_sound` | `applyOnPV` |
+| `applyOnPV i s` | `{U}(x = c → A) ⇝ {U}(v = c → A)`, `U` leaving the literal `v` in `x`, in the atoms along `s` | `Fml.applyOnPVTop_sound` | `applyOnPV` |
 | `simplifyUpdate i b` | the update at `i` without what it pops later (the box) and its shadowed writes (`Upd.simpS`), the scope ends after it merged in first where `b` | `Fml.simpAtB_holds` | `simplifyUpdate1/2/3` |
 
 `sequentialToParallel` while the program is open is `Calculus/Merge.lean`'s.
@@ -59,7 +59,7 @@ open Solidity (Srt Op0 Modality)
 /-! ## The skeleton of a line -/
 
 /-- The propositional skeleton of a formula, as the elaborator reads it off
-a line: a connective, a literal leaf (`true`, `a ≐ b`, `defined(t)`), an
+a line: a connective, a literal leaf (`true`, `a = b`, `wt(s)`), an
 update with the skeleton under it, or a part not looked at — a
 postcondition variable, a program, a quantifier, a `havoc`.  A connective
 carries whether each of its parts, once rewritten, may be a formula not to
@@ -135,10 +135,10 @@ theorem Fml.belowS_sound
   | _, n + 1, .upd m U φ, _, h => by
     obtain ⟨ψ, hψ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact fun σ hs => Upd.afterT_imp hs fun σ' a => Fml.belowS_sound hf n φ hψ σ' a
-  | _, 0, .tt, _, h | _, 0, .eq .., _, h | _, 0, .defined _, _, h | _, 0, .not _, _, h
+  | _, 0, .tt, _, h | _, 0, .eq .., _, h | _, 0, .wellFormed _, _, h | _, 0, .not _, _, h
   | _, 0, .and .., _, h | _, 0, .imp .., _, h | _, 0, .upd .., _, h | _, 0, .modal .., _, h
   | _, 0, .havoc _, _, h | _, 0, .anon .., _, h => hf h
-  | _, _ + 1, .tt, _, h | _, _ + 1, .eq .., _, h | _, _ + 1, .defined _, _, h
+  | _, _ + 1, .tt, _, h | _, _ + 1, .eq .., _, h | _, _ + 1, .wellFormed _, _, h
   | _, _ + 1, .not _, _, h | _, _ + 1, .and .., _, h | _, _ + 1, .imp .., _, h
   | _, _ + 1, .modal .., _, h | _, _ + 1, .havoc _, _, h | _, _ + 1, .anon .., _, h => by cases h
 
@@ -148,7 +148,7 @@ theorem Fml.atUpd_sound {g : {Γ Δ : Ctx} → Modality → Upd C Γ Δ → Fml 
       g m U φ = some ψ → ∀ σ, holds σ ψ → holds σ (.upd m U φ)) :
     {Γ : Ctx} → {φ ψ : Fml C Γ} → Fml.atUpd g φ = some ψ → ∀ σ, holds σ ψ → holds σ φ
   | _, .upd _ _ _, _, h => hg h
-  | _, .tt, _, h | _, .eq .., _, h | _, .defined _, _, h | _, .not _, _, h | _, .and .., _, h
+  | _, .tt, _, h | _, .eq .., _, h | _, .wellFormed _, _, h | _, .not _, _, h | _, .and .., _, h
   | _, .imp .., _, h | _, .modal .., _, h | _, .havoc _, _, h | _, .all .., _, h
   | _, .bind .., _, h | _, .anon .., _, h => by cases h
 
@@ -690,7 +690,8 @@ def FmlRw.applyStorageBox (i : Nat) (s : Skel) : FmlRw C :=
 A law read in the atoms along the skeleton (`Skel`): a whole side of an
 equation that is its left side (`Tm.sideC`, the Theory's equation,
 `Tm.Theq`), and, for an exact law (a literal law, `Tm.EvalEq`), every
-closed occurrence in a `defined(…)` term (`Tm.rwC`).  Each is an
+closed occurrence in a `wt(…)` term (`Tm.rwC`), which the interpreter
+reads.  Each is an
 equivalence, so it applies at any position, negative ones included. -/
 
 section LawEq
@@ -701,13 +702,13 @@ variable {Γ : Ctx} {p : PrimTy}
 return alike. -/
 def Fml.lawAtom (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) : Fml C Γ → Fml C Γ
   | .eq a b => .eq (a.sideC q) (b.sideC q)
-  | .defined t => if exact then .defined (t.rwC q) else .defined t
+  | .wellFormed t => if exact then .wellFormed (t.rwC q) else .wellFormed t
   | φ => φ
 
 /-- Whether `Fml.lawAtom` rewrites something. -/
 def Fml.lawAtomFires (q : Tm C [] (.val p) × Tm C [] (.val p)) (exact : Bool) : Fml C Γ → Bool
   | .eq a b => (Tm.pickClosed q a).isSome || (Tm.pickClosed q b).isSome
-  | .defined t => exact && t.hasC q
+  | .wellFormed t => exact && t.hasC q
   | _ => false
 
 /-- The law `q` in the atoms along the skeleton `s`. -/
@@ -741,12 +742,12 @@ theorem Fml.lawAtom_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.EvalE
     have ha := Tm.sideC_denote hq σ a
     have hb := Tm.sideC_denote hq σ b
     exact ⟨fun h => (ha.symm.trans h).trans hb, fun h => (ha.trans h).trans hb.symm⟩
-  | defined t =>
+  | wellFormed t =>
     cases exact with
     | false => exact Iff.rfl
     | true =>
-      show holds σ (.defined (t.rwC q)) ↔ holds σ (.defined t)
-      rw [holds_defined, holds_defined, Tm.rwC_eval_eq (hx rfl)]
+      show holds σ (.wellFormed (t.rwC q)) ↔ holds σ (.wellFormed t)
+      rw [holds_wellFormed, holds_wellFormed, Tm.rwC_eval_eq (hx rfl)]
   | _ => exact Iff.rfl
 
 /-- Two formulas alike in every state are alike after an update. -/
@@ -766,19 +767,19 @@ theorem Fml.lawAlongS_holds (hq : Tm.Theq q.1 q.2) (hx : exact = true → Tm.Eva
     imp_congr (Fml.lawAlongS_holds hq hx l a σ) (Fml.lawAlongS_holds hq hx r b σ)
   | _, .not _ s, .not a, σ => not_congr (Fml.lawAlongS_holds hq hx s a σ)
   | _, .upd s, .upd _ _ ψ, σ => holds_upd_congr (fun τ => Fml.lawAlongS_holds hq hx s ψ τ) σ
-  | _, .and .., .tt, _ | _, .and .., .eq .., _ | _, .and .., .defined _, _
+  | _, .and .., .tt, _ | _, .and .., .eq .., _ | _, .and .., .wellFormed _, _
   | _, .and .., .not _, _ | _, .and .., .imp .., _ | _, .and .., .upd .., _
   | _, .and .., .modal .., _ | _, .and .., .havoc _, _ | _, .and .., .all .., _
   | _, .and .., .bind .., _ | _, .and .., .anon .., _
-  | _, .imp .., .tt, _ | _, .imp .., .eq .., _ | _, .imp .., .defined _, _
+  | _, .imp .., .tt, _ | _, .imp .., .eq .., _ | _, .imp .., .wellFormed _, _
   | _, .imp .., .not _, _ | _, .imp .., .and .., _ | _, .imp .., .upd .., _
   | _, .imp .., .modal .., _ | _, .imp .., .havoc _, _ | _, .imp .., .all .., _
   | _, .imp .., .bind .., _ | _, .imp .., .anon .., _
-  | _, .not .., .tt, _ | _, .not .., .eq .., _ | _, .not .., .defined _, _
+  | _, .not .., .tt, _ | _, .not .., .eq .., _ | _, .not .., .wellFormed _, _
   | _, .not .., .and .., _ | _, .not .., .imp .., _ | _, .not .., .upd .., _
   | _, .not .., .modal .., _ | _, .not .., .havoc _, _ | _, .not .., .all .., _
   | _, .not .., .bind .., _ | _, .not .., .anon .., _
-  | _, .upd _, .tt, _ | _, .upd _, .eq .., _ | _, .upd _, .defined _, _
+  | _, .upd _, .tt, _ | _, .upd _, .eq .., _ | _, .upd _, .wellFormed _, _
   | _, .upd _, .not _, _ | _, .upd _, .and .., _ | _, .upd _, .imp .., _
   | _, .upd _, .modal .., _ | _, .upd _, .havoc _, _ | _, .upd _, .all .., _
   | _, .upd _, .bind .., _ | _, .upd _, .anon .., _
@@ -803,7 +804,7 @@ namespace FmlRw
 
 /-- **A literal law** in the equations along the skeleton `s` below `n`
 updates of the spine: a whole side of an equation, and every closed
-occurrence in a `defined(…)` term. -/
+occurrence in a `wt(…)` term. -/
 def litEq {p : PrimTy} {t t' : Tm C [] (.val p)} (r : LitLaw t t') (n : Nat) (s : Skel) :
     FmlRw C :=
   FmlRw.below (fun φ => Fml.lawOnS (t, t') true s φ)
@@ -1008,7 +1009,7 @@ theorem Tm.litPV_eq {s : Subst C Γ Δ} {σ₀ : State C Γ} {τ : State C Δ}
 `h` leaves holding a literal read as it. -/
 def Fml.litPVAlong (h : Subst C Γ Δ) : Skel → Fml C Δ → Fml C Δ
   | .lit, .eq a b => .eq (a.litPV h) (b.litPV h)
-  | .lit, .defined t => .defined (t.litPV h)
+  | .lit, .wellFormed t => .wellFormed (t.litPV h)
   | .and _ _ l r, .and a b => .and (Fml.litPVAlong h l a) (Fml.litPVAlong h r b)
   | .imp _ _ l r, .imp a b => .imp (Fml.litPVAlong h l a) (Fml.litPVAlong h r b)
   | .not _ s, .not a => .not (Fml.litPVAlong h s a)
@@ -1017,7 +1018,7 @@ def Fml.litPVAlong (h : Subst C Γ Δ) : Skel → Fml C Δ → Fml C Δ
 /-- Whether `Fml.litPVAlong` reads a local as a literal. -/
 def Fml.litPVFires (h : Subst C Γ Δ) : Skel → Fml C Δ → Bool
   | .lit, .eq a b => a.litPVFires h || b.litPVFires h
-  | .lit, .defined t => t.litPVFires h
+  | .lit, .wellFormed t => t.litPVFires h
   | .and _ _ l r, .and a b | .imp _ _ l r, .imp a b =>
     Fml.litPVFires h l a || Fml.litPVFires h r b
   | .not _ s, .not a => Fml.litPVFires h s a
@@ -1029,9 +1030,9 @@ theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : State C Γ} (σ : Stat
   | .lit, .eq a b => by
     show holds σ (.eq (a.litPV h) (b.litPV h)) ↔ holds σ (.eq a b)
     rw [holds_eq, holds_eq, (Tm.litPV_eq hok a).2, (Tm.litPV_eq hok b).2]
-  | .lit, .defined t => by
-    show holds σ (.defined (t.litPV h)) ↔ holds σ (.defined t)
-    rw [holds_defined, holds_defined, (Tm.litPV_eq hok t).1]
+  | .lit, .wellFormed t => by
+    show holds σ (.wellFormed (t.litPV h)) ↔ holds σ (.wellFormed t)
+    rw [holds_wellFormed, holds_wellFormed, (Tm.litPV_eq hok t).1]
   | .and _ _ l r, .and a b =>
     and_congr (Fml.litPVAlong_holds σ hok l a) (Fml.litPVAlong_holds σ hok r b)
   | .imp _ _ l r, .imp a b =>
@@ -1039,13 +1040,13 @@ theorem Fml.litPVAlong_holds {h : Subst C Γ Δ} {σ₀ : State C Γ} (σ : Stat
   | .not _ s, .not a => not_congr (Fml.litPVAlong_holds σ hok s a)
   | .lit, .tt | .lit, .not _ | .lit, .and .. | .lit, .imp .. | .lit, .upd .. | .lit, .modal ..
   | .lit, .havoc _ | .lit, .all .. | .lit, .bind .. | .lit, .anon .. => Iff.rfl
-  | .and .., .tt | .and .., .eq .. | .and .., .defined _ | .and .., .not _ | .and .., .imp ..
+  | .and .., .tt | .and .., .eq .. | .and .., .wellFormed _ | .and .., .not _ | .and .., .imp ..
   | .and .., .upd .. | .and .., .modal .. | .and .., .havoc _ | .and .., .all ..
   | .and .., .bind .. | .and .., .anon .. => Iff.rfl
-  | .imp .., .tt | .imp .., .eq .. | .imp .., .defined _ | .imp .., .not _ | .imp .., .and ..
+  | .imp .., .tt | .imp .., .eq .. | .imp .., .wellFormed _ | .imp .., .not _ | .imp .., .and ..
   | .imp .., .upd .. | .imp .., .modal .. | .imp .., .havoc _ | .imp .., .all ..
   | .imp .., .bind .. | .imp .., .anon .. => Iff.rfl
-  | .not .., .tt | .not .., .eq .. | .not .., .defined _ | .not .., .and .. | .not .., .imp ..
+  | .not .., .tt | .not .., .eq .. | .not .., .wellFormed _ | .not .., .and .. | .not .., .imp ..
   | .not .., .upd .. | .not .., .modal .. | .not .., .havoc _ | .not .., .all ..
   | .not .., .bind .. | .not .., .anon .. => Iff.rfl
   | .upd _, _ | .opaque, _ => Iff.rfl
@@ -1142,13 +1143,11 @@ def Fml.impCS (lo ro : Bool) (φ ψ : Fml C Γ) : Fml C Γ :=
 def Fml.notCS (o : Bool) (φ : Fml C Γ) : Fml C Γ :=
   if (!o && φ.isFFS) = true then .tt else .not φ
 
-/-- A literal leaf folded: two literals compared (`eqClose`), a literal
-defined. -/
+/-- A literal leaf folded: two literals compared (`eqClose`). -/
 def Fml.litCS : Fml C Γ → Fml C Γ
   | .eq a b => match a.litVal?, b.litVal? with
     | some v, some w => if v = w then .tt else .ff
     | _, _ => .eq a b
-  | .defined t => if t.isLit then .tt else .defined t
   | φ => φ
 
 /-- Whether a fold fires on a connective's parts. -/
@@ -1158,7 +1157,6 @@ def Fml.connFiresS (lo ro : Bool) (φ ψ : Fml C Γ) : Bool :=
 /-- Whether a fold fires on a literal leaf. -/
 def Fml.litFiresS : Fml C Γ → Bool
   | .eq a b => a.isLit && b.isLit
-  | .defined t => t.isLit
   | _ => false
 
 theorem Fml.andCS_holds (lo ro : Bool) (φ ψ : Fml C Γ) (σ : State C Γ) :
@@ -1243,15 +1241,6 @@ theorem Fml.litCS_holds (φ : Fml C Γ) (σ : State C Γ) : holds σ φ.litCS �
         · rename_i hvw
           refine ⟨fun h => absurd trivial h, fun h => ?_⟩
           exact absurd (Option.some.inj h) hvw
-  | defined t =>
-    show holds σ (if t.isLit then .tt else .defined t) ↔ _
-    split
-    · rename_i ht
-      obtain ⟨v, hv⟩ := Option.isSome_iff_exists.1 ht
-      refine ⟨fun _ => ?_, fun _ => trivial⟩
-      rw [holds_defined, Tm.litVal?_eval σ hv]
-      exact Option.some_ne_none _
-    · exact Iff.rfl
   | _ => exact Iff.rfl
 
 /-- The folds, bottom-up along the skeleton `s`. -/
@@ -1343,8 +1332,7 @@ def Fml.skelS {Γ : Ctx} : Fml C Γ → Skel × SkelSt
   | .tt => (.lit, .tt)
   | .eq (.app0 (.lit v)) (.app0 (.lit w)) => (.lit, if v = w then .tt else .ff)
   | .eq _ _ => (.lit, .other)
-  | .defined (.app0 (.lit _)) => (.lit, .tt)
-  | .defined _ => (.lit, .other)
+  | .wellFormed _ => (.lit, .other)
   | .not a =>
     let (sa, ta) := Fml.skelS a
     let st := match ta with

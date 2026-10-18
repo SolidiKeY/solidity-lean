@@ -87,11 +87,12 @@ info: dl{
 place: a postcondition after `uint x = 10;` is a `Post C [uint]`, with
 no weakening. -/
 
-/-- `x` is defined: a postcondition over the one local `x`. -/
-def xDefined : Post StandardExample [.val .uint] := ⟨.defined (.pvV .here), by decide, by decide⟩
+/-- `x = 10`: a postcondition over the one local `x`. -/
+def xTen : Post StandardExample [.val .uint] :=
+  ⟨.eq (.pvV .here) (.app0 (.lit (p := .uint) ⟨10, rfl⟩)), by decide, by decide⟩
 
-/-- info: dl{ ⟨ uint x = 10; ⟩ defined(x) } : Fml StandardExample [] -/
-#guard_msgs in #check cdl!{ ⟨ uint x = 10; ⟩ xDefined }
+/-- info: dl{ ⟨ uint x = 10; ⟩ x = 10 } : Fml StandardExample [] -/
+#guard_msgs in #check cdl!{ ⟨ uint x = 10; ⟩ xTen }
 
 /-! `#wp` and `#step` on a scoped formula. -/
 

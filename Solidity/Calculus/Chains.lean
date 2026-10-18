@@ -86,7 +86,7 @@ def Fml.chainSlot {Γ : Ctx} (i : Nat) : Fml C Γ :=
 /-- `Fml.stepFocusR` as compiled code (`Fml.stepAt`'s shape). -/
 def Fml.stepFocusAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Focus C × Fml C Γ)
   | _, φ => Fml.casesOn (motive := fun Γ _ => Option (Focus C × Fml C Γ)) φ
-    (tt := none) (eq := fun _ _ => none) (defined := fun _ => none) (not := fun _ => none)
+    (tt := none) (eq := fun _ _ => none) (wellFormed := fun _ => none) (not := fun _ => none)
     (and := fun φ ψ => match Fml.stepFocusAt k φ with
       | some (f, φ') => some (f, .and φ' ψ)
       | none => (Fml.stepFocusAt k ψ).map fun (f, ψ') => (f, .and φ ψ'))
@@ -236,7 +236,7 @@ def Fml.lineKey : {Γ : Ctx} → List Var → Fml C Γ → LineKey
     match φ with
     | .tt => .tt
     | .eq a b => .eq (a.keyStr ns) (b.keyStr ns)
-    | .defined t => .defined (t.keyStr ns)
+    | .wellFormed t => .wt (t.keyStr ns)
     | .not φ => .not (φ.lineKey ns)
     | .and φ ψ => .and (φ.lineKey ns) (ψ.lineKey ns)
     | .imp φ ψ => .imp (φ.lineKey ns) (ψ.lineKey ns)
@@ -663,7 +663,7 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
     | some m => φ'.replaceFVar m (mkConst ``Modality.box)
     | none => φ'
   -- past the program, the premises the line begins with (`A → ψ`, an
-  -- obligation's `defined(wt(storage))`) read through: the rewrites are
+  -- obligation's `wt(storage)`) read through: the rewrites are
   -- computed on `ψ` and applied there (`FmlRw.inPath`)
   let (pre, φb₀) := if past then premisePath φb [] else ([], φb)
   let lift (r : Expr) : Expr :=

@@ -1,6 +1,7 @@
 import Solidity.Calculus.Decide
 import Solidity.Calculus.ReadBounds
 import Solidity.Calculus.TermEq
+import Solidity.Calculus.TermAgree
 
 /-!
 # The reduction on a scoped leaf
@@ -429,39 +430,43 @@ def _root_.Solidity.Tm.retsS {Γ : Ctx} {s : Srt} (t : Tm C Γ s) : Bool :=
       (fun _ _ _ => false) false false false (fun _ _ _ _ => false) (fun _ => false))
     (fun _ _ => false) (fun _ _ _ => false) (fun _ _ _ _ => false) (fun _ => false)
 
-/-- `eqD a b`: `a` and `b` defined and equal, read as one equation. -/
-def _root_.Solidity.Fml.eqDView? {Γ : Ctx} (φ ψ : Fml C Γ) :
-    Option ((p : PrimTy) × Tm C Γ (.val p) × Tm C Γ (.val p)) :=
-  match φ, ψ with
-  | .defined (p := p) a, .and (.defined (p := q) b) (.eq (p := r) a' b') =>
-    if h : p = r ∧ q = r then
-      if a.beqR a' && b.beqR b' then some ⟨r, h.1 ▸ a, h.2 ▸ b⟩ else none
-    else none
-  | _, _ => none
+/-- `a` and `b` return one value or both halt: the equation of two
+`Option`s, in the reduction's language. -/
+def _root_.Solidity.LFml.optEq {p : PrimTy} (a b : LTm C (.val p)) : LFml C :=
+  .and (.imp (.eq a a) (.imp (.eq b b) (.eq a b))) (.and (.imp (.eq a a) (.eq b b))
+    (.imp (.eq b b) (.eq a a)))
+
+/-- A Theory equation `a = b` read by the interpreter.  Exactly, at either
+polarity, where the Theory reads both sides as the interpreter does
+(`Tm.agreeB`): their equation where one of them returns (`Tm.totB`), the
+equation of their typed readings, a halt included, otherwise.  Otherwise as its equation where it is a
+goal (`pos`), which implies it; as a hypothesis, that the sides are equal
+where they both return, which it implies (`Tm.denote_eval`). -/
+def _root_.Solidity.Fml.eqAt {Γ : Ctx} {p : PrimTy} (pos : Bool) (a b : Tm C Γ (.val p))
+    (a' b' : LTm C (.val p)) : LFml C :=
+  if a.agreeB && b.agreeB then
+    if a.totB || b.totB then .eq a' b' else LFml.optEq a' b'
+  else if pos then .eq a' b'
+  else .imp (.eq a' a') (.imp (.eq b' b') (.eq a' b'))
 
 /-- `Fml.toLS`'s compiled twin. -/
 def _root_.Solidity.Fml.toLSM : {Γ : Ctx} → Bool → SymS C Γ → Fml C Γ → Option (LFml C)
   | _, _, _, .tt => some .tt
-  | _, pos, ρ, .eq a b =>
-    if pos || (a.retsS && b.retsS) then
-      (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => .eq a' b'
-    else none
-  | _, _, ρ, .defined t => (t.toL ρ).map fun t' => .eq t' t'
+  | _, pos, ρ, .eq a b => (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => Fml.eqAt pos a b a' b'
+  | _, _, ρ, .wellFormed s => ((Tm.app1 .wt s).toL ρ).map fun t' => .eq t' t'
   | _, pos, ρ, .not φ => (φ.toLSM (!pos) ρ).map .not
   | _, pos, ρ, .and φ ψ =>
-    match Fml.eqDView? φ ψ with
-    | some ⟨_, a, b⟩ => (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => .eq a' b'
-    | none => (φ.toLSM pos ρ).bind fun φ' => (ψ.toLSM pos ρ).map fun ψ' => .and φ' ψ'
+    (φ.toLSM pos ρ).bind fun φ' => (ψ.toLSM pos ρ).map fun ψ' => .and φ' ψ'
   | _, pos, ρ, .imp φ ψ => (φ.toLSM (!pos) ρ).bind fun φ' => (ψ.toLSM pos ρ).map fun ψ' => .imp φ' ψ'
   | _, pos, ρ, .upd m U φ =>
     if pos then (U.toLS ρ).bind fun p => (φ.toLSM pos p.1).map fun φ' => guardM m (U.exhL ρ) p.2 φ'
-    else none
-  | _, pos, _, .modal .. => if pos then some .ff else none
-  | _, _, _, .havoc _ => none
+    else some .tt
+  | _, pos, _, .modal .. => if pos then some .ff else some .tt
+  | _, pos, _, .havoc _ => if pos then none else some .tt
   | _, pos, ρ, .all _ p φ => (φ.toLSM pos (ρ.pushQ p)).map fun φ' => .all ρ.next p φ'
   | _, pos, ρ, .bind _ _ t φ =>
     if pos then (φ.toLSM pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none
-  | _, _, _, .anon .. => none
+  | _, pos, _, .anon .. => if pos then none else some .tt
 
 /-- **A scoped formula with its updates pushed in**, at the polarity `pos`
 (`false` under a negation or on the left of an implication, where only a
@@ -472,30 +477,24 @@ def _root_.Solidity.Fml.toLS {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml 
     Option (LFml C) :=
   @Fml.rec C (fun Γ _ => Bool → SymS C Γ → Option (LFml C))
     (fun _ _ => some .tt)
-    (fun a b pos ρ =>
-      if pos || (a.retsS && b.retsS) then
-        (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => .eq a' b'
-      else none)
-    (fun t _ ρ => (t.toL ρ).map fun t' => .eq t' t')
+    (fun a b pos ρ => (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => Fml.eqAt pos a b a' b')
+    (fun s _ ρ => ((Tm.app1 .wt s).toL ρ).map fun t' => .eq t' t')
     (fun _ ih pos ρ => (ih (!pos) ρ).map .not)
-    (fun φ ψ ihφ ihψ pos ρ =>
-      match Fml.eqDView? φ ψ with
-      | some ⟨_, a, b⟩ => (a.toL ρ).bind fun a' => (b.toL ρ).map fun b' => .eq a' b'
-      | none => (ihφ pos ρ).bind fun φ' => (ihψ pos ρ).map fun ψ' => .and φ' ψ')
+    (fun _ _ ihφ ihψ pos ρ => (ihφ pos ρ).bind fun φ' => (ihψ pos ρ).map fun ψ' => .and φ' ψ')
     (fun _ _ ihφ ihψ pos ρ => (ihφ (!pos) ρ).bind fun φ' => (ihψ pos ρ).map fun ψ' => .imp φ' ψ')
     (fun m U _ ih pos ρ =>
       if pos then (U.toLS ρ).bind fun p => (ih pos p.1).map fun φ' => guardM m (U.exhL ρ) p.2 φ'
-      else none)
-    (fun _ _ _ _ _ pos _ => if pos then some .ff else none)
-    (fun _ _ _ _ => none)
+      else some .tt)
+    (fun _ _ _ _ _ pos _ => if pos then some .ff else some .tt)
+    (fun _ _ pos _ => if pos then none else some .tt)
     (fun _ p _ ih pos ρ => (ih pos (ρ.pushQ p)).map fun φ' => .all ρ.next p φ')
     (fun _ _ t _ ih pos ρ => if pos then (ih pos (ρ.pushB t)).map (LFml.allB t ρ.next) else none)
-    (fun _ _ _ _ _ => none) _ φ pos ρ
+    (fun _ _ _ pos _ => if pos then none else some .tt) _ φ pos ρ
 
 theorem _root_.Solidity.Fml.toLS_eq_toLSM {Γ : Ctx} (pos : Bool) (ρ : SymS C Γ) (φ : Fml C Γ) :
     φ.toLS pos ρ = φ.toLSM pos ρ := by
   induction φ generalizing pos with
-  | tt | eq | defined | modal | havoc | anon => rfl
+  | tt | eq | wellFormed | modal | havoc | anon => rfl
   | not φ ih | all x p φ ih | bind m x t φ ih | upd m U φ ih =>
     simp only [Fml.toLSM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [Fml.toLSM, ← ihφ, ← ihψ]; rfl

@@ -471,7 +471,7 @@ one.
   inputs), never weaker; its `require(x == 5)` keeps it derivable.  No `TestSuite`
   function returns a value but the skipped `tryCalleeGet`.
 - **`wt` is one atomic term**, `Op1.wt vs` applied to `storage`, stated as
-  `defined(wt(storage))` (`Fml.wt`).  The interpreter reads it as a test
+  `wt(storage)` (`Fml.wt`).  The interpreter reads it as a test
   on the typed storage, `Storage.wtB` (`Semantics/StorageWt.lean`, a fold
   the kernel evaluates): every root canonical and tight, every mapping key
   in its key type's range (a word is in range by its type).  So `shape_iff_reachable`: for `TestSuite`'s roots (no duplicate,
@@ -610,13 +610,13 @@ replaces has a row in `docs/lean-key-rule-map.md` ("The closer's clauses").
   `foldSame`, `foldZeroT`): a node on literals is evaluated by the
   interpreter's own checked operation (so `/`, `%` truncate and an
   overflow is left unfolded), `t == t` is `true`.
-- **`applyEq`** (`Eqs`, `substE`, `Facts.eqnK`): a premise `t ≐ 5` or
-  `alice.age ≐ v` rewrites `t` (`alice.age`) to the literal (the local)
+- **`applyEq`** (`Eqs`, `substE`, `Facts.eqnK`): a premise `t = 5` or
+  `alice.age = v` rewrites `t` (`alice.age`) to the literal (the local)
   after it; a premise is decomposed through `&&`, `||`, `==`, `!=`, `!`
   and guards (`Facts.decomp`).
 - **Case split on a `bool`** (`Facts.split`): on a `bool` parameter, or a
   condition compared with a literal, where a branch's cover needs it
-  (`se ≐ true ∨ se ≐ false`).
+  (`se = true ∨ se = false`).
 - **`wt` facts** (`LPath.ty`, `LPath.ty_find`, `Facts.retsW`,
   `Facts.halts`): `Derive.topWt` reads the obligation's `wt(storage)` as
   the layout a well-formed storage holds (`Decide.LayoutOk`); a read of the

@@ -100,21 +100,16 @@ def overflowClaim : Fml Bank [] := dl!{ ∀ uint x; x + 1 == x + 1 }
 def overflowReduction : ParameterReduction overflowClaim :=
   (parameterReduction? overflowClaim).get (by decide +kernel)
 
-/-- info: some true -/
-#guard_msgs in
-#eval match overflowReduction.verify with
-  | .inl _ => none
-  | .inr cm => some (decide ((cm.atoms.get .uint 0).val = (2 ^ 256 : Int) - 1))
+-- KeY's `=` is reflexive: at the bound both sides overflow, and are equal.
+/-- info: true -/
+#guard_msgs in #eval overflowReduction.verify.isLeft
 
 def signedUnderflow : Fml Bank [] := dl!{ ∀ int z; z - 1 == z - 1 }
 def signedUnderflowReduction : ParameterReduction signedUnderflow :=
   (parameterReduction? signedUnderflow).get (by decide +kernel)
 
-/-- info: some true -/
-#guard_msgs in
-#eval match signedUnderflowReduction.verify with
-  | .inl _ => none
-  | .inr cm => some (decide ((cm.atoms.get .int 0).val = -(2 ^ 255 : Int)))
+/-- info: true -/
+#guard_msgs in #eval signedUnderflowReduction.verify.isLeft
 
 def declaredClaim : Fml Bank [] := .imp (declaration_facts[Bank]) storageClaim
 def declaredReduction : ParameterReduction declaredClaim := declaration_parameter_reduce[declaredClaim]

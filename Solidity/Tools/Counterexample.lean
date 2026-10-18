@@ -231,7 +231,7 @@ def Fml.eval3C (dom : TDom) : {Γ : Ctx} → State C Γ → Fml C Γ → Tri
   | _, _, .tt => .tt
   | _, σ, .eq a b =>
     (a.eval σ).elim .unknown fun x => (b.eval σ).elim .unknown fun y => if x = y then .tt else .ff
-  | _, σ, .defined t => (t.eval σ).elim .ff fun _ => .tt
+  | _, σ, .wellFormed t => ((Tm.app1 .wt t).eval σ).elim .ff fun _ => .tt
   | _, σ, .not φ => (φ.eval3C dom σ).not
   | _, σ, .and φ ψ => (φ.eval3C dom σ).and (ψ.eval3C dom σ)
   | _, σ, .imp φ ψ => (φ.eval3C dom σ).imp (ψ.eval3C dom σ)
@@ -269,9 +269,10 @@ theorem Fml.eval3C_sound (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ �
         exact fun _ => trivial
       · simp only [hxy, if_false, reduceCtorEq, false_implies, true_and]
         exact fun _ h => h
-  | _, .defined t, σ => by
-    simp only [Fml.eval3C, holds]
-    cases h : t.eval σ <;> simp only [Option.elim, ne_eq, reduceCtorEq, not_false_eq_true,
+  | _, .wellFormed t, σ => by
+    simp only [Fml.eval3C]
+    rw [holds_wellFormed_eval]
+    cases h : (Tm.app1 .wt t).eval σ <;> simp only [Option.elim, ne_eq, reduceCtorEq, not_false_eq_true,
       imp_self, not_true_eq_false, and_self, implies_true, false_implies, true_implies]
   | _, .not φ, σ => by
     have ih := Fml.eval3C_sound dom φ σ
@@ -384,7 +385,7 @@ def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
     (fun _ => .tt)
     (fun a b σ => (a.eval σ).elim .unknown fun x =>
       (b.eval σ).elim .unknown fun y => if x = y then .tt else .ff)
-    (fun t σ => (t.eval σ).elim .ff fun _ => .tt)
+    (fun t σ => ((Tm.app1 .wt t).eval σ).elim .ff fun _ => .tt)
     (fun _ ih σ => (ih σ).not)
     (fun _ _ ih₁ ih₂ σ => (ih₁ σ).and (ih₂ σ))
     (fun _ _ ih₁ ih₂ σ => (ih₁ σ).imp (ih₂ σ))
@@ -401,7 +402,7 @@ def Fml.eval3 (dom : TDom) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) : Tri :=
 
 theorem Fml.eval3_eq (dom : TDom) : {Γ : Ctx} → (φ : Fml C Γ) → ∀ σ : State C Γ,
     φ.eval3 dom σ = φ.eval3C dom σ
-  | _, .tt, _ | _, .eq .., _ | _, .defined _, _ => rfl
+  | _, .tt, _ | _, .eq .., _ | _, .wellFormed _, _ => rfl
   | _, .not φ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ]; rfl
   | _, .and φ ψ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ, ← Fml.eval3_eq dom ψ]; rfl
   | _, .imp φ ψ, _ => by simp only [Fml.eval3C, ← Fml.eval3_eq dom φ, ← Fml.eval3_eq dom ψ]; rfl
@@ -695,7 +696,7 @@ conditions 1 and 2): what a certificate peels in the kernel.  Compiled as
 def Fml.peel (vals : List (Var × Semantics.CallValue)) {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
     Peeled C :=
   Fml.rec (motive := fun Γ _ => State C Γ → Peeled C)
-    (fun σ => ⟨_, σ, .tt⟩) (fun a b σ => ⟨_, σ, .eq a b⟩) (fun t σ => ⟨_, σ, .defined t⟩)
+    (fun σ => ⟨_, σ, .tt⟩) (fun a b σ => ⟨_, σ, .eq a b⟩) (fun t σ => ⟨_, σ, .wellFormed t⟩)
     (fun φ _ σ => ⟨_, σ, .not φ⟩) (fun φ ψ _ _ σ => ⟨_, σ, .and φ ψ⟩)
     (fun φ ψ _ _ σ => ⟨_, σ, .imp φ ψ⟩) (fun m U φ _ σ => ⟨_, σ, .upd m U φ⟩)
     (fun m P κ φ _ σ => ⟨_, σ, .modal m P κ φ⟩) (fun φ _ σ => ⟨_, σ, .havoc φ⟩)
@@ -719,7 +720,7 @@ theorem Fml.peel_eq (vals : List (Var × Semantics.CallValue)) : {Γ : Ctx} → 
   | _, .bind _ _ (.val _) φ, _ => by simp only [Fml.peelC, ← Fml.peel_eq vals φ]; rfl
   | _, .bind _ _ (.alias _) _, _ | _, .bind _ _ (.mem _) _, _ | _, .bind _ _ .old _, _
   | _, .bind _ _ .oldNet _, _ | _, .bind _ _ .kint _, _ | _, .tt, _ | _, .eq .., _
-  | _, .defined _, _ | _, .not _, _ | _, .and .., _ | _, .imp .., _ | _, .upd .., _
+  | _, .wellFormed _, _ | _, .not _, _ | _, .and .., _ | _, .imp .., _ | _, .upd .., _
   | _, .modal .., _ | _, .havoc _, _ | _, .anon .., _ => rfl
 
 /-- What fails under the peeled binders fails under the binders: each is a
@@ -740,7 +741,7 @@ theorem Fml.not_holds_of_peelC (vals : List (Var × Semantics.CallValue)) : {Γ 
       exact fun hall => Fml.not_holds_of_peelC vals _ φ h (hall w)
   | _, _, .bind _ _ (.alias _) _, h | _, _, .bind _ _ (.mem _) _, h | _, _, .bind _ _ .old _, h
   | _, _, .bind _ _ .oldNet _, h | _, _, .bind _ _ .kint _, h | _, _, .tt, h | _, _, .eq .., h
-  | _, _, .defined _, h
+  | _, _, .wellFormed _, h
   | _, _, .not _, h | _, _, .and .., h | _, _, .imp .., h | _, _, .upd .., h
   | _, _, .modal .., h | _, _, .havoc _, h | _, _, .anon .., h => h
 

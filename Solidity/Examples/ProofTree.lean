@@ -98,7 +98,7 @@ request, the rows `[serial, parent, name, branchLabel, state]`. -/
 /--
 info: node: 2
 sequent:
-  dl{ ∀ uint x, true ≐ true ⟹ [ x = 2; } ] ¬x = 0 }
+  dl{ ∀ uint x, true = true ⟹ [ x = 2; } ] ¬x = 0 }
 rule: localValueAssign
 state: inner
 branch: if true true
@@ -114,10 +114,10 @@ info: {"stats": {"nodes": 6, "branches": 2},
  "sequents":
  ["dl{ ⟹ ∀ uint x; [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
   "dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {x = 1;}; ] ¬x = 0 }",
-  "dl{ ∀ uint x, true ≐ true ⟹ [ x = 2; } ] ¬x = 0 }",
-  "dl{ ∀ uint x, true ≐ true, { x := 2 } ⟹ ¬x = 0 }",
-  "dl{ ∀ uint x, true ≐ false ⟹ [ x = 1; } ] ¬x = 0 }",
-  "dl{ ∀ uint x, true ≐ false, { x := 1 } ⟹ ¬x = 0 }"],
+  "dl{ ∀ uint x, true = true ⟹ [ x = 2; } ] ¬x = 0 }",
+  "dl{ ∀ uint x, true = true, { x := 2 } ⟹ ¬x = 0 }",
+  "dl{ ∀ uint x, true = false ⟹ [ x = 1; } ] ¬x = 0 }",
+  "dl{ ∀ uint x, true = false, { x := 1 } ⟹ ¬x = 0 }"],
  "openGoalCount": 0,
  "nodes":
  [[0, -1, "allRight", null, "inner"],
@@ -878,6 +878,7 @@ info: Try this:
         sol_leaf
         sol_close
       case els =>
+        apply updIntro
         sol_leaf
         sol_close
     case els =>

@@ -405,7 +405,7 @@ def derivationLatex (φ : Expr) (steps : Array Step) (o : Options := {}) : MetaM
 
 -- LeanTeX falls back to the root key, so register each head explicitly.
 @[latex_pp app.Solidity.Fml.tt, latex_pp app.Solidity.Fml.eq,
-  latex_pp app.Solidity.Fml.defined, latex_pp app.Solidity.Fml.not,
+  latex_pp app.Solidity.Fml.wellFormed, latex_pp app.Solidity.Fml.not,
   latex_pp app.Solidity.Fml.and, latex_pp app.Solidity.Fml.imp,
   latex_pp app.Solidity.Fml.all, latex_pp app.Solidity.Fml.upd,
   latex_pp app.Solidity.Fml.modal, latex_pp app.Solidity.Fml.havoc,

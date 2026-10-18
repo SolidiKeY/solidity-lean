@@ -77,7 +77,7 @@ its slot. -/
 inductive LineKey where
   | tt
   | eq (a b : String)
-  | defined (t : String)
+  | wt (s : String)
   | not (k : LineKey)
   | and (k l : LineKey)
   | imp (k l : LineKey)
@@ -97,7 +97,7 @@ inductive LineKey where
 def LineKey.quote : LineKey → Lean.Expr
   | .tt => Lean.mkConst ``LineKey.tt
   | .eq a b => Lean.mkApp2 (Lean.mkConst ``LineKey.eq) (Lean.toExpr a) (Lean.toExpr b)
-  | .defined t => Lean.mkApp (Lean.mkConst ``LineKey.defined) (Lean.toExpr t)
+  | .wt s => Lean.mkApp (Lean.mkConst ``LineKey.wt) (Lean.toExpr s)
   | .not k => Lean.mkApp (Lean.mkConst ``LineKey.not) k.quote
   | .and k l => Lean.mkApp2 (Lean.mkConst ``LineKey.and) k.quote l.quote
   | .imp k l => Lean.mkApp2 (Lean.mkConst ``LineKey.imp) k.quote l.quote
@@ -182,28 +182,25 @@ def elabModalProg (taken : List Nat) (P : List RawStmt) (Γ : NCtx) : ElabM (Blk
     ns := b.2.outNames ns
   pure acc
 
-/-- An atom of a formula (an equation, `defined`, a comparison), as
+/-- An atom of a formula (an equation, `wt`, a comparison), as
 `elabFml` reads it, its names in the reader's scope: a formula read where
 it stands (`NRead`). -/
 def elabAtomN : RawFml → ElabM (NRead C)
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
-    pure (.eqD (← tVal C Γ a) (← tVal C Γ b))
-  | .teq a b => do
-    let (Γ, _) ← get
     pure (.eq (← tVal C Γ a) (← tVal C Γ b))
-  | .defined t => do
+  | .wt s => do
     let (Γ, _) ← get
-    pure (.defined (← tVal C Γ t))
+    pure (.wt (← tStor C Γ s))
   | .peq a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.eqD a b)
+    pure (.eq a b)
   | .pne a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.not (.eqD a b))
+    pure (.not (.eq a b))
   | .cmp op a b => do
     let (Γ, _) ← get
     pure (NRead.cmp op (← tVal C Γ a) (← tVal C Γ b))
@@ -346,9 +343,6 @@ no type asked of a local a line past the program no longer declares (a
 memory local the program wrote, a capture): a term's key (`NTm.key`) is
 the text `Tm.keyStr` writes of the scoped term it names. -/
 
-/-- `a = b` with both sides defined, as `Fml.eqD`'s key. -/
-def LineKey.eqD (a b : String) : LineKey := .and (.defined a) (.and (.defined b) (.eq a b))
-
 /-- The keys of `a = b` by name: the sides', or on KeY's `int` its
 comparison's and `true`'s (`NRead.eqK`). -/
 def eqKeys (a b : NTerm C) : String × String :=
@@ -356,33 +350,29 @@ def eqKeys (a b : NTerm C) : String × String :=
   else (a.key, b.key)
 
 /-- A written line with no modality, its key read by name (`Fml.lineKey`'s
-shapes: `Fml.eqD` a conjunction, a comparison `a < b` the equation
+shapes: a comparison `a < b` the equation
 `a < b = true`, a Lean formula its slot). -/
 def elabKeyFml : RawFml → ElabM LineKey
   | .tt => pure .tt
   | .eq a b => do
     let (Γ, _) ← get
     let (ka, kb) := eqKeys C (← tVal C Γ a) (← tVal C Γ b)
-    pure (.eqD ka kb)
-  | .teq a b => do
-    let (Γ, _) ← get
-    let (ka, kb) := eqKeys C (← tVal C Γ a) (← tVal C Γ b)
     pure (.eq ka kb)
-  | .defined t => do
+  | .wt s => do
     let (Γ, _) ← get
-    pure (.defined (← tVal C Γ t).key)
+    pure (.wt (← tStor C Γ s).key)
   | .peq a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.eqD a.key b.key)
+    pure (.eq a.key b.key)
   | .pne a b => do
     let (Γ, _) ← get
     let (a, b) ← elabCompare C Γ a b
-    pure (.not (.eqD a.key b.key))
+    pure (.not (.eq a.key b.key))
   | .cmp op a b => do
     let (Γ, _) ← get
     let t : NTerm C := .binop op (← tVal C Γ a) (← tVal C Γ b)
-    pure (.eqD t.key (NTerm.bool (C := C) true).key)
+    pure (.eq t.key (NTerm.bool (C := C) true).key)
   | .all p x φ => inScope do
     modify fun (Γ, k) => (setBy x (.val p) Γ, k)
     pure (.all (Var.ofName x) p (← elabKeyFml φ))

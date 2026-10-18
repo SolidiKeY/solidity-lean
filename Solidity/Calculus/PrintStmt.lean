@@ -876,31 +876,11 @@ partial def viewF (ns : List Expr) (e : Expr) : PrM (List Expr × Expr) := do
     if !shown then return ← viewF ms (e.getArg! 5)
   return (ns, e)
 
-/-- `defined(a) ∧ defined(b) ∧ a ≐ b`, which `Fml.eqD a b` unfolds to and
-`a = b` prints: `a` and `b`, each with its names.  The two reads of a term
-are the same when they are the same text (`eqTmS`). -/
-def eqDPartsS (ns : List Expr) (e : Expr) :
-    PrM (Option ((List Expr × Expr) × (List Expr × Expr))) := do
-  let (ns, e) ← viewF ns e
-  let_expr Fml.and _ _ l r := e | return none
-  let (nl, l) ← viewF ns l
-  let_expr Fml.defined _ _ _ a := l | return none
-  let (nr, r) ← viewF ns r
-  let_expr Fml.and _ _ l' r' := r | return none
-  let (nl', l') ← viewF nr l'
-  let_expr Fml.defined _ _ _ b := l' | return none
-  let (nr', r') ← viewF nr r'
-  let_expr Fml.eq _ _ _ a' b' := r' | return none
-  unless ← eqTmS nl a nr' a' do return none
-  unless ← eqTmS nl' b nr' b' do return none
-  return some ((nl, a), (nl', b))
-
 /-- A connective, which the operand of `¬`, `{U}` and `⟨P⟩` parenthesises. -/
 def isConnectiveS (ns : List Expr) (e : Expr) : PrM Bool := do
   let (_, e') ← viewF ns e
   if e'.isAppOfArity ``Fml.imp 4 || e'.isAppOfArity ``Fml.all 5 then return true
-  unless e'.isAppOfArity ``Fml.and 4 do return false
-  return (← eqDPartsS ns e).isNone
+  return e'.isAppOfArity ``Fml.and 4
 
 /-- `¬(¬φ ∧ ¬ψ)`, which `φ ∨ ψ` spells: `φ` and `ψ`, with their names. -/
 def orPartsS (ns : List Expr) (e : Expr) :
@@ -948,7 +928,7 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   if e.isAppOfArity ``invFml 4 &&
       !((← whnf e.appArg!).isAppOf ``List.cons || (← whnf e.appArg!).isAppOf ``List.nil) then
     let I := e.appFn!.appArg!
-    return ← ppFmlS ns (← mkAppM ``Fml.isBoolD #[← mkAppM ``Val.lower #[I], mkConst ``Bool.true])
+    return ← ppFmlS ns (← mkAppM ``Fml.isBool #[← mkAppM ``Val.lower #[I], mkConst ``Bool.true])
   let (ns, e) ← viewF ns e
   if let some x ← fmlVar? e then return ← `(dl_fml| $x:ident)
   let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)
@@ -966,33 +946,29 @@ partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
         return ← `(dl_fml| ∃ $(mkIdent (Name.mkSimple T)):ident $x:ident; $(← ppFmlS na a):dl_fml)
     `(dl_fml| ¬$(← arg ns φ):dl_fml)
   | Fml.eq _ _ _ a b =>
-    -- on KeY's `int`, `a == b ≐ true` is `a ≐ b` (`NRead.eqK`)
-    if let some ("=", true, (nl, l), (_, r)) ← cmpPartsS ns a ns b then
-      if let some (l, r) ← ppKPairS nl l r then return ← `(dl_fml| $l:dl_term ≐ $r:dl_term)
-    `(dl_fml| $(← ppTermS ns a):dl_term ≐ $(← ppTermS ns b):dl_term)
-  | Fml.defined _ _ _ t => `(dl_fml| defined($(← ppTermS ns t):dl_term))
+    -- a comparison `a < b = true` is `a < b`; on KeY's `int`, `a == b = true`
+    -- is `a = b` (`NRead.eqK`)
+    let parts? : Option (String × TSyntax `dl_term × TSyntax `dl_term) ←
+      match ← cmpPartsS ns a ns b with
+      | some (sym, false, (nl, l), (nr, r)) => pure (some (sym, ← ppTermS nl l, ← ppTermS nr r))
+      | some (sym, true, (nl, l), (_, r)) =>
+        pure ((← ppKPairS nl l r).map fun (l, r) => (sym, l, r))
+      | none => pure none
+    if let some (sym, l, r) := parts? then
+      return ← match sym with
+        | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
+        | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
+        | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
+        | "=" => `(dl_fml| $l:dl_term = $r:dl_term)
+        | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
+    `(dl_fml| $(← ppTermS ns a):dl_term = $(← ppTermS ns b):dl_term)
+  | Fml.wellFormed _ _ t => `(dl_fml| wt($(← ppSTermS ns t):dl_term))
   | Fml.all _ _ x p φ =>
     let x := x.consumeMData
     let some xi ← ppVar? x | escape
     let some T ← primName? p | escape
     `(dl_fml| ∀ $(mkIdent (Name.mkSimple T)):ident $xi:ident; $(← ppFmlS (x :: ns) φ):dl_fml)
   | Fml.and _ _ φ ψ =>
-    if let some ((na, a), (nb, b)) ← eqDPartsS ns e then
-      let cmp ← cmpPartsS na a nb b
-      -- a KeY `int` comparison's operands, to read back at KeY's `int`
-      let parts? : Option (String × TSyntax `dl_term × TSyntax `dl_term) ← match cmp with
-        | some (sym, false, (nl, l), (nr, r)) => pure (some (sym, ← ppTermS nl l, ← ppTermS nr r))
-        | some (sym, true, (nl, l), (_, r)) =>
-          pure ((← ppKPairS nl l r).map fun (l, r) => (sym, l, r))
-        | none => pure none
-      if let some (sym, l, r) := parts? then
-        return ← match sym with
-          | "<" => `(dl_fml| $l:dl_term < $r:dl_term)
-          | "<=" => `(dl_fml| $l:dl_term <= $r:dl_term)
-          | ">" => `(dl_fml| $l:dl_term > $r:dl_term)
-          | "=" => `(dl_fml| $l:dl_term = $r:dl_term)
-          | _ => `(dl_fml| $l:dl_term >= $r:dl_term)
-      return ← `(dl_fml| $(← ppTermS na a):dl_term = $(← ppTermS nb b):dl_term)
     if let some ((na, a), (nb, b)) ← iffPartsS ns e then
       return ← `(dl_fml| $(← ppFmlS na a):dl_fml ↔ $(← ppFmlS nb b):dl_fml)
     let ψ' ← ppFmlS ns ψ

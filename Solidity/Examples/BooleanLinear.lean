@@ -95,7 +95,8 @@ def reversedTrueReduction : StaticReduction reversedTrue :=
 def partialNot : Fml Bank [] := dl!{ !(find(storage, balances[3]) - 1 == 0) = !(find(storage, balances[3]) - 1 == 0) }
 def partialNotReduction : StaticReduction partialNot := (checkedReduction? partialNot).get (by decide +kernel)
 
-/-- info: some 0 -/
+-- KeY's `=` is reflexive: where the read is `0` both sides halt, and are equal.
+/-- info: none -/
 #guard_msgs in
 #eval match partialNotReduction.verify with
   | .inl _ => none
@@ -119,7 +120,8 @@ def strictEq : Fml Bank [] :=
   dl!{ (false == (find(storage, balances[3]) - 1 == 0)) = !(find(storage, balances[3]) - 1 == 0) }
 def strictEqReduction : StaticReduction strictEq := (checkedReduction? strictEq).get (by decide +kernel)
 
-/-- info: some 0 -/
+-- Where the read is `0` both sides halt, so they are equal; elsewhere alike.
+/-- info: none -/
 #guard_msgs in
 #eval match strictEqReduction.verify with
   | .inl _ => none

@@ -115,20 +115,68 @@ def bindValue {Γ : Ctx} (m : Modality) (x : Var) (p : PrimTy) {φ : Fml C (.val
     (r : DeclarationReduction φ) : DeclarationReduction (.bind m x (.val p) φ) :=
   ⟨.all x p r.formula, fun σ => forall_congr' fun v => r.correct (σ.push v)⟩
 
+private theorem holds_imp' {Γ : Ctx} (σ : State C Γ) (φ ψ : Fml C Γ) :
+    holds σ (.imp φ ψ) ↔ (holds σ φ → holds σ ψ) := Iff.rfl
+private theorem holds_and' {Γ : Ctx} (σ : State C Γ) (φ ψ : Fml C Γ) :
+    holds σ (.and φ ψ) ↔ holds σ φ ∧ holds σ ψ := Iff.rfl
+private theorem holds_not' {Γ : Ctx} (σ : State C Γ) (φ : Fml C Γ) :
+    holds σ (.not φ) ↔ ¬ holds σ φ := Iff.rfl
+
+/-- `{ se := c } ψ`: the condition read by an update, as the rules read it,
+`ψ` over its value in a fresh local. -/
+def capture {Γ : Ctx} (m : Modality) (c : Val C Γ .bool) (ψ : Fml C (.val .bool :: Γ)) :
+    Fml C Γ :=
+  .upd m (Upd.nil.decl (fse 0) (.val (p := .bool) c.lower)) ψ
+
+/-- `φ` past the captured local, which the update pops. -/
+def popped {Γ : Ctx} (m : Modality) (φ : Fml C Γ) : Fml C (.val .bool :: Γ) :=
+  .upd m (Upd.nil.pop (.push .refl)) φ
+
+theorem capture_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool) (ψ : Fml C (.val .bool :: Γ))
+    (σ : State C Γ) :
+    holds σ (capture m c ψ) ↔
+      match c.evalT σ with
+      | .ok v => holds (σ.push (t := .val .bool) v) ψ
+      | .error _ => m.onHalt := by
+  cases hc : c.evalT σ with
+  | ok v =>
+    have hcl : (Rhs.val (p := .bool) c.lower).eval σ =
+        some (LTy.VDen.ofT (H := σ.H) (.val .bool) v) := Val.lower_eval_ok c σ hc
+    exact Upd.afterT_lands_iff (Upd.lands_decl (Upd.lands_nil σ) (fse 0) hcl) m _
+  | error e =>
+    have hglob : (Upd.nil.decl (fse 0) (.val (p := .bool) c.lower)).globT σ = none := by
+      show (c.lower.eval σ).bind (fun _ => some σ.globG) = none
+      rw [Val.lower_eval_error c σ hc]; rfl
+    have hx : (Upd.nil.decl (fse 0) (.val (p := .bool) c.lower)).exh σ = false :=
+      Upd.exh_of_pushFree (by
+        simp only [Upd.pushFree, Rhs.pushFree, Val.lower_pushFree, Bool.and_self])
+    constructor
+    · intro h; exact h.of_noExh hglob hx
+    · intro h; exact Upd.afterT_introX (fun _ => .inl h) fun _ _ hl => by
+        rw [hl.1] at hglob; cases hglob
+
+theorem popped_holds {Γ : Ctx} (m : Modality) (φ : Fml C Γ) (σ : State C Γ) (v : Bool) :
+    holds (σ.push (t := .val .bool) v) (popped m φ) ↔ holds σ φ :=
+  Upd.afterT_lands_iff (Upd.lands_pop_nil _ _) m _
+
+theorem here_holds {Γ : Ctx} (σ : State C Γ) (v b : Bool) :
+    holds (σ.push (t := .val .bool) v) (Fml.isBool (Tm.pvV (p := .bool) .here) b) ↔ v = b :=
+  holds_isBool_pvV _ _ _
+
 def requireFormula {Γ : Ctx} (m : Modality) (c : Val C Γ .bool) (φ : Fml C Γ) : Fml C Γ :=
   match m with
-  | .box => .imp (.isBoolD c.lower true) φ
-  | .diamond => .and (.isBoolD c.lower true) φ
+  | .box => capture .box c (.imp (.isBool (.pvV .here) true) (popped .box φ))
+  | .diamond => capture .diamond c (.and (.isBool (.pvV .here) true) (popped .diamond φ))
 
 theorem requireFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
     (φ : Fml C Γ) (σ : State C Γ) :
     holds σ (requireFormula m c φ) ↔
       match m with
       | .box => c.evalT σ = .ok true → holds σ φ
-      | .diamond => c.evalT σ = .ok true ∧ holds σ φ :=
-  match m with
-  | .box => imp_congr (holds_isBoolD_lower c σ true) Iff.rfl
-  | .diamond => and_congr (holds_isBoolD_lower c σ true) Iff.rfl
+      | .diamond => c.evalT σ = .ok true ∧ holds σ φ := by
+  cases m <;> rw [requireFormula, capture_holds] <;> cases hc : c.evalT σ <;>
+    simp only [holds_imp', holds_and', here_holds, popped_holds, Modality.onHalt, reduceCtorEq,
+      Except.ok.injEq, false_implies, false_and, true_iff]
 
 def require {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (c : Val C Γ .bool)
     (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
@@ -155,7 +203,7 @@ def require {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (c : Val C Γ .bool)
       exact ⟨fun _ => nofun, fun _ => trivial⟩⟩
 
 def assertFormula {Γ : Ctx} (m : Modality) (c : Val C Γ .bool) (φ : Fml C Γ) : Fml C Γ :=
-  .and (.not (.isBoolD c.lower false)) (requireFormula m c φ)
+  .and (.not (capture .diamond c (.isBool (.pvV .here) false))) (requireFormula m c φ)
 
 theorem assertFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
     (φ : Fml C Γ) (σ : State C Γ) :
@@ -163,7 +211,10 @@ theorem assertFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
       (match m with
       | .box => c.evalT σ = .ok true → holds σ φ
       | .diamond => c.evalT σ = .ok true ∧ holds σ φ) :=
-  and_congr (not_congr (holds_isBoolD_lower c σ false)) (requireFormula_holds m c φ σ)
+  and_congr (not_congr (by
+    rw [capture_holds]
+    cases c.evalT σ <;> simp only [here_holds, Modality.onHalt, reduceCtorEq, Except.ok.injEq]))
+    (requireFormula_holds m c φ σ)
 
 def assert {Γ Γ₁ Γ₀ : Ctx} (m : Modality) (c : Val C Γ .bool)
     (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) :
@@ -200,9 +251,11 @@ def revert {Γ Γ₁ Γ₀ : Ctx} (m : Modality)
 
 def branchFormula {Γ : Ctx} (m : Modality) (c : Val C Γ .bool) (P Q : Fml C Γ) : Fml C Γ :=
   match m with
-  | .box => .and (.imp (.isBoolD c.lower true) P) (.imp (.isBoolD c.lower false) Q)
-  | .diamond => .not (.and (.not (.and (.isBoolD c.lower true) P))
-      (.not (.and (.isBoolD c.lower false) Q)))
+  | .box => capture .box c (.and (.imp (.isBool (.pvV .here) true) (popped .box P))
+      (.imp (.isBool (.pvV .here) false) (popped .box Q)))
+  | .diamond => capture .diamond c
+      (.not (.and (.not (.and (.isBool (.pvV .here) true) (popped .diamond P)))
+        (.not (.and (.isBool (.pvV .here) false) (popped .diamond Q)))))
 
 theorem branchFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
     (P Q : Fml C Γ) (σ : State C Γ) :
@@ -210,13 +263,11 @@ theorem branchFormula_holds {Γ : Ctx} (m : Modality) (c : Val C Γ .bool)
       match m with
       | .box => (c.evalT σ = .ok true → holds σ P) ∧ (c.evalT σ = .ok false → holds σ Q)
       | .diamond => ¬ (¬ (c.evalT σ = .ok true ∧ holds σ P) ∧
-          ¬ (c.evalT σ = .ok false ∧ holds σ Q)) :=
-  match m with
-  | .box => and_congr (imp_congr (holds_isBoolD_lower c σ true) Iff.rfl)
-      (imp_congr (holds_isBoolD_lower c σ false) Iff.rfl)
-  | .diamond => not_congr (and_congr
-      (not_congr (and_congr (holds_isBoolD_lower c σ true) Iff.rfl))
-      (not_congr (and_congr (holds_isBoolD_lower c σ false) Iff.rfl)))
+          ¬ (c.evalT σ = .ok false ∧ holds σ Q)) := by
+  cases m <;> rw [branchFormula, capture_holds] <;> cases hc : c.evalT σ <;>
+    simp only [holds_imp', holds_and', holds_not', here_holds, popped_holds, Modality.onHalt,
+      reduceCtorEq, Except.ok.injEq, false_implies, false_and, and_self, not_false_eq_true,
+      not_true_eq_false, true_iff]
 
 def branch {Γ Δ₁ Δ₂ Γ₁ Γ₀ : Ctx} (m : Modality) (c : Val C Γ .bool)
     (P : Prog C Γ Δ₁) (Q : Prog C Γ Δ₂) (ω : Prog C Γ Γ₁)

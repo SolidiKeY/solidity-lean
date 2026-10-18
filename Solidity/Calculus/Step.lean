@@ -171,7 +171,7 @@ def Frames.maxIdx : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Nat
 of its erasure's names). -/
 def Fml.maxIdx : {Γ : Ctx} → Fml C Γ → Nat
   | _, φ => Fml.casesOn (motive := fun _ _ => Nat) φ
-    (tt := 0) (eq := fun _ _ => 0) (defined := fun _ => 0) (not := fun φ => Fml.maxIdx φ)
+    (tt := 0) (eq := fun _ _ => 0) (wellFormed := fun _ => 0) (not := fun φ => Fml.maxIdx φ)
     (and := fun φ ψ => max (Fml.maxIdx φ) (Fml.maxIdx ψ))
     (imp := fun φ ψ => max (Fml.maxIdx φ) (Fml.maxIdx ψ))
     (upd := fun _ U φ => max U.maxIdx (Fml.maxIdx φ))
@@ -217,7 +217,7 @@ updates, a precondition, binders and the goals of a branch, fresh names at
 `Fml.stepR`. -/
 def Fml.stepAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
   | _, φ => Fml.casesOn (motive := fun Γ _ => Option (Fml C Γ)) φ
-    (tt := none) (eq := fun _ _ => none) (defined := fun _ => none) (not := fun _ => none)
+    (tt := none) (eq := fun _ _ => none) (wellFormed := fun _ => none) (not := fun _ => none)
     (and := fun φ ψ => match Fml.stepAt k φ with
       | some φ' => some (.and φ' ψ)
       | none => (Fml.stepAt k ψ).map (.and φ))
@@ -235,7 +235,7 @@ def Fml.stepAt (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
 @[implemented_by Fml.stepAt]
 def Fml.stepR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
   Fml.rec (motive := fun Γ _ => Option (Fml C Γ))
-    (tt := none) (eq := fun _ _ => none) (defined := fun _ => none) (not := fun _ _ => none)
+    (tt := none) (eq := fun _ _ => none) (wellFormed := fun _ => none) (not := fun _ _ => none)
     (and := fun φ ψ ihφ ihψ => match ihφ with
       | some φ' => some (.and φ' ψ)
       | none => ihψ.map (.and φ))
@@ -250,7 +250,7 @@ def Fml.stepR (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
 /-- The recursor's stepper is the compiled one. -/
 theorem Fml.stepR_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepR k φ = Fml.stepAt k φ := by
   induction φ with
-  | tt | eq | defined | not | modal => rfl
+  | tt | eq | wellFormed | not | modal => rfl
   | and φ ψ ihφ ihψ =>
     show (match Fml.stepR k φ with
       | some φ' => some (Fml.and φ' ψ)

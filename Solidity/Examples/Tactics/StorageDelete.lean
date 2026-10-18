@@ -160,7 +160,7 @@ a well-typed storage, where `total` holds the `uint` it is declared as.
 Over today's untyped storage it was refuted (a `bool` there resets to
 `false`); `wt(storage)` describes the typed states. -/
 theorem deleteRootUnknown :
-    ⊨ dl!{ defined(wt(storage)) → [ delete total; ] total == 0 } := by
+    ⊨ dl!{ wt(storage) → [ delete total; ] total == 0 } := by
   sol_prove
 
 /-! ### Below a deleted struct, from the initial store
@@ -270,7 +270,7 @@ last element binds rewritten by the typed Theory's own laws —
 The read sits in an update's right-hand side, `{ x := find(…) }`, which the
 rewrite reaches because its result is a literal and the update is under the
 box (`Proves.updRw`).  Then the update is applied to the goal and dropped
-(`sol_apply_upd`) and `v = v` closes (`Proves.eqDClose`).  Every step is a
+(`sol_apply_upd`) and `v = v` closes (`Proves.eqClose`).  Every step is a
 rule of the calculus, so none of them waits for the program to be gone
 (`deleteFrameMid_theory`).
 
@@ -311,7 +311,7 @@ theorem deleteReadDeep_theory :
   -- dl{ { se1 := 5 ‖ … ‖ x := 0 } ⟹ x = 0 }
   sol_apply_upd
   -- dl{ ⟹ 0 = 0 }
-  exact Proves.eqDClose
+  exact Proves.eqClose
 
 /--
 info: Try this:
@@ -378,7 +378,7 @@ theorem deleteFrame_theory :
   sol_rw [Obs.findOnDelAtFrame, Obs.findOnSave]
   -- dl{ { storage := save(storage, bob.age, 7) ‖ storage := delAt(…) ‖ x := 7 } ⟹ x = 7 }
   sol_apply_upd
-  exact Proves.eqDClose
+  exact Proves.eqClose
 
 /-- The same read, rewritten while `x = x + 1;` is still to run: the merge
 and the rewrite are rules of the calculus, not steps after it. -/

@@ -150,8 +150,8 @@ def upper : (p : PrimTy) → p.Denote
 def range {p : PrimTy} (hp : p ≠ .bool) (t : Tm C Γ (.val p)) : Fml C Γ :=
   let h : BinOp.le.accepts p = true := by
     cases p <;> simp_all only [BinOp.accepts, PrimTy.isNumeric, ne_self_iff_false]
-  .and (.eqD (.app2 (.binop .le h) (.app0 (.lit (lower p))) t) (.app0 (.lit true)))
-    (.eqD (.app2 (.binop .le h) t (.app0 (.lit (upper p)))) (.app0 (.lit true)))
+  .and (.eq (.app2 (.binop .le h) (.app0 (.lit (lower p))) t) (.app0 (.lit true)))
+    (.eq (.app2 (.binop .le h) t (.app0 (.lit (upper p)))) (.app0 (.lit true)))
 
 /-- Every defined typed numeric read satisfies its declared range. -/
 theorem range_holds {p : PrimTy} (hp : p ≠ .bool) {t : Tm C Γ (.val p)}
@@ -165,7 +165,7 @@ theorem range_holds {p : PrimTy} (hp : p ≠ .bool) {t : Tm C Γ (.val p)}
       simpa only [PrimTy.inRange, decide_eq_true_eq] using h
     have hu : v.1 ≤ uintBound - 1 := by omega
     unfold range
-    constructor <;> apply (holds_eqD _ _ _).2 <;> refine ⟨true, ?_, rfl⟩
+    constructor <;> refine (holds_eq_of_eval (p := .bool) (y := true) ?_ rfl).2 rfl
     · rw [Tm.eval_app2, Close.Op2.eval_binop, hv]
       change some (decide (0 ≤ v.1)) = some true
       simp only [hb.1, decide_true]
@@ -178,7 +178,7 @@ theorem range_holds {p : PrimTy} (hp : p ≠ .bool) {t : Tm C Γ (.val p)}
       simpa only [PrimTy.inRange, decide_eq_true_eq] using h
     have hu : v.1 ≤ intBound - 1 := by omega
     unfold range
-    constructor <;> apply (holds_eqD _ _ _).2 <;> refine ⟨true, ?_, rfl⟩
+    constructor <;> refine (holds_eq_of_eval (p := .bool) (y := true) ?_ rfl).2 rfl
     · rw [Tm.eval_app2, Close.Op2.eval_binop, hv]
       change some (decide (-intBound ≤ v.1)) = some true
       simp only [hb.1, decide_true]
@@ -194,12 +194,6 @@ theorem uint_range {t : Tm C Γ (.val .uint)} (ht : t.Total) :
 
 theorem int_range {t : Tm C Γ (.val .int)} (ht : t.Total) :
     Valid (range (by decide : PrimTy.int ≠ .bool) t) := range_holds _ ht
-
-theorem bool_range {t : Tm C Γ (.val .bool)} (ht : t.Total) :
-    Valid (.eqD (.app1 (.unop .not rfl) t) (.app1 (.unop .not rfl) t)) := by
-  intro σ
-  obtain ⟨v, hv⟩ := Tm.total_not ht σ
-  exact (holds_eqD _ _ _).2 ⟨v, hv, hv⟩
 
 theorem valid_true : Valid (.tt : Fml C Γ) := fun _ => trivial
 
@@ -217,7 +211,7 @@ private partial def proveCore (conjunctions : Bool) (g : MVarId) : StateRefT Nat
   let n ← get
   if n == 0 then throwError "declaration facts: node budget exhausted"
   set (n - 1)
-  let rules := #[``uint_range, ``int_range, ``bool_range, ``valid_true,
+  let rules := #[``uint_range, ``int_range, ``valid_true,
     ``valid_and, ``valid_all, ``Tm.total_local, ``Tm.total_lit, ``Tm.total_env,
     ``Tm.total_storage, ``Tm.total_old, ``Tm.total_find, ``Tm.total_not,
     ``Tm.declared_root, ``Tm.declared_field, ``Tm.declared_key]

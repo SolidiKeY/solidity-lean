@@ -112,7 +112,8 @@ than adding parameter locals to the state.
 `Examples/QueryReduction.lean` pin alias agreement/conflict, mixed primitive
 values, rejection of directional fallbacks, dependent mapping keys, mixed
 typed quantified parameters, fields beneath signed/boolean mapping keys,
-failure of defined equality, conservative unused reads, and unsupported
+equality of failures (KeY's `=` is reflexive, so two sides that halt alike
+are equal), conservative unused reads, and unsupported
 arrays, memory, ledger reads and interior quantification. The headline
 equivalences and counterstate transport use only Lean's standard three
 axioms (`propext`, `Classical.choice`, `Quot.sound`).
@@ -513,8 +514,10 @@ encoded value. `ScalarCode.inRange_iff` equates shifted signed/unsigned
 bounds with the interpreter's actual `inRange` check. Checked addition
 subtracts one signed offset from the sum of operand codes; subtraction adds
 one offset to their difference. `arith_correct` retains both operand guards
-and the result's bounds. `eq_correct` requires both computations to return,
-so equal failures cannot produce true defined equality.
+and the result's bounds. `eq_correct` requires both computations to return;
+the source equation is KeY's `=` (`Fml.eq`), exact against the typed
+readings where both sides agree (`Tm.agreeB`, `LFml.optEq`), so two
+computations that fail alike are equal there.
 
 `Calculus/CheckedLinear.lean` connects these operations to existing typed
 leaf terms. `CheckedValue` carries the finite actual references, the partial

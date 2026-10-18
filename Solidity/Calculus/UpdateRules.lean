@@ -13,11 +13,8 @@ left (`Fml.modalFree`), and those that drop a fact a context gives, no
 diamond in it (`Hyps.boxOnly`):
 
 * `andSplit` (`andRight`, the constructor `Proves.andIntro`, which needs
-  no modality-free sequent), `eqDSplit`: `a = b` into `defined(a)`,
-  `defined(b)` and `a ≐ b`;
-* `definedWritten`, `definedLit`, `eqRefl`, `eqClose`, `eqDClose`: a local
-  of the typed state always holds a value of its type, so `defined(x)`
-  needs no update that wrote `x`;
+  no modality-free sequent);
+* `eqRefl`, `eqClose` (KeY's `eqClose`): `t = t`;
 * `applyOnRigidBox` (`applyOnRigidFormula` under the box): the last update
   applied to a first-order goal and dropped (`Fml.substU`; a goal that reads
   no global part where the update writes one);
@@ -217,7 +214,7 @@ them (`Tm.substH`); `none` past an atom it cannot read there. -/
 def Fml.substU {Γ Δ : Ctx} (U : Upd C Γ Δ) : Fml C Δ → Option (Fml C Γ)
   | .tt => some .tt
   | .eq a b => do pure (.eq (← a.substH U.held U.envOnly none) (← b.substH U.held U.envOnly none))
-  | .defined t => (t.substH U.held U.envOnly none).map .defined
+  | .wellFormed s => (s.substH U.held U.envOnly none).map .wellFormed
   | .not φ => (Fml.substU U φ).map .not
   | .and φ ψ => do pure (.and (← Fml.substU U φ) (← Fml.substU U ψ))
   | .imp φ ψ => do pure (.imp (← Fml.substU U φ) (← Fml.substU U ψ))
@@ -234,10 +231,10 @@ theorem Fml.substU_holds {Γ Δ : Ctx} {U : Upd C Γ Δ} {σ : State C Γ} {g : 
     obtain ⟨b', hb, h⟩ := Option.bind_eq_some_iff.1 h
     cases h
     rw [holds_eq, holds_eq, Tm.denote_substH hL a ha, Tm.denote_substH hL b hb]
-  | .defined t, _, h => by
-    obtain ⟨t', ht, rfl⟩ := Option.map_eq_some_iff.1 h
-    rw [holds_defined, holds_defined,
-      Srt.sameO_val.1 (Tm.eval_substH hL (st := none) (fun _ h => Option.noConfusion h) t ht)]
+  | .wellFormed s, _, h => by
+    obtain ⟨s', hs, rfl⟩ := Option.map_eq_some_iff.1 h
+    rw [holds_wellFormed, holds_wellFormed,
+      Srt.sameO_st.1 (Tm.eval_substH hL (st := none) (fun _ h => Option.noConfusion h) s hs)]
   | .not φ, _, h => by
     obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 h
     exact not_congr (Fml.substU_holds hL φ hφ)
@@ -369,54 +366,18 @@ theorem Proves.andSplit {φ ψ : Fml C Γ} (h₁ : Proves C R Γ₀ H φ) (h₂ 
     Proves C R Γ₀ H (.and φ ψ) :=
   .andIntro h₁ h₂
 
-/-- A program comparison `a = b` (`Fml.eqD`) from its three parts: `a` and
-`b` return, and they are equal in the Theory. -/
-theorem Proves.eqDSplit {p : PrimTy} {a b : Tm C Γ (.val p)} (ha : Proves C R Γ₀ H (.defined a))
-    (hb : Proves C R Γ₀ H (.defined b)) (he : Proves C R Γ₀ H (.eq a b))
-    (hm : (H.wrap (Fml.eqD a b)).modalFree = true := by first | rfl | decide) :
-    Proves C R Γ₀ H (Fml.eqD a b) :=
-  .closeHolds (fun σ => H.wrap_and (χ := Fml.eqD a b) (fun _ x yz => ⟨x, yz⟩) σ
-    (Proves.sound ha σ) (H.wrap_and (χ := .and (.defined b) (.eq a b)) (fun _ y z => ⟨y, z⟩) σ
-      (Proves.sound hb σ) (Proves.sound he σ))) hm
-
-/-- **`defined(x)`**: a local of the typed state holds a value of its type,
-behind a context with no diamond.  Today's asks the update that wrote `x`,
-since today's state may not bind it. -/
-theorem Proves.definedWritten {p : PrimTy} {i : Idx Γ (.val p)}
-    (hb : H.boxOnly = true := by first | rfl | decide)
-    (hm : (H.wrap (.defined (.pvV i))).modalFree = true := by first | rfl | decide) :
-    Proves C R Γ₀ H (.defined (.pvV i)) :=
-  .closeHolds (fun σ => H.wrap_valid (φ := .defined (.pvV i)) hb
-    (fun _ h => Option.noConfusion h) σ) hm
-
-/-- A literal is defined, behind a context with no diamond. -/
-theorem Proves.definedLit {p : PrimTy} {v : p.Denote} (hb : H.boxOnly = true := by first | rfl | decide)
-    (hm : (H.wrap (.defined (.app0 (.lit v)))).modalFree = true := by first | rfl | decide) :
-    Proves C R Γ₀ H (.defined (.app0 (.lit v))) :=
-  .closeHolds (fun σ => H.wrap_valid (φ := .defined (.app0 (.lit v))) hb
-    (fun _ h => Option.noConfusion h) σ) hm
-
-/-- **`eqClose`** for any term: `t ≐ t`, behind a context with no diamond. -/
+/-- **`eqClose`** for any term: `t = t`, behind a context with no diamond. -/
 theorem Proves.eqRefl {p : PrimTy} {t : Tm C Γ (.val p)} (hb : H.boxOnly = true := by first | rfl | decide)
     (hm : (H.wrap (.eq t t)).modalFree = true := by first | rfl | decide) :
     Proves C R Γ₀ H (.eq t t) :=
   .closeHolds (fun σ => H.wrap_valid (φ := .eq t t) hb (fun _ => rfl) σ) hm
 
-/-- **`eqClose`**: `v ≐ v`, behind a context with no diamond. -/
+/-- **`eqClose`**: `v = v`, behind a context with no diamond. -/
 theorem Proves.eqClose {p : PrimTy} {v : p.Denote} (hb : H.boxOnly = true := by first | rfl | decide)
     (hm : (H.wrap (.eq (.app0 (.lit v)) (.app0 (.lit v)))).modalFree = true := by
       first | rfl | decide) :
     Proves C R Γ₀ H (.eq (.app0 (.lit v)) (.app0 (.lit v))) :=
   Proves.eqRefl hb hm
-
-/-- **`eqDClose`**: `v = v` as a program comparison writes it (`Fml.eqD`),
-behind a context with no diamond. -/
-theorem Proves.eqDClose {p : PrimTy} {v : p.Denote} (hb : H.boxOnly = true := by first | rfl | decide)
-    (hm : (H.wrap (Fml.eqD (.app0 (.lit v)) (.app0 (.lit v)))).modalFree = true := by
-      first | rfl | decide) :
-    Proves C R Γ₀ H (Fml.eqD (.app0 (.lit v)) (.app0 (.lit v))) :=
-  .closeHolds (fun σ => H.wrap_valid (φ := Fml.eqD (.app0 (.lit v)) (.app0 (.lit v))) hb
-    (fun _ => ⟨fun h => Option.noConfusion h, fun h => Option.noConfusion h, rfl⟩) σ) hm
 
 /-- **`applyOnRigidFormula` under the box**: the last update applied to a
 first-order goal and dropped (`Fml.substU`).  The goal reads no global part

@@ -331,7 +331,7 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 info: Solidity.LeanTaclet.loopExit : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {m : Modality} {x : Ctx} {body : Prog C Γ x}
   {cond : Val C Γ PrimTy.bool},
   dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0 while (cond) body; ]⟩ ⇝
-    "loop exited": cond = false ⟹ ⟨[ ]⟩ ; "unwound to the end": cond = false }
+    "loop exited": { se := cond } se = false ⟹ ⟨[ ]⟩ ; "unwound to the end": { se := cond } se = false }
 solkey: none (a rule solkey does not have)
 printed: none (theory only Lean has)
 sound: Solidity.LeanTaclet.toStep (the premise is Stmt.step's; Stmt.Sound)
@@ -719,8 +719,9 @@ info: 0: localValueDeclInitDrop
   [loop exited]
     3: Closed goal
   [unwound to the end]
-    4: Closed goal
-closed: 0 open goal(s), 5 node(s), 2 branch(es)
+    4: updIntro
+    5: Closed goal
+closed: 0 open goal(s), 6 node(s), 2 branch(es)
 -/
 #guard_msgs in
 #proof_tree dl!{ ⟨ uint i = 5;

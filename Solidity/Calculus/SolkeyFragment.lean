@@ -202,7 +202,7 @@ def Frames.inSolkey (m : Modality) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → 
 /-- Every program under a modality of `φ`, its frames' too, is in the
 fragment, under that modality. -/
 def Fml.inSolkey : {Γ : Ctx} → Fml C Γ → Bool
-  | _, .tt | _, .eq .. | _, .defined _ => true
+  | _, .tt | _, .eq .. | _, .wellFormed _ => true
   | _, .not φ => Fml.inSolkey φ
   | _, .and φ ψ | _, .imp φ ψ => Fml.inSolkey φ && Fml.inSolkey ψ
   | _, .upd _ _ φ => Fml.inSolkey φ

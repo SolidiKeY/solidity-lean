@@ -274,9 +274,10 @@ in the context's update `{U}`:
   Γ ⟹ {U} [ /// @custom:key invariant inv while (cond) body; ω ] φ
 ```
 
-`b` is KeY's `s#b` of `bType b = cond;`, a fresh local; `= TRUE` is
-`Fml.eqD` (defined and equal). The cover, `b = TRUE ∨ b = FALSE` (the
-condition is defined), is asked under the diamond only (`Premise.inv`'s `c'`);
+`b` is KeY's `s#b` of `bType b = cond;`, a fresh local; `= TRUE` is KeY's
+`=` (`Fml.eq`), and the update `{ b := cond }` is where the condition is
+evaluated, so a condition that halts lands nowhere. The cover,
+`b = TRUE ∨ b = FALSE`, is asked under the diamond only (`Premise.inv`'s `c'`);
 under the box `cover` is `true`. `whileInvariantDiamond` binds the variant first,
 `{ variant := dec ‖ b := cond }`, and the body's postcondition is
 `inv = TRUE ∧ { b := cond } (b = TRUE → 0 <= dec ∧ dec < variant)`: **the

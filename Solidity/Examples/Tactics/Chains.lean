@@ -143,20 +143,20 @@ info: theorem chain :
     ~[binopAssignment]~> cdl![m]{ { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ⟨[ if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
     ~[ifElseSplit]~> cdl![m]{
         { se2 := find(storage, alice.age) }
-          { se1 := se2 > 4 } ((se1 ≐ true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ total = 2; } ]⟩ φ)) }
+          { se1 := se2 > 4 } ((se1 = true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 = false → ⟨[ total = 2; } ]⟩ φ)) }
     ~[storageRootWriteStore]~> cdl![m]{
         { se2 := find(storage, alice.age) }
           { se1 := se2 > 4 }
-            ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧ (se1 ≐ false → ⟨[ total = 2; } ]⟩ φ)) }
+            ((se1 = true → { storage := save(storage, total, 1) } φ) ∧ (se1 = false → ⟨[ total = 2; } ]⟩ φ)) }
     ~[storageRootWriteStore]~> cdl![m]{
         { se2 := find(storage, alice.age) }
           { se1 := se2 > 4 }
-            ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧
-                (se1 ≐ false → { storage := save(storage, total, 2) } φ)) }
+            ((se1 = true → { storage := save(storage, total, 1) } φ) ∧
+                (se1 = false → { storage := save(storage, total, 2) } φ)) }
     ~[sequentialToParallel]~> cdl![m]{
         { se2 := find(storage, alice.age) ‖ se1 := find(storage, alice.age) > 4 }
-          ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧
-              (se1 ≐ false → { storage := save(storage, total, 2) } φ)) } := by
+          ((se1 = true → { storage := save(storage, total, 1) } φ) ∧
+              (se1 = false → { storage := save(storage, total, 2) } φ)) } := by
   sol_chain
 
 fresh variables (a `FreshNames` table renames them):
@@ -176,20 +176,20 @@ theorem branchChain :
     ~[binopAssignment]~> cdl![m]{ { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ⟨[ if (se1) {total = 1;} else {total = 2;}; ]⟩ φ }
     ~[ifElseSplit]~> cdl![m]{
         { se2 := find(storage, alice.age) }
-          { se1 := se2 > 4 } ((se1 ≐ true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ total = 2; } ]⟩ φ)) }
+          { se1 := se2 > 4 } ((se1 = true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 = false → ⟨[ total = 2; } ]⟩ φ)) }
     ~[storageRootWriteStore]~> cdl![m]{
         { se2 := find(storage, alice.age) }
           { se1 := se2 > 4 }
-            ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧ (se1 ≐ false → ⟨[ total = 2; } ]⟩ φ)) }
+            ((se1 = true → { storage := save(storage, total, 1) } φ) ∧ (se1 = false → ⟨[ total = 2; } ]⟩ φ)) }
     ~[storageRootWriteStore]~> cdl![m]{
         { se2 := find(storage, alice.age) }
           { se1 := se2 > 4 }
-            ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧
-                (se1 ≐ false → { storage := save(storage, total, 2) } φ)) }
+            ((se1 = true → { storage := save(storage, total, 1) } φ) ∧
+                (se1 = false → { storage := save(storage, total, 2) } φ)) }
     ~[sequentialToParallel]~> cdl![m]{
         { se2 := find(storage, alice.age) ‖ se1 := find(storage, alice.age) > 4 }
-          ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧
-              (se1 ≐ false → { storage := save(storage, total, 2) } φ)) } := by
+          ((se1 = true → { storage := save(storage, total, 1) } φ) ∧
+              (se1 = false → { storage := save(storage, total, 2) } φ)) } := by
   sol_chain
 
 
@@ -212,12 +212,12 @@ info:
   ~[ifElseSplit]~>
   dl{
     { se2 := find(storage, alice.age) }
-      { se1 := se2 > 4 } ((se1 ≐ true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 ≐ false → ⟨[ revert(); } ]⟩ φ)) }
+      { se1 := se2 > 4 } ((se1 = true → ⟨[ total = 1; } ]⟩ φ) ∧ (se1 = false → ⟨[ revert(); } ]⟩ φ)) }
   ~[storageRootWriteStore]~>
   dl{
     { se2 := find(storage, alice.age) }
       { se1 := se2 > 4 }
-        ((se1 ≐ true → { storage := save(storage, total, 1) } φ) ∧ (se1 ≐ false → ⟨[ revert(); } ]⟩ φ)) }
+        ((se1 = true → { storage := save(storage, total, 1) } φ) ∧ (se1 = false → ⟨[ revert(); } ]⟩ φ)) }
   (the line after depends on the modality m, through a rule that reads it (`revertBox`, `revertDiamond`, a loop's invariant rule): go on after `cases m`)
 -/
 #guard_msgs in
@@ -273,15 +273,15 @@ theorem loopChain :
     ~[binopAssignment]~> cdl![m]{ ∀ uint i; { i := 0 } { se1 := i < 1 } ⟨[ if (se1) {i++;/// @custom:key unwind 0
       while (i < 1) {i++;};}; ]⟩ φ }
     ~[ifElseSplit]~> cdl![m]{
-        ∀ uint i; { i := 0 } { se1 := i < 1 } ((se1 ≐ true → ⟨[ i++; /// @custom:key unwind 0
-      while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 ≐ false → φ)) }
+        ∀ uint i; { i := 0 } { se1 := i < 1 } ((se1 = true → ⟨[ i++; /// @custom:key unwind 0
+      while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 = false → φ)) }
     ~[blockEmpty]~> cdl![m]{
-        ∀ uint i; { i := 0 } { se1 := i < 1 } ((se1 ≐ true → ⟨[ i++; /// @custom:key unwind 0
-      while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 ≐ false → φ)) }
+        ∀ uint i; { i := 0 } { se1 := i < 1 } ((se1 = true → ⟨[ i++; /// @custom:key unwind 0
+      while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 = false → φ)) }
     ~[localIncrement]~> cdl![m]{
         ∀ uint i;
-          { i := 0 } { se1 := i < 1 } ((se1 ≐ true → { i := i + 1 } ⟨[ /// @custom:key unwind 0
-      while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 ≐ false → φ)) } := by
+          { i := 0 } { se1 := i < 1 } ((se1 = true → { i := i + 1 } ⟨[ /// @custom:key unwind 0
+      while (i < 1) {i++;}; } ]⟩ φ) ∧ (se1 = false → φ)) } := by
   sol_chain
 
 end

@@ -532,19 +532,19 @@ info: Try this:
 -/
 #guard_msgs in
 theorem internalCallDeclaration :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnOne(); assert(r == 1); ⟩ true } := by
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint r = returnOne(); assert(r == 1); ⟩ true } := by
   sol_prove?
 
 theorem internalCallInExpression :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnOne() + returnOne(); assert(r == 2); ⟩ true } := by
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint r = returnOne() + returnOne(); assert(r == 2); ⟩ true } := by
   sol_prove
 
 theorem internalCallToStorage :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ total = returnOne(); assert(total == 1); ⟩ true } := by
+    ⊢ dl[Suite]{ wt(storage) → ⟨ total = returnOne(); assert(total == 1); ⟩ true } := by
   sol_prove
 
 theorem returnEarly :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ int negative = returnSign(-3); int zero = returnSign(0);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ int negative = returnSign(-3); int zero = returnSign(0);
       int positive = returnSign(4); assert(negative < 0 && zero == 0 && positive > 0); ⟩ true } := by
   sol_prove
 
@@ -554,73 +554,73 @@ info: Try this:
 -/
 #guard_msgs in
 theorem tupleReturnPairDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint lo, uint hi) = returnOrdered(5, 2); assert(lo == 2 && hi == 5); ⟩
+    ⊢ dl[Suite]{ wt(storage) → ⟨ (uint lo, uint hi) = returnOrdered(5, 2); assert(lo == 2 && hi == 5); ⟩
       true } := by
   sol_prove?
 
 theorem tupleReturnReadsReturnVariablesDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint x, uint y) = returnSwapped(); assert(x == 2 && y == 1); ⟩ true } := by
+    ⊢ dl[Suite]{ wt(storage) → ⟨ (uint x, uint y) = returnSwapped(); assert(x == 2 && y == 1); ⟩ true } := by
   sol_prove
 
 theorem tupleReturnDiscardsComponentsDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1, 2);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ (uint lo, , uint sum, bool same) = returnStats(3, 1, 2);
       assert(lo == 1 && sum == 6 && !same); ⟩ true } := by
   sol_prove
 
 theorem tupleReturnAssignsExistingDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint hi; (total, hi) = returnOrdered(9, 4);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint hi; (total, hi) = returnOrdered(9, 4);
       assert(total == 4 && hi == 9); ⟩ true } := by
   sol_prove
 
 theorem tupleAssignmentRotatesDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint first = 1; uint second = 2; uint third = 3;
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint first = 1; uint second = 2; uint third = 3;
       (first, second, third) = (second, third, first);
       assert(first == 2 && second == 3 && third == 1); ⟩ true } := by
   sol_prove
 
 theorem tupleDeclarationDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ (uint first, , bool third) = (4, 5, true);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ (uint first, , bool third) = (4, 5, true);
       assert(first == 4 && third); ⟩ true } := by
   sol_prove
 
 theorem returnLeavesNestedBlocksDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint one = returnFromNestedBlock(3); uint five = returnFromNestedBlock(0);
       assert(one == 1 && five == 5); ⟩ true } := by
   sol_prove
 
 theorem returnOrFallThroughNamedDerived :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint stopped = returnOrFallThrough(true);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint stopped = returnOrFallThrough(true);
       uint finished = returnOrFallThrough(false); assert(stopped == 5 && finished == 6); ⟩ true } := by
   sol_prove
 
 theorem returnFromNestedCall :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnAddTwo(1); assert(r == 3); ⟩ true } := by
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint r = returnAddTwo(1); assert(r == 3); ⟩ true } := by
   sol_prove
 
 theorem returnAfterRevertGuard :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint r = returnRevertsOnZero(3); assert(r == 3); ⟩ true } := by
+    ⊢ dl[Suite]{ wt(storage) → ⟨ uint r = returnRevertsOnZero(3); assert(r == 3); ⟩ true } := by
   sol_prove
 
 theorem returnFromTryBranches :
-    ⊢ dl[Suite]{ defined(wt(storage)) → [ uint r = returnInsideTry(); assert(r == 7 || r == 8); ] true } := by
+    ⊢ dl[Suite]{ wt(storage) → [ uint r = returnInsideTry(); assert(r == 7 || r == 8); ] true } := by
   sol_prove
 
 theorem returnFromVoidFunction :
-    ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ total = 4; returnVoidEarly(9); assert(total == 4);
+    ⊢ dl[Suite]{ wt(storage) → ⟨ total = 4; returnVoidEarly(9); assert(total == 4);
       total = 0; returnVoidEarly(9); assert(total == 9); ⟩ true } := by
   sol_prove
 
 /-- A bare call of a function of several returns is an `InternalCall`: it
 declares the returns in its body and returns nothing (`CallRet.none`), so
 `internalCallExpand` inlines it. -/
-example : ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ returnOrdered(1, 2); ⟩ true } := by
+example : ⊢ dl[Suite]{ wt(storage) → ⟨ returnOrdered(1, 2); ⟩ true } := by
   apply intro
   apply unfold .internalCallExpand
   sol_prove
 
 /-- A tuple assignment's call returns to its targets (`CallRet.rets`):
 `functionBodyExpand`'s. -/
-example : ⊢ dl[Suite]{ defined(wt(storage)) → ⟨ uint a; uint b; (a, b) = returnOrdered(1, 2); ⟩ true } := by
+example : ⊢ dl[Suite]{ wt(storage) → ⟨ uint a; uint b; (a, b) = returnOrdered(1, 2); ⟩ true } := by
   apply intro
   apply update .valueDeclSkip
   apply update .valueDeclSkip

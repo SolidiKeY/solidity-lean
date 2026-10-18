@@ -161,10 +161,10 @@ info: {"stats": {"nodes": 6, "branches": 2},
  "sequents":
  ["dl{ ⟹ ∀ uint x; [ if (true) {x = 2;} else {x = 1;}; ] true }",
   "dl{ ∀ uint x ⟹ [ if (true) {x = 2;} else {x = 1;}; ] true }",
-  "dl{ ∀ uint x, true ≐ true ⟹ [ x = 2; } ] true }",
-  "dl{ ∀ uint x, true ≐ true, { x := 2 } ⟹ true }",
-  "dl{ ∀ uint x, true ≐ false ⟹ [ x = 1; } ] true }",
-  "dl{ ∀ uint x, true ≐ false, { x := 1 } ⟹ true }"],
+  "dl{ ∀ uint x, true = true ⟹ [ x = 2; } ] true }",
+  "dl{ ∀ uint x, true = true, { x := 2 } ⟹ true }",
+  "dl{ ∀ uint x, true = false ⟹ [ x = 1; } ] true }",
+  "dl{ ∀ uint x, true = false, { x := 1 } ⟹ true }"],
  "openGoalCount": 0,
  "nodes":
  [[0, -1, "allRight", null, "inner"],
@@ -198,7 +198,7 @@ closed: 0 open goal(s), 6 node(s), 2 branch(es)
 /--
 info: node: 3
 sequent:
-  dl{ ∀ uint x, true ≐ true, { x := 2 } ⟹ ¬x = 0 }
+  dl{ ∀ uint x, true = true, { x := 2 } ⟹ ¬x = 0 }
 rule: Closed goal
 state: closed
 branch: -

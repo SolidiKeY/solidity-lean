@@ -27,16 +27,16 @@ example : ⊢ dl!{ [ if (true) { x = 2; } else { x = 1; }; ] true } := by
   show sequent!{ ∀ uint x ⟹ [ if (true) { x = 2; } else { x = 1; }; ] true }
   apply Proves.split (Taclet.toStep .ifElseSplit)
   case thn =>
-    show sequent!{ ∀ uint x, true ≐ true ⟹ [ x = 2; ] true }
+    show sequent!{ ∀ uint x, true = true ⟹ [ x = 2; ] true }
     -- an entry folded into the formula is not the line
-    fail_if_success show_sequent!{ ⟹ ∀ uint x; true ≐ true → [ x = 2; ] true }
+    fail_if_success show_sequent!{ ⟹ ∀ uint x; true = true → [ x = 2; ] true }
     apply Proves.update (Taclet.toStep .localValueAssign)
-    fail_if_success show sequent!{ ∀ uint x, true ≐ true, { x := 1 } ⟹ true }
-    show sequent!{ ∀ uint x, true ≐ true, { x := 2 } ⟹ true }
+    fail_if_success show sequent!{ ∀ uint x, true = true, { x := 1 } ⟹ true }
+    show sequent!{ ∀ uint x, true = true, { x := 2 } ⟹ true }
     exact .updIntro (.closeTrue rfl)
   case els =>
     apply Proves.update (Taclet.toStep .localValueAssign)
-    show sequent!{ ∀ uint x, true ≐ false, { x := 1 } ⟹ true }
+    show sequent!{ ∀ uint x, true = false, { x := 1 } ⟹ true }
     exact .updIntro (.closeTrue rfl)
 
 /-- A capture's fresh name, and a hidden binder that is no entry. -/

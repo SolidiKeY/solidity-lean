@@ -44,12 +44,8 @@ theorem chain :
         { storage := save(storage, d2, fixedCopy(uint[], find(storage, d1))) ‖
             x := find(save(storage, d2, fixedCopy(uint[], find(storage, d1))), d2.length) }
           x = 9 }
-    ~[concrete]~> cdl!{
-        { storage := save(storage, d2, fixedCopy(uint[], find(storage, d1))) ‖
-            x := find(save(storage, d2, fixedCopy(uint[], find(storage, d1))), d2.length) }
-          (defined(x) ∧ x ≐ 9) }
-    ~[lenOnSaveFixedCopy]~> cdl!{ { storage := save(storage, d2, fixedCopy(uint[], find(storage, d1))) ‖ x := 9 } (defined(x) ∧ x ≐ 9) }
-    ~[applyOnRigid]~> cdl!{ defined(9) ∧ 9 ≐ 9 }
+    ~[lenOnSaveFixedCopy]~> cdl!{ { storage := save(storage, d2, fixedCopy(uint[], find(storage, d1))) ‖ x := 9 } x = 9 }
+    ~[applyOnRigid]~> cdl!{ 9 = 9 }
     ~[concrete]~> cdl!{ true } := by
   sol_chain
 #last_line chain

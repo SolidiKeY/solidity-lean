@@ -38,42 +38,30 @@ def overflowClaim : Fml Bank [] := dl!{ balances[3] + 1 == balances[3] + 1 }
 def overflowReduction : StaticReduction overflowClaim :=
   (checkedReduction? overflowClaim).get (by decide +kernel)
 
--- Two equally overflowing terms are not defined equality.
-/-- info: some true -/
-#guard_msgs in
-#eval match overflowReduction.verify with
-  | .inl _ => none
-  | .inr cm => some (decide ((three.read cm.val.storage).val = ((2 ^ 256 : Nat) : Int) - 1))
+-- Two equally overflowing terms are equal: KeY's `=` is reflexive.
+/-- info: true -/
+#guard_msgs in #eval overflowReduction.verify.isLeft
 
 def underflowClaim : Fml Bank [] := dl!{ balances[3] - 1 == balances[3] - 1 }
 def underflowReduction : StaticReduction underflowClaim :=
   (checkedReduction? underflowClaim).get (by decide +kernel)
 
-/-- info: some 0 -/
-#guard_msgs in
-#eval match underflowReduction.verify with
-  | .inl _ => none
-  | .inr cm => some (three.read cm.val.storage).val
+/-- info: true -/
+#guard_msgs in #eval underflowReduction.verify.isLeft
 
 def signedOverflowClaim : Fml Bank [] := dl!{ debt + 1 == debt + 1 }
 def signedOverflowReduction : StaticReduction signedOverflowClaim :=
   (checkedReduction? signedOverflowClaim).get (by decide +kernel)
 
-/-- info: some true -/
-#guard_msgs in
-#eval match signedOverflowReduction.verify with
-  | .inl _ => none
-  | .inr cm => some (decide ((debt.read cm.val.storage).val = ((2 ^ 255 : Nat) : Int) - 1))
+/-- info: true -/
+#guard_msgs in #eval signedOverflowReduction.verify.isLeft
 
 def signedUnderflowClaim : Fml Bank [] := dl!{ debt - 1 == debt - 1 }
 def signedUnderflowReduction : StaticReduction signedUnderflowClaim :=
   (checkedReduction? signedUnderflowClaim).get (by decide +kernel)
 
-/-- info: some true -/
-#guard_msgs in
-#eval match signedUnderflowReduction.verify with
-  | .inl _ => none
-  | .inr cm => some (decide ((debt.read cm.val.storage).val = -((2 ^ 255 : Nat) : Int)))
+/-- info: true -/
+#guard_msgs in #eval signedUnderflowReduction.verify.isLeft
 
 /-- Checked unsigned addition cannot wrap around to zero. An overflowing
 premise is false, and therefore cannot refute this implication. -/
@@ -107,12 +95,13 @@ def overflowCancellationReduction : StaticReduction overflowCancellation :=
 def closedFailure : Fml Bank [] := dl!{ 0 - 1 == 0 - 1 }
 def closedFailureReduction : StaticReduction closedFailure :=
   (checkedReduction? closedFailure).get (by decide +kernel)
-def closedCounterstate : { σ : State Bank [] // ¬ σ ⊧ closedFailure } :=
-  closedFailureReduction.countermodel (by decide +kernel)
 
-/-- Even two identically failed closed computations refute the source equality. -/
-theorem closedFailure_not_valid : ¬ Valid closedFailure :=
-  fun hv => closedCounterstate.property (hv closedCounterstate.val)
+/-- info: true -/
+#guard_msgs in #eval closedFailureReduction.verify.isLeft
+
+/-- Two identically failed closed computations are equal: KeY's `=` reads
+both sides in the Theory, where they halt alike. -/
+theorem closedFailure_valid : Valid closedFailure := fun _ => rfl
 
 def declaredClaim : Fml Bank [] := .imp (declaration_facts[Bank]) arithmeticClaim
 def declaredReduction : StaticReduction declaredClaim := declaration_checked_reduce[declaredClaim]

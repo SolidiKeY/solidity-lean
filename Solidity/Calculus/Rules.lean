@@ -859,9 +859,8 @@ inductive Taclet (C : Contract) (k : Nat) :
   `dec`, its value before the iteration kept in a fresh local (KeY's skolem
   `variant`), and checked after the body only where the condition holds
   again (`{ b := cond } (b = TRUE → …)`): an iteration after which the loop
-  ends need not decrease it.  Lean reads `dec` where solkey compares it
-  (`dec = variant`), so the variant must be defined where the invariant
-  holds. -/
+  ends need not decrease it.  The head's update reads `dec` under the
+  diamond, so the variant must return where the invariant holds. -/
   | whileInvariantDiamond {cond inv : Val C Γ .bool} {dec : Val C Γ .uint}
       (hf : Prog.frame body = some (xs, hv) := by side_cond)
       (hq : qs = [] := by side_cond) :
@@ -941,13 +940,15 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   /-- A loop unwound to its bound ends there: the rest with the condition
   false assumed, and that it is false (`Premise.check`).  Not
   `assert(!cond)`, which would make running out of unwindings a failure of
-  the program; and not a capture of the condition, which the loop must
-  evaluate afresh. A written `unwind 0` requests this exit check. -/
+  the program; and not a capture of the condition in the program, which the
+  loop must evaluate afresh.  The condition is read as the invariant rules
+  read it, by an update (`{ b := cond }`, under the diamond: it must
+  return).  A written `unwind 0` requests this exit check. -/
   | loopExit {cond : Val C Γ .bool} :
       dl[LeanTaclet C k]{ ⟨[ /// @custom:key unwind 0
           while (cond) body; ]⟩ ⇝
-        "loop exited": defined(cond) ∧ defined(false) ∧ cond ≐ false ⟹ ⟨[ ]⟩ ;
-        "unwound to the end": defined(cond) ∧ defined(false) ∧ cond ≐ false }
+        "loop exited": { b := cond } (b = FALSE) ⟹ ⟨[ ]⟩ ;
+        "unwound to the end": { b := cond } (b = FALSE) }
 
 
 

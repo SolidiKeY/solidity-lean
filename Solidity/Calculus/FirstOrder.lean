@@ -18,7 +18,7 @@ callback's invariant (`Calculus/CallbackSound.lean`), read alike in every
 typed state of one erasure. -/
 def Fml.FO : {Γ : Ctx} → Fml C Γ → Bool
   | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
-    (tt := true) (eq := fun _ _ => true) (defined := fun _ => true) (not := fun φ => Fml.FO φ)
+    (tt := true) (eq := fun _ _ => true) (wellFormed := fun _ => true) (not := fun φ => Fml.FO φ)
     (and := fun φ ψ => Fml.FO φ && Fml.FO ψ) (imp := fun φ ψ => Fml.FO φ && Fml.FO ψ)
     (upd := fun _ _ _ => false) (modal := fun _ _ _ _ => false) (havoc := fun _ => false)
     (all := fun _ _ φ => Fml.FO φ) (bind := fun _ _ _ _ => false) (anon := fun _ _ => false)

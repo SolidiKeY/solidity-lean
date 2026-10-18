@@ -50,7 +50,7 @@ private def branchφ : Fml SE [] :=
   dl!{ [ if (alice.age > 4) { total = 1; } else { total = 2; }; uint y = total; ] true }
 
 /--
-info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 ≐ true → { storage := save(storage, total, 1) } { y := find(storage, total) } true) ∧ (se1 ≐ false → { storage := save(storage, total, 2) } { y := find(storage, total) } true))
+info: { se2 := find(storage, alice.age) } { se1 := se2 > 4 } ((se1 = true → { storage := save(storage, total, 1) } { y := find(storage, total) } true) ∧ (se1 = false → { storage := save(storage, total, 2) } { y := find(storage, total) } true))
 -/
 #guard_msgs in
 run_meta coreSymex `Solidity.Examples.Tactics.Symex.branch branchφ
@@ -69,7 +69,7 @@ private def guardφ : Fml SE [] :=
   dl!{ [ uint x; x = 4; uint y = x + 1; require(y > 3); total = y; ] true }
 
 /--
-info: { x := 0 } { x := 4 } { y := x + 1 } { se1 := y > 3 } ((se1 ≐ true → { storage := save(storage, total, y) } true) ∧ (se1 ≐ false → true))
+info: { x := 0 } { x := 4 } { y := x + 1 } { se1 := y > 3 } ((se1 = true → { storage := save(storage, total, y) } true) ∧ (se1 = false → true))
 -/
 #guard_msgs in
 run_meta coreSymex `Solidity.Examples.Tactics.Symex.guard guardφ

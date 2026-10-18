@@ -52,11 +52,8 @@ abbrev Tm.lit {p : PrimTy} (v : p.Denote) : Tm C Γ (.val p) := .app0 (.lit v)
 
 /-- `se = true`, the condition of a branch's goal (`Fml.eq`, as the rules
 write it). -/
-def Fml.isBool (t : Tm C Γ (.val .bool)) (b : Bool) : Fml C Γ :=
+abbrev Fml.isBool (t : Tm C Γ (.val .bool)) (b : Bool) : Fml C Γ :=
   .eq t (.app0 (.lit (p := .bool) b))
-
-/-- `t ≐ b` with both sides defined (`Fml.eqD`). -/
-abbrev Fml.isBoolD (t : Tm C Γ (.val .bool)) (b : Bool) : Fml C Γ := .eqD t (Tm.lit (p := .bool) b)
 
 /-- `{v := v'}`: a local set to a value's term. -/
 def Premise.setLocal {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) : Premise C Γ Γ :=
@@ -633,7 +630,7 @@ def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) :
     | .box => .cases [] us
     -- sendNoCallbackDiamond
     | .diamond =>
-      .cases [.isBoolD (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) se.lower)
+      .cases [.isBool (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) se.lower)
         true] us
   -- send_unfold_rightSndArgument
   | .simple sadr, a =>

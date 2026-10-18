@@ -198,8 +198,10 @@ inductive Fml (C : Contract) : Ctx → Type where
   | tt {Γ : Ctx} : Fml C Γ
   /-- `a = b`, two values of one type, read in the Theory (`Tm.denote`). -/
   | eq {Γ : Ctx} {p : PrimTy} (a b : Tm C Γ (.val p)) : Fml C Γ
-  /-- `t` returns. -/
-  | defined {Γ : Ctx} {p : PrimTy} (t : Tm C Γ (.val p)) : Fml C Γ
+  /-- `wt(s)`: `s` is a storage the contract can be in, KeY's
+  `wellFormed(heap)`: a predicate symbol, read by the interpreter's test
+  (`Storage.wtB`). -/
+  | wellFormed {Γ : Ctx} (s : Tm C Γ .st) : Fml C Γ
   | not {Γ : Ctx} (φ : Fml C Γ) : Fml C Γ
   | and {Γ : Ctx} (φ ψ : Fml C Γ) : Fml C Γ
   | imp {Γ : Ctx} (φ ψ : Fml C Γ) : Fml C Γ
@@ -220,10 +222,6 @@ inductive Fml (C : Contract) : Ctx → Type where
 
 /-- `false` is `¬true`. -/
 abbrev Fml.ff {Γ : Ctx} : Fml C Γ := .not .tt
-
-/-- `a = b` with both sides defined. -/
-abbrev Fml.eqD {Γ : Ctx} {p : PrimTy} (a b : Tm C Γ (.val p)) : Fml C Γ :=
-  .and (.defined a) (.and (.defined b) (.eq a b))
 
 /-! ## Premises -/
 

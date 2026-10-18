@@ -232,7 +232,7 @@ def Frames.hasTransfer : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Bool
 /-- Whether a `transfer` occurs in a program of the formula. -/
 def Fml.hasTransfer : {Γ : Ctx} → Fml C Γ → Bool
   | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
-    (tt := false) (eq := fun _ _ => false) (defined := fun _ => false)
+    (tt := false) (eq := fun _ _ => false) (wellFormed := fun _ => false)
     (not := fun φ => Fml.hasTransfer φ)
     (and := fun φ ψ => Fml.hasTransfer φ || Fml.hasTransfer ψ)
     (imp := fun φ ψ => Fml.hasTransfer φ || Fml.hasTransfer ψ)
