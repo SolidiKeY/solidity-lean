@@ -1,7 +1,7 @@
 # Automation: expansions, sizes and the road to a decision procedure
 
-Milestones M0–M5 towards a closer that decides a fragment. M0, M1, M2 and M5
-are built; M3 and M4 are planned. Each section says what is proved and where.
+Milestones M0–M5 towards a closer that decides a fragment. M0, M1, M2, M3
+and M5 are built; M4 is planned. Each section says what is proved and where.
 
 ## M0 · The leaves of a type (`Theory/Typed/Leaves.lean`)
 
@@ -80,11 +80,66 @@ worked chain's last line keeps a `delete` whole, as solkey does.
 `Examples/ChainExpand.lean` shows each, and `sol_decide` closing the
 expanded lines.
 
-## M3 · Reads reduce write-free (planned)
+## M3 · Reads reduce write-free (`Calculus/ElimWriteFree.lean`, `Calculus/StepFragment.lean`)
 
-The closer's read reduction (`LTm.elim`, `Calculus/Decide.lean`) leaves no
-storage symbol on the fragment of saves: a theorem `LTm.elim_stoFree`, and
-per statement that a step emits saves only.
+**The elimination is write-free** (`Calculus/ElimWriteFree.lean`).  On the
+terms it has a reading for (`LTm.Elimable`: no memory sort, `mtSt`, `wt`,
+`cleanTail`, `select`, `copyMem`; `orElse`/`kite`/`err` only at a word), the
+closer's read reduction (`LTm.elim`, `Calculus/Decide.lean`) leaves no
+storage symbol: the start is read only through the observation atoms
+(`LTm.elim_stoFree`, `LFml.elim_stoFree`).  A storage in save normal form
+(`LTm.SaveNF`: `storage` with `save`, `pushSlot`, `shrink` at elimable paths
+and values) is elimable, so a read of it eliminates storage-free
+(`LTm.SaveNF.find_stoFree`).
+
+**A step on the fragment emits saves** (`Calculus/StepFragment.lean`).
+
+* `Tm.SaveLike t`: `t` is `save`, `pushSlot` or `shrink` on `storage`, or
+  what `Tm.expand?` turns into those — `delAt` at a `Ty.expandable` type, a
+  `push` of a word (`sval x`), a `pop` of an array of words; `UpdElem.SaveLike`
+  (a local, or `storage := t` with `t` save-like), `Upd.SaveLike` (every
+  element).
+* The fragment `Stmt.Frag`/`Prog.Frag`: storage writes of a word or of a
+  storage copy (`Src.copy` at any type: a `save` already, expanded when
+  `Ty.expandable`; `Src.fixedCopy`), `delete` at an expandable type, `push`
+  of a word or of the default, `pop` of an array of words or of mappings,
+  alias bindings, locals, `if`, `require`, `assert`, `revert`,
+  `assume(false)`, blocks, every expression memory-free (`Val.MemFree`).
+  Left out: memory (a memory rule writes `memory`), payments and calls,
+  loops (the invariant rule anonymises the frame), `try`, compound
+  assignment and `++`/`--` (their updates are saves too, left out to keep the
+  proof short), copies from memory, a push of a reference value (kept whole
+  by `Tm.expand?`).
+* `Premise.SaveLike P`: every update `P` writes is save-like and every
+  program it runs next (an unfold, a bind, a split's branches) is in the
+  fragment, so the property holds along the strategy's whole run.
+
+**Proved.**
+
+```lean
+theorem Stmt.step_saveLike (s : Stmt C Γ Γ') (h : s.Frag = true) :
+    (s.step k m).SaveLike
+theorem Tm.SaveLike.saveNF_expand {t : Tm C Γ .st} (h : t.SaveLike) :
+    ((t.expand?).getD t).SaveNF
+theorem Stmt.step_saveNF (s : Stmt C Γ Γ') (h : s.Frag = true) :
+    ∀ U ∈ (s.step k m).upds, ∀ t ∈ U.2.2.stores, ((t.expand?).getD t).SaveNF
+```
+
+one lemma per arm (`assignStep_saveLike`, `copyStep_saveLike`,
+`localStep_saveLike`, `rebindStep_saveLike`, `deleteStep_saveLike`,
+`pushStep_saveLike`, `popStep_saveLike`, `iteStep_saveLike`, …), under the
+holes' (`SHole.readStep_saveLike`, `VHole.step_saveLike`); a captured
+condition's branches are weakened by `Prog.wk up`, which keeps the fragment
+(`Prog.frag_wk`).
+
+**Not proved: the bridge to `LTm`.**  `Tm.SaveNF` is `LTm.SaveNF`'s shape on
+the scoped terms.  `Tm.toL ρ` (`Calculus/DecideScoped.lean`) maps `save`,
+`pushSlot`, `shrink` to themselves and `storage` to `ρ`'s storage, so a
+`Tm.SaveNF` term read where `ρ`'s storage is `storage` is `LTm.SaveNF` once
+its paths and values translate to `Elimable` terms — a condition on reads
+(no memory, no `wt`/`cleanTail`), which this file does not state.  Lifting
+the step theorem over a whole `symex` run (each update merged into the one
+before) is also left.
 
 ## M4 · Completeness (planned)
 

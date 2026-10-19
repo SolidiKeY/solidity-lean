@@ -1264,7 +1264,9 @@ def elabCounterexample : Lean.Elab.Command.CommandElab := fun stx => liftTermEla
     synthesizeSyntheticMVarsNoPostponing
     let φE ← instantiateMVars φE
     let ty ← whnf (← inferType φE)
-    unless ty.isAppOfArity ``Fml 2 && (← whnfR ty.appArg!).isAppOf ``List.nil do
+    let closed ← if ty.isAppOfArity ``Fml 2 then (·.isAppOf ``List.nil) <$> whnfR ty.appArg!
+      else pure false
+    unless closed do
       throwError "#counterexample: not a closed scoped formula `Fml C []` (`cdl!\{ … }`, or \
         `dl!\{ … }` under `open scoped Solidity.Scoped`){indentExpr φE}"
     if φE.hasFVar || φE.hasMVar then

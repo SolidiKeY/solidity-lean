@@ -142,6 +142,7 @@ import Solidity.Calculus.Decide
 import Solidity.Calculus.ReadBounds
 import Solidity.Calculus.DecideEval
 import Solidity.Calculus.ElimWriteFree
+import Solidity.Calculus.StepFragment
 import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.Closer

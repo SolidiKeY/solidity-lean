@@ -575,7 +575,7 @@ section Refused
 variable (m : Modality) (φ : Post StandardExample [])
 
 /--
-error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox, applyOnPV, concrete), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)
+error: ~[fooBar]~>: fooBar is no rule: not a `Taclet` or `LeanTaclet` constructor, not an update rule (sequentialToParallel, simplifyUpdate, applySkip, applyOnRigid, applyOnRigidBox, applyStorageBox, applyOnPV, concrete, delAtExpand, copyExpand, pushExpand, popExpand), not a term taclet (`TermTaclet`), not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)
 -/
 #guard_msgs in
 example : dl!{ true } ~[fooBar]~> dl!{ true } := by sol_chain
