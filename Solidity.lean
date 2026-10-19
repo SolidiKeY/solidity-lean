@@ -45,6 +45,7 @@ import Solidity.Calculus.Arms
 import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
 import Solidity.Calculus.Step
+import Solidity.Calculus.TermSize
 import Solidity.Calculus.Quote
 import Solidity.Calculus.Rules
 import Solidity.Calculus.Taclet
@@ -91,6 +92,7 @@ import Solidity.Calculus.Merge
 import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.RewritePast
 import Solidity.Calculus.RewriteLaws
+import Solidity.Calculus.ExpandLaws
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.UpdRuleScoped
 import Solidity.Calculus.StatePartsScoped
@@ -140,6 +142,7 @@ import Solidity.Calculus.Decide
 import Solidity.Calculus.ReadBounds
 import Solidity.Calculus.DecideEval
 import Solidity.Calculus.ElimWriteFree
+import Solidity.Calculus.StepFragment
 import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.Closer
@@ -204,6 +207,7 @@ import Solidity.Examples.ChainNotation
 import Solidity.Examples.Tactics.UpdateRules
 import Solidity.Examples.Tactics.UpdRulesScoped
 import Solidity.Examples.ChainRewrites
+import Solidity.Examples.ChainExpand
 import Solidity.Examples.ChainRewritesOpen
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.ExampleNames
@@ -249,6 +253,7 @@ import Solidity.Typing.CanonTest
 import Solidity.Typing.CleanTail
 import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Typed.Mem
+import Solidity.Theory.Typed.Leaves
 import Solidity.Theory.Segs
 import Solidity.Theory.Bridge.Denote
 import Solidity.Calculus.KeyTaclets

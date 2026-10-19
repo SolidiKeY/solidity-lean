@@ -306,15 +306,16 @@ def ppDeferredExprS (ns : List Expr) (code value : Expr) :
   if (← optSome? decl.appArg!).isSome then return none
   let ns := decl.getArg! 3 :: ns
   let tail ← whnf code.appArg!
-  unless tail.isAppOfArity ``Prog.cons 6 && (← whnf tail.appArg!).isAppOf ``Prog.nil do
-    return none
+  -- `(← …)` lifts out of `&&`, so the shape is tested first
+  unless tail.isAppOfArity ``Prog.cons 6 do return none
+  unless (← whnf tail.appArg!).isAppOf ``Prog.nil do return none
   let value ← whnf value
   unless value.isAppOf ``Src.val do return none
   let value ← whnf value.appArg!
   unless value.isAppOf ``Val.simple do return none
   let value ← whnf value.appArg!
-  unless value.isAppOf ``Simple.local && (← whnf value.appArg!).isAppOf ``Idx.here do
-    return none
+  unless value.isAppOf ``Simple.local && value.isApp do return none
+  unless (← whnf value.appArg!).isAppOf ``Idx.here do return none
   match_expr (← whnf (tail.getArg! 4)) with
   | Stmt.assignIncDec _ _ _ i op _ l _ =>
     unless (← whnf i).isAppOf ``Idx.here do return none
@@ -932,10 +933,12 @@ def iffPartsS (ns : List Expr) (e : Expr) :
 partial def ppFmlS (ns : List Expr) (e : Expr) : PrM (TSyntax `dl_fml) := do
   -- a taclet's loop invariant, its quantified clauses a variable: `inv = TRUE`
   -- as the rule writes it (`invFml`)
-  if e.isAppOfArity ``invFml 4 &&
-      !((← whnf e.appArg!).isAppOf ``List.cons || (← whnf e.appArg!).isAppOf ``List.nil) then
-    let I := e.appFn!.appArg!
-    return ← ppFmlS ns (← mkAppM ``Fml.isBool #[← mkAppM ``Val.lower #[I], mkConst ``Bool.true])
+  -- (nested: a `(← …)` lifts out of `&&`, and `e.appArg!` panics on a variable)
+  if e.isAppOfArity ``invFml 4 then
+    let cs ← whnf e.appArg!
+    unless cs.isAppOf ``List.cons || cs.isAppOf ``List.nil do
+      let I := e.appFn!.appArg!
+      return ← ppFmlS ns (← mkAppM ``Fml.isBool #[← mkAppM ``Val.lower #[I], mkConst ``Bool.true])
   let (ns, e) ← viewF ns e
   if let some x ← fmlVar? e then return ← `(dl_fml| $x:ident)
   let escape := do `(dl_fml| ‹$(← escapeTerm e):term›)

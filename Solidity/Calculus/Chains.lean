@@ -2,6 +2,7 @@ import Solidity.Calculus.ChainKit
 import Solidity.Calculus.Notation
 import Solidity.Calculus.Completeness
 import Solidity.Calculus.Delab
+import Solidity.Calculus.ExpandLaws
 
 /-!
 # Chains on scoped formulas: `φ ~> ψ`, `φ ~[r]~> ψ`, `φ ~*> ψ`
@@ -707,6 +708,12 @@ def scopedRwCandsMany (φ : Expr) (as : Array RwArrow)
           -- through the scope ends under the update (`FmlRw.applyOnRigidPops`)
           if s matches .upd _ then
             rs := rs.push (mkApp2 (mkConst ``FmlRw.applyOnRigidPops) C (toExpr i))
+      else if let some ek := ExpandKind.ofLink? n then
+        -- past the program: a whole value's write as its words, Lean only
+        -- (`FmlRw.expandPast`, `Calculus/ExpandLaws.lean`)
+        if past then
+          for i in List.range k do
+            rs := rs.push (mkApp3 (mkConst ``FmlRw.expandPast) C (mkConst ek.constName) (toExpr i))
       else if n == `applyStorageBox then
         -- past the program: a lone storage write on a first-order line, `storage`
         -- substituted (`FmlRw.applyStorageBoxP`, `Calculus/RewritePast.lean`)
