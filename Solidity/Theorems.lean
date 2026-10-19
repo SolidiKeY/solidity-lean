@@ -36,7 +36,8 @@ typed run has no stuck outcome, so `compiler_correct` covers every case.  Its pr
 | `s ⇝[k, m] p` | a rule rewrites `s` to `p` | `Rule C k m s p` |
 | `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Taclet C k m s p` |
 | `p ≃[m, σ] s` | from `σ`, the premise `p` does what `s` does | `Premise.Sound m s p σ` |
-| `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer` may call back into a contract with invariant `I` | `ProvesC`, `ValidC` |
+| `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer`, `send` and `try` may call back into a contract with invariant `I` | `ProvesC I true`, `ValidC I φ true` |
+| `⊢ₙ[I] φ`, `⊨ₙ[I] φ` | the same under `transferSemantics:noCallback`: only `try` calls back | `ProvesC I false`, `ValidC I φ false` |
 | `(P, σ) ⇓ o` | `P` run from `σ` ends in `o` | `Prog.run σ P = .ok o` |
 | `⟦P⟧b` | `P` compiled, its frame at `b` | `Evm.compileProg b P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
@@ -117,8 +118,10 @@ scoped notation:25 "⊢ₖ " φ:26 => DerivesK Hyps.nil φ
 scoped notation:50 s:51 " ⇝[" k ", " m "] " p:51 => Rewrites s k m p
 scoped notation:50 s:51 " ⇝ₖ[" k ", " m "] " p:51 => RewritesK s k m p
 scoped notation:50 p:51 " ≃[" m ", " σ "] " s:51 => DoesAs p m σ s
-scoped notation:25 "⊢[" I "] " φ:26 => ProvesC (Invariant.fml I) [] Hyps.nil φ
-scoped notation:25 "⊨[" I "] " φ:26 => ValidC I φ
+scoped notation:25 "⊢[" I "] " φ:26 => ProvesC (Invariant.fml I) true [] Hyps.nil φ
+scoped notation:25 "⊨[" I "] " φ:26 => ValidC I φ true
+scoped notation:25 "⊢ₙ[" I "] " φ:26 => ProvesC (Invariant.fml I) false [] Hyps.nil φ
+scoped notation:25 "⊨ₙ[" I "] " φ:26 => ValidC I φ false
 scoped notation:50 c:51 " ⇓ " o:51 => Runs c o
 scoped notation:max "⟦" P "⟧" b:max => Evm.compileProg b P
 scoped notation:50 c:51 " ⇓ₘ " m':51 => MRuns c m'
@@ -219,6 +222,18 @@ reading.  Its transfer rule has two sequents as premises, the second after a
 theorem callback_soundness {I : Invariant C} {φ : Fml C []} :
     ⊢[I] φ → ⊨[I] φ :=
   ProvesC.valid
+
+/-- **Under `transferSemantics:noCallback`**: a `transfer` and a `send`
+forward too little gas to call back, a `try` does not (solkey's bug 5,
+`docs/options.md`), its callee keeping `I`. -/
+theorem noCallback_soundness {I : Invariant C} {φ : Fml C []} :
+    ⊢ₙ[I] φ → ⊨ₙ[I] φ :=
+  ProvesC.valid
+
+/-- With no `try` left, `noCallback` is the deterministic reading. -/
+theorem noCallback_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
+    (⊨ₙ[I] φ) ↔ ⊨ φ :=
+  validC_false_iff h
 
 /-! ## Symbolic execution -/
 

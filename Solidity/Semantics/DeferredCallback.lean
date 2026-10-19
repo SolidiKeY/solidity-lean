@@ -104,7 +104,7 @@ theorem execThen_of_join : {Γ Δ Ε : Ctx} → (P : Prog C Γ Δ) → (Q : Prog
     | halt hs => exact .halt (.halt hs)
     | violated hs => exact .violated (.violated hs)
 
-theorem execP_noTransfer (P : Prog C Γ Δ) (σ : State C Γ) (ht : P.hasTransfer = false) :
+theorem execP_noTransfer (P : Prog C Γ Δ) (σ : State C Γ) (ht : P.callsBack J.pay = false) :
     ExecP J σ P (.ofRes (P.run σ)) := by
   rcases Prog.exec_run J P σ with h | h
   · exact h
@@ -113,7 +113,7 @@ theorem execP_noTransfer (P : Prog C Γ Δ) (σ : State C Γ) (ht : P.hasTransfe
 
 theorem block_of_execP {σ : State C Γ} {P : Prog C Γ Δ} {o : COut C σ.H Δ}
     (h : ExecP J σ P o) : ExecS J σ (.block P) (o.map (Out.drop P.ext)) := by
-  cases ht : P.hasTransfer with
+  cases ht : P.callsBack J.pay with
   | false =>
     rw [h.eq_run ht, COut.map_ofRes]
     exact .det ht

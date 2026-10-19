@@ -658,7 +658,20 @@ theorem ExecS.det_inv {Γ Γ' : Ctx} {σ : State C Γ} {J : StateInv C} {s : Stm
     {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forks = false) : o = .ofRes (s.run σ) := by
   cases h with
   | det _ => rfl
-  | _ => simp_all only [Stmt.forks, Bool.true_eq_false]
+  | _ =>
+    simp only [Stmt.forks] at hs
+    first
+    | simp only [Bool.true_eq_false] at hs
+    | simp_all only [Prog.callsBack_of_hasTransfer _ hs, Bool.false_eq_true]
+
+/-- The same, where only a `try` calls back unless `J.pay`
+(`Stmt.forksIn`). -/
+theorem ExecS.detIn_inv {Γ Γ' : Ctx} {σ : State C Γ} {J : StateInv C} {s : Stmt C Γ Γ'}
+    {o : COut C σ.H Γ'} (h : ExecS J σ s o) (hs : s.forksIn J.pay = false) :
+    o = .ofRes (s.run σ) := by
+  cases h with
+  | det _ => rfl
+  | _ => simp_all only [Stmt.forksIn, Bool.true_eq_false, Bool.false_eq_true]
 
 /-- **A statement that runs no other by a choice runs with callbacks as a
 branch that pays nothing**, where it runs so without. -/
@@ -676,7 +689,7 @@ theorem ExecS.split_det {s : Stmt C Γ Γ} {Δ : Ctx} {P : Prog C Γ Δ} (σ : S
   refine ⟨.ofRes (Prog.run σ P), ?_, by rw [ho, ← e, COut.map_ofRes]⟩
   rcases Prog.exec_run J P σ with hx | hx
   · exact hx
-  · have := ExecP.eq_run hx hP
+  · have := ExecP.eq_run hx (Prog.callsBack_of_hasTransfer P hP)
     revert this
     cases Prog.run σ P <;> exact fun h => nomatch h
 

@@ -3,6 +3,7 @@ import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.CallbackSound
 import Solidity.Calculus.Notation
+import Solidity.Calculus.WalkSyntax
 
 /-!
 # The callback reading on typed runs
@@ -57,18 +58,23 @@ example (I : Invariant StandardExample) :
     ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ Valid cdl!{ [ uint x = 1; ] x == 1 } :=
   ⟨fun h σ => (holdsC_iff_holds _ rfl σ).1 (h σ), fun h σ => (holdsC_iff_holds _ rfl σ).2 (h σ)⟩
 
-/-- KeY's `transferSemantics` option: `noCallback` is the typed reading
-(`validT_noCallback`), `withCallback I` the one with callbacks. -/
+/-- KeY's `transferSemantics` option: under `noCallback` only a `try` calls
+back (`validT_noCallback`), under `withCallback I` a payment too; with no
+`try` in it, a formula reads under `noCallback` as the typed reading. -/
 example (I : Invariant StandardExample) (φ : Fml StandardExample []) :
-    (ValidT .noCallback φ ↔ Valid φ) ∧ (ValidT (.withCallback I) φ ↔ ValidC I φ) :=
+    (ValidT (.noCallback I) φ ↔ ValidC I φ false) ∧ (ValidT (.withCallback I) φ ↔ ValidC I φ) :=
   ⟨validT_noCallback, validT_withCallback⟩
+
+example : ValidT .noCallback cdl!{ [ uint x = 1; ] x == 1 } ↔
+    Valid cdl!{ [ uint x = 1; ] x == 1 } :=
+  validT_noCallback_iff rfl
 
 /-- A payment true with callbacks is true without: the deterministic run
 is a callback run (`valid_of_validC`, from `Prog.exec_run`). -/
 example (I : Invariant StandardExample) (a : Fml StandardExample []) (P : Prog StandardExample [] [])
     (H : ValidC I (.imp a (.modal .box P .nil .tt))) (ha : a.hasTransfer = false) :
     Valid (.imp a (.modal .box P .nil .tt)) :=
-  valid_of_validC H ha rfl
+  valid_of_validC H (Fml.callsBack_of_hasTransfer a ha) rfl
 
 /-! ## The calculus with callbacks -/
 
@@ -84,7 +90,7 @@ case h.h.failed
 ⊢ dl{ ∀ uint to, { ok := false } ⟹ᶜ[Fml.tt] true }
 -/
 #guard_msgs in
-example : ProvesC .tt [] .nil cdl!{ [ ok = to.send(5); ] true } := by
+example : ProvesC .tt true [] .nil cdl!{ [ ok = to.send(5); ] true } := by
   apply ProvesC.allIntro
   apply ProvesC.bindIntro
   apply ProvesC.send .sendWithCallbackBox
@@ -101,5 +107,15 @@ example : ValidC ⟨.tt, rfl⟩ cdl!{ [ ok = to.send(5); ] true } := by
   apply ProvesC.send .sendWithCallbackBox
   case exit => exact .plain (.updIntro (.updIntro (.closeTrue rfl))) rfl
   all_goals exact .plain (.closeTrue rfl) rfl
+
+/-- Under `transferSemantics:noCallback` the send runs as its typed run: the
+ordinary rule fires (`sendNoCallbackBox`), and the sequent says which
+reading it is in. -/
+example : ProvesC .tt false [] .nil cdl!{ [ ok = to.send(5); ] true } := by
+  apply ProvesC.allIntro
+  apply ProvesC.bindIntro
+  trace_state
+  apply ProvesC.plain _ rfl
+  sol_derive
 
 end Solidity.Examples.Tactics.CallbackRuns

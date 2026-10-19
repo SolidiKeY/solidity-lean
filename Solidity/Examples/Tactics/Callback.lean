@@ -115,9 +115,10 @@ theorem withdrawUnsafe_valid : ⊨ dl!{ balance + paidOut == deposited →
   sol_symex
   sol_close
 
-/-- The same, as the no-callback semantics. -/
+/-- The same, as the no-callback semantics: with no `try`, it is the
+deterministic reading. -/
 theorem withdrawUnsafe_noCallback : ValidT .noCallback withdrawUnsafe :=
-  validT_noCallback.2 withdrawUnsafe_valid
+  (validT_noCallback_iff rfl).2 withdrawUnsafe_valid
 
 /-! ## `send`: a callee that may refuse
 
@@ -196,7 +197,7 @@ def before : State Vault [] :=
 theorem execOfRun {C : Contract} {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ}
     {s : Stmt C Γ Γ'} {o : Out C σ.H Γ'} (hf : s.forks = false)
     (h : s.run σ = .ok o) : ExecS J σ s (.ok o) := by
-  have := ExecS.det (J := J) (σ := σ) hf
+  have := ExecS.det (J := J) (σ := σ) (Stmt.forksIn_of_forks hf)
   rwa [h] at this
 
 /-- **Interaction first is not safe with callbacks.**  From `before`, with
@@ -209,7 +210,7 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   -- the run: `amt = 5`; pay `5`; the callee withdraws again; `balance = 0`; `paidOut += 5`
   have H := h before (u 7) ?inv _
     (.cons (execOfRun rfl rfl)
-      (.cons (ExecS.transferResume (st := vault 0 5 5) (nt := []) rfl ?exit ?resume)
+      (.cons (ExecS.transferResume (st := vault 0 5 5) (nt := []) rfl rfl ?exit ?resume)
         (.cons (execOfRun rfl rfl)
           (.cons (execOfRun rfl rfl) .nil))))
   case inv =>

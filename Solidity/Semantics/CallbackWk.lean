@@ -23,19 +23,19 @@ variable {C : Contract}
 
 mutual
 
-theorem hasTransfer_stmt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
-    {Δ : Ctx} → (h : Thin Γ Δ) → (s.wk h).2.2.hasTransfer = s.hasTransfer
+theorem callsBack_stmt {pay : Bool} : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    {Δ : Ctx} → (h : Thin Γ Δ) → (s.wk h).2.2.callsBack pay = s.callsBack pay
   | _, _, .ite c thn els, _, h => by
-    change ((thn.wk h).2.2.hasTransfer || (els.wk h).2.2.hasTransfer) =
-      (thn.hasTransfer || els.hasTransfer)
-    rw [hasTransfer_prog thn h, hasTransfer_prog els h]
-  | _, _, .loop a c body, _, h => hasTransfer_prog body h
-  | _, _, .block body, _, h => hasTransfer_prog body h
+    change ((thn.wk h).2.2.callsBack pay || (els.wk h).2.2.callsBack pay) =
+      (thn.callsBack pay || els.callsBack pay)
+    rw [callsBack_prog thn h, callsBack_prog els h]
+  | _, _, .loop a c body, _, h => callsBack_prog body h
+  | _, _, .block body, _, h => callsBack_prog body h
   | _, _, .call f args ret body, _, h => by cases ret <;> rfl
   | _, _, .callReceiverPush _ _ _ body code _, _, h => by
-    change (body.hasTransfer || (code.wk h).2.2.hasTransfer) =
-      (body.hasTransfer || code.hasTransfer)
-    rw [hasTransfer_prog code h]
+    change (body.callsBack pay || (code.wk h).2.2.callsBack pay) =
+      (body.callsBack pay || code.callsBack pay)
+    rw [callsBack_prog code h]
   | _, _, .assign .., _, _ | _, _, .rebind .., _, _ | _, _, .assignLocal .., _, _
   | _, _, .declLocal .., _, _ | _, _, .declStorage .., _, _
   | _, _, .opAssign .., _, _ | _, _, .incDec .., _, _
@@ -49,21 +49,33 @@ theorem hasTransfer_stmt : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .require .., _, _ | _, _, .assert .., _, _ | _, _, .revert, _, _
   | _, _, .callReceiver .., _, _ | _, _, .tryCall .., _, _ => rfl
 
-theorem hasTransfer_prog : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
-    {Δ : Ctx} → (h : Thin Γ Δ) → (P.wk h).2.2.hasTransfer = P.hasTransfer
+theorem callsBack_prog {pay : Bool} : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    {Δ : Ctx} → (h : Thin Γ Δ) → (P.wk h).2.2.callsBack pay = P.callsBack pay
   | _, _, .nil, _, _ => rfl
   | _, _, .cons s P, _, h => by
-    change ((s.wk h).2.2.hasTransfer || (P.wk (s.wk h).2.1).2.2.hasTransfer) =
-      (s.hasTransfer || P.hasTransfer)
-    rw [hasTransfer_stmt s h, hasTransfer_prog P (s.wk h).2.1]
+    change ((s.wk h).2.2.callsBack pay || (P.wk (s.wk h).2.1).2.2.callsBack pay) =
+      (s.callsBack pay || P.callsBack pay)
+    rw [callsBack_stmt s h, callsBack_prog P (s.wk h).2.1]
 
 end
 
+theorem hasTransfer_stmt {Γ Γ' Δ : Ctx} (s : Stmt C Γ Γ') (h : Thin Γ Δ) :
+    (s.wk h).2.2.hasTransfer = s.hasTransfer := by
+  rw [← Stmt.callsBack_true, ← Stmt.callsBack_true, callsBack_stmt s h]
+
+theorem hasTransfer_prog {Γ Γ' Δ : Ctx} (P : Prog C Γ Γ') (h : Thin Γ Δ) :
+    (P.wk h).2.2.hasTransfer = P.hasTransfer := by
+  rw [← Prog.callsBack_true, ← Prog.callsBack_true, callsBack_prog P h]
+
+theorem forksIn_stmt {pay : Bool} {Γ Γ' Δ : Ctx} (s : Stmt C Γ Γ') (h : Thin Γ Δ) :
+    (s.wk h).2.2.forksIn pay = s.forksIn pay := by
+  cases s <;> try rfl
+  case loop a c body => exact callsBack_prog body h
+  case block body => exact callsBack_prog body h
+
 theorem forks_stmt {Γ Γ' Δ : Ctx} (s : Stmt C Γ Γ') (h : Thin Γ Δ) :
     (s.wk h).2.2.forks = s.forks := by
-  cases s <;> try rfl
-  case loop a c body => exact hasTransfer_prog body h
-  case block body => exact hasTransfer_prog body h
+  rw [← Stmt.forksIn_true, ← Stmt.forksIn_true, forksIn_stmt s h]
 
 /-- Callback outcomes related by local weakening, with the same halted/violated status. -/
 def CWkRel {Γ Δ : Ctx} {H : HTy} (h : Thin Γ Δ)
@@ -168,10 +180,10 @@ def WkP (J : StateInv C) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prop :=
         CWkRel (P.wk h).2.1 (TEnv.off h d) o o'
 
 theorem det_wk {Γ Γ' Δ : Ctx} (J : StateInv C) (s : Stmt C Γ Γ')
-    (h : Thin Γ Δ) (σ : State C Γ) (d : TEnv C σ.H Δ) (hf : s.forks = false) :
+    (h : Thin Γ Δ) (σ : State C Γ) (d : TEnv C σ.H Δ) (hf : s.forksIn J.pay = false) :
     ∃ o', ExecS J (σ.lift h d) (s.wk h).2.2 o' ∧
       CWkRel (s.wk h).2.1 (TEnv.off h d) (.ofRes (s.run σ)) o' :=
-  ⟨_, .det ((forks_stmt s h).trans hf), CWkRel.of_res (Stmt.run_wk s h σ d)⟩
+  ⟨_, .det ((forksIn_stmt s h).trans hf), CWkRel.of_res (Stmt.run_wk s h σ d)⟩
 
 theorem callLeave_wk {Γ Δ Γ' ps rs Γf : Ctx} (h : Thin Γ Δ) (σ : State C Γ)
     (d : TEnv C σ.H Δ) (ret : CallRet Γ rs Γ') (hb : Ext (rs ++ ps) Γf)
@@ -216,20 +228,20 @@ theorem transfer_wk {Γ : Ctx} (J : StateInv C) (r amt : Val C Γ .uint) :
   intro Δ h σ d o he
   cases he with
   | det hf => exact det_wk J _ h σ d hf
-  | transferHalt hp =>
-    refine ⟨_, ExecS.transferHalt (J := J) ?_, rfl⟩
+  | transferHalt hpay hp =>
+    refine ⟨_, ExecS.transferHalt (J := J) hpay ?_, rfl⟩
     rw [TRun.transfer_wk, hp]
     rfl
-  | @transferViolated _ _ _ _ a hp hj =>
+  | @transferViolated _ _ _ _ a hpay hp hj =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    exact ⟨_, .transferViolated hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
-  | @transferResume _ _ _ _ a st nt hp hj hk =>
+    exact ⟨_, .transferViolated hpay hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
+  | @transferResume _ _ _ _ a st nt hpay hp hj hk =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    refine ⟨_, ExecS.transferResume (J := J) (st := st) (nt := nt) hl ?_ ?_, ?_⟩
+    refine ⟨_, ExecS.transferResume (J := J) (st := st) (nt := nt) hpay hl ?_ ?_, ?_⟩
     · exact (at_lift J h a.st _).mpr hj
     · exact (at_lift J h (a.st.havoc st nt) _).mpr hk
     · exact CWkRel.lift_ok h d ⟨a.st.havoc st nt, a.ext⟩
@@ -239,27 +251,27 @@ theorem send_wk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
   intro Δ h σ d o he
   cases he with
   | det hf => exact det_wk J _ h σ d hf
-  | sendHalt hp =>
-    refine ⟨_, ExecS.sendHalt (J := J) ?_, rfl⟩
+  | sendHalt hpay hp =>
+    refine ⟨_, ExecS.sendHalt (J := J) hpay ?_, rfl⟩
     rw [TRun.transfer_wk, hp]
     rfl
-  | @sendFailed _ _ _ _ _ a hp =>
+  | @sendFailed _ _ _ _ _ a hpay hp =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    refine ⟨_, ExecS.sendFailed (J := J) (pv := pv.wk h) hl, ?_⟩
+    refine ⟨_, ExecS.sendFailed (J := J) (pv := pv.wk h) hpay hl, ?_⟩
     simpa only [Out.lift, TEnv.wk_self, State.lift_setLocal] using
       CWkRel.lift_ok h d (⟨σ.setLocal pv false, List.prefix_refl _⟩ : Out C σ.H Γ)
-  | @sendViolated _ _ _ _ _ a hp hj =>
+  | @sendViolated _ _ _ _ _ a hpay hp hj =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    exact ⟨_, .sendViolated hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
-  | @sendResume _ _ _ _ _ a st nt hp hj hk =>
+    exact ⟨_, .sendViolated hpay hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
+  | @sendResume _ _ _ _ _ a st nt hpay hp hj hk =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
-    refine ⟨_, ExecS.sendResume (J := J) (pv := pv.wk h) (st := st) (nt := nt) hl ?_ ?_, ?_⟩
+    refine ⟨_, ExecS.sendResume (J := J) (pv := pv.wk h) (st := st) (nt := nt) hpay hl ?_ ?_, ?_⟩
     · exact (at_lift J h a.st _).mpr hj
     · exact (at_lift J h (a.st.havoc st nt) _).mpr hk
     · simpa only [Out.lift, State.lift_setLocal, lift_havoc] using
@@ -290,7 +302,7 @@ theorem block_wk {Γ Γ₁ : Ctx} (J : StateInv C) (body : Prog C Γ Γ₁) (hb 
   | det hf => exact det_wk J _ h σ d hf
   | block ht hp =>
     obtain ⟨u, hu, hr⟩ := hb h σ d hp
-    exact ⟨_, ExecS.block ((hasTransfer_prog body h).trans ht) hu,
+    exact ⟨_, ExecS.block ((callsBack_prog body h).trans ht) hu,
       CWkRel.drop (Prog.wk_over body h) hr⟩
 
 theorem res_map_map {α β γ : Type} (r : TRes α) (f : α → β) (g : β → γ) :
@@ -467,11 +479,11 @@ theorem loop_exec_wk {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ}
       exact det_wk J _ h τ d hf
   | @loopHalt Γ Γ₁ σ a c body err ht hc =>
     intro hb Δ h d
-    refine ⟨_, ExecS.loopHalt ((hasTransfer_prog body h).trans ht) ?_, rfl⟩
+    refine ⟨_, ExecS.loopHalt ((callsBack_prog body h).trans ht) ?_, rfl⟩
     simpa only [Val.evalT_wk] using hc
   | @loopExit Γ Γ₁ σ a c body ht hc =>
     intro hb Δ h d
-    refine ⟨_, ExecS.loopExit ((hasTransfer_prog body h).trans ht) ?_, ?_⟩
+    refine ⟨_, ExecS.loopExit ((callsBack_prog body h).trans ht) ?_, ?_⟩
     · simpa only [Val.evalT_wk] using hc
     · simpa only [Out.lift, TEnv.wk_self] using
         CWkRel.lift_ok h d (⟨σ, List.prefix_refl _⟩ : Out C σ.H Γ)
@@ -487,19 +499,19 @@ theorem loop_exec_wk {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ}
       obtain ⟨u', hu', hr'⟩ := ih hb h (TEnv.drop (body.wk h).2.2.ext d')
       have hn := execS_drop_lift ho J v.st d'
         (.loop (a.wk h) (c.wk h) (body.wk h).2.2) hu'
-      refine ⟨_, ExecS.loopIter ((hasTransfer_prog body h).trans ht) ?_ hu hn,
+      refine ⟨_, ExecS.loopIter ((callsBack_prog body h).trans ht) ?_ hu hn,
         CWkRel.cat (Out.drop body.ext v) (TEnv.drop (body.wk h).2.2.ext d')
           ((ho.tenv v.st.env d').2.trans hd) hr'⟩
       simpa only [Val.evalT_wk] using hc
   | @loopStop Γ Γ₁ σ a c body o ht hc hp hn _ =>
     intro hb Δ h d
     obtain ⟨u, hu, hr⟩ := hb h σ d hp
-    refine ⟨_, ExecS.loopStop ((hasTransfer_prog body h).trans ht) ?_ hu
+    refine ⟨_, ExecS.loopStop ((callsBack_prog body h).trans ht) ?_ hu
       ((CWkRel.isOk hr).trans hn), CWkRel.drop (Prog.wk_over body h) hr⟩
     simpa only [Val.evalT_wk] using hc
   | @loopDiverge Γ Γ₁ σ a c body ht =>
     intro hb Δ h d
-    exact ⟨_, ExecS.loopDiverge ((hasTransfer_prog body h).trans ht), rfl⟩
+    exact ⟨_, ExecS.loopDiverge ((callsBack_prog body h).trans ht), rfl⟩
   | _ => trivial
 
 theorem loop_wk {Γ Γ₁ : Ctx} (J : StateInv C) (a : LoopAnn C Γ) (c : Val C Γ .bool)

@@ -142,10 +142,14 @@ theorem COut.receiverOp_of_call {Γ ps Γf : Ctx} {E : Ty} (args : Args C Γ ps)
 
 /-! ## The invariant, the callee -/
 
-/-- A contract invariant, read on a state with no locals (solkey's
-`CInv(storage, net)`). -/
+/-- What the callee may do: keep a contract invariant, read on a state with
+no locals (solkey's `CInv(storage, net)`), and, when `pay` is set, call back
+from a `transfer` or a `send` too (KeY's `transferSemantics:withCallback`).
+A `try` calls back either way: its callee has all the gas (solkey's bug 5,
+`docs/options.md`). -/
 structure StateInv (C : Contract) where
   holds : State C [] → Prop
+  pay : Bool := true
 
 /-- The invariant holds of the global part of `σ`. -/
 def StateInv.at {Γ : Ctx} (J : StateInv C) (σ : State C Γ) : Prop :=
@@ -259,6 +263,187 @@ theorem Fml.hasTransfer_modal {Γ Γ' Γ₀ : Ctx} (m : Modality) (P : Prog C Γ
     Fml.hasTransfer (.modal m P κ φ) = (Prog.hasTransfer P || κ.hasTransfer || φ.hasTransfer) :=
   rfl
 
+mutual
+
+/-- Whether a statement may hand control to a callee that calls back: a
+`try`, and a `transfer` or a `send` when `pay` is set, in a branch, a block, a
+loop or a callee included (`hasTransfer` at `pay := true`, `callsBack_true`). -/
+def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
+  | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
+    (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
+    (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false)
+    (transfer := fun _ _ => pay) (send := fun _ _ _ => pay)
+    (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
+    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
+    (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
+    (ite := fun _ thn els => Prog.callsBack pay thn || Prog.callsBack pay els)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (call := fun _ _ _ body => Prog.callsBack pay body)
+    (callReceiver := fun _ _ _ body _ => Prog.callsBack pay body)
+    (callReceiverPush := fun _ _ _ body code _ =>
+      Prog.callsBack pay body || Prog.callsBack pay code)
+    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (loop := fun _ _ body => Prog.callsBack pay body)
+    (block := fun body => Prog.callsBack pay body)
+  termination_by structural _ _ s => s
+
+def Prog.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
+  | _, _, P => Prog.casesOn (motive_2 := fun _ _ _ => Bool) P false
+      (fun s P => Stmt.callsBack pay s || Prog.callsBack pay P)
+  termination_by structural _ _ P => P
+
+end
+
+theorem Prog.callsBack_cons {pay : Bool} {Γ Γ₁ Γ' : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ') :
+    Prog.callsBack pay (.cons s P) = (Stmt.callsBack pay s || Prog.callsBack pay P) := rfl
+
+/-- `callsBack` over the programs of the frames. -/
+def Frames.callsBack (pay : Bool) : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Bool
+  | _, _, κ => Frames.casesOn (motive := fun _ _ _ => Bool) κ false
+      (fun ω κ => Prog.callsBack pay ω || Frames.callsBack pay κ)
+      (fun _ _ κ => Frames.callsBack pay κ) (fun _ κ => Frames.callsBack pay κ)
+  termination_by structural _ _ κ => κ
+
+theorem Frames.callsBack_seq {pay : Bool} {Γ Γ₁ Γ₀ : Ctx} (ω : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) :
+    Frames.callsBack pay (.seq ω κ) = (Prog.callsBack pay ω || κ.callsBack pay) := rfl
+
+/-- `callsBack` over the programs of the formula. -/
+def Fml.callsBack (pay : Bool) : {Γ : Ctx} → Fml C Γ → Bool
+  | _, φ => Fml.casesOn (motive := fun _ _ => Bool) φ
+    (tt := false) (eq := fun _ _ => false) (wellFormed := fun _ => false)
+    (not := fun φ => Fml.callsBack pay φ)
+    (and := fun φ ψ => Fml.callsBack pay φ || Fml.callsBack pay ψ)
+    (imp := fun φ ψ => Fml.callsBack pay φ || Fml.callsBack pay ψ)
+    (upd := fun _ _ φ => Fml.callsBack pay φ)
+    (modal := fun _ P κ φ => Prog.callsBack pay P || κ.callsBack pay || Fml.callsBack pay φ)
+    (havoc := fun φ => Fml.callsBack pay φ) (all := fun _ _ φ => Fml.callsBack pay φ)
+    (bind := fun _ _ _ φ => Fml.callsBack pay φ) (anon := fun _ φ => Fml.callsBack pay φ)
+  termination_by structural _ φ => φ
+
+theorem Fml.callsBack_and {pay : Bool} {Γ : Ctx} (φ ψ : Fml C Γ) :
+    Fml.callsBack pay (.and φ ψ) = (φ.callsBack pay || ψ.callsBack pay) := rfl
+
+theorem Fml.callsBack_imp {pay : Bool} {Γ : Ctx} (φ ψ : Fml C Γ) :
+    Fml.callsBack pay (.imp φ ψ) = (φ.callsBack pay || ψ.callsBack pay) := rfl
+
+theorem Fml.callsBack_modal {pay : Bool} {Γ Γ' Γ₀ : Ctx} (m : Modality) (P : Prog C Γ Γ')
+    (κ : Frames C Γ' Γ₀) (φ : Fml C Γ₀) :
+    Fml.callsBack pay (.modal m P κ φ) =
+      (Prog.callsBack pay P || κ.callsBack pay || φ.callsBack pay) := rfl
+
+/-- `Stmt.forks` when only a `try` hands control unless `pay` is set: a
+`transfer` or a `send` then runs as `Stmt.run` (`forksIn_true`). -/
+def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
+  Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)
+    (declLocal := fun _ _ _ => false) (declStorage := fun _ _ _ => false)
+    (opAssign := fun _ _ _ _ _ => false) (incDec := fun _ _ _ => false)
+    (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
+    (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
+    (push := fun _ _ _ => false) (pop := fun _ => false)
+    (transfer := fun _ _ => pay) (send := fun _ _ _ => pay)
+    (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
+    (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
+    (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
+    (ite := fun _ _ _ => true)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (call := fun _ _ _ _ => true)
+    (callReceiver := fun _ _ _ _ _ => true)
+    (callReceiverPush := fun _ _ _ _ _ _ => true)
+    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (loop := fun _ _ body => Prog.callsBack pay body)
+    (block := fun body => Prog.callsBack pay body)
+
+mutual
+
+/-- At `pay := true`, `callsBack` is `hasTransfer`. -/
+theorem Stmt.callsBack_true : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    s.callsBack true = s.hasTransfer
+  | _, _, .ite _ thn els => by
+    show (Prog.callsBack true thn || Prog.callsBack true els) =
+      (Prog.hasTransfer thn || Prog.hasTransfer els)
+    rw [Prog.callsBack_true thn, Prog.callsBack_true els]
+  | _, _, .call _ _ _ body => Prog.callsBack_true body
+  | _, _, .callReceiver _ _ _ body _ => Prog.callsBack_true body
+  | _, _, .callReceiverPush _ _ _ body code _ => by
+    show (Prog.callsBack true body || Prog.callsBack true code) =
+      (Prog.hasTransfer body || Prog.hasTransfer code)
+    rw [Prog.callsBack_true body, Prog.callsBack_true code]
+  | _, _, .loop _ _ body => Prog.callsBack_true body
+  | _, _, .block body => Prog.callsBack_true body
+  | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..
+  | _, _, .declStorage .. | _, _, .opAssign .. | _, _, .incDec .. | _, _, .assignIncDec ..
+  | _, _, .assignLocalPush .. | _, _, .pushOpAssign .. | _, _, .pushIncDec .. | _, _, .push ..
+  | _, _, .pop .. | _, _, .transfer .. | _, _, .send .. | _, _, .declMem ..
+  | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
+  | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
+  | _, _, .revert | _, _, .tryCall .. => rfl
+
+theorem Prog.callsBack_true : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    P.callsBack true = P.hasTransfer
+  | _, _, .nil => rfl
+  | _, _, .cons s P => by
+    show (Stmt.callsBack true s || Prog.callsBack true P) = (s.hasTransfer || P.hasTransfer)
+    rw [Stmt.callsBack_true s, Prog.callsBack_true P]
+
+end
+
+mutual
+
+/-- A statement with no payment and no `try` hands control to nobody, whatever
+`pay` says. -/
+theorem Stmt.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    s.hasTransfer = false → s.callsBack pay = false
+  | _, _, .ite _ thn els, h => by
+    simp only [Stmt.hasTransfer, Bool.or_eq_false_iff] at h
+    show (Prog.callsBack pay thn || Prog.callsBack pay els) = false
+    rw [Prog.callsBack_of_hasTransfer thn h.1, Prog.callsBack_of_hasTransfer els h.2]; rfl
+  | _, _, .call _ _ _ body, h => Prog.callsBack_of_hasTransfer body h
+  | _, _, .callReceiver _ _ _ body _, h => Prog.callsBack_of_hasTransfer body h
+  | _, _, .callReceiverPush _ _ _ body code _, h => by
+    simp only [Stmt.hasTransfer, Bool.or_eq_false_iff] at h
+    show (Prog.callsBack pay body || Prog.callsBack pay code) = false
+    rw [Prog.callsBack_of_hasTransfer body h.1, Prog.callsBack_of_hasTransfer code h.2]; rfl
+  | _, _, .loop _ _ body, h => Prog.callsBack_of_hasTransfer body h
+  | _, _, .block body, h => Prog.callsBack_of_hasTransfer body h
+  | _, _, .transfer .., h | _, _, .send .., h | _, _, .tryCall .., h => nomatch h
+  | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _
+  | _, _, .declLocal .., _ | _, _, .declStorage .., _ | _, _, .opAssign .., _
+  | _, _, .incDec .., _ | _, _, .assignIncDec .., _ | _, _, .assignLocalPush .., _
+  | _, _, .pushOpAssign .., _ | _, _, .pushIncDec .., _ | _, _, .push .., _ | _, _, .pop .., _
+  | _, _, .declMem .., _ | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _
+  | _, _, .assignMem .., _ | _, _, .delete .., _ | _, _, .deleteMem .., _
+  | _, _, .assignNew .., _ | _, _, .require .., _ | _, _, .assert .., _ | _, _, .revert, _ => rfl
+
+theorem Prog.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    P.hasTransfer = false → P.callsBack pay = false
+  | _, _, .nil, _ => rfl
+  | _, _, .cons s P, h => by
+    simp only [Prog.hasTransfer_cons, Bool.or_eq_false_iff] at h
+    show (Stmt.callsBack pay s || Prog.callsBack pay P) = false
+    rw [Stmt.callsBack_of_hasTransfer s h.1, Prog.callsBack_of_hasTransfer P h.2]; rfl
+
+end
+
+/-- At `pay := true`, `forksIn` is `forks`. -/
+theorem Stmt.forksIn_true {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : s.forksIn true = s.forks := by
+  cases s
+  case loop _ _ body => exact Prog.callsBack_true body
+  case block body => exact Prog.callsBack_true body
+  all_goals rfl
+
+/-- A statement that forks under no reading forks under none. -/
+theorem Stmt.forksIn_of_forks {pay : Bool} {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} (h : s.forks = false) :
+    s.forksIn pay = false := by
+  cases s
+  case loop _ _ body => exact Prog.callsBack_of_hasTransfer body h
+  case block body => exact Prog.callsBack_of_hasTransfer body h
+  all_goals first | rfl | exact nomatch h
+
 /-! ## Runs with callbacks -/
 
 mutual
@@ -267,41 +452,44 @@ mutual
 may call back into a contract with invariant `J`. -/
 inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt C Γ Γ' →
     COut C σ.H Γ' → Prop where
-  /-- A statement that runs no other by a choice and pays nothing runs as
-  `Stmt.run`. -/
+  /-- A statement that runs no other by a choice and hands control to no
+  callee that calls back runs as `Stmt.run`: a `transfer` and a `send` among
+  them unless `J.pay`. -/
   | det {Γ Γ' : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ'} :
-      s.forks = false → ExecS J σ s (.ofRes (s.run σ))
+      s.forksIn J.pay = false → ExecS J σ s (.ofRes (s.run σ))
   /-- A transfer whose operands halt. -/
   | transferHalt {Γ : Ctx} {σ : State C Γ} {r a : Val C Γ .uint} {e : THalt} :
-      TRun.transfer r a σ = .error e → ExecS J σ (.transfer r a) (.halt e)
+      J.pay = true → TRun.transfer r a σ = .error e → ExecS J σ (.transfer r a) (.halt e)
   /-- KeY's "invariant on exit": control leaves with `J` broken. -/
   | transferViolated {Γ : Ctx} {σ : State C Γ} {r a : Val C Γ .uint} {o₁ : Out C σ.H Γ} :
-      TRun.transfer r a σ = .ok o₁ → ¬ J.at o₁.st → ExecS J σ (.transfer r a) .violated
+      J.pay = true → TRun.transfer r a σ = .ok o₁ → ¬ J.at o₁.st →
+        ExecS J σ (.transfer r a) .violated
   /-- KeY's "resume after callback": control leaves with `J` kept and comes
   back to any state the callee may leave in which `J` holds. -/
   | transferResume {Γ : Ctx} {σ : State C Γ} {r a : Val C Γ .uint} {o₁ : Out C σ.H Γ}
       {st : Storage C} {nt : Ledger} :
-      TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
+      J.pay = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
         ExecS J σ (.transfer r a) (.ok ⟨o₁.st.havoc st nt, o₁.ext⟩)
   /-- A send that halts, where its transfer would. -/
   | sendHalt {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
       {e : THalt} :
-      TRun.transfer r a σ = .error e → ExecS J σ (.send pv r a) (.halt e)
+      J.pay = true → TRun.transfer r a σ = .error e → ExecS J σ (.send pv r a) (.halt e)
   /-- KeY's "send failed": the callee reverts, nothing is booked and `pv`
   is `false`, whatever the transaction's oracle says. -/
   | sendFailed {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
       {o₁ : Out C σ.H Γ} :
-      TRun.transfer r a σ = .ok o₁ →
+      J.pay = true → TRun.transfer r a σ = .ok o₁ →
         ExecS J σ (.send pv r a) (.ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩)
   /-- KeY's "invariant on exit", the payment booked. -/
   | sendViolated {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
       {o₁ : Out C σ.H Γ} :
-      TRun.transfer r a σ = .ok o₁ → ¬ J.at o₁.st → ExecS J σ (.send pv r a) .violated
+      J.pay = true → TRun.transfer r a σ = .ok o₁ → ¬ J.at o₁.st →
+        ExecS J σ (.send pv r a) .violated
   /-- KeY's "send succeeded": the payment booked, `J` kept, any state the
   callee may leave in which `J` holds, `pv` then `true`. -/
   | sendResume {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
       {o₁ : Out C σ.H Γ} {st : Storage C} {nt : Ledger} :
-      TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
+      J.pay = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
         ExecS J σ (.send pv r a)
           (.ok ⟨(o₁.st.havoc st nt).setLocal pv (true : Bool), o₁.ext⟩)
   | iteHalt {Γ Γ₁ Γ₂ : Ctx} {σ : State C Γ} {c : Val C Γ .bool} {thn : Prog C Γ Γ₁}
@@ -412,31 +600,31 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   /-- A loop that pays, whose condition halts. -/
   | loopHalt {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
       {body : Prog C Γ Γ₁} {e : THalt} :
-      Prog.hasTransfer body = true → c.evalT σ = .error e → ExecS J σ (.loop a c body) (.halt e)
+      Prog.callsBack J.pay body = true → c.evalT σ = .error e → ExecS J σ (.loop a c body) (.halt e)
   /-- The condition is false: the loop ends where it is. -/
   | loopExit {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
       {body : Prog C Γ Γ₁} :
-      Prog.hasTransfer body = true → c.evalT σ = .ok false →
+      Prog.callsBack J.pay body = true → c.evalT σ = .ok false →
         ExecS J σ (.loop a c body) (.ok ⟨σ, List.prefix_refl _⟩)
   /-- One iteration, its locals popped, and the loop again. -/
   | loopIter {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
       {body : Prog C Γ Γ₁} {υ : Out C σ.H Γ₁} {o : COut C (υ.st.drop body.ext).H Γ} :
-      Prog.hasTransfer body = true → c.evalT σ = .ok true → ExecP J σ body (.ok υ) →
+      Prog.callsBack J.pay body = true → c.evalT σ = .ok true → ExecP J σ body (.ok υ) →
         ExecS J (υ.st.drop body.ext) (.loop a c body) o →
           ExecS J σ (.loop a c body) (o.map (Out.cat (Out.drop body.ext υ)))
   /-- An iteration whose body halts or breaks the invariant. -/
   | loopStop {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
       {body : Prog C Γ Γ₁} {o : COut C σ.H Γ₁} :
-      Prog.hasTransfer body = true → c.evalT σ = .ok true → ExecP J σ body o → o.isOk = false →
+      Prog.callsBack J.pay body = true → c.evalT σ = .ok true → ExecP J σ body o → o.isOk = false →
         ExecS J σ (.loop a c body) (o.map (Out.drop body.ext))
   /-- A loop that pays may diverge: an over-approximation, which a box
   accepts and a diamond does not. -/
   | loopDiverge {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
       {body : Prog C Γ Γ₁} :
-      Prog.hasTransfer body = true → ExecS J σ (.loop a c body) (.halt .diverge)
+      Prog.callsBack J.pay body = true → ExecS J σ (.loop a c body) (.halt .diverge)
   /-- A block that pays, statement by statement, its locals popped. -/
   | block {Γ Γ₁ : Ctx} {σ : State C Γ} {body : Prog C Γ Γ₁} {o : COut C σ.H Γ₁} :
-      Prog.hasTransfer body = true → ExecP J σ body o →
+      Prog.callsBack J.pay body = true → ExecP J σ body o →
         ExecS J σ (.block body) (o.map (Out.drop body.ext))
 
 /-- `ExecP J σ P o`: the same, for a sequence. -/
@@ -552,22 +740,28 @@ nothing, unless it leaves `J` broken on the way. -/
 theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ σ : State C Γ,
     ExecS J σ s (.ofRes (s.run σ)) ∨ ExecS J σ s .violated
   | _, _, .transfer r a, σ => by
-    show ExecS J σ _ (.ofRes (TRun.transfer r a σ)) ∨ _
-    cases h : TRun.transfer r a σ with
-    | error e => exact .inl (.transferHalt h)
-    | ok o₁ =>
-      by_cases hI : J.at o₁.st
-      · exact .inl (ExecS.transferResume (st := o₁.st.storage) (nt := o₁.st.net) h hI hI)
-      · exact .inr (.transferViolated h hI)
+    cases hp : J.pay with
+    | false => exact .inl (.det hp)
+    | true =>
+      show ExecS J σ _ (.ofRes (TRun.transfer r a σ)) ∨ _
+      cases h : TRun.transfer r a σ with
+      | error e => exact .inl (.transferHalt hp h)
+      | ok o₁ =>
+        by_cases hI : J.at o₁.st
+        · exact .inl (ExecS.transferResume (st := o₁.st.storage) (nt := o₁.st.net) hp h hI hI)
+        · exact .inr (.transferViolated hp h hI)
   | _, _, .send pv r a, σ => by
-    show ExecS J σ _ (.ofRes (TRun.send pv r a σ)) ∨ _
-    rcases TRun.send_cases pv r a σ with ⟨e, ht, hs⟩ | ⟨o₁, ht, hs | hs⟩
-    · rw [hs]; exact .inl (.sendHalt ht)
-    · rw [hs]
-      by_cases hI : J.at o₁.st
-      · exact .inl (ExecS.sendResume (st := o₁.st.storage) (nt := o₁.st.net) ht hI hI)
-      · exact .inr (.sendViolated ht hI)
-    · rw [hs]; exact .inl (.sendFailed ht)
+    cases hp : J.pay with
+    | false => exact .inl (.det hp)
+    | true =>
+      show ExecS J σ _ (.ofRes (TRun.send pv r a σ)) ∨ _
+      rcases TRun.send_cases pv r a σ with ⟨e, ht, hs⟩ | ⟨o₁, ht, hs | hs⟩
+      · rw [hs]; exact .inl (.sendHalt hp ht)
+      · rw [hs]
+        by_cases hI : J.at o₁.st
+        · exact .inl (ExecS.sendResume (st := o₁.st.storage) (nt := o₁.st.net) hp ht hI hI)
+        · exact .inr (.sendViolated hp ht hI)
+      · rw [hs]; exact .inl (.sendFailed hp ht)
   | _, _, .ite c thn els, σ => by
     show ExecS J σ _ (.ofRes (TRun.ite c thn.ext thn.runR els.ext els.runR σ)) ∨ _
     rw [TRun.ite_eval]
@@ -690,8 +884,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       · exact .inl (.tryOther h)
       · exact .inr (.tryOther (o := .violated) h)
   | Γ, _, .loop a c body, σ => by
-    cases ht : Prog.hasTransfer body with
-    | false => exact .inl (.det (by simp only [Stmt.forks, ht]))
+    cases ht : Prog.callsBack J.pay body with
+    | false => exact .inl (.det (by simp only [Stmt.forksIn, ht]))
     | true =>
       show ExecS J σ _ (.ofRes (TRun.loop c body.ext body.runR σ)) ∨ _
       rw [TRun.loop_eq]
@@ -752,8 +946,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
         rw [this]
         exact .inl (.loopDiverge ht)
   | _, _, .block body, σ => by
-    cases ht : Prog.hasTransfer body with
-    | false => exact .inl (.det (by simp only [Stmt.forks, ht]))
+    cases ht : Prog.callsBack J.pay body with
+    | false => exact .inl (.det (by simp only [Stmt.forksIn, ht]))
     | true =>
       show ExecS J σ _ (.ofRes ((body.runR σ).map (Out.drop body.ext))) ∨ _
       rw [← COut.map_ofRes]
@@ -825,12 +1019,14 @@ mutual
 /-- **A statement that pays nothing has one callback run**, the
 deterministic one. -/
 theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
-    Stmt.hasTransfer s = false → ∀ {σ : State C Γ} {o : COut C σ.H Γ'}, ExecS J σ s o →
+    Stmt.callsBack J.pay s = false → ∀ {σ : State C Γ} {o : COut C σ.H Γ'}, ExecS J σ s o →
       o = .ofRes (s.run σ)
-  | _, _, .transfer .., ht, _, _, _ | _, _, .send .., ht, _, _, _
-  | _, _, .tryCall .., ht, _, _, _ => by simp only [Stmt.hasTransfer, Bool.true_eq_false] at ht
+  | _, _, .tryCall .., ht, _, _, _ => by simp only [Stmt.callsBack, Bool.true_eq_false] at ht
+  | _, _, .transfer .., ht, _, _, h | _, _, .send .., ht, _, _, h => by
+    simp only [Stmt.callsBack] at ht
+    cases h <;> first | rfl | simp_all only [Bool.true_eq_false]
   | _, _, .ite c thn els, ht, σ, _, h => by
-    simp only [Stmt.hasTransfer, Bool.or_eq_false_iff] at ht
+    simp only [Stmt.callsBack, Bool.or_eq_false_iff] at ht
     cases h with
     | det _ => rfl
     | iteHalt hc =>
@@ -848,7 +1044,7 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
       rw [TRun.ite_eval, hc]
       exact COut.map_ofRes _ _
   | _, _, .call f args ret body, ht, σ, _, h => by
-    simp only [Stmt.hasTransfer] at ht
+    simp only [Stmt.callsBack] at ht
     cases h with
     | det _ => rfl
     | callArgs ha =>
@@ -927,13 +1123,13 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
       cases ht : TRun.call args (.storage _ r) body.ext body.runR σ <;>
         simp only [ht, COut.ofRes] at hg <;> cases hg
   | _, _, .loop _ _ body, ht, _, _, h => by
-    simp only [Stmt.hasTransfer] at ht
+    simp only [Stmt.callsBack] at ht
     cases h with
     | det _ => rfl
     | loopHalt hb _ | loopExit hb _ | loopIter hb _ _ _ | loopStop hb _ _ _ | loopDiverge hb =>
       rw [hb] at ht; cases ht
   | _, _, .block body, ht, _, _, h => by
-    simp only [Stmt.hasTransfer] at ht
+    simp only [Stmt.callsBack] at ht
     cases h with
     | det _ => rfl
     | block hb _ => rw [hb] at ht; cases ht
@@ -952,11 +1148,11 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
 
 /-- The same, for a sequence. -/
 theorem Prog.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
-    Prog.hasTransfer P = false → ∀ {σ : State C Γ} {o : COut C σ.H Γ'}, ExecP J σ P o →
+    Prog.callsBack J.pay P = false → ∀ {σ : State C Γ} {o : COut C σ.H Γ'}, ExecP J σ P o →
       o = .ofRes (Prog.run σ P)
   | _, _, .nil, _, _, _, h => by cases h; rfl
   | _, _, .cons s P, ht, σ, _, h => by
-    simp only [Prog.hasTransfer_cons, Bool.or_eq_false_iff] at ht
+    simp only [Prog.callsBack_cons, Bool.or_eq_false_iff] at ht
     cases h with
     | @cons _ _ _ _ _ _ o₁ _ hs hP =>
       have e₁ := Stmt.eq_run J s ht.1 hs
@@ -984,24 +1180,24 @@ end
 
 /-- **A statement that pays nothing has one callback run** (`Stmt.eq_run`). -/
 theorem ExecS.eq_run {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ'}
-    {o : COut C σ.H Γ'} (h : ExecS J σ s o) (ht : Stmt.hasTransfer s = false) :
+    {o : COut C σ.H Γ'} (h : ExecS J σ s o) (ht : Stmt.callsBack J.pay s = false) :
     o = .ofRes (s.run σ) :=
   Stmt.eq_run J s ht h
 
 /-- The same, for a sequence. -/
 theorem ExecP.eq_run {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ} {P : Prog C Γ Γ'}
-    {o : COut C σ.H Γ'} (h : ExecP J σ P o) (ht : Prog.hasTransfer P = false) :
+    {o : COut C σ.H Γ'} (h : ExecP J σ P o) (ht : Prog.callsBack J.pay P = false) :
     o = .ofRes (Prog.run σ P) :=
   Prog.eq_run J P ht h
 
 /-- The same, for frames. -/
 theorem ExecF.eq_run {J : StateInv C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ} {κ : Frames C Γ Γ₀}
-    {o : COut C σ.H Γ₀} (h : ExecF J σ κ o) (ht : κ.hasTransfer = false) :
+    {o : COut C σ.H Γ₀} (h : ExecF J σ κ o) (ht : κ.callsBack J.pay = false) :
     o = .ofRes (κ.run σ) := by
   induction h with
   | nil => rfl
   | @seq _ _ σ ω κ o₁ _ hω _ ih =>
-    simp only [Frames.hasTransfer_seq, Bool.or_eq_false_iff] at ht
+    simp only [Frames.callsBack_seq, Bool.or_eq_false_iff] at ht
     have e₁ := ExecP.eq_run hω ht.1
     have hs : Prog.run σ ω = .ok o₁ := by
       revert e₁
@@ -1014,7 +1210,7 @@ theorem ExecF.eq_run {J : StateInv C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ}
     rw [hs, ih ht.2, COut.map_ofRes]
     rfl
   | @seqHalt _ _ σ ω κ _ hω =>
-    simp only [Frames.hasTransfer_seq, Bool.or_eq_false_iff] at ht
+    simp only [Frames.callsBack_seq, Bool.or_eq_false_iff] at ht
     have e₁ := ExecP.eq_run hω ht.1
     show _ = COut.ofRes (TRun.seq (fun τ => Prog.run τ ω) (fun τ => Frames.run τ κ) σ)
     unfold TRun.seq
@@ -1024,7 +1220,7 @@ theorem ExecF.eq_run {J : StateInv C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ}
     | error _ => intro e₁; cases e₁; rfl
     | ok _ => exact fun e₁ => nomatch e₁
   | @seqViolated _ _ σ ω κ hω =>
-    simp only [Frames.hasTransfer_seq, Bool.or_eq_false_iff] at ht
+    simp only [Frames.callsBack_seq, Bool.or_eq_false_iff] at ht
     have e₁ := ExecP.eq_run hω ht.1
     revert e₁
     cases Prog.run σ ω <;> exact fun e₁ => nomatch e₁
@@ -1034,7 +1230,7 @@ theorem ExecF.eq_run {J : StateInv C} {Γ₀ : Ctx} {Γ : Ctx} {σ : State C Γ}
 /-- **With no payment, a property of every callback run of a sequence is one
 of its deterministic run.** -/
 theorem ExecP.forall_iff {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ} {P : Prog C Γ Γ'}
-    (hP : Prog.hasTransfer P = false) (Q : COut C σ.H Γ' → Prop) :
+    (hP : Prog.callsBack J.pay P = false) (Q : COut C σ.H Γ' → Prop) :
     (∀ o, ExecP J σ P o → Q o) ↔ Q (.ofRes (Prog.run σ P)) := by
   refine ⟨fun H => ?_, fun H o h => ExecP.eq_run h hP ▸ H⟩
   rcases Prog.exec_run J P σ with h | h
@@ -1045,7 +1241,7 @@ theorem ExecP.forall_iff {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ} {P : 
 
 /-- The same, for frames. -/
 theorem ExecF.forall_iff {J : StateInv C} {Γ₀ Γ : Ctx} {σ : State C Γ} {κ : Frames C Γ Γ₀}
-    (hκ : κ.hasTransfer = false) (Q : COut C σ.H Γ₀ → Prop) :
+    (hκ : κ.callsBack J.pay = false) (Q : COut C σ.H Γ₀ → Prop) :
     (∀ o, ExecF J σ κ o → Q o) ↔ Q (.ofRes (κ.run σ)) := by
   refine ⟨fun H => ?_, fun H o h => ExecF.eq_run h hκ ▸ H⟩
   rcases Frames.exec_run J κ σ with h | h

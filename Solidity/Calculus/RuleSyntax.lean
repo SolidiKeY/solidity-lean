@@ -326,10 +326,13 @@ syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ₖ " dl_fml " }" : term
 /-- A sequent `Γ ⟹[R] φ` over the rule set `R` (`Proves R Γ φ`). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹[" term "] " dl_fml " }" : term
 /-- A sequent `Γ ⟹ᶜ[I] φ` of the calculus with callbacks, every `transfer`
-calling back into a contract with the invariant `I` (`ProvesC I Γ φ`;
-today's judgement was deleted at W4 `sem-del`, the scoped one is
-`Calculus/Callback.lean`'s). -/
+and every `try` calling back into a contract with the invariant `I`
+(`ProvesC I true Γ φ`; today's judgement was deleted at W4 `sem-del`, the
+scoped one is `Calculus/Callback.lean`'s). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ᶜ[" term "] " dl_fml " }" : term
+/-- The same under `transferSemantics:noCallback`: only a `try` calls back
+(`ProvesC I false Γ φ`). -/
+syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ᶜ[" term "; " &"noCallback" "] " dl_fml " }" : term
 /-- A term of the logic (`Tm`), its sort read off its head (`find(…)` a
 value, `save(…)` a storage, `write(…)` a memory, `consr(…)` a path).  Every
 name is a Lean variable of a term sort: `tm{ find(save(st, p, v), q) }`. -/
