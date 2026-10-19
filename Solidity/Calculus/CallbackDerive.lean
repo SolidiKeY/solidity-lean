@@ -106,13 +106,18 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
   return #[#[plain]] ++ rest
 
 /-- A `Proves` leaf closed as `sol_prove` closes one: `sol_leaf` and
-`sol_close`, the invariant opened first where it is assumed. -/
+`sol_close` (`sol_spec_close` for a specification's), the invariant opened
+first where it is assumed. -/
 def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
   let tries : Array (Array (TSyntax `tactic)) := #[
     #[← `(tactic| exact $(← ProofTree.short ``Proves.assumeInv))],
     #[← `(tactic| sol_leaf), ← `(tactic| sol_close)],
     #[← `(tactic| refine $(← ProofTree.short ``Proves.openInv) ?_),
-      ← `(tactic| sol_leaf), ← `(tactic| sol_close)]]
+      ← `(tactic| sol_leaf), ← `(tactic| sol_close)],
+    -- a specification's leaf (`spec[C]{f}`): `sol_spec_close`
+    #[← `(tactic| sol_leaf), ← `(tactic| sol_spec_close)],
+    #[← `(tactic| refine $(← ProofTree.short ``Proves.openInv) ?_),
+      ← `(tactic| sol_leaf), ← `(tactic| sol_spec_close)]]
   for tacs in tries do
     let s ← saveState
     let ok ← tryCatchRuntimeEx

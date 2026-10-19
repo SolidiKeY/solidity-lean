@@ -3,6 +3,8 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.WalkSyntax
+import Solidity.Calculus.Spec
+import Solidity.Calculus.SolSpec
 
 /-!
 # The strategy with callbacks
@@ -107,6 +109,42 @@ theorem sendEnds : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ 
 theorem callEnds :
     ValidC pingInv dl[Pinger]{ fails <= pings →
       ⟨ (bool ok, ) = to.call{value: 5}(""); ⟩ fails <= pings } := by
+  sol_prove
+
+/-! ## The invariant a specification declares
+
+`invariant[C]` is `C`'s `invariant` clauses as the `Invariant C` a callee
+keeps (`specInv`, `Calculus/Spec.lean`), and `spec[C]{f}` the obligation
+that assumes and owes it: solkey's specified problem under
+`transferSemantics:withCallback`. -/
+
+/-- The vault, its invariant declared. -/
+def Bank : Contract := contract!{
+  invariant balance + paidOut == deposited;
+  uint balance;
+  uint paidOut;
+  uint deposited;
+  function withdraw(address to) public {
+    uint amt = balance;
+    balance = 0;
+    paidOut += amt;
+    to.transfer(amt);
+  }
+}
+
+/-! The invariant compiled: `balance + paidOut == deposited` of the storage. -/
+
+/--
+info: dl{ find(storage, balance) + find(storage, paidOut) = find(storage, deposited) } : Fml Bank []
+-/
+#guard_msgs in #check (cinv[Bank] : Fml Bank [])
+
+/-- `withdraw`'s body under the invariant `Bank` declares, every payment
+calling back into a contract that keeps it. -/
+theorem withdraw_withCallback :
+    ValidC invariant[Bank] dl[Bank]{ balance + paidOut == deposited →
+      [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
+        balance + paidOut == deposited } := by
   sol_prove
 
 end Solidity.Examples.Tactics.CallbackStrategy

@@ -68,7 +68,26 @@ def specObligation (C : Contract) (f : String) : Except String (Fml C []) := do
     pure (.upd .box U' (← specModal Δ P posts))
   pure (Fml.closeN false Γ (.imp pre body))
 
+/-- **The contract's invariant** (`invariant e;`, `Contract.inv`), a closed
+formula of the storage: solkey's `CInv(storage, net)`, as `specObligation`
+assumes and owes it, and as a callee keeps it under callbacks
+(`docs/options.md`, O4). -/
+def specInv (C : Contract) : Except String (Fml C []) := do
+  let ctx : SpecCtx C := { storage := .storage, ensures := false, locals := [], result := none }
+  let invs ← C.inv.mapM (SpecExpr.fml C ctx)
+  NRead.conj invs ([] : NCtx)
+
 end Resolve
+
+/-- `cinv[C]`: `C`'s invariant (`specInv`), `Fml C []`. -/
+syntax "cinv[" term "]" : term
+
+/-- `invariant[C]`: `C`'s invariant as the `Invariant C` a callee keeps
+(`ValidC invariant[C] spec[C]{f}`). -/
+syntax "invariant[" term "]" : term
+
+/-- `invariant!`: `invariant[C]` for the file's `InContract` contract. -/
+syntax "invariant!" : term
 
 /-- `cspec[C]{f}`: `spec[C]{f}` scoped, `Fml C []`. -/
 syntax "cspec[" term "]{ " ident " }" : term
@@ -90,9 +109,13 @@ elab_rules : term
       `((specObligation ($c) $(quote f.getId.toString)).map (Fml.quote $q))
   | `(cproblem[ $c:term ]{ constructor }) =>
     elabAgainst c fun q => `((Problem.ctor ($c) Modality.diamond).map (Fml.quote $q))
+  | `(cinv[ $c:term ]) => elabAgainst c fun q => `((specInv ($c)).map (Fml.quote $q))
 
 macro_rules
   | `(spec[ $c:term ]{ $f:ident }) => `(cspec[$c]{ $f })
+  | `(invariant[ $c:term ]) =>
+    `(({ fml := cinv[$c] } : $(Lean.mkIdent `Solidity.Invariant) $c))
+  | `(invariant!) => `(invariant[InContract.contract])
   | `(cspec!{ $f:ident }) => `(cspec[InContract.contract]{ $f })
   | `(cproblem!{ constructor }) => `(cproblem[InContract.contract]{ constructor })
 
