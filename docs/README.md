@@ -15,6 +15,7 @@ the others link to it.
 | [compiler-verification.md](compiler-verification.md) | The EVM compiler: the theorem, the machine, the fragment. |
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [complete-verification.md](complete-verification.md) | Declaration certificates, exact reductions, automatic dependent-read compilation, guarded aliases, original-source countermodels and the complete `#verify` fragment. |
+| [automation.md](automation.md) | Automation milestones; M4: the fragment on which the automatic decision is total and complete, what is proved stage by stage, and what is not yet characterized syntactically. |
 | [solkey-migration.md](solkey-migration.md) | Pinned upstream inputs, migration tooling, evidence and remaining parity work. |
 | [solidity-testing.md](solidity-testing.md) | Testing `.sol` files and directories: CLI, JavaScript and Lean APIs, results and limits. |
 | [testsuite-proofs.md](testsuite-proofs.md) | Proving solkey's TestSuite by `⊢`: the decisions, the milestones, the measured costs. |

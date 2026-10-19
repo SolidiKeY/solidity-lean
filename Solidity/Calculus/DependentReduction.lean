@@ -1,10 +1,12 @@
 import Solidity.Calculus.LeafInputs
+import Solidity.Calculus.CondLift
 
 /-!
 # Original-source decisions with dependent mapping reads
 
-Exact program/update normalization and universal parameter instantiation precede
-automatic occurrence flattening. The original body may read only its declared
+Exact program/update normalization, the folding and lifting of the
+elimination's conditionals into case splits (`Calculus/CondLift.lean`) and universal
+parameter instantiation precede automatic occurrence flattening. The original body may read only its declared
 typed parameters. Generated alias arithmetic then decides validity and
 reconstructs an actual counterstate to the original scoped formula.
 -/
@@ -15,17 +17,20 @@ open ReadRealization Linear ScalarCode
 
 variable {C : Contract}
 
+/-- The nesting depth to which the elimination's conditionals are lifted. -/
+def condLiftFuel : Nat := 64
+
 structure DependentReduction (φ : Fml C []) where
   normalization : DeclarationReduction φ
   source : SourceReduction normalization.formula
-  sentence : UniversalPrefix source.leaf.elim
+  sentence : UniversalPrefix (source.leaf.elim.condSimp.liftCond condLiftFuel)
   body : FlattenedArithmetic sentence.body
   covered : ∀ p ∈ sentence.body.parameters, p ∈ sentence.parameters
 
 def dependentReduction? (φ : Fml C []) : Option (DependentReduction φ) := do
   let d ← ProgramNormalization.ofFormula? 2048 φ
   let r ← sourceReduction? d.formula
-  let sentence ← UniversalPrefix.ofFormula? 1024 r.leaf.elim
+  let sentence ← UniversalPrefix.ofFormula? 1024 (r.leaf.elim.condSimp.liftCond condLiftFuel)
   if hc : ∀ p ∈ sentence.body.parameters, p ∈ sentence.parameters then
     return ⟨d, r, sentence, ← flattenedArithmetic? 2048 sentence.body, hc⟩
   else none
@@ -41,11 +46,13 @@ theorem body_valid_iff {φ : Fml C []} (r : DependentReduction φ) :
   constructor
   · intro h g ν
     exact (r.body.flattening.source.holds_assign g r.sentence.parameters r.covered AEnv.dflt ν).mp
-      (r.sentence.instantiate g AEnv.dflt ν
-        ((r.source.elim_holds_iff g).mpr ((r.normalization.correct g).mpr (h g))))
+      (r.sentence.instantiate g AEnv.dflt ν ((LFml.liftCond_holds g _ _ _).mpr
+        ((LFml.condSimp_holds g _ _).mpr
+          ((r.source.elim_holds_iff g).mpr ((r.normalization.correct g).mpr (h g))))))
   · intro h g
     exact (r.normalization.correct g).mp ((r.source.elim_holds_iff g).mp
-      (r.sentence.close g AEnv.dflt (h g)))
+      ((LFml.condSimp_holds g _ _).mp
+        ((LFml.liftCond_holds g _ _ _).mp (r.sentence.close g AEnv.dflt (h g)))))
 
 theorem valid_iff {φ : Fml C []} (r : DependentReduction φ) : Valid φ ↔ r.arithmetic.Valid :=
   r.body_valid_iff.trans r.body.valid_iff
@@ -64,8 +71,9 @@ def countermodelOf {φ : Fml C []} (r : DependentReduction φ)
   let actual := r.body.countermodelOf cm
   refine ⟨actual.state, actual.atoms, fun hv => actual.refutes ?_⟩
   exact (r.body.flattening.source.holds_assign _ r.sentence.parameters r.covered AEnv.dflt _).mp
-    (r.sentence.instantiate _ AEnv.dflt actual.atoms
-      ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hv)))
+    (r.sentence.instantiate _ AEnv.dflt actual.atoms ((LFml.liftCond_holds _ _ _ _).mpr
+      ((LFml.condSimp_holds _ _ _).mpr
+        ((r.source.elim_holds_iff _).mpr ((r.normalization.correct _).mpr hv)))))
 
 def checkCodes {φ : Fml C []} (r : DependentReduction φ) (xs : List Nat) : Bool :=
   r.arithmetic.guarded.check (fun k => xs[k]?.getD 0)

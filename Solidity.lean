@@ -333,10 +333,16 @@ import Solidity.Calculus.ReadFlattening
 import Solidity.Calculus.ActiveReadConstraints
 import Solidity.Calculus.LeafArithmetic
 import Solidity.Calculus.LeafInputs
+import Solidity.Calculus.CondLift
 import Solidity.Calculus.DependentReduction
+import Solidity.Calculus.LeafTotality
+import Solidity.Calculus.FlattenTotality
+import Solidity.Calculus.LiftTotality
+import Solidity.Calculus.AutoComplete
 import Solidity.Tools.LeafArithmetic
 import Solidity.Examples.ReadFlattening
 import Solidity.Examples.DependentReduction
+import Solidity.Examples.AutoComplete
 import Solidity.Examples.TypedLinear
 import Solidity.Examples.StaticLinear
 import Solidity.Tools.Verify

@@ -21,7 +21,7 @@ structure SPath.View {T : Ty} (t : LTm C (.path T)) where
   path : SPath C T
   correct : ∀ (g : State C []) (ν : AEnv), path.eval g ν = t.eval g ν
 
-private def SPath.viewFuel? : Nat → {T : Ty} → (t : LTm C (.path T)) → Option (SPath.View t)
+def SPath.viewFuel? : Nat → {T : Ty} → (t : LTm C (.path T)) → Option (SPath.View t)
   | 0, _, _ => none
   | _ + 1, _, .app0 (.root r h) => some ⟨⟨r, h, .nil⟩, fun _ _ => rfl⟩
   | fuel + 1, _, .app1 (.field h) q => do

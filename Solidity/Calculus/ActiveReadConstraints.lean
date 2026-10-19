@@ -44,11 +44,11 @@ theorem constraint_holds (r q : ReadOccurrence C) (g : State C []) (ν : AEnv) :
     obtain ⟨qr, hq'⟩ := (q.guard_holds g ν).mp hq
     exact (SymbolicRead.constraint_holds g ν _ _ (r.witness g ν pr hp) (q.witness g ν qr hq')).mpr (h _ _)
 
-private def conjunction : List (LFml C) → LFml C
+def conjunction : List (LFml C) → LFml C
   | [] => .tt
   | φ :: fs => .and φ (conjunction fs)
 
-private theorem conjunction_holds (g : State C []) (ν : AEnv) (fs : List (LFml C)) :
+theorem conjunction_holds (g : State C []) (ν : AEnv) (fs : List (LFml C)) :
     (conjunction fs).holds g ν ↔ ∀ φ ∈ fs, φ.holds g ν := by
   induction fs with
   | nil => simp only [conjunction, LFml.holds, List.not_mem_nil, false_implies, implies_true]
