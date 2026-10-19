@@ -45,6 +45,7 @@ import Solidity.Calculus.Arms
 import Solidity.Calculus.Blocks
 import Solidity.Calculus.WkOver
 import Solidity.Calculus.Step
+import Solidity.Calculus.TermSize
 import Solidity.Calculus.Quote
 import Solidity.Calculus.Rules
 import Solidity.Calculus.Taclet
@@ -242,6 +243,7 @@ import Solidity.Typing.Constructibility
 import Solidity.Typing.CanonTest
 import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Typed.Mem
+import Solidity.Theory.Typed.Leaves
 import Solidity.Theory.Segs
 import Solidity.Theory.Bridge.Denote
 import Solidity.Calculus.KeyTaclets
