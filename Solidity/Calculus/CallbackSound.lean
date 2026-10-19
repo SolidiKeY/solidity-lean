@@ -142,7 +142,8 @@ theorem holdsC_modalK {I : Fml C []} {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (�
 the statement leaves gives the rest and the frames. -/
 theorem holdsC_cons {I : Fml C []} {Γ Γ' Γ₁ Γ₀ : Ctx} {σ : State C Γ} {s : Stmt C Γ Γ'}
     {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
-    (h : ∀ o₁, ExecS (I.stateInv pay) σ s o₁ → o₁.thenF (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ)) :
+    (h : ∀ o₁, ExecS (I.stateInv pay) σ s o₁ →
+      o₁.thenF (I.stateInv pay) (.seq ω κ) m (holdsC I pay · φ)) :
     holdsC I pay σ (.modal m (.cons s ω) κ φ) := by
   intro o ho
   cases ho with
@@ -322,10 +323,12 @@ theorem holdsC_split {s : Stmt C Γ Γ} {ω : Prog C Γ Γ₁} {b : BlockKind} {
   refine holdsC_cons fun o₁ he => ?_
   rcases hcov with hh | hh
   · obtain ⟨o', hP, rfl⟩ := (hc hh).2 _ o₁ he
-    have hA := holdsC_modalK σ P _ φ (h.1 ((holdsC_iff_holds c (Fml.callsBack_of_hasTransfer c hT) σ).2 hh))
+    have hA := holdsC_modalK σ P _ φ
+      (h.1 ((holdsC_iff_holds c (Fml.callsBack_of_hasTransfer c hT) σ).2 hh))
     exact COut.thenF_drop _ (hA o' hP)
   · obtain ⟨o', hQ, rfl⟩ := (hc' hh).2 _ o₁ he
-    have hB := holdsC_modalK σ Q _ φ (h.2 ((holdsC_iff_holds c' (Fml.callsBack_of_hasTransfer c' hT') σ).2 hh))
+    have hB := holdsC_modalK σ Q _ φ
+      (h.2 ((holdsC_iff_holds c' (Fml.callsBack_of_hasTransfer c' hT') σ).2 hh))
     exact COut.thenF_drop _ (hB o' hQ)
 
 /-- `P`'s run, through no frame. -/
@@ -400,7 +403,8 @@ theorem Hyps.wrapC_and {Γ : Ctx} (H : Hyps C Γ₀ Γ) :
 
 /-- The context is monotone. -/
 theorem Hyps.wrapC_mono {Γ : Ctx} (H : Hyps C Γ₀ Γ) {φ ψ : Fml C Γ}
-    (h : ∀ τ, holdsC I pay τ φ → holdsC I pay τ ψ) (σ : State C Γ₀) (hφ : holdsC I pay σ (H.wrap φ)) :
+    (h : ∀ τ, holdsC I pay τ φ → holdsC I pay τ ψ) (σ : State C Γ₀)
+    (hφ : holdsC I pay σ (H.wrap φ)) :
     holdsC I pay σ (H.wrap ψ) :=
   H.wrapC_and (fun τ a _ => h τ a) σ hφ hφ
 
@@ -465,14 +469,16 @@ theorem holdsC_transferCb (hI : I.FO = true) (hT : I.hasTransfer = false)
 after the booking; the rest after the booking and `pv := true`, from any
 state the callee leaves in which the invariant holds; the rest after
 `pv := false`, nothing booked. -/
-theorem holdsC_sendCb (hI : I.FO = true) (hT : I.hasTransfer = false) (pv : Idx Γ (.val .bool))
+theorem holdsC_sendCb {m : Modality} (hI : I.FO = true) (hT : I.hasTransfer = false)
+    (pv : Idx Γ (.val .bool))
     (sadr se : Simple C Γ .uint) (full : Bool)
-    (hx : holdsC I pay σ (.upd .box (Upd.nil.snoc (UpdElem.payTo sadr se)) (Fml.closedAt I)))
-    (hok : holdsC I pay σ (.upd .box ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
-      (.local pv (.val (Tm.lit (p := .bool) true)))) (.havoc (.imp (Fml.closedAt I) (Fml.modalK .box ω κ φ)))))
-    (hf : holdsC I pay σ (.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
-      (Fml.modalK .box ω κ φ))) :
-    holdsC I pay σ (.modal .box (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ) := by
+    (hx : holdsC I pay σ (.upd m (Upd.nil.snoc (UpdElem.payTo sadr se)) (Fml.closedAt I)))
+    (hok : holdsC I pay σ (.upd m ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
+      (.local pv (.val (Tm.lit (p := .bool) true))))
+      (.havoc (.imp (Fml.closedAt I) (Fml.modalK m ω κ φ)))))
+    (hf : holdsC I pay σ (.upd m (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
+      (Fml.modalK m ω κ φ))) :
+    holdsC I pay σ (.modal m (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
   cases he with
   | det _ =>
@@ -544,12 +550,13 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false) {ρ κc Γo
 /-- **`sendNoCallbackBox`, with callbacks unset**: a gas-limited send runs as
 its typed run, the payment booked and `pv` true, or nothing booked and `pv`
 false. -/
-theorem holdsC_sendDet (hp : pay = false) (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint)
-    (hok : holdsC I pay σ (.upd .box ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
-      (.local pv (.val (Tm.lit (p := .bool) true)))) (Fml.modalK .box ω κ φ)))
-    (hf : holdsC I pay σ (.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
-      (Fml.modalK .box ω κ φ))) :
-    holdsC I pay σ (.modal .box (.cons (.send pv (.simple sadr) (.simple se) false) ω) κ φ) := by
+theorem holdsC_sendDet {m : Modality} (hp : pay = false) (pv : Idx Γ (.val .bool))
+    (sadr se : Simple C Γ .uint)
+    (hok : holdsC I pay σ (.upd m ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
+      (.local pv (.val (Tm.lit (p := .bool) true)))) (Fml.modalK m ω κ φ)))
+    (hf : holdsC I pay σ (.upd m (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
+      (Fml.modalK m ω κ φ))) :
+    holdsC I pay σ (.modal m (.cons (.send pv (.simple sadr) (.simple se) false) ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
   rw [ExecS.detIn_inv he (by show (pay || false) = false; rw [hp]; rfl)]
   change COut.thenF _ _ _ _ (COut.ofRes (TRun.send pv (.simple sadr) (.simple se) σ))
@@ -632,6 +639,15 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     refine Hyps.wrapC_and _ ?_ σ
       (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ (ihx σ) (iho σ)) (ihf σ)
     exact fun τ ab c => holdsC_sendCb hI hT _ _ _ _ (holdsC_and_left ab) (holdsC_and_right ab) c
+  | sendD d _ _ _ _ _ ihx iho ihf =>
+    cases d
+    intro σ
+    refine Hyps.wrapC_and _ ?_ σ
+      (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ (ihx σ) (iho σ)) (ihf σ)
+    exact fun τ ab c => holdsC_sendCb hI hT _ _ _ _ (holdsC_and_left ab) (holdsC_and_right ab) c
+  | sendDetD hp _ _ _ _ iho ihf =>
+    refine fun σ => Hyps.wrapC_and _ ?_ σ (iho σ) (ihf σ)
+    exact fun τ a b => holdsC_sendDet hp _ _ _ a b
   | tryCall d _ _ _ ihx iho ihc =>
     cases d
     intro σ

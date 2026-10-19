@@ -502,10 +502,12 @@ def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 
 /-- The callback taclets and the printed `transferWithCallbackBox` rule;
-solkey's `tryCallWithCallbackBox` and `sendWithCallbackBox` are not printed. -/
+solkey's `tryCallWithCallbackBox`, `sendWithCallbackBox` and
+`sendWithCallbackDiamond` are not printed. -/
 def callbackPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .printed .transferWithCallbackBox),
   (``CallbackTaclet.sendWithCallbackBox, .leanOnly .keyTier),
+  (``CallbackTaclet.sendWithCallbackDiamond, .leanOnly .keyTier),
   (``CallbackTaclet.tryCallWithCallbackBox, .leanOnly .keyTier) ]
 
 #check_constructor_table CallbackTaclet, callbackPrintedOrigins.map Prod.fst

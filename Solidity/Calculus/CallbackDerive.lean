@@ -72,8 +72,11 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               .$(mkIdent `transferWithCallbackBox):ident)]]
           | some ``Stmt.send =>
             pure #[#[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendDet) $rflT)],
+              #[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendDetD) $rflT)],
               #[← `(tactic| apply $(← ProofTree.short ``ProvesC.send)
-                .$(mkIdent `sendWithCallbackBox):ident)]]
+                .$(mkIdent `sendWithCallbackBox):ident)],
+              #[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendD)
+                .$(mkIdent `sendWithCallbackDiamond):ident)]]
           | some ``Stmt.tryCall =>
             let app ← `(tactic| apply $(← ProofTree.short ``ProvesC.tryCall)
               .$(mkIdent `tryCallWithCallbackBox):ident)

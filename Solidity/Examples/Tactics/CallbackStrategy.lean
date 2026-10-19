@@ -95,4 +95,18 @@ theorem sendThenTry :
         fails <= pings } := by
   sol_prove
 
+/-! ## Diamonds: a send ends, booked or refused -/
+
+/-- A gas-limited send under the diamond (`sendNoCallbackDiamond`'s goals,
+`ProvesC.sendDetD`). -/
+theorem sendEnds : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
+  sol_prove
+
+/-- A value call under the diamond, its callee keeping the invariant
+(`sendWithCallbackDiamond`, `ProvesC.sendD`). -/
+theorem callEnds :
+    ValidC pingInv dl[Pinger]{ fails <= pings →
+      ⟨ (bool ok, ) = to.call{value: 5}(""); ⟩ fails <= pings } := by
+  sol_prove
+
 end Solidity.Examples.Tactics.CallbackStrategy

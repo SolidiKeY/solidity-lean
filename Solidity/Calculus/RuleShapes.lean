@@ -406,6 +406,7 @@ def tacletOrigins : List (Lean.Name × KeyOrigin) := [
 def callbackOrigins : List (Lean.Name × KeyOrigin) := [
   (``CallbackTaclet.transferWithCallbackBox, .taclet .transferWithCallbackBox),
   (``CallbackTaclet.sendWithCallbackBox, .taclet .sendWithCallbackBox),
+  (``CallbackTaclet.sendWithCallbackDiamond, .taclet .sendWithCallbackDiamond),
   (``CallbackTaclet.tryCallWithCallbackBox, .taclet .tryCallWithCallbackBox) ]
 
 #check_constructor_table CallbackTaclet, callbackOrigins.map Prod.fst
@@ -535,13 +536,13 @@ def claimedTaclets : List KeyTaclet := KeyTaclet.all.filter claims
   and book the payment; here a payment has a rule under the box only, and the
   diamond closes to `false` (`LeanTaclet.transferDiamond`): whether the world
   pays is the compiler theorem's, not the calculus's.
-* `sendWithCallbackDiamond` — a send that may call back, under the diamond:
-  the callback reading is the box's only (`Calculus/Callback.lean`).  A send
-  with no callback has its diamond (`sendNoCallbackDiamond`): a refused send
-  is an outcome of the run (`TRun.send`), not the world's.
+A send has its diamond with callbacks and without (`sendNoCallbackDiamond`,
+`sendWithCallbackDiamond`): a refused send is an outcome of the run
+(`TRun.send`), not the world's.
 
-The other semantics of `transfer` and `send`, `transferWithCallbackBox` and
-`sendWithCallbackBox`, are claimed by `callbackOrigins`. -/
+The other semantics of `transfer` and `send`, `transferWithCallbackBox`,
+`sendWithCallbackBox` and `sendWithCallbackDiamond`, are claimed by
+`callbackOrigins`. -/
 def unclaimedTaclets : List KeyTaclet :=
   [ .emptyModality, .blockReturn, .functionFrameReturn,
     .memoryFieldRead_unfold_rightSndResult, .memoryIndexRead_unfold_rightSndResult,
@@ -556,7 +557,7 @@ def unclaimedTaclets : List KeyTaclet :=
     .memoryIndexWriteStorageRefRhsCapture, .storageFieldRead_unfold_rightCallReceiver,
     .storageIndexRead_unfold_rightCallReceiver, .storageLocalRootPush_unfold_leftCallReceiver,
     .loopNormalize,
-    .transferNoCallbackDiamond, .transferWithCallbackDiamond, .sendWithCallbackDiamond ]
+    .transferNoCallbackDiamond, .transferWithCallbackDiamond ]
 
 /-- Added upstream rules still awaiting correspondence and soundness review.
 These are migration gaps, not implemented or architecturally excused rules. -/
@@ -575,9 +576,9 @@ theorem taclets_partitioned :
       (if migrationPendingTaclets.contains t then 1 else 0) == 1) = true := by
   decide +kernel
 
-theorem claimedTaclets_count : claimedTaclets.length = 341 := by decide +kernel
+theorem claimedTaclets_count : claimedTaclets.length = 342 := by decide +kernel
 
-theorem unclaimedTaclets_count : unclaimedTaclets.length = 36 := by decide +kernel
+theorem unclaimedTaclets_count : unclaimedTaclets.length = 35 := by decide +kernel
 
 /-! ## The rules with no taclet
 

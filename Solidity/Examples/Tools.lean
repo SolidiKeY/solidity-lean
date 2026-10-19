@@ -259,7 +259,7 @@ info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
 info: all 14 rules of `Solidity.LeanTaclet` print as rule lines
 ---
-info: all 3 rules of `Solidity.CallbackTaclet` print as rule lines
+info: all 4 rules of `Solidity.CallbackTaclet` print as rule lines
 -/
 #guard_msgs in #check_rule_text
 

@@ -19,7 +19,9 @@ open Solidity (Modality)
 open scoped Solidity.Schema
 
 /-- solkey's callback taclets: a payment, a send and a `try` under the box,
-with callbacks into the contract. -/
+and a send under the diamond, with callbacks into the contract (solkey's
+`transferWithCallbackDiamond` is not: no diamond over a `transfer` is
+derived, `RuleShapes.unclaimedTaclets`). -/
 inductive CallbackTaclet (C : Contract) (k : Nat) :
     Modality → {Γ Γ' : Ctx} → Stmt C Γ Γ' → Premise C Γ Γ' → Prop where
   | transferWithCallbackBox :
@@ -28,6 +30,13 @@ inductive CallbackTaclet (C : Contract) (k : Nat) :
   | sendWithCallbackBox :
       dl[CallbackTaclet C k]{ [ pv = sadr.send(se); ] ⇝
           "send succeeded":
+            { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
+            ⟨[ ]⟩
+        ; "send failed": { pv := false } ⟨[ ]⟩ }
+  | sendWithCallbackDiamond :
+      dl[CallbackTaclet C k]{ ⟨ pv = sadr.send(se); ⟩ ⇝
+          "non-negative amount": 0 <= se
+        ; "send succeeded":
             { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true }
             ⟨[ ]⟩
         ; "send failed": { pv := false } ⟨[ ]⟩ }
@@ -44,6 +53,7 @@ theorem CallbackTaclet.toTaclet {k : Nat} {m : Modality} {Γ Γ' : Ctx} {s : Stm
     {p : Premise C Γ Γ'} : CallbackTaclet C k m s p → Taclet C k m s p
   | .transferWithCallbackBox => .transferNoCallbackBox
   | .sendWithCallbackBox => .sendNoCallbackBox
+  | .sendWithCallbackDiamond => .sendNoCallbackDiamond
   | .tryCallWithCallbackBox => .tryCallNoCallbackBox
 
 /-- **A callback taclet's premise is the one `Stmt.step` builds.** -/

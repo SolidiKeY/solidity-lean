@@ -206,6 +206,37 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
       (ok : ProvesC I pay Γ₀ (((H.upd .box Uok).havoc).pre (Fml.closedAt I)) (.modalK .box ω κ φ))
       (failed : ProvesC I pay Γ₀ (H.upd .box Ufail) (.modalK .box ω κ φ)) :
       ProvesC I pay Γ₀ H (.modal .box (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ)
+  /-- **`sendWithCallbackDiamond`**: `sendWithCallbackBox`'s goals under the
+  diamond, and "non-negative amount". -/
+  | sendD {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {pv : Idx Γ (.val .bool)} {sadr se : Simple C Γ .uint}
+      {full : Bool} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {f : Fml C Γ}
+      {Uok Ufail : Upd C Γ Γ}
+      (d : CallbackTaclet C
+        (H.freshC I (.modal .diamond (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ))
+        .diamond (.send pv (.simple sadr) (.simple se) full) (.cases [f] [Uok, Ufail]))
+      (fml : ProvesC I pay Γ₀ H f)
+      (exit : ProvesC I pay Γ₀ H
+        (.upd .diamond (Upd.nil.snoc (.pay sadr.lower se.lower)) (Fml.closedAt I)))
+      (ok : ProvesC I pay Γ₀ (((H.upd .diamond Uok).havoc).pre (Fml.closedAt I))
+        (.modalK .diamond ω κ φ))
+      (failed : ProvesC I pay Γ₀ (H.upd .diamond Ufail) (.modalK .diamond ω κ φ)) :
+      ProvesC I pay Γ₀ H (.modal .diamond (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ)
+  /-- **`sendNoCallbackDiamond`**, a send that does not call back: "non-negative
+  amount", then `sendDet`'s goals under the diamond. -/
+  | sendDetD {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {pv : Idx Γ (.val .bool)}
+      {sadr se : Simple C Γ .uint}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (hp : pay = false)
+      (fml : ProvesC I pay Γ₀ H
+        (.isBool (.app2 (.binop .le (p := .uint) rfl) (Tm.lit (p := .uint) ⟨0, rfl⟩) se.lower)
+          true))
+      (ok : ProvesC I pay Γ₀ (H.upd .diamond ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
+        (.local pv (.val (Tm.lit (p := .bool) true))))) (.modalK .diamond ω κ φ))
+      (failed : ProvesC I pay Γ₀
+        (H.upd .diamond (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))))
+        (.modalK .diamond ω κ φ)) :
+      ProvesC I pay Γ₀ H
+        (.modal .diamond (.cons (.send pv (.simple sadr) (.simple se) false) ω) κ φ)
   /-- **`tryCallWithCallbackBox`**: the invariant where control leaves
   ("invariant on exit"); the call's success, from any state the callee may
   leave in which the invariant holds, for every value of its return data
