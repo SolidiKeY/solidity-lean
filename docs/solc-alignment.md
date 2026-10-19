@@ -253,10 +253,13 @@ elements, `shadow` the slots past the end.
 - **A write through a reference to a popped element writes the slot.**
   `Token storage r = tokens[0]; tokens.pop(); r.value = 5;` writes the
   cleared slot. A subsequent zero-argument `push()` of a struct or array
-  resets that slot before exposing it (`storagePushLengthSaveReferenceElement`),
-  so the model reads `0` from `tokens[0].value`. Mapping entries survive reset;
-  a mapping push needs only its length save (`storagePushLengthSaveMappingElement`).
-  A primitive push also clears its slot (`storagePushLengthSave`); a `pop()`
+  saves only the length (`storagePushLengthSave`, `pushSlot`) and exposes
+  the slot as it is, as solc does, so the model reads `5` from
+  `tokens[0].value` (`reused_slot_retains_value`,
+  `Examples/Tactics/CleanTail.lean`). Nothing then tells what a recycled
+  slot of the starting storage holds; `ValidTail .clean` assumes its tails
+  clean (`docs/options.md`, O6). A primitive slot past the end holds its
+  default on every reachable storage, so a primitive push starts there; a `pop()`
   clears the element into the shadow (`storagePopSave`), but keeps a mapping
   element as it is (`storagePopSaveMappingElement`). These dangling executions
   are compiler-specific/undefined; the old resurrection specifications are

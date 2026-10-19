@@ -112,4 +112,45 @@ def Storage.shapeB (st : Storage C) : Bool := SFields.allB canonHB st && SFields
 /-- What `wt(storage)` tests: the shape. -/
 def Storage.wtB (st : Storage C) : Bool := st.shapeB
 
+/-! ## Clean tails
+
+`cleanTail(storage)` (`Op1.cleanTail`, `Signature.lean`): every array's
+shadow (`SVal.array`'s slots past its live end) an ordinary default — a
+word at its default, a dynamic array of length `0` whose shadow is one too,
+a mapping anything.  A Lean-only test (solkey has no such symbol); what it
+decides is `Typing/CleanTail.lean`'s (`Storage.cleanTailB_iff`). -/
+
+/-- An ordinary default, as a fold. -/
+def ordinaryDefaultBFold : Fold where
+  V _ := Bool
+  F _ := Bool
+  L _ := Bool
+  W _ _ := Bool
+  M _ _ := Bool
+  prim := fun {p} v => decide (v = PrimTy.dflt p)
+  struct := fun _ ih => ih
+  array := fun {_} {n} _ _ _ _ ish => n == 0 && ish
+  fixed := fun _ ie => ie
+  map := fun _ _ _ _ => true
+  fnil := true
+  fcons := fun _ _ iv ir => iv && ir
+  lnil := true
+  lcons := fun _ _ iv ir => iv && ir
+  wnil := true
+  wcons := fun _ _ iv ir => iv && ir
+  mnil := true
+  mcons := fun _ _ _ _ _ => true
+
+/-- Every value of a shadow an ordinary default. -/
+def SList.ordinaryDefaultB {E : Ty} (l : SList E) : Bool := l.fold ordinaryDefaultBFold
+
+/-- `cleanTailH`'s test: every array's shadow an ordinary default. -/
+def cleanTailHB : HeredB where
+  arr := fun _ sh => sh.ordinaryDefaultB
+  fix _ _ := true
+  map _ := fun _ _ => true
+
+/-- What `cleanTail(storage)` tests: every root's arrays with clean tails. -/
+def Storage.cleanTailB (st : Storage C) : Bool := SFields.allB cleanTailHB st
+
 end Solidity

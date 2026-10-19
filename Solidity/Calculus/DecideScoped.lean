@@ -214,7 +214,8 @@ def _root_.Solidity.Op1.toL (ρ : SymS C Γ) {a s : Srt} (o : Op1 C a s) (x : LT
     (fun {_} {_} {_} h x => some (.app1 (.selectIn h) x))
     (fun {_} {_} {_} {_} h x => some (.app1 (.fieldIn h) x))
     (fun x => some (.app1 .toInt x))
-    (fun {_} {_} {_} shape x => some (.app1 (.fixedCopy shape) x)) x
+    (fun {_} {_} {_} shape x => some (.app1 (.fixedCopy shape) x))
+    (fun x => some (.app1 .cleanTail x)) x
 
 /-- A binary symbol pushed in: an operator folded on literals, a checked
 index onto the storage the updates left (`atIn`). -/

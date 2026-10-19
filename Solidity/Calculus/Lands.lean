@@ -78,7 +78,7 @@ abbrev State.getV (σ : State C Γ) {t : LTy} (i : Idx Γ t) : t.VDen C :=
 /-- **A term in the Theory**, read in the typed state `σ`: a local's value
 read as its observations, a symbol by `OpN.denote` over the global part
 (`Theory/Bridge/Denote.lean`).  What an equation reads (`holds`). -/
-def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.TDen C
+noncomputable def Tm.denote (σ : State C Γ) : {s : Srt} → Tm C Γ s → s.TDen C
   | _, .pvV i => some (TEnv.get i σ.env)
   | _, .pvP i => match (TEnv.get i σ.env : Option (SRef C _)) with
     | some r => .ref r

@@ -1,4 +1,5 @@
 import Solidity.Signature
+import Solidity.Typing.CleanTail
 
 /-!
 # What a typed symbol denotes in the Theory, and the bridge
@@ -72,8 +73,10 @@ def Op0.denote (g : State C []) {s : Srt} : Op0 C s → s.TDen C
   | .member _ f h => .ref (SRef.ofRoot (C := Contract.ofStruct _) f h)
   | .zlit n => some n
 
-/-- A unary symbol in the Theory, its argument's denotation given. -/
-def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen C
+/-- A unary symbol in the Theory, its argument's denotation given.
+`cleanTail(s)` is what the observations of `s` show (`TSto.CleanTails`,
+`Typing/CleanTail.lean`), so it is classical. -/
+noncomputable def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen C
   | .unop op h, da => da.bind (op.evalT h)
   | .net, da => da.map fun n => (lookupBy n g.net).getD 0
   | .delValue, da => da.map fun _ => PrimTy.dflt _
@@ -92,6 +95,7 @@ def Op1.denote (g : State C []) {a s : Srt} : Op1 C a s → a.TDen C → s.TDen 
   | .fieldIn h, dp => ObsLoc.app dp (.field h .nil)
   | .toInt, da => da.map (·.1)
   | .fixedCopy shape, da => shape.observe da
+  | .cleanTail, ds => open Classical in if TSto.CleanTails ds then some true else none
 
 /-- A binary symbol in the Theory, its arguments' typed readings and
 denotations given. -/
@@ -254,6 +258,14 @@ theorem Op1.denote_eval {a s : Srt} (o : Op1 C a s) {x : Option (a.Den C g.H)} {
     simp only [Op1.evalM, Option.bind_some, Storage.wtT] at hv
     split at hv
     · cases hv; rfl
+    · cases hv
+  | cleanTail =>
+    simp only [Op1.evalM, Option.bind_some, Storage.cleanTailT] at hv
+    split at hv
+    · rename_i hb
+      cases hv
+      simp only [Srt.Bridge] at hu ⊢
+      rw [Op1.denote, hu, if_pos (Storage.cleanTails_obs ((Storage.cleanTailB_iff _).1 hb))]
     · cases hv
   | select r h =>
     simp only [Op1.evalM, Option.map_some, Option.some.injEq] at hv

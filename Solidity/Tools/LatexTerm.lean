@@ -278,6 +278,8 @@ def symbols : Array Sym := #[
   ⟨``Op1.toInt, "\\mathit{toInt}", "", none⟩,
   -- KeY erases the typed adapter: the macros backend prints its source alone
   ⟨``Op1.fixedCopy, "\\mathit{fixedCopy}", "", none⟩,
+  -- Lean only: solkey has no such symbol
+  ⟨``Op1.cleanTail, "\\mathit{cleanTail}", "\\mathit{cleanTail}", none⟩,
   -- Op2
   ⟨``Op2.binop, "", "", none⟩,
   ⟨``Op2.find, "\\mathit{find}", "\\find", some "\\TFind"⟩,
@@ -574,7 +576,7 @@ partial def symDoc (ns : List Expr) (e : Expr) (k : Lean.Name) (oargs xs : Array
     atom (.app (.tx (← sortedSym k structS) 6) #[← x 0, .ident r])
   | ``Op1.alloc =>
     atom (.app (← fn 7) #[.app (.tx (← symOf ``Op1.addM) 4) #[← x 0]])
-  | ``Op1.newArr | ``Op1.addM | ``Op1.wt => plainApp
+  | ``Op1.newArr | ``Op1.addM | ``Op1.wt | ``Op1.cleanTail => plainApp
   | ``Op2.binop | ``Op2.zbin | ``Op2.zcmp =>
     let some op ← binOpTeX oargs[0]! | atom (← unknownTm e)
     infixDoc ns xs[0]! xs[1]! op

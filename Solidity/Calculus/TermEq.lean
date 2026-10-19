@@ -84,7 +84,7 @@ inductive Op1Code where
   | next (E : Ty) | sval (p : PrimTy) | newArr (R : RefTy) | alloc (R : RefTy)
   | mfield (s f : Name) (T : Ty) | addM (R : RefTy) | mval (p : PrimTy) | ref (R : RefTy) | wt
   | select (s r : Name) | selectIn (s s' f : Name) | fieldIn (s s' f : Name) (T : Ty) | toInt
-  | fixedCopy (E : Ty) (n : Nat) (R : RefTy)
+  | fixedCopy (E : Ty) (n : Nat) (R : RefTy) | cleanTail
   deriving DecidableEq
 
 /-- A binary symbol's constructor, data and types, its proofs dropped. -/
@@ -124,6 +124,7 @@ def Op1.code {a s : Srt} : Op1 C a s → Op1Code
   | @Op1.fieldIn _ s s₂ f T _ => .fieldIn s s₂ f T
   | .toInt => .toInt
   | @Op1.fixedCopy _ E n R _ => .fixedCopy E n R
+  | .cleanTail => .cleanTail
 
 /-- A binary symbol's code. -/
 def Op2.code {a b s : Srt} : Op2 C a b s → Op2Code

@@ -1319,6 +1319,7 @@ def _root_.Solidity.Op1.elim {a s : Srt} (o : Op1 C a s) : LTm C a → ElimM C a
     (fun {_} {_} {_} {_} h x _ => (.app1 (.fieldIn h) x : LTm C (.spath _ _)))
     (fun _ ex => (.app1 .toInt (ex : LTm C (.val .uint)) : LTm C .kint))
     (fun {_} {_} {_} shape _ ex => ex.map fun (gd, rd) => (gd, fixedCopyRd shape rd))
+    (fun x _ => (.app1 .cleanTail x : LTm C (.val .bool)))
 
 /-- A binary symbol, eliminated. -/
 def _root_.Solidity.Op2.elim {a b s : Srt} (o : Op2 C a b s) : LTm C a → LTm C b → ElimM C a → ElimM C b →

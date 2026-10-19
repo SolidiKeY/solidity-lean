@@ -254,6 +254,7 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     `(dl_term| find($(← ppSTermS ns s), $lenPath))
   | .sym ``Op1.delValue _ #[t] => `(dl_term| delValue($(← ppTermS ns t)))
   | .sym ``Op1.wt _ #[s] => `(dl_term| wt($(← ppSTermS ns s)))
+  | .sym ``Op1.cleanTail _ #[s] => `(dl_term| cleanTail($(← ppSTermS ns s)))
   | .sym ``Op2.read _ #[m, a] =>
     if ← keyOn then
       if let some (i, f) ← keyAddrS? ns a then return ← `(dl_term| read($(← ppMTermS ns m), $i, $f))

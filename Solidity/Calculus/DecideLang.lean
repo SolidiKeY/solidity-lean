@@ -460,6 +460,7 @@ partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
     | .net => s!"net({x.ppWith nm})"
     | .delValue => s!"delValue({x.ppWith nm})"
     | .wt => s!"wt({x.ppWith nm})"
+    | .cleanTail => s!"cleanTail({x.ppWith nm})"
     | .newArr _ => s!"newArr({x.ppWith nm})"
     | .alloc R _ => s!"alloc({x.ppWith nm}, {(Ty.ref R).toStr})"
     | .addM R _ => s!"addM({x.ppWith nm}, {(Ty.ref R).toStr})"

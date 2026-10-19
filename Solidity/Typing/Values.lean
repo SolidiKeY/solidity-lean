@@ -1330,4 +1330,61 @@ theorem SVal.dfltBelow_defaultOf : (k : Nat) → (T : Ty) → (h : tyRank T < k)
 theorem SVal.defaultOf_dflt (T : Ty) : (SVal.dflt T).defaultOf = SVal.dflt T :=
   SVal.dfltBelow_defaultOf _ T _
 
+/-! ## A test that decides a predicate (`Semantics/StorageWt.lean`'s `HeredB`) -/
+
+/-- Node tests that decide a predicate's node conditions. -/
+structure HeredB.Decides (B : HeredB) (P : Hered) : Prop where
+  arr : ∀ {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E), B.arr e sh = true ↔ P.arr e sh
+  fix : ∀ E n, B.fix E n = true ↔ P.fix E n
+  map : ∀ (K : PrimTy) {V : Ty} (m : SMap K V) (d : SVal V), B.map K m d = true ↔ P.map K m d
+
+section Iff
+
+variable {P : Hered} {B : HeredB}
+
+mutual
+/-- **The test decides the predicate**, its node tests deciding the node
+conditions. -/
+theorem SVal.allB_iff (hB : B.Decides P) : {T : Ty} → (v : SVal T) → v.allB B = true ↔ v.All P
+  | _, .prim _ => by simp only [SVal.allB, SVal.All]
+  | _, .struct fs => by simp only [SVal.allB, SVal.All]; exact SFields.allB_iff hB fs
+  | _, .array e sh _ => by
+    simp only [SVal.allB, SVal.All, Bool.and_eq_true]
+    rw [hB.arr, SVec.allB_iff hB e, SList.allB_iff hB sh, and_assoc]
+  | _, .fixed e => by
+    simp only [SVal.allB, SVal.All, Bool.and_eq_true]
+    rw [hB.fix, SVec.allB_iff hB e]
+  | _, .map m d => by
+    simp only [SVal.allB, SVal.All, Bool.and_eq_true]
+    rw [hB.map, SMap.allB_iff hB m, SVal.allB_iff hB d, and_assoc]
+
+theorem SFields.allB_iff (hB : B.Decides P) : {fs : List (Name × Ty)} → (x : SFields fs) →
+    x.allB B = true ↔ x.All P
+  | _, .nil => by simp only [SFields.allB, SFields.All]
+  | _, .cons v rest => by
+    simp only [SFields.allB, SFields.All, Bool.and_eq_true]
+    rw [SVal.allB_iff hB v, SFields.allB_iff hB rest]
+
+theorem SList.allB_iff (hB : B.Decides P) : {E : Ty} → (l : SList E) → l.allB B = true ↔ l.All P
+  | _, .nil => by simp only [SList.allB, SList.All]
+  | _, .cons v rest => by
+    simp only [SList.allB, SList.All, Bool.and_eq_true]
+    rw [SVal.allB_iff hB v, SList.allB_iff hB rest]
+
+theorem SVec.allB_iff (hB : B.Decides P) : {E : Ty} → {n : Nat} → (l : SVec E n) →
+    l.allB B = true ↔ l.All P
+  | _, _, .nil => by simp only [SVec.allB, SVec.All]
+  | _, _, .cons v rest => by
+    simp only [SVec.allB, SVec.All, Bool.and_eq_true]
+    rw [SVal.allB_iff hB v, SVec.allB_iff hB rest]
+
+theorem SMap.allB_iff (hB : B.Decides P) : {K : PrimTy} → {V : Ty} → (m : SMap K V) → m.allB B = true ↔ m.All P
+  | _, _, .nil => by simp only [SMap.allB, SMap.All]
+  | _, _, .cons _ v rest => by
+    simp only [SMap.allB, SMap.All, Bool.and_eq_true]
+    rw [SVal.allB_iff hB v, SMap.allB_iff hB rest]
+end
+
+end Iff
+
 end Solidity

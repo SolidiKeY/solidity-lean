@@ -112,6 +112,7 @@ def _root_.Solidity.Op1.total {a s : Srt} : Op1 C a s → Bool
   | .unop op _ => op == .not
   | .next => false
   | .wt => false
+  | .cleanTail => false
   | _ => true
 
 theorem _root_.Solidity.Op1.total_isSome {a s : Srt} (o : Op1 C a s) (h : o.total = true)
@@ -123,6 +124,7 @@ theorem _root_.Solidity.Op1.total_isSome {a s : Srt} (o : Op1 C a s) (h : o.tota
     cases p <;> first | exact absurd hp (by decide) | rfl
   case next => simp only [Op1.total, Bool.false_eq_true] at h
   case wt => simp only [Op1.total, Bool.false_eq_true] at h
+  case cleanTail => simp only [Op1.total, Bool.false_eq_true] at h
   all_goals rfl
 
 /-- An operator that returns on every pair of values: the comparisons and

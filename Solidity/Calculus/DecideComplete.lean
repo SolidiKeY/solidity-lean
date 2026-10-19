@@ -1,5 +1,4 @@
-import Solidity.Calculus.DecideTyped
-import Solidity.Calculus.MemRead
+import Solidity.Calculus.DecideCleanTail
 import Solidity.Calculus.Symex
 
 /-!
@@ -48,14 +47,24 @@ or `concreteSize` and `concreteDepth` where its histories are concrete
 `LFml.decideMem`. -/
 def checkCore (ψ : Fml C []) : Option Bool :=
   (ψ.toLS true SymS.init).map fun l =>
-    l.boundsOk && l.decideMem
+    l.boundsOk && bif ψ.assumesCT then l.decideMemCT else l.decideMem
 
 /-- What `checkCore` closes is valid: `Valid.of_toLS` and
-`LFml.decideMem_valid`. -/
+`LFml.decideMem_valid`; under the premise `cleanTail(storage) = true`,
+`LFml.decideMemCT_holds` where the storage shows clean tails and
+`Fml.assumesCT_holds` where it does not. -/
 theorem checkCore_valid {ψ : Fml C []} (h : checkCore ψ = some true) : Valid ψ := by
   simp only [checkCore, Option.map_eq_some_iff, Bool.and_eq_true] at h
   obtain ⟨l, hl, -, hc⟩ := h
-  exact Valid.of_toLS hl (LFml.decideMem_valid hc)
+  cases hct : ψ.assumesCT
+  · rw [hct, cond_false] at hc
+    exact Valid.of_toLS hl (LFml.decideMem_valid hc)
+  · rw [hct, cond_true] at hc
+    intro τ
+    by_cases hg : TSto.CleanTails τ.storage.obs
+    · exact (Fml.toLS_sound ψ true hl τ AEnv.dflt (Agrees.init τ AEnv.dflt)
+        SymS.Fresh.init).1 rfl (LFml.decideMemCT_holds hc τ AEnv.dflt hg)
+    · exact Fml.assumesCT_holds ψ hct τ hg
 
 /-- `checkCore`'s bounds alone (`LFml.boundsOk`): `none` where the
 reduction does not read the leaf; else whether it is within `closeSize` and

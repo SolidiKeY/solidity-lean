@@ -12,7 +12,7 @@ are the last two, the run outside both blocks the first).
 
 Lean states an option in the theorem, not in a setting: the reading is an
 argument of the validity the theorem proves (`ValidT ts φ`, `ValidC I φ pay`,
-the notations `⊨[I]`, `⊨ₙ[I]` of `Theorems.lean`), so a proof under one option
+the notations `⊨[I]`, `⊨ₙ[I]`, `⊨ₜ[m]` of `Theorems.lean`), so a proof under one option
 can never be read as one under another.
 
 | Milestone | What | Status |
@@ -22,6 +22,7 @@ can never be read as one under another.
 | O3 | the strategy under callbacks (`sol_prove`, `sol_derive` on `ValidT`/`ValidC`) | done |
 | O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
 | O5 | `ignoringOverflow { … }` (`ignoringOF`): an overflowing run is assumed away | done |
+| O6 | clean array tails: the starting storage's shadows assumed ordinary defaults (`ValidTail .clean`) | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -229,6 +230,77 @@ reaches into the functions the block calls, whose bodies are inlined and
 guarded with the caller's (KeY Java's option is global), where `unchecked`
 stops at a call as solc's does; so a function that holds one block, called
 from inside the other, is the same nesting error.
+
+## O6. Clean array tails
+
+**Decision.** A storage array keeps the slots past its live end
+(`SVal.array`'s shadow), and an empty `push` on an array of references
+exposes the first of them as it is (`pushSlot`), as solc does: a write
+through an alias left dangling by a `pop` comes back
+(`reused_slot_retains_value`, `Examples/Tactics/CleanTail.lean`), and such a
+storage is reachable (`Tokens.dangling`, `dangling_slot_reachable`). So
+nothing tells what a recycled slot of the starting storage holds, and
+`tokens.push(); assert(tokens[tokens.length - 1].value == 0);` is refuted at
+that storage (`pushRead_solc_refuted`, `Examples/Tactics/TailMode.lean`).
+Whether to assume the tails clean is an option: `TailMode.solc` assumes
+nothing (the reading of `Valid`), `TailMode.clean` assumes every shadow an
+ordinary default (`Storage.CleanTail`, `Typing/CleanTail.lean`: a word at
+its default, a dynamic array of length `0` whose shadow is one too, a
+mapping anything, since no clearing reaches a mapping's entries).
+
+**The reading.** `ValidTail .solc φ` is `Valid φ`; `ValidTail .clean φ` is
+`Valid (cleanTail(storage) = true → φ)` (`Calculus/TailMode.lean`), a
+formula, so `Proves.valid` proves it unchanged and the premise enters the
+sequent by `impRight`. `cleanTail(s)` is a symbol (`Op1.cleanTail`, Lean
+only): the interpreter's test, a fold the kernel evaluates
+(`Storage.cleanTailB`, `Semantics/StorageWt.lean`, deciding
+`Storage.CleanTail`: `Storage.cleanTailB_iff`), `true` on a clean storage
+and undefined on any other, as `wt(storage)` is; the Theory reads it by what
+the observations show (`TSto.CleanTails`: a read past a dynamic array's
+live end, along no mapping key, shows the default word and length `0`),
+which the typed property implies (`Storage.cleanTails_obs`). So what
+`.clean` proves holds in every state with clean tails
+(`ValidTail.holds_of_clean`, `cleanTail_holds` in `Theorems.lean`), the
+initial one among them (`ValidTail.holds_init`), and `.solc` implies it
+(`ValidTail.clean_of_solc`).
+
+**An assumption, not a kept property.** Clean tails are not an invariant
+of the contract: a program that pops an aliased element and writes through
+the alias leaves a dirty tail behind (`leaveDirty_boundary_rejected`), and a
+callback in the middle of a program that repairs it observes the dirty
+storage (`interruptRepair_callback_boundary_rejected`;
+`Calculus/CleanTailBoundary.lean` states the boundary conditions, refuted).
+So the option is a premise on the starting storage only; what the program
+itself writes past an end is read as written, under either option
+(`recycledWrite_solc`).
+
+**The closer.** The reduction leaves the starting storage's reads as atoms
+(`obsW`, `obsL`), and a read past a live end reads the shadow slot as it is.
+Where a leaf assumes the premise (`Fml.assumesCT`: on its spine of
+implications, conjunctions and quantifiers), `Seq.checkCore` folds the
+eliminated reduction (`LFml.decideMemCT`, `Calculus/DecideCleanTail.lean`):
+each atom whose path enters a dynamic array by an unchecked index `q[i]`,
+with no mapping key step after it, is read `q; (i < obsL(q) ? obsW(p) : 0)`
+(`0` for a length), and `false` where `i` is the live length itself
+(`lenOf`: `obsL(q)` or `obsL(q) + 1 - 1`, its guards dropped), since the
+closer does not fold `a < a`. A checked index and a member pass, a mapping
+key stops the fold. Sound by `LTm.ctFold_eval` where the storage shows clean
+tails, and by vacuity where it does not (`Fml.assumesCT_holds`); without
+the premise `checkCore` is unchanged. So `sol_decide`, and `sol_prove`'s
+leaves, prove the recycled slot's default (`pushRead_clean`,
+`pushRead_clean_box`, `pushAlias_clean`).
+
+| Option | `ValidTail` | The starting storage | Proved of a recycled slot |
+|---|---|---|---|
+| `solc` | `Valid φ` | any typed storage | what the program wrote there, nothing of the start |
+| `clean` | `Valid (cleanTail(storage) = true → φ)` | its shadows ordinary defaults | the default, unless the program wrote it |
+
+**Not done.** `next(b)` (the alias of an empty `push`, `p[p.length]`)
+reaches the closer as the index `obsL(q)` and is handled so; a `nextIn`
+over another storage term, and indices that equal the live length only by
+arithmetic other than `+ 1 - 1`, are left as atoms (still exact, only not
+read as the default). `sol_close` (the `simp` closer) does not read the
+premise.
 
 ## Review
 
