@@ -155,6 +155,7 @@ def Op1.key {a s : Srt} : Op1 C a s → String
   | .mval => "mval"
   | .ref => "ref"
   | .wt => "wt"
+  | .cleanTail => "cleanTail"
   | .select r _ => s!"select {r}"
   | @Op1.selectIn _ _ _ f _ => s!"select {f}"
   | @Op1.fieldIn _ _ _ f _ _ => s!"field {f}"
@@ -573,6 +574,7 @@ def NTerm.delValue (t : NTerm C) : NTerm C :=
     pure ⟨_, .app1 .delValue t'⟩
 
 def NTerm.wt (s : NSTerm C) : NTerm C := NTm.app1 .wt s s!"wt({s.text})"
+def NTerm.cleanTail (s : NSTerm C) : NTerm C := NTm.app1 .cleanTail s s!"cleanTail({s.text})"
 
 /-- A root of the contract. -/
 def NPTerm.root (r : Name) : NPTerm C :=

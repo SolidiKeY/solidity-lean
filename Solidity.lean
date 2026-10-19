@@ -146,6 +146,9 @@ import Solidity.Calculus.Closer
 import Solidity.Calculus.ElimFacts
 import Solidity.Calculus.DecideComplete
 import Solidity.Calculus.Problem
+import Solidity.Calculus.TailMode
+import Solidity.Calculus.CleanTailBoundary
+import Solidity.Calculus.DecideCleanTail
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.RewriteChains
 import Solidity.Calculus.RewriteChainGen
@@ -184,6 +187,8 @@ import Solidity.Examples.Tactics.Values
 import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.CheckedBlock
+import Solidity.Examples.Tactics.CleanTail
+import Solidity.Examples.Tactics.TailMode
 import Solidity.Examples.Tactics.Calls
 import Solidity.Examples.Tactics.Constructors
 import Solidity.Examples.Tactics.Loops
@@ -241,6 +246,7 @@ import Solidity.Typing.Tight
 import Solidity.Typing.Fits
 import Solidity.Typing.Constructibility
 import Solidity.Typing.CanonTest
+import Solidity.Typing.CleanTail
 import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Typed.Mem
 import Solidity.Theory.Typed.Leaves

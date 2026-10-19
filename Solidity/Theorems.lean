@@ -3,6 +3,7 @@ import Solidity.Calculus.Symex
 import Solidity.Calculus.CallbackSound
 import Solidity.Evm.Correct
 import Solidity.Calculus.SolkeyProves
+import Solidity.Calculus.TailMode
 
 /-!
 # The main theorems, in one page
@@ -38,6 +39,7 @@ typed run has no stuck outcome, so `compiler_correct` covers every case.  Its pr
 | `p ≃[m, σ] s` | from `σ`, the premise `p` does what `s` does | `Premise.Sound m s p σ` |
 | `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer`, `send` and `try` may call back into a contract with invariant `I` | `ProvesC I true`, `ValidC I φ true` |
 | `⊢ₙ[I] φ`, `⊨ₙ[I] φ` | the same under `transferSemantics:noCallback`: only `try` and a value call call back | `ProvesC I false`, `ValidC I φ false` |
+| `⊨ₜ[m] φ` | `φ` is valid under the tail mode `m`: `.clean` assumes the starting storage's array tails clean (`docs/options.md`, O6) | `ValidTail m φ` |
 | `(P, σ) ⇓ o` | `P` run from `σ` ends in `o` | `Prog.run σ P = .ok o` |
 | `⟦P⟧b` | `P` compiled, its frame at `b` | `Evm.compileProg b P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
@@ -122,6 +124,7 @@ scoped notation:25 "⊢[" I "] " φ:26 => ProvesC (Invariant.fml I) true [] Hyps
 scoped notation:25 "⊨[" I "] " φ:26 => ValidC I φ true
 scoped notation:25 "⊢ₙ[" I "] " φ:26 => ProvesC (Invariant.fml I) false [] Hyps.nil φ
 scoped notation:25 "⊨ₙ[" I "] " φ:26 => ValidC I φ false
+scoped notation:25 "⊨ₜ[" m "] " φ:26 => ValidTail m φ
 scoped notation:50 c:51 " ⇓ " o:51 => Runs c o
 scoped notation:max "⟦" P "⟧" b:max => Evm.compileProg b P
 scoped notation:50 c:51 " ⇓ₘ " m':51 => MRuns c m'
@@ -235,6 +238,13 @@ reading. -/
 theorem noCallback_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
     (⊨ₙ[I] φ) ↔ ⊨ φ :=
   validC_false_iff h
+
+/-- **Clean array tails** (O6): what is valid under `.clean` holds in every
+state whose storage's arrays keep only ordinary defaults past their live
+ends, the initial one among them. -/
+theorem cleanTail_holds {φ : Fml C []} (h : ⊨ₜ[.clean] φ) (σ : State C [])
+    (hσ : σ.storage.CleanTail) : σ ⊧ φ :=
+  h.holds_of_clean σ hσ
 
 /-! ## Symbolic execution -/
 

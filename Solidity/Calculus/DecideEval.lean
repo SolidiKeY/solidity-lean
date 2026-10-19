@@ -2561,6 +2561,7 @@ theorem Op1.elim_rep {a s : Srt} (o : Op1 C a s) (x : LTm C a) (ex : ElimM C a)
   | mval => rfl
   | ref => rfl
   | wt => rfl
+  | cleanTail => rfl
   | select r h => rfl
   | selectIn h => rfl
   | fieldIn h => rfl

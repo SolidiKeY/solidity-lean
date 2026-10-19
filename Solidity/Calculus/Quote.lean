@@ -402,6 +402,7 @@ def qOp1 : {a s : Srt} → Op1 C a s → QM Expr
   | _, _, @Op1.mval _ p => do return mkApp2 (mkConst ``Op1.mval) (← contract) (toExpr p)
   | _, _, @Op1.ref _ R => do return mkApp2 (mkConst ``Op1.ref) (← contract) (toExpr R)
   | _, _, .wt => do return mkApp (mkConst ``Op1.wt) (← contract)
+  | _, _, .cleanTail => do return mkApp (mkConst ``Op1.cleanTail) (← contract)
   | _, _, @Op1.fixedCopy _ E n R shape => do
     return mkAppN (mkConst ``Op1.fixedCopy) #[← contract, toExpr E, toExpr n, toExpr R, FixedCopy.quote shape]
   | _, _, @Op1.select _ s r _ => do

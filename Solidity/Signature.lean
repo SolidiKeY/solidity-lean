@@ -209,6 +209,11 @@ inductive Op1 (C : Contract) : Srt → Srt → Type where
   /-- The typed view of a fixed-array copy source at its destination shape. -/
   | fixedCopy {E : Ty} {n : Nat} {R : RefTy} (shape : FixedCopy E n R) :
       Op1 C (.sv (.ref (.fixed E n))) (.sv (.ref R))
+  /-- `cleanTail(s)`: every array's shadow in `s` an ordinary default
+  (`Storage.cleanTailB`, `Semantics/StorageWt.lean`), undefined on any
+  other storage, as `wt`.  Lean only: solkey has no such symbol
+  (`docs/options.md`, O6). -/
+  | cleanTail : Op1 C .st (.val .bool)
 
 /-- Binary symbols. -/
 inductive Op2 (C : Contract) : Srt → Srt → Srt → Type where
@@ -272,6 +277,12 @@ def Grown.then {H : HTy} {α : HTy → Type} (m : Grown H (fun _ => Unit)) (n : 
 def Storage.wtT (st : Storage C) : Option PrimTy.bool.Denote :=
   if st.wtB then some (true : Bool) else none
 
+/-- `cleanTail(storage)`: `true` on a storage whose arrays' shadows are
+ordinary defaults (`Storage.cleanTailB`), undefined on any other, as
+`wt(storage)` is. -/
+def Storage.cleanTailT (st : Storage C) : Option PrimTy.bool.Denote :=
+  if st.cleanTailB then some (true : Bool) else none
+
 /-- `p[p.length]` in `st`: the slot past the live elements. -/
 def Storage.nextT {E : Ty} (st : Storage C) (r : SRef C (.ref (.array E))) : Option (SRef C E) :=
   (st.find r).map fun (v : SVal (.ref (.array E))) =>
@@ -329,6 +340,7 @@ def Op1.evalM (g : State C []) {a s : Srt} :
   | .fieldIn h, x => x.map (SRef.field · h)
   | .toInt, x => x.map fun n => n.1
   | .fixedCopy shape, x => x.map shape.apply
+  | .cleanTail, x => x.bind Storage.cleanTailT
 
 /-- A unary symbol on the typed global part. -/
 @[implemented_by Op1.evalM]
@@ -353,6 +365,7 @@ def Op1.eval (g : State C []) {a s : Srt} (o : Op1 C a s) :
     (fun {_} {_} {_} {_} h x => x.map (SRef.field · h))
     (fun x => x.map fun n => n.1)
     (fun {_} {_} {_} shape x => x.map shape.apply)
+    (fun x => x.bind Storage.cleanTailT)
 
 theorem Op1.eval_eq_evalM (g : State C []) {a s : Srt} (o : Op1 C a s) :
     o.eval g = o.evalM g := by

@@ -183,6 +183,8 @@ theorem eval_mval {p : PrimTy} (t : Tm C Γ (.val p)) :
 theorem eval_ref {R : RefTy} (i : Tm C Γ (.ident R)) :
     (Tm.app1 (.ref (R := R)) i).eval σ = i.eval σ := rfl
 theorem eval_wt (s : Tm C Γ .st) : (Tm.app1 .wt s).eval σ = (s.eval σ).bind Storage.wtT := rfl
+theorem eval_cleanTail (s : Tm C Γ .st) :
+    (Tm.app1 .cleanTail s).eval σ = (s.eval σ).bind Storage.cleanTailT := rfl
 theorem eval_select {s : Name} (r : Name) (h : C.rootType r = some (.ref (.struct s)))
     (t : Tm C Γ .st) :
     (Tm.app1 (.select r h) t).eval σ = (t.eval σ).map fun st => Storage.selectT st h := rfl
