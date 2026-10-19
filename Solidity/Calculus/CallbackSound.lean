@@ -7,9 +7,10 @@ import Solidity.Semantics.NativeDeferredCallback
 /-!
 # The calculus with callbacks is sound
 
-`ProvesC I H φ` (`Calculus/Callback.lean`) proves `φ` with callbacks:
-what it derives holds, its context in front, when every payment may call
-back into the contract and the callee leaves the invariant as it found it
+`ProvesC I pay H φ` (`Calculus/Callback.lean`) proves `φ` with callbacks:
+what it derives holds, its context in front, when every `try` and value call,
+and with `pay` every payment, may call back into the contract and the callee
+leaves the invariant as it found it
 (`holdsC`, `ValidC`, `Calculus/CallbackHolds.lean`).  `ProvesC.sound_of`
 and `ProvesC.valid` take the invariant first-order (`Fml.FO`, a contract
 invariant of the storage and the ledger; `Invariant.fo` carries it): "the invariant holds" is then a
@@ -500,8 +501,8 @@ theorem holdsC_and_right {I : Fml C []} {Γ : Ctx} {τ : State C Γ} {φ ψ : Fm
     (h : holdsC I pay τ (.and φ ψ)) : holdsC I pay τ ψ := h.2
 
 /-- **Soundness of the calculus with callbacks**, for a first-order invariant
-with no payment in it: what `ProvesC I H φ` proves holds, its context in
-front, when every payment may call back. -/
+with no payment in it: what `ProvesC I pay H φ` proves holds, its context in
+front, when the callees `pay` says may call back. -/
 theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer = false)
     {Γ₀ Γ : Ctx} {H : Hyps C Γ₀ Γ} {φ : Fml C Γ} (d : ProvesC I pay Γ₀ H φ) :
     ∀ σ, holdsC I pay σ (H.wrap φ) := by

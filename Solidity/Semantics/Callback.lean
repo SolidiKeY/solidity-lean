@@ -7,7 +7,9 @@ The relational layer of the callbacks over the typed run
 (`docs/intrinsic.md`, W1 lane `runlemmas`; the untyped one was deleted at W4
 `sem-del`): `ExecS J σ s o` runs
 `s : Stmt C Γ Γ'` from `σ : State C Γ` exactly as `Stmt.run` does,
-except where control leaves the contract (a `transfer`, a `send`, a `try`),
+except where control leaves the contract to a callee that may call back (a
+`try`, a value call, and a `transfer` or a `send` when the invariant's `pay`
+is set, `Stmt.forksIn`),
 where the run either leaves it with the invariant `J` broken (`violated`)
 or resumes in any state the callee may leave (`State.havoc`: the typed
 storage and the ledger replaced) that satisfies `J`.  A loop or a block
@@ -145,8 +147,8 @@ theorem COut.receiverOp_of_call {Γ ps Γf : Ctx} {E : Ty} (args : Args C Γ ps)
 /-- What the callee may do: keep a contract invariant, read on a state with
 no locals (solkey's `CInv(storage, net)`), and, when `pay` is set, call back
 from a `transfer` or a `send` too (KeY's `transferSemantics:withCallback`).
-A `try` calls back either way: its callee has all the gas (solkey's bug 5,
-`docs/options.md`). -/
+A `try` and a value call (`Stmt.send`'s `full`) call back either way: their
+callee has all the gas (solkey's bug 5, `docs/options.md`). -/
 structure StateInv (C : Contract) where
   holds : State C [] → Prop
   pay : Bool := true
@@ -266,7 +268,7 @@ theorem Fml.hasTransfer_modal {Γ Γ' Γ₀ : Ctx} (m : Modality) (P : Prog C Γ
 mutual
 
 /-- Whether a statement may hand control to a callee that calls back: a
-`try`, and a `transfer` or a `send` when `pay` is set, in a branch, a block, a
+`try`, a value call, and a `transfer` or a `send` when `pay` is set, in a branch, a block, a
 loop or a callee included (`hasTransfer` at `pay := true`, `callsBack_true`). -/
 def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, s => Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
@@ -335,8 +337,8 @@ theorem Fml.callsBack_modal {pay : Bool} {Γ Γ' Γ₀ : Ctx} (m : Modality) (P 
     Fml.callsBack pay (.modal m P κ φ) =
       (Prog.callsBack pay P || κ.callsBack pay || φ.callsBack pay) := rfl
 
-/-- `Stmt.forks` when only a `try` hands control unless `pay` is set: a
-`transfer` or a `send` then runs as `Stmt.run` (`forksIn_true`). -/
+/-- `Stmt.forks` when only a `try` and a value call hand control unless `pay`
+is set: a `transfer` or a `send` then runs as `Stmt.run` (`forksIn_true`). -/
 def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
   Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
     (assign := fun _ _ => false) (rebind := fun _ _ => false) (assignLocal := fun _ _ => false)

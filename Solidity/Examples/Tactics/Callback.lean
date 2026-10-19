@@ -92,7 +92,7 @@ theorem withdrawSafe :
 
 /-- What is safe with callbacks is safe without: the deterministic run is one
 of the runs with callbacks. -/
-theorem withdrawSafe_noCallback :
+theorem withdrawSafe_valid :
     ⊨ dl!{ balance + paidOut == deposited →
       [ uint amt = balance; balance = 0; paidOut += amt; to.transfer(amt); ]
         balance + paidOut == deposited } :=
@@ -123,8 +123,9 @@ theorem withdrawUnsafe_noCallback : ValidT .noCallback withdrawUnsafe :=
 /-! ## `send`: a callee that may refuse
 
 `PiggyBankNet`'s `callTo` is `(bool ok, ) = a.call{value: 5}(""); sent = ok;`,
-which solkey's parser lowers to `bool ok = a.send(5); sent = ok;`, and so do
-we here (the lowering needs tuples, which this calculus does not read yet).
+which solkey's parser lowers to `bool ok = a.send(5); sent = ok;`; here it is
+written as solc has it, a send with all the gas (`Stmt.send`'s `full`), read
+alike with callbacks.
 With callbacks, `sendWithCallbackBox` owes the invariant after the booking,
 the rest after a callback that keeps it (`ok` true), and the rest with
 nothing booked (`ok` false): the callee may refuse and revert whatever it
@@ -144,7 +145,7 @@ for `sent = ok;` ("send succeeded", `ok` true), and a refused send books
 nothing ("send failed", `ok` false). -/
 theorem callToKeepsInv :
     ValidC sendVaultInv dl[SendVault]{ balance + paidOut == deposited →
-      [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } := by
+      [ (bool ok, ) = to.call{value: 5}(""); sent = ok; ] balance + paidOut == deposited } := by
   apply ProvesC.valid
   apply ProvesC.allIntro
   apply ProvesC.intro
@@ -167,9 +168,9 @@ theorem callToKeepsInv :
     sol_close
 
 /-- What holds with callbacks holds without. -/
-theorem callToKeepsInv_noCallback :
+theorem callToKeepsInv_valid :
     ⊨ dl[SendVault]{ balance + paidOut == deposited →
-      [ bool ok = to.send(5); sent = ok; ] balance + paidOut == deposited } :=
+      [ (bool ok, ) = to.call{value: 5}(""); sent = ok; ] balance + paidOut == deposited } :=
   fun σ v => holds_of_holdsC_imp (callToKeepsInv σ v) rfl rfl
 
 /-! ## The counterexample, a typed run with callbacks

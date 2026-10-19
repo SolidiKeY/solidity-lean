@@ -88,5 +88,5 @@ None.
 | field-name overloading: Depth0.recursive and Depth1.recursive have different types, and Semantics.structDef is one global name->fields table | 1 | SolcStructs 1 |
 | field-name overloading: as recursiveStructThroughAliases, plus Flagged.y (bool) vs Sub.y/Triple.y (uint) | 1 | SolcStructs 1 |
 | `b.push() = v` (a push used as a target): the grammar has it, the port does not translate it yet | 1 | SolcArrays 1 |
-| `(bool ok, ) = a.call{value: v}("")` is the send `bool ok = a.send(v)`, as solkey lowers it, and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 1 | Net 1 |
+| `(bool ok, ) = a.call{value: v}("")` is a send with all the gas (solkey lowers it to `bool ok = a.send(v)`), and its callback reading is ported (`Calculus/Callback.lean`, `ProvesC.send`), but the problem's invariant `CInv` reads the ledger `net`, which no term reads | 1 | Net 1 |
 | `msg.value` is not a program expression | 1 | Net 1 |

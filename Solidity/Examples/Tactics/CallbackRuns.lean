@@ -58,9 +58,10 @@ example (I : Invariant StandardExample) :
     ValidC I cdl!{ [ uint x = 1; ] x == 1 } ↔ Valid cdl!{ [ uint x = 1; ] x == 1 } :=
   ⟨fun h σ => (holdsC_iff_holds _ rfl σ).1 (h σ), fun h σ => (holdsC_iff_holds _ rfl σ).2 (h σ)⟩
 
-/-- KeY's `transferSemantics` option: under `noCallback` only a `try` calls
-back (`validT_noCallback`), under `withCallback I` a payment too; with no
-`try` in it, a formula reads under `noCallback` as the typed reading. -/
+/-- KeY's `transferSemantics` option: under `noCallback` only a `try` and a
+value call call back (`validT_noCallback`), under `withCallback I` a payment
+too; with neither in it, a formula reads under `noCallback` as the typed
+reading. -/
 example (I : Invariant StandardExample) (φ : Fml StandardExample []) :
     (ValidT (.noCallback I) φ ↔ ValidC I φ false) ∧ (ValidT (.withCallback I) φ ↔ ValidC I φ) :=
   ⟨validT_noCallback, validT_withCallback⟩
@@ -108,9 +109,15 @@ example : ValidC ⟨.tt, rfl⟩ cdl!{ [ ok = to.send(5); ] true } := by
   case exit => exact .plain (.updIntro (.updIntro (.closeTrue rfl))) rfl
   all_goals exact .plain (.closeTrue rfl) rfl
 
-/-- Under `transferSemantics:noCallback` the send runs as its typed run: the
+/-! Under `transferSemantics:noCallback` the send runs as its typed run: the
 ordinary rule fires (`sendNoCallbackBox`), and the sequent says which
 reading it is in. -/
+
+/--
+trace: case h.h
+⊢ dl{ ∀ uint to ⟹ᶜ[Fml.tt; noCallback] [ ok = to .send(5); ] true }
+-/
+#guard_msgs in
 example : ProvesC .tt false [] .nil cdl!{ [ ok = to.send(5); ] true } := by
   apply ProvesC.allIntro
   apply ProvesC.bindIntro

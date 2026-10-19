@@ -11,7 +11,10 @@ The callback reading `holdsC` on scoped formulas and typed states
 callbacks (`ExecP`, then `ExecF` for its frames,
 `Semantics/Callback.lean`), and none of them may break the invariant.
 The invariant is a closed formula `I : Fml C []`, kept by the runs as its
-typed reading (`Fml.stateInv`, `StateInv := ⟨fun σ => holds σ I⟩`).
+typed reading (`Fml.stateInv`, `⟨fun σ => holds σ I, pay⟩`): a `try` and a
+value call always call back, a `transfer` and a `send` when `pay` is set
+(`TransferSem`: `holdsT .noCallback` lets a `try` call back, where it was
+`holds` before `docs/options.md`'s O1).
 
 Proved: with no payment in a formula the two readings agree
 (`holdsC_iff_holds`, from `ExecP.forall_iff` and `ExecF.forall_iff`), and
@@ -314,7 +317,8 @@ theorem valid_of_validC {I : Invariant C} {pay : Bool} {Γ₁ Γ₀ : Ctx} {a : 
   fun σ => holds_of_holdsC_imp (H σ) ha hφ
 
 /-- **With nothing calling back, valid with callbacks is valid**: under
-`transferSemantics:noCallback`, a formula with no `try` reads as `holds`. -/
+`transferSemantics:noCallback`, a formula with no `try` and no value call
+reads as `holds`. -/
 theorem validC_false_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
     ValidC I φ false ↔ Valid φ :=
   forall_congr' fun σ => holdsC_iff_holds φ h σ

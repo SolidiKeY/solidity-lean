@@ -15,12 +15,13 @@ the callee's `{havoc}` (`ProvesC`), not what the rule leaves.
 The rules print as today's (`dl[CallbackTaclet C k]{ … }`, `delabCallbackTaclet`),
 their goals labelled by their no-callback twins' labels.
 
-`ProvesC I H φ` is the callback judgement on scoped sequents:
-the ordinary rules on a statement that runs no other and pays nothing
-(`Stmt.forks`), a split, the callback taclets with solkey's goals
-("invariant on exit", the rest resumed under `{havoc}` with the invariant
-assumed), and the plain calculus (`Proves`) on a goal with no `transfer`
-left.  The invariant is a closed formula `I : Fml C []`, read in any scope
+`ProvesC I pay H φ` is the callback judgement on scoped sequents:
+the ordinary rules on a statement that runs no other and hands control to no
+callee that calls back (`Stmt.forksIn pay`: a `try` and a value call always,
+a `transfer` and a `send` when `pay` is set, `docs/options.md`), a split, the
+callback taclets with solkey's goals ("invariant on exit", the rest resumed
+under `{havoc}` with the invariant assumed), and the plain calculus
+(`Proves`) on a goal where nothing calls back (`Fml.callsBack pay`).  The invariant is a closed formula `I : Fml C []`, read in any scope
 past an update that drops every local (`Fml.closedAt`, invisible when
 printed), so it needs no weakening.
 
@@ -52,7 +53,7 @@ def Hyps.freshC {Γ₀ Γ : Ctx} (I : Fml C []) (H : Hyps C Γ₀ Γ) (φ : Fml 
 
 /-- `ProvesC I pay H φ`: the calculus proves `φ` in the context `H` when a
 callee may call back into a contract with invariant `I`, from every `try`
-and, when `pay` is set, from every `transfer` and `send`. -/
+and value call and, when `pay` is set, from every `transfer` and `send`. -/
 inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
     {Γ : Ctx} → Hyps C Γ₀ Γ → Fml C Γ → Prop where
   /-- A goal where nothing calls back is a goal of the calculus: there the

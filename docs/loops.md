@@ -146,7 +146,9 @@ within its frame), the typed state (well-typed by construction,
 `Stmt.keeps_all` of `Typing/HeredRun.lean`; `reachable_iff` stays true, since a loop
 reaches nothing a finite sequence of body runs does not), and
 `Stmt.exec_run`/`ExecS` (`Semantics/Callback.lean`: a loop whose body has no
-transfer is `det`). Set `Stmt.forks (.loop …) := Prog.hasTransfer body`, not
+transfer is `det`). Set `Stmt.forks (.loop …) := Prog.hasTransfer body`
+(`Stmt.forksIn pay (.loop …) := Prog.callsBack pay body` since
+`docs/options.md`'s O1), not
 `true`: a forking statement with no `ExecS` constructor has no runs, so every
 modality over it would hold vacuously. `stmt_sim` is out of the fragment
 ("The EVM").
@@ -158,8 +160,9 @@ exits, iterates (`loopIter`), stops in its body, or diverges
 so `loopDiverge` over-approximates: a loop whose body pays may always
 diverge. A box accepts a divergence, and the callback reading is box-only
 (solkey's), so nothing is lost; a diamond over such a loop is never valid.
-Each constructor requires `Prog.hasTransfer body`, so a loop that pays
-nothing has only its deterministic run (`ExecS.det`), and
+Each constructor requires `Prog.callsBack J.pay body` (`Prog.hasTransfer`
+before `docs/options.md`'s O1), so a loop where nothing calls back has only
+its deterministic run (`ExecS.det`), and
 `Stmt.exec_run` and `Stmt.eq_run` keep their statements.
 
 ## Decision 2: `break`, `continue`, `for`, `do … while` are lowered

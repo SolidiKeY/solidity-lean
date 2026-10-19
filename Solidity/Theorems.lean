@@ -37,7 +37,7 @@ typed run has no stuck outcome, so `compiler_correct` covers every case.  Its pr
 | `s ⇝ₖ[k, m] p` | a rule of solkey's does | `Taclet C k m s p` |
 | `p ≃[m, σ] s` | from `σ`, the premise `p` does what `s` does | `Premise.Sound m s p σ` |
 | `⊢[I] φ`, `⊨[I] φ` | the same, when `transfer`, `send` and `try` may call back into a contract with invariant `I` | `ProvesC I true`, `ValidC I φ true` |
-| `⊢ₙ[I] φ`, `⊨ₙ[I] φ` | the same under `transferSemantics:noCallback`: only `try` calls back | `ProvesC I false`, `ValidC I φ false` |
+| `⊢ₙ[I] φ`, `⊨ₙ[I] φ` | the same under `transferSemantics:noCallback`: only `try` and a value call call back | `ProvesC I false`, `ValidC I φ false` |
 | `(P, σ) ⇓ o` | `P` run from `σ` ends in `o` | `Prog.run σ P = .ok o` |
 | `⟦P⟧b` | `P` compiled, its frame at `b` | `Evm.compileProg b P` |
 | `(c, m) ⇓ₘ m'`, `(c, m) ↯ₘ` | the machine runs `c` from `m` to `m'`, or reverts | `Evm.run c m` |
@@ -224,13 +224,14 @@ theorem callback_soundness {I : Invariant C} {φ : Fml C []} :
   ProvesC.valid
 
 /-- **Under `transferSemantics:noCallback`**: a `transfer` and a `send`
-forward too little gas to call back, a `try` does not (solkey's bug 5,
+forward too little gas to call back, a `try` and a value call do not (solkey's bug 5,
 `docs/options.md`), its callee keeping `I`. -/
 theorem noCallback_soundness {I : Invariant C} {φ : Fml C []} :
     ⊢ₙ[I] φ → ⊨ₙ[I] φ :=
   ProvesC.valid
 
-/-- With no `try` left, `noCallback` is the deterministic reading. -/
+/-- With no `try` and no value call left, `noCallback` is the deterministic
+reading. -/
 theorem noCallback_iff {I : Invariant C} {φ : Fml C []} (h : φ.callsBack false = false) :
     (⊨ₙ[I] φ) ↔ ⊨ φ :=
   validC_false_iff h

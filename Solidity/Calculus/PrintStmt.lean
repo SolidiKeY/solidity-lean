@@ -449,11 +449,10 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     let some x ← var? i | escape
     match_expr g with
     | Bool.true =>
-      match ← ppExprS ns r with
-      | `(sol_expr| $y:ident) =>
-        let f := mkIdent (y.getId ++ `call)
-        `(sol_stmt| ( $x:ident , ) = $f:ident { value : $(← ppExprS ns a) } ( "" ))
-      | _ => escape
+      let f ← match ← ppExprS ns r with
+        | `(sol_expr| $y:ident) => `(sol_expr| $(mkIdent (y.getId ++ `call)):ident)
+        | e => `(sol_expr| $e:sol_expr . call)
+      `(sol_stmt| ( $x:ident , ) = $f:sol_expr { value : $(← ppExprS ns a) } ( "" ))
     | _ => `(sol_stmt| $x:ident = $(← ppExprS ns r):sol_expr .send( $(← ppExprS ns a) ))
   | Stmt.delete _ _ _ l => `(sol_stmt| delete $(← ppExprS ns l):sol_expr)
   | Stmt.deleteMem _ _ _ p _ => `(sol_stmt| delete $(← ppExprS ns p):sol_expr)

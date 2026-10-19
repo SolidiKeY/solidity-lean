@@ -242,7 +242,7 @@ theorem pingKeepsInv :
 
 /-- What holds with callbacks holds without: the deterministic run is one of
 the runs with callbacks. -/
-theorem pingKeepsInv_noCallback :
+theorem pingKeepsInv_valid :
     ⊨ dl!{ fails <= pings →
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } :=
   valid_of_validC pingKeepsInv rfl rfl

@@ -23,6 +23,7 @@ pp.sol.dl false` shows the constructors again.
 | `dl{ p }` | a premise |
 | `dl{ ..H, c, {U} ⟹[R] φ }` | the scoped sequent `Proves C R Γ₀ ((H.pre c).upd m U) φ` (`Calculus/SequentNotation.lean`) |
 | `dl{ ..Γ ⟹ᶜ[I] φ }` | printing only: a scoped sequent with callbacks (`ProvesC`, `Calculus/Callback.lean`) |
+| `dl{ ..Γ ⟹ᶜ[I; noCallback] φ }` | printing only: the same where a `transfer` and a `send` do not call back (`ProvesC I false`) |
 | `tm{ find(save(s, p, v), q) }` | a scoped term `Tm`, every name a Lean variable (where `Calculus/TermLib.lean` is imported) |
 | `⊨ φ` | `Valid φ` of a scoped `φ` (`Calculus/Logic.lean`) |
 | `σ ⊧ φ` | `holds σ φ`, likewise |
@@ -325,13 +326,13 @@ syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ " dl_fml " }" : term
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ₖ " dl_fml " }" : term
 /-- A sequent `Γ ⟹[R] φ` over the rule set `R` (`Proves R Γ φ`). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹[" term "] " dl_fml " }" : term
-/-- A sequent `Γ ⟹ᶜ[I] φ` of the calculus with callbacks, every `transfer`
-and every `try` calling back into a contract with the invariant `I`
+/-- A sequent `Γ ⟹ᶜ[I] φ` of the calculus with callbacks, every `transfer`,
+`send` and `try` calling back into a contract with the invariant `I`
 (`ProvesC I true Γ φ`; today's judgement was deleted at W4 `sem-del`, the
 scoped one is `Calculus/Callback.lean`'s). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ᶜ[" term "] " dl_fml " }" : term
-/-- The same under `transferSemantics:noCallback`: only a `try` calls back
-(`ProvesC I false Γ φ`). -/
+/-- The same under `transferSemantics:noCallback`: only a `try` and a value
+call call back (`ProvesC I false Γ φ`). -/
 syntax "dl{ " sepBy(dl_hyp, ", ") " ⟹ᶜ[" term "; " &"noCallback" "] " dl_fml " }" : term
 /-- A term of the logic (`Tm`), its sort read off its head (`find(…)` a
 value, `save(…)` a storage, `write(…)` a memory, `consr(…)` a path).  Every
