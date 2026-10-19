@@ -67,9 +67,9 @@ theorem transferStep_sound (k : Nat) (r a : Val C Γ .uint) (q : Premise C Γ Γ
 
 /-- `send_unfold_rightSndArgument`: the amount captured. -/
 theorem sound_sendRight (pv : Idx Γ (.val .bool)) (sadr : Simple C Γ .uint) (a : Val C Γ .uint)
-    (x : Var) :
-    Premise.Runs m (.send pv (.simple sadr) a)
-      (.capture .uint x a (.send pv.there (.simple sadr.up) (.simple (.local .here)))) σ := by
+    (x : Var) (full : Bool) :
+    Premise.Runs m (.send pv (.simple sadr) a full)
+      (.capture .uint x a (.send pv.there (.simple sadr.up) (.simple (.local .here)) full)) σ := by
   refine Premise.sound_capturePushed σ (fun v hv => TRun.send_pushT σ (t := .val .uint) v pv
       (.simple sadr.up) (.simple (.local .here)) (.simple sadr) a
       (by simp only [Val.evalT, Simple.evalT_up]) (by rw [hv]; rfl)) (fun h hh => ?_)
@@ -77,9 +77,9 @@ theorem sound_sendRight (pv : Idx Γ (.val .bool)) (sadr : Simple C Γ .uint) (a
   simp only [TRun.send, Val.evalT, ok_bind, hh]; rfl
 
 /-- `send_unfold_leftFstReceiver`: the receiver captured. -/
-theorem sound_sendLeft (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (x : Var) :
-    Premise.Runs m (.send pv r a)
-      (.capture .uint x r (.send pv.there (.simple (.local .here)) a.up)) σ := by
+theorem sound_sendLeft (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (x : Var) (full : Bool) :
+    Premise.Runs m (.send pv r a full)
+      (.capture .uint x r (.send pv.there (.simple (.local .here)) a.up full)) σ := by
   refine Premise.sound_capturePushed σ (fun v hv => TRun.send_pushT σ (t := .val .uint) v pv
       (.simple (.local .here)) a.up r a (by rw [hv]; rfl) (Val.evalT_up σ (t := .val .uint) v a))
     (fun h hh => ?_)
@@ -87,18 +87,18 @@ theorem sound_sendLeft (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (x : Va
   simp only [TRun.send, hh]; rfl
 
 /-- **A send** (`sendStep`). -/
-theorem sendStep_sound (k : Nat) (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint)
-    (q : Premise C Γ Γ) (hs : sendStep k m pv r a = q) :
-    Premise.Runs m (.send pv r a) q σ := by
+theorem sendStep_sound (k : Nat) (pv : Idx Γ (.val .bool)) (full : Bool) (r a : Val C Γ .uint)
+    (q : Premise C Γ Γ) (hs : sendStep k m pv full r a = q) :
+    Premise.Runs m (.send pv r a full) q σ := by
   cases r with
   | simple sadr =>
     cases a with
     | simple se =>
       cases m with
-      | box => cases hs; exact sound_send (m := .box) σ pv sadr se _
-      | diamond => cases hs; exact sound_send (m := .diamond) σ pv sadr se _
-    | _ => cases hs; exact sound_sendRight σ pv sadr _ _
-  | _ => cases hs; exact sound_sendLeft σ pv _ a _
+      | box => cases hs; exact sound_send (m := .box) σ pv sadr se full _
+      | diamond => cases hs; exact sound_send (m := .diamond) σ pv sadr se full _
+    | _ => cases hs; exact sound_sendRight σ pv sadr _ _ full
+  | _ => cases hs; exact sound_sendLeft σ pv _ a _ full
 
 /-! ### `if`, `require`, `assert` -/
 

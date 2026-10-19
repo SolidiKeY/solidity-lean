@@ -31,7 +31,7 @@ theorem violation_before_source :
       (.callReceiverPush "valuesRef" .nil (.user "r") getterBody trapped.code trapped.value)
       .violated := by
   exact .callReceiverPush (.callBody rfl (.cons (.det rfl) .nil)) rfl
-    (.violated (.transferViolated (J := broken) rfl (fun h => h)))
+    (.violated (.transferViolated (J := broken) rfl rfl (fun h => h)))
 
 /-- A native reference operand copies the allocated memory value after its getter. -/
 theorem reference_copy :

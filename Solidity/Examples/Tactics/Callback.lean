@@ -224,6 +224,48 @@ theorem withdrawUnsafe_withCallback : ¬ ValidT (.withCallback vaultInv) withdra
   -- `0 + 10 == 5` fails
   exact absurd hE (by with_unfolding_all decide)
 
+/-! ## A value call: all the gas, so a callback under either semantics
+
+`(bool ok, ) = to.call{value: amt}("")` forwards all the gas (`Stmt.send`'s
+`full`), so its callee may call back even under `transferSemantics:noCallback`,
+which only makes `transfer` and `send` gas-limited (solkey's bug 5, which
+reads the value call as a `send`, `docs/options.md`).  Read as every callee
+keeping the state (`⊨`), the interaction-first withdrawal by a value call
+keeps the invariant; under `noCallback` it does not. -/
+
+/-- The interaction-first withdrawal, paying by a value call. -/
+def withdrawCall : Fml Vault [] := dl!{ balance + paidOut == deposited →
+  [ uint amt = balance; (bool ok, ) = to.call{value: amt}(""); balance = 0; paidOut += amt; ]
+    balance + paidOut == deposited }
+
+set_option maxHeartbeats 2000000 in
+/-- Every callee keeping the state, the value call is a send. -/
+theorem withdrawCall_valid : ⊨ dl!{ balance + paidOut == deposited →
+    [ uint amt = balance; (bool ok, ) = to.call{value: amt}(""); balance = 0; paidOut += amt; ]
+      balance + paidOut == deposited } := by
+  sol_symex
+  sol_close
+
+/-- **Under `noCallback` the value call calls back**: the same run as
+`withdrawUnsafe_withCallback`'s, the callee withdrawing again, no invariant
+needed. -/
+theorem withdrawCall_noCallback : ¬ ValidT .noCallback withdrawCall := by
+  intro h
+  have H := h before (u 7) ?inv _
+    (.cons (execOfRun rfl rfl)
+      (.cons (execOfRun rfl rfl)
+        (.cons (ExecS.sendResume (st := vault 0 5 5) (nt := []) rfl rfl ?exit ?resume)
+          (.cons (execOfRun rfl rfl)
+            (.cons (execOfRun rfl rfl) .nil)))))
+  case inv =>
+    simp only [holdsC, holds]
+    with_unfolding_all exact rfl
+  case exit => with_unfolding_all exact trivial
+  case resume => with_unfolding_all exact trivial
+  have H2 := H _ ExecF.nil
+  simp only [COut.after, holdsC, holds] at H2
+  exact absurd H2 (by with_unfolding_all decide)
+
 /-! ## The rules -/
 
 /--
@@ -235,7 +277,7 @@ info: @CallbackTaclet.transferWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ
 
 /--
 info: @CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
-  {sadr se : Simple C Γ PrimTy.uint},
+  {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl[CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }

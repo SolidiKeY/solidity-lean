@@ -21,7 +21,7 @@ theorem resumed_allocation_captured :
       observed (finishAt (allocatingPaymentAt []) (SRef.ofRoot "values" rfl) u) = some 9 ∧
       heapLength (finishAt (allocatingPaymentAt []) (SRef.ofRoot "values" rfl) u) = some 1 := by
     refine ⟨_, ExecP.cons
-      (ExecS.transferResume (J := keep) (st := changed) (nt := []) rfl trivial trivial)
+      (ExecS.transferResume (J := keep) (st := changed) (nt := []) rfl rfl trivial trivial)
       (ExecP.cons (ExecS.det rfl) ExecP.nil), ?_⟩
     decide +kernel
   obtain ⟨u, hu, hobs, hheap⟩ := hp
@@ -57,7 +57,7 @@ theorem violation_suppresses_source :
     ∃ u, ExecP broken before (captureProgram trapped) u ∧
       (.violated : COut CallbackContract [] []) = u.map (Out.drop (.push (.push .refl))) := by
   have hd : DirectAfterGetter (J := broken) before trapped .violated :=
-    ⟨.violated, ExecP.violated (ExecS.transferViolated (J := broken) rfl (fun h => h)), rfl⟩
+    ⟨.violated, ExecP.violated (ExecS.transferViolated (J := broken) rfl rfl (fun h => h)), rfl⟩
   exact (captureProgram_direct_iff trapped before).mpr hd
 
 /-- Recover the direct reading from an independently constructed capture-program execution. -/
@@ -71,7 +71,7 @@ namespace ReferenceCopy
 
 open Solidity.Examples.Tactics.DeferredSource
 
-def keep : StateInv ExampleContract := ⟨fun _ => True⟩
+def keep : StateInv ExampleContract := ⟨fun _ => True, true⟩
 
 def observedCopy {H : HTy} {Γ : Ctx} :
     COut ExampleContract H Γ → Option (Int × Int × Int × Nat)

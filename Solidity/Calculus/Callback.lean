@@ -159,15 +159,16 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   callee may leave in which the invariant holds ("send succeeded"); the rest
   after `pv := false`, nothing booked ("send failed"). -/
   | send {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {pv : Idx Γ (.val .bool)} {sadr se : Simple C Γ .uint}
+      {full : Bool}
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {Uok Ufail : Upd C Γ Γ}
       (d : CallbackTaclet C
-        (H.freshC I (.modal .box (.cons (.send pv (.simple sadr) (.simple se)) ω) κ φ))
-        .box (.send pv (.simple sadr) (.simple se)) (.cases [] [Uok, Ufail]))
+        (H.freshC I (.modal .box (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ))
+        .box (.send pv (.simple sadr) (.simple se) full) (.cases [] [Uok, Ufail]))
       (exit : ProvesC I pay Γ₀ H
         (.upd .box (Upd.nil.snoc (.pay sadr.lower se.lower)) (Fml.closedAt I)))
       (ok : ProvesC I pay Γ₀ (((H.upd .box Uok).havoc).pre (Fml.closedAt I)) (.modalK .box ω κ φ))
       (failed : ProvesC I pay Γ₀ (H.upd .box Ufail) (.modalK .box ω κ φ)) :
-      ProvesC I pay Γ₀ H (.modal .box (.cons (.send pv (.simple sadr) (.simple se)) ω) κ φ)
+      ProvesC I pay Γ₀ H (.modal .box (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ)
   /-- **`tryCallWithCallbackBox`**: the invariant where control leaves
   ("invariant on exit"); the call's success, from any state the callee may
   leave in which the invariant holds, for every value of its return data

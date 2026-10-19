@@ -50,7 +50,7 @@ theorem prefix_scope_keeps_fresh_alias :
       heapLength o = some 1 := by
     refine ⟨_, ExecP.cons (ExecS.transferResume (J := keep) (σ := State.init CallbackContract)
       (st := changed) (nt := []) (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl))
-      rfl trivial trivial) (ExecP.cons (ExecS.det rfl) ExecP.nil), ?_⟩
+      rfl rfl trivial trivial) (ExecP.cons (ExecS.det rfl) ExecP.nil), ?_⟩
     decide +kernel
   obtain ⟨o, he, hheap⟩ := hp
   obtain ⟨u, hu, hr⟩ := Prog.exec_afterAlias keep (allocatingPaymentAt []).code

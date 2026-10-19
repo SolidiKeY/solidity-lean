@@ -1329,7 +1329,7 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
   | _, _, .push b v _, _, h, τ, d => TWkRel.of_eq (TRun.push_wk h τ d b v)
   | _, _, .pop b, _, h, τ, d => TWkRel.of_eq (TRun.pop_wk h τ d b)
   | _, _, .transfer r a, _, h, τ, d => TWkRel.of_eq (TRun.transfer_wk h τ d r a)
-  | _, _, .send pv r a, _, h, τ, d => TWkRel.of_eq (TRun.send_wk h τ d pv r a)
+  | _, _, .send pv r a _, _, h, τ, d => TWkRel.of_eq (TRun.send_wk h τ d pv r a)
   | _, _, .declMem R _ init _ hm, _, h, τ, d => TWkRel.of_top (TRun.declMem_wk h τ d R init hm)
   | _, _, .rebindMem i r, _, h, τ, d => TWkRel.of_eq (TRun.rebindMem_wk h τ d i r)
   | _, _, .assignFromMem l q, _, h, τ, d => TWkRel.of_eq (TRun.assignFromMem_wk h τ d l q)

@@ -791,7 +791,7 @@ theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
   | _, _, .push b v _ => keeps_push hP hG b v
   | _, _, .pop b => keeps_pop hP b
   | _, _, .transfer r a => keeps_transfer r a
-  | _, _, .send pv r a => keeps_send pv r a
+  | _, _, .send pv r a _ => keeps_send pv r a
   | _, _, .declMem R _ init _ hm => keeps_declMem R init hm
   | _, _, .rebindMem i r => keeps_rebindMem i r
   | _, _, .assignFromMem l p => keeps_assignFromMem hP hG l p

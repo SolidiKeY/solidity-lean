@@ -296,8 +296,9 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
       Prog.quote Γe Γve code, Src.quote c Γve value]
   | _, _, Γe, _, .transfer r a =>
     mkAppN (mkConst ``Stmt.transfer) #[c, Γe, Val.quote c Γe r, Val.quote c Γe a]
-  | _, _, Γe, _, .send pv r a =>
-    mkAppN (mkConst ``Stmt.send) #[c, Γe, Idx.quote Γe pv, Val.quote c Γe r, Val.quote c Γe a]
+  | _, _, Γe, _, .send pv r a g =>
+    mkAppN (mkConst ``Stmt.send) #[c, Γe, Idx.quote Γe pv, Val.quote c Γe r, Val.quote c Γe a,
+      toExpr g]
   | _, _, Γe, _, .declMem R x init _ _ =>
     mkAppN (mkConst ``Stmt.declMem) #[c, Γe, toExpr R, toExpr x,
       optE (mkAppN (mkConst ``MRhs) #[c, Γe, toExpr R]) (init.map (MRhs.quote c Γe)),

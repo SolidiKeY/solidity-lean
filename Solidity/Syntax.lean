@@ -225,8 +225,10 @@ inductive RawStmt where
   | tryCall (recv : RawExpr) (f : String) (args : List RawExpr) (rets : List (RawTy × String))
       (ok err : List RawStmt) (code : Option String) (panic other : List RawStmt)
   /-- `x = r.send(a);`, and with `T` given the declaration `T x = r.send(a);`
-  (`x` a name).  A bare `r.send(a);` is not read: solkey has no rule for it. -/
-  | send (T : Option RawTy) (x r a : RawExpr)
+  (`x` a name).  A bare `r.send(a);` is not read: solkey has no rule for it.
+  With `full`, the value call `(x, ) = r.call{value: a}("");` and
+  `(T x, ) = r.call{value: a}("");`, which forwards all the gas. -/
+  | send (T : Option RawTy) (x r a : RawExpr) (full : Bool)
   /-- `(uint a, , bool b) = e;`: a variable declared per component, a
   component left out discarded (`elabTuple`). -/
   | tupleDecl (vars : List (Option (RawTy × String))) (rhs : RawExpr)
@@ -675,6 +677,12 @@ syntax sol_ty ident " = " sol_expr ".push()" : sol_stmt
 syntax sol_expr ".transfer(" sol_expr ")" : sol_stmt
 syntax sol_expr " = " sol_expr ".send(" sol_expr ")" : sol_stmt
 syntax sol_ty ident " = " sol_expr ".send(" sol_expr ")" : sol_stmt
+/-- `(ok, ) = r.call{value: a}("");`: a send with all the gas (`RawStmt.send`). -/
+syntax (name := solValueCall) "(" sol_expr ", " ")" " = " sol_expr:max "{" &"value" ": " sol_expr "}"
+  "(" str ")" : sol_stmt
+/-- `(bool ok, ) = r.call{value: a}("");`. -/
+syntax (name := solValueCallDecl) "(" sol_ty ident ", " ")" " = " sol_expr:max "{" &"value" ": "
+  sol_expr "}" "(" str ")" : sol_stmt
 syntax sol_expr:max "(" ")" : sol_stmt
 syntax sol_expr:max "(" sol_expr ")" : sol_stmt
 syntax (priority := high) sol_expr " = " sol_expr:max "(" ")" : sol_stmt
@@ -1198,10 +1206,18 @@ where
   | `(sol_stmt| $r:sol_expr .transfer( $a:sol_expr )) => do
       `(RawStmt.call (.field $(← expandExpr r) "transfer") [$(← expandExpr a)])
   | `(sol_stmt| $l:sol_expr = $r:sol_expr .send( $a:sol_expr )) => do
-      `(RawStmt.send none $(← expandExpr l) $(← expandExpr r) $(← expandExpr a))
+      `(RawStmt.send none $(← expandExpr l) $(← expandExpr r) $(← expandExpr a) false)
   | `(sol_stmt| $T:sol_ty $x:ident = $r:sol_expr .send( $a:sol_expr )) => do
       `(RawStmt.send (some $(← expandTy T)) (.name $(strLit x)) $(← expandExpr r)
-        $(← expandExpr a))
+        $(← expandExpr a) false)
+  | `(sol_stmt| ( $l:sol_expr , ) = $f:sol_expr { value : $a:sol_expr } ( $d:str )) => do
+      unless d.getString.isEmpty do Macro.throwErrorAt d "a value call with no calldata only"
+      let some r ← recvOf? "call" f | Macro.throwErrorAt f "`r.call{value: a}(\"\")`"
+      `(RawStmt.send none $(← expandExpr l) $r $(← expandExpr a) true)
+  | `(sol_stmt| ( $T:sol_ty $x:ident , ) = $f:sol_expr { value : $a:sol_expr } ( $d:str )) => do
+      unless d.getString.isEmpty do Macro.throwErrorAt d "a value call with no calldata only"
+      let some r ← recvOf? "call" f | Macro.throwErrorAt f "`r.call{value: a}(\"\")`"
+      `(RawStmt.send (some $(← expandTy T)) (.name $(strLit x)) $r $(← expandExpr a) true)
   | `(sol_stmt| $f:sol_expr ( )) => do `(RawStmt.call $(← expandExpr f) [])
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
       `(RawStmt.call $(← expandExpr f) [$(← expandExpr a)])
@@ -1238,7 +1254,7 @@ where
     let T ← match T with
       | some T => `(some $T)
       | none => `(none)
-    some <$> `(RawStmt.send $T $l $r $(← expandExpr a))
+    some <$> `(RawStmt.send $T $l $r $(← expandExpr a) false)
   /-- The receiver of `b.push` (`pushRecv?`). -/
   pushRecv (f : TSyntax `sol_expr) : MacroM Term := do
     match ← pushRecv? f with

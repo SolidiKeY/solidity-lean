@@ -411,13 +411,13 @@ after the booking; the rest after the booking and `pv := true`, from any
 state the callee leaves in which the invariant holds; the rest after
 `pv := false`, nothing booked. -/
 theorem holdsC_sendCb (hI : I.FO = true) (hT : I.hasTransfer = false) (pv : Idx Γ (.val .bool))
-    (sadr se : Simple C Γ .uint)
+    (sadr se : Simple C Γ .uint) (full : Bool)
     (hx : holdsC I pay σ (.upd .box (Upd.nil.snoc (UpdElem.payTo sadr se)) (Fml.closedAt I)))
     (hok : holdsC I pay σ (.upd .box ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
       (.local pv (.val (Tm.lit (p := .bool) true)))) (.havoc (.imp (Fml.closedAt I) (Fml.modalK .box ω κ φ)))))
     (hf : holdsC I pay σ (.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
       (Fml.modalK .box ω κ φ))) :
-    holdsC I pay σ (.modal .box (.cons (.send pv (.simple sadr) (.simple se)) ω) κ φ) := by
+    holdsC I pay σ (.modal .box (.cons (.send pv (.simple sadr) (.simple se) full) ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
   cases he with
   | det _ =>
@@ -544,7 +544,7 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     intro σ
     refine Hyps.wrapC_and _ ?_ σ
       (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ (ihx σ) (iho σ)) (ihf σ)
-    exact fun τ ab c => holdsC_sendCb hI hT _ _ _ (holdsC_and_left ab) (holdsC_and_right ab) c
+    exact fun τ ab c => holdsC_sendCb hI hT _ _ _ _ (holdsC_and_left ab) (holdsC_and_right ab) c
   | tryCall d _ _ _ ihx iho ihc =>
     cases d
     intro σ

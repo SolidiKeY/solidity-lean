@@ -236,7 +236,7 @@ theorem transfer_unwk {Γ : Ctx} (J : StateInv C) (r amt : Val C Γ .uint) :
     exact ⟨_, ExecS.transferResume hpay ha ((inv_rel hr J).mpr hj) ((inv_rel hr' J).mpr hk), hr'⟩
 
 theorem send_unwk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
-    (r amt : Val C Γ .uint) : UWkS J (.send pv r amt) := by
+    (r amt : Val C Γ .uint) (full : Bool) : UWkS J (.send pv r amt full) := by
   intro Δ h τ o' he
   cases he with
   | det hf => exact det_unwk J _ h τ hf
@@ -247,7 +247,7 @@ theorem send_unwk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
   | sendViolated hpay hp hj =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
     exact ⟨_, .sendViolated hpay ha (fun hk => hj ((inv_rel hr J).mp hk)), trivial⟩
-  | @sendResume _ _ _ _ _ b st nt hpay hp hj hk =>
+  | @sendResume _ _ _ _ _ _ b st nt hpay hp hj hk =>
     obtain ⟨a, ha, hr⟩ := transfer_ok h τ r amt hp
     have hr' := havoc_rel hr st nt
     exact ⟨_, ExecS.sendResume hpay ha ((inv_rel hr J).mpr hj) ((inv_rel hr' J).mpr hk),
@@ -392,7 +392,7 @@ theorem stmt_unwk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → 
   | _, _, .block body => block_unwk J body (prog_unwk J body)
   | _, _, .loop a c body => loop_unwk J a c body (prog_unwk J body)
   | _, _, .transfer r a => transfer_unwk J r a
-  | _, _, .send pv r a => send_unwk J pv r a
+  | _, _, .send pv r a g => send_unwk J pv r a g
   | _, _, .call f args ret body => call_unwk J f args ret body
   | _, _, .callReceiver f args r body op => callReceiver_unwk J f args r body op
   | _, _, .callReceiverPush f args r body code value =>

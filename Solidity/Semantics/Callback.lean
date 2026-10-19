@@ -183,7 +183,7 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
     (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
-    (transfer := fun _ _ => true) (send := fun _ _ _ => true)
+    (transfer := fun _ _ => true) (send := fun _ _ _ _ => true)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
@@ -214,7 +214,7 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
     (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
-    (transfer := fun _ _ => true) (send := fun _ _ _ => true)
+    (transfer := fun _ _ => true) (send := fun _ _ _ _ => true)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
@@ -276,7 +276,7 @@ def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
     (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
-    (transfer := fun _ _ => pay) (send := fun _ _ _ => pay)
+    (transfer := fun _ _ => pay) (send := fun _ _ _ full => pay || full)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
@@ -345,7 +345,7 @@ def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
     (assignIncDec := fun _ _ _ _ _ => false) (assignLocalPush := fun _ _ => false)
     (pushOpAssign := fun _ _ _ _ _ => false) (pushIncDec := fun _ _ _ => false)
     (push := fun _ _ _ => false) (pop := fun _ => false)
-    (transfer := fun _ _ => pay) (send := fun _ _ _ => pay)
+    (transfer := fun _ _ => pay) (send := fun _ _ _ full => pay || full)
     (declMem := fun _ _ _ _ _ => false) (rebindMem := fun _ _ => false)
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
@@ -470,27 +470,29 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {st : Storage C} {nt : Ledger} :
       J.pay = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
         ExecS J σ (.transfer r a) (.ok ⟨o₁.st.havoc st nt, o₁.ext⟩)
-  /-- A send that halts, where its transfer would. -/
+  /-- A send that halts, where its transfer would; it calls back under
+  `J.pay` or forwarding all the gas (`full`, a value call). -/
   | sendHalt {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
-      {e : THalt} :
-      J.pay = true → TRun.transfer r a σ = .error e → ExecS J σ (.send pv r a) (.halt e)
+      {full : Bool} {e : THalt} :
+      (J.pay || full) = true → TRun.transfer r a σ = .error e →
+        ExecS J σ (.send pv r a full) (.halt e)
   /-- KeY's "send failed": the callee reverts, nothing is booked and `pv`
   is `false`, whatever the transaction's oracle says. -/
   | sendFailed {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
-      {o₁ : Out C σ.H Γ} :
-      J.pay = true → TRun.transfer r a σ = .ok o₁ →
-        ExecS J σ (.send pv r a) (.ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩)
+      {full : Bool} {o₁ : Out C σ.H Γ} :
+      (J.pay || full) = true → TRun.transfer r a σ = .ok o₁ →
+        ExecS J σ (.send pv r a full) (.ok ⟨σ.setLocal pv (false : Bool), List.prefix_refl _⟩)
   /-- KeY's "invariant on exit", the payment booked. -/
   | sendViolated {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
-      {o₁ : Out C σ.H Γ} :
-      J.pay = true → TRun.transfer r a σ = .ok o₁ → ¬ J.at o₁.st →
-        ExecS J σ (.send pv r a) .violated
+      {full : Bool} {o₁ : Out C σ.H Γ} :
+      (J.pay || full) = true → TRun.transfer r a σ = .ok o₁ → ¬ J.at o₁.st →
+        ExecS J σ (.send pv r a full) .violated
   /-- KeY's "send succeeded": the payment booked, `J` kept, any state the
   callee may leave in which `J` holds, `pv` then `true`. -/
   | sendResume {Γ : Ctx} {σ : State C Γ} {pv : Idx Γ (.val .bool)} {r a : Val C Γ .uint}
-      {o₁ : Out C σ.H Γ} {st : Storage C} {nt : Ledger} :
-      J.pay = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st → J.at (o₁.st.havoc st nt) →
-        ExecS J σ (.send pv r a)
+      {full : Bool} {o₁ : Out C σ.H Γ} {st : Storage C} {nt : Ledger} :
+      (J.pay || full) = true → TRun.transfer r a σ = .ok o₁ → J.at o₁.st →
+        J.at (o₁.st.havoc st nt) → ExecS J σ (.send pv r a full)
           (.ok ⟨(o₁.st.havoc st nt).setLocal pv (true : Bool), o₁.ext⟩)
   | iteHalt {Γ Γ₁ Γ₂ : Ctx} {σ : State C Γ} {c : Val C Γ .bool} {thn : Prog C Γ Γ₁}
       {els : Prog C Γ Γ₂} {e : THalt} :
@@ -750,8 +752,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
         by_cases hI : J.at o₁.st
         · exact .inl (ExecS.transferResume (st := o₁.st.storage) (nt := o₁.st.net) hp h hI hI)
         · exact .inr (.transferViolated hp h hI)
-  | _, _, .send pv r a, σ => by
-    cases hp : J.pay with
+  | _, _, .send pv r a full, σ => by
+    cases hp : (J.pay || full) with
     | false => exact .inl (.det hp)
     | true =>
       show ExecS J σ _ (.ofRes (TRun.send pv r a σ)) ∨ _
@@ -1024,7 +1026,7 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
   | _, _, .tryCall .., ht, _, _, _ => by simp only [Stmt.callsBack, Bool.true_eq_false] at ht
   | _, _, .transfer .., ht, _, _, h | _, _, .send .., ht, _, _, h => by
     simp only [Stmt.callsBack] at ht
-    cases h <;> first | rfl | simp_all only [Bool.true_eq_false]
+    cases h <;> first | rfl | simp_all only [Bool.true_eq_false, Bool.false_eq_true]
   | _, _, .ite c thn els, ht, σ, _, h => by
     simp only [Stmt.callsBack, Bool.or_eq_false_iff] at ht
     cases h with

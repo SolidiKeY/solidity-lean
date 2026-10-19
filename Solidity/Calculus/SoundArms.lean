@@ -1252,11 +1252,12 @@ theorem sound_done_false {Γ' : Ctx} (s : Stmt C Γ Γ') : Premise.Sound m s (.d
 
 /-- `sendNoCallbackBox`, `sendNoCallbackDiamond`: the payment with `pv` true,
 or `pv` false. -/
-theorem sound_send (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) (fs : List (Fml C Γ)) :
-    Premise.Sound m (.send pv (.simple sadr) (.simple se)) (.cases fs
+theorem sound_send (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint) (full : Bool)
+    (fs : List (Fml C Γ)) :
+    Premise.Sound m (.send pv (.simple sadr) (.simple se) full) (.cases fs
       [(Upd.nil.snoc (UpdElem.payTo sadr se)).snoc (.local pv (.val (Tm.lit (p := .bool) true))),
         Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))]) σ :=
-  Premise.sound_cases_typed (s := .send pv (.simple sadr) (.simple se))
+  Premise.sound_cases_typed (s := .send pv (.simple sadr) (.simple se) full)
     (t := TRun.send pv (.simple sadr) (.simple se)) σ (TRes.AgreesO.pure _)
     (fun _ => send_sim σ pv sadr se) (fun _ => TRes.NoDiv.ok _) (hx := fun U hU _ => by
       simp only [List.mem_cons, List.not_mem_nil, or_false] at hU

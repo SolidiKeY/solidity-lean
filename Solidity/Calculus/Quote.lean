@@ -305,8 +305,9 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
       ← qOpt (mkApp3 (mkConst ``Src) (← contract) Γe (toExpr E)) (qSrc Γ E) v, rflTrue]
   | @Stmt.pop _ _ E b => sctor ``Stmt.pop #[Γe, toExpr E, ← qSPath Γ _ b]
   | .transfer r a => sctor ``Stmt.transfer #[Γe, ← qVal Γ .uint r, ← qVal Γ .uint a]
-  | .send pv r a =>
-    sctor ``Stmt.send #[Γe, ← qIdx Γ (.val .bool) pv, ← qVal Γ .uint r, ← qVal Γ .uint a]
+  | .send pv r a g =>
+    sctor ``Stmt.send #[Γe, ← qIdx Γ (.val .bool) pv, ← qVal Γ .uint r, ← qVal Γ .uint a,
+      toExpr g]
   | .declMem R x init _ _ =>
     sctor ``Stmt.declMem #[Γe, toExpr R, toExpr x,
       ← qOpt (mkApp3 (mkConst ``MRhs) (← contract) Γe (toExpr R)) (qMRhs Γ R) init,

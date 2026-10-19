@@ -268,7 +268,7 @@ sound as its premise is the one `Stmt.step` builds (`toStep`). -/
 
 /--
 info: Solidity.Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
-  {sadr se : Simple C Γ PrimTy.uint},
+  {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[
@@ -282,7 +282,7 @@ sound: Solidity.Taclet.toStep (the premise is Stmt.step's; Stmt.Sound)
 
 /--
 info: Solidity.CallbackTaclet.sendWithCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
-  {sadr se : Simple C Γ PrimTy.uint},
+  {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl[CallbackTaclet C k]{ [ pv = sadr .send(se); ] ⇝
     "send succeeded":
         { net := if(sadr = self) then net else storeSt(net, at(sadr), selectSt(net, at(sadr)) - se) ‖ pv := true } ⟨[

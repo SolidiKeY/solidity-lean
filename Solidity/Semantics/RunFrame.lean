@@ -410,7 +410,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨_, _, h⟩ := tbind_ok_inv h
     cases h
     exact ⟨TGFrame.pay σ _ _, TLocAgree.refl _⟩
-  | _, _, .send pv r a, hw, d, σ, o, h => by
+  | _, _, .send pv r a _, hw, d, σ, o, h => by
     have hμ := nonpayable_of_within' hw
     subst hμ
     change TRun.send pv r a σ = .ok o at h

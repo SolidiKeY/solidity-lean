@@ -189,7 +189,7 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .push b v _ => TRun.push b v
   | _, _, .pop b => TRun.pop b
   | _, _, .transfer r a => TRun.transfer r a
-  | _, _, .send pv r a => TRun.send pv r a
+  | _, _, .send pv r a _ => TRun.send pv r a
   | _, _, .declMem R _ init _ hm => TRun.declMem R init hm
   | _, _, .rebindMem i r => TRun.rebindMem i r
   | _, _, .assignFromMem l p => TRun.assignFromMem l p
@@ -230,7 +230,7 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
     (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b => TRun.assignLocalPush i b)
     (fun b v _ => TRun.push b v)
-    (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
+    (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a _ => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
     (fun l p => TRun.assignFromMem l p) (fun l r => TRun.assignMem l r)
     (fun l => TRun.delete l) (fun p _ => TRun.deleteMem p) (fun l n h => TRun.assignNew l n h)
@@ -255,7 +255,7 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun op _ _ l r => TRun.opAssign op l r) (fun op _ l => TRun.incDec op l)
     (fun i op _ l _ => TRun.assignIncDec i op l) (fun i b => TRun.assignLocalPush i b)
     (fun b v _ => TRun.push b v)
-    (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a => TRun.send pv r a)
+    (fun b => TRun.pop b) (fun r a => TRun.transfer r a) (fun pv r a _ => TRun.send pv r a)
     (fun R _ init _ hm => TRun.declMem R init hm) (fun i r => TRun.rebindMem i r)
     (fun l p => TRun.assignFromMem l p) (fun l r => TRun.assignMem l r)
     (fun l => TRun.delete l) (fun p _ => TRun.deleteMem p) (fun l n h => TRun.assignNew l n h)

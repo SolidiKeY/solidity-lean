@@ -445,9 +445,16 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     | some a => `(sol_stmt| $(← ppExprS ns b):sol_expr .push( $(← ppExprS ns a) ))
   | Stmt.pop _ _ _ b => `(sol_stmt| $(← ppExprS ns b):sol_expr .pop())
   | Stmt.transfer _ _ r a => `(sol_stmt| $(← ppExprS ns r):sol_expr .transfer( $(← ppExprS ns a) ))
-  | Stmt.send _ _ i r a =>
+  | Stmt.send _ _ i r a g =>
     let some x ← var? i | escape
-    `(sol_stmt| $x:ident = $(← ppExprS ns r):sol_expr .send( $(← ppExprS ns a) ))
+    match_expr g with
+    | Bool.true =>
+      match ← ppExprS ns r with
+      | `(sol_expr| $y:ident) =>
+        let f := mkIdent (y.getId ++ `call)
+        `(sol_stmt| ( $x:ident , ) = $f:ident { value : $(← ppExprS ns a) } ( "" ))
+      | _ => escape
+    | _ => `(sol_stmt| $x:ident = $(← ppExprS ns r):sol_expr .send( $(← ppExprS ns a) ))
   | Stmt.delete _ _ _ l => `(sol_stmt| delete $(← ppExprS ns l):sol_expr)
   | Stmt.deleteMem _ _ _ p _ => `(sol_stmt| delete $(← ppExprS ns p):sol_expr)
   | Stmt.assignNew _ _ R l n _ =>

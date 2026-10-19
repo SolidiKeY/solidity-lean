@@ -247,7 +247,7 @@ theorem transfer_wk {Γ : Ctx} (J : StateInv C) (r amt : Val C Γ .uint) :
     · exact CWkRel.lift_ok h d ⟨a.st.havoc st nt, a.ext⟩
 
 theorem send_wk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
-    (r amt : Val C Γ .uint) : WkS J (.send pv r amt) := by
+    (r amt : Val C Γ .uint) (full : Bool) : WkS J (.send pv r amt full) := by
   intro Δ h σ d o he
   cases he with
   | det hf => exact det_wk J _ h σ d hf
@@ -255,19 +255,19 @@ theorem send_wk {Γ : Ctx} (J : StateInv C) (pv : Idx Γ (.val .bool))
     refine ⟨_, ExecS.sendHalt (J := J) hpay ?_, rfl⟩
     rw [TRun.transfer_wk, hp]
     rfl
-  | @sendFailed _ _ _ _ _ a hpay hp =>
+  | @sendFailed _ _ _ _ _ _ a hpay hp =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
     refine ⟨_, ExecS.sendFailed (J := J) (pv := pv.wk h) hpay hl, ?_⟩
     simpa only [Out.lift, TEnv.wk_self, State.lift_setLocal] using
       CWkRel.lift_ok h d (⟨σ.setLocal pv false, List.prefix_refl _⟩ : Out C σ.H Γ)
-  | @sendViolated _ _ _ _ _ a hpay hp hj =>
+  | @sendViolated _ _ _ _ _ _ a hpay hp hj =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
     exact ⟨_, .sendViolated hpay hl (fun hk => hj ((at_lift J h a.st _).mp hk)), trivial⟩
-  | @sendResume _ _ _ _ _ a st nt hpay hp hj hk =>
+  | @sendResume _ _ _ _ _ _ a st nt hpay hp hj hk =>
     have hl : TRun.transfer (r.wk h) (amt.wk h) (σ.lift h d) = .ok (Out.lift h d a) := by
       rw [TRun.transfer_wk, hp]
       rfl
@@ -526,7 +526,7 @@ theorem stmt_wk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Wk
   | _, _, .block body => block_wk J body (prog_wk J body)
   | _, _, .loop a c body => loop_wk J a c body (prog_wk J body)
   | _, _, .transfer r a => transfer_wk J r a
-  | _, _, .send pv r a => send_wk J pv r a
+  | _, _, .send pv r a g => send_wk J pv r a g
   | _, _, .call f args ret body => call_wk J f args ret body
   | _, _, .callReceiver f args r body op => callReceiver_wk J f args r body op
   | _, _, .callReceiverPush f args r body code value =>

@@ -379,8 +379,8 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .call f as => f :: as
   | .eval as => as
   | .tryCall r _ as .. => r :: as
-  | .send none x r a => [x, r, a]
-  | .send (some _) _ r a => [r, a]
+  | .send none x r a _ => [x, r, a]
+  | .send (some _) _ r a _ => [r, a]
   | .tupleDecl _ r => [r]
   | .tupleAssign ts r => ts.filterMap id ++ [r]
   | .revert | .unchecked _ | .block _ | .brk | .cont | .hole => []
@@ -431,7 +431,7 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .unchecked b => pure (.unchecked b)
   | .tryCall r g as rets ok err code pnc other =>
     return .tryCall (← f r) g (← as.mapM f) rets ok err code pnc other
-  | .send T x r a => return .send T (← f x) (← f r) (← f a)
+  | .send T x r a g => return .send T (← f x) (← f r) (← f a) g
   | .tupleDecl vs r => return .tupleDecl vs (← f r)
   | .tupleAssign ts r => return .tupleAssign (← ts.mapM (·.mapM f)) (← f r)
   | .block b => pure (.block b)
@@ -447,7 +447,7 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
 def RawStmt.declared? : RawStmt → Option String
   | .decl _ x _ | .declStorage _ x _ | .declMemory _ x _ | .declStoragePush _ x _
   | .declPush _ x _ => some x
-  | .send (some _) (.name x) _ _ => some x
+  | .send (some _) (.name x) _ _ _ => some x
   | _ => none
 
 /-- The names a statement binds in its blocks: a `try`'s return locals and
@@ -542,7 +542,7 @@ def RawStmt.renameDecl (x y : String) : RawStmt → RawStmt
   | .declMemory T z i => .declMemory T (if z == x then y else z) i
   | .declStoragePush T z b => .declStoragePush T (if z == x then y else z) b
   | .declPush T z b => .declPush T (if z == x then y else z) b
-  | .send (some T) (.name z) r a => .send (some T) (.name (if z == x then y else z)) r a
+  | .send (some T) (.name z) r a g => .send (some T) (.name (if z == x then y else z)) r a g
   | .tupleDecl vs r => .tupleDecl (vs.map (·.map fun (T, z) => (T, if z == x then y else z))) r
   | s => s
 
@@ -1384,9 +1384,9 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .declPush T x b =>
       let (y, ρ') ← fresh "se" x
       pure (.declPush T y (r b) :: (← renameStmts ρ' ss))
-    | .send (some T) (.name x) e a =>
+    | .send (some T) (.name x) e a g =>
       let (y, ρ') ← fresh "se" x
-      pure (.send (some T) (.name y) (r e) (r a) :: (← renameStmts ρ' ss))
+      pure (.send (some T) (.name y) (r e) (r a) g :: (← renameStmts ρ' ss))
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
     | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
@@ -2513,13 +2513,13 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
     let (P, b) ← hoist b
     let (Q, l) ← hoist l
     pure (P ++ Q, .assignPush l b)
-  | .send T x r a => do
+  | .send T x r a g => do
     -- the receiver first, then the amount, as `transfer`'s
     let (P, r) ← hoist r
     let (Pc, r) ← if a.hasIncDec && !(r matches .name _) then captureExpr C r
       else pure ([], r)
     let (Q, a) ← hoist a
-    pure (P ++ Pc ++ Q, .send T x r a)
+    pure (P ++ Pc ++ Q, .send T x r a g)
   | .eval args => do
     -- the effects captured, left to right; then what may still revert is
     -- evaluated into a fresh local, which nothing reads
@@ -2768,7 +2768,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
   | .call (.field e "transfer") [a] => do
     let Γ ← nctx
     pure [.of Γ (.transfer (← checkIn C Γ .uint e) (← checkIn C Γ .uint a))]
-  | .send T x e a => do
+  | .send T x e a g => do
     let Γ ← nctx
     let r ← checkIn C Γ .uint e
     let v ← checkIn C Γ .uint a
@@ -2778,11 +2778,11 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
         | throw s!"{n}: `send` returns a bool"
       declare C n (.val .bool w)
       let ⟨Γ', th, ix⟩ ← afterCapture Γ (Var.ofName n) (.val .bool)
-      pure [.of Γ (.declLocal .bool (Var.ofName n) none), .of Γ' (.send ix (r.wk th) (v.wk th))]
+      pure [.of Γ (.declLocal .bool (Var.ofName n) none), .of Γ' (.send ix (r.wk th) (v.wk th) g)]
     | some _, _ => throw "`T x = r.send(a);` declares a name"
     | none, x =>
       match ← ElabM.lift (synth C Γ x) with
-      | .val .bool (.simple (.local y)) => pure [.of Γ (.send y r v)]
+      | .val .bool (.simple (.local y)) => pure [.of Γ (.send y r v g)]
       | _ => throw s!"{x.toStr}: a send's result goes to a bool local"
   | .call (.name "constructor") args => elabCtor args
   | .call (.name f) args => elabCall f args none

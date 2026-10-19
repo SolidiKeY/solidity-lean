@@ -56,7 +56,7 @@ def Stmt.inSolkey (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (push := fun b v _ => b.keyValue && v.elim true (fun r => r.keyPushSource && r.keyValue))
     (pop := fun b => b.keyValue)
     (transfer := fun r a => (m == .box) && r.keyValue && a.keyValue)
-    (send := fun _ r a => r.keyValue && a.keyValue)
+    (send := fun _ r a _ => r.keyValue && a.keyValue)
     (declMem := fun _ _ v _ _ => v.elim true MRhs.keyValue)
     (rebindMem := fun _ r => r.keyValue)
     (assignFromMem := fun l p => l.keyValue && p.keyValue)

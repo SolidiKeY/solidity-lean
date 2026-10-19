@@ -371,7 +371,7 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
       fun _ => TRes.NoPanic.ok _
   | _, _, .transfer r a, _, σ => (r.evalT_noPanic σ).bind fun _ => (a.evalT_noPanic σ).bind
       fun _ => TRes.NoPanic.ok _
-  | _, _, .send _ r a, _, σ => (r.evalT_noPanic σ).bind fun _ => (a.evalT_noPanic σ).bind
+  | _, _, .send _ r a _, _, σ => (r.evalT_noPanic σ).bind fun _ => (a.evalT_noPanic σ).bind
       fun _ => TRes.NoPanic.ok _
   | _, _, .declMem R _ init _ _, _, σ => by
     cases init with

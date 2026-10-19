@@ -6,7 +6,7 @@ import Solidity.TestSuite.ScopedProblems
 `⊢` of each obligation solkey `1b4341a303` added, in the order of the
 source; the replays are what `#solkey_derive? … pending`
 (`Frontend/Problems.lean`) prints.  A `send` (and
-the `call{value}` form the import lowers to one; all four are box)
+the `call{value}` form, a send with all the gas; all four are box)
 splits into solkey's goals "send succeeded" and "send failed"
 (`sendNoCallbackBox`); an internal
 call is inlined (`internalCallExpand`, `functionBodyExpand` for a call with

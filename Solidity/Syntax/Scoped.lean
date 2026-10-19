@@ -299,7 +299,10 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
       (hd : (v.isSome || E.defaultOkS) = true) : Stmt C Γ Γ
   | pop {Γ : Ctx} {E : Ty} (b : SPath C Γ (.array E)) : Stmt C Γ Γ
   | transfer {Γ : Ctx} (r a : Val C Γ .uint) : Stmt C Γ Γ
-  | send {Γ : Ctx} (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) : Stmt C Γ Γ
+  /-- `pv = r.send(a);`, or with `full` the value call
+  `(pv, ) = r.call{value: a}("");`, which forwards all the gas: its callee
+  may call back under either `transferSemantics` (`Stmt.forksIn`). -/
+  | send {Γ : Ctx} (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) (full : Bool) : Stmt C Γ Γ
   | declMem {Γ : Ctx} (R : RefTy) (x : Var) (init : Option (MRhs C Γ R))
       (hd : (init.isSome || (Ty.ref R).defaultOkS) = true) (hm : (Ty.ref R).mapFree = true) :
       Stmt C Γ (.mem R :: Γ)
@@ -691,7 +694,8 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
     | some r => s!"{b.toStr ns}.push({r.toStr ns});"
   | .pop b => s!"{b.toStr ns}.pop();"
   | .transfer r a => s!"{r.toStr ns}.transfer({a.toStr ns true});"
-  | .send pv r a => s!"{pv.name ns} = {r.toStr ns}.send({a.toStr ns true});"
+  | .send pv r a false => s!"{pv.name ns} = {r.toStr ns}.send({a.toStr ns true});"
+  | .send pv r a true => s!"({pv.name ns}, ) = {r.toStr ns}.call\{value: {a.toStr ns true}}(\"\");"
   | .assignIncDec x op _ l _ => s!"{x.name ns} = {IncDec.show op (l.toStr ns)};"
   | .assignLocalPush x b => s!"{x.name ns} = {b.toStr ns}.push();"
   | .delete l => s!"delete {l.toStr ns};"
@@ -915,7 +919,7 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
     ⟨Δ, h, .push (b.wk h) (v.map (·.wk h)) (by rw [Option.isSome_map]; exact hd)⟩
   | _, .pop b => ⟨Δ, h, .pop (b.wk h)⟩
   | _, .transfer r a => ⟨Δ, h, .transfer (r.wk h) (a.wk h)⟩
-  | _, .send pv r a => ⟨Δ, h, .send (pv.wk h) (r.wk h) (a.wk h)⟩
+  | _, .send pv r a g => ⟨Δ, h, .send (pv.wk h) (r.wk h) (a.wk h) g⟩
   | _, .declMem R x init hd hm =>
     ⟨_, .keep h, .declMem R x (init.map (·.wk h)) (by rw [Option.isSome_map]; exact hd) hm⟩
   | _, .rebindMem i r => ⟨Δ, h, .rebindMem (i.wk h) (r.wk h)⟩
@@ -975,7 +979,7 @@ def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
     (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ _ _ => .push .refl) (fun _ _ _ => .push .refl)
     (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ _ _ _ _ => .refl) (fun _ _ => .refl)
-    (fun _ _ _ => .refl) (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
+    (fun _ _ _ => .refl) (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ _ => .refl)
     (fun _ _ _ _ _ => .push .refl) (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ => .refl) (fun _ => .refl) (fun _ => .refl) .refl

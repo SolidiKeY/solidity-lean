@@ -1063,11 +1063,11 @@ where
           | _ => none)
         | .declMemory T x _ => declared x T .mem
         | .declStorage T x _ | .declStoragePush T x _ => declared x T .alias
-        | .decl T x _ | .send (some T) (.name x) _ _ => match elabDeclTy C T with
+        | .decl T x _ | .send (some T) (.name x) _ _ _ => match elabDeclTy C T with
           | .ok (.prim p, n) => (Γ, setBy x (.val p n) Δ)
           | _ => (Γ, Δ)
         -- `ok = to.send(5);`: what a send returns, a `bool`
-        | .send none (.name x) _ _ => hint x (some (.val .bool))
+        | .send none (.name x) _ _ _ => hint x (some (.val .bool))
         | .ite _ t e => go decls e (go decls t (Γ, Δ))
         | .block b | .unchecked b => go decls b (Γ, Δ)
         | .whileLoop _ _ b | .loop _ _ b | .doWhile _ b _ => go decls b (Γ, Δ)

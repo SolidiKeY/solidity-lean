@@ -79,7 +79,7 @@ theorem transferOwnerValid : ⊨ dl!{ [ owner.transfer(5); ] true } := by
 
 /--
 info: @Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
-  {sadr se : Simple C Γ PrimTy.uint},
+  {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl{ [ pv = sadr .send(se); ] ⇝
     "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[ ]⟩ ;
       "send failed": { pv := false } ⟨[ ]⟩ }
@@ -88,7 +88,7 @@ info: @Taclet.sendNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : 
 
 /--
 info: @Taclet.sendNoCallbackDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {pv : Idx Γ (LTy.val PrimTy.bool)}
-  {sadr se : Simple C Γ PrimTy.uint},
+  {sadr se : Simple C Γ PrimTy.uint} {full : Bool},
   dl{ ⟨ pv = sadr .send(se); ⟩ ⇝
     "non-negative amount": 0 <= se ;
       "send succeeded": { net := if(sadr = this) then net else store(net, at(sadr), net(sadr) - se) ‖ pv := true } ⟨[
@@ -124,14 +124,14 @@ theorem sendCapturedValid : ⊨ dl!{ [ ok = owner.send(x + 2); ] true } := by
 
 /--
 info: @Taclet.send_unfold_leftFstReceiver : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {pv : Idx Γ (LTy.val PrimTy.bool)} {nadr e : Val C Γ PrimTy.uint},
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {nadr e : Val C Γ PrimTy.uint} {full : Bool},
   dl{ ⟨[ pv = nadr .send(e); ]⟩ ⇝ ⟨[ uint se = nadr; pv = se .send(e); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.send_unfold_leftFstReceiver
 
 /--
 info: @Taclet.send_unfold_rightSndArgument : ∀ {C : Contract} {k : Nat} {m : Modality} {Γ : Ctx}
-  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr : Simple C Γ PrimTy.uint} {nse : Val C Γ PrimTy.uint},
+  {pv : Idx Γ (LTy.val PrimTy.bool)} {sadr : Simple C Γ PrimTy.uint} {nse : Val C Γ PrimTy.uint} {full : Bool},
   dl{ ⟨[ pv = sadr .send(nse); ]⟩ ⇝ ⟨[ uint se = nse; pv = sadr .send(se); ]⟩ }
 -/
 #guard_msgs in #check @Taclet.send_unfold_rightSndArgument

@@ -247,4 +247,74 @@ theorem pingKeepsInv_noCallback :
       [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } :=
   valid_of_validC pingKeepsInv rfl rfl
 
+/-! ## A callee calls back: solkey's bug 5
+
+A `try` hands its callee all the gas, so the callee may call back into the
+contract, the contract itself included (`try this.f()`), whatever
+`transferSemantics` says: that option is about `transfer` and `send`, whose
+2300 gas cannot call back.  `⊨` reads every callee as keeping this
+contract's state, as solkey's `tryCallNoCallbackBox` does, and proves
+`last == 0` past a call that may write `last`; `ValidT .noCallback` lets the
+callee leave any state that keeps the invariant (`⊤` unless given), and
+refutes it (`docs/options.md`). -/
+
+/-- `last = 0;`, then a call that may write `last`. -/
+def selfCall : Fml Pinger [] := dl!{ [ last = 0; try I(7).ping() { } catch { }; ] last == 0 }
+
+/-- Read as every callee keeping the state, the call changes nothing. -/
+theorem selfCall_valid : ⊨ dl!{ [ last = 0; try I(7).ping() { } catch { }; ] last == 0 } := by
+  sol_symex
+  sol_close
+
+/-- A statement that forks nowhere runs as the typed run. -/
+theorem execOfRun {C : Contract} {J : StateInv C} {Γ Γ' : Ctx} {σ : State C Γ}
+    {s : Stmt C Γ Γ'} {o : Out C σ.H Γ'} (hf : s.forks = false)
+    (h : s.run σ = .ok o) : ExecS J σ s (.ok o) := by
+  have := ExecS.det (J := J) (σ := σ) (Stmt.forksIn_of_forks hf)
+  rwa [h] at this
+
+/-- `Pinger`'s storage: `pings`, `fails`, `last`. -/
+def pinger (p f l : Nat) (hp : PrimTy.uint.inRange p = true := by decide)
+    (hf : PrimTy.uint.inRange f = true := by decide)
+    (hl : PrimTy.uint.inRange l = true := by decide) : Storage Pinger :=
+  .cons (.prim ⟨p, hp⟩) (.cons (.prim ⟨f, hf⟩) (.cons (.prim ⟨l, hl⟩) .nil))
+
+/-- **The callee may write `last`**: under `transferSemantics:noCallback`
+the call succeeds having set `last` to `42`, which no invariant forbids. -/
+theorem selfCall_noCallback : ¬ ValidT .noCallback selfCall := by
+  intro h
+  have H := h (State.init Pinger) _
+    (.cons (execOfRun rfl rfl)
+      (.cons (ExecS.tryOk (st := pinger 0 0 42) (nt := []) (vs := []) (rest := [])
+        ?exit ?resume rfl .nil) .nil))
+  case exit => trivial
+  case resume => trivial
+  have H2 := H _ ExecF.nil
+  simp only [COut.after, holdsC, holds] at H2
+  exact absurd H2 (by with_unfolding_all decide)
+
+/-- With the invariant the callee keeps, the honest reading proves what the
+invariant gives: `pingKeepsInv` under `noCallback`, the same derivation. -/
+theorem pingKeepsInv_honest :
+    ValidT (.noCallback pingInv) dl!{ fails <= pings →
+      [ try I(7).ping() { pings += 1; } catch { }; ] fails <= pings } := by
+  apply ProvesC.validT
+  apply ProvesC.intro
+  apply ProvesC.tryCall .tryCallWithCallbackBox
+  · apply ProvesC.plain _ rfl
+    sol_leaf
+    sol_close
+  · apply ProvesC.plain _ rfl
+    sol_derive
+    refine Proves.openInv ?_
+    sol_leaf
+    sol_close
+  · simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]
+    refine ⟨?_, ?_, ?_⟩ <;>
+    · apply ProvesC.plain _ rfl
+      sol_derive
+      all_goals
+        sol_leaf
+        sol_close
+
 end Solidity.Examples.Tactics.TryCatch

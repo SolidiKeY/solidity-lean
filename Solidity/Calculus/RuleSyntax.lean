@@ -1167,7 +1167,8 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (← `(Stmt.transfer $(← schemaAt Γ .val r) $(← schemaAt Γ .val a)), Γ)
   | `(sol_stmt| $l:sol_expr = $r:sol_expr .send( $a:sol_expr )) => do
     let some (.local v) := lhsHead Γ l | Macro.throwErrorAt l "a send's result lands in a stack local"
-    return (← `(Stmt.send $v $(← schemaAt Γ .val r) $(← schemaAt Γ .val a)), Γ)
+    return (← `(Stmt.send $v $(← schemaAt Γ .val r) $(← schemaAt Γ .val a) $(schemaIdent "full")),
+      Γ)
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $a:sol_expr )) => do
     let some (b, "send") ← callRecv? f | Macro.throwErrorAt f "only `r.send(a)` is a call assigned"
     schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $b:sol_expr .send( $a )))

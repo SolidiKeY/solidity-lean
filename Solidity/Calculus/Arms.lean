@@ -619,7 +619,7 @@ def transferStep (m : Modality) : Val C Γ .uint → Val C Γ .uint → Premise 
 
 /-- `pv = r.send(a);` (`sendStep`): the receiver first, then the amount;
 both simple, the send's two outcomes. -/
-def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) :
+def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) (full : Bool) :
     Val C Γ .uint → Val C Γ .uint → Premise C Γ Γ
   | .simple sadr, .simple se =>
     let us : List (Upd C Γ Γ) :=
@@ -634,9 +634,9 @@ def sendStep (m : Modality) (pv : Idx Γ (.val .bool)) :
         true] us
   -- send_unfold_rightSndArgument
   | .simple sadr, a =>
-    .capture .uint (fse k) a (.send pv.there (.simple sadr.up) (.simple (.local .here)))
+    .capture .uint (fse k) a (.send pv.there (.simple sadr.up) (.simple (.local .here)) full)
   -- send_unfold_leftFstReceiver
-  | r, a => .capture .uint (fse k) r (.send pv.there (.simple (.local .here)) a.up)
+  | r, a => .capture .uint (fse k) r (.send pv.there (.simple (.local .here)) a.up full)
 
 /-! ### Memory -/
 

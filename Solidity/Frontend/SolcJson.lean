@@ -42,10 +42,10 @@ normalises what the grammar spells differently from Solidity:
   `(uint x, , bool y) = v` and `return (a, b)`, the value a tuple or a call
   of a function by name (`requireTupleValue`);
 * `(bool ok, ) = R.call{value: V}("")`, matched exactly as
-  `SolJSONParser.isValueCall` matches it, is `bool ok = R.send(V)`; any
-  other value call is a `Gap`.  solc forwards all gas there and `send` the
-  2300-gas stipend, so the result is faithful only under the callback
-  reading (`holdsC`, `docs/solc-alignment.md`);
+  `SolJSONParser.isValueCall` matches it, is kept as written: a send that
+  forwards all the gas (`Stmt.send`'s `full`), so its callee may call back
+  under either `transferSemantics` (solkey reads it as `bool ok = R.send(V)`,
+  its bug 5, `docs/options.md`); any other value call is a `Gap`;
 * an unnamed value a `try`'s call returns is bound to a fresh `tryRetN`,
   which nothing reads;
 * a loop is printed as written, `while`, `for`, `do … while`, `break`,
@@ -1087,9 +1087,9 @@ partial def stmt1 (j : Json) : PM (List String) := do
     pure [← withPush ok (if J.kind e == "Assignment" then assignText e else expr e)]
   | "VariableDeclarationStatement" =>
     if let some (d, r, v) := valueCall? j then
-      -- `(bool ok, ) = R.call{value: V}("")` is `bool ok = R.send(V)`, as solkey reads it;
-      -- faithful only under `holdsC` (full gas, re-entry)
-      return [s!"{← declText d} = {← operand r false}.send({← expr v})"]
+      -- `(bool ok, ) = R.call{value: V}("")`: a send with all the gas, which may call back
+      -- under either `transferSemantics` (`Stmt.send`'s `full`)
+      return [s!"({← declText d}, ) = {← operand r false}.call\{value: {← expr v}}(\"\")"]
     let ds ← PM.lift (J.arr j "declarations")
     if ds.length ≥ 2 then
       -- `(uint a, , bool b) = v`

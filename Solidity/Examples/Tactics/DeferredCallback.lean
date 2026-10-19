@@ -12,8 +12,8 @@ open Solidity.DeferredSource Solidity.DeferredSource.Callback
 
 def CallbackContract : Contract := contract!{ uint calls; uint[] values; }
 
-def keep : StateInv CallbackContract := ⟨fun _ => True⟩
-def broken : StateInv CallbackContract := ⟨fun _ => False⟩
+def keep : StateInv CallbackContract := ⟨fun _ => True, true⟩
+def broken : StateInv CallbackContract := ⟨fun _ => False, true⟩
 
 def before : State CallbackContract [.alias (.array .uint)] :=
   (State.init CallbackContract).push (some (SRef.ofRoot "values" rfl))
@@ -44,14 +44,14 @@ theorem callback_reads_resumed_storage :
     (.ok ⟨(before.pay ⟨9, rfl⟩ 0).havoc changed [], List.prefix_refl _⟩),
     pushBlock_of_prefix (J := keep) payment .here ?_, ?_⟩
   · exact .cons (.transferResume (J := keep) (σ := before) (st := changed) (nt := [])
-      (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl trivial trivial) .nil
+      (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl rfl trivial trivial) .nil
   · decide +kernel
 
 /-- `to.transfer(0); values.push(calls);` stops when its callback invariant breaks. -/
 theorem callback_violation_propagates :
     ExecS broken before (pushBlock payment .here) .violated :=
   pushBlock_of_prefix (J := broken) payment .here
-    (ExecP.violated (.transferViolated (J := broken) rfl (fun h => h)))
+    (ExecP.violated (.transferViolated (J := broken) rfl rfl (fun h => h)))
 
 def getterBody : Prog CallbackContract [.alias (.array .uint)] [.alias (.array .uint)] :=
   .cons (.rebind .here (.path (.loc (.root "values" rfl)))) .nil
@@ -64,7 +64,7 @@ private theorem resume_prefix (σ : State CallbackContract Γ) :
     ExecP keep σ (paymentAt Γ).code
       (.ok ⟨(σ.pay ⟨9, rfl⟩ 0).havoc changed [], List.prefix_refl _⟩) :=
   .cons (.transferResume (J := keep) (σ := σ) (st := changed) (nt := [])
-    (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl trivial trivial) .nil
+    (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl rfl trivial trivial) .nil
 
 /-- Explicit `sp = valuesRef(); to.transfer(0); sp.push(calls);` observes resumed storage. -/
 theorem complete_capture_reads_resumed_storage :
@@ -94,7 +94,7 @@ example : ExecCall broken (State.init CallbackContract) "payingGetter" .nil (.us
     (.cons (.transfer (.simple (.lit 9 rfl)) (.simple (.lit 0 rfl))) .nil)
     (paymentAt []) .violated :=
   .violated (.callBody rfl
-    (.violated (.transferViolated (J := broken) rfl (fun h => h))))
+    (.violated (.transferViolated (J := broken) rfl rfl (fun h => h))))
 
 def trappedPayment : Operand CallbackContract [.alias (.array .uint)] .uint :=
   { payment with value := .val (.binop .div rfl rfl (.simple (.lit 1 rfl)) (.simple (.lit 0 rfl))) }
@@ -102,7 +102,7 @@ def trappedPayment : Operand CallbackContract [.alias (.array .uint)] .uint :=
 /-- `to.transfer(0); values.push(1 / 0);`: invariant violation wins over the bad source. -/
 example : ExecS broken before (pushBlock trappedPayment .here) .violated :=
   pushBlock_of_prefix (J := broken) trappedPayment .here
-    (ExecP.violated (.transferViolated (J := broken) rfl (fun h => h)))
+    (ExecP.violated (.transferViolated (J := broken) rfl rfl (fun h => h)))
 
 /-- With no broken invariant, the same explicit program reaches its bad source. -/
 example : ((pushBlock trappedPayment .here).run before).halt? = some .revert := by decide +kernel
@@ -123,7 +123,7 @@ theorem callback_allocation_survives_scope :
       observed o = some 9 ∧ heapLength o = some 1 := by
   refine ⟨_, pushBlock_of_prefix (J := keep) (allocatingPaymentAt _) .here
     (ExecP.cons (ExecS.transferResume (J := keep) (σ := before) (st := changed) (nt := [])
-      (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl trivial trivial)
+      (r := .simple (.lit 9 rfl)) (a := .simple (.lit 0 rfl)) rfl rfl trivial trivial)
       (ExecP.cons (ExecS.det rfl) ExecP.nil)), ?_⟩
   decide +kernel
 

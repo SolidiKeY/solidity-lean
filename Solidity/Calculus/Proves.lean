@@ -85,7 +85,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (opAssign := fun _ _ _ _ _ => true) (incDec := fun _ _ _ => true)
     (assignIncDec := fun _ _ _ _ _ => true) (assignLocalPush := fun _ _ => true)
     (push := fun b v _ => v.elim true Src.keyPushSource || !b.isSimple) (pop := fun _ => true)
-    (transfer := fun _ _ => m == .box) (send := fun _ _ _ => true)
+    (transfer := fun _ _ => m == .box) (send := fun _ _ _ _ => true)
     (declMem := fun _ _ _ _ _ => true) (rebindMem := fun _ _ => true)
     (assignFromMem := fun _ _ => true) (assignMem := fun _ _ => true) (delete := fun _ => true)
     (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)

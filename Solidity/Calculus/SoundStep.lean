@@ -58,7 +58,7 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | push b v hd => exact pushStep_sound σ k b v hd p hp
   | pop b => exact popStep_sound σ k b p hp
   | transfer r a => exact transferStep_sound σ k r a p hp
-  | send pv r a => exact sendStep_sound σ k pv r a p hp
+  | send pv r a full => exact sendStep_sound σ k pv full r a p hp
   | declMem R x init hd hm =>
     cases init with
     | none => cases hp; exact sound_declMemFresh σ R x hd hm
