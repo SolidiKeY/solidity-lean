@@ -197,13 +197,11 @@ obligations, not `spec!`.
 - **The diamond over reachable states.** Every obligation is a box, so a
   reverting run satisfies it. A diamond spec needs the layout as constraints
   on reachable states (`Typing/Constructibility.lean`, `Typing/Tight.lean`).
-- **A spec's invariant as an `Invariant C`.** `Invariant`
-  (`Calculus/CallbackHolds.lean`) is closed by its type (`Fml C []`) and
-  first-order by `fo`, which admits a quantifier, over the typed `ExecS` of
-  `Semantics/Callback.lean`; what is missing is a compiler from a spec's
-  invariant to one, and a strategy for `ProvesC` (below).
-- **The invariant under callbacks** (`ValidC`, `ProvesC`,
-  `Calculus/Callback.lean`) per function: `ProvesC` has no strategy yet.
+- **A spec's invariant under callbacks**: done (`docs/options.md`, O4):
+  `invariant[C]` compiles it (`specInv`), `ValidC invariant[C] spec[C]{f}`
+  is the obligation with callbacks, and `sol_prove` runs `ProvesC`'s walk on
+  it (`Calculus/CallbackDerive.lean`).  What is open is a callee that calls
+  back through a loop, and a memory or storage return.
 - **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `Fml.inLS`.
 - **The benchmarks' `net(a)` clauses** (EtherWallet, Purchase,
   SimpleAuction) are not tried.

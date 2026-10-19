@@ -18,7 +18,7 @@ can never be read as one under another.
 | O1 | bug 5: `try` and `call{value}` call back under `noCallback` | done |
 | O2 | `checked { … }` (`checkingOF`): an overflow fails both modalities | done |
 | O3 | the strategy under callbacks (`sol_prove`, `sol_derive` on `ValidT`/`ValidC`) | done |
-| O4 | the diamonds of the payments; the invariant from the spec | planned |
+| O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
 | O5 | `ignoringOF`: an overflowing run proves anything | planned |
 
 ## O1. Who calls back (bug 5)
@@ -133,3 +133,37 @@ back, by `ExecS.block`).
 `ProvesC` rule, and stays a leaf; so does a transfer or a send whose operands
 are not simple (their capture rules fire only where the statement does not
 call back), and every diamond over a callback (O4).
+
+## O4. Diamonds, calls, and the invariant a specification declares
+
+**The diamonds.** A send's refusal is an outcome of the run (`TRun.send`,
+the oracle), so a send under the diamond is the run's:
+`CallbackTaclet.sendWithCallbackDiamond` (solkey's, read by `ProvesC.sendD`)
+and `ProvesC.sendDetD` (`sendNoCallbackDiamond` for a gas-limited send), sound
+over any modality (`holdsC_sendCb`, `holdsC_sendDet`). A `transfer` stays
+without a diamond, by the earlier decision: the run books it whatever the
+funds, and a refused payment reverts the machine alone (`Evm.compile_correct`),
+so `⟨ transfer ⟩` would claim a termination the compiler theorem does not
+back. solkey's `transferNoCallbackDiamond` and `transferWithCallbackDiamond`
+stay unclaimed (`RuleShapes.unclaimedTaclets`).
+
+**Calls with callbacks.** An internal call whose body calls back is inlined
+as `Stmt.step` inlines it (`ProvesC.callNone`, `ProvesC.callRets`: the
+parameters declared, the return variables at their defaults, the body under
+the caller's locals as a block). Their soundness relates the call's callback
+run, its body in its own frame (`ExecS.callBody`), to the inlined block's
+(`ExecS.callNone_inline`, `ExecS.callRets_inline`), by forward callback
+weakening (`Prog.exec_wk`), as the deterministic `Stmt.runSt_callNone` does by
+`Prog.run_wk`. A call with a memory or storage return has no rule yet.
+
+**The invariant a specification declares.** `invariant[C]` is `C`'s
+`invariant` clauses compiled as `spec[C]{f}` compiles them (`specInv`,
+`Calculus/Spec.lean`), a closed first-order formula of the storage, as the
+`Invariant C` a callee keeps. `ValidC invariant[C] spec[C]{f}` is solkey's
+specified problem under `transferSemantics:withCallback`: the invariant
+assumed on entry, owed on exit, and owed and assumed again at every payment
+and `try`; `ValidT (.noCallback invariant[C]) spec[C]{f}` its honest
+`noCallback` reading. `sol_prove` proves `Examples/Tactics/CallbackStrategy.lean`'s
+`withdraw_spec`. The invariant does not include the layout premises the
+obligation assumes (`layoutFmls`), so a property of the storage's shape is
+not known after a callee returns unless the invariant states it.
