@@ -572,6 +572,316 @@ theorem holdsC_sendDet {m : Modality} (hp : pay = false) (pv : Idx Γ (.val .boo
 
 end Taclets
 
+/-! ## A call, with callbacks
+
+`Stmt.step`'s premise for a call inlines its body (`callStep`): the
+parameters declared with the arguments (`Args.declsThen`), the body weakened
+under the caller's locals (`Thin.atop`) as a block.  With callbacks the call
+runs its body in its own frame (`ExecS.callBody`); the inlined block runs the
+weakened body, which has the same runs, lifted (`Prog.exec_wk`). -/
+
+section Calls
+
+open DeferredSource.Callback (map_cat_refl singleton_iff block_of_execP)
+
+variable {I : Fml C []} {J : StateInv C}
+
+/-- A callback run from a state equal to another, the outcome at a heap
+both have: from the other.  At states whose heaps reduce to the same one
+(`hX hY := rfl`), the casts are the identity. -/
+theorem ExecS.transport {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {H : HTy} {X Y : State C Γ}
+    (hX : X.H = H) (hY : Y.H = H) (e : X = Y) {u : COut C H Γ'} (h : ExecS J X s (hX ▸ u)) :
+    ExecS J Y s (hY ▸ u) := by
+  subst e; subst hX; exact h
+
+/-- A statement that hands control to nobody and ends in `τ` has that
+callback run. -/
+theorem ExecS.det_ok {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {σ : State C Γ} {τ : State C Γ'}
+    (hs : s.forksIn J.pay = false) (h : Stmt.runSt σ s = .ok τ) :
+    ∃ e : σ.H <+: τ.H, ExecS J σ s (.ok ⟨τ, e⟩) := by
+  have hd := ExecS.det (J := J) (σ := σ) hs
+  cases hr : s.run σ with
+  | error e => simp only [Stmt.runSt, hr, Except.map, reduceCtorEq] at h
+  | ok o =>
+    rw [hr] at hd
+    simp only [Stmt.runSt, hr, Except.map, Except.ok.injEq] at h
+    subst h
+    exact ⟨o.ext, hd⟩
+
+/-- **The parameters declared, with callbacks**: they hand control to nobody,
+so the rest runs from the arguments pushed. -/
+theorem Args.execP_declsThen {Γ Δ : Ctx} : {ps : Ctx} → (as : Args C Γ ps) →
+    (rest : Prog C (ps ++ Γ) Δ) → (σ : State C Γ) → (a : TEnv C σ.H ps) → as.evalT σ = .ok a →
+    ∀ {u : COut C σ.H Δ}, ExecP J (σ.withEnv (TEnv.append ps a σ.env)) rest u →
+      ExecP J σ (as.declsThen rest) u
+  | _, .nil, _, _, _, _, _, h => h
+  | _, .snoc (ps := ps') as p x e, rest, σ, a, ha, u, h => by
+    obtain ⟨v, a'⟩ := a
+    rw [Args.evalT_snoc] at ha
+    cases ha' : as.evalT σ with
+    | error => rw [ha'] at ha; cases ha
+    | ok a'' =>
+      rw [ha'] at ha
+      cases hv : e.evalT σ with
+      | error => simp only [hv, bind, Except.bind] at ha; cases ha
+      | ok v' =>
+        simp only [hv, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at ha
+        obtain ⟨rfl, rfl⟩ := ha
+        refine Args.execP_declsThen as _ σ a'' ha' ?_
+        obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps' a'' σ.env))
+          (s := .declLocal p x (some (e.unders ps'))) rfl
+          (by rw [Stmt.runSt_declLocal, Val.evalT_unders, hv]; rfl)
+        simpa only [map_cat_refl] using ExecP.cons hd h
+  | _, .snocStorage (ps := ps') as R x e, rest, σ, a, ha, u, h => by
+    obtain ⟨v, a'⟩ := a
+    rw [Args.evalT_snocStorage] at ha
+    cases ha' : as.evalT σ with
+    | error => rw [ha'] at ha; cases ha
+    | ok a'' =>
+      rw [ha'] at ha
+      cases hv : e.resolveT σ with
+      | error => simp only [hv, bind, Except.bind] at ha; cases ha
+      | ok q =>
+        simp only [hv, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at ha
+        obtain ⟨rfl, rfl⟩ := ha
+        refine Args.execP_declsThen as _ σ a'' ha' ?_
+        obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps' a'' σ.env))
+          (s := .declStorage R x (some (.path (e.unders ps')))) rfl
+          (by rw [Stmt.runSt_declStorage, SPath.resolveT_unders, hv]; rfl)
+        simpa only [map_cat_refl] using ExecP.cons hd h
+  | _, .snocMemory (ps := ps') as R x e, rest, σ, a, ha, u, h => by
+    obtain ⟨v, a'⟩ := a
+    rw [Args.evalT_snocMemory] at ha
+    cases ha' : as.evalT σ with
+    | error => rw [ha'] at ha; cases ha
+    | ok a'' =>
+      rw [ha'] at ha
+      cases hv : e.mvalT σ with
+      | error => simp only [hv, bind, Except.bind] at ha; cases ha
+      | ok q =>
+        simp only [hv, bind, Except.bind, pure, Except.pure, Except.ok.injEq, Prod.mk.injEq] at ha
+        obtain ⟨rfl, rfl⟩ := ha
+        refine Args.execP_declsThen as _ σ a'' ha' ?_
+        obtain ⟨_, hd⟩ := ExecS.det_ok (J := J) (σ := σ.withEnv (TEnv.append ps' a'' σ.env))
+          (s := .declMem R x (some (.alias (e.unders ps'))) rfl e.mapFree) rfl
+          (by rw [Stmt.runSt_declMem, MPath.mvalT_unders, hv]; rfl)
+        simpa only [map_cat_refl] using ExecP.cons hd h
+
+/-- A statement that hands control to nobody and halts has that callback run. -/
+theorem ExecS.det_err {Γ Γ' : Ctx} {s : Stmt C Γ Γ'} {σ : State C Γ} {e : THalt}
+    (hs : s.forksIn J.pay = false) (h : Stmt.runSt σ s = .error e) :
+    ExecS J σ s (.halt e) := by
+  have hd := ExecS.det (J := J) (σ := σ) hs
+  cases hr : s.run σ with
+  | ok o => simp only [Stmt.runSt, hr, Except.map, reduceCtorEq] at h
+  | error e' =>
+    rw [hr] at hd
+    simp only [Stmt.runSt, hr, Except.map, Except.error.injEq] at h
+    subst h
+    exact hd
+
+/-- The parameters declared, an argument halting: the declarations halt. -/
+theorem Args.execP_declsThen_halt {Γ Δ : Ctx} : {ps : Ctx} → (as : Args C Γ ps) →
+    (rest : Prog C (ps ++ Γ) Δ) → (σ : State C Γ) → {e : THalt} → as.evalT σ = .error e →
+      ExecP J σ (as.declsThen rest) (.halt e)
+  | _, .nil, _, _, _, h => nomatch h
+  | _, .snoc (ps := ps') as p x v, rest, σ, e, ha => by
+    rw [Args.evalT_snoc] at ha
+    cases ha' : as.evalT σ with
+    | error e' =>
+      rw [ha'] at ha; cases ha
+      exact Args.execP_declsThen_halt as _ σ ha'
+    | ok a'' =>
+      rw [ha'] at ha
+      cases hv : v.evalT σ with
+      | ok => simp only [hv, bind, Except.bind, pure, Except.pure, reduceCtorEq] at ha
+      | error e' =>
+        simp only [hv, bind, Except.bind, Except.error.injEq] at ha
+        subst ha
+        refine Args.execP_declsThen as _ σ a'' ha' (.halt (ExecS.det_err rfl ?_))
+        rw [Stmt.runSt_declLocal, Val.evalT_unders, hv]; rfl
+  | _, .snocStorage (ps := ps') as R x v, rest, σ, e, ha => by
+    rw [Args.evalT_snocStorage] at ha
+    cases ha' : as.evalT σ with
+    | error e' =>
+      rw [ha'] at ha; cases ha
+      exact Args.execP_declsThen_halt as _ σ ha'
+    | ok a'' =>
+      rw [ha'] at ha
+      cases hv : v.resolveT σ with
+      | ok => simp only [hv, bind, Except.bind, pure, Except.pure, reduceCtorEq] at ha
+      | error e' =>
+        simp only [hv, bind, Except.bind, Except.error.injEq] at ha
+        subst ha
+        refine Args.execP_declsThen as _ σ a'' ha' (.halt (ExecS.det_err rfl ?_))
+        rw [Stmt.runSt_declStorage, SPath.resolveT_unders, hv]; rfl
+  | _, .snocMemory (ps := ps') as R x v, rest, σ, e, ha => by
+    rw [Args.evalT_snocMemory] at ha
+    cases ha' : as.evalT σ with
+    | error e' =>
+      rw [ha'] at ha; cases ha
+      exact Args.execP_declsThen_halt as _ σ ha'
+    | ok a'' =>
+      rw [ha'] at ha
+      cases hv : v.mvalT σ with
+      | ok => simp only [hv, bind, Except.bind, pure, Except.pure, reduceCtorEq] at ha
+      | error e' =>
+        simp only [hv, bind, Except.bind, Except.error.injEq] at ha
+        subst ha
+        refine Args.execP_declsThen as _ σ a'' ha' (.halt (ExecS.det_err rfl ?_))
+        rw [Stmt.runSt_declMem, MPath.mvalT_unders, hv]; rfl
+
+/-- Two outcomes over a heap end alike when their states do. -/
+theorem Out.eq_of_st {H : HTy} {Γ : Ctx} {a b : Out C H Γ} (h : a.st = b.st) : a = b := by
+  cases a; cases b; cases h; rfl
+
+/-- `TEnv.put_atop` at a frame read as `[] ++ ps`, a call's with no return
+variable. -/
+theorem TEnv.put_atop_nil {H : HTy} {Γ : Ctx} (ps : Ctx) (x : TEnv C H ([] ++ ps))
+    (d : TEnv C H (ps ++ Γ)) :
+    TEnv.put (Thin.atop ps Γ) x d = TEnv.append ps x (TEnv.drop (Ext.append Γ ps) d) :=
+  TEnv.put_atop ps x d
+
+/-- **A call with no result, with callbacks, is its inlined body**
+(`Premise.sound_callNone`'s program): the parameters declared, the body
+lifted under the caller's locals as a block, the parameters popped. -/
+theorem ExecS.callNone_inline {Γ ps Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
+    {body : Prog C ([] ++ ps) Γf} {o : COut C σ.H Γ}
+    (he : ExecS J σ (.call f args .none body) o) :
+    ∃ u, ExecP J σ (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil)) u ∧
+      o = u.map (Out.drop (Ext.append Γ ps)) := by
+  cases he with
+  | det h => exact nomatch h
+  | callArgs ha => exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  | @callBody _ _ _ _ _ _ _ _ _ _ a o' ha hp =>
+    obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.atop ps Γ) (σ.withEnv a)
+      (TEnv.append ps a σ.env) hp
+    have hb := ExecS.transport (H := σ.H)
+      (X := (σ.withEnv a).lift (Thin.atop ps Γ) (TEnv.append ps a σ.env))
+      (Y := σ.withEnv (TEnv.append ps a σ.env)) rfl rfl (State.withEnv_append_lift σ a).symm
+      (block_of_execP hw)
+    refine ⟨_, Args.execP_declsThen args _ σ a ha (singleton_iff.mpr hb), ?_⟩
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.atop ps Γ)) hr).eq_lifted
+    rw [hl]
+    cases o' with
+    | ok x =>
+      refine congrArg COut.ok (Out.eq_of_st ?_)
+      simp only [Out.drop, Out.lift, TRun.callLeave, State.lift, State.drop, State.withEnv,
+        CallRet.leaveT]
+      exact congrArg (fun E => (State.mk x.st.storage x.st.H x.st.heap E x.st.net
+        x.st.selfBalance x.st.tx : State C Γ)) (TEnv.drop_put_atop_wk (Γ := Γ) _ ps _ a σ.env).symm
+    | halt => rfl
+    | violated => rfl
+
+/-- **The return variables declared, with callbacks**, at their defaults. -/
+theorem Binders.execP_declsThen {Γ Δ : Ctx} : {ρ : Ctx} → (bs : Binders ρ) →
+    (rest : Prog C (ρ ++ Γ) Δ) → (σ : State C Γ) → ∀ {u : COut C σ.H Δ},
+      ExecP J (σ.withEnv (TEnv.append ρ (bs.defaultsT (C := C)) σ.env)) rest u →
+        ExecP J σ (bs.declsThen rest) u
+  | _, .nil, _, _, _, h => h
+  | _, .snoc (ρ := ρ') bs p x, rest, σ, u, h => by
+    refine Binders.execP_declsThen bs _ σ ?_
+    obtain ⟨_, hd⟩ := ExecS.det_ok (J := J)
+      (σ := σ.withEnv (TEnv.append ρ' (bs.defaultsT (C := C)) σ.env))
+      (s := .declLocal p x none) rfl (Stmt.runSt_declLocal_none p x _)
+    simpa only [map_cat_refl] using ExecP.cons hd h
+
+/-- A call's callback runs: its arguments halt, or its body runs in its frame
+(`ExecS.callArgs`, `ExecS.callBody`). -/
+theorem ExecS.call_inv {Γ Γ' ps rs Γf : Ctx} {σ : State C Γ} {f : Name} {args : Args C Γ ps}
+    {ret : CallRet Γ rs Γ'} {body : Prog C (rs ++ ps) Γf} {o : COut C σ.H Γ'}
+    (he : ExecS J σ (.call f args ret body) o) :
+    (∃ e, args.evalT σ = .error e ∧ o = .halt e) ∨
+    ∃ (a : TEnv C σ.H ps) (o' : COut C (ret.enterT (σ.withEnv a)).st.H Γf),
+      args.evalT σ = .ok a ∧ ExecP J (ret.enterT (σ.withEnv a)).st body o' ∧
+      o = o'.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))) := by
+  cases he with
+  | det h => exact nomatch h
+  | callArgs ha => exact .inl ⟨_, ha, rfl⟩
+  | callBody ha hp => exact .inr ⟨_, _, ha, hp, rfl⟩
+
+/-- **A call of several results, with callbacks, is its inlined body**
+(`Premise.sound_callRets`' program): the parameters declared, the return
+variables at their defaults, the body lifted under the caller's locals as a
+block, the parameters thinned out from under the return variables. -/
+theorem ExecS.callRets_inline {Γ ps rs Γf : Ctx} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {bs : Binders rs} {body : Prog C (rs ++ ps) Γf} {o : COut C σ.H (rs ++ Γ)}
+    (he : ExecS J σ (.call f args (.rets bs) body) o) :
+    ∃ u, ExecP J σ (args.declsThen (bs.declsThen
+        (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil))) u ∧
+      o = u.map fun x => ⟨x.st.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))), x.ext⟩ := by
+  rcases ExecS.call_inv he with ⟨e, ha, rfl⟩ | ⟨a, o', ha, hp, rfl⟩
+  · exact ⟨.halt _, Args.execP_declsThen_halt args _ σ ha, rfl⟩
+  · obtain ⟨o'', hw, hr⟩ := Prog.exec_wk J body (Thin.keepAll rs (Thin.atop ps Γ))
+      (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a))
+      (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)) hp
+    have hs : (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)).lift
+          (Thin.keepAll rs (Thin.atop ps Γ))
+          (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)) =
+        (σ.withEnv (TEnv.append ps a σ.env)).withEnv
+          (TEnv.append rs (bs.defaultsT (C := C)) (σ.withEnv (TEnv.append ps a σ.env)).env) := by
+      simp only [State.lift, State.withEnv, TEnv.put_keepAll, TEnv.put_atop, TEnv.drop_append]
+    have hb := ExecS.transport (H := σ.H)
+      (X := (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)).lift
+          (Thin.keepAll rs (Thin.atop ps Γ))
+          (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)))
+      (Y := (σ.withEnv (TEnv.append ps a σ.env)).withEnv
+          (TEnv.append rs (bs.defaultsT (C := C)) (σ.withEnv (TEnv.append ps a σ.env)).env))
+      rfl rfl hs (block_of_execP hw)
+    refine ⟨_, Args.execP_declsThen args _ σ a ha
+      (Binders.execP_declsThen bs _ _ (singleton_iff.mpr hb)), ?_⟩
+    have hl := (CallbackWk.CWkRel.drop (Prog.wk_over body (Thin.keepAll rs (Thin.atop ps Γ)))
+      hr).eq_lifted
+    rw [hl]
+    cases o' with
+    | ok x =>
+      refine congrArg COut.ok (Out.eq_of_st ?_)
+      simp only [Out.drop, Out.lift, TRun.callLeave, State.lift, State.drop, State.thin,
+        State.withEnv, CallRet.leaveT]
+      exact congrArg (fun E => (State.mk x.st.storage x.st.H x.st.heap E x.st.net
+        x.st.selfBalance x.st.tx : State C (rs ++ Γ)))
+        (TEnv.thin_put_keepAllAtop _ _ _ a σ.env).symm
+    | halt => rfl
+    | violated => rfl
+
+/-- An outcome's state thinned, read through the frames that thin it. -/
+theorem COut.thenF_thin {H : HTy} {Γ Γ' Γ₀ : Ctx} {e : Thin Γ Γ'} {κ : Frames C Γ Γ₀}
+    {m : Modality} {p : State C Γ₀ → Prop} (o : COut C H Γ')
+    (h : o.thenF J (.drop e κ) m p) :
+    (o.map fun x => ⟨x.st.thin e, x.ext⟩).thenF J κ m p := by
+  cases o with
+  | ok o => exact fun o' he => h o' (.drop he)
+  | halt _ => exact h
+  | violated => exact h
+
+/-- **A call of several results, with callbacks**: its inlined body, the
+parameters thinned out. -/
+theorem holdsC_callRets {Γ ps rs Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {bs : Binders rs} {body : Prog C (rs ++ ps) Γf}
+    {ω : Prog C (rs ++ Γ) Γ₁} {κ : Frames C Γ₁ Γ₀} {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m (args.declsThen (bs.declsThen
+        (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
+      (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args (.rets bs) body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callRets_inline he
+  exact COut.thenF_thin _ (h _ hu)
+
+/-- **A call with no result, with callbacks**: its inlined body, the
+parameters popped. -/
+theorem holdsC_callNone {Γ ps Γf Γ₁ Γ₀ : Ctx} {m : Modality} {σ : State C Γ} {f : Name}
+    {args : Args C Γ ps} {body : Prog C ([] ++ ps) Γf} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀}
+    {φ : Fml C Γ₀}
+    (h : holdsC I pay σ (.modal m
+      (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))
+      (.pop .capture (Ext.append Γ ps) (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.call f args .none body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  obtain ⟨u, hu, rfl⟩ := ExecS.callNone_inline he
+  exact COut.thenF_drop _ (h _ hu)
+
+end Calls
+
 /-! ## Soundness -/
 
 theorem holdsC_and_intro {I : Fml C []} {Γ : Ctx} {τ : State C Γ} {φ ψ : Fml C Γ}
@@ -629,6 +939,8 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
     refine fun σ => Hyps.wrapC_and _ ?_ σ (iho σ) (ihf σ)
     exact fun τ a b => holdsC_sendDet hp _ _ _ a b
   | block _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_block h) σ (ih σ)
+  | callNone _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callNone h) σ (ih σ)
+  | callRets _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_callRets h) σ (ih σ)
   | callback d _ _ ihx ihr =>
     cases d
     exact fun σ => Hyps.wrapC_and _ (fun τ a b => holdsC_transferCb hI hT _ _ a b) σ

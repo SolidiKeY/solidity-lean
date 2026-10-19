@@ -82,6 +82,7 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               .$(mkIdent `tryCallWithCallbackBox):ident)
             pure #[#[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
+          | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets]]
           | _ => pure #[]
         -- the rule `Stmt.step` fires, on a statement that hands control to nobody
         let k := mkAppN (mkConst ``Hyps.freshC) #[ty.getArg! 0, ty.getArg! 3, ty.getArg! 4, I, H, φ]

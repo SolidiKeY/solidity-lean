@@ -181,6 +181,26 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
       {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
       (h : ProvesC I pay Γ₀ H (.modal m body (.pop .capture body.ext (.seq ω κ)) φ)) :
       ProvesC I pay Γ₀ H (.modal m (.cons (.block body) ω) κ φ)
+  /-- `internalCallExpand` of a call with no result whose body may call
+  back: the parameters declared with the arguments, the body under the
+  caller's locals as a block, the parameters popped (`callStep`'s program). -/
+  | callNone {Γ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {body : Prog C ([] ++ ps) Γf} {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂}
+      {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m
+        (args.declsThen (.cons (.block (body.wk (Thin.atop ps Γ)).2.2) .nil))
+        (.pop .capture (Ext.append Γ ps) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args .none body) ω) κ φ)
+  /-- `functionBodyExpand` of a call with targets whose body may call back:
+  the parameters declared, the return variables at their defaults, the body
+  as a block, the parameters thinned out from under the return variables. -/
+  | callRets {Γ ps rs Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
+      {args : Args C Γ ps} {bs : Binders rs} {body : Prog C (rs ++ ps) Γf}
+      {ω : Prog C (rs ++ Γ) Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (bs.declsThen
+          (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
+        (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps))) (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.call f args (.rets bs) body) ω) κ φ)
   /-- **`transferWithCallbackBox`**: the invariant after the booking ("invariant
   on exit", `{U} I`), and the rest resumed after the callback, from any state
   the callee may leave in which the invariant holds (`{U} {havoc} (I → [ ω ] φ)`). -/

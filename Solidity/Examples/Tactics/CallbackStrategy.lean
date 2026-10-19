@@ -147,4 +147,12 @@ theorem withdraw_withCallback :
         balance + paidOut == deposited } := by
   sol_prove
 
+/-- **`withdraw`'s specification under callbacks**: its obligation
+(`spec[Bank]{withdraw}`, the invariant assumed on entry and owed on exit),
+every payment calling back into a contract that keeps the declared
+invariant: solkey's specified problem under `transferSemantics:withCallback`.
+The call is inlined under callbacks (`ProvesC.callRets`). -/
+theorem withdraw_spec : ValidC invariant[Bank] spec[Bank]{withdraw} := by
+  sol_prove
+
 end Solidity.Examples.Tactics.CallbackStrategy
