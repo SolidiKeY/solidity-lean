@@ -200,8 +200,10 @@ obligations, not `spec!`.
 - **A spec's invariant under callbacks**: done (`docs/options.md`, O4):
   `invariant[C]` compiles it (`specInv`), `ValidC invariant[C] spec[C]{f}`
   is the obligation with callbacks, and `sol_prove` runs `ProvesC`'s walk on
-  it (`Calculus/CallbackDerive.lean`).  What is open is a callee that calls
-  back through a loop, and a memory or storage return.
+  it (`Calculus/CallbackDerive.lean`).  What is open, while something in
+  the obligation calls back: a loop by its invariant or at its bound, a loop
+  unwound whose body calls back, and an internal call that returns one value
+  (`y = f(x)`) or a memory or storage one.
 - **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `Fml.inLS`.
 - **The benchmarks' `net(a)` clauses** (EtherWallet, Purchase,
   SimpleAuction) are not tried.

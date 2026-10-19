@@ -26,9 +26,14 @@ elaborator's `require` after the write, an `assert` inside the block,
 
 Not guarded: `**` (no closed bound; it reverts as outside the block), the
 wrapping operators of `unchecked`, division by zero (`Panic(0x12)`, a revert
-as outside).  The guards are written so that they cannot fail themselves:
-at `uint` by the wrapping operators (`a <= a +% b`), at `int` `MAX - b`
-under `b ≥ 0` and `MIN / a` under `a > 0`.
+as outside), the source of a push on a getter's array (read after the
+getter's body).  The guards' own operators cannot overflow: at `uint` they
+are the wrapping ones (`a <= a +% b`), at `int` `MAX - b` under `b ≥ 0` and
+`MIN / a` under `a > 0`; they read the operands again, so a guard halts
+where reading them halts.  A right-hand side is guarded before its target,
+and a binary operator's left operand that may halt is read first
+(`Checked.touch`), in the run's order; what is left of that order is
+`docs/options.md`'s, O2.
 
 `ignoringOverflow { … }` (KeY Java's `ignoringOF`, O5) is the same
 transformation with `if (g) {} else { assume(false); }` for `assert(g)`
@@ -144,6 +149,13 @@ def bumpRange (op : IncDec) : (p : PrimTy) → Val C Γ p → Option (Val C Γ .
     if op.isIncrement then rangeI .add v (litI 1 (by decide)) else rangeI .sub v (litI 1 (by decide))
   | .bool, _ => none
 
+/-- `a == a`: evaluates `a`, and so halts where reading it halts, before the
+guards of what is evaluated after it. -/
+def touch : (p : PrimTy) → Val C Γ p → Val C Γ .bool
+  | .uint, a => cmpU .eqB rfl rfl a a
+  | .int, a => cmpI .eqB rfl rfl a a
+  | .bool, a => .binop .eqB rfl rfl a a
+
 /-- The default `0` a push appends. -/
 def zero : (p : PrimTy) → Val C Γ p
   | .uint => litU 0 (by decide)
@@ -156,17 +168,40 @@ open Checked
 
 /-! ## The guards -/
 
+/-- Whether reading at a storage location may halt (an index out of bounds,
+an unset alias). -/
+def Loc.mayHalt {Γ : Ctx} : {T : Ty} → Loc C Γ T → Bool
+  | _, .root .. => false
+  | _, .field .. | _, .index .. => true
+
+/-- Whether evaluating a value may halt, its checked operations in range: a
+read (an index out of bounds, an unset alias), `**`, `/`, `%`, a shift,
+`addmod`/`mulmod` (by zero).  Over-approximated: it only adds a `touch`. -/
+def Val.mayHalt {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Bool
+  | _, .simple _ => false
+  | _, .read l => l.mayHalt
+  | _, .binop op _ _ a b =>
+    a.mayHalt || b.mayHalt || [BinOp.pow, .div, .mod, .shl, .shr].contains op
+  | _, .unop _ _ _ a => a.mayHalt
+  | _, .ternary c a b => c.mayHalt || a.mayHalt || b.mayHalt
+  | _, .readMem _ | _, .len .. | _, .mlen .. | _, .modular .. => true
+
 mutual
 
 /-- What a value's checked operations need to stay in range, in the order
-they are evaluated; `none` where nothing is checked. -/
+they are evaluated; `none` where nothing is checked.  Where the right
+operand has a guard and the left may halt, the left is read first
+(`touch`): the run halts there before it evaluates the right. -/
 def Val.guard {Γ : Ctx} : {p : PrimTy} → Val C Γ p → Option (Val C Γ .bool)
   | _, .simple _ => none
   | _, .read l => l.guard
   -- the right operand of `&&` and `||` only where it is evaluated
   | _, .binop (p := .bool) .and _ _ a b => andO a.guard (b.guard.map fun g => orB (notB a) g)
   | _, .binop (p := .bool) .or _ _ a b => andO a.guard (b.guard.map fun g => orB a g)
-  | _, .binop op _ _ a b => andO a.guard (andO b.guard (if op.isArith then range op _ a b else none))
+  | _, .binop op _ _ a b =>
+    let gb := b.guard
+    let ga := if gb.isSome && a.mayHalt then andO a.guard (some (touch _ a)) else a.guard
+    andO ga (andO gb (if op.isArith then range op _ a b else none))
   | _, .unop op _ _ a => andO a.guard (if op = .neg then negRange _ a else none)
   | _, .ternary c a b => andO c.guard (iteO c a.guard b.guard)
   | _, .readMem l => l.guard
@@ -235,20 +270,17 @@ def OpLoc.guard {Γ : Ctx} {p : PrimTy} : OpLoc C Γ p → Option (Val C Γ .boo
   | .field b _ _ | .index _ b _ => b.guard
   | .mfield b _ _ | .mindex _ b _ => b.guard
 
-def ReceiverOp.guard {Γ : Ctx} {E : Ty} : ReceiverOp C Γ E → Option (Val C Γ .bool)
-  | .push v _ => v.bind Src.guard
-  | .pop => none
-
 /-- What a statement's own checked operations need to stay in range, before
 it runs (its values are read before its effects); a loop's condition, a
 call's arguments; not what the programs it holds evaluate. -/
 def Stmt.guard {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Val C Γ .bool)
-  | .assign l r => andO l.guard r.guard
+  -- the right-hand side is evaluated before the target (`TRun.assign`)
+  | .assign l r => andO r.guard l.guard
   | .rebind _ r => r.guard
   | .assignLocal _ r => r.guard
   | .declLocal _ _ init => init.bind Val.guard
   | .declStorage _ _ init => init.bind ARhs.guard
-  | .opAssign op _ _ l r => andO l.guard (andO r.guard (range op _ l.val r))
+  | .opAssign op _ _ l r => andO r.guard (andO l.guard (range op _ l.val r))
   | .incDec op _ l => andO l.guard (bumpRange op _ l.val)
   | .assignIncDec _ op _ l _ => andO l.guard (bumpRange op _ l.val)
   | .assignLocalPush _ b => b.guard
@@ -258,8 +290,8 @@ def Stmt.guard {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Val C Γ .bool)
   | .send _ r a _ => andO r.guard a.guard
   | .declMem _ _ init _ _ => init.bind MRhs.guard
   | .rebindMem _ r => r.guard
-  | .assignFromMem l p => andO l.guard p.guard
-  | .assignMem l r => andO l.guard r.guard
+  | .assignFromMem l p => andO p.guard l.guard
+  | .assignMem l r => andO r.guard l.guard
   | .delete l => l.guard
   | .deleteMem p _ => p.guard
   | .assignNew l _ _ => l.guard
@@ -270,9 +302,11 @@ def Stmt.guard {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Val C Γ .bool)
   | .tryCall .. => none
   | .loop _ c _ => c.guard
   | .block _ => none
-  | .pushOpAssign op _ _ b r => andO b.guard (andO r.guard (range op _ (zero _) r))
+  | .pushOpAssign op _ _ b r => andO r.guard (andO b.guard (range op _ (zero _) r))
   | .pushIncDec (p := p) op _ b => andO b.guard (bumpRange op p (zero p))
-  | .callReceiver _ args _ _ op => andO args.guard op.guard
+  -- the push's source is read after the getter's body, which may change
+  -- what it reads: not guarded, it reverts on an overflow as outside
+  | .callReceiver _ args _ _ _ => args.guard
   | .callReceiverPush _ args _ _ _ _ => args.guard
 
 /-! ## The transformation -/

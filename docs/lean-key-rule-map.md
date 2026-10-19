@@ -3,7 +3,7 @@
 The name-by-name map from solkey's `solidityProgramRules.key` (plus
 `ifThenElseRules.key`) to `Solidity.Taclet` (`Calculus/Rules.lean`), then the
 symbol table for updates and the data-structure theories. **Pinned to solkey
-`048a74de51`**: 345 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
+`473da8944c`**: 377 program taclets, enumerated in `Calculus/KeyTaclets.lean`.
 
 These tables are the prose companion of `Calculus/RuleShapes.lean`, which
 checks the correspondence: `tacletOrigins` gives every constructor a typed
@@ -11,8 +11,8 @@ checks the correspondence: `tacletOrigins` gives every constructor a typed
 fails the build), `unclaimedTaclets` excuses the rest with a reason,
 `callbackOrigins` does the same for `CallbackTaclet`, and `taclets_partitioned`
 says every taclet is claimed, architecturally excused, or a pending migration
-gap, in exactly one category (`claimedTaclets_count = 330`,
-`unclaimedTaclets_count = 15`, 0 pending). The pending-name list is empty;
+gap, in exactly one category (`claimedTaclets_count = 342`,
+`unclaimedTaclets_count = 35`, 0 pending). The pending-name list is empty;
 semantic and source-support gaps, including effectful call-receiver operands,
 remain tracked in `docs/solkey-migration.md`.
 The existing `LeanTaclet` layer (`leanTaclets`) has fifteen rules,

@@ -1819,6 +1819,7 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
         throw "push arithmetic inside `unchecked` is not supported"
       | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
+      | .checked .checking _ => throw "`checked { … }` inside `unchecked { … }`: its operations wrap there"
       | .checked o b => do pure (.checked o (← uncheckStmts b))
       | .block b => do pure (.block (← uncheckStmts b))
       | .tryCall e g as rets ok err code pnc other => do

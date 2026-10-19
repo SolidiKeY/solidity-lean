@@ -94,10 +94,25 @@ it is evaluated, a conditional's branches under its condition, a loop's
 condition at its head and again at the end of its body, a deferred push's
 source at the end of its prefix. `**` is not (no closed bound: it reverts,
 as outside), nor division by zero (`Panic(0x12)`, a revert), nor the
-wrapping operators of `unchecked`. The guards cannot fail themselves (at
-`uint` they use `+%`/`*%`, `a <= a +% b`; at `int`, `MAX - b` under
-`b >= 0`), and they are exact: `Syntax/CheckedExact.lean` proves each one
-holds exactly when its operation stays in range, at any bound.
+wrapping operators of `unchecked`, nor the source of a push on a getter's
+array (`f().push(v)`: it is read after the getter's body, which may change
+what it reads). A statement's right-hand side is guarded before its target,
+as the run evaluates them (`TRun.assign`), and a binary operator's left
+operand that may halt (a read, `/`, `**`, …, `Val.mayHalt`) is read
+(`a == a`, `Checked.touch`) before the right operand's guards.
+
+The guards' own operators cannot overflow (at `uint` they use `+%`/`*%`,
+`a <= a +% b`; at `int`, `MAX - b` under `b >= 0`); they read the operands
+again, so a guard halts where reading them halts, in the state the
+statement reads them in. Each guard's formula holds exactly when its
+operation stays in range, at any bound: `Syntax/CheckedExact.lean` proves
+that of the formulas restated over `Int`, not of `rangeU`/`rangeI` as
+terms. One order is not followed: an operand whose read may halt that
+comes before another operand's guarded operation other than as a binary
+operator's left operand (a path's base before its index, an earlier
+argument, `addmod`'s first operands) is not read first, so where the run
+reverts at that read the block asserts the guard first, failing inside
+`checked` and assuming the run away inside `ignoringOverflow`.
 
 **Why not a reading.** The calculus reads a failing term of an update as
 the modality's halt (`Upd.afterT`), with no cause attached: a reading in
@@ -131,10 +146,15 @@ premise's own soundness at `false`, `holdsC_done`), `ProvesC.assert`
 send under `noCallback`: no `{havoc}`), `ProvesC.block` (a block that calls
 back, by `ExecS.block`).
 
-**Not covered.** A loop or an internal call whose body calls back has no
-`ProvesC` rule, and stays a leaf; so does a transfer or a send whose operands
-are not simple (their capture rules fire only where the statement does not
-call back), and every diamond over a callback (O4).
+**Not covered** (while something in the sequent calls back; where nothing
+does, `plain` hands the goal to `Proves`, which covers all of them): a loop
+by its invariant or at its unwinding bound (`Proves.inv`, `Proves.check`
+have no `ProvesC` counterpart), a loop unwound whose body calls back, an
+internal call that returns one value (`y = f(x)`: `Stmt.forksIn` counts
+every call as forking, and O4's call rules take only `CallRet.none` and
+`.rets`), and a transfer or a send whose operands are not simple (their
+capture rules fire only where the statement does not call back).  These stay
+leaves.
 
 ## O4. Diamonds, calls, and the invariant a specification declares
 
@@ -156,7 +176,9 @@ the caller's locals as a block). Their soundness relates the call's callback
 run, its body in its own frame (`ExecS.callBody`), to the inlined block's
 (`ExecS.callNone_inline`, `ExecS.callRets_inline`), by forward callback
 weakening (`Prog.exec_wk`), as the deterministic `Stmt.runSt_callNone` does by
-`Prog.run_wk`. A call with a memory or storage return has no rule yet.
+`Prog.run_wk`. A call that returns one value (`y = f(x)`) or a memory or
+storage one has no rule yet (O3, "Not covered"); a specification's
+obligation calls by `.rets`, so `spec[C]{f}` is covered.
 
 **The invariant a specification declares.** `invariant[C]` is `C`'s
 `invariant` clauses compiled as `spec[C]{f}` compiles them (`specInv`,
@@ -192,11 +214,41 @@ outside the EVM fragment (`inFrag`): the compiler theorem says nothing of a
 program that holds it.
 
 **What it changes.** Only diamonds: the box accepted the revert of an
-overflow already. Since the guards are exact (`Syntax/CheckedExact.lean`), a
-program `p` and its blocks are ordered, `[checked p]φ` implying `[p]φ`, which
-is `[ignoringOverflow p]φ`, and `⟨checked p⟩φ`, which is `⟨p⟩φ`, implying
-`⟨ignoringOverflow p⟩φ`; this ordering is argued, not a theorem here.
+overflow already. Where a guard is false or halts, the statement it precedes
+halts too, by a revert, and where it holds the statement runs as without
+it; so a program `p` and its blocks are ordered, `[checked p]φ` implying
+`[p]φ`, which is `[ignoringOverflow p]φ`, and `⟨checked p⟩φ`, which is
+`⟨p⟩φ`, implying `⟨ignoringOverflow p⟩φ`.  This is argued, not a theorem
+here.
 `Examples/Tactics/CheckedBlock.lean` §4 proves
 `∀ uint a; ⟨ uint y; ignoringOverflow { y = a + 1; }; ⟩ y > a` and refutes
 it without the block. The two blocks do not nest in each other (an
-elaboration error): the guards are written once, by the outermost.
+elaboration error): the guards are written once, by the outermost; nor does
+`checked { … }` inside `unchecked { … }`, whose operations wrap.  The mode
+reaches into the functions the block calls, whose bodies are inlined and
+guarded with the caller's (KeY Java's option is global), where `unchecked`
+stops at a call as solc's does; so a function that holds one block, called
+from inside the other, is the same nesting error.
+
+## Review
+
+One read-only pass after O5, a finder per area, each finding checked
+against the code; fixed on the branch:
+
+* O2/O5: the guards of `x = e`, `x ⊕= e`, the memory assignments and
+  `push() ⊕= e` were asserted target first, where the run evaluates the
+  right side first; a getter's push source was guarded before the getter
+  ran; a binary operator's halting left operand was read after the right
+  one's guards (`Checked.touch`, `haltsFirst`); `checked` inside
+  `unchecked` checked nothing silently (now an error); the docs claimed the
+  guards could not halt and the ordering held exactly.
+* O3/O4: the walk took `transferWithCallbackBox` (a `{havoc}`) for a
+  gas-limited transfer under `noCallback`, before `transferNoCallbackBox`
+  (`transferThenTry`); a `Proves` leaf written `· sorry` under a bullet was
+  not paired with its goal; the `Proves` sub-walk caught no timeout and did
+  not charge its steps to the walk's budget; the uncovered shapes were
+  understated (one-value calls, loops by invariant); the rule map's header
+  counts were stale.
+* Not changed: a call with non-simple arguments under callbacks is inlined
+  without `functionCallArgCapture` first (sound; the walk's rule names
+  differ from `Proves`').

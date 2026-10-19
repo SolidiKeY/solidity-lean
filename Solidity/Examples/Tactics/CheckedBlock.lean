@@ -80,6 +80,23 @@ info: dl{
 #guard_msgs in
 #check (dl!{ [ checked { uint i = 0; while (i + 1 < 4) { i += 1; } }; ] true } : Fml StandardExample [])
 
+/-! A left operand that may halt is read before the right operand's
+guards: here `1 / z` reverts before `y + 1` is evaluated, so the block
+reverts where the run does, whatever `y`. -/
+
+/--
+info: dl{
+  ∀ uint y;
+    [ uint z = 0; assert(1 / z == 1 / z && y <= y +% 1 && 1 / z <= 1 / z +% (y + 1)); uint w = 1 / z + (y + 1); ]
+      false } : Fml StandardExample []
+-/
+#guard_msgs in
+#check (dl!{ ∀ uint y; [ checked { uint z = 0; uint w = 1 / z + (y + 1); }; ] false } : Fml StandardExample [])
+
+theorem haltsFirst : ⊨ dl!{ ∀ uint y; [ checked { uint z = 0; uint w = 1 / z + (y + 1); }; ] false } := by
+  sol_symex
+  sol_close
+
 /-- A narrow type's check is an `assert` inside the block: `250 + 10` at
 `uint8` fails it. -/
 theorem narrow : ¬ (⊨ dl!{ [ checked { uint8 x = 250; x += 10; }; ] false }) :=
@@ -127,5 +144,13 @@ error: Solidity elaboration failed: `checked { … }` and `ignoringOverflow { �
 -/
 #guard_msgs in
 #check (dl!{ [ checked { ignoringOverflow { uint x = 1; }; }; ] true } : Fml StandardExample [])
+
+/-! Nor does `checked { … }` inside `unchecked { … }`, whose operations wrap. -/
+
+/--
+error: Solidity elaboration failed: `checked { … }` inside `unchecked { … }`: its operations wrap there
+-/
+#guard_msgs in
+#check (dl!{ [ unchecked { checked { uint x = 1; }; }; ] true } : Fml StandardExample [])
 
 end Solidity.Examples.Tactics.CheckedBlock

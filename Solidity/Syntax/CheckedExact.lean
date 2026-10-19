@@ -3,9 +3,9 @@
 
 Each guard `Syntax/Checked.lean` writes holds exactly when its operation
 stays in range, read as the run reads the guard's operators (`+%` and `*%`
-modulo `2^256`, `/` truncating, `Int.tdiv`) on operands of their type: so
-`checked { … }` fails exactly where a checked operation would overflow, no
-earlier.  `M` is the range's bound, `2^256` at `uint` and `2^255` at `int`
+modulo `2^256`, `/` truncating, `Int.tdiv`) on operands of their type.  The
+formulas are restated over `Int` here, not read off `rangeU`/`rangeI`; where
+the guards sit in a statement is `docs/options.md`'s, O2.  `M` is the range's bound, `2^256` at `uint` and `2^255` at `int`
 (`-M ≤ x < M`); the statements are over any positive `M`.
 -/
 

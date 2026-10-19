@@ -97,12 +97,48 @@ theorem sendThenTry :
         fails <= pings } := by
   sol_prove
 
+/-- A transfer under `noCallback` keeps what it knows too
+(`transferNoCallbackBox`, no `{havoc}`): `last` is still `3` at the
+`assert`, before the `try` calls back. -/
+theorem transferThenTry :
+    ValidT (.noCallback pingInv) dl[Pinger]{ fails <= pings →
+      [ last = 3; to.transfer(1); assert(last == 3); try I(7).ping() { } catch { }; ]
+        fails <= pings } := by
+  sol_prove
+
 /-! ## Diamonds: a send ends, booked or refused -/
 
 /-- A gas-limited send under the diamond (`sendNoCallbackDiamond`'s goals,
 `ProvesC.sendDetD`). -/
 theorem sendEnds : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
   sol_prove
+
+/-! Its walk: `plain`, then `sendNoCallbackDiamond`'s goals, each leaf's
+closer in its `sorry`'s place. -/
+
+/--
+info: Try this:
+  refine ProvesC.validT ?_
+    try simp only [TransferSem.inv, TransferSem.pay]
+    refine ProvesC.plain ?_ rfl
+    refine Proves.allRight ?_
+    apply Proves.update (Taclet.step_eq .valueDeclSkip)
+    apply Proves.cases (Taclet.step_eq .sendNoCallbackDiamond) rfl <;>
+        (try simp only [List.forall_mem_cons, List.not_mem_nil, false_implies, implies_true, and_true]) <;>
+      (try and_intros)
+    case fml =>
+      sol_leaf
+      sol_close
+    case upd =>
+      sol_leaf
+      sol_close
+    case upd =>
+      sol_leaf
+      sol_close
+-/
+#guard_msgs in
+example : ValidT .noCallback dl[Pinger]{ ⟨ bool ok = to.send(5); ⟩ true } := by
+  sol_derive?
 
 /-- A value call under the diamond, its callee keeping the invariant
 (`sendWithCallbackDiamond`, `ProvesC.sendD`). -/

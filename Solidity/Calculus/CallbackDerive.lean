@@ -12,18 +12,25 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
   and `Proves`' walk from there;
 * a `transfer`, a `send` or a `try` that hands control to a callee that
   calls back: its callback taclet (`transferWithCallbackBox`,
-  `sendWithCallbackBox`, `tryCallWithCallbackBox`), solkey's goals;
-* a gas-limited send (`pay` unset): `sendNoCallbackBox`'s two goals
-  (`ProvesC.sendDet`); a block that calls back: its body (`ProvesC.block`);
-  `assertSimple` (`ProvesC.assert`);
+  `sendWithCallbackBox`, `tryCallWithCallbackBox`; under the diamond
+  `sendWithCallbackDiamond`), solkey's goals;
+* a gas-limited send (`pay` unset): `sendNoCallbackBox`'s or
+  `sendNoCallbackDiamond`'s goals (`ProvesC.sendDet`, `ProvesC.sendDetD`); a
+  block that calls back: its body (`ProvesC.block`); an internal call with no
+  value returned or with a tuple's (`ProvesC.callNone`, `ProvesC.callRets`):
+  its body inlined; `assertSimple` (`ProvesC.assert`);
 * any other statement: the rule `Stmt.step` fires (`ProofTree.ruleAt?`), as
   `Proves` takes it, when the statement hands control to nobody
-  (`Stmt.forksIn`).
+  (`Stmt.forksIn`); a gas-limited transfer so (`transferNoCallbackBox`).
 
 What is left is a leaf: `sol_prove` closes a `Proves` leaf by `sol_leaf`
 and `sol_close`, the invariant assumed opened first where that is needed
-(`Proves.openInv`), and leaves the rest as goals.  A loop or an internal call
-whose body calls back has no rule of `ProvesC`, and stays a leaf.
+(`Proves.openInv`), and leaves the rest as goals.  While something in the
+sequent calls back, three shapes have no rule of `ProvesC` and stay leaves:
+a loop by its invariant or at its unwinding bound (`Proves.inv`,
+`Proves.check` have no counterpart), a loop unwound whose body calls back,
+and an internal call that returns one value (`y = f(x)`) or a memory or
+storage one (`Stmt.forksIn` counts every call as forking).
 
 Nothing here is trusted: every step is an `apply` the kernel checks.
 -/
@@ -67,9 +74,6 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
         let rflT : Lean.Term := ⟨mkIdent `rfl⟩
         -- the callback taclets, a gas-limited send, `assertSimple`, a block
         let own : Array (Array (TSyntax `tactic)) ← match s.getAppFn.constName? with
-          | some ``Stmt.transfer =>
-            pure #[#[← `(tactic| apply $(← ProofTree.short ``ProvesC.callback)
-              .$(mkIdent `transferWithCallbackBox):ident)]]
           | some ``Stmt.send =>
             pure #[#[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendDet) $rflT)],
               #[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendDetD) $rflT)],
@@ -100,9 +104,15 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
                 #[← `(tactic| apply $f (by exact $d) $rfls*)]]
             | none => pure #[]
           | none => pure #[]
-        let block : Array (Array (TSyntax `tactic)) ←
-          if s.isAppOf ``Stmt.block then pure #[#[← ap ``ProvesC.block]] else pure #[]
-        pure (own ++ ordinary ++ block)
+        -- a transfer calls back only where `pay` is set: `transferNoCallbackBox`
+        -- (`ordinary`) first, which fires where it does not
+        let after : Array (Array (TSyntax `tactic)) ← match s.getAppFn.constName? with
+          | some ``Stmt.transfer =>
+            pure #[#[← `(tactic| apply $(← ProofTree.short ``ProvesC.callback)
+              .$(mkIdent `transferWithCallbackBox):ident)]]
+          | some ``Stmt.block => pure #[#[← ap ``ProvesC.block]]
+          | _ => pure #[]
+        pure (own ++ ordinary ++ after)
     | _ => pure #[]
   return #[#[plain]] ++ rest
 
@@ -139,20 +149,29 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   if ty.isAppOf ``Proves then
     let fuel' ← IO.mkRef (← fuel.get)
     let ls ← IO.mkRef #[]
-    let lines ← withCurrHeartbeats (Walk.walk fuel' ls g close)
-    -- each `sorry` is the next leaf `Proves`' walk left: closed here where
-    -- the invariant assumed closes it, its lines in the `sorry`'s place
+    let s ← saveState
+    -- a step that runs out of heartbeats leaves the goal, as a leaf
+    let some lines ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (Walk.walk fuel' ls g close))
+        fun _ => do s.restore; pure none
+      | leaves.modify (·.push g); return #["sorry"]
+    fuel.set (← fuel'.get)
+    -- each `sorry` (`· sorry` under a bullet) is the next leaf `Proves`'
+    -- walk left: closed here where the invariant assumed closes it, its
+    -- lines in the `sorry`'s place
     let mut out : Array String := #[]
     let mut rest := (← ls.get).toList
     for line in lines do
-      if line.trimLeft == "sorry" then
+      let t := line.trimLeft
+      let bullet := t.startsWith "· "
+      if (if bullet then (t.drop 2).trimLeft else t) == "sorry" then
         match rest with
         | l :: rs =>
           rest := rs
           if close then
             if let some cl ← closeLeaf l then
-              let pad := "".pushn ' ' (line.length - line.trimLeft.length)
-              out := out ++ cl.map (pad ++ ·)
+              let pad := "".pushn ' ' (line.length - t.length)
+              out := out ++ cl.mapIdx fun i c =>
+                pad ++ (if bullet then (if i == 0 then "· " else "  ") else "") ++ c
               continue
           leaves.modify (·.push l)
         | [] => pure ()
