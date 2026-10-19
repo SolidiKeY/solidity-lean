@@ -17,7 +17,7 @@ can never be read as one under another.
 |---|---|---|
 | O1 | bug 5: `try` and `call{value}` call back under `noCallback` | done |
 | O2 | `checked { … }` (`checkingOF`): an overflow fails both modalities | done |
-| O3 | the strategy under callbacks (`sol_symex`, `sol_prove` on `ValidT`) | planned |
+| O3 | the strategy under callbacks (`sol_prove`, `sol_derive` on `ValidT`/`ValidC`) | done |
 | O4 | the diamonds of the payments; the invariant from the spec | planned |
 | O5 | `ignoringOF`: an overflowing run proves anything | planned |
 
@@ -102,3 +102,34 @@ the modality's halt (`Upd.afterT`), with no cause attached: a reading in
 which an overflow fails both modalities would need every rule to owe the
 range of its terms, and every soundness proof to tell an overflow from a
 revert. The block gets the same proofs from the existing `assert` rule.
+
+## O3. The strategy with callbacks
+
+**Decision.** `sol_prove`, `sol_derive` and `sol_derive?` take a goal read
+with callbacks (`ValidT ts φ`, `ValidC I φ pay`, a `ProvesC` sequent) and run
+`ProvesC`'s walk (`Calculus/CallbackDerive.lean`), one `apply` per rule as
+`sol_derive`'s walk of `Proves` is: `plain` wherever nothing in the sequent
+calls back, and `Proves`' walk from there; a callback taclet where a
+statement calls back; the rule `Stmt.step` fires on any other statement,
+as `Proves` takes it. `sol_prove` closes a `Proves` leaf by
+`Proves.assumeInv`, by `sol_leaf; sol_close`, or by them after
+`Proves.openInv`; `sol_derive?` writes the walk with those lines
+(`Examples/Tactics/CallbackStrategy.lean` pins one: the hand-written
+`withdrawSafe`, rule for rule).
+
+`Proves` was not merged into `ProvesC`, nor given an option index: the
+merge would make every `Proves` soundness proof one against the callback
+reading, and `sol_prove`'s kernel-evaluated walk (`Seq.residue`) would carry
+the index. The walk is a sibling instead, and shares the leaves.
+
+**The rules added on the way** (`Calculus/Callback.lean`, sound by
+`Calculus/CallbackSound.lean`): `ProvesC.done` (a closing taclet, by the
+premise's own soundness at `false`, `holdsC_done`), `ProvesC.assert`
+(`assertSimple`), `ProvesC.sendDet` (`sendNoCallbackBox` for a gas-limited
+send under `noCallback`: no `{havoc}`), `ProvesC.block` (a block that calls
+back, by `ExecS.block`).
+
+**Not covered.** A loop or an internal call whose body calls back has no
+`ProvesC` rule, and stays a leaf; so does a transfer or a send whose operands
+are not simple (their capture rules fire only where the statement does not
+call back), and every diamond over a callback (O4).

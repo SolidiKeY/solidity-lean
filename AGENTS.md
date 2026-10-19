@@ -150,7 +150,8 @@ exactly one rule (`Stmt.step`), so the strategy never chooses. To prove
 `⊨ dl!{ pre → [ program ] post }`:
 
 - **by the strategy**: `sol_symex; sol_close` (`sol_decide` for reads of
-  writes; `sol_spec` for a `spec!{f}` obligation). `#wp φ` prints what
+  writes; `sol_spec` for a `spec!{f}` obligation); `sol_prove` on a goal
+  read with callbacks (`ValidT`, `ValidC`; `docs/options.md`). `#wp φ` prints what
   `sol_symex` leaves, `#step φ` one step and the rule it fired.
 - **by a walk**: `apply Proves.valid`, then one `apply` per rule — `intro`
   (solkey's `impRight`), `update r`, `unfold r`, `split r` (KeY's two

@@ -21,7 +21,10 @@ callee that calls back (`Stmt.forksIn pay`: a `try` and a value call always,
 a `transfer` and a `send` when `pay` is set, `docs/options.md`), a split, the
 callback taclets with solkey's goals ("invariant on exit", the rest resumed
 under `{havoc}` with the invariant assumed), and the plain calculus
-(`Proves`) on a goal where nothing calls back (`Fml.callsBack pay`).  The invariant is a closed formula `I : Fml C []`, read in any scope
+(`Proves`) on a goal where nothing calls back (`Fml.callsBack pay`); and the
+rules a walk needs on the way where `Proves` would take them: a closing
+taclet, `assertSimple`, a gas-limited send, a block that calls back.  The
+invariant is a closed formula `I : Fml C []`, read in any scope
 past an update that drops every local (`Fml.closedAt`, invisible when
 printed), so it needs no weakening.
 
@@ -145,6 +148,39 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   /-- `emptyModality`. -/
   | empty {Γ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {κ : Frames C Γ Γ₂} {φ : Fml C Γ₂}
       (h : ProvesC I pay Γ₀ H (κ.exit m φ)) : ProvesC I pay Γ₀ H (.modal m .nil κ φ)
+  /-- A taclet that closes the modality (`revertBox`, a diamond's `false`),
+  on a statement that hands control to no callee: `true` or `false`. -/
+  | done {Γ Γ' Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ'}
+      {ω : Prog C Γ' Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b : Bool}
+      (d : Rule C (H.freshC I (.modal m (.cons s ω) κ φ)) m s (.done b))
+      (hs : s.forksIn pay = false)
+      (h : ProvesC I pay Γ₀ H (if b then .tt else .ff)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons s ω) κ φ)
+  /-- `assertSimple`: the rest where the condition holds ("Holds"), and the
+  condition ("Violated"). -/
+  | assert {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {v : Simple C Γ .bool}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (thn : ProvesC I pay Γ₀ (H.pre (Fml.isBool v.lower true)) (.modalK m ω κ φ))
+      (els : ProvesC I pay Γ₀ H (Fml.isBool v.lower true)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.assert (.simple v)) ω) κ φ)
+  /-- **`sendNoCallbackBox`**, a send that does not call back (`pay` unset,
+  the 2300-gas stipend): the rest after the booking and `pv := true` ("send
+  succeeded"), and after `pv := false` ("send failed"), no `{havoc}`. -/
+  | sendDet {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {pv : Idx Γ (.val .bool)} {sadr se : Simple C Γ .uint}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (hp : pay = false)
+      (ok : ProvesC I pay Γ₀ (H.upd .box ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
+        (.local pv (.val (Tm.lit (p := .bool) true))))) (.modalK .box ω κ φ))
+      (failed : ProvesC I pay Γ₀
+        (H.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false)))))
+        (.modalK .box ω κ φ)) :
+      ProvesC I pay Γ₀ H (.modal .box (.cons (.send pv (.simple sadr) (.simple se) false) ω) κ φ)
+  /-- A block whose body calls back (`blockUnfold`'s premise): the body, its
+  locals popped, then the rest. -/
+  | block {Γ Γ₁ Γ₁' Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {body : Prog C Γ Γ₁'}
+      {ω : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
+      (h : ProvesC I pay Γ₀ H (.modal m body (.pop .capture body.ext (.seq ω κ)) φ)) :
+      ProvesC I pay Γ₀ H (.modal m (.cons (.block body) ω) κ φ)
   /-- **`transferWithCallbackBox`**: the invariant after the booking ("invariant
   on exit", `{U} I`), and the rest resumed after the callback, from any state
   the callee may leave in which the invariant holds (`{U} {havoc} (I → [ ω ] φ)`). -/

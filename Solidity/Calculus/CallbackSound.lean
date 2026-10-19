@@ -328,6 +328,60 @@ theorem holdsC_split {s : Stmt C Γ Γ} {ω : Prog C Γ Γ₁} {b : BlockKind} {
     have hB := holdsC_modalK σ Q _ φ (h.2 ((holdsC_iff_holds c' (Fml.callsBack_of_hasTransfer c' hT') σ).2 hh))
     exact COut.thenF_drop _ (hB o' hQ)
 
+/-- `P`'s run, through no frame. -/
+theorem Prog.runFrames_nilF {Γ' : Ctx} (σ : State C Γ) (P : Prog C Γ Γ') :
+    Prog.runFrames σ P .nil = Prog.runSt σ P := by
+  unfold Prog.runFrames Prog.runSt
+  cases Prog.run σ P <;> rfl
+
+/-- **A closing taclet, with callbacks** (`revertBox`, a diamond's `false`):
+on a statement that hands control to no callee, its premise says how its
+run halts. -/
+theorem holdsC_done {s : Stmt C Γ Γ'} {b : Bool} (hs : s.forksIn pay = false)
+    (hr : Premise.Runs m s (.done b) σ) (h : holdsC I pay σ (if b then .tt else .ff)) :
+    holdsC I pay σ (.modal m (.cons s ω) κ φ) := by
+  cases b with
+  | false => exact (h trivial).elim
+  | true =>
+    have H : holds σ (.modal m (.cons s .nil) .nil (.ff : Fml C Γ')) := hr .nil .nil .ff trivial
+    change m.afterRunTR _ (Prog.runFrames σ _ .nil) at H
+    rw [Prog.runFrames_nilF, Prog.runSt_single] at H
+    refine holdsC_cons_det hs (fun τ hτ => ?_) (fun e he => ?_)
+    · rw [hτ] at H
+      exact ((afterRunTR_ok m _ τ).1 H trivial).elim
+    · rw [he] at H
+      obtain ⟨h₁, h₂⟩ := (afterRunTR_error m _ e).1 H
+      exact ⟨h₂, fun hm => by subst hm; exact h₁⟩
+
+/-- **`assertSimple`, with callbacks**: the condition holds, and the rest
+where it does. -/
+theorem holdsC_assert {v : Simple C Γ .bool} {ω : Prog C Γ Γ₁}
+    (h : holdsC I pay σ (.and (.imp (Fml.isBool v.lower true) (Fml.modalK m ω κ φ))
+      (Fml.isBool v.lower true))) :
+    holdsC I pay σ (.modal m (.cons (.assert (.simple v)) ω) κ φ) := by
+  have hc : holds σ (Fml.isBool v.lower true) := (holdsC_iff_holds _ rfl σ).1 h.2
+  have hv : v.evalT σ = true := (holds_isBool σ v true).1 hc
+  have hrun : Stmt.runSt σ (.assert (.simple v)) = .ok σ := by
+    show (TRun.assert (.simple v) σ).map (·.st) = _
+    simp only [TRun.assert, Val.evalT, ok_bind, hv]; rfl
+  refine holdsC_cons_det rfl (fun τ hτ => ?_) (fun e he => ?_)
+  · rw [hrun] at hτ
+    cases hτ
+    exact h.1 h.2
+  · rw [hrun] at he; cases he
+
+/-- **A block that calls back**: its body, its locals popped, then the rest. -/
+theorem holdsC_block {Γ₁' : Ctx} {body : Prog C Γ Γ₁'} {ω : Prog C Γ Γ₁}
+    (h : holdsC I pay σ (.modal m body (.pop .capture body.ext (.seq ω κ)) φ)) :
+    holdsC I pay σ (.modal m (.cons (.block body) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  cases he with
+  | det hf =>
+    have h₁ := COut.thenF_drop _ (h _ (ExecP.of_run (J := I.stateInv pay) hf))
+    rw [COut.map_ofRes] at h₁
+    exact h₁
+  | block _ hp => exact COut.thenF_drop _ (h _ hp)
+
 end Rules
 
 /-! ## The context, read with callbacks -/
@@ -487,6 +541,28 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false) {ρ κc Γo
     rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
     exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)
 
+/-- **`sendNoCallbackBox`, with callbacks unset**: a gas-limited send runs as
+its typed run, the payment booked and `pv` true, or nothing booked and `pv`
+false. -/
+theorem holdsC_sendDet (hp : pay = false) (pv : Idx Γ (.val .bool)) (sadr se : Simple C Γ .uint)
+    (hok : holdsC I pay σ (.upd .box ((Upd.nil.snoc (UpdElem.payTo sadr se)).snoc
+      (.local pv (.val (Tm.lit (p := .bool) true)))) (Fml.modalK .box ω κ φ)))
+    (hf : holdsC I pay σ (.upd .box (Upd.nil.snoc (.local pv (.val (Tm.lit (p := .bool) false))))
+      (Fml.modalK .box ω κ φ))) :
+    holdsC I pay σ (.modal .box (.cons (.send pv (.simple sadr) (.simple se) false) ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  rw [ExecS.detIn_inv he (by show (pay || false) = false; rw [hp]; rfl)]
+  change COut.thenF _ _ _ _ (COut.ofRes (TRun.send pv (.simple sadr) (.simple se) σ))
+  rcases TRun.send_cases pv (.simple sadr) (.simple se) σ with ⟨e, ht, _⟩ | ⟨o₂, ht, hs | hs⟩
+  · exact nomatch ht
+  · rw [hs]
+    have hL := (Upd.lands_of_applyP (transfer_booking sadr se ht)).choose_spec
+    exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hok
+      (Upd.lands_snoc_local hL pv (v := (true : Bool)) rfl)))
+  · rw [hs]
+    exact COut.after_seq (holdsC_modalK _ ω κ φ (Upd.afterT.of_lands hf
+      (Upd.lands_snoc_local (Upd.lands_nil σ) pv (v := (false : Bool)) rfl)))
+
 end Taclets
 
 /-! ## Soundness -/
@@ -536,6 +612,16 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   | @empty Γ Γ₂ H m κ φ _ ih =>
     exact fun σ => H.wrapC_mono (φ := κ.exit m φ) (ψ := .modal m .nil κ φ)
       (fun τ h o ho => by cases ho; exact holdsC_exit_after κ φ τ h) σ (ih σ)
+  | done d hs _ ih =>
+    exact fun σ => Hyps.wrapC_mono _ (fun τ h => holdsC_done hs
+      (by exact Stmt.runs _ _ _ _ d.toStep τ) h) σ (ih σ)
+  | assert _ _ ihT ihE =>
+    refine fun σ => Hyps.wrapC_and _ ?_ σ (ihT σ) (ihE σ)
+    exact fun τ a b => holdsC_assert (holdsC_and_intro a b)
+  | sendDet hp _ _ iho ihf =>
+    refine fun σ => Hyps.wrapC_and _ ?_ σ (iho σ) (ihf σ)
+    exact fun τ a b => holdsC_sendDet hp _ _ _ a b
+  | block _ ih => exact fun σ => Hyps.wrapC_mono _ (fun _ h => holdsC_block h) σ (ih σ)
   | callback d _ _ ihx ihr =>
     cases d
     exact fun σ => Hyps.wrapC_and _ (fun τ a b => holdsC_transferCb hI hT _ _ a b) σ

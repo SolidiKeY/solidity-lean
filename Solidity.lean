@@ -117,6 +117,7 @@ import Solidity.Calculus.CallbackRules
 import Solidity.Calculus.Callback
 import Solidity.Calculus.CallbackHolds
 import Solidity.Calculus.CallbackSound
+import Solidity.Calculus.CallbackDerive
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Sequents
 import Solidity.Calculus.SequentNotation
@@ -188,6 +189,7 @@ import Solidity.Examples.Tactics.Loops
 import Solidity.Examples.Tactics.LoopsImport
 import Solidity.Examples.Tactics.CallOperands
 import Solidity.Examples.Tactics.Callback
+import Solidity.Examples.Tactics.CallbackStrategy
 import Solidity.Examples.Tactics.Contracts
 import Solidity.Examples.Tactics.TryCatch
 import Solidity.Examples.Notation
