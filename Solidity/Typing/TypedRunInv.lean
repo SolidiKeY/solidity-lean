@@ -260,6 +260,10 @@ theorem tkeeps_revert {Γ : Ctx} :
     I.TKeeps (fun _ : State C Γ => (.error .revert : TRes (Out C _ Γ))) :=
   fun _ _ _ h => nomatch h
 
+theorem tkeeps_exhausted {Γ : Ctx} :
+    I.TKeeps (fun _ : State C Γ => (.error .exhausted : TRes (Out C _ Γ))) :=
+  fun _ _ _ h => nomatch h
+
 theorem tkeeps_loop {Γ Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {body : TStep C Γ Γ₁}
     (hb : I.TKeeps body) : I.TKeeps (TRun.loop c x body) := by
   intro σ o hσ h

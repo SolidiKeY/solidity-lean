@@ -1338,6 +1338,11 @@ theorem sound_revert :
   Premise.sound_done σ _ fun h =>
     ⟨by cases m <;> first | rfl | exact absurd h (by decide), .revert, rfl, by decide⟩
 
+/-- `assumeFalse` (Lean): `assume(false);` closes to `true`. -/
+theorem sound_assumeFalse :
+    Premise.Sound m (.assumeFalse : Stmt C Γ Γ) (.done true) σ :=
+  Premise.sound_done_exhausted σ rfl
+
 end Arms2
 
 end Solidity

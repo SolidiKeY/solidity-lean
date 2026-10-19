@@ -201,6 +201,7 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .require c => TRun.require c
   | _, _, .assert c => TRun.assert c
   | _, _, .revert => fun _ => .error .revert
+  | _, _, .assumeFalse => fun _ => .error .exhausted
   | _, _, .call _ args ret body => TRun.call args ret body.ext (Prog.runFC n body)
   | _, _, .callReceiver _ args r body op =>
     TRun.callReceiver args r body.ext (Prog.runFC n body) op
@@ -236,6 +237,7 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun l => TRun.delete l) (fun p _ => TRun.deleteMem p) (fun l n h => TRun.assignNew l n h)
     (fun c thn els ihThn ihEls => TRun.ite c thn.ext ihThn els.ext ihEls)
     (fun c => TRun.require c) (fun c => TRun.assert c) (fun _ => .error .revert)
+    (fun _ => .error .exhausted)
     (fun _ args ret body ih => TRun.call args ret body.ext ih)
     (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
@@ -261,6 +263,7 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun l => TRun.delete l) (fun p _ => TRun.deleteMem p) (fun l n h => TRun.assignNew l n h)
     (fun c thn els ihThn ihEls => TRun.ite c thn.ext ihThn els.ext ihEls)
     (fun c => TRun.require c) (fun c => TRun.assert c) (fun _ => .error .revert)
+    (fun _ => .error .exhausted)
     (fun _ args ret body ih => TRun.call args ret body.ext ih)
     (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
       TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
@@ -309,7 +312,7 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert => rfl
+  | _, _, .revert | _, _, .assumeFalse => rfl
 
 theorem Prog.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     Prog.runF n P = Prog.runFC n P
@@ -356,7 +359,7 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert => fun _ => .refl _
+  | _, _, .revert | _, _, .assumeFalse => fun _ => .refl _
 
 theorem Prog.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     TStep.Approx (Prog.runF n P) (Prog.runR P)

@@ -319,6 +319,10 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | require {Γ : Ctx} (c : Val C Γ .bool) : Stmt C Γ Γ
   | assert {Γ : Ctx} (c : Val C Γ .bool) : Stmt C Γ Γ
   | revert {Γ : Ctx} : Stmt C Γ Γ
+  /-- `assume(false);`: a run the readings assume away.  It halts as
+  exhaustion does, which both modalities accept (`ignoringOverflow { … }`,
+  `docs/options.md` O5); no Solidity source writes it. -/
+  | assumeFalse {Γ : Ctx} : Stmt C Γ Γ
   /-- An internal call of `f`: the arguments bound to the parameters `ps`,
   the return variables `rs` declared on them, the body run in that frame. -/
   | call {Γ Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
@@ -706,6 +710,7 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .require c => s!"require({c.toStr ns true});"
   | .assert c => s!"assert({c.toStr ns true});"
   | .revert => "revert();"
+  | .assumeFalse => "assume(false);"
   | .call f args ret _ =>
     let call := callStr ns f args
     match ret with
@@ -932,6 +937,7 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
   | _, .require c => ⟨Δ, h, .require (c.wk h)⟩
   | _, .assert c => ⟨Δ, h, .assert (c.wk h)⟩
   | _, .revert => ⟨Δ, h, .revert⟩
+  | _, .assumeFalse => ⟨Δ, h, .assumeFalse⟩
   | _, .call f args ret body =>
     let ⟨Δ', h', ret'⟩ := ret.wk h
     ⟨Δ', h', .call f (args.wk h) ret' body⟩
@@ -982,7 +988,7 @@ def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
     (fun _ _ _ => .refl) (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ _ => .refl)
     (fun _ _ _ _ _ => .push .refl) (fun _ _ => .refl) (fun _ _ => .refl) (fun _ _ => .refl)
     (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
-    (fun _ _ _ => .refl) (fun _ => .refl) (fun _ => .refl) .refl
+    (fun _ _ _ => .refl) (fun _ => .refl) (fun _ => .refl) .refl .refl
     (fun _ _ ret _ => ret.ext)
     (fun _ _ _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ => .refl)
     (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl)

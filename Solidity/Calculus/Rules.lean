@@ -936,6 +936,12 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   | transferDiamond :
       dl[LeanTaclet C k]{ ⟨ sadr.transfer(se); ⟩ ⇝ false }
 
+  /-- A run assumed away closes to `true` under either modality: it halts
+  as exhaustion does, which both accept (`ignoringOverflow { … }`,
+  `docs/options.md` O5).  solkey has no such statement. -/
+  | assumeFalse :
+      dl[LeanTaclet C k]{ ⟨[ assume(false); ]⟩ ⇝ true }
+
 
   /-- A loop unwound to its bound ends there: the rest with the condition
   false assumed, and that it is false (`Premise.check`).  Not

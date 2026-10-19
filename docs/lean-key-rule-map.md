@@ -15,11 +15,12 @@ gap, in exactly one category (`claimedTaclets_count = 330`,
 `unclaimedTaclets_count = 15`, 0 pending). The pending-name list is empty;
 semantic and source-support gaps, including effectful call-receiver operands,
 remain tracked in `docs/solkey-migration.md`.
-The existing `LeanTaclet` layer (`leanTaclets`) has ten rules,
-`functionCallArgCapture`, `tryCallDiamond`, `transferDiamond`,
-`loopExit`, `whileClose`, `whileNoVariantDiamond`,
-`pushCompoundUnfoldReceiver`, `pushIncrementUnfoldReceiver`,
-`storageMemorySourceSave` and `pushMemorySourceCapture`.
+The existing `LeanTaclet` layer (`leanTaclets`) has fifteen rules,
+`addmodAssignment`, `mulmodAssignment`, `functionCallArgCapture`,
+`tryCallDiamond`, `transferDiamond`, `assumeFalse`, `loopExit`,
+`whileClose`, `whileNoVariantDiamond`, `pushCompoundUnfoldReceiver`,
+`pushIncrementUnfoldReceiver`, `storageMemorySourceSave`,
+`pushMemorySourceCapture`, `storageFixedCopySave` and `pushFixedCopySave`.
 The two push-suffix rules capture a complex receiver; upstream's bare
 push receiver capture does not match that arithmetic target.
 The memory-source rules preserve internal snapshot assignments and capture
@@ -85,6 +86,7 @@ goal's update level and reads what it adds there: nothing to port.
 | `localValueDeclInitDrop`, `storageLocalDeclInitDrop` | `Premise.bind` (`Stmt.step`'s `declLocal`/`declStorage` arms), `Fml.bind`, `Proves.bind`/`bindIntro` (the hidden binder) | Lean only (the binder) | `T v = e; ⇝ v = e;`: the declared local is put in scope by a binder ("for every value of `v : T`") in front of the assignment, printed as nothing, so the premise reads as solkey's `⟨[ v = e; ]⟩`; KeY's `\addprogvars(v)` |
 | `memoryLocalDeclInitDrop` | `Premise.bind` at a memory type (`Stmt.step`'s `declMem` arm with an initializer), `Fml.bind` (the hidden binder) | Lean only (the binder) | `T memory mv = r; ⇝ mv = r;`, the binder as in the row above.  It ranges over the objects of `mv`'s type and over an unset `mv` (decision 17', `docs/intrinsic.md`), as an alias may be unset (`storageLocalDeclSkip`): no statement leaves a memory local unset, but the premise's `mv = r;` from an unset `mv` runs as the declaration does even where `r` allocates, which no existing object gives (`sound_declMemInit`).  A read through an unset memory local reverts (`State.memRefT`, `MPath.mvalT`), as through an unset alias |
 | `revertDiamond` | `revertDiamond` | same | closes to `false`: a reverted run satisfies no diamond formula |
+| — | `LeanTaclet.assumeFalse` | Lean only | `⟨[ assume(false); ]⟩ ⇝ true` under either modality: the run is assumed away (it halts as exhaustion does, which both accept). solkey has no such statement; `ignoringOverflow { … }` writes it where an operation leaves its range (`docs/options.md`, O5) |
 | `revertBox` | `revertBox` | same | closes to `true`. Only revert, send, transfer and try (`revertBox`/`revertDiamond`, `sendNoCallbackBox`/`sendNoCallbackDiamond`, `transferNoCallbackBox`/`transferDiamond`, `tryCallNoCallbackBox`/`tryCallDiamond`) and the loop invariant rules tell the modalities apart: the modality is a parameter of `Taclet`, so every other rule fires under either |
 
 ## Storage root/field write & read

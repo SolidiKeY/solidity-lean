@@ -386,6 +386,14 @@ theorem Premise.sound_done {s : Stmt C Γ Γ'} (σ : State C Γ) (b : Bool)
     rw [holds_modal_iff, runSt_cons_frames, he]
     exact ⟨trivial, fun h => hp (Except.error.inj h)⟩
 
+/-- A closing taclet on a statement that runs out (`assumeFalse`): `true`
+under either modality. -/
+theorem Premise.sound_done_exhausted {s : Stmt C Γ Γ'} (σ : State C Γ)
+    (hs : Stmt.runSt σ s = .error .exhausted) : Premise.Sound m s (.done true) σ := by
+  intro _ _ ω κ φ _
+  rw [holds_modal_iff, runSt_cons_frames, hs]
+  cases m <;> exact ⟨by first | trivial | rfl, nofun⟩
+
 end Shapes
 
 /-! ## The per-arm statement

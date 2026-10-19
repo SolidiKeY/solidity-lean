@@ -489,6 +489,7 @@ def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
   (``LeanTaclet.tryCallDiamond, .leanOnly .calculus),
   (``LeanTaclet.transferDiamond, .leanOnly .calculus),
+  (``LeanTaclet.assumeFalse, .leanOnly .calculus),
   (``LeanTaclet.loopExit, .leanOnly .calculus),
   (``LeanTaclet.whileClose, .leanOnly .calculus),
   (``LeanTaclet.whileNoVariantDiamond, .leanOnly .calculus),
@@ -556,7 +557,7 @@ def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
 
 theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 60 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 14 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 15 := by decide +kernel
 
 end PrintedRules
 end Solidity

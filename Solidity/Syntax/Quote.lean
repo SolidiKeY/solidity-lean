@@ -323,6 +323,7 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
   | _, _, Γe, _, .require cv => mkAppN (mkConst ``Stmt.require) #[c, Γe, Val.quote c Γe cv]
   | _, _, Γe, _, .assert cv => mkAppN (mkConst ``Stmt.assert) #[c, Γe, Val.quote c Γe cv]
   | _, _, Γe, _, .revert => mkAppN (mkConst ``Stmt.revert) #[c, Γe]
+  | _, _, Γe, _, .assumeFalse => mkAppN (mkConst ``Stmt.assumeFalse) #[c, Γe]
   | _, _, Γe, Γ'e, @Stmt.call _ _ _ ps rs Γf f args ret body =>
     let (ase, pse) := Args.quote c Γe args
     let fre := ctxOnto pse rs

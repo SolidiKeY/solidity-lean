@@ -16,7 +16,9 @@ proof of one says that no checked operation overflows.
 
 * §1 — the underflow, outside and inside the block, and what the block writes;
 * §2 — proofs inside the block: the guards owed and discharged;
-* §3 — evaluation order: `&&`, `?:`, a loop's condition, a narrow type.
+* §3 — evaluation order: `&&`, `?:`, a loop's condition, a narrow type;
+* §4 — `ignoringOverflow { … }` (`ignoringOF`, O5): an overflowing run
+  assumed away, under either modality.
 -/
 
 namespace Solidity.Examples.Tactics.CheckedBlock
@@ -82,5 +84,48 @@ info: dl{
 `uint8` fails it. -/
 theorem narrow : ¬ (⊨ dl!{ [ checked { uint8 x = 250; x += 10; }; ] false }) :=
   fun h => Modality.afterRunTR_not_panic (h (State.init _)) (by decide +kernel)
+
+/-! ## 4 · `ignoringOverflow { … }`: an overflow assumed away
+
+KeY Java's `arithmeticSemanticsIgnoringOF` reads integers as mathematical
+ones, which the typed state cannot hold (a `uint` local is 256 bits).  The
+block reads it soundly instead: where an operation would leave its range the
+run is assumed away (`assume(false);`, `LeanTaclet.assumeFalse`), and an
+assumed-away run satisfies every formula.  The box is unchanged in effect
+(it accepts the revert already); the diamond now claims termination only
+for the runs that do not overflow. -/
+
+/-! What the block writes: `if (1 <= x) {} else { assume(false); }` before
+`x -= 1`. -/
+
+/--
+info: dl{ ⟨ uint x = 0; if (1 <= x) {} else {assume(false);}; x -= 1; ⟩ false } : Fml StandardExample []
+-/
+#guard_msgs in
+#check (dl!{ ⟨ ignoringOverflow { uint x = 0; x -= 1; }; ⟩ false } : Fml StandardExample [])
+
+/-- The underflow is assumed away: even `false` holds after it. -/
+theorem underflowIgnored : ⊨ dl!{ ⟨ ignoringOverflow { uint x = 0; x -= 1; }; ⟩ false } := by
+  sol_symex
+  sol_close
+
+/-- Termination with `y > a`, for every `a` but the one where `a + 1`
+overflows. -/
+theorem endsIgnoring : ⊨ dl!{ ∀ uint a; ⟨ uint y; ignoringOverflow { y = a + 1; }; ⟩ y > a } := by
+  sol_symex
+  sol_close
+
+/-- Without the block it is false: at `a = 2^256 - 1` the run reverts. -/
+theorem endsPlain : ¬ (⊨ dl!{ ∀ uint a; ⟨ uint y; y = a + 1; ⟩ y > a }) :=
+  fun h => Modality.afterRunTR_diamond_fail (h (State.init _) ⟨((2 ^ 256 - 1 : Nat) : Int), by decide⟩)
+    (by decide +kernel)
+
+/-! The two blocks do not nest in each other. -/
+
+/--
+error: Solidity elaboration failed: `checked { … }` and `ignoringOverflow { … }` do not nest in each other
+-/
+#guard_msgs in
+#check (dl!{ [ checked { ignoringOverflow { uint x = 1; }; }; ] true } : Fml StandardExample [])
 
 end Solidity.Examples.Tactics.CheckedBlock

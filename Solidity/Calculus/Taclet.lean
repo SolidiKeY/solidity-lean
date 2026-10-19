@@ -803,6 +803,7 @@ theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)
   pushIncrementUnfoldReceiver "2."
   tryCallDiamond "."
   transferDiamond "."
+  assumeFalse "."
   loopExit "."
 
 /-! ## The rule `Stmt.step` fires -/

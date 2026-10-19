@@ -804,6 +804,7 @@ theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
   | _, _, .require c => RunInv.tkeeps_require c
   | _, _, .assert c => RunInv.tkeeps_assert c
   | _, _, .revert => RunInv.tkeeps_revert
+  | _, _, .assumeFalse => RunInv.tkeeps_exhausted
   | _, _, .call _ args ret body =>
     RunInv.tkeeps_call heredInv.valMemOk args ret body.ext (Prog.keeps_all hP hG body)
   | _, _, .callReceiver _ args r body op => by

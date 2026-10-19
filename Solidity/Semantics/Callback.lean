@@ -190,7 +190,7 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
     (ite := fun _ thn els => Prog.hasTransfer thn || Prog.hasTransfer els)
-    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
     (call := fun _ _ _ body => Prog.hasTransfer body)
     (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
     (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
@@ -221,7 +221,7 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
     (ite := fun _ _ _ => true)
-    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
     (call := fun _ _ _ _ => true)
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
@@ -283,7 +283,7 @@ def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
     (ite := fun _ thn els => Prog.callsBack pay thn || Prog.callsBack pay els)
-    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
     (call := fun _ _ _ body => Prog.callsBack pay body)
     (callReceiver := fun _ _ _ body _ => Prog.callsBack pay body)
     (callReceiverPush := fun _ _ _ body code _ =>
@@ -352,7 +352,7 @@ def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
     (assignFromMem := fun _ _ => false) (assignMem := fun _ _ => false)
     (delete := fun _ => false) (deleteMem := fun _ _ => false) (assignNew := fun _ _ _ => false)
     (ite := fun _ _ _ => true)
-    (require := fun _ => false) (assert := fun _ => false) (revert := false)
+    (require := fun _ => false) (assert := fun _ => false) (revert := false) (assumeFalse := false)
     (call := fun _ _ _ _ => true)
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
@@ -383,7 +383,7 @@ theorem Stmt.callsBack_true : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .pop .. | _, _, .transfer .. | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert | _, _, .tryCall .. => rfl
+  | _, _, .revert | _, _, .assumeFalse | _, _, .tryCall .. => rfl
 
 theorem Prog.callsBack_true : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     P.callsBack true = P.hasTransfer
@@ -419,7 +419,8 @@ theorem Stmt.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (s : Stm
   | _, _, .pushOpAssign .., _ | _, _, .pushIncDec .., _ | _, _, .push .., _ | _, _, .pop .., _
   | _, _, .declMem .., _ | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _
   | _, _, .assignMem .., _ | _, _, .delete .., _ | _, _, .deleteMem .., _
-  | _, _, .assignNew .., _ | _, _, .require .., _ | _, _, .assert .., _ | _, _, .revert, _ => rfl
+  | _, _, .assignNew .., _ | _, _, .require .., _ | _, _, .assert .., _ | _, _, .revert, _
+  | _, _, .assumeFalse, _ => rfl
 
 theorem Prog.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     P.hasTransfer = false → P.callsBack pay = false
@@ -965,7 +966,7 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
   | _, _, .pop .., _ | _, _, .declMem .., _
   | _, _, .rebindMem .., _ | _, _, .assignFromMem .., _ | _, _, .assignMem .., _
   | _, _, .delete .., _ | _, _, .deleteMem .., _ | _, _, .assignNew .., _ | _, _, .require .., _
-  | _, _, .assert .., _ | _, _, .revert, _ => .inl (.det rfl)
+  | _, _, .assert .., _ | _, _, .revert, _ | _, _, .assumeFalse, _ => .inl (.det rfl)
 
 /-- The same, for a sequence. -/
 theorem Prog.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → ∀ σ : State C Γ,
@@ -1148,7 +1149,7 @@ theorem Stmt.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') �
   | _, _, .assignMem .., _, _, _, h | _, _, .delete .., _, _, _, h
   | _, _, .deleteMem .., _, _, _, h | _, _, .assignNew .., _, _, _, h
   | _, _, .require .., _, _, _, h | _, _, .assert .., _, _, _, h
-  | _, _, .revert, _, _, _, h => by cases h; rfl
+  | _, _, .revert, _, _, _, h | _, _, .assumeFalse, _, _, _, h => by cases h; rfl
 
 /-- The same, for a sequence. -/
 theorem Prog.eq_run (J : StateInv C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →

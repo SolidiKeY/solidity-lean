@@ -65,6 +65,7 @@ def Stmt.inSolkey (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (deleteMem := fun p _ => p.keyValue) (assignNew := fun l _ _ => l.keyValue)
     (ite := fun c thn els => c.keyValue && Prog.inSolkey m thn && Prog.inSolkey m els)
     (require := fun c => c.keyValue) (assert := fun c => c.keyValue) (revert := true)
+    (assumeFalse := false)
     (call := fun _ args _ body => (Args.capture args).isNone && args.keyValues && Prog.inSolkey m body)
     (tryCall := fun _ _ _ _ _ _ _ => false)
     (loop := fun a c body => match a with | .auto => c.keyValue && Prog.inSolkey m body | _ => false)
@@ -188,6 +189,7 @@ theorem Stmt.keyStep_of_inSolkey {m : Modality} {Γ Γ' : Ctx} {s : Stmt C Γ Γ
       show (r.keyPushSource || !b.isSimple) = true
       rw [show r.keyPushSource = true from (Bool.and_eq_true _ _ ▸ hv).1]
       rfl
+  | assumeFalse => exact absurd h Bool.false_ne_true
   | _ => rfl
 
 /-! ## Solkey's rules keep the fragment -/
@@ -320,7 +322,7 @@ theorem Stmt.inSolkey_wk (m : Modality) {Γ Δ : Ctx} (h : Thin Γ Δ) :
   | _, .pop .. | _, .pushOpAssign .. | _, .pushIncDec ..
   | _, .transfer .. | _, .send .. | _, .rebindMem .. | _, .assignFromMem ..
   | _, .assignMem .. | _, .delete .. | _, .deleteMem .. | _, .assignNew .. | _, .require ..
-  | _, .assert .. | _, .revert | _, .tryCall .. => by
+  | _, .assert .. | _, .revert | _, .assumeFalse | _, .tryCall .. => by
     simp only [Stmt.wk, Stmt.inSolkey, SPath.keyValue_wk, Loc.keyValue_wk, MPath.keyValue_wk, MLoc.keyValue_wk, Val.keyValue_wk, Src.keyValue_wk, MSrc.keyValue_wk, ARhs.keyValue_wk, MRhs.keyValue_wk, OpLoc.keyValue_wk, NewLhs.keyValue_wk,
       SPath.isSimple_wk, Src.isMemory_wk]
 

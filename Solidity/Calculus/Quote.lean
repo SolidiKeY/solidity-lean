@@ -327,6 +327,7 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
   | .require c => sctor ``Stmt.require #[Γe, ← qVal Γ .bool c]
   | .assert c => sctor ``Stmt.assert #[Γe, ← qVal Γ .bool c]
   | .revert => sctor ``Stmt.revert #[Γe]
+  | .assumeFalse => sctor ``Stmt.assumeFalse #[Γe]
   | @Stmt.call _ _ _ ps rs Γf f args ret body =>
     sctor ``Stmt.call #[Γe, ← qCtx Γ', ← qCtx ps, ← qCtx rs, ← qCtx Γf, toExpr f,
       ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, ← qProg (rs ++ ps) Γf body]

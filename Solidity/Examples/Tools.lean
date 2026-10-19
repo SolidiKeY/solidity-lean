@@ -257,7 +257,7 @@ no Lean rule claims it (`RuleShapes.unclaimedTaclets` says why)
 /--
 info: all 181 rules of `Solidity.Taclet` print as rule lines
 ---
-info: all 14 rules of `Solidity.LeanTaclet` print as rule lines
+info: all 15 rules of `Solidity.LeanTaclet` print as rule lines
 ---
 info: all 4 rules of `Solidity.CallbackTaclet` print as rule lines
 -/

@@ -892,6 +892,7 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
     have := noStore_compileVal b c
     simp only [compileStmt, assertTop]; stores_from
   | .revert => NoStore.storesFrom rfl _
+  | .assumeFalse => NoStore.storesFrom rfl _
   | @Solidity.Stmt.call _ Γ _ ps _ _ _ args ret body => by
     have := (storesFrom_argsCode b args).mono (Nat.le_add_right b Γ.length)
     have := (storesFrom_retEnterCode b ps ret).mono (Nat.le_add_right b Γ.length)

@@ -189,7 +189,7 @@ def Stmt.shrinks {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .transfer .. | .send ..
   | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop ..
+  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .loop ..
   | .pushOpAssign .. | .pushIncDec .. => false
 def Prog.shrinks {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
   | .nil => false
@@ -247,6 +247,7 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
   | .block body => (inFragP F body).map (Frag.restrict Γ)
   | .require c | .assert c => F.guard (valIn F c)
   | .revert => some F
+  | .assumeFalse => none
   | @Solidity.Stmt.call _ _ _ ps rs _ _ args ret body =>
     if argsIn F args then
       match inFragP (Frag.init (rs ++ ps)) body with
@@ -402,6 +403,7 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
       [.jump (compileProg b e).length] ++ compileProg b e
   | .require c | .assert c => compileVal b c ++ assertTop
   | .revert => [.revert]
+  | .assumeFalse => []
   -- the body in its own frame, above the caller's locals
   | @Solidity.Stmt.call _ _ _ ps _ _ _ args ret body =>
     argsCode b args ++ retEnterCode b ps ret ++ compileProg (b + Γ.length) body ++
@@ -433,7 +435,7 @@ def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Nat
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .pop _ | .transfer .. | .send ..
   | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop .. => 0
+  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .loop .. => 0
 def Prog.pushes {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Nat
   | .nil => 0
   | .cons s P => Stmt.pushes s + Prog.pushes P
@@ -452,7 +454,7 @@ def Stmt.pays {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .assert _ | .revert | .tryCall .. | .loop ..
+  | .require _ | .assert _ | .revert | .assumeFalse | .tryCall .. | .loop ..
   | .pushOpAssign .. | .pushIncDec .. => false
 def Prog.pays {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → Bool
   | .nil => false

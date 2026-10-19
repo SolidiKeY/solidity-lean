@@ -1210,6 +1210,7 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     if k == ``solRequire then return (← `(Stmt.require $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solAssert then return (← `(Stmt.assert $(← schemaAt Γ .val ⟨stx.raw[2]⟩)), Γ)
     if k == ``solRevert then return (← `(Stmt.revert), Γ)
+    if k == ``solAssumeFalse then return (← `(Stmt.assumeFalse), Γ)
     if k == ``solTry then return (← schemaTry stx, Γ)
     if k == ``solWhile then
       -- `while (cond) body`: the annotation is the schema variable `ann`

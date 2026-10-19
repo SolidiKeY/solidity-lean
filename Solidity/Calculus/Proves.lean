@@ -74,8 +74,9 @@ variable {C : Contract}
 /-- Whether the rule `Stmt.step` fires on `s` under `m` is one of solkey's
 (`Taclet`), read off the statement alone: a call with an argument to capture
 (`functionCallArgCapture`), a payment or a `try` under the diamond
-(`transferDiamond`, `tryCallDiamond`), an exhausted loop bound (`loopExit`)
-and unsupported invariant shapes have Lean's rules only (`LeanTaclet.keyStep`).
+(`transferDiamond`, `tryCallDiamond`), an exhausted loop bound (`loopExit`),
+`assume(false)` (`assumeFalse`) and unsupported invariant shapes have Lean's
+rules only (`LeanTaclet.keyStep`).
 Automatic and positive-bound loops use `whileUnwind`; framed invariants use
 the upstream box rule, or its diamond rule when a variant is supplied. -/
 def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
@@ -90,7 +91,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (assignFromMem := fun _ _ => true) (assignMem := fun _ _ => true) (delete := fun _ => true)
     (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)
     (ite := fun _ _ _ => true) (require := fun _ => true) (assert := fun _ => true)
-    (revert := true) (call := fun _ args _ _ => (Args.capture args).isNone)
+    (revert := true) (assumeFalse := false) (call := fun _ args _ _ => (Args.capture args).isNone)
     (tryCall := fun _ _ _ _ _ _ _ => m == .box)
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true

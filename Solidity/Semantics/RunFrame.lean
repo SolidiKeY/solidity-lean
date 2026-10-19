@@ -461,7 +461,7 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     · cases h
       exact ⟨TGFrame.refl σ, TLocAgree.refl _⟩
     · cases h
-  | _, _, .revert, _, _, _, _, h => by cases h
+  | _, _, .revert, _, _, _, _, h | _, _, .assumeFalse, _, _, _, _, h => by cases h
   | _, _, .call _ args ret body, hw, d, σ, o, h => by
     have hw' : (args.readsIn μ && ret.noMem && Prog.within μ body) = true := hw
     simp only [Bool.and_eq_true] at hw'

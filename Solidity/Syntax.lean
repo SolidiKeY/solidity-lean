@@ -184,6 +184,16 @@ structure RawLoopSpec where
 def RawLoopSpec.exprs (a : RawLoopSpec) : List RawExpr :=
   a.inv ++ a.qinv.flatMap RawInv.exprs ++ a.dec.toList
 
+/-- How a block reads an operation out of range: `checked { … }` fails the
+proof (KeY Java's `checkingOF`), `ignoringOverflow { … }` assumes the run
+away (`ignoringOF`, read soundly: an overflowing run proves anything, as
+exhaustion does, rather than going on with unbounded values; `Prog.withOF`,
+`docs/options.md` O2, O5). -/
+inductive OFMode where
+  | checking
+  | ignoring
+  deriving DecidableEq, Repr, Inhabited
+
 inductive RawStmt where
   | assign (l r : RawExpr)
   | decl (T : RawTy) (x : String) (init : Option RawExpr)
@@ -208,6 +218,8 @@ inductive RawStmt where
   | require (c : RawExpr)
   | assert (c : RawExpr)
   | revert
+  /-- `assume(false);`: a run assumed away (`Stmt.assumeFalse`). -/
+  | assumeFalse
   /-- `return e;`, `return;`: in a function's body, lowered away when it is
   inlined (`lowerReturns`). -/
   | ret (e : Option RawExpr)
@@ -220,8 +232,9 @@ inductive RawStmt where
   /-- `unchecked { … }`: a scope whose `+ - * **` wrap (`uncheckStmts`). -/
   | unchecked (body : List RawStmt)
   /-- `checked { … }`: a scope where a checked operation that leaves its
-  range is an assertion failure (`Prog.checkOF`, `docs/options.md`). -/
-  | checked (body : List RawStmt)
+  range is an assertion failure (`Prog.checkOF`, `docs/options.md`);
+  `ignoringOverflow { … }` (`o = .ignoring`), one where it is assumed away. -/
+  | checked (o : OFMode) (body : List RawStmt)
   /-- `try e.f(a) returns (T v) { … } catch …`: the receiver, the function,
   the arguments, the return locals, and the clauses normalised as
   `Stmt.tryCall`'s, with the name of the `Panic` code. -/
@@ -722,6 +735,9 @@ syntax (name := solUnchecked) &"unchecked" ppSpace sol_block : sol_stmt
 /-- `checked { … }`: an overflow in it fails as an `assert` does
 (`Prog.checkOF`), not as a revert. -/
 syntax (name := solChecked) &"checked" ppSpace sol_block : sol_stmt
+/-- `ignoringOverflow { … }`: a run in which an operation leaves its range
+proves anything (`Prog.ignoreOF`), under either modality. -/
+syntax (name := solIgnoringOverflow) &"ignoringOverflow" ppSpace sol_block : sol_stmt
 syntax "if " "(" sol_expr ") " sol_block (" else " sol_block)? : sol_stmt
 /-- `if (c) { … } else if (d) { … } else { … }`: the `if`s nested. -/
 syntax (name := solIfChain) "if " "(" sol_expr ") " sol_block
@@ -729,6 +745,9 @@ syntax (name := solIfChain) "if " "(" sol_expr ") " sol_block
 syntax (name := solRequire) &"require" "(" sol_expr ")" : sol_stmt
 syntax (name := solAssert) &"assert" "(" sol_expr ")" : sol_stmt
 syntax (name := solRevert) &"revert" "(" ")" : sol_stmt
+/-- `assume(false);`: not Solidity; the statement `ignoringOverflow { … }`
+writes where an operation leaves its range (`Stmt.assumeFalse`). -/
+syntax (name := solAssumeFalse) &"assume" "(" &"false" ")" : sol_stmt
 /-- `emit E(a, b);`: the arguments evaluated (`RawStmt.eval`), the log dropped. -/
 syntax (name := solEmit) &"emit" ident "(" sol_expr,* ")" : sol_stmt
 /-- `require(c, "msg");`: `require(c);`. -/
@@ -1063,6 +1082,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solRequire => `(RawStmt.require $(← expandExpr ⟨s.raw[2]⟩))
   | ``solAssert => `(RawStmt.assert $(← expandExpr ⟨s.raw[2]⟩))
   | ``solRevert => `(RawStmt.revert)
+  | ``solAssumeFalse => `(RawStmt.assumeFalse)
   | ``solReturn => `(RawStmt.ret (some $(← expandExpr ⟨s.raw[1]⟩)))
   | ``solReturnNone => `(RawStmt.ret none)
   | ``solTry => expandTry s
@@ -1114,7 +1134,9 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solPushTarget =>
     expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
-  | ``solChecked => `(RawStmt.checked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
+  | ``solChecked => `(RawStmt.checked .checking $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
+  | ``solIgnoringOverflow =>
+    `(RawStmt.checked .ignoring $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
   | ``solBlockStmt => `(RawStmt.block [$(← (payload s.raw[1]).mapM (expandStmt ⟨·⟩)),*])
   | ``solTupleAssign =>
     let ts ← (#[s.raw[1]] ++ s.raw[2].getArgs).mapM fun o => do

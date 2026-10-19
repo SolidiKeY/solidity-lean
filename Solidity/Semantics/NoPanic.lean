@@ -80,7 +80,7 @@ def Stmt.asserts {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
   | .pushOpAssign .. | .pushIncDec ..
   | .send .. | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..
-  | .require _ | .revert => false
+  | .require _ | .revert | .assumeFalse => false
 /-- Whether a sequence has an `assert`. -/
 def Prog.asserts {Γ Γ' : Ctx} : Prog C Γ Γ' → Bool
   | .nil => false
@@ -392,6 +392,7 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .require c, _, σ => TRun.require_noPanic c σ
   | _, _, .assert _, h, _ => nomatch h
   | _, _, .revert, _, _ => TRes.NoPanic.revert
+  | _, _, .assumeFalse, _, _ => nofun
   | _, _, .call _ args ret body, h, σ => by
     simp only [Stmt.asserts] at h
     exact TRun.call_noPanic args ret _ _ (Prog.run_noPanic body h) σ

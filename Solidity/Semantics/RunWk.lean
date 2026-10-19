@@ -1340,6 +1340,7 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
   | _, _, .require c, _, h, τ, d => TWkRel.of_eq (TRun.require_wk h τ d c)
   | _, _, .assert c, _, h, τ, d => TWkRel.of_eq (TRun.assert_wk h τ d c)
   | _, _, .revert, _, h, τ, d => rfl
+  | _, _, .assumeFalse, _, h, τ, d => rfl
   | _, _, .ite c thn els, _, h, τ, d => by
     show TWkRel h _ (TRun.ite c thn.ext thn.runR els.ext els.runR τ)
       (TRun.ite (c.wk h) (thn.wk h).2.2.ext (thn.wk h).2.2.runR (els.wk h).2.2.ext

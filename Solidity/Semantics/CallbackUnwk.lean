@@ -409,7 +409,7 @@ theorem stmt_unwk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → 
   | _, _, .declMem .. | _, _, .rebindMem ..
   | _, _, .assignFromMem .. | _, _, .assignMem ..
   | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
-  | _, _, .require .. | _, _, .assert .. | _, _, .revert => by
+  | _, _, .require .. | _, _, .assert .. | _, _, .revert | _, _, .assumeFalse => by
     intro h τ o' he
     rw [he.eq_run rfl]
     exact det_unwk J _ h τ rfl

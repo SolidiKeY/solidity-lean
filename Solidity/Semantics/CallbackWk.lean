@@ -47,6 +47,7 @@ theorem callsBack_stmt {pay : Bool} : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .assignFromMem .., _, _ | _, _, .assignMem .., _, _
   | _, _, .delete .., _, _ | _, _, .deleteMem .., _, _ | _, _, .assignNew .., _, _
   | _, _, .require .., _, _ | _, _, .assert .., _, _ | _, _, .revert, _, _
+  | _, _, .assumeFalse, _, _
   | _, _, .callReceiver .., _, _ | _, _, .tryCall .., _, _ => rfl
 
 theorem callsBack_prog {pay : Bool} : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
@@ -543,7 +544,7 @@ theorem stmt_wk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Wk
   | _, _, .declMem .. | _, _, .rebindMem ..
   | _, _, .assignFromMem .. | _, _, .assignMem ..
   | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
-  | _, _, .require .. | _, _, .assert .. | _, _, .revert => by
+  | _, _, .require .. | _, _, .assert .. | _, _, .revert | _, _, .assumeFalse => by
     intro h σ d o he
     cases he with
     | det hf => exact det_wk J _ h σ d hf

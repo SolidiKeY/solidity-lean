@@ -98,6 +98,8 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
     (revert := match m with
       | .box => .done true
       | .diamond => .done false)
+    -- assumeFalse (Lean)
+    (assumeFalse := .done true)
     (call := fun f args ret body => callStep k f args ret body)
     (tryCall := fun _ rets ok err code pnc other => tryStep m rets ok err code pnc other)
     (loop := fun a c body => loopStep k m a c body)
@@ -131,7 +133,7 @@ def Stmt.maxIdx : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
     (assignFromMem := fun _ _ => 0) (assignMem := fun _ _ => 0) (delete := fun _ => 0)
     (deleteMem := fun _ _ => 0) (assignNew := fun _ _ _ => 0)
     (ite := fun _ thn els => max (Prog.maxIdx thn) (Prog.maxIdx els))
-    (require := fun _ => 0) (assert := fun _ => 0) (revert := 0)
+    (require := fun _ => 0) (assert := fun _ => 0) (revert := 0) (assumeFalse := 0)
     (call := fun _ args ret body =>
       max ((args.names ++ ret.names).foldl (fun n x => max n x.idx) 0) (Prog.maxIdx body))
     (tryCall := fun _ rets ok err code pnc other =>

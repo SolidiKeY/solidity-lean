@@ -741,6 +741,7 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
   | _, _, .require c => fun hm hw _ => require_family c hm hw
   | _, _, .assert c => fun hm hw _ => assert_family c hm hw
   | _, _, .revert => fun _ _ _ => .inr ⟨rfl, rfl⟩
+  | _, _, .assumeFalse => fun _ hw _ => nomatch hw
   | _, _, .ite c t e => fun hm hw hL => by
     obtain ⟨hwc, F₁, F₂, ht, he, rfl⟩ := ite_frag hw
     have hL' : _ + (Prog.pushes t + Prog.pushes e) ≤ Lmax := hL

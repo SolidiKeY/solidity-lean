@@ -29,6 +29,12 @@ wrapping operators of `unchecked`, division by zero (`Panic(0x12)`, a revert
 as outside).  The guards are written so that they cannot fail themselves:
 at `uint` by the wrapping operators (`a <= a +% b`), at `int` `MAX - b`
 under `b ≥ 0` and `MIN / a` under `a > 0`.
+
+`ignoringOverflow { … }` (KeY Java's `ignoringOF`, O5) is the same
+transformation with `if (g) {} else { assume(false); }` for `assert(g)`
+(`OFMode.guardStmt`): an overflowing run is assumed away, under either
+modality, rather than going on with an unbounded value the typed state
+cannot hold.
 -/
 
 namespace Solidity
@@ -259,7 +265,7 @@ def Stmt.guard {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Val C Γ .bool)
   | .assignNew l _ _ => l.guard
   | .ite c _ _ => c.guard
   | .require c | .assert c => c.guard
-  | .revert => none
+  | .revert | .assumeFalse => none
   | .call _ args _ _ => args.guard
   | .tryCall .. => none
   | .loop _ c _ => c.guard
@@ -276,38 +282,51 @@ def Prog.snocS {Γ Γ₁ : Ctx} : Prog C Γ Γ₁ → Stmt C Γ₁ Γ₁ → Pro
   | .nil, s => .cons s .nil
   | .cons t P, s => .cons t (P.snocS s)
 
-/-- `P`, then `assert(g)` where a guard is due. -/
-def Prog.snocGuard {Γ Γ₁ : Ctx} (P : Prog C Γ Γ₁) : Option (Val C Γ₁ .bool) → Prog C Γ Γ₁
+/-- The statement a guard is owed by: `assert(g);` when checking, `if (g) {}
+else { assume(false); }` when ignoring. -/
+def OFMode.guardStmt {Γ : Ctx} : OFMode → Val C Γ .bool → Stmt C Γ Γ
+  | .checking, g => .assert g
+  | .ignoring, g => .ite g .nil (.cons .assumeFalse .nil)
+
+/-- `P`, then the guard's statement where a guard is due. -/
+def Prog.snocGuard {Γ Γ₁ : Ctx} (o : OFMode) (P : Prog C Γ Γ₁) :
+    Option (Val C Γ₁ .bool) → Prog C Γ Γ₁
   | none => P
-  | some g => P.snocS (.assert g)
+  | some g => P.snocS (o.guardStmt g)
 
 mutual
 
-/-- A statement with the programs it holds checked: a loop's condition
-checked again at the end of its body, the source of a deferred push at the
+/-- A statement with the programs it holds guarded: a loop's condition
+guarded again at the end of its body, the source of a deferred push at the
 end of its prefix. -/
-def Stmt.checkOF {Γ Γ' : Ctx} : Stmt C Γ Γ' → Stmt C Γ Γ'
-  | .ite c thn els => .ite c thn.checkOF els.checkOF
-  | .call f args ret body => .call f args ret body.checkOF
+def Stmt.withOF {Γ Γ' : Ctx} (o : OFMode) : Stmt C Γ Γ' → Stmt C Γ Γ'
+  | .ite c thn els => .ite c (thn.withOF o) (els.withOF o)
+  | .call f args ret body => .call f args ret (body.withOF o)
   | .tryCall call rets ok err code pnc other =>
-    .tryCall call rets ok.checkOF err.checkOF code pnc.checkOF other.checkOF
+    .tryCall call rets (ok.withOF o) (err.withOF o) code (pnc.withOF o) (other.withOF o)
   | .loop a c body =>
-    .loop a c (body.checkOF.snocGuard ((c.wk (Thin.ofExt body.ext)).guard))
-  | .block body => .block body.checkOF
-  | .callReceiver f args r body op => .callReceiver f args r body.checkOF op
+    .loop a c ((body.withOF o).snocGuard o ((c.wk (Thin.ofExt body.ext)).guard))
+  | .block body => .block (body.withOF o)
+  | .callReceiver f args r body op => .callReceiver f args r (body.withOF o) op
   | .callReceiverPush f args r body code value =>
-    .callReceiverPush f args r body.checkOF (code.checkOF.snocGuard value.guard) value
+    .callReceiverPush f args r (body.withOF o) ((code.withOF o).snocGuard o value.guard) value
   | s => s
 
-/-- **A program, checked**: each statement preceded by `assert` of its
-guard (`Stmt.guard`). -/
-def Prog.checkOF {Γ Γ' : Ctx} : Prog C Γ Γ' → Prog C Γ Γ'
+/-- **A program, guarded**: each statement preceded by its guard's
+statement (`Stmt.guard`, `OFMode.guardStmt`). -/
+def Prog.withOF {Γ Γ' : Ctx} (o : OFMode) : Prog C Γ Γ' → Prog C Γ Γ'
   | .nil => .nil
   | .cons s P =>
     match s.guard with
-    | none => .cons s.checkOF P.checkOF
-    | some g => .cons (.assert g) (.cons s.checkOF P.checkOF)
+    | none => .cons (s.withOF o) (P.withOF o)
+    | some g => .cons (o.guardStmt g) (.cons (s.withOF o) (P.withOF o))
 
 end
+
+/-- `checked { … }`'s program. -/
+abbrev Prog.checkOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .checking
+
+/-- `ignoringOverflow { … }`'s program. -/
+abbrev Prog.ignoreOF {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' := P.withOF .ignoring
 
 end Solidity

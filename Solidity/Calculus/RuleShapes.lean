@@ -583,7 +583,7 @@ theorem unclaimedTaclets_count : unclaimedTaclets.length = 35 := by decide +kern
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet. There are ten:
+every row above claims a taclet. There are fifteen:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
@@ -591,7 +591,8 @@ only, so that inlining is exact); `tryCallDiamond`, a `try` under the
 diamond closed to `false`, where solkey has no rule (a call may revert in the
 caller, which no formula rules out); and `transferDiamond`, a payment under
 the diamond closed to `false`, where solkey's diamond rules are not ported;
-`loopExit`, the loop at its bound; and
+`assumeFalse`, the statement `ignoringOverflow { … }` writes, closed to
+`true` (solkey has no such statement); `loopExit`, the loop at its bound; and
 `whileClose` and `whileNoVariantDiamond`, a loop with an invariant closed to
 `false` where its body has no frame or, under the diamond, it has no
 variant (solkey unwinds those); and `pushCompoundUnfoldReceiver` and
@@ -606,7 +607,7 @@ constructors, so one added later has to say so here. -/
 def leanTaclets : List Lean.Name :=
   [``LeanTaclet.addmodAssignment, ``LeanTaclet.mulmodAssignment,
     ``LeanTaclet.functionCallArgCapture, ``LeanTaclet.tryCallDiamond, ``LeanTaclet.transferDiamond,
-    ``LeanTaclet.loopExit, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
+    ``LeanTaclet.assumeFalse, ``LeanTaclet.loopExit, ``LeanTaclet.whileClose, ``LeanTaclet.whileNoVariantDiamond,
     ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,
     ``LeanTaclet.storageMemorySourceSave, ``LeanTaclet.pushMemorySourceCapture,
     ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave]

@@ -6,7 +6,9 @@ noCallback | withCallback` is the one about the semantics, and integers are
 KeY's unbounded `int` with no option. Its own `docs/semantics-bugs-fix-ideas.md`
 lists the two gaps this lane closes in Lean: bug 5 (a `try` and a
 `call{value}` read as callees that keep the caller's storage) and bug 6
-(no overflow semantics: KeY Java's `intRules` has three).
+(no overflow semantics: KeY Java's `intRules` has three: `javaSemantics`,
+`arithmeticSemanticsCheckingOF`, `arithmeticSemanticsIgnoringOF`; O2 and O5
+are the last two, the run outside both blocks the first).
 
 Lean states an option in the theorem, not in a setting: the reading is an
 argument of the validity the theorem proves (`ValidT ts φ`, `ValidC I φ pay`,
@@ -19,7 +21,7 @@ can never be read as one under another.
 | O2 | `checked { … }` (`checkingOF`): an overflow fails both modalities | done |
 | O3 | the strategy under callbacks (`sol_prove`, `sol_derive` on `ValidT`/`ValidC`) | done |
 | O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
-| O5 | `ignoringOF`: an overflowing run proves anything | planned |
+| O5 | `ignoringOverflow { … }` (`ignoringOF`): an overflowing run is assumed away | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -167,3 +169,34 @@ and `try`; `ValidT (.noCallback invariant[C]) spec[C]{f}` its honest
 `withdraw_spec`. The invariant does not include the layout premises the
 obligation assumes (`layoutFmls`), so a property of the storage's shape is
 not known after a callee returns unless the invariant states it.
+
+## O5. `ignoringOverflow { … }`: an overflow assumed away (`ignoringOF`)
+
+**Decision.** KeY Java's `arithmeticSemanticsIgnoringOF` reads the
+program's integers as mathematical ones: an operation that overflows goes
+on with its unbounded result, which proves of a program what the machine
+does not do. The typed state cannot hold that result (a `uint` local is a
+256-bit value, `PrimTy.Denote`; only a specification's KeY `int`, `Srt.kint`,
+is unbounded), and a second, unbounded state would be a second run. So the
+block reads the option soundly instead: where a checked operation would
+leave its range, the run is assumed away and satisfies every formula. It is
+O2's transformation with another guard statement (`Prog.withOF`,
+`OFMode.guardStmt`, `Syntax/Checked.lean`): every statement is preceded by
+`if (g) {} else { assume(false); }`, and a narrow type's check by the same.
+
+**`assume(false);`** (`Stmt.assumeFalse`) is a statement of the model, not
+of Solidity: its run halts as exhaustion does (`THalt.exhausted`), which both
+modalities accept (decision 15), and its rule is `LeanTaclet.assumeFalse`,
+`⟨[ assume(false); ]⟩ ⇝ true`. It is outside `⊢ₖ` (`Stmt.keyStep`) and
+outside the EVM fragment (`inFrag`): the compiler theorem says nothing of a
+program that holds it.
+
+**What it changes.** Only diamonds: the box accepted the revert of an
+overflow already. Since the guards are exact (`Syntax/CheckedExact.lean`), a
+program `p` and its blocks are ordered, `[checked p]φ` implying `[p]φ`, which
+is `[ignoringOverflow p]φ`, and `⟨checked p⟩φ`, which is `⟨p⟩φ`, implying
+`⟨ignoringOverflow p⟩φ`; this ordering is argued, not a theorem here.
+`Examples/Tactics/CheckedBlock.lean` §4 proves
+`∀ uint a; ⟨ uint y; ignoringOverflow { y = a + 1; }; ⟩ y > a` and refutes
+it without the block. The two blocks do not nest in each other (an
+elaboration error): the guards are written once, by the outermost.

@@ -467,6 +467,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   | Stmt.require _ _ c => `(sol_stmt| require($(← ppExprS ns c)))
   | Stmt.assert _ _ c => `(sol_stmt| assert($(← ppExprS ns c)))
   | Stmt.revert _ _ => `(sol_stmt| revert())
+  | Stmt.assumeFalse _ _ => `(sol_stmt| assume(false))
   | Stmt.callReceiver _ _ _ _ _ f args r body op =>
     let some recv ← ppCallReceiverExprS ns f args r body | escape
     let some st ← ppReceiverOpS ns recv op | escape

@@ -73,6 +73,7 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | require c => exact requireStep_sound σ k c p hp
   | assert c => exact assertStep_sound σ k c p hp
   | revert => cases m <;> cases hp <;> exact sound_revert σ
+  | assumeFalse => cases hp; exact sound_assumeFalse σ
   | call => cases hb
   | callReceiver => cases hb
   | callReceiverPush => cases hb
