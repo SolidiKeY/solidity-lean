@@ -37,8 +37,8 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | `transfer` | books `net(a) - v` unless `a` is the contract itself, and nothing else; whether the world pays is the EVM's (a refused payment reverts the machine alone) | `TRun.transfer`; `Evm.compile_correct` | `Semantics/Run.lean` |
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `TRun.send`, `TTx.ext` | `Examples/Tactics/Net.lean` |
 | Call arguments | all read, left to right, before the callee runs; storage parameters alias, memory parameters alias memory, and storage-to-memory arguments copy at their evaluation point before later argument effects | `Args.evalT`, `hoistCallArgs`, `CallRet.enterT` (`Semantics/Run.lean`, `Syntax/Elab.lean`) | Calldata parameters remain unsupported. |
-| `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is imported as `bool ok = a.send(v)`, as solkey's `SolJSONParser.isValueCall` reads it; solc forwards all gas there, so the callee can re-enter and write storage, which `holds` ignores (the no-callback reading) and only `holdsC` covers (`Semantics/Callback.lean`). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`) | |
-| `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule) | `Stmt.run` (`.tryCall`), `Binders.decodeT` | `Examples/Tactics/TryCatch.lean` |
+| `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is a send with all the gas (`Stmt.send`'s `full`), where solkey's `SolJSONParser.isValueCall` reads `bool ok = a.send(v)`: solc forwards all gas there, so the callee can re-enter and write storage, under `transferSemantics:noCallback` too (`ValidT .noCallback`, `Stmt.forksIn`); `holds` ignores it (every callee keeping the state). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`), `Semantics/Callback.lean` | `Examples/Tactics/Callback.lean` (`withdrawCall_noCallback`) |
+| `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule). The callee has all the gas, so it may call back under either `transferSemantics` (`ValidT`, `docs/options.md`); `holds` reads it as keeping the state, as solkey's `tryCallNoCallbackBox` does | `Stmt.run` (`.tryCall`), `Binders.decodeT`, `ExecS.tryOk` | `Examples/Tactics/TryCatch.lean` (`selfCall_noCallback`) |
 
 ## Evaluation order
 
@@ -338,10 +338,11 @@ machine). Two consequences of the table being fixed per transaction:
 
 A send is outside the compiled fragment (`Evm.inFrag` refuses it).
 `(bool ok, ) = a.call{value: v}("")`, which solkey lowers to
-`bool ok = a.send(v);` (its `SolJSONParser.isValueCall`), is not written in
-`sol{}` on this branch: it needs tuple syntax. Under solc that call forwards
-all the gas, so the callee may re-enter; the reading without callbacks
-ignores that, as solkey's `noCallback` does.
+`bool ok = a.send(v);` (its `SolJSONParser.isValueCall`), is a send with all
+the gas here (`Stmt.send`'s `full`), written so in `sol{}`. Under solc that
+call forwards all the gas, so the callee may re-enter: `ValidT .noCallback`
+lets it (`docs/options.md`), `holds` ignores it, as solkey's `noCallback`
+does.
 
 ## Calls
 

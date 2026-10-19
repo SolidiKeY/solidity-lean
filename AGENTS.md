@@ -69,7 +69,8 @@ a call with targets, `CallRet.rets`: a tuple assignment's, a spec
 obligation's).  **Callbacks** are
 a second reading of the modalities (`Semantics/Callback.lean`, `holdsC` of
 `Calculus/CallbackHolds.lean`, the `CallbackTaclet`s and `ProvesC` of
-`Calculus/Callback.lean`), not a change to `Stmt.run`.
+`Calculus/Callback.lean`), not a change to `Stmt.run`; which statements call
+back, and the other options of the calculus, are `docs/options.md`'s.
 
 **`sol{ … }` is Solidity, with two spellings of its own** (`Syntax.lean`):
 a decrement is `x−−`/`−−x` (two U+2212; `--` opens a Lean comment), and

@@ -22,4 +22,5 @@ the others link to it.
 | [solkey-feedback.md](solkey-feedback.md) | Open improvement requests flowing Lean → solkey. |
 | [solc-validation.md](solc-validation.md) | Plan, not built: checking the semantics and the rules against solc. |
 | [intrinsic.md](intrinsic.md) | The intrinsic refactor (branch `intrinsic`): what changed, what stays extrinsic on purpose, the decisions, gates, the removal of the surface syntax (W8, decision 11), and what is left of M6c. |
+| [options.md](options.md) | The calculus options, as solkey's `transferSemantics` and KeY Java's `intRules`: who calls back, overflow; the milestones O1–O5. |
 | [loops.md](loops.md) | `while`/`for`/`do … while`/`break`/`continue`: the decisions and the stages; L1–L4 (syntax, semantics, typing, unwinding, the invariant rules) built; L5–L7 planned. |
