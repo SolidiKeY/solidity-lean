@@ -93,6 +93,12 @@ def rwTable : List Lean.Name :=
   [`sequentialToParallel, `simplifyUpdate, `applySkip, `applyOnRigid, `applyOnRigidBox,
     `applyStorageBox, `applyOnPV, `concrete]
 
+/-- The Lean-only expansions past the program (`Calculus/ExpandLaws.lean`):
+named by a link only, never tried by `~=>`, `#chain` or `#last_line`, since
+a chain's last line keeps a `delete` or a copy whole as solkey does. -/
+def rwExpandLinks : List Lean.Name :=
+  [`delAtExpand, `copyExpand, `pushExpand, `popExpand]
+
 /-- The kind of law the constant `c` states under its arguments:
 `TermTaclet`, `EvalLaw`, `LitLaw`, or none. -/
 def lawKind? (c : Lean.Name) : MetaM (Option Lean.Name) := do
@@ -129,7 +135,7 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
   if n == `emptyModality || env.contains (`Solidity.Taclet ++ n) ||
       env.contains (`Solidity.LeanTaclet ++ n) then
     return none
-  if rwTable.contains n then return some (.table n)
+  if rwTable.contains n || rwExpandLinks.contains n then return some (.table n)
   if env.contains (``TermTaclet ++ n) then return some (.law (``TermTaclet ++ n))
   if env.contains (``EvalLaw ++ n) then return some (.evalLaw (``EvalLaw ++ n))
   if env.contains (``LitLaw ++ n) then return some (.litLaw (``LitLaw ++ n))
@@ -140,7 +146,7 @@ def rwArrow? (r : Ident) : MetaM (Option RwArrow) := do
   | [] => pure ()
   | cs => throwError "~[{r}]~>: ambiguous, {r} may be {", ".intercalate (cs.map toString)}"
   throwError "~[{r}]~>: {r} is no rule: not a `Taclet` or `LeanTaclet` constructor, not an \
-    update rule ({", ".intercalate (rwTable.map toString)}), not a term taclet (`TermTaclet`), \
+    update rule ({", ".intercalate ((rwTable ++ rwExpandLinks).map toString)}), not a term taclet (`TermTaclet`), \
     not a law of a memory read (`EvalLaw`), not a literal law (`LitLaw`)"
 
 /-- The symbol of a term `Tm.appN … o …`: its constructor's name, where it

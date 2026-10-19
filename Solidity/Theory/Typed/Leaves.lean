@@ -1117,7 +1117,7 @@ theorem foldlM_save_append {T : Ty} (r : SRef C T) (val : (l : Leaf T) → SVal 
         simp only [Option.bind_some, hy, hs₁, ih st₁, find_save_same hs₁, save_save hs₁]
 
 /-- A word's write is its save. -/
-theorem write_prim {P : PrimTy} (st : Storage C) (r : SRef C (.prim P)) (x : P.Denote) :
+theorem write_word {P : PrimTy} (st : Storage C) (r : SRef C (.prim P)) (x : P.Denote) :
     st.write r (.prim x) = st.save r (.prim x) := by
   simp only [Storage.write, SVal.isPrim, Ty.isPrimitive, ↓reduceIte]
 
@@ -1129,7 +1129,7 @@ theorem delete_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Sto
     st.delete r = T.leaves.foldlM
       (fun s l => s.write (r.append l.2) (.prim (PrimTy.dflt l.1))) st := by
   obtain ⟨l, ls, e⟩ := List.exists_cons_of_ne_nil hne
-  simp only [write_prim]
+  simp only [write_word]
   rw [e, foldlM_save_append r (fun l => .prim (PrimTy.dflt l.1)), ← e]
   simp only [SVal.foldLeaves_defaultOf hT, Option.bind_some, Storage.delete, Option.bind_eq_bind]
 
@@ -1140,7 +1140,7 @@ theorem write_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Stor
     st.write r v = T.leaves.foldlM
       (fun s l => s.write (r.append l.2) (.prim (SVal.wordOf (v.findM l.2)))) st := by
   obtain ⟨l, ls, e⟩ := List.exists_cons_of_ne_nil hne
-  simp only [write_prim]
+  simp only [write_word]
   rw [e, foldlM_save_append r (fun l => .prim (SVal.wordOf (v.findM l.2))), ← e]
   simp only [SVal.foldLeaves_overlay hT]
   unfold Storage.write
@@ -1160,7 +1160,7 @@ theorem write_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st : Stor
         | some y => simp only [Option.bind_some, SVal.overlay_prim]
 
 /-- A read below a reference is the read below the value there. -/
-theorem find_append {U W : Ty} (st : Storage C) (r : SRef C U) (q : Path U W) :
+theorem find_appendM {U W : Ty} (st : Storage C) (r : SRef C U) (q : Path U W) :
     st.find (r.append q) = (st.find r).bind (·.findM q) := by
   simp only [Storage.find, SRef.append, SVal.find_eq_findM, SVal.findM_append]
 
@@ -1184,7 +1184,7 @@ theorem write_find_expand {T : Ty} (hT : T.Finite) (hne : T.leaves ≠ []) (st :
   rw [write_expand hT hne st r v]
   have key : ∀ l ∈ T.leaves, st.find (q.append l.2) = some (.prim (SVal.wordOf (v.findM l.2))) := by
     intro l hl
-    rw [find_append, hv, Option.bind_some]
+    rw [find_appendM, hv, Option.bind_some]
     obtain ⟨b, hb⟩ := Option.isSome_iff_exists.mp
       (SVal.findM_direct v l.2 ((Ty.mem_leaves l.2).1 hl).1 ((Ty.mem_leaves l.2).1 hl).2)
     rw [hb]

@@ -92,6 +92,7 @@ import Solidity.Calculus.Merge
 import Solidity.Calculus.RewriteScoped
 import Solidity.Calculus.RewritePast
 import Solidity.Calculus.RewriteLaws
+import Solidity.Calculus.ExpandLaws
 import Solidity.Calculus.UpdateRules
 import Solidity.Calculus.UpdRuleScoped
 import Solidity.Calculus.StatePartsScoped
@@ -204,6 +205,7 @@ import Solidity.Examples.ChainNotation
 import Solidity.Examples.Tactics.UpdateRules
 import Solidity.Examples.Tactics.UpdRulesScoped
 import Solidity.Examples.ChainRewrites
+import Solidity.Examples.ChainExpand
 import Solidity.Examples.ChainRewritesOpen
 import Solidity.Examples.Tactics.Decide
 import Solidity.Examples.ExampleNames
