@@ -219,6 +219,9 @@ inductive RawStmt where
   | eval (args : List RawExpr)
   /-- `unchecked { … }`: a scope whose `+ - * **` wrap (`uncheckStmts`). -/
   | unchecked (body : List RawStmt)
+  /-- `checked { … }`: a scope where a checked operation that leaves its
+  range is an assertion failure (`Prog.checkOF`, `docs/options.md`). -/
+  | checked (body : List RawStmt)
   /-- `try e.f(a) returns (T v) { … } catch …`: the receiver, the function,
   the arguments, the return locals, and the clauses normalised as
   `Stmt.tryCall`'s, with the name of the `Panic` code. -/
@@ -716,6 +719,9 @@ syntax sol_expr " <<= " sol_expr : sol_stmt
 syntax sol_expr " >>= " sol_expr : sol_stmt
 /-- `unchecked { … }`: its `+ - * **` wrap at `2^256` instead of reverting. -/
 syntax (name := solUnchecked) &"unchecked" ppSpace sol_block : sol_stmt
+/-- `checked { … }`: an overflow in it fails as an `assert` does
+(`Prog.checkOF`), not as a revert. -/
+syntax (name := solChecked) &"checked" ppSpace sol_block : sol_stmt
 syntax "if " "(" sol_expr ") " sol_block (" else " sol_block)? : sol_stmt
 /-- `if (c) { … } else if (d) { … } else { … }`: the `if`s nested. -/
 syntax (name := solIfChain) "if " "(" sol_expr ") " sol_block
@@ -1108,6 +1114,7 @@ partial def expandStmt (s : TSyntax `sol_stmt) : MacroM Term := do
   | ``solPushTarget =>
     expandStmt.pushTarget s ⟨s.raw[0]⟩ (← expandExpr ⟨s.raw[0]⟩) (← expandExpr ⟨s.raw[3]⟩)
   | ``solUnchecked => `(RawStmt.unchecked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
+  | ``solChecked => `(RawStmt.checked $(← expandStmt.expandBlock ⟨s.raw[1]⟩))
   | ``solBlockStmt => `(RawStmt.block [$(← (payload s.raw[1]).mapM (expandStmt ⟨·⟩)),*])
   | ``solTupleAssign =>
     let ts ← (#[s.raw[1]] ++ s.raw[2].getArgs).mapM fun o => do

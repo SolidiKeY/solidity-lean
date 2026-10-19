@@ -56,6 +56,8 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 | `Syntax.lean` | The grammar behind `sol[C]{…}` and `contract!{…}` (`sol_stmt`, `sol_expr`, `sol_ty`; the raw syntax `RawStmt`, `RawExpr`), `Contract`/`FunDecl`, the index types of the typed syntax (`ArrTy`, `IndexTy`), and the quoters' helpers (`rflTrue`, `rflSome`, …); the typed syntax is `Syntax/Scoped.lean`'s. |
 | `Scope.lean` | The scoped syntax's contexts: `LTy`, `Ctx := List LTy`, positions `Idx`, suffixes `Ext` (scope ends), thinnings `Thin` (weakening), `Binders`. |
 | `Syntax/Scoped.lean` | The typed syntax scoped (M2 of `docs/intrinsic.md`): `Stmt C Γ Γ'`/`Prog C Γ Γ'` over `Idx`, scoped branches and blocks, calls closed over their frame (`Args`, `CallRet`), the printers (names beside the context) and `Stmt.wk`.  What every semantics, rule and proof reads; the elaborator emits it (`Syntax/Elab.lean`) and the printers read it (`Calculus/PrintStmt.lean`). |
+| `Syntax/Checked.lean` | `checked { … }` (`docs/options.md`, O2): the range guards of a statement's checked operations, in evaluation order (`Val.guard`, `Stmt.guard`, `Checked.rangeU`/`rangeI`), and `Prog.checkOF`, each statement preceded by `assert` of its guard, a loop's condition checked again at the end of its body. |
+| `Syntax/CheckedExact.lean` | The guards are exact: each holds exactly when its operation stays in range (`add_uint_exact`, `mul_uint_exact`, `add_int_exact`, `sub_int_exact`, `neg_int_exact`, `div_int_exact`, `mul_int_exact`). |
 | `Syntax/PushSource.lean` | Typed primitive path reads, complex-storage-read tests and memory-source classification/admission, shared by push-source schemas, dispatcher and fragment proofs. |
 | `Syntax/Inlined.lean` | A scoped block printed with its calls inlined, for display (`Prog.inlinedStr`, `Prog.inlinedShow`): each call as KeY's `expand_function_body` leaves it, the arguments, return variables, body and result; a `{ … }` block's statements in place. |
 | `Syntax/Elab.lean` | The elaborator (W8.1): the raw passes that fix solc's evaluation order and the fresh names (`hoist`, `captureExpr`, `lowerLoops`, `lowerReturns`, `wrapMods`, `renameStmts`, `freshenBlocks`), then `synth`/`check` into the scoped syntax, a local by `NCtx.find`; statements typed where they are elaborated (`SStmt`) and chained into a block (`SProg.chain`, weakened past a flat block's locals); named contexts (`NCtx`, `NCtx.find`). |
@@ -436,6 +438,7 @@ the scoped calculus (`open scoped Solidity.Scoped`):
 | `Examples/Chains/MemoryCoverage.lean` | One chain per memory rule, from a concrete state. |
 | `Examples/Chains/StorageToMemory.lean`, `MemoryToStorage.lean` | The copies between the two, with lazy reads. |
 | `Examples/Chains/Payment.lean` | `transfer` under the box: a literal amount, a nonsimple amount, a storage receiver. |
+| `Examples/Tactics/CheckedBlock.lean` | `checked { … }`: an underflow refuted inside the block and valid outside it, what the block writes, guards discharged by the closer, `&&` and a loop's condition in evaluation order, a narrow type's `assert`. |
 | `Examples/Chains/CheckedArithmetic.lean`, `EvaluationOrder.lean` | Overflow reverts; the evaluation order of an indexed write. |
 
 `Examples/Tactics/` — theorems `⊨ dl!{ … }` proved by `sol_symex; sol_close`

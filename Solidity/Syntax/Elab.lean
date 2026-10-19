@@ -1,4 +1,5 @@
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.Checked
 
 /-!
 # The elaborator
@@ -383,7 +384,7 @@ def RawStmt.exprs : RawStmt → List RawExpr
   | .send (some _) _ r a _ => [r, a]
   | .tupleDecl _ r => [r]
   | .tupleAssign ts r => ts.filterMap id ++ [r]
-  | .revert | .unchecked _ | .block _ | .brk | .cont | .hole => []
+  | .revert | .unchecked _ | .checked _ | .block _ | .brk | .cont | .hole => []
   | .whileLoop a c _ | .doWhile a _ c | .loop a c _ => a.exprs ++ [c]
   | .forLoop a _ c _ _ => a.exprs ++ c.toList
 
@@ -391,7 +392,7 @@ def RawStmt.exprs : RawStmt → List RawExpr
 loop's body (a `for`'s initialisation, body and update). -/
 def RawStmt.blocks : RawStmt → List (List RawStmt)
   | .ite _ t e => [t, e]
-  | .unchecked b | .block b => [b]
+  | .unchecked b | .checked b | .block b => [b]
   | .tryCall _ _ _ _ ok err _ pnc other => [ok, err, pnc, other]
   | .whileLoop _ _ b | .doWhile _ b _ | .loop _ _ b => [b]
   | .forLoop _ i _ u b => [i, b, u]
@@ -429,6 +430,7 @@ def RawStmt.mapExprsM {m : Type → Type} [Monad m] (f : RawExpr → m RawExpr) 
   | .eval as => return .eval (← as.mapM f)
   | .revert => pure .revert
   | .unchecked b => pure (.unchecked b)
+  | .checked b => pure (.checked b)
   | .tryCall r g as rets ok err code pnc other =>
     return .tryCall (← f r) g (← as.mapM f) rets ok err code pnc other
   | .send T x r a g => return .send T (← f x) (← f r) (← f a) g
@@ -517,6 +519,7 @@ expressions as they are. -/
 def RawStmt.mapBlocks (f : List RawStmt → List RawStmt) : RawStmt → RawStmt
   | .ite c t e => .ite c (f t) (f e)
   | .unchecked b => .unchecked (f b)
+  | .checked b => .checked (f b)
   | .block b => .block (f b)
   | .tryCall r g as rets ok err code pnc other =>
     .tryCall r g as rets (f ok) (f err) code (f pnc) (f other)
@@ -589,6 +592,7 @@ clauses are scopes of their own, so nothing after them is `later`. -/
 partial def freshenStmt (live later : List String) : RawStmt → FreshenM RawStmt
   | .block b => do pure (.block (← freshenList true live later b))
   | .unchecked b => do pure (.unchecked (← freshenList true live later b))
+  | .checked b => do pure (.checked (← freshenList true live later b))
   | .forLoop a [] c u b => do
     pure (.forLoop a [] c (← freshenList false live [] u) (← freshenList false live [] b))
   | .forLoop a i c u b => do
@@ -675,6 +679,13 @@ abbrev SStmt.of (Γ : NCtx) {Γ' : Ctx} (s : Stmt C Γ.ctx Γ') : SStmt C := ⟨
 
 /-- A block read in `Γ`, and the context it leaves. -/
 abbrev Blk (C : Contract) (Γ : Ctx) := (Γ' : Ctx) × Prog C Γ Γ'
+
+/-- A statement inside `checked { … }`: `assert` of its guard first, the
+programs it holds checked (`Stmt.guard`, `Stmt.checkOF`). -/
+def SStmt.checkOF (s : SStmt C) : SProg C :=
+  match s.s.guard with
+  | none => [⟨s.Γ, s.Γ', s.s.checkOF⟩]
+  | some g => [.of s.Γ (.assert g), ⟨s.Γ, s.Γ', s.s.checkOF⟩]
 
 /-- `P` then `Q`. -/
 def Prog.join {Γ Δ Ε : Ctx} : Prog C Γ Δ → Prog C Δ Ε → Prog C Γ Ε
@@ -1033,6 +1044,9 @@ structure ElabScope where
   /-- Names supplied by imported source, including fresh-shaped user locals
   such as `se1`. They are mutable values, never written-out captures. -/
   mutableFreshNames : List String := []
+  /-- Inside `checked { … }`: a narrow type's check is an `assert`
+  (`narrowCheck`). -/
+  checked : Bool := false
 
 /-- Elaboration threads the locals in scope, newest first, and the index of
 the next variable a capture declares, and reads its scope (`ElabScope`). -/
@@ -1272,7 +1286,8 @@ partial def narrowPure (Γ : ECtx) : RawExpr → Except String RawExpr
 def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do
   if 256 ≤ n then return []
   let Γ ← nctx
-  pure [.of Γ (.require (← checkIn C Γ .bool (inTyCond p n e)))]
+  let c ← checkIn C Γ .bool (inTyCond p n e)
+  pure [.of Γ (if (← read).checked then .assert c else .require c)]
 
 /-- What follows a write of `r` to the variable `l`: the check of `r`'s narrow
 operation, on `l` (`c = a + b;` at `uint8` is `c = a + b; require(c <= 255);`:
@@ -1390,6 +1405,7 @@ partial def renameStmts (ρ : List (String × String)) : List RawStmt → ElabM 
     | .ite c t e =>
       pure (.ite (r c) (← renameStmts ρ t) (← renameStmts ρ e) :: (← renameStmts ρ ss))
     | .unchecked b => pure (.unchecked (← renameStmts ρ b) :: (← renameStmts ρ ss))
+    | .checked b => pure (.checked (← renameStmts ρ b) :: (← renameStmts ρ ss))
     | .block b => pure (.block (← renameStmts ρ b) :: (← renameStmts ρ ss))
     | .tupleDecl vs e =>
       let mut ρ' := ρ
@@ -1510,6 +1526,10 @@ partial def lowerReturns (r : List String) : List RawStmt → Except String (Lis
     if b.any RawStmt.hasReturn && !ss.isEmpty then
       throw "`return` inside `unchecked { … }` with statements after the block"
     pure (.unchecked (← lowerReturns r b) :: (← lowerReturns r ss))
+  | .checked b :: ss => do
+    if b.any RawStmt.hasReturn && !ss.isEmpty then
+      throw "`return` inside `checked { … }` with statements after the block"
+    pure (.checked (← lowerReturns r b) :: (← lowerReturns r ss))
   | s :: ss => do pure (s :: (← lowerReturns r ss))
 
 /-! ### Loops, lowered
@@ -1626,6 +1646,7 @@ partial def lowerStmt (rs : Option (List String)) (s : RawStmt) :
     return ← match s with
       | .block b => do pure (.block (← lowerB b), [])
       | .unchecked b => do pure (.unchecked (← lowerB b), [])
+      | .checked b => do pure (.checked (← lowerB b), [])
       | .ite c t e => do pure (.ite c (← lowerB t) (← lowerB e), [])
       | .tryCall e g as rets ok err code pnc other => do
         pure (.tryCall e g as rets (← lowerB ok) (← lowerB err) code (← lowerB pnc) (← lowerB other),
@@ -1648,6 +1669,9 @@ partial def lowerStmt (rs : Option (List String)) (s : RawStmt) :
   | .unchecked b => do
     let (b', ab) ← lowerList rs b
     pure (.unchecked b', ab)
+  | .checked b => do
+    let (b', ab) ← lowerList rs b
+    pure (.checked b', ab)
   | .ite c t e => do
     let (t', a) ← lowerList rs t
     let (e', b) ← lowerList rs e
@@ -1732,6 +1756,7 @@ partial def RawStmt.fillHole (inner : List RawStmt) (s : RawStmt) : Except Strin
   | .block b => return .block (← go b)
   | .unchecked b =>
     if b.any RawStmt.hasHole then throw "`_;` inside `unchecked { … }`" else pure (.unchecked b)
+  | .checked b => return .checked (← go b)
   | .tryCall e g as rets ok err code pnc other =>
     return .tryCall e g as rets (← go ok) (← go err) code (← go pnc) (← go other)
   | .whileLoop a c b => return .whileLoop a c (← go b)
@@ -1790,6 +1815,7 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
         throw "push arithmetic inside `unchecked` is not supported"
       | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
+      | .checked b => do pure (.checked (← uncheckStmts b))
       | .block b => do pure (.block (← uncheckStmts b))
       | .tryCall e g as rets ok err code pnc other => do
         pure (.tryCall (← e.uncheck) g (← as.mapM RawExpr.uncheck) rets (← uncheckStmts ok)
@@ -2832,6 +2858,12 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
   | .revert => do pure [.of (← nctx) .revert]
   | .eval _ => pure []
   | .unchecked ss => do elabBranch (← ElabM.lift (uncheckStmts ss))
+  | .checked ss => do
+    -- the guards made once, by the outermost `checked` (`Prog.checkOF`)
+    if (← read).checked then elabBranch ss
+    else
+      let P ← withReader (fun sc => { sc with checked := true }) (elabBranch ss)
+      pure (P.flatMap SStmt.checkOF)
   | .tryCall e g as rets ok err code pnc other => do
     -- `I(a)` is `a`
     let funs := (← read).funs

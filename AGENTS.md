@@ -76,7 +76,8 @@ back, and the other options of the calculus, are `docs/options.md`'s.
 a decrement is `x−−`/`−−x` (two U+2212; `--` opens a Lean comment), and
 effects stay out of values — an `++` inside an expression or a conditional
 of references is captured by the elaborator before its statement, in solc's
-evaluation order.
+evaluation order.  It has one block of its own, `checked { … }`, where an
+overflow fails as an `assert` (`docs/options.md`).
 
 **The `SolKey` reader** (side-projects, `lean/solkey`), a Lean reader for
 KeY `.key` files that once consumed this package, is outdated since W9.7: it

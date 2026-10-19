@@ -6,6 +6,8 @@ import Solidity.SpecSyntax
 import Solidity.Syntax
 import Solidity.Scope
 import Solidity.Syntax.Scoped
+import Solidity.Syntax.Checked
+import Solidity.Syntax.CheckedExact
 import Solidity.Syntax.PushSource
 import Solidity.Syntax.Inlined
 import Solidity.Syntax.Elab
@@ -179,6 +181,7 @@ import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.Values
 import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.Checked
+import Solidity.Examples.Tactics.CheckedBlock
 import Solidity.Examples.Tactics.Calls
 import Solidity.Examples.Tactics.Constructors
 import Solidity.Examples.Tactics.Loops

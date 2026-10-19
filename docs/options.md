@@ -16,7 +16,7 @@ can never be read as one under another.
 | Milestone | What | Status |
 |---|---|---|
 | O1 | bug 5: `try` and `call{value}` call back under `noCallback` | done |
-| O2 | `checkingOF`: an overflow fails both modalities | planned |
+| O2 | `checked { … }` (`checkingOF`): an overflow fails both modalities | done |
 | O3 | the strategy under callbacks (`sol_symex`, `sol_prove` on `ValidT`) | planned |
 | O4 | the diamonds of the payments; the invariant from the spec | planned |
 | O5 | `ignoringOF`: an overflowing run proves anything | planned |
@@ -66,3 +66,39 @@ The send rules match either kind: the deterministic run is the same.
 `ExtCall` names its function, not its mutability. The oracle answers a call
 by its key alone (`ExtKey`), so two equal calls return the same in a
 deterministic run; the callback runs have no such restriction.
+
+## O2. `checked { … }`: an overflow fails the proof (`checkingOF`)
+
+**Decision.** KeY Java's `arithmeticSemanticsCheckingOF` owes a range goal
+per arithmetic operation. Here it is a block, the dual of `unchecked`, and a
+program transformation rather than a reading: inside `checked { … }` every
+statement is preceded by `assert` of the ranges its checked operations need
+(`Prog.checkOF`, `Syntax/Checked.lean`), and a narrow type's check, which
+the elaborator writes as a `require` after the write (`narrowCheck`), is an
+`assert`. A failing `assert` is a panic, which neither modality accepts, so
+a proof of a `checked` program says that no checked operation in it
+overflows; outside the block an overflow is a revert, which the box accepts
+(solc's `Panic(0x11)`, read as solkey reads its `outOfBounds`).
+
+The run, the rules and the readings are unchanged, and nothing below the
+elaborator: the asserts are ordinary statements, and the strategy takes
+them by `assertSimple`. The theorem shows them (`assert(x <= x +% 1)`), so
+it states what it proves.
+
+**What is guarded**, in evaluation order: `+ - *` at `uint`, `+ - * /` and
+unary `-` at `int`, `x ⊕= e`, `x++`, `x−−` on the target's current value,
+`push() ⊕= e` on the default `0`; the right operand of `&&`/`||` only where
+it is evaluated, a conditional's branches under its condition, a loop's
+condition at its head and again at the end of its body, a deferred push's
+source at the end of its prefix. `**` is not (no closed bound: it reverts,
+as outside), nor division by zero (`Panic(0x12)`, a revert), nor the
+wrapping operators of `unchecked`. The guards cannot fail themselves (at
+`uint` they use `+%`/`*%`, `a <= a +% b`; at `int`, `MAX - b` under
+`b >= 0`), and they are exact: `Syntax/CheckedExact.lean` proves each one
+holds exactly when its operation stays in range, at any bound.
+
+**Why not a reading.** The calculus reads a failing term of an update as
+the modality's halt (`Upd.afterT`), with no cause attached: a reading in
+which an overflow fails both modalities would need every rule to owe the
+range of its terms, and every soundness proof to tell an overflow from a
+revert. The block gets the same proofs from the existing `assert` rule.
