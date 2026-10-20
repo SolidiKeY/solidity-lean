@@ -560,48 +560,83 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
   reverts. -/
   | tryRevert {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} :
-      ExecS J σ (.tryCall call rets ok err code pnc other) (.halt .revert)
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} :
+      ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) (.halt .revert)
   /-- Data that the return variables do not decode. -/
   | tryDecode {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {vs : List Word} {e : THalt} :
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {vs : List Word} {e : THalt} :
       rets.decodeT (C := C) (H := σ.H) vs = .error e →
-        ExecS J σ (.tryCall call rets ok err code pnc other) (.halt e)
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) (.halt e)
   /-- KeY's "invariant on exit": control leaves with `J` broken. -/
   | tryViolated {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} :
-      ¬ J.at σ → ExecS J σ (.tryCall call rets ok err code pnc other) .violated
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} :
+      ¬ J.at σ → ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) .violated
   /-- KeY's "call succeeded": `J` kept, any state the callee may leave in
   which `J` holds, the return data bound, the clause run, its locals popped. -/
   | tryOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {st : Storage C} {nt : Ledger}
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {st : Storage C} {nt : Ledger}
       {vs rest : List Word} {r : TEnv C σ.H ρ} {o : COut C σ.H Γ₁} :
       J.at σ → J.at (σ.havoc st nt) → rets.decodeT vs = .ok (r, rest) →
         ExecP J ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) ok o →
-          ExecS J σ (.tryCall call rets ok err code pnc other)
+          ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
             (o.map (Out.drop ((Ext.append Γ ρ).trans ok.ext)))
   /-- "Error caught": the call reverted, and its effects with it. -/
   | tryError {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {o : COut C σ.H Γ₂} :
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {o : COut C σ.H Γ₂} :
       ExecP J σ err o →
-        ExecS J σ (.tryCall call rets ok err code pnc other) (o.map (Out.drop err.ext))
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) (o.map (Out.drop err.ext))
   /-- "Panic caught", with the code bound. -/
   | tryPanic {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {v : Word} {o : COut C σ.H Γ₃} :
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {v : Word} {o : COut C σ.H Γ₃} :
       ExecP J (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) pnc o →
-        ExecS J σ (.tryCall call rets ok err code pnc other)
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
           (o.map (Out.drop ((Ext.append Γ κ).trans pnc.ext)))
   /-- "Other failure caught". -/
   | tryOther {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
-      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄} {o : COut C σ.H Γ₄} :
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {o : COut C σ.H Γ₄} :
       ExecP J σ other o →
-        ExecS J σ (.tryCall call rets ok err code pnc other) (o.map (Out.drop other.ext))
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) (o.map (Out.drop other.ext))
+  /-- A self-call (`Stmt.tryCall`'s `self`, `docs/options.md` O7): the
+  receiver is the contract, whose function runs as an inlined call, and the
+  success clause from the state it leaves, its locals popped. -/
+  | trySelfOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
+      {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf}
+      {o₁ : Out C σ.H (ρ ++ Γ)} {o : COut C o₁.st.H Γ₁} :
+      (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
+      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.ok o₁) → ExecP J o₁.st ok o →
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
+          (o.map fun o' => ⟨o'.st.drop ((Ext.append Γ ρ).trans ok.ext), o₁.ext.trans o'.ext⟩)
+  /-- A self-call whose callee exhausts or diverges: the caller does too. -/
+  | trySelfHalt {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
+      {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {e : THalt} :
+      (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
+      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) → e ≠ .revert → e ≠ .panic →
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true) (.halt e)
+  /-- A self-call whose callee leaves the contract with `J` broken. -/
+  | trySelfViolated {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ}
+      {rets : Binders ρ} {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
+      {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
+      {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} :
+      (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
+      ExecS J σ (.call call.fn sargs (.rets rets) sbody) .violated →
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true) .violated
   /-- A loop that pays, whose condition halts. -/
   | loopHalt {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
       {body : Prog C Γ Γ₁} {e : THalt} :
@@ -857,10 +892,75 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
                 (ExecS.callReceiverPush (value := value) h hp hu))
           · exact .inr (ExecS.callReceiverPush (value := value) h hp hu)
     · exact .inr (ExecS.callReceiverPushViolated (code := code) (value := value) h)
-  | _, _, .tryCall call rets ok err code pnc other, σ => by
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self, σ => by
     show ExecS J σ _ (.ofRes (TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code
-      pnc.ext pnc.runR other.ext other.runR σ)) ∨ _
+      pnc.ext pnc.runR other.ext other.runR sargs sbody.ext sbody.runR self σ)) ∨ _
+    have hErr : ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
+        (.ofRes ((err.runR σ).map fun o => ⟨o.st.drop err.ext, o.ext⟩)) ∨
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) .violated := by
+      rw [← COut.map_ofRes]
+      rcases Prog.exec_run J err σ with h | h
+      · exact .inl (.tryError h)
+      · exact .inr (.tryError (o := .violated) h)
+    have hOth : ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
+        (.ofRes ((other.runR σ).map fun o => ⟨o.st.drop other.ext, o.ext⟩)) ∨
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) .violated := by
+      rw [← COut.map_ofRes]
+      rcases Prog.exec_run J other σ with h | h
+      · exact .inl (.tryOther h)
+      · exact .inr (.tryOther (o := .violated) h)
+    have hPnc : ∀ v, ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
+        (.ofRes ((pnc.runR (σ.withEnv (TEnv.append _ (code.decodeT v) σ.env))).map
+          fun o => ⟨o.st.drop ((Ext.append _ _).trans pnc.ext), o.ext⟩)) ∨
+        ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) .violated := by
+      intro v
+      rw [← COut.map_ofRes]
+      rcases Prog.exec_run J pnc (σ.withEnv (TEnv.append _ (code.decodeT v) σ.env)) with h | h
+      · exact .inl (.tryPanic h)
+      · exact .inr (.tryPanic (o := .violated) h)
     unfold TRun.tryCall
+    split
+    · exact .inl .tryRevert
+    rename_i hz
+    split
+    · rename_i hs
+      simp only [Bool.and_eq_true, decide_eq_true_eq] at hs
+      obtain ⟨rfl, hs⟩ := hs
+      have hc : ExecS J σ (.call call.fn sargs (.rets rets) sbody)
+          (.ofRes (TRun.call sargs (.rets rets) sbody.ext sbody.runR σ)) ∨
+          ExecS J σ (.call call.fn sargs (.rets rets) sbody) .violated := by
+        rw [TRun.call_eq]
+        cases ha : sargs.evalT σ with
+        | error e => exact .inl (.callArgs ha)
+        | ok a =>
+          show ExecS J σ _ (.ofRes (TRun.callFrom (.rets rets) sbody.ext sbody.runR σ
+            ((CallRet.rets rets).enterT (σ.withEnv a)))) ∨ _
+          rw [TRun.callFrom_eq, ← COut.map_ofRes]
+          rcases Prog.exec_run J sbody ((CallRet.rets rets).enterT (σ.withEnv a)).st with h | h
+          · exact .inl (ExecS.callBody (f := call.fn) ha h)
+          · exact .inr (ExecS.callBody (f := call.fn) (o := .violated) ha h)
+      rcases hc with hc | hc
+      · revert hc
+        cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+        | ok o₁ =>
+          intro hc
+          dsimp only
+          rw [← COut.map_ofRes]
+          rcases Prog.exec_run J ok o₁.st with h | h
+          · exact .inl (ExecS.trySelfOk hz hs hc h)
+          · exact .inr (ExecS.trySelfOk (o := .violated) hz hs hc h)
+        | error e =>
+          intro hc
+          cases e with
+          | revert =>
+            dsimp only
+            split
+            · exact hErr
+            · exact hOth
+          | panic => exact hPnc _
+          | diverge => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide))
+          | exhausted => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide))
+      · exact .inr (ExecS.trySelfViolated hz hs hc)
     rcases lookupBy (call.keyT σ) σ.tx.ext with _ | (vs | _ | v | _)
     · exact .inl .tryRevert
     · dsimp only
@@ -875,19 +975,9 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
           · exact .inl (ExecS.tryOk (st := σ.storage) (nt := σ.net) hI hI hd h)
           · exact .inr (ExecS.tryOk (st := σ.storage) (nt := σ.net) (o := .violated) hI hI hd h)
         · exact .inr (.tryViolated hI)
-    · rw [← COut.map_ofRes]
-      rcases Prog.exec_run J err σ with h | h
-      · exact .inl (.tryError h)
-      · exact .inr (.tryError (o := .violated) h)
-    · dsimp only
-      rw [← COut.map_ofRes]
-      rcases Prog.exec_run J pnc (σ.withEnv (TEnv.append _ (code.decodeT v) σ.env)) with h | h
-      · exact .inl (.tryPanic h)
-      · exact .inr (.tryPanic (o := .violated) h)
-    · rw [← COut.map_ofRes]
-      rcases Prog.exec_run J other σ with h | h
-      · exact .inl (.tryOther h)
-      · exact .inr (.tryOther (o := .violated) h)
+    · exact hErr
+    · exact hPnc v
+    · exact hOth
   | Γ, _, .loop a c body, σ => by
     cases ht : Prog.callsBack J.pay body with
     | false => exact .inl (.det (by simp only [Stmt.forksIn, ht]))
