@@ -209,9 +209,10 @@ their names.
 
 ### Recursion
 
-Status: implemented on branch `open-recursion` (the countdown and a
-recursive sum proved, `Examples/Tactics/Recursion.lean`); the runner's
-`functionsRecursiveUnbounded` is imported and pending (below).
+Status: implemented on branch `open-recursion`: the countdown (box and
+diamond) and a recursive sum proved (`Examples/Tactics/Recursion.lean`),
+and the runner proves `functionsRecursiveUnbounded` unannotated
+(`rec_auto`).
 
 | Question | Decision |
 |---|---|
@@ -220,17 +221,20 @@ recursive sum proved, `Examples/Tactics/Recursion.lean`); the runner's
 | Elaboration | `elabCallRet` (`Syntax/Elab.lean`): a function is recursive when its body (or a modifier's) reaches a call of itself (`isRecursive`, over the contract's functions).  Its call allocates the frame's names once, and the body is elaborated per frame, lazily: `frame n bt` elaborates the raw body under `ElabScope.recs`, where a call of the same function (or of one mutually recursive with it) is `callRec f n … bt` with the frame's own names (`RecFrame`; the thunk's contract erased, `RecThunk`), its errors read once at the call.  A recursive body may call the functions declared before it and the ones mutually recursive with it (`recPartners`).  Refused: a recursive function of several returns or of a reference return (one frame per call shape would be needed). |
 | Quoting | A thunk is not data, so both quoters (`Syntax/Quote.lean`, `Calculus/Quote.lean`) quote a `callRec` by forcing its body once and writing `fun _ => recUnroll Prog.recBase (fun n bt => Q) d`, where `Q` is the forced body with every call of the same function written `callRec f n … bt` (`hs`, the functions whose unrolling is being quoted, by de Bruijn index).  Mutual recursion nests: the inner function's unrolling is under the outer's binders.  The kernel re-checks every quoted term. |
 | The strategy | `recursiveCallUnfold` (Lean only): `callRec` is the call of its body's next frame, which `internalCallExpand`/`functionBodyExpand` expand as any call.  It is exact, so sound, but it does not end with a symbolic argument: it splits every `if` whatever its condition, and with concrete arguments it is just as deep (the closer prunes branches only at the leaves).  `sol_symex` is no proof of a recursive call. |
-| Proofs | KeY's way: `useRecContract` (`useContract` at a `callRec`, `Calculus/Recursion.lean`) with a `RecContract` (the `FunContract` at every call that returns `rs`, the body within its mutability, the parameters unwritten), proved for every frame by `RecContract.unroll`: the bottom frame meets every box contract, and a frame meets it where the frame below does.  No `decreases`: the box accepts the exhausted bottom frame as it accepts a run that does not end; a diamond contract would need one.  In the step the frame below is a free thunk `t`; `sol_symex_rec` runs the strategy up to each call of it (conjunctions split) and `rec_contract ih` proves the call by the hypothesis.  The compiled strategy runs a goal with a free thunk at a placeholder body (`Prog.recSentinel`, `Symex.placeholders`), quoted back as the variable: `Meta.reduce` is far too slow for it. |
+| Proofs | KeY's way: `useRecContract` (`useContract` at a `callRec`, `Calculus/Recursion.lean`) with a `RecContract` (the `FunContract` at every call that returns `rs`, the body within its mutability, the parameters unwritten), proved for every frame by `RecContract.unroll`: the bottom frame meets every contract, and a frame meets it where the frame below does.  `FunContract` and its rule take the modality (`m`, the box by default), so a diamond contract is one too.  No `decreases`, under either modality: both accept the exhausted bottom frame, and the unrolling is finite, so the induction is over the frames, not a measure (a diamond `⟨ f(); ⟩ true` of a countdown from any `a` holds: below 1024 frames it ends, above them it is exhausted, as on the EVM).  In the step the frame below is a free thunk `t`; `sol_symex_rec` runs the strategy up to each call of it (conjunctions split) and `rec_contract ih` proves the call by the hypothesis.  The compiled strategy runs a goal with a free thunk at a placeholder body (`Prog.recSentinel`, `Symex.placeholders`), quoted back as the variable: `Meta.reduce` is far too slow for it. |
 | Analyses that do not force the thunk | `Stmt.maxIdx` (the body's names are read when it is unfolded), `Stmt.size`, the solkey fragment (`inSolkey`, `keyStep`: false), `Stmt.asserts`, `hasTransfer`, `callsBack`, `forks`, the EVM's fragment (outside it), all conservative.  `Stmt.within` forces it (the frame of a contract needs it): linear in the unrolling for one recursive call per body, exponential for several in compiled code, so a loop's frame (`Prog.frame`) over a body with a doubly recursive call is not computable. |
 | Callbacks | `ExecS.callRec`: a recursive call runs as the call of its body (`Stmt.exec_run`, `CallbackWk.callRec_wk`, `CallbackUnwk.callRec_unwk`). |
 | The import | `SolcJson.reach` orders the functions callees first, a call back into the path adding nothing, so each function of a cycle comes after every function it calls outside it. |
 
-**What is left.** The runner's search does not prove a recursive call (it
-would need the induction, a `RecContract` stated by the strategy):
-`functionsRecursiveUnbounded` is imported and `pending`; its obligation is
-proved by hand in `Examples/Tactics/Recursion.lean` (`countdownNoPanic`,
-the same body).  A recursive function of several or reference returns is
-refused.  Diamond contracts (with a `decreases`) are not stated.
+| The runner | An obligation with a recursive call (`Frontend/Testing.lean`) is stated as `Valid` and proved by `rec_auto`: the strategy up to each recursive call (`sol_symex_rec`), the call by the contract `true`/`true` at `nonpayable` (the obligation as its own contract), proved by induction over the frames (`rec_induct`), the closer elsewhere.  The search (`⊢`) is not run on it: it does no induction and unfolds without end.  `functionsRecursiveUnbounded` (`⟨ f(); ⟩ true`) proves so, unannotated. |
+
+**What is left.** `rec_auto` infers only the contract `true`/`true`: a
+recursive call whose result or effect the rest of the obligation needs (a
+postcondition past it) needs a written contract (`rec_contract_by`), which
+the import does not read from `/// @custom:key` yet.  A recursive function
+of several or reference returns is refused.  `Stmt.within` of a body with
+two recursive calls of itself is exponential in compiled code.  A call
+reached under the callback reading (`ValidT`) is not tried.
 
 ### `send`
 
