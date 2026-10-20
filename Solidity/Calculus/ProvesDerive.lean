@@ -72,75 +72,109 @@ def each {β : Type} (f : β → Nat → Option (List α × Nat)) : List β → 
   | [], b => some ([], b)
   | x :: xs, b => both (f x) (each f xs) b
 
+/-- The largest index of a name the context binds: `Fml.maxIdx` of the
+context wrapped around a formula is this and the formula's
+(`Hyps.maxIdx_wrap`), so the walk carries it from a context to the next
+instead of scanning the context at every step. -/
+def _root_.Solidity.Hyps.maxIdxH {Γ₀ : Ctx} : {Γ : Ctx} → Hyps C Γ₀ Γ → Nat
+  | _, H => Hyps.casesOn (motive := fun _ _ => Nat) H 0
+      (fun H a => max (Hyps.maxIdxH H) a.maxIdx)
+      (fun H _ U => max (Hyps.maxIdxH H) U.maxIdx)
+      (fun H => Hyps.maxIdxH H)
+      (fun H x _ => max (Hyps.maxIdxH H) x.idx)
+      (fun H _ x _ => max (Hyps.maxIdxH H) x.idx)
+      (fun H _ => Hyps.maxIdxH H)
+  termination_by structural _ H => H
+
+/-- The fresh index of a step on `φ` behind a context whose largest index
+is `k` (`Hyps.fresh` when `k` is `Hyps.maxIdxH`, `Hyps.fresh_eq_freshK`). -/
+def freshK {Γ : Ctx} (k : Nat) (φ : Fml C Γ) : Nat := max (max k φ.maxIdx) C.rootMaxIdx + 1
+
 /-- The goals of a rule's premise, as the `Proves` rule of its kind has
-them; `r` walks a goal.  A split's branch whose context `x` refutes is
-closed by `closeFalse` and not walked (`refuteS`). -/
-def premise (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat))
-    (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (m : Modality) (ω : Prog C Γ' Γ₁)
+them; `r` walks a goal, given the largest index of its context (`k` that of
+`H`).  A split's branch whose context `x` refutes is closed by `closeFalse`
+and not walked (`refuteS`). -/
+def premise (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Option (List α × Nat))
+    (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (k : Nat)
+    (m : Modality) (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₂) (φ : Fml C Γ₂) (p : Premise C Γ Γ') (b : Nat) :
     Option (List α × Nat) :=
   Premise.casesOn (motive := fun Γ' _ => Prog C Γ' Γ₁ → Option (List α × Nat)) p
-    (fun U ω => r (H.upd m U) (.modalK m ω κ φ) b)
-    (fun U V ω => r ((H.upd m U).upd m V) (.modalK m ω κ φ) b)
-    (fun P e ω => r H (.modal m P (.pop .capture e (.seq ω κ)) φ) b)
-    (fun x t P ω => r (H.bind m x t) (.modal m P (.seq ω κ) φ) b)
-    (fun bk c c' P Q ω => cond (x H c) (r (H.pre c') (.modalK m Q (.pop bk Q.ext (.seq ω κ)) φ) b)
-      (cond (x H c') (r (H.pre c) (.modalK m P (.pop bk P.ext (.seq ω κ)) φ) b)
-        (both (r (H.pre c) (.modalK m P (.pop bk P.ext (.seq ω κ)) φ))
-          (r (H.pre c') (.modalK m Q (.pop bk Q.ext (.seq ω κ)) φ)) b)))
-    (fun c ω => both (r (H.pre c) (.modalK m ω κ φ)) (r H c) b)
-    (fun bo _ => r H (if bo then .tt else .ff) b)
-    (fun bs ω => cond bs.isEmpty none (each (fun br => r H (br.bs.all
+    (fun U ω => r (H.upd m U) (max k U.maxIdx) (.modalK m ω κ φ) b)
+    (fun U V ω => r ((H.upd m U).upd m V) (max (max k U.maxIdx) V.maxIdx) (.modalK m ω κ φ) b)
+    (fun P e ω => r H k (.modal m P (.pop .capture e (.seq ω κ)) φ) b)
+    (fun x t P ω => r (H.bind m x t) (max k x.idx) (.modal m P (.seq ω κ) φ) b)
+    (fun bk c c' P Q ω => cond (x H c)
+      (r (H.pre c') (max k c'.maxIdx) (.modalK m Q (.pop bk Q.ext (.seq ω κ)) φ) b)
+      (cond (x H c') (r (H.pre c) (max k c.maxIdx) (.modalK m P (.pop bk P.ext (.seq ω κ)) φ) b)
+        (both (r (H.pre c) (max k c.maxIdx) (.modalK m P (.pop bk P.ext (.seq ω κ)) φ))
+          (r (H.pre c') (max k c'.maxIdx) (.modalK m Q (.pop bk Q.ext (.seq ω κ)) φ)) b)))
+    (fun c ω => both (r (H.pre c) (max k c.maxIdx) (.modalK m ω κ φ)) (r H k c) b)
+    (fun bo _ => r H k (if bo then .tt else .ff) b)
+    (fun bs ω => cond bs.isEmpty none (each (fun br => r H k (br.bs.all
       (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))) bs b))
     (fun fs us ω => cond (fs.isEmpty && us.isEmpty) none
-      (both (each (fun f => r H f) fs) (each (fun U => r (H.upd m U) (.modalK m ω κ φ)) us) b))
-    (fun I B xs hv U c c' hu hb P post ω => both (r H (I.invHyp B))
+      (both (each (fun f => r H k f) fs)
+        (each (fun U => r (H.upd m U) (max k U.maxIdx) (.modalK m ω κ φ)) us) b))
+    (fun I B xs hv U c c' hu hb P post ω => both (r H k (I.invHyp B))
       (both (r ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c)
+            (max (max (max k (I.invHyp B).maxIdx) U.maxIdx) c.maxIdx)
           (.upd m (Upd.nil.pop hb) (.modalK m P (.pop .block P.ext .nil)
             (Fml.invPost m hu ω κ φ post B))))
         (r ((((H.anonHavoc xs hv).pre (I.invHyp B)).upd m U).pre c')
+            (max (max (max k (I.invHyp B).maxIdx) U.maxIdx) c'.maxIdx)
           (.upd m (Upd.nil.pop (hu.trans hb)) (.modalK m ω κ φ)))) b)
-    (fun P e ω => r H (.modal m P (.drop e (.seq ω κ)) φ) b)
+    (fun P e ω => r H k (.modal m P (.drop e (.seq ω κ)) φ) b)
     (fun c U V ω =>
-      cond (x H c) (r (H.pre (.not c)) (.modal m (.cons .revert ω) κ φ) b)
-        (cond (x H (.not c)) (r (H.pre c) (.upd m U (.upd m V (.modalK m ω κ φ))) b)
-          (both (r (H.pre c) (.upd m U (.upd m V (.modalK m ω κ φ))))
-            (r (H.pre (.not c)) (.modal m (.cons .revert ω) κ φ)) b))) ω
+      cond (x H c) (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ) b)
+        (cond (x H (.not c)) (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))) b)
+          (both (r (H.pre c) (max k c.maxIdx) (.upd m U (.upd m V (.modalK m ω κ φ))))
+            (r (H.pre (.not c)) (max k (Fml.not c).maxIdx) (.modal m (.cons .revert ω) κ φ)) b))) ω
 
 /-- A modality: the frames when the program is done (`empty`), else the rule
-of the first statement and its premise's goals. -/
-def modal (R : RuleSet) (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat))
-    (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (H : Hyps C [] Γ) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
+of the first statement, at the fresh index of the context's largest `k`
+(`freshK`), and its premise's goals. -/
+def modal (R : RuleSet) (r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Option (List α × Nat))
+    (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (H : Hyps C [] Γ)
+    (k : Nat) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
     (φ : Fml C Γ₀) (b : Nat) : Option (List α × Nat) :=
   Prog.casesOn (motive_2 := fun Γ Γ₁ _ => Frames C Γ₁ Γ₀ → Hyps C [] Γ → Option (List α × Nat)) P
-    (fun κ H => r H (κ.exit m φ) b)
-    (fun s ω κ H => match s.stepIn R (H.fresh (.modal m (.cons s ω) κ φ)) m with
-      | some p => premise r x H m ω κ φ p b
+    (fun κ H => r H k (κ.exit m φ) b)
+    (fun s ω κ H => match s.stepIn R (freshK k (.modal m (.cons s ω) κ φ)) m with
+      | some p => premise r x H k m ω κ φ p b
       | none => none) κ H
 
-/-- The walk of the sequent `H ⊢ φ`: the leaves `leaf` leaves, or `none`
-when a step has no rule, a leaf does not close, or `n` or `b` runs out; `rf`
-says which of a split's branches is refuted (`refuteS`). -/
-def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
+/-- The walk of the sequent `H ⊢ φ`, `k` the largest index `H` binds
+(`Hyps.maxIdxH`): the leaves `leaf` leaves, or `none` when a step has no
+rule, a leaf does not close, or `n` or `b` runs out; `rf` says which of a
+split's branches is refuted (`refuteS`). -/
+def runK (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
     (rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) :
-    Nat → {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat)
-  | 0, _, _, _, _ => none
-  | _ + 1, _, _, _, 0 => none
-  | n + 1, _, H, φ, b + 1 =>
+    Nat → {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Option (List α × Nat)
+  | 0, _, _, _, _, _ => none
+  | _ + 1, _, _, _, _, 0 => none
+  | n + 1, _, H, k, φ, b + 1 =>
     Fml.casesOn (motive := fun Γ _ => Hyps C [] Γ → Option (List α × Nat)) φ
       (tt := fun H => cond H.boxOnly (some ([], b)) ((leaf H .tt).map (·, b)))
       (eq := fun t u H => (leaf H (.eq t u)).map (·, b))
       (wellFormed := fun s H => (leaf H (.wellFormed s)).map (·, b))
       (not := fun ψ H => (leaf H (.not ψ)).map (·, b))
       (and := fun ψ χ H => cond (Fml.and ψ χ).modalFree ((leaf H (.and ψ χ)).map (·, b))
-        (both (run R leaf rf n H ψ) (run R leaf rf n H χ) b))
-      (imp := fun a ψ H => run R leaf rf n (H.pre a) ψ b)
-      (upd := fun m U ψ H => run R leaf rf n (H.upd m U) ψ b)
-      (modal := fun m P κ ψ H => modal R (fun H φ b => run R leaf rf n H φ b) rf m H P κ ψ b)
+        (both (runK R leaf rf n H k ψ) (runK R leaf rf n H k χ) b))
+      (imp := fun a ψ H => runK R leaf rf n (H.pre a) (max k a.maxIdx) ψ b)
+      (upd := fun m U ψ H => runK R leaf rf n (H.upd m U) (max k U.maxIdx) ψ b)
+      (modal := fun m P κ ψ H =>
+        modal R (fun H k φ b => runK R leaf rf n H k φ b) rf m H k P κ ψ b)
       (havoc := fun ψ H => (leaf H (.havoc ψ)).map (·, b))
-      (all := fun x p ψ H => run R leaf rf n (H.all x p) ψ b)
-      (bind := fun m x t ψ H => run R leaf rf n (H.bind m x t) ψ b)
+      (all := fun x p ψ H => runK R leaf rf n (H.all x p) (max k x.idx) ψ b)
+      (bind := fun m x t ψ H => runK R leaf rf n (H.bind m x t) (max k x.idx) ψ b)
       (anon := fun xs ψ H => (leaf H (.anon xs ψ)).map (·, b)) H
+
+/-- The walk of the sequent `H ⊢ φ` (`runK` from `H`'s largest index). -/
+def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
+    (rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ)
+    (φ : Fml C Γ) (b : Nat) : Option (List α × Nat) :=
+  runK R leaf rf n H H.maxIdxH φ b
 
 /-! ### The leaves left: scoped sequents
 
@@ -323,15 +357,47 @@ theorem each_sound {β : Type} {f : β → Nat → Option (List α × Nat)} {Q :
 
 variable {R : RuleSet}
 
-theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat)}
-    (hr : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b', r H φ b = some (ls, b') →
+/-- The context wrapped around `φ` binds what the context and `φ` bind. -/
+theorem _root_.Solidity.Hyps.maxIdx_wrap {Γ₀ : Ctx} :
+    ∀ {Γ : Ctx} (H : Hyps C Γ₀ Γ) (φ : Fml C Γ), (H.wrap φ).maxIdx = max H.maxIdxH φ.maxIdx
+  | _, .nil, φ => (Nat.zero_max _).symm
+  | _, .pre H a, φ => by
+    show (H.wrap (.imp a φ)).maxIdx = max (max H.maxIdxH a.maxIdx) φ.maxIdx
+    rw [Hyps.maxIdx_wrap H]
+    show max H.maxIdxH (max a.maxIdx φ.maxIdx) = _
+    omega
+  | _, .upd H m U, φ => by
+    show (H.wrap (.upd m U φ)).maxIdx = max (max H.maxIdxH U.maxIdx) φ.maxIdx
+    rw [Hyps.maxIdx_wrap H]
+    show max H.maxIdxH (max U.maxIdx φ.maxIdx) = _
+    omega
+  | _, .havoc H, φ => Hyps.maxIdx_wrap H (.havoc φ)
+  | _, .all H x p, φ => by
+    show (H.wrap (.all x p φ)).maxIdx = max (max H.maxIdxH x.idx) φ.maxIdx
+    rw [Hyps.maxIdx_wrap H]
+    show max H.maxIdxH (max x.idx φ.maxIdx) = _
+    omega
+  | _, .bind H m x t, φ => by
+    show (H.wrap (.bind m x t φ)).maxIdx = max (max H.maxIdxH x.idx) φ.maxIdx
+    rw [Hyps.maxIdx_wrap H]
+    show max H.maxIdxH (max x.idx φ.maxIdx) = _
+    omega
+  | _, .anon H xs, φ => Hyps.maxIdx_wrap H (.anon xs φ)
+
+/-- `Hyps.fresh` is `freshK` at the context's largest index. -/
+theorem _root_.Solidity.Hyps.fresh_eq_freshK {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) :
+    H.fresh φ = freshK H.maxIdxH φ := by
+  simp only [Hyps.fresh, Fml.fresh, freshK, Hyps.maxIdx_wrap]
+
+theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Nat → Fml C Γ → Nat → Option (List α × Nat)}
+    (hr : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b', r H H.maxIdxH φ b = some (ls, b') →
       (∀ l ∈ ls, P l) → Proves C R [] H φ)
     {x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool}
     (hx : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), x H c = true → Proves C R [] (H.pre c) .ff)
     {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (m : Modality) (s : Stmt C Γ Γ') (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₂) (φ : Fml C Γ₂) (p : Premise C Γ Γ')
     (d : s.stepIn R (H.fresh (.modal m (.cons s ω) κ φ)) m = some p) {b : Nat} {ls : List α}
-    {b' : Nat} (h : premise r x H m ω κ φ p b = some (ls, b')) (hl : ∀ l ∈ ls, P l) :
+    {b' : Nat} (h : premise r x H H.maxIdxH m ω κ φ p b = some (ls, b')) (hl : ∀ l ∈ ls, P l) :
     Proves C R [] H (.modal m (.cons s ω) κ φ) := by
   have hd := Stmt.step_of_stepIn d
   have hR := Stmt.admits_of_stepIn d
@@ -379,9 +445,10 @@ theorem premise_sound {r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → 
       exact .cases (hR := hR) hd hb this.1 this.2
     · simp only [premise, hb, cond_true, reduceCtorEq] at h
   | inv I B xs hv U c c' hu hb P post =>
-    have := both_sound h hl (hr _ _)
-      (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
-    exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
+    cases hv <;>
+    · have := both_sound h hl (hr _ _)
+        (fun _ _ _ h₁ hl₁ => both_sound h₁ hl₁ (hr _ _) (hr _ _))
+      exact .inv (hR := hR) hd this.1 this.2.1 this.2.2
   | inline P e => exact .inline (hR := hR) hd (hr _ _ _ _ _ h hl)
 
 variable {leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)}
@@ -398,47 +465,55 @@ theorem leaf_sound {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C Γ} {b : Nat} {ls :
 variable {rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool}
   (hrf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), rf H c = true → Proves C R [] (H.pre c) .ff)
 include hrf in
-/-- **The walk is a derivation.** -/
-theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) (b : Nat)
-    (ls : List α) (b' : Nat), run R leaf rf n H φ b = some (ls, b') → (∀ l ∈ ls, P l) →
-    Proves C R [] H φ
-  | 0, _, _, _, _, _, _, h, _ => by simp only [run, reduceCtorEq] at h
-  | _ + 1, _, _, _, 0, _, _, h, _ => by simp only [run, reduceCtorEq] at h
+/-- **The walk is a derivation**, its index the context's largest. -/
+theorem runK_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) (b : Nat)
+    (ls : List α) (b' : Nat), runK R leaf rf n H H.maxIdxH φ b = some (ls, b') →
+    (∀ l ∈ ls, P l) → Proves C R [] H φ
+  | 0, _, _, _, _, _, _, h, _ => by simp only [runK, reduceCtorEq] at h
+  | _ + 1, _, _, _, 0, _, _, h, _ => by simp only [runK, reduceCtorEq] at h
   | n + 1, _, H, φ, b + 1, ls, b', h, hl => by
-    have ih : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b', run R leaf rf n H φ b = some (ls, b') →
-        (∀ l ∈ ls, P l) → Proves C R [] H φ :=
-      fun H φ b ls b' h hl => run_sound n H φ b ls b' h hl
+    have ih : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) b ls b',
+        runK R leaf rf n H H.maxIdxH φ b = some (ls, b') → (∀ l ∈ ls, P l) → Proves C R [] H φ :=
+      fun H φ b ls b' h hl => runK_sound n H φ b ls b' h hl
     cases φ with
     | tt =>
       cases hb : H.boxOnly
-      · exact leaf_sound hleaf (b := b) (by simpa only [run, hb, cond_false] using h) hl
+      · exact leaf_sound hleaf (b := b) (by simpa only [runK, hb, cond_false] using h) hl
       · exact .closeTrue hb
     | eq => exact leaf_sound hleaf h hl
     | wellFormed => exact leaf_sound hleaf h hl
     | not => exact leaf_sound hleaf h hl
     | and ψ χ =>
       cases hm : (Fml.and ψ χ).modalFree
-      · simp only [run, hm, cond_false] at h
+      · simp only [runK, hm, cond_false] at h
         have := both_sound h hl (ih _ _) (ih _ _)
         exact .andIntro this.1 this.2
-      · exact leaf_sound hleaf (b := b) (by simpa only [run, hm, cond_true] using h) hl
+      · exact leaf_sound hleaf (b := b) (by simpa only [runK, hm, cond_true] using h) hl
     | imp a ψ => exact .intro (ih _ _ _ _ _ h hl)
     | upd m U ψ => exact .updIntro (ih _ _ _ _ _ h hl)
     | modal m P κ ψ =>
       cases P with
       | nil => exact .empty (ih _ _ _ _ _ h hl)
       | cons s ω =>
-        change (match s.stepIn R (H.fresh (.modal m (.cons s ω) κ ψ)) m with
-          | some p => premise (fun H φ b => run R leaf rf n H φ b) rf H m ω κ ψ p b
+        change (match s.stepIn R (freshK H.maxIdxH (.modal m (.cons s ω) κ ψ)) m with
+          | some p => premise (fun H k φ b => runK R leaf rf n H k φ b) rf H H.maxIdxH m ω κ ψ p b
           | none => none) = some (ls, b') at h
         split at h
         · rename_i p hp
+          rw [← Hyps.fresh_eq_freshK] at hp
           exact premise_sound ih hrf H m s ω κ ψ p hp h hl
         · cases h
     | havoc => exact leaf_sound hleaf h hl
     | all x p ψ => exact .allIntro (ih _ _ _ _ _ h hl)
     | bind m x t ψ => exact .bindIntro (ih _ _ _ _ _ h hl)
     | anon => exact leaf_sound hleaf h hl
+
+include hrf in
+/-- **The walk is a derivation.** -/
+theorem run_sound (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) (b : Nat)
+    (ls : List α) (b' : Nat) (h : run R leaf rf n H φ b = some (ls, b')) (hl : ∀ l ∈ ls, P l) :
+    Proves C R [] H φ :=
+  runK_sound hleaf hrf n H φ b ls b' h hl
 
 end Sound
 
