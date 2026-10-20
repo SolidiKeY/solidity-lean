@@ -1,6 +1,7 @@
 import Solidity.Frontend.Problems
 import Solidity.Calculus.SolSpec
 import Solidity.Calculus.CallbackDerive
+import Solidity.Calculus.Recursion
 
 /-!
 # Testing imported Solidity files
@@ -14,7 +15,10 @@ back (`Fml.callsBack false`: a `try`, a value call) is stated as
 `ValidT .noCallback N.f.problem`, the callee changing the state as it may
 (`docs/options.md`, O7), and proved by `sol_prove`'s walk of `ProvesC`; the
 others as `⊢ N.f.problem`, whose `Valid` is the same reading there
-(`validT_noCallback_iff`).
+(`validT_noCallback_iff`).  One with a recursive call (`Stmt.callRec`) is
+stated as `Valid N.f.problem` and proved by `rec_auto`, each recursive call
+by the contract `true`/`true` proved by induction over its frames
+(`docs/kernel-port.md`, "Recursion"): the search does no induction.
 -/
 
 namespace Solidity.Frontend
@@ -43,6 +47,17 @@ private def callsBackE (N p : Lean.Name) : TermElabM Bool := do
   let v ← withTransparency .all <| whnf e
   return !v.isConstOf ``Bool.false
 
+/-- Whether `e`, or a declaration of the import `N` it names, has a
+recursive call (`Stmt.callRec`). -/
+private partial def hasCallRec (N : Lean.Name) (e : Expr) (fuel : Nat := 8) : MetaM Bool := do
+  if (e.find? (·.isConstOf ``Stmt.callRec)).isSome then return true
+  if fuel == 0 then return false
+  for c in e.getUsedConstants do
+    if N.isPrefixOf c then
+      if let some v := (← getConstInfo c).value? then
+        if ← hasCallRec N v (fuel - 1) then return true
+  return false
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
@@ -56,6 +71,27 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
       let C := mkConst N
       let cb ← if r.tag == .specified || !r.writingCall then pure false
         else callsBackE N (f ++ `problem)
+      -- a recursive call: `rec_auto`, the obligation as its own contract
+      -- (a specified row has no `N.f.problem`: `(← …)` in a `&&` would run first)
+      let recursive ← if r.tag == .specified || cb then pure false
+        else hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
+      if recursive then
+        let ty := mkApp2 (mkConst ``Valid) C (mkConst (f ++ `problem))
+        -- the walk reads the formula by its value; the kernel unfolds it
+        let g ← mkFreshExprSyntheticOpaqueMVar
+          (mkApp2 (mkConst ``Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
+        let tac ← `(tactic| rec_auto)
+        let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
+            fun _ => pure none
+          | return ("pending", "a recursive call the contract true does not prove")
+        unless goals.isEmpty do return ("pending", "a recursive call the contract true does not prove")
+        let proof ← instantiateMVars g
+        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term")
+        let name := f ++ `tested
+        addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
+        unless (← collectAxioms name).all (standardAxioms.contains ·) do
+          return ("pending", "a recursive call the contract true does not prove")
+        return ("proved", "")
       let (ty, goalTy) ← if r.tag == .specified then do
           let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
           let φ ← Term.elabTerm stx none

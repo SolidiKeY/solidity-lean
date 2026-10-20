@@ -390,7 +390,9 @@ test("free and library calls resolve by declaration with attached receivers", ()
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
-  assert.equal(status.recursionGap, 'unsupported');
+  // a recursive call is imported (`Stmt.callRec`); its result is read past
+  // it, which the contract `true`/`true` that `rec_auto` tries does not give
+  assert.equal(status.recursionGap, 'pending');
 });
 
 test("root primitive push bindings and empty user calls parse unambiguously", () => {
@@ -678,8 +680,6 @@ test("solkey's solc/open ports close except where the model says why not", () =>
   // less `SolcLoopsOpen.sol` (its loops are past the search budget). Each row
   // left open is open for a reason the model states, not a gap of the import:
   const open = {
-    // a function recursing into itself: a call is inlined (`kernel-port.md`)
-    functionsRecursiveUnbounded: "unsupported",
     // the callee is the contract itself only at the harness address
     // (0x…DeaDBeef), which no obligation fixes (`--self-address`, below)
     tryCatchExactReturn: "pending", trySuccessRunsCallee: "pending",
@@ -695,7 +695,9 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // (`0x11`); the model reverts there (`SolcOpen.ternaryLiteralOverflow`)
     ternaryLiteralOverflow: "pending",
   };
-  // `callWithoutCodeReverts` proves: address 0 has no code (O8);
+  // `functionsRecursiveUnbounded` proves: its recursive call by the contract
+  // true/true over the 1024 frames of the unrolling (`rec_auto`, kernel-port.md
+  // "Recursion"); `callWithoutCodeReverts` proves: address 0 has no code (O8);
   // `msgValueArith`: `msg.value < 2^128`, a chain fact (`Problem.callPre`).
   const files = ["SolcArithmeticOpen", "SolcConstructorsOpen", "SolcFunctionCallsOpen",
     "SolcHigherLevelOpen", "SolcPaymentsOpen", "SolcSmtControlFlowOpen", "SolcTypesOpen"]

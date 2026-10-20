@@ -934,6 +934,7 @@ def Stmt.runC : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
       (Prog.runC pnc) other.ext (Prog.runC other) sargs sbody.ext (Prog.runC sbody) self
   | _, _, .loop _ c body => TRun.loop c body.ext (Prog.runC body)
   | _, _, .block body => TRun.block body.ext (Prog.runC body)
+  | _, _, .callRec _ _ args ret body => TRun.call args ret (body ()).ext (Prog.runC (body ()))
 
 /-- The compiled typed run of a sequence. -/
 def Prog.runC : {Γ Γ' : Ctx} → Prog C Γ Γ' → TStep C Γ Γ'
@@ -967,6 +968,7 @@ def Stmt.runR {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
+    (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) s
 
 /-- The typed run of a sequence, by its recursor. -/
@@ -994,6 +996,7 @@ def Prog.runR {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
+    (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
 
 /-- The typed run of a statement from `σ`: the state it leaves, or how it
@@ -1015,6 +1018,10 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
   | _, _, .call f args ret body => by
     show TRun.call args ret body.ext body.runR = TRun.call args ret body.ext body.runC
     rw [Prog.runR_eq body]
+  | _, _, .callRec f d args ret body => by
+    show TRun.call args ret (body ()).ext (body ()).runR =
+      TRun.call args ret (body ()).ext (body ()).runC
+    rw [Prog.runR_eq (body ())]
   | _, _, .callReceiver f args r body op => by
     show TRun.callReceiver args r body.ext body.runR op = TRun.callReceiver args r body.ext body.runC op
     rw [Prog.runR_eq body]
@@ -1074,6 +1081,11 @@ theorem Prog.run_cons_ok {Γ₁ Γ₂ : Ctx} {σ : State C Γ} {o : Out C σ.H �
   show TRun.seq s.runR P.runR σ = _
   simp only [TRun.seq, Stmt.run] at h ⊢
   rw [h]
+
+/-- **A recursive call runs as the call of its body** (`Stmt.callRec`). -/
+theorem Stmt.run_callRec {Γ' ps rs : Ctx} (σ : State C Γ) (f : Name) (d : Nat)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
+    Stmt.run σ (.callRec f d args ret body) = Stmt.run σ (.call f args ret (body ())) := rfl
 
 theorem Stmt.run_loop {Γ₁ : Ctx} (σ : State C Γ) (a : LoopAnn C Γ) (c : Val C Γ .bool)
     (body : Prog C Γ Γ₁) :

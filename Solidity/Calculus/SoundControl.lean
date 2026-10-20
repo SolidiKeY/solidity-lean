@@ -254,6 +254,17 @@ theorem sound_block {Γ₂ : Ctx} (body : Prog C Γ Γ₂) :
     Premise.Runs m (.block body) (.unfold body body.ext) σ :=
   Premise.sound_unfold σ (Stmt.runSt_block σ body).symm
 
+/-- `recursiveCallUnfold` (Lean only): a recursive call runs as the call of
+its body (`Stmt.run_callRec`). -/
+theorem sound_recursiveCallUnfold {ps rs : Ctx} (f : Name) (d : Nat) (args : Args C Γ ps)
+    (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
+    Premise.Runs m (.callRec f d args ret body)
+      (.unfold (.cons (.call f args ret (body ())) .nil) .refl) σ :=
+  Premise.sound_unfold σ (by
+    rw [Prog.runSt_single]
+    show (Stmt.runSt σ (.call f args ret (body ()))).map _ = Stmt.runSt σ (.call f args ret (body ()))
+    cases Stmt.runSt σ (.call f args ret (body ())) <;> rfl)
+
 end Control
 
 end Solidity

@@ -166,6 +166,22 @@ theorem call_unwk {Γ Γ' ps rs Γf : Ctx} (J : StateInv C) (f : Name) (args : A
       exact ⟨_, ExecS.callBody (J := J) (σ := τ.thin h) (f := f) (args := args)
         (ret := ret₀) (body := body) ((args_thin h τ args).symm.trans ha) hs, hr⟩
 
+theorem callRec_cases {Γ Γ' ps rs : Ctx} (J : StateInv C) (σ : State C Γ) (f : Name) (dd : Nat)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps))
+    {o : COut C σ.H Γ'} (he : ExecS J σ (.callRec f dd args ret body) o) :
+    ExecS J σ (.call f args ret (body ())) o := by
+  cases he with
+  | det hf => exact nomatch hf
+  | callRec hc => exact hc
+
+theorem callRec_unwk {Γ Γ' ps rs : Ctx} (J : StateInv C) (f : Name) (dd : Nat)
+    (args : Args C Γ ps) (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
+    UWkS J (.callRec f dd args ret body) := by
+  intro Δ h τ o' he
+  change ExecS J τ (.callRec f dd (args.wk h) (ret.wk h).2.2 body) o' at he
+  obtain ⟨u, hu, hr⟩ := call_unwk J f args ret (body ()) h τ (callRec_cases J τ f dd _ _ body he)
+  exact ⟨_, ExecS.callRec hu, hr⟩
+
 theorem thin_self {Γ Δ : Ctx} (h : Thin Γ Δ) (τ : State C Δ) :
     CWkRel h (TEnv.off h τ.env) (.ok ⟨τ.thin h, List.prefix_refl _⟩) (.ok ⟨τ, List.prefix_refl _⟩) := by
   refine ⟨τ.env, (offWk_self _ _).symm, ?_⟩
@@ -447,6 +463,7 @@ theorem stmt_unwk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → 
   | _, _, .transfer r a => transfer_unwk J r a
   | _, _, .send pv r a g => send_unwk J pv r a g
   | _, _, .call f args ret body => call_unwk J f args ret body
+  | _, _, .callRec f dd args ret body => callRec_unwk J f dd args ret body
   | _, _, .callReceiver f args r body op => callReceiver_unwk J f args r body op
   | _, _, .callReceiverPush f args r body code value =>
     callReceiverPush_unwk J f args r body code value (prog_unwk J code)

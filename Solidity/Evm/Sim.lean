@@ -906,6 +906,7 @@ theorem storesFrom_compileStmt (b : Nat) {Γ Γ' : Ctx} :
   | .pushIncDec .. => fun _ _ h => nomatch h
   | .callReceiver .. => fun _ _ h => nomatch h
   | .callReceiverPush .. => fun _ _ h => nomatch h
+  | .callRec .. => fun _ _ h => nomatch h
   | .block body => by simp only [compileStmt]; exact storesFrom_compileProg b body
 /-- A block's code at base `b` stores to no level below `b`. -/
 theorem storesFrom_compileProg (b : Nat) {Γ Γ' : Ctx} :

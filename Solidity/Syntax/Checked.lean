@@ -308,6 +308,7 @@ def Stmt.guard {Γ Γ' : Ctx} : Stmt C Γ Γ' → Option (Val C Γ .bool)
   -- what it reads: not guarded, it reverts on an overflow as outside
   | .callReceiver _ args _ _ _ => args.guard
   | .callReceiverPush _ args _ _ _ _ => args.guard
+  | .callRec _ _ args _ _ => args.guard
 
 /-! ## The transformation -/
 
@@ -345,6 +346,8 @@ def Stmt.withOF {Γ Γ' : Ctx} (o : OFMode) : Stmt C Γ Γ' → Stmt C Γ Γ'
   | .callReceiver f args r body op => .callReceiver f args r (body.withOF o) op
   | .callReceiverPush f args r body code value =>
     .callReceiverPush f args r (body.withOF o) ((code.withOF o).snocGuard o value.guard) value
+  -- every frame of the unrolling guarded, lazily
+  | .callRec f d args ret body => .callRec f d args ret fun u => (body u).withOF o
   | s => s
 
 /-- **A program, guarded**: each statement preceded by its guard's

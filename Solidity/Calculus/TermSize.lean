@@ -247,6 +247,8 @@ def Stmt.size : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
   | _, _, .callReceiver _ args _ body op => 1 + args.size + body.size + op.size
   | _, _, .callReceiverPush _ args _ body code value =>
     1 + args.size + body.size + code.size + value.size
+  -- the body is read when the call is unfolded
+  | _, _, .callRec _ _ args _ _ => 1 + args.size
 
 def Prog.size : {Γ Γ' : Ctx} → Prog C Γ Γ' → Nat
   | _, _, .nil => 0
@@ -1481,6 +1483,7 @@ theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
   | callReceiver f args r body op => bnil
   | callReceiverPush f args r body code value =>
     exact ReceiverValue.step_bounded k f args r body (.deferred code value) _
+  | callRec f d args ret body => bnil
 
 /-- **A rule writes at most two elements an update.** -/
 theorem Stmt.step_upds_le {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :

@@ -475,6 +475,19 @@ theorem Stmt.run_frame : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.within μ 
     obtain ⟨hg, -⟩ := Prog.run_frame body hw'.2 0 hb
     have hg' := ((TGFrame.env σ a).trans he).trans hg
     exact ⟨hg'.withEnv _, CallRet.leaveT_frame ret hw'.1.2 _ hg'.H σ.env _ d⟩
+  | _, _, .callRec _ _ args ret body, hw, d, σ, o, h => by
+    have hw' : (args.readsIn μ && ret.noMem && Prog.within μ (body ())) = true := hw
+    simp only [Bool.and_eq_true] at hw'
+    change TRun.call args ret (body ()).ext (body ()).runR σ = .ok o at h
+    rw [TRun.call_eq] at h
+    obtain ⟨a, _, h⟩ := tbind_ok_inv h
+    unfold TRun.callFrom at h
+    obtain ⟨o', hb, h⟩ := tbind_ok_inv h
+    cases h
+    have he := CallRet.enterT_frame (μ := μ) ret hw'.1.2 (σ.withEnv a)
+    obtain ⟨hg, -⟩ := Prog.run_frame (body ()) hw'.2 0 hb
+    have hg' := ((TGFrame.env σ a).trans he).trans hg
+    exact ⟨hg'.withEnv _, CallRet.leaveT_frame ret hw'.1.2 _ hg'.H σ.env _ d⟩
   | _, _, .loop _ c body, hw, d, σ, o, h => by
     have hw' : (c.readsIn μ && Prog.within μ body) = true := hw
     rw [Bool.and_eq_true] at hw'

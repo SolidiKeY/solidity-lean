@@ -143,11 +143,18 @@ theorem callBumpTwice : ⊨ dl!{ [ uint c = count; bump(); bump(); uint d = coun
 
 /-! ## What cannot be written -/
 
-/-- A function that calls itself: its body cannot be inlined. -/
-def Recursive : Contract := contract!{ uint n; function down(uint x) { down(x); } }
+/-- A function that calls itself is a recursive call (`Stmt.callRec`,
+`Examples/Tactics/Recursion.lean`); one of several returns is not supported. -/
+def Recursive : Contract := contract!{
+  uint n;
+  function down(uint x) { down(x); }
+  function pair(uint x) returns (uint a, uint b) { (a, b) = pair(x); }
+}
 
-/-- error: Solidity elaboration failed: down is not a function declared before this one -/
-#guard_msgs in #check sol[Recursive]{ down(1); }
+example : Prog.toStr [] (sol[Recursive]{ down(1); }) = "down(1);" := rfl
+
+/-- error: Solidity elaboration failed: pair is recursive and returns several values: not supported -/
+#guard_msgs in #check sol[Recursive]{ uint a; uint b; (a, b) = pair(1); }
 
 /-- error: Solidity elaboration failed: bump returns no value -/
 #guard_msgs in #check sol{ uint y = bump(); }

@@ -480,6 +480,13 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     let some recv ← ppCallReceiverExprS ns f args r body | escape
     let some operand ← ppDeferredExprS ns code value | escape
     return ← `(sol_stmt| $recv:sol_expr .push($operand))
+  -- a recursive call prints as the call it is (`recursiveCallUnfold`)
+  | Stmt.callRec c Γ Γ' ps rs f _ args ret body =>
+    -- `recursiveCallUnfold`'s schema: a recursive call whose parts are all schema variables
+    if ← [f, args, ret, body].allM fun x => return (← instantiateMVars x).consumeMData.isFVar then
+      return ← `(sol_stmt| rc)
+    ppStmtS ns (mkAppN (mkConst ``Stmt.call)
+      #[c, Γ, Γ', ps, rs, ps, f, args, ret, mkApp body (mkConst ``Unit.unit)])
   | Stmt.call _ _ _ _ _ _ f args ret body =>
     -- KeY's `fbs` (`ic` under `pp.sol.ic`): a call whose parts are all schema variables
     if ← [f, args, ret, body].allM fun x => return (← instantiateMVars x).consumeMData.isFVar then

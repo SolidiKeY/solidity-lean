@@ -309,6 +309,7 @@ def Stmt.Frag : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, .pushIncDec .. => false
   | _, _, .callReceiver .. => false
   | _, _, .callReceiverPush .. => false
+  | _, _, .callRec .. => false
 
 /-- A program of the fragment: every statement is. -/
 def Prog.Frag : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
@@ -456,6 +457,7 @@ theorem Stmt.frag_wk : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {Γ' : Ctx} → (s
   | _, _, _, _, .pushIncDec .., hs => by simp only [Stmt.Frag, Bool.false_eq_true] at hs
   | _, _, _, _, .callReceiver .., hs => by simp only [Stmt.Frag, Bool.false_eq_true] at hs
   | _, _, _, _, .callReceiverPush .., hs => by simp only [Stmt.Frag, Bool.false_eq_true] at hs
+  | _, _, _, _, .callRec .., hs => by simp only [Stmt.Frag, Bool.false_eq_true] at hs
 
 theorem Prog.frag_wk : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {Γ' : Ctx} → (P : Prog C Γ Γ') →
     P.Frag = true → (P.wk h).2.2.Frag = true

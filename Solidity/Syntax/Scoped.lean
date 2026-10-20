@@ -360,6 +360,17 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   | callReceiverPush {Γ ps Γf Γv : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps) (r : Var)
       (body : Prog C ([.alias (.array E)] ++ ps) Γf)
       (code : Prog C Γ Γv) (value : Src C Γv E) : Stmt C Γ Γ
+  /-- A call of a recursive function `f` (Lean only, `docs/kernel-port.md`,
+  "Recursion"): as `call`, its body run in a frame of its own, the body a
+  block (`rs ++ ps` on both sides) held behind a thunk, so that a body which
+  calls `f` again holds that call's body, one frame deeper, and no printer,
+  quoter or analysis unfolds it.  `d` is how many frames the unrolling has
+  left: the elaborator writes `recUnroll Prog.recBase step recDepth`, whose
+  bottom frame halts with `exhausted` (`assume(false);`), the EVM's stack
+  of 1024 words holding at most 1024 nested frames.  The run is the call's
+  (`TRun.call`, `Stmt.run_callRec`); `d` is read by the quoters only. -/
+  | callRec {Γ Γ' ps rs : Ctx} (f : Name) (d : Nat) (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
+      (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) : Stmt C Γ Γ'
 
 /-- A sequence of statements, each read where the one before leaves. -/
 inductive Prog (C : Contract) : Ctx → Ctx → Type where
@@ -367,6 +378,34 @@ inductive Prog (C : Contract) : Ctx → Ctx → Type where
   | cons {Γ Γ₁ Γ₂ : Ctx} (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) : Prog C Γ Γ₂
 
 end
+
+/-! ## Recursion -/
+
+/-- The bottom frame of a recursive call's unrolling: it halts as resource
+exhaustion does (`assume(false);`), which both modalities accept. -/
+def Prog.recBase {Γ : Ctx} : Prog C Γ Γ := .cons .assumeFalse .nil
+
+/-- **The unrolling of a recursive function**: `n` frames, each `step k`
+of the frame below it (`k` frames left there), behind a thunk, on `base`.
+The elaborator writes a recursive call's body as
+`recUnroll Prog.recBase step recDepth`. -/
+def recUnroll {α : Type} (base : α) (step : Nat → (Unit → α) → α) : Nat → α
+  | 0 => base
+  | n + 1 => step n (fun _ => recUnroll base step n)
+
+/-- The frames a recursive call is unrolled to: the EVM's stack holds 1024
+words and every internal call's frame at least its return address, so no
+run nests deeper (a deeper one halts on the stack's overflow, as the
+bottom frame halts, `exhausted`). -/
+def recDepth : Nat := 1024
+
+/-- **Induction over an unrolling**: what holds of the base and of each
+step from the frame below holds of every unrolling. -/
+theorem recUnroll_induct {α : Type} {base : α} {step : Nat → (Unit → α) → α} (P : α → Prop)
+    (h0 : P base) (hs : ∀ n (t : Unit → α), P (t ()) → P (step n t)) :
+    ∀ n, P (recUnroll base step n)
+  | 0 => h0
+  | n + 1 => hs n _ (recUnroll_induct P h0 hs n)
 
 /-! ## Printing
 
@@ -501,6 +540,7 @@ def Stmt.outNames {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → List Var
   | .declStorage _ x _ => x :: ns
   | .declMem _ x .. => x :: ns
   | .call _ _ ret _ => ret.outNames ns
+  | .callRec _ _ _ ret _ => ret.outNames ns
   | _ => ns
 
 /-- The names of the context a block leaves. -/
@@ -584,6 +624,7 @@ def Prog.retTargets {Γ Γ' : Ctx} (rs : List Var) (start : Nat) (ns : List Var)
 /-- A call of several returns: their names in order, and the call. -/
 def Stmt.tupleRets? {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → Option (List Var × String)
   | .call f args (.rets bs) _ => some (bs.toList.map (·.2), callStr ns f args)
+  | .callRec f _ args (.rets bs) _ => some (bs.toList.map (·.2), callStr ns f args)
   | _ => none
 
 /-- A call of several returns and the statements after it that assign them,
@@ -718,6 +759,11 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .revert => "revert();"
   | .assumeFalse => "assume(false);"
   | .call f args ret _ =>
+    let call := callStr ns f args
+    match ret with
+    | .val _ _ (some y) => s!"{y.name ns} = {call}"
+    | _ => call
+  | .callRec f _ args ret _ =>
     let call := callStr ns f args
     match ret with
     | .val _ _ (some y) => s!"{y.name ns} = {call}"
@@ -952,6 +998,9 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
       (pnc.wk (Thin.keepAll κ h)).2.2 (other.wk h).2.2 (sargs.wk h) sbody self⟩
   | _, .loop a c body => ⟨Δ, h, .loop (a.wk h) (c.wk h) (body.wk h).2.2⟩
   | _, .block body => ⟨Δ, h, .block (body.wk h).2.2⟩
+  | _, .callRec f d args ret body =>
+    let ⟨Δ', h', ret'⟩ := ret.wk h
+    ⟨Δ', h', .callRec f d (args.wk h) ret' body⟩
   | _, .callReceiver f args r body op => ⟨Δ, h, .callReceiver f (args.wk h) r body (op.wk h)⟩
   | _, .callReceiverPush f args r body code value =>
     ⟨Δ, h, .callReceiverPush f (args.wk h) r body (code.wk h).2.2
@@ -1000,6 +1049,7 @@ def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
     (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ _ _ => .refl)
     (fun _ _ _ _ _ _ => .refl)
+    (fun _ _ _ ret _ => ret.ext)
 
 def Prog.ext : {Γ Γ' : Ctx} → Prog C Γ Γ' → Ext Γ Γ'
   | _, _, P => Prog.casesOn (motive_2 := fun Γ Γ' _ => Ext Γ Γ') P .refl

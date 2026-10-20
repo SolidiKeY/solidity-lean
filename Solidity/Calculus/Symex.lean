@@ -174,6 +174,33 @@ partial def restoreMarks (src out : Expr) : Expr :=
     mkAppN out.getAppFn args
   else out
 
+/-- Placeholders for the free variables `xs` of a formula, which the
+compiled strategy carries along without reading them: a `Nat` (a recursive
+call's frames left) by a literal no program writes, a program thunk (the
+frame below of a recursive call, in an induction step,
+`Calculus/Recursion.lean`) by `Prog.recSentinel`.  The arguments, and what
+each placeholder is quoted as, to be written back; `none` if a variable is
+of another type. -/
+def placeholders (xs : Array Expr) : MetaM (Option (Array Expr × Array (Expr × Expr))) := do
+  let mut args := #[]
+  let mut back := #[]
+  for x in xs, i in [0:xs.size] do
+    let ty ← whnfR (← instantiateMVars (← inferType x))
+    if ty.isConstOf ``Nat then
+      let l := mkRawNatLit (2 ^ 62 + i)
+      args := args.push l
+      back := back.push (l, x)
+    else if ty.isForall && ty.bindingDomain!.isConstOf ``Unit &&
+        ty.bindingBody!.isAppOfArity ``Prog 3 && !ty.bindingBody!.hasLooseBVars then
+      let P := ty.bindingBody!
+      args := args.push (Lean.mkLambda `u .default (mkConst ``Unit)
+        (mkAppN (mkConst ``Prog.recSentinel) #[P.getArg! 0, P.getArg! 1, mkRawNatLit i]))
+      back := back.push (mkConst (.num `_recFVar i), x)
+    else return none
+  -- only where a program thunk is free: a `Nat` alone may be computed with
+  unless back.any (·.1.isConst) do return none
+  return some (args, back)
+
 /-- Compute the formula of a goal `Valid φ` (`Solidity.normValid` for
 scoped formulas): the compiled strategy's result quoted back
 (`Fml.quote`); the kernel re-checks it.  A formula with a variable
@@ -187,6 +214,17 @@ def normValid (g : MVarId) (src : Option Expr := none) : TacticM MVarId := do
       unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
         (mkApp4 (mkConst ``Fml.quote) C (quoteConstName n)
           (mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)) (← evaluable φ))
+    | some n, true =>
+      -- free variables the strategy only carries: evaluated at placeholders
+      let xs := (Lean.collectFVars {} φ).fvarIds.map mkFVar
+      match ← if φ.hasMVar then pure none else placeholders xs with
+      | some (args, back) =>
+        let lam ← mkLambdaFVars xs (← evaluable φ)
+        let out ← unsafe evalExpr Lean.Expr (mkConst ``Lean.Expr)
+          (mkApp4 (mkConst ``Fml.quote) C (quoteConstName n)
+            (mkApp (mkConst ``List.nil [0]) (mkConst ``LTy)) (mkAppN lam args))
+        pure (out.replace fun e => (back.find? (·.1 == e)).map (·.2))
+      | none => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
     | _, _ => withTransparency .all <| Meta.reduce φ (skipTypes := true) (skipProofs := true)
   let φ' := match src with
     | some src => restoreMarks src φ'

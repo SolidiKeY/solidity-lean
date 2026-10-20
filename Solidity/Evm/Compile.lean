@@ -185,6 +185,7 @@ def Stmt.shrinks {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .callReceiver _ _ _ body op =>
     Prog.shrinks body || match op with | .pop => true | .push .. => false
   | .callReceiverPush _ _ _ body code _ => Prog.shrinks body || Prog.shrinks code
+  | .callRec .. => true
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .transfer .. | .send ..
   | .declMem ..
@@ -259,6 +260,8 @@ def inFrag {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Stmt C Γ Γ' → Option (Fra
   | .assignNew .. | .tryCall .. | .loop .. | .pushOpAssign .. | .pushIncDec ..
   | .callReceiver .. => none
   | .callReceiverPush .. => none
+  -- recursion is outside the compiled fragment
+  | .callRec .. => none
 /-- A block of the fragment. -/
 def inFragP {Γ Γ' : Ctx} (F : Frag Γ) : Solidity.Prog C Γ Γ' → Option (Frag Γ')
   | .nil => some F
@@ -416,6 +419,7 @@ def compileStmt (b : Nat) {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → List Instr
   | .assignNew .. | .tryCall .. | .loop .. | .pushOpAssign .. | .pushIncDec ..
   | .callReceiver .. => []
   | .callReceiverPush .. => []
+  | .callRec .. => []
 /-- The code of a block: its statements' codes in order. -/
 def compileProg (b : Nat) {Γ Γ' : Ctx} : Solidity.Prog C Γ Γ' → List Instr
   | .nil => []
@@ -433,6 +437,7 @@ def Stmt.pushes {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Nat
   | .callReceiver _ _ _ body op =>
     Prog.pushes body + match op with | .push .. => 1 | .pop => 0
   | .callReceiverPush _ _ _ body code _ => Prog.pushes body + Prog.pushes code + 1
+  | .callRec .. => 0
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .pop _ | .transfer .. | .send ..
   | .declMem ..
@@ -453,6 +458,7 @@ def Stmt.pays {Γ Γ' : Ctx} : Solidity.Stmt C Γ Γ' → Bool
   | .call _ _ _ body => Prog.pays body
   | .callReceiver _ _ _ body _ => Prog.pays body
   | .callReceiverPush _ _ _ body code _ => Prog.pays body || Prog.pays code
+  | .callRec .. => true
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop _ | .declMem ..
   | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete _ | .deleteMem .. | .assignNew ..

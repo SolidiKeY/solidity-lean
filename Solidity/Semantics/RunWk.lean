@@ -1378,6 +1378,8 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
     · exact TWkRel.drop (Prog.wk_over thn h) (Prog.run_wk thn h τ d)
   | _, _, .call _ args ret body, _, h, τ, d =>
     TRun.call_wk h τ d args ret body.ext body.runR
+  | _, _, .callRec _ _ args ret body, _, h, τ, d =>
+    TRun.call_wk h τ d args ret (body ()).ext (body ()).runR
   | _, _, .callReceiver _ args r body op, _, h, τ, d => by
     change TWkRel h (TEnv.off h d) (TRun.callReceiver args r body.ext body.runR op τ)
       (TRun.callReceiver (args.wk h) r body.ext body.runR (op.wk h) (τ.lift h d))

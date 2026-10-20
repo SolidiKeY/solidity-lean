@@ -252,6 +252,19 @@ def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
 
 /-! ## Statements -/
 
+/-- The placeholder of a free program thunk `i` where the compiled strategy
+runs a goal that has one (a recursive call's frame below in an induction
+step, `Calculus/Recursion.lean`; `Symex.normValid`): a body no elaborated
+program has, which the quoter writes back as the constant `_recFVar.i`. -/
+def _root_.Solidity.Prog.recSentinel {F : Ctx} (i : Nat) : Prog C F F :=
+  .cons (.block (.cons (.declLocal .bool (.fresh "⟪recfvar⟫" i) none) .nil)) .nil
+
+/-- Which placeholder a body is, if it is one. -/
+def _root_.Solidity.Prog.recSentinel? {F : Ctx} : Prog C F F → Option Nat
+  | .cons (.block (.cons (.declLocal _ (.fresh b i) none) .nil)) .nil =>
+    if b == "⟪recfvar⟫" then some i else none
+  | _ => none
+
 /-- A constructor of `Stmt C`/`Prog C`, the contract its only parameter. -/
 def sctor (n : Lean.Name) (args : Array Expr) : QM Expr :=
   return mkAppN (mkConst n) (#[← contract] ++ args)
@@ -271,7 +284,7 @@ def qReceiverOp (Γ : Ctx) (E : Ty) : ReceiverOp C Γ E → QM Expr
 
 mutual
 
-partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
+partial def qStmtH (hs : List Name) (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
   let Γe ← qCtx Γ
   match s with
   | @Stmt.assign _ _ T l r => sctor ``Stmt.assign #[Γe, toExpr T, ← qLoc Γ T l, ← qSrc Γ T r]
@@ -322,40 +335,66 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
   | @Stmt.assignNew _ _ R l n _ =>
     sctor ``Stmt.assignNew #[Γe, toExpr R, ← qNewLhs Γ R l, ← qSimple Γ .uint n, rflTrue]
   | @Stmt.ite _ _ Γ₁ Γ₂ c thn els =>
-    sctor ``Stmt.ite #[Γe, ← qCtx Γ₁, ← qCtx Γ₂, ← qVal Γ .bool c, ← qProg Γ Γ₁ thn,
-      ← qProg Γ Γ₂ els]
+    sctor ``Stmt.ite #[Γe, ← qCtx Γ₁, ← qCtx Γ₂, ← qVal Γ .bool c, ← qProgH hs Γ Γ₁ thn,
+      ← qProgH hs Γ Γ₂ els]
   | .require c => sctor ``Stmt.require #[Γe, ← qVal Γ .bool c]
   | .assert c => sctor ``Stmt.assert #[Γe, ← qVal Γ .bool c]
   | .revert => sctor ``Stmt.revert #[Γe]
   | .assumeFalse => sctor ``Stmt.assumeFalse #[Γe]
   | @Stmt.call _ _ _ ps rs Γf f args ret body =>
     sctor ``Stmt.call #[Γe, ← qCtx Γ', ← qCtx ps, ← qCtx rs, ← qCtx Γf, toExpr f,
-      ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, ← qProg (rs ++ ps) Γf body]
+      ← qArgs Γ ps args, ← qCallRet Γ rs Γ' ret, ← qProgH hs (rs ++ ps) Γf body]
   | @Stmt.callReceiver _ _ ps Γf E f args r body op =>
     sctor ``Stmt.callReceiver #[Γe, ← qCtx ps, ← qCtx Γf, toExpr E, toExpr f,
-      ← qArgs Γ ps args, toExpr r, ← qProg ([.alias (.array E)] ++ ps) Γf body,
+      ← qArgs Γ ps args, toExpr r, ← qProgH hs ([.alias (.array E)] ++ ps) Γf body,
       ← qReceiverOp Γ E op]
   | @Stmt.callReceiverPush _ _ ps Γf Γv E f args r body code value =>
     sctor ``Stmt.callReceiverPush #[Γe, ← qCtx ps, ← qCtx Γf, ← qCtx Γv, toExpr E, toExpr f,
-      ← qArgs Γ ps args, toExpr r, ← qProg ([.alias (.array E)] ++ ps) Γf body,
-      ← qProg Γ Γv code, ← qSrc Γv E value]
+      ← qArgs Γ ps args, toExpr r, ← qProgH hs ([.alias (.array E)] ++ ps) Γf body,
+      ← qProgH hs Γ Γv code, ← qSrc Γv E value]
   | @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf call rets ok err code pnc other sargs sbody self =>
     sctor ``Stmt.tryCall #[Γe, ← qCtx ρ, ← qCtx κ, ← qCtx Γ₁, ← qCtx Γ₂, ← qCtx Γ₃, ← qCtx Γ₄,
       ← qCtx ps, ← qCtx Γf,
-      ← qExtCall Γ call, ← qBinders ρ rets, ← qProg (ρ ++ Γ) Γ₁ ok, ← qProg Γ Γ₂ err,
-      qCode κ code, ← qProg (κ ++ Γ) Γ₃ pnc, ← qProg Γ Γ₄ other, ← qArgs Γ ps sargs,
-      ← qProg (ρ ++ ps) Γf sbody, toExpr self]
+      ← qExtCall Γ call, ← qBinders ρ rets, ← qProgH hs (ρ ++ Γ) Γ₁ ok, ← qProgH hs Γ Γ₂ err,
+      qCode κ code, ← qProgH hs (κ ++ Γ) Γ₃ pnc, ← qProgH hs Γ Γ₄ other, ← qArgs Γ ps sargs,
+      ← qProgH hs (ρ ++ ps) Γf sbody, toExpr self]
   | @Stmt.loop _ _ Γ₁ a c body =>
-    sctor ``Stmt.loop #[Γe, ← qCtx Γ₁, ← qLoopAnn Γ a, ← qVal Γ .bool c, ← qProg Γ Γ₁ body]
-  | @Stmt.block _ _ Γ₁ body => sctor ``Stmt.block #[Γe, ← qCtx Γ₁, ← qProg Γ Γ₁ body]
+    sctor ``Stmt.loop #[Γe, ← qCtx Γ₁, ← qLoopAnn Γ a, ← qVal Γ .bool c, ← qProgH hs Γ Γ₁ body]
+  | @Stmt.block _ _ Γ₁ body => sctor ``Stmt.block #[Γe, ← qCtx Γ₁, ← qProgH hs Γ Γ₁ body]
+  | @Stmt.callRec _ _ _ ps rs f d args ret body => do
+    let head := #[Γe, ← qCtx Γ', ← qCtx ps, ← qCtx rs, toExpr f]
+    let ase ← qArgs Γ ps args
+    let rete ← qCallRet Γ rs Γ' ret
+    match hs.idxOf? f with
+    -- a call of the function whose unrolling is being quoted: the frame below
+    | some j => sctor ``Stmt.callRec (head ++ #[.bvar (3 * j + 1), ase, rete, .bvar (3 * j)])
+    -- `fun _ => recUnroll Prog.recBase (fun n bt => body) d`, as `Syntax/Quote.lean`
+    | none =>
+      if let some i := (body ()).recSentinel? then
+        return ← sctor ``Stmt.callRec (head ++ #[Lean.mkRawNatLit d, ase, rete,
+          mkConst (.num `_recFVar i)])
+      let fre ← qCtx (rs ++ ps)
+      let progTy := mkApp3 (mkConst ``Prog) (← contract) fre fre
+      let thunkTy := Lean.mkForall `u .default (mkConst ``Unit) progTy
+      let inner ← qProgH (f :: hs) (rs ++ ps) (rs ++ ps) (body ())
+      let stepE := Lean.mkLambda `n .default (mkConst ``Nat)
+        (Lean.mkLambda `bt .default thunkTy inner)
+      let unroll := mkAppN (mkConst ``recUnroll) #[progTy,
+        mkApp2 (mkConst ``Prog.recBase) (← contract) fre, stepE, Lean.mkRawNatLit d]
+      sctor ``Stmt.callRec (head ++ #[Lean.mkRawNatLit d, ase, rete,
+        Lean.mkLambda `u .default (mkConst ``Unit) unroll])
 
-partial def qProg (Γ Γ' : Ctx) (P : Prog C Γ Γ') : QM Expr := do
+partial def qProgH (hs : List Name) (Γ Γ' : Ctx) (P : Prog C Γ Γ') : QM Expr := do
   match P with
   | .nil => sctor ``Prog.nil #[← qCtx Γ]
   | @Prog.cons _ _ Γ₁ _ s P =>
-    sctor ``Prog.cons #[← qCtx Γ, ← qCtx Γ₁, ← qCtx Γ', ← qStmt Γ Γ₁ s, ← qProg Γ₁ Γ' P]
+    sctor ``Prog.cons #[← qCtx Γ, ← qCtx Γ₁, ← qCtx Γ', ← qStmtH hs Γ Γ₁ s, ← qProgH hs Γ₁ Γ' P]
 
 end
+
+partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := qStmtH [] Γ Γ' s
+
+partial def qProg (Γ Γ' : Ctx) (P : Prog C Γ Γ') : QM Expr := qProgH [] Γ Γ' P
 
 /-! ## Terms, updates, formulas -/
 
