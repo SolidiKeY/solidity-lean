@@ -558,16 +558,28 @@ check there (proposal (c) of the slicing lane) fails it.  `Seq.prove`
 therefore checks only between its compiled stages: a stage that ran past
 the budget is reported by its bound, and no longer stage is run.
 
-**Refutations past exposing updates** (`LFml.refuteOk`,
-`Calculus/LeafDerive.lean`).  Over an unknown history, a read through an
+**Reads past exposing updates** (`exposeBound`,
+`Calculus/ReadBounds.lean`).  Over an unknown history, a read through an
 update that exposes a slot past a live end (`Op2.exposes`: an empty push of
 a reference element, a pop, a shrink) branches on whether it is the exposed
 slot, and the elimination's output grows about sevenfold with each:
 `multiArrayFillByPushLoops`' refutations at four to seven stacked
 `pushSlot`s eliminate to 980, 4937, 35938 and 476239 nodes
-(`normalizationDepth` admits 12).  A refutation is now asked only within
-`refuteExposeDepth` (5) such updates where the history is not known; past
-it the split's two branches are walked.
+(`normalizationDepth` admits 12).  The same elimination runs where `toLS`
+forms a read (`LTm.literalRead`, `Calculus/DecideScoped.lean`): its
+`toLS` took 16 ms, 184 ms and 5.5 s at four, five and six, and did not
+return at seven (the runner's 15-minute hang, the server's stack overflow).
+Both now read through at most `exposeBound` (5) such updates where the
+history is not known (`LTm.exposeDepth`): an early read past it stays lazy,
+and a refutation past it is not asked (`LFml.refuteOk`,
+`Calculus/LeafDerive.lean`), the split's two branches walked.
+`multiArrayFillByPushLoops` now ends in 112 s with "timeout at `sol_prove's
+compiled walk, after its 1024-step stage`": its second loop's guard reads
+the dangling `d`'s unknown length, which only a refutation at seven exposing
+updates could bound, so the walk unwinds until the budget is gone.  Even a
+complete walk would leave about 30 leaves past `stackSize` (12 to 14
+storage updates over an unknown history): `pending` at best without a
+closer for exposed slots.
 
 **Proposal (b)** (a `require(len == 0)` making push histories known) does
 not apply: `pushNoArgs2dLoop`'s three leaves stack 45 storage updates,
