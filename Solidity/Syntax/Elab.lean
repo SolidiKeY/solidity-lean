@@ -1384,6 +1384,7 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
   | .newArr T _ => ((elabTyW C T).toOption.map (·.2)).getD []
   | .ternary _ a _ => exprShape Γ a
   | .call f _ =>
+    if f == bytesLitName then dynBytesRows else
     match lookupBy f C.funs with
     | some d => match d.ret with
       | some (r, .ref _) => shapeUnder d.widths r
@@ -2677,6 +2678,13 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
   | .call f args => do
+    -- a literal of bytes where a `bytes` or a `string` stands: a fresh memory
+    -- array of its bytes (`new bytes(n)`, then each byte written)
+    if let some bs := (RawExpr.call f args).bytesLit? then
+      let x := toString (← freshCapture "mv")
+      let Q ← elabStmtsP (.declMemory (.named "bytes") x (some (.newArr (.named "bytes") (.num bs.length))) ::
+        bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
+      return (Q, .name x)
     if let some ms := lookupBy f C.enums then
       let [a] := args | throw s!"a conversion {f}(…) takes one argument"
       let (P, a) ← hoist a
@@ -3434,6 +3442,8 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
+  -- solc's operations on byte types, as the `uint` ones (`bytesPure`)
+  let s ← ElabM.lift (bytesStmt C (← ctx) s)
   -- push arithmetic inside `unchecked`: the appended slot starts at `0`, so
   -- `b.push() op= r` pushes `0 op r`, wrapping at the element's width as
   -- `narrowWrapNode` wraps (`small.push() -= 1` at `uint8[]` pushes `255`):
@@ -3516,7 +3526,6 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
         throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \
           `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are \
           expected, not whole"
-  let s ← ElabM.lift (bytesStmt C (← ctx) s)
   let s ← ElabM.lift (s.mapExprsM (narrowPure C (← read).unchecked (← ctx)))
   let (P, s) ← hoistStmt s
   let P ← pure (P ++ (← elabStmt1 s))

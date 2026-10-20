@@ -119,4 +119,57 @@ theorem functions : ⊨ dl[Tags]{ ⟨ bytes1 r = first("abcd"); bytes4 w = widen
   sol_symex
   sol_close
 
+/-! ## 3 · `bytes` and `string`
+
+A `bytes1[]`: a `uint[]` whose elements are 8 bits wide and marked `bytes1`
+(`dynBytesRows`), in memory and in storage alike, `string` the same.  A
+literal where one stands is a fresh memory array of its bytes. -/
+
+/-- A literal in memory: its length and its bytes. -/
+theorem memoryLiteral : ⊨ dl!{ ⟨ bytes memory b = "abc"; uint l = b.length; bytes1 c = b[1]; ⟩
+    l == 3 && c == 98 } := by
+  sol_symex
+  sol_decide
+
+/-- `bytes(s)` of a `string` is the same array; an element written takes a
+`bytes1`. -/
+theorem stringToBytes : ⊨ dl!{ ⟨ string memory s = "hi"; bytes memory b = bytes(s); b[0] = "H";
+    bytes1 c = b[0]; uint l = b.length; ⟩ c == 72 && l == 2 } := by
+  sol_symex
+  sol_decide
+
+/-- An index past the end reverts. -/
+theorem memoryOutOfRange : ⊨ dl!{ [ bytes memory b = new bytes(2); bytes1 c = b[2]; ] false } := by
+  sol_symex
+  sol_decide
+
+/-- A contract with `bytes` and `string` in storage and in its functions. -/
+def Texts : Contract := contract!{
+  bytes data;
+  string name;
+  function len(string memory s) returns (uint n) { n = bytes(s).length; }
+  function hello() returns (string memory r) { r = "hello"; }
+}
+
+example : Texts.widths =
+    [("data[]", 8), ("data[]#bytes", 1), ("name[]", 8), ("name[]#bytes", 1)] := rfl
+
+/-- A literal copied to storage, then pushed to and popped. -/
+theorem storagePushPop : ⊨ dl[Texts]{ ⟨ data = "ab"; data.push("c"); uint l = data.length;
+    bytes1 z = data[2]; data.pop(); uint m = data.length; ⟩ l == 3 && z == 99 && m == 2 } := by
+  sol_symex
+  sol_decide
+
+/-- A `string` parameter and return, in memory. -/
+theorem stringFunctions : ⊨ dl[Texts]{ ⟨ uint n = len("abcd"); string memory h = hello();
+    uint k = bytes(h).length; ⟩ n == 4 && k == 5 } := by
+  sol_symex
+  sol_decide
+
+/-- `delete` empties a `string` in storage. -/
+theorem deleteString : ⊨ dl[Texts]{ ⟨ name = "x"; delete name; uint l = bytes(name).length; ⟩
+    l == 0 } := by
+  sol_symex
+  sol_decide
+
 end Solidity.Examples.Tactics.Bytes
