@@ -229,6 +229,8 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
       (Prog.runFC n pnc) other.ext (Prog.runFC n other) sargs sbody.ext (Prog.runFC n sbody) self
   | _, _, .loop _ c body => TRun.loopF n c body.ext (Prog.runFC n body)
   | _, _, .block body => TRun.block body.ext (Prog.runFC n body)
+  | _, _, .callRec _ _ args ret body =>
+    TRun.call args ret (body ()).ext (Prog.runFC n (body ()))
 
 /-- The compiled typed run with fuel of a sequence. -/
 def Prog.runFC (n : Nat) : {Γ Γ' : Ctx} → Prog C Γ Γ' → TStep C Γ Γ'
@@ -263,6 +265,7 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
+    (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) s
 
 /-- The typed run of a sequence with fuel, by its recursor. -/
@@ -290,6 +293,7 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
     (fun _ args r body code value ihBody ihCode =>
       TRun.callReceiverPush args r body.ext ihBody code.ext ihCode value)
+    (fun _ _ args ret body ih => TRun.call args ret (body ()).ext (ih ()))
     TRun.nil (fun _ _ ihS ihP => TRun.seq ihS ihP) P
 
 mutual
@@ -303,6 +307,10 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .call f args ret body => by
     show TRun.call args ret body.ext (body.runF n) = TRun.call args ret body.ext (body.runFC n)
     rw [Prog.runF_eq n body]
+  | _, _, .callRec f _ args ret body => by
+    show TRun.call args ret (body ()).ext ((body ()).runF n) =
+      TRun.call args ret (body ()).ext ((body ()).runFC n)
+    rw [Prog.runF_eq n (body ())]
   | _, _, .callReceiver _ args r body op => by
     change TRun.callReceiver args r body.ext (body.runF n) op =
       TRun.callReceiver args r body.ext (body.runFC n) op
@@ -350,6 +358,8 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .ite c thn els =>
     TRun.ite_approx c thn.ext els.ext (Prog.runF_approx n thn) (Prog.runF_approx n els)
   | _, _, .call _ args ret body => TRun.call_approx args ret body.ext (Prog.runF_approx n body)
+  | _, _, .callRec _ _ args ret body =>
+    TRun.call_approx args ret (body ()).ext (Prog.runF_approx n (body ()))
   | _, _, .callReceiver _ args r body op => by
     intro σ
     exact (TRun.call_approx args (.storage _ r) body.ext (Prog.runF_approx n body) σ).bind
