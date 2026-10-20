@@ -567,14 +567,14 @@ test("inheritance preserves virtual, static, named and modifier dispatch", () =>
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
   for (const fn of ["dispatch", "staticCall", "staticStillDispatches", "namedCall", "privateCall",
-    "modified", "staticModifier", "inheritedStruct", "inheritedEnumSpec", "inheritedEnumModifier", "externalValue"]) {
+    "modified", "staticModifier", "inheritedStruct", "inheritedEnumSpec", "inheritedEnumModifier", "externalValue",
+    "superCall", "superNamed"]) {
     assert.equal(rows[fn].status, "proved", fn);
   }
   assert.equal(rows.falseDispatch.status, "pending");
   assert.equal(rows.falseInheritedEnumSpec.status, "pending");
   assert.equal(rows.externalStaysExternal.status, "pending");
-  assert.equal(rows.superRemainsUnsupported.status, "unsupported");
-  assert.match(rows.superRemainsUnsupported.reason, /super call/);
+  assert.equal(rows.falseSuper.status, "pending");
   assert.equal(rows.viaBase, undefined); // inherited helpers have no new independent row
   const init = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"InitDiamond"});
   assert.deepEqual(init.errors, []);
@@ -583,11 +583,44 @@ test("inheritance preserves virtual, static, named and modifier dispatch", () =>
   assert.equal(init.results.find(r => r.function === "constructor").status, "proved");
 });
 
+test("inheritance resolves super in the most-derived C3 order", () => {
+  const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"SuperDiamond"});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  assert.equal(rows.diamondSuper.status, "proved");
+  assert.equal(rows.staticRight.status, "proved");
+  assert.equal(rows.falseDiamondSuper.status, "pending");
+});
+
+test("inheritance runs base constructors in solc's legacy order", () => {
+  for (const [contract, status] of [["CtorLeaf", "proved"], ["CtorFalse", "pending"],
+    ["CtorImplicit", "proved"], ["CtorUnnamedChild", "proved"]]) {
+    const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract});
+    assert.deepEqual(report.errors, [], contract);
+    assert.equal(report.results.find(r => r.function === "constructor")?.status, status, contract);
+  }
+});
+
+test("inheritance conjoins inherited contract invariants", () => {
+  const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"GuardedChild"});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  assert.equal(rows.bump.status, "proved");
+  assert.equal(rows.breaksBase.status, "pending");
+  assert.equal(rows.breaksOwn.status, "pending");
+});
+
 test("unmodelled inheritance boundaries are rejected instead of omitted", () => {
-  for (const [contract, reason] of [["CtorGap", /base constructor/],
-    ["SpecGap", /inherited contract NatSpec/], ["NameGap", /distinct storage roots/]]) {
+  const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameGap"});
+  assert.ok(report.errors.some(e => /distinct storage roots/.test(e.reason)));
+  assert.equal(testsPassed(report), false);
+  for (const [contract, reason] of [["CtorGap", /modifiers of base constructor/],
+    ["CtorModifierGap", /constructor's modifiers with base constructors/],
+    ["CtorReturnGap", /`return` in base constructor/]]) {
     const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract});
-    assert.ok(report.errors.some(e => reason.test(e.reason)), contract);
+    const ctor = report.results.find(r => r.function === "constructor");
+    assert.equal(ctor?.status, "unsupported", contract);
+    assert.match(ctor.reason, reason, contract);
     assert.equal(testsPassed(report), false);
   }
 });

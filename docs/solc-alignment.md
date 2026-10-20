@@ -447,6 +447,32 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   `immutable` the constructor writes is a storage root with its
   initializer, so the constructor's obligation reads what it wrote, and a
   function's reads any value (true of the deployed code, never refuted).
+- **Base constructors run in solc's legacy order**: every initializer, most
+  base first; then the base constructors' arguments, derived to base; then
+  the constructor bodies, base to derived (`readContract`'s
+  `compositeBody`, one constructor member, each argument a local named as
+  its parameter).  This is the creation code of solc 0.8.33's legacy
+  pipeline (`ContractCompiler::appendInitAndConstructorCode`: a constructor
+  evaluates the next base constructor's arguments and runs it before its
+  own body, after `initializeStateVariables` ran for the whole hierarchy),
+  read off `solc --asm`.  The via-IR pipeline interleaves instead (each
+  contract's initializers just before its body; Solidity docs, "Solidity
+  IR-based Codegen Changes", order of state variable initialization), and
+  that page's description of the legacy order puts the arguments before
+  the initializers, which the emitted code does not:
+  `tests/solc/Inheritance.sol`'s `CtorLeaf` passes an initialized `late`
+  on and asserts it.  A base constructor's virtual calls dispatch to the
+  most-derived contract.  Arguments come from the first contract in the C3
+  order giving them, in its constructor's header (`B(a)`) or its
+  inheritance specifier (`is B(5)`) ("Arguments for Base Constructors").
+  Refused: a modifier on a base constructor, or on a constructor with base
+  constructors (solc runs the bases before it), and a `return` in a base
+  constructor.
+- **`super.f`** in a function of contract `D` names the first contract after
+  `D` in the most-derived contract's C3 order that implements `f`
+  (Solidity docs, "Inheritance": `super` is the next base in the final
+  inheritance graph); every base version is its own member, so the call is
+  static.
 - **A contract with initializers and no constructor** deploys by the
   implicit one (`constructor();` runs the initializers), as solc does, and
   has no obligation, as in solkey.
