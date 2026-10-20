@@ -628,8 +628,16 @@ test("inheritance conjoins inherited contract invariants", () => {
 
 test("unmodelled inheritance boundaries are rejected instead of omitted", () => {
   const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameGap"});
-  assert.ok(report.errors.some(e => /distinct storage roots/.test(e.reason)));
+  assert.ok(report.errors.some(e => /a specification reads: distinct storage roots/.test(e.reason)));
   assert.equal(testsPassed(report), false);
+});
+
+test("inheritance renames a base's private variable of a later one's name", () => {
+  const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameShadow"});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.f, "proved");
+  assert.equal(status.falseShared, "pending");
 });
 
 test("inheritance wraps each constructor's body in its own modifiers, after its bases", () => {

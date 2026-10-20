@@ -502,6 +502,11 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   ends its body alone: such a body is a member of its own,
   `solcCtorBody<id>(params)`, carrying the modifiers, which the composite
   calls in its turn (`bodyMember?`; `tests/solc/InheritanceCtors.sol`).
+- **A base's `private` variable** of a name a later contract declares
+  again is a storage root of its own, renamed by its declaration
+  (`x_PrivateRoot`, `stateRenames`), and every identifier reads it by its
+  declaration's identity; refused where a specification names it, since a
+  clause reads a variable by name (`tests/solc/InheritanceGaps.sol`).
 - **`super.f`** in a function of contract `D` names the first contract after
   `D` in the most-derived contract's C3 order that implements `f`
   (Solidity docs, "Inheritance": `super` is the next base in the final

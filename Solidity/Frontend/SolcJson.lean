@@ -1705,9 +1705,36 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     | none => pure (i, t, defaultLiteral t)
   let constants := constants ++ immutables
   let fixedIds := immutables.map (·.1)
+  -- a base's `private` variable of a name a later one declares again is a
+  -- root of its own: renamed by its declaration's identity, as a local is
+  -- (`x` of `PrivateRoot`, beside the derived `x`, is `x_PrivateRoot`), and
+  -- every identifier reads it by that identity (`PState.names`)
   let variableNames := vars.filterMap fun v => J.str? v "name"
-  unless variableNames.eraseDups.length == variableNames.length do
-    throw "inherited state declarations share a name: distinct storage roots need renaming"
+  let ownerName (v : Json) : String :=
+    ((lineage.find? fun k => (membersOf k).any (J.id? · == J.id? v)).bind (J.str? · "name")).getD "base"
+  let stateRenames : List (Int × String) := Id.run do
+    let mut taken := variableNames
+    let mut out := []
+    for (v, k) in vars.zipIdx do
+      let some n := J.str? v "name" | continue
+      let some i := J.id? v | continue
+      unless (vars.drop (k + 1)).any (J.str? · "name" == some n) do continue
+      let mut x := s!"{n}_{ownerName v}"
+      for _ in [:taken.length + 1] do
+        if !taken.contains x then break
+        x := x ++ "_"
+      taken := x :: taken
+      out := out ++ [(i, x)]
+    return out
+  -- a specification reads a variable by its name, which would now name the
+  -- last declaration: refused where one names a renamed variable
+  let renamedNames := (vars.filter fun v => (J.id? v).any fun i => (lookupBy i stateRenames).isSome)
+    |>.filterMap (J.str? · "name")
+  let specTexts := lineage.map docText ++ nodes.flatMap fun m => (J.nodes m).flatMap fun node =>
+    docText node :: (J.arrD node "loopSpec" |>.toList.filterMap (·.getStr?.toOption))
+  if specTexts.any fun t => (specTokens t).any fun w => renamedNames.contains ((w.splitOn ".").headD w) then
+    throw "inherited state declarations share a name a specification reads: \
+      distinct storage roots, the specification reads them by name"
   let invariants : List String := if testing then
     (cspec.filter (·.kind == "invariant")).map (fun c => s!"invariant {c.text};") else []
   -- the enums, as `contract!` members, for the conversions `E(x)` to check
@@ -1722,8 +1749,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let mut dropped : List (Int × String × Gap) := []
   let mut droppedNames : List (String × Gap) := []
   for v in vars do
-    let n := (J.str? v "name").getD ""
     let i := (J.id? v).getD 0
+    let n := (lookupBy i stateRenames).getD ((J.str? v "name").getD "")
     let mutab := (J.str? v "mutability").getD "mutable"
     let fixed := (v.getObjValAs? Bool "constant").toOption == some true ||
       (mutab != "mutable" && !(mutab == "immutable" && written.contains i))
@@ -1747,7 +1774,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     | .error g =>
       dropped := dropped ++ [(i, n, g)]
       droppedNames := droppedNames ++ [(n, g)]
-  let stateVars := vars.filterMap fun v => J.str? v "name"
+  let stateVars := vars.filterMap (J.str? · "name") ++ stateRenames.map (·.2)
   -- every function, the constructor (`kind` `constructor`, named `""`) among them
   let ownFuns := ownNodes.filter (J.kind · == "FunctionDefinition")
   let ownIds := ownFuns.filterMap J.id?
@@ -1815,6 +1842,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let some resolved := lookupBy target staticNames
       | throw s!"override target #{target} of `{original}` is not imported"
     pure (id, resolved)
+  -- the renamed state variables, read by their identity like a function
+  let funRenames := funRenames ++ stateRenames
   let funParams : List (Int × List String) := funs.filterMap fun f => do
     let i ← J.id? f
     let ps ← (f.getObjVal? "parameters").toOption
