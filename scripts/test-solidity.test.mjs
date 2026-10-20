@@ -596,6 +596,15 @@ test("inheritance resolves super in the most-derived C3 order", () => {
   assert.equal(rows.falseDiamondSuper.status, "pending");
 });
 
+test("constructor and function quotients close as solkey's sdiv_axiom reads them", () => {
+  const report = runSolidityTests(["tests/solc/CtorDivision.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [`${r.contract}.${r.function}`, r.status]));
+  for (const row of ["CtorDivision.constructor", "CtorDivision.half", "CtorDivisionLiteral.constructor",
+    "CtorModulo.constructor"]) assert.equal(status[row], "proved", row);
+  assert.equal(status["CtorDivisionFalse.constructor"], "pending");
+});
+
 test("inheritance runs base constructors in solc's legacy order", () => {
   for (const [contract, status] of [["CtorLeaf", "proved"], ["CtorFalse", "pending"],
     ["CtorImplicit", "proved"], ["CtorUnnamedChild", "proved"]]) {
