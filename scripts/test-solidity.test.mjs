@@ -346,12 +346,11 @@ test("source types preserve overflow and declaration scope", () => {
   assert.equal(status.ternaryOverflowCannotReturn, 'pending');
   for (const name of ['ternaryOverflowPanics', 'ternaryUncheckedWraps',
     'ternaryExplicitWidening']) assert.equal(status[name], 'proved');
-  assert.equal(status.ternaryEffectsOnce, 'unsupported');
-  assert.equal(status.nestedTypedConditionals, 'proved');
+  // a branch's effects run in the branch taken (`hoist`'s conditional capture);
+  // a conditional of literals has solc's mobile type (`mobileTy`)
+  for (const name of ['ternaryEffectsOnce', 'nestedTypedConditionals', 'signedLiteralConditional',
+    'nestedLiteralConditional', 'shortCircuitLiteralConditional']) assert.equal(status[name], 'proved', name);
   assert.equal(status.signedTernaryOverflowCannotReturn, 'pending');
-  assert.equal(status.signedLiteralConditional, 'unsupported');
-  assert.equal(status.nestedLiteralConditional, 'unsupported');
-  assert.equal(status.shortCircuitLiteralConditional, 'unsupported');
 });
 
 test("modifiers use the existing inliner for calls and root obligations", () => {

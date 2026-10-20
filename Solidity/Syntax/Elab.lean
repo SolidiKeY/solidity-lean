@@ -892,6 +892,10 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     | true => pure (.val _ (.binop op h rfl (← check Γ p a) (← check Γ p b)))
     | false => throw s!"operator {BinOp.sym op} does not take {p.toStr}"
   | .ternary c a b => do
+    -- two literals: an `int` where one is negative (`c ? -1 : -127`, `mobileTy`)
+    if let (some u, some v) := (a.litVal?, b.litVal?) then
+      let p : PrimTy := if u < 0 || v < 0 then .int else .uint
+      return .val p (.ternary (← check Γ .bool c) (← check Γ p a) (← check Γ p b))
     let t ← if a.isLit then synth Γ b else synth Γ a
     let some ⟨p, _⟩ := t.toVal? | throw "a conditional of reference type"
     pure (.val p (.ternary (← check Γ .bool c) (← check Γ p a) (← check Γ p b)))

@@ -110,4 +110,10 @@ theorem ternaryLiteralWide : ⊨ dl!{ ⟨ bool t = true; bool f = false;
   sol_symex
   sol_close
 
+/-- Negative literals make it an `int`: `t ? -1 : -127` is an `int8`. -/
+theorem ternaryLiteralSigned : ⊨ dl!{ ⟨ bool t = true; int16 r = t ? -1 : -127; int e = -1;
+    assert(r == e); ⟩ true } := by
+  sol_symex
+  sol_close
+
 end Solidity.Examples.Tactics.SolcOpen
