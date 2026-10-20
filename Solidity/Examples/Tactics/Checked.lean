@@ -99,6 +99,26 @@ theorem castTruncates : ⊨ dl!{ ⟨ uint w = 300; uint8 z = uint8(w); ⟩ z == 
   sol_symex
   sol_close
 
+/-- A narrow operation is checked only where solc evaluates it: under `&&`/`||`
+when the left operand does not decide, in the branch of `c ? a : b` taken. -/
+theorem shortCircuitUnchecked : ⊨ dl!{ ⟨ uint8 x = 255; bool b = false && x + 1 > 0;
+    bool d = true || x + 1 > 0; ⟩ b == false && d == true } := by
+  sol_symex
+  sol_close
+
+theorem shortCircuitChecked : ⊨ dl!{ [ uint8 x = 255; bool b = true && x + 1 > 0; ] false } := by
+  sol_symex
+  sol_close
+
+theorem ternaryBranchUntaken : ⊨ dl!{ ⟨ uint8 x = 255; bool c = false; uint8 y = c ? x + 1 : x; ⟩
+    y == 255 } := by
+  sol_symex
+  sol_close
+
+theorem ternaryBranchTaken : ⊨ dl!{ [ uint8 x = 255; bool c = true; uint8 y = c ? x + 1 : x; ] false } := by
+  sol_symex
+  sol_close
+
 /-! ## 2 · State variables and functions
 
 A state variable, a parameter and a return variable carry their width
@@ -189,6 +209,13 @@ the branch the left operand takes. -/
 example : Prog.toStr [] (sol{ uint8 x = 1; bool b = true && x + 1 > 0; } :
     Prog StandardExample [] _) =
     "uint x = 1; bool se1 = true; if (se1) { uint se2 = x + 1; require(se2 <= 255); se1 = se2 > 0; } else { } bool b = se1;" := by
+  decide
+
+/-- … and in a conditional's branch: a capture assigned in each branch, the
+check in the branch that computes it. -/
+example : Prog.toStr [] (sol{ uint8 x = 1; bool c = true; uint8 y = c ? x + 1 : x; } :
+    Prog StandardExample [] _) =
+    "uint x = 1; bool c = true; uint se1; if (c) { se1 = x + 1; require(se1 <= 255); } else { se1 = x; } uint y = se1;" := by
   decide
 
 /-- error: Solidity elaboration failed: uint8: a narrow integer type is the type of a local, a parameter, a return value or a state variable only, not of an array's element, a mapping's key or value, or a struct's member -/

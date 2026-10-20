@@ -188,6 +188,24 @@ programs, and the check is a statement the rules already run.
   and `~x` at `uint8` is `255 -% x` (`narrowWrapNode`).  At `int` and
   `intN`, `+ - *` wrap on the operands' words, read back as a cast:
   `x + 1` at `int8` is `int8(uint(x) +% 1)`, so `127 + 1` is `-128`.
+- **Signed `unchecked`** wraps unary `-`, `/` and `**` too: `-x` is
+  `int8(0 -% uint(x))`, so `-(-128)` is `-128`; `x / y` at `int8` is the
+  quotient at `int` read back (`-128 / -1` is `-128`), and at `int256` the
+  quotient by `1` where `y` is `-1`, negated on the words
+  (`type(int).min / -1` is `type(int).min`); `x ** k` is the words' power,
+  `int8(uint(x) **% k)`.  Checked, each reverts as solc panics (`0x11`).
+- **Short circuits and conditionals.**  A narrow operation under the right
+  operand of `&&`/`||` or in a branch of `c ? a : b` is checked only where
+  solc evaluates it: `bool se = a; if (se) { se = b; }`, and
+  `uint se; if (c) { se = a; } else { se = b; }` (`hoist`).
+- **Literal conditionals.**  `c ? 63 : 255` has solc's type: the smallest
+  type holding both literals (`uint8`, `mobileTy`), and a literal beside a
+  value its own smallest type (`c ? x : 300` is a `uint16` at `uint8 x`).  So
+  `(t ? 63 : 255) + (f ? 63 : 255)` is a `uint8` addition, and reverts.
+- **`type(T).max`, `type(T).min`** are values of `T`: `type(uint8).max` is
+  `uint8(255)`, so `type(uint8).max + 1` overflows at `uint8`;
+  `type(int8).min` is `int8(-128)`; an enum's are its first and last member
+  (`typeBoundExpr`, `enumLit?`).
 - **Storage packing** is not observable here: a state variable is a value of
   its own in the interpreter and a slot of its own in the compiler, and it
   holds a value of its range; solc packs several narrow variables into one
@@ -199,17 +217,12 @@ What is not modelled, each an elaboration error unless said otherwise:
 
 - a narrow type inside a type: an array's element, a mapping's key or value,
   a struct's member (`narrowNestedMsg`); and a modifier's narrow parameter;
-- signed `**` in `unchecked` (`**%` takes `uint` only); `-128 / -1` and
-  `-(-128)` at `int8` revert inside `unchecked` too, where solc wraps them,
-  as at `int256` already;
 - a cast of arithmetic on literals alone to a narrow `int`
   (`int8(100 + 100)`): write the literal;
-- a narrow operation under the right operand of `&&`/`||` or in a branch of
-  `c ? a : b`: its capture would run where the program does not evaluate it;
 - constant folding: arithmetic on literals alone written to a narrow variable
   (`uint8 z = 200 + 100;`), which solc refuses at compile time, is checked
   at run time instead and reverts;
-- `type(uint8).max` and the other type members;
+- type members other than `type(T).max` and `type(T).min`;
 - a public function's ABI decoding, which reverts on an out-of-range
   argument: a specification's precondition (`Calculus/SurfaceSpec.lean`) does not
   assume a narrow parameter's range, which is weaker, not unsound.

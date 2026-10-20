@@ -624,7 +624,8 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // which the run executes (`docs/options.md`, O8); the value call's
     // callee may write the state under the callback reading (O7)
     trySuccessKeepsStorageUnsound: "pending", callKeepsStorageUnsound: "pending",
-    // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
+    // false on the EVM: `t ? 63 : 255` is a `uint8`, so `63 + 255` panics
+    // (`0x11`); the model reverts there (`SolcOpen.ternaryLiteralOverflow`)
     ternaryLiteralOverflow: "pending",
   };
   // `callWithoutCodeReverts` proves: address 0 has no code (O8);
