@@ -120,7 +120,8 @@ path below it: `small[]` is `[]` under `small` (`Contract.widths`,
 `FunDecl.widths`, `structWidths`). -/
 def shapeUnder (tb : List (String × Nat)) (k : String) : List (String × Nat) :=
   tb.filterMap fun (k', n) =>
-    if k'.startsWith (k ++ "[") || k'.startsWith (k ++ "{") then some (k'.drop k.length, n)
+    if k'.startsWith (k ++ "[") || k'.startsWith (k ++ "{") || k'.startsWith (k ++ "#") then
+      some (k'.drop k.length, n)
     else none
 
 /-- Two shapes name the same narrow positions at the same widths. -/
@@ -138,7 +139,7 @@ def FunDecl.paramCtx (d : FunDecl) : Except String ECtx := do
     | .prim p =>
       if (lookupBy n d.paramLocs).isSome then
         .error s!"data location on value parameter {n}"
-      else .ok [(n, .val p ((lookupBy n d.widths).getD 256))]
+      else .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .val p ((lookupBy n d.widths).getD 256))])
     | .ref R => match lookupBy n d.paramLocs with
       | some .storage => .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .alias R)])
       | some .memory =>
@@ -158,7 +159,8 @@ def elabTy (C : Contract) : RawTy → Except String Ty
     | some p => pure (.prim p)
     | none =>
       if (lookupBy s C.enums).isSome then pure .uint
-      else if (narrowTy? s).isSome then throw (narrowNestedMsg s)
+      else if (narrowTy? s).isSome || (bytesTy? s).isSome || dynBytesTy s then
+        throw (narrowNestedMsg s)
       else match C.structName? s with
         | some e => pure (.struct e)
         | none => throw (unknownStructMsg s)
@@ -173,10 +175,16 @@ def elabTy (C : Contract) : RawTy → Except String Ty
 (`narrowTy?`) as its primitive type; and its width. -/
 def elabDeclTy (C : Contract) : RawTy → Except String (Ty × Nat)
   | .named s =>
-    match narrowTy? s with
-    | some (p, n) => pure (.prim p, n)
-    | none => do pure (← elabTy C (.named s), 256)
+    match narrowTy? s, bytesTy? s with
+    | some (p, n), _ => pure (.prim p, n)
+    | none, some n => pure (.uint, 8 * n)
+    | none, none => do pure (← elabTy C (.named s), 256)
   | T => do pure (← elabTy C T, 256)
+
+/-- The marker of a value type: `[("#bytes", N)]` for a `bytesN`. -/
+def bytesRowsOf (_C : Contract) : RawTy → Except String (List (String × Nat))
+  | .named s => pure ((bytesTy? s).toList.map fun n => ("#bytes", n))
+  | _ => pure []
 
 /-- A local's or a `new`'s type, where a narrow type may stand inside it: its
 `Ty`, and the widths of its narrow positions keyed by their path below it, as
@@ -184,14 +192,19 @@ def elabDeclTy (C : Contract) : RawTy → Except String (Ty × Nat)
 mapping's key `{}`). -/
 def elabTyW (C : Contract) : RawTy → Except String (Ty × List (String × Nat))
   | .named s =>
-    match narrowTy? s with
-    | some (p, n) => pure (.prim p, [("", n)])
+    if dynBytesTy s then pure (.array .uint, dynBytesRows) else
+    match valueRows? s with
+    | some (p, ws) => pure (.prim p, ws)
     | none => do pure (← elabTy C (.named s), [])
   | .mapping k v => do
+    if let .named s := k then
+      if dynBytesTy s then
+        throw s!"mapping({s} => …): a byte string as a key is not modelled \
+          (docs/semantic-gaps.md, \"Bytes and strings\")"
     let (kt, kw) ← elabTyW C k
     let .prim p := kt | throw s!"a mapping's key is a value type, not {kt.toStr}"
     let (vt, vw) ← elabTyW C v
-    pure (.mapping p vt, kw.map (fun (_, n) => ("{}", n)) ++ vw.map fun (k, n) => ("[]" ++ k, n))
+    pure (.mapping p vt, kw.map (fun (k, n) => ("{}" ++ k, n)) ++ vw.map fun (k, n) => ("[]" ++ k, n))
   | .array t => do
     let (t, w) ← elabTyW C t
     pure (.array t, w.map fun (k, n) => ("[]" ++ k, n))
@@ -199,16 +212,23 @@ def elabTyW (C : Contract) : RawTy → Except String (Ty × List (String × Nat)
     let (t, w) ← elabTyW C t
     pure (.fixed t m, w.map fun (k, n) => ("[]" ++ k, n))
 
+/-- The name of the value type at the key `k` of the width table `ws`: a
+`bytesN` where it has a marker row (`valueRows?`), else `p` at its width. -/
+def declTyName (ws : List (String × Nat)) (k : String) (p : PrimTy) : String :=
+  match lookupBy (k ++ "#bytes") ws with
+  | some n => s!"bytes{n}"
+  | none => tyName p ((lookupBy k ws).getD 256)
+
 /-- `T` written back as a declared type, its narrow positions at their widths
 in `ws`, keyed by their path below `k` (`elabTyW`'s inverse: a modifier's
 reference parameter, declared as a local of its type). -/
 partial def rawTyW (ws : List (String × Nat)) : Ty → String → RawTy
-  | .prim p, k => .named (tyName p ((lookupBy k ws).getD 256))
+  | .prim p, k => .named (declTyName ws k p)
   | .ref (.struct s), _ => .named s
   | .ref (.array E), k => .array (rawTyW ws E (k ++ "[]"))
   | .ref (.fixed E n), k => .fixed (rawTyW ws E (k ++ "[]")) n
   | .ref (.mapping p V), k =>
-    .mapping (.named (tyName p ((lookupBy (k ++ "{}") ws).getD 256))) (rawTyW ws V (k ++ "[]"))
+    .mapping (.named (declTyName ws (k ++ "{}") p)) (rawTyW ws V (k ++ "[]"))
 
 /-- A synthesised expression, read in `Γ`: a storage path, a memory path, or
 a value. -/
@@ -329,7 +349,7 @@ assignment, or a call (a cast `uint8(e)` is not one). -/
 def RawExpr.hasIncDec : RawExpr → Bool :=
   RawExpr.any fun
     | .incDec .. | .named .. | .assign .. | .opAssign .. => true
-    | .call f _ => (castTy? f).isNone
+    | .call f _ => (castTy? f).isNone && f != bytesLitName && (bytesTy? f).isNone
     | _ => false
 
 /-- `f({q: b, p: a})`, a call of a function `funs` declares with named
@@ -1553,6 +1573,188 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
 /-- `e`'s width in bits: `intTyOf`'s, `256` for a literal. -/
 def widthIn (Γ : ECtx) (e : RawExpr) : Nat := ((intTyOf C Γ e).map (·.2)).getD 256
 
+/-! ### Byte types
+
+A `bytesN` is a `uint` of `8N` bits (`valueRows?`, `Syntax.lean`); what solc
+does differently from a `uint8N` is rewritten before the statement is
+elaborated (`bytesPure`), where the marker rows tell which positions hold
+bytes. -/
+
+/-- The `bytesN` of the value local `x`: its marker, recorded after it
+(`declareShape`), not an outer `x`'s. -/
+def localBytes? (Γ : ECtx) (x : Name) : Option Nat := do
+  let i ← Γ.findIdx? (·.1 == x)
+  let j ← Γ.findIdx? (·.1 == "#" ++ x)
+  guard (j < i)
+  match Γ[j]? with
+  | some (_, .shape ws) => lookupBy "#bytes" ws
+  | _ => none
+
+/-- Two operands' `bytesN`: a literal takes the other's, the longer wins. -/
+def joinBytes : Option Nat → Option Nat → Option Nat
+  | none, t => t
+  | t, none => t
+  | some n, some m => some (max n m)
+
+/-- The `N` of `e` when solc types it `bytesN`: a variable, an element, a
+member or a function's return marked so, a conversion `bytesN(…)`, an
+element `b[i]` of a `bytesN` (a `bytes1`), and the bitwise operators of
+them. -/
+partial def bytesOf? (Γ : ECtx) : RawExpr → Option Nat
+  | .name x =>
+    match lookupBy x Γ with
+    | some (.val ..) => localBytes? Γ x
+    | some _ => none
+    | none => lookupBy (x ++ "#bytes") C.widths
+  | e@(.index b _) =>
+    if (bytesOf? Γ b).isSome then some 1 else do
+      let (tb, k, .prim _) ← widthPath? C Γ e | none
+      lookupBy (k ++ "#bytes") tb
+  | .field _ "length" => none
+  | e@(.field _ _) => do
+    let (tb, k, .prim _) ← widthPath? C Γ e | none
+    lookupBy (k ++ "#bytes") tb
+  | .call f _ =>
+    match bytesTy? f with
+    | some n => some n
+    | none => do
+      let d ← lookupBy f C.funs
+      let (r, .prim _) ← d.ret | none
+      lookupBy (r ++ "#bytes") d.widths
+  | .binop op a b =>
+    if op matches .band | .bor | .bxor then joinBytes (bytesOf? Γ a) (bytesOf? Γ b)
+    else if op matches .shl | .shr then bytesOf? Γ a
+    else none
+  | .unop .bnot a => bytesOf? Γ a
+  | .ternary _ a b => joinBytes (bytesOf? Γ a) (bytesOf? Γ b)
+  | .assign l _ | .opAssign _ l _ => bytesOf? Γ l
+  | _ => none
+
+/-- The bytes `bs` as a `bytesN`: left-aligned, the rest zero. -/
+def bytesAlign (n : Nat) (bs : List Nat) : Except String Nat := do
+  if n < bs.length then throw s!"a literal of {bs.length} bytes does not fit bytes{n}"
+  pure ((bs ++ List.replicate (n - bs.length) 0).foldl (fun a b => 256 * a + b) 0)
+
+/-- A `bytesM` as a `bytesN`, `M < N`: padded on the right. -/
+def widenBytes (m n : Nat) (e : RawExpr) : RawExpr :=
+  .binop .shl (.call (tyName .uint (8 * n)) [e]) (.num (8 * (n - m)))
+
+/-- `e`, rewritten from `o`, where a `bytesN` is expected (solc's implicit
+conversion): a literal of bytes left-aligned, a shorter `bytesM` padded on
+the right; a longer one is refused, as solc refuses it. -/
+def toBytesAt (Γ : ECtx) (n : Nat) (o e : RawExpr) : Except String RawExpr := do
+  if let some bs := o.bytesLit? then return .num (← bytesAlign n bs)
+  match bytesOf? C Γ o with
+  | some m =>
+    if m == n then pure e
+    else if m < n then pure (widenBytes m n e)
+    else throw s!"{o.toStr}: a bytes{m} where a bytes{n} is expected: write bytes{n}(…)"
+  | none => pure e
+
+/-- `toBytesAt` where the expected type is a `bytesN`, else `e`. -/
+def toBytesAt? (Γ : ECtx) (n : Option Nat) (o e : RawExpr) : Except String RawExpr :=
+  match n with
+  | some n => toBytesAt C Γ n o e
+  | none => pure e
+
+/-- The byte `i` of the `bytesN` `b`, a `bytes1`: `b`'s byte counted from the
+left, `b >> 8((N-1) -% i)` cut to 8 bits, divided by `i < N ? 1 : 0` so that
+an index out of range reverts, as an array's does (`Storage.checkIndex`); a
+literal index is checked here. -/
+def bytesAt (n : Nat) (b i : RawExpr) : Except String RawExpr :=
+  match i.litVal? with
+  | some k =>
+    -- a literal index: in range, or solc's compile error
+    if 0 ≤ k && k < n then
+      pure (.call "uint8" [.binop .mod (.binop .shr b (.num (8 * (n - 1 - k.toNat)))) (.num 256)])
+    else throw s!"index {k} out of range of a bytes{n}"
+  | none =>
+    let sh : RawExpr := .binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i)
+    pure (.call "uint8" [.binop .div (.binop .mod (.binop .shr b sh) (.num 256))
+      (.ternary (.binop .lt i (.num n)) (.num 1) (.num 0))])
+
+/-- Solc's operations on `bytesN` that are not `uint8N`'s, as `uint`
+operations (`docs/semantic-gaps.md`, "Bytes and strings"): a conversion, an
+index, `.length`, a literal of bytes, an implicit widening; read bottom up,
+the types from the expression as written. -/
+partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
+  | .call f as => do
+    let as' ← as.mapM (bytesPure Γ)
+    if let some n := bytesTy? f then
+      let ([o], [a]) := (as, as') | throw s!"a conversion {f}(…) takes one argument"
+      if let some bs := o.bytesLit? then return .num (← bytesAlign n bs)
+      return match bytesOf? C Γ o with
+        | some m =>
+          if m == n then a
+          else if m < n then widenBytes m n a
+          else .call (tyName .uint (8 * n)) [.binop .shr a (.num (8 * (m - n)))]
+        | none => .call (tyName .uint (8 * n)) [a]
+    if dynBytesTy f then
+      let [a] := as' | throw s!"a conversion {f}(…) takes one argument"
+      return a
+    match lookupBy f C.funs with
+    | some d =>
+      if d.params.length != as.length then return .call f as'
+      let as'' ← ((d.params.zip as).zip as').mapM fun (((n, _), o), a) =>
+        toBytesAt? C Γ (lookupBy (n ++ "#bytes") d.widths) o a
+      pure (.call f as'')
+    | none => pure (.call f as')
+  | .index b i => do
+    let b' ← bytesPure Γ b
+    let i' ← bytesPure Γ i
+    if let some n := bytesOf? C Γ b then
+      if i.hasIncDec then throw s!"{(RawExpr.index b i).toStr}: an index of a bytes{n} with an effect"
+      return ← bytesAt n b' i'
+    -- a mapping's `bytesN` key
+    let key := match widthPath? C Γ b with
+      | some (tb, k, .ref (.mapping ..)) => lookupBy (k ++ "{}#bytes") tb
+      | _ => none
+    pure (.index b' (← toBytesAt? C Γ key i i'))
+  | .field b "length" => do
+    if let some n := bytesOf? C Γ b then
+      if b.hasIncDec then throw s!"{b.toStr}.length: a bytes{n} with an effect"
+      return .num n
+    pure (.field (← bytesPure Γ b) "length")
+  | .field b f => do pure (.field (← bytesPure Γ b) f)
+  | .binop op a b => do
+    let a' ← bytesPure Γ a
+    let b' ← bytesPure Γ b
+    if op matches .lt | .gt | .le | .ge | .eqB | .neB | .band | .bor | .bxor then
+      let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
+      return .binop op (← toBytesAt? C Γ n a a') (← toBytesAt? C Γ n b b')
+    pure (.binop op a' b')
+  | .unop op a => do pure (.unop op (← bytesPure Γ a))
+  | .ternary c a b => do
+    let n := joinBytes (bytesOf? C Γ a) (bytesOf? C Γ b)
+    pure (.ternary (← bytesPure Γ c) (← toBytesAt? C Γ n a (← bytesPure Γ a))
+      (← toBytesAt? C Γ n b (← bytesPure Γ b)))
+  | .incDec op e => do pure (.incDec op (← bytesPure Γ e))
+  | .newArr T e => do pure (.newArr T (← bytesPure Γ e))
+  | .modular op a b k => do
+    pure (.modular op (← bytesPure Γ a) (← bytesPure Γ b) (← bytesPure Γ k))
+  | .named f ns as => do pure (.named f ns (← as.mapM (bytesPure Γ)))
+  | .tuple as => do pure (.tuple (← as.mapM (bytesPure Γ)))
+  | .assign l r => do
+    pure (.assign (← bytesPure Γ l) (← toBytesAt? C Γ (bytesOf? C Γ l) r (← bytesPure Γ r)))
+  | .opAssign op l r => do
+    pure (.opAssign op (← bytesPure Γ l) (← toBytesAt? C Γ (bytesOf? C Γ l) r (← bytesPure Γ r)))
+  | e => pure e
+
+/-- `bytesPure` of a statement's expressions, and a value written where a
+`bytesN` is expected converted to it: a declaration's initializer, an
+assignment's right-hand side, a pushed element. -/
+def bytesStmt (Γ : ECtx) (s : RawStmt) : Except String RawStmt := do
+  let s' ← s.mapExprsM (bytesPure C Γ)
+  match s, s' with
+  | .decl (.named T) _ (some o), .decl T' x (some r) =>
+    pure (.decl T' x (some (← toBytesAt? C Γ (bytesTy? T) o r)))
+  | .assign l o, .assign l' r => pure (.assign l' (← toBytesAt? C Γ (bytesOf? C Γ l) o r))
+  | .opAssign op l o, .opAssign _ l' r =>
+    pure (.opAssign op l' (← toBytesAt? C Γ (bytesOf? C Γ l) o r))
+  | .call (.field b "push") [o], .call f [r] =>
+    pure (.call f [← toBytesAt? C Γ (bytesOf? C Γ (.index b (.num 0))) o r])
+  | _, s' => pure s'
+
 /-- `e`, an operation that can leave its narrow type — `+ - * **`, and `/` and
 unary `-` at `int` (`-128 / -1` at `int8`) — with that type. -/
 def checkedNarrow? (Γ : ECtx) (e : RawExpr) : Option (PrimTy × Nat) :=
@@ -2217,7 +2419,7 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
       match T with
       | .prim p =>
         let y := toString (← freshCapture "se")
-        decls := decls ++ [.decl (.named (tyName p ((lookupBy n m.widths).getD 256))) y (some a)]
+        decls := decls ++ [.decl (.named (declTyName m.widths n p)) y (some a)]
         ρ := (n, y) :: ρ
       | .ref _ =>
         let rt := rawTyW m.widths T n
@@ -2507,6 +2709,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         let x ← freshCapture "se"
         let Q ← elabCall f args (some (x, p)) n (resNew := true)
         declare C (toString x) (.val p n)
+        declareShape (toString x) (shapeUnder d.widths r)
         pure (P ++ [.of Γ (.declLocal p x none)] ++ Q, .name (toString x))
       | some (r, .ref R) =>
         if d.retStorage then
@@ -2808,7 +3011,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       pnames := pnames ++ [x]
       targs := ⟨_, targs.2.snoc p x e⟩
       ρ := (n, toString x) :: ρ
-      Γp := (toString x, .val p w) :: Γp
+      Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .val p w) :: Γp
     | .ref R =>
       match lookupBy n d.paramLocs with
       | some .storage =>
@@ -2864,7 +3067,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       if resW < w then throw s!"{f} returns a {tyName p w}, where a {tyName p resW} is expected"
       let r ← pickName "se" (·.rets) 0
       ρ := (n, toString r) :: ρ
-      Γr := [(toString r, .val p w)]
+      Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ [(toString r, .val p w)]
       if targets then
         mrets := [(p, r, w)]
         pure (RetKind.rets [(p, r)])
@@ -2880,7 +3083,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         let w := (lookupBy n d.widths).getD 256
         let r ← freshCapture "se"
         ρ := (n, toString r) :: ρ
-        Γr := (toString r, .val p w) :: Γr
+        Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ (toString r, .val p w) :: Γr
         mrets := mrets ++ [(p, r, w)]
       if targets then pure (RetKind.rets (mrets.map fun (p, r, _) => (p, r))) else pure RetKind.none
   let Γf := Γr ++ Γp
@@ -3313,6 +3516,7 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
         throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \
           `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are \
           expected, not whole"
+  let s ← ElabM.lift (bytesStmt C (← ctx) s)
   let s ← ElabM.lift (s.mapExprsM (narrowPure C (← read).unchecked (← ctx)))
   let (P, s) ← hoistStmt s
   let P ← pure (P ++ (← elabStmt1 s))
@@ -3401,12 +3605,14 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let Γ ← nctx
     let P ← elabCall f args (some (Var.ofName x, p)) n (resNew := true)
     declare C x (.val p n)
+    declareShape x (← ElabM.lift (bytesRowsOf C T))
     pure (.of Γ (.declLocal p (Var.ofName x) none) :: P)
   | .decl T x init => do
     let (.prim p, n) ← ElabM.lift (elabDeclTy C T) | throw s!"{x}: a reference type needs a data location"
     let Γ ← nctx
     let v ← init.mapM (checkIn C Γ p)
     declare C x (.val p n)
+    declareShape x (← ElabM.lift (bytesRowsOf C T))
     let post ← match init with
       | some r => narrowPost C (.name x) r
       | none => pure []
