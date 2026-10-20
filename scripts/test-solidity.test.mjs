@@ -635,9 +635,12 @@ test("unmodelled inheritance boundaries are rejected instead of omitted", () => 
 test("inheritance wraps each constructor's body in its own modifiers, after its bases", () => {
   const report = runSolidityTests(["tests/solc/InheritanceCtors.sol"], {build:false});
   assert.deepEqual(report.errors, []);
-  const status = Object.fromEntries(report.results.map(r => [r.contract, r.status]));
-  for (const c of ["ModLeaf", "CtorModLeaf", "CtorReturnLeaf"]) assert.equal(status[c], "proved", c);
-  for (const c of ["CtorModFalse", "CtorReturnFalse"]) assert.equal(status[c], "pending", c);
+  const status = Object.fromEntries(report.results.map(r => [`${r.contract}.${r.function}`, r.status]));
+  for (const c of ["ModLeaf", "CtorModLeaf", "CtorReturnLeaf", "SuperMod1", "SuperModCtor", "SuperModArg"])
+    assert.equal(status[`${c}.constructor`], "proved", c);
+  for (const c of ["CtorModFalse", "CtorReturnFalse"]) assert.equal(status[`${c}.constructor`], "pending", c);
+  // `super` in a modifier's body, the modifier applied in the contract and below it
+  for (const f of ["SuperModBody.f", "SuperModInherited.h"]) assert.equal(status[f], "proved", f);
 });
 
 test("native modular builtins retain wide results, failure priority and source effects", () => {

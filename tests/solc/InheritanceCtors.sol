@@ -31,3 +31,32 @@ contract CtorModFalse is PlainCtor {
     modifier marked() { seenM = m; _; }
     constructor() PlainCtor(2) marked { assert(seenM == 0); }
 }
+// `super` in a modifier's arguments and body names the next implementation
+// after the contract that writes it, a constructor's as a function's
+contract SuperMod0 { function g() internal virtual returns (uint) { return 1; } }
+contract SuperMod1 is SuperMod0 {
+    uint t;
+    modifier k(uint v) { t = v; _; }
+    function g() internal virtual override returns (uint) { return 2; }
+    constructor() k(super.g()) { }
+}
+contract SuperModCtor is SuperMod1 {
+    function g() internal override returns (uint) { return 3; }
+    constructor() { assert(t == 1); }
+}
+contract SuperModArg is SuperMod1 {
+    uint u;
+    modifier j(uint v) { u = v; _; }
+    function g() internal override returns (uint) { return 3; }
+    constructor() j(super.g()) { assert(t == 1 && u == 2); }
+}
+contract SuperModBody is SuperMod1 {
+    modifier viaSuper() { t = super.g(); _; }
+    function g() internal override returns (uint) { return 3; }
+    /// @custom:key box
+    function f() public viaSuper { assert(t == 2); }
+}
+contract SuperModInherited is SuperModBody {
+    /// @custom:key box
+    function h() public viaSuper { assert(t == 2); }
+}
