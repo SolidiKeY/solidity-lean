@@ -337,13 +337,41 @@ theorem thin_keepAll {Γ Δ : Ctx} {H : HTy} (h : Thin Γ Δ) :
       (r.1, TEnv.append ρ r.2 (TEnv.thin h d))
     rw [thin_keepAll h ρ r.2 d]
 
-theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (J : StateInv C) (call : ExtCall C Γ)
+theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv C) (call : ExtCall C Γ)
     (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
-    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (self : Bool)
     (hok : UWkP J ok) (herr : UWkP J err) (hpnc : UWkP J pnc) (hoth : UWkP J other) :
-    UWkS J (.tryCall call rets ok err code pnc other) := by
+    UWkS J (.tryCall call rets ok err code pnc other sargs sbody self) := by
   intro Δ h τ o' he
+  have ha : (call.wk h).addr.evalT τ = call.addr.evalT (τ.thin h) := by
+    simpa only [State.lift_thin] using Simple.evalT_wk h (τ.thin h) τ.env call.addr
   cases he with
+  | trySelfOk hz hs hc hp =>
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    cases v with
+    | halt _ => cases hr
+    | violated => cases hr
+    | ok a =>
+      change CWkRel (Thin.keepAll ρ h) (TEnv.off h τ.env) (.ok a) _ at hr
+      obtain ⟨d', hd, rfl⟩ := hr
+      obtain ⟨u, hu, hr'⟩ := hok (Thin.keepAll ρ h) _ hp
+      dsimp only [State.thin, State.lift, State.withEnv] at hu hr'
+      rw [TEnv.thin_put] at hu
+      rw [TEnv.off_put] at hr'
+      refine ⟨_, ExecS.trySelfOk (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv hu, ?_⟩
+      rw [COut.map_dropCat, COut.map_dropCat]
+      exact CWkRel.cat a d' hd (CWkRel.drop ((Thin.Over.append h ρ).trans
+        (Prog.wk_over ok (Thin.keepAll ρ h))) hr')
+  | trySelfHalt hz hs hc h1 h2 =>
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    cases v <;> cases hr
+    exact ⟨_, ExecS.trySelfHalt (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv h1 h2, rfl⟩
+  | trySelfViolated hz hs hc =>
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    cases v <;> try cases hr
+    exact ⟨_, ExecS.trySelfViolated (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv,
+      trivial⟩
   | det hf => exact det_unwk J _ h τ hf
   | tryRevert => exact ⟨_, .tryRevert, rfl⟩
   | tryDecode hd => exact ⟨_, .tryDecode hd, rfl⟩
@@ -397,8 +425,8 @@ theorem stmt_unwk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → 
   | _, _, .callReceiver f args r body op => callReceiver_unwk J f args r body op
   | _, _, .callReceiverPush f args r body code value =>
     callReceiverPush_unwk J f args r body code value (prog_unwk J code)
-  | _, _, .tryCall call rets ok err code pnc other =>
-    tryCall_unwk J call rets ok err code pnc other
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
+    tryCall_unwk J call rets ok err code pnc other sargs sbody self
       (prog_unwk J ok) (prog_unwk J err) (prog_unwk J pnc) (prog_unwk J other)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal ..
   | _, _, .declLocal .. | _, _, .declStorage ..

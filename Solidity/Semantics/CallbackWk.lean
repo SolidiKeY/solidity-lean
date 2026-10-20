@@ -411,13 +411,46 @@ theorem callReceiverPush_wk {Γ ps Γf Γv : Ctx} {E : Ty} (J : StateInv C) (f :
     cases v <;> try cases hr
     exact ⟨_, ExecS.callReceiverPushViolated hv, trivial⟩
 
-theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (J : StateInv C) (call : ExtCall C Γ)
+/-- A clause after a self-call, its scope ended: the call's outcome, then
+the clause's (`ExecS.trySelfOk`). -/
+theorem COut.map_dropCat {H : HTy} {Γ₀ Γ Γ' : Ctx} (a : Out C H Γ₀) (e : Ext Γ Γ')
+    (o : COut C a.st.H Γ') :
+    o.map (fun o' => (⟨o'.st.drop e, a.ext.trans o'.ext⟩ : Out C H Γ)) =
+      (o.map (Out.drop e)).map (Out.cat a) := by
+  cases o <;> rfl
+
+theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv C) (call : ExtCall C Γ)
     (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
-    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (self : Bool)
     (hok : WkP J ok) (herr : WkP J err) (hpnc : WkP J pnc) (hoth : WkP J other) :
-    WkS J (.tryCall call rets ok err code pnc other) := by
+    WkS J (.tryCall call rets ok err code pnc other sargs sbody self) := by
   intro Δ h σ d o he
+  have ha : (call.wk h).addr.evalT (σ.lift h d) = call.addr.evalT σ := Simple.evalT_wk h σ d _
   cases he with
+  | trySelfOk hz hs hc hp =>
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    cases v with
+    | halt _ => cases hr
+    | violated => cases hr
+    | ok b =>
+      obtain ⟨d', hd, rfl⟩ := hr
+      obtain ⟨u', hu, hr'⟩ := hok (Thin.keepAll ρ h) _ d' hp
+      refine ⟨_, ExecS.trySelfOk (call := call.wk h) (by rw [ha]; exact hz)
+        (by rw [ha]; exact hs) hv hu, ?_⟩
+      rw [COut.map_dropCat, COut.map_dropCat]
+      exact CWkRel.cat _ d' hd (CWkRel.drop ((Thin.Over.append h ρ).trans
+        (Prog.wk_over ok (Thin.keepAll ρ h))) hr')
+  | trySelfHalt hz hs hc h1 h2 =>
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    cases v <;> cases hr
+    exact ⟨_, ExecS.trySelfHalt (call := call.wk h) (by rw [ha]; exact hz)
+      (by rw [ha]; exact hs) hv h1 h2, rfl⟩
+  | trySelfViolated hz hs hc =>
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    cases v <;> try cases hr
+    exact ⟨_, ExecS.trySelfViolated (call := call.wk h) (by rw [ha]; exact hz)
+      (by rw [ha]; exact hs) hv, trivial⟩
   | det hf => exact det_wk J _ h σ d hf
   | tryRevert => exact ⟨_, .tryRevert, rfl⟩
   | tryDecode hd => exact ⟨_, .tryDecode hd, rfl⟩
@@ -532,8 +565,8 @@ theorem stmt_wk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Wk
   | _, _, .callReceiver f args r body op => callReceiver_wk J f args r body op
   | _, _, .callReceiverPush f args r body code value =>
     callReceiverPush_wk J f args r body code value (prog_wk J code)
-  | _, _, .tryCall call rets ok err code pnc other =>
-    tryCall_wk J call rets ok err code pnc other
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
+    tryCall_wk J call rets ok err code pnc other sargs sbody self
       (prog_wk J ok) (prog_wk J err) (prog_wk J pnc) (prog_wk J other)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal ..
   | _, _, .declLocal .. | _, _, .declStorage ..
