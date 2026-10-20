@@ -976,20 +976,111 @@ theorem afterRunTR_box_error {Γ₂ Γ₀ : Ctx} {ω : Prog C Γ Γ₂} {κ : Fr
         (Prog.runSt υ ω).bind (Frames.runSt · κ)) :=
   ⟨trivial, fun h => he (Except.error.inj h)⟩
 
-/-- `tryCallNoCallbackBox`: under the box, a goal per clause, each for every
-typed value its outcome binds. -/
-theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ)
+/-! ### Self-calls (`tryCallSelfBox`, Lean) -/
+
+theorem ExtCall.hasCode_evalT (c : ExtCall C Γ) (σ : State C Γ) :
+    c.hasCode.evalT σ = .ok (!decide ((c.addr.evalT σ).1 = 0) : Bool) := rfl
+
+theorem ExtCall.isSelf_evalT (c : ExtCall C Γ) (σ : State C Γ) :
+    c.isSelf.evalT σ = .ok (decide ((c.addr.evalT σ).1 = σ.tx.selfAddress.1) : Bool) := rfl
+
+theorem ExtCall.notSelf_evalT (c : ExtCall C Γ) (σ : State C Γ) :
+    c.notSelf.evalT σ = .ok (!decide ((c.addr.evalT σ).1 = σ.tx.selfAddress.1) : Bool) := rfl
+
+theorem TEnv.put_ofExt_append {H : HTy} : (ρ : Ctx) → (r : TEnv C H ρ) → (x : TEnv C H Γ) →
+    TEnv.put (Thin.ofExt (Ext.append Γ ρ)) x (TEnv.append ρ r x) = TEnv.append ρ r x
+  | [], _, _ => rfl
+  | _ :: ρ, r, x => by
+    show (r.1, TEnv.put (Thin.ofExt (Ext.append Γ ρ)) x (TEnv.append ρ r.2 x)) =
+      (r.1, TEnv.append ρ r.2 x)
+    rw [TEnv.put_ofExt_append ρ r.2 x]
+
+/-- A receiver read past the locals a clause binds. -/
+theorem ExtCall.addr_wk_append {ρ : Ctx} (c : ExtCall C Γ) (σ : State C Γ)
+    (r : TEnv C σ.H ρ) :
+    (c.wk (Thin.ofExt (Ext.append Γ ρ))).addr.evalT (σ.withEnv (TEnv.append ρ r σ.env)) =
+      c.addr.evalT σ := by
+  have hl : σ.withEnv (TEnv.append ρ r σ.env) =
+      σ.lift (Thin.ofExt (Ext.append Γ ρ)) (TEnv.append ρ r σ.env) := by
+    show _ = σ.withEnv (TEnv.put _ σ.env _)
+    rw [TEnv.put_ofExt_append]
+  rw [hl]
+  exact Simple.evalT_wk _ σ _ _
+
+theorem Prog.runSt_require_true {Γ₁ : Ctx} {c : Val C Γ .bool} {σ : State C Γ}
+    (h : c.evalT σ = .ok true) (P : Prog C Γ Γ₁) :
+    Prog.runSt σ (.cons (.require c) P) = Prog.runSt σ P := by
+  rw [Prog.runSt_cons]
+  show ((TRun.require c σ).map (·.st)).bind _ = _
+  simp only [TRun.require, h]
+  rfl
+
+theorem Prog.runSt_require_false {Γ₁ : Ctx} {c : Val C Γ .bool} {σ : State C Γ}
+    (h : c.evalT σ = .ok false) (P : Prog C Γ Γ₁) :
+    Prog.runSt σ (.cons (.require c) P) = .error .revert := by
+  rw [Prog.runSt_cons]
+  show ((TRun.require c σ).map (·.st)).bind _ = _
+  simp only [TRun.require, h]
+  rfl
+
+/-- A `catch` clause of no binders run from the caller's state, under the
+box, from its goal. -/
+theorem holds_tryClause {Γ₁ Γ₂ Γ₀ : Ctx} (P : Prog C Γ Γ₁) (σ : State C Γ)
+    (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀)
+    (h : holds σ (Binders.nil.all (Fml.modalK .box P
+      (.pop .block ((Ext.append Γ []).trans P.ext) (.seq ω κ)) φ))) :
+    Modality.afterRunTR .box (holds · φ)
+      ((((P.runR σ).map fun o => (⟨o.st.drop P.ext, o.ext⟩ : Out C σ.H Γ)).map (·.st)).bind
+        fun υ => (Prog.runSt υ ω).bind (Frames.runSt · κ)) := by
+  have h' := holds_modalK_pop σ P ((Ext.append Γ []).trans P.ext) ω κ φ h
+  rw [show (Ext.append Γ []).trans P.ext = P.ext from Subsingleton.elim _ _] at h'
+  rw [TRes.map_st _ _ (State.drop P.ext) fun _ => rfl]
+  exact h'
+
+/-- The `Panic` clause run with the code `c` bound, under the box. -/
+theorem holds_tryPanic {κc Γ₃ Γ₂ Γ₀ : Ctx} (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃)
+    (σ : State C Γ) (c : Semantics.Word) (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀)
+    (h : holds σ (code.binders.all (Fml.modalK .box pnc
+      (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ))) :
+    Modality.afterRunTR .box (holds · φ)
+      ((((pnc.runR (σ.withEnv (TEnv.append κc (code.decodeT (H := σ.H) c) σ.env))).map
+          fun o => (⟨o.st.drop ((Ext.append Γ κc).trans pnc.ext), o.ext⟩ : Out C σ.H Γ)).map
+            (·.st)).bind fun υ => (Prog.runSt υ ω).bind (Frames.runSt · κ)) := by
+  rw [TRes.map_st _ _ (State.drop ((Ext.append Γ κc).trans pnc.ext)) fun _ => rfl]
+  exact holds_modalK_pop _ pnc _ ω κ φ
+    (holds_binders_all code.binders σ _ (code.decodeT (H := σ.H) c) h)
+
+/-- The oracle's reading of a `try` (`TRun.tryCall` past the self-call):
+under the box, a goal per clause, each for every typed value its outcome
+binds; `h1` the success clause's goal at the values bound. -/
+theorem Premise.sound_tryOracle {ρ κc Γ₁ Γe Γ₃ Γ₄ Γ₂ Γ₀ : Ctx} (call : ExtCall C Γ)
     (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe) (code : CodeBinder κc)
-    (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : State C Γ) :
-    Premise.Runs .box (.tryCall call rets ok err code pnc other)
-      (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩])
-      σ := by
-  intro _ _ ω κ φ
-  rintro ⟨h1, h2, h3, h4⟩
-  rw [holds_modal_iff, runSt_cons_frames]
-  show Modality.afterRunTR .box _ (((TRun.tryCall call rets ok.ext ok.runR err.ext err.runR
-    code pnc.ext pnc.runR other.ext other.runR σ).map (·.st)).bind _)
-  unfold TRun.tryCall
+    (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : State C Γ)
+    (ω : Prog C Γ Γ₂) (κ : Frames C Γ₂ Γ₀) (φ : Fml C Γ₀)
+    (h1 : ∀ r : TEnv C σ.H ρ, Modality.afterRunTR .box (holds · φ)
+      (((Prog.runSt (σ.withEnv (TEnv.append ρ r σ.env)) ok).map
+        (State.drop ((Ext.append Γ ρ).trans ok.ext))).bind fun υ =>
+          (Prog.runSt υ ω).bind (Frames.runSt · κ)))
+    (h2 : holds σ (Binders.nil.all (Fml.modalK .box err
+      (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ)))
+    (h3 : holds σ (code.binders.all (Fml.modalK .box pnc
+      (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ)))
+    (h4 : holds σ (Binders.nil.all (Fml.modalK .box other
+      (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ))) :
+    Modality.afterRunTR .box (holds · φ)
+      (((match lookupBy (call.keyT σ) σ.tx.ext with
+        | none => .error .revert
+        | some (.ok vs) => do
+          let (r, _) ← rets.decodeT (H := σ.H) vs
+          (ok.runR (σ.withEnv (TEnv.append ρ r σ.env))).map fun o =>
+            ⟨o.st.drop ((Ext.append Γ ρ).trans ok.ext), o.ext⟩
+        | some .error => (err.runR σ).map fun o => ⟨o.st.drop err.ext, o.ext⟩
+        | some (.panic c) =>
+          (pnc.runR (σ.withEnv (TEnv.append κc (code.decodeT (H := σ.H) c) σ.env))).map
+            fun o => ⟨o.st.drop ((Ext.append Γ κc).trans pnc.ext), o.ext⟩
+        | some .other => (other.runR σ).map fun o => ⟨o.st.drop other.ext, o.ext⟩ :
+          TRes (Out C σ.H Γ)).map (·.st)).bind fun υ =>
+            (Prog.runSt υ ω).bind (Frames.runSt · κ)) := by
   cases lookupBy (call.keyT σ) σ.tx.ext with
   | none => exact afterRunTR_box_error (by decide)
   | some res =>
@@ -1003,36 +1094,127 @@ theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx} (call : Ex
         rw [ok_bind]
         dsimp only
         rw [TRes.map_st _ _ (State.drop ((Ext.append Γ ρ).trans ok.ext)) fun _ => rfl]
-        exact holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)
-    | error =>
+        exact h1 r
+    | error => exact holds_tryClause err σ ω κ φ h2
+    | panic c => exact holds_tryPanic code pnc σ c ω κ φ h3
+    | other => exact holds_tryClause other σ ω κ φ h4
+
+/-- `tryCallNoCallbackBox`: under the box, a goal per clause, each for every
+typed value its outcome binds (another contract's callee; at address `0`
+the caller reverts, which the box accepts). -/
+theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe) (code : CodeBinder κc)
+    (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (σ : State C Γ) :
+    Premise.Runs .box (.tryCall call rets ok err code pnc other sargs sbody false)
+      (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩])
+      σ := by
+  intro _ _ ω κ φ
+  rintro ⟨h1, h2, h3, h4⟩
+  rw [holds_modal_iff, runSt_cons_frames]
+  show Modality.afterRunTR .box _ (((TRun.tryCall call rets ok.ext ok.runR err.ext err.runR
+    code pnc.ext pnc.runR other.ext other.runR sargs sbody.ext sbody.runR false σ).map
+      (·.st)).bind _)
+  unfold TRun.tryCall
+  split
+  · exact afterRunTR_box_error (by decide)
+  rw [if_neg (by simp only [Bool.false_and, Bool.false_eq_true, not_false_eq_true])]
+  exact Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ
+    (fun r => holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)) h2 h3 h4
+
+/-- **`tryCallSelfBox`** (Lean): the receiver the contract, the inlined
+callee and then the success block; another, the oracle's success block,
+both behind `require`s that are the run's case split; each `catch` block
+from the caller's state, which a failed self-call goes to as the oracle's
+does. -/
+theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe) (code : CodeBinder κc)
+    (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (σ : State C Γ) :
+    Premise.Runs .box (.tryCall call rets ok err code pnc other sargs sbody true)
+      (trySelfStep call rets ok err code pnc other sargs sbody) σ := by
+  intro _ _ ω κ φ
+  rintro ⟨h0, h1, h2, h3, h4⟩
+  rw [holds_modal_iff, runSt_cons_frames]
+  show Modality.afterRunTR .box _ (((TRun.tryCall call rets ok.ext ok.runR err.ext err.runR
+    code pnc.ext pnc.runR other.ext other.runR sargs sbody.ext sbody.runR true σ).map
+      (·.st)).bind _)
+  unfold TRun.tryCall
+  split
+  · exact afterRunTR_box_error (by decide)
+  rename_i hz
+  have hc : call.hasCode.evalT σ = .ok true := by
+    rw [ExtCall.hasCode_evalT]; simp only [hz, decide_false, Bool.not_false]
+  split
+  · rename_i hs
+    simp only [Bool.true_and, decide_eq_true_eq] at hs
+    have hi : call.isSelf.evalT σ = .ok true := by
+      rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
+    let P0 : Prog C Γ Γ₁ := .cons (.require call.hasCode) (.cons (.require call.isSelf)
+      (.cons (.call call.fn sargs (.rets rets) sbody) ok))
+    have h0' := holds_modalK_pop σ P0 ((Ext.append Γ ρ).trans ok.ext) ω κ φ (by
+      rw [show (Ext.append Γ ρ).trans ok.ext = (Ext.append Γ []).trans P0.ext from
+        Subsingleton.elim _ _]
+      exact h0)
+    rw [Prog.runSt_require_true hc, Prog.runSt_require_true hi, Prog.runSt_cons] at h0'
+    change Modality.afterRunTR .box _ (((((TRun.call sargs (.rets rets) sbody.ext sbody.runR
+      σ).map (·.st)).bind fun τ => Prog.runSt τ ok).map _).bind _) at h0'
+    revert h0'
+    cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    | ok o =>
+      intro h0'
       dsimp only
-      have h2' := holds_modalK_pop σ err ((Ext.append Γ []).trans err.ext) ω κ φ h2
-      rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at h2'
-      rw [TRes.map_st _ _ (State.drop err.ext) fun _ => rfl]
-      exact h2'
-    | panic c =>
-      dsimp only
-      rw [TRes.map_st _ _ (State.drop ((Ext.append Γ κc).trans pnc.ext)) fun _ => rfl]
-      exact holds_modalK_pop _ pnc _ ω κ φ
-        (holds_binders_all code.binders σ _ (code.decodeT (H := σ.H) c) h3)
-    | other =>
-      dsimp only
-      have h4' := holds_modalK_pop σ other ((Ext.append Γ []).trans other.ext) ω κ φ h4
-      rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at h4'
-      rw [TRes.map_st _ _ (State.drop other.ext) fun _ => rfl]
-      exact h4'
+      rw [show ((Except.ok o : TRes (Out C σ.H (ρ ++ Γ))).map (·.st)).bind
+        (fun τ => Prog.runSt τ ok) = (ok.runR o.st).map (·.st) from rfl] at h0'
+      revert h0'
+      cases ok.runR o.st <;> exact id
+    | error e =>
+      intro _
+      cases e with
+      | revert =>
+        dsimp only
+        split
+        · exact holds_tryClause err σ ω κ φ h2
+        · exact holds_tryClause other σ ω κ φ h4
+      | panic => exact holds_tryPanic code pnc σ _ ω κ φ h3
+      | diverge => exact afterRunTR_box_error (by decide)
+      | exhausted => exact afterRunTR_box_error (by decide)
+  · rename_i hs
+    simp only [Bool.true_and, decide_eq_true_eq] at hs
+    refine Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ (fun r => ?_) h2 h3 h4
+    have h1' := holds_modalK_pop _ _ _ ω κ φ (holds_binders_all rets σ _ r h1)
+    have hc' : (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode.evalT
+        (σ.withEnv (TEnv.append ρ r σ.env)) = .ok true := by
+      rw [ExtCall.hasCode_evalT, ExtCall.addr_wk_append]; simp only [hz, decide_false, Bool.not_false]
+    have hn : (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf.evalT
+        (σ.withEnv (TEnv.append ρ r σ.env)) = .ok true := by
+      rw [ExtCall.notSelf_evalT, ExtCall.addr_wk_append]
+      show Except.ok (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = _
+      simp only [hs, decide_false, Bool.not_false]
+    dsimp only at h1'
+    rw [Prog.runSt_require_true hc', Prog.runSt_require_true hn] at h1'
+    rwa [show (Ext.append Γ ρ).trans (Prog.cons (.require _) (.cons (.require _) ok)).ext =
+      (Ext.append Γ ρ).trans ok.ext from Subsingleton.elim _ _] at h1'
 
 /-- **The rule of a `try` is sound** over the typed state: a goal per clause
 under the box, `false` under the diamond. -/
-theorem Stmt.sound_tryCall (k : Nat) (m : Modality) {ρ κc Γ₁ Γe Γ₃ Γ₄ : Ctx}
+theorem Stmt.sound_tryCall (k : Nat) (m : Modality) {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx}
     (call : ExtCall C Γ) (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe)
-    (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (σ : State C Γ)
-    (pr : Premise C Γ Γ) (hp : Stmt.step k m (.tryCall call rets ok err code pnc other) = pr) :
-    Premise.Runs m (.tryCall call rets ok err code pnc other) pr σ := by
-  change tryStep m rets ok err code pnc other = pr at hp
-  cases m with
-  | box => cases hp; exact Premise.sound_tryCallBox call rets ok err code pnc other σ
-  | diamond => cases hp; exact Premise.sound_done σ false nofun
+    (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) (σ : State C Γ)
+    (pr : Premise C Γ Γ)
+    (hp : Stmt.step k m (.tryCall call rets ok err code pnc other sargs sbody self) = pr) :
+    Premise.Runs m (.tryCall call rets ok err code pnc other sargs sbody self) pr σ := by
+  change tryStepS m call rets ok err code pnc other sargs sbody self = pr at hp
+  cases self with
+  | false =>
+    cases m with
+    | box => cases hp; exact Premise.sound_tryCallBox call rets ok err code pnc other sargs sbody σ
+    | diamond => cases hp; exact Premise.sound_done σ false nofun
+  | true =>
+    cases m with
+    | box => cases hp; exact Premise.sound_trySelfBox call rets ok err code pnc other sargs sbody σ
+    | diamond => cases hp; exact Premise.sound_done σ false nofun
 
 end Try
 
