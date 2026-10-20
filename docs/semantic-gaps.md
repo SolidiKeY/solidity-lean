@@ -268,3 +268,14 @@ theorems are unchanged.
   a `bytes`/`string` member of a struct (`StructEnc` spells no byte types).
 
 **Status.** (updated as slices land)
+- Slice 1, `bytesN` in `sol{}`: landed.  `bytesTy?`, `valueRows?`, the
+  literal grammar (`"…"`, `hex"…"`, `RawExpr.bytesLit`) in `Syntax.lean`;
+  the markers (`shapeUnder` keeps `#` rows, a value local's shape entry,
+  `declTyName` for inlined parameters), `bytesOf?`, `bytesPure`,
+  `bytesStmt` in `Syntax/Elab.lean`; `Examples/Tactics/Bytes.lean` §1–2.
+- Slice 2, `bytes`/`string` in memory and storage: landed (a literal is
+  lowered in `hoist`, `exprShape` knows its shape); §3 of the examples.
+- Slice 3, the solc import: string and hex literals printed (`"…"` quoted,
+  else `hex"…"` from `hexValue`), the elementary types accepted, a `bytesN`
+  parameter's ABI range and a `bytes` parameter's elements' ranges
+  (`paramRanges`, `elemRanges`); `tests/solc/Bytes.sol`.

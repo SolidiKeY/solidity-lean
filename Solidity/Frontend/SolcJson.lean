@@ -888,6 +888,18 @@ partial def expr (j : Json) : PM String := do
       match (parseRational v).bind Q.int? with
       | some n => pure (toString n)
       | none => unsupported s!"the number literal `{v}`"
+    -- a literal of bytes, read at the type it meets (`RawExpr.bytesLit`):
+    -- quoted when its text is, else spelt by its bytes
+    | "string" | "unicodeString" =>
+      match J.str? j "value" with
+      | some v => pure v.quote
+      | none => match J.str? j "hexValue" with
+        | some h => pure s!"hex\"{h}\""
+        | none => unsupported "a string literal without its value"
+    | "hexString" =>
+      match J.str? j "hexValue" with
+      | some h => pure s!"hex\"{h}\""
+      | none => unsupported "a hex literal without its value"
     | k => unsupported s!"a {k} literal"
   | "TupleExpression" =>
     match (← PM.lift (J.arr j "components")) with
@@ -1803,7 +1815,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         if let some bad := (J.nodes typeNode).find? fun node =>
             J.kind node == "ElementaryTypeName" &&
               let t := (J.str? node "name").getD ""
-              !(PrimTy.ofName? t).isSome && !(narrowTy? t).isSome then
+              !(PrimTy.ofName? t).isSome && !(narrowTy? t).isSome && !(bytesTy? t).isSome &&
+              !dynBytesTy t then
           throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
         tyText S typeNode : Except Gap String) with
     | .ok t =>
@@ -1930,7 +1943,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
             | some (.str "storage") => " storage"
             | some (.str "calldata") => " calldata"
             | _ => ""
-          unless (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || t == "address payable" ||
+          unless (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || (bytesTy? t).isSome ||
+              t == "address payable" ||
               loc == " memory" || loc == " storage" do
             unsupported s!"a modifier parameter of unsupported type `{t}{loc}`"
           let t := t ++ loc
@@ -2055,19 +2069,26 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
         if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
           return (x, 0, n)
-        let (q, n) ← narrowTy? (J.tyStr p)
+        -- a `bytesN` is a `uint` of `8N` bits (`valueRows?`)
+        let (q, n) ← (narrowTy? (J.tyStr p)).orElse fun _ =>
+          (bytesTy? (J.tyStr p)).map fun n => (.uint, 8 * n)
         guard (n < 256)
         if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1) else pure (x, 0, 2 ^ n - 1),
       -- a memory array of a narrow integer or an enum: each element in its range
       elemRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
         let t ← J.opt p "typeName"
+        -- `bytes`/`string`: a `bytes1[]`, each element below `2^8`
+        if J.kind t == "ElementaryTypeName" && J.str? p "storageLocation" == some "memory" &&
+            dynBytesTy ((J.str? t "name").getD "") then
+          return (x, 0, 255, none)
         guard (J.kind t == "ArrayTypeName" && J.str? p "storageLocation" == some "memory")
         let b ← J.opt t "baseType"
         let len : Option Nat := (J.opt t "length").bind fun l => (J.str? l "value").bind (·.toNat?)
         guard ((J.opt t "length").isNone || len.isSome)
         if let some n := (J.ref? b).bind (lookupBy · enumBounds) then
           return (x, 0, n, len)
-        let (q, n) ← narrowTy? ((J.str? b "name").getD "")
+        let (q, n) ← (narrowTy? ((J.str? b "name").getD "")).orElse fun _ =>
+          (bytesTy? ((J.str? b "name").getD "")).map fun n => (.uint, 8 * n)
         guard (n < 256)
         if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1, len)
         else pure (x, 0, 2 ^ n - 1, len),
