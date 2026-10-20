@@ -283,6 +283,10 @@ macro drops it (the proof tree's label table prints it). -/
 declare_syntax_cat dl_branch (behavior := both)
 syntax (str ": ")? ("∀ " ident ". ")? "⟨" "[ " sol_block " ]" "⟩" : dl_branch
 syntax (str ": ")? ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
+/-- A self-call's `catch` goal (`trySelfStep`, Lean): `fails(call) →`, where
+the call does not end normally as a call to the contract itself
+(`ExtCall.selfFails`).  Printed only: no taclet is declared with it. -/
+syntax (str ": ")? &"fails" "(" ident ")" " → " ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
 /-- Goals, one per branch (`Premise.branches`), separated by `;`. -/
 syntax dl_branch " ; " sepBy1(dl_branch, " ; ") : dl_premise
 /-- One goal of `Premise.cases`, with solkey's label: a formula to prove, or

@@ -1121,8 +1121,15 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
       let l := lbl i
       let b ← whnf bs[i]
       unless b.isAppOfArity ``Branch.mk 7 do return none
-      -- a goal behind a hypothesis (`Branch.hyp`) has no `dl_branch` form
-      unless (← whnf (b.getArg! 6)).isAppOf ``Option.none do return none
+      -- a goal behind a hypothesis (`Branch.hyp`): a self-call's `catch`,
+      -- `fails(call) →` (`ExtCall.selfFails`); no other has a `dl_branch` form
+      let hyp ← whnf (b.getArg! 6)
+      let selfCall? ← if hyp.isAppOf ``Option.none then pure none
+        else
+          let h := hyp.appArg!.consumeMData
+          unless hyp.isAppOf ``Option.some && h.isAppOf `Solidity.ExtCall.selfFails do return none
+          let some n ← fvarName? (h.getArg! 5) | return none
+          pure (some (nameIdent n))
       let xs := (← instantiateMVars (b.getArg! 4)).consumeMData
       -- the binders: a schema variable (`rets`), the `Panic` code's
       -- (`code.binders`), or none
@@ -1137,8 +1144,10 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
           pure (none, names)
       let blk ← ppBlockOf (← progPiecesS (names ++ ns) (b.getArg! 5)).1
       let x? := x?.map fun x => nameIdent x
-      out := out.push (← if box then `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
-        else `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
+      out := out.push (← match selfCall?, box with
+        | some c, _ => `(dl_branch| $[$l:str :]? fails($c:ident) → $[∀ $x?:ident .]? [ $blk ])
+        | none, true => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
+        | none, false => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
     let some b := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))

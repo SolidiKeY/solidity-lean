@@ -3,6 +3,7 @@ import Solidity.Calculus.Close
 import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
+import Solidity.Calculus.CallbackDerive
 
 /-!
 # A `try` of the contract itself
@@ -21,7 +22,11 @@ The rule is Lean's (`tryCallSelfBox`; solkey's `try` never runs its callee):
 the self-call's goal is the callee inlined and the success block after it,
 behind `require(a != 0); require(a == address(this));`, the oracle's goal
 behind `require(a != 0); require(a != address(this));`, and each `catch`
-block from the caller's state.
+block from the caller's state, where the call does not end normally as a
+self-call: `fails(call)`, `¬⟨ require(a == address(this)); f(args) → rets; ⟩
+true` (`ExtCall.selfFails`).  The walks prove the diamond instead of the
+`catch` goal where they can (`Proves.notLeft`), and drop it otherwise
+(`Proves.hideLeft`).
 -/
 
 namespace Solidity.Examples.Tactics.SelfCall
@@ -44,7 +49,7 @@ open scoped Scoped
 
 Its two success goals print their blocks escaped (`‹body›`): the
 `require`s and the inlined callee in front of `body` are not schema
-variables (`trySelfStep`). -/
+variables (`trySelfStep`); its `catch` goals behind `fails(call)`. -/
 
 /--
 info: @LeanTaclet.tryCallSelfBox : ∀ {C : Contract} {k : Nat} {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} {call : ExtCall C Γ}
@@ -52,8 +57,9 @@ info: @LeanTaclet.tryCallSelfBox : ∀ {C : Contract} {k : Nat} {Γ ρ κ Γ₁ 
   {panicBody : Prog C (κ ++ Γ) Γ₃} {otherBody : Prog C Γ Γ₄} {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf},
   dl[LeanTaclet C k]{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
     ] ⇝
-    "self call succeeded": [ ‹body› ] ; "call succeeded": ∀ rets. [ ‹body› ] ; "Error caught": [ errorBody ] ;
-      "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
+    "self call succeeded": [ ‹body› ] ; "call succeeded": ∀ rets. [ ‹body› ] ;
+      "Error caught": fails(call) → [ errorBody ] ; "Panic caught": fails(call) → ∀ code. [ panicBody ] ;
+      "other failure caught": fails(call) → [ otherBody ] }
 -/
 #guard_msgs in #check @LeanTaclet.tryCallSelfBox
 
@@ -69,14 +75,26 @@ theorem setIxSeen : ⊨ dl!{ [ ix = 0;
   sol_close
 
 /-- **The callee's return value is bound** (solc's `simple_notuple.sol`):
-`gOne(true)` returns `13` to the success block.  Each `catch` block is a goal
-from the caller's state, the callee not known to end normally: so the
-success block states what the return is, not the code after the `try`
-(`docs/options.md` O8). -/
+`gOne(true)` returns `13` to the success block. -/
 theorem gOneReturns : ⊨ dl!{ [
     try this.gOne(true) returns (uint a) { assert(a == 13); } catch { }; ] true } := by
   sol_symex
   sol_close
+
+/-- **The `catch` block is not reached when the callee ends normally**
+(solc's `simple_notuple.sol`, `tryCatchExactReturn`): each `catch` goal
+assumes `¬⟨ require(this == address(this)); gOne(true) → a; ⟩ true`
+(`ExtCall.selfFails`), which the walk refutes by proving the diamond
+(`notLeft`), so `r == 13` after the `try`. -/
+def gOneExactF : Fml SelfCaller [] := dl!{ [ uint r = 0;
+    try this.gOne(true) returns (uint a) { r = a; } catch { r = 9; }; ] r == 13 }
+
+theorem gOneExact : ⊨ gOneExactF := by
+  sol_prove
+
+/-- The same with callbacks (`ValidT .noCallback`, `ProvesC.trySelf`). -/
+theorem gOneExactT : ValidT .noCallback gOneExactF := by
+  sol_prove
 
 /-- A reverting callee runs the catch-all, its writes undone: `gOne(false)`
 reverts at its `require`. -/
