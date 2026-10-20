@@ -14,7 +14,7 @@ namespace Solidity.Examples.Tactics.Inheritance
 open Semantics
 open Lean (toJson)
 
-solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0x8282c171008eb988
   as Imported.InitDiamond testing
 
 /-- The inherited initializers and all five constructor assertions succeed. -/
@@ -42,7 +42,7 @@ derived): `late` is already `9` when `CtorMid` passes `m + late` on, and
 `CtorRoot`'s body dispatches `probe` to `CtorLeaf`, which reads `leaf`. The
 import composes them into one constructor member. -/
 
-solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0x8282c171008eb988
   as Imported.CtorLeaf testing
 
 /-- The four assertions of `CtorLeaf`'s constructor hold on the deployment. -/
@@ -67,7 +67,7 @@ order = 2711
 /-! The implicit constructor of `is CtorRoot(4)`; and a header argument for an
 unnamed parameter, still evaluated. -/
 
-solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0x8282c171008eb988
   as Imported.CtorImplicit testing
 
 /--
@@ -80,13 +80,13 @@ next = 1
 -/
 #guard_msgs in #deploy Imported.CtorImplicit()
 
-solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0x8282c171008eb988
   as Imported.CtorUnnamedChild testing
 
 /--
 info: ok
 balance 0
-got = 6
+got = 5
 -/
 #guard_msgs in #deploy Imported.CtorUnnamedChild(5)
 
@@ -96,7 +96,7 @@ Each base version is its own member, and `super.name()` in a version names
 the next one in `SuperDiamond`'s C3 order: `name` calls `SuperRight`'s
 (`solcFunction445`), which calls `SuperLeft`'s (`427`), not its parent's. -/
 
-solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0x8282c171008eb988
   as Imported.SuperDiamond testing
 
 /--

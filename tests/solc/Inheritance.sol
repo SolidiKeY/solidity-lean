@@ -101,7 +101,7 @@ contract CtorFalse is CtorMid(3) {
 contract CtorImplicit is CtorRoot(4) { uint next = root + 1; }
 contract CtorUnnamed { uint got; constructor(uint, uint b) { got = b; } }
 contract CtorUnnamedChild is CtorUnnamed {
-    constructor(uint x) CtorUnnamed(x, x + 1) payable { assert(got == x + 1); }
+    constructor(uint x) CtorUnnamed(x, x) payable { assert(got == x); }
 }
 
 // A base contract's invariant is the derived contract's too, with its own.

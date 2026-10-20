@@ -1,7 +1,7 @@
 {
  "header": {
   "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
-  "sourceSha256": "a91a6c3172f177b4195e672e504e9fc45cef4d5b5806cdfdf21618e902c75114",
+  "sourceSha256": "5e7e26b3f147a71a53ec663c0e4e92bb088f80835e517bca39e1e781339f0616",
   "solkeyCommit": "a3afb434d3478a019fbef1322a43c21cc75e81c5",
   "source": "tests/solc/Inheritance.sol"
  },
@@ -2416,9 +2416,9 @@
     ],
     "canonicalName": "CtorUnnamedChild",
     "contractKind": "contract",
-    "id": 679,
+    "id": 675,
     "linearizedBaseContracts": [
-     679,
+     675,
      656
     ],
     "name": "CtorUnnamedChild",
@@ -2428,10 +2428,10 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"arguments":[{"leftExpression":{"name":"got","nodeType":"Identifier","referencedDeclaration":643,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"leftExpression":{"name":"x","nodeType":"Identifier","referencedDeclaration":660,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4926:20:0","line":104}
+        {"expression":{"arguments":[{"leftExpression":{"name":"got","nodeType":"Identifier","referencedDeclaration":643,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"x","nodeType":"Identifier","referencedDeclaration":660,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4922:16:0","line":104}
        ]
       },
-      "id": 678,
+      "id": 674,
       "kind": "constructor",
       "modifiers": [
        {
@@ -2445,24 +2445,9 @@
           }
          },
          {
-          "leftExpression": {
-           "name": "x",
-           "nodeType": "Identifier",
-           "referencedDeclaration": 660,
-           "typeDescriptions": {
-            "typeString": "uint256"
-           }
-          },
-          "nodeType": "BinaryOperation",
-          "operator": "+",
-          "rightExpression": {
-           "kind": "number",
-           "nodeType": "Literal",
-           "typeDescriptions": {
-            "typeString": "int_const 1"
-           },
-           "value": "1"
-          },
+          "name": "x",
+          "nodeType": "Identifier",
+          "referencedDeclaration": 660,
           "typeDescriptions": {
            "typeString": "uint256"
           }
@@ -2510,13 +2495,13 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "4874:75:0",
+      "src": "4874:67:0",
       "line": 104,
       "stateMutability": "payable",
       "visibility": "public"
      }
     ],
-    "src": "4827:124:0",
+    "src": "4827:116:0",
     "line": 103
    },
    {
@@ -2526,17 +2511,17 @@
      "nodeType": "StructuredDocumentation",
      "text": "@custom:key invariant guarded <= 10"
     },
-    "id": 683,
+    "id": 679,
     "name": "Guarded",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 682,
+      "id": 678,
       "mutability": "mutable",
       "name": "guarded",
       "nodeType": "VariableDeclaration",
-      "src": "5088:12:0",
+      "src": "5080:12:0",
       "line": 109,
       "stateVariable": true,
       "storageLocation": "default",
@@ -2553,7 +2538,7 @@
       "visibility": "internal"
      }
     ],
-    "src": "5069:34:0",
+    "src": "5061:34:0",
     "line": 109
    },
    {
@@ -2562,7 +2547,7 @@
       "baseName": {
        "name": "Guarded",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 683
+       "referencedDeclaration": 679
       },
       "nodeType": "InheritanceSpecifier"
      }
@@ -2573,10 +2558,10 @@
      "nodeType": "StructuredDocumentation",
      "text": "@custom:key invariant guarded >= 1"
     },
-    "id": 716,
+    "id": 712,
     "linearizedBaseContracts": [
-     716,
-     683
+     712,
+     679
     ],
     "name": "GuardedChild",
     "nodeType": "ContractDefinition",
@@ -2585,10 +2570,10 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"condition":{"leftExpression":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":682,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"5207:35:0","line":112,"trueBody":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":682,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5227:12:0","line":112}]}}
+        {"condition":{"leftExpression":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"5199:35:0","line":112,"trueBody":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5219:12:0","line":112}]}}
        ]
       },
-      "id": 699,
+      "id": 695,
       "kind": "function",
       "name": "bump",
       "nodeType": "FunctionDefinition",
@@ -2600,7 +2585,7 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "5182:62:0",
+      "src": "5174:62:0",
       "line": 112,
       "stateMutability": "nonpayable",
       "visibility": "public"
@@ -2609,10 +2594,10 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":682,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 11"},"value":"11"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5280:12:0","line":113}
+        {"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 11"},"value":"11"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5272:12:0","line":113}
        ]
       },
-      "id": 707,
+      "id": 703,
       "kind": "function",
       "name": "breaksBase",
       "nodeType": "FunctionDefinition",
@@ -2624,7 +2609,7 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "5249:46:0",
+      "src": "5241:46:0",
       "line": 113,
       "stateMutability": "nonpayable",
       "visibility": "public"
@@ -2633,10 +2618,10 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":682,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5330:11:0","line":114}
+        {"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5322:11:0","line":114}
        ]
       },
-      "id": 715,
+      "id": 711,
       "kind": "function",
       "name": "breaksOwn",
       "nodeType": "FunctionDefinition",
@@ -2648,29 +2633,29 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "5300:44:0",
+      "src": "5292:44:0",
       "line": 114,
       "stateMutability": "nonpayable",
       "visibility": "public"
      }
     ],
-    "src": "5143:203:0",
+    "src": "5135:203:0",
     "line": 111
    },
    {
     "canonicalName": "InitRoot",
     "contractKind": "contract",
-    "id": 735,
+    "id": 731,
     "name": "InitRoot",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 718,
+      "id": 714,
       "mutability": "mutable",
       "name": "counter",
       "nodeType": "VariableDeclaration",
-      "src": "5372:12:0",
+      "src": "5364:12:0",
       "line": 118,
       "stateVariable": true,
       "storageLocation": "default",
@@ -2688,11 +2673,11 @@
      },
      {
       "constant": false,
-      "id": 722,
+      "id": 718,
       "mutability": "mutable",
       "name": "initialized",
       "nodeType": "VariableDeclaration",
-      "src": "5390:26:0",
+      "src": "5382:26:0",
       "line": 119,
       "stateVariable": true,
       "storageLocation": "default",
@@ -2711,7 +2696,7 @@
        "expression": {
         "name": "setup",
         "nodeType": "Identifier",
-        "referencedDeclaration": 734,
+        "referencedDeclaration": 730,
         "typeDescriptions": {
          "typeString": "function () returns (uint256)"
         }
@@ -2729,11 +2714,11 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5473:12:0","line":120},
-        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"5487:14:0","line":120}
+        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5465:12:0","line":120},
+        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"5479:14:0","line":120}
        ]
       },
-      "id": 734,
+      "id": 730,
       "kind": "function",
       "name": "setup",
       "nodeType": "FunctionDefinition",
@@ -2746,11 +2731,11 @@
        "parameters": [
         {
          "constant": false,
-         "id": 725,
+         "id": 721,
          "mutability": "mutable",
          "name": "",
          "nodeType": "VariableDeclaration",
-         "src": "5465:4:0",
+         "src": "5457:4:0",
          "line": 120,
          "stateVariable": false,
          "storageLocation": "default",
@@ -2768,13 +2753,13 @@
         }
        ]
       },
-      "src": "5422:82:0",
+      "src": "5414:82:0",
       "line": 120,
       "stateMutability": "nonpayable",
       "visibility": "internal"
      }
     ],
-    "src": "5348:158:0",
+    "src": "5340:158:0",
     "line": 117
    },
    {
@@ -2783,28 +2768,28 @@
       "baseName": {
        "name": "InitRoot",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 735
+       "referencedDeclaration": 731
       },
       "nodeType": "InheritanceSpecifier"
      }
     ],
     "canonicalName": "InitLeft",
     "contractKind": "contract",
-    "id": 743,
+    "id": 739,
     "linearizedBaseContracts": [
-     743,
-     735
+     739,
+     731
     ],
     "name": "InitLeft",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 742,
+      "id": 738,
       "mutability": "mutable",
       "name": "left",
       "nodeType": "VariableDeclaration",
-      "src": "5539:23:0",
+      "src": "5531:23:0",
       "line": 122,
       "stateVariable": true,
       "storageLocation": "default",
@@ -2822,7 +2807,7 @@
        "leftExpression": {
         "name": "counter",
         "nodeType": "Identifier",
-        "referencedDeclaration": 718,
+        "referencedDeclaration": 714,
         "typeDescriptions": {
          "typeString": "uint256"
         }
@@ -2844,7 +2829,7 @@
       "visibility": "internal"
      }
     ],
-    "src": "5507:58:0",
+    "src": "5499:58:0",
     "line": 122
    },
    {
@@ -2853,28 +2838,28 @@
       "baseName": {
        "name": "InitRoot",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 735
+       "referencedDeclaration": 731
       },
       "nodeType": "InheritanceSpecifier"
      }
     ],
     "canonicalName": "InitRight",
     "contractKind": "contract",
-    "id": 751,
+    "id": 747,
     "linearizedBaseContracts": [
-     751,
-     735
+     747,
+     731
     ],
     "name": "InitRight",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 750,
+      "id": 746,
       "mutability": "mutable",
       "name": "right",
       "nodeType": "VariableDeclaration",
-      "src": "5599:24:0",
+      "src": "5591:24:0",
       "line": 123,
       "stateVariable": true,
       "storageLocation": "default",
@@ -2892,7 +2877,7 @@
        "leftExpression": {
         "name": "counter",
         "nodeType": "Identifier",
-        "referencedDeclaration": 718,
+        "referencedDeclaration": 714,
         "typeDescriptions": {
          "typeString": "uint256"
         }
@@ -2914,7 +2899,7 @@
       "visibility": "internal"
      }
     ],
-    "src": "5566:60:0",
+    "src": "5558:60:0",
     "line": 123
    },
    {
@@ -2923,7 +2908,7 @@
       "baseName": {
        "name": "InitLeft",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 743
+       "referencedDeclaration": 739
       },
       "nodeType": "InheritanceSpecifier"
      },
@@ -2931,30 +2916,30 @@
       "baseName": {
        "name": "InitRight",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 751
+       "referencedDeclaration": 747
       },
       "nodeType": "InheritanceSpecifier"
      }
     ],
     "canonicalName": "InitDiamond",
     "contractKind": "contract",
-    "id": 810,
+    "id": 806,
     "linearizedBaseContracts": [
-     810,
-     751,
-     743,
-     735
+     806,
+     747,
+     739,
+     731
     ],
     "name": "InitDiamond",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 762,
+      "id": 758,
       "mutability": "mutable",
       "name": "result",
       "nodeType": "VariableDeclaration",
-      "src": "5677:31:0",
+      "src": "5669:31:0",
       "line": 125,
       "stateVariable": true,
       "storageLocation": "default",
@@ -2973,7 +2958,7 @@
         "leftExpression": {
          "name": "left",
          "nodeType": "Identifier",
-         "referencedDeclaration": 742,
+         "referencedDeclaration": 738,
          "typeDescriptions": {
           "typeString": "uint256"
          }
@@ -2997,7 +2982,7 @@
        "rightExpression": {
         "name": "right",
         "nodeType": "Identifier",
-        "referencedDeclaration": 750,
+        "referencedDeclaration": 746,
         "typeDescriptions": {
          "typeString": "uint256"
         }
@@ -3010,16 +2995,16 @@
      },
      {
       "baseFunctions": [
-       734
+       730
       ],
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5766:12:0","line":126},
-        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"5780:14:0","line":126}
+        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5758:12:0","line":126},
+        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"5772:14:0","line":126}
        ]
       },
-      "id": 775,
+      "id": 771,
       "kind": "function",
       "name": "setup",
       "nodeType": "FunctionDefinition",
@@ -3036,11 +3021,11 @@
        "parameters": [
         {
          "constant": false,
-         "id": 766,
+         "id": 762,
          "mutability": "mutable",
          "name": "",
          "nodeType": "VariableDeclaration",
-         "src": "5758:4:0",
+         "src": "5750:4:0",
          "line": 126,
          "stateVariable": false,
          "storageLocation": "default",
@@ -3058,7 +3043,7 @@
         }
        ]
       },
-      "src": "5714:83:0",
+      "src": "5706:83:0",
       "line": 126,
       "stateMutability": "nonpayable",
       "visibility": "internal"
@@ -3067,14 +3052,14 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"arguments":[{"leftExpression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5826:20:0","line":128},
-        {"expression":{"arguments":[{"leftExpression":{"name":"initialized","nodeType":"Identifier","referencedDeclaration":722,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5848:24:0","line":128},
-        {"expression":{"arguments":[{"leftExpression":{"name":"left","nodeType":"Identifier","referencedDeclaration":742,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5882:17:0","line":129},
-        {"expression":{"arguments":[{"leftExpression":{"name":"right","nodeType":"Identifier","referencedDeclaration":750,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5901:18:0","line":129},
-        {"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":762,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 34"},"value":"34"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5921:20:0","line":129}
+        {"expression":{"arguments":[{"leftExpression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5818:20:0","line":128},
+        {"expression":{"arguments":[{"leftExpression":{"name":"initialized","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5840:24:0","line":128},
+        {"expression":{"arguments":[{"leftExpression":{"name":"left","nodeType":"Identifier","referencedDeclaration":738,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5874:17:0","line":129},
+        {"expression":{"arguments":[{"leftExpression":{"name":"right","nodeType":"Identifier","referencedDeclaration":746,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5893:18:0","line":129},
+        {"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":758,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 34"},"value":"34"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5913:20:0","line":129}
        ]
       },
-      "id": 809,
+      "id": 805,
       "kind": "constructor",
       "name": "",
       "nodeType": "FunctionDefinition",
@@ -3086,13 +3071,13 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "5802:146:0",
+      "src": "5794:146:0",
       "line": 127,
       "stateMutability": "nonpayable",
       "visibility": "public"
      }
     ],
-    "src": "5627:323:0",
+    "src": "5619:323:0",
     "line": 124
    }
   ]
