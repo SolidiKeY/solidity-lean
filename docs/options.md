@@ -308,7 +308,10 @@ each atom whose path enters a dynamic array by an unchecked index `q[i]`,
 with no mapping key step after it, is read `q; (i < obsL(q) ? obsW(p) : 0)`
 (`0` for a length), and `false` where `i` is the live length itself
 (`lenOf`: `obsL(q)` or `obsL(q) + 1 - 1`, its guards dropped), since the
-closer does not fold `a < a`. A checked index and a member pass, a mapping
+closer does not fold `a < a`.  Each guard is a key comparison the closer
+splits on (`LTm.pick`), and a guard the test of an enclosing `ite` decides
+is dropped (`LTm.ctFoldK`): a read through a `delete` tests the same
+`i < obsL(q)` before it reads the starting slot. A checked index and a member pass, a mapping
 key stops the fold. Sound by `LTm.ctFold_eval` where the storage shows clean
 tails, and by vacuity where it does not (`Fml.assumesCT_holds`). Such a
 leaf is offered the plain closer too (`decideMemCT || decideMem`), so the

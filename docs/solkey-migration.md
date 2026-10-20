@@ -183,8 +183,13 @@ and copy assignment values, `loopNormalize`, call-receiver reads and pops,
 `storagePushLengthSave`, `…ReferenceElement`, `storageLocalRootPushBind`,
 `storageLocalPrimitivePushBind` and the compound pushes write
 `save(storage, sp.length, sp.length + 1)`, no `delAt` of the appended
-slot, so a slot past the end is exposed as it is (no clean-tail invariant;
-solkey's `StorageDangling` suite closes, as on its EVM runner). The
+slot, so a slot past the end is exposed as it is (no clean-tail invariant
+in general; solkey's `StorageDangling` suite closes, as on its EVM runner).
+A claim about the pushed row is false from a storage with dirty tails, so
+the push fixtures went pending; a contract that exposes nothing keeps clean
+tails (`ReachableBy.cleanTail`, `docs/options.md` O6), and the runner states
+its obligations under `cleanTail(storage)`, where they prove again
+(`reading: clean`). The
 048a74de51 port had made Lean reset the slot; this change reverts that:
 
 - `Storage.pushSlot` keeps a reference slot as it is (a primitive slot past
