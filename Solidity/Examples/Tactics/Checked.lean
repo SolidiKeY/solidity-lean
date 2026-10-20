@@ -211,6 +211,83 @@ theorem narrowKey : ⊨ dl[NarrowNested]{ ⟨ uint8 k = 7; byKey[k] = 1; byKey[2
   sol_symex
   sol_close
 
+/-! ### Struct members, locals, parameters and modifiers
+
+A struct's narrow member has its width (`structWidths`: `struct Packed {
+uint8 a; int16 b; uint c; uint8[] xs; }`), in storage, in memory and as an
+element.  A storage alias, a memory local and a reference parameter carry the
+narrow positions of their type beside it (`LocalTy.shape`), so a copy or an
+alias of `small` is a `uint8[]` too; one of another shape is refused, as solc
+refuses it.  A modifier's narrow parameter is a local of its type. -/
+
+/-- A contract with a struct of narrow members, and narrow reference parameters. -/
+def NarrowShapes : Contract := contract!{
+  uint8[] small;
+  Packed p;
+  Packed[] ps;
+  mapping(uint => Packed) byId;
+  modifier atMost(uint8 cap) { require(cap > 1); _; }
+  function sum(uint8[] memory xs) returns (uint8 r) { r = xs[0] + xs[1]; }
+  function bump(uint8[] storage xs) { xs[0] += 1; }
+  function capped(uint8 c) atMost(c) { small.push(c); }
+}
+
+/-- A member of a storage struct: `250 + 6` leaves `uint8`. -/
+theorem memberOverflows : ⊨ dl[NarrowShapes]{ [ p.a = 250; p.a += 6; ] false } := by
+  sol_symex
+  sol_close
+
+theorem memberInRange : ⊨ dl[NarrowShapes]{ ⟨ p.b = -32768; p.b += 32767; int16 e = -1;
+    assert(p.b == e); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A struct as a mapping's value, and a narrow array inside a struct. -/
+theorem valueMemberOverflows : ⊨ dl[NarrowShapes]{ [ byId[1].a = 200; byId[1].a += 100; ] false } := by
+  sol_symex
+  sol_close
+
+theorem memberArrayOverflows : ⊨ dl[NarrowShapes]{ [ p.xs.push(255); p.xs[0] += 1; ] false } := by
+  sol_symex
+  sol_close
+
+/-- A struct in memory. -/
+theorem memoryMemberOverflows : ⊨ dl[NarrowShapes]{ [ Packed memory q; q.a = 255; q.a++; ] false } := by
+  sol_symex
+  sol_close
+
+/-- A storage alias of `small` is a `uint8[]`. -/
+theorem aliasOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] storage s = small; s.push(255); s[0] += 1; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- A memory array of `uint8`, allocated or copied from `small`. -/
+theorem memoryOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[](2); m[0] = 255;
+    m[0] += 1; ] false } := by
+  sol_symex
+  sol_close
+
+theorem copyOverflows : ⊨ dl[NarrowShapes]{ [ small.push(255); uint8[] memory m = small; m[0]++; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- A memory parameter and a storage parameter of `uint8[]`. -/
+theorem paramOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[](2); m[0] = 200;
+    m[1] = 100; uint8 r = sum(m); ] false } := by
+  sol_symex
+  sol_close
+
+theorem storageParamOverflows : ⊨ dl[NarrowShapes]{ [ small.push(255); bump(small); ] false } := by
+  sol_symex
+  sol_close
+
+/-- A modifier's narrow parameter. -/
+theorem modifierParam : ⊨ dl[NarrowShapes]{ ⟨ capped(5); ⟩ true } := by
+  sol_symex
+  sol_close
+
 /-! ## 3 · What the elaborator writes -/
 
 -- An operation's check follows its write, on the variable written: at `int8`
@@ -314,9 +391,18 @@ info: "temps[1] = -100; temps[1] -= 28; require((-128 <= temps[1]) && (temps[1] 
 example : Prog.toStr [] (sol[NarrowNested]{ delete small; small.pop(); uint n = small.length; }) =
     "delete small; small.pop(); uint n = small.length;" := by decide
 
-/--
-error: Solidity elaboration failed: small has a narrow element, key or value: it is used through an index, `.length`, `.push`, `.pop` or `delete`, not whole
--/
 #guard_msgs in #check sol[NarrowNested]{ uint[] storage p = small; }
+
+#guard_msgs in #check sol[NarrowShapes]{ uint8[] memory m = new uint[](2); }
+
+#guard_msgs in #check sol[NarrowShapes]{ uint[] memory m = new uint[](2); uint8 r = sum(m); }
+
+#guard_msgs in #check sol[NarrowShapes]{ bool c = true; uint8[] storage s = c ? small : small; }
+
+#guard_msgs in #check sol[NarrowShapes]{ p.a = 300; }
+
+#guard_msgs in #check sol[NarrowShapes]{ capped(300); }
+
+#guard_msgs in #eval Prog.toStr [] (sol[NarrowShapes]{ p.a += 6; Packed memory q; q.b = q.b * 2; })
 
 end Solidity.Examples.Tactics.Checked

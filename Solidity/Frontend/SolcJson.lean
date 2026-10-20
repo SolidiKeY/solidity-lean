@@ -295,8 +295,8 @@ def sourceCast (t value : String) : String :=
   else s!"{t}({value})"
 
 /-- A type node as `sol` text: a mapping's `bool` key is its `uint`.  A narrow
-type inside it is a state variable's only (`narrowOk`, `expandStateTyW`). -/
-partial def tyText (S : Structs) (j : Json) (narrowOk : Bool := false) : Except Gap String := do
+type may stand inside it (`expandStateTyW`, `elabTyW`). -/
+partial def tyText (S : Structs) (j : Json) : Except Gap String := do
   match J.kind j with
   | "ElementaryTypeName" =>
     let n ← J.str j "name"
@@ -314,31 +314,26 @@ partial def tyText (S : Structs) (j : Json) (narrowOk : Bool := false) : Except 
     | some (.error g) => throw g
     | none => throw (.unsupported s!"type `{n}` is not a struct of the contract")
   | "ArrayTypeName" =>
-    let b ← tyText S (← J.get j "baseType") narrowOk
-    if !narrowOk && (narrowTy? b).isSome then
-      throw (.unsupported s!"a narrow array element `{b}` is not modelled")
+    let b ← tyText S (← J.get j "baseType")
     match J.opt j "length" with
     | none => pure s!"{b}[]"
     | some l => pure s!"{b}[{← J.str l "value"}]"
   | "Mapping" =>
-    let k ← tyText S (← J.get j "keyType") narrowOk
-    if !narrowOk && (narrowTy? k).isSome then
-      throw (.unsupported s!"a narrow mapping key `{k}` is not modelled")
+    let k ← tyText S (← J.get j "keyType")
     let k := if k == "bool" then "uint" else k
-    let v ← tyText S (← J.get j "valueType") narrowOk
-    if !narrowOk && (narrowTy? v).isSome then
-      throw (.unsupported s!"a narrow mapping value `{v}` is not modelled")
+    let v ← tyText S (← J.get j "valueType")
     pure s!"mapping({k} => {v})"
   | k => throw (.unsupported s!"type node `{k}`")
 
-/-- A type node as a `Ty`, to compare a struct's members with the table. -/
+/-- A type node as a `Ty`, to compare a struct's members with the table: a
+narrow type is its `uint`/`int` (its width is `narrowShape`'s). -/
 partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := do
   match J.kind j with
   | "ElementaryTypeName" =>
     let n ← (j.getObjValAs? String "name")
-    match PrimTy.ofName? n with
-    | some p => pure (.prim p)
-    | none => throw s!"type `{n}`"
+    match PrimTy.ofName? n, narrowTy? n with
+    | some p, _ | none, some (p, _) => pure (.prim p)
+    | none, none => throw s!"type `{n}`"
   | "UserDefinedTypeName" =>
     if let some id := (J.ref? j).orElse fun _ => (J.opt j "pathNode").bind J.ref? then
       match lookupBy s!"#solc{id}" S with
@@ -362,6 +357,21 @@ partial def tyOf (S : List (String × String)) (j : Json) : Except String Ty := 
     | .prim k => pure (.ref (.mapping k (← tyOf S (← j.getObjVal? "valueType"))))
     | t => throw s!"mapping key `{t.toStr}`"
   | k => throw s!"type node `{k}`"
+
+/-- The narrow positions of a type node, keyed by their path below it as
+`Semantics.structWidths` keys a member's (`uint8[]` is `[("[]", 8)]`). -/
+partial def narrowShape (j : Json) : List (String × Nat) :=
+  match J.kind j with
+  | "ElementaryTypeName" =>
+    match narrowTy? ((J.str? j "name").getD "") with
+    | some (_, n) => [("", n)]
+    | none => []
+  | "ArrayTypeName" =>
+    ((J.opt j "baseType").map narrowShape).getD [] |>.map fun (k, n) => ("[]" ++ k, n)
+  | "Mapping" =>
+    (((J.opt j "keyType").map narrowShape).getD [] |>.map fun (_, n) => ("{}", n)) ++
+      (((J.opt j "valueType").map narrowShape).getD [] |>.map fun (k, n) => ("[]" ++ k, n))
+  | _ => []
 
 /-- Does the type node name the struct `s`? -/
 partial def mentionsStruct (s : String) (j : Json) : Bool :=
@@ -400,7 +410,16 @@ def readStructs (ren : List (String × String)) (defs : List Json) : Structs := 
         match tyOf (identities ++ ren) (← J.get x "typeName") with
         | .ok t => pure (f, t)
         | .error e => throw (.unsupported s!"struct `{n}`, member `{f}`: {e}")
-      if structDef m == got then pure m
+      -- the narrow members' widths, against the table's (`structWidths`)
+      let widths := ms.flatMap fun x =>
+        (narrowShape ((J.opt x "typeName").getD .null)).map fun (k, n) =>
+          ((J.str? x "name").getD "" ++ k, n)
+      let tw := structWidths m
+      let sameW := widths.all (tw.contains ·) && tw.all (widths.contains ·)
+      if structDef m == got && sameW then pure m
+      else if structDef m == got then
+        throw (.unsupported s!"struct `{n}` (line {line}) differs from the table's `{m}` in \
+          its narrow members' widths: {widths} against {tw}")
       else if (structDef m).isEmpty then
         throw (.unsupported s!"struct `{n}` (line {line}) is not in the struct table \
           (`Semantics.structDef`)")
@@ -1697,7 +1716,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
               let t := (J.str? node "name").getD ""
               !(PrimTy.ofName? t).isSome && !(narrowTy? t).isSome then
           throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
-        tyText S typeNode (narrowOk := true) : Except Gap String) with
+        tyText S typeNode : Except Gap String) with
     | .ok t =>
       members := members ++ [s!"{t} {n};"]
       kept := kept ++ [(n, t, v)]
@@ -1791,9 +1810,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let ps ← PM.lift (J.get m "parameters")
         let ps ← (← PM.lift (J.arr ps "parameters")).zipIdx.mapM fun ((p, index) : Json × Nat) => do
           let t ← PM.lift (tyText S (← PM.lift (J.get p "typeName")))
-          if (narrowTy? t).isSome then
-            unsupported s!"a modifier parameter of narrow type `{t}`"
-          unless (PrimTy.ofName? t).isSome || t == "address payable" do
+          unless (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || t == "address payable" do
             unsupported s!"a modifier parameter of unsupported type `{t}`"
           let n ← nameOf p
           let n := if !n.isEmpty then n else Id.run do
