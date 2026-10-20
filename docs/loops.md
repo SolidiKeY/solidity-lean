@@ -529,3 +529,49 @@ the refutation of the second loop's guard at four to six stacked storage
 updates (within `normalizationDepth` 12, `boundsOk` true) overflows the
 interpreter's stack in the language server, and runs past 15 minutes in
 the runner.
+
+**The fresh index, carried** (`Seq.runK`, `Calculus/ProvesDerive.lean`).
+Each step of the walk asked `Hyps.fresh`, which wraps the whole context
+around the goal and scans it (`Fml.maxIdx`): a walk of `n` steps over a
+context that grows with it costs the kernel `O(n²)`.  The walk now carries
+the context's largest index (`Hyps.maxIdxH`, `max`ed with each entry it
+adds) and asks `freshK k φ`, which is `Hyps.fresh` by `Hyps.maxIdx_wrap`
+(`Hyps.fresh_eq_freshK`); `run` is `runK` from `H.maxIdxH`, so
+`residueWithin` and its callers are unchanged.  Measured:
+
+| | before | after |
+|---|---:|---:|
+| `pushNoArgs2dLoop`, kernel check of the 1024-step walk | 658k hb, 44.8 s | 465k hb, 29.9 s |
+| `TestSuite/Derived17.lean` (whole file, alone) | 100.9 s | 97.1 s |
+| its heaviest, `returnLeavesNestedLoops` (interpretation + type checking) | 14.8 s + 63.8 s | 13.6 s + 61.5 s |
+| `Examples/Tactics/Loops.lean` | 24.8 s | 24.8 s |
+| `Examples/Tactics/LoopsImport.lean` | 14.3 s | 13.8 s |
+
+(Scratch copies under `set_option Elab.async false`, timed by
+`IO.monoMsNow` at their first and last command; peak RSS 8.2 GB for
+`Derived17`, 3.0 GB `Loops`, 1.7 GB `LoopsImport`, unchanged.)
+
+**Heartbeats past the budget.**  `returnLeavesNestedLoops` passes with its
+kernel check past the default 200000 heartbeats: nothing checks the budget
+between `sol_prove`'s kernel lemma and the end of the declaration, so a
+check there (proposal (c) of the slicing lane) fails it.  `Seq.prove`
+therefore checks only between its compiled stages: a stage that ran past
+the budget is reported by its bound, and no longer stage is run.
+
+**Refutations past exposing updates** (`LFml.refuteOk`,
+`Calculus/LeafDerive.lean`).  Over an unknown history, a read through an
+update that exposes a slot past a live end (`Op2.exposes`: an empty push of
+a reference element, a pop, a shrink) branches on whether it is the exposed
+slot, and the elimination's output grows about sevenfold with each:
+`multiArrayFillByPushLoops`' refutations at four to seven stacked
+`pushSlot`s eliminate to 980, 4937, 35938 and 476239 nodes
+(`normalizationDepth` admits 12).  A refutation is now asked only within
+`refuteExposeDepth` (5) such updates where the history is not known; past
+it the split's two branches are walked.
+
+**Proposal (b)** (a `require(len == 0)` making push histories known) does
+not apply: `pushNoArgs2dLoop`'s three leaves stack 45 storage updates,
+past `concreteDepth` (40) too, and its push at `next(storage, array2d)`
+is an exposing `pushSlot` of a `uint[]` element, which no length fact makes
+known (the exposed slot is the dangling one above); the same holds of
+`nests.push()`.
