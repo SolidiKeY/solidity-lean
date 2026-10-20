@@ -89,6 +89,8 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
   let env ← getEnv
   unless r.tag == .specified || env.contains (f ++ `problem) do
     return ("unsupported", "no scoped obligation", .solc)
+  -- the reading an obligation is stated under, kept for an error past that point
+  let modeRef ← IO.mkRef TailMode.solc
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
     liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
       let C := mkConst N
@@ -139,6 +141,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       -- the clean-tails reading (O6): a plain obligation of a contract whose
       -- functions expose nothing, under the premise `cleanTail(storage) = true`
       let mode : TailMode := if tail == .clean && spec?.isNone && !cb then .clean else .solc
+      modeRef.set mode
       let problem := mkConst (f ++ `problem)
       let premised (φ : Expr) : Expr :=
         if mode == .clean then mkAppN (mkConst ``Fml.imp) #[C, ctxE [],
@@ -182,7 +185,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
       unless (← collectAxioms name).all (standardAxioms.contains ·) do
         return ("unsupported", "proof uses nonstandard axioms", mode)
       return ("proved", "", mode))
-      fun e => return ("error", ← e.toMessageData.toString, .solc)
+      fun e => return ("error", ← e.toMessageData.toString, ← modeRef.get)
 
 /-- Machine-readable testing entry point for a solc import. Listing performs
 no proof search. Every selected import row is retained, including gaps and
