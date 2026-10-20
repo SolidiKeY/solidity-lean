@@ -23,6 +23,7 @@ can never be read as one under another.
 | O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
 | O5 | `ignoringOverflow { … }` (`ignoringOF`): an overflowing run is assumed away | done |
 | O6 | clean array tails: the starting storage's shadows assumed ordinary defaults (`ValidTail .clean`) | done |
+| O7 | a `try` whose receiver is the contract itself runs its callee; no code at address `0` | in progress (branch `open-selfcall`) |
 
 ## O1. Who calls back (bug 5)
 
@@ -303,6 +304,45 @@ over another storage term, and indices that equal the live length only by
 arithmetic other than `+ 1 - 1`, are left as atoms (still exact, only not
 read as the default). `sol_close` (the `simp` closer) does not read the
 premise.
+
+## O7. Self-calls and address `0` (branch `open-selfcall`)
+
+**Why.** solkey's solc/open ports `trySuccessRunsCallee`,
+`tryCatchExactReturn`, … call the contract itself
+(`try this.setIx() { assert(ix == 42); } catch {}`), which is true on the
+EVM; `Stmt.run` read every callee as the transaction's oracle (`TTx.ext`).
+And `callWithoutCodeReverts` relies on address `0` having no code.
+
+**The run** (`TRun.tryCall`, `Semantics/Run.lean`), in this order:
+
+1. the receiver is `0`: the caller reverts (no code there; a modelling
+   assumption, `docs/solc-alignment.md`);
+2. the receiver is `address(this)` and the statement carries the callee
+   (`Stmt.tryCall`'s `self`): its body runs as an inlined call with targets
+   (`TRun.call … (.rets rets)`), in a frame of its own; on success the
+   success clause runs from the callee's state with the returned values
+   bound; a revert runs the `Error` clause when the transaction's entry for
+   the call is `Error`, the catch-all otherwise (no revert data is kept);
+   a panic runs the `Panic` clause with the entry's code, `1` without one;
+   exhaustion and divergence halt the caller.  Storage, ledger and heap are
+   the caller's on every failure: a halted run has no state to keep;
+3. otherwise the oracle, as before.
+
+**The frame.** The elaborator (`trySelfBody`, `Syntax/Elab.lean`) inlines
+the callee as an internal call with targets and rewrites its environment
+(`RawStmt.selfFrame`): `msg.sender` is `address(this)`, `msg.value` is `0`
+(a `try` sends nothing), in the calls it inlines too.  The run needs no
+change of `TTx`.
+
+**Termination.** The callee is a function declared before the caller (the
+elaborator's `funs`, as for an internal call), whose parameter types are the
+arguments' and whose return types are the `try`'s binders; any other callee
+is the oracle's.  So the body is a subterm of the statement and `Stmt.run`
+stays structural, with no fuel.  A self-call of a later function, or of
+itself, is not run (reported as left).
+
+**Status.** Syntax, elaborator, quote and run done; the rest below as it
+lands.
 
 ## Review
 

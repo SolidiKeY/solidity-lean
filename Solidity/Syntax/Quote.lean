@@ -330,16 +330,21 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
     let Γfe := ctxFrom (rs ++ ps) fre Γf
     mkAppN (mkConst ``Stmt.call) #[c, Γe, Γ'e, pse, ctxE rs, Γfe, toExpr f, ase,
       CallRet.quote Γe ret, Prog.quote fre Γfe body]
-  | Γ, _, Γe, _, @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ call rets ok err code pnc other =>
+  | Γ, _, Γe, _, @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf call rets ok err code pnc other
+      sargs sbody self =>
     let oke := ctxOnto Γe ρ
     let pne := ctxOnto Γe κ
     let Γ₁e := ctxFrom (ρ ++ Γ) oke Γ₁
     let Γ₂e := ctxFrom Γ Γe Γ₂
     let Γ₃e := ctxFrom (κ ++ Γ) pne Γ₃
     let Γ₄e := ctxFrom Γ Γe Γ₄
-    mkAppN (mkConst ``Stmt.tryCall) #[c, Γe, ctxE ρ, ctxE κ, Γ₁e, Γ₂e, Γ₃e, Γ₄e,
+    let (ase, pse) := Args.quote c Γe sargs
+    let fre := ctxOnto pse ρ
+    let Γfe := ctxFrom (ρ ++ ps) fre Γf
+    mkAppN (mkConst ``Stmt.tryCall) #[c, Γe, ctxE ρ, ctxE κ, Γ₁e, Γ₂e, Γ₃e, Γ₄e, pse, Γfe,
       ExtCall.quote c Γe call, Binders.quote rets, Prog.quote oke Γ₁e ok, Prog.quote Γe Γ₂e err,
-      CodeBinder.quote code, Prog.quote pne Γ₃e pnc, Prog.quote Γe Γ₄e other]
+      CodeBinder.quote code, Prog.quote pne Γ₃e pnc, Prog.quote Γe Γ₄e other, ase,
+      Prog.quote fre Γfe sbody, toExpr self]
   | Γ, _, Γe, _, @Stmt.loop _ _ Γ₁ a cv body =>
     let Γ₁e := ctxFrom Γ Γe Γ₁
     mkAppN (mkConst ``Stmt.loop) #[c, Γe, Γ₁e, LoopAnn.quote c Γe a, Val.quote c Γe cv,

@@ -822,12 +822,42 @@ def callReceiverPush {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
   let a ← call args (.storage (.array E) r) hb body σ
   (afterReceiverPrefix he code value a.st).map fun b => ⟨b.st, a.ext.trans b.ext⟩
 
-/-- `try`: the clause the transaction's outcome picks, its locals popped. -/
-def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+/-- The `Panic` code a self-call that panics binds: the transaction's entry
+for the call, `1` (a failed `assert`) without one. -/
+def selfPanicCode (call : ExtCall C Γ) (σ : State C Γ) : Semantics.Word :=
+  match lookupBy (call.keyT σ) σ.tx.ext with
+  | some (.panic c) => c
+  | _ => ⟨1, by decide⟩
+
+/-- `try`: no code at address `0`, where the caller reverts; the contract's
+own function run in a frame of its own when the receiver is the contract
+itself and the elaborator found the callee (`self`, `docs/options.md` O7);
+otherwise the clause the transaction's outcome picks.  Either way the
+clause's locals are popped.  A self-call that reverts goes to the `Error`
+clause when the transaction's entry says the call ends in `Error`, to the
+catch-all otherwise (the model keeps no revert data); one that panics, to
+the `Panic` clause with the entry's code, `1` without one; one that
+exhausts or diverges halts the caller alike. -/
+def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (h₁ : Ext (ρ ++ Γ) Γ₁) (ok : TStep C (ρ ++ Γ) Γ₁)
     (h₂ : Ext Γ Γ₂) (err : TStep C Γ Γ₂) (code : CodeBinder κ)
     (h₃ : Ext (κ ++ Γ) Γ₃) (pnc : TStep C (κ ++ Γ) Γ₃)
-    (h₄ : Ext Γ Γ₄) (other : TStep C Γ Γ₄) : TStep C Γ Γ := fun σ =>
+    (h₄ : Ext Γ Γ₄) (other : TStep C Γ Γ₄) (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
+    (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) : TStep C Γ Γ := fun σ =>
+  if (call.addr.evalT σ).1 = 0 then .error .revert else
+  if self && decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1) then
+    match TRun.call sargs (.rets rets) hs sbody σ with
+    | .ok o => (ok o.st).map fun o' =>
+      ⟨o'.st.drop ((Ext.append Γ ρ).trans h₁), o.ext.trans o'.ext⟩
+    | .error .revert =>
+      match lookupBy (call.keyT σ) σ.tx.ext with
+      | some .error => (err σ).map fun o => ⟨o.st.drop h₂, o.ext⟩
+      | _ => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
+    | .error .panic =>
+      (pnc (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) (selfPanicCode call σ)) σ.env))).map
+        fun o => ⟨o.st.drop ((Ext.append Γ κ).trans h₃), o.ext⟩
+    | .error e => .error e
+  else
   match lookupBy (call.keyT σ) σ.tx.ext with
   | none => .error .revert
   | some (.ok vs) => do
@@ -899,9 +929,9 @@ def Stmt.runC : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .callReceiver _ args r body op => TRun.callReceiver args r body.ext (Prog.runC body) op
   | _, _, .callReceiverPush _ args r body code value =>
     TRun.callReceiverPush args r body.ext (Prog.runC body) code.ext (Prog.runC code) value
-  | _, _, .tryCall call rets ok err code pnc other =>
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
     TRun.tryCall call rets ok.ext (Prog.runC ok) err.ext (Prog.runC err) code pnc.ext
-      (Prog.runC pnc) other.ext (Prog.runC other)
+      (Prog.runC pnc) other.ext (Prog.runC other) sargs sbody.ext (Prog.runC sbody) self
   | _, _, .loop _ c body => TRun.loop c body.ext (Prog.runC body)
   | _, _, .block body => TRun.block body.ext (Prog.runC body)
 
@@ -929,8 +959,9 @@ def Stmt.runR {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun c => TRun.require c) (fun c => TRun.assert c) (fun _ => .error .revert)
     (fun _ => .error .exhausted)
     (fun _ args ret body ih => TRun.call args ret body.ext ih)
-    (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
-      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
+    (fun call rets ok err code pnc other sargs sbody self ihOk ihErr ihPnc ihOther ihSelf =>
+      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther
+        sargs sbody.ext ihSelf self)
     (fun _ c body ih => TRun.loop c body.ext ih) (fun body ih => TRun.block body.ext ih)
     (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
@@ -955,8 +986,9 @@ def Prog.runR {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun c => TRun.require c) (fun c => TRun.assert c) (fun _ => .error .revert)
     (fun _ => .error .exhausted)
     (fun _ args ret body ih => TRun.call args ret body.ext ih)
-    (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
-      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
+    (fun call rets ok err code pnc other sargs sbody self ihOk ihErr ihPnc ihOther ihSelf =>
+      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther
+        sargs sbody.ext ihSelf self)
     (fun _ c body ih => TRun.loop c body.ext ih) (fun body ih => TRun.block body.ext ih)
     (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
@@ -990,12 +1022,13 @@ theorem Stmt.runR_eq : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.runR s = 
     show TRun.callReceiverPush args r body.ext body.runR code.ext code.runR value =
       TRun.callReceiverPush args r body.ext body.runC code.ext code.runC value
     rw [Prog.runR_eq body, Prog.runR_eq code]
-  | _, _, .tryCall call rets ok err code pnc other => by
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self => by
     show TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext pnc.runR
-        other.ext other.runR =
+        other.ext other.runR sargs sbody.ext sbody.runR self =
       TRun.tryCall call rets ok.ext ok.runC err.ext err.runC code pnc.ext pnc.runC
-        other.ext other.runC
-    rw [Prog.runR_eq ok, Prog.runR_eq err, Prog.runR_eq pnc, Prog.runR_eq other]
+        other.ext other.runC sargs sbody.ext sbody.runC self
+    rw [Prog.runR_eq ok, Prog.runR_eq err, Prog.runR_eq pnc, Prog.runR_eq other,
+      Prog.runR_eq sbody]
   | _, _, .loop a c body => by
     show TRun.loop c body.ext body.runR = TRun.loop c body.ext body.runC
     rw [Prog.runR_eq body]
