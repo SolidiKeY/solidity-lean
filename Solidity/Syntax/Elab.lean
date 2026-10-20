@@ -1214,7 +1214,15 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
     else joinIT (intTyOf Γ a) (intTyOf Γ b)
   | .ternary _ a b => joinIT (intTyOf Γ a) (intTyOf Γ b)
   | .incDec _ e => intTyOf Γ e
-  | .call f _ => some ((castTy? f).getD (.uint, 256))
+  | .call f _ =>
+    -- a cast's type, else a declared function's return at its width
+    match castTy? f, lookupBy f C.funs with
+    | some t, _ => some t
+    | none, some d =>
+      match d.ret with
+      | some (r, .prim p) => some (p, (lookupBy r d.widths).getD 256)
+      | _ => some (.uint, 256)
+    | none, none => some (.uint, 256)
   | .bool _ => some (.bool, 256)
   | _ => some (.uint, 256)
 
@@ -1340,6 +1348,18 @@ def castCapture (f : String) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let v ← checkIn C Γn p r
   let x ← captureAs C "se" (.val p n)
   pure ([.of Γn (.declLocal p x (some v))], .name (toString x))
+
+/-- A conversion `E(e)` to an enum of `n` members, `e`'s captures made: a
+fresh `uint` holding `e`, then `assert` that it names a member (solc panics,
+`0x21`, on one that does not). -/
+def enumCapture (n : Nat) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
+  let Γ ← nctx
+  let v ← checkIn C Γ .uint e
+  let x ← captureAs C "se" (.val .uint)
+  let e' : RawExpr := .name (toString x)
+  let Γ' ← nctx
+  let c ← checkIn C Γ' .bool (.binop .lt e' (.num n))
+  pure ([.of Γ (.declLocal .uint x (some v)), .of Γ' (.assert c)], e')
 
 /-- `e`'s value, or the reference it names, held in a fresh local before a
 later operand's effect: `x = i++ + i;` reads the right `i` first (solc
@@ -2008,6 +2028,11 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
   | .call f args => do
+    if let some ms := lookupBy f C.enums then
+      let [a] := args | throw s!"a conversion {f}(…) takes one argument"
+      let (P, a) ← hoist a
+      let (Q, e) ← enumCapture C ms.length a
+      return (P ++ Q, e)
     if (castTy? f).isSome then
       let [a] := args | throw s!"a cast {f}(…) takes one argument"
       let (P, a) ← hoist a
@@ -2472,13 +2497,13 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
       let (Q, l) ← hoist l
       pure (P ++ Pc ++ Q, .assign l (.newArr T n))
     | .call f args, .ok (.val _ (.simple (.local _))) =>
-      if (castTy? f).isSome then hoistAssign l r
+      if (castTy? f).isSome || (lookupBy f C.enums).isSome then hoistAssign l r
       else
         let (P, args) ← hoistCallArgs f args
         pure (P, .assign l (.call f args))
     | _, _ => hoistAssign l r
   | .decl T x (some (.call f args)) => do
-    if (castTy? f).isSome then
+    if (castTy? f).isSome || (lookupBy f C.enums).isSome then
       let (P, r) ← hoist (.call f args)
       return (P, .decl T x (some r))
     let (P, args) ← hoistCallArgs f args

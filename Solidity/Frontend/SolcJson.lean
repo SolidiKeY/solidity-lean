@@ -148,6 +148,9 @@ structure SolcFun where
   /-- Declared `payable`: what a constructor's member keeps (`Contract.deploy`
   refuses value sent to one that is not). -/
   payable : Bool := false
+  /-- The parameters the ABI decoder bounds below their `PrimTy`'s range: a
+  narrow integer's, an enum's members (name, least, greatest value). -/
+  paramRanges : List (String × Int × Int) := []
   /-- Specification members, retained only for the testing import mode. -/
   specMembers : String := ""
   /-- Raw directive/text pairs, for validating one clause at a time before
@@ -637,6 +640,23 @@ partial def constVal (j : Json) : Option Q := do
 def compound (j : Json) : Bool :=
   ["BinaryOperation", "Conditional", "Assignment"].contains (J.kind j)
 
+/-- The declarations some assignment, `++`/`--` or `delete` writes by name. -/
+def writtenIds (ast : Json) : List Int :=
+  (J.nodes ast).filterMap fun n => do
+    let target ← match J.kind n with
+      | "Assignment" => J.opt n "leftHandSide"
+      | "UnaryOperation" =>
+        guard ((J.opt n "operator").any fun o => o == .str "++" || o == .str "--" || o == .str "delete")
+        J.opt n "subExpression"
+      | _ => none
+    guard (J.kind target == "Identifier")
+    J.ref? target
+
+/-- The default of a value type `t`, as the literal solc would write. -/
+def defaultLiteral (t : String) : Json :=
+  if t == "bool" then Json.mkObj [("nodeType", "Literal"), ("kind", "bool"), ("value", "false")]
+  else Json.mkObj [("nodeType", "Literal"), ("kind", "number"), ("value", "0")]
+
 def unsupported {α : Type} (msg : String) : PM α := throw (.unsupported msg)
 
 /-- `e ? 1 : 0`, solc's encoding of a `bool` key, folded on a literal. -/
@@ -714,6 +734,11 @@ def isBaseMember (contracts : List Int) (f : Json) : Bool :=
     J.kind receiver == "Identifier" &&
       J.opt receiver "name" != some (.str "this") && J.opt receiver "name" != some (.str "super") &&
       (J.ref? receiver).any contracts.contains
+
+/-- Is the node a member that names an external function, `r.f` in `r.f(a)`? -/
+def isExternalMember (f : Json) : Bool :=
+  J.kind f == "MemberAccess" && (J.tyStr f).startsWith "function " &&
+    ((J.tyStr f).splitOn " external").length > 1
 
 def isSuperMember (f : Json) : Bool :=
   J.kind f == "MemberAccess" && (J.opt f "expression").any fun receiver =>
@@ -917,6 +942,11 @@ partial def call (j : Json) : PM String := do
     | [a] =>
       let to := J.tyStr f
       if to.startsWith "type(address" || to.startsWith "type(contract " then expr a
+      else if to.startsWith "type(enum " then
+        -- `E(x)`: the enum is a `contract!` member (`enumMembers`), and the
+        -- elaborator asserts that `x` names one of its members
+        let e := ((to.drop 10).dropRight 1).splitOn "." |>.getLast!
+        pure s!"{e}({← expr a})"
       else
         let n ← match J.kind f with
           | "ElementaryTypeNameExpression" =>
@@ -951,11 +981,23 @@ partial def call (j : Json) : PM String := do
         match (J.ref? f).bind (lookupBy · (← get).staticNames) with
         | some name => pure name
         | none => unsupported "a base-qualified call without an imported function declaration"
+      else if isExternalMember f then
+        -- `I(0).f`: the receiver an address, `address(0).f` (`0.f` does not parse)
+        let r ← expr (← PM.lift (J.get f "expression"))
+        let r := if r.front.isDigit then s!"address({r})" else r
+        pure s!"{r}.{← PM.lift (J.str f "memberName")}"
       else expr f
     pure s!"{name}({", ".intercalate as})"
   | k => unsupported s!"a call of kind `{k}`"
 
 end
+
+/-- The node inside its redundant parentheses: `((a, b))` is `(a, b)`. -/
+partial def unparen (j : Json) : Json :=
+  match J.kind j, (J.arr? j "components").map (·.toList) with
+  | "TupleExpression", some [c] =>
+    if (J.opt j "isInlineArray").any (· == .bool true) || c == .null then j else unparen c
+  | _, _ => j
 
 /-- Is the node a tuple of several components, `(a, b)`, and not an inline
 array (`SolJSONParser.isTuple`)? -/
@@ -1053,10 +1095,10 @@ partial def stmt1 (j : Json) : PM (List String) := do
   | "ExpressionStatement" =>
     let e ← PM.lift (J.get j "expression")
     if J.kind e == "Assignment" && (J.opt e "operator").any (· == .str "=") &&
-        (J.opt e "leftHandSide").any isTuple then
-      -- `(a, , b) = v`
-      return [s!"{← tuple (← PM.lift (J.get e "leftHandSide"))} = \
-        {← tupleValue (← PM.lift (J.get e "rightHandSide"))}"]
+        (J.opt e "leftHandSide").any (isTuple ∘ unparen) then
+      -- `(a, , b) = v`, and `((a, b)) = v` as it
+      return [s!"{← tuple (unparen (← PM.lift (J.get e "leftHandSide")))} = \
+        {← tupleValue (unparen (← PM.lift (J.get e "rightHandSide")))}"]
     -- `x.push().f = c`: solc pushes, then stores the constant
     let ok := J.kind e == "Assignment" && (J.opt e "leftHandSide").any isPushedMember &&
       (J.opt e "rightHandSide").any fun r =>
@@ -1077,6 +1119,12 @@ partial def stmt1 (j : Json) : PM (List String) := do
       unless condCalleeOk e do unsupported condCalleeMsg
       if J.tyStr e == "tuple()" then
         return [s!"if ({← expr c}) {"{"} {← call a}; {"}"} else {"{"} {← call b}; {"}"}"]
+    -- `r.f(a);`, an external call outside a `try`: a `try` whose every
+    -- failure reverts the caller, as the call's revert does (and a call to an
+    -- address with no code reverts in both)
+    if J.kind e == "FunctionCall" && J.str? e "kind" == some "functionCall" &&
+        (J.opt e "expression").any isExternalMember then
+      return [s!"try {← expr e} \{ } catch \{ revert(); }"]
     -- an operator's value discarded, `a + b;`: held in a fresh local, its
     -- effects and its revert kept (solkey's `discardAddExpression`, …)
     if ["BinaryOperation", "Conditional"].contains (J.kind e) then
@@ -1324,6 +1372,8 @@ def tagOf (contract : List KeyClause) (f : Json) : Except String Tag := do
   -- a constructor has one whatever its visibility (`SolidityOutline.functionsOf`)
   let ctor := J.str? f "kind" == some "constructor"
   unless ctor || vis == "public" || vis == "external" do return .internal
+  -- `receive` and `fallback` have no name a transaction calls: no obligation
+  if J.str? f "kind" == some "receive" || J.str? f "kind" == some "fallback" then return .internal
   let cs ← keyClauses (docText f)
   if cs.any (·.kind == "skip") then return .skip
   if isSpecified contract || isSpecified cs then return .specified
@@ -1574,6 +1624,20 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     pure (i, t, value)
   let vars := nodes.filter fun n =>
     J.kind n == "VariableDeclaration" && (n.getObjValAs? Bool "stateVariable").toOption == some true
+  -- an immutable nothing writes is a constant: its compile-time initializer,
+  -- or its type's default; one the constructor writes is a storage root
+  let written := writtenIds ast
+  let immutables : List (Int × (String × Json)) := vars.filterMap fun v => do
+    guard ((J.str? v "mutability") == some "immutable")
+    let i ← J.id? v
+    guard !(written.contains i)
+    let t ← (tyText S (← J.opt v "typeName")).toOption
+    guard (PrimTy.ofName? t).isSome
+    match J.opt v "value" with
+    | some value => do guard ((constVal value).isSome || J.kind value == "Literal"); pure (i, t, value)
+    | none => pure (i, t, defaultLiteral t)
+  let constants := constants ++ immutables
+  let fixedIds := immutables.map (·.1)
   let variableNames := vars.filterMap fun v => J.str? v "name"
   unless variableNames.eraseDups.length == variableNames.length do
     throw "inherited state declarations share a name: distinct storage roots need renaming"
@@ -1584,7 +1648,13 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     { c with text := resolveSpecEnums specValues stateNames (resolveSpecConstants constantValues constantBlocked c.text) }
   let invariants : List String := if testing then
     (cspec.filter (·.kind == "invariant")).map (fun c => s!"invariant {c.text};") else []
-  let mut members : List String := invariants
+  -- the enums, as `contract!` members, for the conversions `E(x)` to check
+  -- their argument against
+  let enumMembers : List String := (nodes.filter (J.kind · == "EnumDefinition")).filterMap fun e => do
+    let n ← J.str? e "name"
+    let ms := (J.arrD e "members").toList.filterMap (J.str? · "name")
+    pure s!"enum {n} \{ {", ".intercalate ms} }"
+  let mut members : List String := invariants ++ enumMembers
   -- the variables kept: name, `sol` type, declaration
   let mut kept : List (String × String × Json) := []
   let mut dropped : List (Int × String × Gap) := []
@@ -1593,8 +1663,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let n := (J.str? v "name").getD ""
     let i := (J.id? v).getD 0
     let mutab := (J.str? v "mutability").getD "mutable"
-    let fixed := (v.getObjValAs? Bool "constant").toOption == some true || mutab != "mutable"
+    let fixed := (v.getObjValAs? Bool "constant").toOption == some true ||
+      (mutab != "mutable" && !(mutab == "immutable" && written.contains i))
     match (do
+        if fixedIds.contains i then
+          throw (.unsupported s!"`{n}` (line {J.line v}) is immutable and never written: \
+            its value is inlined, not a storage slot")
         if fixed then
           throw (.unsupported s!"`{n}` (line {J.line v}) is {if mutab == "mutable" then "constant" else mutab}: \
             a value fixed before any call, not a storage slot")
@@ -1749,7 +1823,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     -- what would change the function's meaning, or its constant's name
     let kind := kindOf f
     let refused : Option String :=
-      if kind != "function" && kind != "freeFunction" && kind != "constructor" then some s!"a `{kind}` function"
+      -- `receive` and `fallback` are functions of their kind's name: an
+      -- obligation each, and no other function can call them by name
+      if !["function", "freeFunction", "constructor", "receive", "fallback"].contains kind then
+        some s!"a `{kind}` function"
       else if fname == "report" then some "named like the import's `report` table"
       else none
     let apps : Except Gap String := do
@@ -1814,6 +1891,12 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       line := J.line f, tag := (tag.toOption).getD .malformed,
       params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
       payable := J.str? f "stateMutability" == some "payable",
+      paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
+        if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
+          return (x, 0, n)
+        let (q, n) ← narrowTy? (J.tyStr p)
+        guard (n < 256)
+        if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1) else pure (x, 0, 2 ^ n - 1),
       specMembers := if testing then String.join (fspec
         |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
         |>.map (fun c => s!"{c.kind} {c.text}; ")) else "",
@@ -1880,7 +1963,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
       | _ => none
   let initMembers := match initGap, inits with
-    | none, .ok ms => invariants ++ ms
+    | none, .ok ms => invariants ++ enumMembers ++ ms
     | _, _ => members
   let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any ownIds.contains).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)

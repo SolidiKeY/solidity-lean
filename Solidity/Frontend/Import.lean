@@ -90,6 +90,10 @@ structure ImportRow where
   paramTypes : Ctx := []
   status : ImportStatus
   reason : String
+  /-- Declared `payable`. -/
+  payable : Bool := false
+  /-- The parameters the ABI decoder bounds (`SolcFun.paramRanges`). -/
+  paramRanges : List (String × Int × Int) := []
   deriving Repr, Inhabited
 
 deriving instance ToExpr for Tag
@@ -99,7 +103,8 @@ deriving instance ToExpr for ImportRow
 /-- The row of an imported function. -/
 def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : ImportRow :=
   { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
-    tag := f.tag, params := f.params, status, reason }
+    tag := f.tag, params := f.params, status, reason, payable := f.payable,
+    paramRanges := f.paramRanges }
 
 /-- The declaration `N.f` of the row `f` of `N`'s import. -/
 def ImportRow.declName (N : Lean.Name) (r : ImportRow) : Lean.Name := N ++ Lean.Name.mkSimple r.name

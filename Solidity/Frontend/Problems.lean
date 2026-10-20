@@ -63,6 +63,23 @@ open Lean Elab Command Meta
 def reportRows (N : Lean.Name) : CommandElabM (List ImportRow) :=
   liftTermElabM <| unsafe evalConst (List ImportRow) (N ++ `report)
 
+/-- **What the call guarantees before the body runs**, as a premise read
+at the parameters `Γ`: `msg.value = 0` when `noValue` (a function that is
+not `payable` reverts on value in its dispatcher, as the specified
+obligation assumes, `Calculus/SurfaceSpec.lean`), and each bounded
+parameter in its range (the ABI decoder reverts on a narrow integer or an
+enum out of range).  An argument out of range never reaches the body, so
+the obligation holds of every call that does.  A premise that does not read
+is `true`: the obligation is then stronger, never weaker. -/
+def Problem.callPre (C : Contract) (Γ : NCtx) (noValue : Bool)
+    (ranges : List (Var × Int × Int)) : Fml C Γ.ctx :=
+  let value : List (NRead C) := if noValue then [NRead.eq (.env .msgValue) (.num 0)] else []
+  let bounds : List (NRead C) := ranges.map fun (x, lo, hi) =>
+    NRead.and (NRead.cmp .le (.num lo) (.pv x)) (NRead.cmp .le (.pv x) (.num hi))
+  match NRead.conj (value ++ bounds) Γ with
+  | .ok φ => φ
+  | .error _ => .tt
+
 /-- The modality of a tag's plain obligation, if solkey states that one. -/
 def Tag.modality? : Tag → Option Modality
   | .diamond => some .diamond
@@ -101,6 +118,15 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
   let body := if r.name == "constructor" then
       mkAppN (mkConst ``Fml.upd) #[c, Γe, Γe, toExpr m, mkApp2 (mkConst ``Problem.deployUpd) c Γe, modal]
     else mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.wt) c Γe, modal]
+  -- the call's premise, only where it says something: a function that is
+  -- not `payable` and reads `msg.value`, a parameter the decoder bounds
+  let noValue := !r.payable && r.name != "constructor" &&
+    (v.find? (·.isConstOf ``EnvKey.msgValue)).isSome
+  let ranges : List (Var × Int × Int) := r.paramRanges.map fun (x, b) => (Var.ofName x, b)
+  let body := if noValue || !ranges.isEmpty then
+      mkAppN (mkConst ``Fml.imp) #[c, Γe,
+        mkAppN (mkConst ``Problem.callPre) #[c, toExpr Γ, toExpr noValue, toExpr ranges], body]
+    else body
   let body := if r.paramTypes.any (fun t => t matches .alias _ | .mem _) then
       mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.refInputs) c Γe, body]
     else body

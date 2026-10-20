@@ -266,6 +266,9 @@ def structDef : Name -> List (Name × Ty)
   | "WithArray" =>
       [("n", Ty.uint), ("items", Ty.ref (RefTy.array Ty.uint))]
   | "Triple" => [("x", Ty.uint), ("y", Ty.uint), ("z", Ty.uint)]
+  -- solc/open/SolcConstructorsOpen.sol, SolcLoopsOpen.sol.
+  | "D" => [("p", Ty.uint), ("q", Ty.bool)]
+  | "Nest" => [("d", Ty.ref (RefTy.array (Ty.ref (RefTy.array Ty.uint))))]
   | _ => []
 
 /-- Struct declarations solc refuses ("Identifier already declared"): two
@@ -323,6 +326,8 @@ def structRank : Name -> Nat
   | "Simple" => 1
   | "WithArray" => 1
   | "Triple" => 1
+  | "D" => 1
+  | "Nest" => 1
   | _ => 1
 
 /-- A type's rank: primitives 0, a struct its `structRank`, a dynamic array
@@ -676,7 +681,7 @@ their proofs are `Eq.refl`, from a list of the structs checked once
 /-- The structs of `structDef` that hold no mapping. -/
 def mapFreeStructs : List Name :=
   ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S",
-   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple"]
+   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "D", "Nest"]
 
 /-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
 def Ty.mapFree : Ty → Bool
