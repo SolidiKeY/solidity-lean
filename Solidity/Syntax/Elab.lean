@@ -104,25 +104,49 @@ inductive LocalTy where
   /-- A logical variable of KeY's `int`: only a formula binds one (a
   parameter read beside the ledger), and a program cannot read it. -/
   | kint
+  /-- Not a local: the narrow positions inside the alias or memory local `x`,
+  under the name `#x` (`declareShape`), keyed by their path below `x` as
+  `Contract.widths` keys a state variable's (`uint8[] memory m` is `[]` at
+  `8`).  A reference type has no width, so a local's rides beside it;
+  `ECtx.toNCtx` drops it. -/
+  | shape (ws : List (String × Nat))
   deriving DecidableEq, Repr
 
 /-- The locals in scope, most recent first. -/
 abbrev ECtx := List (Name × LocalTy)
 
-/-- Parameters retain their declared data locations in the function frame. -/
-def FunDecl.paramCtx (d : FunDecl) : Except String ECtx :=
-  d.params.reverse.mapM fun (n, T) => match T with
+/-- The narrow positions below the key `k` of a width table, keyed by their
+path below it: `small[]` is `[]` under `small` (`Contract.widths`,
+`FunDecl.widths`, `structWidths`). -/
+def shapeUnder (tb : List (String × Nat)) (k : String) : List (String × Nat) :=
+  tb.filterMap fun (k', n) =>
+    if k'.startsWith (k ++ "[") || k'.startsWith (k ++ "{") then some (k'.drop k.length, n)
+    else none
+
+/-- Two shapes name the same narrow positions at the same widths. -/
+def sameShape (a b : List (String × Nat)) : Bool :=
+  a.all (b.contains ·) && b.all (a.contains ·)
+
+/-- The entry beside a reference local `x` holding its narrow positions, if it has any. -/
+def shapeEntry (x : Name) (ws : List (String × Nat)) : List (Name × LocalTy) :=
+  if ws.isEmpty then [] else [("#" ++ x, .shape ws)]
+
+/-- Parameters retain their declared data locations in the function frame; a
+reference one its narrow positions (`shapeEntry`). -/
+def FunDecl.paramCtx (d : FunDecl) : Except String ECtx := do
+  let rows ← d.params.reverse.mapM fun (n, T) => match T with
     | .prim p =>
       if (lookupBy n d.paramLocs).isSome then
         .error s!"data location on value parameter {n}"
-      else .ok (n, .val p ((lookupBy n d.widths).getD 256))
+      else .ok [(n, .val p ((lookupBy n d.widths).getD 256))]
     | .ref R => match lookupBy n d.paramLocs with
-      | some .storage => .ok (n, .alias R)
+      | some .storage => .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .alias R)])
       | some .memory =>
-        if (Ty.ref R).mapFree then .ok (n, .mem R)
+        if (Ty.ref R).mapFree then .ok (shapeEntry n (shapeUnder d.widths n) ++ [(n, .mem R)])
         else .error s!"memory parameter {n} holds a mapping"
       | some .calldata => .error s!"calldata parameter {n} is not supported"
       | none => .error s!"reference parameter {n} needs a data location"
+  pure rows.flatten
 
 /-- A type as read, against the contract: a primitive type (`PrimTy.ofName?`),
 an enum of `C` (a `uint`, as a state variable of it is), a struct of
@@ -152,6 +176,27 @@ def elabDeclTy (C : Contract) : RawTy → Except String (Ty × Nat)
     | some (p, n) => pure (.prim p, n)
     | none => do pure (← elabTy C (.named s), 256)
   | T => do pure (← elabTy C T, 256)
+
+/-- A local's or a `new`'s type, where a narrow type may stand inside it: its
+`Ty`, and the widths of its narrow positions keyed by their path below it, as
+`expandStateTyW` reads a state variable's (`uint8[]` is `[("[]", 8)]`, a
+mapping's key `{}`). -/
+def elabTyW (C : Contract) : RawTy → Except String (Ty × List (String × Nat))
+  | .named s =>
+    match narrowTy? s with
+    | some (p, n) => pure (.prim p, [("", n)])
+    | none => do pure (← elabTy C (.named s), [])
+  | .mapping k v => do
+    let (kt, kw) ← elabTyW C k
+    let .prim p := kt | throw s!"a mapping's key is a value type, not {kt.toStr}"
+    let (vt, vw) ← elabTyW C v
+    pure (.mapping p vt, kw.map (fun (_, n) => ("{}", n)) ++ vw.map fun (k, n) => ("[]" ++ k, n))
+  | .array t => do
+    let (t, w) ← elabTyW C t
+    pure (.array t, w.map fun (k, n) => ("[]" ++ k, n))
+  | .fixed t m => do
+    let (t, w) ← elabTyW C t
+    pure (.fixed t m, w.map fun (k, n) => ("[]" ++ k, n))
 
 /-- A synthesised expression, read in `Γ`: a storage path, a memory path, or
 a value. -/
@@ -624,12 +669,13 @@ def freshenBlocks (avoid live : List String) (ss : List RawStmt) : Except String
 specification's storage snapshot.  A name is read as the file's
 `FreshNames` spells it (`acc` may be `sp1`). -/
 def ECtx.toNCtx [FreshNames] (Γ : ECtx) : NCtx :=
-  Γ.map fun (x, t) => (Var.ofName x, match t with
-    | .val p _ => .val p
-    | .alias R => .alias R
-    | .mem R => .mem R
-    | .store => .old
-    | .kint => .kint)
+  Γ.filterMap fun (x, t) => (Var.ofName x, ·) <$> match t with
+    | .val p _ => some (.val p)
+    | .alias R => some (.alias R)
+    | .mem R => some (.mem R)
+    | .store => some .old
+    | .kint => some .kint
+    | .shape _ => none
 
 /-! ### Named contexts and blocks -/
 
@@ -1106,6 +1152,10 @@ def declare (x : Name) (t : LocalTy) : ElabM Unit := do
   checkFresh C Γ x
   set ((x, t) :: Γ, k)
 
+/-- Record the narrow positions of the reference local `x` (`LocalTy.shape`). -/
+def declareShape (x : Name) (ws : List (String × Nat)) : ElabM Unit :=
+  modify fun (Γ, k) => (shapeEntry x ws ++ Γ, k)
+
 /-- A capture: a fresh `base` variable (`freshCapture`), declared at `t`. -/
 def captureAs (base : String) (t : LocalTy) : ElabM Var := do
   let x ← freshCapture base
@@ -1195,7 +1245,7 @@ def elabSize (n : RawExpr) : ElabM (SProg C × (Γ : NCtx) × Simple C Γ.ctx .u
 
 /-- The array type `new T(n)` allocates, if it may be allocated. -/
 def elabNewTy (T : RawTy) : ElabM ((R : RefTy) ×' R.newArrOk = true) := do
-  let .ref R ← ElabM.lift (elabTy C T) | throw "`new` of a value type"
+  let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw "`new` of a value type"
   match h : R.newArrOk with
   | true => pure ⟨R, h⟩
   | false => throw "`new` of an array whose elements a memory array cannot hold"
@@ -1209,55 +1259,114 @@ def joinIT : Option (PrimTy × Nat) → Option (PrimTy × Nat) → Option (PrimT
   | t, none => t
   | some (p, n), some (_, m) => some (p, max n m)
 
-/-- A storage path from a state variable through indices only, and its key
-in `Contract.widths` and type: `values[i]` is `values[]`, an element of
-`uint8[] values` (`expandStateTyW`).  A local shadows a state variable. -/
-def statePath? (Γ : ECtx) : RawExpr → Option (String × Ty)
-  | .name x => if (lookupBy x Γ).isSome then none else (C.rootType x).map (x, ·)
+/-- The narrow positions of the reference local `x` (`LocalTy.shape`). -/
+def localShape (Γ : ECtx) (x : Name) : List (String × Nat) :=
+  match lookupBy ("#" ++ x) Γ with
+  | some (.shape ws) => ws
+  | _ => []
+
+/-- Where the widths of the place `e` are kept: a width table, `e`'s key in
+it, and `e`'s type.  A state variable's table is `Contract.widths`
+(`values[i]` is `values[]`), a reference local's its shape (`m[i]` is `[]`,
+`localShape`), a struct member's its struct's (`structWidths`: `p.xs[i]` is
+`xs[]` of `Packed`).  A local shadows a state variable. -/
+def widthPath? (Γ : ECtx) : RawExpr → Option (List (String × Nat) × String × Ty)
+  | .name x =>
+    match lookupBy x Γ with
+    | some (.alias R) | some (.mem R) => some (localShape Γ x, "", .ref R)
+    | some _ => none
+    | none => (C.rootType x).map (C.widths, x, ·)
   | .index e _ => do
-    let (k, t) ← statePath? Γ e
+    let (tb, k, t) ← widthPath? Γ e
     match t with
-    | .ref (.array E) | .ref (.fixed E _) | .ref (.mapping _ E) => some (k ++ "[]", E)
+    | .ref (.array E) | .ref (.fixed E _) | .ref (.mapping _ E) => some (tb, k ++ "[]", E)
     | _ => none
+  | .field e f => do
+    let (_, _, .ref (.struct s)) ← widthPath? Γ e | none
+    let T ← lookupBy f (structDef s)
+    pure (structWidths s, f, T)
   | _ => none
 
-/-- The width of a narrow position inside a state variable, by its key. -/
-def stateWidth? (Γ : ECtx) (e : RawExpr) : Option (PrimTy × Nat) := do
-  let (k, .prim p) ← statePath? C Γ e | none
-  pure (p, (lookupBy k C.widths).getD 256)
+/-- The type of a place of primitive type, at its width (`widthPath?`). -/
+def pathWidth? (Γ : ECtx) (e : RawExpr) : Option (PrimTy × Nat) := do
+  let (tb, k, .prim p) ← widthPath? C Γ e | none
+  pure (p, (lookupBy k tb).getD 256)
 
-/-- Whether `e` names, whole, a part of a state variable with a narrow position
-below it (`small` of `uint8[] small`, `lists[i]` of `mapping(uint => uint8[])
-lists`). -/
-def narrowWhole (Γ : ECtx) (e : RawExpr) : Bool :=
-  match statePath? C Γ e with
-  | some (k, .ref _) => C.widths.any fun (k', _) => k'.length > k.length && k'.startsWith k
-  | _ => false
+/-- The narrow positions below the place `e` of reference type, keyed by their
+path below it: `small` of `uint8[] small` is `[("[]", 8)]`. -/
+def placeShape (Γ : ECtx) (e : RawExpr) : List (String × Nat) :=
+  match widthPath? C Γ e with
+  | some (tb, k, .ref _) => shapeUnder tb k
+  | _ => []
 
-/-- A use of a part `narrowWhole` names other than through an index, a member
-(`.length`, `.push`, `.pop`) or `delete`: a copy, an alias, an argument.  A
-reference type has no width (`uint[]` is `uint8[]`'s `Ty`), so it would
-lose the element's; solc refuses most of these (`uint[] storage p = small;`
-does not convert), and the rest (`uint8[] storage p = small;`) are refused
-here, as a narrow type inside a local's type is (`narrowNestedMsg`). -/
+/-- The narrow positions of a value of reference type: a place's
+(`placeShape`), a `new`'s type's, a function's return's. -/
+def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
+  | .newArr T _ => ((elabTyW C T).toOption.map (·.2)).getD []
+  | .call f _ =>
+    match lookupBy f C.funs with
+    | some d => match d.ret with
+      | some (r, .ref _) => shapeUnder d.widths r
+      | _ => []
+    | none => []
+  | e => placeShape C Γ e
+
+/-- The narrow positions of `ws`, as a reader sees them (`small[]` at
+`uint8`). -/
+def shapeStr (ws : List (String × Nat)) : String :=
+  if ws.isEmpty then "none" else ", ".intercalate (ws.map fun (k, n) => s!"{k} at {n} bits")
+
+/-- A whole use of `e` where `ws` is expected: the narrow positions must agree
+(solc converts no reference type to one of another element type). -/
+def shapeCheck (Γ : ECtx) (ws : List (String × Nat)) (e : RawExpr) : Except String Unit := do
+  let got := exprShape C Γ e
+  unless sameShape got ws do
+    throw s!"{e.toStr} has narrow positions {shapeStr got} where {shapeStr ws} are expected"
+
+/-- Whether `e` names, whole, a place with a narrow position below it (`small`
+of `uint8[] small`, `lists[i]` of `mapping(uint => uint8[]) lists`, a
+`uint8[] memory m`). -/
+def narrowWhole (Γ : ECtx) (e : RawExpr) : Bool := !(placeShape C Γ e).isEmpty
+
+/-- A reference type. -/
+def isRefTy : Ty → Bool
+  | .ref _ => true
+  | .prim _ => false
+
+mutual
+/-- A use of a place `narrowWhole` names other than through an index, a
+member (`.length`, `.push`, `.pop`), `delete`, or where its narrow positions
+are checked against the target's (a reference local's initializer, a
+reference assignment, a function's reference argument: `shapeCheck`).  A
+reference type has no width (`uint[]` is `uint8[]`'s `Ty`), so any other use
+(an operand of a conditional, a tuple, a named argument) would lose it. -/
 partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | e@(.name _) => if narrowWhole C Γ e then some e else none
-  | .index b k => (narrowBase b).orElse fun _ => narrowWholeUse? Γ k
-  | .field b _ => narrowBase b
+  | e@(.index b k) =>
+    if narrowWhole C Γ e then some e else (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
+  | e@(.field b _) => if narrowWhole C Γ e then some e else narrowBase? Γ b
+  -- a function's reference argument: its shape is checked against the
+  -- parameter's (`elabCallRet`)
+  | .call f as =>
+    let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
+    as.zipIdx.findSome? fun (a, i) =>
+      if refs.getD i false then narrowBase? Γ a else narrowWholeUse? Γ a
   | .binop _ a b | .assign a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? Γ a
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
-  | .call _ as | .named _ _ as | .tuple as => as.findSome? (narrowWholeUse? Γ)
+  | .named _ _ as | .tuple as => as.findSome? (narrowWholeUse? Γ)
   | .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? Γ)
   | _ => none
-where
-  -- an index's or a member's base: its own indices only
-  narrowBase : RawExpr → Option RawExpr
-    | .index b k => (narrowBase b).orElse fun _ => narrowWholeUse? Γ k
-    | .field b _ => narrowBase b
-    | .name _ => none
-    | e => narrowWholeUse? Γ e
+
+/-- `narrowWholeUse?` of an index's or a member's base, or of a use whose
+shape is checked (`shapeCheck`): its own indices only. -/
+partial def narrowBase? (Γ : ECtx) : RawExpr → Option RawExpr
+  | .index b k => (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
+  | .field b _ => narrowBase? Γ b
+  | .name _ => none
+  | e => narrowWholeUse? Γ e
+end
 
 /-- The smallest integer type holding the literals `u` and `v` (solc's mobile
 type, of both): `uintN` when neither is negative, else `intN`. -/
@@ -1314,8 +1423,10 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
       | _ => some (.uint, 256)
     | none, none => some (.uint, 256)
   | .bool _ => some (.bool, 256)
-  -- an element of a state variable: its declared width (`uint8[] values`)
-  | .index e k => (stateWidth? C Γ (.index e k)).orElse fun _ => some (.uint, 256)
+  -- an element or a member: its declared width (`uint8[] values`, `p.a` of a
+  -- `Packed p`)
+  | .index e k => (pathWidth? C Γ (.index e k)).orElse fun _ => some (.uint, 256)
+  | .field e f => (pathWidth? C Γ (.field e f)).orElse fun _ => some (.uint, 256)
   | _ => some (.uint, 256)
 
 /-- `e`'s width in bits: `intTyOf`'s, `256` for a literal. -/
@@ -1427,8 +1538,8 @@ partial def narrowPure (unc : Bool) (Γ : ECtx) : RawExpr → Except String RawE
   | .index e k => do
     -- a narrow mapping key: the index converts to it implicitly, so it fits
     -- (`m[300]` at `mapping(uint8 => …)` is solc's compile error)
-    if let some (key, .ref (.mapping kp _)) := statePath? C Γ e then
-      if let some n := lookupBy (key ++ "{}") C.widths then fitCheck C Γ kp n k
+    if let some (tb, key, .ref (.mapping kp _)) := widthPath? C Γ e then
+      if let some n := lookupBy (key ++ "{}") tb then fitCheck C Γ kp n k
     pure (.index (← narrowPure unc Γ e) (← narrowPure unc Γ k))
   | .ternary c a b => do pure (.ternary (← narrowPure unc Γ c) (← narrowPure unc Γ a) (← narrowPure unc Γ b))
   | .incDec op e => do pure (.incDec op (← narrowPure unc Γ e))
@@ -1976,7 +2087,8 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     for ((n, T), a) in m.params.zip m.args do
       let .prim p := T | throw s!"modifier {m.name}: the parameter {n} has a reference type"
       let y := toString (← freshCapture "se")
-      decls := decls ++ [.decl (.named (p.toStr)) y (some a)]
+      -- a narrow parameter (`uint8 n`) is a local of its type: its argument fits it
+      decls := decls ++ [.decl (.named (tyName p ((lookupBy n m.widths).getD 256))) y (some a)]
       ρ := (n, y) :: ρ
     let code ← renameStmts ρ m.body
     -- a `return` ends the modifier alone: the code after the `_;` of the
@@ -2079,8 +2191,10 @@ local; an unset one, which only a hidden binder holds (decision 17'),
 reverts there where solc reads the other branch), or, when both index, to
 a fresh default object (`Person memory mv1;`, an object nothing reaches),
 and rebound in each branch.  Under the right
-operand of `&&`/`||` or in a branch of a conditional an effect would be
-evaluated where the program does not evaluate it, so there it is an error. -/
+operand of `&&`/`||` or in a branch of a conditional, an effect, a call or a
+narrow check is captured where solc evaluates it, under a test of its own: `a
+&& b` is `bool se = a; if (se) { se = b; }`, and `c ? a : b` is
+`uint se; if (c) { se = a; } else { se = b; }`. -/
 partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
   | .field e f => do
     let (P, e) ← hoist e
@@ -2252,18 +2366,20 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
         let Q ← elabCall f args (some (x, p)) n (resNew := true)
         declare C (toString x) (.val p n)
         pure (P ++ [.of Γ (.declLocal p x none)] ++ Q, .name (toString x))
-      | some (_, .ref R) =>
+      | some (r, .ref R) =>
         if d.retStorage then
           let x ← freshCapture "sp"
           let Q ← elabStorageCall f args R fun Γ r =>
             pure (.of ((r, .alias R) :: Γ) (.declStorage R x (some (.path (.alias .here)))))
           declare C (toString x) (.alias R)
+          declareShape (toString x) (shapeUnder d.widths r)
           return (P ++ Q, .name (toString x))
         -- `Account memory mv1 = makeAccount();`
         let x ← freshCapture "mv"
         let Q ← elabMemCall f args R fun Γ r hm =>
           pure (.of ((r, .mem R) :: Γ) (.declMem R x (some (.alias (.var .here hm))) rfl hm))
         declare C (toString x) (.mem R)
+        declareShape (toString x) (shapeUnder d.widths r)
         pure (P ++ Q, .name (toString x))
       | none =>
         if d.rets.isEmpty then throw s!"{f} returns no value"
@@ -2526,17 +2642,19 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | .ref R =>
       match lookupBy n d.paramLocs with
       | some .storage =>
+        ElabM.lift (shapeCheck C Γ (shapeUnder d.widths n) a)
         let e ← ElabM.lift (checkPath C Γn (.ref R) a)
         let x ← freshCapture "sp"
         targs := ⟨_, targs.2.snocStorage R x e⟩
         ρ := (n, toString x) :: ρ
-        Γp := (toString x, .alias R) :: Γp
+        Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .alias R) :: Γp
       | some .memory =>
+        ElabM.lift (shapeCheck C Γ (shapeUnder d.widths n) a)
         let e ← ElabM.lift (checkMPath C Γn (.ref R) a)
         let x ← freshCapture "mv"
         targs := ⟨_, targs.2.snocMemory R x e⟩
         ρ := (n, toString x) :: ρ
-        Γp := (toString x, .mem R) :: Γp
+        Γp := shapeEntry (toString x) (shapeUnder d.widths n) ++ (toString x, .mem R) :: Γp
       | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
       | none => throw s!"{f}: reference parameter {n} needs a data location"
   let mut mret : Option (RefTy × Var × Bool) := none
@@ -2553,14 +2671,14 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       if d.retStorage then
         let r ← freshCapture "sp"
         ρ := (n, toString r) :: ρ
-        Γr := [(toString r, .alias R)]
+        Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ [(toString r, .alias R)]
         mret := some ⟨R, r, true⟩
         pure (RetKind.storage R r)
       else
         unless d.retMem do throw s!"{f}: its return of reference type {Ty.ref R} needs `memory` or `storage`"
         let r ← freshCapture "mv"
         ρ := (n, toString r) :: ρ
-        Γr := [(toString r, .mem R)]
+        Γr := shapeEntry (toString r) (shapeUnder d.widths n) ++ [(toString r, .mem R)]
         mret := some ⟨R, r, false⟩
         pure (RetKind.mem R r)
     | [(_, .ref R)], some (_, q) => throw s!"{f} returns a reference {Ty.ref R}, not a {q.toStr}"
@@ -2886,14 +3004,42 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   -- a loop outside a function's body, lowered here (`lowerLoops`)
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
     return ← elabStmtsP (← lowerLoops none [s])
+  -- a place with a narrow position below it is used through its indices and
+  -- members, or whole where its narrow positions are checked against the
+  -- target's (`shapeCheck`): a reference local's initializer, a reference
+  -- assignment, a push bound to an alias, an argument (`elabCallRet`)
+  let Γ ← ctx
+  let isRef (l : RawExpr) : Bool := (widthPath? C Γ l).any fun (_, _, t) => t matches .ref _
+  let whole ← match s with
+    | .declStorage T _ (some e) | .declMemory T _ (some e) => do
+      ElabM.lift (shapeCheck C Γ (← ElabM.lift (elabTyW C T)).2 e); pure true
+    | .declStoragePush T _ b => do
+      ElabM.lift (shapeCheck C Γ (← ElabM.lift (elabTyW C T)).2 (.index b (.num 0))); pure true
+    | .assignPush l b =>
+      if isRef l then do
+        ElabM.lift (shapeCheck C Γ (placeShape C Γ l) (.index b (.num 0))); pure true
+      else pure true
+    | .assign l r =>
+      if isRef l then do ElabM.lift (shapeCheck C Γ (placeShape C Γ l) r); pure true
+      else pure false
+    | .declPush .. => pure true
+    | _ => pure false
   unless s matches .delete _ do
     for e in s.exprs do
-      if let some w := narrowWholeUse? C (← ctx) e then
+      let w := if whole then narrowBase? C Γ e else narrowWholeUse? C Γ e
+      if let some w := w then
         throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \
-          `.length`, `.push`, `.pop` or `delete`, not whole"
+          `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are \
+          expected, not whole"
   let s ← ElabM.lift (s.mapExprsM (narrowPure C (← read).unchecked (← ctx)))
   let (P, s) ← hoistStmt s
-  pure (P ++ (← elabStmt1 s))
+  let P ← pure (P ++ (← elabStmt1 s))
+  -- a reference local's narrow positions (`LocalTy.shape`)
+  match s with
+  | .declStorage T x _ | .declMemory T x _ | .declStoragePush T x _ =>
+    declareShape x (← ElabM.lift (elabTyW C T)).2
+  | _ => pure ()
+  pure P
 
 /-- A statement whose expressions have no effect left. -/
 partial def elabStmt1 : RawStmt → ElabM (SProg C)
@@ -2983,19 +3129,19 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       | none => pure []
     pure (.of Γ (.declLocal p (Var.ofName x) v) :: post)
   | .declStorage T x (some (.call f args)) => do
-    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
+    let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw s!"{x}: `storage` on a value type"
     let P ← elabStorageCall f args R fun Γ r =>
       pure (.of ((r, .alias R) :: Γ) (.declStorage R (Var.ofName x) (some (.path (.alias .here)))))
     declare C x (.alias R)
     pure P
   | .declStorage T x init => do
-    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
+    let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw s!"{x}: `storage` on a value type"
     let Γ ← nctx
     let init ← ElabM.lift (init.mapM fun e => ARhs.path <$> checkPath C Γ (.ref R) e)
     declare C x (.alias R)
     pure [.of Γ (.declStorage R (Var.ofName x) init)]
   | .declStoragePush T x b => do
-    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `storage` on a value type"
+    let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw s!"{x}: `storage` on a value type"
     let Γ ← nctx
     let r ← ElabM.lift (elabPush C Γ R b)
     declare C x (.alias R)
@@ -3019,7 +3165,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       pure [.of Γ (.assignLocalPush i b)]
     | _ => throw "`= b.push()` binds a storage pointer or a value local"
   | .declMemory T x (some (.newArr T' n)) => do
-    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
+    let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw s!"{x}: `memory` on a value type"
     let ⟨R', hR⟩ ← elabNewTy C T'
     unless R' = R do throw s!"{x}: `new` of another type"
     let (P, ⟨Γ, se⟩) ← elabSize C n
@@ -3027,13 +3173,13 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     pure (P ++ [.of Γ (.declMem R' (Var.ofName x) (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)])
   | .declMemory T x (some (.call f args)) => do
-    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
+    let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw s!"{x}: `memory` on a value type"
     let P ← elabMemCall f args R fun Γ r hm =>
       pure (.of ((r, .mem R) :: Γ) (.declMem R (Var.ofName x) (some (.alias (.var .here hm))) rfl hm))
     declare C x (.mem R)
     pure P
   | .declMemory T x init => do
-    let .ref R ← ElabM.lift (elabTy C T) | throw s!"{x}: `memory` on a value type"
+    let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw s!"{x}: `memory` on a value type"
     let Γ ← nctx
     let s : Stmt C Γ.ctx (.mem R :: Γ.ctx) ← match init with
       | some e =>
