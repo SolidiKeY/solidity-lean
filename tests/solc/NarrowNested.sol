@@ -91,9 +91,9 @@ contract NarrowNested {
     }
     /// @custom:key box
     function copyPanics() public {
-        small.push(255);
         uint8[] memory m = small;
-        m[m.length - 1]++;
+        m[0] = 255;
+        m[0]++;
         assert(false);
     }
     function sum(uint8[] memory xs) internal pure returns (uint8) {
@@ -113,6 +113,7 @@ contract NarrowNested {
         unchecked { m[0] += 2; }
         assert(m[0] == 1);
     }
+    /// @custom:key box
     function modifierParam(uint8 c) public atMost(c) {
         assert(c > 1);
     }

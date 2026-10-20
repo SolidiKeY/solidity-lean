@@ -268,8 +268,7 @@ theorem memoryOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[]
   sol_symex
   sol_close
 
-theorem copyOverflows : ⊨ dl[NarrowShapes]{ [ small.push(255); uint8[] memory m = small;
-    m[m.length - 1]++; ]
+theorem copyOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = small; m[0] = 255; m[0]++; ]
     false } := by
   sol_symex
   sol_close
