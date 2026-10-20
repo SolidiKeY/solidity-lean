@@ -71,32 +71,50 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
       let C := mkConst N
       let cb ← if r.tag == .specified || !r.writingCall then pure false
         else callsBackE N (f ++ `problem)
-      -- a recursive call: `rec_auto`, the obligation as its own contract
-      -- (a specified row has no `N.f.problem`: `(← …)` in a `&&` would run first)
-      let recursive ← if r.tag == .specified || cb then pure false
-        else hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
+      -- a specification's obligation, scoped
+      let spec? ← if r.tag == .specified then do
+          let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
+          let φ ← Term.elabTerm stx none
+          Term.synthesizeSyntheticMVarsNoPostponing
+          pure (some (← instantiateMVars φ))
+        else pure none
+      -- a recursive call: `rec_auto`, each call by its callee's contract
+      -- (its `requires`/`ensures`, else `true`/`true`) proved by induction
+      -- over the frames (a specified row has no `N.f.problem`: `(← …)` in a
+      -- `&&` would run first)
+      let recursive ← match spec? with
+        | some φ => hasCallRec N φ
+        | none => hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
+      -- under the callback reading (O7) a recursive call is a point where
+      -- control may leave (`Stmt.hasTransfer`, conservative: its frames are
+      -- not unfolded), which no rule of `ProvesC` steps over, and a contract
+      -- (`FunContract`) reads the run without callbacks (`docs/kernel-port.md`,
+      -- "Recursion")
+      if recursive && cb then
+        return ("pending", "a recursive call under the callback reading (O7): no contract rule")
       if recursive then
-        let ty := mkApp2 (mkConst ``Valid) C (mkConst (f ++ `problem))
+        let (ty, goalTy) := match spec? with
+          | some φ => (mkApp2 (mkConst ``Valid) C φ, mkApp2 (mkConst ``Valid) C φ)
+          | none => (mkApp2 (mkConst ``Valid) C (mkConst (f ++ `problem)), mkConst ``True)
         -- the walk reads the formula by its value; the kernel unfolds it
-        let g ← mkFreshExprSyntheticOpaqueMVar
-          (mkApp2 (mkConst ``Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
+        let goalTy ← if spec?.isSome then pure goalTy else
+          pure (mkApp2 (mkConst ``Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
+        let g ← mkFreshExprSyntheticOpaqueMVar goalTy
         let tac ← `(tactic| rec_auto)
+        let pendingMsg := "a recursive call its callee's contract does not prove"
         let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
             fun _ => pure none
-          | return ("pending", "a recursive call the contract true does not prove")
-        unless goals.isEmpty do return ("pending", "a recursive call the contract true does not prove")
+          | return ("pending", pendingMsg)
+        unless goals.isEmpty do return ("pending", pendingMsg)
         let proof ← instantiateMVars g
         if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term")
         let name := f ++ `tested
         addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
         unless (← collectAxioms name).all (standardAxioms.contains ·) do
-          return ("pending", "a recursive call the contract true does not prove")
+          return ("pending", pendingMsg)
         return ("proved", "")
-      let (ty, goalTy) ← if r.tag == .specified then do
-          let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
-          let φ ← Term.elabTerm stx none
-          Term.synthesizeSyntheticMVarsNoPostponing
-          let ty := mkApp2 (mkConst ``Valid) C (← instantiateMVars φ)
+      let (ty, goalTy) ← if let some φ := spec? then do
+          let ty := mkApp2 (mkConst ``Valid) C φ
           pure (ty, ty)
         else if cb then do
           -- the faithful reading: the callee may change the state

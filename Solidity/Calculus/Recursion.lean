@@ -406,16 +406,6 @@ macro "rec_induct" : tactic => `(tactic| (
     simp only [Prog.within, Stmt.within, ih.2.1, Bool.and_true]
     first | rfl | decide))
 
-namespace Recursion
-
-open Lean Elab Tactic Meta
-
-def dbgLog (m : MessageData) : MetaM Unit := do
-  let t ← m.toString
-  IO.FS.withFile "/tmp/claude-1000/-home-guilherme-projects-solidity-lean/15960f8a-ae61-5058-959a-7a8e34358428/scratchpad/rec2dbg-x.log" .append fun h => h.putStrLn t
-
-end Recursion
-
 open Lean Meta in
 /-- The goals of `g` with every local of type `bool` split in its two values. -/
 partial def Recursion.boolCases (g : MVarId) (fuel : Nat := 8) : MetaM (List MVarId) :=
@@ -444,14 +434,13 @@ def tryOn (g : MVarId) (tac : TacticM Unit) : TacticM (Option (List MVarId)) := 
   let s ← saveState
   tryCatchRuntimeEx (do
       setGoals [g]
-      -- each step its own heartbeats, as a search's steps
-      withCurrHeartbeats <| Term.withoutErrToSorry <| withoutRecover tac
+      -- each step its own heartbeats, as a search's steps (`rec_auto`'s
+      -- driver is bounded by its fuel instead)
+      let max := Core.getMaxHeartbeats (← getOptions)
+      withTheReader Core.Context (fun c => { c with maxHeartbeats := max })
+        <| withCurrHeartbeats <| Term.withoutErrToSorry <| withoutRecover tac
       return some (← getUnsolvedGoals))
-    fun e => do
-      let msg ← e.toMessageData.toString
-      s.restore
-      dbgLog m!"tryOn failed: {msg.take 600}"
-      return none
+    fun _ => do s.restore; return none
 
 /-- The recursive call at the head of `χ`'s box: the callee's name and the
 statement. -/
@@ -500,10 +489,6 @@ def closeLeaf (g : MVarId) : TacticM Bool := do
       all_goals rec_bool_cases
       all_goals (first | omega | (simp_all <;> omega) | grind (gen := 3))))))
   then return true
-  let st ← saveState
-  if let some gs ← tryOn g (evalTactic (← `(tactic| sol_spec_prep))) then
-    for g' in gs do dbgLog m!"LEAF: {← ppGoal g'}"
-  st.restore
   return false
 
 /-- How an induction over the frames ended. -/
@@ -512,7 +497,6 @@ inductive Induct where
   /-- the body is not within the mutability: a more permissive one may be -/
   | notWithin
   | failed
-  deriving Repr
 
 mutual
 
@@ -532,9 +516,7 @@ partial def autoGoal (g : MVarId) (fuel : Nat) : TacticM (List MVarId) := g.with
       | some (f, s) => do pure (← autoCall g' f s fuel).isEmpty
       | none => closeLeaf g'
     -- one goal left open: the others are not tried
-    unless ok do
-      dbgLog m!"rec_auto: open {← g'.getType}"
-      return g' :: rest
+    unless ok do return g' :: rest
   return []
 
 /-- The recursive call `s` of `f` at the head of `g`'s box: by a hypothesis
@@ -544,7 +526,6 @@ over the frames (`induct`), at the first mutability its body is within. -/
 partial def autoCall (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
     TacticM (List MVarId) := g.withContext do
   if fuel == 0 then return [g]
-  dbgLog m!"autoCall {f} {fuel}"
   let some (C, H, _) ← withCurrHeartbeats <| goalParts g | return [g]
   let body := s.getArg! 9
   -- a hypothesis about the frame below
@@ -562,7 +543,6 @@ partial def autoCall (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
     st.restore
   let HS ← Term.exprToSyntax H
   let spec ← withCurrHeartbeats <| specContract? C f
-  dbgLog m!"spec {f}: {spec.isSome}"
   let cands : List (Option (Expr × Expr)) := (spec.map some).toList ++ [none]
   for c in cands do
     let (reqS, ensS) ← match c with
@@ -573,13 +553,11 @@ partial def autoCall (g : MVarId) (f : String) (s : Expr) (fuel : Nat) :
       let some gs ← tryOn g (evalTactic (← `(tactic|
           refine useRecContract (H := $HS) (μ := $μ) (req := $reqS) (ens := $ensS)
             ?_ ?_ ?_ (by rfl))))
-        | dbgLog m!"refine failed {f} {μ}"; continue
+        | continue
       let some hc := ← gs.findM? fun g' => do
           return (← instantiateMVars (← g'.getType)).isAppOf ``RecContract
         | st.restore; continue
-      let r ← induct hc (s.getArg! 8) (fuel - 1)
-      dbgLog m!"rec_auto: {f} at {μ}, spec {c.isSome}: {repr r}"
-      match r with
+      match ← induct hc (s.getArg! 8) (fuel - 1) with
       | .notWithin => st.restore; continue
       | .failed => st.restore; break
       | .proved =>
@@ -664,7 +642,10 @@ where it does not close. -/
 elab "rec_auto" : tactic => do
   let g ← getMainGoal
   let rest := (← getGoals).erase g
-  let open_ ← Recursion.autoGoal g 32
+  -- the driver is bounded by its fuel, each step by the heartbeats
+  -- (`Recursion.tryOn`)
+  let open_ ← withTheReader Core.Context ({ · with maxHeartbeats := 0 }) <|
+    Recursion.autoGoal g 32
   unless open_.isEmpty do
     throwError "rec_auto: a goal is left open{indentExpr (← open_.head!.getType)}"
   setGoals rest

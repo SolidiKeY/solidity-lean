@@ -19,7 +19,19 @@ contract Recursion {
         return n + sum(n - 1);
     }
 
+    // open: the step is nonlinear (`n + (n - 1) * n / 2`), which the closer
+    // (`omega`, `grind`) does not prove, so neither does the caller
     function sumThree() public pure { assert(sum(3) == 6); }
+
+    // a sum the closer proves: `x + n`, one at a time
+    /// @custom:key requires x <= 1000 && n <= 1000
+    /// @custom:key ensures \result == x + n
+    function sumTo(uint x, uint n) public pure returns (uint) {
+        if (n == 0) { return x; }
+        return sumTo(x, n - 1) + 1;
+    }
+
+    function sumToSix() public pure { assert(sumTo(3, 3) == 6); }
 
     /// @custom:key ensures \result == (n % 2 == 0)
     function even(uint n) public pure returns (bool) {
@@ -59,5 +71,12 @@ contract Recursion {
         assert(r < 2 && q <= 7);
     }
 
-    function falsePost() public pure { assert(sum(3) == 7); }
+    function falsePost() public pure { assert(sumTo(3, 3) == 7); }
+
+    // open: under the callback reading (O7) a recursive call is a point where
+    // control may leave, which no rule steps over (docs/kernel-port.md)
+    function callThenCount(address to) public {
+        (bool ok, ) = payable(to).call{value: 0}("");
+        countdown();
+    }
 }
