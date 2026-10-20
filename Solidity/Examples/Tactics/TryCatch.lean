@@ -17,7 +17,9 @@ reverting in the caller.  So a proof of a `try` has a goal per clause
 (`tryCallNoCallbackBox`): the success block for every value of the returned
 data, and each `catch` block from the state the call was made in.  A
 missing `Error`/`Panic` clause is the catch-all's block, and a missing
-catch-all `revert();`, as solkey's `TryStatement.of` normalises it.
+catch-all `revert();`, as solkey's `TryStatement.of` normalises it.  A callee that is a function of the contract
+itself does run when the receiver is `address(this)`
+(`Examples/Tactics/SelfCall.lean`); `Pinger` declares none.
 
 With callbacks (`tryCallWithCallbackBox`, `ProvesC.tryCall`) the contract
 also owes its invariant where control leaves, and its success block runs
