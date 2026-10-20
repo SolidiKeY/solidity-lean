@@ -560,7 +560,7 @@ def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
 
 theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 60 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 17 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 18 := by decide +kernel
 
 end PrintedRules
 end Solidity

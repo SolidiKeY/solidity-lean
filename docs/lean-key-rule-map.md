@@ -15,13 +15,13 @@ gap, in exactly one category (`claimedTaclets_count = 342`,
 `unclaimedTaclets_count = 35`, 0 pending). The pending-name list is empty;
 semantic and source-support gaps, including effectful call-receiver operands,
 remain tracked in `docs/solkey-migration.md`.
-The existing `LeanTaclet` layer (`leanTaclets`) has seventeen rules,
+The existing `LeanTaclet` layer (`leanTaclets`) has eighteen rules,
 `addmodAssignment`, `mulmodAssignment`, `functionCallArgCapture`,
 `tryCallDiamond`, `transferDiamond`, `assumeFalse`, `loopExit`,
 `whileClose`, `whileNoVariantDiamond`, `pushCompoundUnfoldReceiver`,
 `pushIncrementUnfoldReceiver`, `storageMemorySourceSave`,
 `pushMemorySourceCapture`, `storageFixedCopySave`, `pushFixedCopySave`,
-`tryCallSelfBox` and `tryCallSelfDiamond`.
+`tryCallSelfBox`, `tryCallSelfDiamond` and `recursiveCallUnfold`.
 The two push-suffix rules capture a complex receiver; upstream's bare
 push receiver capture does not match that arithmetic target.
 The memory-source rules preserve internal snapshot assignments and capture
@@ -365,6 +365,7 @@ receiver kind, Lean does not.
 | — | `LeanTaclet.tryCallSelfBox` | Lean only | a `try` whose callee is a function of the contract declared before the caller (`Stmt.tryCall`'s `self`, `docs/options.md` O8): solkey's `try` never runs a callee. Five goals: the receiver the contract (`require(a != 0); require(a == address(this));`), the callee inlined with the returned values as targets (`.call … (.rets rets)`, `functionBodyExpand`) and then the success block; the receiver another (`require(a != 0); require(a != address(this));`), the success block for every value of the returned data; each `catch` block from the caller's state, which a failed self-call goes to, behind `fails(call)`: `¬⟨ require(a == address(this)); f(args) → rets; ⟩ true` (`ExtCall.selfFails`, `Branch.hyp`), the call not ending normally as a self-call. `tryCallNoCallbackBox` takes only a `try` with no such callee (`self = false`) |
 | — | `ProvesC.trySelf` (with `LeanTaclet.tryCallSelfBox`) | Lean only | `tryCallSelfBox` read with callbacks (`holdsC_trySelfCb`, `docs/options.md` O8), as `ProvesC.tryCall` reads `tryCallNoCallbackBox`'s goals: `I` where control leaves; the self goal as `tryCallSelfBox`'s, the callee inlined and run with callbacks; the other receiver's goal after `{havoc}` and `I`; each `catch` block from where the call was made, behind `fails(call)` |
 | — | `LeanTaclet.tryCallSelfDiamond` | Lean only | a self-call `try` under the diamond closes to `false`, as `tryCallDiamond` |
+| — | `LeanTaclet.recursiveCallUnfold` | Lean only | `⟨[ f(args); ]⟩ ⇝ ⟨[ f(args); ]⟩`, a recursive call (`Stmt.callRec`) read as the ordinary call (`Stmt.call`) of its body, the next frame of its unrolling (`recUnroll`, `docs/kernel-port.md`, "Recursion"); the next step is `internalCallExpand` or `functionBodyExpand`. solkey inlines a recursive callee as any other, without end |
 | — | `LeanTaclet.tryCallDiamond` | Lean only | a diamond `try` closes to `false`; solkey has no rule. The call may revert in the caller (no code at the address, data that does not decode), which no clause catches and no formula rules out |
 | — | `LeanTaclet.transferDiamond` | Lean only | a diamond payment closes to `false`; solkey's diamond rules are not ported. Whether the world pays is the compiler theorem's, not the calculus's |
 
