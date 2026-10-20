@@ -213,4 +213,4 @@ they do, so the proof needs no argument about it.
 `lake build Solidity.Evm.Interpreter` builds the modules. `Evm/Examples.lean`
 is the slowest (the `decide +kernel` runs, the unrolled `**` code under a
 raised `maxRecDepth`); `Evm/Correct.lean`'s `stmt_sim` dispatches one lemma
-per family, held to `maxHeartbeats 11000` (10000 until O7).
+per family, held to `maxHeartbeats 11000` (10000 until O8).

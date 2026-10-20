@@ -622,15 +622,13 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // a value call to the contract itself does not run `receive`
     callRunsReceive: "pending",
     // false on the EVM: at the harness address the callee writes `ix = 42`,
-    // which the run now executes (`docs/options.md`, O7)
-    trySuccessKeepsStorageUnsound: "pending",
+    // which the run executes (`docs/options.md`, O8); the value call's
+    // callee may write the state under the callback reading (O7)
+    trySuccessKeepsStorageUnsound: "pending", callKeepsStorageUnsound: "pending",
     // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
     ternaryLiteralOverflow: "pending",
   };
-  // `callKeepsStorageUnsound` is proved: `⊢` is sound for `Valid`, where a
-  // value call's callee keeps the caller's state (solkey's `noCallback`); on
-  // the EVM it fails, the callee being the contract itself (`docs/options.md`,
-  // O1). `callWithoutCodeReverts` proves: address 0 has no code (O7).
+  // `callWithoutCodeReverts` proves: address 0 has no code (O8).
   const files = ["SolcArithmeticOpen", "SolcConstructorsOpen", "SolcFunctionCallsOpen",
     "SolcHigherLevelOpen", "SolcPaymentsOpen", "SolcSmtControlFlowOpen", "SolcTypesOpen"]
     .map(f => `tests/solc/open/${f}.sol`);
@@ -670,4 +668,16 @@ test("self-calls of the contract run their callee (tests/solc/SelfCalls.sol)", (
     assert.equal(rows[fn], "proved", fn);
   }
   assert.equal(rows.tryCatchExactReturn, "pending");
+});
+
+test("an obligation whose callee may write the state is read with callbacks", () => {
+  // docs/options.md O7: `ValidT .noCallback` where a `try` of a callee not
+  // declared view/pure or a low-level call is reached, `⊢` elsewhere
+  const report = runSolidityTests(["tests/solc/CallbackReading.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.localKept, "proved");
+  assert.equal(status.staticKept, "proved");
+  assert.equal(status.storageLost, "pending");
+  assert.equal(status.valueCallLost, "pending");
 });

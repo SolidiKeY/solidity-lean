@@ -20,7 +20,7 @@ back weakened along it (`TEnv.wk`), which `Look.ofTEnv` does not see.
 There is no `not_stuck` here: the typed run has no `stuck`, and from a state
 some machine represents (`Sim`) the fragment never diverges either, which
 `compile_correct` says by listing every outcome without it.  `stmt_sim`
-checks within `maxHeartbeats 11000` (the W1 gate, pinned below; 10000 before the `try` carried a self-call body, `docs/options.md` O7).
+checks within `maxHeartbeats 11000` (the W1 gate, pinned below; 10000 before the `try` carried a self-call body, `docs/options.md` O8).
 -/
 
 namespace Solidity.Evm

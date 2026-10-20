@@ -930,7 +930,7 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
           catch Panic (code) panicBody catch otherBody; ⟩ ⇝ false }
 
   /-- A `try` whose callee is the contract's own function (`Stmt.tryCall`'s
-  `self`, `docs/options.md` O7; solkey has none: its `try` never runs a
+  `self`, `docs/options.md` O8; solkey has none: its `try` never runs a
   callee).  The receiver the contract itself, the callee's body inlined with
   the returned values as its targets, then the success block; the receiver
   another, the success block for every value of the returned data; each

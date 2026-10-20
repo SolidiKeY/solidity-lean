@@ -15,7 +15,7 @@ top level), the elaborator carries its body in the `try` (`Stmt.tryCall`'s
 `self`), `msg.sender` read as `address(this)` and `msg.value` as `0`; the run
 executes it when the receiver is the contract's own address, reverts at
 address `0` (no code there), and reads any other receiver as the
-transaction's oracle (`TRun.tryCall`, `docs/options.md` O7).
+transaction's oracle (`TRun.tryCall`, `docs/options.md` O8).
 
 The rule is Lean's (`tryCallSelfBox`; solkey's `try` never runs its callee):
 the self-call's goal is the callee inlined and the success block after it,
@@ -72,7 +72,7 @@ theorem setIxSeen : ⊨ dl!{ [ ix = 0;
 `gOne(true)` returns `13` to the success block.  Each `catch` block is a goal
 from the caller's state, the callee not known to end normally: so the
 success block states what the return is, not the code after the `try`
-(`docs/options.md` O7). -/
+(`docs/options.md` O8). -/
 theorem gOneReturns : ⊨ dl!{ [
     try this.gOne(true) returns (uint a) { assert(a == 13); } catch { }; ] true } := by
   sol_symex

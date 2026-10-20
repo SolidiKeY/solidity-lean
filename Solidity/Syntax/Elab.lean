@@ -2525,7 +2525,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
 
 /-- **The body a `try` runs when its receiver is the contract itself**
-(`Stmt.tryCall`'s `self`, `docs/options.md` O7): the callee `g` inlined as a
+(`Stmt.tryCall`'s `self`, `docs/options.md` O8): the callee `g` inlined as a
 call with targets (`elabCallRet`), its environment the frame's
 (`RawStmt.selfFrame`), when `g` is a function declared before this one whose
 parameters take the arguments' types and whose return variables are the

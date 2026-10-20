@@ -602,7 +602,7 @@ push statement). `pushMemorySourceCapture` handles a complex memory push
 source; `storageMemorySourceSave` handles an embedded memory snapshot source
 of an internal storage assignment. `tryCallSelfBox` and `tryCallSelfDiamond`
 are a `try` whose callee is the contract's own function, run in its frame
-(`docs/options.md` O7): solkey's `try` never runs a callee. The list is checked against the
+(`docs/options.md` O8): solkey's `try` never runs a callee. The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/

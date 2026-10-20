@@ -92,6 +92,8 @@ structure ImportRow where
   reason : String
   /-- Declared `payable`. -/
   payable : Bool := false
+  /-- It may call a callee that writes the state (`SolcFun.writingCall`). -/
+  writingCall : Bool := true
   /-- The parameters the ABI decoder bounds (`SolcFun.paramRanges`). -/
   paramRanges : List (String × Int × Int) := []
   deriving Repr, Inhabited
@@ -104,7 +106,7 @@ deriving instance ToExpr for ImportRow
 def ImportRow.ofFun (f : SolcFun) (status : ImportStatus) (reason : String) : ImportRow :=
   { name := f.name, sourceName := f.sourceName, sourceSignature := f.sourceSignature,
     tag := f.tag, params := f.params, status, reason, payable := f.payable,
-    paramRanges := f.paramRanges }
+    writingCall := f.writingCall, paramRanges := f.paramRanges }
 
 /-- The declaration `N.f` of the row `f` of `N`'s import. -/
 def ImportRow.declName (N : Lean.Name) (r : ImportRow) : Lean.Name := N ++ Lean.Name.mkSimple r.name

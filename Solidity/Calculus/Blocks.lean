@@ -227,7 +227,7 @@ def ExtCall.notSelf {Γ : Ctx} (c : ExtCall C Γ) : Val C Γ .bool :=
   .binop .neB rfl rfl (.simple c.addr) (.simple (.env .selfAddress rfl))
 
 /-- `try …` whose callee is the contract's own (`self`, `docs/options.md`
-O7) under the box (`tryCallSelfBox`, Lean): the receiver being the contract,
+O8) under the box (`tryCallSelfBox`, Lean): the receiver being the contract,
 the callee's body inlined with the returned values as its targets and the
 success block after it; the receiver another, the success block for every
 value of the returned data; and each `catch` block from the state the call

@@ -831,7 +831,7 @@ def selfPanicCode (call : ExtCall C Γ) (σ : State C Γ) : Semantics.Word :=
 
 /-- `try`: no code at address `0`, where the caller reverts; the contract's
 own function run in a frame of its own when the receiver is the contract
-itself and the elaborator found the callee (`self`, `docs/options.md` O7);
+itself and the elaborator found the callee (`self`, `docs/options.md` O8);
 otherwise the clause the transaction's outcome picks.  Either way the
 clause's locals are popped.  A self-call that reverts goes to the `Error`
 clause when the transaction's entry says the call ends in `Error`, to the

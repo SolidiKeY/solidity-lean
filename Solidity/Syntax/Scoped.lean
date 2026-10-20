@@ -334,7 +334,7 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
   frame of its own (the parameters bound to `sargs`, the return variables
   `ρ`), `msg.sender` read as `address(this)` and `msg.value` as `0`, which
   runs when the receiver is the contract itself (`TRun.tryCall`,
-  `docs/options.md` O7). -/
+  `docs/options.md` O8). -/
   | tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
       (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
       (panic : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)

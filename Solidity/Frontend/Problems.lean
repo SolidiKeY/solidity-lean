@@ -86,7 +86,7 @@ def Problem.callPre (C : Contract) (Γ : NCtx) (noValue : Bool)
 /-- **Where the contract is deployed**, an opt-in premise
 (`solc_scoped_problems N self A`, `scripts/test-solidity.mjs --self-address`):
 `address(this) == A`, so that a call to a parameter pinned to the harness's
-address `A` is a call to the contract itself (`docs/options.md` O7). -/
+address `A` is a call to the contract itself (`docs/options.md` O8). -/
 def Problem.selfPre (C : Contract) (Γ : NCtx) (A : Nat) : Fml C Γ.ctx :=
   match NRead.conj [NRead.eq (.env .selfAddress) (.num A)] Γ with
   | .ok φ => φ

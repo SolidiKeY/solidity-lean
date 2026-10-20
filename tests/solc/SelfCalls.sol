@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 // The `this`-based twins of tests/solc/open/SolcPaymentsOpen.sol's self-calls:
 // a `try this.f()` runs `f`'s body in a frame of its own (`docs/options.md`
-// O7), so these hold wherever the contract is deployed, with no premise on
+// O8), so these hold wherever the contract is deployed, with no premise on
 // its address.  A callee is run only if it is declared before its caller.
 contract SelfCalls {
     int ix;
@@ -29,7 +29,7 @@ contract SelfCalls {
     }
 
     // pending: each `catch` block is a goal from the caller's state, the
-    // callee not known to end normally (`docs/options.md` O7)
+    // callee not known to end normally (`docs/options.md` O8)
     /// solc: semanticTests/tryCatch/simple_notuple.sol
     /// @custom:key box
     function tryCatchExactReturn(uint q) public view {
