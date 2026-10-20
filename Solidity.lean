@@ -108,6 +108,7 @@ import Solidity.Calculus.Notation
 import Solidity.Calculus.Spec
 import Solidity.Calculus.Deploy
 import Solidity.Calculus.FunContract
+import Solidity.Calculus.Recursion
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Derive
 import Solidity.Calculus.LeafDerive
@@ -203,6 +204,7 @@ import Solidity.Examples.Tactics.CallOperands
 import Solidity.Examples.Tactics.Callback
 import Solidity.Examples.Tactics.CallbackStrategy
 import Solidity.Examples.Tactics.Contracts
+import Solidity.Examples.Tactics.Recursion
 import Solidity.Examples.Tactics.TryCatch
 import Solidity.Examples.Tactics.SelfCall
 import Solidity.Examples.Notation
