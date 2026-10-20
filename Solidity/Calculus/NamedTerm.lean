@@ -519,7 +519,7 @@ def NTerm.binop (op : BinOp) (a b : NTerm C) : NTerm C :=
 
 /-- `⊖ a`, at the operand's type. -/
 def NTerm.unop (op : UnOp) (a : NTerm C) : NTerm C :=
-  syn s!"unop {op.sym}({a.key})" s!"{op.sym}{a.text}" fun Γ => do
+  syn s!"unop {op.sym}({a.key})" (op.show a.text) fun Γ => do
     let ⟨p, a'⟩ ← a.resolveVal Γ
     if h : op.accepts p = true then pure ⟨_, .app1 (.unop op h) a'⟩
     else .error s!"`{op.sym}` does not apply to a `{p.toStr}` (`{a.text}`)"

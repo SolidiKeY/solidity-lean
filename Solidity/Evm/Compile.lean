@@ -305,6 +305,8 @@ def compileVal (b : Nat) {Γ : Ctx} : {p : PrimTy} → Solidity.Val C Γ p → L
       | .not => [.iszero]
       | .neg => negCode
       | .bnot => [.not]
+      -- the same word, read signed or unsigned
+      | .toInt | .toUint => []
   | _, .ternary c x y =>
     compileVal b c ++ [.iszero, .jumpi ((compileVal b x).length + 1)] ++ compileVal b x ++
       [.jump (compileVal b y).length] ++ compileVal b y

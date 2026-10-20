@@ -449,7 +449,7 @@ partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
     | .member _ f _ => f
     | .zlit n => toString n
   | .app1 o x => match o with
-    | .unop op _ => s!"{op.sym}{x.ppArg nm}"
+    | .unop op _ => op.show (x.ppArg nm)
     | @Op1.field _ _ f _ _ => s!"{x.ppWith nm}.{f}"
     | @Op1.mfield _ _ f _ _ => s!"{x.ppWith nm}.{f}"
     | @Op1.fieldIn _ _ _ f _ _ => s!"{x.ppWith nm}.{f}"

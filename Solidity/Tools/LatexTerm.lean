@@ -550,6 +550,8 @@ partial def symDoc (ns : List Expr) (e : Expr) (k : Lean.Name) (oargs xs : Array
     | some ``UnOp.not => return (.cat #[.tx "\\lnot " 1, a], 12)
     | some ``UnOp.neg => return (.cat #[.tx "-" 1, a], 12)
     | some ``UnOp.bnot => return (.cat #[.tx "\\mathord{\\sim}" 1, a], 12)
+    | some ``UnOp.toInt => atom (.cat #[.tx "\\mathit{int}(" 4, .whole (← x 0), .tx ")" 1])
+    | some ``UnOp.toUint => atom (.cat #[.tx "\\mathit{uint}(" 5, .whole (← x 0), .tx ")" 1])
     | _ => atom (← unknownTm e)
   | ``Op1.net =>
     if mac then return ← atom (.cat #[.tx "\\netSelect{" 10, .whole (← x 0), .tx "}" 1])

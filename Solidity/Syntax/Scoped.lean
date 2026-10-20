@@ -403,7 +403,7 @@ def Val.toStr {Γ : Ctx} {p : PrimTy} (ns : List Var) : Val C Γ p → (top : Bo
   | .binop op _ _ a b, top =>
     let s := s!"{a.toStr ns} {BinOp.sym op} {b.toStr ns}"
     if top then s else s!"({s})"
-  | .unop op _ _ a, _ => s!"{UnOp.sym op}{a.toStr ns}"
+  | .unop op _ _ a, _ => op.show (a.toStr ns (op matches .toInt | .toUint))
   | .ternary c a b, top =>
     let s := s!"{c.toStr ns} ? {a.toStr ns} : {b.toStr ns}"
     if top then s else s!"({s})"
