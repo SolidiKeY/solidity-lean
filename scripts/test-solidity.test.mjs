@@ -377,7 +377,9 @@ test("free and library calls resolve by declaration with attached receivers", ()
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
-  assert.equal(status.recursionGap, 'unsupported');
+  // a recursive call is imported (`Stmt.callRec`); its result is read past
+  // it, which the contract `true`/`true` that `rec_auto` tries does not give
+  assert.equal(status.recursionGap, 'pending');
 });
 
 test("root primitive push bindings and empty user calls parse unambiguously", () => {
