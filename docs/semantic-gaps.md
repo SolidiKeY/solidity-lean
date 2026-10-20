@@ -58,10 +58,10 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | open |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); open: `mapping(string => …)`/`mapping(bytes => …)` keys, a byte type as a struct member, `bytes.concat`/`string.concat`, `calldata` |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode` | semantics: builtins | open |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | open |
-| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: needs `string`/`bytes` | open (the branch is chosen, the data dropped) |
+| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: a halt carries no data | open (the branch is chosen, the data dropped): `string` now exists, but a revert is `THalt.revert` and an external call's `ExtResult.error` carries no reason, so binding `r` needs data in both and every proof over a halt ("Bytes and strings" below) |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | open (`docs/kernel-port.md`, "Recursion") |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | open: an option the runner does not offer |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`), quantifier instances at non-literal indices | closer limits, not semantic gaps | open |
@@ -278,4 +278,11 @@ theorems are unchanged.
 - Slice 3, the solc import: string and hex literals printed (`"…"` quoted,
   else `hex"…"` from `hexValue`), the elementary types accepted, a `bytesN`
   parameter's ABI range and a `bytes` parameter's elements' ranges
-  (`paramRanges`, `elemRanges`); `tests/solc/Bytes.sol`.
+  (`paramRanges`, `elemRanges`), a value parameter's marker
+  (`Frontend/Import.lean`, `paramCtx`); `scripts/solc-ast.mjs` keeps a hex
+  literal's `hexValue` (a number's stays noise, so no fixture changes);
+  `tests/solc/Bytes.sol`, its 12 functions proved.
+- A closer limit met on the way, not a byte one: a storage array copied to a
+  memory local (`string memory c = name;`) and the copy's length read is not
+  closed by `sol_close`/`sol_decide`.
+- The examples on memory close with `sol_decide`, not `sol_close`.
