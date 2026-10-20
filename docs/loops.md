@@ -240,7 +240,12 @@ must be between 1 and 20,000. It bounds both path depth and total walk nodes,
 independently of the scoped closer's limits.
 
 Use `sol_prove` for automatic unwinding: it refutes impossible branches while
-walking. `sol_symex` expands both branches before closing leaves, so automatic
+walking (`Seq.refuteS`, `Calculus/LeafDerive.lean`). Once the context stacks
+more than `sliceDepth` storage updates, a guard over locals is refuted on the
+premises it reaches alone (`LFml.slice`): the storage writes of earlier
+iterations, and their guards, would otherwise grow the closer's work with
+each iteration and soon pass its bounds, so the loop would unwind until the
+budget ran out. `sol_symex` expands both branches before closing leaves, so automatic
 loops can exhaust its budget even when their guard is initially false. Give
 that workflow an explicit unwind bound or invariant.
 
