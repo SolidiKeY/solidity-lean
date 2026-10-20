@@ -286,3 +286,12 @@ theorems are unchanged.
   memory local (`string memory c = name;`) and the copy's length read is not
   closed by `sol_close`/`sol_decide`.
 - The examples on memory close with `sol_decide`, not `sol_close`.
+- Checked (2026-10-20): `lean_build` of the default targets; the solc suite
+  (`node --test scripts/test-solidity.test.mjs`) fails 6 tests that fail
+  alike on `c23bb098`, before this lane (`PushReceiver`, `PushSources`,
+  `MemoryPush`, `StorageReturns`, `PushBindings`, the TestSuite's row count
+  617 against the pinned 551); `OmittedTypes.readsString` moved from
+  `unsupported` to `pending` (the copy above).
+- Not done: a `bytesN` local of a tuple declaration (`(bytes4 a, uint b) =
+  f();`) carries no marker, so solc's byte operations on it are refused or
+  read as a `uint32`'s.
