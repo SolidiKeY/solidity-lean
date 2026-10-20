@@ -123,7 +123,7 @@ partial def SpecExpr.fmt : SpecExpr → String
   | .net e => s!"net({SpecExpr.fmt e})"
   | .field e f => s!"{SpecExpr.fmt.at 100 e}.{f}"
   | .index e k => s!"{SpecExpr.fmt.at 100 e}[{SpecExpr.fmt k}]"
-  | .unop op e => s!"{UnOp.sym op}{SpecExpr.fmt.at 75 e}"
+  | .unop op e => op.show (SpecExpr.fmt.at 75 e)
   | e@(.binop op a b) =>
     let p := SpecExpr.prec e
     s!"{SpecExpr.fmt.at p a} {BinOp.sym op} {SpecExpr.fmt.at (p + 1) b}"

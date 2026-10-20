@@ -385,6 +385,20 @@ theorem val_sim : ∀ {p : PrimTy} (e : Solidity.Val C Γ p) {m : Machine},
       · rw [run_append_ok hruna, key hva]
         exact bnot_simT hra m
       · exact .inr ⟨err hva, run_append_revert hruna⟩
+    | toInt =>
+      obtain rfl : p = .uint := by simpa only [unInFrag, beq_iff_eq] using hop
+      simp only [compileVal]
+      rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
+      · rw [run_append_ok hruna, key hva]
+        exact toInt_simT hra m
+      · exact .inr ⟨err hva, run_append_revert hruna⟩
+    | toUint =>
+      obtain rfl : p = .int := by simpa only [unInFrag, beq_iff_eq] using hop
+      simp only [compileVal]
+      rcases iha hm hwa with ⟨va, wa, hva, hra, hruna⟩ | ⟨hva, hruna⟩
+      · rw [run_append_ok hruna, key hva]
+        exact toUint_simT hra m
+      · exact .inr ⟨err hva, run_append_revert hruna⟩
   | p, .ternary c x y, m, hm, hw => by
     have ihc : ∀ {m : Machine}, Sim C L b F σ m → valIn F c = true →
         ValOutT .bool (c.evalT σ) (run (compileVal b c) m) m := fun hm hw => val_sim c hm hw

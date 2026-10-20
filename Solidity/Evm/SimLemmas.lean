@@ -466,6 +466,37 @@ theorem bnot_simT {a : PrimTy.uint.Denote} {wa : Word} (ha : ReprV .uint a wa) (
     omega
   · simp only [run, Machine.push, exec_cons_zero, Instr.step, Machine.next, exec_nil]; rfl
 
+/-- `int(u)`: no code, the word read signed (`2^256 - 1` is `-1`). -/
+theorem toInt_simT {a : PrimTy.uint.Denote} {wa : Word} (ha : ReprV .uint a wa) (m : Machine) :
+    ValOutT .int (TRes.ofOpt (UnOp.toInt.evalT rfl a)) (run [] (m.push wa)) m := by
+  obtain ⟨x, hx, hxa, rfl⟩ := ha.uint_inv
+  have e1 : Semantics.intBound = (H : Int) := rfl
+  have e2 : Semantics.uintBound = (W : Int) := rfl
+  have hs : (if a.1 < Semantics.intBound then a.1 else a.1 - Semantics.uintBound) = sgn x := by
+    rw [hxa, e1, e2]; unfold sgn
+    by_cases h : x < H
+    · rw [if_pos h, if_pos (by omega)]
+    · rw [if_neg h, if_neg (by omega)]
+  show ValOutT .int (TRes.ofOpt (PrimTy.int.ofInt?
+    (if a.1 < Semantics.intBound then a.1 else a.1 - Semantics.uintBound))) _ m
+  rw [hs, ofInt_int (sgn_range hx)]
+  exact .inl ⟨_, _, rfl, ⟨⟨x, hx⟩, rfl, rfl⟩, by simp only [run, exec_nil]⟩
+
+/-- `uint(i)`: no code, the two's complement word read unsigned (`-1` is
+`2^256 - 1`). -/
+theorem toUint_simT {a : PrimTy.int.Denote} {wa : Word} (ha : ReprV .int a wa) (m : Machine) :
+    ValOutT .uint (TRes.ofOpt (UnOp.toUint.evalT rfl a)) (run [] (m.push wa)) m := by
+  obtain ⟨⟨x, hx⟩, rfl, hxa⟩ := ha
+  show ValOutT .uint (TRes.ofOpt (PrimTy.uint.ofInt? (a.1 % Semantics.uintBound))) _ m
+  have hW := W_eq
+  have e2 : Semantics.uintBound = (W : Int) := rfl
+  have hx' : a.1 % Semantics.uintBound = (x : Int) := by
+    rw [hxa, e2]; unfold sgn
+    by_cases h : x < H
+    · rw [if_pos h]; exact Int.emod_eq_of_lt (by omega) (by omega)
+    · rw [if_neg h, Int.sub_emod_right]; exact Int.emod_eq_of_lt (by omega) (by omega)
+  exact out_uint_ok hx' hx (by simp only [run, exec_nil])
+
 /-- The operators with an `op=` form are compiled with their checks, at `uint`
 and at `int`. -/
 theorem compound_frag {op : BinOp} {p : PrimTy} (h : op.hasCompoundAssign = true)

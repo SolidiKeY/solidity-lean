@@ -230,6 +230,8 @@ partial def ppExprS (ns : List Expr) (e : Expr) : MetaM (TSyntax `sol_expr) := d
     | UnOp.neg => `(sol_expr| -$(← ppExprS ns a))
     | UnOp.not => `(sol_expr| !$(← ppExprS ns a))
     | UnOp.bnot => `(sol_expr| ~$(← ppExprS ns a))
+    | UnOp.toInt => `(sol_expr| $(mkIdent `int):ident($(← ppExprS ns a)))
+    | UnOp.toUint => `(sol_expr| $(mkIdent `uint):ident($(← ppExprS ns a)))
     | _ => escape
   | Val.ternary _ _ _ c a b =>
     `(sol_expr| $(← ppExprS ns c) ? $(← ppExprS ns a) : $(← ppExprS ns b))

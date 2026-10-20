@@ -601,14 +601,26 @@ def ofSym? (s : String) : Option BinOp :=
 end BinOp
 
 /-- Unary operators: `unaryMinus*` and `logicalNot*` taclets; `~`, the
-bitwise complement at `uint`, has none. -/
+bitwise complement at `uint`, has none.  `int(u)` and `uint(i)` are solc's
+conversions between `uint256` and `int256`, the same 256-bit word read in
+two's complement (`2^256 - 1` is `-1`): what a cast between the signed and
+unsigned types, a narrowing `int` cast and signed `unchecked` arithmetic
+elaborate through (`castCapture`); no solkey taclet. -/
 inductive UnOp where
   | neg | not
   | bnot
+  | toInt | toUint
   deriving DecidableEq, Repr
 
 def UnOp.sym : UnOp → String
-  | .neg => "-" | .not => "!" | .bnot => "~"
+  | .neg => "-" | .not => "!" | .bnot => "~" | .toInt => "int" | .toUint => "uint"
+
+/-- `op` applied to the operand written `a`: `-a`, `!a`, `~a`; the
+conversions are written as the casts they come from, `int(a)`, `uint(a)`. -/
+def UnOp.show (op : UnOp) (a : String) : String :=
+  match op with
+  | .toInt | .toUint => s!"{op.sym}({a})"
+  | _ => op.sym ++ a
 
 /-- Prefix/postfix increment and decrement (`storageRootPreincrement`,
 `localAssignPostdecrement`, ... taclet families). -/
@@ -740,12 +752,17 @@ def UnOp.accepts : UnOp → PrimTy → Bool
   | .neg, p => p == .int
   | .not, p => p == .bool
   | .bnot, p => p == .uint
+  | .toInt, p => p == .uint
+  | .toUint, p => p == .int
 
-/-- `-x` and `~x` keep their type, `!b` is a `bool`. -/
+/-- `-x` and `~x` keep their type, `!b` is a `bool`, `int(u)` an `int` and
+`uint(i)` a `uint`. -/
 def UnOp.ret : UnOp → PrimTy → PrimTy
   | .neg, p => p
   | .not, _ => .bool
   | .bnot, p => p
+  | .toInt, _ => .int
+  | .toUint, _ => .uint
 
 /-! ## Local variables
 

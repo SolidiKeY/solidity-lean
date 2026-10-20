@@ -140,8 +140,14 @@ def evalT : (op : UnOp) → {p : PrimTy} → op.accepts p = true → p.Denote �
   | .neg, .int, _, a => PrimTy.int.ofInt? (-a.1)
   | .not, .bool, _, a => some (!a)
   | .bnot, .uint, _, a => PrimTy.uint.ofInt? (Semantics.uintBound - 1 - a.1)
+  -- the word read in two's complement: `2^256 - 1` is `-1`
+  | .toInt, .uint, _, a =>
+    PrimTy.int.ofInt? (if a.1 < Semantics.intBound then a.1 else a.1 - Semantics.uintBound)
+  -- the two's complement word: `-1` is `2^256 - 1`
+  | .toUint, .int, _, a => PrimTy.uint.ofInt? (a.1 % Semantics.uintBound)
   | .neg, .uint, h, _ | .neg, .bool, h, _ | .not, .uint, h, _ | .not, .int, h, _
-  | .bnot, .bool, h, _ | .bnot, .int, h, _ => absurd h (by decide)
+  | .bnot, .bool, h, _ | .bnot, .int, h, _ | .toInt, .bool, h, _ | .toInt, .int, h, _
+  | .toUint, .bool, h, _ | .toUint, .uint, h, _ => absurd h (by decide)
 
 end UnOp
 

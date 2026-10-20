@@ -151,8 +151,9 @@ theorem signedRemainder :
 /-- error: Solidity elaboration failed: operator << does not take int -/
 #guard_msgs in #check sol[TestSuite]{ int x = 1; x = x << 1; }
 
-/-- error: Solidity elaboration failed: operator +% does not take int -/
-#guard_msgs in #check sol[TestSuite]{ int x = 1; unchecked { x = x + x; }; }
+-- Signed `unchecked`: the sum of the words, read signed (`Examples/Tactics/SignedCasts.lean`).
+/-- info: "int x = 1; uint se1 = uint(x); uint se2 = uint(x); int se3 = int(se2 +% se1); x = se3;" -/
+#guard_msgs in #eval Prog.toStr [] (sol[TestSuite]{ int x = 1; unchecked { x = x + x; }; })
 
 /-- error: Solidity elaboration failed: `++` or `−−` inside an expression in `unchecked` -/
 #guard_msgs in #check sol{ uint i = 0; unchecked { values[i++] = 1; }; }

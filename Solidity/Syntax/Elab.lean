@@ -203,7 +203,7 @@ partial def RawExpr.toStr (e : RawExpr) (top : Bool := true) : String :=
   | .field e f => s!"{e.toStr false}.{f}"
   | .index e k => s!"{e.toStr false}[{k.toStr}]"
   | .binop op a b => paren s!"{a.toStr false} {op.sym} {b.toStr false}"
-  | .unop op a => s!"{op.sym}{a.toStr false}"
+  | .unop op a => op.show (a.toStr (op matches .toInt | .toUint))
   | .ternary c a b => paren s!"{c.toStr false} ? {a.toStr false} : {b.toStr false}"
   | .incDec op e => IncDec.show op (e.toStr false)
   | .newArr T n => s!"new {T.toStr}({n.toStr})"
@@ -1204,6 +1204,8 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
       | some (.prim p) => some (p, (lookupBy x C.widths).getD 256)
       | _ => some (.uint, 256)
   | .unop .not _ => some (.bool, 256)
+  | .unop .toInt _ => some (.int, 256)
+  | .unop .toUint _ => some (.uint, 256)
   | .unop _ a => intTyOf Γ a
   | .binop op a b =>
     if !op.isArith then some (.bool, 256)
@@ -1254,6 +1256,23 @@ them to the type), `~a` is `(2^N - 1) -% a`; and a literal operand must fit the
 type. -/
 def narrowWrapNode (Γ : ECtx) (e : RawExpr) : Except String RawExpr := do
   let some (p, n) := intTyOf C Γ e | return e
+  -- signed: the operation on the operands' words, the result read back at
+  -- `intN` (`int8(uint(x) +% 1)`, `castCapture`), as solc wraps it
+  if let .binop op a b := e then
+    if p == .int && (op matches .addW | .subW | .mulW) then
+      for l in [a, b] do
+        if let some v := l.litVal? then
+          let (lo, hi) := intRange p n
+          unless lo ≤ v && v ≤ hi do throw s!"{v} does not fit {tyName p n}"
+      let word (l : RawExpr) : RawExpr := match l.litVal? with
+        | some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat
+        | none => .call "uint" [l]
+      -- a negative literal added is subtracted: `x + -1` is `uint(x) -% 1`
+      let w := match op, b.litVal? with
+        | .addW, some v => if v < 0 then .binop .subW (word a) (.num v.natAbs) else .binop op (word a) (word b)
+        | .subW, some v => if v < 0 then .binop .addW (word a) (.num v.natAbs) else .binop op (word a) (word b)
+        | _, _ => .binop op (word a) (word b)
+      return .call (tyName .int n) [w]
   if 256 ≤ n then return e
   match e with
   | .binop op a b =>
@@ -1319,22 +1338,38 @@ def narrowCapture (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let e' : RawExpr := .name (toString x)
   pure (.of Γ (.declLocal p x (some v)) :: (← narrowCheck C p n e'), e')
 
+/-- The low `n` bits of the word `w`: `w % 2^n`, as solc truncates. -/
+def lowBits (n : Nat) (w : RawExpr) : RawExpr :=
+  if 256 ≤ n then w else .binop .mod w (.num (2 ^ n))
+
+/-- The word `w`'s low `n` bits read as an `intN`, in two's complement: the
+bits moved by `2^(n-1)`, cut to `n`, moved back and read as an `int`
+(`int((w +% 128) % 256 -% 128)` at `int8`: `200` is `-56`). -/
+def signedAt (n : Nat) (w : RawExpr) : RawExpr :=
+  if 256 ≤ n then .unop .toInt w
+  else
+    let h : RawExpr := .num (2 ^ (n - 1))
+    .unop .toInt (.binop .subW (.binop .mod (.binop .addW w h) (.num (2 ^ n))) h)
+
 /-- A cast `T(e)`, `e`'s captures made: a fresh local of type `T` holding `e`.
-Narrowing a `uint` keeps the low bits (`e % 2^N`, as solc truncates); a cast
-between `uint` and `int`, and one narrowing an `int`, are refused. -/
+A cast keeps the low bits of `e`'s word (`uint(i)` is `i`'s two's
+complement, `UnOp.toUint`): a `uintN` takes them as they are (`e % 2^N`), an
+`intN` reads them signed (`signedAt`); widening within a sign is the
+identity.  A literal must fit `T`. -/
 def castCapture (f : String) (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   let some (p, n) := castTy? f | throw s!"{f} is not a type"
   let Γ ← ctx
+  let word (q : PrimTy) (e : RawExpr) : RawExpr := if q == .int then .unop .toUint e else e
   let r ← match intTyOf C Γ e, e.litVal? with
     | _, some _ => do ElabM.lift (fitCheck C Γ p n e); pure e
     | some (q, m), none =>
-      if q != p then throw s!"{f}({e.toStr}): a cast between uint and int is not modelled"
-      else if m ≤ n then pure e
-      else if p == .int then throw s!"{f}({e.toStr}): a cast narrowing an int is not modelled"
-      else pure (.binop .mod e (.num (2 ^ n)))
+      if q == p && m ≤ n then pure e
+      else if p == .int then pure (signedAt n (word q e))
+      else pure (lowBits n (word q e))
     | none, none =>
       if 256 ≤ n then pure e
-      else if p == .int then throw s!"{f}({e.toStr}): a cast narrowing an int is not modelled"
+      else if p == .int then
+        throw s!"{f}({e.toStr}): a cast of arithmetic on literals alone to a narrow int; write the literal"
       else pure (.binop .mod e (.num (2 ^ n)))
   let Γn ← nctx
   let v ← checkIn C Γn p r
@@ -2736,7 +2771,10 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's
     -- effects already captured (`hoistStmt`), so reading it twice is safe
     if op.isArith && !op.hasCompoundAssign && op != .pow then
-      return ← elabStmt1 (.assign l (← ElabM.lift (narrowWrapNode C (← ctx) (.binop op l r))))
+      let e ← ElabM.lift (narrowWrapNode C (← ctx) (.binop op l r))
+      -- a signed wrap is a cast, captured (`narrowWrapNode`)
+      if e matches .call .. then return ← elabStmtP (.assign l e)
+      return ← elabStmt1 (.assign l e)
     let (pre, ⟨Γ, p, t⟩) ← elabOpTarget C l
     -- at a narrow target, what `l ⊕ r` may leave the type by is checked after
     let n := widthIn C (← ctx) l

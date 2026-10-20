@@ -171,11 +171,20 @@ programs, and the check is a statement the rules already run.
   least as wide is expected, and a literal where it fits; `uint8 x = total;`
   and `uint8 x = 300;` are elaboration errors (`fitCheck`), as they are
   compile errors.  So a narrow variable only ever holds a value of its range.
-- **Casts.**  `uintN(e)` of a `uint` keeps the low `N` bits (`e % 2^N`), a
-  widening cast keeps the value; either is a capture at its type, so the
-  operations after it are checked at the cast's width (`castCapture`).
+- **Casts.**  A cast keeps the low bits of its operand's 256-bit word, as
+  solc's conversions do: `uintN(e)` of a `uint` is `e % 2^N`, of an `int`
+  `uint(e) % 2^N` (`uint(i)`, `UnOp.toUint`, the two's complement word), and
+  `intN(e)` reads the low `N` bits signed, `int(((w +% 2^(N-1)) % 2^N) -%
+  2^(N-1))` of the word `w` (`int(u)`, `UnOp.toInt`, `signedAt`): so
+  `int8(uint8(200))` is `-56`, `uint8(int8(-100))` is `156`,
+  `int8(int(255))` is `-1`.  A widening cast within a sign keeps the value.
+  Either is a capture at its type, so the operations after it are checked at
+  the cast's width (`castCapture`).  On the machine the conversions are no
+  code: the word is the same (`toInt_simT`, `toUint_simT`).
 - **`unchecked`** wraps `+ - * **` and `<<` modulo `2^N` (`(x +% 1) % 256`),
-  and `~x` at `uint8` is `255 -% x` (`narrowWrapNode`).
+  and `~x` at `uint8` is `255 -% x` (`narrowWrapNode`).  At `int` and
+  `intN`, `+ - *` wrap on the operands' words, read back as a cast:
+  `x + 1` at `int8` is `int8(uint(x) +% 1)`, so `127 + 1` is `-128`.
 - **Storage packing** is not observable here: a state variable is a value of
   its own in the interpreter and a slot of its own in the compiler, and it
   holds a value of its range; solc packs several narrow variables into one
@@ -187,10 +196,11 @@ What is not modelled, each an elaboration error unless said otherwise:
 
 - a narrow type inside a type: an array's element, a mapping's key or value,
   a struct's member (`narrowNestedMsg`); and a modifier's narrow parameter;
-- a cast between `uint` and `int`, and one narrowing an `int`;
-- signed arithmetic in `unchecked` (as at `int256`: `+%` takes `uint` only);
-  `-128 / -1` and `-(-128)` at `int8` revert inside `unchecked` too, where
-  solc wraps them, as at `int256` already;
+- signed `**` in `unchecked` (`**%` takes `uint` only); `-128 / -1` and
+  `-(-128)` at `int8` revert inside `unchecked` too, where solc wraps them,
+  as at `int256` already;
+- a cast of arithmetic on literals alone to a narrow `int`
+  (`int8(100 + 100)`): write the literal;
 - a narrow operation under the right operand of `&&`/`||` or in a branch of
   `c ? a : b`: its capture would run where the program does not evaluate it;
 - constant folding: arithmetic on literals alone written to a narrow variable

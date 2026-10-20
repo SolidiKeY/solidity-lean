@@ -194,14 +194,17 @@ example : Prog.toStr [] (sol{ uint8 x = 1; bool b = true && x + 1 > 0; } :
 /-- error: Solidity elaboration failed: uint8: a narrow integer type is the type of a local, a parameter, a return value or a state variable only, not of an array's element, a mapping's key or value, or a struct's member -/
 #guard_msgs in #check sol{ uint8[] storage x; }
 
-/-- error: Solidity elaboration failed: uint8(x): a cast between uint and int is not modelled -/
-#guard_msgs in #check sol{ int8 x = 1; uint8 y = uint8(x); }
+-- A cast between `uint` and `int`, one narrowing an `int`, and signed
+-- `unchecked`: through the words (`Examples/Tactics/SignedCasts.lean`).
+/--
+info: "int x = 1; uint se1 = uint(x) % 256; uint y = se1; int se2 = int(((uint(x) +% 128) % 256) -% 128); int z = se2; x = z;"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol{ int16 x = 1; uint8 y = uint8(x); int8 z = int8(x); x = z; })
 
-/-- error: Solidity elaboration failed: int8(x): a cast narrowing an int is not modelled -/
-#guard_msgs in #check sol{ int16 x = 1; int8 y = int8(x); }
-
-/-- error: Solidity elaboration failed: operator +% does not take int -/
-#guard_msgs in #check sol{ int8 x = 1; unchecked { x += 1; } }
+/--
+info: "int x = 1; uint se1 = uint(x); int se2 = int((((se1 +% 1) +% 128) % 256) -% 128); x = se2;"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol{ int8 x = 1; unchecked { x += 1; } })
 
 /-- error: Solidity elaboration failed: wide returns a uint16, where a uint8 is expected -/
 #guard_msgs in #check sol[Narrow]{ uint8 t = wide(1); }

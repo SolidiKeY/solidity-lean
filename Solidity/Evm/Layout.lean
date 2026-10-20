@@ -417,11 +417,14 @@ def binInFrag : BinOp → PrimTy → Bool
   | .addW, p | .subW, p | .mulW, p | .powW, p => p == .uint
 
 /-- The unary operators compiled: `!` (at `bool`, the only type it takes),
-`-` at `int` (solc rejects it on an unsigned operand) and `~` at `uint`. -/
+`-` at `int` (solc rejects it on an unsigned operand), `~` at `uint`, and
+the conversions between `uint` and `int`, which keep the word. -/
 def unInFrag : UnOp → PrimTy → Bool
   | .not, _ => true
   | .neg, p => p == .int
   | .bnot, p => p == .uint
+  | .toInt, p => p == .uint
+  | .toUint, p => p == .int
 
 /-- A type laid out in a fixed set of slots: no dynamic array and no
 mapping anywhere in it (`uint`, `Person`, `uint[3]`; not `Basket`, whose
