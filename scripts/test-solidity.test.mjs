@@ -380,6 +380,15 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
     'signedPushArithUncheckedWraps']) assert.equal(status[name], 'proved', name);
 });
 
+test("bytesN, bytes and string: literals, indexing, conversions, storage, memory", () => {
+  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['literals', 'compareAndIndex', 'indexOutOfRange', 'conversions', 'bitwise',
+    'stateAndKeys', 'parameter', 'memoryBytes', 'stringToBytes', 'storagePushPop', 'storageString',
+    'memoryParameter']) assert.equal(status[name], 'proved', name);
+});
+
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
   const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
   assert.deepEqual(report.errors, []);

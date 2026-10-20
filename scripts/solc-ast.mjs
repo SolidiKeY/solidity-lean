@@ -204,7 +204,11 @@ function trim(n, parentKey) {
   for (const [k, v] of Object.entries(n)) {
     // Inherited contracts need Solc's C3 order. Self-only lists remain noise,
     // keeping existing non-inherited fixture hashes unchanged.
-    if (NOISE.has(k) && !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
+    // A hex literal's bytes are its `hexValue` (its `value` is their text,
+    // when they are UTF-8 at all); a number's is noise.
+    const hexBytes = k === "hexValue" && n.nodeType === "Literal" &&
+      (n.kind === "hexString" || typeof n.value !== "string");
+    if (NOISE.has(k) && !hexBytes && !(k === "linearizedBaseContracts" && Array.isArray(v) && v.length > 1)) continue;
     if (KEPT_IF_ANY.has(k) && Array.isArray(v) && v.length === 0) continue;
     if (k === "id" && !DECLS.has(n.nodeType)) continue;
     if (k === "src") {

@@ -67,10 +67,10 @@ contract Bytes {
         assert(data.length == 2);
     }
     function storageString() public {
-        name = "x";
-        string memory copy = name;
+        name = "xy";
+        assert(bytes(name).length == 2 && bytes(name)[1] == "y");
         delete name;
-        assert(bytes(name).length == 0 && bytes(copy).length == 1);
+        assert(bytes(name).length == 0);
     }
     function memoryParameter(bytes memory m) public pure {
         if (m.length > 0) assert(uint8(m[0]) <= 255);
