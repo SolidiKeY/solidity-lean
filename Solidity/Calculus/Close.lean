@@ -72,16 +72,6 @@ def scopedGoal : TacticM Bool := withMainContext do
     if !d.isImplementationDetail && hit (← instantiateMVars d.type) then return true
   return false
 
-/-- A pushed state's global part is the state's (`rfl`): `sol_close`
-reads two reads of one global part, through states of different locals,
-as one (`dsimp`, so the heap typing the reads depend on is unchanged). -/
-theorem glob_push {C : Contract} {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
-    (σ.push v).glob = σ.glob := rfl
-
-/-- A pushed state's heap typing is the state's (`rfl`). -/
-theorem H_push {C : Contract} {Γ : Ctx} {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
-    (σ.push v).H = σ.H := rfl
-
 end Close
 
 /-- The first pass of `sol_close`: evaluate, and name every write with what
@@ -146,15 +136,6 @@ macro "sol_close" : tactic => `(tactic|
           Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self]
       | (sol_close_enrich
          all_goals (repeat' (first | intro _ | apply And.intro))
-         all_goals first
-           | omega
-           | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
-               Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
-               Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])
-      -- last: one global part read through states of different locals
-      -- (`allLeftHide`'s instances, `Calculus/AllLeft.lean`); only where the
-      -- rest failed, so a leaf that closed before takes the same path
-      | (dsimp only [Close.glob_push, Close.H_push] at *
          all_goals first
            | omega
            | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,

@@ -21,7 +21,9 @@ mapping with (`at`, `atIn`, `mat`), at most `Seq.allLeftBudget` of them
 (`Calculus/ProvesDerive.lean`).  The premise is hidden because the
 closers cannot use it: `sol_close`'s `grind` fails on a goal that keeps a
 `∀` over a bounded index beside its instance, and `sol_decide` does not
-instantiate.  A `∀` premise with no instance is kept.
+instantiate.  A `∀` premise with no instance is kept.  An instance is read in the
+premise's scope, the goal in a deeper one: `sol_close` reads a memory
+length through the locals pushed between as one (`CloseS.push_lenU`).
 -/
 
 namespace Solidity
