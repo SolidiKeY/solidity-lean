@@ -119,8 +119,8 @@ test("file-level structs and library references retain declaration identity", ()
   assert.deepEqual(report.errors, []);
   const rows = report.results.map(r => [r.contract, r.function, r.status]);
   assert.deepEqual(rows, [
-    ['DifferentFileStruct', 'unsupportedShape', 'unsupported'],
-    ['DifferentOwnStruct', 'unsupportedShape', 'unsupported'],
+    ['DifferentFileStruct', 'unsupportedShape', 'proved'],
+    ['DifferentOwnStruct', 'unsupportedShape', 'proved'],
     ['FileLevelStructs', 'swaps', 'proved'],
     ['FileLevelStructs', 'falsePost', 'pending'],
     ['FilePairLib', 'swap', 'internal'],
@@ -129,13 +129,24 @@ test("file-level structs and library references retain declaration identity", ()
   assert.equal(testsPassed(report), false);
 });
 
-test("invalid nested and hidden struct declarations cannot use a same-named table shape", () => {
+test("a nested struct of other widths is the contract's own; a hidden one stays out of reach", () => {
   const report = runSolidityTests(["tests/solc/FileLevelStructGaps.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   assert.deepEqual(report.results.filter(r => r.contract !== 'HiddenStructLib')
     .map(r => [r.contract, r.function, r.status]), [
     ['HiddenStructCaller', 'narrowLibraryMember', 'unsupported'],
-    ['InvalidNestedStruct', 'narrowMember', 'unsupported']
+    ['InvalidNestedStruct', 'narrowMember', 'pending']
+  ]);
+  assert.equal(testsPassed(report), false);
+});
+
+test("a contract's own structs: nested, a mapping member, an array of them, literals", () => {
+  const report = runSolidityTests(["tests/solc/OwnStructs.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  assert.deepEqual(report.results.map(r => [r.function, r.status]), [
+    ['nested', 'proved'], ['mappingMember', 'proved'], ['arrayOfStructs', 'proved'],
+    ['literal', 'proved'], ['namedLiteral', 'proved'], ['narrowOverflow', 'proved'],
+    ['falsePost', 'pending']
   ]);
   assert.equal(testsPassed(report), false);
 });
