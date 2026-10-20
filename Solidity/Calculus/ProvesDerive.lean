@@ -623,9 +623,18 @@ def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none) : Meta
     | some steps => [steps]
     | none => ([128, 256, 512, 1024, 2048, 4096, 8192, 16384].filter (· < fuel)) ++ [fuel]
   let mut chosen : Option (Nat × List Expr) := none
+  let mut last : Option Nat := none
   for steps in stages do
+    -- compiled code heeds no heartbeats: a stage that ran past the budget
+    -- is reported here, by its bound, and no longer stage is run.  (The
+    -- kernel check is not checked: a declaration may pass today with its
+    -- walk past the budget, `returnLeavesNestedLoops` of
+    -- `TestSuite/Derived17.lean`; `docs/loops.md`.)
+    if let some k := last then
+      Core.checkMaxHeartbeats s!"sol_prove's compiled walk, after its {k}-step stage"
     let result ← unsafe evalExpr (Option (List Expr)) qTy
       (mkAppN (mkConst ``residueQuoteWithin) #[C, toExpr steps, R, quoteConstName n, np, Γ, H, φe])
+    last := some steps
     if let some leaves := result then
       chosen := some (steps, leaves)
       break
