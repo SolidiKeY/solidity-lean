@@ -613,13 +613,12 @@ test("solkey's solc/open ports close except where the model says why not", () =>
   const open = {
     // a function recursing into itself: a call is inlined (`kernel-port.md`)
     functionsRecursiveUnbounded: "unsupported",
-    // false at 256 bits: `5 + v + v` overflows, and reverts, at v = 2^255
-    msgValueArith: "pending",
     // the callee is the contract itself only at the harness address
     // (0x…DeaDBeef), which no obligation fixes (`--self-address`, below)
     tryCatchExactReturn: "pending", trySuccessRunsCallee: "pending",
     tryMultipleCatchClausesSuccess: "pending", tryNestedGetter: "pending",
-    // a value call to the contract itself does not run `receive`
+    // a value call to the parameter runs `receive` only where it is the
+    // contract, which no obligation fixes (`--self-address`, below)
     callRunsReceive: "pending",
     // false on the EVM: at the harness address the callee writes `ix = 42`,
     // which the run executes (`docs/options.md`, O8); the value call's
@@ -628,7 +627,8 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
     ternaryLiteralOverflow: "pending",
   };
-  // `callWithoutCodeReverts` proves: address 0 has no code (O8).
+  // `callWithoutCodeReverts` proves: address 0 has no code (O8);
+  // `msgValueArith`: `msg.value < 2^128`, a chain fact (`Problem.callPre`).
   const files = ["SolcArithmeticOpen", "SolcConstructorsOpen", "SolcFunctionCallsOpen",
     "SolcHigherLevelOpen", "SolcPaymentsOpen", "SolcSmtControlFlowOpen", "SolcTypesOpen"]
     .map(f => `tests/solc/open/${f}.sol`);
@@ -647,15 +647,15 @@ test("solc/open self-calls prove at the harness address (--self-address)", () =>
     {build:false, selfAddress: "0x00000000000000000000000000000000DeaDBeef"});
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  // a `catch` goal assumes the callee fails (O8); a value call to the
+  // contract runs `receive`; `msg.value < 2^128` (a chain fact)
   for (const fn of ["trySuccessRunsCallee", "tryMultipleCatchClausesSuccess", "tryNestedGetter",
-    "callWithoutCodeReverts", "tryArgumentSideEffect"]) {
+    "callWithoutCodeReverts", "tryArgumentSideEffect", "tryCatchExactReturn", "callRunsReceive",
+    "msgValueArith"]) {
     assert.equal(rows[fn], "proved", fn);
   }
-  // every `catch` block is a goal from the caller's state (O8); a value
-  // call to the contract runs no `receive`; the unsound claims are false
-  // (the value call's callee may write the state under the callback reading, O7)
-  for (const fn of ["tryCatchExactReturn", "callRunsReceive", "trySuccessKeepsStorageUnsound",
-    "callKeepsStorageUnsound", "msgValueArith"]) {
+  // the unsound claims are false on the EVM: the callee writes the state
+  for (const fn of ["trySuccessKeepsStorageUnsound", "callKeepsStorageUnsound"]) {
     assert.equal(rows[fn], "pending", fn);
   }
 });
@@ -665,10 +665,9 @@ test("self-calls of the contract run their callee (tests/solc/SelfCalls.sol)", (
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const fn of ["tryReturnInSuccess", "trySuccessRunsCallee", "tryMultipleCatchClausesSuccess",
-    "tryNestedGetter", "callWithoutCodeReverts"]) {
+    "tryNestedGetter", "callWithoutCodeReverts", "tryCatchExactReturn", "callRunsReceive"]) {
     assert.equal(rows[fn], "proved", fn);
   }
-  assert.equal(rows.tryCatchExactReturn, "pending");
 });
 
 test("an obligation whose callee may write the state is read with callbacks", () => {
