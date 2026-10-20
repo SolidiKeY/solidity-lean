@@ -81,6 +81,11 @@ variable's initializer is printed with it, `uint x = 5;`
 does not print, or calls a function left out, leaves the constructor out,
 not the variable: a function's obligation holds from any well-typed storage
 (solkey's do too), so no function needs it.
+
+Inheritance is flattened: every base version of a function is its own
+member, so a `super.f` names one statically (`PState.superNames`), and the
+base constructors join the most-derived one in a single member in solc's
+legacy order (`compositeBody`; `docs/solc-alignment.md`, "Constructors").
 -/
 
 namespace Solidity.Frontend
