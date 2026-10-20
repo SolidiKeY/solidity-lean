@@ -189,3 +189,82 @@ same-named, same-membered structs are one type (solc's are distinct, but no
 program can tell them apart in one contract).  A member named like a Lean
 keyword (`from`) does not print, as before.  A library's struct that the
 calling contract cannot see stays a row (`HiddenStructCaller`).
+
+## Bytes and strings (lane `open-bytes`)
+
+**What solkey does.** Nothing to follow: solkey's `SolidityInfo` gives
+`string` KeY's `int` sort (an opaque value) and skips `bytes`/`bytesN`
+("not yet supported"); no `.key` file has a `bytes` or `string` sort or
+taclet.  The model follows solc (`docs/solc-alignment.md`).
+
+**Design: a representation, not a type.**  A new `PrimTy` (or a byte-string
+sort) would change every `PrimTy` match (33 files), `PrimTy.Denote`, the
+typed storage and heap, the Theory, the closer and the EVM simulation, and
+re-check all of them; nothing in a proof needs a byte to be other than a
+small number.  So the types are read as the narrow integers already are
+(`narrowTy?`): by the elaborator, onto types the model has.
+
+- `bytesN` is a `uint` of `8N` bits holding the bytes read big-endian: the
+  value `uintN(b)` solc's conversion gives (`bytes2 b = "ab"` is `0x6162`).
+  On that reading solc's operations are the integer ones: `==`, `<` …
+  (lexicographic on bytes is numeric big-endian), `& | ^`, `~` (`2^8N - 1
+  -% b`, `narrowWrapNode`), `<<` (modulo `2^8N`, as a narrow `<<` already
+  wraps), `>>`; `uintM(b)`/`bytesN(u)` at `M = 8N` are the identity.  What
+  differs from `uint8N` is rewritten before the statement is elaborated
+  (`bytesPure`, `Syntax/Elab.lean`): `bytesM(b)` of a `bytesN` keeps the
+  left bytes (`b >> 8(N-M)`) or pads on the right (`uint8M(b) << 8(M-N)`),
+  as does an implicit widening (an assignment, an argument, an operand of
+  another size); `b.length` is `N`; `b[i]` is `uint8((b >> 8((N-1) -% i)) %
+  256)`, divided by `i < N ? 1 : 0` so an index out of range reverts as an
+  array's does (`Storage.checkIndex`: the model reads solc's
+  `Panic(0x32)` as a revert, the solkey reading); a string or `hex"…"`
+  literal at `bytesN` is its bytes left-aligned (`"a"` at `bytes2` is
+  `0x6100`).  Which positions are `bytes` the width tables say, by a
+  marker row beside the width: `k#bytes ↦ N` (`Contract.widths`,
+  `FunDecl.widths`, a reference local's shape; a value local's is its own
+  shape entry), so a `bytes4[]`, a `mapping(bytes32 => …)` and a parameter
+  carry it as a `uint8[]` carries its width.
+- `bytes` and `string` are `bytes1[]`: a `uint[]` whose elements are 8 bits
+  wide (the narrow-element machinery checks pushes and writes), in storage
+  and memory alike, `string` the same as `bytes` (solc's packing is storage
+  layout, out of scope above).  So `.length`, `b[i]`, `.push(x)`, `.pop()`,
+  `delete`, copies between storage and memory, parameters and returns are
+  the array ones.  `bytes(s)` and `string(b)` are the identity.  A literal
+  at `bytes`/`string` is a fresh memory array of its bytes (`new
+  bytes(n)` and its writes); assigned to storage it is copied as a memory
+  array is.  `==` on them is not solc's (it needs `keccak256`, a gap above).
+  The model is more lenient than solc in what it accepts (`s[i]` and
+  `s.length` on a `string`, a `bytes`/`bytes1[]` mix, a hex number of the
+  wrong size at `bytesN`): solc refuses those programs before the import,
+  and a `sol{}` program that uses them gets the array reading.
+
+**What changes.** No low module: `AST.lean`, `Semantics/`, `Calculus/`,
+`Theory/`, `Evm/` and their proofs are untouched, so nothing re-proves and
+no kernel term grows.  `Syntax.lean` (the type names, the `hex"…"` and
+string literal expressions, the width rows), `Syntax/Elab.lean` (the
+markers, `bytesPure`, the literal lowering) and the solc import
+(`Frontend/SolcJson.lean`: the elementary types, literals, ABI ranges of a
+`bytesN` parameter and a `bytes` parameter's elements) change; everything
+above `Syntax.lean` rebuilds once (the usual cost of an elaborator change),
+and the elaboration of a program with no bytes pays one more pass over its
+expressions that finds no marker.  The EVM compiler (`Evm/`) compiles the
+`uint` it is given: a `bytesN` is right-aligned in its slot there, not
+solc's left-aligned layout, which is storage layout, out of scope; its
+theorems are unchanged.
+
+**Left open, with the reason.**
+- `mapping(string => V)`, `mapping(bytes => V)`: a key is a `PrimTy` value
+  (`RefTy.mapping`, `Selector.key`), and a byte string is not one; solc
+  keys by `keccak256` of the bytes, which the model does not have.  It
+  needs a byte-string key sort through `Storage`, `Seg` and the closer.
+- Revert data (`require(c, "msg")`, `revert("msg")`, `catch Error(string
+  memory r)` binding `r`): a reverting run carries no data (`THalt.revert`),
+  and an external call's `ExtResult.error` none; carrying a reason changes
+  `THalt`, `TRun.tryCall`, the transaction table and every proof over a
+  halt.  The `Error` branch is chosen, its `r` is not bound.
+- `bytes.concat`, `string.concat`, `abi.*`, `keccak256` (above),
+  `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
+  `bytesN` word is left-aligned there), `calldata` (refused for every type),
+  a `bytes`/`string` member of a struct (`StructEnc` spells no byte types).
+
+**Status.** (updated as slices land)
