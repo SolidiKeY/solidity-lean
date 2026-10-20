@@ -297,6 +297,15 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
   /-- `impRight`: the precondition moves into the context. -/
   | intro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : Proves C R Γ₀ (H.pre a) φ) :
       Proves C R Γ₀ H (.imp a φ)
+  /-- `impRight`, then `notLeft` on the premise `¬X`: `X` to prove instead of
+  the goal (KeY's succedent keeps both; one formula is kept here).  A
+  self-call's `catch` goal assumes its callee does not end normally
+  (`trySelfStep`): where the callee does, `X`, the catch is not reached. -/
+  | notLeft {Γ : Ctx} {H : Hyps C Γ₀ Γ} {X φ : Fml C Γ} (h : Proves C R Γ₀ H X) :
+      Proves C R Γ₀ H (.imp (.not X) φ)
+  /-- `impRight`, then `hide_left` on the premise: the goal without it. -/
+  | hideLeft {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : Proves C R Γ₀ H φ) :
+      Proves C R Γ₀ H (.imp a φ)
   /-- `andRight`: a conjunction from each conjunct, in the same context; the
   walk takes it where a conjunct is still a program's (a loop body's
   `(¬broke → inv) ∧ (broke → ⟨[ ]⟩)`), the closer reads the others. -/
@@ -381,7 +390,8 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet with a goal per way an external call may end
   (`tryCallNoCallbackBox`): each clause's block in the statement's place,
-  for every value of the locals its outcome binds, its scope ended (`}`).
+  for every value of the locals its outcome binds, its scope ended (`}`),
+  behind what the branch assumes where it has a hypothesis (`Branch.hyp`).
   There is at least one clause: a rule with no goal would prove its
   statement behind any context. -/
   | branches {Γ Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {s : Stmt C Γ Γ}
@@ -389,7 +399,10 @@ inductive Proves (C : Contract) (R : RuleSet) (Γ₀ : Ctx) :
       (d : s.step (H.fresh (.modal m (.cons s ω) κ φ)) m = .branches bs)
       (hne : bs.isEmpty = false)
       (h : ∀ b ∈ bs, Proves C R Γ₀ H
-        (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
+        (Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
+          (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
+          fun c => .imp c
+            (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))))
       (hR : R.admits m s = true := by rule_admits) :
       Proves C R Γ₀ H (.modal m (.cons s ω) κ φ)
   /-- A taclet with labelled goals (`sendNoCallbackBox`): each formula, then

@@ -211,7 +211,8 @@ def tryStep (m : Modality) {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (rets : Bind
     (err : Prog C Γ Γ₂) (code : CodeBinder κ) (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) :
     Premise C Γ Γ :=
   match m with
-  | .box => .branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩]
+  | .box => .branches [⟨rets, ok, none⟩, ⟨Binders.nil, err, none⟩, ⟨code.binders, pnc, none⟩,
+      ⟨Binders.nil, other, none⟩]
   | .diamond => .done false
 
 /-- A self-call's guards (`tryCallSelfBox`, Lean): the receiver has code
@@ -226,22 +227,34 @@ def ExtCall.isSelf {Γ : Ctx} (c : ExtCall C Γ) : Val C Γ .bool :=
 def ExtCall.notSelf {Γ : Ctx} (c : ExtCall C Γ) : Val C Γ .bool :=
   .binop .neB rfl rfl (.simple c.addr) (.simple (.env .selfAddress rfl))
 
+/-- What a self-call's `catch` block may assume (`trySelfStep`): the call
+does not end normally as a call to the contract itself, `¬⟨ require(a ==
+address(this)); f(args) → rets; ⟩ true`.  A `catch` is reached from another
+contract's callee, where the `require` reverts, or from the contract's own
+callee when it fails. -/
+def ExtCall.selfFails {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) : Fml C Γ :=
+  .not (.modal .diamond (.cons (.require call.isSelf)
+    (.cons (.call call.fn sargs (.rets rets) sbody) .nil)) .nil .tt)
+
 /-- `try …` whose callee is the contract's own (`self`, `docs/options.md`
 O8) under the box (`tryCallSelfBox`, Lean): the receiver being the contract,
 the callee's body inlined with the returned values as its targets and the
 success block after it; the receiver another, the success block for every
 value of the returned data; and each `catch` block from the state the call
-was made in.  At address `0` both success goals hold vacuously (the `require`s
-revert). -/
+was made in, where the call does not end normally as a self-call
+(`ExtCall.selfFails`).  At address `0` both success goals hold vacuously
+(the `require`s revert). -/
 def trySelfStep {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
     (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
     (sbody : Prog C (ρ ++ ps) Γf) : Premise C Γ Γ :=
   let up := (call.wk (Thin.ofExt (Ext.append Γ ρ)))
+  let nx := some (call.selfFails rets sargs sbody)
   .branches [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.isSelf)
-      (.cons (.call call.fn sargs (.rets rets) sbody) ok))⟩,
-    ⟨rets, .cons (.require up.hasCode) (.cons (.require up.notSelf) ok)⟩,
-    ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩]
+      (.cons (.call call.fn sargs (.rets rets) sbody) ok)), none⟩,
+    ⟨rets, .cons (.require up.hasCode) (.cons (.require up.notSelf) ok), none⟩,
+    ⟨Binders.nil, err, nx⟩, ⟨code.binders, pnc, nx⟩, ⟨Binders.nil, other, nx⟩]
 
 /-- A `try`'s rule (`Stmt.step`): `tryStep` for another contract's callee,
 `trySelfStep` under the box for the contract's own; `false` under the

@@ -239,11 +239,15 @@ def Binders.all {Γ : Ctx} : {ρ : Ctx} → Binders ρ → Fml C (ρ ++ Γ) → 
   termination_by structural _ bs => bs
 
 /-- A block of a `try`: the locals `bs` its outcome binds, on top of `Γ`,
-and its statements. -/
+and its statements; and what its goal may assume of the state the
+statement starts in (`hyp`: a self-call's `catch` block is reached only
+where the callee does not end normally, `trySelfStep`), its goal then
+`hyp → ∀ bs. ⟨[ P ]⟩`. -/
 structure Branch (C : Contract) (Γ : Ctx) where
   {ρ Γ₁ : Ctx}
   bs : Binders ρ
   P : Prog C (ρ ++ Γ) Γ₁
+  hyp : Option (Fml C Γ) := none
 
 /-- What a rule on a statement `Stmt C Γ Γ'` leaves. -/
 inductive Premise (C : Contract) (Γ : Ctx) : Ctx → Type where
@@ -357,7 +361,10 @@ def Premise.fml {Γ Γ' Γ₁ Γ₀ : Ctx} (m : Modality) (ω : Prog C Γ' Γ₁
     (fun c ω => .and (.imp c (.modalK m ω κ φ)) c)
     (fun b _ => if b then .tt else .ff)
     (fun bs ω => Fml.conj (bs.map fun b =>
-      b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))
+      Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
+        (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
+        fun c => .imp c
+          (b.bs.all (.modalK m b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))))
     (fun fs us ω => Fml.conj (fs ++ us.map fun U => .upd m U (.modalK m ω κ φ)))
     (fun I B xs hv U c c' hu hb P post ω => .and (I.invHyp B) (Fml.anonHavoc xs hv (.imp (I.invHyp B)
       (.upd m U (.and (.imp c (.upd m (Upd.nil.pop hb)

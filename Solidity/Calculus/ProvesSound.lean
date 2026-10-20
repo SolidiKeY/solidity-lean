@@ -179,6 +179,10 @@ theorem Proves.sound_of (hS : Stmt.Sound C) {R : RuleSet} {Γ₀ Γ : Ctx} {H : 
     {φ : Fml C Γ} (d : Proves C R Γ₀ H φ) : ∀ σ, holds σ (H.wrap φ) := by
   induction d with
   | intro _ ih => exact ih
+  | @notLeft Γ H X φ _ ih =>
+    exact fun σ => H.wrap_mono (ψ := .imp (.not X) φ) (fun _ hX hn => (hn hX).elim) σ (ih σ)
+  | @hideLeft Γ H a φ _ ih =>
+    exact fun σ => H.wrap_mono (ψ := .imp a φ) (fun _ h _ => h) σ (ih σ)
   | @andIntro Γ H φ ψ _ _ ih₁ ih₂ =>
     exact fun σ => H.wrap_and (χ := .and φ ψ) (fun _ a b => ⟨a, b⟩) σ (ih₁ σ) (ih₂ σ)
   | allIntro _ ih => exact ih

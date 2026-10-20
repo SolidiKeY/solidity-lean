@@ -1107,7 +1107,8 @@ theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
     (sbody : Prog C (ρ ++ ps) Γf) (σ : State C Γ) :
     Premise.Runs .box (.tryCall call rets ok err code pnc other sargs sbody false)
-      (.branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩])
+      (.branches [⟨rets, ok, none⟩, ⟨Binders.nil, err, none⟩, ⟨code.binders, pnc, none⟩,
+        ⟨Binders.nil, other, none⟩])
       σ := by
   intro _ _ ω κ φ
   rintro ⟨h1, h2, h3, h4⟩
@@ -1122,11 +1123,22 @@ theorem Premise.sound_tryCallBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
   exact Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ
     (fun r => holds_modalK_pop _ ok _ ω κ φ (holds_binders_all rets σ _ r h1)) h2 h3 h4
 
+/-- A program that reverts or panics satisfies no diamond. -/
+theorem not_holds_diamond {Γ₁ Γ₀ : Ctx} (σ : State C Γ) (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀)
+    (φ : Fml C Γ₀) {e : THalt} (he : e = .revert ∨ e = .panic) (h : Prog.runSt σ P = .error e) :
+    ¬ holds σ (.modal .diamond P κ φ) := by
+  rw [holds_modal_iff, h]
+  rcases he with rfl | rfl
+  · exact fun h' => nomatch h'.1
+  · exact fun h' => h'.2 rfl
+
 /-- **`tryCallSelfBox`** (Lean): the receiver the contract, the inlined
 callee and then the success block; another, the oracle's success block,
 both behind `require`s that are the run's case split; each `catch` block
 from the caller's state, which a failed self-call goes to as the oracle's
-does. -/
+does, where the call does not end normally as a self-call
+(`ExtCall.selfFails`): another contract's callee fails that `require`, the
+contract's own reverts or panics. -/
 theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
     (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γe) (code : CodeBinder κc)
     (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
@@ -1150,6 +1162,13 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     simp only [Bool.true_and, decide_eq_true_eq] at hs
     have hi : call.isSelf.evalT σ = .ok true := by
       rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
+    have hnx : ∀ e, TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e →
+        (e = .revert ∨ e = .panic) → holds σ (call.selfFails rets sargs sbody) := by
+      intro e he hk
+      refine not_holds_diamond σ _ _ _ hk ?_
+      rw [Prog.runSt_require_true hi, Prog.runSt_cons]
+      show ((TRun.call sargs (.rets rets) sbody.ext sbody.runR σ).map (·.st)).bind _ = _
+      rw [he]; rfl
     let P0 : Prog C Γ Γ₁ := .cons (.require call.hasCode) (.cons (.require call.isSelf)
       (.cons (.call call.fn sargs (.rets rets) sbody) ok))
     have h0' := holds_modalK_pop σ P0 ((Ext.append Γ ρ).trans ok.ext) ω κ φ (by
@@ -1159,9 +1178,10 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     rw [Prog.runSt_require_true hc, Prog.runSt_require_true hi, Prog.runSt_cons] at h0'
     change Modality.afterRunTR .box _ (((((TRun.call sargs (.rets rets) sbody.ext sbody.runR
       σ).map (·.st)).bind fun τ => Prog.runSt τ ok).map _).bind _) at h0'
-    revert h0'
+    revert h0' hnx
     cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
     | ok o =>
+      intro _
       intro h0'
       dsimp only
       rw [show ((Except.ok o : TRes (Out C σ.H (ρ ++ Γ))).map (·.st)).bind
@@ -1169,19 +1189,23 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
       revert h0'
       cases ok.runR o.st <;> exact id
     | error e =>
-      intro _
+      intro hnx _
       cases e with
       | revert =>
         dsimp only
         split
-        · exact holds_tryClause err σ ω κ φ h2
-        · exact holds_tryClause other σ ω κ φ h4
-      | panic => exact holds_tryPanic code pnc σ _ ω κ φ h3
+        · exact holds_tryClause err σ ω κ φ (h2 (hnx _ rfl (.inl rfl)))
+        · exact holds_tryClause other σ ω κ φ (h4 (hnx _ rfl (.inl rfl)))
+      | panic => exact holds_tryPanic code pnc σ _ ω κ φ (h3 (hnx _ rfl (.inr rfl)))
       | diverge => exact afterRunTR_box_error (by decide)
       | exhausted => exact afterRunTR_box_error (by decide)
   · rename_i hs
     simp only [Bool.true_and, decide_eq_true_eq] at hs
-    refine Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ (fun r => ?_) h2 h3 h4
+    have hnx : holds σ (call.selfFails rets sargs sbody) :=
+      not_holds_diamond σ _ _ _ (.inl rfl) (Prog.runSt_require_false
+        (by rw [ExtCall.isSelf_evalT]; simp only [hs, decide_false]) _)
+    refine Premise.sound_tryOracle call rets ok err code pnc other σ ω κ φ (fun r => ?_)
+      (h2 hnx) (h3 hnx) (h4 hnx)
     have h1' := holds_modalK_pop _ _ _ ω κ φ (holds_binders_all rets σ _ r h1)
     have hc' : (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode.evalT
         (σ.withEnv (TEnv.append ρ r σ.env)) = .ok true := by

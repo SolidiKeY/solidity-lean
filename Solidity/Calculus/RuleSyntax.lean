@@ -1730,7 +1730,7 @@ def schemaBranch (fresh : Bool) (Γ : Scope) (b : TSyntax `dl_branch) : MacroM L
       if stemOf x.getId.toString == "code" then
         `($(Lean.mkCIdent `Solidity.CodeBinder.binders) $x)
       else pure x
-  `($(Lean.mkCIdent `Solidity.Branch.mk) $xs $(← schemaBlock fresh Γ blk))
+  `($(Lean.mkCIdent `Solidity.Branch.mk) $xs $(← schemaBlock fresh Γ blk) none)
 
 /-- The identifiers of a `\find`, outside `‹…›`. -/
 partial def findIdents : Lean.Syntax → Array Ident
