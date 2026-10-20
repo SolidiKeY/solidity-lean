@@ -988,4 +988,54 @@ theorem call {g : Bool} {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallR
 
 end CKeeps
 
+namespace CKeeps
+
+variable {Γ : Ctx}
+
+/-- **A `try`**: a self-call's frame and each clause keep the invariant. -/
+theorem tryCall {g : Bool} {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : TStep C (ρ ++ Γ) Γ₁}
+    (h₂ : Ext Γ Γ₂) {err : TStep C Γ Γ₂} (code : CodeBinder κ)
+    (h₃ : Ext (κ ++ Γ) Γ₃) {pnc : TStep C (κ ++ Γ) Γ₃}
+    (h₄ : Ext Γ Γ₄) {other : TStep C Γ Γ₄} (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
+    {sbody : TStep C (ρ ++ ps) Γf} (self : Bool)
+    (hok : CKeeps g ok) (herr : CKeeps g err) (hpnc : CKeeps g pnc) (hoth : CKeeps g other)
+    (hsb : CKeeps g sbody) (hg : Γ.hasAlias = true → g = true) :
+    CKeeps g (TRun.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other sargs hs sbody self) := by
+  intro σ o hσ h
+  unfold TRun.tryCall at h
+  have hvm : ∀ {H : HTy} {κ' : Ctx}, Ctx.ValMem κ' → ∀ (e : TEnv C H κ'),
+      TEnv.All (aliasLive σ.storage) e :=
+    fun hv e => TEnv.All.of_valMem (P := aliasLive σ.storage) (fun _ _ => trivial)
+      (fun _ _ => trivial) hv e
+  have hp : ∀ c, CTInv (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) c) σ.env)) :=
+    fun _ => ⟨hσ.1, TEnv.All.append κ (hvm (CodeBinder.valMem code) _) hσ.2⟩
+  split at h
+  · cases h
+  split at h
+  · split at h
+    · rename_i o₁ hc
+      have h1 := CKeeps.call sargs (.rets rets) hs hsb hg σ o₁ hσ hc
+      cases hr : ok o₁.st with
+      | error => rw [hr] at h; cases h
+      | ok o' =>
+        rw [hr] at h; cases h
+        have h2 := hok _ o' h1.1 hr
+        exact ⟨h2.1.drop _, fun hg' => Storage.Grows.trans (h1.2 hg') (h2.2 hg')⟩
+    · split at h
+      · exact herr.drop h₂ σ o hσ h
+      · exact hoth.drop h₄ σ o hσ h
+    · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
+    · cases h
+  split at h
+  · cases h
+  · obtain ⟨⟨r, rest⟩, _, h⟩ := tbind_ok_inv h
+    exact hok.drop ((Ext.append Γ ρ).trans h₁) (σ.withEnv (TEnv.append ρ r σ.env)) o
+      ⟨hσ.1, TEnv.All.append ρ (hvm (Binders.valMem rets) _) hσ.2⟩ h
+  · exact herr.drop h₂ σ o hσ h
+  · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
+  · exact hoth.drop h₄ σ o hσ h
+
+end CKeeps
+
 end Solidity
