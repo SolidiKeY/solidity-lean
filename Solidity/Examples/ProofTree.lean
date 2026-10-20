@@ -463,7 +463,7 @@ example : ⊢ dl!{ ⟨ uint x = 5; uint r = ++x; ⟩ r == 6 && x == 6 } := by
   sol_prove?
 
 /-! A split whose condition is ground under its updates keeps only the
-branch it takes (`Hyps.groundS`, `Seq.refutes`): the `revert()` branches are closed by
+branch it takes (`Hyps.groundS`, `Seq.refuteS`): the `revert()` branches are closed by
 `Proves.closeFalse`, not run (two steps fewer in each).  The second reads `y` through twelve updates
 `y := y * y`, each position listed once (`Upd.groundStepS`), not `2¹²` times. -/
 

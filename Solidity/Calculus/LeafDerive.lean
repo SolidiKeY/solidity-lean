@@ -29,7 +29,7 @@ A split's branch is asked of the bounded scoped closer first: `if (v < 0)` after
 `int v = -3;` takes one branch only.  KeY applies the update to the
 condition in each branch's antecedent, simplifies it, and closes the branch
 it became `false` in (`closeFalse`); here a refuted branch is closed by
-`Proves.closeFalse` (`Seq.refutes`), not walked. Symbolic hypotheses, including
+`Proves.closeFalse` (`Seq.refuteS`, on the premises the condition reaches), not walked. Symbolic hypotheses, including
 required storage lengths, may also refute a branch. The closer proves every
 branch it closes.
 
@@ -267,6 +267,261 @@ theorem leafCheckS_sound {R : RuleSet} {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C
   · simp only [hm, cond_false, reduceCtorEq] at h
   simp only [hm, cond_true] at h
   exact Proves.closeHolds (checkCore_valid h) hm
+
+end Seq
+
+/-! ## A split refuted on the premises its condition reads
+
+A split's branch is refuted on its wrapped sequent, the condition the last
+premise (`Seq.refuteS`).  The premises its condition does not reach, through
+the positions they share or through the state, are dropped first
+(`LFml.slice`): a loop's guard over locals is then refuted on the locals'
+facts alone, not through every storage write the loop made, whose guards
+would grow the closer's work with each iteration and soon pass its bounds
+(`LFml.boundsOk`).  A small refutation (`sliceSize`, `sliceDepth`) is read
+whole, as the leaf closer reads it.  Dropping a premise only strengthens a formula
+(`LFml.dropPrem_holds`), so which premises are kept is a matter of
+completeness, not of soundness. -/
+
+namespace Decide
+
+/-- What a term or a formula reads: the positions, and whether it reads
+the state (storage, memory, the transaction's values). -/
+abbrev Reads := List Nat × Bool
+
+/-- Whether a constant reads the state. -/
+def _root_.Solidity.Op0.readsState {s : Srt} (o : Op0 C s) : Bool :=
+  @Op0.casesOn C (fun _ _ => Bool) s o (fun _ => false) (fun _ => true) (fun _ _ _ => false)
+    true true true (fun _ _ _ _ => false) (fun _ => false)
+
+/-- `LTm.reads`' compiled twin. -/
+def LTm.readsM : {s : Srt} → LTm C s → Reads → Reads
+  | _, .var j, r => (r.1.insert j, r.2)
+  | _, .app0 o, r => (r.1, r.2 || o.readsState)
+  | _, .err, r => r
+  | _, .app1 _ x, r => x.readsM r
+  | _, .app2 _ x y, r => y.readsM (x.readsM r)
+  | _, .app3 _ x y z, r => z.readsM (y.readsM (x.readsM r))
+  | _, .index _ q i, r => i.readsM (q.readsM r)
+  | _, .obsW q, r | _, .obsL q, r | _, .obsH q, r => q.readsM (r.1, true)
+  | _, .seq d a, r => a.readsM (d.readsM r)
+  | _, .orElse a b, r => b.readsM (a.readsM r)
+  | _, .kite a b t e, r => e.readsM (t.readsM (b.readsM (a.readsM r)))
+
+/-- **What a term reads**, added to `r`.  By the recursor. -/
+@[implemented_by LTm.readsM]
+def LTm.reads {s : Srt} (t : LTm C s) : Reads → Reads :=
+  @LTm.rec C (fun _ _ => Reads → Reads)
+    (@fun _ j r => (r.1.insert j, r.2)) (@fun _ o r => (r.1, r.2 || o.readsState))
+    (@fun _ _ _ _ ihx r => ihx r)
+    (@fun _ _ _ _ _ _ ihx ihy r => ihy (ihx r))
+    (@fun _ _ _ _ _ _ _ _ ihx ihy ihz r => ihz (ihy (ihx r)))
+    (@fun _ _ _ _ _ _ ihq ihi r => ihi (ihq r))
+    (@fun _ _ ih r => ih (r.1, true)) (@fun _ _ ih r => ih (r.1, true))
+    (@fun _ _ ih r => ih (r.1, true))
+    (@fun _ _ _ _ ihd iha r => iha (ihd r))
+    (@fun _ _ _ iha ihb r => ihb (iha r))
+    (@fun _ _ _ _ _ _ iha ihb iht ihe r => ihe (iht (ihb (iha r))))
+    (@fun _ r => r) s t
+
+theorem LTm.reads_eq_readsM {s : Srt} (t : LTm C s) (r : Reads) : t.reads r = t.readsM r := by
+  induction t generalizing r with
+  | var | app0 | err => rfl
+  | app1 o x ih => simp only [LTm.readsM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.readsM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.readsM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.readsM, ← ihq, ← ihi]; rfl
+  | obsW q ih | obsL q ih | obsH q ih => simp only [LTm.readsM, ← ih]; rfl
+  | seq d a ihd iha => simp only [LTm.readsM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.readsM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => simp only [LTm.readsM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
+/-- `LFml.reads`' compiled twin. -/
+def LFml.readsM : LFml C → Reads → Reads
+  | .tt, r => r
+  | .eq a b, r => b.reads (a.reads r)
+  | .not φ, r => φ.readsM r
+  | .and φ ψ, r | .imp φ ψ, r => ψ.readsM (φ.readsM r)
+  | .all _ _ φ, r => φ.readsM r
+
+/-- **What a formula reads**, added to `r`.  By the recursor. -/
+@[implemented_by LFml.readsM]
+def LFml.reads (φ : LFml C) : Reads → Reads :=
+  @LFml.rec C (fun _ => Reads → Reads) (fun r => r) (@fun _ a b r => b.reads (a.reads r))
+    (fun _ ih r => ih r) (fun _ _ ihφ ihψ r => ihψ (ihφ r)) (fun _ _ ihφ ihψ r => ihψ (ihφ r))
+    (fun _ _ _ ih r => ih r) φ
+
+theorem LFml.reads_eq_readsM (φ : LFml C) (r : Reads) : φ.reads r = φ.readsM r := by
+  induction φ generalizing r with
+  | tt | eq => rfl
+  | not φ ih | all k p φ ih => simp only [LFml.readsM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.readsM, ← ihφ, ← ihψ]; rfl
+
+/-- `LFml.spine`'s compiled twin. -/
+def LFml.spineM : LFml C → List (LFml C) × Reads → List (LFml C) × Reads
+  | .imp P ψ, a => ψ.spineM (P :: a.1, a.2)
+  | .and φ ψ, a => ψ.spineM (φ.spineM a)
+  | .all _ _ φ, a => φ.spineM a
+  | φ, a => (a.1, φ.reads a.2)
+
+/-- **The premises of a formula's positive spine**, innermost first, and what
+its conclusions read, added to `a`.  By the recursor. -/
+@[implemented_by LFml.spineM]
+def LFml.spine (φ : LFml C) : List (LFml C) × Reads → List (LFml C) × Reads :=
+  @LFml.rec C (fun _ => List (LFml C) × Reads → List (LFml C) × Reads)
+    (fun a => (a.1, a.2)) (@fun _ x y a => (a.1, (LFml.eq x y).reads a.2))
+    (fun φ _ a => (a.1, (LFml.not φ).reads a.2))
+    (fun _ _ ihφ ihψ a => ihψ (ihφ a)) (fun P _ _ ihψ a => ihψ (P :: a.1, a.2))
+    (fun _ _ _ ih a => ih a) φ
+
+theorem LFml.spine_eq_spineM (φ : LFml C) (a : List (LFml C) × Reads) :
+    φ.spine a = φ.spineM a := by
+  induction φ generalizing a with
+  | tt => rfl
+  | eq | not => simp only [LFml.spineM]; rfl
+  | all k p φ ih => simp only [LFml.spineM, ← ih]; rfl
+  | and φ ψ ihφ ihψ => simp only [LFml.spineM, ← ihφ, ← ihψ]; rfl
+  | imp φ ψ ihφ ihψ => simp only [LFml.spineM, ← ihψ]; rfl
+
+/-- Whether a premise reading `s` bears on what `r` reads: it reads nothing
+(a ground fact, which may refute alone), or a position `r` reads, or the
+state where `r` reads it. -/
+def Reads.bears (r s : Reads) : Bool :=
+  (s.1.isEmpty && !s.2) || (r.2 && s.2) || s.1.any r.1.contains
+
+/-- What `r` and `s` read together. -/
+def Reads.union (r s : Reads) : Reads := (s.1.foldl (fun l x => l.insert x) r.1, r.2 || s.2)
+
+/-- `r`, grown by every premise of `ss` it bears on, until it grows no
+more, at most `n` rounds. -/
+def Reads.grow (ss : List Reads) (n : Nat) (r : Reads) : Reads :=
+  Nat.rec (motive := fun _ => Reads → Reads) (fun r => r)
+    (fun _ ih r =>
+      let r' := ss.foldl (fun r s => bif r.bears s then r.union s else r) r
+      bif r'.1.length == r.1.length && r'.2 == r.2 then r else ih r') n r
+
+/-- `LFml.dropPrem`'s compiled twin. -/
+def LFml.dropPremM (d : LFml C → Bool) : LFml C → LFml C
+  | .imp P ψ => bif d P then ψ.dropPremM d else .imp P (ψ.dropPremM d)
+  | .and φ ψ => .and (φ.dropPremM d) (ψ.dropPremM d)
+  | .all k p φ => .all k p (φ.dropPremM d)
+  | φ => φ
+
+/-- **The premises of the positive spine that `d` picks, dropped.**  By the
+recursor. -/
+@[implemented_by LFml.dropPremM]
+def LFml.dropPrem (d : LFml C → Bool) (φ : LFml C) : LFml C :=
+  @LFml.rec C (fun _ => LFml C) .tt (@fun _ a b => .eq a b) (fun φ _ => .not φ)
+    (fun _ _ ihφ ihψ => .and ihφ ihψ) (fun P _ _ ihψ => bif d P then ihψ else .imp P ihψ)
+    (fun k p _ ih => .all k p ih) φ
+
+theorem LFml.dropPrem_eq_dropPremM (d : LFml C → Bool) (φ : LFml C) :
+    φ.dropPrem d = φ.dropPremM d := by
+  induction φ with
+  | tt | eq | not => rfl
+  | all k p φ ih => simp only [LFml.dropPremM, ← ih]; rfl
+  | and φ ψ ihφ ihψ => simp only [LFml.dropPremM, ← ihφ, ← ihψ]; rfl
+  | imp φ ψ ihφ ihψ => simp only [LFml.dropPremM, ← ihψ]; rfl
+
+theorem LFml.dropPremM_holds (d : LFml C → Bool) (g : State C []) :
+    ∀ (φ : LFml C) (ν : AEnv), (φ.dropPremM d).holds g ν → φ.holds g ν := by
+  intro φ
+  induction φ with
+  | tt | eq | not => exact fun _ h => h
+  | all k p φ ih => exact fun ν h v => ih _ (h v)
+  | and φ ψ ihφ ihψ => exact fun ν h => ⟨ihφ ν h.1, ihψ ν h.2⟩
+  | imp P ψ _ ihψ =>
+    intro ν h
+    cases hd : d P
+    · simp only [LFml.dropPremM, hd, cond_false] at h
+      exact fun hP => ihψ ν (h hP)
+    · simp only [LFml.dropPremM, hd, cond_true] at h
+      exact fun _ => ihψ ν h
+
+/-- **Dropping premises strengthens a formula.** -/
+theorem LFml.dropPrem_holds (d : LFml C → Bool) (g : State C []) (φ : LFml C) (ν : AEnv)
+    (h : (φ.dropPrem d).holds g ν) : φ.holds g ν := by
+  rw [LFml.dropPrem_eq_dropPremM] at h
+  exact LFml.dropPremM_holds d g φ ν h
+
+/-- **A refutation's formula, sliced**: its premises the innermost one (the
+condition refuted) and its conclusions do not reach (`Reads.grow`)
+dropped. -/
+def LFml.slice (φ : LFml C) : LFml C :=
+  let sp := φ.spine ([], ([], false))
+  let ss := sp.1.map (·.reads ([], false))
+  let r := Reads.grow ss ss.length (match ss with
+    | [] => sp.2
+    | s :: _ => sp.2.union s)
+  φ.dropPrem fun P => !r.bears (P.reads ([], false))
+
+theorem LFml.slice_holds {φ : LFml C} {g : State C []} {ν : AEnv} (h : φ.slice.holds g ν) :
+    φ.holds g ν :=
+  LFml.dropPrem_holds _ g φ ν h
+
+/-- The most nodes, and the most stacked storage updates, of a refutation
+the closer reads whole: within them the refutation is the leaf closer's,
+as before slicing; past them it is sliced first (`LFml.refuteForm`). -/
+def sliceSize : Nat := 600
+
+/-- See `sliceSize`. -/
+def sliceDepth : Nat := 2
+
+/-- **The formula a refutation is closed on**: itself where it is small
+(`sliceSize`, `sliceDepth`), else sliced (`LFml.slice`). -/
+def LFml.refuteForm (φ : LFml C) : LFml C :=
+  bif (φ.fits sliceSize).isSome && decide (φ.stDepth ≤ sliceDepth) then φ else φ.slice
+
+theorem LFml.refuteForm_holds {φ : LFml C} {g : State C []} {ν : AEnv}
+    (h : φ.refuteForm.holds g ν) : φ.holds g ν := by
+  unfold LFml.refuteForm at h
+  cases hc : ((φ.fits sliceSize).isSome && decide (φ.stDepth ≤ sliceDepth))
+  · rw [hc, cond_false] at h; exact LFml.slice_holds h
+  · rw [hc, cond_true] at h; exact h
+
+end Decide
+
+namespace Seq
+
+/-- **The scoped closer on a refutation**: `checkCore` on its formula,
+sliced where it is large (`LFml.refuteForm`). -/
+def refuteCore (ψ : Fml C []) : Bool :=
+  match ψ.toLS true SymS.init with
+  | some l => l.refuteForm.boundsOk &&
+      bif ψ.assumesCT then l.refuteForm.decideMemCT || l.refuteForm.decideMem
+      else l.refuteForm.decideMem
+  | none => false
+
+theorem refuteCore_valid {ψ : Fml C []} (h : refuteCore ψ = true) : Valid ψ := by
+  unfold refuteCore at h
+  split at h
+  case h_2 => cases h
+  rename_i l hl
+  rw [Bool.and_eq_true] at h
+  have hc := h.2
+  cases hct : ψ.assumesCT
+  · rw [hct, cond_false] at hc
+    exact Valid.of_toLS hl fun g ν => LFml.refuteForm_holds (LFml.decideMem_valid hc g ν)
+  · rw [hct, cond_true, Bool.or_eq_true] at hc
+    rcases hc with hc | hc
+    case inr =>
+      exact Valid.of_toLS hl fun g ν => LFml.refuteForm_holds (LFml.decideMem_valid hc g ν)
+    intro τ
+    by_cases hg : TSto.CleanTails τ.storage.obs
+    · exact (Fml.toLS_sound ψ true hl τ AEnv.dflt (Agrees.init τ AEnv.dflt)
+        SymS.Fresh.init).1 rfl
+        (LFml.refuteForm_holds (LFml.decideMemCT_holds hc τ AEnv.dflt hg))
+    · exact Fml.assumesCT_holds ψ hct τ hg
+
+/-- **A split's branch refuted**: `H, c ⟹ false` closed by the scoped closer
+on the premises `c` reaches (`refuteCore`). -/
+def refuteS {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ) : Bool :=
+  ((H.pre c).wrap .ff).modalFree && refuteCore ((H.pre c).wrap .ff)
+
+theorem refuteS_sound {R : RuleSet} {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ)
+    (h : refuteS H c = true) : Proves C R [] (H.pre c) .ff := by
+  rw [refuteS, Bool.and_eq_true] at h
+  exact Proves.closeHolds (refuteCore_valid h.2) h.1
 
 end Seq
 
