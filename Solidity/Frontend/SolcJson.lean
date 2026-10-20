@@ -85,7 +85,9 @@ not the variable: a function's obligation holds from any well-typed storage
 Inheritance is flattened: every base version of a function is its own
 member, so a `super.f` names one statically (`PState.superNames`), and the
 base constructors join the most-derived one in a single member in solc's
-legacy order (`compositeBody`; `docs/solc-alignment.md`, "Constructors").
+legacy order (`compositeBody`; `docs/solc-alignment.md`, "Constructors"),
+a body with modifiers or a base's with a `return` as a member it calls
+(`bodyMember?`).
 -/
 
 namespace Solidity.Frontend
@@ -2103,11 +2105,15 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
           callees ids node freeFunctions functionAliases baseContracts).getD [])).eraseDups
   let compositeReach : List Int := (compositeCalls.flatMap fun i =>
     (reach calls (ids.length + 1) [] [] i).toOption.getD []).eraseDups
-  let compositeBody : Except Gap (List (Nat × String)) := do
-    if let some f := ownCtor then
-      unless (modifierInvocations f).isEmpty do
-        throw (.unsupported "a constructor's modifiers with base constructors: \
-          solc runs the base constructors before them" (J.line f))
+  -- a constructor body with modifiers, or a base one with a `return`, as a
+  -- member of its own (`solcCtorBody<id>`) that the composite calls with its
+  -- parameters: its modifiers wrap its body alone, after the base
+  -- constructors ran, and a `return` ends it alone, as in solc
+  let bodyMember? (f : Json) : Bool :=
+    !(modifierInvocations f).isEmpty ||
+      (ownCtor.bind J.id? != J.id? f && (J.nodes f).any (J.kind · == "Return"))
+  let bodyMemberName (f : Json) : String := s!"solcCtorBody{(J.id? f).getD 0}"
+  let compositeBody : Except Gap (List (Nat × String) × List (String × String)) := do
     for i in compositeCalls do
       match reach calls (ids.length + 1) [] [] i with
       | .error g => throw (.unsupported s!"the call of `{nameAt g}` is recursive: \
@@ -2121,13 +2127,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
                 .unsupported s!"a base constructor calls `{nameAt x}`, which is left out: {m}")
     let mut carry : Nat × Nat := (0, 0)
     let mut out : List (Nat × String) := []
+    let mut helpers : List (String × String) := []
     -- the arguments, derived to base
     for (k, f) in baseCtors do
       let baseName := (J.str? k "name").getD "?"
-      unless (modifierInvocations f).isEmpty do
-        throw (.unsupported s!"the modifiers of base constructor `{baseName}`" (J.line f))
-      if (J.nodes f).any (J.kind · == "Return") then
-        throw (.unsupported s!"a `return` in base constructor `{baseName}`" (J.line f))
       unless ((keyClauses (docText f)).toOption.getD []).isEmpty do
         throw (.unsupported s!"base constructor `{baseName}`'s specification" (J.line f))
       let ps := paramsOf f
@@ -2156,12 +2159,38 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     -- the bodies, base to derived
     for f in baseCtors.reverse.map (·.2) ++ ownCtor.toList do
       let b ← J.get f "body"
+      let st0 := { ctorState f with fresh := carry.1, discards := carry.2 }
       let (ss, st') ← ((← J.arr b "statements").flatMapM fun s => do
-          pure ((← stmt s).map (J.line s, ·))).run
-        { ctorState f with fresh := carry.1, discards := carry.2 }
+          pure ((← stmt s).map (J.line s, ·))).run st0
       carry := (st'.fresh, st'.discards)
-      out := out ++ ss
-    pure out
+      if !bodyMember? f then
+        out := out ++ ss
+        continue
+      -- its parameters, as the composite names them
+      let names := ((J.id? f).bind (lookupBy · ctorNames)).getD []
+      let ps ← (paramsOf f).mapM fun p => do
+        let ((t, _), _) ← (do
+            let t ← PM.lift (tyText S (← PM.lift (J.get p "typeName")))
+            let loc := match J.opt p "storageLocation" with
+              | some (.str "memory") => " memory"
+              | some (.str "storage") => " storage"
+              | _ => ""
+            pure (t ++ loc, ()) : PM (String × Unit)).run st0
+        pure (((J.id? p).bind (lookupBy · names)).getD ((J.str? p "name").getD ""), t)
+      let (apps, _) ← ((modifierInvocations f).mapM fun m => do
+          let some id := modifierId m
+            | throw (.unsupported "a modifier without a declaration identity" (J.line f))
+          let some declared := lookupBy id modifierReads
+            | throw (.unsupported "a modifier outside the imported contract" (J.line f))
+          let _ ← PM.lift declared
+          let args ← (J.arrD m "arguments").toList.mapM expr
+          pure s!" solcModifier{id}({", ".intercalate args})" : PM (List String)).run st0
+      let n := bodyMemberName f
+      let psText := ", ".intercalate (ps.map fun (x, t) => s!"{t} {x}")
+      helpers := helpers ++ [(n, s!"function {n}({psText}){String.join apps} \{ \
+        {String.join (ss.map (·.2 ++ "; "))}}")]
+      out := out ++ [(J.line f, s!"{n}({", ".intercalate (ps.map (·.1))})")]
+    pure (out, helpers)
   let called := (ownIds.flatMap fun i =>
     ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast) ++
     initCalls.flatMap (fun i => (reach calls (ids.length + 1) [] [] i).toOption.getD []) ++
@@ -2172,6 +2201,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       (ownIds.contains i && (testing || !r.modifierApps.isEmpty))))
     let ss ← r.body.toOption
     pure (r.name, r.member (ss.map (·.2)))
+  -- the constructor bodies the composite calls, after every function
+  let ctorHelpers := if baseCtors.isEmpty then [] else
+    ((compositeBody.toOption.map (·.2)).getD [])
+  let funMembers := funMembers ++ ctorHelpers
   -- an initializer that does not print, or calls a function left out
   let initGap : Option Gap := match inits with
     | .error g => some g
@@ -2197,8 +2230,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         params := [], body := do if let some g := initGap then throw g else pure [],
         writingCall := false }
     some { own with
-      body := do let _ ← own.body; compositeBody,
-      calls := (own.calls ++ compositeReach.map nameAt).eraseDups,
+      body := do let _ ← own.body; pure (← compositeBody).1,
+      -- its own modifiers wrap its body's member alone (`bodyMember?`)
+      modifierApps := "",
+      calls := (own.calls ++ compositeReach.map nameAt ++ ctorHelpers.map (·.1)).eraseDups,
       writingCall := own.writingCall || baseCtors.any (writingCall ·.2) ||
         compositeReach.any fun x => (lookupBy x byId).all (·.writingCall) }
   let funs := all.filterMap fun (c, r) => if c then none else some r

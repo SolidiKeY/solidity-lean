@@ -630,15 +630,14 @@ test("unmodelled inheritance boundaries are rejected instead of omitted", () => 
   const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameGap"});
   assert.ok(report.errors.some(e => /distinct storage roots/.test(e.reason)));
   assert.equal(testsPassed(report), false);
-  for (const [contract, reason] of [["CtorGap", /modifiers of base constructor/],
-    ["CtorModifierGap", /constructor's modifiers with base constructors/],
-    ["CtorReturnGap", /`return` in base constructor/]]) {
-    const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract});
-    const ctor = report.results.find(r => r.function === "constructor");
-    assert.equal(ctor?.status, "unsupported", contract);
-    assert.match(ctor.reason, reason, contract);
-    assert.equal(testsPassed(report), false);
-  }
+});
+
+test("inheritance wraps each constructor's body in its own modifiers, after its bases", () => {
+  const report = runSolidityTests(["tests/solc/InheritanceCtors.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.contract, r.status]));
+  for (const c of ["ModLeaf", "CtorModLeaf", "CtorReturnLeaf"]) assert.equal(status[c], "proved", c);
+  for (const c of ["CtorModFalse", "CtorReturnFalse"]) assert.equal(status[c], "pending", c);
 });
 
 test("native modular builtins retain wide results, failure priority and source effects", () => {

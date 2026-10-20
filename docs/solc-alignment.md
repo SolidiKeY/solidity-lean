@@ -496,9 +496,12 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   most-derived contract.  Arguments come from the first contract in the C3
   order giving them, in its constructor's header (`B(a)`) or its
   inheritance specifier (`is B(5)`) ("Arguments for Base Constructors").
-  Refused: a modifier on a base constructor, or on a constructor with base
-  constructors (solc runs the bases before it), and a `return` in a base
-  constructor.
+  A constructor's modifiers wrap its own body alone, after the base
+  constructors ran (`appendBaseConstructor` precedes
+  `appendModifierOrFunctionCode`), and a `return` in a base constructor
+  ends its body alone: such a body is a member of its own,
+  `solcCtorBody<id>(params)`, carrying the modifiers, which the composite
+  calls in its turn (`bodyMember?`; `tests/solc/InheritanceCtors.sol`).
 - **`super.f`** in a function of contract `D` names the first contract after
   `D` in the most-derived contract's C3 order that implements `f`
   (Solidity docs, "Inheritance": `super` is the next base in the final
