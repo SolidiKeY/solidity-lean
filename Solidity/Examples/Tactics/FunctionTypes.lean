@@ -88,6 +88,12 @@ theorem member : ⊨ dl!{ ⟨ hold.f = triple; function (uint) pure returns (uin
   sol_symex
   sol_close
 
+/-- At a symbolic argument: only the branch of the value's tag is reached. -/
+theorem symbolic : ⊨ dl!{ x < 100 → ⟨ function (uint) pure returns (uint) h = triple;
+    assert(h(x) == 3 * x); ⟩ true } := by
+  sol_symex
+  sol_close
+
 /-! ## 2 · The default value, `delete`, `==` -/
 
 /-- An unassigned value panics when called: the run reverts. -/
