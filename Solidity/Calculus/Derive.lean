@@ -359,11 +359,11 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     else pure g
   -- `¬X → ψ`, `X` a program's: `X` proved instead where the walk closes
   -- it (`notLeft`), else the premise hidden (`hideLeft`)
-  if ← negModalGoal? g then
+  if ← tryCatchRuntimeEx (withCurrHeartbeats (negModalGoal? g)) fun _ => pure false then
     let s ← saveState
     let nl ← `(tactic| refine $(← ProofTree.short ``Proves.notLeft) ?_)
     let r ← tryCatchRuntimeEx (do
-        let [gx] ← ProofTree.runOn g #[nl] | return none
+        let [gx] ← withCurrHeartbeats (ProofTree.runOn g #[nl]) | return none
         let ls ← IO.mkRef #[]
         let lines ← walk fuel ls gx (close := true) short
         return if (← ls.get).isEmpty then some lines else none)
@@ -371,7 +371,8 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     if let some lines := r then return (← ProofTree.tacLines nl) ++ lines
     s.restore
     let hl ← `(tactic| refine $(← ProofTree.short ``Proves.hideLeft) ?_)
-    let [g'] ← ProofTree.runOn g #[hl] | throwError "sol_derive: hideLeft failed"
+    let [g'] ← withCurrHeartbeats (ProofTree.runOn g #[hl])
+      | throwError "sol_derive: hideLeft failed"
     return (← ProofTree.tacLines hl) ++ (← walk fuel leaves g' close short)
   let mut step := none
   for (tacs, note) in ← movesAt g short do

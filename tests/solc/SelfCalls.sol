@@ -7,6 +7,11 @@ pragma solidity ^0.8.4;
 // its address.  A callee is run only if it is declared before its caller.
 contract SelfCalls {
     int ix;
+    uint fy;
+
+    receive() external payable {
+        ++fy;
+    }
 
     /// @custom:key skip
     function gOne(bool b) external pure returns (uint) {
@@ -28,8 +33,8 @@ contract SelfCalls {
     function noop() external pure {
     }
 
-    // pending: each `catch` block is a goal from the caller's state, the
-    // callee not known to end normally (`docs/options.md` O8)
+    // each `catch` goal assumes the callee does not end normally
+    // (`fails(call)`, `docs/options.md` O8): `gOne(true)` does
     /// solc: semanticTests/tryCatch/simple_notuple.sol
     /// @custom:key box
     function tryCatchExactReturn(uint q) public view {
@@ -100,6 +105,16 @@ contract SelfCalls {
         } catch {}
         int cur = ix;
         assert(!success || y2 == cur);
+    }
+
+    // a value call to the contract runs its `receive` (O8)
+    /// solc: semanticTests/receive/empty_calldata_calls_receive.sol
+    /// @custom:key box
+    function callRunsReceive() public {
+        fy = 0;
+        (bool ok, ) = payable(address(this)).call{value: 0}("");
+        uint r = fy;
+        assert(ok && r == 1);
     }
 
     /// solc: semanticTests/revertStrings/called_contract_has_code.sol
