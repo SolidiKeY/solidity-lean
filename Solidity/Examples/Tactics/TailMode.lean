@@ -91,4 +91,31 @@ theorem recycledWrite_clean : ValidTail .clean dl!{ [ Token storage r = tokens.p
     r.value = 7; tokens.push(); assert(tokens[tokens.length - 1].value == 7); ] true } :=
   ValidTail.clean_of_solc recycledWrite_solc
 
+/-! ## 4 · As a contract's invariant
+
+Clean tails are kept by a contract none of whose programs shrinks an array
+of references while an alias may be held (`Prog.exposesNone`,
+`Typing/CleanTailRun.lean`): its storages all have clean tails
+(`ReachableBy.cleanTail`), so what `.clean` proves holds in every state it
+reaches. -/
+
+/-- A push bound to an alias and written through it exposes nothing. -/
+example : (sol{ Token storage r = tokens.push(); r.value = 3; } :
+    Prog Tokens [] _).exposesNone = true := by decide
+
+/-- A `pop` with no alias in scope exposes nothing: what it pops is cleared. -/
+example : (sol{ tokens.pop(); delete tokens; } : Prog Tokens [] _).exposesNone = true := by
+  decide
+
+/-- The `pop` that leaves `r` dangling fails the check. -/
+example : (sol{ Token storage r = tokens.push(); tokens.pop(); r.value = 7; } :
+    Prog Tokens [] _).exposesNone = false := by decide
+
+/-- **The recycled slot reads the default in every state the contract
+reaches** through programs that expose nothing. -/
+theorem pushRead_reachable (σ : State Tokens [])
+    (hσ : ReachableBy Tokens (fun _ _ P => P.exposesNone = true) σ.storage) :
+    holds σ pushRead :=
+  pushRead_clean.holds_reachable (fun _ h => h) σ hσ
+
 end Solidity.Examples.Tactics.TailMode

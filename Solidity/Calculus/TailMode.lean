@@ -1,4 +1,5 @@
 import Solidity.Calculus.Logic
+import Solidity.Typing.CleanTailRun
 
 /-!
 # Clean array tails as an option (`docs/options.md`, O6)
@@ -19,11 +20,16 @@ an argument of the validity proved (`ValidTail m φ`), and the premise is a
 formula, so `Proves.valid` proves `.clean` unchanged: `impRight` puts it in
 the antecedent, where the closer reads it (`Calculus/DecideCleanTail.lean`).
 
-It is an assumption on the starting storage, not a property a program
+It is an assumption on the starting storage, not a property every program
 keeps: one that pops an aliased element and writes through the alias
 leaves a dirty tail (`leaveDirty_boundary_rejected`), and a callback may
 observe it (`interruptRepair_callback_boundary_rejected`,
-`Calculus/CleanTailBoundary.lean`).
+`Calculus/CleanTailBoundary.lean`).  It is a contract's invariant when
+every program the contract runs exposes nothing (`Prog.exposesNone`, no
+array of references shrunk while an alias may be held:
+`Typing/CleanTailRun.lean`): then every storage it reaches has clean tails
+(`ReachableBy.cleanTail`), and what `.clean` proves holds there
+(`ValidTail.holds_reachable`).
 -/
 
 namespace Solidity
@@ -78,6 +84,14 @@ theorem ValidTail.holds_of_clean {φ : Fml C []} (h : ValidTail .clean φ) (σ :
 /-- The initial storage has clean tails: what `.clean` proves holds there. -/
 theorem ValidTail.holds_init {φ : Fml C []} (h : ValidTail .clean φ) : holds (State.init C) φ :=
   h.holds_of_clean _ (Storage.init_cleanTail C)
+
+/-- **What `.clean` proves holds in every state a contract reaches** through
+programs that expose nothing (`ReachableBy.cleanTail`). -/
+theorem ValidTail.holds_reachable {φ : Fml C []} (h : ValidTail .clean φ)
+    {F : (Γ Γ' : Ctx) → Prog C Γ Γ' → Prop}
+    (hF : ∀ {Γ Γ' : Ctx} (P : Prog C Γ Γ'), F Γ Γ' P → P.exposesNone = true)
+    (σ : State C []) (hσ : ReachableBy C F σ.storage) : holds σ φ :=
+  h.holds_of_clean σ (hσ.cleanTail hF)
 
 /-- `.solc` assumes less. -/
 theorem ValidTail.clean_of_solc {φ : Fml C []} (h : ValidTail .solc φ) : ValidTail .clean φ :=

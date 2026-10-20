@@ -1721,4 +1721,34 @@ theorem Prog.keeps_ct : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (outer : Bool
 
 end
 
+/-! ## A contract that exposes nothing keeps clean tails -/
+
+/-- **A run that exposes nothing keeps clean tails**: from a state with
+clean tails and no alias local (a transaction's parameters are values and
+memory), a program that passes the check ends with clean tails. -/
+theorem Prog.run_cleanTail {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hP : P.exposesNone = true)
+    {σ : State C Γ} (hσ : σ.storage.CleanTail) (hΓ : Γ.hasAlias = false) {o : Out C σ.H Γ'}
+    (h : P.run σ = .ok o) : o.st.storage.CleanTail :=
+  (Prog.keeps_ct P false hP σ o ⟨hσ, env_noAlias _ hΓ _⟩ h).1.1
+
+/-- **The storages a contract reaches through `F`**: the deployment's, and
+whatever a run of a program `F` admits leaves, from a state over a reached
+storage with no alias local (the constructor, then any sequence of
+transactions). -/
+inductive ReachableBy (C : Contract) (F : (Γ Γ' : Ctx) → Prog C Γ Γ' → Prop) :
+    Storage C → Prop
+  | init : ReachableBy C F (Storage.init C)
+  | step {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hP : F Γ Γ' P) (σ : State C Γ) (hΓ : Γ.hasAlias = false)
+      (hσ : ReachableBy C F σ.storage) (o : Out C σ.H Γ') (h : P.run σ = .ok o) :
+      ReachableBy C F o.st.storage
+
+/-- **Clean tails are a contract's invariant** when every program it runs
+exposes nothing: every storage it reaches has clean tails. -/
+theorem ReachableBy.cleanTail {F : (Γ Γ' : Ctx) → Prog C Γ Γ' → Prop}
+    (hF : ∀ {Γ Γ' : Ctx} (P : Prog C Γ Γ'), F Γ Γ' P → P.exposesNone = true) {st : Storage C}
+    (h : ReachableBy C F st) : st.CleanTail := by
+  induction h with
+  | init => exact Storage.init_cleanTail C
+  | step P hP σ hΓ _ o hr ih => exact P.run_cleanTail (hF P hP) ih hΓ hr
+
 end Solidity
