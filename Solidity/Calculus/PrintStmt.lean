@@ -500,7 +500,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     | none, a :: bs => `(sol_stmt| $fe:sol_expr ( $a:sol_expr, $(bs.toArray),* ))
     | some y, [] => `(sol_stmt| $y:ident = $fe:sol_expr ( ))
     | some y, bs => `(sol_stmt| $y:ident = $fe:sol_expr ( $(bs.toArray),* ))
-  | Stmt.tryCall _ _ _ _ _ _ _ _ c rets ok err code pnc other =>
+  | Stmt.tryCall _ _ _ _ _ _ _ _ _ _ c rets ok err code pnc other _ _ _ =>
     let c := (← instantiateMVars c).consumeMData
     let rets := (← instantiateMVars rets).consumeMData
     let code := (← instantiateMVars code).consumeMData

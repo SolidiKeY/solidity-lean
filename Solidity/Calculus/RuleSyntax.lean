@@ -939,7 +939,9 @@ def schemaTry (stx : TSyntax `sol_stmt) : MacroM Lean.Term := do
   let other ← match o with
     | `(sol_catch| catch $b:sol_block) => block b
     | _ => Macro.throwErrorAt o "`catch otherBody`"
-  `(Stmt.tryCall $call $rets $(← block ok) $err $code $pnc $other)
+  -- another contract's callee: the self-call's parts unused (`Stmt.tryCall`'s `self`)
+  `(Stmt.tryCall $call $rets $(← block ok) $err $code $pnc $other $(mkIdent `selfArgs)
+      $(mkIdent `selfBody) false)
 
 /-- A taclet's `/// @custom:key` clauses above `while`: the annotation written
 (`unwind 0`, `unwind n`, `unwind n + 1`, `invariant inv` with any `dec`, or

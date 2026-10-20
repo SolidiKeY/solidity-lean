@@ -101,7 +101,8 @@ def Stmt.step (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Prem
     -- assumeFalse (Lean)
     (assumeFalse := .done true)
     (call := fun f args ret body => callStep k f args ret body)
-    (tryCall := fun _ rets ok err code pnc other => tryStep m rets ok err code pnc other)
+    (tryCall := fun call rets ok err code pnc other sargs sbody self =>
+      tryStepS m call rets ok err code pnc other sargs sbody self)
     (loop := fun a c body => loopStep k m a c body)
     -- a block is its statements, its locals popped after it
     (block := fun body => .unfold body body.ext)
@@ -136,9 +137,10 @@ def Stmt.maxIdx : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
     (require := fun _ => 0) (assert := fun _ => 0) (revert := 0) (assumeFalse := 0)
     (call := fun _ args ret body =>
       max ((args.names ++ ret.names).foldl (fun n x => max n x.idx) 0) (Prog.maxIdx body))
-    (tryCall := fun _ rets ok err code pnc other =>
-      max (max (max rets.maxIdx ((code.names).foldl (fun n x => max n x.idx) 0))
+    (tryCall := fun _ rets ok err code pnc other sargs sbody _ =>
+      max (max (max (max rets.maxIdx ((code.names).foldl (fun n x => max n x.idx) 0))
         (max (Prog.maxIdx ok) (Prog.maxIdx err))) (max (Prog.maxIdx pnc) (Prog.maxIdx other)))
+        (max ((sargs.names).foldl (fun n x => max n x.idx) 0) (Prog.maxIdx sbody)))
     (loop := fun _ _ body => Prog.maxIdx body) (block := fun body => Prog.maxIdx body)
     (pushOpAssign := fun _ _ _ _ _ => 0) (pushIncDec := fun _ _ _ => 0)
     (callReceiver := fun _ args r body _ =>

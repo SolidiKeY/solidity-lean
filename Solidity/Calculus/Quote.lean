@@ -339,10 +339,12 @@ partial def qStmt (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr := do
     sctor ``Stmt.callReceiverPush #[Γe, ← qCtx ps, ← qCtx Γf, ← qCtx Γv, toExpr E, toExpr f,
       ← qArgs Γ ps args, toExpr r, ← qProg ([.alias (.array E)] ++ ps) Γf body,
       ← qProg Γ Γv code, ← qSrc Γv E value]
-  | @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ call rets ok err code pnc other =>
+  | @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf call rets ok err code pnc other sargs sbody self =>
     sctor ``Stmt.tryCall #[Γe, ← qCtx ρ, ← qCtx κ, ← qCtx Γ₁, ← qCtx Γ₂, ← qCtx Γ₃, ← qCtx Γ₄,
+      ← qCtx ps, ← qCtx Γf,
       ← qExtCall Γ call, ← qBinders ρ rets, ← qProg (ρ ++ Γ) Γ₁ ok, ← qProg Γ Γ₂ err,
-      qCode κ code, ← qProg (κ ++ Γ) Γ₃ pnc, ← qProg Γ Γ₄ other]
+      qCode κ code, ← qProg (κ ++ Γ) Γ₃ pnc, ← qProg Γ Γ₄ other, ← qArgs Γ ps sargs,
+      ← qProg (ρ ++ ps) Γf sbody, toExpr self]
   | @Stmt.loop _ _ Γ₁ a c body =>
     sctor ``Stmt.loop #[Γe, ← qCtx Γ₁, ← qLoopAnn Γ a, ← qVal Γ .bool c, ← qProg Γ Γ₁ body]
   | @Stmt.block _ _ Γ₁ body => sctor ``Stmt.block #[Γe, ← qCtx Γ₁, ← qProg Γ Γ₁ body]
