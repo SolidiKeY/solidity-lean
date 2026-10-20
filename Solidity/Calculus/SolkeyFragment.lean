@@ -67,7 +67,7 @@ def Stmt.inSolkey (m : Modality) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (require := fun c => c.keyValue) (assert := fun c => c.keyValue) (revert := true)
     (assumeFalse := false)
     (call := fun _ args _ body => (Args.capture args).isNone && args.keyValues && Prog.inSolkey m body)
-    (tryCall := fun _ _ _ _ _ _ _ => false)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => false)
     (loop := fun a c body => match a with | .auto => c.keyValue && Prog.inSolkey m body | _ => false)
     (block := fun body => Prog.inSolkey m body)
     (pushOpAssign := fun _ _ _ b r => b.isSimple && b.keyValue && r.keyValue)

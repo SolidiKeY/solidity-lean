@@ -194,7 +194,7 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (call := fun _ _ _ body => Prog.hasTransfer body)
     (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
     (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
-    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
   termination_by structural _ _ s => s
 
@@ -225,7 +225,7 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (call := fun _ _ _ _ => true)
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
-    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
 
 /-- Whether a `transfer` occurs in a program of the frames. -/
@@ -288,7 +288,7 @@ def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (callReceiver := fun _ _ _ body _ => Prog.callsBack pay body)
     (callReceiverPush := fun _ _ _ body code _ =>
       Prog.callsBack pay body || Prog.callsBack pay code)
-    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.callsBack pay body)
     (block := fun body => Prog.callsBack pay body)
   termination_by structural _ _ s => s
@@ -356,7 +356,7 @@ def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
     (call := fun _ _ _ _ => true)
     (callReceiver := fun _ _ _ _ _ => true)
     (callReceiverPush := fun _ _ _ _ _ _ => true)
-    (tryCall := fun _ _ _ _ _ _ _ => true)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.callsBack pay body)
     (block := fun body => Prog.callsBack pay body)
 

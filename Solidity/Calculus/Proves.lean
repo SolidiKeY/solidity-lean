@@ -92,7 +92,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)
     (ite := fun _ _ _ => true) (require := fun _ => true) (assert := fun _ => true)
     (revert := true) (assumeFalse := false) (call := fun _ args _ _ => (Args.capture args).isNone)
-    (tryCall := fun _ _ _ _ _ _ _ => m == .box)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => m == .box)
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true
       | .unwind 0 => false
