@@ -38,9 +38,17 @@ def Ops : Contract := contract!{
   }
   function setOp(bool b) { op = b ? double : triple; }
   function runOp(uint x) returns (uint r) { r = op(x); }
+  struct Holder { uint k; function (uint) pure returns (uint) f; }
+  Holder hold;
 }
 
 example : Ops.widths = [("op#function(uint)returns(uint)", 0)] := rfl
+
+/-- A parameter's and a return's marker, keyed by its name as a width is. -/
+example : (Ops.funs.map fun (n, d) => (n, d.widths)) =
+    [("double", []), ("triple", []), ("apply", [("h#function(uint)returns(uint)", 0)]),
+     ("compose", [("f#function(uint)returns(uint)", 0), ("g#function(uint)returns(uint)", 0)]),
+     ("choose", [("r#function(uint)returns(uint)", 0)]), ("setOp", []), ("runOp", [])] := rfl
 
 local instance : InContract := ⟨Ops⟩
 
@@ -73,6 +81,13 @@ theorem stored : ⊨ dl!{ ⟨ setOp(true); uint y = runOp(5); ⟩ y == 10 } := b
   sol_symex
   sol_close
 
+/-- A struct member of a function type is its tag, a `uint` (the table
+spells no function type): called through a local of the type. -/
+theorem member : ⊨ dl!{ ⟨ hold.f = triple; function (uint) pure returns (uint) g = hold.f;
+    uint y = g(3); ⟩ y == 9 } := by
+  sol_symex
+  sol_close
+
 /-! ## 2 · The default value, `delete`, `==` -/
 
 /-- An unassigned value panics when called: the run reverts. -/
@@ -90,5 +105,31 @@ theorem equality : ⊨ dl!{ ⟨ function (uint) pure returns (uint) h = double; 
     bool b = h == triple; ⟩ a == true && b == false } := by
   sol_symex
   sol_close
+
+/-! ## 3 · What is refused -/
+
+/-- error: Solidity elaboration failed: h(…): a call through an external function value is not modelled (docs/semantic-gaps.md, "Function types") -/
+#guard_msgs in #check sol{ function (uint) external returns (uint) h; uint y = h(1); }
+
+/-- A function declared after a caller that calls through a value of its
+type, and named as a value in the contract, is refused: the caller's
+dispatch could not inline it. -/
+def Late : Contract := contract!{
+  function apply(function (uint) pure returns (uint) h, uint x) pure returns (uint r) { r = h(x); }
+  function double(uint x) pure returns (uint r) { r = 2 * x; }
+  function use(uint x) pure returns (uint r) { r = apply(double, x); }
+}
+
+/-- error: Solidity elaboration failed: se3(…) may call double, which is not declared before this function: declare the functions of type function(uint)returns(uint) first -/
+#guard_msgs in #check sol[Late]{ uint y = use(1); }
+
+/-- One named as a value only outside the contract is refused there. -/
+def Late2 : Contract := contract!{
+  function apply(function (uint) pure returns (uint) h, uint x) pure returns (uint r) { r = h(x); }
+  function double(uint x) pure returns (uint r) { r = 2 * x; }
+}
+
+/-- error: Solidity elaboration failed: double is taken as a value only outside the contract's functions, and a function declared before it calls through a function value: name it as a value in the contract -/
+#guard_msgs in #check sol[Late2]{ uint y = apply(double, 1); }
 
 end Solidity.Examples.Tactics.FunctionTypes
