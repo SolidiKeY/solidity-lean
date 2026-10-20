@@ -466,21 +466,45 @@ theorem tryCall_wk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateInv
       (by rw [ha]; exact hg), ?_⟩
     simpa only [TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h ρ).trans (Prog.wk_over ok (Thin.keepAll ρ h))) hr)
-  | tryError hp =>
+  | tryError hsf hp =>
     obtain ⟨u, hu, hr⟩ := herr h σ d hp
-    exact ⟨_, ExecS.tryError hu, CWkRel.drop (Prog.wk_over err h) hr⟩
-  | tryPanic hp =>
+    exact ⟨_, ExecS.tryError (by rw [ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over err h) hr⟩
+  | trySelfError hz hs hc hp =>
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    cases v <;> cases hr
+    obtain ⟨u, hu, hr⟩ := herr h σ d hp
+    exact ⟨_, ExecS.trySelfError (call := call.wk h) (by rw [ha]; exact hz)
+      (by rw [ha]; exact hs) hv hu, CWkRel.drop (Prog.wk_over err h) hr⟩
+  | trySelfOther hz hs hc hp =>
+    obtain ⟨v, hv, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    cases v <;> cases hr
+    obtain ⟨u, hu, hr⟩ := hoth h σ d hp
+    exact ⟨_, ExecS.trySelfOther (call := call.wk h) (by rw [ha]; exact hz)
+      (by rw [ha]; exact hs) hv hu, CWkRel.drop (Prog.wk_over other h) hr⟩
+  | trySelfPanic hz hs hc hp =>
+    rename_i v u
+    obtain ⟨w, hw, hr⟩ := call_wk J call.fn sargs (.rets rets) sbody h σ d hc
+    cases w <;> cases hr
+    obtain ⟨u', hu, hr⟩ := hpnc (Thin.keepAll κ h)
+      (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) (TEnv.append κ (code.decodeT v) d) hp
+    simp only [State.lift, State.withEnv] at hu
+    rw [TEnv.put_keepAll h κ (code.decodeT v) (code.decodeT v) σ.env d] at hu
+    refine ⟨_, ExecS.trySelfPanic (call := call.wk h) (v := v) (by rw [ha]; exact hz)
+      (by rw [ha]; exact hs) hw hu, ?_⟩
+    simpa only [TEnv.off_keepAll] using
+      (CWkRel.drop ((Thin.Over.append h κ).trans (Prog.wk_over pnc (Thin.keepAll κ h))) hr)
+  | tryPanic hsf hp =>
     rename_i v u
     obtain ⟨u', hu, hr⟩ := hpnc (Thin.keepAll κ h)
       (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) (TEnv.append κ (code.decodeT v) d) hp
     simp only [State.lift, State.withEnv] at hu
     rw [TEnv.put_keepAll h κ (code.decodeT v) (code.decodeT v) σ.env d] at hu
-    refine ⟨_, ExecS.tryPanic (v := v) hu, ?_⟩
+    refine ⟨_, ExecS.tryPanic (v := v) (by rw [ha]; exact hsf) hu, ?_⟩
     simpa only [TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h κ).trans (Prog.wk_over pnc (Thin.keepAll κ h))) hr)
-  | tryOther hp =>
+  | tryOther hsf hp =>
     obtain ⟨u, hu, hr⟩ := hoth h σ d hp
-    exact ⟨_, ExecS.tryOther hu, CWkRel.drop (Prog.wk_over other h) hr⟩
+    exact ⟨_, ExecS.tryOther (by rw [ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over other h) hr⟩
 
 theorem CWkRel.isOk {Γ Δ : Ctx} {H : HTy} {h : Thin Γ Δ}
     {off : List ((t : LTy) × t.TDenote C H)} {o : COut C H Γ} {o' : COut C H Δ}

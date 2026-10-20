@@ -387,21 +387,45 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
       (by rw [← ha]; exact hg), ?_⟩
     simpa only [State.withEnv, TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h ρ).trans (Prog.wk_over ok (Thin.keepAll ρ h))) hr)
-  | tryError hp =>
+  | tryError hsf hp =>
     obtain ⟨u, hu, hr⟩ := herr h τ hp
-    exact ⟨_, ExecS.tryError hu, CWkRel.drop (Prog.wk_over err h) hr⟩
-  | tryPanic hp =>
+    exact ⟨_, ExecS.tryError (by rw [← ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over err h) hr⟩
+  | tryPanic hsf hp =>
     rename_i v u'
     obtain ⟨u, hu, hr⟩ := hpnc (Thin.keepAll κ h)
       (τ.withEnv (TEnv.append κ (code.decodeT v) τ.env)) hp
     dsimp only [State.thin, State.withEnv] at hu
     rw [thin_keepAll h κ (code.decodeT v) τ.env] at hu
-    refine ⟨_, ExecS.tryPanic (v := v) hu, ?_⟩
+    refine ⟨_, ExecS.tryPanic (v := v) (by rw [← ha]; exact hsf) hu, ?_⟩
     simpa only [State.withEnv, TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h κ).trans (Prog.wk_over pnc (Thin.keepAll κ h))) hr)
-  | tryOther hp =>
+  | tryOther hsf hp =>
     obtain ⟨u, hu, hr⟩ := hoth h τ hp
-    exact ⟨_, ExecS.tryOther hu, CWkRel.drop (Prog.wk_over other h) hr⟩
+    exact ⟨_, ExecS.tryOther (by rw [← ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over other h) hr⟩
+  | trySelfError hz hs hc hp =>
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    cases v <;> cases hr
+    obtain ⟨u, hu, hr⟩ := herr h τ hp
+    exact ⟨_, ExecS.trySelfError (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv hu,
+      CWkRel.drop (Prog.wk_over err h) hr⟩
+  | trySelfOther hz hs hc hp =>
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    cases v <;> cases hr
+    obtain ⟨u, hu, hr⟩ := hoth h τ hp
+    exact ⟨_, ExecS.trySelfOther (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv hu,
+      CWkRel.drop (Prog.wk_over other h) hr⟩
+  | trySelfPanic hz hs hc hp =>
+    rename_i v u'
+    obtain ⟨w, hw, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    cases w <;> cases hr
+    obtain ⟨u, hu, hr⟩ := hpnc (Thin.keepAll κ h)
+      (τ.withEnv (TEnv.append κ (code.decodeT v) τ.env)) hp
+    dsimp only [State.thin, State.withEnv] at hu
+    rw [thin_keepAll h κ (code.decodeT v) τ.env] at hu
+    refine ⟨_, ExecS.trySelfPanic (v := v) (by rw [← ha]; exact hz) (by rw [← ha]; exact hs)
+      hw hu, ?_⟩
+    simpa only [State.withEnv, TEnv.off_keepAll] using
+      (CWkRel.drop ((Thin.Over.append h κ).trans (Prog.wk_over pnc (Thin.keepAll κ h))) hr)
 
 theorem cons_cases {Γ Γ₁ Γ₂ : Ctx} (J : StateInv C) (σ : State C Γ)
     (s : Stmt C Γ Γ₁) (P : Prog C Γ₁ Γ₂) {o : COut C σ.H Γ₂}
