@@ -245,7 +245,7 @@ end Parts
 mutual
 
 /-- A statement read in `Γ` (its term `Γe`) leaving `Γ'` (its term `Γ'e`). -/
-def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' → Lean.Expr
+def Stmt.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' → Lean.Expr
   | _, _, Γe, _, @Stmt.assign _ _ T l r =>
     mkAppN (mkConst ``Stmt.assign) #[c, Γe, toExpr T, Loc.quote c Γe l, Src.quote c Γe r]
   | _, _, Γe, _, @Stmt.rebind _ _ R i r =>
@@ -284,7 +284,7 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
     let Γfe := ctxOnto pse [.alias (.array E')]
     mkAppN (mkConst ``Stmt.callReceiver) #[c, Γe, pse,
       ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf, toExpr E', toExpr f,
-      ase, toExpr r, Prog.quote Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
+      ase, toExpr r, Prog.quote hs Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
       ReceiverOp.quote c Γe op]
   | Γ, _, Γe, _, @Stmt.callReceiverPush _ _ ps Γf Γv E' f args r body code value =>
     let (ase, pse) := Args.quote c Γe args
@@ -292,8 +292,8 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
     let Γve := ctxFrom Γ Γe Γv
     mkAppN (mkConst ``Stmt.callReceiverPush) #[c, Γe, pse,
       ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf, Γve, toExpr E', toExpr f,
-      ase, toExpr r, Prog.quote Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
-      Prog.quote Γe Γve code, Src.quote c Γve value]
+      ase, toExpr r, Prog.quote hs Γfe (ctxFrom ([.alias (.array E')] ++ ps) Γfe Γf) body,
+      Prog.quote hs Γe Γve code, Src.quote c Γve value]
   | _, _, Γe, _, .transfer r a =>
     mkAppN (mkConst ``Stmt.transfer) #[c, Γe, Val.quote c Γe r, Val.quote c Γe a]
   | _, _, Γe, _, .send pv r a g =>
@@ -319,7 +319,7 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
     let Γ₁e := ctxFrom Γ Γe Γ₁
     let Γ₂e := ctxFrom Γ Γe Γ₂
     mkAppN (mkConst ``Stmt.ite) #[c, Γe, Γ₁e, Γ₂e, Val.quote c Γe cv,
-      Prog.quote Γe Γ₁e thn, Prog.quote Γe Γ₂e els]
+      Prog.quote hs Γe Γ₁e thn, Prog.quote hs Γe Γ₂e els]
   | _, _, Γe, _, .require cv => mkAppN (mkConst ``Stmt.require) #[c, Γe, Val.quote c Γe cv]
   | _, _, Γe, _, .assert cv => mkAppN (mkConst ``Stmt.assert) #[c, Γe, Val.quote c Γe cv]
   | _, _, Γe, _, .revert => mkAppN (mkConst ``Stmt.revert) #[c, Γe]
@@ -329,7 +329,27 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
     let fre := ctxOnto pse rs
     let Γfe := ctxFrom (rs ++ ps) fre Γf
     mkAppN (mkConst ``Stmt.call) #[c, Γe, Γ'e, pse, ctxE rs, Γfe, toExpr f, ase,
-      CallRet.quote Γe ret, Prog.quote fre Γfe body]
+      CallRet.quote Γe ret, Prog.quote hs fre Γfe body]
+  | _, _, Γe, Γ'e, @Stmt.callRec _ _ _ ps rs f d args ret body =>
+    let (ase, pse) := Args.quote c Γe args
+    let fre := ctxOnto pse rs
+    let head := #[c, Γe, Γ'e, pse, ctxE rs, toExpr f]
+    match hs.idxOf? f with
+    -- a call of a function whose unrolling is being quoted: its frame below
+    | some j => mkAppN (mkConst ``Stmt.callRec)
+        (head ++ #[.bvar (3 * j + 1), ase, CallRet.quote Γe ret, .bvar (3 * j)])
+    -- a recursive call: `fun _ => recUnroll Prog.recBase (fun n bt => body) d`,
+    -- its body's own recursive calls the frame below, `bt`, `n` frames left
+    | none =>
+      let progTy := mkAppN (mkConst ``Prog) #[c, fre, fre]
+      let thunkTy := Lean.mkForall `u .default (mkConst ``Unit) progTy
+      let inner := Prog.quote (f :: hs) fre fre (body ())
+      let stepE := Lean.mkLambda `n .default (mkConst ``Nat)
+        (Lean.mkLambda `bt .default thunkTy inner)
+      let unroll := mkAppN (mkConst ``recUnroll) #[progTy,
+        mkAppN (mkConst ``Prog.recBase) #[c, fre], stepE, Lean.mkRawNatLit d]
+      mkAppN (mkConst ``Stmt.callRec) (head ++ #[Lean.mkRawNatLit d, ase, CallRet.quote Γe ret,
+        Lean.mkLambda `u .default (mkConst ``Unit) unroll])
   | Γ, _, Γe, _, @Stmt.tryCall _ _ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf call rets ok err code pnc other
       sargs sbody self =>
     let oke := ctxOnto Γe ρ
@@ -342,23 +362,23 @@ def Stmt.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Stmt C Γ Γ' �
     let fre := ctxOnto pse ρ
     let Γfe := ctxFrom (ρ ++ ps) fre Γf
     mkAppN (mkConst ``Stmt.tryCall) #[c, Γe, ctxE ρ, ctxE κ, Γ₁e, Γ₂e, Γ₃e, Γ₄e, pse, Γfe,
-      ExtCall.quote c Γe call, Binders.quote rets, Prog.quote oke Γ₁e ok, Prog.quote Γe Γ₂e err,
-      CodeBinder.quote code, Prog.quote pne Γ₃e pnc, Prog.quote Γe Γ₄e other, ase,
-      Prog.quote fre Γfe sbody, toExpr self]
+      ExtCall.quote c Γe call, Binders.quote rets, Prog.quote hs oke Γ₁e ok, Prog.quote hs Γe Γ₂e err,
+      CodeBinder.quote code, Prog.quote hs pne Γ₃e pnc, Prog.quote hs Γe Γ₄e other, ase,
+      Prog.quote hs fre Γfe sbody, toExpr self]
   | Γ, _, Γe, _, @Stmt.loop _ _ Γ₁ a cv body =>
     let Γ₁e := ctxFrom Γ Γe Γ₁
     mkAppN (mkConst ``Stmt.loop) #[c, Γe, Γ₁e, LoopAnn.quote c Γe a, Val.quote c Γe cv,
-      Prog.quote Γe Γ₁e body]
+      Prog.quote hs Γe Γ₁e body]
   | Γ, _, Γe, _, @Stmt.block _ _ Γ₁ body =>
     let Γ₁e := ctxFrom Γ Γe Γ₁
-    mkAppN (mkConst ``Stmt.block) #[c, Γe, Γ₁e, Prog.quote Γe Γ₁e body]
+    mkAppN (mkConst ``Stmt.block) #[c, Γe, Γ₁e, Prog.quote hs Γe Γ₁e body]
 
 /-- A block read in `Γ` (its term `Γe`) leaving `Γ'` (its term `Γ'e`). -/
-def Prog.quote : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Prog C Γ Γ' → Lean.Expr
+def Prog.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.Expr → Prog C Γ Γ' → Lean.Expr
   | _, _, Γe, _, .nil => mkAppN (mkConst ``Prog.nil) #[c, Γe]
   | Γ, _, Γe, Γ₂e, @Prog.cons _ _ Γ₁ _ s P =>
     let Γ₁e := ctxFrom Γ Γe Γ₁
-    mkAppN (mkConst ``Prog.cons) #[c, Γe, Γ₁e, Γ₂e, Stmt.quote Γe Γ₁e s, Prog.quote Γ₁e Γ₂e P]
+    mkAppN (mkConst ``Prog.cons) #[c, Γe, Γ₁e, Γ₂e, Stmt.quote hs Γe Γ₁e s, Prog.quote hs Γ₁e Γ₂e P]
 
 end
 
@@ -367,7 +387,7 @@ the terms of its contexts: the value, `Γ` and `Γ'`. -/
 def Prog.quoteShared {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Lean.Expr × Lean.Expr × Lean.Expr :=
   let Γe := ctxE Γ
   let Γ'e := ctxFrom Γ Γe Γ'
-  Lean.ShareCommon.shareCommon (Prog.quote c Γe Γ'e P, Γe, Γ'e)
+  Lean.ShareCommon.shareCommon (Prog.quote c [] Γe Γ'e P, Γe, Γ'e)
 
 /-- The type `Prog C Γ Γ'` of a quoted block, from the terms of its contexts. -/
 def Prog.quoteType (Γe Γ'e : Lean.Expr) : Lean.Expr := mkAppN (mkConst ``Prog) #[c, Γe, Γ'e]
