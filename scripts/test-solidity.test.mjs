@@ -549,7 +549,8 @@ test("quantified consequents parse and omitted specification bodies stay local",
   assert.equal(types.stillChecked.status, "pending");
   // a `string` is modelled (a `bytes1[]`); its copy into memory is a closer
   // limit, as a `uint[]`'s is (docs/semantic-gaps.md, "Bytes and strings")
-  assert.equal(types.readsString.status, "pending");
+  // a `string` copy into memory always ends normally (`docs/semantic-gaps.md`, "Bytes and strings")
+  assert.equal(types.readsString.status, "proved");
   // a narrow element, key or value is modelled (`expandStateTyW`): `narrow[0]`
   // may be past the end, and `narrow.length == 0` need not hold
   for (const fn of ["readsNarrowKey", "readsNarrowValue"]) assert.equal(types[fn].status, "proved", fn);
