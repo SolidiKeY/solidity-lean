@@ -1461,12 +1461,16 @@ def writingCall (f : Json) : Bool :=
       ["call", "delegatecall"].contains ((J.str? n "memberName").getD ""))
 
 /-- The functions `f` reaches through `calls`, callees first and `f` last,
-added to `done`; or a function on a cycle.  Each level adds a function to
-`path`, so one more than the number of functions is enough `fuel`. -/
+added to `done`: a call back into the path (a recursive call) adds nothing,
+so each function of a cycle comes after every function it calls outside
+the cycle, which is the order the elaborator reads them in (a recursive
+function may call those it is mutually recursive with wherever they stand,
+`isRecursive`).  Each level adds a function to `path`, so one more than the
+number of functions is enough `fuel`; running out is the error. -/
 def reach (calls : Int → List Int) : Nat → List Int → List Int → Int → Except Int (List Int)
   | 0, _, _, f => throw f
   | fuel + 1, path, done, f =>
-    if path.contains f then throw f
+    if path.contains f then pure done
     else if done.contains f then pure done
     else do
       let done ← (calls f).foldlM (reach calls fuel (f :: path)) done
@@ -1952,8 +1956,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let body : Except Gap (List (Nat × String)) := do
       let ss ← r.body
       match reach calls (ids.length + 1) [] [] i with
-      | .error g => throw (.unsupported s!"the call of `{nameAt g}` is recursive: \
-          a call is inlined, and the inlining would not end" r.line)
+      | .error g => throw (.unsupported s!"the calls from `{nameAt g}` are nested past the \
+          number of functions" r.line)
       | .ok order =>
         for c in order.dropLast do
           if let some { body := .error g, .. } := lookupBy c byId then
