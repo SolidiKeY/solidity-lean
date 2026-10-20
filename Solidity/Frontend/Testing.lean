@@ -47,6 +47,17 @@ private def callsBackE (N p : Lean.Name) : TermElabM Bool := do
   let v ← withTransparency .all <| whnf e
   return !v.isConstOf ``Bool.false
 
+/-- Whether `e`, or a declaration of the import `N` it names, has a
+recursive call (`Stmt.callRec`). -/
+private partial def hasCallRec (N : Lean.Name) (e : Expr) (fuel : Nat := 8) : MetaM Bool := do
+  if (e.find? (·.isConstOf ``Stmt.callRec)).isSome then return true
+  if fuel == 0 then return false
+  for c in e.getUsedConstants do
+    if N.isPrefixOf c then
+      if let some v := (← getConstInfo c).value? then
+        if ← hasCallRec N v (fuel - 1) then return true
+  return false
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
@@ -62,11 +73,12 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
         else callsBackE N (f ++ `problem)
       -- a recursive call: `rec_auto`, the obligation as its own contract
       let recursive := r.tag != .specified && !cb &&
-        ((← getConstInfo (f ++ `problem)).value?.any fun v =>
-          (v.find? (·.isConstOf ``Stmt.callRec)).isSome)
+        (← hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem))))
       if recursive then
         let ty := mkApp2 (mkConst ``Valid) C (mkConst (f ++ `problem))
-        let g ← mkFreshExprSyntheticOpaqueMVar ty
+        -- the walk reads the formula by its value; the kernel unfolds it
+        let g ← mkFreshExprSyntheticOpaqueMVar
+          (mkApp2 (mkConst ``Valid) C (← Symex.evaluable (mkConst (f ++ `problem))))
         let tac ← `(tactic| rec_auto)
         let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
             fun _ => pure none

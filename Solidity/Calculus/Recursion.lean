@@ -34,13 +34,13 @@ variable {C : Contract}
 
 section Contract
 
-variable {ps rs : Ctx}
+variable {ps rs : Ctx} {m : Modality}
 
 /-- **A recursive function's contract**, at one body: the contract at every
 call returning `rs`, the body within `μ`, the parameters unwritten. -/
 def RecContract (μ : Mutability) (b : Prog C (rs ++ ps) (rs ++ ps)) (req : Fml C ps)
-    (ens : Fml C (rs ++ (Olds ++ ps))) : Prop :=
-  (∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContract ret b req ens) ∧
+    (ens : Fml C (rs ++ (Olds ++ ps))) (m : Modality := .box) : Prop :=
+  (∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContract ret b req ens m) ∧
     Prog.within μ b = true ∧ writesRets rs.length b = true
 
 /-- A formula of the locals `ps` closed by `∀` over each (a value) or a
@@ -76,15 +76,15 @@ theorem holds_allCtx : (ps : Ctx) → (ns : List Var) → {φ : Fml C ps} →
 (`Fml.allCtx`, named by `ns`, innermost first). -/
 theorem FunContract.ofValidCtx {Γ Γ' Γf : Ctx} (ns : List Var) {ret : CallRet Γ rs Γ'}
     {body : Prog C (rs ++ ps) Γf} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
-    (h : Valid (Fml.allCtx ps ns (FunContract.obligation ret body req ens))) :
-    FunContract ret body req ens :=
+    (h : Valid (Fml.allCtx ps ns (FunContract.obligation ret body req ens m))) :
+    FunContract ret body req ens m :=
   FunContract.ofValid (holds_allCtx ps ns h)
 
 /-- A contract at a call that returns nothing is one at every such call:
 each enters the body alike (`CallRet.enterT`). -/
 theorem FunContract.forall_none {Γf : Ctx} {b : Prog C ([] ++ ps) Γf} {req : Fml C ps}
-    {ens : Fml C ([] ++ (Olds ++ ps))} (h : FunContract (Γ := []) CallRet.none b req ens) :
-    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [] Γ'), FunContract ret b req ens := by
+    {ens : Fml C ([] ++ (Olds ++ ps))} (h : FunContract (Γ := []) CallRet.none b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [] Γ'), FunContract ret b req ens m := by
   intro Γ Γ' ret
   cases ret with
   | none => exact h
@@ -94,8 +94,8 @@ theorem FunContract.forall_none {Γf : Ctx} {b : Prog C ([] ++ ps) Γf} {req : F
 each enters the body with the return variable at its default. -/
 theorem FunContract.forall_val {Γf : Ctx} {p : PrimTy} {b : Prog C ([.val p] ++ ps) Γf}
     {req : Fml C ps} {ens : Fml C ([.val p] ++ (Olds ++ ps))}
-    (h : FunContract (Γ := []) (CallRet.val p (.user "r") Option.none) b req ens) :
-    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.val p] Γ'), FunContract ret b req ens := by
+    (h : FunContract (Γ := []) (CallRet.val p (.user "r") Option.none) b req ens m) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.val p] Γ'), FunContract ret b req ens m := by
   intro Γ Γ' ret
   cases ret with
   | val => exact h
@@ -104,24 +104,25 @@ theorem FunContract.forall_val {Γf : Ctx} {p : PrimTy} {b : Prog C ([.val p] ++
     | snoc bs q x => cases bs; exact h
 
 /-- The bottom frame meets every contract: it is exhausted. -/
-theorem RecContract.base (μ : Mutability) (req : Fml C ps) (ens : Fml C (rs ++ (Olds ++ ps))) :
-    RecContract μ (Prog.recBase : Prog C (rs ++ ps) (rs ++ ps)) req ens :=
-  ⟨fun _ _ hr => ⟨trivial, nofun⟩, rfl, rfl⟩
+theorem RecContract.base (μ : Mutability) (req : Fml C ps) (ens : Fml C (rs ++ (Olds ++ ps)))
+    (m : Modality) :
+    RecContract μ (Prog.recBase : Prog C (rs ++ ps) (rs ++ ps)) req ens m :=
+  ⟨fun _ _ _ => ⟨by cases m <;> first | trivial | rfl, nofun⟩, rfl, rfl⟩
 
 /-- **Induction over the unrolling**: a contract every frame meets where the
 frame below does holds of the recursive call's body. -/
 theorem RecContract.unroll {μ : Mutability} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
     {step : Nat → (Unit → Prog C (rs ++ ps) (rs ++ ps)) → Prog C (rs ++ ps) (rs ++ ps)}
     (hs : ∀ n (t : Unit → Prog C (rs ++ ps) (rs ++ ps)),
-      RecContract μ (t ()) req ens → RecContract μ (step n t) req ens) (d : Nat) :
-    RecContract μ (recUnroll Prog.recBase step d) req ens :=
-  recUnroll_induct (fun b => RecContract μ b req ens) (RecContract.base μ req ens) hs d
+      RecContract μ (t ()) req ens m → RecContract μ (step n t) req ens m) (d : Nat) :
+    RecContract μ (recUnroll Prog.recBase step d) req ens m :=
+  recUnroll_induct (fun b => RecContract μ b req ens m) (RecContract.base μ req ens m) hs d
 
 end Contract
 
 section Rule
 
-variable {Γ ps rs Γ' Γ₂ Γ₀ : Ctx}
+variable {Γ ps rs Γ' Γ₂ Γ₀ : Ctx} {m : Modality}
 
 /-- **A recursive call by its callee's contract** (`useContract` at a
 `Stmt.callRec`, which runs as the call of its body): the goals "pre" and
@@ -129,13 +130,13 @@ variable {Γ ps rs Γ' Γ₂ Γ₀ : Ctx}
 theorem useRecContract {H : Hyps C [] Γ} {μ : Mutability} {f : Name} {d : Nat}
     {args : Args C Γ ps} {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)}
     {ω : Prog C Γ' Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀} {req : Fml C ps}
-    {ens : Fml C (rs ++ (Olds ++ ps))} (hc : RecContract μ (body ()) req ens)
-    («pre» : Valid (H.wrap (Fml.callPre args req)))
-    («post» : Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ)))
-    (hn : ret.nVals = rs.length := by rfl) :
-    Valid (H.wrap (.modal .box (.cons (.callRec f d args ret body) ω) κ φ)) := fun σ =>
-  H.wrap_mono (φ := .modal .box (.cons (.call f args ret (body ())) ω) κ φ)
-    (ψ := .modal .box (.cons (.callRec f d args ret body) ω) κ φ) (fun _ h => h) σ
+    {ens : Fml C (rs ++ (Olds ++ ps))} (hc : RecContract μ (body ()) req ens m)
+    («pre» : Valid (H.wrap (Fml.callPre args req m)))
+    («post» : Valid (H.wrap (Fml.callPost μ args ret ens ω κ φ m)))
+    (hn : ret.nVals = rs.length) :
+    Valid (H.wrap (.modal m (.cons (.callRec f d args ret body) ω) κ φ)) := fun σ =>
+  H.wrap_mono (φ := .modal m (.cons (.call f args ret (body ())) ω) κ φ)
+    (ψ := .modal m (.cons (.callRec f d args ret body) ω) κ φ) (fun _ h => h) σ
     (useContractC_of_valid (f := f) (hc.1 ret) «pre» «post» hc.2.1 (hn ▸ hc.2.2) σ)
 
 /-- A conjunction behind a context, from each conjunct behind it. -/
@@ -251,7 +252,8 @@ elab "rec_contract " h:term : tactic => withMainContext do
   unless ← Recursion.headRecCall χ do
     throwError "rec_contract: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
-  evalTactic (← `(tactic| refine useRecContract (H := $HS) $h ?pre ?post))
+  evalTactic (← `(tactic| refine useRecContract (H := $HS) $h ?pre ?post ?hn))
+  evalTactic (← `(tactic| case hn => rfl))
 
 open Lean Elab Tactic Meta in
 /-- `rec_contract_by μ req ens`: the recursive call at the head of the goal's
@@ -265,7 +267,8 @@ elab "rec_contract_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : 
     throwError "rec_contract_by: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
   evalTactic (← `(tactic| refine useRecContract (H := $HS) (μ := $μ) (req := ?req) (ens := ?ens)
-    ?hc ?pre ?post))
+    ?hc ?pre ?post ?hn))
+  evalTactic (← `(tactic| case hn => rfl))
   evalTactic (← `(tactic| case req => exact $req))
   evalTactic (← `(tactic| case ens => exact $ens))
 

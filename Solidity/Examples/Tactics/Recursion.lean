@@ -105,4 +105,12 @@ theorem addSum : ⊨ dl!{ x <= 1000 → y <= 1000 → [ z = add(x, y); ] z == x 
   case pre => sol_symex; sol_close
   case post => sol_symex; sol_close
 
+/-- **The countdown, automatically** (`rec_auto`, what the solc import's
+runner does): the box's own contract, `true`/`true`, at `nonpayable`, by
+induction over the frames; the same proof as `countdownNoPanic`. -/
+theorem countdownAuto : ⊨ dl!{ [ countdown(); ] true } := by rec_auto
+
+/-- info: 'Solidity.Examples.Tactics.Recursion.addSum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms addSum
+
 end Solidity.Examples.Tactics.Recursion
