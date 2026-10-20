@@ -66,6 +66,12 @@ Two directories, by proof style:
   Generate a chain with `#chain φ` (the `chain-authoring` skill) rather than
   writing it line by line: it prints the statement in this form. A read of
   the state as the program found it (`find(storage, p)`) is a last line.
+
+  For a document needing separate source/receiver/index captures, import
+  `Solidity.Tools.ProgramTrace` and use `#latex_program` or its JSON export
+  (`docs/latex.md`). Disabling grouping alone does not split `CaptureAll`.
+  The checked relation is `Fml.Leads`; the final leaf still needs a proof,
+  and other native rules retain their own granularity.
 - `Examples/Tactics/` — formulas `⊨ dl!{ pre → [ program ] post }` proved by
   tactics, and interpreter runs.
 
