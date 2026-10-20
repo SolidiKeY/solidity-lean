@@ -110,6 +110,13 @@ runner does): the box's own contract, `true`/`true`, at `nonpayable`, by
 induction over the frames; the same proof as `countdownNoPanic`. -/
 theorem countdownAuto : ⊨ dl!{ [ countdown(); ] true } := by rec_auto
 
+/-- **The countdown ends**, from any `a`, the diamond: below `recDepth`
+frames its run ends normally, above them it is exhausted (the EVM's stack
+overflows), which the diamond accepts; the contract under the diamond is
+proved by induction over the frames as the box's (`docs/kernel-port.md`,
+"Recursion"). -/
+theorem countdownEnds : ⊨ dl!{ ⟨ countdown(); ⟩ true } := by rec_auto
+
 /-- info: 'Solidity.Examples.Tactics.Recursion.addSum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms addSum
 

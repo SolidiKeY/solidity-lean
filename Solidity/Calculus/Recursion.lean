@@ -16,9 +16,9 @@ contract (it is exhausted, which the box accepts), and a frame meets it
 where the frame below does.  The step is a box obligation whose recursive
 calls are calls of an unknown body `t ()` that meets the contract: the
 strategy runs up to each of them (`sol_symex_rec`), where `rec_contract`
-uses the hypothesis.  No `decreases` is needed: the box of KeY's partial
-correctness accepts a run that does not end, as it accepts the exhausted
-bottom frame.
+uses the hypothesis.  No `decreases` is needed, under either modality:
+both accept the exhausted bottom frame (decision 15), and the unrolling is
+finite, so the induction is over its frames, not over a measure.
 
 `RecContract` is the hypothesis: the contract at every call that returns
 `rs` (`FunContract`, whatever the call does with them), the mutability the
