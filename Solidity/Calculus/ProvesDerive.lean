@@ -39,7 +39,8 @@ A leaf behind updates of either modality is read: an update's reading asks
 only of the typed states it may end in.
 
 A split whose branch the bounded scoped closer refutes keeps only the other branch,
-the refuted one closed by `Proves.closeFalse` (`refutes`): `returnEarly`
+the refuted one closed by `Proves.closeFalse` (`refuteS`, on the premises the
+condition reaches, `Calculus/LeafDerive.lean`): `returnEarly`
 runs one path of its callee, not 27.  The scoped closer keeps the
 parameters bound, its reduction reading each at its type.  An explicit
 `∀ uint x;` is marked on a leaf left (decision 28): the tactic counts the
@@ -73,7 +74,7 @@ def each {β : Type} (f : β → Nat → Option (List α × Nat)) : List β → 
 
 /-- The goals of a rule's premise, as the `Proves` rule of its kind has
 them; `r` walks a goal.  A split's branch whose context `x` refutes is
-closed by `closeFalse` and not walked (`refutes`). -/
+closed by `closeFalse` and not walked (`refuteS`). -/
 def premise (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat))
     (x : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) {Γ Γ' Γ₁ Γ₂ : Ctx} (H : Hyps C [] Γ) (m : Modality) (ω : Prog C Γ' Γ₁)
     (κ : Frames C Γ₁ Γ₂) (φ : Fml C Γ₂) (p : Premise C Γ Γ') (b : Nat) :
@@ -117,18 +118,9 @@ def modal (R : RuleSet) (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat �
       | some p => premise r x H m ω κ φ p b
       | none => none) κ H
 
-/-- Whether `H, c ⟹ false` closes with nothing left. Literal-bound locals and
-symbolic facts such as `values.length == 3` can both refute a branch; the same
-scoped closer and its existing size bounds check the refutation. -/
-def refutes (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α)) {Γ : Ctx}
-    (H : Hyps C [] Γ) (c : Fml C Γ) : Bool :=
-  match leaf (H.pre c) .ff with
-    | some [] => true
-    | _ => false
-
 /-- The walk of the sequent `H ⊢ φ`: the leaves `leaf` leaves, or `none`
 when a step has no rule, a leaf does not close, or `n` or `b` runs out; `rf`
-says which of a split's branches is refuted (`refutes`). -/
+says which of a split's branches is refuted (`refuteS`). -/
 def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List α))
     (rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool) :
     Nat → {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (List α × Nat)
@@ -252,7 +244,7 @@ def fuel : Nat := Derive.budget
 leaf closes.  A split's branch is refuted as its leaf is read. -/
 def residueWithin (steps : Nat) (R : RuleSet) {Γ : Ctx} (H : Hyps C [] Γ)
     (φ : Fml C Γ) : Option (List (SLeaf C)) :=
-  (run R leafS (refutes leafS) steps H φ steps).map (·.1)
+  (run R leafS refuteS steps H φ steps).map (·.1)
 
 def residue (R : RuleSet) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) : Option (List (SLeaf C)) :=
   residueWithin fuel R H φ
@@ -277,7 +269,7 @@ rule. -/
 def scanLeaves (walk : Bool) (φ : Fml C []) : Option (Nat × Nat) :=
   let leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Option (List (SLeaf C)) :=
     fun H φ => if walk then some [⟨_, H, φ⟩] else leafS H φ
-  (run .all leaf (refutes leafS) fuel .nil φ fuel).map fun (ls, _) =>
+  (run .all leaf refuteS fuel .nil φ fuel).map fun (ls, _) =>
     (ls.length, ls.foldl (fun m l => max m l.2.1.storageWrites) 0)
 
 /-- `residue`, the leaves quoted (`leafQuoteS`), `np` the sequent's
@@ -285,7 +277,7 @@ parameters (their marks, `Quote.qHyps`). -/
 def residueQuoteWithin (steps : Nat) (R : RuleSet) (c : Lean.Expr) (np : Option Nat)
     {Γ : Ctx} (H : Hyps C [] Γ)
     (φ : Fml C Γ) : Option (List Lean.Expr) :=
-  (run R (leafQuoteS c np) (refutes leafS) steps H φ steps).map (·.1)
+  (run R (leafQuoteS c np) refuteS steps H φ steps).map (·.1)
 
 /-- The closer's bounds on a leaf, which `sol_prove?` asks before it
 reduces it: the scoped closer's (`leafFitsOn`) on a leaf it reads; a leaf it
@@ -403,16 +395,6 @@ theorem leaf_sound {Γ : Ctx} {H : Hyps C [] Γ} {φ : Fml C Γ} {b : Nat} {ls :
   cases he
   exact hleaf H φ _ h' hl
 
-theorem refutes_sound {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ)
-    (h : refutes leaf H c = true) : Proves C R [] (H.pre c) .ff := by
-  unfold refutes at h
-  cases hl : leaf (H.pre c) .ff with
-  | none => simp only [hl, reduceCtorEq] at h
-  | some ls =>
-    cases ls with
-    | nil => exact hleaf _ _ [] hl fun _ h => nomatch h
-    | cons _ _ => simp only [hl, reduceCtorEq] at h
-
 variable {rf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Bool}
   (hrf : ∀ {Γ : Ctx} (H : Hyps C [] Γ) (c : Fml C Γ), rf H c = true → Proves C R [] (H.pre c) .ff)
 include hrf in
@@ -492,7 +474,7 @@ theorem Proves.of_residueWithin (steps : Nat) {R : RuleSet} {Γ : Ctx} {H : Hyps
   cases he
   exact Seq.run_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2)
     Seq.leafS_sound
-    (Seq.refutes_sound (P := fun l : Seq.SLeaf C => Proves C R [] l.2.1 l.2.2) Seq.leafS_sound)
+    (fun H c h => Seq.refuteS_sound H c h)
     _ H φ _ _ _ hr hl
 
 /-- `Proves.of_residueWithin` at the walk's full fuel. -/

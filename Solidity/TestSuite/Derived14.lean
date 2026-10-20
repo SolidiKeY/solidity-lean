@@ -17,7 +17,7 @@ declaration or assignment writes its components in order.
 `tupleReturnDiscardsComponents` (`returnStats`' four conditionals and its
 `&&`) run their callees on literals: each split's condition is ground under
 its updates, and the strategy keeps only the branch it takes
-(`Seq.refutes`, closed by `Proves.closeFalse`), so one path each
+(`Seq.refuteS`, closed by `Proves.closeFalse`), so one path each
 is run, not 27 and 32.
 -/
 

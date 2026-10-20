@@ -36,7 +36,7 @@ testStorageNestedPushReturnAlias: derived
 /-! `returnEarly` calls `returnSign` (three exits) three times, and
 `tupleReturnDiscardsComponents` runs `returnStats` (four conditionals and an
 `&&`) on literals: a split whose condition is ground under its updates keeps
-only the branch it takes (`Seq.refutes`, closed by
+only the branch it takes (`Seq.refuteS`, closed by
 `Proves.closeFalse`), so each replay fits one
 declaration (`Derive.replayFits`). -/
 
