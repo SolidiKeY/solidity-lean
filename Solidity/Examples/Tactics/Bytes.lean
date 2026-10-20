@@ -79,4 +79,44 @@ theorem bitwise : ⊨ dl!{ ⟨ bytes1 a = hex"0f"; bytes1 n = ~a; bytes2 b = "ab
   sol_symex
   sol_close
 
+/-! ## 2 · `bytesN` inside types and functions
+
+A state variable, an element, a mapping's key and a parameter carry the
+marker beside their width (`Contract.widths`: `id#bytes`). -/
+
+/-- A contract with `bytesN` in its state and functions. -/
+def Tags : Contract := contract!{
+  bytes4 id;
+  bytes32 root;
+  bytes2[] codes;
+  mapping(bytes32 => uint) votes;
+  mapping(uint => bytes2) names;
+  function first(bytes4 x) returns (bytes1 r) { r = x[0]; }
+  function widen(bytes2 x) returns (bytes4 r) { r = x; }
+}
+
+example : Tags.widths =
+    [("id", 32), ("id#bytes", 4), ("root#bytes", 32), ("codes[]", 16), ("codes[]#bytes", 2),
+     ("votes{}#bytes", 32), ("names[]", 16), ("names[]#bytes", 2)] := rfl
+
+/-- A state variable, and a mapping's value of `bytes2`. -/
+theorem stateVar : ⊨ dl[Tags]{ ⟨ id = "abcd"; bytes1 c = id[3]; ⟩ c == 100 } := by
+  sol_symex
+  sol_close
+
+theorem element : ⊨ dl[Tags]{ ⟨ names[1] = "xy"; bytes1 d = names[1][1]; ⟩ d == 121 } := by
+  sol_symex
+  sol_close
+
+/-- A literal key at `bytes32` is left-aligned too. -/
+theorem mappingKey : ⊨ dl[Tags]{ ⟨ votes["a"] = 1; bytes32 k = "a"; uint v = votes[k]; ⟩ v == 1 } := by
+  sol_symex
+  sol_close
+
+/-- A parameter and a return: `first("abcd")` is `"a"`, `widen("ab")` pads. -/
+theorem functions : ⊨ dl[Tags]{ ⟨ bytes1 r = first("abcd"); bytes4 w = widen("ab"); ⟩
+    r == 97 && w == 1633812480 } := by
+  sol_symex
+  sol_close
+
 end Solidity.Examples.Tactics.Bytes
