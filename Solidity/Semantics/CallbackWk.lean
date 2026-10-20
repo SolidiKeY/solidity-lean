@@ -32,6 +32,7 @@ theorem callsBack_stmt {pay : Bool} : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .loop a c body, _, h => callsBack_prog body h
   | _, _, .block body, _, h => callsBack_prog body h
   | _, _, .call f args ret body, _, h => by cases ret <;> rfl
+  | _, _, .callRec f _ args ret body, _, h => by cases ret <;> rfl
   | _, _, .callReceiverPush _ _ _ body code _, _, h => by
     change (body.callsBack pay || (code.wk h).2.2.callsBack pay) =
       (body.callsBack pay || code.callsBack pay)
@@ -219,6 +220,16 @@ theorem call_wk {Γ Γ' ps rs Γf : Ctx} (J : StateInv C) (f : Name) (args : Arg
     cases ret <;> refine ⟨_, ExecS.callBody (J := J) (σ := σ.lift h d) (f := f)
       (args := args.wk h) (body := body) ?_ hp, hr⟩
     all_goals simpa only [Args.evalT_wk] using ha
+
+theorem callRec_wk {Γ Γ' ps rs : Ctx} (J : StateInv C) (f : Name) (dd : Nat) (args : Args C Γ ps)
+    (ret : CallRet Γ rs Γ') (body : Unit → Prog C (rs ++ ps) (rs ++ ps)) :
+    WkS J (.callRec f dd args ret body) := by
+  intro Δ h σ d o he
+  cases he with
+  | det hf => exact det_wk J _ h σ d hf
+  | callRec hc =>
+    obtain ⟨u, hu, hr⟩ := call_wk J f args ret (body ()) h σ d hc
+    cases ret <;> exact ⟨_, ExecS.callRec hu, hr⟩
 
 theorem CWkRel.lift_ok {Γ Δ : Ctx} {H : HTy} (h : Thin Γ Δ) (d : TEnv C H Δ)
     (a : Out C H Γ) : CWkRel h (TEnv.off h d) (.ok a) (.ok (Out.lift h d a)) :=
@@ -587,6 +598,7 @@ theorem stmt_wk (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Wk
   | _, _, .transfer r a => transfer_wk J r a
   | _, _, .send pv r a g => send_wk J pv r a g
   | _, _, .call f args ret body => call_wk J f args ret body
+  | _, _, .callRec f dd args ret body => callRec_wk J f dd args ret body
   | _, _, .callReceiver f args r body op => callReceiver_wk J f args r body op
   | _, _, .callReceiverPush f args r body code value =>
     callReceiverPush_wk J f args r body code value (prog_wk J code)
