@@ -278,8 +278,9 @@ the positions they share or through the state, are dropped first
 (`LFml.slice`): a loop's guard over locals is then refuted on the locals'
 facts alone, not through every storage write the loop made, whose guards
 would grow the closer's work with each iteration and soon pass its bounds
-(`LFml.boundsOk`).  A small refutation (`sliceSize`, `sliceDepth`) is read
-whole, as the leaf closer reads it.  Dropping a premise only strengthens a formula
+(`LFml.boundsOk`).  A refutation that stacks few storage updates
+(`sliceDepth`), and one whose slice still reads the state, is read whole, as
+the leaf closer reads it.  Dropping a premise only strengthens a formula
 (`LFml.dropPrem_holds`), so which premises are kept is a matter of
 completeness, not of soundness. -/
 
@@ -459,24 +460,27 @@ theorem LFml.slice_holds {φ : LFml C} {g : State C []} {ν : AEnv} (h : φ.slic
     φ.holds g ν :=
   LFml.dropPrem_holds _ g φ ν h
 
-/-- The most nodes, and the most stacked storage updates, of a refutation
-the closer reads whole: within them the refutation is the leaf closer's,
-as before slicing; past them it is sliced first (`LFml.refuteForm`). -/
-def sliceSize : Nat := 600
-
-/-- See `sliceSize`. -/
+/-- The most stacked storage updates of a refutation the closer reads
+whole: past them it is sliced first (`LFml.refuteForm`). -/
 def sliceDepth : Nat := 2
 
-/-- **The formula a refutation is closed on**: itself where it is small
-(`sliceSize`, `sliceDepth`), else sliced (`LFml.slice`). -/
+/-- **The formula a refutation is closed on**: itself where it stacks at
+most `sliceDepth` storage updates, as the leaf closer reads it; else sliced
+(`LFml.slice`) where what is left reads no state, so that the closer's
+reading of storage and memory, whose cost its bounds (`LFml.boundsOk`) are
+set for on the whole leaf, is never asked of a sliced one; else itself. -/
 def LFml.refuteForm (φ : LFml C) : LFml C :=
-  bif (φ.fits sliceSize).isSome && decide (φ.stDepth ≤ sliceDepth) then φ else φ.slice
+  bif decide (φ.stDepth ≤ sliceDepth) then φ
+  else bif (φ.slice.reads ([], false)).2 then φ else φ.slice
 
 theorem LFml.refuteForm_holds {φ : LFml C} {g : State C []} {ν : AEnv}
     (h : φ.refuteForm.holds g ν) : φ.holds g ν := by
   unfold LFml.refuteForm at h
-  cases hc : ((φ.fits sliceSize).isSome && decide (φ.stDepth ≤ sliceDepth))
-  · rw [hc, cond_false] at h; exact LFml.slice_holds h
+  cases hc : decide (φ.stDepth ≤ sliceDepth)
+  · rw [hc, cond_false] at h
+    cases hs : (φ.slice.reads ([], false)).2
+    · rw [hs, cond_false] at h; exact LFml.slice_holds h
+    · rw [hs, cond_true] at h; exact h
   · rw [hc, cond_true] at h; exact h
 
 end Decide
@@ -484,7 +488,7 @@ end Decide
 namespace Seq
 
 /-- **The scoped closer on a refutation**: `checkCore` on its formula,
-sliced where it is large (`LFml.refuteForm`). -/
+sliced where it stacks storage updates (`LFml.refuteForm`). -/
 def refuteCore (ψ : Fml C []) : Bool :=
   match ψ.toLS true SymS.init with
   | some l => l.refuteForm.boundsOk &&
