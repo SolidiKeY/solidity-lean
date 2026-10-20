@@ -605,3 +605,37 @@ test("specification negation widens unsigned operands only beside the ledger", (
   assert.equal(rows.falseNegation.status, "pending");
   assert.equal(rows.checkedInnerArithmetic.status, "pending");
 });
+
+test("solkey's solc/open ports close except where the model says why not", () => {
+  // tests/solc/open: solkey bab7200276's `keyext.solidity.examples/solc/open`,
+  // less `SolcLoopsOpen.sol` (its loops are past the search budget). Each row
+  // left open is open for a reason the model states, not a gap of the import:
+  const open = {
+    // a function recursing into itself: a call is inlined (`kernel-port.md`)
+    functionsRecursiveUnbounded: "unsupported",
+    // false at 256 bits: `5 + v + v` overflows, and reverts, at v = 2^255
+    msgValueArith: "pending",
+    // the callee is the contract itself only at the harness address
+    // (0x…DeaDBeef), which no obligation fixes; `try` does not run the callee
+    tryCatchExactReturn: "pending", trySuccessRunsCallee: "pending",
+    tryMultipleCatchClausesSuccess: "pending", tryNestedGetter: "pending",
+    callRunsReceive: "pending",
+    // that `address(0)` has no code is not a fact of the model
+    callWithoutCodeReverts: "pending",
+    // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
+    ternaryLiteralOverflow: "pending",
+  };
+  // `trySuccessKeepsStorageUnsound` and `callKeepsStorageUnsound` are proved:
+  // `⊢` is sound for `Valid`, where a callee keeps the caller's state
+  // (solkey's `noCallback`); on the EVM they fail, the callee being the
+  // contract itself (`docs/options.md`, O1).
+  const files = ["SolcArithmeticOpen", "SolcConstructorsOpen", "SolcFunctionCallsOpen",
+    "SolcHigherLevelOpen", "SolcPaymentsOpen", "SolcSmtControlFlowOpen", "SolcTypesOpen"]
+    .map(f => `tests/solc/open/${f}.sol`);
+  const report = runSolidityTests(files, {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = report.results.filter(r => !["internal", "skipped"].includes(r.status));
+  assert.equal(rows.length, 51);
+  const expected = new Map(Object.entries(open));
+  for (const r of rows) assert.equal(r.status, expected.get(r.function) ?? "proved", r.function);
+});
