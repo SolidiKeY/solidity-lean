@@ -648,13 +648,14 @@ test("solc/open self-calls prove at the harness address (--self-address)", () =>
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const fn of ["trySuccessRunsCallee", "tryMultipleCatchClausesSuccess", "tryNestedGetter",
-    "callWithoutCodeReverts", "tryArgumentSideEffect", "callKeepsStorageUnsound"]) {
+    "callWithoutCodeReverts", "tryArgumentSideEffect"]) {
     assert.equal(rows[fn], "proved", fn);
   }
-  // every `catch` block is a goal from the caller's state (O7); a value
-  // call to the contract runs no `receive`; the unsound claim is false
+  // every `catch` block is a goal from the caller's state (O8); a value
+  // call to the contract runs no `receive`; the unsound claims are false
+  // (the value call's callee may write the state under the callback reading, O7)
   for (const fn of ["tryCatchExactReturn", "callRunsReceive", "trySuccessKeepsStorageUnsound",
-    "msgValueArith"]) {
+    "callKeepsStorageUnsound", "msgValueArith"]) {
     assert.equal(rows[fn], "pending", fn);
   }
 });

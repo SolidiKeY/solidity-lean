@@ -74,8 +74,9 @@ are no errors. Status 1 means a suite has pending/gap/error results; status 2
 means an invocation, discovery or initial build failure. A suite containing
 only skipped functions cannot pass. `--timeout-ms N` bounds each subprocess,
 including the initial build and each whole-contract Lean invocation (default
-120000 ms). Lean's existing per-step limits and ambient heartbeat limit also
-apply. A timeout is not an expected-open verdict.
+300000 ms: a self-call `try` read with callbacks, `docs/options.md` O8,
+closes the callee's leaves and the oracle's). Lean's existing per-step limits
+and ambient heartbeat limit also apply. A timeout is not an expected-open verdict.
 
 The JavaScript API exports `solidityFiles(paths)`,
 `runSolidityTests(paths, options)`, and `testsPassed(report, listing)` from

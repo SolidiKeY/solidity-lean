@@ -70,7 +70,7 @@ function renameClause(renaming = {}) {
 export function runSolidityTests(paths, options = {}) {
   const files = solidityFiles(paths);
   if (!files.length) throw new Error("no Solidity files selected");
-  const timeoutMs = options.timeoutMs ?? 120000;
+  const timeoutMs = options.timeoutMs ?? 300000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) throw new Error("timeout must be positive milliseconds");
   const batchSize = options.batchSize ?? 32;
   if (!Number.isSafeInteger(batchSize) || batchSize <= 0) throw new Error("batch size must be positive");
