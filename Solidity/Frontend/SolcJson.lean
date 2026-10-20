@@ -294,8 +294,9 @@ def sourceCast (t value : String) : String :=
   if t == "bool" || t == "address" || t == "address payable" then s!"({value})"
   else s!"{t}({value})"
 
-/-- A type node as `sol` text: a mapping's `bool` key is its `uint`. -/
-partial def tyText (S : Structs) (j : Json) : Except Gap String := do
+/-- A type node as `sol` text: a mapping's `bool` key is its `uint`.  A narrow
+type inside it is a state variable's only (`narrowOk`, `expandStateTyW`). -/
+partial def tyText (S : Structs) (j : Json) (narrowOk : Bool := false) : Except Gap String := do
   match J.kind j with
   | "ElementaryTypeName" =>
     let n ← J.str j "name"
@@ -313,19 +314,19 @@ partial def tyText (S : Structs) (j : Json) : Except Gap String := do
     | some (.error g) => throw g
     | none => throw (.unsupported s!"type `{n}` is not a struct of the contract")
   | "ArrayTypeName" =>
-    let b ← tyText S (← J.get j "baseType")
-    if (narrowTy? b).isSome then
+    let b ← tyText S (← J.get j "baseType") narrowOk
+    if !narrowOk && (narrowTy? b).isSome then
       throw (.unsupported s!"a narrow array element `{b}` is not modelled")
     match J.opt j "length" with
     | none => pure s!"{b}[]"
     | some l => pure s!"{b}[{← J.str l "value"}]"
   | "Mapping" =>
-    let k ← tyText S (← J.get j "keyType")
-    if (narrowTy? k).isSome then
+    let k ← tyText S (← J.get j "keyType") narrowOk
+    if !narrowOk && (narrowTy? k).isSome then
       throw (.unsupported s!"a narrow mapping key `{k}` is not modelled")
     let k := if k == "bool" then "uint" else k
-    let v ← tyText S (← J.get j "valueType")
-    if (narrowTy? v).isSome then
+    let v ← tyText S (← J.get j "valueType") narrowOk
+    if !narrowOk && (narrowTy? v).isSome then
       throw (.unsupported s!"a narrow mapping value `{v}` is not modelled")
     pure s!"mapping({k} => {v})"
   | k => throw (.unsupported s!"type node `{k}`")
@@ -1696,7 +1697,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
               let t := (J.str? node "name").getD ""
               !(PrimTy.ofName? t).isSome && !(narrowTy? t).isSome then
           throw (.unsupported s!"elementary state type `{(J.str? bad "name").getD ""}` is not modelled")
-        tyText S typeNode : Except Gap String) with
+        tyText S typeNode (narrowOk := true) : Except Gap String) with
     | .ok t =>
       members := members ++ [s!"{t} {n};"]
       kept := kept ++ [(n, t, v)]
