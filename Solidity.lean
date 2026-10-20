@@ -259,6 +259,7 @@ import Solidity.Typing.Fits
 import Solidity.Typing.Constructibility
 import Solidity.Typing.CanonTest
 import Solidity.Typing.CleanTail
+import Solidity.Typing.CleanTailRun
 import Solidity.Theory.Typed.Obs
 import Solidity.Theory.Typed.Mem
 import Solidity.Theory.Typed.Leaves

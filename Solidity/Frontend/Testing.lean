@@ -58,14 +58,37 @@ private partial def hasCallRec (N : Lean.Name) (e : Expr) (fuel : Nat := 8) : Me
         if ← hasCallRec N v (fuel - 1) then return true
   return false
 
+/-- Whether the program `n` exposes nothing (`Prog.exposesNone`), reduced
+by `whnf`; `false` where it does not reduce. -/
+private def exposesNoneE (n : Lean.Name) : TermElabM Bool := do
+  let e ← elabClosed (← `(Prog.exposesNone $(mkCIdent n)))
+  let v ← withTransparency .all <| whnf e
+  return v.isConstOf ``Bool.true
+
+/-- **The tails reading of the import `N`** (`docs/options.md`, O6): `.clean`
+when every function a transaction may run (every row but an internal one)
+elaborated, takes no storage reference, and exposes nothing
+(`Prog.exposesNone`), so that clean tails are the contract's invariant
+(`ReachableBy.cleanTail`); `.solc` otherwise. -/
+def contractTailMode (N : Lean.Name) (rows : List ImportRow) : CommandElabM TailMode :=
+  liftTermElabM do
+    for r in rows do
+      if r.tag == .internal then continue
+      unless r.status == .elaborated do return .solc
+      if r.paramTypes.any (fun t => t matches .alias _) then return .solc
+      let ok ← tryCatchRuntimeEx (exposesNoneE (r.declName N)) fun _ => pure false
+      unless ok do return .solc
+    return .clean
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
-def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × String) := do
+def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
+    CommandElabM (String × String × TailMode) := do
   let f := r.declName N
   let env ← getEnv
   unless r.tag == .specified || env.contains (f ++ `problem) do
-    return ("unsupported", "no scoped obligation")
+    return ("unsupported", "no scoped obligation", .solc)
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
     liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
       let C := mkConst N
@@ -91,7 +114,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
       -- (`FunContract`) reads the run without callbacks (`docs/kernel-port.md`,
       -- "Recursion")
       if recursive && cb then
-        return ("pending", "a recursive call under the callback reading (O7): no contract rule")
+        return ("pending", "a recursive call under the callback reading (O7): no contract rule", .solc)
       if recursive then
         let (ty, goalTy) := match spec? with
           | some φ => (mkApp2 (mkConst ``Valid) C φ, mkApp2 (mkConst ``Valid) C φ)
@@ -104,15 +127,22 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
         let pendingMsg := "a recursive call its callee's contract does not prove"
         let some goals ← tryCatchRuntimeEx (some <$> Tactic.run g.mvarId! (Tactic.evalTactic tac))
             fun _ => pure none
-          | return ("pending", pendingMsg)
-        unless goals.isEmpty do return ("pending", pendingMsg)
+          | return ("pending", pendingMsg, .solc)
+        unless goals.isEmpty do return ("pending", pendingMsg, .solc)
         let proof ← instantiateMVars g
-        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term")
+        if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", .solc)
         let name := f ++ `tested
         addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
         unless (← collectAxioms name).all (standardAxioms.contains ·) do
-          return ("pending", pendingMsg)
-        return ("proved", "")
+          return ("pending", pendingMsg, .solc)
+        return ("proved", "", .solc)
+      -- the clean-tails reading (O6): a plain obligation of a contract whose
+      -- functions expose nothing, under the premise `cleanTail(storage) = true`
+      let mode : TailMode := if tail == .clean && spec?.isNone && !cb then .clean else .solc
+      let problem := mkConst (f ++ `problem)
+      let premised (φ : Expr) : Expr :=
+        if mode == .clean then mkAppN (mkConst ``Fml.imp) #[C, ctxE [],
+          mkApp2 (mkConst ``Fml.cleanTail) C (ctxE []), φ] else φ
       let (ty, goalTy) ← if let some φ := spec? then do
           let ty := mkApp2 (mkConst ``Valid) C φ
           pure (ty, ty)
@@ -123,7 +153,7 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
           -- the walk reads the formula by its value; the kernel unfolds it
           pure (ty, mkApp ty.appFn! (← Symex.evaluable (mkConst (f ++ `problem))))
         else
-          let ty := ProofTree.provesE C (mkConst (f ++ `problem))
+          let ty := ProofTree.provesE C (premised problem)
           pure (ty, ty)
       let g ← mkFreshExprSyntheticOpaqueMVar goalTy
       let goals ← if r.tag == .specified then do
@@ -140,15 +170,15 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
             out.set (some (← scopedSearch g.mvarId!))
           let some s ← out.get | throwError "search did not run"
           pure s.open_
-      unless goals.isEmpty do return ("pending", "open proof goals")
+      unless goals.isEmpty do return ("pending", "open proof goals", mode)
       let proof ← instantiateMVars g
-      if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term")
+      if proof.hasMVar || proof.hasFVar then return ("error", "incomplete proof term", mode)
       let name := f ++ `tested
       addDecl <| .thmDecl { name, levelParams := [], type := ty, value := proof }
       unless (← collectAxioms name).all (standardAxioms.contains ·) do
-        return ("unsupported", "proof uses nonstandard axioms")
-      return ("proved", ""))
-      fun e => return ("error", ← e.toMessageData.toString)
+        return ("unsupported", "proof uses nonstandard axioms", mode)
+      return ("proved", "", mode))
+      fun e => return ("error", ← e.toMessageData.toString, .solc)
 
 /-- Machine-readable testing entry point for a solc import. Listing performs
 no proof search. Every selected import row is retained, including gaps and
@@ -176,22 +206,25 @@ def elabSolkeyTest : CommandElab := fun stx => do
     ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
     ("signature", toJson r.signature),
     ("status", toJson "notRun"), ("reason", toJson "contract run interrupted"),
-    ("elapsedMs", toJson (0 : Nat))]
+    ("reading", toJson "solc"), ("elapsedMs", toJson (0 : Nat))]
   IO.FS.writeFile output (Json.arr results).pretty
+  -- the tails reading (O6): clean where every function exposes nothing
+  let tail ← contractTailMode N allRows
   for r in rows, i in [:rows.length] do
     let t0 ← IO.monoMsNow
-    let (status, reason) ← if r.status != .elaborated then
-        pure (r.status.toStr, r.reason)
-      else if r.tag == .internal || r.tag == .skip then pure (r.tag.toStr, "")
+    let (status, reason, mode) ← if r.status != .elaborated then
+        pure (r.status.toStr, r.reason, TailMode.solc)
+      else if r.tag == .internal || r.tag == .skip then pure (r.tag.toStr, "", .solc)
       else if r.tag != .specified && r.tag.modality?.isNone then
-        pure ("unsupported", s!"{r.tag.toStr}: no obligation")
-      else if listing then pure ("ready", "")
-      else testObligation N r
+        pure ("unsupported", s!"{r.tag.toStr}: no obligation", .solc)
+      else if listing then pure ("ready", "", tail)
+      else testObligation N r tail
     let elapsed ← IO.monoMsNow
     results := results.set! i <| Json.mkObj [
       ("function", toJson r.displayName), ("tag", toJson r.tag.toStr),
       ("signature", toJson r.signature),
       ("status", toJson status), ("reason", toJson reason),
+      ("reading", toJson (if mode == .clean then "clean" else "solc")),
       ("elapsedMs", toJson (elapsed - t0))]
     IO.FS.writeFile output (Json.arr results).pretty
 
