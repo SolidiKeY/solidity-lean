@@ -159,7 +159,7 @@ theorem noCodeAtZero : ⊨ dl!{ [ try I(0).setIx() { } catch { revert(); }; asse
 `(bool ok, ) = payable(this).call{value: v}("")` sends to the contract
 itself: on the EVM its `receive` runs, `msg.sender` the contract and
 `msg.value` `v`, and a payment to oneself moves no ether.  The elaborator
-writes the call as `if (r == address(this)) { try this.receive{value: v}()
+writes the call as `bool se = r == address(this); if (se) { try this.receive{value: v}()
 { ok = true; } catch { ok = false; } } else { … the call … }` when the
 contract declares a `receive` before the function (`elabValueCall`): the
 self-call a `try` the run executes, by `tryCallSelfBox`. -/
@@ -188,7 +188,7 @@ theorem receiveRunsT : ValidT .noCallback receiveRunsF := by
 
 /-- The claim that the call keeps the storage is refuted on the contract
 itself (`callKeepsStorageUnsound`): `fy` is `1` after it. -/
-private def keepsRP : Prog Receiver [] [] :=
+private def keepsRP : Prog Receiver [] [.val .uint, .val .bool] :=
   sol{ fy = 0; (bool ok, ) = payable(this).call{value: 0}(""); uint r = fy; assert(r == 0); }
 
 /-- The contract deployed at `7`. -/

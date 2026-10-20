@@ -2581,8 +2581,8 @@ partial def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
   else pure none
 
 /-- **A value call** `(bool ok, ) = r.call{value: v}("")`, its result in
-`ix`: with the contract's `receive` available (`receiveSelfBody`), `if (r
-== address(this)) { try this.receive{value: v}() { ok = true; } catch { ok
+`ix`: with the contract's `receive` available (`receiveSelfBody`), `bool
+se = r == address(this); if (se) { try this.receive{value: v}() { ok = true; } catch { ok
 = false; } } else { … the call … }`, the self-call a `try` the contract runs
 (`Stmt.tryCall`'s `self`), every failure `ok = false` with the state the
 caller's; otherwise the call alone. -/
@@ -2593,8 +2593,14 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   unless (← read).funs.any (·.1 == "receive") do return ← plain
   let st ← get
   let (P, ⟨Γr, addr⟩) ← simpleOf C .uint e
-  let Γ' ← nctx
-  let addr' := addr.wk (← ElabM.lift (Γr.wkTo Γ'))
+  let Γ1 ← nctx
+  let addr1 := addr.wk (← ElabM.lift (Γr.wkTo Γ1))
+  -- the test captured, as `ifElseSplit` takes a simple condition
+  let c : Val C Γ1.ctx .bool :=
+    .binop .eqB rfl rfl (.simple addr1) (.simple (.env .selfAddress rfl))
+  let x ← captureAs C "se" (.val .bool)
+  let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
+  let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
   let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
   let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBody (Γ := Γ') a | set st; plain
   let v ← checkIn C Γ' .uint a
@@ -2614,9 +2620,9 @@ partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : R
   let call : ExtCall C Γ'.ctx := ⟨addr', "receive", []⟩
   let tryS : Stmt C Γ'.ctx Γ'.ctx :=
     .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
-  let c : Val C Γ'.ctx .bool :=
-    .binop .eqB rfl rfl (.simple addr') (.simple (.env .selfAddress rfl))
-  pure (P ++ [.of Γ' (.ite c (.cons tryS .nil) (.cons (.send ix' (.simple addr') v true) .nil))])
+  pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),
+    .of Γ' (.ite (.simple (.local ixc)) (.cons tryS .nil)
+      (.cons (.send ix' (.simple addr') v true) .nil))])
 
 /-- **`constructor(args);`**, a deployment (solkey's obligation's
 `constructor(x̄)@C;`): the constructor inlined as any call is
