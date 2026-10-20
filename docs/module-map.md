@@ -476,6 +476,7 @@ or `sol_decide`, derivations `⊢ φ` built one `apply` per taclet, and runs:
 | `Examples/Tactics/Payment.lean`, `Net.lean` | `transfer` and `send` as `⊢` walks with checked sequents; the frame, the ledger's postconditions and the runs, a refused send's included. |
 | `Examples/Tactics/Values.lean`, `Operators.lean`, `Checked.lean` | Operators, checked arithmetic, `−−`, bitwise, shifts, `unchecked`, `uint8` … `int248`, casts. |
 | `Examples/Tactics/Calls.lean`, `CallOperands.lean`, `Callback.lean`, `TryCatch.lean`, `Contracts.lean` | Internal calls, call-valued operands, callbacks (`ProvesC`), `try`/`catch`, calls by contract (`useContract`). |
+| `Examples/Tactics/SelfCall.lean` | A `try` of the contract itself (`tryCallSelfBox`): the callee's writes and return seen on success, refuted under the oracle reading by a typed run; no code at address `0`. |
 | `Examples/Tactics/Constructors.lean` | A deployment: `constructor(args);` with initializers, `Contract.deployT`, `#deploy`, and solkey's `{storage := mtSt ‖ …}` start closed by `sol_close_mt`; the obligations `problem!{constructor}` and `spec!{constructor}` (solkey's `Counter.sol`, `\old(net(a))` of `oldNet := mtSt`), the refusals, the initializer/modifier order, and what `sol_close_mt` leaves open. |
 | `Examples/Tactics/Memory.lean`, `CrossDomain.lean`, `Theory.lean` | Memory, storage↔memory copies, the theory's rewriting. |
 | `Examples/Tactics/SelectOnSaveConsr.lean` | Reading a write back through a `consr` path, by hand and in solkey's order. |

@@ -15,12 +15,13 @@ gap, in exactly one category (`claimedTaclets_count = 342`,
 `unclaimedTaclets_count = 35`, 0 pending). The pending-name list is empty;
 semantic and source-support gaps, including effectful call-receiver operands,
 remain tracked in `docs/solkey-migration.md`.
-The existing `LeanTaclet` layer (`leanTaclets`) has fifteen rules,
+The existing `LeanTaclet` layer (`leanTaclets`) has seventeen rules,
 `addmodAssignment`, `mulmodAssignment`, `functionCallArgCapture`,
 `tryCallDiamond`, `transferDiamond`, `assumeFalse`, `loopExit`,
 `whileClose`, `whileNoVariantDiamond`, `pushCompoundUnfoldReceiver`,
 `pushIncrementUnfoldReceiver`, `storageMemorySourceSave`,
-`pushMemorySourceCapture`, `storageFixedCopySave` and `pushFixedCopySave`.
+`pushMemorySourceCapture`, `storageFixedCopySave`, `pushFixedCopySave`,
+`tryCallSelfBox` and `tryCallSelfDiamond`.
 The two push-suffix rules capture a complex receiver; upstream's bare
 push receiver capture does not match that arithmetic target.
 The memory-source rules preserve internal snapshot assignments and capture
@@ -359,6 +360,8 @@ receiver kind, Lean does not.
 | --- | --- | --- | --- |
 | `tryCallNoCallbackBox` | same | same | sound for `Valid` (every callee keeping the state), solkey's reading; under `ValidT .noCallback` a `try` calls back and takes `tryCallWithCallbackBox` (`ProvesC I false`, solkey's bug 5, `docs/options.md`). One goal per clause (`Premise.branches`, `Proves.branches`): "call succeeded", "Error caught", "Panic caught", "other failure caught". KeY declares the return locals and the `Panic` code without an initializer, leaving them unconstrained; here they are bound under `∀` (`Hyps.all`), since a Lean declaration is its default. `s#call` is an `ExtCall`, whose receiver and arguments are simple: the elaborator captures any other before the `try` |
 | `tryCallWithCallbackBox` | `CallbackTaclet.tryCallWithCallbackBox` | same | read by `ProvesC.tryCall` (`holdsC_tryCb`): `I` where control leaves ("invariant on exit"), the success block after `{havoc}` and `I` ("call succeeded"), each `catch` block from where the call was made |
+| — | `LeanTaclet.tryCallSelfBox` | Lean only | a `try` whose callee is a function of the contract declared before the caller (`Stmt.tryCall`'s `self`, `docs/options.md` O7): solkey's `try` never runs a callee. Five goals: the receiver the contract (`require(a != 0); require(a == address(this));`), the callee inlined with the returned values as targets (`.call … (.rets rets)`, `functionBodyExpand`) and then the success block; the receiver another (`require(a != 0); require(a != address(this));`), the success block for every value of the returned data; each `catch` block from the caller's state, which a failed self-call goes to. `tryCallNoCallbackBox` takes only a `try` with no such callee (`self = false`) |
+| — | `LeanTaclet.tryCallSelfDiamond` | Lean only | a self-call `try` under the diamond closes to `false`, as `tryCallDiamond` |
 | — | `LeanTaclet.tryCallDiamond` | Lean only | a diamond `try` closes to `false`; solkey has no rule. The call may revert in the caller (no code at the address, data that does not decode), which no clause catches and no formula rules out |
 | — | `LeanTaclet.transferDiamond` | Lean only | a diamond payment closes to `false`; solkey's diamond rules are not ported. Whether the world pays is the compiler theorem's, not the calculus's |
 
