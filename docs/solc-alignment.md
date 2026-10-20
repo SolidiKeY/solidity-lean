@@ -206,6 +206,15 @@ programs, and the check is a statement the rules already run.
   `uint8(255)`, so `type(uint8).max + 1` overflows at `uint8`;
   `type(int8).min` is `int8(-128)`; an enum's are its first and last member
   (`typeBoundExpr`, `enumLit?`).
+- **Narrow positions in a state variable.**  An array's element, a mapping's
+  value or key may be narrow (`uint8[] small; mapping(uint8 => int16) m;`):
+  the variable's `Ty` has `uint`/`int` there, and `Contract.widths` keeps
+  each position's width under its path (`small[]`, a key `m{}`, a value
+  `m[]`; `expandStateTyW`).  A read through indices has that type
+  (`statePath?`, `intTyOf`), so a write is checked or wrapped at it as a
+  narrow variable's is, a pushed value and a key must fit (`fitCheck`).  A
+  reference type carries no width, so a part with a narrow position below it
+  is used through its indices and members only (`narrowWholeUse?`).
 - **Storage packing** is not observable here: a state variable is a value of
   its own in the interpreter and a slot of its own in the compiler, and it
   holds a value of its range; solc packs several narrow variables into one
@@ -215,8 +224,12 @@ programs, and the check is a statement the rules already run.
 
 What is not modelled, each an elaboration error unless said otherwise:
 
-- a narrow type inside a type: an array's element, a mapping's key or value,
-  a struct's member (`narrowNestedMsg`); and a modifier's narrow parameter;
+- a narrow type inside the type of a local, a parameter or a return (a
+  `uint8[] memory`, a `uint8[] storage` alias), and a struct's narrow member
+  (`narrowNestedMsg`); a state variable's part with a narrow position below
+  it used whole (copied, aliased, passed), rather than through an index,
+  `.length`, `.push`, `.pop` or `delete`; push arithmetic on a narrow
+  element (`b.push() += e`); and a modifier's narrow parameter;
 - a cast of arithmetic on literals alone to a narrow `int`
   (`int8(100 + 100)`): write the literal;
 - constant folding: arithmetic on literals alone written to a narrow variable

@@ -49,7 +49,7 @@ contract's invariant.
 | a value call to `this` runs `receive` (`callRunsReceive`) | semantics | closed: a self-call `try` of `receive` behind `r == address(this)` (`elabValueCall`, O8); `callKeepsStorageUnsound` stays pending, false on the EVM |
 | `msg.value` bounded by the ether supply (`msgValueArith`) | chain fact | closed: `msg.value < 2^128` (`Problem.callPre`) |
 | literal types in `c ? 63 : 255` (`ternaryLiteralOverflow`, false on the EVM) | elaborator | closed: solc's mobile type (`mobileTy`); the run reverts (`SolcOpen.ternaryLiteralOverflow` refutes the diamond), the row stays `pending` |
-| narrow types inside types (`uint8[]`, `mapping(uint8 => …)`, struct members) | semantics | open |
+| narrow types inside types (`uint8[]`, `mapping(uint8 => …)`, struct members) | semantics | partly closed: a state variable's narrow element, key and value (`expandStateTyW`, `Checked.lean` §2, `tests/solc/NarrowNested.sol`); open: struct members, locals', parameters' and memory types (`docs/solc-alignment.md`) |
 | signed `**` in `unchecked`; `-128 / -1`, `-(-128)` wrap in `unchecked` | semantics | closed: on the words (`narrowWrapNode`, `Examples/Tactics/SignedCasts.lean`), at `int256` too |
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
