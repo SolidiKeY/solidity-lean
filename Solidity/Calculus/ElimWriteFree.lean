@@ -20,7 +20,7 @@ the starting storage only through the observation atoms `obsW`, `obsL`,
   symbol added at those sorts later.
 * **The terms with a reading** (`LTm.Elimable`) exclude what
   `ElimM.ofOrig` keeps as it is, since that is the term itself: a memory
-  sort, `mtSt`, `wt`, `cleanTail` and `select` (each reads its argument as
+  sort, `wt`, `cleanTail` and `select` (each reads its argument as
   written), `copyMem` (its guard is the term), `sfindIn`; and `orElse`,
   `kite` and `err` at any sort but a word's, where the elimination keeps
   the term.  An observation atom of the input keeps its path as it is
@@ -281,6 +281,21 @@ theorem TSegs.hasFrom_free {S T : Ty} {p : TSegs C S T} (hp : p.Free) :
     · exact ih (.index hb hi) (.obsH (.index hb hi))
   | key hi _ ih => exact fun hb ha => ih (.index hb hi) ha
 
+theorem TSegs.mtHas_free {S T : Ty} {p : TSegs C S T} (hp : p.Free) :
+    ∀ {acc : LTm C (.val .bool)}, acc.StoFree → (p.mtHas acc).StoFree := by
+  induction hp with
+  | nil => exact fun h => h
+  | field h _ ih => exact fun ha => ih ha
+  | «at» hi _ ih => exact fun _ => .app0 rfl
+  | @atF E U n i r hi _ ih =>
+    intro acc ha
+    show (r.mtHas (if TSegs.litBelow i n then acc else
+      .kite acc .tt (LTm.ltNat i n) (.lit (p := .bool) false))).StoFree
+    split
+    · exact ih ha
+    · exact ih (.kite rfl ha StoFree.tt (ltNat_free hi n) (.app0 rfl))
+  | key hi _ ih => exact fun ha => ih ha
+
 theorem SPath.snoc_free {T U : Ty} {P : SPath C T} {s : TSegs C T U} (hP : P.Free)
     (hs : s.Free) : (P.snoc s).Free :=
   TSegs.append_free hP hs
@@ -527,6 +542,15 @@ section Storages
 
 theorem SFun.init_free : (SFun.init : SFun C).Free := ⟨StoFree.tt, initRd_free⟩
 
+theorem mtRd_free : SRd.Free (mtRd : SRd C) := by
+  intro V c P hP
+  cases c with
+  | word _ => exact .app0 rfl
+  | len _ => exact StoFree.nat 0
+  | has _ => exact TSegs.mtHas_free hP StoFree.tt
+
+theorem SFun.mt_free : (SFun.mt : SFun C).Free := ⟨StoFree.tt, mtRd_free⟩
+
 variable {S : SFun C} {Pg : LTm C (.val .bool)} {orig : LTm C .st}
 
 theorem SFun.save_free {T : Ty} {P : SPath C T} {Vok : LTm C (.val .bool)} {V : VRd C T}
@@ -580,10 +604,10 @@ def ElimM.Free : (s : Srt) → ElimM C s → Prop
   | .kint, e => LTm.StoFree (e : LTm C .kint)
   | _, _ => False
 
-/-- The constants the elimination reads: not `memory`, `mtSt` (kept as
-written) or a member under `select`. -/
+/-- The constants the elimination reads: not `memory` or a member under
+`select`. -/
 def _root_.Solidity.Op0.elimOk {s : Srt} : Op0 C s → Bool
-  | .lit _ | .env _ | .root _ _ | .storage | .zlit _ => true
+  | .lit _ | .env _ | .root _ _ | .storage | .mtSt | .zlit _ => true
   | _ => false
 
 /-- The unary symbols the elimination reads: not the memory ones, nor `wt`,
@@ -683,6 +707,7 @@ theorem Op0.elim_free {s : Srt} (o : Op0 C s) (ho : o.elimOk = true) : ElimM.Fre
   | env k => exact .app0 rfl
   | root r h => exact ⟨StoFree.tt, .nil⟩
   | storage => exact SFun.init_free
+  | mtSt => exact SFun.mt_free
   | zlit n => exact .app0 rfl
   | _ => exact absurd ho Bool.false_ne_true
 

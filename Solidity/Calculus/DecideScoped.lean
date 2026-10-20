@@ -32,9 +32,12 @@ An update is applied element by element, each element read in the state
 the update is applied in (`Upd.toLS`), and its terms must return: a box
 update's guard is a premise of the rest, a diamond's a conjunct.
 
-The fragment is where `Fml.toLS` returns: a ledger read or write other
-than a payment's, a `select`, a ledger snapshot, `havoc` and `anon` are
-outside it.  It has a polarity: under a negation or on the left of an
+The fragment is where `Fml.toLS` returns: a ledger read, a ledger write
+other than a payment's or a deployment's (`net`, `pay`, `netMt`: the
+reduction keeps no ledger), a balance moved by `selfBalance := selfBalance
+± a`, a `select`, a ledger snapshot, `havoc` and `anon` are outside it.  A
+deployment's `selfBalance := a` sets the balance the state reads
+(`SymS.bal`, `SymS.envL`).  It has a polarity: under a negation or on the left of an
 implication it takes first-order formulas only (`pos := false`), where the
 reduction and the formula agree both ways.
 
@@ -108,19 +111,27 @@ theorem thin_eq_thinM {Γ Δ : Ctx} (h : Thin Γ Δ) (e : BEnv C Δ) :
 end BEnv
 
 /-- The updates so far, by position: what each local is bound to, the
-storage and the memory they left, and the next position a binder takes. -/
+storage, the memory and the contract's balance they left, and the next
+position a binder takes. -/
 structure SymS (C : Contract) (Γ : Ctx) where
   loc : BEnv C Γ
   stor : LTm C .st
   mem : LTm C .mem
+  bal : LTm C (.val .uint)
   next : Nat
 
 /-- No update yet, no local. -/
-def SymS.init : SymS C [] := ⟨(), .app0 .storage, .app0 .memory, 0⟩
+def SymS.init : SymS C [] := ⟨(), .app0 .storage, .app0 .memory, .app0 (.env .selfBalance), 0⟩
+
+/-- An environment value read in `ρ`: the balance the updates left, the
+transaction's values as they are. -/
+def SymS.envL {Γ : Ctx} (ρ : SymS C Γ) : EnvKey → LTm C (.val .uint)
+  | .selfBalance => ρ.bal
+  | k => .app0 (.env k)
 
 /-- A local pushed, bound to `b` (or to nothing). -/
 def SymS.push {Γ : Ctx} {t : LTy} (ρ : SymS C Γ) (b : Option (LTm C t.bs)) : SymS C (t :: Γ) :=
-  ⟨(b, ρ.loc), ρ.stor, ρ.mem, ρ.next + 1⟩
+  ⟨(b, ρ.loc), ρ.stor, ρ.mem, ρ.bal, ρ.next + 1⟩
 
 /-- A quantifier's local pushed: the atom of its position. -/
 def SymS.pushQ {Γ : Ctx} (p : PrimTy) (ρ : SymS C Γ) : SymS C (.val p :: Γ) :=
@@ -143,7 +154,7 @@ variable {Γ : Ctx}
 /-- A constant pushed in: `storage` and `memory` the updates left. -/
 def _root_.Solidity.Op0.toL (ρ : SymS C Γ) {s : Srt} (o : Op0 C s) : Option (LTm C s) :=
   @Op0.casesOn C (fun s _ => Option (LTm C s)) s o
-    (fun v => some (.app0 (.lit v))) (fun k => some (.app0 (.env k)))
+    (fun v => some (.app0 (.lit v))) (fun k => some (ρ.envL k))
     (fun r {_} h => some (.app0 (.root r h))) (some ρ.stor) (some ρ.mem)
     (some (.app0 .mtSt)) (fun s f {_} h => some (.app0 (.member s f h)))
     (fun n => some (.app0 (.zlit n)))
@@ -324,13 +335,15 @@ def _root_.Solidity.Rhs.toL (ρ : SymS C Γ) {t : LTy} (r : Rhs C Γ t) :
 def _root_.Solidity.UpdElem.toLS {Δ : Ctx} (ρ₀ : SymS C Γ) (e : UpdElem C Γ Δ) (ρ : SymS C Δ) :
     Option (SymS C Δ × LTm C (.val .bool)) :=
   @UpdElem.casesOn C Γ Δ (fun _ => Option (SymS C Δ × LTm C (.val .bool))) e
-    (fun {_} i r => (r.toL ρ₀).map fun b => (⟨ρ.loc.set i (some b.1), ρ.stor, ρ.mem, ρ.next⟩, b.2))
-    (fun s => (s.toL ρ₀).map fun s' => (⟨ρ.loc, s', ρ.mem, ρ.next⟩, seqL s' .tt))
-    (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.next⟩, seqL m' .tt))
+    (fun {_} i r => (r.toL ρ₀).map fun b =>
+      (⟨ρ.loc.set i (some b.1), ρ.stor, ρ.mem, ρ.bal, ρ.next⟩, b.2))
+    (fun s => (s.toL ρ₀).map fun s' => (⟨ρ.loc, s', ρ.mem, ρ.bal, ρ.next⟩, seqL s' .tt))
+    (fun m => (m.toL ρ₀).map fun m' => (⟨ρ.loc, ρ.stor, m', ρ.bal, ρ.next⟩, seqL m' .tt))
     (fun _ _ => none)
     (fun r _ a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
     (fun r a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
-    (fun _ _ => none) (fun _ => none)
+    (fun r a => (r.toL ρ₀).bind fun r' => (a.toL ρ₀).map fun a' => (ρ, seqL r' (seqL a' .tt)))
+    (fun a => (a.toL ρ₀).map fun a' => (⟨ρ.loc, ρ.stor, ρ.mem, a', ρ.next⟩, seqL a' .tt))
 
 /-- `Upd.toLS`'s compiled twin. -/
 def _root_.Solidity.Upd.toLSM (ρ₀ : SymS C Γ) : {Δ : Ctx} → Upd C Γ Δ →
@@ -339,8 +352,8 @@ def _root_.Solidity.Upd.toLSM (ρ₀ : SymS C Γ) : {Δ : Ctx} → Upd C Γ Δ �
   | _, .snoc U e => (U.toLSM ρ₀).bind fun p => (e.toLS ρ₀ p.1).map fun q => (q.1, seqL p.2 q.2)
   | _, .decl U _ r => (U.toLSM ρ₀).bind fun p => (r.toL ρ₀).map fun b =>
     (p.1.push (some b.1), seqL p.2 b.2)
-  | _, .pop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.next⟩, p.2)
-  | _, .drop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.next⟩, p.2)
+  | _, .pop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next⟩, p.2)
+  | _, .drop U h => (U.toLSM ρ₀).map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next⟩, p.2)
 
 /-- **An update pushed in**: the state it leaves and what must return for
 it to land; `none` outside the fragment.  By the recursor. -/
@@ -351,8 +364,8 @@ def _root_.Solidity.Upd.toLS (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :
     (fun {_} _ e ih => ih.bind fun p => (e.toLS ρ₀ p.1).map fun q => (q.1, seqL p.2 q.2))
     (fun {_} {_} _ _ r ih => ih.bind fun p => (r.toL ρ₀).map fun b =>
       (p.1.push (some b.1), seqL p.2 b.2))
-    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.next⟩, p.2))
-    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.next⟩, p.2))
+    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next⟩, p.2))
+    (fun {_} {_} _ h ih => ih.map fun p => (⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next⟩, p.2))
     Δ U
 
 theorem _root_.Solidity.Upd.toLS_eq_toLSM (ρ₀ : SymS C Γ) {Δ : Ctx} (U : Upd C Γ Δ) :

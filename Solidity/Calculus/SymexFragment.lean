@@ -115,16 +115,19 @@ theorem Decide.BEnv.Ok.thin : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {e : BEnv C
   | _, _, .keep h, _, he => ⟨he.1, BEnv.Ok.thin h he.2⟩
   | _, _, .drop h, _, he => BEnv.Ok.thin h he.2
 
-/-- **A symbolic state the elimination reads**: its bindings and its
-storage elimable. -/
-def Decide.SymS.Ok {Γ : Ctx} (ρ : SymS C Γ) : Prop := ρ.loc.Ok ∧ ρ.stor.Elimable
+/-- **A symbolic state the elimination reads**: its bindings, its
+storage and its balance elimable. -/
+def Decide.SymS.Ok {Γ : Ctx} (ρ : SymS C Γ) : Prop :=
+  ρ.loc.Ok ∧ ρ.stor.Elimable ∧ ρ.bal.Elimable
 
-/-- Its bindings elimable, its storage in save normal form. -/
-def Decide.SymS.OkNF {Γ : Ctx} (ρ : SymS C Γ) : Prop := ρ.loc.Ok ∧ ρ.stor.SaveNF
+/-- Its bindings and balance elimable, its storage in save normal form. -/
+def Decide.SymS.OkNF {Γ : Ctx} (ρ : SymS C Γ) : Prop :=
+  ρ.loc.Ok ∧ ρ.stor.SaveNF ∧ ρ.bal.Elimable
 
-theorem Decide.SymS.OkNF.ok {Γ : Ctx} {ρ : SymS C Γ} (h : ρ.OkNF) : ρ.Ok := ⟨h.1, h.2.elimable⟩
+theorem Decide.SymS.OkNF.ok {Γ : Ctx} {ρ : SymS C Γ} (h : ρ.OkNF) : ρ.Ok :=
+  ⟨h.1, h.2.1.elimable, h.2.2⟩
 
-theorem Decide.SymS.init_okNF : (SymS.init : SymS C []).OkNF := ⟨trivial, .storage⟩
+theorem Decide.SymS.init_okNF : (SymS.init : SymS C []).OkNF := ⟨trivial, .storage, .app0 rfl⟩
 
 theorem Decide.SymS.Ok.push {Γ : Ctx} {t : LTy} {ρ : SymS C Γ} (h : ρ.Ok)
     {b : Option (LTm C t.bs)} (hb : ∀ x, b = some x → x.Elimable) : (ρ.push b).Ok :=
@@ -216,7 +219,9 @@ theorem Op0.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {s : Srt} (o : Op0 C s)
     (ho : o.elimOk = true) {l : LTm C s} (h : o.toL ρ = some l) : l.Elimable := by
   cases o <;> simp only [Op0.elimOk, Bool.false_eq_true] at ho <;>
     simp only [Op0.toL, Option.some.injEq] at h <;> subst h
-  all_goals first | exact .app0 rfl | exact hρ.2
+  all_goals first | exact .app0 rfl | exact hρ.2.1 | skip
+  rename_i k
+  cases k <;> first | exact hρ.2.2 | exact .app0 rfl
 
 theorem Op1.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {a s : Srt} (o : Op1 C a s)
     (ho : o.elimOk = true) {x : LTm C a} (hx : x.Elimable) {l : LTm C s} (h : o.toL ρ x = some l) :
@@ -225,7 +230,7 @@ theorem Op1.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {a s : Srt} (o : Op1 C a
     simp only [Op1.toL, Option.some.injEq, reduceCtorEq] at h <;> subst h
   all_goals first
     | exact Decide.fold1_unop_elimable _ _ hx
-    | exact Decide.foldNext_elimable hρ.2 hx
+    | exact Decide.foldNext_elimable hρ.2.1 hx
     | exact .app1 rfl hx
 
 theorem Op2.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {a b s : Srt} (o : Op2 C a b s)
@@ -236,7 +241,7 @@ theorem Op2.toL_elimable {ρ : SymS C Γ} (hρ : ρ.Ok) {a b s : Srt} (o : Op2 C
   all_goals first
     | exact Decide.fold2_binop_elimable _ _ hx hy
     | exact Decide.literalRead_elimable (.app2 rfl hx hy)
-    | exact Decide.foldAt_elimable _ hρ.2 hx hy
+    | exact Decide.foldAt_elimable _ hρ.2.1 hx hy
     | exact .app2 rfl hx hy
 
 theorem Op3.toL_elimable {a b c s : Srt} (o : Op3 C a b c s) (ho : o.elimOk = true)
@@ -287,7 +292,7 @@ theorem Tm.SaveNF.toL {ρ : SymS C Γ} (hρ : ρ.OkNF) {t : Tm C Γ .st} (ht : t
   | storage =>
     intro l h
     simp only [Tm.toL_eq_toLM, Tm.toLM, Op0.toL, Option.some.injEq] at h
-    subst h; exact hρ.2
+    subst h; exact hρ.2.1
   | save p v hs ih =>
     intro l h
     cases he with
@@ -410,7 +415,7 @@ theorem UpdElem.ElimOk.toLS {Δ : Ctx} {ρ₀ : SymS C Γ} (hρ₀ : ρ₀.Ok) {
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨s', hs, rfl⟩ := h
     have hs' := Tm.ElimOk.toL hρ₀ he hs
-    exact ⟨⟨hρ.1, hs'⟩, Decide.seqL_elimable hs' Decide.tt_elimable⟩
+    exact ⟨⟨hρ.1, hs', hρ.2.2⟩, Decide.seqL_elimable hs' Decide.tt_elimable⟩
   | _ => exact he.elim
 
 theorem UpdElem.ElimOk.toLS_nf {Δ : Ctx} {ρ₀ : SymS C Γ} (hρ₀ : ρ₀.OkNF) {e : UpdElem C Γ Δ}
@@ -425,7 +430,7 @@ theorem UpdElem.ElimOk.toLS_nf {Δ : Ctx} {ρ₀ : SymS C Γ} (hρ₀ : ρ₀.Ok
   | storage s =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨s', hs, rfl⟩ := h
-    exact ⟨hρ.1, Tm.SaveNF.toL hρ₀ hn he hs⟩
+    exact ⟨hρ.1, Tm.SaveNF.toL hρ₀ hn he hs, hρ.2.2⟩
   | _ => exact he.elim
 
 /-- **An update with a reading, pushed in at an elimable state**, leaves an
