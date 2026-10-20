@@ -77,7 +77,9 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
           Tactic.run g.mvarId! (Tactic.evalTactic tac)
         else if cb then do
           let tac ← `(tactic| sol_prove)
-          Tactic.run g.mvarId! (Tactic.evalTactic tac)
+          -- only whether a leaf is left is reported: stop at the first
+          withOptions (·.setBool `sol.prove.stopAtOpen true) <|
+            Tactic.run g.mvarId! (Tactic.evalTactic tac)
         else do
           let out ← IO.mkRef (none : Option Derive.Search)
           let _ ← Tactic.run g.mvarId! do
