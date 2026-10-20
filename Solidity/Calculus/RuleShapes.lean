@@ -583,7 +583,7 @@ theorem unclaimedTaclets_count : unclaimedTaclets.length = 35 := by decide +kern
 /-! ## The rules with no taclet
 
 A rule upstream has no counterpart for is a `LeanTaclet`, not a `Taclet`, so
-every row above claims a taclet. There are seventeen:
+every row above claims a taclet. There are eighteen:
 `functionCallArgCapture`, printed as `unfoldArgument`, which solkey's
 `docs/net.md` lists as missing (its `ExpandFunctionBody` binds the parameters
 to the arguments as they are; here a parameter is bound to a ready argument
@@ -602,7 +602,9 @@ push statement). `pushMemorySourceCapture` handles a complex memory push
 source; `storageMemorySourceSave` handles an embedded memory snapshot source
 of an internal storage assignment. `tryCallSelfBox` and `tryCallSelfDiamond`
 are a `try` whose callee is the contract's own function, run in its frame
-(`docs/options.md` O8): solkey's `try` never runs a callee. The list is checked against the
+(`docs/options.md` O8): solkey's `try` never runs a callee. `recursiveCallUnfold`
+is a recursive call read as the call of its body's next frame
+(`Stmt.callRec`), where solkey inlines without end. The list is checked against the
 constructors, so one added later has to say so here. -/
 
 /-- Every `LeanTaclet` constructor. -/
@@ -613,7 +615,7 @@ def leanTaclets : List Lean.Name :=
     ``LeanTaclet.pushCompoundUnfoldReceiver, ``LeanTaclet.pushIncrementUnfoldReceiver,
     ``LeanTaclet.storageMemorySourceSave, ``LeanTaclet.pushMemorySourceCapture,
     ``LeanTaclet.storageFixedCopySave, ``LeanTaclet.pushFixedCopySave,
-    ``LeanTaclet.tryCallSelfBox, ``LeanTaclet.tryCallSelfDiamond]
+    ``LeanTaclet.tryCallSelfBox, ``LeanTaclet.tryCallSelfDiamond, ``LeanTaclet.recursiveCallUnfold]
 
 #check_constructor_table LeanTaclet, leanTaclets
 

@@ -969,6 +969,15 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   | assumeFalse :
       dl[LeanTaclet C k]{ ⟨[ assume(false); ]⟩ ⇝ true }
 
+  /-- A recursive call (`Stmt.callRec`, `docs/kernel-port.md`, "Recursion")
+  is the call of its body, the next frame of its unrolling, which the next
+  step expands as any call (`internalCallExpand`, `functionBodyExpand`).
+  solkey inlines a recursive callee as any other, without end. -/
+  | recursiveCallUnfold {Γ Γ' ps rs : Ctx} {f : Name} {d : Nat} {args : Args C Γ ps}
+      {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)} :
+      LeanTaclet C k m (.callRec f d args ret body)
+        (.unfold (.cons (.call f args ret (body ())) .nil) .refl)
+
 
   /-- A loop unwound to its bound ends there: the rest with the condition
   false assumed, and that it is false (`Premise.check`).  Not

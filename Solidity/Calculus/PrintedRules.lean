@@ -500,7 +500,8 @@ def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.pushFixedCopySave, .leanOnly .calculus),
   (``LeanTaclet.pushMemorySourceCapture, .leanOnly .calculus),
   (``LeanTaclet.tryCallSelfBox, .leanOnly .calculus),
-  (``LeanTaclet.tryCallSelfDiamond, .leanOnly .calculus) ]
+  (``LeanTaclet.tryCallSelfDiamond, .leanOnly .calculus),
+  (``LeanTaclet.recursiveCallUnfold, .leanOnly .calculus) ]
 
 #check_constructor_table LeanTaclet, leanPrintedOrigins.map Prod.fst
 

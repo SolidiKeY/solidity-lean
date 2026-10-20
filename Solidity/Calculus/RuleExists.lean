@@ -545,6 +545,7 @@ not), a leaf ruled out by a contradicted hypothesis (`!`). -/
   assert "assertSimple 7*assertConditionCapture"
   revert "revertDiamond revertBox"
   assumeFalse "lean.assumeFalse"
+  callRec "lean.recursiveCallUnfold"
   call "internalCallExpand lean.functionCallArgCapture internalCallExpand lean.functionCallArgCapture functionBodyExpand lean.functionCallArgCapture internalCallExpand lean.functionCallArgCapture internalCallExpand lean.functionCallArgCapture"
   tryCall "lean.tryCallDiamond tryCallNoCallbackBox lean.tryCallSelfDiamond lean.tryCallSelfBox"
   loop "lean.loopExit whileUnwind lean.whileClose lean.whileNoVariantDiamond whileInvariantDiamond lean.whileNoVariantDiamond whileInvariantBox whileUnwind"
