@@ -83,6 +83,15 @@ def Problem.callPre (C : Contract) (Γ : NCtx) (noValue : Bool)
   | .ok φ => φ
   | .error _ => .tt
 
+/-- **Where the contract is deployed**, an opt-in premise
+(`solc_scoped_problems N self A`, `scripts/test-solidity.mjs --self-address`):
+`address(this) == A`, so that a call to a parameter pinned to the harness's
+address `A` is a call to the contract itself (`docs/options.md` O7). -/
+def Problem.selfPre (C : Contract) (Γ : NCtx) (A : Nat) : Fml C Γ.ctx :=
+  match NRead.conj [NRead.eq (.env .selfAddress) (.num A)] Γ with
+  | .ok φ => φ
+  | .error _ => .tt
+
 /-- The modality of a tag's plain obligation, if solkey states that one. -/
 def Tag.modality? : Tag → Option Modality
   | .diamond => some .diamond
@@ -99,7 +108,7 @@ the import does not compile it, and `sol_prove` evaluates the statement
 with compiled code (`Symex.evaluable`).  `none`
 where solkey states no plain obligation (the tag) or a parameter is of no
 value type. -/
-def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
+def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) (selfAddr : Option Nat := none) :
     Except String (Option Expr) := do
   let some m := r.tag.modality? | return none
   unless r.params.length == r.paramTypes.length do
@@ -130,6 +139,11 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
       mkAppN (mkConst ``Fml.imp) #[c, Γe,
         mkAppN (mkConst ``Problem.callPre) #[c, toExpr Γ, toExpr noValue, toExpr ranges], body]
     else body
+  -- the deployment address, when the run asks for it (`Problem.selfPre`)
+  let body := match selfAddr with
+    | some A => mkAppN (mkConst ``Fml.imp) #[c, Γe,
+        mkAppN (mkConst ``Problem.selfPre) #[c, toExpr Γ, toExpr A], body]
+    | none => body
   let body := if r.paramTypes.any (fun t => t matches .alias _ | .mem _) then
       mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.refInputs) c Γe, body]
     else body
@@ -144,7 +158,8 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
 /-- Declare each obligation of the import `N`, `N.f.problem : Fml N []`
 (`obligation`), as the entries of one declaration `N.problems`; compiled
 when `compile`.  How many. -/
-def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
+def declareObligations (N : Lean.Name) (compile : Bool) (selfAddr : Option Nat := none) :
+    CommandElabM Nat := do
   let rows ← reportRows N
   let nilCtx := ctxE []
   let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
@@ -153,7 +168,7 @@ def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
   let mut entries : Array (Lean.Name × Expr) := #[]
   for r in rows do
     unless r.status == .elaborated do continue
-    match obligation env N r with
+    match obligation env N r selfAddr with
     | .error e => errs0 := errs0.push e
     | .ok none => pure ()
     | .ok (some φ) => entries := entries.push (r.declName N ++ `problem, φ)
@@ -188,13 +203,16 @@ def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
 /-- `solc_scoped_problems N`: each obligation `N.f.problem : Fml N []`
 (`obligation`), an entry of one table `N.problems`, compiled, or with
 `decl` not compiled (the scoped `sol_prove` reads an obligation by its
-value, `Symex.evaluable`); an info names how many. -/
-syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")? : command
+value, `Symex.evaluable`); with `self A`, each assuming `address(this) == A`
+(`Problem.selfPre`); an info names how many. -/
+syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")?
+  (&" self " num)? : command
 
 @[command_elab solcScopedProblems]
 def elabSolcScopedProblems : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  let k ← declareObligations N stx[2].isNone
+  let selfAddr := if stx[3].isNone then none else stx[3][1].isNatLit?
+  let k ← declareObligations N stx[2].isNone selfAddr
   logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
 
 /-- `N.f`'s statement, as compiled code evaluates it: `N.f.problem` (its

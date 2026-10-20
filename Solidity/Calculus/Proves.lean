@@ -74,7 +74,8 @@ variable {C : Contract}
 /-- Whether the rule `Stmt.step` fires on `s` under `m` is one of solkey's
 (`Taclet`), read off the statement alone: a call with an argument to capture
 (`functionCallArgCapture`), a payment or a `try` under the diamond
-(`transferDiamond`, `tryCallDiamond`), an exhausted loop bound (`loopExit`),
+(`transferDiamond`, `tryCallDiamond`), a `try` of the contract's own function
+(`tryCallSelfBox`), an exhausted loop bound (`loopExit`),
 `assume(false)` (`assumeFalse`) and unsupported invariant shapes have Lean's
 rules only (`LeanTaclet.keyStep`).
 Automatic and positive-bound loops use `whileUnwind`; framed invariants use
@@ -92,7 +93,7 @@ def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (deleteMem := fun _ _ => true) (assignNew := fun _ _ _ => true)
     (ite := fun _ _ _ => true) (require := fun _ => true) (assert := fun _ => true)
     (revert := true) (assumeFalse := false) (call := fun _ args _ _ => (Args.capture args).isNone)
-    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => m == .box)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ self => m == .box && !self)
     (loop := fun a _ body => match a with
       | .auto | .unwind (_ + 1) => true
       | .unwind 0 => false
