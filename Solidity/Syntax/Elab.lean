@@ -2772,8 +2772,10 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let partners := recPartners C.funs f
       pure (d, C.funs.take j ++ (C.funs.drop j).filter (partners.contains ·.1))
     else pure (d, funs.take i)
-  if recursive && d.rets.length > 1 then
-    throw s!"{f} is recursive and returns several values: not supported"
+  -- a recursive function's frame is one context, `rs ++ ps`, at every call:
+  -- a call of several returns returns to its targets (`CallRet.rets`)
+  if recursive && d.rets.length > 1 && !targets then
+    throw s!"{f} is recursive and returns several values: call it in a tuple assignment"
   -- a parameter's or return variable's name: fresh, or the recursive frame's
   let pickName (base : String) (frameNames : RecFrame → List Var) (j : Nat) : ElabM Var :=
     match site with
@@ -2837,7 +2839,6 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | [], some _ => throw s!"{f} returns no value"
     | [(n, .ref R)], none => do
       if targets then throw s!"{f} returns a {Ty.ref R}, which a tuple assignment does not take"
-      if recursive then throw s!"{f} is recursive and returns a reference: not supported"
       if d.retMem && d.retStorage then throw s!"{f}: its return has two data locations"
       if d.retStorage then
         let r ← freshCapture "sp"
@@ -2871,6 +2872,8 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     | rs, none => do
       if d.retMem then throw s!"{f}: `memory` on a return of a function of several returns"
       if d.retStorage then throw s!"{f}: `storage` on a return of a function of several returns"
+      -- declared in the caller's context too (`CallRet.rets`): fresh at
+      -- every call, a recursive one's too
       for (n, T) in rs do
         let .prim p := T | throw s!"{f}: its return {n} has a reference type"
         let w := (lookupBy n d.widths).getD 256
@@ -2881,9 +2884,9 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       if targets then pure (RetKind.rets (mrets.map fun (p, r, _) => (p, r))) else pure RetKind.none
   let Γf := Γr ++ Γp
   let rnames : List Var := match kind with
-    | .val _ r => [r]
+    | .val _ r | .mem _ r | .storage _ r => [r]
     | .rets l => l.map (·.2)
-    | _ => []
+    | .none => []
   -- the body: at a recursive function's call in its own body, the frame
   -- below (`ElabScope.recs`); for a recursive function, its body elaborated
   -- per frame, lazily (`recUnroll`, `Stmt.callRec`); otherwise inlined
@@ -2976,12 +2979,20 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       let ⟨hm⟩ ← ElabM.lift (memOk R)
       match hd : (Ty.ref R).defaultOkS with
       | true =>
-        let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.mem R] ++ ps) P)
-        pure (.of Γs (.call f as (.mem R r hd hm) b))
+        match recBody with
+        | some (n, mk) =>
+          pure (.of Γs (.callRec f n as (.mem R r hd hm) (← mk ([.mem R] ++ ps) (r :: as.names))))
+        | none =>
+          let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.mem R] ++ ps) P)
+          pure (.of Γs (.call f as (.mem R r hd hm) b))
       | false => throw s!"{f} returns a {Ty.ref R}, whose default is not well-formed"
     | .storage R r =>
-      let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.alias R] ++ ps) P)
-      pure (.of Γs (.call f as (.storage R r) b))
+      match recBody with
+      | some (n, mk) =>
+        pure (.of Γs (.callRec f n as (.storage R r) (← mk ([.alias R] ++ ps) (r :: as.names))))
+      | none =>
+        let ⟨_, b⟩ ← ElabM.lift (SProg.chain (r :: as.names) ([.alias R] ++ ps) P)
+        pure (.of Γs (.call f as (.storage R r) b))
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
 

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 uint constant FILE_BASE = 4;
 function doubleValue(uint x) pure returns (uint) { return 2 * x; }
+/// @custom:key ensures \result == 0
 function recursiveValue(uint x) pure returns (uint) { return recursiveValue(x); }
 library LibA {
     uint constant UNIT = 10;
