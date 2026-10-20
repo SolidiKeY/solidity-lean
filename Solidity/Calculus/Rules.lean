@@ -943,6 +943,8 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
       {selfBody : Prog C (ρ ++ ps) Γf} :
       LeanTaclet C k .box
         (.tryCall call rets body errorBody code panicBody otherBody selfArgs selfBody true)
+        -- its goals: "self call succeeded", "call succeeded", "Error caught",
+        -- "Panic caught", "other failure caught"
         (trySelfStep call rets body errorBody code panicBody otherBody selfArgs selfBody)
 
   /-- A self-call `try` under the diamond closes to `false`, as any `try`. -/

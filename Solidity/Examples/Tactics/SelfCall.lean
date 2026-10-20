@@ -40,15 +40,20 @@ local instance : InContract := ⟨SelfCaller⟩
 
 open scoped Scoped
 
-/-! ## The rule -/
+/-! ## The rule
+
+Its two success goals print their blocks escaped (`‹body›`): the
+`require`s and the inlined callee in front of `body` are not schema
+variables (`trySelfStep`). -/
 
 /--
 info: @LeanTaclet.tryCallSelfBox : ∀ {C : Contract} {k : Nat} {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} {call : ExtCall C Γ}
   {rets : Binders ρ} {body : Prog C (ρ ++ Γ) Γ₁} {errorBody : Prog C Γ Γ₂} {code : CodeBinder κ}
   {panicBody : Prog C (κ ++ Γ) Γ₃} {otherBody : Prog C Γ Γ₄} {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf},
-  LeanTaclet C k Modality.box
-    (Stmt.tryCall call rets body errorBody code panicBody otherBody selfArgs selfBody true)
-    (trySelfStep call rets body errorBody code panicBody otherBody selfArgs selfBody)
+  dl[LeanTaclet C k]{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
+    ] ⇝
+    "self call succeeded": [ ‹body› ] ; "call succeeded": ∀ rets. [ ‹body› ] ; "Error caught": [ errorBody ] ;
+      "Panic caught": ∀ code. [ panicBody ] ; "other failure caught": [ otherBody ] }
 -/
 #guard_msgs in #check @LeanTaclet.tryCallSelfBox
 
@@ -104,31 +109,22 @@ def at7 : State SelfCaller [] :=
 theorem keeps_panics : (Prog.run at7 keepsP).halt? = some .panic := by
   decide +kernel
 
+/-- `[ keepsP ] true`. -/
+def keepsF : Fml SelfCaller [] := .modal .box keepsP .nil .tt
+
 /-- So the claim the oracle reading proves is not valid. -/
-theorem keeps_invalid : ¬ ⊨ dl!{ [ ix = 0;
-    try this.setIx() { int r = ix; assert(r == 0); } catch { }; ] true } := by
+theorem keeps_invalid : ¬ Valid keepsF := by
   intro h
-  have h7 := h at7
-  have hr := keeps_panics
-  revert h7 hr
-  show holds at7 (.modal .box keepsP .nil .tt) → _
-  rw [holds_modal_iff]
-  cases hP : Prog.runSt at7 keepsP with
-  | ok τ =>
-    intro _ hr
-    simp only [Prog.runSt, Except.map] at hP
-    revert hr hP
-    cases Prog.run at7 keepsP <;> simp [TRes.halt?]
-  | error e =>
-    intro h7 hr
-    simp only [Prog.runSt, Except.map] at hP
-    revert hr hP h7
+  have h7 := (holds_modal_iff at7 keepsP .nil .tt).1 (h at7)
+  have hr : Prog.runSt at7 keepsP = .error .panic := by
+    have := keeps_panics
+    unfold Prog.runSt
+    revert this
     cases Prog.run at7 keepsP with
-    | ok => simp
-    | error e' =>
-      simp only [TRes.halt?, Option.some.injEq, Except.error.injEq]
-      rintro rfl rfl
-      simp [Except.bind, Modality.afterRunTR]
+    | ok => intro h; cases h
+    | error e => intro h; cases h; rfl
+  rw [hr] at h7
+  exact h7.2 rfl
 
 /-! ## Address `0` has no code
 
