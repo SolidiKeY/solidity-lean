@@ -539,14 +539,14 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false)
     have h₁ := hok st nt ((holdsC_closedAt_iff hI hT _).2 hJ')
     have h₂ := holdsC_binders_all rets (σ.havoc st nt) _ r h₁
     exact COut.thenF_drop _ (holdsC_modalK _ ok _ φ h₂ o hP)
-  | tryError hP =>
+  | tryError _ hP =>
     rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
     exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
-  | tryPanic hP =>
+  | tryPanic _hsf hP =>
     rename_i v o
     have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v) hpnc
     exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
-  | tryOther hP =>
+  | tryOther _ hP =>
     rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
     exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)
 
@@ -563,6 +563,39 @@ theorem ExecP.require_true {J : StateInv C} {Δ Δ' : Ctx} {τ : State C Δ}
     rfl
   rw [hr] at hd
   exact ExecP.cons hd hP
+
+/-- A run that reverts or panics refutes a diamond, with callbacks. -/
+theorem holdsC_not_diamond {Γ₁ Γ₀ : Ctx} {σ : State C Γ} {P : Prog C Γ Γ₁} {κ : Frames C Γ₁ Γ₀}
+    {φ : Fml C Γ₀} {e : THalt} (he : e = .revert ∨ e = .panic)
+    (h : ExecP (I.stateInv pay) σ P (.halt e)) : ¬ holdsC I pay σ (.modal .diamond P κ φ) := by
+  intro hX
+  have h' := hX _ h
+  rcases he with rfl | rfl
+  · exact nomatch h'.1
+  · exact h'.2 rfl
+
+/-- Another contract's callee: the self-call's `require` reverts. -/
+theorem holdsC_selfFails_notSelf {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (σ : State C Γ)
+    (hs : (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1) :
+    holdsC I pay σ (call.selfFails rets sargs sbody) := by
+  have hd := ExecS.det (J := I.stateInv pay) (σ := σ) (s := .require call.isSelf) rfl
+  have hr : (Stmt.require call.isSelf).run σ = .error .revert := by
+    show TRun.require call.isSelf σ = _
+    simp only [TRun.require, ExtCall.isSelf_evalT, hs, decide_false]
+    rfl
+  rw [hr] at hd
+  exact holdsC_not_diamond (.inl rfl) (ExecP.halt hd)
+
+/-- The contract's own callee, which reverts or panics. -/
+theorem holdsC_selfFails_halt {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (σ : State C Γ)
+    (hs : (call.addr.evalT σ).1 = σ.tx.selfAddress.1) {e : THalt} (he : e = .revert ∨ e = .panic)
+    (hc : ExecS (I.stateInv pay) σ (.call call.fn sargs (.rets rets) sbody) (.halt e)) :
+    holdsC I pay σ (call.selfFails rets sargs sbody) := by
+  have hi : call.isSelf.evalT σ = .ok true := by
+    rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
+  exact holdsC_not_diamond he (ExecP.require_true hi (ExecP.halt (P := .nil) hc))
 
 /-- **`tryCallSelfBox` is sound with callbacks** (Lean, `docs/options.md`
 O8): the invariant where control leaves; the receiver the contract, the
@@ -589,12 +622,12 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
         (Prog.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
           (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok)).ext)
         (.seq ω κ)) φ)))))
-    (herr : holdsC I pay σ (Binders.nil.all
-      (Fml.modalK .box err (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ)))
-    (hpnc : holdsC I pay σ (code.binders.all
-      (Fml.modalK .box pnc (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ)))
-    (hoth : holdsC I pay σ (Binders.nil.all
-      (Fml.modalK .box other (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ))) :
+    (herr : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (Binders.nil.all
+      (Fml.modalK .box err (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ))))
+    (hpnc : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (code.binders.all
+      (Fml.modalK .box pnc (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ))))
+    (hoth : holdsC I pay σ (.imp (call.selfFails rets sargs sbody) (Binders.nil.all
+      (Fml.modalK .box other (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ)))) :
     holdsC I pay σ (.modal .box (.cons (.tryCall call rets ok err code pnc other sargs sbody true)
       ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
@@ -626,14 +659,30 @@ theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
         (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok)).ext from
       Subsingleton.elim _ _]
     exact COut.thenF_drop _ h₃
-  | tryError hP =>
+  | tryError hsf hP =>
+    have herr := herr (holdsC_selfFails_notSelf call rets sargs sbody σ (hsf rfl))
     rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
     exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
-  | tryPanic hP =>
+  | tryPanic hsf hP =>
     rename_i v o
-    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v) hpnc
+    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v)
+      (hpnc (holdsC_selfFails_notSelf call rets sargs sbody σ (hsf rfl)))
     exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
-  | tryOther hP =>
+  | tryOther hsf hP =>
+    have hoth := hoth (holdsC_selfFails_notSelf call rets sargs sbody σ (hsf rfl))
+    rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
+    exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)
+  | trySelfError _ hs hc hP =>
+    have herr := herr (holdsC_selfFails_halt call rets sargs sbody σ hs (.inl rfl) hc)
+    rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
+    exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
+  | trySelfPanic _hz hs hc hP =>
+    rename_i v o
+    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v)
+      (hpnc (holdsC_selfFails_halt call rets sargs sbody σ hs (.inr rfl) hc))
+    exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
+  | trySelfOther _ hs hc hP =>
+    have hoth := hoth (holdsC_selfFails_halt call rets sargs sbody σ hs (.inl rfl) hc)
     rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
     exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)
   | trySelfOk hz hs hc hP =>
@@ -1018,6 +1067,10 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
   induction d with
   | plain h hφ => exact fun σ => (holdsC_iff_holds _ hφ σ).2 (Proves.sound h σ)
   | intro _ ih => exact ih
+  | @notLeft Γ H X φ _ ih =>
+    exact fun σ => Hyps.wrapC_mono (ψ := .imp (.not X) φ) _ (fun _ hX hn => (hn hX).elim) σ (ih σ)
+  | @hideLeft Γ H a φ _ ih =>
+    exact fun σ => Hyps.wrapC_mono (ψ := .imp a φ) _ (fun _ h _ => h) σ (ih σ)
   | allIntro _ ih => exact ih
   | updIntro _ ih => exact ih
   | bindIntro _ ih => exact ih
