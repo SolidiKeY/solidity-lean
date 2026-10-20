@@ -124,7 +124,7 @@ syntax on an admitted body remains an import failure.
 Large literal tables are compiled in segments of at most 64 list cells.
 A kernel-checked reflexivity certificate verifies that the resulting contract
 equals the original literal. This lets the testing import retain the full
-551-function frozen TestSuite without increasing code-generation or proof
+617-function frozen TestSuite (solkey `473da8944c`) without increasing code-generation or proof
 limits. Imported scoped programs remain uncompiled, as before.
 
 Enum members in NatSpec are resolved from the validated solc declarations,

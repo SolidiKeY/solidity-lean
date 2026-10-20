@@ -198,6 +198,10 @@ solkey's `StorageDangling` suite closes, as on its EVM runner). The
   `Counterexamples/`) and `Examples/Tactics/Dangling.lean` now prove the
   resurrection claims in every state; `PushReceiver.lean`'s dirty-entry
   pins flip.
+- The source-runner fixtures that read a row of an empty reference push
+  (`PushReceiver`, `PushSources`, `MemoryPush`, `StorageReturns`,
+  `PushBindings`) are open from a well-formed entry; their pins in
+  `scripts/test-solidity.test.mjs` read so since 2026-10-20.
 - TestSuite: five obligations that read an appended reference slot as its
   default are pending, as they stay open upstream (`SYMBOLIC_TAIL_OPENS`):
   506 derived, 6 pending at the old fixture.

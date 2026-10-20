@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 contract SpecImport {
-    modifier unparsed(uint a, uint b) { unchecked { a + b; } _; }
+    modifier unparsed(uint a, uint b) { assembly { pop(add(a, b)) } _; }
 
     /// @custom:key ensures true -> \forall uint q; q == q
     function universalConsequent() public pure {}

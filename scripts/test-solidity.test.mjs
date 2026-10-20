@@ -187,30 +187,45 @@ test("value push captures complex receivers once", () => {
   assert.deepEqual(report.results.map(r => r.signature),
     ['nested()','falsePost()','effectfulReceiver()','oldTargetIndex()','falseTargetIndex()']);
   const status = Object.fromEntries(report.results.map(r => [r.function,r.status]));
-  assert.equal(status.nested,'proved');
-  assert.equal(status.effectfulReceiver,'proved');
-  assert.equal(status.falsePost,'pending');
-  assert.equal(status.oldTargetIndex,'proved');
-  assert.equal(status.falseTargetIndex,'pending');
+  // An empty push of a reference element saves only the length and exposes the
+  // old slot as it is (solkey d85018517f's `storagePushLengthSave`, e2319c57):
+  // a claim about the pushed row fails from a well-formed entry state
+  // (`nested_dirty`, `Examples/Tactics/PushReceiver.lean`), as solkey's
+  // SYMBOLIC_TAIL_OPENS stay open. The runs from the initial state are pinned there.
+  for (const fn of ['nested','falsePost','oldTargetIndex','falseTargetIndex'])
+    assert.equal(status[fn],'pending',fn);
+  // its search runs out of heartbeats on the open leaves
+  assert.notEqual(status.effectfulReceiver,'proved');
 });
 
 test("push source captures preserve values, independent copies and mutable source names", () => {
-  const report = runSolidityTests(["tests/solc/PushSources.sol"], {build:false});
+  // Batches of three: as one Lean call the contract took 260 s (2026-10-20),
+  // against the 300 s default subprocess timeout.
+  const report = runSolidityTests(["tests/solc/PushSources.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
+  // Each source row is read from `rows.push()`'s exposed old slot (length-only
+  // empty push, see "value push captures complex receivers once"): open, but for
+  // the field written in place and the source index that reverts.
   assert.deepEqual(report.results.map(r => [r.function,r.status]), [
-    ['primitive','proved'], ['primitiveField','proved'], ['primitiveFalse','pending'],
-    ['referenceCopy','proved'], ['referenceFalse','pending'], ['selfCopy','proved'],
-    ['effectfulSource','proved'], ['complexReceiver','proved'], ['badSourceIndex','proved'],
-    ['freshSourceNames','proved']
+    ['primitive','pending'], ['primitiveField','proved'], ['primitiveFalse','pending'],
+    ['referenceCopy','pending'], ['referenceFalse','pending'], ['selfCopy','pending'],
+    ['effectfulSource','pending'], ['complexReceiver','pending'], ['badSourceIndex','proved'],
+    ['freshSourceNames','pending']
   ]);
 });
 
 test("memory push copies atomically and resolves a changing receiver once", () => {
   const report = runSolidityTests(["tests/solc/MemoryPush.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
-  assert.deepEqual(report.results.map(r => [r.function,r.status]), [
+  // `receiverUsesLength` indexes by `cube[0].length` after `cube.push()`, an
+  // exposed old row (length-only empty push, see "value push captures complex
+  // receivers once"): its claim is open, and its search runs out of heartbeats.
+  const status = report.results.map(r => [r.function,r.status]);
+  assert.notEqual(status[4][1], 'proved');
+  status[4][1] = 'open';
+  assert.deepEqual(status, [
     ['arrayCopy','proved'], ['arrayFalse','pending'], ['structCopy','proved'],
-    ['recycledSlot','proved'], ['receiverUsesLength','proved'], ['receiverFalse','pending'],
+    ['recycledSlot','proved'], ['receiverUsesLength','open'], ['receiverFalse','pending'],
     ['complexMemorySource','proved'], ['complexMemoryFalse','pending'],
     ['badMemorySource','proved']
   ]);
@@ -219,10 +234,12 @@ test("memory push copies atomically and resolves a changing receiver once", () =
 test("storage-return bindings retain alias identity, effects and caller memory", () => {
   const report = runSolidityTests(["tests/solc/StorageReturns.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
+  // `returnsIndexed` reads the rows of `rows.push()`: open since the
+  // length-only empty push (see "value push captures complex receivers once").
   assert.deepEqual(report.results.map(r => [r.function,r.status]), [
     ['valuesRef','internal'], ['otherRef','internal'], ['rowRef','internal'],
     ['allocatedRef','internal'], ['rejectedRef','internal'],
-    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','proved'],
+    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','pending'],
     ['heapGrowth','proved'], ['calleeReverts','proved'], ['falseCopy','pending'],
     ['receiverPush','proved'], ['receiverPushValue','proved'], ['receiverPop','proved'],
     ['receiverReadsAfterGetter','proved'], ['receiverReadsBeforeGetterFalse','pending'],
@@ -453,8 +470,10 @@ test("root primitive push bindings and empty user calls parse unambiguously", ()
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   assert.equal(status.rootBinding, 'proved');
   assert.equal(status.falsePost, 'pending');
+  // A pushed reference slot is exposed as it is (length-only empty push, see
+  // "value push captures complex receivers once"): its contents are open.
   for (const name of ['fixedReturn', 'dynamicReturn', 'structReturn']) {
-    assert.equal(status[name], 'proved', name);
+    assert.equal(status[name], 'pending', name);
   }
   assert.equal(status.falseReferencePost, 'pending');
 });
@@ -478,8 +497,12 @@ test("the full frozen TestSuite compiles its testing function table within defau
   ], {build:false, list:true, renaming:{Triple:'FixedTriple'}});
   assert.deepEqual(report.errors, []);
   const rows = report.results.filter(r => r.contract === 'TestSuite');
-  assert.equal(rows.length, 551);
-  assert.equal(rows.filter(r => r.status === 'ready').length, 512);
+  // TestSuite at solkey 473da8944c (`TestSuite/Report.lean`): 617 functions,
+  // 563 obligations (546 derived, 17 pending) and 54 others.
+  assert.equal(rows.length, 617);
+  const count = s => rows.filter(r => r.status === s).length;
+  assert.deepEqual([count('ready'), count('internal'), count('skipped'), count('excluded')],
+    [563, 51, 2, 1]);
   const status = Object.fromEntries(rows.map(r => [r.function, r.status]));
   assert.equal(status.storagePushMemoryCopySource, 'ready');
   assert.equal(status.storagePushCompoundSigned, 'ready');
