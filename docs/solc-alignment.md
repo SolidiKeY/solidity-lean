@@ -227,6 +227,11 @@ programs, and the check is a statement the rules already run.
   assignment, a reference argument; another shape (`uint[] storage s =
   small;`) is refused, as solc refuses it, and any other whole use (a
   conditional's branch, a tuple) too (`narrowWholeUse?`).
+- **Push arithmetic on a narrow element** (`small.push() += v;` at
+  `uint8[]`): `v` fits the element, and the appended slot is checked after
+  the write, `require(small[small.length - 1] <= 255)` (`pushedSlot`), as a
+  variable's write is; so `signed.push() -= x` at `int8` with `x == -128`
+  reverts.  Inside `unchecked` push arithmetic stays refused.
 - **A modifier's narrow parameter** is a local of its type, its argument
   fitting it (`ModApp.widths`, `wrapMods`).
 - **Storage packing** is not observable here: a state variable is a value of
@@ -240,8 +245,7 @@ What is not modelled, each an elaboration error unless said otherwise:
 
 - a place with a narrow position below it used whole other than where its
   shape is checked (a branch of a conditional of references, a tuple, a named
-  argument); a modifier's reference parameter; push arithmetic on a narrow
-  element (`b.push() += e`); a narrow type in a position not listed above (a
+  argument); a modifier's reference parameter; a narrow type in a position not listed above (a
   struct not in the table's widths, `narrowNestedMsg`);
 - a cast of arithmetic on literals alone to a narrow `int`
   (`int8(100 + 100)`): write the literal;

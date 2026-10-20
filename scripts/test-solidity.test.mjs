@@ -360,7 +360,7 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
   for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
     'narrowKey', 'pushOverflowPanics', 'memberOverflowPanics', 'memberInRange', 'valueMemberPanics',
     'memberArrayPanics', 'memoryMemberPanics', 'aliasPanics', 'memoryPanics', 'copyPanics',
-    'memoryParamPanics', 'memoryWraps', 'modifierParam']) assert.equal(status[name], 'proved', name);
+    'memoryParamPanics', 'memoryWraps', 'modifierParam', 'pushArithInRange', 'pushArithPanics']) assert.equal(status[name], 'proved', name);
 });
 
 test("modifiers use the existing inliner for calls and root obligations", () => {

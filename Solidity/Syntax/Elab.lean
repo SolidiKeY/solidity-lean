@@ -1567,6 +1567,10 @@ def narrowCheck (p : PrimTy) (n : Nat) (e : RawExpr) : ElabM (SProg C) := do
     | some o => o.guardStmt c
     | none => .require c)]
 
+/-- The slot `b.push()` appended: `b[b.length - 1]`. -/
+def pushedSlot (b : RawExpr) : RawExpr :=
+  .index b (.binop .sub (.field b "length") (.num 1))
+
 /-- What follows a write of `r` to the variable `l`: the check of `r`'s narrow
 operation, on `l` (`c = a + b;` at `uint8` is `c = a + b; require(c <= 255);`:
 a revert discards the write, so checking after it is checking before it); and,
@@ -3033,12 +3037,15 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
     | .declPush .. => pure true
     | _ => pure false
   -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
-  let es := match s with
-    | .call (.name f) as => [RawExpr.call f as]
-    | s => s.exprs
+  -- a push's receiver, as a `.push` member's base
+  let es : List (RawExpr × Bool) := match s with
+    | .call (.name f) as => [(RawExpr.call f as, whole)]
+    | .pushOpAssign _ b r => [(b, true), (r, whole)]
+    | .pushIncDec _ b => [(b, true)]
+    | s => s.exprs.map (·, whole)
   unless s matches .delete _ do
-    for e in es do
-      let w := if whole then narrowBase? C Γ e else narrowWholeUse? C Γ e
+    for (e, base) in es do
+      let w := if base then narrowBase? C Γ e else narrowWholeUse? C Γ e
       if let some w := w then
         throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \
           `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are \
@@ -3059,21 +3066,22 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let ⟨Γ, t⟩ ← synthM C b
     let .path (.ref (.array (.prim p))) path := t
       | throw "push arithmetic needs a storage array of primitive numeric elements"
-    if widthIn C (← ctx) (.index b (.num 0)) < 256 then
-      throw "push arithmetic on an array of a narrow element: write `b.push(e);`"
-    ElabM.lift (fitCheck C (← ctx) p 256 r)
+    -- at a narrow element (`uint8[]`), `r` fits it and the appended slot is
+    -- checked after the write, as `narrowPost` checks a variable's
+    let n := widthIn C (← ctx) (.index b (.num 0))
+    ElabM.lift (fitCheck C (← ctx) p n r)
     match hop : op.hasCompoundAssign, hp : p.isNumeric with
-    | true, true => pure [.of Γ (.pushOpAssign op hop hp path (← checkIn C Γ p r))]
+    | true, true => pure (.of Γ (.pushOpAssign op hop hp path (← checkIn C Γ p r)) ::
+        (← narrowCheck C p n (pushedSlot b)))
     | false, _ => throw s!"no push compound assignment for {BinOp.sym op}"
     | _, false => throw s!"push arithmetic at {p.toStr}"
   | .pushIncDec op b => do
     let ⟨Γ, t⟩ ← synthM C b
     let .path (.ref (.array (.prim p))) path := t
       | throw "push arithmetic needs a storage array of primitive numeric elements"
-    if widthIn C (← ctx) (.index b (.num 0)) < 256 then
-      throw "push arithmetic on an array of a narrow element: write `b.push(e);`"
+    let n := widthIn C (← ctx) (.index b (.num 0))
     match hp : p.isNumeric with
-    | true => pure [.of Γ (.pushIncDec op hp path)]
+    | true => pure (.of Γ (.pushIncDec op hp path) :: (← narrowCheck C p n (pushedSlot b)))
     | false => throw s!"push increment/decrement at {p.toStr}"
   | .assign l (.newArr T n) => do
     let ⟨R, hR⟩ ← elabNewTy C T

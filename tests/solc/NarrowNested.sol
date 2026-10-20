@@ -7,6 +7,7 @@ struct Packed { uint8 a; int16 b; uint c; uint8[] xs; }
 
 contract NarrowNested {
     uint8[] small;
+    int8[] signedSmall;
     Packed p;
     mapping(uint => Packed) byId;
     modifier atMost(uint8 cap) { require(cap > 1); _; }
@@ -116,5 +117,17 @@ contract NarrowNested {
     /// @custom:key box
     function modifierParam(uint8 c) public atMost(c) {
         assert(c > 1);
+    }
+    // push arithmetic at a narrow element: the appended slot is checked at
+    // it, and a `uint8` added to the fresh `0` passes the check
+    function pushArithInRange(uint8 v) public {
+        small.push() += v;
+        small.push()++;
+    }
+    /// @custom:key box
+    function pushArithPanics(int8 x) public {
+        require(x == -128);
+        signedSmall.push() -= x;
+        assert(false);
     }
 }
