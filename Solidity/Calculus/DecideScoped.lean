@@ -159,9 +159,11 @@ def _root_.Solidity.Op0.toL (ρ : SymS C Γ) {s : Srt} (o : Op0 C s) : Option (L
     (some (.app0 .mtSt)) (fun s f {_} h => some (.app0 (.member s f h)))
     (fun n => some (.app0 (.zlit n)))
 
-/-- Keep symbolic reads in their original form so later antecedents can normalize them. -/
+/-- Keep symbolic reads in their original form so later antecedents can normalize them.
+Over a history not known, only through at most `exposeBound` exposing
+updates: past them the elimination grows sevenfold with each. -/
 def LTm.literalRead {p : PrimTy} (t : LTm C (.val p)) : LTm C (.val p) :=
-  if t.boundsOk then
+  if t.boundsOk && (t.known?.isSome || decide (t.exposeDepth ≤ exposeBound)) then
     let r := t.elim
     if r.litV?.isSome then r else t
   else t

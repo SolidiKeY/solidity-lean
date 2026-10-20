@@ -415,6 +415,77 @@ theorem LFml.known_eq_knownM (φ : LFml C) : φ.known = φ.knownM := by
   | not φ ih | all k p φ ih => simp only [LFml.knownM, ← ih]; rfl
   | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.knownM, ← ihφ, ← ihψ]; rfl
 
+/-- `LTm.exposeDepth`'s compiled twin. -/
+def LTm.exposeDepthM : {s : Srt} → LTm C s → Nat
+  | _, .app1 _ x => x.exposeDepthM
+  | _, .app2 o x y => (if o.exposes then 1 else 0) + max x.exposeDepthM y.exposeDepthM
+  | _, .app3 _ x y z => max x.exposeDepthM (max y.exposeDepthM z.exposeDepthM)
+  | _, .index _ q i => max q.exposeDepthM i.exposeDepthM
+  | _, .seq d a => max d.exposeDepthM a.exposeDepthM
+  | _, .orElse a b => max a.exposeDepthM b.exposeDepthM
+  | _, .kite a b t e => max (max a.exposeDepthM b.exposeDepthM) (max t.exposeDepthM e.exposeDepthM)
+  | _, _ => 0
+
+/-- **How many updates that expose slots past a live end a term stacks**
+(`Op2.exposes`: an empty push of a reference element, a pop, a shrink), at
+its deepest.  By the recursor. -/
+@[implemented_by LTm.exposeDepthM]
+def LTm.exposeDepth {s : Srt} (t : LTm C s) : Nat :=
+  @LTm.rec C (fun _ _ => Nat)
+    (@fun _ _ => 0) (@fun _ _ => 0)
+    (@fun _ _ _ _ ihx => ihx)
+    (@fun _ _ _ o _ _ ihx ihy => (if o.exposes then 1 else 0) + max ihx ihy)
+    (@fun _ _ _ _ _ _ _ _ ihx ihy ihz => max ihx (max ihy ihz))
+    (@fun _ _ _ _ _ _ ihq ihi => max ihq ihi)
+    (@fun _ _ _ => 0) (@fun _ _ _ => 0) (@fun _ _ _ => 0)
+    (@fun _ _ _ _ ihd iha => max ihd iha)
+    (@fun _ _ _ iha ihb => max iha ihb)
+    (@fun _ _ _ _ _ _ iha ihb iht ihe => max (max iha ihb) (max iht ihe))
+    (@fun _ => 0) s t
+
+theorem LTm.exposeDepth_eq_exposeDepthM {s : Srt} (t : LTm C s) :
+    t.exposeDepth = t.exposeDepthM := by
+  induction t with
+  | var | app0 | obsW | obsL | obsH | err => rfl
+  | app1 o x ih => simp only [LTm.exposeDepthM, ← ih]; rfl
+  | app2 o x y ihx ihy => simp only [LTm.exposeDepthM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => simp only [LTm.exposeDepthM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => simp only [LTm.exposeDepthM, ← ihq, ← ihi]; rfl
+  | seq d a ihd iha => simp only [LTm.exposeDepthM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => simp only [LTm.exposeDepthM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe =>
+    simp only [LTm.exposeDepthM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
+/-- `LFml.exposeDepth`'s compiled twin. -/
+def LFml.exposeDepthM : LFml C → Nat
+  | .eq a b => max a.exposeDepth b.exposeDepth
+  | .not φ => φ.exposeDepthM
+  | .and φ ψ | .imp φ ψ => max φ.exposeDepthM ψ.exposeDepthM
+  | .all _ _ φ => φ.exposeDepthM
+  | .tt => 0
+
+/-- The most exposing updates a formula's term stacks.  By the recursor. -/
+@[implemented_by LFml.exposeDepthM]
+def LFml.exposeDepth (φ : LFml C) : Nat :=
+  @LFml.rec C (fun _ => Nat) 0 (@fun _ a b => max a.exposeDepth b.exposeDepth)
+    (fun _ ih => ih) (fun _ _ ihφ ihψ => max ihφ ihψ) (fun _ _ ihφ ihψ => max ihφ ihψ)
+    (fun _ _ _ ih => ih) φ
+
+theorem LFml.exposeDepth_eq_exposeDepthM (φ : LFml C) : φ.exposeDepth = φ.exposeDepthM := by
+  induction φ with
+  | tt | eq => rfl
+  | not φ ih | all k p φ ih => simp only [LFml.exposeDepthM, ← ih]; rfl
+  | and φ ψ ihφ ihψ | imp φ ψ ihφ ihψ => simp only [LFml.exposeDepthM, ← ihφ, ← ihψ]; rfl
+
+/-- The most updates that expose a slot past a live end (`LTm.exposeDepth`)
+the elimination is asked to read through over a history not known
+(`LTm.known?`).  Reading a length or a slot through such an update branches
+on whether it is the exposed slot, so the output grows about sevenfold with
+each (`multiArrayFillByPushLoops` of `SolcLoopsOpen.sol`, `docs/loops.md`:
+980 nodes at four, 4937 at five, 35938 at six, 476239 at seven), well
+within `normalizationDepth`. -/
+def exposeBound : Nat := 5
+
 /-- **A term is within the work bound**: within `normalizationSize` nodes
 and `normalizationDepth` storage updates, or, where its histories are
 concrete, within `concreteSize` and `concreteDepth`. -/
