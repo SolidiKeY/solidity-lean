@@ -719,7 +719,7 @@ has the wrong type for what the name looks up to), and solc refuses one
 def defaultOkStructs : List Name :=
   ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
    "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
-   "WithArray", "Triple"]
+   "WithArray", "Triple", "D", "Nest"]
 
 /-- `T`'s fresh default is well-formed: what `values.push();` and
 `Person memory m;` need. -/

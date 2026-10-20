@@ -40,6 +40,9 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `TRun.send`, `TTx.ext` | `Examples/Tactics/Net.lean` |
 | Call arguments | all read, left to right, before the callee runs; storage parameters alias, memory parameters alias memory, and storage-to-memory arguments copy at their evaluation point before later argument effects | `Args.evalT`, `hoistCallArgs`, `CallRet.enterT` (`Semantics/Run.lean`, `Syntax/Elab.lean`) | Calldata parameters remain unsupported. |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is a send with all the gas (`Stmt.send`'s `full`), where solkey's `SolJSONParser.isValueCall` reads `bool ok = a.send(v)`: solc forwards all gas there, so the callee can re-enter and write storage, under `transferSemantics:noCallback` too (`ValidT .noCallback`, `Stmt.forksIn`); `holds` ignores it (every callee keeping the state). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`), `Semantics/Callback.lean` | `Examples/Tactics/Callback.lean` (`withdrawCall_noCallback`) |
+| Enum conversions | `E(x)` asserts that `x` names a member (solc's Panic `0x21`), then is `x`; an enum is a `uint` | `enumCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/SolcOpen.lean` |
+| A call's ABI | a function's obligation assumes what its dispatcher checks before the body: `msg.value == 0` where it is not `payable` and the body reads `msg.value`, a narrow integer or an enum parameter in its range (solc's decoder reverts otherwise); the specified obligation assumes the first already | `Problem.callPre` (`Frontend/Problems.lean`) | solkey's `SolcPaymentsOpen`, `SolcTypesOpen` |
+| External calls | `r.f(a);` outside a `try` is `try r.f(a) { } catch { revert(); }`: a failed call reverts the caller, as a call to an address with no code does; `receive` and `fallback` are imported with no obligation of their own | `SolcJson.lean` (`isExternalMember`, `tagOf`) | |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule). The callee has all the gas, so it may call back under either `transferSemantics` (`ValidT`, `docs/options.md`); `holds` reads it as keeping the state, as solkey's `tryCallNoCallbackBox` does | `Stmt.run` (`.tryCall`), `Binders.decodeT`, `ExecS.tryOk` | `Examples/Tactics/TryCatch.lean` (`selfCall_noCallback`) |
 
 ## Evaluation order
@@ -413,7 +416,11 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   read once deployed, but a function's obligation starts from any
   well-typed storage, where the root holds any value: `assert(L == 5)` is
   unprovable there (`docs/solkey-feedback.md`, item 9).  The solc import
-  keeps them a `Gap`.
+  inlines a `constant`, and an `immutable` nothing writes: its compile-time
+  initializer, or its type's default (`writtenIds`, `defaultLiteral`).  An
+  `immutable` the constructor writes is a storage root with its
+  initializer, so the constructor's obligation reads what it wrote, and a
+  function's reads any value (true of the deployed code, never refuted).
 - **A contract with initializers and no constructor** deploys by the
   implicit one (`constructor();` runs the initializers), as solc does, and
   has no obligation, as in solkey.

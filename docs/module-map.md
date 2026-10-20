@@ -258,6 +258,8 @@ The map from taclet to theorem is `docs/lean-key-rule-map.md`.
 | `SortCheck/Faithfulness.lean` | Each annotation holds of what the typed run's evaluators read in every typed state, at the value's runtime sort (`Read.SortOk`, `Read.sortOk`, `Typing/Sorts.lean`), at every statement its `Taclet` rule fires on (`faithful_theorem`, the statement read off the constructor's type). |
 | `SolkeyCheck.lean` (root) | `lake exe solkeycheck`. |
 | `Counterexamples/*.lean` | Three refutation modules pinning design decisions: `DeleteFamilyGenericOverlap`, `StaticRuntimeSort`, `PreFixSortAnnotations` (`WellTypedNecessity` went at W10.5.1: its `badStore` is an untyped state, and no typed state is one). |
+| `Examples/Tactics/SignedCasts.lean` | Casts between `uint` and `int` and signed `unchecked`, through `int(u)`/`uint(i)`: solkey's `SolcTypesOpen`/`SolcArithmeticOpen` cases. |
+| `Examples/Tactics/SolcOpen.lean` | What solkey's `solc/open` ports needed of the elaborator: `E(x)` asserts a member, a call's value has its callee's return width under `unchecked`. |
 | `Examples/Tactics/StorageDangling.lean` | solkey's dangling-storage suite: an empty push saves only the length, so a popped alias's writes are exposed again; the four obligations derived in every state by `sol_prove`. |
 
 ## The EVM compiler

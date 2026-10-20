@@ -38,9 +38,12 @@ type or with another axiom, or an elaborated function with no statement,
 is listed apart, never derived.
 
 A parameter is bound at its type's 256-bit range (`PrimTy`), not at its
-width: an `int8` binder admits values solc's ABI decoder rejects.  The
-obligation is then stronger than Solidity's, never weaker, since the body
-is elaborated at the width (`paramCtx`).
+width, and the body is elaborated at the width (`paramCtx`).  What the
+call's dispatcher checks before the body is a premise (`Problem.callPre`):
+a narrow integer or an enum parameter in its range, which solc's ABI
+decoder enforces, and `msg.value = 0` where the function is not `payable`
+and reads `msg.value`.  Each is stated only where it says something, so an
+obligation without them is unchanged.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`: `N.f.problem`, or the

@@ -60,14 +60,17 @@ What the printer cannot write is a `Gap`, reported with its source line:
 `excluded` where the model has no counterpart (a struct recursive through a
 mapping), `unsupported` where the printer or the grammar lacks the form.
 What would change a function's meaning if it were dropped is a `Gap` too:
-an unsupported modifier or an immutable state variable. A contract that inherits is
-refused whole. Supported constants are inlined by declaration identity;
-unsupported constant types remain gaps. Overloads receive distinct internal
+an unsupported modifier. Supported constants are inlined by declaration
+identity, and so is an immutable nothing writes (its initializer or its
+default); one the constructor writes is a storage root. Unsupported
+constant types remain gaps. Overloads receive distinct internal
 names, their calls resolve by solc declaration identity, and reports retain
 their source signatures. Enums become their ordinal values and primitive
 user-defined value types their underlying types. Numeric bounds and wrappers
-retain arithmetic casts, including signedness and width. Narrow aliases and
-runtime casts into enums remain unsupported.
+retain arithmetic casts, including signedness and width. Narrow aliases remain
+unsupported; a conversion `E(x)` into an enum is printed as written, the
+enum a `contract!` member, and the elaborator asserts that `x` names one of
+its members.
 
 The constructor (`kind` `constructor`, which solc names `""`) is read as a
 function named `constructor` (`SolcContract.ctor`), as solkey's
