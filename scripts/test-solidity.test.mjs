@@ -353,6 +353,14 @@ test("source types preserve overflow and declaration scope", () => {
   assert.equal(status.signedTernaryOverflowCannotReturn, 'pending');
 });
 
+test("source types: narrow elements, keys and values of state variables", () => {
+  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
+    'narrowKey', 'pushOverflowPanics']) assert.equal(status[name], 'proved', name);
+});
+
 test("modifiers use the existing inliner for calls and root obligations", () => {
   const report = runSolidityTests(["tests/solc/Modifiers.sol"], {build:false});
   assert.deepEqual(report.errors, []);
@@ -456,10 +464,11 @@ test("quantified consequents parse and omitted specification bodies stay local",
     .map(r => [r.function, r]));
   assert.equal(types.unrelated.status, "proved");
   assert.equal(types.stillChecked.status, "pending");
-  for (const fn of ["readsString", "readsNarrow", "readsNarrowKey", "readsNarrowValue", "specReadsNarrow"]) {
-    assert.equal(types[fn].status, "unsupported", fn);
-  }
-  assert.match(types.specReadsNarrow.reason, /specification reads omitted state variable/);
+  assert.equal(types.readsString.status, "unsupported");
+  // a narrow element, key or value is modelled (`expandStateTyW`): `narrow[0]`
+  // may be past the end, and `narrow.length == 0` need not hold
+  for (const fn of ["readsNarrowKey", "readsNarrowValue"]) assert.equal(types[fn].status, "proved", fn);
+  for (const fn of ["readsNarrow", "specReadsNarrow"]) assert.equal(types[fn].status, "pending", fn);
 });
 
 test("specification parameter renaming preserves scopes, distinct names and frames", () => {
