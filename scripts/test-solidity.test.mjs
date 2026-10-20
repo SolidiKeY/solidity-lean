@@ -456,8 +456,12 @@ test("the full frozen TestSuite compiles its testing function table within defau
   ], {build:false, list:true, renaming:{Triple:'FixedTriple'}});
   assert.deepEqual(report.errors, []);
   const rows = report.results.filter(r => r.contract === 'TestSuite');
-  assert.equal(rows.length, 551);
-  assert.equal(rows.filter(r => r.status === 'ready').length, 512);
+  // TestSuite at solkey 473da8944c (`TestSuite/Report.lean`): 617 functions,
+  // 563 obligations (546 derived, 17 pending) and 54 others.
+  assert.equal(rows.length, 617);
+  const count = s => rows.filter(r => r.status === s).length;
+  assert.deepEqual([count('ready'), count('internal'), count('skipped'), count('excluded')],
+    [563, 51, 2, 1]);
   const status = Object.fromEntries(rows.map(r => [r.function, r.status]));
   assert.equal(status.storagePushMemoryCopySource, 'ready');
   assert.equal(status.storagePushCompoundSigned, 'ready');
