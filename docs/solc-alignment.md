@@ -237,7 +237,10 @@ programs, and the check is a statement the rules already run.
   `uint8[]`): `v` fits the element, and the appended slot is checked after
   the write, `require(small[small.length - 1] <= 255)` (`pushedSlot`), as a
   variable's write is; so `signed.push() -= x` at `int8` with `x == -128`
-  reverts.  Inside `unchecked` push arithmetic stays refused.
+  reverts.  Inside `unchecked` it wraps at the element's width: the slot
+  starts at `0`, so the statement pushes `0 op r` wrapped (`push() -= 1` at
+  `uint8[]` pushes `255`, `signed.push() -= x` with `x == -128` pushes
+  `-128`), `r` evaluated once, before the push (`elabStmtP`).
 - **A modifier's narrow parameter** is a local of its type, its argument
   fitting it (`ModApp.widths`, `wrapMods`); a reference parameter is a
   local at its location (`ModApp.locs`: a storage alias, or a memory local
