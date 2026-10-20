@@ -995,6 +995,28 @@ partial def payload (s : Syntax) : Array Syntax :=
   else if s.getKind == nullKind || s.getKind == groupKind then s.getArgs.flatMap payload
   else #[s]
 
+/-- `type(T).max`, `type(T).min`: an integer type's bound as a value of `T`
+(`uint8(255)`, `int8(-128)`: solc types it `T`, so `type(uint8).max + 1`
+overflows at `uint8`); an enum's, its first or last member, which the
+elaborator reads (`enumLit?`, the member `type(max)`) -/
+def typeBoundExpr (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (g : Ident) :
+      MacroM (Option Term) := do
+  unless funName? f == some "type" do return none
+  let #[a] := as | return none
+  let some T := funName? a | return none
+  let m := g.getId.toString
+  unless m == "max" || m == "min" do
+    Macro.throwErrorAt g s!"type({T}).{m}: only `max` and `min` are modelled"
+  match castTy? T with
+  | some (p, n) =>
+    let v : Int := if p == .int then
+        (if m == "max" then 2 ^ (n - 1) - 1 else -(2 ^ (n - 1) : Int))
+      else (if m == "max" then 2 ^ n - 1 else 0)
+    let lit ← if v < 0 then `(RawExpr.unop .neg (.num $(quote v.natAbs)))
+      else `(RawExpr.num $(quote v.toNat))
+    return some (← `(RawExpr.call $(quote T) [$lit]))
+  | none => return some (← `(RawExpr.field (.name $(quote T)) $(quote s!"type({m})")))
+
 partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
   if e.raw.isOfKind ``solTupleExpr then
     let es := #[e.raw[1]] ++ e.raw[3].getSepArgs
@@ -1040,6 +1062,7 @@ where
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
       `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) . $g:ident) => do
+      if let some t ← typeBoundExpr f as.getElems g then return t
       fieldChain (← expandCall f as.getElems callMsg) (nameParts g.getId)
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandCall f as.getElems callMsg) $(← expandExpr k))

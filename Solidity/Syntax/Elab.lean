@@ -816,7 +816,11 @@ shadows: the position of `m`. -/
 def enumLit? (Γ : NCtx) : RawExpr → String → Option Nat
   | .name x, m =>
     if (Γ.lookupTy (Var.ofName x)).isNone && (C.rootType x).isNone then
-      (lookupBy x C.enums).bind (·.findIdx? (· == m))
+      (lookupBy x C.enums).bind fun ms =>
+        -- `type(E).min`, `type(E).max` (the macro's `type(min)`, `type(max)`)
+        if m == "type(min)" then (if ms.isEmpty then none else some 0)
+        else if m == "type(max)" then (if ms.isEmpty then none else some (ms.length - 1))
+        else ms.findIdx? (· == m)
     else none
   | _, _ => none
 
@@ -1049,6 +1053,9 @@ structure ElabScope where
   /-- Inside `checked { … }` or `ignoringOverflow { … }`: a narrow type's
   check is the mode's guard statement (`narrowCheck`). -/
   overflow : Option OFMode := none
+  /-- Inside `unchecked { … }`: signed `-` and `/` wrap (`narrowWrapNode`);
+  an inlined callee's body is checked again. -/
+  unchecked : Bool := false
   /-- Inside the body of a function called externally by the contract itself
   (`this.f()`, `trySelfBody`): `msg.sender` is `address(this)` and
   `msg.value` is `0` (`RawStmt.selfFrame`), in its inlined calls too. -/
@@ -1198,6 +1205,16 @@ def joinIT : Option (PrimTy × Nat) → Option (PrimTy × Nat) → Option (PrimT
   | t, none => t
   | some (p, n), some (_, m) => some (p, max n m)
 
+/-- The smallest integer type holding the literals `u` and `v` (solc's mobile
+type, of both): `uintN` when neither is negative, else `intN`. -/
+def mobileTy (u v : Int) : PrimTy × Nat :=
+  let signed := u < 0 || v < 0
+  let fits (n : Nat) (w : Int) : Bool :=
+    if signed then -((2 ^ (n - 1) : Nat) : Int) ≤ w && w < ((2 ^ (n - 1) : Nat) : Int)
+    else w < ((2 ^ n : Nat) : Int)
+  let n := ((List.range 32).map (8 * · + 8)).find? (fun n => fits n u && fits n v) |>.getD 256
+  (if signed then .int else .uint, n)
+
 /-- The integer type solc gives `e`: `some (p, n)` for `n` bits (a value not
 built from a narrow variable or a cast is 256 bits wide), `none` for a literal,
 which takes the type of what it meets.  `a ** b`, `a << b` and `a >> b` have
@@ -1223,7 +1240,15 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
       | some v => some (if v < 0 then .int else .uint, 256)
       | none => intTyOf Γ a
     else joinIT (intTyOf Γ a) (intTyOf Γ b)
-  | .ternary _ a b => joinIT (intTyOf Γ a) (intTyOf Γ b)
+  -- solc's conditional has the common type of its branches' mobile types: a
+  -- literal's is the smallest type holding it (`c ? 63 : 255` is a `uint8`,
+  -- `c ? x : 300` a `uint16` at `uint8 x`)
+  | .ternary _ a b =>
+    match a.litVal?, b.litVal? with
+    | some u, some v => some (mobileTy u v)
+    | some u, none => joinIT (some (mobileTy u u)) (intTyOf Γ b)
+    | none, some v => joinIT (intTyOf Γ a) (some (mobileTy v v))
+    | none, none => joinIT (intTyOf Γ a) (intTyOf Γ b)
   | .incDec _ e => intTyOf Γ e
   | .call f _ =>
     -- a cast's type, else a declared function's return at its width
@@ -1271,11 +1296,36 @@ def fitCheck (Γ : ECtx) (p : PrimTy) (n : Nat) (r : RawExpr) : Except String Un
 `+% -% *% **%` of `unchecked` and `<<` are taken modulo `2^N` (solc truncates
 them to the type), `~a` is `(2^N - 1) -% a`; and a literal operand must fit the
 type. -/
-def narrowWrapNode (Γ : ECtx) (e : RawExpr) : Except String RawExpr := do
+def narrowWrapNode (unc : Bool) (Γ : ECtx) (e : RawExpr) : Except String RawExpr := do
   let some (p, n) := intTyOf C Γ e | return e
+  -- signed inside `unchecked` (`unc`): `-a` is `0 -% a` on the words, and
+  -- `a / b` is `-a` where `b` is `-1` (`-128 / -1` at `int8` is `-128`, the
+  -- one quotient that leaves the type), `a / b` elsewhere
+  if unc && p == .int then
+    let neg (a : RawExpr) : RawExpr := .call (tyName .int n) [.binop .subW (.num 0) (.call "uint" [a])]
+    match e with
+    | .unop .neg a => if a.isLit then return e else return neg a
+    | .binop .div a b =>
+      match b.litVal? with
+      | some (-1) => return neg a
+      | some _ => return e
+      | none =>
+        if a.hasIncDec || b.hasIncDec then
+          throw s!"{e.toStr} inside `unchecked`: a signed quotient of an operand with an effect"
+        return .ternary (.binop .eqB b (.unop .neg (.num 1))) (neg a) e
+    | _ => pure ()
   -- signed: the operation on the operands' words, the result read back at
-  -- `intN` (`int8(uint(x) +% 1)`, `castCapture`), as solc wraps it
+  -- `intN` (`int8(uint(x) +% 1)`, `castCapture`), as solc wraps it; `a **% k`
+  -- too, its exponent a `uint` (the words' power is the signed one's, modulo `2^256`)
   if let .binop op a b := e then
+    if p == .int && op == .powW then
+      if let some v := a.litVal? then
+        let (lo, hi) := intRange p n
+        unless lo ≤ v && v ≤ hi do throw s!"{v} does not fit {tyName p n}"
+      let wa : RawExpr := match a.litVal? with
+        | some v => .num (v % ((2 ^ 256 : Nat) : Int)).toNat
+        | none => .call "uint" [a]
+      return .call (tyName .int n) [.binop .powW wa b]
     if p == .int && (op matches .addW | .subW | .mulW) then
       for l in [a, b] do
         if let some v := l.litVal? then
@@ -1306,18 +1356,18 @@ def narrowWrapNode (Γ : ECtx) (e : RawExpr) : Except String RawExpr := do
   | _ => return e
 
 /-- `narrowWrapNode` at every node of `e`, bottom up. -/
-partial def narrowPure (Γ : ECtx) : RawExpr → Except String RawExpr
-  | .binop op a b => do narrowWrapNode C Γ (.binop op (← narrowPure Γ a) (← narrowPure Γ b))
-  | .unop op a => do narrowWrapNode C Γ (.unop op (← narrowPure Γ a))
-  | .field e f => do pure (.field (← narrowPure Γ e) f)
-  | .index e k => do pure (.index (← narrowPure Γ e) (← narrowPure Γ k))
-  | .ternary c a b => do pure (.ternary (← narrowPure Γ c) (← narrowPure Γ a) (← narrowPure Γ b))
-  | .incDec op e => do pure (.incDec op (← narrowPure Γ e))
-  | .newArr T e => do pure (.newArr T (← narrowPure Γ e))
-  | .call f as => do pure (.call f (← as.mapM (narrowPure Γ)))
+partial def narrowPure (unc : Bool) (Γ : ECtx) : RawExpr → Except String RawExpr
+  | .binop op a b => do narrowWrapNode C unc Γ (.binop op (← narrowPure unc Γ a) (← narrowPure unc Γ b))
+  | .unop op a => do narrowWrapNode C unc Γ (.unop op (← narrowPure unc Γ a))
+  | .field e f => do pure (.field (← narrowPure unc Γ e) f)
+  | .index e k => do pure (.index (← narrowPure unc Γ e) (← narrowPure unc Γ k))
+  | .ternary c a b => do pure (.ternary (← narrowPure unc Γ c) (← narrowPure unc Γ a) (← narrowPure unc Γ b))
+  | .incDec op e => do pure (.incDec op (← narrowPure unc Γ e))
+  | .newArr T e => do pure (.newArr T (← narrowPure unc Γ e))
+  | .call f as => do pure (.call f (← as.mapM (narrowPure unc Γ)))
   | .modular op a b k => do
-    pure (.modular op (← narrowPure Γ a) (← narrowPure Γ b) (← narrowPure Γ k))
-  | .named f ns as => do pure (.named f ns (← as.mapM (narrowPure Γ)))
+    pure (.modular op (← narrowPure unc Γ a) (← narrowPure unc Γ b) (← narrowPure unc Γ k))
+  | .named f ns as => do pure (.named f ns (← as.mapM (narrowPure unc Γ)))
   | e => pure e
 
 /-- `require(inTy)` of `e` at `p`'s `n` bits, when `n` is narrow. -/
@@ -2487,7 +2537,7 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   let k₁ := (← get).2
   modify fun (_, k) => (Γf, k)
   let P ← withReader (fun sc =>
-      { sc with funs := scope, top := false, selfFrame := selfFrame,
+      { sc with funs := scope, top := false, selfFrame := selfFrame, unchecked := false,
                 inlined := (k₀, k₁) :: sc.inlined })
     (elabStmtsP body)
   modify fun (_, k) => (Γ, k)
@@ -2767,7 +2817,7 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   -- a loop outside a function's body, lowered here (`lowerLoops`)
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
     return ← elabStmtsP (← lowerLoops none [s])
-  let s ← ElabM.lift (s.mapExprsM (narrowPure C (← ctx)))
+  let s ← ElabM.lift (s.mapExprsM (narrowPure C (← read).unchecked (← ctx)))
   let (P, s) ← hoistStmt s
   pure (P ++ (← elabStmt1 s))
 
@@ -2934,7 +2984,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     -- `&= |= ^= <<= >>=` and a wrapping `+=`: `l = l ⊕ r`, the target's
     -- effects already captured (`hoistStmt`), so reading it twice is safe
     if op.isArith && !op.hasCompoundAssign && op != .pow then
-      let e ← ElabM.lift (narrowWrapNode C (← ctx) (.binop op l r))
+      let e ← ElabM.lift (narrowWrapNode C (← read).unchecked (← ctx) (.binop op l r))
       -- a signed wrap is a cast, captured (`narrowWrapNode`)
       if e matches .call .. then return ← elabStmtP (.assign l e)
       return ← elabStmt1 (.assign l e)
@@ -3068,7 +3118,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
   | .revert => do pure [.of (← nctx) .revert]
   | .assumeFalse => do pure [.of (← nctx) .assumeFalse]
   | .eval _ => pure []
-  | .unchecked ss => do elabBranch (← ElabM.lift (uncheckStmts ss))
+  | .unchecked ss => do
+    withReader (fun sc => { sc with unchecked := true }) (elabBranch (← ElabM.lift (uncheckStmts ss)))
   | .checked o ss => do
     -- the guards made once, by the outermost block (`Prog.withOF`)
     match (← read).overflow with
