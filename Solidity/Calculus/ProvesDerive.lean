@@ -90,8 +90,12 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (Li
           (r (H.pre c') (.modalK m Q (.pop bk Q.ext (.seq ω κ)) φ)) b)))
     (fun c ω => both (r (H.pre c) (.modalK m ω κ φ)) (r H c) b)
     (fun bo _ => r H (if bo then .tt else .ff) b)
-    (fun bs ω => cond bs.isEmpty none (each (fun br => r H (br.bs.all
-      (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))) bs b))
+    (fun bs ω => cond bs.isEmpty none (each (fun br => r H
+      (Option.casesOn (motive := fun _ => Fml C Γ) br.hyp
+        (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ)) φ))
+        fun c => .imp c
+          (br.bs.all (.modalK m br.P (.pop .block ((Ext.append Γ br.ρ).trans br.P.ext) (.seq ω κ))
+            φ)))) bs b))
     (fun fs us ω => cond (fs.isEmpty && us.isEmpty) none
       (both (each (fun f => r H f) fs) (each (fun U => r (H.upd m U) (.modalK m ω κ φ)) us) b))
     (fun I B xs hv U c c' hu hb P post ω => both (r H (I.invHyp B))
@@ -106,6 +110,27 @@ def premise (r : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Nat → Option (Li
         (cond (x H (.not c)) (r (H.pre c) (.upd m U (.upd m V (.modalK m ω κ φ))) b)
           (both (r (H.pre c) (.upd m U (.upd m V (.modalK m ω κ φ))))
             (r (H.pre (.not c)) (.modal m (.cons .revert ω) κ φ)) b))) ω
+
+/-- A premise `¬X` whose `X` reads a program (a self-call's `catch` goal,
+`ExtCall.selfFails`): `X`, which the walk proves instead of the goal
+(`notLeft`), or failing that hides (`hideLeft`); the closer reads no
+program in a context. -/
+def _root_.Solidity.Fml.negModal? {Γ : Ctx} (a : Fml C Γ) : Option (Fml C Γ) :=
+  Fml.casesOn (motive := fun Γ _ => Option (Fml C Γ)) a (tt := none) (eq := fun _ _ => none)
+    (wellFormed := fun _ => none) (not := fun X => cond X.modalFree none (some X))
+    (and := fun _ _ => none) (imp := fun _ _ => none) (upd := fun _ _ _ => none)
+    (modal := fun _ _ _ _ => none) (havoc := fun _ => none) (all := fun _ _ _ => none)
+    (bind := fun _ _ _ _ => none) (anon := fun _ _ => none)
+
+theorem _root_.Solidity.Fml.negModal?_eq {Γ : Ctx} {a X : Fml C Γ} (h : a.negModal? = some X) :
+    a = .not X := by
+  cases a with
+  | not Y =>
+    change cond Y.modalFree none (some Y) = some X at h
+    cases hm : Y.modalFree <;> simp only [hm, cond_true, cond_false, reduceCtorEq,
+      Option.some.injEq] at h
+    rw [h]
+  | _ => cases h
 
 /-- A modality: the frames when the program is done (`empty`), else the rule
 of the first statement and its premise's goals. -/
@@ -134,7 +159,11 @@ def run (R : RuleSet) (leaf : {Γ : Ctx} → Hyps C [] Γ → Fml C Γ → Optio
       (not := fun ψ H => (leaf H (.not ψ)).map (·, b))
       (and := fun ψ χ H => cond (Fml.and ψ χ).modalFree ((leaf H (.and ψ χ)).map (·, b))
         (both (run R leaf rf n H ψ) (run R leaf rf n H χ) b))
-      (imp := fun a ψ H => run R leaf rf n (H.pre a) ψ b)
+      (imp := fun a ψ H => match a.negModal? with
+        | some X => match run R leaf rf n H X b with
+          | some (ls, b') => cond ls.isEmpty (some ([], b')) (run R leaf rf n H ψ b)
+          | none => run R leaf rf n H ψ b
+        | none => run R leaf rf n (H.pre a) ψ b)
       (upd := fun m U ψ H => run R leaf rf n (H.upd m U) ψ b)
       (modal := fun m P κ ψ H => modal R (fun H φ b => run R leaf rf n H φ b) rf m H P κ ψ b)
       (havoc := fun ψ H => (leaf H (.havoc ψ)).map (·, b))
@@ -422,7 +451,35 @@ theorem run_sound : ∀ (n : Nat) {Γ : Ctx} (H : Hyps C [] Γ) (φ : Fml C Γ) 
         have := both_sound h hl (ih _ _) (ih _ _)
         exact .andIntro this.1 this.2
       · exact leaf_sound hleaf (b := b) (by simpa only [run, hm, cond_true] using h) hl
-    | imp a ψ => exact .intro (ih _ _ _ _ _ h hl)
+    | imp a ψ =>
+      change (match a.negModal? with
+        | some X => match run R leaf rf n H X b with
+          | some (ls, b') => cond ls.isEmpty (some ([], b')) (run R leaf rf n H ψ b)
+          | none => run R leaf rf n H ψ b
+        | none => run R leaf rf n (H.pre a) ψ b) = some (ls, b') at h
+      cases hn : a.negModal? with
+      | none =>
+        rw [hn] at h
+        exact .intro (ih _ _ _ _ _ h hl)
+      | some X =>
+        rw [hn] at h
+        dsimp only at h
+        rw [Fml.negModal?_eq hn]
+        cases hX : run R leaf rf n H X b with
+        | none =>
+          rw [hX] at h
+          exact .hideLeft (ih _ _ _ _ _ h hl)
+        | some p =>
+          obtain ⟨lx, bx⟩ := p
+          rw [hX] at h
+          dsimp only at h
+          cases he : lx.isEmpty
+          · rw [he, cond_false] at h
+            exact .hideLeft (ih _ _ _ _ _ h hl)
+          · exact .notLeft (ih _ _ _ _ _ hX fun l hlx => by
+              rw [List.isEmpty_iff] at he
+              rw [he] at hlx
+              exact nomatch hlx)
     | upd m U ψ => exact .updIntro (ih _ _ _ _ _ h hl)
     | modal m P κ ψ =>
       cases P with
