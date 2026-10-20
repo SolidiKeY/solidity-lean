@@ -198,6 +198,17 @@ def elabTyW (C : Contract) : RawTy → Except String (Ty × List (String × Nat)
     let (t, w) ← elabTyW C t
     pure (.fixed t m, w.map fun (k, n) => ("[]" ++ k, n))
 
+/-- `T` written back as a declared type, its narrow positions at their widths
+in `ws`, keyed by their path below `k` (`elabTyW`'s inverse: a modifier's
+reference parameter, declared as a local of its type). -/
+partial def rawTyW (ws : List (String × Nat)) : Ty → String → RawTy
+  | .prim p, k => .named (tyName p ((lookupBy k ws).getD 256))
+  | .ref (.struct s), _ => .named s
+  | .ref (.array E), k => .array (rawTyW ws E (k ++ "[]"))
+  | .ref (.fixed E n), k => .fixed (rawTyW ws E (k ++ "[]")) n
+  | .ref (.mapping p V), k =>
+    .mapping (.named (tyName p ((lookupBy (k ++ "{}") ws).getD 256))) (rawTyW ws V (k ++ "[]"))
+
 /-- A synthesised expression, read in `Γ`: a storage path, a memory path, or
 a value. -/
 inductive TExpr (C : Contract) (Γ : Ctx) where
@@ -1266,9 +1277,11 @@ def placeShape (Γ : ECtx) (e : RawExpr) : List (String × Nat) :=
   | _ => []
 
 /-- The narrow positions of a value of reference type: a place's
-(`placeShape`), a `new`'s type's, a function's return's. -/
+(`placeShape`), a `new`'s type's, a function's return's, a conditional's
+first branch's (`narrowWholeAt?` admits one whose branches agree). -/
 def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
   | .newArr T _ => ((elabTyW C T).toOption.map (·.2)).getD []
+  | .ternary _ a _ => exprShape Γ a
   | .call f _ =>
     match lookupBy f C.funs with
     | some d => match d.ret with
@@ -1283,7 +1296,9 @@ def shapeStr (ws : List (String × Nat)) : String :=
 
 /-- A whole use of `e` where `ws` is expected: the narrow positions must agree
 (solc converts no reference type to one of another element type). -/
-def shapeCheck (Γ : ECtx) (ws : List (String × Nat)) (e : RawExpr) : Except String Unit := do
+def shapeCheck (Γ : ECtx) (ws : List (String × Nat)) : RawExpr → Except String Unit
+  | .ternary _ a b => do shapeCheck Γ ws a; shapeCheck Γ ws b
+  | e => do
   let got := exprShape C Γ e
   unless sameShape got ws do
     throw s!"{e.toStr} has narrow positions {shapeStr got} where {shapeStr ws} are expected: \
@@ -1354,18 +1369,35 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
     if narrowWhole C Γ e then some e else (narrowBase? Γ b).orElse fun _ => narrowWholeUse? Γ k
   | e@(.field b _) => if narrowWhole C Γ e then some e else narrowBase? Γ b
   -- a function's reference argument: its shape is checked against the
-  -- parameter's (`elabCallRet`)
+  -- parameter's (`elabCallRet`); a struct constructor's arguments, each
+  -- against its member's, by the member writes it is lowered to (`hoist`)
   | .call f as =>
+    if (lookupBy f C.funs).isNone && !(structDef f).isEmpty then
+      as.findSome? (narrowWholeAt? Γ)
+    else
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
     as.zipIdx.findSome? fun (a, i) =>
-      if refs.getD i false then narrowBase? Γ a else narrowWholeUse? Γ a
+      if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
   | .binop _ a b | .assign a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? Γ a
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
-  | .named _ _ as | .tuple as => as.findSome? (narrowWholeUse? Γ)
+  | .named f _ as =>
+    if (lookupBy f C.funs).isNone && !(structDef f).isEmpty then as.findSome? (narrowWholeAt? Γ)
+    else as.findSome? (narrowWholeUse? Γ)
+  | .tuple as => as.findSome? (narrowWholeUse? Γ)
   | .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? Γ)
   | _ => none
+
+/-- `narrowBase?` at a whole use whose shape is checked (`shapeCheck`): a
+conditional's branches too, when their narrow positions agree (solc has no
+common type of `uint8[]` and `uint[]`). -/
+partial def narrowWholeAt? (Γ : ECtx) : RawExpr → Option RawExpr
+  | e@(.ternary c a b) =>
+    if sameShape (exprShape C Γ a) (exprShape C Γ b) then
+      ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeAt? Γ a).orElse fun _ => narrowWholeAt? Γ b
+    else some e
+  | e => narrowBase? Γ e
 
 /-- `narrowWholeUse?` of an index's or a member's base, or of a use whose
 shape is checked (`shapeCheck`): its own indices only. -/
@@ -2097,11 +2129,27 @@ partial def wrapMods (body : List RawStmt) : List ModApp → ElabM (List RawStmt
     let mut ρ : List (String × String) := []
     let mut decls : List RawStmt := []
     for ((n, T), a) in m.params.zip m.args do
-      let .prim p := T | throw s!"modifier {m.name}: the parameter {n} has a reference type"
-      let y := toString (← freshCapture "se")
-      -- a narrow parameter (`uint8 n`) is a local of its type: its argument fits it
-      decls := decls ++ [.decl (.named (tyName p ((lookupBy n m.widths).getD 256))) y (some a)]
-      ρ := (n, y) :: ρ
+      -- a narrow parameter (`uint8 n`) is a local of its type: its argument
+      -- fits it; a reference one a local at its location, its argument's
+      -- narrow positions checked against its own (`shapeCheck`): a storage
+      -- one an alias, a memory one bound as `T memory y = a;` binds it
+      match T with
+      | .prim p =>
+        let y := toString (← freshCapture "se")
+        decls := decls ++ [.decl (.named (tyName p ((lookupBy n m.widths).getD 256))) y (some a)]
+        ρ := (n, y) :: ρ
+      | .ref _ =>
+        let rt := rawTyW m.widths T n
+        match lookupBy n m.locs with
+        | some .storage =>
+          let y := toString (← freshCapture "sp")
+          decls := decls ++ [.declStorage rt y (some a)]
+          ρ := (n, y) :: ρ
+        | some .memory =>
+          let y := toString (← freshCapture "mv")
+          decls := decls ++ [.declMemory rt y (some a)]
+          ρ := (n, y) :: ρ
+        | _ => throw s!"modifier {m.name}: the reference parameter {n} is in memory or storage"
     let code ← renameStmts ρ m.body
     -- a `return` ends the modifier alone: the code after the `_;` of the
     -- modifiers outside it still runs (solc's legacy pipeline)
@@ -2274,7 +2322,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     | .ok (.path (.ref R) pa), .ok (.path (.ref R') pb) =>
       if hR : R' = R then
         let c ← checkIn C Γ .bool c
-        let x ← captureAs C "sp" (.alias R)
+        let x ← captureRef C "sp" (.alias R) a
         let ⟨Γ', th, ix⟩ ← afterCapture Γ x (.alias R)
         pure (P ++ [.of Γ (.declStorage R x none),
           .of Γ' (.ite (c.wk th) (.cons (.rebind ix (.path (pa.wk th))) .nil)
@@ -2284,7 +2332,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       if hR : R' = R then
         let pb := hR ▸ pb
         let c ← checkIn C Γ .bool c
-        let x ← captureAs C "mv" (.mem R)
+        let x ← captureRef C "mv" (.mem R) a
         -- declared before the branches, bound to a branch whose read cannot
         -- revert (or, both indexing, to a fresh default object), then rebound
         -- in each branch to the one the condition takes
@@ -2489,6 +2537,9 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
   let mut P : SProg C := []
   let mut prepared : List RawExpr := []
   for ((n, T), a) in d.params.zip args do
+    -- a reference argument's narrow positions, on the expression as written,
+    -- before a capture names it (`elabCallRet` checks the capture again)
+    if T matches .ref _ then ElabM.lift (shapeCheck C (← ctx) (shapeUnder d.widths n) a)
     let (Q, a) ← hoist a
     P := P ++ Q
     let Γ ← nctx
@@ -3045,7 +3096,7 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
     | s => s.exprs.map (·, whole)
   unless s matches .delete _ do
     for (e, base) in es do
-      let w := if base then narrowBase? C Γ e else narrowWholeUse? C Γ e
+      let w := if base then narrowWholeAt? C Γ e else narrowWholeUse? C Γ e
       if let some w := w then
         throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \
           `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are \

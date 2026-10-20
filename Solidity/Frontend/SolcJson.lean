@@ -1852,8 +1852,16 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let ps ← PM.lift (J.get m "parameters")
         let ps ← (← PM.lift (J.arr ps "parameters")).zipIdx.mapM fun ((p, index) : Json × Nat) => do
           let t ← PM.lift (tyText S (← PM.lift (J.get p "typeName")))
-          unless (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || t == "address payable" do
-            unsupported s!"a modifier parameter of unsupported type `{t}`"
+          -- a reference parameter at its location, as a function's
+          let loc := match J.opt p "storageLocation" with
+            | some (.str "memory") => " memory"
+            | some (.str "storage") => " storage"
+            | some (.str "calldata") => " calldata"
+            | _ => ""
+          unless (PrimTy.ofName? t).isSome || (narrowTy? t).isSome || t == "address payable" ||
+              loc == " memory" || loc == " storage" do
+            unsupported s!"a modifier parameter of unsupported type `{t}{loc}`"
+          let t := t ++ loc
           let n ← nameOf p
           let n := if !n.isEmpty then n else Id.run do
             let taken := stateVars ++ J.varDeclNames (J.nodes m)

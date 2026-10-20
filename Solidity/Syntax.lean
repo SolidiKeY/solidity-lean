@@ -289,6 +289,11 @@ evaluates them after the condition, as solc does. -/
 def RawStmt.requireWith (c : RawExpr) (args : List RawExpr) : RawStmt :=
   if args.all RawExpr.isPure then .require c else .ite c [.eval args] [.revert]
 
+/-- A reference parameter's declared data location. -/
+inductive ParamLoc where
+  | memory | storage | calldata
+  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
+
 /-- A modifier as a function applies it (`function f() onlyOwner
 inState(State.Created) { … }`): its parameters, the arguments of this
 application (read in the function's scope), and its body, where each `_;`
@@ -299,14 +304,12 @@ structure ModApp where
   params : List (Name × Ty)
   args : List RawExpr
   body : List RawStmt
-  /-- Its parameters of a narrow integer type, with their width. -/
+  /-- The widths of its parameters' narrow positions, keyed by the parameter
+  and their path below it, as `FunDecl.widths` keys a function's (`xs[]`). -/
   widths : List (Name × Nat) := []
+  /-- Its reference parameters' data locations. -/
+  locs : List (Name × ParamLoc) := []
   deriving Repr, Inhabited
-
-/-- A reference parameter's declared data location. -/
-inductive ParamLoc where
-  | memory | storage | calldata
-  deriving Repr, DecidableEq, Inhabited, Lean.ToExpr
 
 /-- An internal function as the contract declares it: its parameters and
 its return variables (`returns (uint r)`; unnamed, `returns (uint)`, it is
@@ -1599,23 +1602,20 @@ def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
 /-- A modifier: its name, its parameters, and its body, with a `_;` at least
 (solc's "Modifier body does not contain '_'"), anywhere. -/
 def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_param))
-    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term × Array Term) := do
+    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term × Array Term × Array Term) := do
   let `(sol_block| { $[$ss:sol_stmt;]* }) := b | Macro.throwErrorAt b "a modifier's body is a block"
   unless (b.raw.find? (·.isOfKind ``solHole)).isSome do
     Macro.throwErrorAt b "a modifier's body has a `_;`"
-  -- a narrow parameter (`uint8 n`): a `uint` of its width (`ModApp.widths`)
-  let mut rows := #[]
-  let mut ws := #[]
-  for p in ps do
-    let `(sol_param| $T:sol_ty $x:ident) := p | Macro.throwUnsupported
-    let (t, w) ← expandMemberTyW enums T
-    rows := rows.push (← `(($(strLit x), $t)))
-    if let some n := w then ws := ws.push (← `(($(strLit x), $(quote n))))
-  pure (m.getId.toString, rows, ← `([$(← ss.mapM expandStmt),*]), ws)
+  -- a parameter as a function's (`expandParamsW`): a narrow one (`uint8 n`) a
+  -- `uint` of its width, a reference one (`uint8[] memory xs`) its location
+  -- and its narrow positions (`ModApp.widths`, `ModApp.locs`)
+  let (rows, ws, locs) ← expandParamsW enums ps
+  pure (m.getId.toString, rows, ← `([$(← ss.mapM expandStmt),*]), ws, locs)
 
 /-- A function's declaration, as a term: its return variable and its
 modifiers read off its attributes. -/
-def expandFun (enums : List String) (mods : List (String × Array Term × Term × Array Term)) (f : Ident)
+def expandFun (enums : List String)
+    (mods : List (String × Array Term × Term × Array Term × Array Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
   let (ps, ws, locs) ← expandParamsW enums ps
@@ -1651,12 +1651,12 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term �
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
       let name := m.getId.toString
       if attrKeywords.contains name then continue
-      let some (_, params, mb, mws) := mods.find? (·.1 == name) |
+      let some (_, params, mb, mws, mlocs) := mods.find? (·.1 == name) |
         Macro.throwErrorAt m s!"{name} is not a modifier of this contract"
       let args ← match as with
         | some as => as.getElems.mapM expandExpr
         | none => pure #[]
-      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $mb [$mws,*]))
+      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $mb [$mws,*] [$mlocs,*]))
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(strLit f),

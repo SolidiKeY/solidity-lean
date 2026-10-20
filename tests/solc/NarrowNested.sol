@@ -8,6 +8,7 @@ struct Packed { uint8 a; int16 b; uint c; uint8[] xs; }
 contract NarrowNested {
     uint8[] small;
     int8[] signedSmall;
+    uint8[] other;
     Packed p;
     mapping(uint => Packed) byId;
     modifier atMost(uint8 cap) { require(cap > 1); _; }
@@ -128,6 +129,29 @@ contract NarrowNested {
     function pushArithPanics(int8 x) public {
         require(x == -128);
         signedSmall.push() -= x;
+        assert(false);
+    }
+    // a whole use whose narrow positions are checked: a conditional's
+    // branches, which solc requires of one type
+    /// @custom:key box
+    function ternaryAliasPanics(bool c) public {
+        uint8[] storage s = c ? small : other;
+        s.push(255);
+        s[s.length - 1] += 1;
+        assert(false);
+    }
+    function ternaryAliasInRange(bool c) public {
+        uint8[] storage s = c ? small : other;
+        s.push(7);
+    }
+    function lastPlusOne(uint8[] storage xs) internal view returns (uint8) {
+        return xs[xs.length - 1] + 1;
+    }
+    /// @custom:key box
+    function ternaryArgumentPanics(bool c) public {
+        small.push(255);
+        other.push(255);
+        lastPlusOne(c ? small : other);
         assert(false);
     }
 }

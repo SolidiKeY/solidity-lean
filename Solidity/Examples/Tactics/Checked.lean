@@ -223,6 +223,7 @@ refuses it.  A modifier's narrow parameter is a local of its type. -/
 /-- A contract with a struct of narrow members, and narrow reference parameters. -/
 def NarrowShapes : Contract := contract!{
   uint8[] small;
+  uint[] wide;
   Packed p;
   Packed[] ps;
   mapping(uint => Packed) byId;
@@ -284,6 +285,24 @@ theorem paramOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[](
 theorem storageParamOverflows : ⊨ dl[NarrowShapes]{ [ small[0] = 255; bump(small); ] false } := by
   sol_symex
   sol_close
+
+/-! Whole uses whose narrow positions are checked: a conditional's branches
+(each against the target, `shapeCheck`; `tests/solc/NarrowNested.sol` proves
+`ternaryAliasPanics`), a struct constructor's arguments, positional or named
+(each against its member, by the member write it is written as): the
+member's element is checked at `uint8`. -/
+
+/--
+info: "bool c = true; uint[] storage sp1; if (c) { sp1 = small; } else { sp1 = small; } uint[] storage s = sp1; s[0] += 1; require(s[0] <= 255);"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol[NarrowShapes]{ bool c = true;
+  uint8[] storage s = c ? small : small; s[0] += 1; })
+
+/--
+info: "uint[] memory m = new uint[](1); Packed memory mv1; mv1.a = 1; mv1.b = 2; mv1.c = 3; mv1.xs = m; Packed memory q = mv1; q.xs[0] += 1; require(q.xs[0] <= 255);"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol[NarrowShapes]{ uint8[] memory m = new uint8[](1);
+  Packed memory q = Packed({xs: m, a: 1, b: 2, c: 3}); q.xs[0] += 1; })
 
 /-- A modifier's narrow parameter. -/
 theorem modifierParam : ⊨ dl[NarrowShapes]{ ⟨ uint8 r = capped(5); ⟩ r == 5 } := by
@@ -403,15 +422,28 @@ error: Solidity elaboration failed: new uint[](2) has narrow positions none wher
 -/
 #guard_msgs in #check sol[NarrowShapes]{ uint8[] memory m = new uint[](2); }
 
+-- An argument captured before the call is named as written.
 /--
-error: Solidity elaboration failed: mv1 has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
+error: Solidity elaboration failed: m has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
 -/
 #guard_msgs in #check sol[NarrowShapes]{ uint[] memory m = new uint[](2); uint8 r = sum(m); }
 
 /--
-error: Solidity elaboration failed: c ? small : small has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
+error: Solidity elaboration failed: c ? small : wide has a narrow element, key or value: it is used through an index, `.length`, `.push`, `.pop` or `delete`, or whole where the same narrow positions are expected, not whole
 -/
-#guard_msgs in #check sol[NarrowShapes]{ bool c = true; uint8[] storage s = c ? small : small; }
+#guard_msgs in #check sol[NarrowShapes]{ bool c = true; bump(c ? small : wide); }
+
+-- A conditional's branches of another shape than each other: solc has no common type.
+/--
+error: Solidity elaboration failed: small has narrow positions ·[] 8 bits wide where none are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowShapes]{ bool c = true; uint[] storage s = c ? wide : small; }
+
+-- A struct constructor's argument of another shape than its member's.
+/--
+error: Solidity elaboration failed: w has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowShapes]{ uint[] memory w = new uint[](1); Packed memory q = Packed(1, 2, 3, w); }
 
 -- A struct's narrow member, and a modifier's narrow parameter, must fit.
 /--

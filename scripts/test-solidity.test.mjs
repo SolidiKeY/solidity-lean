@@ -370,13 +370,13 @@ test("modifiers use the existing inliner for calls and root obligations", () => 
   for (const name of ['constructor', 'arguments', 'resumesAfterReturn',
     'firstListedOutermost', 'directApplication', 'argumentEvaluation',
     'localsPerApplication', 'multiplePlaceholders', 'internalCallFromModifier',
-    'unnamedParameter', 'unnamedArgumentStillRuns']) {
+    'unnamedParameter', 'unnamedArgumentStillRuns', 'narrowArrayModifier',
+    'narrowArrayModifierPanics', 'storageArrayModifierPanics']) {
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
   // a narrow modifier parameter is a local of its type: `x += 1` at `255` panics
   assert.equal(status.narrowModifierGap, 'pending');
-  assert.equal(status.narrowArrayModifierGap, 'unsupported');
 });
 
 test("free and library calls resolve by declaration with attached receivers", () => {

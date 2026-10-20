@@ -225,15 +225,23 @@ programs, and the check is a statement the rules already run.
   (`shapeCheck`): a reference local's initializer (`uint8[] storage s =
   small;`, `uint8[] memory m = small;`, `new uint8[](n)`), a reference
   assignment, a reference argument; another shape (`uint[] storage s =
-  small;`) is refused, as solc refuses it, and any other whole use (a
-  conditional's branch, a tuple) too (`narrowWholeUse?`).
+  small;`) is refused, as solc refuses it.  A conditional of references
+  in such a place has each branch checked (`narrowWholeAt?`, its branches of
+  one shape, as solc requires), and a struct constructor's argument,
+  positional or named, its member's (the member write it is written as);
+  any other whole use (an operator's operand, a tuple) is refused
+  (`narrowWholeUse?`).  A reference argument's shape is checked as written,
+  before a capture names it.
 - **Push arithmetic on a narrow element** (`small.push() += v;` at
   `uint8[]`): `v` fits the element, and the appended slot is checked after
   the write, `require(small[small.length - 1] <= 255)` (`pushedSlot`), as a
   variable's write is; so `signed.push() -= x` at `int8` with `x == -128`
   reverts.  Inside `unchecked` push arithmetic stays refused.
 - **A modifier's narrow parameter** is a local of its type, its argument
-  fitting it (`ModApp.widths`, `wrapMods`).
+  fitting it (`ModApp.widths`, `wrapMods`); a reference parameter is a
+  local at its location (`ModApp.locs`: a storage alias, or a memory local
+  bound as `T memory y = a;` binds it), its narrow positions checked against
+  its argument's (`rawTyW`).
 - **Storage packing** is not observable here: a state variable is a value of
   its own in the interpreter and a slot of its own in the compiler, and it
   holds a value of its range; solc packs several narrow variables into one
@@ -244,8 +252,8 @@ programs, and the check is a statement the rules already run.
 What is not modelled, each an elaboration error unless said otherwise:
 
 - a place with a narrow position below it used whole other than where its
-  shape is checked (a branch of a conditional of references, a tuple, a named
-  argument); a modifier's reference parameter; a narrow type in a position not listed above (a
+  shape is checked (a tuple of references is refused whatever its types,
+  `elabTuple`); a narrow type in a position not listed above (a
   struct not in the table's widths, `narrowNestedMsg`);
 - a cast of arithmetic on literals alone to a narrow `int`
   (`int8(100 + 100)`): write the literal;
