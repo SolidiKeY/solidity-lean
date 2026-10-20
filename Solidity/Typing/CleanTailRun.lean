@@ -182,4 +182,194 @@ theorem SVal.saveM_ct : {T U : Ty} → {x : SVal T} → (p : Path T U) → {new 
       · rw [he]; exact hzA
       · exact SMap.all_iff.mp hx.2.1 e he
 
+/-! ## Growing: every live reference stays live -/
+
+/-- Every reference path live in `x` is live in `y`. -/
+def SVal.GrowsTo {T : Ty} (x y : SVal T) : Prop :=
+  ∀ (R : RefTy) (p : Path T (.ref R)), x.LiveAll p → y.LiveAll p
+
+theorem SVal.GrowsTo.refl {T : Ty} (x : SVal T) : x.GrowsTo x := fun _ _ h => h
+
+/-- A word has no reference path. -/
+theorem SVal.growsTo_prim {q : PrimTy} (x y : SVal (.prim q)) : x.GrowsTo y :=
+  fun _ p _ => nomatch Path.eq_prim p
+
+/-- **A save keeps every live reference live** when what it replaces grows
+into what it writes: a save keeps every array's length along its path. -/
+theorem SVal.saveM_grows : {T U : Ty} → (x : SVal T) → (q : Path T U) → (new : SVal U) →
+    {x' : SVal T} → x.saveM q new = some x' →
+    (∀ old, x.findM q = some old → old.GrowsTo new) → x.GrowsTo x'
+  | _, _, x, .nil, new, x', h, hg => by
+    have : x' = new := by
+      cases x <;> (simp only [SVal.saveM, Option.some.injEq] at h; exact h.symm)
+    subst this
+    exact hg x (SVal.findM_nil' x)
+  | _, _, .struct fs, .field (f := f0) hf q, new, x', h, hg => by
+    simp only [SVal.saveM, Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+    obtain ⟨z, hz, rfl⟩ := h
+    have ih := SVal.saveM_grows _ q new hz fun old ho => hg old (by simp only [SVal.findM]; exact ho)
+    intro R p hp
+    cases p with
+    | nil => exact SVal.liveAll_nil _
+    | field hg' p =>
+      rename_i g _
+      simp only [SVal.LiveAll] at hp ⊢
+      by_cases e : g = f0
+      · subst e
+        cases (Option.some.inj (hf.symm.trans hg'))
+        rw [SFields.get_set_same]
+        exact ih R p hp
+      · rw [SFields.get_set_ne fs hf hg' (Ne.symm e)]
+        exact hp
+  | _, _, @SVal.array E n e sh hn, .at i q, new, x', h, hg => by
+    simp only [SVal.saveM] at h
+    split at h
+    · rename_i y hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+      obtain ⟨z, hz, rfl⟩ := h
+      have ih := SVal.saveM_grows y q new hz fun old ho =>
+        hg old (by simp only [SVal.findM, hy]; exact ho)
+      intro R p hp
+      cases p with
+      | nil => exact SVal.liveAll_nil _
+      | «at» j p =>
+        simp only [SVal.LiveAll] at hp ⊢
+        have hlen : n ≤ (e.toList ++ sh.toList).length := by
+          rw [List.length_append, SVec.length_toList]; omega
+        refine ⟨?_, fun w hw => ?_⟩
+        · simp only [List.length_take, List.length_set]; omega
+        · rw [SVec.toList_ofList, SList.toList_ofList, List.take_append_drop,
+            List.getElem?_set] at hw
+          split at hw
+          · rename_i hij
+            have hw' : z = w := by
+              have := (List.getElem?_eq_some_iff.mp hy).1
+              simp only [this, ↓reduceIte, Option.some.injEq] at hw
+              exact hw
+            subst hw'
+            rw [hij] at hy
+            exact ih R p (hp.2 y hy)
+          · exact hp.2 w hw
+    · exact nomatch h
+  | _, _, .fixed e, .atF i q, new, x', h, hg => by
+    simp only [SVal.saveM] at h
+    split at h
+    · rename_i y hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+      obtain ⟨z, hz, rfl⟩ := h
+      have ih := SVal.saveM_grows y q new hz fun old ho =>
+        hg old (by simp only [SVal.findM, hy]; exact ho)
+      intro R p hp
+      cases p with
+      | nil => exact SVal.liveAll_nil _
+      | atF j p =>
+        simp only [SVal.LiveAll] at hp ⊢
+        intro w hw
+        rw [SVec.toList_set, List.getElem?_set] at hw
+        split at hw
+        · rename_i hij
+          have hw' : z = w := by
+            have := (List.getElem?_eq_some_iff.mp hy).1
+            simp only [this, ↓reduceIte, Option.some.injEq] at hw
+            exact hw
+          subst hw'
+          rw [hij] at hy
+          exact ih R p (hp y hy)
+        · exact hp w hw
+    · exact nomatch h
+  | _, _, .map m d, .key k q, new, x', h, hg => by
+    simp only [SVal.saveM] at h
+    split at h
+    · rename_i y hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+      obtain ⟨z, hz, rfl⟩ := h
+      have ih := SVal.saveM_grows y q new hz fun old ho =>
+        hg old (by simp only [SVal.findM, hy]; exact ho)
+      intro R p hp
+      cases p with
+      | nil => exact SVal.liveAll_nil _
+      | key k' p =>
+        simp only [SVal.LiveAll, SMap.toList_ofList] at hp ⊢
+        by_cases e : k' = k
+        · subst e
+          simp only [lookupBy_setBy_self]
+          simp only [hy] at hp
+          exact ih R p hp
+        · simp only [lookupBy_setBy_ne e]
+          exact hp
+    · rename_i hy
+      simp only [Option.bind_eq_bind, Option.bind_eq_some_iff, Option.some.injEq] at h
+      obtain ⟨z, hz, rfl⟩ := h
+      have ih := SVal.saveM_grows d q new hz fun old ho =>
+        hg old (by simp only [SVal.findM, hy]; exact ho)
+      intro R p hp
+      cases p with
+      | nil => exact SVal.liveAll_nil _
+      | key k' p =>
+        simp only [SVal.LiveAll, SMap.toList_ofList] at hp ⊢
+        by_cases e : k' = k
+        · subst e
+          simp only [lookupBy_setBy_self]
+          simp only [hy] at hp
+          exact ih R p hp
+        · simp only [lookupBy_setBy_ne e]
+          exact hp
+
+/-- An element pushed: every live slot stays live, at what it held. -/
+theorem SVal.growsTo_push {E : Ty} {n : Nat} (e : SVec E n) (sh : SList E) (hn : n < 2 ^ 256)
+    (x : SVal E) (sh' : List (SVal E)) (h' : (e.toList ++ [x]).length < 2 ^ 256) :
+    (SVal.array e sh hn).GrowsTo (.array (SVec.ofList (e.toList ++ [x])) (.ofList sh') h') := by
+  intro R p hp
+  cases p with
+  | nil => exact SVal.liveAll_nil _
+  | «at» j p =>
+    simp only [SVal.LiveAll] at hp ⊢
+    have hj : j.1.toNat < e.toList.length := by rw [SVec.length_toList]; exact hp.1
+    refine ⟨by rw [List.length_append]; omega, fun w hw => hp.2 w ?_⟩
+    rw [SVec.toList_ofList, List.append_assoc, List.getElem?_append_left hj] at hw
+    rw [List.getElem?_append_left hj]; exact hw
+
+/-- An array of words: no reference path enters its slots. -/
+theorem SVal.growsTo_words {q : PrimTy} {n m : Nat} (e : SVec (.prim q) n) (sh : SList (.prim q))
+    (hn : n < 2 ^ 256) (e' : SVec (.prim q) m) (sh' : SList (.prim q)) (hm : m < 2 ^ 256) :
+    (SVal.array e sh hn).GrowsTo (.array e' sh' hm) := by
+  intro R p hp
+  cases p with
+  | nil => exact SVal.liveAll_nil _
+  | «at» j p => exact nomatch Path.eq_prim p
+
+/-- A reference live in a storage. -/
+def Storage.LiveAll (st : Storage C) {U : Ty} (r : SRef C U) : Prop :=
+  (st.get r.hroot).LiveAll r.path
+
+/-- Every reference live in `st` is live in `st'`. -/
+def Storage.Grows (st st' : Storage C) : Prop :=
+  ∀ {R : RefTy} (r : SRef C (.ref R)), st.LiveAll r → st'.LiveAll r
+
+theorem Storage.Grows.refl (st : Storage C) : st.Grows st := fun _ h => h
+
+theorem Storage.Grows.trans {st₁ st₂ st₃ : Storage C} (h₁ : st₁.Grows st₂) (h₂ : st₂.Grows st₃) :
+    st₁.Grows st₃ := fun r h => h₂ r (h₁ r h)
+
+/-- **A save keeps every live reference live** when what it replaces grows
+into what it writes. -/
+theorem Storage.save_grows {st st' : Storage C} {U : Ty} {q : SRef C U} {new : SVal U}
+    (h : st.save q new = some st') (hg : ∀ old, st.find q = some old → old.GrowsTo new) :
+    st.Grows st' := by
+  obtain ⟨v', hv, rfl⟩ := save_eq_some h
+  have hgx := SVal.saveM_grows _ _ new hv fun old ho =>
+    hg old (by rw [Storage.find, SVal.find_eq_findM]; exact ho)
+  intro R r hr
+  unfold Storage.LiveAll at hr ⊢
+  obtain ⟨rr, rh, rp⟩ := r
+  obtain ⟨qr, qh, qp⟩ := q
+  dsimp only at hr hgx ⊢
+  by_cases e : rr = qr
+  · subst e
+    cases (Option.some.inj (qh.symm.trans rh))
+    rw [SFields.get_set_same]
+    exact hgx R rp hr
+  · rw [SFields.get_set_ne st qh rh (Ne.symm e)]
+    exact hr
+
 end Solidity
