@@ -465,18 +465,20 @@ whole: past them it is sliced first (`LFml.refuteForm`). -/
 def sliceDepth : Nat := 2
 
 /-- **The formula a refutation is closed on**: itself where it stacks at
-most `sliceDepth` storage updates, as the leaf closer reads it; else sliced
-(`LFml.slice`) where what is left reads no state, so that the closer's
-reading of storage and memory, whose cost its bounds (`LFml.boundsOk`) are
-set for on the whole leaf, is never asked of a sliced one; else itself. -/
+most `sliceDepth` storage updates, as the leaf closer reads it, or where it
+is past the closer's largest bound (`concreteSize` nodes, counted first: the
+counts below are not bounded); else sliced (`LFml.slice`) where what is left
+reads no state, so that the closer's reading of storage and memory, whose
+cost its bounds (`LFml.boundsOk`) are set for on the whole leaf, is never
+asked of a sliced one; else itself. -/
 def LFml.refuteForm (φ : LFml C) : LFml C :=
-  bif decide (φ.stDepth ≤ sliceDepth) then φ
+  bif !(φ.fits concreteSize).isSome || decide (φ.stDepth ≤ sliceDepth) then φ
   else bif (φ.slice.reads ([], false)).2 then φ else φ.slice
 
 theorem LFml.refuteForm_holds {φ : LFml C} {g : State C []} {ν : AEnv}
     (h : φ.refuteForm.holds g ν) : φ.holds g ν := by
   unfold LFml.refuteForm at h
-  cases hc : decide (φ.stDepth ≤ sliceDepth)
+  cases hc : (!(φ.fits concreteSize).isSome || decide (φ.stDepth ≤ sliceDepth))
   · rw [hc, cond_false] at h
     cases hs : (φ.slice.reads ([], false)).2
     · rw [hs, cond_false] at h; exact LFml.slice_holds h
