@@ -23,6 +23,7 @@ can never be read as one under another.
 | O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
 | O5 | `ignoringOverflow { … }` (`ignoringOF`): an overflowing run is assumed away | done |
 | O6 | clean array tails: the starting storage's shadows assumed ordinary defaults (`ValidTail .clean`) | done |
+| O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -303,6 +304,42 @@ over another storage term, and indices that equal the live length only by
 arithmetic other than `+ 1 - 1`, are left as atoms (still exact, only not
 read as the default). `sol_close` (the `simp` closer) does not read the
 premise.
+
+## O7. The test runner reads callbacks
+
+**Decision.** `scripts/test-solidity.mjs` reports `proved` for a
+kernel-checked statement, and `⊢ N.f.problem` states `Valid`, bug 5
+included: `tests/solc/open`'s `trySuccessKeepsStorageUnsound` and
+`callKeepsStorageUnsound` were proved, and fail on the EVM, where the callee
+is the contract itself. So `testObligation` (`Frontend/Testing.lean`) states
+a plain obligation as `ValidT .noCallback N.f.problem` where both hold:
+
+* the function, a modifier it applies or a function it inlines holds a
+  `try` of a callee not declared `view` or `pure`, or a low-level
+  `call`/`delegatecall` (`SolcFun.writingCall`, read off solc's AST;
+  `ImportRow.writingCall`);
+* the obligation calls back (`Fml.callsBack false`, reduced by `whnf`; a
+  value that does not reduce counts as calling back).
+
+It is proved by `sol_prove` (O3), the goal read at the obligation's value
+and the declaration stated at `N.f.problem`. Elsewhere it stays
+`⊢ N.f.problem`: with nothing calling back `Valid` is the reading
+(`validT_noCallback_iff`).
+
+**Why the callee's mutability.** solc calls a `view` or `pure` function by
+`STATICCALL`, under which any state write reverts, so a `try` of one leaves
+the caller's storage and balance as they were: `Valid`'s reading is the
+EVM's there (`tryArgumentSideEffect`, `try id(postinc())`, stays proved).
+The model does not record the mutability (`ExtCall`, O1 "Not done": 5D),
+so this step is argued, not a theorem; and `Valid`'s oracle still answers
+two equal calls alike, which a `view` callee reading the caller's state
+between writes need not.
+
+**Where it lives.** In the runner alone: `N.f.problem` is still one table
+of formulas (`solc_scoped_problems`), the reading the statement's type. The
+TestSuite's derived theorems (`Solidity/TestSuite/Derived*.lean`) and
+`#solkey_derive?` stay `⊢ N.f.problem`, solkey's reading, as their
+documents say; `tests/solc/CallbackReading.sol` pins the four cases.
 
 ## Review
 

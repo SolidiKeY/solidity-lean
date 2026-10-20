@@ -35,6 +35,18 @@ argument, including with named arguments and tuple returns. Independent rows
 belong to contracts and libraries; top-level free functions have no independent
 test row. Recursion and unsupported helper signatures remain import gaps.
 
+**What `proved` states.** A plain (box or diamond) obligation is proved as
+`⊢ N.f.problem`, whose reading `Valid` has every external callee keep the
+contract's state (solkey's `noCallback`). Where the function reaches a call
+whose callee may write the state, a `try` of a callee not declared `view` or
+`pure` or a low-level `call` (`SolcFun.writingCall`), and the obligation
+hands control to it (`Fml.callsBack false`), the runner states
+`ValidT .noCallback N.f.problem` instead, the callee changing the state as it
+may, and proves it by `sol_prove`'s walk of `ProvesC` (`docs/options.md`,
+O7). A specification row (`cspec`) is unchanged. The TestSuite's derived
+theorems (`Solidity/TestSuite/Derived*.lean`) stay `⊢ N.f.problem`: solkey's
+reading, as solkey proves them.
+
 | Result | Meaning |
 |---|---|
 | `proved` | Kernel-checked proof, using only Lean's standard three axioms. |

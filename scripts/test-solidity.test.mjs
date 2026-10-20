@@ -620,15 +620,14 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     tryCatchExactReturn: "pending", trySuccessRunsCallee: "pending",
     tryMultipleCatchClausesSuccess: "pending", tryNestedGetter: "pending",
     callRunsReceive: "pending",
+    // the callee is the contract itself; under the callback reading
+    // (`ValidT .noCallback`, docs/options.md O7) its storage may change
+    trySuccessKeepsStorageUnsound: "pending", callKeepsStorageUnsound: "pending",
     // that `address(0)` has no code is not a fact of the model
     callWithoutCodeReverts: "pending",
     // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
     ternaryLiteralOverflow: "pending",
   };
-  // `trySuccessKeepsStorageUnsound` and `callKeepsStorageUnsound` are proved:
-  // `⊢` is sound for `Valid`, where a callee keeps the caller's state
-  // (solkey's `noCallback`); on the EVM they fail, the callee being the
-  // contract itself (`docs/options.md`, O1).
   const files = ["SolcArithmeticOpen", "SolcConstructorsOpen", "SolcFunctionCallsOpen",
     "SolcHigherLevelOpen", "SolcPaymentsOpen", "SolcSmtControlFlowOpen", "SolcTypesOpen"]
     .map(f => `tests/solc/open/${f}.sol`);
@@ -638,4 +637,16 @@ test("solkey's solc/open ports close except where the model says why not", () =>
   assert.equal(rows.length, 51);
   const expected = new Map(Object.entries(open));
   for (const r of rows) assert.equal(r.status, expected.get(r.function) ?? "proved", r.function);
+});
+
+test("an obligation whose callee may write the state is read with callbacks", () => {
+  // docs/options.md O7: `ValidT .noCallback` where a `try` of a callee not
+  // declared view/pure or a low-level call is reached, `⊢` elsewhere
+  const report = runSolidityTests(["tests/solc/CallbackReading.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.localKept, "proved");
+  assert.equal(status.staticKept, "proved");
+  assert.equal(status.storageLost, "pending");
+  assert.equal(status.valueCallLost, "pending");
 });

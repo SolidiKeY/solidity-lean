@@ -1,5 +1,6 @@
 import Solidity.Frontend.Problems
 import Solidity.Calculus.SolSpec
+import Solidity.Calculus.CallbackDerive
 
 /-!
 # Testing imported Solidity files
@@ -7,6 +8,13 @@ import Solidity.Calculus.SolSpec
 The machine-readable entry point used by `scripts/test-solidity.mjs`.
 Every proved result has a kernel-checked declaration and an axiom check.
 An unfinished search stays pending; import gaps remain visible.
+
+A plain obligation whose formula hands control to a callee that may call
+back (`Fml.callsBack false`: a `try`, a value call) is stated as
+`ValidT .noCallback N.f.problem`, the callee changing the state as it may
+(`docs/options.md`, O7), and proved by `sol_prove`'s walk of `ProvesC`; the
+others as `⊢ N.f.problem`, whose `Valid` is the same reading there
+(`validT_noCallback_iff`).
 -/
 
 namespace Solidity.Frontend
@@ -21,6 +29,20 @@ private def ImportRow.signature (r : ImportRow) : String :=
     s!"{r.displayName}({",".intercalate (r.params.map Prod.snd)})"
   else r.sourceSignature
 
+/-- `t`, elaborated with no metavariable left. -/
+private def elabClosed (t : Term) : TermElabM Expr := do
+  let e ← Term.elabTerm t none
+  Term.synthesizeSyntheticMVarsNoPostponing
+  instantiateMVars e
+
+/-- Whether the obligation `p` may hand control to a callee that calls back
+under `transferSemantics:noCallback` (`Fml.callsBack false`), read off its
+value; `true` where it does not reduce. -/
+private def callsBackE (N p : Lean.Name) : TermElabM Bool := do
+  let e ← elabClosed (← `(Fml.callsBack (C := $(mkCIdent N)) false $(mkCIdent p)))
+  let v ← withTransparency .all <| whnf e
+  return !v.isConstOf ``Bool.false
+
 /-- Test one imported obligation. Search constructs a proof term; `addDecl`
 checks it in the kernel before it can be reported as proved. Open goals are
 pending; budget exhaustion is an error. Neither is evidence a claim is false. -/
@@ -32,15 +54,29 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
   withScope (fun sc => { sc with openDecls := .simple `Solidity [] :: sc.openDecls }) <|
     liftTermElabM <| withCurrHeartbeats <| tryCatchRuntimeEx (do
       let C := mkConst N
-      let ty ← if r.tag == .specified then do
+      let cb ← if r.tag == .specified || !r.writingCall then pure false
+        else callsBackE N (f ++ `problem)
+      let (ty, goalTy) ← if r.tag == .specified then do
           let stx ← `(cspec[$(mkCIdent N)]{ $(mkIdent (.mkSimple r.name)) })
           let φ ← Term.elabTerm stx none
           Term.synthesizeSyntheticMVarsNoPostponing
-          pure <| mkApp2 (mkConst ``Valid) C (← instantiateMVars φ)
-        else pure <| ProofTree.provesE C (mkConst (f ++ `problem))
-      let g ← mkFreshExprSyntheticOpaqueMVar ty
+          let ty := mkApp2 (mkConst ``Valid) C (← instantiateMVars φ)
+          pure (ty, ty)
+        else if cb then do
+          -- the faithful reading: the callee may change the state
+          let ty ← elabClosed (← `(ValidT (C := $(mkCIdent N)) .noCallback
+            $(mkCIdent (f ++ `problem))))
+          -- the walk reads the formula by its value; the kernel unfolds it
+          pure (ty, mkApp ty.appFn! (← Symex.evaluable (mkConst (f ++ `problem))))
+        else
+          let ty := ProofTree.provesE C (mkConst (f ++ `problem))
+          pure (ty, ty)
+      let g ← mkFreshExprSyntheticOpaqueMVar goalTy
       let goals ← if r.tag == .specified then do
           let tac ← `(tactic| sol_spec_try)
+          Tactic.run g.mvarId! (Tactic.evalTactic tac)
+        else if cb then do
+          let tac ← `(tactic| sol_prove)
           Tactic.run g.mvarId! (Tactic.evalTactic tac)
         else do
           let out ← IO.mkRef (none : Option Derive.Search)
