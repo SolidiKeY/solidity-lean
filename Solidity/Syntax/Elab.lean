@@ -1298,9 +1298,11 @@ them to the type), `~a` is `(2^N - 1) -% a`; and a literal operand must fit the
 type. -/
 def narrowWrapNode (unc : Bool) (Γ : ECtx) (e : RawExpr) : Except String RawExpr := do
   let some (p, n) := intTyOf C Γ e | return e
-  -- signed inside `unchecked` (`unc`): `-a` is `0 -% a` on the words, and
-  -- `a / b` is `-a` where `b` is `-1` (`-128 / -1` at `int8` is `-128`, the
-  -- one quotient that leaves the type), `a / b` elsewhere
+  -- signed inside `unchecked` (`unc`): `-a` is `0 -% a` on the words; `a / b`
+  -- at `intN` is the quotient at `int`, read back at `intN` (`-128 / -1` at
+  -- `int8` is `-128`), and at `int` the quotient by `1` where `b` is `-1`,
+  -- negated on the words (`type(int).min / -1` is `type(int).min`).  None
+  -- of these is narrowed again (`narrowPure` does not revisit its output)
   if unc && p == .int then
     let neg (a : RawExpr) : RawExpr := .call (tyName .int n) [.binop .subW (.num 0) (.call "uint" [a])]
     match e with
@@ -1312,7 +1314,13 @@ def narrowWrapNode (unc : Bool) (Γ : ECtx) (e : RawExpr) : Except String RawExp
       | none =>
         if a.hasIncDec || b.hasIncDec then
           throw s!"{e.toStr} inside `unchecked`: a signed quotient of an operand with an effect"
-        return .ternary (.binop .eqB b (.unop .neg (.num 1))) (neg a) e
+        if n < 256 then
+          return .call (tyName .int n) [.binop .div (.call "int" [a]) (.call "int" [b])]
+        let m1 : RawExpr := .unop .neg (.num 1)
+        let isM1 : RawExpr := .binop .eqB b m1
+        let q : RawExpr := .binop .div a (.ternary isM1 (.unop .neg b) b)
+        return .call "int" [.binop .mulW (.call "uint" [q])
+          (.ternary isM1 (.num (2 ^ 256 - 1)) (.num 1))]
     | _ => pure ()
   -- signed: the operation on the operands' words, the result read back at
   -- `intN` (`int8(uint(x) +% 1)`, `castCapture`), as solc wraps it; `a **% k`
