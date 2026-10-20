@@ -369,6 +369,16 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
     'signedPushArithUncheckedWraps']) assert.equal(status[name], 'proved', name);
 });
 
+test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
+  const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['positional', 'named', 'fromParameters', 'nested', 'toStorage', 'toMapping',
+    'narrowMembers', 'narrowNamed', 'narrowToStorage', 'narrowMemberOverflowPanics'])
+    assert.equal(status[name], 'proved', name);
+  assert.equal(status.wrongMember, 'pending');
+});
+
 test("modifiers use the existing inliner for calls and root obligations", () => {
   const report = runSolidityTests(["tests/solc/Modifiers.sol"], {build:false});
   assert.deepEqual(report.errors, []);

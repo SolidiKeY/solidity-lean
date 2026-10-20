@@ -1031,6 +1031,21 @@ partial def call (j : Json) : PM String := do
         pure s!"{r}.{← PM.lift (J.str f "memberName")}"
       else expr f
     pure s!"{name}({", ".intercalate as})"
+  | "structConstructorCall" =>
+    -- `S(a, b)` and `S({x: a, y: b})`, printed as written: the elaborator
+    -- lowers either to the member writes of a fresh memory struct (`hoist`)
+    let S := (← get).structs
+    let some r := ((J.ref? f).bind fun id => lookupBy s!"#solc{id}" S).orElse fun _ =>
+        (J.str? f "name").bind (lookupBy · S)
+      | unsupported "a constructor of a struct the import does not know"
+    let name ← PM.lift r
+    let names : List String := (J.arr? j "names").map
+      (·.toList.filterMap (·.getStr?.toOption)) |>.getD []
+    let as ← args.mapM expr
+    if names.isEmpty then pure s!"{name}({", ".intercalate as})"
+    else
+      unless names.length == as.length do unsupported "a struct constructor's named arguments"
+      pure s!"{name}(\{{", ".intercalate ((names.zip as).map fun (n, a) => s!"{n}: {a}")}})"
   | k => unsupported s!"a call of kind `{k}`"
 
 end
