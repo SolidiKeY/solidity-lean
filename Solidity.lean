@@ -193,6 +193,7 @@ import Solidity.Examples.Tactics.Values
 import Solidity.Examples.Tactics.Operators
 import Solidity.Examples.Tactics.Checked
 import Solidity.Examples.Tactics.CheckedBlock
+import Solidity.Examples.Tactics.Bytes
 import Solidity.Examples.Tactics.SignedCasts
 import Solidity.Examples.Tactics.SolcOpen
 import Solidity.Examples.Tactics.CleanTail

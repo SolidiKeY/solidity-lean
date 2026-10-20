@@ -456,6 +456,68 @@ def castTy? (f : String) : Option (PrimTy × Nat) :=
 /-- The Solidity spelling of `p` at `n` bits. -/
 def tyName (p : PrimTy) (n : Nat) : String := if n < 256 then s!"{p.toStr}{n}" else p.toStr
 
+/-! ## Byte types
+
+`bytes1` … `bytes32`, `bytes` and `string` are not types of the syntax
+either (`docs/semantic-gaps.md`, "Bytes and strings"): a `bytesN` is a `uint`
+of `8N` bits holding its bytes read big-endian (the `uintN(b)` solc's
+conversion gives), and `bytes`/`string` a `bytes1[]`, a `uint[]` 8 bits wide.
+Beside a width the tables carry a marker row `k#bytes ↦ N` (`valueRows?`),
+which is how the elaborator tells a `bytesN` from a `uint8N` where solc's
+operations differ (`bytesPure`, `Syntax/Elab.lean`). -/
+
+/-- `bytes1` … `bytes32`: the number of bytes. -/
+def bytesTy? (s : String) : Option Nat :=
+  if s.startsWith "bytes" then
+    match (s.drop 5).toNat? with
+    | some n => if 1 ≤ n && n ≤ 32 && toString n == s.drop 5 then some n else none
+    | none => none
+  else none
+
+/-- `bytes` and `string`, both a `bytes1[]`. -/
+def dynBytesTy (s : String) : Bool := s == "bytes" || s == "string"
+
+/-- The width rows a value type adds at its own position (`""`): a narrow
+integer's width, a `bytesN`'s width below 256 bits and its marker; with the
+primitive type it is read as. -/
+def valueRows? (s : String) : Option (PrimTy × List (String × Nat)) :=
+  match narrowTy? s, bytesTy? s with
+  | some (p, n), _ => some (p, [("", n)])
+  | none, some n => some (.uint, (if n < 32 then [("", 8 * n)] else []) ++ [("#bytes", n)])
+  | none, none => none
+
+/-- The rows of `bytes` and `string`: elements 8 bits wide, each a `bytes1`. -/
+def dynBytesRows : List (String × Nat) := [("[]", 8), ("[]#bytes", 1)]
+
+/-- The name of a literal of bytes (`"ab"`, `hex"6162"`) as an expression:
+a call no function can be the callee of, read at the type it meets
+(`bytesPure`, `Syntax/Elab.lean`). -/
+def bytesLitName : String := "#bytes"
+
+/-- The literal of the bytes `bs`. -/
+def RawExpr.bytesLit (bs : List Nat) : RawExpr := .call bytesLitName (bs.map .num)
+
+/-- The bytes of a literal of bytes. -/
+def RawExpr.bytesLit? : RawExpr → Option (List Nat)
+  | .call f as => if f == bytesLitName then as.mapM fun | .num n => some n | _ => none else none
+  | _ => none
+
+/-- The bytes `hex"…"` spells: pairs of hex digits, `_` between them. -/
+def hexBytes? (s : String) : Option (List Nat) :=
+  let ds := (s.toList.filter (· != '_')).map fun c =>
+    if '0' ≤ c && c ≤ '9' then some (c.toNat - 48)
+    else if 'a' ≤ c && c ≤ 'f' then some (c.toNat - 87)
+    else if 'A' ≤ c && c ≤ 'F' then some (c.toNat - 55)
+    else none
+  match ds.mapM id with
+  | some ds =>
+    let rec pairs : List Nat → Option (List Nat)
+      | [] => some []
+      | a :: b :: r => (pairs r).map ((16 * a + b) :: ·)
+      | [_] => none
+    pairs ds
+  | none => none
+
 /-- Why a narrow type is refused where it stands. -/
 def narrowNestedMsg (s : String) : String :=
   s!"{s}: a narrow integer type stands in the type of a local, a parameter, a return value, " ++
@@ -496,7 +558,8 @@ macro_rules
       | none =>
         -- a struct of the table; an enum never reaches here (`expandMemberTy`),
         -- nor does a narrow type where one may stand (`expandMemberTyW`)
-        if (narrowTy? s).isSome then Lean.Macro.throwErrorAt x (narrowNestedMsg s)
+        if (narrowTy? s).isSome || (bytesTy? s).isSome || dynBytesTy s then
+          Lean.Macro.throwErrorAt x (narrowNestedMsg s)
         else if (structDef s).isEmpty then Lean.Macro.throwErrorAt x (unknownStructMsg s)
         else `(Ty.struct $(Lean.quote s))
   | `(ty!(address payable)) => `(Ty.uint)
@@ -550,6 +613,11 @@ def braced (ss : List String) : String :=
 declare_syntax_cat sol_expr (behavior := both)
 syntax:max num : sol_expr
 syntax:max ident : sol_expr
+/-- `"ab"`: a literal of bytes, a `bytesN`'s left-aligned or a `bytes`/`string`'s
+(`RawExpr.bytesLit`). -/
+syntax:max str : sol_expr
+/-- `hex"6162"`: the bytes the hex digits spell. -/
+syntax:max &"hex" str : sol_expr
 syntax:max sol_expr:max "." ident : sol_expr
 syntax:max sol_expr:max "[" sol_expr "]" : sol_expr
 syntax:max "(" sol_expr ")" : sol_expr
@@ -1066,6 +1134,12 @@ partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
 where
   expandExpr1 : TSyntax `sol_expr → MacroM Term
   | `(sol_expr| $n:num) => `(RawExpr.num $n)
+  | `(sol_expr| $t:str) =>
+    `(RawExpr.bytesLit $(quote (t.getString.toUTF8.toList.map (·.toNat))))
+  | `(sol_expr| hex $t:str) =>
+    match hexBytes? t.getString with
+    | some bs => `(RawExpr.bytesLit $(quote bs))
+    | none => Macro.throwErrorAt t "hex\"…\": pairs of hex digits"
   | `(sol_expr| $x:ident) => expandIdent x
   | `(sol_expr| $e:sol_expr . $f:ident) => do fieldChain (← expandExpr e) (nameParts f.getId)
   | `(sol_expr| $e:sol_expr [ $k:sol_expr ]) => do
@@ -1639,14 +1713,15 @@ A struct's narrow members are its type's (`Semantics.structWidths`).  A
 parameter's and a return's type are read so too (`expandParamsW`). -/
 partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     MacroM (Term × List (String × Nat)) := do
-  let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × Nat) := match K with
-    | `(sol_ty| $x:ident) => narrowTy? x.getId.toString
+  let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × List (String × Nat)) := match K with
+    | `(sol_ty| $x:ident) => valueRows? x.getId.toString
     | _ => none
   match T with
   | `(sol_ty| $x:ident) =>
-    match narrowTy? x.getId.toString with
-    | some (.int, n) => pure (← `(Ty.int), [("", n)])
-    | some (_, n) => pure (← `(Ty.uint), [("", n)])
+    if dynBytesTy x.getId.toString then return (← `(Ty.array Ty.uint), dynBytesRows)
+    match valueRows? x.getId.toString with
+    | some (.int, ws) => pure (← `(Ty.int), ws)
+    | some (_, ws) => pure (← `(Ty.uint), ws)
     | none => pure (← expandMemberTy enums T, [])
   | `(sol_ty| $E:sol_ty []) => do
     let (t, ws) ← expandStateTyW enums E
@@ -1658,9 +1733,13 @@ partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     pure (← `(Ty.fixed $t $m), ws.map fun (k, n) => ("[]" ++ k, n))
   | `(sol_ty| mapping ( $K:sol_ty => $V:sol_ty )) => do
     let (t, ws) ← expandStateTyW enums V
+    if let `(sol_ty| $k:ident) := K then
+      if dynBytesTy k.getId.toString then
+        Macro.throwErrorAt K s!"mapping({k.getId.toString} => …): a byte string as a key is not \
+          modelled (docs/semantic-gaps.md, \"Bytes and strings\")"
     let (kt, kw) ← match narrow? K with
-      | some (.int, n) => pure (← `(PrimTy.int), [("{}", n)])
-      | some (_, n) => pure (← `(PrimTy.uint), [("{}", n)])
+      | some (.int, ws) => pure (← `(PrimTy.int), ws.map fun (k, n) => ("{}" ++ k, n))
+      | some (_, ws) => pure (← `(PrimTy.uint), ws.map fun (k, n) => ("{}" ++ k, n))
       | none => pure (← `(pty!($K)), [])
     if ws.isEmpty && kw.isEmpty then return (← expandMemberTy enums T, [])
     pure (← `(Ty.mapping $kt $t), kw ++ ws.map fun (k, n) => ("[]" ++ k, n))

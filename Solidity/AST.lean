@@ -57,8 +57,9 @@ def unknownTyMsg (s : String) : String :=
   let hint :=
     if s.startsWith "uint" || s.startsWith "int" then
       ": the integer types are `uint8` … `uint256` and `int8` … `int256`, in steps of 8"
-    else if s.startsWith "bytes" || s == "string" || s == "byte" then
-      ": `bytes` and `string` are not modelled"
+    else if s == "byte" then ": `byte` is `bytes1` since solc 0.8"
+    else if s.startsWith "bytes" || s == "string" then
+      ": `bytes1` … `bytes32`, `bytes` and `string` stand where a narrow integer may, not here"
     else ""
   s!"unknown type {s}{hint}"
 

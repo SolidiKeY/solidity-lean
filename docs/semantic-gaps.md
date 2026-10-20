@@ -58,10 +58,10 @@ contract's invariant.
 | `type(T).max`/`min` in `sol{}` (the import folds them) | elaborator | closed: a value of `T` (`typeBoundExpr`), an enum's members |
 | a narrow operation under `&&`/`||` or a ternary branch | elaborator | closed: a conditional capture (`hoist`, `Examples/Tactics/Checked.lean`) |
 | `super` calls; base constructor arguments | semantics | closed in the solc import (`readContract`, `Frontend/SolcJson.lean`): `super.f` names the next implementation after its declaration's contract in the most-derived C3 order; the base constructors compose into one constructor in solc's legacy order (`docs/solc-alignment.md`, "Constructors"); a base's contract clauses are inherited; a constructor's modifiers wrap its own body after its bases, and a base's `return` ends its own body (`solcCtorBody<id>`, `tests/solc/InheritanceCtors.sol`); `super` in a modifier's arguments or body names the next implementation after the contract writing it (`SuperMod*`; `super.m` as a modifier name solc refuses); a base's private variable of a later one's name is its own root (`stateRenames`), refused only where a specification names it |
-| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | open |
+| `bytes`, `string`, `bytesN` (values, storage, memory, `.length`, indexing, `push`, literals, conversions) | semantics: types the model lacks | closed by the elaborator's reading ("Bytes and strings" below; `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol`); open: `mapping(string => …)`/`mapping(bytes => …)` keys, a byte type as a struct member, `bytes.concat`/`string.concat`, `calldata` |
 | `keccak256`, `abi.encode`, `abi.encodePacked`, `abi.decode` | semantics: builtins | open |
 | function types (internal function values, `function (uint) returns (uint) f = g;`) | semantics | open |
-| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: needs `string`/`bytes` | open (the branch is chosen, the data dropped) |
+| revert data: `require(c, "msg")`'s reason, custom errors' arguments, `catch Error(string memory r)` binding `r` | semantics: a halt carries no data | open (the branch is chosen, the data dropped): `string` now exists, but a revert is `THalt.revert` and an external call's `ExtResult.error` carries no reason, so binding `r` needs data in both and every proof over a halt ("Bytes and strings" below) |
 | recursion under the callback reading (`ValidT`): no contract rule over `ExecS` | calculus | open (`docs/kernel-port.md`, "Recursion") |
 | clean array tails as part of a contract's invariant (`ValidTail .clean`, O6) in the runner | obligation | closed: a contract every function of which exposes nothing (`Prog.exposesNone`: no array of references shrunk while a storage alias may be held, no recursive call) keeps clean tails from its deployment on (`ReachableBy.cleanTail`, `Typing/CleanTailRun.lean`), and the runner states its plain obligations under the premise (`reading: clean`, `docs/solidity-testing.md`); elsewhere `.solc` |
 | closer: nonlinear arithmetic (`ensures \result == n * (n + 1) / 2`), quantifier instances at non-literal indices | closer limits, not semantic gaps | open |
@@ -189,3 +189,106 @@ same-named, same-membered structs are one type (solc's are distinct, but no
 program can tell them apart in one contract).  A member named like a Lean
 keyword (`from`) does not print, as before.  A library's struct that the
 calling contract cannot see stays a row (`HiddenStructCaller`).
+
+## Bytes and strings (lane `open-bytes`)
+
+**What solkey does.** Nothing to follow: solkey's `SolidityInfo` gives
+`string` KeY's `int` sort (an opaque value) and skips `bytes`/`bytesN`
+("not yet supported"); no `.key` file has a `bytes` or `string` sort or
+taclet.  The model follows solc (`docs/solc-alignment.md`).
+
+**Design: a representation, not a type.**  A new `PrimTy` (or a byte-string
+sort) would change every `PrimTy` match (33 files), `PrimTy.Denote`, the
+typed storage and heap, the Theory, the closer and the EVM simulation, and
+re-check all of them; nothing in a proof needs a byte to be other than a
+small number.  So the types are read as the narrow integers already are
+(`narrowTy?`): by the elaborator, onto types the model has.
+
+- `bytesN` is a `uint` of `8N` bits holding the bytes read big-endian: the
+  value `uintN(b)` solc's conversion gives (`bytes2 b = "ab"` is `0x6162`).
+  On that reading solc's operations are the integer ones: `==`, `<` …
+  (lexicographic on bytes is numeric big-endian), `& | ^`, `~` (`2^8N - 1
+  -% b`, `narrowWrapNode`), `<<` (modulo `2^8N`, as a narrow `<<` already
+  wraps), `>>`; `uintM(b)`/`bytesN(u)` at `M = 8N` are the identity.  What
+  differs from `uint8N` is rewritten before the statement is elaborated
+  (`bytesPure`, `Syntax/Elab.lean`): `bytesM(b)` of a `bytesN` keeps the
+  left bytes (`b >> 8(N-M)`) or pads on the right (`uint8M(b) << 8(M-N)`),
+  as does an implicit widening (an assignment, an argument, an operand of
+  another size); `b.length` is `N`; `b[i]` is `uint8((b >> 8((N-1) -% i)) %
+  256)`, divided by `i < N ? 1 : 0` so an index out of range reverts as an
+  array's does (`Storage.checkIndex`: the model reads solc's
+  `Panic(0x32)` as a revert, the solkey reading); a string or `hex"…"`
+  literal at `bytesN` is its bytes left-aligned (`"a"` at `bytes2` is
+  `0x6100`).  Which positions are `bytes` the width tables say, by a
+  marker row beside the width: `k#bytes ↦ N` (`Contract.widths`,
+  `FunDecl.widths`, a reference local's shape; a value local's is its own
+  shape entry), so a `bytes4[]`, a `mapping(bytes32 => …)` and a parameter
+  carry it as a `uint8[]` carries its width.
+- `bytes` and `string` are `bytes1[]`: a `uint[]` whose elements are 8 bits
+  wide (the narrow-element machinery checks pushes and writes), in storage
+  and memory alike, `string` the same as `bytes` (solc's packing is storage
+  layout, out of scope above).  So `.length`, `b[i]`, `.push(x)`, `.pop()`,
+  `delete`, copies between storage and memory, parameters and returns are
+  the array ones.  `bytes(s)` and `string(b)` are the identity.  A literal
+  at `bytes`/`string` is a fresh memory array of its bytes (`new
+  bytes(n)` and its writes); assigned to storage it is copied as a memory
+  array is.  `==` on them is not solc's (it needs `keccak256`, a gap above).
+  The model is more lenient than solc in what it accepts (`s[i]` and
+  `s.length` on a `string`, a `bytes`/`bytes1[]` mix, a hex number of the
+  wrong size at `bytesN`): solc refuses those programs before the import,
+  and a `sol{}` program that uses them gets the array reading.
+
+**What changes.** No low module: `AST.lean`, `Semantics/`, `Calculus/`,
+`Theory/`, `Evm/` and their proofs are untouched, so nothing re-proves and
+no kernel term grows.  `Syntax.lean` (the type names, the `hex"…"` and
+string literal expressions, the width rows), `Syntax/Elab.lean` (the
+markers, `bytesPure`, the literal lowering) and the solc import
+(`Frontend/SolcJson.lean`: the elementary types, literals, ABI ranges of a
+`bytesN` parameter and a `bytes` parameter's elements) change; everything
+above `Syntax.lean` rebuilds once (the usual cost of an elaborator change),
+and the elaboration of a program with no bytes pays one more pass over its
+expressions that finds no marker.  The EVM compiler (`Evm/`) compiles the
+`uint` it is given: a `bytesN` is right-aligned in its slot there, not
+solc's left-aligned layout, which is storage layout, out of scope; its
+theorems are unchanged.
+
+**Left open, with the reason.**
+- `mapping(string => V)`, `mapping(bytes => V)`: a key is a `PrimTy` value
+  (`RefTy.mapping`, `Selector.key`), and a byte string is not one; solc
+  keys by `keccak256` of the bytes, which the model does not have.  It
+  needs a byte-string key sort through `Storage`, `Seg` and the closer.
+- Revert data (`require(c, "msg")`, `revert("msg")`, `catch Error(string
+  memory r)` binding `r`): a reverting run carries no data (`THalt.revert`),
+  and an external call's `ExtResult.error` none; carrying a reason changes
+  `THalt`, `TRun.tryCall`, the transaction table and every proof over a
+  halt.  The `Error` branch is chosen, its `r` is not bound.
+- `bytes.concat`, `string.concat`, `abi.*`, `keccak256` (above),
+  `bytesN`/`bytes` in an external call's signature (`ExtKey`, ABI words: a
+  `bytesN` word is left-aligned there), `calldata` (refused for every type),
+  a `bytes`/`string` member of a struct (`StructEnc` spells no byte types).
+
+**Status.** (updated as slices land)
+- Slice 1, `bytesN` in `sol{}`: landed.  `bytesTy?`, `valueRows?`, the
+  literal grammar (`"…"`, `hex"…"`, `RawExpr.bytesLit`) in `Syntax.lean`;
+  the markers (`shapeUnder` keeps `#` rows, a value local's shape entry,
+  `declTyName` for inlined parameters), `bytesOf?`, `bytesPure`,
+  `bytesStmt` in `Syntax/Elab.lean`; `Examples/Tactics/Bytes.lean` §1–2.
+- Slice 2, `bytes`/`string` in memory and storage: landed (a literal is
+  lowered in `hoist`, `exprShape` knows its shape); §3 of the examples.
+- Slice 3, the solc import: string and hex literals printed (`"…"` quoted,
+  else `hex"…"` from `hexValue`), the elementary types accepted, a `bytesN`
+  parameter's ABI range and a `bytes` parameter's elements' ranges
+  (`paramRanges`, `elemRanges`), a value parameter's marker
+  (`Frontend/Import.lean`, `paramCtx`); `scripts/solc-ast.mjs` keeps a hex
+  literal's `hexValue` (a number's stays noise, so no fixture changes);
+  `tests/solc/Bytes.sol`, its 12 functions proved.
+- A closer limit met on the way, not a byte one: a storage array copied to a
+  memory local (`string memory c = name;`) and the copy's length read is not
+  closed by `sol_close`/`sol_decide`.
+- The examples on memory close with `sol_decide`, not `sol_close`.
+- Checked (2026-10-20): `lean_build` of the default targets; the solc suite
+  (`node --test scripts/test-solidity.test.mjs`) fails 6 tests that fail
+  alike on `c23bb098`, before this lane (`PushReceiver`, `PushSources`,
+  `MemoryPush`, `StorageReturns`, `PushBindings`, the TestSuite's row count
+  617 against the pinned 551); `OmittedTypes.readsString` moved from
+  `unsupported` to `pending` (the copy above).

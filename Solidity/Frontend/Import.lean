@@ -151,7 +151,8 @@ def paramCtx (C : Contract) (ps : List RawStmt) : Except String ECtx := do
   let rows ← ps.reverse.mapM fun s => match s with
     | .decl T x none => do
       let (.prim p, n) ← elabDeclTy C T | throw s!"reference parameter {x} needs a data location"
-      pure [(x, .val p n)]
+      -- a `bytesN` one with its marker (`bytesRowsOf`)
+      pure (shapeEntry x (← bytesRowsOf C T) ++ [(x, .val p n)])
     | .declStorage T x none => do
       let (.ref R, ws) ← elabTyW C T | throw s!"storage location on value parameter {x}"
       pure (shapeEntry x ws ++ [(x, .alias R)])

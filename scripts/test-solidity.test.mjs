@@ -401,6 +401,15 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
     'signedPushArithUncheckedWraps']) assert.equal(status[name], 'proved', name);
 });
 
+test("bytesN, bytes and string: literals, indexing, conversions, storage, memory", () => {
+  const report = runSolidityTests(["tests/solc/Bytes.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['literals', 'compareAndIndex', 'indexOutOfRange', 'conversions', 'bitwise',
+    'stateAndKeys', 'parameter', 'memoryBytes', 'stringToBytes', 'storagePushPop', 'storageString',
+    'memoryParameter']) assert.equal(status[name], 'proved', name);
+});
+
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
   const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
   assert.deepEqual(report.errors, []);
@@ -544,7 +553,8 @@ test("quantified consequents parse and omitted specification bodies stay local",
     .map(r => [r.function, r]));
   assert.equal(types.unrelated.status, "proved");
   assert.equal(types.stillChecked.status, "pending");
-  assert.equal(types.readsString.status, "unsupported");
+  // a `string` copy into memory always ends normally (`docs/semantic-gaps.md`, "Bytes and strings")
+  assert.equal(types.readsString.status, "proved");
   // a narrow element, key or value is modelled (`expandStateTyW`): `narrow[0]`
   // may be past the end, and `narrow.length == 0` need not hold
   for (const fn of ["readsNarrowKey", "readsNarrowValue"]) assert.equal(types[fn].status, "proved", fn);
