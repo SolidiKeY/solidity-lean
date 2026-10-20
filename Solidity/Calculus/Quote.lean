@@ -252,6 +252,19 @@ def qLoopAnn (Γ : Ctx) : LoopAnn C Γ → QM Expr
 
 /-! ## Statements -/
 
+/-- The placeholder of a free program thunk `i` where the compiled strategy
+runs a goal that has one (a recursive call's frame below in an induction
+step, `Calculus/Recursion.lean`; `Symex.normValid`): a body no elaborated
+program has, which the quoter writes back as the constant `_recFVar.i`. -/
+def _root_.Solidity.Prog.recSentinel {F : Ctx} (i : Nat) : Prog C F F :=
+  .cons (.block (.cons (.declLocal .bool (.fresh "⟪recfvar⟫" i) none) .nil)) .nil
+
+/-- Which placeholder a body is, if it is one. -/
+def _root_.Solidity.Prog.recSentinel? {F : Ctx} : Prog C F F → Option Nat
+  | .cons (.block (.cons (.declLocal _ (.fresh b i) none) .nil)) .nil =>
+    if b == "⟪recfvar⟫" then some i else none
+  | _ => none
+
 /-- A constructor of `Stmt C`/`Prog C`, the contract its only parameter. -/
 def sctor (n : Lean.Name) (args : Array Expr) : QM Expr :=
   return mkAppN (mkConst n) (#[← contract] ++ args)
@@ -357,6 +370,9 @@ partial def qStmtH (hs : List Name) (Γ Γ' : Ctx) (s : Stmt C Γ Γ') : QM Expr
     | some j => sctor ``Stmt.callRec (head ++ #[.bvar (3 * j + 1), ase, rete, .bvar (3 * j)])
     -- `fun _ => recUnroll Prog.recBase (fun n bt => body) d`, as `Syntax/Quote.lean`
     | none =>
+      if let some i := (body ()).recSentinel? then
+        return ← sctor ``Stmt.callRec (head ++ #[Lean.mkRawNatLit d, ase, rete,
+          mkConst (.num `_recFVar i)])
       let fre ← qCtx (rs ++ ps)
       let progTy := mkApp3 (mkConst ``Prog) (← contract) fre fre
       let thunkTy := Lean.mkForall `u .default (mkConst ``Unit) progTy

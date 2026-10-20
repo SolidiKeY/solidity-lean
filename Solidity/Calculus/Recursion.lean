@@ -112,25 +112,47 @@ def goalParts (g : MVarId) : MetaM (Option (Expr × Expr × Expr)) := do
   let ty ← whnfR (← instantiateMVars (← g.getType))
   let_expr Valid C φ := ty | return none
   let nil := ctxE []
-  let (H, _, χ) ← Contract.peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil φ
+  let (H, _, χ) ← Contract.peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil (← whnfD φ)
   return some (C, H, ← whnfR χ)
 
 /-- Whether `χ` is a box whose first statement is a recursive call. -/
 def headRecCall (χ : Expr) : MetaM Bool := do
-  unless χ.isAppOfArity ``Fml.modal 7 do return false
-  let P ← whnfR (χ.getArg! 4)
+  unless χ.isAppOfArity ``Fml.modal 8 do return false
+  let P ← whnfR (χ.getArg! 5)
   unless P.isAppOfArity ``Prog.cons 6 do return false
   let s ← whnfR (P.getArg! 4)
   return s.isAppOf ``Stmt.callRec
 
+/-- The formula under `φ`'s leading preconditions, updates, `∀`s, hidden
+binders and `havoc`s, and `φ` with another formula in its place. -/
+partial def splitPrefix (φ : Expr) : MetaM (Expr × (Expr → Expr)) := do
+  let φ ← whnfR (← instantiateMVars φ)
+  let a := φ.getAppArgs
+  let f := φ.getAppFn
+  let under (i : Nat) : MetaM (Expr × (Expr → Expr)) := do
+    let (χ, k) ← splitPrefix a[i]!
+    return (χ, fun x => mkAppN f (a.set! i (k x)))
+  if φ.isAppOfArity ``Fml.imp 4 then under 3
+  else if φ.isAppOfArity ``Fml.upd 6 then under 5
+  else if φ.isAppOfArity ``Fml.all 5 then under 4
+  else if φ.isAppOfArity ``Fml.bind 6 then under 5
+  else if φ.isAppOfArity ``Fml.havoc 3 then under 2
+  else return (φ, id)
+
 /-- `sol_symex_rec` on one goal, with fuel. -/
-partial def loop (g : MVarId) (fuel : Nat) : TacticM (List MVarId) := do
+partial def loop (g : MVarId) (fuel : Nat) : TacticM (List MVarId) := g.withContext do
   if fuel == 0 then return [g]
-  let some (_, H, χ) ← goalParts g | return [g]
+  let some (C, H, χ) ← goalParts g | return [g]
   if χ.isAppOfArity ``Fml.and 4 then
-    let gs ← g.apply (← mkAppOptM ``valid_wrap_and #[none, none, some H, none, none])
+    let a := χ.getAppArgs
+    let gs ← g.apply (mkAppN (mkConst ``valid_wrap_and) #[C, a[1]!, H, a[2]!, a[3]!])
+    -- each goal written out, its context's `wrap` unfolded
+    let ty ← whnfR (← instantiateMVars (← g.getType))
+    let (_, k) ← splitPrefix (← whnfD ty.appArg!)
     let mut out := []
-    for g' in gs do out := out ++ (← loop g' fuel)
+    for (g', ψ) in gs.zip [a[2]!, a[3]!] do
+      let g'' ← g'.replaceTargetDefEq (mkApp2 (mkConst ``Valid) C (k ψ))
+      out := out ++ (← loop g'' fuel)
     return out
   if ← headRecCall χ then return [g]
   unless ← hasModal χ do return [g]
