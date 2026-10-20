@@ -1209,6 +1209,23 @@ def joinIT : Option (PrimTy × Nat) → Option (PrimTy × Nat) → Option (PrimT
   | t, none => t
   | some (p, n), some (_, m) => some (p, max n m)
 
+/-- A storage path from a state variable through indices only, and its key
+in `Contract.widths` and type: `values[i]` is `values[]`, an element of
+`uint8[] values` (`expandStateTyW`).  A local shadows a state variable. -/
+def statePath? (Γ : ECtx) : RawExpr → Option (String × Ty)
+  | .name x => if (lookupBy x Γ).isSome then none else (C.rootType x).map (x, ·)
+  | .index e _ => do
+    let (k, t) ← statePath? Γ e
+    match t with
+    | .ref (.array E) | .ref (.fixed E _) | .ref (.mapping _ E) => some (k ++ "[]", E)
+    | _ => none
+  | _ => none
+
+/-- The width of a narrow position inside a state variable, by its key. -/
+def stateWidth? (Γ : ECtx) (e : RawExpr) : Option (PrimTy × Nat) := do
+  let (k, .prim p) ← statePath? C Γ e | none
+  pure (p, (lookupBy k C.widths).getD 256)
+
 /-- The smallest integer type holding the literals `u` and `v` (solc's mobile
 type, of both): `uintN` when neither is negative, else `intN`. -/
 def mobileTy (u v : Int) : PrimTy × Nat :=
@@ -1264,6 +1281,8 @@ def intTyOf (Γ : ECtx) : RawExpr → Option (PrimTy × Nat)
       | _ => some (.uint, 256)
     | none, none => some (.uint, 256)
   | .bool _ => some (.bool, 256)
+  -- an element of a state variable: its declared width (`uint8[] values`)
+  | .index e k => (stateWidth? C Γ (.index e k)).orElse fun _ => some (.uint, 256)
   | _ => some (.uint, 256)
 
 /-- `e`'s width in bits: `intTyOf`'s, `256` for a literal. -/
@@ -1372,7 +1391,12 @@ partial def narrowPure (unc : Bool) (Γ : ECtx) : RawExpr → Except String RawE
   | .binop op a b => do narrowWrapNode C unc Γ (.binop op (← narrowPure unc Γ a) (← narrowPure unc Γ b))
   | .unop op a => do narrowWrapNode C unc Γ (.unop op (← narrowPure unc Γ a))
   | .field e f => do pure (.field (← narrowPure unc Γ e) f)
-  | .index e k => do pure (.index (← narrowPure unc Γ e) (← narrowPure unc Γ k))
+  | .index e k => do
+    -- a narrow mapping key: the index converts to it implicitly, so it fits
+    -- (`m[300]` at `mapping(uint8 => …)` is solc's compile error)
+    if let some (key, .ref (.mapping kp _)) := statePath? C Γ e then
+      if let some n := lookupBy (key ++ "{}") C.widths then fitCheck C Γ kp n k
+    pure (.index (← narrowPure unc Γ e) (← narrowPure unc Γ k))
   | .ternary c a b => do pure (.ternary (← narrowPure unc Γ c) (← narrowPure unc Γ a) (← narrowPure unc Γ b))
   | .incDec op e => do pure (.incDec op (← narrowPure unc Γ e))
   | .newArr T e => do pure (.newArr T (← narrowPure unc Γ e))
@@ -2839,6 +2863,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let ⟨Γ, t⟩ ← synthM C b
     let .path (.ref (.array (.prim p))) path := t
       | throw "push arithmetic needs a storage array of primitive numeric elements"
+    if widthIn C (← ctx) (.index b (.num 0)) < 256 then
+      throw "push arithmetic on an array of a narrow element: write `b.push(e);`"
     ElabM.lift (fitCheck C (← ctx) p 256 r)
     match hop : op.hasCompoundAssign, hp : p.isNumeric with
     | true, true => pure [.of Γ (.pushOpAssign op hop hp path (← checkIn C Γ p r))]
@@ -2848,6 +2874,8 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let ⟨Γ, t⟩ ← synthM C b
     let .path (.ref (.array (.prim p))) path := t
       | throw "push arithmetic needs a storage array of primitive numeric elements"
+    if widthIn C (← ctx) (.index b (.num 0)) < 256 then
+      throw "push arithmetic on an array of a narrow element: write `b.push(e);`"
     match hp : p.isNumeric with
     | true => pure [.of Γ (.pushIncDec op hp path)]
     | false => throw s!"push increment/decrement at {p.toStr}"
@@ -3048,7 +3076,10 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       | false => throw "push() of an element whose default is not well-formed"
     | [a] =>
       match E with
-      | .prim p => pure [.of Γ (.push b (some (.val (← checkIn C Γ p a))) rfl)]
+      | .prim p =>
+        -- a narrow element: the value converts to it implicitly, so it fits
+        ElabM.lift (fitCheck C (← ctx) p (widthIn C (← ctx) (.index e (.num 0))) a)
+        pure [.of Γ (.push b (some (.val (← checkIn C Γ p a))) rfl)]
       | .ref R =>
         if let .mpath (.ref _) _ ← ElabM.lift (synth C Γ a) then
           let mp ← ElabM.lift (checkMPath C Γ (.ref R) a)

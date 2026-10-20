@@ -363,7 +363,9 @@ structure Contract where
   /-- Its `invariant` clauses, as read: solkey's `CInv`. -/
   inv : List SpecExpr := []
   /-- Its state variables of a narrow integer type (`uint8 small;`), with their
-  width: each is a `uint` or an `int` in `vars`. -/
+  width: each is a `uint` or an `int` in `vars`; and the narrow positions
+  inside one, keyed by their path (`uint8[] xs;` is `xs[]`, a mapping's key
+  `m{}`, its value `m[]`: `expandStateTyW`). -/
   widths : List (Name × Nat) := []
   /-- `constructor(…) { … }`: what a deployment runs, called as
   `constructor(args);` (`elabCtor`).  `none` for a contract that declares
@@ -1534,6 +1536,41 @@ def expandMemberTyW (enums : List String) (T : TSyntax `sol_ty) : MacroM (Term �
     | none => do pure (← expandMemberTy enums T, none)
   | _ => do pure (← expandMemberTy enums T, none)
 
+/-- A state variable's type, where a narrow type may stand inside it too: its
+`Ty`, a `uint` or an `int` at each narrow position, and the widths of those
+positions keyed by their path below the variable (`Contract.widths` prefixes
+the name): `""` the variable, `"[]"` an element or a mapping's value, `"{}"` a
+mapping's key (`mapping(uint8 => uint16[]) m` is `[("{}", 8), ("[][]", 16)]`).
+A struct's member stays `uint`/`int`-only (`narrowNestedMsg`). -/
+partial def expandStateTyW (enums : List String) (T : TSyntax `sol_ty) :
+    MacroM (Term × List (String × Nat)) := do
+  let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × Nat) := match K with
+    | `(sol_ty| $x:ident) => narrowTy? x.getId.toString
+    | _ => none
+  match T with
+  | `(sol_ty| $x:ident) =>
+    match narrowTy? x.getId.toString with
+    | some (.int, n) => pure (← `(Ty.int), [("", n)])
+    | some (_, n) => pure (← `(Ty.uint), [("", n)])
+    | none => pure (← expandMemberTy enums T, [])
+  | `(sol_ty| $E:sol_ty []) => do
+    let (t, ws) ← expandStateTyW enums E
+    if ws.isEmpty then return (← expandMemberTy enums T, [])
+    pure (← `(Ty.array $t), ws.map fun (k, n) => ("[]" ++ k, n))
+  | `(sol_ty| $E:sol_ty [ $m:num ]) => do
+    let (t, ws) ← expandStateTyW enums E
+    if ws.isEmpty then return (← expandMemberTy enums T, [])
+    pure (← `(Ty.fixed $t $m), ws.map fun (k, n) => ("[]" ++ k, n))
+  | `(sol_ty| mapping ( $K:sol_ty => $V:sol_ty )) => do
+    let (t, ws) ← expandStateTyW enums V
+    let (kt, kw) ← match narrow? K with
+      | some (.int, n) => pure (← `(PrimTy.int), [("{}", n)])
+      | some (_, n) => pure (← `(PrimTy.uint), [("{}", n)])
+      | none => pure (← `(pty!($K)), [])
+    if ws.isEmpty && kw.isEmpty then return (← expandMemberTy enums T, [])
+    pure (← `(Ty.mapping $kt $t), kw ++ ws.map fun (k, n) => ("[]" ++ k, n))
+  | _ => pure (← expandMemberTy enums T, [])
+
 /-- A function's parameters, and the rows of `FunDecl.widths` for the narrow ones. -/
 def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
     MacroM (Array Term × Array Term × Array Term) := do
@@ -1663,13 +1700,15 @@ macro_rules
           asg := some (← expandSpecLocs ls)
         | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
-          let (t, w) ← expandMemberTyW enums T
+          let (t, ws) ← expandStateTyW enums T
           rows := rows.push (← `(($(strLit x), $t)))
-          if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
+          for (k, n) in ws do
+            widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident = $e:sol_expr ;) =>
-          let (t, w) ← expandMemberTyW enums T
+          let (t, ws) ← expandStateTyW enums T
           rows := rows.push (← `(($(strLit x), $t)))
-          if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
+          for (k, n) in ws do
+            widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
           initRows := initRows.push (← `(($(strLit x), $(← expandExpr e))))
         | `(sol_member| constructor ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
           if ctor.isSome then Lean.Macro.throwErrorAt m "a second constructor: a contract declares one"

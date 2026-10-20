@@ -156,6 +156,61 @@ theorem avgWidened : ⊨ dl[Narrow]{ ⟨ uint8 m = avg(255, 255); ⟩ m == 255 }
   sol_symex
   sol_close
 
+/-! ### Narrow types inside a state variable's type
+
+An array's element, a mapping's key or value: the position has its width,
+kept beside the variable's (`Contract.widths`, keyed `small[]`, `byKey{}`),
+so a read of it has that type and a write is checked, or wrapped, at it. -/
+
+/-- A contract with narrow elements, values and keys. -/
+def NarrowNested : Contract := contract!{
+  uint8[] small;
+  mapping(uint => int8) temps;
+  mapping(uint8 => uint) byKey;
+  uint16[3] fixedW;
+  mapping(uint => uint8[]) lists;
+  mapping(uint => uint16) wide;
+  mapping(uint => mapping(uint => uint8)) grid;
+}
+
+example : NarrowNested.widths =
+    [("small[]", 8), ("temps[]", 8), ("byKey{}", 8), ("fixedW[]", 16), ("lists[][]", 8),
+     ("wide[]", 16), ("grid[][]", 8)] := rfl
+
+/-- A mapping's narrow value: `-100 - 29` leaves `int8`, `-100 - 28` does not. -/
+theorem valueUnderflows : ⊨ dl[NarrowNested]{ [ temps[1] = -100; temps[1] -= 29; ] false } := by
+  sol_symex
+  sol_close
+
+theorem valueInRange : ⊨ dl[NarrowNested]{ ⟨ temps[1] = -100; temps[1] -= 28; int8 e = -128;
+    assert(temps[1] == e); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A narrow element read has its type: `60000 + 60000` overflows at `uint16`. -/
+theorem elementOpType : ⊨ dl[NarrowNested]{ [ wide[0] = 60000; uint w = wide[0] + wide[0]; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- … and wraps at it inside `unchecked`. -/
+theorem elementWraps : ⊨ dl[NarrowNested]{ ⟨ wide[1] = 65535; unchecked { wide[1] += 1; };
+    assert(wide[1] == 0); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A nested value: `200 + 100` at `uint8`. -/
+theorem nestedElementOverflows : ⊨ dl[NarrowNested]{ [ grid[2][3] = 200; grid[2][3] += 100; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- A narrow key: an index converts to it implicitly, so it fits. -/
+theorem narrowKey : ⊨ dl[NarrowNested]{ ⟨ uint8 k = 7; byKey[k] = 1; byKey[255] = 2;
+    assert(byKey[7] == 1); ⟩ true } := by
+  sol_symex
+  sol_close
+
 /-! ## 3 · What the elaborator writes -/
 
 -- An operation's check follows its write, on the variable written: at `int8`
@@ -235,5 +290,23 @@ info: "int x = 1; uint se1 = uint(x); int se2 = int((((se1 +% 1) +% 128) % 256) 
 
 /-- error: Solidity elaboration failed: wide returns a uint16, where a uint8 is expected -/
 #guard_msgs in #check sol[Narrow]{ uint8 t = wide(1); }
+
+-- A narrow position's operation is checked on the position written.
+/--
+info: "temps[1] = -100; temps[1] -= 28; require((-128 <= temps[1]) && (temps[1] <= 127)); small.push(3);"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol[NarrowNested]{ temps[1] = -100; temps[1] -= 28; small.push(3); })
+
+/-- error: Solidity elaboration failed: 200 does not fit int8 -/
+#guard_msgs in #check sol[NarrowNested]{ temps[1] = 200; }
+
+/-- error: Solidity elaboration failed: a uint where a uint8 is expected: write uint8(…) -/
+#guard_msgs in #check sol[NarrowNested]{ small.push(total); }
+
+/-- error: Solidity elaboration failed: 300 does not fit uint8 -/
+#guard_msgs in #check sol[NarrowNested]{ byKey[300] = 1; }
+
+/-- error: Solidity elaboration failed: a uint where a uint8 is expected: write uint8(…) -/
+#guard_msgs in #check sol[NarrowNested]{ uint k = 1; byKey[k] = 1; }
 
 end Solidity.Examples.Tactics.Checked
