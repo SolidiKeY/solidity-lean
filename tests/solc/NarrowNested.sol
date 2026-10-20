@@ -7,6 +7,8 @@ struct Packed { uint8 a; int16 b; uint c; uint8[] xs; }
 
 contract NarrowNested {
     uint8[] small;
+    int8[] signedSmall;
+    uint8[] other;
     Packed p;
     mapping(uint => Packed) byId;
     modifier atMost(uint8 cap) { require(cap > 1); _; }
@@ -116,5 +118,46 @@ contract NarrowNested {
     /// @custom:key box
     function modifierParam(uint8 c) public atMost(c) {
         assert(c > 1);
+    }
+    // push arithmetic at a narrow element: the appended slot is checked at
+    // it, and a `uint8` added to the fresh `0` passes the check
+    function pushArithInRange(uint8 v) public {
+        small.push() += v;
+        small.push()++;
+    }
+    /// @custom:key box
+    function pushArithPanics(int8 x) public {
+        require(x == -128);
+        signedSmall.push() -= x;
+        assert(false);
+    }
+    // a whole use whose narrow positions are checked: a conditional's
+    // branches, which solc requires of one type
+    /// @custom:key box
+    function ternaryAliasPanics(bool c) public {
+        uint8[] storage s = c ? small : other;
+        s.push(255);
+        s[s.length - 1] += 1;
+        assert(false);
+    }
+    function ternaryAliasInRange(bool c) public {
+        uint8[] storage s = c ? small : other;
+        s.push(7);
+    }
+    function lastPlusOne(uint8[] storage xs) internal view returns (uint8) {
+        return xs[xs.length - 1] + 1;
+    }
+    /// @custom:key box
+    function ternaryArgumentPanics(bool c) public {
+        small.push(255);
+        other.push(255);
+        lastPlusOne(c ? small : other);
+        assert(false);
+    }
+    // the ABI decoder reverts on an element out of range: the obligation
+    // assumes each in range (`Problem.callPre`), which the closer does not
+    // instantiate yet
+    function abiElementInRange(uint8[] memory xs) public pure {
+        if (xs.length > 0) { assert(xs[0] <= 255); }
     }
 }

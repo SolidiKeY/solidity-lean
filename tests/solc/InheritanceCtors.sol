@@ -1,0 +1,62 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+// Base constructors with modifiers and `return`s: each constructor's
+// modifiers wrap its own body, after the base constructors ran, and a
+// `return` ends its own body (solc's legacy creation code).
+contract BaseMod {
+    uint n;
+    uint seen;
+    modifier once() { seen = n + 1; _; seen = seen * 10; }
+    constructor(uint x) once { n = x; }
+}
+contract ModLeaf is BaseMod(7) {
+    constructor() { assert(n == 7 && seen == 10); }
+}
+contract PlainCtor { uint m; constructor(uint x) { m = x; } }
+contract CtorModLeaf is PlainCtor {
+    uint seenM;
+    modifier marked() { seenM = m; m += 1; _; }
+    constructor() PlainCtor(2) marked { assert(seenM == 2 && m == 3); }
+}
+contract ReturnCtor { uint r; constructor(uint x) { if (x > 1) { return; } r = x; } }
+contract CtorReturnLeaf is ReturnCtor(3) {
+    uint later;
+    constructor() { later = 1; assert(r == 0 && later == 1); }
+}
+contract CtorReturnFalse is ReturnCtor(3) {
+    constructor() { assert(r == 3); }
+}
+contract CtorModFalse is PlainCtor {
+    uint seenM;
+    modifier marked() { seenM = m; _; }
+    constructor() PlainCtor(2) marked { assert(seenM == 0); }
+}
+// `super` in a modifier's arguments and body names the next implementation
+// after the contract that writes it, a constructor's as a function's
+contract SuperMod0 { function g() internal virtual returns (uint) { return 1; } }
+contract SuperMod1 is SuperMod0 {
+    uint t;
+    modifier k(uint v) { t = v; _; }
+    function g() internal virtual override returns (uint) { return 2; }
+    constructor() k(super.g()) { }
+}
+contract SuperModCtor is SuperMod1 {
+    function g() internal override returns (uint) { return 3; }
+    constructor() { assert(t == 1); }
+}
+contract SuperModArg is SuperMod1 {
+    uint u;
+    modifier j(uint v) { u = v; _; }
+    function g() internal override returns (uint) { return 3; }
+    constructor() j(super.g()) { assert(t == 1 && u == 2); }
+}
+contract SuperModBody is SuperMod1 {
+    modifier viaSuper() { t = super.g(); _; }
+    function g() internal override returns (uint) { return 3; }
+    /// @custom:key box
+    function f() public viaSuper { assert(t == 2); }
+}
+contract SuperModInherited is SuperModBody {
+    /// @custom:key box
+    function h() public viaSuper { assert(t == 2); }
+}

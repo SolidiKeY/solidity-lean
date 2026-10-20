@@ -360,7 +360,10 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
   for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
     'narrowKey', 'pushOverflowPanics', 'memberOverflowPanics', 'memberInRange', 'valueMemberPanics',
     'memberArrayPanics', 'memoryMemberPanics', 'aliasPanics', 'memoryPanics', 'copyPanics',
-    'memoryParamPanics', 'memoryWraps', 'modifierParam']) assert.equal(status[name], 'proved', name);
+    'memoryParamPanics', 'memoryWraps', 'modifierParam', 'pushArithInRange', 'pushArithPanics',
+    'ternaryAliasPanics', 'ternaryAliasInRange', 'ternaryArgumentPanics']) assert.equal(status[name], 'proved', name);
+  // its elements' range is a premise (`Problem.callPre`) the closer does not instantiate
+  assert.equal(status.abiElementInRange, 'pending');
 });
 
 test("modifiers use the existing inliner for calls and root obligations", () => {
@@ -370,13 +373,13 @@ test("modifiers use the existing inliner for calls and root obligations", () => 
   for (const name of ['constructor', 'arguments', 'resumesAfterReturn',
     'firstListedOutermost', 'directApplication', 'argumentEvaluation',
     'localsPerApplication', 'multiplePlaceholders', 'internalCallFromModifier',
-    'unnamedParameter', 'unnamedArgumentStillRuns']) {
+    'unnamedParameter', 'unnamedArgumentStillRuns', 'narrowArrayModifier',
+    'narrowArrayModifierPanics', 'storageArrayModifierPanics']) {
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
   // a narrow modifier parameter is a local of its type: `x += 1` at `255` panics
   assert.equal(status.narrowModifierGap, 'pending');
-  assert.equal(status.narrowArrayModifierGap, 'unsupported');
 });
 
 test("free and library calls resolve by declaration with attached receivers", () => {
@@ -617,6 +620,15 @@ test("inheritance resolves super in the most-derived C3 order", () => {
   assert.equal(rows.falseDiamondSuper.status, "pending");
 });
 
+test("constructor and function quotients close as solkey's sdiv_axiom reads them", () => {
+  const report = runSolidityTests(["tests/solc/CtorDivision.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [`${r.contract}.${r.function}`, r.status]));
+  for (const row of ["CtorDivision.constructor", "CtorDivision.half", "CtorDivisionLiteral.constructor",
+    "CtorModulo.constructor"]) assert.equal(status[row], "proved", row);
+  assert.equal(status["CtorDivisionFalse.constructor"], "pending");
+});
+
 test("inheritance runs base constructors in solc's legacy order", () => {
   for (const [contract, status] of [["CtorLeaf", "proved"], ["CtorFalse", "pending"],
     ["CtorImplicit", "proved"], ["CtorUnnamedChild", "proved"]]) {
@@ -637,17 +649,27 @@ test("inheritance conjoins inherited contract invariants", () => {
 
 test("unmodelled inheritance boundaries are rejected instead of omitted", () => {
   const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameGap"});
-  assert.ok(report.errors.some(e => /distinct storage roots/.test(e.reason)));
+  assert.ok(report.errors.some(e => /a specification reads: distinct storage roots/.test(e.reason)));
   assert.equal(testsPassed(report), false);
-  for (const [contract, reason] of [["CtorGap", /modifiers of base constructor/],
-    ["CtorModifierGap", /constructor's modifiers with base constructors/],
-    ["CtorReturnGap", /`return` in base constructor/]]) {
-    const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract});
-    const ctor = report.results.find(r => r.function === "constructor");
-    assert.equal(ctor?.status, "unsupported", contract);
-    assert.match(ctor.reason, reason, contract);
-    assert.equal(testsPassed(report), false);
-  }
+});
+
+test("inheritance renames a base's private variable of a later one's name", () => {
+  const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameShadow"});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.f, "proved");
+  assert.equal(status.falseShared, "pending");
+});
+
+test("inheritance wraps each constructor's body in its own modifiers, after its bases", () => {
+  const report = runSolidityTests(["tests/solc/InheritanceCtors.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [`${r.contract}.${r.function}`, r.status]));
+  for (const c of ["ModLeaf", "CtorModLeaf", "CtorReturnLeaf", "SuperMod1", "SuperModCtor", "SuperModArg"])
+    assert.equal(status[`${c}.constructor`], "proved", c);
+  for (const c of ["CtorModFalse", "CtorReturnFalse"]) assert.equal(status[`${c}.constructor`], "pending", c);
+  // `super` in a modifier's body, the modifier applied in the contract and below it
+  for (const f of ["SuperModBody.f", "SuperModInherited.h"]) assert.equal(status[f], "proved", f);
 });
 
 test("native modular builtins retain wide results, failure priority and source effects", () => {

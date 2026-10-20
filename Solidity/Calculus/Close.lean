@@ -126,19 +126,21 @@ macro "sol_close" : tactic => `(tactic|
     -- `smod_NumPos` and `smod_NumNeg`, a remainder within a positive divisor;
     -- `Int.tmod_nonneg`, `Close.tmod_nonpos`: `smod_geZero`, its sign the
     -- dividend's; `Int.mul_tmod_left`: `smodMultiple`;
-    -- `Close.uintBitwise_and_self`: its `binaryAndIdentity`, at an `int256`
+    -- `Close.uintBitwise_and_self`: its `binaryAndIdentity`, at an `int256`;
+    -- `Int.tdiv_eq_ediv_of_nonneg`: solkey's `sdiv_axiom`, a quotient of a
+    -- nonnegative dividend is `div` (`div_axiom`: grind's own)
     all_goals first
       | omega
       | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
           Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
-          Close.uintBitwise_and_self]
+          Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self]
       | (sol_close_enrich
          all_goals (repeat' (first | intro _ | apply And.intro))
          all_goals first
            | omega
            | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
                Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
-          Close.uintBitwise_and_self])))
+               Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])))
 
 /-- `sol_close_mt`'s first pass: `sol_close_eval` with the storage
 evaluators unfolded over a deployment's storage. -/

@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 contract Modifiers {
     uint total = 2;
     uint out;
+    uint8[] stored;
     modifier nonZero(uint x) { require(x > 0); _; }
     modifier around() { total = total + 1; _; total = total + 10; }
     modifier doubleAfter() { _; total = total * 2; }
@@ -12,7 +13,9 @@ contract Modifiers {
     modifier keepsLocal(uint x) { uint c = x; _; out = c; }
     modifier twice() { _; _; }
     modifier narrow(uint8 x) { x += 1; _; }
-    modifier narrowArray(uint8[] memory xs) { _; }
+    modifier narrowArray(uint8[] memory xs) { xs[0] += 1; assert(xs[0] == 1); _; }
+    modifier narrowArrayMax(uint8[] memory xs) { xs[0] = 255; xs[0] += 1; _; }
+    modifier storedMax(uint8[] storage xs) { xs.push(255); xs[xs.length - 1] += 1; _; }
     modifier unnamed(uint) { _; }
     function setOne() internal { total = 1; }
     modifier callsInternal() { setOne(); _; }
@@ -47,7 +50,12 @@ contract Modifiers {
     /// @custom:key box
     function internalCallFromModifier() public callsInternal { assert(total == 1); }
     function narrowModifierGap() public narrow(255) {}
-    function narrowArrayModifierGap() public narrowArray(new uint8[](1)) {}
+    // a reference parameter is a local at its location, of its narrow positions
+    function narrowArrayModifier() public narrowArray(new uint8[](1)) {}
+    /// @custom:key box
+    function narrowArrayModifierPanics() public narrowArrayMax(new uint8[](1)) { assert(false); }
+    /// @custom:key box
+    function storageArrayModifierPanics() public storedMax(stored) { assert(false); }
     /// @custom:key box
     function unnamedParameter() public unnamed(1) { assert(true); }
     /// @custom:key box
