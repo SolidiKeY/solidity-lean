@@ -154,4 +154,63 @@ theorem noCodeAtZero : ⊨ dl!{ [ try I(0).setIx() { } catch { revert(); }; asse
   sol_symex
   sol_close
 
+/-! ## A value call to the contract runs `receive`
+
+`(bool ok, ) = payable(this).call{value: v}("")` sends to the contract
+itself: on the EVM its `receive` runs, `msg.sender` the contract and
+`msg.value` `v`, and a payment to oneself moves no ether.  The elaborator
+writes the call as `if (r == address(this)) { try this.receive{value: v}()
+{ ok = true; } catch { ok = false; } } else { … the call … }` when the
+contract declares a `receive` before the function (`elabValueCall`): the
+self-call a `try` the run executes, by `tryCallSelfBox`. -/
+
+/-- A contract that counts what it receives. -/
+def Receiver : Contract := contract!{
+  uint fy;
+  function receive() { ++fy; }
+}
+
+section Receive
+
+local instance : InContract := ⟨Receiver⟩
+
+/-- solc's `empty_calldata_calls_receive.sol` (`callRunsReceive`). -/
+def receiveRunsF : Fml Receiver [] := dl!{ [ fy = 0;
+    (bool ok, ) = payable(this).call{value: 0}(""); uint r = fy; assert(ok && r == 1); ] true }
+
+theorem receiveRuns : ⊨ receiveRunsF := by
+  sol_prove
+
+/-- With callbacks: the value call is a `try` of the contract's own
+`receive` (`ProvesC.trySelf`) or, elsewhere, a call that may call back. -/
+theorem receiveRunsT : ValidT .noCallback receiveRunsF := by
+  sol_prove
+
+/-- The claim that the call keeps the storage is refuted on the contract
+itself (`callKeepsStorageUnsound`): `fy` is `1` after it. -/
+private def keepsRP : Prog Receiver [] [] :=
+  sol{ fy = 0; (bool ok, ) = payable(this).call{value: 0}(""); uint r = fy; assert(r == 0); }
+
+/-- The contract deployed at `7`. -/
+def recv7 : State Receiver [] :=
+  { State.init Receiver with tx := { selfAddress := ⟨7, rfl⟩ } }
+
+theorem keepsR_panics : (Prog.run recv7 keepsRP).halt? = some .panic := by
+  decide +kernel
+
+theorem keepsStorage_invalid : ¬ Valid (.modal .box keepsRP .nil .tt : Fml Receiver []) := by
+  intro h
+  have h7 := (holds_modal_iff recv7 keepsRP .nil .tt).1 (h recv7)
+  have hr : Prog.runSt recv7 keepsRP = .error .panic := by
+    have := keepsR_panics
+    unfold Prog.runSt
+    revert this
+    cases Prog.run recv7 keepsRP with
+    | ok => intro h; cases h
+    | error e => intro h; cases h; rfl
+  rw [hr] at h7
+  exact h7.2 rfl
+
+end Receive
+
 end Solidity.Examples.Tactics.SelfCall
