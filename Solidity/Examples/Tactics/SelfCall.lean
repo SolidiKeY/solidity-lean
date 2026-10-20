@@ -188,7 +188,7 @@ theorem receiveRunsT : ValidT .noCallback receiveRunsF := by
 
 /-- The claim that the call keeps the storage is refuted on the contract
 itself (`callKeepsStorageUnsound`): `fy` is `1` after it. -/
-private def keepsRP : Prog Receiver [] [.val .uint, .val .bool] :=
+private def keepsRP : Prog Receiver [] [.val .uint, .val .bool, .val .bool] :=
   sol{ fy = 0; (bool ok, ) = payable(this).call{value: 0}(""); uint r = fy; assert(r == 0); }
 
 /-- The contract deployed at `7`. -/
