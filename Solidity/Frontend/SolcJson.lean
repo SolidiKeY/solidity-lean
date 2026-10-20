@@ -35,8 +35,9 @@ normalises what the grammar spells differently from Solidity:
   trailing `_`, by its declaration (`referencedDeclaration`), so a member of
   the same name is untouched;
 * a struct is the struct table's (`Semantics.structDef`), under the renames
-  the import names, and its members are checked against the table, member
-  by member; a struct that is not there, or differs, leaves out what uses it;
+  the import names, when its members are the table's, member by member;
+  any other is the contract's own, declared as a `struct` member
+  (`readStructs`, `ownStructMembers`);
 * a tuple of several components is printed where solkey reads one
   (`SolJSONParser.parseTupleStatement`): `(a, , b) = v`,
   `(uint x, , bool y) = v` and `return (a, b)`, the value a tuple or a call
@@ -393,20 +394,27 @@ partial def mentionsStruct (s : String) (j : Json) : Bool :=
 def mentionsThroughMapping (s : String) (j : Json) : Bool :=
   (J.nodes j).any fun n => J.kind n == "Mapping" && mentionsStruct s n
 
-/-- The visible structs against the table: each renamed by `ren`, and
-kept when its members are the table's, in order, at the same types.
-Declaration keys preserve solc's resolution when a contract shadows a
-file-level name. -/
-def readStructs (ren : List (String × String)) (defs : List Json) : Structs := Id.run do
+/-- The visible structs: each renamed by `ren`, the table's under its name
+when its members are the table's, in order, at the same types (and narrow
+widths), else the contract's own, which the import declares as a `struct`
+member (`ownStructMembers`), under its name, or `S_<id>` when another visible
+struct has that name.  Declaration keys preserve solc's resolution when a
+contract shadows a file-level name.  Also the own ones, by declaration. -/
+def readStructs (ren : List (String × String)) (defs : List Json) :
+    Structs × List (Json × String) := Id.run do
+  let printed (d : Json) : String :=
+    let n := (J.str? d "name").getD ""
+    let m := (lookupBy n ren).getD n
+    let clash := defs.any fun e => J.str? e "name" == some n && J.id? e != J.id? d
+    if clash then s!"{m}_{(J.id? d).getD 0}" else m
   let identities := defs.filterMap fun d => do
     let i ← J.id? d
-    let n ← J.str? d "name"
-    pure (s!"#solc{i}", (lookupBy n ren).getD n)
+    pure (s!"#solc{i}", printed d)
   let shapes := defs.map fun d =>
     let n := (J.str? d "name").getD ""
     let m := (lookupBy n ren).getD n
     let line := J.line d
-    let check : Except Gap String := do
+    let check : Except Gap (String × Bool) := do
       let ms ← J.arr d "members"
       if ms.any (fun x => (J.opt x "typeName").any (mentionsThroughMapping n)) then
         throw (.excluded s!"struct `{n}` (line {line}) is recursive through a mapping: \
@@ -426,24 +434,18 @@ def readStructs (ren : List (String × String)) (defs : List Json) : Structs := 
           ((J.str? x "name").getD "" ++ k, n)
       let tw := structWidths m
       let sameW := widths.all (tw.contains ·) && tw.all (widths.contains ·)
-      if structDef m == got && sameW then pure m
-      else if structDef m == got then
-        throw (.unsupported s!"struct `{n}` (line {line}) differs from the table's `{m}` in \
-          its narrow members' widths: {widths} against {tw}")
-      else if (structDef m).isEmpty then
-        throw (.unsupported s!"struct `{n}` (line {line}) is not in the struct table \
-          (`Semantics.structDef`)")
-      else
-        throw (.unsupported s!"struct `{n}` (line {line}) differs from the table's `{m}`: \
-          {got.map (·.1)} against {(structDef m).map (·.1)}")
+      if structDef m == got && sameW && printed d == m then pure (m, false)
+      else pure (printed d, true)
     (d, n, check)
   let mut checked := shapes
   -- A table-shaped parent also requires every actual referenced declaration
   -- to pass. Propagate failures through at most one edge per round.
   for _ in [:defs.length] do
     checked := checked.map fun (d, n, shape) =>
-      let checkedShape : Except Gap String := do
-        let m ← shape
+      let checkedShape : Except Gap (String × Bool) := do
+        let (m, own) ← shape
+        -- a table-shaped struct whose member is an own struct is an own one
+        let mut own := own
         for member in (← J.arr d "members") do
           let typeNode ← J.get member "typeName"
           for node in (J.nodes typeNode).filter (J.kind · == "UserDefinedTypeName") do
@@ -452,12 +454,26 @@ def readStructs (ren : List (String × String)) (defs : List Json) : Structs := 
             let some (_, dep, result) := checked.find? fun (decl, _, _) => J.id? decl == some id
               | throw (.unsupported s!"struct `{n}` refers to an unvalidated type declaration #{id}")
             match result with
-            | .ok _ => pure ()
+            | .ok (_, depOwn) => own := own || depOwn
             | .error _ => throw (.unsupported s!"struct `{n}` depends on invalid struct `{dep}`")
-        pure m
+        pure (if own then printed d else m, own)
       (d, n, checkedShape)
-  return checked.flatMap fun (d, n, check) =>
+  let S : Structs := checked.flatMap fun (d, n, check) =>
+    let check := check.map (·.1)
     ((J.id? d).toList.map fun i => (s!"#solc{i}", check)) ++ [(n, check)]
+  let own := checked.filterMap fun (d, _, check) =>
+    match check with
+    | .ok (p, true) => some (d, p)
+    | _ => none
+  return (S, own)
+
+/-- The contract's own structs (`readStructs`), as `contract!` members:
+`struct S { uint8 a; T[] xs; }`, each member's type as `sol` text. -/
+def ownStructMembers (S : Structs) (own : List (Json × String)) : Except Gap (List String) :=
+  own.mapM fun (d, p) => do
+    let ms ← (← J.arr d "members").mapM fun x => do
+      pure s!"{← tyText S (← J.get x "typeName")} {← J.str x "name"};"
+    pure s!"struct {p} \{ {" ".intercalate ms} }"
 
 /-! ## Expressions and statements -/
 
@@ -1684,7 +1700,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     [(s!"#solc{i}", .ok t), (qualified, .ok t)]
   let structDefs := (nodes.filter (J.kind · == "StructDefinition")) ++
     (units.filter (J.kind · == "StructDefinition"))
-  let S := readStructs ren structDefs ++ enumNames ++ aliasNames
+  let (SS, ownStructs) := readStructs ren structDefs
+  let S := SS ++ enumNames ++ aliasNames
   let constants : List (Int × (String × Json)) := (J.nodes ast).filterMap fun v => do
     guard (J.kind v == "VariableDeclaration" && J.opt v "constant" == some (.bool true))
     let i ← J.id? v
@@ -1747,7 +1764,10 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
     let n ← J.str? e "name"
     let ms := (J.arrD e "members").toList.filterMap (J.str? · "name")
     pure s!"enum {n} \{ {", ".intercalate ms} }"
-  let mut members : List String := invariants ++ enumMembers
+  -- the contract's own structs, declared: a struct whose members do not print
+  -- leaves out what uses it, as an unreadable struct does
+  let structMembers := ownStructs.filterMap fun o => (ownStructMembers S [o]).toOption.bind (·.head?)
+  let mut members : List String := invariants ++ enumMembers ++ structMembers
   -- the variables kept: name, `sol` type, declaration
   let mut kept : List (String × String × Json) := []
   let mut dropped : List (Int × String × Gap) := []
@@ -2247,7 +2267,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         some (match g with | .excluded .. => .excluded m | .unsupported .. => .unsupported m)
       | _ => none
   let initMembers := match initGap, inits with
-    | none, .ok ms => invariants ++ enumMembers ++ ms
+    | none, .ok ms => invariants ++ enumMembers ++ structMembers ++ ms
     | _, _ => members
   let all := ((funs.zip read).filter fun (f, _) => (J.id? f).any ownIds.contains).map fun (f, r) =>
     (kindOf f == "constructor", ((J.id? f).map (withCalls · r)).getD r)
