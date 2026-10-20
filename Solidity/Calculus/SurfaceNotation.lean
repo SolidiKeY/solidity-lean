@@ -583,7 +583,7 @@ def nameKind (Γ : ECtx) (x : String) : NameKind :=
   | some (.alias _) => .alias
   | some (.mem _) => .mem
   | some .store => .store
-  | some .kint => .local
+  | some .kint | some (.shape _) => .local
   | none =>
     if (C.rootType x).isSome then .root else
     match Var.ofName x with
@@ -957,6 +957,7 @@ def elabUpd (Γ : ECtx) : List RawUpdElem → Except String (List (NUpdElem C) �
         | some (.mem _) => some "a memory local"
         | some .store => some "a storage variable"
         | some .kint => some "a KeY `int` local"
+        | some (.shape _) => some "a local's narrow positions"
         | none => if (C.rootType x).isSome then some "a state variable" else none
       if let some what := what? then
         throw s!"`{x} := unset` binds a storage alias; `{x}` is {what}"
