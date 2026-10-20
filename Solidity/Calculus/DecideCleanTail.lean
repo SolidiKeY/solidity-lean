@@ -263,60 +263,90 @@ theorem LTm.ctGuards_eq_ctGuardsM {s : Srt} (t : LTm C s) : t.ctGuards = t.ctGua
 
 /-! ## The fold -/
 
+/-- The tests known on the way to a subterm: each the test of an `ite`
+whose branch it is in, and its value there. -/
+abbrev CTKnown (C : Contract) : Type := List (LTm C (.val .bool) × Bool)
+
+/-- The test `c` is known to read `b`. -/
+def knownAs (K : CTKnown C) (c : LTm C (.val .bool)) (b : Bool) : Bool :=
+  K.any fun e => e.1.beqR c && e.2 == b
+
 /-- `a`, guarded: `q; (c₁ ? … (cₙ ? a : d) … : d)`; `q; d` where a guard is
-`false`; `a` with no guard. -/
-def guardWith {T : Ty} {p : PrimTy} (cs : List (LTm C (.val .bool))) (q : LTm C (.path T))
-    (a d : LTm C (.val p)) : LTm C (.val p) :=
-  bif cs.isEmpty then a
-  else bif cs.any LTm.isFF then .seq q d
-  else .seq q (cs.foldr (fun c acc => .kite c (.lit (p := .bool) true) acc d) a)
+`false` or known to be; a guard known `true` dropped; `a` with no guard left. -/
+def guardWith {T : Ty} {p : PrimTy} (K : CTKnown C) (cs : List (LTm C (.val .bool)))
+    (q : LTm C (.path T)) (a d : LTm C (.val p)) : LTm C (.val p) :=
+  let cs' := cs.filter fun c => !knownAs K c true
+  bif cs'.isEmpty then a
+  else bif cs'.any (fun c => c.isFF || knownAs K c false) then .seq q d
+  else .seq q (cs'.foldr (fun c acc => .kite c (.lit (p := .bool) true) acc d) a)
 
-/-- `LTm.ctFold`'s compiled twin. -/
-def LTm.ctFoldM : {s : Srt} → LTm C s → LTm C s
-  | _, .var k => .var k
-  | _, .app0 o => .app0 o
-  | _, .app1 o x => .app1 o x.ctFoldM
-  | _, .app2 o x y => .app2 o x.ctFoldM y.ctFoldM
-  | _, .app3 o x y z => .app3 o x.ctFoldM y.ctFoldM z.ctFoldM
-  | _, .index it q i => .index it q.ctFoldM i.ctFoldM
-  | _, .obsW q => guardWith q.ctGuardsM q (.obsW q) (.lit (PrimTy.dflt _))
-  | _, .obsL q => guardWith q.ctGuardsM q (.obsL q) (LTm.nat 0)
-  | _, .obsH q => .obsH q
-  | _, .seq d a => .seq d.ctFoldM a.ctFoldM
-  | _, .orElse a b => .orElse a.ctFoldM b.ctFoldM
-  | _, .kite a b t e => .kite a.ctFoldM b.ctFoldM t.ctFoldM e.ctFoldM
-  | _, .err => .err
+/-- The test of an `ite`, at any sort of its first operand. -/
+def _root_.Solidity.Op3.iteTest {a b c s : Srt} (o : Op3 C a b c s) :
+    LTm C a → Option (LTm C (.val .bool)) :=
+  Op3.casesOn (motive := fun a _ _ _ _ => LTm C a → Option (LTm C (.val .bool))) o
+    (fun x => some x) (fun _ => none) (fun _ => none) (fun _ _ => none) (fun _ => none)
+    (fun _ => none) (fun _ _ => none)
 
-/-- **The clause**: every observation of the starting storage past a live
-end read as the default (`guardWith`).  By the recursor. -/
-@[implemented_by LTm.ctFoldM]
-def LTm.ctFold {s : Srt} (t : LTm C s) : LTm C s :=
-  @LTm.rec C (fun s _ => LTm C s)
-    (@fun _ k => .var k) (@fun _ o => .app0 o)
-    (@fun _ _ o _ ihx => .app1 o ihx)
-    (@fun _ _ _ o _ _ ihx ihy => .app2 o ihx ihy)
-    (@fun _ _ _ _ o _ _ _ ihx ihy ihz => .app3 o ihx ihy ihz)
-    (@fun _ _ _ it _ _ ihq ihi => .index it ihq ihi)
-    (@fun _ q _ => guardWith q.ctGuards q (.obsW q) (.lit (PrimTy.dflt _)))
-    (@fun _ q _ => guardWith q.ctGuards q (.obsL q) (LTm.nat 0))
-    (@fun _ q _ => .obsH q)
-    (@fun _ _ _ _ ihd iha => .seq ihd iha)
-    (@fun _ _ _ iha ihb => .orElse iha ihb)
-    (@fun _ _ _ _ _ _ iha ihb iht ihe => .kite iha ihb iht ihe)
-    (@fun _ => .err) s t
+/-- The known tests below an operand of an `ite`: its test, `true` in the
+first branch, `false` in the second. -/
+def CTKnown.branch (K : CTKnown C) (t : Option (LTm C (.val .bool))) (b : Bool) : CTKnown C :=
+  match t with
+  | some c => (c, b) :: K
+  | none => K
 
-theorem LTm.ctFold_eq_ctFoldM {s : Srt} (t : LTm C s) : t.ctFold = t.ctFoldM := by
-  induction t with
+/-- `LTm.ctFoldK`'s compiled twin. -/
+def LTm.ctFoldKM : {s : Srt} → LTm C s → CTKnown C → LTm C s
+  | _, .var k, _ => .var k
+  | _, .app0 o, _ => .app0 o
+  | _, .app1 o x, K => .app1 o (x.ctFoldKM K)
+  | _, .app2 o x y, K => .app2 o (x.ctFoldKM K) (y.ctFoldKM K)
+  | _, .app3 o x y z, K => .app3 o (x.ctFoldKM K) (y.ctFoldKM (K.branch (o.iteTest x) true))
+      (z.ctFoldKM (K.branch (o.iteTest x) false))
+  | _, .index it q i, K => .index it (q.ctFoldKM K) (i.ctFoldKM K)
+  | _, .obsW q, K => guardWith K q.ctGuardsM q (.obsW q) (.lit (PrimTy.dflt _))
+  | _, .obsL q, K => guardWith K q.ctGuardsM q (.obsL q) (LTm.nat 0)
+  | _, .obsH q, _ => .obsH q
+  | _, .seq d a, K => .seq (d.ctFoldKM K) (a.ctFoldKM K)
+  | _, .orElse a b, K => .orElse (a.ctFoldKM K) (b.ctFoldKM K)
+  | _, .kite a b t e, K => .kite (a.ctFoldKM K) (b.ctFoldKM K) (t.ctFoldKM K) (e.ctFoldKM K)
+  | _, .err, _ => .err
+
+/-- **The clause**, under the tests `K` known on the way: every observation
+of the starting storage past a live end read as the default (`guardWith`),
+a guard an enclosing `ite` decides dropped.  By the recursor. -/
+@[implemented_by LTm.ctFoldKM]
+def LTm.ctFoldK {s : Srt} (t : LTm C s) : CTKnown C → LTm C s :=
+  @LTm.rec C (fun s _ => CTKnown C → LTm C s)
+    (@fun _ k _ => .var k) (@fun _ o _ => .app0 o)
+    (@fun _ _ o _ ihx K => .app1 o (ihx K))
+    (@fun _ _ _ o _ _ ihx ihy K => .app2 o (ihx K) (ihy K))
+    (@fun _ _ _ _ o x _ _ ihx ihy ihz K => .app3 o (ihx K) (ihy (K.branch (o.iteTest x) true))
+      (ihz (K.branch (o.iteTest x) false)))
+    (@fun _ _ _ it _ _ ihq ihi K => .index it (ihq K) (ihi K))
+    (@fun _ q _ K => guardWith K q.ctGuards q (.obsW q) (.lit (PrimTy.dflt _)))
+    (@fun _ q _ K => guardWith K q.ctGuards q (.obsL q) (LTm.nat 0))
+    (@fun _ q _ _ => .obsH q)
+    (@fun _ _ _ _ ihd iha K => .seq (ihd K) (iha K))
+    (@fun _ _ _ iha ihb K => .orElse (iha K) (ihb K))
+    (@fun _ _ _ _ _ _ iha ihb iht ihe K => .kite (iha K) (ihb K) (iht K) (ihe K))
+    (@fun _ _ => .err) s t
+
+theorem LTm.ctFoldK_eq_ctFoldKM {s : Srt} (t : LTm C s) (K : CTKnown C) :
+    t.ctFoldK K = t.ctFoldKM K := by
+  induction t generalizing K with
   | var | app0 | obsH | err => rfl
-  | app1 o x ihx => rw [LTm.ctFoldM, ← ihx]; rfl
-  | app2 o x y ihx ihy => rw [LTm.ctFoldM, ← ihx, ← ihy]; rfl
-  | app3 o x y z ihx ihy ihz => rw [LTm.ctFoldM, ← ihx, ← ihy, ← ihz]; rfl
-  | index it q i ihq ihi => rw [LTm.ctFoldM, ← ihq, ← ihi]; rfl
-  | obsW q => rw [LTm.ctFoldM, ← LTm.ctGuards_eq_ctGuardsM]; rfl
-  | obsL q => rw [LTm.ctFoldM, ← LTm.ctGuards_eq_ctGuardsM]; rfl
-  | seq d a ihd iha => rw [LTm.ctFoldM, ← ihd, ← iha]; rfl
-  | orElse a b iha ihb => rw [LTm.ctFoldM, ← iha, ← ihb]; rfl
-  | kite a b t e iha ihb iht ihe => rw [LTm.ctFoldM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+  | app1 o x ihx => rw [LTm.ctFoldKM, ← ihx]; rfl
+  | app2 o x y ihx ihy => rw [LTm.ctFoldKM, ← ihx, ← ihy]; rfl
+  | app3 o x y z ihx ihy ihz => rw [LTm.ctFoldKM, ← ihx, ← ihy, ← ihz]; rfl
+  | index it q i ihq ihi => rw [LTm.ctFoldKM, ← ihq, ← ihi]; rfl
+  | obsW q => rw [LTm.ctFoldKM, ← LTm.ctGuards_eq_ctGuardsM]; rfl
+  | obsL q => rw [LTm.ctFoldKM, ← LTm.ctGuards_eq_ctGuardsM]; rfl
+  | seq d a ihd iha => rw [LTm.ctFoldKM, ← ihd, ← iha]; rfl
+  | orElse a b iha ihb => rw [LTm.ctFoldKM, ← iha, ← ihb]; rfl
+  | kite a b t e iha ihb iht ihe => rw [LTm.ctFoldKM, ← iha, ← ihb, ← iht, ← ihe]; rfl
+
+/-- **The clause** on a term, with nothing known. -/
+abbrev LTm.ctFold {s : Srt} (t : LTm C s) : LTm C s := t.ctFoldK []
 
 /-- `LFml.ctFold`'s compiled twin. -/
 def LFml.ctFoldM : LFml C → LFml C
@@ -516,15 +546,25 @@ theorem LTm.ctGuards_ok {s : Srt} (t : LTm C s) : GuardsOK g ν s t t.ctGuards :
         · exact htail r' hr' c hc
   | _ => exact GuardsOK.nil _ _
 
+/-- A test known to read `b` reads `b`. -/
+theorem knownAs_eval {K : CTKnown C} (hK : ∀ e ∈ K, (e.1.eval g ν : Option Bool) = some e.2)
+    {c : LTm C (.val .bool)} {b : Bool} (h : knownAs K c b = true) :
+    (c.eval g ν : Option Bool) = some b := by
+  obtain ⟨e, he, h⟩ := List.any_eq_true.1 h
+  rw [Bool.and_eq_true, beq_iff_eq] at h
+  rw [← LTm.eq_of_beqR h.1, ← h.2]
+  exact hK e he
+
 /-- A guarded term reads what the term does: where the path halts the term
 does, and a guard that is `false` makes it read the default. -/
-theorem guardWith_eval {T : Ty} {p : PrimTy} (cs : List (LTm C (.val .bool)))
+theorem guardWith_eval {T : Ty} {p : PrimTy} (K : CTKnown C)
+    (hK : ∀ e ∈ K, (e.1.eval g ν : Option Bool) = some e.2) (cs : List (LTm C (.val .bool)))
     (q : LTm C (.path T)) (a d : LTm C (.val p))
     (hnone : (q.eval g ν : Option (SRef C T)) = none → (a.eval g ν : Option p.Denote) = none)
     (hc : ∀ r : SRef C T, (q.eval g ν : Option (SRef C T)) = some r → ∀ c ∈ cs,
       ∃ b, (c.eval g ν : Option Bool) = some b ∧
         (b = false → (a.eval g ν : Option p.Denote) = d.eval g ν)) :
-    ((guardWith cs q a d).eval g ν : Option p.Denote) = a.eval g ν := by
+    ((guardWith K cs q a d).eval g ν : Option p.Denote) = a.eval g ν := by
   have key : ∀ cs' : List (LTm C (.val .bool)), (∀ c ∈ cs', ∃ b, (c.eval g ν : Option Bool) = some b ∧
       (b = false → (a.eval g ν : Option p.Denote) = d.eval g ν)) →
       ((cs'.foldr (fun c acc => .kite c (.lit (p := .bool) true) acc d) a).eval g ν :
@@ -539,65 +579,107 @@ theorem guardWith_eval {T : Ty} {p : PrimTy} (cs : List (LTm C (.val .bool)))
       cases b
       · exact (hf rfl).symm
       · exact ih fun c' h' => h c' (List.mem_cons_of_mem _ h')
+  have hc' : ∀ r : SRef C T, (q.eval g ν : Option (SRef C T)) = some r →
+      ∀ c ∈ cs.filter (fun c => !knownAs K c true), ∃ b, (c.eval g ν : Option Bool) = some b ∧
+        (b = false → (a.eval g ν : Option p.Denote) = d.eval g ν) :=
+    fun r hr c hcm => hc r hr c (List.mem_filter.1 hcm).1
   unfold guardWith
-  cases hcs : cs.isEmpty
+  dsimp only
+  cases hcs : (cs.filter fun c => !knownAs K c true).isEmpty
   · rw [cond_false]
-    cases hff : cs.any LTm.isFF
+    cases hff : (cs.filter fun c => !knownAs K c true).any
+        (fun c => c.isFF || knownAs K c false)
     · rw [cond_false, LTm.eval_seq]
       cases hq : (q.eval g ν : Option (SRef C T)) with
       | none => rw [hnone hq]; rfl
-      | some r => exact key cs (hc r hq)
+      | some r => exact key _ (hc' r hq)
     · rw [cond_true, LTm.eval_seq]
       cases hq : (q.eval g ν : Option (SRef C T)) with
       | none => rw [hnone hq]; rfl
       | some r =>
         obtain ⟨c, hcm, hcf⟩ := List.any_eq_true.1 hff
-        obtain ⟨b, hb, hf⟩ := hc r hq c hcm
-        rw [LTm.isFF_eval hcf] at hb
+        obtain ⟨b, hb, hf⟩ := hc' r hq c hcm
+        have hfalse : (c.eval g ν : Option Bool) = some false := by
+          rcases Bool.or_eq_true_iff.1 hcf with h | h
+          · exact LTm.isFF_eval h
+          · exact knownAs_eval hK h
+        rw [hfalse] at hb
         exact (hf (Option.some.inj hb).symm).symm
   · rfl
 
 /-- **The clause keeps what a term reads**, where the starting storage shows
-clean tails. -/
-theorem LTm.ctFold_eval (hg : TSto.CleanTails g.storage.obs) {s : Srt} (t : LTm C s) :
-    t.ctFold.eval g ν = t.eval g ν := by
+clean tails and the tests known on the way read as known. -/
+theorem LTm.ctFoldK_eval (hg : TSto.CleanTails g.storage.obs) {s : Srt} (t : LTm C s) :
+    ∀ K : CTKnown C, (∀ e ∈ K, (e.1.eval g ν : Option Bool) = some e.2) →
+      (t.ctFoldK K).eval g ν = t.eval g ν := by
   induction t with
-  | var | app0 | obsH | err => rfl
+  | var | app0 | obsH | err => intro _ _; rfl
   | app1 o x ihx =>
-    show (LTm.app1 o x.ctFold).eval g ν = _
-    rw [LTm.eval_app1, LTm.eval_app1, ihx]
+    intro K hK
+    show (LTm.app1 o (x.ctFoldK K)).eval g ν = _
+    rw [LTm.eval_app1, LTm.eval_app1, ihx K hK]
   | app2 o x y ihx ihy =>
-    show (LTm.app2 o x.ctFold y.ctFold).eval g ν = _
-    rw [LTm.eval_app2, LTm.eval_app2, ihx, ihy]
+    intro K hK
+    show (LTm.app2 o (x.ctFoldK K) (y.ctFoldK K)).eval g ν = _
+    rw [LTm.eval_app2, LTm.eval_app2, ihx K hK, ihy K hK]
   | app3 o x y z ihx ihy ihz =>
-    show (LTm.app3 o x.ctFold y.ctFold z.ctFold).eval g ν = _
-    rw [LTm.eval_app3, LTm.eval_app3, ihx, ihy, ihz]
+    intro K hK
+    have gen : ∀ Ky Kz : CTKnown C, (∀ e ∈ Ky, (e.1.eval g ν : Option Bool) = some e.2) →
+        (∀ e ∈ Kz, (e.1.eval g ν : Option Bool) = some e.2) →
+        (LTm.app3 o (x.ctFoldK K) (y.ctFoldK Ky) (z.ctFoldK Kz)).eval g ν =
+          (LTm.app3 o x y z).eval g ν := by
+      intro Ky Kz hy hz
+      rw [LTm.eval_app3, LTm.eval_app3, ihx K hK, ihy Ky hy, ihz Kz hz]
+    cases o
+    case ite p =>
+      show (LTm.app3 .ite (x.ctFoldK K) (y.ctFoldK ((x, true) :: K))
+        (z.ctFoldK ((x, false) :: K))).eval g ν = _
+      rw [LTm.eval_app3, LTm.eval_app3, ihx K hK]
+      cases hx : (x.eval g ν : Option Bool) with
+      | none => rfl
+      | some v =>
+        cases v
+        · rw [ihz _ (List.forall_mem_cons.2 ⟨hx, hK⟩)]; rfl
+        · rw [ihy _ (List.forall_mem_cons.2 ⟨hx, hK⟩)]; rfl
+    all_goals exact gen K K hK hK
   | index it q i ihq ihi =>
-    show (LTm.index it q.ctFold i.ctFold).eval g ν = _
-    rw [LTm.eval_index, LTm.eval_index, ihq, ihi]
+    intro K hK
+    show (LTm.index it (q.ctFoldK K) (i.ctFoldK K)).eval g ν = _
+    rw [LTm.eval_index, LTm.eval_index, ihq K hK, ihi K hK]
   | obsW q =>
-    show (guardWith q.ctGuards q (.obsW q) (.lit (PrimTy.dflt _))).eval g ν = _
-    refine guardWith_eval _ _ _ _ (fun hq => by rw [LTm.eval_obsW, hq]; rfl) fun r hr c hc => ?_
+    intro K hK
+    show (guardWith K q.ctGuards q (.obsW q) (.lit (PrimTy.dflt _))).eval g ν = _
+    refine guardWith_eval K hK _ _ _ _ (fun hq => by rw [LTm.eval_obsW, hq]; rfl)
+      fun r hr c hc => ?_
     obtain ⟨b, hb, hsh⟩ := LTm.ctGuards_ok q r hr c hc
     refine ⟨b, hb, fun hf => ?_⟩
     rw [LTm.eval_obsW, hr, Option.bind_some, hg.1 r (hsh hf)]
     rfl
   | obsL q =>
-    show (guardWith q.ctGuards q (.obsL q) (LTm.nat 0)).eval g ν = _
-    refine guardWith_eval _ _ _ _ (fun hq => by rw [LTm.eval_obsL, hq]; rfl) fun r hr c hc => ?_
+    intro K hK
+    show (guardWith K q.ctGuards q (.obsL q) (LTm.nat 0)).eval g ν = _
+    refine guardWith_eval K hK _ _ _ _ (fun hq => by rw [LTm.eval_obsL, hq]; rfl)
+      fun r hr c hc => ?_
     obtain ⟨b, hb, hsh⟩ := LTm.ctGuards_ok q r hr c hc
     refine ⟨b, hb, fun hf => ?_⟩
     rw [LTm.eval_obsL, hr, Option.bind_some, hg.2 r (hsh hf)]
     rfl
   | seq d a ihd iha =>
-    show (LTm.seq d.ctFold a.ctFold).eval g ν = _
-    rw [LTm.eval_seq, LTm.eval_seq, ihd, iha]
+    intro K hK
+    show (LTm.seq (d.ctFoldK K) (a.ctFoldK K)).eval g ν = _
+    rw [LTm.eval_seq, LTm.eval_seq, ihd K hK, iha K hK]
   | orElse a b iha ihb =>
-    show (LTm.orElse a.ctFold b.ctFold).eval g ν = _
-    rw [LTm.eval_orElse, LTm.eval_orElse, iha, ihb]
+    intro K hK
+    show (LTm.orElse (a.ctFoldK K) (b.ctFoldK K)).eval g ν = _
+    rw [LTm.eval_orElse, LTm.eval_orElse, iha K hK, ihb K hK]
   | kite a b t e iha ihb iht ihe =>
-    show (LTm.kite a.ctFold b.ctFold t.ctFold e.ctFold).eval g ν = _
-    rw [LTm.eval_kite, LTm.eval_kite, iha, ihb, iht, ihe]
+    intro K hK
+    show (LTm.kite (a.ctFoldK K) (b.ctFoldK K) (t.ctFoldK K) (e.ctFoldK K)).eval g ν = _
+    rw [LTm.eval_kite, LTm.eval_kite, iha K hK, ihb K hK, iht K hK, ihe K hK]
+
+theorem LTm.ctFold_eval (hg : TSto.CleanTails g.storage.obs) {s : Srt} (t : LTm C s) :
+    t.ctFold.eval g ν = t.eval g ν :=
+  t.ctFoldK_eval hg [] fun _ h => nomatch h
 
 theorem LFml.ctFold_holds (hg : TSto.CleanTails g.storage.obs) (φ : LFml C) :
     ∀ ν : AEnv, φ.ctFold.holds g ν ↔ φ.holds g ν := by
