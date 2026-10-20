@@ -1277,17 +1277,17 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
     | none => []
   | e => placeShape C Γ e
 
-/-- The narrow positions of `ws`, as a reader sees them (`small[]` at
-`uint8`). -/
+/-- The narrow positions of `ws`, below a place written `·` (`·[]` 8 bits wide). -/
 def shapeStr (ws : List (String × Nat)) : String :=
-  if ws.isEmpty then "none" else ", ".intercalate (ws.map fun (k, n) => s!"{k} at {n} bits")
+  if ws.isEmpty then "none" else ", ".intercalate (ws.map fun (k, n) => s!"·{k} {n} bits wide")
 
 /-- A whole use of `e` where `ws` is expected: the narrow positions must agree
 (solc converts no reference type to one of another element type). -/
 def shapeCheck (Γ : ECtx) (ws : List (String × Nat)) (e : RawExpr) : Except String Unit := do
   let got := exprShape C Γ e
   unless sameShape got ws do
-    throw s!"{e.toStr} has narrow positions {shapeStr got} where {shapeStr ws} are expected"
+    throw s!"{e.toStr} has narrow positions {shapeStr got} where {shapeStr ws} are expected: \
+      solc converts no reference type to one of another element type"
 
 /-- Whether `e` names, whole, a place with a narrow position below it (`small`
 of `uint8[] small`, `lists[i]` of `mapping(uint => uint8[]) lists`, a
