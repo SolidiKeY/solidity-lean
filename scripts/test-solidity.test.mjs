@@ -547,8 +547,6 @@ test("quantified consequents parse and omitted specification bodies stay local",
     .map(r => [r.function, r]));
   assert.equal(types.unrelated.status, "proved");
   assert.equal(types.stillChecked.status, "pending");
-  // a `string` is modelled (a `bytes1[]`); its copy into memory is a closer
-  // limit, as a `uint[]`'s is (docs/semantic-gaps.md, "Bytes and strings")
   // a `string` copy into memory always ends normally (`docs/semantic-gaps.md`, "Bytes and strings")
   assert.equal(types.readsString.status, "proved");
   // a narrow element, key or value is modelled (`expandStateTyW`): `narrow[0]`
