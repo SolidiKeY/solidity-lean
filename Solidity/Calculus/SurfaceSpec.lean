@@ -199,6 +199,16 @@ makes is guarded by the program, which reverts where it is undefined. -/
 def layoutFmls (C : Contract) (rs : List String) : List (NRead C) :=
   (C.vars.filter fun (r, _) => rs.contains r).flatMap fun (r, T) => layoutAt T (.root r) [] 1
 
+/-- A chain fact: `msg.value` is below `2^128` wei, past the total ether
+supply, so no transaction carries more (`docs/solc-alignment.md`). -/
+def etherBound : Int := 2 ^ 128
+
+/-- Whether the statements read `msg.value`, their blocks included (not the
+body of a function they call). -/
+partial def readsMsgValue (ss : List RawStmt) : Bool :=
+  ss.any fun s => s.exprs.any (RawExpr.any fun | .env .msgValue => true | _ => false) ||
+    readsMsgValue s.blocks.flatten
+
 section Compile
 
 variable (C)
@@ -601,7 +611,13 @@ def specPieces (f : String) :
     [.storage (.mtSt)] ++ snap ++ [.netMt (.env .msgSender) (.env .msgValue), .setBalance (.env .msgValue)]
   else snap ++ if d.payable then
     [.net (.env .msgSender) .add (.env .msgValue), .selfBalance .add (.env .msgValue)] else []
-  let msgValue : NRead C := if d.payable then NRead.cmp .ge (.env .msgValue) (.num 0)
+  -- a payable function's `msg.value` is below the ether supply where its
+  -- body's 256-bit arithmetic reads it (`Problem.callPre`, chain facts)
+  let msgValue : NRead C := if d.payable then
+      if readsMsgValue d.body then
+        .and (NRead.cmp .ge (.env .msgValue) (.num 0))
+          (NRead.cmp .lt (.env .msgValue) (.num etherBound))
+      else NRead.cmp .ge (.env .msgValue) (.num 0)
     else .eq (.env .msgValue) (.num 0)
   let read := (C.inv ++ d.spec.requires ++ d.spec.ensures).flatMap SpecExpr.names ++
     (d.spec.assignable.getD []).flatMap SpecLoc.names

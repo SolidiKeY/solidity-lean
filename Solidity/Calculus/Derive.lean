@@ -327,6 +327,21 @@ def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
   unless ok do s.restore; return none
   return some (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
 
+/-- Whether the goal `g` is `¬X → ψ` with `X` a program's (a self-call's
+`catch` goal, `ExtCall.selfFails`): the context cannot keep `¬X` for the
+closer, so the walk proves `X` instead (`notLeft`) or hides it
+(`hideLeft`). -/
+def negModalGoal? (g : MVarId) : MetaM Bool := g.withContext do
+  let ty ← instantiateMVars (← g.getType)
+  let some φ0 := (if ty.isAppOf ``Proves || ty.isAppOf `Solidity.ProvesC then ty.getAppArgs.back?
+    else none) | return false
+  let φ ← whnf φ0
+  unless φ.isAppOf ``Fml.imp do return false
+  let a ← whnf (φ.getArg! (φ.getAppNumArgs - 2))
+  unless a.isAppOf ``Fml.not do return false
+  let mf ← whnfD (← mkAppM ``Fml.modalFree #[a.appArg!])
+  return mf.isConstOf ``Bool.false
+
 /-- The walk from `g`: its script, lines indented relative to the first, a
 `case` per goal of a step with several, `sorry` for a leaf; the leaves are
 collected in `open`. -/
@@ -342,6 +357,23 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
       | [g'] => pure g'
       | _ => pure g
     else pure g
+  -- `¬X → ψ`, `X` a program's: `X` proved instead where the walk closes
+  -- it (`notLeft`), else the premise hidden (`hideLeft`)
+  if ← tryCatchRuntimeEx (withCurrHeartbeats (negModalGoal? g)) fun _ => pure false then
+    let s ← saveState
+    let nl ← `(tactic| refine $(← ProofTree.short ``Proves.notLeft) ?_)
+    let r ← tryCatchRuntimeEx (do
+        let [gx] ← withCurrHeartbeats (ProofTree.runOn g #[nl]) | return none
+        let ls ← IO.mkRef #[]
+        let lines ← walk fuel ls gx (close := true) short
+        return if (← ls.get).isEmpty then some lines else none)
+      fun _ => pure none
+    if let some lines := r then return (← ProofTree.tacLines nl) ++ lines
+    s.restore
+    let hl ← `(tactic| refine $(← ProofTree.short ``Proves.hideLeft) ?_)
+    let [g'] ← withCurrHeartbeats (ProofTree.runOn g #[hl])
+      | throwError "sol_derive: hideLeft failed"
+    return (← ProofTree.tacLines hl) ++ (← walk fuel leaves g' close short)
   let mut step := none
   for (tacs, note) in ← movesAt g short do
     let s ← saveState

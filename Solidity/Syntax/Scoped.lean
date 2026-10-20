@@ -329,10 +329,16 @@ inductive Stmt (C : Contract) : Ctx → Ctx → Type where
       (body : Prog C (rs ++ ps) Γf) : Stmt C Γ Γ'
   /-- `try a.f(e) returns (…) { ok } catch Error(string memory) { err }
   catch Panic(uint c) { panic } catch { other }`: `ok` sees the returned
-  values `rets`, `panic` the code. -/
-  | tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+  values `rets`, `panic` the code.  With `self`, the callee `f` is a function
+  of this contract declared before the caller: `sbody` is its body in a
+  frame of its own (the parameters bound to `sargs`, the return variables
+  `ρ`), `msg.sender` read as `address(this)` and `msg.value` as `0`, which
+  runs when the receiver is the contract itself (`TRun.tryCall`,
+  `docs/options.md` O8). -/
+  | tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
       (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
-      (panic : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) : Stmt C Γ Γ
+      (panic : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+      (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) : Stmt C Γ Γ
   /-- `while (c) { … }`: the body a scope, popped every iteration. -/
   | loop {Γ Γ₁ : Ctx} (a : LoopAnn C Γ) (c : Val C Γ .bool) (body : Prog C Γ Γ₁) : Stmt C Γ Γ
   /-- `{ … }`: a block, its locals ending with it. -/
@@ -727,7 +733,7 @@ def Stmt.toStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
     match code.receiverExpr? ns value with
     | some operand => s!"{receiver}.push({operand});"
     | none => s!"{receiver}.push(eval {braced (Prog.toStrs 0 ns code)} {value.toStr (code.outNames ns)});"
-  | .tryCall c rets ok err code pnc other =>
+  | .tryCall c rets ok err code pnc other _ _ _ =>
     let args := ", ".intercalate (c.args.map fun a => a.2.toStr ns)
     let rs := rets.toList
     let retsS := if rs.isEmpty then "" else
@@ -941,9 +947,9 @@ def Stmt.wk {Γ Δ : Ctx} (h : Thin Γ Δ) : {Γ' : Ctx} → Stmt C Γ Γ' →
   | _, .call f args ret body =>
     let ⟨Δ', h', ret'⟩ := ret.wk h
     ⟨Δ', h', .call f (args.wk h) ret' body⟩
-  | _, @Stmt.tryCall _ _ ρ κ _ _ _ _ c rets ok err code pnc other =>
+  | _, @Stmt.tryCall _ _ ρ κ _ _ _ _ _ _ c rets ok err code pnc other sargs sbody self =>
     ⟨Δ, h, .tryCall (c.wk h) rets (ok.wk (Thin.keepAll ρ h)).2.2 (err.wk h).2.2 code
-      (pnc.wk (Thin.keepAll κ h)).2.2 (other.wk h).2.2⟩
+      (pnc.wk (Thin.keepAll κ h)).2.2 (other.wk h).2.2 (sargs.wk h) sbody self⟩
   | _, .loop a c body => ⟨Δ, h, .loop (a.wk h) (c.wk h) (body.wk h).2.2⟩
   | _, .block body => ⟨Δ, h, .block (body.wk h).2.2⟩
   | _, .callReceiver f args r body op => ⟨Δ, h, .callReceiver f (args.wk h) r body (op.wk h)⟩
@@ -990,7 +996,7 @@ def Stmt.ext {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Ext Γ Γ' :=
     (fun _ => .refl) (fun _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ => .refl) (fun _ => .refl) (fun _ => .refl) .refl .refl
     (fun _ _ ret _ => ret.ext)
-    (fun _ _ _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ => .refl)
+    (fun _ _ _ _ _ _ _ _ _ _ => .refl) (fun _ _ _ => .refl) (fun _ => .refl)
     (fun _ _ _ _ _ => .refl) (fun _ _ _ => .refl)
     (fun _ _ _ _ _ => .refl)
     (fun _ _ _ _ _ _ => .refl)
@@ -1042,7 +1048,7 @@ private def example₁ : Prog SE [] [.val .uint, .val .uint, .mem P, .mem P, .al
       [⟨.uint, .local .here⟩]⟩ (Binders.nil.snoc .uint (.user "v"))
     (.cons (.assignLocal (.there (.there (.there (.there (.there (.there .here)))))) (loc .here))
       .nil)
-    .nil (.some (.user "c")) .nil (.cons .revert .nil)) .nil
+    .nil (.some (.user "c")) .nil (.cons .revert .nil) .nil .nil false) .nil
 
 /--
 info: uint x = alice.age + 1;

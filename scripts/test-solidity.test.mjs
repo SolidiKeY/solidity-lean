@@ -613,22 +613,22 @@ test("solkey's solc/open ports close except where the model says why not", () =>
   const open = {
     // a function recursing into itself: a call is inlined (`kernel-port.md`)
     functionsRecursiveUnbounded: "unsupported",
-    // false at 256 bits: `5 + v + v` overflows, and reverts, at v = 2^255
-    msgValueArith: "pending",
     // the callee is the contract itself only at the harness address
-    // (0x…DeaDBeef), which no obligation fixes; `try` does not run the callee
+    // (0x…DeaDBeef), which no obligation fixes (`--self-address`, below)
     tryCatchExactReturn: "pending", trySuccessRunsCallee: "pending",
     tryMultipleCatchClausesSuccess: "pending", tryNestedGetter: "pending",
+    // a value call to the parameter runs `receive` only where it is the
+    // contract, which no obligation fixes (`--self-address`, below)
     callRunsReceive: "pending",
-    // that `address(0)` has no code is not a fact of the model
-    callWithoutCodeReverts: "pending",
+    // false on the EVM: at the harness address the callee writes `ix = 42`,
+    // which the run executes (`docs/options.md`, O8); the value call's
+    // callee may write the state under the callback reading (O7)
+    trySuccessKeepsStorageUnsound: "pending", callKeepsStorageUnsound: "pending",
     // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
     ternaryLiteralOverflow: "pending",
   };
-  // `trySuccessKeepsStorageUnsound` and `callKeepsStorageUnsound` are proved:
-  // `⊢` is sound for `Valid`, where a callee keeps the caller's state
-  // (solkey's `noCallback`); on the EVM they fail, the callee being the
-  // contract itself (`docs/options.md`, O1).
+  // `callWithoutCodeReverts` proves: address 0 has no code (O8);
+  // `msgValueArith`: `msg.value < 2^128`, a chain fact (`Problem.callPre`).
   const files = ["SolcArithmeticOpen", "SolcConstructorsOpen", "SolcFunctionCallsOpen",
     "SolcHigherLevelOpen", "SolcPaymentsOpen", "SolcSmtControlFlowOpen", "SolcTypesOpen"]
     .map(f => `tests/solc/open/${f}.sol`);
@@ -638,4 +638,46 @@ test("solkey's solc/open ports close except where the model says why not", () =>
   assert.equal(rows.length, 51);
   const expected = new Map(Object.entries(open));
   for (const r of rows) assert.equal(r.status, expected.get(r.function) ?? "proved", r.function);
+});
+
+test("solc/open self-calls prove at the harness address (--self-address)", () => {
+  // the same file, every obligation assuming `address(this) == 0x…DeaDBeef`
+  // (`Problem.selfPre`): a `try` of the pinned parameter runs the callee
+  const report = runSolidityTests(["tests/solc/open/SolcPaymentsOpen.sol"],
+    {build:false, selfAddress: "0x00000000000000000000000000000000DeaDBeef"});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  // a `catch` goal assumes the callee fails (O8); a value call to the
+  // contract runs `receive`; `msg.value < 2^128` (a chain fact)
+  for (const fn of ["trySuccessRunsCallee", "tryMultipleCatchClausesSuccess", "tryNestedGetter",
+    "callWithoutCodeReverts", "tryArgumentSideEffect", "tryCatchExactReturn", "callRunsReceive",
+    "msgValueArith"]) {
+    assert.equal(rows[fn], "proved", fn);
+  }
+  // the unsound claims are false on the EVM: the callee writes the state
+  for (const fn of ["trySuccessKeepsStorageUnsound", "callKeepsStorageUnsound"]) {
+    assert.equal(rows[fn], "pending", fn);
+  }
+});
+
+test("self-calls of the contract run their callee (tests/solc/SelfCalls.sol)", () => {
+  const report = runSolidityTests(["tests/solc/SelfCalls.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const fn of ["tryReturnInSuccess", "trySuccessRunsCallee", "tryMultipleCatchClausesSuccess",
+    "tryNestedGetter", "callWithoutCodeReverts", "tryCatchExactReturn", "callRunsReceive"]) {
+    assert.equal(rows[fn], "proved", fn);
+  }
+});
+
+test("an obligation whose callee may write the state is read with callbacks", () => {
+  // docs/options.md O7: `ValidT .noCallback` where a `try` of a callee not
+  // declared view/pure or a low-level call is reached, `⊢` elsewhere
+  const report = runSolidityTests(["tests/solc/CallbackReading.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  assert.equal(status.localKept, "proved");
+  assert.equal(status.staticKept, "proved");
+  assert.equal(status.storageLost, "pending");
+  assert.equal(status.valueCallLost, "pending");
 });

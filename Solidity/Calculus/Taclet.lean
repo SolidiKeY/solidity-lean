@@ -802,6 +802,8 @@ theorem LeanTaclet.pushFixedCopySave.toStep {E : Ty} {sp : SPath C Γ (.array E)
   pushCompoundUnfoldReceiver "2."
   pushIncrementUnfoldReceiver "2."
   tryCallDiamond "."
+  tryCallSelfBox "."
+  tryCallSelfDiamond "."
   transferDiamond "."
   assumeFalse "."
   loopExit "."

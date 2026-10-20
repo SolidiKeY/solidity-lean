@@ -500,7 +500,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     | none, a :: bs => `(sol_stmt| $fe:sol_expr ( $a:sol_expr, $(bs.toArray),* ))
     | some y, [] => `(sol_stmt| $y:ident = $fe:sol_expr ( ))
     | some y, bs => `(sol_stmt| $y:ident = $fe:sol_expr ( $(bs.toArray),* ))
-  | Stmt.tryCall _ _ _ _ _ _ _ _ c rets ok err code pnc other =>
+  | Stmt.tryCall _ _ _ _ _ _ _ _ _ _ c rets ok err code pnc other _ _ _ =>
     let c := (← instantiateMVars c).consumeMData
     let rets := (← instantiateMVars rets).consumeMData
     let code := (← instantiateMVars code).consumeMData
@@ -1120,7 +1120,16 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     for h : i in [0:bs.size] do
       let l := lbl i
       let b ← whnf bs[i]
-      unless b.isAppOfArity ``Branch.mk 6 do return none
+      unless b.isAppOfArity ``Branch.mk 7 do return none
+      -- a goal behind a hypothesis (`Branch.hyp`): a self-call's `catch`,
+      -- `fails(call) →` (`ExtCall.selfFails`); no other has a `dl_branch` form
+      let hyp ← whnf (b.getArg! 6)
+      let selfCall? ← if hyp.isAppOf ``Option.none then pure none
+        else
+          let h := hyp.appArg!.consumeMData
+          unless hyp.isAppOf ``Option.some && h.isAppOf `Solidity.ExtCall.selfFails do return none
+          let some n ← fvarName? (h.getArg! 5) | return none
+          pure (some (nameIdent n))
       let xs := (← instantiateMVars (b.getArg! 4)).consumeMData
       -- the binders: a schema variable (`rets`), the `Panic` code's
       -- (`code.binders`), or none
@@ -1135,8 +1144,10 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
           pure (none, names)
       let blk ← ppBlockOf (← progPiecesS (names ++ ns) (b.getArg! 5)).1
       let x? := x?.map fun x => nameIdent x
-      out := out.push (← if box then `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
-        else `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
+      out := out.push (← match selfCall?, box with
+        | some c, _ => `(dl_branch| $[$l:str :]? fails($c:ident) → $[∀ $x?:ident .]? [ $blk ])
+        | none, true => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? [ $blk ])
+        | none, false => `(dl_branch| $[$l:str :]? $[∀ $x?:ident .]? ⟨[ $blk ]⟩))
     let some b := out[0]? | return none
     if out.size < 2 then return none
     return some (← `(dl_premise| $b:dl_branch ; $[$(out.extract 1 out.size)];*))

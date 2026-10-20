@@ -72,7 +72,7 @@ def Stmt.asserts {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
   | .call _ _ _ body => Prog.asserts body
   | .callReceiver _ _ _ body _ => Prog.asserts body
   | .callReceiverPush _ _ _ body code _ => Prog.asserts body || Prog.asserts code
-  | .tryCall _ _ ok err _ pnc other =>
+  | .tryCall _ _ ok err _ pnc other _ _ _ =>
     Prog.asserts ok || Prog.asserts err || Prog.asserts pnc || Prog.asserts other
   | .loop _ _ body => Prog.asserts body
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
@@ -300,15 +300,27 @@ theorem callReceiverPush_noPanic {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ p
   · exact TRes.NoPanic.exhausted
   · exact (TRes.NoPanic.ofOpt _).bind fun _ => TRes.NoPanic.ok _
 
-theorem tryCall_noPanic {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
+theorem tryCall_noPanic {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ)
     (h₁ : Ext (ρ ++ Γ) Γ₁) (ok : TStep C (ρ ++ Γ) Γ₁)
     (h₂ : Ext Γ Γ₂) (err : TStep C Γ Γ₂) (code : CodeBinder κ)
     (h₃ : Ext (κ ++ Γ) Γ₃) (pnc : TStep C (κ ++ Γ) Γ₃)
-    (h₄ : Ext Γ Γ₄) (other : TStep C Γ Γ₄) (hok : ∀ σ, (ok σ).NoPanic)
+    (h₄ : Ext Γ Γ₄) (other : TStep C Γ Γ₄) (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
+    (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) (hok : ∀ σ, (ok σ).NoPanic)
     (herr : ∀ σ, (err σ).NoPanic) (hpnc : ∀ σ, (pnc σ).NoPanic)
     (hother : ∀ σ, (other σ).NoPanic) (σ : State C Γ) :
-    (tryCall c rets h₁ ok h₂ err code h₃ pnc h₄ other σ).NoPanic := by
+    (tryCall c rets h₁ ok h₂ err code h₃ pnc h₄ other sargs hs sbody self σ).NoPanic := by
   unfold tryCall
+  split
+  · exact TRes.NoPanic.revert
+  split
+  · split
+    · exact (hok _).map _
+    · split
+      · exact (herr σ).map _
+      · exact (hother σ).map _
+    · exact (hpnc _).map _
+    · rename_i e h1 h2 _
+      exact fun h => h2 (by cases h; rfl)
   split
   · exact TRes.NoPanic.revert
   · exact (Binders.decodeT_noPanic rets _).bind fun _ => (hok _).map _
@@ -402,10 +414,11 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
     obtain ⟨hb, hc⟩ := Bool.or_eq_false_iff.mp h
     exact TRun.callReceiverPush_noPanic args r _ _ _ _ value
       (Prog.run_noPanic body hb) (Prog.run_noPanic code hc) σ
-  | _, _, .tryCall call rets ok err code pnc other, h, σ => by
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self, h, σ => by
     simp only [Stmt.asserts, Bool.or_eq_false_iff] at h
     obtain ⟨⟨⟨hok, herr⟩, hpnc⟩, hother⟩ := h
-    exact TRun.tryCall_noPanic call rets _ _ _ _ code _ _ _ _ (Prog.run_noPanic ok hok)
+    exact TRun.tryCall_noPanic call rets _ _ _ _ code _ _ _ _ sargs _ _ self
+      (Prog.run_noPanic ok hok)
       (Prog.run_noPanic err herr) (Prog.run_noPanic pnc hpnc) (Prog.run_noPanic other hother) σ
   | _, _, .loop _ c body, h, σ => by
     simp only [Stmt.asserts] at h

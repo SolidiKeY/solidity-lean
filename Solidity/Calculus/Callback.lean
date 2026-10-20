@@ -66,6 +66,13 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
   /-- `impRight`. -/
   | intro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : ProvesC I pay Γ₀ (H.pre a) φ) :
       ProvesC I pay Γ₀ H (.imp a φ)
+  /-- `impRight`, then `notLeft`: `X` to prove instead of the goal
+  (`Proves.notLeft`). -/
+  | notLeft {Γ : Ctx} {H : Hyps C Γ₀ Γ} {X φ : Fml C Γ} (h : ProvesC I pay Γ₀ H X) :
+      ProvesC I pay Γ₀ H (.imp (.not X) φ)
+  /-- `impRight`, then `hide_left` on the premise. -/
+  | hideLeft {Γ : Ctx} {H : Hyps C Γ₀ Γ} {a φ : Fml C Γ} (h : ProvesC I pay Γ₀ H φ) :
+      ProvesC I pay Γ₀ H (.imp a φ)
   /-- `allRight`. -/
   | allIntro {Γ : Ctx} {H : Hyps C Γ₀ Γ} {x : Var} {p : PrimTy} {φ : Fml C (.val p :: Γ)}
       (h : ProvesC I pay Γ₀ (H.all x p) φ) : ProvesC I pay Γ₀ H (.all x p φ)
@@ -272,6 +279,40 @@ inductive ProvesC (I : Fml C []) (pay : Bool) (Γ₀ : Ctx) :
         (b.bs.all
           (.modalK .box b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))) :
       ProvesC I pay Γ₀ H (.modal .box (.cons s ω) κ φ)
+  /-- **`tryCallSelfBox` with callbacks** (Lean, `docs/options.md` O8): a
+  self-call `try`, `tryCallSelfBox`'s goals read as `tryCallWithCallbackBox`
+  reads its own.  The invariant where control leaves ("invariant on exit");
+  the receiver the contract: the callee inlined, which may itself call back,
+  then the success block ("self call succeeded"); the receiver another
+  contract: the success block from any state the callee may leave in which
+  the invariant holds, for every value of the return data ("call
+  succeeded"); each `catch` block from the caller's state, where the call
+  does not end normally as a self-call (`ExtCall.selfFails`).  At address
+  `0` the `require`s revert. -/
+  | trySelf {Γ ρ κc Γok Γe Γ₃ Γ₄ ps Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {call : ExtCall C Γ}
+      {rets : Binders ρ} {body : Prog C (ρ ++ Γ) Γok} {errorBody : Prog C Γ Γe}
+      {code : CodeBinder κc} {panicBody : Prog C (κc ++ Γ) Γ₃} {otherBody : Prog C Γ Γ₄}
+      {selfArgs : Args C Γ ps} {selfBody : Prog C (ρ ++ ps) Γf} {ω : Prog C Γ Γ₁}
+      {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂} {b₀ b₁ : Branch C Γ} {bs : List (Branch C Γ)}
+      (d : LeanTaclet C (H.freshC I (.modal .box (.cons (.tryCall call rets body errorBody code
+          panicBody otherBody selfArgs selfBody true) ω) κ φ)) .box
+        (.tryCall call rets body errorBody code panicBody otherBody selfArgs selfBody true)
+        (.branches (b₀ :: b₁ :: bs)))
+      (exit : ProvesC I pay Γ₀ H (Fml.closedAt I))
+      (self : ProvesC I pay Γ₀ H
+        (b₀.bs.all (.modalK .box b₀.P
+          (.pop .block ((Ext.append Γ b₀.ρ).trans b₀.P.ext) (.seq ω κ)) φ)))
+      (ok : ProvesC I pay Γ₀ (H.havoc.pre (Fml.closedAt I))
+        (b₁.bs.all (.modalK .box b₁.P
+          (.pop .block ((Ext.append Γ b₁.ρ).trans b₁.P.ext) (.seq ω κ)) φ)))
+      (caught : ∀ b ∈ bs, ProvesC I pay Γ₀ H
+        (Option.casesOn (motive := fun _ => Fml C Γ) b.hyp
+          (b.bs.all
+            (.modalK .box b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ))
+          fun c => .imp c (b.bs.all
+            (.modalK .box b.P (.pop .block ((Ext.append Γ b.ρ).trans b.P.ext) (.seq ω κ)) φ)))) :
+      ProvesC I pay Γ₀ H (.modal .box (.cons (.tryCall call rets body errorBody code panicBody
+        otherBody selfArgs selfBody true) ω) κ φ)
 
 end Solidity
 

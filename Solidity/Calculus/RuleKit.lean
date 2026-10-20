@@ -25,6 +25,8 @@ def Taclet.branchLabels : List (String × List String) := [
   ("assertSimple", ["Holds", "Violated"]),
   ("tryCallNoCallbackBox",
     ["call succeeded", "Error caught", "Panic caught", "other failure caught"]),
+  ("tryCallSelfBox", ["self call succeeded", "call succeeded", "Error caught", "Panic caught",
+    "other failure caught"]),
   ("sendNoCallbackBox", ["send succeeded", "send failed"]),
   ("sendNoCallbackDiamond", ["non-negative amount", "send succeeded", "send failed"]),
   ("loopExit", ["loop exited", "unwound to the end"]),
@@ -33,12 +35,15 @@ def Taclet.branchLabels : List (String × List String) := [
 
 /-- The taclet whose goals a premise for the statement of head `c` labels:
 an `if` splits by `ifElseSplit`, a `require` by `requireSimple`, an `assert`
-by `assertSimple`, a `try` by `tryCallNoCallbackBox` (and
+by `assertSimple`, a `try` by `tryCallNoCallbackBox` (`tryCallSelfBox` when
+it runs the contract's own function, `self`; and
 `CallbackTaclet.tryCallWithCallbackBox`, labelled alike), a send by
 `sendNoCallbackBox`, or under the diamond (`diamond`) `sendNoCallbackDiamond`;
 a loop by `loopExit`, the one rule of a loop with goals to label. -/
-def Taclet.labelledBy (c : Lean.Name) (diamond : Bool := false) : Option String :=
+def Taclet.labelledBy (c : Lean.Name) (diamond : Bool := false) (self : Bool := false) :
+    Option String :=
   if c == ``Stmt.ite then some "ifElseSplit"
+  else if c == ``Stmt.tryCall && self then some "tryCallSelfBox"
   else if c == ``Stmt.require then some "requireSimple"
   else if c == ``Stmt.assert then some "assertSimple"
   else if c == ``Stmt.tryCall then some "tryCallNoCallbackBox"

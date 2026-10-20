@@ -302,15 +302,34 @@ theorem tkeeps_call {Γ Γ' ps rs Γf : Ctx} (hI : I.ValMemOk) (args : Args C Γ
   exact ⟨h₂.1, CallRet.leaveT_all ret (env_wk _ hσ.2)
     (TEnv.All.take rs (TEnv.All.drop x h₂.2))⟩
 
-theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hI : I.ValMemOk) (call : ExtCall C Γ)
+theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (hI : I.ValMemOk) (call : ExtCall C Γ)
     (rets : Binders ρ) (h₁ : Ext (ρ ++ Γ) Γ₁) {ok : TStep C (ρ ++ Γ) Γ₁}
     (h₂ : Ext Γ Γ₂) {err : TStep C Γ Γ₂} (code : CodeBinder κ)
     (h₃ : Ext (κ ++ Γ) Γ₃) {pnc : TStep C (κ ++ Γ) Γ₃}
-    (h₄ : Ext Γ Γ₄) {other : TStep C Γ Γ₄}
-    (hok : I.TKeeps ok) (herr : I.TKeeps err) (hpnc : I.TKeeps pnc) (hoth : I.TKeeps other) :
-    I.TKeeps (TRun.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other) := by
+    (h₄ : Ext Γ Γ₄) {other : TStep C Γ Γ₄} (sargs : Args C Γ ps) (hs : Ext (ρ ++ ps) Γf)
+    {sbody : TStep C (ρ ++ ps) Γf} (self : Bool)
+    (hok : I.TKeeps ok) (herr : I.TKeeps err) (hpnc : I.TKeeps pnc) (hoth : I.TKeeps other)
+    (hsb : I.TKeeps sbody) :
+    I.TKeeps (TRun.tryCall call rets h₁ ok h₂ err code h₃ pnc h₄ other sargs hs sbody self) := by
   intro σ o hσ h
   unfold TRun.tryCall at h
+  have hp : ∀ c, I.HoldsT (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) c) σ.env)) :=
+    fun _ => hσ.withEnv (TEnv.All.append κ
+      (TEnv.All.of_valMem (hI.val _) (hI.mem _) (CodeBinder.valMem code) _) hσ.2)
+  split at h
+  · cases h
+  split at h
+  · split at h
+    · rename_i o₁ hc
+      have h1 := tkeeps_call hI sargs (.rets rets) hs hsb σ o₁ hσ hc
+      cases hr : ok o₁.st with
+      | error => rw [hr] at h; cases h
+      | ok o' => rw [hr] at h; cases h; exact (hok _ o' h1 hr).drop _
+    · split at h
+      · exact herr.drop h₂ σ o hσ h
+      · exact hoth.drop h₄ σ o hσ h
+    · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
+    · cases h
   split at h
   · cases h
   · obtain ⟨⟨r, rest⟩, _, h⟩ := tbind_ok_inv h
@@ -318,10 +337,7 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (hI : I.ValMemOk
       (hσ.withEnv (TEnv.All.append ρ ?_ hσ.2)) h
     exact TEnv.All.of_valMem (hI.val _) (hI.mem _) (Binders.valMem rets) _
   · exact herr.drop h₂ σ o hσ h
-  · refine hpnc.drop ((Ext.append Γ κ).trans h₃)
-      (σ.withEnv (TEnv.append κ (code.decodeT (H := σ.H) _) σ.env)) o
-      (hσ.withEnv (TEnv.All.append κ ?_ hσ.2)) h
-    exact TEnv.All.of_valMem (hI.val _) (hI.mem _) (CodeBinder.valMem code) _
+  · exact hpnc.drop ((Ext.append Γ κ).trans h₃) _ o (hp _) h
   · exact hoth.drop h₄ σ o hσ h
 
 end RunInv

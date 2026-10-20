@@ -1049,6 +1049,15 @@ structure ElabScope where
   /-- Inside `checked { … }` or `ignoringOverflow { … }`: a narrow type's
   check is the mode's guard statement (`narrowCheck`). -/
   overflow : Option OFMode := none
+  /-- Inside the body of a function called externally by the contract itself
+  (`this.f()`, `trySelfBody`): `msg.sender` is `address(this)` and
+  `msg.value` is `0` (`RawStmt.selfFrame`), in its inlined calls too. -/
+  selfFrame : Bool := false
+  /-- What `msg.value` reads in a self-call's frame (`RawExpr.selfFrame`):
+  `0` for a `try`; in the calls a `receive` run by a value call to the
+  contract inlines, a name no frame has, so that a callee reading it is not
+  run (`receiveSelfBody`). -/
+  selfValue : RawExpr := .num 0
 
 /-- Elaboration threads the locals in scope, newest first, and the index of
 the next variable a capture declares, and reads its scope (`ElabScope`). -/
@@ -1904,6 +1913,34 @@ inductive RetKind where
   | mem (R : RefTy) (r : Var)
   | storage (R : RefTy) (r : Var)
 
+/-- An expression in the frame of an external call the contract makes to
+itself: `msg.sender` is the contract, `msg.value` is `v` (nothing for a
+`try`, which sends no value). -/
+def RawExpr.selfFrame (v : RawExpr) (e : RawExpr) : RawExpr :=
+  Id.run <| e.mapM fun
+    | .env .msgSender => .env .selfAddress
+    | .env .msgValue => v
+    | e => e
+
+/-- `RawExpr.selfFrame` in every expression of the statement, at any depth. -/
+partial def RawStmt.selfFrame (v : RawExpr) (s : RawStmt) : RawStmt :=
+  (Id.run (s.mapExprsM (pure ∘ RawExpr.selfFrame v))).mapBlocks (·.map (RawStmt.selfFrame v))
+
+/-- A simple value as the expression that reads it back, its locals by
+name (`ns`). -/
+def Simple.toRaw {Γ : Ctx} {p : PrimTy} (ns : List Var) : Simple C Γ p → RawExpr
+  | .lit n _ => if n < 0 then .unop .neg (.num n.natAbs) else .num n.toNat
+  | .bool b => .bool b
+  | .local i => .name (toString (i.name ns))
+  | .env k _ => .env k
+
+/-- The parts of an inlined call with return variables `ρ`: its arguments
+and its body. -/
+def Stmt.selfCall? {Γ Γ' : Ctx} (ρ : Ctx) : Stmt C Γ Γ' →
+    Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ ps × Prog C (ρ ++ ps) Γf)
+  | .call (rs := rs) _ as (.rets _) b => if h : rs = ρ then some ⟨_, _, as, h ▸ b⟩ else none
+  | _ => none
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -2335,9 +2372,11 @@ the statement before the call (`uint y = f(a);` is `uint y; y = f(a);`):
 the call is read in the context it pushes, its arguments where `res` is not
 yet in scope. -/
 partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var × PrimTy))
-    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false) :
+    (resW : Nat := 256) (targets : Bool := false) (ctor : Bool := false) (resNew : Bool := false)
+    (selfFrame : Bool := false) :
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
   let funs := (← read).funs
+  let selfFrame := selfFrame || (← read).selfFrame
   -- the callee and the functions its body may call: the constructor (`elabCtor`)
   -- may call every function, a function those declared before it
   let (d, scope) ← if ctor then pure (C.ctor.getD { params := [], body := [] }, C.funs) else
@@ -2440,11 +2479,16 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
   -- a constructor's initializers: after its parameters are bound, before its
   -- modifiers, in declaration order (solkey's `ExpandFunctionBody`)
   let body := (if ctor then C.inits.map fun (x, e) => RawStmt.assign (.name x) e else []) ++ body
+  -- an external call of the contract to itself: its frame's environment
+  let selfValue := (← read).selfValue
+  let body := if selfFrame then body.map (RawStmt.selfFrame selfValue) else body
   -- a block's locals renamed apart (a modifier's `_;` twice repeats the body's)
   let body ← ElabM.lift (freshenBlocks (C.vars.map (·.1)) (Γf.map (·.1)) body)
   let k₁ := (← get).2
   modify fun (_, k) => (Γf, k)
-  let P ← withReader (fun sc => { sc with funs := scope, top := false, inlined := (k₀, k₁) :: sc.inlined })
+  let P ← withReader (fun sc =>
+      { sc with funs := scope, top := false, selfFrame := selfFrame,
+                inlined := (k₀, k₁) :: sc.inlined })
     (elabStmtsP body)
   modify fun (_, k) => (Γ, k)
   -- the call's context: the caller's, with `res` pushed when the statement
@@ -2485,6 +2529,100 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
       pure (.of Γs (.call f as (.storage R r) b))
   unless as.separated Γs.names do throw s!"{f}: an argument reads a parameter"
   pure ([call], mret.map fun (R, r, storage) => (Γs, R, r, storage), mrets)
+
+/-- **The body a `try` runs when its receiver is the contract itself**
+(`Stmt.tryCall`'s `self`, `docs/options.md` O8): the callee `g` inlined as a
+call with targets (`elabCallRet`), its environment the frame's
+(`RawStmt.selfFrame`), when `g` is a function declared before this one whose
+parameters take the arguments' types and whose return variables are the
+`try`'s `ρ`; `none` otherwise (another contract's function, or one this
+function may not call: the restriction that keeps the run structural). -/
+partial def trySelfBody (g : String) {Γ : NCtx} (args : List (ExtArg C Γ.ctx)) (ρ : Ctx) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C (ρ ++ ps) Γf)) := do
+  let some (_, d) := (← read).funs.find? (·.1 == g) | pure none
+  unless d.params.map (·.2) == args.map (fun a => Ty.prim a.1) do return none
+  unless d.rets.all (fun (_, T) => T matches .prim _) do return none
+  let raw := args.map fun a => Simple.toRaw C Γ.names a.2
+  let r ← tryCatch (do
+      let (P, _, _) ← elabCallRet g raw none (targets := true) (selfFrame := true)
+      pure (some P)) fun _ => pure none
+  let some [st] := r | pure none
+  if h : st.Γ.ctx = Γ.ctx then
+    pure (Stmt.selfCall? C ρ (h ▸ st.s))
+  else pure none
+
+/-- **The body a value call runs when its receiver is the contract itself**
+(`(bool ok, ) = payable(this).call{value: v}("")`, `docs/options.md` O8):
+the contract's `receive`, declared before this function, inlined as a call
+with no targets, in a frame of its own: `msg.sender` is `address(this)`, and
+`msg.value` its one parameter, which the call passes `v` (raw, read in the
+caller's scope).  `none` where there is no such `receive`, or where it does
+not elaborate so: a function it calls reads `msg.value` (its frame does not
+have the parameter). -/
+partial def receiveSelfBody {Γ : NCtx} (v : RawExpr) :
+    ElabM (Option ((ps : Ctx) × (Γf : Ctx) × Args C Γ.ctx ps × Prog C ([] ++ ps) Γf)) := do
+  let funs := (← read).funs
+  let some (_, d) := funs.find? (·.1 == "receive") | pure none
+  unless d.params.isEmpty && d.rets.isEmpty && d.mods.isEmpty do return none
+  -- the parameter `msg.value` reads, a name no source declares
+  let receiveValueParam := "msgValue$"
+  let pv := RawExpr.name receiveValueParam
+  let ps : List (Name × Ty) := [(receiveValueParam, .prim .uint)]
+  let d' : FunDecl := { d with params := ps, body := d.body.map (RawStmt.selfFrame pv) }
+  let funs' := funs.map fun (n, e) => if n == "receive" then (n, d') else (n, e)
+  let r ← tryCatch (do
+      let nested : RawExpr := .name (receiveValueParam ++ "nested")
+      let (P, _, _) ← withReader (fun sc => { sc with funs := funs', selfValue := nested })
+        (elabCallRet "receive" [v] none (targets := true) (selfFrame := true))
+      pure (some P)) fun _ => pure none
+  let some [st] := r | pure none
+  if h : st.Γ.ctx = Γ.ctx then
+    pure (Stmt.selfCall? C [] (h ▸ st.s))
+  else pure none
+
+/-- **A value call** `(bool ok, ) = r.call{value: v}("")`, its result in
+`ix`: with the contract's `receive` available (`receiveSelfBody`), `bool
+se = r == address(this); if (se) { try this.receive{value: v}() { ok = true; } catch { ok
+= false; } } else { … the call … }`, the self-call a `try` the contract runs
+(`Stmt.tryCall`'s `self`), every failure `ok = false` with the state the
+caller's; otherwise the call alone. -/
+partial def elabValueCall (Γ : NCtx) (ix : Idx Γ.ctx (.val .bool)) (okName : RawExpr)
+    (e a : RawExpr) : ElabM (SProg C) := do
+  let plain : ElabM (SProg C) := do
+    pure [.of Γ (.send ix (← checkIn C Γ .uint e) (← checkIn C Γ .uint a) true)]
+  unless (← read).funs.any (·.1 == "receive") do return ← plain
+  let st ← get
+  let (P, ⟨Γr, addr⟩) ← simpleOf C .uint e
+  let Γ1 ← nctx
+  let addr1 := addr.wk (← ElabM.lift (Γr.wkTo Γ1))
+  -- the test captured, as `ifElseSplit` takes a simple condition
+  let c : Val C Γ1.ctx .bool :=
+    .binop .eqB rfl rfl (.simple addr1) (.simple (.env .selfAddress rfl))
+  let x ← captureAs C "se" (.val .bool)
+  let ⟨Γ', _, ixc⟩ ← afterCapture Γ1 x (.val .bool)
+  let addr' := addr1.wk (← ElabM.lift (Γ1.wkTo Γ'))
+  let ix' := ix.wk (← ElabM.lift (Γ.wkTo Γ'))
+  let some ⟨_, _, sargs, sbody⟩ ← receiveSelfBody (Γ := Γ') a | set st; plain
+  let v ← checkIn C Γ' .uint a
+  let setOk (b : Bool) : List RawStmt := [.assign okName (.bool b)]
+  let (Γe, _) ← get
+  let okP ← elabStmtsP (setOk true)
+  let okP ← ElabM.lift (SProg.chain Γ'.names ([] ++ Γ'.ctx) okP)
+  let (_, k) ← get
+  set (Γe, k)
+  let err ← elabScope Γ' (setOk false)
+  let ⟨κ, cb⟩ := CodeBinder.ofOption (none : Option Var)
+  let pnc ← elabStmtsP (setOk false)
+  let pnc ← ElabM.lift (SProg.chain (cb.names ++ Γ'.names) (κ ++ Γ'.ctx) pnc)
+  let (_, k) ← get
+  set (Γe, k)
+  let other ← elabScope Γ' (setOk false)
+  let call : ExtCall C Γ'.ctx := ⟨addr', "receive", []⟩
+  let tryS : Stmt C Γ'.ctx Γ'.ctx :=
+    .tryCall call Binders.nil okP.2 err.2 cb pnc.2 other.2 sargs sbody true
+  pure (P ++ [.of Γ1 (.declLocal .bool x (some c)),
+    .of Γ' (.ite (.simple (.local ixc)) (.cons tryS .nil)
+      (.cons (.send ix' (.simple addr') v true) .nil))])
 
 /-- **`constructor(args);`**, a deployment (solkey's obligation's
 `constructor(x̄)@C;`): the constructor inlined as any call is
@@ -2872,11 +3010,15 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
         | throw s!"{n}: `send` returns a bool"
       declare C n (.val .bool w)
       let ⟨Γ', th, ix⟩ ← afterCapture Γ (Var.ofName n) (.val .bool)
+      if g then
+        return [.of Γ (.declLocal .bool (Var.ofName n) none)] ++
+          (← elabValueCall Γ' ix (.name n) e a)
       pure [.of Γ (.declLocal .bool (Var.ofName n) none), .of Γ' (.send ix (r.wk th) (v.wk th) g)]
     | some _, _ => throw "`T x = r.send(a);` declares a name"
     | none, x =>
       match ← ElabM.lift (synth C Γ x) with
-      | .val .bool (.simple (.local y)) => pure [.of Γ (.send y r v g)]
+      | .val .bool (.simple (.local y)) =>
+        if g then elabValueCall Γ y x e a else pure [.of Γ (.send y r v g)]
       | _ => throw s!"{x.toStr}: a send's result goes to a bool local"
   | .call (.name "constructor") args => elabCtor args
   | .call (.name f) args => elabCall f args none
@@ -2962,6 +3104,7 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
       pure (⟨a.1, a.2.wk (← ElabM.lift (Γa.wkTo Γ))⟩ : ExtArg C Γ.ctx)
     let ⟨ρ, bs⟩ := Binders.ofList rets'
     let ⟨κ, cb⟩ := CodeBinder.ofOption (code.map Var.ofName)
+    let sb ← trySelfBody g args' ρ
     let (Γe, _) ← get
     for (p, x) in rets' do declare C (toString x) (.val p)
     let ok ← elabStmtsP ok
@@ -2975,7 +3118,11 @@ partial def elabStmt1 : RawStmt → ElabM (SProg C)
     let (_, k) ← get
     set (Γe, k)
     let other ← elabScope Γ other
-    pure (Q ++ [.of Γ (.tryCall ⟨addr', g, args'⟩ bs ok.2 err.2 cb pnc.2 other.2)])
+    match sb with
+    | some ⟨_, _, sargs, sbody⟩ =>
+      pure (Q ++ [.of Γ (.tryCall ⟨addr', g, args'⟩ bs ok.2 err.2 cb pnc.2 other.2 sargs sbody true)])
+    | none =>
+      pure (Q ++ [.of Γ (.tryCall ⟨addr', g, args'⟩ bs ok.2 err.2 cb pnc.2 other.2 .nil .nil false)])
 
 /-- A loop's condition, invariant or variant, of type `p` (its narrow
 rewrites done, `elabStmtP`), read in `Γ`: nothing may be captured before it,

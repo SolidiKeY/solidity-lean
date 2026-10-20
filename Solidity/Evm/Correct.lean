@@ -20,7 +20,7 @@ back weakened along it (`TEnv.wk`), which `Look.ofTEnv` does not see.
 There is no `not_stuck` here: the typed run has no `stuck`, and from a state
 some machine represents (`Sim`) the fragment never diverges either, which
 `compile_correct` says by listing every outcome without it.  `stmt_sim`
-checks within `maxHeartbeats 10000` (the W1 gate, pinned below).
+checks within `maxHeartbeats 11000` (the W1 gate, pinned below; 10000 before the `try` carried a self-call body, `docs/options.md` O8).
 -/
 
 namespace Solidity.Evm
@@ -706,7 +706,16 @@ theorem seq_sim {Γ₁ Γ₂ : Ctx} (s : Solidity.Stmt C Γ Γ₁) (P : Solidity
     · exact .refused (by simp only [hp₁, Bool.true_or])
         ⟨rfl, _, m₂, by rw [hτ₂]; rfl, hk₁.trans hk₂, hm₂⟩
 
-set_option maxHeartbeats 10000 in
+/-- A `try` is outside the fragment (stated apart, so that `stmt_sim`'s arm
+does not unfold `inFrag` through a `try`'s seven blocks). -/
+theorem inFrag_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (F : Frag Γ) (c : Solidity.ExtCall C Γ)
+    (rets : Binders ρ) (ok : Solidity.Prog C (ρ ++ Γ) Γ₁) (err : Solidity.Prog C Γ Γ₂)
+    (code : CodeBinder κ) (pnc : Solidity.Prog C (κ ++ Γ) Γ₃) (other : Solidity.Prog C Γ Γ₄)
+    (sargs : Solidity.Args C Γ ps) (sbody : Solidity.Prog C (ρ ++ ps) Γf) (self : Bool) :
+    inFrag F (.tryCall c rets ok err code pnc other sargs sbody self) = none := by
+  unfold inFrag; rfl
+
+set_option maxHeartbeats 11000 in
 mutual
 
 /-- **A statement's code does what the statement does**: both succeed, the
@@ -760,7 +769,7 @@ theorem stmt_sim : ∀ {Γ Γ' : Ctx} (s : Solidity.Stmt C Γ Γ') {L b : Nat} {
   | _, _, .assignMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
   | _, _, .deleteMem .. => fun _ hw _ => False.elim (Option.noConfusion hw)
   | _, _, .assignNew .. => fun _ hw _ => False.elim (Option.noConfusion hw)
-  | _, _, .tryCall .. => fun _ hw _ => False.elim (Option.noConfusion hw)
+  | _, _, .tryCall .. => fun _ hw _ => by rw [inFrag_tryCall] at hw; cases hw
   | _, _, .loop .. => fun _ hw _ => False.elim (Option.noConfusion hw)
   | _, _, .assignLocalPush .. => fun _ hw _ => False.elim (Option.noConfusion hw)
   | _, _, .pushOpAssign .. => fun _ hw _ => False.elim (Option.noConfusion hw)

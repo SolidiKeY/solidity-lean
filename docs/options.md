@@ -23,6 +23,8 @@ can never be read as one under another.
 | O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
 | O5 | `ignoringOverflow { … }` (`ignoringOF`): an overflowing run is assumed away | done |
 | O6 | clean array tails: the starting storage's shadows assumed ordinary defaults (`ValidTail .clean`) | done |
+| O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
+| O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -303,6 +305,169 @@ over another storage term, and indices that equal the live length only by
 arithmetic other than `+ 1 - 1`, are left as atoms (still exact, only not
 read as the default). `sol_close` (the `simp` closer) does not read the
 premise.
+
+## O7. The test runner reads callbacks
+
+**Decision.** `scripts/test-solidity.mjs` reports `proved` for a
+kernel-checked statement, and `⊢ N.f.problem` states `Valid`, bug 5
+included: `tests/solc/open`'s `trySuccessKeepsStorageUnsound` and
+`callKeepsStorageUnsound` were proved, and fail on the EVM, where the callee
+is the contract itself. So `testObligation` (`Frontend/Testing.lean`) states
+a plain obligation as `ValidT .noCallback N.f.problem` where both hold:
+
+* the function, a modifier it applies or a function it inlines holds a
+  `try` of a callee not declared `view` or `pure`, or a low-level
+  `call`/`delegatecall` (`SolcFun.writingCall`, read off solc's AST;
+  `ImportRow.writingCall`);
+* the obligation calls back (`Fml.callsBack false`, reduced by `whnf`; a
+  value that does not reduce counts as calling back).
+
+It is proved by `sol_prove` (O3), the goal read at the obligation's value
+and the declaration stated at `N.f.problem`. Elsewhere it stays
+`⊢ N.f.problem`: with nothing calling back `Valid` is the reading
+(`validT_noCallback_iff`).
+
+**Why the callee's mutability.** solc calls a `view` or `pure` function by
+`STATICCALL`, under which any state write reverts, so a `try` of one leaves
+the caller's storage and balance as they were: `Valid`'s reading is the
+EVM's there (`tryArgumentSideEffect`, `try id(postinc())`, stays proved).
+The model does not record the mutability (`ExtCall`, O1 "Not done": 5D),
+so this step is argued, not a theorem; and `Valid`'s oracle still answers
+two equal calls alike, which a `view` callee reading the caller's state
+between writes need not.
+
+**Where it lives.** In the runner alone: `N.f.problem` is still one table
+of formulas (`solc_scoped_problems`), the reading the statement's type. The
+TestSuite's derived theorems (`Solidity/TestSuite/Derived*.lean`) and
+`#solkey_derive?` stay `⊢ N.f.problem`, solkey's reading, as their
+documents say; `tests/solc/CallbackReading.sol` pins the four cases.
+
+## O8. Self-calls and address `0` 
+
+**Why.** solkey's solc/open ports `trySuccessRunsCallee`,
+`tryCatchExactReturn`, … call the contract itself
+(`try this.setIx() { assert(ix == 42); } catch {}`), which is true on the
+EVM; `Stmt.run` read every callee as the transaction's oracle (`TTx.ext`).
+And `callWithoutCodeReverts` relies on address `0` having no code.
+
+**The run** (`TRun.tryCall`, `Semantics/Run.lean`), in this order:
+
+1. the receiver is `0`: the caller reverts (no code there; a modelling
+   assumption, `docs/solc-alignment.md`);
+2. the receiver is `address(this)` and the statement carries the callee
+   (`Stmt.tryCall`'s `self`): its body runs as an inlined call with targets
+   (`TRun.call … (.rets rets)`), in a frame of its own; on success the
+   success clause runs from the callee's state with the returned values
+   bound; a revert runs the `Error` clause when the transaction's entry for
+   the call is `Error`, the catch-all otherwise (no revert data is kept);
+   a panic runs the `Panic` clause with the entry's code, `1` without one;
+   exhaustion and divergence halt the caller.  Storage, ledger and heap are
+   the caller's on every failure: a halted run has no state to keep;
+3. otherwise the oracle, as before.
+
+**The frame.** The elaborator (`trySelfBody`, `Syntax/Elab.lean`) inlines
+the callee as an internal call with targets and rewrites its environment
+(`RawStmt.selfFrame`): `msg.sender` is `address(this)`, `msg.value` is `0`
+(a `try` sends nothing), in the calls it inlines too.  The run needs no
+change of `TTx`.
+
+**Termination.** The callee is a function declared before the caller (the
+elaborator's `funs`, as for an internal call), whose parameter types are the
+arguments' and whose return types are the `try`'s binders; any other callee
+is the oracle's.  So the body is a subterm of the statement and `Stmt.run`
+stays structural, with no fuel.  A self-call of a later function, or of
+itself, is not run (reported as left).
+
+**The rule** (`LeanTaclet.tryCallSelfBox`, `trySelfStep`,
+`Calculus/Blocks.lean`; sound by `Premise.sound_trySelfBox`,
+`Calculus/SoundCalls.lean`).  solkey has none: its `try` never runs a
+callee.  Five goals, the run's case split written as `require`s:
+
+1. `require(a != 0); require(a == address(this)); f(args) → rets; ok`: the
+   callee inlined as a call with targets (`functionBodyExpand`), then the
+   success block;
+2. `∀ rets. require(a != 0); require(a != address(this)); ok`: the oracle;
+3.–5. each `catch` block from the caller's state, behind `fails(call)`:
+   `¬⟨ require(a == address(this)); f(args) → rets; ⟩ true`
+   (`ExtCall.selfFails`, the branch's `Branch.hyp`).  A `catch` is reached
+   from another contract's callee, where that `require` reverts, or from
+   the contract's own callee when it reverts or panics.
+
+`tryCallNoCallbackBox` (and its callback twin) now match only a `try` with
+no self body (`self = false`, the taclet notation writes it); it does not
+split on address `0`, which only makes its goals stronger.  The diamond is
+`false` either way (`tryCallSelfDiamond`).
+
+**The `catch` goals.** A box goal over the callee accepts its revert, so
+no goal of the five says that the callee ends normally: the `catch`
+goals carry it as a premise instead (`fails(call)` above), and the walks
+(`Seq.run`, `Walk.walk`, `CallbackWalk.walk`) take a premise `¬X` whose `X`
+reads a program by proving `X` in the goal's place (`Proves.notLeft`, KeY's
+`impRight; notLeft`), where the walk closes `X`, and drop it otherwise
+(`Proves.hideLeft`, `hide_left`): the closer reads no program in a
+context.  So `uint r; try this.g() returns (uint a) { r = a; } catch { r =
+9; } assert(r == 13);` proves where `g` always returns `13`
+(`tryCatchExactReturn`, `Examples/Tactics/SelfCall.lean`'s `gOneExact`).
+Soundness: `Premise.sound_trySelfBox` reads `fails(call)` off the run (the
+callee's `TRun.call` halted, or the receiver is another);
+`holdsC_trySelfCb` off the callback run, whose `catch` constructors now
+say why they are reached: `tryError`, `tryPanic`, `tryOther` only at
+another address for a self-call, `trySelfError`, `trySelfPanic`,
+`trySelfOther` after the callee's run halts (`Semantics/Callback.lean`).
+
+**A value call to `this`.** `(bool ok, ) = r.call{value: v}("")` with the
+contract's `receive` declared before the caller is elaborated as `bool se =
+r == address(this); if (se) { try this.receive{value: v}() { ok = true; }
+catch { ok = false; } } else { (ok, ) = r.call{value: v}(""); }`
+(`elabValueCall`, `receiveSelfBody`, `Syntax/Elab.lean`): `receive` inlined
+in a frame of its own whose `msg.sender` is the contract and whose
+`msg.value` is a parameter the call passes `v` (`ElabScope.selfValue`); every
+failure is `ok = false` with the caller's state, and a payment to oneself
+moves no ether (`State.pay` books nothing at `address(this)`), so the
+self-call books nothing.  The rules are `tryCallSelfBox`'s (`ProvesC.trySelf`
+with callbacks), whose soundness covers it; `Stmt.send` is unchanged.  A
+`receive` whose body calls a function that reads `msg.value` is not run (its
+frame has no such parameter): the call is then the oracle's, as before.
+`callRunsReceive` proves; `callKeepsStorageUnsound` stays open (false on the
+EVM: `Examples/Tactics/SelfCall.lean`'s `keepsStorage_invalid`).
+
+**The callback reading.** `ExecS` has three more constructors
+(`trySelfOk`, `trySelfHalt`, `trySelfViolated`): the callee's run as an
+inlined call, then the success block; its other outcomes are the existing
+`tryError`/`tryPanic`/`tryOther`.  So the deterministic run is still one
+of the callback runs (`Stmt.exec_run`).  A self-call reaches the oracle's
+`tryOk` (any state the callee may leave) only where the run does: at an
+address other than `0` and the contract's (`tryOk`'s last premise).
+
+`ProvesC.trySelf` (`Calculus/Callback.lean`, sound by `holdsC_trySelfCb`,
+`Calculus/CallbackSound.lean`; Lean only) is `tryCallSelfBox` read with
+callbacks, as `ProvesC.tryCall` reads `tryCallNoCallbackBox`: the invariant
+where control leaves ("invariant on exit"); `tryCallSelfBox`'s self goal,
+the callee inlined, whose own `try`s and payments may call back; the other
+receiver's goal after `{havoc}` with the invariant assumed; each `catch`
+goal from the caller's state.  `sol_prove`'s walk tries it before
+`tryCallWithCallbackBox` (`Calculus/CallbackDerive.lean`), so the runner's
+`ValidT .noCallback` reading (O7) proves a self-call `try` whose callee
+writes storage.
+
+**The runner.** `scripts/test-solidity.mjs --self-address A` declares every
+obligation with the premise `address(this) == A` (`Problem.selfPre`,
+`solc_scoped_problems N decl self A`), for solkey's ports, which pin a
+parameter to the harness's address instead of writing `this`.
+`tests/solc/SelfCalls.sol` writes the same claims with `this`.
+
+**Left.** A self-call of a function declared after the caller, or of
+itself; a `receive` whose callees read `msg.value`.
+
+**Speed.** A `try` of a function declared before the caller now carries a
+second copy of the callee's body (the elaborator inlines it once more), so
+such programs elaborate and kernel-check larger terms.  Each `catch` goal
+carries a third copy, in `fails(call)`, and the walk symbolically executes
+the callee once more per `catch` goal to prove it; a value call in a
+contract with a `receive` carries `receive`'s body and splits on the
+receiver.
+
+**Status.** Done but the items under *Left*.
 
 ## Review
 

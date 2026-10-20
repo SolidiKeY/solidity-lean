@@ -132,6 +132,7 @@ def tacletLine? (e s p m : Expr) (inv : Bool := false) :
     let s' ← whnf s
     let rule? := if inv && p'.isAppOf ``Premise.inv then some "whileInvariantBox"
       else Solidity.Taclet.labelledBy (labelHead s') (m.isConstOf ``Modality.diamond)
+        (s'.isAppOf ``Stmt.tryCall && s'.appArg!.isConstOf ``Bool.true)
     let labels := (do (← Solidity.Taclet.branchLabels.lookup (← rule?))).getD []
     let nativePush := s'.isAppOf ``Stmt.pushOpAssign || s'.isAppOf ``Stmt.pushIncDec
     let some p ← withOptions (fun o => o.setBool `pp.sol.pushArithmetic nativePush)

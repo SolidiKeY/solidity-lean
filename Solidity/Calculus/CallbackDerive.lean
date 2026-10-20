@@ -13,7 +13,8 @@ sequent of `ProvesC`, the strategy is a walk of `ProvesC`'s rules, one
 * a `transfer`, a `send` or a `try` that hands control to a callee that
   calls back: its callback taclet (`transferWithCallbackBox`,
   `sendWithCallbackBox`, `tryCallWithCallbackBox`; under the diamond
-  `sendWithCallbackDiamond`), solkey's goals;
+  `sendWithCallbackDiamond`), solkey's goals; a self-call `try`
+  `tryCallSelfBox`'s, read with callbacks (`ProvesC.trySelf`, Lean);
 * a gas-limited send (`pay` unset): `sendNoCallbackBox`'s or
   `sendNoCallbackDiamond`'s goals (`ProvesC.sendDet`, `ProvesC.sendDetD`); a
   block that calls back: its body (`ProvesC.block`); an internal call with no
@@ -39,9 +40,21 @@ namespace Solidity
 
 open Solidity (Modality)
 
+/-- The test runner's reading of `sol_prove` (`Frontend/Testing.lean`): it
+reports only whether a leaf is left, so the walk stops at the first. -/
+register_option sol.prove.stopAtOpen : Bool := {
+  defValue := false
+  descr := "sol_prove with callbacks: stop at the first leaf left open"
+}
+
 namespace CallbackWalk
 
 open Lean Elab Tactic Meta
+
+/-- A leaf is left and the walk stops there (`sol.prove.stopAtOpen`): the
+rest is left unwalked. -/
+def stopped (leaves : IO.Ref (Array MVarId)) : TacticM Bool := do
+  return sol.prove.stopAtOpen.get (← getOptions) && !(← leaves.get).isEmpty
 
 /-- The `ProvesC` rule of the `Proves` rule `c`, on a statement that hands
 control to nobody, and how many `rfl`s its side conditions take. -/
@@ -82,9 +95,12 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
               #[← `(tactic| apply $(← ProofTree.short ``ProvesC.sendD)
                 .$(mkIdent `sendWithCallbackDiamond):ident)]]
           | some ``Stmt.tryCall =>
+            -- a self-call (`self = true`): `tryCallSelfBox`'s goals with callbacks
+            let selfApp ← `(tactic| apply $(← ProofTree.short ``ProvesC.trySelf)
+              .$(mkIdent `tryCallSelfBox):ident)
             let app ← `(tactic| apply $(← ProofTree.short ``ProvesC.tryCall)
               .$(mkIdent `tryCallWithCallbackBox):ident)
-            pure #[#[← ProofTree.takeApart app]]
+            pure #[#[← ProofTree.takeApart selfApp], #[← ProofTree.takeApart app]]
           | some ``Stmt.assert => pure #[#[← ap ``ProvesC.assert]]
           | some ``Stmt.call => pure #[#[← ap ``ProvesC.callNone], #[← ap ``ProvesC.callRets]]
           | _ => pure #[]
@@ -118,17 +134,19 @@ def movesAt (g : MVarId) : MetaM (Array (Array (TSyntax `tactic))) := g.withCont
 
 /-- A `Proves` leaf closed as `sol_prove` closes one: `sol_leaf` and
 `sol_close` (`sol_spec_close` for a specification's), the invariant opened
-first where it is assumed. -/
-def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
-  let tries : Array (Array (TSyntax `tactic)) := #[
-    #[← `(tactic| exact $(← ProofTree.short ``Proves.assumeInv))],
-    #[← `(tactic| sol_leaf), ← `(tactic| sol_close)],
-    #[← `(tactic| refine $(← ProofTree.short ``Proves.openInv) ?_),
-      ← `(tactic| sol_leaf), ← `(tactic| sol_close)],
+first where it is assumed: where the invariant is `true` (`inv` unset),
+opening it changes nothing, and a failed try costs a closer's run. -/
+def closeLeaf (g : MVarId) (inv : Bool) : TacticM (Option (Array String)) := do
+  let openT ← `(tactic| refine $(← ProofTree.short ``Proves.openInv) ?_)
+  let leaf ← `(tactic| sol_leaf)
+  let close ← `(tactic| sol_close)
+  let spec ← `(tactic| sol_spec_close)
+  let tries : Array (Array (TSyntax `tactic)) :=
+    #[#[leaf, close], #[← `(tactic| exact $(← ProofTree.short ``Proves.assumeInv))]] ++
+    (if inv then #[#[openT, leaf, close]] else #[]) ++
     -- a specification's leaf (`spec[C]{f}`): `sol_spec_close`
-    #[← `(tactic| sol_leaf), ← `(tactic| sol_spec_close)],
-    #[← `(tactic| refine $(← ProofTree.short ``Proves.openInv) ?_),
-      ← `(tactic| sol_leaf), ← `(tactic| sol_spec_close)]]
+    #[#[leaf, spec]] ++
+    (if inv then #[#[openT, leaf, spec]] else #[])
   for tacs in tries do
     let s ← saveState
     let ok ← tryCatchRuntimeEx
@@ -140,7 +158,8 @@ def closeLeaf (g : MVarId) : TacticM (Option (Array String)) := do
 /-- The walk from the `ProvesC` goal `g`: its script and its leaves, as
 `Walk.walk` writes them. -/
 partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarId)
-    (close : Bool) : TacticM (Array String) := do
+    (close : Bool) (inv : Bool := true) : TacticM (Array String) := do
+  if ← stopped leaves then leaves.modify (·.push g); return #["sorry"]
   let n ← fuel.get
   if n == 0 then throwError "sol_derive: more than {Derive.fuel} steps"
   fuel.set (n - 1)
@@ -150,8 +169,10 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
     let fuel' ← IO.mkRef (← fuel.get)
     let ls ← IO.mkRef #[]
     let s ← saveState
-    -- a step that runs out of heartbeats leaves the goal, as a leaf
-    let some lines ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (Walk.walk fuel' ls g close))
+    -- a step that runs out of heartbeats leaves the goal, as a leaf; the
+    -- leaves are closed below, each try on its own heartbeats, not within
+    -- the walk's
+    let some lines ← tryCatchRuntimeEx (some <$> withCurrHeartbeats (Walk.walk fuel' ls g false))
         fun _ => do s.restore; pure none
       | leaves.modify (·.push g); return #["sorry"]
     fuel.set (← fuel'.get)
@@ -167,8 +188,8 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
         match rest with
         | l :: rs =>
           rest := rs
-          if close then
-            if let some cl ← closeLeaf l then
+          if close && !(← stopped leaves) then
+            if let some cl ← closeLeaf l inv then
               let pad := "".pushn ' ' (line.length - t.length)
               out := out ++ cl.mapIdx fun i c =>
                 pad ++ (if bullet then (if i == 0 then "· " else "  ") else "") ++ c
@@ -177,6 +198,30 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
         | [] => pure ()
       out := out.push line
     return out
+  -- `¬X → ψ`, `X` a program's, where something calls back: `X` proved
+  -- instead where the walk closes it (`notLeft`), else the premise hidden
+  -- (`hideLeft`), as `Walk.walk` does
+  if ← tryCatchRuntimeEx (withCurrHeartbeats (Walk.negModalGoal? g)) fun _ => pure false then
+    let s ← saveState
+    let pl ← `(tactic| refine $(← ProofTree.short ``ProvesC.plain) ?_ $(mkIdent `rfl):ident)
+    let viaPlain ← tryCatchRuntimeEx
+      (withCurrHeartbeats do return (← ProofTree.runOn g #[pl]).length == 1)
+      fun _ => pure false
+    s.restore
+    unless viaPlain do
+      let nl ← `(tactic| refine $(← ProofTree.short ``ProvesC.notLeft) ?_)
+      let r ← tryCatchRuntimeEx (do
+          let [gx] ← withCurrHeartbeats (ProofTree.runOn g #[nl]) | return none
+          let ls ← IO.mkRef #[]
+          let lines ← walk fuel ls gx true inv
+          return if (← ls.get).isEmpty then some lines else none)
+        fun _ => pure none
+      if let some lines := r then return (← ProofTree.tacLines nl) ++ lines
+      s.restore
+      let hl ← `(tactic| refine $(← ProofTree.short ``ProvesC.hideLeft) ?_)
+      let [g'] ← withCurrHeartbeats (ProofTree.runOn g #[hl])
+        | throwError "sol_derive: hideLeft failed"
+      return (← ProofTree.tacLines hl) ++ (← walk fuel leaves g' close inv)
   let mut step := none
   let moves ← tryCatchRuntimeEx (withCurrHeartbeats (movesAt g)) fun _ => pure #[]
   for tacs in moves do
@@ -189,11 +234,11 @@ partial def walk (fuel : IO.Ref Nat) (leaves : IO.Ref (Array MVarId)) (g : MVarI
   let some (tacs, gs) := step | leaves.modify (·.push g); return #["sorry"]
   let head := (← tacs.mapM fun t => (ProofTree.tacLines t : MetaM _)).flatten
   match gs with
-  | [g'] => return head ++ (← walk fuel leaves g' close)
+  | [g'] => return head ++ (← walk fuel leaves g' close inv)
   | gs =>
     let mut out := head
     for g' in gs do
-      let body ← walk fuel leaves g' close
+      let body ← walk fuel leaves g' close inv
       out := out ++ body.mapIdx fun i l => (if i == 0 then "· " else "  ") ++ l
     return out
 
@@ -228,7 +273,12 @@ def run (g : MVarId) (close : Bool) : TacticM (Option (Array String × List MVar
   let some (pre, g) ← start g | return none
   let fuel ← IO.mkRef Derive.fuel
   let leaves ← IO.mkRef #[]
-  let lines ← walk fuel leaves g close
+  -- an invariant `true` (`noCallback`'s default): opening it changes nothing
+  let ty ← instantiateMVars (← g.getType)
+  let inv ← match_expr ty with
+    | ProvesC _ I _ _ _ _ _ => pure !(← whnf I).isAppOf ``Fml.tt
+    | _ => pure true
+  let lines ← walk fuel leaves g close inv
   return some (pre ++ lines, (← leaves.get).toList)
 
 end CallbackWalk

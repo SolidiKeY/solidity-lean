@@ -1020,6 +1020,31 @@ theorem TWkRel.drop {Γ' Δ' : Ctx} {e : Ext Γ Γ'} {h : Thin Γ Δ} {e' : Ext 
       show (⟨(a.st.lift h' d').drop e', a.ext⟩ : Out C H Δ) = ⟨(a.st.drop e).lift h _, a.ext⟩
       simp only [State.lift, State.drop, State.withEnv, h1]
 
+/-- A clause run after a call: its scope ended, the call's heap growth
+carried in front (`TRun.tryCall`'s self-call). -/
+theorem TWkRel.dropCat {Γ₀ Γ' Δ' : Ctx} {e : Ext Γ Γ'} {h : Thin Γ Δ} {e' : Ext Δ Δ'}
+    {h' : Thin Γ' Δ'} (ho : Thin.Over e h e' h') (a : Out C H Γ₀)
+    {o : List ((t : LTy) × t.TDenote C H)} {X : TRes (Out C a.st.H Γ')}
+    {Y : TRes (Out C a.st.H Δ')} (hr : TWkRel h' (offWk a.ext o) X Y) :
+    TWkRel h o (X.map fun o' => (⟨o'.st.drop e, a.ext.trans o'.ext⟩ : Out C H Γ))
+      (Y.map fun o' => (⟨o'.st.drop e', a.ext.trans o'.ext⟩ : Out C H Δ)) := by
+  have hd := TWkRel.drop ho hr
+  revert hd
+  cases X with
+  | error => cases Y with
+    | error => exact id
+    | ok => exact fun h => h.elim
+  | ok x => cases Y with
+    | error => exact fun h => h.elim
+    | ok y =>
+      rintro ⟨d'', hd'', he⟩
+      refine ⟨d'', ?_, ?_⟩
+      · rw [hd'', offWk_trans]
+      · have := congrArg Out.st he
+        simp only [Out.drop] at this
+        show (⟨y.st.drop e', _⟩ : Out C H Δ) = ⟨(x.st.drop e).lift h d'', _⟩
+        simp only [this]
+
 /-- A loop body's run, related by `TWkRel.drop` and its background fixed,
 is a lifted turn of the loop (`TRun.loop`'s body). -/
 theorem loopTurn_lift {Γ₁ Δ₁ : Ctx} {e : Ext Γ Γ₁} {e' : Ext Δ Δ₁} {h : Thin Γ Δ}
@@ -1370,38 +1395,95 @@ theorem Stmt.run_wk : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → ∀ {Δ : Ctx} 
       fun a d' => TRun.afterReceiverPrefix_wk h (code.wk h).2.1 code.ext (code.wk h).2.2.ext
         (Prog.wk_over code h) code.runR (code.wk h).2.2.runR value a d'
         (Prog.run_wk code h (a.drop (.push .refl)) d'.2)
-  | _, _, .tryCall call rets ok err code pnc other, _, h, τ, d => by
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self, _, h, τ, d => by
     show TWkRel h (TEnv.off h d)
       (TRun.tryCall call rets ok.ext ok.runR err.ext err.runR code pnc.ext pnc.runR other.ext
-        other.runR τ)
+        other.runR sargs sbody.ext sbody.runR self τ)
       (TRun.tryCall (call.wk h) rets (ok.wk (Thin.keepAll _ h)).2.2.ext
         (ok.wk (Thin.keepAll _ h)).2.2.runR (err.wk h).2.2.ext (err.wk h).2.2.runR code
         (pnc.wk (Thin.keepAll _ h)).2.2.ext (pnc.wk (Thin.keepAll _ h)).2.2.runR
-        (other.wk h).2.2.ext (other.wk h).2.2.runR (τ.lift h d))
+        (other.wk h).2.2.ext (other.wk h).2.2.runR (sargs.wk h) sbody.ext sbody.runR self
+        (τ.lift h d))
     unfold TRun.tryCall
-    rw [ExtCall.keyT_wk, show (τ.lift h d).tx = τ.tx from rfl]
-    cases lookupBy (call.keyT τ) τ.tx.ext with
-    | none => rfl
-    | some o =>
-      cases o with
-      | ok vs =>
-        refine TWkRel.bind_same _ fun ⟨r, _⟩ => ?_
-        show TWkRel h _ (Except.map (Out.drop _) _) (Except.map (Out.drop _) _)
-        rw [show (τ.lift h d).env = TEnv.put h τ.env d from rfl, ← TEnv.put_keepAll h _ r r τ.env d]
-        have := TWkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over ok _))
-          (Prog.run_wk ok (Thin.keepAll _ h) (τ.withEnv (TEnv.append _ r τ.env))
-            (TEnv.append _ r d))
-        rwa [TEnv.off_keepAll] at this
-      | error => exact TWkRel.drop (Prog.wk_over err h) (Prog.run_wk err h τ d)
-      | panic c =>
-        let r : TEnv C τ.H _ := code.decodeT c
-        show TWkRel h _ (Except.map (Out.drop _) _) (Except.map (Out.drop _) _)
-        rw [show (τ.lift h d).env = TEnv.put h τ.env d from rfl, ← TEnv.put_keepAll h _ r r τ.env d]
-        have := TWkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over pnc _))
-          (Prog.run_wk pnc (Thin.keepAll _ h) (τ.withEnv (TEnv.append _ r τ.env))
-            (TEnv.append _ r d))
-        rwa [TEnv.off_keepAll] at this
-      | other => exact TWkRel.drop (Prog.wk_over other h) (Prog.run_wk other h τ d)
+    have ha : (call.wk h).addr.evalT (τ.lift h d) = call.addr.evalT τ := Simple.evalT_wk h τ d _
+    rw [ha, ExtCall.keyT_wk, show (τ.lift h d).tx = τ.tx from rfl]
+    have hok : ∀ r : TEnv C τ.H _, TWkRel h (TEnv.off h d)
+        ((ok.runR (τ.withEnv (TEnv.append _ r τ.env))).map
+          fun o => ⟨o.st.drop ((Ext.append _ _).trans ok.ext), o.ext⟩)
+        (((ok.wk (Thin.keepAll _ h)).2.2.runR ((τ.lift h d).withEnv
+          (TEnv.append _ r (τ.lift h d).env))).map
+          fun o => ⟨o.st.drop ((Ext.append _ _).trans (ok.wk (Thin.keepAll _ h)).2.2.ext),
+            o.ext⟩) := fun r => by
+      show TWkRel h _ (Except.map (Out.drop _) _) (Except.map (Out.drop _) _)
+      rw [show (τ.lift h d).env = TEnv.put h τ.env d from rfl, ← TEnv.put_keepAll h _ r r τ.env d]
+      have := TWkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over ok _))
+        (Prog.run_wk ok (Thin.keepAll _ h) (τ.withEnv (TEnv.append _ r τ.env))
+          (TEnv.append _ r d))
+      rwa [TEnv.off_keepAll] at this
+    have hpnc : ∀ c, TWkRel h (TEnv.off h d)
+        ((pnc.runR (τ.withEnv (TEnv.append _ (code.decodeT (H := τ.H) c) τ.env))).map
+          fun o => ⟨o.st.drop ((Ext.append _ _).trans pnc.ext), o.ext⟩)
+        (((pnc.wk (Thin.keepAll _ h)).2.2.runR ((τ.lift h d).withEnv
+          (TEnv.append _ (code.decodeT (H := (τ.lift h d).H) c) (τ.lift h d).env))).map
+          fun o => ⟨o.st.drop ((Ext.append _ _).trans (pnc.wk (Thin.keepAll _ h)).2.2.ext),
+            o.ext⟩) := fun c => by
+      let r : TEnv C τ.H _ := code.decodeT c
+      show TWkRel h _ (Except.map (Out.drop _) _) (Except.map (Out.drop _) _)
+      rw [show (τ.lift h d).env = TEnv.put h τ.env d from rfl, ← TEnv.put_keepAll h _ r r τ.env d]
+      have := TWkRel.drop (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over pnc _))
+        (Prog.run_wk pnc (Thin.keepAll _ h) (τ.withEnv (TEnv.append _ r τ.env))
+          (TEnv.append _ r d))
+      rwa [TEnv.off_keepAll] at this
+    have herr := TWkRel.drop (Prog.wk_over err h) (Prog.run_wk err h τ d)
+    have hoth := TWkRel.drop (Prog.wk_over other h) (Prog.run_wk other h τ d)
+    split
+    · rfl
+    split
+    · have hc := TRun.call_wk h τ d sargs (.rets rets) sbody.ext sbody.runR
+      change TWkRel (Thin.keepAll _ h) _ _
+        (TRun.call (sargs.wk h) (.rets rets) sbody.ext sbody.runR (τ.lift h d)) at hc
+      revert hc
+      generalize TRun.call sargs (.rets rets) sbody.ext sbody.runR τ = r₀
+      generalize TRun.call (sargs.wk h) (.rets rets) sbody.ext sbody.runR (τ.lift h d) = r
+      intro hc
+      cases r₀ with
+      | ok a =>
+        cases r with
+        | error => exact hc.elim
+        | ok b =>
+          obtain ⟨d', hd', rfl⟩ := hc
+          dsimp only
+          refine TWkRel.dropCat (Thin.Over.trans (Thin.Over.append h _) (Prog.wk_over ok _)) a ?_
+          rw [← hd']
+          exact Prog.run_wk ok (Thin.keepAll _ h) a.st d'
+      | error e =>
+        cases r with
+        | ok => exact hc.elim
+        | error e' =>
+          cases hc
+          cases e with
+          | revert =>
+            dsimp only
+            split
+            · exact herr
+            · exact hoth
+          | panic =>
+            have hp : TRun.selfPanicCode (call.wk h) (τ.lift h d) = TRun.selfPanicCode call τ := by
+              unfold TRun.selfPanicCode
+              rw [ExtCall.keyT_wk]
+              rfl
+            dsimp only
+            rw [hp]
+            exact hpnc _
+          | _ => rfl
+    · cases lookupBy (call.keyT τ) τ.tx.ext with
+      | none => rfl
+      | some o =>
+        cases o with
+        | ok vs => exact TWkRel.bind_same _ fun ⟨r, _⟩ => hok r
+        | error => exact herr
+        | panic c => exact hpnc c
+        | other => exact hoth
   | _, _, .loop a c body, _, h, τ, d => by
     apply TWkRel.of_eq
     show TLoop.run (fun o : Out C τ.H _ => ((body.wk h).2.2.runR o.st).map

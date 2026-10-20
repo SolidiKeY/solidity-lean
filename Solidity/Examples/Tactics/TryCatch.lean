@@ -17,7 +17,9 @@ reverting in the caller.  So a proof of a `try` has a goal per clause
 (`tryCallNoCallbackBox`): the success block for every value of the returned
 data, and each `catch` block from the state the call was made in.  A
 missing `Error`/`Panic` clause is the catch-all's block, and a missing
-catch-all `revert();`, as solkey's `TryStatement.of` normalises it.
+catch-all `revert();`, as solkey's `TryStatement.of` normalises it.  A callee that is a function of the contract
+itself does run when the receiver is `address(this)`
+(`Examples/Tactics/SelfCall.lean`); `Pinger` declares none.
 
 With callbacks (`tryCallWithCallbackBox`, `ProvesC.tryCall`) the contract
 also owes its invariant where control leaves, and its success block runs
@@ -42,7 +44,8 @@ open scoped Scoped
 /--
 info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {call : ExtCall C Γ} {x : Ctx} {rets : Binders x}
   {x_1 : Ctx} {body : Prog C (x ++ Γ) x_1} {x_2 : Ctx} {errorBody : Prog C Γ x_2} {x_3 : Ctx} {code : CodeBinder x_3}
-  {x_4 : Ctx} {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5},
+  {x_4 : Ctx} {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5} {x_6 : Ctx}
+  {selfArgs : Args C Γ x_6} {x_7 : Ctx} {selfBody : Prog C (x ++ x_6) x_7},
   dl{ [ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody; ] ⇝
     "call succeeded": ∀ rets. [ body ] ; "Error caught": [ errorBody ] ; "Panic caught": ∀ code. [ panicBody ] ;
       "other failure caught": [ otherBody ] }
@@ -52,7 +55,8 @@ info: @Taclet.tryCallNoCallbackBox : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {ca
 /--
 info: @LeanTaclet.tryCallDiamond : ∀ {C : Contract} {k : Nat} {Γ : Ctx} {call : ExtCall C Γ} {x : Ctx} {rets : Binders x}
   {x_1 : Ctx} {body : Prog C (x ++ Γ) x_1} {x_2 : Ctx} {errorBody : Prog C Γ x_2} {x_3 : Ctx} {code : CodeBinder x_3}
-  {x_4 : Ctx} {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5},
+  {x_4 : Ctx} {panicBody : Prog C (x_3 ++ Γ) x_4} {x_5 : Ctx} {otherBody : Prog C Γ x_5} {x_6 : Ctx}
+  {selfArgs : Args C Γ x_6} {x_7 : Ctx} {selfBody : Prog C (x ++ x_6) x_7},
   dl[LeanTaclet C k]{ ⟨ try call returns (rets) body catch Error errorBody catch Panic(code) panicBody catch otherBody;
     ⟩ ⇝ false }
 -/
@@ -286,7 +290,7 @@ theorem selfCall_noCallback : ¬ ValidT .noCallback selfCall := by
   have H := h (State.init Pinger) _
     (.cons (execOfRun rfl rfl)
       (.cons (ExecS.tryOk (st := pinger 0 0 42) (nt := []) (vs := []) (rest := [])
-        ?exit ?resume rfl .nil) .nil))
+        ?exit ?resume rfl .nil nofun) .nil))
   case exit => trivial
   case resume => trivial
   have H2 := H _ ExecF.nil

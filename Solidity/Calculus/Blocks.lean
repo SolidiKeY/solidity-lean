@@ -211,8 +211,62 @@ def tryStep (m : Modality) {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (rets : Bind
     (err : Prog C Γ Γ₂) (code : CodeBinder κ) (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) :
     Premise C Γ Γ :=
   match m with
-  | .box => .branches [⟨rets, ok⟩, ⟨Binders.nil, err⟩, ⟨code.binders, pnc⟩, ⟨Binders.nil, other⟩]
+  | .box => .branches [⟨rets, ok, none⟩, ⟨Binders.nil, err, none⟩, ⟨code.binders, pnc, none⟩,
+      ⟨Binders.nil, other, none⟩]
   | .diamond => .done false
+
+/-- A self-call's guards (`tryCallSelfBox`, Lean): the receiver has code
+(`a != 0`), is the contract (`a == address(this)`), is another (`a !=
+address(this)`). -/
+def ExtCall.hasCode {Γ : Ctx} (c : ExtCall C Γ) : Val C Γ .bool :=
+  .binop .neB rfl rfl (.simple c.addr) (.simple (.lit 0 rfl))
+
+def ExtCall.isSelf {Γ : Ctx} (c : ExtCall C Γ) : Val C Γ .bool :=
+  .binop .eqB rfl rfl (.simple c.addr) (.simple (.env .selfAddress rfl))
+
+def ExtCall.notSelf {Γ : Ctx} (c : ExtCall C Γ) : Val C Γ .bool :=
+  .binop .neB rfl rfl (.simple c.addr) (.simple (.env .selfAddress rfl))
+
+/-- What a self-call's `catch` block may assume (`trySelfStep`): the call
+does not end normally as a call to the contract itself, `¬⟨ require(a ==
+address(this)); f(args) → rets; ⟩ true`.  A `catch` is reached from another
+contract's callee, where the `require` reverts, or from the contract's own
+callee when it fails. -/
+def ExtCall.selfFails {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) : Fml C Γ :=
+  .not (.modal .diamond (.cons (.require call.isSelf)
+    (.cons (.call call.fn sargs (.rets rets) sbody) .nil)) .nil .tt)
+
+/-- `try …` whose callee is the contract's own (`self`, `docs/options.md`
+O8) under the box (`tryCallSelfBox`, Lean): the receiver being the contract,
+the callee's body inlined with the returned values as its targets and the
+success block after it; the receiver another, the success block for every
+value of the returned data; and each `catch` block from the state the call
+was made in, where the call does not end normally as a self-call
+(`ExtCall.selfFails`).  At address `0` both success goals hold vacuously
+(the `require`s revert). -/
+def trySelfStep {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
+    (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) : Premise C Γ Γ :=
+  let up := (call.wk (Thin.ofExt (Ext.append Γ ρ)))
+  let nx := some (call.selfFails rets sargs sbody)
+  .branches [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.isSelf)
+      (.cons (.call call.fn sargs (.rets rets) sbody) ok)), none⟩,
+    ⟨rets, .cons (.require up.hasCode) (.cons (.require up.notSelf) ok), none⟩,
+    ⟨Binders.nil, err, nx⟩, ⟨code.binders, pnc, nx⟩, ⟨Binders.nil, other, nx⟩]
+
+/-- A `try`'s rule (`Stmt.step`): `tryStep` for another contract's callee,
+`trySelfStep` under the box for the contract's own; `false` under the
+diamond either way. -/
+def tryStepS (m : Modality) {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) : Premise C Γ Γ :=
+  match self, m with
+  | false, m => tryStep m rets ok err code pnc other
+  | true, .box => trySelfStep call rets ok err code pnc other sargs sbody
+  | true, .diamond => .done false
 
 /-! ## The loop frame -/
 
@@ -303,7 +357,7 @@ def Stmt.within (μ : Mutability) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (ite := fun c thn els => c.readsIn μ && Prog.within μ thn && Prog.within μ els)
     (require := fun c => c.readsIn μ) (assert := fun c => c.readsIn μ) (revert := true) (assumeFalse := true)
     (call := fun _ args ret body => args.readsIn μ && ret.noMem && Prog.within μ body)
-    (tryCall := fun _ _ _ _ _ _ _ => false)
+    (tryCall := fun _ _ _ _ _ _ _ _ _ _ => false)
     (loop := fun _ c body => c.readsIn μ && Prog.within μ body)
     (block := fun body => Prog.within μ body)
     (callReceiver := fun _ _ _ _ _ => false)
@@ -337,7 +391,7 @@ def Stmt.writesAt (d : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → List (LTy × 
     (assignNew := fun _ _ _ => [])
     (ite := fun _ thn els => Prog.writesAt d thn ++ Prog.writesAt d els)
     (require := fun _ => []) (assert := fun _ => []) (revert := []) (assumeFalse := [])
-    (call := fun _ _ ret _ => ret.writesAt d) (tryCall := fun _ _ _ _ _ _ _ => [])
+    (call := fun _ _ ret _ => ret.writesAt d) (tryCall := fun _ _ _ _ _ _ _ _ _ _ => [])
     (loop := fun _ _ body => Prog.writesAt d body) (block := fun body => Prog.writesAt d body)
     (callReceiver := fun _ _ _ _ _ => [])
     (callReceiverPush := fun _ _ _ _ code _ => Prog.writesAt d code)

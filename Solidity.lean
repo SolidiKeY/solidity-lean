@@ -204,6 +204,7 @@ import Solidity.Examples.Tactics.Callback
 import Solidity.Examples.Tactics.CallbackStrategy
 import Solidity.Examples.Tactics.Contracts
 import Solidity.Examples.Tactics.TryCatch
+import Solidity.Examples.Tactics.SelfCall
 import Solidity.Examples.Notation
 import Solidity.Examples.Tactics.ApplySteps
 import Solidity.Examples.ChainNotation

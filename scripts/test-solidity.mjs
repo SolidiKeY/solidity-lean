@@ -64,16 +64,22 @@ function renameClause(renaming = {}) {
 /**
  * Compile each source once, discover all its contracts, and test each selected
  * function. Returns { results, errors }; pending is never a counterexample.
- * options: contract, function, list, timeoutMs, solkey, soljson, build.
+ * options: contract, function, list, timeoutMs, solkey, soljson, build, selfAddress.
  * The timeout bounds each compiler/Lean subprocess, including a whole contract.
  */
 export function runSolidityTests(paths, options = {}) {
   const files = solidityFiles(paths);
   if (!files.length) throw new Error("no Solidity files selected");
-  const timeoutMs = options.timeoutMs ?? 120000;
+  const timeoutMs = options.timeoutMs ?? 300000;
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs <= 0) throw new Error("timeout must be positive milliseconds");
   const batchSize = options.batchSize ?? 32;
   if (!Number.isSafeInteger(batchSize) || batchSize <= 0) throw new Error("batch size must be positive");
+  // `--self-address A`: every obligation assumes `address(this) == A` (`Problem.selfPre`)
+  let selfClause = '';
+  if (options.selfAddress !== undefined) {
+    if (!/^(0x[0-9a-fA-F]+|[0-9]+)$/.test(String(options.selfAddress))) throw new Error("self address must be a number");
+    selfClause = ` self ${BigInt(options.selfAddress).toString()}`;
+  }
   if (options.build !== false) runTool("lake", ["build", "Solidity.Frontend.Testing"], timeoutMs);
   const results = [], errors = [];
   for (const source of files) {
@@ -100,7 +106,7 @@ export function runSolidityTests(paths, options = {}) {
           const wrapper = join(scratch, "Test.lean");
           writeFileSync(wrapper, `import Solidity.Frontend.Testing
 solc_import "source.ast.json" hash 0x${hash.toString(16)} as ${name}${renameClause(options.renaming)} testing
-solc_scoped_problems ${name} decl
+solc_scoped_problems ${name} decl${selfClause}
 #solkey_test ${name}${options.function ? ` only ${leanString(options.function)}` : ""}${first === undefined ? '' : ` from ${first} count ${count}`}${listing ? " listing" : ""} to ${leanString(output)}
 `);
           // `lake lean` supplies the artifact-cache import map. `lake env lean`
@@ -153,14 +159,14 @@ function main(args) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--help") {
-      console.log("usage: node scripts/test-solidity.mjs [--json] [--list] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--no-build] FILE_OR_DIR ...");
+      console.log("usage: node scripts/test-solidity.mjs [--json] [--list] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--no-build] FILE_OR_DIR ...");
       return 0;
     } else if (arg === "--json") options.json = true;
     else if (arg === "--list") options.list = true;
     else if (arg === "--no-build") options.build = false;
-    else if (["--contract", "--function", "--timeout-ms", "--solkey", "--soljson"].includes(arg)) {
+    else if (["--contract", "--function", "--timeout-ms", "--solkey", "--soljson", "--self-address"].includes(arg)) {
       if (!args[i + 1] || args[i + 1].startsWith("--")) throw new Error(`${arg} needs a value`);
-      const key = arg === "--timeout-ms" ? "timeoutMs" : arg.slice(2);
+      const key = arg === "--timeout-ms" ? "timeoutMs" : arg === "--self-address" ? "selfAddress" : arg.slice(2);
       options[key] = arg === "--timeout-ms" ? Number(args[++i]) : args[++i];
     } else if (arg.startsWith("--")) throw new Error(`unknown option: ${arg}`);
     else paths.push(arg);

@@ -41,9 +41,11 @@ A parameter is bound at its type's 256-bit range (`PrimTy`), not at its
 width, and the body is elaborated at the width (`paramCtx`).  What the
 call's dispatcher checks before the body is a premise (`Problem.callPre`):
 a narrow integer or an enum parameter in its range, which solc's ABI
-decoder enforces, and `msg.value = 0` where the function is not `payable`
-and reads `msg.value`.  Each is stated only where it says something, so an
-obligation without them is unchanged.
+decoder enforces, `msg.value = 0` where the function is not `payable`
+and reads `msg.value`, and `msg.value < 2^128` where it is `payable` and
+reads it (a chain fact: the ether supply is below `2^128` wei).  Each is
+stated only where it says something, so an obligation without them is
+unchanged.
 
 * `#solkey_problem N.f` prints the statement in solkey's problem syntax
   (`Problem.text`), to compare with `--print-problem`: `N.f.problem`, or the
@@ -71,15 +73,27 @@ at the parameters `Γ`: `msg.value = 0` when `noValue` (a function that is
 not `payable` reverts on value in its dispatcher, as the specified
 obligation assumes, `Calculus/SurfaceSpec.lean`), and each bounded
 parameter in its range (the ABI decoder reverts on a narrow integer or an
-enum out of range).  An argument out of range never reaches the body, so
-the obligation holds of every call that does.  A premise that does not read
+enum out of range).  `msg.value < 2^128` when `boundValue` (a `payable`
+function that reads it: no transaction carries more than the ether supply,
+`etherBound`, a chain fact).  An argument out of range never reaches the
+body, so the obligation holds of every call that does.  A premise that does not read
 is `true`: the obligation is then stronger, never weaker. -/
 def Problem.callPre (C : Contract) (Γ : NCtx) (noValue : Bool)
-    (ranges : List (Var × Int × Int)) : Fml C Γ.ctx :=
-  let value : List (NRead C) := if noValue then [NRead.eq (.env .msgValue) (.num 0)] else []
+    (ranges : List (Var × Int × Int)) (boundValue : Bool := false) : Fml C Γ.ctx :=
+  let value : List (NRead C) := if noValue then [NRead.eq (.env .msgValue) (.num 0)]
+    else if boundValue then [NRead.cmp .lt (.env .msgValue) (.num etherBound)] else []
   let bounds : List (NRead C) := ranges.map fun (x, lo, hi) =>
     NRead.and (NRead.cmp .le (.num lo) (.pv x)) (NRead.cmp .le (.pv x) (.num hi))
   match NRead.conj (value ++ bounds) Γ with
+  | .ok φ => φ
+  | .error _ => .tt
+
+/-- **Where the contract is deployed**, an opt-in premise
+(`solc_scoped_problems N self A`, `scripts/test-solidity.mjs --self-address`):
+`address(this) == A`, so that a call to a parameter pinned to the harness's
+address `A` is a call to the contract itself (`docs/options.md` O8). -/
+def Problem.selfPre (C : Contract) (Γ : NCtx) (A : Nat) : Fml C Γ.ctx :=
+  match NRead.conj [NRead.eq (.env .selfAddress) (.num A)] Γ with
   | .ok φ => φ
   | .error _ => .tt
 
@@ -99,7 +113,7 @@ the import does not compile it, and `sol_prove` evaluates the statement
 with compiled code (`Symex.evaluable`).  `none`
 where solkey states no plain obligation (the tag) or a parameter is of no
 value type. -/
-def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
+def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) (selfAddr : Option Nat := none) :
     Except String (Option Expr) := do
   let some m := r.tag.modality? | return none
   unless r.params.length == r.paramTypes.length do
@@ -123,13 +137,21 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
     else mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.wt) c Γe, modal]
   -- the call's premise, only where it says something: a function that is
   -- not `payable` and reads `msg.value`, a parameter the decoder bounds
-  let noValue := !r.payable && r.name != "constructor" &&
-    (v.find? (·.isConstOf ``EnvKey.msgValue)).isSome
+  let readsValue := (v.find? (·.isConstOf ``EnvKey.msgValue)).isSome
+  let noValue := !r.payable && r.name != "constructor" && readsValue
+  -- a payable function's `msg.value`, below the ether supply where it is read
+  let boundValue := r.payable && readsValue
   let ranges : List (Var × Int × Int) := r.paramRanges.map fun (x, b) => (Var.ofName x, b)
-  let body := if noValue || !ranges.isEmpty then
+  let body := if noValue || boundValue || !ranges.isEmpty then
       mkAppN (mkConst ``Fml.imp) #[c, Γe,
-        mkAppN (mkConst ``Problem.callPre) #[c, toExpr Γ, toExpr noValue, toExpr ranges], body]
+        mkAppN (mkConst ``Problem.callPre) #[c, toExpr Γ, toExpr noValue, toExpr ranges,
+          toExpr boundValue], body]
     else body
+  -- the deployment address, when the run asks for it (`Problem.selfPre`)
+  let body := match selfAddr with
+    | some A => mkAppN (mkConst ``Fml.imp) #[c, Γe,
+        mkAppN (mkConst ``Problem.selfPre) #[c, toExpr Γ, toExpr A], body]
+    | none => body
   let body := if r.paramTypes.any (fun t => t matches .alias _ | .mem _) then
       mkAppN (mkConst ``Fml.imp) #[c, Γe, mkApp2 (mkConst ``Fml.refInputs) c Γe, body]
     else body
@@ -144,7 +166,8 @@ def obligation (env : Environment) (N : Lean.Name) (r : ImportRow) :
 /-- Declare each obligation of the import `N`, `N.f.problem : Fml N []`
 (`obligation`), as the entries of one declaration `N.problems`; compiled
 when `compile`.  How many. -/
-def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
+def declareObligations (N : Lean.Name) (compile : Bool) (selfAddr : Option Nat := none) :
+    CommandElabM Nat := do
   let rows ← reportRows N
   let nilCtx := ctxE []
   let fmlTy := mkApp2 (mkConst ``Fml) (mkConst N) nilCtx
@@ -153,7 +176,7 @@ def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
   let mut entries : Array (Lean.Name × Expr) := #[]
   for r in rows do
     unless r.status == .elaborated do continue
-    match obligation env N r with
+    match obligation env N r selfAddr with
     | .error e => errs0 := errs0.push e
     | .ok none => pure ()
     | .ok (some φ) => entries := entries.push (r.declName N ++ `problem, φ)
@@ -188,13 +211,16 @@ def declareObligations (N : Lean.Name) (compile : Bool) : CommandElabM Nat := do
 /-- `solc_scoped_problems N`: each obligation `N.f.problem : Fml N []`
 (`obligation`), an entry of one table `N.problems`, compiled, or with
 `decl` not compiled (the scoped `sol_prove` reads an obligation by its
-value, `Symex.evaluable`); an info names how many. -/
-syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")? : command
+value, `Symex.evaluable`); with `self A`, each assuming `address(this) == A`
+(`Problem.selfPre`); an info names how many. -/
+syntax (name := solcScopedProblems) "solc_scoped_problems " ident (&" decl")?
+  (&" self " num)? : command
 
 @[command_elab solcScopedProblems]
 def elabSolcScopedProblems : CommandElab := fun stx => do
   let N ← liftCoreM <| realizeGlobalConstNoOverloadWithInfo stx[1]
-  let k ← declareObligations N stx[2].isNone
+  let selfAddr := if stx[3].isNone then none else stx[3][1].isNatLit?
+  let k ← declareObligations N stx[2].isNone selfAddr
   logInfo m!"{k} obligation{if k == 1 then "" else "s"} declared scoped"
 
 /-- `N.f`'s statement, as compiled code evaluates it: `N.f.problem` (its

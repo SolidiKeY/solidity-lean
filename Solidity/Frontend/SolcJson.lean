@@ -151,6 +151,8 @@ structure SolcFun where
   /-- Declared `payable`: what a constructor's member keeps (`Contract.deploy`
   refuses value sent to one that is not). -/
   payable : Bool := false
+  /-- It, a modifier it applies or a function it calls holds a `writingCall`. -/
+  writingCall : Bool := true
   /-- The parameters the ABI decoder bounds below their `PrimTy`'s range: a
   narrow integer's, an enum's members (name, least, greatest value). -/
   paramRanges : List (String × Int × Int) := []
@@ -1445,6 +1447,19 @@ def callees (ids : List Int) (f : Json) (freeFunctions : List Int := [])
       else []
     rs.foldl (init := acc) fun acc r => if ids.contains r && !acc.contains r then acc ++ [r] else acc
 
+/-- Whether `f` holds a call whose callee may write the caller's state, as
+`docs/options.md`'s O7 reads it: a `try` of a callee not declared `view` or
+`pure` (those solc calls by `STATICCALL`, which cannot write any state), or
+a low-level `call`/`delegatecall` (a value call among them). -/
+def writingCall (f : Json) : Bool :=
+  (J.nodes f).any fun n =>
+    (J.kind n == "TryStatement" &&
+      !(((J.opt n "externalCall").bind (J.opt · "expression")).any fun e =>
+        let ws := (J.tyStr e).splitOn " "
+        ws.contains "pure" || ws.contains "view")) ||
+    (J.kind n == "MemberAccess" &&
+      ["call", "delegatecall"].contains ((J.str? n "memberName").getD ""))
+
 /-- The functions `f` reaches through `calls`, callees first and `f` last,
 added to `done`; or a function on a cycle.  Each level adds a function to
 `path`, so one more than the number of functions is enough `fuel`. -/
@@ -1894,6 +1909,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
       line := J.line f, tag := (tag.toOption).getD .malformed,
       params := (ps.toOption).getD [], rets := (rs.toOption).getD [],
       payable := J.str? f "stateMutability" == some "payable",
+      writingCall := writingCall f || (modifierInvocations f).any fun m =>
+        ((modifierId m).bind fun id => modifierDefs.find? (J.id? · == some id)).all writingCall,
       paramRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
         if let some n := ((J.opt p "typeName").bind J.ref?).bind (lookupBy · enumBounds) then
           return (x, 0, n)
@@ -1945,7 +1962,8 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
               | .unsupported m _ => .unsupported s!"it calls `{nameAt c}`, which is left out: {m}" r.line)
         pure ss
     let cs := ((reach calls (ids.length + 1) [] [] i).toOption.getD []).dropLast
-    { r with body, calls := cs.map nameAt }
+    let writes := r.writingCall || cs.any fun c => (lookupBy c byId).all (·.writingCall)
+    { r with body, calls := cs.map nameAt, writingCall := writes }
   let closed : List (Int × SolcFun) := byId.map fun (i, r) => (i, withCalls i r)
   let order := ids.foldl (fun done i => (reach calls (ids.length + 1) [] done i).toOption.getD done) []
   let called := (ownIds.flatMap fun i =>

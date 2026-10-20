@@ -283,6 +283,10 @@ macro drops it (the proof tree's label table prints it). -/
 declare_syntax_cat dl_branch (behavior := both)
 syntax (str ": ")? ("∀ " ident ". ")? "⟨" "[ " sol_block " ]" "⟩" : dl_branch
 syntax (str ": ")? ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
+/-- A self-call's `catch` goal (`trySelfStep`, Lean): `fails(call) →`, where
+the call does not end normally as a call to the contract itself
+(`ExtCall.selfFails`).  Printed only: no taclet is declared with it. -/
+syntax (str ": ")? &"fails" "(" ident ")" " → " ("∀ " ident ". ")? "[ " sol_block " ]" : dl_branch
 /-- Goals, one per branch (`Premise.branches`), separated by `;`. -/
 syntax dl_branch " ; " sepBy1(dl_branch, " ; ") : dl_premise
 /-- One goal of `Premise.cases`, with solkey's label: a formula to prove, or
@@ -939,7 +943,9 @@ def schemaTry (stx : TSyntax `sol_stmt) : MacroM Lean.Term := do
   let other ← match o with
     | `(sol_catch| catch $b:sol_block) => block b
     | _ => Macro.throwErrorAt o "`catch otherBody`"
-  `(Stmt.tryCall $call $rets $(← block ok) $err $code $pnc $other)
+  -- another contract's callee: the self-call's parts unused (`Stmt.tryCall`'s `self`)
+  `(Stmt.tryCall $call $rets $(← block ok) $err $code $pnc $other $(mkIdent `selfArgs)
+      $(mkIdent `selfBody) false)
 
 /-- A taclet's `/// @custom:key` clauses above `while`: the annotation written
 (`unwind 0`, `unwind n`, `unwind n + 1`, `invariant inv` with any `dec`, or
@@ -1728,7 +1734,7 @@ def schemaBranch (fresh : Bool) (Γ : Scope) (b : TSyntax `dl_branch) : MacroM L
       if stemOf x.getId.toString == "code" then
         `($(Lean.mkCIdent `Solidity.CodeBinder.binders) $x)
       else pure x
-  `($(Lean.mkCIdent `Solidity.Branch.mk) $xs $(← schemaBlock fresh Γ blk))
+  `($(Lean.mkCIdent `Solidity.Branch.mk) $xs $(← schemaBlock fresh Γ blk) none)
 
 /-- The identifiers of a `\find`, outside `‹…›`. -/
 partial def findIdents : Lean.Syntax → Array Ident

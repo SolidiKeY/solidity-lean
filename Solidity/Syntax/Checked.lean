@@ -336,8 +336,9 @@ end of its prefix. -/
 def Stmt.withOF {Γ Γ' : Ctx} (o : OFMode) : Stmt C Γ Γ' → Stmt C Γ Γ'
   | .ite c thn els => .ite c (thn.withOF o) (els.withOF o)
   | .call f args ret body => .call f args ret (body.withOF o)
-  | .tryCall call rets ok err code pnc other =>
+  | .tryCall call rets ok err code pnc other sargs sbody self =>
     .tryCall call rets (ok.withOF o) (err.withOF o) code (pnc.withOF o) (other.withOF o)
+      sargs (sbody.withOF o) self
   | .loop a c body =>
     .loop a c ((body.withOF o).snocGuard o ((c.wk (Thin.ofExt body.ext)).guard))
   | .block body => .block (body.withOF o)
