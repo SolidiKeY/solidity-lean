@@ -18,7 +18,8 @@ goes on along no mapping key, reads the default word and the length `0`.
 collects, along a path, `i < obsL(q)` for each unchecked index step
 `q[i]` into a dynamic array with no mapping key step after it (a member and
 a checked index pass, a key step stops the fold); `LTm.ctFold` rewrites each
-atom `obsW(p)` to `p; (c₁ ? … (cₙ ? obsW(p) : 0) … : 0)` over them, and
+atom `obsW(p)` to `p; (c₁ ? … (cₙ ? obsW(p) : 0) … : 0)` over them, each
+test a key comparison `cᵢ = true` the closer splits on (`LTm.pick`), and
 `obsL(p)` the same with `0` (`guardWith`), leaving the atom alone where
 there is no guard.  It keeps what a term reads under the premise
 (`LTm.ctFold_eval`).
@@ -268,7 +269,7 @@ def guardWith {T : Ty} {p : PrimTy} (cs : List (LTm C (.val .bool))) (q : LTm C 
     (a d : LTm C (.val p)) : LTm C (.val p) :=
   bif cs.isEmpty then a
   else bif cs.any LTm.isFF then .seq q d
-  else .seq q (cs.foldr (fun c acc => .app3 .ite c acc d) a)
+  else .seq q (cs.foldr (fun c acc => .kite c (.lit (p := .bool) true) acc d) a)
 
 /-- `LTm.ctFold`'s compiled twin. -/
 def LTm.ctFoldM : {s : Srt} → LTm C s → LTm C s
@@ -526,14 +527,15 @@ theorem guardWith_eval {T : Ty} {p : PrimTy} (cs : List (LTm C (.val .bool)))
     ((guardWith cs q a d).eval g ν : Option p.Denote) = a.eval g ν := by
   have key : ∀ cs' : List (LTm C (.val .bool)), (∀ c ∈ cs', ∃ b, (c.eval g ν : Option Bool) = some b ∧
       (b = false → (a.eval g ν : Option p.Denote) = d.eval g ν)) →
-      ((cs'.foldr (fun c acc => .app3 .ite c acc d) a).eval g ν : Option p.Denote) = a.eval g ν := by
+      ((cs'.foldr (fun c acc => .kite c (.lit (p := .bool) true) acc d) a).eval g ν :
+        Option p.Denote) = a.eval g ν := by
     intro cs'
     induction cs' with
     | nil => intro _; rfl
     | cons c cs' ih =>
       intro h
       obtain ⟨b, hb, hf⟩ := h c List.mem_cons_self
-      rw [List.foldr_cons, LTm.eval_app3, hb]
+      rw [List.foldr_cons, LTm.eval_kite, hb]
       cases b
       · exact (hf rfl).symm
       · exact ih fun c' h' => h c' (List.mem_cons_of_mem _ h')
