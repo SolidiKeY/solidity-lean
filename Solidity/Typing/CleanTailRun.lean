@@ -1492,4 +1492,233 @@ theorem ckeeps_assignNew {g : Bool} {R : RefTy} (l : NewLhs C Γ R) (n : Simple 
 
 end Leaves
 
+/-! ## The check -/
+
+/-- A receiver's `push`. -/
+def ReceiverOp.isPush {Γ : Ctx} {E : Ty} : ReceiverOp C Γ E → Bool
+  | .push .. => true
+  | .pop => false
+
+mutual
+
+/-- **Exposes nothing**, from a context where a caller may hold an alias
+(`outer`): a statement that may shrink an array of references (an
+assignment or a `delete` of a reference, a copy out of memory, a `pop` of
+references) is taken only where no alias is in scope, here or in a caller,
+so no alias is ever left past a live end.  A recursive call is not
+unfolded: it fails the check. -/
+def Stmt.ctSafe : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool → Bool
+  | Γ, _, s, outer =>
+    let g := outer || Γ.hasAlias
+    Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
+    (assign := @fun _ T _ _ => T.isPrimitive || !g) (rebind := fun _ _ => true)
+    (assignLocal := fun _ _ => true)
+    (declLocal := fun _ _ _ => true) (declStorage := fun _ _ _ => true)
+    (opAssign := fun _ _ _ _ _ => true) (incDec := fun _ _ _ => true)
+    (assignIncDec := fun _ _ _ _ _ => true) (assignLocalPush := fun _ _ => true)
+    (pushOpAssign := fun _ _ _ _ _ => true) (pushIncDec := fun _ _ _ => true)
+    (push := fun _ _ _ => true) (pop := @fun _ E _ => E.isPrimitive || !g)
+    (transfer := fun _ _ => true) (send := fun _ _ _ _ => true)
+    (declMem := fun _ _ _ _ _ => true) (rebindMem := fun _ _ => true)
+    (assignFromMem := fun _ _ => !g) (assignMem := fun _ _ => true)
+    (delete := @fun _ T _ => T.isPrimitive || !g) (deleteMem := fun _ _ => true)
+    (assignNew := fun l _ _ => !l.isStore || !g)
+    (ite := fun _ thn els => Prog.ctSafe thn outer && Prog.ctSafe els outer)
+    (require := fun _ => true) (assert := fun _ => true) (revert := true) (assumeFalse := true)
+    (call := fun _ _ _ body => Prog.ctSafe body g)
+    (callReceiver := @fun _ _ _ E _ _ _ body op =>
+      Prog.ctSafe body g && (op.isPush || E.isPrimitive || !g))
+    (callReceiverPush := fun _ _ _ body code _ => Prog.ctSafe body g && Prog.ctSafe code true)
+    (tryCall := fun _ _ ok err _ pnc other _ sbody _ =>
+      Prog.ctSafe ok outer && Prog.ctSafe err outer && Prog.ctSafe pnc outer &&
+        Prog.ctSafe other outer && Prog.ctSafe sbody g)
+    (callRec := fun _ _ _ _ _ => false)
+    (loop := fun _ _ body => Prog.ctSafe body outer) (block := fun body => Prog.ctSafe body outer)
+  termination_by structural _ _ s => s
+
+def Prog.ctSafe : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool → Bool
+  | _, _, P, outer => Prog.casesOn (motive_2 := fun _ _ _ => Bool) P true
+      (fun s P => Stmt.ctSafe s outer && Prog.ctSafe P outer)
+  termination_by structural _ _ P => P
+
+end
+
+/-- **A program that exposes nothing**: run where nobody holds an alias. -/
+def Prog.exposesNone {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Bool := P.ctSafe false
+
+theorem ctSafe_or {a o h : Bool} (H : (a || !(o || h)) = true) :
+    a = true ∨ ((o || h) = false ∧ h = false) := by
+  cases a <;> cases o <;> cases h <;> simp_all
+
+/-! ## Receivers -/
+
+section Receivers
+
+variable {Γ : Ctx}
+
+theorem ckeeps_callReceiver {g : Bool} {ps Γf : Ctx} {E : Ty} (args : Args C Γ ps) (r : Var)
+    (h : Ext ([.alias (.array E)] ++ ps) Γf) {body : TStep C ([.alias (.array E)] ++ ps) Γf}
+    (op : ReceiverOp C Γ E) (hb : CKeeps g body) (hg : Γ.hasAlias = true → g = true)
+    (hop : op.isPush = true ∨ E.isPrimitive = true ∨ g = false) :
+    CKeeps g (TRun.callReceiver args r h body op) := by
+  intro σ o hσ hr
+  rw [TRun.callReceiver_eq_seq] at hr
+  refine CKeeps.seq (CKeeps.call args (.storage _ r) h hb hg) ?_ σ o hσ hr
+  cases op with
+  | push v _ =>
+    exact CKeeps.weaken ((ckeeps_push (g := true) (.alias .here)
+      (v.map (·.wk (.drop .refl)))).drop (.push .refl)) fun _ => rfl
+  | pop =>
+    rcases hop with hop | hop | hop
+    · exact nomatch hop
+    · exact CKeeps.weaken ((ckeeps_pop (g := true) (.alias .here) (Or.inl hop)).drop
+        (.push .refl)) fun _ => rfl
+    · subst hop
+      intro τ o' hτ ho'
+      obtain ⟨o₁, hr₁, rfl⟩ := tmap_ok_inv ho'
+      obtain ⟨st, e, hs, _⟩ := pop_ct hτ (.alias .here) hr₁
+      have ha : Γ.hasAlias = false := by
+        cases ha : Γ.hasAlias
+        · rfl
+        · exact absurd (hg ha) (by simp only [Bool.false_eq_true, not_false_eq_true])
+      refine ⟨⟨?_, env_noAlias _ ha _⟩, nofun⟩
+      show (o₁.st.drop _).storage.All cleanTailH
+      rw [e]; exact hs
+
+theorem ckeeps_callReceiverPush {g : Bool} {ps Γf Γv : Ctx} {E : Ty} (args : Args C Γ ps)
+    (r : Var) (hb : Ext ([.alias (.array E)] ++ ps) Γf)
+    {body : TStep C ([.alias (.array E)] ++ ps) Γf} (he : Ext Γ Γv) {code : TStep C Γ Γv}
+    (value : Src C Γv E) (hbody : CKeeps g body) (hcode : CKeeps true code)
+    (hg : Γ.hasAlias = true → g = true) :
+    CKeeps g (TRun.callReceiverPush args r hb body he code value) := by
+  intro σ o hσ hr
+  rw [TRun.callReceiverPush_eq_seq] at hr
+  refine CKeeps.seq (CKeeps.call args (.storage _ r) hb hbody hg) ?_ σ o hσ hr
+  intro τ v hτ hv
+  unfold TRun.afterReceiverPrefix at hv
+  obtain ⟨ref, href, hv⟩ := tbind_ok_inv hv
+  have hl : τ.storage.LiveAll ref := SPath.resolveT_liveAll τ hτ.2 (.alias .here) href
+  unfold TRun.pushAfterPrefix at hv
+  obtain ⟨a, ha, hv⟩ := tbind_ok_inv hv
+  have hτ' : CTInv (τ.drop (.push .refl)) := hτ.drop _
+  have h1 := hcode _ a hτ' ha
+  have hl' : a.st.storage.LiveAll ref := h1.2 rfl ref hl
+  obtain ⟨w, hw, hv⟩ := tbind_ok_inv hv
+  split at hv
+  · exact nomatch hv
+  · obtain ⟨st, hst, hv⟩ := tbind_ok_inv hv
+    cases hv
+    have hst' := TRes.ofOpt_ok hst
+    have hgr : a.st.storage.Grows st := Storage.push_grows hst'
+    have hx : w.strip.All cleanTailH :=
+      SVal.strip_all cleanTailH_stripOK (Src.valueT_ct h1.1.1 value hw)
+    refine ⟨(h1.1.withStorage (Storage.push_ct h1.1.1 hl' (fun _ y _ hy => by
+      cases hy; exact hx) hst') fun _ => hgr).drop he, fun _ => ?_⟩
+    exact Storage.Grows.trans (h1.2 rfl) hgr
+
+end Receivers
+
+/-! ## Every statement that passes the check keeps the invariant -/
+
+mutual
+
+/-- **A statement that exposes nothing keeps clean tails**, its aliases
+live, and every live reference live where an alias may be held around it. -/
+theorem Stmt.keeps_ct : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → (outer : Bool) →
+    s.ctSafe outer = true → CKeeps (outer || Γ.hasAlias) (Stmt.runR s)
+  | _, _, .assign l r, _, h => ckeeps_assign l r (ctSafe_or h)
+  | _, _, .rebind i r, _, _ => ckeeps_rebind i r
+  | _, _, .assignLocal i r, _, _ => ckeeps_assignLocal i r
+  | _, _, .declLocal p _ init, _, _ => ckeeps_declLocal p init
+  | _, _, .declStorage R _ init, _, _ => ckeeps_declStorage R init
+  | _, _, .opAssign op _ _ l r, _, _ => ckeeps_opAssign op l r
+  | _, _, .incDec op _ l, _, _ => ckeeps_incDec op l
+  | _, _, .pushOpAssign op _ _ b r, _, _ => ckeeps_pushOpAssign op b r
+  | _, _, .pushIncDec op _ b, _, _ => ckeeps_pushIncDec op b
+  | _, _, .assignIncDec i op _ l _, _, _ => ckeeps_assignIncDec i op l
+  | _, _, .assignLocalPush i b, _, _ => ckeeps_assignLocalPush i b
+  | _, _, .push b v _, _, _ => ckeeps_push b v
+  | _, _, .pop b, _, h => ckeeps_pop b (ctSafe_or h)
+  | _, _, .transfer r a, _, _ => ckeeps_transfer r a
+  | _, _, .send pv r a _, _, _ => ckeeps_send pv r a
+  | _, _, .declMem R _ init _ hm, _, _ => ckeeps_declMem R init hm
+  | _, _, .rebindMem i r, _, _ => ckeeps_rebindMem i r
+  | Γ, _, .assignFromMem l p, outer, h => by
+    have h' : (outer || Γ.hasAlias) = false := by
+      simpa only [Stmt.ctSafe, Bool.not_eq_eq_eq_not, Bool.not_true] using h
+    rw [h']
+    exact ckeeps_assignFromMem l p (by cases outer <;> simp_all)
+  | _, _, .assignMem l r, _, _ => ckeeps_assignMem l r
+  | _, _, .delete l, _, h => ckeeps_delete l (ctSafe_or h)
+  | _, _, .deleteMem p _, _, _ => ckeeps_deleteMem p
+  | Γ, _, .assignNew l n hn, outer, h => by
+    refine ckeeps_assignNew l n hn ?_
+    have h' : (!l.isStore || !(outer || Γ.hasAlias)) = true := h
+    cases hl : l.isStore <;> cases outer <;> cases ha : Γ.hasAlias <;> simp_all
+  | Γ, _, .ite c thn els, outer, h => by
+    have h' : (Prog.ctSafe thn outer && Prog.ctSafe els outer) = true := h
+    rw [Bool.and_eq_true] at h'
+    exact CKeeps.ite c thn.ext els.ext (Prog.keeps_ct thn outer h'.1)
+      (Prog.keeps_ct els outer h'.2)
+  | _, _, .require c, _, _ => CKeeps.require c
+  | _, _, .assert c, _, _ => CKeeps.assert c
+  | _, _, .revert, _, _ => CKeeps.halt .revert
+  | _, _, .assumeFalse, _, _ => CKeeps.halt .exhausted
+  | Γ, _, .call _ args ret body, outer, h => by
+    have h' : Prog.ctSafe body (outer || Γ.hasAlias) = true := h
+    exact CKeeps.call args ret body.ext
+      ((Prog.keeps_ct body _ h').weaken fun hg => by rw [hg, Bool.true_or])
+      fun ha => by rw [ha, Bool.or_true]
+  | _, _, .callRec .., _, h => nomatch h
+  | Γ, _, .callReceiver _ args r body op, outer, h => by
+    have h' : (Prog.ctSafe body (outer || Γ.hasAlias) &&
+        (op.isPush || _ || !(outer || Γ.hasAlias))) = true := h
+    rw [Bool.and_eq_true] at h'
+    refine ckeeps_callReceiver args r body.ext op
+      ((Prog.keeps_ct body _ h'.1).weaken fun hg => by rw [hg, Bool.true_or])
+      (fun ha => by rw [ha, Bool.or_true]) ?_
+    have h2 := h'.2
+    revert h2
+    cases op.isPush <;> cases outer <;> cases Γ.hasAlias <;> simp
+  | Γ, _, .callReceiverPush _ args r body code value, outer, h => by
+    have h' : (Prog.ctSafe body (outer || Γ.hasAlias) && Prog.ctSafe code true) = true := h
+    rw [Bool.and_eq_true] at h'
+    exact ckeeps_callReceiverPush args r body.ext code.ext value
+      ((Prog.keeps_ct body _ h'.1).weaken fun hg => by rw [hg, Bool.true_or])
+      ((Prog.keeps_ct code true h'.2).weaken fun _ => rfl)
+      (fun ha => by rw [ha, Bool.or_true])
+  | Γ, _, .tryCall call rets ok err code pnc other sargs sbody self, outer, h => by
+    have h' : (Prog.ctSafe ok outer && Prog.ctSafe err outer && Prog.ctSafe pnc outer &&
+        Prog.ctSafe other outer && Prog.ctSafe sbody (outer || Γ.hasAlias)) = true := h
+    simp only [Bool.and_eq_true] at h'
+    obtain ⟨⟨⟨⟨hok, herr⟩, hpnc⟩, hoth⟩, hsb⟩ := h'
+    refine CKeeps.tryCall call rets ok.ext err.ext code pnc.ext other.ext sargs sbody.ext self
+      ((Prog.keeps_ct ok outer hok).weaken fun hg => ?_) (Prog.keeps_ct err outer herr)
+      ((Prog.keeps_ct pnc outer hpnc).weaken fun hg => ?_) (Prog.keeps_ct other outer hoth)
+      ((Prog.keeps_ct sbody _ hsb).weaken fun hg => by rw [hg, Bool.true_or])
+      (fun ha => by rw [ha, Bool.or_true])
+    · rcases Bool.or_eq_true_iff.mp hg with hg | hg
+      · rw [hg, Bool.true_or]
+      · rw [Ctx.hasAlias_append _ hg, Bool.or_true]
+    · rcases Bool.or_eq_true_iff.mp hg with hg | hg
+      · rw [hg, Bool.true_or]
+      · rw [Ctx.hasAlias_append _ hg, Bool.or_true]
+  | _, _, .loop _ c body, outer, h => CKeeps.loop c body.ext (Prog.keeps_ct body outer h)
+  | _, _, .block body, outer, h => CKeeps.block body.ext (Prog.keeps_ct body outer h)
+
+/-- **A block that exposes nothing keeps clean tails.** -/
+theorem Prog.keeps_ct : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → (outer : Bool) →
+    P.ctSafe outer = true → CKeeps (outer || Γ.hasAlias) (Prog.runR P)
+  | _, _, .nil, _, _ => CKeeps.nil
+  | Γ, _, .cons s P, outer, h => by
+    have h' : (Stmt.ctSafe s outer && Prog.ctSafe P outer) = true := h
+    rw [Bool.and_eq_true] at h'
+    exact CKeeps.seq (Stmt.keeps_ct s outer h'.1)
+      ((Prog.keeps_ct P outer h'.2).weaken fun hg => by
+        rcases Bool.or_eq_true_iff.mp hg with hg | hg
+        · rw [hg, Bool.true_or]
+        · rw [Ext.hasAlias s.ext hg, Bool.or_true])
+
+end
+
 end Solidity
