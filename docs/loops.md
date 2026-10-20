@@ -473,3 +473,59 @@ the same method (`docs/testsuite-proofs.md`, "Constructors review"):
 
 Both within 10%.  `Derived14` has no master time under this method (W7's
 155 s predates its review), so it is recorded for the next lane.
+
+## Open loops lane (2026-10-20): `SolcLoopsOpen.sol`
+
+Running notes of the `open-loops` lane on solkey's four open loop ports
+(`Solidity/Scratch/open/SolcLoopsOpen.sol`, run by
+`node scripts/test-solidity.mjs --json --function f`; heartbeats are
+`maxHeartbeats` units, `IO.getNumHeartbeats / 1000`).
+
+**Baseline** (master `ee769637`, runner, default 200000 heartbeats):
+
+| Function | Status | Wall | Peak RSS |
+|---|---|---:|---:|
+| `pushNoArgs2dLoop` | error, timeout at `whnf` | 68 s | 6.8 GB |
+| `multiArrayFillByPushLoops` | killed by the runner's 900 s limit (no heartbeat check reached) | > 900 s | — |
+| `binomialFaithfulRowsSmall` | error, timeout at `isDefEq` | 90 s | 1.5 GB |
+| `binomialRowsNine` | error, timeout at `isDefEq` | 80 s | 1.5 GB |
+
+**`pushNoArgs2dLoop` is not valid in the model.**  `array2d.push()` on a
+`uint[][]` recycles the first shadow slot as it is (`pushSlot`,
+`Semantics/Storage.lean`; solkey's `storagePushLengthSave`), and
+`wt(storage)` clears only the shadow slots of word arrays (`tightHB`,
+`Semantics/StorageWt.lean`): a reachable storage with `array2d.length == 0`
+may hold a dangling `uint[]` of length `L > 0` past the end, and then
+`array2d[0].length == 43 + L`.  Its walk leaves three leaves (the three
+asserts); `assert(ll == 43)` is false there (true under clean tails,
+`ValidTail .clean`, `docs/options.md` O6), so the best `⊢` can report is
+`pending`.
+
+**Where its heartbeats go** (`sol_prove`'s walk at 1024 steps, measured in
+a scratch module):  compiled walk 65k (plus about 45k for the failed 128,
+256 and 512 stages), kernel check 658k.  Of the kernel's: `Hyps.fresh`,
+which wraps and scans the whole context at every step, about 200k (the
+same walk with a constant fresh index: 458k); the three leaves 24–28k each
+in isolation; the 94 refutations (47 splits, the first branch of each
+tried in vain) the rest with the walk.  A refutation alone, checked in
+isolation late in the loop, is about 108k (cached across the walk).
+Slicing the context's premises before `toLS` (by the binders they read,
+through the updates) left the kernel total unchanged (675k): the
+refutations' cost is not in the premises' terms.
+
+**`binomial*`**: under the diamond a refutation must also prove every
+memory allocation's landing obligation of the history, and the memory
+terms are trees that double with each `rows[i][j] = rows[i-1][j-1] +
+rows[i-1][j]` (a write reading the memory twice): at 133 context entries
+(`binomialFaithful(3, 1)`) the refutation is past `normalizationSize`
+(24000 nodes) and fails, so the outer loop's guard is never refuted and the
+walk unwinds until its budget runs out.  Slicing premises does not help:
+the obligations are conjuncts the diamond asks, not premises.
+
+**`multiArrayFillByPushLoops`**: `nests.push()` recycles a `Nest` whose
+`d` is a dangling array of unknown length, so the second and third loops'
+guards read unknown lengths; the history is unknown (`Op2.exposes`), and
+the refutation of the second loop's guard at four to six stacked storage
+updates (within `normalizationDepth` 12, `boundsOk` true) overflows the
+interpreter's stack in the language server, and runs past 15 minutes in
+the runner.
