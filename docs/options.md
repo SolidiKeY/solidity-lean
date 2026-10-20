@@ -23,7 +23,7 @@ can never be read as one under another.
 | O4 | the send diamonds; calls with callbacks; the invariant from the spec | done |
 | O5 | `ignoringOverflow { … }` (`ignoringOF`): an overflowing run is assumed away | done |
 | O6 | clean array tails: the starting storage's shadows assumed ordinary defaults (`ValidTail .clean`) | done |
-| O7 | a `try` whose receiver is the contract itself runs its callee; no code at address `0` | in progress (branch `open-selfcall`) |
+| O7 | a `try` whose receiver is the contract itself runs its callee; no code at address `0` | done, but value calls to `this` |
 
 ## O1. Who calls back (bug 5)
 
@@ -341,8 +341,54 @@ is the oracle's.  So the body is a subterm of the statement and `Stmt.run`
 stays structural, with no fuel.  A self-call of a later function, or of
 itself, is not run (reported as left).
 
-**Status.** Syntax, elaborator, quote and run done; the rest below as it
-lands.
+**The rule** (`LeanTaclet.tryCallSelfBox`, `trySelfStep`,
+`Calculus/Blocks.lean`; sound by `Premise.sound_trySelfBox`,
+`Calculus/SoundCalls.lean`).  solkey has none: its `try` never runs a
+callee.  Five goals, the run's case split written as `require`s:
+
+1. `require(a != 0); require(a == address(this)); f(args) → rets; ok`: the
+   callee inlined as a call with targets (`functionBodyExpand`), then the
+   success block;
+2. `∀ rets. require(a != 0); require(a != address(this)); ok`: the oracle;
+3.–5. each `catch` block from the caller's state.
+
+`tryCallNoCallbackBox` (and its callback twin) now match only a `try` with
+no self body (`self = false`, the taclet notation writes it); it does not
+split on address `0`, which only makes its goals stronger.  The diamond is
+`false` either way (`tryCallSelfDiamond`).
+
+**What it cannot prove.** The `catch` goals are owed whether or not the
+callee can fail: a box goal over the callee accepts its revert vacuously,
+and no premise of the calculus states that a run ends normally (a diamond
+side goal).  So `uint r; try this.g() returns (uint a) { r = a; } catch { r
+= 9; } assert(r == 13);` stays open where `try this.g() returns (uint a) {
+assert(a == 13); } catch { }` proves.  The way on: a `Premise` with side
+formulas (`⟨ require(a == this); f(args); ⟩ true`), with the `catch` goals
+behind `require(a != this)`, as a second self rule.
+
+**The callback reading.** `ExecS` has three more constructors
+(`trySelfOk`, `trySelfHalt`, `trySelfViolated`): the callee's run as an
+inlined call, then the success block; its other outcomes are the existing
+`tryError`/`tryPanic`/`tryOther`.  So the deterministic run is still one
+of the callback runs (`Stmt.exec_run`), and `ProvesC` has no rule for a
+self-call `try` (its `tryCallWithCallbackBox` takes `self = false`).
+
+**The runner.** `scripts/test-solidity.mjs --self-address A` declares every
+obligation with the premise `address(this) == A` (`Problem.selfPre`,
+`solc_scoped_problems N decl self A`), for solkey's ports, which pin a
+parameter to the harness's address instead of writing `this`.
+`tests/solc/SelfCalls.sol` writes the same claims with `this`.
+
+**Left.** A value call to the contract itself (`(bool ok, ) =
+payable(this).call{value: v}("")`, running `receive`) is not run: `Stmt.send`
+carries no body (`callRunsReceive` stays open); the `catch`-goal gap above;
+a self-call of a function declared after the caller, or of itself.
+
+**Speed.** A `try` of a function declared before the caller now carries a
+second copy of the callee's body (the elaborator inlines it once more), so
+such programs elaborate and kernel-check larger terms.
+
+**Status.** Done but the items under *Left*.
 
 ## Review
 
