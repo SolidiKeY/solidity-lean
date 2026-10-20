@@ -132,9 +132,6 @@ macro "sol_close" : tactic => `(tactic|
     -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
     -- state: every premise introduced, every conjunct its own goal
     all_goals (repeat' (first | intro _ | apply And.intro))
-    -- one global part read through states of different locals
-    -- (`allLeftHide`'s instances, `Calculus/AllLeft.lean`)
-    all_goals (try dsimp only [Close.glob_push, Close.H_push] at *)
     -- `Int.tmod_lt_of_pos`, `Int.lt_tmod_of_pos`: solkey's `smod_lessPositiveDenom`,
     -- `smod_NumPos` and `smod_NumNeg`, a remainder within a positive divisor;
     -- `Int.tmod_nonneg`, `Close.tmod_nonpos`: `smod_geZero`, its sign the
@@ -149,6 +146,15 @@ macro "sol_close" : tactic => `(tactic|
           Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self]
       | (sol_close_enrich
          all_goals (repeat' (first | intro _ | apply And.intro))
+         all_goals first
+           | omega
+           | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
+               Int.tmod_nonneg, Close.tmod_nonpos, Int.mul_tmod_left, Int.mul_tmod_right,
+               Int.tdiv_eq_ediv_of_nonneg, Close.uintBitwise_and_self])
+      -- last: one global part read through states of different locals
+      -- (`allLeftHide`'s instances, `Calculus/AllLeft.lean`); only where the
+      -- rest failed, so a leaf that closed before takes the same path
+      | (dsimp only [Close.glob_push, Close.H_push] at *
          all_goals first
            | omega
            | grind [Close.lookupBy_uint_congr, Int.tmod_lt_of_pos, Int.lt_tmod_of_pos,
