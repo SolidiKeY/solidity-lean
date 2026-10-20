@@ -941,24 +941,6 @@ end Copy
 
 /-! ## Types whose defaults are well-formed all the way down -/
 
-/-- `T`'s default is well-formed all the way down: a struct `defaultOkS`
-admits, and arrays and mappings of such. -/
-def Ty.okDeep : Ty → Bool
-  | .prim _ => true
-  | .ref (.struct s) => s ∈ defaultOkStructs
-  | .ref (.array E) => E.okDeep
-  | .ref (.fixed E _) => E.okDeep
-  | .ref (.mapping _ V) => V.okDeep
-
-theorem struct_okDeep {s : Name} (h : s ∈ defaultOkStructs) :
-    ∀ nt ∈ structDef s, nt.2.okDeep = true := by
-  simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
-  rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
-    simp only [structDef, List.mem_cons, List.not_mem_nil, or_false, forall_eq, Ty.okDeep,
-        String.reduceEq, imp_self, forall_eq_or_imp, defaultOkStructs, or_self, decide_true,
-        and_self, or_true]
-
 theorem okDeep_defaultOkS : ∀ {T : Ty}, T.okDeep = true → T.defaultOkS = true
   | .prim _, _ => rfl
   | .ref (.struct _), h => by simpa only [Ty.defaultOkS, decide_eq_true_eq, Ty.okDeep] using h

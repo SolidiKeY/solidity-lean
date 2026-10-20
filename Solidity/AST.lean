@@ -999,7 +999,8 @@ theorem mapFree_structDef (s : Name) (hs : structMapFree s = true) :
   all_goals decide
 
 /-- The members of a struct are well-formed all the way down. -/
-theorem struct_okDeep (s : Name) : ∀ nt ∈ Semantics.structDef s, nt.2.okDeep = true := by
+theorem struct_okDeep {s : Name} (_h : structOk s = true) :
+    ∀ nt ∈ Semantics.structDef s, nt.2.okDeep = true := by
   unfold Semantics.structDef
   split
   case h_24 =>
