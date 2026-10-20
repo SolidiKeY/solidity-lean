@@ -821,4 +821,171 @@ theorem ARhs.evalT_ct {Γ : Ctx} {σ : State C Γ} (hσ : CTInv σ) {R : RefTy} 
       exact ⟨Storage.pushPlace_ct hσ.1 hl hp, Storage.pushPlace_grows hp,
         Storage.pushPlace_liveAll hl hp⟩
 
+/-! ## Steps that keep the invariant -/
+
+/-- A step keeps the invariant and, where `g` (an alias may be held around
+it), every live reference live. -/
+def CKeeps (g : Bool) {Γ Γ' : Ctx} (t : TStep C Γ Γ') : Prop :=
+  ∀ (σ : State C Γ) (o : Out C σ.H Γ'), CTInv σ → t σ = .ok o →
+    CTInv o.st ∧ (g = true → σ.storage.Grows o.st.storage)
+
+/-- The invariant at one storage, as `RunInv` reads locals. -/
+def liveInv (st : Storage C) : RunInv C where
+  glob _ := True
+  loc := aliasLive st
+  loc_wk := @fun _ _ x t v h => aliasLive_wk x t v h
+
+namespace CKeeps
+
+variable {Γ : Ctx}
+
+theorem weaken {g g' : Bool} {Γ' : Ctx} {t : TStep C Γ Γ'} (h : CKeeps g t)
+    (hg : g' = true → g = true) : CKeeps g' t :=
+  fun σ o hσ ht => ⟨(h σ o hσ ht).1, fun h' => (h σ o hσ ht).2 (hg h')⟩
+
+theorem drop {g : Bool} {Δ Δ' : Ctx} {t : TStep C Γ Δ} (hf : CKeeps g t) (x : Ext Δ' Δ) :
+    CKeeps g (fun σ => (t σ).map fun o => ⟨o.st.drop x, o.ext⟩) := by
+  intro σ o hσ h
+  obtain ⟨o₁, hr, rfl⟩ := tmap_ok_inv h
+  exact ⟨(hf σ o₁ hσ hr).1.drop x, (hf σ o₁ hσ hr).2⟩
+
+theorem seq {g : Bool} {Γ₁ Γ₂ : Ctx} {s : TStep C Γ Γ₁} {P : TStep C Γ₁ Γ₂} (hs : CKeeps g s)
+    (hP : CKeeps g P) : CKeeps g (TRun.seq s P) := by
+  intro σ o hσ h
+  unfold TRun.seq at h
+  split at h
+  · rename_i o₁ ho₁
+    obtain ⟨o₂, hp, rfl⟩ := tmap_ok_inv h
+    have h1 := hs σ o₁ hσ ho₁
+    have h2 := hP o₁.st o₂ h1.1 hp
+    exact ⟨h2.1, fun hg => Storage.Grows.trans (h1.2 hg) (h2.2 hg)⟩
+  · cases h
+
+theorem nil {g : Bool} : CKeeps g (TRun.nil : TStep C Γ Γ) := by
+  intro σ o hσ h
+  cases h
+  exact ⟨hσ, fun _ => Storage.Grows.refl _⟩
+
+theorem ite {g : Bool} {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (h₁ : Ext Γ Γ₁) {thn : TStep C Γ Γ₁}
+    (h₂ : Ext Γ Γ₂) {els : TStep C Γ Γ₂} (hthn : CKeeps g thn) (hels : CKeeps g els) :
+    CKeeps g (TRun.ite c h₁ thn h₂ els) := by
+  intro σ o hσ h
+  unfold TRun.ite at h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  split at h
+  · exact hthn.drop h₁ σ o hσ h
+  · exact hels.drop h₂ σ o hσ h
+
+theorem block {g : Bool} {Γ₁ : Ctx} (x : Ext Γ Γ₁) {body : TStep C Γ Γ₁} (hb : CKeeps g body) :
+    CKeeps g (TRun.block x body) :=
+  hb.drop x
+
+/-- A step that changes nothing it ends in. -/
+theorem same {g : Bool} {t : TStep C Γ Γ}
+    (ht : ∀ σ o, t σ = .ok o → o.st = σ) : CKeeps g t := by
+  intro σ o hσ h
+  have e := ht σ o h
+  refine ⟨?_, fun _ => ?_⟩
+  · rw [e]; exact hσ
+  · rw [e]; exact Storage.Grows.refl _
+
+theorem require {g : Bool} (c : Val C Γ .bool) : CKeeps g (TRun.require c) := by
+  refine same fun σ o h => ?_
+  unfold TRun.require at h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h; rfl
+  · cases h
+
+theorem assert {g : Bool} (c : Val C Γ .bool) : CKeeps g (TRun.assert c) := by
+  refine same fun σ o h => ?_
+  unfold TRun.assert at h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h; rfl
+  · cases h
+
+theorem halt {g : Bool} (e : THalt) :
+    CKeeps g (fun _ : State C Γ => (.error e : TRes (Out C _ Γ))) :=
+  fun _ _ _ h => nomatch h
+
+theorem loop {g : Bool} {Γ₁ : Ctx} (c : Val C Γ .bool) (x : Ext Γ Γ₁) {body : TStep C Γ Γ₁}
+    (hb : CKeeps g body) : CKeeps g (TRun.loop c x body) := by
+  intro σ o hσ h
+  unfold TRun.loop at h
+  refine TLoop.run_induct
+    (P := fun o : Out C σ.H Γ => CTInv o.st ∧ (g = true → σ.storage.Grows o.st.storage))
+    (Q := fun r => ∀ o, r = .ok o → CTInv o.st ∧ (g = true → σ.storage.Grows o.st.storage))
+    ⟨hσ, fun _ => Storage.Grows.refl _⟩ (fun τ h₁ => ?_) (fun _ h => nomatch h) _ h
+  simp only [TLoop.step]
+  rcases c.evalT τ.st with _ | b
+  · exact fun _ h => nomatch h
+  · cases b
+    · exact fun _ h => by cases h; exact h₁
+    · dsimp only
+      cases hr : body τ.st with
+      | error => exact fun _ h => nomatch h
+      | ok τ' =>
+        have h2 := hb τ.st τ' h₁.1 hr
+        exact ⟨h2.1.drop x, fun hg => Storage.Grows.trans (h₁.2 hg) (h2.2 hg)⟩
+
+end CKeeps
+
+/-- A call's arguments are live: an alias argument resolves to live slots. -/
+theorem Args.evalT_live {Γ : Ctx} (σ : State C Γ) (he : TEnv.All (aliasLive σ.storage) σ.env) :
+    {ps : Ctx} → (as : Args C Γ ps) → {a : TEnv C σ.H ps} → Args.evalT σ as = .ok a →
+      TEnv.All (aliasLive σ.storage) a
+  | _, .nil, _, _ => trivial
+  | _, .snoc as _ _ _, a, h => by
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨trivial, Args.evalT_live σ he as hr⟩
+  | _, .snocStorage as _ _ e, a, h => by
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨v, hv, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨fun r' hr' => by cases hr'; exact SPath.resolveT_liveAll σ he e hv,
+      Args.evalT_live σ he as hr⟩
+  | _, .snocMemory as _ _ _, a, h => by
+    obtain ⟨r, hr, h⟩ := tbind_ok_inv h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨trivial, Args.evalT_live σ he as hr⟩
+
+namespace CKeeps
+
+variable {Γ : Ctx}
+
+/-- **A call**: its body keeps the invariant, every live reference live
+where the caller may hold an alias (`g`). -/
+theorem call {g : Bool} {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet Γ rs Γ')
+    (x : Ext (rs ++ ps) Γf) {body : TStep C (rs ++ ps) Γf} (hb : CKeeps g body)
+    (hg : Γ.hasAlias = true → g = true) : CKeeps g (TRun.call args ret x body) := by
+  intro σ o hσ h
+  unfold TRun.call at h
+  obtain ⟨a, ha, h⟩ := tbind_ok_inv h
+  dsimp only at h
+  obtain ⟨o₂, hr, h⟩ := tbind_ok_inv h
+  cases h
+  have hA := Args.evalT_live σ hσ.2 args ha
+  have h₁ : CTInv (ret.enterT (σ.withEnv a)).st := by
+    refine ⟨by rw [CallRet.enterT_storage]; exact hσ.1, ?_⟩
+    rw [CallRet.enterT_storage]
+    exact RunInv.enterT_env (I := liveInv σ.storage) (fun _ _ _ => trivial)
+      (fun _ _ _ => trivial) (fun _ _ _ h => nomatch h) ret (σ.withEnv a) hA
+  have h₂ := hb _ o₂ h₁ hr
+  have hst : (ret.enterT (σ.withEnv a)).st.storage = σ.storage := by
+    rw [CallRet.enterT_storage]; rfl
+  rw [hst] at h₂
+  refine ⟨⟨h₂.1.1, ?_⟩, h₂.2⟩
+  have hcaller : TEnv.All (aliasLive o₂.st.storage) σ.env := by
+    cases ha' : Γ.hasAlias
+    · exact env_noAlias _ ha' _
+    · exact CTInv.env_grows (h₂.2 (hg ha')) hσ.2
+  exact CallRet.leaveT_all (P := aliasLive o₂.st.storage) ret (env_wk_live _ hcaller)
+    (TEnv.All.take rs (TEnv.All.drop x h₂.1.2))
+
+end CKeeps
+
 end Solidity
