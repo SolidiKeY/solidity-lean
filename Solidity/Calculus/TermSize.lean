@@ -238,8 +238,8 @@ def Stmt.size : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Nat
   | _, _, .revert => 1
   | _, _, .assumeFalse => 1
   | _, _, .call _ args _ body => 1 + args.size + body.size
-  | _, _, .tryCall call _ ok err _ pnc other =>
-    1 + call.size + ok.size + err.size + pnc.size + other.size
+  | _, _, .tryCall call _ ok err _ pnc other sargs sbody _ =>
+    1 + call.size + ok.size + err.size + pnc.size + other.size + sargs.size + sbody.size
   | _, _, .loop a c body => 1 + a.size + c.size + body.size
   | _, _, .block body => 1 + body.size
   | _, _, .pushOpAssign _ _ _ b r => 1 + b.size + r.size
@@ -1396,6 +1396,13 @@ theorem tryStep_bounded (m : Modality) {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (re
     (tryStep m rets ok err code pnc other).Bounded n := by
   cases m <;> bnil
 
+theorem tryStepS_bounded (m : Modality) {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ)
+    (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γ₁) (err : Prog C Γ Γ₂) (code : CodeBinder κ)
+    (pnc : Prog C (κ ++ Γ) Γ₃) (other : Prog C Γ Γ₄) (sargs : Args C Γ ps)
+    (sbody : Prog C (ρ ++ ps) Γf) (self : Bool) (n : Nat) :
+    (tryStepS m call rets ok err code pnc other sargs sbody self).Bounded n := by
+  cases self <;> cases m <;> bnil
+
 theorem ReceiverValue.step_bounded {ps Γf : Ctx} {E : Ty} (f : Name) (args : Args C Γ ps)
     (r : Var) (body : Prog C ([.alias (.array E)] ++ ps) Γf) (e : ReceiverValue C Γ E)
     (n : Nat) : (ReceiverValue.step k f args r body e).Bounded n := by
@@ -1462,7 +1469,8 @@ theorem Stmt.step_bounded {Γ Γ' : Ctx} (s : Stmt C Γ Γ') :
   | revert => cases m <;> bnil
   | assumeFalse => bnil
   | call f args ret body => exact callStep_bounded k f args ret body _
-  | tryCall call rets ok err code pnc other => exact tryStep_bounded m rets ok err code pnc other _
+  | tryCall call rets ok err code pnc other sargs sbody self =>
+    exact tryStepS_bounded m call rets ok err code pnc other sargs sbody self _
   | loop a c body =>
     exact (loopStep_bounded k m a c body).mono (by simp only [Stmt.size]; omega)
   | block body => bnil

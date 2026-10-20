@@ -35,8 +35,8 @@ theorem Stmt.stepSound (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ
   | callReceiver f args r body op => exact Stmt.sound_callReceiver k m f args r body op σ p hp
   | callReceiverPush f args r body code value =>
     exact Stmt.sound_callReceiverPush k m f args r body code value σ p hp
-  | tryCall call rets ok err code pnc other =>
-    exact Stmt.sound_tryCall k m call rets ok err code pnc other σ p hp
+  | tryCall call rets ok err code pnc other sargs sbody self =>
+    exact Stmt.sound_tryCall k m call rets ok err code pnc other sargs sbody self σ p hp
   | loop a c body => exact Stmt.sound_loop k m a c body σ p hp
   | _ => exact Stmt.stepSound_arms k m _ rfl σ p hp
 

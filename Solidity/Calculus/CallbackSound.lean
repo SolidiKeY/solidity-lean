@@ -512,9 +512,11 @@ theorem holdsC_sendCb {m : Modality} (hI : I.FO = true) (hT : I.hasTransfer = fa
 control leaves; the call's success, from any state the callee leaves in which
 the invariant holds, for every value of its return data; each clause's block
 where the call reverted. -/
-theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false) {ρ κc Γok Γe Γ₃ Γ₄ : Ctx}
+theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false)
+    {ρ κc Γok Γe Γ₃ Γ₄ ps Γf : Ctx}
     (call : ExtCall C Γ) (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γok) (err : Prog C Γ Γe)
     (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf)
     (hx : holdsC I pay σ (Fml.closedAt I))
     (hok : holdsC I pay σ (.havoc (.imp (Fml.closedAt I) (rets.all
       (Fml.modalK .box ok (.pop .block ((Ext.append Γ ρ).trans ok.ext) (.seq ω κ)) φ)))))
@@ -524,7 +526,8 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false) {ρ κc Γo
       (Fml.modalK .box pnc (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ)))
     (hoth : holdsC I pay σ (Binders.nil.all
       (Fml.modalK .box other (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ))) :
-    holdsC I pay σ (.modal .box (.cons (.tryCall call rets ok err code pnc other) ω) κ φ) := by
+    holdsC I pay σ (.modal .box (.cons (.tryCall call rets ok err code pnc other sargs sbody false)
+      ω) κ φ) := by
   refine holdsC_cons fun o₁ he => ?_
   cases he with
   | det hf => nomatch hf
@@ -970,7 +973,7 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
       (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ (ihx σ) (iho σ))
       (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ h₁
         (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ h₂ h₃))
-    exact fun τ ab cd => holdsC_tryCb hI hT _ _ _ _ _ _ _ (holdsC_and_left ab)
+    exact fun τ ab cd => holdsC_tryCb hI hT _ _ _ _ _ _ _ _ _ (holdsC_and_left ab)
       (holdsC_and_right ab) (holdsC_and_left cd) (holdsC_and_left (holdsC_and_right cd))
       (holdsC_and_right (holdsC_and_right cd))
 

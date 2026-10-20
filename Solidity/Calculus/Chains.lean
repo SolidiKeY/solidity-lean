@@ -170,7 +170,7 @@ depth, as a line's print and the elaborator flatten it (`whileUnwind` leaves
 partial def Stmt.keyStr {Γ Γ' : Ctx} (ns : List Var) : Stmt C Γ Γ' → String
   | .ite c thn els =>
     s!"if ({c.toStr ns true}) {braced (Prog.keyStrs 0 ns thn)} else {braced (Prog.keyStrs 0 ns els)}"
-  | .tryCall c rets ok err code pnc other =>
+  | .tryCall c rets ok err code pnc other _ _ _ =>
     let args := ", ".intercalate (c.args.map fun a => a.2.toStr ns)
     let rs := rets.toList
     let retsS := if rs.isEmpty then "" else
