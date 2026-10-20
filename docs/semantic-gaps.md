@@ -32,8 +32,11 @@ the proof uses it (address `0` has no code, `docs/solc-alignment.md`; see
 Functional correctness is proved of a deployed contract called by a
 transaction, so what every such call guarantees is a premise of the
 obligation (`Problem.callPre`, `Frontend/Problems.lean`), not something to
-prove: a non-payable function's `msg.value == 0`, a parameter in its ABI
-range, `address(this)` at a harness address when the test pins one
+prove: a non-payable function's `msg.value == 0`, a payable one's
+`msg.value < 2^128` where its body reads `msg.value` (the total ether supply
+is below `2^128` wei, so no transaction carries more; `etherBound`, also in
+the specified obligation, `Calculus/SurfaceSpec.lean`), a parameter in its
+ABI range, `address(this)` at a harness address when the test pins one
 (`--self-address`). Bounds that hold of every reachable state belong in the
 contract's invariant.
 
@@ -42,9 +45,9 @@ contract's invariant.
 | Gap | Kind | Status |
 |---|---|---|
 | recursion (`functionsRecursiveUnbounded`) | semantics: a call is inlined | open |
-| a `catch` goal when the callee cannot fail (`tryCatchExactReturn`) | calculus | open |
-| a value call to `this` runs `receive` (`callRunsReceive`) | semantics | open |
-| `msg.value` bounded by the ether supply (`msgValueArith`) | chain fact | open |
+| a `catch` goal when the callee cannot fail (`tryCatchExactReturn`) | calculus | closed: each self-call `catch` goal assumes `fails(call)`, the walks prove the callee's diamond instead (`notLeft`; `docs/options.md` O8) |
+| a value call to `this` runs `receive` (`callRunsReceive`) | semantics | closed: a self-call `try` of `receive` behind `r == address(this)` (`elabValueCall`, O8); `callKeepsStorageUnsound` stays pending, false on the EVM |
+| `msg.value` bounded by the ether supply (`msgValueArith`) | chain fact | closed: `msg.value < 2^128` (`Problem.callPre`) |
 | literal types in `c ? 63 : 255` (`ternaryLiteralOverflow`, false on the EVM) | elaborator | open |
 | narrow types inside types (`uint8[]`, `mapping(uint8 => …)`, struct members) | semantics | open |
 | signed `**` in `unchecked`; `-128 / -1`, `-(-128)` wrap in `unchecked` | semantics | open |
