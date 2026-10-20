@@ -72,8 +72,9 @@ def testObligation (N : Lean.Name) (r : ImportRow) : CommandElabM (String × Str
       let cb ← if r.tag == .specified || !r.writingCall then pure false
         else callsBackE N (f ++ `problem)
       -- a recursive call: `rec_auto`, the obligation as its own contract
-      let recursive := r.tag != .specified && !cb &&
-        (← hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem))))
+      -- (a specified row has no `N.f.problem`: `(← …)` in a `&&` would run first)
+      let recursive ← if r.tag == .specified || cb then pure false
+        else hasCallRec N (← Symex.evaluable (mkConst (f ++ `problem)))
       if recursive then
         let ty := mkApp2 (mkConst ``Valid) C (mkConst (f ++ `problem))
         -- the walk reads the formula by its value; the kernel unfolds it
