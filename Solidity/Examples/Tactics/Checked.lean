@@ -309,4 +309,14 @@ info: "temps[1] = -100; temps[1] -= 28; require((-128 <= temps[1]) && (temps[1] 
 /-- error: Solidity elaboration failed: a uint where a uint8 is expected: write uint8(…) -/
 #guard_msgs in #check sol[NarrowNested]{ uint k = 1; byKey[k] = 1; }
 
+/-- A part with a narrow position below it is used through an index, a member or
+`delete` only: a reference type has no width to carry it. -/
+example : Prog.toStr [] (sol[NarrowNested]{ delete small; small.pop(); uint n = small.length; }) =
+    "delete small; small.pop(); uint n = small.length;" := by decide
+
+/--
+error: Solidity elaboration failed: small has a narrow element, key or value: it is used through an index, `.length`, `.push`, `.pop` or `delete`, not whole
+-/
+#guard_msgs in #check sol[NarrowNested]{ uint[] storage p = small; }
+
 end Solidity.Examples.Tactics.Checked

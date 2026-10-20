@@ -1226,6 +1226,39 @@ def stateWidth? (Γ : ECtx) (e : RawExpr) : Option (PrimTy × Nat) := do
   let (k, .prim p) ← statePath? C Γ e | none
   pure (p, (lookupBy k C.widths).getD 256)
 
+/-- Whether `e` names, whole, a part of a state variable with a narrow position
+below it (`small` of `uint8[] small`, `lists[i]` of `mapping(uint => uint8[])
+lists`). -/
+def narrowWhole (Γ : ECtx) (e : RawExpr) : Bool :=
+  match statePath? C Γ e with
+  | some (k, .ref _) => C.widths.any fun (k', _) => k'.length > k.length && k'.startsWith k
+  | _ => false
+
+/-- A use of a part `narrowWhole` names other than through an index, a member
+(`.length`, `.push`, `.pop`) or `delete`: a copy, an alias, an argument.  A
+reference type has no width (`uint[]` is `uint8[]`'s `Ty`), so it would
+lose the element's; solc refuses most of these (`uint[] storage p = small;`
+does not convert), and the rest (`uint8[] storage p = small;`) are refused
+here, as a narrow type inside a local's type is (`narrowNestedMsg`). -/
+partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
+  | e@(.name _) => if narrowWhole C Γ e then some e else none
+  | .index b k => (narrowBase b).orElse fun _ => narrowWholeUse? Γ k
+  | .field b _ => narrowBase b
+  | .binop _ a b | .assign a b | .opAssign _ a b => (narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
+  | .unop _ a | .incDec _ a | .newArr _ a => narrowWholeUse? Γ a
+  | .ternary c a b =>
+    ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
+  | .call _ as | .named _ _ as | .tuple as => as.findSome? (narrowWholeUse? Γ)
+  | .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? Γ)
+  | _ => none
+where
+  -- an index's or a member's base: its own indices only
+  narrowBase : RawExpr → Option RawExpr
+    | .index b k => (narrowBase b).orElse fun _ => narrowWholeUse? Γ k
+    | .field b _ => narrowBase b
+    | .name _ => none
+    | e => narrowWholeUse? Γ e
+
 /-- The smallest integer type holding the literals `u` and `v` (solc's mobile
 type, of both): `uintN` when neither is negative, else `intN`. -/
 def mobileTy (u v : Int) : PrimTy × Nat :=
@@ -2853,6 +2886,11 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   -- a loop outside a function's body, lowered here (`lowerLoops`)
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
     return ← elabStmtsP (← lowerLoops none [s])
+  unless s matches .delete _ do
+    for e in s.exprs do
+      if let some w := narrowWholeUse? C (← ctx) e then
+        throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \
+          `.length`, `.push`, `.pop` or `delete`, not whole"
   let s ← ElabM.lift (s.mapExprsM (narrowPure C (← read).unchecked (← ctx)))
   let (P, s) ← hoistStmt s
   pure (P ++ (← elabStmt1 s))
