@@ -187,11 +187,15 @@ test("value push captures complex receivers once", () => {
   assert.deepEqual(report.results.map(r => r.signature),
     ['nested()','falsePost()','effectfulReceiver()','oldTargetIndex()','falseTargetIndex()']);
   const status = Object.fromEntries(report.results.map(r => [r.function,r.status]));
-  assert.equal(status.nested,'proved');
-  assert.equal(status.effectfulReceiver,'proved');
-  assert.equal(status.falsePost,'pending');
-  assert.equal(status.oldTargetIndex,'proved');
-  assert.equal(status.falseTargetIndex,'pending');
+  // An empty push of a reference element saves only the length and exposes the
+  // old slot as it is (solkey d85018517f's `storagePushLengthSave`, e2319c57):
+  // a claim about the pushed row fails from a well-formed entry state
+  // (`nested_dirty`, `Examples/Tactics/PushReceiver.lean`), as solkey's
+  // SYMBOLIC_TAIL_OPENS stay open. The runs from the initial state are pinned there.
+  for (const fn of ['nested','falsePost','oldTargetIndex','falseTargetIndex'])
+    assert.equal(status[fn],'pending',fn);
+  // its search runs out of heartbeats on the open leaves
+  assert.notEqual(status.effectfulReceiver,'proved');
 });
 
 test("push source captures preserve values, independent copies and mutable source names", () => {
@@ -219,10 +223,12 @@ test("memory push copies atomically and resolves a changing receiver once", () =
 test("storage-return bindings retain alias identity, effects and caller memory", () => {
   const report = runSolidityTests(["tests/solc/StorageReturns.sol"], {build:false, batchSize:3});
   assert.deepEqual(report.errors, []);
+  // `returnsIndexed` reads the rows of `rows.push()`: open since the
+  // length-only empty push (see "value push captures complex receivers once").
   assert.deepEqual(report.results.map(r => [r.function,r.status]), [
     ['valuesRef','internal'], ['otherRef','internal'], ['rowRef','internal'],
     ['allocatedRef','internal'], ['rejectedRef','internal'],
-    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','proved'],
+    ['bindsRoot','proved'], ['rebinds','proved'], ['returnsIndexed','pending'],
     ['heapGrowth','proved'], ['calleeReverts','proved'], ['falseCopy','pending'],
     ['receiverPush','proved'], ['receiverPushValue','proved'], ['receiverPop','proved'],
     ['receiverReadsAfterGetter','proved'], ['receiverReadsBeforeGetterFalse','pending'],
@@ -431,8 +437,10 @@ test("root primitive push bindings and empty user calls parse unambiguously", ()
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   assert.equal(status.rootBinding, 'proved');
   assert.equal(status.falsePost, 'pending');
+  // A pushed reference slot is exposed as it is (length-only empty push, see
+  // "value push captures complex receivers once"): its contents are open.
   for (const name of ['fixedReturn', 'dynamicReturn', 'structReturn']) {
-    assert.equal(status[name], 'proved', name);
+    assert.equal(status[name], 'pending', name);
   }
   assert.equal(status.falseReferencePost, 'pending');
 });
