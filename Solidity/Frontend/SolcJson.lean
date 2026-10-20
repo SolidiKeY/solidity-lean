@@ -1968,7 +1968,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   let initSt : PState := { names := funRenames, staticNames, baseContracts, dropped, structs := S, funParams, constants, enumValues, enumBounds, valueTypes, freeFunctions, libraries }
   let inits : Except Gap (List String) := kept.mapM fun (n, t, v) => do
     let some e := J.opt v "value" | pure s!"{t} {n};"
-    match (expr e).run' initSt with
+    match (expr e).run' { initSt with superNames := superNamesOf v } with
     | .ok x => pure s!"{t} {n} = {x};"
     | .error (.excluded m _) => throw (.excluded s!"the initializer of `{n}`: {m}" (J.line v))
     | .error (.unsupported m _) => throw (.unsupported s!"the initializer of `{n}`: {m}" (J.line v))
@@ -1976,7 +1976,7 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
   -- and the ones called are the contract's members, callees first
   let ids := funs.filterMap J.id?
   -- an initializer's calls are the constructor's, declared or implicit
-  let initCalls : List Int := (kept.filterMap fun (_, _, v) => (J.opt v "value").map (fun e => callees ids e freeFunctions functionAliases baseContracts))
+  let initCalls : List Int := (kept.filterMap fun (_, _, v) => (J.opt v "value").map (fun e => callees ids e freeFunctions functionAliases baseContracts (supersOf v)))
     |>.flatten.eraseDups
   let ctorId : Option Int := (funs.find? (kindOf · == "constructor")).bind J.id?
   let callsOf : List (Int × List Int) := funs.filterMap fun f => (J.id? f).map fun i =>

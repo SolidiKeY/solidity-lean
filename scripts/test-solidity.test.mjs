@@ -573,7 +573,8 @@ test("inheritance preserves virtual, static, named and modifier dispatch", () =>
   }
   assert.equal(rows.falseDispatch.status, "pending");
   assert.equal(rows.falseInheritedEnumSpec.status, "pending");
-  assert.equal(rows.externalStaysExternal.status, "pending");
+  // a self-call `try` runs its callee (O8): `r == 2` is proved
+  assert.equal(rows.externalStaysExternal.status, "proved");
   assert.equal(rows.falseSuper.status, "pending");
   assert.equal(rows.viaBase, undefined); // inherited helpers have no new independent row
   const init = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"InitDiamond"});
