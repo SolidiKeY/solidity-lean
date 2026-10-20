@@ -10,7 +10,9 @@ solc's conversions keep the low bits of a value's two's complement word: a
 elaborator writes each cast as a capture at its type through the two
 conversions of `UnOp` (`int(u)`, `uint(i)`: the same 256-bit word, read
 signed or unsigned), and signed `+ - *` inside `unchecked` as the cast of
-the operation on the operands' words (`narrowWrapNode`, `castCapture`).
+the operation on the operands' words (`narrowWrapNode`, `castCapture`);
+unary `-` is `0 -% x` on the word, `x / y` that negation where `y` is `-1`
+(`-128 / -1` is `-128`, at `int256` too), and `x ** k` the words' power.
 The cases are solkey's `SolcTypesOpen.sol` and `SolcArithmeticOpen.sol`
 (solc's `smtCheckerTests/typecast` and `overflow`), true on the EVM.
 -/
@@ -80,6 +82,46 @@ theorem uncheckedCompound : ⊨ dl!{ ⟨ int8 x = 127; unchecked { x += 1; }; in
   sol_symex
   sol_close
 
+/-- `-(-128)` and `-128 / -1` at `int8` inside `unchecked`: each wraps to
+`-128` (`-x` is `0 -% x` on the words, a quotient taken at `int` and read back). -/
+theorem uncheckedNegDiv : ⊨ dl!{ ⟨ int8 x = -128; int8 m = -1; int8 y; int8 z;
+    unchecked { y = -x; z = x / m; }; assert(y == x); assert(z == x); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- Signed `**` inside `unchecked`, the words' power: `(-2) ** 7` is `-128`,
+`(-2) ** 8` wraps to `0` (`sol_decide`: `sol_close` reduces the
+`2^256`-bit words' powers by `whnf`, past its budget). -/
+theorem uncheckedPow : ⊨ dl!{ ⟨ int8 b = -2; int8 p; unchecked { p = b ** 7; }; int8 e = -128;
+    assert(p == e); unchecked { p = b ** 8; }; assert(p == 0); ⟩ true } := by
+  sol_symex
+  sol_decide
+
+/-- At `int256` too: `type(int).min / -1` and `-type(int).min` are `type(int).min`. -/
+theorem uncheckedNegDiv256 : ⊨ dl!{ ⟨ int x = type(int).min; int m = -1; int y; int z;
+    unchecked { y = -x; z = x / m; }; assert(y == x); assert(z == x); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A quotient by another divisor is the checked one's: `-128 / 2` is `-64`. -/
+theorem uncheckedDivOther : ⊨ dl!{ ⟨ int8 x = -128; int8 d = 2; int8 z; unchecked { z = x / d; };
+    int8 e = -64; assert(z == e); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- Checked, the same operations revert (solc's `Panic(0x11)`). -/
+theorem checkedNegReverts : ⊨ dl!{ [ int8 x = -128; int8 y = -x; ] false } := by
+  sol_symex
+  sol_close
+
+theorem checkedDivReverts : ⊨ dl!{ [ int8 x = -128; int8 m = -1; int8 z = x / m; ] false } := by
+  sol_symex
+  sol_close
+
+theorem checkedDiv256Reverts : ⊨ dl!{ [ int x = type(int).min; int m = -1; int z = x / m; ] false } := by
+  sol_symex
+  sol_close
+
 /-! ## 3 · What the elaborator writes
 
 (`#eval`, not `decide`: the kernel does not print a negative number.) -/
@@ -96,5 +138,11 @@ info: "int x = -1; uint se1 = uint(x) % 256; uint y = se1; int se2 = int(((y +% 
 info: "int x = 127; int y; uint se1 = uint(x); int se2 = int((((se1 -% 1) +% 128) % 256) -% 128); y = se2;"
 -/
 #guard_msgs in #eval Prog.toStr [] (sol{ int8 x = 127; int8 y; unchecked { y = x + -1; } })
+
+-- Signed `-`, `/` and `**` inside `unchecked`: on the words, read back at `int8`.
+/--
+info: "int x = -128; int m = -1; int y; uint se1 = uint(x); int se2 = int((((0 -% se1) +% 128) % 256) -% 128); y = se2; int se3 = m; int se4 = x; int se5 = int(((uint(se4 / se3) +% 128) % 256) -% 128); y = se5; uint se6 = uint(x); int se7 = int((((se6 **% 3) +% 128) % 256) -% 128); y = se7;"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol{ int8 x = -128; int8 m = -1; int8 y; unchecked { y = -x; y = x / m; y = x ** 3; } })
 
 end Solidity.Examples.Tactics.SignedCasts

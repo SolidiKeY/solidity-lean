@@ -954,7 +954,7 @@ theorem struct_okDeep {s : Name} (h : s ∈ defaultOkStructs) :
     ∀ nt ∈ structDef s, nt.2.okDeep = true := by
   simp only [defaultOkStructs, List.mem_cons, List.not_mem_nil, or_false] at h
   rcases h with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl |
-      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
+      rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;>
     simp only [structDef, List.mem_cons, List.not_mem_nil, or_false, forall_eq, Ty.okDeep,
         String.reduceEq, imp_self, forall_eq_or_imp, defaultOkStructs, or_self, decide_true,
         and_self, or_true]

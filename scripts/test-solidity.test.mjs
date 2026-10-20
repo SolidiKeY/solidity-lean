@@ -346,12 +346,21 @@ test("source types preserve overflow and declaration scope", () => {
   assert.equal(status.ternaryOverflowCannotReturn, 'pending');
   for (const name of ['ternaryOverflowPanics', 'ternaryUncheckedWraps',
     'ternaryExplicitWidening']) assert.equal(status[name], 'proved');
-  assert.equal(status.ternaryEffectsOnce, 'unsupported');
-  assert.equal(status.nestedTypedConditionals, 'proved');
+  // a branch's effects run in the branch taken (`hoist`'s conditional capture);
+  // a conditional of literals has solc's mobile type (`mobileTy`)
+  for (const name of ['ternaryEffectsOnce', 'nestedTypedConditionals', 'signedLiteralConditional',
+    'nestedLiteralConditional', 'shortCircuitLiteralConditional']) assert.equal(status[name], 'proved', name);
   assert.equal(status.signedTernaryOverflowCannotReturn, 'pending');
-  assert.equal(status.signedLiteralConditional, 'unsupported');
-  assert.equal(status.nestedLiteralConditional, 'unsupported');
-  assert.equal(status.shortCircuitLiteralConditional, 'unsupported');
+});
+
+test("source types: narrow elements, keys, values, struct members, locals and parameters", () => {
+  const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
+    'narrowKey', 'pushOverflowPanics', 'memberOverflowPanics', 'memberInRange', 'valueMemberPanics',
+    'memberArrayPanics', 'memoryMemberPanics', 'aliasPanics', 'memoryPanics', 'copyPanics',
+    'memoryParamPanics', 'memoryWraps', 'modifierParam']) assert.equal(status[name], 'proved', name);
 });
 
 test("modifiers use the existing inliner for calls and root obligations", () => {
@@ -365,7 +374,8 @@ test("modifiers use the existing inliner for calls and root obligations", () => 
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
-  assert.equal(status.narrowModifierGap, 'unsupported');
+  // a narrow modifier parameter is a local of its type: `x += 1` at `255` panics
+  assert.equal(status.narrowModifierGap, 'pending');
   assert.equal(status.narrowArrayModifierGap, 'unsupported');
 });
 
@@ -459,10 +469,11 @@ test("quantified consequents parse and omitted specification bodies stay local",
     .map(r => [r.function, r]));
   assert.equal(types.unrelated.status, "proved");
   assert.equal(types.stillChecked.status, "pending");
-  for (const fn of ["readsString", "readsNarrow", "readsNarrowKey", "readsNarrowValue", "specReadsNarrow"]) {
-    assert.equal(types[fn].status, "unsupported", fn);
-  }
-  assert.match(types.specReadsNarrow.reason, /specification reads omitted state variable/);
+  assert.equal(types.readsString.status, "unsupported");
+  // a narrow element, key or value is modelled (`expandStateTyW`): `narrow[0]`
+  // may be past the end, and `narrow.length == 0` need not hold
+  for (const fn of ["readsNarrowKey", "readsNarrowValue"]) assert.equal(types[fn].status, "proved", fn);
+  for (const fn of ["readsNarrow", "specReadsNarrow"]) assert.equal(types[fn].status, "pending", fn);
 });
 
 test("specification parameter renaming preserves scopes, distinct names and frames", () => {
@@ -561,14 +572,15 @@ test("inheritance preserves virtual, static, named and modifier dispatch", () =>
   assert.deepEqual(report.errors, []);
   const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
   for (const fn of ["dispatch", "staticCall", "staticStillDispatches", "namedCall", "privateCall",
-    "modified", "staticModifier", "inheritedStruct", "inheritedEnumSpec", "inheritedEnumModifier", "externalValue"]) {
+    "modified", "staticModifier", "inheritedStruct", "inheritedEnumSpec", "inheritedEnumModifier", "externalValue",
+    "superCall", "superNamed"]) {
     assert.equal(rows[fn].status, "proved", fn);
   }
   assert.equal(rows.falseDispatch.status, "pending");
   assert.equal(rows.falseInheritedEnumSpec.status, "pending");
-  assert.equal(rows.externalStaysExternal.status, "pending");
-  assert.equal(rows.superRemainsUnsupported.status, "unsupported");
-  assert.match(rows.superRemainsUnsupported.reason, /super call/);
+  // a self-call `try` runs its callee (O8): `r == 2` is proved
+  assert.equal(rows.externalStaysExternal.status, "proved");
+  assert.equal(rows.falseSuper.status, "pending");
   assert.equal(rows.viaBase, undefined); // inherited helpers have no new independent row
   const init = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"InitDiamond"});
   assert.deepEqual(init.errors, []);
@@ -577,11 +589,44 @@ test("inheritance preserves virtual, static, named and modifier dispatch", () =>
   assert.equal(init.results.find(r => r.function === "constructor").status, "proved");
 });
 
+test("inheritance resolves super in the most-derived C3 order", () => {
+  const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"SuperDiamond"});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  assert.equal(rows.diamondSuper.status, "proved");
+  assert.equal(rows.staticRight.status, "proved");
+  assert.equal(rows.falseDiamondSuper.status, "pending");
+});
+
+test("inheritance runs base constructors in solc's legacy order", () => {
+  for (const [contract, status] of [["CtorLeaf", "proved"], ["CtorFalse", "pending"],
+    ["CtorImplicit", "proved"], ["CtorUnnamedChild", "proved"]]) {
+    const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract});
+    assert.deepEqual(report.errors, [], contract);
+    assert.equal(report.results.find(r => r.function === "constructor")?.status, status, contract);
+  }
+});
+
+test("inheritance conjoins inherited contract invariants", () => {
+  const report = runSolidityTests(["tests/solc/Inheritance.sol"], {build:false, contract:"GuardedChild"});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  assert.equal(rows.bump.status, "proved");
+  assert.equal(rows.breaksBase.status, "pending");
+  assert.equal(rows.breaksOwn.status, "pending");
+});
+
 test("unmodelled inheritance boundaries are rejected instead of omitted", () => {
-  for (const [contract, reason] of [["CtorGap", /base constructor/],
-    ["SpecGap", /inherited contract NatSpec/], ["NameGap", /distinct storage roots/]]) {
+  const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract:"NameGap"});
+  assert.ok(report.errors.some(e => /distinct storage roots/.test(e.reason)));
+  assert.equal(testsPassed(report), false);
+  for (const [contract, reason] of [["CtorGap", /modifiers of base constructor/],
+    ["CtorModifierGap", /constructor's modifiers with base constructors/],
+    ["CtorReturnGap", /`return` in base constructor/]]) {
     const report = runSolidityTests(["tests/solc/InheritanceGaps.sol"], {build:false, contract});
-    assert.ok(report.errors.some(e => reason.test(e.reason)), contract);
+    const ctor = report.results.find(r => r.function === "constructor");
+    assert.equal(ctor?.status, "unsupported", contract);
+    assert.match(ctor.reason, reason, contract);
     assert.equal(testsPassed(report), false);
   }
 });
@@ -624,7 +669,8 @@ test("solkey's solc/open ports close except where the model says why not", () =>
     // which the run executes (`docs/options.md`, O8); the value call's
     // callee may write the state under the callback reading (O7)
     trySuccessKeepsStorageUnsound: "pending", callKeepsStorageUnsound: "pending",
-    // the `uint8` addition `63 + 255` panics on the EVM (`0x11`)
+    // false on the EVM: `t ? 63 : 255` is a `uint8`, so `63 + 255` panics
+    // (`0x11`); the model reverts there (`SolcOpen.ternaryLiteralOverflow`)
     ternaryLiteralOverflow: "pending",
   };
   // `functionsRecursiveUnbounded` proves: its recursive call by the contract

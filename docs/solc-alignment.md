@@ -189,6 +189,47 @@ programs, and the check is a statement the rules already run.
   and `~x` at `uint8` is `255 -% x` (`narrowWrapNode`).  At `int` and
   `intN`, `+ - *` wrap on the operands' words, read back as a cast:
   `x + 1` at `int8` is `int8(uint(x) +% 1)`, so `127 + 1` is `-128`.
+- **Signed `unchecked`** wraps unary `-`, `/` and `**` too: `-x` is
+  `int8(0 -% uint(x))`, so `-(-128)` is `-128`; `x / y` at `int8` is the
+  quotient at `int` read back (`-128 / -1` is `-128`), and at `int256` the
+  quotient by `1` where `y` is `-1`, negated on the words
+  (`type(int).min / -1` is `type(int).min`); `x ** k` is the words' power,
+  `int8(uint(x) **% k)`.  Checked, each reverts as solc panics (`0x11`).
+- **Short circuits and conditionals.**  A narrow operation under the right
+  operand of `&&`/`||` or in a branch of `c ? a : b` is checked only where
+  solc evaluates it: `bool se = a; if (se) { se = b; }`, and
+  `uint se; if (c) { se = a; } else { se = b; }` (`hoist`).
+- **Literal conditionals.**  `c ? 63 : 255` has solc's type: the smallest
+  type holding both literals (`uint8`, `mobileTy`), and a literal beside a
+  value its own smallest type (`c ? x : 300` is a `uint16` at `uint8 x`).  So
+  `(t ? 63 : 255) + (f ? 63 : 255)` is a `uint8` addition, and reverts.
+- **`type(T).max`, `type(T).min`** are values of `T`: `type(uint8).max` is
+  `uint8(255)`, so `type(uint8).max + 1` overflows at `uint8`;
+  `type(int8).min` is `int8(-128)`; an enum's are its first and last member
+  (`typeBoundExpr`, `enumLit?`).
+- **Narrow positions inside a type.**  An array's element, a mapping's value
+  or key may be narrow (`uint8[] small; mapping(uint8 => int16) m;`): the
+  variable's `Ty` has `uint`/`int` there, and `Contract.widths` keeps each
+  position's width under its path (`small[]`, a key `m{}`, a value `m[]`;
+  `expandStateTyW`).  A struct's narrow member is the struct table's
+  (`Semantics.structWidths`, beside `structDef`: `struct Packed { uint8 a;
+  int16 b; uint c; uint8[] xs; }` keeps `a`, `b` and `xs[]`), in storage, in
+  memory, as an element.  A storage alias, a memory local, a reference
+  parameter or return carry the narrow positions of their declared type
+  beside it (`uint8[] memory m` is `[]` at 8 bits: `LocalTy.shape`,
+  `elabTyW`, `FunDecl.widths` keyed `xs[]`).  A read through indices and
+  members has its position's type (`widthPath?`, `intTyOf`), so a write is
+  checked or wrapped at it as a narrow variable's is, and a pushed value, a
+  key and a member's value must fit (`fitCheck`).  A reference type carries
+  no width, so a place with a narrow position below it is used whole only
+  where its narrow positions are checked against the target's
+  (`shapeCheck`): a reference local's initializer (`uint8[] storage s =
+  small;`, `uint8[] memory m = small;`, `new uint8[](n)`), a reference
+  assignment, a reference argument; another shape (`uint[] storage s =
+  small;`) is refused, as solc refuses it, and any other whole use (a
+  conditional's branch, a tuple) too (`narrowWholeUse?`).
+- **A modifier's narrow parameter** is a local of its type, its argument
+  fitting it (`ModApp.widths`, `wrapMods`).
 - **Storage packing** is not observable here: a state variable is a value of
   its own in the interpreter and a slot of its own in the compiler, and it
   holds a value of its range; solc packs several narrow variables into one
@@ -198,19 +239,17 @@ programs, and the check is a statement the rules already run.
 
 What is not modelled, each an elaboration error unless said otherwise:
 
-- a narrow type inside a type: an array's element, a mapping's key or value,
-  a struct's member (`narrowNestedMsg`); and a modifier's narrow parameter;
-- signed `**` in `unchecked` (`**%` takes `uint` only); `-128 / -1` and
-  `-(-128)` at `int8` revert inside `unchecked` too, where solc wraps them,
-  as at `int256` already;
+- a place with a narrow position below it used whole other than where its
+  shape is checked (a branch of a conditional of references, a tuple, a named
+  argument); a modifier's reference parameter; push arithmetic on a narrow
+  element (`b.push() += e`); a narrow type in a position not listed above (a
+  struct not in the table's widths, `narrowNestedMsg`);
 - a cast of arithmetic on literals alone to a narrow `int`
   (`int8(100 + 100)`): write the literal;
-- a narrow operation under the right operand of `&&`/`||` or in a branch of
-  `c ? a : b`: its capture would run where the program does not evaluate it;
 - constant folding: arithmetic on literals alone written to a narrow variable
   (`uint8 z = 200 + 100;`), which solc refuses at compile time, is checked
   at run time instead and reverts;
-- `type(uint8).max` and the other type members;
+- type members other than `type(T).max` and `type(T).min`;
 - a public function's ABI decoding, which reverts on an out-of-range
   argument: a specification's precondition (`Calculus/SurfaceSpec.lean`) does not
   assume a narrow parameter's range, which is weaker, not unsound.
@@ -422,6 +461,32 @@ default, no locals, an empty heap, `net` holding the deployer's payment.
   `immutable` the constructor writes is a storage root with its
   initializer, so the constructor's obligation reads what it wrote, and a
   function's reads any value (true of the deployed code, never refuted).
+- **Base constructors run in solc's legacy order**: every initializer, most
+  base first; then the base constructors' arguments, derived to base; then
+  the constructor bodies, base to derived (`readContract`'s
+  `compositeBody`, one constructor member, each argument a local named as
+  its parameter).  This is the creation code of solc 0.8.33's legacy
+  pipeline (`ContractCompiler::appendInitAndConstructorCode`: a constructor
+  evaluates the next base constructor's arguments and runs it before its
+  own body, after `initializeStateVariables` ran for the whole hierarchy),
+  read off `solc --asm`.  The via-IR pipeline interleaves instead (each
+  contract's initializers just before its body; Solidity docs, "Solidity
+  IR-based Codegen Changes", order of state variable initialization), and
+  that page's description of the legacy order puts the arguments before
+  the initializers, which the emitted code does not:
+  `tests/solc/Inheritance.sol`'s `CtorLeaf` passes an initialized `late`
+  on and asserts it.  A base constructor's virtual calls dispatch to the
+  most-derived contract.  Arguments come from the first contract in the C3
+  order giving them, in its constructor's header (`B(a)`) or its
+  inheritance specifier (`is B(5)`) ("Arguments for Base Constructors").
+  Refused: a modifier on a base constructor, or on a constructor with base
+  constructors (solc runs the bases before it), and a `return` in a base
+  constructor.
+- **`super.f`** in a function of contract `D` names the first contract after
+  `D` in the most-derived contract's C3 order that implements `f`
+  (Solidity docs, "Inheritance": `super` is the next base in the final
+  inheritance graph); every base version is its own member, so the call is
+  static.
 - **A contract with initializers and no constructor** deploys by the
   implicit one (`constructor();` runs the initializers), as solc does, and
   has no obligation, as in solkey.

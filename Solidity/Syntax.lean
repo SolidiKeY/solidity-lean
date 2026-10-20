@@ -299,6 +299,8 @@ structure ModApp where
   params : List (Name × Ty)
   args : List RawExpr
   body : List RawStmt
+  /-- Its parameters of a narrow integer type, with their width. -/
+  widths : List (Name × Nat) := []
   deriving Repr, Inhabited
 
 /-- A reference parameter's declared data location. -/
@@ -331,7 +333,9 @@ structure FunDecl where
   another's assumes `msg.value == 0`, as solkey's does. -/
   payable : Bool := false
   /-- Its parameters and return variable of a narrow integer type (`uint8 x`),
-  with their width: each is a `uint` or an `int` in `params`/`ret`. -/
+  with their width: each is a `uint` or an `int` in `params`/`ret`; and the
+  narrow positions inside a reference one, keyed by their path as
+  `Contract.widths` keys them (`uint8[] memory xs` is `xs[]`). -/
   widths : List (Name × Nat) := []
   deriving Repr, Inhabited
 
@@ -363,7 +367,9 @@ structure Contract where
   /-- Its `invariant` clauses, as read: solkey's `CInv`. -/
   inv : List SpecExpr := []
   /-- Its state variables of a narrow integer type (`uint8 small;`), with their
-  width: each is a `uint` or an `int` in `vars`. -/
+  width: each is a `uint` or an `int` in `vars`; and the narrow positions
+  inside one, keyed by their path (`uint8[] xs;` is `xs[]`, a mapping's key
+  `m{}`, its value `m[]`: `expandStateTyW`). -/
   widths : List (Name × Nat) := []
   /-- `constructor(…) { … }`: what a deployment runs, called as
   `constructor(args);` (`elabCtor`).  `none` for a contract that declares
@@ -432,8 +438,8 @@ def tyName (p : PrimTy) (n : Nat) : String := if n < 256 then s!"{p.toStr}{n}" e
 
 /-- Why a narrow type is refused where it stands. -/
 def narrowNestedMsg (s : String) : String :=
-  s!"{s}: a narrow integer type is the type of a local, a parameter, a return value or a " ++
-  "state variable only, not of an array's element, a mapping's key or value, or a struct's member"
+  s!"{s}: a narrow integer type stands in the type of a local, a parameter, a return value, " ++
+  "a state variable or a struct of the table (`structWidths`), not here"
 
 declare_syntax_cat sol_ty (behavior := both)
 syntax:max ident : sol_ty
@@ -995,6 +1001,28 @@ partial def payload (s : Syntax) : Array Syntax :=
   else if s.getKind == nullKind || s.getKind == groupKind then s.getArgs.flatMap payload
   else #[s]
 
+/-- `type(T).max`, `type(T).min`: an integer type's bound as a value of `T`
+(`uint8(255)`, `int8(-128)`: solc types it `T`, so `type(uint8).max + 1`
+overflows at `uint8`); an enum's, its first or last member, which the
+elaborator reads (`enumLit?`, the member `type(max)`) -/
+def typeBoundExpr (f : TSyntax `sol_expr) (as : Array (TSyntax `sol_expr)) (g : Ident) :
+      MacroM (Option Term) := do
+  unless funName? f == some "type" do return none
+  let #[a] := as | return none
+  let some T := funName? a | return none
+  let m := g.getId.toString
+  unless m == "max" || m == "min" do
+    Macro.throwErrorAt g s!"type({T}).{m}: only `max` and `min` are modelled"
+  match castTy? T with
+  | some (p, n) =>
+    let v : Int := if p == .int then
+        (if m == "max" then 2 ^ (n - 1) - 1 else -(2 ^ (n - 1) : Int))
+      else (if m == "max" then 2 ^ n - 1 else 0)
+    let lit ← if v < 0 then `(RawExpr.unop .neg (.num $(quote v.natAbs)))
+      else `(RawExpr.num $(quote v.toNat))
+    return some (← `(RawExpr.call $(quote T) [$lit]))
+  | none => return some (← `(RawExpr.field (.name $(quote T)) $(quote s!"type({m})")))
+
 partial def expandExpr (e : TSyntax `sol_expr) : MacroM Term := do
   if e.raw.isOfKind ``solTupleExpr then
     let es := #[e.raw[1]] ++ e.raw[3].getSepArgs
@@ -1040,6 +1068,7 @@ where
   | `(sol_expr| $f:ident ( { $[$ns:ident : $as:sol_expr],* } )) => do
       `(RawExpr.named $(strLit f) [$(ns.map strLit),*] [$(← as.mapM expandExpr),*])
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) . $g:ident) => do
+      if let some t ← typeBoundExpr f as.getElems g then return t
       fieldChain (← expandCall f as.getElems callMsg) (nameParts g.getId)
   | `(sol_expr| $f:sol_expr ( $as:sol_expr,* ) [ $k:sol_expr ]) => do
       `(RawExpr.index $(← expandCall f as.getElems callMsg) $(← expandExpr k))
@@ -1495,11 +1524,6 @@ def expandMemberTy (enums : List String) (T : TSyntax `sol_ty) : MacroM Term :=
   | `(sol_ty| $x:ident) => if enums.contains x.getId.toString then `(Ty.uint) else `(ty!($T))
   | _ => `(ty!($T))
 
-def expandParams (enums : List String) (ps : Array (TSyntax `sol_param)) : MacroM (Array Term) :=
-  ps.mapM fun
-    | `(sol_param| $T:sol_ty $x:ident) => do `(($(strLit x), $(← expandMemberTy enums T)))
-    | _ => Macro.throwUnsupported
-
 /-- `expandMemberTy` where a narrow type may stand: a `uint8` is `Ty.uint` and
 its width. -/
 def expandMemberTyW (enums : List String) (T : TSyntax `sol_ty) : MacroM (Term × Option Nat) :=
@@ -1511,7 +1535,44 @@ def expandMemberTyW (enums : List String) (T : TSyntax `sol_ty) : MacroM (Term �
     | none => do pure (← expandMemberTy enums T, none)
   | _ => do pure (← expandMemberTy enums T, none)
 
-/-- A function's parameters, and the rows of `FunDecl.widths` for the narrow ones. -/
+/-- A state variable's type, where a narrow type may stand inside it too: its
+`Ty`, a `uint` or an `int` at each narrow position, and the widths of those
+positions keyed by their path below the variable (`Contract.widths` prefixes
+the name): `""` the variable, `"[]"` an element or a mapping's value, `"{}"` a
+mapping's key (`mapping(uint8 => uint16[]) m` is `[("{}", 8), ("[][]", 16)]`).
+A struct's narrow members are its type's (`Semantics.structWidths`).  A
+parameter's and a return's type are read so too (`expandParamsW`). -/
+partial def expandStateTyW (enums : List String) (T : TSyntax `sol_ty) :
+    MacroM (Term × List (String × Nat)) := do
+  let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × Nat) := match K with
+    | `(sol_ty| $x:ident) => narrowTy? x.getId.toString
+    | _ => none
+  match T with
+  | `(sol_ty| $x:ident) =>
+    match narrowTy? x.getId.toString with
+    | some (.int, n) => pure (← `(Ty.int), [("", n)])
+    | some (_, n) => pure (← `(Ty.uint), [("", n)])
+    | none => pure (← expandMemberTy enums T, [])
+  | `(sol_ty| $E:sol_ty []) => do
+    let (t, ws) ← expandStateTyW enums E
+    if ws.isEmpty then return (← expandMemberTy enums T, [])
+    pure (← `(Ty.array $t), ws.map fun (k, n) => ("[]" ++ k, n))
+  | `(sol_ty| $E:sol_ty [ $m:num ]) => do
+    let (t, ws) ← expandStateTyW enums E
+    if ws.isEmpty then return (← expandMemberTy enums T, [])
+    pure (← `(Ty.fixed $t $m), ws.map fun (k, n) => ("[]" ++ k, n))
+  | `(sol_ty| mapping ( $K:sol_ty => $V:sol_ty )) => do
+    let (t, ws) ← expandStateTyW enums V
+    let (kt, kw) ← match narrow? K with
+      | some (.int, n) => pure (← `(PrimTy.int), [("{}", n)])
+      | some (_, n) => pure (← `(PrimTy.uint), [("{}", n)])
+      | none => pure (← `(pty!($K)), [])
+    if ws.isEmpty && kw.isEmpty then return (← expandMemberTy enums T, [])
+    pure (← `(Ty.mapping $kt $t), kw ++ ws.map fun (k, n) => ("[]" ++ k, n))
+  | _ => pure (← expandMemberTy enums T, [])
+
+/-- A function's parameters, and the rows of `FunDecl.widths` for the narrow
+ones and the narrow positions inside one (`expandStateTyW`). -/
 def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
     MacroM (Array Term × Array Term × Array Term) := do
   let mut rows := #[]
@@ -1524,9 +1585,9 @@ def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
       | `(sol_param| $T:sol_ty storage $x:ident) => pure (T, x, some ParamLoc.storage)
       | `(sol_param| $T:sol_ty calldata $x:ident) => pure (T, x, some ParamLoc.calldata)
       | _ => Macro.throwUnsupported
-    let (t, w) ← expandMemberTyW enums T
+    let (t, w) ← expandStateTyW enums T
     rows := rows.push (← `(($(strLit x), $t)))
-    if let some n := w then ws := ws.push (← `(($(strLit x), $(quote n))))
+    for (k, n) in w do ws := ws.push (← `(($(quote (x.getId.toString ++ k)), $(quote n))))
     if let some loc := loc then
       let l ← match loc with
         | .memory => `(ParamLoc.memory)
@@ -1538,15 +1599,23 @@ def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
 /-- A modifier: its name, its parameters, and its body, with a `_;` at least
 (solc's "Modifier body does not contain '_'"), anywhere. -/
 def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_param))
-    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term) := do
+    (b : TSyntax `sol_block) : MacroM (String × Array Term × Term × Array Term) := do
   let `(sol_block| { $[$ss:sol_stmt;]* }) := b | Macro.throwErrorAt b "a modifier's body is a block"
   unless (b.raw.find? (·.isOfKind ``solHole)).isSome do
     Macro.throwErrorAt b "a modifier's body has a `_;`"
-  pure (m.getId.toString, ← expandParams enums ps, ← `([$(← ss.mapM expandStmt),*]))
+  -- a narrow parameter (`uint8 n`): a `uint` of its width (`ModApp.widths`)
+  let mut rows := #[]
+  let mut ws := #[]
+  for p in ps do
+    let `(sol_param| $T:sol_ty $x:ident) := p | Macro.throwUnsupported
+    let (t, w) ← expandMemberTyW enums T
+    rows := rows.push (← `(($(strLit x), $t)))
+    if let some n := w then ws := ws.push (← `(($(strLit x), $(quote n))))
+  pure (m.getId.toString, rows, ← `([$(← ss.mapM expandStmt),*]), ws)
 
 /-- A function's declaration, as a term: its return variable and its
 modifiers read off its attributes. -/
-def expandFun (enums : List String) (mods : List (String × Array Term × Term)) (f : Ident)
+def expandFun (enums : List String) (mods : List (String × Array Term × Term × Array Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
   let (ps, ws, locs) ← expandParamsW enums ps
@@ -1572,8 +1641,8 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term))
         let p := preferReading ps[i]! (!·[1].isNone)
         let n := (p[2].getOptional?.map (·.getId.toString)).getD
           (if ps.size == 1 then "_ret" else s!"_ret{i}")
-        let (t, w) ← expandMemberTyW enums ⟨p[0]⟩
-        if let some b := w then ws := ws.push (← `(($(quote n), $(quote b))))
+        let (t, w) ← expandStateTyW enums ⟨p[0]⟩
+        for (k, b) in w do ws := ws.push (← `(($(quote (n ++ k)), $(quote b))))
         rets := rets.push (← `(($(quote n), $t)))
         retMem := retMem || (p[1].find? fun s => s.isAtom && s.getAtomVal == "memory").isSome
         retStorage := retStorage || (p[1].find? fun s => s.isAtom && s.getAtomVal == "storage").isSome
@@ -1582,12 +1651,12 @@ def expandFun (enums : List String) (mods : List (String × Array Term × Term))
     | `(sol_fattr| $m:ident $[( $as:sol_expr,* )]?) =>
       let name := m.getId.toString
       if attrKeywords.contains name then continue
-      let some (_, params, mb) := mods.find? (·.1 == name) |
+      let some (_, params, mb, mws) := mods.find? (·.1 == name) |
         Macro.throwErrorAt m s!"{name} is not a modifier of this contract"
       let args ← match as with
         | some as => as.getElems.mapM expandExpr
         | none => pure #[]
-      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $mb))
+      apps := apps.push (← `(ModApp.mk $(quote name) [$params,*] [$args,*] $mb [$mws,*]))
     | _ => Macro.throwUnsupported
   let body ← expandStmt.expandBlock b
   `(($(strLit f),
@@ -1640,13 +1709,15 @@ macro_rules
           asg := some (← expandSpecLocs ls)
         | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
-          let (t, w) ← expandMemberTyW enums T
+          let (t, ws) ← expandStateTyW enums T
           rows := rows.push (← `(($(strLit x), $t)))
-          if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
+          for (k, n) in ws do
+            widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident = $e:sol_expr ;) =>
-          let (t, w) ← expandMemberTyW enums T
+          let (t, ws) ← expandStateTyW enums T
           rows := rows.push (← `(($(strLit x), $t)))
-          if let some n := w then widthRows := widthRows.push (← `(($(strLit x), $(Lean.quote n))))
+          for (k, n) in ws do
+            widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
           initRows := initRows.push (← `(($(strLit x), $(← expandExpr e))))
         | `(sol_member| constructor ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
           if ctor.isSome then Lean.Macro.throwErrorAt m "a second constructor: a contract declares one"

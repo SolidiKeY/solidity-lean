@@ -99,6 +99,26 @@ theorem castTruncates : ⊨ dl!{ ⟨ uint w = 300; uint8 z = uint8(w); ⟩ z == 
   sol_symex
   sol_close
 
+/-- A narrow operation is checked only where solc evaluates it: under `&&`/`||`
+when the left operand does not decide, in the branch of `c ? a : b` taken. -/
+theorem shortCircuitUnchecked : ⊨ dl!{ ⟨ uint8 x = 255; bool b = false && x + 1 > 0;
+    bool d = true || x + 1 > 0; ⟩ b == false && d == true } := by
+  sol_symex
+  sol_close
+
+theorem shortCircuitChecked : ⊨ dl!{ [ uint8 x = 255; bool b = true && x + 1 > 0; ] false } := by
+  sol_symex
+  sol_close
+
+theorem ternaryBranchUntaken : ⊨ dl!{ ⟨ uint8 x = 255; bool c = false; uint8 y = c ? x + 1 : x; ⟩
+    y == 255 } := by
+  sol_symex
+  sol_close
+
+theorem ternaryBranchTaken : ⊨ dl!{ [ uint8 x = 255; bool c = true; uint8 y = c ? x + 1 : x; ] false } := by
+  sol_symex
+  sol_close
+
 /-! ## 2 · State variables and functions
 
 A state variable, a parameter and a return variable carry their width
@@ -133,6 +153,140 @@ theorem raiseOverflows : ⊨ dl[Narrow]{ [ level = 250; uint8 r = raise(6); ] fa
 
 /-- The mean of two `uint8`s, the sum taken at `uint`: `avg(255, 255)` is `255`. -/
 theorem avgWidened : ⊨ dl[Narrow]{ ⟨ uint8 m = avg(255, 255); ⟩ m == 255 } := by
+  sol_symex
+  sol_close
+
+/-! ### Narrow types inside a state variable's type
+
+An array's element, a mapping's key or value: the position has its width,
+kept beside the variable's (`Contract.widths`, keyed `small[]`, `byKey{}`),
+so a read of it has that type and a write is checked, or wrapped, at it. -/
+
+/-- A contract with narrow elements, values and keys. -/
+def NarrowNested : Contract := contract!{
+  uint8[] small;
+  mapping(uint => int8) temps;
+  mapping(uint8 => uint) byKey;
+  uint16[3] fixedW;
+  mapping(uint => uint8[]) lists;
+  mapping(uint => uint16) wide;
+  mapping(uint => mapping(uint => uint8)) grid;
+}
+
+example : NarrowNested.widths =
+    [("small[]", 8), ("temps[]", 8), ("byKey{}", 8), ("fixedW[]", 16), ("lists[][]", 8),
+     ("wide[]", 16), ("grid[][]", 8)] := rfl
+
+/-- A mapping's narrow value: `-100 - 29` leaves `int8`, `-100 - 28` does not. -/
+theorem valueUnderflows : ⊨ dl[NarrowNested]{ [ temps[1] = -100; temps[1] -= 29; ] false } := by
+  sol_symex
+  sol_close
+
+theorem valueInRange : ⊨ dl[NarrowNested]{ ⟨ temps[1] = -100; temps[1] -= 28; int8 e = -128;
+    assert(temps[1] == e); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A narrow element read has its type: `60000 + 60000` overflows at `uint16`. -/
+theorem elementOpType : ⊨ dl[NarrowNested]{ [ wide[0] = 60000; uint w = wide[0] + wide[0]; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- … and wraps at it inside `unchecked`. -/
+theorem elementWraps : ⊨ dl[NarrowNested]{ ⟨ wide[1] = 65535; unchecked { wide[1] += 1; };
+    assert(wide[1] == 0); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A nested value: `200 + 100` at `uint8`. -/
+theorem nestedElementOverflows : ⊨ dl[NarrowNested]{ [ grid[2][3] = 200; grid[2][3] += 100; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- A narrow key: an index converts to it implicitly, so it fits. -/
+theorem narrowKey : ⊨ dl[NarrowNested]{ ⟨ uint8 k = 7; byKey[k] = 1; byKey[255] = 2;
+    assert(byKey[7] == 1); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-! ### Struct members, locals, parameters and modifiers
+
+A struct's narrow member has its width (`structWidths`: `struct Packed {
+uint8 a; int16 b; uint c; uint8[] xs; }`), in storage, in memory and as an
+element.  A storage alias, a memory local and a reference parameter carry the
+narrow positions of their type beside it (`LocalTy.shape`), so a copy or an
+alias of `small` is a `uint8[]` too; one of another shape is refused, as solc
+refuses it.  A modifier's narrow parameter is a local of its type. -/
+
+/-- A contract with a struct of narrow members, and narrow reference parameters. -/
+def NarrowShapes : Contract := contract!{
+  uint8[] small;
+  Packed p;
+  Packed[] ps;
+  mapping(uint => Packed) byId;
+  modifier atMost(uint8 cap) { require(cap > 1); _; }
+  function sum(uint8[] memory xs) returns (uint8 r) { r = xs[0] + xs[1]; }
+  function bump(uint8[] storage xs) { xs[0] += 1; }
+  function capped(uint8 c) atMost(c) returns (uint8 r) { r = c; }
+  function badCap() atMost(300) returns (uint8 r) { r = 1; }
+}
+
+/-- A member of a storage struct: `250 + 6` leaves `uint8`. -/
+theorem memberOverflows : ⊨ dl[NarrowShapes]{ [ p.a = 250; p.a += 6; ] false } := by
+  sol_symex
+  sol_close
+
+theorem memberInRange : ⊨ dl[NarrowShapes]{ ⟨ p.b = -32768; p.b += 32767; int16 e = -1;
+    assert(p.b == e); ⟩ true } := by
+  sol_symex
+  sol_close
+
+/-- A struct as a mapping's value, and a narrow array inside a struct. -/
+theorem valueMemberOverflows : ⊨ dl[NarrowShapes]{ [ byId[1].a = 200; byId[1].a += 100; ] false } := by
+  sol_symex
+  sol_close
+
+theorem memberArrayOverflows : ⊨ dl[NarrowShapes]{ [ p.xs[0] = 255; p.xs[0] += 1; ] false } := by
+  sol_symex
+  sol_close
+
+/-- A struct in memory. -/
+theorem memoryMemberOverflows : ⊨ dl[NarrowShapes]{ [ Packed memory q; q.a = 255; q.a++; ] false } := by
+  sol_symex
+  sol_close
+
+/-- A storage alias of `small` is a `uint8[]`: `s[0]` reverts, past the end or
+at `256`. -/
+theorem aliasOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] storage s = small; s[0] = 255; s[0] += 1; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- A memory array of `uint8`, allocated or copied from `small`. -/
+theorem memoryOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[](2); m[0] = 255;
+    m[0] += 1; ] false } := by
+  sol_symex
+  sol_close
+
+theorem copyOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = small; m[0] = 255; m[0]++; ]
+    false } := by
+  sol_symex
+  sol_close
+
+/-- A memory parameter and a storage parameter of `uint8[]`. -/
+theorem paramOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[](2); m[0] = 200;
+    m[1] = 100; uint8 r = sum(m); ] false } := by
+  sol_symex
+  sol_close
+
+theorem storageParamOverflows : ⊨ dl[NarrowShapes]{ [ small[0] = 255; bump(small); ] false } := by
+  sol_symex
+  sol_close
+
+/-- A modifier's narrow parameter. -/
+theorem modifierParam : ⊨ dl[NarrowShapes]{ ⟨ uint8 r = capped(5); ⟩ r == 5 } := by
   sol_symex
   sol_close
 
@@ -191,8 +345,13 @@ example : Prog.toStr [] (sol{ uint8 x = 1; bool b = true && x + 1 > 0; } :
     "uint x = 1; bool se1 = true; if (se1) { uint se2 = x + 1; require(se2 <= 255); se1 = se2 > 0; } else { } bool b = se1;" := by
   decide
 
-/-- error: Solidity elaboration failed: uint8: a narrow integer type is the type of a local, a parameter, a return value or a state variable only, not of an array's element, a mapping's key or value, or a struct's member -/
-#guard_msgs in #check sol{ uint8[] storage x; }
+/-- … and in a conditional's branch: a capture assigned in each branch, the
+check in the branch that computes it. -/
+example : Prog.toStr [] (sol{ uint8 x = 1; bool c = true; uint8 y = c ? x + 1 : x; } :
+    Prog StandardExample [] _) =
+    "uint x = 1; bool c = true; uint se1; if (c) { se1 = x + 1; require(se1 <= 255); } else { se1 = x; } uint y = se1;" := by
+  decide
+
 
 -- A cast between `uint` and `int`, one narrowing an `int`, and signed
 -- `unchecked`: through the words (`Examples/Tactics/SignedCasts.lean`).
@@ -208,5 +367,67 @@ info: "int x = 1; uint se1 = uint(x); int se2 = int((((se1 +% 1) +% 128) % 256) 
 
 /-- error: Solidity elaboration failed: wide returns a uint16, where a uint8 is expected -/
 #guard_msgs in #check sol[Narrow]{ uint8 t = wide(1); }
+
+-- A narrow position's operation is checked on the position written.
+/--
+info: "temps[1] = -100; temps[1] -= 28; require((-128 <= temps[1]) && (temps[1] <= 127)); small.push(3);"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol[NarrowNested]{ temps[1] = -100; temps[1] -= 28; small.push(3); })
+
+/-- error: Solidity elaboration failed: 200 does not fit int8 -/
+#guard_msgs in #check sol[NarrowNested]{ temps[1] = 200; }
+
+/-- error: Solidity elaboration failed: a uint where a uint8 is expected: write uint8(…) -/
+#guard_msgs in #check sol[NarrowNested]{ small.push(total); }
+
+/-- error: Solidity elaboration failed: 300 does not fit uint8 -/
+#guard_msgs in #check sol[NarrowNested]{ byKey[300] = 1; }
+
+/-- error: Solidity elaboration failed: a uint where a uint8 is expected: write uint8(…) -/
+#guard_msgs in #check sol[NarrowNested]{ uint k = 1; byKey[k] = 1; }
+
+/-- A part with a narrow position below it is used through an index, a member,
+`delete`, or whole where its narrow positions are checked against the
+target's: a reference type has no width to carry them. -/
+example : Prog.toStr [] (sol[NarrowNested]{ delete small; small.pop(); uint n = small.length; }) =
+    "delete small; small.pop(); uint n = small.length;" := by decide
+
+-- A reference local of another shape: solc refuses the conversion too.
+/--
+error: Solidity elaboration failed: small has narrow positions ·[] 8 bits wide where none are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowNested]{ uint[] storage p = small; }
+
+/--
+error: Solidity elaboration failed: new uint[](2) has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowShapes]{ uint8[] memory m = new uint[](2); }
+
+/--
+error: Solidity elaboration failed: mv1 has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowShapes]{ uint[] memory m = new uint[](2); uint8 r = sum(m); }
+
+/--
+error: Solidity elaboration failed: c ? small : small has narrow positions none where ·[] 8 bits wide are expected: solc converts no reference type to one of another element type
+-/
+#guard_msgs in #check sol[NarrowShapes]{ bool c = true; uint8[] storage s = c ? small : small; }
+
+-- A struct's narrow member, and a modifier's narrow parameter, must fit.
+/--
+error: Solidity elaboration failed: 300 does not fit uint8
+-/
+#guard_msgs in #check sol[NarrowShapes]{ p.a = 300; }
+
+/--
+error: Solidity elaboration failed: 300 does not fit uint8
+-/
+#guard_msgs in #check sol[NarrowShapes]{ uint8 r = badCap(); }
+
+-- A member's operation is checked at the member's type.
+/--
+info: "p.a += 6; require(p.a <= 255); Packed memory q; int se1 = q.b * 2; require((-32768 <= se1) && (se1 <= 32767)); q.b = se1;"
+-/
+#guard_msgs in #eval Prog.toStr [] (sol[NarrowShapes]{ p.a += 6; Packed memory q; q.b = q.b * 2; })
 
 end Solidity.Examples.Tactics.Checked

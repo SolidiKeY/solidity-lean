@@ -155,8 +155,11 @@ casts in loop invariants remain explicit limitations.
 Ledger locations in `assignable` clauses are refused per function and the
 refusal propagates through callers. Builtin call heads and escaped keywords
 remain distinct from constants sharing their spelling.
-Explicit base constructors, inherited contract NatSpec, duplicate state root
-names and `super` calls are rejected. Virtual calls use the most-derived
+Base constructors run in solc's legacy order, their arguments in either form;
+`super.f` names the next implementation in the most-derived C3 order; a base's
+contract clauses are the derived contract's too. Duplicate state root names,
+modifiers on a base constructor or on a constructor with base constructors,
+and `return` in a base constructor are rejected. Virtual calls use the most-derived
 implementation; explicit `Base.f` calls keep the named implementation, and
 external calls retain their external semantics. Expected-open suites use an expectation
 manifest when the SolKey corpus is imported; `pending` alone does not certify

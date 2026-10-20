@@ -2525,8 +2525,9 @@ Only the selected contract's own functions and constructor receive independent
 test rows. Inherited functions are helpers. Specification enum names resolve
 in the defining declaration's lexical ancestry. The importer refuses missing,
 cyclic, inconsistent or incomplete metadata instead of taking a partial closure.
-Explicit base constructors, inherited contract NatSpec, duplicate storage-root
-names and `super` calls remain explicit gaps. Imports/remappings remain outside
+Base constructors, `super` and inherited contract NatSpec are imported
+(`docs/solc-alignment.md`, "Constructors"); duplicate storage-root names
+remain an explicit gap. Imports/remappings remain outside
 the compiler helper's single-source scope.
 
 This extends the frozen upstream parser for explicit static base calls, which

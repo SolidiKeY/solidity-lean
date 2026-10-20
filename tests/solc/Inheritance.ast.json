@@ -1,8 +1,8 @@
 {
  "header": {
   "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
-  "sourceSha256": "3cd19efb6e9bb0e445173a56d62ad233ac4c0d7fb9cd9120dd3d94453271af98",
-  "solkeyCommit": "048a74de51a7cfb2cf497a043658424098f91e8e",
+  "sourceSha256": "5e7e26b3f147a71a53ec663c0e4e92bb088f80835e517bca39e1e781339f0616",
+  "solkeyCommit": "a3afb434d3478a019fbef1322a43c21cc75e81c5",
   "source": "tests/solc/Inheritance.sol"
  },
  "ast": {
@@ -595,9 +595,9 @@
     ],
     "canonicalName": "Inherited",
     "contractKind": "contract",
-    "id": 367,
+    "id": 401,
     "linearizedBaseContracts": [
-     367,
+     401,
      120
     ],
     "name": "Inherited",
@@ -1187,13 +1187,13 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"declarations":[{"constant":false,"id":354,"mutability":"mutable","name":"r","nodeType":"VariableDeclaration","src":"2545:6:0","line":50,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"arguments":[],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super Inherited)"}},"memberName":"pick","nodeType":"MemberAccess","referencedDeclaration":22,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"VariableDeclarationStatement","src":"2545:21:0","line":50},
-        {"expression":{"arguments":[{"leftExpression":{"name":"r","nodeType":"Identifier","referencedDeclaration":354,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2568:14:0","line":50}
+        {"declarations":[{"constant":false,"id":354,"mutability":"mutable","name":"r","nodeType":"VariableDeclaration","src":"2531:6:0","line":50,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"arguments":[],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super Inherited)"}},"memberName":"pick","nodeType":"MemberAccess","referencedDeclaration":22,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"VariableDeclarationStatement","src":"2531:21:0","line":50},
+        {"expression":{"arguments":[{"leftExpression":{"name":"r","nodeType":"Identifier","referencedDeclaration":354,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2554:14:0","line":50}
        ]
       },
       "id": 366,
       "kind": "function",
-      "name": "superRemainsUnsupported",
+      "name": "superCall",
       "nodeType": "FunctionDefinition",
       "parameters": {
        "nodeType": "ParameterList",
@@ -1203,94 +1203,82 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "2496:89:0",
+      "src": "2496:75:0",
       "line": 50,
       "stateMutability": "pure",
       "visibility": "public"
-     }
-    ],
-    "src": "976:1611:0",
-    "line": 26
-   },
-   {
-    "canonicalName": "InitRoot",
-    "contractKind": "contract",
-    "id": 386,
-    "name": "InitRoot",
-    "nodeType": "ContractDefinition",
-    "nodes": [
-     {
-      "constant": false,
-      "id": 369,
-      "mutability": "mutable",
-      "name": "counter",
-      "nodeType": "VariableDeclaration",
-      "src": "2613:12:0",
-      "line": 54,
-      "stateVariable": true,
-      "storageLocation": "default",
-      "typeDescriptions": {
-       "typeString": "uint256"
-      },
-      "typeName": {
-       "name": "uint",
-       "nodeType": "ElementaryTypeName",
-       "typeDescriptions": {
-        "typeString": "uint256"
-       }
-      },
-      "visibility": "internal"
-     },
-     {
-      "constant": false,
-      "id": 373,
-      "mutability": "mutable",
-      "name": "initialized",
-      "nodeType": "VariableDeclaration",
-      "src": "2631:26:0",
-      "line": 55,
-      "stateVariable": true,
-      "storageLocation": "default",
-      "typeDescriptions": {
-       "typeString": "uint256"
-      },
-      "typeName": {
-       "name": "uint",
-       "nodeType": "ElementaryTypeName",
-       "typeDescriptions": {
-        "typeString": "uint256"
-       }
-      },
-      "value": {
-       "arguments": [],
-       "expression": {
-        "name": "setup",
-        "nodeType": "Identifier",
-        "referencedDeclaration": 385,
-        "typeDescriptions": {
-         "typeString": "function () returns (uint256)"
-        }
-       },
-       "kind": "functionCall",
-       "names": [],
-       "nodeType": "FunctionCall",
-       "typeDescriptions": {
-        "typeString": "uint256"
-       }
-      },
-      "visibility": "internal"
      },
      {
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":369,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"2714:12:0","line":56},
-        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":369,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"2728:14:0","line":56}
+        {"declarations":[{"constant":false,"id":370,"mutability":"mutable","name":"r","nodeType":"VariableDeclaration","src":"2612:6:0","line":51,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"arguments":[{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"}],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super Inherited)"}},"memberName":"ordered","nodeType":"MemberAccess","referencedDeclaration":47,"typeDescriptions":{"typeString":"function (uint256,uint256) pure returns (uint256)"}},"kind":"functionCall","names":["a","b"],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"VariableDeclarationStatement","src":"2612:36:0","line":51},
+        {"expression":{"arguments":[{"leftExpression":{"name":"r","nodeType":"Identifier","referencedDeclaration":370,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 9"},"value":"9"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2650:14:0","line":51}
        ]
       },
-      "id": 385,
+      "id": 384,
       "kind": "function",
-      "name": "setup",
+      "name": "superNamed",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2576:91:0",
+      "line": 51,
+      "stateMutability": "pure",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"declarations":[{"constant":false,"id":388,"mutability":"mutable","name":"r","nodeType":"VariableDeclaration","src":"2708:6:0","line":52,"stateVariable":false,"storageLocation":"default","typeDescriptions":{"typeString":"uint256"},"typeName":{"name":"uint","nodeType":"ElementaryTypeName","typeDescriptions":{"typeString":"uint256"}},"visibility":"internal"}],"initialValue":{"arguments":[],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super Inherited)"}},"memberName":"pick","nodeType":"MemberAccess","referencedDeclaration":22,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"VariableDeclarationStatement","src":"2708:21:0","line":52},
+        {"expression":{"arguments":[{"leftExpression":{"name":"r","nodeType":"Identifier","referencedDeclaration":388,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"2731:14:0","line":52}
+       ]
+      },
+      "id": 400,
+      "kind": "function",
+      "name": "falseSuper",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "2672:76:0",
+      "line": 52,
+      "stateMutability": "pure",
+      "visibility": "public"
+     }
+    ],
+    "src": "976:1774:0",
+    "line": 26
+   },
+   {
+    "canonicalName": "SuperRoot",
+    "contractKind": "contract",
+    "id": 410,
+    "name": "SuperRoot",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"nodeType":"Return","src":"2977:8:0","line":57}
+       ]
+      },
+      "id": 409,
+      "kind": "function",
+      "name": "name",
       "nodeType": "FunctionDefinition",
       "parameters": {
        "nodeType": "ParameterList",
@@ -1301,12 +1289,12 @@
        "parameters": [
         {
          "constant": false,
-         "id": 376,
+         "id": 404,
          "mutability": "mutable",
          "name": "",
          "nodeType": "VariableDeclaration",
-         "src": "2706:4:0",
-         "line": 56,
+         "src": "2969:4:0",
+         "line": 57,
          "stateVariable": false,
          "storageLocation": "default",
          "typeDescriptions": {
@@ -1323,44 +1311,955 @@
         }
        ]
       },
-      "src": "2663:82:0",
-      "line": 56,
-      "stateMutability": "nonpayable",
+      "src": "2922:66:0",
+      "line": 57,
+      "stateMutability": "pure",
       "visibility": "internal"
      }
     ],
-    "src": "2589:158:0",
-    "line": 53
+    "src": "2901:89:0",
+    "line": 57
    },
    {
     "baseContracts": [
      {
       "baseName": {
-       "name": "InitRoot",
+       "name": "SuperRoot",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 386
+       "referencedDeclaration": 410
       },
       "nodeType": "InheritanceSpecifier"
      }
     ],
-    "canonicalName": "InitLeft",
+    "canonicalName": "SuperLeft",
     "contractKind": "contract",
-    "id": 394,
+    "id": 428,
     "linearizedBaseContracts": [
-     394,
-     386
+     428,
+     410
     ],
-    "name": "InitLeft",
+    "name": "SuperLeft",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "baseFunctions": [
+       409
+      ],
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftExpression":{"leftExpression":{"arguments":[],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super SuperLeft)"}},"memberName":"name","nodeType":"MemberAccess","referencedDeclaration":409,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"3093:28:0","line":59}
+       ]
+      },
+      "id": 427,
+      "kind": "function",
+      "name": "name",
+      "nodeType": "FunctionDefinition",
+      "overrides": {
+       "nodeType": "OverrideSpecifier",
+       "overrides": []
+      },
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 416,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "3085:4:0",
+         "line": 59,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "3029:95:0",
+      "line": 59,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     }
+    ],
+    "src": "2991:135:0",
+    "line": 58
+   },
+   {
+    "baseContracts": [
+     {
+      "baseName": {
+       "name": "SuperRoot",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 410
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "SuperRight",
+    "contractKind": "contract",
+    "id": 446,
+    "linearizedBaseContracts": [
+     446,
+     410
+    ],
+    "name": "SuperRight",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "baseFunctions": [
+       409
+      ],
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftExpression":{"leftExpression":{"arguments":[],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super SuperRight)"}},"memberName":"name","nodeType":"MemberAccess","referencedDeclaration":409,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"3230:28:0","line":62}
+       ]
+      },
+      "id": 445,
+      "kind": "function",
+      "name": "name",
+      "nodeType": "FunctionDefinition",
+      "overrides": {
+       "nodeType": "OverrideSpecifier",
+       "overrides": []
+      },
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 434,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "3222:4:0",
+         "line": 62,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "3166:95:0",
+      "line": 62,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     }
+    ],
+    "src": "3127:136:0",
+    "line": 61
+   },
+   {
+    "baseContracts": [
+     {
+      "baseName": {
+       "name": "SuperLeft",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 428
+      },
+      "nodeType": "InheritanceSpecifier"
+     },
+     {
+      "baseName": {
+       "name": "SuperRight",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 446
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "SuperDiamond",
+    "contractKind": "contract",
+    "id": 502,
+    "linearizedBaseContracts": [
+     502,
+     446,
+     428,
+     410
+    ],
+    "name": "SuperDiamond",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "baseFunctions": [
+       427,
+       445
+      ],
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftExpression":{"leftExpression":{"arguments":[],"expression":{"expression":{"name":"super","nodeType":"Identifier","referencedDeclaration":-25,"typeDescriptions":{"typeString":"type(contract super SuperDiamond)"}},"memberName":"name","nodeType":"MemberAccess","referencedDeclaration":445,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"3404:28:0","line":66}
+       ]
+      },
+      "id": 467,
+      "kind": "function",
+      "name": "name",
+      "nodeType": "FunctionDefinition",
+      "overrides": {
+       "nodeType": "OverrideSpecifier",
+       "overrides": [
+        {
+         "name": "SuperLeft",
+         "nodeType": "IdentifierPath",
+         "referencedDeclaration": 428
+        },
+        {
+         "name": "SuperRight",
+         "nodeType": "IdentifierPath",
+         "referencedDeclaration": 446
+        }
+       ]
+      },
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 456,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "3388:4:0",
+         "line": 65,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "3317:122:0",
+      "line": 65,
+      "stateMutability": "pure",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"arguments":[],"expression":{"name":"name","nodeType":"Identifier","referencedDeclaration":467,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1234"},"value":"1234"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3482:22:0","line":68}
+       ]
+      },
+      "id": 478,
+      "kind": "function",
+      "name": "diamondSuper",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3444:63:0",
+      "line": 68,
+      "stateMutability": "pure",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"arguments":[],"expression":{"expression":{"name":"SuperRight","nodeType":"Identifier","referencedDeclaration":446,"typeDescriptions":{"typeString":"type(contract SuperRight)"}},"memberName":"name","nodeType":"MemberAccess","referencedDeclaration":445,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 123"},"value":"123"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3549:32:0","line":69}
+       ]
+      },
+      "id": 490,
+      "kind": "function",
+      "name": "staticRight",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3512:72:0",
+      "line": 69,
+      "stateMutability": "pure",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"arguments":[],"expression":{"name":"name","nodeType":"Identifier","referencedDeclaration":467,"typeDescriptions":{"typeString":"function () pure returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 134"},"value":"134"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3632:21:0","line":70}
+       ]
+      },
+      "id": 501,
+      "kind": "function",
+      "name": "falseDiamondSuper",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "3589:67:0",
+      "line": 70,
+      "stateMutability": "pure",
+      "visibility": "public"
+     }
+    ],
+    "src": "3264:394:0",
+    "line": 64
+   },
+   {
+    "canonicalName": "CtorRoot",
+    "contractKind": "contract",
+    "id": 535,
+    "name": "CtorRoot",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 393,
+      "id": 504,
       "mutability": "mutable",
-      "name": "left",
+      "name": "root",
       "nodeType": "VariableDeclaration",
-      "src": "2780:23:0",
-      "line": 58,
+      "src": "3991:9:0",
+      "line": 78,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 506,
+      "mutability": "mutable",
+      "name": "seen",
+      "nodeType": "VariableDeclaration",
+      "src": "4006:9:0",
+      "line": 79,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 509,
+      "mutability": "mutable",
+      "name": "early",
+      "nodeType": "VariableDeclaration",
+      "src": "4021:14:0",
+      "line": 80,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "kind": "number",
+       "nodeType": "Literal",
+       "typeDescriptions": {
+        "typeString": "int_const 7"
+       },
+       "value": "7"
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"seen","nodeType":"Identifier","referencedDeclaration":506,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"arguments":[],"expression":{"name":"probe","nodeType":"Identifier","referencedDeclaration":534,"typeDescriptions":{"typeString":"function () view returns (uint256)"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"early","nodeType":"Identifier","referencedDeclaration":509,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4063:22:0","line":81},
+        {"expression":{"leftHandSide":{"name":"root","nodeType":"Identifier","referencedDeclaration":504,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"name":"a","nodeType":"Identifier","referencedDeclaration":511,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4087:8:0","line":81}
+       ]
+      },
+      "id": 526,
+      "kind": "constructor",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 511,
+         "mutability": "mutable",
+         "name": "a",
+         "nodeType": "VariableDeclaration",
+         "src": "4053:6:0",
+         "line": 81,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4041:57:0",
+      "line": 81,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"nodeType":"Return","src":"4159:8:0","line":82}
+       ]
+      },
+      "id": 534,
+      "kind": "function",
+      "name": "probe",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 529,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "4151:4:0",
+         "line": 82,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "4103:67:0",
+      "line": 82,
+      "stateMutability": "view",
+      "visibility": "internal"
+     }
+    ],
+    "src": "3967:205:0",
+    "line": 77
+   },
+   {
+    "baseContracts": [
+     {
+      "baseName": {
+       "name": "CtorRoot",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 535
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "CtorMid",
+    "contractKind": "contract",
+    "id": 562,
+    "linearizedBaseContracts": [
+     562,
+     535
+    ],
+    "name": "CtorMid",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 539,
+      "mutability": "mutable",
+      "name": "mid",
+      "nodeType": "VariableDeclaration",
+      "src": "4208:8:0",
+      "line": 85,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 542,
+      "mutability": "mutable",
+      "name": "late",
+      "nodeType": "VariableDeclaration",
+      "src": "4222:13:0",
+      "line": 86,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "kind": "number",
+       "nodeType": "Literal",
+       "typeDescriptions": {
+        "typeString": "int_const 9"
+       },
+       "value": "9"
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"mid","nodeType":"Identifier","referencedDeclaration":539,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"leftExpression":{"name":"root","nodeType":"Identifier","referencedDeclaration":504,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"m","nodeType":"Identifier","referencedDeclaration":544,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4282:18:0","line":87}
+       ]
+      },
+      "id": 561,
+      "kind": "constructor",
+      "modifiers": [
+       {
+        "arguments": [
+         {
+          "leftExpression": {
+           "name": "m",
+           "nodeType": "Identifier",
+           "referencedDeclaration": 544,
+           "typeDescriptions": {
+            "typeString": "uint256"
+           }
+          },
+          "nodeType": "BinaryOperation",
+          "operator": "+",
+          "rightExpression": {
+           "name": "late",
+           "nodeType": "Identifier",
+           "referencedDeclaration": 542,
+           "typeDescriptions": {
+            "typeString": "uint256"
+           }
+          },
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         }
+        ],
+        "kind": "baseConstructorSpecifier",
+        "modifierName": {
+         "name": "CtorRoot",
+         "nodeType": "IdentifierPath",
+         "referencedDeclaration": 535
+        },
+        "nodeType": "ModifierInvocation"
+       }
+      ],
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 544,
+         "mutability": "mutable",
+         "name": "m",
+         "nodeType": "VariableDeclaration",
+         "src": "4253:6:0",
+         "line": 87,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4241:62:0",
+      "line": 87,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "4173:132:0",
+    "line": 84
+   },
+   {
+    "baseContracts": [
+     {
+      "arguments": [
+       {
+        "kind": "number",
+        "nodeType": "Literal",
+        "typeDescriptions": {
+         "typeString": "int_const 3"
+        },
+        "value": "3"
+       }
+      ],
+      "baseName": {
+       "name": "CtorMid",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 562
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "CtorLeaf",
+    "contractKind": "contract",
+    "id": 618,
+    "linearizedBaseContracts": [
+     618,
+     562,
+     535
+    ],
+    "name": "CtorLeaf",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 568,
+      "mutability": "mutable",
+      "name": "leaf",
+      "nodeType": "VariableDeclaration",
+      "src": "4344:14:0",
+      "line": 90,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "kind": "number",
+       "nodeType": "Literal",
+       "typeDescriptions": {
+        "typeString": "int_const 11"
+       },
+       "value": "11"
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 570,
+      "mutability": "mutable",
+      "name": "order",
+      "nodeType": "VariableDeclaration",
+      "src": "4364:10:0",
+      "line": 91,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "baseFunctions": [
+       534
+      ],
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftExpression":{"name":"leaf","nodeType":"Identifier","referencedDeclaration":568,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 100"},"value":"100"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"4437:17:0","line":92}
+       ]
+      },
+      "id": 581,
+      "kind": "function",
+      "name": "probe",
+      "nodeType": "FunctionDefinition",
+      "overrides": {
+       "nodeType": "OverrideSpecifier",
+       "overrides": []
+      },
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 574,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "4429:4:0",
+         "line": 92,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "4380:77:0",
+      "line": 92,
+      "stateMutability": "view",
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"order","nodeType":"Identifier","referencedDeclaration":570,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"leftExpression":{"leftExpression":{"name":"mid","nodeType":"Identifier","referencedDeclaration":539,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"*","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 100"},"value":"100"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"+","rightExpression":{"name":"leaf","nodeType":"Identifier","referencedDeclaration":568,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4486:24:0","line":94},
+        {"expression":{"arguments":[{"leftExpression":{"name":"root","nodeType":"Identifier","referencedDeclaration":504,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 12"},"value":"12"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4520:18:0","line":95},
+        {"expression":{"arguments":[{"leftExpression":{"name":"seen","nodeType":"Identifier","referencedDeclaration":506,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1107"},"value":"1107"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4540:20:0","line":95},
+        {"expression":{"arguments":[{"leftExpression":{"name":"mid","nodeType":"Identifier","referencedDeclaration":539,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 27"},"value":"27"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4562:17:0","line":95},
+        {"expression":{"arguments":[{"leftExpression":{"name":"order","nodeType":"Identifier","referencedDeclaration":570,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2711"},"value":"2711"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4581:21:0","line":95}
+       ]
+      },
+      "id": 617,
+      "kind": "constructor",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4462:147:0",
+      "line": 93,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "4306:305:0",
+    "line": 89
+   },
+   {
+    "baseContracts": [
+     {
+      "arguments": [
+       {
+        "kind": "number",
+        "nodeType": "Literal",
+        "typeDescriptions": {
+         "typeString": "int_const 3"
+        },
+        "value": "3"
+       }
+      ],
+      "baseName": {
+       "name": "CtorMid",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 562
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "CtorFalse",
+    "contractKind": "contract",
+    "id": 632,
+    "linearizedBaseContracts": [
+     632,
+     562,
+     535
+    ],
+    "name": "CtorFalse",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"name":"root","nodeType":"Identifier","referencedDeclaration":504,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4667:17:0","line":99}
+       ]
+      },
+      "id": 631,
+      "kind": "constructor",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4651:36:0",
+      "line": 99,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "4612:77:0",
+    "line": 98
+   },
+   {
+    "baseContracts": [
+     {
+      "arguments": [
+       {
+        "kind": "number",
+        "nodeType": "Literal",
+        "typeDescriptions": {
+         "typeString": "int_const 4"
+        },
+        "value": "4"
+       }
+      ],
+      "baseName": {
+       "name": "CtorRoot",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 535
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "CtorImplicit",
+    "contractKind": "contract",
+    "id": 641,
+    "linearizedBaseContracts": [
+     641,
+     535
+    ],
+    "name": "CtorImplicit",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 640,
+      "mutability": "mutable",
+      "name": "next",
+      "nodeType": "VariableDeclaration",
+      "src": "4729:20:0",
+      "line": 101,
       "stateVariable": true,
       "storageLocation": "default",
       "typeDescriptions": {
@@ -1375,9 +2274,9 @@
       },
       "value": {
        "leftExpression": {
-        "name": "counter",
+        "name": "root",
         "nodeType": "Identifier",
-        "referencedDeclaration": 369,
+        "referencedDeclaration": 504,
         "typeDescriptions": {
          "typeString": "uint256"
         }
@@ -1399,8 +2298,469 @@
       "visibility": "internal"
      }
     ],
-    "src": "2748:58:0",
-    "line": 58
+    "src": "4690:62:0",
+    "line": 101
+   },
+   {
+    "canonicalName": "CtorUnnamed",
+    "contractKind": "contract",
+    "id": 656,
+    "name": "CtorUnnamed",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 643,
+      "mutability": "mutable",
+      "name": "got",
+      "nodeType": "VariableDeclaration",
+      "src": "4776:8:0",
+      "line": 102,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"got","nodeType":"Identifier","referencedDeclaration":643,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"name":"b","nodeType":"Identifier","referencedDeclaration":647,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"4814:7:0","line":102}
+       ]
+      },
+      "id": 655,
+      "kind": "constructor",
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 645,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "4798:4:0",
+         "line": 102,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        },
+        {
+         "constant": false,
+         "id": 647,
+         "mutability": "mutable",
+         "name": "b",
+         "nodeType": "VariableDeclaration",
+         "src": "4804:6:0",
+         "line": 102,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4786:38:0",
+      "line": 102,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "4753:73:0",
+    "line": 102
+   },
+   {
+    "baseContracts": [
+     {
+      "baseName": {
+       "name": "CtorUnnamed",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 656
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "CtorUnnamedChild",
+    "contractKind": "contract",
+    "id": 675,
+    "linearizedBaseContracts": [
+     675,
+     656
+    ],
+    "name": "CtorUnnamedChild",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"arguments":[{"leftExpression":{"name":"got","nodeType":"Identifier","referencedDeclaration":643,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"name":"x","nodeType":"Identifier","referencedDeclaration":660,"typeDescriptions":{"typeString":"uint256"}},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"4922:16:0","line":104}
+       ]
+      },
+      "id": 674,
+      "kind": "constructor",
+      "modifiers": [
+       {
+        "arguments": [
+         {
+          "name": "x",
+          "nodeType": "Identifier",
+          "referencedDeclaration": 660,
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         {
+          "name": "x",
+          "nodeType": "Identifier",
+          "referencedDeclaration": 660,
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         }
+        ],
+        "kind": "baseConstructorSpecifier",
+        "modifierName": {
+         "name": "CtorUnnamed",
+         "nodeType": "IdentifierPath",
+         "referencedDeclaration": 656
+        },
+        "nodeType": "ModifierInvocation"
+       }
+      ],
+      "name": "",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 660,
+         "mutability": "mutable",
+         "name": "x",
+         "nodeType": "VariableDeclaration",
+         "src": "4886:6:0",
+         "line": 104,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "4874:67:0",
+      "line": 104,
+      "stateMutability": "payable",
+      "visibility": "public"
+     }
+    ],
+    "src": "4827:116:0",
+    "line": 103
+   },
+   {
+    "canonicalName": "Guarded",
+    "contractKind": "contract",
+    "documentation": {
+     "nodeType": "StructuredDocumentation",
+     "text": "@custom:key invariant guarded <= 10"
+    },
+    "id": 679,
+    "name": "Guarded",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 678,
+      "mutability": "mutable",
+      "name": "guarded",
+      "nodeType": "VariableDeclaration",
+      "src": "5080:12:0",
+      "line": 109,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     }
+    ],
+    "src": "5061:34:0",
+    "line": 109
+   },
+   {
+    "baseContracts": [
+     {
+      "baseName": {
+       "name": "Guarded",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 679
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "GuardedChild",
+    "contractKind": "contract",
+    "documentation": {
+     "nodeType": "StructuredDocumentation",
+     "text": "@custom:key invariant guarded >= 1"
+    },
+    "id": 712,
+    "linearizedBaseContracts": [
+     712,
+     679
+    ],
+    "name": "GuardedChild",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"condition":{"leftExpression":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"<","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 10"},"value":"10"},"typeDescriptions":{"typeString":"bool"}},"nodeType":"IfStatement","src":"5199:35:0","line":112,"trueBody":{"nodeType":"Block","statements":[{"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5219:12:0","line":112}]}}
+       ]
+      },
+      "id": 695,
+      "kind": "function",
+      "name": "bump",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "5174:62:0",
+      "line": 112,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 11"},"value":"11"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5272:12:0","line":113}
+       ]
+      },
+      "id": 703,
+      "kind": "function",
+      "name": "breaksBase",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "5241:46:0",
+      "line": 113,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"guarded","nodeType":"Identifier","referencedDeclaration":678,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 0"},"value":"0"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5322:11:0","line":114}
+       ]
+      },
+      "id": 711,
+      "kind": "function",
+      "name": "breaksOwn",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "src": "5292:44:0",
+      "line": 114,
+      "stateMutability": "nonpayable",
+      "visibility": "public"
+     }
+    ],
+    "src": "5135:203:0",
+    "line": 111
+   },
+   {
+    "canonicalName": "InitRoot",
+    "contractKind": "contract",
+    "id": 731,
+    "name": "InitRoot",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 714,
+      "mutability": "mutable",
+      "name": "counter",
+      "nodeType": "VariableDeclaration",
+      "src": "5364:12:0",
+      "line": 118,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "constant": false,
+      "id": 718,
+      "mutability": "mutable",
+      "name": "initialized",
+      "nodeType": "VariableDeclaration",
+      "src": "5382:26:0",
+      "line": 119,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "arguments": [],
+       "expression": {
+        "name": "setup",
+        "nodeType": "Identifier",
+        "referencedDeclaration": 730,
+        "typeDescriptions": {
+         "typeString": "function () returns (uint256)"
+        }
+       },
+       "kind": "functionCall",
+       "names": [],
+       "nodeType": "FunctionCall",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     },
+     {
+      "body": {
+       "nodeType": "Block",
+       "statements": [
+        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 1"},"value":"1"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5465:12:0","line":120},
+        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"5479:14:0","line":120}
+       ]
+      },
+      "id": 730,
+      "kind": "function",
+      "name": "setup",
+      "nodeType": "FunctionDefinition",
+      "parameters": {
+       "nodeType": "ParameterList",
+       "parameters": []
+      },
+      "returnParameters": {
+       "nodeType": "ParameterList",
+       "parameters": [
+        {
+         "constant": false,
+         "id": 721,
+         "mutability": "mutable",
+         "name": "",
+         "nodeType": "VariableDeclaration",
+         "src": "5457:4:0",
+         "line": 120,
+         "stateVariable": false,
+         "storageLocation": "default",
+         "typeDescriptions": {
+          "typeString": "uint256"
+         },
+         "typeName": {
+          "name": "uint",
+          "nodeType": "ElementaryTypeName",
+          "typeDescriptions": {
+           "typeString": "uint256"
+          }
+         },
+         "visibility": "internal"
+        }
+       ]
+      },
+      "src": "5414:82:0",
+      "line": 120,
+      "stateMutability": "nonpayable",
+      "visibility": "internal"
+     }
+    ],
+    "src": "5340:158:0",
+    "line": 117
    },
    {
     "baseContracts": [
@@ -1408,29 +2768,29 @@
       "baseName": {
        "name": "InitRoot",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 386
+       "referencedDeclaration": 731
       },
       "nodeType": "InheritanceSpecifier"
      }
     ],
-    "canonicalName": "InitRight",
+    "canonicalName": "InitLeft",
     "contractKind": "contract",
-    "id": 402,
+    "id": 739,
     "linearizedBaseContracts": [
-     402,
-     386
+     739,
+     731
     ],
-    "name": "InitRight",
+    "name": "InitLeft",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 401,
+      "id": 738,
       "mutability": "mutable",
-      "name": "right",
+      "name": "left",
       "nodeType": "VariableDeclaration",
-      "src": "2840:24:0",
-      "line": 59,
+      "src": "5531:23:0",
+      "line": 122,
       "stateVariable": true,
       "storageLocation": "default",
       "typeDescriptions": {
@@ -1447,7 +2807,77 @@
        "leftExpression": {
         "name": "counter",
         "nodeType": "Identifier",
-        "referencedDeclaration": 369,
+        "referencedDeclaration": 714,
+        "typeDescriptions": {
+         "typeString": "uint256"
+        }
+       },
+       "nodeType": "BinaryOperation",
+       "operator": "+",
+       "rightExpression": {
+        "kind": "number",
+        "nodeType": "Literal",
+        "typeDescriptions": {
+         "typeString": "int_const 1"
+        },
+        "value": "1"
+       },
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "visibility": "internal"
+     }
+    ],
+    "src": "5499:58:0",
+    "line": 122
+   },
+   {
+    "baseContracts": [
+     {
+      "baseName": {
+       "name": "InitRoot",
+       "nodeType": "IdentifierPath",
+       "referencedDeclaration": 731
+      },
+      "nodeType": "InheritanceSpecifier"
+     }
+    ],
+    "canonicalName": "InitRight",
+    "contractKind": "contract",
+    "id": 747,
+    "linearizedBaseContracts": [
+     747,
+     731
+    ],
+    "name": "InitRight",
+    "nodeType": "ContractDefinition",
+    "nodes": [
+     {
+      "constant": false,
+      "id": 746,
+      "mutability": "mutable",
+      "name": "right",
+      "nodeType": "VariableDeclaration",
+      "src": "5591:24:0",
+      "line": 123,
+      "stateVariable": true,
+      "storageLocation": "default",
+      "typeDescriptions": {
+       "typeString": "uint256"
+      },
+      "typeName": {
+       "name": "uint",
+       "nodeType": "ElementaryTypeName",
+       "typeDescriptions": {
+        "typeString": "uint256"
+       }
+      },
+      "value": {
+       "leftExpression": {
+        "name": "counter",
+        "nodeType": "Identifier",
+        "referencedDeclaration": 714,
         "typeDescriptions": {
          "typeString": "uint256"
         }
@@ -1469,8 +2899,8 @@
       "visibility": "internal"
      }
     ],
-    "src": "2807:60:0",
-    "line": 59
+    "src": "5558:60:0",
+    "line": 123
    },
    {
     "baseContracts": [
@@ -1478,7 +2908,7 @@
       "baseName": {
        "name": "InitLeft",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 394
+       "referencedDeclaration": 739
       },
       "nodeType": "InheritanceSpecifier"
      },
@@ -1486,31 +2916,31 @@
       "baseName": {
        "name": "InitRight",
        "nodeType": "IdentifierPath",
-       "referencedDeclaration": 402
+       "referencedDeclaration": 747
       },
       "nodeType": "InheritanceSpecifier"
      }
     ],
     "canonicalName": "InitDiamond",
     "contractKind": "contract",
-    "id": 461,
+    "id": 806,
     "linearizedBaseContracts": [
-     461,
-     402,
-     394,
-     386
+     806,
+     747,
+     739,
+     731
     ],
     "name": "InitDiamond",
     "nodeType": "ContractDefinition",
     "nodes": [
      {
       "constant": false,
-      "id": 413,
+      "id": 758,
       "mutability": "mutable",
       "name": "result",
       "nodeType": "VariableDeclaration",
-      "src": "2918:31:0",
-      "line": 61,
+      "src": "5669:31:0",
+      "line": 125,
       "stateVariable": true,
       "storageLocation": "default",
       "typeDescriptions": {
@@ -1528,7 +2958,7 @@
         "leftExpression": {
          "name": "left",
          "nodeType": "Identifier",
-         "referencedDeclaration": 393,
+         "referencedDeclaration": 738,
          "typeDescriptions": {
           "typeString": "uint256"
          }
@@ -1552,7 +2982,7 @@
        "rightExpression": {
         "name": "right",
         "nodeType": "Identifier",
-        "referencedDeclaration": 401,
+        "referencedDeclaration": 746,
         "typeDescriptions": {
          "typeString": "uint256"
         }
@@ -1565,16 +2995,16 @@
      },
      {
       "baseFunctions": [
-       385
+       730
       ],
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":369,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"3007:12:0","line":62},
-        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":369,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"3021:14:0","line":62}
+        {"expression":{"leftHandSide":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Assignment","operator":"+=","rightHandSide":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"uint256"}},"nodeType":"ExpressionStatement","src":"5758:12:0","line":126},
+        {"expression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"Return","src":"5772:14:0","line":126}
        ]
       },
-      "id": 426,
+      "id": 771,
       "kind": "function",
       "name": "setup",
       "nodeType": "FunctionDefinition",
@@ -1591,12 +3021,12 @@
        "parameters": [
         {
          "constant": false,
-         "id": 417,
+         "id": 762,
          "mutability": "mutable",
          "name": "",
          "nodeType": "VariableDeclaration",
-         "src": "2999:4:0",
-         "line": 62,
+         "src": "5750:4:0",
+         "line": 126,
          "stateVariable": false,
          "storageLocation": "default",
          "typeDescriptions": {
@@ -1613,8 +3043,8 @@
         }
        ]
       },
-      "src": "2955:83:0",
-      "line": 62,
+      "src": "5706:83:0",
+      "line": 126,
       "stateMutability": "nonpayable",
       "visibility": "internal"
      },
@@ -1622,14 +3052,14 @@
       "body": {
        "nodeType": "Block",
        "statements": [
-        {"expression":{"arguments":[{"leftExpression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":369,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3067:20:0","line":64},
-        {"expression":{"arguments":[{"leftExpression":{"name":"initialized","nodeType":"Identifier","referencedDeclaration":373,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3089:24:0","line":64},
-        {"expression":{"arguments":[{"leftExpression":{"name":"left","nodeType":"Identifier","referencedDeclaration":393,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3123:17:0","line":65},
-        {"expression":{"arguments":[{"leftExpression":{"name":"right","nodeType":"Identifier","referencedDeclaration":401,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3142:18:0","line":65},
-        {"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":413,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 34"},"value":"34"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"3162:20:0","line":65}
+        {"expression":{"arguments":[{"leftExpression":{"name":"counter","nodeType":"Identifier","referencedDeclaration":714,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5818:20:0","line":128},
+        {"expression":{"arguments":[{"leftExpression":{"name":"initialized","nodeType":"Identifier","referencedDeclaration":718,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 2"},"value":"2"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5840:24:0","line":128},
+        {"expression":{"arguments":[{"leftExpression":{"name":"left","nodeType":"Identifier","referencedDeclaration":738,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 3"},"value":"3"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5874:17:0","line":129},
+        {"expression":{"arguments":[{"leftExpression":{"name":"right","nodeType":"Identifier","referencedDeclaration":746,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 4"},"value":"4"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5893:18:0","line":129},
+        {"expression":{"arguments":[{"leftExpression":{"name":"result","nodeType":"Identifier","referencedDeclaration":758,"typeDescriptions":{"typeString":"uint256"}},"nodeType":"BinaryOperation","operator":"==","rightExpression":{"kind":"number","nodeType":"Literal","typeDescriptions":{"typeString":"int_const 34"},"value":"34"},"typeDescriptions":{"typeString":"bool"}}],"expression":{"name":"assert","nodeType":"Identifier","referencedDeclaration":-3,"typeDescriptions":{"typeString":"function (bool) pure"}},"kind":"functionCall","names":[],"nodeType":"FunctionCall","typeDescriptions":{"typeString":"tuple()"}},"nodeType":"ExpressionStatement","src":"5913:20:0","line":129}
        ]
       },
-      "id": 460,
+      "id": 805,
       "kind": "constructor",
       "name": "",
       "nodeType": "FunctionDefinition",
@@ -1641,14 +3071,14 @@
        "nodeType": "ParameterList",
        "parameters": []
       },
-      "src": "3043:146:0",
-      "line": 63,
+      "src": "5794:146:0",
+      "line": 127,
       "stateMutability": "nonpayable",
       "visibility": "public"
      }
     ],
-    "src": "2868:323:0",
-    "line": 60
+    "src": "5619:323:0",
+    "line": 124
    }
   ]
  }

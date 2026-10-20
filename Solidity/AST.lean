@@ -269,6 +269,18 @@ def structDef : Name -> List (Name × Ty)
   -- solc/open/SolcConstructorsOpen.sol, SolcLoopsOpen.sol.
   | "D" => [("p", Ty.uint), ("q", Ty.bool)]
   | "Nest" => [("d", Ty.ref (RefTy.array (Ty.ref (RefTy.array Ty.uint))))]
+  -- solc/open/NarrowNested.sol: narrow members (`structWidths`).
+  | "Packed" =>
+      [("a", Ty.uint), ("b", Ty.int), ("c", Ty.uint), ("xs", Ty.ref (RefTy.array Ty.uint))]
+  | _ => []
+
+/-- The widths of a struct's narrow members, keyed by their path below the
+member as `Contract.widths` keys a state variable's (`expandStateTyW`):
+`struct Packed { uint8 a; int16 b; uint c; uint8[] xs; }` is `a` at 8, `b`
+at 16 and `xs[]` at 8.  Each such member is a `uint` or an `int` in
+`structDef`; the elaborator reads this table, nothing below it does. -/
+def structWidths : Name -> List (String × Nat)
+  | "Packed" => [("a", 8), ("b", 16), ("xs[]", 8)]
   | _ => []
 
 /-- Struct declarations solc refuses ("Identifier already declared"): two
@@ -328,6 +340,7 @@ def structRank : Name -> Nat
   | "Triple" => 1
   | "D" => 1
   | "Nest" => 1
+  | "Packed" => 1
   | _ => 1
 
 /-- A type's rank: primitives 0, a struct its `structRank`, a dynamic array
@@ -693,7 +706,8 @@ their proofs are `Eq.refl`, from a list of the structs checked once
 /-- The structs of `structDef` that hold no mapping. -/
 def mapFreeStructs : List Name :=
   ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S",
-   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "D", "Nest"]
+   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "D", "Nest",
+   "Packed"]
 
 /-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
 def Ty.mapFree : Ty → Bool
@@ -719,7 +733,7 @@ has the wrong type for what the name looks up to), and solc refuses one
 def defaultOkStructs : List Name :=
   ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
    "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
-   "WithArray", "Triple", "D", "Nest"]
+   "WithArray", "Triple", "D", "Nest", "Packed"]
 
 /-- `T`'s fresh default is well-formed: what `values.push();` and
 `Person memory m;` need. -/
