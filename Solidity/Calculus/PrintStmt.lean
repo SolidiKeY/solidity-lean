@@ -1120,7 +1120,9 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
     for h : i in [0:bs.size] do
       let l := lbl i
       let b ← whnf bs[i]
-      unless b.isAppOfArity ``Branch.mk 6 do return none
+      unless b.isAppOfArity ``Branch.mk 7 do return none
+      -- a goal behind a hypothesis (`Branch.hyp`) has no `dl_branch` form
+      unless (← whnf (b.getArg! 6)).isAppOf ``Option.none do return none
       let xs := (← instantiateMVars (b.getArg! 4)).consumeMData
       -- the binders: a schema variable (`rets`), the `Panic` code's
       -- (`code.binders`), or none

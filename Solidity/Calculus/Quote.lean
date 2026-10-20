@@ -576,8 +576,12 @@ def qPremise (Γ Γ' : Ctx) (p : Premise C Γ Γ') : QM Expr := do
     let brTy := mkApp2 (mkConst ``Branch) (← contract) (← qCtx Γ)
     let mut l := mkApp (mkConst ``List.nil [levelZero]) brTy
     for b in bs.reverse do
+      let fTy ← fam ``Fml Γ
+      let hyp ← match b.hyp with
+        | none => pure (mkApp (mkConst ``Option.none [levelZero]) fTy)
+        | some c => pure (mkApp2 (mkConst ``Option.some [levelZero]) fTy (← qFml Γ c))
       let e := mkAppN (mkConst ``Branch.mk) #[← contract, ← qCtx Γ, ← qCtx b.ρ, ← qCtx b.Γ₁,
-        ← qBinders b.ρ b.bs, ← qProg (b.ρ ++ Γ) b.Γ₁ b.P]
+        ← qBinders b.ρ b.bs, ← qProg (b.ρ ++ Γ) b.Γ₁ b.P, hyp]
       l := mkApp3 (mkConst ``List.cons [levelZero]) brTy e l
     return mk ``Premise.branches #[l]
   | .cases fs us => do
