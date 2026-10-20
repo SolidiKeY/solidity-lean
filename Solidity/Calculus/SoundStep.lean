@@ -80,6 +80,7 @@ theorem Stmt.stepSound_arms (k : Nat) (m : Modality) {Γ Γ' : Ctx} (s : Stmt C 
   | tryCall => cases hb
   | loop => cases hb
   | block body => cases hp; exact sound_block σ body
+  | callRec f d args ret body => cases hp; exact sound_recursiveCallUnfold σ f d args ret body
   | pushOpAssign op hop hp' b r => exact PushSuffix.pushOpStep_sound k op hop hp' b r p hp σ
   | pushIncDec op hp' b => exact PushSuffix.pushIncStep_sound k op hp' b p hp σ
 
