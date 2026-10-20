@@ -387,9 +387,28 @@ test("free and library calls resolve by declaration with attached receivers", ()
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
-  // a recursive call is imported (`Stmt.callRec`); its result is read past
-  // it, which the contract `true`/`true` that `rec_auto` tries does not give
-  assert.equal(status.recursionGap, 'pending');
+  // a recursive call (`Stmt.callRec`) whose result is read past it: by its
+  // callee's `/// @custom:key ensures` contract (`rec_auto`)
+  assert.equal(status.recursionGap, 'proved');
+});
+
+test("recursion: calls by their contracts, proved by induction over the frames", () => {
+  // tests/solc/Recursion.sol: each recursive call by its callee's
+  // `/// @custom:key` contract (`true`/`true` without one), the contract by
+  // induction over the frames (`rec_auto`, docs/kernel-port.md "Recursion")
+  const report = runSolidityTests(["tests/solc/Recursion.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['countdown', 'sumTo', 'sumToSix', 'even', 'odd', 'evenFour',
+    'fib', 'fibOne', 'divmod', 'divmodSeven']) {
+    assert.equal(status[name], 'proved', name);
+  }
+  // the triangular sum's step is nonlinear, past the closer
+  assert.equal(status.sum, 'pending');
+  assert.equal(status.sumThree, 'pending');
+  assert.equal(status.falsePost, 'pending');
+  // under the callback reading (O7) no rule steps over a recursive call
+  assert.equal(status.callThenCount, 'pending');
 });
 
 test("root primitive push bindings and empty user calls parse unambiguously", () => {

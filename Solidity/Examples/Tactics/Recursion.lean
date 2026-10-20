@@ -73,6 +73,30 @@ example : (match Prog.run (State.ofStorage (Storage.init RecursionExample)) runC
     | .error _ => none) = some (7, false, true) := by
   decide +kernel
 
+/-- **Reference returns**: a recursive function may return a storage alias
+or a fresh memory object; such a call runs, but has no contract (its body
+has no mutability, `docs/kernel-port.md`, "Recursion"). -/
+def RefReturns : Contract := contract!{
+  uint[] values;
+  function pick(uint n) returns (uint[] storage r) {
+    if (n == 0) { r = values; return r; }
+    return pick(n - 1);
+  }
+  function mk(uint n) returns (Person memory p) {
+    if (n == 0) { p.age = 7; return p; }
+    return mk(n - 1);
+  }
+}
+
+def refCore := sol[RefReturns]{
+  uint[] storage s = pick(3); s.push(5); Person memory q = mk(2); uint z = q.age; }
+
+/-- `mk(2)` returns the object its bottom frame wrote. -/
+example : (match Prog.run (State.ofStorage (Storage.init RefReturns)) refCore with
+    | .ok o => some (TEnv.get .here o.st.env : PrimTy.uint.Denote).1
+    | .error _ => none) = some 7 := by
+  decide +kernel
+
 /-! ## By contract, proved by induction over the frames -/
 
 /-- **The countdown never fails its assertion**, whatever `a` is: the box
