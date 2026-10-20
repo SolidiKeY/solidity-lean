@@ -577,7 +577,9 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} :
       ¬ J.at σ → ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) .violated
   /-- KeY's "call succeeded": `J` kept, any state the callee may leave in
-  which `J` holds, the return data bound, the clause run, its locals popped. -/
+  which `J` holds, the return data bound, the clause run, its locals popped.
+  A self-call reaches the oracle only at another contract's address (the
+  last premise, `TRun.tryCall`'s order). -/
   | tryOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
       {ok : Prog C (ρ ++ Γ) Γ₁} {err : Prog C Γ Γ₂} {code : CodeBinder κ}
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
@@ -585,6 +587,8 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {vs rest : List Word} {r : TEnv C σ.H ρ} {o : COut C σ.H Γ₁} :
       J.at σ → J.at (σ.havoc st nt) → rets.decodeT vs = .ok (r, rest) →
         ExecP J ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) ok o →
+        (self = true → (call.addr.evalT σ).1 ≠ 0 ∧
+          (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1) →
           ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self)
             (o.map (Out.drop ((Ext.append Γ ρ).trans ok.ext)))
   /-- "Error caught": the call reverted, and its effects with it. -/
@@ -609,7 +613,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {self : Bool} {o : COut C σ.H Γ₄} :
       ExecP J σ other o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody self) (o.map (Out.drop other.ext))
-  /-- A self-call (`Stmt.tryCall`'s `self`, `docs/options.md` O7): the
+  /-- A self-call (`Stmt.tryCall`'s `self`, `docs/options.md` O8): the
   receiver is the contract, whose function runs as an inlined call, and the
   success clause from the state it leaves, its locals popped. -/
   | trySelfOk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} {σ : State C Γ} {call : ExtCall C Γ} {rets : Binders ρ}
@@ -961,6 +965,10 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
           | diverge => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide))
           | exhausted => exact .inl (ExecS.trySelfHalt hz hs hc (by decide) (by decide))
       · exact .inr (ExecS.trySelfViolated hz hs hc)
+    rename_i hns
+    have hg : self = true → (call.addr.evalT σ).1 ≠ 0 ∧
+        (call.addr.evalT σ).1 ≠ σ.tx.selfAddress.1 := fun hself =>
+      ⟨hz, fun he => hns (by simp only [hself, he, decide_true, Bool.and_self])⟩
     rcases lookupBy (call.keyT σ) σ.tx.ext with _ | (vs | _ | v | _)
     · exact .inl .tryRevert
     · dsimp only
@@ -972,8 +980,8 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
         by_cases hI : J.at σ
         · rw [← COut.map_ofRes]
           rcases Prog.exec_run J ok (σ.withEnv (TEnv.append _ r σ.env)) with h | h
-          · exact .inl (ExecS.tryOk (st := σ.storage) (nt := σ.net) hI hI hd h)
-          · exact .inr (ExecS.tryOk (st := σ.storage) (nt := σ.net) (o := .violated) hI hI hd h)
+          · exact .inl (ExecS.tryOk (st := σ.storage) (nt := σ.net) hI hI hd h hg)
+          · exact .inr (ExecS.tryOk (st := σ.storage) (nt := σ.net) (o := .violated) hI hI hd h hg)
         · exact .inr (.tryViolated hI)
     · exact hErr
     · exact hPnc v

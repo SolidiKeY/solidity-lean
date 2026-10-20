@@ -534,7 +534,7 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | tryRevert => exact ⟨trivial, nofun⟩
   | tryDecode hd => exact ⟨trivial, fun he => rets.decodeT_ne_panic _ (he ▸ hd)⟩
   | tryViolated hn => exact (hn ((holdsC_closedAt_iff hI hT σ).1 hx)).elim
-  | tryOk hJ hJ' hd hP =>
+  | tryOk hJ hJ' hd hP _hg =>
     rename_i st nt _ _ r o
     have h₁ := hok st nt ((holdsC_closedAt_iff hI hT _).2 hJ')
     have h₂ := holdsC_binders_all rets (σ.havoc st nt) _ r h₁
@@ -549,6 +549,119 @@ theorem holdsC_tryCb (hI : I.FO = true) (hT : I.hasTransfer = false)
   | tryOther hP =>
     rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
     exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)
+
+/-- A `require` whose condition holds, with callbacks: the rest's runs from
+where it is. -/
+theorem ExecP.require_true {J : StateInv C} {Δ Δ' : Ctx} {τ : State C Δ}
+    {c : Val C Δ .bool} (h : c.evalT τ = .ok true) {P : Prog C Δ Δ'} {o : COut C τ.H Δ'}
+    (hP : ExecP J τ P o) :
+    ExecP J τ (.cons (.require c) P) (o.map (Out.cat ⟨τ, List.prefix_refl _⟩)) := by
+  have hd := ExecS.det (J := J) (σ := τ) (s := .require c) rfl
+  have hr : (Stmt.require c).run τ = .ok ⟨τ, List.prefix_refl _⟩ := by
+    show TRun.require c τ = _
+    simp only [TRun.require, h]
+    rfl
+  rw [hr] at hd
+  exact ExecP.cons hd hP
+
+/-- **`tryCallSelfBox` is sound with callbacks** (Lean, `docs/options.md`
+O8): the invariant where control leaves; the receiver the contract, the
+callee's body inlined (its runs with callbacks) then the success block; the
+receiver another, the success block from any state the callee leaves in
+which the invariant holds; each clause's block where the call reverted. -/
+theorem holdsC_trySelfCb (hI : I.FO = true) (hT : I.hasTransfer = false)
+    {ρ κc Γok Γe Γ₃ Γ₄ ps Γf : Ctx}
+    (call : ExtCall C Γ) (rets : Binders ρ) (ok : Prog C (ρ ++ Γ) Γok) (err : Prog C Γ Γe)
+    (code : CodeBinder κc) (pnc : Prog C (κc ++ Γ) Γ₃) (other : Prog C Γ Γ₄)
+    (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf)
+    (hx : holdsC I pay σ (Fml.closedAt I))
+    (h0 : holdsC I pay σ (Binders.nil.all (Fml.modalK .box
+      (.cons (.require call.hasCode) (.cons (.require call.isSelf)
+        (.cons (.call call.fn sargs (.rets rets) sbody) ok)) : Prog C ([] ++ Γ) Γok)
+      (.pop .block ((Ext.append Γ []).trans
+        (Prog.cons (.require call.hasCode) (.cons (.require call.isSelf)
+          (.cons (.call call.fn sargs (.rets rets) sbody) ok)) : Prog C ([] ++ Γ) Γok).ext)
+        (.seq ω κ)) φ)))
+    (hok : holdsC I pay σ (.havoc (.imp (Fml.closedAt I) (rets.all (Fml.modalK .box
+      (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
+        (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok))
+      (.pop .block ((Ext.append Γ ρ).trans
+        (Prog.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
+          (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok)).ext)
+        (.seq ω κ)) φ)))))
+    (herr : holdsC I pay σ (Binders.nil.all
+      (Fml.modalK .box err (.pop .block ((Ext.append Γ []).trans err.ext) (.seq ω κ)) φ)))
+    (hpnc : holdsC I pay σ (code.binders.all
+      (Fml.modalK .box pnc (.pop .block ((Ext.append Γ κc).trans pnc.ext) (.seq ω κ)) φ)))
+    (hoth : holdsC I pay σ (Binders.nil.all
+      (Fml.modalK .box other (.pop .block ((Ext.append Γ []).trans other.ext) (.seq ω κ)) φ))) :
+    holdsC I pay σ (.modal .box (.cons (.tryCall call rets ok err code pnc other sargs sbody true)
+      ω) κ φ) := by
+  refine holdsC_cons fun o₁ he => ?_
+  cases he with
+  | det hf => nomatch hf
+  | tryRevert => exact ⟨trivial, nofun⟩
+  | tryDecode hd => exact ⟨trivial, fun he => rets.decodeT_ne_panic _ (he ▸ hd)⟩
+  | tryViolated hn => exact (hn ((holdsC_closedAt_iff hI hT σ).1 hx)).elim
+  | tryOk hJ hJ' hd hP hg =>
+    rename_i st nt _ _ r o
+    obtain ⟨hz, hs⟩ := hg rfl
+    have h₁ := hok st nt ((holdsC_closedAt_iff hI hT _).2 hJ')
+    have h₂ := holdsC_modalK _ _ _ φ (holdsC_binders_all rets (σ.havoc st nt) _ r h₁)
+    have ha : (call.wk (Thin.ofExt (Ext.append Γ ρ))).addr.evalT
+        ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) = call.addr.evalT σ :=
+      ExtCall.addr_wk_append call (σ.havoc st nt) r
+    have hc : (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode.evalT
+        ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) = .ok true := by
+      rw [ExtCall.hasCode_evalT, ha]; simp only [hz, decide_false, Bool.not_false]
+    have hn : (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf.evalT
+        ((σ.havoc st nt).withEnv (TEnv.append ρ r σ.env)) = .ok true := by
+      rw [ExtCall.notSelf_evalT, ha]
+      show Except.ok (!decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1)) = _
+      simp only [hs, decide_false, Bool.not_false]
+    have h₃ := h₂ _ (ExecP.require_true hc (ExecP.require_true hn hP))
+    rw [COut.thenF_map_cat, COut.thenF_map_cat] at h₃
+    rw [show (Ext.append Γ ρ).trans ok.ext = (Ext.append Γ ρ).trans
+      (Prog.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).hasCode)
+        (.cons (.require (call.wk (Thin.ofExt (Ext.append Γ ρ))).notSelf) ok)).ext from
+      Subsingleton.elim _ _]
+    exact COut.thenF_drop _ h₃
+  | tryError hP =>
+    rw [show (Ext.append Γ []).trans err.ext = err.ext from Subsingleton.elim _ _] at herr
+    exact COut.thenF_drop _ (holdsC_modalK σ err _ φ herr _ hP)
+  | tryPanic hP =>
+    rename_i v o
+    have h₂ := holdsC_binders_all code.binders σ _ (code.decodeT v) hpnc
+    exact COut.thenF_drop _ (holdsC_modalK _ pnc _ φ h₂ o hP)
+  | tryOther hP =>
+    rw [show (Ext.append Γ []).trans other.ext = other.ext from Subsingleton.elim _ _] at hoth
+    exact COut.thenF_drop _ (holdsC_modalK σ other _ φ hoth _ hP)
+  | trySelfOk hz hs hc hP =>
+    rename_i o₁ o
+    have hc0 : call.hasCode.evalT σ = .ok true := by
+      rw [ExtCall.hasCode_evalT]; simp only [hz, decide_false, Bool.not_false]
+    have hi : call.isSelf.evalT σ = .ok true := by
+      rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
+    have h₃ := holdsC_modalK σ (.cons (.require call.hasCode) (.cons (.require call.isSelf)
+        (.cons (.call call.fn sargs (.rets rets) sbody) ok))) _ φ h0 _
+      (ExecP.require_true hc0 (ExecP.require_true hi (ExecP.cons hc hP)))
+    rw [COut.thenF_map_cat, COut.thenF_map_cat, show (Ext.append Γ []).trans
+      (Prog.cons (.require call.hasCode) (.cons (.require call.isSelf)
+        (.cons (.call call.fn sargs (.rets rets) sbody) ok))).ext =
+      (Ext.append Γ ρ).trans ok.ext from Subsingleton.elim _ _] at h₃
+    cases o with
+    | ok o' => exact fun o'' he => h₃ o'' (.pop he)
+    | halt _ => exact h₃
+    | violated => exact h₃
+  | trySelfHalt _ _ _ _ h2 => exact ⟨trivial, h2⟩
+  | trySelfViolated hz hs hc =>
+    have hc0 : call.hasCode.evalT σ = .ok true := by
+      rw [ExtCall.hasCode_evalT]; simp only [hz, decide_false, Bool.not_false]
+    have hi : call.isSelf.evalT σ = .ok true := by
+      rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
+    exact holdsC_modalK σ (.cons (.require call.hasCode) (.cons (.require call.isSelf)
+        (.cons (.call call.fn sargs (.rets rets) sbody) ok))) _ φ h0 _
+      (ExecP.require_true hc0 (ExecP.require_true hi (ExecP.violated hc)))
 
 /-- **`sendNoCallbackBox`, with callbacks unset**: a gas-limited send runs as
 its typed run, the payment booked and `pv` true, or nothing booked and `pv`
@@ -975,6 +1088,21 @@ theorem ProvesC.sound_of {I : Fml C []} (hI : I.FO = true) (hT : I.hasTransfer =
         (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ h₂ h₃))
     exact fun τ ab cd => holdsC_tryCb hI hT _ _ _ _ _ _ _ _ _ (holdsC_and_left ab)
       (holdsC_and_right ab) (holdsC_and_left cd) (holdsC_and_left (holdsC_and_right cd))
+      (holdsC_and_right (holdsC_and_right cd))
+  | trySelf d _ _ _ _ ihx ih0 iho ihc =>
+    cases d
+    intro σ
+    have h₁ := ihc _ List.mem_cons_self σ
+    have h₂ := ihc _ (List.mem_cons_of_mem _ List.mem_cons_self) σ
+    have h₃ := ihc _ (List.mem_cons_of_mem _ (List.mem_cons_of_mem _ List.mem_cons_self)) σ
+    refine Hyps.wrapC_and _ ?_ σ
+      (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ (ihx σ)
+        (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ (ih0 σ) (iho σ)))
+      (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ h₁
+        (Hyps.wrapC_and _ (fun _ a b => holdsC_and_intro a b) σ h₂ h₃))
+    exact fun τ ab cd => holdsC_trySelfCb hI hT _ _ _ _ _ _ _ _ _ (holdsC_and_left ab)
+      (holdsC_and_left (holdsC_and_right ab)) (holdsC_and_right (holdsC_and_right ab))
+      (holdsC_and_left cd) (holdsC_and_left (holdsC_and_right cd))
       (holdsC_and_right (holdsC_and_right cd))
 
 /-- **A derivation from the empty context proves validity with callbacks**

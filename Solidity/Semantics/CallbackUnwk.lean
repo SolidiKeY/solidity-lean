@@ -376,14 +376,15 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
   | tryRevert => exact ⟨_, .tryRevert, rfl⟩
   | tryDecode hd => exact ⟨_, .tryDecode hd, rfl⟩
   | tryViolated hj => exact ⟨_, .tryViolated (fun hk => hj ((at_thin J h τ).mp hk)), trivial⟩
-  | tryOk hj hk hd hp =>
+  | tryOk hj hk hd hp hg =>
     rename_i st nt vs rest r u'
     obtain ⟨u, hu, hr⟩ := hok (Thin.keepAll ρ h)
       ((τ.havoc st nt).withEnv (TEnv.append ρ r τ.env)) hp
     dsimp only [State.thin, State.withEnv, State.havoc] at hu
     rw [thin_keepAll h ρ r τ.env] at hu
     refine ⟨_, ExecS.tryOk (J := J) (st := st) (nt := nt) (vs := vs) (rest := rest)
-      ((at_thin J h τ).mpr hj) ((at_thin J h (τ.havoc st nt)).mpr hk) hd hu, ?_⟩
+      ((at_thin J h τ).mpr hj) ((at_thin J h (τ.havoc st nt)).mpr hk) hd hu
+      (by rw [← ha]; exact hg), ?_⟩
     simpa only [State.withEnv, TEnv.off_keepAll] using
       (CWkRel.drop ((Thin.Over.append h ρ).trans (Prog.wk_over ok (Thin.keepAll ρ h))) hr)
   | tryError hp =>
