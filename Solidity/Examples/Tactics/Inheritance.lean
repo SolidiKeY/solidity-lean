@@ -3,7 +3,7 @@ import Solidity.Tools.Run
 import Solidity.Semantics.Deploy
 
 /-!
-# Inherited initialization
+# Inheritance: initialization, base constructors, `super`
 
 The compiled fixture checks virtual dispatch while evaluating the base
 initializer and initializes the diamond in reverse C3 order. Every assertion
@@ -14,7 +14,7 @@ namespace Solidity.Examples.Tactics.Inheritance
 open Semantics
 open Lean (toJson)
 
-solc_import "../../../tests/solc/Inheritance.ast.json" hash 0x41b63713787db6a0
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
   as Imported.InitDiamond testing
 
 /-- The inherited initializers and all five constructor assertions succeed. -/
@@ -33,6 +33,80 @@ right = 4
 result = 34
 -/
 #guard_msgs in #deploy Imported.InitDiamond()
+
+/-! ## Base constructors
+
+solc's legacy creation code runs every initializer (most base first), then
+the base constructors' arguments (derived to base), then the bodies (base to
+derived): `late` is already `9` when `CtorMid` passes `m + late` on, and
+`CtorRoot`'s body dispatches `probe` to `CtorLeaf`, which reads `leaf`. The
+import composes them into one constructor member. -/
+
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+  as Imported.CtorLeaf testing
+
+/-- The four assertions of `CtorLeaf`'s constructor hold on the deployment. -/
+theorem base_constructors :
+    (Contract.deployT Imported.CtorLeaf
+      sol[Imported.CtorLeaf]{ constructor(); } {}).toOption.isSome = true := by
+  decide +kernel
+
+/--
+info: ok
+balance 0
+root = 12
+seen = 1107
+early = 7
+mid = 27
+late = 9
+leaf = 11
+order = 2711
+-/
+#guard_msgs in #deploy Imported.CtorLeaf()
+
+/-! The implicit constructor of `is CtorRoot(4)`; and a header argument for an
+unnamed parameter, still evaluated. -/
+
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+  as Imported.CtorImplicit testing
+
+/--
+info: ok
+balance 0
+root = 4
+seen = 7
+early = 7
+next = 1
+-/
+#guard_msgs in #deploy Imported.CtorImplicit()
+
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+  as Imported.CtorUnnamedChild testing
+
+/--
+info: ok
+balance 0
+got = 6
+-/
+#guard_msgs in #deploy Imported.CtorUnnamedChild(5)
+
+/-! ## `super`
+
+Each base version is its own member, and `super.name()` in a version names
+the next one in `SuperDiamond`'s C3 order: `name` calls `SuperRight`'s
+(`solcFunction445`), which calls `SuperLeft`'s (`427`), not its parent's. -/
+
+solc_import "../../../tests/solc/Inheritance.ast.json" hash 0xbb3fe23600dfebc0
+  as Imported.SuperDiamond testing
+
+/--
+info: [(solcFunction409, []), (solcFunction427, [solcFunction409]), (solcFunction445, [solcFunction427]), (name, [solcFunction445])]
+-/
+#guard_msgs in
+#eval IO.println ((Imported.SuperDiamond.funs.take 4).map fun (n, f) =>
+  (n, f.body.flatMap fun (s : RawStmt) => match s with
+    | .ret (some (.binop _ (.binop _ (.call g _) _) _)) => [g]
+    | _ => []))
 
 private def metadataContract (id : Int) (bases order : List Int) : Lean.Json :=
   Lean.Json.mkObj [

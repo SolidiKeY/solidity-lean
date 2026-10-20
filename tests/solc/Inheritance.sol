@@ -47,7 +47,71 @@ contract Inherited is Ancestor {
     function externalStaysExternal() public {
         try this.externalValue() returns (uint r) { assert(r == 2); } catch {}
     }
-    function superRemainsUnsupported() public pure { uint r = super.pick(); assert(r == 1); }
+    function superCall() public pure { uint r = super.pick(); assert(r == 1); }
+    function superNamed() public pure { uint r = super.ordered({a: 1, b: 4}); assert(r == 9); }
+    function falseSuper() public pure { uint r = super.pick(); assert(r == 2); }
+}
+
+// `super` follows the most-derived C3 order [SuperDiamond, SuperRight,
+// SuperLeft, SuperRoot]: SuperRight's `super` is SuperLeft, not its parent.
+contract SuperRoot { function name() internal pure virtual returns (uint) { return 1; } }
+contract SuperLeft is SuperRoot {
+    function name() internal pure virtual override returns (uint) { return super.name() * 10 + 2; }
+}
+contract SuperRight is SuperRoot {
+    function name() internal pure virtual override returns (uint) { return super.name() * 10 + 3; }
+}
+contract SuperDiamond is SuperLeft, SuperRight {
+    function name() internal pure override(SuperLeft, SuperRight) returns (uint) {
+        return super.name() * 10 + 4;
+    }
+    function diamondSuper() public pure { assert(name() == 1234); }
+    function staticRight() public pure { assert(SuperRight.name() == 123); }
+    function falseDiamondSuper() public pure { assert(name() == 134); }
+}
+
+// solc's legacy creation code: every initializer (most base first), then the
+// base constructors' arguments (derived to base), then the bodies (base to
+// derived). `late` is initialized before `CtorMid` passes it on, and the base
+// constructor already dispatches `probe` to `CtorLeaf` and reads `leaf`.
+contract CtorRoot {
+    uint root;
+    uint seen;
+    uint early = 7;
+    constructor(uint a) { seen = probe() + early; root = a; }
+    function probe() internal view virtual returns (uint) { return 0; }
+}
+contract CtorMid is CtorRoot {
+    uint mid;
+    uint late = 9;
+    constructor(uint m) CtorRoot(m + late) { mid = root * 2 + m; }
+}
+contract CtorLeaf is CtorMid(3) {
+    uint leaf = 11;
+    uint order;
+    function probe() internal view override returns (uint) { return leaf * 100; }
+    constructor() {
+        order = mid * 100 + leaf;
+        assert(root == 12); assert(seen == 1107); assert(mid == 27); assert(order == 2711);
+    }
+}
+contract CtorFalse is CtorMid(3) {
+    constructor() { assert(root == 3); }
+}
+contract CtorImplicit is CtorRoot(4) { uint next = root + 1; }
+contract CtorUnnamed { uint got; constructor(uint, uint b) { got = b; } }
+contract CtorUnnamedChild is CtorUnnamed {
+    constructor(uint x) CtorUnnamed(x, x + 1) payable { assert(got == x + 1); }
+}
+
+// A base contract's invariant is the derived contract's too, with its own.
+/// @custom:key invariant guarded <= 10
+contract Guarded { uint guarded; }
+/// @custom:key invariant guarded >= 1
+contract GuardedChild is Guarded {
+    function bump() public { if (guarded < 10) { guarded += 1; } }
+    function breaksBase() public { guarded = 11; }
+    function breaksOwn() public { guarded = 0; }
 }
 
 contract InitRoot {
