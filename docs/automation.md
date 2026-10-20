@@ -79,7 +79,7 @@ worked chain's last line keeps a `delete` whole, as solkey does.
 `Examples/ChainExpand.lean` shows each, and `sol_decide` closing the
 expanded lines.
 
-## M3 · Reads reduce write-free (`Calculus/ElimWriteFree.lean`, `Calculus/StepFragment.lean`)
+## M3 · Reads reduce write-free (`Calculus/ElimWriteFree.lean`, `Calculus/StepFragment.lean`, `Calculus/SymexFragment.lean`)
 
 **The elimination is write-free** (`Calculus/ElimWriteFree.lean`).  On the
 terms it has a reading for (`LTm.Elimable`: no memory sort, `mtSt`, `wt`,
@@ -103,7 +103,8 @@ and values) is elimable, so a read of it eliminates storage-free
   `Ty.expandable`; `Src.fixedCopy`), `delete` at an expandable type, `push`
   of a word or of the default, `pop` of an array of words or of mappings,
   alias bindings, locals, `if`, `require`, `assert`, `revert`,
-  `assume(false)`, blocks, every expression memory-free (`Val.MemFree`).
+  `assume(false)`, blocks, every expression memory-free (`Val.MemFree`),
+  every storage alias declared with an initializer.
   Left out: memory (a memory rule writes `memory`), payments and calls,
   loops (the invariant rule anonymises the frame), `try`, compound
   assignment and `++`/`--` (their updates are saves too, left out to keep the
@@ -131,14 +132,72 @@ holes' (`SHole.readStep_saveLike`, `VHole.step_saveLike`); a captured
 condition's branches are weakened by `Prog.wk up`, which keeps the fragment
 (`Prog.frag_wk`).
 
-**Not proved: the bridge to `LTm`.**  `Tm.SaveNF` is `LTm.SaveNF`'s shape on
-the scoped terms.  `Tm.toL ρ` (`Calculus/DecideScoped.lean`) maps `save`,
-`pushSlot`, `shrink` to themselves and `storage` to `ρ`'s storage, so a
-`Tm.SaveNF` term read where `ρ`'s storage is `storage` is `LTm.SaveNF` once
-its paths and values translate to `Elimable` terms — a condition on reads
-(no memory, no `wt`/`cleanTail`), which this file does not state.  Lifting
-the step theorem over a whole `symex` run (each update merged into the one
-before) is also left.
+**The bridge to `LTm`** (`Calculus/SymexFragment.lean`).  `Tm.ElimOk` is
+`LTm.Elimable`'s symbols (`Op0.elimOk` … `Op3.elimOk`) on the scoped terms,
+any local; `SymS.Ok ρ` says `ρ`'s bindings and storage are elimable,
+`SymS.OkNF ρ` that its storage is in `LTm.SaveNF` (`SymS.init`, whose
+storage is `storage`, is).  `Tm.toL` folds as it pushes in (`fold1`,
+`fold2`, `foldAt`, `foldNext`, `literalRead`), and each fold keeps
+elimability.
+
+```lean
+theorem Tm.ElimOk.toL (hρ : ρ.Ok) (ht : t.ElimOk) : t.toL ρ = some l → l.Elimable
+theorem Tm.SaveNF.toL (hρ : ρ.OkNF) (ht : t.SaveNF) (he : t.ElimOk) :
+    t.toL ρ = some l → l.SaveNF
+theorem Stmt.step_elimOk (s : Stmt C Γ Γ') (h : s.Frag = true) : (s.step k m).ElimOk
+theorem Stmt.step_toL_saveNF (s : Stmt C Γ Γ') (h : s.Frag = true) :
+    ∀ U ∈ (s.step k m).upds, ∀ t ∈ U.2.2.stores, ∀ (ρ : SymS C U.1), ρ.OkNF →
+      ∀ l, ((t.expand?).getD t).toL ρ = some l → l.SaveNF
+```
+
+`Premise.ElimOk` (every update a rule writes has a reading, every condition
+is a fragment formula) is proved one lemma per arm, from
+`Val.lower_elimOk` (a memory-free expression lowers to an `ElimOk` term) and
+`Tm.expand?_elimOk` (the expansion keeps it); a capture is `True`, its
+program being `Premise.SaveLike`'s.
+
+**The lift over a run.**  `symex` never merges updates: its leaf is a nest
+of `{U}` over the postcondition, and `Fml.toLS` composes them, each
+update's storage substituted for the next one's `storage` (`Upd.toLS`).
+That is the level where the lift is proved:
+
+```lean
+theorem Upd.ElimOk.toLS (hρ₀ : ρ₀.Ok) : U.ElimOk → U.toLS ρ₀ = some q → q.1.Ok ∧ q.2.Elimable
+theorem Upd.toLS_okNF (hρ₀ : ρ₀.OkNF) : U.ElimOk → U.NF → U.toLS ρ₀ = some q → q.1.OkNF
+theorem Fml.stepR_frag (k : Nat) (hφ : φ.Frag) : φ.stepR k = some ψ → ψ.Frag
+theorem symex_frag (n : Nat) : φ.Frag → (symex n φ).Frag
+theorem Fml.Frag.toLS (hφ : φ.Frag) : ρ.Ok → φ.toLS pos ρ = some ψ → ψ.Elimable
+theorem symex_reduceS_stoFree (n : Nat) {φ : Fml C []} (h : φ.Frag)
+    (hψ : (symex n φ).reduceS = some ψ) : ψ.StoFree
+```
+
+`Fml.Frag`: programs in the fragment (`Prog.Frag`, `Frames.Frag`), updates
+save-like with a reading, equations with a reading, no `wellFormed`.
+Preservation is by cases on the premise (`Premise.fml_frag`, from
+`Stmt.step_saveLike` and `Stmt.step_elimOk`); `branches` and `inv` never
+occur.  Elimability needs no expansion (`delAt`, `push`, `pop` have a
+reading); save normal form is what the expansion adds:
+`Tm.pickExpandAll` fires every kind at once, an equivalence on an update
+(`holds_upd_expandAll_iff`) that maps a save-like update with a reading to
+one in save normal form (`Upd.rwBy_expandAll_nf`), so each update of a
+fragment leaf, expanded and pushed in onto a chain of saves, leaves one
+(`Upd.SaveLike.toLS_expandAll_okNF`).
+
+**Narrowed, and why.**
+
+* *An unset storage alias* (`T storage x;`): `Rhs.toL` binds it to `err`
+  at a path sort, which `LTm.Elimable` refuses (the elimination keeps an
+  `err` path as written), and `uint y = x.f;` before a rebind pushes in to
+  `find(storage, field(err))`.  `Stmt.Frag` now asks for an initializer.
+* *`wellFormed(s)`*: pushed in as `wt(s)`, which the elimination keeps as
+  written; `Fml.Frag` leaves it out, so a leaf with a `wt(storage)`
+  premise is not covered.
+* *Save normal form on the leaf itself*: proved per update and per
+  composition (`Upd.toLS_okNF`), not as a predicate on the pushed-in
+  `LFml` (the states `Fml.toLS` passes through are not recorded in it);
+  an expansion of every update of a leaf in context
+  (`Upd.rwBy Tm.pickExpandAll` under the binders) is not stated.
+* *The walk* (`Seq.residue`) is not covered; `symex` is.
 
 ## M4 · Completeness of the automatic decision (`Calculus/CondLift.lean`, `Calculus/LiftTotality.lean`, `Calculus/FlattenTotality.lean`, `Calculus/LeafTotality.lean`, `Calculus/AutoComplete.lean`)
 
