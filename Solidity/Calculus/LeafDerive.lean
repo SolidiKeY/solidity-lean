@@ -485,6 +485,14 @@ theorem LFml.refuteForm_holds {φ : LFml C} {g : State C []} {ν : AEnv}
     · rw [hs, cond_true] at h; exact h
   · rw [hc, cond_true] at h; exact h
 
+/-- **Whether the closer is asked to refute `φ`**: within its bounds
+(`LFml.boundsOk`), and, over a history not known (`LFml.known`), within
+`exposeBound` exposing updates (`LFml.exposeDepth`).  A refutation is an
+optimisation of the walk, so past it the split's two branches are
+walked. -/
+def LFml.refuteOk (φ : LFml C) : Bool :=
+  φ.boundsOk && (φ.known || decide (φ.exposeDepth ≤ exposeBound))
+
 end Decide
 
 namespace Seq
@@ -493,7 +501,7 @@ namespace Seq
 sliced where it stacks storage updates (`LFml.refuteForm`). -/
 def refuteCore (ψ : Fml C []) : Bool :=
   match ψ.toLS true SymS.init with
-  | some l => l.refuteForm.boundsOk &&
+  | some l => l.refuteForm.refuteOk &&
       bif ψ.assumesCT then l.refuteForm.decideMemCT || l.refuteForm.decideMem
       else l.refuteForm.decideMem
   | none => false
