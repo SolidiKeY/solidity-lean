@@ -272,14 +272,21 @@ elab "rec_contract_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : 
   evalTactic (← `(tactic| case req => exact $req))
   evalTactic (← `(tactic| case ens => exact $ens))
 
+open Lean Elab Tactic Meta in
+/-- `rec_head`: fails unless the head of the goal's box is a recursive call. -/
+elab "rec_head" : tactic => withMainContext do
+  let some (_, _, χ) ← Recursion.goalParts (← getMainGoal) | throwError "rec_head: not `⊨ φ`"
+  unless ← Recursion.headRecCall χ do throwError "rec_head: no recursive call at the head"
+
 /-- `rec_step ih`: an induction step's obligation, its recursive calls by the
 hypothesis `ih` and everything else by the closer. -/
 macro "rec_step " ih:ident : tactic => `(tactic| (
   sol_symex_rec
   all_goals first
-    | sol_close
-    | (rec_contract $ih
-       all_goals (sol_symex; sol_close))))
+    | (rec_head
+       rec_contract $ih
+       all_goals (sol_symex; sol_close))
+    | sol_close))
 
 /-- `rec_induct μ`: a `RecContract μ` of a recursive call's body by
 induction over its frames (`RecContract.unroll`), each step by `rec_step`:
@@ -306,9 +313,10 @@ a recursive call needs what the call did. -/
 macro "rec_auto" : tactic => `(tactic| (
   sol_symex_rec
   all_goals first
-    | sol_close
-    | (rec_contract_by .nonpayable .tt .tt
+    | (rec_head
+       rec_contract_by .nonpayable .tt .tt
        case hc => rec_induct
-       all_goals (sol_symex; sol_close))))
+       all_goals (sol_symex; sol_close))
+    | sol_close))
 
 end Solidity
