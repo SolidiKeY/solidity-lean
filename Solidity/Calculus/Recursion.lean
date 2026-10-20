@@ -43,6 +43,66 @@ def RecContract (μ : Mutability) (b : Prog C (rs ++ ps) (rs ++ ps)) (req : Fml 
   (∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContract ret b req ens) ∧
     Prog.within μ b = true ∧ writesRets rs.length b = true
 
+/-- A formula of the locals `ps` closed by `∀` over each (a value) or a
+hidden binder (a reference), the outermost first, named by `ns`, innermost
+first: a callee's frame's obligation, its parameters bound. -/
+def Fml.allCtx : (ps : Ctx) → List Var → Fml C ps → Fml C []
+  | [], _, φ => φ
+  | .val p :: ps, ns, φ => Fml.allCtx ps ns.tail (.all (ns.headD (.user "p")) p φ)
+  | t :: ps, ns, φ => Fml.allCtx ps ns.tail (.bind .box (ns.headD (.user "p")) t φ)
+
+theorem holds_allCtx : (ps : Ctx) → (ns : List Var) → {φ : Fml C ps} →
+    Valid (Fml.allCtx ps ns φ) → ∀ σ : State C ps, holds σ φ
+  | [], _, _, h, σ => h σ
+  | .val p :: ps, ns, φ, h, σ =>
+    holds_allCtx ps ns.tail (φ := .all (ns.headD (.user "p")) p φ) h (σ.withEnv σ.env.2) σ.env.1
+  | .alias R :: ps, ns, φ, h, σ =>
+    holds_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) (.alias R) φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .mem R :: ps, ns, φ, h, σ =>
+    holds_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) (.mem R) φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .old :: ps, ns, φ, h, σ =>
+    holds_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) .old φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .oldNet :: ps, ns, φ, h, σ =>
+    holds_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) .oldNet φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+  | .kint :: ps, ns, φ, h, σ =>
+    holds_allCtx ps ns.tail (φ := .bind .box (ns.headD (.user "p")) .kint φ) h
+      (σ.withEnv σ.env.2) σ.env.1
+
+/-- A contract from a proof of its obligation, the frame's parameters bound
+(`Fml.allCtx`, named by `ns`, innermost first). -/
+theorem FunContract.ofValidCtx {Γ Γ' Γf : Ctx} (ns : List Var) {ret : CallRet Γ rs Γ'}
+    {body : Prog C (rs ++ ps) Γf} {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
+    (h : Valid (Fml.allCtx ps ns (FunContract.obligation ret body req ens))) :
+    FunContract ret body req ens :=
+  FunContract.ofValid (holds_allCtx ps ns h)
+
+/-- A contract at a call that returns nothing is one at every such call:
+each enters the body alike (`CallRet.enterT`). -/
+theorem FunContract.forall_none {Γf : Ctx} {b : Prog C ([] ++ ps) Γf} {req : Fml C ps}
+    {ens : Fml C ([] ++ (Olds ++ ps))} (h : FunContract (Γ := []) CallRet.none b req ens) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [] Γ'), FunContract ret b req ens := by
+  intro Γ Γ' ret
+  cases ret with
+  | none => exact h
+  | rets bs => cases bs; exact h
+
+/-- A contract at a call that returns one value is one at every such call:
+each enters the body with the return variable at its default. -/
+theorem FunContract.forall_val {Γf : Ctx} {p : PrimTy} {b : Prog C ([.val p] ++ ps) Γf}
+    {req : Fml C ps} {ens : Fml C ([.val p] ++ (Olds ++ ps))}
+    (h : FunContract (Γ := []) (CallRet.val p (.user "r") Option.none) b req ens) :
+    ∀ {Γ Γ' : Ctx} (ret : CallRet Γ [.val p] Γ'), FunContract ret b req ens := by
+  intro Γ Γ' ret
+  cases ret with
+  | val => exact h
+  | rets bs =>
+    cases bs with
+    | snoc bs q x => cases bs; exact h
+
 /-- The bottom frame meets every contract: it is exhausted. -/
 theorem RecContract.base (μ : Mutability) (req : Fml C ps) (ens : Fml C (rs ++ (Olds ++ ps))) :
     RecContract μ (Prog.recBase : Prog C (rs ++ ps) (rs ++ ps)) req ens :=
@@ -100,7 +160,7 @@ open Lean Elab Tactic Meta
 
 /-- Whether `φ` has a modality, read off its constructors. -/
 partial def hasModal (φ : Expr) : MetaM Bool := do
-  let φ ← whnfR (← instantiateMVars φ)
+  let φ ← whnfD (← instantiateMVars φ)
   if φ.isAppOf ``Fml.modal then return true
   for a in φ.getAppArgs do
     if (← inferType a).isAppOf ``Fml then
@@ -112,8 +172,16 @@ def goalParts (g : MVarId) : MetaM (Option (Expr × Expr × Expr)) := do
   let ty ← whnfR (← instantiateMVars (← g.getType))
   let_expr Valid C φ := ty | return none
   let nil := ctxE []
-  let (H, _, χ) ← Contract.peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil (← whnfD φ)
-  return some (C, H, ← whnfR χ)
+  let mut (H, Γ, χ) ← Contract.peel C (mkApp2 (mkConst ``Hyps.nil) C nil) nil (← whnfD φ)
+  -- a definition under the context (`FunContract.obligation`) unfolded, and peeled
+  for _ in [0:8] do
+    let χ' ← whnfD χ
+    if [``Fml.all, ``Fml.imp, ``Fml.bind, ``Fml.upd, ``Fml.havoc].any χ'.isAppOf then
+      (H, Γ, χ) ← Contract.peel C H Γ χ'
+    else
+      χ := χ'
+      break
+  return some (C, H, χ)
 
 /-- Whether `χ` is a box whose first statement is a recursive call. -/
 def headRecCall (χ : Expr) : MetaM Bool := do
@@ -184,5 +252,21 @@ elab "rec_contract " h:term : tactic => withMainContext do
     throwError "rec_contract: no recursive call at the head of the box{indentExpr χ}"
   let HS ← Term.exprToSyntax H
   evalTactic (← `(tactic| refine useRecContract (H := $HS) $h ?pre ?post))
+
+open Lean Elab Tactic Meta in
+/-- `rec_contract_by μ req ens`: the recursive call at the head of the goal's
+box by the contract `req`/`ens` of mutability `μ`, the goals `hc` (the
+contract, `RecContract.unroll`), "pre" and "post" left. -/
+elab "rec_contract_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : tactic =>
+  withMainContext do
+  let g ← getMainGoal
+  let some (_, H, χ) ← Recursion.goalParts g | throwError "rec_contract_by: expected a goal `⊨ φ`"
+  unless ← Recursion.headRecCall χ do
+    throwError "rec_contract_by: no recursive call at the head of the box{indentExpr χ}"
+  let HS ← Term.exprToSyntax H
+  evalTactic (← `(tactic| refine useRecContract (H := $HS) (μ := $μ) (req := ?req) (ens := ?ens)
+    ?hc ?pre ?post))
+  evalTactic (← `(tactic| case req => exact $req))
+  evalTactic (← `(tactic| case ens => exact $ens))
 
 end Solidity
