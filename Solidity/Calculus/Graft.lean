@@ -162,7 +162,7 @@ def _root_.Solidity.Op1.globFree {a s : Srt} : Op1 C a s → Bool
 /-- A binary symbol that reads nothing of the state but its arguments, and
 touches no memory. -/
 def _root_.Solidity.Op2.globFree {a b s : Srt} : Op2 C a b s → Bool
-  | .at _ | .read | .mlen | .copyMem | .iread | .copy _ | .copySt _ => false
+  | .at _ | .read | .mlen | .keccak | .copyMem | .iread | .copy _ | .copySt _ => false
   | _ => true
 
 /-- A ternary symbol that touches no memory. -/

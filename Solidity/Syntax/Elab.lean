@@ -908,6 +908,7 @@ def Val.vars {Γ : Ctx} (ns : List Var) : {p : PrimTy} → Val C Γ p → List V
   | _, .readMem l => l.vars ns
   | _, .len b _ => b.vars ns
   | _, .mlen b _ => b.vars ns
+  | _, .keccak b _ => b.vars ns
   | _, .modular _ a b k => a.vars ns ++ b.vars ns ++ k.vars ns
 
 end
@@ -1007,6 +1008,8 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
       else throw s!"member access .{f} on an array"
     | .mpath (.ref (.array _)) b =>
       if f == "length" then pure (.val .uint (.mlen b rfl))
+      -- `keccak256(b)`, as `hoist` leaves it (`keccakMember`)
+      else if f == keccakMember then pure (.val .uint (.keccak b rfl))
       else throw s!"member access .{f} on an array"
     -- a fixed-size array's length is its type's: the literal, as solc folds
     -- it.  A base that indexes is evaluated first (it may revert), so

@@ -440,6 +440,36 @@ def MVal.copyMToSt {T : Ty} (v : MVal H T) : SVal T :=
 
 end CopyMem
 
+/-! ## `keccak256`
+
+solc's `keccak256(bytes memory b)` is a function of the bytes of `b`.  The
+model does not compute it: `keccakOf` is an **uninterpreted** function of a
+stored value (`opaque`: the kernel never unfolds it, so the only fact a proof
+has about it is that it is a function, equal arguments giving equal
+results).  At `bytes`/`string` (a `bytes1[]`, `docs/semantic-gaps.md`,
+"Bytes and strings") the argument is a memory array's copy (`copyMToSt`),
+which holds exactly its elements: the function of the byte sequence.
+
+Collision resistance is not assumed: no injectivity can be (a function into
+`2^256` values from all byte strings has collisions), so a proof that needs
+two particular inputs to hash apart takes it as a premise
+(`docs/semantic-gaps.md`, "Hashing").  The compiled code (`#run`) uses a
+stand-in that is not Keccak (`keccakStandIn`), which no proof sees. -/
+
+/-- A compiled stand-in for `keccakOf`: the value's description hashed
+(FNV-1a), only so that `#run` tells inputs apart.  Not Keccak-256. -/
+def keccakStandIn {T : Ty} (_v : SVal T) : PrimTy.uint.Denote :=
+  (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
+
+/-- `keccak256` of a stored value: uninterpreted (see above). -/
+@[implemented_by keccakStandIn]
+opaque keccakOf {T : Ty} : SVal T → PrimTy.uint.Denote :=
+  fun _ => (⟨0, by decide⟩ : {n : Int // PrimTy.uint.inRange n = true})
+
+/-- `keccak256(mv)` of a memory object: of its contents (`copyMToSt`). -/
+def Heap.keccak {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) : PrimTy.uint.Denote :=
+  keccakOf (MVal.copyMToSt hp (T := .ref R) r)
+
 /-- The empty heap. -/
 def Heap.empty : Heap [] := ()
 

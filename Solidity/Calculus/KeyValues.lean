@@ -37,7 +37,7 @@ def Val.keyValue {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .binop _ _ _ a b => a.keyValue && b.keyValue
   | .unop _ _ _ a => a.keyValue
   | .ternary c a b => c.keyValue && a.keyValue && b.keyValue
-  | .len b _ | .mlen b _ => b.keyValue
+  | .len b _ | .mlen b _ | .keccak b _ => b.keyValue
   | .modular .. => false
 
 end
@@ -124,6 +124,7 @@ theorem Val.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} :
     rw [Val.keyValue_wk h c, Val.keyValue_wk h a, Val.keyValue_wk h b]; rfl
   | .len b _ => SPath.keyValue_wk h b
   | .mlen b _ => MPath.keyValue_wk h b
+  | .keccak b _ => MPath.keyValue_wk h b
 
 end
 

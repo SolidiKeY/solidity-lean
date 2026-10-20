@@ -119,6 +119,13 @@ namespace Tms
     Tm C Γ (.val p) := .app2 .read m a
 @[reducible] def Term.mlen {E : Ty} (m : Tm C Γ .mem) (i : Tm C Γ (.ident (.array E))) :
     Tm C Γ (.val .uint) := .app2 .mlen m i
+/-- `keccak256(m, i)` read into a local of type `p`, as `Val.keccak … hk` lowers. -/
+@[reducible] def Term.keccakH {p : PrimTy} {R : RefTy} (hp : p = .uint) (m : Tm C Γ .mem)
+    (i : Tm C Γ (.ident R)) : Tm C Γ (.val p) :=
+  Tm.castV hp.symm (.app2 .keccak m i)
+/-- `keccak256(m, i)`: the hash of the object `i` in `m`, uninterpreted. -/
+@[reducible] def Term.keccak {R : RefTy} (m : Tm C Γ .mem) (i : Tm C Γ (.ident R)) :
+    Tm C Γ (.val .uint) := .app2 .keccak m i
 @[reducible] def Term.env (k : EnvKey) : Tm C Γ (.val .uint) := .app0 (.env k)
 @[reducible] def Term.net (a : Tm C Γ (.val .uint)) : Tm C Γ .kint := .app1 .net a
 @[reducible] def Term.delValue {p : PrimTy} (t : Tm C Γ (.val p)) : Tm C Γ (.val p) :=
@@ -885,6 +892,11 @@ inductive LeanTaclet (C : Contract) (k : Nat) :
   | mulmodAssignment :
       dl[LeanTaclet C k]{ ⟨[ v = mulmod(e₁, e₂, e₃); ]⟩ ⇝
         { v := mulmod(e₁, e₂, e₃) } ⟨[ ]⟩ }
+  /-- `keccak256` of a memory object, read at once: an uninterpreted symbol of
+  the memory (`docs/semantic-gaps.md`, "Hashing"); solkey has no hash. -/
+  | keccakAssignment :
+      dl[LeanTaclet C k]{ ⟨[ v = keccak256(mpath); ]⟩ ⇝
+        { v := keccak256(memory, mpath) } ⟨[ ]⟩ }
 
   /-- A memory source embedded in a storage write is saved as its snapshot. -/
   | storageMemorySourceSave {Γ : Ctx} {T : Ty} {nlhs : Loc C Γ T} {src : Src C Γ T}

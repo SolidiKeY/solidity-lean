@@ -174,6 +174,7 @@ theorem _root_.Solidity.Op2.eval_sameP {a b s : Srt} (o : Op2 C a b s) (hr : gâ‚
     Â· exact absurd hs Bool.false_ne_true
   | read => same_subst hy y y'; same_mem hx x x'
   | mlen => same_subst hy y y'; same_mem hx x x'
+  | keccak => same_subst hy y y'; same_mem hx x x'
   | copyMem => same_subst hy y y'; same_mem hx x x'
   | iread => same_subst hy y y'; same_mem hx x x'
   | copy hR => same_subst hy y y'; same_mem hx x x'

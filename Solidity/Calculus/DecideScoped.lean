@@ -257,7 +257,8 @@ def _root_.Solidity.Op2.toL (ρ : SymS C Γ) {a b s : Srt} (o : Op2 C a b s) (x 
     (fun {_} {_} x y => some (.app2 .delAtIn x y))
     (fun {_} {_} x y => some (.app2 .sfindIn x y))
     (fun op h x y => some (.app2 (.zbin op h) x y))
-    (fun op h x y => some (.app2 (.zcmp op h) x y)) x y
+    (fun op h x y => some (.app2 (.zcmp op h) x y))
+    (fun {_} x y => some (.app2 .keccak x y)) x y
 
 /-- A ternary symbol, an index checked in a storage it names (`atIn`)
 folded as `foldAt`. -/

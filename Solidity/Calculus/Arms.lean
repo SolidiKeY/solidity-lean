@@ -323,6 +323,8 @@ def localStep {p : PrimTy} (i : Idx Γ (.val p)) : Val C Γ p → Premise C Γ �
     .captureMV (fmv k) (.loc l) (.assignLocal i.there (.mlen (.var .here (MPath.loc l).mapFree) hp))
   -- Native modular builtin; its operands remain lazy typed terms.
   | .modular op a b modulus => .setLocal i (.modular op a b modulus)
+  -- Lean only: the hash read at once, as `size` is (no solkey taclet)
+  | .keccak b hp => .setLocal i (.keccak b hp)
 
 /-- The elements of the array are mappings (`marr`; `darr` its negation). -/
 def SPath.elemMapping {T : Ty} (_ : SPath C Γ T) : Bool := T.elemIsMapping

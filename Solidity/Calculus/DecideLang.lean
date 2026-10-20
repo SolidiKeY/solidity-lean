@@ -480,6 +480,7 @@ partial def LTm.ppWith (nm : Nat → String) {s : Srt} : LTm C s → String
     | .nextIn => s!"next({x.ppWith nm}, {y.ppWith nm})"
     | .read => s!"read({x.ppWith nm}, {y.ppWith nm})"
     | .mlen => s!"size({x.ppWith nm}, {y.ppWith nm})"
+    | .keccak => s!"keccak256({x.ppWith nm}, {y.ppWith nm})"
     | .copyMem => s!"copyMem({x.ppWith nm}, {y.ppWith nm})"
     | .iread => s!"read({x.ppWith nm}, {y.ppWith nm})"
     | .copy _ => s!"copy({x.ppWith nm}, {y.ppWith nm})"

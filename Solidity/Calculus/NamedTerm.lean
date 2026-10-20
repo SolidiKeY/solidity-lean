@@ -169,6 +169,7 @@ def Op2.key {a b s : Srt} : Op2 C a b s → String
   | .len => "len"
   | .read => "read"
   | .mlen => "mlen"
+  | .keccak => "keccak"
   | .at _ => "at"
   | .nextIn => "nextIn"
   | .delAt | .delAtIn => "delAt"

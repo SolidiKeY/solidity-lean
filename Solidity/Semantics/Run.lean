@@ -305,6 +305,9 @@ def Val.evalT (σ : State C Γ) : {p : PrimTy} → Val C Γ p → TRes p.Denote
     let y ← b.evalT σ
     let m ← k.evalT σ
     TRes.ofOpt (op.evalT x y m)
+  | _, .keccak b hp => do
+    let r ← b.mvalT σ
+    pure (hp ▸ σ.heap.keccak r)
 
 end
 

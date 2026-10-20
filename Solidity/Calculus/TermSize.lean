@@ -147,6 +147,7 @@ def Val.size : {p : PrimTy} → Val C Γ p → Nat
   | _, .len b _ => 1 + b.size
   | _, .mlen b _ => 1 + b.size
   | _, .modular _ a b k => 1 + a.size + b.size + k.size
+  | _, .keccak b _ => 1 + b.size
 
 end
 
@@ -334,6 +335,9 @@ theorem Val.lower_size : {p : PrimTy} → (v : Val C Γ p) → v.lower.size ≤ 
   | _, .mlen b _ => by
     have := MPath.lower_size b
     simp only [Val.lower, Tm.size_castV, Tm.size, Val.size]; omega
+  | _, .keccak b _ => by
+    have := MPath.lower_size b
+    simp only [Val.lower, Tm.size_castV, Tm.size, Val.size]; omega
   | _, .modular _ a b k => by
     have := Val.lower_size a
     have := Val.lower_size b
@@ -388,6 +392,7 @@ theorem Val.size_up {t : LTy} : {p : PrimTy} → (v : Val C Γ p) → (v.up (t :
   | _, .mlen b _ => by simp only [Val.up, Val.size, MPath.size_up b]
   | _, .modular _ a b k => by
     simp only [Val.up, Val.size, Val.size_up a, Val.size_up b, Val.size_up k]
+  | _, .keccak b _ => by simp only [Val.up, Val.size, MPath.size_up b]
 
 end
 

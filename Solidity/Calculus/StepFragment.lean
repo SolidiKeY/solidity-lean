@@ -249,6 +249,7 @@ def Val.MemFree : {p : PrimTy} → Val C Γ p → Bool
   | _, .len b _ => b.MemFree
   | _, .mlen _ _ => false
   | _, .modular _ a b k => a.MemFree && b.MemFree && k.MemFree
+  | _, .keccak _ _ => false
 
 end
 
@@ -350,6 +351,7 @@ theorem Val.memFree_wk {Γ Δ : Ctx} (h : Thin Γ Δ) :
   | _, .mlen _ _ => rfl
   | _, .modular _ a b k => by
     simp only [Val.wk, Val.MemFree, Val.memFree_wk h a, Val.memFree_wk h b, Val.memFree_wk h k]
+  | _, .keccak _ _ => rfl
 
 end
 

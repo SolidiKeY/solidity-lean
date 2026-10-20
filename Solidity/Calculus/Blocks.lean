@@ -278,7 +278,7 @@ variable {Γ : Ctx}
 def Val.readsState : {p : PrimTy} → Val C Γ p → Bool
   | _, .simple (.env ..) => true
   | _, .simple _ => false
-  | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. => true
+  | _, .read _ | _, .readMem _ | _, .len .. | _, .mlen .. | _, .keccak .. => true
   | _, .binop _ _ _ a b => a.readsState || b.readsState
   | _, .modular _ a b k => a.readsState || b.readsState || k.readsState
   | _, .unop _ _ _ a => a.readsState

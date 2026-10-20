@@ -727,6 +727,7 @@ theorem noStore_compileVal (b : Nat) {Γ : Ctx} : {p : PrimTy} →
   | _, .readMem _ => rfl
   | _, .mlen .. => rfl
   | _, .modular .. => rfl
+  | _, .keccak .. => rfl
 end
 
 /-- Code that stores to no level below `n`. -/

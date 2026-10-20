@@ -426,6 +426,9 @@ theorem Val.evalT_wk : {p : PrimTy} → (v : Val C Γ p) → (v.wk h).evalT (τ.
     simp only [Val.wk, Val.evalT, MPath.mvalT_wk b]
     rfl
   | _, .modular .. => by simp only [Val.wk, Val.evalT, Val.evalT_wk]
+  | _, .keccak b _ => by
+    simp only [Val.wk, Val.evalT, MPath.mvalT_wk b]
+    rfl
 
 end
 

@@ -744,6 +744,10 @@ partial def schemaAt (Γ : Scope) (pos : Pos) : TSyntax `sol_expr → MacroM Lea
       | "mulmod" => `(ModOp.mulmod)
       | _ => Macro.throwUnsupported
     `(Val.modular $op $(← schemaAt Γ .val a) $(← schemaAt Γ .val b) $(← schemaAt Γ .val k))
+  | stx@`(sol_expr| $f:ident($a:sol_expr)) => do
+    unless f.getId.eraseMacroScopes.toString == "keccak256" do Macro.throwUnsupported
+    unless pos == .val do posError stx "`keccak256`" pos
+    `(Val.keccak $(← schemaAt Γ .mpath a) $(schemaIdent "hk"))
   | stx@`(sol_expr| $a:sol_expr ⊕ $b:sol_expr) => do
     unless pos == .val do posError stx "an operator application" pos
     `(Val.binop (p := $(schemaIdent "p")) $(schemaIdent "op") $(schemaIdent "hop") $(schemaIdent "hq")
@@ -1177,6 +1181,11 @@ partial def schemaStmt (fresh : Bool) (Γ : Scope) :
     return (← `(Stmt.send $v $(← schemaAt Γ .val r) $(← schemaAt Γ .val a) $(schemaIdent "full")),
       Γ)
   | `(sol_stmt| $l:sol_expr = $f:sol_expr ( $a:sol_expr )) => do
+    -- `v = keccak256(mpath)`: a value, not a call
+    if let `(sol_expr| $g:ident) := f then
+      if g.getId.eraseMacroScopes.toString == "keccak256" then
+        let e ← `(sol_expr| $f:sol_expr ( $a:sol_expr ))
+        return ← schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $e:sol_expr))
     let some (b, "send") ← callRecv? f | Macro.throwErrorAt f "only `r.send(a)` is a call assigned"
     schemaStmt fresh Γ (← `(sol_stmt| $l:sol_expr = $b:sol_expr .send( $a )))
   | `(sol_stmt| $f:sol_expr ( $a:sol_expr )) => do
@@ -1541,6 +1550,9 @@ partial def schemaTerm0 (Γ : Scope) (pos : TPos) : TSyntax `dl_term → MacroM 
     | "mulmod", #[a, b, k], .val =>
       `(Term.modular ModOp.mulmod $(← schemaTerm Γ .val a) $(← schemaTerm Γ .val b)
         $(← schemaTerm Γ .val k))
+    | "keccak256", #[m, i], .val =>
+      if Γ.isCore then `(Term.keccakH $(schemaIdent "hk") $(← me m) $(← schemaTerm Γ .ident i))
+      else `(Term.keccak $(← me m) $(← schemaTerm Γ .ident i))
     | "select", #[s, r], .val => `(Term.find $(← st s) $(← pa r))
     | "select", #[s, r], .storage | "selectSt", #[s, r], .storage =>
       let `(dl_term| $r:ident) := r | tposError r "a member name" .storage

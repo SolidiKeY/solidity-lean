@@ -237,6 +237,7 @@ partial def ppExprS (ns : List Expr) (e : Expr) : MetaM (TSyntax `sol_expr) := d
     `(sol_expr| $(← ppExprS ns c) ? $(← ppExprS ns a) : $(← ppExprS ns b))
   | Val.len _ _ _ _ b _ => dotExpr (← ppExprS ns b) "length"
   | Val.mlen _ _ _ _ b _ => dotExpr (← ppExprS ns b) "length"
+  | Val.keccak _ _ _ _ b _ => do `(sol_expr| keccak256($(← ppExprS ns b)))
   | Val.modular _ _ op a b k =>
     match_expr (← whnf op) with
     | ModOp.addmod => `(sol_expr| addmod($(← ppExprS ns a), $(← ppExprS ns b), $(← ppExprS ns k)))

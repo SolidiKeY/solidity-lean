@@ -160,6 +160,9 @@ theorem Val.evalT_revertOnly : {p : PrimTy} → (v : Val C Γ p) → (v.evalT σ
     exact (MPath.mvalT_revertOnly b).bind fun _ => TRes.RevertOnly.ok _
   | _, .modular _ a b k => (Val.evalT_revertOnly a).bind fun _ =>
       (Val.evalT_revertOnly b).bind fun _ => (Val.evalT_revertOnly k).bind fun _ => TRes.RevertOnly.ofOpt _
+  | _, .keccak b hp => by
+    subst hp
+    exact (MPath.mvalT_revertOnly b).bind fun _ => TRes.RevertOnly.ok _
 
 end
 

@@ -195,6 +195,7 @@ theorem localStep_sound (k : Nat) {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C 
   cases v with
   | simple s => cases hs; exact sound_setLocal σ i _
   | modular op a b modulus => cases hs; exact sound_setLocal σ i _
+  | keccak b hp => cases hs; exact sound_setLocal σ i _
   | read l =>
     exact SHole.readStep_sound σ k (.local i) l
       (fun _ _ _ _ h => by cases h; exact sound_setLocal σ i _)

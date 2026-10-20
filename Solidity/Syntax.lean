@@ -494,6 +494,10 @@ a call no function can be the callee of, read at the type it meets
 (`bytesPure`, `Syntax/Elab.lean`). -/
 def bytesLitName : String := "#bytes"
 
+/-- `keccak256(b)` once `hoist` has made `b` a memory path: the member
+`b.#keccak256`, which no source can write (`Val.keccak`). -/
+def keccakMember : String := "#keccak256"
+
 /-- The literal of the bytes `bs`. -/
 def RawExpr.bytesLit (bs : List Nat) : RawExpr := .call bytesLitName (bs.map .num)
 
