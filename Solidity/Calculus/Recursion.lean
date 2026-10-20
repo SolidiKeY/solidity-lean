@@ -269,4 +269,43 @@ elab "rec_contract_by " μ:term:max ppSpace req:term:max ppSpace ens:term:max : 
   evalTactic (← `(tactic| case req => exact $req))
   evalTactic (← `(tactic| case ens => exact $ens))
 
+/-- `rec_step ih`: an induction step's obligation, its recursive calls by the
+hypothesis `ih` and everything else by the closer. -/
+macro "rec_step " ih:ident : tactic => `(tactic| (
+  sol_symex_rec
+  all_goals first
+    | sol_close
+    | (rec_contract $ih
+       all_goals (sol_symex; sol_close))))
+
+/-- `rec_induct μ`: a `RecContract μ` of a recursive call's body by
+induction over its frames (`RecContract.unroll`), each step by `rec_step`:
+a function of no return or of one value return. -/
+macro "rec_induct" : tactic => `(tactic| (
+  apply RecContract.unroll
+  intro n t ih
+  refine ⟨?c, ?w, rfl⟩
+  case c =>
+    first | apply FunContract.forall_none | apply FunContract.forall_val
+    apply FunContract.ofValidCtx []
+    rec_step ih
+  case w =>
+    simp only [Prog.within, Stmt.within, ih.2.1, Bool.and_true]
+    first | rfl | decide))
+
+/-- `rec_auto`: a goal `⊨ φ` whose recursive calls are proved by the
+contract `true`/`true` (no panic, the box's) at the most permissive
+mutability (`nonpayable`: storage and ledger forgotten past the call), each
+by induction over its frames: the strategy up to each call
+(`sol_symex_rec`), the closer everywhere else.  The obligation as its own
+contract (`docs/kernel-port.md`, "Recursion"): it closes where nothing past
+a recursive call needs what the call did. -/
+macro "rec_auto" : tactic => `(tactic| (
+  sol_symex_rec
+  all_goals first
+    | sol_close
+    | (rec_contract_by .nonpayable .tt .tt
+       case hc => rec_induct
+       all_goals (sol_symex; sol_close))))
+
 end Solidity
