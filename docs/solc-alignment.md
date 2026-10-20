@@ -263,7 +263,13 @@ What is not modelled, each an elaboration error unless said otherwise:
 - type members other than `type(T).max` and `type(T).min`;
 - a public function's ABI decoding, which reverts on an out-of-range
   argument: a specification's precondition (`Calculus/SurfaceSpec.lean`) does not
-  assume a narrow parameter's range, which is weaker, not unsound.
+  assume a narrow parameter's range, which is weaker, not unsound.  The
+  plain obligation does (`Problem.callPre`): a narrow or enum parameter in
+  its range, and each element of a memory array of one,
+  `∀ uint i; i < xs.length → lo <= xs[i] ∧ xs[i] <= hi`
+  (`SolcFun.elemRanges`); `sol_close` does not instantiate that quantifier
+  yet, so a claim needing it stays `pending`
+  (`NarrowNested.abiElementInRange`).
 
 The printed program has `uint`/`int` where the source has `uint8`/`int8`
 (`Stmt.declLocal` holds a `PrimTy`), and the checks are visible statements.

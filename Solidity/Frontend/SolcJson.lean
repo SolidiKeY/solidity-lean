@@ -161,6 +161,9 @@ structure SolcFun where
   /-- The parameters the ABI decoder bounds below their `PrimTy`'s range: a
   narrow integer's, an enum's members (name, least, greatest value). -/
   paramRanges : List (String × Int × Int) := []
+  /-- The memory array parameters whose elements the ABI decoder bounds so:
+  name, least and greatest value, and a fixed array's length. -/
+  elemRanges : List (String × Int × Int × Option Nat) := []
   /-- Specification members, retained only for the testing import mode. -/
   specMembers : String := ""
   /-- Raw directive/text pairs, for validating one clause at a time before
@@ -1986,6 +1989,19 @@ def readContract (ast : Json) (name : String) (ren : List (String × String)) (t
         let (q, n) ← narrowTy? (J.tyStr p)
         guard (n < 256)
         if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1) else pure (x, 0, 2 ^ n - 1),
+      -- a memory array of a narrow integer or an enum: each element in its range
+      elemRanges := ((ps.toOption).getD []).zip sourceParams.toList |>.filterMap fun ((x, _), p) => do
+        let t ← J.opt p "typeName"
+        guard (J.kind t == "ArrayTypeName" && J.str? p "storageLocation" == some "memory")
+        let b ← J.opt t "baseType"
+        let len : Option Nat := (J.opt t "length").bind fun l => (J.str? l "value").bind (·.toNat?)
+        guard ((J.opt t "length").isNone || len.isSome)
+        if let some n := (J.ref? b).bind (lookupBy · enumBounds) then
+          return (x, 0, n, len)
+        let (q, n) ← narrowTy? ((J.str? b "name").getD "")
+        guard (n < 256)
+        if q == .int then pure (x, -(2 ^ (n - 1) : Int), 2 ^ (n - 1) - 1, len)
+        else pure (x, 0, 2 ^ n - 1, len),
       specMembers := if testing then String.join (fspec
         |>.filter (fun c => ["requires", "ensures", "invariant", "assignable"].contains c.kind)
         |>.map (fun c => s!"{c.kind} {c.text}; ")) else "",

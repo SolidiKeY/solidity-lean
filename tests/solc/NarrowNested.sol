@@ -154,4 +154,10 @@ contract NarrowNested {
         lastPlusOne(c ? small : other);
         assert(false);
     }
+    // the ABI decoder reverts on an element out of range: the obligation
+    // assumes each in range (`Problem.callPre`), which the closer does not
+    // instantiate yet
+    function abiElementInRange(uint8[] memory xs) public pure {
+        if (xs.length > 0) { assert(xs[0] <= 255); }
+    }
 }
