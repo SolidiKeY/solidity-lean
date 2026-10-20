@@ -138,14 +138,30 @@ theorem call_approx {Γ' ps rs Γf : Ctx} (args : Args C Γ ps) (ret : CallRet �
     TStep.Approx (call args ret hb f) (call args ret hb g) := fun _ =>
   (TRes.Approx.refl _).bind fun _ => (hfg _).bind fun _ => .refl _
 
-theorem tryCall_approx {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ : Ctx} (ec : ExtCall C Γ) (rets : Binders ρ)
+theorem tryCall_approx {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (ec : ExtCall C Γ) (rets : Binders ρ)
     (h₁ : Ext (ρ ++ Γ) Γ₁) (h₂ : Ext Γ Γ₂) (code : CodeBinder κ) (h₃ : Ext (κ ++ Γ) Γ₃)
     (h₄ : Ext Γ Γ₄) {ok ok' : TStep C (ρ ++ Γ) Γ₁} {err err' : TStep C Γ Γ₂}
-    {pnc pnc' : TStep C (κ ++ Γ) Γ₃} {oth oth' : TStep C Γ Γ₄} (hok : TStep.Approx ok ok')
-    (herr : TStep.Approx err err') (hpnc : TStep.Approx pnc pnc') (hoth : TStep.Approx oth oth') :
-    TStep.Approx (tryCall ec rets h₁ ok h₂ err code h₃ pnc h₄ oth)
-      (tryCall ec rets h₁ ok' h₂ err' code h₃ pnc' h₄ oth') := fun _ => by
+    {pnc pnc' : TStep C (κ ++ Γ) Γ₃} {oth oth' : TStep C Γ Γ₄} (sargs : Args C Γ ps)
+    (hs : Ext (ρ ++ ps) Γf) {sb sb' : TStep C (ρ ++ ps) Γf} (self : Bool)
+    (hok : TStep.Approx ok ok')
+    (herr : TStep.Approx err err') (hpnc : TStep.Approx pnc pnc') (hoth : TStep.Approx oth oth')
+    (hsb : TStep.Approx sb sb') :
+    TStep.Approx (tryCall ec rets h₁ ok h₂ err code h₃ pnc h₄ oth sargs hs sb self)
+      (tryCall ec rets h₁ ok' h₂ err' code h₃ pnc' h₄ oth' sargs hs sb' self) := fun σ => by
   simp only [tryCall]
+  split
+  · exact .refl _
+  split
+  · rcases call_approx sargs (.rets rets) hs hsb σ with h | h
+    · rw [h]; exact .inl rfl
+    · rw [← h]
+      split
+      · exact (hok _).map _
+      · split
+        · exact (herr _).map _
+        · exact (hoth _).map _
+      · exact (hpnc _).map _
+      · exact .refl _
   split
   · exact .refl _
   · exact (TRes.Approx.refl _).bind fun _ => (hok _).map _
@@ -208,9 +224,9 @@ def Stmt.runFC (n : Nat) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → TStep C Γ Γ'
   | _, _, .callReceiverPush _ args r body code value =>
     TRun.callReceiverPush args r body.ext (Prog.runFC n body)
       code.ext (Prog.runFC n code) value
-  | _, _, .tryCall call rets ok err code pnc other =>
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
     TRun.tryCall call rets ok.ext (Prog.runFC n ok) err.ext (Prog.runFC n err) code pnc.ext
-      (Prog.runFC n pnc) other.ext (Prog.runFC n other)
+      (Prog.runFC n pnc) other.ext (Prog.runFC n other) sargs sbody.ext (Prog.runFC n sbody) self
   | _, _, .loop _ c body => TRun.loopF n c body.ext (Prog.runFC n body)
   | _, _, .block body => TRun.block body.ext (Prog.runFC n body)
 
@@ -239,8 +255,9 @@ def Stmt.runF (n : Nat) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : TStep C Γ Γ' :=
     (fun c => TRun.require c) (fun c => TRun.assert c) (fun _ => .error .revert)
     (fun _ => .error .exhausted)
     (fun _ args ret body ih => TRun.call args ret body.ext ih)
-    (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
-      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
+    (fun call rets ok err code pnc other sargs sbody self ihOk ihErr ihPnc ihOther ihSelf =>
+      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther
+        sargs sbody.ext ihSelf self)
     (fun _ c body ih => TRun.loopF n c body.ext ih) (fun body ih => TRun.block body.ext ih)
     (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
@@ -265,8 +282,9 @@ def Prog.runF (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : TStep C Γ Γ' :=
     (fun c => TRun.require c) (fun c => TRun.assert c) (fun _ => .error .revert)
     (fun _ => .error .exhausted)
     (fun _ args ret body ih => TRun.call args ret body.ext ih)
-    (fun call rets ok err code pnc other ihOk ihErr ihPnc ihOther =>
-      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther)
+    (fun call rets ok err code pnc other sargs sbody self ihOk ihErr ihPnc ihOther ihSelf =>
+      TRun.tryCall call rets ok.ext ihOk err.ext ihErr code pnc.ext ihPnc other.ext ihOther
+        sargs sbody.ext ihSelf self)
     (fun _ c body ih => TRun.loopF n c body.ext ih) (fun body ih => TRun.block body.ext ih)
     (fun op _ _ b r => TRun.pushOpAssign op b r) (fun op _ b => TRun.pushIncDec op b)
     (fun _ args r body op ih => TRun.callReceiver args r body.ext ih op)
@@ -293,12 +311,13 @@ theorem Stmt.runF_eq (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
     change TRun.callReceiverPush args r body.ext (body.runF n) code.ext (code.runF n) value =
       TRun.callReceiverPush args r body.ext (body.runFC n) code.ext (code.runFC n) value
     rw [Prog.runF_eq n body, Prog.runF_eq n code]
-  | _, _, .tryCall call rets ok err code pnc other => by
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self => by
     show TRun.tryCall call rets ok.ext (ok.runF n) err.ext (err.runF n) code pnc.ext
-        (pnc.runF n) other.ext (other.runF n) =
+        (pnc.runF n) other.ext (other.runF n) sargs sbody.ext (sbody.runF n) self =
       TRun.tryCall call rets ok.ext (ok.runFC n) err.ext (err.runFC n) code pnc.ext
-        (pnc.runFC n) other.ext (other.runFC n)
-    rw [Prog.runF_eq n ok, Prog.runF_eq n err, Prog.runF_eq n pnc, Prog.runF_eq n other]
+        (pnc.runFC n) other.ext (other.runFC n) sargs sbody.ext (sbody.runFC n) self
+    rw [Prog.runF_eq n ok, Prog.runF_eq n err, Prog.runF_eq n pnc, Prog.runF_eq n other,
+      Prog.runF_eq n sbody]
   | _, _, .loop a c body => by
     show TRun.loopF n c body.ext (body.runF n) = TRun.loopF n c body.ext (body.runFC n)
     rw [Prog.runF_eq n body]
@@ -346,10 +365,10 @@ theorem Stmt.runF_approx (n : Nat) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
     apply TRes.Approx.map
     unfold TRun.afterReceiverPrefix TRun.pushAfterPrefix
     exact (TRes.Approx.refl _).bind fun _ => (Prog.runF_approx n code _).bind fun _ => .refl _
-  | _, _, .tryCall call rets ok err code pnc other =>
-    TRun.tryCall_approx call rets ok.ext err.ext code pnc.ext other.ext
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
+    TRun.tryCall_approx call rets ok.ext err.ext code pnc.ext other.ext sargs sbody.ext self
       (Prog.runF_approx n ok) (Prog.runF_approx n err) (Prog.runF_approx n pnc)
-      (Prog.runF_approx n other)
+      (Prog.runF_approx n other) (Prog.runF_approx n sbody)
   | _, _, .loop _ c body => TRun.loopF_approx n c body.ext (Prog.runF_approx n body)
   | _, _, .block body => TRun.block_approx body.ext (Prog.runF_approx n body)
   | _, _, .assign .. | _, _, .rebind .. | _, _, .assignLocal .. | _, _, .declLocal ..

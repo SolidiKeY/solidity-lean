@@ -831,9 +831,11 @@ theorem Stmt.keeps_all (hP : HeredRun P G) (hG : ∀ {U : Ty}, SRef C U → G U)
     obtain ⟨ref, _, hv⟩ := tbind_ok_inv hv
     exact keeps_pushAfterPrefix hP hG code.ext code.runR value ref
       (Prog.keeps_all hP hG code) _ _ (hτ.drop (.push .refl)) hv
-  | _, _, .tryCall call rets ok err code pnc other =>
+  | _, _, .tryCall call rets ok err code pnc other sargs sbody self =>
     RunInv.tkeeps_tryCall heredInv.valMemOk call rets ok.ext err.ext code pnc.ext other.ext
-      (Prog.keeps_all hP hG ok) (Prog.keeps_all hP hG err) (Prog.keeps_all hP hG pnc) (Prog.keeps_all hP hG other)
+      sargs sbody.ext self
+      (Prog.keeps_all hP hG ok) (Prog.keeps_all hP hG err) (Prog.keeps_all hP hG pnc)
+      (Prog.keeps_all hP hG other) (Prog.keeps_all hP hG sbody)
   | _, _, .loop _ c body => RunInv.tkeeps_loop c body.ext (Prog.keeps_all hP hG body)
   | _, _, .block body => RunInv.tkeeps_block body.ext (Prog.keeps_all hP hG body)
 
