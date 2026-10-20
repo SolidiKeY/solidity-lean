@@ -204,6 +204,12 @@ obligations, not `spec!`.
   the obligation calls back: a loop by its invariant or at its bound, a loop
   unwound whose body calls back, and an internal call that returns one value
   (`y = f(x)`) or a memory or storage one.
+- **A recursive function's clauses.** A recursive call is proved by its
+  contract (`useRecContract`, `Calculus/Recursion.lean`), the contract by
+  induction over the frames of the unrolling (`docs/kernel-port.md`,
+  "Recursion"); `spec!{f}` and the import do not yet state a recursive
+  function's `requires`/`ensures` as that contract (the runner tries
+  `true`/`true` only, `rec_auto`).
 - **`sol_decide` on `old`, `net` and `Fml.all`**: all outside `Fml.inLS`.
 - **The benchmarks' `net(a)` clauses** (EtherWallet, Purchase,
   SimpleAuction) are not tried.
