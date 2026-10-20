@@ -147,7 +147,7 @@ def seq {q p : PrimTy} {d : LTm C (.val q)} {t : LTm C (.val p)}
       exact CheckedScalar.guard_correct _ _ _ _ iha ihd.1⟩
 
 /-- Recognition is bounded by term depth. Rejection has no semantic verdict. -/
-private def ofTermFuel? (ps : List Parameter) : Nat → {p : PrimTy} → (t : LTm C (.val p)) → Option (CheckedValue (ps := ps) (es := es) t)
+def ofTermFuel? (ps : List Parameter) : Nat → {p : PrimTy} → (t : LTm C (.val p)) → Option (CheckedValue (ps := ps) (es := es) t)
   | 0, _, _ => none
   | fuel + 1, _, t =>
     match StaticValue.ofTerm? t with
@@ -310,15 +310,15 @@ def ne {a b : LTm C (.val .bool)} (ha : BooleanValue (ps := ps) (es := es) a) (h
     rw [LTm.eval_app2, Close.Op2.eval_binop]
     cases hv : a.eval g ν <;> cases hw : b.eval g ν <;> rw [hv, hw] at hn <;> exact hn⟩
 
-private def Result (ps : List Parameter) : {s : Srt} → LTm C s → Type
+def Result (ps : List Parameter) : {s : Srt} → LTm C s → Type
   | .val .bool, t => BooleanValue (ps := ps) (es := es) t
   | _, _ => Empty
 
-private def scalar? : {s : Srt} → (t : LTm C s) → Option (Result (es := es) ps t)
+def scalar? : {s : Srt} → (t : LTm C s) → Option (Result (es := es) ps t)
   | .val .bool, t => (CheckedValue.ofTermIn? ps t).map ofScalar
   | _, _ => none
 
-private def ofTermFuel? (ps : List Parameter) : Nat → {s : Srt} → (t : LTm C s) → Option (Result (es := es) ps t)
+def ofTermFuel? (ps : List Parameter) : Nat → {s : Srt} → (t : LTm C s) → Option (Result (es := es) ps t)
   | 0, _, _ => none
   | fuel + 1, s, .seq (s' := s') d a =>
     match s with
@@ -409,7 +409,7 @@ def imp {φ ψ : LFml C} (a : StorageEncoding (ps := ps) (es := es) φ) (b : Sto
     imp_congr (a.correct rs (fun r hm => hr r (List.mem_append_left _ hm)) g ν)
       (b.correct rs (fun r hm => hr r (List.mem_append_right _ hm)) g ν)⟩
 
-private def equality? : {p : PrimTy} → (a b : LTm C (.val p)) → Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
+def equality? : {p : PrimTy} → (a b : LTm C (.val p)) → Option (StorageEncoding (ps := ps) (es := es) (.eq a b))
   | .bool, a, b => do return boolEq (← BooleanValue.ofTermIn? ps a) (← BooleanValue.ofTermIn? ps b)
   | .uint, a, b | .int, a, b => do return eq (← CheckedValue.ofTermIn? ps a) (← CheckedValue.ofTermIn? ps b)
 

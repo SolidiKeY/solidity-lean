@@ -2517,6 +2517,137 @@ theorem len_rep {E : Ty} {S : SFun C} {s : LTm C .st} (hS : S.Rep g ν s) {gd : 
 
 /-! ### Each symbol -/
 
+/-! ### The empty storage -/
+
+theorem SVal.findM_dflt_at {E U : Ty} (i : PrimTy.uint.Denote) (p : Path E U) :
+    (SVal.dflt (.ref (.array E))).findM (.at i p) = none := by
+  rw [SVal.dflt_array, SVal.findM_at']
+  simp only [SVec.toList, SList.toList, List.append_nil, List.getElem?_nil, Option.bind_none]
+
+theorem SVal.findM_dflt_key {K : PrimTy} {V U : Ty} (k : K.Denote) (p : Path V U) :
+    (SVal.dflt (.ref (.mapping K V))).findM (.key k p) = (SVal.dflt V).findM p := by
+  rw [SVal.dflt_map]; simp only [SVal.findM, SMap.toList]; rfl
+
+/-- **A default read below** is absent or the default (`selectOnEmptyStorage`):
+a dynamic array is empty, a fixed one, a mapping, a struct hold defaults. -/
+theorem SVal.findM_dflt : {T U : Ty} → (p : Path T U) →
+    (SVal.dflt T).findM p = none ∨ (SVal.dflt T).findM p = some (SVal.dflt U)
+  | _, _, .nil => .inr (SVal.findM_nil' _)
+  | _, _, .field hf p => by
+    rw [SVal.dflt_struct, SVal.findM_field', SFields.dflt_get]
+    exact SVal.findM_dflt p
+  | _, _, .at i p => .inl (SVal.findM_dflt_at i p)
+  | _, _, @Path.atF E _ n i p => by
+    rw [SVal.dflt_fixed, SVal.findM_atF', SVec.toList_replicate]
+    by_cases h : i.1.toNat < n
+    · rw [List.getElem?_replicate_of_lt h, Option.bind_some]
+      exact SVal.findM_dflt p
+    · rw [List.getElem?_eq_none (by rw [List.length_replicate]; omega), Option.bind_none]
+      exact .inl rfl
+  | _, _, .key k p => by
+    rw [SVal.findM_dflt_key]
+    exact SVal.findM_dflt p
+
+/-- The empty storage at a reference: absent or the default. -/
+theorem Storage.findM_init {U : Ty} (r : SRef C U) :
+    ((Storage.init C).get r.hroot).findM r.path = none ∨
+      ((Storage.init C).get r.hroot).findM r.path = some (SVal.dflt U) := by
+  rw [Storage.init, SFields.dflt_get]
+  exact SVal.findM_dflt r.path
+
+/-- **`TSegs.mtHas` reads `has` on the empty storage**, from a base whose
+value there is the default where `acc` reads `true`, absent where `false`. -/
+theorem TSegs.mtHas_eval {S T : Ty} (p : TSegs C S T) :
+    ∀ (acc : LTm C (.val .bool)) (b : Bool) (pp : Path S T),
+      p.eval g ν = some pp → (acc.eval g ν : Option Bool) = some b →
+      ((p.mtHas acc).eval g ν : Option Bool) =
+        some ((if b then some (SVal.dflt S) else none).bind (·.findM pp)).isSome := by
+  induction p with
+  | nil =>
+    intro acc b pp hp ha
+    cases hp
+    show (acc.eval g ν : Option Bool) = _
+    rw [ha]; cases b <;> simp only [SVal.findM_nil', if_true, Bool.false_eq_true, if_false,
+      Option.bind_some, Option.bind_none, Option.isSome_some, Option.isSome_none]
+  | field h rest ih =>
+    intro acc b pp hp ha
+    obtain ⟨pp', hpp', rfl⟩ := eval_field_some (g := g) (ν := ν) hp
+    rw [show (TSegs.field h rest).mtHas acc = rest.mtHas acc from rfl, ih acc b pp' hpp' ha]
+    cases b <;> simp only [if_true, Bool.false_eq_true, if_false, Option.bind_some,
+      Option.bind_none, SVal.dflt_struct, SVal.findM_field', SFields.dflt_get]
+  | «at» i rest ih =>
+    intro acc b pp hp _
+    obtain ⟨k, pp', hk, hpp', rfl⟩ := eval_at_some (g := g) (ν := ν) hp
+    show some false = _
+    cases b <;> simp only [if_true, Bool.false_eq_true, if_false, Option.bind_some,
+      Option.bind_none, Option.isSome_none, SVal.findM_dflt_at]
+  | @atF E U n i rest ih =>
+    intro acc b pp hp ha
+    obtain ⟨k, pp', hk, hpp', rfl⟩ := eval_atF_some (g := g) (ν := ν) hp
+    have hb : ((if TSegs.litBelow i n then acc else
+        .kite acc .tt (LTm.ltNat i n) (.lit (p := .bool) false)).eval g ν : Option Bool) =
+        some (b && decide (k.1.toNat < n)) := by
+      split
+      · rename_i hl
+        unfold TSegs.litBelow at hl
+        split at hl
+        · rename_i w hw
+          have hi := LTm.eq_of_litV? hw
+          subst hi
+          have hkw : k = w := by cases hk; rfl
+          subst hkw
+          rw [ha, hl, Bool.and_true]
+        · cases hl
+      · rw [LTm.eval_kite, ha, Option.bind_some,
+          show ((LTm.tt : LTm C (.val .bool)).eval g ν : Option Bool) = some true from rfl,
+          Option.bind_some]
+        cases b
+        · rfl
+        · rw [if_pos rfl, Bool.true_and]
+          exact LTm.eval_ltNat g ν n hk
+    rw [show (TSegs.atF i rest).mtHas acc = rest.mtHas (if TSegs.litBelow i n then acc else
+        .kite acc .tt (LTm.ltNat i n) (.lit (p := .bool) false)) from rfl, ih _ _ pp' hpp' hb]
+    congr 1
+    cases b
+    · simp only [Bool.false_and, Bool.false_eq_true, if_false, Option.bind_none]
+    · simp only [Bool.true_and, if_true, Option.bind_some, SVal.dflt_fixed, SVal.findM_atF',
+        SVec.toList_replicate]
+      by_cases h : k.1.toNat < n
+      · simp only [h, decide_true, if_true, List.getElem?_replicate_of_lt h, Option.bind_some]
+      · rw [List.getElem?_eq_none (by rw [List.length_replicate]; omega)]
+        simp only [h, decide_false, Bool.false_eq_true, if_false, Option.bind_none]
+  | key i rest ih =>
+    intro acc b pp hp ha
+    obtain ⟨j, pp', hj, hpp', rfl⟩ := eval_key_some (g := g) (ν := ν) hp
+    rw [show (TSegs.key i rest).mtHas acc = rest.mtHas acc from rfl, ih acc b pp' hpp' ha]
+    cases b <;> simp only [if_true, Bool.false_eq_true, if_false, Option.bind_some,
+      Option.bind_none, SVal.findM_dflt_key]
+
+theorem mtRd_rep : SRd.Rep g ν mtRd (Storage.init C) := by
+  intro V c Q r hQ
+  cases c with
+  | word P =>
+    show some (PrimTy.dflt P) = some ((Storage.init C).obs.word (.ref r))
+    rw [Storage.obs_word_ref, SVal.obs_word]
+    rcases Storage.findM_init r with h | h <;> rw [h] <;> rfl
+  | len E =>
+    show ((LTm.nat 0 : LTm C (.val .uint)).eval g ν : Option _) = _
+    rw [LTm.eval_nat]
+    show _ = some (uintOfNat ((Storage.init C).obs.len (.ref r)))
+    rw [Storage.obs_len_ref, SVal.obs_len]
+    rcases Storage.findM_init r with h | h <;> rw [h] <;> rfl
+  | has V =>
+    show ((Q.segs.mtHas .tt).eval g ν : Option Bool) = _
+    unfold SPath.eval at hQ
+    obtain ⟨pp, hpp, rfl⟩ := Option.map_eq_some_iff.1 hQ
+    rw [TSegs.mtHas_eval g ν Q.segs .tt true pp hpp rfl]
+    show _ = some (((Storage.init C).get Q.hr).findM pp).isSome
+    rw [Storage.init, SFields.dflt_get]
+    rfl
+
+theorem SFun.mt_rep : (SFun.mt : SFun C).Rep g ν (.app0 .mtSt) :=
+  ⟨rfl, rfl, fun st h => by cases h; exact mtRd_rep g ν⟩
+
 theorem SFun.init_rep : (SFun.init : SFun C).Rep g ν (.app0 .storage) :=
   ⟨rfl, rfl, fun st h => by cases h; exact initRd_rep g ν⟩
 
@@ -2531,7 +2662,7 @@ theorem Op0.elim_rep {s : Srt} (o : Op0 C s) : ElimM.Rep g ν s o.elim (.app0 o)
     exact ⟨rfl, fun r' hr => by cases hr; rfl⟩
   | storage => exact SFun.init_rep g ν
   | memory => rfl
-  | mtSt => exact SFun.ofOrig_rep g ν _
+  | mtSt => exact SFun.mt_rep g ν
   | member s f h => rfl
   | zlit n => rfl
 

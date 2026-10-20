@@ -90,8 +90,6 @@ theorem deployMini :
         selfBalance := msg.value }
       ⟨ constructor(a); ⟩ (x == 5 ∧ y == a ∧ z == 0) } := by
   sol_prove
-  sol_leaf
-  sol_close_mt
 
 -- the update prints as solkey writes it
 /--
@@ -138,16 +136,12 @@ info: \programVariables {
 /-- The obligation, derived: every argument deploys. -/
 theorem miniProblem : ⊨ problem!{ constructor } := by
   sol_prove
-  sol_leaf
-  sol_close_mt
 
 /-- `constructor(7);` deploys from every deployer, read off its derived
 obligation. -/
 theorem miniDeploy : ⊨ dl!{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender), msg.value) ‖
     selfBalance := msg.value } ⟨ constructor(7); ⟩ true } := by
   sol_prove
-  sol_leaf
-  sol_close_mt
 
 /-- A derived obligation of no parameters is a theorem about the typed
 deployment (`Problem.deploy_of_valid_nil`, `Contract.deployT`):
@@ -271,6 +265,44 @@ example : ⊨ dl[Held]{ { storage := mtSt ‖ net := store(mtSt, at(msg.sender),
     selfBalance := msg.value } ⟨ constructor(); ⟩ n == 1 } := by
   sol_symex
   sol_close_mt
+
+/-! ## What `sol_decide` reads of the empty storage
+
+The closer's elimination reads `mtSt` as `Storage.init` (`SFun.mt`,
+solkey's `selectOnEmptyStorage`): a word its type's default, a dynamic
+array's length `0`, a location there by its path (`TSegs.mtHas`).  So
+`sol_prove` closes a constructor that reads its state back, without
+`sol_close_mt`. -/
+
+/-- A `uint` root and a `uint[]` root, both read back by the constructor. -/
+def Back : Contract := contract!{
+  uint a = 1;
+  uint b = 2;
+  uint[] darr;
+  constructor() { a = a + a; b = b - a; assert(b == 0); assert(darr.length == 0); }
+}
+
+/-- info: some true -/
+#guard_msgs in #eval Seq.leafCheckOn
+  (dl[Back]{ { storage := save(storage, b, 2) } { x := find(storage, b) } x = 2 } : Fml Back [])
+
+/-- info: some true -/
+#guard_msgs in #eval Seq.leafCheckOn
+  (dl[Back]{ { storage := mtSt } { storage := save(storage, b, 2) } { x := find(storage, b) } x = 2 } :
+    Fml Back [])
+
+/-- info: some true -/
+#guard_msgs in #eval Seq.leafCheckOn
+  (dl[Back]{ { storage := mtSt } { x := find(storage, b) } x = 0 } : Fml Back [])
+
+/-- info: some true -/
+#guard_msgs in #eval Seq.leafCheckOn
+  (dl[Back]{ { storage := mtSt } { x := darr.length } x = 0 } : Fml Back [])
+
+/-- The deployment reads its defaults and initializers back, under checked
+arithmetic, and its array empty. -/
+theorem backProblem : ⊨ problem[Back]{ constructor } := by
+  sol_prove
 
 end Solidity.Examples.Tactics.Constructors
 

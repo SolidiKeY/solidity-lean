@@ -15,7 +15,8 @@ copy of a storage value (`Src.copy`, `Src.fixedCopy`), deletes at an
 `Ty.expandable` type, a push of a word or of the default, a pop of an array
 of words or of mappings, alias bindings, locals, `if`, `require`, `assert`,
 `revert`, `assume(false)` and blocks; every expression free of memory
-(`Val.MemFree`).  Out: memory (each memory rule writes `memory`), payments
+(`Val.MemFree`), every storage alias declared with an initializer (an unset
+one is bound to `err` at a path, which the elimination keeps as written).  Out: memory (each memory rule writes `memory`), payments
 and calls (they write the ledger or inline a frame), loops (the invariant
 rule's anonymisation), `try`, compound assignment and `++`/`--` (left out to
 keep the proof short: their updates are saves too, `PushSuffix.saveOp`),
@@ -36,8 +37,9 @@ terms: `Tm.toL ρ` (`Calculus/DecideScoped.lean`) maps each `save`,
 `pushSlot`, `shrink` to its symbol and `storage` to `ρ`'s storage, so a
 `Tm.SaveNF` term read at a start `ρ` whose storage is `storage` is an
 `LTm.SaveNF` term once its paths and values translate to `Elimable` ones.
-That last condition is about reads (memory-free, no `wt`/`cleanTail`), not
-about this file's shapes, and is not proved here.
+That condition is about reads, not this file's shapes:
+`Calculus/SymexFragment.lean` states it (`Tm.ElimOk`), proves the bridge
+(`Tm.SaveNF.toL`) and lifts it over the strategy's run.
 
 **The proof** follows `Calculus/TermSize.lean`: one lemma per arm, by cases
 on the arm's own shape, under the holes' lemmas (`SHole.readStep_saveLike`,
@@ -278,7 +280,7 @@ def Stmt.Frag : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
   | _, _, .rebind _ r => r.MemFree
   | _, _, .assignLocal _ v => v.MemFree
   | _, _, .declLocal _ _ init => init.all (·.MemFree)
-  | _, _, .declStorage _ _ init => init.all (·.MemFree)
+  | _, _, .declStorage _ _ init => init.any (·.MemFree)
   | _, _, .push b v _ => b.MemFree && pushArgFrag v
   | _, _, .pop b => b.MemFree && (b.elemMapping || b.elemPrim)
   | _, _, @Stmt.delete _ _ T l => T.expandable && l.MemFree
@@ -404,10 +406,11 @@ theorem Stmt.frag_wk : {Γ Δ : Ctx} → (h : Thin Γ Δ) → {Γ' : Ctx} → (s
   | _, _, h, _, .declLocal _ _ (some e), hs => by
     simp only [Stmt.Frag, Option.all_some] at hs
     simp only [Stmt.wk, Option.map_some, Stmt.Frag, Option.all_some, Val.memFree_wk, hs]
-  | _, _, h, _, .declStorage _ _ none, hs => rfl
+  | _, _, h, _, .declStorage _ _ none, hs => by
+    simp only [Stmt.Frag, Option.any_none, Bool.false_eq_true] at hs
   | _, _, h, _, .declStorage _ _ (some r), hs => by
-    simp only [Stmt.Frag, Option.all_some] at hs
-    simp only [Stmt.wk, Option.map_some, Stmt.Frag, Option.all_some, ARhs.memFree_wk, hs]
+    simp only [Stmt.Frag, Option.any_some] at hs
+    simp only [Stmt.wk, Option.map_some, Stmt.Frag, Option.any_some, ARhs.memFree_wk, hs]
   | _, _, h, _, .push b v _, hs => by
     simp only [Stmt.Frag, Bool.and_eq_true] at hs
     simp only [Stmt.wk, Stmt.Frag, SPath.memFree_wk, pushArgFrag_wk, hs, Bool.and_self]
@@ -545,7 +548,7 @@ theorem Premise.saveLike_capture {p : PrimTy} (x : Var) {e : Val C Γ p}
 theorem Premise.saveLike_captureSP {R : RefTy} (x : Var) {b : SPath C Γ (.ref R)}
     {s : Stmt C (.alias R :: Γ) (.alias R :: Γ)} (hb : b.MemFree = true) (hs : s.Frag = true) :
     (Premise.captureSP x b s).SaveLike := by
-  simp only [Premise.captureSP, Premise.SaveLike, Prog.Frag, Stmt.Frag, Option.all_some,
+  simp only [Premise.captureSP, Premise.SaveLike, Prog.Frag, Stmt.Frag, Option.any_some,
     ARhs.MemFree, hb, hs, Bool.and_self]
 
 /-- A hole that reads no memory. -/
@@ -712,15 +715,15 @@ theorem assignStep_saveLike {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) (hl : l.M
       split
       · exact VHole.step_saveLike k (.store (.field b f h)) hl (fun _ => Premise.saveLike_save _ _) e hr
       · apply VHole.lower_saveLike k (.store (.field b f h)) hl _ e hr
-        simp only [Premise.SaveLike, Prog.Frag, Stmt.Frag, Option.all_some, ARhs.MemFree,
-          SPath.memFree_up, Loc.MemFree, SPath.MemFree, Src.Frag, Val.MemFree, hr, hl,
-          Bool.and_self]
+        simp only [Premise.SaveLike, Prog.Frag, Stmt.Frag, Option.all_some, Option.any_some,
+          ARhs.MemFree, SPath.memFree_up, Loc.MemFree, SPath.MemFree, Src.Frag, Val.MemFree, hr,
+          hl, Bool.and_self]
     | index it b i =>
       simp only [Loc.MemFree, Bool.and_eq_true] at hl
       have hall : (indexCaptureAll k it b i e).SaveLike := by
         simp only [indexCaptureAll, Premise.SaveLike, Prog.Frag, Stmt.Frag, Option.all_some,
-          ARhs.MemFree, SPath.memFree_up, Val.memFree_up, Loc.MemFree, SPath.MemFree, Src.Frag,
-          Val.MemFree, hr, hl.1, hl.2, Bool.and_self]
+          Option.any_some, ARhs.MemFree, SPath.memFree_up, Val.memFree_up, Loc.MemFree,
+          SPath.MemFree, Src.Frag, Val.MemFree, hr, hl.1, hl.2, Bool.and_self]
       simp only [assignStep]
       split
       · cases i with
@@ -756,8 +759,8 @@ theorem assignStep_saveLike {T : Ty} (l : Loc C Γ T) (r : Src C Γ T) (hl : l.M
       simp only [Loc.MemFree, Bool.and_eq_true] at hl
       have hall : (indexRefCaptureAll k it b i q hm).SaveLike := by
         simp only [indexRefCaptureAll, Premise.SaveLike, Prog.Frag, Stmt.Frag, Option.all_some,
-          ARhs.MemFree, SPath.memFree_up, Val.memFree_up, Loc.MemFree, SPath.MemFree, Src.Frag,
-          Val.MemFree, hr, hl.1, hl.2, Bool.and_self]
+          Option.any_some, ARhs.MemFree, SPath.memFree_up, Val.memFree_up, Loc.MemFree,
+          SPath.MemFree, Src.Frag, Val.MemFree, hr, hl.1, hl.2, Bool.and_self]
       simp only [assignStep]
       split
       · cases i with
@@ -960,7 +963,7 @@ theorem Stmt.step_saveLike {Γ Γ' : Ctx} (s : Stmt C Γ Γ') (h : s.Frag = true
     cases init with
     | none => exact trivial
     | some r =>
-      simp only [Stmt.Frag, Option.all_some] at h
+      simp only [Stmt.Frag, Option.any_some] at h
       show Prog.Frag (.cons (.rebind .here r.up) .nil) = true
       simp only [Prog.Frag, Stmt.Frag, ARhs.memFree_up, h, Bool.and_self]
   | push b v hd =>

@@ -211,6 +211,7 @@ structure SymS.Fresh {Γ : Ctx} (ρ : SymS C Γ) : Prop where
   stor : Decide.Fresh ρ.next ρ.stor
   mem : Decide.Fresh ρ.next ρ.mem
   loc : ρ.loc.Fresh ρ.next
+  bal : Decide.Fresh ρ.next ρ.bal
 
 /-- **The reduction's state `ρ`, read in `g₀` and `ν`, stands for the
 global part `G` and the locals `ℓ`.** -/
@@ -220,7 +221,7 @@ structure AgreesV (g₀ : State C []) (ν : AEnv) {Γ : Ctx} (ρ : SymS C Γ) (G
   mem : (ρ.mem.eval g₀ ν : Option (Grown g₀.H (fun _ => Unit))).map Grown.forget =
     some ⟨G.H, G.heap⟩
   tx : g₀.tx = G.tx
-  bal : g₀.selfBalance = G.selfBalance
+  bal : (ρ.bal.eval g₀ ν : Option PrimTy.uint.Denote) = some G.selfBalance
   loc : ∀ {t : LTy} (i : Idx Γ t) (b : LTm C t.bs), ρ.loc.get i = some b →
     (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt (ℓ t i)
 
@@ -233,10 +234,6 @@ abbrev Agrees (g₀ : State C []) (ν : AEnv) {Γ : Ctx} (ρ : SymS C Γ) (τ : 
 section Terms
 
 variable {g₀ : State C []} {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ}
-
-theorem Op0.toL_ne {s : Srt} (o : Op0 C s) (hs : o.isStorage = false) (hm : o.isMemory = false) :
-    o.toL ρ = some (.app0 o) := by
-  cases o <;> simp only [Op0.isStorage, Op0.isMemory, reduceCtorEq] at hs hm <;> rfl
 
 theorem Op1.toL_ne {a s : Srt} (o : Op1 C a s) (x : LTm C a) (hnet : o.isNet = false)
     (hnext : o.isNext = false) : o.toL ρ x = some (fold1 o x) := by
@@ -343,12 +340,12 @@ theorem Tm.toL_drel (h : Agrees g₀ ν ρ τ) :
     | memory =>
       cases ht
       exact h.mem
-    | lit v => cases ht; exact Op0.eval_drel g₀ τ.glob (.lit v) rfl rfl h.tx h.bal
-    | env k => cases ht; exact Op0.eval_drel g₀ τ.glob (.env k) rfl rfl h.tx h.bal
-    | root r hr => cases ht; exact Op0.eval_drel g₀ τ.glob (.root r hr) rfl rfl h.tx h.bal
-    | mtSt => cases ht; exact Op0.eval_drel g₀ τ.glob .mtSt rfl rfl h.tx h.bal
-    | member s f hf => cases ht; exact Op0.eval_drel g₀ τ.glob (.member s f hf) rfl rfl h.tx h.bal
-    | zlit n => cases ht; exact Op0.eval_drel g₀ τ.glob (.zlit n) rfl rfl h.tx h.bal
+    | env k =>
+      cases ht
+      cases k with
+      | selfBalance => exact h.bal
+      | _ => show some (g₀.envVal _) = some (τ.glob.envVal _); simp only [State.envVal, h.tx]
+    | lit _ | root _ _ | mtSt | member _ _ _ | zlit _ => cases ht; rfl
   | _, .app1 o x, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', ht⟩ := ht
@@ -529,7 +526,9 @@ theorem Tm.toL_fresh (hF : ρ.Fresh) : {s : Srt} → (t : Tm C Γ s) → (t' : L
   | _, .pvZ i, t', ht => hF.loc.get i t' ht
   | _, .netOf _ _, _, ht => by cases ht
   | _, .app0 o, t', ht => by
-    cases o <;> cases ht <;> first | exact hF.stor | exact hF.mem | exact Fresh.app0 _ _
+    cases o <;> cases ht <;> first | exact hF.stor | exact hF.mem | exact Fresh.app0 _ _ | skip
+    rename_i k
+    cases k <;> first | exact hF.bal | exact Fresh.app0 _ _
   | _, .app1 o x, t', ht => by
     simp only [Tm.toL, Option.bind_eq_some_iff] at ht
     obtain ⟨x', hx', ht⟩ := ht
@@ -636,7 +635,7 @@ theorem Rhs.toL_sound (hA : Agrees g₀ ν ρ₀ τ) (hF : ρ₀.Fresh) {t : LTy
 theorem AgreesV.setLoc {Δ : Ctx} {ρ : SymS C Δ} {G : State C []} {ℓ : LocsV C Δ}
     (h : AgreesV g₀ ν ρ G ℓ) {t : LTy} (i : Idx Δ t) {b : LTm C t.bs} {v : t.VDen C}
     (hb : (b.eval g₀ ν : Option (t.bs.Den C g₀.H)) = t.vopt v) :
-    AgreesV g₀ ν ⟨ρ.loc.set i (some b), ρ.stor, ρ.mem, ρ.next⟩ G (ℓ.set i v) := by
+    AgreesV g₀ ν ⟨ρ.loc.set i (some b), ρ.stor, ρ.mem, ρ.bal, ρ.next⟩ G (ℓ.set i v) := by
   refine ⟨h.stor, h.mem, h.tx, h.bal, fun {u} j b' hj => ?_⟩
   by_cases e : i.toNat = j.toNat
   · obtain rfl := Idx.ty_eq_of_toNat e
@@ -664,7 +663,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     cases h
     obtain ⟨hg, hv, hfb⟩ := Rhs.toL_sound hA hF0 r hr
     refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, BEnv.Fresh.set i (fun b' hb' => by
-      cases hb'; exact hfb.mono hn) hFρ.loc⟩, rfl⟩
+      cases hb'; exact hfb.mono hn) hFρ.loc, hFρ.bal⟩, rfl⟩
     · rw [hg]
       show _ = Option.map _ (Option.bind _ _)
       cases r.eval τ <;> rfl
@@ -680,7 +679,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     obtain ⟨s', hs', h⟩ := h
     cases h
     have hd := Tm.toL_drel hA st s' hs'
-    refine ⟨?_, ?_, ⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc⟩, rfl⟩
+    refine ⟨?_, ?_, ⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
     · rw [seqL_tt_drel hd]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (st.eval τ : Option (Storage C)) <;> rfl
@@ -696,7 +695,7 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     obtain ⟨m', hm', h⟩ := h
     cases h
     have hd := Tm.toL_drel hA m m' hm'
-    refine ⟨?_, ?_, ⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc⟩, rfl⟩
+    refine ⟨?_, ?_, ⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal⟩, rfl⟩
     · rw [seqL_tt_drel hd]
       show _ = Option.map _ (Option.bind (Option.bind _ _) _)
       cases (m.eval τ : Option (Grown _ _)) <;> rfl
@@ -751,8 +750,42 @@ theorem UpdElem.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
       simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
       obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
       exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
-  | netMt r a => cases h
-  | setBalance a => cases h
+  | netMt r a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', hr', a', ha', h⟩ := h
+    cases h
+    have hdr := Tm.toL_drel hA r r' hr'
+    have hda := Tm.toL_drel hA a a' ha'
+    refine ⟨?_, ?_, hFρ, rfl⟩
+    · rw [seqL_eval, show (r'.eval g₀ ν : Option _) = r.eval τ from hdr]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (r.eval τ : Option PrimTy.uint.Denote)
+      · rfl
+      · simp only [Option.bind_some]
+        rw [seqL_tt_drel hda]
+        cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
+    · intro q hq
+      have hq' : (((r.eval τ).bind fun addr => (a.eval τ).bind fun amt => some (G.withNet _)).bind
+          (fun g' => some (g', ℓ))) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨_, _, _, _, rfl⟩, rfl⟩ := hq'
+      exact ⟨hρ.stor, hρ.mem, hρ.tx, hρ.bal, hρ.loc⟩
+  | setBalance a =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨a', ha', h⟩ := h
+    cases h
+    have hda := Tm.toL_drel hA a a' ha'
+    refine ⟨?_, ?_, ⟨hFρ.stor, hFρ.mem, hFρ.loc, (Tm.toL_fresh hF0 a a' ha').mono hn⟩, rfl⟩
+    · rw [seqL_tt_drel hda]
+      show _ = Option.map _ (Option.bind (Option.bind _ _) _)
+      cases (a.eval τ : Option PrimTy.uint.Denote) <;> rfl
+    · intro q hq
+      have hq' : ((a.eval τ).bind fun amt => some (G.withBalance amt)).bind
+          (fun g' => some (g', ℓ)) = some q := hq
+      simp only [Option.bind_eq_some_iff, Option.some.injEq] at hq'
+      obtain ⟨_, ⟨x, hx, rfl⟩, rfl⟩ := hq'
+      exact ⟨hρ.stor, hρ.mem, hρ.tx,
+        by rw [show (a'.eval g₀ ν : Option _) = a.eval τ from hda, hx]; rfl, hρ.loc⟩
 
 theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : Ctx} (e : UpdElem C Γ Δ)
     {ρ ρ'' : SymS C Δ} {gde : LTm C (.val .bool)} (h : e.toLS ρ₀ ρ = some (ρ'', gde))
@@ -764,17 +797,17 @@ theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     cases h
     obtain ⟨-, -, hfb⟩ := Rhs.toL_sound hA hF0 r hr
     exact ⟨⟨hFρ.stor, hFρ.mem, BEnv.Fresh.set i (fun b' hb' => by
-      cases hb'; exact hfb.mono hn) hFρ.loc⟩, rfl⟩
+      cases hb'; exact hfb.mono hn) hFρ.loc, hFρ.bal⟩, rfl⟩
   | storage st =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨s', hs', h⟩ := h
     cases h
-    exact ⟨⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc⟩, rfl⟩
+    exact ⟨⟨(Tm.toL_fresh hF0 st s' hs').mono hn, hFρ.mem, hFρ.loc, hFρ.bal⟩, rfl⟩
   | memory m =>
     simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
     obtain ⟨m', hm', h⟩ := h
     cases h
-    exact ⟨⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc⟩, rfl⟩
+    exact ⟨⟨hFρ.stor, (Tm.toL_fresh hF0 m m' hm').mono hn, hFρ.loc, hFρ.bal⟩, rfl⟩
   | selfBalance op a => cases h
   | net r op a =>
     simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
@@ -786,8 +819,16 @@ theorem UpdElem.toLS_fresh (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {�
     obtain ⟨r', -, a', -, h⟩ := h
     cases h
     exact ⟨hFρ, rfl⟩
-  | netMt r a => cases h
-  | setBalance a => cases h
+  | netMt r a =>
+    simp only [UpdElem.toLS, Option.bind_eq_some_iff, Option.map_eq_some_iff] at h
+    obtain ⟨r', -, a', -, h⟩ := h
+    cases h
+    exact ⟨hFρ, rfl⟩
+  | setBalance a =>
+    simp only [UpdElem.toLS, Option.map_eq_some_iff] at h
+    obtain ⟨a', ha', h⟩ := h
+    cases h
+    exact ⟨⟨hFρ.stor, hFρ.mem, hFρ.loc, (Tm.toL_fresh hF0 a a' ha').mono hn⟩, rfl⟩
 
 /-- **An update pushed in**: its guard returns exactly where the update
 returns, and the state it leaves agrees with what the update leaves. -/
@@ -837,7 +878,7 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
     obtain ⟨hgb, hvb, hfb⟩ := Rhs.toL_sound hA hF0 r hr
     refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor.mono (Nat.le_succ _), hf₁.mem.mono (Nat.le_succ _),
       ⟨fun b' hb' => by cases hb'; exact hfb.mono (Nat.le_trans hn₁ (Nat.le_succ _)),
-        hf₁.loc.mono (Nat.le_succ _)⟩⟩, Nat.le_trans hn₁ (Nat.le_succ _)⟩
+        hf₁.loc.mono (Nat.le_succ _)⟩, hf₁.bal.mono (Nat.le_succ _)⟩, Nat.le_trans hn₁ (Nat.le_succ _)⟩
     · show (seqL gd₁ gdb).eval g₀ ν = Option.map _ ((U.applyV τ).bind _)
       rw [seqL_eval, hg₁, hgb]
       cases U.applyV τ <;> try rfl
@@ -858,13 +899,13 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
   | pop U h ih =>
     intro ρ' gd hh
     have h' : (U.toLS ρ₀).map
-        (fun p => ((⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.next⟩ : SymS C _), p.2)) =
+        (fun p => ((⟨p.1.loc.drop h, p.1.stor, p.1.mem, p.1.bal, p.1.next⟩ : SymS C _), p.2)) =
         some (ρ', gd) := hh
     rw [Option.map_eq_some_iff] at h'
     obtain ⟨⟨ρ₁, gd₁⟩, hU, hp⟩ := h'
     cases hp
     obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
-    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.drop h hf₁.loc⟩, hn₁⟩
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.drop h hf₁.loc, hf₁.bal⟩, hn₁⟩
     · show _ = Option.map _ ((U.applyV τ).bind _)
       rw [hg₁]; cases U.applyV τ <;> rfl
     · have hq' : (U.applyV τ).bind (fun p => some (p.1, p.2.drop h)) = some q := hq
@@ -877,13 +918,13 @@ theorem Upd.toLS_sound (hA : Agrees g₀ ν ρ₀ τ) (hF0 : ρ₀.Fresh) {Δ : 
   | drop U h ih =>
     intro ρ' gd hh
     have h' : (U.toLS ρ₀).map
-        (fun p => ((⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.next⟩ : SymS C _), p.2)) =
+        (fun p => ((⟨p.1.loc.thin h, p.1.stor, p.1.mem, p.1.bal, p.1.next⟩ : SymS C _), p.2)) =
         some (ρ', gd) := hh
     rw [Option.map_eq_some_iff] at h'
     obtain ⟨⟨ρ₁, gd₁⟩, hU, hp⟩ := h'
     cases hp
     obtain ⟨hg₁, ha₁, hf₁, hn₁⟩ := ih hU
-    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.thin h hf₁.loc⟩, hn₁⟩
+    refine ⟨?_, fun q hq => ?_, ⟨hf₁.stor, hf₁.mem, BEnv.Fresh.thin h hf₁.loc, hf₁.bal⟩, hn₁⟩
     · show _ = Option.map _ ((U.applyV τ).bind _)
       rw [hg₁]; cases U.applyV τ <;> rfl
     · have hq' : (U.applyV τ).bind (fun p => some (p.1, p.2.thin h)) = some q := hq
@@ -1035,11 +1076,13 @@ theorem Tm.retsS_eval {Γ : Ctx} (τ : State C Γ) {p : PrimTy} {t : Tm C Γ (.v
 theorem Agrees.pushQ {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
     (hF : ρ.Fresh) (p : PrimTy) (v : p.Denote) :
     Agrees g₀ (ν.set p ρ.next v) (ρ.pushQ p) (τ.push (t := .val p) v) := by
-  refine ⟨?_, ?_, hA.tx, hA.bal, fun {u} j b hj => ?_⟩
+  refine ⟨?_, ?_, hA.tx, ?_, fun {u} j b hj => ?_⟩
   · show (ρ.stor.eval g₀ (ν.set p ρ.next v) : Option (Storage C)) = some τ.storage
     rw [hF.stor g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.stor
   · show (ρ.mem.eval g₀ (ν.set p ρ.next v) : Option (Grown _ _)).map Grown.forget = _
     rw [hF.mem g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.mem
+  · show (ρ.bal.eval g₀ (ν.set p ρ.next v) : Option _) = _
+    rw [hF.bal g₀ ν p ρ.next v (Nat.le_refl _)]; exact hA.bal
   · rw [State.locV_push]
     cases j with
     | here =>
@@ -1060,7 +1103,7 @@ theorem SymS.Fresh.pushQ {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (p : PrimTy
       intro g ν q k v hk
       simp only [SymS.pushQ, SymS.push] at hk
       rw [LTm.eval_var, LTm.eval_var, AEnv.get_set_ne _ _ _ _ (by omega)]),
-    hF.loc.mono (Nat.le_succ _)⟩⟩
+    hF.loc.mono (Nat.le_succ _)⟩, hF.bal.mono (Nat.le_succ _)⟩
 
 theorem Agrees.push {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (hA : Agrees g₀ ν ρ τ)
     {t : LTy} (v : t.TDenote C τ.H) : Agrees g₀ ν (ρ.push (t := t) none) (τ.push v) := by
@@ -1073,7 +1116,7 @@ theorem Agrees.push {ν : AEnv} {Γ : Ctx} {ρ : SymS C Γ} {τ : State C Γ} (h
 theorem SymS.Fresh.push {Γ : Ctx} {ρ : SymS C Γ} (hF : ρ.Fresh) (t : LTy) :
     (ρ.push (t := t) none).Fresh :=
   ⟨hF.stor.mono (Nat.le_succ _), hF.mem.mono (Nat.le_succ _),
-    ⟨(fun b hb => by cases hb), hF.loc.mono (Nat.le_succ _)⟩⟩
+    ⟨(fun b hb => by cases hb), hF.loc.mono (Nat.le_succ _)⟩, hF.bal.mono (Nat.le_succ _)⟩
 
 theorem guardM_holds {ν : AEnv} {Γ : Ctx} {τ : State C Γ} {Δ : Ctx} (m : Modality) (U : Upd C Γ Δ)
     {x : Option (LTm C (.val .bool))} {gd : LTm C (.val .bool)} {ψ : LFml C} {φ : Fml C Δ}
@@ -1299,7 +1342,7 @@ theorem Agrees.init (τ : State C []) (ν : AEnv) : Agrees τ ν SymS.init τ :=
   ⟨rfl, rfl, rfl, rfl, fun i => nomatch i⟩
 
 theorem SymS.Fresh.init : (SymS.init : SymS C []).Fresh :=
-  ⟨Fresh.app0 _ _, Fresh.app0 _ _, trivial⟩
+  ⟨Fresh.app0 _ _, Fresh.app0 _ _, trivial, Fresh.app0 _ _⟩
 
 end Fml
 

@@ -815,7 +815,9 @@ open Lean Meta
 def Tm.toNilQ? (e : Expr) : MetaM (Option Expr) := do
   if e.hasLooseBVars || e.hasMVar then return none
   let some ty ← (try some <$> whnf (← inferType e) catch _ => pure none) | return none
-  unless ty.isAppOfArity ``Tm 3 && (← whnf (ty.getArg! 2)).isAppOfArity ``Srt.val 1 do return none
+  -- two tests: `do` would lift the `(← …)` out of `&&`, ahead of the first
+  unless ty.isAppOfArity ``Tm 3 do return none
+  unless (← whnf (ty.getArg! 2)).isAppOfArity ``Srt.val 1 do return none
   let r ← Meta.reduce (← mkAppM ``Tm.toNil? #[e]) (skipTypes := true)
   return if r.isAppOfArity ``Option.some 2 then some r.appArg! else none
 

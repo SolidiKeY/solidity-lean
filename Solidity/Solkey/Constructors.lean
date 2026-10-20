@@ -105,14 +105,10 @@ info: \problem {
 #guard_msgs in
 #solkey_problem Solkey.EtherWallet.constructor
 
-/-- The deployment obligation, derived.  `sol_prove`'s closer refuses a
-context that holds `mtSt` (`Decide` has no clause for it yet), even with
-`true` to prove, so its one leaf is closed on its scoped form (`sol_leaf`)
-by `sol_close_mt`. -/
+/-- The deployment obligation, derived: `sol_prove`'s closer reads the
+deployment's update (`mtSt` as `SFun.mt`, the balance it sets). -/
 theorem Solkey.EtherWallet.constructor.proved : ⊢ Solkey.EtherWallet.constructor.problem := by
   sol_prove
-  sol_leaf
-  sol_close_mt
 
 /--
 info: 3 functions: 1 derived, 0 pending, 2 other

@@ -172,7 +172,7 @@ theorem LTm.eval_agree_below (g : State C []) {s : Srt} (t : LTm C s) {ν μ : A
 
 /-- The second budget is shared across sibling branches. Exhaustion has no
 semantic verdict; each accepted node carries its evaluation equivalence. -/
-private def flattenFuel? : Nat → Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
+def flattenFuel? : Nat → Nat → {s : Srt} → (t : LTm C s) → (start : Nat) →
     Option (Flattened t start × Nat)
   | 0, _, _, _, _ | _ + 1, 0, _, _, _ => none
   | _ + 1, remaining + 1, _, .var k, start => some (.pure (.var k) start, remaining)
@@ -271,7 +271,7 @@ def LFml.atomBound : LFml C → Nat
   | .and φ ψ | .imp φ ψ => max φ.atomBound ψ.atomBound
   | .all k _ φ => max (k + 1) φ.atomBound
 
-private def flattenFormulaFuel? : Nat → Nat → (φ : LFml C) → (start : Nat) →
+def flattenFormulaFuel? : Nat → Nat → (φ : LFml C) → (start : Nat) →
     Option (FlattenedFormula φ start × Nat)
   | 0, _, _, _ | _ + 1, 0, _, _ => none
   | _ + 1, remaining + 1, .tt, start => some (.tt start, remaining)

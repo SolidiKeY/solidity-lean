@@ -21,7 +21,7 @@ structure TSegs.Guard {T U : Ty} (p : TSegs C T U) where
   declared : ∀ (g : State C []) (ν : AEnv) (q : Path T U),
     p.eval g ν = some q → q.Declared
 
-private def TSegs.guardFuel? : Nat → {T U : Ty} → (p : TSegs C T U) → Option (TSegs.Guard p)
+def TSegs.guardFuel? : Nat → {T U : Ty} → (p : TSegs C T U) → Option (TSegs.Guard p)
   | 0, _, _, _ => none
   | _ + 1, _, _, .nil => some ⟨.tt, fun _ _ => rfl, by
       intro _ _ q h

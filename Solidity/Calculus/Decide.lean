@@ -1114,6 +1114,46 @@ def fbRd (s : LTm C .st) : SRd C := fun {V} c P =>
 /-- A storage term with no reading of its own: read as it is. -/
 def SFun.ofOrig (s : LTm C .st) : SFun C := ⟨seqL s .tt, fbRd s, s⟩
 
+/-- `TSegs.mtHas`'s compiled twin. -/
+def TSegs.mtHasM : {S T : Ty} → TSegs C S T → LTm C (.val .bool) → LTm C (.val .bool)
+  | _, _, .nil, acc => acc
+  | _, _, .field _ p, acc => p.mtHasM acc
+  | _, _, .at _ _, _ => .lit (p := .bool) false
+  | _, _, @TSegs.atF _ _ _ n i p, acc =>
+    p.mtHasM (if TSegs.litBelow i n then acc else .kite acc .tt (LTm.ltNat i n) (.lit (p := .bool) false))
+  | _, _, .key _ p, acc => p.mtHasM acc
+
+/-- **`has` at the segments `p` below a location of the empty storage**,
+`acc` `has` at the base: a member, a key there; a fixed index where it is
+in range; a dynamic index never (every array is empty, `fixedEmpty`,
+`selectOnShapeSize`).  By the recursor. -/
+@[implemented_by TSegs.mtHasM]
+def TSegs.mtHas {S T : Ty} (p : TSegs C S T) : LTm C (.val .bool) → LTm C (.val .bool) :=
+  @TSegs.rec C (fun _ _ _ => LTm C (.val .bool) → LTm C (.val .bool))
+    (fun acc => acc)
+    (fun _ _ ih acc => ih acc)
+    (fun _ _ _ _ => .lit (p := .bool) false)
+    (@fun _ _ n i _ ih acc =>
+      ih (if TSegs.litBelow i n then acc else .kite acc .tt (LTm.ltNat i n) (.lit (p := .bool) false)))
+    (fun _ _ ih acc => ih acc) S T p
+
+theorem TSegs.mtHas_eq_mtHasM {S T : Ty} (p : TSegs C S T) : p.mtHas = p.mtHasM := by
+  funext acc
+  induction p generalizing acc with
+  | nil => rfl
+  | «at» i p ih => rfl
+  | field h p ih | atF i p ih | key i p ih => simp only [TSegs.mtHasM, ← ih]; rfl
+
+/-- **The empty storage read** (`selectOnEmptyStorage`): a word its type's
+default, a length `0`, `has` by `TSegs.mtHas` from the root. -/
+def mtRd : SRd C := fun {V} c P =>
+  @CK.casesOn (fun V c => LTm C (.path V) → LTm C (.val c.out)) V c
+    (fun P _ => .lit (PrimTy.dflt P)) (fun _ _ => .nat 0)
+    (fun _ _ => P.segs.mtHas .tt) P.toLTm
+
+/-- A deployment's storage, `mtSt`: it returns, and reads as `mtRd`. -/
+def SFun.mt : SFun C := ⟨.tt, mtRd, .app0 .mtSt⟩
+
 /-- `writeAt` by `match`, its compiled form. -/
 def writeAtM {T : Ty} (S : SRd C) (P : SPath C T) (newR : VRd C T) : SRd C := fun c Q =>
   if h : P.r = Q.r then
@@ -1293,7 +1333,7 @@ def _root_.Solidity.Op0.elim {s : Srt} (o : Op0 C s) : ElimM C s :=
     (fun r {_} h => some (.tt, ⟨r, h, .nil⟩))
     SFun.init
     (.app0 .memory : LTm C .mem)
-    (SFun.ofOrig (.app0 .mtSt))
+    SFun.mt
     (fun s f {_} h => (.app0 (.member s f h) : LTm C (.spath _ _)))
     (fun n => (.app0 (.zlit n) : LTm C .kint))
 

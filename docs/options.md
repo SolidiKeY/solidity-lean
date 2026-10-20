@@ -285,8 +285,10 @@ with no mapping key step after it, is read `q; (i < obsL(q) ? obsW(p) : 0)`
 (`lenOf`: `obsL(q)` or `obsL(q) + 1 - 1`, its guards dropped), since the
 closer does not fold `a < a`. A checked index and a member pass, a mapping
 key stops the fold. Sound by `LTm.ctFold_eval` where the storage shows clean
-tails, and by vacuity where it does not (`Fml.assumesCT_holds`); without
-the premise `checkCore` is unchanged. So `sol_decide`, and `sol_prove`'s
+tails, and by vacuity where it does not (`Fml.assumesCT_holds`). Such a
+leaf is offered the plain closer too (`decideMemCT || decideMem`), so the
+premise never loses a leaf `decideMem` closes; without the premise
+`checkCore` is unchanged. So `sol_decide`, and `sol_prove`'s
 leaves, prove the recycled slot's default (`pushRead_clean`,
 `pushRead_clean_box`, `pushAlias_clean`).
 
