@@ -410,6 +410,21 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     'memoryParameter']) assert.equal(status[name], 'proved', name);
 });
 
+test("function types: values in locals, parameters, returns, storage and struct members", () => {
+  // tests/solc/FunctionTypes.sol: a value is its function's tag, a call
+  // through it a dispatch over the functions of its signature
+  // (docs/semantic-gaps.md, "Function types")
+  const report = runSolidityTests(["tests/solc/FunctionTypes.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['applyAndCompose', 'localValue', 'storedByFlag', 'returnedValue',
+    'unassignedPanics', 'memberValue', 'deletedPanics', 'equality'])
+    assert.equal(status[name], 'proved', name);
+  // an unassigned value's call reverts (Panic(0x51)), and a false postcondition
+  assert.equal(status.unassignedDiamond, 'pending');
+  assert.equal(status.falsePost, 'pending');
+});
+
 test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
   const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
   assert.deepEqual(report.errors, []);
