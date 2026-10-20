@@ -1225,40 +1225,6 @@ def elabIncTarget (l : RawExpr) :
         ⟨Γ', p, .mindex a (.var ix b.mapFree) (i.wk th), rfl⟩)
     | .local _ | .root .. => nomatch hs
 
-/-- `e` as a simple value of type `p`, captured into a fresh local first
-when it is not one: read in the context the capture leaves. -/
-def simpleOf (p : PrimTy) (e : RawExpr) : ElabM (SProg C × (Γ : NCtx) × Simple C Γ.ctx p) := do
-  let Γ ← nctx
-  let v ← checkIn C Γ p e
-  match v.toSimple? with
-  | some se => pure ([], ⟨Γ, se⟩)
-  | none =>
-    let x ← captureAs C "se" (.val p)
-    let ⟨Γ', _, ix⟩ ← afterCapture Γ x (.val p)
-    pure ([.of Γ (.declLocal p x (some v))], ⟨Γ', .local ix⟩)
-
-/-- The size of `new T[](n)` as a simple value: a size that is not one is
-captured into a fresh `uint` first (KeY's `memoryArrayFreshAlloc` takes a
-`SimpleExpression`). -/
-def elabSize (n : RawExpr) : ElabM (SProg C × (Γ : NCtx) × Simple C Γ.ctx .uint) :=
-  simpleOf C .uint n
-
-/-- The array type `new T(n)` allocates, if it may be allocated. -/
-def elabNewTy (T : RawTy) : ElabM ((R : RefTy) ×' R.newArrOk = true) := do
-  let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw "`new` of a value type"
-  match h : R.newArrOk with
-  | true => pure ⟨R, h⟩
-  | false => throw "`new` of an array whose elements a memory array cannot hold"
-
-/-! ### Narrow widths -/
-
-/-- Two operands' type: a literal takes the other's, and the wider wins (solc
-converts a `uint8` to a `uint16` implicitly). -/
-def joinIT : Option (PrimTy × Nat) → Option (PrimTy × Nat) → Option (PrimTy × Nat)
-  | none, t => t
-  | t, none => t
-  | some (p, n), some (_, m) => some (p, max n m)
-
 /-- The narrow positions of the reference local `x` (`LocalTy.shape`). -/
 def localShape (Γ : ECtx) (x : Name) : List (String × Nat) :=
   match lookupBy ("#" ++ x) Γ with
@@ -1327,6 +1293,48 @@ def shapeCheck (Γ : ECtx) (ws : List (String × Nat)) (e : RawExpr) : Except St
 of `uint8[] small`, `lists[i]` of `mapping(uint => uint8[]) lists`, a
 `uint8[] memory m`). -/
 def narrowWhole (Γ : ECtx) (e : RawExpr) : Bool := !(placeShape C Γ e).isEmpty
+
+/-- A capture of the reference `e`, declared at `t`, with its narrow positions
+(`exprShape`, `LocalTy.shape`). -/
+def captureRef (base : String) (t : LocalTy) (e : RawExpr) : ElabM Var := do
+  let ws := exprShape C (← ctx) e
+  let x ← captureAs C base t
+  declareShape (toString x) ws
+  pure x
+
+/-- `e` as a simple value of type `p`, captured into a fresh local first
+when it is not one: read in the context the capture leaves. -/
+def simpleOf (p : PrimTy) (e : RawExpr) : ElabM (SProg C × (Γ : NCtx) × Simple C Γ.ctx p) := do
+  let Γ ← nctx
+  let v ← checkIn C Γ p e
+  match v.toSimple? with
+  | some se => pure ([], ⟨Γ, se⟩)
+  | none =>
+    let x ← captureAs C "se" (.val p)
+    let ⟨Γ', _, ix⟩ ← afterCapture Γ x (.val p)
+    pure ([.of Γ (.declLocal p x (some v))], ⟨Γ', .local ix⟩)
+
+/-- The size of `new T[](n)` as a simple value: a size that is not one is
+captured into a fresh `uint` first (KeY's `memoryArrayFreshAlloc` takes a
+`SimpleExpression`). -/
+def elabSize (n : RawExpr) : ElabM (SProg C × (Γ : NCtx) × Simple C Γ.ctx .uint) :=
+  simpleOf C .uint n
+
+/-- The array type `new T(n)` allocates, if it may be allocated. -/
+def elabNewTy (T : RawTy) : ElabM ((R : RefTy) ×' R.newArrOk = true) := do
+  let .ref R ← ElabM.lift ((·.1) <$> elabTyW C T) | throw "`new` of a value type"
+  match h : R.newArrOk with
+  | true => pure ⟨R, h⟩
+  | false => throw "`new` of an array whose elements a memory array cannot hold"
+
+/-! ### Narrow widths -/
+
+/-- Two operands' type: a literal takes the other's, and the wider wins (solc
+converts a `uint8` to a `uint16` implicitly). -/
+def joinIT : Option (PrimTy × Nat) → Option (PrimTy × Nat) → Option (PrimTy × Nat)
+  | none, t => t
+  | t, none => t
+  | some (p, n), some (_, m) => some (p, max n m)
 
 /-- A reference type. -/
 def isRefTy : Ty → Bool
@@ -1656,10 +1664,10 @@ def captureExpr (e : RawExpr) : ElabM (SProg C × RawExpr) := do
   match e, t with
   | .name _, .path (.ref _) _ | .name _, .mpath (.ref _) _ => return ([], e)
   | _, .path (.ref R) sp =>
-    let x ← captureAs C "sp" (.alias R)
+    let x ← captureRef C "sp" (.alias R) e
     return ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
   | _, .mpath (.ref R) mp =>
-    let x ← captureAs C "mv" (.mem R)
+    let x ← captureRef C "mv" (.mem R) e
     return ([.of Γ (.declMem R x (some (.alias mp)) rfl mp.mapFree)], .name (toString x))
   | _, t =>
     let some ⟨p, v⟩ := t.toVal? | throw s!"{e.toStr}: a value or a reference is expected"
@@ -2329,7 +2337,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     let (P, n) ← hoist n
     let ⟨R, hR⟩ ← elabNewTy C T
     let (Q, ⟨Γ, se⟩) ← elabSize C n
-    let x ← captureAs C "mv" (.mem R)
+    let x ← captureRef C "mv" (.mem R) (.newArr T n)
     pure (P ++ Q ++ [.of Γ (.declMem R x (some (.newArr se hR)) rfl
       (MRhs.newArr (C := C) se hR).mapFree)], .name (toString x))
   | .call f args => do
@@ -2444,7 +2452,7 @@ partial def hoistAssign (l r : RawExpr) : ElabM (SProg C × RawStmt) := do
     | .ok (.mpath (.ref _) (.loc _)), .ok (.path (.ref R) sp) =>
       match hm : (Ty.ref R).mapFree with
       | true =>
-        let x ← captureAs C "mv" (.mem R)
+        let x ← captureRef C "mv" (.mem R) r
         pure (P ++ [.of Γ (.declMem R x (some (.copy sp hm)) rfl hm)], .name (toString x))
       | false => throw "a copy into memory of a type that holds a mapping"
     | _, _ => pure (P, r)
@@ -2499,12 +2507,12 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
         | some .storage =>
           let sp ← ElabM.lift (checkPath C Γ (.ref R) a)
           if stable then pure ([], a) else do
-          let x ← captureAs C "sp" (.alias R)
+          let x ← captureRef C "sp" (.alias R) a
           pure ([.of Γ (.declStorage R x (some (.path sp)))], .name (toString x))
         | some .memory =>
           let rhs ← ElabM.lift (elabMRhs C Γ R a)
           if stable && (rhs matches .alias _) then pure ([], a) else do
-          let x ← captureAs C "mv" (.mem R)
+          let x ← captureRef C "mv" (.mem R) a
           pure ([.of Γ (.declMem R x (some rhs) rfl rhs.mapFree)], .name (toString x))
         | some .calldata => throw s!"{f}: calldata parameter {n} is not supported"
         | none => throw s!"{f}: reference parameter {n} needs a data location"
@@ -3024,8 +3032,12 @@ partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
       else pure false
     | .declPush .. => pure true
     | _ => pure false
+  -- a call statement's arguments, as a call expression's (`narrowWholeUse?`)
+  let es := match s with
+    | .call (.name f) as => [RawExpr.call f as]
+    | s => s.exprs
   unless s matches .delete _ do
-    for e in s.exprs do
+    for e in es do
       let w := if whole then narrowBase? C Γ e else narrowWholeUse? C Γ e
       if let some w := w then
         throw s!"{w.toStr} has a narrow element, key or value: it is used through an index, \

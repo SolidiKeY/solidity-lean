@@ -65,7 +65,7 @@ contract NarrowNested {
     /// @custom:key box
     function memberArrayPanics() public {
         p.xs.push(255);
-        p.xs[0] += 1;
+        p.xs[p.xs.length - 1] += 1;
         assert(false);
     }
     /// @custom:key box

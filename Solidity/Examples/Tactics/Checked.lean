@@ -228,7 +228,7 @@ def NarrowShapes : Contract := contract!{
   mapping(uint => Packed) byId;
   modifier atMost(uint8 cap) { require(cap > 1); _; }
   function sum(uint8[] memory xs) returns (uint8 r) { r = xs[0] + xs[1]; }
-  function bump(uint8[] storage xs) { xs[0] += 1; }
+  function bump(uint8[] storage xs) { xs[xs.length - 1] += 1; }
   function capped(uint8 c) atMost(c) { small.push(c); }
 }
 
@@ -247,7 +247,7 @@ theorem valueMemberOverflows : ⊨ dl[NarrowShapes]{ [ byId[1].a = 200; byId[1].
   sol_symex
   sol_close
 
-theorem memberArrayOverflows : ⊨ dl[NarrowShapes]{ [ p.xs.push(255); p.xs[0] += 1; ] false } := by
+theorem memberArrayOverflows : ⊨ dl[NarrowShapes]{ [ p.xs.push(255); p.xs[p.xs.length - 1] += 1; ] false } := by
   sol_symex
   sol_close
 
@@ -257,7 +257,7 @@ theorem memoryMemberOverflows : ⊨ dl[NarrowShapes]{ [ Packed memory q; q.a = 2
   sol_close
 
 /-- A storage alias of `small` is a `uint8[]`. -/
-theorem aliasOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] storage s = small; s.push(255); s[0] += 1; ]
+theorem aliasOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] storage s = small; s.push(255); s[s.length - 1] += 1; ]
     false } := by
   sol_symex
   sol_close
@@ -268,7 +268,8 @@ theorem memoryOverflows : ⊨ dl[NarrowShapes]{ [ uint8[] memory m = new uint8[]
   sol_symex
   sol_close
 
-theorem copyOverflows : ⊨ dl[NarrowShapes]{ [ small.push(255); uint8[] memory m = small; m[0]++; ]
+theorem copyOverflows : ⊨ dl[NarrowShapes]{ [ small.push(255); uint8[] memory m = small;
+    m[m.length - 1]++; ]
     false } := by
   sol_symex
   sol_close

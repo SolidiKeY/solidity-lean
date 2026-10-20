@@ -438,8 +438,8 @@ def tyName (p : PrimTy) (n : Nat) : String := if n < 256 then s!"{p.toStr}{n}" e
 
 /-- Why a narrow type is refused where it stands. -/
 def narrowNestedMsg (s : String) : String :=
-  s!"{s}: a narrow integer type is the type of a local, a parameter, a return value or a " ++
-  "state variable only, not of an array's element, a mapping's key or value, or a struct's member"
+  s!"{s}: a narrow integer type stands in the type of a local, a parameter, a return value, " ++
+  "a state variable or a struct of the table (`structWidths`), not here"
 
 declare_syntax_cat sol_ty (behavior := both)
 syntax:max ident : sol_ty
