@@ -382,9 +382,26 @@ structure Contract where
   declaration order, each with it as read.  The constructor runs them first
   (`elabCtor`), as solkey's `ExpandFunctionBody` prepends them. -/
   inits : List (Name × RawExpr) := []
+  /-- `struct S { … }`: its own structs, each by the name it is written by
+  and its type's name in the table, which spells its members
+  (`Semantics.StructEnc`; the plain name when the table's struct of that
+  name has those members). -/
+  structs : List (Name × Name) := []
   deriving Repr, Inhabited
 
 namespace Contract
+
+/-- The struct a type name names in `C`: its own first, else the table's. -/
+def structName? (C : Contract) (s : Name) : Option Name :=
+  match lookupBy s C.structs with
+  | some e => some e
+  | none => if (structDef s).isEmpty then none else some s
+
+/-- The members of the struct a type name names in `C`; none for another name. -/
+def structFields (C : Contract) (s : Name) : List (Name × Ty) :=
+  match C.structName? s with
+  | some e => structDef e
+  | none => []
 
 /-- The declared type of the storage root `r`. -/
 def rootType (C : Contract) (r : Name) : Option Ty := lookupBy r C.vars
@@ -1497,6 +1514,8 @@ syntax &"event " ident "(" sol_eparam,* ")" ";" : sol_member
 syntax &"error " ident "(" sol_eparam,* ")" ";" : sol_member
 /-- `enum State { Created, Locked }`: `State.Locked` is `1`. -/
 syntax &"enum " ident "{" ident,* "}" : sol_member
+/-- `struct S { uint a; T[] xs; }`: a struct of the contract (`Contract.structs`). -/
+syntax (name := solStruct) &"struct " ident "{" (sol_ty ident ";")* "}" : sol_member
 
 /-- A clause of the specification, where solkey's NatSpec line stands:
 `requires e;` and `ensures e;` above the function they specify (`/// @custom:key
@@ -1521,15 +1540,88 @@ open Lean
 def attrKeywords : List String :=
   ["public", "external", "internal", "private", "view", "pure", "payable", "virtual", "override"]
 
-/-- A declared type, an enum of the contract read as `uint`. -/
-def expandMemberTy (enums : List String) (T : TSyntax `sol_ty) : MacroM Term :=
+/-- What a type is read against in `contract!{ … }`: the contract's enums
+(each a `uint`) and its own structs (`Contract.structs`). -/
+structure TyEnv where
+  enums : List String := []
+  structs : List (String × String) := []
+
+/-- A declared type, an enum of the contract read as `uint`, a struct of the
+contract by its name in the table. -/
+partial def expandMemberTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM Term :=
   match T with
-  | `(sol_ty| $x:ident) => if enums.contains x.getId.toString then `(Ty.uint) else `(ty!($T))
+  | `(sol_ty| $x:ident) =>
+    if env.enums.contains x.getId.toString then `(Ty.uint)
+    else match lookupBy x.getId.toString env.structs with
+      | some e => `(Ty.struct $(quote e))
+      | none => `(ty!($T))
+  | `(sol_ty| $E:sol_ty []) => do `(Ty.array $(← expandMemberTy env E))
+  | `(sol_ty| $E:sol_ty [ $n:num ]) => do `(Ty.fixed $(← expandMemberTy env E) $n)
+  | `(sol_ty| mapping ( $K:sol_ty => $V:sol_ty )) => do
+    `(Ty.mapping pty!($K) $(← expandMemberTy env V))
   | _ => `(ty!($T))
+
+/-- A member's type as a struct's name in the table spells it
+(`Semantics.StructEnc`): a primitive type by its name, a narrow one as
+written, a struct by its name in the table. -/
+partial def spellTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM String := do
+  match T with
+  | `(sol_ty| address payable) => pure "uint"
+  | `(sol_ty| $x:ident) =>
+    let n := x.getId.toString
+    if env.enums.contains n then return "uint"
+    if let some e := lookupBy n env.structs then return e
+    match PrimTy.ofName? n with
+    | some p => return p.toStr
+    | none =>
+      if (narrowTy? n).isSome then return n
+      if (structDef n).isEmpty then Macro.throwErrorAt x (unknownStructMsg n)
+      return n
+  | `(sol_ty| $E:sol_ty []) => return (← spellTy env E) ++ "[]"
+  | `(sol_ty| $E:sol_ty [ $n:num ]) => return s!"{← spellTy env E}[{n.getNat}]"
+  | `(sol_ty| mapping ( $K:sol_ty => $V:sol_ty )) =>
+    return s!"mapping({← spellTy env K}=>{← spellTy env V})"
+  | _ => Macro.throwUnsupported
+
+/-- The contract's structs, each with its name in the table: the plain name
+when the table's struct of that name has these members (and narrow widths),
+else the name that spells them.  A struct is spelled once the contract's
+structs its members name are; one that names itself, through any chain, is
+refused, as the table's rank refuses it (`structDef_rank_lt`). -/
+def expandStructs (enums : List String) (decls : Array (Ident × Array (TSyntax `sol_ty × Ident))) :
+    MacroM (List (String × String)) := do
+  let names := decls.toList.map (·.1.getId.toString)
+  let mut done : List (String × String) := []
+  for _ in [0:decls.size] do
+    for (S, ms) in decls do
+      let n := S.getId.toString
+      if (lookupBy n done).isSome then continue
+      let waits := ms.any fun (T, _) => (T.raw.find? fun x =>
+        x.isIdent && names.contains x.getId.toString && (lookupBy x.getId.toString done).isNone).isSome
+      if waits then continue
+      let env : TyEnv := { enums, structs := done }
+      let fields ← ms.mapM fun (T, f) => do pure s!"{f.getId.toString}:{← spellTy env T}"
+      if fields.isEmpty then Macro.throwErrorAt S s!"struct {n}: a struct has a member"
+      let enc := n ++ "{" ++ ";".intercalate fields.toList ++ "}"
+      let some fs := Semantics.StructEnc.decode enc |
+        Macro.throwErrorAt S s!"struct {n}: its members do not spell a struct: {enc}"
+      if let some f := dupKey? fs then
+        Macro.throwErrorAt S s!"struct {n}: identifier already declared: member {f}"
+      let e := if structDef n == fs && structWidths n == Semantics.StructEnc.widths enc then n
+        else enc
+      unless structDef e == fs do
+        Macro.throwErrorAt S s!"struct {n}: nested past the struct table's rank bound \
+          (`structRankCap`)"
+      done := done ++ [(n, e)]
+  for (S, _) in decls do
+    if (lookupBy S.getId.toString done).isNone then
+      Macro.throwErrorAt S s!"struct {S.getId.toString} contains itself: no struct of the \
+        table does (`structDef_rank_lt`)"
+  pure done
 
 /-- `expandMemberTy` where a narrow type may stand: a `uint8` is `Ty.uint` and
 its width. -/
-def expandMemberTyW (enums : List String) (T : TSyntax `sol_ty) : MacroM (Term × Option Nat) :=
+def expandMemberTyW (enums : TyEnv) (T : TSyntax `sol_ty) : MacroM (Term × Option Nat) :=
   match T with
   | `(sol_ty| $x:ident) =>
     match narrowTy? x.getId.toString with
@@ -1545,7 +1637,7 @@ the name): `""` the variable, `"[]"` an element or a mapping's value, `"{}"` a
 mapping's key (`mapping(uint8 => uint16[]) m` is `[("{}", 8), ("[][]", 16)]`).
 A struct's narrow members are its type's (`Semantics.structWidths`).  A
 parameter's and a return's type are read so too (`expandParamsW`). -/
-partial def expandStateTyW (enums : List String) (T : TSyntax `sol_ty) :
+partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     MacroM (Term × List (String × Nat)) := do
   let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × Nat) := match K with
     | `(sol_ty| $x:ident) => narrowTy? x.getId.toString
@@ -1576,7 +1668,7 @@ partial def expandStateTyW (enums : List String) (T : TSyntax `sol_ty) :
 
 /-- A function's parameters, and the rows of `FunDecl.widths` for the narrow
 ones and the narrow positions inside one (`expandStateTyW`). -/
-def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
+def expandParamsW (enums : TyEnv) (ps : Array (TSyntax `sol_param)) :
     MacroM (Array Term × Array Term × Array Term) := do
   let mut rows := #[]
   let mut ws := #[]
@@ -1601,7 +1693,7 @@ def expandParamsW (enums : List String) (ps : Array (TSyntax `sol_param)) :
 
 /-- A modifier: its name, its parameters, and its body, with a `_;` at least
 (solc's "Modifier body does not contain '_'"), anywhere. -/
-def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_param))
+def expandModifier (enums : TyEnv) (m : Ident) (ps : Array (TSyntax `sol_param))
     (b : TSyntax `sol_block) : MacroM (String × Array Term × Term × Array Term × Array Term) := do
   let `(sol_block| { $[$ss:sol_stmt;]* }) := b | Macro.throwErrorAt b "a modifier's body is a block"
   unless (b.raw.find? (·.isOfKind ``solHole)).isSome do
@@ -1614,7 +1706,7 @@ def expandModifier (enums : List String) (m : Ident) (ps : Array (TSyntax `sol_p
 
 /-- A function's declaration, as a term: its return variable and its
 modifiers read off its attributes. -/
-def expandFun (enums : List String)
+def expandFun (enums : TyEnv)
     (mods : List (String × Array Term × Term × Array Term × Array Term)) (f : Ident)
     (ps : Array (TSyntax `sol_param)) (attrs : Array (TSyntax `sol_fattr))
     (b : TSyntax `sol_block) (spec : Term) : MacroM Term := do
@@ -1680,10 +1772,19 @@ macro_rules
           enums := enums ++ [e.getId.toString]
           enumRows := enumRows.push (← `(($(strLit e), [$(xs.getElems.map strLit),*])))
         | _ => pure ()
+      let mut decls := #[]
+      for m in ms do
+        match m with
+        | `(sol_member| struct $S:ident { $[$Ts:sol_ty $fs:ident ;]* }) =>
+          decls := decls.push (S, Ts.zip fs)
+        | _ => pure ()
+      let structs ← expandStructs enums decls
+      let structRows ← structs.toArray.mapM fun (n, e) => `(($(Lean.quote n), $(Lean.quote e)))
+      let env : TyEnv := { enums, structs }
       for m in ms do
         match m with
         | `(sol_member| modifier $f:ident $[( $ps:sol_param,* )]? $b:sol_block) =>
-          mods := mods ++ [← expandModifier enums f ((ps.map (·.getElems)).getD #[]) b]
+          mods := mods ++ [← expandModifier env f ((ps.map (·.getElems)).getD #[]) b]
         | _ => pure ()
       let mut rows := #[]
       let mut widthRows : Array Lean.Term := #[]
@@ -1709,12 +1810,12 @@ macro_rules
           asg := some (← expandSpecLocs ls)
         | `(sol_member| invariant $e:spec_expr ;) => invs := invs.push (← expandSpec e)
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident ;) =>
-          let (t, ws) ← expandStateTyW enums T
+          let (t, ws) ← expandStateTyW env T
           rows := rows.push (← `(($(strLit x), $t)))
           for (k, n) in ws do
             widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
         | `(sol_member| $T:sol_ty $_:sol_vis* $x:ident = $e:sol_expr ;) =>
-          let (t, ws) ← expandStateTyW enums T
+          let (t, ws) ← expandStateTyW env T
           rows := rows.push (← `(($(strLit x), $t)))
           for (k, n) in ws do
             widthRows := widthRows.push (← `(($(Lean.quote (x.getId.toString ++ k)), $(Lean.quote n))))
@@ -1729,7 +1830,7 @@ macro_rules
             | none => `(none)
           let spec ← `(({ requires := [$reqs,*], ensures := [$enss,*], assignable := $asgT,
                           skip := $(Lean.quote skip) } : FunSpec))
-          let d ← expandFun enums mods (Lean.mkIdent `constructor) ps.getElems as b spec
+          let d ← expandFun env mods (Lean.mkIdent `constructor) ps.getElems as b spec
           ctor := some (← `(some ($d).2))
           reqs := #[]; enss := #[]; skip := false; asg := none
         | `(sol_member| function $f:ident ( $ps:sol_param,* ) $as:sol_fattr* $b:sol_block) =>
@@ -1740,12 +1841,13 @@ macro_rules
             | none => `(none)
           let spec ← `(({ requires := [$reqs,*], ensures := [$enss,*], assignable := $asgT,
                           skip := $(Lean.quote skip) } : FunSpec))
-          funs := funs.push (← expandFun enums mods f ps.getElems as b spec)
+          funs := funs.push (← expandFun env mods f ps.getElems as b spec)
           reqs := #[]; enss := #[]; skip := false; asg := none
         | `(sol_member| modifier $_:ident $[( $_:sol_param,* )]? $_:sol_block)
         | `(sol_member| event $_:ident ( $_:sol_eparam,* ) ;)
         | `(sol_member| error $_:ident ( $_:sol_eparam,* ) ;)
-        | `(sol_member| enum $_:ident { $_:ident,* }) => pure ()
+        | `(sol_member| enum $_:ident { $_:ident,* })
+        | `(sol_member| struct $_:ident { $[$_:sol_ty $_:ident ;]* }) => pure ()
         | _ => Lean.Macro.throwUnsupported
       unless reqs.isEmpty && enss.isEmpty && !skip && asg.isNone do
         Lean.Macro.throwError
@@ -1754,7 +1856,8 @@ macro_rules
         | some t => pure t
         | none => `(none)
       `(({ vars := [$rows,*], funs := [$funs,*], enums := [$enumRows,*], inv := [$invs,*],
-           widths := [$widthRows,*], ctor := $ctorT, inits := [$initRows,*] } : Contract))
+           widths := [$widthRows,*], ctor := $ctorT, inits := [$initRows,*],
+           structs := [$structRows,*] } : Contract))
 /-! ### The contracts
 
 One per store of `Semantics.lean`, under the store's renames, with

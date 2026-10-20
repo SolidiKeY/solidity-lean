@@ -1110,10 +1110,12 @@ theorem MVal.copyMToSt_findM_field {H : HTy} (hp : Heap H) {s f : Name} {T U : T
     (r : HRef H (.struct s)) (hf : lookupBy f (structDef s) = some T) (p : Path T U) :
     (MVal.copyMToSt hp (T := .ref (.struct s)) r).findM (.field hf p) =
       (MVal.copyMToSt hp (hp.field r hf)).findM p := by
-  obtain ⟨hT, he⟩ := MFields.copyBelow_get 4 (MVal.copyBelow hp 4) (structDef s)
+  obtain ⟨hT, he⟩ := MFields.copyBelow_get Semantics.structRankCap
+    (MVal.copyBelow hp Semantics.structRankCap) (structDef s)
     (Nat.lt_of_lt_of_le (Semantics.structDef_rank_lt s) (tyRank_le_rankBound (.ref (.struct s))))
     (hp.get r) hf
-  show ((MFields.copyBelow 4 (MVal.copyBelow hp 4) (structDef s) _ (hp.get r)).get hf).findM p = _
+  show ((MFields.copyBelow Semantics.structRankCap (MVal.copyBelow hp Semantics.structRankCap)
+    (structDef s) _ (hp.get r)).get hf).findM p = _
   rw [he, MVal.copyBelow_eq]
   rfl
 

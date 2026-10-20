@@ -212,15 +212,326 @@ contracts (`Basket`, `Ledger`, `Pair`) agree on their members, so one
 table serves all of them; the two that did not agree are renamed in the
 port and noted at their arm. -/
 
+/-! ## Association-list helpers -/
+
+def lookupBy [DecidableEq κ] (k : κ) : List (κ × α) -> Option α
+  | [] => none
+  | (k', v) :: rest => if k = k' then some v else lookupBy k rest
+
+def setBy [DecidableEq κ] (k : κ) (v : α) : List (κ × α) -> List (κ × α)
+  | [] => [(k, v)]
+  | (k', v') :: rest =>
+      if k = k' then (k, v) :: rest else (k', v') :: setBy k v rest
+
+/-- No duplicate keys: a layout read through `lookupBy` has one entry per
+key (a contract's roots, a struct's members). -/
+def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
+  | [] => true
+  | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest
+
+/-! ### A contract's own structs: names that spell their members
+
+A contract's struct that is not the table's (`docs/semantic-gaps.md`,
+"Struct table") is the table's struct whose name spells its members:
+`Pair{a:uint;b:bool}`, each member's type as Solidity writes it without
+spaces (a narrow `uint8` as written, a table struct by its name, a contract
+struct by its own such name, `T[]`, `T[n]`, `mapping(K=>V)`).  The table's
+last arm decodes such a name (`structDefEnc`) and keeps the members only if
+they pass the table's certificates, so every theorem about the table holds
+of them by that check.  The decoder is structural (fuel: the name's length),
+so the kernel reduces it. -/
+
+namespace StructEnc
+
+def isIdChar (c : Char) : Bool := c.isAlphanum || c == '_' || c == '$'
+
+/-- The leading identifier and what follows it. -/
+def ident : List Char → List Char × List Char
+  | [] => ([], [])
+  | c :: cs =>
+    if isIdChar c then match ident cs with | (a, b) => (c :: a, b) else ([], c :: cs)
+
+/-- The leading digits and what follows them. -/
+def digits : List Char → List Char × List Char
+  | [] => ([], [])
+  | c :: cs =>
+    if c.isDigit then match digits cs with | (a, b) => (c :: a, b) else ([], c :: cs)
+
+def natOf (ds : List Char) : Nat := ds.foldl (fun n c => 10 * n + (c.toNat - 48)) 0
+
+/-- A member list up to the `}` that closes it at depth `d`, that `}`
+included, and what follows. -/
+def block : Nat → List Char → Option (List Char × List Char)
+  | _, [] => none
+  | d, c :: cs =>
+    let d' : Option Nat :=
+      if c == '{' then some (d + 1)
+      else if c == '}' then (match d with | 0 => none | e + 1 => some e)
+      else some d
+    match d' with
+    | none => some ([c], cs)
+    | some e =>
+      match block e cs with
+      | some (a, b) => some (c :: a, b)
+      | none => none
+
+/-- A primitive type by its name: `PrimTy.ofName?`'s, or a narrow `uintN`,
+`intN` (its width is `structWidths`'s). -/
+def primOf (n : List Char) : Option PrimTy :=
+  match PrimTy.ofName? (String.mk n) with
+  | some p => some p
+  | none =>
+    match n with
+    | 'u' :: 'i' :: 'n' :: 't' :: ds@(_ :: _) => if ds.all Char.isDigit then some .uint else none
+    | 'i' :: 'n' :: 't' :: ds@(_ :: _) => if ds.all Char.isDigit then some .int else none
+    | _ => none
+
+/-- The array suffixes `[]`, `[n]` after a type. -/
+def suffixes : Nat → Ty → List Char → Ty × List Char
+  | 0, T, cs => (T, cs)
+  | k + 1, T, '[' :: ']' :: cs => suffixes k (.ref (.array T)) cs
+  | k + 1, T, '[' :: cs =>
+    match digits cs with
+    | (ds@(_ :: _), ']' :: rest) => suffixes k (.ref (.fixed T (natOf ds))) rest
+    | _ => (T, '[' :: cs)
+  | _ + 1, T, cs => (T, cs)
+
+/-- A member's type, and what follows it. -/
+def parseTy : Nat → List Char → Option (Ty × List Char)
+  | 0, _ => none
+  | k + 1, 'm' :: 'a' :: 'p' :: 'p' :: 'i' :: 'n' :: 'g' :: '(' :: cs =>
+    match parseTy k cs with
+    | some (.prim K, '=' :: '>' :: cs') =>
+      match parseTy k cs' with
+      | some (V, ')' :: rest) => some (suffixes rest.length (.ref (.mapping K V)) rest)
+      | _ => none
+    | _ => none
+  | k + 1, cs =>
+    match ident cs with
+    | ([], _) => none
+    | (n, '{' :: rest) =>
+      match block 0 rest with
+      | some (body, rest') =>
+        some (suffixes rest'.length (.ref (.struct (String.mk (n ++ '{' :: body)))) rest')
+      | none => none
+    | (n, rest) =>
+      let T : Ty := match primOf n with
+        | some p => .prim p
+        | none => .ref (.struct (String.mk n))
+      some (suffixes rest.length T rest)
+
+/-- The members `f:T;…}`. -/
+def parseFields : Nat → List Char → Option (List (Name × Ty))
+  | 0, _ => none
+  | k + 1, cs =>
+    match ident cs with
+    | (f@(_ :: _), ':' :: rest) =>
+      match parseTy k rest with
+      | some (T, ['}']) => some [(String.mk f, T)]
+      | some (T, ';' :: rest') => (parseFields k rest').map ((String.mk f, T) :: ·)
+      | _ => none
+    | _ => none
+
+/-- The members a name spells, if it spells some: `S{…}`. -/
+def decode (s : Name) : Option (List (Name × Ty)) :=
+  match ident s.data with
+  | (_ :: _, '{' :: body) => parseFields body.length body
+  | _ => none
+
+end StructEnc
+
+/-- A name that spells its members (`StructEnc`). -/
+def isEnc (s : Name) : Bool := s.data.contains '{'
+
+/-- The name a struct is written by: the part before `{`. -/
+def structDisplay (s : Name) : Name := String.mk (s.data.takeWhile (· != '{'))
+
+/-- The bound on every struct's rank: the fuel of the defaults (`rankBound`). -/
+def structRankCap : Nat := 16
+
+/-- A spelled struct's rank: its braces and brackets, above the table's
+(at most 4), capped.  A nested struct's name is a part of it with fewer
+braces, a fixed-size array a bracket more. -/
+def encRank (s : Name) : Nat :=
+  min (4 + (s.data.filter fun c => c == '{' || c == '[').length) structRankCap
+
+/-! ### The `structDef` termination certificate
+
+`tyRank`-fuelled functions (`SVal.dflt`) and `tyHasMapping` expand a
+struct through the `structDef`
+table, not into a structurally smaller `Ty`, so neither is structural.
+They used to be fuelled at a hardcoded `8`, and fuel exhaustion was a
+*silent wrong answer* — `SVal.int 0` for a struct, `false` for "contains
+a mapping" — rather than an error.
+
+`structRank` replaces that magic number with a certificate: a strict
+upper bound on the rank of every field type of a struct.  A new struct
+whose fields outrank it fails `structDef_rank_lt`, so table drift is a
+build error instead of a wrong answer at depth 9. -/
+
+/-- Strict upper bound on the rank of a struct's field types. -/
+def structRank : Name -> Nat
+  | "Token" => 1
+  | "Account" => 2
+  | "Person" => 3
+  | "Wallet" => 1
+  | "Basket" => 1
+  | "Ledger" => 1
+  | "LedgerUse" => 2
+  | "TokenBucket" => 2
+  | "Toggle" => 1
+  | "FixedTriple" => 2
+  | "Pair" => 1
+  | "FileLevelPair" => 1
+  | "S" => 1
+  | "Sub" => 1
+  | "WithSub" => 2
+  | "Inner" => 1
+  | "Outer" => 2
+  | "Simple" => 1
+  | "WithArray" => 1
+  | "Triple" => 1
+  | "D" => 1
+  | "Nest" => 1
+  | "Packed" => 1
+  | s => encRank s
+
+/-- A type's rank: primitives 0, a struct its `structRank`, a dynamic array
+and a mapping the rank of the type they expand into, a fixed-size array one
+more (its layout recurses into its element, `Evm.sizeF`). -/
+def tyRank : Ty -> Nat
+  | Ty.prim _ => 0
+  | Ty.ref (RefTy.struct n) => structRank n
+  | Ty.ref (RefTy.array e) => tyRank e
+  | Ty.ref (RefTy.fixed e _) => tyRank e + 1
+  | Ty.ref (RefTy.mapping _ v) => tyRank v
+
+def fieldsRank : List (Name × Ty) -> Nat
+  | [] => 0
+  | (_, t) :: rest => max (tyRank t) (fieldsRank rest)
+
+theorem structRank_pos (n : Name) : 0 < structRank n := by
+  unfold structRank; split <;> first
+    | decide
+    | exact Nat.lt_min.mpr ⟨Nat.lt_of_lt_of_le (by decide) (Nat.le_add_right 4 _), by decide⟩
+
+end Semantics
+
+/-! ## Mapping-free types, well-formed defaults
+
+A storage copy of a type that holds a mapping is rejected by solc, and a
+fresh default must be well-formed.  `tyHasMapping` and `defaultOk` answer
+these by well-founded recursion through `structDef`, which the kernel
+cannot evaluate; `mapFree` and `defaultOkS` answer them structurally, so
+their proofs are `Eq.refl`, from a list of the table's structs checked once
+(`mapFree_structDef`), and for a spelled struct (`StructEnc`) from its
+members, which the table keeps only if they agree (`structDefEnc`). -/
+
+/-- The structs of the table that hold no mapping. -/
+def mapFreeStructs : List Name :=
+  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S",
+   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "D", "Nest",
+   "Packed"]
+
+/-- `T` holds no mapping, a struct as `st` says. -/
+def Ty.mapFreeWith (st : Name → Bool) : Ty → Bool
+  | .prim _ => true
+  | .ref (.mapping ..) => false
+  | .ref (.struct s) => st s
+  | .ref (.array e) => e.mapFreeWith st
+  | .ref (.fixed e _) => e.mapFreeWith st
+
+/-- A struct holds no mapping: one of `mapFreeStructs`, or a spelled one
+whose members hold none, with fuel `k`. -/
+def structMapFreeF : Nat → Name → Bool
+  | 0, s => s ∈ mapFreeStructs
+  | k + 1, s => s ∈ mapFreeStructs ||
+      (Semantics.isEnc s &&
+        match Semantics.StructEnc.decode s with
+        | some fs => fs.all fun f => f.2.mapFreeWith (structMapFreeF k)
+        | none => false)
+
+/-- A struct holds no mapping (fuel: its name's length, which bounds its
+nesting). -/
+def structMapFree (s : Name) : Bool := structMapFreeF s.length s
+
+/-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
+def Ty.mapFree : Ty → Bool
+  | .prim _ => true
+  | .ref (.mapping ..) => false
+  | .ref (.struct s) => structMapFree s
+  | .ref (.array e) => e.mapFree
+  | .ref (.fixed e _) => e.mapFree
+
+/-- The table's structs whose fresh default is well-formed: every struct of
+the table.  A struct with a repeated member name would not be (its second row
+has the wrong type for what the name looks up to), and solc refuses one
+(`refusedStructs`). -/
+def defaultOkStructs : List Name :=
+  ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
+   "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
+   "WithArray", "Triple", "D", "Nest", "Packed"]
+
+/-- A struct whose fresh default is well-formed: one of `defaultOkStructs`, or
+a spelled one (the table keeps its members only if they are distinct and
+well-formed, `structDefEnc`). -/
+def structOk (s : Name) : Bool := s ∈ defaultOkStructs || Semantics.isEnc s
+
+/-- `T`'s default is well-formed all the way down: a struct `structOk`
+admits, and arrays and mappings of such. -/
+def Ty.okDeep : Ty → Bool
+  | .prim _ => true
+  | .ref (.struct s) => structOk s
+  | .ref (.array E) => E.okDeep
+  | .ref (.fixed E _) => E.okDeep
+  | .ref (.mapping _ V) => V.okDeep
+
+namespace Semantics
+
+/-- The certificates a spelled struct's members must pass for the table to
+keep them: some members, of rank below the struct's, distinct, well-formed
+all the way down, and holding no mapping if the struct claims none. -/
+def encFieldsOk (s : Name) (fs : List (Name × Ty)) : Bool :=
+  !fs.isEmpty && decide (fieldsRank fs < structRank s) && nodupKeysB fs &&
+    fs.all (fun f => f.2.okDeep) && (!structMapFree s || fs.all fun f => f.2.mapFree)
+
+/-- A spelled struct's members, if they pass `encFieldsOk`; else none, as an
+unknown name has. -/
+def structDefEnc (s : Name) : List (Name × Ty) :=
+  match StructEnc.decode s with
+  | some fs => if encFieldsOk s fs then fs else []
+  | none => []
+
+/-- What `List.all` says of a member (without `funext`, which
+`List.all_eq_true` uses). -/
+theorem all_mem {p : α → Bool} : ∀ {l : List α}, l.all p = true → ∀ x ∈ l, p x = true
+  | [], _, _, hx => nomatch hx
+  | y :: l, h, x, hx => by
+    have h' : (p y && l.all p) = true := h
+    rw [Bool.and_eq_true] at h'
+    cases hx with
+    | head => exact h'.1
+    | tail _ hx => exact all_mem h'.2 x hx
+
+theorem structDefEnc_ok (s : Name) :
+    structDefEnc s = [] ∨ encFieldsOk s (structDefEnc s) = true := by
+  unfold structDefEnc
+  split
+  · split
+    · exact Or.inr (by assumption)
+    · exact Or.inl rfl
+  · exact Or.inl rfl
+
 /-- Struct definitions of the ported contracts.
 
-The trailing catch-all is forced — the key is a `Name`, so the match
-cannot be closed — and it is the one silent default left in this file: an
-unknown struct name has zero fields, so `SVal.dflt` builds an empty
-node for it instead of being `undef`.  Harmless while the contract corpus
-is closed; making it loud would mean an `Option` result threaded through
-`SVal.dflt`, `tyHasMapping` and the reachability proofs. -/
-def structDef : Name -> List (Name × Ty)
+The trailing catch-all reads a contract's own struct, whose name spells its
+members (`StructEnc`, `structDefEnc`).  Any other name has zero fields, so
+`SVal.dflt` builds an empty node for it instead of being `undef`: the
+elaborators refuse a type that names no struct (`unknownStructMsg`) and a
+declaration whose members the check would drop (`expandStructs`), so no
+program meets one. -/
+def structDef (s : Name) : List (Name × Ty) :=
+  match s with
   | "Token" => [("value", Ty.uint)]
   | "Account" =>
       [("balance", Ty.uint), ("token", Ty.ref (RefTy.struct "Token"))]
@@ -272,7 +583,57 @@ def structDef : Name -> List (Name × Ty)
   -- solc/open/NarrowNested.sol: narrow members (`structWidths`).
   | "Packed" =>
       [("a", Ty.uint), ("b", Ty.int), ("c", Ty.uint), ("xs", Ty.ref (RefTy.array Ty.uint))]
+  | _ => structDefEnc s
+
+namespace StructEnc
+
+/-- `l` split at `sep` where no bracket is open. -/
+def splitTop (sep : Char) : Nat → List Char → List Char → List (List Char)
+  | _, acc, [] => [acc.reverse]
+  | d, acc, c :: cs =>
+    if d == 0 && c == sep then acc.reverse :: splitTop sep 0 [] cs
+    else
+      let d' := if c == '{' || c == '(' || c == '[' then d + 1
+        else if c == '}' || c == ')' || c == ']' then d - 1 else d
+      splitTop sep d' (c :: acc) cs
+
+/-- The width of a narrow type's name, `uint8` is `8`. -/
+def narrowWidth (n : List Char) : Option Nat :=
+  let w (ds : List Char) : Option Nat :=
+    if !ds.isEmpty && ds.all Char.isDigit && natOf ds < 256 then some (natOf ds) else none
+  match n with
+  | 'u' :: 'i' :: 'n' :: 't' :: ds => w ds
+  | 'i' :: 'n' :: 't' :: ds => w ds
+  | _ => none
+
+/-- The narrow positions of a spelled type, keyed as `structWidths` keys them. -/
+def shapeOf : Nat → List Char → List (String × Nat)
+  | 0, _ => []
+  | k + 1, t =>
+    if t.getLast? == some ']' then
+      let inner := ((t.reverse.dropWhile (· != '[')).drop 1).reverse
+      (shapeOf k inner).map fun (p, n) => ("[]" ++ p, n)
+    else
+      match t with
+      | 'm' :: 'a' :: 'p' :: 'p' :: 'i' :: 'n' :: 'g' :: '(' :: cs =>
+        match splitTop '=' 0 [] cs.dropLast with
+        | [kt, '>' :: vt] =>
+          ((narrowWidth kt).toList.map fun n => ("{}", n)) ++
+            (shapeOf k vt).map fun (p, n) => ("[]" ++ p, n)
+        | _ => []
+      | _ => (narrowWidth t).toList.map fun n => ("", n)
+
+/-- A spelled struct's narrow members (`structWidths`). -/
+def widths (s : Name) : List (String × Nat) :=
+  match ident s.data with
+  | (_ :: _, '{' :: body) =>
+    (splitTop ';' 0 [] body.dropLast).flatMap fun m =>
+      match splitTop ':' 0 [] m with
+      | [f, t] => (shapeOf t.length t).map fun (p, n) => (String.mk f ++ p, n)
+      | _ => []
   | _ => []
+
+end StructEnc
 
 /-- The widths of a struct's narrow members, keyed by their path below the
 member as `Contract.widths` keys a state variable's (`expandStateTyW`):
@@ -281,7 +642,7 @@ at 16 and `xs[]` at 8.  Each such member is a `uint` or an `int` in
 `structDef`; the elaborator reads this table, nothing below it does. -/
 def structWidths : Name -> List (String × Nat)
   | "Packed" => [("a", 8), ("b", 16), ("xs[]", 8)]
-  | _ => []
+  | s => StructEnc.widths s
 
 /-- Struct declarations solc refuses ("Identifier already declared"): two
 members of one name.  None is in `structDef`, so every struct of the table
@@ -302,72 +663,21 @@ def unknownStructMsg (s : String) : String :=
   | some f => s!"struct {s}: identifier already declared: member {f}"
   | none => unknownTyMsg s
 
-/-! ### The `structDef` termination certificate
-
-`tyRank`-fuelled functions (`SVal.dflt`) and `tyHasMapping` expand a
-struct through the `structDef`
-table, not into a structurally smaller `Ty`, so neither is structural.
-They used to be fuelled at a hardcoded `8`, and fuel exhaustion was a
-*silent wrong answer* — `SVal.int 0` for a struct, `false` for "contains
-a mapping" — rather than an error.
-
-`structRank` replaces that magic number with a certificate: a strict
-upper bound on the rank of every field type of a struct.  A new struct
-whose fields outrank it fails `structDef_rank_lt`, so table drift is a
-build error instead of a wrong answer at depth 9. -/
-
-/-- Strict upper bound on the rank of a struct's field types. -/
-def structRank : Name -> Nat
-  | "Token" => 1
-  | "Account" => 2
-  | "Person" => 3
-  | "Wallet" => 1
-  | "Basket" => 1
-  | "Ledger" => 1
-  | "LedgerUse" => 2
-  | "TokenBucket" => 2
-  | "Toggle" => 1
-  | "FixedTriple" => 2
-  | "Pair" => 1
-  | "FileLevelPair" => 1
-  | "S" => 1
-  | "Sub" => 1
-  | "WithSub" => 2
-  | "Inner" => 1
-  | "Outer" => 2
-  | "Simple" => 1
-  | "WithArray" => 1
-  | "Triple" => 1
-  | "D" => 1
-  | "Nest" => 1
-  | "Packed" => 1
-  | _ => 1
-
-/-- A type's rank: primitives 0, a struct its `structRank`, a dynamic array
-and a mapping the rank of the type they expand into, a fixed-size array one
-more (its layout recurses into its element, `Evm.sizeF`). -/
-def tyRank : Ty -> Nat
-  | Ty.prim _ => 0
-  | Ty.ref (RefTy.struct n) => structRank n
-  | Ty.ref (RefTy.array e) => tyRank e
-  | Ty.ref (RefTy.fixed e _) => tyRank e + 1
-  | Ty.ref (RefTy.mapping _ v) => tyRank v
-
-def fieldsRank : List (Name × Ty) -> Nat
-  | [] => 0
-  | (_, t) :: rest => max (tyRank t) (fieldsRank rest)
-
-theorem structRank_pos (n : Name) : 0 < structRank n := by
-  unfold structRank; split <;> omega
 
 /-- **The certificate.** Every field of a struct outranks nothing: its
 rank is strictly below the struct's own.  Checked by `decide` against the
 concrete table, so adding a struct whose fields are too deep for its
-`structRank` row fails here. -/
+`structRank` row fails here; a spelled struct's members pass it by
+`structDefEnc`'s check. -/
 theorem structDef_rank_lt (n : Name) :
     fieldsRank (structDef n) < structRank n := by
   unfold structDef
   split
+  case h_24 =>
+    rcases structDefEnc_ok n with h | h
+    · rw [h]; exact structRank_pos _
+    · simp only [encFieldsOk, Bool.and_eq_true, decide_eq_true_eq] at h
+      exact h.1.1.1.2
   all_goals first
     | decide
     | simpa [fieldsRank] using structRank_pos _
@@ -407,23 +717,6 @@ decreasing_by
              · simp only [fieldsRank]; omega
              · simp; omega)
 end
-
-/-! ## Association-list helpers -/
-
-def lookupBy [DecidableEq κ] (k : κ) : List (κ × α) -> Option α
-  | [] => none
-  | (k', v) :: rest => if k = k' then some v else lookupBy k rest
-
-def setBy [DecidableEq κ] (k : κ) (v : α) : List (κ × α) -> List (κ × α)
-  | [] => [(k, v)]
-  | (k', v') :: rest =>
-      if k = k' then (k, v) :: rest else (k', v') :: setBy k v rest
-
-/-- No duplicate keys: a layout read through `lookupBy` has one entry per
-key (a contract's roots, a struct's members). -/
-def nodupKeysB [DecidableEq κ] : List (κ × α) -> Bool
-  | [] => true
-  | (k, _) :: rest => (lookupBy k rest).isNone && nodupKeysB rest
 
 /-! ### Association-list laws -/
 
@@ -470,12 +763,25 @@ theorem lookupBy_eq_some_mem [DecidableEq κ] {k : κ} {v : α} :
 
 end Semantics
 
+/-- A property of every struct's members: of the table's, checked once by
+`decide`, and of a spelled one's, from `structDefEnc`. -/
+theorem structDef_rec {P : Name → List (Name × Ty) → Prop} (s : Name)
+    (htab : ∀ t ∈ defaultOkStructs, P t (Semantics.structDef t))
+    (henc : P s (Semantics.structDefEnc s)) : P s (Semantics.structDef s) := by
+  unfold Semantics.structDef
+  split
+  case h_24 => exact henc
+  all_goals exact htab _ (by decide)
+
 /-- **Every struct of the table has distinct member names**: solc refuses
 a struct that repeats one (`refusedStructs`, decision 16), and so does the
 elaborator, so none is in `structDef`. -/
 theorem structDef_nodup (s : Name) : Semantics.nodupKeysB (Semantics.structDef s) = true := by
-  unfold Semantics.structDef
-  split <;> rfl
+  refine structDef_rec (P := fun _ fs => Semantics.nodupKeysB fs = true) s (by decide) ?_
+  rcases Semantics.structDefEnc_ok s with h | h
+  · rw [h]; rfl
+  · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
+    exact h.1.1.2
 
 mutual
   /-- The KeY sort of a static type, as `SolidityInfo.registerPredefinedTypes`
@@ -685,7 +991,7 @@ namespace Ty
 /-- The Solidity spelling: `uint`, `Person[]`, `mapping(uint => bool)`. -/
 def toStr : Ty → String
   | .prim p => p.toStr
-  | .ref (.struct s) => s
+  | .ref (.struct s) => Semantics.structDisplay s
   | .ref (.array T) => T.toStr ++ "[]"
   | .ref (.fixed T n) => s!"{T.toStr}[{n}]"
   | .ref (.mapping K V) => s!"mapping({K.toStr} => {V.toStr})"
@@ -694,52 +1000,41 @@ instance : ToString Ty := ⟨toStr⟩
 
 end Ty
 
-/-! ## Mapping-free types, well-formed defaults
+/-! ## Mapping-free types, well-formed defaults: the table's certificates -/
 
-A storage copy of a type that holds a mapping is rejected by solc, and a
-fresh default must be well-formed.  `tyHasMapping` and `defaultOk` answer
-these by well-founded recursion through `structDef`, which the kernel
-cannot evaluate; `mapFree` and `defaultOkS` answer them structurally, so
-their proofs are `Eq.refl`, from a list of the structs checked once
-(`mapFree_structDef` in `Semantics/Storage.lean`). -/
+/-- The members of a struct without mappings are without mappings too. -/
+theorem mapFree_structDef (s : Name) (hs : structMapFree s = true) :
+    ∀ fT ∈ Semantics.structDef s, fT.2.mapFree = true := by
+  refine structDef_rec (P := fun t fs => structMapFree t = true → ∀ fT ∈ fs, fT.2.mapFree = true)
+    s (by decide) ?_ hs
+  · intro hs
+    rcases Semantics.structDefEnc_ok s with h | h
+    · rw [h]; intro _ hm; cases hm
+    · simp only [Semantics.encFieldsOk, Bool.and_eq_true, Bool.or_eq_true, Bool.not_eq_true'] at h
+      rcases h.2 with h' | h'
+      · rw [hs] at h'; cases h'
+      · exact Semantics.all_mem h'
 
-/-- The structs of `structDef` that hold no mapping. -/
-def mapFreeStructs : List Name :=
-  ["Token", "Account", "Person", "Basket", "TokenBucket", "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S",
-   "Sub", "WithSub", "Inner", "Outer", "Simple", "WithArray", "Triple", "D", "Nest",
-   "Packed"]
-
-/-- `T` holds no mapping: `Person[]` does not, `mapping(uint => uint)` does. -/
-def Ty.mapFree : Ty → Bool
-  | .prim _ => true
-  | .ref (.mapping ..) => false
-  | .ref (.struct s) => s ∈ mapFreeStructs
-  | .ref (.array e) => e.mapFree
-  | .ref (.fixed e _) => e.mapFree
+/-- The members of a struct are well-formed all the way down. -/
+theorem struct_okDeep {s : Name} (_h : structOk s = true) :
+    ∀ nt ∈ Semantics.structDef s, nt.2.okDeep = true := by
+  refine structDef_rec (P := fun _ fs => ∀ nt ∈ fs, nt.2.okDeep = true) s (by decide) ?_
+  rcases Semantics.structDefEnc_ok s with h | h
+  · rw [h]; intro _ hm; cases hm
+  · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
+    exact Semantics.all_mem h.1.2
 
 /-- A member of a struct that holds no mapping holds none: what a memory
 path's type inherits from its receiver's (`MPath.memOk`). -/
 theorem Ty.mapFree_field {s f : Name} {T : Ty} (hs : (Ty.ref (.struct s)).mapFree = true)
     (h : Semantics.lookupBy f (Semantics.structDef s) = some T) : T.mapFree = true := by
-  have hall : ∀ s ∈ mapFreeStructs, ∀ p ∈ Semantics.structDef s, p.2.mapFree = true := by
-    decide
-  simp only [Ty.mapFree, decide_eq_true_eq] at hs
-  exact hall s hs (f, T) (Semantics.lookupBy_eq_some_mem h)
-
-/-- The structs whose fresh default is well-formed: every struct of the
-table.  A struct with a repeated member name would not be (its second row
-has the wrong type for what the name looks up to), and solc refuses one
-(`refusedStructs`). -/
-def defaultOkStructs : List Name :=
-  ["Token", "Account", "Person", "Wallet", "Basket", "Ledger", "LedgerUse", "TokenBucket",
-   "Toggle", "FixedTriple", "Pair", "FileLevelPair", "S", "Sub", "WithSub", "Inner", "Outer", "Simple",
-   "WithArray", "Triple", "D", "Nest", "Packed"]
+  exact mapFree_structDef s hs (f, T) (Semantics.lookupBy_eq_some_mem h)
 
 /-- `T`'s fresh default is well-formed: what `values.push();` and
 `Person memory m;` need. -/
 def Ty.defaultOkS : Ty → Bool
   | .prim _ => true
-  | .ref (.struct s) => s ∈ defaultOkStructs
+  | .ref (.struct s) => structOk s
   | .ref (.array _) => true
   | .ref (.fixed e _) => e.defaultOkS
   | .ref (.mapping _ v) => v.defaultOkS

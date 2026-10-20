@@ -149,8 +149,8 @@ def FunDecl.paramCtx (d : FunDecl) : Except String ECtx := do
   pure rows.flatten
 
 /-- A type as read, against the contract: a primitive type (`PrimTy.ofName?`),
-an enum of `C` (a `uint`, as a state variable of it is), a struct of
-`structDef`.  Any other name is refused (`unknownStructMsg`: a struct
+an enum of `C` (a `uint`, as a state variable of it is), a struct of `C`
+or of the table (`Contract.structName?`).  Any other name is refused (`unknownStructMsg`: a struct
 solc refuses, `refusedStructs`, or an unknown type). -/
 def elabTy (C : Contract) : RawTy → Except String Ty
   | .named s =>
@@ -159,8 +159,9 @@ def elabTy (C : Contract) : RawTy → Except String Ty
     | none =>
       if (lookupBy s C.enums).isSome then pure .uint
       else if (narrowTy? s).isSome then throw (narrowNestedMsg s)
-      else if (structDef s).isEmpty then throw (unknownStructMsg s)
-      else pure (.struct s)
+      else match C.structName? s with
+        | some e => pure (.struct e)
+        | none => throw (unknownStructMsg s)
   | .mapping k v => do
     match ← elabTy C k with
     | .prim p => pure (.mapping p (← elabTy C v))
@@ -1452,7 +1453,7 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   -- parameter's (`elabCallRet`); a struct constructor's arguments, each
   -- against its member's, by the member writes it is lowered to (`hoist`)
   | .call f as =>
-    if (lookupBy f C.funs).isNone && !(structDef f).isEmpty then
+    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
       as.findSome? (narrowWholeAt? Γ)
     else
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
@@ -1463,7 +1464,7 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | .ternary c a b =>
     ((narrowWholeUse? Γ c).orElse fun _ => narrowWholeUse? Γ a).orElse fun _ => narrowWholeUse? Γ b
   | .named f _ as =>
-    if (lookupBy f C.funs).isNone && !(structDef f).isEmpty then as.findSome? (narrowWholeAt? Γ)
+    if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then as.findSome? (narrowWholeAt? Γ)
     else as.findSome? (narrowWholeUse? Γ)
   | .tuple as => as.findSome? (narrowWholeUse? Γ)
   | .modular _ a b k => [a, b, k].findSome? (narrowWholeUse? Γ)
@@ -2446,7 +2447,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     | false => throw s!"++ or −− at {p.toStr}"
   | .named f ns args => do
     -- the members' order; an effect may not move
-    let flds := (structDef f).map (·.1)
+    let flds := (C.structFields f).map (·.1)
     if flds.isEmpty then throw s!"{f}(\{…}): {f} is not a struct or a function declared before this one"
     unless ns.length == flds.length && flds.all ns.contains do
       throw s!"{f}(\{…}) names each member of {f} once: {flds}"
@@ -2487,7 +2488,7 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
     -- a struct's constructor (no function of that name): a fresh memory
     -- object, its members written in order, after the arguments are evaluated
     -- left to right (`T memory mv1; mv1.a = x; mv1.b = y;`)
-    let flds := structDef f
+    let flds := C.structFields f
     if (← read).funs.all (·.1 != f) && !flds.isEmpty then
       let (P, args) ← hoistArgs args
       unless flds.length == args.length do

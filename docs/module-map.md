@@ -52,7 +52,7 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 |---|---|
 | `KeySort.lean` | solkey's sort lattice as one type. Imports nothing. |
 | `Eqns.lean` | `attribute [eqns l₁ … lₙ] f`: hand-named equation lemmas for a definition written with a recursor (irreducible, so `simp only [f]` rewrites constructor applications only; the kernel still reduces it). |
-| `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table, operators, `Var`; the association lists (`lookupBy`, `setBy`, `nodupKeysB`) and their laws (`lookupBy_setBy_self`, …, moved here at W10.5.6). |
+| `AST.lean` | Types (`PrimTy`/`Ty`/`RefTy`, `RefTy.fixed`), the struct table (a contract's own struct a name spelling its members, `StructEnc`, kept by `structDefEnc`'s check; `structDef_rec`), operators, `Var`; the association lists (`lookupBy`, `setBy`, `nodupKeysB`) and their laws (`lookupBy_setBy_self`, …, moved here at W10.5.6). |
 | `Syntax.lean` | The grammar behind `sol[C]{…}` and `contract!{…}` (`sol_stmt`, `sol_expr`, `sol_ty`; the raw syntax `RawStmt`, `RawExpr`), `Contract`/`FunDecl`, the index types of the typed syntax (`ArrTy`, `IndexTy`), and the quoters' helpers (`rflTrue`, `rflSome`, …); the typed syntax is `Syntax/Scoped.lean`'s. |
 | `Scope.lean` | The scoped syntax's contexts: `LTy`, `Ctx := List LTy`, positions `Idx`, suffixes `Ext` (scope ends), thinnings `Thin` (weakening), `Binders`. |
 | `Syntax/Scoped.lean` | The typed syntax scoped (M2 of `docs/intrinsic.md`): `Stmt C Γ Γ'`/`Prog C Γ Γ'` over `Idx`, scoped branches and blocks, calls closed over their frame (`Args`, `CallRet`), the printers (names beside the context) and `Stmt.wk`.  What every semantics, rule and proof reads; the elaborator emits it (`Syntax/Elab.lean`) and the printers read it (`Calculus/PrintStmt.lean`). |
@@ -80,6 +80,7 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 | `Semantics/RevertOnly.lean` | Exchanging pure argument evaluation (`TRes.RevertOnly`: values, reference paths and call arguments return or revert) preserves exact failure priority. |
 | `Examples/Tactics/ReferenceParameters.lean` | Storage and memory arguments, shared aliases, copies, failure order and reference contracts. |
 | `Examples/Tactics/ArrayShapeCopy.lean` | Fixed-to-dynamic and shorter-to-longer fixed storage snapshots, cleared tails, retained destination histories, composed typed-term and source-printer roundtrips. |
+| `Examples/Tactics/OwnStructs.lean` | A contract's own structs (`contract!{ struct S { … } }`): nested, with a mapping member, in an array, built by literals; their names in the table; refused duplicates and self-containment. |
 | `Examples/Tactics/Inheritance.lean` | Kernel-checked diamond initialization with virtual dispatch, base constructors in solc's legacy order, `super` chains, and rejection of malformed C3 metadata. |
 | `Calculus/RefInputs.lean` | Initialized reference inputs as nonallocating diamond identity updates; source obligations exclude unset hidden references. |
 | `Semantics/RunWk.lean` | A weakened program runs as the program, typed (`Stmt.run_wk`, `Prog.run_wk`, W1): `τ.lift h d` (`TEnv.put`/`off`/`thin`), the background weakened along the heap a run grows (`TEnv.wk`, `offWk`), `TWkRel`; per-step lemmas (`TRun.*_wk`); frames run (`Frames.run`); loops on `TLoop`: `run_map`, `run_unfold`, `run_variant`. |
@@ -328,7 +329,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 
 | Module | What it defines |
 |---|---|
-| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; the struct table checked member by member; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`). |
+| `Frontend/SolcJson.lean` | solc's JSON AST (`Lean.Json`) printed as `sol` text per function: `readContract`, `Gap`, `Tag`; a struct the table's when its members are, else the contract's own, declared (`readStructs`, `ownStructMembers`), struct constructors printed; the functions called by name as `contract!` members, callees first; the constructor (`ctor`, a root of the calls) and the state variables' initializers (`initMembers`, `initGap`). |
 | `Frontend/Testing.lean` | `#solkey_test`: kernel-checked function and specification tests with checkpointed JSON results; `scripts/test-solidity.mjs` compiles and tests `.sol` files/directories ([solidity-testing.md](solidity-testing.md)). |
 | `Frontend/Import.lean` | `solc_import "f.json" hash 0x… as N renaming A => B`: `N : Contract`, `N.f : Prog N Γ Γ'` per function (read in its parameters' context, quoted hash-consed and checked by the kernel), `N.constructor : Prog N Γ Γ'` (a deployment, `constructor(x̄);`), `N.report : List ImportRow`; one `evalExpr`. Large contract tables compile in list segments, with a kernel-checked equality to the original literal. |
 | `Solkey/TestSuite.lean` | `Solkey.TestSuite`, its 551 function rows and pinned import report. |

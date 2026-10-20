@@ -656,22 +656,22 @@ def SVal.dfltBelow : (k : Nat) → (T : Ty) → tyRank T < k → SVal T
   | k + 1, T, h => SVal.dfltAt k (SVal.dfltBelow k) T h
 
 /-- A bound on `tyRank` that reads no struct's name (every `structRank` is at
-most 4), so the kernel computes the fuel of `SVal.dflt` without matching a
+most `structRankCap`), so the kernel computes the fuel of `SVal.dflt` without matching a
 string: `tyRank` itself costs a `structRank` lookup per default. -/
 def rankBound : Ty → Nat
   | .prim _ => 0
-  | .ref (.struct _) => 4
+  | .ref (.struct _) => Semantics.structRankCap
   | .ref (.array E) => rankBound E
   | .ref (.fixed E _) => rankBound E + 1
   | .ref (.mapping _ V) => rankBound V
 
-theorem structRank_le_four (s : Name) : structRank s ≤ 4 := by
+theorem structRank_le_cap (s : Name) : structRank s ≤ Semantics.structRankCap := by
   unfold structRank
-  split <;> decide
+  split <;> first | decide | exact Nat.min_le_right _ _
 
 theorem tyRank_le_rankBound : (T : Ty) → tyRank T ≤ rankBound T
   | .prim _ => Nat.le_refl _
-  | .ref (.struct s) => structRank_le_four s
+  | .ref (.struct s) => structRank_le_cap s
   | .ref (.array E) => tyRank_le_rankBound E
   | .ref (.fixed E _) => Nat.succ_le_succ (tyRank_le_rankBound E)
   | .ref (.mapping _ V) => tyRank_le_rankBound V
@@ -2195,10 +2195,6 @@ theorem Storage.pushPlace_len {C : Contract} {E : Ty} {st st' : Storage C}
   · simp only [Storage.len, hf, Option.bind_eq_bind, Option.bind_some, SVal.view_array]
   · simp only [lenU, List.length_append, List.length_singleton, SVec.length_toList]
     omega
-
-/-- The members of a struct without mappings are without mappings too. -/
-theorem mapFree_structDef : ∀ s ∈ mapFreeStructs, ∀ fT ∈ structDef s, fT.2.mapFree = true := by
-  decide
 
 /-! ## The stores
 
