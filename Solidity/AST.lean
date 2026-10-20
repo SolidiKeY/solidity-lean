@@ -411,7 +411,9 @@ def fieldsRank : List (Name × Ty) -> Nat
   | (_, t) :: rest => max (tyRank t) (fieldsRank rest)
 
 theorem structRank_pos (n : Name) : 0 < structRank n := by
-  unfold structRank; split <;> first | omega | (simp only [encRank, structRankCap]; omega)
+  unfold structRank; split <;> first
+    | decide
+    | exact Nat.lt_min.mpr ⟨Nat.lt_of_lt_of_le (by decide) (Nat.le_add_right 4 _), by decide⟩
 
 end Semantics
 
@@ -500,6 +502,17 @@ def structDefEnc (s : Name) : List (Name × Ty) :=
   | some fs => if encFieldsOk s fs then fs else []
   | none => []
 
+/-- What `List.all` says of a member (without `funext`, which
+`List.all_eq_true` uses). -/
+theorem all_mem {p : α → Bool} : ∀ {l : List α}, l.all p = true → ∀ x ∈ l, p x = true
+  | [], _, _, hx => nomatch hx
+  | y :: l, h, x, hx => by
+    have h' : (p y && l.all p) = true := h
+    rw [Bool.and_eq_true] at h'
+    cases hx with
+    | head => exact h'.1
+    | tail _ hx => exact all_mem h'.2 x hx
+
 theorem structDefEnc_ok (s : Name) :
     structDefEnc s = [] ∨ encFieldsOk s (structDefEnc s) = true := by
   unfold structDefEnc
@@ -511,13 +524,14 @@ theorem structDefEnc_ok (s : Name) :
 
 /-- Struct definitions of the ported contracts.
 
-The trailing catch-all is forced — the key is a `Name`, so the match
-cannot be closed — and it is the one silent default left in this file: an
-unknown struct name has zero fields, so `SVal.dflt` builds an empty
-node for it instead of being `undef`.  Harmless while the contract corpus
-is closed; making it loud would mean an `Option` result threaded through
-`SVal.dflt`, `tyHasMapping` and the reachability proofs. -/
-def structDef : Name -> List (Name × Ty)
+The trailing catch-all reads a contract's own struct, whose name spells its
+members (`StructEnc`, `structDefEnc`).  Any other name has zero fields, so
+`SVal.dflt` builds an empty node for it instead of being `undef`: the
+elaborators refuse a type that names no struct (`unknownStructMsg`) and a
+declaration whose members the check would drop (`expandStructs`), so no
+program meets one. -/
+def structDef (s : Name) : List (Name × Ty) :=
+  match s with
   | "Token" => [("value", Ty.uint)]
   | "Account" =>
       [("balance", Ty.uint), ("token", Ty.ref (RefTy.struct "Token"))]
@@ -569,7 +583,7 @@ def structDef : Name -> List (Name × Ty)
   -- solc/open/NarrowNested.sol: narrow members (`structWidths`).
   | "Packed" =>
       [("a", Ty.uint), ("b", Ty.int), ("c", Ty.uint), ("xs", Ty.ref (RefTy.array Ty.uint))]
-  | s => structDefEnc s
+  | _ => structDefEnc s
 
 namespace StructEnc
 
@@ -749,18 +763,25 @@ theorem lookupBy_eq_some_mem [DecidableEq κ] {k : κ} {v : α} :
 
 end Semantics
 
+/-- A property of every struct's members: of the table's, checked once by
+`decide`, and of a spelled one's, from `structDefEnc`. -/
+theorem structDef_rec {P : Name → List (Name × Ty) → Prop} (s : Name)
+    (htab : ∀ t ∈ defaultOkStructs, P t (Semantics.structDef t))
+    (henc : P s (Semantics.structDefEnc s)) : P s (Semantics.structDef s) := by
+  unfold Semantics.structDef
+  split
+  case h_24 => exact henc
+  all_goals exact htab _ (by decide)
+
 /-- **Every struct of the table has distinct member names**: solc refuses
 a struct that repeats one (`refusedStructs`, decision 16), and so does the
 elaborator, so none is in `structDef`. -/
 theorem structDef_nodup (s : Name) : Semantics.nodupKeysB (Semantics.structDef s) = true := by
-  unfold Semantics.structDef
-  split
-  case h_24 =>
-    rcases Semantics.structDefEnc_ok s with h | h
-    · rw [h]; rfl
-    · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
-      exact h.1.1.2
-  all_goals rfl
+  refine structDef_rec (P := fun _ fs => Semantics.nodupKeysB fs = true) s (by decide) ?_
+  rcases Semantics.structDefEnc_ok s with h | h
+  · rw [h]; rfl
+  · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
+    exact h.1.1.2
 
 mutual
   /-- The KeY sort of a static type, as `SolidityInfo.registerPredefinedTypes`
@@ -984,31 +1005,24 @@ end Ty
 /-- The members of a struct without mappings are without mappings too. -/
 theorem mapFree_structDef (s : Name) (hs : structMapFree s = true) :
     ∀ fT ∈ Semantics.structDef s, fT.2.mapFree = true := by
-  revert hs
-  unfold Semantics.structDef
-  split
-  case h_24 =>
-    intro hs
+  refine structDef_rec (P := fun t fs => structMapFree t = true → ∀ fT ∈ fs, fT.2.mapFree = true)
+    s (by decide) ?_ hs
+  · intro hs
     rcases Semantics.structDefEnc_ok s with h | h
     · rw [h]; intro _ hm; cases hm
-    · simp only [Semantics.encFieldsOk, Bool.and_eq_true, Bool.or_eq_true, Bool.not_eq_true',
-        List.all_eq_true] at h
+    · simp only [Semantics.encFieldsOk, Bool.and_eq_true, Bool.or_eq_true, Bool.not_eq_true'] at h
       rcases h.2 with h' | h'
       · rw [hs] at h'; cases h'
-      · exact h'
-  all_goals decide
+      · exact Semantics.all_mem h'
 
 /-- The members of a struct are well-formed all the way down. -/
 theorem struct_okDeep {s : Name} (_h : structOk s = true) :
     ∀ nt ∈ Semantics.structDef s, nt.2.okDeep = true := by
-  unfold Semantics.structDef
-  split
-  case h_24 =>
-    rcases Semantics.structDefEnc_ok s with h | h
-    · rw [h]; intro _ hm; cases hm
-    · simp only [Semantics.encFieldsOk, Bool.and_eq_true, List.all_eq_true] at h
-      exact h.1.2
-  all_goals decide
+  refine structDef_rec (P := fun _ fs => ∀ nt ∈ fs, nt.2.okDeep = true) s (by decide) ?_
+  rcases Semantics.structDefEnc_ok s with h | h
+  · rw [h]; intro _ hm; cases hm
+  · simp only [Semantics.encFieldsOk, Bool.and_eq_true] at h
+    exact Semantics.all_mem h.1.2
 
 /-- A member of a struct that holds no mapping holds none: what a memory
 path's type inherits from its receiver's (`MPath.memOk`). -/
