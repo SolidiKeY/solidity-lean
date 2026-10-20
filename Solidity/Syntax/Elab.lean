@@ -159,7 +159,7 @@ def elabTy (C : Contract) : RawTy → Except String Ty
     | some p => pure (.prim p)
     | none =>
       if (lookupBy s C.enums).isSome then pure .uint
-      else if (narrowTy? s).isSome || (bytesTy? s).isSome || dynBytesTy s then
+      else if (narrowTy? s).isSome || (bytesTy? s).isSome || dynBytesTy s || fnTy? s then
         throw (narrowNestedMsg s)
       else match C.structName? s with
         | some e => pure (.struct e)
@@ -178,12 +178,16 @@ def elabDeclTy (C : Contract) : RawTy → Except String (Ty × Nat)
     match narrowTy? s, bytesTy? s with
     | some (p, n), _ => pure (.prim p, n)
     | none, some n => pure (.uint, 8 * n)
-    | none, none => do pure (← elabTy C (.named s), 256)
+    | none, none =>
+      -- a function type: its tag, a `uint` ("Function types", `Syntax.lean`)
+      if fnTy? s then pure (.uint, 256) else do pure (← elabTy C (.named s), 256)
   | T => do pure (← elabTy C T, 256)
 
-/-- The marker of a value type: `[("#bytes", N)]` for a `bytesN`. -/
+/-- The marker of a value type: `[("#bytes", N)]` for a `bytesN`,
+`[("#function(…)…", 0)]` for a function type. -/
 def bytesRowsOf (_C : Contract) : RawTy → Except String (List (String × Nat))
-  | .named s => pure ((bytesTy? s).toList.map fun n => ("#bytes", n))
+  | .named s =>
+    if fnTy? s then pure [("#" ++ s, 0)] else pure ((bytesTy? s).toList.map fun n => ("#bytes", n))
   | _ => pure []
 
 /-- A local's or a `new`'s type, where a narrow type may stand inside it: its
@@ -404,12 +408,14 @@ def RawExpr.hasCall : RawExpr → Bool :=
 
 /-- Whether the name `x` occurs in the expression. -/
 def RawExpr.mentions (x : String) : RawExpr → Bool :=
-  RawExpr.any fun | .name y => y == x | _ => false
+  RawExpr.any fun | .name y | .call y _ => y == x | _ => false
 
 /-- `e` with the names `ρ` maps renamed (a callee's locals, made fresh). -/
 def RawExpr.rename (ρ : List (String × String)) (e : RawExpr) : RawExpr :=
   Id.run <| e.mapM fun
     | .name x => .name ((lookupBy x ρ).getD x)
+    -- a call through a local of a function type (`fnDispatch`)
+    | .call g as => .call ((lookupBy g ρ).getD g) as
     | e => e
 
 /-- A quantified clause with the names of `ρ` renamed, but not below a
@@ -979,6 +985,93 @@ def enumLit? (Γ : NCtx) : RawExpr → String → Option Nat
     else none
   | _, _ => none
 
+/-! ### Function values
+
+A function's value is its tag, its position in `C.funs` from `1`
+("Function types", `Syntax.lean`); a call through a value is a dispatch over
+the functions of its signature (`fnDispatch`). -/
+
+/-- The functions of `C` named as a value somewhere in its code (not as a
+callee): only these may be reached through a value taken inside `C`. -/
+def fnTaken : List String :=
+  let stmts : List RawStmt := C.funs.flatMap (fun (_, d) => d.body ++ d.mods.flatMap (·.body)) ++
+    (C.ctor.map (·.body)).getD []
+  let es : List RawExpr := C.funs.flatMap (fun (_, d) => d.mods.flatMap (·.args)) ++
+    C.inits.map (·.2)
+  let ns := RawStmt.namesList stmts ++ es.flatMap RawExpr.names
+  (C.funs.map (·.1)).filter ns.contains
+
+/-- Whether the function `d` (its modifiers too) calls through a name that is
+not a function: a parameter, a local or a state variable, possibly of a
+function type. -/
+def callsThroughValue (d : FunDecl) : Bool :=
+  let own := d.params.map (·.1) ++ RawStmt.declsList d.body ++ C.vars.map (·.1) ++
+    d.mods.flatMap fun m => m.params.map (·.1) ++ RawStmt.declsList m.body
+  (FunDecl.callees d).any fun h => own.contains h && !C.funs.any (·.1 == h)
+
+/-- Whether a value of the function `g` may exist: `g` is named as a value
+in the contract, or no function declared before it (nor it) calls through a
+value (`fnTag` refuses `g`'s value elsewhere). -/
+def fnReachable (g : String) : Bool :=
+  (fnTaken C).contains g ||
+    match C.funs.findIdx? (·.1 == g) with
+    | some i => !(C.funs.take (i + 1)).any (callsThroughValue C ·.2)
+    | none => false
+
+/-- The tag of the function `g`.  One named as a value only outside `C`'s code
+(a `sol{ … }` program) is refused when a function declared before it, or it,
+calls through a value: that function's dispatch leaves `g` out
+(`fnDispatch`), as `g` is not declared before it. -/
+def fnTag (g : String) : Except String (Option Nat) := do
+  let some i := C.funs.findIdx? (·.1 == g) | return none
+  unless fnReachable C g do
+    throw s!"{g} is taken as a value only outside the contract's functions, and a function \
+        declared before it calls through a function value: name it as a value in the contract"
+  return some (i + 1)
+
+/-- The spelling of a function type at the key `k` of the width table `ws`
+(its marker row, `valueRows?`). -/
+def fnRow? (ws : List (String × Nat)) (k : String) : Option String :=
+  ws.findSome? fun (k', _) =>
+    if k'.startsWith (k ++ "#function(") then some (k'.drop (k.length + 1)) else none
+
+/-- The function type of the value local `x`: its marker, recorded after it
+(`declareShape`). -/
+def localFn? (Γ : ECtx) (x : Name) : Option String := do
+  let i ← Γ.findIdx? (·.1 == x)
+  let j ← Γ.findIdx? (·.1 == "#" ++ x)
+  guard (j < i)
+  match Γ[j]? with
+  | some (_, .shape ws) => fnRow? ws ""
+  | _ => none
+
+/-- The function type of the name `h` (a value local, else a state
+variable), as `canonFnTy` reads it. -/
+def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
+  (match lookupBy h Γ with
+    | some (.val ..) => localFn? Γ h
+    | some _ => none
+    | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
+
+/-- The signature of the function `d`, as a function type spelled
+(`canonFnTy`); none if a parameter or a return is a reference. -/
+def FunDecl.sigTy? (d : FunDecl) : Option String := do
+  let comp (k : String) : Ty → Option String
+    | .prim p => some ((fnRow? d.widths k).getD (declTyName d.widths k p))
+    | .ref _ => none
+  let ps ← d.params.mapM fun (n, T) => comp n T
+  let rs ← d.rets.mapM fun (n, T) => comp n T
+  pure (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1) (fnTyStr ps rs false))
+
+/-- A function type's component as a value: its primitive type and width. -/
+def fnCompTy? (c : String) : Option (PrimTy × Nat) :=
+  if fnTy? c then some (.uint, 256) else
+  match narrowTy? c, bytesTy? c, PrimTy.ofName? c with
+  | some t, _, _ => some t
+  | none, some n, _ => some (.uint, 8 * n)
+  | none, none, some p => some (p, 256)
+  | none, none, none => if (lookupBy c C.enums).isSome then some (.uint, 256) else none
+
 mutual
 
 def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
@@ -998,7 +1091,11 @@ def synth (Γ : NCtx) : RawExpr → Except String (TExpr C Γ.ctx)
     | none =>
       match hr : C.rootType x with
       | some T => pure (.path T (.loc (.root x hr)))
-      | none => throw s!"unknown name {x}"
+      | none => do
+        -- a function as a value: its tag
+        match ← fnTag C x with
+        | some t => return .val .uint (.simple (← litAt C Γ .uint t))
+        | none => throw s!"unknown name {x}"
   | .field e f => do
     if let some i := enumLit? C Γ e f then return .val .uint (.simple (← litAt C Γ .uint i))
     match ← synth Γ e with
@@ -2707,6 +2804,18 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       let Q ← elabStmtsP (.declMemory (.named f) x none ::
         (flds.zip args).map fun ((g, _), a) => .assign (.field (.name x) g) a)
       return (P ++ Q, .name x)
+    -- a call through a function value, into a fresh local (`fnDispatch`)
+    if (← read).funs.all (·.1 != f) then
+      if let some ty := fnTyOf? C (← ctx) f then
+        let (P, args) ← hoistArgs args
+        let some (_, [r], _) := fnParts? ty | throw s!"{f}(…) returns one value where a value stands"
+        let some (p, n) := fnCompTy? C r | throw s!"{f}(…) returns a {r}, not a value type"
+        let Γ ← nctx
+        let x ← freshCapture "se"
+        let Q ← elabCall f args (some (x, p)) n (resNew := true)
+        declare C (toString x) (.val p n)
+        declareShape (toString x) (← ElabM.lift (bytesRowsOf C (.named r)))
+        return (P ++ [.of Γ (.declLocal p x none)] ++ Q, .name (toString x))
     -- a call inside an expression runs before the statement, into a fresh local
     let (P, args) ← hoistCallArgs f args
     let some (_, d) := (← read).funs.find? (·.1 == f) | throw s!"{f} is not a function declared before this one"
@@ -2868,6 +2977,51 @@ partial def hoistCallArgs (f : String) (args : List RawExpr) :
     prepared := prepared ++ [a]
   pure (P, prepared)
 
+/-- **A call through a function value** `h(a)`, `h` of the function type
+`ty` (`fnTyOf?`): the arguments that are not pure captured, left to right,
+then a dispatch over the functions of `ty`, `if (h == 1) { r = g₁(a); } else
+if … else { revert(); }` (`fnTag`): calling an unassigned value is solc's
+`Panic(0x51)`, which the model reads as a revert, as it reads an index out
+of range's `Panic(0x32)` (`Storage.checkIndex`, the solkey reading).  A function
+of `ty` this one may not call (declared after it) is refused when it is named
+as a value in the contract; one that is not cannot reach here (`fnTag`).
+With `resNew`, `res` is declared by the statement before (`elabCallRet`). -/
+partial def fnDispatch (h ty : String) (args : List RawExpr) (res : Option (Var × PrimTy))
+    (resW : Nat) (resNew : Bool) : ElabM (SProg C) := do
+  let some (ps, _, ext) := fnParts? ty | throw s!"{h}: the function type {ty}"
+  if ext then
+    throw s!"{h}(…): a call through an external function value is not modelled \
+      (docs/semantic-gaps.md, \"Function types\")"
+  unless ps.length == args.length do
+    throw s!"{h} takes {ps.length} arguments, not {args.length}"
+  let scope := (← read).funs
+  let taken := fnTaken C
+  let mut cands : List (String × Nat) := []
+  for ((g, d), i) in C.funs.zipIdx do
+    if FunDecl.sigTy? C d == some ty && fnReachable C g then
+      if scope.any (·.1 == g) then cands := cands ++ [(g, i + 1)]
+      else if taken.contains g then
+        throw s!"{h}(…) may call {g}, which is not declared before this function: \
+          declare the functions of type {ty} first"
+  let mut pre : List RawStmt := []
+  let mut as : List RawExpr := []
+  for (a, c) in args.zip ps do
+    if a.isPure then as := as ++ [a] else
+      let y := toString (← freshCapture "se")
+      pre := pre ++ [.decl (.named c) y (some a)]
+      as := as ++ [.name y]
+  let call (g : String) : RawStmt := match res with
+    | some (x, _) => .assign (.name (toString x)) (.call g as)
+    | none => .call (.name g) as
+  let disp := cands.foldr (fun (g, t) els =>
+    [RawStmt.ite (.binop .eqB (.name h) (.num t)) [call g] els]) [RawStmt.revert]
+  let (Γ0, _) ← get
+  if resNew then
+    if let some (x, p) := res then declare C (toString x) (.val p resW)
+  let P ← elabBranch (pre ++ disp)
+  modify fun (_, k) => (Γ0, k)
+  pure P
+
 /-- **A call, inlined** (KeY's `FunctionBodyStatement`, then its body): `f`
 is found among the functions the scope may call, its arguments are checked
 at its parameters' types in the caller's scope, and its body is elaborated in
@@ -2967,6 +3121,11 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
     (selfFrame : Bool := false) :
     ElabM (SProg C × Option (NCtx × RefTy × Var × Bool) × List (PrimTy × Var × Nat)) := do
   let funs := (← read).funs
+  -- a call through a function value (`fnDispatch`)
+  if !ctor && funs.all (·.1 != f) then
+    if let some ty := fnTyOf? C (← ctx) f then
+      if targets then throw s!"{f}(…): a call through a function value in a tuple assignment"
+      return (← fnDispatch f ty args res resW resNew, none, [])
   let selfFrame := selfFrame || (← read).selfFrame
   -- a call of a recursive function whose body is being elaborated: the frame
   -- below, its names the frame's (`ElabScope.recs`)

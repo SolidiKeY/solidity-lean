@@ -478,9 +478,11 @@ def bytesTy? (s : String) : Option Nat :=
 def dynBytesTy (s : String) : Bool := s == "bytes" || s == "string"
 
 /-- The width rows a value type adds at its own position (`""`): a narrow
-integer's width, a `bytesN`'s width below 256 bits and its marker; with the
-primitive type it is read as. -/
+integer's width, a `bytesN`'s width below 256 bits and its marker, a function
+type's marker ("Function types" below); with the primitive type it is read
+as. -/
 def valueRows? (s : String) : Option (PrimTy × List (String × Nat)) :=
+  if s.startsWith "function(" then some (.uint, [("#" ++ s, 0)]) else
   match narrowTy? s, bytesTy? s with
   | some (p, n), _ => some (p, [("", n)])
   | none, some n => some (.uint, (if n < 32 then [("", 8 * n)] else []) ++ [("#bytes", n)])
@@ -518,6 +520,65 @@ def hexBytes? (s : String) : Option (List Nat) :=
     pairs ds
   | none => none
 
+/-! ## Function types
+
+An internal function type (`function (uint) pure returns (uint)`) is not a
+type of the syntax either (`docs/semantic-gaps.md`, "Function types"): a
+value of one is a `uint`, the tag of a function of the contract (its
+position in `Contract.funs`, from `1`; `0` is unassigned), and a call through
+it is a dispatch over the contract's functions of its signature
+(`fnDispatch`, `Syntax/Elab.lean`).  Its spelling, `function(uint)returns(uint)`
+(`fnTyStr`), is the marker row beside the `uint`: `k#function(uint)returns(uint)
+↦ 0` (`valueRows?`), as a `bytesN`'s is `k#bytes ↦ N`. -/
+
+/-- A function type's spelling (`fnTyStr`). -/
+def fnTy? (s : String) : Bool := s.startsWith "function("
+
+/-- `l` split at the commas where no bracket is open. -/
+def splitTopCommas (s : String) : List String :=
+  if s.isEmpty then [] else
+    (Semantics.StructEnc.splitTop ',' 0 [] s.toList).map String.mk
+
+/-- The spelling of a function type of these parameters and returns. -/
+def fnTyStr (ps rs : List String) (ext : Bool) : String :=
+  s!"function({",".intercalate ps})" ++ (if ext then "external" else "") ++
+    (if rs.isEmpty then "" else s!"returns({",".intercalate rs})")
+
+/-- A function type's parameters, returns, and whether it is `external`. -/
+def fnParts? (s : String) : Option (List String × List String × Bool) := do
+  guard (fnTy? s)
+  let cs := (s.drop 9).toList
+  -- the `)` that closes the parameters
+  let rec close : Nat → List Char → List Char → Option (List Char × List Char)
+    | _, _, [] => none
+    | d, acc, c :: cs =>
+      if c == ')' && d == 0 then some (acc.reverse, cs)
+      else
+        let d' := if c == '(' || c == '[' then d + 1 else if c == ')' || c == ']' then d - 1 else d
+        close d' (c :: acc) cs
+  let (ps, rest) ← close 0 [] cs
+  let rest := String.mk rest
+  let ext := rest.startsWith "external"
+  let rest := if ext then rest.drop 8 else rest
+  let rs ← if rest.isEmpty then pure []
+    else if rest.startsWith "returns(" && rest.endsWith ")" then
+      pure (splitTopCommas ((rest.drop 8).dropRight 1))
+    else none
+  pure (splitTopCommas (String.mk ps), rs, ext)
+
+/-- A function type's spelling with each component as the elaborator reads
+it: `uint256` and `address` are `uint`, an enum of `enums` is `uint`. -/
+partial def canonFnTy (enums : List String) (s : String) : String :=
+  match fnParts? s with
+  | some (ps, rs, ext) =>
+    let comp (c : String) : String :=
+      if fnTy? c then canonFnTy enums c else
+      match PrimTy.ofName? c with
+      | some p => p.toStr
+      | none => if enums.contains c then "uint" else c
+    fnTyStr (ps.map comp) (rs.map comp) ext
+  | none => s
+
 /-- Why a narrow type is refused where it stands. -/
 def narrowNestedMsg (s : String) : String :=
   s!"{s}: a narrow integer type stands in the type of a local, a parameter, a return value, " ++
@@ -531,6 +592,12 @@ syntax:max sol_ty:max "[" "]" : sol_ty
 syntax:max sol_ty:max "[" num "]" : sol_ty
 /-- `address payable`: an `address`, read as `uint`. -/
 syntax:max &"address" &"payable" : sol_ty
+/-- `function (uint) pure returns (uint)`: a function type, read as the
+`uint` tag of a function (`fnTy?`, "Function types" below); its mutability
+is dropped. -/
+syntax:max (name := solFnTy) &"function" "(" sol_ty,* ")"
+  (ppSpace (&"internal" <|> &"external" <|> &"pure" <|> &"view" <|> &"payable"))*
+  (ppSpace &"returns" " (" sol_ty,* ")")? : sol_ty
 
 /-- `ty!(mapping(uint => Person))`: a type written as Solidity does. -/
 syntax "ty!(" sol_ty ")" : term
@@ -944,7 +1011,30 @@ def nameParts : Lean.Name → List String
 section Expand
 open Lean
 
-partial def expandTy : TSyntax `sol_ty → MacroM Term
+/-- A type as a function type's spelling writes it (`fnTyStr`): a name as
+written, a function type spelled. -/
+partial def spellFnTy (T : TSyntax `sol_ty) : MacroM String := do
+  if T.raw.isOfKind ``solFnTy then
+    let ps ← T.raw[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩)
+    let ext := T.raw[4].getArgs.any fun m =>
+      (m.find? fun a => a.isAtom && a.getAtomVal == "external").isSome
+    -- `(returns (…))?`: a null node of its four parts, or of none
+    let r := T.raw[5]
+    let rs ← if r.getNumArgs == 4 then r[2].getSepArgs.toList.mapM (spellFnTy ⟨·⟩) else pure []
+    return fnTyStr ps rs ext
+  match T with
+  | `(sol_ty| $x:ident) => pure x.getId.toString
+  | `(sol_ty| address payable) => pure "address"
+  | `(sol_ty| mapping ( $k => $v )) => return s!"mapping({← spellFnTy k}=>{← spellFnTy v})"
+  | `(sol_ty| $t[]) => return (← spellFnTy t) ++ "[]"
+  | `(sol_ty| $t[$n]) => return s!"{← spellFnTy t}[{n.getNat}]"
+  | _ => Macro.throwUnsupported
+
+partial def expandTy (T : TSyntax `sol_ty) : MacroM Term := do
+  if T.raw.isOfKind ``solFnTy then return ← `(RawTy.named $(quote (← spellFnTy T)))
+  expandTy1 T
+where
+  expandTy1 : TSyntax `sol_ty → MacroM Term
   | `(sol_ty| $x:ident) => `(RawTy.named $(quote x.getId.toString))
   | `(sol_ty| address payable) => `(RawTy.named "address")
   | `(sol_ty| mapping ( $k => $v )) => do `(RawTy.mapping $(← expandTy k) $(← expandTy v))
@@ -1623,6 +1713,7 @@ structure TyEnv where
 /-- A declared type, an enum of the contract read as `uint`, a struct of the
 contract by its name in the table. -/
 partial def expandMemberTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM Term :=
+  if T.raw.isOfKind ``solFnTy then `(Ty.uint) else
   match T with
   | `(sol_ty| $x:ident) =>
     if env.enums.contains x.getId.toString then `(Ty.uint)
@@ -1639,6 +1730,8 @@ partial def expandMemberTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM Term :=
 (`Semantics.StructEnc`): a primitive type by its name, a narrow one as
 written, a struct by its name in the table. -/
 partial def spellTy (env : TyEnv) (T : TSyntax `sol_ty) : MacroM String := do
+  -- a member of function type is its tag, a `uint` (its marker is not kept)
+  if T.raw.isOfKind ``solFnTy then return "uint"
   match T with
   | `(sol_ty| address payable) => pure "uint"
   | `(sol_ty| $x:ident) =>
@@ -1716,6 +1809,9 @@ partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
   let narrow? (K : TSyntax `sol_ty) : Option (PrimTy × List (String × Nat)) := match K with
     | `(sol_ty| $x:ident) => valueRows? x.getId.toString
     | _ => none
+  -- a function type: its tag, a `uint`, and its marker (`valueRows?`)
+  if T.raw.isOfKind ``solFnTy then
+    return (← `(Ty.uint), ((valueRows? (← spellFnTy T)).map (·.2)).getD [])
   match T with
   | `(sol_ty| $x:ident) =>
     if dynBytesTy x.getId.toString then return (← `(Ty.array Ty.uint), dynBytesRows)
