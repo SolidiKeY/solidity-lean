@@ -292,6 +292,3 @@ theorems are unchanged.
   `MemoryPush`, `StorageReturns`, `PushBindings`, the TestSuite's row count
   617 against the pinned 551); `OmittedTypes.readsString` moved from
   `unsupported` to `pending` (the copy above).
-- Not done: a `bytesN` local of a tuple declaration (`(bytes4 a, uint b) =
-  f();`) carries no marker, so solc's byte operations on it are refused or
-  read as a `uint32`'s.
