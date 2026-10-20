@@ -152,8 +152,12 @@ def testObligation (N : Lean.Name) (r : ImportRow) (tail : TailMode := .solc) :
             $(mkCIdent (f ++ `problem))))
           -- the walk reads the formula by its value; the kernel unfolds it
           pure (ty, mkApp ty.appFn! (← Symex.evaluable (mkConst (f ++ `problem))))
+        else if mode == .clean then do
+          -- the walk reads the formula by its value; the kernel unfolds it
+          pure (ProofTree.provesE C (premised problem),
+            ProofTree.provesE C (premised (← Symex.evaluable problem)))
         else
-          let ty := ProofTree.provesE C (premised problem)
+          let ty := ProofTree.provesE C problem
           pure (ty, ty)
       let g ← mkFreshExprSyntheticOpaqueMVar goalTy
       let goals ← if r.tag == .specified then do

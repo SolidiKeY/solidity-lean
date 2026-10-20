@@ -266,15 +266,38 @@ which the typed property implies (`Storage.cleanTails_obs`). So what
 initial one among them (`ValidTail.holds_init`), and `.solc` implies it
 (`ValidTail.clean_of_solc`).
 
-**An assumption, not a kept property.** Clean tails are not an invariant
-of the contract: a program that pops an aliased element and writes through
-the alias leaves a dirty tail behind (`leaveDirty_boundary_rejected`), and a
-callback in the middle of a program that repairs it observes the dirty
-storage (`interruptRepair_callback_boundary_rejected`;
+**An assumption, and a contract's invariant where nothing is exposed.**
+Clean tails are not kept by every program: one that pops an aliased element
+and writes through the alias leaves a dirty tail behind
+(`leaveDirty_boundary_rejected`), and a callback in the middle of a program
+that repairs it observes the dirty storage
+(`interruptRepair_callback_boundary_rejected`;
 `Calculus/CleanTailBoundary.lean` states the boundary conditions, refuted).
-So the option is a premise on the starting storage only; what the program
-itself writes past an end is read as written, under either option
-(`recycledWrite_solc`).
+So the option is a premise on the starting storage; what the program itself
+writes past an end is read as written, under either option
+(`recycledWrite_solc`).  They are kept by a program that **exposes nothing**
+(`Prog.exposesNone`, `Typing/CleanTailRun.lean`): one that shrinks an array
+of references (an assignment or a `delete` of a reference, a copy out of
+memory, a `pop` of references) only where no storage alias is in scope, in
+its own frame or a caller's, and has no recursive call (not unfolded).
+Then every alias stays at live slots and every write lands at live slots
+(`CTInv`, `Stmt.keeps_ct`: the invariant is the clean storage and every
+alias local live, `Storage.LiveAll`; where an alias may be held around a
+statement it also keeps every live reference live, `Storage.Grows`), and a
+clear is all that lands past an end.  A contract all of whose transactions
+expose nothing has clean tails in every storage it reaches from its
+deployment (`ReachableBy.cleanTail`), so what `.clean` proves holds there
+(`ValidTail.holds_reachable`, `pushRead_reachable` in
+`Examples/Tactics/TailMode.lean`).  The reading is the deterministic run's
+(`Valid`): under the callback reading a callee's own run is not checked.
+
+**The runner.** `scripts/test-solidity.mjs` states a contract's plain
+obligations (neither a specification nor one that calls back, O7) under
+`.clean`, `⊢ cleanTail(storage) = true → N.f.problem`, where every function
+of the contract but an internal one elaborated, takes no storage reference
+and exposes nothing (`contractTailMode`, `Frontend/Testing.lean`; the
+premise justified by `ReachableBy.cleanTail`); under `.solc` otherwise.
+Each JSON row says which (`reading`, `docs/solidity-testing.md`).
 
 **The closer.** The reduction leaves the starting storage's reads as atoms
 (`obsW`, `obsL`), and a read past a live end reads the shadow slot as it is.
