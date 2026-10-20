@@ -83,7 +83,7 @@ Automatic and positive-bound loops use `whileUnwind`; framed invariants use
 the upstream box rule, or its diamond rule when a variant is supplied. -/
 def Stmt.keyStep (m : Modality) {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
   Stmt.casesOn (motive_1 := fun _ _ _ => Bool) s
-    (assign := fun _ r => !r.isMemory && !r.isFixedCopy) (rebind := fun _ _ => true) (assignLocal := fun _ v => !v.isModular)
+    (assign := fun _ r => !r.isMemory && !r.isFixedCopy) (rebind := fun _ _ => true) (assignLocal := fun _ v => !v.isLeanOnly)
     (declLocal := fun _ _ _ => true) (declStorage := fun _ _ _ => true)
     (opAssign := fun _ _ _ _ _ => true) (incDec := fun _ _ _ => true)
     (assignIncDec := fun _ _ _ _ _ => true) (assignLocalPush := fun _ _ => true)

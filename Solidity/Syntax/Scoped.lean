@@ -159,9 +159,10 @@ def Val.isSimple {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .simple _ => true
   | _ => false
 
-/-- Whether this expression needs a native modular assignment rule at its root. -/
-def Val.isModular {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
-  | .modular .. => true
+/-- Whether this expression needs a Lean-only assignment rule at its root:
+native modular arithmetic, `keccak256`. -/
+def Val.isLeanOnly {C : Contract} {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
+  | .modular .. | .keccak .. => true
   | _ => false
 
 def SPath.isSimple {C : Contract} {Γ : Ctx} {T : Ty} : SPath C Γ T → Bool

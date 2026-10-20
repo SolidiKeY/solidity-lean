@@ -165,6 +165,8 @@ def elabTy (C : Contract) : RawTy → Except String Ty
         | some e => pure (.struct e)
         | none => throw (unknownStructMsg s)
   | .mapping k v => do
+    if let .named s := k then
+      if dynBytesTy s then return .mapping .uint (← elabTy C v)
     match ← elabTy C k with
     | .prim p => pure (.mapping p (← elabTy C v))
     | t => throw s!"a mapping's key is a value type, not {t.toStr}"
@@ -199,8 +201,8 @@ def elabTyW (C : Contract) : RawTy → Except String (Ty × List (String × Nat)
   | .mapping k v => do
     if let .named s := k then
       if dynBytesTy s then
-        throw s!"mapping({s} => …): a byte string as a key is not modelled \
-          (docs/semantic-gaps.md, \"Bytes and strings\")"
+        let (vt, vw) ← elabTyW C v
+        return (.mapping .uint vt, hashKeyRows ++ vw.map fun (k, n) => ("[]" ++ k, n))
     let (kt, kw) ← elabTyW C k
     let .prim p := kt | throw s!"a mapping's key is a value type, not {kt.toStr}"
     let (vt, vw) ← elabTyW C v
@@ -228,7 +230,8 @@ partial def rawTyW (ws : List (String × Nat)) : Ty → String → RawTy
   | .ref (.array E), k => .array (rawTyW ws E (k ++ "[]"))
   | .ref (.fixed E n), k => .fixed (rawTyW ws E (k ++ "[]")) n
   | .ref (.mapping p V), k =>
-    .mapping (.named (declTyName ws (k ++ "{}") p)) (rawTyW ws V (k ++ "[]"))
+    .mapping (.named (if (lookupBy (k ++ "{}#hash") ws).isSome then "string"
+      else declTyName ws (k ++ "{}") p)) (rawTyW ws V (k ++ "[]"))
 
 /-- A synthesised expression, read in `Γ`: a storage path, a memory path, or
 a value. -/
@@ -1387,7 +1390,7 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
   | .newArr T _ => ((elabTyW C T).toOption.map (·.2)).getD []
   | .ternary _ a _ => exprShape Γ a
   | .call f _ =>
-    if f == bytesLitName then dynBytesRows else
+    if f == bytesLitName || (encodeBuiltin f && (lookupBy f C.funs).isNone) then dynBytesRows else
     match lookupBy f C.funs with
     | some d => match d.ret with
       | some (r, .ref _) => shapeUnder d.widths r
@@ -1479,6 +1482,9 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
   | .call f as =>
     if (lookupBy f C.funs).isNone && !(C.structFields f).isEmpty then
       as.findSome? (narrowWholeAt? Γ)
+    -- a byte string read whole by `keccak256` or the ABI (`abiKind` admits
+    -- no other array)
+    else if (lookupBy f C.funs).isNone && byteBuiltin f then as.findSome? (narrowBase? Γ)
     else
     let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
     as.zipIdx.findSome? fun (a, i) =>
@@ -1709,10 +1715,12 @@ partial def bytesPure (Γ : ECtx) : RawExpr → Except String RawExpr
     if let some n := bytesOf? C Γ b then
       if i.hasIncDec then throw s!"{(RawExpr.index b i).toStr}: an index of a bytes{n} with an effect"
       return ← bytesAt n b' i'
-    -- a mapping's `bytesN` key
-    let key := match widthPath? C Γ b with
-      | some (tb, k, .ref (.mapping ..)) => lookupBy (k ++ "{}#bytes") tb
-      | _ => none
+    -- a mapping's `bytesN` key; a byte string key hashed (`hashKeyRows`)
+    let (key, hashed) := match widthPath? C Γ b with
+      | some (tb, k, .ref (.mapping ..)) =>
+        (lookupBy (k ++ "{}#bytes") tb, (lookupBy (k ++ "{}#hash") tb).isSome)
+      | _ => (none, false)
+    if hashed then return .index b' (.call "keccak256" [i'])
     pure (.index b' (← toBytesAt? C Γ key i i'))
   | .field b "length" => do
     if let some n := bytesOf? C Γ b then
@@ -2520,6 +2528,103 @@ def Stmt.selfCall? {Γ Γ' : Ctx} (ρ : Ctx) : Stmt C Γ Γ' →
   | .call (rs := rs) _ as (.rets _) b => if h : rs = ρ then some ⟨_, _, as, h ▸ b⟩ else none
   | _ => none
 
+/-! ### `abi.*`, `string.concat`, `bytes.concat`
+
+Solidity's ABI layout, not the EVM's: each builtin is lowered here to a fresh
+memory `bytes` of solc's bytes (`docs/semantic-gaps.md`, "Hashing and the
+ABI"), written byte by byte with the array writes the model has.  A value
+is read at its static type (`AbiKind`): `abi.encode` writes it as a 32-byte
+word, big-endian (an `intN` sign-extended, a `bytesN` left-aligned, a
+`bool` `0`/`1`), a `bytes`/`string` as an offset in the head and its length
+and bytes, padded to 32, in the tail; `abi.encodePacked` (and the two
+`concat`s) writes each value in its own width and a byte string's bytes
+bare.  An `address` and an enum are `uint`s to the model, so packed they
+take 32 bytes, not solc's 20 and 1. -/
+
+/-- How `abi.encode` sees a value: its static type. -/
+inductive AbiKind where
+  | uint (n : Nat) | int (n : Nat) | bool | bytesN (n : Nat)
+  /-- `bytes` or `string`. -/
+  | dyn
+  deriving Inhabited, BEq
+
+/-- The width in bytes a packed value takes. -/
+def AbiKind.packedWidth : AbiKind → Nat
+  | .uint n | .int n => n / 8
+  | .bool => 1
+  | .bytesN n => n
+  | .dyn => 0
+
+/-- `a + n`, folded on a literal. -/
+def RawExpr.addN (a : RawExpr) (n : Nat) : RawExpr :=
+  if n == 0 then a else match a with
+    | .num m => .num (m + n)
+    | _ => .binop .add a (.num n)
+
+/-- The `m` bytes of the value `w`, big-endian, written at `r[o]` …
+`r[o + m - 1]`. -/
+def abiBytes (r : String) (o w : RawExpr) (m : Nat) : List RawStmt :=
+  (List.range m).map fun j =>
+    .assign (.index (.name r) (o.addN j))
+      (.binop .mod (.binop .shr w (.num (8 * (m - 1 - j)))) (.num 256))
+
+/-- The word a value of kind `k` is encoded as, a `uint`. -/
+def AbiKind.word (k : AbiKind) (e : RawExpr) : RawExpr :=
+  match k with
+  | .int _ => .unop .toUint e
+  | .bool => .ternary e (.num 1) (.num 0)
+  | _ => e
+
+/-- `abi.encode`'s writes of a static value of kind `k`, its word `w`, at
+the head offset `o`: the word's bytes where they are not the zero `new`
+left (a `uintN`'s low `N/8`, a `bool`'s last), a `bytesN` left-aligned. -/
+def abiEncodeStatic (r : String) (o : Nat) (k : AbiKind) (w : RawExpr) : List RawStmt :=
+  match k with
+  | .uint n => abiBytes r (.num (o + 32 - n / 8)) w (n / 8)
+  | .bool => abiBytes r (.num (o + 31)) w 1
+  | .bytesN n => abiBytes r (.num o) w n
+  | _ => abiBytes r (.num o) w 32
+
+/-- `j = 0; while (j < L) { r[o + j] = x[j]; j = j + 1; }`: the bytes of
+`x` copied to `r` at `o`. -/
+def abiCopy (r x j L : String) (o : RawExpr) : List RawStmt :=
+  [.decl (.named "uint") j (some (.num 0)),
+   .whileLoop {} (.binop .lt (.name j) (.name L))
+     [.assign (.index (.name r) (.binop .add o (.name j))) (.index (.name x) (.name j)),
+      .assign (.name j) (.binop .add (.name j) (.num 1))]]
+
+/-- `(L + 31) / 32 * 32`: a length padded to whole words. -/
+def abiPad (L : RawExpr) : RawExpr := .binop .mul (.binop .div (L.addN 31) (.num 32)) (.num 32)
+
+/-- The checks and the value of `abi.decode` at the type `T` of the word
+`w` (a `uint`): a value out of the type's range reverts, as solc's decoder
+does.  `none` for a type it does not decode. -/
+def abiDecodeAt (T : String) (w : RawExpr) : Option (List RawExpr × RawExpr) :=
+  if T == "bool" then some ([.binop .lt w (.num 2)], .binop .eqB w (.num 1))
+  else if T == "address" then some ([.binop .lt w (.num (2 ^ 160))], w)
+  else if T == "uint" || T == "uint256" then some ([], w)
+  else if T == "int" || T == "int256" then some ([], .call "int256" [w])
+  else match narrowTy? T, bytesTy? T with
+    | some (.uint, n), _ => some ([.binop .lt w (.num (2 ^ n))], .call T [w])
+    | some (.int, n), _ =>
+      some ([.binop .or (.binop .lt w (.num (2 ^ (n - 1))))
+        (.binop .ge w (.num (2 ^ 256 - 2 ^ (n - 1))))], .call T [w])
+    | _, some n =>
+      if n == 32 then some ([], .call T [w])
+      else some ([.binop .eqB (.binop .mod w (.num (2 ^ (256 - 8 * n)))) (.num 0)],
+        .call T [.binop .shr w (.num (256 - 8 * n))])
+    | _, _ => none
+
+/-- The word at byte `o` of `d`, read big-endian: `((d[o] * 256 + d[o+1]) * 256 + …)`. -/
+def abiWordAt (d : String) (o : Nat) : RawExpr :=
+  (List.range 32).foldl (fun acc j =>
+    let b : RawExpr := .index (.name d) (.num (o + j))
+    if j == 0 then b else .binop .add (.binop .mul acc (.num 256)) b) (.num 0)
+
+/-- The name of the hidden builtin `abi.decode` of one component is lowered
+through: `#abiDecode(d, T, i, n)`, the `i`-th of `n` words of `d` read at `T`. -/
+def abiDecodeName : String := "#abiDecode"
+
 mutual
 
 /-- **Captures before a statement**: an `++`/`−−` inside an expression, and a
@@ -2688,6 +2793,37 @@ partial def hoist : RawExpr → ElabM (SProg C × RawExpr)
       let Q ← elabStmtsP (.declMemory (.named "bytes") x (some (.newArr (.named "bytes") (.num bs.length))) ::
         bs.zipIdx.map fun (b, i) => .assign (.index (.name x) (.num i)) (.num b))
       return (Q, .name x)
+    let builtin := (← read).funs.all (·.1 != f)
+    -- `keccak256(b)`: of a memory `bytes` (a storage one copied first), into
+    -- a fresh `bytes32` (`Val.keccak`)
+    if builtin && f == "keccak256" then
+      let [a] := args | throw "keccak256 takes one argument"
+      let (P, a) ← hoist a
+      let (Q, b) ← abiMemBytes a
+      let y := toString (← freshCapture "se")
+      let R ← elabStmtsP [.decl (.named "bytes32") y (some (.field (.name b) keccakMember))]
+      return (P ++ Q ++ R, .name y)
+    if builtin && (f == "abi.encode" || f == "abi.encodePacked" || f == "string.concat" ||
+        f == "bytes.concat") then
+      let (P, args) ← hoistArgs args
+      let (Q, e) ← abiEncode (f == "abi.encode") (f == "string.concat") args
+      return (P ++ Q, e)
+    if builtin && f == "abi.decode" then
+      let [b, T] := args | throw "abi.decode(b, (T)) takes a byte string and a type"
+      let .name T := T | throw "abi.decode: one value type here; a tuple of them is a declaration's `(T a, U b) = abi.decode(…)`"
+      return ← hoist (.call abiDecodeName [b, .name T, .num 0, .num 1])
+    if builtin && f == abiDecodeName then
+      let [b, .name T, .num i, .num n] := args | throw "internal: #abiDecode's arguments"
+      let (P, b) ← hoist b
+      let (Q, d) ← abiMemBytes b
+      let w := toString (← freshCapture "se")
+      let x := toString (← freshCapture "se")
+      let some (checks, v) := abiDecodeAt T (.name w) |
+        throw s!"abi.decode at {T}: only value types are decoded"
+      let R ← elabStmtsP ([.require (.binop .ge (.field (.name d) "length") (.num (32 * n))),
+        .decl (.named "uint") w (some (abiWordAt d (32 * i)))] ++
+        checks.map .require ++ [.decl (.named T) x (some v)])
+      return (P ++ Q ++ R, .name x)
     if let some ms := lookupBy f C.enums then
       let [a] := args | throw s!"a conversion {f}(…) takes one argument"
       let (P, a) ← hoist a
@@ -2817,6 +2953,83 @@ partial def hoistArgs : List RawExpr → ElabM (SProg C × List RawExpr)
     let (Pc, a) ← if as.any (·.hasIncDec) then captureExpr C a else pure ([], a)
     let (Q, as) ← hoistArgs as
     pure (P ++ Pc ++ Q, a :: as)
+
+/-- A byte string as a memory local: a memory one bound to a fresh name, a
+storage one copied into a fresh memory `bytes` (solc's conversion). -/
+partial def abiMemBytes (a : RawExpr) : ElabM (SProg C × String) := do
+  if let .name x := a then
+    if let .ok (.mpath ..) := synth C (← nctx) a then return ([], x)
+  let x := toString (← freshCapture "mv")
+  pure (← elabStmtsP [.declMemory (.named "bytes") x (some a)], x)
+
+/-- The kind of an argument of `abi.encode` (`AbiKind`), by its static type. -/
+partial def abiKind (a : RawExpr) : ElabM AbiKind := do
+  if a.bytesLit?.isSome then return .dyn
+  let Γ ← ctx
+  match synth C (← nctx) a with
+  | .ok (.val .bool _) => pure .bool
+  | .ok (.val .int _) => pure (.int (widthIn C Γ a))
+  | .ok (.val .uint _) =>
+    match bytesOf? C Γ a with
+    | some n => pure (.bytesN n)
+    | none => pure (.uint (widthIn C Γ a))
+  | .ok (.mpath (.ref (.array (.prim .uint))) _) | .ok (.path (.ref (.array (.prim .uint))) _) =>
+    if lookupBy "[]#bytes" (placeShape C Γ a) == some 1 then pure .dyn
+    else throw s!"{a.toStr}: an array other than `bytes`/`string` is not ABI-encoded here"
+  | .ok _ => throw s!"{a.toStr}: a value of this type is not ABI-encoded here"
+  | .error e => throw e
+
+/-- `abi.encode(…)` (`std`) or `abi.encodePacked(…)`/`bytes.concat(…)`/
+`string.concat(…)` (`strs`: byte strings only) of the hoisted arguments: a
+fresh memory `bytes` of solc's layout (`AbiKind`). -/
+partial def abiEncode (std strs : Bool) (args : List RawExpr) : ElabM (SProg C × RawExpr) := do
+  let mut P : SProg C := []
+  -- each argument read once: its word in a fresh `uint`, a byte string in a
+  -- memory local with its length
+  let mut parts : List (AbiKind × String × String) := []
+  for a in args do
+    let k ← abiKind a
+    if strs && k != .dyn then throw "string.concat takes `string`s"
+    match k with
+    | .dyn =>
+      let (Q, x) ← abiMemBytes a
+      let L := toString (← freshCapture "se")
+      let R ← elabStmtsP [.decl (.named "uint") L (some (.field (.name x) "length"))]
+      P := P ++ Q ++ R
+      parts := parts ++ [(k, x, L)]
+    | _ =>
+      let w := toString (← freshCapture "se")
+      P := P ++ (← elabStmtsP [.decl (.named "uint") w (some (k.word a))])
+      parts := parts ++ [(k, w, "")]
+  let r := toString (← freshCapture "mv")
+  let tot := toString (← freshCapture "se")
+  let n := parts.length
+  let total : RawExpr := parts.foldl (fun acc (k, _, L) =>
+      if k == .dyn then
+        if std then .binop .add acc ((abiPad (.name L)).addN 32) else .binop .add acc (.name L)
+      else if std then acc else acc.addN k.packedWidth)
+    (.num (if std then 32 * n else 0))
+  let mut S : List RawStmt := [.decl (.named "uint") tot (some total),
+    .declMemory (.named "bytes") r (some (.newArr (.named "bytes") (.name tot)))]
+  -- `o`: where the next tail (`std`) or the next value (packed) starts
+  let o := toString (← freshCapture "se")
+  S := S ++ [.decl (.named "uint") o (some (.num (if std then 32 * n else 0)))]
+  for ((k, x, L), i) in parts.zipIdx do
+    if std then
+      if k == .dyn then
+        let j := toString (← freshCapture "se")
+        S := S ++ abiBytes r (.num (32 * i)) (.name o) 32 ++ abiBytes r (.name o) (.name L) 32 ++
+          abiCopy r x j L ((RawExpr.name o).addN 32) ++
+          [.assign (.name o) (.binop .add ((RawExpr.name o).addN 32) (abiPad (.name L)))]
+      else S := S ++ abiEncodeStatic r (32 * i) k (.name x)
+    else
+      if k == .dyn then
+        let j := toString (← freshCapture "se")
+        S := S ++ abiCopy r x j L (.name o) ++ [.assign (.name o) (.binop .add (.name o) (.name L))]
+      else
+        S := S ++ abiBytes r (.name o) (.name x) k.packedWidth ++
+          [.assign (.name o) ((RawExpr.name o).addN k.packedWidth)]
+  pure (P ++ (← elabStmtsP S), .name r)
 
 /-- Prepare a reference call in argument order. Storage-to-memory conversion
 copies at the argument's evaluation point; every reference's identity and
@@ -3445,6 +3658,26 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
+  -- `(T a, U b) = abi.decode(d, (T, U));`: each component decoded from its
+  -- word (`#abiDecode`), `d` read once
+  let decode? : Option (RawExpr × List RawExpr) := match s with
+    | .tupleDecl _ (.call "abi.decode" [d, .tuple ts]) | .tupleAssign _ (.call "abi.decode" [d, .tuple ts]) =>
+      some (d, ts)
+    | _ => none
+  if let some (d, ts) := decode? then
+    if (← read).funs.all (·.1 != "abi.decode") then
+      let x := toString (← freshCapture "mv")
+      let n := ts.length
+      let one (i : Nat) : RawExpr := .call abiDecodeName [.name x, ts[i]!, .num i, .num n]
+      let rest : List RawStmt ← match s with
+        | .tupleDecl vs _ => do
+          unless vs.length == n do throw s!"abi.decode gives {n} values, not {vs.length}"
+          pure (vs.zipIdx.filterMap fun (v, i) => v.map fun (T, y) => .decl T y (some (one i)))
+        | .tupleAssign ls _ => do
+          unless ls.length == n do throw s!"abi.decode gives {n} values, not {ls.length}"
+          pure (ls.zipIdx.filterMap fun (l, i) => l.map fun l => .assign l (one i))
+        | _ => pure []
+      return ← elabStmtsP (.declMemory (.named "bytes") x (some d) :: rest)
   -- solc's operations on byte types, as the `uint` ones (`bytesPure`)
   let s ← ElabM.lift (bytesStmt C (← ctx) s)
   -- push arithmetic inside `unchecked`: the appended slot starts at `0`, so

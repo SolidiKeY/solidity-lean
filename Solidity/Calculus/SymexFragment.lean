@@ -1010,6 +1010,7 @@ theorem localStep_elimOk {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p)
     · trivial
   | mlen b hp => exact absurd hv Bool.false_ne_true
   | modular op a b n => exact Premise.elimOk_setLocal i _ hv
+  | keccak b hp => exact absurd hv Bool.false_ne_true
 
 theorem rebindStep_elimOk {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R)
     (hr : r.MemFree = true) : (rebindStep k i r).ElimOk := by

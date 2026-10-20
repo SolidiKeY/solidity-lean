@@ -486,6 +486,7 @@ classified in `printedOrigins` as KeY rules outside the paper's table. -/
 def leanPrintedOrigins : List (Lean.Name × PrintedOrigin) := [
   (``LeanTaclet.addmodAssignment, .leanOnly .calculus),
   (``LeanTaclet.mulmodAssignment, .leanOnly .calculus),
+  (``LeanTaclet.keccakAssignment, .leanOnly .calculus),
   (``LeanTaclet.functionCallArgCapture, .leanOnly .calculus),
   (``LeanTaclet.tryCallDiamond, .leanOnly .calculus),
   (``LeanTaclet.transferDiamond, .leanOnly .calculus),
@@ -560,7 +561,7 @@ def leanOnlyRows (why : LeanOnlyReason) : List Lean.Name :=
 
 theorem leanOnly_keyTier_count : (leanOnlyRows .keyTier).length = 60 := by decide +kernel
 
-theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 18 := by decide +kernel
+theorem leanOnly_calculus_count : (leanOnlyRows .calculus).length = 19 := by decide +kernel
 
 end PrintedRules
 end Solidity

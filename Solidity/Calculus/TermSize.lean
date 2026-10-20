@@ -703,6 +703,7 @@ theorem localStep_bounded {p : PrimTy} (i : Idx Γ (.val p)) (v : Val C Γ p) :
     | var mv hm => exact .upd1 (UpdElem.setLocal_size i _)
     | loc l => bnil
   | modular op a b m => exact .upd1 (UpdElem.setLocal_size i _)
+  | keccak b hp => exact .upd1 (UpdElem.setLocal_size i _)
 
 theorem rebindStep_bounded {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
     (rebindStep k i r).Bounded (6 * r.size + 3) := by

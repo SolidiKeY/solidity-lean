@@ -37,8 +37,8 @@ def Val.keyValue {Γ : Ctx} {p : PrimTy} : Val C Γ p → Bool
   | .binop _ _ _ a b => a.keyValue && b.keyValue
   | .unop _ _ _ a => a.keyValue
   | .ternary c a b => c.keyValue && a.keyValue && b.keyValue
-  | .len b _ | .mlen b _ | .keccak b _ => b.keyValue
-  | .modular .. => false
+  | .len b _ | .mlen b _ => b.keyValue
+  | .modular .. | .keccak .. => false
 
 end
 
@@ -112,7 +112,7 @@ theorem MLoc.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {T : Ty} :
 
 theorem Val.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} :
     (e : Val C Γ p) → (e.wk h).keyValue = e.keyValue
-  | .simple _ | .modular .. => rfl
+  | .simple _ | .modular .. | .keccak .. => rfl
   | .read l => Loc.keyValue_wk h l
   | .readMem l => MLoc.keyValue_wk h l
   | .binop _ _ _ a b => by
@@ -124,7 +124,6 @@ theorem Val.keyValue_wk {Γ Δ : Ctx} (h : Thin Γ Δ) {p : PrimTy} :
     rw [Val.keyValue_wk h c, Val.keyValue_wk h a, Val.keyValue_wk h b]; rfl
   | .len b _ => SPath.keyValue_wk h b
   | .mlen b _ => MPath.keyValue_wk h b
-  | .keccak b _ => MPath.keyValue_wk h b
 
 end
 

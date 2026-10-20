@@ -265,6 +265,8 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     unless vm matches .sym ``Op0.memory _ _ do return ← escapeS e
     let `(dl_term| $x:ident) ← ppITermS ns i | escapeS e
     `(dl_term| $(mkIdent (x.getId.str "length")):ident)
+  | .sym ``Op2.keccak _ #[m, i] =>
+    `(dl_term| keccak256($(← ppMTermS ns m), $(← ppITermS ns i)))
   | .sym ``Op0.env #[k] _ =>
     match_expr (← whnf k) with
     | EnvKey.msgSender => `(dl_term| msg.sender)

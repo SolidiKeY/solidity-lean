@@ -486,6 +486,11 @@ def valueRows? (s : String) : Option (PrimTy × List (String × Nat)) :=
   | none, some n => some (.uint, (if n < 32 then [("", 8 * n)] else []) ++ [("#bytes", n)])
   | none, none => none
 
+/-- The marker rows of a mapping keyed by `string` or `bytes`: the key is the
+`keccak256` of the bytes, a `bytes32` (`docs/semantic-gaps.md`, "Hashing and
+the ABI"); `m[s]` is `m[keccak256(bytes(s))]` (`bytesPure`). -/
+def hashKeyRows : List (String × Nat) := [("{}#hash", 1)]
+
 /-- The rows of `bytes` and `string`: elements 8 bits wide, each a `bytes1`. -/
 def dynBytesRows : List (String × Nat) := [("[]", 8), ("[]#bytes", 1)]
 
@@ -998,12 +1003,30 @@ def expandIdent (x : Ident) : MacroM Term := do
     | none => fieldChain (← `(RawExpr.name $(quote root))) (f :: flds)
   | root :: flds => fieldChain (← `(RawExpr.name $(quote root))) flds
 
+/-- `abi.encode`, `abi.encodePacked`, `abi.decode`, `string.concat`,
+`bytes.concat`: builtins the elaborator lowers (`abiEncode`, `Syntax/Elab.lean`). -/
+def builtinMember (n g : String) : Bool :=
+  (n == "abi" && ["encode", "encodePacked", "decode"].contains g) ||
+    ((n == "string" || n == "bytes") && g == "concat")
+
+/-- A builtin whose value is a fresh memory `bytes`: `abi.encode`,
+`abi.encodePacked`, the two `concat`s. -/
+def encodeBuiltin (f : String) : Bool :=
+  ["abi.encode", "abi.encodePacked", "string.concat", "bytes.concat"].contains f
+
+/-- A builtin that reads byte strings whole: `keccak256`, the ABI's, the
+`concat`s (and `#abiDecode`, `abi.decode`'s lowering). -/
+def byteBuiltin (f : String) : Bool :=
+  encodeBuiltin f || ["keccak256", "abi.decode", "#abiDecode"].contains f
+
 /-- `f`, a function's name: an identifier with no member access. -/
 def funName? (f : TSyntax `sol_expr) : Option String :=
   match f with
   | `(sol_expr| $x:ident) =>
     match nameParts x.getId with
     | [g] => some g
+    -- the builtins under a namespace: `abi.encode`, `string.concat`, …
+    | [n, g] => if builtinMember n g then some s!"{n}.{g}" else none
     | _ => none
   | _ => none
 
@@ -1737,10 +1760,10 @@ partial def expandStateTyW (enums : TyEnv) (T : TSyntax `sol_ty) :
     pure (← `(Ty.fixed $t $m), ws.map fun (k, n) => ("[]" ++ k, n))
   | `(sol_ty| mapping ( $K:sol_ty => $V:sol_ty )) => do
     let (t, ws) ← expandStateTyW enums V
+    -- a byte string as a key: its `keccak256`, a `uint` (`hashKeyRows`)
     if let `(sol_ty| $k:ident) := K then
       if dynBytesTy k.getId.toString then
-        Macro.throwErrorAt K s!"mapping({k.getId.toString} => …): a byte string as a key is not \
-          modelled (docs/semantic-gaps.md, \"Bytes and strings\")"
+        return (← `(Ty.mapping PrimTy.uint $t), hashKeyRows ++ ws.map fun (k, n) => ("[]" ++ k, n))
     let (kt, kw) ← match narrow? K with
       | some (.int, ws) => pure (← `(PrimTy.int), ws.map fun (k, n) => ("{}" ++ k, n))
       | some (_, ws) => pure (← `(PrimTy.uint), ws.map fun (k, n) => ("{}" ++ k, n))
