@@ -353,12 +353,14 @@ test("source types preserve overflow and declaration scope", () => {
   assert.equal(status.signedTernaryOverflowCannotReturn, 'pending');
 });
 
-test("source types: narrow elements, keys and values of state variables", () => {
+test("source types: narrow elements, keys, values, struct members, locals and parameters", () => {
   const report = runSolidityTests(["tests/solc/NarrowNested.sol"], {build:false});
   assert.deepEqual(report.errors, []);
   const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
   for (const name of ['valueOverflowPanics', 'valueInRange', 'elementTypeChecked', 'uncheckedWraps',
-    'narrowKey', 'pushOverflowPanics']) assert.equal(status[name], 'proved', name);
+    'narrowKey', 'pushOverflowPanics', 'memberOverflowPanics', 'memberInRange', 'valueMemberPanics',
+    'memberArrayPanics', 'memoryMemberPanics', 'aliasPanics', 'memoryPanics', 'copyPanics',
+    'memoryParamPanics', 'memoryWraps', 'modifierParam']) assert.equal(status[name], 'proved', name);
 });
 
 test("modifiers use the existing inliner for calls and root obligations", () => {
@@ -372,7 +374,8 @@ test("modifiers use the existing inliner for calls and root obligations", () => 
     assert.equal(status[name], 'proved', name);
   }
   assert.equal(status.falsePost, 'pending');
-  assert.equal(status.narrowModifierGap, 'unsupported');
+  // a narrow modifier parameter is a local of its type: `x += 1` at `255` panics
+  assert.equal(status.narrowModifierGap, 'pending');
   assert.equal(status.narrowArrayModifierGap, 'unsupported');
 });
 
