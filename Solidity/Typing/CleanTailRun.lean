@@ -1038,4 +1038,458 @@ theorem tryCall {g : Bool} {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : 
 
 end CKeeps
 
+/-- A `new` array stored, not kept in memory. -/
+def NewLhs.isStore {Γ : Ctx} {R : RefTy} : NewLhs C Γ R → Bool
+  | .store _ => true
+  | .mem _ => false
+
+/-! ## The statements without sub-programs -/
+
+section Leaves
+
+variable {Γ : Ctx}
+
+/-- A step that only writes the storage: clean tails, and every live
+reference live where it grows. -/
+theorem CKeeps.ofStorage {g : Bool} {t : TStep C Γ Γ}
+    (ht : ∀ σ o, CTInv σ → t σ = .ok o → ∃ st, o.st = σ.withStorage st ∧ st.All cleanTailH ∧
+      (g = true ∨ Γ.hasAlias = true → σ.storage.Grows st)) : CKeeps g t := by
+  intro σ o hσ h
+  obtain ⟨st, e, hs, hg⟩ := ht σ o hσ h
+  rw [e]
+  exact ⟨hσ.withStorage hs fun ha => hg (Or.inr ha), fun hg' => hg (Or.inl hg')⟩
+
+theorem ckeeps_assign {g : Bool} {T : Ty} (l : Loc C Γ T) (r : Src C Γ T)
+    (hT : T.isPrimitive = true ∨ (g = false ∧ Γ.hasAlias = false)) :
+    CKeeps g (TRun.assign l r) := by
+  refine CKeeps.ofStorage fun σ o hσ h => ?_
+  unfold TRun.assign at h
+  obtain ⟨sv, hsv, h⟩ := tbind_ok_inv h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+  cases h
+  refine ⟨st, rfl, Storage.write_ct hσ.1 (Src.valueT_ct hσ.1 r hsv)
+    (Loc.resolveT_liveAll σ hσ.2 l href) (TRes.ofOpt_ok hst), fun hg => ?_⟩
+  rcases hT with hT | ⟨hg', ha⟩
+  · cases T with
+    | prim q => exact Storage.write_prim_grows (TRes.ofOpt_ok hst)
+    | ref _ => exact nomatch hT
+  · rcases hg with hg | hg
+    · rw [hg'] at hg; exact nomatch hg
+    · rw [ha] at hg; exact nomatch hg
+
+theorem ckeeps_rebind {g : Bool} {R : RefTy} (i : Idx Γ (.alias R)) (r : ARhs C Γ R) :
+    CKeeps g (TRun.rebind i r) := by
+  intro σ o hσ h
+  unfold TRun.rebind at h
+  obtain ⟨⟨st, ref⟩, he, h⟩ := tbind_ok_inv h
+  cases h
+  obtain ⟨hs, hg, hl⟩ := ARhs.evalT_ct hσ r he
+  refine ⟨(hσ.withStorage hs fun _ => hg).setLocal i fun r' hr' => ?_, fun _ => hg⟩
+  cases hr'; exact hl
+
+theorem ckeeps_assignLocal {g : Bool} {p : PrimTy} (i : Idx Γ (.val p)) (r : Val C Γ p) :
+    CKeeps g (TRun.assignLocal i r) := by
+  intro σ o hσ h
+  unfold TRun.assignLocal at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+  exact ⟨hσ.setLocal i trivial, fun _ => Storage.Grows.refl _⟩
+
+theorem ckeeps_declLocal {g : Bool} (p : PrimTy) (init : Option (Val C Γ p)) :
+    CKeeps g (TRun.declLocal p init) := by
+  intro σ o hσ h
+  unfold TRun.declLocal at h
+  cases init with
+  | none => cases h; exact ⟨hσ.push trivial, fun _ => Storage.Grows.refl _⟩
+  | some e =>
+    dsimp only at h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ.push trivial, fun _ => Storage.Grows.refl _⟩
+
+theorem ckeeps_declStorage {g : Bool} (R : RefTy) (init : Option (ARhs C Γ R)) :
+    CKeeps g (TRun.declStorage R init) := by
+  intro σ o hσ h
+  unfold TRun.declStorage at h
+  cases init with
+  | none =>
+    cases h
+    exact ⟨hσ.push (fun _ h => nomatch h), fun _ => Storage.Grows.refl _⟩
+  | some r =>
+    obtain ⟨⟨st, ref⟩, he, h⟩ := tbind_ok_inv h
+    cases h
+    obtain ⟨hs, hg, hl⟩ := ARhs.evalT_ct hσ r he
+    refine ⟨(hσ.withStorage hs fun _ => hg).push fun r' hr' => ?_, fun _ => hg⟩
+    cases hr'; exact hl
+
+/-- A word saved at a live reference. -/
+theorem opStoreT_ct {σ : State C Γ} (hσ : CTInv σ) (op : BinOp) {p : PrimTy} {r : SRef C (.prim p)}
+    (hl : σ.storage.LiveAll r) (v : p.Denote) {o : Out C σ.H Γ} (h : opStoreT σ op r v = .ok o) :
+    CTInv o.st ∧ σ.storage.Grows o.st.storage := by
+  unfold opStoreT at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+  cases h
+  have hg : σ.storage.Grows st := Storage.save_prim_grows (TRes.ofOpt_ok hst)
+  exact ⟨hσ.withStorage (Storage.save_ct hσ.1 (by simp only [SVal.All]) hl (TRes.ofOpt_ok hst))
+    fun _ => hg, hg⟩
+
+theorem bumpStoreT_ct {σ : State C Γ} (hσ : CTInv σ) (op : IncDec) {p : PrimTy}
+    {r : SRef C (.prim p)} (hl : σ.storage.LiveAll r) {o : Out C σ.H Γ} {w : p.Denote}
+    (h : bumpStoreT σ op r = .ok (o, w)) : CTInv o.st ∧ σ.storage.Grows o.st.storage := by
+  unfold bumpStoreT at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+  cases h
+  have hg : σ.storage.Grows st := Storage.save_prim_grows (TRes.ofOpt_ok hst)
+  exact ⟨hσ.withStorage (Storage.save_ct hσ.1 (by simp only [SVal.All]) hl (TRes.ofOpt_ok hst))
+    fun _ => hg, hg⟩
+
+theorem opMemT_ct {σ : State C Γ} (hσ : CTInv σ) (op : BinOp) {p : PrimTy}
+    (a : MAddr σ.H (.prim p)) (v : p.Denote) {o : Out C σ.H Γ} (h : opMemT σ op a v = .ok o) :
+    CTInv o.st ∧ σ.storage.Grows o.st.storage := by
+  unfold opMemT at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+  exact ⟨hσ, Storage.Grows.refl _⟩
+
+theorem bumpMemT_ct {σ : State C Γ} (hσ : CTInv σ) (op : IncDec) {p : PrimTy}
+    (a : MAddr σ.H (.prim p)) {o : Out C σ.H Γ} {w : p.Denote} (h : bumpMemT σ op a = .ok (o, w)) :
+    CTInv o.st ∧ σ.storage.Grows o.st.storage := by
+  unfold bumpMemT at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+  exact ⟨hσ, Storage.Grows.refl _⟩
+
+theorem OpLoc.storeT_ct {σ : State C Γ} (hσ : CTInv σ) (op : BinOp) :
+    {p : PrimTy} → (l : OpLoc C Γ p) → (v : p.Denote) → {o : Out C σ.H Γ} →
+      l.storeT σ op v = .ok o → CTInv o.st ∧ σ.storage.Grows o.st.storage
+  | _, .local i, _, o, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ.setLocal i trivial, Storage.Grows.refl _⟩
+  | _, .root r hr, v, o, h =>
+    opStoreT_ct hσ op (r := SRef.ofRoot r hr) (SVal.liveAll_nil _) v h
+  | _, .field b f hf, v, o, h => by
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    exact opStoreT_ct hσ op (Loc.resolveT_liveAll σ hσ.2 _ href) v h
+  | _, .index it b i, v, o, h => by
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    exact opStoreT_ct hσ op (Loc.resolveT_liveAll σ hσ.2 _ href) v h
+  | _, .mfield .., v, o, h => by
+    obtain ⟨a, _, h⟩ := tbind_ok_inv h
+    exact opMemT_ct hσ op a v h
+  | _, .mindex .., v, o, h => by
+    obtain ⟨a, _, h⟩ := tbind_ok_inv h
+    exact opMemT_ct hσ op a v h
+
+theorem OpLoc.bumpT_ct {σ : State C Γ} (hσ : CTInv σ) (op : IncDec) :
+    {p : PrimTy} → (l : OpLoc C Γ p) → {o : Out C σ.H Γ} → {w : p.Denote} →
+      l.bumpT σ op = .ok (o, w) → CTInv o.st ∧ σ.storage.Grows o.st.storage
+  | _, .local i, o, w, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ.setLocal i trivial, Storage.Grows.refl _⟩
+  | _, .root r hr, o, w, h =>
+    bumpStoreT_ct hσ op (r := SRef.ofRoot r hr) (SVal.liveAll_nil _) h
+  | _, .field b f hf, o, w, h => by
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    exact bumpStoreT_ct hσ op (Loc.resolveT_liveAll σ hσ.2 _ href) h
+  | _, .index it b i, o, w, h => by
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    exact bumpStoreT_ct hσ op (Loc.resolveT_liveAll σ hσ.2 _ href) h
+  | _, .mfield .., o, w, h => by
+    obtain ⟨a, _, h⟩ := tbind_ok_inv h
+    exact bumpMemT_ct hσ op a h
+  | _, .mindex .., o, w, h => by
+    obtain ⟨a, _, h⟩ := tbind_ok_inv h
+    exact bumpMemT_ct hσ op a h
+
+theorem ckeeps_opAssign {g : Bool} {p : PrimTy} (op : BinOp) (l : OpLoc C Γ p) (r : Val C Γ p) :
+    CKeeps g (TRun.opAssign op l r) := by
+  intro σ o hσ h
+  unfold TRun.opAssign at h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  have := OpLoc.storeT_ct hσ op l v h
+  exact ⟨this.1, fun _ => this.2⟩
+
+theorem ckeeps_incDec {g : Bool} {p : PrimTy} (op : IncDec) (l : OpLoc C Γ p) :
+    CKeeps g (TRun.incDec op l) := by
+  intro σ o hσ h
+  unfold TRun.incDec at h
+  obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
+  cases h
+  have := OpLoc.bumpT_ct hσ op l hb
+  exact ⟨this.1, fun _ => this.2⟩
+
+theorem ckeeps_assignIncDec {g : Bool} {p : PrimTy} (i : Idx Γ (.val p)) (op : IncDec)
+    (l : OpLoc C Γ p) : CKeeps g (TRun.assignIncDec i op l) := by
+  intro σ o hσ h
+  unfold TRun.assignIncDec at h
+  obtain ⟨⟨o', w⟩, hb, h⟩ := tbind_ok_inv h
+  cases h
+  have := OpLoc.bumpT_ct hσ op l hb
+  exact ⟨this.1.setLocal i trivial, fun _ => this.2⟩
+
+theorem ckeeps_push {g : Bool} {E : Ty} (b : SPath C Γ (.array E)) (v : Option (Src C Γ E)) :
+    CKeeps g (TRun.push b v) := by
+  refine CKeeps.ofStorage fun σ o hσ h => ?_
+  unfold TRun.push at h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  obtain ⟨x, hx, h⟩ : ∃ x : Option (SVal E), (∀ x0, x = some x0 → x0.All cleanTailH) ∧
+      (if σ.storage.full ref = true then Except.error THalt.exhausted
+       else do
+        let st ← TRes.ofOpt (σ.storage.push ref fun slot => some (x.getD slot))
+        pure ({ st := σ.withStorage st, ext := List.prefix_refl _ } : Out C σ.H Γ)) = .ok o := by
+    cases v with
+    | none => exact ⟨none, (fun _ h => nomatch h), h⟩
+    | some r =>
+      dsimp only at h
+      obtain ⟨sv, hsv, h⟩ := tbind_ok_inv h
+      refine ⟨some sv.strip, (fun x0 hx0 => ?_), h⟩
+      cases hx0
+      exact SVal.strip_all cleanTailH_stripOK (Src.valueT_ct hσ.1 r hsv)
+  split at h
+  · exact nomatch h
+  · obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+    cases h
+    refine ⟨st, rfl, Storage.push_ct hσ.1 (SPath.resolveT_liveAll σ hσ.2 b href)
+      (fun s y hs hy => ?_) (TRes.ofOpt_ok hst), fun _ => Storage.push_grows (TRes.ofOpt_ok hst)⟩
+    cases hy
+    cases x with
+    | none => exact hs
+    | some x0 => exact hx x0 rfl
+
+theorem ckeeps_assignLocalPush {g : Bool} {p : PrimTy} (i : Idx Γ (.val p))
+    (b : SPath C Γ (.array (.prim p))) : CKeeps g (TRun.assignLocalPush i b) := by
+  intro σ o hσ h
+  unfold TRun.assignLocalPush at h
+  obtain ⟨o', ho', h⟩ := tbind_ok_inv h
+  cases h
+  have := ckeeps_push (g := true) b none σ o' hσ ho'
+  exact ⟨this.1.setLocal i trivial, fun _ => this.2 rfl⟩
+
+theorem ckeeps_pushOpAssign {g : Bool} {p : PrimTy} (op : BinOp) (b : SPath C Γ (.array (.prim p)))
+    (r : Val C Γ p) : CKeeps g (TRun.pushOpAssign op b r) := by
+  intro σ o hσ h
+  unfold TRun.pushOpAssign at h
+  obtain ⟨v, _, h⟩ := tbind_ok_inv h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h
+  · obtain ⟨⟨st, k⟩, hs, h⟩ := tbind_ok_inv h
+    have hs' : σ.storage.pushPlace ref = some (st, k) := TRes.ofOpt_ok hs
+    have hl := SPath.resolveT_liveAll σ hσ.2 b href
+    have hg : σ.storage.Grows st := Storage.pushPlace_grows hs'
+    have hst := hσ.withStorage (Storage.pushPlace_ct hσ.1 hl hs') fun _ => hg
+    have := opStoreT_ct hst op (Storage.pushPlace_liveAll hl hs') v h
+    exact ⟨this.1, fun _ => Storage.Grows.trans hg this.2⟩
+
+theorem ckeeps_pushIncDec {g : Bool} {p : PrimTy} (op : IncDec) (b : SPath C Γ (.array (.prim p))) :
+    CKeeps g (TRun.pushIncDec op b) := by
+  intro σ o hσ h
+  unfold TRun.pushIncDec at h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  split at h
+  · cases h
+  · obtain ⟨⟨st, k⟩, hs, h⟩ := tbind_ok_inv h
+    obtain ⟨⟨o', value⟩, hb, h⟩ := tbind_ok_inv h
+    cases h
+    have hs' : σ.storage.pushPlace ref = some (st, k) := TRes.ofOpt_ok hs
+    have hl := SPath.resolveT_liveAll σ hσ.2 b href
+    have hg : σ.storage.Grows st := Storage.pushPlace_grows hs'
+    have hst := hσ.withStorage (Storage.pushPlace_ct hσ.1 hl hs') fun _ => hg
+    have := bumpStoreT_ct hst op (Storage.pushPlace_liveAll hl hs') hb
+    exact ⟨this.1, fun _ => Storage.Grows.trans hg this.2⟩
+
+/-- A `pop`: clean tails always, every live reference kept live where its
+elements are words. -/
+theorem pop_ct {σ : State C Γ} (hσ : CTInv σ) {E : Ty} (b : SPath C Γ (.array E))
+    {o : Out C σ.H Γ} (h : TRun.pop b σ = .ok o) :
+    ∃ st, o.st = σ.withStorage st ∧ st.All cleanTailH ∧
+      (E.isPrimitive = true → σ.storage.Grows st) := by
+  unfold TRun.pop at h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+  cases h
+  refine ⟨st, rfl, Storage.pop_ct hσ.1 (SPath.resolveT_liveAll σ hσ.2 b href) id
+    (TRes.ofOpt_ok hst), fun hE => ?_⟩
+  cases E with
+  | prim q => exact Storage.pop_words_grows (TRes.ofOpt_ok hst)
+  | ref _ => exact nomatch hE
+
+theorem ckeeps_pop {g : Bool} {E : Ty} (b : SPath C Γ (.array E))
+    (hE : E.isPrimitive = true ∨ (g = false ∧ Γ.hasAlias = false)) : CKeeps g (TRun.pop b) := by
+  refine CKeeps.ofStorage fun σ o hσ h => ?_
+  obtain ⟨st, e, hs, hg⟩ := pop_ct hσ b h
+  refine ⟨st, e, hs, fun hga => ?_⟩
+  rcases hE with hE | ⟨hg', ha⟩
+  · exact hg hE
+  · rcases hga with h' | h'
+    · rw [hg'] at h'; exact nomatch h'
+    · rw [ha] at h'; exact nomatch h'
+
+theorem ckeeps_transfer {g : Bool} (r a : Val C Γ .uint) : CKeeps g (TRun.transfer r a) := by
+  intro σ o hσ h
+  unfold TRun.transfer at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+  exact ⟨hσ, fun _ => Storage.Grows.refl _⟩
+
+theorem ckeeps_send {g : Bool} (pv : Idx Γ (.val .bool)) (r a : Val C Γ .uint) :
+    CKeeps g (TRun.send pv r a) := by
+  intro σ o hσ h
+  unfold TRun.send at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+  unfold sendT
+  split
+  · exact ⟨CTInv.setLocal (σ := σ.pay _ _) hσ pv trivial, fun _ => Storage.Grows.refl _⟩
+  · exact ⟨hσ.setLocal pv trivial, fun _ => Storage.Grows.refl _⟩
+  · exact ⟨hσ.setLocal pv trivial, fun _ => Storage.Grows.refl _⟩
+
+theorem MRhs.evalT_ct {σ : State C Γ} (hσ : CTInv σ) {R : RefTy} :
+    (r : MRhs C Γ R) → {g : Grew C Γ σ.H (HRef · R)} → r.evalT σ = .ok g →
+      CTInv g.st ∧ g.st.storage = σ.storage
+  | .alias _, g, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ, rfl⟩
+  | .copy _ _, g, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ.adopt _, rfl⟩
+  | .newArr _ _, g, h => by
+    cases h
+    exact ⟨hσ.adopt _, rfl⟩
+
+theorem ckeeps_declMem {g : Bool} (R : RefTy) (init : Option (MRhs C Γ R))
+    (hm : (Ty.ref R).mapFree = true) : CKeeps g (TRun.declMem R init hm) := by
+  intro σ o hσ h
+  unfold TRun.declMem at h
+  cases init with
+  | none => cases h; exact ⟨(hσ.adopt _).push trivial, fun _ => Storage.Grows.refl _⟩
+  | some r =>
+    obtain ⟨g', hg, h⟩ := tbind_ok_inv h
+    cases h
+    obtain ⟨h1, h2⟩ := MRhs.evalT_ct hσ r hg
+    refine ⟨h1.push trivial, fun _ => ?_⟩
+    show σ.storage.Grows g'.st.storage
+    rw [h2]; exact Storage.Grows.refl _
+
+theorem ckeeps_rebindMem {g : Bool} {R : RefTy} (i : Idx Γ (.mem R)) (r : MRhs C Γ R) :
+    CKeeps g (TRun.rebindMem i r) := by
+  intro σ o hσ h
+  unfold TRun.rebindMem at h
+  obtain ⟨g', hg, h⟩ := tbind_ok_inv h
+  cases h
+  obtain ⟨h1, h2⟩ := MRhs.evalT_ct hσ r hg
+  refine ⟨h1.setLocal i trivial, fun _ => ?_⟩
+  show σ.storage.Grows g'.st.storage
+  rw [h2]; exact Storage.Grows.refl _
+
+theorem ckeeps_assignFromMem {R : RefTy} (l : Loc C Γ (.ref R)) (p : MPath C Γ (.ref R))
+    (ha : Γ.hasAlias = false) : CKeeps false (TRun.assignFromMem l p) := by
+  refine CKeeps.ofStorage fun σ o hσ h => ?_
+  unfold TRun.assignFromMem at h
+  obtain ⟨m, _, h⟩ := tbind_ok_inv h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+  cases h
+  refine ⟨st, rfl, Storage.write_ct hσ.1 (SVal.plain_ct (MVal.copyMToSt_plain σ.heap m))
+    (Loc.resolveT_liveAll σ hσ.2 l href) (TRes.ofOpt_ok hst), fun h' => ?_⟩
+  rcases h' with h' | h'
+  · exact nomatch h'
+  · rw [ha] at h'; exact nomatch h'
+
+theorem ckeeps_assignMem {g : Bool} {T : Ty} (l : MLoc C Γ T) (r : MSrc C Γ T) :
+    CKeeps g (TRun.assignMem l r) := by
+  intro σ o hσ h
+  unfold TRun.assignMem at h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  obtain ⟨_, _, h⟩ := tbind_ok_inv h
+  cases h
+  exact ⟨hσ, fun _ => Storage.Grows.refl _⟩
+
+theorem ckeeps_delete {g : Bool} {T : Ty} (l : Loc C Γ T)
+    (hT : T.isPrimitive = true ∨ (g = false ∧ Γ.hasAlias = false)) :
+    CKeeps g (TRun.delete l) := by
+  refine CKeeps.ofStorage fun σ o hσ h => ?_
+  unfold TRun.delete at h
+  obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+  obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+  cases h
+  refine ⟨st, rfl, Storage.delete_ct hσ.1 (Loc.resolveT_liveAll σ hσ.2 l href)
+    (TRes.ofOpt_ok hst), fun hg => ?_⟩
+  rcases hT with hT | ⟨hg', ha⟩
+  · cases T with
+    | prim q => exact Storage.delete_prim_grows (TRes.ofOpt_ok hst)
+    | ref _ => exact nomatch hT
+  · rcases hg with hg | hg
+    · rw [hg'] at hg; exact nomatch hg
+    · rw [ha] at hg; exact nomatch hg
+
+theorem clearT_ct {σ : State C Γ} (hσ : CTInv σ) :
+    {T : Ty} → (a : MAddr σ.H T) → (hm : T.mapFree = true) → {o : Out C σ.H Γ} →
+      TRun.clearT σ a hm = .ok o → CTInv o.st ∧ σ.storage.Grows o.st.storage
+  | .prim _, _, _, o, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ, Storage.Grows.refl _⟩
+  | .ref R, a, hm, o, h => by
+    simp only [TRun.clearT] at h
+    split at h
+    · cases h
+      exact ⟨hσ.adopt _, Storage.Grows.refl _⟩
+    · exact nomatch h
+
+theorem ckeeps_deleteMem {g : Bool} {T : Ty} (p : MPath C Γ T) : CKeeps g (TRun.deleteMem p) := by
+  intro σ o hσ h
+  unfold TRun.deleteMem at h
+  cases p with
+  | var i _ => cases h; exact ⟨(hσ.adopt _).setLocal i trivial, fun _ => Storage.Grows.refl _⟩
+  | loc l =>
+    obtain ⟨a, _, h⟩ := tbind_ok_inv h
+    have := clearT_ct hσ a l.mapFree h
+    exact ⟨this.1, fun _ => this.2⟩
+
+theorem ckeeps_assignNew {g : Bool} {R : RefTy} (l : NewLhs C Γ R) (n : Simple C Γ .uint)
+    (hn : R.newArrOk = true) (hs : l.isStore = false ∨ (g = false ∧ Γ.hasAlias = false)) :
+    CKeeps g (TRun.assignNew l n hn) := by
+  intro σ o hσ h
+  unfold TRun.assignNew at h
+  have hg : CTInv
+      (σ.copyStToMG (newArrT R (n.evalT σ) hn) (RefTy.mapFree_of_newArrOk hn)).st :=
+    hσ.adopt _
+  cases l with
+  | store l =>
+    obtain ⟨ref, href, h⟩ := tbind_ok_inv h
+    obtain ⟨st, hst, h⟩ := tbind_ok_inv h
+    cases h
+    rcases hs with hs | ⟨hg', ha⟩
+    · exact nomatch hs
+    · subst hg'
+      refine ⟨hg.withStorage (Storage.write_ct hg.1
+        (SVal.plain_ct (MVal.copyMToSt_plain _ _))
+        (Loc.resolveT_liveAll _ hg.2 l href) (TRes.ofOpt_ok hst)) fun h' => ?_, nofun⟩
+      rw [ha] at h'; exact nomatch h'
+  | mem l =>
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hg, fun _ => Storage.Grows.refl _⟩
+
+end Leaves
+
 end Solidity
