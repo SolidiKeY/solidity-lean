@@ -41,6 +41,7 @@ the plan to test these claims against solc is `docs/solc-validation.md`.
 | `send` | `ok = a.send(v);` books as `transfer` does and sets `ok` true, or books nothing and sets `ok` false, never reverting; which, the transaction's oracle says | `TRun.send`, `TTx.ext` | `Examples/Tactics/Net.lean` |
 | Call arguments | all read, left to right, before the callee runs; storage parameters alias, memory parameters alias memory, and storage-to-memory arguments copy at their evaluation point before later argument effects | `Args.evalT`, `hoistCallArgs`, `CallRet.enterT` (`Semantics/Run.lean`, `Syntax/Elab.lean`) | Calldata parameters remain unsupported. |
 | `call{value:}` | `(bool ok, ) = a.call{value: v}("")` is a send with all the gas (`Stmt.send`'s `full`), where solkey's `SolJSONParser.isValueCall` reads `bool ok = a.send(v)`: solc forwards all gas there, so the callee can re-enter and write storage, under `transferSemantics:noCallback` too (`ValidT .noCallback`, `Stmt.forksIn`); `holds` ignores it (every callee keeping the state). `send` and `transfer` forward the 2300-gas stipend, under which the no-callback reading is the EVM's | `Frontend/SolcJson.lean` (`valueCall?`), `Semantics/Callback.lean` | `Examples/Tactics/Callback.lean` (`withdrawCall_noCallback`) |
+| Struct constructors | `S(a, b)` and `S({x: a, y: b})` build a fresh memory struct, its members written from the arguments in the order written; the import prints the call as written (`structConstructorCall`), and the elaborator lowers it to the member writes (`hoist`), a narrow member's argument fitting it.  The struct must be the table's (`Semantics.structDef`) | `call` (`Frontend/SolcJson.lean`), `hoist` (`Syntax/Elab.lean`) | `tests/solc/StructLiterals.sol` |
 | Enum conversions | `E(x)` asserts that `x` names a member (solc's Panic `0x21`), then is `x`; an enum is a `uint` | `enumCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/SolcOpen.lean` |
 | A call's ABI | a function's obligation assumes what its dispatcher checks before the body: `msg.value == 0` where it is not `payable` and the body reads `msg.value`, a narrow integer or an enum parameter in its range (solc's decoder reverts otherwise); the specified obligation assumes the first already. **Chain fact:** `msg.value < 2^128` where the function is `payable` and its body reads `msg.value` (`etherBound`, `Calculus/SurfaceSpec.lean`; the specified obligation too): no transaction carries more than the ether supply, below `2^128` wei, so `5 + msg.value + msg.value` does not overflow | `Problem.callPre` (`Frontend/Problems.lean`) | solkey's `SolcPaymentsOpen`, `SolcTypesOpen` |
 | External calls | `r.f(a);` outside a `try` is `try r.f(a) { } catch { revert(); }`: a failed call reverts the caller, as a call to an address with no code does; `receive` and `fallback` are imported with no obligation of their own | `SolcJson.lean` (`isExternalMember`, `tagOf`) | |
@@ -237,7 +238,10 @@ programs, and the check is a statement the rules already run.
   `uint8[]`): `v` fits the element, and the appended slot is checked after
   the write, `require(small[small.length - 1] <= 255)` (`pushedSlot`), as a
   variable's write is; so `signed.push() -= x` at `int8` with `x == -128`
-  reverts.  Inside `unchecked` push arithmetic stays refused.
+  reverts.  Inside `unchecked` it wraps at the element's width: the slot
+  starts at `0`, so the statement pushes `0 op r` wrapped (`push() -= 1` at
+  `uint8[]` pushes `255`, `signed.push() -= x` with `x == -128` pushes
+  `-128`), `r` evaluated once, before the push (`elabStmtP`).
 - **A modifier's narrow parameter** is a local of its type, its argument
   fitting it (`ModApp.widths`, `wrapMods`); a reference parameter is a
   local at its location (`ModApp.locs`: a storage alias, or a memory local
@@ -268,9 +272,9 @@ What is not modelled, each an elaboration error unless said otherwise:
   plain obligation does (`Problem.callPre`): a narrow or enum parameter in
   its range, and each element of a memory array of one,
   `∀ uint i; i < xs.length → lo <= xs[i] ∧ xs[i] <= hi`
-  (`SolcFun.elemRanges`); `sol_close` does not instantiate that quantifier
-  yet, so a claim needing it stays `pending`
-  (`NarrowNested.abiElementInRange`).
+  (`SolcFun.elemRanges`), which `sol_leaf` instantiates at the literal
+  indices the leaf reads (`allLeftHide`, `Calculus/AllLeft.lean`;
+  `NarrowNested.abiElementInRange`).
 
 The printed program has `uint`/`int` where the source has `uint8`/`int8`
 (`Stmt.declLocal` holds a `PrimTy`), and the checks are visible statements.

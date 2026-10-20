@@ -112,6 +112,7 @@ import Solidity.Calculus.Recursion
 import Solidity.Calculus.Symex
 import Solidity.Calculus.Derive
 import Solidity.Calculus.LeafDerive
+import Solidity.Calculus.AllLeft
 import Solidity.Calculus.ProvesDerive
 import Solidity.Calculus.WalkSyntax
 import Solidity.Calculus.Closers

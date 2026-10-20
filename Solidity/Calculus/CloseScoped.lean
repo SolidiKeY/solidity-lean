@@ -85,6 +85,12 @@ theorem havoc_tx (σ : State C Γ) (st : Storage C) (nt : Ledger) :
     (σ.havoc st nt).tx = σ.tx := rfl
 theorem push_storage {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).storage = σ.storage := rfl
+/-- A memory array's length read through a pushed local is the state's: the
+length is a number, so the rewrite changes no type that depends on the heap
+typing (a premise read before a local and a goal read after it read one
+length, `allLeftHide`'s instances among them). -/
+theorem push_lenU {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) {E : Ty}
+    (r : HRef σ.H (.array E)) : (σ.push v).glob.memT.heap.lenU r = σ.glob.memT.heap.lenU r := rfl
 theorem push_net {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) : (σ.push v).net = σ.net := rfl
 theorem push_selfBalance {t : LTy} (σ : State C Γ) (v : t.TDenote C σ.H) :
     (σ.push v).selfBalance = σ.selfBalance := rfl
@@ -894,7 +900,7 @@ attribute [close_rw_s]
   State.locV_push State.locV_setLocal State.locV_drop State.locV_thin CloseS.locV_havoc
   CloseS.glob_storage CloseS.glob_net CloseS.glob_selfBalance CloseS.glob_tx CloseS.glob_envVal
   CloseS.havoc_storage CloseS.havoc_net CloseS.havoc_selfBalance CloseS.havoc_tx
-  CloseS.push_storage CloseS.push_net CloseS.push_selfBalance CloseS.push_tx
+  CloseS.push_storage CloseS.push_net CloseS.push_selfBalance CloseS.push_tx CloseS.push_lenU
   CloseS.setLocal_storage CloseS.setLocal_net CloseS.setLocal_selfBalance CloseS.setLocal_tx
   CloseS.envVal_msgSender CloseS.envVal_msgValue CloseS.envVal_timestamp
   CloseS.envVal_selfBalance CloseS.envVal_selfAddress

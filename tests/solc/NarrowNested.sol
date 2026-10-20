@@ -131,6 +131,31 @@ contract NarrowNested {
         signedSmall.push() -= x;
         assert(false);
     }
+    // inside `unchecked`, push arithmetic wraps at the element's width
+    function pushArithUncheckedWraps() public {
+        uint n = small.length;
+        unchecked { small.push() -= 1; }
+        assert(small[n] == 255);
+    }
+    function pushArithUncheckedAdds(uint8 v) public {
+        uint n = small.length;
+        unchecked { small.push() += v; }
+        assert(small[n] == v);
+    }
+    function pushDecrementUncheckedWraps() public {
+        uint n = small.length;
+        unchecked { small.push()--; }
+        assert(small[n] == 255);
+    }
+    /// @custom:key box
+    function signedPushArithUncheckedWraps(int8 x) public {
+        require(x == -128);
+        uint n = signedSmall.length;
+        unchecked { signedSmall.push() -= x; }
+        assert(signedSmall[n] == -128);
+        unchecked { signedSmall.push()--; }
+        assert(signedSmall[n + 1] == -1);
+    }
     // a whole use whose narrow positions are checked: a conditional's
     // branches, which solc requires of one type
     /// @custom:key box
@@ -155,8 +180,7 @@ contract NarrowNested {
         assert(false);
     }
     // the ABI decoder reverts on an element out of range: the obligation
-    // assumes each in range (`Problem.callPre`), which the closer does not
-    // instantiate yet
+    // assumes each in range (`Problem.callPre`), instantiated at `xs[0]`
     function abiElementInRange(uint8[] memory xs) public pure {
         if (xs.length > 0) { assert(xs[0] <= 255); }
     }

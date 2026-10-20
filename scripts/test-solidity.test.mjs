@@ -389,9 +389,22 @@ test("source types: narrow elements, keys, values, struct members, locals and pa
     'narrowKey', 'pushOverflowPanics', 'memberOverflowPanics', 'memberInRange', 'valueMemberPanics',
     'memberArrayPanics', 'memoryMemberPanics', 'aliasPanics', 'memoryPanics', 'copyPanics',
     'memoryParamPanics', 'memoryWraps', 'modifierParam', 'pushArithInRange', 'pushArithPanics',
-    'ternaryAliasPanics', 'ternaryAliasInRange', 'ternaryArgumentPanics']) assert.equal(status[name], 'proved', name);
-  // its elements' range is a premise (`Problem.callPre`) the closer does not instantiate
-  assert.equal(status.abiElementInRange, 'pending');
+    'ternaryAliasPanics', 'ternaryAliasInRange', 'ternaryArgumentPanics',
+    // its elements' range is a premise (`Problem.callPre`), instantiated (`allLeftHide`)
+    'abiElementInRange',
+    // push arithmetic inside `unchecked` wraps at the element's width
+    'pushArithUncheckedWraps', 'pushArithUncheckedAdds', 'pushDecrementUncheckedWraps',
+    'signedPushArithUncheckedWraps']) assert.equal(status[name], 'proved', name);
+});
+
+test("struct constructor calls: positional, named, nested, to storage, narrow members", () => {
+  const report = runSolidityTests(["tests/solc/StructLiterals.sol"], {build:false});
+  assert.deepEqual(report.errors, []);
+  const status = Object.fromEntries(report.results.map(r => [r.function, r.status]));
+  for (const name of ['positional', 'named', 'fromParameters', 'nested', 'toStorage', 'toMapping',
+    'narrowMembers', 'narrowNamed', 'narrowToStorage', 'narrowMemberOverflowPanics'])
+    assert.equal(status[name], 'proved', name);
+  assert.equal(status.wrongMember, 'pending');
 });
 
 test("modifiers use the existing inliner for calls and root obligations", () => {

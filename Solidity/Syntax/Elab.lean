@@ -2251,8 +2251,9 @@ partial def uncheckStmts : List RawStmt → Except String (List RawStmt)
       | .incDec op l => do
         pure (.opAssign (if op.isIncrement then .addW else .subW) (← l.uncheck) (.num 1))
       | .assignIncDec .. => throw "`v = x++;` inside `unchecked`: write `v = x; x += 1;`"
-      | .pushOpAssign .. | .pushIncDec .. =>
-        throw "push arithmetic inside `unchecked` is not supported"
+      -- the push's value, wrapping, is `elabStmtP`'s (`b.push(uint8(0 +% r))`)
+      | .pushOpAssign op b r => do pure (.pushOpAssign op (← b.uncheck) (← r.uncheck))
+      | .pushIncDec op b => do pure (.pushIncDec op (← b.uncheck))
       | .ite c t e => do pure (.ite (← c.uncheck) (← uncheckStmts t) (← uncheckStmts e))
       | .unchecked b => do pure (.unchecked (← uncheckStmts b))
       | .checked .checking _ => throw "`checked { … }` inside `unchecked { … }`: its operations wrap there"
@@ -3230,6 +3231,51 @@ partial def hoistStmt : RawStmt → ElabM (SProg C × RawStmt)
 whose compound target may need a capture of its own. -/
 partial def elabStmtP (s : RawStmt) : ElabM (SProg C) := do
   let s ← ElabM.lift (s.mapExprsM (RawExpr.orderNamed (← read).funs))
+  -- push arithmetic inside `unchecked`: the appended slot starts at `0`, so
+  -- `b.push() op= r` pushes `0 op r`, wrapping at the element's width as
+  -- `narrowWrapNode` wraps (`small.push() -= 1` at `uint8[]` pushes `255`):
+  -- `r` itself for `+=`, `0` for `*=`, `r`'s negation for `-=` (`0` at `0`,
+  -- `2^N - r` above it; a signed `r` at the minimum is itself), a literal
+  -- folded; `r` is evaluated once, before the push, as the checked
+  -- statement reads it
+  if (← read).unchecked then
+    let push? : Option (BinOp × RawExpr × RawExpr) := match s with
+      | .pushOpAssign op b r => some (op, b, r)
+      | .pushIncDec op b => some (if op.isIncrement then .add else .sub, b, .num 1)
+      | _ => none
+    if let some (op, b, r) := push? then
+      let ⟨_, t⟩ ← synthM C b
+      let .path (.ref (.array (.prim p))) _ := t
+        | throw "push arithmetic needs a storage array of primitive numeric elements"
+      unless p.isNumeric do throw s!"push arithmetic at {p.toStr}"
+      let n := widthIn C (← ctx) (.index b (.num 0))
+      let T := tyName p n
+      let m : Int := 2 ^ n
+      let lit (v : Int) : RawExpr :=
+        let w := if p == .int then ((v + m / 2) % m + m) % m - m / 2 else (v % m + m) % m
+        if w < 0 then .unop .neg (.num w.natAbs) else .num w.toNat
+      let push (pre : List RawStmt) (v : RawExpr) : ElabM (SProg C) :=
+        elabStmtsP (pre ++ [.call (.field b "push") [v]])
+      match op, r.litVal? with
+      | .add, some v => return ← push [] (lit v)
+      | .sub, some v => return ← push [] (lit (-v))
+      | .mul, some _ => return ← push [] (.num 0)
+      | .add, none | .sub, none | .mul, none =>
+        -- `r` at the element's type, captured where it is not a name
+        let (pre, R) ← if r.isPure then pure ([], RawExpr.call T [r]) else do
+          let y := toString (← freshCapture "pa")
+          pure ([RawStmt.decl (.named T) y (some r)], RawExpr.name y)
+        let v : RawExpr := match op with
+          | .add => R
+          | .mul => .binop .mul R (.num 0)
+          | _ =>
+            if p == .int then
+              .ternary (.binop .eqB R (.unop .neg (.num (2 ^ (n - 1))))) R (.binop .sub (.num 0) R)
+            else
+              .ternary (.binop .eqB R (.num 0)) (.num 0)
+                (.binop .add (.binop .sub (.num (2 ^ n - 1)) R) (.num 1))
+        return ← push pre v
+      | _, _ => return ← push [] (.binop op (.num 0) r)
   -- a loop outside a function's body, lowered here (`lowerLoops`)
   if s matches .whileLoop .. | .forLoop .. | .doWhile .. then
     return ← elabStmtsP (← lowerLoops none [s])
