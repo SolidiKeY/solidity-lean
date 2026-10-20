@@ -598,4 +598,227 @@ theorem pushPlace_liveAll {st st' : Storage C} {E : Ty} {r : SRef C (.ref (.arra
 
 end Storage
 
+/-! ## The invariant: clean tails, live aliases -/
+
+/-- Whether a context holds a storage alias. -/
+def Ctx.hasAlias : Ctx → Bool
+  | [] => false
+  | .alias _ :: _ => true
+  | .val _ :: Γ => Ctx.hasAlias Γ
+  | .mem _ :: Γ => Ctx.hasAlias Γ
+  | .old :: Γ => Ctx.hasAlias Γ
+  | .oldNet :: Γ => Ctx.hasAlias Γ
+  | .kint :: Γ => Ctx.hasAlias Γ
+
+theorem Ctx.hasAlias_cons {t : LTy} {Γ : Ctx} (h : Γ.hasAlias = true) :
+    Ctx.hasAlias (t :: Γ) = true := by
+  cases t <;> first | rfl | exact h
+
+theorem Ext.hasAlias {Γ Δ : Ctx} (x : Ext Γ Δ) (h : Γ.hasAlias = true) : Δ.hasAlias = true := by
+  induction x with
+  | refl => exact h
+  | push _ ih => exact Ctx.hasAlias_cons ih
+
+theorem Ctx.hasAlias_append {Γ : Ctx} (ρ : Ctx) (h : Γ.hasAlias = true) :
+    (ρ ++ Γ).hasAlias = true :=
+  Ext.hasAlias (Ext.append Γ ρ) h
+
+/-- A storage alias local is live (an unset one is). -/
+def aliasLive (st : Storage C) {H : HTy} : (t : LTy) → t.TDenote C H → Prop
+  | .alias _, v => ∀ r, v = some r → st.LiveAll r
+  | .val _, _ => True
+  | .mem _, _ => True
+  | .old, _ => True
+  | .oldNet, _ => True
+  | .kint, _ => True
+
+/-- **The invariant**: the storage's tails clean, every alias local live. -/
+def CTInv {Γ : Ctx} (σ : State C Γ) : Prop :=
+  σ.storage.All cleanTailH ∧ TEnv.All (aliasLive σ.storage) σ.env
+
+theorem aliasLive_grows {st st' : Storage C} (hg : st.Grows st') {H : HTy} :
+    (t : LTy) → (v : t.TDenote C H) → aliasLive st t v → aliasLive st' t v
+  | .alias _, _, h => fun r hr => hg r (h r hr)
+  | .val _, _, _ => trivial
+  | .mem _, _, _ => trivial
+  | .old, _, _ => trivial
+  | .oldNet, _, _ => trivial
+  | .kint, _, _ => trivial
+
+theorem aliasLive_wk {st : Storage C} {H H' : HTy} (x : H <+: H') :
+    (t : LTy) → (v : t.TDenote C H) → aliasLive st t v → aliasLive st t (LTy.TDenote.wk x t v)
+  | .alias _, _, h => h
+  | .val _, _, _ => trivial
+  | .mem _, _, _ => trivial
+  | .old, _, _ => trivial
+  | .oldNet, _, _ => trivial
+  | .kint, _, _ => trivial
+
+theorem env_noAlias (st : Storage C) {H : HTy} :
+    {Γ : Ctx} → Γ.hasAlias = false → (e : TEnv C H Γ) → TEnv.All (aliasLive st) e
+  | [], _, _ => trivial
+  | .alias _ :: _, h, _ => nomatch h
+  | .val _ :: Γ, h, e => ⟨trivial, env_noAlias st (Γ := Γ) h e.2⟩
+  | .mem _ :: Γ, h, e => ⟨trivial, env_noAlias st (Γ := Γ) h e.2⟩
+  | .old :: Γ, h, e => ⟨trivial, env_noAlias st (Γ := Γ) h e.2⟩
+  | .oldNet :: Γ, h, e => ⟨trivial, env_noAlias st (Γ := Γ) h e.2⟩
+  | .kint :: Γ, h, e => ⟨trivial, env_noAlias st (Γ := Γ) h e.2⟩
+
+theorem env_wk_live {st : Storage C} {H H' : HTy} (x : H <+: H') : {Γ : Ctx} →
+    {e : TEnv C H Γ} → TEnv.All (aliasLive st) e → TEnv.All (aliasLive st) (TEnv.wk x Γ e)
+  | [], _, _ => trivial
+  | t :: _, _, he => ⟨aliasLive_wk x t _ he.1, env_wk_live x he.2⟩
+
+namespace CTInv
+
+variable {Γ : Ctx}
+
+theorem env_grows {st st' : Storage C} (hg : st.Grows st') {H : HTy} {Γ : Ctx}
+    {e : TEnv C H Γ} (he : TEnv.All (aliasLive st) e) : TEnv.All (aliasLive st') e :=
+  TEnv.All.mono (fun t v h => aliasLive_grows hg t v h) he
+
+/-- The storage replaced by one with clean tails, every live reference kept
+live where an alias may be held. -/
+theorem withStorage {σ : State C Γ} (h : CTInv σ) {st : Storage C} (hs : st.All cleanTailH)
+    (hg : Γ.hasAlias = true → σ.storage.Grows st) : CTInv (σ.withStorage st) := by
+  refine ⟨hs, ?_⟩
+  cases ha : Γ.hasAlias
+  · exact env_noAlias st ha _
+  · exact env_grows (hg ha) h.2
+
+theorem setLocal {σ : State C Γ} (h : CTInv σ) {t : LTy} (i : Idx Γ t) {v : t.TDenote C σ.H}
+    (hv : aliasLive σ.storage t v) : CTInv (σ.setLocal i v) :=
+  ⟨h.1, TEnv.All.set i h.2 hv⟩
+
+theorem push {σ : State C Γ} (h : CTInv σ) {t : LTy} {v : t.TDenote C σ.H}
+    (hv : aliasLive σ.storage t v) : CTInv (σ.push v) :=
+  ⟨h.1, hv, h.2⟩
+
+theorem drop {Δ : Ctx} {σ : State C Δ} (h : CTInv σ) (x : Ext Γ Δ) : CTInv (σ.drop x) :=
+  ⟨h.1, TEnv.All.drop x h.2⟩
+
+theorem adopt {σ : State C Γ} {α : HTy → Type} (h : CTInv σ) (g : Grown σ.H α) :
+    CTInv (σ.adopt g).1 :=
+  ⟨h.1, env_wk_live g.ext h.2⟩
+
+end CTInv
+
+/-! ## Resolved references are live -/
+
+section Resolve
+
+variable {Γ : Ctx} (σ : State C Γ) (he : TEnv.All (aliasLive σ.storage) σ.env)
+
+include he
+
+mutual
+
+/-- **A location resolves to live slots**: its alias is live, and each
+index the program takes it checks against the length. -/
+theorem Loc.resolveT_liveAll : {T : Ty} → (l : Loc C Γ T) → ∀ {r : SRef C T},
+    l.resolveT σ = .ok r → σ.storage.LiveAll r
+  | _, .root _ _, r, h => by
+    cases h
+    exact SVal.liveAll_nil _
+  | _, .field b f hf, r, h => by
+    obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
+    cases h
+    show (σ.storage.get r0.hroot).LiveAll (r0.path.append (.field hf .nil))
+    refine SVal.liveAll_append _ _ _ (SPath.resolveT_liveAll b h0) fun y _ => ?_
+    cases y with
+    | struct fs => simp only [SVal.LiveAll]
+  | _, .index it b i, r, h => by
+    obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
+    obtain ⟨k, _, h⟩ := tbind_ok_inv h
+    obtain ⟨u, hck, h⟩ := tbind_ok_inv h
+    cases h
+    show (σ.storage.get r0.hroot).LiveAll (r0.path.append (Path.index it k))
+    obtain ⟨y0, hy0, hin⟩ := Storage.checkIndex_some (TRes.ofOpt_ok hck)
+    refine SVal.liveAll_append _ _ _ (SPath.resolveT_liveAll b h0) fun y hy => ?_
+    have hyy : y = y0 := by
+      have : (σ.storage.get r0.hroot).find r0.path = some y := by
+        rw [SVal.find_eq_findM]; exact hy
+      rw [show σ.storage.find r0 = (σ.storage.get r0.hroot).find r0.path from rfl, this] at hy0
+      exact Option.some.inj hy0
+    subst hyy
+    cases it with
+    | map =>
+      rw [Path.index_map]
+      cases y with
+      | map m d => simp only [SVal.LiveAll]; split <;> trivial
+    | arr a =>
+      cases a with
+      | dyn =>
+        rw [Path.index_dyn]
+        cases y with
+        | array e sh hn =>
+          change (if (k : PrimTy.uint.Denote).1.toNat < _ then some () else none) = _ at hin
+          split at hin
+          · rename_i hb
+            simp only [SVal.LiveAll]
+            exact ⟨hb, fun _ _ => trivial⟩
+          · exact nomatch hin
+      | fixed =>
+        rw [Path.index_fixed]
+        cases y with
+        | fixed e => simp only [SVal.LiveAll]; exact fun _ _ => trivial
+
+/-- A path resolves to live slots: an alias is live by the invariant. -/
+theorem SPath.resolveT_liveAll : {T : Ty} → (b : SPath C Γ T) → ∀ {r : SRef C T},
+    b.resolveT σ = .ok r → σ.storage.LiveAll r
+  | _, .alias i, r, h => by
+    have hi := TEnv.All.get i he
+    simp only [SPath.resolveT] at h
+    split at h
+    · rename_i r' hr'
+      cases h
+      exact hi _ hr'
+    · exact nomatch h
+  | _, .loc l, _, h => Loc.resolveT_liveAll l h
+
+end
+
+end Resolve
+
+/-- The storage value a source stores has clean tails. -/
+theorem Src.valueT_ct {Γ : Ctx} {σ : State C Γ} {T : Ty} (hs : σ.storage.All cleanTailH) :
+    (r : Src C Γ T) → {v : SVal T} → r.valueT σ = .ok v → v.All cleanTailH
+  | .val _, v, h => by
+    obtain ⟨x, _, h⟩ := tbind_ok_inv h
+    cases h
+    simp only [SVal.All]
+  | .copy _ _, v, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    exact Storage.find_all hs (TRes.ofOpt_ok h)
+  | .copyMem _, v, h => by
+    obtain ⟨mv, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact SVal.plain_ct (MVal.copyMToSt_plain σ.heap mv)
+  | .fixedCopy _ shape hm, v, h => by
+    obtain ⟨_, _, h⟩ := tbind_ok_inv h
+    obtain ⟨sv, _, h⟩ := tbind_ok_inv h
+    cases h
+    exact SVal.plain_ct (shape.apply_plain sv hm)
+
+/-- An alias's right-hand side: clean tails, every live reference kept live,
+and the reference it names live. -/
+theorem ARhs.evalT_ct {Γ : Ctx} {σ : State C Γ} (hσ : CTInv σ) {R : RefTy} :
+    (r : ARhs C Γ R) → {st : Storage C} → {ref : SRef C (.ref R)} →
+      r.evalT σ = .ok (st, ref) →
+      st.All cleanTailH ∧ σ.storage.Grows st ∧ st.LiveAll ref
+  | .path p, st, ref, h => by
+    obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
+    cases h
+    exact ⟨hσ.1, Storage.Grows.refl _, SPath.resolveT_liveAll σ hσ.2 p h0⟩
+  | .push b _, st, ref, h => by
+    obtain ⟨r0, h0, h⟩ := tbind_ok_inv h
+    split at h
+    · exact nomatch h
+    · obtain ⟨⟨st', k⟩, hst, h⟩ := tbind_ok_inv h
+      cases h
+      have hp := TRes.ofOpt_ok hst
+      have hl := SPath.resolveT_liveAll σ hσ.2 b h0
+      exact ⟨Storage.pushPlace_ct hσ.1 hl hp, Storage.pushPlace_grows hp,
+        Storage.pushPlace_liveAll hl hp⟩
+
 end Solidity
