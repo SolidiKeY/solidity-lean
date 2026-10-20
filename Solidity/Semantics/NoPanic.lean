@@ -70,6 +70,8 @@ def Stmt.asserts {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
   | .ite _ t e => Prog.asserts t || Prog.asserts e
   | .block body => Prog.asserts body
   | .call _ _ _ body => Prog.asserts body
+  -- not unfolded: its frames may assert
+  | .callRec .. => true
   | .callReceiver _ _ _ body _ => Prog.asserts body
   | .callReceiverPush _ _ _ body code _ => Prog.asserts body || Prog.asserts code
   | .tryCall _ _ ok err _ pnc other _ _ _ =>
@@ -405,6 +407,7 @@ theorem Stmt.run_noPanic : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → s.asserts 
   | _, _, .assert _, h, _ => nomatch h
   | _, _, .revert, _, _ => TRes.NoPanic.revert
   | _, _, .assumeFalse, _, _ => nofun
+  | _, _, .callRec .., h, _ => nomatch h
   | _, _, .call _ args ret body, h, σ => by
     simp only [Stmt.asserts] at h
     exact TRun.call_noPanic args ret _ _ (Prog.run_noPanic body h) σ

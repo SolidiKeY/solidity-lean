@@ -195,6 +195,8 @@ def Stmt.hasTransfer : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (callReceiver := fun _ _ _ body _ => Prog.hasTransfer body)
     (callReceiverPush := fun _ _ _ body code _ => Prog.hasTransfer body || Prog.hasTransfer code)
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
+    -- not unfolded: its frames may pay
+    (callRec := fun _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
   termination_by structural _ _ s => s
 
@@ -227,6 +229,7 @@ def Stmt.forks {Γ Γ' : Ctx} (s : Stmt C Γ Γ') : Bool :=
     (callReceiverPush := fun _ _ _ _ _ _ => true)
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.hasTransfer body) (block := fun body => Prog.hasTransfer body)
+    (callRec := fun _ _ _ _ _ => true)
 
 /-- Whether a `transfer` occurs in a program of the frames. -/
 def Frames.hasTransfer : {Γ Γ₀ : Ctx} → Frames C Γ Γ₀ → Bool
@@ -291,6 +294,8 @@ def Stmt.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Bool
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.callsBack pay body)
     (block := fun body => Prog.callsBack pay body)
+    -- not unfolded: its frames may call back
+    (callRec := fun _ _ _ _ _ => true)
   termination_by structural _ _ s => s
 
 def Prog.callsBack (pay : Bool) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Bool
@@ -359,6 +364,7 @@ def Stmt.forksIn {Γ Γ' : Ctx} (pay : Bool) (s : Stmt C Γ Γ') : Bool :=
     (tryCall := fun _ _ _ _ _ _ _ _ _ _ => true)
     (loop := fun _ _ body => Prog.callsBack pay body)
     (block := fun body => Prog.callsBack pay body)
+    (callRec := fun _ _ _ _ _ => true)
 
 mutual
 
@@ -383,7 +389,7 @@ theorem Stmt.callsBack_true : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
   | _, _, .pop .. | _, _, .transfer .. | _, _, .send .. | _, _, .declMem ..
   | _, _, .rebindMem .. | _, _, .assignFromMem .. | _, _, .assignMem .. | _, _, .delete ..
   | _, _, .deleteMem .. | _, _, .assignNew .. | _, _, .require .. | _, _, .assert ..
-  | _, _, .revert | _, _, .assumeFalse | _, _, .tryCall .. => rfl
+  | _, _, .revert | _, _, .assumeFalse | _, _, .tryCall .. | _, _, .callRec .. => rfl
 
 theorem Prog.callsBack_true : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     P.callsBack true = P.hasTransfer
@@ -412,7 +418,8 @@ theorem Stmt.callsBack_of_hasTransfer {pay : Bool} : {Γ Γ' : Ctx} → (s : Stm
     rw [Prog.callsBack_of_hasTransfer body h.1, Prog.callsBack_of_hasTransfer code h.2]; rfl
   | _, _, .loop _ _ body, h => Prog.callsBack_of_hasTransfer body h
   | _, _, .block body, h => Prog.callsBack_of_hasTransfer body h
-  | _, _, .transfer .., h | _, _, .send .., h | _, _, .tryCall .., h => nomatch h
+  | _, _, .transfer .., h | _, _, .send .., h | _, _, .tryCall .., h
+  | _, _, .callRec .., h => nomatch h
   | _, _, .assign .., _ | _, _, .rebind .., _ | _, _, .assignLocal .., _
   | _, _, .declLocal .., _ | _, _, .declStorage .., _ | _, _, .opAssign .., _
   | _, _, .incDec .., _ | _, _, .assignIncDec .., _ | _, _, .assignLocalPush .., _
@@ -521,6 +528,10 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       args.evalT σ = .ok a → ExecP J (ret.enterT (σ.withEnv a)).st body o →
         ExecS J σ (.call f args ret body)
           (o.map (TRun.callLeave ret body.ext σ (ret.enterT (σ.withEnv a))))
+  /-- A recursive call runs as the call of its body (`Stmt.run_callRec`). -/
+  | callRec {Γ Γ' ps rs : Ctx} {σ : State C Γ} {f : Name} {d : Nat} {args : Args C Γ ps}
+      {ret : CallRet Γ rs Γ'} {body : Unit → Prog C (rs ++ ps) (rs ++ ps)} {o : COut C σ.H Γ'} :
+      ExecS J σ (.call f args ret (body ())) o → ExecS J σ (.callRec f d args ret body) o
   /-- `f().push(e)` and `f().pop()` continue the getter's callback run once. -/
   | callReceiver {Γ ps Γf : Ctx} {E : Ty} {σ : State C Γ} {f : Name}
       {args : Args C Γ ps} {r : Var} {body : Prog C ([.alias (.array E)] ++ ps) Γf}
@@ -871,6 +882,18 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
       rcases Prog.exec_run J body (ret.enterT (σ.withEnv a)).st with h | h
       · exact .inl (ExecS.callBody (f := f) ha h)
       · exact .inr (ExecS.callBody (f := f) (o := .violated) ha h)
+  | _, _, .callRec f d args ret body, σ => by
+    show ExecS J σ _ (.ofRes (TRun.call args ret (body ()).ext (body ()).runR σ)) ∨ _
+    rw [TRun.call_eq]
+    cases ha : args.evalT σ with
+    | error e => exact .inl (.callRec (.callArgs ha))
+    | ok a =>
+      show ExecS J σ _
+        (.ofRes (TRun.callFrom ret (body ()).ext (body ()).runR σ (ret.enterT (σ.withEnv a)))) ∨ _
+      rw [TRun.callFrom_eq, ← COut.map_ofRes]
+      rcases Prog.exec_run J (body ()) (ret.enterT (σ.withEnv a)).st with h | h
+      · exact .inl (.callRec (ExecS.callBody (f := f) ha h))
+      · exact .inr (.callRec (ExecS.callBody (f := f) (o := .violated) ha h))
   | _, _, .callReceiver f args r body op, σ => by
     have hc : ExecS J σ (.call f args (.storage _ r) body)
         (.ofRes (TRun.call args (.storage _ r) body.ext body.runR σ)) ∨
