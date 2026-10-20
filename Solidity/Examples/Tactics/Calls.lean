@@ -144,7 +144,8 @@ theorem callBumpTwice : ⊨ dl!{ [ uint c = count; bump(); bump(); uint d = coun
 /-! ## What cannot be written -/
 
 /-- A function that calls itself is a recursive call (`Stmt.callRec`,
-`Examples/Tactics/Recursion.lean`); one of several returns is not supported. -/
+`Examples/Tactics/Recursion.lean`); one of several returns returns to a
+tuple's targets, since every frame of its unrolling is one context. -/
 def Recursive : Contract := contract!{
   uint n;
   function down(uint x) { down(x); }
@@ -153,8 +154,11 @@ def Recursive : Contract := contract!{
 
 example : Prog.toStr [] (sol[Recursive]{ down(1); }) = "down(1);" := rfl
 
-/-- error: Solidity elaboration failed: pair is recursive and returns several values: not supported -/
-#guard_msgs in #check sol[Recursive]{ uint a; uint b; (a, b) = pair(1); }
+example : Prog.toStr [] (sol[Recursive]{ uint a; uint b; (a, b) = pair(1); }) =
+    "uint a; uint b; (a, b) = pair(1);" := rfl
+
+/-- error: Solidity elaboration failed: pair is recursive and returns several values: call it in a tuple assignment -/
+#guard_msgs in #check sol[Recursive]{ pair(1); }
 
 /-- error: Solidity elaboration failed: bump returns no value -/
 #guard_msgs in #check sol{ uint y = bump(); }

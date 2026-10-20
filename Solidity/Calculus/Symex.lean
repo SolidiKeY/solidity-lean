@@ -106,6 +106,163 @@ theorem Fml.step_valid {φ : Fml C []} (h : Valid (φ.step.getD φ)) : Valid φ 
 
 end Sound
 
+/-! ## The strategy stops at a recursive call
+
+`recursiveCallUnfold` is exact but does not end on a recursive call
+(`docs/kernel-port.md`, "Recursion"): the strategy the tactics run
+(`Fml.stepS`, `symexS`) is `Fml.step`'s, except that it fires no rule on a
+modality whose first statement is a recursive call (`Stmt.callRec`); it
+goes on with the rest of the formula, and leaves that modality for a
+contract (`rec_contract_by`, `rec_auto`, `Calculus/Recursion.lean`). -/
+
+section Stop
+
+/-- Whether a statement is a recursive call. -/
+def Stmt.isRec {Γ Γ' : Ctx} : Stmt C Γ Γ' → Bool
+  | .callRec .. => true
+  | _ => false
+
+/-- Whether a block's first statement is a recursive call. -/
+def Prog.headRec {Γ Γ' : Ctx} : Prog C Γ Γ' → Bool
+  | .nil => false
+  | .cons s _ => s.isRec
+
+/-- `Fml.modalStep`, none at a recursive call. -/
+def Fml.modalStepS (k : Nat) (m : Modality) {Γ Γ₁ Γ₀ : Ctx} (P : Prog C Γ Γ₁)
+    (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) : Option (Fml C Γ) :=
+  if P.headRec then none else Fml.modalStep k m P κ φ
+
+/-- `Fml.stepAt` that stops at a recursive call; compiled code. -/
+def Fml.stepAtS (k : Nat) : {Γ : Ctx} → Fml C Γ → Option (Fml C Γ)
+  | _, φ => Fml.casesOn (motive := fun Γ _ => Option (Fml C Γ)) φ
+    (tt := none) (eq := fun _ _ => none) (wellFormed := fun _ => none) (not := fun _ => none)
+    (and := fun φ ψ => match Fml.stepAtS k φ with
+      | some φ' => some (.and φ' ψ)
+      | none => (Fml.stepAtS k ψ).map (.and φ))
+    (imp := fun a φ => (Fml.stepAtS k φ).map (.imp a))
+    (upd := fun m U φ => (Fml.stepAtS k φ).map (.upd m U))
+    (modal := fun m P κ φ => Fml.modalStepS k m P κ φ)
+    (havoc := fun φ => (Fml.stepAtS k φ).map .havoc)
+    (all := fun x p φ => (Fml.stepAtS k φ).map (.all x p))
+    (bind := fun m x t φ => (Fml.stepAtS k φ).map (.bind m x t))
+    (anon := fun xs φ => (Fml.stepAtS k φ).map (.anon xs))
+  termination_by structural _ φ => φ
+
+/-- `Fml.stepAtS` by the recursor, which the kernel unfolds (`Fml.stepR`). -/
+@[implemented_by Fml.stepAtS]
+def Fml.stepRS (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) :=
+  Fml.rec (motive := fun Γ _ => Option (Fml C Γ))
+    (tt := none) (eq := fun _ _ => none) (wellFormed := fun _ => none) (not := fun _ _ => none)
+    (and := fun φ ψ ihφ ihψ => match ihφ with
+      | some φ' => some (.and φ' ψ)
+      | none => ihψ.map (.and φ))
+    (imp := fun a _ _ ih => ih.map (.imp a))
+    (upd := fun m U _ ih => ih.map (.upd m U))
+    (modal := fun m P κ φ _ => Fml.modalStepS k m P κ φ)
+    (havoc := fun _ ih => ih.map .havoc)
+    (all := fun x p _ ih => ih.map (.all x p))
+    (bind := fun m x t _ ih => ih.map (.bind m x t))
+    (anon := fun xs _ ih => ih.map (.anon xs)) φ
+
+/-- The recursor's stepper is the compiled one. -/
+theorem Fml.stepRS_eq (k : Nat) {Γ : Ctx} (φ : Fml C Γ) : Fml.stepRS k φ = Fml.stepAtS k φ := by
+  induction φ with
+  | tt | eq | wellFormed | not | modal => rfl
+  | and φ ψ ihφ ihψ =>
+    show (match Fml.stepRS k φ with
+      | some φ' => some (Fml.and φ' ψ)
+      | none => (Fml.stepRS k ψ).map (Fml.and φ)) = _
+    rw [ihφ, ihψ]; rfl
+  | imp a φ _ ih => show (Fml.stepRS k φ).map (Fml.imp a) = _; rw [ih]; rfl
+  | upd m U φ ih => show (Fml.stepRS k φ).map (Fml.upd m U) = _; rw [ih]; rfl
+  | havoc φ ih => show (Fml.stepRS k φ).map Fml.havoc = _; rw [ih]; rfl
+  | all x p φ ih => show (Fml.stepRS k φ).map (Fml.all x p) = _; rw [ih]; rfl
+  | bind m x t φ ih => show (Fml.stepRS k φ).map (Fml.bind m x t) = _; rw [ih]; rfl
+  | anon xs φ ih => show (Fml.stepRS k φ).map (Fml.anon xs) = _; rw [ih]; rfl
+
+/-- One step of the stopping strategy, its fresh names as `Fml.step`'s. -/
+def Fml.stepS {Γ : Ctx} (φ : Fml C Γ) : Option (Fml C Γ) := φ.stepRS φ.fresh
+
+/-- Run the stopping strategy for at most `n` steps. -/
+def symexS {Γ : Ctx} : Nat → Fml C Γ → Fml C Γ
+  | 0, φ => φ
+  | n + 1, φ => match φ.stepS with
+    | some ψ => symexS n ψ
+    | none => φ
+
+/-- A step of the stopping strategy is one of the strategy's. -/
+theorem Fml.stepRS_sound (k : Nat) {Γ : Ctx} (φ : Fml C Γ) :
+    ∀ {ψ : Fml C Γ}, φ.stepRS k = some ψ → ∀ σ, holds σ ψ → holds σ φ := by
+  induction φ with
+  | tt | eq | wellFormed | not => intro _ h; cases h
+  | and φ ψ ihφ ihψ =>
+    intro χ h σ hχ
+    change (match Fml.stepRS k φ with
+      | some φ' => some (Fml.and φ' ψ)
+      | none => (Fml.stepRS k ψ).map (Fml.and φ)) = some χ at h
+    split at h
+    · rename_i φ' hφ
+      cases h
+      exact ⟨ihφ hφ σ hχ.1, hχ.2⟩
+    · obtain ⟨ψ', hψ, rfl⟩ := Option.map_eq_some_iff.1 h
+      exact ⟨hχ.1, ihψ hψ σ hχ.2⟩
+  | imp a φ _ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map (Fml.imp a) = some χ from h)
+    exact fun ha => ih hφ σ (hχ ha)
+  | upd m U φ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map (Fml.upd m U) = some χ from h)
+    exact Upd.afterT_imp hχ fun σ' h => ih hφ σ' h
+  | modal m P κ φ =>
+    intro χ h σ hχ
+    change (if P.headRec then none else Fml.modalStep k m P κ φ) = some χ at h
+    split at h
+    · cases h
+    · exact Fml.modalStep_sound k m P κ φ h σ hχ
+  | havoc φ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map Fml.havoc = some χ from h)
+    exact fun st nt => ih hφ _ (hχ st nt)
+  | all x p φ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map (Fml.all x p) = some χ from h)
+    exact fun v => ih hφ _ (hχ v)
+  | bind m x t φ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ :=
+      Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map (Fml.bind m x t) = some χ from h)
+    exact Modality.forallB_imp (fun v => ih hφ _) hχ
+  | anon xs φ ih =>
+    intro χ h σ hχ
+    obtain ⟨φ', hφ, rfl⟩ := Option.map_eq_some_iff.1 (show (Fml.stepRS k φ).map (Fml.anon xs) = some χ from h)
+    exact fun b => ih hφ _ (hχ b)
+
+/-- `n` steps of the stopping strategy are sound. -/
+theorem symexS_sound {Γ : Ctx} : (n : Nat) → (φ : Fml C Γ) → ∀ σ, holds σ (symexS n φ) → holds σ φ
+  | 0, _, _, h => h
+  | n + 1, φ, σ, h => by
+    unfold symexS at h
+    split at h
+    · rename_i ψ hψ
+      exact Fml.stepRS_sound _ φ hψ σ (symexS_sound n ψ σ h)
+    · exact h
+
+/-- To prove `φ` valid, prove what `symexS n` leaves of it valid. -/
+theorem symexS_valid (n : Nat) {φ : Fml C []} (h : Valid (symexS n φ)) : Valid φ :=
+  fun σ => symexS_sound n φ σ (h σ)
+
+/-- To prove `φ` valid, prove what one step of the stopping strategy leaves
+of it valid. -/
+theorem Fml.stepS_valid {φ : Fml C []} (h : Valid (φ.stepS.getD φ)) : Valid φ := by
+  intro σ
+  cases hs : φ.stepS with
+  | none => simpa only [hs, Option.getD_none] using h σ
+  | some ψ =>
+    exact Fml.stepRS_sound _ φ hs σ (by simpa only [hs, Option.getD_some] using h σ)
+
+end Stop
+
 /-! ## The tactics -/
 
 namespace Symex
@@ -278,9 +435,11 @@ def evalSolStepCore : Tactic := fun _ => withMainContext do
   let g ← getMainGoal
   let some (C, _) ← Symex.validGoal? g
     | throwError m!"sol_step: expected a goal `⊨ φ`{indentExpr (← g.getType)}"
-  let lem := mkApp (mkConst ``Fml.step_valid) C
+  let lem := mkApp (mkConst ``Fml.stepS_valid) C
   Symex.reporting g do
-    replaceMainGoal [← Symex.applyValid "sol_step" g lem (some m!"no modality left")]
+    let g' ← Symex.applyValid "sol_step" g lem (some m!"no modality left, or a recursive call \
+      at the head of each: prove it by its contract (`rec_auto`, `rec_contract_by`)")
+    replaceMainGoal [g']
 
 open Lean Elab Tactic Meta in
 /-- `sol_symex` on a scoped goal `Valid φ`: run the strategy until no
@@ -290,7 +449,15 @@ def evalSolSymexCore : Tactic := fun _ => withMainContext do
   if (← getUnsolvedGoals).isEmpty then return
   let g ← getMainGoal
   let some (C, _) ← Symex.validGoal? g | throwUnsupportedSyntax
-  let lem := mkApp2 (mkConst ``symex_valid) C (mkRawNatLit Symex.fuel)
-  Symex.reporting g do replaceMainGoal [← Symex.applyValid "sol_symex" g lem]
+  let lem := mkApp2 (mkConst ``symexS_valid) C (mkRawNatLit Symex.fuel)
+  Symex.reporting g do
+    let g' ← Symex.applyValid "sol_symex" g lem
+    -- the strategy stops at a recursive call: an error, not a leaf to close
+    if let some r := (← instantiateMVars (← g'.getType)).find? (·.isAppOf ``Stmt.callRec) then
+      let f := if r.getAppNumArgs > 5 then m!" `{r.getArg! 5}`" else m!""
+      throwError m!"sol_symex: the strategy stops at the recursive call{f}, which it does not \
+        unfold (`docs/kernel-port.md`, \"Recursion\"): prove it by its callee's contract \
+        (`rec_auto`, `rec_contract_by`){indentExpr (← g'.getType)}"
+    replaceMainGoal [g']
 
 end Solidity
