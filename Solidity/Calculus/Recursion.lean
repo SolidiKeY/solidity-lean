@@ -13,7 +13,7 @@ contract (`useRecContract`, `useContract` at a recursive call), the contract
 proved once for every frame of the unrolling by induction over it
 (`RecContract.unroll`, `recUnroll_induct`): the bottom frame meets every
 contract (it is exhausted, which the box accepts), and a frame meets it
-where the frame below does.  The step is a box obligation whose recursive
+where the frame below does.  The step is the body's obligation whose recursive
 calls are calls of an unknown body `t ()` that meets the contract: the
 strategy runs up to each of them (`sol_symex_rec`), where `rec_contract`
 uses the hypothesis.  No `decreases` is needed, under either modality:
@@ -288,7 +288,7 @@ macro "rec_step " ih:ident : tactic => `(tactic| (
        all_goals (sol_symex; sol_close))
     | sol_close))
 
-/-- `rec_induct μ`: a `RecContract μ` of a recursive call's body by
+/-- `rec_induct`: a `RecContract` of a recursive call's body by
 induction over its frames (`RecContract.unroll`), each step by `rec_step`:
 a function of no return or of one value return. -/
 macro "rec_induct" : tactic => `(tactic| (

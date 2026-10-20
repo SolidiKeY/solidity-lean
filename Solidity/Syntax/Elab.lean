@@ -2624,7 +2624,9 @@ partial def elabCallRet (f : String) (args : List RawExpr) (res : Option (Var ×
         pure fun _ => recUnroll Prog.recBase
           (fun n bt => match frame n bt with
             | .ok (Q, _) => Q
-            | .error _ => Prog.recBase) recDepth)
+            -- unreachable (a frame elaborates as the one checked above);
+            -- were it reached, a panic, which no modality accepts
+            | .error _ => .cons (.assert (.simple (.bool false))) .nil) recDepth)
     else
       modify fun (_, k) => (Γf, k)
       P ← withReader (fun sc =>
