@@ -1047,6 +1047,20 @@ partial def call (j : Json) : PM String := do
         pure s!"{r}.{← PM.lift (J.str f "memberName")}"
       else expr f
     pure s!"{name}({", ".intercalate as})"
+  | "structConstructorCall" =>
+    -- `S(a, b)` or `S({b: y, a: x})`: the struct by its declaration, as the
+    -- import names it (the table's, or the contract's own)
+    let some id := J.ref? f | unsupported "a struct constructor without its declaration"
+    let name ← match lookupBy s!"#solc{id}" (← get).structs with
+      | some (.ok m) => pure m
+      | some (.error g) => unsupported g.msg
+      | none => unsupported s!"a struct constructor of the type declaration #{id}"
+    let as ← args.mapM expr
+    let names : List String := (J.arr? j "names").map
+      (·.toList.filterMap (·.getStr?.toOption)) |>.getD []
+    if names.isEmpty then pure s!"{name}({", ".intercalate as})"
+    else
+      pure s!"{name}(\{{", ".intercalate ((names.zip as).map fun (n, a) => s!"{n}: {a}")}})"
   | k => unsupported s!"a call of kind `{k}`"
 
 end
